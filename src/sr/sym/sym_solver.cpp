@@ -246,7 +246,7 @@ void TruthTableSolver::ConstrainByEvaluating()
     const TruthTable::CellType EVAL_EXCLUDE = TruthTable::CellType::FALSE;
     
     const SR::SolutionMap sm{};
-    const SR::TheKnowledge tk{};
+    const SR::XTreeDatabase tk{};
     Expression::EvalKit kit { &sm, &tk }; 
     
     // Walk the truth table

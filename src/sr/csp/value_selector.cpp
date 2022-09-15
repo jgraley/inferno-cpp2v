@@ -2,7 +2,7 @@
 #include "solver_holder.hpp"
 #include "query.hpp"
 #include "agents/agent.hpp"
-#include "the_knowledge.hpp"
+#include "x_tree_database.hpp"
 #include "../sym/result.hpp"
 
 #include <algorithm>
@@ -20,10 +20,10 @@
 using namespace CSP;
 
 ValueSelector::ValueSelector( const ConstraintSet &constraints_to_query_, 
-                              const SR::TheKnowledge *knowledge_,
+                              const SR::XTreeDatabase *x_tree_db_,
                               Assignments &assignments_,
                               VariableId var ) :
-    knowledge( knowledge_ ),
+    x_tree_db( x_tree_db_ ),
     assignments( assignments_ ),
     my_var( var ),
     constraints_to_query( constraints_to_query_ )
@@ -82,10 +82,10 @@ ValueSelector::~ValueSelector()
 
 void ValueSelector::SetupDefaultGenerator()
 {
-    SR::TheKnowledge::DepthFirstOrderedIt fwd_it = knowledge->depth_first_ordered_domain.begin();     
+    SR::XTreeDatabase::DepthFirstOrderedIt fwd_it = x_tree_db->depth_first_ordered_domain.begin();     
     values_generator = [=]() mutable -> Value
     {
-        if( fwd_it==knowledge->depth_first_ordered_domain.end() )        
+        if( fwd_it==x_tree_db->depth_first_ordered_domain.end() )        
             return Value();
         
         Value v = *fwd_it;

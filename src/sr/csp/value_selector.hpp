@@ -12,7 +12,7 @@
 
 namespace SR
 {
-    class TheKnowledge;
+    class XTreeDatabase;
 };
 
 namespace CSP
@@ -26,7 +26,7 @@ class ValueSelector : public Traceable
 {
 public:
     ValueSelector( const ConstraintSet &constraints_to_query,
-                   const SR::TheKnowledge *knowledge_,
+                   const SR::XTreeDatabase *x_tree_db_,
                    Assignments &assignments_,
                    VariableId var );
     ~ValueSelector();
@@ -35,7 +35,7 @@ public:
     Value GetNextValue();
     
 private:
-    const SR::TheKnowledge * const knowledge;
+    const SR::XTreeDatabase * const x_tree_db;
     Assignments &assignments;
     const VariableId my_var;
     const ConstraintSet &constraints_to_query;

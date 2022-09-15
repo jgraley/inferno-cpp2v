@@ -13,7 +13,7 @@ namespace SR
 {
 
 class VNStep;
-class TheKnowledge;
+class XTreeDatabase;
 
 /**
  * Vida Nova Sequence
@@ -45,7 +45,7 @@ public:
 
     XLink UniquifyDomainExtension( XLink xlink ) const;
     XLink FindDomainExtension( XLink xlink ) const;
-    void BuildTheKnowledge();
+    void BuildXTreeDatabase();
     void ExtendDomain( PatternLink root_plink );
     
     bool IsDirtyGrass( TreePtr<Node> node );
@@ -53,7 +53,7 @@ public:
     
 private:
     vector< shared_ptr<VNStep> > steps;
-    shared_ptr<TheKnowledge> knowledge;    
+    shared_ptr<XTreeDatabase> x_tree_db;    
     set< TreePtr<Node> > dirty_grass;
     XLink current_root_xlink;
 };    

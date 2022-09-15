@@ -253,7 +253,7 @@ SYM::Over<SYM::BooleanExpression> NestedAgent::SymbolicNormalLinkedQueryPRed() c
 }                     
 
 
-LocatedLink NestedAgent::RunTeleportQuery( const TheKnowledge &knowledge, XLink keyer_xlink ) const
+LocatedLink NestedAgent::RunTeleportQuery( const XTreeDatabase &x_tree_db, XLink keyer_xlink ) const
 {
     LocatedLink tp_link;
     

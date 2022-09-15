@@ -11,7 +11,7 @@
 
 #include "query.hpp"
 #include "link.hpp"
-#include "the_knowledge.hpp"
+#include "x_tree_database.hpp"
 
 #include <set>
 #include <map>
@@ -32,7 +32,7 @@ class EmbeddedSCRAgent;
 class Conjecture;
 class SpecialBase;
 class CompareReplace;
-class TheKnowledge;
+class XTreeDatabase;
 
 /// Solve an and-rule matching problem
 class AndRuleEngine : public virtual GraphIdable,
@@ -66,7 +66,7 @@ public:
               PatternLink base_plink, 
               const set<PatternLink> &surrounding_plinks,
               const set<PatternLink> &surrounding_keyer_plinks );
-        void PlanningStageFive( shared_ptr<const TheKnowledge> knowledge );
+        void PlanningStageFive( shared_ptr<const XTreeDatabase> x_tree_db );
         void PopulateBoundaryStuff( PatternLink link,
                                     const set<Agent *> &surrounding_agents );
         void DetermineKeyersModuloDisjunction( PatternLink plink,
@@ -91,7 +91,7 @@ public:
         // CSP solver stuff
         void DeduceCSPVariables();
         void CreateMyConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list,
-                                  shared_ptr<const TheKnowledge> knowledge );
+                                  shared_ptr<const XTreeDatabase> x_tree_db );
         void Dump();
 
         string GetTrace() const; // used for debug
@@ -133,7 +133,7 @@ public:
         set<PatternLink> reached_links; 
     } plan;
     
-    void PlanningStageFive( shared_ptr<const TheKnowledge> knowledge );      
+    void PlanningStageFive( shared_ptr<const XTreeDatabase> x_tree_db );      
     
 private:        
     void StartCSPSolver( const SolutionMap &fixes,
@@ -170,7 +170,7 @@ public:
 
 private:
     // Information about the X tree
-    shared_ptr<const TheKnowledge> knowledge;
+    shared_ptr<const XTreeDatabase> x_tree_db;
 };
 
 #endif

@@ -1,7 +1,7 @@
 #include "result.hpp"
 
 #include "common/orderable.hpp"
-#include "the_knowledge.hpp"
+#include "x_tree_database.hpp"
 
 using namespace SYM;
 
@@ -268,8 +268,8 @@ string SetResult::Render() const
 
 // ------------------------- DepthFirstRangeResult --------------------------
 
-DepthFirstRangeResult::DepthFirstRangeResult( const SR::TheKnowledge *knowledge_, SR::XLink lower_, bool lower_incl_, SR::XLink upper_, bool upper_incl_ ) :
-    knowledge( knowledge_ ),
+DepthFirstRangeResult::DepthFirstRangeResult( const SR::XTreeDatabase *x_tree_db_, SR::XLink lower_, bool lower_incl_, SR::XLink upper_, bool upper_incl_ ) :
+    x_tree_db( x_tree_db_ ),
     lower( lower_ ),
     lower_incl( lower_incl_ ),
     upper( upper_ ),
@@ -292,28 +292,28 @@ SR::XLink DepthFirstRangeResult::GetOnlyXLink() const
 
 bool DepthFirstRangeResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
 { 
-    SR::TheKnowledge::DepthFirstOrderedIt it_lower, it_upper;
+    SR::XTreeDatabase::DepthFirstOrderedIt it_lower, it_upper;
     
     if( lower )
     {
-        it_lower = knowledge->GetNugget(lower).depth_first_ordered_it;
+        it_lower = x_tree_db->GetNugget(lower).depth_first_ordered_it;
         if( !lower_incl )
             ++it_lower;
     }
     else
     {
-        it_lower = knowledge->depth_first_ordered_domain.begin();
+        it_lower = x_tree_db->depth_first_ordered_domain.begin();
     }
     
     if( upper )
     {
-        it_upper = knowledge->GetNugget(upper).depth_first_ordered_it;
-        if( upper_incl && it_upper != knowledge->depth_first_ordered_domain.end() )
+        it_upper = x_tree_db->GetNugget(upper).depth_first_ordered_it;
+        if( upper_incl && it_upper != x_tree_db->depth_first_ordered_domain.end() )
             ++it_upper;
     }
     else
     {
-        it_upper = knowledge->depth_first_ordered_domain.end();
+        it_upper = x_tree_db->depth_first_ordered_domain.end();
     }
     
     links = set<SR::XLink>( it_lower, it_upper );
@@ -341,8 +341,8 @@ string DepthFirstRangeResult::Render() const
 
 // ------------------------- SimpleCompareRangeResult --------------------------
 
-SimpleCompareRangeResult::SimpleCompareRangeResult( const SR::TheKnowledge *knowledge_, SR::XLink lower_, bool lower_incl_, SR::XLink upper_, bool upper_incl_ ) :
-    knowledge( knowledge_ ),
+SimpleCompareRangeResult::SimpleCompareRangeResult( const SR::XTreeDatabase *x_tree_db_, SR::XLink lower_, bool lower_incl_, SR::XLink upper_, bool upper_incl_ ) :
+    x_tree_db( x_tree_db_ ),
     lower( lower_ ),
     lower_incl( lower_incl_ ),
     upper( upper_ ),
@@ -351,8 +351,8 @@ SimpleCompareRangeResult::SimpleCompareRangeResult( const SR::TheKnowledge *know
 }
 
 
-SimpleCompareRangeResult::SimpleCompareRangeResult( const SR::TheKnowledge *knowledge_, TreePtr<Node> lower_, bool lower_incl_, TreePtr<Node> upper_, bool upper_incl_ ) :
-    knowledge( knowledge_ ),
+SimpleCompareRangeResult::SimpleCompareRangeResult( const SR::XTreeDatabase *x_tree_db_, TreePtr<Node> lower_, bool lower_incl_, TreePtr<Node> upper_, bool upper_incl_ ) :
+    x_tree_db( x_tree_db_ ),
     lower( SR::XLink::CreateDistinct( lower_ ) ),
     lower_incl( lower_incl_ ),
     upper( SR::XLink::CreateDistinct( upper_ ) ),
@@ -375,30 +375,30 @@ SR::XLink SimpleCompareRangeResult::GetOnlyXLink() const
 
 bool SimpleCompareRangeResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
 {        
-    SR::TheKnowledge::SimpleCompareOrderedIt it_lower, it_upper;
+    SR::XTreeDatabase::SimpleCompareOrderedIt it_lower, it_upper;
 
     if( lower )
     {
         if( lower_incl )
-            it_lower = knowledge->simple_compare_ordered_domain.lower_bound(lower);
+            it_lower = x_tree_db->simple_compare_ordered_domain.lower_bound(lower);
         else
-            it_lower = knowledge->simple_compare_ordered_domain.upper_bound(lower);
+            it_lower = x_tree_db->simple_compare_ordered_domain.upper_bound(lower);
     }
     else
     {
-        it_lower = knowledge->simple_compare_ordered_domain.begin();
+        it_lower = x_tree_db->simple_compare_ordered_domain.begin();
     }
     
     if( upper )
     {
         if( upper_incl )
-            it_upper = knowledge->simple_compare_ordered_domain.upper_bound(upper);
+            it_upper = x_tree_db->simple_compare_ordered_domain.upper_bound(upper);
         else
-            it_upper = knowledge->simple_compare_ordered_domain.lower_bound(upper);
+            it_upper = x_tree_db->simple_compare_ordered_domain.lower_bound(upper);
     }
     else
     {
-        it_upper = knowledge->simple_compare_ordered_domain.begin();
+        it_upper = x_tree_db->simple_compare_ordered_domain.begin();
     }
 
     links = set<SR::XLink>( it_lower, it_upper );
@@ -426,8 +426,8 @@ string SimpleCompareRangeResult::Render() const
 
 // ------------------------- CategoryRangeResult --------------------------
 
-CategoryRangeResult::CategoryRangeResult( const SR::TheKnowledge *knowledge_, XLinkBoundsList &&bounds_list_, bool lower_incl_, bool upper_incl_ ) :
-    knowledge( knowledge_ ),
+CategoryRangeResult::CategoryRangeResult( const SR::XTreeDatabase *x_tree_db_, XLinkBoundsList &&bounds_list_, bool lower_incl_, bool upper_incl_ ) :
+    x_tree_db( x_tree_db_ ),
     bounds_list( move(bounds_list_) ),
     lower_incl( lower_incl_ ),
     upper_incl( upper_incl_ )
@@ -452,20 +452,20 @@ bool CategoryRangeResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
     links.clear();
     for( const XLinkBounds &bounds : bounds_list )
     {
-        SR::TheKnowledge::SimpleCompareOrderedIt it_lower, it_upper;
+        SR::XTreeDatabase::SimpleCompareOrderedIt it_lower, it_upper;
 
         ASSERT( &bounds );
         ASSERT( bounds.first );
         if( lower_incl )
-            it_lower = knowledge->category_ordered_domain.lower_bound(*bounds.first);
+            it_lower = x_tree_db->category_ordered_domain.lower_bound(*bounds.first);
         else
-            it_lower = knowledge->category_ordered_domain.upper_bound(*bounds.first);
+            it_lower = x_tree_db->category_ordered_domain.upper_bound(*bounds.first);
 
         ASSERT( bounds.second );
         if( upper_incl )
-            it_upper = knowledge->category_ordered_domain.upper_bound(*bounds.second);
+            it_upper = x_tree_db->category_ordered_domain.upper_bound(*bounds.second);
         else
-            it_upper = knowledge->category_ordered_domain.lower_bound(*bounds.second);
+            it_upper = x_tree_db->category_ordered_domain.lower_bound(*bounds.second);
 
         links = UnionOf( links, set<SR::XLink>( it_lower, it_upper ) );
     }

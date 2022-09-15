@@ -120,17 +120,17 @@ private:
                                     
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            const SolutionMap *hypothesis_links,
-                                           const TheKnowledge *knowledge ) const;                                              
+                                           const XTreeDatabase *x_tree_db ) const;                                              
     void RegenerationQuerySequence( DecidedQueryAgentInterface &query,
                                     SequenceInterface *x_seq,
                                     const Plan::Sequence &plan_seq,
                                     const SolutionMap *hypothesis_links,
-                                    const TheKnowledge *knowledge ) const;
+                                    const XTreeDatabase *x_tree_db ) const;
     void RegenerationQueryCollection( DecidedQueryAgentInterface &query,
                                       CollectionInterface *x_col,
                                       const Plan::Collection &plan_col,
                                       const SolutionMap *hypothesis_links,
-                                      const TheKnowledge *knowledge ) const;
+                                      const XTreeDatabase *x_tree_db ) const;
                                            
 public:
     virtual void MaybeChildrenPlanOverlay(      PatternLink me_plink, 

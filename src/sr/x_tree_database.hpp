@@ -1,5 +1,5 @@
-#ifndef THE_KNOWLEDGE_HPP
-#define THE_KNOWLEDGE_HPP
+#ifndef XTREE_DATABASE_HPP
+#define XTREE_DATABASE_HPP
 
 #include "link.hpp"
 #include "common/standard.hpp"
@@ -23,11 +23,11 @@ class SimpleCompareQuotientSet;
 class VNStep;
 class Lacing;
     
-class TheKnowledge : public Traceable, 
+class XTreeDatabase : public Traceable, 
                      public TreeKit
 {
 public:
-    explicit TheKnowledge( const set< shared_ptr<SYM::BooleanExpression> > &clauses = {} );
+    explicit XTreeDatabase( const set< shared_ptr<SYM::BooleanExpression> > &clauses = {} );
     
 private: 
     const struct Plan : public Traceable
@@ -207,10 +207,10 @@ public:
     // SimpleCompare equivalence classes over the domain.
     shared_ptr<SimpleCompareQuotientSet> domain_extension_classes;
     
-    // XLink-to-nugget-of-knowledge map
+    // XLink-to-nugget-of-x_tree_db map
     unordered_map<XLink, Nugget> nuggets;
 
-    // Node-to-nugget-of-knowledge map
+    // Node-to-nugget-of-x_tree_db map
     map<TreePtr<Node>, NodeNugget> node_nuggets;
 
 private:    

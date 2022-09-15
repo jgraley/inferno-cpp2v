@@ -3,7 +3,7 @@
 #include "../scr_engine.hpp" 
 #include "../conjecture.hpp" 
 #include "link.hpp"
-#include "the_knowledge.hpp"
+#include "x_tree_database.hpp"
 #include "sym/boolean_operators.hpp"
 #include "sym/predicate_operators.hpp"
 #include "sym/symbol_operators.hpp"
@@ -153,7 +153,7 @@ SYM::Over<SYM::BooleanExpression> StuffAgent::SymbolicNormalLinkedQueryPRed() co
 
 void StuffAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            const SolutionMap *hypothesis_links,
-                                           const TheKnowledge *knowledge ) const
+                                           const XTreeDatabase *x_tree_db ) const
 {
     INDENT("#");
     ASSERT( this );
@@ -172,7 +172,7 @@ void StuffAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
     auto xpr_ss = MakeTreeNode<SubSequence>();
     while(xlink != keyer_xlink)
     {       
-        const TheKnowledge::Nugget &nugget( knowledge->GetNugget(xlink) );       
+        const XTreeDatabase::Nugget &nugget( x_tree_db->GetNugget(xlink) );       
         xlink = nugget.parent_xlink;
         
         // Putting this here excludes the terminus, as required

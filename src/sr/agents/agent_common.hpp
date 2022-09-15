@@ -38,16 +38,16 @@ public:
 	
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            const SolutionMap *hypothesis_links,
-                                           const TheKnowledge *knowledge ) const;
+                                           const XTreeDatabase *x_tree_db ) const;
     void RunRegenerationQuery( DecidedQueryAgentInterface &query,
                                const SolutionMap *hypothesis_links,
-                               const TheKnowledge *knowledge ) const;
+                               const XTreeDatabase *x_tree_db ) const;
     virtual QueryLambda StartRegenerationQuery( const SolutionMap *hypothesis_links,
-                                                const TheKnowledge *knowledge,
+                                                const XTreeDatabase *x_tree_db,
                                                 bool use_DQ = false ) const;
     virtual QueryLambda TestStartRegenerationQuery( const SolutionMap *hypothesis_links,
-                                                    const TheKnowledge *knowledge ) const;
-    virtual set<XLink> ExpandNormalDomain( const TheKnowledge &knowledge, const unordered_set<XLink> &keyer_xlinks ) { return {}; }
+                                                    const XTreeDatabase *x_tree_db ) const;
+    virtual set<XLink> ExpandNormalDomain( const XTreeDatabase &x_tree_db, const unordered_set<XLink> &keyer_xlinks ) { return {}; }
     virtual void ResetNLQConjecture();
      
     virtual const SCREngine *GetMasterSCREngine() const;      

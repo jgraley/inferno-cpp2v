@@ -61,9 +61,9 @@ public:
     {
         plan.PlanningStageThree(enclosing_keyers); 
     }
-    void PlanningStageFive( shared_ptr<const TheKnowledge> knowledge )
+    void PlanningStageFive( shared_ptr<const XTreeDatabase> x_tree_db )
     {
-        plan.PlanningStageFive(knowledge); 
+        plan.PlanningStageFive(x_tree_db); 
     }
                     
 private:
@@ -87,7 +87,7 @@ private:
         void PlanningStageTwo(const CompareReplace::AgentPhases &in_progress_agent_phases); // Stage one is the constructor
         void ConfigureAgents();
         void PlanningStageThree(set<PatternLink> enclosing_keyers);
-        void PlanningStageFive( shared_ptr<const TheKnowledge> knowledge );
+        void PlanningStageFive( shared_ptr<const XTreeDatabase> x_tree_db );
         void PlanCompare();
         void PlanReplace();
         void Dump();
@@ -95,7 +95,7 @@ private:
         
         SCREngine * const algo;
         VNSequence *vn_sequence;
-        shared_ptr<const TheKnowledge> knowledge;
+        shared_ptr<const XTreeDatabase> x_tree_db;
         const CompareReplace *root_engine;
         TreePtr<Node> base_pattern;
         PatternLink base_plink;

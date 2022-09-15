@@ -25,9 +25,9 @@ SolverHolder::~SolverHolder()
 
 
 void SolverHolder::Start( const Assignments &forces,
-                          const SR::TheKnowledge *knowledge )
+                          const SR::XTreeDatabase *x_tree_db )
 {
-    solver->Start( forces, knowledge );    
+    solver->Start( forces, x_tree_db );    
 
 #ifdef COROUTINE_HOLDER
     ReapSource();
@@ -61,7 +61,7 @@ void SolverHolder::Start( const Assignments &forces,
     MaybeRethrow();
 #else
     solutions_queue.clear();
-    solver->Run( this, forces, knowledge);
+    solver->Run( this, forces, x_tree_db);
 #endif
 }
 

@@ -29,7 +29,7 @@ public:
     }
 
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    LocatedLink RunTeleportQuery( const TheKnowledge &knowledge, XLink keyer_xlink ) const override;                
+    LocatedLink RunTeleportQuery( const XTreeDatabase &x_tree_db, XLink keyer_xlink ) const override;                
 
     virtual Block GetGraphBlockInfo() const;
     string GetName() const override;

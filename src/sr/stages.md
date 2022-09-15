@@ -53,7 +53,7 @@ Replace planning:
  
 ### Planning Stage Four `S`
 
-Knowledge/database planning. Central to the `VNSequence` (i.e. run once 
+X tree database planning. Central to the `VNSequence` (i.e. run once 
 for all steps):
  - Deduce lacing intervals based on analysis of all pre-restrictions/
    type-restrictions, for category ordering/index.
@@ -69,7 +69,7 @@ for all steps):
 
 ### Analysis stage `A` (input tree required here)
 
-Knowledge database is built based on an analysis of the input tree.
+Initial X tree database is built based on an analysis of the input tree.
 
 ## Transformations stage `T` (steppy)
 

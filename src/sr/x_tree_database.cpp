@@ -1,4 +1,4 @@
-#include "the_knowledge.hpp"
+#include "x_tree_database.hpp"
 #include "sc_relation.hpp"
 #include "agents/agent.hpp"
 #include "vn_step.hpp"
@@ -9,25 +9,25 @@
 using namespace SR;    
 
 //#define TEST_RELATION_PROPERTIES_USING_DOMAIN
-//#define TRACE_KNOWLEDGE_DELTAS
+//#define TRACE_X_TREE_DB_DELTAS
 
-#ifdef TRACE_KNOWLEDGE_DELTAS
-// Global because there are different knowledges owned by different SCR Engines
-TheKnowledge::CategoryOrderedDomain previous_category_ordered_domain;
+#ifdef TRACE_X_TREE_DB_DELTAS
+// Global because there are different x_tree_dbs owned by different SCR Engines
+XTreeDatabase::CategoryOrderedDomain previous_category_ordered_domain;
 #endif    
 
 
-TheKnowledge::TheKnowledge( const set< shared_ptr<SYM::BooleanExpression> > &clauses ) :
+XTreeDatabase::XTreeDatabase( const set< shared_ptr<SYM::BooleanExpression> > &clauses ) :
     plan( clauses ),
     category_ordered_domain( plan.lacing )
 { 
 }
 
 
-TheKnowledge::Plan::Plan( const set< shared_ptr<SYM::BooleanExpression> > &clauses ) :
+XTreeDatabase::Plan::Plan( const set< shared_ptr<SYM::BooleanExpression> > &clauses ) :
     lacing( make_shared<Lacing>() )
 {
-    // Warning: there are a few places that declare an empty knowledge
+    // Warning: there are a few places that declare an empty x_tree_db
     if( clauses.empty() )
         return;
     
@@ -50,7 +50,7 @@ TheKnowledge::Plan::Plan( const set< shared_ptr<SYM::BooleanExpression> > &claus
 }
 
     
-XLink TheKnowledge::UniquifyDomainExtension( XLink xlink )
+XLink XTreeDatabase::UniquifyDomainExtension( XLink xlink )
 {
     ASSERT( xlink );
   
@@ -64,7 +64,7 @@ XLink TheKnowledge::UniquifyDomainExtension( XLink xlink )
 }
 
 
-XLink TheKnowledge::FindDomainExtension( XLink xlink ) const
+XLink XTreeDatabase::FindDomainExtension( XLink xlink ) const
 {
     ASSERT( xlink );
     
@@ -78,31 +78,31 @@ XLink TheKnowledge::FindDomainExtension( XLink xlink ) const
 }
 
 
-const Lacing *TheKnowledge::GetLacing() const
+const Lacing *XTreeDatabase::GetLacing() const
 {
     return plan.lacing.get();
 }
 
 
-TheKnowledge::CategoryRelation::CategoryRelation()
+XTreeDatabase::CategoryRelation::CategoryRelation()
 {
 }
 
 
-TheKnowledge::CategoryRelation::CategoryRelation( shared_ptr<Lacing> lacing_ ) :
+XTreeDatabase::CategoryRelation::CategoryRelation( shared_ptr<Lacing> lacing_ ) :
     lacing( lacing_ )
 {
 }
 
 
-TheKnowledge::CategoryRelation& TheKnowledge::CategoryRelation::operator=(const CategoryRelation &other)
+XTreeDatabase::CategoryRelation& XTreeDatabase::CategoryRelation::operator=(const CategoryRelation &other)
 {
     lacing = other.lacing;
     return *this;
 }
 
 
-bool TheKnowledge::CategoryRelation::operator() (const XLink& x_link, const XLink& y_link) const
+bool XTreeDatabase::CategoryRelation::operator() (const XLink& x_link, const XLink& y_link) const
 {
     TreePtr<Node> x = x_link.GetChildX();
     auto cat_x = TreePtr<CategoryMinimaxNode>::DynamicCast( x );
@@ -125,65 +125,65 @@ bool TheKnowledge::CategoryRelation::operator() (const XLink& x_link, const XLin
 }
 
 
-TheKnowledge::CategoryMinimaxNode::CategoryMinimaxNode( int lacing_index_ ) :
+XTreeDatabase::CategoryMinimaxNode::CategoryMinimaxNode( int lacing_index_ ) :
     lacing_index( lacing_index_ )
 {
 }
     
 
-TheKnowledge::CategoryMinimaxNode::CategoryMinimaxNode() :
+XTreeDatabase::CategoryMinimaxNode::CategoryMinimaxNode() :
     lacing_index( 0 )
 {
 }
     
 
-int TheKnowledge::CategoryMinimaxNode::GetLacingIndex() const
+int XTreeDatabase::CategoryMinimaxNode::GetLacingIndex() const
 {
     return lacing_index;
 }
  
 
-string TheKnowledge::CategoryMinimaxNode::GetTrace() const
+string XTreeDatabase::CategoryMinimaxNode::GetTrace() const
 {
     return GetTypeName() + SSPrintf("(%d)", lacing_index);
 }
 
 
-const TheKnowledge::Nugget &TheKnowledge::GetNugget(XLink xlink) const
+const XTreeDatabase::Nugget &XTreeDatabase::GetNugget(XLink xlink) const
 {
     ASSERT( xlink );
     ASSERT( HasNugget(xlink) )
-          ("Knowledge: no nugget for ")(xlink)("\n")
+          ("X tree database: no nugget for ")(xlink)("\n")
           ("Nuggets: ")(nuggets);
     return nuggets.at(xlink);
 }
 
 
-bool TheKnowledge::HasNugget(XLink xlink) const
+bool XTreeDatabase::HasNugget(XLink xlink) const
 {
     ASSERT( xlink );
     return nuggets.count(xlink) > 0;
 }
 
 
-const TheKnowledge::NodeNugget &TheKnowledge::GetNodeNugget(TreePtr<Node> node) const
+const XTreeDatabase::NodeNugget &XTreeDatabase::GetNodeNugget(TreePtr<Node> node) const
 {
     ASSERT( node );
     ASSERT( HasNodeNugget(node) )
-          ("Knowledge: no node nugget for ")(node)("\n")
+          ("X tree database: no node nugget for ")(node)("\n")
           ("Node nuggets: ")(node_nuggets);
     return node_nuggets.at(node);
 }
 
 
-bool TheKnowledge::HasNodeNugget(TreePtr<Node> node) const
+bool XTreeDatabase::HasNodeNugget(TreePtr<Node> node) const
 {
     ASSERT( node );
     return node_nuggets.count(node) > 0;
 }
 
 
-void TheKnowledge::Build( XLink root_xlink )
+void XTreeDatabase::Build( XLink root_xlink )
 {      
 	ASSERT( root_xlink );
 	
@@ -202,10 +202,10 @@ void TheKnowledge::Build( XLink root_xlink )
     AddAtRoot( REQUIRE_SOLO, XLink::MMAX_Link );
     AddAtRoot( REQUIRE_SOLO, XLink::OffEndXLink );
         
-#ifdef TRACE_KNOWLEDGE_DELTAS
+#ifdef TRACE_X_TREE_DB_DELTAS
     if( Tracer::IsEnabled() ) 
     {        
-        TRACE("Knowledge rebuilt at ")(root_xlink)(":\n")
+        TRACE("X tree db rebuilt at ")(root_xlink)(":\n")
              ( category_ordered_domain )("\n");
         previous_category_ordered_domain = category_ordered_domain;
     }
@@ -213,7 +213,7 @@ void TheKnowledge::Build( XLink root_xlink )
 }
 
 
-void TheKnowledge::ExtendDomainWorker( PatternLink plink )
+void XTreeDatabase::ExtendDomainWorker( PatternLink plink )
 {
     // Extend locally first and then pass that into children.
     set<XLink> extra_xlinks = plink.GetChildAgent()->ExpandNormalDomain( *this, unordered_domain );    
@@ -243,10 +243,10 @@ void TheKnowledge::ExtendDomainWorker( PatternLink plink )
 }
 
 
-void TheKnowledge::ExtendDomain( PatternLink plink )
+void XTreeDatabase::ExtendDomain( PatternLink plink )
 {
     ExtendDomainWorker(plink);
-#ifdef TRACE_KNOWLEDGE_DELTAS
+#ifdef TRACE_X_TREE_DB_DELTAS
     if( Tracer::IsEnabled() ) // We want this deltaing to be relative to what is seen in the log
     {
         TRACE("Domain extended for ")(plink)(", new XLinks:\n")
@@ -264,7 +264,7 @@ void TheKnowledge::ExtendDomain( PatternLink plink )
 }
 
 
-void TheKnowledge::AddAtRoot( SubtreeMode mode, XLink root_xlink )
+void XTreeDatabase::AddAtRoot( SubtreeMode mode, XLink root_xlink )
 {
     // Bootstrap the recursive process with initial (root) values
     Nugget nugget;
@@ -277,7 +277,7 @@ void TheKnowledge::AddAtRoot( SubtreeMode mode, XLink root_xlink )
 }
 
 
-void TheKnowledge::AddLink( SubtreeMode mode, 
+void XTreeDatabase::AddLink( SubtreeMode mode, 
                             XLink xlink, 
                             Nugget &nugget,
                             NodeNugget &node_nugget )
@@ -327,7 +327,7 @@ void TheKnowledge::AddLink( SubtreeMode mode,
     // Grab last link that was added during unwind    
     nugget.last_descendant_xlink = last_xlink;
     
-    // Add a nugget of knowledge
+    // Add a nugget of x_tree_db
     InsertSolo( nuggets, make_pair(xlink, nugget) );
 
 	// Merge in the node nugget
@@ -340,7 +340,7 @@ void TheKnowledge::AddLink( SubtreeMode mode,
 }
 
 
-void TheKnowledge::AddChildren( SubtreeMode mode, XLink xlink )
+void XTreeDatabase::AddChildren( SubtreeMode mode, XLink xlink )
 {
     TreePtr<Node> x = xlink.GetChildX();
     vector< Itemiser::Element * > x_items = x->Itemise();
@@ -358,12 +358,12 @@ void TheKnowledge::AddChildren( SubtreeMode mode, XLink xlink )
 }
 
 
-void TheKnowledge::AddSingularNode( SubtreeMode mode, const TreePtrInterface *p_x_singular, XLink xlink )
+void XTreeDatabase::AddSingularNode( SubtreeMode mode, const TreePtrInterface *p_x_singular, XLink xlink )
 {
     ASSERT( p_x_singular );
     // MakeValueArchetype() can generate nodes with NULL pointers (eg in PointerIs)
     // and these get into the domain even though they are not allowed in input trees.
-    // In this case, stop recursing since there's no child to build knowledge for.    
+    // In this case, stop recursing since there's no child to build x_tree_db for.    
     if( !*p_x_singular )
         return;
         
@@ -386,7 +386,7 @@ void TheKnowledge::AddSingularNode( SubtreeMode mode, const TreePtrInterface *p_
 }
 
 
-void TheKnowledge::AddSequence( SubtreeMode mode, SequenceInterface *x_seq, XLink xlink )
+void XTreeDatabase::AddSequence( SubtreeMode mode, SequenceInterface *x_seq, XLink xlink )
 {
     SequenceInterface::iterator xit_predecessor = x_seq->end();
     for( SequenceInterface::iterator xit = x_seq->begin();
@@ -426,7 +426,7 @@ void TheKnowledge::AddSequence( SubtreeMode mode, SequenceInterface *x_seq, XLin
 }
 
 
-void TheKnowledge::AddCollection( SubtreeMode mode, CollectionInterface *x_col, XLink xlink )
+void XTreeDatabase::AddCollection( SubtreeMode mode, CollectionInterface *x_col, XLink xlink )
 {
     for( CollectionInterface::iterator xit = x_col->begin();
          xit != x_col->end();
@@ -454,7 +454,7 @@ void TheKnowledge::AddCollection( SubtreeMode mode, CollectionInterface *x_col, 
 }
 
 
-string TheKnowledge::Nugget::GetTrace() const
+string XTreeDatabase::Nugget::GetTrace() const
 {
     string s = "(";
 
@@ -493,14 +493,14 @@ string TheKnowledge::Nugget::GetTrace() const
 }
 
 
-void TheKnowledge::NodeNugget::Merge( const NodeNugget &nn )
+void XTreeDatabase::NodeNugget::Merge( const NodeNugget &nn )
 {
 	parents = UnionOf( parents, nn.parents );
 	declarers = UnionOf( declarers, nn.declarers );
 }
 
 
-string TheKnowledge::NodeNugget::GetTrace() const
+string XTreeDatabase::NodeNugget::GetTrace() const
 {
     string s = "(";
 	
@@ -512,7 +512,7 @@ string TheKnowledge::NodeNugget::GetTrace() const
 }
 
 
-set<TreeKit::LinkInfo> TheKnowledge::GetDeclarers( TreePtr<Node> node ) const
+set<TreeKit::LinkInfo> XTreeDatabase::GetDeclarers( TreePtr<Node> node ) const
 {
     set<LinkInfo> infos;
    

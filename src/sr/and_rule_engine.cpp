@@ -145,13 +145,13 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
 }
 
 
-void AndRuleEngine::Plan::PlanningStageFive( shared_ptr<const TheKnowledge> knowledge_ )
+void AndRuleEngine::Plan::PlanningStageFive( shared_ptr<const XTreeDatabase> x_tree_db_ )
 {
-    algo->knowledge = knowledge_;
+    algo->x_tree_db = x_tree_db_;
     
     // ------------------ Set up CSP solver ---------------------   
     list< shared_ptr<CSP::Constraint> > constraints_list;
-    CreateMyConstraints(constraints_list, knowledge_);
+    CreateMyConstraints(constraints_list, x_tree_db_);
     
     // Boundary links may not be in our domain if eg they got 
     // deleted by the enclosing replace. So base_plink is the only one that
@@ -168,11 +168,11 @@ void AndRuleEngine::Plan::PlanningStageFive( shared_ptr<const TheKnowledge> know
     
     // ------------------ Stage five on subordinates ---------------------
 	for( auto p : my_free_abnormal_engines )
-		p.second->PlanningStageFive(knowledge_);
+		p.second->PlanningStageFive(x_tree_db_);
 	for( auto p : my_evaluator_abnormal_engines )
-		p.second->PlanningStageFive(knowledge_);
+		p.second->PlanningStageFive(x_tree_db_);
 	for( auto p : my_multiplicity_engines )
-		p.second->PlanningStageFive(knowledge_);    
+		p.second->PlanningStageFive(x_tree_db_);    
 }
 
 
@@ -463,7 +463,7 @@ void AndRuleEngine::Plan::DeduceCSPVariables()
 
 
 void AndRuleEngine::Plan::CreateMyConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list,
-                                               shared_ptr<const TheKnowledge> knowledge )
+                                               shared_ptr<const XTreeDatabase> x_tree_db )
 {
     for( auto bexpr : expressions_for_current_solve )
     {		
@@ -504,7 +504,7 @@ void AndRuleEngine::Plan::CreateMyConstraints( list< shared_ptr<CSP::Constraint>
 
 		SYM::PredicateAnalysis::CheckRegularPredicateForm( bexpr );
 
-        auto c = make_shared<CSP::SymbolicConstraint>(bexpr, knowledge);
+        auto c = make_shared<CSP::SymbolicConstraint>(bexpr, x_tree_db);
         constraints_list.push_back(c);    
     }        
 }
@@ -574,9 +574,9 @@ string AndRuleEngine::Plan::GetTrace() const
 }
 
 
-void AndRuleEngine::PlanningStageFive( shared_ptr<const TheKnowledge> knowledge )
+void AndRuleEngine::PlanningStageFive( shared_ptr<const XTreeDatabase> x_tree_db )
 {
-    plan.PlanningStageFive(knowledge);
+    plan.PlanningStageFive(x_tree_db);
 }
 
 
@@ -592,7 +592,7 @@ void AndRuleEngine::StartCSPSolver(const SolutionMap &fixes, const SolutionMap *
     
     TRACE("Starting solver\n");
     ASSERT( plan.solver_holder );
-    plan.solver_holder->Start( surrounding_and_base_links, knowledge.get() );
+    plan.solver_holder->Start( surrounding_and_base_links, x_tree_db.get() );
 }
 
 
@@ -700,13 +700,13 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
 
 #ifdef CHECK_EVERYTHING_IS_IN_DOMAIN      
     for( XLink xlink : pq->GetNormalLinks() )    
-        ASSERT( knowledge->domain.count(xlink) > 0 )(xlink)(" not found in ")(knowledge->domain)(" (see issue #202)\n"); // #202 expected to cause this to fail
+        ASSERT( x_tree_db->domain.count(xlink) > 0 )(xlink)(" not found in ")(x_tree_db->domain)(" (see issue #202)\n"); // #202 expected to cause this to fail
 #endif
     
 #ifdef NLQ_TEST
-    auto nlq_lambda = agent->TestStartRegenerationQuery( &basic_solution, knowledge.get() );
+    auto nlq_lambda = agent->TestStartRegenerationQuery( &basic_solution, x_tree_db.get() );
 #else    
-    auto nlq_lambda = agent->StartRegenerationQuery( &basic_solution, knowledge.get() );
+    auto nlq_lambda = agent->StartRegenerationQuery( &basic_solution, x_tree_db.get() );
 #endif
     
     int i=0;
@@ -798,7 +798,7 @@ SolutionMap AndRuleEngine::Compare( XLink base_xlink,
 
 #ifdef CHECK_EVERYTHING_IS_IN_DOMAIN
     if( !dynamic_cast<StarAgent*>(plan.base_plink.GetChildAgent()) ) // Stars are based at SubContainers which don't go into domain    
-        ASSERT( knowledge->domain.count(base_xlink) > 0 )(base_xlink)(" not found in ")(knowledge->domain)(" (see issue #202)\n");
+        ASSERT( x_tree_db->domain.count(base_xlink) > 0 )(base_xlink)(" not found in ")(x_tree_db->domain)(" (see issue #202)\n");
 #endif
     
     // Determine my fixes (just root pattern link to base x link)

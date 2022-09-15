@@ -6,7 +6,7 @@
 
 #include "common/common.hpp"
 #include "common/read_args.hpp"
-#include "../the_knowledge.hpp"
+#include "../x_tree_database.hpp"
 
 namespace SYM
 { 
@@ -138,22 +138,22 @@ public:
     virtual string GetItemTypeName() const override;    
 };
 
-// ------------------------- KnowledgeToSymbolOperator --------------------------
+// ------------------------- XTreeDbToSymbolOperator --------------------------
 
-class KnowledgeToSymbolOperator : public SymbolToSymbolExpression
+class XTreeDbToSymbolOperator : public SymbolToSymbolExpression
 {
 public:    
     typedef SymbolExpression NominalType;
-    explicit KnowledgeToSymbolOperator( shared_ptr<SymbolExpression> a );
+    explicit XTreeDbToSymbolOperator( shared_ptr<SymbolExpression> a );
     VariablesRequiringNuggets GetVariablesRequiringNuggets() const override;
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     virtual unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit,
                                                list<unique_ptr<SymbolResultInterface>> &&op_results ) const override final;
     virtual SR::XLink EvalXLinkFromNugget( SR::XLink parent_xlink, 
-                                           const SR::TheKnowledge::Nugget &nugget ) const = 0;
+                                           const SR::XTreeDatabase::Nugget &nugget ) const = 0;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
-    virtual string GetKnowledgeName() const = 0;
+    virtual string GetRenderPrefix() const = 0;
     
 protected:
     const shared_ptr<SymbolExpression> a;
@@ -161,80 +161,80 @@ protected:
 
 // ------------------------- ParentOperator --------------------------
 
-class ParentOperator : public KnowledgeToSymbolOperator
+class ParentOperator : public XTreeDbToSymbolOperator
 {
 public:    
-    using KnowledgeToSymbolOperator::KnowledgeToSymbolOperator;
+    using XTreeDbToSymbolOperator::XTreeDbToSymbolOperator;
     virtual SR::XLink EvalXLinkFromNugget( SR::XLink parent_xlink, 
-                                           const SR::TheKnowledge::Nugget &nugget ) const override;
+                                           const SR::XTreeDatabase::Nugget &nugget ) const override;
 
     virtual shared_ptr<SymbolExpression> TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
                                                          shared_ptr<SymbolExpression> to_equal ) const override;
 
-    virtual string GetKnowledgeName() const override;
+    virtual string GetRenderPrefix() const override;
 };
 
 // ------------------------- LastDescendantOperator --------------------------
 
-class LastDescendantOperator : public KnowledgeToSymbolOperator
+class LastDescendantOperator : public XTreeDbToSymbolOperator
 {
 public:    
-    using KnowledgeToSymbolOperator::KnowledgeToSymbolOperator;
+    using XTreeDbToSymbolOperator::XTreeDbToSymbolOperator;
     virtual SR::XLink EvalXLinkFromNugget( SR::XLink parent_xlink, 
-                                           const SR::TheKnowledge::Nugget &nugget ) const override;
-    virtual string GetKnowledgeName() const override;
+                                           const SR::XTreeDatabase::Nugget &nugget ) const override;
+    virtual string GetRenderPrefix() const override;
 };
 
 // ------------------------- MyContainerFrontOperator --------------------------
 
-class MyContainerFrontOperator : public KnowledgeToSymbolOperator
+class MyContainerFrontOperator : public XTreeDbToSymbolOperator
 {
 public:    
-    using KnowledgeToSymbolOperator::KnowledgeToSymbolOperator;
+    using XTreeDbToSymbolOperator::XTreeDbToSymbolOperator;
     virtual SR::XLink EvalXLinkFromNugget( SR::XLink parent_xlink, 
-                                           const SR::TheKnowledge::Nugget &nugget ) const override;
-    virtual string GetKnowledgeName() const override;
+                                           const SR::XTreeDatabase::Nugget &nugget ) const override;
+    virtual string GetRenderPrefix() const override;
 };
 
 // ------------------------- MyContainerBackOperator --------------------------
 
-class MyContainerBackOperator : public KnowledgeToSymbolOperator
+class MyContainerBackOperator : public XTreeDbToSymbolOperator
 {
 public:    
-    using KnowledgeToSymbolOperator::KnowledgeToSymbolOperator;
+    using XTreeDbToSymbolOperator::XTreeDbToSymbolOperator;
     virtual SR::XLink EvalXLinkFromNugget( SR::XLink parent_xlink, 
-                                           const SR::TheKnowledge::Nugget &nugget ) const override;
-    virtual string GetKnowledgeName() const override;
+                                           const SR::XTreeDatabase::Nugget &nugget ) const override;
+    virtual string GetRenderPrefix() const override;
 };
 
 // ------------------------- MySequenceSuccessorOperator --------------------------
 
-class MySequenceSuccessorOperator : public KnowledgeToSymbolOperator
+class MySequenceSuccessorOperator : public XTreeDbToSymbolOperator
 {
 public:    
-    using KnowledgeToSymbolOperator::KnowledgeToSymbolOperator;
+    using XTreeDbToSymbolOperator::XTreeDbToSymbolOperator;
     virtual SR::XLink EvalXLinkFromNugget( SR::XLink parent_xlink, 
-                                           const SR::TheKnowledge::Nugget &nugget ) const override;
+                                           const SR::XTreeDatabase::Nugget &nugget ) const override;
 
     virtual shared_ptr<SymbolExpression> TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
                                                          shared_ptr<SymbolExpression> to_equal ) const override;
 
-    virtual string GetKnowledgeName() const override;
+    virtual string GetRenderPrefix() const override;
 };
 
 // ------------------------- MySequencePredecessorOperator --------------------------
 
-class MySequencePredecessorOperator : public KnowledgeToSymbolOperator
+class MySequencePredecessorOperator : public XTreeDbToSymbolOperator
 {
 public:    
-    using KnowledgeToSymbolOperator::KnowledgeToSymbolOperator;
+    using XTreeDbToSymbolOperator::XTreeDbToSymbolOperator;
     virtual SR::XLink EvalXLinkFromNugget( SR::XLink parent_xlink, 
-                                           const SR::TheKnowledge::Nugget &nugget ) const override;
+                                           const SR::XTreeDatabase::Nugget &nugget ) const override;
 
     virtual shared_ptr<SymbolExpression> TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
                                                          shared_ptr<SymbolExpression> to_equal ) const override;
 
-    virtual string GetKnowledgeName() const override;
+    virtual string GetRenderPrefix() const override;
 };
 
 // ------------------------- AllChildrenOperator --------------------------

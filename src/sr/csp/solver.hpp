@@ -10,7 +10,7 @@
 
 namespace SR
 {
-class TheKnowledge;
+class XTreeDatabase;
 }
 
 namespace CSP
@@ -61,10 +61,10 @@ public:
      * 
      * @param forces [in] partial assignment with values for all forced variables.
      * 
-     * @param knowledge [in] database of information about the current values.
+     * @param x_tree_db [in] database of information about the current values.
      */
     virtual void Start( const Assignments &forces,
-                        const SR::TheKnowledge *knowledge ) = 0;
+                        const SR::XTreeDatabase *x_tree_db ) = 0;
                       
     /**
      * Run the solver to exhaustion (i.e. it will discover all the

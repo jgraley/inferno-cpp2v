@@ -79,11 +79,11 @@ void VNStep::PlanningStageThree()
 }
 
 
-void VNStep::PlanningStageFive( shared_ptr<const TheKnowledge> knowledge )
+void VNStep::PlanningStageFive( shared_ptr<const XTreeDatabase> x_tree_db )
 {
     ASSERT( this )("Called on NULL pointer, I expect");
     ASSERT( top_level_engine )("VNStep needs to be configured before use");
-    top_level_engine->PlanningStageFive(knowledge);
+    top_level_engine->PlanningStageFive(x_tree_db);
 }
 
 

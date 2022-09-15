@@ -246,12 +246,12 @@ unique_ptr<BooleanResult> IndexComparisonOperator::Evaluate( const EvalKit &kit,
     unique_ptr<SymbolResultInterface> ra = move( op_results.front() );
     unique_ptr<SymbolResultInterface> rb = move( op_results.back() );
 
-    // For greater/less, we need to consult the knowledge. We use the 
+    // For greater/less, we need to consult the x_tree_db. We use the 
     // overall depth-first ordering.
-    const SR::TheKnowledge::Nugget &nugget_a( kit.knowledge->GetNugget(ra->GetOnlyXLink()) );   
-    const SR::TheKnowledge::Nugget &nugget_b( kit.knowledge->GetNugget(rb->GetOnlyXLink()) );   
-    SR::TheKnowledge::IndexType index_a = nugget_a.depth_first_index;
-    SR::TheKnowledge::IndexType index_b = nugget_b.depth_first_index;
+    const SR::XTreeDatabase::Nugget &nugget_a( kit.x_tree_db->GetNugget(ra->GetOnlyXLink()) );   
+    const SR::XTreeDatabase::Nugget &nugget_b( kit.x_tree_db->GetNugget(rb->GetOnlyXLink()) );   
+    SR::XTreeDatabase::IndexType index_a = nugget_a.depth_first_index;
+    SR::XTreeDatabase::IndexType index_b = nugget_b.depth_first_index;
     
     bool res = EvalBoolFromIndexes( index_a, index_b );
     return make_unique<BooleanResult>( res );  
@@ -287,8 +287,8 @@ shared_ptr<PredicateOperator> IsGreaterOperator::Clone() const
 }
     
 
-bool IsGreaterOperator::EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
-                                           SR::TheKnowledge::IndexType index_b ) const
+bool IsGreaterOperator::EvalBoolFromIndexes( SR::XTreeDatabase::IndexType index_a,
+                                           SR::XTreeDatabase::IndexType index_b ) const
 {
     return index_a > index_b;
 }                    
@@ -346,8 +346,8 @@ shared_ptr<PredicateOperator> IsLessOperator::Clone() const
 }
     
 
-bool IsLessOperator::EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
-                                          SR::TheKnowledge::IndexType index_b ) const
+bool IsLessOperator::EvalBoolFromIndexes( SR::XTreeDatabase::IndexType index_a,
+                                          SR::XTreeDatabase::IndexType index_b ) const
 {
     return index_a < index_b;
 }                    
@@ -405,8 +405,8 @@ shared_ptr<PredicateOperator> IsGreaterOrEqualOperator::Clone() const
 }
     
 
-bool IsGreaterOrEqualOperator::EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
-                                                  SR::TheKnowledge::IndexType index_b ) const
+bool IsGreaterOrEqualOperator::EvalBoolFromIndexes( SR::XTreeDatabase::IndexType index_a,
+                                                  SR::XTreeDatabase::IndexType index_b ) const
 {
     return index_a >= index_b;
 }                    
@@ -459,8 +459,8 @@ shared_ptr<PredicateOperator> IsLessOrEqualOperator::Clone() const
 }
     
 
-bool IsLessOrEqualOperator::EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
-                                               SR::TheKnowledge::IndexType index_b ) const
+bool IsLessOrEqualOperator::EvalBoolFromIndexes( SR::XTreeDatabase::IndexType index_a,
+                                               SR::XTreeDatabase::IndexType index_b ) const
 {
     return index_a <= index_b;
 }                    
@@ -644,15 +644,15 @@ unique_ptr<BooleanResult> IsInCategoryOperator::Evaluate( const EvalKit &kit,
 shared_ptr<SYM::SymbolExpression> IsInCategoryOperator::TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const
 {
     // Get lacing index range
-    const list<pair<int, int>> &int_range_list = kit.knowledge->GetLacing()->GetRangeListForCategory(archetype_node);
+    const list<pair<int, int>> &int_range_list = kit.x_tree_db->GetLacing()->GetRangeListForCategory(archetype_node);
     
     // Get specially hacked XLinks that can be used with the category ordering
     AllInCategoryRangeOperator::ExprBoundsList expr_range_list;
     for( pair<int, int> int_range : int_range_list )
     {
         AllInCategoryRangeOperator::ExprBounds expr_range;
-        expr_range.first = make_shared<SYM::SymbolConstant>( MakeTreeNode<SR::TheKnowledge::CategoryMinimaxNode>(int_range.first) );
-        expr_range.second = make_shared<SYM::SymbolConstant>( MakeTreeNode<SR::TheKnowledge::CategoryMinimaxNode>(int_range.second) );        
+        expr_range.first = make_shared<SYM::SymbolConstant>( MakeTreeNode<SR::XTreeDatabase::CategoryMinimaxNode>(int_range.first) );
+        expr_range.second = make_shared<SYM::SymbolConstant>( MakeTreeNode<SR::XTreeDatabase::CategoryMinimaxNode>(int_range.second) );        
         expr_range_list.push_back( expr_range );
     }
     TRACE(archetype_node)("\n")(int_range_list)("\n")(expr_range_list)("\n");

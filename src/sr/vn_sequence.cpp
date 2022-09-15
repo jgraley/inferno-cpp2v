@@ -1,13 +1,13 @@
 #include "vn_sequence.hpp"
 #include "vn_step.hpp"
 #include "render/graph.hpp"
-#include "the_knowledge.hpp"
+#include "x_tree_database.hpp"
 
 using namespace SR;
 
 
 // Make trace easier to follow
-//#define KNOWLEDGE_EACH_STEP
+//#define X_TREE_DB_EACH_STEP
 
 VNSequence::VNSequence( const vector< shared_ptr<VNStep> > &sequence ) :
     steps( sequence )
@@ -52,14 +52,14 @@ void VNSequence::PlanningStageFour()
         expressions = UnionOfSolo( expressions, step_exprs );
     }
     
-    // Give that set to knowledge planning
-    knowledge = make_shared<TheKnowledge>(expressions);
+    // Give that set to x_tree_db planning
+    x_tree_db = make_shared<XTreeDatabase>(expressions);
 }
 
 
 void VNSequence::PlanningStageFive( int step_index )
 {
-    steps[step_index]->PlanningStageFive(knowledge);
+    steps[step_index]->PlanningStageFive(x_tree_db);
 }
 
 
@@ -78,9 +78,9 @@ void VNSequence::SetStopAfter( int step_index, vector<int> ssa, int d )
 void VNSequence::AnalysisStage( TreePtr<Node> root )
 {
     current_root_xlink = XLink::CreateDistinct(root);    
-    ASSERT( knowledge )("Planning stage four should have created knowledge object");
-#ifndef KNOWLEDGE_EACH_STEP
-	knowledge->Build( current_root_xlink );
+    ASSERT( x_tree_db )("Planning stage four should have created x_tree_db object");
+#ifndef X_TREE_DB_EACH_STEP
+	x_tree_db->Build( current_root_xlink );
 #endif        
 }
 
@@ -90,8 +90,8 @@ TreePtr<Node> VNSequence::TransformStep( int step_index, TreePtr<Node> root )
     ASSERT( current_root_xlink.GetChildX()==root );
     dirty_grass.clear();	
 	    
-#ifdef KNOWLEDGE_EACH_STEP
-	knowledge->Build( current_root_xlink );
+#ifdef X_TREE_DB_EACH_STEP
+	x_tree_db->Build( current_root_xlink );
 #endif        
     steps[step_index]->Transform( current_root_xlink );
     root = current_root_xlink.GetChildX();
@@ -126,30 +126,30 @@ string VNSequence::GetStepName( int step_index ) const
 
 XLink VNSequence::UniquifyDomainExtension( XLink xlink ) const
 {
-    ASSERT( knowledge )("Planning stage four should have created knowledge object");
-    return knowledge->UniquifyDomainExtension( xlink ); 
+    ASSERT( x_tree_db )("Planning stage four should have created x_tree_db object");
+    return x_tree_db->UniquifyDomainExtension( xlink ); 
 }
 
 
 XLink VNSequence::FindDomainExtension( XLink xlink ) const
 {
-    ASSERT( knowledge )("Planning stage four should have created knowledge object");
-    return knowledge->FindDomainExtension( xlink ); 
+    ASSERT( x_tree_db )("Planning stage four should have created x_tree_db object");
+    return x_tree_db->FindDomainExtension( xlink ); 
 }
 
 
-void VNSequence::BuildTheKnowledge()
+void VNSequence::BuildXTreeDatabase()
 {
-    ASSERT( knowledge )("Planning stage four should have created knowledge object");
+    ASSERT( x_tree_db )("Planning stage four should have created x_tree_db object");
 	ASSERT( current_root_xlink );
-	knowledge->Build( current_root_xlink );
+	x_tree_db->Build( current_root_xlink );
 }
 
 
 void VNSequence::ExtendDomain( PatternLink root_plink )
 {
-    ASSERT( knowledge )("Planning stage four should have created knowledge object");  
-    knowledge->ExtendDomain( root_plink );
+    ASSERT( x_tree_db )("Planning stage four should have created x_tree_db object");  
+    x_tree_db->ExtendDomain( root_plink );
 }
 
 

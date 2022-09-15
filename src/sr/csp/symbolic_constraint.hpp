@@ -14,7 +14,7 @@
 namespace SR
 {
 class Conjecture;    
-class TheKnowledge;
+class XTreeDatabase;
 }
 
 namespace CSP
@@ -34,17 +34,17 @@ public:
      * @param op a shared pointer to the boolean operator
      */
     explicit SymbolicConstraint( shared_ptr<SYM::BooleanExpression> op,
-                                 shared_ptr<const SR::TheKnowledge> knowledge );
+                                 shared_ptr<const SR::XTreeDatabase> x_tree_db );
     
 private:
     const struct Plan : public virtual Traceable
     {
         explicit Plan( SymbolicConstraint *algo,  
                        shared_ptr<SYM::BooleanExpression> expression,
-                       shared_ptr<const SR::TheKnowledge> knowledge );
+                       shared_ptr<const SR::XTreeDatabase> x_tree_db );
         void DetermineVariables();
         void DetermineHintExpressions();
-        void DetermineKnowledgeRequirement();
+        void DetermineXTreeDbRequirement();
         string GetTrace() const; // used for debug
 
         SymbolicConstraint * const algo;
@@ -53,8 +53,8 @@ private:
         typedef map< set<VariableId>, shared_ptr<SYM::SymbolExpression>> GivensToExpression;
         map<VariableId, GivensToExpression> suggestion_expressions;
         shared_ptr<SYM::BooleanExpression> alt_expression_for_testing;       
-        SYM::Expression::VariablesRequiringNuggets required_knowledge_level; 
-        shared_ptr<const SR::TheKnowledge> knowledge;
+        SYM::Expression::VariablesRequiringNuggets required_x_tree_db_level; 
+        shared_ptr<const SR::XTreeDatabase> x_tree_db;
     } plan;
 
     const set<VariableId> &GetVariables() const override;

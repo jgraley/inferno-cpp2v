@@ -4,7 +4,7 @@
 #include "expression.hpp"
 #include "overloads.hpp"
 
-#include "../the_knowledge.hpp"
+#include "../x_tree_database.hpp"
 #include "../sc_relation.hpp"
 
 #include "common/common.hpp"
@@ -103,7 +103,7 @@ Over<BooleanExpression> operator!=( Over<SymbolExpression> a, Over<SymbolExpress
 
 // ------------------------- IndexComparisonOperator --------------------------
 
-// Use depth-first index from the knowledge to effect inequalities
+// Use depth-first index from the x_tree_db to effect inequalities
 class IndexComparisonOperator : public PredicateOperator
 {
 public:    
@@ -116,8 +116,8 @@ public:
                                                 list<unique_ptr<SymbolResultInterface>> &&op_results ) const override final;
     shared_ptr<SymbolExpression> TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const override;
     virtual list<shared_ptr<SymbolExpression>> GetRanges() const = 0;
-    virtual bool EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
-                                      SR::TheKnowledge::IndexType index_b ) const = 0;
+    virtual bool EvalBoolFromIndexes( SR::XTreeDatabase::IndexType index_a,
+                                      SR::XTreeDatabase::IndexType index_b ) const = 0;
     virtual Precedence GetPrecedenceNF() const override;
     
 protected:
@@ -132,8 +132,8 @@ class IsGreaterOperator : public IndexComparisonOperator
     using IndexComparisonOperator::IndexComparisonOperator;
     shared_ptr<PredicateOperator> Clone() const override;
 
-    virtual bool EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
-                                      SR::TheKnowledge::IndexType index_b ) const override;
+    virtual bool EvalBoolFromIndexes( SR::XTreeDatabase::IndexType index_a,
+                                      SR::XTreeDatabase::IndexType index_b ) const override;
     list<shared_ptr<SymbolExpression>> GetRanges() const override;
                                       
     Relationship GetRelationshipWith( shared_ptr<PredicateOperator> other ) const override;
@@ -151,8 +151,8 @@ class IsLessOperator : public IndexComparisonOperator
     using IndexComparisonOperator::IndexComparisonOperator;
     shared_ptr<PredicateOperator> Clone() const override;
 
-    virtual bool EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
-                                      SR::TheKnowledge::IndexType index_b ) const override;
+    virtual bool EvalBoolFromIndexes( SR::XTreeDatabase::IndexType index_a,
+                                      SR::XTreeDatabase::IndexType index_b ) const override;
     list<shared_ptr<SymbolExpression>> GetRanges() const override;
 
     Relationship GetRelationshipWith( shared_ptr<PredicateOperator> other ) const override;
@@ -170,8 +170,8 @@ class IsGreaterOrEqualOperator : public IndexComparisonOperator
     using IndexComparisonOperator::IndexComparisonOperator;
     shared_ptr<PredicateOperator> Clone() const override;
 
-    virtual bool EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
-                                      SR::TheKnowledge::IndexType index_b ) const override;
+    virtual bool EvalBoolFromIndexes( SR::XTreeDatabase::IndexType index_a,
+                                      SR::XTreeDatabase::IndexType index_b ) const override;
     list<shared_ptr<SymbolExpression>> GetRanges() const override;
 
     Relationship GetRelationshipWith( shared_ptr<PredicateOperator> other ) const override;
@@ -189,8 +189,8 @@ class IsLessOrEqualOperator : public IndexComparisonOperator
     using IndexComparisonOperator::IndexComparisonOperator;
     shared_ptr<PredicateOperator> Clone() const override;
 
-    virtual bool EvalBoolFromIndexes( SR::TheKnowledge::IndexType index_a,
-                                      SR::TheKnowledge::IndexType index_b ) const override;
+    virtual bool EvalBoolFromIndexes( SR::XTreeDatabase::IndexType index_a,
+                                      SR::XTreeDatabase::IndexType index_b ) const override;
     list<shared_ptr<SymbolExpression>> GetRanges() const override;
 
     Relationship GetRelationshipWith( shared_ptr<PredicateOperator> other ) const override;
@@ -228,7 +228,7 @@ private:
 // ------------------------- IsInCategoryOperator --------------------------
 
 // Note: this predicate is kept specific (rather than generalising to 
-// eg IsInCategoryRange) because it needs to be seen by knowledge planning
+// eg IsInCategoryRange) because it needs to be seen by x_tree_db planning
 // and only then can it be solved into the more generic AllInCategoryRangeOperator. 
 class IsInCategoryOperator : public PredicateOperator
 {

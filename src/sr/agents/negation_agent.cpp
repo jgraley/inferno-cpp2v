@@ -33,7 +33,7 @@ SYM::Over<SYM::BooleanExpression> NegationAgent::SymbolicNormalLinkedQueryPRed()
 
 void NegationAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                               const SolutionMap *hypothesis_links,
-                                              const TheKnowledge *knowledge ) const
+                                              const XTreeDatabase *x_tree_db ) const
 { 
     ASSERT( *GetNegand() );
     // This agent has no normal links, so just do this to populate query

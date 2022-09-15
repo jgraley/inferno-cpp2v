@@ -247,16 +247,16 @@ void SCREngine::Plan::PlanReplace()
 }
 
 
-void SCREngine::Plan::PlanningStageFive( shared_ptr<const TheKnowledge> knowledge_ )
+void SCREngine::Plan::PlanningStageFive( shared_ptr<const XTreeDatabase> x_tree_db_ )
 {    
     TRACE("Planning stage five\n");
 
-    and_rule_engine->PlanningStageFive(knowledge_);
+    and_rule_engine->PlanningStageFive(x_tree_db_);
     
     for( pair< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > p : my_engines )
-        p.second->PlanningStageFive(knowledge_);    
+        p.second->PlanningStageFive(x_tree_db_);    
         
-    knowledge = knowledge_;
+    x_tree_db = x_tree_db_;
     
     Dump();
 } 
@@ -350,7 +350,7 @@ void SCREngine::RunEmbedded( PatternLink plink_to_embedded, XLink base_xlink )
     
     // Obtain a pointer to the though link that will be updated by the 
     // embedded. 
-	TheKnowledge::NodeNugget nn = plan.knowledge->GetNodeNugget(through_subtree);
+	XTreeDatabase::NodeNugget nn = plan.x_tree_db->GetNodeNugget(through_subtree);
 	XLink target_xlink = OnlyElementOf(nn.parents);
 
     // Run the embedded's engine on this subtree and overwrite through ptr via p_through_x
@@ -396,7 +396,7 @@ void SCREngine::SingleCompareReplace( XLink base_xlink,
     // Now replace according to the couplings
     base_xlink.SetXPtr( Replace() );
     ASSERT( replace_solution.at( plan.base_plink ) == base_xlink );
-    plan.vn_sequence->BuildTheKnowledge();  
+    plan.vn_sequence->BuildXTreeDatabase();  
     // Domain extend required on sight of new pattern OR x. This call is due to the change in X tree.
     plan.vn_sequence->ExtendDomain( plan.base_plink ); 
     ASSERT( replace_solution.at( plan.base_plink ) == base_xlink );
@@ -411,7 +411,7 @@ void SCREngine::SingleCompareReplace( XLink base_xlink,
     replace_solution_available = false;
     replace_solution.clear();
           
-    // Clear out anything cached in agents and update the knowledge 
+    // Clear out anything cached in agents and update the x_tree_db 
     // now that replace is done
     for( Agent *a : plan.my_agents )
         a->Reset();

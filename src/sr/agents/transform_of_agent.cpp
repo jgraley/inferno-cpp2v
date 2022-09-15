@@ -1,7 +1,7 @@
 #include "transform_of_agent.hpp"
 #include "../scr_engine.hpp"
 #include "link.hpp"
-#include "the_knowledge.hpp"
+#include "x_tree_database.hpp"
 
 using namespace SR;
 
@@ -13,9 +13,9 @@ shared_ptr<PatternQuery> TransformOfAgent::GetPatternQuery() const
 }
 
 
-LocatedLink TransformOfAgent::RunTeleportQuery( const TheKnowledge &knowledge, XLink keyer_xlink ) const
+LocatedLink TransformOfAgent::RunTeleportQuery( const XTreeDatabase &x_tree_db, XLink keyer_xlink ) const
 {
-    // Transform the candidate expression, sharing the knowledge as a TreeKit
+    // Transform the candidate expression, sharing the x_tree_db as a TreeKit
     // so that implementations can use handy features without needing to search
     // the tree. Note that transformations work on nodes, not XLinks, so some
     // precision is lost.
@@ -28,7 +28,7 @@ LocatedLink TransformOfAgent::RunTeleportQuery( const TheKnowledge &knowledge, X
 
     try
     {
-		TreePtr<Node> trans_x = (*transformation)( knowledge, keyer_x );      
+		TreePtr<Node> trans_x = (*transformation)( x_tree_db, keyer_x );      
 		if( trans_x )
 		{
 			ASSERT( trans_x->IsFinal() )(*this)(" computed non-final ")(*trans_x)(" from ")(keyer_x)("\n");             

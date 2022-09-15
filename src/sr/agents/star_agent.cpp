@@ -37,7 +37,7 @@ SYM::Over<SYM::BooleanExpression> StarAgent::SymbolicNormalLinkedQuery() const
 
 void StarAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                           const SolutionMap *hypothesis_links,
-                                          const TheKnowledge *knowledge ) const
+                                          const XTreeDatabase *x_tree_db ) const
 { 
     // This agent has no normal links, so just do this to populate query
     XLink keyer_xlink = hypothesis_links->at(keyer_plink);

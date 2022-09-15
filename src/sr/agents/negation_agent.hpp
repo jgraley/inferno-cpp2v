@@ -23,7 +23,7 @@ public:
 
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            const SolutionMap *hypothesis_links,
-                                           const TheKnowledge *knowledge ) const;                                              
+                                           const XTreeDatabase *x_tree_db ) const;                                              
     virtual Block GetGraphBlockInfo() const;
     
 private:

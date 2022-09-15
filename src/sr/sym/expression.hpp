@@ -9,7 +9,7 @@
 
 namespace SR
 {
-    class TheKnowledge;
+    class XTreeDatabase;
 }
 
 namespace SYM
@@ -31,7 +31,7 @@ public:
      */
     struct SolveKit
     {
-        const SR::TheKnowledge *knowledge;
+        const SR::XTreeDatabase *x_tree_db;
     };
 
     /**
@@ -40,7 +40,7 @@ public:
     struct EvalKit
     {
         const SR::SolutionMap *hypothesis_links;
-        const SR::TheKnowledge *knowledge;
+        const SR::XTreeDatabase *x_tree_db;
     };
     
     // Bigger number is LOWER precedence.

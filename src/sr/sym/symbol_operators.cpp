@@ -323,28 +323,28 @@ string SingularChildOperator::GetItemTypeName() const
     return "sing";
 }
 
-// ------------------------- KnowledgeToSymbolOperator --------------------------
+// ------------------------- XTreeDbToSymbolOperator --------------------------
 
-KnowledgeToSymbolOperator::KnowledgeToSymbolOperator( shared_ptr<SymbolExpression> a_ ) :
+XTreeDbToSymbolOperator::XTreeDbToSymbolOperator( shared_ptr<SymbolExpression> a_ ) :
     a( a_ )
 {
     ASSERT(a);
 }    
 
 
-Expression::VariablesRequiringNuggets KnowledgeToSymbolOperator::GetVariablesRequiringNuggets() const
+Expression::VariablesRequiringNuggets XTreeDbToSymbolOperator::GetVariablesRequiringNuggets() const
 {
     return GetRequiredVariables();
 }
 
 
-list<shared_ptr<SymbolExpression>> KnowledgeToSymbolOperator::GetSymbolOperands() const
+list<shared_ptr<SymbolExpression>> XTreeDbToSymbolOperator::GetSymbolOperands() const
 {
     return {a};
 }
 
 
-unique_ptr<SymbolResultInterface> KnowledgeToSymbolOperator::Evaluate( const EvalKit &kit,
+unique_ptr<SymbolResultInterface> XTreeDbToSymbolOperator::Evaluate( const EvalKit &kit,
                                                                        list<unique_ptr<SymbolResultInterface>> &&op_results ) const
 {
     // Evaluate operand and ensure we got an XLink
@@ -353,7 +353,7 @@ unique_ptr<SymbolResultInterface> KnowledgeToSymbolOperator::Evaluate( const Eva
     if( !ar->IsDefinedAndUnique() )
         return ar;
         
-    const SR::TheKnowledge::Nugget &nugget( kit.knowledge->GetNugget(ar->GetOnlyXLink()) );   
+    const SR::XTreeDatabase::Nugget &nugget( kit.x_tree_db->GetNugget(ar->GetOnlyXLink()) );   
     SR::XLink result_xlink = EvalXLinkFromNugget( ar->GetOnlyXLink(), nugget );
     if( result_xlink ) 
         return make_unique<SymbolResult>( result_xlink );
@@ -362,13 +362,13 @@ unique_ptr<SymbolResultInterface> KnowledgeToSymbolOperator::Evaluate( const Eva
 }
 
 
-string KnowledgeToSymbolOperator::Render() const
+string XTreeDbToSymbolOperator::Render() const
 {
-    return GetKnowledgeName() + a->RenderWithParentheses(); 
+    return GetRenderPrefix() + a->RenderWithParentheses(); 
 }
 
 
-Expression::Precedence KnowledgeToSymbolOperator::GetPrecedence() const
+Expression::Precedence XTreeDbToSymbolOperator::GetPrecedence() const
 {
     return Precedence::PREFIX;
 }
@@ -376,7 +376,7 @@ Expression::Precedence KnowledgeToSymbolOperator::GetPrecedence() const
 // ------------------------- ParentOperator --------------------------
     
 SR::XLink ParentOperator::EvalXLinkFromNugget( SR::XLink parent_xlink, 
-                                               const SR::TheKnowledge::Nugget &nugget ) const
+                                               const SR::XTreeDatabase::Nugget &nugget ) const
 {
   
     return nugget.parent_xlink;
@@ -392,7 +392,7 @@ shared_ptr<SymbolExpression> ParentOperator::TrySolveForToEqual( const SolveKit 
 }
 
 
-string ParentOperator::GetKnowledgeName() const
+string ParentOperator::GetRenderPrefix() const
 {
     return "Parent";
 }
@@ -400,14 +400,14 @@ string ParentOperator::GetKnowledgeName() const
 // ------------------------- LastDescendantOperator --------------------------
     
 SR::XLink LastDescendantOperator::EvalXLinkFromNugget( SR::XLink parent_xlink, 
-                                                       const SR::TheKnowledge::Nugget &nugget ) const
+                                                       const SR::XTreeDatabase::Nugget &nugget ) const
 {
   
     return nugget.last_descendant_xlink;
 }
 
 
-string LastDescendantOperator::GetKnowledgeName() const
+string LastDescendantOperator::GetRenderPrefix() const
 {
     return "LastDescendant";
 }
@@ -415,14 +415,14 @@ string LastDescendantOperator::GetKnowledgeName() const
 // ------------------------- MyContainerFrontOperator --------------------------
     
 SR::XLink MyContainerFrontOperator::EvalXLinkFromNugget( SR::XLink parent_xlink, 
-                                                         const SR::TheKnowledge::Nugget &nugget ) const
+                                                         const SR::XTreeDatabase::Nugget &nugget ) const
 {
   
     return nugget.my_container_front;
 }
 
 
-string MyContainerFrontOperator::GetKnowledgeName() const
+string MyContainerFrontOperator::GetRenderPrefix() const
 {
     return "MyConFront";
 }
@@ -430,13 +430,13 @@ string MyContainerFrontOperator::GetKnowledgeName() const
 // ------------------------- MyContainerBackOperator --------------------------
 
 SR::XLink MyContainerBackOperator::EvalXLinkFromNugget( SR::XLink parent_xlink, 
-                                                        const SR::TheKnowledge::Nugget &nugget ) const
+                                                        const SR::XTreeDatabase::Nugget &nugget ) const
 {
     return nugget.my_container_back;
 }
 
 
-string MyContainerBackOperator::GetKnowledgeName() const
+string MyContainerBackOperator::GetRenderPrefix() const
 {
     return "MyConBack";
 }
@@ -444,7 +444,7 @@ string MyContainerBackOperator::GetKnowledgeName() const
 // ------------------------- MySequenceSuccessorOperator --------------------------
 
 SR::XLink MySequenceSuccessorOperator::EvalXLinkFromNugget( SR::XLink parent_xlink, 
-                                                            const SR::TheKnowledge::Nugget &nugget ) const
+                                                            const SR::XTreeDatabase::Nugget &nugget ) const
 {  
     return nugget.my_sequence_successor;
 }
@@ -459,7 +459,7 @@ shared_ptr<SymbolExpression> MySequenceSuccessorOperator::TrySolveForToEqual( co
 }
 
 
-string MySequenceSuccessorOperator::GetKnowledgeName() const
+string MySequenceSuccessorOperator::GetRenderPrefix() const
 {
     return "MySeqSuccessor";
 }
@@ -467,7 +467,7 @@ string MySequenceSuccessorOperator::GetKnowledgeName() const
 // ------------------------- MySequencePredecessorOperator --------------------------
 
 SR::XLink MySequencePredecessorOperator::EvalXLinkFromNugget( SR::XLink parent_xlink, 
-                                                              const SR::TheKnowledge::Nugget &nugget ) const
+                                                              const SR::XTreeDatabase::Nugget &nugget ) const
 {  
     return nugget.my_sequence_predecessor;
 }
@@ -482,7 +482,7 @@ shared_ptr<SymbolExpression> MySequencePredecessorOperator::TrySolveForToEqual( 
 }
 
 
-string MySequencePredecessorOperator::GetKnowledgeName() const
+string MySequencePredecessorOperator::GetRenderPrefix() const
 {
     return "MySeqPredecessor";
 }

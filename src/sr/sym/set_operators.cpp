@@ -1,6 +1,6 @@
 #include "set_operators.hpp"
 #include "result.hpp"
-#include "../the_knowledge.hpp"
+#include "../x_tree_database.hpp"
 
 using namespace SYM;
 
@@ -142,7 +142,7 @@ unique_ptr<SymbolResultInterface> AllGreaterOperator::Evaluate( const EvalKit &k
                                                                 list<unique_ptr<SymbolResultInterface>> &&op_results ) const                                                                    
 {
     unique_ptr<SymbolResultInterface> ar = OnlyElementOf(move(op_results));       
-    return make_unique<DepthFirstRangeResult>( kit.knowledge, ar->GetOnlyXLink(), false, SR::XLink(), false );
+    return make_unique<DepthFirstRangeResult>( kit.x_tree_db, ar->GetOnlyXLink(), false, SR::XLink(), false );
 }
 
 
@@ -181,7 +181,7 @@ unique_ptr<SymbolResultInterface> AllLessOperator::Evaluate( const EvalKit &kit,
                                                              list<unique_ptr<SymbolResultInterface>> &&op_results ) const                                                                    
 {
     unique_ptr<SymbolResultInterface> ar = OnlyElementOf(move(op_results));       
-    return make_unique<DepthFirstRangeResult>( kit.knowledge, SR::XLink(), false, ar->GetOnlyXLink(), false );
+    return make_unique<DepthFirstRangeResult>( kit.x_tree_db, SR::XLink(), false, ar->GetOnlyXLink(), false );
 }
 
 
@@ -220,7 +220,7 @@ unique_ptr<SymbolResultInterface> AllGreaterOrEqualOperator::Evaluate( const Eva
                                                                        list<unique_ptr<SymbolResultInterface>> &&op_results ) const                                                                    
 {
     unique_ptr<SymbolResultInterface> ar = OnlyElementOf(move(op_results));       
-    return make_unique<DepthFirstRangeResult>( kit.knowledge, ar->GetOnlyXLink(), true, SR::XLink(), false );
+    return make_unique<DepthFirstRangeResult>( kit.x_tree_db, ar->GetOnlyXLink(), true, SR::XLink(), false );
 }
 
 
@@ -259,7 +259,7 @@ unique_ptr<SymbolResultInterface> AllLessOrEqualOperator::Evaluate( const EvalKi
                                                                     list<unique_ptr<SymbolResultInterface>> &&op_results ) const                                                                    
 {
     unique_ptr<SymbolResultInterface> ar = OnlyElementOf(move(op_results));       
-    return make_unique<DepthFirstRangeResult>( kit.knowledge, SR::XLink(), false, ar->GetOnlyXLink(), true );
+    return make_unique<DepthFirstRangeResult>( kit.x_tree_db, SR::XLink(), false, ar->GetOnlyXLink(), true );
 }
 
 
@@ -303,7 +303,7 @@ unique_ptr<SymbolResultInterface> AllInSimpleCompareRangeOperator::Evaluate( con
                             lower_xlink : 
                             upper->Evaluate(kit)->GetOnlyXLink();
 
-    return make_unique<SimpleCompareRangeResult>( kit.knowledge, lower_xlink, lower_incl, upper_xlink, upper_incl ); 
+    return make_unique<SimpleCompareRangeResult>( kit.x_tree_db, lower_xlink, lower_incl, upper_xlink, upper_incl ); 
 }
 
 
@@ -362,7 +362,7 @@ unique_ptr<SymbolResultInterface> AllInCategoryRangeOperator::Evaluate( const Ev
         xlink_bounds_list.push_back( make_pair( make_unique<SR::XLink>(lower_xlink),
                                                 make_unique<SR::XLink>(upper_xlink) ) );
     }
-    return make_unique<CategoryRangeResult>( kit.knowledge, move(xlink_bounds_list), lower_incl, upper_incl );    
+    return make_unique<CategoryRangeResult>( kit.x_tree_db, move(xlink_bounds_list), lower_incl, upper_incl );    
 }
 
 

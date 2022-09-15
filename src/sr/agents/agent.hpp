@@ -12,7 +12,7 @@ class SpecialBase;
 class SCREngine;
 class AndRuleEngine;
 class Agent;
-class TheKnowledge;
+class XTreeDatabase;
 
 /// Interface for Agents, which co-exist with pattern nodes and implement the search and replace funcitonality for each pattern node.
 class Agent : public virtual Graphable,
@@ -57,11 +57,11 @@ public:
 
     /// Get abnormal/multiplicity info from an Agent given partial map of locations of base and normal links. 
     virtual QueryLambda StartRegenerationQuery( const SolutionMap *hypothesis_links,
-                                                const TheKnowledge *knowledge,
+                                                const XTreeDatabase *x_tree_db,
                                                 bool use_DQ = false ) const = 0;
     virtual QueryLambda TestStartRegenerationQuery( const SolutionMap *hypothesis_links,
-                                                    const TheKnowledge *knowledge ) const = 0;
-    virtual set<XLink> ExpandNormalDomain( const TheKnowledge &knowledge, const unordered_set<XLink> &keyer_xlinks ) = 0;
+                                                    const XTreeDatabase *x_tree_db ) const = 0;
+    virtual set<XLink> ExpandNormalDomain( const XTreeDatabase &x_tree_db, const unordered_set<XLink> &keyer_xlinks ) = 0;
     virtual void ResetNLQConjecture() = 0;    
 
     virtual const SCREngine *GetMasterSCREngine() const = 0;      

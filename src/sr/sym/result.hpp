@@ -14,7 +14,7 @@
 
 namespace SR
 {
-    class TheKnowledge;
+    class XTreeDatabase;
 };
 
 namespace SYM
@@ -120,7 +120,7 @@ class DepthFirstRangeResult : public SymbolResultInterface
 {
 public:
     // lower or upper can be null to exclude that limit
-    DepthFirstRangeResult( const SR::TheKnowledge *knowledge, SR::XLink lower, bool lower_incl, SR::XLink upper, bool upper_incl );
+    DepthFirstRangeResult( const SR::XTreeDatabase *x_tree_db, SR::XLink lower, bool lower_incl, SR::XLink upper, bool upper_incl );
     
     bool IsDefinedAndUnique() const override;    
     SR::XLink GetOnlyXLink() const override;    
@@ -134,7 +134,7 @@ public:
     string Render() const override;
 
 private:    
-    const SR::TheKnowledge *knowledge;
+    const SR::XTreeDatabase *x_tree_db;
     SR::XLink lower, upper;
     bool lower_incl, upper_incl;
 };
@@ -145,8 +145,8 @@ class SimpleCompareRangeResult : public SymbolResultInterface
 {
 public:
     // lower or upper can be null to exclude that limit
-    SimpleCompareRangeResult( const SR::TheKnowledge *knowledge, SR::XLink lower, bool lower_incl, SR::XLink upper, bool upper_incl );
-    SimpleCompareRangeResult( const SR::TheKnowledge *knowledge, TreePtr<Node> lower, bool lower_incl, TreePtr<Node> upper, bool upper_incl );
+    SimpleCompareRangeResult( const SR::XTreeDatabase *x_tree_db, SR::XLink lower, bool lower_incl, SR::XLink upper, bool upper_incl );
+    SimpleCompareRangeResult( const SR::XTreeDatabase *x_tree_db, TreePtr<Node> lower, bool lower_incl, TreePtr<Node> upper, bool upper_incl );
     
     bool IsDefinedAndUnique() const override;    
     SR::XLink GetOnlyXLink() const override;    
@@ -160,7 +160,7 @@ public:
     string Render() const override;
 
 private:    
-    const SR::TheKnowledge *knowledge;
+    const SR::XTreeDatabase *x_tree_db;
     SR::XLink lower;
     bool lower_incl;
     SR::XLink upper;
@@ -178,7 +178,7 @@ public:
     typedef list<XLinkBounds> XLinkBoundsList;
 
     // lower or upper can be null to exclude that limit
-    CategoryRangeResult( const SR::TheKnowledge *knowledge, XLinkBoundsList &&bounds_list, bool lower_incl, bool upper_incl );
+    CategoryRangeResult( const SR::XTreeDatabase *x_tree_db, XLinkBoundsList &&bounds_list, bool lower_incl, bool upper_incl );
     
     bool IsDefinedAndUnique() const override;    
     SR::XLink GetOnlyXLink() const override;    
@@ -192,7 +192,7 @@ public:
     string Render() const override;
 
 private:    
-    const SR::TheKnowledge *knowledge;
+    const SR::XTreeDatabase *x_tree_db;
     const XLinkBoundsList bounds_list;
     const bool lower_incl, upper_incl;
 };

@@ -356,7 +356,7 @@ SYM::Over<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySingul
                                                
 void StandardAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                               const SolutionMap *hypothesis_links,
-                                              const TheKnowledge *knowledge ) const
+                                              const XTreeDatabase *x_tree_db ) const
 { 
     INDENT("Q");
 
@@ -368,12 +368,12 @@ void StandardAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
     for( const Plan::Collection &plan_col : plan.collections )
     {
         auto p_x_col = dynamic_cast<CollectionInterface *>(x_items[plan_col.itemise_index]);
-        RegenerationQueryCollection( query, p_x_col, plan_col, hypothesis_links, knowledge );
+        RegenerationQueryCollection( query, p_x_col, plan_col, hypothesis_links, x_tree_db );
     }
     for( const Plan::Sequence &plan_seq : plan.sequences )
     {
         auto p_x_seq = dynamic_cast<SequenceInterface *>(x_items[plan_seq.itemise_index]);
-        RegenerationQuerySequence( query, p_x_seq, plan_seq, hypothesis_links, knowledge );
+        RegenerationQuerySequence( query, p_x_seq, plan_seq, hypothesis_links, x_tree_db );
     }
 }
 
@@ -382,7 +382,7 @@ void StandardAgent::RegenerationQuerySequence( DecidedQueryAgentInterface &query
                                                SequenceInterface *p_x_seq,
                                                const Plan::Sequence &plan_seq,
                                                const SolutionMap *hypothesis_links,
-                                               const TheKnowledge *knowledge ) const
+                                               const XTreeDatabase *x_tree_db ) const
 {
     INDENT("S");
     ASSERT( planned );
@@ -404,8 +404,8 @@ void StandardAgent::RegenerationQuerySequence( DecidedQueryAgentInterface &query
                 break; // can't do any more in the current run
             
             XLink pred_xlink = hypothesis_links->at(run->predecessor);
-            const TheKnowledge::Nugget &pred_nugget( knowledge->GetNugget(pred_xlink) );                        
-            ASSERT( pred_nugget.containment_context == TheKnowledge::Nugget::IN_SEQUENCE );
+            const XTreeDatabase::Nugget &pred_nugget( x_tree_db->GetNugget(pred_xlink) );                        
+            ASSERT( pred_nugget.containment_context == XTreeDatabase::Nugget::IN_SEQUENCE );
             xit = pred_nugget.my_container_it;
             ++xit; // get past the non-star
         }
@@ -420,8 +420,8 @@ void StandardAgent::RegenerationQuerySequence( DecidedQueryAgentInterface &query
                 break; // can't do any more in the current run
             
             XLink succ_xlink = hypothesis_links->at(run->successor);
-            const TheKnowledge::Nugget &succ_nugget( knowledge->GetNugget(succ_xlink) );  
-            ASSERT( succ_nugget.containment_context == TheKnowledge::Nugget::IN_SEQUENCE );
+            const XTreeDatabase::Nugget &succ_nugget( x_tree_db->GetNugget(succ_xlink) );  
+            ASSERT( succ_nugget.containment_context == XTreeDatabase::Nugget::IN_SEQUENCE );
             xit_star_limit = succ_nugget.my_container_it;
         }
         else
@@ -463,7 +463,7 @@ void StandardAgent::RegenerationQueryCollection( DecidedQueryAgentInterface &que
                                                  CollectionInterface *p_x_col,
                                                  const Plan::Collection &plan_col,
                                                  const SolutionMap *hypothesis_links,
-                                                 const TheKnowledge *knowledge ) const
+                                                 const XTreeDatabase *x_tree_db ) const
 {
     INDENT("C");
 

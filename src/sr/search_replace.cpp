@@ -74,10 +74,10 @@ void CompareReplace::Plan::PlanningStageThree()
 }                                      
 
 
-void CompareReplace::Plan::PlanningStageFive( shared_ptr<const TheKnowledge> knowledge )
+void CompareReplace::Plan::PlanningStageFive( shared_ptr<const XTreeDatabase> x_tree_db )
 {
     // Third, create subordinate AndRuleEngines
-    scr_engine->PlanningStageFive(knowledge);
+    scr_engine->PlanningStageFive(x_tree_db);
 }                                      
 
 
@@ -113,9 +113,9 @@ void CompareReplace::PlanningStageThree()
 }
 
 
-void CompareReplace::PlanningStageFive( shared_ptr<const TheKnowledge> knowledge )
+void CompareReplace::PlanningStageFive( shared_ptr<const XTreeDatabase> x_tree_db )
 {
-    plan.PlanningStageFive(knowledge);
+    plan.PlanningStageFive(x_tree_db);
 }
 
 

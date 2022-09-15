@@ -2,7 +2,7 @@
 #include "solver_holder.hpp"
 #include "query.hpp"
 #include "agents/agent.hpp"
-#include "the_knowledge.hpp"
+#include "x_tree_database.hpp"
 #include "../sym/result.hpp"
 
 #include <algorithm>
@@ -78,7 +78,7 @@ void ReferenceSolver::Plan::DeduceVariables()
             if( arbitrary_forced_variables.count(v) == 1 )
             {
                 // Enforce rule #525 - the arbitrary forces can be outside the
-                // domain and won't have knowledge nuggets. This is OK as long
+                // domain and won't have x_tree_db nuggets. This is OK as long
                 // as constraints that have to deal with them don't need nuggets.
                 ASSERT( c->GetVariablesRequiringNuggets().count(v) == 0 )
                       ( "Constraint:\n")(c)("\nrequires NUGGETS but ")(v)(" is arbitrary\n");
@@ -145,12 +145,12 @@ ReferenceSolver::ReferenceSolver( const list< shared_ptr<Constraint> > &constrai
                         
 
 void ReferenceSolver::Start( const Assignments &forces,
-                             const SR::TheKnowledge *knowledge_ )
+                             const SR::XTreeDatabase *x_tree_db_ )
 {
     TRACE("Reference solver begins\n");
     INDENT("S");
     forced_assignments = forces;
-    knowledge = knowledge_;
+    x_tree_db = x_tree_db_;
 
     // Check that the forces passed to us here match the plan
     for( VariableId v : plan.domain_forced_variables )           
@@ -220,7 +220,7 @@ void ReferenceSolver::Solve()
     current_var_index = 0;
     value_selectors[current_var_index] = 
         make_shared<ValueSelector>( plan.affected_constraints.at(current_var_index), 
-                                    knowledge, 
+                                    x_tree_db, 
                                     assignments, 
                                     plan.free_variables.at(current_var_index) );
     success_count[current_var_index] = 0; 
@@ -263,7 +263,7 @@ void ReferenceSolver::AssignSuccessful()
         TRACEC("Success: Advance to and make selector for X")(current_var_index)("\n");
         value_selectors[current_var_index] = 
             make_shared<ValueSelector>( plan.affected_constraints.at(current_var_index), 
-                                        knowledge, 
+                                        x_tree_db, 
                                         assignments, 
                                         plan.free_variables.at(current_var_index) );     
         success_count[current_var_index] = 0;

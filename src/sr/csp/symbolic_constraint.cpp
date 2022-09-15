@@ -17,22 +17,22 @@
 using namespace CSP;
 
 SymbolicConstraint::SymbolicConstraint( shared_ptr<SYM::BooleanExpression> expression,
-                                        shared_ptr<const SR::TheKnowledge> knowledge ) :
-    plan( this, expression, knowledge )
+                                        shared_ptr<const SR::XTreeDatabase> x_tree_db ) :
+    plan( this, expression, x_tree_db )
 {
 }
 
 
 SymbolicConstraint::Plan::Plan( SymbolicConstraint *algo_,
                                 shared_ptr<SYM::BooleanExpression> expression_,
-                                shared_ptr<const SR::TheKnowledge> knowledge_ ) :
+                                shared_ptr<const SR::XTreeDatabase> x_tree_db_ ) :
     algo( algo_ ),
     consistency_expression( expression_ ),
-    knowledge( knowledge_ )
+    x_tree_db( x_tree_db_ )
 {
     DetermineVariables();   
     DetermineHintExpressions();   
-    DetermineKnowledgeRequirement(); 
+    DetermineXTreeDbRequirement(); 
 }
 
 
@@ -48,7 +48,7 @@ void SymbolicConstraint::Plan::DetermineHintExpressions()
     TRACE("Trying to solve:\n")(consistency_expression->Render())("\n");
    
     // Truth-table solver
-    SYM::Expression::SolveKit kit { knowledge.get() };    
+    SYM::Expression::SolveKit kit { x_tree_db.get() };    
     SYM::TruthTableSolver my_solver(kit, consistency_expression);
     my_solver.PreSolve();    
         
@@ -76,13 +76,13 @@ void SymbolicConstraint::Plan::DetermineHintExpressions()
 }
 
 
-void SymbolicConstraint::Plan::DetermineKnowledgeRequirement()
+void SymbolicConstraint::Plan::DetermineXTreeDbRequirement()
 {
-    required_knowledge_level.clear();
+    required_x_tree_db_level.clear();
     
     consistency_expression->ForDepthFirstWalk( [&](const SYM::Expression *expr)
     {
-        required_knowledge_level = UnionOf( required_knowledge_level, 
+        required_x_tree_db_level = UnionOf( required_x_tree_db_level, 
                                             expr->GetVariablesRequiringNuggets() );
     } );
     
@@ -92,7 +92,7 @@ void SymbolicConstraint::Plan::DetermineKnowledgeRequirement()
         {
             suggestion.second->ForDepthFirstWalk( [&](const SYM::Expression *expr)
             {
-                required_knowledge_level = UnionOf( required_knowledge_level, 
+                required_x_tree_db_level = UnionOf( required_x_tree_db_level, 
                                                     expr->GetVariablesRequiringNuggets() );            
             } );
         }
@@ -114,13 +114,13 @@ const set<VariableId> &SymbolicConstraint::GetVariables() const
 
 SYM::Expression::VariablesRequiringNuggets SymbolicConstraint::GetVariablesRequiringNuggets() const
 {
-    return plan.required_knowledge_level;
+    return plan.required_x_tree_db_level;
 }
 
 
 void SymbolicConstraint::Start()
 {
-    ASSERT( plan.knowledge );
+    ASSERT( plan.x_tree_db );
 }   
 
 
@@ -133,7 +133,7 @@ bool SymbolicConstraint::IsSatisfied( const Assignments &assignments ) const
     for( VariableId v : plan.variables )
         ASSERT( assignments.count(v)==1 );
 #endif        
-    SYM::Expression::EvalKit kit { &assignments, plan.knowledge.get() };    
+    SYM::Expression::EvalKit kit { &assignments, plan.x_tree_db.get() };    
     unique_ptr<SYM::BooleanResult> result = plan.consistency_expression->Evaluate( kit );
     ASSERT( result );
     if( plan.alt_expression_for_testing )
@@ -153,7 +153,7 @@ unique_ptr<SYM::SetResult> SymbolicConstraint::GetSuggestedValues( const Assignm
                                                                    const VariableId &target_var ) const
 {                                 
     ASSERT( target_var );
-    SYM::Expression::EvalKit kit { &assignments, plan.knowledge.get() };    
+    SYM::Expression::EvalKit kit { &assignments, plan.x_tree_db.get() };    
 
     SYM::TruthTableSolver::GivenSymbolSet givens;
     for( VariableId v : plan.variables )            

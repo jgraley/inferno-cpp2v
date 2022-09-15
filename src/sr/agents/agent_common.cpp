@@ -246,14 +246,14 @@ bool AgentCommon::IsPreRestrictionMatch( XLink x ) const
 
 void AgentCommon::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                             const SolutionMap *hypothesis_links,
-                                            const TheKnowledge *knowledge ) const
+                                            const XTreeDatabase *x_tree_db ) const
 {
 }
     
     
 void AgentCommon::RunRegenerationQuery( DecidedQueryAgentInterface &query,
                                         const SolutionMap *hypothesis_links,
-                                        const TheKnowledge *knowledge ) const
+                                        const XTreeDatabase *x_tree_db ) const
 {
     // Admin stuff every RQ has to do
     query.last_activity = DecidedQueryCommon::QUERY;
@@ -262,12 +262,12 @@ void AgentCommon::RunRegenerationQuery( DecidedQueryAgentInterface &query,
 
     XLink keyer_xlink = hypothesis_links->at(keyer_plink);
     if( keyer_xlink != XLink::MMAX_Link )
-        this->RunRegenerationQueryImpl( query, hypothesis_links, knowledge );
+        this->RunRegenerationQueryImpl( query, hypothesis_links, x_tree_db );
 }                             
                       
                       
 AgentCommon::QueryLambda AgentCommon::StartRegenerationQuery( const SolutionMap *hypothesis_links,
-                                                              const TheKnowledge *knowledge,
+                                                              const XTreeDatabase *x_tree_db,
                                                               bool use_DQ ) const
 {
     ASSERT( nlq_conjecture )(phase);
@@ -295,7 +295,7 @@ AgentCommon::QueryLambda AgentCommon::StartRegenerationQuery( const SolutionMap 
                 // Query the agent: our conj will be used for the iteration and
                 // therefore our query will hold the result 
                 query = nlq_conjecture->GetQuery(this);
-                RunRegenerationQuery( *query, hypothesis_links, knowledge );       
+                RunRegenerationQuery( *query, hypothesis_links, x_tree_db );       
                     
                 TRACE("Got query from DNLQ ")(query->GetDecisions())("\n");
                     
@@ -323,7 +323,7 @@ AgentCommon::QueryLambda AgentCommon::StartRegenerationQuery( const SolutionMap 
                                               
                                               
 AgentCommon::QueryLambda AgentCommon::TestStartRegenerationQuery( const SolutionMap *hypothesis_links,
-                                                                  const TheKnowledge *knowledge ) const
+                                                                  const XTreeDatabase *x_tree_db ) const
 {
     QueryLambda mut_lambda;
     QueryLambda ref_lambda;
@@ -331,14 +331,14 @@ AgentCommon::QueryLambda AgentCommon::TestStartRegenerationQuery( const Solution
     auto ref_hits = make_shared<int>(0);
     try
     {
-        mut_lambda = StartRegenerationQuery( hypothesis_links, knowledge, false );
+        mut_lambda = StartRegenerationQuery( hypothesis_links, x_tree_db, false );
     }
     catch( ::Mismatch &e ) 
     {
         try
         {
             Tracer::RAIIDisable silencer; // make ref algo be quiet            
-            (void)StartRegenerationQuery( hypothesis_links, knowledge, true );
+            (void)StartRegenerationQuery( hypothesis_links, x_tree_db, true );
             ASSERT(false)("MUT start threw ")(e)(" but ref didn't\n")
                          (*this)("\n")
                          ("Normal: ")(MapForPattern(pattern_query->GetNormalLinks(), *hypothesis_links))("\n")
@@ -355,7 +355,7 @@ AgentCommon::QueryLambda AgentCommon::TestStartRegenerationQuery( const Solution
     try
     {
         Tracer::RAIIDisable silencer; // make ref algo be quiet             
-        ref_lambda = StartRegenerationQuery( hypothesis_links, knowledge, true );        
+        ref_lambda = StartRegenerationQuery( hypothesis_links, x_tree_db, true );        
     }
     catch( ::Mismatch &e ) 
     {

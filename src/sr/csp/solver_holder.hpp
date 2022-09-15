@@ -16,7 +16,7 @@
 namespace SR
 {
 class Agent;
-class TheKnowledge;
+class XTreeDatabase;
 }
 
 namespace CSP
@@ -46,7 +46,7 @@ public:
      * @param initial_domain [in] the domain for all the variables, could get expanded depending on the solver algorithm.
      */
     void Start( const Assignments &forces,
-                const SR::TheKnowledge *knowledge );
+                const SR::XTreeDatabase *x_tree_db );
 
     /**
      * Try to extract a single solution from the solver. 

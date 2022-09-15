@@ -13,7 +13,7 @@
 
 namespace SR
 {
-    class TheKnowledge;
+    class XTreeDatabase;
 };
 
 namespace CSP
@@ -47,7 +47,7 @@ public:
     ~ReferenceSolver();
 
     virtual void Start( const Assignments &forces,
-                        const SR::TheKnowledge *knowledge );
+                        const SR::XTreeDatabase *x_tree_db );
     virtual void Run( const SolutionReportFunction &solution_report_function,
                       const RejectionReportFunction &rejection_report_function );
 
@@ -95,7 +95,7 @@ protected:
     RejectionReportFunction rejection_report_function;
     
     // Used during solve - depends on pattern and x
-    const SR::TheKnowledge *knowledge;
+    const SR::XTreeDatabase *x_tree_db;
     Assignments forced_assignments;
         
     int current_var_index;

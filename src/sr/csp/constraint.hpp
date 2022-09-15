@@ -50,7 +50,7 @@ public:
     virtual const set<VariableId> &GetVariables() const = 0;
           
     /**
-     * Get the amount of knowledge this constraint's methods will require.
+     * Get the amount of x_tree_db this constraint's methods will require.
      * 
      * @return A list of variables affected by this constraint.
      */
@@ -59,7 +59,7 @@ public:
     /**
      * Set the values of the forced varibles
      * 
-     * @param knowledge [in] pointer to an uptodate TheKnowledge object
+     * @param x_tree_db [in] pointer to an uptodate XTreeDatabase object
      */    
     virtual void Start() = 0;    
     

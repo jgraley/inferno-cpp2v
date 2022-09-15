@@ -35,7 +35,7 @@ public:
     SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQuery() const override;                                       
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            const SolutionMap *hypothesis_links,
-                                           const TheKnowledge *knowledge ) const;                                                                                          
+                                           const XTreeDatabase *x_tree_db ) const;                                                                                          
     TreePtr<Node> BuildReplaceImpl( PatternLink me_plink, 
                                     XLink key_xlink ) final;
     virtual Block GetGraphBlockInfo() const;
