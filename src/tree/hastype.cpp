@@ -1,6 +1,6 @@
 
 #include "cpptree.hpp"
-#include "type_db.hpp"
+#include "type_data.hpp"
 #include "helpers/walk.hpp"
 #include "misc.hpp"
 #include "hastype.hpp"
@@ -194,11 +194,11 @@ TreePtr<Type> HasType::Get( TreePtr<Operator> op, Sequence<Type> optypes )
 #define OTHER(TOK, TEXT, NODE, BASE, CAT) \
 	else if( DynamicTreePtrCast<NODE>(op) ) \
 		return CAT;
-#include "tree/operator_db.inc"
+#include "tree/operator_data.inc"
     else
     {
         throw UnsupportedOperatorMismatch();
-        //ASSERT(0)("Unknown operator ")(*op)(" (not in operator_db.inc), please add to HasType class");
+        //ASSERT(0)("Unknown operator ")(*op)(" (not in operator_data.inc), please add to HasType class");
         //ASSERTFAIL("");
     }
 }

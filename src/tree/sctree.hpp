@@ -8,7 +8,7 @@
 #include <string>
 #include "node/specialise_oostd.hpp"
 #include "clang/Parse/DeclSpec.h"
-#include "tree/type_db.hpp"
+#include "tree/type_data.hpp"
 #include "tree/cpptree.hpp"
 
 /// SCTree namespace contains node definitions that represent elements of SystemC, as native language elements

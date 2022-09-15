@@ -29,7 +29,7 @@
 #include "tree/cpptree.hpp"
 #include "helpers/transformation.hpp"
 #include "common/trace.hpp"
-#include "tree/type_db.hpp"
+#include "tree/type_data.hpp"
 #include "tree/misc.hpp"
 #include "tree/hastype.hpp"
 
@@ -977,7 +977,7 @@ private:
 	        case clang::tok::TOK: \
                 o=MakeTreeNode<NODE>();\
                 break;
-#include "tree/operator_db.inc"
+#include "tree/operator_data.inc"
             default:
                 ASSERTFAIL("Unsupported token kind");
 		}
@@ -1009,7 +1009,7 @@ private:
 	        case clang::tok::TOK: \
 	            o=MakeTreeNode<NODE>(); \
 	            break;
-#include "tree/operator_db.inc"
+#include "tree/operator_data.inc"
             default:
                 ASSERTFAIL("Unsupported token kind");
 		}
@@ -1029,7 +1029,7 @@ private:
 	        case clang::tok::TOK:\
                 o=MakeTreeNode<NODE>(); \
                 break;
-#include "tree/operator_db.inc"
+#include "tree/operator_data.inc"
             default:
                 ASSERTFAIL("Unsupported token kind");
 		}

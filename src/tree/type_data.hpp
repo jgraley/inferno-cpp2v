@@ -1,6 +1,6 @@
 
-#ifndef TYPE_DB_HPP
-#define TYPE_DB_HPP
+#ifndef TYPE_DATA_HPP
+#define TYPE_DATA_HPP
 
 #include "llvm/ADT/APFloat.h"
 

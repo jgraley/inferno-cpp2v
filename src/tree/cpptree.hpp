@@ -8,7 +8,7 @@
 #include <string>
 #include "node/specialise_oostd.hpp"
 #include "clang/Parse/DeclSpec.h"
-#include "tree/type_db.hpp"
+#include "tree/type_data.hpp"
 
 /// CPPTree namespace contains node definitions that represent elements of the C++ language
 namespace CPPTree {
@@ -690,12 +690,12 @@ struct CommutativeBinop : CommutativeOperator { NODE_FUNCTIONS };
 struct AssignmentOperator : NonCommutativeOperator { NODE_FUNCTIONS };
 
 // Use an include file to generate nodes for all the actual operators based on
-// contents of operator_db.inc
+// contents of operator_data.inc
 #define PREFIX(TOK, TEXT, NODE, BASE, CAT) struct NODE : BASE { NODE_FUNCTIONS_FINAL };
 #define POSTFIX(TOK, TEXT, NODE, BASE, CAT) struct NODE : BASE { NODE_FUNCTIONS_FINAL };
 #define INFIX(TOK, TEXT, NODE, BASE, CAT) struct NODE : BASE { NODE_FUNCTIONS_FINAL };
 #define OTHER(TOK, TEXT, NODE, BASE, CAT) struct NODE : BASE { NODE_FUNCTIONS_FINAL };
-#include "operator_db.inc"
+#include "operator_data.inc"
 
 /// Property indicating whether a New/Delete is global 
 /** New/Delete is global if it has :: in

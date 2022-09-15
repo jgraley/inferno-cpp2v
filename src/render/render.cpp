@@ -4,7 +4,7 @@
 #include "tree/hastype.hpp"
 #include "common/trace.hpp"
 #include "common/read_args.hpp"
-#include "tree/type_db.hpp"
+#include "tree/type_data.hpp"
 #include "helpers/walk.hpp"
 #include "helpers/duplicate.hpp"
 #include "tree/misc.hpp"
@@ -356,7 +356,7 @@ string Render::RenderOperator( TreePtr<Operator> op, Sequence<Expression> &opera
 		s = RenderExpression( *operands_it, true ); \
 		s += TEXT; \
     }
-#include "tree/operator_db.inc"
+#include "tree/operator_data.inc"
 	else
     {
 		s = ERROR_UNSUPPORTED(op);
