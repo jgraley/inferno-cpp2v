@@ -42,6 +42,7 @@ struct TreePtrInterface : virtual Itemiser::Element, public Traceable
     virtual Node *get() const = 0; // As per shared_ptr<>, ie gets the actual C pointer
     virtual Node &operator *() const = 0; 
     virtual TreePtrInterface &operator=( const TreePtrInterface &o );
+    virtual TreePtrInterface &operator=( nullptr_t n ) = 0;
     bool operator<(const TreePtrInterface &other) const;
     bool operator==(const TreePtrInterface &other) const;
     bool operator!=(const TreePtrInterface &other) const;
@@ -164,6 +165,12 @@ struct TreePtr : virtual TreePtrCommon,
     	return *this;
     }
     
+    TreePtrInterface &operator=( nullptr_t n ) final
+    {
+    	(void)shared_ptr<VALUE_TYPE>::operator=( n );
+    	return *this;	
+    }
+   
     bool operator<(const TreePtr<VALUE_TYPE> &other) const
     {
 #ifdef TREE_PTR_ORDERING_USE_SERIAL

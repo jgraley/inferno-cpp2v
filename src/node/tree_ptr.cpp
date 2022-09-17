@@ -10,7 +10,6 @@
 TreePtrInterface &TreePtrInterface::operator=( const TreePtrInterface &o )
 {
 	(void)Itemiser::Element::operator=( o ); 
-	(void)Traceable::operator=( o );
 	return *this;
 }
 

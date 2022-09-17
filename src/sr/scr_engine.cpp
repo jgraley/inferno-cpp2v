@@ -369,6 +369,7 @@ void SCREngine::Replace( XLink base_xlink )
     TreePtr<Node> new_base_x = plan.base_agent->BuildReplace(plan.base_plink);
 
     ASSERT( replace_solution.at( plan.base_plink ) == base_xlink );
+    base_xlink.ClearXPtr();
     base_xlink.SetXPtr( new_base_x );
     ASSERT( replace_solution.at( plan.base_plink ) == base_xlink );
     
