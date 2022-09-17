@@ -213,7 +213,6 @@ XLink::XLink( shared_ptr<const Node> parent_x,
 {
     ASSERT( parent_x );
     ASSERT( px );
-    ASSERT( *px );
 #ifdef KEEP_WHODAT_INFO
     whodat = whodat_ ? whodat_ : WHODAT();
 #endif  
@@ -229,8 +228,7 @@ XLink::XLink( const LocatedLink &l ) :
 
 XLink XLink::CreateDistinct( const TreePtr<Node> &tp_x )
 {
-	ASSERTS( tp_x )("Requires non-NULL TreePtr");
-    shared_ptr< TreePtr<Node> > sp_tp_x = make_shared< TreePtr<Node> >( tp_x ); 
+    auto sp_tp_x = make_shared< TreePtr<Node> >( tp_x ); 
     return XLink(sp_tp_x, WHODAT());
 }
               
@@ -240,11 +238,18 @@ bool XLink::operator<(const XLink &other) const
     ASSERT( this );
     ASSERT( &other );
     
-    // NULLness is super-primary ordering
+    // NULLness is hyper-primary ordering
     if( !other.asp_x )
         return false; // for == and > case
     else if( !asp_x )
         return true; // for remaining < case
+    
+    // Half-NULLness is super-primary ordering
+    if( !*other.asp_x )
+        return false; // for == and > case
+    else if( !*asp_x )
+        return true; // for remaining < case
+        
     ASSERT( *asp_x );
     ASSERT( *other.asp_x );
     
@@ -294,6 +299,12 @@ XLink::operator bool() const
 }
 
 
+bool XLink::HasChildX() const
+{
+    return !!*asp_x;
+}
+
+
 TreePtr<Node> XLink::GetChildX() const
 {
     return (TreePtr<Node>)*asp_x;
@@ -327,7 +338,7 @@ string XLink::GetName() const
 {
     if(asp_x==nullptr)
         return "NULL";
-    return asp_x->GetName();
+    return "&"+asp_x->GetName();
 }
 
 
@@ -335,7 +346,7 @@ string XLink::GetShortName() const
 {
     if(asp_x==nullptr)
         return "NULL";
-    return asp_x->GetShortName();
+    return "&"+asp_x->GetShortName();
 }
 
 
@@ -344,7 +355,6 @@ XLink::XLink( shared_ptr<const TreePtrInterface> px,
     asp_x( px )
 {
     ASSERT(px);
-    ASSERT(*px);
 
 #ifdef KEEP_WHODAT_INFO
     whodat = whodat_ ? whodat_ : WHODAT();

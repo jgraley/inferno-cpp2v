@@ -116,11 +116,11 @@ private:
 
     void UpdateEmbeddedActionRequests( TreePtr<Node> through_subtree, TreePtr<Node> new_subtree ) const;
     void RunEmbedded( PatternLink plink_to_embedded, XLink base_xlink );
-    TreePtr<Node> Replace();
-
-public: // For top level engine/VN trans
+    void Replace( XLink base_xlink );
     void SingleCompareReplace( XLink base_xlink,
                                const SolutionMap *enclosing_solution );                                                                                              
+
+public: // For top level engine/VN trans
     int RepeatingCompareReplace( XLink base_xlink,
                                  const SolutionMap *enclosing_solution );                                                                                               
     virtual void SetStopAfter( vector<int> ssa, int d=0 );

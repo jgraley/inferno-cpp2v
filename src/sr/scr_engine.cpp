@@ -360,16 +360,25 @@ void SCREngine::RunEmbedded( PatternLink plink_to_embedded, XLink base_xlink )
 }
 
 
-TreePtr<Node> SCREngine::Replace()
+void SCREngine::Replace( XLink base_xlink )
 {
     INDENT("R");
     
     // Now replace according to the couplings
     TRACE("Now replacing, base agent=")(plan.base_agent)("\n");
     TreePtr<Node> new_base_x = plan.base_agent->BuildReplace(plan.base_plink);
-    TRACE("Replace done\n");
 
-    return new_base_x;
+    ASSERT( replace_solution.at( plan.base_plink ) == base_xlink );
+    base_xlink.SetXPtr( new_base_x );
+    ASSERT( replace_solution.at( plan.base_plink ) == base_xlink );
+    
+    plan.vn_sequence->BuildXTreeDatabase();  
+    
+    // Domain extend required on sight of new pattern OR x. This call is due to the change in X tree.
+    plan.vn_sequence->ExtendDomain( plan.base_plink ); 
+    ASSERT( replace_solution.at( plan.base_plink ) == base_xlink );
+
+    TRACE("Replace done\n");
 }
 
 
@@ -391,16 +400,10 @@ void SCREngine::SingleCompareReplace( XLink base_xlink,
     replace_solution = move(rs);
     replace_solution_available = true;
 
-    ASSERT( replace_solution.at( plan.base_plink ) == base_xlink );
-
     // Now replace according to the couplings
-    base_xlink.SetXPtr( Replace() );
-    ASSERT( replace_solution.at( plan.base_plink ) == base_xlink );
-    plan.vn_sequence->BuildXTreeDatabase();  
-    // Domain extend required on sight of new pattern OR x. This call is due to the change in X tree.
-    plan.vn_sequence->ExtendDomain( plan.base_plink ); 
-    ASSERT( replace_solution.at( plan.base_plink ) == base_xlink );
+    Replace(base_xlink);
 
+	// Now run the embedded SCR engines (LATER model)
     for( PatternLink plink_to_embedded : plan.my_subordinate_plinks_postorder )
     {
         TRACE("Running embedded ")(plink_to_embedded)(" base xlink=")(base_xlink)("\n");

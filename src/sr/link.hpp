@@ -70,6 +70,7 @@ public:
     bool operator==(const XLink &other) const;
     size_t GetHash() const noexcept;    
     explicit operator bool() const;
+	bool HasChildX() const;
     TreePtr<Node> GetChildX() const;
     const TreePtrInterface *GetXPtr() const;
     void SetXPtr(const TreePtrInterface &x);
