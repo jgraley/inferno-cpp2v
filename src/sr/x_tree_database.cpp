@@ -183,10 +183,8 @@ bool XTreeDatabase::HasNodeRow(TreePtr<Node> node) const
 }
 
 
-void XTreeDatabase::Build( XLink root_xlink )
-{      
-	ASSERT( root_xlink );
-	
+void XTreeDatabase::Clear()
+{
     // Clear everything 
     unordered_domain.clear();
     depth_first_ordered_index.clear();
@@ -195,6 +193,14 @@ void XTreeDatabase::Build( XLink root_xlink )
     domain_extension_classes = make_shared<SimpleCompareQuotientSet>();
     xlink_table.clear();
     node_table.clear();    
+}
+
+
+void XTreeDatabase::Build( XLink root_xlink )
+{      
+	ASSERT( root_xlink );
+	Clear();
+	
     current_ordinal = 0;
     
     AddAtRoot( REQUIRE_SOLO, root_xlink );

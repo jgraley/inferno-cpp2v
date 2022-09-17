@@ -368,15 +368,16 @@ void SCREngine::Replace( XLink base_xlink )
     TRACE("Now replacing, base agent=")(plan.base_agent)("\n");
     TreePtr<Node> new_base_x = plan.base_agent->BuildReplace(plan.base_plink);
 
+	plan.vn_sequence->ClearXTreeDatabase();
+
     ASSERT( replace_solution.at( plan.base_plink ) == base_xlink );
     
-    plan.vn_sequence->CurrentXTreeRemove(base_xlink);
-    plan.vn_sequence->CurrentXTreeAdd(base_xlink, new_base_x);
+    plan.vn_sequence->CurrentXTreeDelete(base_xlink);
+    plan.vn_sequence->CurrentXTreeInsert(base_xlink, new_base_x);
     
     ASSERT( replace_solution.at( plan.base_plink ) == base_xlink );
     
-    plan.vn_sequence->BuildXTreeDatabase();  
-    
+    plan.vn_sequence->BuildXTreeDatabase();      
     // Domain extend required on sight of new pattern OR x. This call is due to the change in X tree.
     plan.vn_sequence->ExtendDomain( plan.base_plink ); 
     ASSERT( replace_solution.at( plan.base_plink ) == base_xlink );

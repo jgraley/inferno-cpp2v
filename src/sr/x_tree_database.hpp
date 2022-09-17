@@ -175,6 +175,7 @@ public:
     const NodeRow &GetNodeRow(TreePtr<Node> node) const;
     bool HasNodeRow(TreePtr<Node> node) const;
 
+    void Clear();
     void Build( XLink root_xlink );
     void ExtendDomainWorker( PatternLink plink );
     void ExtendDomain( PatternLink plink );

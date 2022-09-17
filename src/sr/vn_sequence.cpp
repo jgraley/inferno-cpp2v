@@ -138,6 +138,13 @@ XLink VNSequence::FindDomainExtension( XLink xlink ) const
 }
 
 
+void VNSequence::ClearXTreeDatabase()
+{
+    ASSERT( x_tree_db )("Planning stage four should have created x_tree_db object");
+	x_tree_db->Clear();
+}
+
+
 void VNSequence::BuildXTreeDatabase()
 {
     ASSERT( x_tree_db )("Planning stage four should have created x_tree_db object");
@@ -153,7 +160,7 @@ void VNSequence::ExtendDomain( PatternLink root_plink )
 }
 
 
-void VNSequence::CurrentXTreeRemove( XLink target_xlink )
+void VNSequence::CurrentXTreeDelete( XLink target_xlink )
 {
 	ASSERT( target_xlink );
 	ASSERT( target_xlink.HasChildX() );
@@ -162,7 +169,7 @@ void VNSequence::CurrentXTreeRemove( XLink target_xlink )
 }
 
 
-void VNSequence::CurrentXTreeAdd( XLink target_xlink, TreePtr<Node> new_x )
+void VNSequence::CurrentXTreeInsert( XLink target_xlink, TreePtr<Node> new_x )
 {
 	ASSERT( target_xlink );
 	ASSERT( !target_xlink.HasChildX() );

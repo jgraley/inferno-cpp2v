@@ -73,8 +73,8 @@ public:
 	bool HasChildX() const;
     TreePtr<Node> GetChildX() const;
     const TreePtrInterface *GetXPtr() const;
-    void ClearXPtr();
-    void SetXPtr(const TreePtrInterface &x);
+    void ClearXPtr() const;
+    void SetXPtr(const TreePtrInterface &x) const;
     
     string GetTrace() const; // used for debug
     string GetName() const;

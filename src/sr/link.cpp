@@ -317,14 +317,14 @@ const TreePtrInterface *XLink::GetXPtr() const
 }
 
 
-void XLink::ClearXPtr()
+void XLink::ClearXPtr() const
 {
 	// TODO try to get rid of the const cast
 	const_cast<TreePtrInterface &>(*asp_x) = nullptr;
 }
 
 
-void XLink::SetXPtr(const TreePtrInterface &x)
+void XLink::SetXPtr(const TreePtrInterface &x) const
 {
 	// TODO try to get rid of the const cast
 	const_cast<TreePtrInterface &>(*asp_x) = x;
