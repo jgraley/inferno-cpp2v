@@ -1,7 +1,9 @@
 #include "vn_sequence.hpp"
+
 #include "vn_step.hpp"
 #include "render/graph.hpp"
 #include "x_tree_database.hpp"
+#include "tree_update.hpp"
 
 using namespace SR;
 
@@ -138,44 +140,18 @@ XLink VNSequence::FindDomainExtension( XLink xlink ) const
 }
 
 
-void VNSequence::ClearXTreeDatabase()
-{
-    ASSERT( x_tree_db )("Planning stage four should have created x_tree_db object");
-	x_tree_db->Clear();
-}
-
-
-void VNSequence::BuildXTreeDatabase()
-{
-    ASSERT( x_tree_db )("Planning stage four should have created x_tree_db object");
-	ASSERT( current_root_xlink );
-	x_tree_db->Build( current_root_xlink );
-}
-
-
-void VNSequence::ExtendDomain( PatternLink root_plink )
+void VNSequence::ExtendDomain( PatternLink base_plink )
 {
     ASSERT( x_tree_db )("Planning stage four should have created x_tree_db object");  
-    x_tree_db->ExtendDomain( root_plink );
+    x_tree_db->ExtendDomain( base_plink );
 }
 
 
-void VNSequence::CurrentXTreeDelete( XLink target_xlink )
+void VNSequence::ExecuteUpdateCommand( shared_ptr<UpdateCommand> cmd )
 {
-	ASSERT( target_xlink );
-	ASSERT( target_xlink.HasChildX() );
-
-	target_xlink.ClearXPtr();
+	UpdateCommand::ExecKit kit { current_root_xlink, x_tree_db.get() };
+	cmd->Execute( kit );
 }
-
-
-void VNSequence::CurrentXTreeInsert( XLink target_xlink, TreePtr<Node> new_x )
-{
-	ASSERT( target_xlink );
-	ASSERT( !target_xlink.HasChildX() );
-	
-	target_xlink.SetXPtr(new_x);
-}	
 
 
 bool VNSequence::IsDirtyGrass( TreePtr<Node> node )

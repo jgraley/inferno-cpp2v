@@ -10,7 +10,7 @@ namespace SR
 {
 class XTreeDatabase;
 	
-class Command : public Traceable
+class UpdateCommand : public Traceable
 {
 public:
     struct ExecKit
@@ -18,7 +18,6 @@ public:
 		// Note: unline EvalKit etc, these pointers are non-const
 		// because we intend to actually change thing here.
         XLink root_xlink;
-        PatternLink root_plink;
         XTreeDatabase *x_tree_db; 
     };
 
@@ -26,7 +25,7 @@ public:
 };
 
 
-class DeleteCommand : public Command
+class DeleteCommand : public UpdateCommand
 {
 public:
     DeleteCommand( XLink target_xlink );
@@ -37,26 +36,27 @@ private:
 };
 
 
-class InsertCommand : public Command
+class InsertCommand : public UpdateCommand
 {
 public:
-    InsertCommand( XLink target_xlink, TreePtr<Node> new_x );
+    InsertCommand( XLink target_xlink, TreePtr<Node> new_x, PatternLink base_plink );
 	void Execute( const ExecKit &kit ) const final;	
 
 private:
 	XLink target_xlink;
 	TreePtr<Node> new_x;
+	PatternLink base_plink;
 };
 
 
-class CommandSequence : public Command
+class CommandSequence : public UpdateCommand
 {
 public:
-	void Add( shared_ptr<Command> cmd );
+	void Add( shared_ptr<UpdateCommand> cmd );
 	void Execute( const ExecKit &kit ) const final;	
 	
 private:
-	list<shared_ptr<Command>> seq;	
+	list<shared_ptr<UpdateCommand>> seq;	
 };
 
 

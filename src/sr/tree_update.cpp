@@ -1,4 +1,5 @@
 #include "tree_update.hpp"
+
 #include "x_tree_database.hpp"
 
 using namespace SR;
@@ -18,9 +19,10 @@ void DeleteCommand::Execute( const ExecKit &kit ) const
 }	
 
 
-InsertCommand::InsertCommand( XLink target_xlink_, TreePtr<Node> new_x_ ) :
+InsertCommand::InsertCommand( XLink target_xlink_, TreePtr<Node> new_x_, PatternLink base_plink_ ) :
 	target_xlink( target_xlink_ ),
-	new_x( new_x_ )
+	new_x( new_x_ ),
+	base_plink( base_plink_ )
 {
 }
 
@@ -33,11 +35,11 @@ void InsertCommand::Execute( const ExecKit &kit ) const
     kit.x_tree_db->Build( kit.root_xlink );      
     // Domain extend required on sight of new pattern OR x. This call 
     // is due to the change in X tree.
-    kit.x_tree_db->ExtendDomain( kit.root_plink ); 
+    kit.x_tree_db->ExtendDomain( base_plink ); 
 }
 
 
-void CommandSequence::Add( shared_ptr<Command> cmd )
+void CommandSequence::Add( shared_ptr<UpdateCommand> cmd )
 {
 	seq.push_back(cmd);
 }
@@ -45,7 +47,7 @@ void CommandSequence::Add( shared_ptr<Command> cmd )
 
 void CommandSequence::Execute( const ExecKit &kit ) const
 {
-	for( shared_ptr<Command> cmd : seq )
+	for( shared_ptr<UpdateCommand> cmd : seq )
 		cmd->Execute(kit);
 }
 	

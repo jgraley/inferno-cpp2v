@@ -11,6 +11,7 @@
 #include "link.hpp"
 #include "sc_relation.hpp"
 #include "vn_sequence.hpp"
+#include "tree_update.hpp"
 
 #include <list>
 
@@ -368,19 +369,10 @@ void SCREngine::Replace( XLink base_xlink )
     TRACE("Now replacing, base agent=")(plan.base_agent)("\n");
     TreePtr<Node> new_base_x = plan.base_agent->BuildReplace(plan.base_plink);
 
-	plan.vn_sequence->ClearXTreeDatabase();
-
-    ASSERT( replace_solution.at( plan.base_plink ) == base_xlink );
-    
-    plan.vn_sequence->CurrentXTreeDelete(base_xlink);
-    plan.vn_sequence->CurrentXTreeInsert(base_xlink, new_base_x);
-    
-    ASSERT( replace_solution.at( plan.base_plink ) == base_xlink );
-    
-    plan.vn_sequence->BuildXTreeDatabase();      
-    // Domain extend required on sight of new pattern OR x. This call is due to the change in X tree.
-    plan.vn_sequence->ExtendDomain( plan.base_plink ); 
-    ASSERT( replace_solution.at( plan.base_plink ) == base_xlink );
+	auto seq = make_shared<CommandSequence>();
+	seq->Add( make_shared<DeleteCommand>( base_xlink ) );
+	seq->Add( make_shared<InsertCommand>( base_xlink, new_base_x, plan.base_plink ) );
+	plan.vn_sequence->ExecuteUpdateCommand( seq );
 
     TRACE("Replace done\n");
 }
