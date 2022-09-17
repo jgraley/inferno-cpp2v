@@ -47,6 +47,8 @@ public:
     XLink FindDomainExtension( XLink xlink ) const;
     void BuildXTreeDatabase();
     void ExtendDomain( PatternLink root_plink );
+    void CurrentXTreeRemove( XLink target_xlink );
+    void CurrentXTreeAdd( XLink target_xlink, TreePtr<Node> new_x );
     
     bool IsDirtyGrass( TreePtr<Node> node );
     void AddDirtyGrass( TreePtr<Node> node );

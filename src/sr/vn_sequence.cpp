@@ -153,6 +153,24 @@ void VNSequence::ExtendDomain( PatternLink root_plink )
 }
 
 
+void VNSequence::CurrentXTreeRemove( XLink target_xlink )
+{
+	ASSERT( target_xlink );
+	ASSERT( target_xlink.HasChildX() );
+
+	target_xlink.ClearXPtr();
+}
+
+
+void VNSequence::CurrentXTreeAdd( XLink target_xlink, TreePtr<Node> new_x )
+{
+	ASSERT( target_xlink );
+	ASSERT( !target_xlink.HasChildX() );
+	
+	target_xlink.SetXPtr(new_x);
+}	
+
+
 bool VNSequence::IsDirtyGrass( TreePtr<Node> node )
 {
 	return dirty_grass.count(node) > 0;
