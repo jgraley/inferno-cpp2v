@@ -11,7 +11,7 @@
 #include "link.hpp"
 #include "sc_relation.hpp"
 #include "vn_sequence.hpp"
-#include "tree_update.hpp"
+#include "db/tree_update.hpp"
 
 #include <list>
 
@@ -351,7 +351,7 @@ void SCREngine::RunEmbedded( PatternLink plink_to_embedded, XLink base_xlink )
     
     // Obtain a pointer to the though link that will be updated by the 
     // embedded. 
-	XTreeDatabase::NodeRow nn = plan.x_tree_db->GetNodeRow(through_subtree);
+	Tables::NodeRow nn = plan.x_tree_db->GetNodeRow(through_subtree);
 	XLink target_xlink = OnlyElementOf(nn.parents);
 
     // Run the embedded's engine on this subtree and overwrite through ptr via p_through_x

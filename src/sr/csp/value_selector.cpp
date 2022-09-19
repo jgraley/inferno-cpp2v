@@ -2,7 +2,7 @@
 #include "solver_holder.hpp"
 #include "query.hpp"
 #include "agents/agent.hpp"
-#include "x_tree_database.hpp"
+#include "db/x_tree_database.hpp"
 #include "../sym/result.hpp"
 
 #include <algorithm>
@@ -82,10 +82,10 @@ ValueSelector::~ValueSelector()
 
 void ValueSelector::SetupDefaultGenerator()
 {
-    SR::XTreeDatabase::DepthFirstOrderedIt fwd_it = x_tree_db->depth_first_ordered_index.begin();     
+    SR::Indexes::DepthFirstOrderedIt fwd_it = x_tree_db->GetIndexes().depth_first_ordered_index.begin();     
     values_generator = [=]() mutable -> Value
     {
-        if( fwd_it==x_tree_db->depth_first_ordered_index.end() )        
+        if( fwd_it==x_tree_db->GetIndexes().depth_first_ordered_index.end() )        
             return Value();
         
         Value v = *fwd_it;

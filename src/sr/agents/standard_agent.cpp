@@ -404,8 +404,8 @@ void StandardAgent::RegenerationQuerySequence( DecidedQueryAgentInterface &query
                 break; // can't do any more in the current run
             
             XLink pred_xlink = hypothesis_links->at(run->predecessor);
-            const XTreeDatabase::Row &pred_row( x_tree_db->GetRow(pred_xlink) );                        
-            ASSERT( pred_row.containment_context == XTreeDatabase::Row::IN_SEQUENCE );
+            const Tables::Row &pred_row( x_tree_db->GetRow(pred_xlink) );                        
+            ASSERT( pred_row.containment_context == Tables::Row::IN_SEQUENCE );
             xit = pred_row.my_container_it;
             ++xit; // get past the non-star
         }
@@ -420,8 +420,8 @@ void StandardAgent::RegenerationQuerySequence( DecidedQueryAgentInterface &query
                 break; // can't do any more in the current run
             
             XLink succ_xlink = hypothesis_links->at(run->successor);
-            const XTreeDatabase::Row &succ_row( x_tree_db->GetRow(succ_xlink) );  
-            ASSERT( succ_row.containment_context == XTreeDatabase::Row::IN_SEQUENCE );
+            const Tables::Row &succ_row( x_tree_db->GetRow(succ_xlink) );  
+            ASSERT( succ_row.containment_context == Tables::Row::IN_SEQUENCE );
             xit_star_limit = succ_row.my_container_it;
         }
         else

@@ -1,7 +1,7 @@
 #include "result.hpp"
 
 #include "common/orderable.hpp"
-#include "x_tree_database.hpp"
+#include "db/x_tree_database.hpp"
 
 using namespace SYM;
 
@@ -292,7 +292,7 @@ SR::XLink DepthFirstRangeResult::GetOnlyXLink() const
 
 bool DepthFirstRangeResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
 { 
-    SR::XTreeDatabase::DepthFirstOrderedIt it_lower, it_upper;
+    SR::Indexes::DepthFirstOrderedIt it_lower, it_upper;
     
     if( lower )
     {
@@ -302,18 +302,18 @@ bool DepthFirstRangeResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
     }
     else
     {
-        it_lower = x_tree_db->depth_first_ordered_index.begin();
+        it_lower = x_tree_db->GetIndexes().depth_first_ordered_index.begin();
     }
     
     if( upper )
     {
         it_upper = x_tree_db->GetRow(upper).depth_first_ordered_it;
-        if( upper_incl && it_upper != x_tree_db->depth_first_ordered_index.end() )
+        if( upper_incl && it_upper != x_tree_db->GetIndexes().depth_first_ordered_index.end() )
             ++it_upper;
     }
     else
     {
-        it_upper = x_tree_db->depth_first_ordered_index.end();
+        it_upper = x_tree_db->GetIndexes().depth_first_ordered_index.end();
     }
     
     links = set<SR::XLink>( it_lower, it_upper );
@@ -375,30 +375,30 @@ SR::XLink SimpleCompareRangeResult::GetOnlyXLink() const
 
 bool SimpleCompareRangeResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
 {        
-    SR::XTreeDatabase::SimpleCompareOrderedIt it_lower, it_upper;
+    SR::Indexes::SimpleCompareOrderedIt it_lower, it_upper;
 
     if( lower )
     {
         if( lower_incl )
-            it_lower = x_tree_db->simple_compare_ordered_index.lower_bound(lower);
+            it_lower = x_tree_db->GetIndexes().simple_compare_ordered_index.lower_bound(lower);
         else
-            it_lower = x_tree_db->simple_compare_ordered_index.upper_bound(lower);
+            it_lower = x_tree_db->GetIndexes().simple_compare_ordered_index.upper_bound(lower);
     }
     else
     {
-        it_lower = x_tree_db->simple_compare_ordered_index.begin();
+        it_lower = x_tree_db->GetIndexes().simple_compare_ordered_index.begin();
     }
     
     if( upper )
     {
         if( upper_incl )
-            it_upper = x_tree_db->simple_compare_ordered_index.upper_bound(upper);
+            it_upper = x_tree_db->GetIndexes().simple_compare_ordered_index.upper_bound(upper);
         else
-            it_upper = x_tree_db->simple_compare_ordered_index.lower_bound(upper);
+            it_upper = x_tree_db->GetIndexes().simple_compare_ordered_index.lower_bound(upper);
     }
     else
     {
-        it_upper = x_tree_db->simple_compare_ordered_index.begin();
+        it_upper = x_tree_db->GetIndexes().simple_compare_ordered_index.begin();
     }
 
     links = set<SR::XLink>( it_lower, it_upper );
@@ -452,20 +452,20 @@ bool CategoryRangeResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
     links.clear();
     for( const XLinkBounds &bounds : bounds_list )
     {
-        SR::XTreeDatabase::SimpleCompareOrderedIt it_lower, it_upper;
+        SR::Indexes::SimpleCompareOrderedIt it_lower, it_upper;
 
         ASSERT( &bounds );
         ASSERT( bounds.first );
         if( lower_incl )
-            it_lower = x_tree_db->category_ordered_index.lower_bound(*bounds.first);
+            it_lower = x_tree_db->GetIndexes().category_ordered_index.lower_bound(*bounds.first);
         else
-            it_lower = x_tree_db->category_ordered_index.upper_bound(*bounds.first);
+            it_lower = x_tree_db->GetIndexes().category_ordered_index.upper_bound(*bounds.first);
 
         ASSERT( bounds.second );
         if( upper_incl )
-            it_upper = x_tree_db->category_ordered_index.upper_bound(*bounds.second);
+            it_upper = x_tree_db->GetIndexes().category_ordered_index.upper_bound(*bounds.second);
         else
-            it_upper = x_tree_db->category_ordered_index.lower_bound(*bounds.second);
+            it_upper = x_tree_db->GetIndexes().category_ordered_index.lower_bound(*bounds.second);
 
         links = UnionOf( links, set<SR::XLink>( it_lower, it_upper ) );
     }

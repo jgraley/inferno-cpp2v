@@ -1,7 +1,7 @@
 #include "transform_of_agent.hpp"
 #include "../scr_engine.hpp"
 #include "link.hpp"
-#include "x_tree_database.hpp"
+#include "db/x_tree_database.hpp"
 
 using namespace SR;
 

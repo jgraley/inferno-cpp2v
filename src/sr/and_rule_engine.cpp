@@ -798,7 +798,7 @@ SolutionMap AndRuleEngine::Compare( XLink base_xlink,
 
 #ifdef CHECK_EVERYTHING_IS_IN_DOMAIN
     if( !dynamic_cast<StarAgent*>(plan.base_plink.GetChildAgent()) ) // Stars are based at SubContainers which don't go into domain    
-        ASSERT( x_tree_db->domain.count(base_xlink) > 0 )(base_xlink)(" not found in ")(x_tree_db->domain)(" (see issue #202)\n");
+        ASSERT( x_tree_db->domain.count(base_xlink) > 0 )(base_xlink)(" not found in ")(x_tree_db->GetIndexes()->domain)(" (see issue #202)\n");
 #endif
     
     // Determine my fixes (just root pattern link to base x link)

@@ -11,7 +11,7 @@
 
 #include "query.hpp"
 #include "link.hpp"
-#include "x_tree_database.hpp"
+#include "db/x_tree_database.hpp"
 
 #include <set>
 #include <map>

@@ -2,8 +2,8 @@
 
 #include "vn_step.hpp"
 #include "render/graph.hpp"
-#include "x_tree_database.hpp"
-#include "tree_update.hpp"
+#include "db/x_tree_database.hpp"
+#include "db/tree_update.hpp"
 
 using namespace SR;
 
@@ -129,14 +129,14 @@ string VNSequence::GetStepName( int step_index ) const
 XLink VNSequence::UniquifyDomainExtension( XLink xlink ) const
 {
     ASSERT( x_tree_db )("Planning stage four should have created x_tree_db object");
-    return x_tree_db->UniquifyDomainExtension( xlink ); 
+    return x_tree_db->GetIndexes().UniquifyDomainExtension( xlink ); 
 }
 
 
 XLink VNSequence::FindDomainExtension( XLink xlink ) const
 {
     ASSERT( x_tree_db )("Planning stage four should have created x_tree_db object");
-    return x_tree_db->FindDomainExtension( xlink ); 
+    return x_tree_db->GetIndexes().FindDomainExtension( xlink ); 
 }
 
 

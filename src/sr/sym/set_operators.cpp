@@ -1,6 +1,6 @@
 #include "set_operators.hpp"
 #include "result.hpp"
-#include "../x_tree_database.hpp"
+#include "../db/x_tree_database.hpp"
 
 using namespace SYM;
 

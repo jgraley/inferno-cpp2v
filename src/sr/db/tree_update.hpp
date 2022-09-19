@@ -4,7 +4,7 @@
 #include "common/common.hpp"
 #include "common/read_args.hpp"
 #include "node/tree_ptr.hpp"
-#include "link.hpp"
+#include "../link.hpp"
 
 namespace SR 
 {

@@ -2,7 +2,7 @@
 #include "solver_holder.hpp"
 #include "query.hpp"
 #include "agents/agent.hpp"
-#include "x_tree_database.hpp"
+#include "db/x_tree_database.hpp"
 #include "../sym/result.hpp"
 
 #include <algorithm>

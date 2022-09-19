@@ -4,11 +4,13 @@
 #include "expression.hpp"
 #include "overloads.hpp"
 
-#include "../x_tree_database.hpp"
+#include "../db/x_tree_database.hpp"
 #include "../sc_relation.hpp"
+#include "../db/indexes.hpp"
 
 #include "common/common.hpp"
 #include "common/read_args.hpp"
+
 
 namespace SYM
 { 
@@ -116,8 +118,8 @@ public:
                                                 list<unique_ptr<SymbolResultInterface>> &&op_results ) const override final;
     shared_ptr<SymbolExpression> TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const override;
     virtual list<shared_ptr<SymbolExpression>> GetRanges() const = 0;
-    virtual bool EvalBoolFromIndexes( SR::XTreeDatabase::IndexType index_a,
-                                      SR::XTreeDatabase::IndexType index_b ) const = 0;
+    virtual bool EvalBoolFromIndexes( SR::Indexes::OrdinalType index_a,
+                                      SR::Indexes::OrdinalType index_b ) const = 0;
     virtual Precedence GetPrecedenceNF() const override;
     
 protected:
@@ -132,8 +134,8 @@ class IsGreaterOperator : public DepthFirstComparisonOperator
     using DepthFirstComparisonOperator::DepthFirstComparisonOperator;
     shared_ptr<PredicateOperator> Clone() const override;
 
-    virtual bool EvalBoolFromIndexes( SR::XTreeDatabase::IndexType index_a,
-                                      SR::XTreeDatabase::IndexType index_b ) const override;
+    virtual bool EvalBoolFromIndexes( SR::Indexes::OrdinalType index_a,
+                                      SR::Indexes::OrdinalType index_b ) const override;
     list<shared_ptr<SymbolExpression>> GetRanges() const override;
                                       
     Relationship GetRelationshipWith( shared_ptr<PredicateOperator> other ) const override;
@@ -151,8 +153,8 @@ class IsLessOperator : public DepthFirstComparisonOperator
     using DepthFirstComparisonOperator::DepthFirstComparisonOperator;
     shared_ptr<PredicateOperator> Clone() const override;
 
-    virtual bool EvalBoolFromIndexes( SR::XTreeDatabase::IndexType index_a,
-                                      SR::XTreeDatabase::IndexType index_b ) const override;
+    virtual bool EvalBoolFromIndexes( SR::Indexes::OrdinalType index_a,
+                                      SR::Indexes::OrdinalType index_b ) const override;
     list<shared_ptr<SymbolExpression>> GetRanges() const override;
 
     Relationship GetRelationshipWith( shared_ptr<PredicateOperator> other ) const override;
@@ -170,8 +172,8 @@ class IsGreaterOrEqualOperator : public DepthFirstComparisonOperator
     using DepthFirstComparisonOperator::DepthFirstComparisonOperator;
     shared_ptr<PredicateOperator> Clone() const override;
 
-    virtual bool EvalBoolFromIndexes( SR::XTreeDatabase::IndexType index_a,
-                                      SR::XTreeDatabase::IndexType index_b ) const override;
+    virtual bool EvalBoolFromIndexes( SR::Indexes::OrdinalType index_a,
+                                      SR::Indexes::OrdinalType index_b ) const override;
     list<shared_ptr<SymbolExpression>> GetRanges() const override;
 
     Relationship GetRelationshipWith( shared_ptr<PredicateOperator> other ) const override;
@@ -189,8 +191,8 @@ class IsLessOrEqualOperator : public DepthFirstComparisonOperator
     using DepthFirstComparisonOperator::DepthFirstComparisonOperator;
     shared_ptr<PredicateOperator> Clone() const override;
 
-    virtual bool EvalBoolFromIndexes( SR::XTreeDatabase::IndexType index_a,
-                                      SR::XTreeDatabase::IndexType index_b ) const override;
+    virtual bool EvalBoolFromIndexes( SR::Indexes::OrdinalType index_a,
+                                      SR::Indexes::OrdinalType index_b ) const override;
     list<shared_ptr<SymbolExpression>> GetRanges() const override;
 
     Relationship GetRelationshipWith( shared_ptr<PredicateOperator> other ) const override;

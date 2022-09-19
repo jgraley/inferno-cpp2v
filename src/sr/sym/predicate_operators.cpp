@@ -248,10 +248,10 @@ unique_ptr<BooleanResult> DepthFirstComparisonOperator::Evaluate( const EvalKit 
 
     // For greater/less, we need to consult the x_tree_db. We use the 
     // overall depth-first ordering.
-    const SR::XTreeDatabase::Row &row_a( kit.x_tree_db->GetRow(ra->GetOnlyXLink()) );   
-    const SR::XTreeDatabase::Row &row_b( kit.x_tree_db->GetRow(rb->GetOnlyXLink()) );   
-    SR::XTreeDatabase::IndexType ordinal_a = row_a.depth_first_ordinal;
-    SR::XTreeDatabase::IndexType ordinal_b = row_b.depth_first_ordinal;
+    const SR::Tables::Row &row_a( kit.x_tree_db->GetRow(ra->GetOnlyXLink()) );   
+    const SR::Tables::Row &row_b( kit.x_tree_db->GetRow(rb->GetOnlyXLink()) );   
+    SR::Indexes::OrdinalType ordinal_a = row_a.depth_first_ordinal;
+    SR::Indexes::OrdinalType ordinal_b = row_b.depth_first_ordinal;
     
     bool res = EvalBoolFromIndexes( ordinal_a, ordinal_b );
     return make_unique<BooleanResult>( res );  
@@ -287,8 +287,8 @@ shared_ptr<PredicateOperator> IsGreaterOperator::Clone() const
 }
     
 
-bool IsGreaterOperator::EvalBoolFromIndexes( SR::XTreeDatabase::IndexType index_a,
-                                           SR::XTreeDatabase::IndexType index_b ) const
+bool IsGreaterOperator::EvalBoolFromIndexes( SR::Indexes::OrdinalType index_a,
+                                           SR::Indexes::OrdinalType index_b ) const
 {
     return index_a > index_b;
 }                    
@@ -346,8 +346,8 @@ shared_ptr<PredicateOperator> IsLessOperator::Clone() const
 }
     
 
-bool IsLessOperator::EvalBoolFromIndexes( SR::XTreeDatabase::IndexType index_a,
-                                          SR::XTreeDatabase::IndexType index_b ) const
+bool IsLessOperator::EvalBoolFromIndexes( SR::Indexes::OrdinalType index_a,
+                                          SR::Indexes::OrdinalType index_b ) const
 {
     return index_a < index_b;
 }                    
@@ -405,8 +405,8 @@ shared_ptr<PredicateOperator> IsGreaterOrEqualOperator::Clone() const
 }
     
 
-bool IsGreaterOrEqualOperator::EvalBoolFromIndexes( SR::XTreeDatabase::IndexType index_a,
-                                                  SR::XTreeDatabase::IndexType index_b ) const
+bool IsGreaterOrEqualOperator::EvalBoolFromIndexes( SR::Indexes::OrdinalType index_a,
+                                                  SR::Indexes::OrdinalType index_b ) const
 {
     return index_a >= index_b;
 }                    
@@ -459,8 +459,8 @@ shared_ptr<PredicateOperator> IsLessOrEqualOperator::Clone() const
 }
     
 
-bool IsLessOrEqualOperator::EvalBoolFromIndexes( SR::XTreeDatabase::IndexType index_a,
-                                               SR::XTreeDatabase::IndexType index_b ) const
+bool IsLessOrEqualOperator::EvalBoolFromIndexes( SR::Indexes::OrdinalType index_a,
+                                               SR::Indexes::OrdinalType index_b ) const
 {
     return index_a <= index_b;
 }                    
@@ -644,15 +644,15 @@ unique_ptr<BooleanResult> IsInCategoryOperator::Evaluate( const EvalKit &kit,
 shared_ptr<SYM::SymbolExpression> IsInCategoryOperator::TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const
 {
     // Get lacing index range
-    const list<pair<int, int>> &int_range_list = kit.x_tree_db->GetLacing()->GetRangeListForCategory(archetype_node);
+    const list<pair<int, int>> &int_range_list = kit.x_tree_db->GetIndexes().GetLacing()->GetRangeListForCategory(archetype_node);
     
     // Get specially hacked XLinks that can be used with the category ordering
     AllInCategoryRangeOperator::ExprBoundsList expr_range_list;
     for( pair<int, int> int_range : int_range_list )
     {
         AllInCategoryRangeOperator::ExprBounds expr_range;
-        expr_range.first = make_shared<SYM::SymbolConstant>( MakeTreeNode<SR::XTreeDatabase::CategoryMinimaxNode>(int_range.first) );
-        expr_range.second = make_shared<SYM::SymbolConstant>( MakeTreeNode<SR::XTreeDatabase::CategoryMinimaxNode>(int_range.second) );        
+        expr_range.first = make_shared<SYM::SymbolConstant>( MakeTreeNode<SR::Indexes::CategoryMinimaxNode>(int_range.first) );
+        expr_range.second = make_shared<SYM::SymbolConstant>( MakeTreeNode<SR::Indexes::CategoryMinimaxNode>(int_range.second) );        
         expr_range_list.push_back( expr_range );
     }
     TRACE(archetype_node)("\n")(int_range_list)("\n")(expr_range_list)("\n");

@@ -3,7 +3,7 @@
 #include "../scr_engine.hpp" 
 #include "../conjecture.hpp" 
 #include "link.hpp"
-#include "x_tree_database.hpp"
+#include "db/x_tree_database.hpp"
 #include "sym/boolean_operators.hpp"
 #include "sym/predicate_operators.hpp"
 #include "sym/symbol_operators.hpp"
@@ -172,7 +172,7 @@ void StuffAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
     auto xpr_ss = MakeTreeNode<SubSequence>();
     while(xlink != keyer_xlink)
     {       
-        const XTreeDatabase::Row &row( x_tree_db->GetRow(xlink) );       
+        const Tables::Row &row( x_tree_db->GetRow(xlink) );       
         xlink = row.parent_xlink;
         
         // Putting this here excludes the terminus, as required
