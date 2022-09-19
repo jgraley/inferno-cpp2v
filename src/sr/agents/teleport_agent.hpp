@@ -17,7 +17,7 @@ public:
     virtual LocatedLink TeleportUniqueAndCache( const XTreeDatabase &x_tree_db, XLink keyer_xlink, bool expect_in_domain ) const;                  
     virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
 
-    virtual LocatedLink RunTeleportQuery( const XTreeDatabase &x_tree_db, XLink keyer_xlink ) const { ASSERTFAIL(); }
+    virtual LocatedLink RunTeleportQuery( const TreeKit &kit, XLink keyer_xlink ) const { ASSERTFAIL(); }
     
     virtual set<XLink> ExpandNormalDomain( const XTreeDatabase &x_tree_db, const unordered_set<XLink> &keyer_xlinks );
 

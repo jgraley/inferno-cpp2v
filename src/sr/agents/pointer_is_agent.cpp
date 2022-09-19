@@ -15,7 +15,7 @@ shared_ptr<PatternQuery> PointerIsAgent::GetPatternQuery() const
 }
 
 
-LocatedLink PointerIsAgent::RunTeleportQuery( const XTreeDatabase &x_tree_db, XLink keyer_xlink ) const
+LocatedLink PointerIsAgent::RunTeleportQuery( const TreeKit &kit, XLink keyer_xlink ) const
 {
     // Get the pointer that points to us - now from the keyer x link
     const TreePtrInterface *px = keyer_xlink.GetXPtr();
