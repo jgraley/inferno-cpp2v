@@ -122,9 +122,15 @@ private:
                   Row &row,
                   NodeRow &node_row );
     void AddChildren( SubtreeMode mode, XLink xlink );
-    void AddSingularNode( SubtreeMode mode, const TreePtrInterface *p_x_singular, XLink xlink );
-    void AddSequence( SubtreeMode mode, SequenceInterface *x_seq, XLink xlink );
-    void AddCollection( SubtreeMode mode, CollectionInterface *x_col, XLink xlink );
+    void AddSingularNode( SubtreeMode mode, 
+                          const TreePtrInterface *p_x_singular, 
+                          XLink xlink );
+    void AddSequence( SubtreeMode mode, 
+                      SequenceInterface *x_seq, 
+                      XLink xlink );
+    void AddCollection( SubtreeMode mode, 
+                        CollectionInterface *x_col, 
+                        XLink xlink );
         
     shared_ptr<Indexes> indexes;
     shared_ptr<Domain> domain;

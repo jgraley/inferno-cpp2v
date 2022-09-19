@@ -7,6 +7,8 @@
 #include <unordered_set>
 #include <functional>
 
+//#define TRACE_X_TREE_DB_DELTAS
+
 class SimpleCompare;
 
 namespace SYM
@@ -42,6 +44,10 @@ public:
     // Global domain of possible xlink values
     unordered_set<XLink> unordered_domain;            
     
+#ifdef TRACE_X_TREE_DB_DELTAS
+	unordered_set<XLink> previous_unordered_domain;
+#endif    
+
     // SimpleCompare equivalence classes over the domain.
     shared_ptr<SimpleCompareQuotientSet> domain_extension_classes;
 

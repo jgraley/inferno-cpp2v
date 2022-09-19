@@ -2,14 +2,6 @@
 
 using namespace SR;    
 
-//#define TEST_RELATION_PROPERTIES_USING_DOMAIN
-//#define TRACE_X_TREE_DB_DELTAS
-
-#ifdef TRACE_X_TREE_DB_DELTAS
-// Global because there are different x_tree_dbs owned by different SCR Engines
-XTreeDatabase::CategoryOrderedIndex previous_category_ordered_domain;
-#endif    
-
 
 XTreeDatabase::XTreeDatabase( const set< shared_ptr<SYM::BooleanExpression> > &clauses ) :
     plan( clauses )
@@ -55,8 +47,8 @@ void XTreeDatabase::FullBuild( XLink root_xlink_ )
     if( Tracer::IsEnabled() ) 
     {        
         TRACE("X tree db rebuilt at ")(root_xlink)(":\n")
-             ( category_ordered_index )("\n");
-        previous_category_ordered_domain = category_ordered_index;
+             ( plan.domain->unordered_domain )("\n");
+        plan.domain->previous_unordered_domain = plan.domain->unordered_domain;
     }
 #endif    
 }

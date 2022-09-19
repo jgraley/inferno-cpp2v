@@ -145,6 +145,20 @@ inline S1 DifferenceOf( const S1 &s1, const S2 &s2 )
 }    
 
 
+// Intersect unordered_set with complement.
+template< typename S >
+inline unordered_set<S> DifferenceOf( const unordered_set<S> &s1, const unordered_set<S> &s2 )
+{
+    unordered_set<S> result;
+    
+    for( const S &s : s1 )
+		if( s2.count(s)==0 )
+			result.insert(s);
+       
+    return result; 
+}    
+
+
 // Intersect map with complement.
 template< typename K, typename V, typename C >
 inline map<K, V, C> DifferenceOf( const map<K, V, C> &m1, const map<K, V, C> &m2 )

@@ -75,16 +75,11 @@ void Domain::ExtendDomainNewPattern( const TreeKit &kit, PatternLink root_plink_
     if( Tracer::IsEnabled() ) // We want this deltaing to be relative to what is seen in the log
     {
         TRACE("Domain extended due to new pattern ")(root_plink)(", new XLinks:\n")
-             ( DifferenceOf(category_ordered_index, previous_category_ordered_domain) )
+             ( DifferenceOf(unordered_domain, previous_unordered_domain) )
              ("\nRemoved XLinks:\n")
-             ( DifferenceOf(previous_category_ordered_domain, category_ordered_index) )("\n");
-        previous_category_ordered_domain = category_ordered_index;
+             ( DifferenceOf(previous_unordered_domain, unordered_domain) )("\n");
+        previous_unordered_domain = unordered_domain;
     }
-#endif
-
-#ifdef TEST_RELATION_PROPERTIES_USING_DOMAIN    
-    SimpleCompareRelation e;
-    e.TestProperties( unordered_domain );
 #endif
 }
 
@@ -96,15 +91,10 @@ void Domain::ExtendDomainNewX(const TreeKit &kit)
     if( Tracer::IsEnabled() ) // We want this deltaing to be relative to what is seen in the log
     {
         TRACE("Domain extended due new X, pattern is ")(root_plink)(", new XLinks:\n")
-             ( DifferenceOf(category_ordered_index, previous_category_ordered_domain) )
+             ( DifferenceOf(unordered_domain, previous_unordered_domain) )
              ("\nRemoved XLinks:\n")
-             ( DifferenceOf(previous_category_ordered_domain, category_ordered_index) )("\n");
-        previous_category_ordered_domain = category_ordered_index;
+             ( DifferenceOf(previous_unordered_domain, unordered_domain) )("\n");
+        previous_unordered_domain = unordered_domain;
     }
-#endif
-
-#ifdef TEST_RELATION_PROPERTIES_USING_DOMAIN    
-    SimpleCompareRelation e;
-    e.TestProperties( unordered_domain );
 #endif
 }

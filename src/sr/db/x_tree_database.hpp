@@ -1,5 +1,5 @@
-#ifndef XTREE_DATABASE_HPP
-#define XTREE_DATABASE_HPP
+#ifndef X_TREE_DATABASE_HPP
+#define X_TREE_DATABASE_HPP
 
 #include "common/standard.hpp"
 #include "../link.hpp"
