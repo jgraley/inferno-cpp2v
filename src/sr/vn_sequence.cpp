@@ -82,7 +82,7 @@ void VNSequence::AnalysisStage( TreePtr<Node> root )
     current_root_xlink = XLink::CreateDistinct(root);    
     ASSERT( x_tree_db )("Planning stage four should have created x_tree_db object");
 #ifndef X_TREE_DB_EACH_STEP
-	x_tree_db->Build( current_root_xlink );
+	x_tree_db->FullBuild( current_root_xlink );
 #endif        
 }
 
@@ -140,10 +140,10 @@ XLink VNSequence::FindDomainExtension( XLink xlink ) const
 }
 
 
-void VNSequence::ExtendDomain( PatternLink base_plink )
+void VNSequence::ExtendDomainNewPattern( PatternLink base_plink )
 {
     ASSERT( x_tree_db )("Planning stage four should have created x_tree_db object");  
-    x_tree_db->ExtendDomain( base_plink );
+    x_tree_db->ExtendDomainNewPattern( base_plink );
 }
 
 
@@ -151,6 +151,12 @@ void VNSequence::ExecuteUpdateCommand( shared_ptr<UpdateCommand> cmd )
 {
 	UpdateCommand::ExecKit kit { current_root_xlink, x_tree_db.get() };
 	cmd->Execute( kit );
+}
+
+
+void VNSequence::XTreeDbBuildNonIncremental()
+{
+	x_tree_db->BuildNonIncremental();
 }
 
 

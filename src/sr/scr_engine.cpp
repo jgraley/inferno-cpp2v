@@ -374,6 +374,8 @@ void SCREngine::Replace( XLink base_xlink )
 	seq->Add( make_shared<InsertCommand>( base_xlink, new_base_x, plan.base_plink ) );
 	plan.vn_sequence->ExecuteUpdateCommand( seq );
 
+	plan.vn_sequence->XTreeDbBuildNonIncremental();
+
     TRACE("Replace done\n");
 }
 
@@ -440,7 +442,7 @@ int SCREngine::RepeatingCompareReplace( XLink base_xlink,
     // Domain extend required on sight of new pattern OR x. This call is 
     // due to the introduction of a new pattern. It also stops at embeddeds
     // So we do it in SCREngine.
-    plan.vn_sequence->ExtendDomain( plan.base_plink );     
+    plan.vn_sequence->ExtendDomainNewPattern( plan.base_plink );     
     
     for(int i=0; i<repetitions; i++) 
     {

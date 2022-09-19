@@ -176,9 +176,14 @@ public:
     bool HasNodeRow(TreePtr<Node> node) const;
 
     void Clear();
-    void Build( XLink root_xlink );
+    void FullBuild( XLink root_xlink );
     void ExtendDomainWorker( PatternLink plink );
-    void ExtendDomain( PatternLink plink );
+    void ExtendDomainNewPattern( PatternLink root_plink );
+    void ExtendDomainNewX();
+    void UpdateRootXLink(XLink root_xlink);
+    void BuildNonIncremental();
+    void ClearIncremental(XLink base_xlink);
+    void BuildIncremental(XLink base_xlink);
     
 private:
     void AddAtRoot( SubtreeMode mode, XLink root_xlink );
@@ -223,6 +228,9 @@ private:
     
     // TreeKit implementation
   	set<LinkInfo> GetDeclarers( TreePtr<Node> node ) const override;
+  	
+  	XLink root_xlink;
+  	PatternLink root_plink;
 };    
     
 };

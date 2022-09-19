@@ -196,11 +196,13 @@ void XTreeDatabase::Clear()
 }
 
 
-void XTreeDatabase::Build( XLink root_xlink )
+void XTreeDatabase::FullBuild( XLink root_xlink_ )
 {      
-	ASSERT( root_xlink );
+	ASSERT( root_xlink_ );
+
 	Clear();
-	
+
+	root_xlink = root_xlink_;		
     current_ordinal = 0;
     
     AddAtRoot( REQUIRE_SOLO, root_xlink );
@@ -249,13 +251,15 @@ void XTreeDatabase::ExtendDomainWorker( PatternLink plink )
 }
 
 
-void XTreeDatabase::ExtendDomain( PatternLink plink )
+void XTreeDatabase::ExtendDomainNewPattern( PatternLink root_plink_ )
 {
-    ExtendDomainWorker(plink);
+	root_plink = root_plink_;
+	
+    ExtendDomainWorker(root_plink);
 #ifdef TRACE_X_TREE_DB_DELTAS
     if( Tracer::IsEnabled() ) // We want this deltaing to be relative to what is seen in the log
     {
-        TRACE("Domain extended for ")(plink)(", new XLinks:\n")
+        TRACE("Domain extended due to new pattern ")(root_plink)(", new XLinks:\n")
              ( DifferenceOf(category_ordered_index, previous_category_ordered_domain) )
              ("\nRemoved XLinks:\n")
              ( DifferenceOf(previous_category_ordered_domain, category_ordered_index) )("\n");
@@ -267,6 +271,50 @@ void XTreeDatabase::ExtendDomain( PatternLink plink )
     SimpleCompareRelation e;
     e.TestProperties( unordered_domain );
 #endif
+}
+
+
+void XTreeDatabase::ExtendDomainNewX()
+{
+    ExtendDomainWorker(root_plink);
+#ifdef TRACE_X_TREE_DB_DELTAS
+    if( Tracer::IsEnabled() ) // We want this deltaing to be relative to what is seen in the log
+    {
+        TRACE("Domain extended due new X, pattern is ")(root_plink)(", new XLinks:\n")
+             ( DifferenceOf(category_ordered_index, previous_category_ordered_domain) )
+             ("\nRemoved XLinks:\n")
+             ( DifferenceOf(previous_category_ordered_domain, category_ordered_index) )("\n");
+        previous_category_ordered_domain = category_ordered_index;
+    }
+#endif
+
+#ifdef TEST_RELATION_PROPERTIES_USING_DOMAIN    
+    SimpleCompareRelation e;
+    e.TestProperties( unordered_domain );
+#endif
+}
+
+
+void XTreeDatabase::UpdateRootXLink(XLink root_xlink_)
+{
+	root_xlink = root_xlink_;
+}
+
+
+void XTreeDatabase::BuildNonIncremental()
+{
+	FullBuild(root_xlink);
+	ExtendDomainNewX();
+}
+
+
+void XTreeDatabase::ClearIncremental(XLink base_xlink)
+{
+}
+
+
+void XTreeDatabase::BuildIncremental(XLink base_xlink)
+{
 }
 
 
@@ -284,9 +332,9 @@ void XTreeDatabase::AddAtRoot( SubtreeMode mode, XLink root_xlink )
 
 
 void XTreeDatabase::AddLink( SubtreeMode mode, 
-                            XLink xlink, 
-                            Row &row,
-                            NodeRow &node_row )
+                             XLink xlink, 
+                             Row &row,
+                             NodeRow &node_row )
 {
     // This will also prevent recursion into xlink
     if( mode==STOP_IF_ALREADY_IN && xlink_table.count(xlink) > 0 )

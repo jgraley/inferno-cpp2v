@@ -388,7 +388,8 @@ typename T::value_type &&OnlyElementOf( T&&c )
 }
 
 
-// Provide something like front() that works on sets and maps
+// Provide something like front() that works on sets and maps 
+// as well as lists and vectors
 template<typename T>
 const typename T::value_type &FrontOf( const T&c )
 {
