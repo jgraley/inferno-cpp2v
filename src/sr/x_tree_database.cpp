@@ -4,7 +4,7 @@
 #include "vn_step.hpp"
 #include "sym/expression.hpp"
 #include "sym/predicate_operators.hpp"
-#include "lacing.hpp"
+#include "db/lacing.hpp"
 
 using namespace SR;    
 

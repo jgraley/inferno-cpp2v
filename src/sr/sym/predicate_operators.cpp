@@ -3,7 +3,7 @@
 #include "symbol_operators.hpp"
 #include "set_operators.hpp"
 #include "result.hpp"
-#include "../lacing.hpp"
+#include "../db/lacing.hpp"
 #include "common/lambda_loops.hpp"
 
 using namespace SYM;
