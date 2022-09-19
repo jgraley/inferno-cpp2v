@@ -1,10 +1,4 @@
 #include "x_tree_database.hpp"
-#include "../sc_relation.hpp"
-#include "../agents/agent.hpp"
-#include "../vn_step.hpp"
-#include "../sym/expression.hpp"
-#include "../sym/predicate_operators.hpp"
-#include "lacing.hpp"
 
 using namespace SR;    
 
@@ -19,7 +13,8 @@ XTreeDatabase::CategoryOrderedIndex previous_category_ordered_domain;
 
 XTreeDatabase::XTreeDatabase( const set< shared_ptr<SYM::BooleanExpression> > &clauses ) :
     plan( clauses )
-{ 
+{
+	plan.domain->SetOnExtraXLinkFunction( plan.tables->GetOnExtraXLinkFunction() );
 }
 
 
@@ -34,10 +29,11 @@ XTreeDatabase::Plan::Plan( const set< shared_ptr<SYM::BooleanExpression> > &clau
 void XTreeDatabase::Clear()
 {
     // Clear everything 
-    plan.domain->unordered_domain.clear();
     plan.indexes->depth_first_ordered_index.clear();
     plan.indexes->category_ordered_index.clear();
     plan.indexes->simple_compare_ordered_index.clear();
+
+    plan.domain->unordered_domain.clear();
     plan.domain->domain_extension_classes = make_shared<SimpleCompareQuotientSet>();
     
     plan.tables->xlink_table.clear();
@@ -89,15 +85,27 @@ void XTreeDatabase::BuildIncremental(XLink base_xlink)
 }
 
 
+XLink XTreeDatabase::UniquifyDomainExtension( XLink xlink )
+{
+	return plan.domain->UniquifyDomainExtension(xlink);
+}
+
+
+XLink XTreeDatabase::FindDomainExtension( XLink xlink ) const
+{
+	return plan.domain->FindDomainExtension(xlink);
+}
+
+
 void XTreeDatabase::ExtendDomainNewPattern( PatternLink root_plink )
 {
-	plan.domain->ExtendDomainNewPattern( this, root_plink );
+	plan.domain->ExtendDomainNewPattern( *this, root_plink );
 }
 
 
 void XTreeDatabase::ExtendDomainNewX()
 {
-	plan.domain->ExtendDomainNewX( this );
+	plan.domain->ExtendDomainNewX( *this );
 }
 
 
@@ -134,18 +142,6 @@ const Indexes &XTreeDatabase::GetIndexes() const
 Indexes &XTreeDatabase::GetIndexes()
 {
 	return *plan.indexes;
-}
-
-
-Domain &XTreeDatabase::GetDomain()
-{
-	return *plan.domain;
-}
-
-
-Tables &XTreeDatabase::GetTables()
-{
-	return *plan.tables;
 }
 
 

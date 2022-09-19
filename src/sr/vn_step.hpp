@@ -9,7 +9,7 @@
 
 class Graph;
 
-/// SR namespace contains the search and replace implementation
+
 namespace SR 
 {
 

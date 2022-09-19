@@ -1,10 +1,6 @@
 #include "tables.hpp"
 #include "../sc_relation.hpp"
-#include "../agents/agent.hpp"
-#include "../vn_step.hpp"
-#include "../sym/expression.hpp"
-#include "../sym/predicate_operators.hpp"
-#include "lacing.hpp"
+
 
 using namespace SR;    
 
@@ -59,6 +55,17 @@ void Tables::FullBuild( XLink root_xlink )
     
     AddAtRoot( REQUIRE_SOLO, XLink::MMAX_Link );
     AddAtRoot( REQUIRE_SOLO, XLink::OffEndXLink );
+}
+
+
+Domain::OnExtraXLinkFunction Tables::GetOnExtraXLinkFunction()
+{
+	return [&](XLink extra_xlink)
+	{
+        TRACEC(extra_xlink)("\n");
+        // set to REQUIRE_SOLO to replicate #218
+		AddAtRoot( Tables::STOP_IF_ALREADY_IN, extra_xlink ); 
+    };
 }
 
 

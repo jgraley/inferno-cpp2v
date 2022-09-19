@@ -3,22 +3,9 @@
 
 #include "../link.hpp"
 #include "common/standard.hpp"
-#include "../sc_relation.hpp"
-#include "helpers/simple_compare.hpp"
-#include "helpers/transformation.hpp"
 #include "indexes.hpp"
 #include "domain.hpp"
 
-#include <unordered_set>
-
-class SimpleCompare;
-
-namespace SYM
-{
-    class BooleanExpression;
-};
-    
-/// SR namespace contains the search and replace implementation
 namespace SR 
 {
 class SimpleCompareQuotientSet;
@@ -124,9 +111,12 @@ public:
     
     void FullBuild( XLink root_xlink );
 
-    void AddAtRoot( SubtreeMode mode, XLink root_xlink );
+    // Get a lambda for extra nodes to be inserted
+    Domain::OnExtraXLinkFunction GetOnExtraXLinkFunction(); 
+    
     
 private:
+    void AddAtRoot( SubtreeMode mode, XLink root_xlink );
     void AddLink( SubtreeMode mode, 
                   XLink xlink, 
                   Row &row,

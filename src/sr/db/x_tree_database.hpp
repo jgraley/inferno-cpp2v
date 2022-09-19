@@ -1,25 +1,13 @@
 #ifndef XTREE_DATABASE_HPP
 #define XTREE_DATABASE_HPP
 
-#include "../link.hpp"
 #include "common/standard.hpp"
-#include "../sc_relation.hpp"
-#include "helpers/simple_compare.hpp"
-#include "helpers/transformation.hpp"
+#include "../link.hpp"
+
 #include "tables.hpp"
 #include "domain.hpp"
 #include "indexes.hpp"
 
-#include <unordered_set>
-
-class SimpleCompare;
-
-namespace SYM
-{
-    class BooleanExpression;
-};
-    
-/// SR namespace contains the search and replace implementation
 namespace SR 
 {
 class SimpleCompareQuotientSet;
@@ -50,6 +38,8 @@ public:
     void ClearIncremental(XLink base_xlink);
     void BuildIncremental(XLink base_xlink);
            
+    XLink UniquifyDomainExtension( XLink xlink );
+    XLink FindDomainExtension( XLink xlink ) const;
     void ExtendDomainNewPattern( PatternLink root_plink );
     void ExtendDomainNewX();           
             
@@ -58,8 +48,6 @@ public:
     const Tables::NodeRow &GetNodeRow(TreePtr<Node> node) const;
     bool HasNodeRow(TreePtr<Node> node) const;
 	const Indexes &GetIndexes() const;
-	Tables &GetTables();
-	Domain &GetDomain();
 	Indexes &GetIndexes();
 	
 private:    

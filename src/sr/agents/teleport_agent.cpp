@@ -18,11 +18,11 @@ using namespace SYM;
 
 //---------------------------------- TeleportAgent ------------------------------------    
 
-LocatedLink TeleportAgent::TeleportUniqueAndCache( const XTreeDatabase &x_tree_db, XLink keyer_xlink, bool expect_in_domain ) const
+LocatedLink TeleportAgent::TeleportUniqueAndCache( const TreeKit &kit, XLink keyer_xlink, bool expect_in_domain ) const
 {
     auto op = [&](XLink keyer_xlink) -> LocatedLink
     {
-        LocatedLink tp_link = RunTeleportQuery( x_tree_db, keyer_xlink );
+        LocatedLink tp_link = RunTeleportQuery( kit, keyer_xlink );
         if( !tp_link )
             return tp_link;
         
@@ -54,7 +54,7 @@ SYM::Over<SYM::BooleanExpression> TeleportAgent::SymbolicNormalLinkedQueryPRed()
 }                     
 
 
-set<XLink> TeleportAgent::ExpandNormalDomain( const XTreeDatabase &x_tree_db, const unordered_set<XLink> &keyer_xlinks )
+set<XLink> TeleportAgent::ExpandNormalDomain( const TreeKit &kit, const unordered_set<XLink> &keyer_xlinks )
 {
     set<XLink> extra_xlinks;
     for( XLink keyer_xlink : keyer_xlinks )
@@ -66,7 +66,7 @@ set<XLink> TeleportAgent::ExpandNormalDomain( const XTreeDatabase &x_tree_db, co
 
         try
         {
-            LocatedLink cached_link = TeleportUniqueAndCache( x_tree_db, keyer_xlink, false );
+            LocatedLink cached_link = TeleportUniqueAndCache( kit, keyer_xlink, false );
             if( cached_link )
                 extra_xlinks.insert( (XLink)cached_link );
         }

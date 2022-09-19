@@ -47,7 +47,7 @@ public:
                                                 bool use_DQ = false ) const;
     virtual QueryLambda TestStartRegenerationQuery( const SolutionMap *hypothesis_links,
                                                     const XTreeDatabase *x_tree_db ) const;
-    virtual set<XLink> ExpandNormalDomain( const XTreeDatabase &x_tree_db, const unordered_set<XLink> &keyer_xlinks ) { return {}; }
+    virtual set<XLink> ExpandNormalDomain( const TreeKit &kit, const unordered_set<XLink> &keyer_xlinks ) { return {}; }
     virtual void ResetNLQConjecture();
      
     virtual const SCREngine *GetMasterSCREngine() const;      

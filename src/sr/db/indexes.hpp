@@ -4,20 +4,13 @@
 #include "../link.hpp"
 #include "common/standard.hpp"
 #include "../sc_relation.hpp"
-#include "helpers/simple_compare.hpp"
-#include "helpers/transformation.hpp"
-#include "tables.hpp"
-
-#include <unordered_set>
-
-class SimpleCompare;
 
 namespace SYM
 {
     class BooleanExpression;
 };
     
-/// SR namespace contains the search and replace implementation
+
 namespace SR 
 {
 class SimpleCompareQuotientSet;

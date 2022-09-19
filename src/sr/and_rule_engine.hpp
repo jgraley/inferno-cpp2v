@@ -24,7 +24,7 @@ class SolverHolder;
 class Constraint;
 };
     
-/// SR namespace contains the search and replace implementation
+
 namespace SR 
 {
 class Agent;

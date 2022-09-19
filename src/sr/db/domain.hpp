@@ -3,12 +3,9 @@
 
 #include "../link.hpp"
 #include "common/standard.hpp"
-#include "../sc_relation.hpp"
-#include "helpers/simple_compare.hpp"
-#include "helpers/transformation.hpp"
-#include "tables.hpp"
 
 #include <unordered_set>
+#include <functional>
 
 class SimpleCompare;
 
@@ -28,15 +25,19 @@ class XTreeDatabase;
 class Domain
 {   
 public:
+	typedef function<void(XLink)> OnExtraXLinkFunction;
+
+	void SetOnExtraXLinkFunction( OnExtraXLinkFunction on_extra_xlink );
+
     // Add xlink to domain extension if not already there, and return the cannonical one.
     XLink UniquifyDomainExtension( XLink xlink );
 
     // Get the cannonical xlink for the given one.
     XLink FindDomainExtension( XLink xlink ) const;
     
-    void ExtendDomainWorker( XTreeDatabase *db, PatternLink plink );
-    void ExtendDomainNewPattern( XTreeDatabase *db, PatternLink root_plink );
-    void ExtendDomainNewX( XTreeDatabase *db );
+    void ExtendDomainWorker( const TreeKit &kit, PatternLink plink );
+    void ExtendDomainNewPattern( const TreeKit &kit, PatternLink root_plink );
+    void ExtendDomainNewX( const TreeKit &kit );
 
     // Global domain of possible xlink values
     unordered_set<XLink> unordered_domain;            
@@ -45,6 +46,7 @@ public:
     shared_ptr<SimpleCompareQuotientSet> domain_extension_classes;
 
 private:
+    OnExtraXLinkFunction on_extra_xlink;
   	PatternLink root_plink;
 };    
     

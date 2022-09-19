@@ -19,7 +19,7 @@ namespace SYM
     class BooleanExpression;
 };
 
-/// SR namespace contains the search and replace implementation
+
 namespace SR 
 {
 class Agent;
