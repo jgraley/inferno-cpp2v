@@ -7,6 +7,7 @@
 #include "helpers/simple_compare.hpp"
 #include "helpers/transformation.hpp"
 #include "indexes.hpp"
+#include "domain.hpp"
 
 #include <unordered_set>
 
@@ -27,7 +28,8 @@ class Lacing;
 class Tables
 {
 public:
-    Tables( shared_ptr<Indexes> indexes );
+    Tables( shared_ptr<Indexes> indexes,
+            shared_ptr<Domain> domain );
 
     enum SubtreeMode
     {
@@ -123,6 +125,7 @@ public:
     void FullBuild( XLink root_xlink );
 
     void AddAtRoot( SubtreeMode mode, XLink root_xlink );
+    
 private:
     void AddLink( SubtreeMode mode, 
                   XLink xlink, 
@@ -134,6 +137,7 @@ private:
     void AddCollection( SubtreeMode mode, CollectionInterface *x_col, XLink xlink );
         
     shared_ptr<Indexes> indexes;
+    shared_ptr<Domain> domain;
 
     // Depth-first ordering
     int current_ordinal;

@@ -7,6 +7,7 @@
 #include "helpers/simple_compare.hpp"
 #include "helpers/transformation.hpp"
 #include "tables.hpp"
+#include "domain.hpp"
 #include "indexes.hpp"
 
 #include <unordered_set>
@@ -37,7 +38,7 @@ private:
         Plan( const set< shared_ptr<SYM::BooleanExpression> > &clauses );
         
         shared_ptr<Indexes> indexes;
-        
+        shared_ptr<Domain> domain;
         shared_ptr<Tables> tables;
     } plan;
 
@@ -58,6 +59,7 @@ public:
     bool HasNodeRow(TreePtr<Node> node) const;
 	const Indexes &GetIndexes() const;
 	Tables &GetTables();
+	Domain &GetDomain();
 	Indexes &GetIndexes();
 	
 private:    

@@ -42,16 +42,6 @@ private:
     } plan;
     
 public:
-    // Add xlink to domain extension if not already there, and return the cannonical one.
-    XLink UniquifyDomainExtension( XLink xlink );
-
-    // Get the cannonical xlink for the given one.
-    XLink FindDomainExtension( XLink xlink ) const;
-    
-    void ExtendDomainWorker( XTreeDatabase *db, PatternLink plink );
-    void ExtendDomainNewPattern( XTreeDatabase *db, PatternLink root_plink );
-    void ExtendDomainNewX( XTreeDatabase *db );
-
     class CategoryRelation
     {
     public:
@@ -96,9 +86,6 @@ public:
     typedef multiset<XLink, SimpleCompareRelation> SimpleCompareOrderedIndex;
     typedef SimpleCompareOrderedIndex::iterator SimpleCompareOrderedIt;
     
-    // Global domain of possible xlink values
-    unordered_set<XLink> unordered_domain;            
-    
     // Global domain of possible xlink values - ordered
     DepthFirstOrderedIndex depth_first_ordered_index;            
     
@@ -107,13 +94,7 @@ public:
     
     // Whole domain in here, grouped by simple compare, findable using eg lower_bound()
     // Should be the other way around, as an indication of policy
-    SimpleCompareOrderedIndex simple_compare_ordered_index;
-
-    // SimpleCompare equivalence classes over the domain.
-    shared_ptr<SimpleCompareQuotientSet> domain_extension_classes;
-
-private:
-  	PatternLink root_plink;
+    SimpleCompareOrderedIndex simple_compare_ordered_index;   
 };    
     
 }

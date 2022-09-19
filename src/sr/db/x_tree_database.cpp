@@ -25,7 +25,8 @@ XTreeDatabase::XTreeDatabase( const set< shared_ptr<SYM::BooleanExpression> > &c
 
 XTreeDatabase::Plan::Plan( const set< shared_ptr<SYM::BooleanExpression> > &clauses ) :
     indexes( make_shared<Indexes>(clauses) ),
-    tables( make_shared<Tables>(indexes) )
+    domain( make_shared<Domain>() ),
+    tables( make_shared<Tables>(indexes, domain) )
 {
 }
 
@@ -33,11 +34,11 @@ XTreeDatabase::Plan::Plan( const set< shared_ptr<SYM::BooleanExpression> > &clau
 void XTreeDatabase::Clear()
 {
     // Clear everything 
-    plan.indexes->unordered_domain.clear();
+    plan.domain->unordered_domain.clear();
     plan.indexes->depth_first_ordered_index.clear();
     plan.indexes->category_ordered_index.clear();
     plan.indexes->simple_compare_ordered_index.clear();
-    plan.indexes->domain_extension_classes = make_shared<SimpleCompareQuotientSet>();
+    plan.domain->domain_extension_classes = make_shared<SimpleCompareQuotientSet>();
     
     plan.tables->xlink_table.clear();
     plan.tables->node_table.clear();    
@@ -90,13 +91,13 @@ void XTreeDatabase::BuildIncremental(XLink base_xlink)
 
 void XTreeDatabase::ExtendDomainNewPattern( PatternLink root_plink )
 {
-	plan.indexes->ExtendDomainNewPattern( this, root_plink );
+	plan.domain->ExtendDomainNewPattern( this, root_plink );
 }
 
 
 void XTreeDatabase::ExtendDomainNewX()
 {
-	plan.indexes->ExtendDomainNewX( this );
+	plan.domain->ExtendDomainNewX( this );
 }
 
 
@@ -133,6 +134,12 @@ const Indexes &XTreeDatabase::GetIndexes() const
 Indexes &XTreeDatabase::GetIndexes()
 {
 	return *plan.indexes;
+}
+
+
+Domain &XTreeDatabase::GetDomain()
+{
+	return *plan.domain;
 }
 
 

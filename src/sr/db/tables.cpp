@@ -9,8 +9,10 @@
 using namespace SR;    
 
 
-Tables::Tables( shared_ptr<Indexes> indexes_ ) :
-	indexes( indexes_ )
+Tables::Tables( shared_ptr<Indexes> indexes_,
+                shared_ptr<Domain> domain_ ) :
+	indexes( indexes_ ),
+	domain( domain_ )
 {
 }
 
@@ -101,7 +103,7 @@ void Tables::AddLink( SubtreeMode mode,
 	}
     
     // Update domains
-    InsertSolo( indexes->unordered_domain, xlink );
+    InsertSolo( domain->unordered_domain, xlink );
     indexes->depth_first_ordered_index.push_back( xlink );
     indexes->category_ordered_index.insert( xlink );
     indexes->simple_compare_ordered_index.insert( xlink );
@@ -132,7 +134,7 @@ void Tables::AddLink( SubtreeMode mode,
     // Here, elements go into quotient set, but it does not 
     // uniquify: every link in the input X tree must appear 
     // separately in domain.
-    (void)indexes->domain_extension_classes->Uniquify( xlink );    
+    (void)domain->domain_extension_classes->Uniquify( xlink );    
 }
 
 
