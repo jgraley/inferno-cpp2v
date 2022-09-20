@@ -111,33 +111,6 @@ public:
     
     
 private:
-    struct WalkInfo
-    {
-		DBWalk::ContainmentContext context;
-        XLink xlink;
-        XLink parent_xlink;
-        ContainerInterface *p_xcon;
-        ContainerInterface::iterator xit_predecessor;
-        ContainerInterface::iterator xit;
-        const TreePtrInterface *p_x;
-	};
-
-    void AddAtRoot( SubtreeMode mode, 
-                    XLink root_xlink );
-    void AddSingularNode( SubtreeMode mode, 
-                          const TreePtrInterface *p_x_singular, 
-                          XLink xlink );
-    void AddSequence( SubtreeMode mode, 
-                      SequenceInterface *x_seq, 
-                      XLink xlink );
-    void AddCollection( SubtreeMode mode, 
-                        CollectionInterface *x_col, 
-                        XLink xlink );
-    void AddLink( SubtreeMode mode, 
-                  const WalkInfo &walk_info );
-    void AddChildren( SubtreeMode mode, 
-                      XLink xlink );
-        
     shared_ptr<Indexes> indexes;
     shared_ptr<Domain> domain;
 
