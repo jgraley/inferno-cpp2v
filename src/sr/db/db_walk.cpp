@@ -5,19 +5,98 @@ using namespace SR;
 void DBWalk::AddAtRoot( SubtreeMode mode, 
                         XLink root_xlink )
 {
-    AddLink( mode, root_xlink );
+    AddLink( mode, 
+             { ROOT, 
+               root_xlink, 
+               XLink(), 
+               nullptr,
+               ContainerInterface::iterator(), 
+               ContainerInterface::iterator(), 
+               nullptr } );
+}
+
+
+void DBWalk::AddSingularNode( SubtreeMode mode, 
+                              const TreePtrInterface *p_x_singular, 
+                              XLink xlink )
+{
+    ASSERT( p_x_singular );
+    
+    // MakeValueArchetype() can generate nodes with NULL pointers (eg in PointerIs)
+    // and these get into the domain even though they are not allowed in input trees.
+    // In this case, stop recursing since there's no child to build a row for.    
+    if( !*p_x_singular )
+        return;
+        		
+    TreePtr<Node> x = xlink.GetChildX();
+    XLink child_xlink( x, p_x_singular );   
+    
+    AddLink( mode, 
+             { SINGULAR, 
+               child_xlink, 
+               xlink, 
+               nullptr,
+               ContainerInterface::iterator(),
+               ContainerInterface::iterator(),
+               p_x_singular } );
+}
+
+
+void DBWalk::AddSequence( SubtreeMode mode, 
+                          SequenceInterface *x_seq, 
+                          XLink xlink )
+{
+    TreePtr<Node> x = xlink.GetChildX();
+    SequenceInterface::iterator xit_predecessor = x_seq->end();
+    for( SequenceInterface::iterator xit = x_seq->begin();
+         xit != x_seq->end();
+         ++xit )
+    {
+        XLink child_xlink( x, &*xit );
+        AddLink( mode, 
+                 { IN_SEQUENCE, 
+                   child_xlink, 
+                   xlink, 
+                   x_seq,
+                   xit_predecessor,
+                   xit,
+                   &*xit } );
+        xit_predecessor = xit;
+    }
+}
+
+
+void DBWalk::AddCollection( SubtreeMode mode, 
+                            CollectionInterface *x_col, 
+                            XLink xlink )
+{
+    TreePtr<Node> x = xlink.GetChildX();
+    for( CollectionInterface::iterator xit = x_col->begin();
+         xit != x_col->end();
+         ++xit )
+    {
+        XLink child_xlink( x, &*xit );
+        AddLink( mode, 
+                 { IN_COLLECTION, 
+                   child_xlink, 
+                   xlink, 
+                   x_col,
+				   ContainerInterface::iterator(),
+                   xit,
+                   &*xit } );
+    }
 }
 
 
 void DBWalk::AddLink( SubtreeMode mode, 
-                      XLink xlink )
+                      const WalkInfo &walk_info )
 {
     // This will also prevent recursion into xlink
     if( mode==STOP_IF_ALREADY_IN && false )
         return; // Terminate into the existing domain
             
     // Recurse into our child nodes
-    AddChildren( mode, xlink ); 
+    AddChildren( mode, walk_info.xlink ); 
 }
 
 
@@ -40,50 +119,3 @@ void DBWalk::AddChildren( SubtreeMode mode,
 }
 
 
-void DBWalk::AddSingularNode( SubtreeMode mode, 
-                              const TreePtrInterface *p_x_singular, 
-                              XLink xlink )
-{
-    ASSERT( p_x_singular );
-    TreePtr<Node> x = xlink.GetChildX();
-    
-    // MakeValueArchetype() can generate nodes with NULL pointers (eg in PointerIs)
-    // and these get into the domain even though they are not allowed in input trees.
-    // In this case, stop recursing since there's no child to build x_tree_db for.    
-    if( !*p_x_singular )
-        return;
-        		
-    XLink child_xlink( x, p_x_singular );   
-    AddLink( mode, child_xlink );
-}
-
-
-void DBWalk::AddSequence( SubtreeMode mode, 
-                          SequenceInterface *x_seq, 
-                          XLink xlink )
-{
-    TreePtr<Node> x = xlink.GetChildX();
-    SequenceInterface::iterator xit_predecessor = x_seq->end();
-    for( SequenceInterface::iterator xit = x_seq->begin();
-         xit != x_seq->end();
-         ++xit )
-    {
-        XLink child_xlink( x, &*xit );
-        AddLink( mode, child_xlink );
-    }
-}
-
-
-void DBWalk::AddCollection( SubtreeMode mode, 
-                            CollectionInterface *x_col, 
-                            XLink xlink )
-{
-    TreePtr<Node> x = xlink.GetChildX();
-    for( CollectionInterface::iterator xit = x_col->begin();
-         xit != x_col->end();
-         ++xit )
-    {
-        XLink child_xlink( x, &*xit );
-        AddLink( mode, child_xlink );
-    }
-}

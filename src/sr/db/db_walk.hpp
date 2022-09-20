@@ -10,7 +10,7 @@ namespace SR
 
 class DBWalk
 {   
-   enum SubtreeMode
+    enum SubtreeMode
     {
         // Behaviour for main domain population: we will check uniqueness
         // of the XLinks we meet during our recursive walk.
@@ -24,11 +24,27 @@ class DBWalk
         STOP_IF_ALREADY_IN
     };
 
+    enum ContainmentContext
+    {
+        ROOT,
+        SINGULAR,
+        IN_SEQUENCE,
+        IN_COLLECTION
+    };
+    
+    struct WalkInfo
+    {
+		ContainmentContext context;
+        XLink xlink;
+        XLink parent_xlink;
+        ContainerInterface *p_xcon;
+        ContainerInterface::iterator xit_predecessor;
+        ContainerInterface::iterator xit;
+        const TreePtrInterface *p_x;
+	};
+
     void AddAtRoot( SubtreeMode mode,  
                     XLink root_xlink );
-    void AddLink( SubtreeMode mode, 
-                  XLink xlink );
-    void AddChildren( SubtreeMode mode, XLink xlink );
     void AddSingularNode( SubtreeMode mode, 
                           const TreePtrInterface *p_x_singular, 
                           XLink xlink );
@@ -38,6 +54,10 @@ class DBWalk
     void AddCollection( SubtreeMode mode, 
                         CollectionInterface *x_col, 
                         XLink xlink );
+    void AddLink( SubtreeMode mode, 
+                  const WalkInfo &walk_info );
+    void AddChildren( SubtreeMode mode, 
+                      XLink xlink );
 };    
     
 }
