@@ -3,27 +3,14 @@
 
 #include "../link.hpp"
 #include "common/standard.hpp"
-
+#include "indexes.hpp"
 
 namespace SR 
 {
 
 class DBWalk
 {   
-    enum SubtreeMode
-    {
-        // Behaviour for main domain population: we will check uniqueness
-        // of the XLinks we meet during our recursive walk.
-        REQUIRE_SOLO,
-        
-        // Behaviour for domain extensions. We will continue as long as 
-        // nodes are not already in the domain. If a node is in the 
-        // domain, we don't recurse into it since everything under it
-        // will also be in the domain.
-        // https://github.com/jgraley/inferno-cpp2v/issues/213#issuecomment-728266001
-        STOP_IF_ALREADY_IN
-    };
-
+public:
     enum ContainmentContext
     {
         ROOT,
@@ -43,20 +30,56 @@ class DBWalk
         const TreePtrInterface *p_x;
 	};
 
-    void AddAtRoot( SubtreeMode mode,  
+	struct Actions
+	{
+		function<bool (const WalkInfo &)> domain_in_is_ok;
+		function<void (const WalkInfo &)> domain_in;
+		function<Indexes::DepthFirstOrderedIt(const WalkInfo &)> indexes_in;
+		function<void (const WalkInfo &, Indexes::DepthFirstOrderedIt)> xlink_row_in;
+		function<void (const WalkInfo &)> node_row_in;
+		function<void (const WalkInfo &)> xlink_row_out;
+	};
+
+	void FullWalk( const Actions &actions, 
+				   XLink root_xlink );
+	void ExtraXLinkWalk( const Actions &actions, 
+	                     XLink extra_xlink );
+
+private:
+    enum SubtreeMode
+    {
+        // Behaviour for main domain population: we will check uniqueness
+        // of the XLinks we meet during our recursive walk.
+        REQUIRE_SOLO,
+        
+        // Behaviour for domain extensions. We will continue as long as 
+        // nodes are not already in the domain. If a node is in the 
+        // domain, we don't recurse into it since everything under it
+        // will also be in the domain.
+        // https://github.com/jgraley/inferno-cpp2v/issues/213#issuecomment-728266001
+        STOP_IF_ALREADY_IN
+    };
+
+    void AddAtRoot( const Actions &actions, 
+                    SubtreeMode mode,  
                     XLink root_xlink );
-    void AddSingularNode( SubtreeMode mode, 
+    void AddSingularNode( const Actions &actions, 
+                          SubtreeMode mode, 
                           const TreePtrInterface *p_x_singular, 
                           XLink xlink );
-    void AddSequence( SubtreeMode mode, 
+    void AddSequence( const Actions &actions, 
+                      SubtreeMode mode, 
                       SequenceInterface *x_seq, 
                       XLink xlink );
-    void AddCollection( SubtreeMode mode, 
+    void AddCollection( const Actions &actions, 
+                        SubtreeMode mode, 
                         CollectionInterface *x_col, 
                         XLink xlink );
-    void AddLink( SubtreeMode mode, 
+    void AddLink( const Actions &actions, 
+                  SubtreeMode mode, 
                   const WalkInfo &walk_info );
-    void AddChildren( SubtreeMode mode, 
+    void AddChildren( const Actions &actions, 
+                      SubtreeMode mode, 
                       XLink xlink );
 };    
     

@@ -405,7 +405,7 @@ void StandardAgent::RegenerationQuerySequence( DecidedQueryAgentInterface &query
             
             XLink pred_xlink = hypothesis_links->at(run->predecessor);
             const Tables::Row &pred_row( x_tree_db->GetRow(pred_xlink) );                        
-            ASSERT( pred_row.containment_context == Tables::Row::IN_SEQUENCE );
+            ASSERT( pred_row.containment_context == DBWalk::IN_SEQUENCE );
             xit = pred_row.my_container_it;
             ++xit; // get past the non-star
         }
@@ -421,7 +421,7 @@ void StandardAgent::RegenerationQuerySequence( DecidedQueryAgentInterface &query
             
             XLink succ_xlink = hypothesis_links->at(run->successor);
             const Tables::Row &succ_row( x_tree_db->GetRow(succ_xlink) );  
-            ASSERT( succ_row.containment_context == Tables::Row::IN_SEQUENCE );
+            ASSERT( succ_row.containment_context == DBWalk::IN_SEQUENCE );
             xit_star_limit = succ_row.my_container_it;
         }
         else

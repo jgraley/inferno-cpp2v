@@ -5,6 +5,7 @@
 #include "common/standard.hpp"
 #include "indexes.hpp"
 #include "domain.hpp"
+#include "db_walk.hpp"
 
 namespace SR 
 {
@@ -35,15 +36,7 @@ public:
     class Row : public Traceable
     {
     public:
-        enum ContainmentContext
-        {
-            ROOT,
-            SINGULAR,
-            IN_SEQUENCE,
-            IN_COLLECTION
-        };
-
-        ContainmentContext containment_context;
+        DBWalk::ContainmentContext containment_context;
         
         // Parent X link if not ROOT
         // Note that the parent is unique because:
@@ -103,6 +96,8 @@ public:
     const NodeRow &GetNodeRow(TreePtr<Node> node) const;
     bool HasNodeRow(TreePtr<Node> node) const;
 
+	DBWalk::Actions GetActions();
+
     // XLink-to-row-of-x_tree_db map
     unordered_map<XLink, Row> xlink_table;
 
@@ -118,7 +113,7 @@ public:
 private:
     struct WalkInfo
     {
-		Row::ContainmentContext context;
+		DBWalk::ContainmentContext context;
         XLink xlink;
         XLink parent_xlink;
         ContainerInterface *p_xcon;
@@ -151,6 +146,8 @@ private:
     
     // Last node to be reached and given a row
     XLink last_xlink;
+    
+    DBWalk db_walker;
 };    
     
 };

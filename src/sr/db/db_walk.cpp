@@ -2,10 +2,29 @@
 
 using namespace SR;    
 
-void DBWalk::AddAtRoot( SubtreeMode mode, 
+void DBWalk::FullWalk( const Actions &actions,
+                       XLink root_xlink )
+{
+	AddAtRoot( actions, REQUIRE_SOLO, root_xlink );
+    
+    AddAtRoot( actions, REQUIRE_SOLO, XLink::MMAX_Link );
+    AddAtRoot( actions, REQUIRE_SOLO, XLink::OffEndXLink );
+}
+
+
+void DBWalk::ExtraXLinkWalk( const Actions &actions,
+                             XLink extra_xlink )
+{
+	AddAtRoot( actions, STOP_IF_ALREADY_IN, extra_xlink ); 
+}
+
+
+void DBWalk::AddAtRoot( const Actions &actions,
+                        SubtreeMode mode, 
                         XLink root_xlink )
 {
-    AddLink( mode, 
+    AddLink( actions,
+             mode, 
              { ROOT, 
                root_xlink, 
                XLink(), 
@@ -16,7 +35,8 @@ void DBWalk::AddAtRoot( SubtreeMode mode,
 }
 
 
-void DBWalk::AddSingularNode( SubtreeMode mode, 
+void DBWalk::AddSingularNode( const Actions &actions,
+                              SubtreeMode mode, 
                               const TreePtrInterface *p_x_singular, 
                               XLink xlink )
 {
@@ -31,7 +51,8 @@ void DBWalk::AddSingularNode( SubtreeMode mode,
     TreePtr<Node> x = xlink.GetChildX();
     XLink child_xlink( x, p_x_singular );   
     
-    AddLink( mode, 
+    AddLink( actions,
+             mode, 
              { SINGULAR, 
                child_xlink, 
                xlink, 
@@ -42,7 +63,8 @@ void DBWalk::AddSingularNode( SubtreeMode mode,
 }
 
 
-void DBWalk::AddSequence( SubtreeMode mode, 
+void DBWalk::AddSequence( const Actions &actions,
+                          SubtreeMode mode, 
                           SequenceInterface *x_seq, 
                           XLink xlink )
 {
@@ -53,7 +75,8 @@ void DBWalk::AddSequence( SubtreeMode mode,
          ++xit )
     {
         XLink child_xlink( x, &*xit );
-        AddLink( mode, 
+        AddLink( actions,
+                 mode, 
                  { IN_SEQUENCE, 
                    child_xlink, 
                    xlink, 
@@ -66,7 +89,8 @@ void DBWalk::AddSequence( SubtreeMode mode,
 }
 
 
-void DBWalk::AddCollection( SubtreeMode mode, 
+void DBWalk::AddCollection( const Actions &actions,
+                            SubtreeMode mode, 
                             CollectionInterface *x_col, 
                             XLink xlink )
 {
@@ -76,7 +100,8 @@ void DBWalk::AddCollection( SubtreeMode mode,
          ++xit )
     {
         XLink child_xlink( x, &*xit );
-        AddLink( mode, 
+        AddLink( actions,
+                 mode, 
                  { IN_COLLECTION, 
                    child_xlink, 
                    xlink, 
@@ -88,19 +113,40 @@ void DBWalk::AddCollection( SubtreeMode mode,
 }
 
 
-void DBWalk::AddLink( SubtreeMode mode, 
+void DBWalk::AddLink( const Actions &actions,
+                      SubtreeMode mode, 
                       const WalkInfo &walk_info )
 {
     // This will also prevent recursion into xlink
-    if( mode==STOP_IF_ALREADY_IN && false )
+    if( mode==STOP_IF_ALREADY_IN && actions.domain_in_is_ok && !actions.domain_in_is_ok(walk_info) )
         return; // Terminate into the existing domain
             
+    // Wind-in actions
+    if( actions.domain_in )
+		actions.domain_in( walk_info );        
+            
+    Indexes::DepthFirstOrderedIt df_it;
+    
+    if( actions.indexes_in )
+		df_it = actions.indexes_in( walk_info );        
+            
+    if( actions.xlink_row_in )
+		actions.xlink_row_in( walk_info, df_it );        
+            
+    if( actions.node_row_in )
+		actions.node_row_in( walk_info );        
+            
     // Recurse into our child nodes
-    AddChildren( mode, walk_info.xlink ); 
+    AddChildren( actions, mode, walk_info.xlink ); 
+
+    // Unwind actions
+    if( actions.xlink_row_out )
+		actions.xlink_row_out( walk_info );                   
 }
 
 
-void DBWalk::AddChildren( SubtreeMode mode, 
+void DBWalk::AddChildren( const Actions &actions,
+                          SubtreeMode mode, 
                           XLink xlink )
 {
     TreePtr<Node> x = xlink.GetChildX();
@@ -108,11 +154,11 @@ void DBWalk::AddChildren( SubtreeMode mode,
     for( Itemiser::Element *xe : x_items )
     {
         if( SequenceInterface *x_seq = dynamic_cast<SequenceInterface *>(xe) )
-            AddSequence( mode, x_seq, xlink );
+            AddSequence( actions, mode, x_seq, xlink );
         else if( CollectionInterface *x_col = dynamic_cast<CollectionInterface *>(xe) )
-            AddCollection( mode, x_col, xlink );
+            AddCollection( actions, mode, x_col, xlink );
         else if( TreePtrInterface *p_x_singular = dynamic_cast<TreePtrInterface *>(xe) )
-            AddSingularNode( mode, p_x_singular, xlink );
+            AddSingularNode( actions, mode, p_x_singular, xlink );
         else
             ASSERTFAIL("got something from itemise that isnt a Sequence, Collection or a singular TreePtr");
     }
