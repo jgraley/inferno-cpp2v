@@ -98,3 +98,37 @@ void Domain::ExtendDomainNewX(const TreeKit &kit)
     }
 #endif
 }
+
+
+void Domain::PopulateActions( DBWalk::Actions &actions )
+{
+	actions.domain_in_is_ok = [&](const DBWalk::WalkInfo &walk_info) -> bool
+	{
+		return unordered_domain.count( walk_info.xlink ) == 0;
+	};
+	
+	actions.domain_in = [&](const DBWalk::WalkInfo &walk_info)
+	{
+		// ----------------- Update domain
+		InsertSolo( unordered_domain, walk_info.xlink );
+		
+		// Here, elements go into quotient set, but it does not 
+		// uniquify: every link in the input X tree must appear 
+		// separately in domain.
+		(void)domain_extension_classes->Uniquify( walk_info.xlink );    
+	};
+}
+
+
+void Domain::PrepareFullBuild(DBWalk::Actions &actions)
+{
+	PopulateActions( actions );
+}
+
+
+void Domain::PrepareExtraXLink(DBWalk::Actions &actions)
+{
+	PopulateActions( actions );
+}
+
+

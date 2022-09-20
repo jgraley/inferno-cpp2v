@@ -3,6 +3,7 @@
 
 #include "../link.hpp"
 #include "common/standard.hpp"
+#include "db_walk.hpp"
 
 #include <unordered_set>
 #include <functional>
@@ -40,6 +41,10 @@ public:
     void ExtendDomainWorker( const TreeKit &kit, PatternLink plink );
     void ExtendDomainNewPattern( const TreeKit &kit, PatternLink root_plink );
     void ExtendDomainNewX( const TreeKit &kit );
+
+	void PopulateActions(DBWalk::Actions &actions);
+	void PrepareFullBuild(DBWalk::Actions &actions);
+	void PrepareExtraXLink(DBWalk::Actions &actions);
 
     // Global domain of possible xlink values
     unordered_set<XLink> unordered_domain;            

@@ -11,6 +11,8 @@ XTreeDatabase::XTreeDatabase( const set< shared_ptr<SYM::BooleanExpression> > &c
         TRACEC(extra_xlink)("\n");
         
 		DBWalk::Actions actions;
+		plan.domain->PrepareExtraXLink( actions );
+		plan.indexes->PrepareExtraXLink( actions );
 		plan.tables->PrepareExtraXLink( actions );
 		db_walker.ExtraXLinkWalk( actions, extra_xlink );
     };
@@ -51,6 +53,8 @@ void XTreeDatabase::FullBuild( XLink root_xlink_ )
 	root_xlink = root_xlink_;		
 	
 	DBWalk::Actions actions;
+	plan.domain->PrepareFullBuild( actions );
+	plan.indexes->PrepareFullBuild( actions );
 	plan.tables->PrepareFullBuild( actions );
     db_walker.FullWalk( actions, root_xlink );
             

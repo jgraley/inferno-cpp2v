@@ -96,7 +96,7 @@ public:
     const NodeRow &GetNodeRow(TreePtr<Node> node) const;
     bool HasNodeRow(TreePtr<Node> node) const;
 
-	void GetActions(DBWalk::Actions &actions);
+	void PopulateActions(DBWalk::Actions &actions);
 	void PrepareFullBuild(DBWalk::Actions &actions);
 	void PrepareExtraXLink(DBWalk::Actions &actions);
 

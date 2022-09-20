@@ -4,6 +4,7 @@
 #include "../link.hpp"
 #include "common/standard.hpp"
 #include "../sc_relation.hpp"
+#include "db_walk.hpp"
 
 namespace SYM
 {
@@ -62,6 +63,10 @@ public:
     };
 
     const Lacing *GetLacing() const;
+
+	void PopulateActions(DBWalk::Actions &actions);
+	void PrepareFullBuild(DBWalk::Actions &actions);
+	void PrepareExtraXLink(DBWalk::Actions &actions);
 
     // Domain ordered by depth-first walk
     // Don't use a vector for this:

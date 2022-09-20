@@ -47,38 +47,8 @@ bool Tables::HasNodeRow(TreePtr<Node> node) const
 }
 
 
-void Tables::GetActions( DBWalk::Actions &actions )
+void Tables::PopulateActions( DBWalk::Actions &actions )
 {
-	actions.domain_in_is_ok = [&](const DBWalk::WalkInfo &walk_info) -> bool
-	{
-		return domain->unordered_domain.count( walk_info.xlink ) == 0;
-	};
-	
-	actions.domain_in = [&](const DBWalk::WalkInfo &walk_info)
-	{
-		// ----------------- Update domain
-		InsertSolo( domain->unordered_domain, walk_info.xlink );
-		
-		// Here, elements go into quotient set, but it does not 
-		// uniquify: every link in the input X tree must appear 
-		// separately in domain.
-		(void)domain->domain_extension_classes->Uniquify( walk_info.xlink );    
-	};
-
-	actions.indexes_in = [&](const DBWalk::WalkInfo &walk_info) -> Indexes::DepthFirstOrderedIt
-	{
-		// ----------------- Update indices
-		indexes->depth_first_ordered_index.push_back( walk_info.xlink );
-		Indexes::DepthFirstOrderedIt it = indexes->depth_first_ordered_index.end();
-		--it; // I know this is OK because we just pushed to depth_first_ordered_index
-
-		indexes->category_ordered_index.insert( walk_info.xlink );
-
-		indexes->simple_compare_ordered_index.insert( walk_info.xlink );
-		
-		return it;
-	};
-
 	actions.xlink_row_in = [&](const DBWalk::WalkInfo &walk_info, 
 	                           Indexes::DepthFirstOrderedIt df_it)
 	{
@@ -203,13 +173,13 @@ void Tables::PrepareFullBuild(DBWalk::Actions &actions)
 {
     current_ordinal = 0;
 
-	GetActions( actions );
+	PopulateActions( actions );
 }
 
 
 void Tables::PrepareExtraXLink(DBWalk::Actions &actions)
 {
-	GetActions( actions );
+	PopulateActions( actions );
 }
 
 
