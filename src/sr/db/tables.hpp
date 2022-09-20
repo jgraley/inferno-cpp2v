@@ -96,19 +96,15 @@ public:
     const NodeRow &GetNodeRow(TreePtr<Node> node) const;
     bool HasNodeRow(TreePtr<Node> node) const;
 
-	DBWalk::Actions GetActions();
+	void GetActions(DBWalk::Actions &actions);
+	void PrepareFullBuild(DBWalk::Actions &actions);
+	void PrepareExtraXLink(DBWalk::Actions &actions);
 
     // XLink-to-row-of-x_tree_db map
     unordered_map<XLink, Row> xlink_table;
 
     // Node-to-row-of-x_tree_db map
     map<TreePtr<Node>, NodeRow> node_table;
-    
-    void FullBuild( XLink root_xlink );
-
-    // Get a lambda for extra nodes to be inserted
-    Domain::OnExtraXLinkFunction GetOnExtraXLinkFunction(); 
-    
     
 private:
     shared_ptr<Indexes> indexes;

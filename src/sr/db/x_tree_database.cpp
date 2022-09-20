@@ -6,7 +6,16 @@ using namespace SR;
 XTreeDatabase::XTreeDatabase( const set< shared_ptr<SYM::BooleanExpression> > &clauses ) :
     plan( clauses )
 {
-	plan.domain->SetOnExtraXLinkFunction( plan.tables->GetOnExtraXLinkFunction() );
+	auto on_extra_xlink = [&](XLink extra_xlink)
+	{
+        TRACEC(extra_xlink)("\n");
+        
+		DBWalk::Actions actions;
+		plan.tables->PrepareExtraXLink( actions );
+		db_walker.ExtraXLinkWalk( actions, extra_xlink );
+    };
+    
+    plan.domain->SetOnExtraXLinkFunction(on_extra_xlink);
 }
 
 
@@ -41,7 +50,9 @@ void XTreeDatabase::FullBuild( XLink root_xlink_ )
 
 	root_xlink = root_xlink_;		
 	
-    plan.tables->FullBuild(root_xlink);
+	DBWalk::Actions actions;
+	plan.tables->PrepareFullBuild( actions );
+    db_walker.FullWalk( actions, root_xlink );
             
 #ifdef TRACE_X_TREE_DB_DELTAS
     if( Tracer::IsEnabled() ) 

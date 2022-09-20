@@ -55,6 +55,7 @@ private:
   	set<LinkInfo> GetDeclarers( TreePtr<Node> node ) const override;
   	
   	XLink root_xlink;
+    DBWalk db_walker;
 };    
     
 };

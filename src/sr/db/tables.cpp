@@ -47,10 +47,8 @@ bool Tables::HasNodeRow(TreePtr<Node> node) const
 }
 
 
-DBWalk::Actions Tables::GetActions()
+void Tables::GetActions( DBWalk::Actions &actions )
 {
-	DBWalk::Actions actions;
-
 	actions.domain_in_is_ok = [&](const DBWalk::WalkInfo &walk_info) -> bool
 	{
 		return domain->unordered_domain.count( walk_info.xlink ) == 0;
@@ -198,28 +196,20 @@ DBWalk::Actions Tables::GetActions()
 		// Grab last link that was added during unwind    
 		xlink_table.at(walk_info.xlink).last_descendant_xlink = last_xlink;
 	};
-	
-	return actions;
 }
 
 
-void Tables::FullBuild( XLink root_xlink )
+void Tables::PrepareFullBuild(DBWalk::Actions &actions)
 {
     current_ordinal = 0;
 
-    db_walker.FullWalk( GetActions(), root_xlink );
+	GetActions( actions );
 }
 
 
-Domain::OnExtraXLinkFunction Tables::GetOnExtraXLinkFunction()
+void Tables::PrepareExtraXLink(DBWalk::Actions &actions)
 {
-	return [&](XLink extra_xlink)
-	{
-        TRACEC(extra_xlink)("\n");
-        // set to REQUIRE_SOLO to replicate #218
-		//AddAtRoot( Tables::STOP_IF_ALREADY_IN, extra_xlink ); 
-		db_walker.ExtraXLinkWalk( GetActions(), extra_xlink );
-    };
+	GetActions( actions );
 }
 
 
