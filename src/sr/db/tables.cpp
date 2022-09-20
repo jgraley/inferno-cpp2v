@@ -5,10 +5,7 @@
 using namespace SR;    
 
 
-Tables::Tables( shared_ptr<Indexes> indexes_,
-                shared_ptr<Domain> domain_ ) :
-	indexes( indexes_ ),
-	domain( domain_ )
+Tables::Tables()
 {
 }
 
@@ -50,7 +47,7 @@ bool Tables::HasNodeRow(TreePtr<Node> node) const
 void Tables::PopulateActions( DBWalk::Actions &actions )
 {
 	actions.xlink_row_in = [&](const DBWalk::WalkInfo &walk_info, 
-	                           Indexes::DepthFirstOrderedIt df_it)
+	                           DBCommon::DepthFirstOrderedIt df_it)
 	{
 		// ----------------- Generate row
 		Row row;        

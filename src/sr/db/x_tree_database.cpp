@@ -24,7 +24,7 @@ XTreeDatabase::XTreeDatabase( const set< shared_ptr<SYM::BooleanExpression> > &c
 XTreeDatabase::Plan::Plan( const set< shared_ptr<SYM::BooleanExpression> > &clauses ) :
     indexes( make_shared<Indexes>(clauses) ),
     domain( make_shared<Domain>() ),
-    tables( make_shared<Tables>(indexes, domain) )
+    tables( make_shared<Tables>() )
 {
 }
 

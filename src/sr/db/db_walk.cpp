@@ -126,7 +126,7 @@ void DBWalk::AddLink( const Actions &actions,
     if( actions.domain_in )
 		actions.domain_in( walk_info );        
             
-    list<XLink>::const_iterator df_it;
+    DBCommon::DepthFirstOrderedIt df_it;
     
     if( actions.indexes_in )
 		df_it = actions.indexes_in( walk_info );        

@@ -250,8 +250,8 @@ unique_ptr<BooleanResult> DepthFirstComparisonOperator::Evaluate( const EvalKit 
     // overall depth-first ordering.
     const SR::Tables::Row &row_a( kit.x_tree_db->GetRow(ra->GetOnlyXLink()) );   
     const SR::Tables::Row &row_b( kit.x_tree_db->GetRow(rb->GetOnlyXLink()) );   
-    SR::Indexes::OrdinalType ordinal_a = row_a.depth_first_ordinal;
-    SR::Indexes::OrdinalType ordinal_b = row_b.depth_first_ordinal;
+    SR::DBCommon::OrdinalType ordinal_a = row_a.depth_first_ordinal;
+    SR::DBCommon::OrdinalType ordinal_b = row_b.depth_first_ordinal;
     
     bool res = EvalBoolFromIndexes( ordinal_a, ordinal_b );
     return make_unique<BooleanResult>( res );  
@@ -287,8 +287,8 @@ shared_ptr<PredicateOperator> IsGreaterOperator::Clone() const
 }
     
 
-bool IsGreaterOperator::EvalBoolFromIndexes( SR::Indexes::OrdinalType index_a,
-                                           SR::Indexes::OrdinalType index_b ) const
+bool IsGreaterOperator::EvalBoolFromIndexes( SR::DBCommon::OrdinalType index_a,
+                                           SR::DBCommon::OrdinalType index_b ) const
 {
     return index_a > index_b;
 }                    
@@ -346,8 +346,8 @@ shared_ptr<PredicateOperator> IsLessOperator::Clone() const
 }
     
 
-bool IsLessOperator::EvalBoolFromIndexes( SR::Indexes::OrdinalType index_a,
-                                          SR::Indexes::OrdinalType index_b ) const
+bool IsLessOperator::EvalBoolFromIndexes( SR::DBCommon::OrdinalType index_a,
+                                          SR::DBCommon::OrdinalType index_b ) const
 {
     return index_a < index_b;
 }                    
@@ -405,8 +405,8 @@ shared_ptr<PredicateOperator> IsGreaterOrEqualOperator::Clone() const
 }
     
 
-bool IsGreaterOrEqualOperator::EvalBoolFromIndexes( SR::Indexes::OrdinalType index_a,
-                                                  SR::Indexes::OrdinalType index_b ) const
+bool IsGreaterOrEqualOperator::EvalBoolFromIndexes( SR::DBCommon::OrdinalType index_a,
+                                                  SR::DBCommon::OrdinalType index_b ) const
 {
     return index_a >= index_b;
 }                    
@@ -459,8 +459,8 @@ shared_ptr<PredicateOperator> IsLessOrEqualOperator::Clone() const
 }
     
 
-bool IsLessOrEqualOperator::EvalBoolFromIndexes( SR::Indexes::OrdinalType index_a,
-                                               SR::Indexes::OrdinalType index_b ) const
+bool IsLessOrEqualOperator::EvalBoolFromIndexes( SR::DBCommon::OrdinalType index_a,
+                                               SR::DBCommon::OrdinalType index_b ) const
 {
     return index_a <= index_b;
 }                    

@@ -3,6 +3,7 @@
 
 #include "../link.hpp"
 #include "common/standard.hpp"
+#include "db_common.hpp"
 
 namespace SR 
 {
@@ -33,8 +34,8 @@ public:
 	{
 		function<bool (const WalkInfo &)> domain_in_is_ok;
 		function<void (const WalkInfo &)> domain_in;
-		function<list<XLink>::const_iterator(const WalkInfo &)> indexes_in;
-		function<void (const WalkInfo &, list<XLink>::const_iterator)> xlink_row_in;
+		function<DBCommon::DepthFirstOrderedIt(const WalkInfo &)> indexes_in;
+		function<void (const WalkInfo &, DBCommon::DepthFirstOrderedIt)> xlink_row_in;
 		function<void (const WalkInfo &)> node_row_in;
 		function<void (const WalkInfo &)> xlink_row_out;
 	};

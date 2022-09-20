@@ -3,8 +3,6 @@
 
 #include "../link.hpp"
 #include "common/standard.hpp"
-#include "indexes.hpp"
-#include "domain.hpp"
 #include "db_walk.hpp"
 
 namespace SR 
@@ -16,23 +14,8 @@ class Lacing;
 class Tables
 {
 public:
-    Tables( shared_ptr<Indexes> indexes,
-            shared_ptr<Domain> domain );
+    Tables();
 
-    enum SubtreeMode
-    {
-        // Behaviour for main domain population: we will check uniqueness
-        // of the XLinks we meet during our recursive walk.
-        REQUIRE_SOLO,
-        
-        // Behaviour for domain extensions. We will continue as long as 
-        // nodes are not already in the domain. If a node is in the 
-        // domain, we don't recurse into it since everything under it
-        // will also be in the domain.
-        // https://github.com/jgraley/inferno-cpp2v/issues/213#issuecomment-728266001
-        STOP_IF_ALREADY_IN
-    };
-        
     class Row : public Traceable
     {
     public:
@@ -59,10 +42,10 @@ public:
         XLink my_sequence_successor = XLink();
 
         // Index in a depth-first walk
-        Indexes::OrdinalType depth_first_ordinal = -1;
+        DBCommon::OrdinalType depth_first_ordinal = -1;
         
         // Iterator in a depth-first walk
-        Indexes::DepthFirstOrderedIt depth_first_ordered_it;
+        DBCommon::DepthFirstOrderedIt depth_first_ordered_it;
         
         // Iterator on my_container that dereferneces to me, if 
         // IN_SEQUENCE or IN_COLLECTION. Note: only used in regeneration
@@ -107,9 +90,6 @@ public:
     map<TreePtr<Node>, NodeRow> node_table;
     
 private:
-    shared_ptr<Indexes> indexes;
-    shared_ptr<Domain> domain;
-
     // Depth-first ordering
     int current_ordinal;
     

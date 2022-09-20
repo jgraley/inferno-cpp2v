@@ -24,8 +24,6 @@ class Indexes
 public:
     explicit Indexes( const set< shared_ptr<SYM::BooleanExpression> > &clauses = {} );
     
-    typedef int OrdinalType;
-
 private: 
     const struct Plan : public Traceable
     {
@@ -68,14 +66,6 @@ public:
 	void PrepareFullBuild(DBWalk::Actions &actions);
 	void PrepareExtraXLink(DBWalk::Actions &actions);
 
-    // Domain ordered by depth-first walk
-    // Don't use a vector for this:
-    // (a) you'd need the size in advance otherwise the iterators in
-    // the xlink_table will go bad while populating and
-    // (b) incremental domain update will be hard
-    typedef list<XLink> DepthFirstOrderedIndex;    
-    typedef DepthFirstOrderedIndex::const_iterator DepthFirstOrderedIt;    
-    
     // Category ordering TODO merge with SimpleCompare ordering
     typedef multiset<XLink, CategoryRelation> CategoryOrderedIndex;
     typedef CategoryOrderedIndex::iterator CategoryOrderedIt;
@@ -85,7 +75,7 @@ public:
     typedef SimpleCompareOrderedIndex::iterator SimpleCompareOrderedIt;
     
     // Global domain of possible xlink values - ordered
-    DepthFirstOrderedIndex depth_first_ordered_index;            
+    DBCommon::DepthFirstOrderedIndex depth_first_ordered_index;            
     
     // Domain ordered by category
     CategoryOrderedIndex category_ordered_index;

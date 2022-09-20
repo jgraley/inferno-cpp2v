@@ -292,7 +292,7 @@ SR::XLink DepthFirstRangeResult::GetOnlyXLink() const
 
 bool DepthFirstRangeResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
 { 
-    SR::Indexes::DepthFirstOrderedIt it_lower, it_upper;
+    SR::DBCommon::DepthFirstOrderedIt it_lower, it_upper;
     
     if( lower )
     {
