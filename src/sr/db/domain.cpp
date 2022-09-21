@@ -5,13 +5,6 @@
 
 using namespace SR;    
 
-void Domain::ClearMonolithic()
-{
-    unordered_domain.clear();
-    domain_extension_classes = make_shared<SimpleCompareQuotientSet>();
-}    
-
-
 void Domain::SetOnExtraXLinkFunction( OnExtraXLinkFunction on_extra_xlink_ )
 {
     on_extra_xlink = on_extra_xlink_;
@@ -105,6 +98,13 @@ void Domain::ExtendDomainNewX(const TreeKit &kit)
     }
 #endif
 }
+
+
+void Domain::ClearMonolithic()
+{
+    unordered_domain.clear();
+    domain_extension_classes = make_shared<SimpleCompareQuotientSet>();
+}    
 
 
 void Domain::PrepareBuildMonolithic(DBWalk::Actions &actions)

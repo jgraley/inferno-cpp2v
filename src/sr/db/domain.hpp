@@ -31,8 +31,6 @@ class Domain
 public:
 	typedef function<void(XLink)> OnExtraXLinkFunction;
 
-    void ClearMonolithic();
-
 	void SetOnExtraXLinkFunction( OnExtraXLinkFunction on_extra_xlink );
 
     // Add xlink to domain extension if not already there, and return the cannonical one.
@@ -45,6 +43,7 @@ public:
     void ExtendDomainNewPattern( const TreeKit &kit, PatternLink root_plink );
     void ExtendDomainNewX( const TreeKit &kit );
 
+    void ClearMonolithic();
 	void PrepareBuildMonolithic(DBWalk::Actions &actions);
     void PrepareDelete(DBWalk::Actions &actions);
 	void PrepareInsert(DBWalk::Actions &actions);

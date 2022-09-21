@@ -61,10 +61,9 @@ public:
         int lacing_ordinal;
     };
 
-    void ClearMonolithic();
-
     const Lacing *GetLacing() const;
 
+    void ClearMonolithic();
 	void PrepareBuildMonolithic(DBWalk::Actions &actions);
     void PrepareDelete(DBWalk::Actions &actions);
 	void PrepareInsert(DBWalk::Actions &actions);
