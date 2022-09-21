@@ -11,14 +11,16 @@ XTreeDatabase::XTreeDatabase( const set< shared_ptr<SYM::BooleanExpression> > &c
         TRACEC(extra_xlink)("\n");
         
 		DBWalk::Actions actions;
-      	plan.domain->PrepareBuildMonolithic( actions );
-        plan.indexes->PrepareBuildMonolithic( actions );
-        plan.link_table->PrepareBuildMonolithic( actions );
-        plan.node_table->PrepareBuildMonolithic( actions );
 		plan.domain->PrepareInsert( actions );
 		plan.indexes->PrepareInsert( actions );
 		plan.link_table->PrepareInsert( actions );
 		plan.node_table->PrepareInsert( actions );
+		db_walker.ExtraXLinkWalk( actions, extra_xlink );
+        actions = DBWalk::Actions();
+      	plan.domain->PrepareBuildMonolithic( actions );
+        plan.indexes->PrepareBuildMonolithic( actions );
+        plan.link_table->PrepareBuildMonolithic( actions );
+        plan.node_table->PrepareBuildMonolithic( actions );
 		db_walker.ExtraXLinkWalk( actions, extra_xlink );
     };
     
