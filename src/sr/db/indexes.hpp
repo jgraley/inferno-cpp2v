@@ -65,8 +65,8 @@ public:
     const Lacing *GetLacing() const;
 
 	void PopulateActions(DBWalk::Actions &actions);
-	void PrepareFullBuild(DBWalk::Actions &actions);
-	void PrepareExtraXLink(DBWalk::Actions &actions);
+	void PrepareMonolithicBuild(DBWalk::Actions &actions);
+	void PrepareIncrementalInsert(DBWalk::Actions &actions);
 
     // Category ordering TODO merge with SimpleCompare ordering
     typedef multiset<XLink, CategoryRelation> CategoryOrderedIndex;

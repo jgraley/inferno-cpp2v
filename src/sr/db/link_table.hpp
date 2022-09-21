@@ -60,8 +60,8 @@ public:
     void Clear();
     
 	void PopulateActions(DBWalk::Actions &actions);
-	void PrepareFullBuild(DBWalk::Actions &actions);
-	void PrepareExtraXLink(DBWalk::Actions &actions);
+	void PrepareMonolithicBuild(DBWalk::Actions &actions);
+	void PrepareIncrementalInsert(DBWalk::Actions &actions);
 
 private:
     // XLink-to-row-of-x_tree_db map

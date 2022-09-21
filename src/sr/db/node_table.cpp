@@ -64,15 +64,14 @@ void NodeTable::PopulateActions( DBWalk::Actions &actions )
 }
 
 
-void NodeTable::PrepareFullBuild(DBWalk::Actions &actions)
+void NodeTable::PrepareMonolithicBuild(DBWalk::Actions &actions)
 {
 	PopulateActions( actions );
 }
 
 
-void NodeTable::PrepareExtraXLink(DBWalk::Actions &actions)
+void NodeTable::PrepareIncrementalInsert(DBWalk::Actions &actions)
 {
-	PopulateActions( actions );
 }
 
 

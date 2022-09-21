@@ -127,7 +127,7 @@ void LinkTable::PopulateActions( DBWalk::Actions &actions )
 }
 
 
-void LinkTable::PrepareFullBuild(DBWalk::Actions &actions)
+void LinkTable::PrepareMonolithicBuild(DBWalk::Actions &actions)
 {
     current_ordinal = 0;
 
@@ -135,9 +135,8 @@ void LinkTable::PrepareFullBuild(DBWalk::Actions &actions)
 }
 
 
-void LinkTable::PrepareExtraXLink(DBWalk::Actions &actions)
+void LinkTable::PrepareIncrementalInsert(DBWalk::Actions &actions)
 {
-	PopulateActions( actions );
 }
 
 

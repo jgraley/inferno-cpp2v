@@ -11,10 +11,14 @@ XTreeDatabase::XTreeDatabase( const set< shared_ptr<SYM::BooleanExpression> > &c
         TRACEC(extra_xlink)("\n");
         
 		DBWalk::Actions actions;
-		plan.domain->PrepareExtraXLink( actions );
-		plan.indexes->PrepareExtraXLink( actions );
-		plan.link_table->PrepareExtraXLink( actions );
-		plan.node_table->PrepareExtraXLink( actions );
+      	plan.domain->PrepareMonolithicBuild( actions );
+        plan.indexes->PrepareMonolithicBuild( actions );
+        plan.link_table->PrepareMonolithicBuild( actions );
+        plan.node_table->PrepareMonolithicBuild( actions );
+		plan.domain->PrepareIncrementalInsert( actions );
+		plan.indexes->PrepareIncrementalInsert( actions );
+		plan.link_table->PrepareIncrementalInsert( actions );
+		plan.node_table->PrepareIncrementalInsert( actions );
 		db_walker.ExtraXLinkWalk( actions, extra_xlink );
     };
     
@@ -50,10 +54,14 @@ void XTreeDatabase::FullBuild( XLink root_xlink_ )
 	root_xlink = root_xlink_;		
 	
 	DBWalk::Actions actions;
-	plan.domain->PrepareFullBuild( actions );
-	plan.indexes->PrepareFullBuild( actions );
-	plan.link_table->PrepareFullBuild( actions );
-	plan.node_table->PrepareFullBuild( actions );
+	plan.domain->PrepareMonolithicBuild( actions );
+	plan.indexes->PrepareMonolithicBuild( actions );
+	plan.link_table->PrepareMonolithicBuild( actions );
+	plan.node_table->PrepareMonolithicBuild( actions );
+	plan.domain->PrepareIncrementalInsert( actions );
+	plan.indexes->PrepareIncrementalInsert( actions );
+	plan.link_table->PrepareIncrementalInsert( actions );
+	plan.node_table->PrepareIncrementalInsert( actions );
     db_walker.FullWalk( actions, root_xlink );
             
 #ifdef TRACE_X_TREE_DB_DELTAS

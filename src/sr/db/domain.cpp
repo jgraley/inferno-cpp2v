@@ -127,15 +127,14 @@ void Domain::PopulateActions( DBWalk::Actions &actions )
 }
 
 
-void Domain::PrepareFullBuild(DBWalk::Actions &actions)
+void Domain::PrepareMonolithicBuild(DBWalk::Actions &actions)
 {
 	PopulateActions( actions );
 }
 
 
-void Domain::PrepareExtraXLink(DBWalk::Actions &actions)
+void Domain::PrepareIncrementalInsert(DBWalk::Actions &actions)
 {
-	PopulateActions( actions );
 }
 
 

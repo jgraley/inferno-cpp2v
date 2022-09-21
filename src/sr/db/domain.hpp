@@ -45,8 +45,8 @@ public:
     void ExtendDomainNewX( const TreeKit &kit );
 
 	void PopulateActions(DBWalk::Actions &actions);
-	void PrepareFullBuild(DBWalk::Actions &actions);
-	void PrepareExtraXLink(DBWalk::Actions &actions);
+	void PrepareMonolithicBuild(DBWalk::Actions &actions);
+	void PrepareIncrementalInsert(DBWalk::Actions &actions);
 
     // Global domain of possible xlink values
     unordered_set<XLink> unordered_domain;            
