@@ -32,7 +32,7 @@ void InsertCommand::Execute( const ExecKit &kit ) const
 {
 	target_xlink.SetXPtr(new_x);
         
-    kit.x_tree_db->BuildIncremental( target_xlink );      
+    kit.x_tree_db->Insert( target_xlink );      
 }
 
 

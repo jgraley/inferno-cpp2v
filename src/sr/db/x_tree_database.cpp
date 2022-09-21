@@ -92,7 +92,15 @@ void XTreeDatabase::FullBuild()
 void XTreeDatabase::BuildMonolithic()
 {
     ASSERT( root_xlink );
-	FullBuild();
+    
+    ClearMonolithic();
+    
+    DBWalk::Actions actions;
+    plan.domain->PrepareBuildMonolithic( actions );
+    plan.indexes->PrepareBuildMonolithic( actions );
+    plan.link_table->PrepareBuildMonolithic( actions );
+    plan.node_table->PrepareBuildMonolithic( actions );
+    db_walker.FullWalk( actions, root_xlink );
 }
 
 
@@ -114,8 +122,14 @@ void XTreeDatabase::Delete(const Zone &zone)
 }
 
 
-void XTreeDatabase::BuildIncremental(XLink base_xlink)
+void XTreeDatabase::Insert(const Zone &zone)
 {
+    DBWalk::Actions actions;
+    plan.domain->PrepareInsert( actions );
+    plan.indexes->PrepareInsert( actions );
+    plan.link_table->PrepareInsert( actions );
+    plan.node_table->PrepareInsert( actions );
+    db_walker.ZoneWalk( actions, zone );
 }
 
 

@@ -43,7 +43,7 @@ public:
     void BuildMonolithic();
 
     void Delete(const Zone &zone);
-    void BuildIncremental(XLink base_xlink);
+    void Insert(const Zone &zone);
            
     XLink UniquifyDomainExtension( XLink xlink );
     XLink FindDomainExtension( XLink xlink ) const;
