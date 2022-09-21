@@ -248,8 +248,8 @@ unique_ptr<BooleanResult> DepthFirstComparisonOperator::Evaluate( const EvalKit 
 
     // For greater/less, we need to consult the x_tree_db. We use the 
     // overall depth-first ordering.
-    const SR::Tables::Row &row_a( kit.x_tree_db->GetRow(ra->GetOnlyXLink()) );   
-    const SR::Tables::Row &row_b( kit.x_tree_db->GetRow(rb->GetOnlyXLink()) );   
+    const SR::LinkTable::Row &row_a( kit.x_tree_db->GetRow(ra->GetOnlyXLink()) );   
+    const SR::LinkTable::Row &row_b( kit.x_tree_db->GetRow(rb->GetOnlyXLink()) );   
     SR::DBCommon::OrdinalType ordinal_a = row_a.depth_first_ordinal;
     SR::DBCommon::OrdinalType ordinal_b = row_b.depth_first_ordinal;
     

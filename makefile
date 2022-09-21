@@ -1,6 +1,6 @@
 include makefile.common
 
-.PHONY: default all get_libs test docs force_subordinate_makefiles clean iclean resource publish doxygen pattern_graphs doc_graphs
+.PHONY: default all get_libs test docs force_subordinate_makefiles clean iclean dclean resource publish doxygen pattern_graphs doc_graphs
 default : inferno.exe
 all : clean get_libs inferno.exe resource docs test
 
@@ -105,9 +105,9 @@ publish : makefile docs inferno.exe docs/web/publish.sh
 #
 # Cleaning up
 #
-clean : makefile $(LLVM_CLANG_LIBS:%=clean_%) iclean
+clean : $(LLVM_CLANG_LIBS:%=clean_%) iclean
 
-iclean : makefile 
+iclean :  
 	-rm -rf build/*
 	-rm -f inferno.exe
 	-rm -f resource/lib/*

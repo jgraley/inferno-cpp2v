@@ -4,7 +4,8 @@
 #include "common/standard.hpp"
 #include "../link.hpp"
 
-#include "tables.hpp"
+#include "link_table.hpp"
+#include "node_table.hpp"
 #include "domain.hpp"
 #include "indexes.hpp"
 
@@ -27,7 +28,8 @@ private:
         
         shared_ptr<Indexes> indexes;
         shared_ptr<Domain> domain;
-        shared_ptr<Tables> tables;
+        shared_ptr<LinkTable> link_table;
+        shared_ptr<NodeTable> node_table;
     } plan;
 
 public:
@@ -43,9 +45,9 @@ public:
     void ExtendDomainNewPattern( PatternLink root_plink );
     void ExtendDomainNewX();           
             
-    const Tables::Row &GetRow(XLink xlink) const;
+    const LinkTable::Row &GetRow(XLink xlink) const;
     bool HasRow(XLink xlink) const;    
-    const Tables::NodeRow &GetNodeRow(TreePtr<Node> node) const;
+    const NodeTable::NodeRow &GetNodeRow(TreePtr<Node> node) const;
     bool HasNodeRow(TreePtr<Node> node) const;
 	const Indexes &GetIndexes() const;
 	Indexes &GetIndexes();

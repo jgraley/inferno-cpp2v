@@ -172,7 +172,7 @@ void StuffAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
     auto xpr_ss = MakeTreeNode<SubSequence>();
     while(xlink != keyer_xlink)
     {       
-        const Tables::Row &row( x_tree_db->GetRow(xlink) );       
+        const LinkTable::Row &row( x_tree_db->GetRow(xlink) );       
         xlink = row.parent_xlink;
         
         // Putting this here excludes the terminus, as required

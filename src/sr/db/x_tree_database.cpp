@@ -13,7 +13,8 @@ XTreeDatabase::XTreeDatabase( const set< shared_ptr<SYM::BooleanExpression> > &c
 		DBWalk::Actions actions;
 		plan.domain->PrepareExtraXLink( actions );
 		plan.indexes->PrepareExtraXLink( actions );
-		plan.tables->PrepareExtraXLink( actions );
+		plan.link_table->PrepareExtraXLink( actions );
+		plan.node_table->PrepareExtraXLink( actions );
 		db_walker.ExtraXLinkWalk( actions, extra_xlink );
     };
     
@@ -24,7 +25,8 @@ XTreeDatabase::XTreeDatabase( const set< shared_ptr<SYM::BooleanExpression> > &c
 XTreeDatabase::Plan::Plan( const set< shared_ptr<SYM::BooleanExpression> > &clauses ) :
     indexes( make_shared<Indexes>(clauses) ),
     domain( make_shared<Domain>() ),
-    tables( make_shared<Tables>() )
+    link_table( make_shared<LinkTable>() ),
+    node_table( make_shared<NodeTable>() )
 {
 }
 
@@ -39,8 +41,8 @@ void XTreeDatabase::Clear()
     plan.domain->unordered_domain.clear();
     plan.domain->domain_extension_classes = make_shared<SimpleCompareQuotientSet>();
     
-    plan.tables->xlink_table.clear();
-    plan.tables->node_table.clear();    
+    plan.link_table->xlink_table.clear();
+    plan.node_table->node_table.clear();    
 }
 
 
@@ -55,7 +57,8 @@ void XTreeDatabase::FullBuild( XLink root_xlink_ )
 	DBWalk::Actions actions;
 	plan.domain->PrepareFullBuild( actions );
 	plan.indexes->PrepareFullBuild( actions );
-	plan.tables->PrepareFullBuild( actions );
+	plan.link_table->PrepareFullBuild( actions );
+	plan.node_table->PrepareFullBuild( actions );
     db_walker.FullWalk( actions, root_xlink );
             
 #ifdef TRACE_X_TREE_DB_DELTAS
@@ -116,27 +119,27 @@ void XTreeDatabase::ExtendDomainNewX()
 }
 
 
-const Tables::Row &XTreeDatabase::GetRow(XLink xlink) const
+const LinkTable::Row &XTreeDatabase::GetRow(XLink xlink) const
 {
-	return plan.tables->GetRow(xlink);
+	return plan.link_table->GetRow(xlink);
 }
 
 
 bool XTreeDatabase::HasRow(XLink xlink) const
 {
-	return plan.tables->HasRow(xlink);
+	return plan.link_table->HasRow(xlink);
 }
 
 
-const Tables::NodeRow &XTreeDatabase::GetNodeRow(TreePtr<Node> node) const
+const NodeTable::NodeRow &XTreeDatabase::GetNodeRow(TreePtr<Node> node) const
 {
-	return plan.tables->GetNodeRow(node);
+	return plan.node_table->GetNodeRow(node);
 }
 
 
 bool XTreeDatabase::HasNodeRow(TreePtr<Node> node) const
 {
-	return plan.tables->HasNodeRow(node);
+	return plan.node_table->HasNodeRow(node);
 }
 
 
@@ -156,10 +159,10 @@ set<TreeKit::LinkInfo> XTreeDatabase::GetDeclarers( TreePtr<Node> node ) const
 {
     set<LinkInfo> infos;
    
-    if( plan.tables->node_table.count(node)==0 ) // not found
+    if( plan.node_table->node_table.count(node)==0 ) // not found
         throw UnknownNode();
         
-    Tables::NodeRow row = plan.tables->node_table.at(node);
+    NodeTable::NodeRow row = plan.node_table->node_table.at(node);
     // Note that row.declarers is "precise", i.e. the XLinks are the actual
     // declaring xlinks, not just arbitrary parent links to the declaree.
     // Also correct for parallel links where only some declare.
@@ -169,7 +172,7 @@ set<TreeKit::LinkInfo> XTreeDatabase::GetDeclarers( TreePtr<Node> node ) const
         
         // first is TreePtr to the declarer node. Loses info about which 
         // link declared (in case of parallel links) but gets you the declarer node.
-        info.first = plan.tables->xlink_table.at(declarer_xlink).parent_xlink.GetChildX();
+        info.first = plan.link_table->xlink_table.at(declarer_xlink).parent_xlink.GetChildX();
 
         // second is TreePtrInterface * to the declarer's pointer to declaree
         // Retains precise info about which link.

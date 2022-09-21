@@ -1,16 +1,16 @@
-#include "tables.hpp"
+#include "link_table.hpp"
 #include "../sc_relation.hpp"
 
 
 using namespace SR;    
 
 
-Tables::Tables()
+LinkTable::LinkTable()
 {
 }
 
 
-const Tables::Row &Tables::GetRow(XLink xlink) const
+const LinkTable::Row &LinkTable::GetRow(XLink xlink) const
 {
     ASSERT( xlink );
     ASSERT( HasRow(xlink) )
@@ -20,31 +20,14 @@ const Tables::Row &Tables::GetRow(XLink xlink) const
 }
 
 
-bool Tables::HasRow(XLink xlink) const
+bool LinkTable::HasRow(XLink xlink) const
 {
     ASSERT( xlink );
     return xlink_table.count(xlink) > 0;
 }
 
 
-const Tables::NodeRow &Tables::GetNodeRow(TreePtr<Node> node) const
-{
-    ASSERT( node );
-    ASSERT( HasNodeRow(node) )
-          ("X tree database: no node row for ")(node)("\n")
-          ("Node xlink_table: ")(node_table);
-    return node_table.at(node);
-}
-
-
-bool Tables::HasNodeRow(TreePtr<Node> node) const
-{
-    ASSERT( node );
-    return node_table.count(node) > 0;
-}
-
-
-void Tables::PopulateActions( DBWalk::Actions &actions )
+void LinkTable::PopulateActions( DBWalk::Actions &actions )
 {
 	actions.xlink_row_in = [&](const DBWalk::WalkInfo &walk_info, 
 	                           DBCommon::DepthFirstOrderedIt df_it)
@@ -128,34 +111,6 @@ void Tables::PopulateActions( DBWalk::Actions &actions )
 		// Add a row of x_tree_db
 		InsertSolo( xlink_table, make_pair(walk_info.xlink, row) );
 	};
-
-	actions.node_row_in = [&](const DBWalk::WalkInfo &walk_info)
-	{
-		// ----------------- Generate node row
-		NodeRow node_row;
-		switch( walk_info.context )
-		{
-			
-		case DBWalk::ROOT:
-		{
-			break;
-		}	
-		case DBWalk::SINGULAR:
-		case DBWalk::IN_SEQUENCE:
-		case DBWalk::IN_COLLECTION:
-		{
-			TreePtr<Node> parent_x = walk_info.parent_xlink.GetChildX();
-			set<const TreePtrInterface *> declared = parent_x->GetDeclared();
-			if( declared.count( walk_info.p_x ) > 0 )
-				node_row.declarers.insert( walk_info.xlink );
-			break;
-		}
-		}
-		node_row.parents.insert( walk_info.xlink );    
-
-		// Merge in the node row
-		node_table[walk_info.xlink.GetChildX()].Merge( node_row );			
-	};
 	
 	actions.xlink_row_out = [&](const DBWalk::WalkInfo &walk_info)
 	{
@@ -166,7 +121,7 @@ void Tables::PopulateActions( DBWalk::Actions &actions )
 }
 
 
-void Tables::PrepareFullBuild(DBWalk::Actions &actions)
+void LinkTable::PrepareFullBuild(DBWalk::Actions &actions)
 {
     current_ordinal = 0;
 
@@ -174,13 +129,13 @@ void Tables::PrepareFullBuild(DBWalk::Actions &actions)
 }
 
 
-void Tables::PrepareExtraXLink(DBWalk::Actions &actions)
+void LinkTable::PrepareExtraXLink(DBWalk::Actions &actions)
 {
 	PopulateActions( actions );
 }
 
 
-string Tables::Row::GetTrace() const
+string LinkTable::Row::GetTrace() const
 {
     string s = "(";
 
@@ -217,23 +172,3 @@ string Tables::Row::GetTrace() const
     s += ")";
     return s;
 }
-
-
-void Tables::NodeRow::Merge( const NodeRow &nn )
-{
-	parents = UnionOf( parents, nn.parents );
-	declarers = UnionOf( declarers, nn.declarers );
-}
-
-
-string Tables::NodeRow::GetTrace() const
-{
-    string s = "(";
-	
-	s += " parents=" + Trace(parents);
-	s += "declarers=" + Trace(declarers);
-    
-    s += ")";
-    return s;
-}
-

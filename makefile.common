@@ -71,7 +71,7 @@ OPTIONS += -I$(LLVM)/include -I$(CLANG)/include
 OPTIONS += -D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS
 
 # Dependencies to add for all compiles
-DEPS = makefile.common
+DEPS = makefile.common makefile src/makefile
 
 # For compiling on multi-core machines
 JOBS=3

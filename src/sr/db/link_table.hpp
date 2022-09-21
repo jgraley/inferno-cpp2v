@@ -1,5 +1,5 @@
-#ifndef TABLES_HPP
-#define TABLES_HPP
+#ifndef LINK_TABLE_HPP
+#define LINK_TABLE_HPP
 
 #include "../link.hpp"
 #include "common/standard.hpp"
@@ -11,10 +11,10 @@ class SimpleCompareQuotientSet;
 class VNStep;
 class Lacing;
     
-class Tables
+class LinkTable
 {
 public:
-    Tables();
+    LinkTable();
 
     class Row : public Traceable
     {
@@ -55,30 +55,9 @@ public:
         string GetTrace() const;
     };
     
-    class NodeRow : public Traceable
-    {
-    public:		
-		// Our node is the child of these links.
-		set<XLink> parents;
-
-		// Declarative XLinks onto our node. 
-		// A subset of parents, so to get the declarer node, you'll need 
-		// to use eg Row::parent_xlink.GetChildX(). Why have I done 
-		// this? So that this info is unambiguous across parallel links:
-		// We'll uniquely specify the correct one if only one is a 
-		// declaring link (precision). Taking parent discards that info.
-		set<XLink> declarers;
-		
-        void Merge( const NodeRow &nn );
-        string GetTrace() const;
-    };
-
     const Row &GetRow(XLink xlink) const;
     bool HasRow(XLink xlink) const;
     
-    const NodeRow &GetNodeRow(TreePtr<Node> node) const;
-    bool HasNodeRow(TreePtr<Node> node) const;
-
 	void PopulateActions(DBWalk::Actions &actions);
 	void PrepareFullBuild(DBWalk::Actions &actions);
 	void PrepareExtraXLink(DBWalk::Actions &actions);
@@ -86,17 +65,12 @@ public:
     // XLink-to-row-of-x_tree_db map
     unordered_map<XLink, Row> xlink_table;
 
-    // Node-to-row-of-x_tree_db map
-    map<TreePtr<Node>, NodeRow> node_table;
-    
 private:
     // Depth-first ordering
     int current_ordinal;
     
     // Last node to be reached and given a row
     XLink last_xlink;
-    
-    DBWalk db_walker;
 };    
     
 };
