@@ -81,8 +81,9 @@ void VNSequence::AnalysisStage( TreePtr<Node> root )
 {
     current_root_xlink = XLink::CreateDistinct(root);    
     ASSERT( x_tree_db )("Planning stage four should have created x_tree_db object");
+    x_tree_db->SetRoot( current_root_xlink );
 #ifndef X_TREE_DB_EACH_STEP
-	x_tree_db->FullBuild( current_root_xlink );
+	x_tree_db->FullBuild();
 #endif        
 }
 
@@ -93,7 +94,7 @@ TreePtr<Node> VNSequence::TransformStep( int step_index, TreePtr<Node> root )
     dirty_grass.clear();	
 	    
 #ifdef X_TREE_DB_EACH_STEP
-	x_tree_db->Build( current_root_xlink );
+	x_tree_db->FullBuild();
 #endif        
     steps[step_index]->Transform( current_root_xlink );
     root = current_root_xlink.GetChildX();

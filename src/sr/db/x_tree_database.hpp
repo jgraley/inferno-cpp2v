@@ -34,12 +34,15 @@ private:
     } plan;
 
 public:
-    void FullClear();
-    void FullBuild( XLink new_root_xlink );
+    void SetRoot(XLink root_xlink);
 
+    void FullClear();
+    void FullBuild();
+
+    void ClearMonolithic();
     void BuildMonolithic();
 
-    void ClearIncremental(XLink base_xlink);
+    void Delete(const Zone &zone);
     void BuildIncremental(XLink base_xlink);
            
     XLink UniquifyDomainExtension( XLink xlink );

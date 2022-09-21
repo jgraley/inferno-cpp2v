@@ -14,7 +14,7 @@ DeleteCommand::DeleteCommand( XLink target_xlink_ ) :
 void DeleteCommand::Execute( const ExecKit &kit ) const
 {
 	// TODO only delete subtree under target_xlink
-	kit.x_tree_db->ClearIncremental(target_xlink);    
+	kit.x_tree_db->Delete(target_xlink);    
     
     target_xlink.ClearXPtr();
 }	

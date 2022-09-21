@@ -35,27 +35,29 @@ XTreeDatabase::Plan::Plan( const set< shared_ptr<SYM::BooleanExpression> > &clau
 }
 
     
+void XTreeDatabase::SetRoot(XLink root_xlink_)
+{
+  	root_xlink = root_xlink_;		    
+}
+    
+    
 void XTreeDatabase::FullClear()
 {
+    ASSERT( root_xlink );
+    
     // Clear everything 
-    plan.domain->ClearMonolithic();
-    plan.indexes->ClearMonolithic();
-    plan.link_table->ClearMonolithic();
-    plan.node_table->ClearMonolithic();    
+    ClearMonolithic();
     
     Zone root_zone( root_xlink );
-    plan.domain->Delete(root_zone);
-    plan.indexes->Delete(root_zone);
-    plan.link_table->Delete(root_zone);
-    plan.node_table->Delete(root_zone);    
+    Delete( root_zone );
 }
 
 
-void XTreeDatabase::FullBuild( XLink root_xlink_ )
+void XTreeDatabase::FullBuild()
 {      
-	FullClear();
+    ASSERT( root_xlink );
 
-	root_xlink = root_xlink_;		    
+	FullClear();
 	
 	{
         DBWalk::Actions actions;
@@ -89,12 +91,26 @@ void XTreeDatabase::FullBuild( XLink root_xlink_ )
 
 void XTreeDatabase::BuildMonolithic()
 {
-	FullBuild(root_xlink);
+    ASSERT( root_xlink );
+	FullBuild();
 }
 
 
-void XTreeDatabase::ClearIncremental(XLink base_xlink)
+void XTreeDatabase::ClearMonolithic()
 {
+    plan.domain->ClearMonolithic();
+    plan.indexes->ClearMonolithic();
+    plan.link_table->ClearMonolithic();
+    plan.node_table->ClearMonolithic();    
+}
+
+
+void XTreeDatabase::Delete(const Zone &zone)
+{
+    plan.domain->Delete(zone);
+    plan.indexes->Delete(zone);
+    plan.link_table->Delete(zone);
+    plan.node_table->Delete(zone);    
 }
 
 
@@ -105,42 +121,49 @@ void XTreeDatabase::BuildIncremental(XLink base_xlink)
 
 XLink XTreeDatabase::UniquifyDomainExtension( XLink xlink )
 {
+    ASSERT( root_xlink );
 	return plan.domain->UniquifyDomainExtension(xlink);
 }
 
 
 XLink XTreeDatabase::FindDomainExtension( XLink xlink ) const
 {
+    ASSERT( root_xlink );
 	return plan.domain->FindDomainExtension(xlink);
 }
 
 
 void XTreeDatabase::ExtendDomainNewPattern( PatternLink root_plink )
 {
+    ASSERT( root_xlink );
 	plan.domain->ExtendDomainNewPattern( *this, root_plink );
 }
 
 
 void XTreeDatabase::ExtendDomainNewX()
 {
+    ASSERT( root_xlink );
 	plan.domain->ExtendDomainNewX( *this );
 }
 
 
 const LinkTable::Row &XTreeDatabase::GetRow(XLink xlink) const
 {
+    ASSERT( root_xlink );
 	return plan.link_table->GetRow(xlink);
 }
 
 
 bool XTreeDatabase::HasRow(XLink xlink) const
 {
+    ASSERT( root_xlink );
 	return plan.link_table->HasRow(xlink);
 }
 
 
 const NodeTable::Row &XTreeDatabase::GetNodeRow(TreePtr<Node> node) const
 {
+    ASSERT( root_xlink );
 	return plan.node_table->GetRow(node);
 }
 
