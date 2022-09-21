@@ -2,6 +2,13 @@
 
 using namespace SR;    
 
+// We won't normally expect matches as postconditions to our
+// public methods because changing strategies make some do more
+// and others do less. But:
+// - FullX methods should erase history, so can always check
+// - All methods should match if strategy does not change, as
+//   when testing the test
+//#define DB_TEST_THE_TEST
 
 XTreeDatabase::XTreeDatabase( const set< shared_ptr<SYM::BooleanExpression> > &clauses ) :
     plan( clauses )
@@ -15,13 +22,33 @@ XTreeDatabase::XTreeDatabase( const set< shared_ptr<SYM::BooleanExpression> > &c
 		plan.indexes->PrepareInsert( actions );
 		plan.link_table->PrepareInsert( actions );
 		plan.node_table->PrepareInsert( actions );
-		db_walker.ExtraXLinkWalk( actions, extra_xlink );
+		db_walker.ExtraXLinkWalk( &actions, extra_xlink );
+#ifdef DB_TEST_EXTENSIONS
+		DBWalk::Actions ref_actions;
+		plan.ref_domain->PrepareInsert( ref_actions );
+		plan.ref_indexes->PrepareInsert( ref_actions );
+		db_walker.ExtraXLinkWalk( &ref_actions, extra_xlink );
+#ifdef DB_TEST_THE_TEST
+        ExpectMatches();
+#endif
+#endif
+        
         actions = DBWalk::Actions();
       	plan.domain->PrepareBuildMonolithic( actions );
         plan.indexes->PrepareBuildMonolithic( actions );
         plan.link_table->PrepareBuildMonolithic( actions );
         plan.node_table->PrepareBuildMonolithic( actions );
-		db_walker.ExtraXLinkWalk( actions, extra_xlink );
+		db_walker.ExtraXLinkWalk( &actions, extra_xlink );
+
+#ifdef DB_TEST_EXTENSIONS
+        ref_actions = DBWalk::Actions();
+		plan.ref_domain->PrepareBuildMonolithic( ref_actions );
+        plan.ref_indexes->PrepareBuildMonolithic( ref_actions );
+		db_walker.ExtraXLinkWalk( &ref_actions, extra_xlink );
+#ifdef DB_TEST_THE_TEST
+        ExpectMatches();
+#endif
+#endif
     };
     
     plan.domain->SetOnExtraXLinkFunction(on_extra_xlink);
@@ -33,6 +60,10 @@ XTreeDatabase::Plan::Plan( const set< shared_ptr<SYM::BooleanExpression> > &clau
     domain( make_shared<Domain>() ),
     link_table( make_shared<LinkTable>() ),
     node_table( make_shared<NodeTable>() )
+#ifdef DB_TEST_EXTENSIONS
+    ,ref_domain( make_shared<Domain>() ),
+    ref_indexes( make_shared<Indexes>(clauses, true) )
+#endif    
 {
 }
 
@@ -51,6 +82,10 @@ void XTreeDatabase::FullClear()
     
     TreeZone root_zone( root_xlink );
     Delete( root_zone );
+
+#ifdef DB_TEST_EXTENSIONS
+    ExpectMatches();
+#endif
 }
 
 
@@ -63,6 +98,10 @@ void XTreeDatabase::FullBuild()
     TreeZone root_zone( root_xlink );
     Delete( root_zone );
     Insert( root_zone );
+    
+#ifdef DB_TEST_EXTENSIONS
+    ExpectMatches();
+#endif
 }
 
 
@@ -72,6 +111,13 @@ void XTreeDatabase::ClearMonolithic()
     plan.indexes->ClearMonolithic();
     plan.link_table->ClearMonolithic();
     plan.node_table->ClearMonolithic();    
+#ifdef DB_TEST_EXTENSIONS
+    plan.ref_domain->ClearMonolithic();
+    plan.ref_indexes->ClearMonolithic();
+#ifdef DB_TEST_THE_TEST
+    ExpectMatches();
+#endif
+#endif
 }
 
 
@@ -86,8 +132,17 @@ void XTreeDatabase::BuildMonolithic()
     plan.indexes->PrepareBuildMonolithic( actions );
     plan.link_table->PrepareBuildMonolithic( actions );
     plan.node_table->PrepareBuildMonolithic( actions );
-    db_walker.FullWalk( actions, root_xlink );
-
+    db_walker.FullWalk( &actions, root_xlink );
+#ifdef DB_TEST_EXTENSIONS
+    DBWalk::Actions ref_actions;
+	plan.ref_domain->PrepareBuildMonolithic( ref_actions );
+    plan.ref_indexes->PrepareBuildMonolithic( ref_actions );
+    db_walker.FullWalk( &ref_actions, root_xlink );
+#ifdef DB_TEST_THE_TEST
+    ExpectMatches();
+#endif
+#endif
+    
 #ifdef TRACE_X_TREE_DB_DELTAS
     if( Tracer::IsEnabled() ) 
     {        
@@ -106,7 +161,16 @@ void XTreeDatabase::Delete(const TreeZone &zone)
     plan.indexes->PrepareDelete( actions );
     plan.link_table->PrepareDelete( actions );
     plan.node_table->PrepareDelete( actions );
-    db_walker.ZoneWalk( actions, zone );   
+    db_walker.ZoneWalk( &actions, zone );   
+#ifdef DB_TEST_EXTENSIONS
+    DBWalk::Actions ref_actions;
+	plan.ref_domain->PrepareDelete( ref_actions );
+    plan.ref_indexes->PrepareDelete( ref_actions );
+    db_walker.ZoneWalk( &ref_actions, zone );
+#ifdef DB_TEST_THE_TEST
+    ExpectMatches();
+#endif
+#endif
 }
 
 
@@ -117,7 +181,16 @@ void XTreeDatabase::Insert(const TreeZone &zone)
     plan.indexes->PrepareInsert( actions );
     plan.link_table->PrepareInsert( actions );
     plan.node_table->PrepareInsert( actions );
-    db_walker.ZoneWalk( actions, zone );
+    db_walker.ZoneWalk( &actions, zone );
+#ifdef DB_TEST_EXTENSIONS
+    DBWalk::Actions ref_actions;
+	plan.ref_domain->PrepareInsert( ref_actions );
+    plan.ref_indexes->PrepareInsert( ref_actions );
+    db_walker.ZoneWalk( &ref_actions, zone );
+#ifdef DB_TEST_THE_TEST
+    ExpectMatches();
+#endif
+#endif
 }
 
 
@@ -182,12 +255,6 @@ const Indexes &XTreeDatabase::GetIndexes() const
 }
 
 
-Indexes &XTreeDatabase::GetIndexes()
-{
-	return *plan.indexes;
-}
-
-
 set<TreeKit::LinkInfo> XTreeDatabase::GetDeclarers( TreePtr<Node> node ) const
 {
     set<LinkInfo> infos;
@@ -215,3 +282,12 @@ set<TreeKit::LinkInfo> XTreeDatabase::GetDeclarers( TreePtr<Node> node ) const
     }
     return infos;
 }
+
+
+#ifdef DB_TEST_EXTENSIONS
+void XTreeDatabase::ExpectMatches() const
+{
+    plan.ref_indexes->ExpectMatching( *plan.indexes );
+}
+#endif
+

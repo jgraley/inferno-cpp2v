@@ -377,6 +377,12 @@ void SCREngine::Replace( XLink base_xlink )
 	plan.vn_sequence->ExecuteUpdateCommand( seq );
 
 	plan.vn_sequence->XTreeDbBuildMonolithic();
+    
+    plan.vn_sequence->ExtendDomainNewX();
+    
+#ifdef DB_TEST_EXTENSIONS
+    plan.vn_sequence->XTreeDbExpectMatches();
+#endif
 
     TRACE("Replace done\n");
 }

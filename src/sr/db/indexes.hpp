@@ -23,7 +23,7 @@ class XTreeDatabase;
 class Indexes
 {
 public:
-    explicit Indexes( const set< shared_ptr<SYM::BooleanExpression> > &clauses = {} );
+    explicit Indexes( const set< shared_ptr<SYM::BooleanExpression> > &clauses = {}, bool ref=false );
     
 private: 
     const struct Plan : public Traceable
@@ -67,6 +67,8 @@ public:
 	void PrepareBuildMonolithic(DBWalk::Actions &actions);
     void PrepareDelete(DBWalk::Actions &actions);
 	void PrepareInsert(DBWalk::Actions &actions);
+    
+    void ExpectMatching( const Indexes &mut );
 
     // Category ordering TODO merge with SimpleCompare ordering
     typedef multiset<XLink, CategoryRelation> CategoryOrderedIndex;
@@ -85,6 +87,9 @@ public:
     // Whole domain in here, grouped by simple compare, findable using eg lower_bound()
     // Should be the other way around, as an indication of policy
     SimpleCompareOrderedIndex simple_compare_ordered_index;   
+
+private:
+    const bool ref;
 };    
     
 }

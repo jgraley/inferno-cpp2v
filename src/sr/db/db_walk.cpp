@@ -2,36 +2,40 @@
 
 using namespace SR;    
 
-void DBWalk::FullWalk( const Actions &actions,
+void DBWalk::FullWalk( const Actions *actions,
                        XLink root_xlink )
 {
-	AddAtRoot( actions, REQUIRE_SOLO, root_xlink );
+    WalkKit kit { actions, REQUIRE_SOLO };
     
-    AddAtRoot( actions, REQUIRE_SOLO, XLink::MMAX_Link );
-    AddAtRoot( actions, REQUIRE_SOLO, XLink::OffEndXLink );
+	AddAtRoot( kit, root_xlink );
+    
+    AddAtRoot( kit, XLink::MMAX_Link );
+    AddAtRoot( kit, XLink::OffEndXLink );
 }
 
 
-void DBWalk::ZoneWalk( const Actions &actions,
+void DBWalk::ZoneWalk( const Actions *actions,
                        const TreeZone &zone )
 {
-	AddAtRoot( actions, REQUIRE_SOLO, zone.GetBase() );
+    WalkKit kit { actions, REQUIRE_SOLO };
+
+	AddAtRoot( kit, zone.GetBase() );
 }
 
 
-void DBWalk::ExtraXLinkWalk( const Actions &actions,
+void DBWalk::ExtraXLinkWalk( const Actions *actions,
                              XLink extra_xlink )
 {
-	AddAtRoot( actions, STOP_IF_ALREADY_IN, extra_xlink ); 
+    WalkKit kit { actions, STOP_IF_ALREADY_IN };
+
+	AddAtRoot( kit, extra_xlink ); 
 }
 
 
-void DBWalk::AddAtRoot( const Actions &actions,
-                        SubtreeMode mode, 
+void DBWalk::AddAtRoot( const WalkKit &kit, 
                         XLink root_xlink )
 {
-    AddLink( actions,
-             mode, 
+    AddLink( kit, 
              { ROOT, 
                root_xlink, 
                XLink(), 
@@ -42,8 +46,7 @@ void DBWalk::AddAtRoot( const Actions &actions,
 }
 
 
-void DBWalk::AddSingularNode( const Actions &actions,
-                              SubtreeMode mode, 
+void DBWalk::AddSingularNode( const WalkKit &kit, 
                               const TreePtrInterface *p_x_singular, 
                               XLink xlink )
 {
@@ -58,8 +61,7 @@ void DBWalk::AddSingularNode( const Actions &actions,
     TreePtr<Node> x = xlink.GetChildX();
     XLink child_xlink( x, p_x_singular );   
     
-    AddLink( actions,
-             mode, 
+    AddLink( kit, 
              { SINGULAR, 
                child_xlink, 
                xlink, 
@@ -70,8 +72,7 @@ void DBWalk::AddSingularNode( const Actions &actions,
 }
 
 
-void DBWalk::AddSequence( const Actions &actions,
-                          SubtreeMode mode, 
+void DBWalk::AddSequence( const WalkKit &kit, 
                           SequenceInterface *x_seq, 
                           XLink xlink )
 {
@@ -82,8 +83,7 @@ void DBWalk::AddSequence( const Actions &actions,
          ++xit )
     {
         XLink child_xlink( x, &*xit );
-        AddLink( actions,
-                 mode, 
+        AddLink( kit, 
                  { IN_SEQUENCE, 
                    child_xlink, 
                    xlink, 
@@ -96,8 +96,7 @@ void DBWalk::AddSequence( const Actions &actions,
 }
 
 
-void DBWalk::AddCollection( const Actions &actions,
-                            SubtreeMode mode, 
+void DBWalk::AddCollection( const WalkKit &kit, 
                             CollectionInterface *x_col, 
                             XLink xlink )
 {
@@ -107,8 +106,7 @@ void DBWalk::AddCollection( const Actions &actions,
          ++xit )
     {
         XLink child_xlink( x, &*xit );
-        AddLink( actions,
-                 mode, 
+        AddLink( kit, 
                  { IN_COLLECTION, 
                    child_xlink, 
                    xlink, 
@@ -120,40 +118,40 @@ void DBWalk::AddCollection( const Actions &actions,
 }
 
 
-void DBWalk::AddLink( const Actions &actions,
-                      SubtreeMode mode, 
+void DBWalk::AddLink( const WalkKit &kit, 
                       const WalkInfo &walk_info )
 {
     // This will also prevent recursion into xlink
-    if( mode==STOP_IF_ALREADY_IN && actions.domain_in_is_ok && !actions.domain_in_is_ok(walk_info) )
+    if( kit.mode==STOP_IF_ALREADY_IN && 
+        kit.actions->domain_in_is_ok && 
+        !kit.actions->domain_in_is_ok(walk_info) )
         return; // Terminate into the existing domain
             
     // Wind-in actions
-    if( actions.domain_in )
-		actions.domain_in( walk_info );        
+    if( kit.actions->domain_in )
+		kit.actions->domain_in( walk_info );        
             
     DBCommon::DepthFirstOrderedIt df_it;
     
-    if( actions.indexes_in )
-		df_it = actions.indexes_in( walk_info );        
+    if( kit.actions->indexes_in )
+		df_it = kit.actions->indexes_in( walk_info );        
             
-    if( actions.link_row_in )
-		actions.link_row_in( walk_info, df_it );        
+    if( kit.actions->link_row_in )
+		kit.actions->link_row_in( walk_info, df_it );        
             
-    if( actions.node_row_in )
-		actions.node_row_in( walk_info );        
+    if( kit.actions->node_row_in )
+		kit.actions->node_row_in( walk_info );        
             
     // Recurse into our child nodes
-    AddChildren( actions, mode, walk_info.xlink ); 
+    AddChildren( kit, walk_info.xlink ); 
 
     // Unwind actions
-    if( actions.link_row_out )
-		actions.link_row_out( walk_info );                   
+    if( kit.actions->link_row_out )
+		kit.actions->link_row_out( walk_info );                   
 }
 
 
-void DBWalk::AddChildren( const Actions &actions,
-                          SubtreeMode mode, 
+void DBWalk::AddChildren( const WalkKit &kit, 
                           XLink xlink )
 {
     TreePtr<Node> x = xlink.GetChildX();
@@ -161,11 +159,11 @@ void DBWalk::AddChildren( const Actions &actions,
     for( Itemiser::Element *xe : x_items )
     {
         if( SequenceInterface *x_seq = dynamic_cast<SequenceInterface *>(xe) )
-            AddSequence( actions, mode, x_seq, xlink );
+            AddSequence( kit, x_seq, xlink );
         else if( CollectionInterface *x_col = dynamic_cast<CollectionInterface *>(xe) )
-            AddCollection( actions, mode, x_col, xlink );
+            AddCollection( kit, x_col, xlink );
         else if( TreePtrInterface *p_x_singular = dynamic_cast<TreePtrInterface *>(xe) )
-            AddSingularNode( actions, mode, p_x_singular, xlink );
+            AddSingularNode( kit, p_x_singular, xlink );
         else
             ASSERTFAIL("got something from itemise that isnt a Sequence, Collection or a singular TreePtr");
     }

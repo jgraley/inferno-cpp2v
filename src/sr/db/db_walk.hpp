@@ -29,6 +29,7 @@ public:
         ContainerInterface::iterator xit_predecessor;
         ContainerInterface::iterator xit;
         const TreePtrInterface *p_x;
+        int relative_depth;
 	};
 
 	struct Actions
@@ -40,12 +41,12 @@ public:
 		function<void (const WalkInfo &)> node_row_in;
 		function<void (const WalkInfo &)> link_row_out;
 	};
-
-	void FullWalk( const Actions &actions, 
+    
+	void FullWalk( const Actions *actions, 
 				   XLink root_xlink );
-    void ZoneWalk( const Actions &actions,
+    void ZoneWalk( const Actions *actions,
                    const TreeZone &zone );
-    void ExtraXLinkWalk( const Actions &actions, 
+    void ExtraXLinkWalk( const Actions *actions, 
 	                     XLink extra_xlink );
 
 private:
@@ -63,26 +64,26 @@ private:
         STOP_IF_ALREADY_IN
     };
 
-    void AddAtRoot( const Actions &actions, 
-                    SubtreeMode mode,  
+    struct WalkKit
+    {
+        const Actions *actions;
+        SubtreeMode mode;
+    };
+
+    void AddAtRoot( const WalkKit &kit, 
                     XLink root_xlink );
-    void AddSingularNode( const Actions &actions, 
-                          SubtreeMode mode, 
+    void AddSingularNode( const WalkKit &kit, 
                           const TreePtrInterface *p_x_singular, 
                           XLink xlink );
-    void AddSequence( const Actions &actions, 
-                      SubtreeMode mode, 
+    void AddSequence( const WalkKit &kit, 
                       SequenceInterface *x_seq, 
                       XLink xlink );
-    void AddCollection( const Actions &actions, 
-                        SubtreeMode mode, 
+    void AddCollection( const WalkKit &kit, 
                         CollectionInterface *x_col, 
                         XLink xlink );
-    void AddLink( const Actions &actions, 
-                  SubtreeMode mode, 
+    void AddLink( const WalkKit &kit, 
                   const WalkInfo &walk_info );
-    void AddChildren( const Actions &actions, 
-                      SubtreeMode mode, 
+    void AddChildren( const WalkKit &kit, 
                       XLink xlink );
 };    
     

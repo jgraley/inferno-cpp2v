@@ -6,13 +6,12 @@
 
 using namespace SR;    
 
+#define CAT_TO_INCREMENTAL 0
 
-//#define CAT_TO_INCREMENTAL
-
-
-Indexes::Indexes( const set< shared_ptr<SYM::BooleanExpression> > &clauses ) :
+Indexes::Indexes( const set< shared_ptr<SYM::BooleanExpression> > &clauses, bool ref_ ) :
     plan( clauses ),
-    category_ordered_index( plan.lacing )
+    category_ordered_index( plan.lacing ),
+    ref( ref_ )
 { 
 }
 
@@ -117,9 +116,8 @@ const Lacing *Indexes::GetLacing() const
 void Indexes::ClearMonolithic()
 {
     depth_first_ordered_index.clear();
-#ifndef CAT_TO_INCREMENTAL
-    category_ordered_index.clear();
-#endif
+    if( ref || !CAT_TO_INCREMENTAL )
+        category_ordered_index.clear();
     simple_compare_ordered_index.clear();
 }
 
@@ -133,7 +131,8 @@ void Indexes::PrepareBuildMonolithic(DBWalk::Actions &actions)
 		DBCommon::DepthFirstOrderedIt it = depth_first_ordered_index.end();
 		--it; // I know this is OK because we just pushed to depth_first_ordered_index
 
-		category_ordered_index.insert( walk_info.xlink );
+        if( ref || !CAT_TO_INCREMENTAL )
+            category_ordered_index.insert( walk_info.xlink );
 
 		simple_compare_ordered_index.insert( walk_info.xlink );
 		
@@ -146,16 +145,31 @@ void Indexes::PrepareDelete( DBWalk::Actions &actions )
 {
 	actions.indexes_in = [&](const DBWalk::WalkInfo &walk_info) -> DBCommon::DepthFirstOrderedIt
 	{
-#ifdef CAT_TO_INCREMENTAL
-		category_ordered_index.delete( walk_info.xlink );
-#endif
+		if( !ref && CAT_TO_INCREMENTAL)
+            category_ordered_index.erase( walk_info.xlink );
         
-		return depth_first_ordered_index.end(); // no valid it since we deleted
+		return depth_first_ordered_index.end(); 
 	};
 }
 
 
 void Indexes::PrepareInsert(DBWalk::Actions &actions)
 {
+	actions.indexes_in = [&](const DBWalk::WalkInfo &walk_info) -> DBCommon::DepthFirstOrderedIt
+	{ 
+        if( !ref && CAT_TO_INCREMENTAL )
+            category_ordered_index.insert( walk_info.xlink );
+
+		return depth_first_ordered_index.end(); 
+	};
 }
 
+
+void Indexes::ExpectMatching( const Indexes &mut )
+{
+    ASSERT( ref );
+    ASSERT( !mut.ref );
+    
+    ASSERT( category_ordered_index == mut.category_ordered_index )
+          ( DumpDiff(category_ordered_index, mut.category_ordered_index) );
+}

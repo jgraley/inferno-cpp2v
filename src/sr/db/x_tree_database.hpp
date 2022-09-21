@@ -10,6 +10,8 @@
 #include "domain.hpp"
 #include "indexes.hpp"
 
+#define DB_TEST_EXTENSIONS
+
 namespace SR 
 {
 class SimpleCompareQuotientSet;
@@ -27,10 +29,17 @@ private:
     {
         Plan( const set< shared_ptr<SYM::BooleanExpression> > &clauses );
         
-        shared_ptr<Indexes> indexes;
         shared_ptr<Domain> domain;
+        shared_ptr<Indexes> indexes;
         shared_ptr<LinkTable> link_table;
         shared_ptr<NodeTable> node_table;
+
+#ifdef DB_TEST_EXTENSIONS
+        shared_ptr<Domain> ref_domain;
+        shared_ptr<Indexes> ref_indexes;
+        //shared_ptr<LinkTable> ref_link_table;
+        //shared_ptr<NodeTable> ref_node_table;
+#endif
     } plan;
 
 public:
@@ -55,8 +64,10 @@ public:
     const NodeTable::Row &GetNodeRow(TreePtr<Node> node) const;
     bool HasNodeRow(TreePtr<Node> node) const;
 	const Indexes &GetIndexes() const;
-	Indexes &GetIndexes();
-	
+#ifdef DB_TEST_EXTENSIONS
+    void ExpectMatches() const;
+#endif	
+
 private:    
     // TreeKit implementation
   	set<LinkInfo> GetDeclarers( TreePtr<Node> node ) const override;

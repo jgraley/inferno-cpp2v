@@ -560,4 +560,20 @@ std::unique_ptr<T_DEST> dynamic_pointer_cast(std::unique_ptr<T_SRC>& src)
     return dest_temp;
 }
 
+
+template<typename C>
+string DumpDiff( const C &c0, const C &c1 )
+{
+    string s;
+    s += SSPrintf("Size: %u -> %u elements; diff begins\n", c0.size(), c1.size());
+    C ins = DifferenceOf( c1, c0 );
+    for( auto e : ins )
+        s += "+ " + Trace(e) + "\n";
+    C rem = DifferenceOf( c0, c1 );
+    for( auto e : rem )
+        s += "- " + Trace(e) + "\n";
+    s += "diff ends\n";
+    return s;
+}
+
 #endif

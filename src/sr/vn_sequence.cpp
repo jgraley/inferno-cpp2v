@@ -141,6 +141,13 @@ XLink VNSequence::FindDomainExtension( XLink xlink ) const
 }
 
 
+void VNSequence::ExtendDomainNewX()
+{
+    ASSERT( x_tree_db )("Planning stage four should have created x_tree_db object");  
+    x_tree_db->ExtendDomainNewX();
+}
+
+
 void VNSequence::ExtendDomainNewPattern( PatternLink base_plink )
 {
     ASSERT( x_tree_db )("Planning stage four should have created x_tree_db object");  
@@ -158,9 +165,16 @@ void VNSequence::ExecuteUpdateCommand( shared_ptr<UpdateCommand> cmd )
 void VNSequence::XTreeDbBuildMonolithic()
 {
 	x_tree_db->BuildMonolithic();
-    x_tree_db->ExtendDomainNewX();
 }
 
+
+#ifdef DB_TEST_EXTENSIONS
+void VNSequence::XTreeDbExpectMatches() const
+{
+    ASSERT( x_tree_db )("Planning stage four should have created x_tree_db object");  
+    x_tree_db->ExpectMatches();
+}
+#endif
 
 bool VNSequence::IsDirtyGrass( TreePtr<Node> node )
 {

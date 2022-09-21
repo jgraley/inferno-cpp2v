@@ -46,10 +46,13 @@ public:
 
     XLink UniquifyDomainExtension( XLink xlink ) const;
     XLink FindDomainExtension( XLink xlink ) const;
+    void ExtendDomainNewX();
     void ExtendDomainNewPattern( PatternLink root_plink );
 
     void ExecuteUpdateCommand( shared_ptr<UpdateCommand> cmd );
     void XTreeDbBuildMonolithic();
+    
+    void XTreeDbExpectMatches() const;
     
     bool IsDirtyGrass( TreePtr<Node> node );
     void AddDirtyGrass( TreePtr<Node> node );
