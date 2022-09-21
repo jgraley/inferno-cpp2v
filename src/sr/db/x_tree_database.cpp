@@ -99,10 +99,12 @@ void XTreeDatabase::BuildMonolithic()
 
 void XTreeDatabase::Delete(const TreeZone &zone)
 {
-    plan.domain->Delete(zone);
-    plan.indexes->Delete(zone);
-    plan.link_table->Delete(zone);
-    plan.node_table->Delete(zone);    
+    DBWalk::Actions actions;
+    plan.domain->PrepareDelete( actions );
+    plan.indexes->PrepareDelete( actions );
+    plan.link_table->PrepareDelete( actions );
+    plan.node_table->PrepareDelete( actions );
+    db_walker.ZoneWalk( actions, zone );   
 }
 
 

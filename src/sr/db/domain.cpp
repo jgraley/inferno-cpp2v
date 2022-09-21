@@ -12,11 +12,6 @@ void Domain::ClearMonolithic()
 }    
 
 
-void Domain::Delete( const TreeZone &zone )
-{
-}
-
-
 void Domain::SetOnExtraXLinkFunction( OnExtraXLinkFunction on_extra_xlink_ )
 {
     on_extra_xlink = on_extra_xlink_;
@@ -135,6 +130,11 @@ void Domain::PopulateActions( DBWalk::Actions &actions )
 void Domain::PrepareBuildMonolithic(DBWalk::Actions &actions)
 {
 	PopulateActions( actions );
+}
+
+
+void Domain::PrepareDelete( DBWalk::Actions &actions )
+{
 }
 
 

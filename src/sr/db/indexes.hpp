@@ -62,12 +62,12 @@ public:
     };
 
     void ClearMonolithic();
-    void Delete( const TreeZone &zone );
 
     const Lacing *GetLacing() const;
 
 	void PopulateActions(DBWalk::Actions &actions);
 	void PrepareBuildMonolithic(DBWalk::Actions &actions);
+    void PrepareDelete(DBWalk::Actions &actions);
 	void PrepareInsert(DBWalk::Actions &actions);
 
     // Category ordering TODO merge with SimpleCompare ordering

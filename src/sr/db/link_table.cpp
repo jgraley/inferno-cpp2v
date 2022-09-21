@@ -33,11 +33,6 @@ void LinkTable::ClearMonolithic()
 }
 
 
-void LinkTable::Delete( const TreeZone &zone )
-{
-}
-
-
 void LinkTable::PopulateActions( DBWalk::Actions &actions )
 {
 	actions.link_row_in = [&](const DBWalk::WalkInfo &walk_info, 
@@ -137,6 +132,11 @@ void LinkTable::PrepareBuildMonolithic(DBWalk::Actions &actions)
     current_ordinal = 0;
 
 	PopulateActions( actions );
+}
+
+
+void LinkTable::PrepareDelete( DBWalk::Actions &actions )
+{
 }
 
 

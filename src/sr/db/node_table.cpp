@@ -33,11 +33,6 @@ void NodeTable::ClearMonolithic()
 }
 
 
-void NodeTable::Delete( const TreeZone &zone )
-{
-}
-
-
 void NodeTable::PopulateActions( DBWalk::Actions &actions )
 {
 	actions.node_row_in = [&](const DBWalk::WalkInfo &walk_info)
@@ -72,6 +67,11 @@ void NodeTable::PopulateActions( DBWalk::Actions &actions )
 void NodeTable::PrepareBuildMonolithic(DBWalk::Actions &actions)
 {
 	PopulateActions( actions );
+}
+
+
+void NodeTable::PrepareDelete( DBWalk::Actions &actions )
+{
 }
 
 

@@ -32,7 +32,6 @@ public:
 	typedef function<void(XLink)> OnExtraXLinkFunction;
 
     void ClearMonolithic();
-    void Delete( const TreeZone &zone );
 
 	void SetOnExtraXLinkFunction( OnExtraXLinkFunction on_extra_xlink );
 
@@ -48,6 +47,7 @@ public:
 
 	void PopulateActions(DBWalk::Actions &actions);
 	void PrepareBuildMonolithic(DBWalk::Actions &actions);
+    void PrepareDelete(DBWalk::Actions &actions);
 	void PrepareInsert(DBWalk::Actions &actions);
 
     // Global domain of possible xlink values
