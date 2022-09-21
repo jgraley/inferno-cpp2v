@@ -56,26 +56,15 @@ void XTreeDatabase::FullClear()
 void XTreeDatabase::FullBuild()
 {      
     ASSERT( root_xlink );
-
-	FullClear();
 	
 	{
-        DBWalk::Actions actions;
-        plan.domain->PrepareBuildMonolithic( actions );
-        plan.indexes->PrepareBuildMonolithic( actions );
-        plan.link_table->PrepareBuildMonolithic( actions );
-        plan.node_table->PrepareBuildMonolithic( actions );
-        db_walker.FullWalk( actions, root_xlink );
+        BuildMonolithic();
     }
     
 	{
         Zone root_zone( root_xlink );
-        DBWalk::Actions actions;
-        plan.domain->PrepareInsert( actions );
-        plan.indexes->PrepareInsert( actions );
-        plan.link_table->PrepareInsert( actions );
-        plan.node_table->PrepareInsert( actions );
-        db_walker.ZoneWalk( actions, root_zone );
+        Delete( root_zone );
+        Insert( root_zone );
     }
             
 #ifdef TRACE_X_TREE_DB_DELTAS
