@@ -45,10 +45,9 @@ void XTreeDatabase::FullClear()
 {
     ASSERT( root_xlink );
     
-    // Clear everything 
     ClearMonolithic();
     
-    Zone root_zone( root_xlink );
+    TreeZone root_zone( root_xlink );
     Delete( root_zone );
 }
 
@@ -57,24 +56,20 @@ void XTreeDatabase::FullBuild()
 {      
     ASSERT( root_xlink );
 	
-	{
-        BuildMonolithic();
-    }
-    
-	{
-        Zone root_zone( root_xlink );
-        Delete( root_zone );
-        Insert( root_zone );
-    }
-            
-#ifdef TRACE_X_TREE_DB_DELTAS
-    if( Tracer::IsEnabled() ) 
-    {        
-        TRACE("X tree db rebuilt at ")(root_xlink)(":\n")
-             ( plan.domain->unordered_domain )("\n");
-        plan.domain->previous_unordered_domain = plan.domain->unordered_domain;
-    }
-#endif    
+    BuildMonolithic();
+
+    TreeZone root_zone( root_xlink );
+    Delete( root_zone );
+    Insert( root_zone );
+}
+
+
+void XTreeDatabase::ClearMonolithic()
+{
+    plan.domain->ClearMonolithic();
+    plan.indexes->ClearMonolithic();
+    plan.link_table->ClearMonolithic();
+    plan.node_table->ClearMonolithic();    
 }
 
 
@@ -90,19 +85,19 @@ void XTreeDatabase::BuildMonolithic()
     plan.link_table->PrepareBuildMonolithic( actions );
     plan.node_table->PrepareBuildMonolithic( actions );
     db_walker.FullWalk( actions, root_xlink );
+
+#ifdef TRACE_X_TREE_DB_DELTAS
+    if( Tracer::IsEnabled() ) 
+    {        
+        TRACE("X tree db rebuilt at ")(root_xlink)(":\n")
+             ( plan.domain->unordered_domain )("\n");
+        plan.domain->previous_unordered_domain = plan.domain->unordered_domain;
+    }
+#endif    
 }
 
 
-void XTreeDatabase::ClearMonolithic()
-{
-    plan.domain->ClearMonolithic();
-    plan.indexes->ClearMonolithic();
-    plan.link_table->ClearMonolithic();
-    plan.node_table->ClearMonolithic();    
-}
-
-
-void XTreeDatabase::Delete(const Zone &zone)
+void XTreeDatabase::Delete(const TreeZone &zone)
 {
     plan.domain->Delete(zone);
     plan.indexes->Delete(zone);
@@ -111,7 +106,7 @@ void XTreeDatabase::Delete(const Zone &zone)
 }
 
 
-void XTreeDatabase::Insert(const Zone &zone)
+void XTreeDatabase::Insert(const TreeZone &zone)
 {
     DBWalk::Actions actions;
     plan.domain->PrepareInsert( actions );

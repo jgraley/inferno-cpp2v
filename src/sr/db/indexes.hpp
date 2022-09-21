@@ -62,7 +62,7 @@ public:
     };
 
     void ClearMonolithic();
-    void Delete( const Zone &zone );
+    void Delete( const TreeZone &zone );
 
     const Lacing *GetLacing() const;
 

@@ -44,7 +44,7 @@ public:
 	void FullWalk( const Actions &actions, 
 				   XLink root_xlink );
     void ZoneWalk( const Actions &actions,
-                   const Zone &zone );
+                   const TreeZone &zone );
     void ExtraXLinkWalk( const Actions &actions, 
 	                     XLink extra_xlink );
 

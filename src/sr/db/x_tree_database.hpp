@@ -42,8 +42,8 @@ public:
     void ClearMonolithic();
     void BuildMonolithic();
 
-    void Delete(const Zone &zone);
-    void Insert(const Zone &zone);
+    void Delete(const TreeZone &zone);
+    void Insert(const TreeZone &zone);
            
     XLink UniquifyDomainExtension( XLink xlink );
     XLink FindDomainExtension( XLink xlink ) const;

@@ -32,7 +32,7 @@ public:
 	typedef function<void(XLink)> OnExtraXLinkFunction;
 
     void ClearMonolithic();
-    void Delete( const Zone &zone );
+    void Delete( const TreeZone &zone );
 
 	void SetOnExtraXLinkFunction( OnExtraXLinkFunction on_extra_xlink );
 

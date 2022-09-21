@@ -59,7 +59,7 @@ public:
     const Row &GetRow(XLink xlink) const;
     bool HasRow(XLink xlink) const;
     void ClearMonolithic();
-    void Delete( const Zone &zone );
+    void Delete( const TreeZone &zone );
 
 	void PopulateActions(DBWalk::Actions &actions);
 	void PrepareBuildMonolithic(DBWalk::Actions &actions);

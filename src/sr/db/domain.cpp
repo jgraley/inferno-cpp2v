@@ -12,7 +12,7 @@ void Domain::ClearMonolithic()
 }    
 
 
-void Domain::Delete( const Zone &zone )
+void Domain::Delete( const TreeZone &zone )
 {
 }
 

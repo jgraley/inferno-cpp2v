@@ -13,7 +13,7 @@ void DBWalk::FullWalk( const Actions &actions,
 
 
 void DBWalk::ZoneWalk( const Actions &actions,
-                       const Zone &zone )
+                       const TreeZone &zone )
 {
 	AddAtRoot( actions, REQUIRE_SOLO, zone.GetBase() );
 }

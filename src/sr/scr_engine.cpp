@@ -364,14 +364,16 @@ void SCREngine::RunEmbedded( PatternLink plink_to_embedded, XLink base_xlink )
 void SCREngine::Replace( XLink base_xlink )
 {
     INDENT("R");
+    TreeZone base_zone( base_xlink );
     
     // Now replace according to the couplings
     TRACE("Now replacing, base agent=")(plan.base_agent)("\n");
     TreePtr<Node> new_base_x = plan.base_agent->BuildReplace(plan.base_plink);
+    FreeZone new_zone( new_base_x );
 
 	auto seq = make_shared<CommandSequence>();
-	seq->Add( make_shared<DeleteCommand>( base_xlink ) );
-	seq->Add( make_shared<InsertCommand>( base_xlink, new_base_x, plan.base_plink ) );
+	seq->Add( make_shared<DeleteCommand>( base_zone ) );
+	seq->Add( make_shared<InsertCommand>( base_zone, new_zone ) );
 	plan.vn_sequence->ExecuteUpdateCommand( seq );
 
 	plan.vn_sequence->XTreeDbBuildMonolithic();
@@ -439,9 +441,10 @@ int SCREngine::RepeatingCompareReplace( XLink base_xlink,
         TRACE("Stopping as requested before trying\n");
         return 0;
     }    
+    
     // Domain extend required on sight of new pattern OR x. This call is 
-    // due to the introduction of a new pattern. It also stops at embeddeds
-    // So we do it in SCREngine.
+    // due to the introduction of a new pattern. It also stops at embeddeds,
+    // so we do it in SCREngine.
     plan.vn_sequence->ExtendDomainNewPattern( plan.base_plink );     
     
     for(int i=0; i<repetitions; i++) 

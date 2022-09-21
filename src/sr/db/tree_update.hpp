@@ -28,24 +28,23 @@ public:
 class DeleteCommand : public UpdateCommand
 {
 public:
-    DeleteCommand( XLink target_xlink );
+    DeleteCommand( const TreeZone &target );
 	void Execute( const ExecKit &kit ) const final;	
 
 private:
-	XLink target_xlink;
+	TreeZone target;
 };
 
 
 class InsertCommand : public UpdateCommand
 {
 public:
-    InsertCommand( XLink target_xlink, TreePtr<Node> new_x, PatternLink base_plink );
+    InsertCommand( const TreeZone &target, const FreeZone &new_zone );
 	void Execute( const ExecKit &kit ) const final;	
 
 private:
-	XLink target_xlink;
-	TreePtr<Node> new_x;
-	PatternLink base_plink;
+	TreeZone target;
+	FreeZone new_zone;
 };
 
 

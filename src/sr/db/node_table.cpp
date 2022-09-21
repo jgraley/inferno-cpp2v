@@ -33,7 +33,7 @@ void NodeTable::ClearMonolithic()
 }
 
 
-void NodeTable::Delete( const Zone &zone )
+void NodeTable::Delete( const TreeZone &zone )
 {
 }
 

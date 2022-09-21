@@ -5,34 +5,35 @@
 
 using namespace SR;
 
-DeleteCommand::DeleteCommand( XLink target_xlink_ ) :
-	target_xlink( target_xlink_ )
+DeleteCommand::DeleteCommand( const TreeZone &target_ ) :
+	target( target_ )
 {
 }
 
 
 void DeleteCommand::Execute( const ExecKit &kit ) const
 {
-	// TODO only delete subtree under target_xlink
-	kit.x_tree_db->Delete(target_xlink);    
+	kit.x_tree_db->Delete( target );    
     
-    target_xlink.ClearXPtr();
+    target.GetBase().ClearXPtr();
 }	
 
 
-InsertCommand::InsertCommand( XLink target_xlink_, TreePtr<Node> new_x_, PatternLink base_plink_ ) :
-	target_xlink( target_xlink_ ),
-	new_x( new_x_ ),
-	base_plink( base_plink_ )
+InsertCommand::InsertCommand( const TreeZone &target_, const FreeZone &new_zone_ ) :
+	target( target_ ),
+	new_zone( new_zone_ )
 {
 }
 
 
 void InsertCommand::Execute( const ExecKit &kit ) const
 {
-	target_xlink.SetXPtr(new_x);
-        
-    kit.x_tree_db->Insert( target_xlink );      
+    XLink base_xlink = target.GetBase();
+    ASSERT( !base_xlink.GetChildX() );
+	base_xlink.SetXPtr( new_zone.GetBase() );
+    
+    TreeZone nt( base_xlink, new_zone );
+    kit.x_tree_db->Insert( nt );      
 }
 
 
