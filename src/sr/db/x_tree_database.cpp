@@ -11,14 +11,14 @@ XTreeDatabase::XTreeDatabase( const set< shared_ptr<SYM::BooleanExpression> > &c
         TRACEC(extra_xlink)("\n");
         
 		DBWalk::Actions actions;
-      	plan.domain->PrepareMonolithicBuild( actions );
-        plan.indexes->PrepareMonolithicBuild( actions );
-        plan.link_table->PrepareMonolithicBuild( actions );
-        plan.node_table->PrepareMonolithicBuild( actions );
-		plan.domain->PrepareIncrementalInsert( actions );
-		plan.indexes->PrepareIncrementalInsert( actions );
-		plan.link_table->PrepareIncrementalInsert( actions );
-		plan.node_table->PrepareIncrementalInsert( actions );
+      	plan.domain->PrepareBuildMonolithic( actions );
+        plan.indexes->PrepareBuildMonolithic( actions );
+        plan.link_table->PrepareBuildMonolithic( actions );
+        plan.node_table->PrepareBuildMonolithic( actions );
+		plan.domain->PrepareInsert( actions );
+		plan.indexes->PrepareInsert( actions );
+		plan.link_table->PrepareInsert( actions );
+		plan.node_table->PrepareInsert( actions );
 		db_walker.ExtraXLinkWalk( actions, extra_xlink );
     };
     
@@ -38,31 +38,43 @@ XTreeDatabase::Plan::Plan( const set< shared_ptr<SYM::BooleanExpression> > &clau
 void XTreeDatabase::FullClear()
 {
     // Clear everything 
-    plan.domain->Clear();
-    plan.indexes->Clear();
-    plan.link_table->Clear();
-    plan.node_table->Clear();    
+    plan.domain->ClearMonolithic();
+    plan.indexes->ClearMonolithic();
+    plan.link_table->ClearMonolithic();
+    plan.node_table->ClearMonolithic();    
+    
+    Zone root_zone( root_xlink );
+    plan.domain->Delete(root_zone);
+    plan.indexes->Delete(root_zone);
+    plan.link_table->Delete(root_zone);
+    plan.node_table->Delete(root_zone);    
 }
 
 
 void XTreeDatabase::FullBuild( XLink root_xlink_ )
 {      
-	ASSERT( root_xlink_ );
-
 	FullClear();
 
-	root_xlink = root_xlink_;		
+	root_xlink = root_xlink_;		    
 	
-	DBWalk::Actions actions;
-	plan.domain->PrepareMonolithicBuild( actions );
-	plan.indexes->PrepareMonolithicBuild( actions );
-	plan.link_table->PrepareMonolithicBuild( actions );
-	plan.node_table->PrepareMonolithicBuild( actions );
-	plan.domain->PrepareIncrementalInsert( actions );
-	plan.indexes->PrepareIncrementalInsert( actions );
-	plan.link_table->PrepareIncrementalInsert( actions );
-	plan.node_table->PrepareIncrementalInsert( actions );
-    db_walker.FullWalk( actions, root_xlink );
+	{
+        DBWalk::Actions actions;
+        plan.domain->PrepareBuildMonolithic( actions );
+        plan.indexes->PrepareBuildMonolithic( actions );
+        plan.link_table->PrepareBuildMonolithic( actions );
+        plan.node_table->PrepareBuildMonolithic( actions );
+        db_walker.FullWalk( actions, root_xlink );
+    }
+    
+	{
+        Zone root_zone( root_xlink );
+        DBWalk::Actions actions;
+        plan.domain->PrepareInsert( actions );
+        plan.indexes->PrepareInsert( actions );
+        plan.link_table->PrepareInsert( actions );
+        plan.node_table->PrepareInsert( actions );
+        db_walker.ZoneWalk( actions, root_zone );
+    }
             
 #ifdef TRACE_X_TREE_DB_DELTAS
     if( Tracer::IsEnabled() ) 
@@ -75,16 +87,9 @@ void XTreeDatabase::FullBuild( XLink root_xlink_ )
 }
 
 
-void XTreeDatabase::UpdateRootXLink(XLink root_xlink_)
-{
-	root_xlink = root_xlink_;
-}
-
-
 void XTreeDatabase::BuildMonolithic()
 {
 	FullBuild(root_xlink);
-	ExtendDomainNewX();
 }
 
 

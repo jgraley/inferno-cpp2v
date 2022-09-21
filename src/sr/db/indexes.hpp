@@ -1,6 +1,7 @@
 #ifndef INDEXES_HPP
 #define INDEXES_HPP
 
+#include "../zone.hpp"
 #include "../link.hpp"
 #include "common/standard.hpp"
 #include "../sc_relation.hpp"
@@ -60,13 +61,14 @@ public:
         int lacing_ordinal;
     };
 
-    void Clear();
+    void ClearMonolithic();
+    void Delete( const Zone &zone );
 
     const Lacing *GetLacing() const;
 
 	void PopulateActions(DBWalk::Actions &actions);
-	void PrepareMonolithicBuild(DBWalk::Actions &actions);
-	void PrepareIncrementalInsert(DBWalk::Actions &actions);
+	void PrepareBuildMonolithic(DBWalk::Actions &actions);
+	void PrepareInsert(DBWalk::Actions &actions);
 
     // Category ordering TODO merge with SimpleCompare ordering
     typedef multiset<XLink, CategoryRelation> CategoryOrderedIndex;

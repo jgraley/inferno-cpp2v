@@ -1,6 +1,7 @@
 #ifndef LINK_TABLE_HPP
 #define LINK_TABLE_HPP
 
+#include "../zone.hpp"
 #include "../link.hpp"
 #include "common/standard.hpp"
 #include "db_walk.hpp"
@@ -57,11 +58,12 @@ public:
     
     const Row &GetRow(XLink xlink) const;
     bool HasRow(XLink xlink) const;
-    void Clear();
-    
+    void ClearMonolithic();
+    void Delete( const Zone &zone );
+
 	void PopulateActions(DBWalk::Actions &actions);
-	void PrepareMonolithicBuild(DBWalk::Actions &actions);
-	void PrepareIncrementalInsert(DBWalk::Actions &actions);
+	void PrepareBuildMonolithic(DBWalk::Actions &actions);
+	void PrepareInsert(DBWalk::Actions &actions);
 
 private:
     // XLink-to-row-of-x_tree_db map

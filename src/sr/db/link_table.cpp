@@ -27,9 +27,14 @@ bool LinkTable::HasRow(XLink xlink) const
 }
 
 
-void LinkTable::Clear()
+void LinkTable::ClearMonolithic()
 {
     rows.clear();
+}
+
+
+void LinkTable::Delete( const Zone &zone )
+{
 }
 
 
@@ -127,7 +132,7 @@ void LinkTable::PopulateActions( DBWalk::Actions &actions )
 }
 
 
-void LinkTable::PrepareMonolithicBuild(DBWalk::Actions &actions)
+void LinkTable::PrepareBuildMonolithic(DBWalk::Actions &actions)
 {
     current_ordinal = 0;
 
@@ -135,7 +140,7 @@ void LinkTable::PrepareMonolithicBuild(DBWalk::Actions &actions)
 }
 
 
-void LinkTable::PrepareIncrementalInsert(DBWalk::Actions &actions)
+void LinkTable::PrepareInsert(DBWalk::Actions &actions)
 {
 }
 

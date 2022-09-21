@@ -1,6 +1,7 @@
 #ifndef DOMAIN_HPP
 #define DOMAIN_HPP
 
+#include "../zone.hpp"
 #include "../link.hpp"
 #include "common/standard.hpp"
 #include "db_walk.hpp"
@@ -30,7 +31,8 @@ class Domain
 public:
 	typedef function<void(XLink)> OnExtraXLinkFunction;
 
-    void Clear();
+    void ClearMonolithic();
+    void Delete( const Zone &zone );
 
 	void SetOnExtraXLinkFunction( OnExtraXLinkFunction on_extra_xlink );
 
@@ -45,8 +47,8 @@ public:
     void ExtendDomainNewX( const TreeKit &kit );
 
 	void PopulateActions(DBWalk::Actions &actions);
-	void PrepareMonolithicBuild(DBWalk::Actions &actions);
-	void PrepareIncrementalInsert(DBWalk::Actions &actions);
+	void PrepareBuildMonolithic(DBWalk::Actions &actions);
+	void PrepareInsert(DBWalk::Actions &actions);
 
     // Global domain of possible xlink values
     unordered_set<XLink> unordered_domain;            

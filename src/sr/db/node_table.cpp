@@ -27,9 +27,14 @@ bool NodeTable::HasRow(TreePtr<Node> node) const
 }
 
 
-void NodeTable::Clear()
+void NodeTable::ClearMonolithic()
 {
     rows.clear();
+}
+
+
+void NodeTable::Delete( const Zone &zone )
+{
 }
 
 
@@ -64,13 +69,13 @@ void NodeTable::PopulateActions( DBWalk::Actions &actions )
 }
 
 
-void NodeTable::PrepareMonolithicBuild(DBWalk::Actions &actions)
+void NodeTable::PrepareBuildMonolithic(DBWalk::Actions &actions)
 {
 	PopulateActions( actions );
 }
 
 
-void NodeTable::PrepareIncrementalInsert(DBWalk::Actions &actions)
+void NodeTable::PrepareInsert(DBWalk::Actions &actions)
 {
 }
 

@@ -1,6 +1,7 @@
 #ifndef NODE_TABLE_HPP
 #define NODE_TABLE_HPP
 
+#include "../zone.hpp"
 #include "../link.hpp"
 #include "common/standard.hpp"
 #include "db_walk.hpp"
@@ -36,11 +37,12 @@ public:
 
     const Row &GetRow(TreePtr<Node> node) const;
     bool HasRow(TreePtr<Node> node) const;
-    void Clear();
+    void ClearMonolithic();
+    void Delete( const Zone &zone );
 
 	void PopulateActions(DBWalk::Actions &actions);
-	void PrepareMonolithicBuild(DBWalk::Actions &actions);
-	void PrepareIncrementalInsert(DBWalk::Actions &actions);
+	void PrepareBuildMonolithic(DBWalk::Actions &actions);
+	void PrepareInsert(DBWalk::Actions &actions);
 
 private:
     // Node-to-row-of-x_tree_db map

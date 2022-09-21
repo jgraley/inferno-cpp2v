@@ -1,6 +1,7 @@
 #ifndef DB_WALK_HPP
 #define DB_WALK_HPP
 
+#include "../zone.hpp"
 #include "../link.hpp"
 #include "common/standard.hpp"
 #include "db_common.hpp"
@@ -42,7 +43,9 @@ public:
 
 	void FullWalk( const Actions &actions, 
 				   XLink root_xlink );
-	void ExtraXLinkWalk( const Actions &actions, 
+    void ZoneWalk( const Actions &actions,
+                   const Zone &zone );
+    void ExtraXLinkWalk( const Actions &actions, 
 	                     XLink extra_xlink );
 
 private:

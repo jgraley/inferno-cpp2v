@@ -12,6 +12,13 @@ void DBWalk::FullWalk( const Actions &actions,
 }
 
 
+void DBWalk::ZoneWalk( const Actions &actions,
+                       const Zone &zone )
+{
+	AddAtRoot( actions, REQUIRE_SOLO, zone.GetBase() );
+}
+
+
 void DBWalk::ExtraXLinkWalk( const Actions &actions,
                              XLink extra_xlink )
 {

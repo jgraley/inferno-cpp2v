@@ -3,6 +3,7 @@
 
 #include "common/common.hpp"
 #include "node/tree_ptr.hpp"
+#include "../zone.hpp"
 #include "../link.hpp"
 
 namespace SR 

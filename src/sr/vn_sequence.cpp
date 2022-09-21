@@ -157,6 +157,7 @@ void VNSequence::ExecuteUpdateCommand( shared_ptr<UpdateCommand> cmd )
 void VNSequence::XTreeDbBuildMonolithic()
 {
 	x_tree_db->BuildMonolithic();
+    x_tree_db->ExtendDomainNewX();
 }
 
 

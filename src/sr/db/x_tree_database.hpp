@@ -2,6 +2,7 @@
 #define X_TREE_DATABASE_HPP
 
 #include "common/standard.hpp"
+#include "../zone.hpp"
 #include "../link.hpp"
 
 #include "link_table.hpp"
@@ -34,9 +35,10 @@ private:
 
 public:
     void FullClear();
-    void FullBuild( XLink root_xlink );
-    void UpdateRootXLink(XLink root_xlink);
+    void FullBuild( XLink new_root_xlink );
+
     void BuildMonolithic();
+
     void ClearIncremental(XLink base_xlink);
     void BuildIncremental(XLink base_xlink);
            
