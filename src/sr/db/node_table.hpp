@@ -16,7 +16,7 @@ class NodeTable
 public:
     NodeTable();
 
-    class NodeRow : public Traceable
+    class Row : public Traceable
     {
     public:		
 		// Our node is the child of these links.
@@ -30,21 +30,21 @@ public:
 		// declaring link (precision). Taking parent discards that info.
 		set<XLink> declarers;
 		
-        void Merge( const NodeRow &nn );
+        void Merge( const Row &nn );
         string GetTrace() const;
     };
 
-    const NodeRow &GetNodeRow(TreePtr<Node> node) const;
-    bool HasNodeRow(TreePtr<Node> node) const;
+    const Row &GetRow(TreePtr<Node> node) const;
+    bool HasRow(TreePtr<Node> node) const;
+    void Clear();
 
 	void PopulateActions(DBWalk::Actions &actions);
 	void PrepareFullBuild(DBWalk::Actions &actions);
 	void PrepareExtraXLink(DBWalk::Actions &actions);
 
-    // Node-to-row-of-x_tree_db map
-    map<TreePtr<Node>, NodeRow> node_table;
-    
 private:
+    // Node-to-row-of-x_tree_db map
+    map<TreePtr<Node>, Row> rows;
 };    
     
 };

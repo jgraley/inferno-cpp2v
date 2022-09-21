@@ -41,8 +41,8 @@ void XTreeDatabase::Clear()
     plan.domain->unordered_domain.clear();
     plan.domain->domain_extension_classes = make_shared<SimpleCompareQuotientSet>();
     
-    plan.link_table->xlink_table.clear();
-    plan.node_table->node_table.clear();    
+    plan.link_table->Clear();
+    plan.node_table->Clear();    
 }
 
 
@@ -131,15 +131,15 @@ bool XTreeDatabase::HasRow(XLink xlink) const
 }
 
 
-const NodeTable::NodeRow &XTreeDatabase::GetNodeRow(TreePtr<Node> node) const
+const NodeTable::Row &XTreeDatabase::GetNodeRow(TreePtr<Node> node) const
 {
-	return plan.node_table->GetNodeRow(node);
+	return plan.node_table->GetRow(node);
 }
 
 
 bool XTreeDatabase::HasNodeRow(TreePtr<Node> node) const
 {
-	return plan.node_table->HasNodeRow(node);
+	return plan.node_table->HasRow(node);
 }
 
 
@@ -159,10 +159,10 @@ set<TreeKit::LinkInfo> XTreeDatabase::GetDeclarers( TreePtr<Node> node ) const
 {
     set<LinkInfo> infos;
    
-    if( plan.node_table->node_table.count(node)==0 ) // not found
+    if( !plan.node_table->HasRow(node) ) // not found
         throw UnknownNode();
         
-    NodeTable::NodeRow row = plan.node_table->node_table.at(node);
+    NodeTable::Row row = plan.node_table->GetRow(node);
     // Note that row.declarers is "precise", i.e. the XLinks are the actual
     // declaring xlinks, not just arbitrary parent links to the declaree.
     // Also correct for parallel links where only some declare.
@@ -172,7 +172,7 @@ set<TreeKit::LinkInfo> XTreeDatabase::GetDeclarers( TreePtr<Node> node ) const
         
         // first is TreePtr to the declarer node. Loses info about which 
         // link declared (in case of parallel links) but gets you the declarer node.
-        info.first = plan.link_table->xlink_table.at(declarer_xlink).parent_xlink.GetChildX();
+        info.first = plan.link_table->GetRow(declarer_xlink).parent_xlink.GetChildX();
 
         // second is TreePtrInterface * to the declarer's pointer to declaree
         // Retains precise info about which link.

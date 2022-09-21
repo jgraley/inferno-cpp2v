@@ -57,15 +57,16 @@ public:
     
     const Row &GetRow(XLink xlink) const;
     bool HasRow(XLink xlink) const;
+    void Clear();
     
 	void PopulateActions(DBWalk::Actions &actions);
 	void PrepareFullBuild(DBWalk::Actions &actions);
 	void PrepareExtraXLink(DBWalk::Actions &actions);
 
-    // XLink-to-row-of-x_tree_db map
-    unordered_map<XLink, Row> xlink_table;
-
 private:
+    // XLink-to-row-of-x_tree_db map
+    unordered_map<XLink, Row> rows;
+
     // Depth-first ordering
     int current_ordinal;
     

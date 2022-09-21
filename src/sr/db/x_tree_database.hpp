@@ -47,7 +47,7 @@ public:
             
     const LinkTable::Row &GetRow(XLink xlink) const;
     bool HasRow(XLink xlink) const;    
-    const NodeTable::NodeRow &GetNodeRow(TreePtr<Node> node) const;
+    const NodeTable::Row &GetNodeRow(TreePtr<Node> node) const;
     bool HasNodeRow(TreePtr<Node> node) const;
 	const Indexes &GetIndexes() const;
 	Indexes &GetIndexes();

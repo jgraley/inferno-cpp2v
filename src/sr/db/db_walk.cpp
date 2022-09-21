@@ -131,8 +131,8 @@ void DBWalk::AddLink( const Actions &actions,
     if( actions.indexes_in )
 		df_it = actions.indexes_in( walk_info );        
             
-    if( actions.xlink_row_in )
-		actions.xlink_row_in( walk_info, df_it );        
+    if( actions.link_row_in )
+		actions.link_row_in( walk_info, df_it );        
             
     if( actions.node_row_in )
 		actions.node_row_in( walk_info );        
@@ -141,8 +141,8 @@ void DBWalk::AddLink( const Actions &actions,
     AddChildren( actions, mode, walk_info.xlink ); 
 
     // Unwind actions
-    if( actions.xlink_row_out )
-		actions.xlink_row_out( walk_info );                   
+    if( actions.link_row_out )
+		actions.link_row_out( walk_info );                   
 }
 
 

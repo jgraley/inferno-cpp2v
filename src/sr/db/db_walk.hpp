@@ -35,9 +35,9 @@ public:
 		function<bool (const WalkInfo &)> domain_in_is_ok;
 		function<void (const WalkInfo &)> domain_in;
 		function<DBCommon::DepthFirstOrderedIt(const WalkInfo &)> indexes_in;
-		function<void (const WalkInfo &, DBCommon::DepthFirstOrderedIt)> xlink_row_in;
+		function<void (const WalkInfo &, DBCommon::DepthFirstOrderedIt)> link_row_in;
 		function<void (const WalkInfo &)> node_row_in;
-		function<void (const WalkInfo &)> xlink_row_out;
+		function<void (const WalkInfo &)> link_row_out;
 	};
 
 	void FullWalk( const Actions &actions, 

@@ -15,21 +15,27 @@ const LinkTable::Row &LinkTable::GetRow(XLink xlink) const
     ASSERT( xlink );
     ASSERT( HasRow(xlink) )
           ("X tree database: no row for ")(xlink)("\n")
-          ("Rows: ")(xlink_table);
-    return xlink_table.at(xlink);
+          ("Rows: ")(rows);
+    return rows.at(xlink);
 }
 
 
 bool LinkTable::HasRow(XLink xlink) const
 {
     ASSERT( xlink );
-    return xlink_table.count(xlink) > 0;
+    return rows.count(xlink) > 0;
+}
+
+
+void LinkTable::Clear()
+{
+    rows.clear();
 }
 
 
 void LinkTable::PopulateActions( DBWalk::Actions &actions )
 {
-	actions.xlink_row_in = [&](const DBWalk::WalkInfo &walk_info, 
+	actions.link_row_in = [&](const DBWalk::WalkInfo &walk_info, 
 	                           DBCommon::DepthFirstOrderedIt df_it)
 	{
 		// ----------------- Generate row
@@ -37,59 +43,59 @@ void LinkTable::PopulateActions( DBWalk::Actions &actions )
 		row.containment_context = walk_info.context;
 		switch( row.containment_context )
 		{
-		case DBWalk::ROOT:
-		{
-			row.my_container_front = walk_info.xlink;
-			row.my_container_back = walk_info.xlink;
-			break;
-		}	
-		case DBWalk::SINGULAR:
-		{
-			row.parent_xlink = walk_info.parent_xlink;
-			row.my_container_front = walk_info.xlink;
-			row.my_container_back = walk_info.xlink;
-			break;
-		}
-		case DBWalk::IN_SEQUENCE:
-		{
-			TreePtr<Node> parent_x = walk_info.parent_xlink.GetChildX();
+            case DBWalk::ROOT:
+            {
+                row.my_container_front = walk_info.xlink;
+                row.my_container_back = walk_info.xlink;
+                break;
+            }	
+            case DBWalk::SINGULAR:
+            {
+                row.parent_xlink = walk_info.parent_xlink;
+                row.my_container_front = walk_info.xlink;
+                row.my_container_back = walk_info.xlink;
+                break;
+            }
+            case DBWalk::IN_SEQUENCE:
+            {
+                TreePtr<Node> parent_x = walk_info.parent_xlink.GetChildX();
 
-			row.parent_xlink = walk_info.parent_xlink;
-			row.my_container_it = walk_info.xit;        
-			row.my_container_front = XLink( parent_x, &walk_info.p_xcon->front() );
-			row.my_container_back = XLink( parent_x, &walk_info.p_xcon->back() );
-			
-			if( walk_info.xit_predecessor != walk_info.p_xcon->end() )
-				row.my_sequence_predecessor = XLink( parent_x, &*walk_info.xit_predecessor );
+                row.parent_xlink = walk_info.parent_xlink;
+                row.my_container_it = walk_info.xit;        
+                row.my_container_front = XLink( parent_x, &walk_info.p_xcon->front() );
+                row.my_container_back = XLink( parent_x, &walk_info.p_xcon->back() );
+                
+                if( walk_info.xit_predecessor != walk_info.p_xcon->end() )
+                    row.my_sequence_predecessor = XLink( parent_x, &*walk_info.xit_predecessor );
 
-			SequenceInterface::iterator xit_successor = walk_info.xit;
-			++xit_successor;
-			if( xit_successor != walk_info.p_xcon->end() )
-				row.my_sequence_successor = XLink( parent_x, &*xit_successor );
-			else
-				row.my_sequence_successor = XLink::OffEndXLink;        
-			break;
-		}
-		case DBWalk::IN_COLLECTION:
-		{
-			TreePtr<Node> parent_x = walk_info.parent_xlink.GetChildX();
+                SequenceInterface::iterator xit_successor = walk_info.xit;
+                ++xit_successor;
+                if( xit_successor != walk_info.p_xcon->end() )
+                    row.my_sequence_successor = XLink( parent_x, &*xit_successor );
+                else
+                    row.my_sequence_successor = XLink::OffEndXLink;        
+                break;
+            }
+            case DBWalk::IN_COLLECTION:
+            {
+                TreePtr<Node> parent_x = walk_info.parent_xlink.GetChildX();
 
-			row.parent_xlink = walk_info.parent_xlink;
-			row.my_container_it = walk_info.xit;
-			row.my_container_front = XLink( parent_x, &*(walk_info.p_xcon->begin()) );
-			// Note: in real STL containers, one would use *(x_col->rbegin())
-			row.my_container_back = XLink( parent_x, &(walk_info.p_xcon->back()) );
-			break;
-		}
+                row.parent_xlink = walk_info.parent_xlink;
+                row.my_container_it = walk_info.xit;
+                row.my_container_front = XLink( parent_x, &*(walk_info.p_xcon->begin()) );
+                // Note: in real STL containers, one would use *(x_col->rbegin())
+                row.my_container_back = XLink( parent_x, &(walk_info.p_xcon->back()) );
+                break;
+            }
 		}
 			
 		row.depth_first_ordered_it = df_it;
 		row.depth_first_ordinal = current_ordinal++;  
 			
 		// Check for badness
-		if( xlink_table.count(walk_info.xlink) )
+		if( rows.count(walk_info.xlink) )
 		{
-			Row old_row = xlink_table.at(walk_info.xlink);
+			Row old_row = rows.at(walk_info.xlink);
 			// remember that row is incomplete because 
 			// we have not been able to fill everything in yet
 			if( row.parent_xlink != old_row.parent_xlink )
@@ -109,14 +115,14 @@ void LinkTable::PopulateActions( DBWalk::Actions &actions )
 		last_xlink = walk_info.xlink;
 
 		// Add a row of x_tree_db
-		InsertSolo( xlink_table, make_pair(walk_info.xlink, row) );
+		InsertSolo( rows, make_pair(walk_info.xlink, row) );
 	};
 	
-	actions.xlink_row_out = [&](const DBWalk::WalkInfo &walk_info)
+	actions.link_row_out = [&](const DBWalk::WalkInfo &walk_info)
 	{
 		// ----------------- Generate row unwind
 		// Grab last link that was added during unwind    
-		xlink_table.at(walk_info.xlink).last_descendant_xlink = last_xlink;
+		rows.at(walk_info.xlink).last_descendant_xlink = last_xlink;
 	};
 }
 
