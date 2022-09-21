@@ -374,7 +374,7 @@ void SCREngine::Replace( XLink base_xlink )
 	seq->Add( make_shared<InsertCommand>( base_xlink, new_base_x, plan.base_plink ) );
 	plan.vn_sequence->ExecuteUpdateCommand( seq );
 
-	plan.vn_sequence->XTreeDbBuildNonIncremental();
+	plan.vn_sequence->XTreeDbBuildMonolithic();
 
     TRACE("Replace done\n");
 }

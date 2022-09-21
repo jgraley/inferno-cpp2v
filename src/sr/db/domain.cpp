@@ -5,6 +5,13 @@
 
 using namespace SR;    
 
+void Domain::Clear()
+{
+    unordered_domain.clear();
+    domain_extension_classes = make_shared<SimpleCompareQuotientSet>();
+}    
+
+
 void Domain::SetOnExtraXLinkFunction( OnExtraXLinkFunction on_extra_xlink_ )
 {
     on_extra_xlink = on_extra_xlink_;

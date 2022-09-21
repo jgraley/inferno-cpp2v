@@ -30,6 +30,8 @@ class Domain
 public:
 	typedef function<void(XLink)> OnExtraXLinkFunction;
 
+    void Clear();
+
 	void SetOnExtraXLinkFunction( OnExtraXLinkFunction on_extra_xlink );
 
     // Add xlink to domain extension if not already there, and return the cannonical one.

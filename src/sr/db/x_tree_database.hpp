@@ -33,10 +33,10 @@ private:
     } plan;
 
 public:
-    void Clear();
+    void FullClear();
     void FullBuild( XLink root_xlink );
     void UpdateRootXLink(XLink root_xlink);
-    void BuildNonIncremental();
+    void BuildMonolithic();
     void ClearIncremental(XLink base_xlink);
     void BuildIncremental(XLink base_xlink);
            

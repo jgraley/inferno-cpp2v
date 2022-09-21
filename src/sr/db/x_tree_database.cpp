@@ -31,16 +31,11 @@ XTreeDatabase::Plan::Plan( const set< shared_ptr<SYM::BooleanExpression> > &clau
 }
 
     
-void XTreeDatabase::Clear()
+void XTreeDatabase::FullClear()
 {
     // Clear everything 
-    plan.indexes->depth_first_ordered_index.clear();
-    plan.indexes->category_ordered_index.clear();
-    plan.indexes->simple_compare_ordered_index.clear();
-
-    plan.domain->unordered_domain.clear();
-    plan.domain->domain_extension_classes = make_shared<SimpleCompareQuotientSet>();
-    
+    plan.domain->Clear();
+    plan.indexes->Clear();
     plan.link_table->Clear();
     plan.node_table->Clear();    
 }
@@ -50,7 +45,7 @@ void XTreeDatabase::FullBuild( XLink root_xlink_ )
 {      
 	ASSERT( root_xlink_ );
 
-	Clear();
+	FullClear();
 
 	root_xlink = root_xlink_;		
 	
@@ -78,7 +73,7 @@ void XTreeDatabase::UpdateRootXLink(XLink root_xlink_)
 }
 
 
-void XTreeDatabase::BuildNonIncremental()
+void XTreeDatabase::BuildMonolithic()
 {
 	FullBuild(root_xlink);
 	ExtendDomainNewX();

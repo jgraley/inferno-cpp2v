@@ -15,7 +15,6 @@ void DBWalk::FullWalk( const Actions &actions,
 void DBWalk::ExtraXLinkWalk( const Actions &actions,
                              XLink extra_xlink )
 {
-	// set to REQUIRE_SOLO to replicate #218
 	AddAtRoot( actions, STOP_IF_ALREADY_IN, extra_xlink ); 
 }
 

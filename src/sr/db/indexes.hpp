@@ -60,6 +60,8 @@ public:
         int lacing_ordinal;
     };
 
+    void Clear();
+
     const Lacing *GetLacing() const;
 
 	void PopulateActions(DBWalk::Actions &actions);

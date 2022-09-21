@@ -57,9 +57,6 @@ public:
 private:
 	list<shared_ptr<UpdateCommand>> seq;	
 };
-
-
-
 	
 }
 

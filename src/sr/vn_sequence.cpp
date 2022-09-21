@@ -154,9 +154,9 @@ void VNSequence::ExecuteUpdateCommand( shared_ptr<UpdateCommand> cmd )
 }
 
 
-void VNSequence::XTreeDbBuildNonIncremental()
+void VNSequence::XTreeDbBuildMonolithic()
 {
-	x_tree_db->BuildNonIncremental();
+	x_tree_db->BuildMonolithic();
 }
 
 

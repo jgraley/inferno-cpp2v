@@ -49,7 +49,7 @@ public:
     void ExtendDomainNewPattern( PatternLink root_plink );
 
     void ExecuteUpdateCommand( shared_ptr<UpdateCommand> cmd );
-    void XTreeDbBuildNonIncremental();
+    void XTreeDbBuildMonolithic();
     
     bool IsDirtyGrass( TreePtr<Node> node );
     void AddDirtyGrass( TreePtr<Node> node );

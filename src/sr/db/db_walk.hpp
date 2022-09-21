@@ -55,7 +55,7 @@ private:
         // Behaviour for domain extensions. We will continue as long as 
         // nodes are not already in the domain. If a node is in the 
         // domain, we don't recurse into it since everything under it
-        // will also be in the domain.
+        // will also be in the domain. 
         // https://github.com/jgraley/inferno-cpp2v/issues/213#issuecomment-728266001
         STOP_IF_ALREADY_IN
     };
