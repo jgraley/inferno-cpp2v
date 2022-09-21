@@ -60,7 +60,6 @@ public:
     bool HasRow(XLink xlink) const;
     void ClearMonolithic();
 
-	void PopulateActions(DBWalk::Actions &actions);
 	void PrepareBuildMonolithic(DBWalk::Actions &actions);
     void PrepareDelete(DBWalk::Actions &actions);
 	void PrepareInsert(DBWalk::Actions &actions);

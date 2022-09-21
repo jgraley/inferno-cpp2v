@@ -45,7 +45,6 @@ public:
     void ExtendDomainNewPattern( const TreeKit &kit, PatternLink root_plink );
     void ExtendDomainNewX( const TreeKit &kit );
 
-	void PopulateActions(DBWalk::Actions &actions);
 	void PrepareBuildMonolithic(DBWalk::Actions &actions);
     void PrepareDelete(DBWalk::Actions &actions);
 	void PrepareInsert(DBWalk::Actions &actions);

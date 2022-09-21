@@ -33,8 +33,10 @@ void LinkTable::ClearMonolithic()
 }
 
 
-void LinkTable::PopulateActions( DBWalk::Actions &actions )
+void LinkTable::PrepareBuildMonolithic(DBWalk::Actions &actions)
 {
+    current_ordinal = 0;
+
 	actions.link_row_in = [&](const DBWalk::WalkInfo &walk_info, 
 	                           DBCommon::DepthFirstOrderedIt df_it)
 	{
@@ -124,14 +126,6 @@ void LinkTable::PopulateActions( DBWalk::Actions &actions )
 		// Grab last link that was added during unwind    
 		rows.at(walk_info.xlink).last_descendant_xlink = last_xlink;
 	};
-}
-
-
-void LinkTable::PrepareBuildMonolithic(DBWalk::Actions &actions)
-{
-    current_ordinal = 0;
-
-	PopulateActions( actions );
 }
 
 

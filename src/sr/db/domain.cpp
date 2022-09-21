@@ -107,7 +107,7 @@ void Domain::ExtendDomainNewX(const TreeKit &kit)
 }
 
 
-void Domain::PopulateActions( DBWalk::Actions &actions )
+void Domain::PrepareBuildMonolithic(DBWalk::Actions &actions)
 {
 	actions.domain_in_is_ok = [&](const DBWalk::WalkInfo &walk_info) -> bool
 	{
@@ -124,12 +124,6 @@ void Domain::PopulateActions( DBWalk::Actions &actions )
 		// separately in domain.
 		(void)domain_extension_classes->Uniquify( walk_info.xlink );    
 	};
-}
-
-
-void Domain::PrepareBuildMonolithic(DBWalk::Actions &actions)
-{
-	PopulateActions( actions );
 }
 
 
