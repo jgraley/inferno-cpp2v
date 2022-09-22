@@ -29,6 +29,8 @@ class XTreeDatabase;
 class Domain
 {   
 public:
+	Domain();
+	
 	typedef function<void(XLink)> OnExtraXLinkFunction;
 
 	void SetOnExtraXLinkFunction( OnExtraXLinkFunction on_extra_xlink );
@@ -43,8 +45,8 @@ public:
     void ExtendDomainNewPattern( const TreeKit &kit, PatternLink root_plink );
     void ExtendDomainNewX( const TreeKit &kit );
 
-    void ClearMonolithic();
-	void PrepareBuildMonolithic(DBWalk::Actions &actions);
+    void MonolithicClear();
+	void PrepareMonolithicBuild(DBWalk::Actions &actions);
     void PrepareDelete(DBWalk::Actions &actions);
 	void PrepareInsert(DBWalk::Actions &actions);
 

@@ -136,7 +136,7 @@ const Lacing *Indexes::GetLacing() const
 }
 
 
-void Indexes::ClearMonolithic()
+void Indexes::MonolithicClear()
 {
     depth_first_ordered_index.clear();
     if( ref || !CAT_TO_INCREMENTAL )
@@ -145,7 +145,7 @@ void Indexes::ClearMonolithic()
 }
 
 
-void Indexes::PrepareBuildMonolithic(DBWalk::Actions &actions)
+void Indexes::PrepareMonolithicBuild(DBWalk::Actions &actions)
 {
 	actions.indexes_in = [&](const DBWalk::WalkInfo &walk_info) -> DBCommon::DepthFirstOrderedIt
 	{

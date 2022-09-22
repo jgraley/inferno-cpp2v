@@ -50,7 +50,8 @@ public:
     void ExtendDomainNewPattern( PatternLink root_plink );
 
     void ExecuteUpdateCommand( shared_ptr<UpdateCommand> cmd );
-    void XTreeDbBuildMonolithic();
+    void XTreeDbMonolithicClear();
+    void XTreeDbMonolithicBuild();
     
     void XTreeDbExpectMatches() const;
     

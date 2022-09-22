@@ -34,7 +34,7 @@ public:
 
 	struct Actions
 	{
-		function<bool (const WalkInfo &)> domain_in_is_ok;
+		function<bool (const WalkInfo &)> is_unreached;
 		function<void (const WalkInfo &)> domain_in;
 		function<DBCommon::DepthFirstOrderedIt(const WalkInfo &)> indexes_in;
 		function<void (const WalkInfo &, DBCommon::DepthFirstOrderedIt)> link_row_in;

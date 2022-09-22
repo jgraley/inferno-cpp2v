@@ -59,8 +59,8 @@ public:
     const Row &GetRow(XLink xlink) const;
     bool HasRow(XLink xlink) const;
     
-    void ClearMonolithic();
-	void PrepareBuildMonolithic(DBWalk::Actions &actions);
+    void MonolithicClear();
+	void PrepareMonolithicBuild(DBWalk::Actions &actions);
     void PrepareDelete(DBWalk::Actions &actions);
 	void PrepareInsert(DBWalk::Actions &actions);
 

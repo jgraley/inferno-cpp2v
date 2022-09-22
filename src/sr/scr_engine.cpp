@@ -376,11 +376,12 @@ void SCREngine::Replace( XLink base_xlink )
 	seq->Add( make_shared<InsertCommand>( base_zone, new_zone ) );
 	plan.vn_sequence->ExecuteUpdateCommand( seq );
 
-	plan.vn_sequence->XTreeDbBuildMonolithic();
+	plan.vn_sequence->XTreeDbMonolithicClear();
+	plan.vn_sequence->XTreeDbMonolithicBuild();
     
     plan.vn_sequence->ExtendDomainNewX();
     
-#ifdef DB_TEST_EXTENSIONS
+#ifdef DB_ENABLE_COMPARATIVE_TEST
     plan.vn_sequence->XTreeDbExpectMatches();
 #endif
 

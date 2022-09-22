@@ -83,7 +83,7 @@ void VNSequence::AnalysisStage( TreePtr<Node> root )
     ASSERT( x_tree_db )("Planning stage four should have created x_tree_db object");
     x_tree_db->SetRoot( current_root_xlink );
 #ifndef X_TREE_DB_EACH_STEP
-	x_tree_db->FullBuild();
+	x_tree_db->InitialBuild();
 #endif        
 }
 
@@ -94,7 +94,7 @@ TreePtr<Node> VNSequence::TransformStep( int step_index, TreePtr<Node> root )
     dirty_grass.clear();	
 	    
 #ifdef X_TREE_DB_EACH_STEP
-	x_tree_db->FullBuild();
+	x_tree_db->InitialBuild();
 #endif        
     steps[step_index]->Transform( current_root_xlink );
     root = current_root_xlink.GetChildX();
@@ -162,13 +162,19 @@ void VNSequence::ExecuteUpdateCommand( shared_ptr<UpdateCommand> cmd )
 }
 
 
-void VNSequence::XTreeDbBuildMonolithic()
+void VNSequence::XTreeDbMonolithicClear()
 {
-	x_tree_db->BuildMonolithic();
+	x_tree_db->MonolithicClear();
 }
 
 
-#ifdef DB_TEST_EXTENSIONS
+void VNSequence::XTreeDbMonolithicBuild()
+{
+	x_tree_db->MonolithicBuild();
+}
+
+
+#ifdef DB_ENABLE_COMPARATIVE_TEST
 void VNSequence::XTreeDbExpectMatches() const
 {
     ASSERT( x_tree_db )("Planning stage four should have created x_tree_db object");  

@@ -27,13 +27,13 @@ bool LinkTable::HasRow(XLink xlink) const
 }
 
 
-void LinkTable::ClearMonolithic()
+void LinkTable::MonolithicClear()
 {
     rows.clear();
 }
 
 
-void LinkTable::PrepareBuildMonolithic(DBWalk::Actions &actions)
+void LinkTable::PrepareMonolithicBuild(DBWalk::Actions &actions)
 {
     current_ordinal = 0;
 

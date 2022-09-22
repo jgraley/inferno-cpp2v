@@ -38,8 +38,8 @@ public:
     const Row &GetRow(TreePtr<Node> node) const;
     bool HasRow(TreePtr<Node> node) const;
     
-    void ClearMonolithic();
-	void PrepareBuildMonolithic(DBWalk::Actions &actions);
+    void MonolithicClear();
+	void PrepareMonolithicBuild(DBWalk::Actions &actions);
     void PrepareDelete(DBWalk::Actions &actions);
 	void PrepareInsert(DBWalk::Actions &actions);
 

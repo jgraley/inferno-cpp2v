@@ -10,7 +10,7 @@
 #include "domain.hpp"
 #include "indexes.hpp"
 
-#define DB_TEST_EXTENSIONS
+//#define DB_ENABLE_COMPARATIVE_TEST
 
 namespace SR 
 {
@@ -34,7 +34,7 @@ private:
         shared_ptr<LinkTable> link_table;
         shared_ptr<NodeTable> node_table;
 
-#ifdef DB_TEST_EXTENSIONS
+#ifdef DB_ENABLE_COMPARATIVE_TEST
         shared_ptr<Domain> ref_domain;
         shared_ptr<Indexes> ref_indexes;
         //shared_ptr<LinkTable> ref_link_table;
@@ -45,16 +45,21 @@ private:
 public:
     void SetRoot(XLink root_xlink);
 
-    void FullClear();
-    void FullBuild();
+	// Use both monolithic and incremental updates in order 
+	// to build full db during analysis stage
+    void InitialBuild();
 
-    void ClearMonolithic();
-    void BuildMonolithic();
+	// Monolithic strategy: clear for whole tree and build from scratch
+    void MonolithicClear();
+    void MonolithicBuild(); // includes permanent columns
+	void MonolithicExtra(XLink extra_xlink);
 
-    void BuildInit();
+	// Incremental strategy: perform updates on zones
+    void InsertPermanent();
     void Delete(const TreeZone &zone);
     void Insert(const TreeZone &zone);
-           
+    void InsertExtra(XLink extra_xlink);
+
     XLink UniquifyDomainExtension( XLink xlink );
     XLink FindDomainExtension( XLink xlink ) const;
     void ExtendDomainNewPattern( PatternLink root_plink );
@@ -65,7 +70,7 @@ public:
     const NodeTable::Row &GetNodeRow(TreePtr<Node> node) const;
     bool HasNodeRow(TreePtr<Node> node) const;
 	const Indexes &GetIndexes() const;
-#ifdef DB_TEST_EXTENSIONS
+#ifdef DB_ENABLE_COMPARATIVE_TEST
     void ExpectMatches() const;
 #endif	
 
