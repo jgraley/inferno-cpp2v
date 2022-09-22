@@ -5,7 +5,7 @@
 
 // Generate messages when can't find a declaration. Vida Nova should be
 // OK with this, but it may be unexpected for some/all test cases. See #617
-// #define WARN_UNFOUND_DECL
+//#define WARN_UNFOUND_DECL
 
 using namespace CPPTree;
 

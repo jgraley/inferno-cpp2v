@@ -12,7 +12,7 @@ class SimpleCompareQuotientSet;
 class VNStep;
 class Lacing;
     
-class NodeTable
+class NodeTable : public Traceable
 {
 public:
     NodeTable();
@@ -43,6 +43,7 @@ public:
     void PrepareDelete(DBWalk::Actions &actions);
 	void PrepareInsert(DBWalk::Actions &actions);
 
+	string GetTrace() const;
 private:
     // Node-to-row-of-x_tree_db map
     map<TreePtr<Node>, Row> rows;

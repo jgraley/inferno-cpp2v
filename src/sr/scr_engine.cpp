@@ -371,12 +371,13 @@ void SCREngine::Replace( XLink base_xlink )
     TreePtr<Node> new_base_x = plan.base_agent->BuildReplace(plan.base_plink);
     FreeZone new_zone( new_base_x );
 
+	plan.vn_sequence->XTreeDbMonolithicClear();
+
 	auto seq = make_shared<CommandSequence>();
 	seq->Add( make_shared<DeleteCommand>( base_zone ) );
 	seq->Add( make_shared<InsertCommand>( base_zone, new_zone ) );
 	plan.vn_sequence->ExecuteUpdateCommand( seq );
 
-	plan.vn_sequence->XTreeDbMonolithicClear();
 	plan.vn_sequence->XTreeDbMonolithicBuild();
     
     plan.vn_sequence->ExtendDomainNewX();

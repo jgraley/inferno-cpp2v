@@ -57,10 +57,10 @@ void (Adder::T)()
 {
 wait(  ::Adder::proceed );
  ::gvar+=(2);
-"Caught:HasDeclaration::DeclarationNotFound";
+"ExtractInits() caught HasDeclaration::DeclarationNotFound";
 wait(  ::Adder::proceed );
  ::gvar+=(3);
-"Caught:HasDeclaration::DeclarationNotFound";
+"ExtractInits() caught HasDeclaration::DeclarationNotFound";
 }
 
 Multiplier::Multiplier(char (*name_1))
@@ -72,10 +72,10 @@ void (Multiplier::T_1)()
 {
 wait(  ::Multiplier::instigate );
  ::gvar*=(5);
-"Caught:HasDeclaration::DeclarationNotFound";
+"ExtractInits() caught HasDeclaration::DeclarationNotFound";
 wait(  ::Multiplier::proceed_1 );
  ::gvar*=(5);
-"Caught:HasDeclaration::DeclarationNotFound";
+"ExtractInits() caught HasDeclaration::DeclarationNotFound";
 wait(  ::Multiplier::proceed_1 );
  ::cease( ::gvar);
 }
@@ -88,7 +88,7 @@ TopLevel::TopLevel(char (*name_2)) : add_inst("add_inst"), mul_inst("mul_inst")
 void (TopLevel::T_2)()
 {
  ::gvar=(1);
-"Caught:HasDeclaration::DeclarationNotFound";
+"ExtractInits() caught HasDeclaration::DeclarationNotFound";
 }
 
 void (cease)(void p1_1);

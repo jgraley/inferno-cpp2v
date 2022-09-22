@@ -92,3 +92,8 @@ string NodeTable::Row::GetTrace() const
     return s;
 }
 
+
+string NodeTable::GetTrace() const
+{
+	return Trace(rows);
+}

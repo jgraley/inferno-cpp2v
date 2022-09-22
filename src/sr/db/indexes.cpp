@@ -87,11 +87,11 @@ bool Indexes::CategoryRelation::operator() (const XLink& x_link, const XLink& y_
 #endif        
 	    if( r != Orderable::EQUAL )
 		    return r < Orderable::EQUAL;	
-#ifdef SET_FOR_CAT_INDEX		    	
-		return x_link < y_link; 
-#else
-		return false; // take as equal
-#endif		
+		    
+        if( ReadArgs::use_strong_cat_order )    	//------------ it's here!
+			return x_link.operator<(y_link); 
+		else
+			return false; // take as equal
     }
     else if( cat_x && cat_y )
     {

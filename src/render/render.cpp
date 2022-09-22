@@ -26,14 +26,22 @@ using namespace SCTree;
 
 // TODO indent back to previous level at end of string
 #define ERROR_UNKNOWN(V) \
-    string( "\n#error " ) + \
+    string( "«" ) + \
     string( V ) + \
     string( " not supported in " ) + \
     string( __func__ ) + \
-    string( "\n" );
+    string( "»" );
 
 #define ERROR_UNSUPPORTED(P) \
     ERROR_UNKNOWN( P ? typeid(*P).name() : "<nullptr>" );
+
+// For #400 make methods that return strings try-functions
+// and use this for the catch clause.
+#define DEFAULT_CATCH_CLAUSE \
+    catch( const ::Mismatch &e ) \
+    { \
+		return RenderMismatchException( __func__, e ); \
+	} 
 
 
 Render::Render( string of ) :
@@ -109,13 +117,14 @@ bool Render::IsSystemC( TreePtr<Node> root )
 }
 
 
-string Render::RenderLiteral( TreePtr<Literal> sp )
+string Render::RenderLiteral( TreePtr<Literal> sp ) try
 {
 	return Sanitise( sp->GetRender() );
 }
+DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderIdentifier( TreePtr<Identifier> id )
+string Render::RenderIdentifier( TreePtr<Identifier> id ) try
 {
 	string ids;
 	if( id )
@@ -138,19 +147,12 @@ string Render::RenderIdentifier( TreePtr<Identifier> id )
 	ASSERT(ids.size()>0)(*id)(" rendered to an empty string\n");
 	return ids;
 }
+DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderScopePrefix( TreePtr<Identifier> id )
+string Render::RenderScopePrefix( TreePtr<Identifier> id ) try
 {
-    TreePtr<Scope> scope;
-    try
-    {
-        scope = GetScope( program, id );
-    }
-    catch( ::Mismatch &me )
-    {
-        return RenderMismatchException(me);
-    } 
+    TreePtr<Scope> scope = GetScope( program, id );
         
 	//TRACE("%p %p %p\n", program.get(), scope.get(), scope_stack.top().get() );
 	if( scope == scope_stack.top() )
@@ -168,17 +170,19 @@ string Render::RenderScopePrefix( TreePtr<Identifier> id )
 	else
 		return ERROR_UNSUPPORTED( scope );
 }
+DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderScopedIdentifier( TreePtr<Identifier> id )
+string Render::RenderScopedIdentifier( TreePtr<Identifier> id ) try
 {
 	string s = RenderScopePrefix( id ) + RenderIdentifier( id );
 	TRACE("Render scoped identifier %s\n", s.c_str() );
 	return s;
 }
+DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderIntegralType( TreePtr<Integral> type, string object )
+string Render::RenderIntegralType( TreePtr<Integral> type, string object ) try
 {
 	bool ds;
 	int64_t width;
@@ -231,9 +235,10 @@ string Render::RenderIntegralType( TreePtr<Integral> type, string object )
 
 	return s;
 }
+DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderFloatingType( TreePtr<Floating> type )
+string Render::RenderFloatingType( TreePtr<Floating> type ) try
 {
 	string s;
 	TreePtr<SpecificFloatSemantics> sem = DynamicTreePtrCast<SpecificFloatSemantics>(type->semantics);
@@ -250,9 +255,10 @@ string Render::RenderFloatingType( TreePtr<Floating> type )
 
 	return s;
 }
+DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderType( TreePtr<Type> type, string object, bool constant )
+string Render::RenderType( TreePtr<Type> type, string object, bool constant ) try
 {
 	string sobject;
 	if( !object.empty() )
@@ -294,11 +300,12 @@ string Render::RenderType( TreePtr<Type> type, string object, bool constant )
 	else
 		return ERROR_UNSUPPORTED(type);
 }
+DEFAULT_CATCH_CLAUSE
 
 
 // Insert escapes into a string so it can be put in source code
 // TODO use \n \r etc and let printable ascii through
-string Render::Sanitise( string s )
+string Render::Sanitise( string s ) try
 {
 	string o;
 	for( int i=0; i<s.size(); i++ )
@@ -311,9 +318,10 @@ string Render::Sanitise( string s )
 	}
 	return o;
 }
+DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderOperator( TreePtr<Operator> op, Sequence<Expression> &operands )
+string Render::RenderOperator( TreePtr<Operator> op, Sequence<Expression> &operands ) try
 {
 	ASSERT(op);
     string s;
@@ -363,9 +371,10 @@ string Render::RenderOperator( TreePtr<Operator> op, Sequence<Expression> &opera
     }
     return s;
 }
+DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderCall( TreePtr<Call> call )
+string Render::RenderCall( TreePtr<Call> call ) try
 {
 	string s;
 
@@ -388,9 +397,10 @@ string Render::RenderCall( TreePtr<Call> call )
 	s += ")";
 	return s;
 }
+DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderExpression( TreePtr<Initialiser> expression, bool bracketize_operator )
+string Render::RenderExpression( TreePtr<Initialiser> expression, bool bracketize_operator ) try
 {
 	//TRACE("%p\n", expression.get());
 
@@ -482,9 +492,10 @@ string Render::RenderExpression( TreePtr<Initialiser> expression, bool bracketiz
 	else
 		return ERROR_UNSUPPORTED(expression);
 }
+DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderMakeRecord( TreePtr<MakeRecord> ro )
+string Render::RenderMakeRecord( TreePtr<MakeRecord> ro ) try
 {
 	string s;
 
@@ -502,12 +513,13 @@ string Render::RenderMakeRecord( TreePtr<MakeRecord> ro )
 	s += " }";
 	return s;
 }
+DEFAULT_CATCH_CLAUSE
 
 
 string Render::RenderMapInOrder( TreePtr<MapOperator> ro,
                                  TreePtr<Scope> r,
                                  string separator,
-                                 bool separate_last )
+                                 bool separate_last ) try
 {
 	string s;
 
@@ -547,9 +559,10 @@ string Render::RenderMapInOrder( TreePtr<MapOperator> ro,
 	}
 	return s;
 }
+DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderAccess( TreePtr<AccessSpec> current_access )
+string Render::RenderAccess( TreePtr<AccessSpec> current_access ) try
 {
 	if( DynamicTreePtrCast<Public>( current_access ) )
 		return "public";
@@ -560,9 +573,10 @@ string Render::RenderAccess( TreePtr<AccessSpec> current_access )
 	else
 		return ERROR_UNKNOWN("current_access spec");
 }
+DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderStorage( TreePtr<Instance> st )
+string Render::RenderStorage( TreePtr<Instance> st ) try
 {
 	if( DynamicTreePtrCast<Program>( scope_stack.top() ) )
 		return ""; // at top-level scope, everything is set to static, but don't actually output the word
@@ -585,6 +599,7 @@ string Render::RenderStorage( TreePtr<Instance> st )
 	else
 		return ERROR_UNKNOWN(st->GetTypeName());
 }
+DEFAULT_CATCH_CLAUSE
 
 
 void Render::ExtractInits( Sequence<Statement> &body, Sequence<Statement> &inits, Sequence<Statement> &remainder )
@@ -604,7 +619,7 @@ void Render::ExtractInits( Sequence<Statement> &body, Sequence<Statement> &inits
             }
             catch( ::Mismatch &me )
             {
-                remainder.push_back(MakeTreeNode<SpecificString>(RenderMismatchException(me)));
+                remainder.push_back(MakeTreeNode<SpecificString>(RenderMismatchException(__func__, me)));
                 continue;
             }
 		}
@@ -614,7 +629,7 @@ void Render::ExtractInits( Sequence<Statement> &body, Sequence<Statement> &inits
 
 
 string Render::RenderInstance( TreePtr<Instance> o, string sep, bool showtype,
-                               bool showstorage, bool showinit, bool showscope )
+                               bool showstorage, bool showinit, bool showscope ) try
 {
 	string s;
     string name;
@@ -728,13 +743,14 @@ string Render::RenderInstance( TreePtr<Instance> o, string sep, bool showtype,
 
 	return s;
 }
+DEFAULT_CATCH_CLAUSE
 
 
 // Non-const static objects in records and functions 
 // get split into a part that goes into the record (main line of rendering) and
 // a part that goes separately (deferred_decls gets appended at the very end).
 // Do all functions, since SortDecls() ignores function bodies for dep analysis
-bool Render::ShouldSplitInstance( TreePtr<Instance> o )
+bool Render::ShouldSplitInstance( TreePtr<Instance> o ) 
 {
 	bool isfunc = !!DynamicTreePtrCast<Callable>( o->type );
 	bool isnumber = !!DynamicTreePtrCast<Numeric>( o->type );
@@ -754,7 +770,7 @@ bool Render::ShouldSplitInstance( TreePtr<Instance> o )
 
 string Render::RenderDeclaration( TreePtr<Declaration> declaration,
                                   string sep, TreePtr<AccessSpec> *current_access,
-                                  bool showtype, bool force_incomplete, bool shownonfuncinit )
+                                  bool showtype, bool force_incomplete, bool shownonfuncinit ) try
 {
 	TRACE();
 	string s;
@@ -872,9 +888,10 @@ string Render::RenderDeclaration( TreePtr<Declaration> declaration,
 	TRACE();
 	return s;
 }
+DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderStatement( TreePtr<Statement> statement, string sep )
+string Render::RenderStatement( TreePtr<Statement> statement, string sep ) try
 {
 	TRACE();
 	if( !statement )
@@ -962,6 +979,7 @@ string Render::RenderStatement( TreePtr<Statement> statement, string sep )
     else
 		return ERROR_UNSUPPORTED(statement);
 }
+DEFAULT_CATCH_CLAUSE
 
 
 template< class ELEMENT >
@@ -970,7 +988,7 @@ string Render::RenderSequence( Sequence<ELEMENT> spe,
                                bool separate_last,
                                TreePtr<AccessSpec> init_access,
                                bool showtype,
-                               bool shownonfuncinit )
+                               bool shownonfuncinit ) try
 {
 	TRACE();
 	string s;
@@ -990,11 +1008,12 @@ string Render::RenderSequence( Sequence<ELEMENT> spe,
 	}
 	return s;
 }
+DEFAULT_CATCH_CLAUSE
 
 
 string Render::RenderOperandSequence( Sequence<Expression> spe,
                                       string separator,
-                                      bool separate_last )
+                                      bool separate_last ) try
 {
 	TRACE();
 	string s;
@@ -1009,10 +1028,11 @@ string Render::RenderOperandSequence( Sequence<Expression> spe,
 	}
 	return s;
 }
+DEFAULT_CATCH_CLAUSE
 
 
 string Render::RenderModuleCtor( TreePtr<Module> m,
-                                 TreePtr<AccessSpec> *access )
+                                 TreePtr<AccessSpec> *access ) try
 {
     string s;
     
@@ -1075,13 +1095,14 @@ string Render::RenderModuleCtor( TreePtr<Module> m,
     
     return s;
 }
+DEFAULT_CATCH_CLAUSE
 
 
 string Render::RenderDeclarationCollection( TreePtr<Scope> sd,
                                             string separator,
                                             bool separate_last,
                                             TreePtr<AccessSpec> init_access,
-                                            bool showtype )
+                                            bool showtype ) try
 {
 	TRACE();
 
@@ -1110,9 +1131,11 @@ string Render::RenderDeclarationCollection( TreePtr<Scope> sd,
 	TRACE();
 	return s;
 }
+DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderMismatchException( const Mismatch &me )
+string Render::RenderMismatchException( string fname, const Mismatch &me )
 {
-    return "«Caught:"+me.What()+"»";
+    return "«"+fname+"() caught "+me.What()+"»";
 }
+
