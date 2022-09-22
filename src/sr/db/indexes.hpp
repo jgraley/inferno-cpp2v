@@ -12,6 +12,7 @@ namespace SYM
     class BooleanExpression;
 };
     
+//#define SET_FOR_CAT_INDEX    
 
 namespace SR 
 {
@@ -75,7 +76,11 @@ public:
     void ExpectMatching( const Indexes &mut );
 
     // Category ordering TODO merge with SimpleCompare ordering
+#ifdef SET_FOR_CAT_INDEX		    	
+    typedef set<XLink, CategoryRelation> CategoryOrderedIndex;
+#else
     typedef multiset<XLink, CategoryRelation> CategoryOrderedIndex;
+#endif
     typedef CategoryOrderedIndex::iterator CategoryOrderedIt;
 
     // We will provide a SimpleCompare ordered version of the domain

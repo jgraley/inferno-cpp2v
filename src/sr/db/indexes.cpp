@@ -78,16 +78,20 @@ bool Indexes::CategoryRelation::operator() (const XLink& x_link, const XLink& y_
     if( !cat_x && !cat_y )
     {
 #ifdef TRACE_CATEGORY_RELATION
-        TRACEC("neither is minimax\n");
         xi = lacing->GetOrdinalForNode( x );
         yi = lacing->GetOrdinalForNode( y );
+        Orderable::Result r = x - y;
 #else
         // Fast path out
         Orderable::Result r = lacing->OrdinalCompare( x, y );    
-	    if( r != Orderable::EQUAL )
-		    return r < Orderable::EQUAL;		
-		return false; //x_link < y_link; 
 #endif        
+	    if( r != Orderable::EQUAL )
+		    return r < Orderable::EQUAL;	
+#ifdef SET_FOR_CAT_INDEX		    	
+		return x_link < y_link; 
+#else
+		return false; // take as equal
+#endif		
     }
     else if( cat_x && cat_y )
     {
@@ -112,12 +116,8 @@ bool Indexes::CategoryRelation::operator() (const XLink& x_link, const XLink& y_
     }
     else
     {
-		ASSERT(false);
+		ASSERTFAIL();
 	}
-#ifdef TRACE_CATEGORY_RELATION
-    TRACEC("xi=%d yi=%d result is %s\n", xi, yi, xi<yi?"true":"false");
-#endif    
-    return xi - yi;   
 }
 
 
@@ -185,8 +185,11 @@ void Indexes::PrepareDelete( DBWalk::Actions &actions )
 	{
 		if( !ref && CAT_TO_INCREMENTAL)
         {
-            //size_t n = category_ordered_index.erase( walk_info.xlink );
+#ifdef SET_FOR_CAT_INDEX		    	
+            size_t n = category_ordered_index.erase( walk_info.xlink );
+#else
             size_t n = EraseExact( category_ordered_index, walk_info.xlink );
+#endif
             TRACE("Erased ")(walk_info.xlink)(" from category_ordered_index; erased %u; size now %u\n", n, category_ordered_index.size());    
         }
             
@@ -216,6 +219,6 @@ void Indexes::ExpectMatching( const Indexes &mut )
     ASSERT( ref );
     ASSERT( !mut.ref );
     
-    //ASSERT( category_ordered_index == mut.category_ordered_index )
-    //      ( DiffTrace(category_ordered_index, mut.category_ordered_index) );
+    ASSERT( category_ordered_index == mut.category_ordered_index )
+          ( DiffTrace(category_ordered_index, mut.category_ordered_index) );
 }
