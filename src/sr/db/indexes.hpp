@@ -43,19 +43,23 @@ public:
         CategoryRelation& operator=(const CategoryRelation &other);
         
         bool operator() (const XLink& x_link, const XLink& y_link) const;
+        
     private:
+		Orderable::Result LacingOrdinalCompare(const XLink& x_link, const XLink& y_link) const;
+		
         shared_ptr<Lacing> lacing;
     };
 
     // Create a node here so that a regular XLink can be used and passed
-    // through the sym stuff by value.
-    class CategoryMinimaxNode : public Node
+    // through the sym stuff by value. Is minimus because intervals on this
+    // index are half-open.
+    class CategoryMinimusNode : public Node
     {
     public:
         NODE_FUNCTIONS_FINAL
-        CategoryMinimaxNode( int lacing_ordinal );
-        CategoryMinimaxNode(); ///< default constructor, for making archetypes 
-        int GetLacingOrdinal() const;
+        CategoryMinimusNode( int lacing_ordinal );
+        CategoryMinimusNode(); ///< default constructor, for making archetypes 
+        int GetMinimusOrdinal() const;
         string GetTrace() const override;
     private:
         int lacing_ordinal;

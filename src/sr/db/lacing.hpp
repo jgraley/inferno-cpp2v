@@ -47,8 +47,9 @@ public:
     // Returns the lacing ordinal value for the candidate.
     int GetOrdinalForNode( TreePtr<Node> node ) const;
 
-    // Equivalent to GetOrdinalForNode(lnode) < GetOrdinalForNode(rnode)
-    bool IsOrdinalLess( TreePtr<Node> lnode, TreePtr<Node> rnode ) const;
+    // Approximately GetOrdinalForNode(lnode) - GetOrdinalForNode(rnode)
+    // but close enough for comparisons
+    Orderable::Result OrdinalCompare( TreePtr<Node> lnode, TreePtr<Node> rnode ) const;
 
 private:    
     class DecisionNode;

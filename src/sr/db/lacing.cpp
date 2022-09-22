@@ -54,7 +54,7 @@ int Lacing::GetOrdinalForNode( TreePtr<Node> target_node ) const
 }
 
 
-bool Lacing::IsOrdinalLess( TreePtr<Node> lnode, TreePtr<Node> rnode ) const
+Orderable::Result Lacing::OrdinalCompare( TreePtr<Node> lnode, TreePtr<Node> rnode ) const
 {
     const Lacing::DecisionNode *decision_node_l = decision_tree_root.get();
     const Lacing::DecisionNode *decision_node_r = decision_tree_root.get();
@@ -80,9 +80,9 @@ bool Lacing::IsOrdinalLess( TreePtr<Node> lnode, TreePtr<Node> rnode ) const
         
         // Do we have a result yet?
         if( lmax < rmin )
-            return true;
+            return lmax-rmin;
         if( lmin >= rmax )
-            return false;
+            return lmin-rmax;
 
         // Advance right
         if( auto dn_local_match_r = dynamic_cast<const DecisionNodeLocalMatch *>(decision_node_r) )
@@ -102,9 +102,9 @@ bool Lacing::IsOrdinalLess( TreePtr<Node> lnode, TreePtr<Node> rnode ) const
         
         // Do we have a result yet?
         if( lmax < rmin )
-            return true;
+            return lmax-rmin;
         if( lmin >= rmax )
-            return false;
+            return lmin-rmax;
     }
 }
 
