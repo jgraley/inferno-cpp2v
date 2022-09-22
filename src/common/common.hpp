@@ -562,7 +562,7 @@ std::unique_ptr<T_DEST> dynamic_pointer_cast(std::unique_ptr<T_SRC>& src)
 
 
 template<typename C>
-string DumpDiff( const C &c0, const C &c1 )
+string DiffTrace( const C &c0, const C &c1 )
 {
     string s;
     s += SSPrintf("Size: %u -> %u elements; diff begins\n", c0.size(), c1.size());
@@ -574,6 +574,22 @@ string DumpDiff( const C &c0, const C &c1 )
         s += "- " + Trace(e) + "\n";
     s += "diff ends\n";
     return s;
+}
+
+
+template<typename K, class COMPARE>
+size_t EraseExact( multiset<K, COMPARE> &mset, const K &value )
+{
+    using It = typename multiset<K, COMPARE>::iterator;
+    pair<It, It> p = mset.equal_range( value );
+    list<It> to_erase;
+    for( It it=p.first; it != p.second; ++it )
+        if( *it == value )
+            to_erase.push_back( it );
+    for( It it : to_erase )
+        mset.erase(it);
+
+    return to_erase.size();
 }
 
 #endif

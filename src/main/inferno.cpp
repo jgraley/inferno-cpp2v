@@ -211,7 +211,7 @@ Inferno::Plan::Plan(Inferno *algo_) :
     // Parse input X
     Stage stage_parse_X(
         { Progress::PARSING, 
-          ReadArgs::trace, false, false, false,
+          true, false, false, false,
           SSPrintf("Parsing input %s", ReadArgs::infile.c_str()), 
           nullptr, 
           [this]()
@@ -224,7 +224,7 @@ Inferno::Plan::Plan(Inferno *algo_) :
     // Render output X
     Stage stage_render_X(
         { Progress::RENDERING, 
-          false, ReadArgs::trace_hits, false, false,
+          false, true, false, false,
           "Rendering output to code", 
           nullptr, [&]()
           { 
@@ -248,7 +248,7 @@ Inferno::Plan::Plan(Inferno *algo_) :
     // Output an intermediate/output graph
     Stage stage_X_graph(
         { Progress::RENDERING, 
-          false, ReadArgs::trace_hits, false, false,
+          false, true, false, false,
           "Rendering output to graph", 
           nullptr, 
           [this]()
@@ -309,7 +309,7 @@ Inferno::Plan::Plan(Inferno *algo_) :
           }, 
           nullptr },    
         { Progress::PLANNING_FOUR, 
-          ReadArgs::trace, false, false, false,
+          true, false, false, false,
           "Planning stage four", 
           nullptr,
           [this]()
@@ -415,8 +415,8 @@ void Inferno::RunStage( Stage stage )
     {
     case Progress::NON_STEPPY:
         Progress(stage.progress_stage).SetAsCurrent();
-        Tracer::Enable( stage.allow_trace ); 
-        HitCount::Enable( stage.allow_hits ); 
+        Tracer::Enable( stage.allow_trace && ReadArgs::trace ); 
+        HitCount::Enable( stage.allow_hits && ReadArgs::trace_hits ); 
         stage.stage_function();
         break;
     

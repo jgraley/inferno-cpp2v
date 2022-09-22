@@ -8,6 +8,8 @@ using namespace SR;
 
 #define CAT_TO_INCREMENTAL false
 
+#define TRACE_CATEGORY_RELATION
+
 Indexes::Indexes( const set< shared_ptr<SYM::BooleanExpression> > &clauses, bool ref_ ) :
     plan( clauses ),
     category_ordered_index( plan.lacing ),
@@ -62,23 +64,44 @@ Indexes::CategoryRelation& Indexes::CategoryRelation::operator=(const CategoryRe
 
 bool Indexes::CategoryRelation::operator() (const XLink& x_link, const XLink& y_link) const
 {
+#ifdef TRACE_CATEGORY_RELATION
+    INDENT("@");
+    TRACE("x_link=")(x_link)(" y_link=")(y_link)("\n");
+#endif
     TreePtr<Node> x = x_link.GetChildX();
     auto cat_x = TreePtr<CategoryMinimaxNode>::DynamicCast( x );
     TreePtr<Node> y = y_link.GetChildX();    
     auto cat_y = TreePtr<CategoryMinimaxNode>::DynamicCast( y );
 
-    if( !cat_x && !cat_y )
-        return lacing->IsOrdinalLess( x, y );    
-   
     int xi, yi;
-    if( cat_x )
-        xi = cat_x->GetLacingOrdinal();
-    else
+    if( !cat_x && !cat_y )
+    {
+#ifdef TRACE_CATEGORY_RELATION
+        TRACEC("neither is minimax\n");
         xi = lacing->GetOrdinalForNode( x );
-    if( cat_y )
-        yi = cat_y->GetLacingOrdinal();
-    else
         yi = lacing->GetOrdinalForNode( y );
+#else
+        // Fast path out
+        return lacing->IsOrdinalLess( x, y );    
+#endif        
+    }
+    else
+    {
+#ifdef TRACE_CATEGORY_RELATION
+        TRACEC("one or both is minimax\n");
+#endif
+        if( cat_x )
+            xi = cat_x->GetLacingOrdinal();
+        else
+            xi = lacing->GetOrdinalForNode( x );
+        if( cat_y )
+            yi = cat_y->GetLacingOrdinal();
+        else
+            yi = lacing->GetOrdinalForNode( y );
+    }
+#ifdef TRACE_CATEGORY_RELATION
+    TRACEC("xi=%d yi=%d result is %s\n", xi, yi, xi<yi?"true":"false");
+#endif    
     return xi < yi;   
 }
 
@@ -147,8 +170,9 @@ void Indexes::PrepareDelete( DBWalk::Actions &actions )
 	{
 		if( !ref && CAT_TO_INCREMENTAL)
         {
-            size_t n = category_ordered_index.erase( walk_info.xlink );
-            TRACE("Erasing ")(walk_info.xlink)(" from category_ordered_index; erased %u; size now %u\n", n, category_ordered_index.size());    
+            //size_t n = category_ordered_index.erase( walk_info.xlink );
+            size_t n = EraseExact( category_ordered_index, walk_info.xlink );
+            TRACE("Erased ")(walk_info.xlink)(" from category_ordered_index; erased %u; size now %u\n", n, category_ordered_index.size());    
         }
             
         
@@ -177,6 +201,6 @@ void Indexes::ExpectMatching( const Indexes &mut )
     ASSERT( ref );
     ASSERT( !mut.ref );
     
-    ASSERT( category_ordered_index == mut.category_ordered_index )
-          ( DumpDiff(category_ordered_index, mut.category_ordered_index) );
+    //ASSERT( category_ordered_index == mut.category_ordered_index )
+    //      ( DiffTrace(category_ordered_index, mut.category_ordered_index) );
 }
