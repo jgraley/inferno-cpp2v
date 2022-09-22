@@ -113,7 +113,7 @@ void LinkTable::PrepareBuildMonolithic(DBWalk::Actions &actions)
 		}
 		
 		// Keep track of the last added on the way in.
-		// AddChildren() may recuse back here and update last_link.
+		// VisitItemise() may recuse back here and update last_link.
 		last_xlink = walk_info.xlink;
 
 		// Add a row of x_tree_db

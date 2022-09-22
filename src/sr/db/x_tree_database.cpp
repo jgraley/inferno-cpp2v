@@ -93,8 +93,11 @@ void XTreeDatabase::FullBuild()
 {      
     ASSERT( root_xlink );
 	
+    // Init monolitically
     BuildMonolithic();
 
+    // Init incrementally
+    BuildInit();
     TreeZone root_zone( root_xlink );
     Delete( root_zone );
     Insert( root_zone );
@@ -123,6 +126,7 @@ void XTreeDatabase::ClearMonolithic()
 
 void XTreeDatabase::BuildMonolithic()
 {
+    INDENT("M");
     ASSERT( root_xlink );
     
     ClearMonolithic();
@@ -154,8 +158,32 @@ void XTreeDatabase::BuildMonolithic()
 }
 
 
+void XTreeDatabase::BuildInit()
+{
+    INDENT("N");
+    
+    DBWalk::Actions actions;
+    plan.domain->PrepareInsert( actions );
+    plan.indexes->PrepareInsert( actions );
+    plan.link_table->PrepareInsert( actions );
+    plan.node_table->PrepareInsert( actions );
+    db_walker.InitWalk( &actions );
+#ifdef DB_TEST_EXTENSIONS
+    DBWalk::Actions ref_actions;
+	plan.ref_domain->PrepareInsert( ref_actions );
+    plan.ref_indexes->PrepareInsert( ref_actions );
+    db_walker.InitWalk( &ref_actions );
+#ifdef DB_TEST_THE_TEST
+    ExpectMatches();
+#endif
+#endif
+}
+
+
 void XTreeDatabase::Delete(const TreeZone &zone)
 {
+    INDENT("D");
+
     DBWalk::Actions actions;
     plan.domain->PrepareDelete( actions );
     plan.indexes->PrepareDelete( actions );
@@ -176,6 +204,8 @@ void XTreeDatabase::Delete(const TreeZone &zone)
 
 void XTreeDatabase::Insert(const TreeZone &zone)
 {
+    INDENT("I");
+
     DBWalk::Actions actions;
     plan.domain->PrepareInsert( actions );
     plan.indexes->PrepareInsert( actions );

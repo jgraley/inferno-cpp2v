@@ -7,10 +7,19 @@ void DBWalk::FullWalk( const Actions *actions,
 {
     WalkKit kit { actions, REQUIRE_SOLO };
     
-	AddAtRoot( kit, root_xlink );
+	VisitBase( kit, root_xlink );
     
-    AddAtRoot( kit, XLink::MMAX_Link );
-    AddAtRoot( kit, XLink::OffEndXLink );
+    VisitBase( kit, XLink::MMAX_Link );
+    VisitBase( kit, XLink::OffEndXLink );
+}
+
+
+void DBWalk::InitWalk( const Actions *actions )
+{
+    WalkKit kit { actions, REQUIRE_SOLO };
+
+    VisitBase( kit, XLink::MMAX_Link );
+    VisitBase( kit, XLink::OffEndXLink );
 }
 
 
@@ -19,7 +28,7 @@ void DBWalk::ZoneWalk( const Actions *actions,
 {
     WalkKit kit { actions, REQUIRE_SOLO };
 
-	AddAtRoot( kit, zone.GetBase() );
+	VisitBase( kit, zone.GetBase() );
 }
 
 
@@ -28,14 +37,14 @@ void DBWalk::ExtraXLinkWalk( const Actions *actions,
 {
     WalkKit kit { actions, STOP_IF_ALREADY_IN };
 
-	AddAtRoot( kit, extra_xlink ); 
+	VisitBase( kit, extra_xlink ); 
 }
 
 
-void DBWalk::AddAtRoot( const WalkKit &kit, 
+void DBWalk::VisitBase( const WalkKit &kit, 
                         XLink root_xlink )
 {
-    AddLink( kit, 
+    VisitLink( kit, 
              { ROOT, 
                root_xlink, 
                XLink(), 
@@ -46,7 +55,7 @@ void DBWalk::AddAtRoot( const WalkKit &kit,
 }
 
 
-void DBWalk::AddSingularNode( const WalkKit &kit, 
+void DBWalk::VisitSingular( const WalkKit &kit, 
                               const TreePtrInterface *p_x_singular, 
                               XLink xlink )
 {
@@ -61,7 +70,7 @@ void DBWalk::AddSingularNode( const WalkKit &kit,
     TreePtr<Node> x = xlink.GetChildX();
     XLink child_xlink( x, p_x_singular );   
     
-    AddLink( kit, 
+    VisitLink( kit, 
              { SINGULAR, 
                child_xlink, 
                xlink, 
@@ -72,7 +81,7 @@ void DBWalk::AddSingularNode( const WalkKit &kit,
 }
 
 
-void DBWalk::AddSequence( const WalkKit &kit, 
+void DBWalk::VisitSequence( const WalkKit &kit, 
                           SequenceInterface *x_seq, 
                           XLink xlink )
 {
@@ -83,7 +92,7 @@ void DBWalk::AddSequence( const WalkKit &kit,
          ++xit )
     {
         XLink child_xlink( x, &*xit );
-        AddLink( kit, 
+        VisitLink( kit, 
                  { IN_SEQUENCE, 
                    child_xlink, 
                    xlink, 
@@ -96,7 +105,7 @@ void DBWalk::AddSequence( const WalkKit &kit,
 }
 
 
-void DBWalk::AddCollection( const WalkKit &kit, 
+void DBWalk::VisitCollection( const WalkKit &kit, 
                             CollectionInterface *x_col, 
                             XLink xlink )
 {
@@ -106,7 +115,7 @@ void DBWalk::AddCollection( const WalkKit &kit,
          ++xit )
     {
         XLink child_xlink( x, &*xit );
-        AddLink( kit, 
+        VisitLink( kit, 
                  { IN_COLLECTION, 
                    child_xlink, 
                    xlink, 
@@ -118,14 +127,18 @@ void DBWalk::AddCollection( const WalkKit &kit,
 }
 
 
-void DBWalk::AddLink( const WalkKit &kit, 
+void DBWalk::VisitLink( const WalkKit &kit, 
                       const WalkInfo &walk_info )
 {
+    INDENT(".");
+    
     // This will also prevent recursion into xlink
     if( kit.mode==STOP_IF_ALREADY_IN && 
         kit.actions->domain_in_is_ok && 
         !kit.actions->domain_in_is_ok(walk_info) )
         return; // Terminate into the existing domain
+            
+    TRACE("Visiting link ")(walk_info.xlink)("\n");    
             
     // Wind-in actions
     if( kit.actions->domain_in )
@@ -143,7 +156,7 @@ void DBWalk::AddLink( const WalkKit &kit,
 		kit.actions->node_row_in( walk_info );        
             
     // Recurse into our child nodes
-    AddChildren( kit, walk_info.xlink ); 
+    VisitItemise( kit, walk_info.xlink ); 
 
     // Unwind actions
     if( kit.actions->link_row_out )
@@ -151,7 +164,7 @@ void DBWalk::AddLink( const WalkKit &kit,
 }
 
 
-void DBWalk::AddChildren( const WalkKit &kit, 
+void DBWalk::VisitItemise( const WalkKit &kit, 
                           XLink xlink )
 {
     TreePtr<Node> x = xlink.GetChildX();
@@ -159,11 +172,11 @@ void DBWalk::AddChildren( const WalkKit &kit,
     for( Itemiser::Element *xe : x_items )
     {
         if( SequenceInterface *x_seq = dynamic_cast<SequenceInterface *>(xe) )
-            AddSequence( kit, x_seq, xlink );
+            VisitSequence( kit, x_seq, xlink );
         else if( CollectionInterface *x_col = dynamic_cast<CollectionInterface *>(xe) )
-            AddCollection( kit, x_col, xlink );
+            VisitCollection( kit, x_col, xlink );
         else if( TreePtrInterface *p_x_singular = dynamic_cast<TreePtrInterface *>(xe) )
-            AddSingularNode( kit, p_x_singular, xlink );
+            VisitSingular( kit, p_x_singular, xlink );
         else
             ASSERTFAIL("got something from itemise that isnt a Sequence, Collection or a singular TreePtr");
     }

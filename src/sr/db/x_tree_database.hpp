@@ -51,6 +51,7 @@ public:
     void ClearMonolithic();
     void BuildMonolithic();
 
+    void BuildInit();
     void Delete(const TreeZone &zone);
     void Insert(const TreeZone &zone);
            

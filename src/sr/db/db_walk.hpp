@@ -44,6 +44,7 @@ public:
     
 	void FullWalk( const Actions *actions, 
 				   XLink root_xlink );
+    void InitWalk( const Actions *actions );
     void ZoneWalk( const Actions *actions,
                    const TreeZone &zone );
     void ExtraXLinkWalk( const Actions *actions, 
@@ -70,21 +71,21 @@ private:
         SubtreeMode mode;
     };
 
-    void AddAtRoot( const WalkKit &kit, 
+    void VisitBase( const WalkKit &kit, 
                     XLink root_xlink );
-    void AddSingularNode( const WalkKit &kit, 
-                          const TreePtrInterface *p_x_singular, 
-                          XLink xlink );
-    void AddSequence( const WalkKit &kit, 
-                      SequenceInterface *x_seq, 
-                      XLink xlink );
-    void AddCollection( const WalkKit &kit, 
-                        CollectionInterface *x_col, 
+    void VisitSingular( const WalkKit &kit, 
+                        const TreePtrInterface *p_x_singular, 
                         XLink xlink );
-    void AddLink( const WalkKit &kit, 
-                  const WalkInfo &walk_info );
-    void AddChildren( const WalkKit &kit, 
-                      XLink xlink );
+    void VisitSequence( const WalkKit &kit, 
+                        SequenceInterface *x_seq, 
+                        XLink xlink );
+    void VisitCollection( const WalkKit &kit, 
+                          CollectionInterface *x_col, 
+                          XLink xlink );
+    void VisitLink( const WalkKit &kit, 
+                    const WalkInfo &walk_info );
+    void VisitItemise( const WalkKit &kit, 
+                       XLink xlink );
 };    
     
 }

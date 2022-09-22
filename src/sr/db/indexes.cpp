@@ -6,7 +6,7 @@
 
 using namespace SR;    
 
-#define CAT_TO_INCREMENTAL 0
+#define CAT_TO_INCREMENTAL false
 
 Indexes::Indexes( const set< shared_ptr<SYM::BooleanExpression> > &clauses, bool ref_ ) :
     plan( clauses ),
@@ -146,7 +146,11 @@ void Indexes::PrepareDelete( DBWalk::Actions &actions )
 	actions.indexes_in = [&](const DBWalk::WalkInfo &walk_info) -> DBCommon::DepthFirstOrderedIt
 	{
 		if( !ref && CAT_TO_INCREMENTAL)
-            category_ordered_index.erase( walk_info.xlink );
+        {
+            size_t n = category_ordered_index.erase( walk_info.xlink );
+            TRACE("Erasing ")(walk_info.xlink)(" from category_ordered_index; erased %u; size now %u\n", n, category_ordered_index.size());    
+        }
+            
         
 		return depth_first_ordered_index.end(); 
 	};
@@ -158,7 +162,10 @@ void Indexes::PrepareInsert(DBWalk::Actions &actions)
 	actions.indexes_in = [&](const DBWalk::WalkInfo &walk_info) -> DBCommon::DepthFirstOrderedIt
 	{ 
         if( !ref && CAT_TO_INCREMENTAL )
+        {
             category_ordered_index.insert( walk_info.xlink );
+            TRACE("Inserting ")(walk_info.xlink)(" into category_ordered_index; size now %u\n", category_ordered_index.size());    
+        }
 
 		return depth_first_ordered_index.end(); 
 	};
