@@ -63,7 +63,7 @@ private:
     bool IsSatisfied( const Assignments &assignments ) const override;
     unique_ptr<SYM::SetResult> GetSuggestedValues( const Assignments &assignments,
                                                    const VariableId &var ) const override;               
-    
+    string GetTrace() const override;
     void Dump() const;
 };
 

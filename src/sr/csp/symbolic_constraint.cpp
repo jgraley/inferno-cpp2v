@@ -173,6 +173,12 @@ unique_ptr<SYM::SetResult> SymbolicConstraint::GetSuggestedValues( const Assignm
 }
 
 
+string SymbolicConstraint::GetTrace() const
+{
+    return Constraint::GetTrace() + SSPrintf("[%d]", plan.variables.size());
+}
+
+
 void SymbolicConstraint::Dump() const
 {
     TRACE("Degree: ")(plan.variables.size())("\n"); // keep this - useful for quickly checking the degrees

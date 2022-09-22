@@ -15,7 +15,7 @@
 // was empty).
 //#define CHECK_NONEMPTY_RESIDUAL
 
-//#define LOG_INDIVIDUAL_SUGGESTION_SETS
+#define LOG_INDIVIDUAL_SUGGESTION_SETS
 
 using namespace CSP;
 
@@ -64,7 +64,7 @@ ValueSelector::ValueSelector( const ConstraintSet &constraints_to_query_,
               
     if( sok )
     {
-		TRACEC("Intersection of suggstions is ")(*s)(" - make queue from this\n"); 		
+		TRACEC("Intersection of suggestions is ")(*s)(" - make queue from this\n"); 		
         SetupSuggestionGenerator( s );
 	}
     else

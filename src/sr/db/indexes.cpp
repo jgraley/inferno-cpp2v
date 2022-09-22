@@ -64,55 +64,82 @@ Indexes::CategoryRelation& Indexes::CategoryRelation::operator=(const CategoryRe
 
 bool Indexes::CategoryRelation::operator() (const XLink& x_link, const XLink& y_link) const
 {
-    INDENT("@");
-
 #ifdef TRACE_CATEGORY_RELATION
+    INDENT("@");
     TRACE("x_link=")(x_link)(" y_link=")(y_link)("\n");
 #endif
     TreePtr<Node> x = x_link.GetChildX();
-    auto cat_x = TreePtr<CategoryMinimusNode>::DynamicCast( x );
+    auto x_minimus = TreePtr<CategoryMinimusNode>::DynamicCast( x );
     TreePtr<Node> y = y_link.GetChildX();    
-    auto cat_y = TreePtr<CategoryMinimusNode>::DynamicCast( y );
+    auto y_minimus = TreePtr<CategoryMinimusNode>::DynamicCast( y );
 
-    int xi, yi;
-    if( !cat_x && !cat_y )
+    int xi=-1, yi=-1;
+    if( !x_minimus && !y_minimus )
     {
-#ifdef TRACE_CATEGORY_RELATION
         xi = lacing->GetOrdinalForNode( x );
         yi = lacing->GetOrdinalForNode( y );
-        Orderable::Result r = x - y;
-#else
+        Orderable::Result ro = xi - yi;
         // Fast path out
-        Orderable::Result r = lacing->OrdinalCompare( x, y );    
+        //Orderable::Result r = lacing->OrdinalCompare( x, y );    
+#ifdef TRACE_CATEGORY_RELATION
+        TRACEC("both normal: %d - %d = %d\n", xi, yi, r);
 #endif        
-	    if( r != Orderable::EQUAL )
-		    return r < Orderable::EQUAL;	
+#ifdef CHECK_ORDINAL_COMPARE
+        ASSERT( (r>0) == (ro>0) );
+        ASSERT( (r<0) == (ro<0) );
+        ASSERT( (r==0) == (ro==0) );
+#endif
+   	    if( ro != Orderable::EQUAL )
+		    return ro < Orderable::EQUAL;	
 		    
         if( ReadArgs::use_strong_cat_order )    	//------------ it's here!
-			return x_link.operator<(y_link); 
+        {
+			bool res = x_link.operator<(y_link);
+#ifdef TRACE_CATEGORY_RELATION
+			TRACEC("strong cat order: ")(res)("\n");
+#endif
+			return res; 
+		}
 		else
+		{
+#ifdef TRACE_CATEGORY_RELATION
+			TRACEC("weak cat order : false\n");
+#endif
 			return false; // take as equal
+		}
     }
-    else if( cat_x && cat_y )
+    else if( x_minimus && y_minimus )
     {
 		ASSERT( false ); // not expecting this to happen
-		return cat_x->GetMinimusOrdinal() < cat_y->GetMinimusOrdinal();
+		return x_minimus->GetMinimusOrdinal() < y_minimus->GetMinimusOrdinal();
 	}
-    else if( cat_x && !cat_y )
+    else if( x_minimus && !y_minimus )
 	{
-        xi = cat_x->GetMinimusOrdinal();
+        xi = x_minimus->GetMinimusOrdinal();
         yi = lacing->GetOrdinalForNode( y );
+        bool res;
         if( xi != yi )
-			return xi < yi;
-		return true; // minimus is on the left
+			res = xi < yi;
+		else
+		    res = true; // minimus is on the left
+#ifdef TRACE_CATEGORY_RELATION
+        TRACEC("left is minimus: %d♭ - %d = %d result: ", xi, yi, xi-yi)(res)("\n");
+#endif
+		return res;
 	}
-	else if( !cat_x && cat_y )
+	else if( !x_minimus && y_minimus )
     {
         xi = lacing->GetOrdinalForNode( x );
-        yi = cat_y->GetMinimusOrdinal();      
+        yi = y_minimus->GetMinimusOrdinal();      
+        bool res;
         if( xi != yi )
-			return xi < yi;
-		return false; // minimus is on the right
+			res = xi < yi;
+		else
+		    res = false; // minimus is on the right
+#ifdef TRACE_CATEGORY_RELATION
+        TRACEC("right is minimus: %d - %d♭ = %d result: ", xi, yi, xi-yi)(res)("\n");
+#endif
+		return res;
     }
     else
     {
@@ -139,7 +166,7 @@ int Indexes::CategoryMinimusNode::GetMinimusOrdinal() const
 }
  
 
-string Indexes::CategoryMinimusNode::GetTrace() const
+string Indexes::CategoryMinimusNode::GetName() const
 {
     return GetTypeName() + SSPrintf("(%d)", lacing_ordinal);
 }

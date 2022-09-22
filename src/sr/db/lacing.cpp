@@ -78,11 +78,18 @@ Orderable::Result Lacing::OrdinalCompare( TreePtr<Node> lnode, TreePtr<Node> rno
             ASSERTFAIL();            
         }
         
+		ASSERT( lmax >= GetOrdinalForNode(lnode) );
+		ASSERT( lmin <= GetOrdinalForNode(lnode) );
+		ASSERT( rmax >= GetOrdinalForNode(rnode) );
+		ASSERT( rmin <= GetOrdinalForNode(rnode) );
+
         // Do we have a result yet?
         if( lmax < rmin )
             return lmax-rmin;
-        if( lmin >= rmax )
+        if( lmin > rmax )
             return lmin-rmax;
+        if( lmin==lmax && rmin==rmax && lmin==rmin )
+            return 0;
 
         // Advance right
         if( auto dn_local_match_r = dynamic_cast<const DecisionNodeLocalMatch *>(decision_node_r) )
@@ -100,11 +107,18 @@ Orderable::Result Lacing::OrdinalCompare( TreePtr<Node> lnode, TreePtr<Node> rno
             ASSERTFAIL();            
         }
         
+		ASSERT( lmax >= GetOrdinalForNode(lnode) );
+		ASSERT( lmin <= GetOrdinalForNode(lnode) );
+		ASSERT( rmax >= GetOrdinalForNode(rnode) );
+		ASSERT( rmin <= GetOrdinalForNode(rnode) );
+
         // Do we have a result yet?
         if( lmax < rmin )
             return lmax-rmin;
-        if( lmin >= rmax )
+        if( lmin > rmax )
             return lmin-rmax;
+        if( lmin==lmax && rmin==rmax && lmin==rmin )
+            return 0;
     }
 }
 
