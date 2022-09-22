@@ -8,7 +8,7 @@ using namespace SR;
 
 #define CAT_TO_INCREMENTAL false
 
-#define TRACE_CATEGORY_RELATION
+//#define TRACE_CATEGORY_RELATION
 
 Indexes::Indexes( const set< shared_ptr<SYM::BooleanExpression> > &clauses, bool ref_ ) :
     plan( clauses ),
