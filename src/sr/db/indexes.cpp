@@ -92,21 +92,11 @@ bool Indexes::CategoryRelation::operator() (const XLink& x_link, const XLink& y_
    	    if( ro != Orderable::EQUAL )
 		    return ro < Orderable::EQUAL;	
 		    
-        if( ReadArgs::use_strong_cat_order )    	//------------ it's here!
-        {
-			bool res = x_link.operator<(y_link);
+        bool res = x_link.operator<(y_link);
 #ifdef TRACE_CATEGORY_RELATION
-			TRACEC("strong cat order: ")(res)("\n");
+        TRACEC("strong cat order: ")(res)("\n");
 #endif
-			return res; 
-		}
-		else
-		{
-#ifdef TRACE_CATEGORY_RELATION
-			TRACEC("weak cat order : false\n");
-#endif
-			return false; // take as equal
-		}
+        return res; 
     }
     else if( x_minimus && y_minimus )
     {
@@ -212,11 +202,7 @@ void Indexes::PrepareDelete( DBWalk::Actions &actions )
 	{
 		if( !ref && CAT_TO_INCREMENTAL)
         {
-#ifdef SET_FOR_CAT_INDEX		    	
             size_t n = category_ordered_index.erase( walk_info.xlink );
-#else
-            size_t n = EraseExact( category_ordered_index, walk_info.xlink );
-#endif
             TRACE("Erased ")(walk_info.xlink)(" from category_ordered_index; erased %u; size now %u\n", n, category_ordered_index.size());    
         }
             

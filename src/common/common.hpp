@@ -576,20 +576,4 @@ string DiffTrace( const C &c0, const C &c1 )
     return s;
 }
 
-
-template<typename K, class COMPARE>
-size_t EraseExact( multiset<K, COMPARE> &mset, const K &value )
-{
-    using It = typename multiset<K, COMPARE>::iterator;
-    pair<It, It> p = mset.equal_range( value );
-    list<It> to_erase;
-    for( It it=p.first; it != p.second; ++it )
-        if( *it == value )
-            to_erase.push_back( it );
-    for( It it : to_erase )
-        mset.erase(it);
-
-    return to_erase.size();
-}
-
 #endif
