@@ -15,36 +15,20 @@ XTreeDatabase::XTreeDatabase( const set< shared_ptr<SYM::BooleanExpression> > &c
 {
 	auto on_insert_extra_subtree = [&](XLink extra_base_xlink)
 	{
-        TRACEC("Adding extra subtree to x tree db, base: ")(extra_base_xlink)("\n");
+        TRACEC("Inserting extra subtree to x tree db, base: ")(extra_base_xlink)("\n");
         MonolithicExtra( extra_base_xlink );
         InsertExtra( extra_base_xlink );        
     };
 
-#ifdef EXTEND_UNDO    
 	auto on_delete_extra_xlink = [&](XLink extra_xlink)
 	{
-        DBWalk::Actions actions;
-        plan.domain->PrepareDelete( actions );
-        plan.indexes->PrepareDelete( actions );
-        plan.link_table->PrepareDelete( actions );
-        plan.node_table->PrepareDelete( actions );
-        db_walker.SingleXLinkWalk( &actions, extra_xlink );   
-#ifdef DB_ENABLE_COMPARATIVE_TEST
-        {
-            INDENT("⦼");
-            DBWalk::Actions ref_actions;
-            plan.ref_domain->PrepareDelete( ref_actions );
-            plan.ref_indexes->PrepareDelete( ref_actions );
-            db_walker.SingleXLinkWalk( &ref_actions, extra_xlink );
-#ifdef DB_TEST_THE_TEST
-            ExpectMatches();
-#endif
-        }
-#endif
+        TRACEC("Deleting extra xlink from x tree db: ")(extra_xlink)("\n");
+        DeleteExtra( extra_xlink );
+        // No monolithic variant: everything monolithic gets splatted in ClearMonolithic()
     };
-#endif
     
-    plan.domain->SetOnExtraXLinkFunctions(on_insert_extra_subtree);
+    plan.domain->SetOnExtraXLinkFunctions( on_insert_extra_subtree,
+                                           on_delete_extra_xlink );
 }
 
 
@@ -111,7 +95,7 @@ void XTreeDatabase::MonolithicBuild()
     ASSERT( root_xlink );
         
     DBWalk::Actions actions;
-    plan.domain->PrepareMonolithicBuild( actions );
+    plan.domain->PrepareMonolithicBuild( actions, false );
     plan.indexes->PrepareMonolithicBuild( actions );
     plan.link_table->PrepareMonolithicBuild( actions );
     plan.node_table->PrepareMonolithicBuild( actions );
@@ -120,7 +104,7 @@ void XTreeDatabase::MonolithicBuild()
     {
         INDENT("⦼");
         DBWalk::Actions ref_actions;
-        plan.ref_domain->PrepareMonolithicBuild( ref_actions );
+        plan.ref_domain->PrepareMonolithicBuild( ref_actions, false );
         plan.ref_indexes->PrepareMonolithicBuild( ref_actions );
         db_walker.FullWalk( &ref_actions, root_xlink );
 #ifdef DB_TEST_THE_TEST
@@ -161,7 +145,7 @@ void XTreeDatabase::MonolithicExtra(XLink extra_base_xlink)
     INDENT("f");
 
     DBWalk::Actions actions;
-	plan.domain->PrepareMonolithicBuild( actions );
+	plan.domain->PrepareMonolithicBuild( actions, true );
 	plan.indexes->PrepareMonolithicBuild( actions );
 	plan.link_table->PrepareMonolithicBuild( actions );
 	plan.node_table->PrepareMonolithicBuild( actions );
@@ -171,7 +155,7 @@ void XTreeDatabase::MonolithicExtra(XLink extra_base_xlink)
     {
         INDENT("⦼");
         DBWalk::Actions ref_actions;
-        plan.ref_domain->PrepareMonolithicBuild( ref_actions );
+        plan.ref_domain->PrepareMonolithicBuild( ref_actions, true );
         plan.ref_indexes->PrepareMonolithicBuild( ref_actions );
         db_walker.ExtraZoneWalk( &ref_actions, extra_base_xlink );
 #ifdef DB_TEST_THE_TEST
@@ -257,6 +241,33 @@ void XTreeDatabase::InsertExtra(XLink extra_base_xlink)
 }
 
 
+void XTreeDatabase::DeleteExtra(XLink extra_xlink)
+{
+    // Note not symmetrical with InsertExtra(): we
+    // will be invoked with every xlink in the extra
+    // zones and on each call we delete just that
+    // xlink.
+    DBWalk::Actions actions;
+    plan.domain->PrepareDelete( actions );
+    plan.indexes->PrepareDelete( actions );
+    plan.link_table->PrepareDelete( actions );
+    plan.node_table->PrepareDelete( actions );
+    db_walker.SingleXLinkWalk( &actions, extra_xlink );   
+#ifdef DB_ENABLE_COMPARATIVE_TEST
+    {
+        INDENT("⦼");
+        DBWalk::Actions ref_actions;
+        plan.ref_domain->PrepareDelete( ref_actions );
+        plan.ref_indexes->PrepareDelete( ref_actions );
+        db_walker.SingleXLinkWalk( &ref_actions, extra_xlink );
+#ifdef DB_TEST_THE_TEST
+        ExpectMatches();
+#endif
+    }
+#endif
+}
+
+
 XLink XTreeDatabase::UniquifyDomainExtension( XLink xlink )
 {
     ASSERT( root_xlink );
@@ -282,6 +293,13 @@ void XTreeDatabase::ExtendDomainNewX()
 {
     ASSERT( root_xlink );
 	plan.domain->ExtendDomainNewX( *this );
+}
+
+
+void XTreeDatabase::UnExtendDomain()
+{
+    ASSERT( root_xlink );
+    plan.domain->UnExtendDomain();
 }
 
 

@@ -118,13 +118,15 @@ void Domain::ExtendDomainNewX(const TreeKit &kit)
 }
 
 
-void Domain::UnExtendDomain(const TreeKit &kit)
+void Domain::UnExtendDomain()
 {
 #ifdef TRACE_DOMAIN_EXTEND
 	unordered_set<XLink> previous_unordered_domain = unordered_domain;
+    TRACE("Domain extensions believed to be:\n")(extended_domain)("\n");
 #endif    
 
-    for( XLink extra_xlink : extended_domain )
+    unordered_set<XLink> to_delete = extended_domain;
+    for( XLink extra_xlink : to_delete )
     {
         extended_domain.erase( extra_xlink );
         on_delete_extra_xlink( extra_xlink );
@@ -143,12 +145,11 @@ void Domain::UnExtendDomain(const TreeKit &kit)
 void Domain::MonolithicClear()
 {
     unordered_domain.clear();
-    extended_domain.clear();
     domain_extension_classes->Clear();
 }    
 
 
-void Domain::PrepareMonolithicBuild(DBWalk::Actions &actions)
+void Domain::PrepareMonolithicBuild(DBWalk::Actions &actions, bool extra)
 {
 	actions.is_unreached = [&](const DBWalk::WalkInfo &walk_info) -> bool
 	{
@@ -156,10 +157,15 @@ void Domain::PrepareMonolithicBuild(DBWalk::Actions &actions)
 	};
 	
 	actions.domain_in = [&](const DBWalk::WalkInfo &walk_info)
-	{
+	{        
 		// ----------------- Update domain
 		InsertSolo( unordered_domain, walk_info.xlink ); 
-        InsertSolo( extended_domain, walk_info.xlink );
+        if( extra )
+            InsertSolo( extended_domain, walk_info.xlink );
+        
+#ifdef TRACE_DOMAIN_EXTEND
+        TRACE("Saw domain extra ")(walk_info.xlink)(" extra flag=")(extra)(" ud.size=%u ed.size()=%u\n", unordered_domain.size(), extended_domain.size());
+#endif
         
         // Here, elements go into quotient set, but it does not 
 		// uniquify: every link in the input X tree must appear 

@@ -43,10 +43,10 @@ public:
     void PatternWalker( const TreeKit &kit, PatternLink plink, bool remove = false );
     void ExtendDomainNewPattern( const TreeKit &kit, PatternLink root_plink );
     void ExtendDomainNewX( const TreeKit &kit );
-    void UnExtendDomain(const TreeKit &kit);
+    void UnExtendDomain();
 
     void MonolithicClear();
-	void PrepareMonolithicBuild(DBWalk::Actions &actions);
+	void PrepareMonolithicBuild(DBWalk::Actions &actions, bool extra);
     void PrepareDelete(DBWalk::Actions &actions);
 	void PrepareInsert(DBWalk::Actions &actions);
 

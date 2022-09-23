@@ -59,12 +59,14 @@ public:
     void Delete(const TreeZone &zone);
     void Insert(const TreeZone &zone);
     void InsertExtra(XLink extra_base_xlink);
+    void DeleteExtra(XLink extra_xlink);
 
     XLink UniquifyDomainExtension( XLink xlink );
     XLink FindDomainExtension( XLink xlink ) const;
     void ExtendDomainNewPattern( PatternLink root_plink );
     void ExtendDomainNewX();           
-            
+    void UnExtendDomain();
+
     const LinkTable::Row &GetRow(XLink xlink) const;
     bool HasRow(XLink xlink) const;    
     const NodeTable::Row &GetNodeRow(TreePtr<Node> node) const;

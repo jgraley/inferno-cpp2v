@@ -46,8 +46,9 @@ public:
 
     XLink UniquifyDomainExtension( XLink xlink ) const;
     XLink FindDomainExtension( XLink xlink ) const;
-    void ExtendDomainNewX();
     void ExtendDomainNewPattern( PatternLink root_plink );
+    void ExtendDomainNewX();
+    void UnExtendDomain();
 
     void ExecuteUpdateCommand( shared_ptr<UpdateCommand> cmd );
     void XTreeDbMonolithicClear();
