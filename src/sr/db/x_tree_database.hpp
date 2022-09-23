@@ -10,7 +10,7 @@
 #include "domain.hpp"
 #include "indexes.hpp"
 
-#define DB_ENABLE_COMPARATIVE_TEST
+//#define DB_ENABLE_COMPARATIVE_TEST
 
 namespace SR 
 {

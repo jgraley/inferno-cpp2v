@@ -3,8 +3,7 @@
 
 #include "domain.hpp"
 
-#define TRACE_DOMAIN_EXTEND
-
+//#define TRACE_DOMAIN_EXTEND
 
 using namespace SR;    
 

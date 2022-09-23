@@ -147,7 +147,7 @@ void DBWalk::VisitLink( const WalkKit &kit,
         !kit.actions->is_unreached(walk_info) )
         return; // Terminate into existing links/nodes
             
-    TRACE("Visiting link ")(walk_info.xlink)("\n");    
+    //TRACE("Visiting link ")(walk_info.xlink)("\n");    
             
     WindInActions( kit, walk_info );        
             

@@ -367,7 +367,7 @@ set<TreeKit::LinkInfo> XTreeDatabase::GetDeclarers( TreePtr<Node> node ) const
 
 void XTreeDatabase::Dump() const
 {
-    plan.ref_indexes->Dump();
+    plan.indexes->Dump();
 }
 
 
