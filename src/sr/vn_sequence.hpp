@@ -53,6 +53,7 @@ public:
     void XTreeDbMonolithicClear();
     void XTreeDbMonolithicBuild();
     
+    void XTreeDbDump() const;
     void XTreeDbExpectMatches() const;
     
     bool IsDirtyGrass( TreePtr<Node> node );

@@ -12,8 +12,7 @@ namespace SYM
     class BooleanExpression;
 };
     
-#define SET_FOR_CAT_INDEX    
-
+    
 namespace SR 
 {
 class SimpleCompareQuotientSet;
@@ -73,6 +72,7 @@ public:
     void PrepareDelete(DBWalk::Actions &actions);
 	void PrepareInsert(DBWalk::Actions &actions);
     
+    void Dump() const;
     void ExpectMatching( const Indexes &mut );
 
     // Category ordering TODO merge with SimpleCompare ordering
@@ -95,6 +95,7 @@ public:
 
 private:
     const bool ref;
+    const bool incremental;
 };    
     
 }

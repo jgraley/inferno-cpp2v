@@ -174,6 +174,12 @@ void VNSequence::XTreeDbMonolithicBuild()
 }
 
 
+void VNSequence::XTreeDbDump() const
+{
+    ASSERT( x_tree_db )("Planning stage four should have created x_tree_db object");  
+    x_tree_db->Dump();
+}
+
 #ifdef DB_ENABLE_COMPARATIVE_TEST
 void VNSequence::XTreeDbExpectMatches() const
 {

@@ -43,7 +43,7 @@ public:
     static bool assert_pedigree;
     static bool documentation_graphs;
     static bool output_all;
-    static bool use_x;
+    static bool use_incremental;
     
 private:
     void ParseQuitAfter(std::string arg);

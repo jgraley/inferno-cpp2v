@@ -334,7 +334,7 @@ void SCREngine::UpdateEmbeddedActionRequests( TreePtr<Node> through_subtree, Tre
 
 void SCREngine::RunEmbedded( PatternLink plink_to_embedded, XLink base_xlink )
 {         
-    INDENT("L");
+    INDENT("E");
     auto embedded_agent = dynamic_cast<RequiresSubordinateSCREngine *>(plink_to_embedded.GetChildAgent());
     ASSERT( embedded_agent );    
     shared_ptr<SCREngine> embedded_engine = plan.my_engines.at(embedded_agent);
@@ -371,6 +371,13 @@ void SCREngine::Replace( XLink base_xlink )
     TreePtr<Node> new_base_x = plan.base_agent->BuildReplace(plan.base_plink);
     FreeZone new_zone( new_base_x );
 
+#ifdef DB_ENABLE_COMPARATIVE_TEST
+    // For debug
+	plan.vn_sequence->XTreeDbDump();
+    TRACE("Early check\n");
+    plan.vn_sequence->XTreeDbExpectMatches();
+#endif
+    
 	plan.vn_sequence->XTreeDbMonolithicClear();
 
 	auto seq = make_shared<CommandSequence>();
@@ -383,6 +390,7 @@ void SCREngine::Replace( XLink base_xlink )
     plan.vn_sequence->ExtendDomainNewX();
     
 #ifdef DB_ENABLE_COMPARATIVE_TEST
+    TRACE("Late check\n");
     plan.vn_sequence->XTreeDbExpectMatches();
 #endif
 

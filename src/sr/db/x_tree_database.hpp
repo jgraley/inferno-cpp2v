@@ -10,7 +10,7 @@
 #include "domain.hpp"
 #include "indexes.hpp"
 
-//#define DB_ENABLE_COMPARATIVE_TEST
+#define DB_ENABLE_COMPARATIVE_TEST
 
 namespace SR 
 {
@@ -52,13 +52,13 @@ public:
 	// Monolithic strategy: clear for whole tree and build from scratch
     void MonolithicClear();
     void MonolithicBuild(); // includes permanent columns
-	void MonolithicExtra(XLink extra_xlink);
+	void MonolithicExtra(XLink extra_base_xlink);
 
 	// Incremental strategy: perform updates on zones
     void InsertPermanent();
     void Delete(const TreeZone &zone);
     void Insert(const TreeZone &zone);
-    void InsertExtra(XLink extra_xlink);
+    void InsertExtra(XLink extra_base_xlink);
 
     XLink UniquifyDomainExtension( XLink xlink );
     XLink FindDomainExtension( XLink xlink ) const;
@@ -70,6 +70,7 @@ public:
     const NodeTable::Row &GetNodeRow(TreePtr<Node> node) const;
     bool HasNodeRow(TreePtr<Node> node) const;
 	const Indexes &GetIndexes() const;
+    void Dump() const;
 #ifdef DB_ENABLE_COMPARATIVE_TEST
     void ExpectMatches() const;
 #endif	

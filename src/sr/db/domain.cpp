@@ -3,6 +3,9 @@
 
 #include "domain.hpp"
 
+#define TRACE_DOMAIN_EXTEND
+
+
 using namespace SR;    
 
 Domain::Domain() :
@@ -11,9 +14,11 @@ Domain::Domain() :
 }
 	
 
-void Domain::SetOnExtraXLinkFunction( OnExtraXLinkFunction on_extra_xlink_ )
+void Domain::SetOnExtraXLinkFunctions( OnExtraXLinkFunction on_insert_extra_subtree_,
+                                       OnExtraXLinkFunction on_delete_extra_xlink_ )
 {
-    on_extra_xlink = on_extra_xlink_;
+    on_insert_extra_subtree = on_insert_extra_subtree_;
+    on_delete_extra_xlink = on_delete_extra_xlink_;
 }
 
 
@@ -45,29 +50,32 @@ XLink Domain::FindDomainExtension( XLink xlink ) const
 }
 
 
-void Domain::ExtendDomainWorker( const TreeKit &kit, PatternLink plink )
+void Domain::PatternWalker( const TreeKit &kit, PatternLink plink, bool remove )
 {
     // Extend locally first and then pass that into children.
-    set<XLink> extra_xlinks = plink.GetChildAgent()->ExpandNormalDomain( kit, unordered_domain );    
-    if( !extra_xlinks.empty() )
+    // This avoids the need for a reductive "keep trying until no more
+    // extra XLinks are provided" because we know that only the child pattern
+    // can match a pattern node's generated XLink.
+    set<XLink> extra_subtrees = plink.GetChildAgent()->ExpandNormalDomain( kit, unordered_domain );    
+    if( !extra_subtrees.empty() )
         TRACE("There are extra x domain elements for ")(plink)(":\n");
-    for( XLink extra_xlink : extra_xlinks )
-        on_extra_xlink( extra_xlink );
+    for( XLink extra_base_xlink : extra_subtrees )
+        on_insert_extra_subtree( extra_base_xlink );
     
     // Visit couplings repeatedly TODO union over couplings and
     // only recurse on last reaching.
     auto pq = plink.GetChildAgent()->GetPatternQuery();    
     for( PatternLink child_plink : pq->GetNormalLinks() )
     {
-        ExtendDomainWorker( kit, child_plink );
+        PatternWalker( kit, child_plink, remove );
     }
     for( PatternLink child_plink : pq->GetAbnormalLinks() )
     {
-        ExtendDomainWorker( kit, child_plink );
+        PatternWalker( kit, child_plink, remove );
     }
     for( PatternLink child_plink : pq->GetMultiplicityLinks() )
     {
-        ExtendDomainWorker( kit, child_plink );
+        PatternWalker( kit, child_plink, remove );
     }
 }
 
@@ -76,15 +84,17 @@ void Domain::ExtendDomainNewPattern( const TreeKit &kit, PatternLink root_plink_
 {
 	root_plink = root_plink_;
 	
-    ExtendDomainWorker(kit, root_plink);
-#ifdef TRACE_X_TREE_DB_DELTAS
+#ifdef TRACE_DOMAIN_EXTEND
+	unordered_set<XLink> previous_unordered_domain = unordered_domain;
+#endif    
+
+    PatternWalker(kit, root_plink);
+
+#ifdef TRACE_DOMAIN_EXTEND
     if( Tracer::IsEnabled() ) // We want this deltaing to be relative to what is seen in the log
     {
-        TRACE("Domain extended due to new pattern ")(root_plink)(", new XLinks:\n")
-             ( DifferenceOf(unordered_domain, previous_unordered_domain) )
-             ("\nRemoved XLinks:\n")
-             ( DifferenceOf(previous_unordered_domain, unordered_domain) )("\n");
-        previous_unordered_domain = unordered_domain;
+        TRACE("Domain extended due to new pattern ")(root_plink)(", domain change is:\n")
+             ( DiffTrace(previous_unordered_domain, unordered_domain) );
     }
 #endif
 }
@@ -92,15 +102,39 @@ void Domain::ExtendDomainNewPattern( const TreeKit &kit, PatternLink root_plink_
 
 void Domain::ExtendDomainNewX(const TreeKit &kit)
 {
-    ExtendDomainWorker(kit, root_plink);
-#ifdef TRACE_X_TREE_DB_DELTAS
+#ifdef TRACE_DOMAIN_EXTEND
+	unordered_set<XLink> previous_unordered_domain = unordered_domain;
+#endif    
+
+    PatternWalker(kit, root_plink);
+
+#ifdef TRACE_DOMAIN_EXTEND
     if( Tracer::IsEnabled() ) // We want this deltaing to be relative to what is seen in the log
     {
-        TRACE("Domain extended due new X, pattern is ")(root_plink)(", new XLinks:\n")
-             ( DifferenceOf(unordered_domain, previous_unordered_domain) )
-             ("\nRemoved XLinks:\n")
-             ( DifferenceOf(previous_unordered_domain, unordered_domain) )("\n");
-        previous_unordered_domain = unordered_domain;
+        TRACE("Domain extended due new X, pattern is ")(root_plink)(", domain change is:\n")
+             ( DiffTrace(previous_unordered_domain, unordered_domain) );
+    }
+#endif
+}
+
+
+void Domain::UnExtendDomain(const TreeKit &kit)
+{
+#ifdef TRACE_DOMAIN_EXTEND
+	unordered_set<XLink> previous_unordered_domain = unordered_domain;
+#endif    
+
+    for( XLink extra_xlink : extended_domain )
+    {
+        extended_domain.erase( extra_xlink );
+        on_delete_extra_xlink( extra_xlink );
+    }
+
+#ifdef TRACE_DOMAIN_EXTEND
+    if( Tracer::IsEnabled() ) // We want this deltaing to be relative to what is seen in the log
+    {
+        TRACE("Domain un-extended pattern is ")(root_plink)(", domain change is:\n")
+             ( DiffTrace(previous_unordered_domain, unordered_domain) );
     }
 #endif
 }
@@ -124,8 +158,10 @@ void Domain::PrepareMonolithicBuild(DBWalk::Actions &actions)
 	{
 		// ----------------- Update domain
 		InsertSolo( unordered_domain, walk_info.xlink );
-		
-		// Here, elements go into quotient set, but it does not 
+#ifdef EXTEND_UNDO    
+        InsertSolo( extended_domain, extra_xlink );
+#endif				
+        // Here, elements go into quotient set, but it does not 
 		// uniquify: every link in the input X tree must appear 
 		// separately in domain.
 		(void)domain_extension_classes->Uniquify( walk_info.xlink );    

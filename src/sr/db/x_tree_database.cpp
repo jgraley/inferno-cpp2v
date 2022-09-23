@@ -13,14 +13,38 @@ using namespace SR;
 XTreeDatabase::XTreeDatabase( const set< shared_ptr<SYM::BooleanExpression> > &clauses ) :
     plan( clauses )
 {
-	auto on_extra_xlink = [&](XLink extra_xlink)
+	auto on_insert_extra_subtree = [&](XLink extra_base_xlink)
 	{
-        TRACEC(extra_xlink)("\n");
-        MonolithicExtra( extra_xlink );
-        InsertExtra( extra_xlink );
+        TRACEC("Adding extra subtree to x tree db, base: ")(extra_base_xlink)("\n");
+        MonolithicExtra( extra_base_xlink );
+        InsertExtra( extra_base_xlink );        
     };
+
+#ifdef EXTEND_UNDO    
+	auto on_delete_extra_xlink = [&](XLink extra_xlink)
+	{
+        DBWalk::Actions actions;
+        plan.domain->PrepareDelete( actions );
+        plan.indexes->PrepareDelete( actions );
+        plan.link_table->PrepareDelete( actions );
+        plan.node_table->PrepareDelete( actions );
+        db_walker.ZoneWalk( &actions, zone );   
+#ifdef DB_ENABLE_COMPARATIVE_TEST
+        {
+            INDENT("⦼");
+            DBWalk::Actions ref_actions;
+            plan.ref_domain->PrepareDelete( ref_actions );
+            plan.ref_indexes->PrepareDelete( ref_actions );
+            db_walker.ZoneWalk( &ref_actions, zone );
+#ifdef DB_TEST_THE_TEST
+            ExpectMatches();
+#endif
+        }
+#endif
+    };
+#endif
     
-    plan.domain->SetOnExtraXLinkFunction(on_extra_xlink);
+    plan.domain->SetOnExtraXLinkFunctions(on_insert_extra_subtree);
 }
 
 
@@ -63,23 +87,27 @@ void XTreeDatabase::InitialBuild()
 
 void XTreeDatabase::MonolithicClear()
 {
+    INDENT("c");
     plan.domain->MonolithicClear();
     plan.indexes->MonolithicClear();
     plan.link_table->MonolithicClear();
     plan.node_table->MonolithicClear();    
 #ifdef DB_ENABLE_COMPARATIVE_TEST
-    plan.ref_domain->MonolithicClear();
-    plan.ref_indexes->MonolithicClear();
+    {
+        INDENT("⦼");
+        plan.ref_domain->MonolithicClear();
+        plan.ref_indexes->MonolithicClear();
 #ifdef DB_TEST_THE_TEST
-    ExpectMatches();
+        ExpectMatches();
 #endif
+    }
 #endif
 }
 
 
 void XTreeDatabase::MonolithicBuild()
 {
-    INDENT("M");
+    INDENT("m");
     ASSERT( root_xlink );
         
     DBWalk::Actions actions;
@@ -89,29 +117,23 @@ void XTreeDatabase::MonolithicBuild()
     plan.node_table->PrepareMonolithicBuild( actions );
     db_walker.FullWalk( &actions, root_xlink );
 #ifdef DB_ENABLE_COMPARATIVE_TEST
-    DBWalk::Actions ref_actions;
-	plan.ref_domain->PrepareMonolithicBuild( ref_actions );
-    plan.ref_indexes->PrepareMonolithicBuild( ref_actions );
-    db_walker.FullWalk( &ref_actions, root_xlink );
+    {
+        INDENT("⦼");
+        DBWalk::Actions ref_actions;
+        plan.ref_domain->PrepareMonolithicBuild( ref_actions );
+        plan.ref_indexes->PrepareMonolithicBuild( ref_actions );
+        db_walker.FullWalk( &ref_actions, root_xlink );
 #ifdef DB_TEST_THE_TEST
-    ExpectMatches();
+        ExpectMatches();
 #endif
+    }   
 #endif
-    
-#ifdef TRACE_X_TREE_DB_DELTAS
-    if( Tracer::IsEnabled() ) 
-    {        
-        TRACE("X tree db rebuilt at ")(root_xlink)(":\n")
-             ( plan.domain->unordered_domain )("\n");
-        plan.domain->previous_unordered_domain = plan.domain->unordered_domain;
-    }
-#endif    
 }
 
 
 void XTreeDatabase::InsertPermanent()
 {
-    INDENT("N");
+    INDENT("p");
     
     DBWalk::Actions actions;
     plan.domain->PrepareInsert( actions );
@@ -120,43 +142,49 @@ void XTreeDatabase::InsertPermanent()
     plan.node_table->PrepareInsert( actions );
     db_walker.InitWalk( &actions );
 #ifdef DB_ENABLE_COMPARATIVE_TEST
-    DBWalk::Actions ref_actions;
-	plan.ref_domain->PrepareInsert( ref_actions );
-    plan.ref_indexes->PrepareInsert( ref_actions );
-    db_walker.InitWalk( &ref_actions );
+    {
+        INDENT("⦼");
+        DBWalk::Actions ref_actions;
+        plan.ref_domain->PrepareInsert( ref_actions );
+        plan.ref_indexes->PrepareInsert( ref_actions );
+        db_walker.InitWalk( &ref_actions );
 #ifdef DB_TEST_THE_TEST
-    ExpectMatches();
+        ExpectMatches();
 #endif
+    }
 #endif
 }
 
 
-void XTreeDatabase::MonolithicExtra(XLink extra_xlink)
+void XTreeDatabase::MonolithicExtra(XLink extra_base_xlink)
 {
-    INDENT("E");
+    INDENT("f");
 
     DBWalk::Actions actions;
 	plan.domain->PrepareMonolithicBuild( actions );
 	plan.indexes->PrepareMonolithicBuild( actions );
 	plan.link_table->PrepareMonolithicBuild( actions );
 	plan.node_table->PrepareMonolithicBuild( actions );
-	db_walker.ExtraXLinkWalk( &actions, extra_xlink );
+	db_walker.ExtraXLinkWalk( &actions, extra_base_xlink );
 
 #ifdef DB_ENABLE_COMPARATIVE_TEST
-    DBWalk::Actions ref_actions;
-	plan.ref_domain->PrepareMonolithicBuild( ref_actions );
-	plan.ref_indexes->PrepareMonolithicBuild( ref_actions );
-	db_walker.ExtraXLinkWalk( &ref_actions, extra_xlink );
+    {
+        INDENT("⦼");
+        DBWalk::Actions ref_actions;
+        plan.ref_domain->PrepareMonolithicBuild( ref_actions );
+        plan.ref_indexes->PrepareMonolithicBuild( ref_actions );
+        db_walker.ExtraXLinkWalk( &ref_actions, extra_base_xlink );
 #ifdef DB_TEST_THE_TEST
-	ExpectMatches();
+        ExpectMatches();
 #endif
+    }
 #endif
 }
 
 
 void XTreeDatabase::Delete(const TreeZone &zone)
 {
-    INDENT("D");
+    INDENT("d");
 
     DBWalk::Actions actions;
     plan.domain->PrepareDelete( actions );
@@ -165,20 +193,23 @@ void XTreeDatabase::Delete(const TreeZone &zone)
     plan.node_table->PrepareDelete( actions );
     db_walker.ZoneWalk( &actions, zone );   
 #ifdef DB_ENABLE_COMPARATIVE_TEST
-    DBWalk::Actions ref_actions;
-	plan.ref_domain->PrepareDelete( ref_actions );
-    plan.ref_indexes->PrepareDelete( ref_actions );
-    db_walker.ZoneWalk( &ref_actions, zone );
+    {
+        INDENT("⦼");
+        DBWalk::Actions ref_actions;
+        plan.ref_domain->PrepareDelete( ref_actions );
+        plan.ref_indexes->PrepareDelete( ref_actions );
+        db_walker.ZoneWalk( &ref_actions, zone );
 #ifdef DB_TEST_THE_TEST
-    ExpectMatches();
+        ExpectMatches();
 #endif
+    }
 #endif
 }
 
 
 void XTreeDatabase::Insert(const TreeZone &zone)
 {
-    INDENT("I");
+    INDENT("i");
 
     DBWalk::Actions actions;
     plan.domain->PrepareInsert( actions );
@@ -187,35 +218,41 @@ void XTreeDatabase::Insert(const TreeZone &zone)
     plan.node_table->PrepareInsert( actions );
     db_walker.ZoneWalk( &actions, zone );
 #ifdef DB_ENABLE_COMPARATIVE_TEST
-    DBWalk::Actions ref_actions;
-	plan.ref_domain->PrepareInsert( ref_actions );
-    plan.ref_indexes->PrepareInsert( ref_actions );
-    db_walker.ZoneWalk( &ref_actions, zone );
+    {
+        INDENT("⦼");
+        DBWalk::Actions ref_actions;
+        plan.ref_domain->PrepareInsert( ref_actions );
+        plan.ref_indexes->PrepareInsert( ref_actions );
+        db_walker.ZoneWalk( &ref_actions, zone );
 #ifdef DB_TEST_THE_TEST
-    ExpectMatches();
+        ExpectMatches();
 #endif
+    }
 #endif
 }
 
 
-void XTreeDatabase::InsertExtra(XLink extra_xlink)
+void XTreeDatabase::InsertExtra(XLink extra_base_xlink)
 {
-    INDENT("X");
+    INDENT("e");
     
 	DBWalk::Actions actions;
 	plan.domain->PrepareInsert( actions );
 	plan.indexes->PrepareInsert( actions );
 	plan.link_table->PrepareInsert( actions );
 	plan.node_table->PrepareInsert( actions );
-	db_walker.ExtraXLinkWalk( &actions, extra_xlink );
+	db_walker.ExtraXLinkWalk( &actions, extra_base_xlink );
 #ifdef DB_ENABLE_COMPARATIVE_TEST
-	DBWalk::Actions ref_actions;
-	plan.ref_domain->PrepareInsert( ref_actions );
-	plan.ref_indexes->PrepareInsert( ref_actions );
-	db_walker.ExtraXLinkWalk( &ref_actions, extra_xlink );
+    {
+        INDENT("⦼");
+        DBWalk::Actions ref_actions;
+        plan.ref_domain->PrepareInsert( ref_actions );
+        plan.ref_indexes->PrepareInsert( ref_actions );
+        db_walker.ExtraXLinkWalk( &ref_actions, extra_base_xlink );
 #ifdef DB_TEST_THE_TEST
-	ExpectMatches();
+        ExpectMatches();
 #endif
+    }
 #endif
 }
 
@@ -307,6 +344,12 @@ set<TreeKit::LinkInfo> XTreeDatabase::GetDeclarers( TreePtr<Node> node ) const
         infos.insert( info );
     }
     return infos;
+}
+
+
+void XTreeDatabase::Dump() const
+{
+    plan.ref_indexes->Dump();
 }
 
 
