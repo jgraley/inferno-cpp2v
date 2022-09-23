@@ -32,13 +32,22 @@ void DBWalk::ZoneWalk( const Actions *actions,
 }
 
 
-void DBWalk::ExtraXLinkWalk( const Actions *actions,
-                             XLink extra_xlink )
+void DBWalk::ExtraZoneWalk( const Actions *actions,
+                             XLink extra_base_xlink )
 {
     WalkKit kit { actions, STOP_IF_ALREADY_IN };
 
-	VisitBase( kit, extra_xlink ); 
+	VisitBase( kit, extra_base_xlink ); 
 }
+
+
+void DBWalk::SingleXLinkWalk( const Actions *actions, 
+                              XLink xlink )
+{
+    WalkKit kit { actions, NO_RECURSE };
+
+	VisitBase( kit, xlink );
+}                      
 
 
 void DBWalk::VisitBase( const WalkKit &kit, 
@@ -128,7 +137,7 @@ void DBWalk::VisitCollection( const WalkKit &kit,
 
 
 void DBWalk::VisitLink( const WalkKit &kit, 
-                      const WalkInfo &walk_info )
+                        const WalkInfo &walk_info )
 {
     INDENT(".");
     
@@ -140,32 +149,18 @@ void DBWalk::VisitLink( const WalkKit &kit,
             
     TRACE("Visiting link ")(walk_info.xlink)("\n");    
             
-    // Wind-in actions
-    if( kit.actions->domain_in )
-		kit.actions->domain_in( walk_info );        
-            
-    DBCommon::DepthFirstOrderedIt df_it;
-    
-    if( kit.actions->indexes_in )
-		df_it = kit.actions->indexes_in( walk_info );        
-            
-    if( kit.actions->link_row_in )
-		kit.actions->link_row_in( walk_info, df_it );        
-            
-    if( kit.actions->node_row_in )
-		kit.actions->node_row_in( walk_info );        
+    WindInActions( kit, walk_info );        
             
     // Recurse into our child nodes
-    VisitItemise( kit, walk_info.xlink ); 
+    if( kit.mode != NO_RECURSE )
+        VisitItemise( kit, walk_info.xlink ); 
 
-    // Unwind actions
-    if( kit.actions->link_row_out )
-		kit.actions->link_row_out( walk_info );                   
+    UnwindActions( kit, walk_info );                          
 }
 
 
 void DBWalk::VisitItemise( const WalkKit &kit, 
-                          XLink xlink )
+                           XLink xlink )
 {
     TreePtr<Node> x = xlink.GetChildX();
     vector< Itemiser::Element * > x_items = x->Itemise();
@@ -183,3 +178,30 @@ void DBWalk::VisitItemise( const WalkKit &kit,
 }
 
 
+void DBWalk::WindInActions( const WalkKit &kit, 
+                            const WalkInfo &walk_info )
+{
+    // Wind-in actions
+    if( kit.actions->domain_in )
+		kit.actions->domain_in( walk_info );        
+            
+    DBCommon::DepthFirstOrderedIt df_it;
+    
+    if( kit.actions->indexes_in )
+		df_it = kit.actions->indexes_in( walk_info );        
+            
+    if( kit.actions->link_row_in )
+		kit.actions->link_row_in( walk_info, df_it );        
+            
+    if( kit.actions->node_row_in )
+		kit.actions->node_row_in( walk_info );        
+}                            
+
+
+void DBWalk::UnwindActions( const WalkKit &kit, 
+                            const WalkInfo &walk_info )
+{
+    // Unwind actions
+    if( kit.actions->link_row_out )
+		kit.actions->link_row_out( walk_info );                    
+}                            

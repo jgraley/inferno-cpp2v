@@ -29,7 +29,6 @@ public:
         ContainerInterface::iterator xit_predecessor;
         ContainerInterface::iterator xit;
         const TreePtrInterface *p_x;
-        int relative_depth;
 	};
 
 	struct Actions
@@ -47,8 +46,10 @@ public:
     void InitWalk( const Actions *actions );
     void ZoneWalk( const Actions *actions,
                    const TreeZone &zone );
-    void ExtraXLinkWalk( const Actions *actions, 
-	                     XLink extra_xlink );
+    void ExtraZoneWalk( const Actions *actions, 
+	                    XLink extra_base_xlink );
+    void SingleXLinkWalk( const Actions *actions, 
+	                      XLink xlink );
 
 private:
     enum SubtreeMode
@@ -62,7 +63,11 @@ private:
         // domain, we don't recurse into it since everything under it
         // will also be in the domain. 
         // https://github.com/jgraley/inferno-cpp2v/issues/213#issuecomment-728266001
-        STOP_IF_ALREADY_IN
+        STOP_IF_ALREADY_IN,
+        
+        // Only visit the base, for when we have an explicit list of xtrees and 
+        // are looping though that.
+        NO_RECURSE
     };
 
     struct WalkKit
@@ -86,6 +91,11 @@ private:
                     const WalkInfo &walk_info );
     void VisitItemise( const WalkKit &kit, 
                        XLink xlink );
+
+    void WindInActions( const WalkKit &kit, 
+                        const WalkInfo &walk_info );
+    void UnwindActions( const WalkKit &kit, 
+                        const WalkInfo &walk_info );
 };    
     
 }

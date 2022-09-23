@@ -28,14 +28,14 @@ XTreeDatabase::XTreeDatabase( const set< shared_ptr<SYM::BooleanExpression> > &c
         plan.indexes->PrepareDelete( actions );
         plan.link_table->PrepareDelete( actions );
         plan.node_table->PrepareDelete( actions );
-        db_walker.ZoneWalk( &actions, zone );   
+        db_walker.SingleXLinkWalk( &actions, extra_xlink );   
 #ifdef DB_ENABLE_COMPARATIVE_TEST
         {
             INDENT("⦼");
             DBWalk::Actions ref_actions;
             plan.ref_domain->PrepareDelete( ref_actions );
             plan.ref_indexes->PrepareDelete( ref_actions );
-            db_walker.ZoneWalk( &ref_actions, zone );
+            db_walker.SingleXLinkWalk( &ref_actions, extra_xlink );
 #ifdef DB_TEST_THE_TEST
             ExpectMatches();
 #endif
@@ -165,7 +165,7 @@ void XTreeDatabase::MonolithicExtra(XLink extra_base_xlink)
 	plan.indexes->PrepareMonolithicBuild( actions );
 	plan.link_table->PrepareMonolithicBuild( actions );
 	plan.node_table->PrepareMonolithicBuild( actions );
-	db_walker.ExtraXLinkWalk( &actions, extra_base_xlink );
+	db_walker.ExtraZoneWalk( &actions, extra_base_xlink );
 
 #ifdef DB_ENABLE_COMPARATIVE_TEST
     {
@@ -173,7 +173,7 @@ void XTreeDatabase::MonolithicExtra(XLink extra_base_xlink)
         DBWalk::Actions ref_actions;
         plan.ref_domain->PrepareMonolithicBuild( ref_actions );
         plan.ref_indexes->PrepareMonolithicBuild( ref_actions );
-        db_walker.ExtraXLinkWalk( &ref_actions, extra_base_xlink );
+        db_walker.ExtraZoneWalk( &ref_actions, extra_base_xlink );
 #ifdef DB_TEST_THE_TEST
         ExpectMatches();
 #endif
@@ -241,14 +241,14 @@ void XTreeDatabase::InsertExtra(XLink extra_base_xlink)
 	plan.indexes->PrepareInsert( actions );
 	plan.link_table->PrepareInsert( actions );
 	plan.node_table->PrepareInsert( actions );
-	db_walker.ExtraXLinkWalk( &actions, extra_base_xlink );
+	db_walker.ExtraZoneWalk( &actions, extra_base_xlink );
 #ifdef DB_ENABLE_COMPARATIVE_TEST
     {
         INDENT("⦼");
         DBWalk::Actions ref_actions;
         plan.ref_domain->PrepareInsert( ref_actions );
         plan.ref_indexes->PrepareInsert( ref_actions );
-        db_walker.ExtraXLinkWalk( &ref_actions, extra_base_xlink );
+        db_walker.ExtraZoneWalk( &ref_actions, extra_base_xlink );
 #ifdef DB_TEST_THE_TEST
         ExpectMatches();
 #endif

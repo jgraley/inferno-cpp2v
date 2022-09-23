@@ -143,6 +143,7 @@ void Domain::UnExtendDomain(const TreeKit &kit)
 void Domain::MonolithicClear()
 {
     unordered_domain.clear();
+    extended_domain.clear();
     domain_extension_classes->Clear();
 }    
 
@@ -157,10 +158,9 @@ void Domain::PrepareMonolithicBuild(DBWalk::Actions &actions)
 	actions.domain_in = [&](const DBWalk::WalkInfo &walk_info)
 	{
 		// ----------------- Update domain
-		InsertSolo( unordered_domain, walk_info.xlink );
-#ifdef EXTEND_UNDO    
-        InsertSolo( extended_domain, extra_xlink );
-#endif				
+		InsertSolo( unordered_domain, walk_info.xlink ); 
+        InsertSolo( extended_domain, walk_info.xlink );
+        
         // Here, elements go into quotient set, but it does not 
 		// uniquify: every link in the input X tree must appear 
 		// separately in domain.
