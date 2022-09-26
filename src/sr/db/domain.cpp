@@ -125,10 +125,10 @@ void Domain::UnExtendDomain()
 #endif    
 
     unordered_set<XLink> to_delete = extended_domain;
-    for( XLink extra_xlink : to_delete )
+    for( auto it = extended_domain.begin(); it != extended_domain.end(); )
     {
-        extended_domain.erase( extra_xlink );
-        on_delete_extra_xlink( extra_xlink );
+        on_delete_extra_xlink( *it );
+        it = extended_domain.erase( it );
     }
 
 #ifdef TRACE_DOMAIN_EXTEND
