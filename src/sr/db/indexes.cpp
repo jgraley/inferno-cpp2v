@@ -201,8 +201,8 @@ void Indexes::PrepareDelete( DBWalk::Actions &actions )
 	{
 		if( incremental )
         {
-            size_t n = category_ordered_index.erase( walk_info.xlink );
-            TRACEC("Erased ")(walk_info.xlink)(" from category_ordered_index; erased %u; size now %u\n", n, category_ordered_index.size());    
+            EraseSolo( category_ordered_index, walk_info.xlink );
+            TRACEC("Erased ")(walk_info.xlink)(" from category_ordered_index; size now %u\n", category_ordered_index.size());    
         }            
         
         // Would be used by xlink_table but that's not incremental yet

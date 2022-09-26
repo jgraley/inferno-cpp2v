@@ -58,7 +58,7 @@ void SymbolicConstraint::Plan::DetermineHintExpressions()
         TRACEC("Solving for variable: ")(v)("\n");
         
         SYM::TruthTableSolver::GivenSymbolSet other_vars = variables;           
-        other_vars.erase(v);
+        EraseSolo( other_vars, v );
 
         vector<VariableId> other_vars_vec = ToVector( other_vars );
         ForPower<bool>( other_vars_vec.size(), index_range_bool, [&](vector<bool> indices)

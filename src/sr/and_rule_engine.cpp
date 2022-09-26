@@ -33,7 +33,7 @@
 #define CHECK_FOR_SURROUNDING_KEYERS
 
 // Enabling this is making the Karnaugh map finder slow down #586
-//#define EXTRA_CONDENSED_CONSTRINTS
+//#define EXTRA_CONDENSED_CONSTRAINTS
 
 using namespace SR;
 
@@ -474,7 +474,7 @@ void AndRuleEngine::Plan::CreateMyConstraints( list< shared_ptr<CSP::Constraint>
         expressions_condensed[required_plinks].insert( bexpr );
     }
     
-#ifdef EXTRA_CONDENSED_CONSTRINTS
+#ifdef EXTRA_CONDENSED_CONSTRAINTS
     bool changed;
     do
     {
@@ -486,7 +486,7 @@ void AndRuleEngine::Plan::CreateMyConstraints( list< shared_ptr<CSP::Constraint>
                 if( p1.first != p2.first && IsIncludes(p1.first, p2.first) )
                 {
                     p1.second = UnionOf( p1.second, p2.second );
-                    expressions_condensed.erase(p2.first);
+                    EraseSolo( expressions_condensed, p2.first );
                     changed = true;
                     goto DONE;
                 }

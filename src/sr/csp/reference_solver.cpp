@@ -283,7 +283,10 @@ void ReferenceSolver::AssignSuccessful()
 
 bool ReferenceSolver::AssignUnsuccessful()
 {
-    value_selectors.erase(current_var_index);   
+    EraseSolo( value_selectors, current_var_index );   
+    
+    // We may or may not have managed to put a value into assignments 
+    // before giving up so no EraseSolo()
     assignments.erase( plan.free_variables.at(current_var_index) );         
     TRACE("Killed selector for X")(current_var_index)("\n");
     
@@ -322,6 +325,10 @@ ReferenceSolver::SelectNextValueRV ReferenceSolver::TryFindNextConsistentValue( 
         {
             TRACEC("Value is ")(value)("\n");
             return make_pair(value, all_unsatisfied);
+        }
+        else
+        {
+            EraseSolo( assignments, plan.free_variables.at(my_var_index) );
         }
     }
     TRACEC("No (more) values found\n");

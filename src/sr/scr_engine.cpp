@@ -346,7 +346,7 @@ void SCREngine::RunEmbedded( PatternLink plink_to_embedded, XLink base_xlink )
    
     // Recall the base node of the subtree under through (after replace)
     TreePtr<Node> through_subtree = embedded_action_requests.at(embedded_agent);
-    embedded_action_requests.erase(embedded_agent); // not needed any more
+    EraseSolo( embedded_action_requests, embedded_agent); // not needed any more
     ASSERT( through_subtree );
     
     // Obtain a pointer to the though link that will be updated by the 

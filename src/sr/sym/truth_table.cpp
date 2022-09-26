@@ -243,7 +243,7 @@ int TruthTable::CountInSlice( SliceSpec slice, CellType target_value ) const
 
 shared_ptr<TruthTable::SliceSpec> TruthTable::TryFindBestKarnaughSlice( CellType target_value, bool preferred_index, const TruthTable &so_far ) const
 {
-    // Slow when EXTRA_CONDENSED_CONSTRINTS is enabled because of bigger truth tables #586
+    // Slow when EXTRA_CONDENSED_CONSTRAINTS is enabled because of bigger truth tables #586
     enum class KarnaughClass
     {
         FREE,

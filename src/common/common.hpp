@@ -44,6 +44,14 @@ inline void InsertSolo( S &s, const typename S::value_type &p )
 }
 
 
+template< typename S >
+inline void EraseSolo( S &s, const typename S::key_type &p )
+{
+    size_t n = s.erase( p );
+    ASSERT( n==1 )("Unexpectedly erased %u elements", n);
+}
+
+
 // Union two sets, without the pain of iterators
 template< typename S1, typename S2 >
 inline S1 UnionOf( const S1 &s1, const S2 &s2 )
