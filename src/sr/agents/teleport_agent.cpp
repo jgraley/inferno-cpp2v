@@ -18,7 +18,7 @@ using namespace SYM;
 
 //---------------------------------- TeleportAgent ------------------------------------    
 
-LocatedLink TeleportAgent::TeleportUniqueAndCache( const TreeKit &kit, XLink keyer_xlink, bool expect_in_domain ) const
+XLink TeleportAgent::TeleportQueryUnique( const TreeKit &kit, XLink keyer_xlink, bool expect_in_domain ) const
 {
     LocatedLink tp_link = RunTeleportQuery( kit, keyer_xlink );
     if( !tp_link )
@@ -30,10 +30,8 @@ LocatedLink TeleportAgent::TeleportUniqueAndCache( const TreeKit &kit, XLink key
         domain_xlink = my_scr_engine->FindDomainExtension(tp_link);
     else
         domain_xlink = my_scr_engine->UniquifyDomainExtension(tp_link);
-    
-    LocatedLink ude_link( (PatternLink)tp_link, domain_xlink ); 
-               
-    return ude_link;
+                   
+    return domain_xlink;
 }                                    
 
 
@@ -61,9 +59,9 @@ set<XLink> TeleportAgent::ExpandNormalDomain( const TreeKit &kit, const unordere
 
         try
         {
-            LocatedLink cached_link = TeleportUniqueAndCache( kit, keyer_xlink, false );
-            if( cached_link )
-                extra_xlinks.insert( (XLink)cached_link );
+            XLink unique_xlink = TeleportQueryUnique( kit, keyer_xlink, false );
+            if( unique_xlink )
+                extra_xlinks.insert( (XLink)unique_xlink );
         }
         catch( ::Mismatch & ) {}
     }
@@ -99,9 +97,9 @@ unique_ptr<SymbolResultInterface> TeleportAgent::TeleportOperator::Evaluate( con
     if( !keyer_result->IsDefinedAndUnique() )
         return make_unique<SymbolResult>( SymbolResult::NOT_A_SYMBOL );
     XLink keyer_xlink = keyer_result->GetOnlyXLink();
-    LocatedLink cached_link = agent->TeleportUniqueAndCache( *(kit.x_tree_db), keyer_xlink, true );        
-    if( (XLink)cached_link )
-        return make_unique<SymbolResult>( (XLink)cached_link );
+    XLink unique_xlink = agent->TeleportQueryUnique( *(kit.x_tree_db), keyer_xlink, true );        
+    if( unique_xlink )
+        return make_unique<SymbolResult>( unique_xlink );
     else 
         return make_unique<SymbolResult>( SymbolResult::NOT_A_SYMBOL );
 }
