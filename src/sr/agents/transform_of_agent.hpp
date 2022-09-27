@@ -28,7 +28,7 @@ public:
     }
 
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    XLink RunTeleportQuery( const TreeKit &kit, XLink keyer_xlink ) const override;                
+    TreePtr<Node> RunTeleportQuery( const TreeKit &kit, XLink keyer_xlink ) const override;                
 
     virtual Block GetGraphBlockInfo() const;
     string GetName() const override;

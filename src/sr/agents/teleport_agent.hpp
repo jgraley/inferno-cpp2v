@@ -16,7 +16,8 @@ public:
     virtual XLink TeleportQueryUnique( const TreeKit &kit, XLink keyer_xlink, bool expect_in_domain ) const;                  
     virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
 
-    virtual XLink RunTeleportQuery( const TreeKit &kit, XLink keyer_xlink ) const { ASSERTFAIL(); }
+    // XLink -> Node is correct: PointerIs needs to see the incoming TreePtr.
+    virtual TreePtr<Node> RunTeleportQuery( const TreeKit &kit, XLink keyer_xlink ) const { ASSERTFAIL(); }
     
     virtual set<XLink> ExpandNormalDomain( const TreeKit &kit, const unordered_set<XLink> &keyer_xlinks );
 

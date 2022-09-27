@@ -13,7 +13,7 @@ shared_ptr<PatternQuery> TransformOfAgent::GetPatternQuery() const
 }
 
 
-XLink TransformOfAgent::RunTeleportQuery( const TreeKit &kit, XLink keyer_xlink ) const
+TreePtr<Node> TransformOfAgent::RunTeleportQuery( const TreeKit &kit, XLink keyer_xlink ) const
 {
     // Transform the candidate expression, sharing the x_tree_db as a TreeKit
     // so that implementations can use handy features without needing to search
@@ -22,30 +22,20 @@ XLink TransformOfAgent::RunTeleportQuery( const TreeKit &kit, XLink keyer_xlink 
     
     // Policy: Don't convert MMAX link to a node (will evaluate to NOT_A_SYMBOL)
     if( keyer_xlink == XLink::MMAX_Link )
-         return LocatedLink(); 
+         return TreePtr<Node>(); 
          
     TreePtr<Node> keyer_x = keyer_xlink.GetChildX();
 
     try
     {
 		TreePtr<Node> trans_x = (*transformation)( kit, keyer_x );      
-		if( trans_x )
-		{
-			ASSERT( trans_x->IsFinal() )(*this)(" computed non-final ")(*trans_x)(" from ")(keyer_x)("\n");             
-			return XLink::CreateDistinct(trans_x);  // Cache will un-distinct
-		}
-		else
-		{
-			// Transformation returned nullptr, probably because the candidate was incompatible
-			// with the transformation - a search MISS.
-			TRACE("Got NULL; query fails\n");
-			return XLink();  
-		}
+		ASSERT( !trans_x || trans_x->IsFinal() )(*this)(" computed non-final ")(*trans_x)(" from ")(keyer_x)("\n");             
+		return trans_x; // can be NULL
 	}
     catch( const ::Mismatch &e )
     {
 		TRACE("Caught ")(e)("; query fails\n");
-		return LocatedLink();  
+		return TreePtr<Node>();  
 	}
 }
 

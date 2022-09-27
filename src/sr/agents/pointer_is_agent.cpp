@@ -15,17 +15,14 @@ shared_ptr<PatternQuery> PointerIsAgent::GetPatternQuery() const
 }
 
 
-XLink PointerIsAgent::RunTeleportQuery( const TreeKit &kit, XLink keyer_xlink ) const
+TreePtr<Node> PointerIsAgent::RunTeleportQuery( const TreeKit &kit, XLink keyer_xlink ) const
 {
     // Get the pointer that points to us - now from the keyer x link
     const TreePtrInterface *px = keyer_xlink.GetXPtr();
 	ASSERT(px);     
 	
 	// Make an archetypical node matching the pointer's type
-	TreePtr<Node> ptr_arch = px->MakeValueArchetype();
-
-	// We need an XLink to the archetype
-	return XLink::CreateDistinct(ptr_arch); // Cache will un-distinct
+	return px->MakeValueArchetype();
 }
 
 

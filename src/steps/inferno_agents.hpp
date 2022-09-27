@@ -206,7 +206,7 @@ struct NestedAgent : public virtual TeleportAgent
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;                
     virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
 
-    XLink RunTeleportQuery( const TreeKit &kit, XLink keyer_xlink ) const override;                
+    TreePtr<Node> RunTeleportQuery( const TreeKit &kit, XLink keyer_xlink ) const override;                
 
     virtual XLink Advance( XLink xlink, 
                            string *depth ) const = 0;
