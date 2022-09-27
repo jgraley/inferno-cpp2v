@@ -20,16 +20,16 @@ using namespace SYM;
 
 XLink TeleportAgent::TeleportQueryUnique( const TreeKit &kit, XLink keyer_xlink, bool expect_in_domain ) const
 {
-    LocatedLink tp_link = RunTeleportQuery( kit, keyer_xlink );
-    if( !tp_link )
-        return tp_link;
+    XLink tp_xlink = RunTeleportQuery( kit, keyer_xlink );
+    if( !tp_xlink )
+        return tp_xlink;
     
     // We will uniquify the link against the domain and then cache it against keyer_xlink
     XLink domain_xlink;
     if( expect_in_domain )
-        domain_xlink = my_scr_engine->FindDomainExtension(tp_link);
+        domain_xlink = my_scr_engine->FindDomainExtension(tp_xlink);
     else
-        domain_xlink = my_scr_engine->UniquifyDomainExtension(tp_link);
+        domain_xlink = my_scr_engine->UniquifyDomainExtension(tp_xlink);
                    
     return domain_xlink;
 }                                    

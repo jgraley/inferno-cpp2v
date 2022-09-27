@@ -253,7 +253,7 @@ SYM::Over<SYM::BooleanExpression> NestedAgent::SymbolicNormalLinkedQueryPRed() c
 }                     
 
 
-LocatedLink NestedAgent::RunTeleportQuery( const TreeKit &kit, XLink keyer_xlink ) const
+XLink NestedAgent::RunTeleportQuery( const TreeKit &kit, XLink keyer_xlink ) const
 {
     LocatedLink tp_link;
     
@@ -268,8 +268,7 @@ LocatedLink NestedAgent::RunTeleportQuery( const TreeKit &kit, XLink keyer_xlink
             xlink = next_xlink;
 
         auto cur_depth = MakeTreeNode<Node>();
-        XLink new_xlink = XLink::CreateDistinct(cur_depth); // cache will un-distinct
-        tp_link = LocatedLink(PatternLink(this, &depth), new_xlink);
+        return XLink::CreateDistinct(cur_depth); // cache will un-distinct
     }
     
     return tp_link;

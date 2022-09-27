@@ -13,7 +13,7 @@ shared_ptr<PatternQuery> TransformOfAgent::GetPatternQuery() const
 }
 
 
-LocatedLink TransformOfAgent::RunTeleportQuery( const TreeKit &kit, XLink keyer_xlink ) const
+XLink TransformOfAgent::RunTeleportQuery( const TreeKit &kit, XLink keyer_xlink ) const
 {
     // Transform the candidate expression, sharing the x_tree_db as a TreeKit
     // so that implementations can use handy features without needing to search
@@ -32,15 +32,14 @@ LocatedLink TransformOfAgent::RunTeleportQuery( const TreeKit &kit, XLink keyer_
 		if( trans_x )
 		{
 			ASSERT( trans_x->IsFinal() )(*this)(" computed non-final ")(*trans_x)(" from ")(keyer_x)("\n");             
-			XLink tp_xlink = XLink::CreateDistinct(trans_x);  // Cache will un-distinct
-			return LocatedLink(PatternLink(this, &pattern), tp_xlink);
+			return XLink::CreateDistinct(trans_x);  // Cache will un-distinct
 		}
 		else
 		{
 			// Transformation returned nullptr, probably because the candidate was incompatible
 			// with the transformation - a search MISS.
 			TRACE("Got NULL; query fails\n");
-			return LocatedLink();  
+			return XLink();  
 		}
 	}
     catch( const ::Mismatch &e )
