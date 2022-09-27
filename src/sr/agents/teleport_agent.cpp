@@ -20,25 +20,20 @@ using namespace SYM;
 
 LocatedLink TeleportAgent::TeleportUniqueAndCache( const TreeKit &kit, XLink keyer_xlink, bool expect_in_domain ) const
 {
-    auto op = [&](XLink keyer_xlink) -> LocatedLink
-    {
-        LocatedLink tp_link = RunTeleportQuery( kit, keyer_xlink );
-        if( !tp_link )
-            return tp_link;
-        
-        // We will uniquify the link against the domain and then cache it against keyer_xlink
-        XLink domain_xlink;
-        if( expect_in_domain )
-            domain_xlink = my_scr_engine->FindDomainExtension(tp_link);
-        else
-            domain_xlink = my_scr_engine->UniquifyDomainExtension(tp_link);
-        
-        LocatedLink ude_link( (PatternLink)tp_link, domain_xlink ); 
-                   
-        return ude_link;
-    };
+    LocatedLink tp_link = RunTeleportQuery( kit, keyer_xlink );
+    if( !tp_link )
+        return tp_link;
     
-    return cache( keyer_xlink, op );
+    // We will uniquify the link against the domain and then cache it against keyer_xlink
+    XLink domain_xlink;
+    if( expect_in_domain )
+        domain_xlink = my_scr_engine->FindDomainExtension(tp_link);
+    else
+        domain_xlink = my_scr_engine->UniquifyDomainExtension(tp_link);
+    
+    LocatedLink ude_link( (PatternLink)tp_link, domain_xlink ); 
+               
+    return ude_link;
 }                                    
 
 
@@ -79,7 +74,6 @@ set<XLink> TeleportAgent::ExpandNormalDomain( const TreeKit &kit, const unordere
 void TeleportAgent::Reset()
 {
     AgentCommon::Reset();
-    cache.Reset();
 }
 
 

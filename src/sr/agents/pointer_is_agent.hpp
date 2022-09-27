@@ -3,7 +3,6 @@
 
 #include "../search_replace.hpp"
 #include "teleport_agent.hpp"
-#include "../cache.hpp"
 
 namespace SR
 {

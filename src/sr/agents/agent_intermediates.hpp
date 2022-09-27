@@ -5,7 +5,6 @@
 #include "common/common.hpp"
 #include "../query.hpp"
 #include "../sym/overloads.hpp"
-#include "../cache.hpp"
 
 namespace SR
 { 

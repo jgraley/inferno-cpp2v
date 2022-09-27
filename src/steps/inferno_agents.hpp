@@ -6,7 +6,6 @@
 #include "helpers/transformation.hpp"
 #include "tree/sctree.hpp"
 #include "sr/agents/star_agent.hpp"
-#include "sr/cache.hpp"
 #include "sr/agents/builder_agent.hpp"
 #include "sr/sym/expression.hpp"
 

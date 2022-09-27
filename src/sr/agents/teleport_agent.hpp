@@ -5,7 +5,6 @@
 #include "common/common.hpp"
 #include "../query.hpp"
 #include "../sym/overloads.hpp"
-#include "../cache.hpp"
 #include "special_agent.hpp"
 
 namespace SR
@@ -24,8 +23,6 @@ public:
     virtual void Reset();    
 
 private:
-    mutable CacheByLocation cache;    
-
     class TeleportOperator : public SYM::SymbolToSymbolExpression
     {
     public:    
