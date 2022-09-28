@@ -15,8 +15,6 @@ namespace SYM
     
 namespace SR 
 {
-class SimpleCompareQuotientSet;
-class VNStep;
 class Lacing;
 class XTreeDatabase;
     

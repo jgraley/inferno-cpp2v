@@ -7,10 +7,7 @@
 #include "db_walk.hpp"
 
 namespace SR 
-{
-class SimpleCompareQuotientSet;
-class VNStep;
-class Lacing;
+{    
     
 class NodeTable : public Traceable
 {

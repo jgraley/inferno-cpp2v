@@ -176,29 +176,3 @@ void SimpleCompareRelation::TestProperties( const set<XLink> &xlinks ) const
           ("transitive ")(tt)("\n");
 }
 
-//////////////////////////// SimpleCompareQuotientSet ///////////////////////////////
-
-XLink SimpleCompareQuotientSet::Uniquify( XLink xlink )
-{
-    // insert() only acts if element not already in set.
-    // Conveniently, it returns an iterator to the matching element
-    // regardless of whether x was inserted, so it's always what we
-    // want to return. p.second is true if insertion took place, useful 
-    // for tracing etc.
-    pair<Classes::iterator, bool> p = classes.insert( xlink );
-    return *p.first;
-}
-
-
-XLink SimpleCompareQuotientSet::Find( XLink xlink ) const
-{
-    Classes::iterator it = classes.find( xlink );
-    ASSERT( it != classes.end() )("No quotient set found for ")(xlink)("\nin")(classes)("\n");
-    return *it;
-}
-
-
-void SimpleCompareQuotientSet::Clear()
-{
-    classes.clear();
-}

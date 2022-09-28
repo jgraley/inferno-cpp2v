@@ -13,10 +13,7 @@
 //#define DB_ENABLE_COMPARATIVE_TEST
 
 namespace SR 
-{
-class SimpleCompareQuotientSet;
-class VNStep;
-class Lacing;
+{    
     
 class XTreeDatabase : public Traceable, 
                       public TreeKit

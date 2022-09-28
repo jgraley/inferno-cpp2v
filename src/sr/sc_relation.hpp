@@ -31,19 +31,6 @@ private:
     shared_ptr<SimpleCompare> simple_compare;
 }; 
 
-
-class SimpleCompareQuotientSet
-{
-public:
-    XLink Uniquify( XLink xlink );
-    XLink Find( XLink xlink ) const;
-    void Clear();
-    
-private:    
-    typedef set<XLink, SimpleCompareRelation> Classes;
-    Classes classes;
-};
-
 };
 
 #endif

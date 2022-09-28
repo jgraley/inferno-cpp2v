@@ -7,8 +7,7 @@
 
 using namespace SR;    
 
-Domain::Domain() :
-	domain_extension_classes( make_shared<SimpleCompareQuotientSet>() )
+Domain::Domain()
 {
 }
 	
@@ -31,7 +30,15 @@ XLink Domain::UniquifyDomainExtension( XLink xlink )
     if( unordered_domain.count(xlink) > 0 )
         return xlink;
         
-    return domain_extension_classes->Uniquify( xlink ); 
+    // insert() only acts if element not already in set.
+    // Conveniently, it returns an iterator to the matching element
+    // regardless of whether x was inserted, so it's always what we
+    // want to return. p.second is true if insertion took place, useful 
+    // for tracing etc.
+    pair<set<XLink, SimpleCompareRelation>::iterator, bool> p = 
+        domain_extension_classes.insert( xlink );
+        
+    return *p.first;
 }
 
 
@@ -45,7 +52,13 @@ XLink Domain::FindDomainExtension( XLink xlink ) const
     if( unordered_domain.count(xlink) > 0 )
         return xlink;
         
-    return domain_extension_classes->Find( xlink ); 
+    set<XLink, SimpleCompareRelation>::iterator it = 
+        domain_extension_classes.find( xlink );
+    ASSERT( it != domain_extension_classes.end() )
+          ("No quotient set found for ")(xlink)
+          ("\nin")(domain_extension_classes)("\n");
+          
+    return *it;
 }
 
 
@@ -144,7 +157,7 @@ void Domain::UnExtendDomain()
 void Domain::MonolithicClear()
 {
     unordered_domain.clear();
-    domain_extension_classes->Clear();
+    domain_extension_classes.clear();
 }    
 
 
@@ -166,10 +179,7 @@ void Domain::PrepareMonolithicBuild(DBWalk::Actions &actions, bool extra)
         TRACE("Saw domain extra ")(walk_info.xlink)(" extra flag=")(extra)(" ud.size=%u ed.size()=%u\n", unordered_domain.size(), extended_domain.size());
 #endif
         
-        // Here, elements go into quotient set, but it does not 
-		// uniquify: every link in the input X tree must appear 
-		// separately in domain.
-		(void)domain_extension_classes->Uniquify( walk_info.xlink );    
+		(void)domain_extension_classes.insert( walk_info.xlink );    
 	};
 }
 

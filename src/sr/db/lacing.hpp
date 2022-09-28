@@ -12,10 +12,7 @@ class SimpleCompare;
    
 
 namespace SR 
-{
-class SimpleCompareQuotientSet;
-class VNStep;
-    
+{   
 /*
  * Lacing provides the tools and data structures required to create an ordering 
  * on categories of node types. Categories and their relationships are boiled
