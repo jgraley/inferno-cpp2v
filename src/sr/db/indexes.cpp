@@ -12,7 +12,7 @@ Indexes::Indexes( const set< shared_ptr<SYM::BooleanExpression> > &clauses, bool
     plan( clauses ),
     category_ordered_index( plan.lacing ),
     ref( ref_ ),
-    incremental( ref ? false : ReadArgs::use_incremental )
+    use_incremental( ref ? false : ReadArgs::use_incremental )
 { 
 }
 
@@ -170,8 +170,7 @@ const Lacing *Indexes::GetLacing() const
 void Indexes::MonolithicClear()
 {
     depth_first_ordered_index.clear();
-    if( !incremental )
-        category_ordered_index.clear();
+    // category_ordered_index.clear(); now incremental
     simple_compare_ordered_index.clear();
 }
 
@@ -185,8 +184,7 @@ void Indexes::PrepareMonolithicBuild(DBWalk::Actions &actions)
 		DBCommon::DepthFirstOrderedIt it = depth_first_ordered_index.end();
 		--it; // I know this is OK because we just pushed to depth_first_ordered_index
 
-        if( !incremental )
-            category_ordered_index.insert( walk_info.xlink );
+        // category_ordered_index.insert( walk_info.xlink ); now incremental
 
 		simple_compare_ordered_index.insert( walk_info.xlink );
 		
@@ -199,11 +197,8 @@ void Indexes::PrepareDelete( DBWalk::Actions &actions )
 {
 	actions.indexes_in = [&](const DBWalk::WalkInfo &walk_info) -> DBCommon::DepthFirstOrderedIt
 	{
-		if( incremental )
-        {
-            EraseSolo( category_ordered_index, walk_info.xlink );
-            TRACEC("Erased ")(walk_info.xlink)(" from category_ordered_index; size now %u\n", category_ordered_index.size());    
-        }            
+		EraseSolo( category_ordered_index, walk_info.xlink );
+        TRACEC("Erased ")(walk_info.xlink)(" from category_ordered_index; size now %u\n", category_ordered_index.size());    
         
         // Would be used by xlink_table but that's not incremental yet
 		return depth_first_ordered_index.end(); 
@@ -215,11 +210,8 @@ void Indexes::PrepareInsert(DBWalk::Actions &actions)
 {
 	actions.indexes_in = [&](const DBWalk::WalkInfo &walk_info) -> DBCommon::DepthFirstOrderedIt
 	{ 
-        if( incremental )
-        {
-            category_ordered_index.insert( walk_info.xlink );
-            TRACEC("Inserted ")(walk_info.xlink)(" into category_ordered_index; size now %u\n", category_ordered_index.size());    
-        }
+        category_ordered_index.insert( walk_info.xlink );
+        TRACEC("Inserted ")(walk_info.xlink)(" into category_ordered_index; size now %u\n", category_ordered_index.size());    
 
         // Would be used by xlink_table but that's not incremental yet
 		return depth_first_ordered_index.end();

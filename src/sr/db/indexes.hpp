@@ -93,7 +93,7 @@ public:
 
 private:
     const bool ref;
-    const bool incremental;
+    const bool use_incremental;
 };    
     
 }

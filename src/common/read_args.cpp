@@ -22,8 +22,9 @@ bool ReadArgs::trace_hits = false;
 bool ReadArgs::trace_quiet = false;
 bool ReadArgs::trace_no_stack = false;
 string ReadArgs::hits_format;
-bool ReadArgs::unit_tests = false;
-bool ReadArgs::csp_test = false;
+bool ReadArgs::test_units = false;
+bool ReadArgs::test_csp = false;
+bool ReadArgs::test_rel = false;
 int ReadArgs::runonlystep = 0; 
 bool ReadArgs::runonlyenable = false; 
 bool ReadArgs::quitafter = false;
@@ -51,7 +52,8 @@ void ReadArgs::Usage(string msg)
                     "-tq         No output to console.\n"
                     "-ts         Trace but don't show mini-stacks (for when re-architecting).\n"
     		        "-su         Run unit tests and quit.\n"
-    		        "-sc         Enable CSV solver self-test.\n"
+    		        "-sc         Enable CSP solver self-test.\n"
+    		        "-sr         Enable relation self-test.\n"
     		        "-ap         Enable pedigree assertions in search and replace engine.\n"
                     "-q<p>.<c>...   Stop after stage+step <p>, and optional match count(s) <c>. Eg -qT12.2.3\n"
                     "               for transformation 12, root match 2, first embedded match 3.\n"    
@@ -196,9 +198,11 @@ ReadArgs::ReadArgs( int ac, char *av[] )
         {
             char assert_option = argv[curarg][2];
             if( assert_option=='u' )
-                unit_tests = true;
+                test_units = true;
             else if( assert_option=='c' )
-                csp_test = true;
+                test_csp = true;
+            else if( assert_option=='r' )
+                test_rel = true;
             else
                 Usage("Unknown argument after -s");
         }

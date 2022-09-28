@@ -26,7 +26,8 @@ public:
     /// Perform a test to check the reflexive, symmetric and 
     /// transitive properties, given a representative set
     /// of links. Pass if no assert failure.
-    void TestProperties( const set<XLink> &xlinks ) const;
+    void TestProperties( const unordered_set<XLink> &xlinks ) const;
+    
 private:
     shared_ptr<SimpleCompare> simple_compare;
 }; 

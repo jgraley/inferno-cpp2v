@@ -32,7 +32,7 @@ bool SimpleCompareRelation::operator()( XLink xlink, XLink ylink ) const
 }
 
 
-void SimpleCompareRelation::TestProperties( const set<XLink> &xlinks ) const
+void SimpleCompareRelation::TestProperties( const unordered_set<XLink> &xlinks ) const
 {
     // Need a random access container because we will in fact randomly access it
     vector<XLink> vxlinks;

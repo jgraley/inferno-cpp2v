@@ -62,7 +62,7 @@ XLink Domain::FindDomainExtension( XLink xlink ) const
 }
 
 
-void Domain::PatternWalker( const TreeKit &kit, PatternLink plink, bool remove )
+void Domain::ExtendDomainPatternWalk( const TreeKit &kit, PatternLink plink, bool remove )
 {
     // Extend locally first and then pass that into children.
     // This avoids the need for a reductive "keep trying until no more
@@ -79,15 +79,15 @@ void Domain::PatternWalker( const TreeKit &kit, PatternLink plink, bool remove )
     auto pq = plink.GetChildAgent()->GetPatternQuery();    
     for( PatternLink child_plink : pq->GetNormalLinks() )
     {
-        PatternWalker( kit, child_plink, remove );
+        ExtendDomainPatternWalk( kit, child_plink, remove );
     }
     for( PatternLink child_plink : pq->GetAbnormalLinks() )
     {
-        PatternWalker( kit, child_plink, remove );
+        ExtendDomainPatternWalk( kit, child_plink, remove );
     }
     for( PatternLink child_plink : pq->GetMultiplicityLinks() )
     {
-        PatternWalker( kit, child_plink, remove );
+        ExtendDomainPatternWalk( kit, child_plink, remove );
     }
 }
 
@@ -100,7 +100,7 @@ void Domain::ExtendDomainNewPattern( const TreeKit &kit, PatternLink root_plink_
 	unordered_set<XLink> previous_unordered_domain = unordered_domain;
 #endif    
 
-    PatternWalker(kit, root_plink);
+    ExtendDomainPatternWalk(kit, root_plink);
 
 #ifdef TRACE_DOMAIN_EXTEND
     if( Tracer::IsEnabled() ) // We want this deltaing to be relative to what is seen in the log
@@ -109,6 +109,12 @@ void Domain::ExtendDomainNewPattern( const TreeKit &kit, PatternLink root_plink_
              ( DiffTrace(previous_unordered_domain, unordered_domain) );
     }
 #endif
+
+    if( ReadArgs::test_rel )
+    {
+        SimpleCompareRelation r;
+        r.TestProperties( unordered_domain );
+    }
 }
 
 
@@ -118,7 +124,7 @@ void Domain::ExtendDomainNewX(const TreeKit &kit)
 	unordered_set<XLink> previous_unordered_domain = unordered_domain;
 #endif    
 
-    PatternWalker(kit, root_plink);
+    ExtendDomainPatternWalk(kit, root_plink);
 
 #ifdef TRACE_DOMAIN_EXTEND
     if( Tracer::IsEnabled() ) // We want this deltaing to be relative to what is seen in the log

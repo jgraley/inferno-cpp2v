@@ -27,7 +27,7 @@ shared_ptr<CSP::SolverHolder> CSP::CreateSolverAndHolder( const list< shared_ptr
                                                      arbitrary_forced_variables );
 #endif
 
-    if( ReadArgs::csp_test )
+    if( ReadArgs::test_csp )
     {
         auto refalg = make_shared<CSP::ReferenceSolver>( constraints, 
                                                          free_variables, 
