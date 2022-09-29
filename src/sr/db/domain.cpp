@@ -38,7 +38,8 @@ XLink Domain::UniquifyDomainExtension( TreePtr<Node> node, bool expect_in_domain
     // And insert it
     auto p = domain_extension_classes.insert( make_pair( node, xlink ) );
     ASSERT( p.second ); // false if was already there, contradicting the find() above
-    return p.first->second;
+    
+    return xlink;
 }
 
 
