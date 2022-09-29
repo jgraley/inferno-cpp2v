@@ -59,7 +59,7 @@ public:
     void DeleteExtra(XLink extra_xlink);
 
     XLink UniquifyDomainExtension( XLink xlink );
-    XLink FindDomainExtension( XLink xlink ) const;
+    XLink FindDomainExtension( TreePtr<Node> node ) const;
     void ExtendDomainNewPattern( PatternLink root_plink );
     void ExtendDomainNewX();           
     void UnExtendDomain();

@@ -43,20 +43,14 @@ XLink Domain::UniquifyDomainExtension( XLink xlink )
 }
 
 
-XLink Domain::FindDomainExtension( XLink xlink ) const
+XLink Domain::FindDomainExtension( TreePtr<Node> node ) const
 {
-    ASSERT( xlink );
+    ASSERT( node );
     
-    // Don't worry about generated nodes that are already in 
-    // the X tree (they had to have been found there after a
-    // search). 
-    if( unordered_domain.count(xlink) > 0 )
-        return xlink;
-        
     map<TreePtr<Node>, XLink, SimpleCompareRelation>::const_iterator it = 
-        domain_extension_classes.find( xlink.GetChildX() );
+        domain_extension_classes.find( node );
     ASSERT( it != domain_extension_classes.end() )
-          ("No quotient set found for ")(xlink)
+          ("No quotient set found for ")(node)
           ("\nin")(domain_extension_classes)("\n");
           
     return it->second;

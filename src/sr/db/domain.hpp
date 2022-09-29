@@ -36,7 +36,7 @@ public:
     XLink UniquifyDomainExtension( XLink xlink );
 
     // Get the cannonical xlink for the given one.
-    XLink FindDomainExtension( XLink xlink ) const;
+    XLink FindDomainExtension( TreePtr<Node> node ) const;
     
     void ExtendDomainPatternWalk( const TreeKit &kit, PatternLink plink, bool remove = false );
     void ExtendDomainNewPattern( const TreeKit &kit, PatternLink root_plink );

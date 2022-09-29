@@ -275,10 +275,10 @@ XLink XTreeDatabase::UniquifyDomainExtension( XLink xlink )
 }
 
 
-XLink XTreeDatabase::FindDomainExtension( XLink xlink ) const
+XLink XTreeDatabase::FindDomainExtension( TreePtr<Node> node ) const
 {
     ASSERT( root_xlink );
-	return plan.domain->FindDomainExtension(xlink);
+	return plan.domain->FindDomainExtension(node);
 }
 
 

@@ -617,9 +617,9 @@ XLink SCREngine::UniquifyDomainExtension( XLink xlink ) const
 }
 
 
-XLink SCREngine::FindDomainExtension( XLink xlink ) const
+XLink SCREngine::FindDomainExtension( TreePtr<Node> node ) const
 {
-    return plan.vn_sequence->FindDomainExtension( xlink ); 
+    return plan.vn_sequence->FindDomainExtension( node ); 
 }
 
 
