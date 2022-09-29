@@ -611,9 +611,9 @@ const CompareReplace * SCREngine::GetOverallMaster() const
 }
 
 
-XLink SCREngine::UniquifyDomainExtension( XLink xlink ) const
+XLink SCREngine::UniquifyDomainExtension( TreePtr<Node> node ) const
 {
-    return plan.vn_sequence->UniquifyDomainExtension( xlink ); 
+    return plan.vn_sequence->UniquifyDomainExtension( node ); 
 }
 
 

@@ -268,10 +268,10 @@ void XTreeDatabase::DeleteExtra(XLink extra_xlink)
 }
 
 
-XLink XTreeDatabase::UniquifyDomainExtension( XLink xlink )
+XLink XTreeDatabase::UniquifyDomainExtension( TreePtr<Node> node )
 {
     ASSERT( root_xlink );
-	return plan.domain->UniquifyDomainExtension(xlink);
+	return plan.domain->UniquifyDomainExtension(node);
 }
 
 

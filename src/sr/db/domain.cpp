@@ -20,16 +20,23 @@ void Domain::SetOnExtraXLinkFunctions( OnExtraXLinkFunction on_insert_extra_subt
 }
 
 
-XLink Domain::UniquifyDomainExtension( XLink xlink )
+XLink Domain::UniquifyDomainExtension( TreePtr<Node> node )
 {
-    ASSERT( xlink );
+    ASSERT( node );
+  
+    map<TreePtr<Node>, XLink, SimpleCompareRelation>::const_iterator it = 
+        domain_extension_classes.find( node );
+    if( it != domain_extension_classes.end() )
+        return it->second;
+  
+    XLink xlink = XLink::CreateDistinct( node );    
   
     // insert() only acts if element not already in set.
     // Conveniently, it returns an iterator to the matching element
     // regardless of whether x was inserted, so it's always what we
     // want to return. p.second is true if insertion took place, useful 
     // for tracing etc.
-    pair<TreePtr<Node>, XLink> newp = make_pair( xlink.GetChildX(), xlink );
+    pair<TreePtr<Node>, XLink> newp = make_pair( node, xlink );
     pair<map<TreePtr<Node>, XLink, SimpleCompareRelation>::const_iterator, bool> p = 
         domain_extension_classes.insert( newp );
         

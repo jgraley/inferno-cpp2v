@@ -33,7 +33,7 @@ public:
                                    OnExtraXLinkFunction on_delete_extra_xlink = OnExtraXLinkFunction() );
 
     // Add xlink to domain extension if not already there, and return the cannonical one.
-    XLink UniquifyDomainExtension( XLink xlink );
+    XLink UniquifyDomainExtension( TreePtr<Node> node );
 
     // Get the cannonical xlink for the given one.
     XLink FindDomainExtension( TreePtr<Node> node ) const;

@@ -22,16 +22,14 @@ XLink TeleportAgent::TeleportQueryUnique( const TreeKit &kit, XLink keyer_xlink,
 {
     TreePtr<Node> tp_node = RunTeleportQuery( kit, keyer_xlink );
     if( !tp_node )
-        return XLink();
-        
-    XLink tp_xlink = XLink::CreateDistinct( tp_node );    
+        return XLink();        
         
     // We will uniquify the link against the domain
     XLink domain_xlink;
     if( expect_in_domain )
         domain_xlink = my_scr_engine->FindDomainExtension(tp_node);
     else
-        domain_xlink = my_scr_engine->UniquifyDomainExtension(tp_xlink);
+        domain_xlink = my_scr_engine->UniquifyDomainExtension(tp_node);
                    
     return domain_xlink;
 }                                    

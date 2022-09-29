@@ -127,10 +127,10 @@ string VNSequence::GetStepName( int step_index ) const
 }
 
 
-XLink VNSequence::UniquifyDomainExtension( XLink xlink ) const
+XLink VNSequence::UniquifyDomainExtension( TreePtr<Node> node ) const
 {
     ASSERT( x_tree_db )("Planning stage four should have created x_tree_db object");
-    return x_tree_db->UniquifyDomainExtension( xlink ); 
+    return x_tree_db->UniquifyDomainExtension( node ); 
 }
 
 
