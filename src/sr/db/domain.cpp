@@ -24,24 +24,20 @@ XLink Domain::UniquifyDomainExtension( TreePtr<Node> node, bool expect_in_domain
 {
     ASSERT( node );
   
-    map<TreePtr<Node>, XLink, SimpleCompareRelation>::const_iterator it = 
-        domain_extension_classes.find( node );
+    // If there's already a class for this node, return it and early-out
+    auto it = domain_extension_classes.find( node );
     if( it != domain_extension_classes.end() )
         return it->second;
   
+    // There was not a class, which could be an error
     ASSERT( !expect_in_domain );
   
+    // Not an error, so create an XLink that will allow us to track this subtree
     XLink xlink = XLink::CreateDistinct( node );    
   
-    // insert() only acts if element not already in set.
-    // Conveniently, it returns an iterator to the matching element
-    // regardless of whether x was inserted, so it's always what we
-    // want to return. p.second is true if insertion took place, useful 
-    // for tracing etc.
-    pair<TreePtr<Node>, XLink> newp = make_pair( node, xlink );
-    pair<map<TreePtr<Node>, XLink, SimpleCompareRelation>::const_iterator, bool> p = 
-        domain_extension_classes.insert( newp );
-        
+    // And insert it
+    auto p = domain_extension_classes.insert( make_pair( node, xlink ) );
+    ASSERT( p.second ); // false if was already there, contradicting the find() above
     return p.first->second;
 }
 
@@ -182,8 +178,7 @@ void Domain::PrepareMonolithicBuild(DBWalk::Actions &actions, bool extra)
 #ifdef TRACE_DOMAIN_EXTEND
         TRACE("Saw domain extra ")(walk_info.xlink)(" extra flag=")(extra)(" ud.size=%u ed.size()=%u\n", unordered_domain.size(), extended_domain.size());
 #endif
-        pair<TreePtr<Node>, XLink> newp = make_pair( walk_info.xlink.GetChildX(), walk_info.xlink );
-		(void)domain_extension_classes.insert( newp );    
+		(void)domain_extension_classes.insert( make_pair( walk_info.xlink.GetChildX(), walk_info.xlink ) );    
 	};
 }
 
