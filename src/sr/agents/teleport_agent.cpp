@@ -24,7 +24,7 @@ XLink TeleportAgent::TeleportQueryUnique( const TreeKit &kit, XLink keyer_xlink,
     if( !tp_node )
         return XLink();        
         
-    // We will uniquify the link against the domain
+    // Uniquify the link against the domain
     return my_scr_engine->UniquifyDomainExtension(tp_node, expect_in_domain);
 }                                    
 
