@@ -29,7 +29,7 @@ XLink TeleportAgent::TeleportQueryUnique( const TreeKit &kit, XLink keyer_xlink,
     // We will uniquify the link against the domain
     XLink domain_xlink;
     if( expect_in_domain )
-        domain_xlink = my_scr_engine->FindDomainExtension(tp_xlink.GetChildX());
+        domain_xlink = my_scr_engine->FindDomainExtension(tp_node);
     else
         domain_xlink = my_scr_engine->UniquifyDomainExtension(tp_xlink);
                    
