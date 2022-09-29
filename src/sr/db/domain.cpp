@@ -20,7 +20,7 @@ void Domain::SetOnExtraXLinkFunctions( OnExtraXLinkFunction on_insert_extra_subt
 }
 
 
-XLink Domain::UniquifyDomainExtension( TreePtr<Node> node )
+XLink Domain::UniquifyDomainExtension( TreePtr<Node> node, bool expect_in_domain )
 {
     ASSERT( node );
   
@@ -28,6 +28,8 @@ XLink Domain::UniquifyDomainExtension( TreePtr<Node> node )
         domain_extension_classes.find( node );
     if( it != domain_extension_classes.end() )
         return it->second;
+  
+    ASSERT( !expect_in_domain );
   
     XLink xlink = XLink::CreateDistinct( node );    
   
