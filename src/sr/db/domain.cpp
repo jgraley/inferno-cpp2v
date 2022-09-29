@@ -24,12 +24,6 @@ XLink Domain::UniquifyDomainExtension( XLink xlink )
 {
     ASSERT( xlink );
   
-    // Don't worry about generated nodes that are already in 
-    // the X tree (they had to have been found there after a
-    // search). 
-    if( unordered_domain.count(xlink) > 0 )
-        return xlink;
-        
     // insert() only acts if element not already in set.
     // Conveniently, it returns an iterator to the matching element
     // regardless of whether x was inserted, so it's always what we
