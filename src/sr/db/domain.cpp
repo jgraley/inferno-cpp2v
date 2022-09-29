@@ -35,10 +35,11 @@ XLink Domain::UniquifyDomainExtension( XLink xlink )
     // regardless of whether x was inserted, so it's always what we
     // want to return. p.second is true if insertion took place, useful 
     // for tracing etc.
-    pair<set<XLink, SimpleCompareRelation>::iterator, bool> p = 
-        domain_extension_classes.insert( xlink );
+    pair<TreePtr<Node>, XLink> newp = make_pair( xlink.GetChildX(), xlink );
+    pair<map<TreePtr<Node>, XLink, SimpleCompareRelation>::const_iterator, bool> p = 
+        domain_extension_classes.insert( newp );
         
-    return *p.first;
+    return p.first->second;
 }
 
 
@@ -52,13 +53,13 @@ XLink Domain::FindDomainExtension( XLink xlink ) const
     if( unordered_domain.count(xlink) > 0 )
         return xlink;
         
-    set<XLink, SimpleCompareRelation>::iterator it = 
-        domain_extension_classes.find( xlink );
+    map<TreePtr<Node>, XLink, SimpleCompareRelation>::const_iterator it = 
+        domain_extension_classes.find( xlink.GetChildX() );
     ASSERT( it != domain_extension_classes.end() )
           ("No quotient set found for ")(xlink)
           ("\nin")(domain_extension_classes)("\n");
           
-    return *it;
+    return it->second;
 }
 
 
@@ -184,8 +185,8 @@ void Domain::PrepareMonolithicBuild(DBWalk::Actions &actions, bool extra)
 #ifdef TRACE_DOMAIN_EXTEND
         TRACE("Saw domain extra ")(walk_info.xlink)(" extra flag=")(extra)(" ud.size=%u ed.size()=%u\n", unordered_domain.size(), extended_domain.size());
 #endif
-        
-		(void)domain_extension_classes.insert( walk_info.xlink );    
+        pair<TreePtr<Node>, XLink> newp = make_pair( walk_info.xlink.GetChildX(), walk_info.xlink );
+		(void)domain_extension_classes.insert( newp );    
 	};
 }
 

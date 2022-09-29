@@ -6,6 +6,7 @@
 #include "sc_node_relation.hpp"
 #include "common/standard.hpp"
 #include "db_walk.hpp"
+#include "node/specialise_oostd.hpp"
 
 #include <unordered_set>
 #include <functional>
@@ -51,7 +52,7 @@ public:
     unordered_set<XLink> unordered_domain;            
     
     // SimpleCompare equivalence classes over the domain.
-    set<XLink, SimpleCompareNodeRelation> domain_extension_classes;
+    map<TreePtr<Node>, XLink, SimpleCompareNodeRelation> domain_extension_classes;
 
 private:
     OnExtraXLinkFunction on_insert_extra_subtree;
