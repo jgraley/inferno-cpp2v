@@ -56,12 +56,13 @@ void VNSequence::PlanningStageFour()
    	
    	lacing = make_shared<Lacing>();
     lacing->Build( clauses );   
+
+    x_tree_db = make_shared<XTreeDatabase>(lacing);
 }
 
 
 void VNSequence::PlanningStageFive( int step_index )
 {
-    x_tree_db = make_shared<XTreeDatabase>(lacing);
     // Give that set to x_tree_db planning
     steps[step_index]->PlanningStageFive(x_tree_db);
 }
