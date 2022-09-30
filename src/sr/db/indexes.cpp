@@ -1,8 +1,7 @@
 #include "x_tree_database.hpp"
 #include "../sc_relation.hpp"
-#include "../sym/expression.hpp"
-#include "../sym/predicate_operators.hpp"
 #include "lacing.hpp"
+#include "common/read_args.hpp"
 
 #include "indexes.hpp"
 
@@ -10,8 +9,8 @@ using namespace SR;
 
 //#define TRACE_CATEGORY_RELATION
 
-Indexes::Indexes( const set< shared_ptr<SYM::BooleanExpression> > &clauses, bool ref_ ) :
-    plan( clauses ),
+Indexes::Indexes( shared_ptr<Lacing> lacing, bool ref_ ) :
+    plan( lacing ),
     category_ordered_index( plan.lacing ),
     ref( ref_ ),
     use_incremental( ref ? false : ReadArgs::use_incremental )
@@ -19,30 +18,10 @@ Indexes::Indexes( const set< shared_ptr<SYM::BooleanExpression> > &clauses, bool
 }
 
 
-Indexes::Plan::Plan( const set< shared_ptr<SYM::BooleanExpression> > &clauses ) :
-    lacing( make_shared<Lacing>() )
+Indexes::Plan::Plan( shared_ptr<Lacing> lacing_ ) :
+    lacing( lacing_ )
 {
-    // Warning: there are a few places that declare an empty x_tree_db
-    if( clauses.empty() )
-        return;
-    
-    // Extract all the non-final archetypes from the IsInCategoryOperator nodes 
-    // into a set so that they are uniqued by SimpleCompare equality. These
-    // are the categories.
-    Lacing::CategorySet categories;
-    for( shared_ptr<SYM::BooleanExpression> clause : clauses )
-    {
-        clause->ForDepthFirstWalk( [&](const SYM::Expression *expr)
-        {
-            if( auto ko_expr = dynamic_cast<const SYM::IsInCategoryOperator *>(expr) )
-            { 
-                categories.insert( ko_expr->GetArchetypeNode() );
-            }
-        } );
-    }
-
-    lacing->Build(categories);
-}
+}    
 
 
 const Lacing *Indexes::GetLacing() const

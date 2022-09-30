@@ -44,23 +44,25 @@ void VNSequence::PlanningStageThree( int step_index )
 void VNSequence::PlanningStageFour()
 {
     // Determine the full set of expressions across all the steps
-    set< shared_ptr<SYM::BooleanExpression> > expressions;
+    set< shared_ptr<SYM::BooleanExpression> > clauses;
     for( shared_ptr<VNStep> vnt : steps )
     {
         const SCREngine *root_scr_engine = vnt->GetTopLevelEngine()->GetRootEngine();
         if( !root_scr_engine )
             continue; // apparently wasn't planned, probably due to -q being specified.
         set< shared_ptr<SYM::BooleanExpression> > step_exprs = root_scr_engine->GetExpressions();
-        expressions = UnionOfSolo( expressions, step_exprs );
+        clauses = UnionOfSolo( clauses, step_exprs );
     }
-    
-    // Give that set to x_tree_db planning
-    x_tree_db = make_shared<XTreeDatabase>(expressions);
+   	
+   	lacing = make_shared<Lacing>();
+    lacing->Build( clauses );   
 }
 
 
 void VNSequence::PlanningStageFive( int step_index )
 {
+    x_tree_db = make_shared<XTreeDatabase>(lacing);
+    // Give that set to x_tree_db planning
     steps[step_index]->PlanningStageFive(x_tree_db);
 }
 
@@ -78,7 +80,7 @@ void VNSequence::SetStopAfter( int step_index, vector<int> ssa, int d )
 
 
 void VNSequence::AnalysisStage( TreePtr<Node> root )
-{
+{    
     current_root_xlink = XLink::CreateDistinct(root);    
     ASSERT( x_tree_db )("Planning stage four should have created x_tree_db object");
     x_tree_db->SetRoot( current_root_xlink );

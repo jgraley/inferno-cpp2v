@@ -245,9 +245,7 @@ void TruthTableSolver::ConstrainByEvaluating()
     const TruthTable::CellType SHOULD_EVAL = TruthTable::CellType::TRUE;
     const TruthTable::CellType EVAL_EXCLUDE = TruthTable::CellType::FALSE;
     
-    const SR::SolutionMap sm{};
-    const SR::XTreeDatabase tk{};
-    Expression::EvalKit kit { &sm, &tk }; 
+    Expression::EvalKit kit { nullptr, nullptr }; 
     
     // Walk the truth table
     ForPower<bool>( ttwp->GetDegree(), index_range_bool, [&](vector<bool> indices)

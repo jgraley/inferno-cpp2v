@@ -1,5 +1,7 @@
 #include "lacing.hpp"
 #include "agents/agent.hpp"
+#include "../sym/expression.hpp"
+#include "../sym/predicate_operators.hpp"
 
 #include <limits>
 
@@ -10,6 +12,33 @@ Lacing::Lacing() :
     cats_to_lacing_range_lists(SimpleCompare())
 {
 }
+
+
+
+void Lacing::Build( const set< shared_ptr<SYM::BooleanExpression> > &clauses )
+{
+    // Warning: there are a few places that declare an empty x_tree_db
+    if( clauses.empty() )
+        return;
+    
+    // Extract all the non-final archetypes from the IsInCategoryOperator nodes 
+    // into a set so that they are uniqued by SimpleCompare equality. These
+    // are the categories.
+    Lacing::CategorySet categories;
+    for( shared_ptr<SYM::BooleanExpression> clause : clauses )
+    {
+        clause->ForDepthFirstWalk( [&](const SYM::Expression *expr)
+        {
+            if( auto ko_expr = dynamic_cast<const SYM::IsInCategoryOperator *>(expr) )
+            { 
+                categories.insert( ko_expr->GetArchetypeNode() );
+            }
+        } );
+    }
+
+    Build(categories);
+}
+
 
 
 void Lacing::Build( const CategorySet &categories_ )

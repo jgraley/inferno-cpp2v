@@ -22,12 +22,12 @@ class XTreeDatabase;
 class Indexes
 {
 public:
-    explicit Indexes( const set< shared_ptr<SYM::BooleanExpression> > &clauses = {}, bool ref=false );
+    explicit Indexes(shared_ptr<Lacing> lacing, bool ref=false );
     
 private: 
     const struct Plan : public Traceable
     {
-        Plan( const set< shared_ptr<SYM::BooleanExpression> > &clauses );
+        Plan( shared_ptr<Lacing> lacing );
         
         shared_ptr<Lacing> lacing;
 

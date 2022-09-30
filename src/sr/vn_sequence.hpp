@@ -5,6 +5,7 @@
 #include "common/read_args.hpp"
 #include "node/tree_ptr.hpp"
 #include "link.hpp"
+#include "sr/db/lacing.hpp"
 
 class Graph;
 
@@ -62,6 +63,7 @@ public:
     
 private:
     vector< shared_ptr<VNStep> > steps;
+    shared_ptr<Lacing> lacing;
     shared_ptr<XTreeDatabase> x_tree_db;    
     set< TreePtr<Node> > dirty_grass;
     XLink current_root_xlink;

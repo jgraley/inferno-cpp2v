@@ -1,16 +1,19 @@
 #ifndef LACING_HPP
 #define LACING_HPP
 
-#include "link.hpp"
+#include "sr/link.hpp"
 #include "common/standard.hpp"
-#include "sc_relation.hpp"
-#include "../helpers/simple_compare.hpp"
+#include "helpers/simple_compare.hpp"
 
 #include <unordered_set>
 
 class SimpleCompare;
    
-
+namespace SYM
+{
+    class BooleanExpression;
+};
+    
 namespace SR 
 {   
 /*
@@ -31,8 +34,11 @@ public:
     typedef set<TreePtr<Node>> CategorySet;
 
     Lacing();
-    
-    // Create the lacing data structures including decision tree. Only needed
+
+	// Build lacing strucutres based on clausal expressions from the patterns
+	void Build( const set< shared_ptr<SYM::BooleanExpression> > &clauses );
+
+    // Build the lacing data structures including decision tree. Only needed
     // once, at planning time for the whole sequence.
     void Build( const CategorySet &categories );
 

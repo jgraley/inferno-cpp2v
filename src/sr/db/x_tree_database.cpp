@@ -1,4 +1,5 @@
 #include "x_tree_database.hpp"
+#include "lacing.hpp"
 
 using namespace SR;    
 
@@ -10,8 +11,8 @@ using namespace SR;
 //   when testing the test
 //#define DB_TEST_THE_TEST
 
-XTreeDatabase::XTreeDatabase( const set< shared_ptr<SYM::BooleanExpression> > &clauses ) :
-    plan( clauses )
+XTreeDatabase::XTreeDatabase( shared_ptr<Lacing> lacing ) :
+    plan( lacing )
 {
 	auto on_insert_extra_subtree = [&](XLink extra_base_xlink)
 	{
@@ -32,8 +33,8 @@ XTreeDatabase::XTreeDatabase( const set< shared_ptr<SYM::BooleanExpression> > &c
 }
 
 
-XTreeDatabase::Plan::Plan( const set< shared_ptr<SYM::BooleanExpression> > &clauses ) :
-    indexes( make_shared<Indexes>(clauses) ),
+XTreeDatabase::Plan::Plan( shared_ptr<Lacing> lacing ) :
+    indexes( make_shared<Indexes>(lacing) ),
     domain( make_shared<Domain>() ),
     link_table( make_shared<LinkTable>() ),
     node_table( make_shared<NodeTable>() )

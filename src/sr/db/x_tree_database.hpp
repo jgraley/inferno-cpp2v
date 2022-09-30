@@ -19,12 +19,12 @@ class XTreeDatabase : public Traceable,
                       public TreeKit
 {
 public:
-    explicit XTreeDatabase( const set< shared_ptr<SYM::BooleanExpression> > &clauses = {} );
+    explicit XTreeDatabase( shared_ptr<Lacing> lacing );
     
 private: 
     const struct Plan : public Traceable
     {
-        Plan( const set< shared_ptr<SYM::BooleanExpression> > &clauses );
+        Plan( shared_ptr<Lacing> lacing );
         
         shared_ptr<Domain> domain;
         shared_ptr<Indexes> indexes;
