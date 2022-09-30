@@ -651,8 +651,8 @@ shared_ptr<SYM::SymbolExpression> IsInCategoryOperator::TrySolveFor( const Solve
     for( pair<int, int> int_range : int_range_list )
     {
         AllInCategoryRangeOperator::ExprBounds expr_range;
-        expr_range.first = make_shared<SYM::SymbolConstant>( MakeTreeNode<SR::Indexes::CategoryMinimusNode>(int_range.first) );
-        expr_range.second = make_shared<SYM::SymbolConstant>( MakeTreeNode<SR::Indexes::CategoryMinimusNode>(int_range.second) );        
+        expr_range.first = make_shared<SYM::SymbolConstant>( MakeTreeNode<SR::CategoryRelation::MinimusNode>(int_range.first) );
+        expr_range.second = make_shared<SYM::SymbolConstant>( MakeTreeNode<SR::CategoryRelation::MinimusNode>(int_range.second) );        
         expr_range_list.push_back( expr_range );
     }
     TRACE(archetype_node)("\n")(int_range_list)("\n")(expr_range_list)("\n");
@@ -863,7 +863,7 @@ shared_ptr<SymbolExpression> IsSimpleCompareEquivalentOperator::TrySolveFor( con
         // (because XLink native comparison will be faster than SimpleCompare)
         // but ar might be an arbitrary force, and not in the domain.
         // See #522 #525
-        // X, true, X, true gets simulates equal_range()    
+        // X, true, X, true simulates equal_range()    
         shared_ptr<SymbolExpression> r = make_shared<AllInSimpleCompareRangeOperator>(second, true, second, true);
         solution = first->TrySolveForToEqual( kit, target, r );
         if( solution )

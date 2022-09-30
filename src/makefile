@@ -35,6 +35,7 @@ SR_SYM_MODULES = $(SR_SYM)/result $(SR_SYM)/expression $(SR_SYM)/overloads $(SR_
 SR_SYM_MODULES += $(SR_SYM)/boolean_operators $(SR_SYM)/predicate_operators $(SR_SYM)/conditional_operators $(SR_SYM)/symbol_operators $(SR_SYM)/set_operators
 SR_SYM_MODULES += $(SR_SYM)/truth_table $(SR_SYM)/truth_table_with_predicates $(SR_SYM)/expression_analysis
 SR_DB_MODULES += $(SR_DB)/x_tree_database $(SR_DB)/link_table $(SR_DB)/node_table $(SR_DB)/indexes $(SR_DB)/domain $(SR_DB)/tree_update $(SR_DB)/lacing $(SR_DB)/db_walk 
+SR_DB_MODULES += $(SR_DB)/cat_relation
 PARSE_MODULES = $(PARSE)/identifier_tracker $(PARSE)/rc_hold
 RENDER_MODULES = $(RENDER)/sort_decls $(RENDER)/graph $(RENDER)/render $(RENDER)/uniquify_identifiers $(RENDER)/doc_graphs
 STEPS_MODULES = $(STEPS)/inferno_agents $(STEPS)/split_instance_declarations $(STEPS)/generate_implicit_casts $(STEPS)/generate_stacks $(STEPS)/lower_control_flow 

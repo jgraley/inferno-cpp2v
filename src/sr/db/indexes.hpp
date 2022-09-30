@@ -5,6 +5,7 @@
 #include "../link.hpp"
 #include "common/standard.hpp"
 #include "../sc_relation.hpp"
+#include "cat_relation.hpp"
 #include "db_walk.hpp"
 
 namespace SYM
@@ -33,36 +34,6 @@ private:
     } plan;
     
 public:
-    class CategoryRelation
-    {
-    public:
-        CategoryRelation();
-        CategoryRelation( shared_ptr<Lacing> lacing );
-        CategoryRelation& operator=(const CategoryRelation &other);
-        
-        bool operator() (const XLink& x_link, const XLink& y_link) const;
-        
-    private:
-		Orderable::Result LacingOrdinalCompare(const XLink& x_link, const XLink& y_link) const;
-		
-        shared_ptr<Lacing> lacing;
-    };
-
-    // Create a node here so that a regular XLink can be used and passed
-    // through the sym stuff by value. Is minimus because intervals on this
-    // index are half-open.
-    class CategoryMinimusNode : public Node
-    {
-    public:
-        NODE_FUNCTIONS_FINAL
-        CategoryMinimusNode( int lacing_ordinal );
-        CategoryMinimusNode(); ///< default constructor, for making archetypes 
-        int GetMinimusOrdinal() const;
-        string GetName() const override;
-    private:
-        int lacing_ordinal;
-    };
-
     const Lacing *GetLacing() const;
 
     void MonolithicClear();
