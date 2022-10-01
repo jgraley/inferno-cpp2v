@@ -88,21 +88,21 @@ Orderable::Result SimpleCompare::Compare( TreePtr<Node> l, TreePtr<Node> r ) con
 }
 
 
-Orderable::Result SimpleCompare::Compare( SequenceInterface &x, SequenceInterface &y ) const
+Orderable::Result SimpleCompare::Compare( SequenceInterface &l, SequenceInterface &r ) const
 {
     // Ensure the sizes are the same so we don;t go off the end
-    int sd = (int)(x.size()) - (int)(y.size());
+    int sd = (int)(l.size()) - (int)(r.size());
     if( sd != Orderable::EQUAL )
         return sd;
     
-    ContainerInterface::iterator xit, yit;
+    ContainerInterface::iterator lit, rit;
     
     // Check each element in turn
-    for( xit = x.begin(), yit = y.begin(); xit != x.end(); ++xit, ++yit )
+    for( lit = l.begin(), rit = r.begin(); lit != l.end(); ++lit, ++rit )
     {
-        Orderable::Result cr = Compare( (TreePtr<Node>)*xit, (TreePtr<Node>)*yit );
-        if( cr != Orderable::EQUAL )
-            return cr;
+        Orderable::Result d = Compare( (TreePtr<Node>)*lit, (TreePtr<Node>)*rit );
+        if( d != Orderable::EQUAL )
+            return d;
     }
 
     // survived to the end? then we have a match.
@@ -110,25 +110,25 @@ Orderable::Result SimpleCompare::Compare( SequenceInterface &x, SequenceInterfac
 }
 
 
-Orderable::Result SimpleCompare::Compare( CollectionInterface &x, CollectionInterface &y ) const
+Orderable::Result SimpleCompare::Compare( CollectionInterface &l, CollectionInterface &r ) const
 {
     // Ensure the sizes are the same so we don't go off the end
-    int sd = (int)(x.size()) - (int)(y.size());
+    int sd = (int)(l.size()) - (int)(r.size());
     if( sd != Orderable::EQUAL )
         return sd;
         
     // Use this object so our ordering is used.
-    Orderered xo = GetOrdering(x);
-    Orderered yo = GetOrdering(y);
+    Orderered l_ordering = GetOrdering(l);
+    Orderered r_ordering = GetOrdering(r);
     
-    return LexicographicalCompare(xo, yo, *this);
+    return LexicographicalCompare(l_ordering, r_ordering, *this);
 }
 
 
-bool SimpleCompare::operator()( TreePtr<Node> xl, TreePtr<Node> yl ) const
+bool SimpleCompare::operator()( TreePtr<Node> l, TreePtr<Node> r ) const
 {
     //FTRACE("SC::operator() ")(xl)(" - ")(yl)("\n");
-    return Compare(xl, yl) < Orderable::EQUAL;
+    return Compare(l, r) < Orderable::EQUAL;
 }
 
 
