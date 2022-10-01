@@ -1,4 +1,4 @@
-#include "../sc_relation.hpp"
+#include "sc_relation.hpp"
 #include "../agents/agent.hpp"
 
 #include "domain.hpp"

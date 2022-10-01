@@ -6,7 +6,6 @@
 #include "common/common.hpp"
 #include "../conjecture.hpp"
 #include "../query.hpp"
-#include "../sc_relation.hpp"
 #include "../sym/overloads.hpp"
 
 namespace SR

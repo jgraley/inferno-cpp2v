@@ -1,5 +1,4 @@
 #include "link_table.hpp"
-#include "../sc_relation.hpp"
 
 
 using namespace SR;    

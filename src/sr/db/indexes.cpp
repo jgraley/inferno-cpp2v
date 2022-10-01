@@ -1,5 +1,5 @@
 #include "x_tree_database.hpp"
-#include "../sc_relation.hpp"
+#include "sc_relation.hpp"
 #include "lacing.hpp"
 #include "common/read_args.hpp"
 

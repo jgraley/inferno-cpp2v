@@ -4,7 +4,7 @@
 #include "../zone.hpp"
 #include "../link.hpp"
 #include "common/standard.hpp"
-#include "../sc_relation.hpp"
+#include "sc_relation.hpp"
 #include "cat_relation.hpp"
 #include "db_walk.hpp"
 

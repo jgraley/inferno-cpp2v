@@ -6,7 +6,7 @@
 #include "helpers/transformation.hpp"
 #include "helpers/walk.hpp"
 #include "helpers/flatten.hpp"
-#include "link.hpp"
+#include "../link.hpp"
 
 #include <memory>
 

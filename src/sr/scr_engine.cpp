@@ -9,7 +9,6 @@
 #include "agents/agent.hpp"
 #include "and_rule_engine.hpp"
 #include "link.hpp"
-#include "sc_relation.hpp"
 #include "vn_sequence.hpp"
 #include "db/tree_update.hpp"
 

@@ -1,5 +1,5 @@
 #include "node_table.hpp"
-#include "../sc_relation.hpp"
+#include "sc_relation.hpp"
 
 
 using namespace SR;    
