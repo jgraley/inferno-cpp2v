@@ -46,7 +46,6 @@ public:
     string GetStepName( int step_index ) const;
 
     XLink UniquifyDomainExtension( TreePtr<Node> node, bool expect_in_domain ) const;
-    XLink FindDomainExtension( TreePtr<Node> node ) const;
     void ExtendDomainNewPattern( PatternLink root_plink );
     void ExtendDomainNewX();
     void UnExtendDomain();

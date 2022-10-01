@@ -143,7 +143,6 @@ public: // For agents
     bool IsKeyed( Agent *agent ) const; 
     const CompareReplace * GetOverallMaster() const;
     XLink UniquifyDomainExtension( TreePtr<Node> node, bool expect_in_domain ) const;
-    XLink FindDomainExtension( TreePtr<Node> node ) const;
     bool IsDirtyGrass( TreePtr<Node> node ) const;
     void AddDirtyGrass( TreePtr<Node> node ) const;
     

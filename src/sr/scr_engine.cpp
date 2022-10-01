@@ -625,12 +625,6 @@ XLink SCREngine::UniquifyDomainExtension( TreePtr<Node> node, bool expect_in_dom
 }
 
 
-XLink SCREngine::FindDomainExtension( TreePtr<Node> node ) const
-{
-    return plan.vn_sequence->FindDomainExtension( node ); 
-}
-
-
 bool SCREngine::IsDirtyGrass( TreePtr<Node> node ) const
 {
 	return plan.vn_sequence->IsDirtyGrass( node );

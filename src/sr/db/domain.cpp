@@ -44,19 +44,6 @@ XLink Domain::UniquifyDomainExtension( TreePtr<Node> node, bool expect_in_domain
 }
 
 
-XLink Domain::FindDomainExtension( TreePtr<Node> node ) const
-{
-    ASSERT( node );
-    
-    auto it = domain_extension_classes.find( node );
-    ASSERT( it != domain_extension_classes.end() )
-          ("No quotient set found for ")(node)
-          ("\nin")(domain_extension_classes)("\n");
-          
-    return it->second;
-}
-
-
 void Domain::ExtendDomainPatternWalk( const TreeKit &kit, PatternLink plink, bool remove )
 {
     // Extend locally first and then pass that into children.

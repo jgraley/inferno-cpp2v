@@ -139,13 +139,6 @@ XLink VNSequence::UniquifyDomainExtension( TreePtr<Node> node, bool expect_in_do
 }
 
 
-XLink VNSequence::FindDomainExtension( TreePtr<Node> node ) const
-{
-    ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");    
-    return x_tree_db->FindDomainExtension( node ); 
-}
-
-
 void VNSequence::ExtendDomainNewPattern( PatternLink base_plink )
 {
     ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");    

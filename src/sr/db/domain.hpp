@@ -34,9 +34,6 @@ public:
 
     // Add xlink to domain extension if not already there, and return the cannonical one.
     XLink UniquifyDomainExtension( TreePtr<Node> node, bool expect_in_domain );
-
-    // Get the cannonical xlink for the given one.
-    XLink FindDomainExtension( TreePtr<Node> node ) const;
     
     void ExtendDomainPatternWalk( const TreeKit &kit, PatternLink plink, bool remove = false );
     void ExtendDomainNewPattern( const TreeKit &kit, PatternLink root_plink );

@@ -274,13 +274,6 @@ XLink XTreeDatabase::UniquifyDomainExtension( TreePtr<Node> node, bool expect_in
 }
 
 
-XLink XTreeDatabase::FindDomainExtension( TreePtr<Node> node ) const
-{
-    ASSERT( root_xlink );
-	return plan.domain->FindDomainExtension(node);
-}
-
-
 void XTreeDatabase::ExtendDomainNewPattern( PatternLink root_plink )
 {
     ASSERT( root_xlink );
