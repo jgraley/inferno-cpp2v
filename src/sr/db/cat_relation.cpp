@@ -26,12 +26,12 @@ CategoryRelation& CategoryRelation::operator=(const CategoryRelation &other)
 
 bool CategoryRelation::operator() (const XLink& x_link, const XLink& y_link) const
 {
-	//return Compare(x_link, y_link) < Orderable::EQUAL;
-//}
+	return Compare(x_link, y_link) < Orderable::EQUAL;
+}
 
 
-//Orderable::Result Compare(const XLink& x_link, const XLink& y_link) const
-//{
+Orderable::Result CategoryRelation::Compare(const XLink& x_link, const XLink& y_link) const
+{
 #ifdef TRACE_CATEGORY_RELATION
     INDENT("@");
     TRACE("x_link=")(x_link)(" y_link=")(y_link)("\n");
@@ -58,46 +58,34 @@ bool CategoryRelation::operator() (const XLink& x_link, const XLink& y_link) con
         ASSERT( (r==0) == (ro==0) );
 #endif
    	    if( ro != Orderable::EQUAL )
-		    return ro < Orderable::EQUAL;	
+		    return ro;	
 		    
-        bool res = x_link.operator<(y_link);
-#ifdef TRACE_CATEGORY_RELATION
-        TRACEC("strong cat order: ")(res)("\n");
-#endif
-        return res; 
+        return x_link.Compare(y_link);
     }
     else if( x_minimus && y_minimus )
     {
 		ASSERT( false ); // not expecting this to happen
-		return x_minimus->GetMinimusOrdinal() < y_minimus->GetMinimusOrdinal();
+		xi = x_minimus->GetMinimusOrdinal();
+		yi = y_minimus->GetMinimusOrdinal();
+		return xi - yi;
 	}
     else if( x_minimus && !y_minimus )
 	{
         xi = x_minimus->GetMinimusOrdinal();
         yi = lacing->GetOrdinalForNode( y );
-        bool res;
         if( xi != yi )
-			res = xi < yi;
+			return xi - yi;
 		else
-		    res = true; // minimus is on the left
-#ifdef TRACE_CATEGORY_RELATION
-        TRACEC("left is minimus: %d♭ - %d = %d result: ", xi, yi, xi-yi)(res)("\n");
-#endif
-		return res;
+		    return -1; // minimus is on the left
 	}
 	else if( !x_minimus && y_minimus )
     {
         xi = lacing->GetOrdinalForNode( x );
         yi = y_minimus->GetMinimusOrdinal();      
-        bool res;
         if( xi != yi )
-			res = xi < yi;
+			return xi - yi;
 		else
-		    res = false; // minimus is on the right
-#ifdef TRACE_CATEGORY_RELATION
-        TRACEC("right is minimus: %d - %d♭ = %d result: ", xi, yi, xi-yi)(res)("\n");
-#endif
-		return res;
+		    return 1; // minimus is on the right
     }
     else
     {
