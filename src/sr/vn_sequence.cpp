@@ -56,13 +56,14 @@ void VNSequence::PlanningStageFour()
    	
    	lacing = make_shared<Lacing>();
     lacing->Build( clauses );   
-
-    x_tree_db = make_shared<XTreeDatabase>(lacing);
 }
 
 
 void VNSequence::PlanningStageFive( int step_index )
 {
+    if( !x_tree_db )
+		x_tree_db = make_shared<XTreeDatabase>(lacing);
+
     // Give that set to x_tree_db planning
     steps[step_index]->PlanningStageFive(x_tree_db);
 }
@@ -84,6 +85,7 @@ void VNSequence::AnalysisStage( TreePtr<Node> root )
 {    
     current_root_xlink = XLink::CreateDistinct(root);    
     ASSERT( x_tree_db )("Planning stage four should have created x_tree_db object");
+    ASSERT( current_root_xlink );
     x_tree_db->SetRoot( current_root_xlink );
 #ifndef X_TREE_DB_EACH_STEP
 	x_tree_db->InitialBuild();
@@ -167,6 +169,7 @@ void VNSequence::UnExtendDomain()
 
 void VNSequence::ExecuteUpdateCommand( shared_ptr<UpdateCommand> cmd )
 {
+    ASSERT( x_tree_db )("Planning stage four should have created x_tree_db object");  
 	UpdateCommand::ExecKit kit { current_root_xlink, x_tree_db.get() };
 	cmd->Execute( kit );
 }
@@ -174,12 +177,14 @@ void VNSequence::ExecuteUpdateCommand( shared_ptr<UpdateCommand> cmd )
 
 void VNSequence::XTreeDbMonolithicClear()
 {
+    ASSERT( x_tree_db )("Planning stage four should have created x_tree_db object");  
 	x_tree_db->MonolithicClear();
 }
 
 
 void VNSequence::XTreeDbMonolithicBuild()
 {
+    ASSERT( x_tree_db )("Planning stage four should have created x_tree_db object");  
 	x_tree_db->MonolithicBuild();
 }
 
