@@ -61,7 +61,7 @@ public:
      * 
      * @param x_tree_db [in] pointer to an uptodate XTreeDatabase object
      */    
-    virtual void Start() = 0;    
+    virtual void Start( const SR::XTreeDatabase *x_tree_db ) = 0;    
     
     /**
      * Determine whether a partila assignment satisfies this constraint. 

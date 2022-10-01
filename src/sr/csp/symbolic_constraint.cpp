@@ -118,9 +118,10 @@ SYM::Expression::VariablesRequiringRows SymbolicConstraint::GetVariablesRequirin
 }
 
 
-void SymbolicConstraint::Start()
+void SymbolicConstraint::Start( const SR::XTreeDatabase *x_tree_db_ )
 {
-    ASSERT( plan.x_tree_db );
+    ASSERT( x_tree_db_ );
+	x_tree_db = x_tree_db_;
 }   
 
 
@@ -133,7 +134,7 @@ bool SymbolicConstraint::IsSatisfied( const Assignments &assignments ) const
     for( VariableId v : plan.variables )
         ASSERT( assignments.count(v)==1 );
 #endif        
-    SYM::Expression::EvalKit kit { &assignments, plan.x_tree_db.get() };    
+    SYM::Expression::EvalKit kit { &assignments, x_tree_db };    
     unique_ptr<SYM::BooleanResult> result = plan.consistency_expression->Evaluate( kit );
     ASSERT( result );
     if( plan.alt_expression_for_testing )
@@ -153,7 +154,7 @@ unique_ptr<SYM::SetResult> SymbolicConstraint::GetSuggestedValues( const Assignm
                                                                    const VariableId &target_var ) const
 {                                 
     ASSERT( target_var );
-    SYM::Expression::EvalKit kit { &assignments, plan.x_tree_db.get() };    
+    SYM::Expression::EvalKit kit { &assignments, x_tree_db };    
 
     SYM::TruthTableSolver::GivenSymbolSet givens;
     for( VariableId v : plan.variables )            
