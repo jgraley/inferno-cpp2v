@@ -24,8 +24,8 @@ void SR::TestRelationProperties( function<Orderable::Diff(XLink l, XLink r)> com
         
     // Measure the coverage    
     static int tr=0;
-    static vector<int> ts(3);
-    static vector<int> tt(9);     
+    static map<string, int> ts;
+    static map<string, map<string, int>> tt;     
         
     // Reflexive property
     for( XLink a_xlink : vxlinks )
@@ -45,17 +45,17 @@ void SR::TestRelationProperties( function<Orderable::Diff(XLink l, XLink r)> com
         if( ab_cr == 0 )            // a == b
         {
             ASSERT( ba_cr == 0 );       
-            ts[0]++;
+            ts["a==b"]++;
         }
         else if( ab_cr < 0 )        // a < b
         {
             ASSERT( ba_cr > 0);
-            ts[1]++;
+            ts["a<b"]++;
         }
         else if( ab_cr > 0 )        // a > b
         {
             ASSERT( ba_cr < 0);
-            ts[2]++;
+            ts["a>b"]++;
         }
         else
         {
@@ -74,20 +74,21 @@ void SR::TestRelationProperties( function<Orderable::Diff(XLink l, XLink r)> com
         Orderable::Diff ac_cr = compare(a_xlink, c_xlink);
         if( ab_cr == 0 )            // a == b
         {
+			map<string, int> &t = tt["a==b"];
             if( bc_cr == 0 )            // b == c
             {
                 ASSERT( ac_cr == 0 );
-                tt[0]++;
+                t["b==c"]++;
             }
             else if( bc_cr < 0 )        // b < c
             {
                 ASSERT( ac_cr < 0 );
-                tt[1]++;
+                t["b<c"]++;
             }
             else if( bc_cr > 0 )        // b > c
             {
                 ASSERT( ac_cr > 0 );
-                tt[2]++;
+                t["b>c"]++;
             }
             else
             {
@@ -96,19 +97,22 @@ void SR::TestRelationProperties( function<Orderable::Diff(XLink l, XLink r)> com
         }
         else if( ab_cr < 0 )        // a < b
         {
+			map<string, int> &t = tt["a<b"];
+            t["b>c"];
             if( bc_cr == 0 )            // b == c
             {
                 ASSERT( ac_cr < 0 );
-                tt[3]++;
+                t["b==c"]++;
             }
             else if( bc_cr < 0 )        // b < c
             {
                 ASSERT( ac_cr < 0 );
-                tt[4]++;
+                t["b<c"]++;
             }
             else if( bc_cr > 0 )        // b > c
             {
                 // no information relating a to c
+                t["b>c"]++;
             }
             else
             {
@@ -117,19 +121,21 @@ void SR::TestRelationProperties( function<Orderable::Diff(XLink l, XLink r)> com
         }
         else if( ab_cr > 0 )        // a > b
         {
+			map<string, int> &t = tt["a>b"];
             if( bc_cr == 0 )            // b == c
             {
                 ASSERT( ac_cr > 0 );
-                tt[6]++;
+                t["b==c"]++;
             }
             else if( bc_cr < 0 )        // b < c
             {
                 // no information relating a to c
+                t["b<c"]++;
             }
             else if( bc_cr > 0 )        // b > c
             {
                 ASSERT( ac_cr > 0 );
-                tt[8]++;
+                t["b>c"]++;
             }
             else
             {
