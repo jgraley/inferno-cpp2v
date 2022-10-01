@@ -20,7 +20,7 @@ public:
     SimpleCompare &operator=(const SimpleCompare &other);
         
     /// Pass in two pointers to nodes, which can point to subtrees. Result is true if they match. O(1) locally.
-    virtual Orderable::Result Compare( TreePtr<Node> x, TreePtr<Node> y ) const;
+    virtual Orderable::Result Compare( TreePtr<Node> l, TreePtr<Node> r ) const;
     
     /// Pass in two sequences of pointers to nodes, which can point to subtrees. Result is true if they match. O(n) locally.
     Orderable::Result Compare( SequenceInterface &x, SequenceInterface &y ) const;

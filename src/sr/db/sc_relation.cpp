@@ -15,19 +15,19 @@ SimpleCompareRelation::SimpleCompareRelation() :
 }
 
 
-Orderable::Result SimpleCompareRelation::Compare( XLink xlink, XLink ylink ) const
+Orderable::Result SimpleCompareRelation::Compare( XLink l_xlink, XLink r_xlink ) const
 {
     // Get the child nodes and disregard the arrow heads
-    TreePtr<Node> xnode = xlink.GetChildX();
-    TreePtr<Node> ynode = ylink.GetChildX();
+    TreePtr<Node> l_node = l_xlink.GetChildX();
+    TreePtr<Node> r_node = r_xlink.GetChildX();
     
     // And then resort to SimpleCompare
-    return simple_compare->Compare( xnode, ynode );
+    return simple_compare->Compare( l_node, r_node );
 }
 
 
-bool SimpleCompareRelation::operator()( XLink xlink, XLink ylink ) const
+bool SimpleCompareRelation::operator()( XLink l_xlink, XLink r_xlink ) const
 {
-    return Compare(xlink, ylink) < Orderable::EQUAL;
+    return Compare(l_xlink, r_xlink) < Orderable::EQUAL;
 }
 

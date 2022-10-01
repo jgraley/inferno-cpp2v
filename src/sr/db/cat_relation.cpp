@@ -24,62 +24,62 @@ CategoryRelation& CategoryRelation::operator=(const CategoryRelation &other)
 }
 
 
-bool CategoryRelation::operator() (const XLink& x_link, const XLink& y_link) const
+bool CategoryRelation::operator() (const XLink& l_xlink, const XLink& r_xlink) const
 {
-	return Compare(x_link, y_link) < Orderable::EQUAL;
+	return Compare(l_xlink, r_xlink) < Orderable::EQUAL;
 }
 
 
-Orderable::Result CategoryRelation::Compare(const XLink& x_link, const XLink& y_link) const
+Orderable::Result CategoryRelation::Compare(const XLink& l_xlink, const XLink& r_xlink) const
 {
 #ifdef TRACE_CATEGORY_RELATION
     INDENT("@");
-    TRACE("x_link=")(x_link)(" y_link=")(y_link)("\n");
+    TRACE("l_xlink=")(l_xlink)(" r_xlink=")(r_xlink)("\n");
 #endif
-    TreePtr<Node> x = x_link.GetChildX();
-    auto x_minimus = TreePtr<MinimusNode>::DynamicCast( x );
-    TreePtr<Node> y = y_link.GetChildX();    
-    auto y_minimus = TreePtr<MinimusNode>::DynamicCast( y );
+    TreePtr<Node> l_node = l_xlink.GetChildX();
+    auto l_minimus = TreePtr<MinimusNode>::DynamicCast( l_node );
+    TreePtr<Node> r_node = r_xlink.GetChildX();    
+    auto r_minimus = TreePtr<MinimusNode>::DynamicCast( r_node );
 
-    int xi=-1, yi=-1;
-    if( !x_minimus && !y_minimus )
+    int li=-1, ri=-1;
+    if( !l_minimus && !r_minimus )
     {
-        xi = lacing->GetOrdinalForNode( x );
-        yi = lacing->GetOrdinalForNode( y );
-        Orderable::Result ro = xi - yi;
+        li = lacing->GetOrdinalForNode( l_node );
+        ri = lacing->GetOrdinalForNode( r_node );
+        Orderable::Result res = li - ri;
         // Fast path out
-        //Orderable::Result r = lacing->OrdinalCompare( x, y );    
+        //Orderable::Result res1 = lacing->OrdinalCompare( x, y );    
 #ifdef TRACE_CATEGORY_RELATION
-        TRACEC("both normal: %d - %d = %d\n", xi, yi, r);
+        TRACEC("both normal: %d - %d = %d\n", li, ri, res);
 #endif        
 #ifdef CHECK_ORDINAL_COMPARE
-        ASSERT( (r>0) == (ro>0) );
-        ASSERT( (r<0) == (ro<0) );
-        ASSERT( (r==0) == (ro==0) );
+        ASSERT( (res>0) == (res1>0) );
+        ASSERT( (res<0) == (res1<0) );
+        ASSERT( (res==0) == (res1==0) );
 #endif
-   	    if( ro != Orderable::EQUAL )
-		    return ro;	
+   	    if( res != Orderable::EQUAL )
+		    return res;	
 		    
-        return x_link.Compare(y_link);
+        return l_xlink.Compare(r_xlink);
     }
-    else if( x_minimus && y_minimus )
+    else if( l_minimus && r_minimus )
     {
 		ASSERT( false ); // not expecting this to happen
-		xi = x_minimus->GetMinimusOrdinal();
-		yi = y_minimus->GetMinimusOrdinal();
-		return xi - yi;
+		li = l_minimus->GetMinimusOrdinal();
+		ri = r_minimus->GetMinimusOrdinal();
+		return li - ri;
 	}
-    else if( x_minimus && !y_minimus )
+    else if( l_minimus && !r_minimus )
 	{
-        xi = x_minimus->GetMinimusOrdinal();
-        yi = lacing->GetOrdinalForNode( y );
-        return (xi*2-1) - (yi*2); // minimus is on the left
+        li = l_minimus->GetMinimusOrdinal();
+        ri = lacing->GetOrdinalForNode( r_node );
+        return (li*2-1) - (ri*2); // minimus is on the left
 	}
-	else if( !x_minimus && y_minimus )
+	else if( !l_minimus && r_minimus )
     {
-        xi = lacing->GetOrdinalForNode( x );
-        yi = y_minimus->GetMinimusOrdinal();      
-        return (xi*2) - (yi*2-1); // minimus is on the right
+        li = lacing->GetOrdinalForNode( l_node );
+        ri = r_minimus->GetMinimusOrdinal();      
+        return (li*2) - (ri*2-1); // minimus is on the right
 
     }
     else

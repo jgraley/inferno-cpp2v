@@ -15,68 +15,67 @@ SimpleCompare &SimpleCompare::operator=(const SimpleCompare &other)
 }
 
 
-Orderable::Result SimpleCompare::Compare( TreePtr<Node> x, TreePtr<Node> y ) const
+Orderable::Result SimpleCompare::Compare( TreePtr<Node> l, TreePtr<Node> r ) const
 {   
     // Inputs must be non-NULL (though we do handle NULL in itemise, see below)
-    ASSERT(x);
-    ASSERT(y);
+    ASSERT(l);
+    ASSERT(r);
 
     //FTRACE("SC::Compare ")(x)(" - ")(y)("\n");
 
     // If we are asked to do a trivial compare, return immediately reporting success
-    if( x==y )
+    if( l==r )
         return Orderable::EQUAL;
         
     // Local comparison deals with node type and value if there is one
-    Orderable::Result cr = Node::OrderCompare(x.get(), y.get(), order_property);
+    Orderable::Result cr = Node::OrderCompare(l.get(), r.get(), order_property);
     
     if( cr != Orderable::EQUAL )
         return cr;
 
     // Itemise them both and chuck out if sizes do not match
-    vector< Itemiser::Element * > x_items = x->Itemise();
-    vector< Itemiser::Element * > y_items = y->Itemise();
-    int sd = (int)(x_items.size()) - (int)(y_items.size());
+    vector< Itemiser::Element * > l_items = l->Itemise();
+    vector< Itemiser::Element * > r_items = r->Itemise();
+    int sd = (int)(l_items.size()) - (int)(r_items.size());
     if( sd != Orderable::EQUAL )
         return sd; 
     
-    for( int i=0; i<x_items.size(); i++ )
+    for( int i=0; i<l_items.size(); i++ )
     {
-        bool r;
-        ASSERT( y_items[i] )( "itemise returned null element");
-        ASSERT( x_items[i] )( "itemise returned null element");
+        ASSERT( l_items[i] )( "itemise returned null element");
+        ASSERT( r_items[i] )( "itemise returned null element");
 
-        if( SequenceInterface *x_seq = dynamic_cast<SequenceInterface *>(x_items[i]) )
+        if( SequenceInterface *l_seq = dynamic_cast<SequenceInterface *>(l_items[i]) )
         {
-            SequenceInterface *y_seq = dynamic_cast<SequenceInterface *>(y_items[i]);
-            ASSERT( y_seq );
-            Orderable::Result cr = Compare( *x_seq, *y_seq );
-            if( cr != Orderable::EQUAL )
-                return cr;                
+            SequenceInterface *r_seq = dynamic_cast<SequenceInterface *>(r_items[i]);
+            ASSERT( r_seq );
+            Orderable::Result d = Compare( *l_seq, *r_seq );
+            if( d != Orderable::EQUAL )
+                return d;                
         }
-        else if( CollectionInterface *x_col = dynamic_cast<CollectionInterface *>(x_items[i]) )
+        else if( CollectionInterface *l_col = dynamic_cast<CollectionInterface *>(l_items[i]) )
         {
-            CollectionInterface *y_col = dynamic_cast<CollectionInterface *>(y_items[i]);
-            ASSERT( y_col );
-            Orderable::Result cr = Compare( *x_col, *y_col );
-            if( cr != Orderable::EQUAL )
-                return cr;                
+            CollectionInterface *r_col = dynamic_cast<CollectionInterface *>(r_items[i]);
+            ASSERT( r_col );
+            Orderable::Result d = Compare( *l_col, *r_col );
+            if( d != Orderable::EQUAL )
+                return d;                
         }
-        else if( TreePtrInterface *x_singular = dynamic_cast<TreePtrInterface *>(x_items[i]) )
+        else if( TreePtrInterface *l_singular = dynamic_cast<TreePtrInterface *>(l_items[i]) )
         {
-            TreePtrInterface *y_singular = dynamic_cast<TreePtrInterface *>(y_items[i]);
-            ASSERT( y_singular );
+            TreePtrInterface *r_singular = dynamic_cast<TreePtrInterface *>(r_items[i]);
+            ASSERT( r_singular );
             
             // MakeValueArchetype() can generate nodes with NULL pointers (eg in PointerIs)
             // and these get SimpleCompared even though they are not allowed in input trees.
             // In this case, order on the non-null-ness of x and y.
-            if( !(TreePtr<Node>)*x_singular || !(TreePtr<Node>)*y_singular )
-                return (int)(!(TreePtr<Node>)*y_singular) - (int)(!(TreePtr<Node>)*x_singular);                
+            if( !(TreePtr<Node>)*l_singular || !(TreePtr<Node>)*r_singular )
+                return (int)(!(TreePtr<Node>)*r_singular) - (int)(!(TreePtr<Node>)*l_singular);                
             
             // Both non-null, so we are allowed to recurse
-            Orderable::Result cr = Compare( (TreePtr<Node>)*x_singular, (TreePtr<Node>)*y_singular );
-            if( cr != Orderable::EQUAL )
-                return cr;                
+            Orderable::Result d = Compare( (TreePtr<Node>)*l_singular, (TreePtr<Node>)*r_singular );
+            if( d != Orderable::EQUAL )
+                return d;                
         }
         else
         {

@@ -18,10 +18,10 @@ class SimpleCompareRelation
 {
 public:
     SimpleCompareRelation();
-    Orderable::Result Compare( XLink xlink, XLink ylink ) const;
+    Orderable::Result Compare( XLink l_xlink, XLink r_xlink ) const;
 
     /// Less operator: for use with set, map etc
-    bool operator()( XLink xlink, XLink ylink ) const;
+    bool operator()( XLink l_xlink, XLink r_xlink ) const;
 
 private:
     shared_ptr<SimpleCompare> simple_compare;
