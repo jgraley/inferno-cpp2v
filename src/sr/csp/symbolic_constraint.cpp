@@ -17,18 +17,18 @@
 using namespace CSP;
 
 SymbolicConstraint::SymbolicConstraint( shared_ptr<SYM::BooleanExpression> expression,
-                                        shared_ptr<const SR::XTreeDatabase> x_tree_db ) :
-    plan( this, expression, x_tree_db )
+                                        shared_ptr<const SR::Lacing> lacing ) :
+    plan( this, expression, lacing )
 {
 }
 
 
 SymbolicConstraint::Plan::Plan( SymbolicConstraint *algo_,
                                 shared_ptr<SYM::BooleanExpression> expression_,
-                                shared_ptr<const SR::XTreeDatabase> x_tree_db_ ) :
+                                shared_ptr<const SR::Lacing> lacing_ ) :
     algo( algo_ ),
     consistency_expression( expression_ ),
-    x_tree_db( x_tree_db_ )
+    lacing( lacing_ )
 {
     DetermineVariables();   
     DetermineHintExpressions();   
@@ -48,7 +48,7 @@ void SymbolicConstraint::Plan::DetermineHintExpressions()
     TRACE("Trying to solve:\n")(consistency_expression->Render())("\n");
    
     // Truth-table solver
-    SYM::Expression::SolveKit kit { x_tree_db.get() };    
+    SYM::Expression::SolveKit kit { lacing.get() };    
     SYM::TruthTableSolver my_solver(kit, consistency_expression);
     my_solver.PreSolve();    
         

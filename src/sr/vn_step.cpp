@@ -79,11 +79,11 @@ void VNStep::PlanningStageThree()
 }
 
 
-void VNStep::PlanningStageFive( shared_ptr<const XTreeDatabase> x_tree_db )
+void VNStep::PlanningStageFive( shared_ptr<const Lacing> lacing )
 {
     ASSERT( this )("Called on NULL pointer, I expect");
     ASSERT( top_level_engine )("VNStep needs to be configured before use");
-    top_level_engine->PlanningStageFive(x_tree_db);
+    top_level_engine->PlanningStageFive(lacing);
 }
 
 
@@ -99,6 +99,12 @@ void VNStep::SetStopAfter( vector<int> ssa, int d )
     ASSERT( top_level_engine )("VNStep needs to be configured before use");
     top_level_engine->SetStopAfter( ssa, d );
 }  
+
+
+void VNStep::SetXTreeDb( shared_ptr<const XTreeDatabase> x_tree_db )
+{
+	top_level_engine->SetXTreeDb( x_tree_db );
+}
 
 
 void VNStep::Transform( XLink root_xlink )

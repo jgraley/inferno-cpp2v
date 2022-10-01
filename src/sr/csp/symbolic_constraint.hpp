@@ -34,14 +34,14 @@ public:
      * @param op a shared pointer to the boolean operator
      */
     explicit SymbolicConstraint( shared_ptr<SYM::BooleanExpression> op,
-                                 shared_ptr<const SR::XTreeDatabase> x_tree_db );
+                                 shared_ptr<const SR::Lacing> lacing );
     
 private:
     const struct Plan : public virtual Traceable
     {
         explicit Plan( SymbolicConstraint *algo,  
                        shared_ptr<SYM::BooleanExpression> expression,
-                       shared_ptr<const SR::XTreeDatabase> x_tree_db );
+                       shared_ptr<const SR::Lacing> lacing );
         void DetermineVariables();
         void DetermineHintExpressions();
         void DetermineXTreeDbRequirement();
@@ -54,7 +54,7 @@ private:
         map<VariableId, GivensToExpression> suggestion_expressions;
         shared_ptr<SYM::BooleanExpression> alt_expression_for_testing;       
         SYM::Expression::VariablesRequiringRows required_x_tree_db_level; 
-        shared_ptr<const SR::XTreeDatabase> x_tree_db;
+        shared_ptr<const SR::Lacing> lacing;
     } plan;
 
     const set<VariableId> &GetVariables() const override;

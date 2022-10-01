@@ -145,13 +145,11 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
 }
 
 
-void AndRuleEngine::Plan::PlanningStageFive( shared_ptr<const XTreeDatabase> x_tree_db_ )
-{
-    algo->x_tree_db = x_tree_db_;
-    
+void AndRuleEngine::Plan::PlanningStageFive( shared_ptr<const Lacing> lacing )
+{   
     // ------------------ Set up CSP solver ---------------------   
     list< shared_ptr<CSP::Constraint> > constraints_list;
-    CreateMyConstraints(constraints_list, x_tree_db_);
+    CreateMyConstraints(constraints_list, lacing);
     
     // Boundary links may not be in our domain if eg they got 
     // deleted by the enclosing replace. So base_plink is the only one that
@@ -168,11 +166,11 @@ void AndRuleEngine::Plan::PlanningStageFive( shared_ptr<const XTreeDatabase> x_t
     
     // ------------------ Stage five on subordinates ---------------------
 	for( auto p : my_free_abnormal_engines )
-		p.second->PlanningStageFive(x_tree_db_);
+		p.second->PlanningStageFive(lacing);
 	for( auto p : my_evaluator_abnormal_engines )
-		p.second->PlanningStageFive(x_tree_db_);
+		p.second->PlanningStageFive(lacing);
 	for( auto p : my_multiplicity_engines )
-		p.second->PlanningStageFive(x_tree_db_);    
+		p.second->PlanningStageFive(lacing);    
 }
 
 
@@ -463,7 +461,7 @@ void AndRuleEngine::Plan::DeduceCSPVariables()
 
 
 void AndRuleEngine::Plan::CreateMyConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list,
-                                               shared_ptr<const XTreeDatabase> x_tree_db )
+                                               shared_ptr<const Lacing> lacing )
 {
     for( auto bexpr : expressions_for_current_solve )
     {		
@@ -504,7 +502,7 @@ void AndRuleEngine::Plan::CreateMyConstraints( list< shared_ptr<CSP::Constraint>
 
 		SYM::PredicateAnalysis::CheckRegularPredicateForm( bexpr );
 
-        auto c = make_shared<CSP::SymbolicConstraint>(bexpr, x_tree_db);
+        auto c = make_shared<CSP::SymbolicConstraint>(bexpr, lacing);
         constraints_list.push_back(c);    
     }        
 }
@@ -574,9 +572,9 @@ string AndRuleEngine::Plan::GetTrace() const
 }
 
 
-void AndRuleEngine::PlanningStageFive( shared_ptr<const XTreeDatabase> x_tree_db )
+void AndRuleEngine::PlanningStageFive( shared_ptr<const Lacing> lacing )
 {
-    plan.PlanningStageFive(x_tree_db);
+    plan.PlanningStageFive(lacing);
 }
 
 
@@ -786,6 +784,20 @@ void AndRuleEngine::RegenerationPass( SolutionMap &basic_solution, const Solutio
     }
 
     TRACE("Regeneration complete\n");
+}
+
+
+void AndRuleEngine::SetXTreeDb( shared_ptr<const XTreeDatabase> x_tree_db_ )
+{
+    x_tree_db = x_tree_db_;
+
+    // ------------------ Stage five on subordinates ---------------------
+	for( auto p : plan.my_free_abnormal_engines )
+		p.second->SetXTreeDb(x_tree_db);
+	for( auto p : plan.my_evaluator_abnormal_engines )
+		p.second->SetXTreeDb(x_tree_db);
+	for( auto p : plan.my_multiplicity_engines )
+		p.second->SetXTreeDb(x_tree_db);    
 }
 
 

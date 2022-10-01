@@ -61,9 +61,9 @@ public:
     {
         plan.PlanningStageThree(enclosing_keyers); 
     }
-    void PlanningStageFive( shared_ptr<const XTreeDatabase> x_tree_db )
+    void PlanningStageFive( shared_ptr<const Lacing> lacing )
     {
-        plan.PlanningStageFive(x_tree_db); 
+        plan.PlanningStageFive(lacing); 
     }
                     
 private:
@@ -87,7 +87,7 @@ private:
         void PlanningStageTwo(const CompareReplace::AgentPhases &in_progress_agent_phases); // Stage one is the constructor
         void ConfigureAgents();
         void PlanningStageThree(set<PatternLink> enclosing_keyers);
-        void PlanningStageFive( shared_ptr<const XTreeDatabase> x_tree_db );
+        void PlanningStageFive( shared_ptr<const Lacing> lacing );
         void PlanCompare();
         void PlanReplace();
         void Dump();
@@ -95,7 +95,6 @@ private:
         
         SCREngine * const algo;
         VNSequence *vn_sequence;
-        shared_ptr<const XTreeDatabase> x_tree_db;
         const CompareReplace *root_engine;
         TreePtr<Node> base_pattern;
         PatternLink base_plink;
@@ -125,6 +124,7 @@ public: // For top level engine/VN trans
                                  const SolutionMap *enclosing_solution );                                                                                               
     virtual void SetStopAfter( vector<int> ssa, int d=0 );
     static void SetMaxReps( int n, bool e );
+	void SetXTreeDb( shared_ptr<const XTreeDatabase> x_tree_db );
     set< shared_ptr<SYM::BooleanExpression> > GetExpressions() const;
     list<const AndRuleEngine *> GetAndRuleEngines() const;
     list<const SCREngine *> GetSCREngines() const;
@@ -160,6 +160,7 @@ private:
     vector<int> stop_after;
     int depth;    
     
+    shared_ptr<const XTreeDatabase> x_tree_db;
     mutable SolutionMap replace_solution;
     bool replace_solution_available = false;    
     mutable map< RequiresSubordinateSCREngine *, TreePtr<Node> > embedded_action_requests;

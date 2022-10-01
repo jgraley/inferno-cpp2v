@@ -248,17 +248,15 @@ void SCREngine::Plan::PlanReplace()
 }
 
 
-void SCREngine::Plan::PlanningStageFive( shared_ptr<const XTreeDatabase> x_tree_db_ )
+void SCREngine::Plan::PlanningStageFive( shared_ptr<const Lacing> lacing )
 {    
     TRACE("Planning stage five\n");
 
-    and_rule_engine->PlanningStageFive(x_tree_db_);
+    and_rule_engine->PlanningStageFive(lacing);
     
     for( pair< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > p : my_engines )
-        p.second->PlanningStageFive(x_tree_db_);    
-        
-    x_tree_db = x_tree_db_;
-    
+        p.second->PlanningStageFive(lacing);    
+            
     Dump();
 } 
 
@@ -351,7 +349,7 @@ void SCREngine::RunEmbedded( PatternLink plink_to_embedded, XLink base_xlink )
     
     // Obtain a pointer to the though link that will be updated by the 
     // embedded. 
-	NodeTable::Row nn = plan.x_tree_db->GetNodeRow(through_subtree);
+	NodeTable::Row nn = x_tree_db->GetNodeRow(through_subtree);
 	XLink target_xlink = OnlyElementOf(nn.parents);
 
     // Run the embedded's engine on this subtree and overwrite through ptr via p_through_x
@@ -510,6 +508,17 @@ void SCREngine::SetMaxReps( int n, bool e )
 { 
     repetitions = n; 
     rep_error = e; 
+}
+
+
+void SCREngine::SetXTreeDb( shared_ptr<const XTreeDatabase> x_tree_db_ )
+{
+    x_tree_db = x_tree_db_;
+
+    plan.and_rule_engine->SetXTreeDb(x_tree_db);
+    
+    for( pair< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > p : plan.my_engines )
+        p.second->SetXTreeDb(x_tree_db);            
 }
 
 

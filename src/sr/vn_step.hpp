@@ -16,6 +16,7 @@ namespace SR
 class CompareReplace;
 class VNSequence;
 class XTreeDatabase;
+class Lacing;
 
 /**
  * Vida Nova Transformation    
@@ -39,11 +40,12 @@ public:
     void PlanningStageOne( VNSequence *vn_sequence );
     void PlanningStageTwo();
     void PlanningStageThree();
-    void PlanningStageFive( shared_ptr<const XTreeDatabase> x_tree_db );
+    void PlanningStageFive( shared_ptr<const Lacing> lacing );
     
     static void SetMaxReps( int n, bool e );
     void SetStopAfter( vector<int> ssa, int d=0 );    
             
+	void SetXTreeDb( shared_ptr<const XTreeDatabase> x_tree_db );
     void Transform( XLink root_xlink );
         
     virtual Block GetGraphBlockInfo() const;

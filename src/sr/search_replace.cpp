@@ -74,10 +74,10 @@ void CompareReplace::Plan::PlanningStageThree()
 }                                      
 
 
-void CompareReplace::Plan::PlanningStageFive( shared_ptr<const XTreeDatabase> x_tree_db )
+void CompareReplace::Plan::PlanningStageFive( shared_ptr<const Lacing> lacing )
 {
     // Third, create subordinate AndRuleEngines
-    scr_engine->PlanningStageFive(x_tree_db);
+    scr_engine->PlanningStageFive(lacing);
 }                                      
 
 
@@ -113,9 +113,15 @@ void CompareReplace::PlanningStageThree()
 }
 
 
-void CompareReplace::PlanningStageFive( shared_ptr<const XTreeDatabase> x_tree_db )
+void CompareReplace::PlanningStageFive( shared_ptr<const Lacing> lacing )
 {
-    plan.PlanningStageFive(x_tree_db);
+    plan.PlanningStageFive(lacing);
+}
+
+
+void CompareReplace::SetXTreeDb( shared_ptr<const XTreeDatabase> x_tree_db )
+{
+	plan.scr_engine->SetXTreeDb( x_tree_db );
 }
 
 

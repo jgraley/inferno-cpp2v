@@ -66,7 +66,7 @@ public:
               PatternLink base_plink, 
               const set<PatternLink> &surrounding_plinks,
               const set<PatternLink> &surrounding_keyer_plinks );
-        void PlanningStageFive( shared_ptr<const XTreeDatabase> x_tree_db );
+        void PlanningStageFive( shared_ptr<const Lacing> lacing );
         void PopulateBoundaryStuff( PatternLink link,
                                     const set<Agent *> &surrounding_agents );
         void DetermineKeyersModuloDisjunction( PatternLink plink,
@@ -91,7 +91,7 @@ public:
         // CSP solver stuff
         void DeduceCSPVariables();
         void CreateMyConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list,
-                                  shared_ptr<const XTreeDatabase> x_tree_db );
+                                  shared_ptr<const Lacing> lacing );
         void Dump();
 
         string GetTrace() const; // used for debug
@@ -133,7 +133,7 @@ public:
         set<PatternLink> reached_links; 
     } plan;
     
-    void PlanningStageFive( shared_ptr<const XTreeDatabase> x_tree_db );      
+    void PlanningStageFive( shared_ptr<const Lacing> lacing );      
     
 private:        
     void StartCSPSolver( const SolutionMap &fixes,
@@ -154,6 +154,7 @@ private:
                            const SolutionMap *surrounding_solution );
     
 public:
+	void SetXTreeDb( shared_ptr<const XTreeDatabase> x_tree_db );
     SolutionMap Compare( XLink base_xlink,
                          const SolutionMap *surrounding_solution );
     SolutionMap Compare( TreePtr<Node> base_xnode );

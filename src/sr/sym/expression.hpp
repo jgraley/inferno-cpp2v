@@ -10,6 +10,7 @@
 namespace SR
 {
     class XTreeDatabase;
+    class Lacing;
 }
 
 namespace SYM
@@ -27,11 +28,11 @@ class Expression : public Traceable, public Orderable
 public:
     /**
      * The information we need to solve a symbolic expression (and
-     * maybe other manipulations).
+     * maybe other manipulations) at planning time.
      */
     struct SolveKit
     {
-        const SR::XTreeDatabase *x_tree_db;
+        const SR::Lacing *lacing;
     };
 
     /**

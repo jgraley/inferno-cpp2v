@@ -40,7 +40,7 @@ private:
         void PlanningStageOne(VNSequence *vn_sequence);
         void PlanningStageTwo();
         void PlanningStageThree();
-        void PlanningStageFive( shared_ptr<const XTreeDatabase> x_tree_db );
+        void PlanningStageFive( shared_ptr<const Lacing> lacing );
         string GetTrace() const; // used for debug
 
         TreePtr<Node> compare_pattern;
@@ -58,8 +58,9 @@ public:
     void PlanningStageOne(VNSequence *vn_sequence);
     void PlanningStageTwo();
     void PlanningStageThree();
-    void PlanningStageFive( shared_ptr<const XTreeDatabase> x_tree_db );
+    void PlanningStageFive( shared_ptr<const Lacing> lacing );
 
+	void SetXTreeDb( shared_ptr<const XTreeDatabase> x_tree_db );
     void Transform( XLink root_xlink );
     
     virtual Block GetGraphBlockInfo() const;

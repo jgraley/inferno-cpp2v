@@ -61,11 +61,7 @@ void VNSequence::PlanningStageFour()
 
 void VNSequence::PlanningStageFive( int step_index )
 {
-    if( !x_tree_db )
-		x_tree_db = make_shared<XTreeDatabase>(lacing);
-
-    // Give that set to x_tree_db planning
-    steps[step_index]->PlanningStageFive(x_tree_db);
+    steps[step_index]->PlanningStageFive(lacing);  
 }
 
 
@@ -84,12 +80,14 @@ void VNSequence::SetStopAfter( int step_index, vector<int> ssa, int d )
 void VNSequence::AnalysisStage( TreePtr<Node> root )
 {    
     current_root_xlink = XLink::CreateDistinct(root);    
-    ASSERT( x_tree_db )("Planning stage four should have created x_tree_db object");
-    ASSERT( current_root_xlink );
+    
+    x_tree_db = make_shared<XTreeDatabase>(lacing);
+    ASSERT( x_tree_db )("Planning stage four should have created x_tree_db object");    
     x_tree_db->SetRoot( current_root_xlink );
+    
 #ifndef X_TREE_DB_EACH_STEP
 	x_tree_db->InitialBuild();
-#endif        
+#endif        	
 }
 
 
@@ -101,6 +99,9 @@ TreePtr<Node> VNSequence::TransformStep( int step_index, TreePtr<Node> root )
 #ifdef X_TREE_DB_EACH_STEP
 	x_tree_db->InitialBuild();
 #endif        
+
+    steps[step_index]->SetXTreeDb( x_tree_db );
+
     steps[step_index]->Transform( current_root_xlink );
     root = current_root_xlink.GetChildX();
     return root;   

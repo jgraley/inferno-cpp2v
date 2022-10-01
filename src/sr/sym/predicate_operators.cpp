@@ -644,7 +644,7 @@ unique_ptr<BooleanResult> IsInCategoryOperator::Evaluate( const EvalKit &kit,
 shared_ptr<SYM::SymbolExpression> IsInCategoryOperator::TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const
 {
     // Get lacing index range
-    const list<pair<int, int>> &int_range_list = kit.x_tree_db->GetIndexes().GetLacing()->GetRangeListForCategory(archetype_node);
+    const list<pair<int, int>> &int_range_list = kit.lacing->GetRangeListForCategory(archetype_node);
     
     // Get specially hacked XLinks that can be used with the category ordering
     AllInCategoryRangeOperator::ExprBoundsList expr_range_list;
