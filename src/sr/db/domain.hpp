@@ -48,6 +48,8 @@ public:
     void PrepareDelete(DBWalk::Actions &actions);
 	void PrepareInsert(DBWalk::Actions &actions);
 
+    void TestRelations( const unordered_set<XLink> &xlinks );
+    
     // Global domain of possible xlink values
     unordered_set<XLink> unordered_domain;            
     

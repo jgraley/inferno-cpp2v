@@ -43,6 +43,7 @@ public:
     
     void Dump() const;
     void ExpectMatching( const Indexes &mut );
+    void TestRelations( const unordered_set<XLink> &xlinks );
 
     // Category ordering TODO merge with SimpleCompare ordering
     typedef set<XLink, CategoryRelation> CategoryOrderedIndex;

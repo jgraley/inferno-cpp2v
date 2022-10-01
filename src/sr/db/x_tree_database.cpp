@@ -1,5 +1,8 @@
 #include "x_tree_database.hpp"
+
 #include "lacing.hpp"
+
+#include "common/read_args.hpp"
 
 using namespace SR;    
 
@@ -282,6 +285,12 @@ void XTreeDatabase::ExtendDomainNewPattern( PatternLink root_plink )
 {
     ASSERT( root_xlink );
 	plan.domain->ExtendDomainNewPattern( *this, root_plink );
+	
+    if( ReadArgs::test_rel )
+    {
+		plan.domain->TestRelations( plan.domain->unordered_domain );
+		plan.indexes->TestRelations( plan.domain->unordered_domain );
+	}		
 }
 
 

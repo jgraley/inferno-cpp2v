@@ -26,6 +26,12 @@ CategoryRelation& CategoryRelation::operator=(const CategoryRelation &other)
 
 bool CategoryRelation::operator() (const XLink& x_link, const XLink& y_link) const
 {
+	//return Compare(x_link, y_link) < Orderable::EQUAL;
+//}
+
+
+//Orderable::Result Compare(const XLink& x_link, const XLink& y_link) const
+//{
 #ifdef TRACE_CATEGORY_RELATION
     INDENT("@");
     TRACE("x_link=")(x_link)(" y_link=")(y_link)("\n");

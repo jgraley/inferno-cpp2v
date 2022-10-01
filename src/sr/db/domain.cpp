@@ -1,7 +1,8 @@
-#include "sc_relation.hpp"
-#include "../agents/agent.hpp"
-
 #include "domain.hpp"
+
+#include "relation_test.hpp"
+
+#include "../agents/agent.hpp"
 
 //#define TRACE_DOMAIN_EXTEND
 
@@ -103,12 +104,6 @@ void Domain::ExtendDomainNewPattern( const TreeKit &kit, PatternLink root_plink_
              ( DiffTrace(previous_unordered_domain, unordered_domain) );
     }
 #endif
-
-    if( ReadArgs::test_rel )
-    {
-        SimpleCompareRelation r;
-        r.TestProperties( unordered_domain );
-    }
 }
 
 
@@ -190,6 +185,14 @@ void Domain::PrepareDelete( DBWalk::Actions &actions )
 
 void Domain::PrepareInsert(DBWalk::Actions &actions)
 {
+}
+
+
+void Domain::TestRelations( const unordered_set<XLink> &xlinks )
+{	
+	SimpleCompare sc;
+	TestRelationProperties( [&](XLink l, XLink r){ return sc.Compare(l.GetChildX(), r.GetChildX()); }, 
+							xlinks );
 }
 
 

@@ -1,9 +1,11 @@
+#include "indexes.hpp"
+
 #include "x_tree_database.hpp"
 #include "sc_relation.hpp"
 #include "lacing.hpp"
-#include "common/read_args.hpp"
+#include "relation_test.hpp"
 
-#include "indexes.hpp"
+#include "common/read_args.hpp"
 
 using namespace SR;    
 
@@ -97,3 +99,20 @@ void Indexes::ExpectMatching( const Indexes &mut )
           ( DiffTrace(category_ordered_index, mut.category_ordered_index) )
           ( mut.category_ordered_index );
 }
+
+
+void Indexes::TestRelations( const unordered_set<XLink> &xlinks )
+{
+	using namespace std::placeholders;
+
+	SimpleCompareRelation scr;
+	TestRelationProperties( bind(&SimpleCompareRelation::Compare, scr, _1, _2), 
+							xlinks );
+
+	// TODO provide category relation with Compare()
+	//CategoryRelation cat_r;
+	//TestRelationProperties( bind(&CategoryRelation::Compare, cat_r, _1, _2), 
+    //	 					xlinks );
+}
+
+

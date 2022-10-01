@@ -68,6 +68,7 @@ public:
     bool operator<(const XLink &other) const;
     bool operator!=(const XLink &other) const;
     bool operator==(const XLink &other) const;
+    Orderable::Result Compare(const XLink &other) const;
     size_t GetHash() const noexcept;    
     explicit operator bool() const;
 	bool HasChildX() const;
