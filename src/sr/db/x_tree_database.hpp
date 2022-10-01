@@ -19,7 +19,7 @@ class XTreeDatabase : public Traceable,
                       public TreeKit
 {
 public:
-    explicit XTreeDatabase( shared_ptr<Lacing> lacing );
+    explicit XTreeDatabase( shared_ptr<Lacing> lacing, XLink root_xlink );
     
 private: 
     const struct Plan : public Traceable
@@ -40,8 +40,6 @@ private:
     } plan;
 
 public:
-    void SetRoot(XLink root_xlink);
-
 	// Use both monolithic and incremental updates in order 
 	// to build full db during analysis stage
     void InitialBuild();

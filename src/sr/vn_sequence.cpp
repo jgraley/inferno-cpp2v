@@ -81,9 +81,8 @@ void VNSequence::AnalysisStage( TreePtr<Node> root )
 {    
     current_root_xlink = XLink::CreateDistinct(root);    
     
-    x_tree_db = make_shared<XTreeDatabase>(lacing);
-    ASSERT( x_tree_db )("Planning stage four should have created x_tree_db object");    
-    x_tree_db->SetRoot( current_root_xlink );
+    x_tree_db = make_shared<XTreeDatabase>(lacing, current_root_xlink);
+    ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");    
     
 #ifndef X_TREE_DB_EACH_STEP
 	x_tree_db->InitialBuild();
@@ -135,42 +134,42 @@ string VNSequence::GetStepName( int step_index ) const
 
 XLink VNSequence::UniquifyDomainExtension( TreePtr<Node> node, bool expect_in_domain ) const
 {
-    ASSERT( x_tree_db )("Planning stage four should have created x_tree_db object");
+    ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");    
     return x_tree_db->UniquifyDomainExtension( node, expect_in_domain ); 
 }
 
 
 XLink VNSequence::FindDomainExtension( TreePtr<Node> node ) const
 {
-    ASSERT( x_tree_db )("Planning stage four should have created x_tree_db object");
+    ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");    
     return x_tree_db->FindDomainExtension( node ); 
 }
 
 
 void VNSequence::ExtendDomainNewPattern( PatternLink base_plink )
 {
-    ASSERT( x_tree_db )("Planning stage four should have created x_tree_db object");  
+    ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");    
     x_tree_db->ExtendDomainNewPattern( base_plink );
 }
 
 
 void VNSequence::ExtendDomainNewX()
 {
-    ASSERT( x_tree_db )("Planning stage four should have created x_tree_db object");  
+    ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");    
     x_tree_db->ExtendDomainNewX();
 }
 
 
 void VNSequence::UnExtendDomain()
 {
-    ASSERT( x_tree_db )("Planning stage four should have created x_tree_db object");  
+    ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");    
     x_tree_db->UnExtendDomain();
 }
 
 
 void VNSequence::ExecuteUpdateCommand( shared_ptr<UpdateCommand> cmd )
 {
-    ASSERT( x_tree_db )("Planning stage four should have created x_tree_db object");  
+    ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");    
 	UpdateCommand::ExecKit kit { current_root_xlink, x_tree_db.get() };
 	cmd->Execute( kit );
 }
@@ -178,28 +177,28 @@ void VNSequence::ExecuteUpdateCommand( shared_ptr<UpdateCommand> cmd )
 
 void VNSequence::XTreeDbMonolithicClear()
 {
-    ASSERT( x_tree_db )("Planning stage four should have created x_tree_db object");  
+    ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");    
 	x_tree_db->MonolithicClear();
 }
 
 
 void VNSequence::XTreeDbMonolithicBuild()
 {
-    ASSERT( x_tree_db )("Planning stage four should have created x_tree_db object");  
+    ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");    
 	x_tree_db->MonolithicBuild();
 }
 
 
 void VNSequence::XTreeDbDump() const
 {
-    ASSERT( x_tree_db )("Planning stage four should have created x_tree_db object");  
+    ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");    
     x_tree_db->Dump();
 }
 
 #ifdef DB_ENABLE_COMPARATIVE_TEST
 void VNSequence::XTreeDbExpectMatches() const
 {
-    ASSERT( x_tree_db )("Planning stage four should have created x_tree_db object");  
+    ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");    
     x_tree_db->ExpectMatches();
 }
 #endif

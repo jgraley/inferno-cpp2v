@@ -11,8 +11,9 @@ using namespace SR;
 //   when testing the test
 //#define DB_TEST_THE_TEST
 
-XTreeDatabase::XTreeDatabase( shared_ptr<Lacing> lacing ) :
-    plan( lacing )
+XTreeDatabase::XTreeDatabase( shared_ptr<Lacing> lacing, XLink root_xlink_ ) :
+    plan( lacing ),
+    root_xlink( root_xlink_ )
 {
 	auto on_insert_extra_subtree = [&](XLink extra_base_xlink)
 	{
@@ -45,12 +46,6 @@ XTreeDatabase::Plan::Plan( shared_ptr<Lacing> lacing ) :
 {
 }
 
-    
-void XTreeDatabase::SetRoot(XLink root_xlink_)
-{
-  	root_xlink = root_xlink_;		    
-}
-    
     
 void XTreeDatabase::InitialBuild()
 {      
