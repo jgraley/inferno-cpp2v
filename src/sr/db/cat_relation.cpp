@@ -73,19 +73,14 @@ Orderable::Result CategoryRelation::Compare(const XLink& x_link, const XLink& y_
 	{
         xi = x_minimus->GetMinimusOrdinal();
         yi = lacing->GetOrdinalForNode( y );
-        if( xi != yi )
-			return xi - yi;
-		else
-		    return -1; // minimus is on the left
+        return (xi*2-1) - (yi*2); // minimus is on the left
 	}
 	else if( !x_minimus && y_minimus )
     {
         xi = lacing->GetOrdinalForNode( x );
         yi = y_minimus->GetMinimusOrdinal();      
-        if( xi != yi )
-			return xi - yi;
-		else
-		    return 1; // minimus is on the right
+        return (xi*2) - (yi*2-1); // minimus is on the right
+
     }
     else
     {
