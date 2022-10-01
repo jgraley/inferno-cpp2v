@@ -46,19 +46,19 @@ Orderable::Result CategoryRelation::Compare(const XLink& l_xlink, const XLink& r
     {
         li = lacing->GetOrdinalForNode( l_node );
         ri = lacing->GetOrdinalForNode( r_node );
-        Orderable::Result res = li - ri;
-        // Fast path out
-        //Orderable::Result res1 = lacing->OrdinalCompare( x, y );    
+        Orderable::Result d = li - ri;
+        // Fast path out - now super slow TODO resolve, see #642
+        //Orderable::Result d1 = lacing->OrdinalCompare( x, y );    
 #ifdef TRACE_CATEGORY_RELATION
-        TRACEC("both normal: %d - %d = %d\n", li, ri, res);
+        TRACEC("both normal: %d - %d = %d\n", li, ri, d);
 #endif        
 #ifdef CHECK_ORDINAL_COMPARE
-        ASSERT( (res>0) == (res1>0) );
-        ASSERT( (res<0) == (res1<0) );
-        ASSERT( (res==0) == (res1==0) );
+        ASSERT( (d>0) == (d1>0) );
+        ASSERT( (d<0) == (d1<0) );
+        ASSERT( (d==0) == (d1==0) );
 #endif
-   	    if( res != Orderable::EQUAL )
-		    return res;	
+   	    if( d != Orderable::EQUAL )
+		    return d;	
 		    
         return XLink::Compare(l_xlink, r_xlink);
     }

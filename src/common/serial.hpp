@@ -2,6 +2,7 @@
 #define SERIAL_HPP
 
 #include "progress.hpp"
+#include "orderable.hpp"
 
 #include <map>
 #include <bits/stdint-uintn.h>
@@ -43,7 +44,9 @@ protected:
     SerialNumber &operator=( const SerialNumber &other );
 
 public:
-    bool operator<( const SerialNumber &o ) const;
+    bool operator<( const SerialNumber &other ) const;
+    static Orderable::Result Compare(const SerialNumber &l, const SerialNumber &r);
+
     inline SNType GetSerialNumber() const;
     string GetSerialString() const; 
 	void SetHook(shared_ptr<Hook> h) const;
@@ -75,6 +78,8 @@ public:
 
     string GetSerialString() const;
     bool operator<( const SatelliteSerial &other ) const;
+    static Orderable::Result Compare(const SatelliteSerial &l, const SatelliteSerial &r);
+    
     void Redetermine( const SerialNumber *mother, const void *satellite );
     
 private:

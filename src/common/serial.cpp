@@ -34,12 +34,18 @@ inline SerialNumber &SerialNumber::operator=( const SerialNumber &other )
 }
 
 
-bool SerialNumber::operator<( const SerialNumber &o ) const
+bool SerialNumber::operator<( const SerialNumber &other ) const
 {
-	if( progress != o.progress )
-		return progress < o.progress;
-	else
-		return serial < o.serial;
+    return Compare(*this, other) < 0;
+}
+
+
+Orderable::Result SerialNumber::Compare(const SerialNumber &l, const SerialNumber &r)
+{
+	if( l.progress != r.progress )
+		return Progress::Compare(l.progress, r.progress);
+		
+	return l.serial - r.serial;
 }
 
 
@@ -107,7 +113,13 @@ string SatelliteSerial::GetSerialString() const
 
 bool SatelliteSerial::operator<( const SatelliteSerial &other ) const
 {
-    return serial < other.serial;
+    return Compare(*this, other) < 0;
+}
+
+
+Orderable::Result SatelliteSerial::Compare(const SatelliteSerial &l, const SatelliteSerial &r)
+{
+    return l.serial - r.serial;
 }
 
 

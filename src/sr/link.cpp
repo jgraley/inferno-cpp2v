@@ -279,17 +279,15 @@ Orderable::Result XLink::Compare(const XLink &l, const XLink &r)
     auto r_tp = TreePtr<Node>(*r.asp_x);
     ASSERTS( l_tp );
     ASSERTS( r_tp );
-    if( l_tp->Node::operator<(*r_tp) )
-        return -1;
-    if( r_tp->Node::operator<(*l_tp) )
-        return 1;
-
+    Orderable::Result d_node = Node::Compare( *l_tp, *r_tp );
+    if( d_node != 0 )
+		return d_node;
+		
     // Satellite serial number aka arrow-head number is secondary ordering
     // Use ordering on the TreePtrs themselves #625
-    if( l.asp_x->TreePtrInterface::operator<(*r.asp_x) )
-        return -1;
-    if( r.asp_x->TreePtrInterface::operator<(*l.asp_x) )
-        return 1;
+    Orderable::Result d_tpi = TreePtrInterface::Compare( *l.asp_x, *r.asp_x );
+    if( d_tpi != 0 )
+		return d_tpi;
        
     // Pointer-based tertiary ordering for just in case TODO assert pointers are equal
     if( l.asp_x < r.asp_x )

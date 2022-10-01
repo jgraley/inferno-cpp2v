@@ -19,7 +19,7 @@ TreePtrInterface &TreePtrInterface::operator=( const TreePtrInterface &o )
 
 bool TreePtrInterface::operator<(const TreePtrInterface &other) const
 {
-	return GetSS() < other.GetSS();
+	return Compare(*this, other) < 0;
 }
 
 
@@ -32,6 +32,12 @@ bool TreePtrInterface::operator==(const TreePtrInterface &other) const
 bool TreePtrInterface::operator!=(const TreePtrInterface &other) const
 {
 	return get() != other.get();
+}
+
+
+Orderable::Result TreePtrInterface::Compare(const TreePtrInterface &l, const TreePtrInterface &r)
+{
+	return SatelliteSerial::Compare( l.GetSS(), r.GetSS() );
 }
 
 

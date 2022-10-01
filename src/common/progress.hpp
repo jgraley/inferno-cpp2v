@@ -1,6 +1,8 @@
 #ifndef PROGRESS_HPP
 #define PROGRESS_HPP
 
+#include "orderable.hpp"
+
 #include <map>
 #include <string>
 
@@ -51,13 +53,17 @@ public:
     {
         return stage != o.stage || step != o.step;
     }
-    inline bool operator<( const Progress &o ) const
+    inline bool operator<( const Progress &other ) const
     {
-        if( stage != o.stage )
-            return (int)stage < (int)o.stage;
-        else
-            return step < o.step;
+		return Compare(*this, other) < 0;
     }
+    static Orderable::Result Compare(const Progress &l, const Progress &r)
+    {
+        if( l.stage != r.stage )
+            return (int)l.stage - (int)r.stage;
+        else
+            return l.step - r.step;		
+	}
 
 private:    
     Stage stage;

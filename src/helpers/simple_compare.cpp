@@ -15,6 +15,13 @@ SimpleCompare &SimpleCompare::operator=(const SimpleCompare &other)
 }
 
 
+bool SimpleCompare::operator()( TreePtr<Node> l, TreePtr<Node> r ) const
+{
+    //FTRACE("SC::operator() ")(xl)(" - ")(yl)("\n");
+    return Compare(l, r) < Orderable::EQUAL;
+}
+
+
 Orderable::Result SimpleCompare::Compare( TreePtr<Node> l, TreePtr<Node> r ) const
 {   
     // Inputs must be non-NULL (though we do handle NULL in itemise, see below)
@@ -122,13 +129,6 @@ Orderable::Result SimpleCompare::Compare( CollectionInterface &l, CollectionInte
     Orderered r_ordering = GetOrdering(r);
     
     return LexicographicalCompare(l_ordering, r_ordering, *this);
-}
-
-
-bool SimpleCompare::operator()( TreePtr<Node> l, TreePtr<Node> r ) const
-{
-    //FTRACE("SC::operator() ")(xl)(" - ")(yl)("\n");
-    return Compare(l, r) < Orderable::EQUAL;
 }
 
 
