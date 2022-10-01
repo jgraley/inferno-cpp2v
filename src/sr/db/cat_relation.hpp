@@ -20,7 +20,7 @@ class XTreeDatabase;
 class CategoryRelation
 {
 public:
-	CategoryRelation();
+	//CategoryRelation();
 	CategoryRelation( shared_ptr<Lacing> lacing );
 	CategoryRelation& operator=(const CategoryRelation &other);
 	

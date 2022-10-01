@@ -110,7 +110,7 @@ void Indexes::TestRelations( const unordered_set<XLink> &xlinks )
 							xlinks );
 
 	// TODO provide category relation with Compare()
-	CategoryRelation cat_r;
+	CategoryRelation cat_r( plan.lacing );
 	TestRelationProperties( bind(&CategoryRelation::Compare, cat_r, _1, _2), 
     	 					xlinks );
 }

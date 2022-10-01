@@ -6,9 +6,9 @@ using namespace SR;
 
 //#define TRACE_CATEGORY_RELATION
 
-CategoryRelation::CategoryRelation()
-{
-}
+//CategoryRelation::CategoryRelation()
+//{
+//}
 
 
 CategoryRelation::CategoryRelation( shared_ptr<Lacing> lacing_ ) :
