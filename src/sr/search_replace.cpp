@@ -119,19 +119,21 @@ void CompareReplace::PlanningStageFive( shared_ptr<const Lacing> lacing )
 }
 
 
-void CompareReplace::SetXTreeDb( shared_ptr<const XTreeDatabase> x_tree_db )
+void CompareReplace::SetXTreeDb( shared_ptr<const XTreeDatabase> x_tree_db_ )
 {
+	x_tree_db = x_tree_db_;
 	plan.scr_engine->SetXTreeDb( x_tree_db );
 }
 
 
-void CompareReplace::Transform( XLink root_xlink )
+void CompareReplace::Transform()
 {
     INDENT(")");
     TRACE("Enter S&R instance ")(*this);
 
     SolutionMap empty_solution;    
-    (void)plan.scr_engine->RepeatingCompareReplace( root_xlink, &empty_solution );       
+    (void)plan.scr_engine->RepeatingCompareReplace( x_tree_db->GetRootXLink(), 
+                                                    &empty_solution );       
 }
 
 

@@ -66,7 +66,6 @@ private:
     shared_ptr<Lacing> lacing;
     shared_ptr<XTreeDatabase> x_tree_db;    
     set< TreePtr<Node> > dirty_grass;
-    XLink current_root_xlink;
 };    
     
 }

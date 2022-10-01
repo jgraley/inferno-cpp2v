@@ -107,11 +107,11 @@ void VNStep::SetXTreeDb( shared_ptr<const XTreeDatabase> x_tree_db )
 }
 
 
-void VNStep::Transform( XLink root_xlink )
+void VNStep::Transform()
 {
     ASSERT( this )("Called on NULL pointer, I expect");
     ASSERT( top_level_engine )("VNStep needs to be configured before use");
-    top_level_engine->Transform( root_xlink );
+    top_level_engine->Transform();
 }                                   
 
 

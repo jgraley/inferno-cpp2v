@@ -67,11 +67,14 @@ public:
     const NodeTable::Row &GetNodeRow(TreePtr<Node> node) const;
     bool HasNodeRow(TreePtr<Node> node) const;
 	const Indexes &GetIndexes() const;
+	TreePtr<Node> GetRootNode() const;
+	XLink GetRootXLink() const;
+
     void Dump() const;
 #ifdef DB_ENABLE_COMPARATIVE_TEST
     void ExpectMatches() const;
 #endif	
-
+	
 private:    
     // TreeKit implementation
   	set<LinkInfo> GetDeclarers( TreePtr<Node> node ) const override;

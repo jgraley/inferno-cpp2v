@@ -332,6 +332,33 @@ const Indexes &XTreeDatabase::GetIndexes() const
 }
 
 
+TreePtr<Node> XTreeDatabase::GetRootNode() const
+{
+	return root_xlink.GetChildX();
+}
+
+
+XLink XTreeDatabase::GetRootXLink() const
+{
+	return root_xlink;
+}
+
+
+void XTreeDatabase::Dump() const
+{
+    plan.indexes->Dump();
+}
+
+
+#ifdef DB_ENABLE_COMPARATIVE_TEST
+void XTreeDatabase::ExpectMatches() const
+{
+    plan.ref_indexes->ExpectMatching( *plan.indexes );
+}
+#endif
+
+
+
 set<TreeKit::LinkInfo> XTreeDatabase::GetDeclarers( TreePtr<Node> node ) const
 {
     set<LinkInfo> infos;
@@ -359,18 +386,3 @@ set<TreeKit::LinkInfo> XTreeDatabase::GetDeclarers( TreePtr<Node> node ) const
     }
     return infos;
 }
-
-
-void XTreeDatabase::Dump() const
-{
-    plan.indexes->Dump();
-}
-
-
-#ifdef DB_ENABLE_COMPARATIVE_TEST
-void XTreeDatabase::ExpectMatches() const
-{
-    plan.ref_indexes->ExpectMatching( *plan.indexes );
-}
-#endif
-

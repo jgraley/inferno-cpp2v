@@ -79,9 +79,9 @@ void VNSequence::SetStopAfter( int step_index, vector<int> ssa, int d )
 
 void VNSequence::AnalysisStage( TreePtr<Node> root )
 {    
-    current_root_xlink = XLink::CreateDistinct(root);    
+    XLink root_xlink = XLink::CreateDistinct(root);    
     
-    x_tree_db = make_shared<XTreeDatabase>(lacing, current_root_xlink);
+    x_tree_db = make_shared<XTreeDatabase>(lacing, root_xlink);
     ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");    
     
 #ifndef X_TREE_DB_EACH_STEP
@@ -92,7 +92,8 @@ void VNSequence::AnalysisStage( TreePtr<Node> root )
 
 TreePtr<Node> VNSequence::TransformStep( int step_index, TreePtr<Node> root )
 {
-    ASSERT( current_root_xlink.GetChildX()==root );
+    ASSERT( root == x_tree_db->GetRootNode() )("Unexpected root - re-run AnalysisStage() to change root");
+    
     dirty_grass.clear();	
 	    
 #ifdef X_TREE_DB_EACH_STEP
@@ -100,10 +101,9 @@ TreePtr<Node> VNSequence::TransformStep( int step_index, TreePtr<Node> root )
 #endif        
 
     steps[step_index]->SetXTreeDb( x_tree_db );
-
-    steps[step_index]->Transform( current_root_xlink );
-    root = current_root_xlink.GetChildX();
-    return root;   
+    steps[step_index]->Transform();
+    
+    return x_tree_db->GetRootNode();   
 }
            
                  
@@ -170,7 +170,7 @@ void VNSequence::UnExtendDomain()
 void VNSequence::ExecuteUpdateCommand( shared_ptr<UpdateCommand> cmd )
 {
     ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");    
-	UpdateCommand::ExecKit kit { current_root_xlink, x_tree_db.get() };
+	UpdateCommand::ExecKit kit { x_tree_db.get() };
 	cmd->Execute( kit );
 }
 

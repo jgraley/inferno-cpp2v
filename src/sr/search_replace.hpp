@@ -61,7 +61,7 @@ public:
     void PlanningStageFive( shared_ptr<const Lacing> lacing );
 
 	void SetXTreeDb( shared_ptr<const XTreeDatabase> x_tree_db );
-    void Transform( XLink root_xlink );
+    void Transform();
     
     virtual Block GetGraphBlockInfo() const;
     virtual string GetGraphId() const; 
@@ -75,6 +75,7 @@ public:
 
 private:
     VNSequence *vn_sequence = nullptr;
+    shared_ptr<const XTreeDatabase> x_tree_db;
 };
 
 

@@ -16,8 +16,7 @@ public:
     struct ExecKit
     {
 		// Note: unline EvalKit etc, these pointers are non-const
-		// because we intend to actually change thing here.
-        XLink root_xlink;
+		// because we intend to actually change things here.
         XTreeDatabase *x_tree_db; 
     };
 
