@@ -26,11 +26,11 @@ CategoryRelation& CategoryRelation::operator=(const CategoryRelation &other)
 
 bool CategoryRelation::operator() (const XLink& l_xlink, const XLink& r_xlink) const
 {
-	return Compare(l_xlink, r_xlink) < Orderable::EQUAL;
+	return Compare(l_xlink, r_xlink) < 0;
 }
 
 
-Orderable::Result CategoryRelation::Compare(const XLink& l_xlink, const XLink& r_xlink) const
+Orderable::Diff CategoryRelation::Compare(const XLink& l_xlink, const XLink& r_xlink) const
 {
 #ifdef TRACE_CATEGORY_RELATION
     INDENT("@");
@@ -46,9 +46,9 @@ Orderable::Result CategoryRelation::Compare(const XLink& l_xlink, const XLink& r
     {
         li = lacing->GetOrdinalForNode( l_node );
         ri = lacing->GetOrdinalForNode( r_node );
-        Orderable::Result d = li - ri;
+        Orderable::Diff d = li - ri;
         // Fast path out - now super slow TODO resolve, see #642
-        //Orderable::Result d1 = lacing->OrdinalCompare( x, y );    
+        //Orderable::Diff d1 = lacing->OrdinalCompare( x, y );    
 #ifdef TRACE_CATEGORY_RELATION
         TRACEC("both normal: %d - %d = %d\n", li, ri, d);
 #endif        
@@ -57,7 +57,7 @@ Orderable::Result CategoryRelation::Compare(const XLink& l_xlink, const XLink& r
         ASSERT( (d<0) == (d1<0) );
         ASSERT( (d==0) == (d1==0) );
 #endif
-   	    if( d != Orderable::EQUAL )
+   	    if( d )
 		    return d;	
 		    
         return XLink::Compare(l_xlink, r_xlink);
@@ -80,7 +80,6 @@ Orderable::Result CategoryRelation::Compare(const XLink& l_xlink, const XLink& r
         li = lacing->GetOrdinalForNode( l_node );
         ri = r_minimus->GetMinimusOrdinal();      
         return (li*2) - (ri*2-1); // minimus is on the right
-
     }
     else
     {

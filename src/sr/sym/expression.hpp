@@ -76,13 +76,13 @@ public:
     using Orderable::OrderCompare;
     using Orderable::OrderCompareEqual;
     // Add versions that take shared_ptr
-    static Orderable::Result OrderCompare( shared_ptr<const Expression> l, 
+    static Orderable::Diff OrderCompare( shared_ptr<const Expression> l, 
                                            shared_ptr<const Expression> r, 
                                            OrderProperty order_property = STRICT );    
     static bool OrderCompareEqual( shared_ptr<const Expression> l, 
                                    shared_ptr<const Expression> r, 
                                    OrderProperty order_property = STRICT );    
-    virtual Orderable::Result OrderCompareChildren( const Orderable *candidate, 
+    virtual Orderable::Diff OrderCompareChildren( const Orderable *candidate, 
                                                     OrderProperty order_property ) const override;
     struct OrderComparer : public Traceable 
     {

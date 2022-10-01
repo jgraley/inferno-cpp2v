@@ -10,7 +10,7 @@
 namespace SR
 {
 
-void TestRelationProperties( function<Orderable::Result(XLink l, XLink r)> compare,
+void TestRelationProperties( function<Orderable::Diff(XLink l, XLink r)> compare,
 				     		 const unordered_set<XLink> &xlinks );
 
 };

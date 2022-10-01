@@ -15,7 +15,7 @@ SimpleCompareRelation::SimpleCompareRelation() :
 }
 
 
-Orderable::Result SimpleCompareRelation::Compare( XLink l_xlink, XLink r_xlink ) const
+Orderable::Diff SimpleCompareRelation::Compare( XLink l_xlink, XLink r_xlink ) const
 {
     // Get the child nodes and disregard the arrow heads
     TreePtr<Node> l_node = l_xlink.GetChildX();
@@ -28,6 +28,6 @@ Orderable::Result SimpleCompareRelation::Compare( XLink l_xlink, XLink r_xlink )
 
 bool SimpleCompareRelation::operator()( XLink l_xlink, XLink r_xlink ) const
 {
-    return Compare(l_xlink, r_xlink) < Orderable::EQUAL;
+    return Compare(l_xlink, r_xlink) < 0;
 }
 

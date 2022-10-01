@@ -54,7 +54,7 @@ bool Expression::IsIndependentOf( shared_ptr<Expression> target ) const
 }
 
 
-Orderable::Result Expression::OrderCompare( shared_ptr<const Expression> l, 
+Orderable::Diff Expression::OrderCompare( shared_ptr<const Expression> l, 
                                             shared_ptr<const Expression> r, 
                                             OrderProperty order_property )
 {
@@ -70,7 +70,7 @@ bool Expression::OrderCompareEqual( shared_ptr<const Expression> l,
 }
 
 
-Orderable::Result Expression::OrderCompareChildren( const Orderable *candidate, 
+Orderable::Diff Expression::OrderCompareChildren( const Orderable *candidate, 
                                                     OrderProperty order_property ) const 
 {
     ASSERT( candidate );
@@ -104,8 +104,8 @@ Orderable::Result Expression::OrderCompareChildren( const Orderable *candidate,
 bool Expression::OrderComparer::operator()( const shared_ptr<const Expression> &a, 
                                             const shared_ptr<const Expression> &b ) const
 {
-    Orderable::Result r = Expression::OrderCompare( a, b );
-    return r < Orderable::EQUAL;
+    Orderable::Diff r = Expression::OrderCompare( a, b );
+    return r < 0;
 }                                      
 
 

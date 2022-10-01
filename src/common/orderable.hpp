@@ -6,8 +6,7 @@ using namespace std;
 class Orderable
 {
 public:
-    typedef int Result;
-    static const Result EQUAL = 0;
+    typedef int Diff;
 
     enum OrderProperty
     {
@@ -27,12 +26,12 @@ public:
         // Note: inclusiveness of MINIMUS and MAXIMUS is impl-defined, see rule #528
     };
 
-    static Orderable::Result OrderCompare( const Orderable *l, 
+    static Orderable::Diff OrderCompare( const Orderable *l, 
                                            const Orderable *r, 
                                            OrderProperty order_property = STRICT );
-    virtual Orderable::Result OrderCompareLocal( const Orderable *candidate, 
+    virtual Orderable::Diff OrderCompareLocal( const Orderable *candidate, 
                                                  OrderProperty order_property ) const;
-    virtual Orderable::Result OrderCompareChildren( const Orderable *candidate, 
+    virtual Orderable::Diff OrderCompareChildren( const Orderable *candidate, 
                                                     OrderProperty order_property ) const;
     static bool OrderCompareEqual( const Orderable *l, 
                                    const Orderable *r, 

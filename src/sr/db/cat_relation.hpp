@@ -25,7 +25,7 @@ public:
 	CategoryRelation& operator=(const CategoryRelation &other);
 	
 	bool operator() (const XLink& l_xlink, const XLink& r_xlink) const;
-	Orderable::Result Compare(const XLink& l_xlink, const XLink& r_xlink) const;
+	Orderable::Diff Compare(const XLink& l_xlink, const XLink& r_xlink) const;
 	
 	// Create a node here so that a regular XLink can be used and passed
 	// through the sym stuff by value. Is minimus because intervals on this

@@ -99,12 +99,12 @@ unique_ptr<SymbolResultInterface> TeleportAgent::TeleportOperator::Evaluate( con
 }
 
 
-Orderable::Result TeleportAgent::TeleportOperator::OrderCompareLocal( const Orderable *candidate, 
+Orderable::Diff TeleportAgent::TeleportOperator::OrderCompareLocal( const Orderable *candidate, 
                                                                       OrderProperty order_property ) const 
 {
     auto c = GET_THAT_POINTER(candidate);
 
-    Orderable::Result r;
+    Orderable::Diff r;
     switch( order_property )
     {
     case STRICT:
@@ -114,7 +114,7 @@ Orderable::Result TeleportAgent::TeleportOperator::OrderCompareLocal( const Orde
         break;
     case REPEATABLE:
         // Repeatable ordering stops after name check since address compare is not repeatable
-        r = Orderable::EQUAL;
+        r = 0;
         break;
     }
     return r;

@@ -105,7 +105,7 @@ UniquifyCompare::UniquifyCompare( const UniquifyIdentifiers *unique_ ) :
 }
 
 
-Orderable::Result UniquifyCompare::Compare( TreePtr<Node> a, TreePtr<Node> b ) const
+Orderable::Diff UniquifyCompare::Compare( TreePtr<Node> a, TreePtr<Node> b ) const
 {
     //FTRACE("UC::Compare ")(a)(" - ")(b)("\n");
     
@@ -188,7 +188,7 @@ void IdentifierFingerprinter::ProcessCollection( CollectionInterface *x_col, int
     int prev_start_index;
     for( TreePtr<Node> x : comparer.GetOrdering(*x_col) )
     {
-        if( prev_x && comparer.Compare(x, prev_x) == Orderable::EQUAL )
+        if( prev_x && comparer.Compare(x, prev_x) == 0 )
         {
             // Our comparer cannot differentiate this subtree from the 
             // previous one, so "replay" the same indexes while traversing it.  

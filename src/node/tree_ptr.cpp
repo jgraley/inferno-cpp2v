@@ -35,7 +35,7 @@ bool TreePtrInterface::operator!=(const TreePtrInterface &other) const
 }
 
 
-Orderable::Result TreePtrInterface::Compare(const TreePtrInterface &l, const TreePtrInterface &r)
+Orderable::Diff TreePtrInterface::Compare(const TreePtrInterface &l, const TreePtrInterface &r)
 {
 	return SatelliteSerial::Compare( l.GetSS(), r.GetSS() );
 }

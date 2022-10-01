@@ -18,11 +18,11 @@ SimpleCompare &SimpleCompare::operator=(const SimpleCompare &other)
 bool SimpleCompare::operator()( TreePtr<Node> l, TreePtr<Node> r ) const
 {
     //FTRACE("SC::operator() ")(xl)(" - ")(yl)("\n");
-    return Compare(l, r) < Orderable::EQUAL;
+    return Compare(l, r) < 0;
 }
 
 
-Orderable::Result SimpleCompare::Compare( TreePtr<Node> l, TreePtr<Node> r ) const
+Orderable::Diff SimpleCompare::Compare( TreePtr<Node> l, TreePtr<Node> r ) const
 {   
     // Inputs must be non-NULL (though we do handle NULL in itemise, see below)
     ASSERT(l);
@@ -32,19 +32,17 @@ Orderable::Result SimpleCompare::Compare( TreePtr<Node> l, TreePtr<Node> r ) con
 
     // If we are asked to do a trivial compare, return immediately reporting success
     if( l==r )
-        return Orderable::EQUAL;
+        return 0;
         
     // Local comparison deals with node type and value if there is one
-    Orderable::Result cr = Node::OrderCompare(l.get(), r.get(), order_property);
-    
-    if( cr != Orderable::EQUAL )
-        return cr;
+    if( Orderable::Diff cd = Node::OrderCompare(l.get(), r.get(), order_property) )
+        return cd;
 
     // Itemise them both and chuck out if sizes do not match
     vector< Itemiser::Element * > l_items = l->Itemise();
     vector< Itemiser::Element * > r_items = r->Itemise();
     int sd = (int)(l_items.size()) - (int)(r_items.size());
-    if( sd != Orderable::EQUAL )
+    if( sd != 0 )
         return sd; 
     
     for( int i=0; i<l_items.size(); i++ )
@@ -56,16 +54,14 @@ Orderable::Result SimpleCompare::Compare( TreePtr<Node> l, TreePtr<Node> r ) con
         {
             SequenceInterface *r_seq = dynamic_cast<SequenceInterface *>(r_items[i]);
             ASSERT( r_seq );
-            Orderable::Result d = Compare( *l_seq, *r_seq );
-            if( d != Orderable::EQUAL )
+            if( Orderable::Diff d = Compare( *l_seq, *r_seq ) )            
                 return d;                
         }
         else if( CollectionInterface *l_col = dynamic_cast<CollectionInterface *>(l_items[i]) )
         {
             CollectionInterface *r_col = dynamic_cast<CollectionInterface *>(r_items[i]);
             ASSERT( r_col );
-            Orderable::Result d = Compare( *l_col, *r_col );
-            if( d != Orderable::EQUAL )
+            if( Orderable::Diff d = Compare( *l_col, *r_col ) )
                 return d;                
         }
         else if( TreePtrInterface *l_singular = dynamic_cast<TreePtrInterface *>(l_items[i]) )
@@ -80,8 +76,7 @@ Orderable::Result SimpleCompare::Compare( TreePtr<Node> l, TreePtr<Node> r ) con
                 return (int)(!(TreePtr<Node>)*r_singular) - (int)(!(TreePtr<Node>)*l_singular);                
             
             // Both non-null, so we are allowed to recurse
-            Orderable::Result d = Compare( (TreePtr<Node>)*l_singular, (TreePtr<Node>)*r_singular );
-            if( d != Orderable::EQUAL )
+            if( Orderable::Diff d = Compare( (TreePtr<Node>)*l_singular, (TreePtr<Node>)*r_singular ) )
                 return d;                
         }
         else
@@ -91,15 +86,15 @@ Orderable::Result SimpleCompare::Compare( TreePtr<Node> l, TreePtr<Node> r ) con
     }
 
     // survived to the end? then we have a match.
-    return Orderable::EQUAL;
+    return 0;
 }
 
 
-Orderable::Result SimpleCompare::Compare( SequenceInterface &l, SequenceInterface &r ) const
+Orderable::Diff SimpleCompare::Compare( SequenceInterface &l, SequenceInterface &r ) const
 {
     // Ensure the sizes are the same so we don;t go off the end
     int sd = (int)(l.size()) - (int)(r.size());
-    if( sd != Orderable::EQUAL )
+    if( sd != 0 )
         return sd;
     
     ContainerInterface::iterator lit, rit;
@@ -107,21 +102,19 @@ Orderable::Result SimpleCompare::Compare( SequenceInterface &l, SequenceInterfac
     // Check each element in turn
     for( lit = l.begin(), rit = r.begin(); lit != l.end(); ++lit, ++rit )
     {
-        Orderable::Result d = Compare( (TreePtr<Node>)*lit, (TreePtr<Node>)*rit );
-        if( d != Orderable::EQUAL )
+        if( Orderable::Diff d = Compare( (TreePtr<Node>)*lit, (TreePtr<Node>)*rit ) )       
             return d;
     }
 
     // survived to the end? then we have a match.
-    return Orderable::EQUAL;
+    return 0;
 }
 
 
-Orderable::Result SimpleCompare::Compare( CollectionInterface &l, CollectionInterface &r ) const
+Orderable::Diff SimpleCompare::Compare( CollectionInterface &l, CollectionInterface &r ) const
 {
     // Ensure the sizes are the same so we don't go off the end
-    int sd = (int)(l.size()) - (int)(r.size());
-    if( sd != Orderable::EQUAL )
+    if( int sd = (int)(l.size()) - (int)(r.size()) )
         return sd;
         
     // Use this object so our ordering is used.

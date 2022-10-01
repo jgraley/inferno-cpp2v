@@ -24,7 +24,7 @@ bool SpecificString::IsLocalMatch( const Matcher *candidate ) const
 }
 
  
-Orderable::Result SpecificString::OrderCompareLocal( const Orderable *candidate, 
+Orderable::Diff SpecificString::OrderCompareLocal( const Orderable *candidate, 
                                                      OrderProperty order_property ) const
 {
     auto c = GET_THAT_POINTER(candidate);
@@ -108,15 +108,15 @@ bool SpecificInteger::IsLocalMatch( const Matcher *candidate ) const
 }
 
 
-Orderable::Result SpecificInteger::OrderCompareLocal( const Orderable *candidate, 
+Orderable::Diff SpecificInteger::OrderCompareLocal( const Orderable *candidate, 
                                                       OrderProperty order_property ) const
 {
     auto c = GET_THAT_POINTER(candidate);
 
-    if( value.isUnsigned() != c->value.isUnsigned() )
-        return (int)(value.isUnsigned()) - (int)(c->value.isUnsigned());
-    if( value.getBitWidth() != c->value.getBitWidth() )
-        return (int)(value.getBitWidth()) - (int)(c->value.getBitWidth());
+    if( int d = (int)value.isUnsigned() - (int)c->value.isUnsigned() )
+        return d;
+    if( int d = (int)(value.getBitWidth()) - (int)(c->value.getBitWidth()) )
+        return d;
     return (value > c->value) - (value < c->value);
     // Note: just subtracting could overflow
 }
@@ -162,7 +162,7 @@ bool SpecificFloat::IsLocalMatch( const Matcher *candidate ) const
 }
 
 
-Orderable::Result SpecificFloat::OrderCompareLocal( const Orderable *candidate, 
+Orderable::Diff SpecificFloat::OrderCompareLocal( const Orderable *candidate, 
                                                     OrderProperty order_property ) const
 {
     auto c = GET_THAT_POINTER(candidate);
@@ -226,7 +226,7 @@ bool SpecificIdentifier::IsLocalMatch( const Matcher *candidate ) const
 }
 
 
-Orderable::Result SpecificIdentifier::OrderCompareLocal( const Orderable *candidate, 
+Orderable::Diff SpecificIdentifier::OrderCompareLocal( const Orderable *candidate, 
                                                          OrderProperty order_property ) const
 {
     auto c = GET_THAT_POINTER(candidate);
@@ -236,7 +236,7 @@ Orderable::Result SpecificIdentifier::OrderCompareLocal( const Orderable *candid
     if( c == this )
     {
         //FTRACEC("0 (fast out)\n");
-        return Orderable::EQUAL; // fast-out
+        return 0; // fast-out
     }
         
     // Primary ordering on name due rule #528
@@ -253,7 +253,7 @@ Orderable::Result SpecificIdentifier::OrderCompareLocal( const Orderable *candid
     }    
     
     // Secondary ordering on address due rule #528
-    Orderable::Result r;
+    Orderable::Diff r;
     switch( order_property )
     {
     case STRICT:
@@ -263,7 +263,7 @@ Orderable::Result SpecificIdentifier::OrderCompareLocal( const Orderable *candid
         break;
     case REPEATABLE:
         // Repeatable ordering stops after name check since address compare is not repeatable
-        r = Orderable::EQUAL;
+        r = 0;
         break;
     }
     //FTRACEC("%d (address)\n", r);
@@ -322,12 +322,12 @@ bool SpecificFloatSemantics::IsLocalMatch( const Matcher *candidate ) const
 }
 
 
-Orderable::Result SpecificFloatSemantics::OrderCompareLocal( const Orderable *candidate, 
+Orderable::Diff SpecificFloatSemantics::OrderCompareLocal( const Orderable *candidate, 
                                                              OrderProperty order_property ) const
 {
     auto c = GET_THAT_POINTER(candidate); 
 
-    Orderable::Result r;
+    Orderable::Diff r;
     switch( order_property )
     {
     case STRICT:
@@ -338,7 +338,7 @@ Orderable::Result SpecificFloatSemantics::OrderCompareLocal( const Orderable *ca
         break;
     case REPEATABLE:
         // Repeatable ordering stops at type
-        r = Orderable::EQUAL;
+        r = 0;
         break;
     }
     return r;

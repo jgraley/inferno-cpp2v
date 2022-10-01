@@ -4,7 +4,7 @@
  
 using namespace SR;
 
-void SR::TestRelationProperties( function<Orderable::Result(XLink l, XLink r)> compare,
+void SR::TestRelationProperties( function<Orderable::Diff(XLink l, XLink r)> compare,
                                  const unordered_set<XLink> &xlinks ) 
 {
     // Need a random access container because we will in fact randomly access it
@@ -30,8 +30,8 @@ void SR::TestRelationProperties( function<Orderable::Result(XLink l, XLink r)> c
     // Reflexive property
     for( XLink a_xlink : vxlinks )
     {
-        Orderable::Result aa_cr = compare(a_xlink, a_xlink);
-        ASSERT( aa_cr == Orderable::EQUAL );
+        Orderable::Diff aa_cr = compare(a_xlink, a_xlink);
+        ASSERT( aa_cr == 0 );
         tr++;
     }
     
@@ -40,21 +40,21 @@ void SR::TestRelationProperties( function<Orderable::Result(XLink l, XLink r)> c
     {
         XLink a_xlink = random_xlink();
         XLink b_xlink = random_xlink();
-        Orderable::Result ab_cr = compare(a_xlink, b_xlink);
-        Orderable::Result ba_cr = compare(b_xlink, a_xlink);
-        if( ab_cr == Orderable::EQUAL )            // a == b
+        Orderable::Diff ab_cr = compare(a_xlink, b_xlink);
+        Orderable::Diff ba_cr = compare(b_xlink, a_xlink);
+        if( ab_cr == 0 )            // a == b
         {
-            ASSERT( ba_cr == Orderable::EQUAL );       
+            ASSERT( ba_cr == 0 );       
             ts[0]++;
         }
-        else if( ab_cr < Orderable::EQUAL )        // a < b
+        else if( ab_cr < 0 )        // a < b
         {
-            ASSERT( ba_cr > Orderable::EQUAL);
+            ASSERT( ba_cr > 0);
             ts[1]++;
         }
-        else if( ab_cr > Orderable::EQUAL )        // a > b
+        else if( ab_cr > 0 )        // a > b
         {
-            ASSERT( ba_cr < Orderable::EQUAL);
+            ASSERT( ba_cr < 0);
             ts[2]++;
         }
         else
@@ -69,24 +69,24 @@ void SR::TestRelationProperties( function<Orderable::Result(XLink l, XLink r)> c
         XLink a_xlink = random_xlink();
         XLink b_xlink = random_xlink();
         XLink c_xlink = random_xlink();
-        Orderable::Result ab_cr = compare(a_xlink, b_xlink);
-        Orderable::Result bc_cr = compare(b_xlink, c_xlink);
-        Orderable::Result ac_cr = compare(a_xlink, c_xlink);
-        if( ab_cr == Orderable::EQUAL )            // a == b
+        Orderable::Diff ab_cr = compare(a_xlink, b_xlink);
+        Orderable::Diff bc_cr = compare(b_xlink, c_xlink);
+        Orderable::Diff ac_cr = compare(a_xlink, c_xlink);
+        if( ab_cr == 0 )            // a == b
         {
-            if( bc_cr == Orderable::EQUAL )            // b == c
+            if( bc_cr == 0 )            // b == c
             {
-                ASSERT( ac_cr == Orderable::EQUAL );
+                ASSERT( ac_cr == 0 );
                 tt[0]++;
             }
-            else if( bc_cr < Orderable::EQUAL )        // b < c
+            else if( bc_cr < 0 )        // b < c
             {
-                ASSERT( ac_cr < Orderable::EQUAL );
+                ASSERT( ac_cr < 0 );
                 tt[1]++;
             }
-            else if( bc_cr > Orderable::EQUAL )        // b > c
+            else if( bc_cr > 0 )        // b > c
             {
-                ASSERT( ac_cr > Orderable::EQUAL );
+                ASSERT( ac_cr > 0 );
                 tt[2]++;
             }
             else
@@ -94,19 +94,19 @@ void SR::TestRelationProperties( function<Orderable::Result(XLink l, XLink r)> c
                 ASSERTFAIL("huh?\n");
             }
         }
-        else if( ab_cr < Orderable::EQUAL )        // a < b
+        else if( ab_cr < 0 )        // a < b
         {
-            if( bc_cr == Orderable::EQUAL )            // b == c
+            if( bc_cr == 0 )            // b == c
             {
-                ASSERT( ac_cr < Orderable::EQUAL );
+                ASSERT( ac_cr < 0 );
                 tt[3]++;
             }
-            else if( bc_cr < Orderable::EQUAL )        // b < c
+            else if( bc_cr < 0 )        // b < c
             {
-                ASSERT( ac_cr < Orderable::EQUAL );
+                ASSERT( ac_cr < 0 );
                 tt[4]++;
             }
-            else if( bc_cr > Orderable::EQUAL )        // b > c
+            else if( bc_cr > 0 )        // b > c
             {
                 // no information relating a to c
             }
@@ -115,20 +115,20 @@ void SR::TestRelationProperties( function<Orderable::Result(XLink l, XLink r)> c
                 ASSERTFAIL("huh?\n");
             }
         }
-        else if( ab_cr > Orderable::EQUAL )        // a > b
+        else if( ab_cr > 0 )        // a > b
         {
-            if( bc_cr == Orderable::EQUAL )            // b == c
+            if( bc_cr == 0 )            // b == c
             {
-                ASSERT( ac_cr > Orderable::EQUAL );
+                ASSERT( ac_cr > 0 );
                 tt[6]++;
             }
-            else if( bc_cr < Orderable::EQUAL )        // b < c
+            else if( bc_cr < 0 )        // b < c
             {
                 // no information relating a to c
             }
-            else if( bc_cr > Orderable::EQUAL )        // b > c
+            else if( bc_cr > 0 )        // b > c
             {
-                ASSERT( ac_cr > Orderable::EQUAL );
+                ASSERT( ac_cr > 0 );
                 tt[8]++;
             }
             else

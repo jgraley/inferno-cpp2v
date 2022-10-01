@@ -30,7 +30,7 @@ bool BooleanConstant::GetAsBool() const
 }
 
 
-Orderable::Result BooleanConstant::OrderCompareLocal( const Orderable *candidate, 
+Orderable::Diff BooleanConstant::OrderCompareLocal( const Orderable *candidate, 
                                                       OrderProperty order_property ) const 
 {
     auto c = GET_THAT_POINTER(candidate);

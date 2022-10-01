@@ -40,7 +40,7 @@ bool SerialNumber::operator<( const SerialNumber &other ) const
 }
 
 
-Orderable::Result SerialNumber::Compare(const SerialNumber &l, const SerialNumber &r)
+Orderable::Diff SerialNumber::Compare(const SerialNumber &l, const SerialNumber &r)
 {
 	if( l.progress != r.progress )
 		return Progress::Compare(l.progress, r.progress);
@@ -117,7 +117,7 @@ bool SatelliteSerial::operator<( const SatelliteSerial &other ) const
 }
 
 
-Orderable::Result SatelliteSerial::Compare(const SatelliteSerial &l, const SatelliteSerial &r)
+Orderable::Diff SatelliteSerial::Compare(const SatelliteSerial &l, const SatelliteSerial &r)
 {
     return l.serial - r.serial;
 }

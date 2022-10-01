@@ -57,10 +57,10 @@ public:
     {
 		return Compare(*this, other) < 0;
     }
-    static Orderable::Result Compare(const Progress &l, const Progress &r)
+    static Orderable::Diff Compare(const Progress &l, const Progress &r)
     {
-        if( l.stage != r.stage )
-            return (int)l.stage - (int)r.stage;
+        if( int ld = l.stage - r.stage )
+            return ld;
         else
             return l.step - r.step;		
 	}

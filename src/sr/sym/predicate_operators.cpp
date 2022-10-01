@@ -680,7 +680,7 @@ Relationship IsInCategoryOperator::GetRelationshipWith( shared_ptr<PredicateOper
 }
 
 
-Orderable::Result IsInCategoryOperator::OrderCompareLocal( const Orderable *candidate, 
+Orderable::Diff IsInCategoryOperator::OrderCompareLocal( const Orderable *candidate, 
                                                      OrderProperty order_property ) const 
 {
     auto c = GET_THAT_POINTER(candidate);
@@ -768,19 +768,18 @@ unique_ptr<BooleanResult> IsChildCollectionSizedOperator::Evaluate( const EvalKi
 }
 
 
-Orderable::Result IsChildCollectionSizedOperator::OrderCompareLocal( const Orderable *candidate, 
+Orderable::Diff IsChildCollectionSizedOperator::OrderCompareLocal( const Orderable *candidate, 
                                                                   OrderProperty order_property ) const 
 {
     auto c = GET_THAT_POINTER(candidate);
     //FTRACE(Render())("\n");
-    Result r1 = OrderCompare(archetype_node.get(), 
-                             c->archetype_node.get(), 
-                             order_property);
-    if( r1 != EQUAL )
-        return r1;
+    if( Diff d1 = OrderCompare(archetype_node.get(), 
+                               c->archetype_node.get(), 
+                               order_property) )
+        return d1;
 
-    if( item_index != c->item_index )
-        return item_index - c->item_index;
+    if( int d2 = item_index - c->item_index )
+        return d2;
 
     return size - c->size;
 }  
@@ -841,9 +840,9 @@ unique_ptr<BooleanResult> IsSimpleCompareEquivalentOperator::Evaluate( const Eva
     unique_ptr<SymbolResultInterface> ra = move( op_results.front() );
     unique_ptr<SymbolResultInterface> rb = move( op_results.back() );
 
-    Orderable::Result res = equivalence_relation.Compare( ra->GetOnlyXLink().GetChildX(), 
+    Orderable::Diff res = equivalence_relation.Compare( ra->GetOnlyXLink().GetChildX(), 
                                                           rb->GetOnlyXLink().GetChildX() );
-    return make_unique<BooleanResult>( res == EQUAL );    
+    return make_unique<BooleanResult>( res == 0 );    
 }
 
 
@@ -936,7 +935,7 @@ unique_ptr<BooleanResult> IsLocalMatchOperator::Evaluate( const EvalKit &kit,
 }
 
 
-Orderable::Result IsLocalMatchOperator::OrderCompareLocal( const Orderable *candidate, 
+Orderable::Diff IsLocalMatchOperator::OrderCompareLocal( const Orderable *candidate, 
                                                            OrderProperty order_property ) const 
 {
     auto c = GET_THAT_POINTER(candidate);

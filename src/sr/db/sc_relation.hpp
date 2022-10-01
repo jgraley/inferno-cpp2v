@@ -18,7 +18,7 @@ class SimpleCompareRelation
 {
 public:
     SimpleCompareRelation();
-    Orderable::Result Compare( XLink l_xlink, XLink r_xlink ) const;
+    Orderable::Diff Compare( XLink l_xlink, XLink r_xlink ) const;
 
     /// Less operator: for use with set, map etc
     bool operator()( XLink l_xlink, XLink r_xlink ) const;

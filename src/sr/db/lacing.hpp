@@ -52,7 +52,7 @@ public:
 
     // Approximately GetOrdinalForNode(lnode) - GetOrdinalForNode(rnode)
     // but close enough for comparisons
-    Orderable::Result OrdinalCompare( TreePtr<Node> lnode, TreePtr<Node> rnode ) const;
+    Orderable::Diff OrdinalCompare( TreePtr<Node> lnode, TreePtr<Node> rnode ) const;
 
 private:    
     class DecisionNode;

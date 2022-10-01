@@ -23,13 +23,13 @@ public:
     bool operator()( TreePtr<Node> l, TreePtr<Node> r ) const;    
         
     /// Pass in two pointers to nodes, which can point to subtrees. Result is true if they match. O(1) locally.
-    virtual Orderable::Result Compare( TreePtr<Node> l, TreePtr<Node> r ) const;
+    virtual Orderable::Diff Compare( TreePtr<Node> l, TreePtr<Node> r ) const;
     
     /// Pass in two sequences of pointers to nodes, which can point to subtrees. Result is true if they match. O(n) locally.
-    Orderable::Result Compare( SequenceInterface &l, SequenceInterface &r ) const;
+    Orderable::Diff Compare( SequenceInterface &l, SequenceInterface &r ) const;
     
     /// Pass in two collection of pointers to nodes, which can point to subtrees. Result is true if they match. O(nlogn) locally.
-    Orderable::Result Compare( CollectionInterface &l, CollectionInterface &r ) const;
+    Orderable::Diff Compare( CollectionInterface &l, CollectionInterface &r ) const;
 
     /// Make a SimpleCompare-ordered set using the current SC, filled with the elements from the supplied container
     Orderered GetOrdering( ContainerInterface &c ) const;

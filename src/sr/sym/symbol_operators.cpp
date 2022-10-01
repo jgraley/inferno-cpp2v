@@ -39,7 +39,7 @@ SR::XLink SymbolConstant::GetOnlyXLink() const
 }
 
 
-Orderable::Result SymbolConstant::OrderCompareLocal( const Orderable *candidate, 
+Orderable::Diff SymbolConstant::OrderCompareLocal( const Orderable *candidate, 
                                                      OrderProperty order_property ) const 
 {
     auto c = GET_THAT_POINTER(candidate);
@@ -115,7 +115,7 @@ shared_ptr<SymbolExpression> SymbolVariable::TrySolveForToEqual( const SolveKit 
 }                                                                                                                  
 
 
-Orderable::Result SymbolVariable::OrderCompareLocal( const Orderable *candidate, 
+Orderable::Diff SymbolVariable::OrderCompareLocal( const Orderable *candidate, 
                                                      OrderProperty order_property ) const 
 {
     auto c = GET_THAT_POINTER(candidate);
@@ -182,16 +182,15 @@ unique_ptr<SymbolResultInterface> ChildToSymbolOperator::Evaluate( const EvalKit
 }
 
 
-Orderable::Result ChildToSymbolOperator::OrderCompareLocal( const Orderable *candidate, 
+Orderable::Diff ChildToSymbolOperator::OrderCompareLocal( const Orderable *candidate, 
                                                               OrderProperty order_property ) const 
 {
     auto c = GET_THAT_POINTER(candidate);
     //FTRACE(Render())("\n");
-    Result r1 = OrderCompare(archetype_node.get(), 
-                             c->archetype_node.get(), 
-                             order_property);
-    if( r1 != EQUAL )
-        return r1;
+    if( Diff d1 = OrderCompare(archetype_node.get(), 
+                           c->archetype_node.get(), 
+                           order_property) )
+        return d1;
 
     return item_index - c->item_index;
 }  
