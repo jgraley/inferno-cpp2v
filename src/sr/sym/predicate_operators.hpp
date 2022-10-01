@@ -5,7 +5,7 @@
 #include "overloads.hpp"
 
 #include "../db/x_tree_database.hpp"
-#include "../sc_relation.hpp"
+#include "helpers/simple_compare.hpp"
 #include "../db/indexes.hpp"
 
 #include "common/common.hpp"
@@ -317,7 +317,7 @@ public:
 private:
     shared_ptr<SymbolExpression> a;
     shared_ptr<SymbolExpression> b;
-    SR::SimpleCompareRelation equivalence_relation;
+    SimpleCompare equivalence_relation;
 };
 
 // ------------------------- IsLocalMatchOperator --------------------------

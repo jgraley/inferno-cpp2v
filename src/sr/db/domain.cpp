@@ -47,8 +47,7 @@ XLink Domain::FindDomainExtension( TreePtr<Node> node ) const
 {
     ASSERT( node );
     
-    map<TreePtr<Node>, XLink, SimpleCompareRelation>::const_iterator it = 
-        domain_extension_classes.find( node );
+    auto it = domain_extension_classes.find( node );
     ASSERT( it != domain_extension_classes.end() )
           ("No quotient set found for ")(node)
           ("\nin")(domain_extension_classes)("\n");

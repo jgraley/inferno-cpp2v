@@ -841,11 +841,9 @@ unique_ptr<BooleanResult> IsSimpleCompareEquivalentOperator::Evaluate( const Eva
     unique_ptr<SymbolResultInterface> ra = move( op_results.front() );
     unique_ptr<SymbolResultInterface> rb = move( op_results.back() );
 
-    // For equality, it is sufficient to compare the x links
-    // themselves, which have the required uniqueness properties
-    // within the full arrowhead model (cf DepthFirstComparisonOperator).
-    bool res = ( equivalence_relation.Compare(ra->GetOnlyXLink(), rb->GetOnlyXLink()) == EQUAL );
-    return make_unique<BooleanResult>( res );    
+    Orderable::Result res = equivalence_relation.Compare( ra->GetOnlyXLink().GetChildX(), 
+                                                          rb->GetOnlyXLink().GetChildX() );
+    return make_unique<BooleanResult>( res == EQUAL );    
 }
 
 
