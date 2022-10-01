@@ -60,7 +60,7 @@ Orderable::Result CategoryRelation::Compare(const XLink& l_xlink, const XLink& r
    	    if( res != Orderable::EQUAL )
 		    return res;	
 		    
-        return l_xlink.Compare(r_xlink);
+        return XLink::Compare(l_xlink, r_xlink);
     }
     else if( l_minimus && r_minimus )
     {

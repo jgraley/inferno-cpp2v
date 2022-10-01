@@ -233,7 +233,7 @@ XLink XLink::CreateDistinct( const TreePtr<Node> &tp_x )
               
 bool XLink::operator<(const XLink &other) const
 {
-    return Compare(other) < Orderable::EQUAL;
+    return Compare(*this, other) < Orderable::EQUAL;
 }
 
     
@@ -249,51 +249,52 @@ bool XLink::operator==(const XLink &other) const
 }
 
 
-Orderable::Result XLink::Compare(const XLink &other) const
+Orderable::Result XLink::Compare(const XLink &l, const XLink &r)
 {
-    ASSERT( this );
-    ASSERT( &other );
+	// Checking for broken references, not part of the ordering
+    ASSERTS( &l );
+    ASSERTS( &r );
     
     // NULLness is hyper-primary ordering
-    if( !other.asp_x && !asp_x )
+    if( !r.asp_x && !l.asp_x )
         return 0; // for == case
-    else if( !other.asp_x )
+    else if( !r.asp_x )
         return 1; // for > case
-    else if( !asp_x )
+    else if( !l.asp_x )
         return -1; // for < case
     
     // Half-NULLness is super-primary ordering
-    if( !*other.asp_x && !*asp_x )
+    if( !*r.asp_x && !*l.asp_x )
         return 0; // for == case
-    else if( !*other.asp_x )
+    else if( !*r.asp_x )
         return 1; // for > case
-    else if( !*asp_x )
+    else if( !*l.asp_x )
         return -1; // for < case
         
-    ASSERT( *asp_x );
-    ASSERT( *other.asp_x );
+    ASSERTS( *l.asp_x );
+    ASSERTS( *r.asp_x );
     
     // Child node serial number is primary ordering
-    auto tp_this = TreePtr<Node>(*asp_x);
-    auto tp_other = TreePtr<Node>(*other.asp_x);
-    ASSERT( tp_this );
-    ASSERT( tp_other );
-    if( tp_this->Node::operator<(*tp_other) )
+    auto l_tp = TreePtr<Node>(*l.asp_x);
+    auto r_tp = TreePtr<Node>(*r.asp_x);
+    ASSERTS( l_tp );
+    ASSERTS( r_tp );
+    if( l_tp->Node::operator<(*r_tp) )
         return -1;
-    if( tp_other->Node::operator<(*tp_this) )
+    if( r_tp->Node::operator<(*l_tp) )
         return 1;
 
     // Satellite serial number aka arrow-head number is secondary ordering
     // Use ordering on the TreePtrs themselves #625
-    if( asp_x->TreePtrInterface::operator<(*other.asp_x) )
+    if( l.asp_x->TreePtrInterface::operator<(*r.asp_x) )
         return -1;
-    if( other.asp_x->TreePtrInterface::operator<(*asp_x) )
+    if( r.asp_x->TreePtrInterface::operator<(*l.asp_x) )
         return 1;
        
     // Pointer-based tertiary ordering for just in case TODO assert pointers are equal
-    if( asp_x < other.asp_x )
+    if( l.asp_x < r.asp_x )
 		return -1;
-    else if( asp_x > other.asp_x )
+    else if( l.asp_x > r.asp_x )
 		return 1;
     else 
 		return 0;
