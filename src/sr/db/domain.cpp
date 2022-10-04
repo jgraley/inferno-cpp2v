@@ -184,11 +184,17 @@ void Domain::TestRelations( const unordered_set<XLink> &xlinks )
     // If we have to choose between stbility and totality, we'll choose stability.
     // We don't actually need totality because these are equivalence classes.
     SimpleCompare sc;
-	TestRelationProperties( [&](XLink l, XLink r){ return sc.Compare(l.GetChildX(), r.GetChildX()); }, 
-							[&](XLink l, XLink r){ return l.GetChildX()==r.GetChildX(); }, 
-							xlinks,
+	TestRelationProperties( xlinks,
                             false,
-                            "SimpleCompare (Domain)" );
+                            "SimpleCompare (Domain)",
+    [&](XLink l, XLink r)
+    { 
+        return sc.Compare(l.GetChildX(), r.GetChildX()); 
+    }, 
+	[&](XLink l, XLink r)
+    { 
+        return l.GetChildX()==r.GetChildX(); 
+    } );
 }
 
 

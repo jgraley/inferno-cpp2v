@@ -3,7 +3,6 @@
 #include "x_tree_database.hpp"
 #include "sc_relation.hpp"
 #include "lacing.hpp"
-#include "relation_test.hpp"
 
 #include "common/read_args.hpp"
 
@@ -103,22 +102,11 @@ void Indexes::ExpectMatching( const Indexes &mut )
 
 void Indexes::TestRelations( const unordered_set<XLink> &xlinks )
 {
-	using namespace std::placeholders;
-
 	SimpleCompareRelation scr;
-	TestRelationProperties( bind(&SimpleCompareRelation::Compare, scr, _1, _2), 
-							[&](XLink l, XLink r){ return l==r; }, 
-							xlinks,
-                            false, // TODO require totality so can use set<> and not lose domain elements
-                            "SimpleCompareRelation (Indexes)" );
+	scr.Test( xlinks );
 
-	// TODO provide category relation with Compare()
 	CategoryRelation cat_r( plan.lacing );
-	TestRelationProperties( bind(&CategoryRelation::Compare, cat_r, _1, _2), 
-							[&](XLink l, XLink r){ return l==r; }, 
-    	 					xlinks,
-                            true,
-                            "CategoryRelation (Indexes)" );
+	cat_r.Test( xlinks );
 }
 
 

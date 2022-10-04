@@ -4,12 +4,22 @@
  
 using namespace SR;
 
-void SR::TestRelationProperties( function<Orderable::Diff(XLink l, XLink r)> compare,
-                                 function<bool(XLink l, XLink r)> is_equal_native, 
-                                 const unordered_set<XLink> &xlinks,
+#define RANDVAL_RANGE 1000000
+
+void SR::TestRelationProperties( const unordered_set<XLink> &xlinks,
                                  bool expect_totality,
-                                 string relation_name ) 
+                                 string relation_name, 
+                                 function<Orderable::Diff(XLink l, XLink r)> compare,
+                                 function<bool(XLink l, XLink r)> is_equal_native, 
+                                 function<XLink(XLink x, int randval)> get_special ) 
 {
+    // Measure the coverage    
+    static map<string, int> tstab;
+    static int tr=0, tlinks=0, tspecial=0;
+    static map<string, int> ts;
+    static map<string, map<string, int>> tt;     
+    static map<string, int> ttot;
+
     // Need a random access container because we will in fact randomly access it
     vector<XLink> vxlinks;
     
@@ -18,18 +28,31 @@ void SR::TestRelationProperties( function<Orderable::Diff(XLink l, XLink r)> com
 
     std::mt19937 random_gen;  // everyone's favourite engine: fast, long period
     std::uniform_int_distribution<int> random_index(0, vxlinks.size()-1);  // numbers in the range [0, vxlinks.size())
+    std::uniform_int_distribution<int> random_special(0, RANDVAL_RANGE*2-1);  // numbers in the range [0, RANDVAL_RANGE*2)
     static const unsigned long int seed = 0;
     random_gen.seed(seed);
-    auto random_xlink = [&]()
-    {
-        return vxlinks[random_index(random_gen)];
-    };
-        
-    // Measure the coverage    
-    static int tr=0;
-    static map<string, int> ts;
-    static map<string, map<string, int>> tt;     
-    static map<string, int> ttot;
+    auto random_xlink = [&]() -> XLink
+    {        
+        tlinks++;
+        int randval = random_special(random_gen);
+        // should be a 50% chance so about half the x we test with are special
+        if( get_special && randval < RANDVAL_RANGE ) 
+        {
+            XLink new_xlink, xlink;
+            do
+            {
+                xlink = vxlinks[random_index(random_gen)];
+                new_xlink = get_special( xlink, randval );        
+            } 
+            while( new_xlink == xlink );
+            tspecial++;
+            return new_xlink;            
+        }
+        else
+        {
+            return vxlinks[random_index(random_gen)];            
+        }
+    };        
 
     // Stability property
     for( int i=0; i<vxlinks.size()*10; i++ )
@@ -41,7 +64,7 @@ void SR::TestRelationProperties( function<Orderable::Diff(XLink l, XLink r)> com
         if( ab_eq_native ) // Natively equal
         {
             ASSERT( ab_diff == 0)(relation_name)(" failed stability:\n")(a_xlink)(" ")(b_xlink);
-            ts["a!=b"]++;
+            tstab["a!=b"]++;
         }
     }
 
@@ -178,16 +201,18 @@ void SR::TestRelationProperties( function<Orderable::Diff(XLink l, XLink r)> com
             if( !ab_eq_native ) // Natively not equal
             {
                 ASSERT( ab_diff != 0)(relation_name)(" failed totality:\n")(a_xlink)(" ")(b_xlink);
-                ts["a!=b"]++;
+                ttot["a!=b"]++;
             }
         }
     }
     
     // See #210 for some results
-    FTRACE("Relation tests passed. Coverage:\n")
-          ("reflexive ")(tr)("\n")
-          ("symmetric/antisymmetric ")(ts)("\n")
-          ("transitive ")(tt)("\n")
-          ("totality ")(tt)("\n");
+    FTRACE("Relation tests for ")(relation_name)(" passed. Coverage:\n")
+          ("Made %d special of %d total XLinks\n", tspecial, tlinks)
+          ("Stability ")(tstab)("\n")
+          ("Reflexive ")(tr)("\n")
+          ("Symmetric/antisymmetric ")(ts)("\n")
+          ("Transitive ")(tt)("\n")
+          ("Totality ")(ttot)("\n");
 }
 

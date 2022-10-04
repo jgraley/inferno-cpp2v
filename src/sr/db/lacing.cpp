@@ -52,12 +52,30 @@ void Lacing::Build( const CategorySet &categories_ )
 }
 
 
+const list<pair<int, int>> &Lacing::TryGetRangeListForCategory( TreePtr<Node> archetype ) const
+{
+    if( cats_to_lacing_range_lists.count(archetype)>0 )
+    {
+        auto &lrl = cats_to_lacing_range_lists.at(archetype);
+        ASSERT( !lrl.empty() );
+        return lrl;
+    }
+    else
+    {
+        // Empty indicates failure
+        static const list<pair<int, int>> empty_lrl;
+        return empty_lrl;
+    }
+}
+
+
 const list<pair<int, int>> &Lacing::GetRangeListForCategory( TreePtr<Node> archetype ) const
 {
-    ASSERT( cats_to_lacing_range_lists.count(archetype)>0 )
+    auto &lrl = TryGetRangeListForCategory( archetype );
+    ASSERT( !lrl.empty() )
           ("Could not find lacing info for ")(archetype)
           ("\nin:\n")(cats_to_lacing_range_lists)("\n");
-    return cats_to_lacing_range_lists.at(archetype);
+    return lrl;
 }
 
 

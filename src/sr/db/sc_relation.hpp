@@ -23,6 +23,8 @@ public:
     /// Less operator: for use with set, map etc
     bool operator()( XLink l_xlink, XLink r_xlink ) const;
 
+    void Test( const unordered_set<XLink> &xlinks );
+
 private:
     shared_ptr<SimpleCompare> simple_compare;
 }; 

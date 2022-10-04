@@ -1,6 +1,7 @@
-#include "lacing.hpp"
-
 #include "cat_relation.hpp"
+
+#include "lacing.hpp"
+#include "relation_test.hpp"
 
 using namespace SR;    
 
@@ -64,10 +65,13 @@ Orderable::Diff CategoryRelation::Compare(const XLink& l_xlink, const XLink& r_x
     }
     else if( l_minimus && r_minimus )
     {
-		ASSERT( false ); // not expecting this to happen
+        // This case only expected during test. Fall back to XLink to
+        // keep the ordering total for the benefit of the test.
 		li = l_minimus->GetMinimusOrdinal();
 		ri = r_minimus->GetMinimusOrdinal();
-		return li - ri;
+        if( Orderable::Diff d = li - ri )
+            return d;
+		return XLink::Compare(l_xlink, r_xlink);
 	}
     else if( l_minimus && !r_minimus )
 	{
@@ -85,6 +89,43 @@ Orderable::Diff CategoryRelation::Compare(const XLink& l_xlink, const XLink& r_x
     {
 		ASSERTFAIL();
 	}
+}
+
+
+void CategoryRelation::Test( const unordered_set<XLink> &xlinks )
+{
+	using namespace std::placeholders;
+
+	TestRelationProperties( xlinks,
+                            true,
+                            "CategoryRelation",
+                            bind(&CategoryRelation::Compare, *this, _1, _2), 
+	[&](XLink l, XLink r)
+    { 
+        return l==r; 
+    }, 
+    [&](XLink x, int randval)
+    {
+        // We wish to inject "special" nodes which will be minimax 
+        // xlinks that we attempt to generate from the already-selected xlink
+        // and use the provided random value to choose which minimax to gen.
+        // TODO maybe we could just calculate i directly from randval and the lacing size?
+        
+        // Consult the lacing for lacing indices
+        auto rl = lacing->TryGetRangeListForCategory( x.GetChildX() );
+        
+        // Only nodes seen in cat clauses during planning will succeed
+        if( rl.empty() )
+            return x; // returning x indicates fail 
+            
+        // Choose random minimax index
+        pair<int, int> r = ToVector(rl).at((randval/2)%rl.size()); // a random range from the list of them
+        int i = randval%2 ? r.first : r.second; // begin or end of range, randomly
+        
+        // Make minimus node (this relation always uses minimus because half-open
+        TreePtr<Node> node = MakeTreeNode<SR::CategoryRelation::MinimusNode>(i);
+        return XLink::CreateDistinct( node );
+    } );
 }
 
 

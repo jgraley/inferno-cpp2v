@@ -1,5 +1,7 @@
 #include "sc_relation.hpp"
 
+#include "relation_test.hpp"
+
 #include "helpers/simple_compare.hpp"
 #include "helpers/duplicate.hpp"
 
@@ -31,3 +33,17 @@ bool SimpleCompareRelation::operator()( XLink l_xlink, XLink r_xlink ) const
     return Compare(l_xlink, r_xlink) < 0;
 }
 
+
+void SimpleCompareRelation::Test( const unordered_set<XLink> &xlinks )
+{
+	using namespace std::placeholders;
+
+	TestRelationProperties( xlinks,
+                            false, // TODO require totality so can use set<> and not lose domain elements
+                            "SimpleCompareRelation",
+                            bind(&SimpleCompareRelation::Compare, *this, _1, _2), 
+    [&](XLink l, XLink r)
+    { 
+        return l==r; 
+    } );
+}

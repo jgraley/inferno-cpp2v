@@ -42,9 +42,10 @@ public:
     // once, at planning time for the whole sequence.
     void Build( const CategorySet &categories );
 
-    // Returns a list of non-overlapping pair(begin, end) ranges in increasing order.
+    // (Tries to) return a list of non-overlapping pair(begin, end) ranges in increasing order.
     // These are the possible values of lacing ordinal that will match the category
     // defined by the supplied archetype.
+    const list<pair<int, int>> &TryGetRangeListForCategory( TreePtr<Node> archetype ) const;
     const list<pair<int, int>> &GetRangeListForCategory( TreePtr<Node> archetype ) const;
     
     // Returns the lacing ordinal value for the candidate.
