@@ -11,7 +11,10 @@ namespace SR
 {
 
 void TestRelationProperties( function<Orderable::Diff(XLink l, XLink r)> compare,
-				     		 const unordered_set<XLink> &xlinks );
+                             function<bool(XLink l, XLink r)> is_equal_native, 
+				     		 const unordered_set<XLink> &xlinks,
+                             bool expect_totality,
+                             string relation_name );
 
 };
 

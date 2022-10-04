@@ -107,12 +107,18 @@ void Indexes::TestRelations( const unordered_set<XLink> &xlinks )
 
 	SimpleCompareRelation scr;
 	TestRelationProperties( bind(&SimpleCompareRelation::Compare, scr, _1, _2), 
-							xlinks );
+							[&](XLink l, XLink r){ return l==r; }, 
+							xlinks,
+                            false, // TODO require totality so can use set<> and not lose domain elements
+                            "SimpleCompareRelation (Indexes)" );
 
 	// TODO provide category relation with Compare()
 	CategoryRelation cat_r( plan.lacing );
 	TestRelationProperties( bind(&CategoryRelation::Compare, cat_r, _1, _2), 
-    	 					xlinks );
+							[&](XLink l, XLink r){ return l==r; }, 
+    	 					xlinks,
+                            true,
+                            "CategoryRelation (Indexes)" );
 }
 
 

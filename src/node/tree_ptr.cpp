@@ -6,7 +6,7 @@
 #include "tree_ptr.hpp"
 
 // To reduce clutter in log diffs when satellite serial numbers are not in synch
-#define SUPPRESS_SATELLITE_NUMBERS
+//#define SUPPRESS_SATELLITE_NUMBERS
 
 // -------------------------- TreePtrInterface ----------------------------    
 

@@ -6,8 +6,8 @@
 #include <typeindex>		
 
 Orderable::Diff Orderable::OrderCompare( const Orderable *l, 
-                                           const Orderable *r, 
-                                           OrderProperty order_property )
+                                         const Orderable *r, 
+                                         OrderProperty order_property )
 {
     //FTRACE(Traceable::TypeIdName(*l))(" ")(Traceable::TypeIdName(*r))("\n");
     

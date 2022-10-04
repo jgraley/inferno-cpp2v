@@ -177,9 +177,18 @@ void Domain::PrepareInsert(DBWalk::Actions &actions)
 
 void Domain::TestRelations( const unordered_set<XLink> &xlinks )
 {	
-	SimpleCompare sc;
+    // We do not expect stability and totality in SimpleCompare wrt anything:
+    // - SC is tighter than base node value since it looks at whole subtree by value
+    // - TreePtr is tighter than SC because it looks at the subtree by identity
+    // - XLink is tighter still, becausae it looks at TreePtr by identity
+    // If we have to choose between stbility and totality, we'll choose stability.
+    // We don't actually need totality because these are equivalence classes.
+    SimpleCompare sc;
 	TestRelationProperties( [&](XLink l, XLink r){ return sc.Compare(l.GetChildX(), r.GetChildX()); }, 
-							xlinks );
+							[&](XLink l, XLink r){ return l.GetChildX()==r.GetChildX(); }, 
+							xlinks,
+                            false,
+                            "SimpleCompare (Domain)" );
 }
 
 

@@ -5,7 +5,10 @@
 using namespace SR;
 
 void SR::TestRelationProperties( function<Orderable::Diff(XLink l, XLink r)> compare,
-                                 const unordered_set<XLink> &xlinks ) 
+                                 function<bool(XLink l, XLink r)> is_equal_native, 
+                                 const unordered_set<XLink> &xlinks,
+                                 bool expect_totality,
+                                 string relation_name ) 
 {
     // Need a random access container because we will in fact randomly access it
     vector<XLink> vxlinks;
@@ -26,12 +29,27 @@ void SR::TestRelationProperties( function<Orderable::Diff(XLink l, XLink r)> com
     static int tr=0;
     static map<string, int> ts;
     static map<string, map<string, int>> tt;     
-        
+    static map<string, int> ttot;
+
+    // Stability property
+    for( int i=0; i<vxlinks.size()*10; i++ )
+    {
+        XLink a_xlink = random_xlink();
+        XLink b_xlink = random_xlink();
+        Orderable::Diff ab_diff = compare(a_xlink, b_xlink);
+        bool ab_eq_native = is_equal_native(a_xlink, b_xlink);
+        if( ab_eq_native ) // Natively equal
+        {
+            ASSERT( ab_diff == 0)(relation_name)(" failed stability:\n")(a_xlink)(" ")(b_xlink);
+            ts["a!=b"]++;
+        }
+    }
+
     // Reflexive property
     for( XLink a_xlink : vxlinks )
     {
-        Orderable::Diff aa_cr = compare(a_xlink, a_xlink);
-        ASSERT( aa_cr == 0 );
+        Orderable::Diff aa_diff = compare(a_xlink, a_xlink);
+        ASSERT( aa_diff == 0 )(relation_name)(" failed reflexivity:\n")(a_xlink);
         tr++;
     }
     
@@ -40,21 +58,21 @@ void SR::TestRelationProperties( function<Orderable::Diff(XLink l, XLink r)> com
     {
         XLink a_xlink = random_xlink();
         XLink b_xlink = random_xlink();
-        Orderable::Diff ab_cr = compare(a_xlink, b_xlink);
-        Orderable::Diff ba_cr = compare(b_xlink, a_xlink);
-        if( ab_cr == 0 )            // a == b
+        Orderable::Diff ab_diff = compare(a_xlink, b_xlink);
+        Orderable::Diff ba_diff = compare(b_xlink, a_xlink);
+        if( ab_diff == 0 )            // a == b
         {
-            ASSERT( ba_cr == 0 );       
+            ASSERT( ba_diff == 0 )(relation_name)(" failed symmetry:\n")(a_xlink)(" ")(b_xlink);       
             ts["a==b"]++;
         }
-        else if( ab_cr < 0 )        // a < b
+        else if( ab_diff < 0 )        // a < b
         {
-            ASSERT( ba_cr > 0);
+            ASSERT( ba_diff > 0)(relation_name)(" failed antisymmetry:\n")(a_xlink)(" ")(b_xlink);
             ts["a<b"]++;
         }
-        else if( ab_cr > 0 )        // a > b
+        else if( ab_diff > 0 )        // a > b
         {
-            ASSERT( ba_cr < 0);
+            ASSERT( ba_diff < 0)(relation_name)(" failed antisymmetry:\n")(a_xlink)(" ")(b_xlink);
             ts["a>b"]++;
         }
         else
@@ -69,25 +87,25 @@ void SR::TestRelationProperties( function<Orderable::Diff(XLink l, XLink r)> com
         XLink a_xlink = random_xlink();
         XLink b_xlink = random_xlink();
         XLink c_xlink = random_xlink();
-        Orderable::Diff ab_cr = compare(a_xlink, b_xlink);
-        Orderable::Diff bc_cr = compare(b_xlink, c_xlink);
-        Orderable::Diff ac_cr = compare(a_xlink, c_xlink);
-        if( ab_cr == 0 )            // a == b
+        Orderable::Diff ab_diff = compare(a_xlink, b_xlink);
+        Orderable::Diff bc_diff = compare(b_xlink, c_xlink);
+        Orderable::Diff ac_diff = compare(a_xlink, c_xlink);
+        if( ab_diff == 0 )            // a == b
         {
 			map<string, int> &t = tt["a==b"];
-            if( bc_cr == 0 )            // b == c
+            if( bc_diff == 0 )            // b == c
             {
-                ASSERT( ac_cr == 0 );
+                ASSERT( ac_diff == 0 )(relation_name)(" failed transitivity:\n")(a_xlink)(" ")(b_xlink)(" ")(c_xlink);
                 t["b==c"]++;
             }
-            else if( bc_cr < 0 )        // b < c
+            else if( bc_diff < 0 )        // b < c
             {
-                ASSERT( ac_cr < 0 );
+                ASSERT( ac_diff < 0 )(relation_name)(" failed transitivity:\n")(a_xlink)(" ")(b_xlink)(" ")(c_xlink);
                 t["b<c"]++;
             }
-            else if( bc_cr > 0 )        // b > c
+            else if( bc_diff > 0 )        // b > c
             {
-                ASSERT( ac_cr > 0 );
+                ASSERT( ac_diff > 0 )(relation_name)(" failed transitivity:\n")(a_xlink)(" ")(b_xlink)(" ")(c_xlink);
                 t["b>c"]++;
             }
             else
@@ -95,21 +113,21 @@ void SR::TestRelationProperties( function<Orderable::Diff(XLink l, XLink r)> com
                 ASSERTFAIL("huh?\n");
             }
         }
-        else if( ab_cr < 0 )        // a < b
+        else if( ab_diff < 0 )        // a < b
         {
 			map<string, int> &t = tt["a<b"];
             t["b>c"];
-            if( bc_cr == 0 )            // b == c
+            if( bc_diff == 0 )            // b == c
             {
-                ASSERT( ac_cr < 0 );
+                ASSERT( ac_diff < 0 )(relation_name)(" failed transitivity:\n")(a_xlink)(" ")(b_xlink)(" ")(c_xlink);
                 t["b==c"]++;
             }
-            else if( bc_cr < 0 )        // b < c
+            else if( bc_diff < 0 )        // b < c
             {
-                ASSERT( ac_cr < 0 );
+                ASSERT( ac_diff < 0 )(relation_name)(" failed transitivity:\n")(a_xlink)(" ")(b_xlink)(" ")(c_xlink);
                 t["b<c"]++;
             }
-            else if( bc_cr > 0 )        // b > c
+            else if( bc_diff > 0 )        // b > c
             {
                 // no information relating a to c
                 t["b>c"]++;
@@ -119,22 +137,22 @@ void SR::TestRelationProperties( function<Orderable::Diff(XLink l, XLink r)> com
                 ASSERTFAIL("huh?\n");
             }
         }
-        else if( ab_cr > 0 )        // a > b
+        else if( ab_diff > 0 )        // a > b
         {
 			map<string, int> &t = tt["a>b"];
-            if( bc_cr == 0 )            // b == c
+            if( bc_diff == 0 )            // b == c
             {
-                ASSERT( ac_cr > 0 );
+                ASSERT( ac_diff > 0 )(relation_name)(" failed transitivity:\n")(a_xlink)(" ")(b_xlink)(" ")(c_xlink);
                 t["b==c"]++;
             }
-            else if( bc_cr < 0 )        // b < c
+            else if( bc_diff < 0 )        // b < c
             {
                 // no information relating a to c
                 t["b<c"]++;
             }
-            else if( bc_cr > 0 )        // b > c
+            else if( bc_diff > 0 )        // b > c
             {
-                ASSERT( ac_cr > 0 );
+                ASSERT( ac_diff > 0 )(relation_name)(" failed transitivity:\n")(a_xlink)(" ")(b_xlink)(" ")(c_xlink);
                 t["b>c"]++;
             }
             else
@@ -148,10 +166,28 @@ void SR::TestRelationProperties( function<Orderable::Diff(XLink l, XLink r)> com
         }
     }    
     
+    if( expect_totality )
+    {
+        // Totality property
+        for( int i=0; i<vxlinks.size()*10; i++ )
+        {
+            XLink a_xlink = random_xlink();
+            XLink b_xlink = random_xlink();
+            Orderable::Diff ab_diff = compare(a_xlink, b_xlink);
+            bool ab_eq_native = is_equal_native(a_xlink, b_xlink);
+            if( !ab_eq_native ) // Natively not equal
+            {
+                ASSERT( ab_diff != 0)(relation_name)(" failed totality:\n")(a_xlink)(" ")(b_xlink);
+                ts["a!=b"]++;
+            }
+        }
+    }
+    
     // See #210 for some results
     FTRACE("Relation tests passed. Coverage:\n")
           ("reflexive ")(tr)("\n")
           ("symmetric/antisymmetric ")(ts)("\n")
-          ("transitive ")(tt)("\n");
+          ("transitive ")(tt)("\n")
+          ("totality ")(tt)("\n");
 }
 
