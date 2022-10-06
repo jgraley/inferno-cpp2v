@@ -81,17 +81,17 @@ unique_ptr<BooleanResult> GreenGrassAgent::IsGreenGrassOperator::Evaluate( const
 }
 
 
-Orderable::Diff GreenGrassAgent::IsGreenGrassOperator::OrderCompare3WayLocal( const Orderable *right, 
+Orderable::Diff GreenGrassAgent::IsGreenGrassOperator::OrderCompare3WayLocal( const Orderable &right, 
                                                      OrderProperty order_property ) const 
 {
-    auto r = GET_THAT_POINTER(right);
+    auto &r = *GET_THAT_POINTER(&right);
 
     Orderable::Diff d;
     switch( order_property )
     {
     case STRICT:
         // Unique order uses agent address to ensure different agents compare different
-        d = (int)(agent > r->agent) - (int)(agent < r->agent);
+        d = (int)(agent > r.agent) - (int)(agent < r.agent);
         // Note: just subtracting could overflow
         break;
     case REPEATABLE:

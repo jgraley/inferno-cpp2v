@@ -481,6 +481,9 @@ typename _Unique_if<T>::_Known_bound make_unique(Args&&...) = delete;
     tp; \
 })    
 
+// Note: GET_THAT_REFERENCE has problems I think with the statement
+// expression ({ ... }) forcing by-value result.
+
 
 // To use with set, map and algorithms like min_element when the
 // container/range actually contains pointers (or shared or unique pointers)

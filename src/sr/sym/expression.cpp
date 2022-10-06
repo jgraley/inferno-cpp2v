@@ -41,7 +41,7 @@ void Expression::ForDepthFirstWalk( function<void(const Expression *)> f ) const
 
 bool Expression::IsIndependentOf( shared_ptr<Expression> target ) const
 {
-    if( OrderCompareEqual( this, target.get() ) )
+    if( OrderCompare3Way( *this, *target )==0 )
         return false; // we match the target, so not independent.
         
     for( shared_ptr<Expression> op : GetOperands() )
@@ -58,27 +58,18 @@ Orderable::Diff Expression::OrderCompare3Way( shared_ptr<const Expression> l,
                                               shared_ptr<const Expression> r, 
                                               OrderProperty order_property )
 {
-    return OrderCompare3Way( l.get(), r.get(), order_property );
+    return OrderCompare3Way( *l, *r, order_property );
 }
 
 
-bool Expression::OrderCompareEqual( shared_ptr<const Expression> l, 
-                                    shared_ptr<const Expression> r, 
-                                    OrderProperty order_property )
-{
-    return OrderCompareEqual( l.get(), r.get(), order_property );
-}
 
-
-Orderable::Diff Expression::OrderCompare3WayChildren( const Orderable *right, 
+Orderable::Diff Expression::OrderCompare3WayChildren( const Orderable &right, 
                                                       OrderProperty order_property ) const 
 {
-    ASSERT( right );
-    auto r = GET_THAT_POINTER(right);    
-    ASSERT(r);
+    auto &r = *GET_THAT_POINTER(&right);    
     
     list<shared_ptr<Expression>> ll = GetOperands();
-    list<shared_ptr<Expression>> rl = r->GetOperands();
+    list<shared_ptr<Expression>> rl = r.GetOperands();
     
     if( IsCommutative() )
     {
@@ -104,7 +95,7 @@ Orderable::Diff Expression::OrderCompare3WayChildren( const Orderable *right,
 Orderable::Diff Expression::Relation::Compare3Way( const shared_ptr<const Expression> &l, 
                                                    const shared_ptr<const Expression> &r ) const
 {
-    return Expression::OrderCompare3Way( l, r );
+    return Expression::OrderCompare3Way( *l, *r );
 }                                                        
 
 

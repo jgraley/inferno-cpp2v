@@ -39,14 +39,14 @@ SR::XLink SymbolConstant::GetOnlyXLink() const
 }
 
 
-Orderable::Diff SymbolConstant::OrderCompare3WayLocal( const Orderable *right, 
-                                                     OrderProperty order_property ) const 
+Orderable::Diff SymbolConstant::OrderCompare3WayLocal( const Orderable &right, 
+                                                       OrderProperty order_property ) const 
 {
-    auto r = GET_THAT_POINTER(right);
+    auto &r = *GET_THAT_POINTER(&right);
 
-    if( xlink == r->xlink )
+    if( xlink == r.xlink )
         return 0;
-    else if( xlink < r->xlink )
+    else if( xlink < r.xlink )
         return -1;
     else
         return 1;
@@ -94,18 +94,19 @@ SR::PatternLink SymbolVariable::GetPatternLink() const
 }
 
 
-shared_ptr<SymbolExpression> SymbolVariable::TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
-                                                           shared_ptr<SymbolExpression> to_equal ) const
+shared_ptr<SymbolExpression> SymbolVariable::TrySolveForToEqual( const SolveKit &kit, 
+                                                                 shared_ptr<SymbolVariable> target, 
+                                                                 shared_ptr<SymbolExpression> to_equal ) const
 {
     // Trivial case terminates a recursive solve. This amounts to "what 
-    // value should target have, so that this equals to_equal?". 
+    // value should target have, so that this evaluates to to_equal?". 
 
-    if( !OrderCompareEqual( this, target.get() ) )
+    if( OrderCompare3Way( *this, *target ) != 0 )
         return nullptr; // This is not the target, so won't be able to solve
 
-    // "what value should this have, so that this equals to_equal?"
+    // "what value should this have, so that this evaluates to to_equal?"
     
-    if( OrderCompareEqual( this, to_equal.get() ) )
+    if( OrderCompare3Way( *this, *to_equal ) == 0 )
         return nullptr; // This is to_equal, so any value will work
 
     if( !to_equal->IsIndependentOf( target ) )
@@ -115,14 +116,14 @@ shared_ptr<SymbolExpression> SymbolVariable::TrySolveForToEqual( const SolveKit 
 }                                                                                                                  
 
 
-Orderable::Diff SymbolVariable::OrderCompare3WayLocal( const Orderable *right, 
+Orderable::Diff SymbolVariable::OrderCompare3WayLocal( const Orderable &right, 
                                                      OrderProperty order_property ) const 
 {
-    auto r = GET_THAT_POINTER(right);
+    auto &r = *GET_THAT_POINTER(&right);
 
-    if( plink == r->plink )
+    if( plink == r.plink )
         return 0;
-    else if( plink < r->plink )
+    else if( plink < r.plink )
         return -1;
     else
         return 1;
@@ -182,17 +183,17 @@ unique_ptr<SymbolResultInterface> ChildToSymbolOperator::Evaluate( const EvalKit
 }
 
 
-Orderable::Diff ChildToSymbolOperator::OrderCompare3WayLocal( const Orderable *right, 
+Orderable::Diff ChildToSymbolOperator::OrderCompare3WayLocal( const Orderable &right, 
                                                               OrderProperty order_property ) const 
 {
-    auto r = GET_THAT_POINTER(right);
+    auto &r = *GET_THAT_POINTER(&right);
     //FTRACE(Render())("\n");
-    if( Diff d1 = OrderCompare3Way(archetype_node.get(), 
-                                   r->archetype_node.get(), 
+    if( Diff d1 = OrderCompare3Way(*archetype_node, 
+                                   *r.archetype_node, 
                                    order_property) )
         return d1;
 
-    return item_index - r->item_index;
+    return item_index - r.item_index;
 }  
 
 

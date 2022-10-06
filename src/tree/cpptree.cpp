@@ -24,11 +24,11 @@ bool SpecificString::IsLocalMatch( const Matcher *candidate ) const
 }
 
  
-Orderable::Diff SpecificString::OrderCompare3WayLocal( const Orderable *right, 
+Orderable::Diff SpecificString::OrderCompare3WayLocal( const Orderable &right, 
                                                      OrderProperty order_property ) const
 {
-    auto r = GET_THAT_POINTER(right);
-    return value.compare(r->value);
+    auto &r = *GET_THAT_POINTER(&right);
+    return value.compare(r.value);
 }
  
  
@@ -108,16 +108,16 @@ bool SpecificInteger::IsLocalMatch( const Matcher *candidate ) const
 }
 
 
-Orderable::Diff SpecificInteger::OrderCompare3WayLocal( const Orderable *right, 
+Orderable::Diff SpecificInteger::OrderCompare3WayLocal( const Orderable &right, 
                                                       OrderProperty order_property ) const
 {
-    auto r = GET_THAT_POINTER(right);
+    auto &r = *GET_THAT_POINTER(&right);
 
-    if( int d = (int)value.isUnsigned() - (int)r->value.isUnsigned() )
+    if( int d = (int)value.isUnsigned() - (int)r.value.isUnsigned() )
         return d;
-    if( int d = (int)(value.getBitWidth()) - (int)(r->value.getBitWidth()) )
+    if( int d = (int)(value.getBitWidth()) - (int)(r.value.getBitWidth()) )
         return d;
-    return (value > r->value) - (value < r->value);
+    return (value > r.value) - (value < r.value);
     // Note: just subtracting could overflow
 }
  
@@ -162,13 +162,13 @@ bool SpecificFloat::IsLocalMatch( const Matcher *candidate ) const
 }
 
 
-Orderable::Diff SpecificFloat::OrderCompare3WayLocal( const Orderable *right, 
+Orderable::Diff SpecificFloat::OrderCompare3WayLocal( const Orderable &right, 
                                                     OrderProperty order_property ) const
 {
-    auto r = GET_THAT_POINTER(right);
+    auto &r = *GET_THAT_POINTER(&right);
         
     // Primary ordering: the value
-    cmpResult cr = compare(*r);
+    cmpResult cr = compare(r);
     if( cr==APFloat::cmpLessThan )
         return -1;
     if( cr==APFloat::cmpGreaterThan )
@@ -176,7 +176,7 @@ Orderable::Diff SpecificFloat::OrderCompare3WayLocal( const Orderable *right,
     
     // Secondary ordering: the hash
     uint32_t h = getHashValue();
-    uint32_t ch = r->getHashValue();
+    uint32_t ch = r.getHashValue();
     return (int)(h > ch) - (int)(h < ch);
     // Note: just subtracting could overflow
 }
@@ -226,30 +226,30 @@ bool SpecificIdentifier::IsLocalMatch( const Matcher *candidate ) const
 }
 
 
-Orderable::Diff SpecificIdentifier::OrderCompare3WayLocal( const Orderable *right, 
+Orderable::Diff SpecificIdentifier::OrderCompare3WayLocal( const Orderable &right, 
                                                            OrderProperty order_property ) const
 {
-    auto r = GET_THAT_POINTER(right);
+    auto &r = *GET_THAT_POINTER(&right);
         
     //FTRACEC("Compare ")(*this)(" with ")(*r)(": ");
 
-    if( r == this )
+    if( &r == this )
     {
         //FTRACEC("0 (fast out)\n");
         return 0; // fast-out
     }
         
     // Primary ordering on name due rule #528
-    if( name != r->name )
+    if( name != r.name )
     {
         //FTRACEC("%d (name)\n", name.compare(r->name));
-        return name.compare(r->name);      
+        return name.compare(r.name);      
     }
           
     // Optional over-ride of address compare for making ranges, see rule #528
-    if( addr_bounding_role != BoundingRole::NONE || r->addr_bounding_role != BoundingRole::NONE )
+    if( addr_bounding_role != BoundingRole::NONE || r.addr_bounding_role != BoundingRole::NONE )
     {
-        return (int)addr_bounding_role - (int)(r->addr_bounding_role);
+        return (int)addr_bounding_role - (int)(r.addr_bounding_role);
     }    
     
     // Secondary ordering on address due rule #528
@@ -258,7 +258,7 @@ Orderable::Diff SpecificIdentifier::OrderCompare3WayLocal( const Orderable *righ
     {
     case STRICT:
         // Unique order uses address to ensure different identifiers compare differently
-        d = (int)(this > right) - (int)(this < right);
+        d = (int)(this > &right) - (int)(this < &right);
         // Note: just subtracting could overflow
         break;
     case REPEATABLE:
@@ -322,10 +322,10 @@ bool SpecificFloatSemantics::IsLocalMatch( const Matcher *candidate ) const
 }
 
 
-Orderable::Diff SpecificFloatSemantics::OrderCompare3WayLocal( const Orderable *right, 
+Orderable::Diff SpecificFloatSemantics::OrderCompare3WayLocal( const Orderable &right, 
                                                                OrderProperty order_property ) const
 {
-    auto r = GET_THAT_POINTER(right); 
+    auto &r = *GET_THAT_POINTER(&right); 
 
     Orderable::Diff d;
     switch( order_property )
@@ -333,7 +333,7 @@ Orderable::Diff SpecificFloatSemantics::OrderCompare3WayLocal( const Orderable *
     case STRICT:
         // Don't use any particular ordering apart from where the 
         // llvm::fltSemantics are being stored.
-        d = (int)(value > r->value) - (int)(value < r->value);
+        d = (int)(value > r.value) - (int)(value < r.value);
         // Note: just subtracting could overflow
         break;
     case REPEATABLE:

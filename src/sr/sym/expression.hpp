@@ -74,15 +74,11 @@ public:
     
     bool IsIndependentOf( shared_ptr<Expression> target ) const;
     using Orderable::OrderCompare3Way;
-    using Orderable::OrderCompareEqual;
     // Add versions that take shared_ptr
     static Orderable::Diff OrderCompare3Way( shared_ptr<const Expression> l, 
                                            shared_ptr<const Expression> r, 
-                                           OrderProperty order_property = STRICT );    
-    static bool OrderCompareEqual( shared_ptr<const Expression> l, 
-                                   shared_ptr<const Expression> r, 
-                                   OrderProperty order_property = STRICT );    
-    virtual Orderable::Diff OrderCompare3WayChildren( const Orderable *right, 
+                                           OrderProperty order_property = STRICT );      
+    virtual Orderable::Diff OrderCompare3WayChildren( const Orderable &right, 
                                                       OrderProperty order_property ) const override;
     struct Relation : public Traceable 
     {

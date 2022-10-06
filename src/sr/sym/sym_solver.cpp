@@ -395,7 +395,7 @@ void TruthTableSolver::ConstrainUsingDerived()
 Relationship TruthTableSolver::TryDeriveRelationship( shared_ptr<PredicateOperator> pi, 
                                                       shared_ptr<PredicateOperator> pj ) const
 {
-    ASSERT( !Expression::OrderCompareEqual(pi, pj) ); // caller doesn't pass us equal preds
+    ASSERT( Expression::OrderCompare3Way(pi, pj) != 0 ); // caller doesn't pass us equal preds
     auto ops_i = pi->GetSymbolOperands();
     auto ops_j = pj->GetSymbolOperands();
     
@@ -436,7 +436,7 @@ Relationship TruthTableSolver::TryDeriveRelationship( shared_ptr<PredicateOperat
             // Supposed to be the same operand
             
             // Check using OrderCompareEqual()
-            ASSERT( Expression::OrderCompareEqual( OnlyElementOf(ops_i), OnlyElementOf(ops_j) ) );
+            ASSERT( Expression::OrderCompare3Way( OnlyElementOf(ops_i), OnlyElementOf(ops_j) ) == 0 );
             
             // Check by looking directly
             if( auto svi = dynamic_pointer_cast<SymbolVariable>(OnlyElementOf(ops_i)) )
@@ -455,7 +455,7 @@ Relationship TruthTableSolver::TryDeriveRelationship( shared_ptr<PredicateOperat
 shared_ptr<PredicateOperator> TruthTableSolver::TryDerivePredicate( shared_ptr<PredicateOperator> pi, 
                                                                     shared_ptr<PredicateOperator> pj ) const
 {
-    ASSERT( !Expression::OrderCompareEqual(pi, pj) ); // caller doesn't pass us equal preds
+    ASSERT( Expression::OrderCompare3Way(pi, pj) != 0 ); // caller doesn't pass us equal preds
     
     // Try to substitute one variable with another 
     if( pi->IsCanSubstituteFrom() ) // basically EqualsOperator
@@ -483,20 +483,20 @@ shared_ptr<PredicateOperator> TruthTableSolver::TryDerivePredicate( shared_ptr<P
         // Try forward case 
         if( (tij==Transitivity::FORWARD || tij==Transitivity::BIDIRECTIONAL) )
         {
-            if( Expression::OrderCompareEqual(ops_i.second, ops_j.first) )
+            if( Expression::OrderCompare3Way(ops_i.second, ops_j.first) == 0 )
                 return Substitute( pi, ops_i.second, ops_j.second ); // Textbook case           
 
-            if( Expression::OrderCompareEqual(ops_i.first, ops_j.second) )
+            if( Expression::OrderCompare3Way(ops_i.first, ops_j.second) == 0 )
                 return Substitute( pi, ops_i.first, ops_j.first );                
         }
         
         // Try reverse case, where the second pred (pj) is commuted
         if( (tij==Transitivity::REVERSE || tij==Transitivity::BIDIRECTIONAL) )
         {
-            if( Expression::OrderCompareEqual(ops_i.second, ops_j.second) )
+            if( Expression::OrderCompare3Way(ops_i.second, ops_j.second) == 0 )
                 return Substitute( pi, ops_i.second, ops_j.first );                
 
-            if( Expression::OrderCompareEqual(ops_i.first, ops_j.first) )
+            if( Expression::OrderCompare3Way(ops_i.first, ops_j.first) == 0 )
                 return Substitute( pi, ops_i.first, ops_j.second );    
         }
     }

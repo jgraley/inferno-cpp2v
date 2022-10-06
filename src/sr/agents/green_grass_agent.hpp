@@ -33,8 +33,8 @@ class GreenGrassAgent : public virtual ColocatedAgent
         virtual unique_ptr<SYM::BooleanResult> Evaluate( const EvalKit &kit,
                                                          list<unique_ptr<SYM::SymbolResultInterface>> &&op_results ) const override;
 
-        Orderable::Diff OrderCompare3WayLocal( const Orderable *right, 
-                                           OrderProperty order_property ) const override;
+        Orderable::Diff OrderCompare3WayLocal( const Orderable &right, 
+                                               OrderProperty order_property ) const override;
 
         virtual string RenderNF() const override;
         virtual Precedence GetPrecedenceNF() const override;

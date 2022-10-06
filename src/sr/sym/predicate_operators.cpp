@@ -52,7 +52,7 @@ shared_ptr<PredicateOperator> PredicateOperator::TrySubstitute( shared_ptr<Symbo
     list<shared_ptr<SymbolExpression> *> sop = p->GetSymbolOperandPointers();
     for( shared_ptr<SymbolExpression> *s : sop )
     {
-        if( OrderCompareEqual( over, *s ) )
+        if( OrderCompare3Way( over, *s )==0 )
         {
             *s = with;
             return p;
@@ -680,13 +680,13 @@ Relationship IsInCategoryOperator::GetRelationshipWith( shared_ptr<PredicateOper
 }
 
 
-Orderable::Diff IsInCategoryOperator::OrderCompare3WayLocal( const Orderable *right, 
+Orderable::Diff IsInCategoryOperator::OrderCompare3WayLocal( const Orderable &right, 
                                                      OrderProperty order_property ) const 
 {
-    auto r = GET_THAT_POINTER(right);
+    auto &r = *GET_THAT_POINTER(&right);
     //FTRACE(Render())("\n");
-    return OrderCompare3Way(archetype_node.get(), 
-                            r->archetype_node.get(), 
+    return OrderCompare3Way(*archetype_node, 
+                            *r.archetype_node, 
                             order_property);
 }  
 
@@ -768,20 +768,20 @@ unique_ptr<BooleanResult> IsChildCollectionSizedOperator::Evaluate( const EvalKi
 }
 
 
-Orderable::Diff IsChildCollectionSizedOperator::OrderCompare3WayLocal( const Orderable *right, 
+Orderable::Diff IsChildCollectionSizedOperator::OrderCompare3WayLocal( const Orderable &right, 
                                                                   OrderProperty order_property ) const 
 {
-    auto r = GET_THAT_POINTER(right);
+    auto &r = *GET_THAT_POINTER(&right);
     //FTRACE(Render())("\n");
-    if( Diff d1 = OrderCompare3Way(archetype_node.get(), 
-                                   r->archetype_node.get(), 
+    if( Diff d1 = OrderCompare3Way(*archetype_node, 
+                                   *r.archetype_node, 
                                    order_property) )
         return d1;
 
-    if( int d2 = item_index - r->item_index )
+    if( int d2 = item_index - r.item_index )
         return d2;
 
-    return size - r->size;
+    return size - r.size;
 }  
 
 
@@ -935,12 +935,12 @@ unique_ptr<BooleanResult> IsLocalMatchOperator::Evaluate( const EvalKit &kit,
 }
 
 
-Orderable::Diff IsLocalMatchOperator::OrderCompare3WayLocal( const Orderable *right, 
+Orderable::Diff IsLocalMatchOperator::OrderCompare3WayLocal( const Orderable &right, 
                                                              OrderProperty order_property ) const 
 {
-    auto r = GET_THAT_POINTER(right);
-    return OrderCompare3Way( pattern_node, 
-                             r->pattern_node, 
+    auto &r = *GET_THAT_POINTER(&right);
+    return OrderCompare3Way( *pattern_node, 
+                             *r.pattern_node, 
                              order_property);
 }  
 

@@ -26,16 +26,13 @@ public:
         // Note: inclusiveness of MINIMUS and MAXIMUS is impl-defined, see rule #528
     };
 
-    static Orderable::Diff OrderCompare3Way( const Orderable *l, 
-                                             const Orderable *r, 
+    static Orderable::Diff OrderCompare3Way( const Orderable &l, 
+                                             const Orderable &r, 
                                              OrderProperty order_property = STRICT );
-    virtual Orderable::Diff OrderCompare3WayLocal( const Orderable *right, 
+    virtual Orderable::Diff OrderCompare3WayLocal( const Orderable &right, 
                                                    OrderProperty order_property ) const;
-    virtual Orderable::Diff OrderCompare3WayChildren( const Orderable *right, 
+    virtual Orderable::Diff OrderCompare3WayChildren( const Orderable &right, 
                                                       OrderProperty order_property ) const;
-    static bool OrderCompareEqual( const Orderable *l, 
-                                   const Orderable *r, 
-                                   OrderProperty order_property = STRICT );
 };
 
 #endif
