@@ -29,10 +29,10 @@ public:
     static Orderable::Diff OrderCompare3Way( const Orderable *l, 
                                              const Orderable *r, 
                                              OrderProperty order_property = STRICT );
-    virtual Orderable::Diff OrderCompareLocal( const Orderable *candidate, 
-                                                 OrderProperty order_property ) const;
-    virtual Orderable::Diff OrderCompareChildren( const Orderable *candidate, 
-                                                    OrderProperty order_property ) const;
+    virtual Orderable::Diff OrderCompare3WayLocal( const Orderable *candidate, 
+                                                   OrderProperty order_property ) const;
+    virtual Orderable::Diff OrderCompare3WayChildren( const Orderable *candidate, 
+                                                      OrderProperty order_property ) const;
     static bool OrderCompareEqual( const Orderable *l, 
                                    const Orderable *r, 
                                    OrderProperty order_property = STRICT );

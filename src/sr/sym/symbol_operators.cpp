@@ -39,7 +39,7 @@ SR::XLink SymbolConstant::GetOnlyXLink() const
 }
 
 
-Orderable::Diff SymbolConstant::OrderCompareLocal( const Orderable *candidate, 
+Orderable::Diff SymbolConstant::OrderCompare3WayLocal( const Orderable *candidate, 
                                                      OrderProperty order_property ) const 
 {
     auto c = GET_THAT_POINTER(candidate);
@@ -115,7 +115,7 @@ shared_ptr<SymbolExpression> SymbolVariable::TrySolveForToEqual( const SolveKit 
 }                                                                                                                  
 
 
-Orderable::Diff SymbolVariable::OrderCompareLocal( const Orderable *candidate, 
+Orderable::Diff SymbolVariable::OrderCompare3WayLocal( const Orderable *candidate, 
                                                      OrderProperty order_property ) const 
 {
     auto c = GET_THAT_POINTER(candidate);
@@ -182,7 +182,7 @@ unique_ptr<SymbolResultInterface> ChildToSymbolOperator::Evaluate( const EvalKit
 }
 
 
-Orderable::Diff ChildToSymbolOperator::OrderCompareLocal( const Orderable *candidate, 
+Orderable::Diff ChildToSymbolOperator::OrderCompare3WayLocal( const Orderable *candidate, 
                                                               OrderProperty order_property ) const 
 {
     auto c = GET_THAT_POINTER(candidate);

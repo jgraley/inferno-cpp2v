@@ -81,7 +81,7 @@ unique_ptr<BooleanResult> GreenGrassAgent::IsGreenGrassOperator::Evaluate( const
 }
 
 
-Orderable::Diff GreenGrassAgent::IsGreenGrassOperator::OrderCompareLocal( const Orderable *candidate, 
+Orderable::Diff GreenGrassAgent::IsGreenGrassOperator::OrderCompare3WayLocal( const Orderable *candidate, 
                                                      OrderProperty order_property ) const 
 {
     auto c = GET_THAT_POINTER(candidate);

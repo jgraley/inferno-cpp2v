@@ -178,7 +178,7 @@ shared_ptr<SYM::SymbolExpression> IdentifierByNameAgent::IsIdentifierNamedOperat
 }                                                                                                                                             
                                               
                                               
-Orderable::Diff IdentifierByNameAgent::IsIdentifierNamedOperator::OrderCompareLocal( const Orderable *candidate, 
+Orderable::Diff IdentifierByNameAgent::IsIdentifierNamedOperator::OrderCompare3WayLocal( const Orderable *candidate, 
                                                                                        OrderProperty order_property ) const 
 {
     auto c = GET_THAT_POINTER(candidate);
@@ -342,7 +342,7 @@ unique_ptr<SYM::SymbolResultInterface> NestedAgent::NestingOperator::Evaluate( c
 }
 
 
-Orderable::Diff NestedAgent::NestingOperator::OrderCompareLocal( const Orderable *candidate, 
+Orderable::Diff NestedAgent::NestingOperator::OrderCompare3WayLocal( const Orderable *candidate, 
                                                                       OrderProperty order_property ) const 
 {
     auto c = GET_THAT_POINTER(candidate);

@@ -82,7 +82,7 @@ public:
     static bool OrderCompareEqual( shared_ptr<const Expression> l, 
                                    shared_ptr<const Expression> r, 
                                    OrderProperty order_property = STRICT );    
-    virtual Orderable::Diff OrderCompareChildren( const Orderable *candidate, 
+    virtual Orderable::Diff OrderCompare3WayChildren( const Orderable *candidate, 
                                                     OrderProperty order_property ) const override;
     struct OrderComparer : public Traceable 
     {

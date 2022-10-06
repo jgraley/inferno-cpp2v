@@ -70,7 +70,7 @@ bool Expression::OrderCompareEqual( shared_ptr<const Expression> l,
 }
 
 
-Orderable::Diff Expression::OrderCompareChildren( const Orderable *candidate, 
+Orderable::Diff Expression::OrderCompare3WayChildren( const Orderable *candidate, 
                                                     OrderProperty order_property ) const 
 {
     ASSERT( candidate );

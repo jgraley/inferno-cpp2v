@@ -23,7 +23,7 @@ public:
     unique_ptr<SymbolResultInterface> GetValue() const;
     SR::XLink GetOnlyXLink() const;
 
-    Orderable::Diff OrderCompareLocal( const Orderable *candidate, 
+    Orderable::Diff OrderCompare3WayLocal( const Orderable *candidate, 
                                        OrderProperty order_property ) const override;
 
     virtual string Render() const override;
@@ -47,7 +47,7 @@ public:
     virtual shared_ptr<SymbolExpression> TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
                                                        shared_ptr<SymbolExpression> to_equal ) const override;
 
-    Orderable::Diff OrderCompareLocal( const Orderable *candidate, 
+    Orderable::Diff OrderCompare3WayLocal( const Orderable *candidate, 
                                        OrderProperty order_property ) const override;
 
     virtual string Render() const override;
@@ -72,7 +72,7 @@ public:
     virtual unique_ptr<SymbolResultInterface> EvalFromItem( SR::XLink parent_xlink, 
                                                    Itemiser::Element *item ) const = 0;
 
-    Orderable::Diff OrderCompareLocal( const Orderable *candidate, 
+    Orderable::Diff OrderCompare3WayLocal( const Orderable *candidate, 
                                        OrderProperty order_property ) const override;                                                
 
     virtual string Render() const override;

@@ -680,7 +680,7 @@ Relationship IsInCategoryOperator::GetRelationshipWith( shared_ptr<PredicateOper
 }
 
 
-Orderable::Diff IsInCategoryOperator::OrderCompareLocal( const Orderable *candidate, 
+Orderable::Diff IsInCategoryOperator::OrderCompare3WayLocal( const Orderable *candidate, 
                                                      OrderProperty order_property ) const 
 {
     auto c = GET_THAT_POINTER(candidate);
@@ -768,7 +768,7 @@ unique_ptr<BooleanResult> IsChildCollectionSizedOperator::Evaluate( const EvalKi
 }
 
 
-Orderable::Diff IsChildCollectionSizedOperator::OrderCompareLocal( const Orderable *candidate, 
+Orderable::Diff IsChildCollectionSizedOperator::OrderCompare3WayLocal( const Orderable *candidate, 
                                                                   OrderProperty order_property ) const 
 {
     auto c = GET_THAT_POINTER(candidate);
@@ -935,7 +935,7 @@ unique_ptr<BooleanResult> IsLocalMatchOperator::Evaluate( const EvalKit &kit,
 }
 
 
-Orderable::Diff IsLocalMatchOperator::OrderCompareLocal( const Orderable *candidate, 
+Orderable::Diff IsLocalMatchOperator::OrderCompare3WayLocal( const Orderable *candidate, 
                                                            OrderProperty order_property ) const 
 {
     auto c = GET_THAT_POINTER(candidate);

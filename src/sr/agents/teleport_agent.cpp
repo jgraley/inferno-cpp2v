@@ -99,7 +99,7 @@ unique_ptr<SymbolResultInterface> TeleportAgent::TeleportOperator::Evaluate( con
 }
 
 
-Orderable::Diff TeleportAgent::TeleportOperator::OrderCompareLocal( const Orderable *candidate, 
+Orderable::Diff TeleportAgent::TeleportOperator::OrderCompare3WayLocal( const Orderable *candidate, 
                                                                       OrderProperty order_property ) const 
 {
     auto c = GET_THAT_POINTER(candidate);

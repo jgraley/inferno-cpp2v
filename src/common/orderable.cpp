@@ -16,15 +16,15 @@ Orderable::Diff Orderable::OrderCompare3Way( const Orderable *l,
     if( l_index != r_index )
         return (l_index > r_index) ? 1 : -1;
 
-    Diff id = l->OrderCompareLocal(r, order_property);
+    Diff id = l->OrderCompare3WayLocal(r, order_property);
     if( id  )
         return id;
         
-    return l->OrderCompareChildren(r, order_property);
+    return l->OrderCompare3WayChildren(r, order_property);
 }
 
 
-Orderable::Diff Orderable::OrderCompareLocal( const Orderable *candidate, 
+Orderable::Diff Orderable::OrderCompare3WayLocal( const Orderable *candidate, 
                                               OrderProperty order_property ) const 
 {
     // Often, there are no contents to compare
@@ -32,7 +32,7 @@ Orderable::Diff Orderable::OrderCompareLocal( const Orderable *candidate,
 }
 
 
-Orderable::Diff Orderable::OrderCompareChildren( const Orderable *candidate, 
+Orderable::Diff Orderable::OrderCompare3WayChildren( const Orderable *candidate, 
                                                  OrderProperty order_property ) const 
 {
     // Sometimes we don't incorprorate children in this ordering 

@@ -24,7 +24,7 @@ bool SpecificString::IsLocalMatch( const Matcher *candidate ) const
 }
 
  
-Orderable::Diff SpecificString::OrderCompareLocal( const Orderable *candidate, 
+Orderable::Diff SpecificString::OrderCompare3WayLocal( const Orderable *candidate, 
                                                      OrderProperty order_property ) const
 {
     auto c = GET_THAT_POINTER(candidate);
@@ -108,7 +108,7 @@ bool SpecificInteger::IsLocalMatch( const Matcher *candidate ) const
 }
 
 
-Orderable::Diff SpecificInteger::OrderCompareLocal( const Orderable *candidate, 
+Orderable::Diff SpecificInteger::OrderCompare3WayLocal( const Orderable *candidate, 
                                                       OrderProperty order_property ) const
 {
     auto c = GET_THAT_POINTER(candidate);
@@ -162,7 +162,7 @@ bool SpecificFloat::IsLocalMatch( const Matcher *candidate ) const
 }
 
 
-Orderable::Diff SpecificFloat::OrderCompareLocal( const Orderable *candidate, 
+Orderable::Diff SpecificFloat::OrderCompare3WayLocal( const Orderable *candidate, 
                                                     OrderProperty order_property ) const
 {
     auto c = GET_THAT_POINTER(candidate);
@@ -226,7 +226,7 @@ bool SpecificIdentifier::IsLocalMatch( const Matcher *candidate ) const
 }
 
 
-Orderable::Diff SpecificIdentifier::OrderCompareLocal( const Orderable *candidate, 
+Orderable::Diff SpecificIdentifier::OrderCompare3WayLocal( const Orderable *candidate, 
                                                          OrderProperty order_property ) const
 {
     auto c = GET_THAT_POINTER(candidate);
@@ -322,7 +322,7 @@ bool SpecificFloatSemantics::IsLocalMatch( const Matcher *candidate ) const
 }
 
 
-Orderable::Diff SpecificFloatSemantics::OrderCompareLocal( const Orderable *candidate, 
+Orderable::Diff SpecificFloatSemantics::OrderCompare3WayLocal( const Orderable *candidate, 
                                                              OrderProperty order_property ) const
 {
     auto c = GET_THAT_POINTER(candidate); 
