@@ -35,7 +35,7 @@ Orderable::Diff SimpleCompare::Compare( TreePtr<Node> l, TreePtr<Node> r ) const
         return 0;
         
     // Local comparison deals with node type and value if there is one
-    if( Orderable::Diff cd = Node::OrderCompare(l.get(), r.get(), order_property) )
+    if( Orderable::Diff cd = Node::OrderCompare3Way(l.get(), r.get(), order_property) )
         return cd;
 
     // Itemise them both and chuck out if sizes do not match

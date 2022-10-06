@@ -73,10 +73,10 @@ public:
     void ForDepthFirstWalk( function<void(const Expression *)> f ) const;
     
     bool IsIndependentOf( shared_ptr<Expression> target ) const;
-    using Orderable::OrderCompare;
+    using Orderable::OrderCompare3Way;
     using Orderable::OrderCompareEqual;
     // Add versions that take shared_ptr
-    static Orderable::Diff OrderCompare( shared_ptr<const Expression> l, 
+    static Orderable::Diff OrderCompare3Way( shared_ptr<const Expression> l, 
                                            shared_ptr<const Expression> r, 
                                            OrderProperty order_property = STRICT );    
     static bool OrderCompareEqual( shared_ptr<const Expression> l, 

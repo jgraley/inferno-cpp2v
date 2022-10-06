@@ -5,7 +5,7 @@
 #include <typeinfo>
 #include <typeindex>		
 
-Orderable::Diff Orderable::OrderCompare( const Orderable *l, 
+Orderable::Diff Orderable::OrderCompare3Way( const Orderable *l, 
                                          const Orderable *r, 
                                          OrderProperty order_property )
 {
@@ -45,6 +45,6 @@ bool Orderable::OrderCompareEqual( const Orderable *l,
                                    const Orderable *r, 
                                    OrderProperty order_property )
 {
-    return OrderCompare( l, r, order_property ) == 0;
+    return OrderCompare3Way( l, r, order_property ) == 0;
 }                                   
 

@@ -26,9 +26,9 @@ public:
         // Note: inclusiveness of MINIMUS and MAXIMUS is impl-defined, see rule #528
     };
 
-    static Orderable::Diff OrderCompare( const Orderable *l, 
-                                           const Orderable *r, 
-                                           OrderProperty order_property = STRICT );
+    static Orderable::Diff OrderCompare3Way( const Orderable *l, 
+                                             const Orderable *r, 
+                                             OrderProperty order_property = STRICT );
     virtual Orderable::Diff OrderCompareLocal( const Orderable *candidate, 
                                                  OrderProperty order_property ) const;
     virtual Orderable::Diff OrderCompareChildren( const Orderable *candidate, 

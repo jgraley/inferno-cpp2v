@@ -187,7 +187,7 @@ Orderable::Diff ChildToSymbolOperator::OrderCompareLocal( const Orderable *candi
 {
     auto c = GET_THAT_POINTER(candidate);
     //FTRACE(Render())("\n");
-    if( Diff d1 = OrderCompare(archetype_node.get(), 
+    if( Diff d1 = OrderCompare3Way(archetype_node.get(), 
                            c->archetype_node.get(), 
                            order_property) )
         return d1;

@@ -685,7 +685,7 @@ Orderable::Diff IsInCategoryOperator::OrderCompareLocal( const Orderable *candid
 {
     auto c = GET_THAT_POINTER(candidate);
     //FTRACE(Render())("\n");
-    return OrderCompare(archetype_node.get(), 
+    return OrderCompare3Way(archetype_node.get(), 
                         c->archetype_node.get(), 
                         order_property);
 }  
@@ -773,7 +773,7 @@ Orderable::Diff IsChildCollectionSizedOperator::OrderCompareLocal( const Orderab
 {
     auto c = GET_THAT_POINTER(candidate);
     //FTRACE(Render())("\n");
-    if( Diff d1 = OrderCompare(archetype_node.get(), 
+    if( Diff d1 = OrderCompare3Way(archetype_node.get(), 
                                c->archetype_node.get(), 
                                order_property) )
         return d1;
@@ -939,7 +939,7 @@ Orderable::Diff IsLocalMatchOperator::OrderCompareLocal( const Orderable *candid
                                                            OrderProperty order_property ) const 
 {
     auto c = GET_THAT_POINTER(candidate);
-    return OrderCompare( pattern_node, 
+    return OrderCompare3Way( pattern_node, 
                          c->pattern_node, 
                          order_property);
 }  
