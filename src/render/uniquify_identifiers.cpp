@@ -105,7 +105,7 @@ UniquifyCompare::UniquifyCompare( const UniquifyIdentifiers *unique_ ) :
 }
 
 
-Orderable::Diff UniquifyCompare::Compare( TreePtr<Node> a, TreePtr<Node> b ) const
+Orderable::Diff UniquifyCompare::Compare3Way( TreePtr<Node> a, TreePtr<Node> b ) const
 {
     //FTRACE("UC::Compare ")(a)(" - ")(b)("\n");
     
@@ -115,7 +115,7 @@ Orderable::Diff UniquifyCompare::Compare( TreePtr<Node> a, TreePtr<Node> b ) con
     auto id_a = TreePtr<SpecificIdentifier>::DynamicCast(a);
     auto id_b = TreePtr<SpecificIdentifier>::DynamicCast(b);
     if( !(id_a && id_b) )
-        return SimpleCompare::Compare(a, b);
+        return SimpleCompare::Compare3Way(a, b);
         
     // We have two SpecificIdentifiers, so get their unique names
     string ustr_a = unique->at(id_a);
@@ -188,7 +188,7 @@ void IdentifierFingerprinter::ProcessCollection( CollectionInterface *x_col, int
     int prev_start_index;
     for( TreePtr<Node> x : comparer.GetOrdering(*x_col) )
     {
-        if( prev_x && comparer.Compare(x, prev_x) == 0 )
+        if( prev_x && comparer.Compare3Way(x, prev_x) == 0 )
         {
             // Our comparer cannot differentiate this subtree from the 
             // previous one, so "replay" the same indexes while traversing it.  

@@ -189,7 +189,7 @@ void Domain::TestRelations( const unordered_set<XLink> &xlinks )
                             "SimpleCompare (Domain)",
     [&](XLink l, XLink r)
     { 
-        return sc.Compare(l.GetChildX(), r.GetChildX()); 
+        return sc.Compare3Way(l.GetChildX(), r.GetChildX()); 
     }, 
 	[&](XLink l, XLink r)
     { 

@@ -25,7 +25,7 @@ public:
 	CategoryRelation& operator=(const CategoryRelation &other);
 	
 	bool operator() (const XLink& l_xlink, const XLink& r_xlink) const;
-	Orderable::Diff Compare(const XLink& l_xlink, const XLink& r_xlink) const;
+	Orderable::Diff Compare3Way(const XLink& l_xlink, const XLink& r_xlink) const;
 	
     void Test( const unordered_set<XLink> &xlinks );
 

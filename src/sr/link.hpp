@@ -68,7 +68,7 @@ public:
     bool operator<(const XLink &other) const;
     bool operator!=(const XLink &other) const;
     bool operator==(const XLink &other) const;
-    static Orderable::Diff Compare(const XLink &l, const XLink &r);
+    static Orderable::Diff Compare3Way(const XLink &l, const XLink &r);
     size_t GetHash() const noexcept;    
     explicit operator bool() const;
 	bool HasChildX() const;

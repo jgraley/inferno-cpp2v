@@ -17,20 +17,20 @@ SimpleCompareRelation::SimpleCompareRelation() :
 }
 
 
-Orderable::Diff SimpleCompareRelation::Compare( XLink l_xlink, XLink r_xlink ) const
+Orderable::Diff SimpleCompareRelation::Compare3Way( XLink l_xlink, XLink r_xlink ) const
 {
     // Get the child nodes and disregard the arrow heads
     TreePtr<Node> l_node = l_xlink.GetChildX();
     TreePtr<Node> r_node = r_xlink.GetChildX();
     
     // And then resort to SimpleCompare
-    return simple_compare->Compare( l_node, r_node );
+    return simple_compare->Compare3Way( l_node, r_node );
 }
 
 
 bool SimpleCompareRelation::operator()( XLink l_xlink, XLink r_xlink ) const
 {
-    return Compare(l_xlink, r_xlink) < 0;
+    return Compare3Way(l_xlink, r_xlink) < 0;
 }
 
 
@@ -41,7 +41,7 @@ void SimpleCompareRelation::Test( const unordered_set<XLink> &xlinks )
 	TestRelationProperties( xlinks,
                             false, // TODO require totality so can use set<> and not lose domain elements
                             "SimpleCompareRelation",
-                            bind(&SimpleCompareRelation::Compare, *this, _1, _2), 
+                            bind(&SimpleCompareRelation::Compare3Way, *this, _1, _2), 
     [&](XLink l, XLink r)
     { 
         return l==r; 

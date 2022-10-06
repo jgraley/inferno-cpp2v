@@ -840,8 +840,8 @@ unique_ptr<BooleanResult> IsSimpleCompareEquivalentOperator::Evaluate( const Eva
     unique_ptr<SymbolResultInterface> ra = move( op_results.front() );
     unique_ptr<SymbolResultInterface> rb = move( op_results.back() );
 
-    Orderable::Diff res = equivalence_relation.Compare( ra->GetOnlyXLink().GetChildX(), 
-                                                          rb->GetOnlyXLink().GetChildX() );
+    Orderable::Diff res = equivalence_relation.Compare3Way( ra->GetOnlyXLink().GetChildX(), 
+                                                            rb->GetOnlyXLink().GetChildX() );
     return make_unique<BooleanResult>( res == 0 );    
 }
 

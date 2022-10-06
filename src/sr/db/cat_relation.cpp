@@ -27,11 +27,11 @@ CategoryRelation& CategoryRelation::operator=(const CategoryRelation &other)
 
 bool CategoryRelation::operator() (const XLink& l_xlink, const XLink& r_xlink) const
 {
-	return Compare(l_xlink, r_xlink) < 0;
+	return Compare3Way(l_xlink, r_xlink) < 0;
 }
 
 
-Orderable::Diff CategoryRelation::Compare(const XLink& l_xlink, const XLink& r_xlink) const
+Orderable::Diff CategoryRelation::Compare3Way(const XLink& l_xlink, const XLink& r_xlink) const
 {
 #ifdef TRACE_CATEGORY_RELATION
     INDENT("@");
@@ -61,7 +61,7 @@ Orderable::Diff CategoryRelation::Compare(const XLink& l_xlink, const XLink& r_x
    	    if( d )
 		    return d;	
 		    
-        return XLink::Compare(l_xlink, r_xlink);
+        return XLink::Compare3Way(l_xlink, r_xlink);
     }
     else if( l_minimus && r_minimus )
     {
@@ -71,7 +71,7 @@ Orderable::Diff CategoryRelation::Compare(const XLink& l_xlink, const XLink& r_x
 		ri = r_minimus->GetMinimusOrdinal();
         if( Orderable::Diff d = li - ri )
             return d;
-		return XLink::Compare(l_xlink, r_xlink);
+		return XLink::Compare3Way(l_xlink, r_xlink);
 	}
     else if( l_minimus && !r_minimus )
 	{
@@ -99,7 +99,7 @@ void CategoryRelation::Test( const unordered_set<XLink> &xlinks )
 	TestRelationProperties( xlinks,
                             true,
                             "CategoryRelation",
-                            bind(&CategoryRelation::Compare, *this, _1, _2), 
+                            bind(&CategoryRelation::Compare3Way, *this, _1, _2), 
 	[&](XLink l, XLink r)
     { 
         return l==r; 

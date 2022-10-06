@@ -55,9 +55,9 @@ public:
     }
     inline bool operator<( const Progress &other ) const
     {
-		return Compare(*this, other) < 0;
+		return Compare3Way(*this, other) < 0;
     }
-    static Orderable::Diff Compare(const Progress &l, const Progress &r)
+    static Orderable::Diff Compare3Way(const Progress &l, const Progress &r)
     {
         if( int ld = l.stage - r.stage )
             return ld;
