@@ -52,7 +52,7 @@ shared_ptr<PredicateOperator> PredicateOperator::TrySubstitute( shared_ptr<Symbo
     list<shared_ptr<SymbolExpression> *> sop = p->GetSymbolOperandPointers();
     for( shared_ptr<SymbolExpression> *s : sop )
     {
-        if( OrderCompare3Way( over, *s )==0 )
+        if( OrderCompare3Way( *over, **s )==0 )
         {
             *s = with;
             return p;

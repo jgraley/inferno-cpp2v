@@ -54,15 +54,6 @@ bool Expression::IsIndependentOf( shared_ptr<Expression> target ) const
 }
 
 
-Orderable::Diff Expression::OrderCompare3Way( shared_ptr<const Expression> l, 
-                                              shared_ptr<const Expression> r, 
-                                              OrderProperty order_property )
-{
-    return OrderCompare3Way( *l, *r, order_property );
-}
-
-
-
 Orderable::Diff Expression::OrderCompare3WayChildren( const Orderable &right, 
                                                       OrderProperty order_property ) const 
 {
