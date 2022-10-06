@@ -86,20 +86,20 @@ Orderable::Diff GreenGrassAgent::IsGreenGrassOperator::OrderCompare3WayLocal( co
 {
     auto c = GET_THAT_POINTER(candidate);
 
-    Orderable::Diff r;
+    Orderable::Diff d;
     switch( order_property )
     {
     case STRICT:
         // Unique order uses agent address to ensure different agents compare different
-        r = (int)(agent > c->agent) - (int)(agent < c->agent);
+        d = (int)(agent > c->agent) - (int)(agent < c->agent);
         // Note: just subtracting could overflow
         break;
     case REPEATABLE:
         // Repeatable ordering stops after name check since address compare is not repeatable
-        r = 0;
+        d = 0;
         break;
     }
-    return r;
+    return d;
 }  
 
 

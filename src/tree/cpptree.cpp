@@ -253,21 +253,21 @@ Orderable::Diff SpecificIdentifier::OrderCompare3WayLocal( const Orderable *cand
     }    
     
     // Secondary ordering on address due rule #528
-    Orderable::Diff r;
+    Orderable::Diff d;
     switch( order_property )
     {
     case STRICT:
         // Unique order uses address to ensure different identifiers compare differently
-        r = (int)(this > candidate) - (int)(this < candidate);
+        d = (int)(this > candidate) - (int)(this < candidate);
         // Note: just subtracting could overflow
         break;
     case REPEATABLE:
         // Repeatable ordering stops after name check since address compare is not repeatable
-        r = 0;
+        d = 0;
         break;
     }
-    //FTRACEC("%d (address)\n", r);
-    return r;
+    //FTRACEC("%d (address)\n", d);
+    return d;
 }
 
 
@@ -327,21 +327,21 @@ Orderable::Diff SpecificFloatSemantics::OrderCompare3WayLocal( const Orderable *
 {
     auto c = GET_THAT_POINTER(candidate); 
 
-    Orderable::Diff r;
+    Orderable::Diff d;
     switch( order_property )
     {
     case STRICT:
         // Don't use any particular ordering apart from where the 
         // llvm::fltSemantics are being stored.
-        r = (int)(value > c->value) - (int)(value < c->value);
+        d = (int)(value > c->value) - (int)(value < c->value);
         // Note: just subtracting could overflow
         break;
     case REPEATABLE:
         // Repeatable ordering stops at type
-        r = 0;
+        d = 0;
         break;
     }
-    return r;
+    return d;
 }
 
 
