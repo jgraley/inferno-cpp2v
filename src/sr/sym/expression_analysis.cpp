@@ -109,7 +109,7 @@ vector< set<shared_ptr<PredicateOperator>> > PredicateAnalysis::GetPredicates( s
     // Move into a data structure that can differentiate by expression equality 
     map< shared_ptr<PredicateOperator>, 
          set<shared_ptr<PredicateOperator>>, 
-         Expression::OrderComparer > preds_grouped_by_equality;
+         Expression::Relation > preds_grouped_by_equality;
     for( shared_ptr<PredicateOperator> pred : preds_unique_by_ptr )
         preds_grouped_by_equality[pred].insert(pred);
     

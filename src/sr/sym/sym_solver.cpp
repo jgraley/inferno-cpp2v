@@ -285,8 +285,8 @@ void TruthTableSolver::ConstrainUsingDerived()
     typedef shared_ptr<PredicateOperator> DerivedPred;
 
     // These derived_pred_to_... maps will unique-ize on equality of Pk 
-    map<shared_ptr<PredicateOperator>, set<set<int>>, Expression::OrderComparer> derived_pred_to_init_indices;
-    map<shared_ptr<PredicateOperator>, EqualPredicateSet, Expression::OrderComparer> derived_pred_to_derived_equal_pred_set;
+    map<shared_ptr<PredicateOperator>, set<set<int>>, Expression::Relation> derived_pred_to_init_indices;
+    map<shared_ptr<PredicateOperator>, EqualPredicateSet, Expression::Relation> derived_pred_to_derived_equal_pred_set;
     for( int i=0; i<ttwp->GetDegree(); i++ )
     {
         for( int j=0; j<ttwp->GetDegree(); j++ )
@@ -406,8 +406,8 @@ Relationship TruthTableSolver::TryDeriveRelationship( shared_ptr<PredicateOperat
         
         // Note that taking sets of operands can contract on eg S1 ⚬ S1, but I think
         // the relationship deduction is the same (but most predicates like that are effectively consts)
-        auto set_ops_i = ToSet<list<shared_ptr<SymbolExpression>>, Expression::OrderComparer>( ops_i );
-        auto set_ops_j = ToSet<list<shared_ptr<SymbolExpression>>, Expression::OrderComparer>( ops_j );
+        auto set_ops_i = ToSet<list<shared_ptr<SymbolExpression>>, Expression::Relation>( ops_i );
+        auto set_ops_j = ToSet<list<shared_ptr<SymbolExpression>>, Expression::Relation>( ops_j );
         auto set_ops_common = IntersectionOf( set_ops_i, set_ops_j );
         
         // We want the operands common to both i and j to be either all of i's operands or all of j's
@@ -428,7 +428,7 @@ Relationship TruthTableSolver::TryDeriveRelationship( shared_ptr<PredicateOperat
         // So if the lex compare with reversed j ops matches we do
         // pi->GetRelationshipWith( pj->GetCommute() ). Could be used for 
         // REVERSE transitivity too.
-        if( LexicographicalCompare( ops_i, ops_j, Expression::OrderComparer() ) != 0 )
+        if( LexicographicalCompare( ops_i, ops_j, Expression::Relation() ) != 0 )
             return Relationship::NONE;
             
         if( ops_i.size()==1 && ops_j.size()==1 )

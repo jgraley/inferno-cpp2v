@@ -71,7 +71,7 @@ bool Expression::OrderCompareEqual( shared_ptr<const Expression> l,
 
 
 Orderable::Diff Expression::OrderCompare3WayChildren( const Orderable *candidate, 
-                                                    OrderProperty order_property ) const 
+                                                      OrderProperty order_property ) const 
 {
     ASSERT( candidate );
     auto *c = dynamic_cast<const Expression *>(candidate);    
@@ -83,29 +83,35 @@ Orderable::Diff Expression::OrderCompare3WayChildren( const Orderable *candidate
     if( IsCommutative() )
     {
         // Commutative
-        set<shared_ptr<Expression>, OrderComparer> lo;
+        set<shared_ptr<Expression>, Relation> lo;
         for( shared_ptr<Expression> e : ll )     
             lo.insert( e );
 
-        set<shared_ptr<Expression>, OrderComparer> ro;
+        set<shared_ptr<Expression>, Relation> ro;
         for( shared_ptr<Expression> e : rl )      
             ro.insert( e );
 
-        return LexicographicalCompare( lo, ro, OrderComparer() );
+        return LexicographicalCompare( lo, ro, Relation() );
     }
     else
     {
         // Non-commutative
-        return LexicographicalCompare( ll, rl, OrderComparer() );
+        return LexicographicalCompare( ll, rl, Relation() );
     }
 }
 
 
-bool Expression::OrderComparer::operator()( const shared_ptr<const Expression> &a, 
-                                            const shared_ptr<const Expression> &b ) const
+Orderable::Diff Expression::Relation::Compare3Way( const shared_ptr<const Expression> &l, 
+                                                   const shared_ptr<const Expression> &r ) const
 {
-    Orderable::Diff r = Expression::OrderCompare3Way( a, b );
-    return r < 0;
+    return Expression::OrderCompare3Way( l, r );
+}                                                        
+
+
+bool Expression::Relation::operator()( const shared_ptr<const Expression> &l, 
+                                       const shared_ptr<const Expression> &r ) const
+{
+    return Compare3Way(l, r) < 0;
 }                                      
 
 

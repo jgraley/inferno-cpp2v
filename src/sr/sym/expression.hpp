@@ -83,11 +83,13 @@ public:
                                    shared_ptr<const Expression> r, 
                                    OrderProperty order_property = STRICT );    
     virtual Orderable::Diff OrderCompare3WayChildren( const Orderable *candidate, 
-                                                    OrderProperty order_property ) const override;
-    struct OrderComparer : public Traceable 
+                                                      OrderProperty order_property ) const override;
+    struct Relation : public Traceable 
     {
-        bool operator()( const shared_ptr<const Expression> &a, 
-                         const shared_ptr<const Expression> &b ) const;
+        Orderable::Diff Compare3Way( const shared_ptr<const Expression> &l, 
+                                     const shared_ptr<const Expression> &r ) const;
+        bool operator()( const shared_ptr<const Expression> &l, 
+                         const shared_ptr<const Expression> &r ) const;
     };
     
     // Fore more than 2 operands, this would mean "any permutation of operands

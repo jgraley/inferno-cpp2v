@@ -56,7 +56,7 @@ private:
     const string label_fmt;
     vector<EqualPredicateSet> predicates;
     shared_ptr<TruthTable> truth_table;
-    map<shared_ptr<PredicateOperator>, int, Expression::OrderComparer> pred_to_index;
+    map<shared_ptr<PredicateOperator>, int, Expression::Relation> pred_to_index;
     vector<string> pred_labels;
     int next_pred_num;
 };

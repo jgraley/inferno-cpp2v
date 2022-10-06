@@ -6,8 +6,8 @@
 #include <typeindex>		
 
 Orderable::Diff Orderable::OrderCompare3Way( const Orderable *l, 
-                                         const Orderable *r, 
-                                         OrderProperty order_property )
+                                             const Orderable *r, 
+                                             OrderProperty order_property )
 {
     //FTRACE(Traceable::TypeIdName(*l))(" ")(Traceable::TypeIdName(*r))("\n");
     
@@ -25,7 +25,7 @@ Orderable::Diff Orderable::OrderCompare3Way( const Orderable *l,
 
 
 Orderable::Diff Orderable::OrderCompare3WayLocal( const Orderable *candidate, 
-                                              OrderProperty order_property ) const 
+                                                  OrderProperty order_property ) const 
 {
     // Often, there are no contents to compare
     return 0; 
@@ -33,7 +33,7 @@ Orderable::Diff Orderable::OrderCompare3WayLocal( const Orderable *candidate,
 
 
 Orderable::Diff Orderable::OrderCompare3WayChildren( const Orderable *candidate, 
-                                                 OrderProperty order_property ) const 
+                                                     OrderProperty order_property ) const 
 {
     // Sometimes we don't incorprorate children in this ordering 
     // (i.e. local ordering only is required)

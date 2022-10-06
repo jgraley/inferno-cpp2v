@@ -36,7 +36,7 @@ class UniquifyCompare : public SimpleCompare
 {
 public:
     UniquifyCompare( const UniquifyIdentifiers *unique );
-    Orderable::Diff Compare3Way( TreePtr<Node> a, TreePtr<Node> b ) const override;
+    Orderable::Diff Compare3Way( TreePtr<Node> l, TreePtr<Node> r ) const override;
     
 private:
     const UniquifyIdentifiers * const unique;

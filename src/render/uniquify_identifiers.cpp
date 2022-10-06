@@ -105,26 +105,26 @@ UniquifyCompare::UniquifyCompare( const UniquifyIdentifiers *unique_ ) :
 }
 
 
-Orderable::Diff UniquifyCompare::Compare3Way( TreePtr<Node> a, TreePtr<Node> b ) const
+Orderable::Diff UniquifyCompare::Compare3Way( TreePtr<Node> l, TreePtr<Node> r ) const
 {
     //FTRACE("UC::Compare ")(a)(" - ")(b)("\n");
     
     // We're ovreridden the node entrypoint of SimpleCompare. If we're not
     // dealing with two SpecificIdentifiers, call back into that function
     // explicitly to get normal compare behaviour.
-    auto id_a = TreePtr<SpecificIdentifier>::DynamicCast(a);
-    auto id_b = TreePtr<SpecificIdentifier>::DynamicCast(b);
-    if( !(id_a && id_b) )
-        return SimpleCompare::Compare3Way(a, b);
+    auto id_l = TreePtr<SpecificIdentifier>::DynamicCast(l);
+    auto id_r = TreePtr<SpecificIdentifier>::DynamicCast(r);
+    if( !(id_l && id_r) )
+        return SimpleCompare::Compare3Way(l, r);
         
     // We have two SpecificIdentifiers, so get their unique names
-    string ustr_a = unique->at(id_a);
-    string ustr_b = unique->at(id_b);
+    string ustr_l = unique->at(id_l);
+    string ustr_r = unique->at(id_r);
     //FTRACE(id_a)(" becomes ")(ustr_a)("\n");
     
     // Compare those. This is like a REPEATABLE SC but using the
     // uniquified names instead.
-    return ustr_a.compare(ustr_b);
+    return ustr_l.compare(ustr_r);
 }
 
 //////////////////////////// IdentifierFingerprinter ///////////////////////////////
