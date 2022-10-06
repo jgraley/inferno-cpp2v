@@ -23,8 +23,8 @@ public:
     unique_ptr<SymbolResultInterface> GetValue() const;
     SR::XLink GetOnlyXLink() const;
 
-    virtual Orderable::Diff OrderCompareLocal( const Orderable *candidate, 
-                                                 OrderProperty order_property ) const override;
+    Orderable::Diff OrderCompareLocal( const Orderable *candidate, 
+                                       OrderProperty order_property ) const override;
 
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
@@ -48,7 +48,7 @@ public:
                                                        shared_ptr<SymbolExpression> to_equal ) const override;
 
     Orderable::Diff OrderCompareLocal( const Orderable *candidate, 
-                                         OrderProperty order_property ) const override;
+                                       OrderProperty order_property ) const override;
 
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
@@ -72,8 +72,8 @@ public:
     virtual unique_ptr<SymbolResultInterface> EvalFromItem( SR::XLink parent_xlink, 
                                                    Itemiser::Element *item ) const = 0;
 
-    virtual Orderable::Diff OrderCompareLocal( const Orderable *candidate, 
-                                                 OrderProperty order_property ) const override;                                                
+    Orderable::Diff OrderCompareLocal( const Orderable *candidate, 
+                                       OrderProperty order_property ) const override;                                                
 
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;

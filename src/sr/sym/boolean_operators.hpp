@@ -20,8 +20,8 @@ public:
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;
     bool GetAsBool() const;    
 
-    virtual Orderable::Diff OrderCompareLocal( const Orderable *candidate, 
-                                                 OrderProperty order_property ) const override;
+    Orderable::Diff OrderCompareLocal( const Orderable *candidate, 
+                                       OrderProperty order_property ) const override;
 
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;

@@ -246,8 +246,8 @@ public:
     shared_ptr<SymbolExpression> TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const override;
     Relationship GetRelationshipWith( shared_ptr<PredicateOperator> other ) const override;
 
-    virtual Orderable::Diff OrderCompareLocal( const Orderable *candidate, 
-                                                 OrderProperty order_property ) const override;
+    Orderable::Diff OrderCompareLocal( const Orderable *candidate, 
+                                       OrderProperty order_property ) const override;
 
     // TODO non-overlapping categories, might be easier with lace-ability, see #510
     //Relationship GetRelationshipWith( shared_ptr<PredicateOperator> other ) const override;
@@ -277,8 +277,8 @@ public:
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 list<unique_ptr<SymbolResultInterface>> &&op_results ) const override final;
 
-    virtual Orderable::Diff OrderCompareLocal( const Orderable *candidate, 
-                                                 OrderProperty order_property ) const override;                                                
+    Orderable::Diff OrderCompareLocal( const Orderable *candidate, 
+                                       OrderProperty order_property ) const override;                                                
 
     virtual string RenderNF() const override;
     virtual Precedence GetPrecedenceNF() const override;
@@ -334,8 +334,8 @@ public:
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 list<unique_ptr<SymbolResultInterface>> &&op_results ) const override final;
 
-    virtual Orderable::Diff OrderCompareLocal( const Orderable *candidate, 
-                                                 OrderProperty order_property ) const override;                                                
+    Orderable::Diff OrderCompareLocal( const Orderable *candidate, 
+                                       OrderProperty order_property ) const override;                                                
 
     virtual string RenderNF() const override;
     virtual Precedence GetPrecedenceNF() const override;
