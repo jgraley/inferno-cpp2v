@@ -70,15 +70,15 @@ bool Expression::OrderCompareEqual( shared_ptr<const Expression> l,
 }
 
 
-Orderable::Diff Expression::OrderCompare3WayChildren( const Orderable *candidate, 
+Orderable::Diff Expression::OrderCompare3WayChildren( const Orderable *right, 
                                                       OrderProperty order_property ) const 
 {
-    ASSERT( candidate );
-    auto *c = dynamic_cast<const Expression *>(candidate);    
-    ASSERT(c);
+    ASSERT( right );
+    auto r = GET_THAT_POINTER(right);    
+    ASSERT(r);
     
     list<shared_ptr<Expression>> ll = GetOperands();
-    list<shared_ptr<Expression>> rl = c->GetOperands();
+    list<shared_ptr<Expression>> rl = r->GetOperands();
     
     if( IsCommutative() )
     {

@@ -123,7 +123,7 @@ struct SpecificString : String
     SpecificString(); ///< default constructor, for making archetypes 
     SpecificString( string s ); /// Construct with a given STL string
 	virtual bool IsLocalMatch( const Matcher *candidate ) const; /// Overloaded comparison for search&replace
-    virtual Orderable::Diff OrderCompare3WayLocal( const Orderable *candidate, 
+    virtual Orderable::Diff OrderCompare3WayLocal( const Orderable *right, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
 	virtual string GetRender() const; /// Produce a string for debug
     virtual string GetTrace() const;
@@ -160,7 +160,7 @@ struct SpecificInteger : Integer
     int64_t GetWidth() const;
 
 	virtual bool IsLocalMatch( const Matcher *candidate ) const; /// Overloaded comparison for search&replace
-    virtual Orderable::Diff OrderCompare3WayLocal( const Orderable *candidate, 
+    virtual Orderable::Diff OrderCompare3WayLocal( const Orderable *right, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
 	virtual string GetRender() const; /// Produce a string for debug
     virtual string GetTrace() const;
@@ -182,7 +182,7 @@ struct SpecificFloat : Float, llvm::APFloat
     SpecificFloat(); ///< default constructor, for making archetypes 
     SpecificFloat( llvm::APFloat v ); ///< Construct with an LLVM-style float
 	virtual bool IsLocalMatch( const Matcher *candidate ) const; /// Overloaded comparison for search&replace
-    virtual Orderable::Diff OrderCompare3WayLocal( const Orderable *candidate, 
+    virtual Orderable::Diff OrderCompare3WayLocal( const Orderable *right, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
 	virtual string GetRender() const; /// Produce a string for graphing
     virtual string GetTrace() const;
@@ -238,7 +238,7 @@ struct SpecificIdentifier : virtual Property
 	SpecificIdentifier( string s, BoundingRole addr_bounding_role = BoundingRole::NONE ); ///< construct with a given name
     virtual shared_ptr<Cloner> Duplicate( shared_ptr<Cloner> p ); /// Overloaded duplication function for search&replace
 	virtual bool IsLocalMatch( const Matcher *candidate ) const; /// Overloaded comparison for search&replace
-    virtual Orderable::Diff OrderCompare3WayLocal( const Orderable *candidate, 
+    virtual Orderable::Diff OrderCompare3WayLocal( const Orderable *right, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
 	virtual string GetRender() const; /// This is relied upon to just return the identifier name for rendering
     virtual string GetGraphName() const;
@@ -568,7 +568,7 @@ struct SpecificFloatSemantics : FloatSemantics
     SpecificFloatSemantics(); ///< default constructor, for making archetypes 
     SpecificFloatSemantics( const llvm::fltSemantics *s ); /// Construct from LLVM's class
 	virtual bool IsLocalMatch( const Matcher *candidate ) const; /// Overloaded comparison for search&replace
-    virtual Orderable::Diff OrderCompare3WayLocal( const Orderable *candidate, 
+    virtual Orderable::Diff OrderCompare3WayLocal( const Orderable *right, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
 	operator const llvm::fltSemantics &() const; /// convert back to LLVM's class
 	// TODO no render?

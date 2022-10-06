@@ -39,14 +39,14 @@ SR::XLink SymbolConstant::GetOnlyXLink() const
 }
 
 
-Orderable::Diff SymbolConstant::OrderCompare3WayLocal( const Orderable *candidate, 
+Orderable::Diff SymbolConstant::OrderCompare3WayLocal( const Orderable *right, 
                                                      OrderProperty order_property ) const 
 {
-    auto c = GET_THAT_POINTER(candidate);
+    auto r = GET_THAT_POINTER(right);
 
-    if( xlink == c->xlink )
+    if( xlink == r->xlink )
         return 0;
-    else if( xlink < c->xlink )
+    else if( xlink < r->xlink )
         return -1;
     else
         return 1;
@@ -115,14 +115,14 @@ shared_ptr<SymbolExpression> SymbolVariable::TrySolveForToEqual( const SolveKit 
 }                                                                                                                  
 
 
-Orderable::Diff SymbolVariable::OrderCompare3WayLocal( const Orderable *candidate, 
+Orderable::Diff SymbolVariable::OrderCompare3WayLocal( const Orderable *right, 
                                                      OrderProperty order_property ) const 
 {
-    auto c = GET_THAT_POINTER(candidate);
+    auto r = GET_THAT_POINTER(right);
 
-    if( plink == c->plink )
+    if( plink == r->plink )
         return 0;
-    else if( plink < c->plink )
+    else if( plink < r->plink )
         return -1;
     else
         return 1;
@@ -182,17 +182,17 @@ unique_ptr<SymbolResultInterface> ChildToSymbolOperator::Evaluate( const EvalKit
 }
 
 
-Orderable::Diff ChildToSymbolOperator::OrderCompare3WayLocal( const Orderable *candidate, 
+Orderable::Diff ChildToSymbolOperator::OrderCompare3WayLocal( const Orderable *right, 
                                                               OrderProperty order_property ) const 
 {
-    auto c = GET_THAT_POINTER(candidate);
+    auto r = GET_THAT_POINTER(right);
     //FTRACE(Render())("\n");
     if( Diff d1 = OrderCompare3Way(archetype_node.get(), 
-                           c->archetype_node.get(), 
-                           order_property) )
+                                   r->archetype_node.get(), 
+                                   order_property) )
         return d1;
 
-    return item_index - c->item_index;
+    return item_index - r->item_index;
 }  
 
 

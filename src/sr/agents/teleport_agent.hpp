@@ -34,7 +34,7 @@ private:
         virtual unique_ptr<SYM::SymbolResultInterface> Evaluate( const EvalKit &kit,
                                                                  list<unique_ptr<SYM::SymbolResultInterface>> &&op_results ) const override;
 
-        Orderable::Diff OrderCompare3WayLocal( const Orderable *candidate, 
+        Orderable::Diff OrderCompare3WayLocal( const Orderable *right, 
                                            OrderProperty order_property ) const override;
 
         virtual string Render() const override;

@@ -178,11 +178,11 @@ shared_ptr<SYM::SymbolExpression> IdentifierByNameAgent::IsIdentifierNamedOperat
 }                                                                                                                                             
                                               
                                               
-Orderable::Diff IdentifierByNameAgent::IsIdentifierNamedOperator::OrderCompare3WayLocal( const Orderable *candidate, 
+Orderable::Diff IdentifierByNameAgent::IsIdentifierNamedOperator::OrderCompare3WayLocal( const Orderable *right, 
                                                                                        OrderProperty order_property ) const 
 {
-    auto c = GET_THAT_POINTER(candidate);
-    return name.compare(c->name);
+    auto r = GET_THAT_POINTER(right);
+    return name.compare(r->name);
 }  
 
 
@@ -342,17 +342,17 @@ unique_ptr<SYM::SymbolResultInterface> NestedAgent::NestingOperator::Evaluate( c
 }
 
 
-Orderable::Diff NestedAgent::NestingOperator::OrderCompare3WayLocal( const Orderable *candidate, 
+Orderable::Diff NestedAgent::NestingOperator::OrderCompare3WayLocal( const Orderable *right, 
                                                                       OrderProperty order_property ) const 
 {
-    auto c = GET_THAT_POINTER(candidate);
+    auto r = GET_THAT_POINTER(right);
 
     Orderable::Diff d;
     switch( order_property )
     {
     case STRICT:
         // Unique order is unique by owning agent
-        d = (int)(agent > c->agent) - (int)(agent < c->agent);
+        d = (int)(agent > r->agent) - (int)(agent < r->agent);
         // Note: just subtracting could overflow
         break;
     case REPEATABLE:

@@ -680,14 +680,14 @@ Relationship IsInCategoryOperator::GetRelationshipWith( shared_ptr<PredicateOper
 }
 
 
-Orderable::Diff IsInCategoryOperator::OrderCompare3WayLocal( const Orderable *candidate, 
+Orderable::Diff IsInCategoryOperator::OrderCompare3WayLocal( const Orderable *right, 
                                                      OrderProperty order_property ) const 
 {
-    auto c = GET_THAT_POINTER(candidate);
+    auto r = GET_THAT_POINTER(right);
     //FTRACE(Render())("\n");
     return OrderCompare3Way(archetype_node.get(), 
-                        c->archetype_node.get(), 
-                        order_property);
+                            r->archetype_node.get(), 
+                            order_property);
 }  
 
 
@@ -768,20 +768,20 @@ unique_ptr<BooleanResult> IsChildCollectionSizedOperator::Evaluate( const EvalKi
 }
 
 
-Orderable::Diff IsChildCollectionSizedOperator::OrderCompare3WayLocal( const Orderable *candidate, 
+Orderable::Diff IsChildCollectionSizedOperator::OrderCompare3WayLocal( const Orderable *right, 
                                                                   OrderProperty order_property ) const 
 {
-    auto c = GET_THAT_POINTER(candidate);
+    auto r = GET_THAT_POINTER(right);
     //FTRACE(Render())("\n");
     if( Diff d1 = OrderCompare3Way(archetype_node.get(), 
-                               c->archetype_node.get(), 
-                               order_property) )
+                                   r->archetype_node.get(), 
+                                   order_property) )
         return d1;
 
-    if( int d2 = item_index - c->item_index )
+    if( int d2 = item_index - r->item_index )
         return d2;
 
-    return size - c->size;
+    return size - r->size;
 }  
 
 
@@ -935,13 +935,13 @@ unique_ptr<BooleanResult> IsLocalMatchOperator::Evaluate( const EvalKit &kit,
 }
 
 
-Orderable::Diff IsLocalMatchOperator::OrderCompare3WayLocal( const Orderable *candidate, 
-                                                           OrderProperty order_property ) const 
+Orderable::Diff IsLocalMatchOperator::OrderCompare3WayLocal( const Orderable *right, 
+                                                             OrderProperty order_property ) const 
 {
-    auto c = GET_THAT_POINTER(candidate);
+    auto r = GET_THAT_POINTER(right);
     return OrderCompare3Way( pattern_node, 
-                         c->pattern_node, 
-                         order_property);
+                             r->pattern_node, 
+                             order_property);
 }  
 
 

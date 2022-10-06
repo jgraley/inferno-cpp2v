@@ -53,7 +53,7 @@ Ultimately the choice of how to override `IsLocalMatch()` lies with the user, bu
 Note: `Orderable` is a general-purpose class within Vida Nova. It's usage in the `Node` class hierarchy is simplified relative to it's general usage. Only the overloads necessry for `Node` classes is given here.
 
 Over-ride one virtual function:
- - `virtual Orderable::Diff OrderCompare3WayLocal( const Orderable *candidate, OrderProperty order_property ) const;`
+ - `virtual Orderable::Diff OrderCompare3WayLocal( const Orderable *right, OrderProperty order_property ) const;`
  
 Override this exactly when `IsLocalMatch()` is over-ridden, and implement a comparison on _only_ the local data members (making no reference to child pointers).
 

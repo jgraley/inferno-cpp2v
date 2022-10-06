@@ -24,7 +24,7 @@ Orderable::Diff Orderable::OrderCompare3Way( const Orderable *l,
 }
 
 
-Orderable::Diff Orderable::OrderCompare3WayLocal( const Orderable *candidate, 
+Orderable::Diff Orderable::OrderCompare3WayLocal( const Orderable *right, 
                                                   OrderProperty order_property ) const 
 {
     // Often, there are no contents to compare
@@ -32,7 +32,7 @@ Orderable::Diff Orderable::OrderCompare3WayLocal( const Orderable *candidate,
 }
 
 
-Orderable::Diff Orderable::OrderCompare3WayChildren( const Orderable *candidate, 
+Orderable::Diff Orderable::OrderCompare3WayChildren( const Orderable *right, 
                                                      OrderProperty order_property ) const 
 {
     // Sometimes we don't incorprorate children in this ordering 
