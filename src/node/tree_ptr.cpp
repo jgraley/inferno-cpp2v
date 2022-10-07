@@ -38,8 +38,9 @@ bool TreePtrInterface::operator!=(const TreePtrInterface &other) const
 Orderable::Diff TreePtrInterface::Compare3Way(const TreePtrInterface &l, const TreePtrInterface &r)
 {
     // NULLness is primary ordering because we wish to dereference both pointers. 
-    // If both are NULL we'll call that equal, and drop out.
-    if( !r && !l )
+    // If both are NULL we'll call that equal, and drop out. Also do fast-out on 
+    // equal pointers.
+    if( l==r )
         return 0; // for == case
     else if( !r )
         return 1; // for > case

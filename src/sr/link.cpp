@@ -87,8 +87,9 @@ Orderable::Diff PatternLink::Compare3Way(const PatternLink &l, const PatternLink
     ASSERTS( &r );
     
     // NULLness is primary ordering because we wish to dereference both pointers. 
-    // If both are NULL we'll call that equal, and drop out.    
-    if( !r.asp_pattern && !l.asp_pattern )
+    // If both are NULL we'll call that equal, and drop out. Also do fast-out on 
+    // equal pointers.
+    if( r.asp_pattern==l.asp_pattern )
         return 0; // for == case
     else if( !r.asp_pattern )
         return 1; // for > case
@@ -263,8 +264,9 @@ Orderable::Diff XLink::Compare3Way(const XLink &l, const XLink &r)
     ASSERTS( &r );
     
     // NULLness is primary ordering because we wish to dereference both pointers. 
-    // If both are NULL we'll call that equal, and drop out.
-    if( !r.asp_x && !l.asp_x )
+    // If both are NULL we'll call that equal, and drop out. Also do fast-out on 
+    // equal pointers.
+    if( r.asp_x==l.asp_x )
         return 0; // for == case
     else if( !r.asp_x )
         return 1; // for > case
