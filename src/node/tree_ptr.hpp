@@ -47,6 +47,7 @@ struct TreePtrInterface : virtual Itemiser::Element, public Traceable
     bool operator==(const TreePtrInterface &other) const;
     bool operator!=(const TreePtrInterface &other) const;
     static Orderable::Diff Compare3Way(const TreePtrInterface &l, const TreePtrInterface &r);
+    static Orderable::Diff Compare3WayIdentity(const TreePtrInterface &l, const TreePtrInterface &r);
     virtual TreePtr<Node> MakeValueArchetype() const = 0; // construct an object of the VALUE_TYPE type (NOT a clone)
     virtual string GetName() const = 0;
     virtual string GetShortName() const = 0;

@@ -37,6 +37,23 @@ bool TreePtrInterface::operator!=(const TreePtrInterface &other) const
 
 Orderable::Diff TreePtrInterface::Compare3Way(const TreePtrInterface &l, const TreePtrInterface &r)
 {
+    // Half-NULLness is super-primary ordering
+    if( !r && !l )
+        return 0; // for == case
+    else if( !r )
+        return 1; // for > case
+    else if( !l )
+        return -1; // for < case
+        
+    ASSERTS( l );
+    ASSERTS( r );
+
+	return Node::Compare3WayIdentity( *l, *r );
+}
+
+
+Orderable::Diff TreePtrInterface::Compare3WayIdentity(const TreePtrInterface &l, const TreePtrInterface &r)
+{
 	return SatelliteSerial::Compare3WayIdentity( l.GetSS(), r.GetSS() );
 }
 

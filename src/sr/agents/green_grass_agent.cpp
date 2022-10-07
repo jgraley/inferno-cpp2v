@@ -85,21 +85,8 @@ Orderable::Diff GreenGrassAgent::IsGreenGrassOperator::OrderCompare3WayLocal( co
                                                      OrderProperty order_property ) const 
 {
     auto &r = *GET_THAT_POINTER(&right);
-
-    Orderable::Diff d;
-    switch( order_property )
-    {
-    case STRICT:
-        // Unique order uses agent address to ensure different agents compare different
-        d = (int)(agent > r.agent) - (int)(agent < r.agent);
-        // Note: just subtracting could overflow
-        break;
-    case REPEATABLE:
-        // Repeatable ordering stops after name check since address compare is not repeatable
-        d = 0;
-        break;
-    }
-    return d;
+    // Agents aren't comparable, so value of operator is identiy of agent
+    return Node::Compare3WayIdentity( *agent->GetPatternPtr(), *r.agent->GetPatternPtr() );
 }  
 
 

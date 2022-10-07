@@ -94,25 +94,15 @@ Orderable::Diff PatternLink::Compare3Way(const PatternLink &l, const PatternLink
     else if( !l.asp_pattern )
         return -1; // for < case
     
-    // Half-NULLness is super-primary ordering
-    if( !*r.asp_pattern && !*l.asp_pattern )
-        return 0; // for == case
-    else if( !*r.asp_pattern )
-        return 1; // for > case
-    else if( !*l.asp_pattern )
-        return -1; // for < case
-    
-    // Child node serial number is primary ordering
-    auto tp_this = TreePtr<Node>(*l.asp_pattern);
-    auto tp_other = TreePtr<Node>(*r.asp_pattern);
-    ASSERTS( tp_this );
-    ASSERTS( tp_other );
-    if( Orderable::Diff d_node = Node::Compare3WayIdentity( *tp_this, *tp_other ) )
+    // Primary ordering is TreePtr value, which is Node identity. Will be the serial number 
+    // for repeatability.
+    if( Orderable::Diff d_node = TreePtrInterface::Compare3Way( *l.asp_pattern, *r.asp_pattern ) )
 		return d_node;
 
-    // Satellite serial number aka arrow-head number is secondary ordering
-    // Use ordering on the TreePtrs themselves #625
-    if( Orderable::Diff d_tpi = TreePtrInterface::Compare3Way( *l.asp_pattern, *r.asp_pattern ) )
+    // Secondary ordering is by the identity of the TreePtr - this is what gives
+    // us the arrowhead model for patterns. Will be the satellite serial number 
+    // for repeatability.
+    if( Orderable::Diff d_tpi = TreePtrInterface::Compare3WayIdentity( *l.asp_pattern, *r.asp_pattern ) )
 		return d_tpi;
        
     // Pointer-based tertiary ordering for just in case TODO assert pointers are equal
@@ -278,28 +268,15 @@ Orderable::Diff XLink::Compare3Way(const XLink &l, const XLink &r)
     else if( !l.asp_x )
         return -1; // for < case
     
-    // Half-NULLness is super-primary ordering
-    if( !*r.asp_x && !*l.asp_x )
-        return 0; // for == case
-    else if( !*r.asp_x )
-        return 1; // for > case
-    else if( !*l.asp_x )
-        return -1; // for < case
-        
-    ASSERTS( *l.asp_x );
-    ASSERTS( *r.asp_x );
-    
-    // Child node serial number is primary ordering
-    auto l_tp = TreePtr<Node>(*l.asp_x);
-    auto r_tp = TreePtr<Node>(*r.asp_x);
-    ASSERTS( l_tp );
-    ASSERTS( r_tp );
-    if( Orderable::Diff d_node = Node::Compare3WayIdentity( *l_tp, *r_tp ) )
+    // Primary ordering is TreePtr value, which is Node identity. Will be the serial number 
+    // for repeatability.
+    if( Orderable::Diff d_node = TreePtrInterface::Compare3Way( *l.asp_x, *r.asp_x ) )
 		return d_node;
 		
-    // Satellite serial number aka arrow-head number is secondary ordering
-    // Use ordering on the TreePtrs themselves #625
-    if( Orderable::Diff d_tpi = TreePtrInterface::Compare3Way( *l.asp_x, *r.asp_x ) )
+    // Secondary ordering is by the identity of the TreePtr - this is what gives
+    // us the arrowhead model for x trees. Will be the satellite serial number 
+    // for repeatability.
+    if( Orderable::Diff d_tpi = TreePtrInterface::Compare3WayIdentity( *l.asp_x, *r.asp_x ) )
 		return d_tpi;
        
     // Pointer-based tertiary ordering for just in case TODO assert pointers are equal

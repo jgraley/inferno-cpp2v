@@ -252,22 +252,8 @@ Orderable::Diff SpecificIdentifier::OrderCompare3WayLocal( const Orderable &righ
         return (int)addr_bounding_role - (int)(r.addr_bounding_role);
     }    
     
-    // Secondary ordering on address due rule #528
-    Orderable::Diff d;
-    switch( order_property )
-    {
-    case STRICT:
-        // Unique order uses address to ensure different identifiers compare differently
-        d = (int)(this > &right) - (int)(this < &right);
-        // Note: just subtracting could overflow
-        break;
-    case REPEATABLE:
-        // Repeatable ordering stops after name check since address compare is not repeatable
-        d = 0;
-        break;
-    }
-    //FTRACEC("%d (address)\n", d);
-    return d;
+    // Secondary ordering on identity due rule #528
+    return Compare3WayIdentity(*this, r);
 }
 
 
