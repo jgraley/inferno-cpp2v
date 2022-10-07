@@ -14,17 +14,17 @@ public:
     // Orderable could be REPEATABLE which is weak, but we still want
     // to account for the number of equivalent elements, so use multiset.
     // Use a reference to SimpleCompare so derived classes can use it.
-    typedef multiset<TreePtr<Node>, const SimpleCompare &> Orderered;
+    typedef multiset<reference_wrapper<Node>, const SimpleCompare &> NodeOrdering;
 
     SimpleCompare( Orderable::OrderProperty order_property = Orderable::STRICT );
     SimpleCompare &operator=(const SimpleCompare &other);
 
     /// Less operator: for use with set, map etc
-    bool operator()( TreePtr<Node> l, TreePtr<Node> r ) const;    
+    bool operator()( const Node &l, const Node &r ) const;    
         
-    /// Pass in two pointers to nodes, which can point to subtrees. Result is true if they match. O(1) locally.
-    virtual Orderable::Diff Compare3Way( TreePtr<Node> l, TreePtr<Node> r ) const;
-    
+    /// Pass in two nodes, which can have subtrees. Result is 0 if they match. O(1) locally.
+    virtual Orderable::Diff Compare3Way( const Node &l, const Node &r ) const;
+
     /// Pass in two sequences of pointers to nodes, which can point to subtrees. Result is true if they match. O(n) locally.
     Orderable::Diff Compare3Way( SequenceInterface &l, SequenceInterface &r ) const;
     
@@ -32,7 +32,19 @@ public:
     Orderable::Diff Compare3Way( CollectionInterface &l, CollectionInterface &r ) const;
 
     /// Make a SimpleCompare-ordered set using the current SC, filled with the elements from the supplied container
-    Orderered GetOrdering( ContainerInterface &c ) const;
+    NodeOrdering GetNodeOrdering( ContainerInterface &c ) const;
+
+    // ---------------- Legacy interface used by renderer only --------------------
+    typedef multiset<TreePtr<Node>, const SimpleCompare &> TreePtrOrdering;
+
+    /// Less operator: for use with set, map etc (legacy)
+    bool operator()( TreePtr<Node> l, TreePtr<Node> r ) const;    
+        
+    /// Pass in two pointers to nodes, which can point to subtrees. Result is 0 if they match. O(1) locally. (legacy)
+    virtual Orderable::Diff Compare3Way( TreePtr<Node> l, TreePtr<Node> r ) const;
+    
+    /// Make a SimpleCompare-ordered set using the current SC, filled with the elements from the supplied container (legacy)
+    TreePtrOrdering GetTreePtrOrdering( ContainerInterface &c ) const;
 
 private:
     Orderable::OrderProperty order_property;

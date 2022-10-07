@@ -24,8 +24,8 @@ public:
 	CategoryRelation( shared_ptr<Lacing> lacing );
 	CategoryRelation& operator=(const CategoryRelation &other);
 	
-	bool operator() (const XLink& l_xlink, const XLink& r_xlink) const;
-	Orderable::Diff Compare3Way(const XLink& l_xlink, const XLink& r_xlink) const;
+	bool operator() (XLink l_xlink, XLink r_xlink) const;
+	Orderable::Diff Compare3Way(XLink l_xlink, XLink r_xlink) const;
 	
     void Test( const unordered_set<XLink> &xlinks );
 

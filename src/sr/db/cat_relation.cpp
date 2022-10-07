@@ -25,13 +25,13 @@ CategoryRelation& CategoryRelation::operator=(const CategoryRelation &other)
 }
 
 
-bool CategoryRelation::operator() (const XLink& l_xlink, const XLink& r_xlink) const
+bool CategoryRelation::operator() (XLink l_xlink, XLink r_xlink) const
 {
 	return Compare3Way(l_xlink, r_xlink) < 0;
 }
 
 
-Orderable::Diff CategoryRelation::Compare3Way(const XLink& l_xlink, const XLink& r_xlink) const
+Orderable::Diff CategoryRelation::Compare3Way(XLink l_xlink, XLink r_xlink) const
 {
 #ifdef TRACE_CATEGORY_RELATION
     INDENT("@");

@@ -47,6 +47,17 @@ public:
 
     void TestRelations( const unordered_set<XLink> &xlinks );
     
+    class Relation
+    {
+    public:
+        bool operator() (TreePtr<Node> l_node, TreePtr<Node> r_node) const;
+        Orderable::Diff Compare3Way(TreePtr<Node> l_node, TreePtr<Node> r_node) const;
+        
+        void Test( const unordered_set<XLink> &xlinks );
+    private:
+        SimpleCompare sc;
+    };
+    
     // Global domain of possible xlink values
     unordered_set<XLink> unordered_domain;            
     

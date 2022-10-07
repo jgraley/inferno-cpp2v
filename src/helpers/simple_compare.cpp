@@ -15,6 +15,7 @@ SimpleCompare &SimpleCompare::operator=(const SimpleCompare &other)
 }
 
 
+// Inputs must be non-NULL (though we do handle NULL in itemise, see below)
 bool SimpleCompare::operator()( TreePtr<Node> l, TreePtr<Node> r ) const
 {
     //FTRACE("SC::operator() ")(xl)(" - ")(yl)("\n");
@@ -24,23 +25,32 @@ bool SimpleCompare::operator()( TreePtr<Node> l, TreePtr<Node> r ) const
 
 Orderable::Diff SimpleCompare::Compare3Way( TreePtr<Node> l, TreePtr<Node> r ) const
 {   
-    // Inputs must be non-NULL (though we do handle NULL in itemise, see below)
-    ASSERT(l);
-    ASSERT(r);
+    return Compare3Way( *l, *r );
+}
+    
+    
+bool SimpleCompare::operator()( const Node &l, const Node &r ) const
+{
+    //FTRACE("SC::operator() ")(xl)(" - ")(yl)("\n");
+    return Compare3Way(l, r) < 0;
+}
 
+
+Orderable::Diff SimpleCompare::Compare3Way( const Node &l, const Node &r ) const
+{   
     //FTRACE("SC::Compare ")(x)(" - ")(y)("\n");
 
     // If we are asked to do a trivial compare, return immediately reporting success
-    if( l==r )
+    if( &l==&r )
         return 0;
         
     // Local comparison deals with node type and value if there is one
-    if( Orderable::Diff cd = Node::OrderCompare3Way(*l, *r, order_property) )
+    if( Orderable::Diff cd = Node::OrderCompare3Way(l, r, order_property) )
         return cd;
 
     // Itemise them both and chuck out if sizes do not match
-    vector< Itemiser::Element * > l_items = l->Itemise();
-    vector< Itemiser::Element * > r_items = r->Itemise();
+    vector< Itemiser::Element * > l_items = l.Itemise();
+    vector< Itemiser::Element * > r_items = r.Itemise();
     int sd = (int)(l_items.size()) - (int)(r_items.size());
     if( sd != 0 )
         return sd; 
@@ -76,7 +86,7 @@ Orderable::Diff SimpleCompare::Compare3Way( TreePtr<Node> l, TreePtr<Node> r ) c
                 return (int)(!(TreePtr<Node>)*r_singular) - (int)(!(TreePtr<Node>)*l_singular);                
             
             // Both non-null, so we are allowed to recurse
-            if( Orderable::Diff d = Compare3Way( (TreePtr<Node>)*l_singular, (TreePtr<Node>)*r_singular ) )
+            if( Orderable::Diff d = Compare3Way( *(TreePtr<Node>)*l_singular, *(TreePtr<Node>)*r_singular ) )
                 return d;                
         }
         else
@@ -102,7 +112,7 @@ Orderable::Diff SimpleCompare::Compare3Way( SequenceInterface &l, SequenceInterf
     // Check each element in turn
     for( lit = l.begin(), rit = r.begin(); lit != l.end(); ++lit, ++rit )
     {
-        if( Orderable::Diff d = Compare3Way( (TreePtr<Node>)*lit, (TreePtr<Node>)*rit ) )       
+        if( Orderable::Diff d = Compare3Way( *(TreePtr<Node>)*lit, *(TreePtr<Node>)*rit ) )       
             return d;
     }
 
@@ -118,17 +128,26 @@ Orderable::Diff SimpleCompare::Compare3Way( CollectionInterface &l, CollectionIn
         return sd;
         
     // Use this object so our ordering is used.
-    Orderered l_ordering = GetOrdering(l);
-    Orderered r_ordering = GetOrdering(r);
+    NodeOrdering l_ordering = GetNodeOrdering(l);
+    NodeOrdering r_ordering = GetNodeOrdering(r);
     
     return LexicographicalCompare(l_ordering, r_ordering, *this);
 }
 
 
-SimpleCompare::Orderered SimpleCompare::GetOrdering( ContainerInterface &c ) const
+SimpleCompare::NodeOrdering SimpleCompare::GetNodeOrdering( ContainerInterface &c ) const
 {
-    Orderered ordered( *this );
+    NodeOrdering ordering( *this );
     for( const TreePtrInterface &e : c )
-    	ordered.insert( (TreePtr<Node>)e );
-    return ordered; // hoping for a "move"
+    	ordering.insert( *(TreePtr<Node>)e );
+    return ordering; 
+}
+
+
+SimpleCompare::TreePtrOrdering SimpleCompare::GetTreePtrOrdering( ContainerInterface &c ) const
+{
+    TreePtrOrdering ordering( *this );
+    for( const TreePtrInterface &e : c )
+    	ordering.insert( (TreePtr<Node>)e );
+    return ordering; 
 }

@@ -186,7 +186,7 @@ void IdentifierFingerprinter::ProcessCollection( CollectionInterface *x_col, int
     TreePtr<Node> prev_x;
     int index_offset = 0;
     int prev_start_index;
-    for( TreePtr<Node> x : comparer.GetOrdering(*x_col) )
+    for( TreePtr<Node> x : comparer.GetTreePtrOrdering(*x_col) )
     {
         if( prev_x && comparer.Compare3Way(x, prev_x) == 0 )
         {
