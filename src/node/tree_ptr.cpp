@@ -37,18 +37,30 @@ bool TreePtrInterface::operator!=(const TreePtrInterface &other) const
 
 Orderable::Diff TreePtrInterface::Compare3Way(const TreePtrInterface &l, const TreePtrInterface &r)
 {
-    // Half-NULLness is super-primary ordering
+    // NULLness is primary ordering because we wish to dereference both pointers. 
+    // If both are NULL we'll call that equal, and drop out.
     if( !r && !l )
         return 0; // for == case
     else if( !r )
         return 1; // for > case
     else if( !l )
-        return -1; // for < case
-        
+        return -1; // for < case        
     ASSERTS( l );
     ASSERTS( r );
 
-	return Node::Compare3WayIdentity( *l, *r );
+    // Secondary ordering is on the value of the node (not including subtree) which will
+    // help with orderings of sets of things in the trace logs.
+    if( Orderable::Diff d_nv = Node::OrderCompare3Way(*l, *r) )
+        return d_nv;
+
+    // Tertiary ordering is on the identities of the nodes, which corresponds to the values of 
+    // the TreePtrs.
+	if( Orderable::Diff d_ni = Node::Compare3WayIdentity( *l, *r ) )
+        return d_ni;
+        
+    // Check that last claim
+    ASSERTS( l==r );
+    return 0;
 }
 
 

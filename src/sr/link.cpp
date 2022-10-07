@@ -12,6 +12,9 @@ using namespace SR;
  
 #define ALIGNMENT_BITS 3 
 
+#define COVER_FOR_UNEQUAL_ASP
+
+
 // Tests the not-on-stack tests themseleves
 //#define TEST_ASSERT_NOT_ON_STACK
 
@@ -82,11 +85,9 @@ Orderable::Diff PatternLink::Compare3Way(const PatternLink &l, const PatternLink
 {
     ASSERTS( &l );
     ASSERTS( &r );
-    // PatternLink is unique across parent-child links in
-    // the pattern. This operator will permit PatternLink to 
-    // act as keys in maps.
-        
-    // NULLness is hyper-primary ordering
+    
+    // NULLness is primary ordering because we wish to dereference both pointers. 
+    // If both are NULL we'll call that equal, and drop out.    
     if( !r.asp_pattern && !l.asp_pattern )
         return 0; // for == case
     else if( !r.asp_pattern )
@@ -94,24 +95,25 @@ Orderable::Diff PatternLink::Compare3Way(const PatternLink &l, const PatternLink
     else if( !l.asp_pattern )
         return -1; // for < case
     
-    // Primary ordering is TreePtr value, which is Node identity. Will be the serial number 
-    // for repeatability.
+    // Secondary ordering is on the value of the TreePtr which will
+    // help with orderings of sets of things in the trace logs.
     if( Orderable::Diff d_node = TreePtrInterface::Compare3Way( *l.asp_pattern, *r.asp_pattern ) )
 		return d_node;
 
-    // Secondary ordering is by the identity of the TreePtr - this is what gives
-    // us the arrowhead model for patterns. Will be the satellite serial number 
-    // for repeatability.
+    // Tertiary ordering is on the identities of the TreePtrs, which 
+    // corresponds to the values of the PatternLinks.
     if( Orderable::Diff d_tpi = TreePtrInterface::Compare3WayIdentity( *l.asp_pattern, *r.asp_pattern ) )
 		return d_tpi;
        
-    // Pointer-based tertiary ordering for just in case TODO assert pointers are equal
+    // Check that last claim
+#ifdef COVER_FOR_UNEQUAL_ASP
     if( l.asp_pattern < r.asp_pattern )
 		return -1;
     else if( l.asp_pattern > r.asp_pattern )
 		return 1;
-    else 
-		return 0;
+#endif
+    ASSERTS( l == r );
+    return 0;
 }
 
 
@@ -256,11 +258,12 @@ bool XLink::operator==(const XLink &other) const
 
 Orderable::Diff XLink::Compare3Way(const XLink &l, const XLink &r)
 {
-	// Checking for broken references, not part of the ordering
+	// Checking for broken references
     ASSERTS( &l );
     ASSERTS( &r );
     
-    // NULLness is hyper-primary ordering
+    // NULLness is primary ordering because we wish to dereference both pointers. 
+    // If both are NULL we'll call that equal, and drop out.
     if( !r.asp_x && !l.asp_x )
         return 0; // for == case
     else if( !r.asp_x )
@@ -268,24 +271,25 @@ Orderable::Diff XLink::Compare3Way(const XLink &l, const XLink &r)
     else if( !l.asp_x )
         return -1; // for < case
     
-    // Primary ordering is TreePtr value, which is Node identity. Will be the serial number 
-    // for repeatability.
+    // Secondary ordering is on the value of the TreePtr which will
+    // help with orderings of sets of things in the trace logs.
     if( Orderable::Diff d_node = TreePtrInterface::Compare3Way( *l.asp_x, *r.asp_x ) )
 		return d_node;
 		
-    // Secondary ordering is by the identity of the TreePtr - this is what gives
-    // us the arrowhead model for x trees. Will be the satellite serial number 
-    // for repeatability.
+    // Tertiary ordering is on the identities of the TreePtrs, which 
+    // corresponds to the values of the XLinks.
     if( Orderable::Diff d_tpi = TreePtrInterface::Compare3WayIdentity( *l.asp_x, *r.asp_x ) )
 		return d_tpi;
        
-    // Pointer-based tertiary ordering for just in case TODO assert pointers are equal
+    // Check that last claim
+#ifdef COVER_FOR_UNEQUAL_ASP
     if( l.asp_x < r.asp_x )
 		return -1;
     else if( l.asp_x > r.asp_x )
 		return 1;
-    else 
-		return 0;
+#endif
+    ASSERTS( l == r );
+    return 0;
 }
 
 
