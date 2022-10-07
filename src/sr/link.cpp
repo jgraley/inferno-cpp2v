@@ -56,39 +56,7 @@ PatternLink PatternLink::CreateDistinct( const TreePtr<Node> &tp_pattern )
               
 bool PatternLink::operator<(const PatternLink &other) const
 {
-    ASSERT( this );
-    ASSERT( &other );
-    // PatternLink is unique across parent-child links in
-    // the pattern. This operator will permit PatternLink to 
-    // act as keys in maps.
-        
-    // NULLness is super-primary ordering
-    if( !other.asp_pattern )
-        return false; // for == and > case
-    else if( !asp_pattern )
-        return true; // for remaining < case
-    ASSERT( *asp_pattern );
-    ASSERT( *other.asp_pattern );
-    
-    // Child node serial number is primary ordering
-    auto tp_this = TreePtr<Node>(*asp_pattern);
-    auto tp_other = TreePtr<Node>(*other.asp_pattern);
-    ASSERT( tp_this );
-    ASSERT( tp_other );
-    if( tp_this->Node::operator<(*tp_other) )
-        return true;
-    if( tp_other->Node::operator<(*tp_this) )
-        return false;
-
-    // Satellite serial number aka arrow-head number is secondary ordering
-    // Use ordering on the TreePtrs themselves #625
-    if( asp_pattern->TreePtrInterface::operator<(*other.asp_pattern) )
-        return true;
-    if( other.asp_pattern->TreePtrInterface::operator<(*asp_pattern) )
-        return false;
-       
-    // Pointer-based tertiary ordering for just in case TODO assert pointers are equal
-    return asp_pattern < other.asp_pattern;
+    return Compare3Way( *this, other ) < 0;
 }
 
 
@@ -107,6 +75,53 @@ bool PatternLink::operator==(const PatternLink &other) const
 bool PatternLink::operator==(const LocatedLink &other) const
 {
     return *this == other.plink;
+}
+
+
+Orderable::Diff PatternLink::Compare3Way(const PatternLink &l, const PatternLink &r)
+{
+    ASSERTS( &l );
+    ASSERTS( &r );
+    // PatternLink is unique across parent-child links in
+    // the pattern. This operator will permit PatternLink to 
+    // act as keys in maps.
+        
+    // NULLness is hyper-primary ordering
+    if( !r.asp_pattern && !l.asp_pattern )
+        return 0; // for == case
+    else if( !r.asp_pattern )
+        return 1; // for > case
+    else if( !l.asp_pattern )
+        return -1; // for < case
+    
+    // Half-NULLness is super-primary ordering
+    if( !*r.asp_pattern && !*l.asp_pattern )
+        return 0; // for == case
+    else if( !*r.asp_pattern )
+        return 1; // for > case
+    else if( !*l.asp_pattern )
+        return -1; // for < case
+    
+    // Child node serial number is primary ordering
+    auto tp_this = TreePtr<Node>(*l.asp_pattern);
+    auto tp_other = TreePtr<Node>(*r.asp_pattern);
+    ASSERTS( tp_this );
+    ASSERTS( tp_other );
+    if( Orderable::Diff d_node = Node::Compare3WayIdentity( *tp_this, *tp_other ) )
+		return d_node;
+
+    // Satellite serial number aka arrow-head number is secondary ordering
+    // Use ordering on the TreePtrs themselves #625
+    if( Orderable::Diff d_tpi = TreePtrInterface::Compare3Way( *l.asp_pattern, *r.asp_pattern ) )
+		return d_tpi;
+       
+    // Pointer-based tertiary ordering for just in case TODO assert pointers are equal
+    if( l.asp_pattern < r.asp_pattern )
+		return -1;
+    else if( l.asp_pattern > r.asp_pattern )
+		return 1;
+    else 
+		return 0;
 }
 
 
@@ -279,7 +294,7 @@ Orderable::Diff XLink::Compare3Way(const XLink &l, const XLink &r)
     auto r_tp = TreePtr<Node>(*r.asp_x);
     ASSERTS( l_tp );
     ASSERTS( r_tp );
-    if( Orderable::Diff d_node = Node::Compare3Way( *l_tp, *r_tp ) )
+    if( Orderable::Diff d_node = Node::Compare3WayIdentity( *l_tp, *r_tp ) )
 		return d_node;
 		
     // Satellite serial number aka arrow-head number is secondary ordering

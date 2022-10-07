@@ -44,8 +44,7 @@ protected:
     SerialNumber &operator=( const SerialNumber &other );
 
 public:
-    bool operator<( const SerialNumber &other ) const;
-    static Orderable::Diff Compare3Way(const SerialNumber &l, const SerialNumber &r);
+    static Orderable::Diff Compare3WayIdentity(const SerialNumber &l, const SerialNumber &r);
 
     inline SNType GetSerialNumber() const;
     string GetSerialString() const; 
@@ -77,8 +76,7 @@ public:
     explicit SatelliteSerial( const SerialNumber *mother, const void *satellite );
 
     string GetSerialString() const;
-    bool operator<( const SatelliteSerial &other ) const;
-    static Orderable::Diff Compare3Way(const SatelliteSerial &l, const SatelliteSerial &r);
+    static Orderable::Diff Compare3WayIdentity(const SatelliteSerial &l, const SatelliteSerial &r);
     
     void Redetermine( const SerialNumber *mother, const void *satellite );
     

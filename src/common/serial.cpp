@@ -34,13 +34,7 @@ inline SerialNumber &SerialNumber::operator=( const SerialNumber &other )
 }
 
 
-bool SerialNumber::operator<( const SerialNumber &other ) const
-{
-    return Compare3Way(*this, other) < 0;
-}
-
-
-Orderable::Diff SerialNumber::Compare3Way(const SerialNumber &l, const SerialNumber &r)
+Orderable::Diff SerialNumber::Compare3WayIdentity(const SerialNumber &l, const SerialNumber &r)
 {
 	if( l.progress != r.progress )
 		return Progress::Compare3Way(l.progress, r.progress);
@@ -111,13 +105,7 @@ string SatelliteSerial::GetSerialString() const
 }
 
 
-bool SatelliteSerial::operator<( const SatelliteSerial &other ) const
-{
-    return Compare3Way(*this, other) < 0;
-}
-
-
-Orderable::Diff SatelliteSerial::Compare3Way(const SatelliteSerial &l, const SatelliteSerial &r)
+Orderable::Diff SatelliteSerial::Compare3WayIdentity(const SatelliteSerial &l, const SatelliteSerial &r)
 {
     return l.serial - r.serial;
 }

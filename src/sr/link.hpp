@@ -32,6 +32,7 @@ public:
     bool operator!=(const PatternLink &other) const;
     bool operator==(const PatternLink &other) const;
     bool operator==(const LocatedLink &other) const;
+    static Orderable::Diff Compare3Way(const PatternLink &l, const PatternLink &r);
     size_t GetHash() const noexcept;
     explicit operator bool() const;
     Agent *GetChildAgent() const;
