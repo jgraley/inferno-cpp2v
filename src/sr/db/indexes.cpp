@@ -35,7 +35,7 @@ void Indexes::MonolithicClear()
 {
     depth_first_ordered_index.clear();
     // category_ordered_index.clear(); now incremental
-    simple_compare_ordered_index.clear();
+    // simple_compare_ordered_index.clear();
 }
 
 
@@ -50,7 +50,7 @@ void Indexes::PrepareMonolithicBuild(DBWalk::Actions &actions)
 
         // category_ordered_index.insert( walk_info.xlink ); now incremental
 
-		simple_compare_ordered_index.insert( walk_info.xlink );
+		// simple_compare_ordered_index.insert( walk_info.xlink );
 		
 		return it;
 	};
@@ -64,6 +64,8 @@ void Indexes::PrepareDelete( DBWalk::Actions &actions )
 		EraseSolo( category_ordered_index, walk_info.xlink );
         TRACEC("Erased ")(walk_info.xlink)(" from category_ordered_index; size now %u\n", category_ordered_index.size());    
         
+		EraseSolo( simple_compare_ordered_index, walk_info.xlink );
+
         // Would be used by xlink_table but that's not incremental yet
 		return depth_first_ordered_index.end(); 
 	};
@@ -77,8 +79,10 @@ void Indexes::PrepareInsert(DBWalk::Actions &actions)
         category_ordered_index.insert( walk_info.xlink );
         TRACEC("Inserted ")(walk_info.xlink)(" into category_ordered_index; size now %u\n", category_ordered_index.size());    
 
+		simple_compare_ordered_index.insert( walk_info.xlink );
+
         // Would be used by xlink_table but that's not incremental yet
-		return depth_first_ordered_index.end();
+		return depth_first_ordered_index.end();				
 	};
 }
 
