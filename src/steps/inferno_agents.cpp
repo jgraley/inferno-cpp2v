@@ -173,7 +173,7 @@ shared_ptr<SYM::SymbolExpression> IdentifierByNameAgent::IsIdentifierNamedOperat
     pair<TreePtr<Node>, TreePtr<Node>> range_nodes = iba->GetBounds( name );
     auto lower = make_shared<SYM::SymbolConstant>( range_nodes.first );
     auto upper = make_shared<SYM::SymbolConstant>( range_nodes.second );
-    auto r = make_shared<SYM::AllInSimpleCompareRangeOperator>( lower, true, upper, true );
+    auto r = make_shared<SYM::AllInSimpleCompareRangeOperator>( lower, BoundingRole::NONE, true, upper, BoundingRole::NONE, true );
     return a->TrySolveForToEqual( kit, target, r );
 }                                                                                                                                             
                                               

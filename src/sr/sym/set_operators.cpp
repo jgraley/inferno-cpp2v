@@ -277,12 +277,16 @@ Expression::Precedence AllLessOrEqualOperator::GetPrecedence() const
 // ------------------------- AllInSimpleCompareRangeOperator --------------------------
 
 AllInSimpleCompareRangeOperator::AllInSimpleCompareRangeOperator( shared_ptr<SymbolExpression> lower_,
+                                                                  Orderable::BoundingRole lower_role_,
                                                                   bool lower_incl_,
                                                                   shared_ptr<SymbolExpression> upper_,
+                                                                  Orderable::BoundingRole upper_role_,
                                                                   bool upper_incl_ ) :
     lower( lower_ ),
+    lower_role( lower_role_ ),
     lower_incl( lower_incl_ ),
     upper( upper_ ),
+    upper_role( upper_role_ ),
     upper_incl( upper_incl_ )
 {
 }
@@ -302,6 +306,18 @@ unique_ptr<SymbolResultInterface> AllInSimpleCompareRangeOperator::Evaluate( con
     SR::XLink upper_xlink = (upper==lower) ? 
                             lower_xlink : 
                             upper->Evaluate(kit)->GetOnlyXLink();
+
+	if( lower_role != BoundingRole::NONE )
+	{
+		auto node = MakeTreeNode<SR::SimpleCompareRelation::MinimaxNode>( lower_xlink.GetChildX(), lower_role );
+		lower_xlink = SR::XLink::CreateDistinct( node );
+	}
+
+	if( upper_role != BoundingRole::NONE )
+	{
+		auto node = MakeTreeNode<SR::SimpleCompareRelation::MinimaxNode>( upper_xlink.GetChildX(), upper_role );
+		upper_xlink = SR::XLink::CreateDistinct( node );
+	}
 
     return make_unique<SimpleCompareRangeResult>( kit.x_tree_db, lower_xlink, lower_incl, upper_xlink, upper_incl ); 
 }

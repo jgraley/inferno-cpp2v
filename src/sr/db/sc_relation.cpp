@@ -30,27 +30,23 @@ Orderable::Diff SimpleCompareRelation::Compare3Way( XLink l_xlink, XLink r_xlink
     if( r_minimax )
 		r_node = r_minimax->GetGuide();
 
+    if( Orderable::Diff d = simple_compare->Compare3Way( l_node, r_node ) )
+		return d;
+
     if( !l_minimax && !r_minimax )
     {
-		// TODO fall back to XLink direct compare
-        return simple_compare->Compare3Way( l_node, r_node );
+		return XLink::Compare3Way(l_xlink, r_xlink);			
 	}
     else if( l_minimax && r_minimax )
     {
-        if( Orderable::Diff d = simple_compare->Compare3Way( l_node, r_node ) )
-			return d;
 		return (int)l_minimax->GetRole() - (int)r_minimax->GetRole();        
 	}	
     else if( l_minimax && !r_minimax )
     {
-        if( Orderable::Diff d = simple_compare->Compare3Way( l_node, r_node ) )
-			return d;
 		return (int)l_minimax->GetRole();        
 	}	
     else if( !l_minimax && r_minimax )
     {
-        if( Orderable::Diff d = simple_compare->Compare3Way( l_node, r_node ) )
-			return d;
 		return - (int)r_minimax->GetRole();        
 	}	
 	else

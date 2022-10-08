@@ -50,7 +50,7 @@ public:
     typedef CategoryOrderedIndex::iterator CategoryOrderedIt;
 
     // We will provide a SimpleCompare ordered version of the domain
-    typedef multiset<XLink, SimpleCompareRelation> SimpleCompareOrderedIndex;
+    typedef set<XLink, SimpleCompareRelation> SimpleCompareOrderedIndex;
     typedef SimpleCompareOrderedIndex::iterator SimpleCompareOrderedIt;
     
     // Global domain of possible xlink values - ordered

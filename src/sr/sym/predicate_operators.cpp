@@ -861,7 +861,8 @@ shared_ptr<SymbolExpression> IsSimpleCompareEquivalentOperator::TrySolveFor( con
         // but ar might be an arbitrary force, and not in the domain.
         // See #522 #525
         // X, true, X, true simulates equal_range()    
-        shared_ptr<SymbolExpression> r = make_shared<AllInSimpleCompareRangeOperator>(second, true, second, true);
+        shared_ptr<SymbolExpression> r = make_shared<AllInSimpleCompareRangeOperator>(second, BoundingRole::MINIMUS, true, 
+                                                                                      second, BoundingRole::MAXIMUS, true);
         solution = first->TrySolveForToEqual( kit, target, r );
         if( solution )
             Break();

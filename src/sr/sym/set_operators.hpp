@@ -147,8 +147,10 @@ class AllInSimpleCompareRangeOperator : public SymbolToSymbolExpression
 public:    
     typedef SymbolExpression NominalType;
     AllInSimpleCompareRangeOperator( shared_ptr<SymbolExpression> lower,
+                                     Orderable::BoundingRole lower_role,
                                      bool lower_incl,
                                      shared_ptr<SymbolExpression> upper,
+                                     Orderable::BoundingRole upper_role,
                                      bool upper_incl ); 
     list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     
@@ -159,8 +161,10 @@ public:
     
 private:
     const shared_ptr<SymbolExpression> lower;
+    const Orderable::BoundingRole lower_role;
     const bool lower_incl;
     const shared_ptr<SymbolExpression> upper;
+    const Orderable::BoundingRole upper_role;
     const bool upper_incl;
 };
 
