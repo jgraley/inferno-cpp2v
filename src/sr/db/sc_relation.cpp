@@ -67,7 +67,7 @@ void SimpleCompareRelation::Test( const unordered_set<XLink> &xlinks )
 	using namespace std::placeholders;
 
 	TestRelationProperties( xlinks,
-                            false, // TODO require totality so can use set<> and not lose domain elements
+                            true,
                             "SimpleCompareRelation",
                             bind(&SimpleCompareRelation::Compare3Way, *this, _1, _2), 
     [&](XLink l, XLink r)
