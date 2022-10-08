@@ -85,17 +85,34 @@ SerialNumber::Cache SerialNumber::cache;
 //////////////////////////// SatelliteSerial ///////////////////////////////
 
 SatelliteSerial::SatelliteSerial() :
+    p_mother_block( nullptr ),
     serial( -1 )
 {
 }
 
 
 SatelliteSerial::SatelliteSerial( const SerialNumber *mother, const void *satellite ) :
-    serial( DetermineSerialNumber( mother, satellite ) )
+    p_mother_block( GetMotherBlock(mother, satellite).get() ),
+    serial( p_mother_block ? p_mother_block->AssignSerial(this) : -1 )
 {
 }
 
 
+SatelliteSerial::SatelliteSerial( const SatelliteSerial &other ) :
+	p_mother_block( other.p_mother_block ),
+    serial( p_mother_block ? p_mother_block->AssignSerial(this) : -1 )
+{			
+}
+
+
+SatelliteSerial &SatelliteSerial::operator=( const SatelliteSerial &other )
+{
+	p_mother_block = other.p_mother_block;
+    serial = p_mother_block ? p_mother_block->AssignSerial(this) : -1;
+	return *this;
+}
+    
+    
 string SatelliteSerial::GetSerialString() const
 {
     if( serial==-1 )
@@ -107,20 +124,35 @@ string SatelliteSerial::GetSerialString() const
 
 Orderable::Diff SatelliteSerial::Compare3WayIdentity(const SatelliteSerial &l, const SatelliteSerial &r)
 {
-    return l.serial - r.serial;
+    Orderable::Diff d = l.serial - r.serial;
+
+	// Check that we're really getting an identity relation
+	if( d==0 )
+		ASSERTS( &l == &r )
+		       ("l=")(l.GetSerialString())(" at %p mb=%p\n", &l, l.p_mother_block)
+               ("r=")(r.GetSerialString())(" at %p mb=%p\n", &r, r.p_mother_block);
+	else
+		ASSERTS( &l != &r )
+		       ("l=")(l.GetSerialString())(" at %p mb=%p\n", &l, l.p_mother_block)
+               ("r=")(r.GetSerialString())(" at %p mb=%p\n", &r, r.p_mother_block);
+	return d;
 }
 
 
-void SatelliteSerial::Redetermine( const SerialNumber *mother, const void *satellite )
+int SatelliteSerial::MotherBlock::AssignSerial(const SatelliteSerial *ss_for_trace)
 {
-    serial = DetermineSerialNumber( mother, satellite );
+    int ns = next_serial;
+    next_serial++;
+    return ns;
 }
 
 
-SatelliteSerial::SatelliteSNType SatelliteSerial::DetermineSerialNumber( const SerialNumber *mother, const void *satellite )
+shared_ptr<SatelliteSerial::MotherBlock> SatelliteSerial::GetMotherBlock( const SerialNumber *mother, const void *satellite )
 {
     if( !mother )
-        return 0;
+    {
+        return nullptr;
+	}
     
 	shared_ptr<MotherBlock> mother_block;
 	if( mother->HasHook() )
@@ -133,19 +165,10 @@ SatelliteSerial::SatelliteSNType SatelliteSerial::DetermineSerialNumber( const S
 		mother_block = make_shared<MotherBlock>();
 		mother->SetHook(mother_block); 
 	}
-
-    if( mother_block->serial_by_satellite.count(satellite) == 0 )
-    {
-        int ns = mother_block->next_serial;
-        mother_block->next_serial++;
-        mother_block->serial_by_satellite[satellite] = ns;
-        return ns;
-    }
-    else
-    {
-        return mother_block->serial_by_satellite.at(satellite);
-    }
+	
+	return mother_block;
 }
+
 
 //////////////////////////// LeakCheck ///////////////////////////////
 

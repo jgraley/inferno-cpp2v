@@ -15,7 +15,7 @@ using namespace std;
 #include <exception>
 	
 #define CONTAINER_SEP ", "    
-#define SUPPRESS_ADDRESSES    
+//#define SUPPRESS_ADDRESSES    
     
 ////////////////////////// Trace() free functions //////////////////////////
     

@@ -73,23 +73,26 @@ public:
     typedef int SatelliteSNType;
     
     SatelliteSerial();
+    SatelliteSerial( const SatelliteSerial &other );
+    SatelliteSerial &operator=( const SatelliteSerial &other );
     explicit SatelliteSerial( const SerialNumber *mother, const void *satellite );
 
     string GetSerialString() const;
     static Orderable::Diff Compare3WayIdentity(const SatelliteSerial &l, const SatelliteSerial &r);
-    
-    void Redetermine( const SerialNumber *mother, const void *satellite );
-    
+        
 private:
-    static SatelliteSNType DetermineSerialNumber( const SerialNumber *mother, const void *satellite );
-
 	// These are hooked to the mother SerialNumber instance
     struct MotherBlock : SerialNumber::Hook
     {
-        map<const void *, SatelliteSNType> serial_by_satellite;
         int next_serial=0;
+        int AssignSerial(const SatelliteSerial *ss_for_trace);
     };  
 
+    static shared_ptr<MotherBlock> GetMotherBlock( const SerialNumber *mother, const void *satellite );
+
+	// Ordinary pointer is OK as long as we keep mother object alive, which
+	// we do if used with TreePtr
+	MotherBlock *p_mother_block;
     SatelliteSNType serial;
 };
 

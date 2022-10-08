@@ -12,9 +12,6 @@ using namespace SR;
  
 #define ALIGNMENT_BITS 3 
 
-#define COVER_FOR_UNEQUAL_ASP
-
-
 // Tests the not-on-stack tests themseleves
 //#define TEST_ASSERT_NOT_ON_STACK
 
@@ -106,14 +103,6 @@ Orderable::Diff PatternLink::Compare3Way(const PatternLink &l, const PatternLink
     if( Orderable::Diff d_tpi = TreePtrInterface::Compare3WayIdentity( *l.asp_pattern, *r.asp_pattern ) )
 		return d_tpi;
        
-    // Check that last claim
-#ifdef COVER_FOR_UNEQUAL_ASP
-    if( l.asp_pattern < r.asp_pattern )
-		return -1;
-    else if( l.asp_pattern > r.asp_pattern )
-		return 1;
-#endif
-    ASSERTS( l == r );
     return 0;
 }
 
@@ -283,14 +272,6 @@ Orderable::Diff XLink::Compare3Way(const XLink &l, const XLink &r)
     if( Orderable::Diff d_tpi = TreePtrInterface::Compare3WayIdentity( *l.asp_x, *r.asp_x ) )
 		return d_tpi;
        
-    // Check that last claim
-#ifdef COVER_FOR_UNEQUAL_ASP
-    if( l.asp_x < r.asp_x )
-		return -1;
-    else if( l.asp_x > r.asp_x )
-		return 1;
-#endif
-    ASSERTS( l == r );
     return 0;
 }
 

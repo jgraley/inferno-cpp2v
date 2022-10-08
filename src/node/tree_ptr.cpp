@@ -51,7 +51,7 @@ Orderable::Diff TreePtrInterface::Compare3Way(const TreePtrInterface &l, const T
 
     // Secondary ordering is on the value of the node (not including subtree) which will
     // help with orderings of sets of things in the trace logs.
-    if( Orderable::Diff d_nv = Node::OrderCompare3Way(*l, *r) )
+    if( Orderable::Diff d_nv = Node::OrderCompare3Way( *l, *r ) )
         return d_nv;
 
     // Tertiary ordering is on the identities of the nodes, which corresponds to the values of 
