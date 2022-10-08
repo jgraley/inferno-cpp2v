@@ -33,13 +33,14 @@ bool CategoryRelation::operator() (XLink l_xlink, XLink r_xlink) const
 
 Orderable::Diff CategoryRelation::Compare3Way(XLink l_xlink, XLink r_xlink) const
 {
+    TreePtr<Node> l_node = l_xlink.GetChildX();
+    TreePtr<Node> r_node = r_xlink.GetChildX();    
+
 #ifdef TRACE_CATEGORY_RELATION
     INDENT("@");
     TRACE("l_xlink=")(l_xlink)(" r_xlink=")(r_xlink)("\n");
 #endif
-    TreePtr<Node> l_node = l_xlink.GetChildX();
     auto l_minimus = TreePtr<MinimusNode>::DynamicCast( l_node );
-    TreePtr<Node> r_node = r_xlink.GetChildX();    
     auto r_minimus = TreePtr<MinimusNode>::DynamicCast( r_node );
 
     int li=-1, ri=-1;
@@ -149,5 +150,5 @@ int CategoryRelation::MinimusNode::GetMinimusOrdinal() const
 
 string CategoryRelation::MinimusNode::GetName() const
 {
-    return GetTypeName() + SSPrintf("(%d)", lacing_ordinal);
+    return SSPrintf("Cat-Minimus(%d)", lacing_ordinal);
 }

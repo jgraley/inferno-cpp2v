@@ -19,12 +19,44 @@ SimpleCompareRelation::SimpleCompareRelation() :
 
 Orderable::Diff SimpleCompareRelation::Compare3Way( XLink l_xlink, XLink r_xlink ) const
 {
-    // Get the child nodes and disregard the arrow heads
     TreePtr<Node> l_node = l_xlink.GetChildX();
-    TreePtr<Node> r_node = r_xlink.GetChildX();
-    
-    // And then resort to SimpleCompare
-    return simple_compare->Compare3Way( l_node, r_node );
+    TreePtr<Node> r_node = r_xlink.GetChildX();    
+
+    auto l_minimax = TreePtr<MinimaxNode>::DynamicCast( l_node );
+    if( l_minimax )
+		l_node = l_minimax->GetGuide();
+		
+    auto r_minimax = TreePtr<MinimaxNode>::DynamicCast( r_node );
+    if( r_minimax )
+		r_node = r_minimax->GetGuide();
+
+    if( !l_minimax && !r_minimax )
+    {
+		// TODO fall back to XLink direct compare
+        return simple_compare->Compare3Way( l_node, r_node );
+	}
+    else if( l_minimax && r_minimax )
+    {
+        if( Orderable::Diff d = simple_compare->Compare3Way( l_node, r_node ) )
+			return d;
+		return (int)l_minimax->GetRole() - (int)r_minimax->GetRole();        
+	}	
+    else if( l_minimax && !r_minimax )
+    {
+        if( Orderable::Diff d = simple_compare->Compare3Way( l_node, r_node ) )
+			return d;
+		return (int)l_minimax->GetRole();        
+	}	
+    else if( !l_minimax && r_minimax )
+    {
+        if( Orderable::Diff d = simple_compare->Compare3Way( l_node, r_node ) )
+			return d;
+		return - (int)r_minimax->GetRole();        
+	}	
+	else
+    {
+		ASSERTFAIL();
+	}
 }
 
 
@@ -46,4 +78,36 @@ void SimpleCompareRelation::Test( const unordered_set<XLink> &xlinks )
     { 
         return l==r; 
     } );
+}
+
+
+SimpleCompareRelation::MinimaxNode::MinimaxNode( TreePtr<Node> guide_, BoundingRole role_ ) :
+	guide(guide_),
+	role(role_)
+{
+}
+
+
+SimpleCompareRelation::MinimaxNode::MinimaxNode() :
+	guide(nullptr),
+	role(Orderable::BoundingRole::NONE)
+{
+}
+
+
+TreePtr<Node> SimpleCompareRelation::MinimaxNode::GetGuide() const
+{
+	return guide;
+}
+
+
+Orderable::BoundingRole SimpleCompareRelation::MinimaxNode::GetRole() const
+{
+	return role;
+}
+
+
+string SimpleCompareRelation::MinimaxNode::GetName() const
+{
+    return "SC-" + Orderable::RoleToString(role) + "(" + Trace(guide) + ")";
 }

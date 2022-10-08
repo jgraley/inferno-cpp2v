@@ -1,6 +1,8 @@
 #ifndef ORDERABLE_HPP
 #define ORDERABLE_HPP
 
+#include <string>
+
 using namespace std;
 
 class Orderable
@@ -25,7 +27,7 @@ public:
         MAXIMUS = 1
         // Note: inclusiveness of MINIMUS and MAXIMUS is impl-defined, see rule #528
     };
-
+    
     static Orderable::Diff OrderCompare3Way( const Orderable &l, 
                                              const Orderable &r, 
                                              OrderProperty order_property = STRICT );
@@ -33,6 +35,7 @@ public:
                                                    OrderProperty order_property ) const;
     virtual Orderable::Diff OrderCompare3WayChildren( const Orderable &right, 
                                                       OrderProperty order_property ) const;
+    static string RoleToString( BoundingRole role );
 };
 
 #endif

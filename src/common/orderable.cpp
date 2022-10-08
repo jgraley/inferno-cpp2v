@@ -40,3 +40,19 @@ Orderable::Diff Orderable::OrderCompare3WayChildren( const Orderable &right,
     return 0; 
 }
 
+
+string Orderable::RoleToString( BoundingRole role )
+{
+	switch( role )
+	{
+		case BoundingRole::MINIMUS:
+			return "MINIMUS";
+		case BoundingRole::NONE:
+			return "NONE";
+		case BoundingRole::MAXIMUS:
+			return "MAXIMUS";			
+	}
+	ASSERTFAIL();
+}
+
+

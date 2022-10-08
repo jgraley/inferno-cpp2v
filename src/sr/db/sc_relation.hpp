@@ -25,6 +25,23 @@ public:
 
     void Test( const unordered_set<XLink> &xlinks );
 
+	// Create a node here so that a regular XLink can be used and passed
+	// through the sym stuff by value. Is minimus because intervals on this
+	// index are half-open.
+	class MinimaxNode : public Node
+	{
+	public:
+		NODE_FUNCTIONS_FINAL
+		MinimaxNode( TreePtr<Node> guide, BoundingRole role );
+		MinimaxNode(); ///< default constructor, for making archetypes 
+		TreePtr<Node> GetGuide() const;
+		BoundingRole GetRole() const;
+		string GetName() const override;
+	private:
+		TreePtr<Node> guide;
+		BoundingRole role;
+	};
+
 private:
     shared_ptr<SimpleCompare> simple_compare;
 }; 
