@@ -34,8 +34,6 @@ const Lacing *Indexes::GetLacing() const
 void Indexes::MonolithicClear()
 {
     depth_first_ordered_index.clear();
-    // category_ordered_index.clear(); now incremental
-    // simple_compare_ordered_index.clear();
 }
 
 
@@ -43,14 +41,9 @@ void Indexes::PrepareMonolithicBuild(DBWalk::Actions &actions)
 {
 	actions.indexes_in = [&](const DBWalk::WalkInfo &walk_info) -> DBCommon::DepthFirstOrderedIt
 	{
-		// ----------------- Update indices
 		depth_first_ordered_index.push_back( walk_info.xlink );
 		DBCommon::DepthFirstOrderedIt it = depth_first_ordered_index.end();
 		--it; // I know this is OK because we just pushed to depth_first_ordered_index
-
-        // category_ordered_index.insert( walk_info.xlink ); now incremental
-
-		// simple_compare_ordered_index.insert( walk_info.xlink );
 		
 		return it;
 	};
