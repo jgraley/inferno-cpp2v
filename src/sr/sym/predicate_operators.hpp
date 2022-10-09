@@ -118,8 +118,7 @@ public:
                                                 list<unique_ptr<SymbolResultInterface>> &&op_results ) const override final;
     shared_ptr<SymbolExpression> TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const override;
     virtual list<shared_ptr<SymbolExpression>> GetRanges() const = 0;
-    virtual bool EvalBoolFromIndexes( SR::DBCommon::OrdinalType index_a,
-                                      SR::DBCommon::OrdinalType index_b ) const = 0;
+    virtual bool EvalBoolFromDiff( Orderable::Diff diff ) const = 0;
     virtual Precedence GetPrecedenceNF() const override;
     
 protected:
@@ -134,8 +133,7 @@ class IsGreaterOperator : public DepthFirstComparisonOperator
     using DepthFirstComparisonOperator::DepthFirstComparisonOperator;
     shared_ptr<PredicateOperator> Clone() const override;
 
-    virtual bool EvalBoolFromIndexes( SR::DBCommon::OrdinalType index_a,
-                                      SR::DBCommon::OrdinalType index_b ) const override;
+    bool EvalBoolFromDiff( Orderable::Diff diff ) const override;
     list<shared_ptr<SymbolExpression>> GetRanges() const override;
                                       
     Relationship GetRelationshipWith( shared_ptr<PredicateOperator> other ) const override;
@@ -153,8 +151,7 @@ class IsLessOperator : public DepthFirstComparisonOperator
     using DepthFirstComparisonOperator::DepthFirstComparisonOperator;
     shared_ptr<PredicateOperator> Clone() const override;
 
-    virtual bool EvalBoolFromIndexes( SR::DBCommon::OrdinalType index_a,
-                                      SR::DBCommon::OrdinalType index_b ) const override;
+    bool EvalBoolFromDiff( Orderable::Diff diff ) const override;
     list<shared_ptr<SymbolExpression>> GetRanges() const override;
 
     Relationship GetRelationshipWith( shared_ptr<PredicateOperator> other ) const override;
@@ -172,8 +169,7 @@ class IsGreaterOrEqualOperator : public DepthFirstComparisonOperator
     using DepthFirstComparisonOperator::DepthFirstComparisonOperator;
     shared_ptr<PredicateOperator> Clone() const override;
 
-    virtual bool EvalBoolFromIndexes( SR::DBCommon::OrdinalType index_a,
-                                      SR::DBCommon::OrdinalType index_b ) const override;
+    bool EvalBoolFromDiff( Orderable::Diff diff ) const override;
     list<shared_ptr<SymbolExpression>> GetRanges() const override;
 
     Relationship GetRelationshipWith( shared_ptr<PredicateOperator> other ) const override;
@@ -191,8 +187,7 @@ class IsLessOrEqualOperator : public DepthFirstComparisonOperator
     using DepthFirstComparisonOperator::DepthFirstComparisonOperator;
     shared_ptr<PredicateOperator> Clone() const override;
 
-    virtual bool EvalBoolFromIndexes( SR::DBCommon::OrdinalType index_a,
-                                      SR::DBCommon::OrdinalType index_b ) const override;
+    bool EvalBoolFromDiff( Orderable::Diff diff ) const override;
     list<shared_ptr<SymbolExpression>> GetRanges() const override;
 
     Relationship GetRelationshipWith( shared_ptr<PredicateOperator> other ) const override;

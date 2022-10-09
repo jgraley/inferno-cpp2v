@@ -62,6 +62,7 @@ public:
     void UnExtendDomain();
 	const Domain &GetDomain() const;
 
+    const LinkTable &GetLinkTable() const;
     const LinkTable::Row &GetRow(XLink xlink) const;
     bool HasRow(XLink xlink) const;    
     const NodeTable::Row &GetNodeRow(TreePtr<Node> node) const;

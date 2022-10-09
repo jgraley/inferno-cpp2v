@@ -307,6 +307,12 @@ const Domain &XTreeDatabase::GetDomain() const
 }
 
 
+const LinkTable &XTreeDatabase::GetLinkTable() const
+{
+	return *plan.link_table;
+}
+
+
 const LinkTable::Row &XTreeDatabase::GetRow(XLink xlink) const
 {
     ASSERT( root_xlink )("XTreeDatabase@%p has no root xlnik", this);
