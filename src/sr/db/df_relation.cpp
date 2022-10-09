@@ -16,18 +16,18 @@ DepthFirstRelation::DepthFirstRelation(const LinkTable *link_table_) :
 }
 
 
+bool DepthFirstRelation::operator()( XLink l_xlink, XLink r_xlink ) const
+{
+    return Compare3Way(l_xlink, r_xlink) < 0;
+}
+
+
 Orderable::Diff DepthFirstRelation::Compare3Way( XLink l_xlink, XLink r_xlink ) const
 {
 	const LinkTable::Row &l_row = link_table->GetRow(l_xlink);
 	const LinkTable::Row &r_row = link_table->GetRow(r_xlink);
 
     return l_row.depth_first_ordinal - r_row.depth_first_ordinal;
-}
-
-
-bool DepthFirstRelation::operator()( XLink l_xlink, XLink r_xlink ) const
-{
-    return Compare3Way(l_xlink, r_xlink) < 0;
 }
 
 

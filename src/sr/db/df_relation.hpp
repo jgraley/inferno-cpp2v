@@ -19,10 +19,10 @@ class DepthFirstRelation
 {
 public:
     DepthFirstRelation(const LinkTable *link_table);
-    Orderable::Diff Compare3Way( XLink l_xlink, XLink r_xlink ) const;
 
     /// Less operator: for use with set, map etc
     bool operator()( XLink l_xlink, XLink r_xlink ) const;
+    Orderable::Diff Compare3Way( XLink l_xlink, XLink r_xlink ) const;
 
     void Test( const unordered_set<XLink> &xlinks );
     

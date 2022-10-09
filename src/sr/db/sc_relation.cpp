@@ -16,6 +16,12 @@ SimpleCompareRelation::SimpleCompareRelation() :
 }
 
 
+bool SimpleCompareRelation::operator()( XLink l_xlink, XLink r_xlink ) const
+{
+    return Compare3Way(l_xlink, r_xlink) < 0;
+}
+
+
 Orderable::Diff SimpleCompareRelation::Compare3Way( XLink l_xlink, XLink r_xlink ) const
 {
     TreePtr<Node> l_node = l_xlink.GetChildX();
@@ -52,12 +58,6 @@ Orderable::Diff SimpleCompareRelation::Compare3Way( XLink l_xlink, XLink r_xlink
     {
 		ASSERTFAIL();
 	}
-}
-
-
-bool SimpleCompareRelation::operator()( XLink l_xlink, XLink r_xlink ) const
-{
-    return Compare3Way(l_xlink, r_xlink) < 0;
 }
 
 

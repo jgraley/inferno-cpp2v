@@ -163,6 +163,7 @@ void DBWalk::VisitItemise( const WalkKit &kit,
                            XLink xlink )
 {
     TreePtr<Node> x = xlink.GetChildX();
+    ASSERT(x)("This probably means we're walking an incomplete tree");
     vector< Itemiser::Element * > x_items = x->Itemise();
     for( Itemiser::Element *xe : x_items )
     {
