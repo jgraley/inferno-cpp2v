@@ -60,6 +60,7 @@ public:
     void ExtendDomainNewPattern( PatternLink root_plink );
     void ExtendDomainNewX();           
     void UnExtendDomain();
+	const Domain &GetDomain() const;
 
     const LinkTable::Row &GetRow(XLink xlink) const;
     bool HasRow(XLink xlink) const;    

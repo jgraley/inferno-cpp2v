@@ -82,10 +82,10 @@ ValueSelector::~ValueSelector()
 
 void ValueSelector::SetupDefaultGenerator()
 {
-    SR::DBCommon::DepthFirstOrderedIt fwd_it = x_tree_db->GetIndexes().depth_first_ordered_index.begin();     
+    auto fwd_it = x_tree_db->GetDomain().unordered_domain.begin();     
     values_generator = [=]() mutable -> Value
     {
-        if( fwd_it==x_tree_db->GetIndexes().depth_first_ordered_index.end() )        
+        if( fwd_it==x_tree_db->GetDomain().unordered_domain.end() )        
             return Value();
         
         Value v = *fwd_it;

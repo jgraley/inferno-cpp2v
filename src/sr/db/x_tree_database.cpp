@@ -301,6 +301,12 @@ void XTreeDatabase::UnExtendDomain()
 }
 
 
+const Domain &XTreeDatabase::GetDomain() const
+{
+	return *plan.domain;
+}
+
+
 const LinkTable::Row &XTreeDatabase::GetRow(XLink xlink) const
 {
     ASSERT( root_xlink )("XTreeDatabase@%p has no root xlnik", this);
