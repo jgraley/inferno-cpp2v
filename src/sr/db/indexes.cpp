@@ -38,6 +38,7 @@ const Lacing *Indexes::GetLacing() const
 void Indexes::MonolithicClear()
 {
     depth_first_ordered_index.clear();
+    new_depth_first_ordered_index.clear();
 }
 
 
@@ -50,6 +51,10 @@ void Indexes::PrepareMonolithicBuild(DBWalk::Actions &actions)
 		--it; // I know this is OK because we just pushed to depth_first_ordered_index
 		
 		return it;
+	};
+	actions.indexes_in_late = [&](const DBWalk::WalkInfo &walk_info)
+	{
+		new_depth_first_ordered_index.insert( walk_info.xlink );
 	};
 }
 

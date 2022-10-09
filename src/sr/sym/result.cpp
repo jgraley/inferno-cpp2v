@@ -292,28 +292,33 @@ SR::XLink DepthFirstRangeResult::GetOnlyXLink() const
 
 bool DepthFirstRangeResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
 { 
-    SR::DBCommon::DepthFirstOrderedIt it_lower, it_upper;
+	const SR::Indexes::NewDepthFirstOrderedIndex &index = x_tree_db->GetIndexes().new_depth_first_ordered_index;
+    SR::Indexes::NewDepthFirstOrderedIt it_lower, it_upper;
     
     if( lower )
     {
-        it_lower = x_tree_db->GetRow(lower).depth_first_ordered_it;
+        it_lower = index.find(lower);
+        ASSERT( it_lower != index.end() )
+              ("lower=")(lower)(" upper=")(upper)("\n")
+              (index);
         if( !lower_incl )
             ++it_lower;
     }
     else
     {
-        it_lower = x_tree_db->GetIndexes().depth_first_ordered_index.begin();
+        it_lower = index.begin();
     }
     
     if( upper )
     {
-        it_upper = x_tree_db->GetRow(upper).depth_first_ordered_it;
-        if( upper_incl && it_upper != x_tree_db->GetIndexes().depth_first_ordered_index.end() )
+        it_upper = index.find(upper);
+        ASSERT( it_lower != index.end() );
+        if( upper_incl )
             ++it_upper;
     }
     else
     {
-        it_upper = x_tree_db->GetIndexes().depth_first_ordered_index.end();
+        it_upper = index.end();
     }
     
     links = set<SR::XLink>( it_lower, it_upper );
