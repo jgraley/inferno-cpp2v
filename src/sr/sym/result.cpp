@@ -292,8 +292,8 @@ SR::XLink DepthFirstRangeResult::GetOnlyXLink() const
 
 bool DepthFirstRangeResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
 { 
-	const SR::Indexes::NewDepthFirstOrderedIndex &index = x_tree_db->GetIndexes().new_depth_first_ordered_index;
-    SR::Indexes::NewDepthFirstOrderedIt it_lower, it_upper;
+	const SR::Indexes::DepthFirstOrderedIndex &index = x_tree_db->GetIndexes().depth_first_ordered_index;
+    SR::Indexes::DepthFirstOrderedIt it_lower, it_upper;
     
     if( lower )
     {

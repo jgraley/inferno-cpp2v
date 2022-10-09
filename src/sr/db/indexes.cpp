@@ -14,7 +14,7 @@ using namespace SR;
 
 Indexes::Indexes( shared_ptr<Lacing> lacing, const LinkTable *link_table_, bool ref_ ) :
     plan( lacing ),
-    new_depth_first_ordered_index( link_table_ ),
+    depth_first_ordered_index( link_table_ ),
     category_ordered_index( plan.lacing ),
     link_table( link_table_ ),
     ref( ref_ ),
@@ -37,7 +37,7 @@ const Lacing *Indexes::GetLacing() const
 
 void Indexes::MonolithicClear()
 {
-    new_depth_first_ordered_index.clear();
+    depth_first_ordered_index.clear();
 }
 
 
@@ -48,7 +48,7 @@ void Indexes::PrepareMonolithicBuild(DBWalk::Actions &actions)
 	};
 	actions.indexes_in_late = [&](const DBWalk::WalkInfo &walk_info)
 	{
-		new_depth_first_ordered_index.insert( walk_info.xlink );
+		depth_first_ordered_index.insert( walk_info.xlink );
 	};
 }
 

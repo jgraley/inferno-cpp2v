@@ -56,11 +56,11 @@ public:
     typedef SimpleCompareOrderedIndex::iterator SimpleCompareOrderedIt;
     
     // We will provide a depth-first ordered version of the domain
-    typedef set<XLink, DepthFirstRelation> NewDepthFirstOrderedIndex;
-    typedef NewDepthFirstOrderedIndex::iterator NewDepthFirstOrderedIt;
+    typedef set<XLink, DepthFirstRelation> DepthFirstOrderedIndex;
+    typedef DepthFirstOrderedIndex::iterator DepthFirstOrderedIt;
 
     // Global domain of possible xlink values - new version
-    NewDepthFirstOrderedIndex new_depth_first_ordered_index;            
+    DepthFirstOrderedIndex depth_first_ordered_index;            
     
     // Domain ordered by category
     CategoryOrderedIndex category_ordered_index;
