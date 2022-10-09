@@ -59,9 +59,6 @@ public:
     typedef set<XLink, DepthFirstRelation> NewDepthFirstOrderedIndex;
     typedef NewDepthFirstOrderedIndex::iterator NewDepthFirstOrderedIt;
 
-    // Global domain of possible xlink values - old version
-    DBCommon::DepthFirstOrderedIndex depth_first_ordered_index;            
-    
     // Global domain of possible xlink values - new version
     NewDepthFirstOrderedIndex new_depth_first_ordered_index;            
     
