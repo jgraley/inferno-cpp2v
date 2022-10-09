@@ -184,14 +184,12 @@ void DBWalk::WindInActions( const WalkKit &kit,
     // Wind-in actions
     if( kit.actions->domain_in )
 		kit.actions->domain_in( walk_info );        
-            
-    DBCommon::DepthFirstOrderedIt df_it;
-    
+               
     if( kit.actions->indexes_in )
-		df_it = kit.actions->indexes_in( walk_info );        
+		kit.actions->indexes_in( walk_info );        
             
     if( kit.actions->link_row_in )
-		kit.actions->link_row_in( walk_info, df_it );        
+		kit.actions->link_row_in( walk_info );        
             
     if( kit.actions->node_row_in )
 		kit.actions->node_row_in( walk_info );        

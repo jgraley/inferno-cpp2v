@@ -44,13 +44,9 @@ void Indexes::MonolithicClear()
 
 void Indexes::PrepareMonolithicBuild(DBWalk::Actions &actions)
 {
-	actions.indexes_in = [&](const DBWalk::WalkInfo &walk_info) -> DBCommon::DepthFirstOrderedIt
+	actions.indexes_in = [&](const DBWalk::WalkInfo &walk_info)
 	{
 		depth_first_ordered_index.push_back( walk_info.xlink );
-		DBCommon::DepthFirstOrderedIt it = depth_first_ordered_index.end();
-		--it; // I know this is OK because we just pushed to depth_first_ordered_index
-		
-		return it;
 	};
 	actions.indexes_in_late = [&](const DBWalk::WalkInfo &walk_info)
 	{
@@ -61,30 +57,24 @@ void Indexes::PrepareMonolithicBuild(DBWalk::Actions &actions)
 
 void Indexes::PrepareDelete( DBWalk::Actions &actions )
 {
-	actions.indexes_in = [&](const DBWalk::WalkInfo &walk_info) -> DBCommon::DepthFirstOrderedIt
+	actions.indexes_in = [&](const DBWalk::WalkInfo &walk_info)
 	{
 		EraseSolo( category_ordered_index, walk_info.xlink );
         TRACEC("Erased ")(walk_info.xlink)(" from category_ordered_index; size now %u\n", category_ordered_index.size());    
         
 		EraseSolo( simple_compare_ordered_index, walk_info.xlink );
-
-        // Would be used by xlink_table but that's not incremental yet
-		return depth_first_ordered_index.end(); 
 	};
 }
 
 
 void Indexes::PrepareInsert(DBWalk::Actions &actions)
 {
-	actions.indexes_in = [&](const DBWalk::WalkInfo &walk_info) -> DBCommon::DepthFirstOrderedIt
+	actions.indexes_in = [&](const DBWalk::WalkInfo &walk_info)
 	{ 
         category_ordered_index.insert( walk_info.xlink );
         TRACEC("Inserted ")(walk_info.xlink)(" into category_ordered_index; size now %u\n", category_ordered_index.size());    
 
-		simple_compare_ordered_index.insert( walk_info.xlink );
-
-        // Would be used by xlink_table but that's not incremental yet
-		return depth_first_ordered_index.end();				
+		simple_compare_ordered_index.insert( walk_info.xlink );		
 	};
 }
 

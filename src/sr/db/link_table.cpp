@@ -35,8 +35,7 @@ void LinkTable::MonolithicClear()
 
 void LinkTable::PrepareMonolithicBuild(DBWalk::Actions &actions)
 {
-	actions.link_row_in = [&](const DBWalk::WalkInfo &walk_info, 
-	                           DBCommon::DepthFirstOrderedIt df_it)
+	actions.link_row_in = [&](const DBWalk::WalkInfo &walk_info)
 	{
 		// ----------------- Generate row
 		Row row;        
@@ -89,7 +88,6 @@ void LinkTable::PrepareMonolithicBuild(DBWalk::Actions &actions)
             }
 		}
 			
-		row.depth_first_ordered_it = df_it;
 		row.depth_first_ordinal = current_ordinal++;  
 			
 		// Check for badness

@@ -41,10 +41,7 @@ public:
 
         // Index in a depth-first walk
         DBCommon::OrdinalType depth_first_ordinal = -1;
-        
-        // Iterator in a depth-first walk
-        DBCommon::DepthFirstOrderedIt depth_first_ordered_it;
-        
+
         // Iterator on my_container that dereferneces to me, if 
         // IN_SEQUENCE or IN_COLLECTION. Note: only used in regeneration
         // queries.
