@@ -27,9 +27,9 @@ private:
         Plan( shared_ptr<Lacing> lacing );
         
         shared_ptr<Domain> domain;
-        shared_ptr<Indexes> indexes;
         shared_ptr<LinkTable> link_table;
         shared_ptr<NodeTable> node_table;
+        shared_ptr<Indexes> indexes;
 
 #ifdef DB_ENABLE_COMPARATIVE_TEST
         shared_ptr<Domain> ref_domain;

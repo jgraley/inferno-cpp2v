@@ -38,13 +38,13 @@ XTreeDatabase::XTreeDatabase( shared_ptr<Lacing> lacing, XLink root_xlink_ ) :
 
 
 XTreeDatabase::Plan::Plan( shared_ptr<Lacing> lacing ) :
-    indexes( make_shared<Indexes>(lacing) ),
     domain( make_shared<Domain>() ),
     link_table( make_shared<LinkTable>() ),
-    node_table( make_shared<NodeTable>() )
+    node_table( make_shared<NodeTable>() ),
+    indexes( make_shared<Indexes>(lacing, link_table.get()) )
 #ifdef DB_ENABLE_COMPARATIVE_TEST
     ,ref_domain( make_shared<Domain>() ),
-    ref_indexes( make_shared<Indexes>(clauses, true) )
+    ref_indexes( make_shared<Indexes>(lacing, link_table.get(), true) )
 #endif    
 {
 }

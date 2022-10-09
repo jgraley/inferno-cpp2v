@@ -195,6 +195,9 @@ void DBWalk::WindInActions( const WalkKit &kit,
             
     if( kit.actions->node_row_in )
 		kit.actions->node_row_in( walk_info );        
+
+    if( kit.actions->indexes_in_late )
+		kit.actions->indexes_in_late( walk_info );        
 }                            
 
 

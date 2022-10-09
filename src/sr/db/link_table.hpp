@@ -9,7 +9,7 @@
 namespace SR 
 {
     
-class LinkTable
+class LinkTable : public Traceable
 {
 public:
     LinkTable();
@@ -60,6 +60,8 @@ public:
 	void PrepareMonolithicBuild(DBWalk::Actions &actions);
     void PrepareDelete(DBWalk::Actions &actions);
 	void PrepareInsert(DBWalk::Actions &actions);
+	
+	string GetTrace() const;
 
 private:
     // XLink-to-row-of-x_tree_db map

@@ -29,13 +29,12 @@ bool LinkTable::HasRow(XLink xlink) const
 void LinkTable::MonolithicClear()
 {
     rows.clear();
+    current_ordinal = 0;
 }
 
 
 void LinkTable::PrepareMonolithicBuild(DBWalk::Actions &actions)
 {
-    current_ordinal = 0;
-
 	actions.link_row_in = [&](const DBWalk::WalkInfo &walk_info, 
 	                           DBCommon::DepthFirstOrderedIt df_it)
 	{
@@ -140,11 +139,10 @@ void LinkTable::PrepareInsert(DBWalk::Actions &actions)
 
 string LinkTable::Row::GetTrace() const
 {
-    string s = "(";
+    string s = "(cc=";
 
     bool par = false;
     bool cont = false;
-    bool idx = false;
     switch( containment_context )
     {
         case DBWalk::ROOT:
@@ -156,7 +154,7 @@ string LinkTable::Row::GetTrace() const
             break;
         case DBWalk::IN_SEQUENCE:
             s += "IN_SEQUENCE";
-            par = cont = idx = true;
+            par = cont = true;
             break;
         case DBWalk::IN_COLLECTION:
             s += "IN_COLLECTION";
@@ -170,8 +168,13 @@ string LinkTable::Row::GetTrace() const
         s += ", front=" + Trace(my_container_front);
         s += ", back=" + Trace(my_container_back);
     }
-    if( idx )
-        s += SSPrintf(", dfi=%d", depth_first_ordinal);
+    s += SSPrintf(", dfo=%d", depth_first_ordinal);
     s += ")";
     return s;
+}
+
+
+string LinkTable::GetTrace() const
+{
+	return Trace(rows);
 }

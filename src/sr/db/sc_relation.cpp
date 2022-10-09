@@ -9,7 +9,6 @@
 
 using namespace SR;
 
-//////////////////////////// SimpleCompareRelation ///////////////////////////////
 
 SimpleCompareRelation::SimpleCompareRelation() :
     simple_compare( make_shared<SimpleCompare>() )
@@ -69,6 +68,7 @@ void SimpleCompareRelation::Test( const unordered_set<XLink> &xlinks )
 	TestRelationProperties( xlinks,
                             true,
                             "SimpleCompareRelation",
+                            function<string()>(),
                             bind(&SimpleCompareRelation::Compare3Way, *this, _1, _2), 
     [&](XLink l, XLink r)
     { 

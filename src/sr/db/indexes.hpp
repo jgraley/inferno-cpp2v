@@ -6,6 +6,7 @@
 #include "common/standard.hpp"
 #include "sc_relation.hpp"
 #include "cat_relation.hpp"
+#include "df_relation.hpp"
 #include "db_walk.hpp"
 
 namespace SYM
@@ -18,11 +19,12 @@ namespace SR
 {
 class Lacing;
 class XTreeDatabase;
+class LinkTable;
     
 class Indexes
 {
 public:
-    explicit Indexes(shared_ptr<Lacing> lacing, bool ref=false );
+    Indexes(shared_ptr<Lacing> lacing, const LinkTable *link_table, bool ref=false );
     
 private: 
     const struct Plan : public Traceable
@@ -53,8 +55,15 @@ public:
     typedef set<XLink, SimpleCompareRelation> SimpleCompareOrderedIndex;
     typedef SimpleCompareOrderedIndex::iterator SimpleCompareOrderedIt;
     
-    // Global domain of possible xlink values - ordered
+    // We will provide a depth-first ordered version of the domain
+    typedef set<XLink, DepthFirstRelation> NewDepthFirstOrderedIndex;
+    typedef NewDepthFirstOrderedIndex::iterator NewDepthFirstOrderedIt;
+
+    // Global domain of possible xlink values - old version
     DBCommon::DepthFirstOrderedIndex depth_first_ordered_index;            
+    
+    // Global domain of possible xlink values - new version
+    NewDepthFirstOrderedIndex new_depth_first_ordered_index;            
     
     // Domain ordered by category
     CategoryOrderedIndex category_ordered_index;
@@ -64,6 +73,7 @@ public:
     SimpleCompareOrderedIndex simple_compare_ordered_index;   
 
 private:
+    const LinkTable *link_table;
     const bool ref;
     const bool use_incremental;
 };    

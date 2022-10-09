@@ -100,6 +100,7 @@ void CategoryRelation::Test( const unordered_set<XLink> &xlinks )
 	TestRelationProperties( xlinks,
                             true,
                             "CategoryRelation",
+                            function<string()>(),
                             bind(&CategoryRelation::Compare3Way, *this, _1, _2), 
 	[&](XLink l, XLink r)
     { 
