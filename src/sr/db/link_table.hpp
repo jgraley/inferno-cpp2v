@@ -19,7 +19,7 @@ public:
     public:
         DBWalk::ContainmentContext containment_context;
         
-        // Parent X link if not ROOT
+        // Parent X link if not a base
         // Note that the parent is unique because:
         // - row is relative to a link, not a node,
         // - multiple parents only allowed at leaf, and parent is 
@@ -30,22 +30,26 @@ public:
         // descendents, it will be the current node. 
         XLink last_descendant_xlink = XLink();
         
+        // Index into itemisation of the parent node
+        int item_number;
+
         // First element of container of which I'm a member. 
         // Defined for all item types.
         XLink my_container_front = XLink();
         XLink my_container_back = XLink();
 
-        // Neighbour elements within my sequence (sequences only)
-        XLink my_sequence_predecessor = XLink();
-        XLink my_sequence_successor = XLink();
-
-        // Index in a depth-first walk
-        DBCommon::OrdinalType depth_first_ordinal = -1;
-
         // Iterator on my_container that dereferneces to me, if 
         // IN_SEQUENCE or IN_COLLECTION. Note: only used in regeneration
         // queries.
         ContainerInterface::iterator my_container_it;
+
+        // Neighbour elements within my sequence (sequences only)
+        XLink my_sequence_predecessor = XLink();
+        XLink my_sequence_successor = XLink();
+
+        // Ordinals
+        DBCommon::OrdinalType depth_first_ordinal = -1;
+        DBCommon::OrdinalType base_ordinal = -1;
                
         string GetTrace() const;
     };
@@ -65,7 +69,10 @@ private:
     unordered_map<XLink, Row> rows;
 
     // Depth-first ordering
-    int current_ordinal;
+    int current_depth_first_ordinal;
+    
+    // Base ordering
+    int current_base_ordinal;
     
     // Last node to be reached and given a row
     XLink last_xlink;

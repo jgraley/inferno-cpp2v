@@ -4,7 +4,9 @@
 using namespace SR;    
 
 
-LinkTable::LinkTable()
+LinkTable::LinkTable():
+    current_depth_first_ordinal(0),
+    current_base_ordinal(0)
 {
 }
 
@@ -29,7 +31,10 @@ bool LinkTable::HasRow(XLink xlink) const
 void LinkTable::MonolithicClear()
 {
     rows.clear();
-    current_ordinal = 0;
+    current_depth_first_ordinal = 0;
+    // We do not reset current_base_ordinal, but just let it spin. New
+    // domain extras are always added to the end of the ordering and 
+    // we never need to renumber.
 }
 
 
@@ -40,10 +45,17 @@ void LinkTable::PrepareMonolithicBuild(DBWalk::Actions &actions)
 		// ----------------- Generate row
 		Row row;        
 		row.containment_context = walk_info.context;
+		row.depth_first_ordinal = current_depth_first_ordinal++;  
 		switch( row.containment_context )
 		{
             case DBWalk::ROOT:
+            case DBWalk::EXTRA:
+            case DBWalk::SPECIAL:
             {
+                // Base ordinal filled on only for base xlinks, so that we retain
+                // locality.
+                row.base_ordinal = current_base_ordinal++;
+                
                 row.my_container_front = walk_info.xlink;
                 row.my_container_back = walk_info.xlink;
                 break;
@@ -51,6 +63,7 @@ void LinkTable::PrepareMonolithicBuild(DBWalk::Actions &actions)
             case DBWalk::SINGULAR:
             {
                 row.parent_xlink = walk_info.parent_xlink;
+                row.item_number = walk_info.item_number;
                 row.my_container_front = walk_info.xlink;
                 row.my_container_back = walk_info.xlink;
                 break;
@@ -60,6 +73,7 @@ void LinkTable::PrepareMonolithicBuild(DBWalk::Actions &actions)
                 TreePtr<Node> parent_x = walk_info.parent_xlink.GetChildX();
 
                 row.parent_xlink = walk_info.parent_xlink;
+                row.item_number = walk_info.item_number;
                 row.my_container_it = walk_info.xit;        
                 row.my_container_front = XLink( parent_x, &walk_info.p_xcon->front() );
                 row.my_container_back = XLink( parent_x, &walk_info.p_xcon->back() );
@@ -80,6 +94,7 @@ void LinkTable::PrepareMonolithicBuild(DBWalk::Actions &actions)
                 TreePtr<Node> parent_x = walk_info.parent_xlink.GetChildX();
 
                 row.parent_xlink = walk_info.parent_xlink;
+                row.item_number = walk_info.item_number;
                 row.my_container_it = walk_info.xit;
                 row.my_container_front = XLink( parent_x, &*(walk_info.p_xcon->begin()) );
                 // Note: in real STL containers, one would use *(x_col->rbegin())
@@ -87,8 +102,6 @@ void LinkTable::PrepareMonolithicBuild(DBWalk::Actions &actions)
                 break;
             }
 		}
-			
-		row.depth_first_ordinal = current_ordinal++;  
 			
 		// Check for badness
 		if( rows.count(walk_info.xlink) )
@@ -145,6 +158,12 @@ string LinkTable::Row::GetTrace() const
     {
         case DBWalk::ROOT:
             s += "ROOT";
+            break;
+        case DBWalk::EXTRA:
+            s += "EXTRA";
+            break;
+        case DBWalk::SPECIAL:
+            s += "SPECIAL";
             break;
         case DBWalk::SINGULAR:
             s += "SINGULAR";

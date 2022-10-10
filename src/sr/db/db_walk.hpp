@@ -14,7 +14,10 @@ class DBWalk
 public:
     enum ContainmentContext
     {
+        UNKNOWN,
         ROOT,
+        EXTRA,
+        SPECIAL,
         SINGULAR,
         IN_SEQUENCE,
         IN_COLLECTION
@@ -25,10 +28,11 @@ public:
 		ContainmentContext context;
         XLink xlink;
         XLink parent_xlink;
+        int item_number;
+        const TreePtrInterface *p_x;
         ContainerInterface *p_xcon;
         ContainerInterface::iterator xit_predecessor;
         ContainerInterface::iterator xit;
-        const TreePtrInterface *p_x;
 	};
 
 	struct Actions
@@ -78,16 +82,20 @@ private:
     };
 
     void VisitBase( const WalkKit &kit, 
-                    XLink root_xlink );
+                    XLink root_xlink,
+                    ContainmentContext context );
     void VisitSingular( const WalkKit &kit, 
                         const TreePtrInterface *p_x_singular, 
-                        XLink xlink );
+                        XLink xlink,
+                        int item_number );
     void VisitSequence( const WalkKit &kit, 
                         SequenceInterface *x_seq, 
-                        XLink xlink );
+                        XLink xlink,
+                        int item_number );
     void VisitCollection( const WalkKit &kit, 
                           CollectionInterface *x_col, 
-                          XLink xlink );
+                          XLink xlink,
+                          int item_number );
     void VisitLink( const WalkKit &kit, 
                     const WalkInfo &walk_info );
     void VisitItemise( const WalkKit &kit, 

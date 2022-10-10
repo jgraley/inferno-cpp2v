@@ -5,12 +5,11 @@ using namespace SR;
 void DBWalk::FullWalk( const Actions *actions,
                        XLink root_xlink )
 {
+    InitWalk( actions );
+    
     WalkKit kit { actions, REQUIRE_SOLO };
     
-	VisitBase( kit, root_xlink );
-    
-    VisitBase( kit, XLink::MMAX_Link );
-    VisitBase( kit, XLink::OffEndXLink );
+	VisitBase( kit, root_xlink, ROOT );
 }
 
 
@@ -18,8 +17,8 @@ void DBWalk::InitWalk( const Actions *actions )
 {
     WalkKit kit { actions, REQUIRE_SOLO };
 
-    VisitBase( kit, XLink::MMAX_Link );
-    VisitBase( kit, XLink::OffEndXLink );
+    VisitBase( kit, XLink::MMAX_Link, SPECIAL );
+    VisitBase( kit, XLink::OffEndXLink, SPECIAL );
 }
 
 
@@ -28,7 +27,7 @@ void DBWalk::ZoneWalk( const Actions *actions,
 {
     WalkKit kit { actions, REQUIRE_SOLO };
 
-	VisitBase( kit, zone.GetBase() );
+	VisitBase( kit, zone.GetBase(), UNKNOWN );
 }
 
 
@@ -37,7 +36,7 @@ void DBWalk::ExtraZoneWalk( const Actions *actions,
 {
     WalkKit kit { actions, STOP_IF_ALREADY_IN };
 
-	VisitBase( kit, extra_base_xlink ); 
+	VisitBase( kit, extra_base_xlink, EXTRA ); 
 }
 
 
@@ -46,27 +45,30 @@ void DBWalk::SingleXLinkWalk( const Actions *actions,
 {
     WalkKit kit { actions, NO_RECURSE };
 
-	VisitBase( kit, xlink );
+	VisitBase( kit, xlink, UNKNOWN );
 }                      
 
 
 void DBWalk::VisitBase( const WalkKit &kit, 
-                        XLink root_xlink )
+                        XLink root_xlink,
+                        ContainmentContext context )
 {
     VisitLink( kit, 
-             { ROOT, 
+             { context, 
                root_xlink, 
                XLink(), 
+               -1,
+               nullptr,
                nullptr,
                ContainerInterface::iterator(), 
-               ContainerInterface::iterator(), 
-               nullptr } );
+               ContainerInterface::iterator() } );
 }
 
 
 void DBWalk::VisitSingular( const WalkKit &kit, 
-                              const TreePtrInterface *p_x_singular, 
-                              XLink xlink )
+                            const TreePtrInterface *p_x_singular, 
+                            XLink xlink,
+                            int item_number )
 {
     ASSERT( p_x_singular );
     
@@ -83,16 +85,18 @@ void DBWalk::VisitSingular( const WalkKit &kit,
              { SINGULAR, 
                child_xlink, 
                xlink, 
+               item_number,
+               p_x_singular,
                nullptr,
                ContainerInterface::iterator(),
-               ContainerInterface::iterator(),
-               p_x_singular } );
+               ContainerInterface::iterator() } );
 }
 
 
 void DBWalk::VisitSequence( const WalkKit &kit, 
-                          SequenceInterface *x_seq, 
-                          XLink xlink )
+                            SequenceInterface *x_seq, 
+                            XLink xlink,
+                            int item_number )
 {
     TreePtr<Node> x = xlink.GetChildX();
     SequenceInterface::iterator xit_predecessor = x_seq->end();
@@ -105,18 +109,20 @@ void DBWalk::VisitSequence( const WalkKit &kit,
                  { IN_SEQUENCE, 
                    child_xlink, 
                    xlink, 
+                   item_number,
+                   &*xit,
                    x_seq,
                    xit_predecessor,
-                   xit,
-                   &*xit } );
+                   xit } );
         xit_predecessor = xit;
     }
 }
 
 
 void DBWalk::VisitCollection( const WalkKit &kit, 
-                            CollectionInterface *x_col, 
-                            XLink xlink )
+                              CollectionInterface *x_col, 
+                              XLink xlink,
+                              int item_number )
 {
     TreePtr<Node> x = xlink.GetChildX();
     for( CollectionInterface::iterator xit = x_col->begin();
@@ -128,10 +134,11 @@ void DBWalk::VisitCollection( const WalkKit &kit,
                  { IN_COLLECTION, 
                    child_xlink, 
                    xlink, 
+                   item_number,
+                   &*xit,
                    x_col,
 				   ContainerInterface::iterator(),
-                   xit,
-                   &*xit } );
+                   xit } );
     }
 }
 
@@ -165,14 +172,15 @@ void DBWalk::VisitItemise( const WalkKit &kit,
     TreePtr<Node> x = xlink.GetChildX();
     ASSERT(x)("This probably means we're walking an incomplete tree");
     vector< Itemiser::Element * > x_items = x->Itemise();
-    for( Itemiser::Element *xe : x_items )
+    for( int item_number=0; item_number<x_items.size(); item_number++ )
     {
+        Itemiser::Element *xe = x_items[item_number];
         if( SequenceInterface *x_seq = dynamic_cast<SequenceInterface *>(xe) )
-            VisitSequence( kit, x_seq, xlink );
+            VisitSequence( kit, x_seq, xlink, item_number );
         else if( CollectionInterface *x_col = dynamic_cast<CollectionInterface *>(xe) )
-            VisitCollection( kit, x_col, xlink );
+            VisitCollection( kit, x_col, xlink, item_number );
         else if( TreePtrInterface *p_x_singular = dynamic_cast<TreePtrInterface *>(xe) )
-            VisitSingular( kit, p_x_singular, xlink );
+            VisitSingular( kit, p_x_singular, xlink, item_number );
         else
             ASSERTFAIL("got something from itemise that isnt a Sequence, Collection or a singular TreePtr");
     }

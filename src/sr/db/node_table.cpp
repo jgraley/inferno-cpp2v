@@ -41,10 +41,6 @@ void NodeTable::PrepareMonolithicBuild(DBWalk::Actions &actions)
 		Row row;
 		switch( walk_info.context )
 		{
-            case DBWalk::ROOT:
-            {
-                break;
-            }	
             case DBWalk::SINGULAR:
             case DBWalk::IN_SEQUENCE:
             case DBWalk::IN_COLLECTION:
