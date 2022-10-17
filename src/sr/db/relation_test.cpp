@@ -67,7 +67,27 @@ void SR::TestRelationProperties( const unordered_set<XLink> &xlinks,
             ASSERT( ab_diff == 0)
                   (log_on_fail())("\n")
                   (relation_name)(" failed stability:\n")(a_xlink)(" ")(b_xlink);
-            tstab["a!=b"]++;
+            tstab["a !equiv b"]++;
+        }
+    }
+
+    if( expect_totality )
+    {
+        // Totality property
+        for( int i=0; i<vxlinks.size()*10; i++ )
+        {
+            XLink a_xlink = random_xlink();
+            XLink b_xlink = random_xlink();
+            Orderable::Diff ab_diff = compare(a_xlink, b_xlink);
+            bool ab_eq_native = is_equal_native(a_xlink, b_xlink);
+            if( !ab_eq_native ) // Natively not equal
+            {
+                ASSERT( ab_diff != 0)
+                      (log_on_fail())("\n")
+                      (relation_name)(" failed totality:\n")
+                      (a_xlink)(" != ")(b_xlink);
+                ttot["a!=b"]++;
+            }
         }
     }
 
@@ -94,15 +114,15 @@ void SR::TestRelationProperties( const unordered_set<XLink> &xlinks,
             ASSERT( ba_diff == 0 )
                   (log_on_fail())("\n")
                   (relation_name)(" failed symmetry:\n")
-                  (a_xlink)(" ")(b_xlink);       
-            ts["a==b"]++;
+                  (a_xlink)(" equiv ")(b_xlink);       
+            ts["a equiv b"]++;
         }
         else if( ab_diff < 0 )        // a < b
         {
             ASSERT( ba_diff > 0)
                   (log_on_fail())("\n")
                   (relation_name)(" failed antisymmetry:\n")
-                  (a_xlink)(" ")(b_xlink);
+                  (a_xlink)(" < ")(b_xlink);
             ts["a<b"]++;
         }
         else if( ab_diff > 0 )        // a > b
@@ -110,7 +130,7 @@ void SR::TestRelationProperties( const unordered_set<XLink> &xlinks,
             ASSERT( ba_diff < 0)
                   (log_on_fail())("\n")
                   (relation_name)(" failed antisymmetry:\n")
-                  (a_xlink)(" ")(b_xlink);
+                  (a_xlink)(" > ")(b_xlink);
             ts["a>b"]++;
         }
         else
@@ -136,15 +156,15 @@ void SR::TestRelationProperties( const unordered_set<XLink> &xlinks,
                 ASSERT( ac_diff == 0 )
                       (log_on_fail())("\n")
                       (relation_name)(" failed transitivity:\n")
-                      (a_xlink)(" ")(b_xlink)(" ")(c_xlink);
-                t["b==c"]++;
+                      (a_xlink)(" equiv ")(b_xlink)(" equiv ")(c_xlink);
+                t["b equiv c"]++;
             }
             else if( bc_diff < 0 )        // b < c
             {
                 ASSERT( ac_diff < 0 )
                       (log_on_fail())("\n")
                       (relation_name)(" failed transitivity:\n")
-                      (a_xlink)(" ")(b_xlink)(" ")(c_xlink);
+                      (a_xlink)(" equiv ")(b_xlink)(" < ")(c_xlink);
                 t["b<c"]++;
             }
             else if( bc_diff > 0 )        // b > c
@@ -152,7 +172,7 @@ void SR::TestRelationProperties( const unordered_set<XLink> &xlinks,
                 ASSERT( ac_diff > 0 )
                       (log_on_fail())("\n")
                       (relation_name)(" failed transitivity:\n")
-                      (a_xlink)(" ")(b_xlink)(" ")(c_xlink);
+                      (a_xlink)(" equiv ")(b_xlink)(" > ")(c_xlink);
                 t["b>c"]++;
             }
             else
@@ -169,15 +189,15 @@ void SR::TestRelationProperties( const unordered_set<XLink> &xlinks,
                 ASSERT( ac_diff < 0 )
                       (log_on_fail())("\n")
                       (relation_name)(" failed transitivity:\n")
-                      (a_xlink)(" ")(b_xlink)(" ")(c_xlink);
-                t["b==c"]++;
+                      (a_xlink)(" < ")(b_xlink)(" equiv ")(c_xlink);
+                t["b equiv c"]++;
             }
             else if( bc_diff < 0 )        // b < c
             {
                 ASSERT( ac_diff < 0 )
 					  (log_on_fail())("\n")
                       (relation_name)(" failed transitivity:\n")
-                      (a_xlink)(" ")(b_xlink)(" ")(c_xlink);
+                      (a_xlink)(" < ")(b_xlink)(" < ")(c_xlink);
                 t["b<c"]++;
             }
             else if( bc_diff > 0 )        // b > c
@@ -199,7 +219,7 @@ void SR::TestRelationProperties( const unordered_set<XLink> &xlinks,
                       (log_on_fail())("\n")
                       (relation_name)(" failed transitivity:\n")
                       (a_xlink)(" ")(b_xlink)(" ")(c_xlink);
-                t["b==c"]++;
+                t["b equiv c"]++;
             }
             else if( bc_diff < 0 )        // b < c
             {
@@ -224,27 +244,7 @@ void SR::TestRelationProperties( const unordered_set<XLink> &xlinks,
             ASSERTFAIL("huh?\n");
         }
     }    
-    
-    if( expect_totality )
-    {
-        // Totality property
-        for( int i=0; i<vxlinks.size()*10; i++ )
-        {
-            XLink a_xlink = random_xlink();
-            XLink b_xlink = random_xlink();
-            Orderable::Diff ab_diff = compare(a_xlink, b_xlink);
-            bool ab_eq_native = is_equal_native(a_xlink, b_xlink);
-            if( !ab_eq_native ) // Natively not equal
-            {
-                ASSERT( ab_diff != 0)
-                      (log_on_fail())("\n")
-                      (relation_name)(" failed totality:\n")
-                      (a_xlink)(" ")(b_xlink);
-                ttot["a!=b"]++;
-            }
-        }
-    }
-    
+        
     // See #210 for some results
     FTRACE("Relation tests for ")(relation_name)(" passed. Coverage:\n")
           ("Made %d special of %d total XLinks\n", tspecial, tlinks)

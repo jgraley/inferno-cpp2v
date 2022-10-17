@@ -150,6 +150,33 @@ void LinkTable::PrepareInsert(DBWalk::Actions &actions)
 }
 
 
+bool LinkTable::Row::IsBase() const
+{
+    switch( containment_context )
+    {
+        case DBWalk::ROOT:
+            return true;
+            break;
+        case DBWalk::EXTRA:
+            return true;
+            break;
+        case DBWalk::SPECIAL:
+            return true;
+            break;
+        case DBWalk::SINGULAR:
+            return false;
+            break;
+        case DBWalk::IN_SEQUENCE:
+            return false;
+            break;
+        case DBWalk::IN_COLLECTION:
+            return false;
+            break;
+    }    
+    ASSERTFAIL();
+}
+
+
 string LinkTable::Row::GetTrace() const
 {
     string s = "(cc=";

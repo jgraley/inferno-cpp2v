@@ -18,6 +18,7 @@ public:
     {
     public:
         DBWalk::ContainmentContext containment_context;
+        bool IsBase() const;
         
         // Parent X link if not a base
         // Note that the parent is unique because:
