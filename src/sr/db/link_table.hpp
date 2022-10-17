@@ -49,7 +49,8 @@ public:
 
         // Ordinals
         DBCommon::OrdinalType depth_first_ordinal = -1;
-        DBCommon::OrdinalType base_ordinal = -1;
+        DBCommon::OrdinalType container_ordinal = -1; 
+        DBCommon::OrdinalType base_ordinal = -1; 
                
         string GetTrace() const;
     };

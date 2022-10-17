@@ -77,6 +77,7 @@ void LinkTable::PrepareMonolithicBuild(DBWalk::Actions &actions)
                 row.my_container_it = walk_info.xit;        
                 row.my_container_front = XLink( parent_x, &walk_info.p_xcon->front() );
                 row.my_container_back = XLink( parent_x, &walk_info.p_xcon->back() );
+                row.container_ordinal = walk_info.container_ordinal;
                 
                 if( walk_info.xit_predecessor != walk_info.p_xcon->end() )
                     row.my_sequence_predecessor = XLink( parent_x, &*walk_info.xit_predecessor );
@@ -99,6 +100,7 @@ void LinkTable::PrepareMonolithicBuild(DBWalk::Actions &actions)
                 row.my_container_front = XLink( parent_x, &*(walk_info.p_xcon->begin()) );
                 // Note: in real STL containers, one would use *(x_col->rbegin())
                 row.my_container_back = XLink( parent_x, &(walk_info.p_xcon->back()) );
+                row.container_ordinal = walk_info.container_ordinal;
                 break;
             }
 		}

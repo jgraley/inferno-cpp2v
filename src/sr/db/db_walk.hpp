@@ -29,6 +29,7 @@ public:
         XLink xlink;
         XLink parent_xlink;
         int item_number;
+        int container_ordinal;
         const TreePtrInterface *p_x;
         ContainerInterface *p_xcon;
         ContainerInterface::iterator xit_predecessor;

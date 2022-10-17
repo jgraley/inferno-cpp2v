@@ -58,6 +58,7 @@ void DBWalk::VisitBase( const WalkKit &kit,
                root_xlink, 
                XLink(), 
                -1,
+               -1,
                nullptr,
                nullptr,
                ContainerInterface::iterator(), 
@@ -86,6 +87,7 @@ void DBWalk::VisitSingular( const WalkKit &kit,
                child_xlink, 
                xlink, 
                item_number,
+               -1,
                p_x_singular,
                nullptr,
                ContainerInterface::iterator(),
@@ -99,7 +101,8 @@ void DBWalk::VisitSequence( const WalkKit &kit,
                             int item_number )
 {
     TreePtr<Node> x = xlink.GetChildX();
-    SequenceInterface::iterator xit_predecessor = x_seq->end();
+    SequenceInterface::iterator xit_predecessor = x_seq->end();    
+    int i=0;
     for( SequenceInterface::iterator xit = x_seq->begin();
          xit != x_seq->end();
          ++xit )
@@ -110,11 +113,13 @@ void DBWalk::VisitSequence( const WalkKit &kit,
                    child_xlink, 
                    xlink, 
                    item_number,
+                   i,
                    &*xit,
                    x_seq,
                    xit_predecessor,
                    xit } );
         xit_predecessor = xit;
+        i++;
     }
 }
 
@@ -124,7 +129,8 @@ void DBWalk::VisitCollection( const WalkKit &kit,
                               XLink xlink,
                               int item_number )
 {
-    TreePtr<Node> x = xlink.GetChildX();
+    TreePtr<Node> x = xlink.GetChildX();    
+    int i=0;
     for( CollectionInterface::iterator xit = x_col->begin();
          xit != x_col->end();
          ++xit )
@@ -135,10 +141,12 @@ void DBWalk::VisitCollection( const WalkKit &kit,
                    child_xlink, 
                    xlink, 
                    item_number,
+                   i,
                    &*xit,
                    x_col,
 				   ContainerInterface::iterator(),
                    xit } );
+        i++;
     }
 }
 
