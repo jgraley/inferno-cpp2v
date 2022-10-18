@@ -63,53 +63,44 @@ Orderable::Diff DepthFirstRelation::Compare3Way( const XLink l_xlink, const XLin
             //FTRACE("Both at base, comparing base ordinals\n");
             return l_row.base_ordinal - r_row.base_ordinal;
         }
-        else
+
+        if( !l_row.IsBase() )
+        {            
+            // If we hit r0 then l0 was a descendent of it. Use parent to spot sooner.
+            if( l_parent_xlink == r_xlink )
+                return RIGHT_IS_ANCESTOR;
+                
+            // If we share a parent, l0 and r0 are weakly removed siblings
+            if( candidate_mutuals[l_parent_xlink].second )
+            {
+                // Ensure l and r are direct siblings
+                r_cur_xlink = candidate_mutuals[l_parent_xlink].second;
+                //FTRACE("Paths met advancing left, parent is: ")(l_parent_xlink)("\n");
+                break;
+            }
+            // If l and r are same depth, we need to update candidate_mutuals here
+            // so the R block just below can spot the meet.
+            candidate_mutuals[l_parent_xlink].first = l_cur_xlink;                
+            l_cur_xlink = l_parent_xlink; // advance toward ancestor
+        }
+
+        if( !r_row.IsBase() )
         {
-            if( !l_row.IsBase() )
-            {            
-                // If we hit r0 then l0 was a descendent of it. Use parent to spot sooner.
-                if( l_parent_xlink == r_xlink )
-                    return RIGHT_IS_ANCESTOR;
-                    
-                // If we share a parent, l0 and r0 are weakly removed siblings
-                if( candidate_mutuals[l_parent_xlink].second )
-                {
-                    // Ensure l and r are direct siblings
-                    r_cur_xlink = candidate_mutuals[l_parent_xlink].second;
-                    //FTRACE("Paths met advancing left, parent is: ")(l_parent_xlink)("\n");
-                    break;
-                }
-                // If l and r are same depth, we need to update candidate_mutuals here
-                // so the R block just below can spot the meet.
-                candidate_mutuals[l_parent_xlink].first = l_cur_xlink;                
-            }
+            // If we hit l0 then r0 was a descendent of it. Use parent to spot sooner.
+            if( r_parent_xlink == l_xlink )
+                return LEFT_IS_ANCESTOR;
 
-            if( !r_row.IsBase() )
+            // If we share a parent, l0 and r0 are weakly removed siblings
+            if( candidate_mutuals[r_parent_xlink].first )
             {
-                // If we hit l0 then r0 was a descendent of it. Use parent to spot sooner.
-                if( r_parent_xlink == l_xlink )
-                    return LEFT_IS_ANCESTOR;
-
-                // If we share a parent, l0 and r0 are weakly removed siblings
-                if( candidate_mutuals[r_parent_xlink].first )
-                {
-                    // Ensure l and r are direct siblings
-                    l_cur_xlink = candidate_mutuals[r_parent_xlink].first;
-                    //FTRACE("Paths met advancing right, parent is: ")(r_parent_xlink)("\n");
-                    break;
-                }
-                // Update candidate mutual
-                candidate_mutuals[r_parent_xlink].second = r_cur_xlink;
+                // Ensure l and r are direct siblings
+                l_cur_xlink = candidate_mutuals[r_parent_xlink].first;
+                //FTRACE("Paths met advancing right, parent is: ")(r_parent_xlink)("\n");
+                break;
             }
-
-            if( !l_row.IsBase() )
-            {
-                l_cur_xlink = l_parent_xlink;
-            }
-            if( !r_row.IsBase() )
-            {
-                r_cur_xlink = r_parent_xlink;
-            }
+            // Update candidate mutual.
+            candidate_mutuals[r_parent_xlink].second = r_cur_xlink;
+            r_cur_xlink = r_parent_xlink; // advance toward ancestor
         }
     }
     
@@ -117,12 +108,14 @@ Orderable::Diff DepthFirstRelation::Compare3Way( const XLink l_xlink, const XLin
     // and l and r are direct siblings. We must check against orderings in 
     // the common parent to l and r and can use link table rows directly 
     // for this due to having a common parent.
-    
     const LinkTable::Row &l_row = link_table->GetRow(l_cur_xlink);       
     const LinkTable::Row &r_row = link_table->GetRow(r_cur_xlink);
+    
+    // Itemisation is primary
     if( Orderable::Diff d = l_row.item_number - r_row.item_number )
         return d;
         
+    // Secondary is position inside container
     if( Orderable::Diff d = l_row.container_ordinal - r_row.container_ordinal )
         return d;
         
