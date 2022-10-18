@@ -5,7 +5,6 @@ using namespace SR;
 
 
 LinkTable::LinkTable():
-    current_depth_first_ordinal(0),
     current_base_ordinal(0)
 {
 }
@@ -31,7 +30,6 @@ bool LinkTable::HasRow(XLink xlink) const
 void LinkTable::MonolithicClear()
 {
     rows.clear();
-    current_depth_first_ordinal = 0;
     // We do not reset current_base_ordinal, but just let it spin. New
     // domain extras are always added to the end of the ordering and 
     // we never need to renumber.
@@ -45,7 +43,6 @@ void LinkTable::PrepareMonolithicBuild(DBWalk::Actions &actions)
 		// ----------------- Generate row
 		Row row;        
 		row.containment_context = walk_info.context;
-		row.depth_first_ordinal = current_depth_first_ordinal++;  
 		switch( row.containment_context )
 		{
             case DBWalk::ROOT:
@@ -214,7 +211,8 @@ string LinkTable::Row::GetTrace() const
         s += ", front=" + Trace(my_container_front);
         s += ", back=" + Trace(my_container_back);
     }
-    s += SSPrintf(", dfo=%d", depth_first_ordinal);
+    s += SSPrintf(", co=%d", container_ordinal);
+    s += SSPrintf(", bo=%d", base_ordinal);
     s += ")";
     return s;
 }

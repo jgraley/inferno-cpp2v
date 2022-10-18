@@ -49,7 +49,6 @@ public:
         XLink my_sequence_successor = XLink();
 
         // Ordinals
-        DBCommon::OrdinalType depth_first_ordinal = -1;
         DBCommon::OrdinalType container_ordinal = -1; 
         DBCommon::OrdinalType base_ordinal = -1; 
                
@@ -69,9 +68,6 @@ public:
 private:
     // XLink-to-row-of-x_tree_db map
     unordered_map<XLink, Row> rows;
-
-    // Depth-first ordering
-    int current_depth_first_ordinal;
     
     // Base ordering
     int current_base_ordinal;

@@ -26,7 +26,6 @@ bool DepthFirstRelation::operator()( XLink l_xlink, XLink r_xlink ) const
 
 Orderable::Diff DepthFirstRelation::Compare3Way( const XLink l_xlink, const XLink r_xlink ) const
 {
-#ifdef NEW_DF_REL
     // Maps a parent xlink to two optional child xlinks: the first is 
     // a weak ancestor of l and second of r. We fill in first from the
     // ancestry of l and the second from r. As soon as we discover we've 
@@ -66,7 +65,7 @@ Orderable::Diff DepthFirstRelation::Compare3Way( const XLink l_xlink, const XLin
 
         if( !l_row.IsBase() )
         {            
-            // If we hit r0 then l0 was a descendent of it. Use parent to spot sooner.
+            // If l hits r0 then l0 was a descendent of it. Use parent to spot sooner.
             if( l_parent_xlink == r_xlink )
                 return RIGHT_IS_ANCESTOR;
                 
@@ -81,12 +80,12 @@ Orderable::Diff DepthFirstRelation::Compare3Way( const XLink l_xlink, const XLin
             // If l and r are same depth, we need to update candidate_mutuals here
             // so the R block just below can spot the meet.
             candidate_mutuals[l_parent_xlink].first = l_cur_xlink;                
-            l_cur_xlink = l_parent_xlink; // advance toward ancestor
+            l_cur_xlink = l_parent_xlink; // advance l toward ancestor
         }
 
         if( !r_row.IsBase() )
         {
-            // If we hit l0 then r0 was a descendent of it. Use parent to spot sooner.
+            // If r hits l0 then r0 was a descendent of it. Use parent to spot sooner.
             if( r_parent_xlink == l_xlink )
                 return LEFT_IS_ANCESTOR;
 
@@ -98,9 +97,9 @@ Orderable::Diff DepthFirstRelation::Compare3Way( const XLink l_xlink, const XLin
                 //FTRACE("Paths met advancing right, parent is: ")(r_parent_xlink)("\n");
                 break;
             }
-            // Update candidate mutual.
+            // Update candidate_mutuals.
             candidate_mutuals[r_parent_xlink].second = r_cur_xlink;
-            r_cur_xlink = r_parent_xlink; // advance toward ancestor
+            r_cur_xlink = r_parent_xlink; // advance r toward ancestor
         }
     }
     
@@ -124,12 +123,6 @@ Orderable::Diff DepthFirstRelation::Compare3Way( const XLink l_xlink, const XLin
           ("Got to ")(l_cur_xlink)(" and ")(r_cur_xlink)("\n")
           (candidate_mutuals);
     return 0;
-#else
-	const LinkTable::Row &l_row = link_table->GetRow(l_xlink);
-	const LinkTable::Row &r_row = link_table->GetRow(r_xlink);
-
-    return l_row.depth_first_ordinal - r_row.depth_first_ordinal;
-#endif
 }
 
 
