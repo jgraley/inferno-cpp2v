@@ -72,14 +72,12 @@ void XTreeDatabase::MonolithicClear()
 {
     INDENT("c");
     plan.domain->MonolithicClear();
-    plan.indexes->MonolithicClear();
     plan.link_table->MonolithicClear();
     plan.node_table->MonolithicClear();    
 #ifdef DB_ENABLE_COMPARATIVE_TEST
     {
         INDENT("⦼");
         plan.ref_domain->MonolithicClear();
-        plan.ref_indexes->MonolithicClear();
 #ifdef DB_TEST_THE_TEST
         ExpectMatches();
 #endif
@@ -95,7 +93,6 @@ void XTreeDatabase::MonolithicBuild()
         
     DBWalk::Actions actions;
     plan.domain->PrepareMonolithicBuild( actions, false );
-    plan.indexes->PrepareMonolithicBuild( actions );
     plan.link_table->PrepareMonolithicBuild( actions );
     plan.node_table->PrepareMonolithicBuild( actions );
     db_walker.FullWalk( &actions, root_xlink );
@@ -104,7 +101,6 @@ void XTreeDatabase::MonolithicBuild()
         INDENT("⦼");
         DBWalk::Actions ref_actions;
         plan.ref_domain->PrepareMonolithicBuild( ref_actions, false );
-        plan.ref_indexes->PrepareMonolithicBuild( ref_actions );
         db_walker.FullWalk( &ref_actions, root_xlink );
 #ifdef DB_TEST_THE_TEST
         ExpectMatches();
@@ -145,7 +141,6 @@ void XTreeDatabase::MonolithicExtra(XLink extra_base_xlink)
 
     DBWalk::Actions actions;
 	plan.domain->PrepareMonolithicBuild( actions, true );
-	plan.indexes->PrepareMonolithicBuild( actions );
 	plan.link_table->PrepareMonolithicBuild( actions );
 	plan.node_table->PrepareMonolithicBuild( actions );
 	db_walker.ExtraZoneWalk( &actions, extra_base_xlink );
@@ -155,7 +150,6 @@ void XTreeDatabase::MonolithicExtra(XLink extra_base_xlink)
         INDENT("⦼");
         DBWalk::Actions ref_actions;
         plan.ref_domain->PrepareMonolithicBuild( ref_actions, true );
-        plan.ref_indexes->PrepareMonolithicBuild( ref_actions );
         db_walker.ExtraZoneWalk( &ref_actions, extra_base_xlink );
 #ifdef DB_TEST_THE_TEST
         ExpectMatches();

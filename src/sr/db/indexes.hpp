@@ -38,8 +38,6 @@ private:
 public:
     const Lacing *GetLacing() const;
 
-    void MonolithicClear();
-	void PrepareMonolithicBuild(DBWalk::Actions &actions);
     void PrepareDelete(DBWalk::Actions &actions);
 	void PrepareInsert(DBWalk::Actions &actions);
     
