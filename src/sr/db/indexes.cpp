@@ -10,7 +10,7 @@
 using namespace SR;    
 
 //#define TRACE_CATEGORY_RELATION
-//#define INCREMENTAL_DFI
+#define INCREMENTAL_DFI
 
 Indexes::Indexes( shared_ptr<Lacing> lacing, const LinkTable *link_table_, bool ref_ ) :
     plan( lacing ),
