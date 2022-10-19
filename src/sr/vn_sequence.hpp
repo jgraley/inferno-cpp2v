@@ -50,7 +50,7 @@ public:
     void ExtendDomainNewX();
     void UnExtendDomain();
 
-    void ExecuteUpdateCommand( shared_ptr<UpdateCommand> cmd );
+    void ExecuteUpdateCommand( shared_ptr<UpdateCommand> cmd, bool monolithic_is_valid );
     void XTreeDbMonolithicClear();
     void XTreeDbMonolithicBuild();
     

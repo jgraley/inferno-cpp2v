@@ -18,6 +18,9 @@ public:
 		// Note: unline EvalKit etc, these pointers are non-const
 		// because we intend to actually change things here.
         XTreeDatabase *x_tree_db; 
+        
+        // TEMPORARY while transitioning to incremental
+        bool monolithic_is_valid;
     };
 
 	virtual void Execute( const ExecKit &kit ) const = 0;

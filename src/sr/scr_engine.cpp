@@ -375,15 +375,25 @@ void SCREngine::Replace( XLink base_xlink )
     plan.vn_sequence->XTreeDbExpectMatches();
 #endif
     
+    // Temporary: incrementals that depend on monolithics
+	auto seq = make_shared<CommandSequence>();
+	seq->Add( make_shared<DeleteCommand>( base_zone ) );
+	plan.vn_sequence->ExecuteUpdateCommand( seq, true );
+
 	plan.vn_sequence->XTreeDbMonolithicClear();
     plan.vn_sequence->UnExtendDomain();
 
-	auto seq = make_shared<CommandSequence>();
+	seq = make_shared<CommandSequence>();
 	seq->Add( make_shared<DeleteCommand>( base_zone ) );
 	seq->Add( make_shared<InsertCommand>( base_zone, new_zone ) );
-	plan.vn_sequence->ExecuteUpdateCommand( seq );
+	plan.vn_sequence->ExecuteUpdateCommand( seq, false );
 
 	plan.vn_sequence->XTreeDbMonolithicBuild();
+    
+    // Temporary: incrementals that depend on monolithics
+	seq = make_shared<CommandSequence>();
+	seq->Add( make_shared<InsertCommand>( base_zone, new_zone ) );
+	plan.vn_sequence->ExecuteUpdateCommand( seq, true );
     
     plan.vn_sequence->ExtendDomainNewX();
     
