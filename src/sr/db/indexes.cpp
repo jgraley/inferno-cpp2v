@@ -10,7 +10,7 @@
 using namespace SR;    
 
 //#define TRACE_CATEGORY_RELATION
-
+//#define INCREMENTAL_DFI
 
 Indexes::Indexes( shared_ptr<Lacing> lacing, const LinkTable *link_table_, bool ref_ ) :
     plan( lacing ),
@@ -37,16 +37,20 @@ const Lacing *Indexes::GetLacing() const
 
 void Indexes::MonolithicClear()
 {
+#ifndef INCREMENTAL_DFI
     depth_first_ordered_index.clear();
+#endif    
 }
 
 
 void Indexes::PrepareMonolithicBuild(DBWalk::Actions &actions)
 {
+#ifndef INCREMENTAL_DFI
 	actions.indexes_in_late = [&](const DBWalk::WalkInfo &walk_info)
-	{
+	{ 	
 		depth_first_ordered_index.insert( walk_info.xlink );
 	};
+#endif        
 }
 
 
@@ -56,6 +60,9 @@ void Indexes::PrepareDelete( DBWalk::Actions &actions )
 	{
 		EraseSolo( category_ordered_index, walk_info.xlink );       
 		EraseSolo( simple_compare_ordered_index, walk_info.xlink );
+#ifdef INCREMENTAL_DFI
+		EraseSolo( depth_first_ordered_index, walk_info.xlink );
+#endif
 	};
 }
 
@@ -66,6 +73,9 @@ void Indexes::PrepareInsert(DBWalk::Actions &actions)
 	{ 
         category_ordered_index.insert( walk_info.xlink );
 		simple_compare_ordered_index.insert( walk_info.xlink );		
+#ifdef INCREMENTAL_DFI
+		depth_first_ordered_index.insert( walk_info.xlink );
+#endif        
 	};
 }
 
@@ -81,9 +91,8 @@ void Indexes::ExpectMatching( const Indexes &mut )
     ASSERT( ref );
     ASSERT( !mut.ref );
     
-    ASSERT( category_ordered_index == mut.category_ordered_index )
-          ( DiffTrace(category_ordered_index, mut.category_ordered_index) )
-          ( mut.category_ordered_index );
+    ASSERT( depth_first_ordered_index == mut.depth_first_ordered_index )
+          ( DiffTrace(depth_first_ordered_index, mut.depth_first_ordered_index) );
 }
 
 
