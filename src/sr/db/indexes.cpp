@@ -43,9 +43,6 @@ void Indexes::MonolithicClear()
 
 void Indexes::PrepareMonolithicBuild(DBWalk::Actions &actions)
 {
-	actions.indexes_in = [&](const DBWalk::WalkInfo &walk_info)
-	{
-	};
 	actions.indexes_in_late = [&](const DBWalk::WalkInfo &walk_info)
 	{
 		depth_first_ordered_index.insert( walk_info.xlink );
@@ -55,11 +52,9 @@ void Indexes::PrepareMonolithicBuild(DBWalk::Actions &actions)
 
 void Indexes::PrepareDelete( DBWalk::Actions &actions )
 {
-	actions.indexes_in = [&](const DBWalk::WalkInfo &walk_info)
+	actions.indexes_in_late = [&](const DBWalk::WalkInfo &walk_info)
 	{
-		EraseSolo( category_ordered_index, walk_info.xlink );
-        TRACEC("Erased ")(walk_info.xlink)(" from category_ordered_index; size now %u\n", category_ordered_index.size());    
-        
+		EraseSolo( category_ordered_index, walk_info.xlink );       
 		EraseSolo( simple_compare_ordered_index, walk_info.xlink );
 	};
 }
@@ -70,8 +65,6 @@ void Indexes::PrepareInsert(DBWalk::Actions &actions)
 	actions.indexes_in = [&](const DBWalk::WalkInfo &walk_info)
 	{ 
         category_ordered_index.insert( walk_info.xlink );
-        TRACEC("Inserted ")(walk_info.xlink)(" into category_ordered_index; size now %u\n", category_ordered_index.size());    
-
 		simple_compare_ordered_index.insert( walk_info.xlink );		
 	};
 }
