@@ -380,8 +380,8 @@ void SCREngine::Replace( XLink base_xlink )
 	seq->Add( make_shared<DeleteCommand>( base_zone ) );
 	plan.vn_sequence->ExecuteUpdateCommand( seq, true );
 
-	plan.vn_sequence->XTreeDbMonolithicClear();
     plan.vn_sequence->UnExtendDomain();
+	plan.vn_sequence->XTreeDbMonolithicClear();
 
 	seq = make_shared<CommandSequence>();
 	seq->Add( make_shared<DeleteCommand>( base_zone ) );

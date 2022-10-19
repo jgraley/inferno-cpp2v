@@ -8,8 +8,6 @@
 
 #include <random>
 
-#define NEW_DF_REL
-
 using namespace SR;
 
 DepthFirstRelation::DepthFirstRelation(const LinkTable *link_table_) :
