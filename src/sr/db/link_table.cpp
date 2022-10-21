@@ -1,10 +1,12 @@
 #include "link_table.hpp"
 
+#include "node_table.hpp"
 
 using namespace SR;    
 
 
-LinkTable::LinkTable():
+LinkTable::LinkTable(shared_ptr<NodeTable> node_table_) :
+	node_table(node_table_),
     current_base_ordinal(0)
 {
 }
@@ -59,7 +61,8 @@ void LinkTable::PrepareMonolithicBuild(DBWalk::Actions &actions)
             }	
             case DBWalk::SINGULAR:
             {
-                row.parent_xlink = walk_info.parent_xlink;
+				row.parent_xlink = walk_info.parent_xlink;
+                row.parent_node = walk_info.parent_xlink.GetChildX();
                 row.item_ordinal = walk_info.item_ordinal;
                 row.my_container_front = walk_info.xlink;
                 row.my_container_back = walk_info.xlink;
@@ -69,7 +72,8 @@ void LinkTable::PrepareMonolithicBuild(DBWalk::Actions &actions)
             {
                 TreePtr<Node> parent_x = walk_info.parent_xlink.GetChildX();
 
-                row.parent_xlink = walk_info.parent_xlink;
+				row.parent_xlink = walk_info.parent_xlink;
+                row.parent_node = walk_info.parent_xlink.GetChildX();
                 row.item_ordinal = walk_info.item_ordinal;
                 row.my_container_it = walk_info.xit;        
                 row.my_container_front = XLink( parent_x, &walk_info.p_xcon->front() );
@@ -91,7 +95,8 @@ void LinkTable::PrepareMonolithicBuild(DBWalk::Actions &actions)
             {
                 TreePtr<Node> parent_x = walk_info.parent_xlink.GetChildX();
 
-                row.parent_xlink = walk_info.parent_xlink;
+				row.parent_xlink = walk_info.parent_xlink;
+                row.parent_node = walk_info.parent_xlink.GetChildX();
                 row.item_ordinal = walk_info.item_ordinal;
                 row.my_container_it = walk_info.xit;
                 row.my_container_front = XLink( parent_x, &*(walk_info.p_xcon->begin()) );
@@ -105,17 +110,6 @@ void LinkTable::PrepareMonolithicBuild(DBWalk::Actions &actions)
 		// Check for badness
 		if( rows.count(walk_info.xlink.GetXPtr()) )
 		{
-			Row old_row = rows.at(walk_info.xlink.GetXPtr());
-			// remember that row is incomplete because 
-			// we have not been able to fill everything in yet
-			if( row.parent_xlink != old_row.parent_xlink )
-			{
-				ASSERT(false)
-					  ("Rule #217 violation or cycle: node with child should have only one parent\n")
-					  ("From parents: ")(row.parent_xlink)(" and ")(old_row.parent_xlink)
-					  ("\nTo child: ")(walk_info.xlink);
-			}
-			
 			// Otherwise why did the parents not fail the check?
 			ASSERTFAIL("Unknown trouble");				
 		}
@@ -174,6 +168,25 @@ bool LinkTable::Row::IsBase() const
 }
 
 
+XLink LinkTable::Row::GetParentXLink() const
+{
+	return parent_xlink;
+	/*const NodeTable::Row &nr = node_table->GetRow(parent_node);
+	const set<XLink> &ps = nr.parents;
+
+    // Note that the parent is unique because:
+    // - row is relative to a link, not a node,
+    // - multiple parents only allowed at leaf (see #217), and parent is 
+    //   (at least) one level back from that.
+	switch( ps.size() )
+	{
+		0: return XLink(); 
+		1: return OnlyElementOf(ps);
+		default: ASSERTFAIL("Rule #217 violation: node with child TreePtr has multiple parents");
+	}*/		
+}
+
+
 string LinkTable::Row::GetTrace() const
 {
     string s = "(cc=";
@@ -205,7 +218,7 @@ string LinkTable::Row::GetTrace() const
             break;
     }    
     if( par )
-        s += ", parent_xlink=" + Trace(parent_xlink);
+        s += ", parent_node=" + Trace(parent_node);
     if( cont )
     {
         s += ", front=" + Trace(my_container_front);

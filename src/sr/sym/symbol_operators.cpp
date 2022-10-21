@@ -379,7 +379,7 @@ SR::XLink ParentOperator::EvalXLinkFromRow( SR::XLink parent_xlink,
                                                const SR::LinkTable::Row &row ) const
 {
   
-    return row.parent_xlink;
+    return row.GetParentXLink();
 }
 
 

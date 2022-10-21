@@ -47,9 +47,9 @@ Orderable::Diff DepthFirstRelation::Compare3Way( const XLink l_xlink, const XLin
     while(true)
     {
         const LinkTable::Row &l_row = link_table->GetRow(l_cur_xlink);  
-        XLink l_parent_xlink = l_row.parent_xlink;    
+        XLink l_parent_xlink = l_row.GetParentXLink();    
         const LinkTable::Row &r_row = link_table->GetRow(r_cur_xlink);
-        XLink r_parent_xlink = r_row.parent_xlink;
+        XLink r_parent_xlink = r_row.GetParentXLink();
         
         //FTRACE("At ")(l_cur_xlink)(" and ")(r_cur_xlink)("\n")
         //      ("Parents ")(l_parent_xlink)(" and ")(r_parent_xlink)("\n")

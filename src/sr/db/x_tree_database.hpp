@@ -27,15 +27,15 @@ private:
         Plan( shared_ptr<Lacing> lacing );
         
         shared_ptr<Domain> domain;
-        shared_ptr<LinkTable> link_table;
         shared_ptr<NodeTable> node_table;
+        shared_ptr<LinkTable> link_table;
         shared_ptr<Indexes> indexes;
 
 #ifdef DB_ENABLE_COMPARATIVE_TEST
         shared_ptr<Domain> ref_domain;
         shared_ptr<Indexes> ref_indexes;
-        //shared_ptr<LinkTable> ref_link_table;
         //shared_ptr<NodeTable> ref_node_table;
+        //shared_ptr<LinkTable> ref_link_table;
 #endif
     } plan;
 

@@ -39,8 +39,8 @@ XTreeDatabase::XTreeDatabase( shared_ptr<Lacing> lacing, XLink root_xlink_ ) :
 
 XTreeDatabase::Plan::Plan( shared_ptr<Lacing> lacing ) :
     domain( make_shared<Domain>() ),
-    link_table( make_shared<LinkTable>() ),
     node_table( make_shared<NodeTable>() ),
+    link_table( make_shared<LinkTable>(node_table) ),
     indexes( make_shared<Indexes>(lacing, link_table.get()) )
 #ifdef DB_ENABLE_COMPARATIVE_TEST
     ,ref_domain( make_shared<Domain>() ),
@@ -384,7 +384,7 @@ set<TreeKit::LinkInfo> XTreeDatabase::GetDeclarers( TreePtr<Node> node ) const
         
         // first is TreePtr to the declarer node. Loses info about which 
         // link declared (in case of parallel links) but gets you the declarer node.
-        info.first = plan.link_table->GetRow(declarer_xlink).parent_xlink.GetChildX();
+        info.first = plan.link_table->GetRow(declarer_xlink).GetParentXLink().GetChildX();
 
         // second is TreePtrInterface * to the declarer's pointer to declaree
         // Retains precise info about which link.

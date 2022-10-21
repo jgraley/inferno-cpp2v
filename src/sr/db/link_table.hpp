@@ -8,25 +8,28 @@
 
 namespace SR 
 {
+class NodeTable;    
     
 class LinkTable : public Traceable
 {
 public:
-    LinkTable();
+    LinkTable(shared_ptr<NodeTable> node_table);
 
     class Row : public Traceable
     {
     public:
-        DBWalk::ContainmentContext containment_context;
         bool IsBase() const;
-        
+
         // Parent X link if not a base
-        // Note that the parent is unique because:
-        // - row is relative to a link, not a node,
-        // - multiple parents only allowed at leaf, and parent is 
-        //   (at least) one level back from that.
-        XLink parent_xlink = XLink();
+		XLink GetParentXLink() const;
+
+        string GetTrace() const;
+
+        DBWalk::ContainmentContext containment_context;
         
+        TreePtr<Node> parent_node;
+        XLink parent_xlink;
+
         // Last of the descendents in depth first order. If no 
         // descendents, it will be the current node. 
         XLink last_descendant_xlink = XLink();
@@ -50,9 +53,7 @@ public:
 
         // Ordinals
         DBCommon::OrdinalType container_ordinal = -1; 
-        DBCommon::OrdinalType base_ordinal = -1; 
-               
-        string GetTrace() const;
+        DBCommon::OrdinalType base_ordinal = -1;                
     };
     
     const Row &GetRow(XLink xlink) const;
@@ -67,6 +68,8 @@ public:
 
 private:
 	typedef const TreePtrInterface * Key;
+
+    shared_ptr<NodeTable> node_table;
 
     // XLink-to-row-of-x_tree_db map
     unordered_map<Key, Row> rows;
