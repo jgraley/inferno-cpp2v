@@ -47,8 +47,6 @@ void LinkTable::PrepareMonolithicBuild(DBWalk::Actions &actions)
 		switch( row.containment_context )
 		{
             case DBWalk::ROOT:
-            case DBWalk::EXTRA:
-            case DBWalk::SPECIAL:
             {
                 // Base ordinal filled on only for base xlinks, so that we retain
                 // locality.
@@ -133,12 +131,6 @@ bool LinkTable::Row::IsBase() const
         case DBWalk::ROOT:
             return true;
             break;
-        case DBWalk::EXTRA:
-            return true;
-            break;
-        case DBWalk::SPECIAL:
-            return true;
-            break;
         case DBWalk::SINGULAR:
             return false;
             break;
@@ -163,12 +155,6 @@ string LinkTable::Row::GetTrace() const
     {
         case DBWalk::ROOT:
             s += "ROOT";
-            break;
-        case DBWalk::EXTRA:
-            s += "EXTRA";
-            break;
-        case DBWalk::SPECIAL:
-            s += "SPECIAL";
             break;
         case DBWalk::SINGULAR:
             s += "SINGULAR";

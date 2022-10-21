@@ -17,8 +17,8 @@ void DBWalk::InitWalk( const Actions *actions )
 {
     WalkKit kit { actions, REQUIRE_SOLO };
 
-    VisitBase( kit, XLink::MMAX_Link, SPECIAL );
-    VisitBase( kit, XLink::OffEndXLink, SPECIAL );
+    VisitBase( kit, XLink::MMAX_Link, ROOT );
+    VisitBase( kit, XLink::OffEndXLink, ROOT );
 }
 
 
@@ -36,7 +36,7 @@ void DBWalk::ExtraZoneWalk( const Actions *actions,
 {
     WalkKit kit { actions, STOP_IF_ALREADY_IN };
 
-	VisitBase( kit, extra_base_xlink, EXTRA ); 
+	VisitBase( kit, extra_base_xlink, ROOT ); 
 }
 
 

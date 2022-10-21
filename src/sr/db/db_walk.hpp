@@ -16,8 +16,6 @@ public:
     {
         UNKNOWN,
         ROOT,
-        EXTRA,
-        SPECIAL,
         SINGULAR,
         IN_SEQUENCE,
         IN_COLLECTION
