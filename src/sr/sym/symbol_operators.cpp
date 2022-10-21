@@ -380,7 +380,7 @@ SR::XLink ParentOperator::EvalXLinkFromRow( const EvalKit &kit,
                                             const SR::LinkTable::Row &row ) const
 {
   
-    return kit.x_tree_db->GetParentXLink(xlink);
+    return kit.x_tree_db->TryGetParentXLink(xlink);
 }
 
 

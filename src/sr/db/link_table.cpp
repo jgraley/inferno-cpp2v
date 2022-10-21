@@ -5,8 +5,7 @@
 using namespace SR;    
 
 
-LinkTable::LinkTable(shared_ptr<NodeTable> node_table_) :
-	node_table(node_table_),
+LinkTable::LinkTable() :
     current_base_ordinal(0)
 {
 }
@@ -61,7 +60,6 @@ void LinkTable::PrepareMonolithicBuild(DBWalk::Actions &actions)
             }	
             case DBWalk::SINGULAR:
             {
-				row.parent_xlink = walk_info.parent_xlink;
                 row.parent_node = walk_info.parent_xlink.GetChildX();
                 row.item_ordinal = walk_info.item_ordinal;
                 row.my_container_front = walk_info.xlink;
@@ -72,7 +70,6 @@ void LinkTable::PrepareMonolithicBuild(DBWalk::Actions &actions)
             {
                 TreePtr<Node> parent_x = walk_info.parent_xlink.GetChildX();
 
-				row.parent_xlink = walk_info.parent_xlink;
                 row.parent_node = walk_info.parent_xlink.GetChildX();
                 row.item_ordinal = walk_info.item_ordinal;
                 row.my_container_it = walk_info.xit;        
@@ -95,7 +92,6 @@ void LinkTable::PrepareMonolithicBuild(DBWalk::Actions &actions)
             {
                 TreePtr<Node> parent_x = walk_info.parent_xlink.GetChildX();
 
-				row.parent_xlink = walk_info.parent_xlink;
                 row.parent_node = walk_info.parent_xlink.GetChildX();
                 row.item_ordinal = walk_info.item_ordinal;
                 row.my_container_it = walk_info.xit;
@@ -165,25 +161,6 @@ bool LinkTable::Row::IsBase() const
             break;
     }    
     ASSERTFAIL();
-}
-
-
-XLink LinkTable::Row::GetParentXLink() const
-{
-	return parent_xlink;
-	/*const NodeTable::Row &nr = node_table->GetRow(parent_node);
-	const set<XLink> &ps = nr.parents;
-
-    // Note that the parent is unique because:
-    // - row is relative to a link, not a node,
-    // - multiple parents only allowed at leaf (see #217), and parent is 
-    //   (at least) one level back from that.
-	switch( ps.size() )
-	{
-		0: return XLink(); 
-		1: return OnlyElementOf(ps);
-		default: ASSERTFAIL("Rule #217 violation: node with child TreePtr has multiple parents");
-	}*/		
 }
 
 

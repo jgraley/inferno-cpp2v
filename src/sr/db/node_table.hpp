@@ -22,7 +22,7 @@ public:
 
 		// Declarative XLinks onto our node. 
 		// A subset of parents, so to get the declarer node, you'll need 
-		// to use eg Row::GetParentXLink().GetChildX(). Why have I done 
+		// to use eg Row::TryGetParentXLink().GetChildX(). Why have I done 
 		// this? So that this info is unambiguous across parallel links:
 		// We'll uniquely specify the correct one if only one is a 
 		// declaring link (precision). Taking parent discards that info.

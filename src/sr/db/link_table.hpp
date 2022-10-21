@@ -13,22 +13,17 @@ class NodeTable;
 class LinkTable : public Traceable
 {
 public:
-    LinkTable(shared_ptr<NodeTable> node_table);
+    LinkTable();
 
     class Row : public Traceable
     {
     public:
         bool IsBase() const;
-
-        // Parent X link if not a base
-		XLink GetParentXLink() const;
-
         string GetTrace() const;
 
         DBWalk::ContainmentContext containment_context;
         
         TreePtr<Node> parent_node;
-        XLink parent_xlink;
 
         // Last of the descendents in depth first order. If no 
         // descendents, it will be the current node. 
@@ -68,8 +63,6 @@ public:
 
 private:
 	typedef const TreePtrInterface * Key;
-
-    shared_ptr<NodeTable> node_table;
 
     // XLink-to-row-of-x_tree_db map
     unordered_map<Key, Row> rows;

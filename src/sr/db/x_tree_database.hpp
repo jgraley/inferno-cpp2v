@@ -67,7 +67,9 @@ public:
     bool HasRow(XLink xlink) const;    
     const NodeTable::Row &GetNodeRow(TreePtr<Node> node) const;
     bool HasNodeRow(TreePtr<Node> node) const;
-    XLink GetParentXLink(XLink xlink) const;
+    
+    // Parent X link if not a base
+	XLink TryGetParentXLink(XLink xlink) const;
     
 	const Indexes &GetIndexes() const;
 	TreePtr<Node> GetRootNode() const;

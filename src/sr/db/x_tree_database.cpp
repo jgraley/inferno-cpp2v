@@ -40,7 +40,7 @@ XTreeDatabase::XTreeDatabase( shared_ptr<Lacing> lacing, XLink root_xlink_ ) :
 XTreeDatabase::Plan::Plan( const XTreeDatabase *algo, shared_ptr<Lacing> lacing ) :
     domain( make_shared<Domain>() ),
     node_table( make_shared<NodeTable>() ),
-    link_table( make_shared<LinkTable>(node_table) ),
+    link_table( make_shared<LinkTable>() ),
     indexes( make_shared<Indexes>(lacing, algo) )
 #ifdef DB_ENABLE_COMPARATIVE_TEST
     ,ref_domain( make_shared<Domain>() ),
@@ -334,9 +334,25 @@ bool XTreeDatabase::HasNodeRow(TreePtr<Node> node) const
 }
 
 
-XLink XTreeDatabase::GetParentXLink(XLink xlink) const
+XLink XTreeDatabase::TryGetParentXLink(XLink xlink) const
 {
-	return plan.link_table->GetRow(xlink).parent_xlink;
+//	return plan.link_table->GetRow(xlink).parent_xlink;
+	TreePtr<Node> parent_node = plan.link_table->GetRow(xlink).parent_node;
+	if( !parent_node )
+		return XLink();
+		
+	const set<XLink> &ps = plan.node_table->GetRow(parent_node).parents;
+
+    // Note that the parent is unique because:
+    // - row is relative to a link, not a node,
+    // - multiple parents only allowed at leaf (see #217), and parent is 
+    //   (at least) one level back from that.
+	switch( ps.size() )
+	{
+		case 0: return XLink(); 
+		case 1: return OnlyElementOf(ps);
+		default: ASSERTFAIL("Rule #217 violation: node with child TreePtr has multiple parents");
+	}		
 }
 
 
@@ -390,7 +406,7 @@ set<TreeKit::LinkInfo> XTreeDatabase::GetDeclarers( TreePtr<Node> node ) const
         
         // first is TreePtr to the declarer node. Loses info about which 
         // link declared (in case of parallel links) but gets you the declarer node.
-        info.first = plan.link_table->GetRow(declarer_xlink).GetParentXLink().GetChildX();
+        info.first = TryGetParentXLink(declarer_xlink).GetChildX();
 
         // second is TreePtrInterface * to the declarer's pointer to declaree
         // Retains precise info about which link.
