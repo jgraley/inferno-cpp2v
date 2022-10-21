@@ -15,7 +15,7 @@ using namespace SR;
 //#define DB_TEST_THE_TEST
 
 XTreeDatabase::XTreeDatabase( shared_ptr<Lacing> lacing, XLink root_xlink_ ) :
-    plan( lacing ),
+    plan( this, lacing ),
     root_xlink( root_xlink_ )
 {
 	auto on_insert_extra_subtree = [&](XLink extra_base_xlink)
@@ -37,14 +37,14 @@ XTreeDatabase::XTreeDatabase( shared_ptr<Lacing> lacing, XLink root_xlink_ ) :
 }
 
 
-XTreeDatabase::Plan::Plan( shared_ptr<Lacing> lacing ) :
+XTreeDatabase::Plan::Plan( const XTreeDatabase *algo, shared_ptr<Lacing> lacing ) :
     domain( make_shared<Domain>() ),
     node_table( make_shared<NodeTable>() ),
     link_table( make_shared<LinkTable>(node_table) ),
-    indexes( make_shared<Indexes>(lacing, link_table.get()) )
+    indexes( make_shared<Indexes>(lacing, algo) )
 #ifdef DB_ENABLE_COMPARATIVE_TEST
     ,ref_domain( make_shared<Domain>() ),
-    ref_indexes( make_shared<Indexes>(lacing, link_table.get(), true) )
+    ref_indexes( make_shared<Indexes>(lacing, algo, true) )
 #endif    
 {
 }
@@ -331,6 +331,12 @@ const NodeTable::Row &XTreeDatabase::GetNodeRow(TreePtr<Node> node) const
 bool XTreeDatabase::HasNodeRow(TreePtr<Node> node) const
 {
 	return plan.node_table->HasRow(node);
+}
+
+
+XLink XTreeDatabase::GetParentXLink(XLink xlink) const
+{
+	return plan.link_table->GetRow(xlink).parent_xlink;
 }
 
 

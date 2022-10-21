@@ -248,7 +248,7 @@ unique_ptr<BooleanResult> DepthFirstComparisonOperator::Evaluate( const EvalKit 
 
     // For greater/less, we need to consult the x_tree_db. We use the 
     // depth-first relation.
-    SR::DepthFirstRelation dfr( &kit.x_tree_db->GetLinkTable() ); 
+    SR::DepthFirstRelation dfr( kit.x_tree_db ); 
     Orderable::Diff diff = dfr.Compare3Way(ra->GetOnlyXLink(), rb->GetOnlyXLink() );
     bool res = EvalBoolFromDiff( diff );
     

@@ -1,7 +1,7 @@
 #include "df_relation.hpp"
 
 #include "relation_test.hpp"
-#include "link_table.hpp"
+#include "x_tree_database.hpp"
 
 #include "helpers/simple_compare.hpp"
 #include "helpers/duplicate.hpp"
@@ -10,8 +10,8 @@
 
 using namespace SR;
 
-DepthFirstRelation::DepthFirstRelation(const LinkTable *link_table_) :
-    link_table( link_table_ )
+DepthFirstRelation::DepthFirstRelation(const XTreeDatabase *db_) :
+    db( db_ )
 {
 }
 
@@ -46,10 +46,10 @@ Orderable::Diff DepthFirstRelation::Compare3Way( const XLink l_xlink, const XLin
     XLink r_cur_xlink = r_xlink;
     while(true)
     {
-        const LinkTable::Row &l_row = link_table->GetRow(l_cur_xlink);  
-        XLink l_parent_xlink = l_row.GetParentXLink();    
-        const LinkTable::Row &r_row = link_table->GetRow(r_cur_xlink);
-        XLink r_parent_xlink = r_row.GetParentXLink();
+        const LinkTable::Row &l_row = db->GetRow(l_cur_xlink);  
+        XLink l_parent_xlink = db->GetParentXLink(l_cur_xlink);    
+        const LinkTable::Row &r_row = db->GetRow(r_cur_xlink);
+        XLink r_parent_xlink = db->GetParentXLink(r_cur_xlink);
         
         //FTRACE("At ")(l_cur_xlink)(" and ")(r_cur_xlink)("\n")
         //      ("Parents ")(l_parent_xlink)(" and ")(r_parent_xlink)("\n")
@@ -105,8 +105,8 @@ Orderable::Diff DepthFirstRelation::Compare3Way( const XLink l_xlink, const XLin
     // and l and r are direct siblings. We must check against orderings in 
     // the common parent to l and r and can use link table rows directly 
     // for this due to having a common parent.
-    const LinkTable::Row &l_row = link_table->GetRow(l_cur_xlink);       
-    const LinkTable::Row &r_row = link_table->GetRow(r_cur_xlink);
+    const LinkTable::Row &l_row = db->GetRow(l_cur_xlink);       
+    const LinkTable::Row &r_row = db->GetRow(r_cur_xlink);
     
     // Itemisation is primary
     if( Orderable::Diff d = l_row.item_ordinal - r_row.item_ordinal )
@@ -131,7 +131,7 @@ void DepthFirstRelation::Test( const unordered_set<XLink> &xlinks )
 	TestRelationProperties( xlinks,
                             true,
                             "DepthFirstRelation",
-                            [&](){ return Trace(link_table); },                            
+                            [&](){ return string(); },                            
                             bind(&DepthFirstRelation::Compare3Way, *this, _1, _2), 
     [&](XLink l, XLink r)
     { 

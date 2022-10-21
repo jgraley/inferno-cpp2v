@@ -354,7 +354,7 @@ unique_ptr<SymbolResultInterface> XTreeDbToSymbolOperator::Evaluate( const EvalK
         return ar;
         
     const SR::LinkTable::Row &row( kit.x_tree_db->GetRow(ar->GetOnlyXLink()) );   
-    SR::XLink result_xlink = EvalXLinkFromRow( ar->GetOnlyXLink(), row );
+    SR::XLink result_xlink = EvalXLinkFromRow( kit, ar->GetOnlyXLink(), row );
     if( result_xlink ) 
         return make_unique<SymbolResult>( result_xlink );
     else
@@ -375,11 +375,12 @@ Expression::Precedence XTreeDbToSymbolOperator::GetPrecedence() const
 
 // ------------------------- ParentOperator --------------------------
     
-SR::XLink ParentOperator::EvalXLinkFromRow( SR::XLink parent_xlink, 
-                                               const SR::LinkTable::Row &row ) const
+SR::XLink ParentOperator::EvalXLinkFromRow( const EvalKit &kit,
+                                            SR::XLink xlink, 
+                                            const SR::LinkTable::Row &row ) const
 {
   
-    return row.GetParentXLink();
+    return kit.x_tree_db->GetParentXLink(xlink);
 }
 
 
@@ -399,8 +400,9 @@ string ParentOperator::GetRenderPrefix() const
 
 // ------------------------- LastDescendantOperator --------------------------
     
-SR::XLink LastDescendantOperator::EvalXLinkFromRow( SR::XLink parent_xlink, 
-                                                       const SR::LinkTable::Row &row ) const
+SR::XLink LastDescendantOperator::EvalXLinkFromRow( const EvalKit &kit,
+                                                    SR::XLink xlink, 
+                                                    const SR::LinkTable::Row &row ) const
 {
   
     return row.last_descendant_xlink;
@@ -414,8 +416,9 @@ string LastDescendantOperator::GetRenderPrefix() const
 
 // ------------------------- MyContainerFrontOperator --------------------------
     
-SR::XLink MyContainerFrontOperator::EvalXLinkFromRow( SR::XLink parent_xlink, 
-                                                         const SR::LinkTable::Row &row ) const
+SR::XLink MyContainerFrontOperator::EvalXLinkFromRow( const EvalKit &kit,
+                                                      SR::XLink xlink, 
+                                                      const SR::LinkTable::Row &row ) const
 {
   
     return row.my_container_front;
@@ -429,8 +432,9 @@ string MyContainerFrontOperator::GetRenderPrefix() const
 
 // ------------------------- MyContainerBackOperator --------------------------
 
-SR::XLink MyContainerBackOperator::EvalXLinkFromRow( SR::XLink parent_xlink, 
-                                                        const SR::LinkTable::Row &row ) const
+SR::XLink MyContainerBackOperator::EvalXLinkFromRow( const EvalKit &kit,
+                                                     SR::XLink xlink, 
+                                                     const SR::LinkTable::Row &row ) const
 {
     return row.my_container_back;
 }
@@ -443,8 +447,9 @@ string MyContainerBackOperator::GetRenderPrefix() const
 
 // ------------------------- MySequenceSuccessorOperator --------------------------
 
-SR::XLink MySequenceSuccessorOperator::EvalXLinkFromRow( SR::XLink parent_xlink, 
-                                                            const SR::LinkTable::Row &row ) const
+SR::XLink MySequenceSuccessorOperator::EvalXLinkFromRow( const EvalKit &kit,
+                                                         SR::XLink xlink, 
+                                                         const SR::LinkTable::Row &row ) const
 {  
     return row.my_sequence_successor;
 }
@@ -466,8 +471,9 @@ string MySequenceSuccessorOperator::GetRenderPrefix() const
 
 // ------------------------- MySequencePredecessorOperator --------------------------
 
-SR::XLink MySequencePredecessorOperator::EvalXLinkFromRow( SR::XLink parent_xlink, 
-                                                              const SR::LinkTable::Row &row ) const
+SR::XLink MySequencePredecessorOperator::EvalXLinkFromRow( const EvalKit &kit,
+                                                           SR::XLink xlink, 
+                                                           const SR::LinkTable::Row &row ) const
 {  
     return row.my_sequence_predecessor;
 }
@@ -526,7 +532,7 @@ unique_ptr<SymbolResultInterface> AllChildrenOperator::Evaluate( const EvalKit &
 
 
 shared_ptr<SymbolExpression> AllChildrenOperator::TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
-                                                                  shared_ptr<SymbolExpression> to_equal ) const
+                                                                      shared_ptr<SymbolExpression> to_equal ) const
 {   
     // AllChildren and Parent are inverse of each other
     auto a_to_equal = make_shared<ParentOperator>( to_equal );

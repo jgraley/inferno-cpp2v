@@ -19,12 +19,12 @@ class XTreeDatabase : public Traceable,
                       public TreeKit
 {
 public:
-    explicit XTreeDatabase( shared_ptr<Lacing> lacing, XLink root_xlink );
+    XTreeDatabase( shared_ptr<Lacing> lacing, XLink root_xlink );
     
 private: 
     const struct Plan : public Traceable
     {
-        Plan( shared_ptr<Lacing> lacing );
+        Plan( const XTreeDatabase *algo, shared_ptr<Lacing> lacing );
         
         shared_ptr<Domain> domain;
         shared_ptr<NodeTable> node_table;
@@ -67,6 +67,8 @@ public:
     bool HasRow(XLink xlink) const;    
     const NodeTable::Row &GetNodeRow(TreePtr<Node> node) const;
     bool HasNodeRow(TreePtr<Node> node) const;
+    XLink GetParentXLink(XLink xlink) const;
+    
 	const Indexes &GetIndexes() const;
 	TreePtr<Node> GetRootNode() const;
 	XLink GetRootXLink() const;

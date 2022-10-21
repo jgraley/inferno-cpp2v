@@ -13,12 +13,12 @@
 namespace SR
 {
 
-class LinkTable;
+class XTreeDatabase;
 
 class DepthFirstRelation
 {
 public:
-    DepthFirstRelation(const LinkTable *link_table);
+    DepthFirstRelation(const XTreeDatabase *db);
 
     /// Less operator: for use with set, map etc
     bool operator()( XLink l_xlink, XLink r_xlink ) const;
@@ -27,7 +27,7 @@ public:
     void Test( const unordered_set<XLink> &xlinks );
     
 private:
-	const LinkTable * const link_table;
+	const XTreeDatabase * const db;
 }; 
 
 };

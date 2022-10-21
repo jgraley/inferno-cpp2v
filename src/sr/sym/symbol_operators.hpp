@@ -149,8 +149,9 @@ public:
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     virtual unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit,
                                                list<unique_ptr<SymbolResultInterface>> &&op_results ) const override final;
-    virtual SR::XLink EvalXLinkFromRow( SR::XLink parent_xlink, 
-                                           const SR::LinkTable::Row &row ) const = 0;
+    virtual SR::XLink EvalXLinkFromRow( const EvalKit &kit,
+                                        SR::XLink xlink, 
+                                        const SR::LinkTable::Row &row ) const = 0;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     virtual string GetRenderPrefix() const = 0;
@@ -165,13 +166,14 @@ class ParentOperator : public XTreeDbToSymbolOperator
 {
 public:    
     using XTreeDbToSymbolOperator::XTreeDbToSymbolOperator;
-    virtual SR::XLink EvalXLinkFromRow( SR::XLink parent_xlink, 
-                                           const SR::LinkTable::Row &row ) const override;
+    SR::XLink EvalXLinkFromRow( const EvalKit &kit,
+                                SR::XLink xlink, 
+                                const SR::LinkTable::Row &row ) const override;
 
-    virtual shared_ptr<SymbolExpression> TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
-                                                         shared_ptr<SymbolExpression> to_equal ) const override;
+    shared_ptr<SymbolExpression> TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
+                                                     shared_ptr<SymbolExpression> to_equal ) const override;
 
-    virtual string GetRenderPrefix() const override;
+    string GetRenderPrefix() const override;
 };
 
 // ------------------------- LastDescendantOperator --------------------------
@@ -180,9 +182,10 @@ class LastDescendantOperator : public XTreeDbToSymbolOperator
 {
 public:    
     using XTreeDbToSymbolOperator::XTreeDbToSymbolOperator;
-    virtual SR::XLink EvalXLinkFromRow( SR::XLink parent_xlink, 
-                                           const SR::LinkTable::Row &row ) const override;
-    virtual string GetRenderPrefix() const override;
+    SR::XLink EvalXLinkFromRow( const EvalKit &kit,
+                                SR::XLink xlink, 
+                                const SR::LinkTable::Row &row ) const override;
+    string GetRenderPrefix() const override;
 };
 
 // ------------------------- MyContainerFrontOperator --------------------------
@@ -191,9 +194,10 @@ class MyContainerFrontOperator : public XTreeDbToSymbolOperator
 {
 public:    
     using XTreeDbToSymbolOperator::XTreeDbToSymbolOperator;
-    virtual SR::XLink EvalXLinkFromRow( SR::XLink parent_xlink, 
-                                           const SR::LinkTable::Row &row ) const override;
-    virtual string GetRenderPrefix() const override;
+    SR::XLink EvalXLinkFromRow( const EvalKit &kit,
+                                SR::XLink xlink, 
+                                const SR::LinkTable::Row &row ) const override;
+    string GetRenderPrefix() const override;
 };
 
 // ------------------------- MyContainerBackOperator --------------------------
@@ -202,9 +206,10 @@ class MyContainerBackOperator : public XTreeDbToSymbolOperator
 {
 public:    
     using XTreeDbToSymbolOperator::XTreeDbToSymbolOperator;
-    virtual SR::XLink EvalXLinkFromRow( SR::XLink parent_xlink, 
-                                           const SR::LinkTable::Row &row ) const override;
-    virtual string GetRenderPrefix() const override;
+    SR::XLink EvalXLinkFromRow( const EvalKit &kit,
+                                SR::XLink xlink, 
+                                const SR::LinkTable::Row &row ) const override;
+    string GetRenderPrefix() const override;
 };
 
 // ------------------------- MySequenceSuccessorOperator --------------------------
@@ -213,13 +218,14 @@ class MySequenceSuccessorOperator : public XTreeDbToSymbolOperator
 {
 public:    
     using XTreeDbToSymbolOperator::XTreeDbToSymbolOperator;
-    virtual SR::XLink EvalXLinkFromRow( SR::XLink parent_xlink, 
-                                           const SR::LinkTable::Row &row ) const override;
+    SR::XLink EvalXLinkFromRow( const EvalKit &kit,
+                                SR::XLink xlink, 
+                                const SR::LinkTable::Row &row ) const override;
 
-    virtual shared_ptr<SymbolExpression> TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
-                                                         shared_ptr<SymbolExpression> to_equal ) const override;
+    shared_ptr<SymbolExpression> TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
+                                                     shared_ptr<SymbolExpression> to_equal ) const override;
 
-    virtual string GetRenderPrefix() const override;
+    string GetRenderPrefix() const override;
 };
 
 // ------------------------- MySequencePredecessorOperator --------------------------
@@ -228,13 +234,14 @@ class MySequencePredecessorOperator : public XTreeDbToSymbolOperator
 {
 public:    
     using XTreeDbToSymbolOperator::XTreeDbToSymbolOperator;
-    virtual SR::XLink EvalXLinkFromRow( SR::XLink parent_xlink, 
-                                           const SR::LinkTable::Row &row ) const override;
+    SR::XLink EvalXLinkFromRow( const EvalKit &kit,
+                                SR::XLink xlink, 
+                                const SR::LinkTable::Row &row ) const override;
 
-    virtual shared_ptr<SymbolExpression> TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
-                                                         shared_ptr<SymbolExpression> to_equal ) const override;
+    shared_ptr<SymbolExpression> TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
+                                                     shared_ptr<SymbolExpression> to_equal ) const override;
 
-    virtual string GetRenderPrefix() const override;
+    string GetRenderPrefix() const override;
 };
 
 // ------------------------- AllChildrenOperator --------------------------

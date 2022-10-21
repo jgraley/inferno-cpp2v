@@ -2,7 +2,6 @@
 
 #include "x_tree_database.hpp"
 #include "sc_relation.hpp"
-#include "link_table.hpp"
 #include "lacing.hpp"
 
 #include "common/read_args.hpp"
@@ -11,11 +10,11 @@ using namespace SR;
 
 //#define TRACE_CATEGORY_RELATION
 
-Indexes::Indexes( shared_ptr<Lacing> lacing, const LinkTable *link_table_, bool ref_ ) :
+Indexes::Indexes( shared_ptr<Lacing> lacing, const XTreeDatabase *db_, bool ref_ ) :
     plan( lacing ),
-    depth_first_ordered_index( link_table_ ),
+    depth_first_ordered_index( db_ ),
     category_ordered_index( plan.lacing ),
-    link_table( link_table_ ),
+    db( db_ ),
     ref( ref_ ),
     use_incremental( ref ? false : ReadArgs::use_incremental )
 { 
@@ -80,7 +79,7 @@ void Indexes::TestRelations( const unordered_set<XLink> &xlinks )
 	CategoryRelation cat_r( plan.lacing );
 	cat_r.Test( xlinks );
 	
-	DepthFirstRelation dfr( link_table );
+	DepthFirstRelation dfr( db );
 	dfr.Test( xlinks );	
 }
 

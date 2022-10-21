@@ -19,12 +19,11 @@ namespace SR
 {
 class Lacing;
 class XTreeDatabase;
-class LinkTable;
     
 class Indexes
 {
 public:
-    Indexes(shared_ptr<Lacing> lacing, const LinkTable *link_table, bool ref=false );
+    Indexes(shared_ptr<Lacing> lacing, const XTreeDatabase *db, bool ref=false );
     
 private: 
     const struct Plan : public Traceable
@@ -68,7 +67,7 @@ public:
     SimpleCompareOrderedIndex simple_compare_ordered_index;   
 
 private:
-    const LinkTable *link_table;
+    const XTreeDatabase *db;
     const bool ref;
     const bool use_incremental;
 };    
