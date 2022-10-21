@@ -71,6 +71,9 @@ public:
     // Parent X link if not a base
 	XLink TryGetParentXLink(XLink xlink) const;
     
+	XLink GetLastDescendant(XLink xlink) const;
+
+
 	const Indexes &GetIndexes() const;
 	TreePtr<Node> GetRootNode() const;
 	XLink GetRootXLink() const;

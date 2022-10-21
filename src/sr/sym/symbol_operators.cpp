@@ -405,7 +405,7 @@ SR::XLink LastDescendantOperator::EvalXLinkFromRow( const EvalKit &kit,
                                                     const SR::LinkTable::Row &row ) const
 {
   
-    return row.last_descendant_xlink;
+    return kit.x_tree_db->GetLastDescendant(xlink);
 }
 
 

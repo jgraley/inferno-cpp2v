@@ -183,11 +183,11 @@ void DBWalk::VisitItemise( const WalkKit &kit,
     for( int item_ordinal=0; item_ordinal<x_items.size(); item_ordinal++ )
     {
         Itemiser::Element *xe = x_items[item_ordinal];
-        if( SequenceInterface *x_seq = dynamic_cast<SequenceInterface *>(xe) )
+        if( auto x_seq = dynamic_cast<SequenceInterface *>(xe) )
             VisitSequence( kit, x_seq, xlink, item_ordinal );
-        else if( CollectionInterface *x_col = dynamic_cast<CollectionInterface *>(xe) )
+        else if( auto x_col = dynamic_cast<CollectionInterface *>(xe) )
             VisitCollection( kit, x_col, xlink, item_ordinal );
-        else if( TreePtrInterface *p_x_singular = dynamic_cast<TreePtrInterface *>(xe) )
+        else if( auto p_x_singular = dynamic_cast<TreePtrInterface *>(xe) )
             VisitSingular( kit, p_x_singular, xlink, item_ordinal );
         else
             ASSERTFAIL("got something from itemise that isnt a Sequence, Collection or a singular TreePtr");

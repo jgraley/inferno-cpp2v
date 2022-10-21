@@ -356,6 +356,35 @@ XLink XTreeDatabase::TryGetParentXLink(XLink xlink) const
 }
 
 
+XLink XTreeDatabase::GetLastDescendant(XLink xlink) const
+{
+    TreePtr<Node> x = xlink.GetChildX();
+    ASSERT(x)("This probably means we're walking an incomplete tree");
+    vector< Itemiser::Element * > x_items = x->Itemise();
+
+	// Loop backward over the items
+    for( int item_ordinal=x_items.size()-1; item_ordinal>=0; item_ordinal-- )
+    {
+        Itemiser::Element *xe = x_items[item_ordinal];
+		if( auto x_con = dynamic_cast<ContainerInterface *>(xe) )
+		{
+			if( !x_con->empty() )
+				return GetLastDescendant( XLink( x, &x_con->back() ) );
+		}
+		else if( auto p_x_singular = dynamic_cast<TreePtrInterface *>(xe) )
+		{
+			if( *p_x_singular ) // tolerate NULL singlar child pointers
+        		return GetLastDescendant( XLink( x, &*p_x_singular ) );
+		}
+		else
+			ASSERTFAIL("got something strange from itemise");
+	}
+
+	// No children so we are our our own last descendant
+	return xlink;	
+}
+
+
 const Indexes &XTreeDatabase::GetIndexes() const
 {
 	return *plan.indexes;
