@@ -109,7 +109,7 @@ Orderable::Diff DepthFirstRelation::Compare3Way( const XLink l_xlink, const XLin
     const LinkTable::Row &r_row = link_table->GetRow(r_cur_xlink);
     
     // Itemisation is primary
-    if( Orderable::Diff d = l_row.item_number - r_row.item_number )
+    if( Orderable::Diff d = l_row.item_ordinal - r_row.item_ordinal )
         return d;
         
     // Secondary is position inside container

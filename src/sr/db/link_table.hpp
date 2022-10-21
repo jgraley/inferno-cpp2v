@@ -32,7 +32,7 @@ public:
         XLink last_descendant_xlink = XLink();
         
         // Index into itemisation of the parent node
-        int item_number;
+        int item_ordinal;
 
         // First element of container of which I'm a member. 
         // Defined for all item types.
@@ -66,8 +66,10 @@ public:
 	string GetTrace() const;
 
 private:
+	typedef const TreePtrInterface * Key;
+
     // XLink-to-row-of-x_tree_db map
-    unordered_map<XLink, Row> rows;
+    unordered_map<Key, Row> rows;
     
     // Base ordering
     int current_base_ordinal;

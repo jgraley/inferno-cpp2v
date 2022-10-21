@@ -28,7 +28,7 @@ public:
 		ContainmentContext context;
         XLink xlink;
         XLink parent_xlink;
-        int item_number;
+        int item_ordinal;
         int container_ordinal;
         const TreePtrInterface *p_x;
         ContainerInterface *p_xcon;
@@ -88,15 +88,15 @@ private:
     void VisitSingular( const WalkKit &kit, 
                         const TreePtrInterface *p_x_singular, 
                         XLink xlink,
-                        int item_number );
+                        int item_ordinal );
     void VisitSequence( const WalkKit &kit, 
                         SequenceInterface *x_seq, 
                         XLink xlink,
-                        int item_number );
+                        int item_ordinal );
     void VisitCollection( const WalkKit &kit, 
                           CollectionInterface *x_col, 
                           XLink xlink,
-                          int item_number );
+                          int item_ordinal );
     void VisitLink( const WalkKit &kit, 
                     const WalkInfo &walk_info );
     void VisitItemise( const WalkKit &kit, 

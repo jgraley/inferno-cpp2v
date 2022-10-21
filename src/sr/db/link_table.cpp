@@ -16,14 +16,14 @@ const LinkTable::Row &LinkTable::GetRow(XLink xlink) const
     ASSERT( HasRow(xlink) )
           ("X tree database: no row for ")(xlink)("\n")
           ("Rows: ")(rows);
-    return rows.at(xlink);
+    return rows.at(xlink.GetXPtr());
 }
 
 
 bool LinkTable::HasRow(XLink xlink) const
 {
     ASSERT( xlink );
-    return rows.count(xlink) > 0;
+    return rows.count(xlink.GetXPtr()) > 0;
 }
 
 
@@ -60,7 +60,7 @@ void LinkTable::PrepareMonolithicBuild(DBWalk::Actions &actions)
             case DBWalk::SINGULAR:
             {
                 row.parent_xlink = walk_info.parent_xlink;
-                row.item_number = walk_info.item_number;
+                row.item_ordinal = walk_info.item_ordinal;
                 row.my_container_front = walk_info.xlink;
                 row.my_container_back = walk_info.xlink;
                 break;
@@ -70,7 +70,7 @@ void LinkTable::PrepareMonolithicBuild(DBWalk::Actions &actions)
                 TreePtr<Node> parent_x = walk_info.parent_xlink.GetChildX();
 
                 row.parent_xlink = walk_info.parent_xlink;
-                row.item_number = walk_info.item_number;
+                row.item_ordinal = walk_info.item_ordinal;
                 row.my_container_it = walk_info.xit;        
                 row.my_container_front = XLink( parent_x, &walk_info.p_xcon->front() );
                 row.my_container_back = XLink( parent_x, &walk_info.p_xcon->back() );
@@ -92,7 +92,7 @@ void LinkTable::PrepareMonolithicBuild(DBWalk::Actions &actions)
                 TreePtr<Node> parent_x = walk_info.parent_xlink.GetChildX();
 
                 row.parent_xlink = walk_info.parent_xlink;
-                row.item_number = walk_info.item_number;
+                row.item_ordinal = walk_info.item_ordinal;
                 row.my_container_it = walk_info.xit;
                 row.my_container_front = XLink( parent_x, &*(walk_info.p_xcon->begin()) );
                 // Note: in real STL containers, one would use *(x_col->rbegin())
@@ -103,9 +103,9 @@ void LinkTable::PrepareMonolithicBuild(DBWalk::Actions &actions)
 		}
 			
 		// Check for badness
-		if( rows.count(walk_info.xlink) )
+		if( rows.count(walk_info.xlink.GetXPtr()) )
 		{
-			Row old_row = rows.at(walk_info.xlink);
+			Row old_row = rows.at(walk_info.xlink.GetXPtr());
 			// remember that row is incomplete because 
 			// we have not been able to fill everything in yet
 			if( row.parent_xlink != old_row.parent_xlink )
@@ -125,14 +125,14 @@ void LinkTable::PrepareMonolithicBuild(DBWalk::Actions &actions)
 		last_xlink = walk_info.xlink;
 
 		// Add a row of x_tree_db
-		InsertSolo( rows, make_pair(walk_info.xlink, row) );
+		InsertSolo( rows, make_pair(walk_info.xlink.GetXPtr(), row) );
 	};
 	
 	actions.link_row_out = [&](const DBWalk::WalkInfo &walk_info)
 	{
 		// ----------------- Generate row unwind
 		// Grab last link that was added during unwind    
-		rows.at(walk_info.xlink).last_descendant_xlink = last_xlink;
+		rows.at(walk_info.xlink.GetXPtr()).last_descendant_xlink = last_xlink;
 	};
 }
 
