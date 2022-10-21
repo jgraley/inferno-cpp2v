@@ -46,22 +46,22 @@ Orderable::Diff DepthFirstRelation::Compare3Way( const XLink l_xlink, const XLin
     XLink r_cur_xlink = r_xlink;
     while(true)
     {
-        const LinkTable::Row &l_row = db->GetRow(l_cur_xlink);  
         XLink l_parent_xlink = db->GetParentXLink(l_cur_xlink);    
-        const LinkTable::Row &r_row = db->GetRow(r_cur_xlink);
         XLink r_parent_xlink = db->GetParentXLink(r_cur_xlink);
         
         //FTRACE("At ")(l_cur_xlink)(" and ")(r_cur_xlink)("\n")
         //      ("Parents ")(l_parent_xlink)(" and ")(r_parent_xlink)("\n")
         //      ("With ")(candidate_mutuals)("\n");
 
-        if( l_row.IsBase() && r_row.IsBase() )
+        if( !l_parent_xlink && !r_parent_xlink )
         {
             //FTRACE("Both at base, comparing base ordinals\n");
+			const LinkTable::Row &l_row = db->GetRow(l_cur_xlink);       
+			const LinkTable::Row &r_row = db->GetRow(r_cur_xlink);
             return l_row.base_ordinal - r_row.base_ordinal;
         }
 
-        if( !l_row.IsBase() )
+        if( l_parent_xlink )
         {            
             // If l hits r0 then l0 was a descendent of it. Use parent to spot sooner.
             if( l_parent_xlink == r_xlink )
@@ -81,7 +81,7 @@ Orderable::Diff DepthFirstRelation::Compare3Way( const XLink l_xlink, const XLin
             l_cur_xlink = l_parent_xlink; // advance l toward ancestor
         }
 
-        if( !r_row.IsBase() )
+        if( r_parent_xlink )
         {
             // If r hits l0 then r0 was a descendent of it. Use parent to spot sooner.
             if( r_parent_xlink == l_xlink )
