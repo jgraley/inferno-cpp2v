@@ -119,7 +119,6 @@ void Domain::UnExtendDomain()
     TRACE("Domain extensions believed to be:\n")(extended_domain)("\n");
 #endif    
 
-    unordered_set<XLink> to_delete = extended_domain;
     for( auto it = extended_domain.begin(); it != extended_domain.end(); )
     {
         on_delete_extra_xlink( *it );
