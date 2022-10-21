@@ -50,7 +50,7 @@ public:
 	void MonolithicExtra(XLink extra_base_xlink);
 
 	// Incremental strategy: perform updates on zones
-    void InsertPermanent();
+    void InitialBuildForIncremental();
     void Delete(const TreeZone &zone);
     void Insert(const TreeZone &zone);
     void InsertExtra(XLink extra_base_xlink);

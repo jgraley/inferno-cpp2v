@@ -58,9 +58,7 @@ void XTreeDatabase::InitialBuild()
     MonolithicBuild();
 
     // Full build incrementally
-    InsertPermanent();
-    TreeZone root_zone( root_xlink );
-    Insert( root_zone );
+    InitialBuildForIncremental();
     
 #ifdef DB_ENABLE_COMPARATIVE_TEST
     ExpectMatches();
@@ -110,7 +108,7 @@ void XTreeDatabase::MonolithicBuild()
 }
 
 
-void XTreeDatabase::InsertPermanent()
+void XTreeDatabase::InitialBuildForIncremental()
 {
     INDENT("p");
     
@@ -119,14 +117,14 @@ void XTreeDatabase::InsertPermanent()
     plan.indexes->PrepareInsert( actions );
     plan.link_table->PrepareInsert( actions );
     plan.node_table->PrepareInsert( actions );
-    db_walker.InitWalk( &actions );
+    db_walker.FullWalk( &actions, root_xlink );
 #ifdef DB_ENABLE_COMPARATIVE_TEST
     {
         INDENT("⦼");
         DBWalk::Actions ref_actions;
         plan.ref_domain->PrepareInsert( ref_actions );
         plan.ref_indexes->PrepareInsert( ref_actions );
-        db_walker.InitWalk( &ref_actions );
+        db_walker.FullWalk( &ref_actions, root_xlink );
 #ifdef DB_TEST_THE_TEST
         ExpectMatches();
 #endif
@@ -143,14 +141,14 @@ void XTreeDatabase::MonolithicExtra(XLink extra_base_xlink)
 	plan.domain->PrepareMonolithicBuild( actions, true );
 	plan.link_table->PrepareMonolithicBuild( actions );
 	plan.node_table->PrepareMonolithicBuild( actions );
-	db_walker.ExtraZoneWalk( &actions, extra_base_xlink );
+	db_walker.ExtraFullWalk( &actions, extra_base_xlink );
 
 #ifdef DB_ENABLE_COMPARATIVE_TEST
     {
         INDENT("⦼");
         DBWalk::Actions ref_actions;
         plan.ref_domain->PrepareMonolithicBuild( ref_actions, true );
-        db_walker.ExtraZoneWalk( &ref_actions, extra_base_xlink );
+        db_walker.ExtraFullWalk( &ref_actions, extra_base_xlink );
 #ifdef DB_TEST_THE_TEST
         ExpectMatches();
 #endif
@@ -218,14 +216,14 @@ void XTreeDatabase::InsertExtra(XLink extra_base_xlink)
 	plan.indexes->PrepareInsert( actions );
 	plan.link_table->PrepareInsert( actions );
 	plan.node_table->PrepareInsert( actions );
-	db_walker.ExtraZoneWalk( &actions, extra_base_xlink );
+	db_walker.ExtraFullWalk( &actions, extra_base_xlink );
 #ifdef DB_ENABLE_COMPARATIVE_TEST
     {
         INDENT("⦼");
         DBWalk::Actions ref_actions;
         plan.ref_domain->PrepareInsert( ref_actions );
         plan.ref_indexes->PrepareInsert( ref_actions );
-        db_walker.ExtraZoneWalk( &ref_actions, extra_base_xlink );
+        db_walker.ExtraFullWalk( &ref_actions, extra_base_xlink );
 #ifdef DB_TEST_THE_TEST
         ExpectMatches();
 #endif

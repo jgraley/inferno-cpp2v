@@ -54,6 +54,8 @@ public:
     void PrepareDelete(DBWalk::Actions &actions);
 	void PrepareInsert(DBWalk::Actions &actions);
 	
+	void GenerateRow(const DBWalk::WalkInfo &walk_info);
+	
 	string GetTrace() const;
 
 private:

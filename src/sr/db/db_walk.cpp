@@ -31,8 +31,8 @@ void DBWalk::ZoneWalk( const Actions *actions,
 }
 
 
-void DBWalk::ExtraZoneWalk( const Actions *actions,
-                             XLink extra_base_xlink )
+void DBWalk::ExtraFullWalk( const Actions *actions,
+                            XLink extra_base_xlink )
 {
     WalkKit kit { actions, STOP_IF_ALREADY_IN };
 
@@ -61,7 +61,7 @@ void DBWalk::VisitBase( const WalkKit &kit,
                -1,
                ContainerInterface::iterator(), 
                ContainerInterface::iterator(),
-               nullptr, 
+               root_xlink.GetXPtr(), 
                root_xlink, 
                root_xlink.GetChildX() } );
 }
