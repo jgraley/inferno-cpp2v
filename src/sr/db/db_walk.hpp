@@ -44,7 +44,6 @@ public:
 		function<void (const WalkInfo &)> link_row_in;
 		function<void (const WalkInfo &)> indexes_in_late;
 		function<void (const WalkInfo &)> node_row_in;
-		function<void (const WalkInfo &)> link_row_out;
 	};
     
 	void FullWalk( const Actions *actions, 

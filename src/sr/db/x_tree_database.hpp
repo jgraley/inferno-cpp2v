@@ -71,8 +71,9 @@ public:
     // Parent X link if not a base
 	XLink TryGetParentXLink(XLink xlink) const;
     
+    // Last of the descendents in depth first order. If no 
+    // descendents, it will be the supplied node. 
 	XLink GetLastDescendant(XLink xlink) const;
-
 
 	const Indexes &GetIndexes() const;
 	TreePtr<Node> GetRootNode() const;

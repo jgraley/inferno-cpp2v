@@ -109,20 +109,9 @@ void LinkTable::PrepareMonolithicBuild(DBWalk::Actions &actions)
 			// Otherwise why did the parents not fail the check?
 			ASSERTFAIL("Unknown trouble");				
 		}
-		
-		// Keep track of the last added on the way in.
-		// VisitItemise() may recuse back here and update last_link.
-		last_xlink = walk_info.xlink;
 
 		// Add a row of x_tree_db
 		InsertSolo( rows, make_pair(walk_info.xlink.GetXPtr(), row) );
-	};
-	
-	actions.link_row_out = [&](const DBWalk::WalkInfo &walk_info)
-	{
-		// ----------------- Generate row unwind
-		// Grab last link that was added during unwind    
-		rows.at(walk_info.xlink.GetXPtr()).last_descendant_xlink = last_xlink;
 	};
 }
 

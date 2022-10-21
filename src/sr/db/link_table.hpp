@@ -24,10 +24,6 @@ public:
         DBWalk::ContainmentContext containment_context;
         
         TreePtr<Node> parent_node;
-
-        // Last of the descendents in depth first order. If no 
-        // descendents, it will be the current node. 
-        XLink last_descendant_xlink = XLink();
         
         // Index into itemisation of the parent node
         int item_ordinal;
@@ -68,10 +64,7 @@ private:
     unordered_map<Key, Row> rows;
     
     // Base ordering
-    int current_base_ordinal;
-    
-    // Last node to be reached and given a row
-    XLink last_xlink;
+    int current_base_ordinal;    
 };    
     
 };

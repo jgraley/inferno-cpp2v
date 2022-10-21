@@ -218,8 +218,5 @@ void DBWalk::WindInActions( const WalkKit &kit,
 
 void DBWalk::UnwindActions( const WalkKit &kit, 
                             const WalkInfo &walk_info )
-{
-    // Unwind actions
-    if( kit.actions->link_row_out )
-		kit.actions->link_row_out( walk_info );                    
+{                  
 }                            
