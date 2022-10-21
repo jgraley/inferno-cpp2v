@@ -18,7 +18,6 @@ public:
     class Row : public Traceable
     {
     public:
-        bool IsBase() const;
         string GetTrace() const;
 
         DBWalk::ContainmentContext containment_context;

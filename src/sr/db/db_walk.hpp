@@ -23,15 +23,16 @@ public:
     
     struct WalkInfo
     {
-		ContainmentContext context;
-        XLink xlink;
         XLink parent_xlink;
         int item_ordinal;
-        int container_ordinal;
-        const TreePtrInterface *p_x;
+		ContainmentContext context;
         ContainerInterface *p_xcon;
+        int container_ordinal;
         ContainerInterface::iterator xit_predecessor;
         ContainerInterface::iterator xit;
+        const TreePtrInterface *p_x;
+        XLink xlink;
+        TreePtr<Node> x;
 	};
 
 	struct Actions
@@ -97,7 +98,8 @@ private:
     void VisitLink( const WalkKit &kit, 
                     const WalkInfo &walk_info );
     void VisitItemise( const WalkKit &kit, 
-                       XLink xlink );
+                       XLink xlink,
+                       TreePtr<Node> x );
 
     void WindInActions( const WalkKit &kit, 
                         const WalkInfo &walk_info );
