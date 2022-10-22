@@ -165,8 +165,6 @@ void DBWalk::VisitLink( const WalkKit &kit,
     // This will also prevent recursion into xlink
     if( kit.mode==STOP_IF_ALREADY_IN && 
         kit.exclusions->count( walk_info.xlink ) )
-        //kit.actions->is_unreached && 
-        //!kit.actions->is_unreached(walk_info) )
         return; // Terminate into existing links/nodes
             
     TRACE("Visiting link ")(walk_info.xlink)("\n");    

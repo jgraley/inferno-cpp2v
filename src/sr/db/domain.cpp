@@ -144,11 +144,6 @@ void Domain::MonolithicClear()
 
 void Domain::PrepareMonolithicBuild(DBWalk::Actions &actions, bool extra)
 {
-	actions.is_unreached = [=](const DBWalk::WalkInfo &walk_info) -> bool
-	{
-		return unordered_domain.count( walk_info.xlink ) == 0;
-	};
-	
 	actions.domain_in = [=](const DBWalk::WalkInfo &walk_info)
 	{        
 		// ----------------- Update domain
@@ -173,10 +168,6 @@ void Domain::PrepareDelete( DBWalk::Actions &actions )
 
 void Domain::PrepareInsert(DBWalk::Actions &actions)
 {
-/*	actions.is_unreached = [&](const DBWalk::WalkInfo &walk_info) -> bool
-	{
-		return unordered_domain.count( walk_info.xlink ) == 0;
-	};*/
 }
 
 

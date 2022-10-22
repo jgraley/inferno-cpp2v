@@ -37,8 +37,6 @@ public:
 
 	struct Actions
 	{
-		function<bool (const WalkInfo &)> is_unreached;
-		
 		function<void (const WalkInfo &)> domain_in;
 		function<void (const WalkInfo &)> domain_out;
 
