@@ -4,8 +4,6 @@
 
 using namespace SR;    
 
-#define INCREMENTAL
-
 
 LinkTable::LinkTable() :
     current_base_ordinal(0)
@@ -30,50 +28,23 @@ bool LinkTable::HasRow(XLink xlink) const
 }
 
 
-void LinkTable::MonolithicClear()
-{
-#ifndef INCREMENTAL
-    rows.clear();
-    // We do not reset current_base_ordinal, but just let it spin. New
-    // domain extras are always added to the end of the ordering and 
-    // we never need to renumber.
-#endif
-}
-
-
-void LinkTable::PrepareMonolithicBuild(DBWalk::Actions &actions)
-{
-#ifndef INCREMENTAL
-	actions.link_row_in = [=](const DBWalk::WalkInfo &walk_info)
-	{
-		ASSERT( walk_info.context != DBWalk::UNKNOWN );
-    	GenerateRow(walk_info);
-	};
-#endif
-}
-
-
 void LinkTable::PrepareDelete( DBWalk::Actions &actions )
 {
-#ifdef INCREMENTAL
 	actions.link_row_out = [=](const DBWalk::WalkInfo &walk_info)
 	{
 		if( walk_info.context != DBWalk::UNKNOWN )
     		rows.erase( walk_info.p_x );
 	};
-#endif
 }
 
 
 void LinkTable::PrepareInsert(DBWalk::Actions &actions)
 {
-#ifdef INCREMENTAL
 	actions.link_row_in = [=](const DBWalk::WalkInfo &walk_info)
 	{
 		if( walk_info.context != DBWalk::UNKNOWN )
     		GenerateRow(walk_info);
 	};
-#endif
 }
 
 

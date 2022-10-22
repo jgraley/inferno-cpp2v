@@ -86,7 +86,6 @@ void XTreeDatabase::MonolithicClear()
 {
     INDENT("c");
     plan.domain->MonolithicClear();
-    plan.link_table->MonolithicClear();
     plan.node_table->MonolithicClear();    
 #ifdef DB_ENABLE_COMPARATIVE_TEST
     {
@@ -114,7 +113,6 @@ void XTreeDatabase::MonolithicBuild()
 
     DBWalk::Actions actions;
     plan.domain->PrepareMonolithicBuild( actions, false );
-    plan.link_table->PrepareMonolithicBuild( actions );
     plan.node_table->PrepareMonolithicBuild( actions );
     db_walker.FullWalk( &actions, root_xlink );
 #ifdef DB_ENABLE_COMPARATIVE_TEST
@@ -167,7 +165,6 @@ void XTreeDatabase::MonolithicExtra(XLink extra_base_xlink, const unordered_set<
 
     DBWalk::Actions actions;
 	plan.domain->PrepareMonolithicBuild( actions, true );
-	plan.link_table->PrepareMonolithicBuild( actions );
 	plan.node_table->PrepareMonolithicBuild( actions );
 	db_walker.ExtraFullWalk( &actions, extra_base_xlink, exclusions );
 
