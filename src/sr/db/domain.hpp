@@ -68,6 +68,8 @@ private:
     OnExtraXLinkFunction on_insert_extra_subtree;
     OnExtraXLinkFunction on_delete_extra_xlink;
   	PatternLink root_plink;
+  	
+public:  	
     unordered_set<XLink> extended_domain;
 };    
     

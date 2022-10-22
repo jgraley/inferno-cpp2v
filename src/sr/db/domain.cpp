@@ -4,7 +4,7 @@
 
 #include "../agents/agent.hpp"
 
-//#define TRACE_DOMAIN_EXTEND
+#define TRACE_DOMAIN_EXTEND
 
 using namespace SR;    
 
@@ -154,7 +154,10 @@ void Domain::PrepareMonolithicBuild(DBWalk::Actions &actions, bool extra)
 		// ----------------- Update domain
 		InsertSolo( unordered_domain, walk_info.xlink ); 
         if( extra )
+        {
             InsertSolo( extended_domain, walk_info.xlink );
+			TRACE("Inserted extension node ")(walk_info.xlink)(" now got %d\n", extended_domain.size());
+		}
         
 #ifdef TRACE_DOMAIN_EXTEND
         TRACE("Saw domain extra ")(walk_info.xlink)(" extra flag=")(extra)(" ud.size=%u ed.size()=%u\n", unordered_domain.size(), extended_domain.size());
@@ -171,6 +174,10 @@ void Domain::PrepareDelete( DBWalk::Actions &actions )
 
 void Domain::PrepareInsert(DBWalk::Actions &actions)
 {
+/*	actions.is_unreached = [&](const DBWalk::WalkInfo &walk_info) -> bool
+	{
+		return unordered_domain.count( walk_info.xlink ) == 0;
+	};*/
 }
 
 

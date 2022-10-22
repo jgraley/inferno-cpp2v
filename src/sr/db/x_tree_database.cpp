@@ -21,8 +21,16 @@ XTreeDatabase::XTreeDatabase( shared_ptr<Lacing> lacing, XLink root_xlink_ ) :
 	auto on_insert_extra_subtree = [&](XLink extra_base_xlink)
 	{
         TRACEC("Inserting extra subtree to x tree db, base: ")(extra_base_xlink)("\n");
+		TRACE("BEFORE EXTRA domain %d exts %d cat index %d\n", 
+			plan.domain->unordered_domain.size(),
+			plan.domain->extended_domain.size(),
+			plan.indexes->category_ordered_index.size() );
         MonolithicExtra( extra_base_xlink );
         InsertExtra( extra_base_xlink );        
+		TRACE("AFTER EXTRA domain %d exts %d cat index %d\n", 
+			plan.domain->unordered_domain.size(),
+			plan.domain->extended_domain.size(),
+			plan.indexes->category_ordered_index.size() );
     };
 
 	auto on_delete_extra_xlink = [&](XLink extra_xlink)
