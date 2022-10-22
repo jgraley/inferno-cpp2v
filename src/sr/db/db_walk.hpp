@@ -58,7 +58,8 @@ public:
     void ZoneWalk( const Actions *actions,
                    const TreeZone &zone );
     void ExtraFullWalk( const Actions *actions, 
-	                    XLink extra_base_xlink );
+	                    XLink extra_base_xlink,
+	                    const unordered_set<XLink> *exclusions );
     void SingleXLinkWalk( const Actions *actions, 
 	                      XLink xlink );
 
@@ -85,6 +86,7 @@ private:
     {
         const Actions *actions;
         SubtreeMode mode;
+        const unordered_set<XLink> *exclusions;
     };
 
     void VisitBase( const WalkKit &kit, 

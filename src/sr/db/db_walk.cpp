@@ -32,10 +32,11 @@ void DBWalk::ZoneWalk( const Actions *actions,
 
 
 void DBWalk::ExtraFullWalk( const Actions *actions,
-                            XLink extra_base_xlink )
+                            XLink extra_base_xlink,
+                            const unordered_set<XLink> *exclusions )
 {
-    WalkKit kit { actions, STOP_IF_ALREADY_IN };
-
+    WalkKit kit { actions, STOP_IF_ALREADY_IN, exclusions };
+	TRACE("base=")(extra_base_xlink)("\n");
 	VisitBase( kit, extra_base_xlink, ROOT );  
 }
 
@@ -163,11 +164,12 @@ void DBWalk::VisitLink( const WalkKit &kit,
     
     // This will also prevent recursion into xlink
     if( kit.mode==STOP_IF_ALREADY_IN && 
-        kit.actions->is_unreached && 
-        !kit.actions->is_unreached(walk_info) )
+        kit.exclusions->count( walk_info.xlink ) )
+        //kit.actions->is_unreached && 
+        //!kit.actions->is_unreached(walk_info) )
         return; // Terminate into existing links/nodes
             
-    //TRACE("Visiting link ")(walk_info.xlink)("\n");    
+    TRACE("Visiting link ")(walk_info.xlink)("\n");    
             
     WindInActions( kit, walk_info );        
             

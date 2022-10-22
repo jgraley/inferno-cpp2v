@@ -58,7 +58,7 @@ public:
 	
 	string GetTrace() const;
 
-private:
+//private:
 	typedef const TreePtrInterface * Key;
 
     // XLink-to-row-of-x_tree_db map

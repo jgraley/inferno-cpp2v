@@ -37,6 +37,7 @@ void Indexes::PrepareDelete( DBWalk::Actions &actions )
 {
 	actions.indexes_out = [&](const DBWalk::WalkInfo &walk_info)
 	{
+		TRACE("Erasing from indexes ")(walk_info.xlink)("\n");
 		EraseSolo( category_ordered_index, walk_info.xlink );       
 		EraseSolo( simple_compare_ordered_index, walk_info.xlink );
 		EraseSolo( depth_first_ordered_index, walk_info.xlink );

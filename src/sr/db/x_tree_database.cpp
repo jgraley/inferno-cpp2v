@@ -20,17 +20,25 @@ XTreeDatabase::XTreeDatabase( shared_ptr<Lacing> lacing, XLink root_xlink_ ) :
 {
 	auto on_insert_extra_subtree = [&](XLink extra_base_xlink)
 	{
+		const unordered_set<XLink> exclusions = plan.domain->unordered_domain;
         TRACEC("Inserting extra subtree to x tree db, base: ")(extra_base_xlink)("\n");
-		TRACE("BEFORE EXTRA domain %d exts %d cat index %d\n", 
+		TRACE("BEFORE EXTRA domain %d exts %d cat index %d link table %d\n", 
 			plan.domain->unordered_domain.size(),
 			plan.domain->extended_domain.size(),
-			plan.indexes->category_ordered_index.size() );
-        MonolithicExtra( extra_base_xlink );
-        InsertExtra( extra_base_xlink );        
-		TRACE("AFTER EXTRA domain %d exts %d cat index %d\n", 
+			plan.indexes->category_ordered_index.size(),
+			plan.link_table->rows.size() );
+        MonolithicExtra( extra_base_xlink, &exclusions );
+		TRACE("AFTER EXTRA MONO domain %d exts %d cat index %d link table %d\n", 
 			plan.domain->unordered_domain.size(),
 			plan.domain->extended_domain.size(),
-			plan.indexes->category_ordered_index.size() );
+			plan.indexes->category_ordered_index.size(),
+			plan.link_table->rows.size() );
+        InsertExtra( extra_base_xlink, &exclusions );        
+		TRACE("AFTER EXTRA INCR domain %d exts %d cat index %d link table %d\n", 
+			plan.domain->unordered_domain.size(),
+			plan.domain->extended_domain.size(),
+			plan.indexes->category_ordered_index.size(),
+			plan.link_table->rows.size() );
     };
 
 	auto on_delete_extra_xlink = [&](XLink extra_xlink)
@@ -97,6 +105,13 @@ void XTreeDatabase::MonolithicBuild()
     INDENT("m");
     ASSERT( root_xlink );
         
+	TRACE("BEFORE BUILD MONO domain %d exts %d cat index %d link table %d\n", 
+		plan.domain->unordered_domain.size(),
+		plan.domain->extended_domain.size(),
+		plan.indexes->category_ordered_index.size(),
+		plan.link_table->rows.size() );
+	TRACE(plan.indexes->category_ordered_index)("\n");
+
     DBWalk::Actions actions;
     plan.domain->PrepareMonolithicBuild( actions, false );
     plan.link_table->PrepareMonolithicBuild( actions );
@@ -113,6 +128,11 @@ void XTreeDatabase::MonolithicBuild()
 #endif
     }   
 #endif
+	TRACE("AFTER BUILD MONO domain %d exts %d cat index %d link table %d\n", 
+		plan.domain->unordered_domain.size(),
+		plan.domain->extended_domain.size(),
+		plan.indexes->category_ordered_index.size(),
+		plan.link_table->rows.size() );
 }
 
 
@@ -141,7 +161,7 @@ void XTreeDatabase::InitialBuildForIncremental()
 }
 
 
-void XTreeDatabase::MonolithicExtra(XLink extra_base_xlink)
+void XTreeDatabase::MonolithicExtra(XLink extra_base_xlink, const unordered_set<XLink> *exclusions)
 {
     INDENT("f");
 
@@ -149,14 +169,14 @@ void XTreeDatabase::MonolithicExtra(XLink extra_base_xlink)
 	plan.domain->PrepareMonolithicBuild( actions, true );
 	plan.link_table->PrepareMonolithicBuild( actions );
 	plan.node_table->PrepareMonolithicBuild( actions );
-	db_walker.ExtraFullWalk( &actions, extra_base_xlink );
+	db_walker.ExtraFullWalk( &actions, extra_base_xlink, exclusions );
 
 #ifdef DB_ENABLE_COMPARATIVE_TEST
     {
         INDENT("⦼");
         DBWalk::Actions ref_actions;
         plan.ref_domain->PrepareMonolithicBuild( ref_actions, true );
-        db_walker.ExtraFullWalk( &ref_actions, extra_base_xlink );
+        db_walker.ExtraFullWalk( &ref_actions, extra_base_xlink, exclusions );
 #ifdef DB_TEST_THE_TEST
         ExpectMatches();
 #endif
@@ -194,6 +214,12 @@ void XTreeDatabase::Insert(const TreeZone &zone)
 {
     INDENT("i");
 
+	TRACE("BEFORE INSERT INCR domain %d exts %d cat index %d link table %d\n", 
+		plan.domain->unordered_domain.size(),
+		plan.domain->extended_domain.size(),
+		plan.indexes->category_ordered_index.size(),
+		plan.link_table->rows.size() );
+
     DBWalk::Actions actions;
     plan.domain->PrepareInsert( actions );
     plan.indexes->PrepareInsert( actions );
@@ -212,10 +238,16 @@ void XTreeDatabase::Insert(const TreeZone &zone)
 #endif
     }
 #endif
+
+	TRACE("AFTER INSERT INCR domain %d exts %d cat index %d link table %d\n", 
+		plan.domain->unordered_domain.size(),
+		plan.domain->extended_domain.size(),
+		plan.indexes->category_ordered_index.size(),
+		plan.link_table->rows.size() );
 }
 
 
-void XTreeDatabase::InsertExtra(XLink extra_base_xlink)
+void XTreeDatabase::InsertExtra(XLink extra_base_xlink, const unordered_set<XLink> *exclusions)
 {
     INDENT("e");
     
@@ -224,14 +256,14 @@ void XTreeDatabase::InsertExtra(XLink extra_base_xlink)
 	plan.indexes->PrepareInsert( actions );
 	plan.link_table->PrepareInsert( actions );
 	plan.node_table->PrepareInsert( actions );
-	db_walker.ExtraFullWalk( &actions, extra_base_xlink );
+	db_walker.ExtraFullWalk( &actions, extra_base_xlink, exclusions );
 #ifdef DB_ENABLE_COMPARATIVE_TEST
     {
         INDENT("⦼");
         DBWalk::Actions ref_actions;
         plan.ref_domain->PrepareInsert( ref_actions );
         plan.ref_indexes->PrepareInsert( ref_actions );
-        db_walker.ExtraFullWalk( &ref_actions, extra_base_xlink );
+        db_walker.ExtraFullWalk( &ref_actions, extra_base_xlink, exclusions );
 #ifdef DB_TEST_THE_TEST
         ExpectMatches();
 #endif
