@@ -49,9 +49,9 @@ void Indexes::PrepareInsert(DBWalk::Actions &actions)
 {
 	actions.indexes_in = [=](const DBWalk::WalkInfo &walk_info)
 	{ 
-        category_ordered_index.insert( walk_info.xlink );
-		simple_compare_ordered_index.insert( walk_info.xlink );		
-        depth_first_ordered_index.insert( walk_info.xlink );
+        InsertSolo( category_ordered_index, walk_info.xlink );
+		InsertSolo( simple_compare_ordered_index, walk_info.xlink );		
+        InsertSolo( depth_first_ordered_index, walk_info.xlink );
 	};
 }
 

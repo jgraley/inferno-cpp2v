@@ -108,13 +108,6 @@ void LinkTable::GenerateRow(const DBWalk::WalkInfo &walk_info)
 			break;
 		}
 	}
-		
-	// Check for badness
-	if( rows.count(walk_info.xlink.GetXPtr()) )
-	{
-		// Otherwise why did the parents not fail the check?
-		ASSERT(false)("Link already in table ")(walk_info.xlink)("\n");				
-	}
 
 	// Add a row of x_tree_db
 	InsertSolo( rows, make_pair(walk_info.p_x, row) );
