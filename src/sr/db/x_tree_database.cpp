@@ -18,7 +18,7 @@ XTreeDatabase::XTreeDatabase( shared_ptr<Lacing> lacing, XLink root_xlink_ ) :
     plan( this, lacing ),
     root_xlink( root_xlink_ )
 {
-	auto on_insert_extra_subtree = [&](XLink extra_base_xlink)
+	auto on_insert_extra_subtree = [=](XLink extra_base_xlink)
 	{
 		const unordered_set<XLink> exclusions = plan.domain->unordered_domain;
         TRACEC("Inserting extra subtree to x tree db, base: ")(extra_base_xlink)("\n");
@@ -41,7 +41,7 @@ XTreeDatabase::XTreeDatabase( shared_ptr<Lacing> lacing, XLink root_xlink_ ) :
 			plan.link_table->rows.size() );
     };
 
-	auto on_delete_extra_xlink = [&](XLink extra_xlink)
+	auto on_delete_extra_xlink = [=](XLink extra_xlink)
 	{
         TRACEC("Deleting extra xlink from x tree db: ")(extra_xlink)("\n");
         DeleteExtra( extra_xlink );
