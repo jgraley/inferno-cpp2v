@@ -36,7 +36,7 @@ void DBWalk::ExtraFullWalk( const Actions *actions,
 {
     WalkKit kit { actions, STOP_IF_ALREADY_IN };
 
-	VisitBase( kit, extra_base_xlink, ROOT ); 
+	VisitBase( kit, extra_base_xlink, ROOT );  
 }
 
 
@@ -45,7 +45,8 @@ void DBWalk::SingleXLinkWalk( const Actions *actions,
 {
     WalkKit kit { actions, NO_RECURSE };
 
-	VisitBase( kit, xlink, UNKNOWN );
+    // Switched from UNKNOWN to ROOT to get link table delete to act.
+	VisitBase( kit, xlink, ROOT );
 }                      
 
 
@@ -206,23 +207,29 @@ void DBWalk::WindInActions( const WalkKit &kit,
     if( kit.actions->domain_in )
 		kit.actions->domain_in( walk_info );        
                
-    if( kit.actions->indexes_in )
-		kit.actions->indexes_in( walk_info );        
-            
     if( kit.actions->link_row_in )
 		kit.actions->link_row_in( walk_info );        
             
     if( kit.actions->node_row_in )
 		kit.actions->node_row_in( walk_info );        
 
-    if( kit.actions->indexes_in_late )
-		kit.actions->indexes_in_late( walk_info );        
+    if( kit.actions->indexes_in )
+		kit.actions->indexes_in( walk_info );                    
 }                            
 
 
 void DBWalk::UnwindActions( const WalkKit &kit, 
                             const WalkInfo &walk_info )
 {                  
+    if( kit.actions->indexes_out )
+		kit.actions->indexes_out( walk_info );                    
+
+    if( kit.actions->node_row_out )
+		kit.actions->node_row_out( walk_info );        
+
     if( kit.actions->link_row_out )
 		kit.actions->link_row_out( walk_info );        
+
+    if( kit.actions->domain_out )
+		kit.actions->domain_out( walk_info );        
 }                            

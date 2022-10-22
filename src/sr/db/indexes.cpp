@@ -35,7 +35,7 @@ const Lacing *Indexes::GetLacing() const
 
 void Indexes::PrepareDelete( DBWalk::Actions &actions )
 {
-	actions.indexes_in = [&](const DBWalk::WalkInfo &walk_info)
+	actions.indexes_out = [&](const DBWalk::WalkInfo &walk_info)
 	{
 		EraseSolo( category_ordered_index, walk_info.xlink );       
 		EraseSolo( simple_compare_ordered_index, walk_info.xlink );
@@ -46,7 +46,7 @@ void Indexes::PrepareDelete( DBWalk::Actions &actions )
 
 void Indexes::PrepareInsert(DBWalk::Actions &actions)
 {
-	actions.indexes_in_late = [&](const DBWalk::WalkInfo &walk_info)
+	actions.indexes_in = [&](const DBWalk::WalkInfo &walk_info)
 	{ 
         category_ordered_index.insert( walk_info.xlink );
 		simple_compare_ordered_index.insert( walk_info.xlink );		
