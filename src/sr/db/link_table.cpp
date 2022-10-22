@@ -4,7 +4,7 @@
 
 using namespace SR;    
 
-//#define INCREMENTAL
+#define INCREMENTAL
 
 
 LinkTable::LinkTable() :
