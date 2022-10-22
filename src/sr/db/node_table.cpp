@@ -35,7 +35,7 @@ void NodeTable::MonolithicClear()
 
 void NodeTable::PrepareMonolithicBuild(DBWalk::Actions &actions)
 {
-	actions.node_row_in = [&](const DBWalk::WalkInfo &walk_info)
+	actions.node_row_in = [=](const DBWalk::WalkInfo &walk_info)
 	{
 		// ----------------- Generate node row
 		Row row;
