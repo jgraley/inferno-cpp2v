@@ -41,6 +41,12 @@ XTreeDatabase::XTreeDatabase( shared_ptr<Lacing> lacing, XLink root_xlink_ ) :
 			plan.link_table->rows.size() );
     };
 
+    auto on_insert_extra_zone = [=](const TreeZone &extra_zone)
+    {
+        MonolithicExtraZone( extra_zone );
+        InsertExtraZone( extra_zone );        
+    };
+
 	auto on_delete_extra_xlink = [=](XLink extra_xlink)
 	{
         TRACEC("Deleting extra xlink from x tree db: ")(extra_xlink)("\n");
@@ -49,6 +55,7 @@ XTreeDatabase::XTreeDatabase( shared_ptr<Lacing> lacing, XLink root_xlink_ ) :
     };
     
     plan.domain->SetOnExtraXLinkFunctions( on_insert_extra_subtree,
+                                           on_insert_extra_zone, 
                                            on_delete_extra_xlink );
 }
 
@@ -182,6 +189,29 @@ void XTreeDatabase::MonolithicExtra(XLink extra_base_xlink, const unordered_set<
 }
 
 
+void XTreeDatabase::MonolithicExtraZone(const TreeZone &extra_zone)
+{
+    INDENT("f");
+
+    DBWalk::Actions actions;
+	plan.domain->PrepareMonolithicBuild( actions, true );
+	plan.node_table->PrepareMonolithicBuild( actions );
+	db_walker.ExtraZoneWalk( &actions, extra_zone );
+
+#ifdef DB_ENABLE_COMPARATIVE_TEST
+    {
+        INDENT("⦼");
+        DBWalk::Actions ref_actions;
+        plan.ref_domain->PrepareMonolithicBuild( ref_actions, true );
+        db_walker.ExtraZoneWalk( &ref_actions, extra_zone );
+#ifdef DB_TEST_THE_TEST
+        ExpectMatches();
+#endif
+    }
+#endif
+}
+
+
 void XTreeDatabase::Delete(const TreeZone &zone)
 {
     INDENT("d");
@@ -261,6 +291,31 @@ void XTreeDatabase::InsertExtra(XLink extra_base_xlink, const unordered_set<XLin
         plan.ref_domain->PrepareInsert( ref_actions );
         plan.ref_indexes->PrepareInsert( ref_actions );
         db_walker.ExtraFullWalk( &ref_actions, extra_base_xlink, exclusions );
+#ifdef DB_TEST_THE_TEST
+        ExpectMatches();
+#endif
+    }
+#endif
+}
+
+
+void XTreeDatabase::InsertExtraZone(const TreeZone &extra_zone)
+{
+    INDENT("e");
+    
+	DBWalk::Actions actions;
+	plan.domain->PrepareInsert( actions );
+	plan.indexes->PrepareInsert( actions );
+	plan.link_table->PrepareInsert( actions );
+	plan.node_table->PrepareInsert( actions );
+	db_walker.ExtraZoneWalk( &actions, extra_zone );
+#ifdef DB_ENABLE_COMPARATIVE_TEST
+    {
+        INDENT("⦼");
+        DBWalk::Actions ref_actions;
+        plan.ref_domain->PrepareInsert( ref_actions );
+        plan.ref_indexes->PrepareInsert( ref_actions );
+        db_walker.ExtraZoneWalk( &ref_actions, extra_zone );
 #ifdef DB_TEST_THE_TEST
         ExpectMatches();
 #endif

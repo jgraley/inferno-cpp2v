@@ -35,18 +35,22 @@ private:
 class TreeZone
 { 
 public:
+    static TreeZone CreateFromExclusions( XLink base, const unordered_set<XLink> &exclusions );
+
     explicit TreeZone( XLink base );
     TreeZone( XLink base, const FreeZone &free_zone );
       
     XLink GetBase() const;
+    set<XLink> GetTerminii() const;
     
 private:
-    XLink base;
+    void CreateFromExclusionsWalker( XLink base, const unordered_set<XLink> &exclusions );
+
+    XLink base;    
     set<XLink> terminii;
 };
  
  
-TreeZone MakeZoneFromExclusions( XLink base, unordered_set<XLink> exclusions );
     
 }
 

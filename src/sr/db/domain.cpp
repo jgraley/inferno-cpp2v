@@ -6,6 +6,9 @@
 
 #define TRACE_DOMAIN_EXTEND
 
+
+#define DO_ZONE_CALLBACK
+
 using namespace SR;    
 
 Domain::Domain()
@@ -14,9 +17,11 @@ Domain::Domain()
 	
 
 void Domain::SetOnExtraXLinkFunctions( OnExtraXLinkFunction on_insert_extra_subtree_,
+                                       OnExtraZoneFunction on_insert_extra_zone_,
                                        OnExtraXLinkFunction on_delete_extra_xlink_ )
 {
     on_insert_extra_subtree = on_insert_extra_subtree_;
+    on_insert_extra_zone = on_insert_extra_zone_;
     on_delete_extra_xlink = on_delete_extra_xlink_;
 }
 
@@ -54,7 +59,17 @@ void Domain::ExtendDomainPatternWalk( const TreeKit &kit, PatternLink plink, boo
     if( !extra_subtrees.empty() )
         TRACE("There are extra x domain elements for ")(plink)(":\n");
     for( XLink extra_base_xlink : extra_subtrees )
+    {
+#ifdef DO_ZONE_CALLBACK
+        // TODO own function for this
+        auto zone = TreeZone::CreateFromExclusions(extra_base_xlink, unordered_domain );
+        on_insert_extra_zone( zone );        
+        // TODO keep the zones similar to extended_domain and use for delete
+#else     
         on_insert_extra_subtree( extra_base_xlink );
+#error no        
+#endif
+    }
     
     // Visit couplings repeatedly TODO union over couplings and
     // only recurse on last reaching.

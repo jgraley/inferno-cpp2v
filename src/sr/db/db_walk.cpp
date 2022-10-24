@@ -38,6 +38,21 @@ void DBWalk::ExtraFullWalk( const Actions *actions,
     WalkKit kit { actions, STOP_IF_ALREADY_IN, exclusions };
 	TRACE("base=")(extra_base_xlink)("\n");
 	VisitBase( kit, extra_base_xlink, ROOT );  
+    ASSERTFAIL();
+}
+
+
+void DBWalk::ExtraZoneWalk( const Actions *actions,
+                            const TreeZone &extra_zone )
+{
+    // TODO go over to natively using zones for walk. 
+    unordered_set<XLink> terminii_unordered;
+    for( XLink terminus : extra_zone.GetTerminii() )
+        terminii_unordered.insert( terminus );
+        
+    WalkKit kit { actions, STOP_IF_ALREADY_IN, &terminii_unordered };
+	TRACE("base=")(extra_zone.GetBase())(" terminii=")(terminii_unordered)("\n");
+	VisitBase( kit, extra_zone.GetBase(), ROOT );  
 }
 
 
