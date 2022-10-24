@@ -68,14 +68,6 @@ Graphable::Block SearchContainerAgent::GetGraphBlockInfo() const
 
 //---------------------------------- AnyNode ------------------------------------    
 
-shared_ptr<ContainerInterface> AnyNodeAgent::GetContainerInterface( XLink keyer_xlink ) const
-{ 
-    // Note: does not do the flatten every time - instead, the FlattenNode object's range is presented
-    // to the Conjecture object, which increments it only when trying alternative choice
-    return make_shared<FlattenNode>( keyer_xlink.GetChildX() );
-}
-
-
 SYM::Over<SYM::BooleanExpression> AnyNodeAgent::SymbolicNormalLinkedQueryPRed() const
 {
     PatternLink terminus_plink(this, &terminus);
@@ -96,44 +88,11 @@ Graphable::Block AnyNodeAgent::GetGraphBlockInfo() const
 
 //---------------------------------- Stuff ------------------------------------    
 
-shared_ptr<ContainerInterface> StuffAgent::GetContainerInterface( XLink keyer_xlink ) const
-{    
-    // Note: does not do the walk every time - instead, the Walk object's range is presented
-    // to the Conjecture object, which increments it only when trying alternative choice
-    return make_shared<Walk>( keyer_xlink.GetChildX(), nullptr, nullptr );
-}
-
-
 void StuffAgent::PatternQueryRestrictions( shared_ptr<PatternQuery> pq ) const
 {
     if( recurse_restriction )
         pq->RegisterMultiplicityLink( PatternLink(this, &recurse_restriction) );
-}
-
-
-void StuffAgent::DecidedQueryRestrictions( DecidedQueryAgentInterface &query, ContainerInterface::iterator thistime, XLink keyer_xlink ) const
-{
-    // Where a recurse restriction is in use, apply it to all the recursion points
-    // underlying the current iterator, thistime.
-    if( recurse_restriction )
-    {
-        auto xpr_ss = MakeTreeNode<SubSequence>();
-
-        // See if we are looking at a walk iterator
-        const Walk::iterator *pwtt = dynamic_cast<const Walk::iterator *>(thistime.GetUnderlyingIterator());
-        ASSERT(pwtt)("Failed to get Walk::iterator out of the decision iterator");    
-
-        // Check all the nodes that we recursed through in order to get here
-        for( pair<TreePtr<Node>, const TreePtrInterface *> p : pwtt->GetCurrentPath() )
-        {
-            xpr_ss->elts.push_back( p.second ? XLink(p.first, p.second) : keyer_xlink );
-            TRACE("DQR ")(p.first)(" ")(p.second)("\n");
-        }
-
-        XLink xpr_ss_link = XLink::CreateDistinct( xpr_ss ); // Only used in after-pass
-        query.RegisterMultiplicityLink( PatternLink(this, &recurse_restriction), xpr_ss_link ); // Links into X     
-    }   
-}                                                                                     
+}                                                      
 
 
 SYM::Over<SYM::BooleanExpression> StuffAgent::SymbolicNormalLinkedQueryPRed() const

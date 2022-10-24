@@ -5,6 +5,8 @@
 #include "common/standard.hpp"
 #include "node/specialise_oostd.hpp"
 
+#include <unordered_set>
+
 namespace SR 
 {
 
@@ -40,7 +42,11 @@ public:
     
 private:
     XLink base;
+    set<XLink> terminii;
 };
+ 
+ 
+TreeZone MakeZoneFromExclusions( XLink base, unordered_set<XLink> exclusions );
     
 }
 

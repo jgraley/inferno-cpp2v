@@ -23,9 +23,7 @@ public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;                
     TreePtr<Node> BuildReplaceImpl( PatternLink me_plink, 
                                     XLink key_xlink ) final;
-    virtual shared_ptr<ContainerInterface> GetContainerInterface( XLink keyer_xlink ) const = 0;
     virtual void PatternQueryRestrictions( shared_ptr<PatternQuery> pq ) const {};
-    virtual void DecidedQueryRestrictions( DecidedQueryAgentInterface &query, ContainerInterface::iterator thistime, XLink keyer_xlink ) const {};
     virtual Block GetGraphBlockInfo() const;
 
     TreePtr<Node> terminus; // A node somewhere under Stuff, that matches normally, truncating the subtree
@@ -44,7 +42,6 @@ public:
 class AnyNodeAgent : public SearchContainerAgent
 {
     class NoParentMismatch : public Mismatch {};
-    virtual shared_ptr<ContainerInterface> GetContainerInterface( XLink keyer_xlink ) const;
     virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
     virtual Block GetGraphBlockInfo() const;
 };
@@ -79,9 +76,7 @@ public:
 class StuffAgent : public SearchContainerAgent
 {
 public:
-    virtual shared_ptr<ContainerInterface> GetContainerInterface( XLink keyer_xlink ) const;
     virtual void PatternQueryRestrictions( shared_ptr<PatternQuery> pq ) const;
-    virtual void DecidedQueryRestrictions( DecidedQueryAgentInterface &query, ContainerInterface::iterator thistime, XLink keyer_xlink ) const;                                          
     virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            const SolutionMap *hypothesis_links,
