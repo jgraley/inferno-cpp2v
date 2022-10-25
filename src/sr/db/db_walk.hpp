@@ -59,29 +59,13 @@ public:
                         const TreeZone &extra_zone );
 
 private:
-    enum SubtreeMode
-    {
-        // Behaviour for main domain population: we will check uniqueness
-        // of the XLinks we meet during our recursive walk.
-        REQUIRE_SOLO,
-        
-        // Behaviour for domain extensions. We will continue as long as 
-        // nodes are not already in the domain. If a node is in the 
-        // domain, we don't recurse into it since everything under it
-        // will also be in the domain. 
-        // https://github.com/jgraley/inferno-cpp2v/issues/213#issuecomment-728266001
-        STOP_IF_ALREADY_IN,
-    };
-
     struct WalkKit
     {
         const Actions *actions;
-        SubtreeMode mode;
-        const unordered_set<XLink> *exclusions;
+        const TreeZone *zone;
     };
 
     void VisitBase( const WalkKit &kit, 
-                    XLink root_xlink,
                     ContainmentContext context );
     void VisitSingular( const WalkKit &kit, 
                         const TreePtrInterface *p_x_singular, 

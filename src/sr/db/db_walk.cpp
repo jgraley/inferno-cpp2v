@@ -7,48 +7,44 @@ void DBWalk::FullWalk( const Actions *actions,
 {
     InitWalk( actions );
     
-    WalkKit kit { actions, STOP_IF_ALREADY_IN };
+    TreeZone zone( root_xlink );
+    WalkKit kit { actions, &zone };
     
-	VisitBase( kit, root_xlink, ROOT );
+	VisitBase( kit, ROOT );
 }
 
 
 void DBWalk::InitWalk( const Actions *actions )
 {
-    WalkKit kit { actions, STOP_IF_ALREADY_IN };
+    TreeZone zone1( XLink::MMAX_Link );
+    TreeZone zone2( XLink::OffEndXLink );
 
-    VisitBase( kit, XLink::MMAX_Link, ROOT );
-    VisitBase( kit, XLink::OffEndXLink, ROOT );
+    VisitBase( { actions, &zone1 }, ROOT );
+    VisitBase( { actions, &zone2 }, ROOT );
 }
 
 
 void DBWalk::ZoneWalk( const Actions *actions,
                        const TreeZone &zone )
 {
-    WalkKit kit { actions, STOP_IF_ALREADY_IN };
+    WalkKit kit { actions, &zone };
 
-	VisitBase( kit, zone.GetBase(), UNKNOWN );
+	VisitBase( kit, UNKNOWN );
 }
 
 
 void DBWalk::ExtraZoneWalk( const Actions *actions,
                             const TreeZone &extra_zone )
 {
-    // TODO go over to natively using zones for walk. 
-    unordered_set<XLink> terminii_unordered;
-    for( XLink terminus : extra_zone.GetTerminii() )
-        terminii_unordered.insert( terminus );
-        
-    WalkKit kit { actions, STOP_IF_ALREADY_IN, &terminii_unordered };
-	TRACE("base=")(extra_zone.GetBase())(" terminii=")(terminii_unordered)("\n");
-	VisitBase( kit, extra_zone.GetBase(), ROOT );  
+    WalkKit kit { actions, &extra_zone };
+	VisitBase( kit, ROOT );  
 }
 
 
-void DBWalk::VisitBase( const WalkKit &kit, 
-                        XLink root_xlink,
+void DBWalk::VisitBase( const WalkKit &kit,                         
                         ContainmentContext context )
 {
+    XLink base_xlink = kit.zone->GetBase();
     VisitLink( kit, 
              { XLink(), 
                -1,
@@ -57,9 +53,9 @@ void DBWalk::VisitBase( const WalkKit &kit,
                -1,
                ContainerInterface::iterator(), 
                ContainerInterface::iterator(),
-               root_xlink.GetXPtr(), 
-               root_xlink, 
-               root_xlink.GetChildX() } );
+               base_xlink.GetXPtr(), 
+               base_xlink, 
+               base_xlink.GetChildX() } );
 }
 
 
@@ -157,8 +153,7 @@ void DBWalk::VisitLink( const WalkKit &kit,
     INDENT(".");
     
     // This will also prevent recursion into xlink
-    if( kit.mode==STOP_IF_ALREADY_IN && 
-        kit.exclusions->count( walk_info.xlink ) )
+    if( kit.zone->GetTerminii().count( walk_info.xlink ) )
         return; // Terminate into existing links/nodes
             
     TRACE("Visiting link ")(walk_info.xlink)("\n");    
