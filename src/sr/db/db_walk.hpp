@@ -50,14 +50,9 @@ public:
 		function<void (const WalkInfo &)> indexes_out;
 	};
     
-	void FullWalk( const Actions *actions, 
-				   XLink root_xlink );
-    void InitWalk( const Actions *actions );
-    void ZoneWalk( const Actions *actions,
-                   const TreeZone &zone );
-    void ExtraZoneWalk( const Actions *actions,
-                        const TreeZone &extra_zone );
-
+    void Walk( const Actions *actions,
+               const TreeZone &zone,
+               ContainmentContext base_context );
 private:
     struct WalkKit
     {

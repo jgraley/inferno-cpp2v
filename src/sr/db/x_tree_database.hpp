@@ -56,6 +56,9 @@ public:
     void InsertExtraZone(const TreeZone &extra_zone);
     void DeleteExtraZone(const TreeZone &extra_zone);
 
+    void InitialWalk( const Actions *actions,
+                      XLink root_xlink );
+
     XLink UniquifyDomainExtension( TreePtr<Node> node, bool expect_in_domain );
     void ExtendDomainNewPattern( PatternLink root_plink );
     void ExtendDomainNewX();           

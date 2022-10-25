@@ -2,42 +2,12 @@
 
 using namespace SR;    
 
-void DBWalk::FullWalk( const Actions *actions,
-                       XLink root_xlink )
-{
-    InitWalk( actions );
-    
-    TreeZone zone( root_xlink );
-    WalkKit kit { actions, &zone };
-    
-	VisitBase( kit, ROOT );
-}
-
-
-void DBWalk::InitWalk( const Actions *actions )
-{
-    TreeZone zone1( XLink::MMAX_Link );
-    TreeZone zone2( XLink::OffEndXLink );
-
-    VisitBase( { actions, &zone1 }, ROOT );
-    VisitBase( { actions, &zone2 }, ROOT );
-}
-
-
-void DBWalk::ZoneWalk( const Actions *actions,
-                       const TreeZone &zone )
+void DBWalk::Walk( const Actions *actions,
+                   const TreeZone &zone,
+                   ContainmentContext base_context )
 {
     WalkKit kit { actions, &zone };
-
-	VisitBase( kit, UNKNOWN );
-}
-
-
-void DBWalk::ExtraZoneWalk( const Actions *actions,
-                            const TreeZone &extra_zone )
-{
-    WalkKit kit { actions, &extra_zone };
-	VisitBase( kit, ROOT );  
+	VisitBase( kit, base_context );  
 }
 
 

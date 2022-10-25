@@ -97,13 +97,13 @@ void XTreeDatabase::MonolithicBuild()
     DBWalk::Actions actions;
     plan.domain->PrepareMonolithicBuild( actions, false );
     plan.node_table->PrepareMonolithicBuild( actions );
-    db_walker.FullWalk( &actions, root_xlink );
+    InitialWalk( &actions, root_xlink );
 #ifdef DB_ENABLE_COMPARATIVE_TEST
     {
         INDENT("⦼");
         DBWalk::Actions ref_actions;
         plan.ref_domain->PrepareMonolithicBuild( ref_actions, false );
-        db_walker.FullWalk( &ref_actions, root_xlink );
+        InitialWalk( &ref_actions, root_xlink );
 #ifdef DB_TEST_THE_TEST
         ExpectMatches();
 #endif
@@ -126,14 +126,14 @@ void XTreeDatabase::InitialBuildForIncremental()
     plan.indexes->PrepareInsert( actions );
     plan.link_table->PrepareInsert( actions );
     plan.node_table->PrepareInsert( actions );
-    db_walker.FullWalk( &actions, root_xlink );
+    InitialWalk( &actions, root_xlink );
 #ifdef DB_ENABLE_COMPARATIVE_TEST
     {
         INDENT("⦼");
         DBWalk::Actions ref_actions;
         plan.ref_domain->PrepareInsert( ref_actions );
         plan.ref_indexes->PrepareInsert( ref_actions );
-        db_walker.FullWalk( &ref_actions, root_xlink );
+        InitialWalk( &ref_actions, root_xlink );
 #ifdef DB_TEST_THE_TEST
         ExpectMatches();
 #endif
@@ -149,14 +149,14 @@ void XTreeDatabase::MonolithicExtraZone(const TreeZone &extra_zone)
     DBWalk::Actions actions;
 	plan.domain->PrepareMonolithicBuild( actions, true );
 	plan.node_table->PrepareMonolithicBuild( actions );
-	db_walker.ExtraZoneWalk( &actions, extra_zone );
+	db_walker.Walk( &actions, extra_zone, DBWalk::ROOT );
 
 #ifdef DB_ENABLE_COMPARATIVE_TEST
     {
         INDENT("⦼");
         DBWalk::Actions ref_actions;
         plan.ref_domain->PrepareMonolithicBuild( ref_actions, true );
-        db_walker.ExtraZoneWalk( &ref_actions, extra_zone );
+        db_walker.Walk( &ref_actions, extra_zone, DBWalk::ROOT );
 #ifdef DB_TEST_THE_TEST
         ExpectMatches();
 #endif
@@ -174,14 +174,14 @@ void XTreeDatabase::Delete(const TreeZone &zone)
     plan.indexes->PrepareDelete( actions );
     plan.link_table->PrepareDelete( actions );
     plan.node_table->PrepareDelete( actions );
-    db_walker.ZoneWalk( &actions, zone );   
+    db_walker.Walk( &actions, zone, DBWalk::UNKNOWN );   
 #ifdef DB_ENABLE_COMPARATIVE_TEST
     {
         INDENT("⦼");
         DBWalk::Actions ref_actions;
         plan.ref_domain->PrepareDelete( ref_actions );
         plan.ref_indexes->PrepareDelete( ref_actions );
-        db_walker.ZoneWalk( &ref_actions, zone );
+        db_walker.Walk( &ref_actions, zone, DBWalk::UNKNOWN );
 #ifdef DB_TEST_THE_TEST
         ExpectMatches();
 #endif
@@ -205,14 +205,14 @@ void XTreeDatabase::Insert(const TreeZone &zone)
     plan.indexes->PrepareInsert( actions );
     plan.link_table->PrepareInsert( actions );
     plan.node_table->PrepareInsert( actions );
-    db_walker.ZoneWalk( &actions, zone );
+    db_walker.Walk( &actions, zone, DBWalk::UNKNOWN );
 #ifdef DB_ENABLE_COMPARATIVE_TEST
     {
         INDENT("⦼");
         DBWalk::Actions ref_actions;
         plan.ref_domain->PrepareInsert( ref_actions );
         plan.ref_indexes->PrepareInsert( ref_actions );
-        db_walker.ZoneWalk( &ref_actions, zone );
+        db_walker.Walk( &ref_actions, zone, DBWalk::UNKNOWN );
 #ifdef DB_TEST_THE_TEST
         ExpectMatches();
 #endif
@@ -236,14 +236,14 @@ void XTreeDatabase::InsertExtraZone(const TreeZone &extra_zone)
 	plan.indexes->PrepareInsert( actions );
 	plan.link_table->PrepareInsert( actions );
 	plan.node_table->PrepareInsert( actions );
-	db_walker.ExtraZoneWalk( &actions, extra_zone );
+	db_walker.Walk( &actions, extra_zone, DBWalk::ROOT );
 #ifdef DB_ENABLE_COMPARATIVE_TEST
     {
         INDENT("⦼");
         DBWalk::Actions ref_actions;
         plan.ref_domain->PrepareInsert( ref_actions );
         plan.ref_indexes->PrepareInsert( ref_actions );
-        db_walker.ExtraZoneWalk( &ref_actions, extra_zone );
+        db_walker.Walk( &ref_actions, extra_zone, DBWalk::ROOT );
 #ifdef DB_TEST_THE_TEST
         ExpectMatches();
 #endif
@@ -264,20 +264,28 @@ void XTreeDatabase::DeleteExtraZone(const TreeZone &extra_zone)
     plan.indexes->PrepareDelete( actions );
     plan.link_table->PrepareDelete( actions );
     plan.node_table->PrepareDelete( actions );
-    db_walker.ExtraZoneWalk( &actions, extra_zone );   
+    db_walker.Walk( &actions, extra_zone, DBWalk::ROOT );   
 #ifdef DB_ENABLE_COMPARATIVE_TEST
     {
         INDENT("⦼");
         DBWalk::Actions ref_actions;
         plan.ref_domain->PrepareDelete( ref_actions );
         plan.ref_indexes->PrepareDelete( ref_actions );
-        db_walker.ExtraZoneWalk( &ref_actions, extra_zone );
+        db_walker.Walk( &ref_actions, extra_zone, DBWalk::ROOT );
 #ifdef DB_TEST_THE_TEST
         ExpectMatches();
 #endif
     }
 #endif
 }
+
+void XTreeDatabase::InitialWalk( const Actions *actions,
+                                 XLink root_xlink )
+{
+    db_walker.Walk( actions, TreeZone( XLink::MMAX_Link ), DBWalk::ROOT );
+    db_walker.Walk( actions, TreeZone( XLink::OffEndXLink ), DBWalk::ROOT );
+    db_walker.Walk( actions, TreeZone( root_xlink ), DBWalk::ROOT );
+}                                 
 
 
 XLink XTreeDatabase::UniquifyDomainExtension( TreePtr<Node> node, bool expect_in_domain )
