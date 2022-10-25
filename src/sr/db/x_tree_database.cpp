@@ -24,13 +24,6 @@ XTreeDatabase::XTreeDatabase( shared_ptr<Lacing> lacing, XLink root_xlink_ ) :
         InsertExtraZone( extra_zone );        
     };
 
-	auto on_delete_extra_xlink = [=](XLink extra_xlink)
-	{
-        TRACEC("Deleting extra xlink from x tree db: ")(extra_xlink)("\n");
-        DeleteExtra( extra_xlink );
-        // No monolithic variant: everything monolithic gets splatted in ClearMonolithic()
-    };
-    
     auto on_delete_extra_zone = [=](const TreeZone &extra_zone)
 	{
         TRACEC("Deleting extra zone from x tree db: ")(extra_zone.GetBase())("\n");
@@ -39,7 +32,6 @@ XTreeDatabase::XTreeDatabase( shared_ptr<Lacing> lacing, XLink root_xlink_ ) :
     };
     
     plan.domain->SetOnExtraXLinkFunctions( on_insert_extra_zone, 
-                                           on_delete_extra_xlink,
                                            on_delete_extra_zone );
 }
 
@@ -97,7 +89,7 @@ void XTreeDatabase::MonolithicBuild()
         
 	TRACE("BEFORE BUILD MONO domain %d exts %d cat index %d link table %d\n", 
 		plan.domain->unordered_domain.size(),
-		plan.domain->extended_domain.size(),
+		plan.domain->extended_zones.size(),
 		plan.indexes->category_ordered_index.size(),
 		plan.link_table->rows.size() );
 	TRACE(plan.indexes->category_ordered_index)("\n");
@@ -119,7 +111,7 @@ void XTreeDatabase::MonolithicBuild()
 #endif
 	TRACE("AFTER BUILD MONO domain %d exts %d cat index %d link table %d\n", 
 		plan.domain->unordered_domain.size(),
-		plan.domain->extended_domain.size(),
+		plan.domain->extended_zones.size(),
 		plan.indexes->category_ordered_index.size(),
 		plan.link_table->rows.size() );
 }
@@ -204,7 +196,7 @@ void XTreeDatabase::Insert(const TreeZone &zone)
 
 	TRACE("BEFORE INSERT INCR domain %d exts %d cat index %d link table %d\n", 
 		plan.domain->unordered_domain.size(),
-		plan.domain->extended_domain.size(),
+		plan.domain->extended_zones.size(),
 		plan.indexes->category_ordered_index.size(),
 		plan.link_table->rows.size() );
 
@@ -229,7 +221,7 @@ void XTreeDatabase::Insert(const TreeZone &zone)
 
 	TRACE("AFTER INSERT INCR domain %d exts %d cat index %d link table %d\n", 
 		plan.domain->unordered_domain.size(),
-		plan.domain->extended_domain.size(),
+		plan.domain->extended_zones.size(),
 		plan.indexes->category_ordered_index.size(),
 		plan.link_table->rows.size() );
 }
@@ -259,32 +251,6 @@ void XTreeDatabase::InsertExtraZone(const TreeZone &extra_zone)
 #endif
 }
 
-
-void XTreeDatabase::DeleteExtra(XLink extra_xlink)
-{
-    // Note not symmetrical with InsertExtra(): we
-    // will be invoked with every xlink in the extra
-    // zones and on each call we delete just that
-    // xlink.
-    DBWalk::Actions actions;
-    plan.domain->PrepareDelete( actions );
-    plan.indexes->PrepareDelete( actions );
-    plan.link_table->PrepareDelete( actions );
-    plan.node_table->PrepareDelete( actions );
-    db_walker.SingleXLinkWalk( &actions, extra_xlink );   
-#ifdef DB_ENABLE_COMPARATIVE_TEST
-    {
-        INDENT("⦼");
-        DBWalk::Actions ref_actions;
-        plan.ref_domain->PrepareDelete( ref_actions );
-        plan.ref_indexes->PrepareDelete( ref_actions );
-        db_walker.SingleXLinkWalk( &ref_actions, extra_xlink );
-#ifdef DB_TEST_THE_TEST
-        ExpectMatches();
-#endif
-    }
-#endif
-}
 
 void XTreeDatabase::DeleteExtraZone(const TreeZone &extra_zone)
 

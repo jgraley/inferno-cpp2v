@@ -6,8 +6,6 @@
 
 #define TRACE_DOMAIN_EXTEND
 
-#define ERASE_BY_ZONE
-
 using namespace SR;    
 
 Domain::Domain()
@@ -16,11 +14,9 @@ Domain::Domain()
 	
 
 void Domain::SetOnExtraXLinkFunctions( OnExtraZoneFunction on_insert_extra_zone_,
-                                       OnExtraXLinkFunction on_delete_extra_xlink_,
                                        OnExtraZoneFunction on_delete_extra_zone_ )
 {
     on_insert_extra_zone = on_insert_extra_zone_;
-    on_delete_extra_xlink = on_delete_extra_xlink_;
     on_delete_extra_zone = on_delete_extra_zone_;
 }
 
@@ -52,9 +48,7 @@ void Domain::ExtendDomainBaseXLink( const TreeKit &kit, XLink base_xlink )
 {
     auto zone = TreeZone::CreateFromExclusions(base_xlink, unordered_domain );
     on_insert_extra_zone( zone );        
-#ifdef ERASE_BY_ZONE
     extended_zones.push_back( zone ); // TODO std::move the zone
-#endif    
 }
 
 
@@ -130,14 +124,8 @@ void Domain::UnExtendDomain()
 {
 #ifdef TRACE_DOMAIN_EXTEND
 	unordered_set<XLink> previous_unordered_domain = unordered_domain;
-    TRACE("Domain extensions believed to be:\n")(extended_domain)("\n");
+    TRACE("Domain extensions believed to be:\n")(extended_zones.size())("\n"); // TODO make TreeZone traceable
 #endif    
-
-    for( auto it = extended_domain.begin(); it != extended_domain.end(); )
-    {
-        on_delete_extra_xlink( *it );
-        it = extended_domain.erase( it );
-    }
 
     for( auto it = extended_zones.begin(); it != extended_zones.end(); )
     {
@@ -168,14 +156,9 @@ void Domain::PrepareMonolithicBuild(DBWalk::Actions &actions, bool extra)
 	{        
 		// ----------------- Update domain
 		InsertSolo( unordered_domain, walk_info.xlink ); 
-#ifndef ERASE_BY_ZONE
-        if( extra )
-        {
-            InsertSolo( extended_domain, walk_info.xlink );
-		}
-#endif
+        
 #ifdef TRACE_DOMAIN_EXTEND
-		TRACE("Saw xlink ")(walk_info.xlink)(" extra flag=")(extra)(" ud.size=%u ed.size()=%u\n", unordered_domain.size(), extended_domain.size());
+		TRACE("Saw xlink ")(walk_info.xlink)(" extra flag=")(extra)(" ud.size=%u ed.size()=%u\n", unordered_domain.size(), extended_zones.size());
 #endif
         
 		(void)domain_extension_classes.insert( make_pair( walk_info.xlink.GetChildX(), walk_info.xlink ) );    

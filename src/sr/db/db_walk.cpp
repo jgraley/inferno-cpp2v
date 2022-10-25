@@ -56,16 +56,6 @@ void DBWalk::ExtraZoneWalk( const Actions *actions,
 }
 
 
-void DBWalk::SingleXLinkWalk( const Actions *actions, 
-                              XLink xlink )
-{
-    WalkKit kit { actions, NO_RECURSE };
-
-    // Switched from UNKNOWN to ROOT to get link table delete to act.
-	VisitBase( kit, xlink, ROOT );
-}                      
-
-
 void DBWalk::VisitBase( const WalkKit &kit, 
                         XLink root_xlink,
                         ContainmentContext context )
@@ -187,8 +177,7 @@ void DBWalk::VisitLink( const WalkKit &kit,
     WindInActions( kit, walk_info );        
             
     // Recurse into our child nodes
-    if( kit.mode != NO_RECURSE )
-        VisitItemise( kit, walk_info.xlink, walk_info.x ); 
+    VisitItemise( kit, walk_info.xlink, walk_info.x ); 
 
     UnwindActions( kit, walk_info );                          
 }

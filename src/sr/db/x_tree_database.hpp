@@ -54,7 +54,6 @@ public:
     void Delete(const TreeZone &zone);
     void Insert(const TreeZone &zone);
     void InsertExtraZone(const TreeZone &extra_zone);
-    void DeleteExtra(XLink extra_xlink);
     void DeleteExtraZone(const TreeZone &extra_zone);
 
     XLink UniquifyDomainExtension( TreePtr<Node> node, bool expect_in_domain );

@@ -60,8 +60,6 @@ public:
 	                    const unordered_set<XLink> *exclusions );
     void ExtraZoneWalk( const Actions *actions,
                         const TreeZone &extra_zone );
-    void SingleXLinkWalk( const Actions *actions, 
-	                      XLink xlink );
 
 private:
     enum SubtreeMode
@@ -76,10 +74,6 @@ private:
         // will also be in the domain. 
         // https://github.com/jgraley/inferno-cpp2v/issues/213#issuecomment-728266001
         STOP_IF_ALREADY_IN,
-        
-        // Only visit the base, for when we have an explicit list of xtrees and 
-        // are looping though that.
-        NO_RECURSE
     };
 
     struct WalkKit

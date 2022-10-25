@@ -27,11 +27,9 @@ class Domain
 public:
 	Domain();
 	
-	typedef function<void(XLink)> OnExtraXLinkFunction;
 	typedef function<void(const TreeZone &)> OnExtraZoneFunction;
 
 	void SetOnExtraXLinkFunctions( OnExtraZoneFunction on_insert_extra_zone,
-                                   OnExtraXLinkFunction on_delete_extra_xlink = OnExtraXLinkFunction(),
                                    OnExtraZoneFunction on_delete_extra_zone = OnExtraZoneFunction() );
 
     // Add xlink to domain extension if not already there, and return the cannonical one.
@@ -69,13 +67,11 @@ public:
 
 private:
     OnExtraZoneFunction on_insert_extra_zone;
-    OnExtraXLinkFunction on_delete_extra_xlink;
     OnExtraZoneFunction on_delete_extra_zone;
     
   	PatternLink root_plink;
   	
 public:  	
-    unordered_set<XLink> extended_domain;
     list<TreeZone> extended_zones;
 };    
     
