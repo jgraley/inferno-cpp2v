@@ -7,7 +7,7 @@ void DBWalk::FullWalk( const Actions *actions,
 {
     InitWalk( actions );
     
-    WalkKit kit { actions, REQUIRE_SOLO };
+    WalkKit kit { actions, STOP_IF_ALREADY_IN };
     
 	VisitBase( kit, root_xlink, ROOT );
 }
@@ -15,7 +15,7 @@ void DBWalk::FullWalk( const Actions *actions,
 
 void DBWalk::InitWalk( const Actions *actions )
 {
-    WalkKit kit { actions, REQUIRE_SOLO };
+    WalkKit kit { actions, STOP_IF_ALREADY_IN };
 
     VisitBase( kit, XLink::MMAX_Link, ROOT );
     VisitBase( kit, XLink::OffEndXLink, ROOT );
@@ -25,20 +25,9 @@ void DBWalk::InitWalk( const Actions *actions )
 void DBWalk::ZoneWalk( const Actions *actions,
                        const TreeZone &zone )
 {
-    WalkKit kit { actions, REQUIRE_SOLO };
+    WalkKit kit { actions, STOP_IF_ALREADY_IN };
 
 	VisitBase( kit, zone.GetBase(), UNKNOWN );
-}
-
-
-void DBWalk::ExtraFullWalk( const Actions *actions,
-                            XLink extra_base_xlink,
-                            const unordered_set<XLink> *exclusions )
-{
-    WalkKit kit { actions, STOP_IF_ALREADY_IN, exclusions };
-	TRACE("base=")(extra_base_xlink)("\n");
-	VisitBase( kit, extra_base_xlink, ROOT );  
-    ASSERTFAIL();
 }
 
 

@@ -55,9 +55,6 @@ public:
     void InitWalk( const Actions *actions );
     void ZoneWalk( const Actions *actions,
                    const TreeZone &zone );
-    void ExtraFullWalk( const Actions *actions, 
-	                    XLink extra_base_xlink,
-	                    const unordered_set<XLink> *exclusions );
     void ExtraZoneWalk( const Actions *actions,
                         const TreeZone &extra_zone );
 
