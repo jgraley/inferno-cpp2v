@@ -279,7 +279,7 @@ void XTreeDatabase::DeleteExtraZone(const TreeZone &extra_zone)
 #endif
 }
 
-void XTreeDatabase::InitialWalk( const Actions *actions,
+void XTreeDatabase::InitialWalk( const DBWalk::Actions *actions,
                                  XLink root_xlink )
 {
     db_walker.Walk( actions, TreeZone( XLink::MMAX_Link ), DBWalk::ROOT );

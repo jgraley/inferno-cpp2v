@@ -9,6 +9,7 @@
 #include "node_table.hpp"
 #include "domain.hpp"
 #include "indexes.hpp"
+#include "db_walk.hpp"
 
 //#define DB_ENABLE_COMPARATIVE_TEST
 
@@ -56,7 +57,7 @@ public:
     void InsertExtraZone(const TreeZone &extra_zone);
     void DeleteExtraZone(const TreeZone &extra_zone);
 
-    void InitialWalk( const Actions *actions,
+    void InitialWalk( const DBWalk::Actions *actions,
                       XLink root_xlink );
 
     XLink UniquifyDomainExtension( TreePtr<Node> node, bool expect_in_domain );
