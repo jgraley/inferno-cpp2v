@@ -18,29 +18,6 @@ XTreeDatabase::XTreeDatabase( shared_ptr<Lacing> lacing, XLink root_xlink_ ) :
     plan( this, lacing ),
     root_xlink( root_xlink_ )
 {
-	auto on_insert_extra_subtree = [=](XLink extra_base_xlink)
-	{
-		const unordered_set<XLink> exclusions = plan.domain->unordered_domain;
-        TRACEC("Inserting extra subtree to x tree db, base: ")(extra_base_xlink)("\n");
-		TRACE("BEFORE EXTRA domain %d exts %d cat index %d link table %d\n", 
-			plan.domain->unordered_domain.size(),
-			plan.domain->extended_domain.size(),
-			plan.indexes->category_ordered_index.size(),
-			plan.link_table->rows.size() );
-        MonolithicExtra( extra_base_xlink, &exclusions );
-		TRACE("AFTER EXTRA MONO domain %d exts %d cat index %d link table %d\n", 
-			plan.domain->unordered_domain.size(),
-			plan.domain->extended_domain.size(),
-			plan.indexes->category_ordered_index.size(),
-			plan.link_table->rows.size() );
-        InsertExtra( extra_base_xlink, &exclusions );        
-		TRACE("AFTER EXTRA INCR domain %d exts %d cat index %d link table %d\n", 
-			plan.domain->unordered_domain.size(),
-			plan.domain->extended_domain.size(),
-			plan.indexes->category_ordered_index.size(),
-			plan.link_table->rows.size() );
-    };
-
     auto on_insert_extra_zone = [=](const TreeZone &extra_zone)
     {
         MonolithicExtraZone( extra_zone );
@@ -54,9 +31,16 @@ XTreeDatabase::XTreeDatabase( shared_ptr<Lacing> lacing, XLink root_xlink_ ) :
         // No monolithic variant: everything monolithic gets splatted in ClearMonolithic()
     };
     
-    plan.domain->SetOnExtraXLinkFunctions( on_insert_extra_subtree,
-                                           on_insert_extra_zone, 
-                                           on_delete_extra_xlink );
+    auto on_delete_extra_zone = [=](const TreeZone &extra_zone)
+	{
+        TRACEC("Deleting extra zone from x tree db: ")(extra_zone.GetBase())("\n");
+        DeleteExtraZone( extra_zone );
+        // No monolithic variant: everything monolithic gets splatted in ClearMonolithic()
+    };
+    
+    plan.domain->SetOnExtraXLinkFunctions( on_insert_extra_zone, 
+                                           on_delete_extra_xlink,
+                                           on_delete_extra_zone );
 }
 
 
@@ -166,29 +150,6 @@ void XTreeDatabase::InitialBuildForIncremental()
 }
 
 
-void XTreeDatabase::MonolithicExtra(XLink extra_base_xlink, const unordered_set<XLink> *exclusions)
-{
-    INDENT("f");
-
-    DBWalk::Actions actions;
-	plan.domain->PrepareMonolithicBuild( actions, true );
-	plan.node_table->PrepareMonolithicBuild( actions );
-	db_walker.ExtraFullWalk( &actions, extra_base_xlink, exclusions );
-
-#ifdef DB_ENABLE_COMPARATIVE_TEST
-    {
-        INDENT("⦼");
-        DBWalk::Actions ref_actions;
-        plan.ref_domain->PrepareMonolithicBuild( ref_actions, true );
-        db_walker.ExtraFullWalk( &ref_actions, extra_base_xlink, exclusions );
-#ifdef DB_TEST_THE_TEST
-        ExpectMatches();
-#endif
-    }
-#endif
-}
-
-
 void XTreeDatabase::MonolithicExtraZone(const TreeZone &extra_zone)
 {
     INDENT("f");
@@ -274,31 +235,6 @@ void XTreeDatabase::Insert(const TreeZone &zone)
 }
 
 
-void XTreeDatabase::InsertExtra(XLink extra_base_xlink, const unordered_set<XLink> *exclusions)
-{
-    INDENT("e");
-    
-	DBWalk::Actions actions;
-	plan.domain->PrepareInsert( actions );
-	plan.indexes->PrepareInsert( actions );
-	plan.link_table->PrepareInsert( actions );
-	plan.node_table->PrepareInsert( actions );
-	db_walker.ExtraFullWalk( &actions, extra_base_xlink, exclusions );
-#ifdef DB_ENABLE_COMPARATIVE_TEST
-    {
-        INDENT("⦼");
-        DBWalk::Actions ref_actions;
-        plan.ref_domain->PrepareInsert( ref_actions );
-        plan.ref_indexes->PrepareInsert( ref_actions );
-        db_walker.ExtraFullWalk( &ref_actions, extra_base_xlink, exclusions );
-#ifdef DB_TEST_THE_TEST
-        ExpectMatches();
-#endif
-    }
-#endif
-}
-
-
 void XTreeDatabase::InsertExtraZone(const TreeZone &extra_zone)
 {
     INDENT("e");
@@ -343,6 +279,33 @@ void XTreeDatabase::DeleteExtra(XLink extra_xlink)
         plan.ref_domain->PrepareDelete( ref_actions );
         plan.ref_indexes->PrepareDelete( ref_actions );
         db_walker.SingleXLinkWalk( &ref_actions, extra_xlink );
+#ifdef DB_TEST_THE_TEST
+        ExpectMatches();
+#endif
+    }
+#endif
+}
+
+void XTreeDatabase::DeleteExtraZone(const TreeZone &extra_zone)
+
+{
+    // Note not symmetrical with InsertExtra(): we
+    // will be invoked with every xlink in the extra
+    // zones and on each call we delete just that
+    // xlink.
+    DBWalk::Actions actions;
+    plan.domain->PrepareDelete( actions );
+    plan.indexes->PrepareDelete( actions );
+    plan.link_table->PrepareDelete( actions );
+    plan.node_table->PrepareDelete( actions );
+    db_walker.ExtraZoneWalk( &actions, extra_zone );   
+#ifdef DB_ENABLE_COMPARATIVE_TEST
+    {
+        INDENT("⦼");
+        DBWalk::Actions ref_actions;
+        plan.ref_domain->PrepareDelete( ref_actions );
+        plan.ref_indexes->PrepareDelete( ref_actions );
+        db_walker.ExtraZoneWalk( &ref_actions, extra_zone );
 #ifdef DB_TEST_THE_TEST
         ExpectMatches();
 #endif

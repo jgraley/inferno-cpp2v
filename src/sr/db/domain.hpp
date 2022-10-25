@@ -30,14 +30,15 @@ public:
 	typedef function<void(XLink)> OnExtraXLinkFunction;
 	typedef function<void(const TreeZone &)> OnExtraZoneFunction;
 
-	void SetOnExtraXLinkFunctions( OnExtraXLinkFunction on_insert_extra_subtree,
-                                   OnExtraZoneFunction on_insert_extra_zone,
-                                   OnExtraXLinkFunction on_delete_extra_xlink = OnExtraXLinkFunction() );
+	void SetOnExtraXLinkFunctions( OnExtraZoneFunction on_insert_extra_zone,
+                                   OnExtraXLinkFunction on_delete_extra_xlink = OnExtraXLinkFunction(),
+                                   OnExtraZoneFunction on_delete_extra_zone = OnExtraZoneFunction() );
 
     // Add xlink to domain extension if not already there, and return the cannonical one.
     XLink UniquifyDomainExtension( TreePtr<Node> node, bool expect_in_domain );
     
-    void ExtendDomainPatternWalk( const TreeKit &kit, PatternLink plink, bool remove = false );
+    void ExtendDomainBaseXLink( const TreeKit &kit, XLink base_xlink );
+    void ExtendDomainPatternWalk( const TreeKit &kit, PatternLink plink );
     void ExtendDomainNewPattern( const TreeKit &kit, PatternLink root_plink );
     void ExtendDomainNewX( const TreeKit &kit );
     void UnExtendDomain();
@@ -67,13 +68,15 @@ public:
     map<TreePtr<Node>, XLink, SimpleCompare> domain_extension_classes;
 
 private:
-    OnExtraXLinkFunction on_insert_extra_subtree;
     OnExtraZoneFunction on_insert_extra_zone;
     OnExtraXLinkFunction on_delete_extra_xlink;
+    OnExtraZoneFunction on_delete_extra_zone;
+    
   	PatternLink root_plink;
   	
 public:  	
     unordered_set<XLink> extended_domain;
+    list<TreeZone> extended_zones;
 };    
     
 }

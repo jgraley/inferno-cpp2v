@@ -47,16 +47,15 @@ public:
 	// Monolithic strategy: clear for whole tree and build from scratch
     void MonolithicClear();
     void MonolithicBuild(); // includes permanent columns
-	void MonolithicExtra(XLink extra_base_xlink, const unordered_set<XLink> *exclusions);
 	void MonolithicExtraZone(const TreeZone &extra_zone);
 
 	// Incremental strategy: perform updates on zones
     void InitialBuildForIncremental();
     void Delete(const TreeZone &zone);
     void Insert(const TreeZone &zone);
-    void InsertExtra(XLink extra_base_xlink, const unordered_set<XLink> *exclusions);
     void InsertExtraZone(const TreeZone &extra_zone);
     void DeleteExtra(XLink extra_xlink);
+    void DeleteExtraZone(const TreeZone &extra_zone);
 
     XLink UniquifyDomainExtension( TreePtr<Node> node, bool expect_in_domain );
     void ExtendDomainNewPattern( PatternLink root_plink );

@@ -6,8 +6,7 @@
 
 #define TRACE_DOMAIN_EXTEND
 
-
-#define DO_ZONE_CALLBACK
+#define ERASE_BY_ZONE
 
 using namespace SR;    
 
@@ -16,13 +15,13 @@ Domain::Domain()
 }
 	
 
-void Domain::SetOnExtraXLinkFunctions( OnExtraXLinkFunction on_insert_extra_subtree_,
-                                       OnExtraZoneFunction on_insert_extra_zone_,
-                                       OnExtraXLinkFunction on_delete_extra_xlink_ )
+void Domain::SetOnExtraXLinkFunctions( OnExtraZoneFunction on_insert_extra_zone_,
+                                       OnExtraXLinkFunction on_delete_extra_xlink_,
+                                       OnExtraZoneFunction on_delete_extra_zone_ )
 {
-    on_insert_extra_subtree = on_insert_extra_subtree_;
     on_insert_extra_zone = on_insert_extra_zone_;
     on_delete_extra_xlink = on_delete_extra_xlink_;
+    on_delete_extra_zone = on_delete_extra_zone_;
 }
 
 
@@ -49,42 +48,42 @@ XLink Domain::UniquifyDomainExtension( TreePtr<Node> node, bool expect_in_domain
 }
 
 
-void Domain::ExtendDomainPatternWalk( const TreeKit &kit, PatternLink plink, bool remove )
+void Domain::ExtendDomainBaseXLink( const TreeKit &kit, XLink base_xlink )
+{
+    auto zone = TreeZone::CreateFromExclusions(base_xlink, unordered_domain );
+    on_insert_extra_zone( zone );        
+#ifdef ERASE_BY_ZONE
+    extended_zones.push_back( zone ); // TODO std::move the zone
+#endif    
+}
+
+
+void Domain::ExtendDomainPatternWalk( const TreeKit &kit, PatternLink plink )
 {
     // Extend locally first and then pass that into children.
     // This avoids the need for a reductive "keep trying until no more
     // extra XLinks are provided" because we know that only the child pattern
     // can match a pattern node's generated XLink.
-    set<XLink> extra_subtrees = plink.GetChildAgent()->ExpandNormalDomain( kit, unordered_domain );    
-    if( !extra_subtrees.empty() )
+    set<XLink> subtrees = plink.GetChildAgent()->ExpandNormalDomain( kit, unordered_domain );    
+    if( !subtrees.empty() )
         TRACE("There are extra x domain elements for ")(plink)(":\n");
-    for( XLink extra_base_xlink : extra_subtrees )
-    {
-#ifdef DO_ZONE_CALLBACK
-        // TODO own function for this
-        auto zone = TreeZone::CreateFromExclusions(extra_base_xlink, unordered_domain );
-        on_insert_extra_zone( zone );        
-        // TODO keep the zones similar to extended_domain and use for delete
-#else     
-        on_insert_extra_subtree( extra_base_xlink );
-#error no        
-#endif
-    }
+    for( XLink base_xlink : subtrees )
+        ExtendDomainBaseXLink( kit, base_xlink );
     
     // Visit couplings repeatedly TODO union over couplings and
     // only recurse on last reaching.
     auto pq = plink.GetChildAgent()->GetPatternQuery();    
     for( PatternLink child_plink : pq->GetNormalLinks() )
     {
-        ExtendDomainPatternWalk( kit, child_plink, remove );
+        ExtendDomainPatternWalk( kit, child_plink );
     }
     for( PatternLink child_plink : pq->GetAbnormalLinks() )
     {
-        ExtendDomainPatternWalk( kit, child_plink, remove );
+        ExtendDomainPatternWalk( kit, child_plink );
     }
     for( PatternLink child_plink : pq->GetMultiplicityLinks() )
     {
-        ExtendDomainPatternWalk( kit, child_plink, remove );
+        ExtendDomainPatternWalk( kit, child_plink );
     }
 }
 
@@ -140,6 +139,12 @@ void Domain::UnExtendDomain()
         it = extended_domain.erase( it );
     }
 
+    for( auto it = extended_zones.begin(); it != extended_zones.end(); )
+    {
+        on_delete_extra_zone( *it );
+        it = extended_zones.erase( it );
+    }
+
 #ifdef TRACE_DOMAIN_EXTEND
     if( Tracer::IsEnabled() ) // We want this deltaing to be relative to what is seen in the log
     {
@@ -163,10 +168,12 @@ void Domain::PrepareMonolithicBuild(DBWalk::Actions &actions, bool extra)
 	{        
 		// ----------------- Update domain
 		InsertSolo( unordered_domain, walk_info.xlink ); 
+#ifndef ERASE_BY_ZONE
         if( extra )
         {
             InsertSolo( extended_domain, walk_info.xlink );
 		}
+#endif
 #ifdef TRACE_DOMAIN_EXTEND
 		TRACE("Saw xlink ")(walk_info.xlink)(" extra flag=")(extra)(" ud.size=%u ed.size()=%u\n", unordered_domain.size(), extended_domain.size());
 #endif
