@@ -4,7 +4,7 @@
 
 #include "../agents/agent.hpp"
 
-#define TRACE_DOMAIN_EXTEND
+//#define TRACE_DOMAIN_EXTEND
 
 using namespace SR;    
 
@@ -26,6 +26,9 @@ XLink Domain::UniquifyDomainExtension( TreePtr<Node> node, bool expect_in_domain
     ASSERT( node );
   
     // If there's already a class for this node, return it and early-out
+    // Note: this is done by simple compare, and identity is not 
+    // required. This makes for a very "powerful" search for existing
+    // candidates.
     auto it = domain_extension_classes.find( node );
     if( it != domain_extension_classes.end() )
         return it->second;
@@ -47,6 +50,10 @@ XLink Domain::UniquifyDomainExtension( TreePtr<Node> node, bool expect_in_domain
 void Domain::ExtendDomainBaseXLink( const TreeKit &kit, XLink base_xlink )
 {
     auto zone = TreeZone::CreateFromExclusions(base_xlink, unordered_domain );
+    //TRACE("Zone is ")(zone)("\n"); 
+    if( zone.IsEmpty() )
+        return;
+        
     on_insert_extra_zone( zone );        
     extended_zones.push_back( zone ); // TODO std::move the zone
 }
@@ -124,7 +131,7 @@ void Domain::UnExtendDomain()
 {
 #ifdef TRACE_DOMAIN_EXTEND
 	unordered_set<XLink> previous_unordered_domain = unordered_domain;
-    TRACE("Domain extensions believed to be:\n")(extended_zones.size())("\n"); // TODO make TreeZone traceable
+    TRACE("Domain extensions believed to be:\n")(extended_zones)("\n"); 
 #endif    
 
     for( auto it = extended_zones.begin(); it != extended_zones.end(); )

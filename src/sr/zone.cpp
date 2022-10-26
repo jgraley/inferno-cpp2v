@@ -18,6 +18,25 @@ TreePtr<Node> FreeZone::GetBase() const
     return base;
 }
 
+
+string FreeZone::GetTrace() const
+{
+    list<string> elts;
+    for( const XLink &p : terminii )
+        elts.push_back( Trace(p) );
+
+    string arrow;
+    if( terminii.empty() )
+        arrow = " →"; // Indicates the subtree goes all the way to leaves
+    else
+        arrow = " ⇥ "; // Indicates the subtree terminates
+    
+    // TODO show empty zone using ↯
+    
+    return "FreeZone(" + Trace(base) + arrow + Join(elts, ", ") +")";
+}
+
+
 // ------------------------- TreeZone --------------------------
 
 TreeZone TreeZone::CreateFromExclusions( XLink base_xlink, const unordered_set<XLink> &exclusions )
@@ -59,6 +78,13 @@ set<XLink> TreeZone::GetTerminii() const
 }
 
 
+bool TreeZone::IsEmpty() const
+{
+    // There must be a base, so the only way to be empty is to terminate at the base
+    return terminii.size()==1 && OnlyElementOf(terminii)==base;
+}
+
+
 void TreeZone::CreateFromExclusionsWalker( XLink xlink, const unordered_set<XLink> &exclusions )
 {
     if( exclusions.count(xlink) > 0 )
@@ -79,3 +105,22 @@ void TreeZone::CreateFromExclusionsWalker( XLink xlink, const unordered_set<XLin
 }
     
 
+string TreeZone::GetTrace() const
+{
+    list<string> elts;
+    for( const XLink &p : terminii )
+        elts.push_back( Trace(p) );
+
+    string arrow;
+    if( terminii.empty() )
+        arrow = " →"; // Indicates the subtree goes all the way to leaves
+    else
+        arrow = " ⇥ "; // Indicates the subtree terminates
+        
+    string rhs = arrow + Join(elts, ", ");
+    if( IsEmpty() )
+        rhs = " ↯"; // Indicates zone is empty due to a terminus at base
+                    // (we still give the base, for info)
+    
+    return "TreeZone(" + Trace(base) + rhs +")";
+}

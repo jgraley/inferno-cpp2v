@@ -107,6 +107,8 @@ void LinkTable::GenerateRow(const DBWalk::WalkInfo &walk_info)
 			row.container_ordinal = walk_info.container_ordinal;
 			break;
 		}
+        default:
+            ASSERTFAIL(); // could be UNKNOWN but that's not allowed
 	}
 
 	// Add a row of x_tree_db

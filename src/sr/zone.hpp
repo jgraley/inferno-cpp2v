@@ -15,15 +15,18 @@ namespace SR
 // FreeZone is for zones that are not anywhere in the current
 // x tree. They are assumed to be "orphaned" and so for minimality
 // we express the base as a TreePtr<Node>. See #623.
-class FreeZone
+class FreeZone : public Traceable
 { 
 public:
     explicit FreeZone( TreePtr<Node> base );
       
     TreePtr<Node> GetBase() const;
     
+    string GetTrace() const;
+    
 private:
     TreePtr<Node> base;
+    set<XLink> terminii;
 };
 
 // ------------------------- TreeZone --------------------------
@@ -32,7 +35,7 @@ private:
 // nodes in the tree have an XLink, including at the root, and we
 // prefer to keep track of the XLink to the base node for precision
 // and convenience. See #623.
-class TreeZone
+class TreeZone : public Traceable
 { 
 public:
     static TreeZone CreateFromExclusions( XLink base, const unordered_set<XLink> &exclusions );
@@ -42,7 +45,10 @@ public:
       
     XLink GetBase() const;
     set<XLink> GetTerminii() const;
+    bool IsEmpty() const;
     
+    string GetTrace() const;
+
 private:
     void CreateFromExclusionsWalker( XLink base, const unordered_set<XLink> &exclusions );
 
