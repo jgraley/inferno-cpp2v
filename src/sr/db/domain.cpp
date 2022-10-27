@@ -50,7 +50,9 @@ XLink Domain::UniquifyDomainExtension( TreePtr<Node> node, bool expect_in_domain
 void Domain::ExtendDomainBaseXLink( const TreeKit &kit, XLink base_xlink )
 {
     auto zone = TreeZone::CreateFromExclusions(base_xlink, unordered_domain );
-    //TRACE("Zone is ")(zone)("\n"); 
+#ifdef TRACE_DOMAIN_EXTEND
+    TRACE("Zone is ")(zone)("\n"); 
+#endif    
     if( zone.IsEmpty() )
         return;
         
