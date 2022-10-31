@@ -325,14 +325,15 @@ unique_ptr<SymbolResultInterface> AllInSimpleCompareRangeOperator::Evaluate( con
 
 string AllInSimpleCompareRangeOperator::Render() const
 {
+    // ∈ etc means elt included (closed bound); ∉ means elt not included (open bound)
     list<string> restrictions;
     
     if( lower )
-        restrictions.push_back( string(lower_incl?"[":"(") + lower->Render() );
+        restrictions.push_back( string(lower_incl?"∈":"∉") + lower->Render() );
     if( upper )
-        restrictions.push_back( upper->Render() + string(upper_incl?"]":")") );
+        restrictions.push_back( upper->Render() + string(upper_incl?"∋":"∌") );
         
-    return Join(restrictions, ", ", "{SC ", " }");
+    return Join(restrictions, ", ", "{SC ", "}");
 }
 
 
@@ -384,15 +385,16 @@ unique_ptr<SymbolResultInterface> AllInCategoryRangeOperator::Evaluate( const Ev
 
 string AllInCategoryRangeOperator::Render() const
 {
+    // ∈ etc means elt included (closed bound); ∉ means elt not included (open bound)
     list<string> terms;;
     for( const ExprBounds &bounds : bounds_list )
     {
         list<string> restrictions;
-        restrictions.push_back( string(lower_incl?"[":"(") + bounds.first->Render() );
-        restrictions.push_back( bounds.second->Render() + string(upper_incl?"]":")") );
+        restrictions.push_back( string(lower_incl?"∈":"∉") + bounds.first->Render() );
+        restrictions.push_back( bounds.second->Render() + string(upper_incl?"∋":"∌") );
         terms.push_back( Join(restrictions, ", ") );
     }
-    return Join(terms, " ∪ ", "{CAT ", " }");
+    return Join(terms, " ∪ ", "{CAT ", "}");
 }
 
 

@@ -419,14 +419,15 @@ bool SimpleCompareRangeResult::operator==( const SymbolResultInterface &other ) 
 
 string SimpleCompareRangeResult::Render() const
 {
+    // ∈ etc means elt included (closed bound); ∉ means elt not included (open bound)
     list<string> restrictions;
     
     if( lower )
-        restrictions.push_back( string(lower_incl?"[":"(") + lower.GetTrace() );
+        restrictions.push_back( string(lower_incl?"∈":"∉") + lower.GetTrace() );
     if( upper )
-        restrictions.push_back( upper.GetTrace() + string(upper_incl?"]":")") );
+        restrictions.push_back( upper.GetTrace() + string(upper_incl?"∋":"∌") );
         
-    return Join(restrictions, ", ", "{SC ", " }");
+    return Join(restrictions, ", ", "{SC ", "}");
 }
 
 // ------------------------- CategoryRangeResult --------------------------
@@ -486,14 +487,15 @@ bool CategoryRangeResult::operator==( const SymbolResultInterface &other ) const
 
 string CategoryRangeResult::Render() const
 {
+    // ∈ etc means elt included (closed bound); ∉ means elt not included (open bound)
     list<string> terms;
     for( const XLinkBounds &bounds : bounds_list )
     {
         list<string> restrictions;
-        restrictions.push_back( string(lower_incl?"[":"(") + bounds.first->GetTrace() );
-        restrictions.push_back( bounds.second->GetTrace() + string(upper_incl?"]":")") );
+        restrictions.push_back( string(lower_incl?"∈":"∉") + bounds.first->GetTrace() );
+        restrictions.push_back( bounds.second->GetTrace() + string(upper_incl?"∋":"∌") );
         terms.push_back( Join(restrictions, ", ") );
     }
-    return Join(terms, " ∪ ", "{CAT ", " }");
+    return Join(terms, " ∪ ", "{CAT ", "}");
 }
 

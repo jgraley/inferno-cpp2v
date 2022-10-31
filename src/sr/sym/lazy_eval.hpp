@@ -6,6 +6,7 @@
 namespace SYM
 { 
 
+/// This class permits
 template<typename EVALTYPE>
 class Lazy : public Traceable
 {
