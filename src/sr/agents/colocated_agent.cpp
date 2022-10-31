@@ -8,17 +8,17 @@
 using namespace SR;
 using namespace SYM;
 
-Over<BooleanExpression> ColocatedAgent::SymbolicNormalLinkedQuery() const
+Lazy<BooleanExpression> ColocatedAgent::SymbolicNormalLinkedQuery() const
 {
-	Over<BooleanExpression> my_expr = SYM::MakeOver<SYM::BooleanConstant>(true);
+	Lazy<BooleanExpression> my_expr = SYM::MakeLazy<SYM::BooleanConstant>(true);
 
 	for( PatternLink plink : pattern_query->GetNormalLinks() )
-		my_expr = my_expr & MakeOver<SymbolVariable>(keyer_plink) == MakeOver<SymbolVariable>(plink);
+		my_expr = my_expr & MakeLazy<SymbolVariable>(keyer_plink) == MakeLazy<SymbolVariable>(plink);
 	
 	my_expr = my_expr &
 	          SymbolicColocatedQuery() &
    		      ( SymbolicPreRestriction() |
-		        MakeOver<SymbolVariable>(keyer_plink) == MakeOver<SymbolConstant>(XLink::MMAX_Link) );
+		        MakeLazy<SymbolVariable>(keyer_plink) == MakeLazy<SymbolConstant>(XLink::MMAX_Link) );
 
 	return my_expr;
 }
@@ -30,9 +30,9 @@ void ColocatedAgent::RunColocatedQuery( XLink common_xlink ) const
 }
 
 
-SYM::Over<SYM::BooleanExpression> ColocatedAgent::SymbolicColocatedQuery() const
+SYM::Lazy<SYM::BooleanExpression> ColocatedAgent::SymbolicColocatedQuery() const
 {
-	return SYM::MakeOver<SYM::BooleanConstant>(true); 
+	return SYM::MakeLazy<SYM::BooleanConstant>(true); 
 }
 
 

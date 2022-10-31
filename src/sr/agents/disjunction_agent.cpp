@@ -31,26 +31,26 @@ shared_ptr<PatternQuery> DisjunctionAgent::GetPatternQuery() const
 }
 
 
-SYM::Over<SYM::BooleanExpression> DisjunctionAgent::SymbolicNormalLinkedQuery() const
+SYM::Lazy<SYM::BooleanExpression> DisjunctionAgent::SymbolicNormalLinkedQuery() const
 {
     ASSERT( GetDisjuncts().size() == 2 )
           ("Got %d choices; to support more than 2 disjuncts, enable SplitDisjunctions; fewer than 2 not allowed", GetDisjuncts().size());
 
-    auto mmax_expr = MakeOver<SymbolConstant>(XLink::MMAX_Link);
-    auto keyer_expr = MakeOver<SymbolVariable>(keyer_plink);
+    auto mmax_expr = MakeLazy<SymbolConstant>(XLink::MMAX_Link);
+    auto keyer_expr = MakeLazy<SymbolVariable>(keyer_plink);
     
     list< shared_ptr<BooleanExpression> > is_mmax_exprs, is_keyer_exprs;
     list< shared_ptr<SymbolExpression> > disjunct_exprs;
     for( const TreePtrInterface &p : GetDisjuncts() )           
     {
         PatternLink disjunct_plink(this, &p);
-        auto disjunct_expr = MakeOver<SymbolVariable>(disjunct_plink);
+        auto disjunct_expr = MakeLazy<SymbolVariable>(disjunct_plink);
         disjunct_exprs.push_back( disjunct_expr );
         is_mmax_exprs.push_back( disjunct_expr==mmax_expr );
         is_keyer_exprs.push_back( disjunct_expr==keyer_expr );
     }
            
-    Over<BooleanExpression> main_expr = is_mmax_exprs.front() & is_keyer_exprs.back() | is_mmax_exprs.back() & is_keyer_exprs.front();
+    Lazy<BooleanExpression> main_expr = is_mmax_exprs.front() & is_keyer_exprs.back() | is_mmax_exprs.back() & is_keyer_exprs.front();
 
     // Don't forget the pre-restriction, applies in non-MMAX-keyer case
     main_expr &= SymbolicPreRestriction() | keyer_expr==mmax_expr; 

@@ -27,7 +27,7 @@ BooleanExpressionSet PreprocessForEngine::operator()( BooleanExpressionSet in ) 
             case false:
                 ASSERT(false)("Got a FALSE BooleanConstant clause in engine and-rule preprocessing");
                 // Of course, there IS a correct thing to do - replace the whole list with a single constant FALSE
-                return { MakeOver<BooleanConstant>(false) }; // ...like this
+                return { MakeLazy<BooleanConstant>(false) }; // ...like this
             }
         }
         else
@@ -97,7 +97,7 @@ shared_ptr<BooleanExpression> CreateTidiedOperator<OP>::operator()( list< shared
     
     // By cases: empty get identity, singlur gets returned, otherwise actually generate the operator
     if( out.empty() )
-        return MakeOver<BooleanConstant>(identity);
+        return MakeLazy<BooleanConstant>(identity);
     else if( out.size()==1 )
         return OnlyElementOf(out);
     else

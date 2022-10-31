@@ -4,7 +4,7 @@
 #include "sym/boolean_operators.hpp"
 #include "sym/predicate_operators.hpp"
 #include "sym/symbol_operators.hpp"
-#include "sym/overloads.hpp"
+#include "sym/lazy_eval.hpp"
 
 using namespace SR;
 using namespace SYM;
@@ -25,9 +25,9 @@ shared_ptr<PatternQuery> NegationAgent::GetPatternQuery() const
 }
 
 
-SYM::Over<SYM::BooleanExpression> NegationAgent::SymbolicNormalLinkedQueryPRed() const
+SYM::Lazy<SYM::BooleanExpression> NegationAgent::SymbolicNormalLinkedQueryPRed() const
 {
-    return MakeOver<SYM::BooleanConstant>(true);
+    return MakeLazy<SYM::BooleanConstant>(true);
 }                                      
 
 

@@ -199,14 +199,14 @@ Expression::Precedence IsEqualOperator::GetPrecedenceNF() const
 }
 
 
-Over<BooleanExpression> SYM::operator==( Over<SymbolExpression> a, Over<SymbolExpression> b )
+Lazy<BooleanExpression> SYM::operator==( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b )
 {
-    return MakeOver<IsEqualOperator>( a, b );
+    return MakeLazy<IsEqualOperator>( a, b );
 }
 
 // ------------------------- (not equal operator) --------------------------
 
-Over<BooleanExpression> SYM::operator!=( Over<SymbolExpression> a, Over<SymbolExpression> b )
+Lazy<BooleanExpression> SYM::operator!=( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b )
 {
     return ~(a==b);
 }
@@ -330,9 +330,9 @@ string IsGreaterOperator::RenderNF() const
 }
 
 
-Over<BooleanExpression> SYM::operator>( Over<SymbolExpression> a, Over<SymbolExpression> b )
+Lazy<BooleanExpression> SYM::operator>( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b )
 {
-    return MakeOver<IsGreaterOperator>( a, b );
+    return MakeLazy<IsGreaterOperator>( a, b );
 }
 
 // ------------------------- IsLessOperator --------------------------
@@ -388,9 +388,9 @@ string IsLessOperator::RenderNF() const
 }
 
 
-Over<BooleanExpression> SYM::operator<( Over<SymbolExpression> a, Over<SymbolExpression> b )
+Lazy<BooleanExpression> SYM::operator<( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b )
 {
-    return MakeOver<IsLessOperator>( a, b );
+    return MakeLazy<IsLessOperator>( a, b );
 }
 
 // ------------------------- IsGreaterOrEqualOperator --------------------------
@@ -441,9 +441,9 @@ string IsGreaterOrEqualOperator::RenderNF() const
 }
 
 
-Over<BooleanExpression> SYM::operator>=( Over<SymbolExpression> a, Over<SymbolExpression> b )
+Lazy<BooleanExpression> SYM::operator>=( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b )
 {
-    return MakeOver<IsGreaterOrEqualOperator>( a, b );
+    return MakeLazy<IsGreaterOrEqualOperator>( a, b );
 }
 
 // ------------------------- IsLessOrEqualOperator --------------------------
@@ -494,9 +494,9 @@ string IsLessOrEqualOperator::RenderNF() const
 }
 
 
-Over<BooleanExpression> SYM::operator<=( Over<SymbolExpression> a, Over<SymbolExpression> b )
+Lazy<BooleanExpression> SYM::operator<=( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b )
 {
-    return MakeOver<IsLessOrEqualOperator>( a, b );
+    return MakeLazy<IsLessOrEqualOperator>( a, b );
 }
 
 // ------------------------- IsAllDiffOperator --------------------------

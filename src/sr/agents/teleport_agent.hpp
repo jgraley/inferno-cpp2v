@@ -4,7 +4,7 @@
 #include "agent_intermediates.hpp"
 #include "common/common.hpp"
 #include "../query.hpp"
-#include "../sym/overloads.hpp"
+#include "../sym/lazy_eval.hpp"
 #include "special_agent.hpp"
 
 namespace SR
@@ -14,7 +14,7 @@ class TeleportAgent : public PreRestrictedAgent
 {
 public:    
     virtual XLink TeleportQueryUnique( const TreeKit &kit, XLink keyer_xlink, bool expect_in_domain ) const;                  
-    virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
 
     // XLink -> Node is correct: PointerIs needs to see the incoming TreePtr.
     virtual TreePtr<Node> RunTeleportQuery( const TreeKit &kit, XLink keyer_xlink ) const { ASSERTFAIL(); }

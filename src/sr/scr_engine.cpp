@@ -497,7 +497,7 @@ int SCREngine::RepeatingCompareReplace( XLink base_xlink,
     }
     
     TRACE("Stop after ")(stop_after)(" depth=")(depth)("\n");
-    TRACE("Over the limit of %d reps\n", repetitions); 
+    TRACE("Lazy the limit of %d reps\n", repetitions); 
     ASSERT(!rep_error)
           ("Still getting matches after %d repetitions, may be repeating forever.\n"
            "Try using -rn%d to suppress this error\n", repetitions, repetitions);

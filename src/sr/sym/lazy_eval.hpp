@@ -7,12 +7,12 @@ namespace SYM
 { 
 
 template<typename EVALTYPE>
-class Over : public Traceable
+class Lazy : public Traceable
 {
 public:
     // Be strict and don't support assignment, default copy etc - 
     // because most of our operators are overloaded
-    Over( shared_ptr<EVALTYPE> pexpr_ = nullptr ) :
+    Lazy( shared_ptr<EVALTYPE> pexpr_ = nullptr ) :
         pexpr( pexpr_ )
     {
     }
@@ -32,13 +32,13 @@ public:
         return pexpr;
     }
     
-    Over<EVALTYPE> operator &=( Over<EVALTYPE> other )
+    Lazy<EVALTYPE> operator &=( Lazy<EVALTYPE> other )
     {
         pexpr = shared_ptr<EVALTYPE>(*this & other);
         return *this;
     }
 
-    Over<EVALTYPE> operator |=( Over<EVALTYPE> other )
+    Lazy<EVALTYPE> operator |=( Lazy<EVALTYPE> other )
     {
         pexpr = shared_ptr<EVALTYPE>(*this | other);
         return *this;
@@ -50,10 +50,10 @@ private:
 
 
 template<class T, class ... Args>
-Over<typename T::NominalType> MakeOver(Args && ... args)
+Lazy<typename T::NominalType> MakeLazy(Args && ... args)
 {
     shared_ptr<T> ptr = make_shared<T>(args...);
-    return Over<typename T::NominalType>(ptr);
+    return Lazy<typename T::NominalType>(ptr);
 }
 
 };

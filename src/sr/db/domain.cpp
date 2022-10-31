@@ -42,7 +42,7 @@ XLink Domain::UniquifyDomainExtension( TreePtr<Node> node, bool expect_in_domain
     // To ensure compliance with rule #217 we must duplicate the tree that
     // we were given, in case it meanders into the main X tree not at an
     // identifier, causing illegal multiple parents. See #677
-    // TODO maybe only do this if subtree actually would go wrong
+    // TODO maybe only do this if subtree actually would go wrong.
     TreePtr<Node> dup_node = Duplicate::DuplicateSubtree( node );
   
     // Not an error, so create an XLink that will allow us to track this subtree

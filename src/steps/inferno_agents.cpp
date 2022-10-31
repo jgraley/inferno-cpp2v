@@ -7,7 +7,7 @@
 #include "sr/search_replace.hpp"
 #include "sr/link.hpp"
 #include "sr/sym/result.hpp"
-#include "sr/sym/overloads.hpp"
+#include "sr/sym/lazy_eval.hpp"
 #include "sr/sym/boolean_operators.hpp"
 #include "sr/sym/symbol_operators.hpp"
 #include "sr/sym/set_operators.hpp"
@@ -116,10 +116,10 @@ Graphable::Block IdentifierByNameAgent::GetGraphBlockInfo() const
 }
 
 
-SYM::Over<SYM::BooleanExpression> IdentifierByNameAgent::SymbolicNormalLinkedQueryPRed() const
+SYM::Lazy<SYM::BooleanExpression> IdentifierByNameAgent::SymbolicNormalLinkedQueryPRed() const
 {
-    auto keyer_expr = SYM::MakeOver<SYM::SymbolVariable>(keyer_plink);   
-    return SYM::MakeOver<IsIdentifierNamedOperator>(this, name, keyer_expr);
+    auto keyer_expr = SYM::MakeLazy<SYM::SymbolVariable>(keyer_plink);   
+    return SYM::MakeLazy<IsIdentifierNamedOperator>(this, name, keyer_expr);
 }
 
 
@@ -236,15 +236,15 @@ shared_ptr<PatternQuery> NestedAgent::GetPatternQuery() const
 }
 
     
-SYM::Over<SYM::BooleanExpression> NestedAgent::SymbolicNormalLinkedQueryPRed() const                                      
+SYM::Lazy<SYM::BooleanExpression> NestedAgent::SymbolicNormalLinkedQueryPRed() const                                      
 {                 
     shared_ptr<PatternQuery> my_pq = GetPatternQuery();         
     PatternLink child_plink = my_pq->GetNormalLinks().front();
     
-    SYM::Over<SYM::SymbolExpression> keyer_expr = SYM::MakeOver<SYM::SymbolVariable>(keyer_plink);
-    SYM::Over<SYM::SymbolExpression> child_expr = SYM::MakeOver<SYM::SymbolVariable>(child_plink);
+    SYM::Lazy<SYM::SymbolExpression> keyer_expr = SYM::MakeLazy<SYM::SymbolVariable>(keyer_plink);
+    SYM::Lazy<SYM::SymbolExpression> child_expr = SYM::MakeLazy<SYM::SymbolVariable>(child_plink);
     
-    SYM::Over<SYM::BooleanExpression> expr = SYM::MakeOver<NestingOperator>( this, keyer_expr ) == child_expr;
+    SYM::Lazy<SYM::BooleanExpression> expr = SYM::MakeLazy<NestingOperator>( this, keyer_expr ) == child_expr;
     
     if( depth )
         expr &= TeleportAgent::SymbolicNormalLinkedQueryPRed();

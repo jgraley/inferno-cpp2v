@@ -2,7 +2,7 @@
 #define PREDICATE_OPERATORS_HPP
 
 #include "expression.hpp"
-#include "overloads.hpp"
+#include "lazy_eval.hpp"
 
 #include "../db/x_tree_database.hpp"
 #include "helpers/simple_compare.hpp"
@@ -97,11 +97,11 @@ private:
 };
 
 
-Over<BooleanExpression> operator==( Over<SymbolExpression> a, Over<SymbolExpression> b );
+Lazy<BooleanExpression> operator==( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b );
 
 // ------------------------- (not equal operator) --------------------------
 
-Over<BooleanExpression> operator!=( Over<SymbolExpression> a, Over<SymbolExpression> b );
+Lazy<BooleanExpression> operator!=( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b );
 
 // ------------------------- DepthFirstComparisonOperator --------------------------
 
@@ -142,7 +142,7 @@ class IsGreaterOperator : public DepthFirstComparisonOperator
     virtual string RenderNF() const override;
 };
 
-Over<BooleanExpression> operator>( Over<SymbolExpression> a, Over<SymbolExpression> b );
+Lazy<BooleanExpression> operator>( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b );
 
 // ------------------------- IsLessOperator --------------------------
 
@@ -160,7 +160,7 @@ class IsLessOperator : public DepthFirstComparisonOperator
     virtual string RenderNF() const override;
 };
 
-Over<BooleanExpression> operator<( Over<SymbolExpression> a, Over<SymbolExpression> b );
+Lazy<BooleanExpression> operator<( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b );
 
 // ------------------------- IsGreaterOrEqualOperator --------------------------
 
@@ -178,7 +178,7 @@ class IsGreaterOrEqualOperator : public DepthFirstComparisonOperator
     virtual string RenderNF() const override;
 };
 
-Over<BooleanExpression> operator>=( Over<SymbolExpression> a, Over<SymbolExpression> b );
+Lazy<BooleanExpression> operator>=( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b );
 
 // ------------------------- IsLessOrEqualOperator --------------------------
 
@@ -196,7 +196,7 @@ class IsLessOrEqualOperator : public DepthFirstComparisonOperator
     virtual string RenderNF() const override;
 };
 
-Over<BooleanExpression> operator<=( Over<SymbolExpression> a, Over<SymbolExpression> b );
+Lazy<BooleanExpression> operator<=( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b );
 
 // ------------------------- IsAllDiffOperator --------------------------
 

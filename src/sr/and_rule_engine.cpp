@@ -392,7 +392,7 @@ void AndRuleEngine::Plan::CreateMyFullSymbolics()
     for( PatternLink keyer_plink : my_normal_links_unique_by_agent ) // Only one constraint per agent
     {
 		Agent *agent = keyer_plink.GetChildAgent();
-		SYM::Over<SYM::BooleanExpression> op = agent->SymbolicQuery(false);
+		SYM::Lazy<SYM::BooleanExpression> op = agent->SymbolicQuery(false);
         expressions_from_agents.insert( op );
     }
 }
@@ -416,7 +416,7 @@ void AndRuleEngine::Plan::CreateSurroundingCouplingSymbolics()
     for( PatternLink keyer_plink : boundary_keyer_links )
     {                                    
 		Agent *agent = keyer_plink.GetChildAgent();
-		SYM::Over<SYM::BooleanExpression> op = agent->SymbolicQuery(true);
+		SYM::Lazy<SYM::BooleanExpression> op = agent->SymbolicQuery(true);
         expressions_from_agents.insert( op );
     }
 }

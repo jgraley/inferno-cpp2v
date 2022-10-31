@@ -21,16 +21,16 @@ shared_ptr<PatternQuery> StarAgent::GetPatternQuery() const
 }
 
 
-SYM::Over<SYM::BooleanExpression> StarAgent::SymbolicNormalLinkedQuery() const
+SYM::Lazy<SYM::BooleanExpression> StarAgent::SymbolicNormalLinkedQuery() const
 {
     if( ShouldGenerateCategoryClause() )
     {
-        auto keyer_expr = MakeOver<SymbolVariable>(keyer_plink);
-        return MakeOver<IsSubcontainerInCategoryOperator>(GetArchetypeNode(), keyer_expr);
+        auto keyer_expr = MakeLazy<SymbolVariable>(keyer_plink);
+        return MakeLazy<IsSubcontainerInCategoryOperator>(GetArchetypeNode(), keyer_expr);
     }
     else
     {
-        return MakeOver<BooleanConstant>(true);
+        return MakeLazy<BooleanConstant>(true);
     }    
 }
 

@@ -231,9 +231,9 @@ void StandardAgent::IncrPatternQuerySingular( const Plan::Singular &plan_sing,
 
 // ---------------------------- Symbolic Queries ----------------------------------                                               
                                                
-Over<BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryPRed() const
+Lazy<BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryPRed() const
 {
-	auto expr = MakeOver<IsLocalMatchOperator>(GetPatternPtr().get(), MakeOver<SymbolVariable>(keyer_plink));
+	auto expr = MakeLazy<IsLocalMatchOperator>(GetPatternPtr().get(), MakeLazy<SymbolVariable>(keyer_plink));
 
     for( const Plan::Singular &plan_sing : plan.singulars )
         expr &= SymbolicNormalLinkedQuerySingular( plan_sing );
@@ -248,18 +248,18 @@ Over<BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryPRed() const
 }                                  
 
                                                
-Over<BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySequence(const Plan::Sequence &plan_seq) const
+Lazy<BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySequence(const Plan::Sequence &plan_seq) const
 {
-	auto expr = MakeOver<BooleanConstant>(true);
+	auto expr = MakeLazy<BooleanConstant>(true);
 
     // Require that every candidate x link is in the correct container. Binary 
     // constraint with keyer and candidate, for each candidate.
-    auto keyer_expr = MakeOver<SymbolVariable>(keyer_plink);
-    auto keyer_child_seq_front_expr = MakeOver<ChildSequenceFrontOperator>(GetArchetypeNode(), plan_seq.itemise_index, keyer_expr);
+    auto keyer_expr = MakeLazy<SymbolVariable>(keyer_plink);
+    auto keyer_child_seq_front_expr = MakeLazy<ChildSequenceFrontOperator>(GetArchetypeNode(), plan_seq.itemise_index, keyer_expr);
     for( PatternLink candidate_plink : plan_seq.non_stars )
     {        
-        auto candidate_expr = MakeOver<SymbolVariable>(candidate_plink);
-        auto candidate_seq_front_expr = MakeOver<MyContainerFrontOperator>(candidate_expr);
+        auto candidate_expr = MakeLazy<SymbolVariable>(candidate_plink);
+        auto candidate_seq_front_expr = MakeLazy<MyContainerFrontOperator>(candidate_expr);
         expr &= (candidate_seq_front_expr == keyer_child_seq_front_expr);
     }
     
@@ -267,8 +267,8 @@ Over<BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySequence(const P
     // front node in its own sequence. A unary constraint.
     if( plan_seq.non_star_at_front ) 
     {
-        auto candidate_expr = MakeOver<SymbolVariable>(plan_seq.non_star_at_front);
-        auto candidate_seq_front_expr = MakeOver<MyContainerFrontOperator>(candidate_expr);
+        auto candidate_expr = MakeLazy<SymbolVariable>(plan_seq.non_star_at_front);
+        auto candidate_seq_front_expr = MakeLazy<MyContainerFrontOperator>(candidate_expr);
         expr &= ( candidate_expr == candidate_seq_front_expr );
     }
  
@@ -276,8 +276,8 @@ Over<BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySequence(const P
     // back node in its own sequence. A unary constraint.
     if( plan_seq.non_star_at_back ) 
     {
-        auto candidate_expr = MakeOver<SymbolVariable>(plan_seq.non_star_at_back);
-        auto candidate_seq_back_expr = MakeOver<MyContainerBackOperator>(candidate_expr);
+        auto candidate_expr = MakeLazy<SymbolVariable>(plan_seq.non_star_at_back);
+        auto candidate_seq_back_expr = MakeLazy<MyContainerBackOperator>(candidate_expr);
         expr &= ( candidate_expr == candidate_seq_back_expr );
     }
     
@@ -285,12 +285,12 @@ Over<BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySequence(const P
     // pairs of candidate x links. Only needs the two candidate x nodes, so binary constraint.
     for( pair<PatternLink, PatternLink> p : plan_seq.adjacent_non_stars )
     {
-        auto candidate_a_expr = MakeOver<SymbolVariable>(p.first);
-        auto candidate_b_expr = MakeOver<SymbolVariable>(p.second);
-        auto candidate_a_successor_expr = MakeOver<MySequenceSuccessorOperator>(candidate_a_expr);
+        auto candidate_a_expr = MakeLazy<SymbolVariable>(p.first);
+        auto candidate_b_expr = MakeLazy<SymbolVariable>(p.second);
+        auto candidate_a_successor_expr = MakeLazy<MySequenceSuccessorOperator>(candidate_a_expr);
         expr &= ( candidate_b_expr == candidate_a_successor_expr );
         // Avoid being pushed off the end since candidate b is not a shim
-        expr &= ( candidate_b_expr != MakeOver<SymbolConstant>(XLink::OffEndXLink) ); 
+        expr &= ( candidate_b_expr != MakeLazy<SymbolConstant>(XLink::OffEndXLink) ); 
     }
         
     // Gapped pairs of non-stars in the pattern (i.e. stars in between) should 
@@ -298,8 +298,8 @@ Over<BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySequence(const P
     // the two candidate x nodes, so binary constraint.    
     for( pair<PatternLink, PatternLink> p : plan_seq.gapped_non_stars ) 
     {
-        auto candidate_a_expr = MakeOver<SymbolVariable>(p.first);
-        auto candidate_b_expr = MakeOver<SymbolVariable>(p.second);
+        auto candidate_a_expr = MakeLazy<SymbolVariable>(p.first);
+        auto candidate_b_expr = MakeLazy<SymbolVariable>(p.second);
         expr &= ( candidate_a_expr < candidate_b_expr );
     }
 
@@ -307,18 +307,18 @@ Over<BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySequence(const P
 }                                  
 
 
-SYM::Over<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryCollection(const Plan::Collection &plan_col) const
+SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryCollection(const Plan::Collection &plan_col) const
 {
-    auto expr = MakeOver<BooleanConstant>(true);
+    auto expr = MakeLazy<BooleanConstant>(true);
 
     // Require that every candidate x link is in the correct container. Binary 
     // constraint with keyer and candidate, for each candidate.
-    auto keyer_expr = MakeOver<SymbolVariable>(keyer_plink);
-    auto keyer_child_col_front_expr = MakeOver<ChildCollectionFrontOperator>(GetArchetypeNode(), plan_col.itemise_index, keyer_expr);
+    auto keyer_expr = MakeLazy<SymbolVariable>(keyer_plink);
+    auto keyer_child_col_front_expr = MakeLazy<ChildCollectionFrontOperator>(GetArchetypeNode(), plan_col.itemise_index, keyer_expr);
     for( PatternLink candidate_plink : plan_col.non_stars )
     {        
-        auto candidate_expr = MakeOver<SymbolVariable>(candidate_plink);
-        auto candidate_col_front_expr = MakeOver<MyContainerFrontOperator>(candidate_expr);
+        auto candidate_expr = MakeLazy<SymbolVariable>(candidate_plink);
+        auto candidate_col_front_expr = MakeLazy<MyContainerFrontOperator>(candidate_expr);
         expr &= (candidate_col_front_expr == keyer_child_col_front_expr);
     }
 
@@ -328,27 +328,27 @@ SYM::Over<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryCollec
     {
         list< shared_ptr<SymbolExpression> > candidate_exprs;
         for( PatternLink candidate_plink : plan_col.non_stars ) 
-            candidate_exprs.push_back( MakeOver<SymbolVariable>(candidate_plink) );
-        expr &= MakeOver<IsAllDiffOperator>( candidate_exprs );        
+            candidate_exprs.push_back( MakeLazy<SymbolVariable>(candidate_plink) );
+        expr &= MakeLazy<IsAllDiffOperator>( candidate_exprs );        
     }
 
     // Require that there are no leftover x, if no star in pattern. 
     // Unary constraint on keyer.
     if( !plan_col.star_plink )
     {
-        auto keyer_expr = MakeOver<SymbolVariable>(keyer_plink);
-        expr &= MakeOver<IsChildCollectionSizedOperator>(GetArchetypeNode(), plan_col.itemise_index, keyer_expr, plan_col.non_stars.size());
+        auto keyer_expr = MakeLazy<SymbolVariable>(keyer_plink);
+        expr &= MakeLazy<IsChildCollectionSizedOperator>(GetArchetypeNode(), plan_col.itemise_index, keyer_expr, plan_col.non_stars.size());
     }
 
     return expr;
 }                                  
 
 
-SYM::Over<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySingular(const Plan::Singular &plan_sing) const
+SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySingular(const Plan::Singular &plan_sing) const
 {
-    auto keyer = MakeOver<SymbolVariable>(keyer_plink);
-    auto keyer_sing_expr = MakeOver<SingularChildOperator>( GetArchetypeNode(), plan_sing.itemise_index, keyer );
-    auto candidate_expr = MakeOver<SymbolVariable>(plan_sing.plink);
+    auto keyer = MakeLazy<SymbolVariable>(keyer_plink);
+    auto keyer_sing_expr = MakeLazy<SingularChildOperator>( GetArchetypeNode(), plan_sing.itemise_index, keyer );
+    auto candidate_expr = MakeLazy<SymbolVariable>(plan_sing.plink);
     return keyer_sing_expr == candidate_expr;
 }                                  
 

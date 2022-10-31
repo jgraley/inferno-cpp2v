@@ -7,7 +7,7 @@
 #include "sym/boolean_operators.hpp"
 #include "sym/predicate_operators.hpp"
 #include "sym/symbol_operators.hpp"
-#include "sym/overloads.hpp"
+#include "sym/lazy_eval.hpp"
 
 using namespace SR;
 using namespace SYM;
@@ -68,11 +68,11 @@ Graphable::Block SearchContainerAgent::GetGraphBlockInfo() const
 
 //---------------------------------- AnyNode ------------------------------------    
 
-SYM::Over<SYM::BooleanExpression> AnyNodeAgent::SymbolicNormalLinkedQueryPRed() const
+SYM::Lazy<SYM::BooleanExpression> AnyNodeAgent::SymbolicNormalLinkedQueryPRed() const
 {
     PatternLink terminus_plink(this, &terminus);
-    return MakeOver<ParentOperator>( MakeOver<SymbolVariable>(terminus_plink) ) ==
-           MakeOver<SymbolVariable>(keyer_plink);
+    return MakeLazy<ParentOperator>( MakeLazy<SymbolVariable>(terminus_plink) ) ==
+           MakeLazy<SymbolVariable>(keyer_plink);
 }
 
 
@@ -95,16 +95,16 @@ void StuffAgent::PatternQueryRestrictions( shared_ptr<PatternQuery> pq ) const
 }                                                      
 
 
-SYM::Over<SYM::BooleanExpression> StuffAgent::SymbolicNormalLinkedQueryPRed() const
+SYM::Lazy<SYM::BooleanExpression> StuffAgent::SymbolicNormalLinkedQueryPRed() const
 {
     PatternLink terminus_plink(this, &terminus);
-    auto expr = MakeOver<BooleanConstant>(true);
+    auto expr = MakeLazy<BooleanConstant>(true);
     
-    expr &= MakeOver<SymbolVariable>(terminus_plink) >= 
-            MakeOver<SymbolVariable>(keyer_plink);
+    expr &= MakeLazy<SymbolVariable>(terminus_plink) >= 
+            MakeLazy<SymbolVariable>(keyer_plink);
             
-    expr &= MakeOver<SymbolVariable>(terminus_plink) <= 
-            MakeOver<LastDescendantOperator>( MakeOver<SymbolVariable>(keyer_plink) );
+    expr &= MakeLazy<SymbolVariable>(terminus_plink) <= 
+            MakeLazy<LastDescendantOperator>( MakeLazy<SymbolVariable>(keyer_plink) );
     
     return expr;
 }

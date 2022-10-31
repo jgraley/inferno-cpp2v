@@ -19,7 +19,7 @@ public:
 
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;              
 
-    virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const override;                                       
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const override;                                       
 
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            const SolutionMap *hypothesis_links,

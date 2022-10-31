@@ -42,7 +42,7 @@ public:
 class AnyNodeAgent : public SearchContainerAgent
 {
     class NoParentMismatch : public Mismatch {};
-    virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
     virtual Block GetGraphBlockInfo() const;
 };
 
@@ -77,7 +77,7 @@ class StuffAgent : public SearchContainerAgent
 {
 public:
     virtual void PatternQueryRestrictions( shared_ptr<PatternQuery> pq ) const;
-    virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            const SolutionMap *hypothesis_links,
                                            const XTreeDatabase *x_tree_db ) const;                                              

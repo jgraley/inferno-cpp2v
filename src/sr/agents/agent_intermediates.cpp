@@ -23,9 +23,9 @@ using namespace SYM;
 
 //---------------------------------- DefaultMMAXAgent ------------------------------------    
 
-SYM::Over<SYM::BooleanExpression> DefaultMMAXAgent::SymbolicNormalLinkedQuery() const
+SYM::Lazy<SYM::BooleanExpression> DefaultMMAXAgent::SymbolicNormalLinkedQuery() const
 {    
-    auto mmax_expr = MakeOver<SymbolConstant>(SR::XLink::MMAX_Link);
+    auto mmax_expr = MakeLazy<SymbolConstant>(SR::XLink::MMAX_Link);
     ClutchRewriter mmax_rewriter( mmax_expr );
     shared_ptr<BooleanExpression> original_expr = SymbolicNormalLinkedQueryMMed();
     return mmax_rewriter.ApplyDistributed( original_expr );
@@ -33,7 +33,7 @@ SYM::Over<SYM::BooleanExpression> DefaultMMAXAgent::SymbolicNormalLinkedQuery() 
 
 //---------------------------------- PreRestrictedAgent ------------------------------------    
 
-SYM::Over<SYM::BooleanExpression> PreRestrictedAgent::SymbolicNormalLinkedQueryMMed() const
+SYM::Lazy<SYM::BooleanExpression> PreRestrictedAgent::SymbolicNormalLinkedQueryMMed() const
 {
     return SymbolicPreRestriction() & SymbolicNormalLinkedQueryPRed();
 }                  

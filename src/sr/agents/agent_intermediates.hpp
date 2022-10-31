@@ -4,7 +4,7 @@
 #include "agent_common.hpp"
 #include "common/common.hpp"
 #include "../query.hpp"
-#include "../sym/overloads.hpp"
+#include "../sym/lazy_eval.hpp"
 
 namespace SR
 { 
@@ -15,8 +15,8 @@ namespace SR
 class DefaultMMAXAgent : public AgentCommon
 {
 public:                                        
-    SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQuery() const final;                                       
-    virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryMMed() const = 0;                                       
+    SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuery() const final;                                       
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryMMed() const = 0;                                       
 };
 
 
@@ -26,8 +26,8 @@ public:
 class PreRestrictedAgent : public DefaultMMAXAgent
 {
 public:    
-    SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryMMed() const final;                                       
-    virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const = 0;                                       
+    SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryMMed() const final;                                       
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const = 0;                                       
 };
 
 

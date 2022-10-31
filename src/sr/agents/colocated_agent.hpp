@@ -20,10 +20,10 @@ public:
     class PreRestrictionMismatch : public Mismatch {};
     class ColocationMismatch : public Mismatch {};
                                                  
-    virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQuery() const override; 
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuery() const override; 
     
     virtual void RunColocatedQuery(XLink common_xlink) const;
-    virtual SYM::Over<SYM::BooleanExpression> SymbolicColocatedQuery() const; 
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicColocatedQuery() const; 
     TreePtr<Node> BuildReplaceImpl( PatternLink me_plink, 
                                     XLink key_xlink ) final;
     virtual TreePtr<Node> BuildReplaceImpl( PatternLink me_plink );

@@ -6,7 +6,7 @@
 #include "common/common.hpp"
 #include "../conjecture.hpp"
 #include "../query.hpp"
-#include "../sym/overloads.hpp"
+#include "../sym/lazy_eval.hpp"
 
 namespace SR
 { 
@@ -25,13 +25,13 @@ public:
     virtual list<PatternLink> GetVisibleChildren( Path v ) const override;
     virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const;                                    
                                   
-    SYM::Over<SYM::BooleanExpression> SymbolicQuery( bool coupling_only ) const override;                                       
-    virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQuery() const = 0;
-    virtual SYM::Over<SYM::BooleanExpression> SymbolicCouplingQuery() const;       
+    SYM::Lazy<SYM::BooleanExpression> SymbolicQuery( bool coupling_only ) const override;                                       
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuery() const = 0;
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicCouplingQuery() const;       
     bool IsNonTrivialPreRestrictionNP(const TreePtrInterface *pptr) const override;
     bool IsNonTrivialPreRestriction() const;
     bool ShouldGenerateCategoryClause() const override;                                
-	virtual SYM::Over<SYM::BooleanExpression> SymbolicPreRestriction() const;
+	virtual SYM::Lazy<SYM::BooleanExpression> SymbolicPreRestriction() const;
     bool IsPreRestrictionMatch( TreePtr<Node> x ) const; // return true if matches
     bool IsPreRestrictionMatch( XLink x ) const; // return true if matches
 	

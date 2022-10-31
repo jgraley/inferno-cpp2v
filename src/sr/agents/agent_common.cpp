@@ -147,7 +147,7 @@ shared_ptr<DecidedQuery> AgentCommon::CreateDecidedQuery() const
 }
                                 
 
-Over<BooleanExpression> AgentCommon::SymbolicQuery( bool coupling_only ) const 
+Lazy<BooleanExpression> AgentCommon::SymbolicQuery( bool coupling_only ) const 
 {
 	auto cq_expr = SymbolicCouplingQuery();
     if( coupling_only )
@@ -158,25 +158,25 @@ Over<BooleanExpression> AgentCommon::SymbolicQuery( bool coupling_only ) const
 }
 
 
-Over<BooleanExpression> AgentCommon::SymbolicCouplingQuery() const
+Lazy<BooleanExpression> AgentCommon::SymbolicCouplingQuery() const
 {
     ASSERT( my_keyer_engine )(*this)(" has not been configured for couplings");
 	
     // This class establishes the policy for couplings in one place.
     // And it always will be: see #121; para starting at "No!!"
 
-    auto keyer_expr = MakeOver<SymbolVariable>(keyer_plink);
-    auto mmax_expr = MakeOver<SymbolConstant>(SR::XLink::MMAX_Link);
+    auto keyer_expr = MakeLazy<SymbolVariable>(keyer_plink);
+    auto mmax_expr = MakeLazy<SymbolConstant>(SR::XLink::MMAX_Link);
     
     // Policy must apply for every residual
-    auto expr = MakeOver<BooleanConstant>(true);
+    auto expr = MakeLazy<BooleanConstant>(true);
     for( PatternLink residual_plink : residual_plinks )
     {
-        auto residual_expr = MakeOver<SymbolVariable>(residual_plink);
+        auto residual_expr = MakeLazy<SymbolVariable>(residual_plink);
         
         // Policy: Accept SimpleCompare equivalence of current 
         // residual to keyer, or either one being MMAX
-        expr &= ( MakeOver<IsSimpleCompareEquivalentOperator>( keyer_expr, residual_expr ) |
+        expr &= ( MakeLazy<IsSimpleCompareEquivalentOperator>( keyer_expr, residual_expr ) |
                   keyer_expr == mmax_expr | // See thought on #384
                   residual_expr == mmax_expr );
     }
@@ -217,16 +217,16 @@ bool AgentCommon::ShouldGenerateCategoryClause() const
 }                                
 
 
-SYM::Over<SYM::BooleanExpression> AgentCommon::SymbolicPreRestriction() const
+SYM::Lazy<SYM::BooleanExpression> AgentCommon::SymbolicPreRestriction() const
 {
     if( ShouldGenerateCategoryClause() )
     {
-        auto keyer_expr = MakeOver<SymbolVariable>(keyer_plink);
-	    return MakeOver<IsInCategoryOperator>(GetArchetypeNode(), keyer_expr);
+        auto keyer_expr = MakeLazy<SymbolVariable>(keyer_plink);
+	    return MakeLazy<IsInCategoryOperator>(GetArchetypeNode(), keyer_expr);
     }
     else
     {
-        return MakeOver<BooleanConstant>(true);
+        return MakeLazy<BooleanConstant>(true);
     }
 }
 

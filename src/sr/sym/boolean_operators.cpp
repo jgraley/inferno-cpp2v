@@ -91,9 +91,9 @@ Expression::Precedence NotOperator::GetPrecedence() const
 }
 
 
-Over<BooleanExpression> SYM::operator~( Over<BooleanExpression> a )
+Lazy<BooleanExpression> SYM::operator~( Lazy<BooleanExpression> a )
 {
-    return MakeOver<NotOperator>( a );
+    return MakeLazy<NotOperator>( a );
 }
 
 // ------------------------- AndOperator --------------------------
@@ -146,7 +146,7 @@ Expression::Precedence AndOperator::GetPrecedence() const
 }
 
 
-Over<BooleanExpression> SYM::operator&( Over<BooleanExpression> a, Over<BooleanExpression> b )
+Lazy<BooleanExpression> SYM::operator&( Lazy<BooleanExpression> a, Lazy<BooleanExpression> b )
 {
     // Overloaded operator can only take 2 args, but operator is commutative and
     // associative: we want a o b o c to generate Operator({a, b, c}) not
@@ -205,7 +205,7 @@ Expression::Precedence OrOperator::GetPrecedence() const
 }
 
 
-Over<BooleanExpression> SYM::operator|( Over<BooleanExpression> a, Over<BooleanExpression> b )
+Lazy<BooleanExpression> SYM::operator|( Lazy<BooleanExpression> a, Lazy<BooleanExpression> b )
 {
     // Overloaded operator can only take 2 args, but operator is commutative and
     // associative: we want a o b o c to generate Operator({a, b, c}) not
@@ -265,9 +265,9 @@ Expression::Precedence BoolEqualOperator::GetPrecedence() const
 }
 
 
-Over<BooleanExpression> SYM::operator==( Over<BooleanExpression> a, Over<BooleanExpression> b )
+Lazy<BooleanExpression> SYM::operator==( Lazy<BooleanExpression> a, Lazy<BooleanExpression> b )
 {
-    return MakeOver<BoolEqualOperator>( a, b );
+    return MakeLazy<BoolEqualOperator>( a, b );
 }
 
 // ------------------------- ImplicationOperator --------------------------

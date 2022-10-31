@@ -29,15 +29,15 @@ XLink TeleportAgent::TeleportQueryUnique( const TreeKit &kit, XLink keyer_xlink,
 }                                    
 
 
-SYM::Over<SYM::BooleanExpression> TeleportAgent::SymbolicNormalLinkedQueryPRed() const                                      
+SYM::Lazy<SYM::BooleanExpression> TeleportAgent::SymbolicNormalLinkedQueryPRed() const                                      
 {             
     shared_ptr<PatternQuery> my_pq = GetPatternQuery();         
     PatternLink child_plink = OnlyElementOf( my_pq->GetNormalLinks() );
     
-    SYM::Over<SYM::SymbolExpression> keyer_expr = MakeOver<SymbolVariable>(keyer_plink);
-    SYM::Over<SYM::SymbolExpression> child_expr = MakeOver<SymbolVariable>(child_plink);
+    SYM::Lazy<SYM::SymbolExpression> keyer_expr = MakeLazy<SymbolVariable>(keyer_plink);
+    SYM::Lazy<SYM::SymbolExpression> child_expr = MakeLazy<SymbolVariable>(child_plink);
     
-    return MakeOver<TeleportOperator>( this, keyer_expr ) == child_expr;
+    return MakeLazy<TeleportOperator>( this, keyer_expr ) == child_expr;
 }                     
 
 

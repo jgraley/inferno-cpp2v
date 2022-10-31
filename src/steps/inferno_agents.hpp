@@ -107,7 +107,7 @@ struct IdentifierByNameAgent : public virtual SearchLeafAgent
 {
     IdentifierByNameAgent( string n ) : name(n) {}
     virtual Block GetGraphBlockInfo() const;
-    virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
     virtual pair<TreePtr<Node>, TreePtr<Node>> GetBounds( string name ) const { ASSERTFAIL(); } // TODO implemnt all and put back = 0
     string name;
 
@@ -204,7 +204,7 @@ struct LabelIdentifierByNameAgent : Special<CPPTree::LabelIdentifier>,
 struct NestedAgent : public virtual TeleportAgent
 {
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;                
-    virtual SYM::Over<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
 
     TreePtr<Node> RunTeleportQuery( const TreeKit &kit, XLink keyer_xlink ) const override;                
 

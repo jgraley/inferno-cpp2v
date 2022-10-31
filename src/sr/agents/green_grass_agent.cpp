@@ -16,10 +16,10 @@ shared_ptr<PatternQuery> GreenGrassAgent::GetPatternQuery() const
 }
 
 
-Over<BooleanExpression> GreenGrassAgent::SymbolicColocatedQuery() const
+Lazy<BooleanExpression> GreenGrassAgent::SymbolicColocatedQuery() const
 {
-    auto keyer_expr = MakeOver<SymbolVariable>(keyer_plink);
-    return MakeOver<IsGreenGrassOperator>(this, keyer_expr);
+    auto keyer_expr = MakeLazy<SymbolVariable>(keyer_plink);
+    return MakeLazy<IsGreenGrassOperator>(this, keyer_expr);
 }
 
 
