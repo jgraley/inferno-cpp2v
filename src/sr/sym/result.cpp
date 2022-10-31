@@ -259,6 +259,7 @@ unique_ptr<SetResult> SetResult::IntersectionCore( list<unique_ptr<SetResult>> o
 
 string SetResult::Render() const
 {
+    // ç is being used to mean complement of, since existing symbols not that great
     string s;
     if( complement_flag )
         s += "ç";

@@ -29,6 +29,7 @@ unique_ptr<SymbolResultInterface> ComplementOperator::Evaluate( const EvalKit &k
 
 string ComplementOperator::Render() const
 {
+    // ç is being used to mean complement of, since existing symbols not that great
     return "ç" + RenderForMe(a);
 }
 
@@ -104,6 +105,7 @@ unique_ptr<SymbolResultInterface> IntersectionOperator::Evaluate( const EvalKit 
 
 string IntersectionOperator::Render() const
 {
+    // ç{} is universal set aka whole domain
     if( sa.empty() )
         return "ç{}";
     list<string> ls;
