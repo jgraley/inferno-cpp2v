@@ -3,7 +3,7 @@
 # Slower ones first for optimial multi-core usage (whole suite time)
 CASES = sctest13 sctest03 sctest11 sctest12 sctest08 sctest10 sctest02 
 CASES += sctest01 sctest04 sctest05 sctest06 sctest07 sctest09 sctest15
-CASES += issue677
+CASES += issue677 issue667
 
 # Quicker ones first for exploratory (max feedback ASAP)
 #CASES =  sctest09 sctest15 sctest06 sctest07 

@@ -3,6 +3,7 @@
 #include "x_tree_database.hpp"
 #include "sc_relation.hpp"
 #include "lacing.hpp"
+#include "relation_test.hpp"
 
 #include "common/read_args.hpp"
 
@@ -77,11 +78,23 @@ void Indexes::TestRelations( const unordered_set<XLink> &xlinks )
 	SimpleCompareRelation scr;
 	scr.Test( xlinks );
 
+    TestOrderingIntact( simple_compare_ordered_index,
+                        true,
+                        "simple_compare_ordered_index" );
+
 	CategoryRelation cat_r( plan.lacing );
 	cat_r.Test( xlinks );
 	
+    TestOrderingIntact( category_ordered_index,
+                        true,
+                        "category_ordered_index" );
+
 	DepthFirstRelation dfr( db );
 	dfr.Test( xlinks );	
+
+    TestOrderingIntact( depth_first_ordered_index,
+                        true,
+                        "depth_first_ordered_index" );
 }
 
 

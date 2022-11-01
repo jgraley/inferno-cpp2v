@@ -14,7 +14,6 @@ Lacing::Lacing() :
 }
 
 
-
 void Lacing::Build( const set< shared_ptr<SYM::BooleanExpression> > &clauses )
 {
     // Warning: there are a few places that declare an empty x_tree_db
@@ -38,7 +37,6 @@ void Lacing::Build( const set< shared_ptr<SYM::BooleanExpression> > &clauses )
 
     Build(categories);
 }
-
 
 
 void Lacing::Build( const CategorySet &categories_ )
