@@ -113,8 +113,7 @@ string TreePtrCommon::GetName() const
 	string s = SatelliteSerial::GetSerialString() + "->";
 #endif  
 	
-	s += get()->GetName();
-	s += get()->GetSerialString();
+	s += get()->GetTrace();
 	return s;
 }  
 

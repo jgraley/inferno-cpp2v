@@ -1,6 +1,8 @@
 
 #include "cpptree.hpp"
 
+#define EXPLICIT_BASE 0
+
 using namespace CPPTree;
 
 //////////////////////////// SpecificString ///////////////////////////////
@@ -46,7 +48,8 @@ string SpecificString::GetTrace() const
 
 //////////////////////////// SpecificInteger ///////////////////////////////
 
-SpecificInteger::SpecificInteger() 
+SpecificInteger::SpecificInteger()  : 
+    value(INTEGER_DEFAULT_WIDTH, false)
 {
 }
 
@@ -113,7 +116,7 @@ Orderable::Diff SpecificInteger::OrderCompare3WayLocal( const Orderable &right,
 {
     auto &r = *GET_THAT_POINTER(&right);
 
-    if( int d = (int)value.isUnsigned() - (int)r.value.isUnsigned() )
+    if( int d = ((int)value.isUnsigned() - (int)r.value.isUnsigned()) )
         return d;
     if( int d = (int)(value.getBitWidth()) - (int)(r.value.getBitWidth()) )
         return d;
@@ -126,8 +129,12 @@ string SpecificInteger::GetRender() const /// Produce a string for debug
 {
     return string(value.toString(10)) + // decimal
            (value.isUnsigned() ? "U" : "") +
+#if EXPLICIT_BASE
+           ("b"+to_string(value.getBitWidth()));
+#else            
            (value.getBitWidth()>TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified] ? "L" : "") +
            (value.getBitWidth()>TypeDb::integral_bits[clang::DeclSpec::TSW_long] ? "L" : "");
+#endif
            // note, assuming longlong bigger than long, so second L appends first to get LL
 }
 
@@ -200,7 +207,8 @@ string SpecificFloat::GetTrace() const
 
 //////////////////////////// SpecificIdentifier ///////////////////////////////
 
-SpecificIdentifier::SpecificIdentifier() 
+SpecificIdentifier::SpecificIdentifier() :
+    addr_bounding_role( BoundingRole::NONE )
 {
 }
 
