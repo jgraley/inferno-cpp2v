@@ -60,7 +60,17 @@ void Lacing::FixupCategories(const CategorySet &raw_categories_)
     {
         bool unique = true;
         for( TreePtr<Node> y : categories )
-            unique &= !x->IsEquivalentCategory(y.get());
+            if( Node::IsEquivalentCategory(x.get(), y.get()) )
+            {
+                unique = false;
+            }
+            else
+            {
+                // A handy place to check that node ordering is always at least
+                // as strict as catecory equivalence.
+                ASSERT( Node::OrderCompare3Way( *x, *y, Orderable::STRICT ) );
+                ASSERT( Node::OrderCompare3Way( *x, *y, Orderable::REPEATABLE ) );
+            }
             
         if( unique )
             categories.insert(x);

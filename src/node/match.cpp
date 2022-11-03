@@ -17,9 +17,9 @@ Matcher::~Matcher()
 }
 
 
-bool Matcher::IsEquivalentCategory( const Matcher *r ) const
+bool Matcher::IsEquivalentCategory( const Matcher *l, const Matcher *r )
 {
     // IsSubcategory() is a weak subcategory, so two nodes represent equivalent 
     // category if and only if each is a subcategory of the other.
-    return IsSubcategory(r) && r->IsSubcategory(this);
+    return l->IsSubcategory(r) && r->IsSubcategory(l);
 }

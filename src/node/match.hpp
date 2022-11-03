@@ -32,7 +32,7 @@ struct Matcher
         return !!dynamic_cast<const TARGET_TYPE *>(source_archetype);
     }
     
-    bool IsEquivalentCategory( const Matcher *r ) const;
+    static bool IsEquivalentCategory( const Matcher *l, const Matcher *r );
 };
 
 #define MATCHER_FUNCTION \
