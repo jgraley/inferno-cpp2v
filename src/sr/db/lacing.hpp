@@ -40,20 +40,7 @@ public:
 
     // Build the lacing data structures including decision tree. Only needed
     // once, at planning time for the whole sequence.
-    void Build( const CategorySet &categories );
-
-    // (Tries to) return a list of non-overlapping pair(begin, end) ranges in increasing order.
-    // These are the possible values of lacing ordinal that will match the category
-    // defined by the supplied archetype.
-    const list<pair<int, int>> &TryGetRangeListForCategory( TreePtr<Node> archetype ) const;
-    const list<pair<int, int>> &GetRangeListForCategory( TreePtr<Node> archetype ) const;
-    
-    // Returns the lacing ordinal value for the candidate.
-    int GetOrdinalForNode( TreePtr<Node> node ) const;
-
-    // Approximately GetOrdinalForNode(lnode) - GetOrdinalForNode(rnode)
-    // but close enough for comparisons
-    Orderable::Diff OrdinalCompare( TreePtr<Node> lnode, TreePtr<Node> rnode ) const;
+    void Build( const CategorySet &raw_categories );
 
 private:    
     class DecisionNode;
@@ -105,8 +92,22 @@ private:
     private:
         int lacing_ordinal;
     };    
-            
-    set<TreePtr<Node>, SimpleCompare> unique_categories;
+    
+public:
+    // (Tries to) return a list of non-overlapping pair(begin, end) ranges in increasing order.
+    // These are the possible values of lacing ordinal that will match the category
+    // defined by the supplied archetype.
+    const list<pair<int, int>> &TryGetRangeListForCategory( TreePtr<Node> archetype ) const;
+    const list<pair<int, int>> &GetRangeListForCategory( TreePtr<Node> archetype ) const;
+    
+    // Returns the lacing ordinal value for the candidate.
+    int GetOrdinalForNode( TreePtr<Node> node ) const;
+
+    // Approximately GetOrdinalForNode(lnode) - GetOrdinalForNode(rnode)
+    // but close enough for comparisons
+    Orderable::Diff OrdinalCompare( TreePtr<Node> lnode, TreePtr<Node> rnode ) const;
+
+private:    
     CategorySet categories;
     int ncats;
     // Categorisation of the categories

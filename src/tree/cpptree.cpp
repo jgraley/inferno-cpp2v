@@ -112,7 +112,7 @@ bool SpecificInteger::IsLocalMatch( const Matcher *candidate ) const
 
 
 Orderable::Diff SpecificInteger::OrderCompare3WayLocal( const Orderable &right, 
-                                                      OrderProperty order_property ) const
+                                                        OrderProperty order_property ) const
 {
     auto &r = *GET_THAT_POINTER(&right);
 

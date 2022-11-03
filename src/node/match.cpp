@@ -15,3 +15,11 @@ bool Matcher::IsLocalMatch( const Matcher *candidate ) const
 Matcher::~Matcher()
 {
 }
+
+
+bool Matcher::IsEquivalentCategory( const Matcher *r ) const
+{
+    // IsSubcategory() is a weak subcategory, so two nodes represent equivalent 
+    // category if and only if each is a subcategory of the other.
+    return IsSubcategory(r) && r->IsSubcategory(this);
+}

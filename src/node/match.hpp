@@ -31,6 +31,8 @@ struct Matcher
         (void)target_archetype; // don't care about value of archetypes; just want the type
         return !!dynamic_cast<const TARGET_TYPE *>(source_archetype);
     }
+    
+    bool IsEquivalentCategory( const Matcher *r ) const;
 };
 
 #define MATCHER_FUNCTION \

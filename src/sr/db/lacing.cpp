@@ -5,11 +5,12 @@
 
 #include <limits>
 
+#define BF
+
 using namespace SR;    
 
 Lacing::Lacing() :
-    unique_categories(SimpleCompare()),
-    cats_to_lacing_range_lists(SimpleCompare())
+    cats_to_lacing_range_lists()
 {
 }
 
@@ -23,25 +24,25 @@ void Lacing::Build( const set< shared_ptr<SYM::BooleanExpression> > &clauses )
     // Extract all the non-final archetypes from the IsInCategoryOperator nodes 
     // into a set so that they are uniqued by SimpleCompare equality. These
     // are the categories.
-    Lacing::CategorySet categories;
+    Lacing::CategorySet raw_categories;
     for( shared_ptr<SYM::BooleanExpression> clause : clauses )
     {
         clause->ForDepthFirstWalk( [&](const SYM::Expression *expr)
         {
             if( auto ko_expr = dynamic_cast<const SYM::IsInCategoryOperator *>(expr) )
             { 
-                categories.insert( ko_expr->GetArchetypeNode() );
+                raw_categories.insert( ko_expr->GetArchetypeNode() );
             }
         } );
     }
 
-    Build(categories);
+    Build(raw_categories);
 }
 
 
-void Lacing::Build( const CategorySet &categories_ )
+void Lacing::Build( const CategorySet &raw_categories_ )
 {
-    FixupCategories(categories_);
+    FixupCategories(raw_categories_);
     FindSuperAndSubCategories();
     Sort();
     BuildRanges();
@@ -50,141 +51,23 @@ void Lacing::Build( const CategorySet &categories_ )
 }
 
 
-const list<pair<int, int>> &Lacing::TryGetRangeListForCategory( TreePtr<Node> archetype ) const
+void Lacing::FixupCategories(const CategorySet &raw_categories_)
 {
-    if( cats_to_lacing_range_lists.count(archetype)>0 )
-    {
-        auto &lrl = cats_to_lacing_range_lists.at(archetype);
-        ASSERT( !lrl.empty() );
-        return lrl;
-    }
-    else
-    {
-        // Empty indicates failure
-        static const list<pair<int, int>> empty_lrl;
-        return empty_lrl;
-    }
-}
-
-
-const list<pair<int, int>> &Lacing::GetRangeListForCategory( TreePtr<Node> archetype ) const
-{
-    auto &lrl = TryGetRangeListForCategory( archetype );
-    ASSERT( !lrl.empty() )
-          ("Could not find lacing info for ")(archetype)
-          ("\nin:\n")(cats_to_lacing_range_lists)("\n");
-    return lrl;
-}
-
-
-int Lacing::GetOrdinalForNode( TreePtr<Node> target_node ) const
-{
-    const Lacing::DecisionNode *decision_node = decision_tree_root.get();
-    while(true) 
-    {
-        if( auto dn_leaf = dynamic_cast<const DecisionNodeLeaf *>(decision_node) )
-        {
-            return dn_leaf->GetLacingOrdinal();
-        }
-        else if( auto dn_local_match = dynamic_cast<const DecisionNodeLocalMatch *>(decision_node) )
-        {
-            //dn_local_match->GetLacingRange();
-            decision_node = dn_local_match->GetNextDecisionNode( target_node );
-        }
-        else
-        {
-            ASSERTFAIL();            
-        }
-    }
-}
-
-
-Orderable::Diff Lacing::OrdinalCompare( TreePtr<Node> lnode, TreePtr<Node> rnode ) const // Broken, see #642
-{
-    const Lacing::DecisionNode *decision_node_l = decision_tree_root.get();
-    const Lacing::DecisionNode *decision_node_r = decision_tree_root.get();
-    int lmin=0, lmax=numeric_limits<int>::max(), 
-        rmin=0, rmax=numeric_limits<int>::max();
-    while(true) 
-    {
-        // Advance left
-        if( auto dn_local_match_l = dynamic_cast<const DecisionNodeLocalMatch *>(decision_node_l) )
-        {
-            decision_node_l = dn_local_match_l->GetNextDecisionNode( lnode );
-            tie(lmin, lmax) = dn_local_match_l->GetLacingRange();
-        }
-        else if( auto dn_leaf_l = dynamic_cast<const DecisionNodeLeaf *>(decision_node_l) )
-        {
-            if( lmin != lmax )
-                lmin = lmax = dn_leaf_l->GetLacingOrdinal();      
-        }
-        else 
-        {
-            ASSERTFAIL();            
-        }
-        
-		ASSERT( lmax >= GetOrdinalForNode(lnode) );
-		ASSERT( lmin <= GetOrdinalForNode(lnode) );
-		ASSERT( rmax >= GetOrdinalForNode(rnode) );
-		ASSERT( rmin <= GetOrdinalForNode(rnode) );
-
-        // Do we have a result yet?
-        if( lmax < rmin )
-            return lmax-rmin;
-        if( lmin > rmax )
-            return lmin-rmax;
-        if( lmin==lmax && rmin==rmax && lmin==rmin )
-            return 0;
-
-        // Advance right
-        if( auto dn_local_match_r = dynamic_cast<const DecisionNodeLocalMatch *>(decision_node_r) )
-        {
-            decision_node_r = dn_local_match_r->GetNextDecisionNode( rnode );
-            tie(rmin, rmax) = dn_local_match_r->GetLacingRange();
-        }
-        else if( auto dn_leaf_r = dynamic_cast<const DecisionNodeLeaf *>(decision_node_r) )
-        {
-            if( rmin != rmax )
-                rmin = rmax = dn_leaf_r->GetLacingOrdinal();
-        }
-        else 
-        {
-            ASSERTFAIL();            
-        }
-        
-		ASSERT( lmax >= GetOrdinalForNode(lnode) );
-		ASSERT( lmin <= GetOrdinalForNode(lnode) );
-		ASSERT( rmax >= GetOrdinalForNode(rnode) );
-		ASSERT( rmin <= GetOrdinalForNode(rnode) );
-
-        // Do we have a result yet?
-        if( lmax < rmin )
-            return lmax-rmin;
-        if( lmin > rmax )
-            return lmin-rmax;
-        if( lmin==lmax && rmin==rmax && lmin==rmin )
-            return 0;
-    }
-}
-
-
-void Lacing::FixupCategories(const CategorySet &categories_)
-{
-    // Uniquify categories by copying into a set that's ordered by
-    // simple compare. These are archetypes, so we get a type-based
-    // uniqueness. 
-    unique_categories.clear();
-    std::copy( categories_.begin(), 
-               categories_.end(),
-               std::inserter( unique_categories, unique_categories.begin() ) );
-               
-    // Copy back to set with defailt comparer, so we can have NULL 
-    // pointer elements
+    // Uniquify using IsSameCategory() so we definitely get a
+    // category-uniquification.
     categories.clear();
-    std::copy( unique_categories.begin(), 
-               unique_categories.end(),
-               std::inserter( categories, categories.begin() ) );
+    for( TreePtr<Node> x : raw_categories_ )
+    {
+        bool unique = true;
+        for( TreePtr<Node> y : categories )
+            unique &= !x->IsEquivalentCategory(y.get());
+            
+        if( unique )
+            categories.insert(x);
+    }
     
+    
+
     // We need to process a NULL category that includes all the X tree
     // nodes that don't fall into any of the supplied categories. It's
     // a disjoint category: no strict supers or subs.
@@ -537,3 +420,120 @@ string Lacing::DecisionNodeLeaf::Render(string pre)
     return SSPrintf("Your lacing ordinal is %d\n", lacing_ordinal );
 }
         
+        
+const list<pair<int, int>> &Lacing::TryGetRangeListForCategory( TreePtr<Node> archetype ) const
+{
+    if( cats_to_lacing_range_lists.count(archetype)>0 )
+    {
+        auto &lrl = cats_to_lacing_range_lists.at(archetype);
+        ASSERT( !lrl.empty() );
+        return lrl;
+    }
+    else
+    {
+        // Empty indicates failure
+        static const list<pair<int, int>> empty_lrl;
+        return empty_lrl;
+    }
+}
+
+
+const list<pair<int, int>> &Lacing::GetRangeListForCategory( TreePtr<Node> archetype ) const
+{
+    auto &lrl = TryGetRangeListForCategory( archetype );
+    ASSERT( !lrl.empty() )
+          ("Could not find lacing info for ")(archetype)
+          ("\nin:\n")(cats_to_lacing_range_lists)("\n");
+    return lrl;
+}
+
+
+int Lacing::GetOrdinalForNode( TreePtr<Node> target_node ) const
+{
+    const Lacing::DecisionNode *decision_node = decision_tree_root.get();
+    while(true) 
+    {
+        if( auto dn_leaf = dynamic_cast<const DecisionNodeLeaf *>(decision_node) )
+        {
+            return dn_leaf->GetLacingOrdinal();
+        }
+        else if( auto dn_local_match = dynamic_cast<const DecisionNodeLocalMatch *>(decision_node) )
+        {
+            //dn_local_match->GetLacingRange();
+            decision_node = dn_local_match->GetNextDecisionNode( target_node );
+        }
+        else
+        {
+            ASSERTFAIL();            
+        }
+    }
+}
+
+
+Orderable::Diff Lacing::OrdinalCompare( TreePtr<Node> lnode, TreePtr<Node> rnode ) const // Broken, see #642
+{
+    const Lacing::DecisionNode *decision_node_l = decision_tree_root.get();
+    const Lacing::DecisionNode *decision_node_r = decision_tree_root.get();
+    int lmin=0, lmax=numeric_limits<int>::max(), 
+        rmin=0, rmax=numeric_limits<int>::max();
+    while(true) 
+    {
+        // Advance left
+        if( auto dn_local_match_l = dynamic_cast<const DecisionNodeLocalMatch *>(decision_node_l) )
+        {
+            decision_node_l = dn_local_match_l->GetNextDecisionNode( lnode );
+            tie(lmin, lmax) = dn_local_match_l->GetLacingRange();
+        }
+        else if( auto dn_leaf_l = dynamic_cast<const DecisionNodeLeaf *>(decision_node_l) )
+        {
+            if( lmin != lmax )
+                lmin = lmax = dn_leaf_l->GetLacingOrdinal();      
+        }
+        else 
+        {
+            ASSERTFAIL();            
+        }
+        
+		ASSERT( lmax >= GetOrdinalForNode(lnode) );
+		ASSERT( lmin <= GetOrdinalForNode(lnode) );
+		ASSERT( rmax >= GetOrdinalForNode(rnode) );
+		ASSERT( rmin <= GetOrdinalForNode(rnode) );
+
+        // Do we have a result yet?
+        if( lmax < rmin )
+            return lmax-rmin;
+        if( lmin > rmax )
+            return lmin-rmax;
+        if( lmin==lmax && rmin==rmax && lmin==rmin )
+            return 0;
+
+        // Advance right
+        if( auto dn_local_match_r = dynamic_cast<const DecisionNodeLocalMatch *>(decision_node_r) )
+        {
+            decision_node_r = dn_local_match_r->GetNextDecisionNode( rnode );
+            tie(rmin, rmax) = dn_local_match_r->GetLacingRange();
+        }
+        else if( auto dn_leaf_r = dynamic_cast<const DecisionNodeLeaf *>(decision_node_r) )
+        {
+            if( rmin != rmax )
+                rmin = rmax = dn_leaf_r->GetLacingOrdinal();
+        }
+        else 
+        {
+            ASSERTFAIL();            
+        }
+        
+		ASSERT( lmax >= GetOrdinalForNode(lnode) );
+		ASSERT( lmin <= GetOrdinalForNode(lnode) );
+		ASSERT( rmax >= GetOrdinalForNode(rnode) );
+		ASSERT( rmin <= GetOrdinalForNode(rnode) );
+
+        // Do we have a result yet?
+        if( lmax < rmin )
+            return lmax-rmin;
+        if( lmin > rmax )
+            return lmin-rmax;
+        if( lmin==lmax && rmin==rmax && lmin==rmin )
+            return 0;
+    }
+}
