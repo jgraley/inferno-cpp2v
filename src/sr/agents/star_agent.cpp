@@ -148,7 +148,7 @@ unique_ptr<BooleanResult> StarAgent::IsSubcontainerInCategoryOperator::Evaluate(
     // Check pre-restriction
     bool matches = true;
     for( const TreePtrInterface &xe : *x_ci )
-        matches = matches & archetype_node->IsSubcategory( ((TreePtr<Node>)xe).get() );            
+        matches = matches & archetype_node->IsSubcategory( *(TreePtr<Node>)xe );            
 
     return make_unique<BooleanResult>( matches );
 }                                   

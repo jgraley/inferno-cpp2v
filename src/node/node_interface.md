@@ -37,29 +37,29 @@ The `Node` class is actually built from a collection of sub-base classes, each o
 ### 3.1 `Matcher`
 
 Defines two virtual functions:
- - `virtual bool IsSubcategory( const Matcher *source_archetype ) const = 0;`
- - `virtual bool IsLocalMatch( const Matcher *candidate ) const;`
+ - `virtual bool IsSubcategory( const Matcher &candidate ) const;`
+ - `virtual bool IsLocalMatch( const Matcher &candidate ) const;`
 
-`IsSubcategory()` returns true if `source_archetype` is a non-strict subcategory of the category upon which the method was called. This method needs to be implemented separately in each type of node due to the limitations of C++. However, the required implementation is produced by including the macro `MATCHER_FUNCTION` (no semicolon required) in the node's class definition.
+`IsSubcategory()` returns true if `candidate` is a non-strict subcategory of the category upon which the method was called. This method needs to be implemented separately in each type of node due to the limitations of C++. However, the required implementation is produced by including the macro `MATCHER_FUNCTION` (no semicolon required) in the node's class definition.
 
-`IsLocalMatch()` returns true if the candidate is (a) the same as or (b) a member of the category described by the object upon which the method was called. It defaults to a call to `IsSubcategory()`.
+`IsLocalMatch()` returns true if `candidate` is (a) a non-strict subcategory of the category upon which the method was called and (b) mateches all of the callee object's local data members. It calls `IsSubcategory()` to establish (a) and then `IsLocalMatchCovariant()` to establish (b) - this must be filled in by node implementations that have local data members.
 
-Under our set-theoretical view of a tree, subcategory corresponds to subset. So `IsSubcategory()` would be the correct implementation for `IsLocalMatch()` on nodes that do not contain any data members and are therefore entirely defined by their type. If a node has members that point to other nodes, we ignore them in the matcher, which is the reason for the word `Local` in the function name. If there are data members of other type, it may be necessary to override `IsLocalMatch()` with a new, stricter check on the data members. 
+Under our set-theoretical view of a tree, subcategory corresponds to subset. So `IsSubcategory()` would be the correct implementation for `IsLocalMatch()` on nodes that do not contain any data members and are therefore entirely defined by their type. If a node has members that point to other nodes, we ignore them in the matcher, which is the reason for the word `Local` in the function name. If there are data members of other type, it may be necessary to override `IsLocalMatchCovariant()` with a new, stricter check on the data members. 
 
-Ultimately the choice of how to override `IsLocalMatch()` lies with the user, but the semantics must be consistent across the whole node interface the presented to the generic tools.
+Ultimately the choice of how to override `IsLocalMatchCovariant()` lies with the user, but the semantics must be consistent across the whole node interface the presented to the generic tools.
 
 ### 3.2 `Orderable`
 
 Note: `Orderable` is a general-purpose class within Vida Nova. It's usage in the `Node` class hierarchy is simplified relative to it's general usage. Only the overloads necessry for `Node` classes is given here.
 
 Over-ride one virtual function:
- - `virtual Orderable::Diff OrderCompare3WayLocal( const Orderable &right, OrderProperty order_property ) const;`
+ - `virtual Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, OrderProperty order_property ) const;`
  
-Override this exactly when `IsLocalMatch()` is over-ridden, and implement a comparison on _only_ the local data members (making no reference to child pointers).
+Override this exactly when `IsLocalMatchCovariant()` is over-ridden, and implement a comparison on _only_ the local data members (making no reference to child pointers).
 
-The comparison should be equivalent to `*this - *candidate` so that the return value is:
- - negative if `*this` is _before_ `*candidate`;
- - positive if `*this` is _after_ `*candidate`;
+The comparison should be equivalent to `*this - candidate` so that the return value is:
+ - negative if `*this` is _before_ `candidate`;
+ - positive if `*this` is _after_ `candidate`;
  - zero otherwise.
  
 `order_property` should be checked: if `STRICT` then a strict ordering should be implemented, even if this requires comparison of pointers. If `REPEATABLE`, only repeatable comparisons should be included.
@@ -67,7 +67,7 @@ The comparison should be equivalent to `*this - *candidate` so that the return v
 ### 3.3 `Itemiser`
 
 Defines the following virtual function:
- - `virtual vector< Itemiser::Element * > Itemise(const Itemiser *itemise_object) const = 0;`
+ - `virtual vector< Itemiser::Element * > Itemise(const Itemiser *itemise_object) const;`
 
 `Itemise()` searches `itemise_object` for members derived from the class named `Itemiser::Element`, and returns them in a vector. The node on which `Itemise()` is called must be a non-strict supercategory of `itemise_object`. If the two types differ, `Itemise()` will only return members of `itemise_object` for which there exists a corresponding element in the object on which `Itemise()` was called.
 
@@ -82,7 +82,7 @@ The `Itemiser` class is obviously fairly flexible but to be compliant with the n
 ### 3.4 `Cloner`
 
 Defines 2 virtual functions:
- - `virtual shared_ptr<Cloner> Clone() const = 0;`
+ - `virtual shared_ptr<Cloner> Clone() const;`
  - `virtual shared_ptr<Cloner> Duplicate( shared_ptr<Cloner> p ) {...}`
 
 `Clone()` is the usual clone implementation: a new object is created, identical to the one on which `Clone()` was called. This method needs to be implemented separately in each type of node due to the limitations of C++. However, the required implementation is produced by including the macro `CLONE_FUNCTION` in the node's class definition. `Clone()` returns a `shared_ptr<>` because `shared_ptr<>` manages the lifecycle for all nodes. This `shared_ptr<Cloner>` is compatible with `TreePtr<Node>`.

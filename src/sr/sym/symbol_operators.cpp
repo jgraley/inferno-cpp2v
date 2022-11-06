@@ -39,10 +39,10 @@ SR::XLink SymbolConstant::GetOnlyXLink() const
 }
 
 
-Orderable::Diff SymbolConstant::OrderCompare3WayLocal( const Orderable &right, 
+Orderable::Diff SymbolConstant::OrderCompare3WayCovariant( const Orderable &right, 
                                                        OrderProperty order_property ) const 
 {
-    auto &r = *GET_THAT_POINTER(&right);
+    auto &r = GET_THAT_REFERENCE(right);
 
     if( xlink == r.xlink )
         return 0;
@@ -116,10 +116,10 @@ shared_ptr<SymbolExpression> SymbolVariable::TrySolveForToEqual( const SolveKit 
 }                                                                                                                  
 
 
-Orderable::Diff SymbolVariable::OrderCompare3WayLocal( const Orderable &right, 
+Orderable::Diff SymbolVariable::OrderCompare3WayCovariant( const Orderable &right, 
                                                      OrderProperty order_property ) const 
 {
-    auto &r = *GET_THAT_POINTER(&right);
+    auto &r = GET_THAT_REFERENCE(right);
 
     if( plink == r.plink )
         return 0;
@@ -170,7 +170,7 @@ unique_ptr<SymbolResultInterface> ChildToSymbolOperator::Evaluate( const EvalKit
     if( !ar->IsDefinedAndUnique() )
         return ar;
 
-    if( !archetype_node->IsSubcategory( ar->GetOnlyXLink().GetChildX().get() ) )
+    if( !archetype_node->IsSubcategory( *(ar->GetOnlyXLink().GetChildX()) ) )
         return make_unique<SymbolResult>(SymbolResult::NOT_A_SYMBOL); // Will not be able to itemise due incompatible type
     
     // Itemise the child node of the XLink we got, according to the "schema"
@@ -183,10 +183,10 @@ unique_ptr<SymbolResultInterface> ChildToSymbolOperator::Evaluate( const EvalKit
 }
 
 
-Orderable::Diff ChildToSymbolOperator::OrderCompare3WayLocal( const Orderable &right, 
+Orderable::Diff ChildToSymbolOperator::OrderCompare3WayCovariant( const Orderable &right, 
                                                               OrderProperty order_property ) const 
 {
-    auto &r = *GET_THAT_POINTER(&right);
+    auto &r = GET_THAT_REFERENCE(right);
     //FTRACE(Render())("\n");
     if( Diff d1 = OrderCompare3Way(*archetype_node, 
                                    *r.archetype_node, 

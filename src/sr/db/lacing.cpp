@@ -60,7 +60,7 @@ void Lacing::FixupCategories(const CategorySet &raw_categories_)
     {
         bool unique = true;
         for( TreePtr<Node> y : categories )
-            if( Node::IsEquivalentCategory(x.get(), y.get()) )
+            if( Node::IsEquivalentCategory(*x, *y) )
             {
                 unique = false;
             }
@@ -369,7 +369,7 @@ bool Lacing::LocalMatchWithNULL( TreePtr<Node> l, TreePtr<Node> r )
     else if( !l || !r )
         return false; // Null and non-NULL never match 
     else 
-        return l->IsSubcategory( r.get() );
+        return l->IsSubcategory( *r );
 }
 
 

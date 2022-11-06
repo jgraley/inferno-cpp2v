@@ -40,7 +40,20 @@ void Indexes::PrepareDelete( DBWalk::Actions &actions )
 	{
 		TRACE("Erasing from indexes ")(walk_info.xlink)("\n");
 		EraseSolo( category_ordered_index, walk_info.xlink );       
+
 		EraseSolo( simple_compare_ordered_index, walk_info.xlink );
+        
+        // We must delete SimpleCompare index entries for parents of the base
+        // node, since removing it will invalidate the SC ordering.
+        XLink ancestor_xlink = walk_info.xlink;
+        if( walk_info.context==DBWalk::UNKNOWN ) // at base
+        {
+            while( ancestor_xlink = db->TryGetParentXLink(ancestor_xlink) )
+            {
+                EraseSolo( simple_compare_ordered_index, ancestor_xlink );
+            }
+        }
+
 		EraseSolo( depth_first_ordered_index, walk_info.xlink );
 	};
 }
@@ -51,7 +64,20 @@ void Indexes::PrepareInsert(DBWalk::Actions &actions)
 	actions.indexes_in = [=](const DBWalk::WalkInfo &walk_info)
 	{ 
         InsertSolo( category_ordered_index, walk_info.xlink );
+
 		InsertSolo( simple_compare_ordered_index, walk_info.xlink );		
+
+        // We may now re-instate SimpleCompare index entries for parents 
+        // of the base node so that the SC ordering is intact.
+        XLink ancestor_xlink = walk_info.xlink;
+        if( walk_info.context==DBWalk::UNKNOWN ) // at base
+        {
+            while( ancestor_xlink = db->TryGetParentXLink(ancestor_xlink) )
+            {
+                InsertSolo( simple_compare_ordered_index, ancestor_xlink );
+            }
+        }
+
         InsertSolo( depth_first_ordered_index, walk_info.xlink );
 	};
 }

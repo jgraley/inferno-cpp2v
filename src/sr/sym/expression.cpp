@@ -57,7 +57,7 @@ bool Expression::IsIndependentOf( shared_ptr<Expression> target ) const
 Orderable::Diff Expression::OrderCompare3WayChildren( const Orderable &right, 
                                                       OrderProperty order_property ) const 
 {
-    auto &r = *GET_THAT_POINTER(&right);    
+    auto &r = GET_THAT_REFERENCE(right);    
     
     list<shared_ptr<Expression>> ll = GetOperands();
     list<shared_ptr<Expression>> rl = r.GetOperands();

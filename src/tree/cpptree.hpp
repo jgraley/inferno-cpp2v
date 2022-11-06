@@ -122,8 +122,8 @@ struct SpecificString : String
 	NODE_FUNCTIONS_FINAL
     SpecificString(); ///< default constructor, for making archetypes 
     SpecificString( string s ); /// Construct with a given STL string
-	virtual bool IsLocalMatch( const Matcher *candidate ) const; /// Overloaded comparison for search&replace
-    virtual Orderable::Diff OrderCompare3WayLocal( const Orderable &right, 
+	virtual bool IsLocalMatchCovariant( const Matcher &candidate ) const; /// Overloaded comparison for search&replace
+    virtual Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
 	virtual string GetRender() const; /// Produce a string for debug
     virtual string GetTrace() const;
@@ -159,8 +159,8 @@ struct SpecificInteger : Integer
     bool IsSigned() const;
     int64_t GetWidth() const;
 
-	virtual bool IsLocalMatch( const Matcher *candidate ) const; /// Overloaded comparison for search&replace
-    virtual Orderable::Diff OrderCompare3WayLocal( const Orderable &right, 
+	virtual bool IsLocalMatchCovariant( const Matcher &candidate ) const; /// Overloaded comparison for search&replace
+    virtual Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
 	virtual string GetRender() const; /// Produce a string for debug
     virtual string GetTrace() const;
@@ -181,8 +181,8 @@ struct SpecificFloat : Float, llvm::APFloat
 	NODE_FUNCTIONS_FINAL
     SpecificFloat(); ///< default constructor, for making archetypes 
     SpecificFloat( llvm::APFloat v ); ///< Construct with an LLVM-style float
-	virtual bool IsLocalMatch( const Matcher *candidate ) const; /// Overloaded comparison for search&replace
-    virtual Orderable::Diff OrderCompare3WayLocal( const Orderable &right, 
+	virtual bool IsLocalMatchCovariant( const Matcher &candidate ) const; /// Overloaded comparison for search&replace
+    virtual Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
 	virtual string GetRender() const; /// Produce a string for graphing
     virtual string GetTrace() const;
@@ -237,8 +237,8 @@ struct SpecificIdentifier : virtual Property
 	SpecificIdentifier(); ///< default constructor, for making archetypes 
 	SpecificIdentifier( string s, BoundingRole addr_bounding_role = BoundingRole::NONE ); ///< construct with a given name
     virtual shared_ptr<Cloner> Duplicate( shared_ptr<Cloner> p ); /// Overloaded duplication function for search&replace
-	virtual bool IsLocalMatch( const Matcher *candidate ) const; /// Overloaded comparison for search&replace
-    virtual Orderable::Diff OrderCompare3WayLocal( const Orderable &right, 
+	virtual bool IsLocalMatchCovariant( const Matcher &candidate ) const; /// Overloaded comparison for search&replace
+    virtual Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
 	virtual string GetRender() const; /// This is relied upon to just return the identifier name for rendering
     virtual string GetGraphName() const;
@@ -567,8 +567,8 @@ struct SpecificFloatSemantics : FloatSemantics
 	NODE_FUNCTIONS_FINAL
     SpecificFloatSemantics(); ///< default constructor, for making archetypes 
     SpecificFloatSemantics( const llvm::fltSemantics *s ); /// Construct from LLVM's class
-	virtual bool IsLocalMatch( const Matcher *candidate ) const; /// Overloaded comparison for search&replace
-    virtual Orderable::Diff OrderCompare3WayLocal( const Orderable &right, 
+	virtual bool IsLocalMatchCovariant( const Matcher &candidate ) const; /// Overloaded comparison for search&replace
+    virtual Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
 	operator const llvm::fltSemantics &() const; /// convert back to LLVM's class
 	// TODO no render?

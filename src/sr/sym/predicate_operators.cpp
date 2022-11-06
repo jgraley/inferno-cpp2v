@@ -621,7 +621,7 @@ list<shared_ptr<SymbolExpression> *> IsInCategoryOperator::GetSymbolOperandPoint
 
 
 unique_ptr<BooleanResult> IsInCategoryOperator::Evaluate( const EvalKit &kit,
-                                                    list<unique_ptr<SymbolResultInterface>> &&op_results ) const 
+                                                          list<unique_ptr<SymbolResultInterface>> &&op_results ) const 
 {
     ASSERT( op_results.size()==1 );        
     // IEEE 754 Kind-of can be said to be C(a) ∈ C(arch) where C propogates 
@@ -630,7 +630,7 @@ unique_ptr<BooleanResult> IsInCategoryOperator::Evaluate( const EvalKit &kit,
     if( !ra->IsDefinedAndUnique() )
         return make_unique<BooleanResult>( false );
     
-    bool matches = archetype_node->IsSubcategory( ra->GetOnlyXLink().GetChildX().get() );
+    bool matches = archetype_node->IsSubcategory( *(ra->GetOnlyXLink().GetChildX()) );
     return make_unique<BooleanResult>( matches );
 }
 
@@ -662,7 +662,7 @@ Relationship IsInCategoryOperator::GetRelationshipWith( shared_ptr<PredicateOper
     if( auto ko_other = dynamic_pointer_cast<IsInCategoryOperator>(other) )
     {
         // For implication, the SUBCATEGORY implies the SUPERCATEGORY
-        if( ko_other->GetArchetypeNode()->IsSubcategory( archetype_node.get() ) ) // like "contains"
+        if( ko_other->GetArchetypeNode()->IsSubcategory( *archetype_node ) ) // like "contains"
             return Relationship::IMPLIES;
             
         // TODO could determine CONTRADICTS by studying the lacings, or by
@@ -674,10 +674,10 @@ Relationship IsInCategoryOperator::GetRelationshipWith( shared_ptr<PredicateOper
 }
 
 
-Orderable::Diff IsInCategoryOperator::OrderCompare3WayLocal( const Orderable &right, 
+Orderable::Diff IsInCategoryOperator::OrderCompare3WayCovariant( const Orderable &right, 
                                                      OrderProperty order_property ) const 
 {
-    auto &r = *GET_THAT_POINTER(&right);
+    auto &r = GET_THAT_REFERENCE(right);
     //FTRACE(Render())("\n");
     return OrderCompare3Way(*archetype_node, 
                             *r.archetype_node, 
@@ -744,7 +744,7 @@ unique_ptr<BooleanResult> IsChildCollectionSizedOperator::Evaluate( const EvalKi
 
     // XLink must match our referee (i.e. be non-strict subtype)
     // If not, we will say that the size was wrong
-    if( !archetype_node->IsSubcategory( ra->GetOnlyXLink().GetChildX().get() ) )
+    if( !archetype_node->IsSubcategory( *(ra->GetOnlyXLink().GetChildX()) ) )
         return make_unique<BooleanResult>( false ); 
     
     // Itemise the child node of the XLink we got, according to the "schema"
@@ -762,10 +762,10 @@ unique_ptr<BooleanResult> IsChildCollectionSizedOperator::Evaluate( const EvalKi
 }
 
 
-Orderable::Diff IsChildCollectionSizedOperator::OrderCompare3WayLocal( const Orderable &right, 
+Orderable::Diff IsChildCollectionSizedOperator::OrderCompare3WayCovariant( const Orderable &right, 
                                                                   OrderProperty order_property ) const 
 {
-    auto &r = *GET_THAT_POINTER(&right);
+    auto &r = GET_THAT_REFERENCE(right);
     //FTRACE(Render())("\n");
     if( Diff d1 = OrderCompare3Way(*archetype_node, 
                                    *r.archetype_node, 
@@ -925,15 +925,15 @@ unique_ptr<BooleanResult> IsLocalMatchOperator::Evaluate( const EvalKit &kit,
         return make_unique<BooleanResult>( false );
 
     // Use IsLocalMatch on the pattern node 
-    bool match = pattern_node->IsLocalMatch( ra->GetOnlyXLink().GetChildX().get() );
+    bool match = pattern_node->IsLocalMatch( *(ra->GetOnlyXLink().GetChildX()) );
     return make_unique<BooleanResult>( match );
 }
 
 
-Orderable::Diff IsLocalMatchOperator::OrderCompare3WayLocal( const Orderable &right, 
+Orderable::Diff IsLocalMatchOperator::OrderCompare3WayCovariant( const Orderable &right, 
                                                              OrderProperty order_property ) const 
 {
-    auto &r = *GET_THAT_POINTER(&right);
+    auto &r = GET_THAT_REFERENCE(right);
     return OrderCompare3Way( *pattern_node, 
                              *r.pattern_node, 
                              order_property);

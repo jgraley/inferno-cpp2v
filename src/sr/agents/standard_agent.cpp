@@ -536,7 +536,7 @@ TreePtr<Node> StandardAgent::BuildReplaceImpl( PatternLink me_plink,
         ASSERT( under_xlink );
         TreePtr<Node> under_node = under_xlink.GetChildX();
         ASSERT( under_xlink.GetChildX()->IsFinal() ); 
-        ASSERT( IsSubcategory(under_xlink.GetChildX().get()) ); 
+        ASSERT( IsSubcategory(*under_xlink.GetChildX()) ); 
         return BuildReplaceOverlay( me_plink, under_xlink );
     }
     else if( key_xlink ) 
@@ -546,7 +546,7 @@ TreePtr<Node> StandardAgent::BuildReplaceImpl( PatternLink me_plink,
         // has keyed this, and due wildcarding, key will be a final node
         // i.e. possibly a subclass of this node.
         ASSERT( key_xlink.GetChildX()->IsFinal() ); 
-        ASSERT( IsSubcategory(key_xlink.GetChildX().get()) ); 
+        ASSERT( IsSubcategory(*key_xlink.GetChildX()) ); 
         return BuildReplaceOverlay( me_plink, key_xlink );
     }
     else
@@ -570,7 +570,7 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( PatternLink me_plink,
     ASSERT( under_xlink );
     TreePtr<Node> under_node = under_xlink.GetChildX();
     
-    ASSERT( IsSubcategory(under_node.get()) ) 
+    ASSERT( IsSubcategory(*under_node) ) 
 		  (" must be a non-strict superclass of under_node=")
 		  (*under_node)
 		  (", so that it does not have more members");
@@ -582,7 +582,7 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( PatternLink me_plink,
     // Make a new node, we will overlay from pattern, so resulting node will be dirty.    
     // Use of DuplicateNode()/CloneNode() ensures correct behaviour with identifiers. 
     ASSERT( under_node->IsFinal() )("About to build non-final ")(*dest)("\n"); 
-    if( under_node->IsSubcategory(GetPatternPtr().get()) ) 
+    if( under_node->IsSubcategory(*GetPatternPtr()) ) 
         dest = AgentCommon::CloneNode( true );
     else
         dest = AgentCommon::DuplicateNode( under_node, true );

@@ -18,18 +18,17 @@ SpecificString::SpecificString( string s ) :
 }
 
 
-bool SpecificString::IsLocalMatch( const Matcher *candidate ) const 
+bool SpecificString::IsLocalMatchCovariant( const Matcher &candidate ) const 
 {
-    ASSERT( candidate );
-    auto *c = dynamic_cast<const SpecificString *>(candidate);
-    return c && c->value == value;
+    auto &c = GET_THAT_REFERENCE(candidate);
+    return c.value == value;
 }
 
  
-Orderable::Diff SpecificString::OrderCompare3WayLocal( const Orderable &right, 
-                                                     OrderProperty order_property ) const
+Orderable::Diff SpecificString::OrderCompare3WayCovariant( const Orderable &right, 
+                                                           OrderProperty order_property ) const
 {
-    auto &r = *GET_THAT_POINTER(&right);
+    auto &r = GET_THAT_REFERENCE(right);
     return value.compare(r.value);
 }
  
@@ -99,22 +98,20 @@ int64_t SpecificInteger::GetWidth() const
 }
 
 
-bool SpecificInteger::IsLocalMatch( const Matcher *candidate ) const
+bool SpecificInteger::IsLocalMatchCovariant( const Matcher &candidate ) const
 {
-    ASSERT( candidate );
-    auto *c = dynamic_cast<const SpecificInteger *>(candidate);
+    auto &c = GET_THAT_REFERENCE(candidate);
     // A local match will require all fields to match, not just the numerical value.
-    return c && 
-           c->value.isUnsigned() == value.isUnsigned() &&
-           c->value.getBitWidth() == value.getBitWidth() &&
-           c->value == value;
+    return c.value.isUnsigned() == value.isUnsigned() &&
+           c.value.getBitWidth() == value.getBitWidth() &&
+           c.value == value;
 }
 
 
-Orderable::Diff SpecificInteger::OrderCompare3WayLocal( const Orderable &right, 
-                                                        OrderProperty order_property ) const
+Orderable::Diff SpecificInteger::OrderCompare3WayCovariant( const Orderable &right, 
+                                                            OrderProperty order_property ) const
 {
-    auto &r = *GET_THAT_POINTER(&right);
+    auto &r = GET_THAT_REFERENCE(right);
 
     if( int d = ((int)value.isUnsigned() - (int)r.value.isUnsigned()) )
         return d;
@@ -158,21 +155,20 @@ SpecificFloat::SpecificFloat( llvm::APFloat v ) :
 }
 
 
-bool SpecificFloat::IsLocalMatch( const Matcher *candidate ) const 
+bool SpecificFloat::IsLocalMatchCovariant( const Matcher &candidate ) const 
 {
-    ASSERT( candidate );
-    auto *c = dynamic_cast<const SpecificFloat *>(candidate);
+    auto &c = GET_THAT_REFERENCE(candidate);
     // A local match will require all fields to match, not just the numerical value.
-    return c && 
-    //    c->getSemantics() == getSemantics() && //TODO
-    bitwiseIsEqual( *c );
+    return bitwiseIsEqual( c ); 
+    //     && c.getSemantics() == getSemantics() && //TODO
+    
 }
 
 
-Orderable::Diff SpecificFloat::OrderCompare3WayLocal( const Orderable &right, 
+Orderable::Diff SpecificFloat::OrderCompare3WayCovariant( const Orderable &right, 
                                                     OrderProperty order_property ) const
 {
-    auto &r = *GET_THAT_POINTER(&right);
+    auto &r = GET_THAT_REFERENCE(right);
         
     // Primary ordering: the value
     cmpResult cr = compare(r);
@@ -227,17 +223,16 @@ shared_ptr<Cloner> SpecificIdentifier::Duplicate( shared_ptr<Cloner> p )
 }
 
 
-bool SpecificIdentifier::IsLocalMatch( const Matcher *candidate ) const 
+bool SpecificIdentifier::IsLocalMatchCovariant( const Matcher &candidate ) const 
 {
-    ASSERT( candidate );
-    return candidate == this;
+    return &candidate == this;
 }
 
 
-Orderable::Diff SpecificIdentifier::OrderCompare3WayLocal( const Orderable &right, 
+Orderable::Diff SpecificIdentifier::OrderCompare3WayCovariant( const Orderable &right, 
                                                            OrderProperty order_property ) const
 {
-    auto &r = *GET_THAT_POINTER(&right);
+    auto &r = GET_THAT_REFERENCE(right);
         
     //FTRACEC("Compare ")(*this)(" with ")(*r)(": ");
 
@@ -308,18 +303,17 @@ SpecificFloatSemantics::SpecificFloatSemantics( const llvm::fltSemantics *s ) :
 }
 
 
-bool SpecificFloatSemantics::IsLocalMatch( const Matcher *candidate ) const
+bool SpecificFloatSemantics::IsLocalMatchCovariant( const Matcher &candidate ) const
 {
-    ASSERT( candidate );
-    auto *c = dynamic_cast<const SpecificFloatSemantics *>(candidate);
-    return c && c->value == value;
+    auto &c = GET_THAT_REFERENCE(candidate);
+    return c.value == value;
 }
 
 
-Orderable::Diff SpecificFloatSemantics::OrderCompare3WayLocal( const Orderable &right, 
+Orderable::Diff SpecificFloatSemantics::OrderCompare3WayCovariant( const Orderable &right, 
                                                                OrderProperty order_property ) const
 {
-    auto &r = *GET_THAT_POINTER(&right); 
+    auto &r = GET_THAT_REFERENCE(right); 
 
     Orderable::Diff d;
     switch( order_property )

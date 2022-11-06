@@ -178,10 +178,10 @@ shared_ptr<SYM::SymbolExpression> IdentifierByNameAgent::IsIdentifierNamedOperat
 }                                                                                                                                             
                                               
                                               
-Orderable::Diff IdentifierByNameAgent::IsIdentifierNamedOperator::OrderCompare3WayLocal( const Orderable &right, 
+Orderable::Diff IdentifierByNameAgent::IsIdentifierNamedOperator::OrderCompare3WayCovariant( const Orderable &right, 
                                                                                        OrderProperty order_property ) const 
 {
-    auto &r = *GET_THAT_POINTER(&right);
+    auto &r = GET_THAT_REFERENCE(right);
     return name.compare(r.name);
 }  
 
@@ -342,10 +342,10 @@ unique_ptr<SYM::SymbolResultInterface> NestedAgent::NestingOperator::Evaluate( c
 }
 
 
-Orderable::Diff NestedAgent::NestingOperator::OrderCompare3WayLocal( const Orderable &right, 
+Orderable::Diff NestedAgent::NestingOperator::OrderCompare3WayCovariant( const Orderable &right, 
                                                                       OrderProperty order_property ) const 
 {
-    auto &r = *GET_THAT_POINTER(&right);
+    auto &r = GET_THAT_REFERENCE(right);
     // Agents aren't comparable, so value of operator is identiy of agent
     return Node::Compare3WayIdentity( *agent->GetPatternPtr(), *r.agent->GetPatternPtr() );
 }  

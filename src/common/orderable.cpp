@@ -16,7 +16,7 @@ Orderable::Diff Orderable::OrderCompare3Way( const Orderable &l,
     if( l_index != r_index )
         return (l_index > r_index) ? 1 : -1;
 
-    Diff id = l.OrderCompare3WayLocal(r, order_property);
+    Diff id = l.OrderCompare3WayCovariant(r, order_property);
     if( id  )
         return id;
         
@@ -24,8 +24,8 @@ Orderable::Diff Orderable::OrderCompare3Way( const Orderable &l,
 }
 
 
-Orderable::Diff Orderable::OrderCompare3WayLocal( const Orderable &right, 
-                                                  OrderProperty order_property ) const 
+Orderable::Diff Orderable::OrderCompare3WayCovariant( const Orderable &right, 
+                                                      OrderProperty order_property ) const 
 {
     // Often, there are no contents to compare
     return 0; 

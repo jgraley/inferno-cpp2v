@@ -338,7 +338,6 @@ bool XTreeDatabase::HasNodeRow(TreePtr<Node> node) const
 
 XLink XTreeDatabase::TryGetParentXLink(XLink xlink) const
 {
-//	return plan.link_table->GetRow(xlink).parent_xlink;
 	TreePtr<Node> parent_node = plan.link_table->GetRow(xlink).parent_node;
 	if( !parent_node )
 		return XLink();

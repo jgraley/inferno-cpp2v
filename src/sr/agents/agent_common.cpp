@@ -234,7 +234,7 @@ SYM::Lazy<SYM::BooleanExpression> AgentCommon::SymbolicPreRestriction() const
 bool AgentCommon::IsPreRestrictionMatch( TreePtr<Node> x ) const
 {
     // Pre-restriction policy defined here. 
-    return IsSubcategory( x.get() );
+    return IsSubcategory( *x );
 }
 
 
@@ -487,7 +487,7 @@ void AgentCommon::PlanOverlay( PatternLink me_plink,
     // over a subcategory means we simply update the singulars we know about
     // in over. Under is likely to be an X node and hence final, while
     // over can be StandaedAgent<some intermediate>.
-    if( !IsSubcategory(under_plink.GetChildAgent()) ) 
+    if( !IsSubcategory(*under_plink.GetChildAgent()) ) 
         return; // Not compatible with pattern: recursion stops here
         
     // Under must be a standard agent

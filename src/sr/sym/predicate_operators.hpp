@@ -241,7 +241,7 @@ public:
     shared_ptr<SymbolExpression> TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const override;
     Relationship GetRelationshipWith( shared_ptr<PredicateOperator> other ) const override;
 
-    Orderable::Diff OrderCompare3WayLocal( const Orderable &right, 
+    Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                            OrderProperty order_property ) const override;
 
     // TODO non-overlapping categories, might be easier with lace-ability, see #510
@@ -272,7 +272,7 @@ public:
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 list<unique_ptr<SymbolResultInterface>> &&op_results ) const override final;
 
-    Orderable::Diff OrderCompare3WayLocal( const Orderable &right, 
+    Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                            OrderProperty order_property ) const override;                                                
 
     virtual string RenderNF() const override;
@@ -329,7 +329,7 @@ public:
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 list<unique_ptr<SymbolResultInterface>> &&op_results ) const override final;
 
-    Orderable::Diff OrderCompare3WayLocal( const Orderable &right, 
+    Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                            OrderProperty order_property ) const override;                                                
 
     virtual string RenderNF() const override;

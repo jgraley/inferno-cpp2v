@@ -30,10 +30,10 @@ bool BooleanConstant::GetAsBool() const
 }
 
 
-Orderable::Diff BooleanConstant::OrderCompare3WayLocal( const Orderable &right, 
+Orderable::Diff BooleanConstant::OrderCompare3WayCovariant( const Orderable &right, 
                                                       OrderProperty order_property ) const 
 {
-    auto &r = *GET_THAT_POINTER(&right);
+    auto &r = GET_THAT_REFERENCE(right);
 
     return value - r.value;
 }  

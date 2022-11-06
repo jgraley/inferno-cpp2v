@@ -483,6 +483,7 @@ typename _Unique_if<T>::_Known_bound make_unique(Args&&...) = delete;
 
 // Note: GET_THAT_REFERENCE has problems I think with the statement
 // expression ({ ... }) forcing by-value result.
+#define GET_THAT_REFERENCE(BT) (*GET_THAT_POINTER(&(BT)))
 
 
 // To use with set, map and algorithms like min_element when the

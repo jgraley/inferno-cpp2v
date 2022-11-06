@@ -38,7 +38,7 @@ void BuildDefaultSequence( vector< shared_ptr<VNStep> > *sequence )
     // intermediates are used (requres EXPECTATION_RUN in test examples)
     {
         sequence->push_back( make_shared<FixCrazyNumber>() );
-        //sequence->push_back( make_shared<FixCrazyNumberEmb>() );
+        sequence->push_back( make_shared<FixCrazyNumberEmb>() );
     }
     
     // SystemC detection, converts implicit SystemC to explicit. Always at the top

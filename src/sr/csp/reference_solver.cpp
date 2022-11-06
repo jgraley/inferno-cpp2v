@@ -374,7 +374,7 @@ void ReferenceSolver::ShowBestAssignment()
         if( assignments_to_show.count(var) > 0 )
         {
             TRACE(" assigned ")(assignments_to_show.at(var));
-            if( var.GetChildAgent()->IsLocalMatch(assignments_to_show.at(var).GetChildX().get()) || 
+            if( var.GetChildAgent()->IsLocalMatch(*(assignments_to_show.at(var).GetChildX())) || 
                 assignments_to_show.at(var) == SR::XLink::MMAX_Link )
             {
                 TRACEC(" is a local match\n");
