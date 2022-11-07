@@ -36,8 +36,8 @@ public:
     
     bool IsDeclarer(const DBWalk::WalkInfo &walk_info) const;
     
-    void MonolithicClear();
-	void PrepareMonolithicBuild(DBWalk::Actions &actions);
+	void PrepareDeleteMonolithic(DBWalk::Actions &actions);
+	void PrepareInsertMonolithic(DBWalk::Actions &actions);
     void PrepareDelete(DBWalk::Actions &actions);
 	void PrepareInsert(DBWalk::Actions &actions);
 

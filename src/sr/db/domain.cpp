@@ -172,11 +172,27 @@ void Domain::MonolithicClear()
 }    
 
 
-void Domain::PrepareMonolithicBuild(DBWalk::Actions &actions, bool extra)
+void Domain::PrepareDeleteMonolithic(DBWalk::Actions &actions, bool extra)
 {
 	actions.domain_in = [=](const DBWalk::WalkInfo &walk_info)
 	{        
-		// ----------------- Update domain
+		EraseSolo( unordered_domain, walk_info.xlink ); 
+        
+#ifdef TRACE_DOMAIN_EXTEND
+		TRACE("Saw xlink ")(walk_info.xlink)(" extra flag=")(extra)(" ud.size=%u ed.size()=%u\n", unordered_domain.size(), extended_zones.size());
+#endif
+        
+        // TODO probably erases the class too soon - would need to keep a count of the number of
+        // elements or something and only erase when it hits zero. But there my be bigger fish to fry here.
+		(void)domain_extension_classes.erase( walk_info.xlink.GetChildX() );    
+	};
+}
+
+
+void Domain::PrepareInsertMonolithic(DBWalk::Actions &actions, bool extra)
+{
+	actions.domain_in = [=](const DBWalk::WalkInfo &walk_info)
+	{        
 		InsertSolo( unordered_domain, walk_info.xlink ); 
         
 #ifdef TRACE_DOMAIN_EXTEND

@@ -42,7 +42,8 @@ public:
     void UnExtendDomain();
 
     void MonolithicClear();
-	void PrepareMonolithicBuild(DBWalk::Actions &actions, bool extra);
+	void PrepareDeleteMonolithic(DBWalk::Actions &actions, bool extra);
+	void PrepareInsertMonolithic(DBWalk::Actions &actions, bool extra);
     void PrepareDelete(DBWalk::Actions &actions);
 	void PrepareInsert(DBWalk::Actions &actions);
 

@@ -48,13 +48,24 @@ bool NodeTable::IsDeclarer(const DBWalk::WalkInfo &walk_info) const
 }
 
 
-void NodeTable::MonolithicClear()
+void NodeTable::PrepareDeleteMonolithic(DBWalk::Actions &actions)
 {
-    rows.clear();
+	actions.node_row_out = [=](const DBWalk::WalkInfo &walk_info)
+	{
+		if( !ReadArgs::use_incremental )
+        {
+            Row &row = rows[walk_info.xlink.GetChildX()];
+            
+            EraseSolo( row.parents, walk_info.xlink );    		
+
+            if( IsDeclarer(walk_info) )
+                EraseSolo( row.declarers, walk_info.xlink );
+        }
+	};
 }
 
 
-void NodeTable::PrepareMonolithicBuild(DBWalk::Actions &actions)
+void NodeTable::PrepareInsertMonolithic(DBWalk::Actions &actions)
 {
 	actions.node_row_in = [=](const DBWalk::WalkInfo &walk_info)
 	{

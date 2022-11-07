@@ -68,7 +68,11 @@ void XTreeDatabase::MonolithicClear()
 {
     INDENT("c");
     plan.domain->MonolithicClear();
-    plan.node_table->MonolithicClear();    
+
+    DBWalk::Actions actions;
+    plan.node_table->PrepareDeleteMonolithic( actions );
+    InitialWalk( &actions, root_xlink );
+
 #ifdef DB_ENABLE_COMPARATIVE_TEST
     {
         INDENT("⦼");
@@ -87,14 +91,14 @@ void XTreeDatabase::MonolithicBuild()
     ASSERT( root_xlink );
 
     DBWalk::Actions actions;
-    plan.domain->PrepareMonolithicBuild( actions, false );
-    plan.node_table->PrepareMonolithicBuild( actions );
+    plan.domain->PrepareInsertMonolithic( actions, false );
+    plan.node_table->PrepareInsertMonolithic( actions );
     InitialWalk( &actions, root_xlink );
 #ifdef DB_ENABLE_COMPARATIVE_TEST
     {
         INDENT("⦼");
         DBWalk::Actions ref_actions;
-        plan.ref_domain->PrepareMonolithicBuild( ref_actions, false );
+        plan.ref_domain->PrepareInsertMonolithic( ref_actions, false );
         InitialWalk( &ref_actions, root_xlink );
 #ifdef DB_TEST_THE_TEST
         ExpectMatches();
@@ -134,15 +138,15 @@ void XTreeDatabase::MonolithicExtraZone(const TreeZone &extra_zone)
     INDENT("f");
 
     DBWalk::Actions actions;
-	plan.domain->PrepareMonolithicBuild( actions, true );
-	plan.node_table->PrepareMonolithicBuild( actions );
+	plan.domain->PrepareInsertMonolithic( actions, true );
+	plan.node_table->PrepareInsertMonolithic( actions );
 	db_walker.Walk( &actions, extra_zone, DBWalk::ROOT );
 
 #ifdef DB_ENABLE_COMPARATIVE_TEST
     {
         INDENT("⦼");
         DBWalk::Actions ref_actions;
-        plan.ref_domain->PrepareMonolithicBuild( ref_actions, true );
+        plan.ref_domain->PrepareInsertMonolithic( ref_actions, true );
         db_walker.Walk( &ref_actions, extra_zone, DBWalk::ROOT );
 #ifdef DB_TEST_THE_TEST
         ExpectMatches();
