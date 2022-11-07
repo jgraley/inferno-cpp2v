@@ -5,19 +5,16 @@
 #include "lacing.hpp"
 #include "relation_test.hpp"
 
-#include "common/read_args.hpp"
 
 using namespace SR;    
 
 //#define TRACE_CATEGORY_RELATION
 
-Indexes::Indexes( shared_ptr<Lacing> lacing, const XTreeDatabase *db_, bool ref_ ) :
+Indexes::Indexes( shared_ptr<Lacing> lacing, const XTreeDatabase *db_ ) :
     plan( lacing ),
     depth_first_ordered_index( db_ ),
     category_ordered_index( plan.lacing ),
-    db( db_ ),
-    ref( ref_ ),
-    use_incremental( ref ? false : ReadArgs::use_incremental )
+    db( db_ )
 { 
 }
 
@@ -86,16 +83,6 @@ void Indexes::PrepareInsert(DBWalk::Actions &actions)
 void Indexes::Dump() const
 {
     TRACE("category_ordered_index:\n")(category_ordered_index)("\n");
-}
-
-
-void Indexes::ExpectMatching( const Indexes &mut )
-{
-    ASSERT( ref );
-    ASSERT( !mut.ref );
-    
-    ASSERT( depth_first_ordered_index == mut.depth_first_ordered_index )
-          ( DiffTrace(depth_first_ordered_index, mut.depth_first_ordered_index) );
 }
 
 

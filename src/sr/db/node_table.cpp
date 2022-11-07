@@ -1,6 +1,7 @@
 #include "node_table.hpp"
 #include "sc_relation.hpp"
 
+#include "common/read_args.hpp"
 
 using namespace SR;    
 
@@ -37,43 +38,65 @@ void NodeTable::PrepareMonolithicBuild(DBWalk::Actions &actions)
 {
 	actions.node_row_in = [=](const DBWalk::WalkInfo &walk_info)
 	{
-		// ----------------- Generate node row
-		Row row;
-		switch( walk_info.context )
-		{
-            case DBWalk::SINGULAR:
-            case DBWalk::IN_SEQUENCE:
-            case DBWalk::IN_COLLECTION:
-            {
-                TreePtr<Node> parent_x = walk_info.parent_xlink.GetChildX();
-                set<const TreePtrInterface *> declared = parent_x->GetDeclared();
-                if( declared.count( walk_info.p_x ) > 0 )
-                    row.declarers.insert( walk_info.xlink );
-                break;
-            }
-		}
-		row.parents.insert( walk_info.xlink );    
+		if( !ReadArgs::use_incremental )
+        {
+            Row &row = rows[walk_info.xlink.GetChildX()];
+            row.parents.insert( walk_info.xlink );    		
 
-		// Merge in the node row
-		rows[walk_info.xlink.GetChildX()].Merge( row );			
+            switch( walk_info.context )
+            {
+                case DBWalk::SINGULAR:
+                case DBWalk::IN_SEQUENCE:
+                case DBWalk::IN_COLLECTION:
+                {
+                    TreePtr<Node> parent_x = walk_info.parent_xlink.GetChildX();
+                    set<const TreePtrInterface *> declared = parent_x->GetDeclared();
+                    if( declared.count( walk_info.p_x ) > 0 )
+                        row.declarers.insert( walk_info.xlink );
+                    break;
+                }
+            }
+        }
 	};
 }
 
 
 void NodeTable::PrepareDelete( DBWalk::Actions &actions )
 {
+	actions.node_row_out = [=](const DBWalk::WalkInfo &walk_info)
+	{
+		if( ReadArgs::use_incremental )
+        {
+            // ?	
+        }
+	};
 }
 
 
 void NodeTable::PrepareInsert(DBWalk::Actions &actions)
 {
-}
+	actions.node_row_in = [=](const DBWalk::WalkInfo &walk_info)
+	{
+		if( ReadArgs::use_incremental )
+        {
+            Row &row = rows[walk_info.xlink.GetChildX()];
+            row.parents.insert( walk_info.xlink );    
 
-
-void NodeTable::Row::Merge( const Row &nn )
-{
-	parents = UnionOf( parents, nn.parents );
-	declarers = UnionOf( declarers, nn.declarers );
+            switch( walk_info.context )
+            {
+                case DBWalk::SINGULAR:
+                case DBWalk::IN_SEQUENCE:
+                case DBWalk::IN_COLLECTION:
+                {
+                    TreePtr<Node> parent_x = walk_info.parent_xlink.GetChildX();
+                    set<const TreePtrInterface *> declared = parent_x->GetDeclared();
+                    if( declared.count( walk_info.p_x ) > 0 )
+                        row.declarers.insert( walk_info.xlink );
+                    break;
+                }
+            }			
+        }
+	};
 }
 
 

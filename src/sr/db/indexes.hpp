@@ -23,7 +23,7 @@ class XTreeDatabase;
 class Indexes
 {
 public:
-    Indexes(shared_ptr<Lacing> lacing, const XTreeDatabase *db, bool ref=false );
+    Indexes(shared_ptr<Lacing> lacing, const XTreeDatabase *db );
     
 private: 
     const struct Plan : public Traceable
@@ -41,7 +41,6 @@ public:
 	void PrepareInsert(DBWalk::Actions &actions);
     
     void Dump() const;
-    void ExpectMatching( const Indexes &mut );
     void TestRelations( const unordered_set<XLink> &xlinks );
 
     // Category ordering TODO merge with SimpleCompare ordering
@@ -68,8 +67,6 @@ public:
 
 private:
     const XTreeDatabase *db;
-    const bool ref;
-    const bool use_incremental;
 };    
     
 }

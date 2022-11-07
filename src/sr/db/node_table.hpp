@@ -28,7 +28,6 @@ public:
 		// declaring link (precision). Taking parent discards that info.
 		set<XLink> declarers;
 		
-        void Merge( const Row &nn );
         string GetTrace() const;
     };
 

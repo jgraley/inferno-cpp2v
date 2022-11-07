@@ -42,7 +42,7 @@ XTreeDatabase::Plan::Plan( const XTreeDatabase *algo, shared_ptr<Lacing> lacing 
     indexes( make_shared<Indexes>(lacing, algo) )
 #ifdef DB_ENABLE_COMPARATIVE_TEST
     ,ref_domain( make_shared<Domain>() ),
-    ref_indexes( make_shared<Indexes>(lacing, algo, true) )
+    ref_indexes( make_shared<Indexes>(lacing, algo) )
 #endif    
 {
 }
@@ -413,7 +413,6 @@ void XTreeDatabase::Dump() const
 #ifdef DB_ENABLE_COMPARATIVE_TEST
 void XTreeDatabase::ExpectMatches() const
 {
-    plan.ref_indexes->ExpectMatching( *plan.indexes );
 }
 #endif
 
