@@ -61,10 +61,11 @@ void NodeTable::PrepareMonolithicBuild(DBWalk::Actions &actions)
 		if( !ReadArgs::use_incremental )
         {
             Row &row = rows[walk_info.xlink.GetChildX()];
-            row.parents.insert( walk_info.xlink );    		
+            
+            InsertSolo( row.parents, walk_info.xlink );    		
 
             if( IsDeclarer(walk_info) )
-                row.declarers.insert( walk_info.xlink );
+                InsertSolo( row.declarers, walk_info.xlink );
         }
 	};
 }
@@ -89,10 +90,10 @@ void NodeTable::PrepareInsert(DBWalk::Actions &actions)
 		if( ReadArgs::use_incremental )
         {
             Row &row = rows[walk_info.xlink.GetChildX()];
-            row.parents.insert( walk_info.xlink );    
+            InsertSolo( row.parents, walk_info.xlink );    		
 
             if( IsDeclarer(walk_info) )
-                row.declarers.insert( walk_info.xlink );
+                InsertSolo( row.declarers, walk_info.xlink );
         }
 	};
 }
