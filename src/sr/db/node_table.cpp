@@ -28,6 +28,26 @@ bool NodeTable::HasRow(TreePtr<Node> node) const
 }
 
 
+bool NodeTable::IsDeclarer(const DBWalk::WalkInfo &walk_info) const
+{
+    switch( walk_info.context )
+    {
+        case DBWalk::SINGULAR:
+        case DBWalk::IN_SEQUENCE:
+        case DBWalk::IN_COLLECTION:
+        {
+            TreePtr<Node> parent_x = walk_info.parent_xlink.GetChildX();
+            set<const TreePtrInterface *> declared = parent_x->GetDeclared();
+            return declared.count( walk_info.p_x ) > 0;
+        }
+        default:
+        {
+            return false;
+        }
+    }
+}
+
+
 void NodeTable::MonolithicClear()
 {
     rows.clear();
@@ -43,19 +63,8 @@ void NodeTable::PrepareMonolithicBuild(DBWalk::Actions &actions)
             Row &row = rows[walk_info.xlink.GetChildX()];
             row.parents.insert( walk_info.xlink );    		
 
-            switch( walk_info.context )
-            {
-                case DBWalk::SINGULAR:
-                case DBWalk::IN_SEQUENCE:
-                case DBWalk::IN_COLLECTION:
-                {
-                    TreePtr<Node> parent_x = walk_info.parent_xlink.GetChildX();
-                    set<const TreePtrInterface *> declared = parent_x->GetDeclared();
-                    if( declared.count( walk_info.p_x ) > 0 )
-                        row.declarers.insert( walk_info.xlink );
-                    break;
-                }
-            }
+            if( IsDeclarer(walk_info) )
+                row.declarers.insert( walk_info.xlink );
         }
 	};
 }
@@ -82,19 +91,8 @@ void NodeTable::PrepareInsert(DBWalk::Actions &actions)
             Row &row = rows[walk_info.xlink.GetChildX()];
             row.parents.insert( walk_info.xlink );    
 
-            switch( walk_info.context )
-            {
-                case DBWalk::SINGULAR:
-                case DBWalk::IN_SEQUENCE:
-                case DBWalk::IN_COLLECTION:
-                {
-                    TreePtr<Node> parent_x = walk_info.parent_xlink.GetChildX();
-                    set<const TreePtrInterface *> declared = parent_x->GetDeclared();
-                    if( declared.count( walk_info.p_x ) > 0 )
-                        row.declarers.insert( walk_info.xlink );
-                    break;
-                }
-            }			
+            if( IsDeclarer(walk_info) )
+                row.declarers.insert( walk_info.xlink );
         }
 	};
 }
