@@ -54,12 +54,15 @@ void NodeTable::PrepareDeleteMonolithic(DBWalk::Actions &actions)
 	{
 		if( !ReadArgs::use_incremental )
         {
-            Row &row = rows[walk_info.xlink.GetChildX()];
+            // Should already be there
+            Row &row = rows.at(walk_info.xlink.GetChildX());
             
             EraseSolo( row.parents, walk_info.xlink );    		
-
             if( IsDeclarer(walk_info) )
                 EraseSolo( row.declarers, walk_info.xlink );
+                
+            if( row.parents.empty() )
+                EraseSolo( rows, walk_info.xlink.GetChildX() );
         }
 	};
 }
@@ -71,10 +74,10 @@ void NodeTable::PrepareInsertMonolithic(DBWalk::Actions &actions)
 	{
 		if( !ReadArgs::use_incremental )
         {
+            // Create if not already there
             Row &row = rows[walk_info.xlink.GetChildX()];
             
             InsertSolo( row.parents, walk_info.xlink );    		
-
             if( IsDeclarer(walk_info) )
                 InsertSolo( row.declarers, walk_info.xlink );
         }
@@ -100,9 +103,10 @@ void NodeTable::PrepareInsert(DBWalk::Actions &actions)
 	{
 		if( ReadArgs::use_incremental )
         {
+            // Create if not already there
             Row &row = rows[walk_info.xlink.GetChildX()];
+            
             InsertSolo( row.parents, walk_info.xlink );    		
-
             if( IsDeclarer(walk_info) )
                 InsertSolo( row.declarers, walk_info.xlink );
         }
