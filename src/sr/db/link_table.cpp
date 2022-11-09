@@ -33,7 +33,7 @@ void LinkTable::PrepareDelete( DBWalk::Actions &actions )
 	actions.link_row_out = [=](const DBWalk::WalkInfo &walk_info)
 	{
 		if( walk_info.context != DBWalk::UNKNOWN )
-    		rows.erase( walk_info.p_x );
+    		EraseSolo( rows, walk_info.p_x );
 	};
 }
 
