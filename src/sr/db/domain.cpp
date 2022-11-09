@@ -169,6 +169,7 @@ void Domain::MonolithicClear()
 {
     unordered_domain.clear();
     domain_extension_classes.clear();
+    extended_zones.clear();
 }    
 
 
