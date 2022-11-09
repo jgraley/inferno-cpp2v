@@ -42,8 +42,8 @@ public:
     void UnExtendDomain();
 
     void MonolithicClear();
-	void PrepareDeleteMonolithic(DBWalk::Actions &actions, bool extra);
-	void PrepareInsertMonolithic(DBWalk::Actions &actions, bool extra);
+	void PrepareDeleteMonolithic(DBWalk::Actions &actions);
+	void PrepareInsertMonolithic(DBWalk::Actions &actions);
     void PrepareDelete(DBWalk::Actions &actions);
 	void PrepareInsert(DBWalk::Actions &actions);
 
@@ -72,7 +72,6 @@ private:
     
   	PatternLink root_plink;
   	
-public:  	
     list<TreeZone> extended_zones;
 };    
     

@@ -172,14 +172,14 @@ void Domain::MonolithicClear()
 }    
 
 
-void Domain::PrepareDeleteMonolithic(DBWalk::Actions &actions, bool extra)
+void Domain::PrepareDeleteMonolithic(DBWalk::Actions &actions)
 {
 	actions.domain_in = [=](const DBWalk::WalkInfo &walk_info)
 	{        
 		EraseSolo( unordered_domain, walk_info.xlink ); 
         
 #ifdef TRACE_DOMAIN_EXTEND
-		TRACE("Saw xlink ")(walk_info.xlink)(" extra flag=")(extra)(" ud.size=%u ed.size()=%u\n", unordered_domain.size(), extended_zones.size());
+		TRACE("Saw xlink ")(walk_info.xlink)(" ud.size=%u ed.size()=%u\n", unordered_domain.size(), extended_zones.size());
 #endif
         
         // TODO probably erases the class too soon - would need to keep a count of the number of
@@ -189,14 +189,14 @@ void Domain::PrepareDeleteMonolithic(DBWalk::Actions &actions, bool extra)
 }
 
 
-void Domain::PrepareInsertMonolithic(DBWalk::Actions &actions, bool extra)
+void Domain::PrepareInsertMonolithic(DBWalk::Actions &actions)
 {
 	actions.domain_in = [=](const DBWalk::WalkInfo &walk_info)
 	{        
 		InsertSolo( unordered_domain, walk_info.xlink ); 
         
 #ifdef TRACE_DOMAIN_EXTEND
-		TRACE("Saw xlink ")(walk_info.xlink)(" extra flag=")(extra)(" ud.size=%u ed.size()=%u\n", unordered_domain.size(), extended_zones.size());
+		TRACE("Saw xlink ")(walk_info.xlink)(" ud.size=%u ed.size()=%u\n", unordered_domain.size(), extended_zones.size());
 #endif
         
 		(void)domain_extension_classes.insert( make_pair( walk_info.xlink.GetChildX(), walk_info.xlink ) );    
