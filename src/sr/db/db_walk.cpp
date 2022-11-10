@@ -16,7 +16,7 @@ void DBWalk::VisitBase( const WalkKit &kit,
 {
     XLink base_xlink = kit.zone->GetBase();
     VisitLink( kit, 
-             { XLink(), 
+             { TreePtr<Node>(), 
                -1,
                context,	 
                nullptr,
@@ -46,7 +46,7 @@ void DBWalk::VisitSingular( const WalkKit &kit,
     XLink child_xlink( x, p_x_singular );   
     
     VisitLink( kit, 
-             { xlink, 
+             { x, 
                item_ordinal,
                SINGULAR,
                nullptr,
@@ -73,7 +73,7 @@ void DBWalk::VisitSequence( const WalkKit &kit,
     {
         XLink child_xlink( x, &*xit );
         VisitLink( kit, 
-                 { xlink, 
+                 { x, 
                    item_ordinal,
                    IN_SEQUENCE,
                    x_seq,
@@ -102,7 +102,7 @@ void DBWalk::VisitCollection( const WalkKit &kit,
     {
         XLink child_xlink( x, &*xit );
         VisitLink( kit, 
-                 { xlink, 
+                 { x, 
                    item_ordinal,
                    IN_COLLECTION,
                    x_col,

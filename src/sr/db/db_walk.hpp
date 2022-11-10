@@ -23,7 +23,7 @@ public:
     
     struct WalkInfo
     {
-        XLink parent_xlink;
+        TreePtr<Node> parent_x;
         int item_ordinal;
 		ContainmentContext context;
         ContainerInterface *p_xcon;

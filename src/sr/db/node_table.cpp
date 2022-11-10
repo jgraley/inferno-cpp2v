@@ -36,8 +36,7 @@ bool NodeTable::IsDeclarer(const DBWalk::WalkInfo &walk_info) const
         case DBWalk::IN_SEQUENCE:
         case DBWalk::IN_COLLECTION:
         {
-            TreePtr<Node> parent_x = walk_info.parent_xlink.GetChildX();
-            set<const TreePtrInterface *> declared = parent_x->GetDeclared();
+            set<const TreePtrInterface *> declared = walk_info.parent_x->GetDeclared();
             return declared.count( walk_info.p_x ) > 0;
         }
         default:
@@ -53,7 +52,7 @@ void NodeTable::PrepareDelete( DBWalk::Actions &actions )
 	actions.node_row_out = [=](const DBWalk::WalkInfo &walk_info)
 	{
         // Should already be there
-        Row &row = rows.at(walk_info.xlink.GetChildX());
+        Row &row = rows.at(walk_info.x);
         
         EraseSolo( row.parents, walk_info.xlink );    		
         if( IsDeclarer(walk_info) )

@@ -66,7 +66,7 @@ void LinkTable::GenerateRow(const DBWalk::WalkInfo &walk_info)
 		}	
 		case DBWalk::SINGULAR:
 		{
-			row.parent_node = walk_info.parent_xlink.GetChildX();
+			row.parent_node = walk_info.parent_x;
 			row.item_ordinal = walk_info.item_ordinal;
 			row.my_container_front = walk_info.xlink;
 			row.my_container_back = walk_info.xlink;
@@ -74,36 +74,32 @@ void LinkTable::GenerateRow(const DBWalk::WalkInfo &walk_info)
 		}
 		case DBWalk::IN_SEQUENCE:
 		{
-			TreePtr<Node> parent_x = walk_info.parent_xlink.GetChildX();
-
-			row.parent_node = walk_info.parent_xlink.GetChildX();
+			row.parent_node = walk_info.parent_x;
 			row.item_ordinal = walk_info.item_ordinal;
 			row.my_container_it = walk_info.xit;        
-			row.my_container_front = XLink( parent_x, &walk_info.p_xcon->front() );
-			row.my_container_back = XLink( parent_x, &walk_info.p_xcon->back() );
+			row.my_container_front = XLink( walk_info.parent_x, &walk_info.p_xcon->front() );
+			row.my_container_back = XLink( walk_info.parent_x, &walk_info.p_xcon->back() );
 			row.container_ordinal = walk_info.container_ordinal;
 			
 			if( walk_info.xit_predecessor != walk_info.p_xcon->end() )
-				row.my_sequence_predecessor = XLink( parent_x, &*walk_info.xit_predecessor );
+				row.my_sequence_predecessor = XLink( walk_info.parent_x, &*walk_info.xit_predecessor );
 
 			SequenceInterface::iterator xit_successor = walk_info.xit;
 			++xit_successor;
 			if( xit_successor != walk_info.p_xcon->end() )
-				row.my_sequence_successor = XLink( parent_x, &*xit_successor );
+				row.my_sequence_successor = XLink( walk_info.parent_x, &*xit_successor );
 			else
 				row.my_sequence_successor = XLink::OffEndXLink;        
 			break;
 		}
 		case DBWalk::IN_COLLECTION:
 		{
-			TreePtr<Node> parent_x = walk_info.parent_xlink.GetChildX();
-
-			row.parent_node = walk_info.parent_xlink.GetChildX();
+			row.parent_node = walk_info.parent_x;
 			row.item_ordinal = walk_info.item_ordinal;
 			row.my_container_it = walk_info.xit;
-			row.my_container_front = XLink( parent_x, &*(walk_info.p_xcon->begin()) );
+			row.my_container_front = XLink( walk_info.parent_x, &*(walk_info.p_xcon->begin()) );
 			// Note: in real STL containers, one would use *(x_col->rbegin())
-			row.my_container_back = XLink( parent_x, &(walk_info.p_xcon->back()) );
+			row.my_container_back = XLink( walk_info.parent_x, &(walk_info.p_xcon->back()) );
 			row.container_ordinal = walk_info.container_ordinal;
 			break;
 		}
