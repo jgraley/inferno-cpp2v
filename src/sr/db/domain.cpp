@@ -66,8 +66,8 @@ void Domain::ExtendDomainBaseXLink( const TreeKit &kit, TreePtr<Node> node )
     // our domain_extension_classes
     on_insert_extra_zone( zone );        
     
-    // Ensure the original tree is found in the domain now (it wasn't earlier on)
-    // as an extra check
+    // Ensure the original tree is found in the domain now (it wasn't 
+    // earlier on) as an extra check
     ASSERT( domain_extension_classes.count( node ) == 1 );
     
     // Remember we did this so UnExtendDomain() can undo it
@@ -170,7 +170,6 @@ void Domain::UnExtendDomain()
 
 void Domain::MonolithicClear()
 {
-    unordered_domain.clear();
     domain_extension_classes.clear();
     extended_zones.clear();
 }    
@@ -180,9 +179,6 @@ void Domain::PrepareDeleteMonolithic(DBWalk::Actions &actions)
 {
 	actions.domain_out = [=](const DBWalk::WalkInfo &walk_info)
 	{                
-		if( !ReadArgs::use_incremental )
-			EraseSolo( unordered_domain, walk_info.xlink );
-
 #ifdef TRACE_DOMAIN_EXTEND
 		TRACE("Saw xlink ")(walk_info.xlink)(" ud.size=%u ed.size()=%u\n", unordered_domain.size(), extended_zones.size());
 #endif
@@ -198,9 +194,6 @@ void Domain::PrepareInsertMonolithic(DBWalk::Actions &actions)
 {
 	actions.domain_in = [=](const DBWalk::WalkInfo &walk_info)
 	{                
-		if( !ReadArgs::use_incremental )
-			InsertSolo( unordered_domain, walk_info.xlink );   
-
 #ifdef TRACE_DOMAIN_EXTEND
 		TRACE("Saw xlink ")(walk_info.xlink)(" ud.size=%u ed.size()=%u\n", unordered_domain.size(), extended_zones.size());
 #endif
@@ -216,8 +209,7 @@ void Domain::PrepareDelete( DBWalk::Actions &actions )
 {
 	actions.domain_out = [=](const DBWalk::WalkInfo &walk_info)
 	{        
-		if( ReadArgs::use_incremental )
-			EraseSolo( unordered_domain, walk_info.xlink );
+		EraseSolo( unordered_domain, walk_info.xlink );
 	};
 }
 
@@ -226,8 +218,7 @@ void Domain::PrepareInsert(DBWalk::Actions &actions)
 {
 	actions.domain_in = [=](const DBWalk::WalkInfo &walk_info)
 	{        
-		if( ReadArgs::use_incremental )
-			InsertSolo( unordered_domain, walk_info.xlink );   
+		InsertSolo( unordered_domain, walk_info.xlink );   
 	};
 }
 
