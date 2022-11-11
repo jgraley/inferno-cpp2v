@@ -62,7 +62,10 @@ void Domain::ExtendDomainBaseXLink( const TreeKit &kit, TreePtr<Node> node )
     // as an extra check
     ASSERT( domain_extension_classes.count( node ) == 1 );
     
-    auto zone = TreeZone::CreateFromExclusions(xlink, unordered_domain );
+    // Make a zone. If in future we allow eg borrowing identifiers from
+    // existing X tree or extensions, use the CreateFromExclusions() one.
+    auto zone = TreeZone(xlink);
+    // TreeZone::CreateFromExclusions(xlink, unordered_domain );
 #ifdef TRACE_DOMAIN_EXTEND
     TRACE("Zone is ")(zone)("\n"); 
 #endif    
@@ -71,7 +74,11 @@ void Domain::ExtendDomainBaseXLink( const TreeKit &kit, TreePtr<Node> node )
     // X tree nodes in domain_extension_classes, so should have returned earlier.
     ASSERT( !zone.IsEmpty() ); 
         
+    // Add this domain extnesion to the database
     on_insert_extra_zone( zone );        
+    
+    // Remember we did this so UnExtendDomain() can undo it
+    // TODO should we push to front for a LIFO action?
     extended_zones.push_back( zone ); // TODO std::move the zone
 }
 
