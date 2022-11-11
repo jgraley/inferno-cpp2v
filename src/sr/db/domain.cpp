@@ -60,14 +60,42 @@ XLink Domain::UniquifyDomainExtension( TreePtr<Node> node, bool expect_in_domain
 }
 
 
-void Domain::ExtendDomainBaseXLink( const TreeKit &kit, XLink base_xlink )
+void Domain::ExtendDomainBaseXLink( const TreeKit &kit, TreePtr<Node> node )
 {
-    auto zone = TreeZone::CreateFromExclusions(base_xlink, unordered_domain );
+    ASSERT( node );
+  
+    // If there's already a class for this node, return it and early-out
+    // Note: this is done by simple compare, and identity is not 
+    // required. This makes for a very "powerful" search for existing
+    // candidates.
+    if( domain_extension_classes.count(node) > 0 )
+        return;
+  
+    // To ensure compliance with rule #217 we must duplicate the tree that
+    // we were given, in case it meanders into the main X tree not at an
+    // identifier, causing illegal multiple parents. See #677
+    // TODO maybe only do this if subtree actually would go wrong.
+    TreePtr<Node> dup_node = Duplicate::DuplicateSubtree( node );
+  
+    // Create an XLink that will allow us to track this subtree
+    XLink xlink = XLink::CreateDistinct( dup_node );    
+  
+    // And insert it
+    auto p = domain_extension_classes.insert( make_pair( dup_node, xlink ) );
+    ASSERT( p.second ); // false if was already there, contradicting the find() above
+    
+    // Ensure the original tree is found in the domain now (it wasn't earlier on)
+    // as an extra check
+    ASSERT( domain_extension_classes.count( node ) == 1 );
+    
+    auto zone = TreeZone::CreateFromExclusions(xlink, unordered_domain );
 #ifdef TRACE_DOMAIN_EXTEND
     TRACE("Zone is ")(zone)("\n"); 
 #endif    
-    if( zone.IsEmpty() )
-        return;
+
+    // if base is terminus then its in the X tree, but we're putting all the 
+    // X tree nodes in domain_extension_classes, so should have returned earlier.
+    ASSERT( !zone.IsEmpty() ); 
         
     on_insert_extra_zone( zone );        
     extended_zones.push_back( zone ); // TODO std::move the zone
@@ -85,10 +113,7 @@ void Domain::ExtendDomainPatternWalk( const TreeKit &kit, PatternLink plink )
         TRACE("There are extra x domain elements for ")(plink)(":\n");
 
     for( TreePtr<Node> base_node : subtrees )
-    {
-		XLink base_xlink = UniquifyDomainExtension(base_node, false);	
-        ExtendDomainBaseXLink( kit, base_xlink );
-	}
+        ExtendDomainBaseXLink( kit, base_node );
     
     // Visit couplings repeatedly TODO union over couplings and
     // only recurse on last reaching.

@@ -35,7 +35,7 @@ public:
     // Add xlink to domain extension if not already there, and return the cannonical one.
     XLink UniquifyDomainExtension( TreePtr<Node> node, bool expect_in_domain );
     
-    void ExtendDomainBaseXLink( const TreeKit &kit, XLink base_xlink );
+    void ExtendDomainBaseXLink( const TreeKit &kit, TreePtr<Node> node );
     void ExtendDomainPatternWalk( const TreeKit &kit, PatternLink plink );
     void ExtendDomainNewPattern( const TreeKit &kit, PatternLink root_plink );
     void ExtendDomainNewX( const TreeKit &kit );
