@@ -54,23 +54,16 @@ void Domain::ExtendDomainBaseXLink( const TreeKit &kit, TreePtr<Node> node )
     // Create an XLink that will allow us to track this subtree
     XLink xlink = XLink::CreateDistinct( dup_node );    
   
-    // And insert it
-    auto p = domain_extension_classes.insert( make_pair( dup_node, xlink ) );
-    ASSERT( p.second ); // false if was already there, contradicting the find() above
-    
-    // Make a zone. If in future we allow eg borrowing identifiers from
-    // existing X tree or extensions, use the CreateFromExclusions() one.
+    // Make a zone. 
     auto zone = TreeZone(xlink);
-    // TreeZone::CreateFromExclusions(xlink, unordered_domain );
+    ASSERT( !zone.IsEmpty() ); 
+
 #ifdef TRACE_DOMAIN_EXTEND
     TRACE("Zone is ")(zone)("\n"); 
 #endif    
-
-    // if base is terminus then its in the X tree, but we're putting all the 
-    // X tree nodes in domain_extension_classes, so should have returned earlier.
-    ASSERT( !zone.IsEmpty() ); 
         
-    // Add this domain extnesion to the database
+    // Add this domain extension to the whole database including
+    // our domain_extension_classes
     on_insert_extra_zone( zone );        
     
     // Ensure the original tree is found in the domain now (it wasn't earlier on)
@@ -212,6 +205,8 @@ void Domain::PrepareInsertMonolithic(DBWalk::Actions &actions)
 		TRACE("Saw xlink ")(walk_info.xlink)(" ud.size=%u ed.size()=%u\n", unordered_domain.size(), extended_zones.size());
 #endif
         
+        // Not solo because domain_extension_classes is not a total ordering- 
+        // there may already be a class for this xlink
 		(void)domain_extension_classes.insert( make_pair( walk_info.xlink.GetChildX(), walk_info.xlink ) );    
 	};
 }
