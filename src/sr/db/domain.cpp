@@ -58,10 +58,6 @@ void Domain::ExtendDomainBaseXLink( const TreeKit &kit, TreePtr<Node> node )
     auto p = domain_extension_classes.insert( make_pair( dup_node, xlink ) );
     ASSERT( p.second ); // false if was already there, contradicting the find() above
     
-    // Ensure the original tree is found in the domain now (it wasn't earlier on)
-    // as an extra check
-    ASSERT( domain_extension_classes.count( node ) == 1 );
-    
     // Make a zone. If in future we allow eg borrowing identifiers from
     // existing X tree or extensions, use the CreateFromExclusions() one.
     auto zone = TreeZone(xlink);
@@ -76,6 +72,10 @@ void Domain::ExtendDomainBaseXLink( const TreeKit &kit, TreePtr<Node> node )
         
     // Add this domain extnesion to the database
     on_insert_extra_zone( zone );        
+    
+    // Ensure the original tree is found in the domain now (it wasn't earlier on)
+    // as an extra check
+    ASSERT( domain_extension_classes.count( node ) == 1 );
     
     // Remember we did this so UnExtendDomain() can undo it
     // TODO should we push to front for a LIFO action?
