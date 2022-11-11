@@ -6,6 +6,7 @@
 #include "node/graphable.hpp"
 #include "../sym/lazy_eval.hpp"
 
+
 namespace SR
 { 
 class SpecialBase;
@@ -61,7 +62,8 @@ public:
                                                 bool use_DQ = false ) const = 0;
     virtual QueryLambda TestStartRegenerationQuery( const SolutionMap *hypothesis_links,
                                                     const XTreeDatabase *x_tree_db ) const = 0;
-    virtual set<XLink> ExpandNormalDomain( const TreeKit &kit, const unordered_set<XLink> &keyer_xlinks ) = 0;
+    virtual set<TreePtr<Node>> ExpandNormalDomain( const TreeKit &kit, const unordered_set<XLink> &xlinks ) = 0;
+
     virtual void ResetNLQConjecture() = 0;    
 
     virtual const SCREngine *GetMasterSCREngine() const = 0;      

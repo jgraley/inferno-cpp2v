@@ -80,11 +80,15 @@ void Domain::ExtendDomainPatternWalk( const TreeKit &kit, PatternLink plink )
     // This avoids the need for a reductive "keep trying until no more
     // extra XLinks are provided" because we know that only the child pattern
     // can match a pattern node's generated XLink.
-    set<XLink> subtrees = plink.GetChildAgent()->ExpandNormalDomain( kit, unordered_domain );    
+    set<TreePtr<Node>> subtrees = plink.GetChildAgent()->ExpandNormalDomain( kit, unordered_domain );      
     if( !subtrees.empty() )
         TRACE("There are extra x domain elements for ")(plink)(":\n");
-    for( XLink base_xlink : subtrees )
+
+    for( TreePtr<Node> base_node : subtrees )
+    {
+		XLink base_xlink = UniquifyDomainExtension(base_node, false);	
         ExtendDomainBaseXLink( kit, base_xlink );
+	}
     
     // Visit couplings repeatedly TODO union over couplings and
     // only recurse on last reaching.

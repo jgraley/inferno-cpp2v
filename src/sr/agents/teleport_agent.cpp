@@ -18,14 +18,14 @@ using namespace SYM;
 
 //---------------------------------- TeleportAgent ------------------------------------    
 
-XLink TeleportAgent::TeleportQueryUnique( const TreeKit &kit, XLink keyer_xlink, bool expect_in_domain ) const
+XLink TeleportAgent::TeleportQueryUnique( const TreeKit &kit, XLink keyer_xlink ) const
 {
     TreePtr<Node> tp_node = RunTeleportQuery( kit, keyer_xlink );
     if( !tp_node )
         return XLink();        
         
     // Uniquify the link against the domain
-    return my_scr_engine->UniquifyDomainExtension(tp_node, expect_in_domain);
+    return my_scr_engine->UniquifyDomainExtension(tp_node, true);
 }                                    
 
 
@@ -41,9 +41,9 @@ SYM::Lazy<SYM::BooleanExpression> TeleportAgent::SymbolicNormalLinkedQueryPRed()
 }                     
 
 
-set<XLink> TeleportAgent::ExpandNormalDomain( const TreeKit &kit, const unordered_set<XLink> &keyer_xlinks )
+set<TreePtr<Node>> TeleportAgent::ExpandNormalDomain( const TreeKit &kit, const unordered_set<XLink> &keyer_xlinks )
 {
-    set<XLink> extra_xlinks;
+    set<TreePtr<Node>> extra_nodes;
     for( XLink keyer_xlink : keyer_xlinks )
     {
         if( keyer_xlink == XLink::MMAX_Link )
@@ -51,15 +51,21 @@ set<XLink> TeleportAgent::ExpandNormalDomain( const TreeKit &kit, const unordere
         if( !IsPreRestrictionMatch(keyer_xlink) )
             continue; // Failed pre-restriction so can't expand domain
 
+		TreePtr<Node> tp_node;
         try
         {
-            XLink unique_xlink = TeleportQueryUnique( kit, keyer_xlink, false );
-            if( unique_xlink )
-                extra_xlinks.insert( (XLink)unique_xlink );
+			tp_node = RunTeleportQuery( kit, keyer_xlink );
         }
-        catch( ::Mismatch & ) {}
+        catch( ::Mismatch & ) 
+        {
+			continue;
+		}
+		if( !tp_node )
+			continue;        
+		
+		extra_nodes.insert( tp_node );               
     }
-    return extra_xlinks;
+    return extra_nodes; 
 }
 
 
@@ -91,7 +97,7 @@ unique_ptr<SymbolResultInterface> TeleportAgent::TeleportOperator::Evaluate( con
     if( !keyer_result->IsDefinedAndUnique() )
         return make_unique<SymbolResult>( SymbolResult::NOT_A_SYMBOL );
     XLink keyer_xlink = keyer_result->GetOnlyXLink();
-    XLink unique_xlink = agent->TeleportQueryUnique( *(kit.x_tree_db), keyer_xlink, true );        
+    XLink unique_xlink = agent->TeleportQueryUnique( *(kit.x_tree_db), keyer_xlink );        
     if( unique_xlink )
         return make_unique<SymbolResult>( unique_xlink );
     else 

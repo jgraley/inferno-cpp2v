@@ -13,13 +13,13 @@ namespace SR
 class TeleportAgent : public PreRestrictedAgent
 {
 public:    
-    virtual XLink TeleportQueryUnique( const TreeKit &kit, XLink keyer_xlink, bool expect_in_domain ) const;                  
+    virtual XLink TeleportQueryUnique( const TreeKit &kit, XLink keyer_xlink ) const;                  
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
 
     // XLink -> Node is correct: PointerIs needs to see the incoming TreePtr.
     virtual TreePtr<Node> RunTeleportQuery( const TreeKit &kit, XLink keyer_xlink ) const { ASSERTFAIL(); }
     
-    virtual set<XLink> ExpandNormalDomain( const TreeKit &kit, const unordered_set<XLink> &keyer_xlinks );
+    set<TreePtr<Node>> ExpandNormalDomain( const TreeKit &kit, const unordered_set<XLink> &xlinks ) override;
 
     virtual void Reset();    
 
