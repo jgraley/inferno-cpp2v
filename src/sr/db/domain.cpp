@@ -178,10 +178,11 @@ void Domain::MonolithicClear()
 
 void Domain::PrepareDeleteMonolithic(DBWalk::Actions &actions)
 {
-	actions.domain_in = [=](const DBWalk::WalkInfo &walk_info)
-	{        
-		EraseSolo( unordered_domain, walk_info.xlink ); 
-        
+	actions.domain_out = [=](const DBWalk::WalkInfo &walk_info)
+	{                
+		if( !ReadArgs::use_incremental )
+			EraseSolo( unordered_domain, walk_info.xlink );
+
 #ifdef TRACE_DOMAIN_EXTEND
 		TRACE("Saw xlink ")(walk_info.xlink)(" ud.size=%u ed.size()=%u\n", unordered_domain.size(), extended_zones.size());
 #endif
@@ -196,9 +197,10 @@ void Domain::PrepareDeleteMonolithic(DBWalk::Actions &actions)
 void Domain::PrepareInsertMonolithic(DBWalk::Actions &actions)
 {
 	actions.domain_in = [=](const DBWalk::WalkInfo &walk_info)
-	{        
-		InsertSolo( unordered_domain, walk_info.xlink ); 
-        
+	{                
+		if( !ReadArgs::use_incremental )
+			InsertSolo( unordered_domain, walk_info.xlink );   
+
 #ifdef TRACE_DOMAIN_EXTEND
 		TRACE("Saw xlink ")(walk_info.xlink)(" ud.size=%u ed.size()=%u\n", unordered_domain.size(), extended_zones.size());
 #endif
@@ -210,11 +212,21 @@ void Domain::PrepareInsertMonolithic(DBWalk::Actions &actions)
 
 void Domain::PrepareDelete( DBWalk::Actions &actions )
 {
+	actions.domain_out = [=](const DBWalk::WalkInfo &walk_info)
+	{        
+		if( ReadArgs::use_incremental )
+			EraseSolo( unordered_domain, walk_info.xlink );
+	};
 }
 
 
 void Domain::PrepareInsert(DBWalk::Actions &actions)
 {
+	actions.domain_in = [=](const DBWalk::WalkInfo &walk_info)
+	{        
+		if( ReadArgs::use_incremental )
+			InsertSolo( unordered_domain, walk_info.xlink );   
+	};
 }
 
 
