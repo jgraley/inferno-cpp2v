@@ -33,7 +33,7 @@ public:
                                    OnExtraZoneFunction on_delete_extra_zone = OnExtraZoneFunction() );
 
     // Add xlink to domain extension if not already there, and return the cannonical one.
-    XLink UniquifyDomainExtension( TreePtr<Node> node, bool expect_in_domain );
+    XLink GetUniqueDomainExtension( TreePtr<Node> node ) const; 
     
     void ExtendDomainBaseXLink( const TreeKit &kit, TreePtr<Node> node );
     void ExtendDomainPatternWalk( const TreeKit &kit, PatternLink plink );

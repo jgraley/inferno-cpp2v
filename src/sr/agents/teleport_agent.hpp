@@ -13,7 +13,6 @@ namespace SR
 class TeleportAgent : public PreRestrictedAgent
 {
 public:    
-    virtual XLink TeleportQueryUnique( const TreeKit &kit, XLink keyer_xlink ) const;                  
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
 
     // XLink -> Node is correct: PointerIs needs to see the incoming TreePtr.

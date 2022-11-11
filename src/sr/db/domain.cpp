@@ -22,7 +22,7 @@ void Domain::SetOnExtraXLinkFunctions( OnExtraZoneFunction on_insert_extra_zone_
 }
 
 
-XLink Domain::UniquifyDomainExtension( TreePtr<Node> node, bool expect_in_domain )
+XLink Domain::GetUniqueDomainExtension( TreePtr<Node> node ) const
 {
     ASSERT( node );
   
@@ -30,33 +30,7 @@ XLink Domain::UniquifyDomainExtension( TreePtr<Node> node, bool expect_in_domain
     // Note: this is done by simple compare, and identity is not 
     // required. This makes for a very "powerful" search for existing
     // candidates.
-    auto it = domain_extension_classes.find( node );
-    
-    if( expect_in_domain )
-        ASSERT( it != domain_extension_classes.end() );
-    
-    // If in domain, we're done
-    if( it != domain_extension_classes.end() )
-        return it->second;
-  
-    // To ensure compliance with rule #217 we must duplicate the tree that
-    // we were given, in case it meanders into the main X tree not at an
-    // identifier, causing illegal multiple parents. See #677
-    // TODO maybe only do this if subtree actually would go wrong.
-    TreePtr<Node> dup_node = Duplicate::DuplicateSubtree( node );
-  
-    // Not an error, so create an XLink that will allow us to track this subtree
-    XLink xlink = XLink::CreateDistinct( dup_node );    
-  
-    // And insert it
-    auto p = domain_extension_classes.insert( make_pair( dup_node, xlink ) );
-    ASSERT( p.second ); // false if was already there, contradicting the find() above
-    
-    // Ensure the original tree is found in the domain now (it wasn't earlier on)
-    // as an extra check
-    ASSERT( domain_extension_classes.count( node ) == 1 );
-    
-    return xlink;
+    return domain_extension_classes.at( node );
 }
 
 

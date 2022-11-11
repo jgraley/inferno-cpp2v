@@ -18,17 +18,6 @@ using namespace SYM;
 
 //---------------------------------- TeleportAgent ------------------------------------    
 
-XLink TeleportAgent::TeleportQueryUnique( const TreeKit &kit, XLink keyer_xlink ) const
-{
-    TreePtr<Node> tp_node = RunTeleportQuery( kit, keyer_xlink );
-    if( !tp_node )
-        return XLink();        
-        
-    // Uniquify the link against the domain
-    return my_scr_engine->UniquifyDomainExtension(tp_node, true);
-}                                    
-
-
 SYM::Lazy<SYM::BooleanExpression> TeleportAgent::SymbolicNormalLinkedQueryPRed() const                                      
 {             
     shared_ptr<PatternQuery> my_pq = GetPatternQuery();         
@@ -92,16 +81,27 @@ list<shared_ptr<SymbolExpression>> TeleportAgent::TeleportOperator::GetSymbolOpe
 unique_ptr<SymbolResultInterface> TeleportAgent::TeleportOperator::Evaluate( const EvalKit &kit,
                                                                              list<unique_ptr<SymbolResultInterface>> &&op_results ) const 
 {
+	// Extract xlink from symbolic result
     ASSERT( op_results.size()==1 );            
     unique_ptr<SymbolResultInterface> keyer_result = OnlyElementOf(move(op_results));
     if( !keyer_result->IsDefinedAndUnique() )
         return make_unique<SymbolResult>( SymbolResult::NOT_A_SYMBOL );
     XLink keyer_xlink = keyer_result->GetOnlyXLink();
-    XLink unique_xlink = agent->TeleportQueryUnique( *(kit.x_tree_db), keyer_xlink );        
-    if( unique_xlink )
-        return make_unique<SymbolResult>( unique_xlink );
-    else 
-        return make_unique<SymbolResult>( SymbolResult::NOT_A_SYMBOL );
+        
+    // Apply the teleporting operation to the xlink. It may create new nodes
+    // so it returns a TreePtr<Node> to avoid creating new xlink without base.
+    TreePtr<Node> tp_node = agent->RunTeleportQuery( *(kit.x_tree_db), keyer_xlink );
+
+    // Teleporting operation can fail: if so call it a NaS
+    if( !tp_node )
+        return make_unique<SymbolResult>( SymbolResult::NOT_A_SYMBOL );        
+        
+    // We are required to have already added the new node to the domain
+    // during domain extension, so use the node to fetch the unbique XLink
+    XLink unique_xlink = kit.x_tree_db->GetUniqueDomainExtension(tp_node);
+    
+    // Form a symbol result to return.       
+    return make_unique<SymbolResult>( unique_xlink );
 }
 
 

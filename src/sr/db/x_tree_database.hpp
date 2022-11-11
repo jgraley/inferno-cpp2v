@@ -60,7 +60,7 @@ public:
     void InitialWalk( const DBWalk::Actions *actions,
                       XLink root_xlink );
 
-    XLink UniquifyDomainExtension( TreePtr<Node> node, bool expect_in_domain );
+    XLink GetUniqueDomainExtension( TreePtr<Node> node ) const;
     void ExtendDomainNewPattern( PatternLink root_plink );
     void ExtendDomainNewX();           
     void UnExtendDomain();
