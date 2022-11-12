@@ -45,28 +45,30 @@ void Domain::ExtendDomainBaseXLink( const TreeKit &kit, TreePtr<Node> node )
     // required. This makes for a very "powerful" search for existing
     // candidates.
     if( domain_extension_classes.count(node) > 0 )
-        return;
+        return; // Is meaningful or conincidental
+        
+    // An extra subtree is required
   
     // To ensure compliance with rule #217 we must duplicate the tree that
     // we were given, in case it meanders into the main X tree not at an
     // identifier, causing illegal multiple parents. See #677
     // TODO maybe only do this if subtree actually would go wrong.
-    TreePtr<Node> dup_node = Duplicate::DuplicateSubtree( node );
+    TreePtr<Node> extra_node = Duplicate::DuplicateSubtree( node );
   
     // Create an XLink that will allow us to track this subtree
-    XLink xlink = XLink::CreateDistinct( dup_node );    
+    XLink extra_xlink = XLink::CreateDistinct( extra_node );    
   
     // Make a zone. 
-    auto zone = TreeZone(xlink);
-    ASSERT( !zone.IsEmpty() ); 
+    auto extra_zone = TreeZone(extra_xlink);
+    ASSERT( !extra_zone.IsEmpty() ); 
 
 #ifdef TRACE_DOMAIN_EXTEND
-    TRACE("Zone is ")(zone)("\n"); 
+    TRACE("Zone is ")(extra_zone)("\n"); 
 #endif    
         
     // Add this domain extension to the whole database including
     // our domain_extension_classes
-    on_insert_extra_zone( zone );        
+    on_insert_extra_zone( extra_zone );        
     
     // Ensure the original tree is found in the domain now (it wasn't 
     // earlier on) as an extra check
@@ -74,7 +76,7 @@ void Domain::ExtendDomainBaseXLink( const TreeKit &kit, TreePtr<Node> node )
     
     // Remember we did this so UnExtendDomain() can undo it
     // TODO should we push to front for a LIFO action?
-    extended_zones.push_back( zone ); // TODO std::move the zone
+    extra_zones.push_back( extra_zone ); // TODO std::move the zone
 }
 
 
@@ -151,16 +153,16 @@ void Domain::UnExtendDomain()
 {
 #ifdef TRACE_DOMAIN_EXTEND
 	unordered_set<XLink> previous_unordered_domain = unordered_domain;
-    TRACE("Domain extensions believed to be:\n")(extended_zones)("\n"); 
+    TRACE("Domain extensions believed to be:\n")(extra_zones)("\n"); 
 #endif    
 
-    for( auto it = extended_zones.begin(); it != extended_zones.end(); )
+    for( auto it = extra_zones.begin(); it != extra_zones.end(); )
     {
         on_delete_extra_zone( *it );
-        it = extended_zones.erase( it );
+        it = extra_zones.erase( it );
     }
 
-	ASSERT( extended_zones.empty() );
+	ASSERT( extra_zones.empty() );
 
 #ifdef TRACE_DOMAIN_EXTEND
     if( Tracer::IsEnabled() ) // We want this deltaing to be relative to what is seen in the log

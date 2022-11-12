@@ -69,7 +69,7 @@ private:
     
   	PatternLink root_plink;
   	
-    list<TreeZone> extended_zones;
+    list<TreeZone> extra_zones;
 };    
     
 }
