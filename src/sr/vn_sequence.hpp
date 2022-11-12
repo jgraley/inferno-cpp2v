@@ -49,7 +49,7 @@ public:
     void ExtendDomainNewX();
     void UnExtendDomain();
 
-    void ExecuteUpdateCommand( shared_ptr<UpdateCommand> cmd, bool monolithic_is_valid );
+    void ExecuteUpdateCommand( shared_ptr<UpdateCommand> cmd );
     
     void XTreeDbDump() const;
     void XTreeDbExpectMatches() const;

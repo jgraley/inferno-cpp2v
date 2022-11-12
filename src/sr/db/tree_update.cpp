@@ -13,15 +13,11 @@ DeleteCommand::DeleteCommand( const TreeZone &target_ ) :
 
 void DeleteCommand::Execute( const ExecKit &kit ) const
 {
-	if( kit.monolithic_is_valid ) // Incrementals might depend on monolithics
-    {
-        kit.x_tree_db->Delete( target );    
-    }
-    
-    if( !kit.monolithic_is_valid ) // Monolithics might depend on tree update
-    {
-        target.GetBase().ClearXPtr();
-    }
+    // Update database 
+    kit.x_tree_db->Delete( target );    
+
+    // Patch the tree
+    target.GetBase().ClearXPtr();
 }	
 
 
@@ -34,18 +30,16 @@ InsertCommand::InsertCommand( const TreeZone &target_, const FreeZone &new_zone_
 
 void InsertCommand::Execute( const ExecKit &kit ) const
 {
-    XLink base_xlink = target.GetBase();
-    if( !kit.monolithic_is_valid ) // Monolithics might depend on tree update
-    {
-        ASSERT( !base_xlink.GetChildX() );
-        base_xlink.SetXPtr( new_zone.GetBase() );
-    }
+	// Get base of target zone
+    XLink target_base_xlink = target.GetBase();    
+    ASSERT( !target_base_xlink.GetChildX() );
     
-    if( kit.monolithic_is_valid ) // Incrementals might depend on monolithics
-    {
-        TreeZone nt( base_xlink, new_zone );
-        kit.x_tree_db->Insert( nt );      
-    }
+    // Patch the tree
+    target_base_xlink.SetXPtr( new_zone.GetBase() );
+    
+    // Update database 
+    TreeZone new_tree_zone( target_base_xlink, new_zone );
+    kit.x_tree_db->Insert( new_tree_zone );      
 }
 
 

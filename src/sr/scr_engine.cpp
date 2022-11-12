@@ -379,16 +379,8 @@ void SCREngine::Replace( XLink base_xlink )
 
 	auto seq = make_shared<CommandSequence>();
 	seq->Add( make_shared<DeleteCommand>( base_zone ) );
-	plan.vn_sequence->ExecuteUpdateCommand( seq, true );
-
-	seq = make_shared<CommandSequence>();
-	seq->Add( make_shared<DeleteCommand>( base_zone ) );
 	seq->Add( make_shared<InsertCommand>( base_zone, new_zone ) );
-	plan.vn_sequence->ExecuteUpdateCommand( seq, false );
-    
-	seq = make_shared<CommandSequence>();
-	seq->Add( make_shared<InsertCommand>( base_zone, new_zone ) );
-	plan.vn_sequence->ExecuteUpdateCommand( seq, true );
+	plan.vn_sequence->ExecuteUpdateCommand( seq );
     
     plan.vn_sequence->ExtendDomainNewX();
     

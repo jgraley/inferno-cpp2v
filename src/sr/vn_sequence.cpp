@@ -153,10 +153,10 @@ void VNSequence::UnExtendDomain()
 }
 
 
-void VNSequence::ExecuteUpdateCommand( shared_ptr<UpdateCommand> cmd, bool monolithic_is_valid )
+void VNSequence::ExecuteUpdateCommand( shared_ptr<UpdateCommand> cmd )
 {
     ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");    
-	UpdateCommand::ExecKit kit { x_tree_db.get(), monolithic_is_valid };
+	UpdateCommand::ExecKit kit { x_tree_db.get() };
 	cmd->Execute( kit );
 }
 
