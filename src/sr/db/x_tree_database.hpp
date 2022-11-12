@@ -49,7 +49,6 @@ public:
     void MonolithicClear();
     void MonolithicBuild(); // includes permanent columns
 	void MonolithicClearExtra(const TreeZone &extra_zone);
-	void MonolithicBuildExtra(const TreeZone &extra_zone);
 
 	// Incremental strategy: perform updates on zones
     void InitialBuildForIncremental();

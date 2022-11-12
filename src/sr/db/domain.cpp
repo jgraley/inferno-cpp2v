@@ -178,18 +178,8 @@ void Domain::PrepareDeleteMonolithic(DBWalk::Actions &actions)
 	{                
         // TODO probably erases the class too soon - would need to keep a count of the number of
         // elements or something and only erase when it hits zero. But there my be bigger fish to fry here.
-		(void)domain_extension_classes.erase( walk_info.x );    
-	};
-}
-
-
-void Domain::PrepareInsertMonolithic(DBWalk::Actions &actions)
-{
-	actions.domain_in = [=](const DBWalk::WalkInfo &walk_info)
-	{                
-        // Not solo because domain_extension_classes is not a total ordering- 
-        // there may already be a class for this xlink
-		(void)domain_extension_classes.insert( make_pair( walk_info.x, walk_info.xlink ) );    
+		//if( !ReadArgs::use_incremental )
+			//(void)domain_extension_classes.erase( walk_info.x );    
 	};
 }
 
@@ -198,6 +188,10 @@ void Domain::PrepareDelete( DBWalk::Actions &actions )
 {
 	actions.domain_out = [=](const DBWalk::WalkInfo &walk_info)
 	{        
+        // TODO probably erases the class too soon - would need to keep a count of the number of
+        // elements or something and only erase when it hits zero. But there my be bigger fish to fry here.
+		(void)domain_extension_classes.erase( walk_info.x );    
+
 		EraseSolo( unordered_domain, walk_info.xlink );
 	};
 }
@@ -207,6 +201,10 @@ void Domain::PrepareInsert(DBWalk::Actions &actions)
 {
 	actions.domain_in = [=](const DBWalk::WalkInfo &walk_info)
 	{        
+        // Not solo because domain_extension_classes is not a total ordering- 
+        // there may already be a class for this xlink
+		(void)domain_extension_classes.insert( make_pair( walk_info.x, walk_info.xlink ) );    
+
 		InsertSolo( unordered_domain, walk_info.xlink );   
 	};
 }
