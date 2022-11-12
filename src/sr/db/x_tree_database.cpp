@@ -26,7 +26,6 @@ XTreeDatabase::XTreeDatabase( shared_ptr<Lacing> lacing, XLink root_xlink_ ) :
     auto on_delete_extra_zone = [=](const TreeZone &extra_zone)
 	{
         DeleteExtraZone( extra_zone );
-        MonolithicClearExtra( extra_zone );
     };
     
     plan.domain->SetOnExtraXLinkFunctions( on_insert_extra_zone, 
@@ -49,53 +48,10 @@ XTreeDatabase::Plan::Plan( const XTreeDatabase *algo, shared_ptr<Lacing> lacing 
     
 void XTreeDatabase::InitialBuild()
 {      
+    INDENT("p");
     ASSERT( root_xlink );
 	
-    // Full build monolithically
-    MonolithicBuild();
-
-    // Full build incrementally
-    InitialBuildForIncremental();
-    
-#ifdef DB_ENABLE_COMPARATIVE_TEST
-    ExpectMatches();
-#endif
-}
-
-
-void XTreeDatabase::MonolithicClear()
-{
-    INDENT("c");
-    
-    DBWalk::Actions actions;
-    plan.domain->PrepareDeleteMonolithic( actions );
-    InitialWalk( &actions, root_xlink );
-
-#ifdef DB_ENABLE_COMPARATIVE_TEST
-    {
-        INDENT("⦼");
-
-        DBWalk::Actions ref_actions;
-        plan.ref_domain->PrepareDeleteMonolithic( ref_actions );
-        InitialWalk( &ref_actions, root_xlink );
-#ifdef DB_TEST_THE_TEST
-        ExpectMatches();
-#endif
-    }
-#endif
-}
-
-
-void XTreeDatabase::MonolithicBuild()
-{
-
-}
-
-
-void XTreeDatabase::InitialBuildForIncremental()
-{
-    INDENT("p");
-    
+	// Full build incrementally
     DBWalk::Actions actions;
     plan.domain->PrepareInsert( actions );
     plan.indexes->PrepareInsert( actions );
@@ -114,27 +70,9 @@ void XTreeDatabase::InitialBuildForIncremental()
 #endif
     }
 #endif
-}
-
-
-void XTreeDatabase::MonolithicClearExtra(const TreeZone &extra_zone)
-{
-    INDENT("f");
-
-    DBWalk::Actions actions;
-	plan.domain->PrepareDeleteMonolithic( actions );
-	db_walker.Walk( &actions, extra_zone, DBWalk::ROOT );
-
+    
 #ifdef DB_ENABLE_COMPARATIVE_TEST
-    {
-        INDENT("⦼");
-        DBWalk::Actions ref_actions;
-        plan.ref_domain->PrepareDeleteMonolithic( ref_actions );
-        db_walker.Walk( &ref_actions, extra_zone, DBWalk::ROOT );
-#ifdef DB_TEST_THE_TEST
-        ExpectMatches();
-#endif
-    }
+    ExpectMatches();
 #endif
 }
 

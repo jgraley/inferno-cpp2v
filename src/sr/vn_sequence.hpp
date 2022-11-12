@@ -50,8 +50,6 @@ public:
     void UnExtendDomain();
 
     void ExecuteUpdateCommand( shared_ptr<UpdateCommand> cmd, bool monolithic_is_valid );
-    void XTreeDbMonolithicClear();
-    void XTreeDbMonolithicBuild();
     
     void XTreeDbDump() const;
     void XTreeDbExpectMatches() const;

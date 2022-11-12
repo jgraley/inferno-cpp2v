@@ -172,18 +172,6 @@ void Domain::UnExtendDomain()
 }
 
 
-void Domain::PrepareDeleteMonolithic(DBWalk::Actions &actions)
-{
-	actions.domain_out = [=](const DBWalk::WalkInfo &walk_info)
-	{                
-        // TODO probably erases the class too soon - would need to keep a count of the number of
-        // elements or something and only erase when it hits zero. But there my be bigger fish to fry here.
-		//if( !ReadArgs::use_incremental )
-			//(void)domain_extension_classes.erase( walk_info.x );    
-	};
-}
-
-
 void Domain::PrepareDelete( DBWalk::Actions &actions )
 {
 	actions.domain_out = [=](const DBWalk::WalkInfo &walk_info)

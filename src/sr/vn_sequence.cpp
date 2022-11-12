@@ -161,20 +161,6 @@ void VNSequence::ExecuteUpdateCommand( shared_ptr<UpdateCommand> cmd, bool monol
 }
 
 
-void VNSequence::XTreeDbMonolithicClear()
-{
-    ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");    
-	x_tree_db->MonolithicClear();
-}
-
-
-void VNSequence::XTreeDbMonolithicBuild()
-{
-    ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");    
-	x_tree_db->MonolithicBuild();
-}
-
-
 void VNSequence::XTreeDbDump() const
 {
     ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");    

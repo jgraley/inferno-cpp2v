@@ -45,13 +45,7 @@ public:
 	// to build full db during analysis stage
     void InitialBuild();
 
-	// Monolithic strategy: clear for whole tree and build from scratch
-    void MonolithicClear();
-    void MonolithicBuild(); // includes permanent columns
-	void MonolithicClearExtra(const TreeZone &extra_zone);
-
 	// Incremental strategy: perform updates on zones
-    void InitialBuildForIncremental();
     void Delete(const TreeZone &zone);
     void Insert(const TreeZone &zone);
     void InsertExtraZone(const TreeZone &extra_zone);

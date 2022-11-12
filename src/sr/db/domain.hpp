@@ -41,7 +41,6 @@ public:
     void ExtendDomainNewX( const TreeKit &kit );
     void UnExtendDomain();
 
-	void PrepareDeleteMonolithic(DBWalk::Actions &actions);
     void PrepareDelete(DBWalk::Actions &actions);
 	void PrepareInsert(DBWalk::Actions &actions);
 
