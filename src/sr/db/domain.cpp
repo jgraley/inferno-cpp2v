@@ -160,6 +160,8 @@ void Domain::UnExtendDomain()
         it = extended_zones.erase( it );
     }
 
+	ASSERT( extended_zones.empty() );
+
 #ifdef TRACE_DOMAIN_EXTEND
     if( Tracer::IsEnabled() ) // We want this deltaing to be relative to what is seen in the log
     {
@@ -170,24 +172,13 @@ void Domain::UnExtendDomain()
 }
 
 
-void Domain::MonolithicClear()
-{
-#ifndef NO_CLEAR
-    domain_extension_classes.clear();
-#endif    
-    extended_zones.clear();
-}    
-
-
 void Domain::PrepareDeleteMonolithic(DBWalk::Actions &actions)
 {
 	actions.domain_out = [=](const DBWalk::WalkInfo &walk_info)
 	{                
-#ifdef NO_CLEAR
         // TODO probably erases the class too soon - would need to keep a count of the number of
         // elements or something and only erase when it hits zero. But there my be bigger fish to fry here.
 		(void)domain_extension_classes.erase( walk_info.x );    
-#endif
 	};
 }
 

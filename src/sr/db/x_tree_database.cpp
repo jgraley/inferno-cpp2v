@@ -67,12 +67,18 @@ void XTreeDatabase::InitialBuild()
 void XTreeDatabase::MonolithicClear()
 {
     INDENT("c");
-    plan.domain->MonolithicClear();
+    
+    DBWalk::Actions actions;
+    plan.domain->PrepareDeleteMonolithic( actions );
+    InitialWalk( &actions, root_xlink );
 
 #ifdef DB_ENABLE_COMPARATIVE_TEST
     {
         INDENT("⦼");
-        plan.ref_domain->MonolithicClear();
+
+        DBWalk::Actions ref_actions;
+        plan.ref_domain->PrepareDeleteMonolithic( ref_actions );
+        InitialWalk( &ref_actions, root_xlink );
 #ifdef DB_TEST_THE_TEST
         ExpectMatches();
 #endif
