@@ -48,7 +48,8 @@ public:
 	// Monolithic strategy: clear for whole tree and build from scratch
     void MonolithicClear();
     void MonolithicBuild(); // includes permanent columns
-	void MonolithicExtraZone(const TreeZone &extra_zone);
+	void MonolithicClearExtra(const TreeZone &extra_zone);
+	void MonolithicBuildExtra(const TreeZone &extra_zone);
 
 	// Incremental strategy: perform updates on zones
     void InitialBuildForIncremental();

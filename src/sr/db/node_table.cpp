@@ -59,7 +59,7 @@ void NodeTable::PrepareDelete( DBWalk::Actions &actions )
             EraseSolo( row.declarers, walk_info.xlink );
             
         if( row.parents.empty() )
-            EraseSolo( rows, walk_info.xlink.GetChildX() );
+            EraseSolo( rows, walk_info.x );
 	};
 }
 
@@ -69,7 +69,7 @@ void NodeTable::PrepareInsert(DBWalk::Actions &actions)
 	actions.node_row_in = [=](const DBWalk::WalkInfo &walk_info)
 	{
         // Create if not already there
-        Row &row = rows[walk_info.xlink.GetChildX()];
+        Row &row = rows[walk_info.x];
         
         InsertSolo( row.parents, walk_info.xlink );    		
         if( IsDeclarer(walk_info) )

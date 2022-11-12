@@ -20,14 +20,14 @@ XTreeDatabase::XTreeDatabase( shared_ptr<Lacing> lacing, XLink root_xlink_ ) :
 {
     auto on_insert_extra_zone = [=](const TreeZone &extra_zone)
     {
-        MonolithicExtraZone( extra_zone );
+        MonolithicBuildExtra( extra_zone );
         InsertExtraZone( extra_zone );        
     };
 
     auto on_delete_extra_zone = [=](const TreeZone &extra_zone)
 	{
         DeleteExtraZone( extra_zone );
-        // No monolithic variant: everything monolithic gets splatted in ClearMonolithic()
+        MonolithicClearExtra( extra_zone );
     };
     
     plan.domain->SetOnExtraXLinkFunctions( on_insert_extra_zone, 
@@ -128,7 +128,29 @@ void XTreeDatabase::InitialBuildForIncremental()
 }
 
 
-void XTreeDatabase::MonolithicExtraZone(const TreeZone &extra_zone)
+void XTreeDatabase::MonolithicClearExtra(const TreeZone &extra_zone)
+{
+    INDENT("f");
+
+    DBWalk::Actions actions;
+	plan.domain->PrepareDeleteMonolithic( actions );
+	db_walker.Walk( &actions, extra_zone, DBWalk::ROOT );
+
+#ifdef DB_ENABLE_COMPARATIVE_TEST
+    {
+        INDENT("⦼");
+        DBWalk::Actions ref_actions;
+        plan.ref_domain->PrepareDeleteMonolithic( ref_actions );
+        db_walker.Walk( &ref_actions, extra_zone, DBWalk::ROOT );
+#ifdef DB_TEST_THE_TEST
+        ExpectMatches();
+#endif
+    }
+#endif
+}
+
+
+void XTreeDatabase::MonolithicBuildExtra(const TreeZone &extra_zone)
 {
     INDENT("f");
 
