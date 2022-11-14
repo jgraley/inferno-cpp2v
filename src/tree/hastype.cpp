@@ -10,12 +10,11 @@ using namespace CPPTree;
 
 #define INT 0
 
-
-TreePtr<Node> HasType::operator()( const TreeKit &kit_, TreePtr<Node> node )
+Transformation::NodeInfo<Node> HasType::operator()( const TreeKit &kit_, TreePtr<Node> node )
 {
 	kit = &kit_;
 	auto e = TreePtr<CPPTree::Expression>::DynamicCast(node);
-	TreePtr<Node> n;
+	Transformation::NodeInfo<Node> n;
 	if( e ) // if the tree at root is not an expression, return nullptr
 		n = Get( e );
 	kit = nullptr;
@@ -23,7 +22,7 @@ TreePtr<Node> HasType::operator()( const TreeKit &kit_, TreePtr<Node> node )
 }
 
 
-TreePtr<Type> HasType::Get( TreePtr<Expression> o )
+Transformation::NodeInfo<CPPTree::Type> HasType::Get( TreePtr<Expression> o )
 {
     ASSERT(o);
     
@@ -32,7 +31,7 @@ TreePtr<Type> HasType::Get( TreePtr<Expression> o )
         TreePtr<Node> n = HasDeclaration()(*kit, ii);
         TreePtr<Instance> i = DynamicTreePtrCast<Instance>(n);
         ASSERT(i);
-        return i->type; 
+        return NODE_AND_CHILD(i, type); 
     }
     else if( auto op = DynamicTreePtrCast<NonCommutativeOperator>(o) ) // operator
     {
@@ -117,7 +116,7 @@ TreePtr<Type> HasType::Get( TreePtr<Expression> o )
 
 // Just discover the type of operators, where the types of the operands have already been determined
 // Note we always get a Sequence, even when the operator is commutative
-TreePtr<Type> HasType::Get( TreePtr<Operator> op, Sequence<Type> optypes )
+Transformation::NodeInfo<CPPTree::Type> HasType::Get( TreePtr<Operator> op, Sequence<Type> optypes )
 {
 	// Lower types that masquerade as other types in preparation for operand analysis
 	// - References go to the referenced type
@@ -204,7 +203,7 @@ TreePtr<Type> HasType::Get( TreePtr<Operator> op, Sequence<Type> optypes )
 }
 
 
-TreePtr<Type> HasType::GetStandard( Sequence<Type> &optypes )
+Transformation::NodeInfo<CPPTree::Type> HasType::GetStandard( Sequence<Type> &optypes )
 {
 	Sequence<Numeric> nums;
 	for( TreePtr<Type> optype : optypes )
@@ -222,7 +221,7 @@ TreePtr<Type> HasType::GetStandard( Sequence<Type> &optypes )
 }
 
 
-TreePtr<Type> HasType::GetStandard( Sequence<Numeric> &optypes )
+Transformation::NodeInfo<CPPTree::Type> HasType::GetStandard( Sequence<Numeric> &optypes )
 {
 	// Start the width and signedness as per regular "int" since this is the
 	// minimum result type for standard operators
@@ -296,7 +295,7 @@ TreePtr<Type> HasType::GetStandard( Sequence<Numeric> &optypes )
 }
 
 
-TreePtr<Type> HasType::GetSpecial( TreePtr<Operator> op, Sequence<Type> &optypes )
+Transformation::NodeInfo<CPPTree::Type> HasType::GetSpecial( TreePtr<Operator> op, Sequence<Type> &optypes )
 {
     if( dynamic_pointer_cast<Dereference>(op) || dynamic_pointer_cast<Subscript>(op) )
     {
@@ -337,7 +336,7 @@ TreePtr<Type> HasType::GetSpecial( TreePtr<Operator> op, Sequence<Type> &optypes
     }
 }
 
-TreePtr<Type> HasType::GetLiteral( TreePtr<Literal> l )
+Transformation::NodeInfo<CPPTree::Type> HasType::GetLiteral( TreePtr<Literal> l )
 {
     if( auto si = DynamicTreePtrCast<SpecificInteger>(l) )
     {
@@ -385,7 +384,7 @@ TreePtr<Type> HasType::GetLiteral( TreePtr<Literal> l )
 
 // Is this call really a constructor call? If so return the object being
 // constructed. Otherwise, return nullptr
-TreePtr<Expression> HasType::IsConstructorCall( const TreeKit &kit_, TreePtr<Call> call )
+Transformation::NodeInfo<CPPTree::Expression> HasType::IsConstructorCall( const TreeKit &kit_, TreePtr<Call> call )
 {
 	kit = &kit_;
 	TreePtr<Expression> e;

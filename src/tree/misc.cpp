@@ -22,7 +22,7 @@ TreePtr<Identifier> GetIdentifierOfDeclaration( TreePtr<Declaration> d )
 }
 
 	
-TreePtr<Node> HasDeclaration::operator()( const TreeKit &kit, TreePtr<Node> node ) try
+Transformation::NodeInfo<Node> HasDeclaration::operator()( const TreeKit &kit, TreePtr<Node> node ) try
 {
     set<TreeKit::LinkInfo> infos = kit.GetDeclarers( node );
     
@@ -37,7 +37,7 @@ TreePtr<Node> HasDeclaration::operator()( const TreeKit &kit, TreePtr<Node> node
     // function decl/def are folded, so we expect only one declarer
     TreeKit::LinkInfo info = OnlyElementOf( infos );
     
-    return info.first;
+    return NODE_ONLY(info.first); 
 }
 catch( TreeKit::UnknownNode &) 
 {

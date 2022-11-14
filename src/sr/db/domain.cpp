@@ -7,7 +7,7 @@
 
 //#define TRACE_DOMAIN_EXTEND
 
-//#define NO_CLEAR
+//#define BYPASS
 
 using namespace SR;    
 
@@ -28,6 +28,11 @@ XLink Domain::GetUniqueDomainExtension( TreePtr<Node> node ) const
 {
     ASSERT( node );
   
+#ifdef BYPASS
+    if( unordered_domain.count(node) > 0 )
+		return xlink;
+#endif		
+  
     // If there's already a class for this node, return it and early-out
     // Note: this is done by simple compare, and identity is not 
     // required. This makes for a very "powerful" search for existing
@@ -40,12 +45,17 @@ void Domain::ExtendDomainBaseXLink( const TreeKit &kit, TreePtr<Node> node )
 {
     ASSERT( node );
   
+#ifdef BYPASS
+    if( unordered_domain.count(node) > 0 )
+        return; // Is meaningful
+#endif
+
     // If there's already a class for this node, return it and early-out
     // Note: this is done by simple compare, and identity is not 
     // required. This makes for a very "powerful" search for existing
     // candidates.
     if( domain_extension_classes.count(node) > 0 )
-        return; // Is meaningful or conincidental
+        return; // Is conincidental
         
     // An extra subtree is required
   
