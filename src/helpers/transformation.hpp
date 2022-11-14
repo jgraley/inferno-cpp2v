@@ -37,12 +37,14 @@ public:
     template< class VALUE_TYPE >
     using NodeInfo = pair<const TreePtrInterface *, TreePtr<VALUE_TYPE>>;
 // Handy macros for a node and a child pointer or just a node
-#define NODE_AND_CHILD( N, C ) make_pair(&(N->C), N->C)
+#define PARENT_AND_CHILD( N, C ) make_pair(&(N->C), N->C)
 #define NODE_ONLY( N ) make_pair(nullptr, N)
+#define CHANGE_NODE( N, NI ) make_pair(NI.first, N)
+#define GET_NODE( NI ) (NI.second)
 #else
     template< class VALUE_TYPE >
     using NodeInfo = TreePtr<VALUE_TYPE>;
-#define NODE_AND_CHILD( N, C ) (N->C)
+#define PARENT_AND_CHILD( N, C ) (N->C)
 #define NODE_ONLY( N ) (N)
 #define CHANGE_NODE( N, NI ) (N)
 #define GET_NODE( NI ) (NI)

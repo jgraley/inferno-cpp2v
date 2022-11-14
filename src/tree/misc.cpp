@@ -54,12 +54,12 @@ HasDeclaration HasDeclaration::instance; // TODO Use this instead of constructin
 // Look for a record, skipping over typedefs. Returns nullptr if not a record.
 TreePtr<Record> GetRecordDeclaration( const TreeKit &kit, TreePtr<TypeIdentifier> id )
 {
-	TreePtr<Node> ut = HasDeclaration()( kit, id );
+	TreePtr<Node> ut = GET_NODE( HasDeclaration()( kit, id ) );
 	while( TreePtr<Typedef> td = DynamicTreePtrCast<Typedef>(ut) )
 	{
 	    TreePtr<TypeIdentifier> ti = DynamicTreePtrCast<TypeIdentifier>(td->type);
 	    if(ti)
-	        ut = HasDeclaration()( kit, ti );
+	        ut = GET_NODE( HasDeclaration()( kit, ti ) );
 	    else
 	        return TreePtr<Record>(); // not a record
 	}
@@ -84,7 +84,7 @@ TreePtr<Instance> FindMemberByName( const TreeKit &kit, TreePtr<Record> r, strin
     if( TreePtr<InheritanceRecord> ir = DynamicTreePtrCast<InheritanceRecord>( r ) )
         for( TreePtr<Base> b : ir->bases )
         {
-            TreePtr<Node> ut = HasDeclaration()( kit, b->record );
+            TreePtr<Node> ut = GET_NODE( HasDeclaration()( kit, b->record ) );
             TreePtr<InheritanceRecord> ir = DynamicTreePtrCast<InheritanceRecord>(ut);
             ASSERT(ir);
             if( TreePtr<Instance> i = FindMemberByName( kit, ir, name ) )

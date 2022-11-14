@@ -28,15 +28,15 @@ Transformation::NodeInfo<CPPTree::Type> HasType::Get( TreePtr<Expression> o )
     
     if( auto ii = DynamicTreePtrCast<SpecificInstanceIdentifier>(o) ) // object or function instance
     {        
-        TreePtr<Node> n = HasDeclaration()(*kit, ii);
-        TreePtr<Instance> i = DynamicTreePtrCast<Instance>(n);
+        NodeInfo<Node> n = HasDeclaration()(*kit, ii);
+        TreePtr<Instance> i = DynamicTreePtrCast<Instance>(GET_NODE(n));
         ASSERT(i);
-        return NODE_AND_CHILD(i, type); 
+        return PARENT_AND_CHILD(i, type); 
     }
     else if( auto op = DynamicTreePtrCast<NonCommutativeOperator>(o) ) // operator
     {
         // Get the types of all the operands to the operator first
-        Sequence<Type> optypes;
+        list<NodeInfo<Type>> optypes;
         for( TreePtr<Expression> o : op->operands )
             optypes.push_back( Get(o) );
         return Get( op, optypes );
@@ -44,7 +44,7 @@ Transformation::NodeInfo<CPPTree::Type> HasType::Get( TreePtr<Expression> o )
     else if( auto op = DynamicTreePtrCast<CommutativeOperator>(o) ) // operator
     {
         // Get the types of all the operands to the operator first
-        Sequence<Type> optypes;
+        list<NodeInfo<Type>> optypes;
         for( TreePtr<Expression> o : op->operands )
                  optypes.push_back( Get(o) );
         return Get( op, optypes );
@@ -55,10 +55,10 @@ Transformation::NodeInfo<CPPTree::Type> HasType::Get( TreePtr<Expression> o )
     }
     else if( auto c = DynamicTreePtrCast<Call>(o) )
     {
-        TreePtr<Type> t = Get(c->callee); // get type of the function itself
+        TreePtr<Type> t = GET_NODE(Get(c->callee)); // get type of the function itself
         ASSERT( dynamic_pointer_cast<Callable>(t) )( "Trying to call something that is not Callable");
         if( auto f = DynamicTreePtrCast<Function>(t) )
-        	return NODE_AND_CHILD(f, return_type);
+        	return PARENT_AND_CHILD(f, return_type);
         else
         	return NODE_ONLY(MakeTreeNode<Void>());
     }
@@ -68,11 +68,11 @@ Transformation::NodeInfo<CPPTree::Type> HasType::Get( TreePtr<Expression> o )
     }
     else if( auto c = DynamicTreePtrCast<Cast>(o) )
     {
-        return NODE_AND_CHILD(c, type);
+        return PARENT_AND_CHILD(c, type);
     }
     else if( auto rl = DynamicTreePtrCast<MakeRecord>(o) )
     {
-        return NODE_AND_CHILD(rl, type);
+        return PARENT_AND_CHILD(rl, type);
     }
     else if( DynamicTreePtrCast<LabelIdentifier>(o) )
     {
@@ -99,7 +99,7 @@ Transformation::NodeInfo<CPPTree::Type> HasType::Get( TreePtr<Expression> o )
     else if( auto ce = DynamicTreePtrCast<StatementExpression>(o) )
     {
         if( ce->statements.empty() )
-            return MakeTreeNode<Void>(); 
+            return NODE_ONLY(MakeTreeNode<Void>()); 
         TreePtr<Statement> last = ce->statements.back();
         if( TreePtr<Expression> e = DynamicTreePtrCast<Expression>(last) )
             return Get(e);
@@ -121,19 +121,19 @@ Transformation::NodeInfo<CPPTree::Type> HasType::Get( TreePtr<Operator> op, list
 	// Lower types that masquerade as other types in preparation for operand analysis
 	// - References go to the referenced type
 	// - Arrays go to pointers
-	for( TreePtr<Type> &t : optypes )
+	for( NodeInfo<Type> &t : optypes )
 	{
-		while( auto r = DynamicTreePtrCast<Reference>(t) )
-			t = r->destination;
-		if( auto a = DynamicTreePtrCast<Array>(t) )
+		while( auto r = DynamicTreePtrCast<Reference>(GET_NODE(t)) )
+			t = PARENT_AND_CHILD(r, destination);
+		if( auto a = DynamicTreePtrCast<Array>(GET_NODE(t)) )
 		{
 			auto p = MakeTreeNode<Pointer>();
 			p->destination = a->element;
-			t = p;
+			t = NODE_ONLY(p);
 		}
 		// Check we finished the job
-		ASSERT( !DynamicTreePtrCast<Reference>(t) );
-		ASSERT( !DynamicTreePtrCast<Array>(t) );
+		ASSERT( !DynamicTreePtrCast<Reference>(GET_NODE(t)) );
+		ASSERT( !DynamicTreePtrCast<Array>(GET_NODE(t)) );
 	}
 
 	// Turn an array literal into an array
@@ -251,7 +251,7 @@ Transformation::NodeInfo<CPPTree::Type> HasType::GetStandard( list<NodeInfo<Nume
         //ASSERT( intop )(*optype)(" is not Floating or Integral, please add to HasType class" );
 
         // Do a max algorithm on the width
-		auto siwidth = DynamicTreePtrCast<SpecificInteger>(GET_NODE(intop->width));
+		auto siwidth = DynamicTreePtrCast<SpecificInteger>(intop->width);
         if( !siwidth )
             throw NumericalOperatorUsageMismatch3();
 		//ASSERT( siwidth )( "Integral size ")(*(intop->width))(" is not specific, cannot decide result type");
@@ -301,9 +301,9 @@ Transformation::NodeInfo<CPPTree::Type> HasType::GetSpecial( TreePtr<Operator> o
     if( dynamic_pointer_cast<Dereference>(op) || dynamic_pointer_cast<Subscript>(op) )
     {
         if( TreePtr<Pointer> o2 = DynamicTreePtrCast<Pointer>( GET_NODE(optypes.front()) ) )
-            return NODE_AND_CHILD(o2, destination);
+            return PARENT_AND_CHILD(o2, destination);
         else if( TreePtr<Array> o2 = DynamicTreePtrCast<Array>( GET_NODE(optypes.front()) ) )
-            return NODE_AND_CHILD(o2, element);
+            return PARENT_AND_CHILD(o2, element);
         else
             throw DereferenceUsageMismatch();
             //ASSERTFAIL( "dereferencing non-pointer" );
@@ -311,7 +311,7 @@ Transformation::NodeInfo<CPPTree::Type> HasType::GetSpecial( TreePtr<Operator> o
     else if( DynamicTreePtrCast<AddressOf>(op) )
     {
         auto p = MakeTreeNode<Pointer>();
-        p->destination = optypes.front();
+        p->destination = GET_NODE(optypes.front());
         return NODE_ONLY(p);
     }
     else if( DynamicTreePtrCast<Comma>(op) )
@@ -393,8 +393,8 @@ Transformation::NodeInfo<CPPTree::Expression> HasType::IsConstructorCall( const 
     if( auto lf = DynamicTreePtrCast<Lookup>(call->callee) )
     {
 		ASSERT(lf->member);
-		if( DynamicTreePtrCast<Constructor>( Get( lf->member ) ) )
-			e = NODE_AND_CHILD(lf, base);
+		if( DynamicTreePtrCast<Constructor>( GET_NODE(Get( lf->member )) ) )
+			e = PARENT_AND_CHILD(lf, base);
     }
 
     kit = nullptr;
