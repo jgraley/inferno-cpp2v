@@ -32,10 +32,10 @@ public:
 private:    
     // TODO make these private
     NodeInfo<CPPTree::Type> Get( TreePtr<CPPTree::Expression> o );
-    NodeInfo<CPPTree::Type> Get( TreePtr<CPPTree::Operator> op, Sequence<CPPTree::Type> optypes );
-    NodeInfo<CPPTree::Type> GetStandard( Sequence<CPPTree::Type> &optypes );
-    NodeInfo<CPPTree::Type> GetStandard( Sequence<CPPTree::Numeric> &optypes );
-    NodeInfo<CPPTree::Type> GetSpecial( TreePtr<CPPTree::Operator> op, Sequence<CPPTree::Type> &optypes );
+    NodeInfo<CPPTree::Type> Get( TreePtr<CPPTree::Operator> op, list<NodeInfo<CPPTree::Type>> optypes );
+    NodeInfo<CPPTree::Type> GetStandard( list<NodeInfo<CPPTree::Type>> &optypes );
+    NodeInfo<CPPTree::Type> GetStandard( list<NodeInfo<CPPTree::Numeric>> &optypes );
+    NodeInfo<CPPTree::Type> GetSpecial( TreePtr<CPPTree::Operator> op, list<NodeInfo<CPPTree::Type>> &optypes );
     NodeInfo<CPPTree::Type> GetLiteral( TreePtr<CPPTree::Literal> l );
 
 	const TreeKit *kit = nullptr;

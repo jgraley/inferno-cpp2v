@@ -44,6 +44,8 @@ public:
     using NodeInfo = TreePtr<VALUE_TYPE>;
 #define NODE_AND_CHILD( N, C ) (N->C)
 #define NODE_ONLY( N ) (N)
+#define CHANGE_NODE( N, NI ) (N)
+#define GET_NODE( NI ) (NI)
 #endif
 
     // Apply this transformation to tree at root, using context for decls etc.
