@@ -33,6 +33,12 @@ class Transformation : public virtual Graphable
 {
 public:
 
+    // The so-called augmented tree pointer can be uysed as a tree
+    // pointer but it also holds other info, in this case a pointer
+    // to a tree ptr (i.e. a double pointer). This is used to 
+    // disambiguate which parent is meant when there can be more 
+    // than one. It can also be constructed without the double
+    // pointer, for when creating new free nodes.
     template<class VALUE_TYPE>
     class AugTreePtr : public TreePtr<VALUE_TYPE>
     {
@@ -42,20 +48,29 @@ public:
         {
         }
         
-        // If a pointer was provided we keep the pointer.
-        explicit AugTreePtr(TreePtr<VALUE_TYPE> *p_tree_ptr_) : 
+        // If a pointer was provided we keep the pointer. Usage style
+        // is typically AugTreePtr<NodeType>( &parent->child_ptr );
+        template<class OTHER_VALUE_TYPE>
+        explicit AugTreePtr(TreePtr<OTHER_VALUE_TYPE> *p_tree_ptr_) : 
             TreePtr<VALUE_TYPE>(*p_tree_ptr_), 
             p_tree_ptr(p_tree_ptr_) 
         {
+            ASSERTS( p_tree_ptr );
+            ASSERTS( *p_tree_ptr );
+            // Not a local automatic please, we're going to hang on to it.
+            ASSERTS( !ON_STACK(p_tree_ptr_) );
         }
             
         // If a value was provided the pointer is NULL 
-        explicit AugTreePtr(TreePtr<VALUE_TYPE> tree_ptr) : 
+        template<class OTHER_VALUE_TYPE>
+        explicit AugTreePtr(TreePtr<OTHER_VALUE_TYPE> tree_ptr) : 
             TreePtr<VALUE_TYPE>(tree_ptr), 
             p_tree_ptr(nullptr)
         {
+            ASSERTS( tree_ptr );
         }
         
+    private:
         template<class OTHER_VALUE_TYPE>
         AugTreePtr(TreePtr<VALUE_TYPE> tree_ptr, const AugTreePtr<OTHER_VALUE_TYPE> &other) : 
             TreePtr<VALUE_TYPE>(tree_ptr), 
@@ -63,6 +78,7 @@ public:
         {
         }
 
+    public:
         template<class OTHER_VALUE_TYPE>
         AugTreePtr(const AugTreePtr<OTHER_VALUE_TYPE> &other) : 
             TreePtr<VALUE_TYPE>(other), 
@@ -80,15 +96,15 @@ public:
             return *this;
         }
        
+        template<class OTHER_VALUE_TYPE>
+        static AugTreePtr<VALUE_TYPE> DynamicCast( const AugTreePtr<OTHER_VALUE_TYPE> &g )
+        {
+            return AugTreePtr(TreePtr<VALUE_TYPE>::DynamicCast(g), g);
+        }
+
         const TreePtrInterface *p_tree_ptr;
     };
     
-// Handy macros for a node and a child pointer or just a node
-#define PARENT_AND_CHILD( N, C ) AugTreePtr<decltype(N->C)::value_type>(&(N->C))
-#define NODE_ONLY( N ) AugTreePtr<decltype(N)::value_type>(N)
-#define CHANGE_NODE( N, NI ) AugTreePtr<decltype(N)::value_type>(N, NI)
-#define GET_NODE( NI ) (NI)
-
     // Apply this transformation to tree at root, using context for decls etc.
     virtual AugTreePtr<Node> operator()( const TreeKit &kit, // Handy functions
     		                             TreePtr<Node> node ) = 0;    // Root of the subtree we want to modify    		                          
