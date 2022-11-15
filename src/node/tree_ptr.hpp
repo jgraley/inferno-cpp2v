@@ -86,6 +86,8 @@ template<typename VALUE_TYPE>
 struct TreePtr : virtual TreePtrCommon, 
                  shared_ptr<VALUE_TYPE>
 {
+    typedef VALUE_TYPE value_type;
+    
     TreePtr() {}
 
     explicit TreePtr( VALUE_TYPE *o ) : 

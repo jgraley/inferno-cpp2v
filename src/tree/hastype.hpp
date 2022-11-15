@@ -23,20 +23,20 @@ public:
     class NumericalOperatorUsageMismatch4 : public NumericalOperatorUsageMismatch {};
     class DereferenceUsageMismatch : public UsageMismatch {};
 
-    NodeInfo<Node> operator()( const TreeKit &kit_, TreePtr<Node> node ) override;
+    AugTreePtr<Node> operator()( const TreeKit &kit_, TreePtr<Node> node ) override;
 
     // Is this call really a constructor call? If so return the object being
     // constructed. Otherwise, return nullptr
-    NodeInfo<CPPTree::Expression> IsConstructorCall( const TreeKit &kit_, TreePtr<CPPTree::Call> call );
+    AugTreePtr<CPPTree::Expression> IsConstructorCall( const TreeKit &kit_, TreePtr<CPPTree::Call> call );
 
 private:    
     // TODO make these private
-    NodeInfo<CPPTree::Type> Get( TreePtr<CPPTree::Expression> o );
-    NodeInfo<CPPTree::Type> Get( TreePtr<CPPTree::Operator> op, list<NodeInfo<CPPTree::Type>> optypes );
-    NodeInfo<CPPTree::Type> GetStandard( list<NodeInfo<CPPTree::Type>> &optypes );
-    NodeInfo<CPPTree::Type> GetStandard( list<NodeInfo<CPPTree::Numeric>> &optypes );
-    NodeInfo<CPPTree::Type> GetSpecial( TreePtr<CPPTree::Operator> op, list<NodeInfo<CPPTree::Type>> &optypes );
-    NodeInfo<CPPTree::Type> GetLiteral( TreePtr<CPPTree::Literal> l );
+    AugTreePtr<CPPTree::Type> Get( TreePtr<CPPTree::Expression> o );
+    AugTreePtr<CPPTree::Type> Get( TreePtr<CPPTree::Operator> op, list<AugTreePtr<CPPTree::Type>> optypes );
+    AugTreePtr<CPPTree::Type> GetStandard( list<AugTreePtr<CPPTree::Type>> &optypes );
+    AugTreePtr<CPPTree::Type> GetStandard( list<AugTreePtr<CPPTree::Numeric>> &optypes );
+    AugTreePtr<CPPTree::Type> GetSpecial( TreePtr<CPPTree::Operator> op, list<AugTreePtr<CPPTree::Type>> &optypes );
+    AugTreePtr<CPPTree::Type> GetLiteral( TreePtr<CPPTree::Literal> l );
 
 	const TreeKit *kit = nullptr;
     

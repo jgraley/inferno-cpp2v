@@ -22,7 +22,7 @@ TreePtr<Identifier> GetIdentifierOfDeclaration( TreePtr<Declaration> d )
 }
 
 	
-Transformation::NodeInfo<Node> HasDeclaration::operator()( const TreeKit &kit, TreePtr<Node> node ) try
+Transformation::AugTreePtr<Node> HasDeclaration::operator()( const TreeKit &kit, TreePtr<Node> node ) try
 {
     set<TreeKit::LinkInfo> infos = kit.GetDeclarers( node );
     

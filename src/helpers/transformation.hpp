@@ -32,27 +32,66 @@ private:
 class Transformation : public virtual Graphable
 {
 public:
-#if 0
-    // Convention is that *first points to *second or first is NULL
-    template< class VALUE_TYPE >
-    using NodeInfo = pair<const TreePtrInterface *, TreePtr<VALUE_TYPE>>;
+
+    template<class VALUE_TYPE>
+    class AugTreePtr : public TreePtr<VALUE_TYPE>
+    {
+    public:
+        AugTreePtr() :
+            p_tree_ptr(nullptr)
+        {
+        }
+        
+        // If a pointer was provided we keep the pointer.
+        explicit AugTreePtr(TreePtr<VALUE_TYPE> *p_tree_ptr_) : 
+            TreePtr<VALUE_TYPE>(*p_tree_ptr_), 
+            p_tree_ptr(p_tree_ptr_) 
+        {
+        }
+            
+        // If a value was provided the pointer is NULL 
+        explicit AugTreePtr(TreePtr<VALUE_TYPE> tree_ptr) : 
+            TreePtr<VALUE_TYPE>(tree_ptr), 
+            p_tree_ptr(nullptr)
+        {
+        }
+        
+        template<class OTHER_VALUE_TYPE>
+        AugTreePtr(TreePtr<VALUE_TYPE> tree_ptr, const AugTreePtr<OTHER_VALUE_TYPE> &other) : 
+            TreePtr<VALUE_TYPE>(tree_ptr), 
+            p_tree_ptr(other.p_tree_ptr)
+        {
+        }
+
+        template<class OTHER_VALUE_TYPE>
+        AugTreePtr(const AugTreePtr<OTHER_VALUE_TYPE> &other) : 
+            TreePtr<VALUE_TYPE>(other), 
+            p_tree_ptr(other.p_tree_ptr)
+        {
+        }
+                
+        AugTreePtr<VALUE_TYPE> &operator=( const AugTreePtr<VALUE_TYPE> &other ) = default;
+
+        template<class OTHER_VALUE_TYPE>
+        AugTreePtr<VALUE_TYPE> &operator=( const AugTreePtr<OTHER_VALUE_TYPE> &other )
+        {
+            TreePtr<VALUE_TYPE>::operator=(other); 
+            p_tree_ptr = other.p_tree_ptr;
+            return *this;
+        }
+       
+        const TreePtrInterface *p_tree_ptr;
+    };
+    
 // Handy macros for a node and a child pointer or just a node
-#define PARENT_AND_CHILD( N, C ) make_pair(&(N->C), N->C)
-#define NODE_ONLY( N ) make_pair(nullptr, N)
-#define CHANGE_NODE( N, NI ) make_pair(NI.first, N)
-#define GET_NODE( NI ) (NI.second)
-#else
-    template< class VALUE_TYPE >
-    using NodeInfo = TreePtr<VALUE_TYPE>;
-#define PARENT_AND_CHILD( N, C ) (N->C)
-#define NODE_ONLY( N ) (N)
-#define CHANGE_NODE( N, NI ) (N)
+#define PARENT_AND_CHILD( N, C ) AugTreePtr<decltype(N->C)::value_type>(&(N->C))
+#define NODE_ONLY( N ) AugTreePtr<decltype(N)::value_type>(N)
+#define CHANGE_NODE( N, NI ) AugTreePtr<decltype(N)::value_type>(N, NI)
 #define GET_NODE( NI ) (NI)
-#endif
 
     // Apply this transformation to tree at root, using context for decls etc.
-    virtual NodeInfo<Node> operator()( const TreeKit &kit, // Handy functions
-    		                           TreePtr<Node> node ) = 0;    // Root of the subtree we want to modify    		                          
+    virtual AugTreePtr<Node> operator()( const TreeKit &kit, // Handy functions
+    		                             TreePtr<Node> node ) = 0;    // Root of the subtree we want to modify    		                          
 };
 
 #endif
