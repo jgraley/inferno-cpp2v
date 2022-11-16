@@ -343,6 +343,35 @@ void XTreeDatabase::ExpectMatches() const
 
 
 
+set<TreeKit::LinkInfo> XTreeDatabase::GetParents( TreePtr<Node> node ) const
+{
+    set<LinkInfo> infos;
+   
+    if( !plan.node_table->HasRow(node) ) // not found
+        throw UnknownNode();
+        
+    NodeTable::Row row = plan.node_table->GetRow(node);
+    // Note that row.declarers is "precise", i.e. the XLinks are the actual
+    // declaring xlinks, not just arbitrary parent links to the declaree.
+    // Also correct for parallel links where only some declare.
+    for( XLink parent_xlink : row.parents )
+    {
+        LinkInfo info;
+        
+        // first is TreePtr to the declarer node. Loses info about which 
+        // link declared (in case of parallel links) but gets you the declarer node.
+        info.first = TryGetParentXLink(parent_xlink).GetChildX();
+
+        // second is TreePtrInterface * to the declarer's pointer to declaree
+        // Retains precise info about which link.
+        info.second = parent_xlink.GetXPtr();
+        
+        infos.insert( info );
+    }
+    return infos;
+}
+
+
 set<TreeKit::LinkInfo> XTreeDatabase::GetDeclarers( TreePtr<Node> node ) const
 {
     set<LinkInfo> infos;

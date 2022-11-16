@@ -51,7 +51,11 @@ set<Agent::TeleportResult> TeleportAgent::ExpandNormalDomain( const TreeKit &kit
 		}
 		if( !tp_result.second )
 			continue;       // NULL  
-		
+    
+        if( tp_result.first ) // parent link was supplied
+            ASSERT( tp_result.first.GetChildX() == tp_result.second );    
+        FTRACEC(tp_result)("\n");
+        
 		tp_results.insert( tp_result );               
     }
     return tp_results; 
@@ -90,15 +94,19 @@ unique_ptr<SymbolResultInterface> TeleportAgent::TeleportOperator::Evaluate( con
         
     // Apply the teleporting operation to the xlink. It may create new nodes
     // so it returns a TreePtr<Node> to avoid creating new xlink without base.
-    TeleportResult tp_node = agent->RunTeleportQuery( *(kit.x_tree_db), keyer_xlink );
+    TeleportResult tp_result = agent->RunTeleportQuery( *(kit.x_tree_db), keyer_xlink );
 
     // Teleporting operation can fail: if so call it a NaS
-    if( !tp_node.second )
+    if( !tp_result.second )
         return make_unique<SymbolResult>( SymbolResult::NOT_A_SYMBOL );        
         
+    // Consistency check
+    if( tp_result.first ) // parent link was supplied
+         ASSERT( tp_result.first.GetChildX() == tp_result.second );
+
     // We are required to have already added the new node to the domain
     // during domain extension, so use the node to fetch the unbique XLink
-    XLink unique_xlink = kit.x_tree_db->GetUniqueDomainExtension(tp_node);
+    XLink unique_xlink = kit.x_tree_db->GetUniqueDomainExtension(tp_result);
     
     // Form a symbol result to return.       
     return make_unique<SymbolResult>( unique_xlink );

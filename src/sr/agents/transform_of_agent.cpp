@@ -29,13 +29,17 @@ Agent::TeleportResult TransformOfAgent::RunTeleportQuery( const TreeKit &kit, XL
     try
     {
 		Transformation::AugTreePtr<Node> trans = (*transformation)( kit, keyer_x );   // TODO use AugTreePtr result, turn into pair<Xlink, TreePtr<Node>>   
-		ASSERT( !trans || ((TreePtr<Node>)trans)->IsFinal() )(*this)(" computed non-final ")((TreePtr<Node>)trans)(" from ")(keyer_x)("\n");             
-		if( !(TreePtr<Node>)trans )
-            return TeleportResult(); // NULL
-        else if( trans.p_tree_ptr == nullptr )
-            return make_pair(XLink(), (TreePtr<Node>)trans); // no parent specified
-        else
-            return make_pair(XLink((TreePtr<Node>)trans, trans.p_tree_ptr), (TreePtr<Node>)trans); // parent was specified
+		ASSERT( !trans || ((TreePtr<Node>)trans)->IsFinal() )(*this)(" computed non-final ")((TreePtr<Node>)trans)(" from ")(keyer_x)("\n");                             
+		if( !(TreePtr<Node>)trans ) // NULL
+            return TeleportResult(); 
+        else if( trans.p_tree_ptr == nullptr ) // no parent specified
+            return make_pair(XLink(), (TreePtr<Node>)trans); 
+        else // parent was specified
+        {
+            XLink xlink((TreePtr<Node>)trans, trans.p_tree_ptr);
+            FTRACEC("XLink ")(xlink)(" from ")(keyer_x)("\n");
+            return make_pair(xlink, (TreePtr<Node>)trans);             
+        }
 	}
     catch( const ::Mismatch &e )
     {

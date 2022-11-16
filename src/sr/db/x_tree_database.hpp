@@ -84,6 +84,7 @@ public:
 	
 private:    
     // TreeKit implementation
+  	set<LinkInfo> GetParents( TreePtr<Node> node ) const override;
   	set<LinkInfo> GetDeclarers( TreePtr<Node> node ) const override;
   	
   	XLink root_xlink;

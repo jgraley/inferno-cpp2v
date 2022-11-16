@@ -116,7 +116,7 @@ SatelliteSerial &SatelliteSerial::operator=( const SatelliteSerial &other )
 string SatelliteSerial::GetSerialString() const
 {
     if( serial==-1 )
-        return "NULL";
+        return "#?";
     else
         return SSPrintf("#%d", serial);
 }

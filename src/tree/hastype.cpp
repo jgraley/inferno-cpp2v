@@ -31,7 +31,7 @@ Transformation::AugTreePtr<CPPTree::Type> HasType::Get( TreePtr<Expression> o )
         AugTreePtr<Node> n = HasDeclaration()(*kit, ii);
         TreePtr<Instance> i = DynamicTreePtrCast<Instance>(n);
         ASSERT(i);
-        return AugTreePtr<Type>(&i->type); 
+        return n.Descend<Type>(&i->type); 
     }
     else if( auto op = DynamicTreePtrCast<NonCommutativeOperator>(o) ) // operator
     {
@@ -55,10 +55,10 @@ Transformation::AugTreePtr<CPPTree::Type> HasType::Get( TreePtr<Expression> o )
     }
     else if( auto c = DynamicTreePtrCast<Call>(o) )
     {
-        TreePtr<Type> t = Get(c->callee); // get type of the function itself
+        AugTreePtr<Type> t = Get(c->callee); // get type of the function itself
         ASSERT( dynamic_pointer_cast<Callable>(t) )( "Trying to call something that is not Callable");
         if( auto f = DynamicTreePtrCast<Function>(t) )
-        	return AugTreePtr<Type>(&f->return_type);
+        	return t.Descend<Type>(&f->return_type);
         else
         	return AugTreePtr<Type>(MakeTreeNode<Void>());
     }
@@ -124,7 +124,7 @@ Transformation::AugTreePtr<CPPTree::Type> HasType::Get( TreePtr<Operator> op, li
 	for( AugTreePtr<Type> &t : optypes )
 	{
 		while( auto r = DynamicTreePtrCast<Reference>(t) )
-			t = AugTreePtr<Type>(&r->destination);
+			t = t.Descend<Type>(&r->destination);
 		if( auto a = DynamicTreePtrCast<Array>(t) )
 		{
 			auto p = MakeTreeNode<Pointer>();
@@ -301,9 +301,9 @@ Transformation::AugTreePtr<CPPTree::Type> HasType::GetSpecial( TreePtr<Operator>
     if( dynamic_pointer_cast<Dereference>(op) || dynamic_pointer_cast<Subscript>(op) )
     {
         if( TreePtr<Pointer> o2 = DynamicTreePtrCast<Pointer>( optypes.front() ) )
-            return AugTreePtr<Type>(&o2->destination);
+            return optypes.front().Descend<Type>(&o2->destination);
         else if( TreePtr<Array> o2 = DynamicTreePtrCast<Array>( optypes.front() ) )
-            return AugTreePtr<Type>(&o2->element);
+            return optypes.front().Descend<Type>(&o2->element);
         else
             throw DereferenceUsageMismatch();
             //ASSERTFAIL( "dereferencing non-pointer" );

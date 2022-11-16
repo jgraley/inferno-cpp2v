@@ -24,9 +24,9 @@ TreePtr<Identifier> GetIdentifierOfDeclaration( TreePtr<Declaration> d )
 	
 Transformation::AugTreePtr<Node> HasDeclaration::operator()( const TreeKit &kit, TreePtr<Node> node ) try
 {
-    set<TreeKit::LinkInfo> infos = kit.GetDeclarers( node );
+    set<TreeKit::LinkInfo> declarer_infos = kit.GetDeclarers( node );
     
-    if( infos.empty() )
+    if( declarer_infos.empty() )
     {
 #ifdef WARN_UNFOUND_DECL
         FTRACE("Warning: declaration of ")(node)(" not found (has no declarer links)\n");
@@ -35,9 +35,21 @@ Transformation::AugTreePtr<Node> HasDeclaration::operator()( const TreeKit &kit,
     }
     
     // function decl/def are folded, so we expect only one declarer
-    TreeKit::LinkInfo info = OnlyElementOf( infos );
+    TreePtr<Node> declarer = OnlyElementOf( declarer_infos ).first;
     
-    return AugTreePtr<Node>(info.first); 
+    // To be able to represent the declarer as a node in the tree, we
+    // must find its parent link
+    set<TreeKit::LinkInfo> parent_infos = kit.GetParents( declarer );
+
+    if( parent_infos.empty() )
+    {
+        return AugTreePtr<Node>(declarer);
+    }
+    else
+    {
+        const TreePtrInterface *declarer_parent_link = OnlyElementOf( parent_infos ).second;
+        return AugTreePtr<Node>(declarer, declarer_parent_link); 
+    }
 }
 catch( TreeKit::UnknownNode &) 
 {
