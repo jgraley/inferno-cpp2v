@@ -14,11 +14,10 @@ class TeleportAgent : public PreRestrictedAgent
 {
 public:    
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
-
-    // XLink -> Node is correct: PointerIs needs to see the incoming TreePtr.
-    virtual TreePtr<Node> RunTeleportQuery( const TreeKit &kit, XLink keyer_xlink ) const { ASSERTFAIL(); }
     
-    set<TreePtr<Node>> ExpandNormalDomain( const TreeKit &kit, const unordered_set<XLink> &xlinks ) override;
+    virtual TeleportResult RunTeleportQuery( const TreeKit &kit, XLink keyer_xlink ) const = 0;
+    
+    set<TeleportResult> ExpandNormalDomain( const TreeKit &kit, const unordered_set<XLink> &xlinks ) override;
 
     virtual void Reset();    
 

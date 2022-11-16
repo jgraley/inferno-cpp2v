@@ -54,7 +54,7 @@ public:
     void InitialWalk( const DBWalk::Actions *actions,
                       XLink root_xlink );
 
-    XLink GetUniqueDomainExtension( TreePtr<Node> node ) const;
+    XLink GetUniqueDomainExtension( Agent::TeleportResult tpr ) const;
     void ExtendDomainNewPattern( PatternLink root_plink );
     void ExtendDomainNewX();           
     void UnExtendDomain();

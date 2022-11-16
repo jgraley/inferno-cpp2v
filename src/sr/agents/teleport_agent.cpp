@@ -30,9 +30,9 @@ SYM::Lazy<SYM::BooleanExpression> TeleportAgent::SymbolicNormalLinkedQueryPRed()
 }                     
 
 
-set<TreePtr<Node>> TeleportAgent::ExpandNormalDomain( const TreeKit &kit, const unordered_set<XLink> &keyer_xlinks )
+set<Agent::TeleportResult> TeleportAgent::ExpandNormalDomain( const TreeKit &kit, const unordered_set<XLink> &keyer_xlinks )
 {
-    set<TreePtr<Node>> extra_nodes;
+    set<TeleportResult> tp_results;
     for( XLink keyer_xlink : keyer_xlinks )
     {
         if( keyer_xlink == XLink::MMAX_Link )
@@ -40,21 +40,21 @@ set<TreePtr<Node>> TeleportAgent::ExpandNormalDomain( const TreeKit &kit, const 
         if( !IsPreRestrictionMatch(keyer_xlink) )
             continue; // Failed pre-restriction so can't expand domain
 
-		TreePtr<Node> tp_node;
+		TeleportResult tp_result;
         try
         {
-			tp_node = RunTeleportQuery( kit, keyer_xlink );
+			tp_result = RunTeleportQuery( kit, keyer_xlink );
         }
         catch( ::Mismatch & ) 
         {
 			continue;
 		}
-		if( !tp_node )
-			continue;        
+		if( !tp_result.second )
+			continue;       // NULL  
 		
-		extra_nodes.insert( tp_node );               
+		tp_results.insert( tp_result );               
     }
-    return extra_nodes; 
+    return tp_results; 
 }
 
 
@@ -90,10 +90,10 @@ unique_ptr<SymbolResultInterface> TeleportAgent::TeleportOperator::Evaluate( con
         
     // Apply the teleporting operation to the xlink. It may create new nodes
     // so it returns a TreePtr<Node> to avoid creating new xlink without base.
-    TreePtr<Node> tp_node = agent->RunTeleportQuery( *(kit.x_tree_db), keyer_xlink );
+    TeleportResult tp_node = agent->RunTeleportQuery( *(kit.x_tree_db), keyer_xlink );
 
     // Teleporting operation can fail: if so call it a NaS
-    if( !tp_node )
+    if( !tp_node.second )
         return make_unique<SymbolResult>( SymbolResult::NOT_A_SYMBOL );        
         
     // We are required to have already added the new node to the domain

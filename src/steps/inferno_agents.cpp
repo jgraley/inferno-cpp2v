@@ -253,7 +253,7 @@ SYM::Lazy<SYM::BooleanExpression> NestedAgent::SymbolicNormalLinkedQueryPRed() c
 }                     
 
 
-TreePtr<Node> NestedAgent::RunTeleportQuery( const TreeKit &kit, XLink keyer_xlink ) const
+Agent::TeleportResult NestedAgent::RunTeleportQuery( const TreeKit &kit, XLink keyer_xlink ) const
 {   
     // Compare the depth with the supplied pattern if present
     if( depth )
@@ -265,10 +265,10 @@ TreePtr<Node> NestedAgent::RunTeleportQuery( const TreeKit &kit, XLink keyer_xli
         while( XLink next_xlink = Advance(xlink, &s) )
             xlink = next_xlink;
 
-        return MakeTreeNode<Node>(); // TODO obviously wrong 
+        return make_pair(XLink(), MakeTreeNode<Node>()); // TODO obviously wrong see #679
     }
     
-    return TreePtr<Node>();
+    return TeleportResult();
 }    
 
 

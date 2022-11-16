@@ -13,7 +13,7 @@ shared_ptr<PatternQuery> TransformOfAgent::GetPatternQuery() const
 }
 
 
-TreePtr<Node> TransformOfAgent::RunTeleportQuery( const TreeKit &kit, XLink keyer_xlink ) const
+Agent::TeleportResult TransformOfAgent::RunTeleportQuery( const TreeKit &kit, XLink keyer_xlink ) const
 {
     // Transform the candidate expression, sharing the x_tree_db as a TreeKit
     // so that implementations can use handy features without needing to search
@@ -22,20 +22,25 @@ TreePtr<Node> TransformOfAgent::RunTeleportQuery( const TreeKit &kit, XLink keye
     
     // Policy: Don't convert MMAX link to a node (will evaluate to NOT_A_SYMBOL)
     if( keyer_xlink == XLink::MMAX_Link )
-         return TreePtr<Node>(); 
+         return TeleportResult(); 
          
     TreePtr<Node> keyer_x = keyer_xlink.GetChildX();
 
     try
     {
-		TreePtr<Node> trans_x = (*transformation)( kit, keyer_x );   // TODO use AugTreePtr result, turn into pair<Xlink, TreePtr<Node>>   
-		ASSERT( !trans_x || trans_x->IsFinal() )(*this)(" computed non-final ")(*trans_x)(" from ")(keyer_x)("\n");             
-		return trans_x; // can be NULL
+		Transformation::AugTreePtr<Node> trans = (*transformation)( kit, keyer_x );   // TODO use AugTreePtr result, turn into pair<Xlink, TreePtr<Node>>   
+		ASSERT( !trans || ((TreePtr<Node>)trans)->IsFinal() )(*this)(" computed non-final ")((TreePtr<Node>)trans)(" from ")(keyer_x)("\n");             
+		if( !(TreePtr<Node>)trans )
+            return TeleportResult(); // NULL
+        else if( trans.p_tree_ptr == nullptr )
+            return make_pair(XLink(), (TreePtr<Node>)trans); // no parent specified
+        else
+            return make_pair(XLink((TreePtr<Node>)trans, trans.p_tree_ptr), (TreePtr<Node>)trans); // parent was specified
 	}
     catch( const ::Mismatch &e )
     {
 		TRACE("Caught ")(e)("; query fails\n");
-		return TreePtr<Node>();  
+		return TeleportResult(); // NULL
 	}
 }
 

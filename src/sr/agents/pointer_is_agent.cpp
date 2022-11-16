@@ -15,14 +15,17 @@ shared_ptr<PatternQuery> PointerIsAgent::GetPatternQuery() const
 }
 
 
-TreePtr<Node> PointerIsAgent::RunTeleportQuery( const TreeKit &kit, XLink keyer_xlink ) const
+Agent::TeleportResult PointerIsAgent::RunTeleportQuery( const TreeKit &kit, XLink keyer_xlink ) const
 {
     // Get the pointer that points to us - now from the keyer x link
     const TreePtrInterface *px = keyer_xlink.GetXPtr();
 	ASSERT(px);     
 	
 	// Make an archetypical node matching the pointer's type
-	return px->MakeValueArchetype();
+    TreePtr<Node> tnode = px->MakeValueArchetype();
+    
+    // Package up to indicate we don't have a parent for it
+	return make_pair( XLink(), tnode );
 }
 
 

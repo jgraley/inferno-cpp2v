@@ -7,6 +7,7 @@
 #include "common/standard.hpp"
 #include "db_walk.hpp"
 #include "node/specialise_oostd.hpp"
+#include "../agents/agent.hpp"
 
 #include <unordered_set>
 #include <functional>
@@ -33,9 +34,9 @@ public:
                                    OnExtraZoneFunction on_delete_extra_zone = OnExtraZoneFunction() );
 
     // Add xlink to domain extension if not already there, and return the cannonical one.
-    XLink GetUniqueDomainExtension( TreePtr<Node> node ) const; 
+    XLink GetUniqueDomainExtension( Agent::TeleportResult tpr ) const; 
     
-    void ExtendDomainBaseXLink( const TreeKit &kit, TreePtr<Node> node );
+    void ExtendDomainBaseXLink( const TreeKit &kit, Agent::TeleportResult tpr );
     void ExtendDomainPatternWalk( const TreeKit &kit, PatternLink plink );
     void ExtendDomainNewPattern( const TreeKit &kit, PatternLink root_plink );
     void ExtendDomainNewX( const TreeKit &kit );

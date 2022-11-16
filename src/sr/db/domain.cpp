@@ -24,12 +24,12 @@ void Domain::SetOnExtraXLinkFunctions( OnExtraZoneFunction on_insert_extra_zone_
 }
 
 
-XLink Domain::GetUniqueDomainExtension( TreePtr<Node> node ) const
+XLink Domain::GetUniqueDomainExtension( Agent::TeleportResult tpr ) const
 {
-    ASSERT( node );
+    ASSERT( tpr.second );
   
 #ifdef BYPASS
-    if( unordered_domain.count(node) > 0 )
+    if( unordered_domain.count(tpr.second) > 0 )
 		return xlink;
 #endif		
   
@@ -37,12 +37,13 @@ XLink Domain::GetUniqueDomainExtension( TreePtr<Node> node ) const
     // Note: this is done by simple compare, and identity is not 
     // required. This makes for a very "powerful" search for existing
     // candidates.
-    return domain_extension_classes.at( node );
+    return domain_extension_classes.at( tpr.second );
 }
 
 
-void Domain::ExtendDomainBaseXLink( const TreeKit &kit, TreePtr<Node> node )
+void Domain::ExtendDomainBaseXLink( const TreeKit &kit, Agent::TeleportResult tpr )
 {
+    TreePtr<Node> node = tpr.second;
     ASSERT( node );
   
 #ifdef BYPASS
@@ -96,12 +97,12 @@ void Domain::ExtendDomainPatternWalk( const TreeKit &kit, PatternLink plink )
     // This avoids the need for a reductive "keep trying until no more
     // extra XLinks are provided" because we know that only the child pattern
     // can match a pattern node's generated XLink.
-    set<TreePtr<Node>> subtrees = plink.GetChildAgent()->ExpandNormalDomain( kit, unordered_domain );      
-    if( !subtrees.empty() )
+    set<Agent::TeleportResult> tp_results = plink.GetChildAgent()->ExpandNormalDomain( kit, unordered_domain );      
+    if( !tp_results.empty() )
         TRACE("There are extra x domain elements for ")(plink)(":\n");
 
-    for( TreePtr<Node> base_node : subtrees )
-        ExtendDomainBaseXLink( kit, base_node );
+    for( Agent::TeleportResult tpr : tp_results )
+        ExtendDomainBaseXLink( kit, tpr );
     
     // Visit couplings repeatedly TODO union over couplings and
     // only recurse on last reaching.

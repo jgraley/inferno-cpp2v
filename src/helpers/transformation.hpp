@@ -55,7 +55,6 @@ public:
             TreePtr<VALUE_TYPE>(*p_tree_ptr_), 
             p_tree_ptr(p_tree_ptr_) 
         {
-            ASSERTS( p_tree_ptr );
             ASSERTS( *p_tree_ptr );
             // Not a local automatic please, we're going to hang on to it.
             ASSERTS( !ON_STACK(p_tree_ptr_) );
@@ -67,7 +66,6 @@ public:
             TreePtr<VALUE_TYPE>(tree_ptr), 
             p_tree_ptr(nullptr)
         {
-            ASSERTS( tree_ptr );
         }
         
     private:
@@ -96,6 +94,11 @@ public:
             return *this;
         }
        
+        operator bool()
+        {
+            return TreePtr<VALUE_TYPE>::operator bool(); 
+        }
+
         template<class OTHER_VALUE_TYPE>
         static AugTreePtr<VALUE_TYPE> DynamicCast( const AugTreePtr<OTHER_VALUE_TYPE> &g )
         {
