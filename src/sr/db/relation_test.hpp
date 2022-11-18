@@ -8,6 +8,16 @@
 
 #include <functional>
 
+// K is probably an element of a set so it's its own key
+template<class K>
+const K &GetKey( const K &x ) { return x; }
+
+// K is probably an element of a map represented as a key-value pair
+// (as seen in loops) so key is "first" of that pair.
+template<class K, class V>
+const K &GetKey( const pair<K, V> &x ) { return x.first; }
+
+
 namespace SR
 {
 
@@ -24,20 +34,21 @@ void TestOrderingIntact( const ORDERING &ordering,
                          bool expect_totality,
                          string ordering_name )
 {
+    typedef typename ORDERING::value_type value_type;
     auto comp_func = ordering.key_comp();
     int t=0; 
 
-    ForOverlappingAdjacentPairs( ordering, [&](const XLink &first, 
-                                               const XLink &second)
+    ForOverlappingAdjacentPairs( ordering, [&](const value_type &pred, 
+                                               const value_type &succ)
     {
-        // Test the STL interface to the relation, which is what CONTAINER will actually use
-        ASSERT( comp_func(second, first)==false )
+        // Test the STL interface to the relation, which is what ORDERING will actually use
+        ASSERT( comp_func(GetKey(succ), GetKey(pred))==false )
               (ordering_name)(" failed broken ordering:\n")
-              (first)(" < ")(second);
+              (pred)(" < ")(succ);
         if( expect_totality )
-            ASSERT( comp_func(first, second)==true ) // antisymmetry and totality
+            ASSERT( comp_func(GetKey(pred), GetKey(succ))==true ) // antisymmetry and totality
                   (ordering_name)(" failed broken ordering:\n")
-                  (second)(" < ")(first);
+                  (succ)(" < ")(pred);
                     
         // To test using Compare3Way we'd have to construct our own instance
         // of the relation class.

@@ -7,8 +7,6 @@
 
 //#define TRACE_DOMAIN_EXTEND
 
-#define BYPASS
-
 using namespace SR;    
 
 Domain::Domain()
@@ -25,17 +23,15 @@ void Domain::SetOnExtraXLinkFunctions( OnExtraZoneFunction on_insert_extra_zone_
 
 
 XLink Domain::GetUniqueDomainExtension( Agent::TeleportResult tpr ) const
-{
+{  
     ASSERT( tpr.second );
-  
-#ifdef BYPASS
+    
     if( tpr.first )
     {
         ASSERT( tpr.first.GetChildX() == tpr.second );
         ASSERT( domain_extension_classes.count(tpr.second) > 0 );
-		return tpr.first;
+		return tpr.first; // After checks, it can be used directly
     }
-#endif		
   
     // If there's already a class for this node, return it and early-out
     // Note: this is done by simple compare, and identity is not 
@@ -47,18 +43,16 @@ XLink Domain::GetUniqueDomainExtension( Agent::TeleportResult tpr ) const
 
 void Domain::ExtendDomainBaseXLink( const TreeKit &kit, Agent::TeleportResult tpr )
 {
-#ifdef BYPASS
-    if( tpr.first )
+    TreePtr<Node> node = tpr.second;
+    ASSERT( node );
+
+    if( tpr.first ) // We've been given an XLink
     {
         ASSERT( tpr.first.GetChildX() == tpr.second );
         ASSERT( domain_extension_classes.count(tpr.second) > 0 );
-        return;
+        return; // No need to extend domain
     }
-#endif
 
-    TreePtr<Node> node = tpr.second;
-    ASSERT( node );
-  
     // If there's already a class for this node, return it and early-out
     // Note: this is done by simple compare, and identity is not 
     // required. This makes for a very "powerful" search for existing
@@ -108,14 +102,6 @@ void Domain::ExtendDomainPatternWalk( const TreeKit &kit, PatternLink plink )
     set<Agent::TeleportResult> tp_results = plink.GetChildAgent()->ExpandNormalDomain( kit, unordered_domain );      
     if( !tp_results.empty() )
         TRACE("There are extra x domain elements for ")(plink)(":\n");
-
-    for( Agent::TeleportResult tpr : tp_results )
-        if( tpr.first )
-        {
-            if( tpr.first.GetChildX() != tpr.second )
-                FTRACE(tp_results);
-            ASSERT( tpr.first.GetChildX() == tpr.second )(tpr);
-        }
 
     for( Agent::TeleportResult tpr : tp_results )
         ExtendDomainBaseXLink( kit, tpr );
@@ -269,6 +255,10 @@ void Domain::TestRelations( const unordered_set<XLink> &xlinks )
 {	
     Domain::Relation dr;
     dr.Test( xlinks );
+
+   // TestOrderingIntact( domain_extension_classes,
+   //                     true,
+   //                     "domain_extension_classes" );
 }
 
 

@@ -54,7 +54,6 @@ set<Agent::TeleportResult> TeleportAgent::ExpandNormalDomain( const TreeKit &kit
     
         if( tp_result.first ) // parent link was supplied
             ASSERT( tp_result.first.GetChildX() == tp_result.second );    
-        FTRACEC(tp_result)("\n");
         
 		tp_results.insert( tp_result );               
     }

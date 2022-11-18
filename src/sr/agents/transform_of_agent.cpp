@@ -37,7 +37,6 @@ Agent::TeleportResult TransformOfAgent::RunTeleportQuery( const TreeKit &kit, XL
         else // parent was specified
         {
             XLink xlink((TreePtr<Node>)trans, trans.p_tree_ptr);
-            FTRACEC("XLink ")(xlink)(" from ")(keyer_x)("\n");
             return make_pair(xlink, (TreePtr<Node>)trans);             
         }
 	}
