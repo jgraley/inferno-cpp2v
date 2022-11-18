@@ -256,9 +256,9 @@ void Domain::TestRelations( const unordered_set<XLink> &xlinks )
     Domain::Relation dr;
     dr.Test( xlinks );
 
-   // TestOrderingIntact( domain_extension_classes,
-   //                     true,
-   //                     "domain_extension_classes" );
+    TestOrderingIntact( domain_extension_classes,
+                        false,
+                        "domain_extension_classes" );
 }
 
 

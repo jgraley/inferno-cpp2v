@@ -8,7 +8,7 @@
 
 #include <functional>
 
-// K is probably an element of a set so it's its own key
+// K is probably an element of a set so it's its own key.
 template<class K>
 const K &GetKey( const K &x ) { return x; }
 
