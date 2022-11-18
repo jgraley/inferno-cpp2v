@@ -85,7 +85,7 @@ template<typename TF, typename TS>
 string Trace(const pair<TF, TS> &p) 
 {
     list<string> elts = { Trace(p.first), Trace(p.second) };
-    return Join(elts, ", ", "(", ")");
+    return Join(elts, ", ", "pair(", ")");
 }
 
 
@@ -117,7 +117,7 @@ string Trace(tuple<TYPES...> const & t)
     typedef tuple<TYPES...> TUPLE;
     list<string> elts;
     TraceTupleWorker<TUPLE, tuple_size<TUPLE>::value>::Execute(elts, t);
-    return Join( elts, CONTAINER_SEP, "[", "]" );
+    return Join( elts, ", ", "tuple(", ")" );
 }
 
 

@@ -199,17 +199,13 @@ void XTreeDatabase::ExtendDomainNewPattern( PatternLink root_plink )
 {
     ASSERT( root_xlink );
 	plan.domain->ExtendDomainNewPattern( *this, root_plink );
-	
-    if( ReadArgs::test_rel )
-    {
-		plan.domain->TestRelations( plan.domain->unordered_domain );
-		plan.indexes->TestRelations( plan.domain->unordered_domain );
-	}		
 }
 
-
+	
 void XTreeDatabase::ExtendDomainNewX()
 {
+    TestRelations();
+    
     ASSERT( root_xlink );
 	plan.domain->ExtendDomainNewX( *this );
 }
@@ -398,4 +394,14 @@ set<TreeKit::LinkInfo> XTreeDatabase::GetDeclarers( TreePtr<Node> node ) const
         infos.insert( info );
     }
     return infos;
+}
+
+
+void XTreeDatabase::TestRelations()
+{
+    if( ReadArgs::test_rel )
+    {
+		plan.domain->TestRelations( plan.domain->unordered_domain );
+		plan.indexes->TestRelations( plan.domain->unordered_domain );
+	}		
 }

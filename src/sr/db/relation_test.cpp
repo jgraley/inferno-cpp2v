@@ -35,24 +35,25 @@ void SR::TestRelationProperties( const unordered_set<XLink> &xlinks,
     auto random_xlink = [&]() -> XLink
     {        
         tlinks++;
-        int randval = random_special(random_gen);
         // should be a 50% chance so about half the x we test with are special
-        if( get_special && randval < RANDVAL_RANGE ) 
+        int randval = random_special(random_gen);
+        if( get_special && randval < RANDVAL_RANGE ) // Try to return special
         {
             XLink new_xlink, xlink;
-            do
+            for( int t=0; t<vxlinks.size(); t++ ) // Only make this many attempts
             {
                 xlink = vxlinks[random_index(random_gen)];
-                new_xlink = get_special( xlink, randval );        
-            } 
-            while( new_xlink == xlink );
-            tspecial++;
-            return new_xlink;            
+                new_xlink = get_special( xlink, randval );       
+                if( new_xlink != xlink ) // Success
+                {
+                    tspecial++;
+                    return new_xlink;            
+                } 
+            }
+            // Ran out of tries for special
         }
-        else
-        {
-            return vxlinks[random_index(random_gen)];            
-        }
+        // Return a link from the supplied set
+        return vxlinks[random_index(random_gen)];            
     };        
 
     // Stability property

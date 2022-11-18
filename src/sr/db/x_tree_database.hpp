@@ -87,6 +87,8 @@ private:
   	set<LinkInfo> GetParents( TreePtr<Node> node ) const override;
   	set<LinkInfo> GetDeclarers( TreePtr<Node> node ) const override;
   	
+    void TestRelations();
+    
   	XLink root_xlink;
     DBWalk db_walker;
 };    
