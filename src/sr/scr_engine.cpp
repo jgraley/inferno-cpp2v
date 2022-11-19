@@ -375,15 +375,11 @@ void SCREngine::Replace( XLink base_xlink )
     plan.vn_sequence->XTreeDbExpectMatches();
 #endif
     
-    plan.vn_sequence->UnExtendDomain();
-
 	auto seq = make_shared<CommandSequence>();
 	seq->Add( make_shared<DeleteCommand>( base_zone ) );
 	seq->Add( make_shared<InsertCommand>( base_zone, new_zone ) );
 	plan.vn_sequence->ExecuteUpdateCommand( seq );
-    
-    plan.vn_sequence->ExtendDomainNewX();
-    
+        
 #ifdef DB_ENABLE_COMPARATIVE_TEST
     TRACE("Late check\n");
     plan.vn_sequence->XTreeDbExpectMatches();

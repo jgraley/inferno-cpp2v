@@ -56,9 +56,7 @@ public:
 
     XLink GetUniqueDomainExtension( TreePtr<Node> node ) const;
     void ExtendDomainNewPattern( PatternLink root_plink );
-    void ExtendDomainNewX();           
-    void UnExtendDomain();
-	const Domain &GetDomain() const;
+   	const Domain &GetDomain() const;
 
     const LinkTable &GetLinkTable() const;
     const LinkTable::Row &GetRow(XLink xlink) const;

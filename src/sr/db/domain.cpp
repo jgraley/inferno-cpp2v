@@ -71,10 +71,6 @@ void Domain::ExtendDomainBaseXLink( const TreeKit &kit, TreePtr<Node> node )
     // Ensure the original tree is found in the domain now (it wasn't 
     // earlier on) as an extra check
     ASSERT( domain_extension_classes.count( node ) == 1 );
-    
-    // Remember we did this so UnExtendDomain() can undo it
-    // TODO should we push to front for a LIFO action?
-    extra_zones.push_back( extra_zone ); // TODO std::move the zone
 }
 
 
@@ -116,33 +112,11 @@ void Domain::ExtendDomainNewPattern( const TreeKit &kit, PatternLink root_plink_
 }
 
 
-void Domain::ExtendDomainNewX(const TreeKit &kit)
-{
-    ExtendDomainPatternWalk(kit, root_plink);
-}
-
-
-void Domain::UnExtendDomain()
-{
-/* Disabled because the NewPattern/NewX/UnExtend model is broken
- * (sctest12 step 43) in an embedded SCR, possibly because we need
- * the domain extensions from the enclusing SCR.
-  
-    for( auto it = extra_zones.begin(); it != extra_zones.end(); )
-    {
-        on_delete_extra_zone( *it );
-        it = extra_zones.erase( it );
-    }
-
-	ASSERT( extra_zones.empty() );
-	ASSERT( domain_extension_classes.empty() );*/
-}
-
-
 void Domain::PrepareDelete( DBWalk::Actions &actions )
 {
 	actions.domain_out = [=](const DBWalk::WalkInfo &walk_info)
 	{        
+		(void)domain_extension_classes.erase( walk_info.x );    
 		EraseSolo( unordered_domain, walk_info.xlink );
 	};
 }
@@ -152,6 +126,7 @@ void Domain::PrepareInsert(DBWalk::Actions &actions)
 {
 	actions.domain_in = [=](const DBWalk::WalkInfo &walk_info)
 	{        
+		(void)domain_extension_classes.insert( make_pair( walk_info.x, walk_info.xlink ) );    
 		InsertSolo( unordered_domain, walk_info.xlink );   
 	};
 }

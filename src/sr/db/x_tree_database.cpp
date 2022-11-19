@@ -202,22 +202,6 @@ void XTreeDatabase::ExtendDomainNewPattern( PatternLink root_plink )
 }
 
 	
-void XTreeDatabase::ExtendDomainNewX()
-{
-    TestRelations();
-    
-    ASSERT( root_xlink );
-	plan.domain->ExtendDomainNewX( *this );
-}
-
-
-void XTreeDatabase::UnExtendDomain()
-{
-    ASSERT( root_xlink );
-    plan.domain->UnExtendDomain();
-}
-
-
 const Domain &XTreeDatabase::GetDomain() const
 {
 	return *plan.domain;

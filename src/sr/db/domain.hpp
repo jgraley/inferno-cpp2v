@@ -39,8 +39,6 @@ public:
     void ExtendDomainBaseXLink( const TreeKit &kit, TreePtr<Node> node );
     void ExtendDomainPatternWalk( const TreeKit &kit, PatternLink plink );
     void ExtendDomainNewPattern( const TreeKit &kit, PatternLink root_plink );
-    void ExtendDomainNewX( const TreeKit &kit );
-    void UnExtendDomain();
 
     void PrepareDelete(DBWalk::Actions &actions);
 	void PrepareInsert(DBWalk::Actions &actions);
@@ -70,9 +68,7 @@ private:
     OnExtraZoneFunction on_insert_extra_zone;
     OnExtraZoneFunction on_delete_extra_zone;
     
-  	PatternLink root_plink;
-  	
-    list<TreeZone> extra_zones;
+  	PatternLink root_plink;  	
 };    
     
 }

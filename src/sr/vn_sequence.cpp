@@ -139,20 +139,6 @@ void VNSequence::ExtendDomainNewPattern( PatternLink base_plink )
 }
 
 
-void VNSequence::ExtendDomainNewX()
-{
-    ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");    
-    x_tree_db->ExtendDomainNewX();
-}
-
-
-void VNSequence::UnExtendDomain()
-{
-    ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");    
-    x_tree_db->UnExtendDomain();
-}
-
-
 void VNSequence::ExecuteUpdateCommand( shared_ptr<UpdateCommand> cmd )
 {
     ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");    
