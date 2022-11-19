@@ -124,7 +124,11 @@ void Domain::ExtendDomainNewX(const TreeKit &kit)
 
 void Domain::UnExtendDomain()
 {
-/*    for( auto it = extra_zones.begin(); it != extra_zones.end(); )
+/* Disabled because the NewPattern/NewX/UnExtend model is broken
+ * (sctest12 step 43) in an embedded SCR, possibly because we need
+ * the domain extensions from the enclusing SCR.
+  
+    for( auto it = extra_zones.begin(); it != extra_zones.end(); )
     {
         on_delete_extra_zone( *it );
         it = extra_zones.erase( it );
