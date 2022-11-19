@@ -132,7 +132,7 @@ void XTreeDatabase::InsertExtraZone(const TreeZone &extra_zone)
     INDENT("e");
     
 	DBWalk::Actions actions;
-	plan.domain->PrepareInsert( actions );
+	plan.domain->PrepareInsertExtra( actions );
 	plan.indexes->PrepareInsert( actions );
 	plan.link_table->PrepareInsert( actions );
 	plan.node_table->PrepareInsert( actions );
@@ -141,7 +141,7 @@ void XTreeDatabase::InsertExtraZone(const TreeZone &extra_zone)
     {
         INDENT("⦼");
         DBWalk::Actions ref_actions;
-        plan.ref_domain->PrepareInsert( ref_actions );
+        plan.ref_domain->PrepareInsertExtra( ref_actions );
         plan.ref_indexes->PrepareInsert( ref_actions );
         db_walker.Walk( &ref_actions, extra_zone, DBWalk::ROOT );
 #ifdef DB_TEST_THE_TEST
@@ -160,7 +160,7 @@ void XTreeDatabase::DeleteExtraZone(const TreeZone &extra_zone)
     // zones and on each call we delete just that
     // xlink.
     DBWalk::Actions actions;
-    plan.domain->PrepareDelete( actions );
+    plan.domain->PrepareDeleteExtra( actions );
     plan.indexes->PrepareDelete( actions );
     plan.link_table->PrepareDelete( actions );
     plan.node_table->PrepareDelete( actions );
@@ -169,7 +169,7 @@ void XTreeDatabase::DeleteExtraZone(const TreeZone &extra_zone)
     {
         INDENT("⦼");
         DBWalk::Actions ref_actions;
-        plan.ref_domain->PrepareDelete( ref_actions );
+        plan.ref_domain->PrepareDeleteExtra( ref_actions );
         plan.ref_indexes->PrepareDelete( ref_actions );
         db_walker.Walk( &ref_actions, extra_zone, DBWalk::ROOT );
 #ifdef DB_TEST_THE_TEST
