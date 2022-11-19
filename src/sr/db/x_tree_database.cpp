@@ -188,10 +188,10 @@ void XTreeDatabase::InitialWalk( const DBWalk::Actions *actions,
 }                                 
 
 
-XLink XTreeDatabase::GetUniqueDomainExtension( Agent::TeleportResult tpr ) const
+XLink XTreeDatabase::GetUniqueDomainExtension( TreePtr<Node> node ) const
 {
     ASSERT( root_xlink );
-	return plan.domain->GetUniqueDomainExtension(tpr);
+	return plan.domain->GetUniqueDomainExtension(node);
 }
 
 

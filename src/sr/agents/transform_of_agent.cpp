@@ -13,7 +13,7 @@ shared_ptr<PatternQuery> TransformOfAgent::GetPatternQuery() const
 }
 
 
-Agent::TeleportResult TransformOfAgent::RunTeleportQuery( const TreeKit &kit, XLink keyer_xlink ) const
+TeleportAgent::TeleportResult TransformOfAgent::RunTeleportQuery( const TreeKit &kit, XLink keyer_xlink ) const
 {
     // Transform the candidate expression, sharing the x_tree_db as a TreeKit
     // so that implementations can use handy features without needing to search

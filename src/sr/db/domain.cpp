@@ -22,36 +22,21 @@ void Domain::SetOnExtraXLinkFunctions( OnExtraZoneFunction on_insert_extra_zone_
 }
 
 
-XLink Domain::GetUniqueDomainExtension( Agent::TeleportResult tpr ) const
-{  
-    ASSERT( tpr.second );
-    
-    if( tpr.first )
-    {
-        ASSERT( tpr.first.GetChildX() == tpr.second );
-        ASSERT( domain_extension_classes.count(tpr.second) > 0 );
-		return tpr.first; // After checks, it can be used directly
-    }
-  
+XLink Domain::GetUniqueDomainExtension( TreePtr<Node> node ) const
+{   
+    ASSERT( node );
+
     // If there's already a class for this node, return it and early-out
     // Note: this is done by simple compare, and identity is not 
     // required. This makes for a very "powerful" search for existing
     // candidates.
-    return domain_extension_classes.at( tpr.second );
+    return domain_extension_classes.at( node );
 }
 
 
-void Domain::ExtendDomainBaseXLink( const TreeKit &kit, Agent::TeleportResult tpr )
+void Domain::ExtendDomainBaseXLink( const TreeKit &kit, TreePtr<Node> node )
 {
-    TreePtr<Node> node = tpr.second;
     ASSERT( node );
-
-    if( tpr.first ) // We've been given an XLink
-    {
-        ASSERT( tpr.first.GetChildX() == tpr.second );
-        ASSERT( domain_extension_classes.count(tpr.second) > 0 );
-        return; // No need to extend domain
-    }
 
     // If there's already a class for this node, return it and early-out
     // Note: this is done by simple compare, and identity is not 
@@ -99,12 +84,12 @@ void Domain::ExtendDomainPatternWalk( const TreeKit &kit, PatternLink plink )
     // This avoids the need for a reductive "keep trying until no more
     // extra XLinks are provided" because we know that only the child pattern
     // can match a pattern node's generated XLink.
-    set<Agent::TeleportResult> tp_results = plink.GetChildAgent()->ExpandNormalDomain( kit, unordered_domain );      
-    if( !tp_results.empty() )
+    set<TreePtr<Node>> extend_nodes = plink.GetChildAgent()->ExpandNormalDomain( kit, unordered_domain );      
+    if( !extend_nodes.empty() )
         TRACE("There are extra x domain elements for ")(plink)(":\n");
 
-    for( Agent::TeleportResult tpr : tp_results )
-        ExtendDomainBaseXLink( kit, tpr );
+    for( TreePtr<Node> node : extend_nodes )
+        ExtendDomainBaseXLink( kit, node );
     
     // Visit couplings repeatedly TODO union over couplings and
     // only recurse on last reaching.
@@ -232,7 +217,7 @@ void Domain::Relation::Test( const unordered_set<XLink> &xlinks )
     // We do not expect stability and totality in this relation WRT any given type:
     // - SC is tighter than base node value since it looks at whole subtree by value
     // - TreePtr is tighter than SC because it looks at the subtree by identity
-    // - XLink is tighter still, becausae it looks at TreePtr by identity
+    // - XLink is tighter still, because it looks at TreePtr by identity
     // If we have to choose between stbility and totality, we'll choose stability.
     // We don't actually need totality because these are equivalence classes.
     SimpleCompare sc;
@@ -255,7 +240,8 @@ void Domain::TestRelations( const unordered_set<XLink> &xlinks )
 {	
     Domain::Relation dr;
     dr.Test( xlinks );
-
+    
+    // Exposes #688
     //TestOrderingIntact( domain_extension_classes,
     //                    false,
     //                    "domain_extension_classes" );

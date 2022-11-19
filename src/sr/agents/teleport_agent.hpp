@@ -14,10 +14,11 @@ class TeleportAgent : public PreRestrictedAgent
 {
 public:    
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
+    typedef pair<XLink, TreePtr<Node>> TeleportResult;
     
     virtual TeleportResult RunTeleportQuery( const TreeKit &kit, XLink keyer_xlink ) const = 0;
     
-    set<TeleportResult> ExpandNormalDomain( const TreeKit &kit, const unordered_set<XLink> &xlinks ) override;
+    set<TreePtr<Node>> ExpandNormalDomain( const TreeKit &kit, const unordered_set<XLink> &xlinks ) override;
 
     virtual void Reset();    
 

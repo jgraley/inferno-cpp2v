@@ -34,9 +34,9 @@ public:
                                    OnExtraZoneFunction on_delete_extra_zone = OnExtraZoneFunction() );
 
     // Add xlink to domain extension if not already there, and return the cannonical one.
-    XLink GetUniqueDomainExtension( Agent::TeleportResult tpr ) const; 
+    XLink GetUniqueDomainExtension( TreePtr<Node> node ) const; 
     
-    void ExtendDomainBaseXLink( const TreeKit &kit, Agent::TeleportResult tpr );
+    void ExtendDomainBaseXLink( const TreeKit &kit, TreePtr<Node> node );
     void ExtendDomainPatternWalk( const TreeKit &kit, PatternLink plink );
     void ExtendDomainNewPattern( const TreeKit &kit, PatternLink root_plink );
     void ExtendDomainNewX( const TreeKit &kit );

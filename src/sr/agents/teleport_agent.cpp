@@ -30,9 +30,9 @@ SYM::Lazy<SYM::BooleanExpression> TeleportAgent::SymbolicNormalLinkedQueryPRed()
 }                     
 
 
-set<Agent::TeleportResult> TeleportAgent::ExpandNormalDomain( const TreeKit &kit, const unordered_set<XLink> &keyer_xlinks )
+set<TreePtr<Node>> TeleportAgent::ExpandNormalDomain( const TreeKit &kit, const unordered_set<XLink> &keyer_xlinks )
 {
-    set<TeleportResult> tp_results;
+    set<TreePtr<Node>> tp_results;
     for( XLink keyer_xlink : keyer_xlinks )
     {
         if( keyer_xlink == XLink::MMAX_Link )
@@ -53,9 +53,12 @@ set<Agent::TeleportResult> TeleportAgent::ExpandNormalDomain( const TreeKit &kit
 			continue;       // NULL  
     
         if( tp_result.first ) // parent link was supplied
+        {
             ASSERT( tp_result.first.GetChildX() == tp_result.second );    
+            continue; // Don't bother Domain when there's an XLink
+        }
         
-		tp_results.insert( tp_result );               
+		tp_results.insert( tp_result.second );               
     }
     return tp_results; 
 }
@@ -99,13 +102,16 @@ unique_ptr<SymbolResultInterface> TeleportAgent::TeleportOperator::Evaluate( con
     if( !tp_result.second )
         return make_unique<SymbolResult>( SymbolResult::NOT_A_SYMBOL );        
         
-    // Consistency check
+    // If we got an XLink, just return it, don't bother Domain
     if( tp_result.first ) // parent link was supplied
+    {
          ASSERT( tp_result.first.GetChildX() == tp_result.second );
+         return make_unique<SymbolResult>( tp_result.first );
+	}
 
     // We are required to have already added the new node to the domain
     // during domain extension, so use the node to fetch the unbique XLink
-    XLink unique_xlink = kit.x_tree_db->GetUniqueDomainExtension(tp_result);
+    XLink unique_xlink = kit.x_tree_db->GetUniqueDomainExtension(tp_result.second);
     
     // Form a symbol result to return.       
     return make_unique<SymbolResult>( unique_xlink );

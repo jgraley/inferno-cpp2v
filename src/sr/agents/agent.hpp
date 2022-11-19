@@ -21,7 +21,6 @@ class Agent : public virtual Graphable,
 {
 public:  
     typedef Graphable::Phase Phase;
-    typedef pair<XLink, TreePtr<Node>> TeleportResult;
     
     enum Path
     {
@@ -63,7 +62,7 @@ public:
                                                 bool use_DQ = false ) const = 0;
     virtual QueryLambda TestStartRegenerationQuery( const SolutionMap *hypothesis_links,
                                                     const XTreeDatabase *x_tree_db ) const = 0;
-    virtual set<TeleportResult> ExpandNormalDomain( const TreeKit &kit, const unordered_set<XLink> &xlinks ) = 0;
+    virtual set<TreePtr<Node>> ExpandNormalDomain( const TreeKit &kit, const unordered_set<XLink> &xlinks ) = 0;
 
     virtual void ResetNLQConjecture() = 0;    
 

@@ -253,7 +253,7 @@ SYM::Lazy<SYM::BooleanExpression> NestedAgent::SymbolicNormalLinkedQueryPRed() c
 }                     
 
 
-Agent::TeleportResult NestedAgent::RunTeleportQuery( const TreeKit &kit, XLink keyer_xlink ) const
+TeleportAgent::TeleportResult NestedAgent::RunTeleportQuery( const TreeKit &kit, XLink keyer_xlink ) const
 {   
     // Compare the depth with the supplied pattern if present
     if( depth )
