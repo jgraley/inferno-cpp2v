@@ -26,10 +26,10 @@ XLink Domain::GetUniqueDomainExtension( TreePtr<Node> node ) const
 {   
     ASSERT( node );
 
-    // If there's already a class for this node, return it and early-out
-    // Note: this is done by simple compare, and identity is not 
-    // required. This makes for a very "powerful" search for existing
-    // candidates.
+	ASSERT( domain_extension_classes.count(node) > 0 )
+	      (node)(" not found in domain_extension_classes:\n")
+	      (domain_extension_classes);
+
     return domain_extension_classes.at( node );
 }
 
@@ -112,63 +112,26 @@ void Domain::ExtendDomainPatternWalk( const TreeKit &kit, PatternLink plink )
 void Domain::ExtendDomainNewPattern( const TreeKit &kit, PatternLink root_plink_ )
 {
 	root_plink = root_plink_;
-	
-#ifdef TRACE_DOMAIN_EXTEND
-	unordered_set<XLink> previous_unordered_domain = unordered_domain;
-#endif    
-
     ExtendDomainPatternWalk(kit, root_plink);
-
-#ifdef TRACE_DOMAIN_EXTEND
-    if( Tracer::IsEnabled() ) // We want this deltaing to be relative to what is seen in the log
-    {
-        TRACE("Domain extended due to new pattern ")(root_plink)(", domain change is:\n")
-             ( DiffTrace(previous_unordered_domain, unordered_domain) );
-    }
-#endif
 }
 
 
 void Domain::ExtendDomainNewX(const TreeKit &kit)
 {
-#ifdef TRACE_DOMAIN_EXTEND
-	unordered_set<XLink> previous_unordered_domain = unordered_domain;
-#endif    
-
     ExtendDomainPatternWalk(kit, root_plink);
-
-#ifdef TRACE_DOMAIN_EXTEND
-    if( Tracer::IsEnabled() ) // We want this deltaing to be relative to what is seen in the log
-    {
-        TRACE("Domain extended due new X, pattern is ")(root_plink)(", domain change is:\n")
-             ( DiffTrace(previous_unordered_domain, unordered_domain) );
-    }
-#endif
 }
 
 
 void Domain::UnExtendDomain()
 {
-#ifdef TRACE_DOMAIN_EXTEND
-	unordered_set<XLink> previous_unordered_domain = unordered_domain;
-    TRACE("Domain extensions believed to be:\n")(extra_zones)("\n"); 
-#endif    
-
-    for( auto it = extra_zones.begin(); it != extra_zones.end(); )
+/*    for( auto it = extra_zones.begin(); it != extra_zones.end(); )
     {
         on_delete_extra_zone( *it );
         it = extra_zones.erase( it );
     }
 
 	ASSERT( extra_zones.empty() );
-
-#ifdef TRACE_DOMAIN_EXTEND
-    if( Tracer::IsEnabled() ) // We want this deltaing to be relative to what is seen in the log
-    {
-        TRACE("Domain un-extended pattern is ")(root_plink)(", domain change is:\n")
-             ( DiffTrace(previous_unordered_domain, unordered_domain) );
-    }
-#endif
+	ASSERT( domain_extension_classes.empty() );*/
 }
 
 
