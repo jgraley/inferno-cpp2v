@@ -8,6 +8,7 @@
 #include "link_table.hpp"
 #include "node_table.hpp"
 #include "domain.hpp"
+#include "domain_extension.hpp"
 #include "indexes.hpp"
 #include "db_walk.hpp"
 
@@ -27,17 +28,10 @@ private:
     {
         Plan( const XTreeDatabase *algo, shared_ptr<Lacing> lacing );
         
-        shared_ptr<Domain> domain;
+        shared_ptr<DomainExtension> domain_extension;
         shared_ptr<NodeTable> node_table;
         shared_ptr<LinkTable> link_table;
         shared_ptr<Indexes> indexes;
-
-#ifdef DB_ENABLE_COMPARATIVE_TEST
-        shared_ptr<Domain> ref_domain;
-        shared_ptr<Indexes> ref_indexes;
-        //shared_ptr<NodeTable> ref_node_table;
-        //shared_ptr<LinkTable> ref_link_table;
-#endif
     } plan;
 
 public:
@@ -56,7 +50,7 @@ public:
 
     XLink GetUniqueDomainExtension( TreePtr<Node> node ) const;
     void ExtendDomainNewPattern( PatternLink root_plink );
-   	const Domain &GetDomain() const;
+   	const DomainExtension &GetDomain() const;
 
     const LinkTable &GetLinkTable() const;
     const LinkTable::Row &GetRow(XLink xlink) const;
@@ -76,9 +70,6 @@ public:
 	XLink GetRootXLink() const;
 
     void Dump() const;
-#ifdef DB_ENABLE_COMPARATIVE_TEST
-    void ExpectMatches() const;
-#endif	
 	
 private:    
     // TreeKit implementation

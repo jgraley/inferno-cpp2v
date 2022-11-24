@@ -28,20 +28,16 @@ XTreeDatabase::XTreeDatabase( shared_ptr<Lacing> lacing, XLink root_xlink_ ) :
         DeleteExtraZone( extra_zone );
     };
     
-    plan.domain->SetOnExtraXLinkFunctions( on_insert_extra_zone, 
-                                           on_delete_extra_zone );
+    plan.domain_extension->SetOnExtraXLinkFunctions( on_insert_extra_zone, 
+                                                     on_delete_extra_zone );
 }
 
 
 XTreeDatabase::Plan::Plan( const XTreeDatabase *algo, shared_ptr<Lacing> lacing ) :
-    domain( make_shared<Domain>() ),
+    domain_extension( make_shared<DomainExtension>() ),
     node_table( make_shared<NodeTable>() ),
     link_table( make_shared<LinkTable>() ),
     indexes( make_shared<Indexes>(lacing, algo) )
-#ifdef DB_ENABLE_COMPARATIVE_TEST
-    ,ref_domain( make_shared<Domain>() ),
-    ref_indexes( make_shared<Indexes>(lacing, algo) )
-#endif    
 {
 }
 
@@ -53,27 +49,11 @@ void XTreeDatabase::InitialBuild()
 	
 	// Full build incrementally
     DBWalk::Actions actions;
-    plan.domain->PrepareInsert( actions );
+    plan.domain_extension->PrepareInsert( actions );
     plan.indexes->PrepareInsert( actions );
     plan.link_table->PrepareInsert( actions );
     plan.node_table->PrepareInsert( actions );
     InitialWalk( &actions, root_xlink );
-#ifdef DB_ENABLE_COMPARATIVE_TEST
-    {
-        INDENT("⦼");
-        DBWalk::Actions ref_actions;
-        plan.ref_domain->PrepareInsert( ref_actions );
-        plan.ref_indexes->PrepareInsert( ref_actions );
-        InitialWalk( &ref_actions, root_xlink );
-#ifdef DB_TEST_THE_TEST
-        ExpectMatches();
-#endif
-    }
-#endif
-    
-#ifdef DB_ENABLE_COMPARATIVE_TEST
-    ExpectMatches();
-#endif
 }
 
 
@@ -82,23 +62,11 @@ void XTreeDatabase::Delete(const TreeZone &zone)
     INDENT("d");
 
     DBWalk::Actions actions;
-    plan.domain->PrepareDelete( actions );
+    plan.domain_extension->PrepareDelete( actions );
     plan.indexes->PrepareDelete( actions );
     plan.link_table->PrepareDelete( actions );
     plan.node_table->PrepareDelete( actions );
     db_walker.Walk( &actions, zone, DBWalk::UNKNOWN );   
-#ifdef DB_ENABLE_COMPARATIVE_TEST
-    {
-        INDENT("⦼");
-        DBWalk::Actions ref_actions;
-        plan.ref_domain->PrepareDelete( ref_actions );
-        plan.ref_indexes->PrepareDelete( ref_actions );
-        db_walker.Walk( &ref_actions, zone, DBWalk::UNKNOWN );
-#ifdef DB_TEST_THE_TEST
-        ExpectMatches();
-#endif
-    }
-#endif
 }
 
 
@@ -107,23 +75,11 @@ void XTreeDatabase::Insert(const TreeZone &zone)
     INDENT("i");
 
     DBWalk::Actions actions;
-    plan.domain->PrepareInsert( actions );
+    plan.domain_extension->PrepareInsert( actions );
     plan.indexes->PrepareInsert( actions );
     plan.link_table->PrepareInsert( actions );
     plan.node_table->PrepareInsert( actions );
     db_walker.Walk( &actions, zone, DBWalk::UNKNOWN );
-#ifdef DB_ENABLE_COMPARATIVE_TEST
-    {
-        INDENT("⦼");
-        DBWalk::Actions ref_actions;
-        plan.ref_domain->PrepareInsert( ref_actions );
-        plan.ref_indexes->PrepareInsert( ref_actions );
-        db_walker.Walk( &ref_actions, zone, DBWalk::UNKNOWN );
-#ifdef DB_TEST_THE_TEST
-        ExpectMatches();
-#endif
-    }
-#endif
 }
 
 
@@ -132,23 +88,11 @@ void XTreeDatabase::InsertExtraZone(const TreeZone &extra_zone)
     INDENT("e");
     
 	DBWalk::Actions actions;
-	plan.domain->PrepareInsertExtra( actions );
+	plan.domain_extension->PrepareInsertExtra( actions );
 	plan.indexes->PrepareInsert( actions );
 	plan.link_table->PrepareInsert( actions );
 	plan.node_table->PrepareInsert( actions );
 	db_walker.Walk( &actions, extra_zone, DBWalk::ROOT );
-#ifdef DB_ENABLE_COMPARATIVE_TEST
-    {
-        INDENT("⦼");
-        DBWalk::Actions ref_actions;
-        plan.ref_domain->PrepareInsertExtra( ref_actions );
-        plan.ref_indexes->PrepareInsert( ref_actions );
-        db_walker.Walk( &ref_actions, extra_zone, DBWalk::ROOT );
-#ifdef DB_TEST_THE_TEST
-        ExpectMatches();
-#endif
-    }
-#endif
 }
 
 
@@ -160,23 +104,11 @@ void XTreeDatabase::DeleteExtraZone(const TreeZone &extra_zone)
     // zones and on each call we delete just that
     // xlink.
     DBWalk::Actions actions;
-    plan.domain->PrepareDeleteExtra( actions );
+    plan.domain_extension->PrepareDeleteExtra( actions );
     plan.indexes->PrepareDelete( actions );
     plan.link_table->PrepareDelete( actions );
     plan.node_table->PrepareDelete( actions );
     db_walker.Walk( &actions, extra_zone, DBWalk::ROOT );   
-#ifdef DB_ENABLE_COMPARATIVE_TEST
-    {
-        INDENT("⦼");
-        DBWalk::Actions ref_actions;
-        plan.ref_domain->PrepareDeleteExtra( ref_actions );
-        plan.ref_indexes->PrepareDelete( ref_actions );
-        db_walker.Walk( &ref_actions, extra_zone, DBWalk::ROOT );
-#ifdef DB_TEST_THE_TEST
-        ExpectMatches();
-#endif
-    }
-#endif
 }
 
 void XTreeDatabase::InitialWalk( const DBWalk::Actions *actions,
@@ -191,20 +123,20 @@ void XTreeDatabase::InitialWalk( const DBWalk::Actions *actions,
 XLink XTreeDatabase::GetUniqueDomainExtension( TreePtr<Node> node ) const
 {
     ASSERT( root_xlink );
-	return plan.domain->GetUniqueDomainExtension(node);
+	return plan.domain_extension->GetUniqueDomainExtension(node);
 }
 
 
 void XTreeDatabase::ExtendDomainNewPattern( PatternLink root_plink )
 {
     ASSERT( root_xlink );
-	plan.domain->ExtendDomainNewPattern( *this, root_plink );
+	plan.domain_extension->ExtendDomainNewPattern( *this, root_plink );
 }
 
 	
-const Domain &XTreeDatabase::GetDomain() const
+const DomainExtension &XTreeDatabase::GetDomain() const
 {
-	return *plan.domain;
+	return *plan.domain_extension;
 }
 
 
@@ -315,14 +247,6 @@ void XTreeDatabase::Dump() const
 }
 
 
-#ifdef DB_ENABLE_COMPARATIVE_TEST
-void XTreeDatabase::ExpectMatches() const
-{
-}
-#endif
-
-
-
 set<TreeKit::LinkInfo> XTreeDatabase::GetParents( TreePtr<Node> node ) const
 {
     set<LinkInfo> infos;
@@ -385,7 +309,7 @@ void XTreeDatabase::TestRelations()
 {
     if( ReadArgs::test_rel )
     {
-		plan.domain->TestRelations( plan.domain->unordered_domain );
-		plan.indexes->TestRelations( plan.domain->unordered_domain );
+		plan.domain_extension->TestRelations( plan.domain_extension->unordered_domain );
+		plan.indexes->TestRelations( plan.domain_extension->unordered_domain );
 	}		
 }

@@ -368,23 +368,11 @@ void SCREngine::Replace( XLink base_xlink )
     TreePtr<Node> new_base_x = plan.base_agent->BuildReplace(plan.base_plink);
     FreeZone new_zone( new_base_x );
 
-#ifdef DB_ENABLE_COMPARATIVE_TEST
-    // For debug
-	plan.vn_sequence->XTreeDbDump();
-    TRACE("Early check\n");
-    plan.vn_sequence->XTreeDbExpectMatches();
-#endif
-    
 	auto seq = make_shared<CommandSequence>();
 	seq->Add( make_shared<DeleteCommand>( base_zone ) );
 	seq->Add( make_shared<InsertCommand>( base_zone, new_zone ) );
 	plan.vn_sequence->ExecuteUpdateCommand( seq );
         
-#ifdef DB_ENABLE_COMPARATIVE_TEST
-    TRACE("Late check\n");
-    plan.vn_sequence->XTreeDbExpectMatches();
-#endif
-
     TRACE("Replace done\n");
 }
 

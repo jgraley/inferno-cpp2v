@@ -153,14 +153,6 @@ void VNSequence::XTreeDbDump() const
     x_tree_db->Dump();
 }
 
-#ifdef DB_ENABLE_COMPARATIVE_TEST
-void VNSequence::XTreeDbExpectMatches() const
-{
-    ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");    
-    x_tree_db->ExpectMatches();
-}
-#endif
-
 bool VNSequence::IsDirtyGrass( TreePtr<Node> node )
 {
 	return dirty_grass.count(node) > 0;
