@@ -38,7 +38,7 @@ XTreeDatabase::Plan::Plan( const XTreeDatabase *algo, shared_ptr<Lacing> lacing 
     node_table( make_shared<NodeTable>() ),
     link_table( make_shared<LinkTable>() ),
     indexes( make_shared<Indexes>(lacing, algo) ),
-    domain_extension( make_shared<DomainExtension>() )
+    domain_extension( make_shared<DomainExtension>(algo) )
 {
 }
 
@@ -314,7 +314,7 @@ void XTreeDatabase::TestRelations()
 {
     if( ReadArgs::test_rel )
     {
-		plan.domain_extension->TestRelations( plan.domain_extension->unordered_domain );
-		plan.indexes->TestRelations( plan.domain_extension->unordered_domain );
+		plan.domain_extension->TestRelations( plan.domain->unordered_domain );
+		plan.indexes->TestRelations( plan.domain->unordered_domain );
 	}		
 }

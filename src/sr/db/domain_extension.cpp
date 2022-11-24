@@ -1,6 +1,7 @@
 #include "domain_extension.hpp"
 
 #include "relation_test.hpp"
+#include "x_tree_database.hpp"
 
 #include "../agents/agent.hpp"
 #include "helpers/duplicate.hpp"
@@ -9,13 +10,14 @@
 
 using namespace SR;    
 
-DomainExtension::DomainExtension()
+DomainExtension::DomainExtension( const XTreeDatabase *db_ ) :
+    db( db_ ) 
 {
 }
 	
 
 void DomainExtension::SetOnExtraXLinkFunctions( OnExtraZoneFunction on_insert_extra_zone_,
-                                       OnExtraZoneFunction on_delete_extra_zone_ )
+                                                OnExtraZoneFunction on_delete_extra_zone_ )
 {
     on_insert_extra_zone = on_insert_extra_zone_;
     on_delete_extra_zone = on_delete_extra_zone_;
@@ -80,7 +82,7 @@ void DomainExtension::ExtendDomainPatternWalk( const TreeKit &kit, PatternLink p
     // This avoids the need for a reductive "keep trying until no more
     // extra XLinks are provided" because we know that only the child pattern
     // can match a pattern node's generated XLink.
-    set<TreePtr<Node>> extend_nodes = plink.GetChildAgent()->ExpandNormalDomain( kit, unordered_domain );      
+    set<TreePtr<Node>> extend_nodes = plink.GetChildAgent()->ExpandNormalDomain( kit, db->GetDomain().unordered_domain );      
     if( !extend_nodes.empty() )
         TRACE("There are extra x domain elements for ")(plink)(":\n");
 
@@ -117,7 +119,6 @@ void DomainExtension::PrepareDelete( DBWalk::Actions &actions )
 	actions.domain_extension_out = [=](const DBWalk::WalkInfo &walk_info)
 	{        
 		(void)domain_extension_classes.erase( walk_info.x );    
-		EraseSolo( unordered_domain, walk_info.xlink );
 	};
 }
 
@@ -127,7 +128,6 @@ void DomainExtension::PrepareInsert(DBWalk::Actions &actions)
 	actions.domain_extension_in = [=](const DBWalk::WalkInfo &walk_info)
 	{        
 		(void)domain_extension_classes.insert( make_pair( walk_info.x, walk_info.xlink ) );    
-		InsertSolo( unordered_domain, walk_info.xlink );   
 	};
 }
 
@@ -139,8 +139,6 @@ void DomainExtension::PrepareDeleteExtra( DBWalk::Actions &actions )
         // TODO probably erases the class too soon - would need to keep a count of the number of
         // elements or something and only erase when it hits zero. But there my be bigger fish to fry here.
 		(void)domain_extension_classes.erase( walk_info.x );    
-
-		EraseSolo( unordered_domain, walk_info.xlink );
 	};
 }
 
@@ -152,8 +150,6 @@ void DomainExtension::PrepareInsertExtra(DBWalk::Actions &actions)
         // Not solo because domain_extension_classes is not a total ordering- 
         // there may already be a class for this xlink
 		(void)domain_extension_classes.insert( make_pair( walk_info.x, walk_info.xlink ) );    
-
-		InsertSolo( unordered_domain, walk_info.xlink );   
 	};
 }
 

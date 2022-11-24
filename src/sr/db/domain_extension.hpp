@@ -17,11 +17,12 @@ class SimpleCompare;
 /// SR namespace contains the search and replace implementation
 namespace SR 
 {
-    
+class XTreeDatabase;
+
 class DomainExtension
 {   
 public:
-	DomainExtension();
+	DomainExtension( const XTreeDatabase *db );
 	
 	typedef function<void(const TreeZone &)> OnExtraZoneFunction;
 
@@ -51,15 +52,14 @@ public:
         void Test( const unordered_set<XLink> &xlinks );
     private:
         SimpleCompare sc;
-    };
-    
-    // Global domain of possible xlink values
-    unordered_set<XLink> unordered_domain;            
+    };    
     
     // SimpleCompare equivalence classes over the domain.
     map<TreePtr<Node>, XLink, SimpleCompare> domain_extension_classes;
 
 private:
+    const XTreeDatabase *db;
+
     OnExtraZoneFunction on_insert_extra_zone;
     OnExtraZoneFunction on_delete_extra_zone;
     
