@@ -28,10 +28,11 @@ private:
     {
         Plan( const XTreeDatabase *algo, shared_ptr<Lacing> lacing );
         
-        shared_ptr<DomainExtension> domain_extension;
+        shared_ptr<Domain> domain;
         shared_ptr<NodeTable> node_table;
         shared_ptr<LinkTable> link_table;
         shared_ptr<Indexes> indexes;
+        shared_ptr<DomainExtension> domain_extension;
     } plan;
 
 public:
@@ -50,7 +51,7 @@ public:
 
     XLink GetUniqueDomainExtension( TreePtr<Node> node ) const;
     void ExtendDomainNewPattern( PatternLink root_plink );
-   	const DomainExtension &GetDomain() const;
+   	const Domain &GetDomain() const;
 
     const LinkTable &GetLinkTable() const;
     const LinkTable::Row &GetRow(XLink xlink) const;

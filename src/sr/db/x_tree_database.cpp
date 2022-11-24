@@ -34,10 +34,11 @@ XTreeDatabase::XTreeDatabase( shared_ptr<Lacing> lacing, XLink root_xlink_ ) :
 
 
 XTreeDatabase::Plan::Plan( const XTreeDatabase *algo, shared_ptr<Lacing> lacing ) :
-    domain_extension( make_shared<DomainExtension>() ),
+    domain( make_shared<Domain>() ),
     node_table( make_shared<NodeTable>() ),
     link_table( make_shared<LinkTable>() ),
-    indexes( make_shared<Indexes>(lacing, algo) )
+    indexes( make_shared<Indexes>(lacing, algo) ),
+    domain_extension( make_shared<DomainExtension>() )
 {
 }
 
@@ -49,6 +50,7 @@ void XTreeDatabase::InitialBuild()
 	
 	// Full build incrementally
     DBWalk::Actions actions;
+    plan.domain->PrepareInsert( actions );
     plan.domain_extension->PrepareInsert( actions );
     plan.indexes->PrepareInsert( actions );
     plan.link_table->PrepareInsert( actions );
@@ -62,6 +64,7 @@ void XTreeDatabase::Delete(const TreeZone &zone)
     INDENT("d");
 
     DBWalk::Actions actions;
+    plan.domain->PrepareDelete( actions );
     plan.domain_extension->PrepareDelete( actions );
     plan.indexes->PrepareDelete( actions );
     plan.link_table->PrepareDelete( actions );
@@ -75,6 +78,7 @@ void XTreeDatabase::Insert(const TreeZone &zone)
     INDENT("i");
 
     DBWalk::Actions actions;
+    plan.domain->PrepareInsert( actions );
     plan.domain_extension->PrepareInsert( actions );
     plan.indexes->PrepareInsert( actions );
     plan.link_table->PrepareInsert( actions );
@@ -88,6 +92,7 @@ void XTreeDatabase::InsertExtraZone(const TreeZone &extra_zone)
     INDENT("e");
     
 	DBWalk::Actions actions;
+	plan.domain->PrepareInsert( actions );
 	plan.domain_extension->PrepareInsertExtra( actions );
 	plan.indexes->PrepareInsert( actions );
 	plan.link_table->PrepareInsert( actions );
@@ -97,13 +102,13 @@ void XTreeDatabase::InsertExtraZone(const TreeZone &extra_zone)
 
 
 void XTreeDatabase::DeleteExtraZone(const TreeZone &extra_zone)
-
 {
     // Note not symmetrical with InsertExtra(): we
     // will be invoked with every xlink in the extra
     // zones and on each call we delete just that
     // xlink.
     DBWalk::Actions actions;
+    plan.domain->PrepareDelete( actions );
     plan.domain_extension->PrepareDeleteExtra( actions );
     plan.indexes->PrepareDelete( actions );
     plan.link_table->PrepareDelete( actions );
@@ -134,9 +139,9 @@ void XTreeDatabase::ExtendDomainNewPattern( PatternLink root_plink )
 }
 
 	
-const DomainExtension &XTreeDatabase::GetDomain() const
+const Domain &XTreeDatabase::GetDomain() const
 {
-	return *plan.domain_extension;
+	return *plan.domain;
 }
 
 

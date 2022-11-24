@@ -40,6 +40,9 @@ public:
 		function<void (const WalkInfo &)> domain_in;
 		function<void (const WalkInfo &)> domain_out;
 
+		function<void (const WalkInfo &)> domain_extension_in;
+		function<void (const WalkInfo &)> domain_extension_out;
+
 		function<void (const WalkInfo &)> link_row_in;
 		function<void (const WalkInfo &)> link_row_out;
 
