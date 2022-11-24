@@ -164,10 +164,7 @@ void DBWalk::WindInActions( const WalkKit &kit,
     // Wind-in actions
     if( kit.actions->domain_in )
 		kit.actions->domain_in( walk_info );        
-               
-    if( kit.actions->domain_extension_in )
-		kit.actions->domain_extension_in( walk_info );        
-               
+                              
     if( kit.actions->link_row_in )
 		kit.actions->link_row_in( walk_info );        
             
@@ -176,12 +173,18 @@ void DBWalk::WindInActions( const WalkKit &kit,
 
     if( kit.actions->indexes_in )
 		kit.actions->indexes_in( walk_info );                    
+
+    if( kit.actions->domain_extension_in )
+		kit.actions->domain_extension_in( walk_info );        
 }                            
 
 
 void DBWalk::UnwindActions( const WalkKit &kit, 
                             const WalkInfo &walk_info )
 {                  
+    if( kit.actions->domain_extension_out )
+		kit.actions->domain_extension_out( walk_info );        
+
     if( kit.actions->indexes_out )
 		kit.actions->indexes_out( walk_info );                    
 
@@ -190,9 +193,6 @@ void DBWalk::UnwindActions( const WalkKit &kit,
 
     if( kit.actions->link_row_out )
 		kit.actions->link_row_out( walk_info );        
-
-    if( kit.actions->domain_extension_out )
-		kit.actions->domain_extension_out( walk_info );        
 
     if( kit.actions->domain_out )
 		kit.actions->domain_out( walk_info );        

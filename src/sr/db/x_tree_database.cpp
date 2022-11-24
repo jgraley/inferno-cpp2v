@@ -51,10 +51,10 @@ void XTreeDatabase::InitialBuild()
 	// Full build incrementally
     DBWalk::Actions actions;
     plan.domain->PrepareInsert( actions );
-    plan.domain_extension->PrepareInsert( actions );
     plan.indexes->PrepareInsert( actions );
     plan.link_table->PrepareInsert( actions );
     plan.node_table->PrepareInsert( actions );
+    plan.domain_extension->PrepareInsert( actions );
     InitialWalk( &actions, root_xlink );
 }
 
@@ -79,10 +79,10 @@ void XTreeDatabase::Insert(const TreeZone &zone)
 
     DBWalk::Actions actions;
     plan.domain->PrepareInsert( actions );
-    plan.domain_extension->PrepareInsert( actions );
     plan.indexes->PrepareInsert( actions );
     plan.link_table->PrepareInsert( actions );
     plan.node_table->PrepareInsert( actions );
+    plan.domain_extension->PrepareInsert( actions );
     db_walker.Walk( &actions, zone, DBWalk::UNKNOWN );
 }
 
@@ -93,10 +93,10 @@ void XTreeDatabase::InsertExtraZone(const TreeZone &extra_zone)
     
 	DBWalk::Actions actions;
 	plan.domain->PrepareInsert( actions );
-	plan.domain_extension->PrepareInsertExtra( actions );
 	plan.indexes->PrepareInsert( actions );
 	plan.link_table->PrepareInsert( actions );
 	plan.node_table->PrepareInsert( actions );
+	plan.domain_extension->PrepareInsertExtra( actions );
 	db_walker.Walk( &actions, extra_zone, DBWalk::ROOT );
 }
 
@@ -109,10 +109,10 @@ void XTreeDatabase::DeleteExtraZone(const TreeZone &extra_zone)
     // xlink.
     DBWalk::Actions actions;
     plan.domain->PrepareDelete( actions );
-    plan.domain_extension->PrepareDeleteExtra( actions );
     plan.indexes->PrepareDelete( actions );
     plan.link_table->PrepareDelete( actions );
     plan.node_table->PrepareDelete( actions );
+    plan.domain_extension->PrepareDeleteExtra( actions );
     db_walker.Walk( &actions, extra_zone, DBWalk::ROOT );   
 }
 
