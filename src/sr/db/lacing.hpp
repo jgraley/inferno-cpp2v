@@ -11,7 +11,7 @@ class SimpleCompare;
    
 namespace SYM
 {
-    class BooleanExpression;
+    class Expression;
 };
     
 namespace SR 
@@ -36,7 +36,7 @@ public:
     Lacing();
 
 	// Build lacing strucutres based on clausal expressions from the patterns
-	void Build( const set< shared_ptr<SYM::BooleanExpression> > &clauses );
+	void Build( const set<const SYM::Expression *> &sub_exprs );
 
     // Build the lacing data structures including decision tree. Only needed
     // once, at planning time for the whole sequence.

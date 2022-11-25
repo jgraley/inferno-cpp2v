@@ -10,9 +10,27 @@
 
 using namespace SR;    
 
-DomainExtension::DomainExtension( const XTreeDatabase *db_ ) :
-    db( db_ ) 
+
+DomainExtension::ExtenderSet DomainExtension::DetermineExtenders( const set<const SYM::Expression *> &sub_exprs )
 {
+	ExtenderSet extenders;
+    for( auto sub_expr : sub_exprs )
+    {
+        if( auto ext = dynamic_cast<const Extender *>(sub_expr) )
+        { 
+            extenders.insert( ext );
+        }
+    }
+
+    return extenders;
+}
+
+
+DomainExtension::DomainExtension( const XTreeDatabase *db_, ExtenderSet extenders_ ) :
+    db( db_ ),
+    extenders(extenders_) 
+{
+	FTRACE(extenders);
 }
 	
 

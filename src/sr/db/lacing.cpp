@@ -15,25 +15,22 @@ Lacing::Lacing() :
 }
 
 
-void Lacing::Build( const set< shared_ptr<SYM::BooleanExpression> > &clauses )
+void Lacing::Build( const set<const SYM::Expression *> &sub_exprs )
 {
     // Warning: there are a few places that declare an empty x_tree_db
-    if( clauses.empty() )
+    if( sub_exprs.empty() )
         return;
     
     // Extract all the non-final archetypes from the IsInCategoryOperator nodes 
     // into a set so that they are uniqued by SimpleCompare equality. These
     // are the categories.
     Lacing::CategorySet raw_categories;
-    for( shared_ptr<SYM::BooleanExpression> clause : clauses )
+    for( auto sub_expr : sub_exprs )
     {
-        clause->ForDepthFirstWalk( [&](const SYM::Expression *expr)
-        {
-            if( auto ko_expr = dynamic_cast<const SYM::IsInCategoryOperator *>(expr) )
-            { 
-                raw_categories.insert( ko_expr->GetArchetypeNode() );
-            }
-        } );
+        if( auto in_cat_expr = dynamic_cast<const SYM::IsInCategoryOperator *>(sub_expr) )
+        { 
+            raw_categories.insert( in_cat_expr->GetArchetypeNode() );
+        }
     }
 
     Build(raw_categories);

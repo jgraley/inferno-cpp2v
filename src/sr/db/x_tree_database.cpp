@@ -14,8 +14,8 @@ using namespace SR;
 //   when testing the test
 //#define DB_TEST_THE_TEST
 
-XTreeDatabase::XTreeDatabase( shared_ptr<Lacing> lacing, XLink root_xlink_ ) :
-    plan( this, lacing ),
+XTreeDatabase::XTreeDatabase( XLink root_xlink_, shared_ptr<Lacing> lacing, DomainExtension::ExtenderSet domain_extenders ) :
+    plan( this, lacing, domain_extenders ),
     root_xlink( root_xlink_ )
 {
     auto on_insert_extra_zone = [=](const TreeZone &extra_zone)
@@ -33,12 +33,12 @@ XTreeDatabase::XTreeDatabase( shared_ptr<Lacing> lacing, XLink root_xlink_ ) :
 }
 
 
-XTreeDatabase::Plan::Plan( const XTreeDatabase *algo, shared_ptr<Lacing> lacing ) :
+XTreeDatabase::Plan::Plan( const XTreeDatabase *algo, shared_ptr<Lacing> lacing, DomainExtension::ExtenderSet domain_extenders ) :
     domain( make_shared<Domain>() ),
     node_table( make_shared<NodeTable>() ),
     link_table( make_shared<LinkTable>() ),
     indexes( make_shared<Indexes>(lacing, algo) ),
-    domain_extension( make_shared<DomainExtension>(algo) )
+    domain_extension( make_shared<DomainExtension>(algo, domain_extenders) )
 {
 }
 

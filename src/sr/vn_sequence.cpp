@@ -43,19 +43,31 @@ void VNSequence::PlanningStageThree( int step_index )
 
 void VNSequence::PlanningStageFour()
 {
+	// TODO factor all this somewhere else
     // Determine the full set of expressions across all the steps
     set< shared_ptr<SYM::BooleanExpression> > clauses;
     for( shared_ptr<VNStep> vnt : steps )
     {
         const SCREngine *root_scr_engine = vnt->GetTopLevelEngine()->GetRootEngine();
         if( !root_scr_engine )
-            continue; // apparently wasn't planned, probably due to -q being specified.
+            continue; // apparently wasn't planned, probably due to -q being specified. See #641
         set< shared_ptr<SYM::BooleanExpression> > step_exprs = root_scr_engine->GetExpressions();
         clauses = UnionOfSolo( clauses, step_exprs );
     }
+    
+    set<const SYM::Expression *> sub_exprs;
+    for( shared_ptr<SYM::BooleanExpression> clause : clauses )
+    {
+		clause->ForDepthFirstWalk([&](const SYM::Expression *sub_expr)
+		{
+			sub_exprs.insert(sub_expr);
+		} );
+   	}
    	
    	lacing = make_shared<Lacing>();
-    lacing->Build( clauses );   
+    lacing->Build( sub_exprs );   
+    
+    domain_extenders = DomainExtension::DetermineExtenders(sub_exprs);
 }
 
 
@@ -81,7 +93,7 @@ void VNSequence::AnalysisStage( TreePtr<Node> root )
 {    
     XLink root_xlink = XLink::CreateDistinct(root);    
     
-    x_tree_db = make_shared<XTreeDatabase>(lacing, root_xlink);
+    x_tree_db = make_shared<XTreeDatabase>(root_xlink, lacing, domain_extenders);
     ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");    
     
 #ifndef X_TREE_DB_EACH_STEP

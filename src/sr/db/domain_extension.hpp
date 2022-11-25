@@ -13,7 +13,13 @@
 #include <functional>
 
 class SimpleCompare;
-    
+
+
+namespace SYM
+{
+    class Expression;
+};
+       
 /// SR namespace contains the search and replace implementation
 namespace SR 
 {
@@ -22,8 +28,16 @@ class XTreeDatabase;
 class DomainExtension
 {   
 public:
-	DomainExtension( const XTreeDatabase *db );
-	
+	class Extender : public virtual Traceable
+	{
+	};
+
+	typedef set<const Extender *> ExtenderSet;
+
+	static ExtenderSet DetermineExtenders( const set<const SYM::Expression *> &sub_exprs );
+
+	DomainExtension( const XTreeDatabase *db, ExtenderSet extenders );
+		
 	typedef function<void(const TreeZone &)> OnExtraZoneFunction;
 
 	void SetOnExtraXLinkFunctions( OnExtraZoneFunction on_insert_extra_zone,
@@ -64,6 +78,7 @@ private:
     OnExtraZoneFunction on_delete_extra_zone;
     
   	PatternLink root_plink;  	
+  	ExtenderSet extenders;
 };    
     
 }

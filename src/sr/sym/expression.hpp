@@ -23,7 +23,7 @@ class BooleanResult;
 
 // ------------------------- Expression --------------------------
 
-class Expression : public Traceable, public Orderable
+class Expression : public virtual Traceable, public Orderable
 {    
 public:
     /**

@@ -21,12 +21,12 @@ class XTreeDatabase : public Traceable,
                       public TreeKit
 {
 public:
-    XTreeDatabase( shared_ptr<Lacing> lacing, XLink root_xlink );
+    XTreeDatabase( XLink root_xlink, shared_ptr<Lacing> lacing, DomainExtension::ExtenderSet domain_extenders );
     
 private: 
     const struct Plan : public Traceable
     {
-        Plan( const XTreeDatabase *algo, shared_ptr<Lacing> lacing );
+        Plan( const XTreeDatabase *algo, shared_ptr<Lacing> lacing, DomainExtension::ExtenderSet domain_extenders );
         
         shared_ptr<Domain> domain;
         shared_ptr<NodeTable> node_table;

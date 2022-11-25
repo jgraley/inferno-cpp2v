@@ -6,6 +6,7 @@
 #include "node/tree_ptr.hpp"
 #include "link.hpp"
 #include "sr/db/lacing.hpp"
+#include "sr/db/domain_extension.hpp"
 
 class Graph;
 
@@ -57,6 +58,7 @@ public:
 private:
     vector< shared_ptr<VNStep> > steps;
     shared_ptr<Lacing> lacing;
+    DomainExtension::ExtenderSet domain_extenders;
     shared_ptr<XTreeDatabase> x_tree_db;    
     set< TreePtr<Node> > dirty_grass;
 };    

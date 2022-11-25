@@ -5,6 +5,7 @@
 #include "common/common.hpp"
 #include "../query.hpp"
 #include "../sym/lazy_eval.hpp"
+#include "../db/domain_extension.hpp"
 #include "special_agent.hpp"
 
 namespace SR
@@ -23,7 +24,7 @@ public:
     virtual void Reset();    
 
 private:
-    class TeleportOperator : public SYM::SymbolToSymbolExpression
+    class TeleportOperator : public SYM::SymbolToSymbolExpression, public DomainExtension::Extender
     {
     public:    
         typedef SymbolExpression NominalType;
