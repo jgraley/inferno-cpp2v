@@ -4,6 +4,7 @@
 #include "x_tree_database.hpp"
 
 #include "../agents/agent.hpp"
+#include "../agents/teleport_agent.hpp"
 #include "helpers/duplicate.hpp"
 
 //#define TRACE_DOMAIN_EXTEND
@@ -11,14 +12,20 @@
 using namespace SR;    
 
 
+bool DomainExtension::ExtenderClassRelation::operator()( const Extender *l, const Extender *r ) const
+{
+	return l->IsExtenderLess( *r );
+}
+
+
 DomainExtension::ExtenderSet DomainExtension::DetermineExtenders( const set<const SYM::Expression *> &sub_exprs )
 {
 	ExtenderSet extenders;
     for( auto sub_expr : sub_exprs )
     {
-        if( auto ext = dynamic_cast<const Extender *>(sub_expr) )
+        if( auto tp_op = dynamic_cast<const TeleportAgent::TeleportOperator *>(sub_expr) )
         { 
-            extenders.insert( ext );
+            extenders.insert( tp_op->GetAgent() );
         }
     }
 
@@ -175,5 +182,3 @@ void DomainExtension::PrepareInsertExtra(DBWalk::Actions &actions)
 void DomainExtension::TestRelations( const unordered_set<XLink> &xlinks )
 {	
 }
-
-

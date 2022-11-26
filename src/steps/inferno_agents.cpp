@@ -272,6 +272,12 @@ TeleportAgent::TeleportResult NestedAgent::RunTeleportQuery( const TreeKit &kit,
 }    
 
 
+int NestedAgent::GetExtenderOrdinal() const
+{
+	return 3;
+}
+
+
 Graphable::Block NestedAgent::GetGraphBlockInfo() const
 {
     Block block;

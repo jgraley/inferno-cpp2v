@@ -19,6 +19,8 @@ public:
     TeleportResult RunTeleportQuery( const TreeKit &kit, XLink keyer_xlink ) const override;
                  
     virtual Block GetGraphBlockInfo() const;
+            
+	int GetExtenderOrdinal() const override;
                                            
 private:
     virtual const TreePtrInterface *GetPointer() const = 0;

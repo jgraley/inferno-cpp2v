@@ -11,7 +11,7 @@
 namespace SR
 { 
 
-class TeleportAgent : public PreRestrictedAgent
+class TeleportAgent : public PreRestrictedAgent, public DomainExtension::Extender
 {
 public:    
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
@@ -23,8 +23,9 @@ public:
 
     virtual void Reset();    
 
-private:
-    class TeleportOperator : public SYM::SymbolToSymbolExpression, public DomainExtension::Extender
+	bool IsExtenderLess( const Extender &r ) const override;
+
+    class TeleportOperator : public SYM::SymbolToSymbolExpression
     {
     public:    
         typedef SymbolExpression NominalType;
@@ -39,6 +40,7 @@ private:
 
         virtual string Render() const override;
         virtual Precedence GetPrecedence() const override;
+		const TeleportAgent *GetAgent() const;
         
     protected:
         const TeleportAgent *agent;

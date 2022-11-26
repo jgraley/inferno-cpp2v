@@ -70,6 +70,12 @@ void TeleportAgent::Reset()
 }
 
 
+bool TeleportAgent::IsExtenderLess( const Extender &r ) const
+{
+	return GetExtenderOrdinal() < r.GetExtenderOrdinal();
+}
+
+
 TeleportAgent::TeleportOperator::TeleportOperator( const TeleportAgent *agent_,
                                                    shared_ptr<SymbolExpression> keyer_ ) :
     agent( agent_ ),
@@ -139,3 +145,7 @@ Expression::Precedence TeleportAgent::TeleportOperator::GetPrecedence() const
 }
 
 
+const TeleportAgent *TeleportAgent::TeleportOperator::GetAgent() const
+{
+	return agent;
+}

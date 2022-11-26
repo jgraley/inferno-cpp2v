@@ -49,3 +49,9 @@ Graphable::Block PointerIsAgent::GetGraphBlockInfo() const
                            { link } } };
     return block;
 }
+
+
+int PointerIsAgent::GetExtenderOrdinal() const
+{
+	return 2;
+}

@@ -30,9 +30,19 @@ class DomainExtension
 public:
 	class Extender : public virtual Traceable
 	{
+	public:
+		virtual bool IsExtenderLess( const Extender &r ) const = 0;
+		virtual int GetExtenderOrdinal() const = 0;
 	};
 
-	typedef set<const Extender *> ExtenderSet;
+	class ExtenderClassRelation
+	{
+	public:
+		/// Less operator: for use with set, map etc
+		bool operator()( const Extender *l, const Extender *r ) const;		
+	};
+	
+	typedef set<const Extender *, ExtenderClassRelation> ExtenderSet;
 
 	static ExtenderSet DetermineExtenders( const set<const SYM::Expression *> &sub_exprs );
 

@@ -76,3 +76,20 @@ string TransformOfAgent::GetName() const
 	return transformation->GetName() + GetSerialString();
 }
 
+
+bool TransformOfAgent::IsExtenderLess( const Extender &r ) const
+{
+	// If comparing two TransformOfAgent, secondary onto the transformation object's type
+	// TODO transformation object's state might matter, so should call into it
+	if( auto rto = dynamic_cast<const TransformOfAgent *>(&r) )
+		return typeid(*transformation).before(typeid(*rto->transformation));
+	
+	// Otherwise resort to the default compare
+	return TeleportAgent::IsExtenderLess(r);
+}
+
+
+int TransformOfAgent::GetExtenderOrdinal() const
+{
+	return 1;
+}

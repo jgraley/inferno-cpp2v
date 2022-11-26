@@ -33,6 +33,9 @@ public:
     virtual Block GetGraphBlockInfo() const;
     string GetName() const override;
     
+ 	bool IsExtenderLess( const Extender &r ) const override;
+	int GetExtenderOrdinal() const override;
+
     TreePtr<Node> pattern; 
     Transformation *transformation;
 
