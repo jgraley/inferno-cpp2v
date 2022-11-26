@@ -172,53 +172,8 @@ void DomainExtension::PrepareInsertExtra(DBWalk::Actions &actions)
 }
 
 
-bool DomainExtension::Relation::operator() (TreePtr<Node> l_node, TreePtr<Node> r_node) const
-{
-    return Compare3Way( l_node, r_node ) < 0;
-}
-
-
-Orderable::Diff DomainExtension::Relation::Compare3Way(TreePtr<Node> l_node, TreePtr<Node> r_node) const
-{
-    ASSERT( l_node );
-    ASSERT( r_node );
-    return sc.Compare3Way( *l_node, *r_node );
-}
-
-
-void DomainExtension::Relation::Test( const unordered_set<XLink> &xlinks )
-{
-    // We do not expect stability and totality in this relation WRT any given type:
-    // - SC is tighter than base node value since it looks at whole subtree by value
-    // - TreePtr is tighter than SC because it looks at the subtree by identity
-    // - XLink is tighter still, because it looks at TreePtr by identity
-    // If we have to choose between stbility and totality, we'll choose stability.
-    // We don't actually need totality because these are equivalence classes.
-    SimpleCompare sc;
-	TestRelationProperties( xlinks,
-                            false,
-                            "SimpleCompare (Domain)",
-                            function<string()>(),
-    [&](XLink l, XLink r)
-    { 
-        return sc.Compare3Way(l.GetChildX(), r.GetChildX()); 
-    }, 
-	[&](XLink l, XLink r)
-    { 
-        return l.GetChildX()==r.GetChildX(); 
-    } );
-}
-
-
 void DomainExtension::TestRelations( const unordered_set<XLink> &xlinks )
 {	
-    DomainExtension::Relation dr;
-    dr.Test( xlinks );
-    
-    // Exposes #688
-    //TestOrderingIntact( domain_extension_classes,
-    //                    false,
-    //                    "domain_extension_classes" );
 }
 
 

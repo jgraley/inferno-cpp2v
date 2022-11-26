@@ -56,18 +56,7 @@ public:
 	void PrepareInsertExtra(DBWalk::Actions &actions);
 
     void TestRelations( const unordered_set<XLink> &xlinks );
-    
-    class Relation
-    {
-    public:
-        bool operator() (TreePtr<Node> l_node, TreePtr<Node> r_node) const;
-        Orderable::Diff Compare3Way(TreePtr<Node> l_node, TreePtr<Node> r_node) const;
         
-        void Test( const unordered_set<XLink> &xlinks );
-    private:
-        SimpleCompare sc;
-    };    
-    
     // SimpleCompare equivalence classes over the domain.
     map<TreePtr<Node>, XLink, SimpleCompare> domain_extension_classes;
 
