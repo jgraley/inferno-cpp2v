@@ -11,6 +11,7 @@
 
 using namespace SR;    
 
+// ------------------------- DomainExtension --------------------------
 
 bool DomainExtension::ExtenderClassRelation::operator()( const Extender *l, const Extender *r ) const
 {
@@ -33,11 +34,11 @@ DomainExtension::ExtenderSet DomainExtension::DetermineExtenders( const set<cons
 }
 
 
-DomainExtension::DomainExtension( const XTreeDatabase *db_, ExtenderSet extenders_ ) :
-    db( db_ ),
-    extenders(extenders_) 
+DomainExtension::DomainExtension( const XTreeDatabase *db_, ExtenderSet extenders ) :
+    db( db_ ) 
 {
-	FTRACE(extenders);
+	for( const Extender *extender : extenders )
+	     channels.insert( make_unique<DomainExtensionChannel>(db, extender) );
 }
 	
 
@@ -46,6 +47,8 @@ void DomainExtension::SetOnExtraXLinkFunctions( OnExtraZoneFunction on_insert_ex
 {
     on_insert_extra_zone = on_insert_extra_zone_;
     on_delete_extra_zone = on_delete_extra_zone_;
+	for( const unique_ptr<DomainExtensionChannel> &channel : channels )
+		channel->SetOnExtraXLinkFunctions( on_insert_extra_zone_, on_delete_extra_zone_ );
 }
 
 
@@ -101,18 +104,18 @@ void DomainExtension::ExtendDomainBaseXLink( const TreeKit &kit, TreePtr<Node> n
 }
 
 
-void DomainExtension::ExtendDomainPatternWalk( const TreeKit &kit, PatternLink plink )
+void DomainExtension::ExtendDomainPatternWalk( const TreeKit &kit )
 {
-	for( const Extender *extender : extenders )
+	for( const unique_ptr<DomainExtensionChannel> &channel : channels )
 	{
 		// Extend locally first and then pass that into children.
 		// This avoids the need for a reductive "keep trying until no more
 		// extra XLinks are provided" because we know that only the child pattern
 		// can match a pattern node's generated XLink.
 		const unordered_set<XLink> &domain = db->GetDomain().unordered_domain;
-		set<TreePtr<Node>> extend_nodes = extender->ExpandNormalDomain( kit, domain );      
+		set<TreePtr<Node>> extend_nodes = channel->extender->ExpandNormalDomain( kit, domain );      
 		if( !extend_nodes.empty() )
-			TRACE("There are extra x domain elements for ")(plink)(":\n");
+			TRACE("There are extra x domain elements:\n");
 
 		for( TreePtr<Node> node : extend_nodes )
 			ExtendDomainBaseXLink( kit, node );
@@ -122,8 +125,7 @@ void DomainExtension::ExtendDomainPatternWalk( const TreeKit &kit, PatternLink p
 
 void DomainExtension::ExtendDomainNewPattern( const TreeKit &kit, PatternLink root_plink_ )
 {
-	root_plink = root_plink_;
-    ExtendDomainPatternWalk(kit, root_plink);
+    ExtendDomainPatternWalk(kit);
 }
 
 
@@ -170,3 +172,21 @@ void DomainExtension::PrepareInsertExtra(DBWalk::Actions &actions)
 void DomainExtension::TestRelations( const unordered_set<XLink> &xlinks )
 {	
 }
+
+// ------------------------- DomainExtensionChannel --------------------------
+
+DomainExtensionChannel::DomainExtensionChannel( const XTreeDatabase *db_, const DomainExtension::Extender *extender_ ) :
+    db( db_ ),
+    extender( extender_ )
+{
+}
+
+
+void DomainExtensionChannel::SetOnExtraXLinkFunctions( DomainExtension::OnExtraZoneFunction on_insert_extra_zone_,
+                                                       DomainExtension::OnExtraZoneFunction on_delete_extra_zone_ )
+{
+    on_insert_extra_zone = on_insert_extra_zone_;
+    on_delete_extra_zone = on_delete_extra_zone_;
+}
+
+

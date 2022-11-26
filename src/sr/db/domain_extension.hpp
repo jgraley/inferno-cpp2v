@@ -19,11 +19,15 @@ namespace SYM
 {
     class Expression;
 };
+     
        
 /// SR namespace contains the search and replace implementation
 namespace SR 
 {
 class XTreeDatabase;
+class DomainExtensionChannel;
+
+// ------------------------- DomainExtension --------------------------
 
 class DomainExtension
 {   
@@ -58,7 +62,7 @@ public:
     XLink GetUniqueDomainExtension( TreePtr<Node> node ) const; 
     
     void ExtendDomainBaseXLink( const TreeKit &kit, TreePtr<Node> node );
-    void ExtendDomainPatternWalk( const TreeKit &kit, PatternLink plink );
+    void ExtendDomainPatternWalk( const TreeKit &kit );
     void ExtendDomainNewPattern( const TreeKit &kit, PatternLink root_plink );
 
     void PrepareDelete(DBWalk::Actions &actions);
@@ -73,13 +77,30 @@ public:
 
 private:
     const XTreeDatabase *db;
-
+  	set<unique_ptr<DomainExtensionChannel>> channels;
+  	
     OnExtraZoneFunction on_insert_extra_zone;
     OnExtraZoneFunction on_delete_extra_zone;
-    
-  	PatternLink root_plink;  	
-  	ExtenderSet extenders;
 };    
+    
+// ------------------------- DomainExtensionChannel --------------------------
+
+class DomainExtensionChannel
+{
+public:	
+   	DomainExtensionChannel( const XTreeDatabase *db, const DomainExtension::Extender *extender );
+
+	void SetOnExtraXLinkFunctions( DomainExtension::OnExtraZoneFunction on_insert_extra_zone,
+                                   DomainExtension::OnExtraZoneFunction on_delete_extra_zone = DomainExtension::OnExtraZoneFunction() );
+
+//private:
+    const XTreeDatabase *db;
+	const DomainExtension::Extender *extender;
+
+    DomainExtension::OnExtraZoneFunction on_insert_extra_zone;
+    DomainExtension::OnExtraZoneFunction on_delete_extra_zone;
+};
+    
     
 }
 
