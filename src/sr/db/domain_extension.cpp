@@ -103,32 +103,20 @@ void DomainExtension::ExtendDomainBaseXLink( const TreeKit &kit, TreePtr<Node> n
 
 void DomainExtension::ExtendDomainPatternWalk( const TreeKit &kit, PatternLink plink )
 {
-    // Extend locally first and then pass that into children.
-    // This avoids the need for a reductive "keep trying until no more
-    // extra XLinks are provided" because we know that only the child pattern
-    // can match a pattern node's generated XLink.
-    set<TreePtr<Node>> extend_nodes = plink.GetChildAgent()->ExpandNormalDomain( kit, db->GetDomain().unordered_domain );      
-    if( !extend_nodes.empty() )
-        TRACE("There are extra x domain elements for ")(plink)(":\n");
+	for( const Extender *extender : extenders )
+	{
+		// Extend locally first and then pass that into children.
+		// This avoids the need for a reductive "keep trying until no more
+		// extra XLinks are provided" because we know that only the child pattern
+		// can match a pattern node's generated XLink.
+		const unordered_set<XLink> &domain = db->GetDomain().unordered_domain;
+		set<TreePtr<Node>> extend_nodes = extender->ExpandNormalDomain( kit, domain );      
+		if( !extend_nodes.empty() )
+			TRACE("There are extra x domain elements for ")(plink)(":\n");
 
-    for( TreePtr<Node> node : extend_nodes )
-        ExtendDomainBaseXLink( kit, node );
-    
-    // Visit couplings repeatedly TODO union over couplings and
-    // only recurse on last reaching.
-    auto pq = plink.GetChildAgent()->GetPatternQuery();    
-    for( PatternLink child_plink : pq->GetNormalLinks() )
-    {
-        ExtendDomainPatternWalk( kit, child_plink );
-    }
-    for( PatternLink child_plink : pq->GetAbnormalLinks() )
-    {
-        ExtendDomainPatternWalk( kit, child_plink );
-    }
-    for( PatternLink child_plink : pq->GetMultiplicityLinks() )
-    {
-        ExtendDomainPatternWalk( kit, child_plink );
-    }
+		for( TreePtr<Node> node : extend_nodes )
+			ExtendDomainBaseXLink( kit, node );
+	}
 }
 
 

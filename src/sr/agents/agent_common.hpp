@@ -46,8 +46,6 @@ public:
                                                 bool use_DQ = false ) const;
     virtual QueryLambda TestStartRegenerationQuery( const SolutionMap *hypothesis_links,
                                                     const XTreeDatabase *x_tree_db ) const;
-
-    set<TreePtr<Node>> ExpandNormalDomain( const TreeKit &kit, const unordered_set<XLink> &xlinks ) override { return {}; }
     
     virtual void ResetNLQConjecture();
      

@@ -140,9 +140,12 @@ Transformation::AugTreePtr<CPPTree::Type> HasType::Get( TreePtr<Operator> op, li
     if( auto al = DynamicTreePtrCast<MakeArray>(op) )
     {
     	auto a = MakeTreeNode<Array>();
-    	a->element = AugTreePtr<Type>(optypes.front());
     	auto sz = MakeTreeNode<SpecificInteger>( (int)(optypes.size()) ); // TODO make it work with size_t and remove the cast
     	a->size = sz;
+    	if( optypes.empty() )
+			a->element = AugTreePtr<Type>(MakeTreeNode<Void>()); // array has no elements so cannot determine type
+		else
+			a->element = optypes.front();
         return AugTreePtr<Type>(a);
     }
 

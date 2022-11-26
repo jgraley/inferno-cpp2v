@@ -30,7 +30,7 @@ SYM::Lazy<SYM::BooleanExpression> TeleportAgent::SymbolicNormalLinkedQueryPRed()
 }                     
 
 
-set<TreePtr<Node>> TeleportAgent::ExpandNormalDomain( const TreeKit &kit, const unordered_set<XLink> &keyer_xlinks )
+set<TreePtr<Node>> TeleportAgent::ExpandNormalDomain( const TreeKit &kit, const unordered_set<XLink> &keyer_xlinks ) const
 {
     set<TreePtr<Node>> tp_results;
     for( XLink keyer_xlink : keyer_xlinks )
