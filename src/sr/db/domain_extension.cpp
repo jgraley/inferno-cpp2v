@@ -34,25 +34,97 @@ DomainExtension::ExtenderSet DomainExtension::DetermineExtenders( const set<cons
 }
 
 
-DomainExtension::DomainExtension( const XTreeDatabase *db_, ExtenderSet extenders ) :
-    db( db_ ) 
+DomainExtension::DomainExtension( const XTreeDatabase *db, ExtenderSet extenders )
 {
 	for( const Extender *extender : extenders )
-	     channels.insert( make_unique<DomainExtensionChannel>(db, extender) );
+	     channels[extender] = make_unique<DomainExtensionChannel>(db, extender);
 }
 	
 
 void DomainExtension::SetOnExtraXLinkFunctions( OnExtraZoneFunction on_insert_extra_zone_,
                                                 OnExtraZoneFunction on_delete_extra_zone_ )
 {
-    on_insert_extra_zone = on_insert_extra_zone_;
-    on_delete_extra_zone = on_delete_extra_zone_;
-	for( const unique_ptr<DomainExtensionChannel> &channel : channels )
-		channel->SetOnExtraXLinkFunctions( on_insert_extra_zone_, on_delete_extra_zone_ );
+	for( auto &p : channels )
+		p.second->SetOnExtraXLinkFunctions( on_insert_extra_zone_, on_delete_extra_zone_ );
 }
 
 
-XLink DomainExtension::GetUniqueDomainExtension( TreePtr<Node> node ) const
+XLink DomainExtension::GetUniqueDomainExtension( const Extender *extender, TreePtr<Node> node ) const
+{   
+    ASSERT( channels.count(extender) );
+    return channels.at(extender)->GetUniqueDomainExtension( node );
+}
+
+
+void DomainExtension::ExtendDomainNewPattern( const TreeKit &kit, PatternLink root_plink_ )
+{
+	for( auto &p : channels )
+        p.second->ExtendDomain(kit);
+}
+
+
+void DomainExtension::PrepareDelete( DBWalk::Actions &actions )
+{
+	actions.domain_extension_out = [=](const DBWalk::WalkInfo &walk_info)
+	{        
+		for( auto &p : channels )
+			 p.second->Delete( walk_info );
+	};
+}
+
+
+void DomainExtension::PrepareInsert(DBWalk::Actions &actions)
+{
+	actions.domain_extension_in = [=](const DBWalk::WalkInfo &walk_info)
+	{        
+		for( auto &p : channels )
+			 p.second->Insert( walk_info );			 
+	};
+}
+
+
+void DomainExtension::PrepareDeleteExtra( DBWalk::Actions &actions )
+{
+	actions.domain_extension_out = [=](const DBWalk::WalkInfo &walk_info)
+	{        
+		for( auto &p : channels )
+			 p.second->DeleteExtra( walk_info );			
+	};
+}
+
+
+void DomainExtension::PrepareInsertExtra(DBWalk::Actions &actions)
+{
+	actions.domain_extension_in = [=](const DBWalk::WalkInfo &walk_info)
+	{        
+		for( auto &p : channels )
+			 p.second->InsertExtra( walk_info );			 
+	};
+}
+
+
+void DomainExtension::TestRelations( const unordered_set<XLink> &xlinks )
+{	
+}
+
+// ------------------------- DomainExtensionChannel --------------------------
+
+DomainExtensionChannel::DomainExtensionChannel( const XTreeDatabase *db_, const DomainExtension::Extender *extender_ ) :
+    db( db_ ),
+    extender( extender_ )
+{
+}
+
+
+void DomainExtensionChannel::SetOnExtraXLinkFunctions( DomainExtension::OnExtraZoneFunction on_insert_extra_zone_,
+                                                       DomainExtension::OnExtraZoneFunction on_delete_extra_zone_ )
+{
+    on_insert_extra_zone = on_insert_extra_zone_;
+    on_delete_extra_zone = on_delete_extra_zone_;
+}
+
+
+XLink DomainExtensionChannel::GetUniqueDomainExtension( TreePtr<Node> node ) const
 {   
     ASSERT( node );
 
@@ -64,7 +136,7 @@ XLink DomainExtension::GetUniqueDomainExtension( TreePtr<Node> node ) const
 }
 
 
-void DomainExtension::ExtendDomainBaseXLink( const TreeKit &kit, TreePtr<Node> node )
+void DomainExtensionChannel::ExtendDomainBaseXLink( const TreeKit &kit, TreePtr<Node> node )
 {
     ASSERT( node );
 
@@ -104,89 +176,47 @@ void DomainExtension::ExtendDomainBaseXLink( const TreeKit &kit, TreePtr<Node> n
 }
 
 
-void DomainExtension::ExtendDomainPatternWalk( const TreeKit &kit )
+void DomainExtensionChannel::ExtendDomain( const TreeKit &kit )
 {
-	for( const unique_ptr<DomainExtensionChannel> &channel : channels )
-	{
-		// Extend locally first and then pass that into children.
-		// This avoids the need for a reductive "keep trying until no more
-		// extra XLinks are provided" because we know that only the child pattern
-		// can match a pattern node's generated XLink.
-		const unordered_set<XLink> &domain = db->GetDomain().unordered_domain;
-		set<TreePtr<Node>> extend_nodes = channel->extender->ExpandNormalDomain( kit, domain );      
-		if( !extend_nodes.empty() )
-			TRACE("There are extra x domain elements:\n");
+	// Extend locally first and then pass that into children.
+	// This avoids the need for a reductive "keep trying until no more
+	// extra XLinks are provided" because we know that only the child pattern
+	// can match a pattern node's generated XLink.
+	const unordered_set<XLink> &domain = db->GetDomain().unordered_domain;
+	set<TreePtr<Node>> extend_nodes = extender->ExpandNormalDomain( kit, domain );      
+	if( !extend_nodes.empty() )
+		TRACE("There are extra x domain elements:\n");
 
-		for( TreePtr<Node> node : extend_nodes )
-			ExtendDomainBaseXLink( kit, node );
-	}
+	for( TreePtr<Node> node : extend_nodes )
+		ExtendDomainBaseXLink( kit, node );
 }
 
 
-void DomainExtension::ExtendDomainNewPattern( const TreeKit &kit, PatternLink root_plink_ )
+void DomainExtensionChannel::Insert(const DBWalk::WalkInfo &walk_info)
 {
-    ExtendDomainPatternWalk(kit);
+	(void)domain_extension_classes.insert( make_pair( walk_info.x, walk_info.xlink ) );   
 }
 
 
-void DomainExtension::PrepareDelete( DBWalk::Actions &actions )
+void DomainExtensionChannel::Delete(const DBWalk::WalkInfo &walk_info)
 {
-	actions.domain_extension_out = [=](const DBWalk::WalkInfo &walk_info)
-	{        
-		(void)domain_extension_classes.erase( walk_info.x );    
-	};
+	(void)domain_extension_classes.erase( walk_info.x );   
 }
 
 
-void DomainExtension::PrepareInsert(DBWalk::Actions &actions)
+void DomainExtensionChannel::InsertExtra(const DBWalk::WalkInfo &walk_info)
 {
-	actions.domain_extension_in = [=](const DBWalk::WalkInfo &walk_info)
-	{        
-		(void)domain_extension_classes.insert( make_pair( walk_info.x, walk_info.xlink ) );    
-	};
+    // Not solo because domain_extension_classes is not a total ordering- 
+    // there may already be a class for this xlink
+	(void)domain_extension_classes.insert( make_pair( walk_info.x, walk_info.xlink ) );    
 }
 
 
-void DomainExtension::PrepareDeleteExtra( DBWalk::Actions &actions )
+void DomainExtensionChannel::DeleteExtra(const DBWalk::WalkInfo &walk_info)
 {
-	actions.domain_extension_out = [=](const DBWalk::WalkInfo &walk_info)
-	{        
-        // TODO probably erases the class too soon - would need to keep a count of the number of
-        // elements or something and only erase when it hits zero. But there my be bigger fish to fry here.
-		(void)domain_extension_classes.erase( walk_info.x );    
-	};
-}
-
-
-void DomainExtension::PrepareInsertExtra(DBWalk::Actions &actions)
-{
-	actions.domain_extension_in = [=](const DBWalk::WalkInfo &walk_info)
-	{        
-        // Not solo because domain_extension_classes is not a total ordering- 
-        // there may already be a class for this xlink
-		(void)domain_extension_classes.insert( make_pair( walk_info.x, walk_info.xlink ) );    
-	};
-}
-
-
-void DomainExtension::TestRelations( const unordered_set<XLink> &xlinks )
-{	
-}
-
-// ------------------------- DomainExtensionChannel --------------------------
-
-DomainExtensionChannel::DomainExtensionChannel( const XTreeDatabase *db_, const DomainExtension::Extender *extender_ ) :
-    db( db_ ),
-    extender( extender_ )
-{
-}
-
-
-void DomainExtensionChannel::SetOnExtraXLinkFunctions( DomainExtension::OnExtraZoneFunction on_insert_extra_zone_,
-                                                       DomainExtension::OnExtraZoneFunction on_delete_extra_zone_ )
-{
-    on_insert_extra_zone = on_insert_extra_zone_;
-    on_delete_extra_zone = on_delete_extra_zone_;
+    // TODO probably erases the class too soon - would need to keep a count of the number of
+    // elements or something and only erase when it hits zero. But there my be bigger fish to fry here.
+	(void)domain_extension_classes.erase( walk_info.x );    
 }
 
 

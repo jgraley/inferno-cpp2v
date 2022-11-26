@@ -117,7 +117,7 @@ unique_ptr<SymbolResultInterface> TeleportAgent::TeleportOperator::Evaluate( con
 
     // We are required to have already added the new node to the domain
     // during domain extension, so use the node to fetch the unbique XLink
-    XLink unique_xlink = kit.x_tree_db->GetUniqueDomainExtension(tp_result.second);
+    XLink unique_xlink = kit.x_tree_db->GetUniqueDomainExtension(agent, tp_result.second);
     
     // Form a symbol result to return.       
     return make_unique<SymbolResult>( unique_xlink );

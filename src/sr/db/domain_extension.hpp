@@ -29,6 +29,7 @@ class DomainExtensionChannel;
 
 // ------------------------- DomainExtension --------------------------
 
+// Once instance in X tree database covers all domain and all agents
 class DomainExtension
 {   
 public:
@@ -59,10 +60,8 @@ public:
                                    OnExtraZoneFunction on_delete_extra_zone = OnExtraZoneFunction() );
 
     // Add xlink to domain extension if not already there, and return the cannonical one.
-    XLink GetUniqueDomainExtension( TreePtr<Node> node ) const; 
+    XLink GetUniqueDomainExtension( const Extender *extender, TreePtr<Node> node ) const; 
     
-    void ExtendDomainBaseXLink( const TreeKit &kit, TreePtr<Node> node );
-    void ExtendDomainPatternWalk( const TreeKit &kit );
     void ExtendDomainNewPattern( const TreeKit &kit, PatternLink root_plink );
 
     void PrepareDelete(DBWalk::Actions &actions);
@@ -71,20 +70,17 @@ public:
 	void PrepareInsertExtra(DBWalk::Actions &actions);
 
     void TestRelations( const unordered_set<XLink> &xlinks );
-        
-    // SimpleCompare equivalence classes over the domain.
-    map<TreePtr<Node>, XLink, SimpleCompare> domain_extension_classes;
 
 private:
-    const XTreeDatabase *db;
-  	set<unique_ptr<DomainExtensionChannel>> channels;
-  	
-    OnExtraZoneFunction on_insert_extra_zone;
-    OnExtraZoneFunction on_delete_extra_zone;
+	// Map equivalence classes of extender agents onto our channel objects
+	// so that we have one for each equaivalence class.
+  	map<const Extender *, unique_ptr<DomainExtensionChannel>, ExtenderClassRelation> channels;
 };    
     
 // ------------------------- DomainExtensionChannel --------------------------
 
+// An instance for each equaivalence class of domain-extender agents, 
+// covers whole domain for that extender algorithm.
 class DomainExtensionChannel
 {
 public:	
@@ -93,12 +89,24 @@ public:
 	void SetOnExtraXLinkFunctions( DomainExtension::OnExtraZoneFunction on_insert_extra_zone,
                                    DomainExtension::OnExtraZoneFunction on_delete_extra_zone = DomainExtension::OnExtraZoneFunction() );
 
-//private:
+	XLink GetUniqueDomainExtension( TreePtr<Node> node ) const;
+    void ExtendDomainBaseXLink( const TreeKit &kit, TreePtr<Node> node );
+	void ExtendDomain( const TreeKit &kit );
+
+	void Insert(const DBWalk::WalkInfo &walk_info);
+	void Delete(const DBWalk::WalkInfo &walk_info);
+	void InsertExtra(const DBWalk::WalkInfo &walk_info);
+	void DeleteExtra(const DBWalk::WalkInfo &walk_info);
+
+private:
     const XTreeDatabase *db;
 	const DomainExtension::Extender *extender;
 
     DomainExtension::OnExtraZoneFunction on_insert_extra_zone;
     DomainExtension::OnExtraZoneFunction on_delete_extra_zone;
+
+    // SimpleCompare equivalence classes over the domain.
+    map<TreePtr<Node>, XLink, SimpleCompare> domain_extension_classes;
 };
     
     

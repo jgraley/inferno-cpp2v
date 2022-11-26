@@ -49,7 +49,7 @@ public:
     void InitialWalk( const DBWalk::Actions *actions,
                       XLink root_xlink );
 
-    XLink GetUniqueDomainExtension( TreePtr<Node> node ) const;
+    XLink GetUniqueDomainExtension( const DomainExtension::Extender *extender, TreePtr<Node> node ) const;
     void ExtendDomainNewPattern( PatternLink root_plink );
    	const Domain &GetDomain() const;
 
