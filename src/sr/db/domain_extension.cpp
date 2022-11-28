@@ -208,13 +208,13 @@ void DomainExtensionChannel::Complete( const TreeKit &kit )
 
 void DomainExtensionChannel::Insert(const DBWalk::WalkInfo &walk_info)
 {
-	(void)domain_extension_classes.insert( make_pair( walk_info.x, walk_info.xlink ) );   
+	//(void)domain_extension_classes.insert( make_pair( walk_info.x, walk_info.xlink ) );   
 }
 
 
 void DomainExtensionChannel::Delete(const DBWalk::WalkInfo &walk_info)
 {
-	(void)domain_extension_classes.erase( walk_info.x );   
+	//(void)domain_extension_classes.erase( walk_info.x );   
 }
 
 
