@@ -46,7 +46,7 @@ public:
     void GenerateGraphRegions( int step_index, Graph &graph ) const;
     string GetStepName( int step_index ) const;
 
-    void ExtendDomainNewPattern( PatternLink root_plink );
+    void CompleteDomainExtension();
     void ExecuteUpdateCommand( shared_ptr<UpdateCommand> cmd );
     
     void XTreeDbDump() const;

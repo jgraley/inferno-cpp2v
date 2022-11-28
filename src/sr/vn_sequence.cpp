@@ -144,10 +144,10 @@ string VNSequence::GetStepName( int step_index ) const
 }
 
 
-void VNSequence::ExtendDomainNewPattern( PatternLink base_plink )
+void VNSequence::CompleteDomainExtension()
 {
     ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");    
-    x_tree_db->ExtendDomainNewPattern( base_plink );
+    x_tree_db->CompleteDomainExtension();
 }
 
 

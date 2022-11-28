@@ -56,10 +56,10 @@ XLink DomainExtension::GetUniqueDomainExtension( const Extender *extender, TreeP
 }
 
 
-void DomainExtension::ExtendDomainNewPattern( const TreeKit &kit, PatternLink root_plink_ )
+void DomainExtension::Complete( const TreeKit &kit )
 {
 	for( auto &p : channels )
-        p.second->ExtendDomain(kit);
+        p.second->Complete(kit);
 }
 
 
@@ -176,7 +176,7 @@ void DomainExtensionChannel::ExtendDomainBaseXLink( const TreeKit &kit, TreePtr<
 }
 
 
-void DomainExtensionChannel::ExtendDomain( const TreeKit &kit )
+void DomainExtensionChannel::Complete( const TreeKit &kit )
 {
 	// Extend locally first and then pass that into children.
 	// This avoids the need for a reductive "keep trying until no more

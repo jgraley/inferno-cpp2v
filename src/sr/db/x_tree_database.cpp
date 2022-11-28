@@ -132,10 +132,10 @@ XLink XTreeDatabase::GetUniqueDomainExtension( const DomainExtension::Extender *
 }
 
 
-void XTreeDatabase::ExtendDomainNewPattern( PatternLink root_plink )
+void XTreeDatabase::CompleteDomainExtension()
 {
     ASSERT( root_xlink );
-	plan.domain_extension->ExtendDomainNewPattern( *this, root_plink );
+	plan.domain_extension->Complete( *this );
 }
 
 	

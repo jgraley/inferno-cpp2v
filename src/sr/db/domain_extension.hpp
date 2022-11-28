@@ -62,7 +62,8 @@ public:
     // Add xlink to domain extension if not already there, and return the cannonical one.
     XLink GetUniqueDomainExtension( const Extender *extender, TreePtr<Node> node ) const; 
     
-    void ExtendDomainNewPattern( const TreeKit &kit, PatternLink root_plink );
+    // To be called after modifying the tree, and before any search/compare operation
+    void Complete( const TreeKit &kit );
 
     void PrepareDelete(DBWalk::Actions &actions);
 	void PrepareInsert(DBWalk::Actions &actions);
@@ -91,7 +92,7 @@ public:
 
 	XLink GetUniqueDomainExtension( TreePtr<Node> node ) const;
     void ExtendDomainBaseXLink( const TreeKit &kit, TreePtr<Node> node );
-	void ExtendDomain( const TreeKit &kit );
+	void Complete( const TreeKit &kit );
 
 	void Insert(const DBWalk::WalkInfo &walk_info);
 	void Delete(const DBWalk::WalkInfo &walk_info);
