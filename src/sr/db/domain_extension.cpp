@@ -173,8 +173,10 @@ void DomainExtensionChannel::ExtendDomainBaseXLink( const TreeKit &kit, TreePtr<
     TRACE("Zone is ")(extra_zone)("\n"); 
 #endif    
         
-    // Add this domain extension to the whole database including
-    // our domain_extension_classes
+    // Add this xlink to the extension classes as initial
+	(void)domain_extension_classes.insert( make_pair( extra_xlink.GetChildX(), extra_xlink ) );    
+        
+    // Add the whole zon to the rest of the database
     on_insert_extra_zone( extra_zone );        
     
     // Ensure the original tree is found in the domain now (it wasn't 
@@ -183,14 +185,9 @@ void DomainExtensionChannel::ExtendDomainBaseXLink( const TreeKit &kit, TreePtr<
 }
 
 
-void DomainExtensionChannel::InitialBuild( const TreeKit &kit )
+void DomainExtensionChannel::ExtendDomain( const TreeKit &kit, const unordered_set<XLink> &new_domain )
 {
-	// Extend locally first and then pass that into children.
-	// This avoids the need for a reductive "keep trying until no more
-	// extra XLinks are provided" because we know that only the child pattern
-	// can match a pattern node's generated XLink.
-	const unordered_set<XLink> &domain = db->GetDomain().unordered_domain;
-	set<TreePtr<Node>> extend_nodes = extender->ExpandNormalDomain( kit, domain );      
+	set<TreePtr<Node>> extend_nodes = extender->ExpandNormalDomain( kit, new_domain );      
 	if( !extend_nodes.empty() )
 		TRACE("There are extra x domain elements:\n");
 
@@ -199,38 +196,37 @@ void DomainExtensionChannel::InitialBuild( const TreeKit &kit )
 }
 
 
+void DomainExtensionChannel::InitialBuild( const TreeKit &kit )
+{
+	ExtendDomain( kit, db->GetDomain().unordered_domain );
+}
+
+
 void DomainExtensionChannel::Complete( const TreeKit &kit )
 {
-    // TODO less than this
-	InitialBuild( kit );
+    // TODO only do what's left over as invalid from previous deletes 
+    // and not restored by inserts
+	ExtendDomain( kit, db->GetDomain().unordered_domain );
 }
 
 
 void DomainExtensionChannel::Insert(const DBWalk::WalkInfo &walk_info)
 {
-	//(void)domain_extension_classes.insert( make_pair( walk_info.x, walk_info.xlink ) );   
 }
 
 
 void DomainExtensionChannel::Delete(const DBWalk::WalkInfo &walk_info)
 {
-	//(void)domain_extension_classes.erase( walk_info.x );   
 }
 
 
 void DomainExtensionChannel::InsertExtra(const DBWalk::WalkInfo &walk_info)
 {
-    // Not solo because domain_extension_classes is not a total ordering- 
-    // there may already be a class for this xlink
-	(void)domain_extension_classes.insert( make_pair( walk_info.x, walk_info.xlink ) );    
 }
 
 
 void DomainExtensionChannel::DeleteExtra(const DBWalk::WalkInfo &walk_info)
 {
-    // TODO probably erases the class too soon - would need to keep a count of the number of
-    // elements or something and only erase when it hits zero. But there my be bigger fish to fry here.
-	(void)domain_extension_classes.erase( walk_info.x );    
 }
 
 

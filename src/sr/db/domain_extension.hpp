@@ -93,6 +93,7 @@ public:
 
 	XLink GetUniqueDomainExtension( TreePtr<Node> node ) const;
     void ExtendDomainBaseXLink( const TreeKit &kit, TreePtr<Node> node );
+    void ExtendDomain( const TreeKit &kit, const unordered_set<XLink> &new_domain );
 	void InitialBuild( const TreeKit &kit );
 	void Complete( const TreeKit &kit );
 
