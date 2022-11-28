@@ -56,6 +56,13 @@ XLink DomainExtension::GetUniqueDomainExtension( const Extender *extender, TreeP
 }
 
 
+void DomainExtension::InitialBuild( const TreeKit &kit )
+{
+	for( auto &p : channels )
+        p.second->InitialBuild(kit);
+}
+
+
 void DomainExtension::Complete( const TreeKit &kit )
 {
 	for( auto &p : channels )
@@ -176,7 +183,7 @@ void DomainExtensionChannel::ExtendDomainBaseXLink( const TreeKit &kit, TreePtr<
 }
 
 
-void DomainExtensionChannel::Complete( const TreeKit &kit )
+void DomainExtensionChannel::InitialBuild( const TreeKit &kit )
 {
 	// Extend locally first and then pass that into children.
 	// This avoids the need for a reductive "keep trying until no more
@@ -189,6 +196,13 @@ void DomainExtensionChannel::Complete( const TreeKit &kit )
 
 	for( TreePtr<Node> node : extend_nodes )
 		ExtendDomainBaseXLink( kit, node );
+}
+
+
+void DomainExtensionChannel::Complete( const TreeKit &kit )
+{
+    // TODO less than this
+	InitialBuild( kit );
 }
 
 

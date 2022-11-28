@@ -54,8 +54,9 @@ void XTreeDatabase::InitialBuild()
     plan.indexes->PrepareInsert( actions );
     plan.link_table->PrepareInsert( actions );
     plan.node_table->PrepareInsert( actions );
-    plan.domain_extension->PrepareInsert( actions );
     InitialWalk( &actions, root_xlink );
+
+    plan.domain_extension->InitialBuild( *this );
 }
 
 

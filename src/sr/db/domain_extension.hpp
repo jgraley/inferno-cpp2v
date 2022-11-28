@@ -63,6 +63,7 @@ public:
     XLink GetUniqueDomainExtension( const Extender *extender, TreePtr<Node> node ) const; 
     
     // To be called after modifying the tree, and before any search/compare operation
+    void InitialBuild( const TreeKit &kit );
     void Complete( const TreeKit &kit );
 
     void PrepareDelete(DBWalk::Actions &actions);
@@ -92,6 +93,7 @@ public:
 
 	XLink GetUniqueDomainExtension( TreePtr<Node> node ) const;
     void ExtendDomainBaseXLink( const TreeKit &kit, TreePtr<Node> node );
+	void InitialBuild( const TreeKit &kit );
 	void Complete( const TreeKit &kit );
 
 	void Insert(const DBWalk::WalkInfo &walk_info);
