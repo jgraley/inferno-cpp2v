@@ -28,7 +28,7 @@ TeleportAgent::TeleportResult TransformOfAgent::RunTeleportQuery( const TreeKit 
 
     try
     {
-		Transformation::AugTreePtr<Node> trans = (*transformation)( kit, keyer_x );   // TODO use AugTreePtr result, turn into pair<Xlink, TreePtr<Node>>   
+		AugTreePtr<Node> trans = (*transformation)( kit, keyer_x );   // TODO use AugTreePtr result, turn into pair<Xlink, TreePtr<Node>>   
 		ASSERT( !trans || ((TreePtr<Node>)trans)->IsFinal() )(*this)(" computed non-final ")((TreePtr<Node>)trans)(" from ")(keyer_x)("\n");                             
 		if( !(TreePtr<Node>)trans ) // NULL
             return TeleportResult(); 

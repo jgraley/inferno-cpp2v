@@ -22,8 +22,10 @@ TreePtr<Identifier> GetIdentifierOfDeclaration( TreePtr<Declaration> d )
 }
 
 	
-Transformation::AugTreePtr<Node> HasDeclaration::operator()( const TreeKit &kit, TreePtr<Node> node ) try
+AugTreePtr<Node> HasDeclaration::operator()( const TreeKit &kit, TreePtr<Node> node ) try
 {
+    ReportingTreeAccess rta;
+    
     set<TreeKit::LinkInfo> declarer_infos = kit.GetDeclarers( node );
     
     if( declarer_infos.empty() )
@@ -37,19 +39,19 @@ Transformation::AugTreePtr<Node> HasDeclaration::operator()( const TreeKit &kit,
     // function decl/def are folded, so we expect only one declarer
     TreePtr<Node> declarer = OnlyElementOf( declarer_infos ).first;
     
-    // To be able to represent the declarer as a node in the tree, we
+    // If we don't require reports, just return the node and we're done
+    if( !kit.IsRequireReports() )
+        return AugTreePtr<Node>(declarer);
+    
+    // To be able to report the declarer as a node in the tree, we
     // must find its parent link
     set<TreeKit::LinkInfo> parent_infos = kit.GetParents( declarer );
+    const TreePtrInterface *declarer_parent_link = OnlyElementOf( parent_infos ).second;
 
-    if( parent_infos.empty() )
-    {
-        return AugTreePtr<Node>(declarer);
-    }
-    else
-    {
-        const TreePtrInterface *declarer_parent_link = OnlyElementOf( parent_infos ).second;
-        return AugTreePtr<Node>(declarer, declarer_parent_link); 
-    }
+    // Report and return
+    return AugTreePtr<Node>(declarer, declarer_parent_link); 
+    
+    // TODO arenm't declarations always in-tree? So we never need to declare anything, because there's no domain extension!
 }
 catch( TreeKit::UnknownNode &) 
 {

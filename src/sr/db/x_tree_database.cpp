@@ -253,6 +253,12 @@ void XTreeDatabase::Dump() const
 }
 
 
+bool XTreeDatabase::IsRequireReports() const
+{
+    return true; // Yes we do, we're the actual database, and must maintain domain extension info
+}    
+
+
 set<TreeKit::LinkInfo> XTreeDatabase::GetParents( TreePtr<Node> node ) const
 {
     set<LinkInfo> infos;
@@ -261,9 +267,7 @@ set<TreeKit::LinkInfo> XTreeDatabase::GetParents( TreePtr<Node> node ) const
         throw UnknownNode();
         
     NodeTable::Row row = plan.node_table->GetRow(node);
-    // Note that row.declarers is "precise", i.e. the XLinks are the actual
-    // declaring xlinks, not just arbitrary parent links to the declaree.
-    // Also correct for parallel links where only some declare.
+    ASSERT( !row.parents.empty() )("node=")(node);
     for( XLink parent_xlink : row.parents )
     {
         LinkInfo info;
@@ -278,6 +282,7 @@ set<TreeKit::LinkInfo> XTreeDatabase::GetParents( TreePtr<Node> node ) const
         
         infos.insert( info );
     }
+    ASSERT( !infos.empty() )("node=")(node);
     return infos;
 }
 

@@ -16,6 +16,12 @@ ReferenceTreeKit::ReferenceTreeKit( TreePtr<Node> context_ ) :
 }
 
 	
+bool ReferenceTreeKit::IsRequireReports() const
+{
+    return false; // No we don't, we're just the reference one
+}    
+
+
 set<ReferenceTreeKit::LinkInfo> ReferenceTreeKit::GetParents( TreePtr<Node> node ) const
 {
 	set<LinkInfo> infos;
