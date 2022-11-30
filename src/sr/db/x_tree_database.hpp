@@ -18,7 +18,7 @@ namespace SR
 {    
     
 class XTreeDatabase : public Traceable, 
-                      public TreeKit
+                      public NavigationUtils
 {
 public:
     XTreeDatabase( XLink root_xlink, shared_ptr<Lacing> lacing, DomainExtension::ExtenderSet domain_extenders );

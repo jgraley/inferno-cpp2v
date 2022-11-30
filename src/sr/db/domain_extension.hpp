@@ -36,7 +36,7 @@ public:
 	class Extender : public virtual Traceable
 	{
 	public:
-		virtual set<TreePtr<Node>> ExpandNormalDomain( const TreeKit &kit, const unordered_set<XLink> &xlinks ) const = 0;
+		virtual set<TreePtr<Node>> ExpandNormalDomain( const XTreeDatabase *db, const unordered_set<XLink> &xlinks ) const = 0;
 		virtual bool IsExtenderLess( const Extender &r ) const = 0;
 		virtual int GetExtenderOrdinal() const = 0;
 	};
@@ -63,8 +63,8 @@ public:
     XLink GetUniqueDomainExtension( const Extender *extender, TreePtr<Node> node ) const; 
     
     // To be called after modifying the tree, and before any search/compare operation
-    void InitialBuild( const TreeKit &kit );
-    void Complete( const TreeKit &kit );
+    void InitialBuild();
+    void Complete();
 
     void PrepareDelete(DBWalk::Actions &actions);
 	void PrepareInsert(DBWalk::Actions &actions);
@@ -92,10 +92,10 @@ public:
                                    DomainExtension::OnExtraZoneFunction on_delete_extra_zone = DomainExtension::OnExtraZoneFunction() );
 
 	XLink GetUniqueDomainExtension( TreePtr<Node> node ) const;
-    void ExtendDomainBaseXLink( const TreeKit &kit, TreePtr<Node> node );
-    void ExtendDomain( const TreeKit &kit, const unordered_set<XLink> &new_domain );
-	void InitialBuild( const TreeKit &kit );
-	void Complete( const TreeKit &kit );
+    void ExtendDomainBaseXLink( TreePtr<Node> node );
+    void ExtendDomain(const unordered_set<XLink> &new_domain );
+	void InitialBuild();
+	void Complete();
 
 	void Insert(const DBWalk::WalkInfo &walk_info);
 	void Delete(const DBWalk::WalkInfo &walk_info);

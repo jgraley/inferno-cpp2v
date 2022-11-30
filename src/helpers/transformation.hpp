@@ -138,7 +138,7 @@ class ReportingTreeAccess
 
 
 
-class TreeKit
+class NavigationUtils
 {
 public:	
     class UnknownNode : public Exception {};
@@ -149,32 +149,39 @@ public:
     virtual bool IsRequireReports() const = 0;
 	virtual set<LinkInfo> GetParents( TreePtr<Node> node ) const = 0;
 	virtual set<LinkInfo> GetDeclarers( TreePtr<Node> node ) const = 0;
-    virtual ~TreeKit();
+    virtual ~NavigationUtils();
 };
 
 
-class ReferenceTreeKit : public TreeKit
+class ReferenceNavigationUtils : public NavigationUtils
 {
 public:	
-	ReferenceTreeKit( TreePtr<Node> context_ );
+	ReferenceNavigationUtils( TreePtr<Node> root_ );
 
     bool IsRequireReports() const override;
 	set<LinkInfo> GetParents( TreePtr<Node> node ) const override;
 	set<LinkInfo> GetDeclarers( TreePtr<Node> node ) const override;
 	
 private:
-	TreePtr<Node> context;
+	TreePtr<Node> root;
 };
 
 
 class Transformation : public virtual Graphable
 {
-public:
-
+public:   
+    struct TreeKit
+    {
+        const NavigationUtils *nav;
+    };
     
-    // Apply this transformation to tree at root, using context for decls etc.
-    virtual AugTreePtr<Node> operator()( const TreeKit &kit, // Handy functions
-    		                             TreePtr<Node> node ) = 0;    // Root of the subtree we want to modify    		                          
+    // Apply this transformation to tree at node, using root for decls etc.
+    AugTreePtr<Node> operator()( TreePtr<Node> node, 
+    		                     TreePtr<Node> root );
+                                         	                          
+    // Apply this transformation to tree at node, using kit for decls etc.
+    virtual AugTreePtr<Node> ApplyTransformation( const TreeKit &kit, // Handy functions
+    		                                      TreePtr<Node> node ) = 0;    // Root of the subtree we want to modify    		                          
 };
 
 #endif

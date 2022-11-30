@@ -56,7 +56,7 @@ void XTreeDatabase::InitialBuild()
     plan.node_table->PrepareInsert( actions );
     InitialWalk( &actions, root_xlink );
 
-    plan.domain_extension->InitialBuild( *this );
+    plan.domain_extension->InitialBuild();
 }
 
 
@@ -136,7 +136,7 @@ XLink XTreeDatabase::GetUniqueDomainExtension( const DomainExtension::Extender *
 void XTreeDatabase::CompleteDomainExtension()
 {
     ASSERT( root_xlink );
-	plan.domain_extension->Complete( *this );
+	plan.domain_extension->Complete();
 }
 
 	
@@ -259,7 +259,7 @@ bool XTreeDatabase::IsRequireReports() const
 }    
 
 
-set<TreeKit::LinkInfo> XTreeDatabase::GetParents( TreePtr<Node> node ) const
+set<NavigationUtils::LinkInfo> XTreeDatabase::GetParents( TreePtr<Node> node ) const
 {
     set<LinkInfo> infos;
    
@@ -287,7 +287,7 @@ set<TreeKit::LinkInfo> XTreeDatabase::GetParents( TreePtr<Node> node ) const
 }
 
 
-set<TreeKit::LinkInfo> XTreeDatabase::GetDeclarers( TreePtr<Node> node ) const
+set<NavigationUtils::LinkInfo> XTreeDatabase::GetDeclarers( TreePtr<Node> node ) const
 {
     set<LinkInfo> infos;
    

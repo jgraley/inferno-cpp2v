@@ -5,28 +5,28 @@
 #include "flatten.hpp"
 #include "transformation.hpp"
 
-TreeKit::~TreeKit()
+NavigationUtils::~NavigationUtils()
 {
 }
 
 
-ReferenceTreeKit::ReferenceTreeKit( TreePtr<Node> context_ ) :
-	context( context_ )
+ReferenceNavigationUtils::ReferenceNavigationUtils( TreePtr<Node> root_ ) :
+	root( root_ )
 {
 }
 
 	
-bool ReferenceTreeKit::IsRequireReports() const
+bool ReferenceNavigationUtils::IsRequireReports() const
 {
     return false; // No we don't, we're just the reference one
 }    
 
 
-set<ReferenceTreeKit::LinkInfo> ReferenceTreeKit::GetParents( TreePtr<Node> node ) const
+set<NavigationUtils::LinkInfo> ReferenceNavigationUtils::GetParents( TreePtr<Node> node ) const
 {
 	set<LinkInfo> infos;
 	
-	Walk w(context, nullptr, nullptr);
+	Walk w(root, nullptr, nullptr);
 	for( const TreePtrInterface &n : w )
 	{
         FlattenNode flat( node );
@@ -44,11 +44,11 @@ set<ReferenceTreeKit::LinkInfo> ReferenceTreeKit::GetParents( TreePtr<Node> node
 }
 
 
-set<ReferenceTreeKit::LinkInfo> ReferenceTreeKit::GetDeclarers( TreePtr<Node> node ) const
+set<NavigationUtils::LinkInfo> ReferenceNavigationUtils::GetDeclarers( TreePtr<Node> node ) const
 {
 	set<LinkInfo> infos;
 	
-	Walk w(context, nullptr, nullptr);
+	Walk w(root, nullptr, nullptr);
 	for( const TreePtrInterface &n : w )
 	{
 		set<const TreePtrInterface *> declared = ((TreePtr<Node>)n)->GetDeclared();
@@ -63,4 +63,13 @@ set<ReferenceTreeKit::LinkInfo> ReferenceTreeKit::GetDeclarers( TreePtr<Node> no
 	}
 	
 	return infos;
+}
+
+
+AugTreePtr<Node> Transformation::operator()( TreePtr<Node> node, 
+    		                                 TreePtr<Node> root	)
+{
+    ReferenceNavigationUtils nav(root);
+    TreeKit kit { &nav };
+    return ApplyTransformation( kit, node );
 }

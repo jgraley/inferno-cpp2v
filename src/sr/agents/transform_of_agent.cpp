@@ -13,7 +13,7 @@ shared_ptr<PatternQuery> TransformOfAgent::GetPatternQuery() const
 }
 
 
-TeleportAgent::TeleportResult TransformOfAgent::RunTeleportQuery( const TreeKit &kit, XLink keyer_xlink ) const
+TeleportAgent::TeleportResult TransformOfAgent::RunTeleportQuery( const XTreeDatabase *db, XLink keyer_xlink ) const
 {
     // Transform the candidate expression, sharing the x_tree_db as a TreeKit
     // so that implementations can use handy features without needing to search
@@ -26,9 +26,11 @@ TeleportAgent::TeleportResult TransformOfAgent::RunTeleportQuery( const TreeKit 
          
     TreePtr<Node> keyer_x = keyer_xlink.GetChildX();
 
+    Transformation::TreeKit kit { db };
+
     try
     {
-		AugTreePtr<Node> trans = (*transformation)( kit, keyer_x );   // TODO use AugTreePtr result, turn into pair<Xlink, TreePtr<Node>>   
+		AugTreePtr<Node> trans = transformation->ApplyTransformation( kit, keyer_x );   // TODO use AugTreePtr result, turn into pair<Xlink, TreePtr<Node>>   
 		ASSERT( !trans || ((TreePtr<Node>)trans)->IsFinal() )(*this)(" computed non-final ")((TreePtr<Node>)trans)(" from ")(keyer_x)("\n");                             
 		if( !(TreePtr<Node>)trans ) // NULL
             return TeleportResult(); 

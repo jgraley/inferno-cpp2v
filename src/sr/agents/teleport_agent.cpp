@@ -30,7 +30,7 @@ SYM::Lazy<SYM::BooleanExpression> TeleportAgent::SymbolicNormalLinkedQueryPRed()
 }                     
 
 
-set<TreePtr<Node>> TeleportAgent::ExpandNormalDomain( const TreeKit &kit, const unordered_set<XLink> &keyer_xlinks ) const
+set<TreePtr<Node>> TeleportAgent::ExpandNormalDomain( const XTreeDatabase *db, const unordered_set<XLink> &keyer_xlinks ) const
 {
     set<TreePtr<Node>> tp_results;
     for( XLink keyer_xlink : keyer_xlinks )
@@ -43,7 +43,7 @@ set<TreePtr<Node>> TeleportAgent::ExpandNormalDomain( const TreeKit &kit, const 
 		TeleportResult tp_result;
         try
         {
-			tp_result = RunTeleportQuery( kit, keyer_xlink );
+			tp_result = RunTeleportQuery( db, keyer_xlink );
         }
         catch( ::Mismatch & ) 
         {
@@ -102,7 +102,7 @@ unique_ptr<SymbolResultInterface> TeleportAgent::TeleportOperator::Evaluate( con
         
     // Apply the teleporting operation to the xlink. It may create new nodes
     // so it returns a TreePtr<Node> to avoid creating new xlink without base.
-    TeleportResult tp_result = agent->RunTeleportQuery( *(kit.x_tree_db), keyer_xlink );
+    TeleportResult tp_result = agent->RunTeleportQuery( kit.x_tree_db, keyer_xlink );
 
     // Teleporting operation can fail: if so call it a NaS
     if( !tp_result.second )

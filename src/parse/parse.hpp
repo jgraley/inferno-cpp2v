@@ -752,7 +752,8 @@ private:
 			// At this point, when we have the instance (and hence the type) and the initialiser
 			// we can detect when an array initialiser has been inserted for a record instance and
 			// change it.
-			ReferenceTreeKit kit(all_decls);
+			ReferenceNavigationUtils nav(all_decls);
+            Transformation::TreeKit kit { &nav };
 			if ( TreePtr<MakeArray> ai = DynamicTreePtrCast<MakeArray>(o->initialiser) )
 				if ( TreePtr<TypeIdentifier> ti = DynamicTreePtrCast<TypeIdentifier>(o->type) )
 					if ( TreePtr<Record> r = GetRecordDeclaration(kit, ti) )
@@ -1057,8 +1058,7 @@ private:
 		c->callee = callee;
 
 		// If CallableParams, fill in the args map based on the supplied args and original function type
-		ReferenceTreeKit kit(all_decls);
-		TreePtr<Node> t = HasType::instance(kit, callee);
+		TreePtr<Node> t = HasType::instance(callee, all_decls);
 		if( TreePtr<CallableParams> p = DynamicTreePtrCast<CallableParams>(t) )
 		    PopulateMapOperator( c, args, p );
 
@@ -1549,10 +1549,11 @@ private:
 		}
 
 		// Find the specified member in the record implied by the expression on the left of .
-		ReferenceTreeKit kit(all_decls);
-		TreePtr<Node> tbase = HasType::instance( kit, a->base );
+		TreePtr<Node> tbase = HasType::instance( a->base, all_decls );
 		TreePtr<TypeIdentifier> tibase = DynamicTreePtrCast<TypeIdentifier>(tbase);
 		ASSERT( tibase );
+        ReferenceNavigationUtils nav(all_decls);
+        Transformation::TreeKit kit { &nav };
 		TreePtr<Record> rbase = GetRecordDeclaration(kit, tibase);
 		ASSERT( rbase )( "thing on left of ./-> is not a record/record ptr" );
 		TreePtr<Instance> m = FindMemberByName( kit, rbase, string(Member.getName()) );
@@ -1817,8 +1818,7 @@ private:
 			ASSERT(0)("typeof() only supported on types at the moment");
 			// TODO This is wrong because we'll get 2 refs to the type, need to duplicate,
 			// or maybe add an alternative node and convert in a S&R
-			ReferenceTreeKit kit(all_decls);
-			p->operand = TreePtr<Type>::DynamicCast( HasType::instance( kit, hold_expr.FromRaw(TyOrEx) ) );
+			p->operand = TreePtr<Type>::DynamicCast( HasType::instance( hold_expr.FromRaw(TyOrEx), all_decls ) );
 		}
 		return hold_expr.ToRaw( p );
 	}
@@ -1914,7 +1914,8 @@ private:
 	{
 		TreePtr<TypeIdentifier> id = DynamicTreePtrCast<TypeIdentifier>(t);
 		ASSERT(id);
-	    ReferenceTreeKit kit(all_decls);
+        ReferenceNavigationUtils nav(all_decls);
+        Transformation::TreeKit kit { &nav };
 		TreePtr<Record> r = GetRecordDeclaration( kit, id );
 
 		for( TreePtr<Declaration> d : r->members )
@@ -2041,7 +2042,8 @@ private:
 		// At this point, when we have the instance (and hence the type) and the initialiser
 		// we can detect when an array initialiser has been inserted for a record instance and
 		// change it.
-		ReferenceTreeKit kit(all_decls);
+        ReferenceNavigationUtils nav(all_decls);
+        Transformation::TreeKit kit { &nav };
 		if( TreePtr<MakeArray> ai = DynamicTreePtrCast<MakeArray>(e) )
 			if( TreePtr<TypeIdentifier> ti = DynamicTreePtrCast<TypeIdentifier>(t) )
 				if( TreePtr<Record> r = GetRecordDeclaration(kit, ti) )

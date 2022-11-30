@@ -56,17 +56,17 @@ XLink DomainExtension::GetUniqueDomainExtension( const Extender *extender, TreeP
 }
 
 
-void DomainExtension::InitialBuild( const TreeKit &kit )
+void DomainExtension::InitialBuild()
 {
 	for( auto &p : channels )
-        p.second->InitialBuild(kit);
+        p.second->InitialBuild();
 }
 
 
-void DomainExtension::Complete( const TreeKit &kit )
+void DomainExtension::Complete()
 {
 	for( auto &p : channels )
-        p.second->Complete(kit);
+        p.second->Complete();
 }
 
 
@@ -143,7 +143,7 @@ XLink DomainExtensionChannel::GetUniqueDomainExtension( TreePtr<Node> node ) con
 }
 
 
-void DomainExtensionChannel::ExtendDomainBaseXLink( const TreeKit &kit, TreePtr<Node> node )
+void DomainExtensionChannel::ExtendDomainBaseXLink( TreePtr<Node> node )
 {
     ASSERT( node );
 
@@ -185,28 +185,28 @@ void DomainExtensionChannel::ExtendDomainBaseXLink( const TreeKit &kit, TreePtr<
 }
 
 
-void DomainExtensionChannel::ExtendDomain( const TreeKit &kit, const unordered_set<XLink> &new_domain )
+void DomainExtensionChannel::ExtendDomain( const unordered_set<XLink> &new_domain )
 {
-	set<TreePtr<Node>> extend_nodes = extender->ExpandNormalDomain( kit, new_domain );      
+	set<TreePtr<Node>> extend_nodes = extender->ExpandNormalDomain( db, new_domain );      
 	if( !extend_nodes.empty() )
 		TRACE("There are extra x domain elements:\n");
 
 	for( TreePtr<Node> node : extend_nodes )
-		ExtendDomainBaseXLink( kit, node );
+		ExtendDomainBaseXLink( node );
 }
 
 
-void DomainExtensionChannel::InitialBuild( const TreeKit &kit )
+void DomainExtensionChannel::InitialBuild()
 {
-	ExtendDomain( kit, db->GetDomain().unordered_domain );
+	ExtendDomain( db->GetDomain().unordered_domain );
 }
 
 
-void DomainExtensionChannel::Complete( const TreeKit &kit )
+void DomainExtensionChannel::Complete()
 {
     // TODO only do what's left over as invalid from previous deletes 
     // and not restored by inserts
-	ExtendDomain( kit, db->GetDomain().unordered_domain );
+	ExtendDomain( db->GetDomain().unordered_domain );
 }
 
 

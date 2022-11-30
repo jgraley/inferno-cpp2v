@@ -17,9 +17,9 @@ public:
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
     typedef pair<XLink, TreePtr<Node>> TeleportResult;
     
-    virtual TeleportResult RunTeleportQuery( const TreeKit &kit, XLink keyer_xlink ) const = 0;
+    virtual TeleportResult RunTeleportQuery( const XTreeDatabase *db, XLink keyer_xlink ) const = 0;
     
-    set<TreePtr<Node>> ExpandNormalDomain( const TreeKit &kit, const unordered_set<XLink> &xlinks ) const override;
+    set<TreePtr<Node>> ExpandNormalDomain( const XTreeDatabase *db, const unordered_set<XLink> &xlinks ) const override;
 
     virtual void Reset();    
 

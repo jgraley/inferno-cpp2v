@@ -22,11 +22,11 @@ TreePtr<Identifier> GetIdentifierOfDeclaration( TreePtr<Declaration> d )
 }
 
 	
-AugTreePtr<Node> HasDeclaration::operator()( const TreeKit &kit, TreePtr<Node> node ) try
+AugTreePtr<Node> HasDeclaration::ApplyTransformation( const TreeKit &kit, TreePtr<Node> node ) try
 {
     ReportingTreeAccess rta;
     
-    set<TreeKit::LinkInfo> declarer_infos = kit.GetDeclarers( node );
+    set<NavigationUtils::LinkInfo> declarer_infos = kit.nav->GetDeclarers( node );
     
     if( declarer_infos.empty() )
     {
@@ -40,20 +40,18 @@ AugTreePtr<Node> HasDeclaration::operator()( const TreeKit &kit, TreePtr<Node> n
     TreePtr<Node> declarer = OnlyElementOf( declarer_infos ).first;
     
     // If we don't require reports, just return the node and we're done
-    if( !kit.IsRequireReports() )
+    if( !kit.nav->IsRequireReports() )
         return AugTreePtr<Node>(declarer);
     
     // To be able to report the declarer as a node in the tree, we
     // must find its parent link
-    set<TreeKit::LinkInfo> parent_infos = kit.GetParents( declarer );
+    set<NavigationUtils::LinkInfo> parent_infos = kit.nav->GetParents( declarer );
     const TreePtrInterface *declarer_parent_link = OnlyElementOf( parent_infos ).second;
 
     // Report and return
     return AugTreePtr<Node>(declarer, declarer_parent_link); 
-    
-    // TODO arenm't declarations always in-tree? So we never need to declare anything, because there's no domain extension!
 }
-catch( TreeKit::UnknownNode &) 
+catch( NavigationUtils::UnknownNode &) 
 {
 #ifdef WARN_UNFOUND_DECL
     FTRACE("Warning: declaration of ")(node)(" not found (UnknownNode)\n");
@@ -66,14 +64,14 @@ catch( TreeKit::UnknownNode &)
 HasDeclaration HasDeclaration::instance; // TODO Use this instead of constructing a temp (could contain lookup tables etc in the future)
 
 // Look for a record, skipping over typedefs. Returns nullptr if not a record.
-TreePtr<Record> GetRecordDeclaration( const TreeKit &kit, TreePtr<TypeIdentifier> id )
+TreePtr<Record> GetRecordDeclaration( const Transformation::TreeKit &kit, TreePtr<TypeIdentifier> id )
 {
-	TreePtr<Node> ut = HasDeclaration()( kit, id );
+	TreePtr<Node> ut = HasDeclaration().ApplyTransformation( kit, id );
 	while( TreePtr<Typedef> td = DynamicTreePtrCast<Typedef>(ut) )
 	{
 	    TreePtr<TypeIdentifier> ti = DynamicTreePtrCast<TypeIdentifier>(td->type);
 	    if(ti)
-	        ut = HasDeclaration()( kit, ti );
+	        ut = HasDeclaration().ApplyTransformation( kit, ti );
 	    else
 	        return TreePtr<Record>(); // not a record
 	}
@@ -83,7 +81,7 @@ TreePtr<Record> GetRecordDeclaration( const TreeKit &kit, TreePtr<TypeIdentifier
 
 
 // Hunt through a record and its bases to find the named member (actually, render string)
-TreePtr<Instance> FindMemberByName( const TreeKit &kit, TreePtr<Record> r, string name )
+TreePtr<Instance> FindMemberByName( const Transformation::TreeKit &kit, TreePtr<Record> r, string name )
 {
     TRACE("Record has %d members\n", r->members.size() );
     
@@ -98,7 +96,7 @@ TreePtr<Instance> FindMemberByName( const TreeKit &kit, TreePtr<Record> r, strin
     if( TreePtr<InheritanceRecord> ir = DynamicTreePtrCast<InheritanceRecord>( r ) )
         for( TreePtr<Base> b : ir->bases )
         {
-            TreePtr<Node> ut = HasDeclaration()( kit, b->record );
+            TreePtr<Node> ut = HasDeclaration().ApplyTransformation( kit, b->record );
             TreePtr<InheritanceRecord> ir = DynamicTreePtrCast<InheritanceRecord>(ut);
             ASSERT(ir);
             if( TreePtr<Instance> i = FindMemberByName( kit, ir, name ) )
