@@ -30,21 +30,20 @@ SYM::Lazy<SYM::BooleanExpression> TeleportAgent::SymbolicNormalLinkedQueryPRed()
 }                     
 
 
-TreePtr<Node> TeleportAgent::ExpandNormalDomain( const XTreeDatabase *db, XLink keyer_xlink ) const
+TreePtr<Node> TeleportAgent::ExpandNormalDomain( const XTreeDatabase *db, XLink keyer_xlink, set<XLink> &deps ) const
 {
+	deps.clear();
+	
 	if( keyer_xlink == XLink::MMAX_Link )
 		return TreePtr<Node>(); // MMAX at base never expands domain because then, all child patterns are also MMAX
 	if( !IsPreRestrictionMatch(keyer_xlink) )
 		return TreePtr<Node>(); // Failed pre-restriction so can't expand domain
 
+	DepRep dep_rep;
 	TeleportResult tp_result;
 	try
 	{
-		DepRep dep_rep;
 		tp_result = RunTeleportQuery( db, &dep_rep, keyer_xlink );
-		auto deps = dep_rep.GetDeps();
-		if( tp_result.first )
-			ASSERT( deps.count( tp_result.first ) > 0 );
 	}
 	catch( ::Mismatch & ) 
 	{
@@ -53,12 +52,15 @@ TreePtr<Node> TeleportAgent::ExpandNormalDomain( const XTreeDatabase *db, XLink 
 	if( !tp_result.second )
 		return TreePtr<Node>();       // NULL  
 
+	deps = dep_rep.GetDeps();	
+	
 	if( tp_result.first ) // parent link was supplied
 	{
 		ASSERT( tp_result.first.GetChildX() == tp_result.second );    
+		ASSERT( deps.count( tp_result.first ) > 0 );
 		return TreePtr<Node>(); // Don't bother Domain when there's an XLink
-	}
-	
+	}		
+
 	return tp_result.second;               
 }
 
@@ -162,3 +164,9 @@ set<XLink> TeleportAgent::DepRep::GetDeps() const
 	return deps;
 }
 
+
+void TeleportAgent::DepRep::Clear()
+{
+	deps.clear();
+}	
+	

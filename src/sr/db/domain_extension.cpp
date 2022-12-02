@@ -189,7 +189,8 @@ void DomainExtensionChannel::ExtendDomain( const unordered_set<XLink> &new_domai
 {
     for( XLink new_xlink : new_domain )
     {
-		TreePtr<Node> node = extender->ExpandNormalDomain( db, new_xlink );  
+		set<XLink> deps;
+		TreePtr<Node> node = extender->ExpandNormalDomain( db, new_xlink, deps );  
     	if( node )
 			ExtendDomainBaseXLink( node );
 	}
