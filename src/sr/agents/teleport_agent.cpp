@@ -30,41 +30,36 @@ SYM::Lazy<SYM::BooleanExpression> TeleportAgent::SymbolicNormalLinkedQueryPRed()
 }                     
 
 
-set<TreePtr<Node>> TeleportAgent::ExpandNormalDomain( const XTreeDatabase *db, const unordered_set<XLink> &keyer_xlinks ) const
+TreePtr<Node> TeleportAgent::ExpandNormalDomain( const XTreeDatabase *db, XLink keyer_xlink ) const
 {
-    set<TreePtr<Node>> tp_results;
-    for( XLink keyer_xlink : keyer_xlinks )
-    {
-        if( keyer_xlink == XLink::MMAX_Link )
-            continue; // MMAX at base never expands domain because then, all child patterns are also MMAX
-        if( !IsPreRestrictionMatch(keyer_xlink) )
-            continue; // Failed pre-restriction so can't expand domain
+	if( keyer_xlink == XLink::MMAX_Link )
+		return TreePtr<Node>(); // MMAX at base never expands domain because then, all child patterns are also MMAX
+	if( !IsPreRestrictionMatch(keyer_xlink) )
+		return TreePtr<Node>(); // Failed pre-restriction so can't expand domain
 
-		TeleportResult tp_result;
-        try
-        {
-			DepRep dep_rep;
-			tp_result = RunTeleportQuery( db, &dep_rep, keyer_xlink );
-			auto deps = dep_rep.GetDeps();
-			if( tp_result.first )
-				ASSERT( deps.count( tp_result.first ) > 0 );
-        }
-        catch( ::Mismatch & ) 
-        {
-			continue;
-		}
-		if( !tp_result.second )
-			continue;       // NULL  
-    
-        if( tp_result.first ) // parent link was supplied
-        {
-            ASSERT( tp_result.first.GetChildX() == tp_result.second );    
-            continue; // Don't bother Domain when there's an XLink
-        }
-        
-		tp_results.insert( tp_result.second );               
-    }
-    return tp_results; 
+	TeleportResult tp_result;
+	try
+	{
+		DepRep dep_rep;
+		tp_result = RunTeleportQuery( db, &dep_rep, keyer_xlink );
+		auto deps = dep_rep.GetDeps();
+		if( tp_result.first )
+			ASSERT( deps.count( tp_result.first ) > 0 );
+	}
+	catch( ::Mismatch & ) 
+	{
+		return TreePtr<Node>();
+	}
+	if( !tp_result.second )
+		return TreePtr<Node>();       // NULL  
+
+	if( tp_result.first ) // parent link was supplied
+	{
+		ASSERT( tp_result.first.GetChildX() == tp_result.second );    
+		return TreePtr<Node>(); // Don't bother Domain when there's an XLink
+	}
+	
+	return tp_result.second;               
 }
 
 

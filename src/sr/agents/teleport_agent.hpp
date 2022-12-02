@@ -19,7 +19,7 @@ public:
     
     virtual TeleportResult RunTeleportQuery( const XTreeDatabase *db, DependencyReporter *dep_rep, XLink keyer_xlink ) const = 0;
     
-    set<TreePtr<Node>> ExpandNormalDomain( const XTreeDatabase *db, const unordered_set<XLink> &xlinks ) const override;
+    TreePtr<Node> ExpandNormalDomain( const XTreeDatabase *db, XLink xlink ) const override;
 
     virtual void Reset();    
 

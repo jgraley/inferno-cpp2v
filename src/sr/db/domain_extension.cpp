@@ -187,12 +187,12 @@ void DomainExtensionChannel::ExtendDomainBaseXLink( TreePtr<Node> node )
 
 void DomainExtensionChannel::ExtendDomain( const unordered_set<XLink> &new_domain )
 {
-	set<TreePtr<Node>> extend_nodes = extender->ExpandNormalDomain( db, new_domain );      
-	if( !extend_nodes.empty() )
-		TRACE("There are extra x domain elements:\n");
-
-	for( TreePtr<Node> node : extend_nodes )
-		ExtendDomainBaseXLink( node );
+    for( XLink new_xlink : new_domain )
+    {
+		TreePtr<Node> node = extender->ExpandNormalDomain( db, new_xlink );  
+    	if( node )
+			ExtendDomainBaseXLink( node );
+	}
 }
 
 
