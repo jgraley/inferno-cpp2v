@@ -43,7 +43,11 @@ set<TreePtr<Node>> TeleportAgent::ExpandNormalDomain( const XTreeDatabase *db, c
 		TeleportResult tp_result;
         try
         {
-			tp_result = RunTeleportQuery( db, keyer_xlink );
+			DepRep dep_rep;
+			tp_result = RunTeleportQuery( db, &dep_rep, keyer_xlink );
+			auto deps = dep_rep.GetDeps();
+			if( tp_result.first )
+				ASSERT( deps.count( tp_result.first ) > 0 );
         }
         catch( ::Mismatch & ) 
         {
@@ -102,7 +106,7 @@ unique_ptr<SymbolResultInterface> TeleportAgent::TeleportOperator::Evaluate( con
         
     // Apply the teleporting operation to the xlink. It may create new nodes
     // so it returns a TreePtr<Node> to avoid creating new xlink without base.
-    TeleportResult tp_result = agent->RunTeleportQuery( kit.x_tree_db, keyer_xlink );
+    TeleportResult tp_result = agent->RunTeleportQuery( kit.x_tree_db, nullptr, keyer_xlink );
 
     // Teleporting operation can fail: if so call it a NaS
     if( !tp_result.second )
@@ -149,3 +153,17 @@ const TeleportAgent *TeleportAgent::TeleportOperator::GetAgent() const
 {
 	return agent;
 }
+
+
+void TeleportAgent::DepRep::ReportTreeNode( const TreePtrInterface *p_tree_ptr )
+{
+	XLink xlink( (TreePtr<Node>)*p_tree_ptr, p_tree_ptr );
+	deps.insert( xlink );
+}
+
+
+set<XLink> TeleportAgent::DepRep::GetDeps() const
+{
+	return deps;
+}
+

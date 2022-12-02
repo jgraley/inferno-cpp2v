@@ -28,7 +28,7 @@ public:
     }
 
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    TeleportResult RunTeleportQuery( const XTreeDatabase *db, XLink keyer_xlink ) const override;                
+    TeleportResult RunTeleportQuery( const XTreeDatabase *db, DependencyReporter *dep_rep, XLink keyer_xlink ) const override;                
 
     virtual Block GetGraphBlockInfo() const;
     string GetName() const override;

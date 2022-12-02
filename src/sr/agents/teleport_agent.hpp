@@ -17,7 +17,7 @@ public:
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
     typedef pair<XLink, TreePtr<Node>> TeleportResult;
     
-    virtual TeleportResult RunTeleportQuery( const XTreeDatabase *db, XLink keyer_xlink ) const = 0;
+    virtual TeleportResult RunTeleportQuery( const XTreeDatabase *db, DependencyReporter *dep_rep, XLink keyer_xlink ) const = 0;
     
     set<TreePtr<Node>> ExpandNormalDomain( const XTreeDatabase *db, const unordered_set<XLink> &xlinks ) const override;
 
@@ -46,6 +46,16 @@ public:
         const TeleportAgent *agent;
         shared_ptr<SymbolExpression> keyer;
     };
+    
+    class DepRep : public DependencyReporter
+	{
+	public:	
+		void ReportTreeNode( const TreePtrInterface *p_tree_ptr ) override;
+		set<XLink> GetDeps() const;
+		
+	private:
+		set<XLink> deps;
+	};
 };
 
 };

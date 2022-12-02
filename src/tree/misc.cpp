@@ -23,9 +23,7 @@ TreePtr<Identifier> GetIdentifierOfDeclaration( TreePtr<Declaration> d )
 
 	
 AugTreePtr<Node> HasDeclaration::ApplyTransformation( const TreeKit &kit, TreePtr<Node> node ) try
-{
-    ReportingTreeAccess rta;
-    
+{    
     set<NavigationUtils::LinkInfo> declarer_infos = kit.nav->GetDeclarers( node );
     
     if( declarer_infos.empty() )
@@ -49,7 +47,7 @@ AugTreePtr<Node> HasDeclaration::ApplyTransformation( const TreeKit &kit, TreePt
     const TreePtrInterface *declarer_parent_link = OnlyElementOf( parent_infos ).second;
 
     // Report and return
-    return AugTreePtr<Node>(declarer, declarer_parent_link); 
+    return AugTreePtr<Node>(declarer, declarer_parent_link, kit.dep_rep); 
 }
 catch( NavigationUtils::UnknownNode &) 
 {

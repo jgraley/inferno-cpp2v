@@ -13,7 +13,7 @@ shared_ptr<PatternQuery> TransformOfAgent::GetPatternQuery() const
 }
 
 
-TeleportAgent::TeleportResult TransformOfAgent::RunTeleportQuery( const XTreeDatabase *db, XLink keyer_xlink ) const
+TeleportAgent::TeleportResult TransformOfAgent::RunTeleportQuery( const XTreeDatabase *db, DependencyReporter *dep_rep, XLink keyer_xlink ) const
 {
     // Transform the candidate expression, sharing the x_tree_db as a TreeKit
     // so that implementations can use handy features without needing to search
@@ -26,7 +26,7 @@ TeleportAgent::TeleportResult TransformOfAgent::RunTeleportQuery( const XTreeDat
          
     TreePtr<Node> keyer_x = keyer_xlink.GetChildX();
 
-    Transformation::TreeKit kit { db };
+    Transformation::TreeKit kit { db, dep_rep };
 
     try
     {
