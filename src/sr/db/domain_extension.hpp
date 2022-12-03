@@ -109,11 +109,23 @@ private:
     DomainExtension::OnExtraZoneFunction on_insert_extra_zone;
     DomainExtension::OnExtraZoneFunction on_delete_extra_zone;
 
-    // SimpleCompare equivalence classes over the domain.
-    map<TreePtr<Node>, XLink, SimpleCompare> domain_extension_classes;
+    //map<XLink, pair<TreePtr<Node>, set<XLink>>> initial_to_ext_and_deps;
+
+public:
+    struct ExtClass : Traceable
+    {
+        ExtClass( XLink new_xlink_, int count_ );
+        string GetTrace() const override;
+        
+        XLink new_xlink;
+        int count;
+    };
+
+private:
+    // SimpleCompare equivalence classes over the domain, with refcount = size of the class.
+    map<TreePtr<Node>, ExtClass, SimpleCompare> domain_extension_classes;
 };
-    
-    
+        
 }
 
 #endif

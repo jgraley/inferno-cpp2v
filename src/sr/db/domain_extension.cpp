@@ -139,7 +139,7 @@ XLink DomainExtensionChannel::GetUniqueDomainExtension( TreePtr<Node> node ) con
 	      (node)(" not found in domain_extension_classes:\n")
 	      (domain_extension_classes);
 
-    return domain_extension_classes.at( node );
+    return domain_extension_classes.at( node ).new_xlink;
 }
 
 
@@ -152,7 +152,10 @@ void DomainExtensionChannel::ExtendDomainBaseXLink( TreePtr<Node> node )
     // required. This makes for a very "powerful" search for existing
     // candidates.
     if( domain_extension_classes.count(node) > 0 )
-        return; // Is conincidental
+    {
+        domain_extension_classes.at(node).count++;
+        return; 
+    }
         
     // An extra subtree is required
   
@@ -174,7 +177,7 @@ void DomainExtensionChannel::ExtendDomainBaseXLink( TreePtr<Node> node )
 #endif    
         
     // Add this xlink to the extension classes as initial
-	(void)domain_extension_classes.insert( make_pair( extra_xlink.GetChildX(), extra_xlink ) );    
+	(void)domain_extension_classes.insert( make_pair( extra_xlink.GetChildX(), ExtClass{extra_xlink, 0} ) );    
         
     // Add the whole zon to the rest of the database
     on_insert_extra_zone( extra_zone );        
@@ -231,3 +234,14 @@ void DomainExtensionChannel::DeleteExtra(const DBWalk::WalkInfo &walk_info)
 }
 
 
+DomainExtensionChannel::ExtClass::ExtClass( XLink new_xlink_, int count_ ) :
+    new_xlink( new_xlink_ ),
+    count( count_ )
+{
+}
+
+
+string DomainExtensionChannel::ExtClass::GetTrace() const 
+{ 
+    return "(new_xlink="+new_xlink.GetTrace()+SSPrintf(", count=%d)", count); 
+}
