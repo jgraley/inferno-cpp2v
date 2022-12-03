@@ -192,11 +192,12 @@ void DomainExtensionChannel::ExtendDomain( XLink new_xlink )
 {
     set<XLink> deps;
     TreePtr<Node> extra_node = extender->GetDomainExtraNode( db, new_xlink, deps );  
-    if( extra_node )
-    {
-        initial_to_tracking.insert( make_pair( new_xlink, TrackingBlock(extra_node, deps) ) );
-        ExtendDomainBaseXLink( extra_node );
-    }
+    if( !extra_node )
+        return;
+    
+    initial_to_tracking.insert( make_pair( new_xlink, TrackingBlock(extra_node, deps) ) );
+    
+    ExtendDomainBaseXLink( extra_node );
 }
 
 
