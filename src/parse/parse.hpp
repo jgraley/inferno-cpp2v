@@ -753,7 +753,7 @@ private:
 			// we can detect when an array initialiser has been inserted for a record instance and
 			// change it.
 			ReferenceNavigationUtils nav(all_decls);
-            Transformation::TreeKit kit { &nav };
+            TreeKit kit { &nav };
 			if ( TreePtr<MakeArray> ai = DynamicTreePtrCast<MakeArray>(o->initialiser) )
 				if ( TreePtr<TypeIdentifier> ti = DynamicTreePtrCast<TypeIdentifier>(o->type) )
 					if ( TreePtr<Record> r = GetRecordDeclaration(kit, ti) )
@@ -1553,7 +1553,7 @@ private:
 		TreePtr<TypeIdentifier> tibase = DynamicTreePtrCast<TypeIdentifier>(tbase);
 		ASSERT( tibase );
         ReferenceNavigationUtils nav(all_decls);
-        Transformation::TreeKit kit { &nav };
+        TreeKit kit { &nav };
 		TreePtr<Record> rbase = GetRecordDeclaration(kit, tibase);
 		ASSERT( rbase )( "thing on left of ./-> is not a record/record ptr" );
 		TreePtr<Instance> m = FindMemberByName( kit, rbase, string(Member.getName()) );
@@ -1915,7 +1915,7 @@ private:
 		TreePtr<TypeIdentifier> id = DynamicTreePtrCast<TypeIdentifier>(t);
 		ASSERT(id);
         ReferenceNavigationUtils nav(all_decls);
-        Transformation::TreeKit kit { &nav };
+        TreeKit kit { &nav };
 		TreePtr<Record> r = GetRecordDeclaration( kit, id );
 
 		for( TreePtr<Declaration> d : r->members )
@@ -2043,7 +2043,7 @@ private:
 		// we can detect when an array initialiser has been inserted for a record instance and
 		// change it.
         ReferenceNavigationUtils nav(all_decls);
-        Transformation::TreeKit kit { &nav };
+        TreeKit kit { &nav };
 		if( TreePtr<MakeArray> ai = DynamicTreePtrCast<MakeArray>(e) )
 			if( TreePtr<TypeIdentifier> ti = DynamicTreePtrCast<TypeIdentifier>(t) )
 				if( TreePtr<Record> r = GetRecordDeclaration(kit, ti) )

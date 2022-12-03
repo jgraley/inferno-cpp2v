@@ -62,7 +62,7 @@ catch( NavigationUtils::UnknownNode &)
 HasDeclaration HasDeclaration::instance; // TODO Use this instead of constructing a temp (could contain lookup tables etc in the future)
 
 // Look for a record, skipping over typedefs. Returns nullptr if not a record.
-TreePtr<Record> GetRecordDeclaration( const Transformation::TreeKit &kit, TreePtr<TypeIdentifier> id )
+TreePtr<Record> GetRecordDeclaration( const TreeKit &kit, TreePtr<TypeIdentifier> id )
 {
 	TreePtr<Node> ut = HasDeclaration().ApplyTransformation( kit, id );
 	while( TreePtr<Typedef> td = DynamicTreePtrCast<Typedef>(ut) )
@@ -79,7 +79,7 @@ TreePtr<Record> GetRecordDeclaration( const Transformation::TreeKit &kit, TreePt
 
 
 // Hunt through a record and its bases to find the named member (actually, render string)
-TreePtr<Instance> FindMemberByName( const Transformation::TreeKit &kit, TreePtr<Record> r, string name )
+TreePtr<Instance> FindMemberByName( const TreeKit &kit, TreePtr<Record> r, string name )
 {
     TRACE("Record has %d members\n", r->members.size() );
     

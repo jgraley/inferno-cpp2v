@@ -5,6 +5,7 @@
 #include "flatten.hpp"
 #include "transformation.hpp"
 
+
 NavigationUtils::~NavigationUtils()
 {
 }
@@ -72,4 +73,17 @@ AugTreePtr<Node> Transformation::operator()( TreePtr<Node> node,
     ReferenceNavigationUtils nav(root);
     TreeKit kit { &nav };
     return ApplyTransformation( kit, node );
+}
+
+
+// Apply this transformation to tree at node, using kit for decls etc.
+AugTreePtr<Node> Transformation::ApplyTransformation( const TreeKit &kit, // Handy functions
+                                                      AugTreePtr<Node> node )   // Root of the subtree we want to modify    		                          
+{
+    if( node.p_tree_ptr )
+        kit.dep_rep->EnterTreeTransformation( this );
+    AugTreePtr<Node> out_node = ApplyTransformation( kit, (TreePtr<Node>)node );
+    if( node.p_tree_ptr )
+        kit.dep_rep->ExitTreeTransformation();
+    return out_node;
 }

@@ -26,7 +26,7 @@ TeleportAgent::TeleportResult TransformOfAgent::RunTeleportQuery( const XTreeDat
          
     TreePtr<Node> keyer_x = keyer_xlink.GetChildX();
 
-    Transformation::TreeKit kit { db, dep_rep };
+    TreeKit kit { db, dep_rep };
 
     try
     {

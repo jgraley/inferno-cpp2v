@@ -5,10 +5,34 @@
 #include "node/graphable.hpp"
 #include <functional>
 
+class Transformation;
+
 class DependencyReporter
 {
 public:	
 	virtual void ReportTreeNode( const TreePtrInterface *p_tree_ptr ) = 0;
+    virtual void EnterTreeTransformation( Transformation *tx ) {}
+    virtual void ExitTreeTransformation() {}
+};
+
+class NavigationUtils
+{
+public:	
+    class UnknownNode : public Exception {};
+	
+    // Convention is that second points to one of first's TreePtrs
+    typedef pair<TreePtr<Node>, const TreePtrInterface *> LinkInfo;
+
+    virtual bool IsRequireReports() const = 0;
+	virtual set<LinkInfo> GetParents( TreePtr<Node> node ) const = 0;
+	virtual set<LinkInfo> GetDeclarers( TreePtr<Node> node ) const = 0;
+    virtual ~NavigationUtils();
+};
+
+struct TreeKit
+{
+    const NavigationUtils *nav;
+    DependencyReporter *dep_rep;
 };
 
 
@@ -113,6 +137,7 @@ public:
             return AugTreePtr<OTHER_VALUE_TYPE>(*other_tree_ptr);
     }
 
+
     template<class OTHER_VALUE_TYPE>
     static AugTreePtr<VALUE_TYPE> DynamicCast( const AugTreePtr<OTHER_VALUE_TYPE> &g )
     {
@@ -124,18 +149,20 @@ public:
 };
 
 
-class NavigationUtils
+class Transformation : public virtual Graphable
 {
-public:	
-    class UnknownNode : public Exception {};
-	
-    // Convention is that second points to one of first's TreePtrs
-    typedef pair<TreePtr<Node>, const TreePtrInterface *> LinkInfo;
+public:       
+    // Apply this transformation to tree at node, using root for decls etc.
+    AugTreePtr<Node> operator()( TreePtr<Node> node, 
+    		                     TreePtr<Node> root );
+                                         	                          
+    // Apply this transformation to tree at node, using kit for decls etc.
+    virtual AugTreePtr<Node> ApplyTransformation( const TreeKit &kit, // Handy functions
+    		                                      TreePtr<Node> node ) = 0;    // Root of the subtree we want to modify    		                          
 
-    virtual bool IsRequireReports() const = 0;
-	virtual set<LinkInfo> GetParents( TreePtr<Node> node ) const = 0;
-	virtual set<LinkInfo> GetDeclarers( TreePtr<Node> node ) const = 0;
-    virtual ~NavigationUtils();
+    // Apply this transformation to tree at node, using kit for decls etc.
+    virtual AugTreePtr<Node> ApplyTransformation( const TreeKit &kit, // Handy functions
+    		                                      AugTreePtr<Node> node );    // Root of the subtree we want to modify    		                          
 };
 
 
@@ -152,23 +179,5 @@ private:
 	TreePtr<Node> root;
 };
 
-
-class Transformation : public virtual Graphable
-{
-public:   
-    struct TreeKit
-    {
-        const NavigationUtils *nav;
-        DependencyReporter *dep_rep;
-    };
-    
-    // Apply this transformation to tree at node, using root for decls etc.
-    AugTreePtr<Node> operator()( TreePtr<Node> node, 
-    		                     TreePtr<Node> root );
-                                         	                          
-    // Apply this transformation to tree at node, using kit for decls etc.
-    virtual AugTreePtr<Node> ApplyTransformation( const TreeKit &kit, // Handy functions
-    		                                      TreePtr<Node> node ) = 0;    // Root of the subtree we want to modify    		                          
-};
 
 #endif

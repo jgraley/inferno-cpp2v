@@ -226,7 +226,7 @@ void DomainExtensionChannel::DropStartXlink( XLink start_xlink )
     }
 
     // Remove this starting link from domain extension classes, possibly
-    // dropping the extnesion class completely.
+    // dropping the extension class completely.
     ASSERT( domain_extension_classes.count(extra_node) > 0 );
     int nc = --domain_extension_classes.at(extra_node).count;
     if( nc==0 )
@@ -274,11 +274,7 @@ void DomainExtensionChannel::Complete()
 {
     // TODO only do what's left over as invalid from previous deletes 
     // and not restored by inserts
-#ifdef TRUE_DE
     for( XLink start_xlink : starts_to_redo )
-#else
-    for( XLink start_xlink : db->GetDomain().unordered_domain )
-#endif
         ExtendDomain( start_xlink );
         
     starts_to_redo.clear();   
@@ -287,16 +283,13 @@ void DomainExtensionChannel::Complete()
 
 void DomainExtensionChannel::Insert(const DBWalk::WalkInfo &walk_info)
 {
-#ifdef TRUE_DE
     XLink start_xlink = walk_info.xlink;
     ExtendDomain( start_xlink );
-#endif
 }
 
 
 void DomainExtensionChannel::Delete(const DBWalk::WalkInfo &walk_info)
 {
-#ifdef TRUE_DE
     XLink xlink = walk_info.xlink;
     
     // First deal with the case where the deleted xlink is the start of a domain 
@@ -326,7 +319,6 @@ void DomainExtensionChannel::Delete(const DBWalk::WalkInfo &walk_info)
             InsertSolo(starts_to_redo, start_xlink);
         }
     }    
-#endif    
 }
 
 

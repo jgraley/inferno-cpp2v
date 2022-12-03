@@ -51,11 +51,15 @@ public:
 	{
 	public:	
 		void ReportTreeNode( const TreePtrInterface *p_tree_ptr ) override;
+        void EnterTreeTransformation( Transformation *tx ) override;
+        void ExitTreeTransformation() override;
+
 		set<XLink> GetDeps() const;
 		void Clear();
 		
 	private:
 		set<XLink> deps;
+        int depth = 0;
 	};
 };
 
