@@ -139,7 +139,7 @@ XLink DomainExtensionChannel::GetUniqueDomainExtension( TreePtr<Node> node ) con
 	      (node)(" not found in domain_extension_classes:\n")
 	      (domain_extension_classes);
 
-    return domain_extension_classes.at( node ).new_xlink;
+    return domain_extension_classes.at( node ).extra_xlink;
 }
 
 
@@ -177,7 +177,7 @@ void DomainExtensionChannel::ExtendDomainBaseXLink( TreePtr<Node> node )
 #endif    
         
     // Add this xlink to the extension classes as initial
-	(void)domain_extension_classes.insert( make_pair( extra_xlink.GetChildX(), ExtClass{extra_xlink, 0} ) );    
+	(void)domain_extension_classes.insert( make_pair( extra_node, ExtClass(extra_xlink, 0) ) );    
         
     // Add the whole zon to the rest of the database
     on_insert_extra_zone( extra_zone );        
@@ -193,9 +193,12 @@ void DomainExtensionChannel::ExtendDomain( const unordered_set<XLink> &new_domai
     for( XLink new_xlink : new_domain )
     {
 		set<XLink> deps;
-		TreePtr<Node> node = extender->ExpandNormalDomain( db, new_xlink, deps );  
-    	if( node )
-			ExtendDomainBaseXLink( node );
+		TreePtr<Node> extra_node = extender->ExpandNormalDomain( db, new_xlink, deps );  
+    	if( extra_node )
+        {
+            initial_to_tracking.insert( make_pair( new_xlink, TrackingBlock(extra_node, deps) ) );
+			ExtendDomainBaseXLink( extra_node );
+        }
 	}
 }
 
@@ -234,8 +237,8 @@ void DomainExtensionChannel::DeleteExtra(const DBWalk::WalkInfo &walk_info)
 }
 
 
-DomainExtensionChannel::ExtClass::ExtClass( XLink new_xlink_, int count_ ) :
-    new_xlink( new_xlink_ ),
+DomainExtensionChannel::ExtClass::ExtClass( XLink extra_xlink_, int count_ ) :
+    extra_xlink( extra_xlink_ ),
     count( count_ )
 {
 }
@@ -243,5 +246,18 @@ DomainExtensionChannel::ExtClass::ExtClass( XLink new_xlink_, int count_ ) :
 
 string DomainExtensionChannel::ExtClass::GetTrace() const 
 { 
-    return "(new_xlink="+new_xlink.GetTrace()+SSPrintf(", count=%d)", count); 
+    return "(extra_xlink="+Trace(extra_xlink)+SSPrintf(", count=%d)", count); 
+}
+
+
+DomainExtensionChannel::TrackingBlock::TrackingBlock( TreePtr<Node> extra_node_, set<XLink> deps_ ) :
+    extra_node( extra_node_ ),
+    deps( move(deps_) )
+{
+}
+
+
+string DomainExtensionChannel::TrackingBlock::GetTrace() const 
+{ 
+    return "(extra_node="+Trace(extra_node)+", deps=%"+Trace(deps)+")";
 }

@@ -109,19 +109,27 @@ private:
     DomainExtension::OnExtraZoneFunction on_insert_extra_zone;
     DomainExtension::OnExtraZoneFunction on_delete_extra_zone;
 
-    //map<XLink, pair<TreePtr<Node>, set<XLink>>> initial_to_ext_and_deps;
-
-public:
-    struct ExtClass : Traceable
+    struct TrackingBlock : Traceable
     {
-        ExtClass( XLink new_xlink_, int count_ );
+        TrackingBlock( TreePtr<Node> extra_node_, set<XLink> deps_ );
         string GetTrace() const override;
         
-        XLink new_xlink;
+        TreePtr<Node> extra_node;
+        set<XLink> deps;
+    };
+    
+    struct ExtClass : Traceable
+    {
+        ExtClass( XLink extra_xlink_, int count_ );
+        string GetTrace() const override;
+        
+        XLink extra_xlink;
         int count;
     };
 
-private:
+    // One for each initial, keeping track of the new node and dependencies
+    map<XLink, TrackingBlock> initial_to_tracking;
+
     // SimpleCompare equivalence classes over the domain, with refcount = size of the class.
     map<TreePtr<Node>, ExtClass, SimpleCompare> domain_extension_classes;
 };
