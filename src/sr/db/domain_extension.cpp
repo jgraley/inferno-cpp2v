@@ -179,7 +179,7 @@ void DomainExtensionChannel::ExtendDomainBaseXLink( TreePtr<Node> node )
     // Add this xlink to the extension classes as initial
 	(void)domain_extension_classes.insert( make_pair( extra_node, ExtClass(extra_xlink, 0) ) );    
         
-    // Add the whole zon to the rest of the database
+    // Add the whole zone to the rest of the database
     on_insert_extra_zone( extra_zone );        
     
     // Ensure the original tree is found in the domain now (it wasn't 
@@ -188,14 +188,14 @@ void DomainExtensionChannel::ExtendDomainBaseXLink( TreePtr<Node> node )
 }
 
 
-void DomainExtensionChannel::ExtendDomain( XLink new_xlink )
+void DomainExtensionChannel::ExtendDomain( XLink start_xlink )
 {
     set<XLink> deps;
-    TreePtr<Node> extra_node = extender->GetDomainExtraNode( db, new_xlink, deps );  
+    TreePtr<Node> extra_node = extender->GetDomainExtraNode( db, start_xlink, deps );  
     if( !extra_node )
         return;
     
-    initial_to_tracking.insert( make_pair( new_xlink, TrackingBlock(extra_node, deps) ) );
+    start_to_tracking.insert( make_pair( start_xlink, TrackingBlock(extra_node, deps) ) );
     
     ExtendDomainBaseXLink( extra_node );
 }
@@ -203,8 +203,8 @@ void DomainExtensionChannel::ExtendDomain( XLink new_xlink )
 
 void DomainExtensionChannel::InitialBuild()
 {
-    for( XLink new_xlink : db->GetDomain().unordered_domain )
-        ExtendDomain( new_xlink );
+    for( XLink xlink : db->GetDomain().unordered_domain )
+        ExtendDomain( xlink );
 }
 
 
@@ -212,8 +212,8 @@ void DomainExtensionChannel::Complete()
 {
     // TODO only do what's left over as invalid from previous deletes 
     // and not restored by inserts
-    for( XLink new_xlink : db->GetDomain().unordered_domain )
-        ExtendDomain( new_xlink );
+    for( XLink xlink : db->GetDomain().unordered_domain )
+        ExtendDomain( xlink );
 }
 
 

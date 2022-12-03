@@ -127,8 +127,8 @@ private:
         int count;
     };
 
-    // One for each initial, keeping track of the new node and dependencies
-    map<XLink, TrackingBlock> initial_to_tracking;
+    // One for each start xlink, keeping track of the new node and dependencies
+    map<XLink, TrackingBlock> start_to_tracking;
 
     // SimpleCompare equivalence classes over the domain, with refcount = size of the class.
     map<TreePtr<Node>, ExtClass, SimpleCompare> domain_extension_classes;
