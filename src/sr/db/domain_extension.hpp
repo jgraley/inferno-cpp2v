@@ -92,8 +92,8 @@ public:
                                    DomainExtension::OnExtraZoneFunction on_delete_extra_zone = DomainExtension::OnExtraZoneFunction() );
 
 	XLink GetUniqueDomainExtension( TreePtr<Node> node ) const;
-    void ExtendDomainExtraNode( TreePtr<Node> node );
-    void ExtendDomain( XLink start_xlink );
+    void AddExtraNode( TreePtr<Node> node );
+    void TryAddStartXLink( XLink start_xlink );
     void DropStartXlink( XLink start_xlink );
     void Validate() const;
     void InitialBuild();

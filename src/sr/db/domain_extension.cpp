@@ -145,7 +145,7 @@ XLink DomainExtensionChannel::GetUniqueDomainExtension( TreePtr<Node> node ) con
 }
 
 
-void DomainExtensionChannel::ExtendDomainExtraNode( TreePtr<Node> extra_node )
+void DomainExtensionChannel::AddExtraNode( TreePtr<Node> extra_node )
 {
     ASSERT( extra_node );
 
@@ -191,7 +191,7 @@ void DomainExtensionChannel::ExtendDomainExtraNode( TreePtr<Node> extra_node )
 }
 
 
-void DomainExtensionChannel::ExtendDomain( XLink start_xlink )
+void DomainExtensionChannel::TryAddStartXLink( XLink start_xlink )
 {
     set<XLink> deps;
     TreePtr<Node> extra_node = extender->GetDomainExtraNode( db, start_xlink, deps );  
@@ -202,7 +202,7 @@ void DomainExtensionChannel::ExtendDomain( XLink start_xlink )
     for( XLink dep : deps )
         dep_to_starts[dep].insert(start_xlink);
     
-    ExtendDomainExtraNode( extra_node );
+    AddExtraNode( extra_node );
 }
 
 
@@ -264,9 +264,9 @@ void DomainExtensionChannel::Validate() const
 void DomainExtensionChannel::InitialBuild()
 {
     for( XLink xlink : db->GetDomain().unordered_domain )
-        ExtendDomain( xlink );
+        TryAddStartXLink( xlink );
 
-    Validate();
+    //Validate();
 }
 
 
@@ -275,7 +275,7 @@ void DomainExtensionChannel::Complete()
     // TODO only do what's left over as invalid from previous deletes 
     // and not restored by inserts
     for( XLink start_xlink : starts_to_redo )
-        ExtendDomain( start_xlink );
+        TryAddStartXLink( start_xlink );
         
     starts_to_redo.clear();   
 }
@@ -284,7 +284,7 @@ void DomainExtensionChannel::Complete()
 void DomainExtensionChannel::Insert(const DBWalk::WalkInfo &walk_info)
 {
     XLink start_xlink = walk_info.xlink;
-    ExtendDomain( start_xlink );
+    TryAddStartXLink( start_xlink );
 }
 
 
