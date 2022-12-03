@@ -92,9 +92,11 @@ public:
                                    DomainExtension::OnExtraZoneFunction on_delete_extra_zone = DomainExtension::OnExtraZoneFunction() );
 
 	XLink GetUniqueDomainExtension( TreePtr<Node> node ) const;
-    void ExtendDomainBaseXLink( TreePtr<Node> node );
-    void ExtendDomain( XLink new_xlink );
-	void InitialBuild();
+    void ExtendDomainExtraNode( TreePtr<Node> node );
+    void ExtendDomain( XLink start_xlink );
+    void DropStartXlink( XLink start_xlink );
+    void Validate() const;
+    void InitialBuild();
 	void Complete();
 
 	void Insert(const DBWalk::WalkInfo &walk_info);
@@ -109,9 +111,9 @@ private:
     DomainExtension::OnExtraZoneFunction on_insert_extra_zone;
     DomainExtension::OnExtraZoneFunction on_delete_extra_zone;
 
-    struct TrackingBlock : Traceable
+    struct TrackingRow : Traceable
     {
-        TrackingBlock( TreePtr<Node> extra_node_, set<XLink> deps_ );
+        TrackingRow( TreePtr<Node> extra_node_, set<XLink> deps_ );
         string GetTrace() const override;
         
         TreePtr<Node> extra_node;
@@ -128,8 +130,13 @@ private:
     };
 
     // One for each start xlink, keeping track of the new node and dependencies
-    map<XLink, TrackingBlock> start_to_tracking;
+    map<XLink, TrackingRow> start_to_tracking;
+    
+    // A reversal of start_to_tracking for indexing on dependency
+    map<XLink, set<XLink>> dep_to_starts;
 
+    set<XLink> starts_to_redo;
+    
     // SimpleCompare equivalence classes over the domain, with refcount = size of the class.
     map<TreePtr<Node>, ExtClass, SimpleCompare> domain_extension_classes;
 };
