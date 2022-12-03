@@ -36,7 +36,7 @@ public:
 	class Extender : public virtual Traceable
 	{
 	public:
-		virtual TreePtr<Node> ExpandNormalDomain( const XTreeDatabase *db, XLink xlink, set<XLink> &deps ) const = 0;
+		virtual TreePtr<Node> GetDomainExtraNode( const XTreeDatabase *db, XLink xlink, set<XLink> &deps ) const = 0;
 		virtual bool IsExtenderLess( const Extender &r ) const = 0;
 		virtual int GetExtenderOrdinal() const = 0;
 	};
@@ -93,7 +93,7 @@ public:
 
 	XLink GetUniqueDomainExtension( TreePtr<Node> node ) const;
     void ExtendDomainBaseXLink( TreePtr<Node> node );
-    void ExtendDomain(const unordered_set<XLink> &new_domain );
+    void ExtendDomain( XLink new_xlink );
 	void InitialBuild();
 	void Complete();
 

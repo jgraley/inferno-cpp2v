@@ -188,24 +188,22 @@ void DomainExtensionChannel::ExtendDomainBaseXLink( TreePtr<Node> node )
 }
 
 
-void DomainExtensionChannel::ExtendDomain( const unordered_set<XLink> &new_domain )
+void DomainExtensionChannel::ExtendDomain( XLink new_xlink )
 {
-    for( XLink new_xlink : new_domain )
+    set<XLink> deps;
+    TreePtr<Node> extra_node = extender->GetDomainExtraNode( db, new_xlink, deps );  
+    if( extra_node )
     {
-		set<XLink> deps;
-		TreePtr<Node> extra_node = extender->ExpandNormalDomain( db, new_xlink, deps );  
-    	if( extra_node )
-        {
-            initial_to_tracking.insert( make_pair( new_xlink, TrackingBlock(extra_node, deps) ) );
-			ExtendDomainBaseXLink( extra_node );
-        }
-	}
+        initial_to_tracking.insert( make_pair( new_xlink, TrackingBlock(extra_node, deps) ) );
+        ExtendDomainBaseXLink( extra_node );
+    }
 }
 
 
 void DomainExtensionChannel::InitialBuild()
 {
-	ExtendDomain( db->GetDomain().unordered_domain );
+    for( XLink new_xlink : db->GetDomain().unordered_domain )
+        ExtendDomain( new_xlink );
 }
 
 
@@ -213,7 +211,8 @@ void DomainExtensionChannel::Complete()
 {
     // TODO only do what's left over as invalid from previous deletes 
     // and not restored by inserts
-	ExtendDomain( db->GetDomain().unordered_domain );
+    for( XLink new_xlink : db->GetDomain().unordered_domain )
+        ExtendDomain( new_xlink );
 }
 
 

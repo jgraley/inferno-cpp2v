@@ -30,7 +30,7 @@ SYM::Lazy<SYM::BooleanExpression> TeleportAgent::SymbolicNormalLinkedQueryPRed()
 }                     
 
 
-TreePtr<Node> TeleportAgent::ExpandNormalDomain( const XTreeDatabase *db, XLink keyer_xlink, set<XLink> &deps ) const
+TreePtr<Node> TeleportAgent::GetDomainExtraNode( const XTreeDatabase *db, XLink keyer_xlink, set<XLink> &deps ) const
 {
 	deps.clear();
 	
