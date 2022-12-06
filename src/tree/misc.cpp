@@ -22,7 +22,7 @@ TreePtr<Identifier> GetIdentifierOfDeclaration( TreePtr<Declaration> d )
 }
 
 	
-AugTreePtr<Node> HasDeclaration::ApplyTransformation( const TreeKit &kit, TreePtr<Node> node ) try
+AugTreePtr<Node> HasDeclaration::ApplyTransformation( const TreeKit &kit, TreePtr<Node> node ) const try
 {    
     set<NavigationUtils::LinkInfo> declarer_infos = kit.nav->GetDeclarers( node );
     

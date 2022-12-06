@@ -68,7 +68,7 @@ set<NavigationUtils::LinkInfo> ReferenceNavigationUtils::GetDeclarers( TreePtr<N
 
 
 AugTreePtr<Node> Transformation::operator()( TreePtr<Node> node, 
-    		                                 TreePtr<Node> root	)
+    		                                 TreePtr<Node> root	) const
 {
     ReferenceNavigationUtils nav(root);
     TreeKit kit { &nav };
@@ -78,7 +78,7 @@ AugTreePtr<Node> Transformation::operator()( TreePtr<Node> node,
 
 // Apply this transformation to tree at node, using kit for decls etc.
 AugTreePtr<Node> Transformation::ApplyTransformation( const TreeKit &kit, // Handy functions
-                                                      AugTreePtr<Node> node )   // Root of the subtree we want to modify    		                          
+                                                      AugTreePtr<Node> node ) const   // Root of the subtree we want to modify    		                          
 {
     if( node.p_tree_ptr )
         kit.dep_rep->EnterTreeTransformation( this );

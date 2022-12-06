@@ -11,7 +11,7 @@ class DependencyReporter
 {
 public:	
 	virtual void ReportTreeNode( const TreePtrInterface *p_tree_ptr ) = 0;
-    virtual void EnterTreeTransformation( Transformation *tx ) {}
+    virtual void EnterTreeTransformation( const Transformation *tx ) {}
     virtual void ExitTreeTransformation() {}
 };
 
@@ -154,15 +154,15 @@ class Transformation : public virtual Graphable
 public:       
     // Apply this transformation to tree at node, using root for decls etc.
     AugTreePtr<Node> operator()( TreePtr<Node> node, 
-    		                     TreePtr<Node> root );
+    		                     TreePtr<Node> root ) const;
                                          	                          
     // Apply this transformation to tree at node, using kit for decls etc.
     virtual AugTreePtr<Node> ApplyTransformation( const TreeKit &kit, // Handy functions
-    		                                      TreePtr<Node> node ) = 0;    // Root of the subtree we want to modify    		                          
+    		                                      TreePtr<Node> node ) const = 0;    // Root of the subtree we want to modify    		                          
 
     // Apply this transformation to tree at node, using kit for decls etc.
     virtual AugTreePtr<Node> ApplyTransformation( const TreeKit &kit, // Handy functions
-    		                                      AugTreePtr<Node> node );    // Root of the subtree we want to modify    		                          
+    		                                      AugTreePtr<Node> node ) const;    // Root of the subtree we want to modify    		                          
 };
 
 
