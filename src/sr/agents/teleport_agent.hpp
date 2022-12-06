@@ -47,9 +47,10 @@ public:
      * teleport operation will already get a domain extension because its starting
      * node is in the X tree and we attempt domain extension for all nodes in the 
      * X tree. So we can optimise by leaving it out of the deps for the current 
-     * starting X link.
+     * starting X link. 
      * 
-     * Related: #689 #693 
+     * Related: #689 #693 #696. Also see AugTreePtr<> and See ApplySubTransformation() 
+     * for TransformOf case.
      */
     typedef pair<XLink, TreePtr<Node>> TeleportResult;    
     virtual TeleportResult RunTeleportQuery( const XTreeDatabase *db, DependencyReporter *dep_rep, XLink start_xlink ) const = 0;

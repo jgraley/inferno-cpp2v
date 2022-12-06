@@ -23,22 +23,20 @@ public:
     class NumericalOperatorUsageMismatch4 : public NumericalOperatorUsageMismatch {};
     class DereferenceUsageMismatch : public UsageMismatch {};
 
-    AugTreePtr<Node> ApplyTransformation( const TreeKit &kit_, TreePtr<Node> node ) const override;
+    AugTreePtr<Node> ApplyTransformation( const TreeKit &kit, TreePtr<Node> node ) const override;
 
     // Is this call really a constructor call? If so return the object being
     // constructed. Otherwise, return nullptr
-    AugTreePtr<CPPTree::Expression> IsConstructorCall( const TreeKit &kit_, TreePtr<CPPTree::Call> call ) const;
+    AugTreePtr<CPPTree::Expression> IsConstructorCall( const TreeKit &kit, TreePtr<CPPTree::Call> call ) const;
 
 private:    
     // TODO make these private
-    AugTreePtr<CPPTree::Type> Get( TreePtr<CPPTree::Expression> o ) const;
-    AugTreePtr<CPPTree::Type> Get( TreePtr<CPPTree::Operator> op, list<AugTreePtr<CPPTree::Type>> optypes ) const;
-    AugTreePtr<CPPTree::Type> GetStandard( list<AugTreePtr<CPPTree::Type>> &optypes ) const;
-    AugTreePtr<CPPTree::Type> GetStandard( list<AugTreePtr<CPPTree::Numeric>> &optypes ) const;
-    AugTreePtr<CPPTree::Type> GetSpecial( TreePtr<CPPTree::Operator> op, list<AugTreePtr<CPPTree::Type>> &optypes ) const;
-    AugTreePtr<CPPTree::Type> GetLiteral( TreePtr<CPPTree::Literal> l ) const;
-
-	const mutable TreeKit *kit = nullptr;
+    AugTreePtr<CPPTree::Type> Get( const TreeKit &kit, TreePtr<CPPTree::Expression> o ) const;
+    AugTreePtr<CPPTree::Type> Get( const TreeKit &kit, TreePtr<CPPTree::Operator> op, list<AugTreePtr<CPPTree::Type>> optypes ) const;
+    AugTreePtr<CPPTree::Type> GetStandard( const TreeKit &kit, list<AugTreePtr<CPPTree::Type>> &optypes ) const;
+    AugTreePtr<CPPTree::Type> GetStandard( const TreeKit &kit, list<AugTreePtr<CPPTree::Numeric>> &optypes ) const;
+    AugTreePtr<CPPTree::Type> GetSpecial( const TreeKit &kit, TreePtr<CPPTree::Operator> op, list<AugTreePtr<CPPTree::Type>> &optypes ) const;
+    AugTreePtr<CPPTree::Type> GetLiteral( const TreeKit &kit, TreePtr<CPPTree::Literal> l ) const;
     
 public:
     static HasType instance; 

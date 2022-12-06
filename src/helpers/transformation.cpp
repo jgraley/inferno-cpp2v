@@ -77,8 +77,8 @@ AugTreePtr<Node> Transformation::operator()( TreePtr<Node> node,
 
 
 // Apply this transformation to tree at node, using kit for decls etc.
-AugTreePtr<Node> Transformation::ApplyTransformation( const TreeKit &kit, // Handy functions
-                                                      AugTreePtr<Node> node ) const   // Root of the subtree we want to modify    		                          
+AugTreePtr<Node> Transformation::ApplySubTransformation( const TreeKit &kit, // Handy functions
+                                                         AugTreePtr<Node> node ) const   // Root of the subtree we want to modify    		                          
 {
     if( node.p_tree_ptr )
         kit.dep_rep->EnterTreeTransformation( this );

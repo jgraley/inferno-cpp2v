@@ -36,12 +36,8 @@ struct TreeKit
 };
 
 
-// The so-called augmented tree pointer can be used as a tree
-// pointer but it also holds other info, in this case a pointer
-// to a tree ptr (i.e. a double pointer). This is used to 
-// disambiguate which parent is meant when there can be more 
-// than one (Tree-style). It can also be constructed without the double
-// pointer, for when creating new free nodes (Free-style).
+// The augmented tree pointer is designed to act like a normal TreePtr
+// (to an extent) while hepling to meet the requirements of 
 template<class VALUE_TYPE>
 class AugTreePtr : public TreePtr<VALUE_TYPE>
 {
@@ -153,16 +149,20 @@ class Transformation : public virtual Graphable
 {
 public:       
     // Apply this transformation to tree at node, using root for decls etc.
+    // This entry point is for non-VN use cases, without dmain extension.
     AugTreePtr<Node> operator()( TreePtr<Node> node, 
     		                     TreePtr<Node> root ) const;
                                          	                          
     // Apply this transformation to tree at node, using kit for decls etc.
+    // Vida Nova implementation with a TreeKit for VN integration: see
+    // comment by RunTeleportQuery().
     virtual AugTreePtr<Node> ApplyTransformation( const TreeKit &kit, // Handy functions
     		                                      TreePtr<Node> node ) const = 0;    // Root of the subtree we want to modify    		                          
 
-    // Apply this transformation to tree at node, using kit for decls etc.
-    virtual AugTreePtr<Node> ApplyTransformation( const TreeKit &kit, // Handy functions
-    		                                      AugTreePtr<Node> node ) const;    // Root of the subtree we want to modify    		                          
+    // This one is to be used from within a transformation, when invoking 
+    // another. TODO use more, see 
+    virtual AugTreePtr<Node> ApplySubTransformation( const TreeKit &kit, // Handy functions
+    		                                         AugTreePtr<Node> node ) const;    // Root of the subtree we want to modify    		                          
 };
 
 

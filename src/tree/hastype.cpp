@@ -10,25 +10,23 @@ using namespace CPPTree;
 
 #define INT 0
 
-AugTreePtr<Node> HasType::ApplyTransformation( const TreeKit &kit_, TreePtr<Node> node ) const
+AugTreePtr<Node> HasType::ApplyTransformation( const TreeKit &kit, TreePtr<Node> node ) const
 {
-	kit = &kit_;
 	auto e = TreePtr<CPPTree::Expression>::DynamicCast(node);
 	AugTreePtr<Node> n;
 	if( e ) // if the tree at root is not an expression, return nullptr
-		n = Get( e );
-	kit = nullptr;
+		n = Get( kit, e );
 	return n;
 }
 
 
-AugTreePtr<CPPTree::Type> HasType::Get( TreePtr<Expression> o ) const
+AugTreePtr<CPPTree::Type> HasType::Get( const TreeKit &kit, TreePtr<Expression> o ) const
 {
     ASSERT(o);
     
     if( auto ii = DynamicTreePtrCast<SpecificInstanceIdentifier>(o) ) // object or function instance
     {        
-        AugTreePtr<Node> n = HasDeclaration().ApplyTransformation(*kit, ii);
+        AugTreePtr<Node> n = HasDeclaration().ApplyTransformation(kit, ii);
         TreePtr<Instance> i = DynamicTreePtrCast<Instance>(n);
         ASSERT(i);
         return n.Descend<Type>(&i->type); 
@@ -38,24 +36,24 @@ AugTreePtr<CPPTree::Type> HasType::Get( TreePtr<Expression> o ) const
         // Get the types of all the operands to the operator first
         list<AugTreePtr<Type>> optypes;
         for( TreePtr<Expression> o : op->operands )
-            optypes.push_back( Get(o) );
-        return Get( op, optypes );
+            optypes.push_back( Get(kit, o) );
+        return Get( kit, op, optypes );
     }
     else if( auto op = DynamicTreePtrCast<CommutativeOperator>(o) ) // operator
     {
         // Get the types of all the operands to the operator first
         list<AugTreePtr<Type>> optypes;
         for( TreePtr<Expression> o : op->operands )
-                 optypes.push_back( Get(o) );
-        return Get( op, optypes );
+                 optypes.push_back( Get(kit, o) );
+        return Get( kit, op, optypes );
     }
     else if( auto l = DynamicTreePtrCast<Literal>(o) )
     {
-        return GetLiteral( l );
+        return GetLiteral( kit, l );
     }
     else if( auto c = DynamicTreePtrCast<Call>(o) )
     {
-        AugTreePtr<Type> t = Get(c->callee); // get type of the function itself
+        AugTreePtr<Type> t = Get(kit, c->callee); // get type of the function itself
         ASSERT( dynamic_pointer_cast<Callable>(t) )( "Trying to call something that is not Callable");
         if( auto f = DynamicTreePtrCast<Function>(t) )
         	return t.Descend<Type>(&f->return_type);
@@ -64,15 +62,15 @@ AugTreePtr<CPPTree::Type> HasType::Get( TreePtr<Expression> o ) const
     }
     else if( auto l = DynamicTreePtrCast<Lookup>(o) ) // a.b; just return type of b
     {
-        return Get( l->member );
+        return Get( kit, l->member );
     }
     else if( auto c = DynamicTreePtrCast<Cast>(o) )
     {
-        return AugTreePtr<Type>(&c->type, kit->dep_rep);
+        return AugTreePtr<Type>(&c->type, kit.dep_rep);
     }
     else if( auto rl = DynamicTreePtrCast<MakeRecord>(o) )
     {
-        return AugTreePtr<Type>(&rl->type, kit->dep_rep);
+        return AugTreePtr<Type>(&rl->type, kit.dep_rep);
     }
     else if( DynamicTreePtrCast<LabelIdentifier>(o) )
     {
@@ -102,7 +100,7 @@ AugTreePtr<CPPTree::Type> HasType::Get( TreePtr<Expression> o ) const
             return AugTreePtr<Type>(MakeTreeNode<Void>()); 
         TreePtr<Statement> last = ce->statements.back();
         if( TreePtr<Expression> e = DynamicTreePtrCast<Expression>(last) )
-            return Get(e);
+            return Get(kit, e);
         else
             return AugTreePtr<Type>(MakeTreeNode<Void>()); 
     }
@@ -116,7 +114,7 @@ AugTreePtr<CPPTree::Type> HasType::Get( TreePtr<Expression> o ) const
 
 // Just discover the type of operators, where the types of the operands have already been determined
 // Note we always get a Sequence, even when the operator is commutative
-AugTreePtr<CPPTree::Type> HasType::Get( TreePtr<Operator> op, list<AugTreePtr<Type>> optypes ) const
+AugTreePtr<CPPTree::Type> HasType::Get( const TreeKit &kit, TreePtr<Operator> op, list<AugTreePtr<Type>> optypes ) const
 {
 	// Lower types that masquerade as other types in preparation for operand analysis
 	// - References go to the referenced type
@@ -177,12 +175,12 @@ AugTreePtr<CPPTree::Type> HasType::Get( TreePtr<Operator> op, list<AugTreePtr<Ty
 		        return p;
 	}
 
-#define ARITHMETIC GetStandard( optypes )
-#define BITWISE GetStandard( optypes )
+#define ARITHMETIC GetStandard( kit, optypes )
+#define BITWISE GetStandard( kit, optypes )
 #define LOGICAL AugTreePtr<Boolean>(MakeTreeNode<Boolean>())
 #define COMPARISON AugTreePtr<Boolean>(MakeTreeNode<Boolean>())
 #define SHIFT optypes.front()
-#define SPECIAL GetSpecial( op, optypes )
+#define SPECIAL GetSpecial( kit, op, optypes )
 
     if(0) {}
 #define INFIX(TOK, TEXT, NODE, BASE, CAT) \
@@ -207,14 +205,14 @@ AugTreePtr<CPPTree::Type> HasType::Get( TreePtr<Operator> op, list<AugTreePtr<Ty
 }
 
 
-AugTreePtr<CPPTree::Type> HasType::GetStandard( list<AugTreePtr<Type>> &optypes ) const
+AugTreePtr<CPPTree::Type> HasType::GetStandard( const TreeKit &kit, list<AugTreePtr<Type>> &optypes ) const
 {
 	list<AugTreePtr<Numeric>> nums;
 	for( AugTreePtr<Type> optype : optypes )
 		if( auto n = AugTreePtr<Numeric>::DynamicCast(optype) )
 			nums.push_back(n);
 	if( nums.size() == optypes.size() )
-		return GetStandard( nums );
+		return GetStandard( kit, nums );
 
     throw NumericalOperatorUsageMismatch1();
 //	if( optypes.size() == 2 )
@@ -225,7 +223,7 @@ AugTreePtr<CPPTree::Type> HasType::GetStandard( list<AugTreePtr<Type>> &optypes 
 }
 
 
-AugTreePtr<CPPTree::Type> HasType::GetStandard( list<AugTreePtr<Numeric>> &optypes ) const
+AugTreePtr<CPPTree::Type> HasType::GetStandard( const TreeKit &kit, list<AugTreePtr<Numeric>> &optypes ) const
 {
 	// Start the width and signedness as per regular "int" since this is the
 	// minimum result type for standard operators
@@ -299,7 +297,7 @@ AugTreePtr<CPPTree::Type> HasType::GetStandard( list<AugTreePtr<Numeric>> &optyp
 }
 
 
-AugTreePtr<CPPTree::Type> HasType::GetSpecial( TreePtr<Operator> op, list<AugTreePtr<Type>> &optypes ) const
+AugTreePtr<CPPTree::Type> HasType::GetSpecial( const TreeKit &kit, TreePtr<Operator> op, list<AugTreePtr<Type>> &optypes ) const
 {
     if( dynamic_pointer_cast<Dereference>(op) || dynamic_pointer_cast<Subscript>(op) )
     {
@@ -340,7 +338,7 @@ AugTreePtr<CPPTree::Type> HasType::GetSpecial( TreePtr<Operator> op, list<AugTre
     }
 }
 
-AugTreePtr<CPPTree::Type> HasType::GetLiteral( TreePtr<Literal> l ) const
+AugTreePtr<CPPTree::Type> HasType::GetLiteral( const TreeKit &kit, TreePtr<Literal> l ) const
 {
     if( auto si = DynamicTreePtrCast<SpecificInteger>(l) )
     {
@@ -388,19 +386,17 @@ AugTreePtr<CPPTree::Type> HasType::GetLiteral( TreePtr<Literal> l ) const
 
 // Is this call really a constructor call? If so return the object being
 // constructed. Otherwise, return nullptr
-AugTreePtr<CPPTree::Expression> HasType::IsConstructorCall( const TreeKit &kit_, TreePtr<Call> call ) const
+AugTreePtr<CPPTree::Expression> HasType::IsConstructorCall( const TreeKit &kit, TreePtr<Call> call ) const
 {
-	kit = &kit_;
 	AugTreePtr<CPPTree::Expression> e;
 
     if( auto lf = DynamicTreePtrCast<Lookup>(call->callee) )
     {
 		ASSERT(lf->member);
-		if( DynamicTreePtrCast<Constructor>( Get( lf->member ) ) )
-			e = AugTreePtr<Expression>(&lf->base, kit->dep_rep);
+		if( DynamicTreePtrCast<Constructor>( Get( kit, lf->member ) ) )
+			e = AugTreePtr<Expression>(&lf->base, kit.dep_rep);
     }
 
-    kit = nullptr;
     return e;
 }
 
