@@ -4,6 +4,7 @@
 #include "../scr_engine.hpp"
 #include "link.hpp"
 #include "standard_agent.hpp"
+#include "db/x_tree_database.hpp"
 
 using namespace SR;
 
@@ -17,6 +18,19 @@ shared_ptr<PatternQuery> PointerIsAgent::GetPatternQuery() const
 
 TeleportAgent::TeleportResult PointerIsAgent::RunTeleportQuery( const XTreeDatabase *db, DependencyReporter *dep_rep, XLink start_xlink ) const
 {
+	// Report dependency on parent node
+	if( dep_rep )
+	{
+		TreePtr<Node> parent_node = db->GetRow(start_xlink).parent_node;
+		if( parent_node )
+		{	
+			// If no parent node, there's no dep to declare, assuming root xlink
+			// pointer type cannot change. Might be better to refuse the whole teleport, TBD.
+			XLink parent_xlink = OnlyElementOf(db->GetNodeRow(parent_node).parents); // is a parent so rule #217 says should be only one
+			dep_rep->ReportTreeNode( parent_xlink.GetXPtr() );
+		}
+	}
+	
     // Get the pointer that points to us - now from the keyer x link
     const TreePtrInterface *px = start_xlink.GetXPtr();
 	ASSERT(px);     

@@ -10,6 +10,8 @@ class Transformation;
 class DependencyReporter
 {
 public:	
+	// We actually require a pointer to the parent node's TreePtr 
+	// to the node in question.
 	virtual void ReportTreeNode( const TreePtrInterface *p_tree_ptr ) = 0;
 };
 

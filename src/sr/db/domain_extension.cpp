@@ -241,6 +241,8 @@ void DomainExtensionChannel::DropStartXlink( XLink start_xlink )
 
 void DomainExtensionChannel::Validate() const
 {
+	ASSERT( start_to_tracking.size() <= db->GetDomain().unordered_domain.size() );
+	
     for( auto p : start_to_tracking )
     {
         XLink start_xlink = p.first;
@@ -259,6 +261,8 @@ void DomainExtensionChannel::Validate() const
         for( XLink start_xlink : p.second )
             ASSERT( start_to_tracking.count(start_xlink) == 1 );            
     }
+    
+	//FTRACE(extender)(" domain %d: %d starts, %d deps\n", db->GetDomain().unordered_domain.size(), start_to_tracking.size(), dep_to_starts.size());    
 }
 
 
@@ -267,8 +271,8 @@ void DomainExtensionChannel::InitialBuild()
 {
     for( XLink xlink : db->GetDomain().unordered_domain )
         TryAddStartXLink( xlink );
-
-    //Validate();
+	
+    Validate();
 }
 
 
@@ -280,6 +284,8 @@ void DomainExtensionChannel::Complete()
         TryAddStartXLink( start_xlink );
         
     starts_to_redo.clear();   
+
+    Validate();
 }
 
 
@@ -309,7 +315,7 @@ void DomainExtensionChannel::Delete(const DBWalk::WalkInfo &walk_info)
     
     // Now deal with the case where the deleted xlink is a dependency of a domain 
     // extension: in this case, we want to remove it but remember that we want to 
-    // redo those starting xlinks at Complete() time.
+    // redo the starting xlink at Complete() time.
     if( dep_to_starts.count(xlink)>0 )
     {
         set<XLink> start_xlinks = dep_to_starts.at(xlink);
