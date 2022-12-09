@@ -154,23 +154,8 @@ const TeleportAgent *TeleportAgent::TeleportOperator::GetAgent() const
 
 void TeleportAgent::DepRep::ReportTreeNode( const TreePtrInterface *p_tree_ptr )
 {
-	if( depth==0 )
-    {
-        XLink xlink( (TreePtr<Node>)*p_tree_ptr, p_tree_ptr );
-        deps.insert( xlink );
-    }
-}
-
-
-void TeleportAgent::DepRep::EnterTreeTransformation( const Transformation *tx )
-{
-    depth++;
-}
-
-
-void TeleportAgent::DepRep::ExitTreeTransformation()
-{
-    depth--;
+    XLink xlink( (TreePtr<Node>)*p_tree_ptr, p_tree_ptr );
+    deps.insert( xlink );
 }
 
 

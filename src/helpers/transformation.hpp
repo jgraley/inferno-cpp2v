@@ -11,8 +11,6 @@ class DependencyReporter
 {
 public:	
 	virtual void ReportTreeNode( const TreePtrInterface *p_tree_ptr ) = 0;
-    virtual void EnterTreeTransformation( const Transformation *tx ) {}
-    virtual void ExitTreeTransformation() {}
 };
 
 class NavigationUtils
@@ -158,11 +156,6 @@ public:
     // comment by RunTeleportQuery().
     virtual AugTreePtr<Node> ApplyTransformation( const TreeKit &kit, // Handy functions
     		                                      TreePtr<Node> node ) const = 0;    // Root of the subtree we want to modify    		                          
-
-    // This one is to be used from within a transformation, when invoking 
-    // another. TODO use more, see 
-    virtual AugTreePtr<Node> ApplySubTransformation( const TreeKit &kit, // Handy functions
-    		                                         AugTreePtr<Node> node ) const;    // Root of the subtree we want to modify    		                          
 };
 
 

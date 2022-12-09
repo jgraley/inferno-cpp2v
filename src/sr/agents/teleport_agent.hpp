@@ -41,16 +41,9 @@ public:
      * if changed by a replace operation, force us to re-create the domain 
      * extension in case that needs to change too.
      * 
-     * 2. Call `EnterTreeTransformation()` and `ExitTreeTransformation()` around 
-     * any call to one of the teleport operations that are already directly used
-     * by a teleport agent that exists in any pattern node. Reason: the "inner"
-     * teleport operation will already get a domain extension because its starting
-     * node is in the X tree and we attempt domain extension for all nodes in the 
-     * X tree. So we can optimise by leaving it out of the deps for the current 
-     * starting X link. 
+     * 2. deleted - see #696
      * 
-     * Related: #689 #693 #696. Also see AugTreePtr<> and See ApplySubTransformation() 
-     * for TransformOf case.
+     * Related: #689 #693 #696. Also see AugTreePtr<>.
      */
     typedef pair<XLink, TreePtr<Node>> TeleportResult;    
     virtual TeleportResult RunTeleportQuery( const XTreeDatabase *db, DependencyReporter *dep_rep, XLink start_xlink ) const = 0;
@@ -87,15 +80,12 @@ public:
 	{
 	public:	
 		void ReportTreeNode( const TreePtrInterface *p_tree_ptr ) override;
-        void EnterTreeTransformation( const Transformation *tx ) override;
-        void ExitTreeTransformation() override;
 
 		set<XLink> GetDeps() const;
 		void Clear();
 		
 	private:
 		set<XLink> deps;
-        int depth = 0;
 	};
 };
 
