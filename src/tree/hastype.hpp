@@ -32,9 +32,9 @@ public:
 private:    
     // TODO make these private
     AugTreePtr<CPPTree::Type> Get( const TreeKit &kit, TreePtr<CPPTree::Expression> o ) const;
-    AugTreePtr<CPPTree::Type> Get( const TreeKit &kit, TreePtr<CPPTree::Operator> op, list<AugTreePtr<CPPTree::Type>> optypes ) const;
+    AugTreePtr<CPPTree::Type> GetOperator( const TreeKit &kit, TreePtr<CPPTree::Operator> op, list<AugTreePtr<CPPTree::Type>> optypes ) const;
     AugTreePtr<CPPTree::Type> GetStandard( const TreeKit &kit, list<AugTreePtr<CPPTree::Type>> &optypes ) const;
-    AugTreePtr<CPPTree::Type> GetStandard( const TreeKit &kit, list<AugTreePtr<CPPTree::Numeric>> &optypes ) const;
+    AugTreePtr<CPPTree::Type> GetStandardOnNumerics( const TreeKit &kit, list<AugTreePtr<CPPTree::Numeric>> &optypes ) const;
     AugTreePtr<CPPTree::Type> GetSpecial( const TreeKit &kit, TreePtr<CPPTree::Operator> op, list<AugTreePtr<CPPTree::Type>> &optypes ) const;
     AugTreePtr<CPPTree::Type> GetLiteral( const TreeKit &kit, TreePtr<CPPTree::Literal> l ) const;
     

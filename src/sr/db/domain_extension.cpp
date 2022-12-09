@@ -198,6 +198,8 @@ void DomainExtensionChannel::TryAddStartXLink( XLink start_xlink )
     if( !extra_node )
         return;
     
+    //ASSERT( deps.size() < 20 )("Big deps for ")(start_xlink)("\n")(deps);
+    
     start_to_tracking.insert( make_pair( start_xlink, TrackingRow(extra_node, deps) ) );
     for( XLink dep : deps )
         dep_to_starts[dep].insert(start_xlink);

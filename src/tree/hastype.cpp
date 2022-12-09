@@ -37,7 +37,7 @@ AugTreePtr<CPPTree::Type> HasType::Get( const TreeKit &kit, TreePtr<Expression> 
         list<AugTreePtr<Type>> optypes;
         for( TreePtr<Expression> o : op->operands )
             optypes.push_back( Get(kit, o) );
-        return Get( kit, op, optypes );
+        return GetOperator( kit, op, optypes );
     }
     else if( auto op = DynamicTreePtrCast<CommutativeOperator>(o) ) // operator
     {
@@ -45,7 +45,7 @@ AugTreePtr<CPPTree::Type> HasType::Get( const TreeKit &kit, TreePtr<Expression> 
         list<AugTreePtr<Type>> optypes;
         for( TreePtr<Expression> o : op->operands )
                  optypes.push_back( Get(kit, o) );
-        return Get( kit, op, optypes );
+        return GetOperator( kit, op, optypes );
     }
     else if( auto l = DynamicTreePtrCast<Literal>(o) )
     {
@@ -114,7 +114,7 @@ AugTreePtr<CPPTree::Type> HasType::Get( const TreeKit &kit, TreePtr<Expression> 
 
 // Just discover the type of operators, where the types of the operands have already been determined
 // Note we always get a Sequence, even when the operator is commutative
-AugTreePtr<CPPTree::Type> HasType::Get( const TreeKit &kit, TreePtr<Operator> op, list<AugTreePtr<Type>> optypes ) const
+AugTreePtr<CPPTree::Type> HasType::GetOperator( const TreeKit &kit, TreePtr<Operator> op, list<AugTreePtr<Type>> optypes ) const
 {
 	// Lower types that masquerade as other types in preparation for operand analysis
 	// - References go to the referenced type
@@ -212,7 +212,7 @@ AugTreePtr<CPPTree::Type> HasType::GetStandard( const TreeKit &kit, list<AugTree
 		if( auto n = AugTreePtr<Numeric>::DynamicCast(optype) )
 			nums.push_back(n);
 	if( nums.size() == optypes.size() )
-		return GetStandard( kit, nums );
+		return GetStandardOnNumerics( kit, nums );
 
     throw NumericalOperatorUsageMismatch1();
 //	if( optypes.size() == 2 )
@@ -223,7 +223,7 @@ AugTreePtr<CPPTree::Type> HasType::GetStandard( const TreeKit &kit, list<AugTree
 }
 
 
-AugTreePtr<CPPTree::Type> HasType::GetStandard( const TreeKit &kit, list<AugTreePtr<Numeric>> &optypes ) const
+AugTreePtr<CPPTree::Type> HasType::GetStandardOnNumerics( const TreeKit &kit, list<AugTreePtr<Numeric>> &optypes ) const
 {
 	// Start the width and signedness as per regular "int" since this is the
 	// minimum result type for standard operators
