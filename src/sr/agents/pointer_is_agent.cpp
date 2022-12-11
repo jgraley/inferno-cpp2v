@@ -26,8 +26,7 @@ TeleportAgent::TeleportResult PointerIsAgent::RunTeleportQuery( const XTreeDatab
 		{	
 			// If no parent node, there's no dep to declare, assuming root xlink
 			// pointer type cannot change. Might be better to refuse the whole teleport, TBD.
-			XLink parent_xlink = OnlyElementOf(db->GetNodeRow(parent_node).parents); // is a parent so rule #217 says should be only one
-			dep_rep->ReportTreeNode( parent_xlink.GetXPtr() );
+			dep_rep->ReportTreeNode( parent_node );
 		}
 	}
 	
@@ -38,7 +37,7 @@ TeleportAgent::TeleportResult PointerIsAgent::RunTeleportQuery( const XTreeDatab
 	// Make an archetypical node matching the pointer's type
     TreePtr<Node> tnode = px->MakeValueArchetype();
     
-    // Package up to indicate we don't have a parent for it
+    // Package up to indicate we don't have a parent for the new node
 	return make_pair( XLink(), tnode );
 }
 

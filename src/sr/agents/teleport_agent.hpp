@@ -48,7 +48,7 @@ public:
     typedef pair<XLink, TreePtr<Node>> TeleportResult;    
     virtual TeleportResult RunTeleportQuery( const XTreeDatabase *db, DependencyReporter *dep_rep, XLink start_xlink ) const = 0;
     
-    TreePtr<Node> GetDomainExtraNode( const XTreeDatabase *db, XLink start_xlink, set<XLink> &deps ) const override;
+    TreePtr<Node> GetDomainExtraNode( const XTreeDatabase *db, XLink start_xlink, set<TreePtr<Node>> &deps ) const override;
 
     virtual void Reset();    
 
@@ -79,13 +79,13 @@ public:
     class DepRep : public DependencyReporter
 	{
 	public:	
-		void ReportTreeNode( const TreePtrInterface *p_tree_ptr ) override;
+		void ReportTreeNode( TreePtr<Node> tree_ptr ) override;
 
-		set<XLink> GetDeps() const;
+		set<TreePtr<Node>> GetDeps() const;
 		void Clear();
 		
 	private:
-		set<XLink> deps;
+		set<TreePtr<Node>> deps;
 	};
 };
 

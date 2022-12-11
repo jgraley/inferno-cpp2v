@@ -12,7 +12,7 @@ class DependencyReporter
 public:	
 	// We actually require a pointer to the parent node's TreePtr 
 	// to the node in question.
-	virtual void ReportTreeNode( const TreePtrInterface *p_tree_ptr ) = 0;
+	virtual void ReportTreeNode( TreePtr<Node> tree_ptr ) = 0;
 };
 
 class NavigationUtils
@@ -58,7 +58,7 @@ public:
         // Not a local automatic please, we're going to hang on to it.
         ASSERTS( !ON_STACK(p_tree_ptr_) );
         if( dep_rep )
-			dep_rep->ReportTreeNode( p_tree_ptr );
+			dep_rep->ReportTreeNode( *this );
     }
         
     // Tree style constructor: if a pointer was provided we keep the pointer. Usage style
@@ -73,7 +73,7 @@ public:
         // Not a local automatic please, we're going to hang on to it.
         ASSERTS( !ON_STACK(p_tree_ptr_) );
         if( dep_rep )
-			dep_rep->ReportTreeNode( p_tree_ptr );
+			dep_rep->ReportTreeNode( *this );
     }
         
     // Free style constructor: if a value was provided the pointer is NULL 

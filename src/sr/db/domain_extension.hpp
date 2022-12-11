@@ -36,7 +36,7 @@ public:
 	class Extender : public virtual Traceable
 	{
 	public:
-		virtual TreePtr<Node> GetDomainExtraNode( const XTreeDatabase *db, XLink xlink, set<XLink> &deps ) const = 0;
+		virtual TreePtr<Node> GetDomainExtraNode( const XTreeDatabase *db, XLink xlink, set<TreePtr<Node>> &deps ) const = 0;
 		virtual bool IsExtenderLess( const Extender &r ) const = 0;
 		virtual int GetExtenderOrdinal() const = 0;
 	};
@@ -113,11 +113,11 @@ private:
 
     struct TrackingRow : Traceable
     {
-        TrackingRow( TreePtr<Node> extra_node_, set<XLink> deps_ );
+        TrackingRow( TreePtr<Node> extra_node_, set<TreePtr<Node>> deps_ );
         string GetTrace() const override;
         
         TreePtr<Node> extra_node;
-        set<XLink> deps;
+        set<TreePtr<Node>> deps;
     };
     
     struct ExtClass : Traceable
@@ -133,8 +133,9 @@ private:
     map<XLink, TrackingRow> start_to_tracking;
     
     // A reversal of start_to_tracking for indexing on dependency
-    map<XLink, set<XLink>> dep_to_starts;
+    map<TreePtr<Node>, set<XLink>> dep_to_starts;
 
+    // Here we collect domain extension start XLinks that we will re-create during Complete()
     set<XLink> starts_to_redo;
     
     // SimpleCompare equivalence classes over the domain, with refcount = size of the class.

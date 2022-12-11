@@ -30,7 +30,7 @@ SYM::Lazy<SYM::BooleanExpression> TeleportAgent::SymbolicNormalLinkedQueryPRed()
 }                     
 
 
-TreePtr<Node> TeleportAgent::GetDomainExtraNode( const XTreeDatabase *db, XLink start_xlink, set<XLink> &deps ) const
+TreePtr<Node> TeleportAgent::GetDomainExtraNode( const XTreeDatabase *db, XLink start_xlink, set<TreePtr<Node>> &deps ) const
 {
 	deps.clear();
 	
@@ -53,11 +53,11 @@ TreePtr<Node> TeleportAgent::GetDomainExtraNode( const XTreeDatabase *db, XLink 
 		return TreePtr<Node>();       // NULL  
 
 	deps = dep_rep.GetDeps();	
-	
+    
 	if( tp_result.first ) // parent link was supplied
 	{
-		ASSERT( tp_result.first.GetChildX() == tp_result.second );    
-		ASSERT( deps.count( tp_result.first ) > 0 );
+		ASSERT( tp_result.first.GetChildX() == tp_result.second ); // Consistency
+		ASSERT( deps.count( tp_result.first.GetChildX() ) > 0 ); // Result should be a dep
 		return TreePtr<Node>(); // Don't bother Domain when there's an XLink
 	}		
 
@@ -152,14 +152,13 @@ const TeleportAgent *TeleportAgent::TeleportOperator::GetAgent() const
 }
 
 
-void TeleportAgent::DepRep::ReportTreeNode( const TreePtrInterface *p_tree_ptr )
+void TeleportAgent::DepRep::ReportTreeNode( TreePtr<Node> tree_ptr )
 {
-    XLink xlink( (TreePtr<Node>)*p_tree_ptr, p_tree_ptr );
-    deps.insert( xlink );
+    deps.insert( tree_ptr );
 }
 
 
-set<XLink> TeleportAgent::DepRep::GetDeps() const
+set<TreePtr<Node>> TeleportAgent::DepRep::GetDeps() const
 {
 	return deps;
 }

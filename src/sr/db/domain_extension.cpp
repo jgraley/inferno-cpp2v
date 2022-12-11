@@ -193,7 +193,7 @@ void DomainExtensionChannel::AddExtraNode( TreePtr<Node> extra_node )
 
 void DomainExtensionChannel::TryAddStartXLink( XLink start_xlink )
 {
-    set<XLink> deps;
+    set<TreePtr<Node>> deps;
     TreePtr<Node> extra_node = extender->GetDomainExtraNode( db, start_xlink, deps );  
     if( !extra_node )
         return;
@@ -201,7 +201,7 @@ void DomainExtensionChannel::TryAddStartXLink( XLink start_xlink )
     //ASSERT( deps.size() < 20 )("Big deps for ")(start_xlink)("\n")(deps);
     
     start_to_tracking.insert( make_pair( start_xlink, TrackingRow(extra_node, deps) ) );
-    for( XLink dep : deps )
+    for( TreePtr<Node> dep : deps )
         dep_to_starts[dep].insert(start_xlink);
     
     AddExtraNode( extra_node );
@@ -214,11 +214,11 @@ void DomainExtensionChannel::DropStartXlink( XLink start_xlink )
     ASSERT( start_to_tracking.count(start_xlink)>0 );
     
     TreePtr<Node> extra_node = start_to_tracking.at(start_xlink).extra_node;
-    set<XLink> &deps = start_to_tracking.at(start_xlink).deps;
+    set<TreePtr<Node>> &deps = start_to_tracking.at(start_xlink).deps;
 
     // Remove this starting xlink from deps structures, possibly dropping the
     // dep completely
-    for( XLink dep : deps )
+    for( TreePtr<Node> dep : deps )
     {
         ASSERT( dep_to_starts.count(dep)>0 );
         ASSERT( !dep_to_starts.at(dep).empty() );
@@ -246,8 +246,8 @@ void DomainExtensionChannel::Validate() const
     for( auto p : start_to_tracking )
     {
         XLink start_xlink = p.first;
-        for( XLink dep_xlink : p.second.deps )
-            ASSERT( dep_to_starts.count(dep_xlink) == 1 );            
+        for( TreePtr<Node> dep : p.second.deps )
+            ASSERT( dep_to_starts.count(dep) == 1 );            
             
         ASSERT( domain_extension_classes.count(p.second.extra_node)==1 );
         ASSERT( domain_extension_classes.at(p.second.extra_node).count > 0 );
@@ -257,7 +257,6 @@ void DomainExtensionChannel::Validate() const
     
     for( auto p : dep_to_starts )
     {
-        XLink dep_xlink = p.first;
         for( XLink start_xlink : p.second )
             ASSERT( start_to_tracking.count(start_xlink) == 1 );            
     }
@@ -313,12 +312,14 @@ void DomainExtensionChannel::Delete(const DBWalk::WalkInfo &walk_info)
         EraseSolo(starts_to_redo, xlink);
     }
     
+    TreePtr<Node> x = walk_info.x;
+    
     // Now deal with the case where the deleted xlink is a dependency of a domain 
     // extension: in this case, we want to remove it but remember that we want to 
     // redo the starting xlink at Complete() time.
-    if( dep_to_starts.count(xlink)>0 )
+    if( dep_to_starts.count(x)>0 )
     {
-        set<XLink> start_xlinks = dep_to_starts.at(xlink);
+        set<XLink> start_xlinks = dep_to_starts.at(x);
         for( XLink start_xlink : start_xlinks )
         {
             ASSERT( start_to_tracking.count(start_xlink)>0 );
@@ -353,7 +354,7 @@ string DomainExtensionChannel::ExtClass::GetTrace() const
 }
 
 
-DomainExtensionChannel::TrackingRow::TrackingRow( TreePtr<Node> extra_node_, set<XLink> deps_ ) :
+DomainExtensionChannel::TrackingRow::TrackingRow( TreePtr<Node> extra_node_, set<TreePtr<Node>> deps_ ) :
     extra_node( extra_node_ ),
     deps( move(deps_) )
 {
