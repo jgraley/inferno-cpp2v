@@ -59,9 +59,9 @@ public:
 	void SetOnExtraXLinkFunctions( OnExtraZoneFunction on_insert_extra_zone,
                                    OnExtraZoneFunction on_delete_extra_zone = OnExtraZoneFunction() );
 
-    // Add xlink to domain extension if not already there, and return the cannonical one.
-    XLink GetUniqueDomainExtension( const Extender *extender, TreePtr<Node> node ) const; 
-    
+    // Gain access to a channel
+    const DomainExtensionChannel *GetChannel( const Extender *extender ) const;
+
     // To be called after modifying the tree, and before any search/compare operation
     void InitialBuild();
     void Complete();
@@ -91,7 +91,7 @@ public:
 	void SetOnExtraXLinkFunctions( DomainExtension::OnExtraZoneFunction on_insert_extra_zone,
                                    DomainExtension::OnExtraZoneFunction on_delete_extra_zone = DomainExtension::OnExtraZoneFunction() );
 
-	XLink GetUniqueDomainExtension( TreePtr<Node> node ) const;
+	XLink GetUniqueDomainExtension( XLink start_xlink, TreePtr<Node> node ) const;
     void AddExtraNode( TreePtr<Node> node );
     void TryAddStartXLink( XLink start_xlink );
     void DropStartXlink( XLink start_xlink );

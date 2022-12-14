@@ -51,10 +51,10 @@ void DomainExtension::SetOnExtraXLinkFunctions( OnExtraZoneFunction on_insert_ex
 }
 
 
-XLink DomainExtension::GetUniqueDomainExtension( const Extender *extender, TreePtr<Node> node ) const
-{   
+const DomainExtensionChannel *DomainExtension::GetChannel( const Extender *extender ) const
+{
     ASSERT( channels.count(extender) );
-    return channels.at(extender)->GetUniqueDomainExtension( node );
+    return channels.at(extender).get();
 }
 
 
@@ -133,14 +133,22 @@ void DomainExtensionChannel::SetOnExtraXLinkFunctions( DomainExtension::OnExtraZ
 }
 
 
-XLink DomainExtensionChannel::GetUniqueDomainExtension( TreePtr<Node> node ) const
+XLink DomainExtensionChannel::GetUniqueDomainExtension( XLink start_xlink, TreePtr<Node> node ) const
 {   
     ASSERT( node );
-
 	ASSERT( domain_extension_classes.count(node) > 0 )
 	      (node)(" not found in domain_extension_classes:\n")
 	      (domain_extension_classes);
+    
+    // Cross-checks using start_xlink (rather than acting as a cache, 
+    // which we can now do, see #700)
+    ASSERT( start_xlink );
+    ASSERT( start_to_tracking.count(start_xlink)>0 );
+    TreePtr<Node> cached_node = start_to_tracking.at(start_xlink).extra_node;    
+    SimpleCompare sc;
+    ASSERT( sc.Compare3Way(node, cached_node)==0 ); 
 
+    // Actual uniquify is just a lookup in the map
     return domain_extension_classes.at( node ).extra_xlink;
 }
 

@@ -126,10 +126,10 @@ void XTreeDatabase::InitialWalk( const DBWalk::Actions *actions,
 }                                 
 
 
-XLink XTreeDatabase::GetUniqueDomainExtension( const DomainExtension::Extender *extender, TreePtr<Node> node ) const
+const DomainExtensionChannel *XTreeDatabase::GetDEChannel( const DomainExtension::Extender *extender ) const
 {
     ASSERT( root_xlink );
-	return plan.domain_extension->GetUniqueDomainExtension(extender, node);
+	return plan.domain_extension->GetChannel(extender);
 }
 
 

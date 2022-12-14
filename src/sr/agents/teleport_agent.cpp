@@ -96,14 +96,14 @@ unique_ptr<SymbolResultInterface> TeleportAgent::TeleportOperator::Evaluate( con
 {
 	// Extract xlink from symbolic result
     ASSERT( op_results.size()==1 );            
-    unique_ptr<SymbolResultInterface> keyer_result = OnlyElementOf(move(op_results));
-    if( !keyer_result->IsDefinedAndUnique() )
+    unique_ptr<SymbolResultInterface> start_result = OnlyElementOf(move(op_results));
+    if( !start_result->IsDefinedAndUnique() )
         return make_unique<SymbolResult>( SymbolResult::NOT_A_SYMBOL );
-    XLink keyer_xlink = keyer_result->GetOnlyXLink();
+    XLink start_xlink = start_result->GetOnlyXLink();
         
     // Apply the teleporting operation to the xlink. It may create new nodes
     // so it returns a TreePtr<Node> to avoid creating new xlink without base.
-    TeleportResult tp_result = agent->RunTeleportQuery( kit.x_tree_db, nullptr, keyer_xlink );
+    TeleportResult tp_result = agent->RunTeleportQuery( kit.x_tree_db, nullptr, start_xlink );
 
     // Teleporting operation can fail: if so call it a NaS
     if( !tp_result.second )
@@ -118,7 +118,7 @@ unique_ptr<SymbolResultInterface> TeleportAgent::TeleportOperator::Evaluate( con
 
     // We are required to have already added the new node to the domain
     // during domain extension, so use the node to fetch the unbique XLink
-    XLink unique_xlink = kit.x_tree_db->GetUniqueDomainExtension(agent, tp_result.second);
+    XLink unique_xlink = kit.x_tree_db->GetDEChannel(agent)->GetUniqueDomainExtension(start_xlink, tp_result.second);
     
     // Form a symbol result to return.       
     return make_unique<SymbolResult>( unique_xlink );
