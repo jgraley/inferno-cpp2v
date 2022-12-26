@@ -20,7 +20,7 @@ public:
         XTreeDatabase *x_tree_db; 
         
         // Forth-like stack of generated nodes.
-        stack<TreePtr<Node>> *node_stack;
+        stack<FreeZone> *free_zone_stack;
     };
 
 	virtual void Execute( const ExecKit &kit ) const = 0;
@@ -52,12 +52,11 @@ private:
 class InsertCommand : public UpdateCommand
 {
 public:
-    InsertCommand( const TreeZone &target, const FreeZone &new_zone );
+    InsertCommand( const TreeZone &target );
 	void Execute( const ExecKit &kit ) const final;	
 
 private:
 	TreeZone target;
-	FreeZone new_zone;
 };
 
 

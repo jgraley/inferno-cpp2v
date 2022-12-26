@@ -363,18 +363,21 @@ void SCREngine::Replace( XLink base_xlink )
     INDENT("R");
 	auto commands = make_shared<CommandSequence>();
 
+	Agent::ReplaceKit replace_kit;
+    replace_kit.commands = commands.get();    
+    TreePtr<Node> new_base_x = plan.base_agent->BuildReplace(replace_kit, plan.base_plink);
+    FreeZone new_zone( new_base_x );
+	commands->Add( make_shared<PushCommand>( new_zone ) );
+
     TreeZone base_zone( base_xlink );
 	commands->Add( make_shared<DeleteCommand>( base_zone ) );
     
     // Now replace according to the couplings
     TRACE("Now replacing, base agent=")(plan.base_agent)("\n");
-	Agent::ReplaceKit replace_kit;
-    replace_kit.commands = commands.get();    
-    TreePtr<Node> new_base_x = plan.base_agent->BuildReplace(replace_kit, plan.base_plink);
-    FreeZone new_zone( new_base_x );
-	commands->Add( make_shared<InsertCommand>( base_zone, new_zone ) );
+	commands->Add( make_shared<InsertCommand>( base_zone ) );
     
-	plan.vn_sequence->ExecuteUpdateCommand( commands );        
+    stack<FreeZone> free_zone_stack;
+	plan.vn_sequence->ExecuteUpdateCommand( commands, &free_zone_stack );        
     plan.vn_sequence->CompleteDomainExtension();     
 
     TRACE("Replace done\n");

@@ -151,10 +151,12 @@ void VNSequence::CompleteDomainExtension()
 }
 
 
-void VNSequence::ExecuteUpdateCommand( shared_ptr<UpdateCommand> cmd )
+void VNSequence::ExecuteUpdateCommand( shared_ptr<UpdateCommand> cmd, 
+                                       stack<FreeZone> *free_zone_stack )
 {
     ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");    
-	UpdateCommand::ExecKit kit { x_tree_db.get() };
+    
+	UpdateCommand::ExecKit kit { x_tree_db.get(), free_zone_stack };
 	cmd->Execute( kit );
 }
 

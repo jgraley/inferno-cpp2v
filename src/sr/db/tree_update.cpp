@@ -29,13 +29,12 @@ PushCommand::PushCommand( const FreeZone &new_zone_ ) :
 
 void PushCommand::Execute( const ExecKit &kit ) const
 {
-	kit.node_stack->push( new_zone.GetBase() );      
+	kit.free_zone_stack->push( new_zone );      
 }
 
 
-InsertCommand::InsertCommand( const TreeZone &target_, const FreeZone &new_zone_ ) :
-	target( target_ ),
-	new_zone( new_zone_ )
+InsertCommand::InsertCommand( const TreeZone &target_ ) :
+	target( target_ )
 {
 }
 
@@ -47,11 +46,13 @@ void InsertCommand::Execute( const ExecKit &kit ) const
     ASSERT( !target_base_xlink.GetChildX() );
     
     // Patch the tree
-    target_base_xlink.SetXPtr( new_zone.GetBase() );
+    target_base_xlink.SetXPtr( kit.free_zone_stack->top().GetBase() );
     
     // Update database 
-    TreeZone new_tree_zone( target_base_xlink, new_zone );
+    TreeZone new_tree_zone( target_base_xlink, kit.free_zone_stack->top() );
     kit.x_tree_db->Insert( new_tree_zone );      
+
+    kit.free_zone_stack->pop();
 }
 
 
