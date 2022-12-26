@@ -81,6 +81,7 @@ public:
     virtual bool ReplaceKeyerQuery( PatternLink me_plink, 
                                     set<PatternLink> keyer_plinks ) = 0;
 
+    virtual TreePtr<Node> BuildExecuteReplace( PatternLink me_plink ) = 0;
     virtual TreePtr<Node> BuildReplace( const ReplaceKit &kit, 
                                         PatternLink me_plink ) = 0;
     virtual list<PatternLink> GetChildren() const = 0;

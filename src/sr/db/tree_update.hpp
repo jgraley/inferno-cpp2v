@@ -19,11 +19,22 @@ public:
 		// because we intend to actually change things here.
         XTreeDatabase *x_tree_db; 
         
-        // TEMPORARY while transitioning to incremental
-        bool monolithic_is_valid;
+        // Forth-like stack of generated nodes.
+        stack<TreePtr<Node>> *node_stack;
     };
 
 	virtual void Execute( const ExecKit &kit ) const = 0;
+};
+
+
+class PushCommand : public UpdateCommand
+{
+public:
+    PushCommand( const FreeZone &new_zone );
+	void Execute( const ExecKit &kit ) const final;	
+
+private:
+	FreeZone new_zone;
 };
 
 

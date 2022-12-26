@@ -21,6 +21,18 @@ void DeleteCommand::Execute( const ExecKit &kit ) const
 }	
 
 
+PushCommand::PushCommand( const FreeZone &new_zone_ ) :
+	new_zone( new_zone_ )
+{
+}
+
+
+void PushCommand::Execute( const ExecKit &kit ) const
+{
+	kit.node_stack->push( new_zone.GetBase() );      
+}
+
+
 InsertCommand::InsertCommand( const TreeZone &target_, const FreeZone &new_zone_ ) :
 	target( target_ ),
 	new_zone( new_zone_ )

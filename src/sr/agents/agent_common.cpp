@@ -515,6 +515,14 @@ bool AgentCommon::ReplaceKeyerQuery( PatternLink me_plink,
     return false;
 }
                                   
+                                  
+TreePtr<Node> AgentCommon::BuildExecuteReplace( PatternLink me_plink )
+{
+	Agent::ReplaceKit replace_kit;
+    TreePtr<Node> new_base_x = BuildReplace(replace_kit, me_plink);
+    return new_base_x;
+}
+                                  
 
 TreePtr<Node> AgentCommon::BuildReplace( const ReplaceKit &kit, 
                                          PatternLink me_plink )

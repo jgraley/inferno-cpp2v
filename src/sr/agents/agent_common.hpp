@@ -59,8 +59,9 @@ public:
                                   PatternLink under_plink );
     virtual bool ReplaceKeyerQuery( PatternLink me_plink, 
                                     set<PatternLink> keyer_plinks );                                  
+    TreePtr<Node> BuildExecuteReplace( PatternLink me_plink ) override;
     TreePtr<Node> BuildReplace( const ReplaceKit &kit, 
-                                        PatternLink me_plink ) override;
+                                PatternLink me_plink ) override;
     virtual TreePtr<Node> BuildReplaceImpl( const ReplaceKit &kit, 
                                             PatternLink me_plink, 
                                             XLink key_xlink );
