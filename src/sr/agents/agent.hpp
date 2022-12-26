@@ -14,6 +14,7 @@ class SCREngine;
 class AndRuleEngine;
 class Agent;
 class XTreeDatabase;
+class CommandSequence;
 
 /// Interface for Agents, which co-exist with pattern nodes and implement the search and replace funcitonality for each pattern node.
 class Agent : public virtual Graphable,

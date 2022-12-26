@@ -27,6 +27,7 @@ class Conjecture;
 class SpecialBase;
 class AndRuleEngine;
 class VNSequence;
+class CommandSequence;
 
 class RequiresSubordinateSCREngine : public virtual Graphable
 {
