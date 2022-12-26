@@ -361,18 +361,18 @@ void SCREngine::RunEmbedded( PatternLink plink_to_embedded, XLink base_xlink )
 void SCREngine::Replace( XLink base_xlink )
 {
     INDENT("R");
+	auto seq = make_shared<CommandSequence>();
+
     TreeZone base_zone( base_xlink );
+	seq->Add( make_shared<DeleteCommand>( base_zone ) );
     
     // Now replace according to the couplings
     TRACE("Now replacing, base agent=")(plan.base_agent)("\n");
     TreePtr<Node> new_base_x = plan.base_agent->BuildReplace(plan.base_plink);
     FreeZone new_zone( new_base_x );
-
-	auto seq = make_shared<CommandSequence>();
-	seq->Add( make_shared<DeleteCommand>( base_zone ) );
 	seq->Add( make_shared<InsertCommand>( base_zone, new_zone ) );
-	plan.vn_sequence->ExecuteUpdateCommand( seq );
-        
+    
+	plan.vn_sequence->ExecuteUpdateCommand( seq );        
     plan.vn_sequence->CompleteDomainExtension();     
 
     TRACE("Replace done\n");

@@ -26,7 +26,7 @@ public:
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicColocatedQuery() const; 
     TreePtr<Node> BuildReplaceImpl( PatternLink me_plink, 
                                     XLink key_xlink ) final;
-    virtual TreePtr<Node> BuildReplaceImpl( PatternLink me_plink );
+    virtual TreePtr<Node> BuildReplaceColocated( PatternLink me_plink );
 };
 
 };

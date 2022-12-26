@@ -20,7 +20,7 @@ class SearchReplace;
 /// agent, performing search and replace operations via the `search_pattern` and 
 /// `replace_pattern` pointers until no more matches are found (the usual reductive style).  
 class EmbeddedSCRAgent : public virtual ColocatedAgent, 
-                   public RequiresSubordinateSCREngine 
+                         public RequiresSubordinateSCREngine 
 {
 public:
     EmbeddedSCRAgent( TreePtr<Node> sp, TreePtr<Node> rp, bool is_search );
@@ -28,7 +28,7 @@ public:
     virtual const TreePtrInterface *GetThrough() const = 0;    
     virtual void MaybeChildrenPlanOverlay( PatternLink me_plink, 
                                   PatternLink under_plink );
-    TreePtr<Node> BuildReplaceImpl( PatternLink me_plink ) final;
+    TreePtr<Node> BuildReplaceColocated( PatternLink me_plink ) final;
     virtual list<PatternLink> GetVisibleChildren( Path v ) const;
 	virtual bool IsSearch() const { return is_search; }
 	virtual TreePtr<Node> GetSearchPattern() const { return search_pattern; }
@@ -47,7 +47,7 @@ private:
 /// Agent that allows some transformation to run at the corresponding place in the output tree 
 template<class PRE_RESTRICTION>
 class EmbeddedSCR : public EmbeddedSCRAgent, 
-              public Special<PRE_RESTRICTION>
+                    public Special<PRE_RESTRICTION>
 {
 public:
     SPECIAL_NODE_FUNCTIONS

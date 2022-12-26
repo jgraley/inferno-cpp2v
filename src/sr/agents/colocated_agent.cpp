@@ -41,11 +41,11 @@ TreePtr<Node> ColocatedAgent::BuildReplaceImpl( PatternLink me_plink,
 {
 	// Colocated agents forward to a child agent so they take up no 
 	// space in generated tree. Therefore they don't use their keys.
-	return BuildReplaceImpl(me_plink);
+	return BuildReplaceColocated(me_plink);
 }
 
 
-TreePtr<Node> ColocatedAgent::BuildReplaceImpl( PatternLink me_plink )
+TreePtr<Node> ColocatedAgent::BuildReplaceColocated( PatternLink me_plink )
 {
 	// We use OnlyElementOf() as default impl because otherwise 
 	// it's not clear which of multiple child links should be used for 
