@@ -10,7 +10,9 @@ namespace SR
 {
 class XTreeDatabase;
 	
-class UpdateCommand : public Traceable
+// ------------------------- Command --------------------------
+    
+class Command : public Traceable
 {
 public:
     struct ExecKit
@@ -26,19 +28,21 @@ public:
 	virtual void Execute( const ExecKit &kit ) const = 0;
 };
 
+// ------------------------- PushFreeZoneCommand --------------------------
 
-class PushCommand : public UpdateCommand
+class PushFreeZoneCommand : public Command
 {
 public:
-    PushCommand( const FreeZone &new_zone );
+    PushFreeZoneCommand( const FreeZone &new_zone );
 	void Execute( const ExecKit &kit ) const final;	
 
 private:
 	FreeZone new_zone;
 };
 
+// ------------------------- DeleteCommand --------------------------
 
-class DeleteCommand : public UpdateCommand
+class DeleteCommand : public Command
 {
 public:
     DeleteCommand( const TreeZone &target );
@@ -48,8 +52,9 @@ private:
 	TreeZone target;
 };
 
+// ------------------------- InsertCommand --------------------------
 
-class InsertCommand : public UpdateCommand
+class InsertCommand : public Command
 {
 public:
     InsertCommand( const TreeZone &target );
@@ -59,15 +64,16 @@ private:
 	TreeZone target;
 };
 
+// ------------------------- CommandSequence --------------------------
 
-class CommandSequence : public UpdateCommand
+class CommandSequence : public Command
 {
 public:
-	void Add( shared_ptr<UpdateCommand> cmd );
+	void Add( shared_ptr<Command> cmd );
 	void Execute( const ExecKit &kit ) const final;	
 	
 private:
-	list<shared_ptr<UpdateCommand>> seq;	
+	list<shared_ptr<Command>> seq;	
 };
 	
 }

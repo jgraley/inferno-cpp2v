@@ -367,7 +367,7 @@ void SCREngine::Replace( XLink base_xlink )
     replace_kit.commands = commands.get();    
     TreePtr<Node> new_base_x = plan.base_agent->BuildReplace(replace_kit, plan.base_plink);
     FreeZone new_zone( new_base_x );
-	commands->Add( make_shared<PushCommand>( new_zone ) );
+	commands->Add( make_shared<PushFreeZoneCommand>( new_zone ) );
 
     TreeZone base_zone( base_xlink );
 	commands->Add( make_shared<DeleteCommand>( base_zone ) );

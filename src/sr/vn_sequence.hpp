@@ -16,7 +16,7 @@ namespace SR
 
 class VNStep;
 class XTreeDatabase;
-class UpdateCommand;
+class Command;
 
 /**
  * Vida Nova Sequence
@@ -47,7 +47,7 @@ public:
     string GetStepName( int step_index ) const;
 
     void CompleteDomainExtension();
-    void ExecuteUpdateCommand( shared_ptr<UpdateCommand> cmd,
+    void ExecuteUpdateCommand( shared_ptr<Command> cmd,
                                stack<FreeZone> *free_zone_stack );
     
     void XTreeDbDump() const;
