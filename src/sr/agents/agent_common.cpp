@@ -15,6 +15,7 @@
 #include "sym/predicate_operators.hpp"
 #include "sym/symbol_operators.hpp"
 #include "sym/rewriters.hpp"
+#include "db/tree_update.hpp"
 
 #include <stdexcept>
 
@@ -516,20 +517,52 @@ bool AgentCommon::ReplaceKeyerQuery( PatternLink me_plink,
 }
                                   
                                   
-TreePtr<Node> AgentCommon::BuildExecuteReplace( PatternLink me_plink )
+TreePtr<Node> AgentCommon::BuildForAnalysis( PatternLink me_plink )
 {
 	Agent::ReplaceKit replace_kit;
-    TreePtr<Node> new_base_x = BuildReplace(replace_kit, me_plink);
-    return new_base_x;
+	auto commands = BuildCommandSeq(replace_kit, me_plink);
+
+    stack<FreeZone> free_zone_stack;
+    Command::ExecKit exec_kit {nullptr, &free_zone_stack};
+	commands->Execute( exec_kit );     
+       
+    return free_zone_stack.top().GetBase();
 }
-                                  
+
+
+Agent::CommandSeq AgentCommon::BuildCommandSeq( const ReplaceKit &kit, 
+                                                PatternLink me_plink )
+{
+    INDENT("C");
+    ASSERT( me_plink.GetChildAgent() == this );
+    ASSERT(this);
+    ASSERT(my_scr_engine)("Agent ")(*this)(" appears not to have been configured");
+    ASSERT( phase != IN_COMPARE_ONLY )(*this)(" is configured for compare only");
+    
+    auto seq = BuildCommandSeqImpl( kit, me_plink );
+    ASSERT( !seq->IsEmpty() );
+    return seq;
+}
+
+
+Agent::CommandSeq AgentCommon::BuildCommandSeqImpl( const ReplaceKit &kit, 
+                                                    PatternLink me_plink )
+{
+	auto commands = make_unique<CommandSequence>();
+
+    TreePtr<Node> new_base_x = BuildReplace(kit, me_plink);
+    FreeZone new_zone( new_base_x );
+	commands->Add( make_shared<PushFreeZoneCommand>( new_zone ) );
+    
+    return commands;
+}
+
 
 TreePtr<Node> AgentCommon::BuildReplace( const ReplaceKit &kit, 
                                          PatternLink me_plink )
 {
     INDENT("B");
     ASSERT( me_plink.GetChildAgent() == this );
-
     ASSERT(this);
     ASSERT(my_scr_engine)("Agent ")(*this)(" appears not to have been configured");
     ASSERT( phase != IN_COMPARE_ONLY )(*this)(" is configured for compare only");

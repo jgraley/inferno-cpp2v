@@ -69,8 +69,10 @@ private:
 class CommandSequence : public Command
 {
 public:
-	void Add( shared_ptr<Command> cmd );
 	void Execute( const ExecKit &kit ) const final;	
+
+	void Add( shared_ptr<Command> cmd );
+    bool IsEmpty() const;
 	
 private:
 	list<shared_ptr<Command>> seq;	

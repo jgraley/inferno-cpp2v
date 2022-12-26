@@ -62,11 +62,6 @@ void InsertCommand::Execute( const ExecKit &kit ) const
 
 // ------------------------- CommandSequence --------------------------
 
-void CommandSequence::Add( shared_ptr<Command> cmd )
-{
-	seq.push_back(cmd);
-}
-
 
 void CommandSequence::Execute( const ExecKit &kit ) const
 {
@@ -74,3 +69,16 @@ void CommandSequence::Execute( const ExecKit &kit ) const
 		cmd->Execute(kit);
 }
 	
+    
+void CommandSequence::Add( shared_ptr<Command> cmd )
+{
+	seq.push_back(cmd);
+}
+
+
+bool CommandSequence::IsEmpty() const
+{
+	return seq.empty();
+}
+
+

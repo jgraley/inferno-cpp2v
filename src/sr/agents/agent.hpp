@@ -23,8 +23,9 @@ class Agent : public virtual Graphable,
 public:  
     struct ReplaceKit
     {
-        CommandSequence *commands;
     };
+
+    typedef unique_ptr<CommandSequence> CommandSeq;
 
     typedef Graphable::Phase Phase;
     
@@ -81,7 +82,9 @@ public:
     virtual bool ReplaceKeyerQuery( PatternLink me_plink, 
                                     set<PatternLink> keyer_plinks ) = 0;
 
-    virtual TreePtr<Node> BuildExecuteReplace( PatternLink me_plink ) = 0;
+    virtual TreePtr<Node> BuildForAnalysis( PatternLink me_plink ) = 0;
+    virtual CommandSeq BuildCommandSeq( const ReplaceKit &kit, 
+                                        PatternLink me_plink ) = 0;
     virtual TreePtr<Node> BuildReplace( const ReplaceKit &kit, 
                                         PatternLink me_plink ) = 0;
     virtual list<PatternLink> GetChildren() const = 0;

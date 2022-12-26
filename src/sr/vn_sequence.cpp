@@ -151,7 +151,7 @@ void VNSequence::CompleteDomainExtension()
 }
 
 
-void VNSequence::ExecuteUpdateCommand( shared_ptr<Command> cmd, 
+void VNSequence::ExecuteUpdateCommand( Command *cmd, 
                                        stack<FreeZone> *free_zone_stack )
 {
     ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");    
