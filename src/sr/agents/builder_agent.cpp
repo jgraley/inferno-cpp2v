@@ -31,7 +31,8 @@ bool BuilderAgent::ReplaceKeyerQuery( PatternLink me_plink,
 }
  
  
-TreePtr<Node> BuilderAgent::BuildReplaceImpl( PatternLink me_plink, 
+TreePtr<Node> BuilderAgent::BuildReplaceImpl( const ReplaceKit &kit, 
+                                              PatternLink me_plink, 
                                               XLink key_xlink ) 
 {
     INDENT("%");

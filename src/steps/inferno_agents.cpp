@@ -45,8 +45,9 @@ string BuildIdentifierAgent::GetNewName()
         ASSERT( source );
         // We have a child identifier - let replace algorithm run in the expectation it will
         // get subsitituted with a SpecificIdentifier from the original program tree
+        ReplaceKit kit { nullptr };
         PatternLink source_plink(this, &source);
-        TreePtr<Node> new_identifier = source_plink.GetChildAgent()->BuildReplace(source_plink);
+        TreePtr<Node> new_identifier = source_plink.GetChildAgent()->BuildReplace(kit, source_plink);
         TRACE("End SoftMakeIdentifier recurse\n");
         ASSERT( new_identifier );
         TreePtr<SpecificIdentifier> si = DynamicTreePtrCast<SpecificIdentifier>( new_identifier );
@@ -406,7 +407,8 @@ TreePtr<Node> BuildContainerSizeAgent::BuildNewSubtree()
 {
 	ASSERT( container );
     PatternLink container_plink(this, &container);
-    TreePtr<Node> new_node = container_plink.GetChildAgent()->BuildReplace(container_plink);
+    ReplaceKit kit { nullptr };
+    TreePtr<Node> new_node = container_plink.GetChildAgent()->BuildReplace(kit, container_plink);
     ASSERT( new_node );
 	ContainerInterface *new_container = dynamic_cast<ContainerInterface *>(new_node.get());
 	ASSERT( new_container );

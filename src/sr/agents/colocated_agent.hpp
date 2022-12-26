@@ -24,9 +24,11 @@ public:
     
     virtual void RunColocatedQuery(XLink common_xlink) const;
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicColocatedQuery() const; 
-    TreePtr<Node> BuildReplaceImpl( PatternLink me_plink, 
+    TreePtr<Node> BuildReplaceImpl( const ReplaceKit &kit, 
+                                    PatternLink me_plink, 
                                     XLink key_xlink ) final;
-    virtual TreePtr<Node> BuildReplaceColocated( PatternLink me_plink );
+    virtual TreePtr<Node> BuildReplaceColocated( const ReplaceKit &kit, 
+                                                 PatternLink me_plink );
 };
 
 };

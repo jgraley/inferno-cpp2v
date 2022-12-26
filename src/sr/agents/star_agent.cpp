@@ -68,7 +68,8 @@ void StarAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
 }
 
 
-TreePtr<Node> StarAgent::BuildReplaceImpl( PatternLink me_plink, 
+TreePtr<Node> StarAgent::BuildReplaceImpl( const ReplaceKit &kit, 
+                                           PatternLink me_plink, 
                                            XLink key_xlink ) 
 {
     INDENT("*");

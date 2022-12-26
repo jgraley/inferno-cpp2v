@@ -59,8 +59,10 @@ public:
                                   PatternLink under_plink );
     virtual bool ReplaceKeyerQuery( PatternLink me_plink, 
                                     set<PatternLink> keyer_plinks );                                  
-    virtual TreePtr<Node> BuildReplace( PatternLink me_plink );
-    virtual TreePtr<Node> BuildReplaceImpl( PatternLink me_plink, 
+    TreePtr<Node> BuildReplace( const ReplaceKit &kit, 
+                                        PatternLink me_plink ) override;
+    virtual TreePtr<Node> BuildReplaceImpl( const ReplaceKit &kit, 
+                                            PatternLink me_plink, 
                                             XLink key_xlink );
     TreePtr<Node> CloneNode( bool force_dirty ) const;
     TreePtr<Node> DuplicateNode( TreePtr<Node> pattern,

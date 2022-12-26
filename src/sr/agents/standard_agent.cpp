@@ -522,7 +522,8 @@ void StandardAgent::MaybeChildrenPlanOverlay( PatternLink me_plink,
 }
 
 
-TreePtr<Node> StandardAgent::BuildReplaceImpl( PatternLink me_plink, 
+TreePtr<Node> StandardAgent::BuildReplaceImpl( const ReplaceKit &kit, 
+                                               PatternLink me_plink, 
                                                XLink key_xlink ) 
 {
     INDENT("B");
@@ -533,7 +534,7 @@ TreePtr<Node> StandardAgent::BuildReplaceImpl( PatternLink me_plink,
         // The under pattern node is in a different location from over (=this), 
         // but overlay planning has set up overlay_under_plink for us.
         XLink under_xlink = my_scr_engine->GetReplaceKey( overlay_under_plink );
-        return BuildReplaceOverlay( me_plink, under_xlink );
+        return BuildReplaceOverlay( kit, me_plink, under_xlink );
     }
     else if( key_xlink ) 
     {
@@ -541,13 +542,13 @@ TreePtr<Node> StandardAgent::BuildReplaceImpl( PatternLink me_plink,
         // The under and over pattern nodes are both this. AndRuleEngine 
         // has keyed this, and due wildcarding, key will be a final node
         // i.e. possibly a subclass of this node.
-        return BuildReplaceOverlay( me_plink, key_xlink );
+        return BuildReplaceOverlay( kit, me_plink, key_xlink );
     }
     else
     {
         // Free replace pattern, just duplicate it.
         ASSERT( me_plink.GetPattern()->IsFinal() ); 
-        return BuildReplaceNormal( me_plink ); 
+        return BuildReplaceNormal( kit, me_plink ); 
     }
 }
 
@@ -557,7 +558,8 @@ TreePtr<Node> StandardAgent::BuildReplaceImpl( PatternLink me_plink,
 #include "tree/cpptree.hpp"
 #endif
 
-TreePtr<Node> StandardAgent::BuildReplaceOverlay( PatternLink me_plink, 
+TreePtr<Node> StandardAgent::BuildReplaceOverlay( const ReplaceKit &kit, 
+                                                  PatternLink me_plink, 
                                                   XLink under_xlink )  // overlaying
 {
 	INDENT("O");
@@ -611,7 +613,7 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( PatternLink me_plink,
 		        ASSERT( my_elt )("Some element of member %d (", i)(*my_con)(") of ")(*this)(" was nullptr\n");
 		        TRACE("Got ")(*my_elt)("\n");
                 PatternLink my_elt_plink( this, &my_elt );
-				TreePtr<Node> new_elt = my_elt_plink.GetChildAgent()->BuildReplace(my_elt_plink);
+				TreePtr<Node> new_elt = my_elt_plink.GetChildAgent()->BuildReplace(kit, my_elt_plink);
                 ASSERT(new_elt); 
                 if( ContainerInterface *new_sub_con = dynamic_cast<ContainerInterface *>(new_elt.get()) )
                 {
@@ -637,7 +639,7 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( PatternLink me_plink,
             if( *my_singular )
             {         
                 PatternLink my_singular_plink( this, my_singular );                    
-                TreePtr<Node> new_dest_singular = my_singular_plink.GetChildAgent()->BuildReplace(my_singular_plink);
+                TreePtr<Node> new_dest_singular = my_singular_plink.GetChildAgent()->BuildReplace(kit, my_singular_plink);
                 ASSERT( new_dest_singular );                
                 ASSERT( new_dest_singular->IsFinal() );
                 *dest_singular = new_dest_singular;
@@ -714,7 +716,8 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( PatternLink me_plink,
 }
 
     
-TreePtr<Node> StandardAgent::BuildReplaceNormal( PatternLink me_plink ) 
+TreePtr<Node> StandardAgent::BuildReplaceNormal( const ReplaceKit &kit, 
+                                                 PatternLink me_plink ) 
 {
 	INDENT("N");
  
@@ -752,7 +755,7 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal( PatternLink me_plink )
 		        ASSERT( my_elt )("Some element of member %d (", i)(*my_con)(") of ")(*this)(" was nullptr\n");
 		        TRACE("Got ")(*my_elt)("\n");
                 PatternLink my_elt_plink( this, &my_elt );
-				TreePtr<Node> new_elt = my_elt_plink.GetChildAgent()->BuildReplace(my_elt_plink);
+				TreePtr<Node> new_elt = my_elt_plink.GetChildAgent()->BuildReplace(kit, my_elt_plink);
 		        if( ContainerInterface *new_sub_con = dynamic_cast<ContainerInterface *>(new_elt.get()) )
 		        {
 			        TRACE("Walking SubContainer length %d\n", new_sub_con->size() );
@@ -772,7 +775,7 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal( PatternLink me_plink )
             TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
             ASSERT( *my_singular )("Member %d (", i)(*my_singular)(") of ")(*this)(" was nullptr when not overlaying\n");
             PatternLink my_singular_plink( this, my_singular );                    
-            TreePtr<Node> new_dest_singular = my_singular_plink.GetChildAgent()->BuildReplace(my_singular_plink);
+            TreePtr<Node> new_dest_singular = my_singular_plink.GetChildAgent()->BuildReplace(kit, my_singular_plink);
             *dest_singular = new_dest_singular;
         }
         else

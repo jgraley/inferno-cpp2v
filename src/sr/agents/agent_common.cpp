@@ -516,7 +516,8 @@ bool AgentCommon::ReplaceKeyerQuery( PatternLink me_plink,
 }
                                   
 
-TreePtr<Node> AgentCommon::BuildReplace( PatternLink me_plink )
+TreePtr<Node> AgentCommon::BuildReplace( const ReplaceKit &kit, 
+                                         PatternLink me_plink )
 {
     INDENT("B");
     ASSERT( me_plink.GetChildAgent() == this );
@@ -533,7 +534,7 @@ TreePtr<Node> AgentCommon::BuildReplace( PatternLink me_plink )
 		      (*this)(" keyed with non-final node ")(key_xlink)("\n"); 
     }
     
-    TreePtr<Node> dest = BuildReplaceImpl(me_plink, key_xlink);
+    TreePtr<Node> dest = BuildReplaceImpl(kit, me_plink, key_xlink);
    
     ASSERT( dest );
     ASSERT( dest->IsFinal() )(*this)(" built non-final ")(*dest)("\n"); 
@@ -542,7 +543,8 @@ TreePtr<Node> AgentCommon::BuildReplace( PatternLink me_plink )
 }
 
 
-TreePtr<Node> AgentCommon::BuildReplaceImpl( PatternLink me_plink, 
+TreePtr<Node> AgentCommon::BuildReplaceImpl( const ReplaceKit &kit, 
+                                             PatternLink me_plink, 
                                              XLink key_xlink )
 {
 	// This default implementation gives us a "search-only" agent

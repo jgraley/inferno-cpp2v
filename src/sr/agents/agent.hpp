@@ -21,6 +21,11 @@ class Agent : public virtual Graphable,
               public virtual Node
 {
 public:  
+    struct ReplaceKit
+    {
+        CommandSequence *commands;
+    };
+
     typedef Graphable::Phase Phase;
     
     enum Path
@@ -76,7 +81,8 @@ public:
     virtual bool ReplaceKeyerQuery( PatternLink me_plink, 
                                     set<PatternLink> keyer_plinks ) = 0;
 
-    virtual TreePtr<Node> BuildReplace( PatternLink me_plink ) = 0;
+    virtual TreePtr<Node> BuildReplace( const ReplaceKit &kit, 
+                                        PatternLink me_plink ) = 0;
     virtual list<PatternLink> GetChildren() const = 0;
     virtual list<PatternLink> GetVisibleChildren( Path v ) const = 0;                        
     virtual bool ShouldGenerateCategoryClause() const = 0;                                

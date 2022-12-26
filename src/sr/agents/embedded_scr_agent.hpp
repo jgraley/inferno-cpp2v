@@ -28,7 +28,8 @@ public:
     virtual const TreePtrInterface *GetThrough() const = 0;    
     virtual void MaybeChildrenPlanOverlay( PatternLink me_plink, 
                                   PatternLink under_plink );
-    TreePtr<Node> BuildReplaceColocated( PatternLink me_plink ) final;
+    TreePtr<Node> BuildReplaceColocated( const ReplaceKit &kit, 
+                                         PatternLink me_plink ) final;
     virtual list<PatternLink> GetVisibleChildren( Path v ) const;
 	virtual bool IsSearch() const { return is_search; }
 	virtual TreePtr<Node> GetSearchPattern() const { return search_pattern; }

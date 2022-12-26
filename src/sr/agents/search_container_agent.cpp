@@ -28,7 +28,8 @@ shared_ptr<PatternQuery> SearchContainerAgent::GetPatternQuery() const
 }
 
 
-TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( PatternLink me_plink, 
+TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( const ReplaceKit &kit, 
+                                                      PatternLink me_plink, 
                                                       XLink key_xlink ) 
 {
     INDENT("#");
@@ -38,7 +39,7 @@ TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( PatternLink me_plink,
          (*(terminus))(", term=")(terminus_key_xlink)("\n");
          
     PatternLink terminus_plink(this, &terminus);
-    TreePtr<Node> new_terminus_subtree = terminus_plink.GetChildAgent()->BuildReplace(terminus_plink);
+    TreePtr<Node> new_terminus_subtree = terminus_plink.GetChildAgent()->BuildReplace(kit, terminus_plink);
     TRACE( "Stuff node: Substituting stuff");
     int c = 0;
     TreePtr<Node> t = DuplicateSubtree(key_xlink, terminus_key_xlink, new_terminus_subtree, &c);   

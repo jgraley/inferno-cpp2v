@@ -65,10 +65,11 @@ void DeltaAgent::StartPlanOverlay()
 }
 
 
-TreePtr<Node> DeltaAgent::BuildReplaceColocated( PatternLink me_plink ) 
+TreePtr<Node> DeltaAgent::BuildReplaceColocated( const ReplaceKit &kit, 
+                                                 PatternLink me_plink ) 
 {
     INDENT("O");    
 
     PatternLink overlay_plink(this, GetOverlay());
-    return overlay_plink.GetChildAgent()->BuildReplace(overlay_plink);
+    return overlay_plink.GetChildAgent()->BuildReplace(kit, overlay_plink);
 }

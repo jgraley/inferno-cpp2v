@@ -30,14 +30,15 @@ void EmbeddedSCRAgent::MaybeChildrenPlanOverlay( PatternLink me_plink,
 }
 
 
-TreePtr<Node> EmbeddedSCRAgent::BuildReplaceColocated( PatternLink me_plink )
+TreePtr<Node> EmbeddedSCRAgent::BuildReplaceColocated( const ReplaceKit &kit, 
+                                                       PatternLink me_plink )
 {
     INDENT("l");
     ASSERT( *GetThrough() );   
     
     // Continue current replace operation by following the "through" pointer
     PatternLink through_plink(this, GetThrough());
-    TreePtr<Node> my_through_subtree = through_plink.GetChildAgent()->BuildReplace(through_plink);
+    TreePtr<Node> my_through_subtree = through_plink.GetChildAgent()->BuildReplace(kit, through_plink);
     ASSERT( my_through_subtree );
     
     my_scr_engine->RequestEmbeddedAction( this, my_through_subtree );   
