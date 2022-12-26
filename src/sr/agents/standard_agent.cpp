@@ -533,10 +533,6 @@ TreePtr<Node> StandardAgent::BuildReplaceImpl( PatternLink me_plink,
         // The under pattern node is in a different location from over (=this), 
         // but overlay planning has set up overlay_under_plink for us.
         XLink under_xlink = my_scr_engine->GetReplaceKey( overlay_under_plink );
-        ASSERT( under_xlink );
-        TreePtr<Node> under_node = under_xlink.GetChildX();
-        ASSERT( under_xlink.GetChildX()->IsFinal() ); 
-        ASSERT( IsSubcategory(*under_xlink.GetChildX()) ); 
         return BuildReplaceOverlay( me_plink, under_xlink );
     }
     else if( key_xlink ) 
@@ -545,8 +541,6 @@ TreePtr<Node> StandardAgent::BuildReplaceImpl( PatternLink me_plink,
         // The under and over pattern nodes are both this. AndRuleEngine 
         // has keyed this, and due wildcarding, key will be a final node
         // i.e. possibly a subclass of this node.
-        ASSERT( key_xlink.GetChildX()->IsFinal() ); 
-        ASSERT( IsSubcategory(*key_xlink.GetChildX()) ); 
         return BuildReplaceOverlay( me_plink, key_xlink );
     }
     else
@@ -568,6 +562,8 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( PatternLink me_plink,
 {
 	INDENT("O");
     ASSERT( under_xlink );
+    ASSERT( under_xlink.GetChildX()->IsFinal() ); 
+    ASSERT( IsSubcategory(*under_xlink.GetChildX()) ); 
     TreePtr<Node> under_node = under_xlink.GetChildX();
     
     ASSERT( IsSubcategory(*under_node) ) 

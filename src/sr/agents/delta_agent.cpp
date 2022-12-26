@@ -70,5 +70,6 @@ TreePtr<Node> DeltaAgent::BuildReplaceColocated( PatternLink me_plink )
     INDENT("O");    
 
     PatternLink overlay_plink(this, GetOverlay());
-    return overlay_plink.GetChildAgent()->BuildReplace(overlay_plink);
+    //return overlay_plink.GetChildAgent()->BuildReplace(overlay_plink);
+    return AsAgent((TreePtr<Node>)(*const_cast<TreePtrInterface *>(GetOverlay())))->BuildReplace(overlay_plink);
 }

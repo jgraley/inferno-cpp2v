@@ -44,11 +44,11 @@ public:
     
     TreePtr<PRE_RESTRICTION> through;
     TreePtr<PRE_RESTRICTION> overlay;
-    virtual const TreePtrInterface *GetThrough() const 
+    virtual const TreePtrInterface *GetThrough() const override
     {
         return &through;
     }
-    virtual const TreePtrInterface *GetOverlay() const
+    virtual const TreePtrInterface *GetOverlay() const override
     {
         return &overlay;
     }
