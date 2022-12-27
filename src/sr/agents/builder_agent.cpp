@@ -3,6 +3,7 @@
 #include "sym/lazy_eval.hpp"
 #include "sym/lazy_eval.hpp"
 #include "sym/boolean_operators.hpp"
+#include "db/tree_update.hpp"
 
 using namespace SR;
 
@@ -31,9 +32,9 @@ bool BuilderAgent::ReplaceKeyerQuery( PatternLink me_plink,
 }
  
  
-TreePtr<Node> BuilderAgent::BuildReplaceImpl( const ReplaceKit &kit, 
-                                              PatternLink me_plink, 
-                                              XLink key_xlink ) 
+Agent::CommandPtr BuilderAgent::BuildCommandImpl( const ReplaceKit &kit, 
+                                                  PatternLink me_plink, 
+                                                  XLink key_xlink )
 {
     INDENT("%");
 
@@ -46,11 +47,13 @@ TreePtr<Node> BuilderAgent::BuildReplaceImpl( const ReplaceKit &kit,
         LocatedLink new_link( me_plink, XLink::CreateDistinct( new_node ) );
         my_scr_engine->SetReplaceKey( new_link );
         
-        return DuplicateSubtree( new_link );   
+        TreeZone new_zone( new_link );
+        return make_unique<PushTreeZoneCommand>( new_zone );   
     }
     else
     {
         ASSERT( key_xlink ); // we're on residual plink
-        return DuplicateSubtree( key_xlink ); // default action
+        TreeZone new_zone( key_xlink );
+        return make_unique<PushTreeZoneCommand>( new_zone );   
     }
 }

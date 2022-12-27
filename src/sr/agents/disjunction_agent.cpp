@@ -7,8 +7,6 @@
 #include "sym/result.hpp"
 #include "db/tree_update.hpp"
 
-#define TREE_ZONE
-
 using namespace SR;
 using namespace SYM;
 
@@ -68,15 +66,10 @@ Agent::CommandPtr DisjunctionAgent::BuildCommandImpl( const ReplaceKit &kit,
     // Conjuction and disjunction are ambiguous because there are 
     // multiple conjuncts/disjuncts
     ASSERT(key_xlink)("Unkeyed boolean agent seen in replace context");
-#ifdef TREE_ZONE
     TreeZone new_zone( key_xlink );
-	return make_unique<PushTreeZoneCommand>( new_zone );
-#else
-    TreePtr<Node> new_base_x = DuplicateSubtree(key_xlink);   
-    FreeZone new_zone( new_base_x );
-	return make_unique<PushFreeZoneCommand>( new_zone );
-#endif    
-}                                                 
+	return make_unique<PushTreeZoneCommand>( new_zone );   
+}
+                                                 
 
 Graphable::Block DisjunctionAgent::GetGraphBlockInfo() const
 {
