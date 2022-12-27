@@ -106,7 +106,7 @@ TreePtr<Node> VNSequence::TransformStep( int step_index, TreePtr<Node> root )
 {
     ASSERT( root == x_tree_db->GetRootNode() )("Unexpected root - re-run AnalysisStage() to change root");
     
-    dirty_grass.clear();	
+    x_tree_db->ClearDirtyGrass();	
 	    
 #ifdef X_TREE_DB_EACH_STEP
 	x_tree_db->InitialBuild();
@@ -167,14 +167,15 @@ void VNSequence::XTreeDbDump() const
     x_tree_db->Dump();
 }
 
+
 bool VNSequence::IsDirtyGrass( TreePtr<Node> node )
 {
-	return dirty_grass.count(node) > 0;
+	return x_tree_db->IsDirtyGrass(node);
 }
 
 
 void VNSequence::AddDirtyGrass( TreePtr<Node> node )
 {
-	dirty_grass.insert(node);
+	x_tree_db->AddDirtyGrass(node);
 }
 

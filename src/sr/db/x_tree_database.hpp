@@ -70,6 +70,10 @@ public:
 	TreePtr<Node> GetRootNode() const;
 	XLink GetRootXLink() const;
 
+    bool IsDirtyGrass( TreePtr<Node> node );
+    void AddDirtyGrass( TreePtr<Node> node );
+    void ClearDirtyGrass();
+    
     void Dump() const;
 	
 private:    
@@ -83,6 +87,8 @@ private:
     
   	XLink root_xlink;
     DBWalk db_walker;
+    
+    set< TreePtr<Node> > dirty_grass;
 };    
     
 };

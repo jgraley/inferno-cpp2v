@@ -61,7 +61,6 @@ private:
     shared_ptr<Lacing> lacing;
     DomainExtension::ExtenderSet domain_extenders;
     shared_ptr<XTreeDatabase> x_tree_db;    
-    set< TreePtr<Node> > dirty_grass;
 };    
     
 }

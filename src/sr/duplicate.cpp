@@ -12,6 +12,7 @@ TreePtr<Node> Duplicate::DuplicateNode( const SCREngine *scr_engine,
     TreePtr<Node> dest( dynamic_pointer_cast<Node>( dup_dest ) );
     ASSERTS(dest);
 
+    ASSERT( scr_engine );
     bool source_dirty = scr_engine->IsDirtyGrass( source );
     if( force_dirty || // requested by caller
         source_dirty ) // source was dirty
