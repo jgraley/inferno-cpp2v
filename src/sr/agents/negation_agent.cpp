@@ -45,6 +45,15 @@ void NegationAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
 }
 
 
+TreePtr<Node> NegationAgent::BuildReplaceImpl( const ReplaceKit &kit, 
+                                               PatternLink me_plink, 
+                                               XLink key_xlink )
+{
+    ASSERT(key_xlink)("Unkeyed search-only agent seen in replace context");
+    return DuplicateSubtree(key_xlink);   
+}
+
+
 Graphable::Block NegationAgent::GetGraphBlockInfo() const
 {
 	// The Negation node appears as a diamond with a ¬ character inside it. The affected subtree is 

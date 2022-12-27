@@ -525,7 +525,7 @@ TreePtr<Node> AgentCommon::BuildForAnalysis( PatternLink me_plink )
     stack<FreeZone> free_zone_stack;
     Command::ExecKit exec_kit {nullptr, &free_zone_stack};
 	commands->Execute( exec_kit );     
-       
+    ASSERT( free_zone_stack.size() == 1);       
     return free_zone_stack.top().GetBase();
 }
 
@@ -581,18 +581,6 @@ TreePtr<Node> AgentCommon::BuildReplace( const ReplaceKit &kit,
     ASSERT( dest->IsFinal() )(*this)(" built non-final ")(*dest)("\n"); 
     
     return dest;
-}
-
-
-TreePtr<Node> AgentCommon::BuildReplaceImpl( const ReplaceKit &kit, 
-                                             PatternLink me_plink, 
-                                             XLink key_xlink )
-{
-	// This default implementation gives us a "search-only" agent
-	// that can only be in replace path replace if keyed, and then 
-	// simply duplicates the key subtree
-    ASSERT(key_xlink)("Unkeyed search-only agent seen in replace context");
-    return DuplicateSubtree(key_xlink);   
 }
 
 

@@ -24,6 +24,10 @@ public:
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            const SolutionMap *hypothesis_links,
                                            const XTreeDatabase *x_tree_db ) const;                                              
+	TreePtr<Node> BuildReplaceImpl( const ReplaceKit &kit, 
+                                    PatternLink me_plink, 
+                                    XLink key_xlink ) final;  
+
     virtual Block GetGraphBlockInfo() const;
     
 private:

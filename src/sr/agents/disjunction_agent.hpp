@@ -28,6 +28,10 @@ public:
                                                                
     SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuery() const override;                                       
 
+	TreePtr<Node> BuildReplaceImpl( const ReplaceKit &kit, 
+                                    PatternLink me_plink, 
+                                    XLink key_xlink ) final;  
+
     virtual Block GetGraphBlockInfo() const;
     
     // Interface for pattern trasformation

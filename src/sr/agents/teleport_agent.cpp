@@ -77,6 +77,15 @@ bool TeleportAgent::IsExtenderLess( const Extender &r ) const
 }
 
 
+TreePtr<Node> TeleportAgent::BuildReplaceImpl( const ReplaceKit &kit, 
+                                               PatternLink me_plink, 
+                                               XLink key_xlink )
+{
+    ASSERT(key_xlink)("Unkeyed search-only agent seen in replace context");
+    return DuplicateSubtree(key_xlink);   
+}
+
+
 TeleportAgent::TeleportOperator::TeleportOperator( const TeleportAgent *agent_,
                                                    shared_ptr<SymbolExpression> keyer_ ) :
     agent( agent_ ),

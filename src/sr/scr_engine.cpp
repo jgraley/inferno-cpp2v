@@ -372,7 +372,8 @@ void SCREngine::Replace( XLink base_xlink )
 	commands->Add( make_shared<InsertCommand>( base_zone ) );
     
     stack<FreeZone> free_zone_stack;
-	plan.vn_sequence->ExecuteUpdateCommand( commands.get(), &free_zone_stack );        
+	plan.vn_sequence->ExecuteUpdateCommand( commands.get(), &free_zone_stack );  
+    ASSERT( free_zone_stack.empty() );
     plan.vn_sequence->CompleteDomainExtension();     
 
     TRACE("Replace done\n");

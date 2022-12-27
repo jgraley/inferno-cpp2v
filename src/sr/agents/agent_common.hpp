@@ -68,7 +68,7 @@ public:
                                 PatternLink me_plink ) override;
     virtual TreePtr<Node> BuildReplaceImpl( const ReplaceKit &kit, 
                                             PatternLink me_plink, 
-                                            XLink key_xlink );
+                                            XLink key_xlink ) = 0;
     TreePtr<Node> CloneNode( bool force_dirty ) const;
     TreePtr<Node> DuplicateNode( TreePtr<Node> pattern,
                                  bool force_dirty ) const;

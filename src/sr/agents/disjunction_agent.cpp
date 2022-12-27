@@ -58,6 +58,15 @@ SYM::Lazy<SYM::BooleanExpression> DisjunctionAgent::SymbolicNormalLinkedQuery() 
 }
 
 
+TreePtr<Node> DisjunctionAgent::BuildReplaceImpl( const ReplaceKit &kit, 
+                                                  PatternLink me_plink, 
+                                                  XLink key_xlink )
+{
+    ASSERT(key_xlink)("Unkeyed search-only agent seen in replace context");
+    return DuplicateSubtree(key_xlink);   
+}
+
+
 Graphable::Block DisjunctionAgent::GetGraphBlockInfo() const
 {
 	// The Disjunction node appears as a diamond with a ∨ character inside it. The affected subtrees are 
