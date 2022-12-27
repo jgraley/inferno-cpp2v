@@ -550,7 +550,7 @@ Agent::CommandPtr AgentCommon::BuildCommandImpl( const ReplaceKit &kit,
                                                  PatternLink me_plink, 
                                                  XLink key_xlink )
 {
-    TreePtr<Node> new_base_x = BuildReplace(kit, me_plink);
+    TreePtr<Node> new_base_x = BuildReplaceImpl(kit, me_plink, key_xlink);
     FreeZone new_zone( new_base_x );
 	return make_unique<PushFreeZoneCommand>( new_zone );
 }
@@ -586,7 +586,7 @@ TreePtr<Node> AgentCommon::BuildReplaceImpl( const ReplaceKit &kit,
                                              PatternLink me_plink, 
                                              XLink key_xlink )
 {
-	auto commands = BuildCommand(kit, me_plink);
+	auto commands = BuildCommandImpl(kit, me_plink, key_xlink);
 
     stack<FreeZone> free_zone_stack;
     Command::ExecKit exec_kit {nullptr, my_scr_engine, &free_zone_stack};

@@ -2,6 +2,7 @@
 #include "green_grass_agent.hpp"
 #include "../search_replace.hpp" 
 #include "link.hpp"
+#include "db/tree_update.hpp"
 
 using namespace SR;
 
@@ -69,8 +70,15 @@ TreePtr<Node> DeltaAgent::BuildReplaceImpl( const ReplaceKit &kit,
                                             PatternLink me_plink, 
                                             XLink key_xlink )
 {
-    INDENT("O");    
-
     PatternLink overlay_plink(this, GetOverlay());
     return overlay_plink.GetChildAgent()->BuildReplace(kit, overlay_plink);
 }
+
+
+Agent::CommandPtr DeltaAgent::BuildCommandImpl( const ReplaceKit &kit, 
+                                                PatternLink me_plink, 
+                                                XLink key_xlink )
+{
+    PatternLink overlay_plink(this, GetOverlay());
+    return overlay_plink.GetChildAgent()->BuildCommand(kit, overlay_plink);    
+}                                         

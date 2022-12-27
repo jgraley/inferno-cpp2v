@@ -18,9 +18,14 @@ class GreenGrassAgent : public virtual ColocatedAgent
 {               
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicColocatedQuery() const; 
+
     TreePtr<Node> BuildReplaceImpl( const ReplaceKit &kit, 
                                     PatternLink me_plink, 
                                     XLink key_xlink ) final;
+    CommandPtr BuildCommandImpl( const ReplaceKit &kit, 
+                                 PatternLink me_plink, 
+                                 XLink key_xlink ) final;
+
     virtual Block GetGraphBlockInfo() const;
     virtual const TreePtrInterface *GetThrough() const = 0;
 

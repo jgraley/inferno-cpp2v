@@ -2,6 +2,7 @@
 #include "../search_replace.hpp" 
 #include "../scr_engine.hpp"
 #include "link.hpp"
+#include "db/tree_update.hpp"
 
 using namespace SR;
 

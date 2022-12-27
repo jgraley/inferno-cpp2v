@@ -25,6 +25,7 @@ public:
     {
     };
 
+    // really just to reduce the amount of typing if I change it
     typedef unique_ptr<Command> CommandPtr;
 
     typedef Graphable::Phase Phase;
