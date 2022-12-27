@@ -3,7 +3,7 @@
 
 using namespace SR;
 
-TreePtr<Node> Duplicate::DuplicateNode( const SCREngine *scr_engine,
+TreePtr<Node> Duplicate::DuplicateNode( const DirtyGrassUpdateInterface *dirty_grass,
                                         TreePtr<Node> source,
                                         bool force_dirty )
 {
@@ -12,20 +12,20 @@ TreePtr<Node> Duplicate::DuplicateNode( const SCREngine *scr_engine,
     TreePtr<Node> dest( dynamic_pointer_cast<Node>( dup_dest ) );
     ASSERTS(dest);
 
-    ASSERT( scr_engine );
-    bool source_dirty = scr_engine->IsDirtyGrass( source );
+    ASSERT( dirty_grass );
+    bool source_dirty = dirty_grass->IsDirtyGrass( source );
     if( force_dirty || // requested by caller
         source_dirty ) // source was dirty
     {
         //TRACE("dirtying ")(*dest)(" force=%d source=%d (")(*source)(")\n", force_dirty, source_dirty);        
-        scr_engine->AddDirtyGrass( dest );
+        dirty_grass->AddDirtyGrass( dest );
     }
     
     return dest;    
 }                                                     
 
                                              
-TreePtr<Node> Duplicate::DuplicateSubtree( const SCREngine *scr_engine,
+TreePtr<Node> Duplicate::DuplicateSubtree( const DirtyGrassUpdateInterface *dirty_grass,
                                            XLink source_xlink,
                                            XLink source_terminus_xlink,
                                            TreePtr<Node> dest_terminus,
@@ -55,7 +55,7 @@ TreePtr<Node> Duplicate::DuplicateSubtree( const SCREngine *scr_engine,
     }
 
     // Make a new node, since we're substituting, preserve dirtyness        
-    TreePtr<Node> dest = DuplicateNode( scr_engine, source, false );
+    TreePtr<Node> dest = DuplicateNode( dirty_grass, source, false );
 
     // Itemise the members. Note that the itemiser internally does a
     // dynamic_cast onto the type of source, and itemises over that type. dest must
@@ -84,7 +84,7 @@ TreePtr<Node> Duplicate::DuplicateSubtree( const SCREngine *scr_engine,
             {
                 ASSERTS( source_elt ); // present simplified scheme disallows nullptr
                 //TRACES("Duplicating ")(*source_elt)("\n");
-                TreePtr<Node> dest_elt = DuplicateSubtree( scr_engine,
+                TreePtr<Node> dest_elt = DuplicateSubtree( dirty_grass,
                                                            XLink( source, &source_elt ), 
                                                            source_terminus_xlink, 
                                                            dest_terminus,
@@ -98,7 +98,7 @@ TreePtr<Node> Duplicate::DuplicateSubtree( const SCREngine *scr_engine,
             //TRACE("Duplicating node ")(*keynode_singular)("\n");
             TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
             ASSERTS( *source_singular )("source should be non-nullptr");
-            *dest_singular = DuplicateSubtree( scr_engine,
+            *dest_singular = DuplicateSubtree( dirty_grass,
                                                XLink(source, source_singular), 
                                                source_terminus_xlink, 
                                                dest_terminus,

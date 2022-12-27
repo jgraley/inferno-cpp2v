@@ -168,13 +168,13 @@ void VNSequence::XTreeDbDump() const
 }
 
 
-bool VNSequence::IsDirtyGrass( TreePtr<Node> node )
+bool VNSequence::IsDirtyGrass( TreePtr<Node> node ) const
 {
 	return x_tree_db->IsDirtyGrass(node);
 }
 
 
-void VNSequence::AddDirtyGrass( TreePtr<Node> node )
+void VNSequence::AddDirtyGrass( TreePtr<Node> node ) const
 {
 	x_tree_db->AddDirtyGrass(node);
 }

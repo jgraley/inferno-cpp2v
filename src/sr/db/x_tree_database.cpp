@@ -247,13 +247,13 @@ XLink XTreeDatabase::GetRootXLink() const
 }
 
 
-bool XTreeDatabase::IsDirtyGrass( TreePtr<Node> node )
+bool XTreeDatabase::IsDirtyGrass( TreePtr<Node> node ) const
 {
 	return dirty_grass.count(node) > 0;
 }
 
 
-void XTreeDatabase::AddDirtyGrass( TreePtr<Node> node )
+void XTreeDatabase::AddDirtyGrass( TreePtr<Node> node ) const
 {
 	dirty_grass.insert(node);
 }

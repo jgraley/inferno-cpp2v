@@ -53,8 +53,8 @@ public:
     void XTreeDbDump() const;
     void XTreeDbExpectMatches() const;
     
-    bool IsDirtyGrass( TreePtr<Node> node );
-    void AddDirtyGrass( TreePtr<Node> node );
+    bool IsDirtyGrass( TreePtr<Node> node ) const;
+    void AddDirtyGrass( TreePtr<Node> node ) const;
     
 private:
     vector< shared_ptr<VNStep> > steps;

@@ -4,6 +4,7 @@
 #include "common/standard.hpp"
 #include "../zone.hpp"
 #include "../link.hpp"
+#include "../duplicate.hpp"
 
 #include "link_table.hpp"
 #include "node_table.hpp"
@@ -18,7 +19,8 @@ namespace SR
 {    
     
 class XTreeDatabase : public Traceable, 
-                      public NavigationUtils
+                      public NavigationUtils,
+                      public Duplicate::DirtyGrassUpdateInterface
 {
 public:
     XTreeDatabase( XLink root_xlink, shared_ptr<Lacing> lacing, DomainExtension::ExtenderSet domain_extenders );
@@ -70,8 +72,8 @@ public:
 	TreePtr<Node> GetRootNode() const;
 	XLink GetRootXLink() const;
 
-    bool IsDirtyGrass( TreePtr<Node> node );
-    void AddDirtyGrass( TreePtr<Node> node );
+    bool IsDirtyGrass( TreePtr<Node> node ) const final;
+    void AddDirtyGrass( TreePtr<Node> node ) const final;
     void ClearDirtyGrass();
     
     void Dump() const;
@@ -88,7 +90,7 @@ private:
   	XLink root_xlink;
     DBWalk db_walker;
     
-    set< TreePtr<Node> > dirty_grass;
+    mutable set< TreePtr<Node> > dirty_grass; // See #702 re mutable
 };    
     
 };
