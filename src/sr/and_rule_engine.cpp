@@ -12,7 +12,7 @@
 #include "agents/embedded_scr_agent.hpp"
 #include "agents/standard_agent.hpp"
 #include "agents/delta_agent.hpp"
-#include "agents/search_container_agent.hpp"
+#include "agents/depth_agent.hpp"
 #include "agents/star_agent.hpp"
 #include "common/common.hpp"
 #include "agents/disjunction_agent.hpp"

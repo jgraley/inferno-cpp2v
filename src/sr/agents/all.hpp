@@ -3,7 +3,7 @@
 // search_replace.hpp. This would not be so under the agents scheme. 
 // We compromise by putting them here. 
 #include "standard_agent.hpp"
-#include "search_container_agent.hpp"
+#include "depth_agent.hpp"
 #include "star_agent.hpp"
 #include "green_grass_agent.hpp"
 #include "delta_agent.hpp"

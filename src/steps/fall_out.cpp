@@ -66,7 +66,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     auto ll_all = MakePatternNode< Conjunction<Node> >();
     auto lls_not1 = MakePatternNode< Negation<Node> >();
     auto lls_not2 = MakePatternNode< Negation<Node> >();
-    auto ll_any = MakePatternNode< AnyNode<Node> >();
+    auto ll_any = MakePatternNode< Child<Node> >();
     auto ll_over = MakePatternNode< Delta<Node> >();
     auto ll_all_over = MakePatternNode< Delta<Node> >();
     auto lls_goto = MakePatternNode<Goto>();
@@ -213,8 +213,8 @@ LabelTypeToEnum::LabelTypeToEnum()
     auto l_apall = MakePatternNode< Conjunction<Node> >();
     auto apnot = MakePatternNode< Negation<Node> >();
     auto l_apnot = MakePatternNode< Negation<Node> >();
-    auto apany = MakePatternNode< AnyNode<Node> >();
-    auto l_apany = MakePatternNode< AnyNode<Node> >();
+    auto apany = MakePatternNode< Child<Node> >();
+    auto l_apany = MakePatternNode< Child<Node> >();
     auto l_apall_over = MakePatternNode< Delta<Node> >();
     auto l_over = MakePatternNode< Delta<Type> >();
     auto ms_sub = MakePatternNode<Subscript>();
@@ -282,8 +282,8 @@ RemoveLabelSubscript::RemoveLabelSubscript()
     auto l_apall = MakePatternNode< Conjunction<Node> >();
     auto apnot = MakePatternNode< Negation<Node> >();
     auto l_apnot = MakePatternNode< Negation<Node> >();
-    auto apany = MakePatternNode< AnyNode<Node> >();
-    auto l_apany = MakePatternNode< AnyNode<Node> >();
+    auto apany = MakePatternNode< Child<Node> >();
+    auto l_apany = MakePatternNode< Child<Node> >();
     auto l_over = MakePatternNode< Delta<Type> >();
     auto ms_sub = MakePatternNode<Subscript>();
     auto nr_sub = MakePatternNode<Subscript>();
@@ -316,8 +316,8 @@ LabelInstancesToEnum::LabelInstancesToEnum()
     auto l_apall = MakePatternNode< Conjunction<Node> >();
     auto apnot = MakePatternNode< Negation<Node> >();
     auto l_apnot = MakePatternNode< Negation<Node> >();
-    auto apany = MakePatternNode< AnyNode<Node> >();
-    auto l_apany = MakePatternNode< AnyNode<Node> >();
+    auto apany = MakePatternNode< Child<Node> >();
+    auto l_apany = MakePatternNode< Child<Node> >();
     auto l_over = MakePatternNode< Delta<Type> >();
     auto ms_sub = MakePatternNode<Subscript>();
     auto nr_sub = MakePatternNode<Subscript>();
@@ -388,7 +388,7 @@ LabelVarsToEnum::LabelVarsToEnum()
     auto m_over = MakePatternNode< Delta<Expression> >();
     auto l_index = MakePatternNode<Expression>();
     auto ms_all = MakePatternNode< Conjunction<Node> >();
-    auto ms_anynode = MakePatternNode< AnyNode<Node> >();
+    auto ms_anynode = MakePatternNode< Child<Node> >();
     auto nested_array = MakePatternNode<NestedArrayAgent>();
     auto nested_subscript = MakePatternNode<NestedSubscriptLookupAgent>();
     auto nested_subscript2 = MakePatternNode<NestedSubscriptLookupAgent>();

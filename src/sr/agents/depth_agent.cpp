@@ -1,4 +1,4 @@
-#include "search_container_agent.hpp"
+#include "depth_agent.hpp"
 #include "../search_replace.hpp" 
 #include "../scr_engine.hpp" 
 #include "../conjecture.hpp" 
@@ -12,9 +12,9 @@
 using namespace SR;
 using namespace SYM;
 
-//---------------------------------- SearchContainerAgent ------------------------------------    
+//---------------------------------- DepthAgent ------------------------------------    
 
-shared_ptr<PatternQuery> SearchContainerAgent::GetPatternQuery() const
+shared_ptr<PatternQuery> DepthAgent::GetPatternQuery() const
 {
     auto pq = make_shared<PatternQuery>();
     
@@ -28,13 +28,13 @@ shared_ptr<PatternQuery> SearchContainerAgent::GetPatternQuery() const
 }
 
 
-TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( const ReplaceKit &kit, 
-                                                      PatternLink me_plink, 
-                                                      XLink key_xlink ) 
+TreePtr<Node> DepthAgent::BuildReplaceImpl( const ReplaceKit &kit, 
+                                            PatternLink me_plink, 
+                                            XLink key_xlink ) 
 {
     INDENT("#");
     XLink terminus_key_xlink = my_scr_engine->GetReplaceKey( PatternLink(this, &terminus) );
-    ASSERT(terminus_key_xlink);// this could mean replace is being attempted on a SearchContainerAgent in an abnormal context
+    ASSERT(terminus_key_xlink);// this could mean replace is being attempted on a DepthAgent in an abnormal context
     TRACE( "Stuff node: Duplicating at terminus first: keynode=")
          (*(terminus))(", term=")(terminus_key_xlink)("\n");
          
@@ -48,7 +48,7 @@ TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( const ReplaceKit &kit,
 }
 
 
-Graphable::Block SearchContainerAgent::GetGraphBlockInfo() const
+Graphable::Block DepthAgent::GetGraphBlockInfo() const
 {
     Block block;
 	block.bold = true;
@@ -67,9 +67,9 @@ Graphable::Block SearchContainerAgent::GetGraphBlockInfo() const
     return block;
 }
 
-//---------------------------------- AnyNode ------------------------------------    
+//---------------------------------- ChildAgent ------------------------------------    
 
-SYM::Lazy<SYM::BooleanExpression> AnyNodeAgent::SymbolicNormalLinkedQueryPRed() const
+SYM::Lazy<SYM::BooleanExpression> ChildAgent::SymbolicNormalLinkedQueryPRed() const
 {
     PatternLink terminus_plink(this, &terminus);
     return MakeLazy<ParentOperator>( MakeLazy<SymbolVariable>(terminus_plink) ) ==
@@ -77,17 +77,17 @@ SYM::Lazy<SYM::BooleanExpression> AnyNodeAgent::SymbolicNormalLinkedQueryPRed() 
 }
 
 
-Graphable::Block AnyNodeAgent::GetGraphBlockInfo() const
+Graphable::Block ChildAgent::GetGraphBlockInfo() const
 {
-	// The AnyNode node appears as a small circle with the text #==1 in it. The terminus block emerges from the
+	// The Child node appears as a small circle with the text #==1 in it. The terminus block emerges from the
 	// right of the circle. 1 implies the tendancy to match exactly one level. See #256.
-    Block block = SearchContainerAgent::GetGraphBlockInfo();
-    block.title = "AnyNode";
+    Block block = DepthAgent::GetGraphBlockInfo();
+    block.title = "Child";
 	block.symbol = "#=1"; // TODO this can be generated when Stuff nodes are generalised, see #256
     return block;
 }
 
-//---------------------------------- Stuff ------------------------------------    
+//---------------------------------- StuffAgent ------------------------------------    
 
 void StuffAgent::PatternQueryRestrictions( shared_ptr<PatternQuery> pq ) const
 {
@@ -149,7 +149,7 @@ Graphable::Block StuffAgent::GetGraphBlockInfo() const
 	// The Stuff node appears as a small square with a # character inside it. The terminus block emerges from the
 	// right of the circle. # is chosen (as is the name Stuff) for its addr_bounding_role to * because
 	// the nodes are both able to wildcard multiple nodes in the input tree.
-    Block block = SearchContainerAgent::GetGraphBlockInfo();
+    Block block = DepthAgent::GetGraphBlockInfo();
 	block.title = "Stuff"; 
 	block.symbol = "#"; 
     if( recurse_restriction )

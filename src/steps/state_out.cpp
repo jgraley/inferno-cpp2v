@@ -33,7 +33,7 @@ GotoAfterWait::GotoAfterWait()
     auto wait = MakePatternNode<Wait>();
     auto notmatch = MakePatternNode< Negation<Statement> >();
     auto all = MakePatternNode< Conjunction<Statement> >();
-    auto anynode = MakePatternNode< AnyNode<Statement> >();
+    auto anynode = MakePatternNode< Child<Statement> >();
     auto over = MakePatternNode< Delta<Statement> >();
     auto all_over = MakePatternNode< Delta<Statement> >();
     auto sx_goto = MakePatternNode<Goto>();

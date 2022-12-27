@@ -1,5 +1,5 @@
-#ifndef SEARCH_CONTAINER_AGENT_HPP
-#define SEARCH_CONTAINER_AGENT_HPP
+#ifndef DEPTH_AGENT_HPP
+#define DEPTH_AGENT_HPP
 
 #include "agent_intermediates.hpp"
 #include "common/common.hpp"
@@ -11,11 +11,11 @@
 namespace SR
 { 
 
-//---------------------------------- SearchContainerAgent ------------------------------------    
+//---------------------------------- DepthAgent ------------------------------------    
 
 /// Agent that tries to match the sub-pattern under `terminus` to any element
 /// within some container of nodes. 
-class SearchContainerAgent : public virtual PreRestrictedAgent
+class DepthAgent : public virtual PreRestrictedAgent
 {
 public:
     class TerminusMismatch : public Mismatch {};
@@ -34,13 +34,13 @@ public:
     }
 };
 
-//---------------------------------- AnyNode ------------------------------------    
-// TODO really badly named. How about Child?
+//---------------------------------- ChildAgent ------------------------------------    
+
 /// Agent that matches the sub-pattern under `terminus` to any child of the
-/// current node. This includes children in `Collection`s. It can be used to 
+/// current node. This includes children in `Conbtainer`s. It can be used to 
 /// move "one level" down a tree with no assumption as to the nature of the node
 /// being bypassed.
-class AnyNodeAgent : public SearchContainerAgent
+class ChildAgent : public DepthAgent
 {
     class NoParentMismatch : public Mismatch {};
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
@@ -50,7 +50,7 @@ class AnyNodeAgent : public SearchContainerAgent
 
 /// Agent that matches any single node, with terminus support
 template<class PRE_RESTRICTION>
-class AnyNode : public AnyNodeAgent, 
+class Child : public ChildAgent, 
                 public Special<PRE_RESTRICTION> 
 {
 public:
@@ -62,7 +62,7 @@ public:
     }    
 };
 
-//---------------------------------- Stuff ------------------------------------    
+//---------------------------------- StuffAgent ------------------------------------    
 
 /// Agent that matches the sub-pattern under `terminus` to any node in 
 /// the subtree at current node. The current node itself may be matched. It 
@@ -74,7 +74,7 @@ public:
 /// traversed).
 /// The recurse restriction is an abnormal context because it can match zero or more 
 /// different subtrees.
-class StuffAgent : public SearchContainerAgent
+class StuffAgent : public DepthAgent
 {
 public:
     virtual void PatternQueryRestrictions( shared_ptr<PatternQuery> pq ) const;

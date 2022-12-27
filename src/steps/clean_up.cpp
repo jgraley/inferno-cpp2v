@@ -133,7 +133,7 @@ CleanupCompoundSingle::CleanupCompoundSingle()
     auto all = MakePatternNode< Conjunction<Statement> >();
     auto sx_not = MakePatternNode< Negation<Statement> >();
     auto sx_instance = MakePatternNode<Instance>();
-    auto node = MakePatternNode< AnyNode<Statement> >();
+    auto node = MakePatternNode< Child<Statement> >();
     auto over = MakePatternNode< Delta<Statement> >();
     auto s_comp = MakePatternNode<Compound>();
     auto body = MakePatternNode< Statement >();
@@ -442,7 +442,7 @@ CleanupUnusedVariables::CleanupUnusedVariables()
     auto stuff1 = MakePatternNode< Stuff<Scope> >();
     auto s_stuff2 = MakePatternNode< Stuff<Scope> >();
     auto s_antip = MakePatternNode< Conjunction<Node> >();
-    auto s_anynode = MakePatternNode< AnyNode<Node> >();
+    auto s_anynode = MakePatternNode< Child<Node> >();
     auto s_nm = MakePatternNode< Negation<Node> >();
     auto sx_ir = MakePatternNode<InheritanceRecord>();
     auto s_nscope = MakePatternNode< Negation<Scope> >();

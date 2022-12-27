@@ -4,7 +4,7 @@
 #include "common/hit_count.hpp"
 #include "agents/standard_agent.hpp"
 #include "agents/delta_agent.hpp"
-#include "agents/search_container_agent.hpp"
+#include "agents/depth_agent.hpp"
 #include "common/common.hpp"
 #include "agents/agent.hpp"
 #include "and_rule_engine.hpp"

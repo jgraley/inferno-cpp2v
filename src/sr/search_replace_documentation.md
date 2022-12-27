@@ -165,11 +165,11 @@ Compare with the pre-restriction documented above, which applies to all special 
 
 Note that a recurse restriction pattern is an abnormal context.
 
-### 5.2 `AnyNode` pattern
+### 5.2 `Child` pattern
 
-As mentioned above, the `Stuff` node can match at the root of the input program subtree, i.e. zero levels of recursion. Therefore a pattern of `If( Stuff( For(...) ) )` would match a program like `If( For(...) )`. `AnyNode` is an alternative to `Stuff` that matches only on exactly one level of indirection. A pattern like `If( AnyNode( For(...) )` will match for example `If( While( For(...) ) )` but not `If( For(...) )` or `If( While( Switch( For(...) ) ) )`.
+As mentioned above, the `Stuff` node can match at the root of the input program subtree, i.e. zero levels of recursion. Therefore a pattern of `If( Stuff( For(...) ) )` would match a program like `If( For(...) )`. `Child` is an alternative to `Stuff` that matches only on exactly one level of indirection. A pattern like `If( Child( For(...) )` will match for example `If( While( For(...) ) )` but not `If( For(...) )` or `If( While( Switch( For(...) ) ) )`.
 
-`AnyNode` supports pre-restriction and has a `terminus` just like Stuff, but there is no recurse restriction. AnyNode is useful for anti-parenting, see below.
+`Child` supports pre-restriction and has a `terminus` just like Stuff, but there is no recurse restriction. Child is useful for anti-parenting, see below.
 
 ## 6 Boolean search patterns
 
@@ -321,11 +321,11 @@ A common solution is to insert `Conjunction` in the search pattern, with a `Nega
 
 As an aside, the but-not pattern is useful for anti-parenting. This is where you want to find occurrences of a node whose parentage is _not_ some specific pattern. For example, if you want to differentiate between declarations and usages of a variable, the declarations may be matched easily as `Declaration( identifier:my_variable )`. But to find usages, we have to allow any other node that might point to an `InstanceIdentifier`, like `Operator`, `If` etc _including_ `Declaration` where the variable is used as the initialiser - obviously a usage.
 
-There are a few ways to do this in Vida Nova, but the preferred one uses a combination of `Conjunction` and `Negation` to create an and-not pattern; the undesired parentage is expressed in the `Negation` branch, and the other branch points to the target node via `AnyNode` in order to match any other parentage. Written down, it looks like 
+There are a few ways to do this in Vida Nova, but the preferred one uses a combination of `Conjunction` and `Negation` to create an and-not pattern; the undesired parentage is expressed in the `Negation` branch, and the other branch points to the target node via `Child` in order to match any other parentage. Written down, it looks like 
 
-`Conjunction( Negation( bad_parent( my_node ) ), AnyNode( my_node ) )`
+`Conjunction( Negation( bad_parent( my_node ) ), Child( my_node ) )`
 
-To modify just `my_node`, insert a `Delta` node before it in the `AnyNode` branch.
+To modify just `my_node`, insert a `Delta` node before it in the `Child` branch.
 
 ### 11.3 `GreenGrass` node
 

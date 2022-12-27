@@ -1,7 +1,7 @@
 #include "search_to_compare.hpp"
 #include "vn_step.hpp"
 #include "agents/standard_agent.hpp"
-#include "agents/search_container_agent.hpp"
+#include "agents/depth_agent.hpp"
 #include "agents/embedded_scr_agent.hpp"
    
 using namespace SR;
