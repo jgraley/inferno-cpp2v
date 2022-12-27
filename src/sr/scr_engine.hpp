@@ -137,8 +137,8 @@ public: // For agents
     // Note: this is const but RepeatingCompareReplace() isn't. Why?
     // Because we're not calling OUR RepeatingCompareReplace but
     // the embedded_engine's one - and that pointer is not const.
-    void RequestEmbeddedAction( RequiresSubordinateSCREngine *embedded_agent, 
-                             TreePtr<Node> embedded_through_subtree ) const;    
+    void MarkBaseForEmbedded( RequiresSubordinateSCREngine *embedded_agent, 
+                              TreePtr<Node> embedded_through_subtree ) const;    
     void SetReplaceKey( LocatedLink keyer_link ) const;
     XLink GetReplaceKey( PatternLink plink ) const;
     bool IsKeyedByAndRuleEngine( Agent *agent ) const; 
@@ -164,7 +164,7 @@ private:
     shared_ptr<const XTreeDatabase> x_tree_db;
     mutable SolutionMap replace_solution;
     bool replace_solution_available = false;    
-    mutable map< RequiresSubordinateSCREngine *, TreePtr<Node> > embedded_action_requests;
+    mutable map< RequiresSubordinateSCREngine *, TreePtr<Node> > bases_for_embedded;
 };
 
 };

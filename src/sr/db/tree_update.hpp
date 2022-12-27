@@ -6,6 +6,7 @@
 #include "../zone.hpp"
 #include "../link.hpp"
 #include "../duplicate.hpp"
+#include "../scr_engine.hpp"
 
 namespace SR 
 {
@@ -24,6 +25,9 @@ public:
         
         // Remove after #702 and just use x_tree_db directly
         const Duplicate::DirtyGrassUpdateInterface *green_grass;
+
+        // For embedded patterns
+        const SCREngine *scr_engine;
 
         // Forth-like stack of generated nodes.
         stack<FreeZone> *free_zone_stack;        
@@ -78,6 +82,20 @@ public:
 
 private:
 	TreeZone target;
+};
+
+// ------------------------- MarkBaseForEmbeddedCommand --------------------------
+
+// Takes the base of the zone at the top of the stack and remembers it as
+// the base to use for the configured embedded engine.
+class MarkBaseForEmbeddedCommand : public Command
+{
+public:
+    MarkBaseForEmbeddedCommand( RequiresSubordinateSCREngine *embedded_agent );
+	void Execute( const ExecKit &kit ) const final;	
+
+private:
+	RequiresSubordinateSCREngine * const embedded_agent;
 };
 
 // ------------------------- CommandSequence --------------------------

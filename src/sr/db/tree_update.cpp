@@ -74,8 +74,20 @@ void InsertCommand::Execute( const ExecKit &kit ) const
     kit.free_zone_stack->pop();
 }
 
-// ------------------------- CommandSequence --------------------------
+// ------------------------- MarkBaseForEmbeddedCommand --------------------------
 
+MarkBaseForEmbeddedCommand::MarkBaseForEmbeddedCommand( RequiresSubordinateSCREngine *embedded_agent_ ) :
+    embedded_agent( embedded_agent_ )
+{
+}
+    
+void MarkBaseForEmbeddedCommand::Execute( const ExecKit &kit ) const
+{
+    ASSERT( kit.free_zone_stack->top().GetBase() );
+    kit.scr_engine->MarkBaseForEmbedded( embedded_agent, kit.free_zone_stack->top().GetBase() );   
+}
+    
+// ------------------------- CommandSequence --------------------------
 
 void CommandSequence::Execute( const ExecKit &kit ) const
 {

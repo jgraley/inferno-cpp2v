@@ -314,7 +314,7 @@ void SCREngine::UpdateEmbeddedActionRequests( TreePtr<Node> through_subtree, Tre
     
 	// We need to fix up any remaining action requests at the same level as the one
 	// that just ran if they have the same through node as the one we just changed.
-    for( auto &p : embedded_action_requests ) // ref important - we're modifying!
+    for( auto &p : bases_for_embedded ) // ref important - we're modifying!
     {
         if( p.second == through_subtree )
         {
@@ -339,11 +339,11 @@ void SCREngine::RunEmbedded( PatternLink plink_to_embedded, XLink base_xlink )
    
     TRACE("Going to run embedded on ")(*embedded_engine)
          (" agent ")(embedded_agent)
-         (" and embedded_action_requests are\n")(embedded_action_requests)("\n");
+         (" and bases_for_embedded are\n")(bases_for_embedded)("\n");
    
     // Recall the base node of the subtree under through (after replace)
-    TreePtr<Node> through_subtree = embedded_action_requests.at(embedded_agent);
-    EraseSolo( embedded_action_requests, embedded_agent); // not needed any more
+    TreePtr<Node> through_subtree = bases_for_embedded.at(embedded_agent);
+    EraseSolo( bases_for_embedded, embedded_agent); // not needed any more
     ASSERT( through_subtree );
     
     // Obtain a pointer to the though link that will be updated by the 
@@ -374,7 +374,7 @@ void SCREngine::Replace( XLink base_xlink )
 	commands->Add( make_unique<InsertCommand>( base_zone ) );
     
     stack<FreeZone> free_zone_stack;
-	plan.vn_sequence->ExecuteUpdateCommand( commands.get(), &free_zone_stack );  
+	plan.vn_sequence->ExecuteUpdateCommand( commands.get(), this, &free_zone_stack );  
     ASSERT( free_zone_stack.empty() );
     plan.vn_sequence->CompleteDomainExtension();     
 
@@ -396,7 +396,7 @@ void SCREngine::SingleCompareReplace( XLink base_xlink,
            
     // Replace will need the compare keys unioned with the enclosing keys
     SolutionMap rs = UnionOfSolo( *enclosing_solution, cs );    
-    embedded_action_requests.clear();
+    bases_for_embedded.clear();
     replace_solution = move(rs);
     replace_solution_available = true;
 
@@ -544,10 +544,10 @@ void SCREngine::GenerateGraphRegions( Graph &graph ) const
 }
 
 
-void SCREngine::RequestEmbeddedAction( RequiresSubordinateSCREngine *embedded_agent,
-                                       TreePtr<Node> embedded_through_subtree ) const
+void SCREngine::MarkBaseForEmbedded( RequiresSubordinateSCREngine *embedded_agent,
+                                     TreePtr<Node> embedded_through_subtree ) const
 {
-    InsertSolo( embedded_action_requests, make_pair( embedded_agent, embedded_through_subtree ) );
+    InsertSolo( bases_for_embedded, make_pair( embedded_agent, embedded_through_subtree ) );
 }
 
 

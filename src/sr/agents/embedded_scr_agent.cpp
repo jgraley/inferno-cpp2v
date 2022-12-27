@@ -43,11 +43,29 @@ TreePtr<Node> EmbeddedSCRAgent::BuildReplaceImpl( const ReplaceKit &kit,
     TreePtr<Node> my_through_subtree = through_plink.GetChildAgent()->BuildReplace(kit, through_plink);
     ASSERT( my_through_subtree );
     
-    my_scr_engine->RequestEmbeddedAction( this, my_through_subtree );   
+    my_scr_engine->MarkBaseForEmbedded( this, my_through_subtree );   
     ASSERT( my_through_subtree );
     
     return my_through_subtree;
 }
+
+
+Agent::CommandPtr EmbeddedSCRAgent::BuildCommandImpl( const ReplaceKit &kit, 
+                                                      PatternLink me_plink, 
+                                                      XLink key_xlink )
+{
+    auto commands = make_unique<CommandSequence>();
+    
+    PatternLink through_plink(this, GetThrough());
+    commands->Add( through_plink.GetChildAgent()->BuildCommand(kit, through_plink) );    
+    
+    // Indicates that the embedded engine should act at the base
+    // of whatever's at the top of the stack, which should be the 
+    // though subtree due to the previous command.
+    commands->Add( make_unique<MarkBaseForEmbeddedCommand>( this ) );  
+    
+    return commands;
+}                                         
 
 
 list<PatternLink> EmbeddedSCRAgent::GetVisibleChildren( Path v ) const

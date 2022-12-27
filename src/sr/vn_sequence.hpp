@@ -48,6 +48,7 @@ public:
 
     void CompleteDomainExtension();
     void ExecuteUpdateCommand( Command *cmd,
+                               const SCREngine *scr_engine,
                                stack<FreeZone> *free_zone_stack );
     
     void XTreeDbDump() const;

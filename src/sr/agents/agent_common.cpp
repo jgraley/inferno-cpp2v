@@ -589,7 +589,7 @@ TreePtr<Node> AgentCommon::BuildReplaceImpl( const ReplaceKit &kit,
 	auto commands = BuildCommandImpl(kit, me_plink, key_xlink);
 
     stack<FreeZone> free_zone_stack;
-    Command::ExecKit exec_kit {nullptr, my_scr_engine, &free_zone_stack};
+    Command::ExecKit exec_kit {nullptr, my_scr_engine, my_scr_engine, &free_zone_stack};
 	commands->Execute( exec_kit );     
     ASSERT( free_zone_stack.size() == 1);       
     return free_zone_stack.top().GetBase();
