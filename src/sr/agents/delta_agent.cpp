@@ -65,8 +65,9 @@ void DeltaAgent::StartPlanOverlay()
 }
 
 
-TreePtr<Node> DeltaAgent::BuildReplaceColocated( const ReplaceKit &kit, 
-                                                 PatternLink me_plink ) 
+TreePtr<Node> DeltaAgent::BuildReplaceImpl( const ReplaceKit &kit, 
+                                            PatternLink me_plink, 
+                                            XLink key_xlink )
 {
     INDENT("O");    
 

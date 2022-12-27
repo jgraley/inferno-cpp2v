@@ -15,6 +15,17 @@ shared_ptr<PatternQuery> ConjunctionAgent::GetPatternQuery() const
 }
 
 
+TreePtr<Node> ConjunctionAgent::BuildReplaceImpl( const ReplaceKit &kit, 
+                                                  PatternLink me_plink, 
+                                                  XLink key_xlink )
+{
+    // Conjuction and disjunction are ambiguous because there are 
+    // multiple conjuncts/disjuncts
+    ASSERT(key_xlink)("Unkeyed boolean agent seen in replace context");
+    return DuplicateSubtree(key_xlink);   
+}
+
+
 Graphable::Block ConjunctionAgent::GetGraphBlockInfo() const
 {
 	// The Conjunction node appears as a diamond with a ∧ character inside it. The affected subtrees are 

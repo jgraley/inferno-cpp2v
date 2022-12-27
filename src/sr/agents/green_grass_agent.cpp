@@ -23,6 +23,17 @@ Lazy<BooleanExpression> GreenGrassAgent::SymbolicColocatedQuery() const
 }
 
 
+TreePtr<Node> GreenGrassAgent::BuildReplaceImpl( const ReplaceKit &kit, 
+                                                 PatternLink me_plink, 
+                                                 XLink key_xlink )
+{
+    auto plinks = pattern_query->GetNormalLinks();
+    PatternLink replace_plink = OnlyElementOf(plinks);
+    ASSERT( replace_plink );          
+    return replace_plink.GetChildAgent()->BuildReplace(kit, replace_plink);
+}
+
+
 Graphable::Block GreenGrassAgent::GetGraphBlockInfo() const
 {
 	// The GreenGrass node appears as a cylinder containing four vertical line characters,

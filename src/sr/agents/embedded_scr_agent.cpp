@@ -30,8 +30,9 @@ void EmbeddedSCRAgent::MaybeChildrenPlanOverlay( PatternLink me_plink,
 }
 
 
-TreePtr<Node> EmbeddedSCRAgent::BuildReplaceColocated( const ReplaceKit &kit, 
-                                                       PatternLink me_plink )
+TreePtr<Node> EmbeddedSCRAgent::BuildReplaceImpl( const ReplaceKit &kit, 
+                                                  PatternLink me_plink, 
+                                                  XLink key_xlink )
 {
     INDENT("l");
     ASSERT( *GetThrough() );   

@@ -21,8 +21,9 @@ class DeltaAgent : public virtual ColocatedAgent,
 public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;                
     virtual list<PatternLink> GetVisibleChildren( Path v ) const;
-    TreePtr<Node> BuildReplaceColocated( const ReplaceKit &kit, 
-                                         PatternLink me_plink ) final;
+    TreePtr<Node> BuildReplaceImpl( const ReplaceKit &kit, 
+                                    PatternLink me_plink, 
+                                    XLink key_xlink ) final;
     virtual void StartPlanOverlay();
     
 private:

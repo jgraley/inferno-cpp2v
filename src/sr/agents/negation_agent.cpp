@@ -49,7 +49,8 @@ TreePtr<Node> NegationAgent::BuildReplaceImpl( const ReplaceKit &kit,
                                                PatternLink me_plink, 
                                                XLink key_xlink )
 {
-    ASSERT(key_xlink)("Unkeyed search-only agent seen in replace context");
+    // Negation is ambiguous because of the negation property
+    ASSERT(key_xlink)("Unkeyed boolean agent seen in replace context");
     return DuplicateSubtree(key_xlink);   
 }
 

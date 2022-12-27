@@ -15,6 +15,9 @@ class ConjunctionAgent : public virtual ColocatedAgent
 {
 public:               
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
+	TreePtr<Node> BuildReplaceImpl( const ReplaceKit &kit, 
+                                    PatternLink me_plink, 
+                                    XLink key_xlink ) final;  
     virtual Block GetGraphBlockInfo() const;
 private:
     virtual CollectionInterface &GetConjuncts() const = 0;

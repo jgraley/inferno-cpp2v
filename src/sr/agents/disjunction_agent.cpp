@@ -62,7 +62,9 @@ TreePtr<Node> DisjunctionAgent::BuildReplaceImpl( const ReplaceKit &kit,
                                                   PatternLink me_plink, 
                                                   XLink key_xlink )
 {
-    ASSERT(key_xlink)("Unkeyed search-only agent seen in replace context");
+    // Conjuction and disjunction are ambiguous because there are 
+    // multiple conjuncts/disjuncts
+    ASSERT(key_xlink)("Unkeyed boolean agent seen in replace context");
     return DuplicateSubtree(key_xlink);   
 }
 
