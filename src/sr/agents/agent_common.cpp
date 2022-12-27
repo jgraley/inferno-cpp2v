@@ -524,8 +524,8 @@ TreePtr<Node> AgentCommon::BuildForAnalysis( PatternLink me_plink )
 }
 
 
-Agent::CommandSeq AgentCommon::BuildCommandSeq( const ReplaceKit &kit, 
-                                                PatternLink me_plink )
+Agent::CommandPtr AgentCommon::BuildCommand( const ReplaceKit &kit, 
+                                             PatternLink me_plink )
 {
     INDENT("C");
     ASSERT( me_plink.GetChildAgent() == this );
@@ -533,22 +533,16 @@ Agent::CommandSeq AgentCommon::BuildCommandSeq( const ReplaceKit &kit,
     ASSERT(my_scr_engine)("Agent ")(*this)(" appears not to have been configured");
     ASSERT( phase != IN_COMPARE_ONLY )(*this)(" is configured for compare only");
     
-    auto seq = BuildCommandSeqImpl( kit, me_plink );
-    ASSERT( !seq->IsEmpty() );
-    return seq;
+    return BuildCommandImpl( kit, me_plink );
 }
 
 
-Agent::CommandSeq AgentCommon::BuildCommandSeqImpl( const ReplaceKit &kit, 
-                                                    PatternLink me_plink )
+Agent::CommandPtr AgentCommon::BuildCommandImpl( const ReplaceKit &kit, 
+                                                 PatternLink me_plink )
 {
-	auto commands = make_unique<CommandSequence>();
-
     TreePtr<Node> new_base_x = BuildReplace(kit, me_plink);
     FreeZone new_zone( new_base_x );
-	commands->Add( make_shared<PushFreeZoneCommand>( new_zone ) );
-    
-    return commands;
+	return make_unique<PushFreeZoneCommand>( new_zone );
 }
 
 
@@ -582,7 +576,7 @@ TreePtr<Node> AgentCommon::BuildReplaceImpl( const ReplaceKit &kit,
                                              PatternLink me_plink, 
                                              XLink key_xlink )
 {
-	auto commands = BuildCommandSeq(kit, me_plink);
+	auto commands = BuildCommand(kit, me_plink);
 
     stack<FreeZone> free_zone_stack;
     Command::ExecKit exec_kit {nullptr, &free_zone_stack};

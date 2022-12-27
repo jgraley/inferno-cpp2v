@@ -8,6 +8,8 @@
 #include "../sym/predicate_operators.hpp"
 #include "special_agent.hpp"
 
+//#define COMMAND_SEQ
+
 namespace SR
 {
 
@@ -28,9 +30,14 @@ public:
                                                                
     SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuery() const override;                                       
 
+#ifdef COMMAND_SEQ
+    CommandPtr BuildCommandSeqImpl( const ReplaceKit &kit, 
+                                    PatternLink me_plink ) final;
+#else                                    
 	TreePtr<Node> BuildReplaceImpl( const ReplaceKit &kit, 
                                     PatternLink me_plink, 
                                     XLink key_xlink ) final;  
+#endif
 
     virtual Block GetGraphBlockInfo() const;
     

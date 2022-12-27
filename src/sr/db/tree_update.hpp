@@ -71,11 +71,11 @@ class CommandSequence : public Command
 public:
 	void Execute( const ExecKit &kit ) const final;	
 
-	void Add( shared_ptr<Command> cmd );
+	void Add( unique_ptr<Command> cmd );
     bool IsEmpty() const;
 	
 private:
-	list<shared_ptr<Command>> seq;	
+	list<unique_ptr<Command>> seq;	
 };
 	
 }

@@ -14,7 +14,7 @@ class SCREngine;
 class AndRuleEngine;
 class Agent;
 class XTreeDatabase;
-class CommandSequence;
+class Command;
 
 /// Interface for Agents, which co-exist with pattern nodes and implement the search and replace funcitonality for each pattern node.
 class Agent : public virtual Graphable,
@@ -25,7 +25,7 @@ public:
     {
     };
 
-    typedef unique_ptr<CommandSequence> CommandSeq;
+    typedef unique_ptr<Command> CommandPtr;
 
     typedef Graphable::Phase Phase;
     
@@ -83,8 +83,8 @@ public:
                                     set<PatternLink> keyer_plinks ) = 0;
 
     virtual TreePtr<Node> BuildForAnalysis( PatternLink me_plink ) = 0;
-    virtual CommandSeq BuildCommandSeq( const ReplaceKit &kit, 
-                                        PatternLink me_plink ) = 0;
+    virtual CommandPtr BuildCommand( const ReplaceKit &kit, 
+                                     PatternLink me_plink ) = 0;
     virtual TreePtr<Node> BuildReplace( const ReplaceKit &kit, 
                                         PatternLink me_plink ) = 0;
     virtual list<PatternLink> GetChildren() const = 0;

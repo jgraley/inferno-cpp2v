@@ -362,14 +362,16 @@ void SCREngine::Replace( XLink base_xlink )
 {
     INDENT("R");
 	Agent::ReplaceKit replace_kit;
-	auto commands = plan.base_agent->BuildCommandSeq(replace_kit, plan.base_plink);
-
+	auto commands = make_unique<CommandSequence>();
+	unique_ptr<Command> build_command = plan.base_agent->BuildCommand(replace_kit, plan.base_plink);
+    commands->Add(move(build_command));
+    
     TreeZone base_zone( base_xlink );
-	commands->Add( make_shared<DeleteCommand>( base_zone ) );
+	commands->Add( make_unique<DeleteCommand>( base_zone ) );
     
     // Now replace according to the couplings
     TRACE("Now replacing, base agent=")(plan.base_agent)("\n");
-	commands->Add( make_shared<InsertCommand>( base_zone ) );
+	commands->Add( make_unique<InsertCommand>( base_zone ) );
     
     stack<FreeZone> free_zone_stack;
 	plan.vn_sequence->ExecuteUpdateCommand( commands.get(), &free_zone_stack );  
