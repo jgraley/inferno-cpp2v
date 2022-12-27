@@ -5,7 +5,7 @@
 
 #include "../agents/agent.hpp"
 #include "../agents/teleport_agent.hpp"
-#include "helpers/duplicate.hpp"
+#include "helpers/simple_duplicate.hpp"
 
 //#define TRACE_DOMAIN_EXTEND
 
@@ -173,7 +173,7 @@ void DomainExtensionChannel::AddExtraNode( TreePtr<Node> extra_node )
     // we were given, in case it meanders into the main X tree not at an
     // identifier, causing illegal multiple parents. See #677
     // TODO maybe only do this if subtree actually would go wrong.
-    TreePtr<Node> extra_node_dup = Duplicate::DuplicateSubtree( extra_node );
+    TreePtr<Node> extra_node_dup = SimpleDuplicate::DuplicateSubtree( extra_node );
   
     // Create an XLink that will allow us to track this subtree
     XLink extra_xlink = XLink::CreateDistinct( extra_node_dup );    

@@ -40,6 +40,18 @@ private:
 	FreeZone new_zone;
 };
 
+// ------------------------- PushTreeZoneCommand --------------------------
+
+class PushTreeZoneCommand : public Command
+{
+public:
+    PushTreeZoneCommand( const TreeZone &new_zone );
+	void Execute( const ExecKit &kit ) const final;	
+
+private:
+	TreeZone new_zone;
+};
+
 // ------------------------- DeleteCommand --------------------------
 
 class DeleteCommand : public Command

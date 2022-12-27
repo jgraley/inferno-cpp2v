@@ -59,7 +59,6 @@ SYM::Lazy<SYM::BooleanExpression> DisjunctionAgent::SymbolicNormalLinkedQuery() 
 }
 
 
-#ifdef COMMAND_SEQ
 Agent::CommandPtr DisjunctionAgent::BuildCommandImpl( const ReplaceKit &kit, 
                                                       PatternLink me_plink, 
                                                       XLink key_xlink )
@@ -67,22 +66,15 @@ Agent::CommandPtr DisjunctionAgent::BuildCommandImpl( const ReplaceKit &kit,
     // Conjuction and disjunction are ambiguous because there are 
     // multiple conjuncts/disjuncts
     ASSERT(key_xlink)("Unkeyed boolean agent seen in replace context");
+#ifdef TREE_ZONE
+    TreeZone new_zone( key_xlink );
+	return make_unique<PushTreeZoneCommand>( new_zone );
+#else
     TreePtr<Node> new_base_x = DuplicateSubtree(key_xlink);   
     FreeZone new_zone( new_base_x );
 	return make_unique<PushFreeZoneCommand>( new_zone );
-    
-}                                                  
-#else                                    
-TreePtr<Node> DisjunctionAgent::BuildReplaceImpl( const ReplaceKit &kit, 
-                                                  PatternLink me_plink, 
-                                                  XLink key_xlink )
-{
-    // Conjuction and disjunction are ambiguous because there are 
-    // multiple conjuncts/disjuncts
-    ASSERT(key_xlink)("Unkeyed boolean agent seen in replace context");
-    return DuplicateSubtree(key_xlink);   
-}
-#endif
+#endif    
+}                                                 
 
 Graphable::Block DisjunctionAgent::GetGraphBlockInfo() const
 {

@@ -1,9 +1,9 @@
 
-#include "duplicate.hpp"
+#include "simple_duplicate.hpp"
 #include "node/specialise_oostd.hpp"
 #include "common/trace.hpp"
 
-TreePtr<Node> Duplicate::DuplicateNode( TreePtr<Node> source ) 
+TreePtr<Node> SimpleDuplicate::DuplicateNode( TreePtr<Node> source ) 
 {
     // Make the new node (destination node)
     shared_ptr<Cloner> dup_dest = source->Duplicate(source);
@@ -14,19 +14,10 @@ TreePtr<Node> Duplicate::DuplicateNode( TreePtr<Node> source )
 }                                                     
 
 
-TreePtr<Node> Duplicate::DuplicateSubtree( TreePtr<Node> source,
-                                           TreePtr<Node> source_terminus,
-                                           TreePtr<Node> dest_terminus ) 
-{
+TreePtr<Node> SimpleDuplicate::DuplicateSubtree( TreePtr<Node> source ) 
+{    
     ASSERT( source );
-    if( source_terminus )
-        ASSERT( dest_terminus );
    
-    // If source_terminus and dest_terminus are supplied, substitute dest_terminus node
-    // in place of all copies of source terminus (directly, without duplicating).
-    if( source_terminus && source == source_terminus ) 
-        return dest_terminus;
-
     // Make a new node, since we're substituting, preserve dirtyness        
     TreePtr<Node> dest = DuplicateNode( source );
 
@@ -57,7 +48,7 @@ TreePtr<Node> Duplicate::DuplicateSubtree( TreePtr<Node> source,
             {
                 ASSERT( p ); // present simplified scheme disallows nullptr
                 //TRACE("Duplicating ")(*p)("\n");
-                TreePtr<Node> n = DuplicateSubtree( (TreePtr<Node>)p, source_terminus, dest_terminus );
+                TreePtr<Node> n = DuplicateSubtree( (TreePtr<Node>)p );
                 //TRACE("Normal element, inserting ")(*n)(" directly\n");
                 dest_con->insert( n );
             }
@@ -67,7 +58,7 @@ TreePtr<Node> Duplicate::DuplicateSubtree( TreePtr<Node> source,
             //TRACE("Duplicating node ")(*keynode_singular)("\n");
             TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
             ASSERT( *keynode_singular )("source should be non-nullptr");
-            *dest_singular = DuplicateSubtree( (TreePtr<Node>)*keynode_singular, source_terminus, dest_terminus );
+            *dest_singular = DuplicateSubtree( (TreePtr<Node>)*keynode_singular );
             ASSERT( *dest_singular );
             ASSERT( TreePtr<Node>(*dest_singular)->IsFinal() );            
         }

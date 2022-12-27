@@ -30,15 +30,9 @@ public:
                                                                
     SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuery() const override;                                       
 
-#ifdef COMMAND_SEQ
     CommandPtr BuildCommandImpl( const ReplaceKit &kit, 
                                  PatternLink me_plink, 
                                  XLink key_xlink ) final;
-#else                                    
-	TreePtr<Node> BuildReplaceImpl( const ReplaceKit &kit, 
-                                    PatternLink me_plink, 
-                                    XLink key_xlink ) final;  
-#endif
 
     virtual Block GetGraphBlockInfo() const;
     

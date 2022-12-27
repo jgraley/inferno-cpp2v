@@ -3,7 +3,7 @@
 #include "relation_test.hpp"
 
 #include "helpers/simple_compare.hpp"
-#include "helpers/duplicate.hpp"
+#include "helpers/simple_duplicate.hpp"
 
 #include <random>
 

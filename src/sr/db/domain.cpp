@@ -3,7 +3,7 @@
 #include "relation_test.hpp"
 
 #include "../agents/agent.hpp"
-#include "helpers/duplicate.hpp"
+#include "helpers/simple_duplicate.hpp"
 
 //#define TRACE_DOMAIN_EXTEND
 

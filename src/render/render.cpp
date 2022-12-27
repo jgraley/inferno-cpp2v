@@ -6,7 +6,7 @@
 #include "common/read_args.hpp"
 #include "tree/type_data.hpp"
 #include "helpers/walk.hpp"
-#include "helpers/duplicate.hpp"
+#include "helpers/simple_duplicate.hpp"
 #include "tree/misc.hpp"
 #include "tree/scope.hpp"
 #include "sort_decls.hpp"
