@@ -19,7 +19,7 @@ void PushFreeZoneCommand::Execute( const ExecKit &kit ) const
 }
 
 // ------------------------- PushTreeZoneCommand --------------------------
-/*
+
 PushTreeZoneCommand::PushTreeZoneCommand( const TreeZone &new_zone_ ) :
 	new_zone( new_zone_ )
 {
@@ -28,11 +28,11 @@ PushTreeZoneCommand::PushTreeZoneCommand( const TreeZone &new_zone_ ) :
 
 void PushTreeZoneCommand::Execute( const ExecKit &kit ) const
 {
-    TreePtr<Node> new_base_x = DuplicateSubtree(new_zone.GetBase());   
+    TreePtr<Node> new_base_x = Duplicate::DuplicateSubtree(kit.green_grass, new_zone.GetBase());   
     FreeZone new_free_zone( new_base_x );
     kit.free_zone_stack->push( new_free_zone );      
 }
-*/
+
 // ------------------------- DeleteCommand --------------------------
 
 DeleteCommand::DeleteCommand( const TreeZone &target_ ) :

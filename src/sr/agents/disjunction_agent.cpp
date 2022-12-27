@@ -7,6 +7,8 @@
 #include "sym/result.hpp"
 #include "db/tree_update.hpp"
 
+#define TREE_ZONE
+
 using namespace SR;
 using namespace SYM;
 
