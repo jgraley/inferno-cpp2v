@@ -520,13 +520,7 @@ bool AgentCommon::ReplaceKeyerQuery( PatternLink me_plink,
 TreePtr<Node> AgentCommon::BuildForAnalysis( PatternLink me_plink )
 {
 	Agent::ReplaceKit replace_kit;
-	auto commands = BuildCommandSeq(replace_kit, me_plink);
-
-    stack<FreeZone> free_zone_stack;
-    Command::ExecKit exec_kit {nullptr, &free_zone_stack};
-	commands->Execute( exec_kit );     
-    ASSERT( free_zone_stack.size() == 1);       
-    return free_zone_stack.top().GetBase();
+    return BuildReplace( replace_kit, me_plink );
 }
 
 
@@ -582,6 +576,20 @@ TreePtr<Node> AgentCommon::BuildReplace( const ReplaceKit &kit,
     
     return dest;
 }
+
+
+TreePtr<Node> AgentCommon::BuildReplaceImpl( const ReplaceKit &kit, 
+                                             PatternLink me_plink, 
+                                             XLink key_xlink )
+{
+	auto commands = BuildCommandSeq(kit, me_plink);
+
+    stack<FreeZone> free_zone_stack;
+    Command::ExecKit exec_kit {nullptr, &free_zone_stack};
+	commands->Execute( exec_kit );     
+    ASSERT( free_zone_stack.size() == 1);       
+    return free_zone_stack.top().GetBase();
+}                                             
 
 
 TreePtr<Node> AgentCommon::CloneNode( bool force_dirty ) const
