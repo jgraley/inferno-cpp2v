@@ -156,7 +156,7 @@ void VNSequence::ExecuteUpdateCommand( Command *cmd,
 {
     ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");    
     
-	Command::ExecKit kit { x_tree_db.get(), free_zone_stack };
+	Command::ExecKit kit { x_tree_db.get(), x_tree_db.get(), free_zone_stack };
 	cmd->Execute( kit );
 }
 

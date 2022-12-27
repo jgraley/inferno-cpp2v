@@ -5,6 +5,7 @@
 #include "node/tree_ptr.hpp"
 #include "../zone.hpp"
 #include "../link.hpp"
+#include "../duplicate.hpp"
 
 namespace SR 
 {
@@ -21,8 +22,11 @@ public:
 		// because we intend to actually change things here.
         XTreeDatabase *x_tree_db; 
         
+        // Remove after #702 and just use x_tree_db directly
+        const Duplicate::DirtyGrassUpdateInterface *green_grass;
+
         // Forth-like stack of generated nodes.
-        stack<FreeZone> *free_zone_stack;
+        stack<FreeZone> *free_zone_stack;        
     };
 
 	virtual void Execute( const ExecKit &kit ) const = 0;

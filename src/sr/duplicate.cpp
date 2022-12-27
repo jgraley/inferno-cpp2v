@@ -12,13 +12,15 @@ TreePtr<Node> Duplicate::DuplicateNode( const DirtyGrassUpdateInterface *dirty_g
     TreePtr<Node> dest( dynamic_pointer_cast<Node>( dup_dest ) );
     ASSERTS(dest);
 
-    ASSERT( dirty_grass );
-    bool source_dirty = dirty_grass->IsDirtyGrass( source );
-    if( force_dirty || // requested by caller
-        source_dirty ) // source was dirty
+    if( dirty_grass )
     {
-        //TRACE("dirtying ")(*dest)(" force=%d source=%d (")(*source)(")\n", force_dirty, source_dirty);        
-        dirty_grass->AddDirtyGrass( dest );
+        bool source_dirty = dirty_grass->IsDirtyGrass( source );
+        if( force_dirty || // requested by caller
+            source_dirty ) // source was dirty
+        {
+            //TRACE("dirtying ")(*dest)(" force=%d source=%d (")(*source)(")\n", force_dirty, source_dirty);        
+            dirty_grass->AddDirtyGrass( dest );
+        }
     }
     
     return dest;    
