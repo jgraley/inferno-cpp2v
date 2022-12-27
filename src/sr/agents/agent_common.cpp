@@ -533,12 +533,21 @@ Agent::CommandPtr AgentCommon::BuildCommand( const ReplaceKit &kit,
     ASSERT(my_scr_engine)("Agent ")(*this)(" appears not to have been configured");
     ASSERT( phase != IN_COMPARE_ONLY )(*this)(" is configured for compare only");
     
-    return BuildCommandImpl( kit, me_plink );
+    XLink key_xlink;
+    if( keyer_plink )
+    {
+        key_xlink = my_scr_engine->GetReplaceKey( keyer_plink );
+		ASSERT( !key_xlink || key_xlink.GetChildX()->IsFinal() )
+		      (*this)(" keyed with non-final node ")(key_xlink)("\n"); 
+    }
+
+    return BuildCommandImpl( kit, me_plink, key_xlink );
 }
 
 
 Agent::CommandPtr AgentCommon::BuildCommandImpl( const ReplaceKit &kit, 
-                                                 PatternLink me_plink )
+                                                 PatternLink me_plink, 
+                                                 XLink key_xlink )
 {
     TreePtr<Node> new_base_x = BuildReplace(kit, me_plink);
     FreeZone new_zone( new_base_x );

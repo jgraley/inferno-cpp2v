@@ -5,6 +5,7 @@
 #include "sym/predicate_operators.hpp"
 #include "sym/symbol_operators.hpp"
 #include "sym/result.hpp"
+#include "db/tree_update.hpp"
 
 using namespace SR;
 using namespace SYM;
@@ -59,12 +60,17 @@ SYM::Lazy<SYM::BooleanExpression> DisjunctionAgent::SymbolicNormalLinkedQuery() 
 
 
 #ifdef COMMAND_SEQ
-CommandSeq DisjunctionAgent::BuildCommandSeqImpl( const ReplaceKit &kit, 
-                                                  PatternLink me_plink )
+Agent::CommandPtr DisjunctionAgent::BuildCommandImpl( const ReplaceKit &kit, 
+                                                      PatternLink me_plink, 
+                                                      XLink key_xlink )
 {
     // Conjuction and disjunction are ambiguous because there are 
     // multiple conjuncts/disjuncts
     ASSERT(key_xlink)("Unkeyed boolean agent seen in replace context");
+    TreePtr<Node> new_base_x = DuplicateSubtree(key_xlink);   
+    FreeZone new_zone( new_base_x );
+	return make_unique<PushFreeZoneCommand>( new_zone );
+    
 }                                                  
 #else                                    
 TreePtr<Node> DisjunctionAgent::BuildReplaceImpl( const ReplaceKit &kit, 

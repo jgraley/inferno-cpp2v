@@ -63,7 +63,8 @@ public:
     CommandPtr BuildCommand( const ReplaceKit &kit, 
                              PatternLink me_plink ) override;
     virtual CommandPtr BuildCommandImpl( const ReplaceKit &kit, 
-                                         PatternLink me_plink );
+                                         PatternLink me_plink, 
+                                         XLink key_xlink );
     TreePtr<Node> BuildReplace( const ReplaceKit &kit, 
                                 PatternLink me_plink ) override;
     virtual TreePtr<Node> BuildReplaceImpl( const ReplaceKit &kit, 
