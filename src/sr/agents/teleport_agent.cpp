@@ -10,6 +10,7 @@
 #include "sym/predicate_operators.hpp"
 #include "sym/symbol_operators.hpp"
 #include "sym/result.hpp"
+#include "db/tree_update.hpp"
 
 #include <stdexcept>
 
@@ -77,12 +78,13 @@ bool TeleportAgent::IsExtenderLess( const Extender &r ) const
 }
 
 
-TreePtr<Node> TeleportAgent::BuildReplaceImpl( const ReplaceKit &kit, 
-                                               PatternLink me_plink, 
-                                               XLink key_xlink )
+Agent::CommandPtr TeleportAgent::BuildCommandImpl( const ReplaceKit &kit, 
+                                                   PatternLink me_plink, 
+                                                   XLink key_xlink )
 {
-    ASSERT(key_xlink)("Unkeyed search-only agent seen in replace context");
-    return DuplicateSubtree(key_xlink);   
+    ASSERT(key_xlink)("Unkeyed agent seen in replace context");
+    TreeZone new_zone( key_xlink );
+	return make_unique<PushTreeZoneCommand>( new_zone );   
 }
 
 

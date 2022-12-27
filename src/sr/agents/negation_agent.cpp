@@ -5,6 +5,7 @@
 #include "sym/predicate_operators.hpp"
 #include "sym/symbol_operators.hpp"
 #include "sym/lazy_eval.hpp"
+#include "db/tree_update.hpp"
 
 using namespace SR;
 using namespace SYM;
@@ -45,13 +46,14 @@ void NegationAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
 }
 
 
-TreePtr<Node> NegationAgent::BuildReplaceImpl( const ReplaceKit &kit, 
-                                               PatternLink me_plink, 
-                                               XLink key_xlink )
+Agent::CommandPtr NegationAgent::BuildCommandImpl( const ReplaceKit &kit, 
+                                                   PatternLink me_plink, 
+                                                   XLink key_xlink )
 {
     // Negation is ambiguous because of the negation property
     ASSERT(key_xlink)("Unkeyed boolean agent seen in replace context");
-    return DuplicateSubtree(key_xlink);   
+    TreeZone new_zone( key_xlink );
+	return make_unique<PushTreeZoneCommand>( new_zone );   
 }
 
 

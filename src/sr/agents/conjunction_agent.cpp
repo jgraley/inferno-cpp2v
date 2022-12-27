@@ -1,6 +1,7 @@
 #include "conjunction_agent.hpp"
 #include "conjecture.hpp"
 #include "link.hpp"
+#include "db/tree_update.hpp"
 
 using namespace SR;
 
@@ -15,14 +16,15 @@ shared_ptr<PatternQuery> ConjunctionAgent::GetPatternQuery() const
 }
 
 
-TreePtr<Node> ConjunctionAgent::BuildReplaceImpl( const ReplaceKit &kit, 
-                                                  PatternLink me_plink, 
-                                                  XLink key_xlink )
+Agent::CommandPtr ConjunctionAgent::BuildCommandImpl( const ReplaceKit &kit, 
+                                                   PatternLink me_plink, 
+                                                   XLink key_xlink )
 {
     // Conjuction and disjunction are ambiguous because there are 
     // multiple conjuncts/disjuncts
     ASSERT(key_xlink)("Unkeyed boolean agent seen in replace context");
-    return DuplicateSubtree(key_xlink);   
+    TreeZone new_zone( key_xlink );
+	return make_unique<PushTreeZoneCommand>( new_zone );   
 }
 
 

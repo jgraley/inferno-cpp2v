@@ -11,6 +11,7 @@
 #include "sr/sym/boolean_operators.hpp"
 #include "sr/sym/symbol_operators.hpp"
 #include "sr/sym/set_operators.hpp"
+#include "sr/db/tree_update.hpp"
 
 // Not pulling in SYM because it clashes with CPPTree
 //using namespace SYM;
@@ -123,12 +124,13 @@ SYM::Lazy<SYM::BooleanExpression> IdentifierByNameAgent::SymbolicNormalLinkedQue
 }
 
 
-TreePtr<Node> IdentifierByNameAgent::BuildReplaceImpl( const ReplaceKit &kit, 
-                                                       PatternLink me_plink, 
-                                                       XLink key_xlink )
+Agent::CommandPtr IdentifierByNameAgent::BuildCommandImpl( const ReplaceKit &kit, 
+                                                           PatternLink me_plink, 
+                                                           XLink key_xlink )
 {
-    ASSERT(key_xlink)("Unkeyed search-only agent seen in replace context");
-    return DuplicateSubtree(key_xlink);   
+    ASSERT(key_xlink)("Unkeyed agent seen in replace context");
+    TreeZone new_zone( key_xlink );
+	return make_unique<PushTreeZoneCommand>( new_zone );   
 }
 
 
