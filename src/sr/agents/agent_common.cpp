@@ -518,7 +518,7 @@ bool AgentCommon::ReplaceKeyerQuery( PatternLink me_plink,
 }
                                   
                                   
-TreePtr<Node> AgentCommon::BuildForAnalysis( PatternLink me_plink )
+TreePtr<Node> AgentCommon::BuildForBuildersAnalysis( PatternLink me_plink )
 {
 	Agent::ReplaceKit replace_kit;
     return BuildReplace( replace_kit, me_plink );
