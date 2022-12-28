@@ -33,26 +33,45 @@ TreePtr<Node> Duplicate::DuplicateSubtree( const DirtyGrassUpdateInterface *dirt
                                            TreePtr<Node> dest_terminus,
                                            int *terminus_hit_count )
 {
+    if( source_terminus_xlink )
+        ASSERTS( dest_terminus );
+    map<XLink, TreePtr<Node>> terminii;
+    if( source_terminus_xlink )
+        terminii[source_terminus_xlink] = dest_terminus;
+    TreePtr<Node> r = DuplicateSubtree( dirty_grass, source_xlink, terminii );
+    if( terminus_hit_count )
+        for( auto p : terminii )
+            if( !p.second ) // these are switched to NULL on hitting terminus
+                (*terminus_hit_count)++;
+    return r;
+}
+
+
+TreePtr<Node> Duplicate::DuplicateSubtree( const DirtyGrassUpdateInterface *dirty_grass,
+                                           XLink source_xlink )
+{
+    map<XLink, TreePtr<Node>> empty_terminii;
+    return DuplicateSubtree( dirty_grass, source_xlink, empty_terminii );
+}
+    
+    
+TreePtr<Node> Duplicate::DuplicateSubtree( const DirtyGrassUpdateInterface *dirty_grass,
+                                           XLink source_xlink,
+                                           map<XLink, TreePtr<Node>> &terminii )
+{
     ASSERTS( source_xlink );
 	TreePtr<Node> source = source_xlink.GetChildX();
-        
-    TreePtr<Node> source_terminus;
-    if( source_terminus_xlink )
-    {
-		source_terminus = source_terminus_xlink.GetChildX();
-        ASSERTS( dest_terminus );
-	}
-    
+            
     // If source_terminus and dest_terminus are supplied, substitute dest_terminus node
     // in place of all copies of source terminus (directly, without duplicating).
-    //if( source_terminus )
-		//FTRACE(source);
-    if( source_terminus_xlink && source_xlink == source_terminus_xlink ) 
+
+    if( terminii.count(source_xlink) == 1 ) 
     {
-        TRACES("Reached source terminus ")(source_terminus_xlink)
+        TreePtr<Node> dest_terminus = terminii.at(source_xlink);
+        TRACES("Reached source terminus ")(source_xlink)
               (" and substituting ")(dest_terminus)("\n");
-        if( terminus_hit_count )
-			(*terminus_hit_count)++;
+        ASSERT( dest_terminus ); // if this fails, we're probably hitting the same terminus twice
+        terminii.at(source_xlink) = TreePtr<Node>();
         return dest_terminus;
     }
 
@@ -88,9 +107,7 @@ TreePtr<Node> Duplicate::DuplicateSubtree( const DirtyGrassUpdateInterface *dirt
                 //TRACES("Duplicating ")(*source_elt)("\n");
                 TreePtr<Node> dest_elt = DuplicateSubtree( dirty_grass,
                                                            XLink( source, &source_elt ), 
-                                                           source_terminus_xlink, 
-                                                           dest_terminus,
-                                                           terminus_hit_count );
+                                                           terminii );
                 //TRACE("inserting ")(*dest_elt)(" directly\n");
                 dest_container->insert( dest_elt );
             }
@@ -102,9 +119,7 @@ TreePtr<Node> Duplicate::DuplicateSubtree( const DirtyGrassUpdateInterface *dirt
             ASSERTS( *source_singular )("source should be non-nullptr");
             *dest_singular = DuplicateSubtree( dirty_grass,
                                                XLink(source, source_singular), 
-                                               source_terminus_xlink, 
-                                               dest_terminus,
-                                               terminus_hit_count );
+                                               terminii );
             ASSERTS( *dest_singular );
             ASSERTS( TreePtr<Node>(*dest_singular)->IsFinal() );            
         }
