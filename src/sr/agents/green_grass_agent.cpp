@@ -24,17 +24,6 @@ Lazy<BooleanExpression> GreenGrassAgent::SymbolicColocatedQuery() const
 }
 
 
-TreePtr<Node> GreenGrassAgent::BuildReplaceImpl( const ReplaceKit &kit, 
-                                                 PatternLink me_plink, 
-                                                 XLink key_xlink )
-{
-    auto plinks = pattern_query->GetNormalLinks();
-    PatternLink replace_plink = OnlyElementOf(plinks);
-    ASSERT( replace_plink );          
-    return replace_plink.GetChildAgent()->BuildReplace(kit, replace_plink);
-}
-
-
 Agent::CommandPtr GreenGrassAgent::BuildCommandImpl( const ReplaceKit &kit, 
                                                      PatternLink me_plink, 
                                                      XLink key_xlink )

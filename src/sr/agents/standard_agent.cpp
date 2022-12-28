@@ -9,6 +9,7 @@
 #include "sym/boolean_operators.hpp"
 #include "sym/predicate_operators.hpp"
 #include "sym/symbol_operators.hpp"
+#include "db/tree_update.hpp"
 
 using namespace SR;
 using namespace SYM;
@@ -522,9 +523,9 @@ void StandardAgent::MaybeChildrenPlanOverlay( PatternLink me_plink,
 }
 
 
-TreePtr<Node> StandardAgent::BuildReplaceImpl( const ReplaceKit &kit, 
-                                               PatternLink me_plink, 
-                                               XLink key_xlink ) 
+Agent::CommandPtr StandardAgent::BuildCommandImpl( const ReplaceKit &kit, 
+                                                   PatternLink me_plink, 
+                                                   XLink key_xlink ) 
 {
     INDENT("B");
 
@@ -534,7 +535,9 @@ TreePtr<Node> StandardAgent::BuildReplaceImpl( const ReplaceKit &kit,
         // The under pattern node is in a different location from over (=this), 
         // but overlay planning has set up overlay_under_plink for us.
         XLink under_xlink = my_scr_engine->GetReplaceKey( overlay_under_plink );
-        return BuildReplaceOverlay( kit, me_plink, under_xlink );
+        TreePtr<Node> new_base_x = BuildReplaceOverlay( kit, me_plink, under_xlink );
+        FreeZone new_zone( new_base_x );
+	    return make_unique<PushFreeZoneCommand>( new_zone );
     }
     else if( key_xlink ) 
     {
@@ -542,13 +545,17 @@ TreePtr<Node> StandardAgent::BuildReplaceImpl( const ReplaceKit &kit,
         // The under and over pattern nodes are both this. AndRuleEngine 
         // has keyed this, and due wildcarding, key will be a final node
         // i.e. possibly a subclass of this node.
-        return BuildReplaceOverlay( kit, me_plink, key_xlink );
+        TreePtr<Node> new_base_x = BuildReplaceOverlay( kit, me_plink, key_xlink );
+        FreeZone new_zone( new_base_x );
+        return make_unique<PushFreeZoneCommand>( new_zone );
     }
     else
     {
         // Free replace pattern, just duplicate it.
         ASSERT( me_plink.GetPattern()->IsFinal() ); 
-        return BuildReplaceNormal( kit, me_plink ); 
+        TreePtr<Node> new_base_x = BuildReplaceNormal( kit, me_plink ); 
+        FreeZone new_zone( new_base_x );
+        return make_unique<PushFreeZoneCommand>( new_zone );
     }
 }
 

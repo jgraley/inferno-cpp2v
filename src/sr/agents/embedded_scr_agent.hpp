@@ -29,9 +29,6 @@ public:
     virtual void MaybeChildrenPlanOverlay( PatternLink me_plink, 
                                   PatternLink under_plink );
 
-    TreePtr<Node> BuildReplaceImpl( const ReplaceKit &kit, 
-                                    PatternLink me_plink, 
-                                    XLink key_xlink ) final;
     CommandPtr BuildCommandImpl( const ReplaceKit &kit, 
                                  PatternLink me_plink, 
                                  XLink key_xlink ) final;

@@ -32,25 +32,6 @@ void EmbeddedSCRAgent::MaybeChildrenPlanOverlay( PatternLink me_plink,
 }
 
 
-TreePtr<Node> EmbeddedSCRAgent::BuildReplaceImpl( const ReplaceKit &kit, 
-                                                  PatternLink me_plink, 
-                                                  XLink key_xlink )
-{
-    INDENT("l");
-    ASSERT( *GetThrough() );   
-    
-    // Continue current replace operation by following the "through" pointer
-    PatternLink through_plink(this, GetThrough());
-    TreePtr<Node> my_through_subtree = through_plink.GetChildAgent()->BuildReplace(kit, through_plink);
-    ASSERT( my_through_subtree );
-    
-    my_scr_engine->MarkBaseForEmbedded( this, my_through_subtree );   
-    ASSERT( my_through_subtree );
-    
-    return my_through_subtree;
-}
-
-
 Agent::CommandPtr EmbeddedSCRAgent::BuildCommandImpl( const ReplaceKit &kit, 
                                                       PatternLink me_plink, 
                                                       XLink key_xlink )
