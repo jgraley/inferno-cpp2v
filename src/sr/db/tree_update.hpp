@@ -66,11 +66,11 @@ private:
 class DeleteCommand : public Command
 {
 public:
-    DeleteCommand( const TreeZone &target );
+    DeleteCommand( XLink target_base_xlink );
 	void Execute( const ExecKit &kit ) const final;	
 
 private:
-	TreeZone target;
+	XLink target_base_xlink;
 };
 
 // ------------------------- InsertCommand --------------------------
@@ -78,11 +78,11 @@ private:
 class InsertCommand : public Command
 {
 public:
-    InsertCommand( const TreeZone &target );
+    InsertCommand( XLink target_base_xlink );
 	void Execute( const ExecKit &kit ) const final;	
 
 private:
-	TreeZone target;
+	XLink target_base_xlink;
 };
 
 // ------------------------- MarkBaseForEmbeddedCommand --------------------------

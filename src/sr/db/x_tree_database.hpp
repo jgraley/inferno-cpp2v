@@ -43,10 +43,10 @@ public:
     void InitialBuild();
 
 	// Incremental strategy: perform updates on zones
-    void Delete(const TreeZone &zone);
-    void Insert(const TreeZone &zone);
-    void InsertExtraZone(const TreeZone &extra_zone);
-    void DeleteExtraZone(const TreeZone &extra_zone);
+    void Delete(XLink base);
+    void Insert(XLink base);
+    void InsertExtraZone(XLink extra_base);
+    void DeleteExtraZone(XLink extra_base);
 
     void InitialWalk( const DBWalk::Actions *actions,
                       XLink root_xlink );

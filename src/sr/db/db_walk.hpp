@@ -54,13 +54,13 @@ public:
 	};
     
     void Walk( const Actions *actions,
-               const TreeZone &zone,
+               XLink base_xlink,
                ContainmentContext base_context );
 private:
     struct WalkKit
     {
         const Actions *actions;
-        const TreeZone *zone;
+        XLink base_xlink;
     };
 
     void VisitBase( const WalkKit &kit, 

@@ -20,12 +20,12 @@ XTreeDatabase::XTreeDatabase( XLink root_xlink_, shared_ptr<Lacing> lacing, Doma
 {
     auto on_insert_extra_zone = [=](const TreeZone &extra_zone)
     {
-        InsertExtraZone( extra_zone );        
+        InsertExtraZone( extra_zone.GetBase() );        
     };
 
     auto on_delete_extra_zone = [=](const TreeZone &extra_zone)
 	{
-        DeleteExtraZone( extra_zone );
+        DeleteExtraZone( extra_zone.GetBase() );
     };
     
     plan.domain_extension->SetOnExtraXLinkFunctions( on_insert_extra_zone, 
@@ -60,7 +60,7 @@ void XTreeDatabase::InitialBuild()
 }
 
 
-void XTreeDatabase::Delete(const TreeZone &zone)
+void XTreeDatabase::Delete(XLink base)
 {
     INDENT("d");
 
@@ -70,11 +70,11 @@ void XTreeDatabase::Delete(const TreeZone &zone)
     plan.indexes->PrepareDelete( actions );
     plan.link_table->PrepareDelete( actions );
     plan.node_table->PrepareDelete( actions );
-    db_walker.Walk( &actions, zone, DBWalk::UNKNOWN );   
+    db_walker.Walk( &actions, base, DBWalk::UNKNOWN );   
 }
 
 
-void XTreeDatabase::Insert(const TreeZone &zone)
+void XTreeDatabase::Insert(XLink base)
 {
     INDENT("i");
 
@@ -84,11 +84,11 @@ void XTreeDatabase::Insert(const TreeZone &zone)
     plan.link_table->PrepareInsert( actions );
     plan.node_table->PrepareInsert( actions );
     plan.domain_extension->PrepareInsert( actions );
-    db_walker.Walk( &actions, zone, DBWalk::UNKNOWN );
+    db_walker.Walk( &actions, base, DBWalk::UNKNOWN );
 }
 
 
-void XTreeDatabase::InsertExtraZone(const TreeZone &extra_zone)
+void XTreeDatabase::InsertExtraZone(XLink extra_base)
 {
     INDENT("e");
     
@@ -98,11 +98,11 @@ void XTreeDatabase::InsertExtraZone(const TreeZone &extra_zone)
 	plan.link_table->PrepareInsert( actions );
 	plan.node_table->PrepareInsert( actions );
 	plan.domain_extension->PrepareInsertExtra( actions );
-	db_walker.Walk( &actions, extra_zone, DBWalk::ROOT );
+	db_walker.Walk( &actions, extra_base, DBWalk::ROOT );
 }
 
 
-void XTreeDatabase::DeleteExtraZone(const TreeZone &extra_zone)
+void XTreeDatabase::DeleteExtraZone(XLink extra_base)
 {
     // Note not symmetrical with InsertExtra(): we
     // will be invoked with every xlink in the extra
@@ -114,15 +114,15 @@ void XTreeDatabase::DeleteExtraZone(const TreeZone &extra_zone)
     plan.link_table->PrepareDelete( actions );
     plan.node_table->PrepareDelete( actions );
     plan.domain_extension->PrepareDeleteExtra( actions );
-    db_walker.Walk( &actions, extra_zone, DBWalk::ROOT );   
+    db_walker.Walk( &actions, extra_base, DBWalk::ROOT );   
 }
 
 void XTreeDatabase::InitialWalk( const DBWalk::Actions *actions,
                                  XLink root_xlink )
 {
-    db_walker.Walk( actions, TreeZone( XLink::MMAX_Link ), DBWalk::ROOT );
-    db_walker.Walk( actions, TreeZone( XLink::OffEndXLink ), DBWalk::ROOT );
-    db_walker.Walk( actions, TreeZone( root_xlink ), DBWalk::ROOT );
+    db_walker.Walk( actions, XLink::MMAX_Link, DBWalk::ROOT );
+    db_walker.Walk( actions, XLink::OffEndXLink, DBWalk::ROOT );
+    db_walker.Walk( actions, root_xlink, DBWalk::ROOT );
 }                                 
 
 

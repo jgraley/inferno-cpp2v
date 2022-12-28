@@ -64,8 +64,8 @@ void PushTreeZoneCommand::Execute( const ExecKit &kit ) const
 
 // ------------------------- DeleteCommand --------------------------
 
-DeleteCommand::DeleteCommand( const TreeZone &target_ ) :
-	target( target_ )
+DeleteCommand::DeleteCommand( XLink target_base_xlink_ ) :
+	target_base_xlink( target_base_xlink_ )
 {
 }
 
@@ -73,32 +73,29 @@ DeleteCommand::DeleteCommand( const TreeZone &target_ ) :
 void DeleteCommand::Execute( const ExecKit &kit ) const
 {
     // Update database 
-    kit.x_tree_db->Delete( target );    
+    kit.x_tree_db->Delete( target_base_xlink );    
 
     // Patch the tree
-    target.GetBase().ClearXPtr();
+    target_base_xlink.ClearXPtr();
 }	
 
 // ------------------------- InsertCommand --------------------------
 
-InsertCommand::InsertCommand( const TreeZone &target_ ) :
-	target( target_ )
+InsertCommand::InsertCommand( XLink target_base_xlink_ ) :
+	target_base_xlink( target_base_xlink_ )
 {
 }
 
 
 void InsertCommand::Execute( const ExecKit &kit ) const
 {
-	// Get base of target zone
-    XLink target_base_xlink = target.GetBase();    
     ASSERT( !target_base_xlink.GetChildX() );
     
     // Patch the tree
     target_base_xlink.SetXPtr( kit.free_zone_stack->top().GetBase() );
     
     // Update database 
-    TreeZone new_tree_zone( target_base_xlink, kit.free_zone_stack->top() );
-    kit.x_tree_db->Insert( new_tree_zone );      
+    kit.x_tree_db->Insert( target_base_xlink );      
 
     kit.free_zone_stack->pop();
 }

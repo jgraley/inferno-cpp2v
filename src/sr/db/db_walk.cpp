@@ -3,10 +3,10 @@
 using namespace SR;    
 
 void DBWalk::Walk( const Actions *actions,
-                   const TreeZone &zone,
+                   XLink base_xlink,
                    ContainmentContext base_context )
 {
-    WalkKit kit { actions, &zone };
+    WalkKit kit { actions, base_xlink };
 	VisitBase( kit, base_context );  
 }
 
@@ -14,7 +14,7 @@ void DBWalk::Walk( const Actions *actions,
 void DBWalk::VisitBase( const WalkKit &kit,                         
                         ContainmentContext context )
 {
-    XLink base_xlink = kit.zone->GetBase();
+    XLink base_xlink = kit.base_xlink;
     VisitLink( kit, 
              { TreePtr<Node>(), 
                -1,
@@ -120,13 +120,7 @@ void DBWalk::VisitCollection( const WalkKit &kit,
 void DBWalk::VisitLink( const WalkKit &kit, 
                         const WalkInfo &walk_info )
 {
-    INDENT(".");
-    
-    // This will also prevent recursion into xlink
-    list<XLink> terms = kit.zone->GetTerminii();
-    if( find( terms.begin(), terms.end(), walk_info.xlink ) != terms.end() )
-        return; // Terminate into existing links/nodes
-            
+    INDENT(".");            
     TRACE("Visiting link ")(walk_info.xlink)("\n");    
             
     WindInActions( kit, walk_info );        
