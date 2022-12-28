@@ -71,12 +71,6 @@ public:
                                             PatternLink me_plink, 
                                             XLink key_xlink );
     TreePtr<Node> CloneNode( bool force_dirty ) const;
-    TreePtr<Node> DuplicateNode( TreePtr<Node> pattern,
-                                 bool force_dirty ) const;
-    TreePtr<Node> DuplicateSubtree( XLink source_xlink,
-                                    XLink source_terminus_xlink = XLink(),
-                                    TreePtr<Node> dest_terminus = TreePtr<Node>(),
-                                    int *terminus_hit_count = nullptr ) const;
     virtual string GetTrace() const;
 
 protected:                                  

@@ -20,11 +20,6 @@ public:
     static TreePtr<Node> DuplicateNode( const DirtyGrassUpdateInterface *dirty_grass,
                                         TreePtr<Node> pattern,
                                         bool force_dirty );
-    static TreePtr<Node> DuplicateSubtree( const DirtyGrassUpdateInterface *dirty_grass,
-                                           XLink source_xlink,
-                                           XLink source_terminus_xlink,
-                                           TreePtr<Node> dest_terminus,
-                                           int *terminus_hit_count = nullptr );
 
     static TreePtr<Node> DuplicateSubtree( const DirtyGrassUpdateInterface *dirty_grass,
                                            XLink source_xlink );

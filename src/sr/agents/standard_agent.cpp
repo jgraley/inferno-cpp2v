@@ -583,7 +583,7 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( const ReplaceKit &kit,
     if( under_node->IsSubcategory(*GetPatternPtr()) ) 
         dest = AgentCommon::CloneNode( true );
     else
-        dest = AgentCommon::DuplicateNode( under_node, true );
+        dest = Duplicate::DuplicateNode( my_scr_engine, under_node, true );
     ASSERT( dest->IsFinal() )("About to build non-final ")(*dest)("\n"); 
 
     // Loop over the child elements of me (=over) and dest, limited to elements
@@ -682,7 +682,7 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( const ReplaceKit &kit,
 	        for( const TreePtrInterface &under_elt : *under_container )
 	        {
 		        ASSERT( under_elt ); // present simplified scheme disallows nullptr
-		        TreePtr<Node> new_elt = DuplicateSubtree( XLink(under_node, &under_elt) );
+		        TreePtr<Node> new_elt = Duplicate::DuplicateSubtree( my_scr_engine, XLink(under_node, &under_elt) );
 		        if( ContainerInterface *new_sub_container = dynamic_cast<ContainerInterface *>(new_elt.get()) )
 		        {
 			        TRACE("Walking SubContainer length %d\n", new_sub_container->size() );
@@ -701,7 +701,7 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( const ReplaceKit &kit,
         {
             TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
             ASSERT( *under_singular );
-            *dest_singular = DuplicateSubtree( XLink(under_node, under_singular) );
+            *dest_singular = Duplicate::DuplicateSubtree( my_scr_engine, XLink(under_node, under_singular) );
             ASSERT( *dest_singular );
             ASSERT( (**dest_singular).IsFinal() );            
         }

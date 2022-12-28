@@ -1,6 +1,7 @@
 #include "star_agent.hpp"
 #include "../subcontainers.hpp" 
 #include "../search_replace.hpp" 
+#include "../scr_engine.hpp" 
 #include "link.hpp"
 #include "sym/symbol_operators.hpp"
 #include "sym/boolean_operators.hpp"
@@ -95,7 +96,7 @@ TreePtr<Node> StarAgent::BuildReplaceImpl( const ReplaceKit &kit,
     for( const TreePtrInterface &key_elt : *key_container )
     {
         TRACE("Building ")(key_elt)("\n");
-        TreePtr<Node> dest_elt = DuplicateSubtree( XLink(key_node, &key_elt) );
+        TreePtr<Node> dest_elt = Duplicate::DuplicateSubtree( my_scr_engine, XLink(key_node, &key_elt) );
         dest_container->insert( dest_elt );
     }
     

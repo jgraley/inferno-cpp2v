@@ -612,22 +612,6 @@ TreePtr<Node> AgentCommon::CloneNode( bool force_dirty ) const
 }
 
 
-TreePtr<Node> AgentCommon::DuplicateNode( TreePtr<Node> source,
-                                          bool force_dirty ) const
-{
-    return Duplicate::DuplicateNode( my_scr_engine, source, force_dirty );
-}
-
-
-TreePtr<Node> AgentCommon::DuplicateSubtree( XLink source_xlink,
-                                             XLink source_terminus_xlink,
-                                             TreePtr<Node> dest_terminus,
-                                             int *terminus_hit_count ) const
-{
-    return Duplicate::DuplicateSubtree( my_scr_engine, source_xlink, source_terminus_xlink, dest_terminus, terminus_hit_count );
-}                                             
-
-
 string AgentCommon::GetTrace() const
 {
     return Traceable::GetName() + GetSerialString();

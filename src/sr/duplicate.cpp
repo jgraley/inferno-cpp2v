@@ -26,26 +26,6 @@ TreePtr<Node> Duplicate::DuplicateNode( const DirtyGrassUpdateInterface *dirty_g
     return dest;    
 }                                                     
 
-                                             
-TreePtr<Node> Duplicate::DuplicateSubtree( const DirtyGrassUpdateInterface *dirty_grass,
-                                           XLink source_xlink,
-                                           XLink source_terminus_xlink,
-                                           TreePtr<Node> dest_terminus,
-                                           int *terminus_hit_count )
-{
-    if( source_terminus_xlink )
-        ASSERTS( dest_terminus );
-    map<XLink, TreePtr<Node>> terminii;
-    if( source_terminus_xlink )
-        terminii[source_terminus_xlink] = dest_terminus;
-    TreePtr<Node> r = DuplicateSubtree( dirty_grass, source_xlink, terminii );
-    if( terminus_hit_count )
-        for( auto p : terminii )
-            if( !p.second ) // these are switched to NULL on hitting terminus
-                (*terminus_hit_count)++;
-    return r;
-}
-
 
 TreePtr<Node> Duplicate::DuplicateSubtree( const DirtyGrassUpdateInterface *dirty_grass,
                                            XLink source_xlink )

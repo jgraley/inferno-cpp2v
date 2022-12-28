@@ -1,6 +1,7 @@
 #include "embedded_scr_agent.hpp"
 #include "../search_replace.hpp" 
 #include "../scr_engine.hpp"
+#include "../duplicate.hpp"
 #include "link.hpp"
 #include "db/tree_update.hpp"
 
