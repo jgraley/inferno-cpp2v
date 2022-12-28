@@ -41,11 +41,11 @@ public:
 class PushFreeZoneCommand : public Command
 {
 public:
-    PushFreeZoneCommand( const FreeZone &new_zone );
+    PushFreeZoneCommand( const FreeZone &zone );
 	void Execute( const ExecKit &kit ) const final;	
 
 private:
-	FreeZone new_zone;
+	FreeZone zone;
 };
 
 // ------------------------- PushTreeZoneCommand --------------------------
@@ -53,11 +53,11 @@ private:
 class PushTreeZoneCommand : public Command
 {
 public:
-    PushTreeZoneCommand( const TreeZone &new_zone );
+    PushTreeZoneCommand( const TreeZone &zone );
 	void Execute( const ExecKit &kit ) const final;	
 
 private:
-	TreeZone new_zone;
+	TreeZone zone;
 };
 
 // ------------------------- DeleteCommand --------------------------

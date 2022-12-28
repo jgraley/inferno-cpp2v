@@ -123,7 +123,8 @@ void DBWalk::VisitLink( const WalkKit &kit,
     INDENT(".");
     
     // This will also prevent recursion into xlink
-    if( kit.zone->GetTerminii().count( walk_info.xlink ) )
+    list<XLink> terms = kit.zone->GetTerminii();
+    if( find( terms.begin(), terms.end(), walk_info.xlink ) != terms.end() )
         return; // Terminate into existing links/nodes
             
     TRACE("Visiting link ")(walk_info.xlink)("\n");    

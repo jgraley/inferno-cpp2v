@@ -21,9 +21,17 @@ public:
     class TerminusMismatch : public Mismatch {};
 
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;                
+
+#ifndef DEPTH_COMMAND
     TreePtr<Node> BuildReplaceImpl( const ReplaceKit &kit, 
                                     PatternLink me_plink, 
                                     XLink key_xlink ) final;
+#else
+    CommandPtr BuildCommandImpl( const ReplaceKit &kit, 
+                                 PatternLink me_plink, 
+                                 XLink key_xlink ) final;
+#endif
+
     virtual void PatternQueryRestrictions( shared_ptr<PatternQuery> pq ) const {};
     virtual Block GetGraphBlockInfo() const;
 

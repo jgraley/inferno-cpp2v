@@ -27,7 +27,7 @@ shared_ptr<PatternQuery> DepthAgent::GetPatternQuery() const
     return pq;
 }
 
-
+#ifndef DEPTH_COMMAND
 TreePtr<Node> DepthAgent::BuildReplaceImpl( const ReplaceKit &kit, 
                                             PatternLink me_plink, 
                                             XLink key_xlink ) 
@@ -47,6 +47,23 @@ TreePtr<Node> DepthAgent::BuildReplaceImpl( const ReplaceKit &kit,
     return t;
 }
 
+#else
+CommandPtr DepthAgent::BuildCommandImpl( const ReplaceKit &kit, 
+                                         PatternLink me_plink, 
+                                         XLink key_xlink ) 
+{
+    INDENT("#");
+    XLink terminus_key_xlink = my_scr_engine->GetReplaceKey( PatternLink(this, &terminus) );
+    ASSERT(terminus_key_xlink);// this could mean replace is being attempted on a DepthAgent in an abnormal context
+         
+    PatternLink terminus_plink(this, &terminus);
+    CommandPtr terminus_command = terminus_plink.GetChildAgent()->BuildCommand(kit, terminus_plink);
+    // Leaves new_terminus_subtree on the stack
+
+    TreeZone new_zone( key_xlink, {terminus_key_xlink} );
+	return make_unique<PushTreeZoneCommand>( new_zone );   
+}
+#endif
 
 Graphable::Block DepthAgent::GetGraphBlockInfo() const
 {

@@ -18,7 +18,7 @@ namespace SR
 class FreeZone : public Traceable
 { 
 public:
-    explicit FreeZone( TreePtr<Node> base );
+    explicit FreeZone( TreePtr<Node> base, list<XLink> terminii = {} );
       
     TreePtr<Node> GetBase() const;
     
@@ -26,7 +26,7 @@ public:
     
 private:
     TreePtr<Node> base;
-    set<XLink> terminii;
+    list<XLink> terminii;
 };
 
 // ------------------------- TreeZone --------------------------
@@ -38,26 +38,21 @@ private:
 class TreeZone : public Traceable
 { 
 public:
-    static TreeZone CreateFromExclusions( XLink base, const unordered_set<XLink> &exclusions );
-
-    explicit TreeZone( XLink base );
+    explicit TreeZone( XLink base, list<XLink> terminii = {} );
     TreeZone( XLink base, const FreeZone &free_zone );
       
     XLink GetBase() const;
-    set<XLink> GetTerminii() const;
+    list<XLink> GetTerminii() const;
     bool IsEmpty() const;
     
     string GetTrace() const;
 
 private:
-    void CreateFromExclusionsWalker( XLink base, const unordered_set<XLink> &exclusions );
-
     XLink base;    
-    set<XLink> terminii;
+    list<XLink> terminii;
 };
  
  
-    
 }
 
 #endif

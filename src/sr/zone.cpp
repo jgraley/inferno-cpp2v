@@ -6,8 +6,9 @@ using namespace SR;
 
 // ------------------------- FreeZone --------------------------
 
-FreeZone::FreeZone( TreePtr<Node> base_ ) :
-    base( base_ )
+FreeZone::FreeZone( TreePtr<Node> base_, list<XLink> terminii_ ) :
+    base( base_ ),
+    terminii( terminii_ )
 {
     ASSERT( base ); // FreeZone is not nullable
 }
@@ -39,16 +40,9 @@ string FreeZone::GetTrace() const
 
 // ------------------------- TreeZone --------------------------
 
-TreeZone TreeZone::CreateFromExclusions( XLink base_xlink, const unordered_set<XLink> &exclusions )
-{
-    TreeZone zone( base_xlink );
-    zone.CreateFromExclusionsWalker( base_xlink, exclusions );
-    return zone;
-}
-
-
-TreeZone::TreeZone( XLink base_ ) :
-    base( base_ )
+TreeZone::TreeZone( XLink base_, list<XLink> terminii_ ) :
+    base( base_ ),
+    terminii( terminii_ )
 {
     ASSERT( base ); // TreeZone is not nullable
     ASSERT( base.GetChildX() ); // Cannot be empty
@@ -72,7 +66,7 @@ XLink TreeZone::GetBase() const
 }
 
 
-set<XLink> TreeZone::GetTerminii() const
+list<XLink> TreeZone::GetTerminii() const
 {
     return terminii;
 }
@@ -84,26 +78,6 @@ bool TreeZone::IsEmpty() const
     return terminii.size()==1 && OnlyElementOf(terminii)==base;
 }
 
-
-void TreeZone::CreateFromExclusionsWalker( XLink xlink, const unordered_set<XLink> &exclusions )
-{
-    if( exclusions.count(xlink) > 0 )
-    {
-        terminii.insert( xlink ); // Exclusive terminus!
-        // Don't look past this new terminus
-        return;
-    }
-
-    // Recurse through chidren of node
-    TreePtr<Node> node = xlink.GetChildX();
-    FlattenNode flat( node );
-    for(const TreePtrInterface &child_node : flat )
-    {
-        SR::XLink child_xlink( node, &child_node );
-        CreateFromExclusionsWalker( child_xlink, exclusions );
-    }
-}
-    
 
 string TreeZone::GetTrace() const
 {

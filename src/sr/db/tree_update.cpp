@@ -7,28 +7,30 @@ using namespace SR;
 
 // ------------------------- PushFreeZoneCommand --------------------------
 
-PushFreeZoneCommand::PushFreeZoneCommand( const FreeZone &new_zone_ ) :
-	new_zone( new_zone_ )
+PushFreeZoneCommand::PushFreeZoneCommand( const FreeZone &zone_ ) :
+	zone( zone_ )
 {
 }
 
 
 void PushFreeZoneCommand::Execute( const ExecKit &kit ) const
 {
-	kit.free_zone_stack->push( new_zone );      
+	kit.free_zone_stack->push( zone );      
 }
 
 // ------------------------- PushTreeZoneCommand --------------------------
 
-PushTreeZoneCommand::PushTreeZoneCommand( const TreeZone &new_zone_ ) :
-	new_zone( new_zone_ )
+PushTreeZoneCommand::PushTreeZoneCommand( const TreeZone &zone_ ) :
+	zone( zone_ )
 {
 }
 
 
 void PushTreeZoneCommand::Execute( const ExecKit &kit ) const
 {
-    TreePtr<Node> new_base_x = Duplicate::DuplicateSubtree(kit.green_grass, new_zone.GetBase());   
+    //zone<XLink> terms = zone.GetTerminii();
+    
+    TreePtr<Node> new_base_x = Duplicate::DuplicateSubtree(kit.green_grass, zone.GetBase());   
     FreeZone new_free_zone( new_base_x );
     kit.free_zone_stack->push( new_free_zone );      
 }
