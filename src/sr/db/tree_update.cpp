@@ -17,8 +17,16 @@ void PushFreeZoneCommand::Execute( const ExecKit &kit ) const
 {
     list<XLink> terms = zone.GetTerminii();
     ASSERT( kit.free_zone_stack->size() >= terms.size() ); // There must be enough items on the stack
-    ASSERT( terms.size() == 0 ); // TODO 
-	kit.free_zone_stack->push( zone );      
+        
+    while( !terms.empty() )
+    {
+        // Do terms backward to compensate for stack reversal        
+        terms.back().SetXPtr( kit.free_zone_stack->top().GetBase() );
+        terms.pop_back();
+        kit.free_zone_stack->pop();
+    }
+    
+    kit.free_zone_stack->push( zone );      
 }
 
 // ------------------------- PushTreeZoneCommand --------------------------

@@ -625,14 +625,22 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( const ReplaceKit &kit,
                 if( ContainerInterface *new_sub_con = dynamic_cast<ContainerInterface *>(new_elt.get()) )
                 {
                     TRACE("Walking SubContainer length %d\n", new_sub_con->size() );
-                    for( const TreePtrInterface &new_sub_elt : *new_sub_con )
-                        dest_con->insert( new_sub_elt );
+		            for( const TreePtrInterface &new_sub_elt : *new_sub_con )
+                    {
+                        // Insert NULL to "reserve" the space 
+			            ContainerInterface::iterator it = dest_con->insert( TreePtr<Node>() ); 
+                        
+                        it.Overwrite(&new_sub_elt);
+                    }
                 }
                 else 
                 {
                     ASSERT( new_elt->IsFinal() )("Got intermediate node ")(*new_elt);
                     TRACE("inserting ")(*new_elt)(" directly\n");
-                    dest_con->insert( new_elt );
+                    // Insert NULL to "reserve" the space 
+                    ContainerInterface::iterator it = dest_con->insert( TreePtr<Node>() ); 
+                    
+                    it.Overwrite(&new_elt);
                 }
 	        }
 	        present_in_overlay.insert( dest_items[i] );
@@ -682,25 +690,33 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( const ReplaceKit &kit,
             // Note: we get here when a wildcard is coupled that does not have the container
             // because it is an intermediate node. Eg Scope as a wildcard matching Module does 
             // not have "bases".
-            ContainerInterface *dest_container = dynamic_cast<ContainerInterface *>(dest_items[i]);
-            dest_container->clear();
+            ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_items[i]);
+            dest_con->clear();
 
             TRACE("Copying container size %d from key\n", under_container->size() );
 	        for( const TreePtrInterface &under_elt : *under_container )
 	        {
 		        ASSERT( under_elt ); // present simplified scheme disallows nullptr
 		        TreePtr<Node> new_elt = Duplicate::DuplicateSubtree( my_scr_engine, XLink(under_node, &under_elt) );
-		        if( ContainerInterface *new_sub_container = dynamic_cast<ContainerInterface *>(new_elt.get()) )
+		        if( ContainerInterface *new_sub_con = dynamic_cast<ContainerInterface *>(new_elt.get()) )
 		        {
-			        TRACE("Walking SubContainer length %d\n", new_sub_container->size() );
-		            for( const TreePtrInterface &new_sub_elt : *new_sub_container )
-			            dest_container->insert( new_sub_elt );
-           		}
+			        TRACE("Walking SubContainer length %d\n", new_sub_con->size() );
+		            for( const TreePtrInterface &new_sub_elt : *new_sub_con )
+                    {
+                        // Insert NULL to "reserve" the space 
+                        ContainerInterface::iterator it = dest_con->insert( TreePtr<Node>() ); 
+                        
+                        it.Overwrite(&new_elt);
+                    }
+                }
 		        else
 		        {
                     ASSERT( new_elt->IsFinal() );
 			        TRACE("inserting ")(*new_elt)(" directly\n");
-			        dest_container->insert( new_elt );
+                    // Insert NULL to "reserve" the space 
+                    ContainerInterface::iterator it = dest_con->insert( TreePtr<Node>() ); 
+                    
+                    it.Overwrite(&new_elt);
 		        }
 	        }
         }            
@@ -767,12 +783,20 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal( const ReplaceKit &kit,
 		        {
 			        TRACE("Walking SubContainer length %d\n", new_sub_con->size() );
 		            for( const TreePtrInterface &new_sub_elt : *new_sub_con )
-			            dest_con->insert( new_sub_elt );  
+                    {
+                        // Insert NULL to "reserve" the space 
+			            ContainerInterface::iterator it = dest_con->insert( TreePtr<Node>() ); 
+                        
+                        it.Overwrite(&new_sub_elt);
+                    }
            		}
 		        else
 		        {
 			        TRACE("inserting ")(*new_elt)(" directly\n");
-			        dest_con->insert( new_elt );
+                    // Insert NULL to "reserve" the space 
+                    ContainerInterface::iterator it = dest_con->insert( TreePtr<Node>() ); 
+                    
+                    it.Overwrite(&new_elt);
 		        }
 	        }
         }            

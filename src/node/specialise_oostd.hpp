@@ -25,8 +25,8 @@ public:
     virtual const iterator &end()   { return my_end; }
     virtual void erase( const ContainerInterface::iterator_interface & ) { ASSERTFAIL("Cannot modify ContainerFromIterator<>"); }
     virtual void clear()                                     { ASSERTFAIL("Cannot modify ContainerFromIterator<>"); }    
-    virtual void insert( const TreePtrInterface & )          { ASSERTFAIL("Cannot modify ContainerFromIterator<>"); }
-    virtual void insert_front( const TreePtrInterface & )    { ASSERTFAIL("Cannot modify ContainerFromIterator<>"); }
+    virtual const iterator &insert( const TreePtrInterface & )          { ASSERTFAIL("Cannot modify ContainerFromIterator<>"); }
+    virtual const iterator &insert_front( const TreePtrInterface & )    { ASSERTFAIL("Cannot modify ContainerFromIterator<>"); }
 private:
     iterator my_begin, my_end;
 };

@@ -110,7 +110,7 @@ void SCREngine::Plan::CategoriseAgents( const set<PatternLink> &enclosing_plinks
         if( enclosing_agents.count( plink.GetChildAgent() ) == 0 ) // exclude by agent
             my_plinks.insert( plink );
 
-    // Need the replace plinks in the same order that BuildReplace() walks the tree
+    // Need the replace plinks in the same order that BuildCommand() walks the tree
     for( PatternLink plink : visible_replace_plinks_postorder )
         if( enclosing_plinks.count(plink) == 0 ) // exclude by plink
         {
