@@ -20,6 +20,12 @@ TreePtr<Node> FreeZone::GetBase() const
 }
 
 
+list<XLink> FreeZone::GetTerminii() const
+{
+    return terminii;
+}
+
+
 string FreeZone::GetTrace() const
 {
     list<string> elts;

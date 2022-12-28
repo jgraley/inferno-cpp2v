@@ -15,6 +15,9 @@ PushFreeZoneCommand::PushFreeZoneCommand( const FreeZone &zone_ ) :
 
 void PushFreeZoneCommand::Execute( const ExecKit &kit ) const
 {
+    list<XLink> terms = zone.GetTerminii();
+    ASSERT( kit.free_zone_stack->size() >= terms.size() ); // There must be enough items on the stack
+    ASSERT( terms.size() == 0 ); // TODO 
 	kit.free_zone_stack->push( zone );      
 }
 
@@ -28,9 +31,23 @@ PushTreeZoneCommand::PushTreeZoneCommand( const TreeZone &zone_ ) :
 
 void PushTreeZoneCommand::Execute( const ExecKit &kit ) const
 {
-    //zone<XLink> terms = zone.GetTerminii();
+    list<XLink> terms = zone.GetTerminii();
+    ASSERT( kit.free_zone_stack->size() >= terms.size() ); // There must be enough items on the stack
+    ASSERT( terms.size() <= 1 ); // DuplicateSubtree() can only do 0 or 1 terminus (TODO).
     
-    TreePtr<Node> new_base_x = Duplicate::DuplicateSubtree(kit.green_grass, zone.GetBase());   
+    TreePtr<Node> new_base_x;
+    if( terms.size() == 1 ) // one terminus
+    {
+        new_base_x = Duplicate::DuplicateSubtree(kit.green_grass, 
+                                                 zone.GetBase(), 
+                                                 terms.front(), 
+                                                 kit.free_zone_stack->top().GetBase());   
+        kit.free_zone_stack->pop();
+    }
+    else // size 0 ie no terminii
+    {
+        new_base_x = Duplicate::DuplicateSubtree(kit.green_grass, zone.GetBase());   
+    }
     FreeZone new_free_zone( new_base_x );
     kit.free_zone_stack->push( new_free_zone );      
 }

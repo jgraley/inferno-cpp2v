@@ -8,6 +8,9 @@
 #include "helpers/transformation.hpp"
 #include "special_agent.hpp"
 
+#define DEPTH_COMMAND
+
+
 namespace SR
 { 
 

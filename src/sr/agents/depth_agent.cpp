@@ -8,6 +8,7 @@
 #include "sym/predicate_operators.hpp"
 #include "sym/symbol_operators.hpp"
 #include "sym/lazy_eval.hpp"
+#include "db/tree_update.hpp"
 
 using namespace SR;
 using namespace SYM;
@@ -48,20 +49,23 @@ TreePtr<Node> DepthAgent::BuildReplaceImpl( const ReplaceKit &kit,
 }
 
 #else
-CommandPtr DepthAgent::BuildCommandImpl( const ReplaceKit &kit, 
-                                         PatternLink me_plink, 
-                                         XLink key_xlink ) 
+Agent::CommandPtr DepthAgent::BuildCommandImpl( const ReplaceKit &kit, 
+                                                PatternLink me_plink, 
+                                                XLink key_xlink ) 
 {
     INDENT("#");
+    auto commands = make_unique<CommandSequence>();
+    
     XLink terminus_key_xlink = my_scr_engine->GetReplaceKey( PatternLink(this, &terminus) );
     ASSERT(terminus_key_xlink);// this could mean replace is being attempted on a DepthAgent in an abnormal context
-         
     PatternLink terminus_plink(this, &terminus);
-    CommandPtr terminus_command = terminus_plink.GetChildAgent()->BuildCommand(kit, terminus_plink);
+    commands->Add( terminus_plink.GetChildAgent()->BuildCommand(kit, terminus_plink) );
     // Leaves new_terminus_subtree on the stack
 
     TreeZone new_zone( key_xlink, {terminus_key_xlink} );
-	return make_unique<PushTreeZoneCommand>( new_zone );   
+	commands->Add( make_unique<PushTreeZoneCommand>( new_zone ) );   
+    
+    return commands;
 }
 #endif
 

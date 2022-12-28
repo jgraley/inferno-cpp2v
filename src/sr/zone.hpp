@@ -21,7 +21,8 @@ public:
     explicit FreeZone( TreePtr<Node> base, list<XLink> terminii = {} );
       
     TreePtr<Node> GetBase() const;
-    
+    list<XLink> GetTerminii() const;
+
     string GetTrace() const;
     
 private:
