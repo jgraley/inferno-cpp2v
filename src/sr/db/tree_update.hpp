@@ -30,6 +30,7 @@ public:
         const SCREngine *scr_engine;
 
         // Forth-like stack of generated nodes.
+        // Rule: we push in natural order, and correct the reversal when reading
         stack<FreeZone> *free_zone_stack;        
     };
 
@@ -96,6 +97,20 @@ public:
 
 private:
 	RequiresSubordinateSCREngine * const embedded_agent;
+};
+
+// ------------------------- PushSubContainerCommand --------------------------
+
+// Create a free subcontainer given a tree subcontainer by duplicating 
+// the element subtrees. TODO generalise to a PushFreeZoneCommand with terminii?
+class PushSubContainerCommand : public Command
+{
+public:
+    PushSubContainerCommand( XLink base );
+	void Execute( const ExecKit &kit ) const final;	
+
+private:
+	XLink base;
 };
 
 // ------------------------- CommandSequence --------------------------

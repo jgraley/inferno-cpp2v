@@ -6,6 +6,7 @@
 #include "sym/symbol_operators.hpp"
 #include "sym/boolean_operators.hpp"
 #include "sym/result.hpp"
+#include "db/tree_update.hpp"
 
 using namespace SR;
 using namespace SYM;
@@ -69,6 +70,7 @@ void StarAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
 }
 
 
+#ifndef COMMAND
 TreePtr<Node> StarAgent::BuildReplaceImpl( const ReplaceKit &kit, 
                                            PatternLink me_plink, 
                                            XLink key_xlink ) 
@@ -102,6 +104,36 @@ TreePtr<Node> StarAgent::BuildReplaceImpl( const ReplaceKit &kit,
     
     return dest;
 }
+
+#else
+
+Agent::CommandPtr StarAgent::BuildCommandImpl( const ReplaceKit &kit, 
+                                               PatternLink me_plink, 
+                                               XLink key_xlink ) 
+{
+    INDENT("*");
+    ASSERT( key_xlink );
+    TreePtr<Node> key_node = key_xlink.GetChildX();
+    
+    // Key needs to implement ContainerInterface
+    ContainerInterface *key_container = dynamic_cast<ContainerInterface *>(key_node.get());
+    ASSERT( key_container )("Star node ")(*this)(" keyed to ")(*key_node)(" which should implement ContainerInterface");  
+
+    auto commands = make_unique<CommandSequence>();
+    
+    for( const TreePtrInterface &key_elt : *key_container )
+    {
+        TreeZone new_zone( XLink(key_node, &key_elt) );
+        commands->Add( make_unique<PushTreeZoneCommand>( new_zone ) );
+        // Leaves a tree zone on the stack for every element in the subcontainer
+    }
+    
+    // Makes a free zone for the subcontainer
+	commands->Add( make_unique<PushSubContainerCommand>( key_xlink ) );   
+    
+    return commands;
+}
+#endif
 
 
 Graphable::Block StarAgent::GetGraphBlockInfo() const

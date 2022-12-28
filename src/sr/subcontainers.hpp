@@ -43,10 +43,11 @@ public:
     SubContainerRange( TreePtr<Node> parent_x, const iterator &b, const iterator &e );
     virtual const iterator &begin();
     virtual const iterator &end();
-    virtual void erase( const iterator_interface & )    { ASSERTFAIL("Cannot modify SubContainerRange"); }
-    virtual void clear()                                { ASSERTFAIL("Cannot modify SubContainerRange"); }    
-    virtual void insert( const TreePtrInterface & )     { ASSERTFAIL("Cannot modify SubContainerRange"); }
-    virtual void push_back( const TreePtrInterface &gx ){ ASSERTFAIL("Cannot modify SubContainerRange"); }  
+    virtual void erase( const iterator_interface & )      { ASSERTFAIL("Cannot modify SubContainerRange"); }
+    virtual void clear()                                  { ASSERTFAIL("Cannot modify SubContainerRange"); }    
+    virtual void insert( const TreePtrInterface & )       { ASSERTFAIL("Cannot modify SubContainerRange"); }
+    virtual void insert_front( const TreePtrInterface & ) { ASSERTFAIL("Cannot modify SubContainerRange"); }
+    virtual void push_back( const TreePtrInterface &gx )  { ASSERTFAIL("Cannot modify SubContainerRange"); }  
     virtual string GetContentsTrace(); 
     virtual void AssertMatchingContents( TreePtr<Node> other );    
     

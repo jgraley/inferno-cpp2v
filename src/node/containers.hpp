@@ -82,6 +82,7 @@ public:
 
 	// These direct calls to the container are designed to support co-variance.
     virtual void insert( const TreePtrInterface &gx ) = 0;
+    virtual void insert_front( const TreePtrInterface &gx ) = 0;
 	virtual const iterator &begin() = 0;
     virtual const iterator &end() = 0;
     virtual const TreePtrInterface &front();
@@ -269,6 +270,11 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
         // Like multiset, we do allow more than one copy of the same element
 		push_back( gx );
 	}
+	virtual void insert_front( const TreePtrInterface &gx ) // Simulating the SimpleAssociatedContaner API 
+	{
+        // Like multiset, we do allow more than one copy of the same element
+		push_front( gx );
+	}
     using ContainerCommon<Impl>::erase;
     virtual int erase( const TreePtrInterface &gx ) // Simulating the SimpleAssociatedContaner API 
     {
@@ -302,6 +308,17 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
 	{
 		value_type sx(gx);
 		Impl::push_back( sx );
+	}
+	virtual void push_front( const TreePtrInterface &gx )
+	{
+		value_type sx( value_type::InferredDynamicCast(gx) );
+		Impl::push_front( sx );
+	}
+	template<typename OTHER>
+	inline void push_front( const OTHER &gx )
+	{
+		value_type sx(gx);
+		Impl::push_front( sx );
 	}
 
 	// Covariant style only works with refs and pointers, so force begin/end to return refs safely
@@ -415,8 +432,19 @@ struct SimpleAssociativeContainer : virtual ContainerCommon< ASSOCIATIVE_IMPL< T
 		value_type sx( value_type::InferredDynamicCast(gx) );
 		Impl::insert( sx );
 	}
+	virtual void insert_front( const TreePtrInterface &gx )
+	{
+		value_type sx( value_type::InferredDynamicCast(gx) );
+		Impl::insert( sx );
+	}
 	template<typename OTHER>
 	inline void insert( const OTHER &gx )
+	{
+		value_type sx(gx);
+		Impl::insert( sx );
+	}
+	template<typename OTHER>
+	inline void insert_front( const OTHER &gx )
 	{
 		value_type sx(gx);
 		Impl::insert( sx );

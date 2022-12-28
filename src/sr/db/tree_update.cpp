@@ -37,8 +37,9 @@ void PushTreeZoneCommand::Execute( const ExecKit &kit ) const
     map<XLink, TreePtr<Node>> terminii;
     while( !terms.empty() )
     {
-        terminii[terms.front()] = kit.free_zone_stack->top().GetBase();
-        terms.pop_front();
+        // Do terms backward to compensate for stack reversal
+        terminii[terms.back()] = kit.free_zone_stack->top().GetBase();
+        terms.pop_back();
         kit.free_zone_stack->pop();
     }
 
@@ -107,6 +108,47 @@ void MarkBaseForEmbeddedCommand::Execute( const ExecKit &kit ) const
     kit.scr_engine->MarkBaseForEmbedded( embedded_agent, kit.free_zone_stack->top().GetBase() );   
 }
     
+// ------------------------- PushSubContainerCommand --------------------------
+
+PushSubContainerCommand::PushSubContainerCommand( XLink base_ ) :
+    base( base_ )
+{
+}
+
+
+void PushSubContainerCommand::Execute( const ExecKit &kit ) const
+{
+    ASSERT( base );
+    TreePtr<Node> base_node = base.GetChildX();
+    
+    // Key needs to implement ContainerInterface
+    ContainerInterface *base_container = dynamic_cast<ContainerInterface *>(base_node.get());
+    ASSERT( base_container )("Star node ")(*this)(" keyed to ")(*base_node)(" which should implement ContainerInterface");  
+    
+    // Make a subcontainer of the corresponding type
+    TreePtr<SubContainer> dest;
+    if( dynamic_cast<SequenceInterface *>(base_container) )
+        dest = MakeTreeNode<SubSequence>();
+    else if( dynamic_cast<CollectionInterface *>(base_container) )
+        dest = MakeTreeNode<SubCollection>();
+    else
+        ASSERT(0)("Please add new kind of container");
+    
+    // Copy elements into dest subcontainer, duplicating all the subtrees
+    TRACE("Walking container length %d\n", base_container->size() );
+    ContainerInterface *dest_container = dynamic_cast<ContainerInterface *>(dest.get());
+    for( const TreePtrInterface &key_elt : *base_container )
+    {
+        TRACE("Building ")(key_elt)("\n");
+        TreePtr<Node> dest_elt = kit.free_zone_stack->top().GetBase();
+        kit.free_zone_stack->pop();
+        dest_container->insert_front( dest_elt ); // undo stack reversal
+    }
+    
+    FreeZone dest_free_zone( dest );
+    kit.free_zone_stack->push( dest_free_zone );      
+}
+
 // ------------------------- CommandSequence --------------------------
 
 void CommandSequence::Execute( const ExecKit &kit ) const
