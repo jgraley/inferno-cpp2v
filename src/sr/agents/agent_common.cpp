@@ -546,16 +546,6 @@ Agent::CommandPtr AgentCommon::BuildCommand( const ReplaceKit &kit,
 }
 
 
-Agent::CommandPtr AgentCommon::BuildCommandImpl( const ReplaceKit &kit, 
-                                                 PatternLink me_plink, 
-                                                 XLink key_xlink )
-{
-    TreePtr<Node> new_base_x = BuildReplaceImpl(kit, me_plink, key_xlink);
-    FreeZone new_zone( new_base_x );
-	return make_unique<PushFreeZoneCommand>( new_zone );
-}
-
-
 TreePtr<Node> AgentCommon::BuildReplace( const ReplaceKit &kit, 
                                          PatternLink me_plink )
 {

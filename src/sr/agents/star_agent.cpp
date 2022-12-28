@@ -70,43 +70,6 @@ void StarAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
 }
 
 
-#ifndef COMMAND
-TreePtr<Node> StarAgent::BuildReplaceImpl( const ReplaceKit &kit, 
-                                           PatternLink me_plink, 
-                                           XLink key_xlink ) 
-{
-    INDENT("*");
-    ASSERT( key_xlink );
-    TreePtr<Node> key_node = key_xlink.GetChildX();
-    
-    // Key needs to implement ContainerInterface
-    ContainerInterface *key_container = dynamic_cast<ContainerInterface *>(key_node.get());
-    ASSERT( key_container )("Star node ")(*this)(" keyed to ")(*key_node)(" which should implement ContainerInterface");  
-    
-    // Make a subcontainer of the corresponding type
-    TreePtr<SubContainer> dest;
-    if( dynamic_cast<SequenceInterface *>(key_container) )
-        dest = MakeTreeNode<SubSequence>();
-    else if( dynamic_cast<CollectionInterface *>(key_container) )
-        dest = MakeTreeNode<SubCollection>();
-    else
-        ASSERT(0)("Please add new kind of container");
-    
-    // Copy elements into dest subcontainer, duplicating all the subtrees
-    TRACE("Walking container length %d\n", key_container->size() );
-    ContainerInterface *dest_container = dynamic_cast<ContainerInterface *>(dest.get());
-    for( const TreePtrInterface &key_elt : *key_container )
-    {
-        TRACE("Building ")(key_elt)("\n");
-        TreePtr<Node> dest_elt = Duplicate::DuplicateSubtree( my_scr_engine, XLink(key_node, &key_elt) );
-        dest_container->insert( dest_elt );
-    }
-    
-    return dest;
-}
-
-#else
-
 Agent::CommandPtr StarAgent::BuildCommandImpl( const ReplaceKit &kit, 
                                                PatternLink me_plink, 
                                                XLink key_xlink ) 
@@ -133,7 +96,6 @@ Agent::CommandPtr StarAgent::BuildCommandImpl( const ReplaceKit &kit,
     
     return commands;
 }
-#endif
 
 
 Graphable::Block StarAgent::GetGraphBlockInfo() const

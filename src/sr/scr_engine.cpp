@@ -140,7 +140,7 @@ void SCREngine::Plan::WalkVisible( set<PatternLink> &visible,
 {
     visible.insert( plink );    
     
-    // Gee, I sure hope recovers children in the same order as BuildReplaceImpl()    
+    // Gee, I sure hope recovers children in the same order as BuildCommandImpl()    
     list<PatternLink> visible_child_plinks = plink.GetChildAgent()->GetVisibleChildren(path); 
     
     for( PatternLink visible_child_plink : visible_child_plinks )

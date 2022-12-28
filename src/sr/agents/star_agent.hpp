@@ -10,8 +10,6 @@
 #include "../sym/predicate_operators.hpp"
 #include "special_agent.hpp"
 
-#define COMMAND
-
 namespace SR
 { 
 
@@ -39,15 +37,9 @@ public:
                                            const SolutionMap *hypothesis_links,
                                            const XTreeDatabase *x_tree_db ) const;                                                                                          
 
-#ifndef COMMAND
-    TreePtr<Node> BuildReplaceImpl( const ReplaceKit &kit, 
-                                    PatternLink me_plink, 
-                                    XLink key_xlink ) final;
-#else
     CommandPtr BuildCommandImpl( const ReplaceKit &kit, 
                                  PatternLink me_plink, 
                                  XLink key_xlink ) final;
-#endif
 
     virtual Block GetGraphBlockInfo() const;
     
