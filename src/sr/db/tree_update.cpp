@@ -38,10 +38,14 @@ void PushTreeZoneCommand::Execute( const ExecKit &kit ) const
     TreePtr<Node> new_base_x;
     if( terms.size() == 1 ) // one terminus
     {
+        int c = 0;
         new_base_x = Duplicate::DuplicateSubtree(kit.green_grass, 
                                                  zone.GetBase(), 
                                                  terms.front(), 
-                                                 kit.free_zone_stack->top().GetBase());   
+                                                 kit.free_zone_stack->top().GetBase(), 
+                                                 &c);   
+    
+        ASSERT( c==1 )(terms.front()); 
         kit.free_zone_stack->pop();
     }
     else // size 0 ie no terminii

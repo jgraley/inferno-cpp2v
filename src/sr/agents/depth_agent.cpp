@@ -28,27 +28,7 @@ shared_ptr<PatternQuery> DepthAgent::GetPatternQuery() const
     return pq;
 }
 
-#ifndef DEPTH_COMMAND
-TreePtr<Node> DepthAgent::BuildReplaceImpl( const ReplaceKit &kit, 
-                                            PatternLink me_plink, 
-                                            XLink key_xlink ) 
-{
-    INDENT("#");
-    XLink terminus_key_xlink = my_scr_engine->GetReplaceKey( PatternLink(this, &terminus) );
-    ASSERT(terminus_key_xlink);// this could mean replace is being attempted on a DepthAgent in an abnormal context
-    TRACE( "Stuff node: Duplicating at terminus first: keynode=")
-         (*(terminus))(", term=")(terminus_key_xlink)("\n");
-         
-    PatternLink terminus_plink(this, &terminus);
-    TreePtr<Node> new_terminus_subtree = terminus_plink.GetChildAgent()->BuildReplace(kit, terminus_plink);
-    TRACE( "Stuff node: Substituting stuff");
-    int c = 0;
-    TreePtr<Node> t = DuplicateSubtree(key_xlink, terminus_key_xlink, new_terminus_subtree, &c);   
-    ASSERT( c==1 )(terminus_key_xlink); 
-    return t;
-}
 
-#else
 Agent::CommandPtr DepthAgent::BuildCommandImpl( const ReplaceKit &kit, 
                                                 PatternLink me_plink, 
                                                 XLink key_xlink ) 
@@ -67,7 +47,7 @@ Agent::CommandPtr DepthAgent::BuildCommandImpl( const ReplaceKit &kit,
     
     return commands;
 }
-#endif
+
 
 Graphable::Block DepthAgent::GetGraphBlockInfo() const
 {
