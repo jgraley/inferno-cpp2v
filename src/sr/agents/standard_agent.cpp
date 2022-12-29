@@ -696,24 +696,11 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( const ReplaceKit &kit,
 	        {
 		        ASSERT( under_elt ); // present simplified scheme disallows nullptr
 		        TreePtr<Node> new_elt = Duplicate::DuplicateSubtree( my_scr_engine, XLink(under_node, &under_elt) );
-		        if( ContainerInterface *new_sub_con = dynamic_cast<ContainerInterface *>(new_elt.get()) )
-		        {
-			        TRACE("Walking SubContainer length %d\n", new_sub_con->size() );
-		            for( const TreePtrInterface &new_sub_elt : *new_sub_con )
-                    {
-                        auto dest_upd = make_shared<ContainerUpdater>( dest_con ); 
-                        
-                        dest_upd->Insert((TreePtr<Node>)new_sub_elt);
-                    }
-                }
-		        else
-		        {
-                    ASSERT( new_elt->IsFinal() );
-			        TRACE("inserting ")(*new_elt)(" directly\n");
-                    auto dest_upd = make_shared<ContainerUpdater>( dest_con ); 
+                ASSERT( new_elt->IsFinal() );
+                TRACE("inserting ")(*new_elt)(" directly\n");
+                auto dest_upd = make_shared<ContainerUpdater>( dest_con ); 
                     
-                    dest_upd->Insert((TreePtr<Node>)new_elt);
-		        }
+                dest_upd->Insert((TreePtr<Node>)new_elt);            
 	        }
         }            
         else if( TreePtrInterface *under_singular = dynamic_cast<TreePtrInterface *>(under_items[i]) )
