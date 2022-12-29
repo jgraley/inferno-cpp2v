@@ -775,28 +775,29 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal( const ReplaceKit &kit,
         {
             ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_items[i]);
             dest_con->clear();
-
+            auto commands = make_unique<CommandSequence>();
+            dest_terminii.clear();
+            ASSERT( free_zone_stack.empty() );
+            
             TRACE("Copying container size %d\n", my_con->size() );
 	        for( const TreePtrInterface &my_elt : *my_con )
 	        {
-                auto commands = make_unique<CommandSequence>();
-
 		        ASSERT( my_elt )("Some element of member %d (", i)(*my_con)(") of ")(*this)(" was nullptr\n");
 		        TRACE("Got ")(*my_elt)("\n");
                 dest_terminii.push_back( make_shared<ContainerUpdater>( dest_con ) );
                 PatternLink my_elt_plink( this, &my_elt );
                 commands->Add( my_elt_plink.GetChildAgent()->BuildCommand(kit, my_elt_plink) );
-                
-                FreeZone dest_zone( dest, dest_terminii );
-                dest_terminii.clear();
-                commands->Add( make_unique<PopulateFreeZoneCommand>(dest_zone) );
-                ASSERT( free_zone_stack.empty() );
-                commands->Execute( exec_kit );     
-                ASSERT( free_zone_stack.size() == 1);
-                FreeZone check_zone = free_zone_stack.top();
-                free_zone_stack.pop();
-                ASSERT( check_zone.GetBase() == dest );
-	        }           
+            }
+            
+            FreeZone dest_zone( dest, dest_terminii );
+            dest_terminii.clear();
+            commands->Add( make_unique<PopulateFreeZoneCommand>(dest_zone) );
+            ASSERT( free_zone_stack.empty() );
+            commands->Execute( exec_kit );     
+            ASSERT( free_zone_stack.size() == 1 );
+            FreeZone check_zone = free_zone_stack.top();
+            free_zone_stack.pop();
+            ASSERT( check_zone.GetBase() == dest );                       
         }            
         else if( TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[i]) )
         {

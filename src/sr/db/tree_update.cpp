@@ -19,12 +19,18 @@ void PopulateFreeZoneCommand::Execute( const ExecKit &kit ) const
     const list<shared_ptr<Updater>> &terminii = zone.GetTerminii();
     ASSERT( kit.free_zone_stack->size() >= terminii.size() ); // There must be enough items on the stack
     
-    // Do terms backward to compensate for stack reversal   
-    for( auto terminus_it = terminii.rbegin(); terminus_it != terminii.rend(); ++terminus_it )
+    // Get a forward list of subtrees to overwrite
+    list<FreeZone> subtrees;
+    for( auto terminus_upd : terminii )
     {
-        Updater *terminus_upd = terminus_it->get();
-        TreePtr<Node> elt = kit.free_zone_stack->top().GetBase(); // see #703
+        subtrees.push_front( kit.free_zone_stack->top() );
         kit.free_zone_stack->pop();
+    }
+            
+    for( auto terminus_upd : terminii )
+    {
+        TreePtr<Node> elt = subtrees.front().GetBase(); // see #703
+        subtrees.pop_front();
 
         // Direct support for sub containers
         if( ContainerInterface *sub_con = dynamic_cast<ContainerInterface *>(elt.get()) )
