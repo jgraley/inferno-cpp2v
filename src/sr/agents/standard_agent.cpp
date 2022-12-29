@@ -628,7 +628,7 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( const ReplaceKit &kit,
 		            for( const TreePtrInterface &new_sub_elt : *new_sub_con )
                     {
                         // Insert NULL to "reserve" the space, and get an overwriter
-                        auto dest_ow = make_unique<ContainerInterface::iterator>( dest_con->insert( TreePtr<Node>() ) ); 
+                        auto dest_ow = make_shared<ContainerInterface::iterator>( dest_con->insert( TreePtr<Node>() ) ); 
                         
                         dest_ow->Overwrite(&new_sub_elt);
                     }
@@ -638,7 +638,7 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( const ReplaceKit &kit,
                     ASSERT( new_elt->IsFinal() )("Got intermediate node ")(*new_elt);
                     TRACE("inserting ")(*new_elt)(" directly\n");
                     // Insert NULL to "reserve" the space, and get an overwriter
-                    auto dest_ow = make_unique<ContainerInterface::iterator>( dest_con->insert( TreePtr<Node>() ) ); 
+                    auto dest_ow = make_shared<ContainerInterface::iterator>( dest_con->insert( TreePtr<Node>() ) ); 
                     
                     dest_ow->Overwrite(&new_elt);
                 }
@@ -654,7 +654,7 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( const ReplaceKit &kit,
             if( *my_singular )
             {         
                 present_in_overlay.insert( dest_items[i] );
-                auto dest_ow = make_unique<SingularOverwriter>( dest_singular );
+                auto dest_ow = make_shared<SingularOverwriter>( dest_singular );
                 
                 PatternLink my_singular_plink( this, my_singular );                    
                 TreePtr<Node> new_dest = my_singular_plink.GetChildAgent()->BuildReplace(kit, my_singular_plink);
@@ -704,7 +704,7 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( const ReplaceKit &kit,
 		            for( const TreePtrInterface &new_sub_elt : *new_sub_con )
                     {
                         // Insert NULL to "reserve" the space, and get an overwriter
-                        auto dest_ow = make_unique<ContainerInterface::iterator>( dest_con->insert( TreePtr<Node>() ) ); 
+                        auto dest_ow = make_shared<ContainerInterface::iterator>( dest_con->insert( TreePtr<Node>() ) ); 
                         
                         dest_ow->Overwrite(&new_sub_elt);
                     }
@@ -714,7 +714,7 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( const ReplaceKit &kit,
                     ASSERT( new_elt->IsFinal() );
 			        TRACE("inserting ")(*new_elt)(" directly\n");
                     // Insert NULL to "reserve" the space, and get an overwriter
-                    auto dest_ow = make_unique<ContainerInterface::iterator>( dest_con->insert( TreePtr<Node>() ) ); 
+                    auto dest_ow = make_shared<ContainerInterface::iterator>( dest_con->insert( TreePtr<Node>() ) ); 
                     
                     dest_ow->Overwrite(&new_elt);
 		        }
@@ -723,7 +723,7 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( const ReplaceKit &kit,
         else if( TreePtrInterface *under_singular = dynamic_cast<TreePtrInterface *>(under_items[i]) )
         {
             TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
-            auto dest_ow = make_unique<SingularOverwriter>( dest_singular );
+            auto dest_ow = make_shared<SingularOverwriter>( dest_singular );
 
             ASSERT( *under_singular );
             auto new_dest = Duplicate::DuplicateSubtree( my_scr_engine, XLink(under_node, under_singular) );
@@ -758,6 +758,9 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal( const ReplaceKit &kit,
     vector< Itemiser::Element * > my_items = Itemise();
     vector< Itemiser::Element * > dest_items = dest->Itemise(); 
 
+    auto commands = make_unique<CommandSequence>();
+    list<shared_ptr<Overwriter>> dest_terminii;
+
     TRACE("Copying %d members pattern=", dest_items.size())(*this)(" dest=")(*dest)("\n");
     // Loop over all the members of pattern (which can be a subset of dest)
     // and for non-nullptr members, duplicate them by recursing and write the
@@ -779,23 +782,36 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal( const ReplaceKit &kit,
 		        ASSERT( my_elt )("Some element of member %d (", i)(*my_con)(") of ")(*this)(" was nullptr\n");
 		        TRACE("Got ")(*my_elt)("\n");
                 PatternLink my_elt_plink( this, &my_elt );
-				TreePtr<Node> new_elt = my_elt_plink.GetChildAgent()->BuildReplace(kit, my_elt_plink);
+
+                CommandPtr cmd = my_elt_plink.GetChildAgent()->BuildCommand(kit, my_elt_plink);
+
+                stack<FreeZone> free_zone_stack;
+                Command::ExecKit exec_kit {nullptr, my_scr_engine, my_scr_engine, &free_zone_stack};
+                cmd->Execute( exec_kit );     
+                ASSERT( free_zone_stack.size() == 1);
+                TreePtr<Node> new_elt = free_zone_stack.top().GetBase();
+
+                commands->Add( move(cmd) );
 		        if( ContainerInterface *new_sub_con = dynamic_cast<ContainerInterface *>(new_elt.get()) )
 		        {
+                    commands->Add( make_unique<UnpackSubContainerCommand>() );
+
 			        TRACE("Walking SubContainer length %d\n", new_sub_con->size() );
 		            for( const TreePtrInterface &new_sub_elt : *new_sub_con )
                     {
                         // Insert NULL to "reserve" the space, and get an overwriter
-                        auto dest_ow = make_unique<ContainerInterface::iterator>( dest_con->insert( TreePtr<Node>() ) ); 
+                        auto dest_ow = make_shared<ContainerInterface::iterator>( dest_con->insert( TreePtr<Node>() ) ); 
+                        dest_terminii.push_back( dest_ow );
                         
-                        dest_ow->Overwrite(&new_sub_elt);
+                        dest_ow->Overwrite(&new_sub_elt);                                                
                     }
            		}
 		        else
 		        {
 			        TRACE("inserting ")(*new_elt)(" directly\n");
                     // Insert NULL to "reserve" the space, and get an overwriter
-                    auto dest_ow = make_unique<ContainerInterface::iterator>( dest_con->insert( TreePtr<Node>() ) ); 
+                    auto dest_ow = make_shared<ContainerInterface::iterator>( dest_con->insert( TreePtr<Node>() ) ); 
+                    dest_terminii.push_back( dest_ow );
                     
                     dest_ow->Overwrite(&new_elt);
 		        }
@@ -806,17 +822,30 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal( const ReplaceKit &kit,
             TRACE("Copying single element\n");
             TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
             ASSERT( *my_singular )("Member %d (", i)(*my_singular)(") of ")(*this)(" was nullptr when not overlaying\n");
-            auto dest_ow = make_unique<SingularOverwriter>( dest_singular );
+            auto dest_ow = make_shared<SingularOverwriter>( dest_singular );
+            dest_terminii.push_back( dest_ow );
             
             PatternLink my_singular_plink( this, my_singular );                    
-            TreePtr<Node> new_dest = my_singular_plink.GetChildAgent()->BuildReplace(kit, my_singular_plink);
+            CommandPtr cmd = my_singular_plink.GetChildAgent()->BuildCommand(kit, my_singular_plink);
+
+            stack<FreeZone> free_zone_stack;
+            Command::ExecKit exec_kit {nullptr, my_scr_engine, my_scr_engine, &free_zone_stack};
+            cmd->Execute( exec_kit );     
+            ASSERT( free_zone_stack.size() == 1);
+            TreePtr<Node> new_dest = free_zone_stack.top().GetBase();
             dest_ow->Overwrite( &new_dest );
+
+            commands->Add( move(cmd) );
         }
         else
         {
             ASSERTFAIL("got something from itemise that isn't a sequence or a shared pointer");
         }
     }
+    
+    FreeZone dest_zone( dest, dest_terminii );
+    commands->Add( make_unique<PopulateFreeZoneCommand>(dest_zone) );
+    
     return dest;
 }
 

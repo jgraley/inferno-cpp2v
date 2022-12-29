@@ -119,6 +119,16 @@ private:
 	XLink base;
 };
 
+// ------------------------- UnpackSubContainerCommand --------------------------
+
+// Pop a subcontainer off the stack and push all its elements individually.
+class UnpackSubContainerCommand : public Command
+{
+public:
+    UnpackSubContainerCommand();
+	void Execute( const ExecKit &kit ) const final;	
+};
+
 // ------------------------- CommandSequence --------------------------
 
 class CommandSequence : public Command

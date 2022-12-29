@@ -18,10 +18,10 @@ void PopulateFreeZoneCommand::Execute( const ExecKit &kit ) const
 {
     const list<shared_ptr<Overwriter>> &terminii = zone.GetTerminii();
     ASSERT( kit.free_zone_stack->size() >= terminii.size() ); // There must be enough items on the stack
-        
+    
+    // Do terms backward to compensate for stack reversal   
     for( auto terminus_it = terminii.rbegin(); terminus_it != terminii.rend(); ++terminus_it )
     {
-        // Do terms backward to compensate for stack reversal     
         Overwriter &terminus_overwritable = **terminus_it;
         TreePtr<Node> new_subtree = kit.free_zone_stack->top().GetBase(); // see #703
         terminus_overwritable.Overwrite( &new_subtree );
@@ -43,23 +43,23 @@ DuplicateAndPopulateTreeZoneCommand::DuplicateAndPopulateTreeZoneCommand( const 
 
 void DuplicateAndPopulateTreeZoneCommand::Execute( const ExecKit &kit ) const
 {
-    list<XLink> terms = zone.GetTerminii();
-    ASSERT( kit.free_zone_stack->size() >= terms.size() ); // There must be enough items on the stack
+    list<XLink> terminii = zone.GetTerminii();
+    ASSERT( kit.free_zone_stack->size() >= terminii.size() ); // There must be enough items on the stack
     
-    map<XLink, TreePtr<Node>> terminii;
-    while( !terms.empty() )
-    {
-        // Do terms backward to compensate for stack reversal
-        terminii[terms.back()] = kit.free_zone_stack->top().GetBase();
-        terms.pop_back();
+    map<XLink, TreePtr<Node>> duplicator_terminus_map;
+    
+    // Do terms backward to compensate for stack reversal
+    for( auto terminus_it = terminii.rbegin(); terminus_it != terminii.rend(); ++terminus_it )
+    {        
+        duplicator_terminus_map[*terminus_it] = kit.free_zone_stack->top().GetBase();
         kit.free_zone_stack->pop();
     }
 
     TreePtr<Node> new_base_x = Duplicate::DuplicateSubtree( kit.green_grass, 
                                                             zone.GetBase(), 
-                                                            terminii );   
+                                                            duplicator_terminus_map );   
     
-    for( auto p : terminii )
+    for( auto p : duplicator_terminus_map )
         ASSERT( !p.second ); // these are switched to NULL on reaching each terminus
 
     FreeZone new_free_zone( new_base_x );
@@ -121,9 +121,6 @@ void MarkBaseForEmbeddedCommand::Execute( const ExecKit &kit ) const
     
 // ------------------------- CreateAndPopulateSubContainerCommand --------------------------
 
-// Create a free subcontainer given a tree subcontainer, and populate it
-// from the stack. Push the resulting subtree to the stack.
-// TODO generalise to a PopulateFreeZoneCommand?
 CreateAndPopulateSubContainerCommand::CreateAndPopulateSubContainerCommand( XLink base_ ) :
     base( base_ )
 {
@@ -161,6 +158,28 @@ void CreateAndPopulateSubContainerCommand::Execute( const ExecKit &kit ) const
     
     FreeZone dest_free_zone( dest );
     kit.free_zone_stack->push( dest_free_zone );      
+}
+
+// ------------------------- UnpackSubContainerCommand --------------------------
+
+UnpackSubContainerCommand::UnpackSubContainerCommand()
+{
+}
+
+
+void UnpackSubContainerCommand::Execute( const ExecKit &kit ) const
+{
+    TreePtr<Node> elt = kit.free_zone_stack->top().GetBase();
+    kit.free_zone_stack->pop();
+    
+    ContainerInterface *sub_con = dynamic_cast<ContainerInterface *>(elt.get());
+    ASSERT( sub_con ); // should be a subcontainer
+    
+    for( const TreePtrInterface &sub_elt : *sub_con )
+    {
+        FreeZone sub_zone( (TreePtr<Node>)sub_elt );
+        kit.free_zone_stack->push( sub_zone );                                                  
+    }
 }
 
 // ------------------------- CommandSequence --------------------------
