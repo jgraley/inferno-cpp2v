@@ -10,6 +10,38 @@
 namespace SR 
 {
 
+// ------------------------- Updater --------------------------    
+    
+class Updater
+{
+public:
+    virtual void Insert( TreePtr<Node> node ) const = 0;
+};    
+    
+// ------------------------- SingularUpdater --------------------------    
+    
+class SingularUpdater : public Updater
+{
+public:
+    explicit SingularUpdater( TreePtrInterface *tree_ptr );
+    void Insert( TreePtr<Node> node ) const final;
+    
+private:
+    TreePtrInterface *tree_ptr;
+};    
+    
+// ------------------------- ContainerUpdater --------------------------    
+    
+class ContainerUpdater : public Updater
+{
+public:
+    explicit ContainerUpdater( ContainerInterface *container );
+    void Insert( TreePtr<Node> node ) const final;
+    
+private:
+    ContainerInterface *container;
+};    
+    
 // ------------------------- FreeZone --------------------------
 
 // FreeZone is for zones that are not anywhere in the current
@@ -18,16 +50,16 @@ namespace SR
 class FreeZone : public Traceable
 { 
 public:
-    explicit FreeZone( TreePtr<Node> base, list<shared_ptr<Overwriter>> terminii = {} );
+    explicit FreeZone( TreePtr<Node> base, list<shared_ptr<Updater>> terminii = {} );
       
     TreePtr<Node> GetBase() const;
-    const list<shared_ptr<Overwriter>> &GetTerminii() const;
+    const list<shared_ptr<Updater>> &GetTerminii() const;
 
     string GetTrace() const;
     
 private:
     TreePtr<Node> base;
-    list<shared_ptr<Overwriter>> terminii;
+    list<shared_ptr<Updater>> terminii;
 };
 
 // ------------------------- TreeZone --------------------------

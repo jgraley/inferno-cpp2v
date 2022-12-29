@@ -627,20 +627,18 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( const ReplaceKit &kit,
                     TRACE("Walking SubContainer length %d\n", new_sub_con->size() );
 		            for( const TreePtrInterface &new_sub_elt : *new_sub_con )
                     {
-                        // Insert NULL to "reserve" the space, and get an overwriter
-                        auto dest_ow = make_shared<ContainerInterface::iterator>( dest_con->insert( TreePtr<Node>() ) ); 
+                        auto dest_upd = make_shared<ContainerUpdater>( dest_con ); 
                         
-                        dest_ow->Overwrite(&new_sub_elt);
+                        dest_upd->Insert((TreePtr<Node>)new_sub_elt);
                     }
                 }
                 else 
                 {
                     ASSERT( new_elt->IsFinal() )("Got intermediate node ")(*new_elt);
                     TRACE("inserting ")(*new_elt)(" directly\n");
-                    // Insert NULL to "reserve" the space, and get an overwriter
-                    auto dest_ow = make_shared<ContainerInterface::iterator>( dest_con->insert( TreePtr<Node>() ) ); 
+                    auto dest_upd = make_shared<ContainerUpdater>( dest_con ); 
                     
-                    dest_ow->Overwrite(&new_elt);
+                    dest_upd->Insert((TreePtr<Node>)new_elt);
                 }
 	        }
 	        present_in_overlay.insert( dest_items[i] );
@@ -654,11 +652,11 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( const ReplaceKit &kit,
             if( *my_singular )
             {         
                 present_in_overlay.insert( dest_items[i] );
-                auto dest_ow = make_shared<SingularOverwriter>( dest_singular );
+                auto dest_upd = make_shared<SingularUpdater>( dest_singular );
                 
                 PatternLink my_singular_plink( this, my_singular );                    
                 TreePtr<Node> new_dest = my_singular_plink.GetChildAgent()->BuildReplace(kit, my_singular_plink);
-                dest_ow->Overwrite( &new_dest );
+                dest_upd->Insert((TreePtr<Node>)new_dest);
             }
         }
         else
@@ -703,31 +701,29 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( const ReplaceKit &kit,
 			        TRACE("Walking SubContainer length %d\n", new_sub_con->size() );
 		            for( const TreePtrInterface &new_sub_elt : *new_sub_con )
                     {
-                        // Insert NULL to "reserve" the space, and get an overwriter
-                        auto dest_ow = make_shared<ContainerInterface::iterator>( dest_con->insert( TreePtr<Node>() ) ); 
+                        auto dest_upd = make_shared<ContainerUpdater>( dest_con ); 
                         
-                        dest_ow->Overwrite(&new_sub_elt);
+                        dest_upd->Insert((TreePtr<Node>)new_sub_elt);
                     }
                 }
 		        else
 		        {
                     ASSERT( new_elt->IsFinal() );
 			        TRACE("inserting ")(*new_elt)(" directly\n");
-                    // Insert NULL to "reserve" the space, and get an overwriter
-                    auto dest_ow = make_shared<ContainerInterface::iterator>( dest_con->insert( TreePtr<Node>() ) ); 
+                    auto dest_upd = make_shared<ContainerUpdater>( dest_con ); 
                     
-                    dest_ow->Overwrite(&new_elt);
+                    dest_upd->Insert((TreePtr<Node>)new_elt);
 		        }
 	        }
         }            
         else if( TreePtrInterface *under_singular = dynamic_cast<TreePtrInterface *>(under_items[i]) )
         {
             TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
-            auto dest_ow = make_shared<SingularOverwriter>( dest_singular );
+            auto dest_upd = make_shared<SingularUpdater>( dest_singular );
 
             ASSERT( *under_singular );
             auto new_dest = Duplicate::DuplicateSubtree( my_scr_engine, XLink(under_node, under_singular) );
-            dest_ow->Overwrite( &new_dest );          
+            dest_upd->Insert((TreePtr<Node>)new_dest);         
         }
         else
         {
@@ -758,7 +754,7 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal( const ReplaceKit &kit,
     vector< Itemiser::Element * > my_items = Itemise();
     vector< Itemiser::Element * > dest_items = dest->Itemise(); 
     
-    list<shared_ptr<Overwriter>> dest_terminii;
+    list<shared_ptr<Updater>> dest_terminii;
 
     TRACE("Copying %d members pattern=", dest_items.size())(*this)(" dest=")(*dest)("\n");
     // Loop over all the members of pattern (which can be a subset of dest)
@@ -797,21 +793,19 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal( const ReplaceKit &kit,
 			        TRACE("Walking SubContainer length %d\n", new_sub_con->size() );
 		            for( const TreePtrInterface &new_sub_elt : *new_sub_con )
                     {
-                        // Insert NULL to "reserve" the space, and get an overwriter
-                        auto dest_ow = make_shared<ContainerInterface::iterator>( dest_con->insert( TreePtr<Node>() ) ); 
-                        dest_terminii.push_back( dest_ow );
+                        auto dest_upd = make_shared<ContainerUpdater>( dest_con ); 
+                        dest_terminii.push_back( dest_upd );
                         
-                        dest_ow->Overwrite(&new_sub_elt);                                                
+                        dest_upd->Insert((TreePtr<Node>)new_sub_elt);
                     }
            		}
 		        else
 		        {
 			        TRACE("inserting ")(*new_elt)(" directly\n");
-                    // Insert NULL to "reserve" the space, and get an overwriter
-                    auto dest_ow = make_shared<ContainerInterface::iterator>( dest_con->insert( TreePtr<Node>() ) ); 
-                    dest_terminii.push_back( dest_ow );
+                    auto dest_upd = make_shared<ContainerUpdater>( dest_con ); 
+                    dest_terminii.push_back( dest_upd );
                     
-                    dest_ow->Overwrite(&new_elt);
+                    dest_upd->Insert((TreePtr<Node>)new_elt);
 		        }
 	        }
         }            
@@ -820,8 +814,8 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal( const ReplaceKit &kit,
             TRACE("Copying single element\n");
             TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
             ASSERT( *my_singular )("Member %d (", i)(*my_singular)(") of ")(*this)(" was nullptr when not overlaying\n");
-            auto dest_ow = make_shared<SingularOverwriter>( dest_singular );
-            dest_terminii.push_back( dest_ow );
+            auto dest_upd = make_shared<SingularUpdater>( dest_singular );
+            dest_terminii.push_back( dest_upd );
             
             PatternLink my_singular_plink( this, my_singular );                    
             CommandPtr cmd = my_singular_plink.GetChildAgent()->BuildCommand(kit, my_singular_plink);
@@ -831,7 +825,7 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal( const ReplaceKit &kit,
             cmd->Execute( exec_kit );     
             ASSERT( free_zone_stack.size() == 1);
             TreePtr<Node> new_dest = free_zone_stack.top().GetBase();
-            dest_ow->Overwrite( &new_dest );
+            dest_upd->Insert((TreePtr<Node>)new_dest);
         }
         else
         {

@@ -16,15 +16,15 @@ PopulateFreeZoneCommand::PopulateFreeZoneCommand( const FreeZone &zone_ ) :
 
 void PopulateFreeZoneCommand::Execute( const ExecKit &kit ) const
 {
-    const list<shared_ptr<Overwriter>> &terminii = zone.GetTerminii();
+    const list<shared_ptr<Updater>> &terminii = zone.GetTerminii();
     ASSERT( kit.free_zone_stack->size() >= terminii.size() ); // There must be enough items on the stack
     
     // Do terms backward to compensate for stack reversal   
     for( auto terminus_it = terminii.rbegin(); terminus_it != terminii.rend(); ++terminus_it )
     {
-        Overwriter &terminus_overwritable = **terminus_it;
+        Updater &terminus_updater = **terminus_it;
         TreePtr<Node> new_subtree = kit.free_zone_stack->top().GetBase(); // see #703
-        terminus_overwritable.Overwrite( &new_subtree );
+        terminus_updater.Insert( new_subtree );
         kit.free_zone_stack->pop();
     }
     

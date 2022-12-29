@@ -20,42 +20,20 @@
 #define ASSOCIATIVE_IMPL multiset
 #define SEQUENCE_IMPL list
 
-//----------------------- Overwriter -------------------------
-
-class Overwriter
-{
-public:
-    virtual const TreePtrInterface &operator*() const = 0;
-	virtual const TreePtrInterface *operator->() const = 0;
-    virtual void Overwrite( const TreePtrInterface *v ) const = 0;
-};
-
-//----------------------- SingularOverwriter -------------------------
-
-class SingularOverwriter : public Overwriter
-{
-public:
-    SingularOverwriter( TreePtrInterface *tp );
-	const TreePtrInterface &operator*() const final;
-	const TreePtrInterface *operator->() const final;
-    void Overwrite( const TreePtrInterface *v ) const final;
-    
-private:
-    TreePtrInterface *tp;
-};
-
 //----------------------- ContainerInterface -------------------------
 
 class ContainerInterface : public virtual Traceable, public virtual Itemiser::Element
 {
 public:
 	// Abstract base class for the implementation-specific iterators in containers.
-	struct iterator_interface : public Traceable, Overwriter
+	struct iterator_interface : public Traceable
 	{
 		// TODO const iterator and const versions of begin(), end()
 		virtual unique_ptr<iterator_interface> Clone() const = 0; // Make another copy of the present iterator
 		virtual iterator_interface &operator++() = 0;
 		virtual iterator_interface &operator--();
+        virtual const TreePtrInterface &operator*() const = 0;
+        virtual const TreePtrInterface *operator->() const = 0;
 		virtual bool operator==( const iterator_interface &ib ) const = 0;
 		virtual void Overwrite( const TreePtrInterface *v ) const = 0;
 		virtual const bool IsOrdered() const = 0;

@@ -17,31 +17,6 @@
 
 using namespace std;
 
-//----------------------- SingularOverwriter -------------------------
-
-SingularOverwriter::SingularOverwriter( TreePtrInterface *tp_ ) :
-    tp( tp_ )
-{
-}    
-
-
-const TreePtrInterface &SingularOverwriter::operator*() const
-{
-    return *tp;
-}
-
-
-const TreePtrInterface *SingularOverwriter::operator->() const
-{
-    return tp;
-}
-
-
-void SingularOverwriter::Overwrite( const TreePtrInterface *v ) const
-{
-    *tp = *v;
-}
-
 //----------------------- ContainerInterface -------------------------
 
 ContainerInterface::iterator_interface &ContainerInterface::iterator_interface::operator--() 

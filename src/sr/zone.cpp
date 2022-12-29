@@ -4,9 +4,35 @@
 
 using namespace SR;
 
+// ------------------------- SingularUpdater --------------------------    
+    
+SingularUpdater::SingularUpdater( TreePtrInterface *tree_ptr_ ) :
+    tree_ptr( tree_ptr_ )
+{
+}
+
+
+void SingularUpdater::Insert( TreePtr<Node> node ) const
+{
+    *tree_ptr = node;
+}
+    
+// ------------------------- ContainerUpdater --------------------------    
+    
+ContainerUpdater::ContainerUpdater( ContainerInterface *container_ ) :
+    container( container_ )
+{
+}
+
+
+void ContainerUpdater::Insert( TreePtr<Node> node ) const
+{
+    (void)container->insert( node ); 
+}
+
 // ------------------------- FreeZone --------------------------
 
-FreeZone::FreeZone( TreePtr<Node> base_, list<shared_ptr<Overwriter>> terminii_ ) :
+FreeZone::FreeZone( TreePtr<Node> base_, list<shared_ptr<Updater>> terminii_ ) :
     base( base_ ),
     terminii( move(terminii_) )
 {
@@ -20,7 +46,7 @@ TreePtr<Node> FreeZone::GetBase() const
 }
 
 
-const list<shared_ptr<Overwriter>> &FreeZone::GetTerminii() const
+const list<shared_ptr<Updater>> &FreeZone::GetTerminii() const
 {
     return terminii;
 }
@@ -29,7 +55,7 @@ const list<shared_ptr<Overwriter>> &FreeZone::GetTerminii() const
 string FreeZone::GetTrace() const
 {
     list<string> elts;
-    for( const shared_ptr<Overwriter> &p : terminii )
+    for( const shared_ptr<Updater> &p : terminii )
         elts.push_back( "TODO" );
 
     string arrow;
