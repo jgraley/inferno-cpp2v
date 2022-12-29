@@ -654,16 +654,6 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( const ReplaceKit &kit,
     }
     
 
-    FreeZone dest_zone( dest, dest_terminii );
-    dest_terminii.clear();
-    commands->Add( make_unique<PopulateFreeZoneCommand>(dest_zone) );
-    ASSERT( free_zone_stack.empty() );
-    commands->Execute( exec_kit );     
-    ASSERT( free_zone_stack.size() == 1 );
-    FreeZone check_zone = free_zone_stack.top();
-    free_zone_stack.pop();
-    ASSERT( check_zone.GetBase() == dest );                       
-
 
     // Loop over all the elements of under_node and dest that do not appear in pattern or
     // appear in pattern but are nullptr TreePtr<>s. Duplicate from under_node into dest.
@@ -695,22 +685,19 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( const ReplaceKit &kit,
 	        for( const TreePtrInterface &under_elt : *under_container )
 	        {
 		        ASSERT( under_elt ); // present simplified scheme disallows nullptr
-		        TreePtr<Node> new_elt = Duplicate::DuplicateSubtree( my_scr_engine, XLink(under_node, &under_elt) );
-                ASSERT( new_elt->IsFinal() );
-                TRACE("inserting ")(*new_elt)(" directly\n");
-                auto dest_upd = make_shared<ContainerUpdater>( dest_con ); 
-                    
-                dest_upd->Insert((TreePtr<Node>)new_elt);            
-	        }
+                TreeZone under_zone( XLink(under_node, &under_elt) );
+                commands->Add( make_unique<DuplicateAndPopulateTreeZoneCommand>( under_zone ) );
+                dest_terminii.push_back( make_shared<ContainerUpdater>( dest_con ) );            
+ 	        }
         }            
         else if( TreePtrInterface *under_singular = dynamic_cast<TreePtrInterface *>(under_items[i]) )
         {
             TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
             auto dest_upd = make_shared<SingularUpdater>( dest_singular );
-
-            ASSERT( *under_singular );
-            auto new_dest = Duplicate::DuplicateSubtree( my_scr_engine, XLink(under_node, under_singular) );
-            dest_upd->Insert((TreePtr<Node>)new_dest);         
+            ASSERT( *under_singular );            
+            TreeZone under_zone( XLink(under_node, under_singular) );
+            commands->Add( make_unique<DuplicateAndPopulateTreeZoneCommand>( under_zone ) );
+            dest_terminii.push_back( make_shared<SingularUpdater>( dest_singular ) );            
         }
         else
         {
@@ -718,6 +705,16 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( const ReplaceKit &kit,
         }
     }
     
+    FreeZone dest_zone( dest, dest_terminii );
+    dest_terminii.clear();
+    commands->Add( make_unique<PopulateFreeZoneCommand>(dest_zone) );
+    ASSERT( free_zone_stack.empty() );
+    commands->Execute( exec_kit );     
+    ASSERT( free_zone_stack.size() == 1 );
+    FreeZone check_zone = free_zone_stack.top();
+    free_zone_stack.pop();
+    ASSERT( check_zone.GetBase() == dest );                       
+
     ASSERT( dest );
     return dest;
 }
