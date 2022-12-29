@@ -591,6 +591,14 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( const ReplaceKit &kit,
         dest = Duplicate::DuplicateNode( my_scr_engine, under_node, true );
     ASSERT( dest->IsFinal() )("About to build non-final ")(*dest)("\n"); 
 
+    // Stuff for creating commands
+    auto commands = make_unique<CommandSequence>();
+    list<shared_ptr<Updater>> dest_terminii;
+
+    // Stuff for executing commands
+    stack<FreeZone> free_zone_stack;
+    Command::ExecKit exec_kit {nullptr, my_scr_engine, my_scr_engine, &free_zone_stack};
+
     // Loop over the child elements of me (=over) and dest, limited to elements
     // present in me, which is a non-strict superclass of under_node and dest.
     // Overlay or overwrite pattern over a duplicate of dest. Keep track of 
@@ -618,26 +626,8 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( const ReplaceKit &kit,
 		        ASSERT( my_elt )("Some element of member %d (", i)(*my_con)(") of ")(*this)(" was nullptr\n");
 		        TRACE("Got ")(*my_elt)("\n");
                 PatternLink my_elt_plink( this, &my_elt );
-				TreePtr<Node> new_elt = my_elt_plink.GetChildAgent()->BuildReplace(kit, my_elt_plink);
-                ASSERT(new_elt); 
-                if( ContainerInterface *new_sub_con = dynamic_cast<ContainerInterface *>(new_elt.get()) )
-                {
-                    TRACE("Walking SubContainer length %d\n", new_sub_con->size() );
-		            for( const TreePtrInterface &new_sub_elt : *new_sub_con )
-                    {
-                        auto dest_upd = make_shared<ContainerUpdater>( dest_con ); 
-                        
-                        dest_upd->Insert((TreePtr<Node>)new_sub_elt);
-                    }
-                }
-                else 
-                {
-                    ASSERT( new_elt->IsFinal() )("Got intermediate node ")(*new_elt);
-                    TRACE("inserting ")(*new_elt)(" directly\n");
-                    auto dest_upd = make_shared<ContainerUpdater>( dest_con ); 
-                    
-                    dest_upd->Insert((TreePtr<Node>)new_elt);
-                }
+                commands->Add( my_elt_plink.GetChildAgent()->BuildCommand(kit, my_elt_plink) );
+                dest_terminii.push_back( make_shared<ContainerUpdater>( dest_con ) );
 	        }
 	        present_in_overlay.insert( dest_items[i] );
         }            
@@ -653,8 +643,8 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( const ReplaceKit &kit,
                 auto dest_upd = make_shared<SingularUpdater>( dest_singular );
                 
                 PatternLink my_singular_plink( this, my_singular );                    
-                TreePtr<Node> new_dest = my_singular_plink.GetChildAgent()->BuildReplace(kit, my_singular_plink);
-                dest_upd->Insert((TreePtr<Node>)new_dest);
+                commands->Add( my_singular_plink.GetChildAgent()->BuildCommand(kit, my_singular_plink) );
+                dest_terminii.push_back( make_shared<SingularUpdater>( dest_singular ) );            
             }
         }
         else
@@ -663,6 +653,18 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( const ReplaceKit &kit,
         }        
     }
     
+
+    FreeZone dest_zone( dest, dest_terminii );
+    dest_terminii.clear();
+    commands->Add( make_unique<PopulateFreeZoneCommand>(dest_zone) );
+    ASSERT( free_zone_stack.empty() );
+    commands->Execute( exec_kit );     
+    ASSERT( free_zone_stack.size() == 1 );
+    FreeZone check_zone = free_zone_stack.top();
+    free_zone_stack.pop();
+    ASSERT( check_zone.GetBase() == dest );                       
+
+
     // Loop over all the elements of under_node and dest that do not appear in pattern or
     // appear in pattern but are nullptr TreePtr<>s. Duplicate from under_node into dest.
     vector< Itemiser::Element * > under_items = under_node->Itemise();
