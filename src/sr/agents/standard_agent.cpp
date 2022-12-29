@@ -757,8 +757,7 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal( const ReplaceKit &kit,
     // be dynamic_castable to pattern's type.
     vector< Itemiser::Element * > my_items = Itemise();
     vector< Itemiser::Element * > dest_items = dest->Itemise(); 
-
-    auto commands = make_unique<CommandSequence>();
+    
     list<shared_ptr<Overwriter>> dest_terminii;
 
     TRACE("Copying %d members pattern=", dest_items.size())(*this)(" dest=")(*dest)("\n");
@@ -783,19 +782,31 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal( const ReplaceKit &kit,
 		        TRACE("Got ")(*my_elt)("\n");
                 PatternLink my_elt_plink( this, &my_elt );
 
-                CommandPtr cmd = my_elt_plink.GetChildAgent()->BuildCommand(kit, my_elt_plink);
-
                 stack<FreeZone> free_zone_stack;
                 Command::ExecKit exec_kit {nullptr, my_scr_engine, my_scr_engine, &free_zone_stack};
-                cmd->Execute( exec_kit );     
+
+                auto commands = make_unique<CommandSequence>();
+                CommandPtr build_cmd = my_elt_plink.GetChildAgent()->BuildCommand(kit, my_elt_plink);
+                
+                // We have to execute the build command first, in order to determine whether we
+                // have a subcontainer, and if so, how many elements it has.
+                build_cmd->Execute( exec_kit );     
                 ASSERT( free_zone_stack.size() == 1);
                 TreePtr<Node> new_elt = free_zone_stack.top().GetBase();
+                int nelts = 1;
+                if( ContainerInterface *new_sub_con = dynamic_cast<ContainerInterface *>(new_elt.get()) )
+                    nelts = new_sub_con->size();
+                free_zone_stack.pop();
+                
+                commands->Add( move(build_cmd) );
+                commands->Add( make_unique<UnpackSubContainerCommand>() );
 
-                commands->Add( move(cmd) );
+                commands->Execute( exec_kit );     
+                ASSERT( free_zone_stack.size() == nelts);
+                //TreePtr<Node> new_elt_popped = free_zone_stack.top().GetBase();
+
 		        if( ContainerInterface *new_sub_con = dynamic_cast<ContainerInterface *>(new_elt.get()) )
 		        {
-                    commands->Add( make_unique<UnpackSubContainerCommand>() );
-
 			        TRACE("Walking SubContainer length %d\n", new_sub_con->size() );
 		            for( const TreePtrInterface &new_sub_elt : *new_sub_con )
                     {
@@ -834,8 +845,6 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal( const ReplaceKit &kit,
             ASSERT( free_zone_stack.size() == 1);
             TreePtr<Node> new_dest = free_zone_stack.top().GetBase();
             dest_ow->Overwrite( &new_dest );
-
-            commands->Add( move(cmd) );
         }
         else
         {
@@ -843,8 +852,8 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal( const ReplaceKit &kit,
         }
     }
     
-    FreeZone dest_zone( dest, dest_terminii );
-    commands->Add( make_unique<PopulateFreeZoneCommand>(dest_zone) );
+    //FreeZone dest_zone( dest, dest_terminii );
+    //commands->Add( make_unique<PopulateFreeZoneCommand>(dest_zone) );
     
     return dest;
 }

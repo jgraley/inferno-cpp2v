@@ -546,7 +546,10 @@ void SCREngine::GenerateGraphRegions( Graph &graph ) const
 void SCREngine::MarkBaseForEmbedded( RequiresSubordinateSCREngine *embedded_agent,
                                      TreePtr<Node> embedded_through_subtree ) const
 {
-    InsertSolo( bases_for_embedded, make_pair( embedded_agent, embedded_through_subtree ) );
+    // permit multiple insertionswhile working on command sequence (so we can call
+    // BuildCommand() more than once on the same subtree)
+    //InsertSolo( bases_for_embedded, make_pair( embedded_agent, embedded_through_subtree ) );
+    bases_for_embedded.insert( make_pair( embedded_agent, embedded_through_subtree ) );
 }
 
 

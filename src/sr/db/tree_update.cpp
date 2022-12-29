@@ -170,11 +170,13 @@ UnpackSubContainerCommand::UnpackSubContainerCommand()
 void UnpackSubContainerCommand::Execute( const ExecKit &kit ) const
 {
     TreePtr<Node> elt = kit.free_zone_stack->top().GetBase();
-    kit.free_zone_stack->pop();
-    
     ContainerInterface *sub_con = dynamic_cast<ContainerInterface *>(elt.get());
-    ASSERT( sub_con ); // should be a subcontainer
     
+    if( !sub_con ) // no action if not a subcontainer
+        return;
+        
+    kit.free_zone_stack->pop();
+
     for( const TreePtrInterface &sub_elt : *sub_con )
     {
         FreeZone sub_zone( (TreePtr<Node>)sub_elt );
