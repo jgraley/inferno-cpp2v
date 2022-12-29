@@ -6,9 +6,9 @@ using namespace SR;
 
 // ------------------------- FreeZone --------------------------
 
-FreeZone::FreeZone( TreePtr<Node> base_, list<XLink> terminii_ ) :
+FreeZone::FreeZone( TreePtr<Node> base_, list<shared_ptr<Overwriter>> terminii_ ) :
     base( base_ ),
-    terminii( terminii_ )
+    terminii( move(terminii_) )
 {
     ASSERT( base ); // FreeZone is not nullable
 }
@@ -20,7 +20,7 @@ TreePtr<Node> FreeZone::GetBase() const
 }
 
 
-list<XLink> FreeZone::GetTerminii() const
+const list<shared_ptr<Overwriter>> &FreeZone::GetTerminii() const
 {
     return terminii;
 }
@@ -29,8 +29,8 @@ list<XLink> FreeZone::GetTerminii() const
 string FreeZone::GetTrace() const
 {
     list<string> elts;
-    for( const XLink &p : terminii )
-        elts.push_back( Trace(p) );
+    for( const shared_ptr<Overwriter> &p : terminii )
+        elts.push_back( "TODO" );
 
     string arrow;
     if( terminii.empty() )

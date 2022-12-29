@@ -53,7 +53,7 @@ Agent::CommandPtr NegationAgent::BuildCommandImpl( const ReplaceKit &kit,
     // Negation is ambiguous because of the negation property
     ASSERT(key_xlink)("Unkeyed boolean agent seen in replace context");
     TreeZone new_zone( key_xlink );
-	return make_unique<PushTreeZoneCommand>( new_zone );   
+	return make_unique<DuplicateAndPopulateTreeZoneCommand>( new_zone );   
 }
 
 

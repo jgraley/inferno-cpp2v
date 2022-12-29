@@ -18,16 +18,16 @@ namespace SR
 class FreeZone : public Traceable
 { 
 public:
-    explicit FreeZone( TreePtr<Node> base, list<XLink> terminii = {} );
+    explicit FreeZone( TreePtr<Node> base, list<shared_ptr<Overwriter>> terminii = {} );
       
     TreePtr<Node> GetBase() const;
-    list<XLink> GetTerminii() const;
+    const list<shared_ptr<Overwriter>> &GetTerminii() const;
 
     string GetTrace() const;
     
 private:
     TreePtr<Node> base;
-    list<XLink> terminii;
+    list<shared_ptr<Overwriter>> terminii;
 };
 
 // ------------------------- TreeZone --------------------------

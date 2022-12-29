@@ -87,12 +87,12 @@ Agent::CommandPtr StarAgent::BuildCommandImpl( const ReplaceKit &kit,
     for( const TreePtrInterface &key_elt : *key_container )
     {
         TreeZone new_zone( XLink(key_node, &key_elt) );
-        commands->Add( make_unique<PushTreeZoneCommand>( new_zone ) );
+        commands->Add( make_unique<DuplicateAndPopulateTreeZoneCommand>( new_zone ) );
         // Leaves a tree zone on the stack for every element in the subcontainer
     }
     
     // Makes a free zone for the subcontainer
-	commands->Add( make_unique<PushSubContainerCommand>( key_xlink ) );   
+	commands->Add( make_unique<CreateAndPopulateSubContainerCommand>( key_xlink ) );   
     
     return commands;
 }

@@ -48,12 +48,12 @@ Agent::CommandPtr BuilderAgent::BuildCommandImpl( const ReplaceKit &kit,
         my_scr_engine->SetReplaceKey( new_link );
         
         TreeZone new_zone( new_link );
-        return make_unique<PushTreeZoneCommand>( new_zone );   
+        return make_unique<DuplicateAndPopulateTreeZoneCommand>( new_zone );   
     }
     else
     {
         ASSERT( key_xlink ); // we're on residual plink
         TreeZone new_zone( key_xlink );
-        return make_unique<PushTreeZoneCommand>( new_zone );   
+        return make_unique<DuplicateAndPopulateTreeZoneCommand>( new_zone );   
     }
 }

@@ -43,7 +43,7 @@ Agent::CommandPtr DepthAgent::BuildCommandImpl( const ReplaceKit &kit,
     // Leaves new_terminus_subtree on the stack
 
     TreeZone new_zone( key_xlink, {terminus_key_xlink} );
-	commands->Add( make_unique<PushTreeZoneCommand>( new_zone ) );   
+	commands->Add( make_unique<DuplicateAndPopulateTreeZoneCommand>( new_zone ) );   
     
     return commands;
 }

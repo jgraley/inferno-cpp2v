@@ -37,24 +37,30 @@ public:
 	virtual void Execute( const ExecKit &kit ) const = 0;
 };
 
-// ------------------------- PushFreeZoneCommand --------------------------
+// ------------------------- PopulateFreeZoneCommand --------------------------
 
-class PushFreeZoneCommand : public Command
+// Populate a free zone from the stack. Push the resulting subtree to the stack.
+// TODO fill in new zone terminii from sub zone terminii
+class PopulateFreeZoneCommand : public Command
 {
 public:
-    PushFreeZoneCommand( const FreeZone &zone );
+    PopulateFreeZoneCommand( const FreeZone &zone );
 	void Execute( const ExecKit &kit ) const final;	
 
 private:
 	FreeZone zone;
 };
 
-// ------------------------- PushTreeZoneCommand --------------------------
+// ------------------------- DuplicateAndPopulateTreeZoneCommand --------------$
 
-class PushTreeZoneCommand : public Command
+// Duplicate a tree zone, making a free zone, and populate it from the stack.
+// Push the resulting subtree to the stack.
+// TODO turn this into a Duplicate that turns Tree to Free, followed by a 
+// PopulateFreeZoneCommand
+class DuplicateAndPopulateTreeZoneCommand : public Command
 {
 public:
-    PushTreeZoneCommand( const TreeZone &zone );
+    DuplicateAndPopulateTreeZoneCommand( const TreeZone &zone );
 	void Execute( const ExecKit &kit ) const final;	
 
 private:
@@ -85,10 +91,10 @@ private:
 	XLink target_base_xlink;
 };
 
-// ------------------------- MarkBaseForEmbeddedCommand --------------------------
+// ------------------------- MarkBaseForEmbeddedCommand -----------------------$
 
 // Takes the base of the zone at the top of the stack and remembers it as
-// the base to use for the configured embedded engine.
+// the base to use for the configured embedded engine. No change to stack.
 class MarkBaseForEmbeddedCommand : public Command
 {
 public:
@@ -99,14 +105,14 @@ private:
 	RequiresSubordinateSCREngine * const embedded_agent;
 };
 
-// ------------------------- PushSubContainerCommand --------------------------
+// ------------------------- CreateAndPopulateSubContainerCommand --------------------------
 
 // Create a free subcontainer given a tree subcontainer by duplicating 
-// the element subtrees. TODO generalise to a PushFreeZoneCommand with terminii?
-class PushSubContainerCommand : public Command
+// the element subtrees. TODO generalise to a PopulateFreeZoneCommand with terminii?
+class CreateAndPopulateSubContainerCommand : public Command
 {
 public:
-    PushSubContainerCommand( XLink base );
+    CreateAndPopulateSubContainerCommand( XLink base );
 	void Execute( const ExecKit &kit ) const final;	
 
 private:

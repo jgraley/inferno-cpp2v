@@ -67,7 +67,7 @@ Agent::CommandPtr DisjunctionAgent::BuildCommandImpl( const ReplaceKit &kit,
     // multiple conjuncts/disjuncts
     ASSERT(key_xlink)("Unkeyed boolean agent seen in replace context");
     TreeZone new_zone( key_xlink );
-	return make_unique<PushTreeZoneCommand>( new_zone );   
+	return make_unique<DuplicateAndPopulateTreeZoneCommand>( new_zone );   
 }
                                                  
 

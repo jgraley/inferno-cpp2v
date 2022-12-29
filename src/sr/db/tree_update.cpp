@@ -5,39 +5,43 @@
 
 using namespace SR;
 
-// ------------------------- PushFreeZoneCommand --------------------------
+// ------------------------- PopulateFreeZoneCommand --------------------------
 
-PushFreeZoneCommand::PushFreeZoneCommand( const FreeZone &zone_ ) :
+// Populate a free zone from the stack. Push the resulting subtree to the stack.
+PopulateFreeZoneCommand::PopulateFreeZoneCommand( const FreeZone &zone_ ) :
 	zone( zone_ )
 {
 }
 
 
-void PushFreeZoneCommand::Execute( const ExecKit &kit ) const
+void PopulateFreeZoneCommand::Execute( const ExecKit &kit ) const
 {
-    list<XLink> terms = zone.GetTerminii();
-    ASSERT( kit.free_zone_stack->size() >= terms.size() ); // There must be enough items on the stack
+    const list<shared_ptr<Overwriter>> &terminii = zone.GetTerminii();
+    ASSERT( kit.free_zone_stack->size() >= terminii.size() ); // There must be enough items on the stack
         
-    while( !terms.empty() )
+    for( auto terminus_it = terminii.rbegin(); terminus_it != terminii.rend(); ++terminus_it )
     {
-        // Do terms backward to compensate for stack reversal        
-        terms.back().SetXPtr( kit.free_zone_stack->top().GetBase() );
-        terms.pop_back();
+        // Do terms backward to compensate for stack reversal     
+        Overwriter &terminus_overwritable = **terminus_it;
+        TreePtr<Node> new_subtree = kit.free_zone_stack->top().GetBase(); // see #703
+        terminus_overwritable.Overwrite( &new_subtree );
         kit.free_zone_stack->pop();
     }
     
     kit.free_zone_stack->push( zone );      
 }
 
-// ------------------------- PushTreeZoneCommand --------------------------
+// ------------------------- DuplicateAndPopulateTreeZoneCommand --------------------------
 
-PushTreeZoneCommand::PushTreeZoneCommand( const TreeZone &zone_ ) :
+// Duplicate a tree zone, making a free zone, and populate it from the stack.
+// Push the resulting subtree to the stack.
+DuplicateAndPopulateTreeZoneCommand::DuplicateAndPopulateTreeZoneCommand( const TreeZone &zone_ ) :
 	zone( zone_ )
 {
 }
 
 
-void PushTreeZoneCommand::Execute( const ExecKit &kit ) const
+void DuplicateAndPopulateTreeZoneCommand::Execute( const ExecKit &kit ) const
 {
     list<XLink> terms = zone.GetTerminii();
     ASSERT( kit.free_zone_stack->size() >= terms.size() ); // There must be enough items on the stack
@@ -102,6 +106,8 @@ void InsertCommand::Execute( const ExecKit &kit ) const
 
 // ------------------------- MarkBaseForEmbeddedCommand --------------------------
 
+// Takes the base of the zone at the top of the stack and remembers it as
+// the base to use for the configured embedded engine. No change to stack.
 MarkBaseForEmbeddedCommand::MarkBaseForEmbeddedCommand( RequiresSubordinateSCREngine *embedded_agent_ ) :
     embedded_agent( embedded_agent_ )
 {
@@ -113,15 +119,18 @@ void MarkBaseForEmbeddedCommand::Execute( const ExecKit &kit ) const
     kit.scr_engine->MarkBaseForEmbedded( embedded_agent, kit.free_zone_stack->top().GetBase() );   
 }
     
-// ------------------------- PushSubContainerCommand --------------------------
+// ------------------------- CreateAndPopulateSubContainerCommand --------------------------
 
-PushSubContainerCommand::PushSubContainerCommand( XLink base_ ) :
+// Create a free subcontainer given a tree subcontainer, and populate it
+// from the stack. Push the resulting subtree to the stack.
+// TODO generalise to a PopulateFreeZoneCommand?
+CreateAndPopulateSubContainerCommand::CreateAndPopulateSubContainerCommand( XLink base_ ) :
     base( base_ )
 {
 }
 
 
-void PushSubContainerCommand::Execute( const ExecKit &kit ) const
+void CreateAndPopulateSubContainerCommand::Execute( const ExecKit &kit ) const
 {
     ASSERT( base );
     TreePtr<Node> base_node = base.GetChildX();

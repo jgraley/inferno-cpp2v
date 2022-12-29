@@ -537,7 +537,7 @@ Agent::CommandPtr StandardAgent::BuildCommandImpl( const ReplaceKit &kit,
         XLink under_xlink = my_scr_engine->GetReplaceKey( overlay_under_plink );
         TreePtr<Node> new_base_x = BuildReplaceOverlay( kit, me_plink, under_xlink );
         FreeZone new_zone( new_base_x );
-	    return make_unique<PushFreeZoneCommand>( new_zone );
+	    return make_unique<PopulateFreeZoneCommand>( new_zone );
     }
     else if( key_xlink ) 
     {
@@ -547,7 +547,7 @@ Agent::CommandPtr StandardAgent::BuildCommandImpl( const ReplaceKit &kit,
         // i.e. possibly a subclass of this node.
         TreePtr<Node> new_base_x = BuildReplaceOverlay( kit, me_plink, key_xlink );
         FreeZone new_zone( new_base_x );
-        return make_unique<PushFreeZoneCommand>( new_zone );
+        return make_unique<PopulateFreeZoneCommand>( new_zone );
     }
     else
     {
@@ -555,7 +555,7 @@ Agent::CommandPtr StandardAgent::BuildCommandImpl( const ReplaceKit &kit,
         ASSERT( me_plink.GetPattern()->IsFinal() ); 
         TreePtr<Node> new_base_x = BuildReplaceNormal( kit, me_plink ); 
         FreeZone new_zone( new_base_x );
-        return make_unique<PushFreeZoneCommand>( new_zone );
+        return make_unique<PopulateFreeZoneCommand>( new_zone );
     }
 }
 
