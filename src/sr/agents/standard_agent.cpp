@@ -735,7 +735,7 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( const ReplaceKit &kit,
     return dest;
 }
 
-#define COMMAND    
+
 TreePtr<Node> StandardAgent::BuildReplaceNormal( const ReplaceKit &kit, 
                                                  PatternLink me_plink ) 
 {
@@ -779,42 +779,23 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal( const ReplaceKit &kit,
             TRACE("Copying container size %d\n", my_con->size() );
 	        for( const TreePtrInterface &my_elt : *my_con )
 	        {
+                auto commands = make_unique<CommandSequence>();
+
 		        ASSERT( my_elt )("Some element of member %d (", i)(*my_con)(") of ")(*this)(" was nullptr\n");
 		        TRACE("Got ")(*my_elt)("\n");
+                dest_terminii.push_back( make_shared<ContainerUpdater>( dest_con ) );
                 PatternLink my_elt_plink( this, &my_elt );
-
-                auto commands = make_unique<CommandSequence>();
                 commands->Add( my_elt_plink.GetChildAgent()->BuildCommand(kit, my_elt_plink) );
                 
-                ASSERT( free_zone_stack.empty() );
-                commands->Execute( exec_kit );     
-                ASSERT( free_zone_stack.size() == 1);
-                auto dest_upd = make_shared<ContainerUpdater>( dest_con ); 
-#ifndef COMMAND
-                TreePtr<Node> new_elt = free_zone_stack.top().GetBase();
-                free_zone_stack.pop();
-                
-		        if( ContainerInterface *new_sub_con = dynamic_cast<ContainerInterface *>(new_elt.get()) )
-		        {
-		            for( const TreePtrInterface &new_sub_elt : *new_sub_con )
-                        dest_upd->Insert((TreePtr<Node>)new_sub_elt);
-           		}
-		        else
-		        {
-                    dest_upd->Insert((TreePtr<Node>)new_elt);
-		        }
-#else
-                dest_terminii.push_back( dest_upd );
-
                 FreeZone dest_zone( dest, dest_terminii );
                 dest_terminii.clear();
-                auto cmd = make_unique<PopulateFreeZoneCommand>(dest_zone);
-                cmd->Execute( exec_kit );
+                commands->Add( make_unique<PopulateFreeZoneCommand>(dest_zone) );
+                ASSERT( free_zone_stack.empty() );
+                commands->Execute( exec_kit );     
                 ASSERT( free_zone_stack.size() == 1);
                 FreeZone check_zone = free_zone_stack.top();
                 free_zone_stack.pop();
                 ASSERT( check_zone.GetBase() == dest );
-#endif                
 	        }           
         }            
         else if( TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[i]) )
