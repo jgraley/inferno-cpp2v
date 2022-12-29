@@ -753,8 +753,6 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal( const ReplaceKit &kit,
     // be dynamic_castable to pattern's type.
     vector< Itemiser::Element * > my_items = Itemise();
     vector< Itemiser::Element * > dest_items = dest->Itemise(); 
-    
-    list<shared_ptr<Updater>> dest_terminii;
 
     TRACE("Copying %d members pattern=", dest_items.size())(*this)(" dest=")(*dest)("\n");
     // Loop over all the members of pattern (which can be a subset of dest)
@@ -770,6 +768,7 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal( const ReplaceKit &kit,
         {
             ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_items[i]);
             dest_con->clear();
+            list<shared_ptr<Updater>> dest_terminii;
 
             TRACE("Copying container size %d\n", my_con->size() );
 	        for( const TreePtrInterface &my_elt : *my_con )
@@ -780,34 +779,31 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal( const ReplaceKit &kit,
 
                 auto commands = make_unique<CommandSequence>();
                 commands->Add( my_elt_plink.GetChildAgent()->BuildCommand(kit, my_elt_plink) );
-                //commands->Add( make_unique<UnpackSubContainerCommand>() );
 
                 stack<FreeZone> free_zone_stack;
                 Command::ExecKit exec_kit {nullptr, my_scr_engine, my_scr_engine, &free_zone_stack};
                 commands->Execute( exec_kit );     
                 ASSERT( free_zone_stack.size() == 1);
+                auto dest_upd = make_shared<ContainerUpdater>( dest_con ); 
+#ifndef COMMAND
                 TreePtr<Node> new_elt = free_zone_stack.top().GetBase();
-
+                free_zone_stack.pop();
+                
 		        if( ContainerInterface *new_sub_con = dynamic_cast<ContainerInterface *>(new_elt.get()) )
 		        {
-			        TRACE("Walking SubContainer length %d\n", new_sub_con->size() );
 		            for( const TreePtrInterface &new_sub_elt : *new_sub_con )
-                    {
-                        auto dest_upd = make_shared<ContainerUpdater>( dest_con ); 
-                        dest_terminii.push_back( dest_upd );
-                        
                         dest_upd->Insert((TreePtr<Node>)new_sub_elt);
-                    }
            		}
 		        else
 		        {
-			        TRACE("inserting ")(*new_elt)(" directly\n");
-                    auto dest_upd = make_shared<ContainerUpdater>( dest_con ); 
-                    dest_terminii.push_back( dest_upd );
-                    
                     dest_upd->Insert((TreePtr<Node>)new_elt);
 		        }
+#else
+                dest_terminii.push_back( dest_upd );
+#endif                
 	        }
+            
+            
         }            
         else if( TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[i]) )
         {
@@ -815,7 +811,7 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal( const ReplaceKit &kit,
             TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
             ASSERT( *my_singular )("Member %d (", i)(*my_singular)(") of ")(*this)(" was nullptr when not overlaying\n");
             auto dest_upd = make_shared<SingularUpdater>( dest_singular );
-            dest_terminii.push_back( dest_upd );
+            //dest_terminii.push_back( dest_upd );
             
             PatternLink my_singular_plink( this, my_singular );                    
             CommandPtr cmd = my_singular_plink.GetChildAgent()->BuildCommand(kit, my_singular_plink);

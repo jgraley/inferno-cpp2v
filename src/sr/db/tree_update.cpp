@@ -22,10 +22,20 @@ void PopulateFreeZoneCommand::Execute( const ExecKit &kit ) const
     // Do terms backward to compensate for stack reversal   
     for( auto terminus_it = terminii.rbegin(); terminus_it != terminii.rend(); ++terminus_it )
     {
-        Updater &terminus_updater = **terminus_it;
-        TreePtr<Node> new_subtree = kit.free_zone_stack->top().GetBase(); // see #703
-        terminus_updater.Insert( new_subtree );
+        Updater *terminus_upd = terminus_it->get();
+        TreePtr<Node> elt = kit.free_zone_stack->top().GetBase(); // see #703
         kit.free_zone_stack->pop();
+
+        // Direct support for sub containers
+        if( ContainerInterface *sub_con = dynamic_cast<ContainerInterface *>(elt.get()) )
+        {
+            for( const TreePtrInterface &sub_elt : *sub_con )
+                terminus_upd->Insert( (TreePtr<Node>)sub_elt );                                     
+        }
+        else
+        {
+            terminus_upd->Insert( elt );
+        }
     }
     
     kit.free_zone_stack->push( zone );      
