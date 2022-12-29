@@ -520,8 +520,14 @@ bool AgentCommon::ReplaceKeyerQuery( PatternLink me_plink,
                                   
 TreePtr<Node> AgentCommon::BuildForBuildersAnalysis( PatternLink me_plink )
 {
-	Agent::ReplaceKit replace_kit;
-    return BuildReplace( replace_kit, me_plink );
+	Agent::ReplaceKit kit;
+	auto commands = BuildCommand(kit, me_plink);
+
+    stack<FreeZone> free_zone_stack;
+    Command::ExecKit exec_kit {nullptr, my_scr_engine, my_scr_engine, &free_zone_stack};
+	commands->Execute( exec_kit );     
+    ASSERT( free_zone_stack.size() == 1);       
+    return free_zone_stack.top().GetBase();
 }
 
 
@@ -544,46 +550,6 @@ Agent::CommandPtr AgentCommon::BuildCommand( const ReplaceKit &kit,
 
     return BuildCommandImpl( kit, me_plink, key_xlink );
 }
-
-
-TreePtr<Node> AgentCommon::BuildReplace( const ReplaceKit &kit, 
-                                         PatternLink me_plink )
-{
-    INDENT("B");
-    ASSERT( me_plink.GetChildAgent() == this );
-    ASSERT(this);
-    ASSERT(my_scr_engine)("Agent ")(*this)(" appears not to have been configured");
-    ASSERT( phase != IN_COMPARE_ONLY )(*this)(" is configured for compare only");
-
-    XLink key_xlink;
-    if( keyer_plink )
-    {
-        key_xlink = my_scr_engine->GetReplaceKey( keyer_plink );
-		ASSERT( !key_xlink || key_xlink.GetChildX()->IsFinal() )
-		      (*this)(" keyed with non-final node ")(key_xlink)("\n"); 
-    }
-    
-    TreePtr<Node> dest = BuildReplaceImpl(kit, me_plink, key_xlink);
-   
-    ASSERT( dest );
-    ASSERT( dest->IsFinal() )(*this)(" built non-final ")(*dest)("\n"); 
-    
-    return dest;
-}
-
-
-TreePtr<Node> AgentCommon::BuildReplaceImpl( const ReplaceKit &kit, 
-                                             PatternLink me_plink, 
-                                             XLink key_xlink )
-{
-	auto commands = BuildCommandImpl(kit, me_plink, key_xlink);
-
-    stack<FreeZone> free_zone_stack;
-    Command::ExecKit exec_kit {nullptr, my_scr_engine, my_scr_engine, &free_zone_stack};
-	commands->Execute( exec_kit );     
-    ASSERT( free_zone_stack.size() == 1);       
-    return free_zone_stack.top().GetBase();
-}                                             
 
 
 TreePtr<Node> AgentCommon::CloneNode( bool force_dirty ) const
