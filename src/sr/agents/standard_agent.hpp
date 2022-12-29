@@ -140,7 +140,7 @@ public:
                                  XLink key_xlink ) final;
 
 private:	
-	TreePtr<Node> BuildReplaceOverlay( const ReplaceKit &kit, 
+	CommandPtr BuildCommandOverlay( const ReplaceKit &kit, 
                                        PatternLink me_plink, 
                                        XLink key_xlink ); // under substitution if not nullptr
     CommandPtr BuildCommandNormal( const ReplaceKit &kit, 

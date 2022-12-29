@@ -535,9 +535,7 @@ Agent::CommandPtr StandardAgent::BuildCommandImpl( const ReplaceKit &kit,
         // The under pattern node is in a different location from over (=this), 
         // but overlay planning has set up overlay_under_plink for us.
         XLink under_xlink = my_scr_engine->GetReplaceKey( overlay_under_plink );
-        TreePtr<Node> new_base_x = BuildReplaceOverlay( kit, me_plink, under_xlink );
-        FreeZone new_zone( new_base_x );
-	    return make_unique<PopulateFreeZoneCommand>( new_zone );
+        return BuildCommandOverlay( kit, me_plink, under_xlink );
     }
     else if( key_xlink ) 
     {
@@ -545,9 +543,7 @@ Agent::CommandPtr StandardAgent::BuildCommandImpl( const ReplaceKit &kit,
         // The under and over pattern nodes are both this. AndRuleEngine 
         // has keyed this, and due wildcarding, key will be a final node
         // i.e. possibly a subclass of this node.
-        TreePtr<Node> new_base_x = BuildReplaceOverlay( kit, me_plink, key_xlink );
-        FreeZone new_zone( new_base_x );
-        return make_unique<PopulateFreeZoneCommand>( new_zone );
+        return BuildCommandOverlay( kit, me_plink, key_xlink );
     }
     else
     {
@@ -557,15 +553,10 @@ Agent::CommandPtr StandardAgent::BuildCommandImpl( const ReplaceKit &kit,
     }
 }
 
-#define NEW_THING
 
-#ifndef NEW_THING
-#include "tree/cpptree.hpp"
-#endif
-
-TreePtr<Node> StandardAgent::BuildReplaceOverlay( const ReplaceKit &kit, 
-                                                  PatternLink me_plink, 
-                                                  XLink under_xlink )  // overlaying
+Agent::CommandPtr StandardAgent::BuildCommandOverlay( const ReplaceKit &kit, 
+                                                      PatternLink me_plink, 
+                                                      XLink under_xlink )  // overlaying
 {
 	INDENT("O");
     ASSERT( under_xlink );
@@ -594,10 +585,6 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( const ReplaceKit &kit,
     // Stuff for creating commands
     auto commands = make_unique<CommandSequence>();
     list<shared_ptr<Updater>> dest_terminii;
-
-    // Stuff for executing commands
-    stack<FreeZone> free_zone_stack;
-    Command::ExecKit exec_kit {nullptr, my_scr_engine, my_scr_engine, &free_zone_stack};
 
     // Loop over the child elements of me (=over) and dest, limited to elements
     // present in me, which is a non-strict superclass of under_node and dest.
@@ -706,17 +693,9 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( const ReplaceKit &kit,
     }
     
     FreeZone dest_zone( dest, dest_terminii );
-    dest_terminii.clear();
     commands->Add( make_unique<PopulateFreeZoneCommand>(dest_zone) );
-    ASSERT( free_zone_stack.empty() );
-    commands->Execute( exec_kit );     
-    ASSERT( free_zone_stack.size() == 1 );
-    FreeZone check_zone = free_zone_stack.top();
-    free_zone_stack.pop();
-    ASSERT( check_zone.GetBase() == dest );                       
 
-    ASSERT( dest );
-    return dest;
+    return commands;
 }
 
 
@@ -728,7 +707,7 @@ Agent::CommandPtr StandardAgent::BuildCommandNormal( const ReplaceKit &kit,
 	// Make a new node, force dirty because from pattern
     // Use clone here because we never want to place an Agent object in the output program tree.
     // Identifiers that have multiple references in the pattern will be coupled, and  
-    // after the first hit, BuildReplaceOverlay() will handle the rest and it uses Duplicate()
+    // after the first hit, BuildCommandOverlay() will handle the rest and it uses Duplicate()
     TreePtr<Node> dest = AgentCommon::CloneNode(true);
     ASSERT( dest->IsFinal() )(*this)(" about to build non-final ")(*dest)("\n"); 
 
