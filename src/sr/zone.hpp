@@ -12,7 +12,7 @@ namespace SR
 
 // ------------------------- Updater --------------------------    
     
-class Updater
+class Updater : public Traceable
 {
 public:
     virtual void Insert( TreePtr<Node> node ) const = 0;
@@ -26,6 +26,8 @@ public:
     explicit SingularUpdater( TreePtrInterface *tree_ptr );
     void Insert( TreePtr<Node> node ) const final;
     
+    string GetTrace() const;
+
 private:
     TreePtrInterface *tree_ptr;
 };    
@@ -38,6 +40,8 @@ public:
     explicit ContainerUpdater( ContainerInterface *container );
     void Insert( TreePtr<Node> node ) const final;
     
+    string GetTrace() const;
+
 private:
     ContainerInterface *container;
 };    
@@ -50,10 +54,13 @@ private:
 class FreeZone : public Traceable
 { 
 public:
+    static FreeZone CreateEmpty();
+
     explicit FreeZone( TreePtr<Node> base, list<shared_ptr<Updater>> terminii = {} );
       
     TreePtr<Node> GetBase() const;
     const list<shared_ptr<Updater>> &GetTerminii() const;
+    bool IsEmpty() const;
 
     string GetTrace() const;
     
@@ -71,6 +78,8 @@ private:
 class TreeZone : public Traceable
 { 
 public:
+    static TreeZone CreateEmpty( XLink base );
+
     explicit TreeZone( XLink base, list<XLink> terminii = {} );
     TreeZone( XLink base, const FreeZone &free_zone );
       

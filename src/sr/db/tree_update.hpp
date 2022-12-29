@@ -51,12 +51,23 @@ private:
 	FreeZone zone;
 };
 
+// ------------------------- DuplicateTreeZoneCommand --------------------------
+
+// Duplicate a tree zone, making a free zone, and push it to the stack.
+class DuplicateTreeZoneCommand : public Command
+{
+public:
+    DuplicateTreeZoneCommand( const TreeZone &zone );
+	void Execute( const ExecKit &kit ) const final;	
+
+private:
+	TreeZone zone;
+};
+
 // ------------------------- DuplicateAndPopulateTreeZoneCommand --------------------------
 
 // Duplicate a tree zone, making a free zone, and populate it from the stack.
 // Push the resulting subtree to the stack.
-// TODO turn this into a Duplicate that turns Tree to Free, followed by a 
-// PopulateFreeZoneCommand
 class DuplicateAndPopulateTreeZoneCommand : public Command
 {
 public:

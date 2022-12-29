@@ -7,7 +7,6 @@ using namespace SR;
 
 // ------------------------- PopulateFreeZoneCommand --------------------------
 
-// Populate a free zone from the stack. Push the resulting subtree to the stack.
 PopulateFreeZoneCommand::PopulateFreeZoneCommand( const FreeZone &zone_ ) :
 	zone( zone_ )
 {
@@ -47,10 +46,21 @@ void PopulateFreeZoneCommand::Execute( const ExecKit &kit ) const
     kit.free_zone_stack->push( zone );      
 }
 
+// ------------------------- DuplicateTreeZoneCommand --------------------------
+
+DuplicateTreeZoneCommand::DuplicateTreeZoneCommand( const TreeZone &zone_ ) :
+	zone( zone_ )
+{
+}
+
+
+void DuplicateTreeZoneCommand::Execute( const ExecKit &kit ) const
+{
+    // todo
+}
+
 // ------------------------- DuplicateAndPopulateTreeZoneCommand --------------------------
 
-// Duplicate a tree zone, making a free zone, and populate it from the stack.
-// Push the resulting subtree to the stack.
 DuplicateAndPopulateTreeZoneCommand::DuplicateAndPopulateTreeZoneCommand( const TreeZone &zone_ ) :
 	zone( zone_ )
 {
@@ -122,8 +132,6 @@ void InsertCommand::Execute( const ExecKit &kit ) const
 
 // ------------------------- MarkBaseForEmbeddedCommand --------------------------
 
-// Takes the base of the zone at the top of the stack and remembers it as
-// the base to use for the configured embedded engine. No change to stack.
 MarkBaseForEmbeddedCommand::MarkBaseForEmbeddedCommand( RequiresSubordinateSCREngine *embedded_agent_ ) :
     embedded_agent( embedded_agent_ )
 {
