@@ -756,10 +756,6 @@ Agent::CommandPtr StandardAgent::BuildCommandNormal( const ReplaceKit &kit,
     auto commands = make_unique<CommandSequence>();
     list<shared_ptr<Updater>> dest_terminii;
 
-    // Stuff for executing commands
-    stack<FreeZone> free_zone_stack;
-    Command::ExecKit exec_kit {nullptr, my_scr_engine, my_scr_engine, &free_zone_stack};
-
     TRACE("Copying %d members pattern=", dest_items.size())(*this)(" dest=")(*dest)("\n");
     // Loop over all the members of pattern (which can be a subset of dest)
     // and for non-nullptr members, duplicate them by recursing and write the
@@ -774,28 +770,25 @@ Agent::CommandPtr StandardAgent::BuildCommandNormal( const ReplaceKit &kit,
         {
             ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_items[i]);
             dest_con->clear();
-            ASSERT( free_zone_stack.empty() );
             
             TRACE("Copying container size %d\n", my_con->size() );
 	        for( const TreePtrInterface &my_elt : *my_con )
 	        {
 		        ASSERT( my_elt )("Some element of member %d (", i)(*my_con)(") of ")(*this)(" was nullptr\n");
 		        TRACE("Got ")(*my_elt)("\n");
-                dest_terminii.push_back( make_shared<ContainerUpdater>( dest_con ) );
                 PatternLink my_elt_plink( this, &my_elt );
                 commands->Add( my_elt_plink.GetChildAgent()->BuildCommand(kit, my_elt_plink) );
+                dest_terminii.push_back( make_shared<ContainerUpdater>( dest_con ) );
             }
         }            
         else if( TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[i]) )
         {
             TRACE("Copying single element\n");
             TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
-            ASSERT( *my_singular )("Member %d (", i)(*my_singular)(") of ")(*this)(" was nullptr when not overlaying\n");
-
-            dest_terminii.push_back( make_shared<SingularUpdater>( dest_singular ) );
-            
+            ASSERT( *my_singular )("Member %d (", i)(*my_singular)(") of ")(*this)(" was nullptr when not overlaying\n");            
             PatternLink my_singular_plink( this, my_singular );                    
             commands->Add( my_singular_plink.GetChildAgent()->BuildCommand(kit, my_singular_plink) );
+            dest_terminii.push_back( make_shared<SingularUpdater>( dest_singular ) );            
         }
         else
         {
@@ -804,7 +797,6 @@ Agent::CommandPtr StandardAgent::BuildCommandNormal( const ReplaceKit &kit,
     }
     
     FreeZone dest_zone( dest, dest_terminii );
-    dest_terminii.clear();
     commands->Add( make_unique<PopulateFreeZoneCommand>(dest_zone) );
     
     return commands;
