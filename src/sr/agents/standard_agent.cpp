@@ -804,18 +804,23 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal( const ReplaceKit &kit,
             TRACE("Copying single element\n");
             TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
             ASSERT( *my_singular )("Member %d (", i)(*my_singular)(") of ")(*this)(" was nullptr when not overlaying\n");
-            auto dest_upd = make_shared<SingularUpdater>( dest_singular );
-            //dest_terminii.push_back( dest_upd );
+            auto commands = make_unique<CommandSequence>();
+
+            dest_terminii.clear();
+            dest_terminii.push_back( make_shared<SingularUpdater>( dest_singular ) );
             
             PatternLink my_singular_plink( this, my_singular );                    
-            CommandPtr cmd = my_singular_plink.GetChildAgent()->BuildCommand(kit, my_singular_plink);
+            commands->Add( my_singular_plink.GetChildAgent()->BuildCommand(kit, my_singular_plink) );
 
-            stack<FreeZone> free_zone_stack;
-            Command::ExecKit exec_kit {nullptr, my_scr_engine, my_scr_engine, &free_zone_stack};
-            cmd->Execute( exec_kit );     
-            ASSERT( free_zone_stack.size() == 1);
-            TreePtr<Node> new_dest = free_zone_stack.top().GetBase();
-            dest_upd->Insert((TreePtr<Node>)new_dest);
+            FreeZone dest_zone( dest, dest_terminii );
+            dest_terminii.clear();
+            commands->Add( make_unique<PopulateFreeZoneCommand>(dest_zone) );
+            ASSERT( free_zone_stack.empty() );
+            commands->Execute( exec_kit );     
+            ASSERT( free_zone_stack.size() == 1 );
+            FreeZone check_zone = free_zone_stack.top();
+            free_zone_stack.pop();
+            ASSERT( check_zone.GetBase() == dest );                       
         }
         else
         {
