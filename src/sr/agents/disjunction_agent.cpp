@@ -66,7 +66,7 @@ Agent::CommandPtr DisjunctionAgent::BuildCommandImpl( const ReplaceKit &kit,
     // Conjuction and disjunction are ambiguous because there are 
     // multiple conjuncts/disjuncts
     ASSERT(key_xlink)("Unkeyed boolean agent seen in replace context");
-    TreeZone new_zone( key_xlink );
+    auto new_zone = TreeZone::CreateSubtree( key_xlink );
 	return make_unique<DuplicateAndPopulateTreeZoneCommand>( new_zone );   
 }
                                                  

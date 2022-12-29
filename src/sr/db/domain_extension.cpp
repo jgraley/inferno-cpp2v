@@ -179,7 +179,7 @@ void DomainExtensionChannel::AddExtraNode( TreePtr<Node> extra_node )
     XLink extra_xlink = XLink::CreateDistinct( extra_node_dup );    
   
     // Make a zone. 
-    auto extra_zone = TreeZone(extra_xlink);
+    auto extra_zone = TreeZone::CreateSubtree(extra_xlink);
     ASSERT( !extra_zone.IsEmpty() ); 
 
 #ifdef TRACE_DOMAIN_EXTEND

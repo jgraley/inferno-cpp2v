@@ -6,6 +6,12 @@ using namespace SR;
 
 // ------------------------- FreeZone --------------------------
 
+FreeZone FreeZone::CreateSubtree( TreePtr<Node> base )
+{
+    return FreeZone( base, {} );
+}
+
+
 FreeZone FreeZone::CreateEmpty()
 {
     return FreeZone( TreePtr<Node>(), // NULL
@@ -80,6 +86,12 @@ string FreeZone::GetTrace() const
 
 // ------------------------- TreeZone --------------------------
 
+TreeZone TreeZone::CreateSubtree( XLink base )
+{
+    return TreeZone( base, {} );
+}
+
+
 TreeZone TreeZone::CreateEmpty( XLink base )
 {
     ASSERTS( base );
@@ -95,17 +107,6 @@ TreeZone::TreeZone( XLink base_, list<XLink> terminii_ ) :
     ASSERT( base ); // TreeZone is not nullable
     ASSERT( base.GetChildX() ); // Cannot be empty
 }
-
-
-TreeZone::TreeZone( XLink base, const FreeZone &free_zone ) :
-    TreeZone( base )
-{
-    ASSERT( base.GetChildX() == free_zone.GetBase() )
-          ( "Making TreeZone from FreeZone but bases do not match:\n")
-          (base)("\n")
-          (free_zone.GetBase())("\n");
-    // TODO copy terminii out of free_zone
-}    
 
 
 XLink TreeZone::GetBase() const

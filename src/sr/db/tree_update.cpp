@@ -88,7 +88,7 @@ void DuplicateAndPopulateTreeZoneCommand::Execute( const ExecKit &kit ) const
     for( auto p : duplicator_terminus_map )
         ASSERT( !p.second ); // these are switched to NULL on reaching each terminus
 
-    FreeZone new_free_zone( new_base_x );
+    auto new_free_zone = FreeZone::CreateSubtree( new_base_x );
     kit.free_zone_stack->push( new_free_zone );      
 }
 

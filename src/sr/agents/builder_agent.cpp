@@ -47,13 +47,13 @@ Agent::CommandPtr BuilderAgent::BuildCommandImpl( const ReplaceKit &kit,
         LocatedLink new_link( me_plink, XLink::CreateDistinct( new_node ) );
         my_scr_engine->SetReplaceKey( new_link );
         
-        TreeZone new_zone( new_link );
+        auto new_zone = TreeZone::CreateSubtree( new_link );
         return make_unique<DuplicateAndPopulateTreeZoneCommand>( new_zone );   
     }
     else
     {
         ASSERT( key_xlink ); // we're on residual plink
-        TreeZone new_zone( key_xlink );
+        auto new_zone = TreeZone::CreateSubtree( key_xlink );
         return make_unique<DuplicateAndPopulateTreeZoneCommand>( new_zone );   
     }
 }

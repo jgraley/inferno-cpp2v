@@ -672,7 +672,7 @@ Agent::CommandPtr StandardAgent::BuildCommandOverlay( const ReplaceKit &kit,
 	        for( const TreePtrInterface &under_elt : *under_container )
 	        {
 		        ASSERT( under_elt ); // present simplified scheme disallows nullptr
-                TreeZone under_zone( XLink(under_node, &under_elt) );
+                auto under_zone = TreeZone::CreateSubtree( XLink(under_node, &under_elt) );
                 commands->Add( make_unique<DuplicateAndPopulateTreeZoneCommand>( under_zone ) );
                 dest_terminii.push_back( make_shared<ContainerUpdater>( dest_con ) );            
  	        }
@@ -682,7 +682,7 @@ Agent::CommandPtr StandardAgent::BuildCommandOverlay( const ReplaceKit &kit,
             TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
             auto dest_upd = make_shared<SingularUpdater>( dest_singular );
             ASSERT( *under_singular );            
-            TreeZone under_zone( XLink(under_node, under_singular) );
+            auto under_zone = TreeZone::CreateSubtree( XLink(under_node, under_singular) );
             commands->Add( make_unique<DuplicateAndPopulateTreeZoneCommand>( under_zone ) );
             dest_terminii.push_back( make_shared<SingularUpdater>( dest_singular ) );            
         }

@@ -99,7 +99,7 @@ Agent::CommandPtr StarAgent::BuildCommandImpl( const ReplaceKit &kit,
     ContainerInterface *dest_container = dynamic_cast<ContainerInterface *>(dest.get());
     for( const TreePtrInterface &key_elt : *key_container )
     {
-        TreeZone new_zone( XLink(key_node, &key_elt) );
+        auto new_zone = TreeZone::CreateSubtree( XLink(key_node, &key_elt) );
         commands->Add( make_unique<DuplicateAndPopulateTreeZoneCommand>( new_zone ) );
         dest_terminii.push_back( make_shared<ContainerUpdater>( dest_container ) );
     }

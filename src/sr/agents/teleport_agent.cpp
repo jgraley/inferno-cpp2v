@@ -83,7 +83,7 @@ Agent::CommandPtr TeleportAgent::BuildCommandImpl( const ReplaceKit &kit,
                                                    XLink key_xlink )
 {
     ASSERT(key_xlink)("Unkeyed agent seen in replace context");
-    TreeZone new_zone( key_xlink );
+    auto new_zone = TreeZone::CreateSubtree( key_xlink );
 	return make_unique<DuplicateAndPopulateTreeZoneCommand>( new_zone );   
 }
 

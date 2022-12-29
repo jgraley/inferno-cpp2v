@@ -19,9 +19,10 @@ namespace SR
 class FreeZone : public Traceable
 { 
 public:
+    static FreeZone CreateSubtree( TreePtr<Node> base );
     static FreeZone CreateEmpty();
 
-    explicit FreeZone( TreePtr<Node> base, list<shared_ptr<Updater>> terminii = {} );
+    explicit FreeZone( TreePtr<Node> base, list<shared_ptr<Updater>> terminii );
       
     TreePtr<Node> GetBase() const;
     const list<shared_ptr<Updater>> &GetTerminii() const;
@@ -43,10 +44,10 @@ private:
 class TreeZone : public Traceable
 { 
 public:
+    static TreeZone CreateSubtree( XLink base );
     static TreeZone CreateEmpty( XLink base );
 
-    explicit TreeZone( XLink base, list<XLink> terminii = {} );
-    TreeZone( XLink base, const FreeZone &free_zone );
+    explicit TreeZone( XLink base, list<XLink> terminii );
       
     XLink GetBase() const;
     list<XLink> GetTerminii() const;
