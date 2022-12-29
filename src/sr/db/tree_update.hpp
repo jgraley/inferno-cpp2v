@@ -51,7 +51,7 @@ private:
 	FreeZone zone;
 };
 
-// ------------------------- DuplicateAndPopulateTreeZoneCommand --------------$
+// ------------------------- DuplicateAndPopulateTreeZoneCommand --------------------------
 
 // Duplicate a tree zone, making a free zone, and populate it from the stack.
 // Push the resulting subtree to the stack.
@@ -91,7 +91,7 @@ private:
 	XLink target_base_xlink;
 };
 
-// ------------------------- MarkBaseForEmbeddedCommand -----------------------$
+// ------------------------- MarkBaseForEmbeddedCommand --------------------------
 
 // Takes the base of the zone at the top of the stack and remembers it as
 // the base to use for the configured embedded engine. No change to stack.
@@ -103,30 +103,6 @@ public:
 
 private:
 	RequiresSubordinateSCREngine * const embedded_agent;
-};
-
-// ------------------------- CreateAndPopulateSubContainerCommand --------------------------
-
-// Create a free subcontainer given a tree subcontainer by duplicating 
-// the element subtrees. TODO generalise to a PopulateFreeZoneCommand with terminii?
-class CreateAndPopulateSubContainerCommand : public Command
-{
-public:
-    CreateAndPopulateSubContainerCommand( XLink base );
-	void Execute( const ExecKit &kit ) const final;	
-
-private:
-	XLink base;
-};
-
-// ------------------------- UnpackSubContainerCommand --------------------------
-
-// Pop a subcontainer off the stack and push all its elements individually.
-class UnpackSubContainerCommand : public Command
-{
-public:
-    UnpackSubContainerCommand();
-	void Execute( const ExecKit &kit ) const final;	
 };
 
 // ------------------------- CommandSequence --------------------------

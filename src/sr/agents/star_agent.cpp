@@ -82,17 +82,31 @@ Agent::CommandPtr StarAgent::BuildCommandImpl( const ReplaceKit &kit,
     ContainerInterface *key_container = dynamic_cast<ContainerInterface *>(key_node.get());
     ASSERT( key_container )("Star node ")(*this)(" keyed to ")(*key_node)(" which should implement ContainerInterface");  
 
+    // Stuff for creating commands
     auto commands = make_unique<CommandSequence>();
+    list<shared_ptr<Updater>> dest_terminii;
     
+    // Make a subcontainer of the corresponding type
+    TreePtr<SubContainer> dest;
+    if( dynamic_cast<SequenceInterface *>(key_container) )
+        dest = MakeTreeNode<SubSequence>();
+    else if( dynamic_cast<CollectionInterface *>(key_container) )
+        dest = MakeTreeNode<SubCollection>();
+    else
+        ASSERT(0)("Please add new kind of container");
+    
+    TRACE("Walking container length %d\n", key_container->size() );
+    ContainerInterface *dest_container = dynamic_cast<ContainerInterface *>(dest.get());
     for( const TreePtrInterface &key_elt : *key_container )
     {
         TreeZone new_zone( XLink(key_node, &key_elt) );
         commands->Add( make_unique<DuplicateAndPopulateTreeZoneCommand>( new_zone ) );
-        // Leaves a tree zone on the stack for every element in the subcontainer
+        dest_terminii.push_back( make_shared<ContainerUpdater>( dest_container ) );
     }
     
     // Makes a free zone for the subcontainer
-	commands->Add( make_unique<CreateAndPopulateSubContainerCommand>( key_xlink ) );   
+    FreeZone dest_zone( dest, dest_terminii );
+    commands->Add( make_unique<PopulateFreeZoneCommand>(dest_zone) );
     
     return commands;
 }
