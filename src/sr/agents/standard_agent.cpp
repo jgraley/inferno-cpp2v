@@ -553,9 +553,7 @@ Agent::CommandPtr StandardAgent::BuildCommandImpl( const ReplaceKit &kit,
     {
         // Free replace pattern, just duplicate it.
         ASSERT( me_plink.GetPattern()->IsFinal() ); 
-        TreePtr<Node> new_base_x = BuildReplaceNormal( kit, me_plink ); 
-        FreeZone new_zone( new_base_x );
-        return make_unique<PopulateFreeZoneCommand>( new_zone );
+        return BuildCommandNormal( kit, me_plink ); 
     }
 }
 
@@ -736,8 +734,8 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( const ReplaceKit &kit,
 }
 
 
-TreePtr<Node> StandardAgent::BuildReplaceNormal( const ReplaceKit &kit, 
-                                                 PatternLink me_plink ) 
+Agent::CommandPtr StandardAgent::BuildCommandNormal( const ReplaceKit &kit, 
+                                                     PatternLink me_plink ) 
 {
 	INDENT("N");
  
@@ -808,14 +806,8 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal( const ReplaceKit &kit,
     FreeZone dest_zone( dest, dest_terminii );
     dest_terminii.clear();
     commands->Add( make_unique<PopulateFreeZoneCommand>(dest_zone) );
-    ASSERT( free_zone_stack.empty() );
-    commands->Execute( exec_kit );     
-    ASSERT( free_zone_stack.size() == 1 );
-    FreeZone check_zone = free_zone_stack.top();
-    free_zone_stack.pop();
-    ASSERT( check_zone.GetBase() == dest );                       
     
-    return dest;
+    return commands;
 }
 
 
