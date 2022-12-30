@@ -2,6 +2,7 @@
 #define DUPLICATE_HPP
 
 #include "link.hpp"
+#include "updater.hpp"
 
 namespace SR
 { 
@@ -16,6 +17,18 @@ public:
         virtual bool IsDirtyGrass( TreePtr<Node> node ) const = 0;
         virtual void AddDirtyGrass( TreePtr<Node> node ) const = 0;
     };
+    
+    struct TerminusInfo
+    {
+        // Actions on finding terminus:
+        // 1. Terminus is overwritten with dest, which can be NULL.
+        // 2. dest is set to NULL so you can check we got them all.
+        // 3. If dest was NULL (=placeholder value), updater is created on it.
+        TreePtr<Node> dest;
+        shared_ptr<Updater> updater;
+    };
+    
+    typedef map<XLink, TerminusInfo> TerminiiMap;
 
     static TreePtr<Node> DuplicateNode( const DirtyGrassUpdateInterface *dirty_grass,
                                         TreePtr<Node> pattern,
@@ -25,13 +38,15 @@ public:
                                            XLink source_xlink );
 
     // terminii maps source tree terminii to destination terminii. We deep copy the
-    // source tree up to the source terminii which are the keys in the map, and then
-    // shallow-copy the dest terminii which are the values in the map. It's a non-const
-    // ref to the map, and we remove terminii from it when found. Caller should check
-    // that the map is empty afterwards.
+    // source tree up to the source terminii which are the keys in the map. See TerminusInfo
+    // for what happens next.
     static TreePtr<Node> DuplicateSubtree( const DirtyGrassUpdateInterface *dirty_grass,
                                            XLink source_xlink,
-                                           map<XLink, TreePtr<Node>> &terminii );
+                                           TerminiiMap &terminii_map );
+                                           
+    static TreePtr<Node> DuplicateSubtreeWorker( const DirtyGrassUpdateInterface *dirty_grass,
+                                                 XLink source_base_xlink,
+                                                 TerminiiMap &terminii_map );
 };
 
 }

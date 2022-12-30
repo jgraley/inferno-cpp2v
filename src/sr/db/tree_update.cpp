@@ -41,9 +41,7 @@ void PopulateFreeZoneCommand::Execute( const ExecKit &kit ) const
         operand_zones.push_front( kit.free_zone_stack->top() );
         kit.free_zone_stack->pop();
     }
-            
-    TRACE("-------------- Zone base ")(zone.GetBase())("\n");
-            
+                        
     // Iterate over terminii and operand zones together, populating the terminii
     // from the operands. 
     for( auto p : Zip( terminii, operand_zones ) )
@@ -52,7 +50,6 @@ void PopulateFreeZoneCommand::Execute( const ExecKit &kit ) const
         FreeZone &operand_zone = p.second; 
         ASSERT( operand_zone.GetTerminii().empty() )(zone)(" ")(Zip( terminii, operand_zones )); // TODO accumulate the terminii in the result zone.
         ASSERT( !operand_zone.IsEmpty() );
-        TRACE("Terminus Updater ")(terminus_upd)(" Zone ")(operand_zone)("\n");
         // Populate terminus. Apply() will expand SubContainers
         ASSERT( operand_zone.GetBase() );
         terminus_upd->Apply( operand_zone.GetBase() );
@@ -97,9 +94,7 @@ void DuplicateAndPopulateTreeZoneCommand::Execute( const ExecKit &kit ) const
 {
     list<XLink> terminii = zone.GetTerminii();
     ASSERT( kit.free_zone_stack->size() >= terminii.size() ); // There must be enough items on the stack
-    
-    map<XLink, TreePtr<Node>> duplicator_terminus_map;
-    
+        
     // Get a forward list of subtrees to overwrite
     list<FreeZone> operand_zones;
     for( auto terminus_upd : terminii )
@@ -110,13 +105,14 @@ void DuplicateAndPopulateTreeZoneCommand::Execute( const ExecKit &kit ) const
 
     // Iterate over terminii and operand zones together, filling the map for
     // DuplicateSubtree() to use.
+    Duplicate::TerminiiMap duplicator_terminus_map;
     for( auto p : Zip( terminii, operand_zones ) )
     {        
         XLink terminus_upd = p.first;
         FreeZone &operand_zone = p.second; 
         ASSERT( operand_zone.GetTerminii().empty() )(zone)(" ")(Zip( terminii, operand_zones )); // TODO accumulate the terminii in the result zone.
 
-        duplicator_terminus_map[terminus_upd] = operand_zone.GetBase();
+        duplicator_terminus_map[terminus_upd] = { operand_zone.GetBase(), shared_ptr<Updater>() };
     }
 
     // Duplicate the subtree, populating from the map.
@@ -126,7 +122,7 @@ void DuplicateAndPopulateTreeZoneCommand::Execute( const ExecKit &kit ) const
     
     // Consistency check
     for( auto p : duplicator_terminus_map )
-        ASSERT( !p.second ); // these are switched to NULL on reaching each terminus
+        ASSERT( !p.second.dest ); // these are switched to NULL on reaching each terminus
 
     // Create a new zone for the result.
     auto result_zone = FreeZone::CreateSubtree( new_base_x );

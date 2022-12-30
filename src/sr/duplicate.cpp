@@ -30,30 +30,40 @@ TreePtr<Node> Duplicate::DuplicateNode( const DirtyGrassUpdateInterface *dirty_g
 TreePtr<Node> Duplicate::DuplicateSubtree( const DirtyGrassUpdateInterface *dirty_grass,
                                            XLink source_xlink )
 {
-    map<XLink, TreePtr<Node>> empty_terminii;
-    return DuplicateSubtree( dirty_grass, source_xlink, empty_terminii );
+    TerminiiMap empty_terminii_map;
+    return DuplicateSubtree( dirty_grass, source_xlink, empty_terminii_map );
 }
     
     
 TreePtr<Node> Duplicate::DuplicateSubtree( const DirtyGrassUpdateInterface *dirty_grass,
-                                           XLink source_xlink,
-                                           map<XLink, TreePtr<Node>> &terminii )
+                                           XLink source_base_xlink,
+                                           TerminiiMap &terminii_map )
 {
-    ASSERTS( source_xlink );
-	TreePtr<Node> source = source_xlink.GetChildX();
-            
-    // If source_terminus and dest_terminus are supplied, substitute dest_terminus node
-    // in place of all copies of source terminus (directly, without duplicating).
+    ASSERTS( source_base_xlink );
 
-    if( terminii.count(source_xlink) == 1 ) 
+    // Terminus at root: we can subsitute but we can't make an updater.
+    if( terminii_map.count(source_base_xlink) == 1 ) 
     {
-        TreePtr<Node> dest_terminus = terminii.at(source_xlink);
-        TRACES("Reached source terminus ")(source_xlink)
+        TerminusInfo &terminus_info = terminii_map.at(source_base_xlink);
+        TreePtr<Node> dest_terminus = terminus_info.dest;
+        TRACES("Reached source terminus ")(source_base_xlink)
               (" and substituting ")(dest_terminus)("\n");
-        ASSERT( dest_terminus ); // if this fails, we're probably hitting the same terminus twice
-        terminii.at(source_xlink) = TreePtr<Node>();
+        ASSERT( terminus_info.dest ); // Can't make an updater for the base
+        terminus_info.dest = TreePtr<Node>();
         return dest_terminus;
     }
+
+    return DuplicateSubtreeWorker( dirty_grass,
+                                   source_base_xlink,
+                                   terminii_map );
+}
+
+
+TreePtr<Node> Duplicate::DuplicateSubtreeWorker( const DirtyGrassUpdateInterface *dirty_grass,
+                                                 XLink source_xlink,
+                                                 TerminiiMap &terminii_map )
+{
+	TreePtr<Node> source = source_xlink.GetChildX();
 
     // Make a new node, since we're substituting, preserve dirtyness        
     TreePtr<Node> dest = DuplicateNode( dirty_grass, source, false );
@@ -86,8 +96,8 @@ TreePtr<Node> Duplicate::DuplicateSubtree( const DirtyGrassUpdateInterface *dirt
                 ASSERTS( source_elt ); // present simplified scheme disallows nullptr
                 //TRACES("Duplicating ")(*source_elt)("\n");
                 TreePtr<Node> dest_elt = DuplicateSubtree( dirty_grass,
-                                                           XLink( source, &source_elt ), 
-                                                           terminii );
+                                                                 XLink( source, &source_elt ), 
+                                                                 terminii_map );
                 //TRACE("inserting ")(*dest_elt)(" directly\n");
                 dest_container->insert( dest_elt );
             }
@@ -98,8 +108,8 @@ TreePtr<Node> Duplicate::DuplicateSubtree( const DirtyGrassUpdateInterface *dirt
             TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
             ASSERTS( *source_singular )("source should be non-nullptr");
             *dest_singular = DuplicateSubtree( dirty_grass,
-                                               XLink(source, source_singular), 
-                                               terminii );
+                                                     XLink(source, source_singular), 
+                                                     terminii_map );
             ASSERTS( *dest_singular );
             ASSERTS( TreePtr<Node>(*dest_singular)->IsFinal() );            
         }
