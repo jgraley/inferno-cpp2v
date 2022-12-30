@@ -70,9 +70,9 @@ void StarAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
 }
 
 
-Agent::CommandPtr StarAgent::BuildCommandImpl( const ReplaceKit &kit, 
-                                               PatternLink me_plink, 
-                                               XLink key_xlink ) 
+Agent::CommandPtr StarAgent::GenerateCommandImpl( const ReplaceKit &kit, 
+                                                  PatternLink me_plink, 
+                                                  XLink key_xlink ) 
 {
     INDENT("*");
     ASSERT( key_xlink );
@@ -101,7 +101,9 @@ Agent::CommandPtr StarAgent::BuildCommandImpl( const ReplaceKit &kit,
     {
         auto new_zone = TreeZone::CreateSubtree( XLink(key_node, &key_elt) );
         commands->Add( make_unique<DuplicateAndPopulateTreeZoneCommand>( new_zone ) );
-        dest_terminii.push_back( make_shared<ContainerUpdater>( dest_container ) );
+        // Make a placeholder in the dest container for the updater to point to
+        ContainerInterface::iterator dest_it = dest_container->insert( ContainerUpdater::GetPlaceholder() );
+        dest_terminii.push_back( make_shared<ContainerUpdater>( dest_container, dest_it ) );    
     }
     
     // Makes a free zone for the subcontainer
@@ -140,7 +142,7 @@ Graphable::Block StarAgent::GetGraphBlockInfo() const
  
 
 unique_ptr<BooleanResult> StarAgent::IsSubcontainerInCategoryOperator::Evaluate( const EvalKit &kit,
-                                                                           list<unique_ptr<SymbolResultInterface>> &&op_results ) const
+                                                                                 list<unique_ptr<SymbolResultInterface>> &&op_results ) const
 {
     ASSERT( op_results.size()==1 );        
     unique_ptr<SymbolResultInterface> ra = OnlyElementOf(move(op_results));

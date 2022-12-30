@@ -41,13 +41,15 @@ struct SubContainerRange : SubContainer,
     iterator my_end;
 public:
     SubContainerRange( TreePtr<Node> parent_x, const iterator &b, const iterator &e );
-    virtual const iterator &begin();
-    virtual const iterator &end();
-    virtual const iterator &insert( const TreePtrInterface & )       { ASSERTFAIL("Cannot modify SubContainerRange"); }
-    virtual const iterator &insert_front( const TreePtrInterface & ) { ASSERTFAIL("Cannot modify SubContainerRange"); }
-    virtual void erase( const iterator_interface & )      { ASSERTFAIL("Cannot modify SubContainerRange"); }
-    virtual void clear()                                  { ASSERTFAIL("Cannot modify SubContainerRange"); }    
-    virtual void push_back( const TreePtrInterface &gx )  { ASSERTFAIL("Cannot modify SubContainerRange"); }  
+    const iterator &begin() override;
+    const iterator &end() override;
+    const iterator &insert( const TreePtrInterface & ) final       { ASSERTFAIL("Cannot modify SubContainerRange"); }
+    const iterator &insert( const ContainerInterface::iterator_interface &pos, const TreePtrInterface & ) final       { ASSERTFAIL("Cannot modify SubContainerRange"); }
+    const iterator &insert_front( const TreePtrInterface & ) final { ASSERTFAIL("Cannot modify SubContainerRange"); }
+    void erase( const iterator_interface & ) final      { ASSERTFAIL("Cannot modify SubContainerRange"); }
+    void clear() final                                  { ASSERTFAIL("Cannot modify SubContainerRange"); }    
+    //void push_back( const TreePtrInterface &gx ) final  { ASSERTFAIL("Cannot modify SubContainerRange"); }  
+    
     virtual string GetContentsTrace(); 
     virtual void AssertMatchingContents( TreePtr<Node> other );    
     
@@ -103,8 +105,8 @@ struct SubContainerRangeExclusions : SubContainerRange
                                  const iterator &e );
     void SetExclusions( const ExclusionSet &exclusions_ );
     
-    virtual const iterator &begin();
-    virtual const iterator &end();
+    const iterator &begin() final;
+    const iterator &end() final;
     string GetContentsTrace();
 
 private: 

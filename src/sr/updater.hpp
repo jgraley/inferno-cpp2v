@@ -15,7 +15,7 @@ namespace SR
 class Updater : public Traceable
 {
 public:
-    virtual void Insert( TreePtr<Node> node ) const = 0;
+    virtual void Apply( TreePtr<Node> node ) = 0;
 };    
     
 // ------------------------- SingularUpdater --------------------------    
@@ -24,12 +24,12 @@ class SingularUpdater : public Updater
 {
 public:
     explicit SingularUpdater( TreePtrInterface *tree_ptr );
-    void Insert( TreePtr<Node> node ) const final;
+    void Apply( TreePtr<Node> node ) final;
     
     string GetTrace() const;
 
 private:
-    TreePtrInterface *tree_ptr;
+    TreePtrInterface * const tree_ptr;
 };    
     
 // ------------------------- ContainerUpdater --------------------------    
@@ -37,13 +37,19 @@ private:
 class ContainerUpdater : public Updater
 {
 public:
-    explicit ContainerUpdater( ContainerInterface *container );
-    void Insert( TreePtr<Node> node ) const final;
+    explicit ContainerUpdater( ContainerInterface *container,
+                               ContainerInterface::iterator it_ );             
+    void Apply( TreePtr<Node> node ) final;
     
+    static TreePtr<Node> GetPlaceholder();
     string GetTrace() const;
 
 private:
-    ContainerInterface *container;
+    ContainerInterface * const container;
+    ContainerInterface::iterator it_begin;
+    ContainerInterface::iterator it_end;
+    
+    bool dirty = false;
 };    
     
 }

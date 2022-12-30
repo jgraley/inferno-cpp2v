@@ -12,8 +12,9 @@ public:
 	{
 	}
 
-	virtual void operator()( TreePtr<Node> context,
-	    		             TreePtr<Node> *proot );
+	virtual void operator()( TreePtr<Node> root, 
+                             TreePtr<Node> context = TreePtr<Node>() );
+    
 private:
 	void OnLink( TreePtr<Node> p, TreePtr<Node> c );
 

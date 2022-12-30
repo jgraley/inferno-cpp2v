@@ -32,14 +32,14 @@ void EmbeddedSCRAgent::MaybeChildrenPlanOverlay( PatternLink me_plink,
 }
 
 
-Agent::CommandPtr EmbeddedSCRAgent::BuildCommandImpl( const ReplaceKit &kit, 
-                                                      PatternLink me_plink, 
-                                                      XLink key_xlink )
+Agent::CommandPtr EmbeddedSCRAgent::GenerateCommandImpl( const ReplaceKit &kit, 
+                                                         PatternLink me_plink, 
+                                                         XLink key_xlink )
 {
     auto commands = make_unique<CommandSequence>();
     
     PatternLink through_plink(this, GetThrough());
-    commands->Add( through_plink.GetChildAgent()->BuildCommand(kit, through_plink) );    
+    commands->Add( through_plink.GetChildAgent()->GenerateCommand(kit, through_plink) );    
     
     // Indicates that the embedded engine should act at the base
     // of whatever's at the top of the stack, which should be the 

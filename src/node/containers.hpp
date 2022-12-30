@@ -84,12 +84,14 @@ public:
 	virtual const iterator &begin() = 0;
     virtual const iterator &end() = 0;
     virtual const iterator &insert( const TreePtrInterface &gx ) = 0;
+    virtual const iterator &insert( const iterator_interface &pos, const TreePtrInterface &gx ) = 0;
     virtual const iterator &insert_front( const TreePtrInterface &gx ) = 0;
     virtual const TreePtrInterface &front();
     virtual const TreePtrInterface &back();
     virtual void erase( const iterator_interface &it ) = 0;
     virtual bool empty();
     virtual int size() const;
+    //virtual int count( const TreePtrInterface &gx ) = 0;
     virtual void clear() = 0;
 };
 
@@ -181,17 +183,17 @@ struct ContainerCommon : virtual ContainerInterface, CONTAINER_IMPL
     {
         erase( *it.GetUnderlyingIterator() );
     }
-    virtual void erase( const typename ContainerInterface::iterator_interface &it )
+    void erase( const typename ContainerInterface::iterator_interface &it ) override
     {
         auto cit = dynamic_cast<const iterator *>( &it );
         ASSERT( cit ); // if this fails, you passed erase() the wrong kind of iterator
         Impl::erase( *(typename Impl::iterator *)cit );    
     }
-    virtual bool empty() 
+    bool empty() override
     {
         return Impl::empty();
     }
-    virtual int size() const
+    int size() const override
     {
         return Impl::size();
     }
@@ -200,7 +202,7 @@ struct ContainerCommon : virtual ContainerInterface, CONTAINER_IMPL
 		value_type sx( value_type::InferredDynamicCast(gx) );
         return std::count( Impl::begin(), Impl::end(), sx );
     }
-    virtual void clear()
+    void clear() override
     {
     	return Impl::clear();
     }
@@ -321,37 +323,49 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
 	// So that's OK then.
     iterator my_begin, my_end, my_insert;
 
-    virtual const iterator &begin()
+    const iterator &begin() override
     {
     	my_begin.Impl::iterator::operator=( Impl::begin() );
     	return my_begin;
     }
-    virtual const iterator &end()
+    const iterator &end() override
     {
     	my_end.Impl::iterator::operator=( Impl::end() );
     	return my_end;
     }  
-	virtual const iterator &insert( const TreePtrInterface &gx ) // Simulating the SimpleAssociatedContaner API 
+	const iterator &insert( const TreePtrInterface &gx ) override // Simulating the SimpleAssociatedContaner API 
 	{
         // Like multiset, we do allow more than one copy of the same element
-		push_back( gx );
+		value_type sx( value_type::InferredDynamicCast(gx) );
+        Impl::push_back( sx );
         my_insert.Impl::iterator::operator=( prev(Impl::end()) );
         return my_insert;
 	}
-	virtual const iterator &insert_front( const TreePtrInterface &gx ) // Simulating the SimpleAssociatedContaner API 
+	const iterator &insert( const ContainerInterface::iterator_interface &pos, 
+                            const TreePtrInterface &gx ) override // Simulating the SimpleAssociatedContaner API 
+	{
+        // Like multiset, we do allow more than one copy of the same element		
+        auto posit = dynamic_cast<const iterator *>( &pos );
+        ASSERT( posit ); // if this fails, you passed insert() the wrong kind of iterator
+        value_type sx( value_type::InferredDynamicCast(gx) );
+        my_insert.Impl::iterator::operator=( Impl::insert( *(typename Impl::iterator *)posit, sx ) );
+        return my_insert;
+	}
+	const iterator &insert_front( const TreePtrInterface &gx ) override // Simulating the SimpleAssociatedContaner API 
 	{
         // Like multiset, we do allow more than one copy of the same element
-		push_front( gx );
+		value_type sx( value_type::InferredDynamicCast(gx) );
+        Impl::push_front( sx );
         my_insert.Impl::iterator::operator=( prev(Impl::end()) );
         return my_insert;
     }
 
-    virtual const TreePtr<VALUE_TYPE> &front()
+    const TreePtr<VALUE_TYPE> &front() override
     {
         ASSERT( !ContainerCommon<Impl>::empty() )("Attempting to obtain front() of an empty sequence");
         return Impl::front();
     }
-    virtual const TreePtr<VALUE_TYPE> &back()
+    const TreePtr<VALUE_TYPE> &back() override
     {
         ASSERT( !ContainerCommon<Impl>::empty() )("Attempting to obtain back() of an empty sequence");
         return Impl::back();
@@ -433,26 +447,26 @@ struct SimpleAssociativeContainer : virtual ContainerCommon< ASSOCIATIVE_IMPL< T
 	};
 
     using ContainerCommon<Impl>::erase;
-	virtual int erase( const TreePtrInterface &gx )
+	int erase( const TreePtrInterface &gx ) override
 	{
 		value_type sx( value_type::InferredDynamicCast(gx) );
 		return Impl::erase( sx );
 	}
 
 	iterator my_begin, my_end, my_insert;
-    virtual const iterator &begin()
+    const iterator &begin() override
     {
     	my_begin.Impl::iterator::operator=( Impl::begin() );
     	my_begin.owner = this;
     	return my_begin;
     }
-    virtual const iterator &end()
+    const iterator &end() override
     {
     	my_end.Impl::iterator::operator=( Impl::end() );
     	my_end.owner = this;
     	return my_end;
     }
-	virtual const iterator &insert( const TreePtrInterface &gx )
+	const iterator &insert( const TreePtrInterface &gx ) override
 	{
 		value_type sx( value_type::InferredDynamicCast(gx) );
 		auto p = Impl::insert( sx );
@@ -463,12 +477,23 @@ struct SimpleAssociativeContainer : virtual ContainerCommon< ASSOCIATIVE_IMPL< T
         my_insert.owner = this;
         return my_insert;
 	}
-	virtual const iterator &insert_front( const TreePtrInterface &gx )
+	const iterator &insert( const ContainerInterface::iterator_interface &pos, 
+                            const TreePtrInterface &gx ) override
+	{
+        auto posit = dynamic_cast<const iterator *>( &pos );
+        ASSERT( posit ); // if this fails, you passed insert() the wrong kind of iterator
+		value_type sx( value_type::InferredDynamicCast(gx) );
+		auto p = Impl::insert( *(typename Impl::iterator *)posit, sx );
+        my_insert.Impl::iterator::operator=( p.first );
+        my_insert.owner = this;
+        return my_insert;
+	}
+	const iterator &insert_front( const TreePtrInterface &gx ) override
 	{
 		return insert(gx);
 	}
 	template<typename OTHER>
-	inline const iterator &insert( const OTHER &gx )
+	const iterator &insert( const OTHER &gx )
 	{
 		value_type sx(gx);
 		auto p = Impl::insert( sx );
@@ -480,7 +505,17 @@ struct SimpleAssociativeContainer : virtual ContainerCommon< ASSOCIATIVE_IMPL< T
         return my_insert;
 	}
 	template<typename OTHER>
-	inline const iterator &insert_front( const OTHER &gx )
+	const iterator &insert( const typename ContainerInterface::iterator_interface &pos, 
+                            const OTHER &gx )
+	{
+		value_type sx( value_type::InferredDynamicCast(gx) );
+		auto p = Impl::insert( pos, sx );
+        my_insert.Impl::iterator::operator=( p.first );
+        my_insert.owner = this;
+        return my_insert;
+	}
+	template<typename OTHER>
+	const iterator &insert_front( const OTHER &gx )
 	{
 		return insert(gx);
 	}

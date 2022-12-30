@@ -28,9 +28,9 @@ public:
                                                                
     SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuery() const override;                                       
 
-    CommandPtr BuildCommandImpl( const ReplaceKit &kit, 
-                                 PatternLink me_plink, 
-                                 XLink key_xlink ) final;
+    CommandPtr GenerateCommandImpl( const ReplaceKit &kit, 
+                                    PatternLink me_plink, 
+                                    XLink key_xlink ) final;
 
     virtual Block GetGraphBlockInfo() const;
     

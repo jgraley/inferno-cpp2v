@@ -60,11 +60,11 @@ public:
     virtual bool ReplaceKeyerQuery( PatternLink me_plink, 
                                     set<PatternLink> keyer_plinks );                                  
     TreePtr<Node> BuildForBuildersAnalysis( PatternLink me_plink ) override;
-    CommandPtr BuildCommand( const ReplaceKit &kit, 
-                             PatternLink me_plink ) override;
-    virtual CommandPtr BuildCommandImpl( const ReplaceKit &kit, 
-                                         PatternLink me_plink, 
-                                         XLink key_xlink ) = 0;
+    CommandPtr GenerateCommand( const ReplaceKit &kit, 
+                                PatternLink me_plink ) override;
+    virtual CommandPtr GenerateCommandImpl( const ReplaceKit &kit, 
+                                            PatternLink me_plink, 
+                                            XLink key_xlink ) = 0;
     TreePtr<Node> CloneNode( bool force_dirty ) const;
     virtual string GetTrace() const;
 

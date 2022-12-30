@@ -110,7 +110,7 @@ void SCREngine::Plan::CategoriseAgents( const set<PatternLink> &enclosing_plinks
         if( enclosing_agents.count( plink.GetChildAgent() ) == 0 ) // exclude by agent
             my_plinks.insert( plink );
 
-    // Need the replace plinks in the same order that BuildCommand() walks the tree
+    // Need the replace plinks in the same order that GenerateCommand() walks the tree
     for( PatternLink plink : visible_replace_plinks_postorder )
         if( enclosing_plinks.count(plink) == 0 ) // exclude by plink
         {
@@ -140,7 +140,7 @@ void SCREngine::Plan::WalkVisible( set<PatternLink> &visible,
 {
     visible.insert( plink );    
     
-    // Gee, I sure hope recovers children in the same order as BuildCommandImpl()    
+    // Gee, I sure hope recovers children in the same order as GenerateCommandImpl()    
     list<PatternLink> visible_child_plinks = plink.GetChildAgent()->GetVisibleChildren(path); 
     
     for( PatternLink visible_child_plink : visible_child_plinks )
@@ -363,7 +363,7 @@ void SCREngine::Replace( XLink base_xlink )
     INDENT("R");
 	Agent::ReplaceKit replace_kit;
 	auto commands = make_unique<CommandSequence>();
-	unique_ptr<Command> build_command = plan.base_agent->BuildCommand(replace_kit, plan.base_plink);
+	unique_ptr<Command> build_command = plan.base_agent->GenerateCommand(replace_kit, plan.base_plink);
     commands->Add(move(build_command));
     
 	commands->Add( make_unique<DeleteCommand>( base_xlink ) );
@@ -547,7 +547,7 @@ void SCREngine::MarkBaseForEmbedded( RequiresSubordinateSCREngine *embedded_agen
                                      TreePtr<Node> embedded_through_subtree ) const
 {
     // permit multiple insertionswhile working on command sequence (so we can call
-    // BuildCommand() more than once on the same subtree)
+    // GenerateCommand() more than once on the same subtree)
     //InsertSolo( bases_for_embedded, make_pair( embedded_agent, embedded_through_subtree ) );
     bases_for_embedded.insert( make_pair( embedded_agent, embedded_through_subtree ) );
 }

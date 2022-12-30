@@ -22,9 +22,9 @@ public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;                
     virtual list<PatternLink> GetVisibleChildren( Path v ) const;
 
-    CommandPtr BuildCommandImpl( const ReplaceKit &kit, 
-                                 PatternLink me_plink, 
-                                 XLink key_xlink ) final;
+    CommandPtr GenerateCommandImpl( const ReplaceKit &kit, 
+                                    PatternLink me_plink, 
+                                    XLink key_xlink ) final;
 
     virtual void StartPlanOverlay();
     

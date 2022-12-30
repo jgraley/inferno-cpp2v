@@ -2,6 +2,7 @@
 
 #include "x_tree_database.hpp"
 #include "common/read_args.hpp"
+#include "tree/validate.hpp"
 
 using namespace SR;
 
@@ -18,32 +19,50 @@ void PopulateFreeZoneCommand::Execute( const ExecKit &kit ) const
     const list<shared_ptr<Updater>> &terminii = zone.GetTerminii();
     ASSERT( kit.free_zone_stack->size() >= terminii.size() ); // There must be enough items on the stack
     
+    // TODO currently operates in-place on member zone: in order to execute this 
+    // more than once, the zone will need to be duplicated to make the result zone
+    ASSERT( !dirty );
+    dirty = true;
+    
+    if( zone.IsEmpty() )
+    {
+        // We're empty, so we should have one terminus
+        ASSERT( terminii.size() == 1 );
+        // Exactly one zone to attach should be on the stack, and that's also
+        // going to be our output, since populating an empty zone just means
+        // substituting. So there's nothing to do.
+        return;
+    }
+
     // Get a forward list of subtrees to overwrite
-    list<FreeZone> subtrees;
+    list<FreeZone> operand_zones;
     for( auto terminus_upd : terminii )
     {
-        subtrees.push_front( kit.free_zone_stack->top() );
+        operand_zones.push_front( kit.free_zone_stack->top() );
         kit.free_zone_stack->pop();
     }
             
-    for( auto terminus_upd : terminii )
+    TRACE("-------------- Zone base ")(zone.GetBase())("\n");
+            
+    // Iterate over terminii and operand zones together, populating the terminii
+    // from the operands. 
+    for( auto p : Zip( terminii, operand_zones ) )
     {
-        TreePtr<Node> elt = subtrees.front().GetBase(); // see #703
-        subtrees.pop_front();
-
-        // Direct support for sub containers
-        if( ContainerInterface *sub_con = dynamic_cast<ContainerInterface *>(elt.get()) )
-        {
-            for( const TreePtrInterface &sub_elt : *sub_con )
-                terminus_upd->Insert( (TreePtr<Node>)sub_elt );                                     
-        }
-        else
-        {
-            terminus_upd->Insert( elt );
-        }
+        shared_ptr<Updater> terminus_upd = p.first;
+        FreeZone &operand_zone = p.second; 
+        ASSERT( operand_zone.GetTerminii().empty() )(zone)(" ")(Zip( terminii, operand_zones )); // TODO accumulate the terminii in the result zone.
+        ASSERT( !operand_zone.IsEmpty() );
+        TRACE("Terminus Updater ")(terminus_upd)(" Zone ")(operand_zone)("\n");
+        // Populate terminus. Apply() will expand SubContainers
+        ASSERT( operand_zone.GetBase() );
+        terminus_upd->Apply( operand_zone.GetBase() );
     }
     
-    kit.free_zone_stack->push( zone );      
+    Validate()( zone.GetBase() );
+    
+    // Create a new zone for the result, so we don't leave our member zone's terminii in.
+    auto result_zone = FreeZone::CreateSubtree( zone.GetBase() );    
+    kit.free_zone_stack->push( result_zone );      
 }
 
 // ------------------------- DuplicateTreeZoneCommand --------------------------
@@ -56,7 +75,14 @@ DuplicateTreeZoneCommand::DuplicateTreeZoneCommand( const TreeZone &zone_ ) :
 
 void DuplicateTreeZoneCommand::Execute( const ExecKit &kit ) const
 {
-    // todo
+    if( zone.IsEmpty() )
+    {
+        auto empty_free_zone = FreeZone::CreateEmpty();
+        kit.free_zone_stack->push( empty_free_zone );      
+        return;
+    }
+
+    ASSERTFAIL(); // TODO
 }
 
 // ------------------------- DuplicateAndPopulateTreeZoneCommand --------------------------
@@ -74,22 +100,37 @@ void DuplicateAndPopulateTreeZoneCommand::Execute( const ExecKit &kit ) const
     
     map<XLink, TreePtr<Node>> duplicator_terminus_map;
     
-    // Do terms backward to compensate for stack reversal
-    for( auto terminus_it = terminii.rbegin(); terminus_it != terminii.rend(); ++terminus_it )
-    {        
-        duplicator_terminus_map[*terminus_it] = kit.free_zone_stack->top().GetBase();
+    // Get a forward list of subtrees to overwrite
+    list<FreeZone> operand_zones;
+    for( auto terminus_upd : terminii )
+    {
+        operand_zones.push_front( kit.free_zone_stack->top() );
         kit.free_zone_stack->pop();
     }
 
+    // Iterate over terminii and operand zones together, filling the map for
+    // DuplicateSubtree() to use.
+    for( auto p : Zip( terminii, operand_zones ) )
+    {        
+        XLink terminus_upd = p.first;
+        FreeZone &operand_zone = p.second; 
+        ASSERT( operand_zone.GetTerminii().empty() )(zone)(" ")(Zip( terminii, operand_zones )); // TODO accumulate the terminii in the result zone.
+
+        duplicator_terminus_map[terminus_upd] = operand_zone.GetBase();
+    }
+
+    // Duplicate the subtree, populating from the map.
     TreePtr<Node> new_base_x = Duplicate::DuplicateSubtree( kit.green_grass, 
                                                             zone.GetBase(), 
                                                             duplicator_terminus_map );   
     
+    // Consistency check
     for( auto p : duplicator_terminus_map )
         ASSERT( !p.second ); // these are switched to NULL on reaching each terminus
 
-    auto new_free_zone = FreeZone::CreateSubtree( new_base_x );
-    kit.free_zone_stack->push( new_free_zone );      
+    // Create a new zone for the result.
+    auto result_zone = FreeZone::CreateSubtree( new_base_x );
+    kit.free_zone_stack->push( result_zone );      
 }
 
 // ------------------------- DeleteCommand --------------------------
@@ -122,6 +163,8 @@ void InsertCommand::Execute( const ExecKit &kit ) const
     ASSERT( !target_base_xlink.GetChildX() );
     
     // Patch the tree
+    FreeZone zone = kit.free_zone_stack->top();
+    Validate()( zone.GetBase() );
     target_base_xlink.SetXPtr( kit.free_zone_stack->top().GetBase() );
     
     // Update database 
@@ -141,6 +184,7 @@ void MarkBaseForEmbeddedCommand::Execute( const ExecKit &kit ) const
 {
     ASSERT( kit.free_zone_stack->top().GetBase() );
     kit.scr_engine->MarkBaseForEmbedded( embedded_agent, kit.free_zone_stack->top().GetBase() );   
+    // Note: SCREngine will tell us to take a hike if we execute this more than once
 }
     
 // ------------------------- CommandSequence --------------------------

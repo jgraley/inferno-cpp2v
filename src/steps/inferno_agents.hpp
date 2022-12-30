@@ -109,9 +109,9 @@ struct IdentifierByNameAgent : public virtual SearchLeafAgent
     virtual Block GetGraphBlockInfo() const;
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
 
-    CommandPtr BuildCommandImpl( const ReplaceKit &kit, 
-                                 PatternLink me_plink, 
-                                 XLink key_xlink ) final;
+    CommandPtr GenerateCommandImpl( const ReplaceKit &kit, 
+                                    PatternLink me_plink, 
+                                    XLink key_xlink ) final;
 
     virtual pair<TreePtr<Node>, TreePtr<Node>> GetBounds( string name ) const { ASSERTFAIL(); } // TODO implemnt all and put back = 0
     string name;

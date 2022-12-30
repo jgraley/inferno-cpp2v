@@ -240,7 +240,7 @@ Sequence<Declaration> JumbleDecls( Sequence<Declaration> c )
    	    
    	    // Insert the element. If we didn't find a dependency, we'll be off the end of
    	    // the sequence and hopefully insert() will actually push_back()
-  		s.insert( i, to_insert ); 
+  		s.insert( i, (const TreePtrInterface &)to_insert ); 
 	}
 	
 	ASSERT( s.size() == c.size() );
@@ -254,7 +254,7 @@ Sequence<Declaration> ReverseDecls( Sequence<Declaration> c )
 	{
    	    // Insert the element. If we didn't find a dependency, we'll be off the end of
    	    // the sequence and hopefully insert() will actually push_back()
-  		s.insert( s.begin(), to_insert ); 
+  		s.insert( s.begin(), (const TreePtrInterface &)to_insert ); 
 	}
 	
 	ASSERT( s.size() == c.size() );

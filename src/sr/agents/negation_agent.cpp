@@ -46,9 +46,9 @@ void NegationAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
 }
 
 
-Agent::CommandPtr NegationAgent::BuildCommandImpl( const ReplaceKit &kit, 
-                                                   PatternLink me_plink, 
-                                                   XLink key_xlink )
+Agent::CommandPtr NegationAgent::GenerateCommandImpl( const ReplaceKit &kit, 
+                                                      PatternLink me_plink, 
+                                                      XLink key_xlink )
 {
     // Negation is ambiguous because of the negation property
     ASSERT(key_xlink)("Unkeyed boolean agent seen in replace context");

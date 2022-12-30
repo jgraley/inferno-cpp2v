@@ -29,9 +29,9 @@ public:
     virtual void MaybeChildrenPlanOverlay( PatternLink me_plink, 
                                   PatternLink under_plink );
 
-    CommandPtr BuildCommandImpl( const ReplaceKit &kit, 
-                                 PatternLink me_plink, 
-                                 XLink key_xlink ) final;
+    CommandPtr GenerateCommandImpl( const ReplaceKit &kit, 
+                                    PatternLink me_plink, 
+                                    XLink key_xlink ) final;
 
     virtual list<PatternLink> GetVisibleChildren( Path v ) const;
 	virtual bool IsSearch() const { return is_search; }

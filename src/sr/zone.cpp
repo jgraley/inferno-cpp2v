@@ -75,7 +75,7 @@ string FreeZone::GetTrace() const
     else
     {
         if( terminii.empty() )
-            arrow = " →"; // Indicates the zone goes all the way to leaves i.e. subtree
+            arrow = " → "; // Indicates the zone goes all the way to leaves i.e. subtree
         else
             arrow = " ⇥ "; // Indicates the zone terminates
     }
@@ -144,7 +144,7 @@ string TreeZone::GetTrace() const
     {
         string arrow;
         if( terminii.empty() )
-            arrow = " →"; // Indicates the zone goes all the way to leaves i.e. subtree
+            arrow = " → "; // Indicates the zone goes all the way to leaves i.e. subtree
         else
             arrow = " ⇥ "; // Indicates the zone terminates
             

@@ -29,9 +29,9 @@ shared_ptr<PatternQuery> DepthAgent::GetPatternQuery() const
 }
 
 
-Agent::CommandPtr DepthAgent::BuildCommandImpl( const ReplaceKit &kit, 
-                                                PatternLink me_plink, 
-                                                XLink key_xlink ) 
+Agent::CommandPtr DepthAgent::GenerateCommandImpl( const ReplaceKit &kit, 
+                                                   PatternLink me_plink, 
+                                                   XLink key_xlink ) 
 {
     INDENT("#");
     auto commands = make_unique<CommandSequence>();
@@ -39,7 +39,7 @@ Agent::CommandPtr DepthAgent::BuildCommandImpl( const ReplaceKit &kit,
     XLink terminus_key_xlink = my_scr_engine->GetReplaceKey( PatternLink(this, &terminus) );
     ASSERT(terminus_key_xlink);// this could mean replace is being attempted on a DepthAgent in an abnormal context
     PatternLink terminus_plink(this, &terminus);
-    commands->Add( terminus_plink.GetChildAgent()->BuildCommand(kit, terminus_plink) );
+    commands->Add( terminus_plink.GetChildAgent()->GenerateCommand(kit, terminus_plink) );
     // Leaves new_terminus_subtree on the stack
 
     TreeZone new_zone( key_xlink, {terminus_key_xlink} );

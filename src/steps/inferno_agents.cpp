@@ -124,9 +124,9 @@ SYM::Lazy<SYM::BooleanExpression> IdentifierByNameAgent::SymbolicNormalLinkedQue
 }
 
 
-Agent::CommandPtr IdentifierByNameAgent::BuildCommandImpl( const ReplaceKit &kit, 
-                                                           PatternLink me_plink, 
-                                                           XLink key_xlink )
+Agent::CommandPtr IdentifierByNameAgent::GenerateCommandImpl( const ReplaceKit &kit, 
+                                                              PatternLink me_plink, 
+                                                              XLink key_xlink )
 {
     ASSERT(key_xlink)("Unkeyed agent seen in replace context");
     auto new_zone = TreeZone::CreateSubtree( key_xlink );

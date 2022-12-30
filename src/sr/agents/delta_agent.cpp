@@ -66,10 +66,10 @@ void DeltaAgent::StartPlanOverlay()
 }
 
 
-Agent::CommandPtr DeltaAgent::BuildCommandImpl( const ReplaceKit &kit, 
-                                                PatternLink me_plink, 
-                                                XLink key_xlink )
+Agent::CommandPtr DeltaAgent::GenerateCommandImpl( const ReplaceKit &kit, 
+                                                   PatternLink me_plink, 
+                                                   XLink key_xlink )
 {
     PatternLink overlay_plink(this, GetOverlay());
-    return overlay_plink.GetChildAgent()->BuildCommand(kit, overlay_plink);    
+    return overlay_plink.GetChildAgent()->GenerateCommand(kit, overlay_plink);    
 }                                         

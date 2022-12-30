@@ -21,12 +21,14 @@ public:
 	typedef ITERATOR iterator; /// So that the standard Container::iterator requirement is met
 	ContainerFromIterator( CP ...cp ) : my_begin( cp... ), my_end() {}
     
-	virtual const iterator &begin() { return my_begin; }
-    virtual const iterator &end()   { return my_end; }
-    virtual void erase( const ContainerInterface::iterator_interface & ) { ASSERTFAIL("Cannot modify ContainerFromIterator<>"); }
-    virtual void clear()                                     { ASSERTFAIL("Cannot modify ContainerFromIterator<>"); }    
-    virtual const iterator &insert( const TreePtrInterface & )          { ASSERTFAIL("Cannot modify ContainerFromIterator<>"); }
-    virtual const iterator &insert_front( const TreePtrInterface & )    { ASSERTFAIL("Cannot modify ContainerFromIterator<>"); }
+	const iterator &begin() final { return my_begin; }
+    const iterator &end() final   { return my_end; }
+    void erase( const ContainerInterface::iterator_interface & ) final { ASSERTFAIL("Cannot modify ContainerFromIterator<>"); }
+    void clear() final                                     { ASSERTFAIL("Cannot modify ContainerFromIterator<>"); }    
+    const iterator &insert( const TreePtrInterface & ) final          { ASSERTFAIL("Cannot modify ContainerFromIterator<>"); }
+    const iterator &insert( const ContainerInterface::iterator_interface &pos, 
+                            const TreePtrInterface & ) final          { ASSERTFAIL("Cannot modify ContainerFromIterator<>"); }
+    const iterator &insert_front( const TreePtrInterface & ) final    { ASSERTFAIL("Cannot modify ContainerFromIterator<>"); }
 private:
     iterator my_begin, my_end;
 };

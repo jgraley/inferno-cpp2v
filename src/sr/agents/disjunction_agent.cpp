@@ -59,9 +59,9 @@ SYM::Lazy<SYM::BooleanExpression> DisjunctionAgent::SymbolicNormalLinkedQuery() 
 }
 
 
-Agent::CommandPtr DisjunctionAgent::BuildCommandImpl( const ReplaceKit &kit, 
-                                                      PatternLink me_plink, 
-                                                      XLink key_xlink )
+Agent::CommandPtr DisjunctionAgent::GenerateCommandImpl( const ReplaceKit &kit, 
+                                                         PatternLink me_plink, 
+                                                         XLink key_xlink )
 {
     // Conjuction and disjunction are ambiguous because there are 
     // multiple conjuncts/disjuncts

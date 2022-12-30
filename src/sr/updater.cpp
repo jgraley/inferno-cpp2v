@@ -12,9 +12,10 @@ SingularUpdater::SingularUpdater( TreePtrInterface *tree_ptr_ ) :
 }
 
 
-void SingularUpdater::Insert( TreePtr<Node> node ) const
+void SingularUpdater::Apply( TreePtr<Node> node )
 {
     *tree_ptr = node;
+    TRACE("Singular applied ")(node)("\n");    
 }
     
 
@@ -25,15 +26,57 @@ string SingularUpdater::GetTrace() const
     
 // ------------------------- ContainerUpdater --------------------------    
     
-ContainerUpdater::ContainerUpdater( ContainerInterface *container_ ) :
-    container( container_ )
+ContainerUpdater::ContainerUpdater( ContainerInterface *container_,
+                                    ContainerInterface::iterator it_ ) :
+    container( container_ ),
+    it_begin( it_ ),
+    it_end( ++it_ )
 {
+    ASSERT( it_begin != container->end() );
+    // but it_end could be end()
 }
 
 
-void ContainerUpdater::Insert( TreePtr<Node> node ) const
+void ContainerUpdater::Apply( TreePtr<Node> node )
 {
-    (void)container->insert( node ); 
+    ASSERT( !dirty );
+    dirty = true;
+
+    // C++ insert() has "insert before" semantics, see https://cplusplus.com/reference/list/list/insert/
+    // (this is logical: there are n+1 possible insert positions and n+1 iterator values if you include end())
+    // so "insert before" the end, in order to preserve ordering.
+    if( ContainerInterface *operand_sub_con = dynamic_cast<ContainerInterface *>(node.get()) )
+    {            
+        // Operand zone base has container interface, so it's a SubContainer. Expand it and populate.
+        for( const TreePtrInterface &sub_elt : *operand_sub_con )
+        {
+            ASSERT( (TreePtr<Node>)sub_elt );
+            container->insert( *it_end.GetUnderlyingIterator(), (TreePtr<Node>)sub_elt ); 
+        }                                    
+    }
+    else
+    {
+        // Populate terminus with singular-based zone.
+        ASSERT( node );
+        container->insert( *it_end.GetUnderlyingIterator(), node ); 
+    }
+    
+    // We don't need the placeholder any more
+    container->erase( *it_begin.GetUnderlyingIterator() );  
+    
+    /**
+     * Why all this complciated placeholder business then?
+     * It's to permit multiple terminii to refer to the same Sequence
+     * with a well-defined relative order. We place a null element in
+     * for each terminus so that iterators relative to different
+     * terminii have differnt values.
+     */     
+}
+
+
+TreePtr<Node> ContainerUpdater::GetPlaceholder()
+{
+    return TreePtr<Node>(); // It's just a NULL tree ptr!
 }
 
 

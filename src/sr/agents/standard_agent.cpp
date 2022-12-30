@@ -523,9 +523,9 @@ void StandardAgent::MaybeChildrenPlanOverlay( PatternLink me_plink,
 }
 
 
-Agent::CommandPtr StandardAgent::BuildCommandImpl( const ReplaceKit &kit, 
-                                                   PatternLink me_plink, 
-                                                   XLink key_xlink ) 
+Agent::CommandPtr StandardAgent::GenerateCommandImpl( const ReplaceKit &kit, 
+                                                      PatternLink me_plink, 
+                                                      XLink key_xlink ) 
 {
     INDENT("B");
 
@@ -535,7 +535,7 @@ Agent::CommandPtr StandardAgent::BuildCommandImpl( const ReplaceKit &kit,
         // The under pattern node is in a different location from over (=this), 
         // but overlay planning has set up overlay_under_plink for us.
         XLink under_xlink = my_scr_engine->GetReplaceKey( overlay_under_plink );
-        return BuildCommandOverlay( kit, me_plink, under_xlink );
+        return GenerateCommandOverlay( kit, me_plink, under_xlink );
     }
     else if( key_xlink ) 
     {
@@ -543,20 +543,20 @@ Agent::CommandPtr StandardAgent::BuildCommandImpl( const ReplaceKit &kit,
         // The under and over pattern nodes are both this. AndRuleEngine 
         // has keyed this, and due wildcarding, key will be a final node
         // i.e. possibly a subclass of this node.
-        return BuildCommandOverlay( kit, me_plink, key_xlink );
+        return GenerateCommandOverlay( kit, me_plink, key_xlink );
     }
     else
     {
         // Free replace pattern, just duplicate it.
         ASSERT( me_plink.GetPattern()->IsFinal() ); 
-        return BuildCommandNormal( kit, me_plink ); 
+        return GenerateCommandNormal( kit, me_plink ); 
     }
 }
 
 
-Agent::CommandPtr StandardAgent::BuildCommandOverlay( const ReplaceKit &kit, 
-                                                      PatternLink me_plink, 
-                                                      XLink under_xlink )  // overlaying
+Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit, 
+                                                         PatternLink me_plink, 
+                                                         XLink under_xlink )  // overlaying
 {
 	INDENT("O");
     ASSERT( under_xlink );
@@ -613,8 +613,10 @@ Agent::CommandPtr StandardAgent::BuildCommandOverlay( const ReplaceKit &kit,
 		        ASSERT( my_elt )("Some element of member %d (", i)(*my_con)(") of ")(*this)(" was nullptr\n");
 		        TRACE("Got ")(*my_elt)("\n");
                 PatternLink my_elt_plink( this, &my_elt );
-                commands->Add( my_elt_plink.GetChildAgent()->BuildCommand(kit, my_elt_plink) );
-                dest_terminii.push_back( make_shared<ContainerUpdater>( dest_con ) );
+                commands->Add( my_elt_plink.GetChildAgent()->GenerateCommand(kit, my_elt_plink) );
+                // Make a placeholder in the dest container for the updater to point to
+                ContainerInterface::iterator dest_it = dest_con->insert( ContainerUpdater::GetPlaceholder() );
+                dest_terminii.push_back( make_shared<ContainerUpdater>( dest_con, dest_it ) );     
 	        }
 	        present_in_overlay.insert( dest_items[i] );
         }            
@@ -630,7 +632,7 @@ Agent::CommandPtr StandardAgent::BuildCommandOverlay( const ReplaceKit &kit,
                 auto dest_upd = make_shared<SingularUpdater>( dest_singular );
                 
                 PatternLink my_singular_plink( this, my_singular );                    
-                commands->Add( my_singular_plink.GetChildAgent()->BuildCommand(kit, my_singular_plink) );
+                commands->Add( my_singular_plink.GetChildAgent()->GenerateCommand(kit, my_singular_plink) );
                 dest_terminii.push_back( make_shared<SingularUpdater>( dest_singular ) );            
             }
         }
@@ -674,7 +676,9 @@ Agent::CommandPtr StandardAgent::BuildCommandOverlay( const ReplaceKit &kit,
 		        ASSERT( under_elt ); // present simplified scheme disallows nullptr
                 auto under_zone = TreeZone::CreateSubtree( XLink(under_node, &under_elt) );
                 commands->Add( make_unique<DuplicateAndPopulateTreeZoneCommand>( under_zone ) );
-                dest_terminii.push_back( make_shared<ContainerUpdater>( dest_con ) );            
+                // Make a placeholder in the dest container for the updater to point to
+                ContainerInterface::iterator dest_it = dest_con->insert( ContainerUpdater::GetPlaceholder() );
+                dest_terminii.push_back( make_shared<ContainerUpdater>( dest_con, dest_it ) );     
  	        }
         }            
         else if( TreePtrInterface *under_singular = dynamic_cast<TreePtrInterface *>(under_items[i]) )
@@ -699,15 +703,15 @@ Agent::CommandPtr StandardAgent::BuildCommandOverlay( const ReplaceKit &kit,
 }
 
 
-Agent::CommandPtr StandardAgent::BuildCommandNormal( const ReplaceKit &kit, 
-                                                     PatternLink me_plink ) 
+Agent::CommandPtr StandardAgent::GenerateCommandNormal( const ReplaceKit &kit, 
+                                                        PatternLink me_plink ) 
 {
 	INDENT("N");
  
 	// Make a new node, force dirty because from pattern
     // Use clone here because we never want to place an Agent object in the output program tree.
     // Identifiers that have multiple references in the pattern will be coupled, and  
-    // after the first hit, BuildCommandOverlay() will handle the rest and it uses Duplicate()
+    // after the first hit, GenerateCommandOverlay() will handle the rest and it uses Duplicate()
     TreePtr<Node> dest = AgentCommon::CloneNode(true);
     ASSERT( dest->IsFinal() )(*this)(" about to build non-final ")(*dest)("\n"); 
 
@@ -742,8 +746,10 @@ Agent::CommandPtr StandardAgent::BuildCommandNormal( const ReplaceKit &kit,
 		        ASSERT( my_elt )("Some element of member %d (", i)(*my_con)(") of ")(*this)(" was nullptr\n");
 		        TRACE("Got ")(*my_elt)("\n");
                 PatternLink my_elt_plink( this, &my_elt );
-                commands->Add( my_elt_plink.GetChildAgent()->BuildCommand(kit, my_elt_plink) );
-                dest_terminii.push_back( make_shared<ContainerUpdater>( dest_con ) );
+                commands->Add( my_elt_plink.GetChildAgent()->GenerateCommand(kit, my_elt_plink) );
+                // Make a placeholder in the dest container for the updater to point to
+                ContainerInterface::iterator dest_it = dest_con->insert( ContainerUpdater::GetPlaceholder() );
+                dest_terminii.push_back( make_shared<ContainerUpdater>( dest_con, dest_it ) );    
             }
         }            
         else if( TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[i]) )
@@ -752,7 +758,7 @@ Agent::CommandPtr StandardAgent::BuildCommandNormal( const ReplaceKit &kit,
             TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
             ASSERT( *my_singular )("Member %d (", i)(*my_singular)(") of ")(*this)(" was nullptr when not overlaying\n");            
             PatternLink my_singular_plink( this, my_singular );                    
-            commands->Add( my_singular_plink.GetChildAgent()->BuildCommand(kit, my_singular_plink) );
+            commands->Add( my_singular_plink.GetChildAgent()->GenerateCommand(kit, my_singular_plink) );
             dest_terminii.push_back( make_shared<SingularUpdater>( dest_singular ) );            
         }
         else

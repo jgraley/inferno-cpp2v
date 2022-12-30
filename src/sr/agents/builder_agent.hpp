@@ -21,9 +21,9 @@ public:
     bool ReplaceKeyerQuery( PatternLink me_plink, 
                             set<PatternLink> keyer_plinks ) final;                                  
 
-    CommandPtr BuildCommandImpl( const ReplaceKit &kit, 
-                                 PatternLink me_plink, 
-                                 XLink key_xlink ) final;
+    CommandPtr GenerateCommandImpl( const ReplaceKit &kit, 
+                                    PatternLink me_plink, 
+                                    XLink key_xlink ) final;
                                             
     virtual TreePtr<Node> BuildNewSubtree() = 0;
 };

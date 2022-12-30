@@ -521,7 +521,7 @@ bool AgentCommon::ReplaceKeyerQuery( PatternLink me_plink,
 TreePtr<Node> AgentCommon::BuildForBuildersAnalysis( PatternLink me_plink )
 {
 	Agent::ReplaceKit kit;
-	auto commands = BuildCommand(kit, me_plink);
+	auto commands = GenerateCommand(kit, me_plink);
 
     stack<FreeZone> free_zone_stack;
     Command::ExecKit exec_kit {nullptr, my_scr_engine, my_scr_engine, &free_zone_stack};
@@ -531,8 +531,8 @@ TreePtr<Node> AgentCommon::BuildForBuildersAnalysis( PatternLink me_plink )
 }
 
 
-Agent::CommandPtr AgentCommon::BuildCommand( const ReplaceKit &kit, 
-                                             PatternLink me_plink )
+Agent::CommandPtr AgentCommon::GenerateCommand( const ReplaceKit &kit, 
+                                                PatternLink me_plink )
 {
     INDENT("C");
     ASSERT( me_plink.GetChildAgent() == this );
@@ -548,7 +548,7 @@ Agent::CommandPtr AgentCommon::BuildCommand( const ReplaceKit &kit,
 		      (*this)(" keyed with non-final node ")(key_xlink)("\n"); 
     }
 
-    return BuildCommandImpl( kit, me_plink, key_xlink );
+    return GenerateCommandImpl( kit, me_plink, key_xlink );
 }
 
 

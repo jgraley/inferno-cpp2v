@@ -84,8 +84,8 @@ public:
                                     set<PatternLink> keyer_plinks ) = 0;
 
     virtual TreePtr<Node> BuildForBuildersAnalysis( PatternLink me_plink ) = 0;
-    virtual CommandPtr BuildCommand( const ReplaceKit &kit, 
-                                     PatternLink me_plink ) = 0;
+    virtual CommandPtr GenerateCommand( const ReplaceKit &kit, 
+                                        PatternLink me_plink ) = 0;
     virtual list<PatternLink> GetChildren() const = 0;
     virtual list<PatternLink> GetVisibleChildren( Path v ) const = 0;                        
     virtual bool ShouldGenerateCategoryClause() const = 0;                                

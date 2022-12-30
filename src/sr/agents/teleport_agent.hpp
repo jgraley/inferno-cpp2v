@@ -54,9 +54,9 @@ public:
 
 	bool IsExtenderLess( const Extender &r ) const override;
 
-    CommandPtr BuildCommandImpl( const ReplaceKit &kit, 
-                                 PatternLink me_plink, 
-                                 XLink key_xlink ) final;
+    CommandPtr GenerateCommandImpl( const ReplaceKit &kit, 
+                                    PatternLink me_plink, 
+                                    XLink key_xlink ) final;
 
     class TeleportOperator : public SYM::SymbolToSymbolExpression
     {

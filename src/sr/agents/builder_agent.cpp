@@ -32,9 +32,9 @@ bool BuilderAgent::ReplaceKeyerQuery( PatternLink me_plink,
 }
  
  
-Agent::CommandPtr BuilderAgent::BuildCommandImpl( const ReplaceKit &kit, 
-                                                  PatternLink me_plink, 
-                                                  XLink key_xlink )
+Agent::CommandPtr BuilderAgent::GenerateCommandImpl( const ReplaceKit &kit, 
+                                                     PatternLink me_plink, 
+                                                     XLink key_xlink )
 {
     INDENT("%");
 

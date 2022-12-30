@@ -78,9 +78,9 @@ bool TeleportAgent::IsExtenderLess( const Extender &r ) const
 }
 
 
-Agent::CommandPtr TeleportAgent::BuildCommandImpl( const ReplaceKit &kit, 
-                                                   PatternLink me_plink, 
-                                                   XLink key_xlink )
+Agent::CommandPtr TeleportAgent::GenerateCommandImpl( const ReplaceKit &kit, 
+                                                      PatternLink me_plink, 
+                                                      XLink key_xlink )
 {
     ASSERT(key_xlink)("Unkeyed agent seen in replace context");
     auto new_zone = TreeZone::CreateSubtree( key_xlink );

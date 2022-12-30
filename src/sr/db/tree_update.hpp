@@ -49,6 +49,7 @@ public:
 
 private:
 	FreeZone zone;
+    mutable bool dirty = false;
 };
 
 // ------------------------- DuplicateTreeZoneCommand --------------------------

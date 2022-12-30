@@ -25,6 +25,8 @@ bool SimpleCompare::operator()( TreePtr<Node> l, TreePtr<Node> r ) const
 
 Orderable::Diff SimpleCompare::Compare3Way( TreePtr<Node> l, TreePtr<Node> r ) const
 {   
+    ASSERT( l );
+    ASSERT( r );
     return Compare3Way( *l, *r );
 }
     

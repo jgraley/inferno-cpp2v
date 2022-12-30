@@ -12,46 +12,48 @@
 
 using namespace CPPTree;
 
-void Validate::operator()( TreePtr<Node> context,
-						   TreePtr<Node> *proot )
+void Validate::operator()( TreePtr<Node> root, 
+                           TreePtr<Node> context )
 {
-	(void)context;
 	decl_refs.clear();
 	total_refs.clear();
 
-	// Is the proot reachable from context? If not that's probably because we haven't inserted
-	// the subtree at proot into the program tree at context yet.
+	// Is the root reachable from context? If not that's probably because we haven't inserted
+	// the subtree at root into the program tree at context yet.
 	bool connected = false;
 
-	// First walk over the entire context counting incoming links (because
-	// incoming links from other than the subtree of interest still count
-	// when validating link counts).
-	Walk wcon( context, nullptr, nullptr );
-	for( const TreePtrInterface &x : wcon )
-	{
-		if( x )
-		{
-			// TODO use UniqueWalk for this!
-			vector< Itemiser::Element * > items = ((TreePtr<Node>)x)->Itemise();
-		    for( Itemiser::Element *item : items )
-			{
-				if( ContainerInterface *con = dynamic_cast<ContainerInterface *>(item) )
-				{
-					for( const TreePtrInterface &tpi : *con )
-						OnLink( (TreePtr<Node>)x, (TreePtr<Node>)tpi );
-				}
-				else if( TreePtrInterface *singular = dynamic_cast<TreePtrInterface *>(item) )
-				{
-					OnLink( (TreePtr<Node>)x, (TreePtr<Node>)*singular );
-				}
-			}
-			if( (TreePtr<Node>)x == *proot )
-				connected = true;
-		}
-	}
-
+	if( context )
+    {
+        // First walk over the entire context counting incoming links (because
+        // incoming links from other than the subtree of interest still count
+        // when validating link counts).
+        Walk wcon( context, nullptr, nullptr );
+        for( const TreePtrInterface &x : wcon )
+        {
+            if( x )
+            {
+                // TODO use UniqueWalk for this!
+                vector< Itemiser::Element * > items = ((TreePtr<Node>)x)->Itemise();
+                for( Itemiser::Element *item : items )
+                {
+                    if( ContainerInterface *con = dynamic_cast<ContainerInterface *>(item) )
+                    {
+                        for( const TreePtrInterface &tpi : *con )
+                            OnLink( (TreePtr<Node>)x, (TreePtr<Node>)tpi );
+                    }
+                    else if( TreePtrInterface *singular = dynamic_cast<TreePtrInterface *>(item) )
+                    {
+                        OnLink( (TreePtr<Node>)x, (TreePtr<Node>)*singular );
+                    }
+                }
+                if( (TreePtr<Node>)x == root )
+                    connected = true;
+            }
+        }
+    }
+    
 	// Now do the actual validation, only on the specified subtree
-	Walk w( *proot, nullptr, nullptr );
+	Walk w( root, nullptr, nullptr );
 	for( Walk::iterator wit = w.begin(); wit != w.end(); ++wit )
 	{
 		const auto x = (TreePtr<Node>)*wit;
@@ -62,27 +64,30 @@ void Validate::operator()( TreePtr<Node> context,
 
 			// Intermediate nodes are only allowed in search and replace patterns; the trees for programs
 			// must be built from final nodes.
-            TRACE("validating finality of ")(*x)(" as %d\n", (int)x->IsFinal() );
+            //TRACE("validating finality of ")(*x)(" as %d\n", (int)x->IsFinal() );
 			ASSERT( x->IsFinal() )( "Found intermediate (non-final) node ")(*x)(" at ")(wit);
 
 			// Check that we can successfully call HasType on every Expression
-			if( TreePtr<Expression> e = DynamicTreePtrCast<Expression>(x) )
-			    (void)HasType::instance(e, context);
+			if( context )
+            {
+                if(TreePtr<Expression> e = DynamicTreePtrCast<Expression>(x) )
+                    (void)HasType::instance(e, context);
 
-			// Check that every identifier has a declaration
-			if( TreePtr<InstanceIdentifier> ii = DynamicTreePtrCast<InstanceIdentifier>(x) )
-			    (void)HasDeclaration()(ii, context);
+                // Check that every identifier has a declaration
+                if( TreePtr<InstanceIdentifier> ii = DynamicTreePtrCast<InstanceIdentifier>(x) )
+                    (void)HasDeclaration()(ii, context);
+            }
 
-			// if x is missing it's NODE_FUNCTIONS macro, then the Clone we get (y) will be a clone
+			// if x is missing its NODE_FUNCTIONS macro, then the Clone we get (y) will be a clone
 			// of the most specialised base of x that does have NODE_FUNCTIONS.
 			TreePtr<Node> y( dynamic_pointer_cast<Node>((*x).Clone()) );
 			ASSERT( y->GetName()==x->GetName() )(*x)(" apparently does not contain NODE_FUNCTIONS macro because it Clone()s to ")(*y)(" at ")(wit);
         }
 
-		if( x && x != context && connected ) // Skip the root, since we won't have counted any refs to it
+		if( context && connected && x && x != context ) // Skip the root, since we won't have counted any refs to it
 			                                 // Also, these rules may be broken for disconnected subtrees
 		{
-			TRACE("decl_refs=%d total refs=%d\n", decl_refs[x], total_refs[x] );
+			//TRACE("decl_refs=%d total refs=%d\n", decl_refs[x], total_refs[x] );
 			// Check incoming pointers rule: Non-identifier nodes should be referenced exactly once
 			// Identifiers should be referenced exactly once by the node that declares them,
 			// and may be referenced zero or more times by other nodes. We skip the
