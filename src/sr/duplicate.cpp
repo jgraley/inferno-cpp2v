@@ -94,12 +94,29 @@ TreePtr<Node> Duplicate::DuplicateSubtreeWorker( const DirtyGrassUpdateInterface
             for( const TreePtrInterface &source_elt : *source_container )
             {
                 ASSERTS( source_elt ); // present simplified scheme disallows nullptr
-                //TRACES("Duplicating ")(*source_elt)("\n");
-                TreePtr<Node> dest_elt = DuplicateSubtree( dirty_grass,
-                                                                 XLink( source, &source_elt ), 
-                                                                 terminii_map );
-                //TRACE("inserting ")(*dest_elt)(" directly\n");
-                dest_container->insert( dest_elt );
+                XLink source_child_xlink = XLink(source, &source_elt);
+
+                if( terminii_map.count(source_child_xlink) == 1 ) 
+                {
+                    TerminusInfo &terminus_info = terminii_map.at(source_child_xlink);
+                    TreePtr<Node> dest_terminus = terminus_info.dest;
+                    TRACES("Reached source terminus ")(source_child_xlink)
+                          (" and substituting ")(dest_terminus)("\n");
+                    terminus_info.dest = TreePtr<Node>();
+                    ContainerInterface::iterator dest_it = dest_container->insert( dest_terminus );
+                    // NULL value was provided, so consider it a placeholder for an updater
+                    if( !dest_terminus )
+                        terminus_info.updater = make_shared<ContainerUpdater>( dest_container, dest_it );
+                }
+                else
+                {
+                     //TRACES("Duplicating ")(*source_elt)("\n");
+                    TreePtr<Node> dest_elt = DuplicateSubtreeWorker( dirty_grass,
+                                                                     source_child_xlink, 
+                                                                     terminii_map );
+                    //TRACE("inserting ")(*dest_elt)(" directly\n");
+                    dest_container->insert( dest_elt );
+                }
             }
         }            
         else if( TreePtrInterface *source_singular = dynamic_cast<TreePtrInterface *>(source_items[i]) )
@@ -107,9 +124,26 @@ TreePtr<Node> Duplicate::DuplicateSubtreeWorker( const DirtyGrassUpdateInterface
             //TRACE("Duplicating node ")(*keynode_singular)("\n");
             TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
             ASSERTS( *source_singular )("source should be non-nullptr");
-            *dest_singular = DuplicateSubtree( dirty_grass,
-                                                     XLink(source, source_singular), 
-                                                     terminii_map );
+            XLink source_child_xlink = XLink(source, source_singular);
+            
+            if( terminii_map.count(source_child_xlink) == 1 ) 
+            {
+                TerminusInfo &terminus_info = terminii_map.at(source_child_xlink);
+                TreePtr<Node> dest_terminus = terminus_info.dest;
+                TRACES("Reached source terminus ")(source_child_xlink)
+                      (" and substituting ")(dest_terminus)("\n");
+                terminus_info.dest = TreePtr<Node>();
+                *dest_singular = dest_terminus;
+                // NULL value was provided, so consider it a placeholder for an updater
+                if( !dest_terminus )
+                    terminus_info.updater = make_shared<SingularUpdater>( dest_singular );
+            }
+            else
+            {
+                *dest_singular = DuplicateSubtreeWorker( dirty_grass,
+                                                         source_child_xlink, 
+                                                         terminii_map );
+            }
             ASSERTS( *dest_singular );
             ASSERTS( TreePtr<Node>(*dest_singular)->IsFinal() );            
         }
