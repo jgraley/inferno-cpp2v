@@ -34,6 +34,12 @@ public:
         stack<FreeZone> *free_zone_stack;        
     };
 
+	enum OperandMode
+	{
+		IMMEDIATE,
+		STACK
+	};
+
 	virtual void Execute( const ExecKit &kit ) const = 0;
 };
 
@@ -44,11 +50,13 @@ public:
 class PopulateFreeZoneCommand : public Command
 {
 public:
-    PopulateFreeZoneCommand( const FreeZone &zone );
+    explicit PopulateFreeZoneCommand( const FreeZone &zone );
+    explicit PopulateFreeZoneCommand();
 	void Execute( const ExecKit &kit ) const final;	
 
 private:
-	FreeZone zone;
+    const OperandMode op_mode;
+	unique_ptr<FreeZone> imm_zone;
     mutable bool dirty = false;
 };
 

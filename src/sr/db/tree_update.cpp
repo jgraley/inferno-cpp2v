@@ -9,22 +9,43 @@ using namespace SR;
 // ------------------------- PopulateFreeZoneCommand --------------------------
 
 PopulateFreeZoneCommand::PopulateFreeZoneCommand( const FreeZone &zone_ ) :
-	zone( zone_ )
+	op_mode( IMMEDIATE ),
+	imm_zone( make_unique<FreeZone>( zone_ ) )
+{
+}
+
+
+PopulateFreeZoneCommand::PopulateFreeZoneCommand() :
+	op_mode( STACK )
 {
 }
 
 
 void PopulateFreeZoneCommand::Execute( const ExecKit &kit ) const
 {
-    const list<shared_ptr<Updater>> &terminii = zone.GetTerminii();
+	FreeZone *zone;
+	switch( op_mode )
+	{
+		case IMMEDIATE:
+			zone = imm_zone.get();
+			break;
+		case STACK:
+			zone = &kit.free_zone_stack->top();
+			kit.free_zone_stack->pop();
+			break;
+		default:
+			ASSERTFAIL(); // bad mode
+	}
+
+    const list<shared_ptr<Updater>> &terminii = zone->GetTerminii();
     ASSERT( kit.free_zone_stack->size() >= terminii.size() ); // There must be enough items on the stack
     
     // TODO currently operates in-place on member zone: in order to execute this 
     // more than once, the zone will need to be duplicated to make the result zone
     ASSERT( !dirty );
-    dirty = true;
+    dirty = (op_mode==IMMEDIATE);
     
-    if( zone.IsEmpty() )
+    if( zone->IsEmpty() )
     {
         // We're empty, so we should have one terminus
         ASSERT( terminii.size() == 1 );
@@ -55,10 +76,10 @@ void PopulateFreeZoneCommand::Execute( const ExecKit &kit ) const
         terminus_upd->Apply( operand_zone.GetBase() );
     }
     
-    Validate()( zone.GetBase() );
+    //Validate()( zone->GetBase() );
     
     // Create a new zone for the result, so we don't leave our member zone's terminii in.
-    auto result_zone = FreeZone::CreateSubtree( zone.GetBase() );    
+    auto result_zone = FreeZone::CreateSubtree( zone->GetBase() );    
     kit.free_zone_stack->push( result_zone );      
 }
 
@@ -174,7 +195,7 @@ void InsertCommand::Execute( const ExecKit &kit ) const
     
     // Patch the tree
     FreeZone zone = kit.free_zone_stack->top();
-    Validate()( zone.GetBase() );
+    //Validate()( zone.GetBase() );
     target_base_xlink.SetXPtr( kit.free_zone_stack->top().GetBase() );
     
     // Update database 
