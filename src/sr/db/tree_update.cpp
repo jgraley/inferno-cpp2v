@@ -72,14 +72,28 @@ DuplicateTreeZoneCommand::DuplicateTreeZoneCommand( const TreeZone &zone_ ) :
 
 void DuplicateTreeZoneCommand::Execute( const ExecKit &kit ) const
 {
-    if( zone.IsEmpty() )
-    {
-        auto empty_free_zone = FreeZone::CreateEmpty();
-        kit.free_zone_stack->push( empty_free_zone );      
-        return;
-    }
+    // Iterate over terminii and operand zones together, filling the map for
+    // DuplicateSubtree() to use.
+    Duplicate::TerminiiMap duplicator_terminus_map;
+    for( XLink terminus_upd : zone.GetTerminii() ) 
+        duplicator_terminus_map[terminus_upd] = { TreePtr<Node>(), shared_ptr<Updater>() };
 
-    ASSERTFAIL(); // TODO
+    // Duplicate the subtree, populating from the map.
+    TreePtr<Node> new_base_x = Duplicate::DuplicateSubtree( kit.green_grass, 
+                                                            zone.GetBase(), 
+                                                            duplicator_terminus_map );   
+    
+    // Consistency check
+    list<shared_ptr<Updater>> free_zone_terminii;
+    for( XLink terminus_upd : zone.GetTerminii() )
+    {
+		ASSERT( duplicator_terminus_map[terminus_upd].updater );
+        free_zone_terminii.push_back( duplicator_terminus_map[terminus_upd].updater );
+	}
+
+    // Create a new zone for the result.
+    auto result_zone = FreeZone( new_base_x, free_zone_terminii );
+    kit.free_zone_stack->push( result_zone );      
 }
 
 // ------------------------- DuplicateAndPopulateTreeZoneCommand --------------------------
