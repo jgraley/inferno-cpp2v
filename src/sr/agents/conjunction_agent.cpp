@@ -24,7 +24,10 @@ Agent::CommandPtr ConjunctionAgent::GenerateCommandImpl( const ReplaceKit &kit,
     // multiple conjuncts/disjuncts
     ASSERT(key_xlink)("Unkeyed boolean agent seen in replace context");
     auto new_zone = TreeZone::CreateSubtree( key_xlink );
-	return make_unique<DuplicateAndPopulateTreeZoneCommand>( new_zone );   
+    auto commands = make_unique<CommandSequence>();
+	commands->Add( make_unique<DuplicateTreeZoneCommand>( new_zone ) );
+	commands->Add( make_unique<PopulateFreeZoneCommand>() );
+	return commands;
 }
 
 

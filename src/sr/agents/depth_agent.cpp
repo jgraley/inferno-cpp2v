@@ -33,19 +33,18 @@ Agent::CommandPtr DepthAgent::GenerateCommandImpl( const ReplaceKit &kit,
                                                    XLink key_xlink ) 
 {
     INDENT("#");
-    auto commands = make_unique<CommandSequence>();
     
     XLink terminus_key_xlink = my_scr_engine->GetReplaceKey( PatternLink(this, &terminus) );
     ASSERT(terminus_key_xlink);// this could mean replace is being attempted on a DepthAgent in an abnormal context
     PatternLink terminus_plink(this, &terminus);
-    commands->Add( terminus_plink.GetChildAgent()->GenerateCommand(kit, terminus_plink) );
-    // Leaves new_terminus_subtree on the stack
-
     TreeZone new_zone( key_xlink, {terminus_key_xlink} );
 
-	commands->Add( make_unique<DuplicateTreeZoneCommand>( new_zone ) );
-	commands->Add( make_unique<PopulateFreeZoneCommand>() );
+    auto commands = make_unique<CommandSequence>();
+    commands->Add( terminus_plink.GetChildAgent()->GenerateCommand(kit, terminus_plink) );
+    // Leaves new_terminus_subtree on the stack
     
+	commands->Add( make_unique<DuplicateTreeZoneCommand>( new_zone ) );
+	commands->Add( make_unique<PopulateFreeZoneCommand>() );    
     return commands;
 }
 

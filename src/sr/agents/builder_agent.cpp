@@ -48,12 +48,18 @@ Agent::CommandPtr BuilderAgent::GenerateCommandImpl( const ReplaceKit &kit,
         my_scr_engine->SetReplaceKey( new_link );
         
         auto new_zone = TreeZone::CreateSubtree( new_link );
-        return make_unique<DuplicateAndPopulateTreeZoneCommand>( new_zone );   
+		auto commands = make_unique<CommandSequence>();
+		commands->Add( make_unique<DuplicateTreeZoneCommand>( new_zone ) );
+		commands->Add( make_unique<PopulateFreeZoneCommand>() );
+		return commands;
     }
     else
     {
         ASSERT( key_xlink ); // we're on residual plink
         auto new_zone = TreeZone::CreateSubtree( key_xlink );
-        return make_unique<DuplicateAndPopulateTreeZoneCommand>( new_zone );   
+		auto commands = make_unique<CommandSequence>();
+		commands->Add( make_unique<DuplicateTreeZoneCommand>( new_zone ) );
+		commands->Add( make_unique<PopulateFreeZoneCommand>() );
+		return commands;
     }
 }

@@ -121,63 +121,6 @@ void DuplicateTreeZoneCommand::Execute( const ExecKit &kit ) const
     kit.free_zone_stack->push( result_zone );      
 }
 
-// ------------------------- DuplicateAndPopulateTreeZoneCommand --------------------------
-
-DuplicateAndPopulateTreeZoneCommand::DuplicateAndPopulateTreeZoneCommand( const TreeZone &zone_ ) :
-	zone( zone_ )
-{
-}
-
-
-void DuplicateAndPopulateTreeZoneCommand::Execute( const ExecKit &kit ) const
-{
-    list<XLink> terminii = zone.GetTerminii();
-    ASSERT( kit.free_zone_stack->size() >= terminii.size() ); // There must be enough items on the stack
-        
-    if( zone.IsEmpty() )
-    {
-        // We're empty, so we should have one terminus
-        ASSERT( terminii.size() == 1 );
-        // Exactly one zone to attach should be on the stack, and that's also
-        // going to be our output, since populating an empty zone just means
-        // substituting. So there's nothing to do.
-        return;
-    }
-
-    // Get a correctly-ordered list of subtrees to overwrite
-    list<FreeZone> operand_zones;
-    for( auto terminus_upd : terminii )
-    {
-        operand_zones.push_front( kit.free_zone_stack->top() );
-        kit.free_zone_stack->pop();
-    }
-
-    // Iterate over terminii and operand zones together, filling the map for
-    // DuplicateSubtree() to use.
-    Duplicate::TerminiiMap duplicator_terminus_map;
-    for( auto p : Zip( terminii, operand_zones ) )
-    {        
-        XLink terminus_upd = p.first;
-        FreeZone &operand_zone = p.second; 
-        ASSERT( operand_zone.GetTerminii().empty() )(zone)(" ")(Zip( terminii, operand_zones )); // TODO accumulate the terminii in the result zone.
-
-        duplicator_terminus_map[terminus_upd] = { operand_zone.GetBase(), shared_ptr<Updater>() };
-    }
-
-    // Duplicate the subtree, populating from the map.
-    TreePtr<Node> new_base_x = Duplicate::DuplicateSubtree( kit.green_grass, 
-                                                            zone.GetBase(), 
-                                                            duplicator_terminus_map );   
-    
-    // Consistency check
-    for( auto p : duplicator_terminus_map )
-        ASSERT( !p.second.dest ); // these are switched to NULL on reaching each terminus
-
-    // Create a new zone for the result.
-    auto result_zone = FreeZone::CreateSubtree( new_base_x );
-    kit.free_zone_stack->push( result_zone );      
-}
-
 // ------------------------- DeleteCommand --------------------------
 
 DeleteCommand::DeleteCommand( XLink target_base_xlink_ ) :
