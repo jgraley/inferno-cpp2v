@@ -642,8 +642,6 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
         }        
     }
     
-
-
     // Loop over all the elements of under_node and dest that do not appear in pattern or
     // appear in pattern but are nullptr TreePtr<>s. Duplicate from under_node into dest.
     vector< Itemiser::Element * > under_items = under_node->Itemise();
@@ -675,12 +673,8 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
 	        {
 		        ASSERT( under_elt ); // present simplified scheme disallows nullptr
                 auto under_zone = TreeZone::CreateSubtree( XLink(under_node, &under_elt) );
-#ifdef SPLIT
                 commands->Add( make_unique<DuplicateTreeZoneCommand>( under_zone ) );
                 commands->Add( make_unique<PopulateFreeZoneCommand>() );
-#else
-				commands->Add( make_unique<DuplicateAndPopulateTreeZoneCommand>( under_zone ) );
-#endif
                 // Make a placeholder in the dest container for the updater to point to
                 ContainerInterface::iterator dest_it = dest_con->insert( ContainerUpdater::GetPlaceholder() );
                 dest_terminii.push_back( make_shared<ContainerUpdater>( dest_con, dest_it ) );     

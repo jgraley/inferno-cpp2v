@@ -23,14 +23,15 @@ PopulateFreeZoneCommand::PopulateFreeZoneCommand() :
 
 void PopulateFreeZoneCommand::Execute( const ExecKit &kit ) const
 {
-	FreeZone *zone;
+	unique_ptr<FreeZone> zone;
 	switch( op_mode )
 	{
 		case IMMEDIATE:
-			zone = imm_zone.get();
+			ASSERT( imm_zone ); // we don't have deep copy so can only use once TODO
+			zone = move(imm_zone);
 			break;
 		case STACK:
-			zone = &kit.free_zone_stack->top();
+			zone = make_unique<FreeZone>(kit.free_zone_stack->top());
 			kit.free_zone_stack->pop();
 			break;
 		default:
@@ -39,11 +40,6 @@ void PopulateFreeZoneCommand::Execute( const ExecKit &kit ) const
 
     const list<shared_ptr<Updater>> &terminii = zone->GetTerminii();
     ASSERT( kit.free_zone_stack->size() >= terminii.size() ); // There must be enough items on the stack
-    
-    // TODO currently operates in-place on member zone: in order to execute this 
-    // more than once, the zone will need to be duplicated to make the result zone
-    ASSERT( !dirty );
-    dirty = (op_mode==IMMEDIATE);
     
     if( zone->IsEmpty() )
     {

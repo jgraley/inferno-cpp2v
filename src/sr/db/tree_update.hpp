@@ -56,8 +56,7 @@ public:
 
 private:
     const OperandMode op_mode;
-	unique_ptr<FreeZone> imm_zone;
-    mutable bool dirty = false;
+	mutable unique_ptr<FreeZone> imm_zone; // TODO a deep copy?
 };
 
 // ------------------------- DuplicateTreeZoneCommand --------------------------
