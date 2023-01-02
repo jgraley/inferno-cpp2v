@@ -28,56 +28,25 @@ shared_ptr<PatternQuery> DepthAgent::GetPatternQuery() const
     return pq;
 }
 
-
-#define SPLIT
 Agent::CommandPtr DepthAgent::GenerateCommandImpl( const ReplaceKit &kit, 
                                                    PatternLink me_plink, 
                                                    XLink key_xlink ) 
 {
     INDENT("#");
-	
-	XLink terminus_key_xlink = my_scr_engine->GetReplaceKey( PatternLink(this, &terminus) );
-	ASSERT(terminus_key_xlink);// this could mean replace is being attempted on a DepthAgent in an abnormal context
-	PatternLink terminus_plink(this, &terminus);
-   
-	stack<FreeZone> free_zone_stack;
-	stack<FreeZone> free_zone_stack2;
-	Command::ExecKit exec_kit {nullptr, my_scr_engine, my_scr_engine, &free_zone_stack};
+    auto commands = make_unique<CommandSequence>();
+    
+    XLink terminus_key_xlink = my_scr_engine->GetReplaceKey( PatternLink(this, &terminus) );
+    ASSERT(terminus_key_xlink);// this could mean replace is being attempted on a DepthAgent in an abnormal context
+    PatternLink terminus_plink(this, &terminus);
+    commands->Add( terminus_plink.GetChildAgent()->GenerateCommand(kit, terminus_plink) );
+    // Leaves new_terminus_subtree on the stack
 
-    {
-		auto commands = make_unique<CommandSequence>();
-   		commands->Add( terminus_plink.GetChildAgent()->GenerateCommand(kit, terminus_plink) );
-		// Leaves new_terminus_subtree on the stack
-		commands->Execute( exec_kit );     
-		ASSERT( free_zone_stack.size() == 1);       
-	}
-	free_zone_stack2 = free_zone_stack;
-	FreeZone over_zone = free_zone_stack.top();
-	//FTRACE("Over zone ")(free_zone_stack.top())(" goes over terminus ")(terminus_key_xlink)("\n");
-	ASSERT( free_zone_stack2.size() == 1);       
-	{
-		TreeZone new_zone( key_xlink, {terminus_key_xlink} );
-		//FTRACE("Tree zone raw ")(new_zone)("\n");
-		make_unique<DuplicateTreeZoneCommand>( new_zone )->Execute( exec_kit );
-		//FTRACE("Free zone raw ")(free_zone_stack.top())("\n");
-		make_unique<PopulateFreeZoneCommand>()->Execute( exec_kit );
-		//FTRACE("Free zone populated ")(free_zone_stack.top())("\n");
-		ASSERT( free_zone_stack.size() == 1);       
-	}    
-	FreeZone res_split = free_zone_stack.top();
-    {
-		TreeZone new_zone( key_xlink, {terminus_key_xlink} );
-	    Command::ExecKit exec_kit2 {nullptr, my_scr_engine, my_scr_engine, &free_zone_stack2};
-		ASSERT( free_zone_stack2.size() == 1);       
-		make_unique<DuplicateAndPopulateTreeZoneCommand>( new_zone )->Execute( exec_kit2 );   		
-		//FTRACE("Free zone populated (ref) ")(free_zone_stack.top())("\n");
-		ASSERT( free_zone_stack2.size() == 1);       
-	}    
-	FreeZone res_combined = free_zone_stack2.top();
-	
-	ASSERT( SimpleCompare()(res_combined.GetBase(), res_split.GetBase())==0 )(res_combined.GetBase())(" vs ")(res_split.GetBase());
-	
-	return make_unique<PopulateFreeZoneCommand>(res_combined);
+    TreeZone new_zone( key_xlink, {terminus_key_xlink} );
+
+	commands->Add( make_unique<DuplicateTreeZoneCommand>( new_zone ) );
+	commands->Add( make_unique<PopulateFreeZoneCommand>() );
+    
+    return commands;
 }
 
 

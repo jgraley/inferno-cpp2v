@@ -673,7 +673,8 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
 	        {
 		        ASSERT( under_elt ); // present simplified scheme disallows nullptr
                 auto under_zone = TreeZone::CreateSubtree( XLink(under_node, &under_elt) );
-                commands->Add( make_unique<DuplicateAndPopulateTreeZoneCommand>( under_zone ) );
+                commands->Add( make_unique<DuplicateTreeZoneCommand>( under_zone ) );
+               	commands->Add( make_unique<PopulateFreeZoneCommand>() );
                 //commands->Add( make_unique<PopulateFreeZoneCommand>() );
                 // Make a placeholder in the dest container for the updater to point to
                 ContainerInterface::iterator dest_it = dest_con->insert( ContainerUpdater::GetPlaceholder() );
@@ -686,7 +687,8 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
             auto dest_upd = make_shared<SingularUpdater>( dest_singular );
             ASSERT( *under_singular );            
             auto under_zone = TreeZone::CreateSubtree( XLink(under_node, under_singular) );
-            commands->Add( make_unique<DuplicateAndPopulateTreeZoneCommand>( under_zone ) );
+            commands->Add( make_unique<DuplicateTreeZoneCommand>( under_zone ) );
+           	commands->Add( make_unique<PopulateFreeZoneCommand>() );
             //commands->Add( make_unique<PopulateFreeZoneCommand>() );
             dest_terminii.push_back( make_shared<SingularUpdater>( dest_singular ) );            
         }
