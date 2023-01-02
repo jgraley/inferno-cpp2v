@@ -76,7 +76,7 @@ public:
 	void Execute( const ExecKit &kit ) const final;	
 
 private:
-	mutable unique_ptr<FreeZone> imm_zone; // TODO a deep copy?
+	unique_ptr<FreeZone> imm_zone; // TODO a deep copy?
 };
 
 // ------------------------- DeleteCommand --------------------------
