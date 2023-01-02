@@ -6,77 +6,17 @@
 
 using namespace SR;
 
-// ------------------------- PopulateFreeZoneCommand --------------------------
+// ------------------------- DeclareFreeZoneCommand --------------------------
 
-PopulateFreeZoneCommand::PopulateFreeZoneCommand( const FreeZone &zone_ ) :
-	op_mode( IMMEDIATE ),
-	imm_zone( make_unique<FreeZone>( zone_ ) )
+DeclareFreeZoneCommand::DeclareFreeZoneCommand( const FreeZone &zone_ ) :
+	zone(zone_)
 {
-}
+}	
 
 
-PopulateFreeZoneCommand::PopulateFreeZoneCommand() :
-	op_mode( STACK )
+void DeclareFreeZoneCommand::Execute( const ExecKit &kit ) const
 {
-}
-
-
-void PopulateFreeZoneCommand::Execute( const ExecKit &kit ) const
-{
-	unique_ptr<FreeZone> zone;
-	switch( op_mode )
-	{
-		case IMMEDIATE:
-			ASSERT( imm_zone ); // we don't have deep copy so can only use once TODO
-			zone = move(imm_zone);
-			break;
-		case STACK:
-			zone = make_unique<FreeZone>(kit.free_zone_stack->top());
-			kit.free_zone_stack->pop();
-			break;
-		default:
-			ASSERTFAIL(); // bad mode
-	}
-
-    const list<shared_ptr<Updater>> &terminii = zone->GetTerminii();
-    ASSERT( kit.free_zone_stack->size() >= terminii.size() ); // There must be enough items on the stack
-    
-    if( zone->IsEmpty() )
-    {
-        // We're empty, so we should have one terminus
-        ASSERT( terminii.size() == 1 );
-        // Exactly one zone to attach should be on the stack, and that's also
-        // going to be our output, since populating an empty zone just means
-        // substituting. So there's nothing to do.
-        return;
-    }
-
-    // Get a correctly-ordered list of subtrees to overwrite
-    list<FreeZone> operand_zones;
-    for( auto terminus_upd : terminii )
-    {
-        operand_zones.push_front( kit.free_zone_stack->top() );
-        kit.free_zone_stack->pop();
-    }
-                        
-    // Iterate over terminii and operand zones together, populating the terminii
-    // from the operands. 
-    for( auto p : Zip( terminii, operand_zones ) )
-    {
-        shared_ptr<Updater> terminus_upd = p.first;
-        FreeZone &operand_zone = p.second; 
-        ASSERT( operand_zone.GetTerminii().empty() )(zone)(" ")(Zip( terminii, operand_zones )); // TODO accumulate the terminii in the result zone.
-        ASSERT( !operand_zone.IsEmpty() );
-        // Populate terminus. Apply() will expand SubContainers
-        ASSERT( operand_zone.GetBase() );
-        terminus_upd->Apply( operand_zone.GetBase() );
-    }
-    
-    //Validate()( zone->GetBase() );
-    
-    // Create a new zone for the result, so we don't leave our member zone's terminii in.
-    auto result_zone = FreeZone::CreateSubtree( zone->GetBase() );    
-    kit.free_zone_stack->push( result_zone );      
+	kit.free_zone_stack->push(zone);
 }
 
 // ------------------------- DuplicateTreeZoneCommand --------------------------
@@ -118,6 +58,59 @@ void DuplicateTreeZoneCommand::Execute( const ExecKit &kit ) const
 
     // Create a new zone for the result.
     auto result_zone = FreeZone( new_base_x, free_zone_terminii );
+    kit.free_zone_stack->push( result_zone );      
+}
+
+// ------------------------- PopulateFreeZoneCommand --------------------------
+
+PopulateFreeZoneCommand::PopulateFreeZoneCommand()
+{
+}
+
+
+void PopulateFreeZoneCommand::Execute( const ExecKit &kit ) const
+{
+	FreeZone zone = kit.free_zone_stack->top();
+	kit.free_zone_stack->pop();
+	
+    const list<shared_ptr<Updater>> &terminii = zone.GetTerminii();
+    ASSERT( kit.free_zone_stack->size() >= terminii.size() ); // There must be enough items on the stack
+    
+    if( zone.IsEmpty() )
+    {
+        // We're empty, so we should have one terminus
+        ASSERT( terminii.size() == 1 );
+        // Exactly one zone to attach should be on the stack, and that's also
+        // going to be our output, since populating an empty zone just means
+        // substituting. So there's nothing to do.
+        return;
+    }
+
+    // Get a correctly-ordered list of subtrees to overwrite
+    list<FreeZone> operand_zones;
+    for( auto terminus_upd : terminii )
+    {
+        operand_zones.push_front( kit.free_zone_stack->top() );
+        kit.free_zone_stack->pop();
+    }
+                        
+    // Iterate over terminii and operand zones together, populating the terminii
+    // from the operands. 
+    for( auto p : Zip( terminii, operand_zones ) )
+    {
+        shared_ptr<Updater> terminus_upd = p.first;
+        FreeZone &operand_zone = p.second; 
+        ASSERT( operand_zone.GetTerminii().empty() )(zone)(" ")(Zip( terminii, operand_zones )); // TODO accumulate the terminii in the result zone.
+        ASSERT( !operand_zone.IsEmpty() );
+        // Populate terminus. Apply() will expand SubContainers
+        ASSERT( operand_zone.GetBase() );
+        terminus_upd->Apply( operand_zone.GetBase() );
+    }
+    
+    //Validate()( zone->GetBase() );
+    
+    // Create a new zone for the result, so we don't leave our member zone's terminii in.
+    auto result_zone = FreeZone::CreateSubtree( zone.GetBase() );    
     kit.free_zone_stack->push( result_zone );      
 }
 

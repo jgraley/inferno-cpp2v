@@ -110,7 +110,8 @@ Agent::CommandPtr StarAgent::GenerateCommandImpl( const ReplaceKit &kit,
     
     // Makes a free zone for the subcontainer
     FreeZone dest_zone( dest, dest_terminii );
-    commands->Add( make_unique<PopulateFreeZoneCommand>(dest_zone) );
+    commands->Add( make_unique<DeclareFreeZoneCommand>(dest_zone) );
+    commands->Add( make_unique<PopulateFreeZoneCommand>() );
     
     return commands;
 }

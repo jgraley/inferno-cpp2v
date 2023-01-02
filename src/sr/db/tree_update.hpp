@@ -34,29 +34,20 @@ public:
         stack<FreeZone> *free_zone_stack;        
     };
 
-	enum OperandMode
-	{
-		IMMEDIATE,
-		STACK
-	};
-
 	virtual void Execute( const ExecKit &kit ) const = 0;
 };
 
-// ------------------------- PopulateFreeZoneCommand --------------------------
+// ------------------------- DeclareFreeZoneCommand --------------------------
 
-// Populate a free zone from the stack. Push the resulting subtree to the stack.
-// TODO fill in new zone terminii from sub zone terminii
-class PopulateFreeZoneCommand : public Command
+// Put a free zone onto the stack.
+class DeclareFreeZoneCommand : public Command
 {
 public:
-    explicit PopulateFreeZoneCommand( const FreeZone &zone );
-    explicit PopulateFreeZoneCommand();
+    DeclareFreeZoneCommand( const FreeZone &zone );
 	void Execute( const ExecKit &kit ) const final;	
 
 private:
-    const OperandMode op_mode;
-	mutable unique_ptr<FreeZone> imm_zone; // TODO a deep copy?
+	FreeZone zone;
 };
 
 // ------------------------- DuplicateTreeZoneCommand --------------------------
@@ -70,6 +61,22 @@ public:
 
 private:
 	TreeZone zone;
+};
+
+// ------------------------- PopulateFreeZoneCommand --------------------------
+
+// Populate a free zone and push the resulting subtree 
+// to the stack. Free zone to populate should be on top of stack, 
+// and then the overlay free zones, in push order.
+// TODO fill in new zone terminii from sub zone terminii?
+class PopulateFreeZoneCommand : public Command
+{
+public:
+    explicit PopulateFreeZoneCommand();
+	void Execute( const ExecKit &kit ) const final;	
+
+private:
+	mutable unique_ptr<FreeZone> imm_zone; // TODO a deep copy?
 };
 
 // ------------------------- DeleteCommand --------------------------
