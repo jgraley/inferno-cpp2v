@@ -38,7 +38,7 @@ class ContainerUpdater : public Updater
 {
 public:
     explicit ContainerUpdater( ContainerInterface *container,
-                               ContainerInterface::iterator it_ );             
+                               ContainerInterface::iterator it_placeholder_ );             
     void Apply( TreePtr<Node> node ) final;
     
     static TreePtr<Node> GetPlaceholder();
@@ -46,8 +46,7 @@ public:
 
 private:
     ContainerInterface * const container;
-    ContainerInterface::iterator it_begin;
-    ContainerInterface::iterator it_end;
+    ContainerInterface::iterator it_placeholder;
     
     bool dirty = false;
 };    

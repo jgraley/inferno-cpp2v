@@ -40,7 +40,8 @@ bool SimpleCompare::operator()( const Node &l, const Node &r ) const
 
 Orderable::Diff SimpleCompare::Compare3Way( const Node &l, const Node &r ) const
 {   
-    //FTRACE("SC::Compare ")(l)(" - ")(r)("\n");
+    //INDENT("-");
+    //FTRACEC("SC::Compare ")(l)(" - ")(r)("\n");
 
     // If we are asked to do a trivial compare, return immediately reporting success
     if( &l==&r )

@@ -51,7 +51,7 @@ void PopulateFreeZoneCommand::Execute( const ExecKit &kit ) const
         return;
     }
 
-    // Get a forward list of subtrees to overwrite
+    // Get a correctly-ordered list of subtrees to overwrite
     list<FreeZone> operand_zones;
     for( auto terminus_upd : terminii )
     {
@@ -89,6 +89,15 @@ DuplicateTreeZoneCommand::DuplicateTreeZoneCommand( const TreeZone &zone_ ) :
 
 void DuplicateTreeZoneCommand::Execute( const ExecKit &kit ) const
 {
+    if( zone.IsEmpty() )
+    {
+		// Duplicate::DuplicateSubtree() can't work with the
+		// terminus-at-base you get with an empty zone, so handle that
+		// case explicitly.
+        kit.free_zone_stack->push( FreeZone::CreateEmpty() ); 
+        return;
+    }
+
     // Iterate over terminii and operand zones together, filling the map for
     // DuplicateSubtree() to use.
     Duplicate::TerminiiMap duplicator_terminus_map;
@@ -100,7 +109,6 @@ void DuplicateTreeZoneCommand::Execute( const ExecKit &kit ) const
                                                             zone.GetBase(), 
                                                             duplicator_terminus_map );   
     
-    // Consistency check
     list<shared_ptr<Updater>> free_zone_terminii;
     for( XLink terminus_upd : zone.GetTerminii() )
     {
@@ -126,7 +134,17 @@ void DuplicateAndPopulateTreeZoneCommand::Execute( const ExecKit &kit ) const
     list<XLink> terminii = zone.GetTerminii();
     ASSERT( kit.free_zone_stack->size() >= terminii.size() ); // There must be enough items on the stack
         
-    // Get a forward list of subtrees to overwrite
+    if( zone.IsEmpty() )
+    {
+        // We're empty, so we should have one terminus
+        ASSERT( terminii.size() == 1 );
+        // Exactly one zone to attach should be on the stack, and that's also
+        // going to be our output, since populating an empty zone just means
+        // substituting. So there's nothing to do.
+        return;
+    }
+
+    // Get a correctly-ordered list of subtrees to overwrite
     list<FreeZone> operand_zones;
     for( auto terminus_upd : terminii )
     {
@@ -191,6 +209,7 @@ void InsertCommand::Execute( const ExecKit &kit ) const
     
     // Patch the tree
     FreeZone zone = kit.free_zone_stack->top();
+    ASSERT( !zone.IsEmpty() );
     //Validate()( zone.GetBase() );
     target_base_xlink.SetXPtr( kit.free_zone_stack->top().GetBase() );
     
@@ -209,8 +228,10 @@ MarkBaseForEmbeddedCommand::MarkBaseForEmbeddedCommand( RequiresSubordinateSCREn
     
 void MarkBaseForEmbeddedCommand::Execute( const ExecKit &kit ) const
 {
-    ASSERT( kit.free_zone_stack->top().GetBase() );
-    kit.scr_engine->MarkBaseForEmbedded( embedded_agent, kit.free_zone_stack->top().GetBase() );   
+	FreeZone zone = kit.free_zone_stack->top();
+	
+    ASSERT( !zone.IsEmpty() );
+    kit.scr_engine->MarkBaseForEmbedded( embedded_agent, zone.GetBase() );   
     // Note: SCREngine will tell us to take a hike if we execute this more than once
 }
     
