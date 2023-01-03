@@ -180,9 +180,18 @@ void CommandSequence::Execute( const ExecKit &kit ) const
 }
 	
     
-void CommandSequence::Add( unique_ptr<Command> cmd )
+void CommandSequence::Add( unique_ptr<Command> new_cmd )
 {
-	seq.push_back(move(cmd));
+    if( auto new_seq = dynamic_pointer_cast<CommandSequence>(new_cmd) )
+    {
+        seq.insert( seq.end(),
+                    make_move_iterator(new_seq->seq.begin()),
+                    make_move_iterator(new_seq->seq.end()) );    
+    }
+    else
+    {
+	    seq.push_back(move(new_cmd));
+    }
 }
 
 

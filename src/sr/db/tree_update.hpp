@@ -124,7 +124,7 @@ class CommandSequence : public Command
 public:
 	void Execute( const ExecKit &kit ) const final;	
 
-	void Add( unique_ptr<Command> cmd );
+	void Add( unique_ptr<Command> new_cmd );
     bool IsEmpty() const;
 	
 private:
