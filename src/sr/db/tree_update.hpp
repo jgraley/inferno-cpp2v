@@ -43,11 +43,11 @@ public:
 class DeclareFreeZoneCommand : public Command
 {
 public:
-    DeclareFreeZoneCommand( const FreeZone &zone );
+    DeclareFreeZoneCommand( FreeZone &&zone );
 	void Execute( const ExecKit &kit ) const final;	
 
 private:
-	FreeZone zone;
+	unique_ptr<FreeZone> zone;
 };
 
 // ------------------------- DuplicateTreeZoneCommand --------------------------

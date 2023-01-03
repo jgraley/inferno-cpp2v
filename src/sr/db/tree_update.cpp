@@ -8,15 +8,15 @@ using namespace SR;
 
 // ------------------------- DeclareFreeZoneCommand --------------------------
 
-DeclareFreeZoneCommand::DeclareFreeZoneCommand( const FreeZone &zone_ ) :
-	zone(zone_)
+DeclareFreeZoneCommand::DeclareFreeZoneCommand( FreeZone &&zone_ ) :
+	zone(make_unique<FreeZone>(move(zone_)))
 {
 }	
 
 
 void DeclareFreeZoneCommand::Execute( const ExecKit &kit ) const
 {
-	kit.free_zone_stack->push(zone);
+	kit.free_zone_stack->push(*zone);
 }
 
 // ------------------------- DuplicateTreeZoneCommand --------------------------

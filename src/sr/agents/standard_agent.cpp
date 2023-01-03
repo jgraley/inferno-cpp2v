@@ -696,8 +696,7 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
         }
     }
     
-    FreeZone dest_zone( dest, dest_terminii );
-    commands->Add( make_unique<DeclareFreeZoneCommand>(dest_zone) );
+    commands->Add( make_unique<DeclareFreeZoneCommand>( FreeZone(dest, dest_terminii) ) );
     commands->Add( make_unique<PopulateFreeZoneCommand>() );
 
     return commands;
@@ -768,8 +767,7 @@ Agent::CommandPtr StandardAgent::GenerateCommandNormal( const ReplaceKit &kit,
         }       
     }
     
-    FreeZone dest_zone( dest, dest_terminii );
-    commands->Add( make_unique<DeclareFreeZoneCommand>(dest_zone) );
+    commands->Add( make_unique<DeclareFreeZoneCommand>( FreeZone(dest, dest_terminii) ) );
     commands->Add( make_unique<PopulateFreeZoneCommand>() );
     
     return commands;
