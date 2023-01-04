@@ -70,7 +70,7 @@ string Traceable::GetTrace() const
 
 string VSSPrintf(string fmt, va_list vl)
 {
-    char cs[1024];    
+    char cs[10240];    
     vsnprintf( cs, sizeof(cs), fmt.c_str(), vl );  
     //cs[sizeof(cs)-1] = '\0';
     return string(cs);
@@ -122,4 +122,15 @@ string JoinInstanceFunction( string instance, string function )
     if( instance != "" && instance.substr(instance. size()-2) != "::" )
         indot = instance+".";
     return SSPrintf("%s%s()", indot.c_str(), function.c_str());
+}
+
+
+string OrdinalString( int i )
+{
+	string s = to_string(i);
+	if( i%10==1 && i%100!=11 )
+		return s+"st";
+	if( i%10==2 && i%100!=12 )
+		return s+"nd";
+	return s+"th";	
 }

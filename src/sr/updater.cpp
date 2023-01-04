@@ -21,7 +21,7 @@ void SingularUpdater::Apply( TreePtr<Node> node )
 
 string SingularUpdater::GetTrace() const
 {
-    return Trace(tree_ptr);
+    return "(Singular " + Trace(tree_ptr) + ")";
 }
     
 // ------------------------- ContainerUpdater --------------------------    
@@ -32,6 +32,13 @@ ContainerUpdater::ContainerUpdater( ContainerInterface *container_,
     it_placeholder( it_placeholder_ )
 {
     ASSERT( it_placeholder != container->end() );
+	bool found = false;
+    for( ContainerInterface::iterator it=container->begin(); it!=container->end(); ++it )
+    {
+		if( it == it_placeholder )
+			found = true;		
+	}
+	ASSERT( found );
 }
 
 
@@ -88,13 +95,20 @@ TreePtr<Node> ContainerUpdater::GetPlaceholder()
 
 string ContainerUpdater::GetTrace() const
 {
-    string s = "(" + Trace(*container) + ":";
+	int i=1, n=0;
     for( ContainerInterface::iterator it=container->begin(); it!=container->end(); ++it )
     {
 		if( it == it_placeholder )
-			s += "*";
-		s += Trace(*it)+" ";
+			n = i;
+		i++;
 	}
+    string s = "(";
+    if( n==0 )
+		s += "ERROR!";
+	else
+		s += OrdinalString( n );
+	s += " in ";
+    s += Trace(*container) ;
 	return s + ")";
 }
     

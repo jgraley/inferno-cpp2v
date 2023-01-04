@@ -19,6 +19,12 @@ void DeclareFreeZoneCommand::Execute( const ExecKit &kit ) const
 	kit.free_zone_stack->push(*zone);
 }
 
+
+string DeclareFreeZoneCommand::GetTrace() const
+{
+	return "DeclareFreeZoneCommand      "+Trace(*zone)+" -> STACK";
+}
+
 // ------------------------- DuplicateTreeZoneCommand --------------------------
 
 DuplicateTreeZoneCommand::DuplicateTreeZoneCommand( const TreeZone &zone_ ) :
@@ -59,6 +65,12 @@ void DuplicateTreeZoneCommand::Execute( const ExecKit &kit ) const
     // Create a new zone for the result.
     auto result_zone = FreeZone( new_base_x, free_zone_terminii );
     kit.free_zone_stack->push( result_zone );      
+}
+
+
+string DuplicateTreeZoneCommand::GetTrace() const
+{
+	return "DuplicateTreeZoneCommand    "+Trace(zone)+" -> STACK";
 }
 
 // ------------------------- PopulateFreeZoneCommand --------------------------
@@ -114,6 +126,12 @@ void PopulateFreeZoneCommand::Execute( const ExecKit &kit ) const
     kit.free_zone_stack->push( result_zone );      
 }
 
+
+string PopulateFreeZoneCommand::GetTrace() const
+{
+	return "PopulateFreeZoneCommand     STACK, STACK* -> STACK";
+}
+
 // ------------------------- DeleteCommand --------------------------
 
 DeleteCommand::DeleteCommand( XLink target_base_xlink_ ) :
@@ -130,6 +148,12 @@ void DeleteCommand::Execute( const ExecKit &kit ) const
     // Patch the tree
     target_base_xlink.ClearXPtr();
 }	
+
+
+string DeleteCommand::GetTrace() const
+{
+	return "DeleteCommand               "+Trace(target_base_xlink);
+}
 
 // ------------------------- InsertCommand --------------------------
 
@@ -155,12 +179,19 @@ void InsertCommand::Execute( const ExecKit &kit ) const
     kit.free_zone_stack->pop();
 }
 
+
+string InsertCommand::GetTrace() const
+{
+	return "InsertCommand               STACK, "+Trace(target_base_xlink);
+}
+
 // ------------------------- MarkBaseForEmbeddedCommand --------------------------
 
 MarkBaseForEmbeddedCommand::MarkBaseForEmbeddedCommand( RequiresSubordinateSCREngine *embedded_agent_ ) :
     embedded_agent( embedded_agent_ )
 {
 }
+    
     
 void MarkBaseForEmbeddedCommand::Execute( const ExecKit &kit ) const
 {
@@ -170,11 +201,18 @@ void MarkBaseForEmbeddedCommand::Execute( const ExecKit &kit ) const
     kit.scr_engine->MarkBaseForEmbedded( embedded_agent, zone.GetBase() );   
     // Note: SCREngine will tell us to take a hike if we execute this more than once
 }
+
     
+string MarkBaseForEmbeddedCommand::GetTrace() const
+{
+	return "MarkBaseForEmbeddedCommand  STACK -> STACK";
+}
+
 // ------------------------- CommandSequence --------------------------
 
 void CommandSequence::Execute( const ExecKit &kit ) const
 {
+	//FTRACE(" executing");
 	for( const unique_ptr<Command> &cmd : seq )
 		cmd->Execute(kit);
 }
@@ -201,3 +239,10 @@ bool CommandSequence::IsEmpty() const
 }
 
 
+string CommandSequence::GetTrace() const
+{
+    list<string> elts;
+    for( const unique_ptr<Command> &pc : seq )
+        elts.push_back( Trace(*pc) );
+    return Join( elts, "\n", "CommandSequence[\n", " ]\n" );
+}

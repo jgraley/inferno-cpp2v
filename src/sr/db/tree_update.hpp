@@ -46,6 +46,8 @@ public:
     DeclareFreeZoneCommand( FreeZone &&zone );
 	void Execute( const ExecKit &kit ) const final;	
 
+	string GetTrace() const final;
+
 private:
 	unique_ptr<FreeZone> zone;
 };
@@ -58,6 +60,8 @@ class DuplicateTreeZoneCommand : public Command
 public:
     DuplicateTreeZoneCommand( const TreeZone &zone );
 	void Execute( const ExecKit &kit ) const final;	
+
+	string GetTrace() const final;
 
 private:
 	TreeZone zone;
@@ -75,8 +79,7 @@ public:
     explicit PopulateFreeZoneCommand();
 	void Execute( const ExecKit &kit ) const final;	
 
-private:
-	unique_ptr<FreeZone> imm_zone; // TODO a deep copy?
+	string GetTrace() const final;
 };
 
 // ------------------------- DeleteCommand --------------------------
@@ -86,6 +89,8 @@ class DeleteCommand : public Command
 public:
     DeleteCommand( XLink target_base_xlink );
 	void Execute( const ExecKit &kit ) const final;	
+
+	string GetTrace() const final;
 
 private:
 	XLink target_base_xlink;
@@ -98,6 +103,8 @@ class InsertCommand : public Command
 public:
     InsertCommand( XLink target_base_xlink );
 	void Execute( const ExecKit &kit ) const final;	
+
+	string GetTrace() const final;
 
 private:
 	XLink target_base_xlink;
@@ -113,6 +120,8 @@ public:
     MarkBaseForEmbeddedCommand( RequiresSubordinateSCREngine *embedded_agent );
 	void Execute( const ExecKit &kit ) const final;	
 
+	string GetTrace() const final;
+
 private:
 	RequiresSubordinateSCREngine * const embedded_agent;
 };
@@ -127,6 +136,8 @@ public:
 	void Add( unique_ptr<Command> new_cmd );
     bool IsEmpty() const;
 	
+	string GetTrace() const final;
+
 private:
 	list<unique_ptr<Command>> seq;	
 };
