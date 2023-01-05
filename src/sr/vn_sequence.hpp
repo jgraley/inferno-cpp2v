@@ -47,9 +47,8 @@ public:
     string GetStepName( int step_index ) const;
 
     void CompleteDomainExtension();
-    void ExecuteUpdateCommand( Command *cmd,
-                               const SCREngine *scr_engine,
-                               stack<FreeZone> *free_zone_stack );
+    void RunUpdateCommand( unique_ptr<Command> cmd, 
+                           const SCREngine *scr_engine );
     
     void XTreeDbDump() const;
     void XTreeDbExpectMatches() const;

@@ -141,6 +141,11 @@ public:
 private:
 	list<unique_ptr<Command>> seq;	
 };
+
+// ------------------------- Runners --------------------------
+
+FreeZone RunGetFreeZoneNoDB( unique_ptr<Command> cmd, const SCREngine *scr_engine );
+void RunVoidForReplace( unique_ptr<Command> cmd, const SCREngine *scr_engine, XTreeDatabase *x_tree_db );
 	
 }
 

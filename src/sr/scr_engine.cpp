@@ -361,20 +361,15 @@ void SCREngine::RunEmbedded( PatternLink plink_to_embedded, XLink base_xlink )
 void SCREngine::Replace( XLink base_xlink )
 {
     INDENT("R");
-	Agent::ReplaceKit replace_kit;
 	auto commands = make_unique<CommandSequence>();
-	unique_ptr<Command> build_command = plan.base_agent->GenerateCommand(replace_kit, plan.base_plink);
-    commands->Add(move(build_command));
+
+	Agent::ReplaceKit replace_kit;
+    commands->Add(plan.base_agent->GenerateCommand(replace_kit, plan.base_plink));
+    commands->Add( make_unique<DeleteCommand>( base_xlink ) );
+   	commands->Add( make_unique<InsertCommand>( base_xlink ) );
+	
+	plan.vn_sequence->RunUpdateCommand( move(commands), this );  
     
-	commands->Add( make_unique<DeleteCommand>( base_xlink ) );
-    
-    // Now replace according to the couplings
-    TRACE("Now replacing, base agent=")(plan.base_agent)("\n");
-	commands->Add( make_unique<InsertCommand>( base_xlink ) );
-    
-    stack<FreeZone> free_zone_stack;
-	plan.vn_sequence->ExecuteUpdateCommand( commands.get(), this, &free_zone_stack );  
-    ASSERT( free_zone_stack.empty() );
     plan.vn_sequence->CompleteDomainExtension();     
 
     TRACE("Replace done\n");

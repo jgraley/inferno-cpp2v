@@ -246,3 +246,25 @@ string CommandSequence::GetTrace() const
         elts.push_back( Trace(*pc) );
     return Join( elts, "\n", "CommandSequence[\n", " ]\n" );
 }
+
+// ------------------------- Runners --------------------------
+
+FreeZone SR::RunGetFreeZoneNoDB( unique_ptr<Command> cmd, const SCREngine *scr_engine )
+{
+    stack<FreeZone> free_zone_stack;
+    Command::ExecKit exec_kit {nullptr, scr_engine, scr_engine, &free_zone_stack};
+	cmd->Execute( exec_kit );   
+	ASSERT( free_zone_stack.size() == 1);       
+    return free_zone_stack.top();  	
+}
+
+
+void SR::RunVoidForReplace( unique_ptr<Command> cmd, const SCREngine *scr_engine, XTreeDatabase *x_tree_db )
+{
+    stack<FreeZone> free_zone_stack;
+    Command::ExecKit exec_kit {x_tree_db, x_tree_db, scr_engine, &free_zone_stack};
+	cmd->Execute( exec_kit );   
+	ASSERT( free_zone_stack.size() == 0);       
+}
+
+

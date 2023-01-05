@@ -522,12 +522,8 @@ TreePtr<Node> AgentCommon::BuildForBuildersAnalysis( PatternLink me_plink )
 {
 	Agent::ReplaceKit kit;
 	auto commands = GenerateCommand(kit, me_plink);
-
-    stack<FreeZone> free_zone_stack;
-    Command::ExecKit exec_kit {nullptr, my_scr_engine, my_scr_engine, &free_zone_stack};
-	commands->Execute( exec_kit );     
-    ASSERT( free_zone_stack.size() == 1);       
-    return free_zone_stack.top().GetBase();
+    FreeZone zone = RunGetFreeZoneNoDB( move(commands), my_scr_engine );     
+    return zone.GetBase();
 }
 
 

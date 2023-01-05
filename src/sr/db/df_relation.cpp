@@ -24,6 +24,12 @@ bool DepthFirstRelation::operator()( XLink l_xlink, XLink r_xlink ) const
 
 Orderable::Diff DepthFirstRelation::Compare3Way( const XLink l_xlink, const XLink r_xlink ) const
 {
+	return CompareHierarchical( l_xlink, r_xlink ).first;
+}
+
+
+pair<Orderable::Diff, DepthFirstRelation::RelType> DepthFirstRelation::CompareHierarchical( XLink l_xlink, XLink r_xlink ) const
+{
     // Maps a parent xlink to two optional child xlinks: the first is 
     // a weak ancestor of l and second of r. We fill in first from the
     // ancestry of l and the second from r. As soon as we discover we've 
@@ -35,12 +41,10 @@ Orderable::Diff DepthFirstRelation::Compare3Way( const XLink l_xlink, const XLin
     if( l_xlink == r_xlink )
     {
         //FTRACE("early out\n");
-        return 0;
+        return make_pair(0, SAME);
     }
     
     // Parent is lower in depth-first ordering
-    const Orderable::Diff LEFT_IS_ANCESTOR  = 0-1;
-    const Orderable::Diff RIGHT_IS_ANCESTOR = 1-0;
     
     XLink l_cur_xlink = l_xlink;
     XLink r_cur_xlink = r_xlink;
@@ -55,17 +59,17 @@ Orderable::Diff DepthFirstRelation::Compare3Way( const XLink l_xlink, const XLin
 
         if( !l_parent_xlink && !r_parent_xlink )
         {
-            //FTRACE("Both at base, comparing base ordinals\n");
+            //FTRACE("Both at root, comparing root ordinals\n");
 			const LinkTable::Row &l_row = db->GetRow(l_cur_xlink);       
 			const LinkTable::Row &r_row = db->GetRow(r_cur_xlink);
-            return l_row.base_ordinal - r_row.base_ordinal;
+            return make_pair(l_row.base_ordinal - r_row.base_ordinal, ROOTS_ARE_DISTINCT);
         }
 
         if( l_parent_xlink )
         {            
             // If l hits r0 then l0 was a descendent of it. Use parent to spot sooner.
             if( l_parent_xlink == r_xlink )
-                return RIGHT_IS_ANCESTOR;
+                return make_pair(1, RIGHT_IS_ANCESTOR);
                 
             // If we share a parent, l0 and r0 are weakly removed siblings
             if( candidate_mutuals[l_parent_xlink].second )
@@ -85,7 +89,7 @@ Orderable::Diff DepthFirstRelation::Compare3Way( const XLink l_xlink, const XLin
         {
             // If r hits l0 then r0 was a descendent of it. Use parent to spot sooner.
             if( r_parent_xlink == l_xlink )
-                return LEFT_IS_ANCESTOR;
+                return make_pair(-1, RIGHT_IS_ANCESTOR);;
 
             // If we share a parent, l0 and r0 are weakly removed siblings
             if( candidate_mutuals[r_parent_xlink].first )
@@ -110,17 +114,17 @@ Orderable::Diff DepthFirstRelation::Compare3Way( const XLink l_xlink, const XLin
     
     // Itemisation is primary
     if( Orderable::Diff d = l_row.item_ordinal - r_row.item_ordinal )
-        return d;
+        return make_pair(d, WEAKLY_REMOVED_ITEM_SIBLINGS);
         
     // Secondary is position inside container
     if( Orderable::Diff d = l_row.container_ordinal - r_row.container_ordinal )
-        return d;
+        return make_pair(d, WEAKLY_REMOVED_CONTAINER_SIBLINGS);
         
     ASSERT(false)
           ("Comparing ")(l_xlink)(" with ")(r_xlink)("\n")
           ("Got to ")(l_cur_xlink)(" and ")(r_cur_xlink)("\n")
           (candidate_mutuals);
-    return 0;
+    ASSERTFAIL();
 }
 
 
