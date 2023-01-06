@@ -403,6 +403,14 @@ const typename T::value_type &OnlyElementOf( const T&c )
 
 
 template<typename T>
+decltype(T::begin()) &OnlyElementOf( T&c )
+{
+    ASSERT( c.size()==1 )("Size is %d:\n", c.size())(c)("\n");
+    return *(c.begin());
+}
+
+
+template<typename T>
 typename T::value_type &&OnlyElementOf( T&&c )
 {
     ASSERT( c.size()==1 );

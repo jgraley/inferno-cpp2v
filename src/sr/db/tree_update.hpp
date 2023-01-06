@@ -37,6 +37,17 @@ public:
 	virtual void Execute( const ExecKit &kit ) const = 0;
 };
 
+// ------------------------- ImmediateTreeZoneCommand --------------------------
+
+class ImmediateTreeZoneCommand : public Command
+{
+public:
+    ImmediateTreeZoneCommand( const TreeZone &zone );
+
+protected:
+	TreeZone zone;
+};
+
 // ------------------------- DeclareFreeZoneCommand --------------------------
 
 // Put a free zone onto the stack.
@@ -55,16 +66,13 @@ private:
 // ------------------------- DuplicateTreeZoneCommand --------------------------
 
 // Duplicate a tree zone, making a free zone, and push it to the stack.
-class DuplicateTreeZoneCommand : public Command
+class DuplicateTreeZoneCommand : public ImmediateTreeZoneCommand
 {
 public:
-    DuplicateTreeZoneCommand( const TreeZone &zone );
+    using ImmediateTreeZoneCommand::ImmediateTreeZoneCommand;
 	void Execute( const ExecKit &kit ) const final;	
 
 	string GetTrace() const final;
-
-private:
-	TreeZone zone;
 };
 
 // ------------------------- PopulateFreeZoneCommand --------------------------
@@ -135,6 +143,7 @@ public:
 
 	void Add( unique_ptr<Command> new_cmd );
     bool IsEmpty() const;
+    const list<unique_ptr<Command>> &GetSeq() const;
 	
 	string GetTrace() const final;
 
@@ -147,6 +156,18 @@ private:
 FreeZone RunGetFreeZoneNoDB( unique_ptr<Command> cmd, const SCREngine *scr_engine );
 void RunVoidForReplace( unique_ptr<Command> cmd, const SCREngine *scr_engine, XTreeDatabase *x_tree_db );
 	
+// ------------------------- TreeZoneOverlapFinder --------------------------
+
+class TreeZoneOverlapFinder
+{
+public:
+	TreeZoneOverlapFinder( CommandSequence *seq );
+	
+private:	
+    typedef set<const ImmediateTreeZoneCommand *> Overlapping;
+	set<unique_ptr<Overlapping>> disjoint_sets_tz;
+};
+
 }
 
 #endif

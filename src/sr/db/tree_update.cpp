@@ -6,6 +6,13 @@
 
 using namespace SR;
 
+// ------------------------- ImmediateTreeZoneCommand --------------------------
+
+ImmediateTreeZoneCommand::ImmediateTreeZoneCommand( const TreeZone &zone_ ) :
+	zone( zone_ )
+{
+}
+
 // ------------------------- DeclareFreeZoneCommand --------------------------
 
 DeclareFreeZoneCommand::DeclareFreeZoneCommand( FreeZone &&zone_ ) :
@@ -26,12 +33,6 @@ string DeclareFreeZoneCommand::GetTrace() const
 }
 
 // ------------------------- DuplicateTreeZoneCommand --------------------------
-
-DuplicateTreeZoneCommand::DuplicateTreeZoneCommand( const TreeZone &zone_ ) :
-	zone( zone_ )
-{
-}
-
 
 void DuplicateTreeZoneCommand::Execute( const ExecKit &kit ) const
 {
@@ -239,6 +240,12 @@ bool CommandSequence::IsEmpty() const
 }
 
 
+const list<unique_ptr<Command>> &CommandSequence::GetSeq() const
+{
+	return seq;
+}
+
+
 string CommandSequence::GetTrace() const
 {
     list<string> elts;
@@ -262,14 +269,46 @@ FreeZone SR::RunGetFreeZoneNoDB( unique_ptr<Command> cmd, const SCREngine *scr_e
 void SR::RunVoidForReplace( unique_ptr<Command> cmd, const SCREngine *scr_engine, XTreeDatabase *x_tree_db )
 {
 	// Ensure we have a CommandSequence
+	auto seq = make_unique<CommandSequence>();
+	seq->Add( move(cmd) ); // flattens as it goes...
+	
 	// Uniqueness of tree zones
+	TreeZoneOverlapFinder finder( seq.get() );
+	
 	// calculate SASU indexes
 	// err...
 	
     stack<FreeZone> free_zone_stack;
     Command::ExecKit exec_kit {x_tree_db, x_tree_db, scr_engine, &free_zone_stack};
-	cmd->Execute( exec_kit );   
+	seq->Execute( exec_kit );   
 	ASSERT( free_zone_stack.size() == 0);       
 }
 
+// ------------------------- TreeZoneOverlapFinder --------------------------
 
+TreeZoneOverlapFinder::TreeZoneOverlapFinder( CommandSequence *seq )
+{
+	// Put them all into one Overlapping set, pessamistically assuming they
+	// all overlap
+	
+	disjoint_sets_tz.insert(make_unique<Overlapping>());
+	
+	for( const unique_ptr<Command> &cmd : seq->GetSeq() )
+	{
+		if( auto tz_cmd = dynamic_cast<const ImmediateTreeZoneCommand *>(cmd.get()) )
+    		OnlyElementOf(disjoint_sets_tz)->insert( tz_cmd );
+	}
+	
+	// First partition by base alone:
+	// - same/ancestral => maybe overlapping
+	// - sibling        => distinct
+	// (sibling relationship on root means distinct)
+	// using n^2 algo (for now)
+	//
+	// Then for each distinct set, resolve the maybe overlapping, 
+	// which means iterating over terminii.
+	// using n^2 algo.
+	//
+	// Reduce to a map from const ImmediateTreeZoneCommand * to something
+	// that makes checks quick.
+}

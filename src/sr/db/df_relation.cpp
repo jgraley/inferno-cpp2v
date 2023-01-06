@@ -62,7 +62,7 @@ pair<Orderable::Diff, DepthFirstRelation::RelType> DepthFirstRelation::CompareHi
             //FTRACE("Both at root, comparing root ordinals\n");
 			const LinkTable::Row &l_row = db->GetRow(l_cur_xlink);       
 			const LinkTable::Row &r_row = db->GetRow(r_cur_xlink);
-            return make_pair(l_row.base_ordinal - r_row.base_ordinal, ROOTS_ARE_DISTINCT);
+            return make_pair(l_row.base_ordinal - r_row.base_ordinal, ROOT_SIBLINGS);
         }
 
         if( l_parent_xlink )
@@ -114,11 +114,11 @@ pair<Orderable::Diff, DepthFirstRelation::RelType> DepthFirstRelation::CompareHi
     
     // Itemisation is primary
     if( Orderable::Diff d = l_row.item_ordinal - r_row.item_ordinal )
-        return make_pair(d, WEAKLY_REMOVED_ITEM_SIBLINGS);
+        return make_pair(d, ITEM_SIBLINGS);
         
     // Secondary is position inside container
     if( Orderable::Diff d = l_row.container_ordinal - r_row.container_ordinal )
-        return make_pair(d, WEAKLY_REMOVED_CONTAINER_SIBLINGS);
+        return make_pair(d, CONTAINER_SIBLINGS);
         
     ASSERT(false)
           ("Comparing ")(l_xlink)(" with ")(r_xlink)("\n")

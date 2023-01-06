@@ -20,12 +20,14 @@ class DepthFirstRelation
 public:
 	enum RelType
 	{
+		// Siblings mean weakly removed i.e. supplied nodes could be 
+		// descendants of the actualk siblings. 
 		SAME,
 		LEFT_IS_ANCESTOR,
 		RIGHT_IS_ANCESTOR,
-		WEAKLY_REMOVED_CONTAINER_SIBLINGS,
-		WEAKLY_REMOVED_ITEM_SIBLINGS,
-		ROOTS_ARE_DISTINCT
+		CONTAINER_SIBLINGS,
+		ITEM_SIBLINGS,
+		ROOT_SIBLINGS
 	};
 		
     DepthFirstRelation(const XTreeDatabase *db);
