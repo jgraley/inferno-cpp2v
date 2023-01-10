@@ -1,6 +1,7 @@
 #include "zone.hpp"
 
 #include "helpers/flatten.hpp"
+#include "db/df_relation.hpp"
 
 using namespace SR;
 
@@ -125,6 +126,67 @@ bool TreeZone::IsEmpty() const
 {
     // There must be a base, so the only way to be empty is to terminate at the base
     return terminii.size()==1 && OnlyElementOf(terminii)==base;
+}
+
+
+bool TreeZone::IsOverlap( const XTreeDatabase *db, const TreeZone &l, const TreeZone &r )
+{
+    DepthFirstRelation df_rel(db);
+    const TreeZone *d;
+    const TreeZone *a;
+    
+    auto p_base = df_rel.CompareHierarchical(l.base, r.base);
+    switch( p_base.second )
+    {
+        case DepthFirstRelation::SAME:
+            return true; // identical
+            
+        case DepthFirstRelation::LEFT_IS_ANCESTOR:
+            a = &l;
+            d = &r;
+            break; // maybe
+            
+        case DepthFirstRelation::RIGHT_IS_ANCESTOR:
+            a = &r;
+            d = &l;
+            break; // maybe
+        
+        case DepthFirstRelation::CONTAINER_SIBLINGS:
+        case DepthFirstRelation::ITEM_SIBLINGS:
+        case DepthFirstRelation::ROOT_SIBLINGS:
+            return false; // weakly removed sibling bases cannot overlap
+            
+        default:
+            ASSERTFAILS();
+    }
+    
+    // If a has a terminus that is an ancestor (weakly)
+    // to d's base, then they do not overlap. Otherwise, they do.
+    for( XLink terminus : a->terminii )
+    {
+        auto p_term = df_rel.CompareHierarchical(terminus, d->base);
+        switch( p_base.second )
+        {
+            case DepthFirstRelation::SAME:
+                return false; // close but no overlap, zone d begins at from a's terminus
+                
+            case DepthFirstRelation::LEFT_IS_ANCESTOR:
+                return false; // no overlap, zone d descends from a's terminus
+                
+            case DepthFirstRelation::RIGHT_IS_ANCESTOR:
+                return true; // a's terminus descends from base of d, making the zones overlap
+            
+            case DepthFirstRelation::CONTAINER_SIBLINGS:
+            case DepthFirstRelation::ITEM_SIBLINGS:
+            case DepthFirstRelation::ROOT_SIBLINGS:
+                break; // a's terminus is on a different branch than d
+                
+            default:
+                ASSERTFAILS();
+        }                
+    }
+    
+    return true; // None of a's terminii in path from a's base to zone d
 }
 
 

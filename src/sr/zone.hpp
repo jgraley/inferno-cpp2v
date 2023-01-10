@@ -10,7 +10,8 @@
 
 namespace SR 
 {
-
+    class XTreeDatabase;
+    
 // ------------------------- FreeZone --------------------------
 
 // FreeZone is for zones that are not anywhere in the current
@@ -52,6 +53,8 @@ public:
     XLink GetBase() const;
     list<XLink> GetTerminii() const;
     bool IsEmpty() const;
+    
+    static bool IsOverlap( const XTreeDatabase *db, const TreeZone &l, const TreeZone &r );
     
     string GetTrace() const;
 

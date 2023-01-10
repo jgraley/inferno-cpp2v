@@ -44,6 +44,8 @@ class ImmediateTreeZoneCommand : public Command
 public:
     ImmediateTreeZoneCommand( const TreeZone &zone );
 
+    const TreeZone *GetTreeZone() const;
+    
 protected:
 	TreeZone zone;
 };
@@ -161,11 +163,11 @@ void RunVoidForReplace( unique_ptr<Command> cmd, const SCREngine *scr_engine, XT
 class TreeZoneOverlapFinder
 {
 public:
-	TreeZoneOverlapFinder( CommandSequence *seq );
+	TreeZoneOverlapFinder( const XTreeDatabase *db, CommandSequence *seq );
 	
 private:	
-    typedef set<const ImmediateTreeZoneCommand *> Overlapping;
-	set<unique_ptr<Overlapping>> disjoint_sets_tz;
+    map<const TreeZone *, const ImmediateTreeZoneCommand *> tzps_to_commands;
+    map<const TreeZone *, set<const TreeZone *>> overlapping_zones;
 };
 
 }

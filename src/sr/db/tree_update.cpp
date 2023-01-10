@@ -3,6 +3,7 @@
 #include "x_tree_database.hpp"
 #include "common/read_args.hpp"
 #include "tree/validate.hpp"
+#include "common/lambda_loops.hpp"
 
 using namespace SR;
 
@@ -11,6 +12,12 @@ using namespace SR;
 ImmediateTreeZoneCommand::ImmediateTreeZoneCommand( const TreeZone &zone_ ) :
 	zone( zone_ )
 {
+}
+
+
+const TreeZone *ImmediateTreeZoneCommand::GetTreeZone() const
+{
+    return &zone;
 }
 
 // ------------------------- DeclareFreeZoneCommand --------------------------
@@ -273,7 +280,7 @@ void SR::RunVoidForReplace( unique_ptr<Command> cmd, const SCREngine *scr_engine
 	seq->Add( move(cmd) ); // flattens as it goes...
 	
 	// Uniqueness of tree zones
-	TreeZoneOverlapFinder finder( seq.get() );
+	//TreeZoneOverlapFinder finder( x_tree_db, seq.get() );
 	
 	// calculate SASU indexes
 	// err...
@@ -286,29 +293,33 @@ void SR::RunVoidForReplace( unique_ptr<Command> cmd, const SCREngine *scr_engine
 
 // ------------------------- TreeZoneOverlapFinder --------------------------
 
-TreeZoneOverlapFinder::TreeZoneOverlapFinder( CommandSequence *seq )
+TreeZoneOverlapFinder::TreeZoneOverlapFinder( const XTreeDatabase *db, CommandSequence *seq )
 {
 	// Put them all into one Overlapping set, pessamistically assuming they
 	// all overlap
 	
-	disjoint_sets_tz.insert(make_unique<Overlapping>());
-	
 	for( const unique_ptr<Command> &cmd : seq->GetSeq() )
 	{
 		if( auto tz_cmd = dynamic_cast<const ImmediateTreeZoneCommand *>(cmd.get()) )
-    		OnlyElementOf(disjoint_sets_tz)->insert( tz_cmd );
+        {
+            // Note that key is actually TreeZone *, so equal TreeZones get different 
+            // rows which is why we InsertSolo()
+            const TreeZone *zone = tz_cmd->GetTreeZone();
+            InsertSolo( tzps_to_commands, make_pair( zone, tz_cmd ) );
+        }
 	}
 	
-	// First partition by base alone:
-	// - same/ancestral => maybe overlapping
-	// - sibling        => distinct
-	// (sibling relationship on root means distinct)
-	// using n^2 algo (for now)
-	//
-	// Then for each distinct set, resolve the maybe overlapping, 
-	// which means iterating over terminii.
-	// using n^2 algo.
-	//
-	// Reduce to a map from const ImmediateTreeZoneCommand * to something
-	// that makes checks quick.
+    ForAllCommutativeDistinctPairs( tzps_to_commands, 
+                                    [&](const pair<const TreeZone *, const ImmediateTreeZoneCommand *> &l, 
+                                        const pair<const TreeZone *, const ImmediateTreeZoneCommand *> &r)
+    {
+        if( TreeZone::IsOverlap( db, *l.first, *r.first ) )
+        {
+            // It's a symmentrical relationship so do it both ways around
+            overlapping_zones[l.first].insert(r.first);
+            overlapping_zones[r.first].insert(l.first);
+        }
+    } );
+    
+    //FTRACE(overlapping_zones);
 }

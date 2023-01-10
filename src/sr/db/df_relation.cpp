@@ -62,6 +62,7 @@ pair<Orderable::Diff, DepthFirstRelation::RelType> DepthFirstRelation::CompareHi
             //FTRACE("Both at root, comparing root ordinals\n");
 			const LinkTable::Row &l_row = db->GetRow(l_cur_xlink);       
 			const LinkTable::Row &r_row = db->GetRow(r_cur_xlink);
+            ASSERT( l_row.base_ordinal != r_row.base_ordinal );
             return make_pair(l_row.base_ordinal - r_row.base_ordinal, ROOT_SIBLINGS);
         }
 
@@ -89,7 +90,7 @@ pair<Orderable::Diff, DepthFirstRelation::RelType> DepthFirstRelation::CompareHi
         {
             // If r hits l0 then r0 was a descendent of it. Use parent to spot sooner.
             if( r_parent_xlink == l_xlink )
-                return make_pair(-1, RIGHT_IS_ANCESTOR);;
+                return make_pair(-1, LEFT_IS_ANCESTOR);
 
             // If we share a parent, l0 and r0 are weakly removed siblings
             if( candidate_mutuals[r_parent_xlink].first )
