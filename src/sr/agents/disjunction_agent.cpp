@@ -69,7 +69,6 @@ Agent::CommandPtr DisjunctionAgent::GenerateCommandImpl( const ReplaceKit &kit,
     auto new_zone = TreeZone::CreateSubtree( key_xlink );
     auto commands = make_unique<CommandSequence>();
 	commands->Add( make_unique<DuplicateTreeZoneCommand>( new_zone ) );
-	commands->Add( make_unique<PopulateFreeZoneCommand>() );
 	return commands;
 }
                                                  

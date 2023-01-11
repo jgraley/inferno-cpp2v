@@ -87,7 +87,6 @@ Agent::CommandPtr TeleportAgent::GenerateCommandImpl( const ReplaceKit &kit,
 	
     auto commands = make_unique<CommandSequence>();
 	commands->Add( make_unique<DuplicateTreeZoneCommand>( new_zone ) );
-	commands->Add( make_unique<PopulateFreeZoneCommand>() );
 	return commands;
 }
 

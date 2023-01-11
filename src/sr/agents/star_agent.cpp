@@ -101,7 +101,6 @@ Agent::CommandPtr StarAgent::GenerateCommandImpl( const ReplaceKit &kit,
     {
         auto new_zone = TreeZone::CreateSubtree( XLink(key_node, &key_elt) );
         commands->Add( make_unique<DuplicateTreeZoneCommand>( new_zone ) );
-       	commands->Add( make_unique<PopulateFreeZoneCommand>() );
 
         // Make a placeholder in the dest container for the updater to point to
         ContainerInterface::iterator dest_it = dest_container->insert( ContainerUpdater::GetPlaceholder() );
@@ -109,7 +108,6 @@ Agent::CommandPtr StarAgent::GenerateCommandImpl( const ReplaceKit &kit,
     }
     
     // Makes a free zone for the subcontainer
-    ;
     commands->Add( make_unique<DeclareFreeZoneCommand>( FreeZone(dest, dest_terminii) ) );
     commands->Add( make_unique<PopulateFreeZoneCommand>() );
     
