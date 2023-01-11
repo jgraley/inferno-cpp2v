@@ -73,7 +73,7 @@ void ContainerUpdater::Apply( TreePtr<Node> node )
     container->erase( *it_placeholder.GetUnderlyingIterator() );  
     
     /**
-     * Why all this complciated placeholder business then?
+     * Why all this complicated placeholder business then?
      * It's to permit multiple terminii to refer to the same Sequence
      * with a well-defined relative order. We place a null element in
      * for each terminus so that iterators relative to different

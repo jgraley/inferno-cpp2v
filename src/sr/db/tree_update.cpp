@@ -43,6 +43,9 @@ string DeclareFreeZoneCommand::GetTrace() const
 
 void DuplicateTreeZoneCommand::Execute( const ExecKit &kit ) const
 {
+	if( kit.x_tree_db )
+		zone.DBCheck(kit.x_tree_db);
+	
     if( zone.IsEmpty() )
     {
 		// Duplicate::DuplicateSubtree() can't work with the
@@ -280,7 +283,7 @@ void SR::RunVoidForReplace( unique_ptr<Command> cmd, const SCREngine *scr_engine
 	seq->Add( move(cmd) ); // flattens as it goes...
 	
 	// Uniqueness of tree zones
-	//TreeZoneOverlapFinder finder( x_tree_db, seq.get() );
+	TreeZoneOverlapFinder finder( x_tree_db, seq.get() );
 	
 	// calculate SASU indexes
 	// err...
@@ -305,7 +308,15 @@ TreeZoneOverlapFinder::TreeZoneOverlapFinder( const XTreeDatabase *db, CommandSe
             // Note that key is actually TreeZone *, so equal TreeZones get different 
             // rows which is why we InsertSolo()
             const TreeZone *zone = tz_cmd->GetTreeZone();
+            
+            // Zone should be known to the DB
+            zone->DBCheck(db);
+            
+            // Record zone and related command
             InsertSolo( tzps_to_commands, make_pair( zone, tz_cmd ) );
+            
+            // Start off with an empty overlapping set
+            InsertSolo( overlapping_zones, make_pair( zone, set<const TreeZone *>() ) );
         }
 	}
 	

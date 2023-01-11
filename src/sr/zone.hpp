@@ -53,7 +53,8 @@ public:
     XLink GetBase() const;
     list<XLink> GetTerminii() const;
     bool IsEmpty() const;
-    
+    void DBCheck( const XTreeDatabase *db ) const;
+
     static bool IsOverlap( const XTreeDatabase *db, const TreeZone &l, const TreeZone &r );
     
     string GetTrace() const;

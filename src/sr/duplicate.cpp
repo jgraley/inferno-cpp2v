@@ -28,10 +28,19 @@ TreePtr<Node> Duplicate::DuplicateNode( const DirtyGrassUpdateInterface *dirty_g
 
 
 TreePtr<Node> Duplicate::DuplicateSubtree( const DirtyGrassUpdateInterface *dirty_grass,
-                                           XLink source_xlink )
+                                           XLink source_base_xlink )
 {
     TerminiiMap empty_terminii_map;
-    return DuplicateSubtree( dirty_grass, source_xlink, empty_terminii_map );
+	TreePtr<Node> source_base = source_base_xlink.GetChildX();
+    return DuplicateSubtreeWorker( dirty_grass, source_base, empty_terminii_map );
+}
+    
+    
+TreePtr<Node> Duplicate::DuplicateSubtree( const DirtyGrassUpdateInterface *dirty_grass,
+                                           TreePtr<Node> source_base )
+{
+    TerminiiMap empty_terminii_map;
+    return DuplicateSubtreeWorker( dirty_grass, source_base, empty_terminii_map );
 }
     
     
@@ -53,18 +62,18 @@ TreePtr<Node> Duplicate::DuplicateSubtree( const DirtyGrassUpdateInterface *dirt
         return dest_terminus;
     }
 
+	TreePtr<Node> source_base = source_base_xlink.GetChildX();
+
     return DuplicateSubtreeWorker( dirty_grass,
-                                   source_base_xlink,
+                                   source_base,
                                    terminii_map );
 }
 
 
 TreePtr<Node> Duplicate::DuplicateSubtreeWorker( const DirtyGrassUpdateInterface *dirty_grass,
-                                                 XLink source_xlink,
+                                                 TreePtr<Node> source,
                                                  TerminiiMap &terminii_map )
 {
-	TreePtr<Node> source = source_xlink.GetChildX();
-
     // Make a new node, since we're substituting, preserve dirtyness        
     TreePtr<Node> dest = DuplicateNode( dirty_grass, source, false );
 
@@ -74,7 +83,7 @@ TreePtr<Node> Duplicate::DuplicateSubtreeWorker( const DirtyGrassUpdateInterface
     vector< Itemiser::Element * > source_items = source->Itemise();
     vector< Itemiser::Element * > dest_items = dest->Itemise(); 
 
-    TRACES("Duplicating %d members source=", dest_items.size())(source_xlink)(" dest=")(*dest)("\n");
+    TRACES("Duplicating %d members source=", dest_items.size())(source)(" dest=")(*dest)("\n");
     // Loop over all the members of source (which can be a subset of dest)
     // and for non-nullptr members, duplicate them by recursing and write the
     // duplicates to the destination.
@@ -112,7 +121,7 @@ TreePtr<Node> Duplicate::DuplicateSubtreeWorker( const DirtyGrassUpdateInterface
                 {
                      //TRACES("Duplicating ")(*source_elt)("\n");
                     TreePtr<Node> dest_elt = DuplicateSubtreeWorker( dirty_grass,
-                                                                     source_child_xlink, 
+                                                                     source_child_xlink.GetChildX(), 
                                                                      terminii_map );
                     //TRACE("inserting ")(*dest_elt)(" directly\n");
                     dest_container->insert( dest_elt );
@@ -141,7 +150,7 @@ TreePtr<Node> Duplicate::DuplicateSubtreeWorker( const DirtyGrassUpdateInterface
             else
             {
                 *dest_singular = DuplicateSubtreeWorker( dirty_grass,
-                                                         source_child_xlink, 
+                                                         source_child_xlink.GetChildX(), 
                                                          terminii_map );
 				ASSERTS( *dest_singular );
 				ASSERTS( TreePtr<Node>(*dest_singular)->IsFinal() );            

@@ -4,6 +4,7 @@
 #include "sym/lazy_eval.hpp"
 #include "sym/boolean_operators.hpp"
 #include "db/tree_update.hpp"
+#include "helpers/simple_duplicate.hpp"
 
 using namespace SR;
 
@@ -38,28 +39,27 @@ Agent::CommandPtr BuilderAgent::GenerateCommandImpl( const ReplaceKit &kit,
 {
     INDENT("%");
 
+	TreePtr<Node> new_node;
     if( me_plink == keyer_plink )
     {
         ASSERT( !key_xlink ); // we're on keyer plink
         // Call the soft pattern impl 
-        TreePtr<Node> new_node = BuildNewSubtree();
+        new_node = BuildNewSubtree();
           
-        LocatedLink new_link( me_plink, XLink::CreateDistinct( new_node ) );
-        my_scr_engine->SetReplaceKey( new_link );
+        // Key it
+        XLink new_xlink = XLink::CreateDistinct( new_node );
+        my_scr_engine->SetReplaceKey( LocatedLink( me_plink, new_xlink ) );   
         
-        auto new_zone = TreeZone::CreateSubtree( new_link );
-		auto commands = make_unique<CommandSequence>();
-		commands->Add( make_unique<DuplicateTreeZoneCommand>( new_zone ) );
-		commands->Add( make_unique<PopulateFreeZoneCommand>() );
-		return commands;
+        // Don't duplicate since this is first one     
     }
     else
     {
         ASSERT( key_xlink ); // we're on residual plink
-        auto new_zone = TreeZone::CreateSubtree( key_xlink );
-		auto commands = make_unique<CommandSequence>();
-		commands->Add( make_unique<DuplicateTreeZoneCommand>( new_zone ) );
-		commands->Add( make_unique<PopulateFreeZoneCommand>() );
-		return commands;
+        
+        // Duplicate to keep free zones distinct since not first one
+        new_node = SimpleDuplicate::DuplicateSubtree(key_xlink.GetChildX());
     }
+
+    // Make free zone without duplicating since this is first one
+    return make_unique<DeclareFreeZoneCommand>( FreeZone::CreateSubtree( new_node ) );
 }

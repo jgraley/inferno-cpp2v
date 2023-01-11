@@ -35,7 +35,10 @@ public:
                                         bool force_dirty );
 
     static TreePtr<Node> DuplicateSubtree( const DirtyGrassUpdateInterface *dirty_grass,
-                                           XLink source_xlink );
+                                           XLink source_base_xlink );
+
+    static TreePtr<Node> DuplicateSubtree( const DirtyGrassUpdateInterface *dirty_grass,
+                                           TreePtr<Node> source_base );
 
     // terminii maps source tree terminii to destination terminii. We deep copy the
     // source tree up to the source terminii which are the keys in the map. See TerminusInfo
@@ -45,7 +48,7 @@ public:
                                            TerminiiMap &terminii_map );
                                            
     static TreePtr<Node> DuplicateSubtreeWorker( const DirtyGrassUpdateInterface *dirty_grass,
-                                                 XLink source_base_xlink,
+                                                 TreePtr<Node> source,
                                                  TerminiiMap &terminii_map );
 };
 

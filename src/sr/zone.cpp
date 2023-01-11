@@ -2,6 +2,7 @@
 
 #include "helpers/flatten.hpp"
 #include "db/df_relation.hpp"
+#include "db/x_tree_database.hpp"
 
 using namespace SR;
 
@@ -126,6 +127,14 @@ bool TreeZone::IsEmpty() const
 {
     // There must be a base, so the only way to be empty is to terminate at the base
     return terminii.size()==1 && OnlyElementOf(terminii)==base;
+}
+
+
+void TreeZone::DBCheck( const XTreeDatabase *db ) const
+{
+	ASSERT( db->HasRow( base ) )(base);
+	for( XLink terminus_xlink : terminii )
+		ASSERT( db->HasRow( terminus_xlink ) )(terminus_xlink);
 }
 
 
