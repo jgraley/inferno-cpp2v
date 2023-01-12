@@ -26,7 +26,7 @@ public:
     explicit FreeZone( TreePtr<Node> base, vector<shared_ptr<Updater>> terminii );
       
     TreePtr<Node> GetBase() const;
-    const vector<shared_ptr<Updater>> &GetTerminii() const;
+    vector<shared_ptr<Updater>> GetTerminii() const;
     shared_ptr<Updater> GetTerminus(int ti) const;
     bool IsEmpty() const;
 
@@ -34,7 +34,7 @@ public:
     
 private:
     TreePtr<Node> base;
-    vector<shared_ptr<Updater>> terminii;
+    map<int, shared_ptr<Updater>> terminii;
 };
 
 // ------------------------- TreeZone --------------------------

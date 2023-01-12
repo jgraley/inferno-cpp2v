@@ -96,7 +96,7 @@ void PopulateFreeZoneCommand::Execute( const ExecKit &kit ) const
 	FreeZone dest_zone = kit.free_zone_stack->top();
 	kit.free_zone_stack->pop();
 	
-    const vector<shared_ptr<Updater>> &terminii = dest_zone.GetTerminii();
+    vector<shared_ptr<Updater>> terminii = dest_zone.GetTerminii();
     ASSERT( kit.free_zone_stack->size() >= terminii.size() ); // There must be enough items on the stack
     
     if( dest_zone.IsEmpty() )
@@ -157,7 +157,7 @@ void JoinFreeZoneCommand::Execute( const ExecKit &kit ) const
 	kit.free_zone_stack->pop();
 	FreeZone dest_zone = kit.free_zone_stack->top();
 	
-    const vector<shared_ptr<Updater>> &terminii = dest_zone.GetTerminii();
+    vector<shared_ptr<Updater>> terminii = dest_zone.GetTerminii();
     
     if( dest_zone.IsEmpty() )
     {

@@ -22,15 +22,22 @@ FreeZone FreeZone::CreateEmpty()
 
 
 FreeZone::FreeZone( TreePtr<Node> base_, vector<shared_ptr<Updater>> terminii_ ) :
-    base( base_ ),
-    terminii( move(terminii_) )
+    base( base_ )
 {
+	// Fill the map
+	for( int i=0; i<terminii_.size(); i++ )
+	{
+		terminii[i] = terminii_.at(i);
+		if( base )
+			ASSERT( terminii.at(i) );
+	}
+	
     // An empty free zone is indicated by a NULL base and exactly one
     // terminus, which should also be NULL.
     if( !base )
     {
         ASSERT( terminii.size() == 1 );
-        ASSERT( !OnlyElementOf(terminii) );
+        ASSERT( !terminii.at(0) );
     }
 
     // Checks all terminii are distinct
@@ -44,16 +51,19 @@ TreePtr<Node> FreeZone::GetBase() const
 }
 
 
-const vector<shared_ptr<Updater>> &FreeZone::GetTerminii() const
+vector<shared_ptr<Updater>> FreeZone::GetTerminii() const
 {
-    return terminii;
+	vector<shared_ptr<Updater>> v;
+	for( int i=0; i<terminii.size(); i++ )
+		v.push_back( terminii.at(i) );
+	
+    return v;
 }
 
 
 shared_ptr<Updater> FreeZone::GetTerminus(int ti) const
 {
 	ASSERT( ti >= 0 );
-	ASSERT( ti < terminii.size() );
     return terminii.at(ti);
 }
 
@@ -64,7 +74,7 @@ bool FreeZone::IsEmpty() const
     if( !base )
     {
         ASSERT( terminii.size() == 1 );
-        ASSERT( !OnlyElementOf(terminii) );
+        ASSERT( !terminii.at(0) );
         return true;
     }
     return false;
@@ -74,13 +84,13 @@ bool FreeZone::IsEmpty() const
 string FreeZone::GetTrace() const
 {
     list<string> elts;
-    for( const shared_ptr<Updater> &p : terminii )
-        elts.push_back( Trace(p) );
+    for( auto p : terminii )
+        elts.push_back( Trace(p.first)+":"+Trace(p.second) );
     
-    string arrow;
+    string arrow, rhs;
     if( IsEmpty() )
     {
-        arrow = " ↯ "; // Indicates zone is empty due to a terminus at base
+        rhs = " ↯ "; // Indicates zone is empty due to a terminus at base
     }
     else
     {
@@ -88,9 +98,11 @@ string FreeZone::GetTrace() const
             arrow = " → "; // Indicates the zone goes all the way to leaves i.e. subtree
         else
             arrow = " ⇥ "; // Indicates the zone terminates
+
+        rhs = arrow + Join(elts, ", ");
     }
         
-    return "FreeZone(" + Trace(base) + arrow + Join(elts, ", ") +")";
+    return "FreeZone(" + Trace(base) + rhs +")";
 }
 
 
