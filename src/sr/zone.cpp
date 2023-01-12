@@ -68,6 +68,13 @@ shared_ptr<Updater> FreeZone::GetTerminus(int ti) const
 }
 
 
+void FreeZone::DropTerminus(int ti)
+{
+	int ne = terminii.erase(ti);
+	ASSERT( ne==1 );
+}
+
+
 bool FreeZone::IsEmpty() const
 {
     // No base indicates an empty zone

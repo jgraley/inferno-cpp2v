@@ -155,7 +155,7 @@ void JoinFreeZoneCommand::Execute( const ExecKit &kit ) const
 {
 	FreeZone source_zone = kit.free_zone_stack->top();
 	kit.free_zone_stack->pop();
-	FreeZone dest_zone = kit.free_zone_stack->top();
+	FreeZone &dest_zone = kit.free_zone_stack->top();
 	
     vector<shared_ptr<Updater>> terminii = dest_zone.GetTerminii();
     
@@ -172,6 +172,7 @@ void JoinFreeZoneCommand::Execute( const ExecKit &kit ) const
     }
 
     shared_ptr<Updater> terminus_upd = dest_zone.GetTerminus(terminus_index);
+    dest_zone.DropTerminus(terminus_index);
     
     ASSERT( source_zone.GetTerminii().empty() )(dest_zone)(" ")(source_zone);
     ASSERT( !source_zone.IsEmpty() );
@@ -179,11 +180,7 @@ void JoinFreeZoneCommand::Execute( const ExecKit &kit ) const
     ASSERT( source_zone.GetBase() );
     terminus_upd->Apply( source_zone.GetBase() );
     
-    //Validate()( zone->GetBase() );
-    
-    // Create a new zone for the result, so we don't leave our member zone's terminii in.
-    auto result_zone = FreeZone::CreateSubtree( dest_zone.GetBase() );    
-    kit.free_zone_stack->push( result_zone );      
+    //Validate()( zone->GetBase() );     
 }
 
 
