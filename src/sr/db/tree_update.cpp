@@ -84,65 +84,6 @@ string DuplicateTreeZoneCommand::GetTrace() const
 	return "DuplicateTreeZoneCommand    "+Trace(zone)+" -> PUSH";
 }
 
-// ------------------------- PopulateFreeZoneCommand --------------------------
-
-PopulateFreeZoneCommand::PopulateFreeZoneCommand()
-{
-}
-
-
-void PopulateFreeZoneCommand::Execute( const ExecKit &kit ) const
-{
-	FreeZone dest_zone = kit.free_zone_stack->top();
-	kit.free_zone_stack->pop();
-	
-    vector<shared_ptr<Updater>> terminii = dest_zone.GetTerminii();
-    ASSERT( kit.free_zone_stack->size() >= terminii.size() ); // There must be enough items on the stack
-    
-    if( dest_zone.IsEmpty() )
-    {
-        // We're empty, so we should have one terminus
-        ASSERT( terminii.size() == 1 );
-        // Exactly one zone to attach should be on the stack, and that's also
-        // going to be our output, since populating an empty zone just means
-        // substituting. So there's nothing to do.
-        return;
-    }
-
-    // Get a correctly-ordered list of subtrees to overwrite
-    list<FreeZone> source_zones;
-    for( auto terminus_upd : terminii )
-    {
-        source_zones.push_front( kit.free_zone_stack->top() );
-        kit.free_zone_stack->pop();
-    }
-                        
-    // Iterate over terminii and operand zones together, populating the terminii
-    // from the operands. 
-    for( auto p : Zip( terminii, source_zones ) )
-    {
-        shared_ptr<Updater> terminus_upd = p.first;
-        FreeZone &source_zone = p.second; 
-        ASSERT( source_zone.GetTerminii().empty() )(dest_zone)(" ")(Zip( terminii, source_zones )); // TODO accumulate the terminii in the result zone.
-        ASSERT( !source_zone.IsEmpty() );
-        // Populate terminus. Apply() will expand SubContainers
-        ASSERT( source_zone.GetBase() );
-        terminus_upd->Apply( source_zone.GetBase() );
-    }
-    
-    //Validate()( zone->GetBase() );
-    
-    // Create a new zone for the result, so we don't leave our member zone's terminii in.
-    auto result_zone = FreeZone::CreateSubtree( dest_zone.GetBase() );    
-    kit.free_zone_stack->push( result_zone );      
-}
-
-
-string PopulateFreeZoneCommand::GetTrace() const
-{
-	return "PopulateFreeZoneCommand     POP, POP* -> PUSH";
-}
-
 // ------------------------- JoinFreeZoneCommand --------------------------
 
 JoinFreeZoneCommand::JoinFreeZoneCommand(int ti) :
@@ -184,7 +125,7 @@ void JoinFreeZoneCommand::Execute( const ExecKit &kit ) const
 
 string JoinFreeZoneCommand::GetTrace() const
 {
-	return SSPrintf("JoinFreeZoneCommand       PEEK[%d], POP", terminus_index);
+	return SSPrintf("JoinFreeZoneCommand         PEEK[%d], POP", terminus_index);
 }
 
 // ------------------------- DeleteCommand --------------------------

@@ -613,13 +613,14 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
 	        {
 		        ASSERT( my_elt )("Some element of member %d (", i)(*my_con)(") of ")(*this)(" was nullptr\n");
 		        TRACE("Got ")(*my_elt)("\n");
-                PatternLink my_elt_plink( this, &my_elt );
-                commands->Add( my_elt_plink.GetChildAgent()->GenerateCommand(kit, my_elt_plink) );
-				commands->Add( make_unique<JoinFreeZoneCommand>(ti++) );
-                
+
                 // Make a placeholder in the dest container for the updater to point to
                 ContainerInterface::iterator dest_it = dest_con->insert( ContainerUpdater::GetPlaceholder() );
                 dest_terminii.push_back( make_shared<ContainerUpdater>( dest_con, dest_it ) );     
+		        
+                PatternLink my_elt_plink( this, &my_elt );
+                commands->Add( my_elt_plink.GetChildAgent()->GenerateCommand(kit, my_elt_plink) );
+				commands->Add( make_unique<JoinFreeZoneCommand>(ti++) );                
 	        }
 	        present_in_overlay.insert( dest_items[i] );
         }            
@@ -632,13 +633,12 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
             if( *my_singular )
             {         
                 present_in_overlay.insert( dest_items[i] );
-                auto dest_upd = make_shared<SingularUpdater>( dest_singular );
+
+                dest_terminii.push_back( make_shared<SingularUpdater>( dest_singular ) );            
                 
                 PatternLink my_singular_plink( this, my_singular );                    
                 commands->Add( my_singular_plink.GetChildAgent()->GenerateCommand(kit, my_singular_plink) );
-				commands->Add( make_unique<JoinFreeZoneCommand>(ti++) );
-                
-                dest_terminii.push_back( make_shared<SingularUpdater>( dest_singular ) );            
+				commands->Add( make_unique<JoinFreeZoneCommand>(ti++) );                
             }
         }
         else
@@ -677,25 +677,25 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
 	        for( const TreePtrInterface &under_elt : *under_container )
 	        {
 		        ASSERT( under_elt ); // present simplified scheme disallows nullptr
-                auto under_zone = TreeZone::CreateSubtree( XLink(under_node, &under_elt) );
-                commands->Add( make_unique<DuplicateTreeZoneCommand>( under_zone ) );
-                commands->Add( make_unique<JoinFreeZoneCommand>(ti++) );
-                
+
                 // Make a placeholder in the dest container for the updater to point to
                 ContainerInterface::iterator dest_it = dest_con->insert( ContainerUpdater::GetPlaceholder() );
                 dest_terminii.push_back( make_shared<ContainerUpdater>( dest_con, dest_it ) );     
+
+                auto under_zone = TreeZone::CreateSubtree( XLink(under_node, &under_elt) );
+                commands->Add( make_unique<DuplicateTreeZoneCommand>( under_zone ) );
+                commands->Add( make_unique<JoinFreeZoneCommand>(ti++) );
  	        }
         }            
         else if( TreePtrInterface *under_singular = dynamic_cast<TreePtrInterface *>(under_items[i]) )
         {
             TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
-            auto dest_upd = make_shared<SingularUpdater>( dest_singular );
+            dest_terminii.push_back( make_shared<SingularUpdater>( dest_singular ) );            
+
             ASSERT( *under_singular );            
             auto under_zone = TreeZone::CreateSubtree( XLink(under_node, under_singular) );
             commands->Add( make_unique<DuplicateTreeZoneCommand>( under_zone ) );
             commands->Add( make_unique<JoinFreeZoneCommand>(ti++) );
-
-            dest_terminii.push_back( make_shared<SingularUpdater>( dest_singular ) );            
         }
         else
         {
@@ -752,25 +752,26 @@ Agent::CommandPtr StandardAgent::GenerateCommandNormal( const ReplaceKit &kit,
 	        {
 		        ASSERT( my_elt )("Some element of member %d (", i)(*my_con)(") of ")(*this)(" was nullptr\n");
 		        TRACE("Got ")(*my_elt)("\n");
-                PatternLink my_elt_plink( this, &my_elt );
-                commands->Add( my_elt_plink.GetChildAgent()->GenerateCommand(kit, my_elt_plink) );
-                commands->Add( make_unique<JoinFreeZoneCommand>(ti++) );
-
+		        
                 // Make a placeholder in the dest container for the updater to point to
                 ContainerInterface::iterator dest_it = dest_con->insert( ContainerUpdater::GetPlaceholder() );
                 dest_terminii.push_back( make_shared<ContainerUpdater>( dest_con, dest_it ) );    
+
+                PatternLink my_elt_plink( this, &my_elt );
+                commands->Add( my_elt_plink.GetChildAgent()->GenerateCommand(kit, my_elt_plink) );
+                commands->Add( make_unique<JoinFreeZoneCommand>(ti++) );
             }
         }            
         else if( TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[i]) )
         {
             TRACE("Copying single element\n");
-            TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
             ASSERT( *my_singular )("Member %d (", i)(*my_singular)(") of ")(*this)(" was nullptr when not overlaying\n");            
+            TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
+            dest_terminii.push_back( make_shared<SingularUpdater>( dest_singular ) );            
+
             PatternLink my_singular_plink( this, my_singular );                    
             commands->Add( my_singular_plink.GetChildAgent()->GenerateCommand(kit, my_singular_plink) );
             commands->Add( make_unique<JoinFreeZoneCommand>(ti++) );
-
-            dest_terminii.push_back( make_shared<SingularUpdater>( dest_singular ) );            
         }
         else
         {

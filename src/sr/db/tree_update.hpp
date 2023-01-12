@@ -77,21 +77,6 @@ public:
 	string GetTrace() const final;
 };
 
-// ------------------------- PopulateFreeZoneCommand --------------------------
-
-// Populate a free zone and push the resulting subtree 
-// to the stack. Free zone to populate should be on top of stack, 
-// and then the source free zones, in push order.
-// TODO fill in new zone terminii from sub zone terminii?
-class PopulateFreeZoneCommand : public Command
-{
-public:
-    explicit PopulateFreeZoneCommand();
-	void Execute( const ExecKit &kit ) const final;	
-
-	string GetTrace() const final;
-};
-
 // ------------------------- JoinFreeZoneCommand --------------------------
 
 // Populate one terminus of a free zone. Source zone should be on 
