@@ -161,6 +161,7 @@ public:
 	void Execute( const ExecKit &kit ) const final;	
 
 	void Add( unique_ptr<Command> new_cmd );
+	void AddAtStart( unique_ptr<Command> new_cmd );
     bool IsEmpty() const;
     const list<unique_ptr<Command>> &GetSeq() const;
 	

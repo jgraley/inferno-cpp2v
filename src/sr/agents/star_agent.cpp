@@ -95,12 +95,14 @@ Agent::CommandPtr StarAgent::GenerateCommandImpl( const ReplaceKit &kit,
     else
         ASSERT(0)("Please add new kind of container");
     
+    int it = 0;
     TRACE("Walking container length %d\n", key_container->size() );
     ContainerInterface *dest_container = dynamic_cast<ContainerInterface *>(dest.get());
     for( const TreePtrInterface &key_elt : *key_container )
     {
         auto new_zone = TreeZone::CreateSubtree( XLink(key_node, &key_elt) );
         commands->Add( make_unique<DuplicateTreeZoneCommand>( new_zone ) );
+		commands->Add( make_unique<JoinFreeZoneCommand>(it++) );
 
         // Make a placeholder in the dest container for the updater to point to
         ContainerInterface::iterator dest_it = dest_container->insert( ContainerUpdater::GetPlaceholder() );
@@ -108,8 +110,7 @@ Agent::CommandPtr StarAgent::GenerateCommandImpl( const ReplaceKit &kit,
     }
     
     // Makes a free zone for the subcontainer
-    commands->Add( make_unique<DeclareFreeZoneCommand>( FreeZone(dest, dest_terminii) ) );
-    commands->Add( make_unique<PopulateFreeZoneCommand>() );
+    commands->AddAtStart( make_unique<DeclareFreeZoneCommand>( FreeZone(dest, dest_terminii) ) );
     
     return commands;
 }

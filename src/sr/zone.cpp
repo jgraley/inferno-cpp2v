@@ -25,11 +25,11 @@ FreeZone::FreeZone( TreePtr<Node> base_, vector<shared_ptr<Updater>> terminii_ )
     base( base_ )
 {
 	// Fill the map
-	for( int i=0; i<terminii_.size(); i++ )
+	for( int ti=0; ti<terminii_.size(); ti++ )
 	{
-		terminii[i] = terminii_.at(i);
+		terminii[ti] = terminii_.at(ti);
 		if( base )
-			ASSERT( terminii.at(i) );
+			ASSERT( terminii.at(ti) );
 	}
 	
     // An empty free zone is indicated by a NULL base and exactly one
@@ -54,22 +54,34 @@ TreePtr<Node> FreeZone::GetBase() const
 vector<shared_ptr<Updater>> FreeZone::GetTerminii() const
 {
 	vector<shared_ptr<Updater>> v;
-	for( int i=0; i<terminii.size(); i++ )
-		v.push_back( terminii.at(i) );
+	for( int ti=0; ti<terminii.size(); ti++ )
+	{
+		ASSERT( terminii.count(ti) > 0 );
+		v.push_back( terminii.at(ti) );
+	}
 	
     return v;
+}
+
+
+int FreeZone::GetNumTerminii() const
+{
+    return terminii.size();
 }
 
 
 shared_ptr<Updater> FreeZone::GetTerminus(int ti) const
 {
 	ASSERT( ti >= 0 );
+	ASSERT( terminii.count(ti) > 0 );
     return terminii.at(ti);
 }
 
 
 void FreeZone::DropTerminus(int ti)
 {
+	ASSERT( ti >= 0 );
+	ASSERT( terminii.count(ti) > 0 );
 	int ne = terminii.erase(ti);
 	ASSERT( ne==1 );
 }

@@ -27,6 +27,7 @@ public:
       
     TreePtr<Node> GetBase() const;
     vector<shared_ptr<Updater>> GetTerminii() const;
+	int GetNumTerminii() const;
     shared_ptr<Updater> GetTerminus(int ti) const;
     void DropTerminus(int ti);
     bool IsEmpty() const;

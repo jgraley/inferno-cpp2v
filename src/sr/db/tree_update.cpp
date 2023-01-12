@@ -156,9 +156,7 @@ void JoinFreeZoneCommand::Execute( const ExecKit &kit ) const
 	FreeZone source_zone = kit.free_zone_stack->top();
 	kit.free_zone_stack->pop();
 	FreeZone &dest_zone = kit.free_zone_stack->top();
-	
-    vector<shared_ptr<Updater>> terminii = dest_zone.GetTerminii();
-    
+	    
     if( dest_zone.IsEmpty() )
     {
         // We're empty, so we should have one terminus
@@ -171,11 +169,11 @@ void JoinFreeZoneCommand::Execute( const ExecKit &kit ) const
 		return;   
     }
 
+    ASSERT( !source_zone.IsEmpty() );
+
     shared_ptr<Updater> terminus_upd = dest_zone.GetTerminus(terminus_index);
     dest_zone.DropTerminus(terminus_index);
     
-    ASSERT( source_zone.GetTerminii().empty() )(dest_zone)(" ")(source_zone);
-    ASSERT( !source_zone.IsEmpty() );
     // Populate terminus. Apply() will expand SubContainers
     ASSERT( source_zone.GetBase() );
     terminus_upd->Apply( source_zone.GetBase() );
@@ -286,6 +284,21 @@ void CommandSequence::Add( unique_ptr<Command> new_cmd )
     else
     {
 	    seq.push_back(move(new_cmd));
+    }
+}
+
+
+void CommandSequence::AddAtStart( unique_ptr<Command> new_cmd )
+{
+    if( auto new_seq = dynamic_pointer_cast<CommandSequence>(new_cmd) )
+    {
+        seq.insert( seq.begin(),
+                    make_move_iterator(new_seq->seq.begin()),
+                    make_move_iterator(new_seq->seq.end()) );    
+    }
+    else
+    {
+	    seq.push_front(move(new_cmd));
     }
 }
 
