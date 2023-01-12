@@ -584,7 +584,7 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
 
     // Stuff for creating commands
     auto commands = make_unique<CommandSequence>();
-    list<shared_ptr<Updater>> dest_terminii;
+    vector<shared_ptr<Updater>> dest_terminii;
 
     // Loop over the child elements of me (=over) and dest, limited to elements
     // present in me, which is a non-strict superclass of under_node and dest.
@@ -721,7 +721,7 @@ Agent::CommandPtr StandardAgent::GenerateCommandNormal( const ReplaceKit &kit,
 
     // Stuff for creating commands
     auto commands = make_unique<CommandSequence>();
-    list<shared_ptr<Updater>> dest_terminii;
+    vector<shared_ptr<Updater>> dest_terminii;
 
     TRACE("Copying %d members pattern=", dest_items.size())(*this)(" dest=")(*dest)("\n");
     // Loop over all the members of pattern (which can be a subset of dest)

@@ -23,17 +23,18 @@ public:
     static FreeZone CreateSubtree( TreePtr<Node> base );
     static FreeZone CreateEmpty();
 
-    explicit FreeZone( TreePtr<Node> base, list<shared_ptr<Updater>> terminii );
+    explicit FreeZone( TreePtr<Node> base, vector<shared_ptr<Updater>> terminii );
       
     TreePtr<Node> GetBase() const;
-    const list<shared_ptr<Updater>> &GetTerminii() const;
+    const vector<shared_ptr<Updater>> &GetTerminii() const;
+    shared_ptr<Updater> GetTerminus(int ti) const;
     bool IsEmpty() const;
 
     string GetTrace() const;
     
 private:
     TreePtr<Node> base;
-    list<shared_ptr<Updater>> terminii;
+    vector<shared_ptr<Updater>> terminii;
 };
 
 // ------------------------- TreeZone --------------------------
@@ -48,10 +49,11 @@ public:
     static TreeZone CreateSubtree( XLink base );
     static TreeZone CreateEmpty( XLink base );
 
-    explicit TreeZone( XLink base, list<XLink> terminii );
+    explicit TreeZone( XLink base, vector<XLink> terminii );
       
     XLink GetBase() const;
-    list<XLink> GetTerminii() const;
+    vector<XLink> GetTerminii() const;
+    XLink GetTerminus(int ti) const;
     bool IsEmpty() const;
     void DBCheck( const XTreeDatabase *db ) const;
 
@@ -61,7 +63,7 @@ public:
 
 private:
     XLink base;    
-    list<XLink> terminii;
+    vector<XLink> terminii;
 };
  
  

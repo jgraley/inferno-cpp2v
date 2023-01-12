@@ -36,7 +36,7 @@ void DeclareFreeZoneCommand::Execute( const ExecKit &kit ) const
 
 string DeclareFreeZoneCommand::GetTrace() const
 {
-	return "DeclareFreeZoneCommand      "+Trace(*zone)+" -> STACK";
+	return "DeclareFreeZoneCommand      "+Trace(*zone)+" -> PUSH";
 }
 
 // ------------------------- DuplicateTreeZoneCommand --------------------------
@@ -66,7 +66,7 @@ void DuplicateTreeZoneCommand::Execute( const ExecKit &kit ) const
                                                             zone.GetBase(), 
                                                             duplicator_terminus_map );   
     
-    list<shared_ptr<Updater>> free_zone_terminii;
+    vector<shared_ptr<Updater>> free_zone_terminii;
     for( XLink terminus_upd : zone.GetTerminii() )
     {
 		ASSERT( duplicator_terminus_map[terminus_upd].updater );
@@ -81,7 +81,7 @@ void DuplicateTreeZoneCommand::Execute( const ExecKit &kit ) const
 
 string DuplicateTreeZoneCommand::GetTrace() const
 {
-	return "DuplicateTreeZoneCommand    "+Trace(zone)+" -> STACK";
+	return "DuplicateTreeZoneCommand    "+Trace(zone)+" -> PUSH";
 }
 
 // ------------------------- PopulateFreeZoneCommand --------------------------
@@ -93,13 +93,13 @@ PopulateFreeZoneCommand::PopulateFreeZoneCommand()
 
 void PopulateFreeZoneCommand::Execute( const ExecKit &kit ) const
 {
-	FreeZone zone = kit.free_zone_stack->top();
+	FreeZone dest_zone = kit.free_zone_stack->top();
 	kit.free_zone_stack->pop();
 	
-    const list<shared_ptr<Updater>> &terminii = zone.GetTerminii();
+    const vector<shared_ptr<Updater>> &terminii = dest_zone.GetTerminii();
     ASSERT( kit.free_zone_stack->size() >= terminii.size() ); // There must be enough items on the stack
     
-    if( zone.IsEmpty() )
+    if( dest_zone.IsEmpty() )
     {
         // We're empty, so we should have one terminus
         ASSERT( terminii.size() == 1 );
@@ -110,37 +110,86 @@ void PopulateFreeZoneCommand::Execute( const ExecKit &kit ) const
     }
 
     // Get a correctly-ordered list of subtrees to overwrite
-    list<FreeZone> operand_zones;
+    list<FreeZone> source_zones;
     for( auto terminus_upd : terminii )
     {
-        operand_zones.push_front( kit.free_zone_stack->top() );
+        source_zones.push_front( kit.free_zone_stack->top() );
         kit.free_zone_stack->pop();
     }
                         
     // Iterate over terminii and operand zones together, populating the terminii
     // from the operands. 
-    for( auto p : Zip( terminii, operand_zones ) )
+    for( auto p : Zip( terminii, source_zones ) )
     {
         shared_ptr<Updater> terminus_upd = p.first;
-        FreeZone &operand_zone = p.second; 
-        ASSERT( operand_zone.GetTerminii().empty() )(zone)(" ")(Zip( terminii, operand_zones )); // TODO accumulate the terminii in the result zone.
-        ASSERT( !operand_zone.IsEmpty() );
+        FreeZone &source_zone = p.second; 
+        ASSERT( source_zone.GetTerminii().empty() )(dest_zone)(" ")(Zip( terminii, source_zones )); // TODO accumulate the terminii in the result zone.
+        ASSERT( !source_zone.IsEmpty() );
         // Populate terminus. Apply() will expand SubContainers
-        ASSERT( operand_zone.GetBase() );
-        terminus_upd->Apply( operand_zone.GetBase() );
+        ASSERT( source_zone.GetBase() );
+        terminus_upd->Apply( source_zone.GetBase() );
     }
     
     //Validate()( zone->GetBase() );
     
     // Create a new zone for the result, so we don't leave our member zone's terminii in.
-    auto result_zone = FreeZone::CreateSubtree( zone.GetBase() );    
+    auto result_zone = FreeZone::CreateSubtree( dest_zone.GetBase() );    
     kit.free_zone_stack->push( result_zone );      
 }
 
 
 string PopulateFreeZoneCommand::GetTrace() const
 {
-	return "PopulateFreeZoneCommand     STACK, STACK* -> STACK";
+	return "PopulateFreeZoneCommand     POP, POP* -> PUSH";
+}
+
+// ------------------------- JoinFreeZoneCommand --------------------------
+
+JoinFreeZoneCommand::JoinFreeZoneCommand(int ti) :
+    terminus_index(ti)
+{
+}
+
+
+void JoinFreeZoneCommand::Execute( const ExecKit &kit ) const
+{
+	FreeZone source_zone = kit.free_zone_stack->top();
+	kit.free_zone_stack->pop();
+	FreeZone dest_zone = kit.free_zone_stack->top();
+	
+    const vector<shared_ptr<Updater>> &terminii = dest_zone.GetTerminii();
+    
+    if( dest_zone.IsEmpty() )
+    {
+        // We're empty, so we should have one terminus
+        ASSERT( terminus_index==0 );
+        kit.free_zone_stack->pop(); // pop the dest zone
+		kit.free_zone_stack->push( source_zone ); // push source zone over it
+		// TODO not really SSA: we're not just modifying the zone, 
+		// but replacing it with another one. Could elide from the 
+		// command sequence.
+		return;   
+    }
+
+    shared_ptr<Updater> terminus_upd = dest_zone.GetTerminus(terminus_index);
+    
+    ASSERT( source_zone.GetTerminii().empty() )(dest_zone)(" ")(source_zone);
+    ASSERT( !source_zone.IsEmpty() );
+    // Populate terminus. Apply() will expand SubContainers
+    ASSERT( source_zone.GetBase() );
+    terminus_upd->Apply( source_zone.GetBase() );
+    
+    //Validate()( zone->GetBase() );
+    
+    // Create a new zone for the result, so we don't leave our member zone's terminii in.
+    auto result_zone = FreeZone::CreateSubtree( dest_zone.GetBase() );    
+    kit.free_zone_stack->push( result_zone );      
+}
+
+
+string JoinFreeZoneCommand::GetTrace() const
+{
+	return SSPrintf("JoinFreeZoneCommand       PEEK[%d], POP", terminus_index);
 }
 
 // ------------------------- DeleteCommand --------------------------
@@ -193,7 +242,7 @@ void InsertCommand::Execute( const ExecKit &kit ) const
 
 string InsertCommand::GetTrace() const
 {
-	return "InsertCommand               STACK, "+Trace(target_base_xlink);
+	return "InsertCommand               POP, "+Trace(target_base_xlink);
 }
 
 // ------------------------- MarkBaseForEmbeddedCommand --------------------------
@@ -216,7 +265,7 @@ void MarkBaseForEmbeddedCommand::Execute( const ExecKit &kit ) const
     
 string MarkBaseForEmbeddedCommand::GetTrace() const
 {
-	return "MarkBaseForEmbeddedCommand  STACK -> STACK";
+	return "MarkBaseForEmbeddedCommand  PEEK";
 }
 
 // ------------------------- CommandSequence --------------------------

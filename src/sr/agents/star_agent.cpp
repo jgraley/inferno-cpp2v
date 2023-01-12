@@ -84,7 +84,7 @@ Agent::CommandPtr StarAgent::GenerateCommandImpl( const ReplaceKit &kit,
 
     // Stuff for creating commands
     auto commands = make_unique<CommandSequence>();
-    list<shared_ptr<Updater>> dest_terminii;
+    vector<shared_ptr<Updater>> dest_terminii;
     
     // Make a subcontainer of the corresponding type
     TreePtr<SubContainer> dest;

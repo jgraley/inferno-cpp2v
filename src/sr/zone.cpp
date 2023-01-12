@@ -21,7 +21,7 @@ FreeZone FreeZone::CreateEmpty()
 }
 
 
-FreeZone::FreeZone( TreePtr<Node> base_, list<shared_ptr<Updater>> terminii_ ) :
+FreeZone::FreeZone( TreePtr<Node> base_, vector<shared_ptr<Updater>> terminii_ ) :
     base( base_ ),
     terminii( move(terminii_) )
 {
@@ -44,9 +44,17 @@ TreePtr<Node> FreeZone::GetBase() const
 }
 
 
-const list<shared_ptr<Updater>> &FreeZone::GetTerminii() const
+const vector<shared_ptr<Updater>> &FreeZone::GetTerminii() const
 {
     return terminii;
+}
+
+
+shared_ptr<Updater> FreeZone::GetTerminus(int ti) const
+{
+	ASSERT( ti >= 0 );
+	ASSERT( ti < terminii.size() );
+    return terminii.at(ti);
 }
 
 
@@ -102,9 +110,9 @@ TreeZone TreeZone::CreateEmpty( XLink base )
 }
 
 
-TreeZone::TreeZone( XLink base_, list<XLink> terminii_ ) :
+TreeZone::TreeZone( XLink base_, vector<XLink> terminii_ ) :
     base( base_ ),
-    terminii( terminii_ )
+    terminii( move(terminii_) )
 {
     ASSERT( base ); // TreeZone is not nullable
     ASSERT( base.GetChildX() ); // Cannot be empty
@@ -117,9 +125,17 @@ XLink TreeZone::GetBase() const
 }
 
 
-list<XLink> TreeZone::GetTerminii() const
+vector<XLink> TreeZone::GetTerminii() const
 {
     return terminii;
+}
+
+
+XLink TreeZone::GetTerminus(int ti) const
+{
+	ASSERT( ti >= 0 );
+	ASSERT( ti < terminii.size() );
+    return terminii.at(ti);
 }
 
 
