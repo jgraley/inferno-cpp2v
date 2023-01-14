@@ -1,7 +1,7 @@
 #include "conjunction_agent.hpp"
 #include "conjecture.hpp"
 #include "link.hpp"
-#include "up/tree_update.hpp"
+#include "up/commands.hpp"
 
 using namespace SR;
 

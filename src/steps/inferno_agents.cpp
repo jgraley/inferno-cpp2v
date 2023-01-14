@@ -11,7 +11,7 @@
 #include "sr/sym/boolean_operators.hpp"
 #include "sr/sym/symbol_operators.hpp"
 #include "sr/sym/set_operators.hpp"
-#include "sr/up/tree_update.hpp"
+#include "sr/up/commands.hpp"
 
 // Not pulling in SYM because it clashes with CPPTree
 //using namespace SYM;

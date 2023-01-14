@@ -9,7 +9,7 @@
 #include "sym/boolean_operators.hpp"
 #include "sym/predicate_operators.hpp"
 #include "sym/symbol_operators.hpp"
-#include "up/tree_update.hpp"
+#include "up/commands.hpp"
 
 using namespace SR;
 using namespace SYM;
