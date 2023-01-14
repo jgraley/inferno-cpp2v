@@ -1,7 +1,6 @@
 #ifndef DB_WALK_HPP
 #define DB_WALK_HPP
 
-#include "../zone.hpp"
 #include "../link.hpp"
 #include "common/standard.hpp"
 #include "db_common.hpp"

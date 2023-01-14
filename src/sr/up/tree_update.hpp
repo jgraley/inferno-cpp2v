@@ -3,7 +3,7 @@
 
 #include "common/common.hpp"
 #include "node/tree_ptr.hpp"
-#include "../zone.hpp"
+#include "zone.hpp"
 #include "../link.hpp"
 #include "../duplicate.hpp"
 #include "../scr_engine.hpp"

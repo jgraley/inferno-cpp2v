@@ -2,7 +2,7 @@
 #define X_TREE_DATABASE_HPP
 
 #include "common/standard.hpp"
-#include "../zone.hpp"
+#include "../up/zone.hpp"
 #include "../link.hpp"
 #include "../duplicate.hpp"
 

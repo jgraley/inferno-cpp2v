@@ -1,7 +1,6 @@
 #ifndef LINK_TABLE_HPP
 #define LINK_TABLE_HPP
 
-#include "../zone.hpp"
 #include "../link.hpp"
 #include "common/standard.hpp"
 #include "db_walk.hpp"

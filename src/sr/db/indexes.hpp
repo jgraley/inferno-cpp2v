@@ -1,7 +1,6 @@
 #ifndef INDEXES_HPP
 #define INDEXES_HPP
 
-#include "../zone.hpp"
 #include "../link.hpp"
 #include "common/standard.hpp"
 #include "sc_relation.hpp"

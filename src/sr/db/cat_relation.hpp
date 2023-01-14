@@ -1,7 +1,6 @@
 #ifndef CAT_RELATION_HPP
 #define CAT_RELATION_HPP
 
-#include "../zone.hpp"
 #include "../link.hpp"
 #include "common/standard.hpp"
 #include "db_walk.hpp"

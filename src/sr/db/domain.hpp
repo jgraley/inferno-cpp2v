@@ -1,7 +1,6 @@
 #ifndef DOMAIN_HPP
 #define DOMAIN_HPP
 
-#include "../zone.hpp"
 #include "../link.hpp"
 #include "helpers/simple_compare.hpp"
 #include "common/standard.hpp"
