@@ -24,6 +24,8 @@ public:
     static FreeZone CreateEmpty();
 
     explicit FreeZone( TreePtr<Node> base, vector<shared_ptr<Updater>> terminii );
+
+    void AddTerminus(int ti, shared_ptr<Updater> terminus);
       
     TreePtr<Node> GetBase() const;
     vector<shared_ptr<Updater>> GetTerminii() const;

@@ -45,6 +45,16 @@ FreeZone::FreeZone( TreePtr<Node> base_, vector<shared_ptr<Updater>> terminii_ )
 }
 
 
+void FreeZone::AddTerminus(int ti, shared_ptr<Updater> terminus)
+{
+	// Can't use this to make an empty zone
+	ASSERT( base );
+	ASSERT( terminus );
+	
+	terminii[ti] = terminus;
+}
+
+
 TreePtr<Node> FreeZone::GetBase() const
 {
     return base;
