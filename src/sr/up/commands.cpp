@@ -7,6 +7,16 @@
 
 using namespace SR;
 
+// ------------------------- Command --------------------------
+
+string Command::OpName( int reg ) const
+{
+	if( reg==-1 )
+		return "STACK";
+	else
+		return SSPrintf("R%d", reg);
+}
+
 // ------------------------- ImmediateTreeZoneCommand --------------------------
 
 ImmediateTreeZoneCommand::ImmediateTreeZoneCommand( const TreeZone &zone_ ) :
@@ -28,6 +38,13 @@ DeclareFreeZoneCommand::DeclareFreeZoneCommand( FreeZone &&zone_ ) :
 }	
 
 
+void DeclareFreeZoneCommand::SetOperands( int &pseudo_stack_top )
+{
+	pseudo_stack_top++;
+	dest_reg = pseudo_stack_top;
+}
+
+
 void DeclareFreeZoneCommand::Execute( const ExecKit &kit ) const
 {
 	kit.free_zone_stack->push(*zone);
@@ -36,10 +53,17 @@ void DeclareFreeZoneCommand::Execute( const ExecKit &kit ) const
 
 string DeclareFreeZoneCommand::GetTrace() const
 {
-	return "DeclareFreeZoneCommand      "+Trace(*zone)+" -> PUSH";
+	return "DeclareFreeZoneCommand      "+Trace(*zone)+" -> "+OpName(dest_reg);
 }
 
 // ------------------------- DuplicateTreeZoneCommand --------------------------
+
+void DuplicateTreeZoneCommand::SetOperands( int &pseudo_stack_top )
+{
+	pseudo_stack_top++;
+	dest_reg = pseudo_stack_top;
+}
+
 
 void DuplicateTreeZoneCommand::Execute( const ExecKit &kit ) const
 {
@@ -81,7 +105,7 @@ void DuplicateTreeZoneCommand::Execute( const ExecKit &kit ) const
 
 string DuplicateTreeZoneCommand::GetTrace() const
 {
-	return "DuplicateTreeZoneCommand    "+Trace(zone)+" -> PUSH";
+	return "DuplicateTreeZoneCommand    "+Trace(zone)+" -> "+OpName(dest_reg);
 }
 
 // ------------------------- JoinFreeZoneCommand --------------------------
@@ -89,6 +113,14 @@ string DuplicateTreeZoneCommand::GetTrace() const
 JoinFreeZoneCommand::JoinFreeZoneCommand(int ti) :
     terminus_index(ti)
 {
+}
+
+
+void JoinFreeZoneCommand::SetOperands( int &pseudo_stack_top )
+{
+	source_reg = pseudo_stack_top;
+	pseudo_stack_top--;
+	dest_reg = pseudo_stack_top;
 }
 
 
@@ -125,13 +157,21 @@ void JoinFreeZoneCommand::Execute( const ExecKit &kit ) const
 
 string JoinFreeZoneCommand::GetTrace() const
 {
-	return SSPrintf("JoinFreeZoneCommand         PEEK[%d], POP", terminus_index);
+	return "JoinFreeZoneCommand         " +
+	       OpName(dest_reg) +
+	       SSPrintf("[%d], ", terminus_index) +
+	       OpName(source_reg);
 }
 
 // ------------------------- DeleteCommand --------------------------
 
 DeleteCommand::DeleteCommand( XLink target_base_xlink_ ) :
 	target_base_xlink( target_base_xlink_ )
+{
+}
+
+
+void DeleteCommand::SetOperands( int &pseudo_stack_top )
 {
 }
 
@@ -155,6 +195,11 @@ string DeleteCommand::GetTrace() const
 
 InsertCommand::InsertCommand( XLink target_base_xlink_ ) :
 	target_base_xlink( target_base_xlink_ )
+{
+}
+
+
+void InsertCommand::SetOperands( int &pseudo_stack_top )
 {
 }
 
@@ -189,6 +234,12 @@ MarkBaseForEmbeddedCommand::MarkBaseForEmbeddedCommand( RequiresSubordinateSCREn
 }
     
     
+void MarkBaseForEmbeddedCommand::SetOperands( int &pseudo_stack_top )
+{
+	dest_reg = pseudo_stack_top;
+}
+
+
 void MarkBaseForEmbeddedCommand::Execute( const ExecKit &kit ) const
 {
 	FreeZone zone = kit.free_zone_stack->top();
@@ -201,10 +252,17 @@ void MarkBaseForEmbeddedCommand::Execute( const ExecKit &kit ) const
     
 string MarkBaseForEmbeddedCommand::GetTrace() const
 {
-	return "MarkBaseForEmbeddedCommand  PEEK";
+	return "MarkBaseForEmbeddedCommand  "+OpName(dest_reg);
 }
 
 // ------------------------- CommandSequence --------------------------
+
+void CommandSequence::SetOperands( int &pseudo_stack_top )
+{
+	for( const unique_ptr<Command> &cmd : seq )
+		cmd->SetOperands( pseudo_stack_top );
+}
+
 
 void CommandSequence::Execute( const ExecKit &kit ) const
 {

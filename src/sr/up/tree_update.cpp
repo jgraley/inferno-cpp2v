@@ -26,13 +26,18 @@ void SR::RunVoidForReplace( unique_ptr<Command> cmd, const SCREngine *scr_engine
 	auto seq = make_unique<CommandSequence>();
 	seq->Add( move(cmd) ); 
 	
-	// flatten...
+	// Flatten...
 	CommandSequenceFlattener().Apply(*seq);
 	
 	// Uniqueness of tree zones
 	TreeZoneOverlapFinder finder( x_tree_db, seq.get() );
 	
-	// calculate SSA indexes
+	// Calculate SSA indexes
+	int pseudo_stack_top = 0;
+	seq->SetOperands( pseudo_stack_top );
+	
+	//FTRACE(seq);
+	
 	// err...
 	
     stack<FreeZone> free_zone_stack;
