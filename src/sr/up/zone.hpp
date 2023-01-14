@@ -23,6 +23,7 @@ public:
     static FreeZone CreateSubtree( TreePtr<Node> base );
     static FreeZone CreateEmpty();
 
+	FreeZone();
     explicit FreeZone( TreePtr<Node> base, vector<shared_ptr<Updater>> terminii );
 
     void AddTerminus(int ti, shared_ptr<Updater> terminus);

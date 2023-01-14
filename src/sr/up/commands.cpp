@@ -47,7 +47,7 @@ void DeclareFreeZoneCommand::SetOperands( int &pseudo_stack_top )
 
 void DeclareFreeZoneCommand::Execute( const ExecKit &kit ) const
 {
-	kit.free_zone_stack->push(*zone);
+	(*kit.free_zone_regs)[dest_reg] = *zone;
 }
 
 
@@ -75,7 +75,7 @@ void DuplicateTreeZoneCommand::Execute( const ExecKit &kit ) const
 		// Duplicate::DuplicateSubtree() can't work with the
 		// terminus-at-base you get with an empty zone, so handle that
 		// case explicitly.
-        kit.free_zone_stack->push( FreeZone::CreateEmpty() ); 
+        (*kit.free_zone_regs)[dest_reg] = FreeZone::CreateEmpty(); 
         return;
     }
 
@@ -99,7 +99,7 @@ void DuplicateTreeZoneCommand::Execute( const ExecKit &kit ) const
 
     // Create a new zone for the result.
     auto result_zone = FreeZone( new_base_x, free_zone_terminii );
-    kit.free_zone_stack->push( result_zone );      
+    (*kit.free_zone_regs)[dest_reg] = result_zone;      
 }
 
 
@@ -126,16 +126,14 @@ void JoinFreeZoneCommand::SetOperands( int &pseudo_stack_top )
 
 void JoinFreeZoneCommand::Execute( const ExecKit &kit ) const
 {
-	FreeZone source_zone = kit.free_zone_stack->top();
-	kit.free_zone_stack->pop();
-	FreeZone &dest_zone = kit.free_zone_stack->top();
+	FreeZone source_zone = (*kit.free_zone_regs)[source_reg];
+	FreeZone &dest_zone = (*kit.free_zone_regs)[dest_reg];
 	    
     if( dest_zone.IsEmpty() )
     {
         // We're empty, so we should have one terminus
         ASSERT( terminus_index==0 );
-        kit.free_zone_stack->pop(); // pop the dest zone
-		kit.free_zone_stack->push( source_zone ); // push source zone over it
+		dest_zone = source_zone; // push source zone over it
 		// TODO not really SSA: we're not just modifying the zone, 
 		// but replacing it with another one. Could elide from the 
 		// command sequence.
@@ -201,6 +199,8 @@ InsertCommand::InsertCommand( XLink target_base_xlink_ ) :
 
 void InsertCommand::SetOperands( int &pseudo_stack_top )
 {
+	source_reg = pseudo_stack_top;
+	pseudo_stack_top--;
 }
 
 
@@ -209,15 +209,10 @@ void InsertCommand::Execute( const ExecKit &kit ) const
     ASSERT( !target_base_xlink.GetChildX() );
     
     // Patch the tree
-    FreeZone zone = kit.free_zone_stack->top();
-    ASSERT( !zone.IsEmpty() );
-    //Validate()( zone.GetBase() );
-    target_base_xlink.SetXPtr( kit.free_zone_stack->top().GetBase() );
+    target_base_xlink.SetXPtr( (*kit.free_zone_regs)[source_reg].GetBase() );
     
     // Update database 
     kit.x_tree_db->Insert( target_base_xlink );      
-
-    kit.free_zone_stack->pop();
 }
 
 
@@ -242,7 +237,7 @@ void MarkBaseForEmbeddedCommand::SetOperands( int &pseudo_stack_top )
 
 void MarkBaseForEmbeddedCommand::Execute( const ExecKit &kit ) const
 {
-	FreeZone zone = kit.free_zone_stack->top();
+	FreeZone &zone = (*kit.free_zone_regs)[dest_reg];
 	
     ASSERT( !zone.IsEmpty() );
     kit.scr_engine->MarkBaseForEmbedded( embedded_agent, zone.GetBase() );   

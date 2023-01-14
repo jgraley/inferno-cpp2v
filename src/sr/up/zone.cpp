@@ -21,6 +21,11 @@ FreeZone FreeZone::CreateEmpty()
 }
 
 
+FreeZone::FreeZone()
+{
+}
+
+
 FreeZone::FreeZone( TreePtr<Node> base_, vector<shared_ptr<Updater>> terminii_ ) :
     base( base_ )
 {

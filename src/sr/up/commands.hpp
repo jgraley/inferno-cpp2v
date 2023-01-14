@@ -137,6 +137,7 @@ public:
 
 private:
 	XLink target_base_xlink;
+	int source_reg = -1;
 };
 
 // ------------------------- MarkBaseForEmbeddedCommand --------------------------

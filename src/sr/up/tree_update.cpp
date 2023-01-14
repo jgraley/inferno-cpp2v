@@ -12,12 +12,22 @@ using namespace SR;
 
 FreeZone SR::RunGetFreeZoneNoDB( unique_ptr<Command> cmd, const SCREngine *scr_engine )
 {
+	// Ensure we have a CommandSequence
+	auto seq = make_unique<CommandSequence>();
+	seq->Add( move(cmd) ); 
+	
+	// Flatten...
+	CommandSequenceFlattener().Apply(*seq);
+	
+	// Calculate SSA indexes
+	int pseudo_stack_top = 0;
+	seq->SetOperands( pseudo_stack_top );
+
     stack<FreeZone> free_zone_stack;
     map<int, FreeZone> free_zone_regs;
     Command::ExecKit exec_kit {nullptr, scr_engine, scr_engine, &free_zone_stack, &free_zone_regs};
-	cmd->Execute( exec_kit );   
-	ASSERT( free_zone_stack.size() == 1);       
-    return free_zone_stack.top();  	
+	seq->Execute( exec_kit );   
+    return free_zone_regs[1];  	
 }
 
 
@@ -45,7 +55,6 @@ void SR::RunVoidForReplace( unique_ptr<Command> cmd, const SCREngine *scr_engine
     map<int, FreeZone> free_zone_regs;    
     Command::ExecKit exec_kit {x_tree_db, x_tree_db, scr_engine, &free_zone_stack, &free_zone_regs};
 	seq->Execute( exec_kit );   
-	ASSERT( free_zone_stack.size() == 0);       
 }
 
 // ------------------------- TreeZoneOverlapFinder --------------------------
