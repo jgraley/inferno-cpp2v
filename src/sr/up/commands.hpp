@@ -32,6 +32,7 @@ public:
         // Forth-like stack of generated nodes.
         // Rule: we push in natural order, and correct the reversal when reading
         stack<FreeZone> *free_zone_stack;        
+        map<int, FreeZone> *free_zone_regs;        
     };
 
 	virtual void SetOperands( int &pseudo_stack_top ) = 0;
