@@ -16,7 +16,7 @@
 #include "sym/predicate_operators.hpp"
 #include "sym/symbol_operators.hpp"
 #include "sym/rewriters.hpp"
-#include "db/tree_update.hpp"
+#include "up/tree_update.hpp"
 
 #include <stdexcept>
 

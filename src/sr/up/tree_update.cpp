@@ -1,6 +1,6 @@
 #include "tree_update.hpp"
 
-#include "x_tree_database.hpp"
+#include "db/x_tree_database.hpp"
 #include "common/read_args.hpp"
 #include "tree/validate.hpp"
 #include "common/lambda_loops.hpp"

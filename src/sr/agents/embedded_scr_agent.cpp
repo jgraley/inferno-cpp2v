@@ -3,7 +3,7 @@
 #include "../scr_engine.hpp"
 #include "../duplicate.hpp"
 #include "link.hpp"
-#include "db/tree_update.hpp"
+#include "up/tree_update.hpp"
 
 using namespace SR;
 

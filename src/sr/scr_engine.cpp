@@ -10,7 +10,7 @@
 #include "and_rule_engine.hpp"
 #include "link.hpp"
 #include "vn_sequence.hpp"
-#include "db/tree_update.hpp"
+#include "up/tree_update.hpp"
 
 #include <list>
 

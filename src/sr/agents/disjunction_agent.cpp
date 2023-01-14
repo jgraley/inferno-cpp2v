@@ -5,7 +5,7 @@
 #include "sym/predicate_operators.hpp"
 #include "sym/symbol_operators.hpp"
 #include "sym/result.hpp"
-#include "db/tree_update.hpp"
+#include "up/tree_update.hpp"
 
 using namespace SR;
 using namespace SYM;

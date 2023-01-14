@@ -6,7 +6,7 @@
 #include "sym/symbol_operators.hpp"
 #include "sym/boolean_operators.hpp"
 #include "sym/result.hpp"
-#include "db/tree_update.hpp"
+#include "up/tree_update.hpp"
 
 using namespace SR;
 using namespace SYM;
