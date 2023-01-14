@@ -216,31 +216,13 @@ void CommandSequence::Execute( const ExecKit &kit ) const
     
 void CommandSequence::Add( unique_ptr<Command> new_cmd )
 {
-    if( auto new_seq = dynamic_pointer_cast<CommandSequence>(new_cmd) )
-    {
-        seq.insert( seq.end(),
-                    make_move_iterator(new_seq->seq.begin()),
-                    make_move_iterator(new_seq->seq.end()) );    
-    }
-    else
-    {
-	    seq.push_back(move(new_cmd));
-    }
+    seq.push_back(move(new_cmd));
 }
 
 
 void CommandSequence::AddAtStart( unique_ptr<Command> new_cmd )
 {
-    if( auto new_seq = dynamic_pointer_cast<CommandSequence>(new_cmd) )
-    {
-        seq.insert( seq.begin(),
-                    make_move_iterator(new_seq->seq.begin()),
-                    make_move_iterator(new_seq->seq.end()) );    
-    }
-    else
-    {
-	    seq.push_front(move(new_cmd));
-    }
+    seq.push_front(move(new_cmd));
 }
 
 
@@ -250,9 +232,15 @@ bool CommandSequence::IsEmpty() const
 }
 
 
-const list<unique_ptr<Command>> &CommandSequence::GetSeq() const
+list<unique_ptr<Command>> &CommandSequence::GetCommands()
 {
 	return seq;
+}
+
+
+void CommandSequence::Clear()
+{
+	seq.clear();
 }
 
 
@@ -280,12 +268,15 @@ void SR::RunVoidForReplace( unique_ptr<Command> cmd, const SCREngine *scr_engine
 {
 	// Ensure we have a CommandSequence
 	auto seq = make_unique<CommandSequence>();
-	seq->Add( move(cmd) ); // flattens as it goes...
+	seq->Add( move(cmd) ); 
+	
+	// flatten...
+	CommandSequenceFlattener().Apply(*seq);
 	
 	// Uniqueness of tree zones
 	TreeZoneOverlapFinder finder( x_tree_db, seq.get() );
 	
-	// calculate SASU indexes
+	// calculate SSA indexes
 	// err...
 	
     stack<FreeZone> free_zone_stack;
@@ -301,7 +292,7 @@ TreeZoneOverlapFinder::TreeZoneOverlapFinder( const XTreeDatabase *db, CommandSe
 	// Put them all into one Overlapping set, pessamistically assuming they
 	// all overlap
 	
-	for( const unique_ptr<Command> &cmd : seq->GetSeq() )
+	for( const unique_ptr<Command> &cmd : seq->GetCommands() )
 	{
 		if( auto tz_cmd = dynamic_cast<const ImmediateTreeZoneCommand *>(cmd.get()) )
         {
@@ -334,3 +325,30 @@ TreeZoneOverlapFinder::TreeZoneOverlapFinder( const XTreeDatabase *db, CommandSe
     
     //FTRACE(overlapping_zones);
 }
+
+// ------------------------- CommandSequenceFlattener --------------------------
+
+void CommandSequenceFlattener::Apply( CommandSequence &seq )
+{
+	list<unique_ptr<Command>> commands( move(seq.GetCommands()) );
+	
+	Worker( seq, commands );
+}
+
+
+void CommandSequenceFlattener::Worker( CommandSequence &seq, list<unique_ptr<Command>> &commands )
+{
+	for( unique_ptr<Command> &cmd : commands )
+	{
+		ASSERT( cmd );
+		if( auto sub_seq = dynamic_pointer_cast<CommandSequence>(cmd) )
+		{
+			Worker( seq, sub_seq->GetCommands() );
+		}
+		else
+		{
+			seq.Add( move(cmd) );
+		}
+	}
+}
+

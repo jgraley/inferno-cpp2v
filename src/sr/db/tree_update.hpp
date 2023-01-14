@@ -148,7 +148,8 @@ public:
 	void Add( unique_ptr<Command> new_cmd );
 	void AddAtStart( unique_ptr<Command> new_cmd );
     bool IsEmpty() const;
-    const list<unique_ptr<Command>> &GetSeq() const;
+    list<unique_ptr<Command>> &GetCommands();
+    void Clear();    
 	
 	string GetTrace() const final;
 
@@ -171,6 +172,15 @@ public:
 private:	
     map<const TreeZone *, const ImmediateTreeZoneCommand *> tzps_to_commands;
     map<const TreeZone *, set<const TreeZone *>> overlapping_zones;
+};
+
+// ------------------------- CommandSequenceFlattener --------------------------
+
+class CommandSequenceFlattener
+{
+public:
+	void Apply( CommandSequence &seq );
+	void Worker( CommandSequence &seq, list<unique_ptr<Command>> &commands );
 };
 
 }
