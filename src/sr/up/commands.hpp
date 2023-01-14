@@ -29,9 +29,7 @@ public:
         // For embedded patterns
         const SCREngine *scr_engine;
 
-        // Forth-like stack of generated nodes.
-        // Rule: we push in natural order, and correct the reversal when reading
-        stack<FreeZone> *free_zone_stack;        
+        // "Register bank" of free zones for workspace
         map<int, FreeZone> *free_zone_regs;        
     };
 

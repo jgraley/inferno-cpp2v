@@ -23,9 +23,8 @@ FreeZone SR::RunGetFreeZoneNoDB( unique_ptr<Command> cmd, const SCREngine *scr_e
 	int pseudo_stack_top = 0;
 	seq->SetOperands( pseudo_stack_top );
 
-    stack<FreeZone> free_zone_stack;
     map<int, FreeZone> free_zone_regs;
-    Command::ExecKit exec_kit {nullptr, scr_engine, scr_engine, &free_zone_stack, &free_zone_regs};
+    Command::ExecKit exec_kit {nullptr, scr_engine, scr_engine, &free_zone_regs};
 	seq->Execute( exec_kit );   
     return free_zone_regs[1];  	
 }
@@ -51,9 +50,8 @@ void SR::RunVoidForReplace( unique_ptr<Command> cmd, const SCREngine *scr_engine
 	
 	// err...
 	
-    stack<FreeZone> free_zone_stack;
     map<int, FreeZone> free_zone_regs;    
-    Command::ExecKit exec_kit {x_tree_db, x_tree_db, scr_engine, &free_zone_stack, &free_zone_regs};
+    Command::ExecKit exec_kit {x_tree_db, x_tree_db, scr_engine, &free_zone_regs};
 	seq->Execute( exec_kit );   
 }
 
