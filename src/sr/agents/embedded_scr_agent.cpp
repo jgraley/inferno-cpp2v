@@ -1,7 +1,7 @@
 #include "embedded_scr_agent.hpp"
 #include "../search_replace.hpp" 
 #include "../scr_engine.hpp"
-#include "../duplicate.hpp"
+#include "../up/duplicate.hpp"
 #include "link.hpp"
 #include "up/tree_update.hpp"
 

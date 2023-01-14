@@ -1,7 +1,7 @@
 #ifndef DUPLICATE_HPP
 #define DUPLICATE_HPP
 
-#include "link.hpp"
+#include "../link.hpp"
 #include "updater.hpp"
 
 namespace SR

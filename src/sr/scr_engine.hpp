@@ -11,7 +11,7 @@
 #include "agents/agent.hpp"
 #include "node/graphable.hpp"
 #include "search_replace.hpp"
-#include "duplicate.hpp"
+#include "up/duplicate.hpp"
 
 #include <set>
 

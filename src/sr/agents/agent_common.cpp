@@ -6,7 +6,7 @@
 #include "scr_engine.hpp"
 #include "and_rule_engine.hpp"
 #include "link.hpp"
-#include "duplicate.hpp"
+#include "up/duplicate.hpp"
 
 // Temporary
 #include "tree/cpptree.hpp"

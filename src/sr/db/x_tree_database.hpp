@@ -4,7 +4,7 @@
 #include "common/standard.hpp"
 #include "../up/zone.hpp"
 #include "../link.hpp"
-#include "../duplicate.hpp"
+#include "../up/duplicate.hpp"
 
 #include "link_table.hpp"
 #include "node_table.hpp"
