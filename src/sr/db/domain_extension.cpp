@@ -43,8 +43,8 @@ DomainExtension::DomainExtension( const XTreeDatabase *db, ExtenderSet extenders
 }
 	
 
-void DomainExtension::SetOnExtraXLinkFunctions( OnExtraZoneFunction on_insert_extra_zone_,
-                                                OnExtraZoneFunction on_delete_extra_zone_ )
+void DomainExtension::SetOnExtraXLinkFunctions( OnExtraSubtreeFunction on_insert_extra_zone_,
+                                                OnExtraSubtreeFunction on_delete_extra_zone_ )
 {
 	for( auto &p : channels )
 		p.second->SetOnExtraXLinkFunctions( on_insert_extra_zone_, on_delete_extra_zone_ );
@@ -125,10 +125,10 @@ DomainExtensionChannel::DomainExtensionChannel( const XTreeDatabase *db_, const 
 }
 
 
-void DomainExtensionChannel::SetOnExtraXLinkFunctions( DomainExtension::OnExtraZoneFunction on_insert_extra_zone_,
-                                                       DomainExtension::OnExtraZoneFunction on_delete_extra_zone_ )
+void DomainExtensionChannel::SetOnExtraXLinkFunctions( DomainExtension::OnExtraSubtreeFunction on_insert_extra_zone_,
+                                                       DomainExtension::OnExtraSubtreeFunction on_delete_extra_zone_ )
 {
-    on_insert_extra_zone = on_insert_extra_zone_;
+    on_insert_extra_subtree = on_insert_extra_zone_;
     on_delete_extra_zone = on_delete_extra_zone_;
 }
 
@@ -177,10 +177,6 @@ void DomainExtensionChannel::AddExtraNode( TreePtr<Node> extra_node )
   
     // Create an XLink that will allow us to track this subtree
     XLink extra_xlink = XLink::CreateDistinct( extra_node_dup );    
-  
-    // Make a zone. 
-    auto extra_zone = TreeZone::CreateSubtree(extra_xlink);
-    ASSERT( !extra_zone.IsEmpty() ); 
 
 #ifdef TRACE_DOMAIN_EXTEND
     TRACE("Zone is ")(extra_zone)("\n"); 
@@ -190,8 +186,8 @@ void DomainExtensionChannel::AddExtraNode( TreePtr<Node> extra_node )
     // at 1 since there's one ref (this one)
 	(void)domain_extension_classes.insert( make_pair( extra_node_dup, ExtClass(extra_xlink, 1) ) );    
         
-    // Add the whole zone to the rest of the database
-    on_insert_extra_zone( extra_zone );        
+    // Add the whole subtree to the rest of the database
+    on_insert_extra_subtree( extra_xlink );        
     
     // Ensure the original tree is found in the domain now (it wasn't 
     // earlier on) as an extra check

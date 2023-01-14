@@ -54,10 +54,10 @@ public:
 
 	DomainExtension( const XTreeDatabase *db, ExtenderSet extenders );
 		
-	typedef function<void(const TreeZone &)> OnExtraZoneFunction;
+	typedef function<void(XLink)> OnExtraSubtreeFunction;
 
-	void SetOnExtraXLinkFunctions( OnExtraZoneFunction on_insert_extra_zone,
-                                   OnExtraZoneFunction on_delete_extra_zone = OnExtraZoneFunction() );
+	void SetOnExtraXLinkFunctions( OnExtraSubtreeFunction on_insert_extra_subtree,
+                                   OnExtraSubtreeFunction on_delete_extra_zone = OnExtraSubtreeFunction() );
 
     // Gain access to a channel
     const DomainExtensionChannel *GetChannel( const Extender *extender ) const;
@@ -88,8 +88,8 @@ class DomainExtensionChannel
 public:	
    	DomainExtensionChannel( const XTreeDatabase *db, const DomainExtension::Extender *extender );
 
-	void SetOnExtraXLinkFunctions( DomainExtension::OnExtraZoneFunction on_insert_extra_zone,
-                                   DomainExtension::OnExtraZoneFunction on_delete_extra_zone = DomainExtension::OnExtraZoneFunction() );
+	void SetOnExtraXLinkFunctions( DomainExtension::OnExtraSubtreeFunction on_insert_extra_subtree,
+                                   DomainExtension::OnExtraSubtreeFunction on_delete_extra_zone = DomainExtension::OnExtraSubtreeFunction() );
 
 	XLink GetUniqueDomainExtension( XLink start_xlink, TreePtr<Node> node ) const;
     void AddExtraNode( TreePtr<Node> node );
@@ -108,8 +108,8 @@ private:
     const XTreeDatabase *db;
 	const DomainExtension::Extender *extender;
 
-    DomainExtension::OnExtraZoneFunction on_insert_extra_zone;
-    DomainExtension::OnExtraZoneFunction on_delete_extra_zone;
+    DomainExtension::OnExtraSubtreeFunction on_insert_extra_subtree;
+    DomainExtension::OnExtraSubtreeFunction on_delete_extra_zone;
 
     struct TrackingRow : Traceable
     {

@@ -18,17 +18,17 @@ XTreeDatabase::XTreeDatabase( XLink root_xlink_, shared_ptr<Lacing> lacing, Doma
     plan( this, lacing, domain_extenders ),
     root_xlink( root_xlink_ )
 {
-    auto on_insert_extra_zone = [=](const TreeZone &extra_zone)
+    auto on_insert_extra_subtree = [=](XLink extra_base)
     {
-        InsertExtraZone( extra_zone.GetBase() );        
+        InsertExtraZone( extra_base );        
     };
 
-    auto on_delete_extra_zone = [=](const TreeZone &extra_zone)
+    auto on_delete_extra_zone = [=](XLink extra_base)
 	{
-        DeleteExtraZone( extra_zone.GetBase() );
+        DeleteExtraZone( extra_base );
     };
     
-    plan.domain_extension->SetOnExtraXLinkFunctions( on_insert_extra_zone, 
+    plan.domain_extension->SetOnExtraXLinkFunctions( on_insert_extra_subtree, 
                                                      on_delete_extra_zone );
 }
 
