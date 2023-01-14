@@ -40,8 +40,7 @@ DeclareFreeZoneCommand::DeclareFreeZoneCommand( FreeZone &&zone_ ) :
 
 void DeclareFreeZoneCommand::SetOperands( int &pseudo_stack_top )
 {
-	pseudo_stack_top++;
-	dest_reg = pseudo_stack_top;
+	dest_reg = pseudo_stack_top++;
 }
 
 
@@ -60,8 +59,7 @@ string DeclareFreeZoneCommand::GetTrace() const
 
 void DuplicateTreeZoneCommand::SetOperands( int &pseudo_stack_top )
 {
-	pseudo_stack_top++;
-	dest_reg = pseudo_stack_top;
+	dest_reg = pseudo_stack_top++;
 }
 
 
@@ -118,9 +116,8 @@ JoinFreeZoneCommand::JoinFreeZoneCommand(int ti) :
 
 void JoinFreeZoneCommand::SetOperands( int &pseudo_stack_top )
 {
-	source_reg = pseudo_stack_top;
-	pseudo_stack_top--;
-	dest_reg = pseudo_stack_top;
+	source_reg = --pseudo_stack_top;
+	dest_reg = pseudo_stack_top-1;
 }
 
 
@@ -199,8 +196,7 @@ InsertCommand::InsertCommand( XLink target_base_xlink_ ) :
 
 void InsertCommand::SetOperands( int &pseudo_stack_top )
 {
-	source_reg = pseudo_stack_top;
-	pseudo_stack_top--;
+	source_reg = --pseudo_stack_top;
 }
 
 
@@ -231,7 +227,7 @@ MarkBaseForEmbeddedCommand::MarkBaseForEmbeddedCommand( RequiresSubordinateSCREn
     
 void MarkBaseForEmbeddedCommand::SetOperands( int &pseudo_stack_top )
 {
-	dest_reg = pseudo_stack_top;
+	dest_reg = pseudo_stack_top-1;
 }
 
 

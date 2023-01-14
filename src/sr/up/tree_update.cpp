@@ -22,11 +22,12 @@ FreeZone SR::RunGetFreeZoneNoDB( unique_ptr<Command> cmd, const SCREngine *scr_e
 	// Calculate SSA indexes
 	int pseudo_stack_top = 0;
 	seq->SetOperands( pseudo_stack_top );
+	ASSERT( pseudo_stack_top==1 );
 
     map<int, FreeZone> free_zone_regs;
     Command::ExecKit exec_kit {nullptr, scr_engine, scr_engine, &free_zone_regs};
 	seq->Execute( exec_kit );   
-    return free_zone_regs[1];  	
+    return free_zone_regs[0];  	
 }
 
 
@@ -45,6 +46,7 @@ void SR::RunVoidForReplace( unique_ptr<Command> cmd, const SCREngine *scr_engine
 	// Calculate SSA indexes
 	int pseudo_stack_top = 0;
 	seq->SetOperands( pseudo_stack_top );
+	ASSERT( pseudo_stack_top==0 );
 	
 	//FTRACE(seq);
 	
