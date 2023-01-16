@@ -38,9 +38,9 @@ DeclareFreeZoneCommand::DeclareFreeZoneCommand( FreeZone &&zone_ ) :
 }	
 
 
-void DeclareFreeZoneCommand::SetOperands( int &pseudo_stack_top )
+void DeclareFreeZoneCommand::SetOperandRegs( SSAAllocator &allocator )
 {
-	dest_reg = pseudo_stack_top++;
+	dest_reg = allocator.Push();
 }
 
 
@@ -57,9 +57,9 @@ string DeclareFreeZoneCommand::GetTrace() const
 
 // ------------------------- DuplicateTreeZoneCommand --------------------------
 
-void DuplicateTreeZoneCommand::SetOperands( int &pseudo_stack_top )
+void DuplicateTreeZoneCommand::SetOperandRegs( SSAAllocator &allocator )
 {
-	dest_reg = pseudo_stack_top++;
+	dest_reg = allocator.Push();
 }
 
 
@@ -114,10 +114,10 @@ JoinFreeZoneCommand::JoinFreeZoneCommand(int ti) :
 }
 
 
-void JoinFreeZoneCommand::SetOperands( int &pseudo_stack_top )
+void JoinFreeZoneCommand::SetOperandRegs( SSAAllocator &allocator )
 {
-	source_reg = --pseudo_stack_top;
-	dest_reg = pseudo_stack_top-1;
+	source_reg = allocator.Pop();
+	dest_reg = allocator.Peek();
 }
 
 
@@ -166,7 +166,7 @@ DeleteCommand::DeleteCommand( XLink target_base_xlink_ ) :
 }
 
 
-void DeleteCommand::SetOperands( int &pseudo_stack_top )
+void DeleteCommand::SetOperandRegs( SSAAllocator &allocator )
 {
 }
 
@@ -194,9 +194,9 @@ InsertCommand::InsertCommand( XLink target_base_xlink_ ) :
 }
 
 
-void InsertCommand::SetOperands( int &pseudo_stack_top )
+void InsertCommand::SetOperandRegs( SSAAllocator &allocator )
 {
-	source_reg = --pseudo_stack_top;
+	source_reg = allocator.Pop();
 }
 
 
@@ -214,7 +214,7 @@ void InsertCommand::Execute( const ExecKit &kit ) const
 
 string InsertCommand::GetTrace() const
 {
-	return "InsertCommand               POP, "+Trace(target_base_xlink);
+	return "InsertCommand               "+OpName(source_reg)+", "+Trace(target_base_xlink);
 }
 
 // ------------------------- MarkBaseForEmbeddedCommand --------------------------
@@ -225,9 +225,9 @@ MarkBaseForEmbeddedCommand::MarkBaseForEmbeddedCommand( RequiresSubordinateSCREn
 }
     
     
-void MarkBaseForEmbeddedCommand::SetOperands( int &pseudo_stack_top )
+void MarkBaseForEmbeddedCommand::SetOperandRegs( SSAAllocator &allocator )
 {
-	dest_reg = pseudo_stack_top-1;
+	dest_reg = allocator.Peek();
 }
 
 
@@ -248,10 +248,10 @@ string MarkBaseForEmbeddedCommand::GetTrace() const
 
 // ------------------------- CommandSequence --------------------------
 
-void CommandSequence::SetOperands( int &pseudo_stack_top )
+void CommandSequence::SetOperandRegs( SSAAllocator &allocator )
 {
 	for( const unique_ptr<Command> &cmd : seq )
-		cmd->SetOperands( pseudo_stack_top );
+		cmd->SetOperandRegs( allocator );
 }
 
 

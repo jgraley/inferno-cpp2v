@@ -20,14 +20,14 @@ FreeZone SR::RunGetFreeZoneNoDB( unique_ptr<Command> cmd, const SCREngine *scr_e
 	CommandSequenceFlattener().Apply(*seq);
 	
 	// Calculate SSA indexes
-	int pseudo_stack_top = 0;
-	seq->SetOperands( pseudo_stack_top );
-	ASSERT( pseudo_stack_top==1 );
+	SSAAllocator ssa_allocator;
+	seq->SetOperandRegs( ssa_allocator );
+    SSAAllocator::Reg out_reg = ssa_allocator.Pop();
 
-    map<int, FreeZone> free_zone_regs;
+    map<SSAAllocator::Reg, FreeZone> free_zone_regs;
     Command::ExecKit exec_kit {nullptr, scr_engine, scr_engine, &free_zone_regs};
 	seq->Execute( exec_kit );   
-    return free_zone_regs[0];  	
+    return free_zone_regs[out_reg];  	
 }
 
 
@@ -44,15 +44,14 @@ void SR::RunVoidForReplace( unique_ptr<Command> cmd, const SCREngine *scr_engine
 	TreeZoneOverlapFinder finder( x_tree_db, seq.get() );
 	
 	// Calculate SSA indexes
-	int pseudo_stack_top = 0;
-	seq->SetOperands( pseudo_stack_top );
-	ASSERT( pseudo_stack_top==0 );
+	SSAAllocator ssa_allocator;
+	seq->SetOperandRegs( ssa_allocator );
 	
 	//FTRACE(seq);
 	
 	// err...
 	
-    map<int, FreeZone> free_zone_regs;    
+    map<SSAAllocator::Reg, FreeZone> free_zone_regs;    
     Command::ExecKit exec_kit {x_tree_db, x_tree_db, scr_engine, &free_zone_regs};
 	seq->Execute( exec_kit );   
 }

@@ -7,6 +7,7 @@
 #include "../link.hpp"
 #include "duplicate.hpp"
 #include "../scr_engine.hpp"
+#include "ssa_allocator.hpp"
 
 namespace SR 
 {
@@ -30,10 +31,10 @@ public:
         const SCREngine *scr_engine;
 
         // "Register bank" of free zones for workspace
-        map<int, FreeZone> *free_zone_regs;        
+        map<SSAAllocator::Reg, FreeZone> *free_zone_regs;        
     };
 
-	virtual void SetOperands( int &pseudo_stack_top ) = 0;
+	virtual void SetOperandRegs( SSAAllocator &allocator ) = 0;
 
 	virtual void Execute( const ExecKit &kit ) const = 0;
 	
@@ -61,7 +62,7 @@ class DeclareFreeZoneCommand : public Command
 {
 public:
     DeclareFreeZoneCommand( FreeZone &&zone );
-	void SetOperands( int &pseudo_stack_top ) final;
+	void SetOperandRegs( SSAAllocator &allocator ) final;
 	void Execute( const ExecKit &kit ) const final;	
 
 	string GetTrace() const final;
@@ -78,7 +79,7 @@ class DuplicateTreeZoneCommand : public ImmediateTreeZoneCommand
 {
 public:
     using ImmediateTreeZoneCommand::ImmediateTreeZoneCommand;
-	void SetOperands( int &pseudo_stack_top ) final;
+	void SetOperandRegs( SSAAllocator &allocator ) final;
 	void Execute( const ExecKit &kit ) const final;	
 
 	string GetTrace() const final;
@@ -96,7 +97,7 @@ class JoinFreeZoneCommand : public Command
 {
 public:
     explicit JoinFreeZoneCommand(int ti);
-	void SetOperands( int &pseudo_stack_top ) final;
+	void SetOperandRegs( SSAAllocator &allocator ) final;
 	void Execute( const ExecKit &kit ) const final;	
 
 	string GetTrace() const final;
@@ -113,7 +114,7 @@ class DeleteCommand : public Command
 {
 public:
     DeleteCommand( XLink target_base_xlink );
-	void SetOperands( int &pseudo_stack_top ) final;
+	void SetOperandRegs( SSAAllocator &allocator ) final;
 	void Execute( const ExecKit &kit ) const final;	
 
 	string GetTrace() const final;
@@ -128,7 +129,7 @@ class InsertCommand : public Command
 {
 public:
     InsertCommand( XLink target_base_xlink );
-	void SetOperands( int &pseudo_stack_top ) final;
+	void SetOperandRegs( SSAAllocator &allocator ) final;
 	void Execute( const ExecKit &kit ) const final;	
 
 	string GetTrace() const final;
@@ -146,7 +147,7 @@ class MarkBaseForEmbeddedCommand : public Command
 {
 public:
     MarkBaseForEmbeddedCommand( RequiresSubordinateSCREngine *embedded_agent );
-	void SetOperands( int &pseudo_stack_top ) final;
+	void SetOperandRegs( SSAAllocator &allocator ) final;
 	void Execute( const ExecKit &kit ) const final;	
 
 	string GetTrace() const final;
@@ -161,7 +162,7 @@ private:
 class CommandSequence : public Command
 {
 public:
-	void SetOperands( int &pseudo_stack_top ) final;
+	void SetOperandRegs( SSAAllocator &allocator ) final;
 	void Execute( const ExecKit &kit ) const final;	
 
 	void Add( unique_ptr<Command> new_cmd );
