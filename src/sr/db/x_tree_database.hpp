@@ -10,7 +10,7 @@
 #include "node_table.hpp"
 #include "domain.hpp"
 #include "domain_extension.hpp"
-#include "indexes.hpp"
+#include "orderings.hpp"
 #include "db_walk.hpp"
 
 //#define DB_ENABLE_COMPARATIVE_TEST
@@ -33,7 +33,7 @@ private:
         shared_ptr<Domain> domain;
         shared_ptr<NodeTable> node_table;
         shared_ptr<LinkTable> link_table;
-        shared_ptr<Indexes> indexes;
+        shared_ptr<Orderings> indexes;
         shared_ptr<DomainExtension> domain_extension;
     } plan;
 
@@ -68,7 +68,7 @@ public:
     // descendents, it will be the supplied node. 
 	XLink GetLastDescendant(XLink xlink) const;
 
-	const Indexes &GetIndexes() const;
+	const Orderings &GetOrderings() const;
 	TreePtr<Node> GetRootNode() const;
 	XLink GetRootXLink() const;
 

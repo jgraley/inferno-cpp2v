@@ -135,7 +135,8 @@ private:
     // A reversal of start_to_tracking for indexing on dependency
     map<TreePtr<Node>, set<XLink>> dep_to_starts;
 
-    // Here we collect domain extension start XLinks that we will re-create during Complete()
+    // Here we collect domain extension start XLinks that we will re-create 
+    // during Complete() and then clear.
     set<XLink> starts_to_redo;
     
     // SimpleCompare equivalence classes over the domain, with refcount = size of the class.

@@ -37,7 +37,7 @@ XTreeDatabase::Plan::Plan( const XTreeDatabase *algo, shared_ptr<Lacing> lacing,
     domain( make_shared<Domain>() ),
     node_table( make_shared<NodeTable>() ),
     link_table( make_shared<LinkTable>() ),
-    indexes( make_shared<Indexes>(lacing, algo) ),
+    indexes( make_shared<Orderings>(lacing, algo) ),
     domain_extension( make_shared<DomainExtension>(algo, domain_extenders) )
 {
 }
@@ -229,7 +229,7 @@ XLink XTreeDatabase::GetLastDescendant(XLink xlink) const
 }
 
 
-const Indexes &XTreeDatabase::GetIndexes() const
+const Orderings &XTreeDatabase::GetOrderings() const
 {
 	return *plan.indexes;
 }

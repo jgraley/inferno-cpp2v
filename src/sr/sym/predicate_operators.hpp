@@ -6,7 +6,7 @@
 
 #include "../db/x_tree_database.hpp"
 #include "helpers/simple_compare.hpp"
-#include "../db/indexes.hpp"
+#include "../db/orderings.hpp"
 
 #include "common/common.hpp"
 #include "common/read_args.hpp"

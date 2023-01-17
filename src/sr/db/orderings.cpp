@@ -1,4 +1,4 @@
-#include "indexes.hpp"
+#include "orderings.hpp"
 
 #include "x_tree_database.hpp"
 #include "sc_relation.hpp"
@@ -10,35 +10,35 @@ using namespace SR;
 
 //#define TRACE_CATEGORY_RELATION
 
-Indexes::Indexes( shared_ptr<Lacing> lacing, const XTreeDatabase *db_ ) :
+Orderings::Orderings( shared_ptr<Lacing> lacing, const XTreeDatabase *db_ ) :
     plan( lacing ),
-    depth_first_ordered_index( db_ ),
-    category_ordered_index( plan.lacing ),
+    depth_first_ordering( db_ ),
+    category_ordering( plan.lacing ),
     db( db_ )
 { 
 }
 
 
-Indexes::Plan::Plan( shared_ptr<Lacing> lacing_ ) :
+Orderings::Plan::Plan( shared_ptr<Lacing> lacing_ ) :
     lacing( lacing_ )
 {
 }    
 
 
-const Lacing *Indexes::GetLacing() const
+const Lacing *Orderings::GetLacing() const
 {
     return plan.lacing.get();
 }
 
 
-void Indexes::PrepareDelete( DBWalk::Actions &actions )
+void Orderings::PrepareDelete( DBWalk::Actions &actions )
 {
 	actions.indexes_out = [=](const DBWalk::WalkInfo &walk_info)
 	{
 		TRACE("Erasing from indexes ")(walk_info.xlink)("\n");
-		EraseSolo( category_ordered_index, walk_info.xlink );       
+		EraseSolo( category_ordering, walk_info.xlink );       
 
-		EraseSolo( simple_compare_ordered_index, walk_info.xlink );
+		EraseSolo( simple_compare_ordering, walk_info.xlink );
         
         // We must delete SimpleCompare index entries for parents of the base
         // node, since removing it will invalidate the SC ordering.
@@ -47,22 +47,22 @@ void Indexes::PrepareDelete( DBWalk::Actions &actions )
         {
             while( ancestor_xlink = db->TryGetParentXLink(ancestor_xlink) )
             {
-                EraseSolo( simple_compare_ordered_index, ancestor_xlink );
+                EraseSolo( simple_compare_ordering, ancestor_xlink );
             }
         }
 
-		EraseSolo( depth_first_ordered_index, walk_info.xlink );
+		EraseSolo( depth_first_ordering, walk_info.xlink );
 	};
 }
 
 
-void Indexes::PrepareInsert(DBWalk::Actions &actions)
+void Orderings::PrepareInsert(DBWalk::Actions &actions)
 {
 	actions.indexes_in = [=](const DBWalk::WalkInfo &walk_info)
 	{ 
-        InsertSolo( category_ordered_index, walk_info.xlink );
+        InsertSolo( category_ordering, walk_info.xlink );
 
-		InsertSolo( simple_compare_ordered_index, walk_info.xlink );		
+		InsertSolo( simple_compare_ordering, walk_info.xlink );		
 
         // We may now re-instate SimpleCompare index entries for parents 
         // of the base node so that the SC ordering is intact.
@@ -71,43 +71,43 @@ void Indexes::PrepareInsert(DBWalk::Actions &actions)
         {
             while( ancestor_xlink = db->TryGetParentXLink(ancestor_xlink) )
             {
-                InsertSolo( simple_compare_ordered_index, ancestor_xlink );
+                InsertSolo( simple_compare_ordering, ancestor_xlink );
             }
         }
 
-        InsertSolo( depth_first_ordered_index, walk_info.xlink );
+        InsertSolo( depth_first_ordering, walk_info.xlink );
 	};
 }
 
 
-void Indexes::Dump() const
+void Orderings::Dump() const
 {
-    TRACE("category_ordered_index:\n")(category_ordered_index)("\n");
+    TRACE("category_ordering:\n")(category_ordering)("\n");
 }
 
 
-void Indexes::TestRelations( const unordered_set<XLink> &xlinks )
+void Orderings::TestRelations( const unordered_set<XLink> &xlinks )
 {
 	SimpleCompareRelation scr;
 	scr.Test( xlinks );
 
-    TestOrderingIntact( simple_compare_ordered_index,
+    TestOrderingIntact( simple_compare_ordering,
                         true,
-                        "simple_compare_ordered_index" );
+                        "simple_compare_ordering" );
 
 	CategoryRelation cat_r( plan.lacing );
 	cat_r.Test( xlinks );
 	
-    TestOrderingIntact( category_ordered_index,
+    TestOrderingIntact( category_ordering,
                         true,
-                        "category_ordered_index" );
+                        "category_ordering" );
 
 	DepthFirstRelation dfr( db );
 	dfr.Test( xlinks );	
 
-    TestOrderingIntact( depth_first_ordered_index,
+    TestOrderingIntact( depth_first_ordering,
                         true,
-                        "depth_first_ordered_index" );
+                        "depth_first_ordering" );
 }
 
 

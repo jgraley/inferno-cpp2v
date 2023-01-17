@@ -1,5 +1,5 @@
-#ifndef INDEXES_HPP
-#define INDEXES_HPP
+#ifndef ORDERINGS_HPP
+#define ORDERINGS_HPP
 
 #include "../link.hpp"
 #include "common/standard.hpp"
@@ -19,10 +19,10 @@ namespace SR
 class Lacing;
 class XTreeDatabase;
     
-class Indexes
+class Orderings
 {
 public:
-    Indexes(shared_ptr<Lacing> lacing, const XTreeDatabase *db );
+    Orderings(shared_ptr<Lacing> lacing, const XTreeDatabase *db );
     
 private: 
     const struct Plan : public Traceable
@@ -43,26 +43,26 @@ public:
     void TestRelations( const unordered_set<XLink> &xlinks );
 
     // Category ordering TODO merge with SimpleCompare ordering
-    typedef set<XLink, CategoryRelation> CategoryOrderedIndex;
-    typedef CategoryOrderedIndex::iterator CategoryOrderedIt;
+    typedef set<XLink, CategoryRelation> CategoryOrdering;
+    typedef CategoryOrdering::iterator CategoryOrderingIterator;
 
     // We will provide a SimpleCompare ordered version of the domain
-    typedef set<XLink, SimpleCompareRelation> SimpleCompareOrderedIndex;
-    typedef SimpleCompareOrderedIndex::iterator SimpleCompareOrderedIt;
+    typedef set<XLink, SimpleCompareRelation> SimpleCompareOrdering;
+    typedef SimpleCompareOrdering::iterator SimpleCompareOrderingIterator;
     
     // We will provide a depth-first ordered version of the domain
-    typedef set<XLink, DepthFirstRelation> DepthFirstOrderedIndex;
-    typedef DepthFirstOrderedIndex::iterator DepthFirstOrderedIt;
+    typedef set<XLink, DepthFirstRelation> DepthFirstOrdering;
+    typedef DepthFirstOrdering::iterator DepthFirstOrderingIterator;
 
     // Global domain of possible xlink values - new version
-    DepthFirstOrderedIndex depth_first_ordered_index;            
+    DepthFirstOrdering depth_first_ordering;            
     
     // Domain ordered by category
-    CategoryOrderedIndex category_ordered_index;
+    CategoryOrdering category_ordering;
     
     // Whole domain in here, grouped by simple compare, findable using eg lower_bound()
     // Should be the other way around, as an indication of policy
-    SimpleCompareOrderedIndex simple_compare_ordered_index;   
+    SimpleCompareOrdering simple_compare_ordering;   
 
 private:
     const XTreeDatabase *db;
