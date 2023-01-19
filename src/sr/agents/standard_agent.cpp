@@ -603,6 +603,7 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
     vector< Itemiser::Element * > dest_items_in_me = Itemise( dest.get() ); // Get the members of dest corresponding to pattern's class
     ASSERT( my_items.size() == dest_items_in_me.size() );        
     
+//#ifndef ONE_LOOP    
     TRACE("Copying %d members from pattern=", dest_items_in_me.size())(*this)(" dest=")(*dest)("\n");
     for( int i=0; i<dest_items_in_me.size(); i++ )
     {
@@ -656,17 +657,34 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
             ASSERTFAIL("got something from itemise that isn't a sequence or a shared pointer");
         }        
     }
-    
+//#endif    
 
     TRACE("Copying %d members from under_node=", dest_items.size())(*under_node)(" dest=")(*dest)("\n");
-    // Loop over all the members of under_node (which can be a subset of dest)
-    // and for non-nullptr members, duplicate them by recursing and write the
-    // duplicates to the destination.
-    for( int i=0; i<dest_items.size(); i++ )
+    // i tracks items in under/dest, j tracks items in me
+    for( int i=0, j=0; i<dest_items.size(); j < dest_items_in_me.size() && dest_items[i]==dest_items_in_me[j] && j++, i++ )
     {
         ASSERT( under_items[i] )( "itemise returned null element" );
         ASSERT( dest_items[i] )( "itemise returned null element" );
+
+        bool in_me = j < dest_items_in_me.size() && dest_items[i]==dest_items_in_me[j];
         
+        bool should_overlay;
+        if( in_me )
+        {
+			should_overlay = true; // in me...
+			if( TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[j]) )
+				if( !*my_singular )
+					should_overlay = false; // but is a NULL singular
+		}
+		else
+        {
+			should_overlay = false; // not in me (I'm a super-category)
+		}
+        
+        ASSERT( (present_in_overlay.count(dest_items[i]) > 0) ==
+                should_overlay )
+                ("i=%d j=%d did overlay=%d should_overlay=%d", i, j, present_in_overlay.count(dest_items[i])>0, should_overlay);
+            
         if( present_in_overlay.count(dest_items[i]) > 0 )
             continue; // already did this one in the above loop
 
