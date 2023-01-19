@@ -640,6 +640,7 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
 			if( should_overlay )
 			{	
 				ContainerInterface *my_con = dynamic_cast<ContainerInterface *>(my_items[j]);
+				ASSERT(my_con);
 				
 				TRACE("Copying container size %d from my_con\n", (*my_con).size() );
 				for( const TreePtrInterface &my_elt : *my_con )
@@ -681,9 +682,9 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
 
 			if( should_overlay )
 			{
-				TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[j]);						   
+				TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[j]);		
+				ASSERT(	my_singular );
 				ASSERT( *my_singular ); // Should not have marked this one for overlay if NULL
-									
 				PatternLink my_singular_plink( this, my_singular );                    
 				commands->Add( my_singular_plink.GetChildAgent()->GenerateCommand(kit, my_singular_plink) );
 			}		
