@@ -603,21 +603,21 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
     
 //#ifndef ONE_LOOP    
     TRACE("Copying %d members from pattern=", dest_items_in_me.size())(*this)(" dest=")(*dest)("\n");
-    for( int i=0; i<dest_items_in_me.size(); i++ )
+    for( int j=0; j<dest_items_in_me.size(); j++ )
     {
-    	TRACE("member %d from pattern\n", i );
-        ASSERT( my_items[i] )( "itemise returned null element" );
-        ASSERT( dest_items_in_me[i] )( "itemise returned null element" );
-        if( ContainerInterface *my_con = dynamic_cast<ContainerInterface *>(my_items[i]) )                
+    	TRACE("member %d from pattern\n", j );
+        ASSERT( my_items[j] )( "itemise returned null element" );
+        ASSERT( dest_items_in_me[j] )( "itemise returned null element" );
+        if( ContainerInterface *my_con = dynamic_cast<ContainerInterface *>(my_items[j]) )                
         {
-            ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_items_in_me[i]);
+            ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_items_in_me[j]);
             ASSERT( dest_con )( "itemise for dest didn't match itemise for my_con");
             dest_con->clear();
 
             TRACE("Copying container size %d from my_con\n", (*my_con).size() );
 	        for( const TreePtrInterface &my_elt : *my_con )
 	        {
-		        ASSERT( my_elt )("Some element of member %d (", i)(*my_con)(") of ")(*this)(" was nullptr\n");
+		        ASSERT( my_elt )("Some element of member %d (", j)(*my_con)(") of ")(*this)(" was nullptr\n");
 		        TRACE("Got ")(*my_elt)("\n");
 
                 // Make a placeholder in the dest container for the updater to point to
@@ -630,9 +630,21 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
 				ti++;
 	        }
         }            
-        else if( TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[i]) )
+        else if( TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[j]) )
         {
         	TRACE();
+            TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items_in_me[j]);
+            ASSERT( dest_singular )( "itemise for target didn't match itemise for pattern");
+                       
+            if( *my_singular )
+            {         
+                zone.AddTerminus( ti, make_shared<SingularUpdater>(dest_singular) );            
+                
+                PatternLink my_singular_plink( this, my_singular );                    
+                commands->Add( my_singular_plink.GetChildAgent()->GenerateCommand(kit, my_singular_plink) );
+				commands->Add( make_unique<JoinFreeZoneCommand>(ti) );   
+				ti++;             
+            }
         }
         else
         {
@@ -664,24 +676,18 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
 			should_overlay = false; // not in me (I'm a super-category)
 		}
                     
+		if( should_overlay )
+		{
+		    ASSERT( my_items[j] )( "itemise returned null element" );
+			ASSERT( dest_items_in_me[j] )( "itemise returned null element" );
+		}
+		
     	TRACE("Member %d from key\n", i );
         if( ContainerInterface *under_container = dynamic_cast<ContainerInterface *>(under_items[i]) )                
         {
 			if( should_overlay )
-			{
-				TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items_in_me[i]);
-				ASSERT( dest_singular )( "itemise for target didn't match itemise for pattern");
-						   
-				if( *my_singular )
-				{         
-					zone.AddTerminus( ti, make_shared<SingularUpdater>(dest_singular) );            
-					
-					PatternLink my_singular_plink( this, my_singular );                    
-					commands->Add( my_singular_plink.GetChildAgent()->GenerateCommand(kit, my_singular_plink) );
-					commands->Add( make_unique<JoinFreeZoneCommand>(ti) );   
-					ti++;             
-				}
-			}
+			{	
+			}	
 			else
 			{
 				// Note: we get here when a wildcard is coupled that does not have the container
@@ -709,16 +715,19 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
         else if( TreePtrInterface *under_singular = dynamic_cast<TreePtrInterface *>(under_items[i]) )
         {
 			if( should_overlay )
-				continue; // already overlayed this one in the above loop
+			{
+			}		
+			else
+			{
+				TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
+				zone.AddTerminus( ti, make_shared<SingularUpdater>(dest_singular) );            
 
-            TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
-            zone.AddTerminus( ti, make_shared<SingularUpdater>(dest_singular) );            
-
-            ASSERT( *under_singular );            
-            auto under_zone = TreeZone::CreateSubtree( XLink(under_node, under_singular) );
-            commands->Add( make_unique<DuplicateTreeZoneCommand>( under_zone ) );
-            commands->Add( make_unique<JoinFreeZoneCommand>(ti) );
-            ti++;
+				ASSERT( *under_singular );            
+				auto under_zone = TreeZone::CreateSubtree( XLink(under_node, under_singular) );
+				commands->Add( make_unique<DuplicateTreeZoneCommand>( under_zone ) );
+				commands->Add( make_unique<JoinFreeZoneCommand>(ti) );
+				ti++;
+			}
         }
         else
         {
