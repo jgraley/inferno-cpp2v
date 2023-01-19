@@ -601,26 +601,6 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
     vector< Itemiser::Element * > dest_items_in_me = Itemise( dest.get() ); // Get the members of dest corresponding to pattern's class
     ASSERT( my_items.size() == dest_items_in_me.size() );        
     
-//#ifndef ONE_LOOP    
-    TRACE("Copying %d members from pattern=", dest_items_in_me.size())(*this)(" dest=")(*dest)("\n");
-    for( int j=0; j<dest_items_in_me.size(); j++ )
-    {
-    	TRACE("member %d from pattern\n", j );
-        ASSERT( my_items[j] )( "itemise returned null element" );
-        ASSERT( dest_items_in_me[j] )( "itemise returned null element" );
-        if( ContainerInterface *my_con = dynamic_cast<ContainerInterface *>(my_items[j]) )                
-        {
-        }            
-        else if( TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[j]) )
-        {
-        }
-        else
-        {
-            ASSERTFAIL("got something from itemise that isn't a sequence or a shared pointer");
-        }        
-    }
-//#endif    
-
     TRACE("Copying %d members from under_node=", dest_items.size())(*under_node)(" dest=")(*dest)("\n");
     // i tracks items in under/dest, j tracks items in me
 	bool in_me;
@@ -653,23 +633,23 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
     	TRACE("Member %d from key\n", i );
         if( ContainerInterface *under_container = dynamic_cast<ContainerInterface *>(under_items[i]) )                
         {
+    		ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_items[i]);
+			ASSERT( dest_con )( "itemise for dest didn't match itemise for my_con");
+    		dest_con->clear();
+    		
 			if( should_overlay )
 			{	
 				ContainerInterface *my_con = dynamic_cast<ContainerInterface *>(my_items[j]);
-				ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_items_in_me[j]);
-				ASSERT( dest_con )( "itemise for dest didn't match itemise for my_con");
-				dest_con->clear();
-
+				
 				TRACE("Copying container size %d from my_con\n", (*my_con).size() );
 				for( const TreePtrInterface &my_elt : *my_con )
 				{
-					ASSERT( my_elt )("Some element of member %d (", j)(*my_con)(") of ")(*this)(" was nullptr\n");
-					TRACE("Got ")(*my_elt)("\n");
-
 					// Make a placeholder in the dest container for the updater to point to
 					ContainerInterface::iterator dest_it = dest_con->insert( ContainerUpdater::GetPlaceholder() );
 					zone.AddTerminus( ti, make_shared<ContainerUpdater>(dest_con, dest_it) );     
 					
+					ASSERT( my_elt )("Some element of member %d (", j)(*my_con)(") of ")(*this)(" was nullptr\n");
+					TRACE("Got ")(*my_elt)("\n");
 					PatternLink my_elt_plink( this, &my_elt );
 					commands->Add( my_elt_plink.GetChildAgent()->GenerateCommand(kit, my_elt_plink) );
 					commands->Add( make_unique<JoinFreeZoneCommand>(ti) );                
@@ -678,21 +658,14 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
 			}	
 			else
 			{
-				// Note: we get here when a wildcard is coupled that does not have the container
-				// because it is an intermediate node. Eg Scope as a wildcard matching Module does 
-				// not have "bases".
-				ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_items[i]);
-				dest_con->clear();
-
 				TRACE("Copying container size %d from key\n", under_container->size() );
 				for( const TreePtrInterface &under_elt : *under_container )
 				{
-					ASSERT( under_elt ); // present simplified scheme disallows nullptr
-
 					// Make a placeholder in the dest container for the updater to point to
 					ContainerInterface::iterator dest_it = dest_con->insert( ContainerUpdater::GetPlaceholder() );
 					zone.AddTerminus( ti, make_shared<ContainerUpdater>(dest_con, dest_it) );     
 
+					ASSERT( under_elt ); // present simplified scheme disallows nullptr
 					auto under_zone = TreeZone::CreateSubtree( XLink(under_node, &under_elt) );
 					commands->Add( make_unique<DuplicateTreeZoneCommand>( under_zone ) );
 					commands->Add( make_unique<JoinFreeZoneCommand>(ti) );
@@ -702,31 +675,27 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
         }            
         else if( TreePtrInterface *under_singular = dynamic_cast<TreePtrInterface *>(under_items[i]) )
         {
+			TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
+			ASSERT( dest_singular )( "itemise for target didn't match itemise for pattern");
+			zone.AddTerminus( ti, make_shared<SingularUpdater>(dest_singular) );            
+
 			if( should_overlay )
 			{
-				TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[j]);
-				TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items_in_me[j]);
-				ASSERT( dest_singular )( "itemise for target didn't match itemise for pattern");
-						   
-				ASSERT( *my_singular );
-				zone.AddTerminus( ti, make_shared<SingularUpdater>(dest_singular) );            
-					
+				TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[j]);						   
+				ASSERT( *my_singular ); // Should not have marked this one for overlay if NULL
+									
 				PatternLink my_singular_plink( this, my_singular );                    
 				commands->Add( my_singular_plink.GetChildAgent()->GenerateCommand(kit, my_singular_plink) );
-				commands->Add( make_unique<JoinFreeZoneCommand>(ti) );   
-				ti++;             
 			}		
 			else
 			{
-				TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
-				zone.AddTerminus( ti, make_shared<SingularUpdater>(dest_singular) );            
-
 				ASSERT( *under_singular );            
 				auto under_zone = TreeZone::CreateSubtree( XLink(under_node, under_singular) );
 				commands->Add( make_unique<DuplicateTreeZoneCommand>( under_zone ) );
-				commands->Add( make_unique<JoinFreeZoneCommand>(ti) );
-				ti++;
 			}
+
+			commands->Add( make_unique<JoinFreeZoneCommand>(ti) );   
+			ti++;             
         }
         else
         {
