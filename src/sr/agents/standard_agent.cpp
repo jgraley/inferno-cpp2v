@@ -633,18 +633,6 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
         else if( TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[i]) )
         {
         	TRACE();
-            TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items_in_me[i]);
-            ASSERT( dest_singular )( "itemise for target didn't match itemise for pattern");
-                       
-            if( *my_singular )
-            {         
-                zone.AddTerminus( ti, make_shared<SingularUpdater>(dest_singular) );            
-                
-                PatternLink my_singular_plink( this, my_singular );                    
-                commands->Add( my_singular_plink.GetChildAgent()->GenerateCommand(kit, my_singular_plink) );
-				commands->Add( make_unique<JoinFreeZoneCommand>(ti) );   
-				ti++;             
-            }
         }
         else
         {
@@ -680,28 +668,43 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
         if( ContainerInterface *under_container = dynamic_cast<ContainerInterface *>(under_items[i]) )                
         {
 			if( should_overlay )
-				continue; // already overlayed this one in the above loop
+			{
+				TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items_in_me[i]);
+				ASSERT( dest_singular )( "itemise for target didn't match itemise for pattern");
+						   
+				if( *my_singular )
+				{         
+					zone.AddTerminus( ti, make_shared<SingularUpdater>(dest_singular) );            
+					
+					PatternLink my_singular_plink( this, my_singular );                    
+					commands->Add( my_singular_plink.GetChildAgent()->GenerateCommand(kit, my_singular_plink) );
+					commands->Add( make_unique<JoinFreeZoneCommand>(ti) );   
+					ti++;             
+				}
+			}
+			else
+			{
+				// Note: we get here when a wildcard is coupled that does not have the container
+				// because it is an intermediate node. Eg Scope as a wildcard matching Module does 
+				// not have "bases".
+				ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_items[i]);
+				dest_con->clear();
 
-            // Note: we get here when a wildcard is coupled that does not have the container
-            // because it is an intermediate node. Eg Scope as a wildcard matching Module does 
-            // not have "bases".
-            ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_items[i]);
-            dest_con->clear();
+				TRACE("Copying container size %d from key\n", under_container->size() );
+				for( const TreePtrInterface &under_elt : *under_container )
+				{
+					ASSERT( under_elt ); // present simplified scheme disallows nullptr
 
-            TRACE("Copying container size %d from key\n", under_container->size() );
-	        for( const TreePtrInterface &under_elt : *under_container )
-	        {
-		        ASSERT( under_elt ); // present simplified scheme disallows nullptr
+					// Make a placeholder in the dest container for the updater to point to
+					ContainerInterface::iterator dest_it = dest_con->insert( ContainerUpdater::GetPlaceholder() );
+					zone.AddTerminus( ti, make_shared<ContainerUpdater>(dest_con, dest_it) );     
 
-                // Make a placeholder in the dest container for the updater to point to
-                ContainerInterface::iterator dest_it = dest_con->insert( ContainerUpdater::GetPlaceholder() );
-                zone.AddTerminus( ti, make_shared<ContainerUpdater>(dest_con, dest_it) );     
-
-                auto under_zone = TreeZone::CreateSubtree( XLink(under_node, &under_elt) );
-                commands->Add( make_unique<DuplicateTreeZoneCommand>( under_zone ) );
-                commands->Add( make_unique<JoinFreeZoneCommand>(ti) );
-                ti++;
- 	        }
+					auto under_zone = TreeZone::CreateSubtree( XLink(under_node, &under_elt) );
+					commands->Add( make_unique<DuplicateTreeZoneCommand>( under_zone ) );
+					commands->Add( make_unique<JoinFreeZoneCommand>(ti) );
+					ti++;
+				}
+			}
         }            
         else if( TreePtrInterface *under_singular = dynamic_cast<TreePtrInterface *>(under_items[i]) )
         {
