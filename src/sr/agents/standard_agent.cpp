@@ -676,12 +676,12 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
 			should_overlay = false; // not in me (I'm a super-category)
 		}
                     
-        if( should_overlay )
-            continue; // already overlayed this one in the above loop
-
     	TRACE("Member %d from key\n", i );
         if( ContainerInterface *under_container = dynamic_cast<ContainerInterface *>(under_items[i]) )                
         {
+			if( should_overlay )
+				continue; // already overlayed this one in the above loop
+
             // Note: we get here when a wildcard is coupled that does not have the container
             // because it is an intermediate node. Eg Scope as a wildcard matching Module does 
             // not have "bases".
@@ -705,6 +705,9 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
         }            
         else if( TreePtrInterface *under_singular = dynamic_cast<TreePtrInterface *>(under_items[i]) )
         {
+			if( should_overlay )
+				continue; // already overlayed this one in the above loop
+
             TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
             zone.AddTerminus( ti, make_shared<SingularUpdater>(dest_singular) );            
 
