@@ -587,8 +587,6 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
     FreeZone zone = FreeZone::CreateSubtree(dest);
     int ti = 0;
 
-    set< Itemiser::Element * > present_in_overlay; 
-
     // Loop over all the elements of under_node and dest that do not appear in pattern or
     // appear in pattern but are nullptr TreePtr<>s. Duplicate from under_node into dest.
     vector< Itemiser::Element * > under_items = under_node->Itemise();
@@ -612,8 +610,6 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
         ASSERT( dest_items_in_me[i] )( "itemise returned null element" );
         if( ContainerInterface *my_con = dynamic_cast<ContainerInterface *>(my_items[i]) )                
         {
-	        present_in_overlay.insert( dest_items_in_me[i] );
-
             ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_items_in_me[i]);
             ASSERT( dest_con )( "itemise for dest didn't match itemise for my_con");
             dest_con->clear();
@@ -642,8 +638,6 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
                        
             if( *my_singular )
             {         
-                present_in_overlay.insert( dest_items_in_me[i] );
-
                 zone.AddTerminus( ti, make_shared<SingularUpdater>(dest_singular) );            
                 
                 PatternLink my_singular_plink( this, my_singular );                    
@@ -661,12 +655,13 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
 
     TRACE("Copying %d members from under_node=", dest_items.size())(*under_node)(" dest=")(*dest)("\n");
     // i tracks items in under/dest, j tracks items in me
-    for( int i=0, j=0; i<dest_items.size(); j < dest_items_in_me.size() && dest_items[i]==dest_items_in_me[j] && j++, i++ )
+	bool in_me;
+    for( int i=0, j=0; i<dest_items.size(); i++, in_me && j++ )
     {
         ASSERT( under_items[i] )( "itemise returned null element" );
         ASSERT( dest_items[i] )( "itemise returned null element" );
 
-        bool in_me = j < dest_items_in_me.size() && dest_items[i]==dest_items_in_me[j];
+        in_me = j < dest_items_in_me.size() && dest_items[i]==dest_items_in_me[j];
         
         bool should_overlay;
         if( in_me )
@@ -680,13 +675,9 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
         {
 			should_overlay = false; // not in me (I'm a super-category)
 		}
-        
-        ASSERT( (present_in_overlay.count(dest_items[i]) > 0) ==
-                should_overlay )
-                ("i=%d j=%d did overlay=%d should_overlay=%d", i, j, present_in_overlay.count(dest_items[i])>0, should_overlay);
-            
-        if( present_in_overlay.count(dest_items[i]) > 0 )
-            continue; // already did this one in the above loop
+                    
+        if( should_overlay )
+            continue; // already overlayed this one in the above loop
 
     	TRACE("Member %d from key\n", i );
         if( ContainerInterface *under_container = dynamic_cast<ContainerInterface *>(under_items[i]) )                
