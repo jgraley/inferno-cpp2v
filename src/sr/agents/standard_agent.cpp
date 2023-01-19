@@ -587,24 +587,33 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
     FreeZone zone = FreeZone::CreateSubtree(dest);
     int ti = 0;
 
+    set< Itemiser::Element * > present_in_overlay; 
+
+    // Loop over all the elements of under_node and dest that do not appear in pattern or
+    // appear in pattern but are nullptr TreePtr<>s. Duplicate from under_node into dest.
+    vector< Itemiser::Element * > under_items = under_node->Itemise();
+    vector< Itemiser::Element * > dest_items = under_node->Itemise( dest.get() ); 
+    ASSERT( under_items.size() == dest_items.size() );
+
     // Loop over the child elements of me (=over) and dest, limited to elements
     // present in me, which is a non-strict superclass of under_node and dest.
     // Overlay or overwrite pattern over a duplicate of dest. Keep track of 
     // corresponding elements of dest. 
     vector< Itemiser::Element * > my_items = Itemise();
-    vector< Itemiser::Element * > dest_items = Itemise( dest.get() ); // Get the members of dest corresponding to pattern's class
-    ASSERT( my_items.size() == dest_items.size() );
-    set< Itemiser::Element * > present_in_overlay; // Repeatability audit: OK since only checking for existance 
+    vector< Itemiser::Element * > dest_items_in_me = Itemise( dest.get() ); // Get the members of dest corresponding to pattern's class
+    ASSERT( my_items.size() == dest_items_in_me.size() );        
     
-    TRACE("Copying %d members from pattern=", dest_items.size())(*this)(" dest=")(*dest)("\n");
-    for( int i=0; i<dest_items.size(); i++ )
+    TRACE("Copying %d members from pattern=", dest_items_in_me.size())(*this)(" dest=")(*dest)("\n");
+    for( int i=0; i<dest_items_in_me.size(); i++ )
     {
     	TRACE("member %d from pattern\n", i );
         ASSERT( my_items[i] )( "itemise returned null element" );
-        ASSERT( dest_items[i] )( "itemise returned null element" );
+        ASSERT( dest_items_in_me[i] )( "itemise returned null element" );
         if( ContainerInterface *my_con = dynamic_cast<ContainerInterface *>(my_items[i]) )                
         {
-            ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_items[i]);
+	        present_in_overlay.insert( dest_items_in_me[i] );
+
+            ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_items_in_me[i]);
             ASSERT( dest_con )( "itemise for dest didn't match itemise for my_con");
             dest_con->clear();
 
@@ -623,17 +632,16 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
 				commands->Add( make_unique<JoinFreeZoneCommand>(ti) );                
 				ti++;
 	        }
-	        present_in_overlay.insert( dest_items[i] );
         }            
         else if( TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[i]) )
         {
         	TRACE();
-            TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
+            TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items_in_me[i]);
             ASSERT( dest_singular )( "itemise for target didn't match itemise for pattern");
                        
             if( *my_singular )
             {         
-                present_in_overlay.insert( dest_items[i] );
+                present_in_overlay.insert( dest_items_in_me[i] );
 
                 zone.AddTerminus( ti, make_shared<SingularUpdater>(dest_singular) );            
                 
@@ -649,10 +657,6 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
         }        
     }
     
-    // Loop over all the elements of under_node and dest that do not appear in pattern or
-    // appear in pattern but are nullptr TreePtr<>s. Duplicate from under_node into dest.
-    vector< Itemiser::Element * > under_items = under_node->Itemise();
-    dest_items = under_node->Itemise( dest.get() ); 
 
     TRACE("Copying %d members from under_node=", dest_items.size())(*under_node)(" dest=")(*dest)("\n");
     // Loop over all the members of under_node (which can be a subset of dest)
