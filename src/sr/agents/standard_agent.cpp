@@ -610,41 +610,9 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
         ASSERT( dest_items_in_me[j] )( "itemise returned null element" );
         if( ContainerInterface *my_con = dynamic_cast<ContainerInterface *>(my_items[j]) )                
         {
-            ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_items_in_me[j]);
-            ASSERT( dest_con )( "itemise for dest didn't match itemise for my_con");
-            dest_con->clear();
-
-            TRACE("Copying container size %d from my_con\n", (*my_con).size() );
-	        for( const TreePtrInterface &my_elt : *my_con )
-	        {
-		        ASSERT( my_elt )("Some element of member %d (", j)(*my_con)(") of ")(*this)(" was nullptr\n");
-		        TRACE("Got ")(*my_elt)("\n");
-
-                // Make a placeholder in the dest container for the updater to point to
-                ContainerInterface::iterator dest_it = dest_con->insert( ContainerUpdater::GetPlaceholder() );
-                zone.AddTerminus( ti, make_shared<ContainerUpdater>(dest_con, dest_it) );     
-		        
-                PatternLink my_elt_plink( this, &my_elt );
-                commands->Add( my_elt_plink.GetChildAgent()->GenerateCommand(kit, my_elt_plink) );
-				commands->Add( make_unique<JoinFreeZoneCommand>(ti) );                
-				ti++;
-	        }
         }            
         else if( TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[j]) )
         {
-        	TRACE();
-            TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items_in_me[j]);
-            ASSERT( dest_singular )( "itemise for target didn't match itemise for pattern");
-                       
-            if( *my_singular )
-            {         
-                zone.AddTerminus( ti, make_shared<SingularUpdater>(dest_singular) );            
-                
-                PatternLink my_singular_plink( this, my_singular );                    
-                commands->Add( my_singular_plink.GetChildAgent()->GenerateCommand(kit, my_singular_plink) );
-				commands->Add( make_unique<JoinFreeZoneCommand>(ti) );   
-				ti++;             
-            }
         }
         else
         {
@@ -687,6 +655,26 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
         {
 			if( should_overlay )
 			{	
+				ContainerInterface *my_con = dynamic_cast<ContainerInterface *>(my_items[j]);
+				ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_items_in_me[j]);
+				ASSERT( dest_con )( "itemise for dest didn't match itemise for my_con");
+				dest_con->clear();
+
+				TRACE("Copying container size %d from my_con\n", (*my_con).size() );
+				for( const TreePtrInterface &my_elt : *my_con )
+				{
+					ASSERT( my_elt )("Some element of member %d (", j)(*my_con)(") of ")(*this)(" was nullptr\n");
+					TRACE("Got ")(*my_elt)("\n");
+
+					// Make a placeholder in the dest container for the updater to point to
+					ContainerInterface::iterator dest_it = dest_con->insert( ContainerUpdater::GetPlaceholder() );
+					zone.AddTerminus( ti, make_shared<ContainerUpdater>(dest_con, dest_it) );     
+					
+					PatternLink my_elt_plink( this, &my_elt );
+					commands->Add( my_elt_plink.GetChildAgent()->GenerateCommand(kit, my_elt_plink) );
+					commands->Add( make_unique<JoinFreeZoneCommand>(ti) );                
+					ti++;
+				}
 			}	
 			else
 			{
@@ -716,6 +704,17 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
         {
 			if( should_overlay )
 			{
+				TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[j]);
+				TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items_in_me[j]);
+				ASSERT( dest_singular )( "itemise for target didn't match itemise for pattern");
+						   
+				ASSERT( *my_singular );
+				zone.AddTerminus( ti, make_shared<SingularUpdater>(dest_singular) );            
+					
+				PatternLink my_singular_plink( this, my_singular );                    
+				commands->Add( my_singular_plink.GetChildAgent()->GenerateCommand(kit, my_singular_plink) );
+				commands->Add( make_unique<JoinFreeZoneCommand>(ti) );   
+				ti++;             
 			}		
 			else
 			{
