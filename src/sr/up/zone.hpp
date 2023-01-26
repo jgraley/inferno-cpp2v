@@ -10,14 +10,21 @@
 
 namespace SR 
 {
-    class XTreeDatabase;
+class XTreeDatabase;
+    
+// ------------------------- Zone --------------------------
+class Zone : public Traceable
+{
+public:
+	virtual ~Zone() = default;
+};
     
 // ------------------------- FreeZone --------------------------
 
 // FreeZone is for zones that are not anywhere in the current
 // x tree. They are assumed to be "orphaned" and so for minimality
 // we express the base as a TreePtr<Node>. See #623.
-class FreeZone : public Traceable
+class FreeZone : public Zone
 { 
 public:
     static FreeZone CreateSubtree( TreePtr<Node> base );
@@ -48,7 +55,7 @@ private:
 // nodes in the tree have an XLink, including at the root, and we
 // prefer to keep track of the XLink to the base node for precision
 // and convenience. See #623.
-class TreeZone : public Traceable
+class TreeZone : public Zone
 { 
 public:
     static TreeZone CreateSubtree( XLink base );

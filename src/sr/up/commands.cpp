@@ -46,7 +46,7 @@ void DeclareFreeZoneCommand::SetOperandRegs( SSAAllocator &allocator )
 
 void DeclareFreeZoneCommand::Execute( const ExecKit &kit ) const
 {
-	(*kit.free_zone_regs)[dest_reg] = *zone;
+	(*kit.register_file)[dest_reg] = make_unique<FreeZone>(*zone);
 }
 
 
@@ -73,7 +73,7 @@ void DuplicateTreeZoneCommand::Execute( const ExecKit &kit ) const
 		// Duplicate::DuplicateSubtree() can't work with the
 		// terminus-at-base you get with an empty zone, so handle that
 		// case explicitly.
-        (*kit.free_zone_regs)[dest_reg] = FreeZone::CreateEmpty(); 
+        (*kit.register_file)[dest_reg] = make_unique<FreeZone>(FreeZone::CreateEmpty()); 
         return;
     }
 
@@ -97,7 +97,7 @@ void DuplicateTreeZoneCommand::Execute( const ExecKit &kit ) const
 
     // Create a new zone for the result.
     auto result_zone = FreeZone( new_base_x, free_zone_terminii );
-    (*kit.free_zone_regs)[dest_reg] = result_zone;      
+    (*kit.register_file)[dest_reg] = make_unique<FreeZone>(result_zone);      
 }
 
 
@@ -123,8 +123,8 @@ void JoinFreeZoneCommand::SetOperandRegs( SSAAllocator &allocator )
 
 void JoinFreeZoneCommand::Execute( const ExecKit &kit ) const
 {
-	FreeZone source_zone = (*kit.free_zone_regs)[source_reg];
-	FreeZone &dest_zone = (*kit.free_zone_regs)[dest_reg];
+	FreeZone source_zone = *(*kit.register_file)[source_reg];
+	FreeZone &dest_zone = *(*kit.register_file)[dest_reg];
 	    
     if( dest_zone.IsEmpty() )
     {
@@ -205,7 +205,7 @@ void InsertCommand::Execute( const ExecKit &kit ) const
     ASSERT( !target_base_xlink.GetChildX() );
     
     // Patch the tree
-    target_base_xlink.SetXPtr( (*kit.free_zone_regs)[source_reg].GetBase() );
+    target_base_xlink.SetXPtr( (*kit.register_file)[source_reg]->GetBase() );
     
     // Update database 
     kit.x_tree_db->Insert( target_base_xlink );      
@@ -233,7 +233,7 @@ void MarkBaseForEmbeddedCommand::SetOperandRegs( SSAAllocator &allocator )
 
 void MarkBaseForEmbeddedCommand::Execute( const ExecKit &kit ) const
 {
-	FreeZone &zone = (*kit.free_zone_regs)[dest_reg];
+	FreeZone &zone = *(*kit.register_file)[dest_reg];
 	
     ASSERT( !zone.IsEmpty() );
     kit.scr_engine->MarkBaseForEmbedded( embedded_agent, zone.GetBase() );   

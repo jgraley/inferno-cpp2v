@@ -24,10 +24,10 @@ FreeZone SR::RunGetFreeZoneNoDB( unique_ptr<Command> cmd, const SCREngine *scr_e
 	seq->SetOperandRegs( ssa_allocator );
     SSAAllocator::Reg out_reg = ssa_allocator.Pop();
 
-    map<SSAAllocator::Reg, FreeZone> free_zone_regs;
-    Command::ExecKit exec_kit {nullptr, scr_engine, scr_engine, &free_zone_regs};
+    Command::RegisterFile register_file;
+    Command::ExecKit exec_kit {nullptr, scr_engine, scr_engine, &register_file};
 	seq->Execute( exec_kit );   
-    return free_zone_regs[out_reg];  	
+    return *register_file[out_reg];  	
 }
 
 
@@ -51,8 +51,8 @@ void SR::RunVoidForReplace( unique_ptr<Command> cmd, const SCREngine *scr_engine
 	
 	// err...
 	
-    map<SSAAllocator::Reg, FreeZone> free_zone_regs;    
-    Command::ExecKit exec_kit {x_tree_db, x_tree_db, scr_engine, &free_zone_regs};
+    Command::RegisterFile register_file;    
+    Command::ExecKit exec_kit {x_tree_db, x_tree_db, scr_engine, &register_file};
 	seq->Execute( exec_kit );   
 }
 

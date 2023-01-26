@@ -18,6 +18,8 @@ class XTreeDatabase;
 class Command : public Traceable
 {
 public:
+	typedef map<SSAAllocator::Reg, unique_ptr<FreeZone>> RegisterFile;
+
     struct ExecKit
     {
 		// Note: unline EvalKit etc, these pointers are non-const
@@ -31,7 +33,7 @@ public:
         const SCREngine *scr_engine;
 
         // "Register bank" of free zones for workspace
-        map<SSAAllocator::Reg, FreeZone> *free_zone_regs;        
+        RegisterFile *register_file;        
     };
 
 	virtual void SetOperandRegs( SSAAllocator &allocator ) = 0;
