@@ -80,16 +80,16 @@ void DuplicateTreeZoneCommand::Execute( const ExecKit &kit ) const
     // Iterate over terminii and operand zones together, filling the map for
     // DuplicateSubtree() to use.
     Duplicate::TerminiiMap duplicator_terminus_map;
-    for( XLink terminus_upd : zone.GetTerminii() ) 
+    for( XLink terminus_upd : zone.GetTerminusXLinks() ) 
         duplicator_terminus_map[terminus_upd] = { TreePtr<Node>(), shared_ptr<Updater>() };
 
     // Duplicate the subtree, populating from the map.
     TreePtr<Node> new_base_x = Duplicate::DuplicateSubtree( kit.green_grass, 
-                                                            zone.GetBase(), 
+                                                            zone.GetBaseXLink(), 
                                                             duplicator_terminus_map );   
     
     vector<shared_ptr<Updater>> free_zone_terminii;
-    for( XLink terminus_upd : zone.GetTerminii() )
+    for( XLink terminus_upd : zone.GetTerminusXLinks() )
     {
 		ASSERT( duplicator_terminus_map[terminus_upd].updater );
         free_zone_terminii.push_back( duplicator_terminus_map[terminus_upd].updater );
@@ -123,6 +123,7 @@ void JoinFreeZoneCommand::SetOperandRegs( SSAAllocator &allocator )
 
 void JoinFreeZoneCommand::Execute( const ExecKit &kit ) const
 {
+	// Only free zones can be joined
 	FreeZone source_zone = dynamic_cast<FreeZone &>(*(*kit.register_file)[source_reg]);
 	FreeZone &dest_zone = dynamic_cast<FreeZone &>(*(*kit.register_file)[dest_reg]);
 	    
@@ -139,14 +140,14 @@ void JoinFreeZoneCommand::Execute( const ExecKit &kit ) const
 
     ASSERT( !source_zone.IsEmpty() );
 
-    shared_ptr<Updater> terminus_upd = dest_zone.GetTerminus(terminus_index);
+    shared_ptr<Updater> terminus_upd = dest_zone.GetTerminusUpdater(terminus_index);
     dest_zone.DropTerminus(terminus_index);
     
     // Populate terminus. Apply() will expand SubContainers
-    ASSERT( source_zone.GetBase() );
-    terminus_upd->Apply( source_zone.GetBase() );
+    ASSERT( source_zone.GetBaseNode() );
+    terminus_upd->Apply( source_zone.GetBaseNode() );
     
-    //Validate()( zone->GetBase() );     
+    //Validate()( zone->GetBaseNode() );     
 }
 
 
@@ -204,9 +205,11 @@ void InsertCommand::Execute( const ExecKit &kit ) const
 {
     ASSERT( !target_base_xlink.GetChildX() );
     
-    // Patch the tree
+    // New zone must be a free zone
     auto source_free_zone = dynamic_cast<FreeZone &>(*(*kit.register_file)[source_reg]);
-    target_base_xlink.SetXPtr( source_free_zone.GetBase() );
+    
+    // Patch the tree
+    target_base_xlink.SetXPtr( source_free_zone.GetBaseNode() );
     
     // Update database 
     kit.x_tree_db->Insert( target_base_xlink );      
@@ -234,10 +237,11 @@ void MarkBaseForEmbeddedCommand::SetOperandRegs( SSAAllocator &allocator )
 
 void MarkBaseForEmbeddedCommand::Execute( const ExecKit &kit ) const
 {
+	// TODO could probably work on TreeZones too
 	FreeZone &zone = dynamic_cast<FreeZone &>(*(*kit.register_file)[dest_reg]);
 	
     ASSERT( !zone.IsEmpty() );
-    kit.scr_engine->MarkBaseForEmbedded( embedded_agent, zone.GetBase() );   
+    kit.scr_engine->MarkBaseForEmbedded( embedded_agent, zone.GetBaseNode() );   
     // Note: SCREngine will tell us to take a hike if we execute this more than once
 }
 

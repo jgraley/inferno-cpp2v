@@ -27,6 +27,8 @@ FreeZone SR::RunGetFreeZoneNoDB( unique_ptr<Command> cmd, const SCREngine *scr_e
     Command::RegisterFile register_file;
     Command::ExecKit exec_kit {nullptr, scr_engine, scr_engine, &register_file};
 	seq->Execute( exec_kit );   
+	
+	// We absolutely require a free zone
     return dynamic_cast<FreeZone &>(*register_file[out_reg]);
 }
 

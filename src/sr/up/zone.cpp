@@ -60,13 +60,13 @@ void FreeZone::AddTerminus(int ti, shared_ptr<Updater> terminus)
 }
 
 
-TreePtr<Node> FreeZone::GetBase() const
+TreePtr<Node> FreeZone::GetBaseNode() const
 {
     return base;
 }
 
 
-vector<shared_ptr<Updater>> FreeZone::GetTerminii() const
+vector<shared_ptr<Updater>> FreeZone::GetTerminusUpdaters() const
 {
 	vector<shared_ptr<Updater>> v;
 	for( int ti=0; ti<terminii.size(); ti++ )
@@ -85,7 +85,7 @@ int FreeZone::GetNumTerminii() const
 }
 
 
-shared_ptr<Updater> FreeZone::GetTerminus(int ti) const
+shared_ptr<Updater> FreeZone::GetTerminusUpdater(int ti) const
 {
 	ASSERT( ti >= 0 );
 	ASSERT( terminii.count(ti) > 0 );
@@ -165,19 +165,19 @@ TreeZone::TreeZone( XLink base_, vector<XLink> terminii_ ) :
 }
 
 
-XLink TreeZone::GetBase() const
+XLink TreeZone::GetBaseXLink() const
 {
     return base;
 }
 
 
-vector<XLink> TreeZone::GetTerminii() const
+vector<XLink> TreeZone::GetTerminusXLinks() const
 {
     return terminii;
 }
 
 
-XLink TreeZone::GetTerminus(int ti) const
+XLink TreeZone::GetTerminusXLink(int ti) const
 {
 	ASSERT( ti >= 0 );
 	ASSERT( ti < terminii.size() );

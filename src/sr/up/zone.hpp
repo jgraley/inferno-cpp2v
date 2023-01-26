@@ -35,10 +35,10 @@ public:
 
     void AddTerminus(int ti, shared_ptr<Updater> terminus);
       
-    TreePtr<Node> GetBase() const;
-    vector<shared_ptr<Updater>> GetTerminii() const;
+    TreePtr<Node> GetBaseNode() const;
+    vector<shared_ptr<Updater>> GetTerminusUpdaters() const;
 	int GetNumTerminii() const;
-    shared_ptr<Updater> GetTerminus(int ti) const;
+    shared_ptr<Updater> GetTerminusUpdater(int ti) const;
     void DropTerminus(int ti);
     bool IsEmpty() const;
 
@@ -63,9 +63,9 @@ public:
 
     explicit TreeZone( XLink base, vector<XLink> terminii );
       
-    XLink GetBase() const;
-    vector<XLink> GetTerminii() const;
-    XLink GetTerminus(int ti) const;
+    XLink GetBaseXLink() const;
+    vector<XLink> GetTerminusXLinks() const;
+    XLink GetTerminusXLink(int ti) const;
     bool IsEmpty() const;
     void DBCheck( const XTreeDatabase *db ) const;
 
