@@ -18,7 +18,7 @@ class XTreeDatabase;
 class Command : public Traceable
 {
 public:
-	typedef map<SSAAllocator::Reg, unique_ptr<FreeZone>> RegisterFile;
+	typedef map<SSAAllocator::Reg, unique_ptr<Zone>> RegisterFile;
 
     struct ExecKit
     {

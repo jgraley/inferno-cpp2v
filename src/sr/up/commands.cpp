@@ -123,8 +123,8 @@ void JoinFreeZoneCommand::SetOperandRegs( SSAAllocator &allocator )
 
 void JoinFreeZoneCommand::Execute( const ExecKit &kit ) const
 {
-	FreeZone source_zone = *(*kit.register_file)[source_reg];
-	FreeZone &dest_zone = *(*kit.register_file)[dest_reg];
+	FreeZone source_zone = dynamic_cast<FreeZone &>(*(*kit.register_file)[source_reg]);
+	FreeZone &dest_zone = dynamic_cast<FreeZone &>(*(*kit.register_file)[dest_reg]);
 	    
     if( dest_zone.IsEmpty() )
     {
@@ -205,7 +205,8 @@ void InsertCommand::Execute( const ExecKit &kit ) const
     ASSERT( !target_base_xlink.GetChildX() );
     
     // Patch the tree
-    target_base_xlink.SetXPtr( (*kit.register_file)[source_reg]->GetBase() );
+    auto source_free_zone = dynamic_cast<FreeZone &>(*(*kit.register_file)[source_reg]);
+    target_base_xlink.SetXPtr( source_free_zone.GetBase() );
     
     // Update database 
     kit.x_tree_db->Insert( target_base_xlink );      
@@ -233,7 +234,7 @@ void MarkBaseForEmbeddedCommand::SetOperandRegs( SSAAllocator &allocator )
 
 void MarkBaseForEmbeddedCommand::Execute( const ExecKit &kit ) const
 {
-	FreeZone &zone = *(*kit.register_file)[dest_reg];
+	FreeZone &zone = dynamic_cast<FreeZone &>(*(*kit.register_file)[dest_reg]);
 	
     ASSERT( !zone.IsEmpty() );
     kit.scr_engine->MarkBaseForEmbedded( embedded_agent, zone.GetBase() );   
