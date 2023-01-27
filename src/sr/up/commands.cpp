@@ -192,25 +192,20 @@ void ModifyTreeCommand::SetOperandRegs( SSAAllocator &allocator )
 void ModifyTreeCommand::Execute( const ExecKit &kit ) const
 {
     // New zone must be a free zone
-    auto target_zone = dynamic_cast<TreeZone &>(*(*kit.register_file)[target_reg]);
+    auto target_tree_zone = dynamic_cast<TreeZone &>(*(*kit.register_file)[target_reg]);
     auto source_free_zone = dynamic_cast<FreeZone &>(*(*kit.register_file)[source_reg]);
-
-	ASSERT( target_zone.GetNumTerminii() == 0 ); // TODO under #723
-    XLink target_base_xlink = target_zone.GetBaseXLink();
+	ASSERT( target_tree_zone.GetNumTerminii() == source_free_zone.GetNumTerminii() );
+	
+	ASSERT( target_tree_zone.GetNumTerminii() == 0 ); // TODO under #723
     
     // Update database 
-    kit.x_tree_db->Delete( target_base_xlink );    
-
-    // Patch the tree
-    target_base_xlink.ClearXPtr();
-
-    ASSERT( !target_base_xlink.GetChildX() );
+    kit.x_tree_db->Delete( target_tree_zone.GetBaseXLink() );    
     
     // Patch the tree
-    target_base_xlink.SetXPtr( source_free_zone.GetBaseNode() );
+    target_tree_zone.GetBaseXLink().SetXPtr( source_free_zone.GetBaseNode() );
     
     // Update database 
-    kit.x_tree_db->Insert( target_base_xlink );      
+    kit.x_tree_db->Insert( target_tree_zone.GetBaseXLink() );      
 }
 
 

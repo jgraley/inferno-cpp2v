@@ -59,7 +59,7 @@ protected:
 
 // ------------------------- DeclareFreeZoneCommand --------------------------
 
-// Create a free zone
+// Create a new free zone
 class DeclareFreeZoneCommand : public Command
 {
 public:
@@ -76,7 +76,7 @@ private:
 
 // ------------------------- DeclareTreeZoneCommand --------------------------
 
-// Create a tree zone
+// Create a new tree zone
 class DeclareTreeZoneCommand : public ImmediateTreeZoneCommand
 {
 public:
@@ -93,7 +93,7 @@ private:
 
 // ------------------------- DuplicateZoneCommand --------------------------
 
-// Duplicate a tree zone, making a free zone
+// Duplicate a dest tree zone, making a new free zone
 class DuplicateZoneCommand : public Command
 {
 public:
@@ -108,9 +108,7 @@ private:
 
 // ------------------------- JoinZoneCommand --------------------------
 
-// Populate one terminus of a free zone. Source zone should be on 
-// top of stack and will be popped, and then dest free zone which will 
-// be peeked.
+// Populate one terminus of a dest free zone with a source free zone
 class JoinZoneCommand : public Command
 {
 public:
@@ -128,6 +126,8 @@ private:
 
 // ------------------------- ModifyTreeCommand --------------------------
 
+// Replace that part of the tree represented by a target tree zone with
+// the contents of a source free zone.
 class ModifyTreeCommand : public Command
 {
 public:
