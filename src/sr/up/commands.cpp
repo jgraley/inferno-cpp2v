@@ -14,7 +14,7 @@ string Command::OpName( int reg ) const
 	if( reg==-1 )
 		return "STACK";
 	else
-		return SSPrintf("R%d", reg);
+		return SSPrintf("Z%d", reg);
 }
 
 // ------------------------- ImmediateTreeZoneCommand --------------------------
@@ -180,54 +180,34 @@ string JoinZoneCommand::GetTrace() const
 	       OpName(source_reg);
 }
 
-// ------------------------- DeleteCommand --------------------------
+// ------------------------- ModifyZoneCommand --------------------------
 
-DeleteCommand::DeleteCommand( XLink target_base_xlink_ ) :
-	target_base_xlink( target_base_xlink_ )
+ModifyZoneCommand::ModifyZoneCommand( TreeZone target_zone_ ) :
+	target_zone( target_zone_ )
 {
+	ASSERT( target_zone.GetNumTerminii() == 0 ); // TODO under #723
 }
 
 
-void DeleteCommand::SetOperandRegs( SSAAllocator &allocator )
-{
-}
-
-
-void DeleteCommand::Execute( const ExecKit &kit ) const
-{
-    // Update database 
-    kit.x_tree_db->Delete( target_base_xlink );    
-
-    // Patch the tree
-    target_base_xlink.ClearXPtr();
-}	
-
-
-string DeleteCommand::GetTrace() const
-{
-	return "DeleteCommand               "+Trace(target_base_xlink);
-}
-
-// ------------------------- InsertCommand --------------------------
-
-InsertCommand::InsertCommand( XLink target_base_xlink_ ) :
-	target_base_xlink( target_base_xlink_ )
-{
-}
-
-
-void InsertCommand::SetOperandRegs( SSAAllocator &allocator )
+void ModifyZoneCommand::SetOperandRegs( SSAAllocator &allocator )
 {
 	source_reg = allocator.Pop();
 }
 
 
-void InsertCommand::Execute( const ExecKit &kit ) const
+void ModifyZoneCommand::Execute( const ExecKit &kit ) const
 {
-    ASSERT( !target_base_xlink.GetChildX() );
-    
     // New zone must be a free zone
     auto source_free_zone = dynamic_cast<FreeZone &>(*(*kit.register_file)[source_reg]);
+    XLink target_base_xlink = target_zone.GetBaseXLink();
+    
+    // Update database 
+    kit.x_tree_db->Delete( target_base_xlink );    
+
+    // Patch the tree
+    target_base_xlink.ClearXPtr();
+
+    ASSERT( !target_base_xlink.GetChildX() );
     
     // Patch the tree
     target_base_xlink.SetXPtr( source_free_zone.GetBaseNode() );
@@ -237,9 +217,9 @@ void InsertCommand::Execute( const ExecKit &kit ) const
 }
 
 
-string InsertCommand::GetTrace() const
+string ModifyZoneCommand::GetTrace() const
 {
-	return "InsertCommand               "+OpName(source_reg)+", "+Trace(target_base_xlink);
+	return "ModifyZoneCommand               "+OpName(source_reg)+", "+Trace(target_zone);
 }
 
 // ------------------------- MarkBaseForEmbeddedCommand --------------------------

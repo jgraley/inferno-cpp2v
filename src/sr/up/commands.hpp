@@ -126,34 +126,19 @@ private:
 	int dest_reg = -1;
 };
 
-// ------------------------- DeleteCommand --------------------------
+// ------------------------- ModifyZoneCommand --------------------------
 
-class DeleteCommand : public Command
+class ModifyZoneCommand : public Command
 {
 public:
-    DeleteCommand( XLink target_base_xlink );
+    ModifyZoneCommand( TreeZone target_zone );
 	void SetOperandRegs( SSAAllocator &allocator ) final;
 	void Execute( const ExecKit &kit ) const final;	
 
 	string GetTrace() const final;
 
 private:
-	XLink target_base_xlink;
-};
-
-// ------------------------- InsertCommand --------------------------
-
-class InsertCommand : public Command
-{
-public:
-    InsertCommand( XLink target_base_xlink );
-	void SetOperandRegs( SSAAllocator &allocator ) final;
-	void Execute( const ExecKit &kit ) const final;	
-
-	string GetTrace() const final;
-
-private:
-	XLink target_base_xlink;
+	TreeZone target_zone;
 	int source_reg = -1;
 };
 

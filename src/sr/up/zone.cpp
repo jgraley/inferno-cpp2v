@@ -177,6 +177,12 @@ vector<XLink> TreeZone::GetTerminusXLinks() const
 }
 
 
+int TreeZone::GetNumTerminii() const
+{
+    return terminii.size();
+}
+
+
 XLink TreeZone::GetTerminusXLink(int ti) const
 {
 	ASSERT( ti >= 0 );

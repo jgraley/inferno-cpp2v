@@ -65,6 +65,7 @@ public:
       
     XLink GetBaseXLink() const;
     vector<XLink> GetTerminusXLinks() const;
+	int GetNumTerminii() const;
     XLink GetTerminusXLink(int ti) const;
     bool IsEmpty() const;
     void DBCheck( const XTreeDatabase *db ) const;
