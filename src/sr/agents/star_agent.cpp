@@ -104,8 +104,9 @@ Agent::CommandPtr StarAgent::GenerateCommandImpl( const ReplaceKit &kit,
         zone.AddTerminus( ti, make_shared<ContainerUpdater>(dest_container, dest_it) );    
 		
         auto new_zone = TreeZone::CreateSubtree( XLink(key_node, &key_elt) );
-        commands->Add( make_unique<DuplicateTreeZoneCommand>( new_zone ) );
-		commands->Add( make_unique<JoinFreeZoneCommand>(ti) );
+	    commands->Add( make_unique<DeclareTreeZoneCommand>( new_zone ) );
+	    commands->Add( make_unique<DuplicateZoneCommand>() );
+		commands->Add( make_unique<JoinZoneCommand>(ti) );
         ti++;
     }
     

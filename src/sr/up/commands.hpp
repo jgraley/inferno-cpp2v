@@ -59,7 +59,7 @@ protected:
 
 // ------------------------- DeclareFreeZoneCommand --------------------------
 
-// Put a free zone onto the stack.
+// Create a free zone
 class DeclareFreeZoneCommand : public Command
 {
 public:
@@ -74,10 +74,10 @@ private:
 	int dest_reg = -1;
 };
 
-// ------------------------- DuplicateTreeZoneCommand --------------------------
+// ------------------------- DeclareTreeZoneCommand --------------------------
 
-// Duplicate a tree zone, making a free zone, and push it to the stack.
-class DuplicateTreeZoneCommand : public ImmediateTreeZoneCommand
+// Create a tree zone
+class DeclareTreeZoneCommand : public ImmediateTreeZoneCommand
 {
 public:
     using ImmediateTreeZoneCommand::ImmediateTreeZoneCommand;
@@ -90,15 +90,31 @@ private:
 	int dest_reg = -1;
 };
 
-// ------------------------- JoinFreeZoneCommand --------------------------
+
+// ------------------------- DuplicateZoneCommand --------------------------
+
+// Duplicate a tree zone, making a free zone
+class DuplicateZoneCommand : public Command
+{
+public:
+	void SetOperandRegs( SSAAllocator &allocator ) final;
+	void Execute( const ExecKit &kit ) const final;	
+
+	string GetTrace() const final;
+
+private:
+	int dest_reg = -1;
+};
+
+// ------------------------- JoinZoneCommand --------------------------
 
 // Populate one terminus of a free zone. Source zone should be on 
 // top of stack and will be popped, and then dest free zone which will 
 // be peeked.
-class JoinFreeZoneCommand : public Command
+class JoinZoneCommand : public Command
 {
 public:
-    explicit JoinFreeZoneCommand(int ti);
+    explicit JoinZoneCommand(int ti);
 	void SetOperandRegs( SSAAllocator &allocator ) final;
 	void Execute( const ExecKit &kit ) const final;	
 

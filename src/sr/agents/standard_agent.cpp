@@ -653,7 +653,7 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
 					TRACE("Got ")(*my_elt)("\n");
 					PatternLink my_elt_plink( this, &my_elt );
 					commands->Add( my_elt_plink.GetChildAgent()->GenerateCommand(kit, my_elt_plink) );
-					commands->Add( make_unique<JoinFreeZoneCommand>(ti) );                
+					commands->Add( make_unique<JoinZoneCommand>(ti) );                
 					ti++;
 				}
 			}	
@@ -668,8 +668,9 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
 
 					ASSERT( under_elt ); // present simplified scheme disallows nullptr
 					auto under_zone = TreeZone::CreateSubtree( XLink(under_node, &under_elt) );
-					commands->Add( make_unique<DuplicateTreeZoneCommand>( under_zone ) );
-					commands->Add( make_unique<JoinFreeZoneCommand>(ti) );
+					commands->Add( make_unique<DeclareTreeZoneCommand>( under_zone ) );
+					commands->Add( make_unique<DuplicateZoneCommand>() );
+					commands->Add( make_unique<JoinZoneCommand>(ti) );
 					ti++;
 				}
 			}
@@ -692,10 +693,11 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
 			{
 				ASSERT( *under_singular );            
 				auto under_zone = TreeZone::CreateSubtree( XLink(under_node, under_singular) );
-				commands->Add( make_unique<DuplicateTreeZoneCommand>( under_zone ) );
+				commands->Add( make_unique<DeclareTreeZoneCommand>( under_zone ) );
+				commands->Add( make_unique<DuplicateZoneCommand>() );
 			}
 
-			commands->Add( make_unique<JoinFreeZoneCommand>(ti) );   
+			commands->Add( make_unique<JoinZoneCommand>(ti) );   
 			ti++;             
         }
         else
@@ -760,7 +762,7 @@ Agent::CommandPtr StandardAgent::GenerateCommandNormal( const ReplaceKit &kit,
 
                 PatternLink my_elt_plink( this, &my_elt );
                 commands->Add( my_elt_plink.GetChildAgent()->GenerateCommand(kit, my_elt_plink) );
-                commands->Add( make_unique<JoinFreeZoneCommand>(ti) );
+                commands->Add( make_unique<JoinZoneCommand>(ti) );
                 ti++;
             }
         }            
@@ -773,7 +775,7 @@ Agent::CommandPtr StandardAgent::GenerateCommandNormal( const ReplaceKit &kit,
 
             PatternLink my_singular_plink( this, my_singular );                    
             commands->Add( my_singular_plink.GetChildAgent()->GenerateCommand(kit, my_singular_plink) );
-            commands->Add( make_unique<JoinFreeZoneCommand>(ti) );
+            commands->Add( make_unique<JoinZoneCommand>(ti) );
             ti++;
         }
         else

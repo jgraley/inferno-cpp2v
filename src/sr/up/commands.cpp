@@ -55,16 +55,37 @@ string DeclareFreeZoneCommand::GetTrace() const
 	return "DeclareFreeZoneCommand      "+Trace(*zone)+" -> "+OpName(dest_reg);
 }
 
-// ------------------------- DuplicateTreeZoneCommand --------------------------
+// ------------------------- DeclareTreeZoneCommand --------------------------
 
-void DuplicateTreeZoneCommand::SetOperandRegs( SSAAllocator &allocator )
+void DeclareTreeZoneCommand::SetOperandRegs( SSAAllocator &allocator )
 {
 	dest_reg = allocator.Push();
 }
 
 
-void DuplicateTreeZoneCommand::Execute( const ExecKit &kit ) const
+void DeclareTreeZoneCommand::Execute( const ExecKit &kit ) const
 {
+	(*kit.register_file)[dest_reg] = make_unique<TreeZone>(zone);
+}
+
+
+string DeclareTreeZoneCommand::GetTrace() const
+{
+	return "DeclareTreeZoneCommand      "+Trace(zone)+" -> "+OpName(dest_reg);
+}
+
+// ------------------------- DuplicateZoneCommand --------------------------
+
+void DuplicateZoneCommand::SetOperandRegs( SSAAllocator &allocator )
+{
+	dest_reg = allocator.Peek();
+}
+
+
+void DuplicateZoneCommand::Execute( const ExecKit &kit ) const
+{
+	TreeZone &zone = dynamic_cast<TreeZone &>(*(*kit.register_file)[dest_reg]);
+	
 	if( kit.x_tree_db )
 		zone.DBCheck(kit.x_tree_db);
 	
@@ -101,27 +122,27 @@ void DuplicateTreeZoneCommand::Execute( const ExecKit &kit ) const
 }
 
 
-string DuplicateTreeZoneCommand::GetTrace() const
+string DuplicateZoneCommand::GetTrace() const
 {
-	return "DuplicateTreeZoneCommand    "+Trace(zone)+" -> "+OpName(dest_reg);
+	return "DuplicateZoneCommand        "+OpName(dest_reg);
 }
 
-// ------------------------- JoinFreeZoneCommand --------------------------
+// ------------------------- JoinZoneCommand --------------------------
 
-JoinFreeZoneCommand::JoinFreeZoneCommand(int ti) :
+JoinZoneCommand::JoinZoneCommand(int ti) :
     terminus_index(ti)
 {
 }
 
 
-void JoinFreeZoneCommand::SetOperandRegs( SSAAllocator &allocator )
+void JoinZoneCommand::SetOperandRegs( SSAAllocator &allocator )
 {
 	source_reg = allocator.Pop();
 	dest_reg = allocator.Peek();
 }
 
 
-void JoinFreeZoneCommand::Execute( const ExecKit &kit ) const
+void JoinZoneCommand::Execute( const ExecKit &kit ) const
 {
 	// Only free zones can be joined
 	FreeZone source_zone = dynamic_cast<FreeZone &>(*(*kit.register_file)[source_reg]);
@@ -151,9 +172,9 @@ void JoinFreeZoneCommand::Execute( const ExecKit &kit ) const
 }
 
 
-string JoinFreeZoneCommand::GetTrace() const
+string JoinZoneCommand::GetTrace() const
 {
-	return "JoinFreeZoneCommand         " +
+	return "JoinZoneCommand         " +
 	       OpName(dest_reg) +
 	       SSPrintf("[%d], ", terminus_index) +
 	       OpName(source_reg);

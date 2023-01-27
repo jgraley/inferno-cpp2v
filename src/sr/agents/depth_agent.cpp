@@ -40,12 +40,13 @@ Agent::CommandPtr DepthAgent::GenerateCommandImpl( const ReplaceKit &kit,
     ASSERT(terminus_key_xlink);// this could mean replace is being attempted on a DepthAgent in an abnormal context
     PatternLink terminus_plink(this, &terminus);
     TreeZone new_zone( key_xlink, {terminus_key_xlink} );
-	commands->Add( make_unique<DuplicateTreeZoneCommand>( new_zone ) );
+	commands->Add( make_unique<DeclareTreeZoneCommand>( new_zone ) );
+	commands->Add( make_unique<DuplicateZoneCommand>() );
 
     commands->Add( terminus_plink.GetChildAgent()->GenerateCommand(kit, terminus_plink) );
     // Leaves new_terminus_subtree on the stack
     
-	commands->Add( make_unique<JoinFreeZoneCommand>(0) );    
+	commands->Add( make_unique<JoinZoneCommand>(0) );    
     return commands;
 }
 
