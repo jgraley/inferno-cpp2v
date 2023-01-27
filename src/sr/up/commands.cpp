@@ -180,25 +180,22 @@ string JoinZoneCommand::GetTrace() const
 	       OpName(source_reg);
 }
 
-// ------------------------- ModifyZoneCommand --------------------------
+// ------------------------- ModifyTreeCommand --------------------------
 
-ModifyZoneCommand::ModifyZoneCommand( TreeZone target_zone_ ) :
-	target_zone( target_zone_ )
+void ModifyTreeCommand::SetOperandRegs( SSAAllocator &allocator )
 {
-	ASSERT( target_zone.GetNumTerminii() == 0 ); // TODO under #723
-}
-
-
-void ModifyZoneCommand::SetOperandRegs( SSAAllocator &allocator )
-{
+	target_reg = allocator.Pop();
 	source_reg = allocator.Pop();
 }
 
 
-void ModifyZoneCommand::Execute( const ExecKit &kit ) const
+void ModifyTreeCommand::Execute( const ExecKit &kit ) const
 {
     // New zone must be a free zone
+    auto target_zone = dynamic_cast<TreeZone &>(*(*kit.register_file)[target_reg]);
     auto source_free_zone = dynamic_cast<FreeZone &>(*(*kit.register_file)[source_reg]);
+
+	ASSERT( target_zone.GetNumTerminii() == 0 ); // TODO under #723
     XLink target_base_xlink = target_zone.GetBaseXLink();
     
     // Update database 
@@ -217,9 +214,9 @@ void ModifyZoneCommand::Execute( const ExecKit &kit ) const
 }
 
 
-string ModifyZoneCommand::GetTrace() const
+string ModifyTreeCommand::GetTrace() const
 {
-	return "ModifyZoneCommand               "+OpName(source_reg)+", "+Trace(target_zone);
+	return "ModifyTreeCommand               "+OpName(source_reg)+", "+OpName(target_reg);
 }
 
 // ------------------------- MarkBaseForEmbeddedCommand --------------------------

@@ -126,20 +126,19 @@ private:
 	int dest_reg = -1;
 };
 
-// ------------------------- ModifyZoneCommand --------------------------
+// ------------------------- ModifyTreeCommand --------------------------
 
-class ModifyZoneCommand : public Command
+class ModifyTreeCommand : public Command
 {
 public:
-    ModifyZoneCommand( TreeZone target_zone );
 	void SetOperandRegs( SSAAllocator &allocator ) final;
 	void Execute( const ExecKit &kit ) const final;	
 
 	string GetTrace() const final;
 
 private:
-	TreeZone target_zone;
 	int source_reg = -1;
+	int target_reg = -1;
 };
 
 // ------------------------- MarkBaseForEmbeddedCommand --------------------------
