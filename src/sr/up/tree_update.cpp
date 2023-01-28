@@ -67,7 +67,7 @@ TreeZoneOverlapFinder::TreeZoneOverlapFinder( const XTreeDatabase *db, CommandSe
 	
 	for( const unique_ptr<Command> &cmd : seq->GetCommands() )
 	{
-		if( auto tz_cmd = dynamic_cast<const ImmediateTreeZoneCommand *>(cmd.get()) )
+		if( auto tz_cmd = dynamic_cast<const DeclareTreeZoneCommand *>(cmd.get()) )
         {
             // Note that key is actually TreeZone *, so equal TreeZones get different 
             // rows which is why we InsertSolo()
@@ -85,8 +85,8 @@ TreeZoneOverlapFinder::TreeZoneOverlapFinder( const XTreeDatabase *db, CommandSe
 	}
 	
     ForAllCommutativeDistinctPairs( tzps_to_commands, 
-                                    [&](const pair<const TreeZone *, const ImmediateTreeZoneCommand *> &l, 
-                                        const pair<const TreeZone *, const ImmediateTreeZoneCommand *> &r)
+                                    [&](const pair<const TreeZone *, const DeclareTreeZoneCommand *> &l, 
+                                        const pair<const TreeZone *, const DeclareTreeZoneCommand *> &r)
     {
         if( TreeZone::IsOverlap( db, *l.first, *r.first ) )
         {
@@ -121,6 +121,21 @@ void CommandSequenceFlattener::Worker( CommandSequence &seq, list<unique_ptr<Com
 		else
 		{
 			seq.Add( move(cmd) );
+		}
+	}
+}
+
+// ------------------------- EmptyZoneRemover --------------------------
+
+void EmptyZoneRemover::Apply( CommandSequence &seq )
+{
+	for( const unique_ptr<Command> &cmd : seq.GetCommands() )
+	{
+		if( auto tz_cmd = dynamic_cast<const DeclareTreeZoneCommand *>(cmd.get()) )
+		{
+			if( tz_cmd->IsEmpty() ) 
+			{
+			}
 		}
 	}
 }

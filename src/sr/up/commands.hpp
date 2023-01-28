@@ -44,19 +44,6 @@ protected:
 	string OpName( int reg ) const;
 };
 
-// ------------------------- ImmediateTreeZoneCommand --------------------------
-
-class ImmediateTreeZoneCommand : public Command
-{
-public:
-    ImmediateTreeZoneCommand( const TreeZone &zone );
-
-    const TreeZone *GetTreeZone() const;
-    
-protected:
-	TreeZone zone;
-};
-
 // ------------------------- DeclareFreeZoneCommand --------------------------
 
 // Create a new free zone
@@ -77,16 +64,18 @@ private:
 // ------------------------- DeclareTreeZoneCommand --------------------------
 
 // Create a new tree zone
-class DeclareTreeZoneCommand : public ImmediateTreeZoneCommand
+class DeclareTreeZoneCommand : public Command
 {
 public:
-    using ImmediateTreeZoneCommand::ImmediateTreeZoneCommand;
+    DeclareTreeZoneCommand( const TreeZone &zone );
 	void SetOperandRegs( SSAAllocator &allocator ) final;
 	void Execute( const ExecKit &kit ) const final;	
+    const TreeZone *GetTreeZone() const;
 
 	string GetTrace() const final;
 
 private:
+	TreeZone zone;
 	int dest_reg = -1;
 };
 

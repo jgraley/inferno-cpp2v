@@ -17,19 +17,6 @@ string Command::OpName( int reg ) const
 		return SSPrintf("Z%d", reg);
 }
 
-// ------------------------- ImmediateTreeZoneCommand --------------------------
-
-ImmediateTreeZoneCommand::ImmediateTreeZoneCommand( const TreeZone &zone_ ) :
-	zone( zone_ )
-{
-}
-
-
-const TreeZone *ImmediateTreeZoneCommand::GetTreeZone() const
-{
-    return &zone;
-}
-
 // ------------------------- DeclareFreeZoneCommand --------------------------
 
 DeclareFreeZoneCommand::DeclareFreeZoneCommand( FreeZone &&zone_ ) :
@@ -57,6 +44,12 @@ string DeclareFreeZoneCommand::GetTrace() const
 
 // ------------------------- DeclareTreeZoneCommand --------------------------
 
+DeclareTreeZoneCommand::DeclareTreeZoneCommand( const TreeZone &zone_ ) :
+	zone( zone_ )
+{
+}
+
+
 void DeclareTreeZoneCommand::SetOperandRegs( SSAAllocator &allocator )
 {
 	dest_reg = allocator.Push();
@@ -66,6 +59,12 @@ void DeclareTreeZoneCommand::SetOperandRegs( SSAAllocator &allocator )
 void DeclareTreeZoneCommand::Execute( const ExecKit &kit ) const
 {
 	(*kit.register_file)[dest_reg] = make_unique<TreeZone>(zone);
+}
+
+
+const TreeZone *DeclareTreeZoneCommand::GetTreeZone() const
+{
+    return &zone;
 }
 
 

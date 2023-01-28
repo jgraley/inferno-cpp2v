@@ -11,7 +11,7 @@
 namespace SR 
 {
 
-class ImmediateTreeZoneCommand;
+class DeclareTreeZoneCommand;
 
 // ------------------------- Runners --------------------------
 
@@ -26,7 +26,7 @@ public:
 	TreeZoneOverlapFinder( const XTreeDatabase *db, CommandSequence *seq );
 	
 private:	
-    map<const TreeZone *, const ImmediateTreeZoneCommand *> tzps_to_commands;
+    map<const TreeZone *, const DeclareTreeZoneCommand *> tzps_to_commands;
     map<const TreeZone *, set<const TreeZone *>> overlapping_zones;
 };
 
@@ -37,6 +37,14 @@ class CommandSequenceFlattener
 public:
 	void Apply( CommandSequence &seq );
 	void Worker( CommandSequence &seq, list<unique_ptr<Command>> &commands );
+};
+
+// ------------------------- EmptyZoneRemover --------------------------
+
+class EmptyZoneRemover
+{
+public:
+	void Apply( CommandSequence &seq );
 };
 
 }
