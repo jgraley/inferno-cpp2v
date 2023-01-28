@@ -523,7 +523,7 @@ TreePtr<Node> AgentCommon::BuildForBuildersAnalysis( PatternLink me_plink )
 {
 	Agent::ReplaceKit kit;
 	auto commands = GenerateCommand(kit, me_plink);
-    FreeZone zone = RunGetFreeZoneNoDB( move(commands), my_scr_engine );     
+    FreeZone zone = RunForBuilder( move(commands), my_scr_engine );     
     return zone.GetBaseNode();
 }
 

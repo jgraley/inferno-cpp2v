@@ -17,6 +17,27 @@ string Command::OpName( int reg ) const
 		return SSPrintf("Z%d", reg);
 }
 
+
+SSAAllocator::Reg Command::GetSourceReg() const
+{
+	Operands ops = GetOperandRegs();
+	return OnlyElementOf( ops.sources );
+}
+
+
+SSAAllocator::Reg Command::GetTargetReg() const
+{
+	Operands ops = GetOperandRegs();
+	return OnlyElementOf( ops.targets );
+}
+
+
+SSAAllocator::Reg Command::GetDestReg() const
+{
+	Operands ops = GetOperandRegs();
+	return OnlyElementOf( ops.dests );
+}
+
 // ------------------------- DeclareFreeZoneCommand --------------------------
 
 DeclareFreeZoneCommand::DeclareFreeZoneCommand( FreeZone &&zone_ ) :
@@ -25,9 +46,21 @@ DeclareFreeZoneCommand::DeclareFreeZoneCommand( FreeZone &&zone_ ) :
 }	
 
 
-void DeclareFreeZoneCommand::SetOperandRegs( SSAAllocator &allocator )
+void DeclareFreeZoneCommand::DetermineOperandRegs( SSAAllocator &allocator )
 {
 	dest_reg = allocator.Push();
+}
+
+
+Command::Operands DeclareFreeZoneCommand::GetOperandRegs() const
+{
+	return { {}, {}, {dest_reg} };
+}
+
+
+const FreeZone *DeclareFreeZoneCommand::GetFreeZone() const
+{
+    return zone.get();
 }
 
 
@@ -39,7 +72,7 @@ void DeclareFreeZoneCommand::Execute( const ExecKit &kit ) const
 
 string DeclareFreeZoneCommand::GetTrace() const
 {
-	return "DeclareFreeZoneCommand      "+Trace(*zone)+" -> "+OpName(dest_reg);
+	return "DeclareFreeZoneCommand "+Trace(*zone)+" -> "+OpName(dest_reg);
 }
 
 // ------------------------- DeclareTreeZoneCommand --------------------------
@@ -50,15 +83,15 @@ DeclareTreeZoneCommand::DeclareTreeZoneCommand( const TreeZone &zone_ ) :
 }
 
 
-void DeclareTreeZoneCommand::SetOperandRegs( SSAAllocator &allocator )
+void DeclareTreeZoneCommand::DetermineOperandRegs( SSAAllocator &allocator )
 {
 	dest_reg = allocator.Push();
 }
 
 
-void DeclareTreeZoneCommand::Execute( const ExecKit &kit ) const
+Command::Operands DeclareTreeZoneCommand::GetOperandRegs() const
 {
-	(*kit.register_file)[dest_reg] = make_unique<TreeZone>(zone);
+	return { {}, {}, {dest_reg} };
 }
 
 
@@ -68,35 +101,41 @@ const TreeZone *DeclareTreeZoneCommand::GetTreeZone() const
 }
 
 
+void DeclareTreeZoneCommand::Execute( const ExecKit &kit ) const
+{
+	(*kit.register_file)[dest_reg] = make_unique<TreeZone>(zone);
+}
+
+
 string DeclareTreeZoneCommand::GetTrace() const
 {
-	return "DeclareTreeZoneCommand      "+Trace(zone)+" -> "+OpName(dest_reg);
+	return "DeclareTreeZoneCommand "+Trace(zone)+" -> "+OpName(dest_reg);
 }
 
 // ------------------------- DuplicateZoneCommand --------------------------
 
-void DuplicateZoneCommand::SetOperandRegs( SSAAllocator &allocator )
+void DuplicateZoneCommand::DetermineOperandRegs( SSAAllocator &allocator )
 {
-	dest_reg = allocator.Peek();
+	source_reg = allocator.Pop();
+	dest_reg = allocator.Push();
+	ASSERT( source_reg != dest_reg ); // SSA
+}
+
+
+Command::Operands DuplicateZoneCommand::GetOperandRegs() const
+{
+	return { {source_reg}, {}, {dest_reg} };
 }
 
 
 void DuplicateZoneCommand::Execute( const ExecKit &kit ) const
 {
-	TreeZone &zone = dynamic_cast<TreeZone &>(*(*kit.register_file)[dest_reg]);
+	TreeZone &zone = dynamic_cast<TreeZone &>(*(*kit.register_file)[source_reg]);
+    ASSERT( !zone.IsEmpty() ); // Need to elide empty zones before executing
 	
 	if( kit.x_tree_db )
 		zone.DBCheck(kit.x_tree_db);
 	
-    if( zone.IsEmpty() )
-    {
-		// Duplicate::DuplicateSubtree() can't work with the
-		// terminus-at-base you get with an empty zone, so handle that
-		// case explicitly.
-        (*kit.register_file)[dest_reg] = make_unique<FreeZone>(FreeZone::CreateEmpty()); 
-        return;
-    }
-
     // Iterate over terminii and operand zones together, filling the map for
     // DuplicateSubtree() to use.
     Duplicate::TerminiiMap duplicator_terminus_map;
@@ -123,7 +162,7 @@ void DuplicateZoneCommand::Execute( const ExecKit &kit ) const
 
 string DuplicateZoneCommand::GetTrace() const
 {
-	return "DuplicateZoneCommand        "+OpName(dest_reg);
+	return "DuplicateZoneCommand "+OpName(source_reg)+ " -> "+OpName(dest_reg);
 }
 
 // ------------------------- JoinZoneCommand --------------------------
@@ -134,10 +173,22 @@ JoinZoneCommand::JoinZoneCommand(int ti) :
 }
 
 
-void JoinZoneCommand::SetOperandRegs( SSAAllocator &allocator )
+void JoinZoneCommand::DetermineOperandRegs( SSAAllocator &allocator )
 {
 	source_reg = allocator.Pop();
-	dest_reg = allocator.Peek();
+	target_reg = allocator.Peek();
+}
+
+
+Command::Operands JoinZoneCommand::GetOperandRegs() const
+{
+	return { {source_reg}, {target_reg}, {} };
+}
+
+
+void JoinZoneCommand::SetSourceReg( SSAAllocator::Reg reg )
+{
+	source_reg = reg;
 }
 
 
@@ -145,23 +196,12 @@ void JoinZoneCommand::Execute( const ExecKit &kit ) const
 {
 	// Only free zones can be joined
 	FreeZone source_zone = dynamic_cast<FreeZone &>(*(*kit.register_file)[source_reg]);
-	FreeZone &dest_zone = dynamic_cast<FreeZone &>(*(*kit.register_file)[dest_reg]);
-	    
-    if( dest_zone.IsEmpty() )
-    {
-        // We're empty, so we should have one terminus
-        ASSERT( terminus_index==0 );
-		dest_zone = source_zone; // push source zone over it
-		// TODO not really SSA: we're not just modifying the zone, 
-		// but replacing it with another one. Could elide from the 
-		// command sequence.
-		return;   
-    }
-
     ASSERT( !source_zone.IsEmpty() );
+	FreeZone &target_zone = dynamic_cast<FreeZone &>(*(*kit.register_file)[target_reg]);
+    ASSERT( !target_zone.IsEmpty() ); // Need to elide empty zones before executing	    
 
-    shared_ptr<Updater> terminus_upd = dest_zone.GetTerminusUpdater(terminus_index);
-    dest_zone.DropTerminus(terminus_index);
+    shared_ptr<Updater> terminus_upd = target_zone.GetTerminusUpdater(terminus_index);
+    target_zone.DropTerminus(terminus_index);
     
     // Populate terminus. Apply() will expand SubContainers
     ASSERT( source_zone.GetBaseNode() );
@@ -173,18 +213,32 @@ void JoinZoneCommand::Execute( const ExecKit &kit ) const
 
 string JoinZoneCommand::GetTrace() const
 {
-	return "JoinZoneCommand         " +
-	       OpName(dest_reg) +
-	       SSPrintf("[%d], ", terminus_index) +
-	       OpName(source_reg);
+	return "JoinZoneCommand " +
+	       OpName(target_reg) +
+	       SSPrintf("[%d]", terminus_index) +
+	       " joins " +
+  	       OpName(source_reg);
+
 }
 
 // ------------------------- ModifyTreeCommand --------------------------
 
-void ModifyTreeCommand::SetOperandRegs( SSAAllocator &allocator )
+void ModifyTreeCommand::DetermineOperandRegs( SSAAllocator &allocator )
 {
 	target_reg = allocator.Pop();
 	source_reg = allocator.Pop();
+}
+
+
+Command::Operands ModifyTreeCommand::GetOperandRegs() const
+{
+	return { {source_reg}, {target_reg}, {} };
+}
+
+
+void ModifyTreeCommand::SetSourceReg( SSAAllocator::Reg reg )
+{
+	source_reg = reg;
 }
 
 
@@ -210,7 +264,7 @@ void ModifyTreeCommand::Execute( const ExecKit &kit ) const
 
 string ModifyTreeCommand::GetTrace() const
 {
-	return "ModifyTreeCommand               "+OpName(source_reg)+", "+OpName(target_reg);
+	return "ModifyTreeCommand "+OpName(source_reg)+" over "+OpName(target_reg);
 }
 
 // ------------------------- MarkBaseForEmbeddedCommand --------------------------
@@ -221,16 +275,28 @@ MarkBaseForEmbeddedCommand::MarkBaseForEmbeddedCommand( RequiresSubordinateSCREn
 }
     
     
-void MarkBaseForEmbeddedCommand::SetOperandRegs( SSAAllocator &allocator )
+void MarkBaseForEmbeddedCommand::DetermineOperandRegs( SSAAllocator &allocator )
 {
-	dest_reg = allocator.Peek();
+	source_reg = allocator.Peek();
+}
+
+
+Command::Operands MarkBaseForEmbeddedCommand::GetOperandRegs() const
+{
+	return { {source_reg}, {}, {} };
+}
+
+
+void MarkBaseForEmbeddedCommand::SetSourceReg( SSAAllocator::Reg reg )
+{
+	source_reg = reg;
 }
 
 
 void MarkBaseForEmbeddedCommand::Execute( const ExecKit &kit ) const
 {
 	// TODO could probably work on TreeZones too
-	FreeZone &zone = dynamic_cast<FreeZone &>(*(*kit.register_file)[dest_reg]);
+	FreeZone &zone = dynamic_cast<FreeZone &>(*(*kit.register_file)[source_reg]);
 	
     ASSERT( !zone.IsEmpty() );
     kit.scr_engine->MarkBaseForEmbedded( embedded_agent, zone.GetBaseNode() );   
@@ -240,15 +306,21 @@ void MarkBaseForEmbeddedCommand::Execute( const ExecKit &kit ) const
     
 string MarkBaseForEmbeddedCommand::GetTrace() const
 {
-	return "MarkBaseForEmbeddedCommand  "+OpName(dest_reg);
+	return "MarkBaseForEmbeddedCommand "+OpName(source_reg);
 }
 
 // ------------------------- CommandSequence --------------------------
 
-void CommandSequence::SetOperandRegs( SSAAllocator &allocator )
+void CommandSequence::DetermineOperandRegs( SSAAllocator &allocator )
 {
 	for( const unique_ptr<Command> &cmd : seq )
-		cmd->SetOperandRegs( allocator );
+		cmd->DetermineOperandRegs( allocator );
+}
+
+
+Command::Operands CommandSequence::GetOperandRegs() const
+{
+	return { {}, {}, {} };
 }
 
 

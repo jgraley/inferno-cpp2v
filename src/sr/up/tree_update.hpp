@@ -7,6 +7,7 @@
 #include "../link.hpp"
 #include "duplicate.hpp"
 #include "../scr_engine.hpp"
+#include "ssa_allocator.hpp"
 
 namespace SR 
 {
@@ -15,8 +16,8 @@ class DeclareTreeZoneCommand;
 
 // ------------------------- Runners --------------------------
 
-FreeZone RunGetFreeZoneNoDB( unique_ptr<Command> cmd, const SCREngine *scr_engine );
-void RunVoidForReplace( unique_ptr<Command> cmd, const SCREngine *scr_engine, XTreeDatabase *x_tree_db );
+FreeZone RunForBuilder( unique_ptr<Command> cmd, const SCREngine *scr_engine );
+void RunForReplace( unique_ptr<Command> cmd, const SCREngine *scr_engine, XTreeDatabase *x_tree_db );
 	
 // ------------------------- TreeZoneOverlapFinder --------------------------
 
@@ -44,6 +45,13 @@ public:
 class EmptyZoneRemover
 {
 public:
+	struct OperandMaps
+	{
+		map<SSAAllocator::Reg, set<unique_ptr<Command> *>> as_source;
+		map<SSAAllocator::Reg, set<unique_ptr<Command> *>> as_target;
+		map<SSAAllocator::Reg, unique_ptr<Command> *> as_dest; // SSA so only one		
+	};
+	OperandMaps DetermineOpUsers( CommandSequence &seq );
 	void Apply( CommandSequence &seq );
 };
 

@@ -276,8 +276,8 @@ string TreeZone::GetTrace() const
     string rhs;
     if( IsEmpty() )
     {
-        rhs = " ↯"; // Indicates zone is empty due to a terminus at base
-                    // (we still give the base, for info)
+        rhs = " ↯ "; // Indicates zone is empty due to a terminus at base
+                     // (we still give the base, for info)
     }
     else
     {

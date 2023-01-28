@@ -36,12 +36,23 @@ public:
         RegisterFile *register_file;        
     };
 
-	virtual void SetOperandRegs( SSAAllocator &allocator ) = 0;
+	struct Operands
+	{
+		set<SSAAllocator::Reg> sources;
+		set<SSAAllocator::Reg> targets;
+		set<SSAAllocator::Reg> dests;
+	};
+
+	virtual void DetermineOperandRegs( SSAAllocator &allocator ) = 0;
+	virtual Operands GetOperandRegs() const = 0;
+	SSAAllocator::Reg GetSourceReg() const;	
+	SSAAllocator::Reg GetTargetReg() const;	
+	SSAAllocator::Reg GetDestReg() const;	
 
 	virtual void Execute( const ExecKit &kit ) const = 0;
 	
 protected:
-	string OpName( int reg ) const;
+	string OpName( SSAAllocator::Reg reg ) const;
 };
 
 // ------------------------- DeclareFreeZoneCommand --------------------------
@@ -51,14 +62,17 @@ class DeclareFreeZoneCommand : public Command
 {
 public:
     DeclareFreeZoneCommand( FreeZone &&zone );
-	void SetOperandRegs( SSAAllocator &allocator ) final;
+	void DetermineOperandRegs( SSAAllocator &allocator ) final;
+	Operands GetOperandRegs() const final;
+    const FreeZone *GetFreeZone() const;
+
 	void Execute( const ExecKit &kit ) const final;	
 
 	string GetTrace() const final;
 
 private:
 	unique_ptr<FreeZone> zone;
-	int dest_reg = -1;
+	SSAAllocator::Reg dest_reg = -1;
 };
 
 // ------------------------- DeclareTreeZoneCommand --------------------------
@@ -68,15 +82,17 @@ class DeclareTreeZoneCommand : public Command
 {
 public:
     DeclareTreeZoneCommand( const TreeZone &zone );
-	void SetOperandRegs( SSAAllocator &allocator ) final;
-	void Execute( const ExecKit &kit ) const final;	
+	void DetermineOperandRegs( SSAAllocator &allocator ) final;
+	Operands GetOperandRegs() const final;
     const TreeZone *GetTreeZone() const;
+
+	void Execute( const ExecKit &kit ) const final;	
 
 	string GetTrace() const final;
 
 private:
 	TreeZone zone;
-	int dest_reg = -1;
+	SSAAllocator::Reg dest_reg = -1;
 };
 
 
@@ -86,13 +102,16 @@ private:
 class DuplicateZoneCommand : public Command
 {
 public:
-	void SetOperandRegs( SSAAllocator &allocator ) final;
+	void DetermineOperandRegs( SSAAllocator &allocator ) final;
+	Operands GetOperandRegs() const final;
+
 	void Execute( const ExecKit &kit ) const final;	
 
 	string GetTrace() const final;
 
 private:
-	int dest_reg = -1;
+	SSAAllocator::Reg source_reg = -1;
+	SSAAllocator::Reg dest_reg = -1;
 };
 
 // ------------------------- JoinZoneCommand --------------------------
@@ -102,15 +121,18 @@ class JoinZoneCommand : public Command
 {
 public:
     explicit JoinZoneCommand(int ti);
-	void SetOperandRegs( SSAAllocator &allocator ) final;
+	void DetermineOperandRegs( SSAAllocator &allocator ) final;
+	Operands GetOperandRegs() const final;
+	void SetSourceReg( SSAAllocator::Reg reg );
+
 	void Execute( const ExecKit &kit ) const final;	
 
 	string GetTrace() const final;
 
 private:
 	const int terminus_index;
-	int source_reg = -1;
-	int dest_reg = -1;
+	SSAAllocator::Reg source_reg = -1;
+	SSAAllocator::Reg target_reg = -1;
 };
 
 // ------------------------- ModifyTreeCommand --------------------------
@@ -120,14 +142,17 @@ private:
 class ModifyTreeCommand : public Command
 {
 public:
-	void SetOperandRegs( SSAAllocator &allocator ) final;
+	void DetermineOperandRegs( SSAAllocator &allocator ) final;
+	Operands GetOperandRegs() const final;
+	void SetSourceReg( SSAAllocator::Reg reg );
+
 	void Execute( const ExecKit &kit ) const final;	
 
 	string GetTrace() const final;
 
 private:
-	int source_reg = -1;
-	int target_reg = -1;
+	SSAAllocator::Reg source_reg = -1;
+	SSAAllocator::Reg target_reg = -1;
 };
 
 // ------------------------- MarkBaseForEmbeddedCommand --------------------------
@@ -138,14 +163,17 @@ class MarkBaseForEmbeddedCommand : public Command
 {
 public:
     MarkBaseForEmbeddedCommand( RequiresSubordinateSCREngine *embedded_agent );
-	void SetOperandRegs( SSAAllocator &allocator ) final;
+	void DetermineOperandRegs( SSAAllocator &allocator ) final;
+	Operands GetOperandRegs() const final;
+	void SetSourceReg( SSAAllocator::Reg reg );
+
 	void Execute( const ExecKit &kit ) const final;	
 
 	string GetTrace() const final;
 
 private:
 	RequiresSubordinateSCREngine * const embedded_agent;
-	int dest_reg = -1;
+	SSAAllocator::Reg source_reg = -1;
 };
 
 // ------------------------- CommandSequence --------------------------
@@ -153,7 +181,9 @@ private:
 class CommandSequence : public Command
 {
 public:
-	void SetOperandRegs( SSAAllocator &allocator ) final;
+	void DetermineOperandRegs( SSAAllocator &allocator ) final;
+	Operands GetOperandRegs() const final;
+
 	void Execute( const ExecKit &kit ) const final;	
 
 	void Add( unique_ptr<Command> new_cmd );
