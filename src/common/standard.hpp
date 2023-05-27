@@ -9,6 +9,7 @@
 #include <bits/stdint-uintn.h>
 #include <memory>
 #include <stdarg.h>
+#include <string>
 
 using namespace std;
 
