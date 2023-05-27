@@ -20,7 +20,6 @@ LLVM_REVISION ?= 61726
 #
 get_libs : makefile
 	tar -zxf llvm-${LLVM_REVISION}-patched.tgz
-	ln -sf llvm-${LLVM_REVISION}-patched llvm
 							
 #
 # Compile llvm and clang sources
