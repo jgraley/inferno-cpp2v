@@ -69,6 +69,7 @@ public:
     XLink GetTerminusXLink(int ti) const;
     bool IsEmpty() const;
     void DBCheck( const XTreeDatabase *db ) const;
+    //FreeZone Duplicate( TreeZone &zone, 
 
     static bool IsOverlap( const XTreeDatabase *db, const TreeZone &l, const TreeZone &r );
     

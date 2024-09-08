@@ -25,9 +25,6 @@ public:
 		// Note: unline EvalKit etc, these pointers are non-const
 		// because we intend to actually change things here.
         XTreeDatabase *x_tree_db; 
-        
-        // Remove after #702 and just use x_tree_db directly
-        const Duplicate::DirtyGrassUpdateInterface *green_grass;
 
         // For embedded patterns
         const SCREngine *scr_engine;

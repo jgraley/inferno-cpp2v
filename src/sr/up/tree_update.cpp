@@ -10,7 +10,7 @@ using namespace SR;
 
 // ------------------------- Runners --------------------------
 
-FreeZone SR::RunForBuilder( unique_ptr<Command> cmd, const SCREngine *scr_engine )
+FreeZone SR::RunForBuilder( unique_ptr<Command> cmd )
 {
 	// Ensure we have a CommandSequence
 	auto seq = make_unique<CommandSequence>();
@@ -28,7 +28,7 @@ FreeZone SR::RunForBuilder( unique_ptr<Command> cmd, const SCREngine *scr_engine
 	EmptyZoneRemover().Apply(*seq);
 
     Command::RegisterFile register_file;
-    Command::ExecKit exec_kit {nullptr, scr_engine, scr_engine, &register_file};
+    Command::ExecKit exec_kit {nullptr, nullptr, &register_file};
 	seq->Execute( exec_kit );   
 	
 	// We absolutely require a free zone
@@ -58,7 +58,7 @@ void SR::RunForReplace( unique_ptr<Command> cmd, const SCREngine *scr_engine, XT
 	// err...
 	
     Command::RegisterFile register_file;    
-    Command::ExecKit exec_kit {x_tree_db, x_tree_db, scr_engine, &register_file};
+    Command::ExecKit exec_kit {x_tree_db, scr_engine, &register_file};
 	seq->Execute( exec_kit );   
 }
 

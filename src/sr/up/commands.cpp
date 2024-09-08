@@ -143,7 +143,7 @@ void DuplicateZoneCommand::Execute( const ExecKit &kit ) const
         duplicator_terminus_map[terminus_upd] = { TreePtr<Node>(), shared_ptr<Updater>() };
 
     // Duplicate the subtree, populating from the map.
-    TreePtr<Node> new_base_x = Duplicate::DuplicateSubtree( kit.green_grass, 
+    TreePtr<Node> new_base_x = Duplicate::DuplicateSubtree( kit.x_tree_db, 
                                                             zone.GetBaseXLink(), 
                                                             duplicator_terminus_map );   
     
