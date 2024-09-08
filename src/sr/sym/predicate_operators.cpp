@@ -532,7 +532,7 @@ unique_ptr<BooleanResult> IsAllDiffOperator::Evaluate( const EvalKit &kit,
     
     // Note: could be done faster using a set<XLink>
     bool m = true;
-    ForAllCommutativeDistinctPairs( op_results, [&](const unique_ptr<SymbolResultInterface> &ra,
+    ForAllUnorderedPairs( op_results, [&](const unique_ptr<SymbolResultInterface> &ra,
                                                     const unique_ptr<SymbolResultInterface> &rb) 
     {    
         // For equality, it is sufficient to compare the x links

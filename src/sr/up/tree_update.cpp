@@ -88,7 +88,7 @@ TreeZoneOverlapFinder::TreeZoneOverlapFinder( const XTreeDatabase *db, CommandSe
         }
 	}
 	
-    ForAllCommutativeDistinctPairs( tzps_to_commands, 
+    ForAllUnorderedPairs( tzps_to_commands, 
                                     [&](const pair<const TreeZone *, const DeclareTreeZoneCommand *> &l, 
                                         const pair<const TreeZone *, const DeclareTreeZoneCommand *> &r)
     {

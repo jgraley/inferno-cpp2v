@@ -295,7 +295,7 @@ class IsSimpleCompareEquivalentOperator : public PredicateOperator
 public:    
     typedef BooleanExpression NominalType;
     explicit IsSimpleCompareEquivalentOperator( shared_ptr<SymbolExpression> a, 
-                                 shared_ptr<SymbolExpression> b );
+                                                shared_ptr<SymbolExpression> b );
     shared_ptr<PredicateOperator> Clone() const override;
 
     list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() override;

@@ -44,16 +44,16 @@ catch( BreakException )
 }
 
 // Acting on a container such as [1, 2, 3, 4], will call func with 
-// (2, 1), (3, 1), (4, 1), (3, 2), (4, 2), (4, 3), i.e. n(n-1)/2 iterations.
+// {2, 1}, {3, 1}, {4, 1}, {3, 2}, {4, 2}, {4, 3}, i.e. n(n-1)/2 iterations.
 // No iterations if size() is 0 or 1.
 template<typename T>
-void ForAllCommutativeDistinctPairs( const T &container, 
-                                     function<void(const typename T::value_type &first, 
-                                                   const typename T::value_type &second)> func ) try
+void ForAllUnorderedPairs( const T &container, 
+                           function<void(const typename T::value_type &first, 
+                                         const typename T::value_type &second)> func ) try
 {
 	for( typename T::const_iterator oit=container.begin(); oit != container.end(); ++oit )
     {
-        // Starting at oit gets us "Commutative"
+        // Starting at oit gets us "Unordered"
         for( typename T::const_iterator iit=oit; iit != container.end(); ++iit )
         {
             if( oit != iit ) // Gets us "Distinct"
