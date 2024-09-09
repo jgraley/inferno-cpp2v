@@ -1,33 +1,33 @@
-#include "updater.hpp"
+#include "terminus.hpp"
 
 #include "helpers/flatten.hpp"
 
 using namespace SR;
 
-// ------------------------- SingularUpdater --------------------------    
+// ------------------------- SingularTerminus --------------------------    
     
-SingularUpdater::SingularUpdater( TreePtrInterface *tree_ptr_ ) :
+SingularTerminus::SingularTerminus( TreePtrInterface *tree_ptr_ ) :
     tree_ptr( tree_ptr_ )
 {
 }
 
 
-void SingularUpdater::Apply( TreePtr<Node> node )
+void SingularTerminus::Join( TreePtr<Node> node )
 {
     *tree_ptr = node;
-    TRACE("Singular applied ")(node)("\n");    
+    TRACE("Singular joined ")(node)("\n");    
 }
     
 
-string SingularUpdater::GetTrace() const
+string SingularTerminus::GetTrace() const
 {
     return "(Singular " + Trace(tree_ptr) + ")";
 }
     
-// ------------------------- ContainerUpdater --------------------------    
+// ------------------------- ContainerTerminus --------------------------    
     
-ContainerUpdater::ContainerUpdater( ContainerInterface *container_,
-                                    ContainerInterface::iterator it_placeholder_ ) :
+ContainerTerminus::ContainerTerminus( ContainerInterface *container_,
+                                      ContainerInterface::iterator it_placeholder_ ) :
     container( container_ ),
     it_placeholder( it_placeholder_ )
 {
@@ -42,10 +42,10 @@ ContainerUpdater::ContainerUpdater( ContainerInterface *container_,
 }
 
 
-void ContainerUpdater::Apply( TreePtr<Node> node )
+void ContainerTerminus::Join( TreePtr<Node> node )
 {
-    ASSERT( !dirty );
-    dirty = true;
+    ASSERT( !joined );
+    joined = true;
 
 	ContainerInterface::iterator it_after = it_placeholder;
 
@@ -87,13 +87,13 @@ void ContainerUpdater::Apply( TreePtr<Node> node )
 }
 
 
-TreePtr<Node> ContainerUpdater::GetPlaceholder()
+TreePtr<Node> ContainerTerminus::GetPlaceholder()
 {
     return TreePtr<Node>(); // It's just a NULL tree ptr!
 }
 
 
-string ContainerUpdater::GetTrace() const
+string ContainerTerminus::GetTrace() const
 {
 	int i=1, n=0;
     for( ContainerInterface::iterator it=container->begin(); it!=container->end(); ++it )

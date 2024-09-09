@@ -18,7 +18,7 @@ FreeZone FreeZone::CreateSubtree( TreePtr<Node> base )
 FreeZone FreeZone::CreateEmpty()
 {
     return FreeZone( TreePtr<Node>(), // NULL
-                     { shared_ptr<Updater>() } ); // One element, NULL
+                     { shared_ptr<Terminus>() } ); // One element, NULL
 }
 
 
@@ -27,7 +27,7 @@ FreeZone::FreeZone()
 }
 
 
-FreeZone::FreeZone( TreePtr<Node> base_, vector<shared_ptr<Updater>> terminii_ ) :
+FreeZone::FreeZone( TreePtr<Node> base_, vector<shared_ptr<Terminus>> terminii_ ) :
     base( base_ )
 {
 	// Fill the map
@@ -71,7 +71,7 @@ int FreeZone::GetNumTerminii() const
 }
 
 
-void FreeZone::AddTerminus(int ti, shared_ptr<Updater> terminus)
+void FreeZone::AddTerminus(int ti, shared_ptr<Terminus> terminus)
 {
 	// Can't use this to make an empty zone
 	ASSERT( base );
@@ -87,9 +87,9 @@ TreePtr<Node> FreeZone::GetBaseNode() const
 }
 
 
-vector<shared_ptr<Updater>> FreeZone::GetTerminusUpdaters() const
+vector<shared_ptr<Terminus>> FreeZone::GetTerminusUpdaters() const
 {
-	vector<shared_ptr<Updater>> v;
+	vector<shared_ptr<Terminus>> v;
 	for( int ti=0; ti<terminii.size(); ti++ )
 	{
 		ASSERT( terminii.count(ti) > 0 );
@@ -101,7 +101,7 @@ vector<shared_ptr<Updater>> FreeZone::GetTerminusUpdaters() const
 
 
 
-shared_ptr<Updater> FreeZone::GetTerminusUpdater(int ti) const
+shared_ptr<Terminus> FreeZone::GetTerminus(int ti) const
 {
 	ASSERT( ti >= 0 );
 	ASSERT( terminii.count(ti) > 0 );
@@ -123,12 +123,12 @@ void FreeZone::Join( FreeZone &child_zone, int ti )
     ASSERT( !child_zone.IsEmpty() );
     ASSERT( !IsEmpty() ); // Need to elide empty zones before executing	    
 
-    shared_ptr<Updater> terminus_upd = GetTerminusUpdater(ti);
+    shared_ptr<Terminus> terminus = GetTerminus(ti);
     DropTerminus(ti);
     
-    // Populate terminus. Apply() will expand SubContainers
+    // Populate terminus. Join() will expand SubContainers
     ASSERT( child_zone.GetBaseNode() );
-    terminus_upd->Apply( child_zone.GetBaseNode() );
+    terminus->Join( child_zone.GetBaseNode() );
     
     //Validate()( zone->GetBaseNode() );     
 }

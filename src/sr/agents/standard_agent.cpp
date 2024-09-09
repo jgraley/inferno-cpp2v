@@ -646,8 +646,8 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
 				for( const TreePtrInterface &my_elt : *my_con )
 				{
 					// Make a placeholder in the dest container for the updater to point to
-					ContainerInterface::iterator dest_it = dest_con->insert( ContainerUpdater::GetPlaceholder() );
-					zone.AddTerminus( ti, make_shared<ContainerUpdater>(dest_con, dest_it) );     
+					ContainerInterface::iterator dest_it = dest_con->insert( ContainerTerminus::GetPlaceholder() );
+					zone.AddTerminus( ti, make_shared<ContainerTerminus>(dest_con, dest_it) );     
 					
 					ASSERT( my_elt )("Some element of member %d (", j)(*my_con)(") of ")(*this)(" was nullptr\n");
 					TRACE("Got ")(*my_elt)("\n");
@@ -663,8 +663,8 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
 				for( const TreePtrInterface &under_elt : *under_container )
 				{
 					// Make a placeholder in the dest container for the updater to point to
-					ContainerInterface::iterator dest_it = dest_con->insert( ContainerUpdater::GetPlaceholder() );
-					zone.AddTerminus( ti, make_shared<ContainerUpdater>(dest_con, dest_it) );     
+					ContainerInterface::iterator dest_it = dest_con->insert( ContainerTerminus::GetPlaceholder() );
+					zone.AddTerminus( ti, make_shared<ContainerTerminus>(dest_con, dest_it) );     
 
 					ASSERT( under_elt ); // present simplified scheme disallows nullptr
 					auto under_zone = TreeZone::CreateSubtree( XLink(under_node, &under_elt) );
@@ -679,7 +679,7 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
         {
 			TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
 			ASSERT( dest_singular )( "itemise for target didn't match itemise for pattern");
-			zone.AddTerminus( ti, make_shared<SingularUpdater>(dest_singular) );            
+			zone.AddTerminus( ti, make_shared<SingularTerminus>(dest_singular) );            
 
 			if( should_overlay )
 			{
@@ -757,8 +757,8 @@ Agent::CommandPtr StandardAgent::GenerateCommandNormal( const ReplaceKit &kit,
 		        TRACE("Got ")(*my_elt)("\n");
 		        
                 // Make a placeholder in the dest container for the updater to point to
-                ContainerInterface::iterator dest_it = dest_con->insert( ContainerUpdater::GetPlaceholder() );
-                zone.AddTerminus( ti, make_shared<ContainerUpdater>(dest_con, dest_it) );    
+                ContainerInterface::iterator dest_it = dest_con->insert( ContainerTerminus::GetPlaceholder() );
+                zone.AddTerminus( ti, make_shared<ContainerTerminus>(dest_con, dest_it) );    
 
                 PatternLink my_elt_plink( this, &my_elt );
                 commands->Add( my_elt_plink.GetChildAgent()->GenerateCommand(kit, my_elt_plink) );
@@ -771,7 +771,7 @@ Agent::CommandPtr StandardAgent::GenerateCommandNormal( const ReplaceKit &kit,
             TRACE("Copying single element\n");
             ASSERT( *my_singular )("Member %d (", i)(*my_singular)(") of ")(*this)(" was nullptr when not overlaying\n");            
             TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
-            zone.AddTerminus( ti, make_shared<SingularUpdater>(dest_singular) );            
+            zone.AddTerminus( ti, make_shared<SingularTerminus>(dest_singular) );            
 
             PatternLink my_singular_plink( this, my_singular );                    
             commands->Add( my_singular_plink.GetChildAgent()->GenerateCommand(kit, my_singular_plink) );

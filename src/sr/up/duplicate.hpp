@@ -2,7 +2,7 @@
 #define DUPLICATE_HPP
 
 #include "../link.hpp"
-#include "updater.hpp"
+#include "terminus.hpp"
 
 namespace SR
 { 
@@ -25,7 +25,7 @@ public:
         // 2. dest is set to NULL so you can check we got them all.
         // 3. If dest was NULL (=placeholder value), updater is created on it.
         TreePtr<Node> dest;
-        shared_ptr<Updater> updater;
+        shared_ptr<Terminus> updater;
     };
     
     typedef map<XLink, TerminusInfo> TerminiiMap;

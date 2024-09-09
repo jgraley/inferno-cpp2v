@@ -57,7 +57,7 @@ TreePtr<Node> Duplicate::DuplicateSubtree( const DirtyGrassUpdateInterface *dirt
         TreePtr<Node> dest_terminus = terminus_info.dest;
         TRACES("Reached source terminus ")(source_base_xlink)
               (" and substituting ")(dest_terminus)("\n");
-        ASSERT( terminus_info.dest ); // Can't make an Updater for the base
+        ASSERT( terminus_info.dest ); // Can't make an Terminus for the base
         terminus_info.dest = TreePtr<Node>();
         return dest_terminus;
     }
@@ -115,7 +115,7 @@ TreePtr<Node> Duplicate::DuplicateSubtreeWorker( const DirtyGrassUpdateInterface
                     ContainerInterface::iterator dest_it = dest_container->insert( dest_terminus );
                     // NULL value was provided, so consider it a placeholder for an updater
                     if( !dest_terminus )
-                        terminus_info.updater = make_shared<ContainerUpdater>( dest_container, dest_it );
+                        terminus_info.updater = make_shared<ContainerTerminus>( dest_container, dest_it );
                 }
                 else
                 {
@@ -145,7 +145,7 @@ TreePtr<Node> Duplicate::DuplicateSubtreeWorker( const DirtyGrassUpdateInterface
                 *dest_singular = dest_terminus;
                 // NULL value was provided, so consider it a placeholder for an updater
                 if( !dest_terminus )
-                    terminus_info.updater = make_shared<SingularUpdater>( dest_singular );
+                    terminus_info.updater = make_shared<SingularTerminus>( dest_singular );
             }
             else
             {

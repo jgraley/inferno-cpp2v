@@ -10,21 +10,21 @@
 namespace SR 
 {
 
-// ------------------------- Updater --------------------------    
+// ------------------------- Terminus --------------------------    
     
-class Updater : public Traceable
+class Terminus : public Traceable
 {
 public:
-    virtual void Apply( TreePtr<Node> node ) = 0;
+    virtual void Join( TreePtr<Node> node ) = 0;
 };    
     
-// ------------------------- SingularUpdater --------------------------    
+// ------------------------- SingularTerminus --------------------------    
     
-class SingularUpdater : public Updater
+class SingularTerminus : public Terminus
 {
 public:
-    explicit SingularUpdater( TreePtrInterface *tree_ptr );
-    void Apply( TreePtr<Node> node ) final;
+    explicit SingularTerminus( TreePtrInterface *tree_ptr );
+    void Join( TreePtr<Node> node ) final;
     
     string GetTrace() const;
 
@@ -32,14 +32,14 @@ private:
     TreePtrInterface * const tree_ptr;
 };    
     
-// ------------------------- ContainerUpdater --------------------------    
+// ------------------------- ContainerTerminus --------------------------    
     
-class ContainerUpdater : public Updater
+class ContainerTerminus : public Terminus
 {
 public:
-    explicit ContainerUpdater( ContainerInterface *container,
+    explicit ContainerTerminus( ContainerInterface *container,
                                ContainerInterface::iterator it_placeholder_ );             
-    void Apply( TreePtr<Node> node ) final;
+    void Join( TreePtr<Node> node ) final;
     
     static TreePtr<Node> GetPlaceholder();
     string GetTrace() const;
@@ -48,7 +48,7 @@ private:
     ContainerInterface * const container;
     ContainerInterface::iterator it_placeholder;
     
-    bool dirty = false;
+    bool joined = false;
 };    
     
 }

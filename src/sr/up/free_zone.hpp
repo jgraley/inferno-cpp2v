@@ -5,7 +5,7 @@
 #include "../link.hpp"
 #include "common/standard.hpp"
 #include "node/specialise_oostd.hpp"
-#include "updater.hpp"
+#include "terminus.hpp"
 
 #include <unordered_set>
 
@@ -25,15 +25,15 @@ public:
     static FreeZone CreateEmpty();
 
 	FreeZone();
-    explicit FreeZone( TreePtr<Node> base, vector<shared_ptr<Updater>> terminii );
+    explicit FreeZone( TreePtr<Node> base, vector<shared_ptr<Terminus>> terminii );
 
     bool IsEmpty() const override;
 	int GetNumTerminii() const override;
     TreePtr<Node> GetBaseNode() const override;
 
-    void AddTerminus(int ti, shared_ptr<Updater> terminus);      
-    vector<shared_ptr<Updater>> GetTerminusUpdaters() const;
-    shared_ptr<Updater> GetTerminusUpdater(int ti) const;
+    void AddTerminus(int ti, shared_ptr<Terminus> terminus);      
+    vector<shared_ptr<Terminus>> GetTerminusUpdaters() const;
+    shared_ptr<Terminus> GetTerminus(int ti) const;
     void DropTerminus(int ti);
     
     void Join( FreeZone &child_zone, int terminus_index );
@@ -42,7 +42,7 @@ public:
     
 private:
     TreePtr<Node> base;
-    map<int, shared_ptr<Updater>> terminii;
+    map<int, shared_ptr<Terminus>> terminii;
 };
  
 }

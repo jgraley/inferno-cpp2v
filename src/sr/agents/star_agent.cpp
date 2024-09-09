@@ -100,8 +100,8 @@ Agent::CommandPtr StarAgent::GenerateCommandImpl( const ReplaceKit &kit,
     for( const TreePtrInterface &key_elt : *key_container )
     {
         // Make a placeholder in the dest container for the updater to point to
-        ContainerInterface::iterator dest_it = dest_container->insert( ContainerUpdater::GetPlaceholder() );
-        zone.AddTerminus( ti, make_shared<ContainerUpdater>(dest_container, dest_it) );    
+        ContainerInterface::iterator dest_it = dest_container->insert( ContainerTerminus::GetPlaceholder() );
+        zone.AddTerminus( ti, make_shared<ContainerTerminus>(dest_container, dest_it) );    
 		
         auto new_zone = TreeZone::CreateSubtree( XLink(key_node, &key_elt) );
 	    commands->Add( make_unique<DeclareTreeZoneCommand>( new_zone ) );
