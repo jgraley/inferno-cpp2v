@@ -12,7 +12,7 @@
 namespace SR 
 {
 class XTreeDatabase;    
-
+class FreeZone;
 // ------------------------- TreeZone --------------------------
 
 // TreeZone is for zones that are within the current x tree. All
@@ -27,13 +27,17 @@ public:
 
     explicit TreeZone( XLink base, vector<XLink> terminii );
       
+    bool IsEmpty() const override;
+	int GetNumTerminii() const override;
+    TreePtr<Node> GetBaseNode() const override;
+
     XLink GetBaseXLink() const;
     vector<XLink> GetTerminusXLinks() const;
-	int GetNumTerminii() const;
     XLink GetTerminusXLink(int ti) const;
-    bool IsEmpty() const;
     void DBCheck( const XTreeDatabase *db ) const;
-    //FreeZone Duplicate( TreeZone &zone, 
+
+    FreeZone Duplicate( XTreeDatabase *x_tree_db ) const;
+    void Update( XTreeDatabase *x_tree_db, const FreeZone &free_zone ) const;
 
     static bool IsOverlap( const XTreeDatabase *db, const TreeZone &l, const TreeZone &r );
     

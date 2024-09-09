@@ -90,7 +90,7 @@ private:
   	XLink root_xlink;
     DBWalk db_walker;
     
-    mutable set< TreePtr<Node> > dirty_grass; // See #702 re mutable
+    mutable set< TreePtr<Node> > dirty_grass; // See #724 re mutable
 };    
     
 };

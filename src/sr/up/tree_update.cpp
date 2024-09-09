@@ -216,7 +216,7 @@ void EmptyZoneRemover::Apply( CommandSequence &seq )
 			{
 				b_cmd_source->SetSourceReg( new_source_reg );				
 			}
-			else if( auto m_cmd_source = dynamic_cast<ModifyTreeCommand *>(cmd_source->get()) )
+			else if( auto m_cmd_source = dynamic_cast<UpdateTreeCommand *>(cmd_source->get()) )
 			{
 				m_cmd_source->SetSourceReg( new_source_reg );				
 			}

@@ -133,11 +133,11 @@ private:
 	SSAAllocator::Reg target_reg = -1;
 };
 
-// ------------------------- ModifyTreeCommand --------------------------
+// ------------------------- UpdateTreeCommand --------------------------
 
 // Replace that part of the tree represented by a target tree zone with
 // the contents of a source free zone.
-class ModifyTreeCommand : public Command
+class UpdateTreeCommand : public Command
 {
 public:
 	void DetermineOperandRegs( SSAAllocator &allocator ) final;

@@ -3,6 +3,7 @@
 #include "helpers/flatten.hpp"
 #include "db/df_relation.hpp"
 #include "db/x_tree_database.hpp"
+#include "free_zone.hpp"
 
 using namespace SR;
 
@@ -31,6 +32,25 @@ TreeZone::TreeZone( XLink base_, vector<XLink> terminii_ ) :
 }
 
 
+bool TreeZone::IsEmpty() const
+{
+    // There must be a base, so the only way to be empty is to terminate at the base
+    return terminii.size()==1 && OnlyElementOf(terminii)==base;
+}
+
+
+int TreeZone::GetNumTerminii() const
+{
+    return terminii.size();
+}
+
+
+TreePtr<Node> TreeZone::GetBaseNode() const
+{
+	return base.GetChildX();
+}
+
+
 XLink TreeZone::GetBaseXLink() const
 {
     return base;
@@ -43,12 +63,6 @@ vector<XLink> TreeZone::GetTerminusXLinks() const
 }
 
 
-int TreeZone::GetNumTerminii() const
-{
-    return terminii.size();
-}
-
-
 XLink TreeZone::GetTerminusXLink(int ti) const
 {
 	ASSERT( ti >= 0 );
@@ -57,18 +71,56 @@ XLink TreeZone::GetTerminusXLink(int ti) const
 }
 
 
-bool TreeZone::IsEmpty() const
-{
-    // There must be a base, so the only way to be empty is to terminate at the base
-    return terminii.size()==1 && OnlyElementOf(terminii)==base;
-}
-
-
 void TreeZone::DBCheck( const XTreeDatabase *db ) const
 {
 	ASSERT( db->HasRow( base ) )(base);
 	for( XLink terminus_xlink : terminii )
 		ASSERT( db->HasRow( terminus_xlink ) )(terminus_xlink);
+}
+
+
+FreeZone TreeZone::Duplicate( XTreeDatabase *x_tree_db ) const
+{
+    ASSERTS( !IsEmpty() ); // Need to elide empty zones before executing	
+	if( x_tree_db ) // DB is optional
+		DBCheck(x_tree_db);
+	
+    // Iterate over terminii and operand zones together, filling the map for
+    // DuplicateSubtree() to use.
+    Duplicate::TerminiiMap duplicator_terminus_map;
+    for( XLink terminus_upd : GetTerminusXLinks() ) 
+        duplicator_terminus_map[terminus_upd] = { TreePtr<Node>(), shared_ptr<Updater>() };
+
+    // Duplicate the subtree, populating from the map.
+    TreePtr<Node> new_base_x = Duplicate::DuplicateSubtree( x_tree_db, 
+                                                            GetBaseXLink(), 
+                                                            duplicator_terminus_map );   
+    
+    vector<shared_ptr<Updater>> free_zone_terminii;
+    for( XLink terminus_upd : GetTerminusXLinks() )
+    {
+		ASSERTS( duplicator_terminus_map[terminus_upd].updater );
+        free_zone_terminii.push_back( duplicator_terminus_map[terminus_upd].updater );
+	}
+
+    // Create a new zone for the result.
+    return FreeZone( new_base_x, free_zone_terminii );
+}
+
+
+void TreeZone::Update( XTreeDatabase *x_tree_db, const FreeZone &free_zone ) const
+{
+	ASSERT( GetNumTerminii() == free_zone.GetNumTerminii() );	
+	ASSERT( GetNumTerminii() == 0 ); // TODO under #723
+    
+    // Update database 
+    x_tree_db->Delete( GetBaseXLink() );    
+    
+    // Patch the tree
+    GetBaseXLink().SetXPtr( free_zone.GetBaseNode() );
+    
+    // Update database 
+    x_tree_db->Insert( GetBaseXLink() );   	
 }
 
 

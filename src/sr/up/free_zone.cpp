@@ -3,6 +3,7 @@
 #include "helpers/flatten.hpp"
 #include "db/df_relation.hpp"
 #include "db/x_tree_database.hpp"
+#include "tree_zone.hpp"
 
 using namespace SR;
 
@@ -50,6 +51,26 @@ FreeZone::FreeZone( TreePtr<Node> base_, vector<shared_ptr<Updater>> terminii_ )
 }
 
 
+bool FreeZone::IsEmpty() const
+{
+    // No base indicates an empty zone
+    if( !base )
+    {
+        ASSERT( terminii.size() == 1 );
+        ASSERT( !terminii.at(0) );
+        return true;
+    }
+    return false;
+}
+
+
+
+int FreeZone::GetNumTerminii() const
+{
+    return terminii.size();
+}
+
+
 void FreeZone::AddTerminus(int ti, shared_ptr<Updater> terminus)
 {
 	// Can't use this to make an empty zone
@@ -79,11 +100,6 @@ vector<shared_ptr<Updater>> FreeZone::GetTerminusUpdaters() const
 }
 
 
-int FreeZone::GetNumTerminii() const
-{
-    return terminii.size();
-}
-
 
 shared_ptr<Updater> FreeZone::GetTerminusUpdater(int ti) const
 {
@@ -102,16 +118,19 @@ void FreeZone::DropTerminus(int ti)
 }
 
 
-bool FreeZone::IsEmpty() const
+void FreeZone::Join( FreeZone &child_zone, int ti )
 {
-    // No base indicates an empty zone
-    if( !base )
-    {
-        ASSERT( terminii.size() == 1 );
-        ASSERT( !terminii.at(0) );
-        return true;
-    }
-    return false;
+    ASSERT( !child_zone.IsEmpty() );
+    ASSERT( !IsEmpty() ); // Need to elide empty zones before executing	    
+
+    shared_ptr<Updater> terminus_upd = GetTerminusUpdater(ti);
+    DropTerminus(ti);
+    
+    // Populate terminus. Apply() will expand SubContainers
+    ASSERT( child_zone.GetBaseNode() );
+    terminus_upd->Apply( child_zone.GetBaseNode() );
+    
+    //Validate()( zone->GetBaseNode() );     
 }
 
 
@@ -133,7 +152,7 @@ string FreeZone::GetTrace() const
         else
             arrow = " ⇥ "; // Indicates the zone terminates
 
-        rhs = arrow + Join(elts, ", ");
+        rhs = arrow + ::Join(elts, ", ");
     }
         
     return "FreeZone(" + Trace(base) + rhs +")";

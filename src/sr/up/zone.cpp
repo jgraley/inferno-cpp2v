@@ -1,7 +1,13 @@
 #include "zone.hpp"
 
-#include "helpers/flatten.hpp"
-#include "db/df_relation.hpp"
-#include "db/x_tree_database.hpp"
+#include "scr_engine.hpp"
+
 
 using namespace SR;
+
+void Zone::MarkBaseForEmbedded(const SCREngine *scr_engine, RequiresSubordinateSCREngine *embedded_agent)
+{
+    ASSERT( !IsEmpty() );
+    scr_engine->MarkBaseForEmbedded( embedded_agent, GetBaseNode() );   
+    // Note: SCREngine will tell us to take a hike if we execute this more than once}
+}

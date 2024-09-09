@@ -11,6 +11,7 @@
 
 namespace SR 
 {
+
         
 // ------------------------- FreeZone --------------------------
 
@@ -26,14 +27,16 @@ public:
 	FreeZone();
     explicit FreeZone( TreePtr<Node> base, vector<shared_ptr<Updater>> terminii );
 
-    void AddTerminus(int ti, shared_ptr<Updater> terminus);
-      
-    TreePtr<Node> GetBaseNode() const;
+    bool IsEmpty() const override;
+	int GetNumTerminii() const override;
+    TreePtr<Node> GetBaseNode() const override;
+
+    void AddTerminus(int ti, shared_ptr<Updater> terminus);      
     vector<shared_ptr<Updater>> GetTerminusUpdaters() const;
-	int GetNumTerminii() const;
     shared_ptr<Updater> GetTerminusUpdater(int ti) const;
     void DropTerminus(int ti);
-    bool IsEmpty() const;
+    
+    void Join( FreeZone &child_zone, int terminus_index );
 
     string GetTrace() const;
     

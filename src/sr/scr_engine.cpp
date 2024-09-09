@@ -366,7 +366,7 @@ void SCREngine::Replace( XLink base_xlink )
 	Agent::ReplaceKit replace_kit;
     commands->Add(plan.base_agent->GenerateCommand(replace_kit, plan.base_plink));
     commands->Add( make_unique<DeclareTreeZoneCommand>( TreeZone::CreateSubtree(base_xlink) ) );
-    commands->Add( make_unique<ModifyTreeCommand>() );
+    commands->Add( make_unique<UpdateTreeCommand>() );
 	
 	plan.vn_sequence->RunUpdateCommand( move(commands), this );  
     
