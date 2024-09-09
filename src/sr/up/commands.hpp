@@ -3,7 +3,8 @@
 
 #include "common/common.hpp"
 #include "node/tree_ptr.hpp"
-#include "zone.hpp"
+#include "free_zone.hpp"
+#include "tree_zone.hpp"
 #include "../link.hpp"
 #include "duplicate.hpp"
 #include "../scr_engine.hpp"
