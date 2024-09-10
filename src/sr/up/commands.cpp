@@ -40,6 +40,11 @@ SSAAllocator::Reg Command::GetDestReg() const
 
 // ------------------------- DeclareFreeZoneCommand --------------------------
 
+bool DeclareFreeZoneCommand::IsExpression() const
+{
+	return true;
+}
+
 DeclareFreeZoneCommand::DeclareFreeZoneCommand( FreeZone &&zone_ ) :
 	zone(make_unique<FreeZone>(move(zone_)))
 {
@@ -76,6 +81,12 @@ string DeclareFreeZoneCommand::GetTrace() const
 }
 
 // ------------------------- DeclareTreeZoneCommand --------------------------
+
+bool DeclareTreeZoneCommand::IsExpression() const
+{
+	return true;
+}
+
 
 DeclareTreeZoneCommand::DeclareTreeZoneCommand( const TreeZone &zone_ ) :
 	zone( zone_ )
@@ -114,6 +125,12 @@ string DeclareTreeZoneCommand::GetTrace() const
 
 // ------------------------- DuplicateZoneCommand --------------------------
 
+bool DuplicateZoneCommand::IsExpression() const
+{
+	return true;
+}
+
+
 void DuplicateZoneCommand::DetermineOperandRegs( SSAAllocator &allocator )
 {
 	source_reg = allocator.Pop();
@@ -142,6 +159,12 @@ string DuplicateZoneCommand::GetTrace() const
 }
 
 // ------------------------- JoinZoneCommand --------------------------
+
+bool JoinZoneCommand::IsExpression() const
+{
+	return true;
+}
+
 
 JoinZoneCommand::JoinZoneCommand(int ti) :
     terminus_index(ti)
@@ -189,6 +212,12 @@ string JoinZoneCommand::GetTrace() const
 
 // ------------------------- UpdateTreeCommand --------------------------
 
+bool UpdateTreeCommand::IsExpression() const
+{
+	return false;
+}
+
+
 void UpdateTreeCommand::DetermineOperandRegs( SSAAllocator &allocator )
 {
 	target_reg = allocator.Pop();
@@ -223,6 +252,11 @@ string UpdateTreeCommand::GetTrace() const
 }
 
 // ------------------------- MarkBaseForEmbeddedCommand --------------------------
+
+bool MarkBaseForEmbeddedCommand::IsExpression() const
+{
+	return true;
+}
 
 MarkBaseForEmbeddedCommand::MarkBaseForEmbeddedCommand( RequiresSubordinateSCREngine *embedded_agent_ ) :
     embedded_agent( embedded_agent_ )
@@ -261,6 +295,12 @@ string MarkBaseForEmbeddedCommand::GetTrace() const
 }
 
 // ------------------------- CommandSequence --------------------------
+
+bool CommandSequence::IsExpression() const
+{
+	ASSERT(!seq.empty());
+	return seq.back()->IsExpression(); // like the comma operator
+}
 
 void CommandSequence::DetermineOperandRegs( SSAAllocator &allocator )
 {

@@ -51,6 +51,14 @@ FreeZone::FreeZone( TreePtr<Node> base_, vector<shared_ptr<Terminus>> terminii_ 
 }
 
 
+FreeZone &FreeZone::operator=( FreeZone &other )
+{
+	base = other.base;
+	terminii = other.terminii;
+	return *this;
+}
+
+
 bool FreeZone::IsEmpty() const
 {
     // No base indicates an empty zone
@@ -62,7 +70,6 @@ bool FreeZone::IsEmpty() const
     }
     return false;
 }
-
 
 
 int FreeZone::GetNumTerminii() const
@@ -120,9 +127,22 @@ void FreeZone::DropTerminus(int ti)
 
 void FreeZone::Join( FreeZone &child_zone, int ti )
 {
-    ASSERT( !child_zone.IsEmpty() );
-    ASSERT( !IsEmpty() ); // Need to elide empty zones before executing	    
-
+	if( child_zone.IsEmpty() )
+	{
+		// nothing happens	
+		return; 
+	}
+	else if( IsEmpty() )
+	{		
+		ASSERT(ti == 0);		
+		operator=(child_zone);
+		return;
+	}
+	
+	// TODO support inserting the child's terminii. Do we renumber, or
+	// just assign new keys?
+	ASSERT( child_zone.GetNumTerminii() == 0 );
+	 
     shared_ptr<Terminus> terminus = GetTerminus(ti);
     DropTerminus(ti);
     

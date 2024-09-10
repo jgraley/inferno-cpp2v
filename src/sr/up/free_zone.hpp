@@ -27,6 +27,8 @@ public:
 	FreeZone();
     explicit FreeZone( TreePtr<Node> base, vector<shared_ptr<Terminus>> terminii );
 
+	FreeZone &operator=( FreeZone &other );
+
     bool IsEmpty() const override;
 	int GetNumTerminii() const override;
     TreePtr<Node> GetBaseNode() const override;

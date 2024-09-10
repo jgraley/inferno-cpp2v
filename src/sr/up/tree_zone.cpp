@@ -81,10 +81,12 @@ void TreeZone::DBCheck( const XTreeDatabase *db ) const
 
 FreeZone TreeZone::Duplicate( XTreeDatabase *x_tree_db ) const
 {
-    ASSERTS( !IsEmpty() ); // Need to elide empty zones before executing	
 	if( x_tree_db ) // DB is optional
 		DBCheck(x_tree_db);
-	
+
+    if( IsEmpty() )
+		return FreeZone::CreateEmpty();
+    	
     // Iterate over terminii and operand zones together, filling the map for
     // DuplicateSubtree() to use.
     Duplicate::TerminiiMap duplicator_terminus_map;

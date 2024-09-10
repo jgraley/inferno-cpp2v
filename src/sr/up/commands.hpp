@@ -21,15 +21,18 @@ class Command : public Traceable
 public:
 	typedef map<SSAAllocator::Reg, unique_ptr<Zone>> RegisterFile;
 
-    struct ExecKit
+    struct EvalKit
     {
-		// Note: unline EvalKit etc, these pointers are non-const
+		// Note: unlike kits in sym, these pointers are non-const
 		// because we intend to actually change things here.
         XTreeDatabase *x_tree_db; 
 
         // For embedded patterns
         const SCREngine *scr_engine;
-
+	};
+	
+    struct ExecKit : EvalKit
+    {
         // "Register bank" of free zones for workspace
         RegisterFile *register_file;        
     };
@@ -41,6 +44,7 @@ public:
 		set<SSAAllocator::Reg> dests;
 	};
 
+	virtual bool IsExpression() const = 0;
 	virtual void DetermineOperandRegs( SSAAllocator &allocator ) = 0;
 	virtual Operands GetOperandRegs() const = 0;
 	SSAAllocator::Reg GetSourceReg() const;	
@@ -60,6 +64,7 @@ class DeclareFreeZoneCommand : public Command
 {
 public:
     DeclareFreeZoneCommand( FreeZone &&zone );
+	bool IsExpression() const final;
 	void DetermineOperandRegs( SSAAllocator &allocator ) final;
 	Operands GetOperandRegs() const final;
     const FreeZone *GetFreeZone() const;
@@ -80,6 +85,7 @@ class DeclareTreeZoneCommand : public Command
 {
 public:
     DeclareTreeZoneCommand( const TreeZone &zone );
+	bool IsExpression() const final;
 	void DetermineOperandRegs( SSAAllocator &allocator ) final;
 	Operands GetOperandRegs() const final;
     const TreeZone *GetTreeZone() const;
@@ -100,6 +106,7 @@ private:
 class DuplicateZoneCommand : public Command
 {
 public:
+	bool IsExpression() const final;
 	void DetermineOperandRegs( SSAAllocator &allocator ) final;
 	Operands GetOperandRegs() const final;
 
@@ -119,6 +126,7 @@ class JoinZoneCommand : public Command
 {
 public:
     explicit JoinZoneCommand(int ti);
+	bool IsExpression() const final;
 	void DetermineOperandRegs( SSAAllocator &allocator ) final;
 	Operands GetOperandRegs() const final;
 	void SetSourceReg( SSAAllocator::Reg reg );
@@ -140,6 +148,7 @@ private:
 class UpdateTreeCommand : public Command
 {
 public:
+	bool IsExpression() const final;
 	void DetermineOperandRegs( SSAAllocator &allocator ) final;
 	Operands GetOperandRegs() const final;
 	void SetSourceReg( SSAAllocator::Reg reg );
@@ -161,6 +170,7 @@ class MarkBaseForEmbeddedCommand : public Command
 {
 public:
     MarkBaseForEmbeddedCommand( RequiresSubordinateSCREngine *embedded_agent );
+	bool IsExpression() const final;
 	void DetermineOperandRegs( SSAAllocator &allocator ) final;
 	Operands GetOperandRegs() const final;
 	void SetSourceReg( SSAAllocator::Reg reg );
@@ -179,6 +189,7 @@ private:
 class CommandSequence : public Command
 {
 public:
+	bool IsExpression() const final;
 	void DetermineOperandRegs( SSAAllocator &allocator ) final;
 	Operands GetOperandRegs() const final;
 
