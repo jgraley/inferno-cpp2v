@@ -46,6 +46,7 @@ bool PopulateZoneCommand::IsExpression() const
 	return true;
 }
 
+
 PopulateZoneCommand::PopulateZoneCommand( unique_ptr<Zone> &&zone_, vector<unique_ptr<Command>> &&child_expressions_ ) :
 	zone(move(zone_)),
 	child_expressions(move(child_expressions_))
@@ -53,7 +54,7 @@ PopulateZoneCommand::PopulateZoneCommand( unique_ptr<Zone> &&zone_, vector<uniqu
 }	
 
 
-void PopulateZoneCommand::DetermineOperandRegs( SSAAllocator &allocator )
+void PopulateZoneCommand::DetermineOperandRegs( SSAAllocator &allocator ) const
 {
 	dest_reg = allocator.Push();
 }
@@ -88,8 +89,8 @@ void PopulateZoneCommand::Execute( const ExecKit &kit ) const
 	}		
 	
 	vector<FreeZone> child_zones;
-	for( unique_ptr<Command> &child_expression : child_expressions )
-		child_zones.push_back( Evaluate( move(child_expression), kit ) );	
+	for( const unique_ptr<Command> &child_expression : child_expressions )
+		child_zones.push_back( Evaluate( child_expression.get(), kit ) );	
 		
 	(*kit.register_file)[dest_reg] = make_unique<FreeZone>(free_zone.Populate(kit.x_tree_db, child_zones));
 }
@@ -113,7 +114,7 @@ DeclareFreeZoneCommand::DeclareFreeZoneCommand( FreeZone &&zone_ ) :
 }	
 
 
-void DeclareFreeZoneCommand::DetermineOperandRegs( SSAAllocator &allocator )
+void DeclareFreeZoneCommand::DetermineOperandRegs( SSAAllocator &allocator ) const
 {
 	dest_reg = allocator.Push();
 }
@@ -156,7 +157,7 @@ DeclareTreeZoneCommand::DeclareTreeZoneCommand( const TreeZone &zone_ ) :
 }
 
 
-void DeclareTreeZoneCommand::DetermineOperandRegs( SSAAllocator &allocator )
+void DeclareTreeZoneCommand::DetermineOperandRegs( SSAAllocator &allocator ) const
 {
 	dest_reg = allocator.Push();
 }
@@ -193,7 +194,7 @@ bool DuplicateZoneCommand::IsExpression() const
 }
 
 
-void DuplicateZoneCommand::DetermineOperandRegs( SSAAllocator &allocator )
+void DuplicateZoneCommand::DetermineOperandRegs( SSAAllocator &allocator ) const
 {
 	source_reg = allocator.Pop();
 	dest_reg = allocator.Push();
@@ -234,7 +235,7 @@ JoinZoneCommand::JoinZoneCommand(int ti) :
 }
 
 
-void JoinZoneCommand::DetermineOperandRegs( SSAAllocator &allocator )
+void JoinZoneCommand::DetermineOperandRegs( SSAAllocator &allocator ) const
 {
 	source_reg = allocator.Pop();
 	target_reg = allocator.Peek();
@@ -280,7 +281,7 @@ bool UpdateTreeCommand::IsExpression() const
 }
 
 
-void UpdateTreeCommand::DetermineOperandRegs( SSAAllocator &allocator )
+void UpdateTreeCommand::DetermineOperandRegs( SSAAllocator &allocator ) const
 {
 	target_reg = allocator.Pop();
 	source_reg = allocator.Pop();
@@ -326,7 +327,7 @@ MarkBaseForEmbeddedCommand::MarkBaseForEmbeddedCommand( RequiresSubordinateSCREn
 }
     
     
-void MarkBaseForEmbeddedCommand::DetermineOperandRegs( SSAAllocator &allocator )
+void MarkBaseForEmbeddedCommand::DetermineOperandRegs( SSAAllocator &allocator ) const
 {
 	source_reg = allocator.Peek();
 }
@@ -364,7 +365,7 @@ bool CommandSequence::IsExpression() const
 	return seq.back()->IsExpression(); // like the comma operator
 }
 
-void CommandSequence::DetermineOperandRegs( SSAAllocator &allocator )
+void CommandSequence::DetermineOperandRegs( SSAAllocator &allocator ) const
 {
 	for( const unique_ptr<Command> &cmd : seq )
 		cmd->DetermineOperandRegs( allocator );

@@ -45,7 +45,7 @@ public:
 	};
 
 	virtual bool IsExpression() const = 0;
-	virtual void DetermineOperandRegs( SSAAllocator &allocator ) = 0;
+	virtual void DetermineOperandRegs( SSAAllocator &allocator ) const = 0;
 	virtual Operands GetOperandRegs() const = 0;
 	SSAAllocator::Reg GetSourceReg() const;	
 	SSAAllocator::Reg GetTargetReg() const;	
@@ -68,7 +68,7 @@ class PopulateZoneCommand : public Command
 public:
     PopulateZoneCommand( unique_ptr<Zone> &&zone_, vector<unique_ptr<Command>> &&child_expressions_ );
 	bool IsExpression() const final;
-	void DetermineOperandRegs( SSAAllocator &allocator ) final;
+	void DetermineOperandRegs( SSAAllocator &allocator ) const final;
 	Operands GetOperandRegs() const final;
     const Zone *GetZone() const;
 
@@ -78,8 +78,8 @@ public:
 
 private:
 	unique_ptr<Zone> zone;
-	mutable vector<unique_ptr<Command>> child_expressions; //<----- TODO try and get Evaluate to accept const by not modifying the supplied seq
-	SSAAllocator::Reg dest_reg = -1;
+	vector<unique_ptr<Command>> child_expressions;
+	mutable SSAAllocator::Reg dest_reg = -1;
 };
 
 // ------------------------- DeclareFreeZoneCommand --------------------------
@@ -90,7 +90,7 @@ class DeclareFreeZoneCommand : public Command
 public:
     DeclareFreeZoneCommand( FreeZone &&zone );
 	bool IsExpression() const final;
-	void DetermineOperandRegs( SSAAllocator &allocator ) final;
+	void DetermineOperandRegs( SSAAllocator &allocator ) const final;
 	Operands GetOperandRegs() const final;
     const FreeZone *GetFreeZone() const;
 
@@ -100,7 +100,7 @@ public:
 
 private:
 	unique_ptr<FreeZone> zone;
-	SSAAllocator::Reg dest_reg = -1;
+	mutable SSAAllocator::Reg dest_reg = -1;
 };
 
 // ------------------------- DeclareTreeZoneCommand --------------------------
@@ -111,7 +111,7 @@ class DeclareTreeZoneCommand : public Command
 public:
     DeclareTreeZoneCommand( const TreeZone &zone );
 	bool IsExpression() const final;
-	void DetermineOperandRegs( SSAAllocator &allocator ) final;
+	void DetermineOperandRegs( SSAAllocator &allocator ) const final;
 	Operands GetOperandRegs() const final;
     const TreeZone *GetTreeZone() const;
 
@@ -121,7 +121,7 @@ public:
 
 private:
 	TreeZone zone;
-	SSAAllocator::Reg dest_reg = -1;
+	mutable SSAAllocator::Reg dest_reg = -1;
 };
 
 
@@ -132,7 +132,7 @@ class DuplicateZoneCommand : public Command
 {
 public:
 	bool IsExpression() const final;
-	void DetermineOperandRegs( SSAAllocator &allocator ) final;
+	void DetermineOperandRegs( SSAAllocator &allocator ) const final;
 	Operands GetOperandRegs() const final;
 
 	void Execute( const ExecKit &kit ) const final;	
@@ -140,8 +140,8 @@ public:
 	string GetTrace() const final;
 
 private:
-	SSAAllocator::Reg source_reg = -1;
-	SSAAllocator::Reg dest_reg = -1;
+	mutable SSAAllocator::Reg source_reg = -1;
+	mutable SSAAllocator::Reg dest_reg = -1;
 };
 
 // ------------------------- JoinZoneCommand --------------------------
@@ -152,7 +152,7 @@ class JoinZoneCommand : public Command
 public:
     explicit JoinZoneCommand(int ti);
 	bool IsExpression() const final;
-	void DetermineOperandRegs( SSAAllocator &allocator ) final;
+	void DetermineOperandRegs( SSAAllocator &allocator ) const final;
 	Operands GetOperandRegs() const final;
 	void SetSourceReg( SSAAllocator::Reg reg );
 
@@ -162,8 +162,8 @@ public:
 
 private:
 	const int terminus_index;
-	SSAAllocator::Reg source_reg = -1;
-	SSAAllocator::Reg target_reg = -1;
+	mutable SSAAllocator::Reg source_reg = -1;
+	mutable SSAAllocator::Reg target_reg = -1;
 };
 
 // ------------------------- UpdateTreeCommand --------------------------
@@ -174,7 +174,7 @@ class UpdateTreeCommand : public Command
 {
 public:
 	bool IsExpression() const final;
-	void DetermineOperandRegs( SSAAllocator &allocator ) final;
+	void DetermineOperandRegs( SSAAllocator &allocator ) const final;
 	Operands GetOperandRegs() const final;
 	void SetSourceReg( SSAAllocator::Reg reg );
 
@@ -183,8 +183,8 @@ public:
 	string GetTrace() const final;
 
 private:
-	SSAAllocator::Reg source_reg = -1;
-	SSAAllocator::Reg target_reg = -1;
+	mutable SSAAllocator::Reg source_reg = -1;
+	mutable SSAAllocator::Reg target_reg = -1;
 };
 
 // ------------------------- MarkBaseForEmbeddedCommand --------------------------
@@ -196,7 +196,7 @@ class MarkBaseForEmbeddedCommand : public Command
 public:
     MarkBaseForEmbeddedCommand( RequiresSubordinateSCREngine *embedded_agent );
 	bool IsExpression() const final;
-	void DetermineOperandRegs( SSAAllocator &allocator ) final;
+	void DetermineOperandRegs( SSAAllocator &allocator ) const final;
 	Operands GetOperandRegs() const final;
 	void SetSourceReg( SSAAllocator::Reg reg );
 
@@ -206,7 +206,7 @@ public:
 
 private:
 	RequiresSubordinateSCREngine * const embedded_agent;
-	SSAAllocator::Reg source_reg = -1;
+	mutable SSAAllocator::Reg source_reg = -1;
 };
 
 // ------------------------- CommandSequence --------------------------
@@ -215,7 +215,7 @@ class CommandSequence : public Command
 {
 public:
 	bool IsExpression() const final;
-	void DetermineOperandRegs( SSAAllocator &allocator ) final;
+	void DetermineOperandRegs( SSAAllocator &allocator ) const final;
 	Operands GetOperandRegs() const final;
 
 	void Execute( const ExecKit &kit ) const final;	

@@ -10,72 +10,56 @@ using namespace SR;
 
 // ------------------------- Runners --------------------------
 
-FreeZone SR::Evaluate( unique_ptr<Command> cmd, const Command::EvalKit &eval_kit )
+FreeZone SR::Evaluate( const Command *cmd, const Command::EvalKit &eval_kit )
 {
 	ASSERT( cmd->IsExpression() );
 
-	// Ensure we have a CommandSequence
-	auto seq = make_unique<CommandSequence>();
-	seq->Add( move(cmd) ); 
-	
-	// Flatten...
-	CommandSequenceFlattener().Apply(*seq);
-	
-	ASSERT( seq->IsExpression() );
-
 	// Calculate SSA indexes
 	SSAAllocator ssa_allocator;
-	seq->DetermineOperandRegs( ssa_allocator );
+	cmd->DetermineOperandRegs( ssa_allocator );
     SSAAllocator::Reg out_reg = ssa_allocator.Pop();
 
+	// Execute it
     Command::RegisterFile register_file;
     Command::ExecKit exec_kit;
     exec_kit.register_file = &register_file;
     (Command::EvalKit &)exec_kit = eval_kit; 
-	seq->Execute( exec_kit );   
+	cmd->Execute( exec_kit );   
 	
-	// We absolutely require a free zone
+	// Extract the result, a FreeZone
     return dynamic_cast<FreeZone &>(*register_file[out_reg]);
 }
 
 
-FreeZone SR::RunForBuilder( unique_ptr<Command> cmd )
+FreeZone SR::RunForBuilder( const Command *cmd )
 {
 	ASSERT( cmd->IsExpression() );
 
     Command::EvalKit eval_kit {nullptr, nullptr};
     
-    return Evaluate(move(cmd), eval_kit);
+    return Evaluate(cmd, eval_kit);
 }
 
 
-void SR::RunForReplace( unique_ptr<Command> cmd, const SCREngine *scr_engine, XTreeDatabase *x_tree_db )
+void SR::RunForReplace( const Command *cmd, const SCREngine *scr_engine, XTreeDatabase *x_tree_db )
 {
 	ASSERT( !cmd->IsExpression() );
 
-	// Ensure we have a CommandSequence
-	auto seq = make_unique<CommandSequence>();
-	seq->Add( move(cmd) ); 
-	
-	// Flatten...
-	CommandSequenceFlattener().Apply(*seq);
-	
-	ASSERT( !seq->IsExpression() );
-	
 	// Calculate SSA indexes
 	SSAAllocator ssa_allocator;
-	seq->DetermineOperandRegs( ssa_allocator );
+	cmd->DetermineOperandRegs( ssa_allocator );
 
 	// Uniqueness of tree zones
-	//TreeZoneOverlapFinder finder( x_tree_db, seq.get() );
+	//TreeZoneOverlapFinder finder( x_tree_db, cmd.get() );
 	
 	// err...
 	
+	// Execute it
     Command::RegisterFile register_file;    
     Command::ExecKit exec_kit;
     exec_kit.register_file = &register_file;
     (Command::EvalKit &)exec_kit = Command::EvalKit{x_tree_db, scr_engine}; 
-	seq->Execute( exec_kit );   
+	cmd->Execute( exec_kit );   
 }
 
 // ------------------------- TreeZoneOverlapFinder --------------------------
