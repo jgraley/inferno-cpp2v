@@ -51,6 +51,14 @@ PopulateZoneCommand::PopulateZoneCommand( unique_ptr<Zone> &&zone_, vector<uniqu
 	zone(move(zone_)),
 	child_expressions(move(child_expressions_))
 {
+	ASSERT( zone->GetNumTerminii() == child_expressions.size() );
+}	
+
+
+PopulateZoneCommand::PopulateZoneCommand( unique_ptr<Zone> &&zone_ ) :
+	zone(move(zone_))
+{
+	ASSERT( zone->GetNumTerminii() == 0 );
 }	
 
 
@@ -89,12 +97,17 @@ void PopulateZoneCommand::Execute( const ExecKit &kit ) const
 		ASSERTFAIL();
 	}		
 	
-//	FTRACE(free_zone)("\n");
+	//FTRACE(free_zone)("\n");
 	vector<FreeZone> child_zones;
 	for( const unique_ptr<Command> &child_expression : child_expressions )
+	{
+		//FTRACE(child_expression)("\n");
 		child_zones.push_back( Evaluate( child_expression.get(), kit ) );	
-		
-	(*kit.register_file)[dest_reg] = make_unique<FreeZone>(free_zone.Populate(kit.x_tree_db, child_zones));
+	}
+	
+	free_zone.Populate(kit.x_tree_db, child_zones);
+	
+	(*kit.register_file)[dest_reg] = make_unique<FreeZone>(free_zone);
 }
 
 

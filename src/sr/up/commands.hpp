@@ -67,6 +67,7 @@ class PopulateZoneCommand : public Command
 {
 public:
     PopulateZoneCommand( unique_ptr<Zone> &&zone_, vector<unique_ptr<Command>> &&child_expressions_ );
+    PopulateZoneCommand( unique_ptr<Zone> &&zone_ );
 	bool IsExpression() const final;
 	void DetermineOperandRegs( SSAAllocator &allocator ) const final;
 	Operands GetOperandRegs() const final;

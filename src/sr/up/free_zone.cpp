@@ -94,17 +94,16 @@ TreePtr<Node> FreeZone::GetBaseNode() const
 }
 
 
-FreeZone &FreeZone::Populate( XTreeDatabase *x_tree_db, vector<FreeZone> child_zones ) 
+void FreeZone::Populate( XTreeDatabase *x_tree_db, vector<FreeZone> child_zones ) 
 {
-	vector<FreeZone>::iterator it = child_zones.begin();
-	for( int ti=0; ti<terminii.size(); ti++ )
+	ASSERT( terminii.size() == child_zones.size() );
+	int ti=0;
+	for( FreeZone &child_zone : child_zones )
 	{
-		ASSERT( it != child_zones.end() );
-		Join(*it++, ti);			
-	}	
-	ASSERT( it == child_zones.end() );
-	
-	return *this;
+		Join(child_zone, ti++);
+	}		
+		
+	ASSERT( GetNumTerminii() == 0 );
 }
 
 

@@ -17,7 +17,6 @@ public:
     Reg Pop();
     Reg Peek();
     
-private:    
     stack<Reg> id_stack;
     Reg next_id = 0;
 };    

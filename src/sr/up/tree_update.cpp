@@ -17,6 +17,7 @@ FreeZone SR::Evaluate( const Command *cmd, const Command::EvalKit &eval_kit )
 	// Calculate SSA indexes
 	SSAAllocator ssa_allocator;
 	cmd->DetermineOperandRegs( ssa_allocator );
+	ASSERT( !ssa_allocator.id_stack.empty() );
     SSAAllocator::Reg out_reg = ssa_allocator.Pop();
 
 	// Execute it
@@ -27,6 +28,7 @@ FreeZone SR::Evaluate( const Command *cmd, const Command::EvalKit &eval_kit )
 	cmd->Execute( exec_kit );   
 	
 	// Extract the result, a FreeZone
+	ASSERT( register_file.count(out_reg) > 0 );
     return dynamic_cast<FreeZone &>(*register_file[out_reg]);
 }
 

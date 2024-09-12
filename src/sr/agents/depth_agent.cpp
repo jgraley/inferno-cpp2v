@@ -35,8 +35,6 @@ Agent::CommandPtr DepthAgent::GenerateCommandImpl( const ReplaceKit &kit,
 {
     INDENT("#");
     
-    auto commands = make_unique<CommandSequence>();
-
     PatternLink terminus_plink(this, &terminus);
     vector<Agent::CommandPtr> child_commands;
     child_commands.push_back( terminus_plink.GetChildAgent()->GenerateCommand(kit, terminus_plink) );
