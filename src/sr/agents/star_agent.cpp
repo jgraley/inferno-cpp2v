@@ -70,6 +70,7 @@ void StarAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
 }
 
 #define NEW
+#define VNEW
 Agent::CommandPtr StarAgent::GenerateCommandImpl( const ReplaceKit &kit, 
                                                   PatternLink me_plink, 
                                                   XLink key_xlink ) 
