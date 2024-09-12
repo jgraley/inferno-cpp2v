@@ -74,6 +74,7 @@ const Zone *PopulateZoneCommand::GetZone() const
 
 void PopulateZoneCommand::Execute( const ExecKit &kit ) const
 {
+	//FTRACE(zone)("\n");
 	FreeZone free_zone;
 	if( auto fzp = dynamic_cast<FreeZone *>(zone.get()) )
 	{
@@ -88,6 +89,7 @@ void PopulateZoneCommand::Execute( const ExecKit &kit ) const
 		ASSERTFAIL();
 	}		
 	
+//	FTRACE(free_zone)("\n");
 	vector<FreeZone> child_zones;
 	for( const unique_ptr<Command> &child_expression : child_expressions )
 		child_zones.push_back( Evaluate( child_expression.get(), kit ) );	

@@ -100,8 +100,7 @@ FreeZone &FreeZone::Populate( XTreeDatabase *x_tree_db, vector<FreeZone> child_z
 	for( int ti=0; ti<terminii.size(); ti++ )
 	{
 		ASSERT( it != child_zones.end() );
-		Join(*it++, ti);	
-		it++;
+		Join(*it++, ti);			
 	}	
 	ASSERT( it == child_zones.end() );
 	

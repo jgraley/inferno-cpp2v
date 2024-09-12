@@ -28,6 +28,7 @@ shared_ptr<PatternQuery> DepthAgent::GetPatternQuery() const
     return pq;
 }
 
+
 Agent::CommandPtr DepthAgent::GenerateCommandImpl( const ReplaceKit &kit, 
                                                    PatternLink me_plink, 
                                                    XLink key_xlink ) 
@@ -36,18 +37,15 @@ Agent::CommandPtr DepthAgent::GenerateCommandImpl( const ReplaceKit &kit,
     
     auto commands = make_unique<CommandSequence>();
 
-    XLink terminus_key_xlink = my_scr_engine->GetReplaceKey( PatternLink(this, &terminus) );
-    ASSERT(terminus_key_xlink);// this could mean replace is being attempted on a DepthAgent in an abnormal context
     PatternLink terminus_plink(this, &terminus);
-    TreeZone new_zone( key_xlink, {terminus_key_xlink} );
-	commands->Add( make_unique<DeclareTreeZoneCommand>( new_zone ) );
-	commands->Add( make_unique<DuplicateZoneCommand>() );
+    vector<Agent::CommandPtr> child_commands;
+    child_commands.push_back( terminus_plink.GetChildAgent()->GenerateCommand(kit, terminus_plink) );
 
-    commands->Add( terminus_plink.GetChildAgent()->GenerateCommand(kit, terminus_plink) );
-    // Leaves new_terminus_subtree on the stack
-    
-	commands->Add( make_unique<JoinZoneCommand>(0) );    
-    return commands;
+    XLink terminus_key_xlink = my_scr_engine->GetReplaceKey( terminus_plink );
+    ASSERT(terminus_key_xlink);// this could mean replace is being attempted on a DepthAgent in an abnormal context
+    auto new_zone = make_unique<TreeZone>( key_xlink, vector<XLink>{terminus_key_xlink} );   
+
+    return make_unique<PopulateZoneCommand>( move(new_zone), move(child_commands) );
 }
 
 
