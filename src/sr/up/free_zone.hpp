@@ -27,11 +27,12 @@ public:
 	FreeZone();
     explicit FreeZone( TreePtr<Node> base, vector<shared_ptr<Terminus>> terminii );
 
-	FreeZone &operator=( FreeZone &other );
+	FreeZone &operator=( const FreeZone &other );
 
     bool IsEmpty() const override;
 	int GetNumTerminii() const override;
     TreePtr<Node> GetBaseNode() const override;
+    FreeZone &Populate( XTreeDatabase *x_tree_db, vector<FreeZone> child_zones ); 
 
     void AddTerminus(int ti, shared_ptr<Terminus> terminus);      
     vector<shared_ptr<Terminus>> GetTerminusUpdaters() const;

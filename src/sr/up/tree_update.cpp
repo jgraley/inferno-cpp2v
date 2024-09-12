@@ -10,7 +10,7 @@ using namespace SR;
 
 // ------------------------- Runners --------------------------
 
-FreeZone SR::Evaluate( unique_ptr<Command> cmd, Command::EvalKit &eval_kit )
+FreeZone SR::Evaluate( unique_ptr<Command> cmd, const Command::EvalKit &eval_kit )
 {
 	ASSERT( cmd->IsExpression() );
 
@@ -31,7 +31,7 @@ FreeZone SR::Evaluate( unique_ptr<Command> cmd, Command::EvalKit &eval_kit )
     Command::RegisterFile register_file;
     Command::ExecKit exec_kit;
     exec_kit.register_file = &register_file;
-    (Command::EvalKit &)exec_kit = eval_kit; // sorry about this
+    (Command::EvalKit &)exec_kit = eval_kit; 
 	seq->Execute( exec_kit );   
 	
 	// We absolutely require a free zone
@@ -74,7 +74,7 @@ void SR::RunForReplace( unique_ptr<Command> cmd, const SCREngine *scr_engine, XT
     Command::RegisterFile register_file;    
     Command::ExecKit exec_kit;
     exec_kit.register_file = &register_file;
-    (Command::EvalKit &)exec_kit = Command::EvalKit{x_tree_db, scr_engine}; // sorry about this
+    (Command::EvalKit &)exec_kit = Command::EvalKit{x_tree_db, scr_engine}; 
 	seq->Execute( exec_kit );   
 }
 

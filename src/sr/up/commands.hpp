@@ -57,6 +57,31 @@ protected:
 	string OpName( SSAAllocator::Reg reg ) const;
 };
 
+// ------------------------- PopulateZoneCommand --------------------------
+
+// Consureuct with any zone and optional marker M. On evaluate: populate the
+// zone, apply marker and return the resulting FreeZone. Note: Populate includes
+// duplication of tree zones where encountered, so that it's always a free zone 
+// that's modified and returned.
+class PopulateZoneCommand : public Command
+{
+public:
+    PopulateZoneCommand( unique_ptr<Zone> &&zone_, vector<unique_ptr<Command>> &&child_expressions_ );
+	bool IsExpression() const final;
+	void DetermineOperandRegs( SSAAllocator &allocator ) final;
+	Operands GetOperandRegs() const final;
+    const Zone *GetZone() const;
+
+	void Execute( const ExecKit &kit ) const final;	
+
+	string GetTrace() const final;
+
+private:
+	unique_ptr<Zone> zone;
+	mutable vector<unique_ptr<Command>> child_expressions; //<----- TODO try and get Evaluate to accept const by not modifying the supplied seq
+	SSAAllocator::Reg dest_reg = -1;
+};
+
 // ------------------------- DeclareFreeZoneCommand --------------------------
 
 // Create a new free zone

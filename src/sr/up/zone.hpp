@@ -12,6 +12,8 @@ namespace SR
 {
 	class SCREngine;
 	class RequiresSubordinateSCREngine;
+	class FreeZone;
+	class XTreeDatabase;
 	    
 // ------------------------- Zone --------------------------
 class Zone : public Traceable
@@ -22,10 +24,9 @@ public:
     virtual bool IsEmpty() const = 0;
 	virtual int GetNumTerminii() const = 0;
     virtual TreePtr<Node> GetBaseNode() const = 0;
-    
+        
     void MarkBaseForEmbedded(const SCREngine *scr_engine, RequiresSubordinateSCREngine *embedded_agent);
-};
-    
+};    
  
 }
 

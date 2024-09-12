@@ -51,7 +51,7 @@ FreeZone::FreeZone( TreePtr<Node> base_, vector<shared_ptr<Terminus>> terminii_ 
 }
 
 
-FreeZone &FreeZone::operator=( FreeZone &other )
+FreeZone &FreeZone::operator=( const FreeZone &other )
 {
 	base = other.base;
 	terminii = other.terminii;
@@ -94,6 +94,21 @@ TreePtr<Node> FreeZone::GetBaseNode() const
 }
 
 
+FreeZone &FreeZone::Populate( XTreeDatabase *x_tree_db, vector<FreeZone> child_zones ) 
+{
+	vector<FreeZone>::iterator it = child_zones.begin();
+	for( int ti=0; ti<terminii.size(); ti++ )
+	{
+		ASSERT( it != child_zones.end() );
+		Join(*it++, ti);	
+		it++;
+	}	
+	ASSERT( it == child_zones.end() );
+	
+	return *this;
+}
+
+
 vector<shared_ptr<Terminus>> FreeZone::GetTerminusUpdaters() const
 {
 	vector<shared_ptr<Terminus>> v;
@@ -105,7 +120,6 @@ vector<shared_ptr<Terminus>> FreeZone::GetTerminusUpdaters() const
 	
     return v;
 }
-
 
 
 shared_ptr<Terminus> FreeZone::GetTerminus(int ti) const

@@ -4,6 +4,7 @@
 #include "common/read_args.hpp"
 #include "tree/validate.hpp"
 #include "common/lambda_loops.hpp"
+#include "tree_update.hpp"
 
 using namespace SR;
 
@@ -36,6 +37,67 @@ SSAAllocator::Reg Command::GetDestReg() const
 {
 	Operands ops = GetOperandRegs();
 	return OnlyElementOf( ops.dests );
+}
+
+// ------------------------- PopulateZoneCommand --------------------------
+
+bool PopulateZoneCommand::IsExpression() const
+{
+	return true;
+}
+
+PopulateZoneCommand::PopulateZoneCommand( unique_ptr<Zone> &&zone_, vector<unique_ptr<Command>> &&child_expressions_ ) :
+	zone(move(zone_)),
+	child_expressions(move(child_expressions_))
+{
+}	
+
+
+void PopulateZoneCommand::DetermineOperandRegs( SSAAllocator &allocator )
+{
+	dest_reg = allocator.Push();
+}
+
+
+Command::Operands PopulateZoneCommand::GetOperandRegs() const
+{
+	return { {}, {}, {dest_reg} };
+}
+
+
+const Zone *PopulateZoneCommand::GetZone() const
+{
+    return zone.get();
+}
+
+
+void PopulateZoneCommand::Execute( const ExecKit &kit ) const
+{
+	FreeZone free_zone;
+	if( auto fzp = dynamic_cast<FreeZone *>(zone.get()) )
+	{
+		free_zone = *fzp;
+	}
+	else if( auto tzp = dynamic_cast<TreeZone *>(zone.get()) )
+	{
+		free_zone = tzp->Duplicate( kit.x_tree_db );
+	}
+	else
+	{
+		ASSERTFAIL();
+	}		
+	
+	vector<FreeZone> child_zones;
+	for( unique_ptr<Command> &child_expression : child_expressions )
+		child_zones.push_back( Evaluate( move(child_expression), kit ) );	
+		
+	(*kit.register_file)[dest_reg] = make_unique<FreeZone>(free_zone.Populate(kit.x_tree_db, child_zones));
+}
+
+
+string PopulateZoneCommand::GetTrace() const
+{
+	return "PopulateZoneCommand "+Trace(*zone)+" -> "+OpName(dest_reg);
 }
 
 // ------------------------- DeclareFreeZoneCommand --------------------------

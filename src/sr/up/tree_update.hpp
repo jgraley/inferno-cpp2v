@@ -18,7 +18,7 @@ class DeclareTreeZoneCommand;
 
 // ------------------------- Runners --------------------------
 
-FreeZone Evaluate( unique_ptr<Command> cmd, Command::EvalKit &eval_kit );
+FreeZone Evaluate( unique_ptr<Command> cmd, const Command::EvalKit &eval_kit );
 FreeZone RunForBuilder( unique_ptr<Command> cmd );
 void RunForReplace( unique_ptr<Command> cmd, const SCREngine *scr_engine, XTreeDatabase *x_tree_db );
 	
