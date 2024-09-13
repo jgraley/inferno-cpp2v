@@ -583,8 +583,8 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
     ASSERT( dest->IsFinal() )("About to build non-final ")(*dest)("\n"); 
 
     // Stuff for creating commands
-    auto commands = make_unique<CommandSequence>();
-    FreeZone zone = FreeZone::CreateSubtree(dest);
+    vector<Agent::CommandPtr> child_commands;    
+    auto zone = make_unique<FreeZone>(FreeZone::CreateSubtree(dest));
     int ti = 0;
 
     // Loop over all the elements of under_node and dest that do not appear in pattern or
@@ -647,14 +647,12 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
 				{
 					// Make a placeholder in the dest container for the updater to point to
 					ContainerInterface::iterator dest_it = dest_con->insert( ContainerTerminus::GetPlaceholder() );
-					zone.AddTerminus( ti, make_shared<ContainerTerminus>(dest_con, dest_it) );     
+					zone->AddTerminus( ti++, make_shared<ContainerTerminus>(dest_con, dest_it) );     
 					
 					ASSERT( my_elt )("Some element of member %d (", j)(*my_con)(") of ")(*this)(" was nullptr\n");
 					TRACE("Got ")(*my_elt)("\n");
 					PatternLink my_elt_plink( this, &my_elt );
-					commands->Add( my_elt_plink.GetChildAgent()->GenerateCommand(kit, my_elt_plink) );
-					commands->Add( make_unique<JoinZoneCommand>(ti) );                
-					ti++;
+					child_commands.push_back( my_elt_plink.GetChildAgent()->GenerateCommand(kit, my_elt_plink) );				
 				}
 			}	
 			else
@@ -664,14 +662,11 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
 				{
 					// Make a placeholder in the dest container for the updater to point to
 					ContainerInterface::iterator dest_it = dest_con->insert( ContainerTerminus::GetPlaceholder() );
-					zone.AddTerminus( ti, make_shared<ContainerTerminus>(dest_con, dest_it) );     
+					zone->AddTerminus( ti++, make_shared<ContainerTerminus>(dest_con, dest_it) );     
 
 					ASSERT( under_elt ); // present simplified scheme disallows nullptr
-					auto under_zone = TreeZone::CreateSubtree( XLink(under_node, &under_elt) );
-					commands->Add( make_unique<DeclareTreeZoneCommand>( under_zone ) );
-					commands->Add( make_unique<DuplicateZoneCommand>() );
-					commands->Add( make_unique<JoinZoneCommand>(ti) );
-					ti++;
+					auto under_zone = make_unique<TreeZone>(TreeZone::CreateSubtree( XLink(under_node, &under_elt) ));
+					child_commands.push_back( make_unique<PopulateZoneCommand>(move(under_zone)) );		
 				}
 			}
         }            
@@ -679,7 +674,7 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
         {
 			TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
 			ASSERT( dest_singular )( "itemise for target didn't match itemise for pattern");
-			zone.AddTerminus( ti, make_shared<SingularTerminus>(dest_singular) );            
+			zone->AddTerminus( ti++, make_shared<SingularTerminus>(dest_singular) );            
 
 			if( should_overlay )
 			{
@@ -687,18 +682,14 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
 				ASSERT(	my_singular );
 				ASSERT( *my_singular ); // Should not have marked this one for overlay if NULL
 				PatternLink my_singular_plink( this, my_singular );                    
-				commands->Add( my_singular_plink.GetChildAgent()->GenerateCommand(kit, my_singular_plink) );
+				child_commands.push_back( my_singular_plink.GetChildAgent()->GenerateCommand(kit, my_singular_plink) );           
 			}		
 			else
 			{
 				ASSERT( *under_singular );            
-				auto under_zone = TreeZone::CreateSubtree( XLink(under_node, under_singular) );
-				commands->Add( make_unique<DeclareTreeZoneCommand>( under_zone ) );
-				commands->Add( make_unique<DuplicateZoneCommand>() );
+				auto under_zone = make_unique<TreeZone>(TreeZone::CreateSubtree( XLink(under_node, under_singular) ));
+				child_commands.push_back( make_unique<PopulateZoneCommand>(move(under_zone)) );			
 			}
-
-			commands->Add( make_unique<JoinZoneCommand>(ti) );   
-			ti++;             
         }
         else
         {
@@ -706,11 +697,8 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
         }
     }
     
-    commands->AddAtStart( make_unique<DeclareFreeZoneCommand>(move(zone)) );
-
-    return commands;
+    return make_unique<PopulateZoneCommand>( move(zone), move(child_commands) );         
 }
-
 
 Agent::CommandPtr StandardAgent::GenerateCommandNormal( const ReplaceKit &kit, 
                                                         PatternLink me_plink ) 
@@ -731,8 +719,8 @@ Agent::CommandPtr StandardAgent::GenerateCommandNormal( const ReplaceKit &kit,
     vector< Itemiser::Element * > dest_items = dest->Itemise(); 
 
     // Stuff for creating commands
-    auto commands = make_unique<CommandSequence>();
-    FreeZone zone = FreeZone::CreateSubtree(dest);
+    vector<Agent::CommandPtr> child_commands;
+    auto zone = make_unique<FreeZone>(FreeZone::CreateSubtree(dest));
     int ti = 0;
 
     TRACE("Copying %d members pattern=", dest_items.size())(*this)(" dest=")(*dest)("\n");
@@ -758,12 +746,10 @@ Agent::CommandPtr StandardAgent::GenerateCommandNormal( const ReplaceKit &kit,
 		        
                 // Make a placeholder in the dest container for the updater to point to
                 ContainerInterface::iterator dest_it = dest_con->insert( ContainerTerminus::GetPlaceholder() );
-                zone.AddTerminus( ti, make_shared<ContainerTerminus>(dest_con, dest_it) );    
+                zone->AddTerminus( ti++, make_shared<ContainerTerminus>(dest_con, dest_it) );    
 
                 PatternLink my_elt_plink( this, &my_elt );
-                commands->Add( my_elt_plink.GetChildAgent()->GenerateCommand(kit, my_elt_plink) );
-                commands->Add( make_unique<JoinZoneCommand>(ti) );
-                ti++;
+				child_commands.push_back( my_elt_plink.GetChildAgent()->GenerateCommand(kit, my_elt_plink) );               
             }
         }            
         else if( TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[i]) )
@@ -771,12 +757,10 @@ Agent::CommandPtr StandardAgent::GenerateCommandNormal( const ReplaceKit &kit,
             TRACE("Copying single element\n");
             ASSERT( *my_singular )("Member %d (", i)(*my_singular)(") of ")(*this)(" was nullptr when not overlaying\n");            
             TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
-            zone.AddTerminus( ti, make_shared<SingularTerminus>(dest_singular) );            
+            zone->AddTerminus( ti++, make_shared<SingularTerminus>(dest_singular) );            
 
             PatternLink my_singular_plink( this, my_singular );                    
-            commands->Add( my_singular_plink.GetChildAgent()->GenerateCommand(kit, my_singular_plink) );
-            commands->Add( make_unique<JoinZoneCommand>(ti) );
-            ti++;
+			child_commands.push_back( my_singular_plink.GetChildAgent()->GenerateCommand(kit, my_singular_plink) );           
         }
         else
         {
@@ -784,9 +768,7 @@ Agent::CommandPtr StandardAgent::GenerateCommandNormal( const ReplaceKit &kit,
         }       
     }
     
-    commands->AddAtStart( make_unique<DeclareFreeZoneCommand>(move(zone)) );
-    
-    return commands;
+    return make_unique<PopulateZoneCommand>( move(zone), move(child_commands) );     
 }
 
 

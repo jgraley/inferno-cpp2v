@@ -23,11 +23,8 @@ Agent::CommandPtr ConjunctionAgent::GenerateCommandImpl( const ReplaceKit &kit,
     // Conjuction and disjunction are ambiguous because there are 
     // multiple conjuncts/disjuncts
     ASSERT(key_xlink)("Unkeyed boolean agent seen in replace context");
-    auto new_zone = TreeZone::CreateSubtree( key_xlink );
-    auto commands = make_unique<CommandSequence>();
-	commands->Add( make_unique<DeclareTreeZoneCommand>( new_zone ) );
-	commands->Add( make_unique<DuplicateZoneCommand>() );
-	return commands;
+    auto new_zone = make_unique<TreeZone>(TreeZone::CreateSubtree( key_xlink ));
+	return make_unique<PopulateZoneCommand>( move(new_zone) );
 }
 
 

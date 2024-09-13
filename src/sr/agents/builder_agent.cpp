@@ -61,5 +61,5 @@ Agent::CommandPtr BuilderAgent::GenerateCommandImpl( const ReplaceKit &kit,
     }
 
     // Make free zone without duplicating since this is first one
-    return make_unique<DeclareFreeZoneCommand>( FreeZone::CreateSubtree( new_node ) );
+    return make_unique<PopulateZoneCommand>( make_unique<FreeZone>(FreeZone::CreateSubtree( new_node )) );
 }

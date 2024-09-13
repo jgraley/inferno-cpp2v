@@ -69,8 +69,7 @@ void StarAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
     }
 }
 
-#define NEW
-#define VNEW
+
 Agent::CommandPtr StarAgent::GenerateCommandImpl( const ReplaceKit &kit, 
                                                   PatternLink me_plink, 
                                                   XLink key_xlink ) 
@@ -92,13 +91,8 @@ Agent::CommandPtr StarAgent::GenerateCommandImpl( const ReplaceKit &kit,
     else
         ASSERT(0)("Please add new kind of container");
     
-#ifdef NEW
     vector<Agent::CommandPtr> child_commands;
     auto zone = make_unique<FreeZone>(FreeZone::CreateSubtree(dest));
-#else
-    auto commands = make_unique<CommandSequence>();
-    FreeZone zone = FreeZone::CreateSubtree(dest);
-#endif
     int ti = 0;
 
     TRACE("Walking container length %d\n", key_container->size() );
@@ -106,38 +100,14 @@ Agent::CommandPtr StarAgent::GenerateCommandImpl( const ReplaceKit &kit,
     for( const TreePtrInterface &key_elt : *key_container )
     {
         ContainerInterface::iterator dest_it = dest_container->insert( ContainerTerminus::GetPlaceholder() );
-#ifdef NEW    
         zone->AddTerminus( ti, make_shared<ContainerTerminus>(dest_container, dest_it) );    
-#else
-        zone.AddTerminus( ti, make_shared<ContainerTerminus>(dest_container, dest_it) );    
-#endif
 
-#ifdef VNEW    
         auto child_zone = make_unique<TreeZone>(TreeZone::CreateSubtree( XLink(key_node, &key_elt) ));
 	    child_commands.push_back( make_unique<PopulateZoneCommand>(move(child_zone)) );
-#else
-        auto child_zone = TreeZone::CreateSubtree( XLink(key_node, &key_elt) );
-#ifdef NEW	    
-		auto commands = make_unique<CommandSequence>();
-	    commands->Add( make_unique<DeclareTreeZoneCommand>( child_zone ) );
-	    commands->Add( make_unique<DuplicateZoneCommand>() );		
-	    child_commands.push_back( move(commands) );
-#else		
-	    commands->Add( make_unique<DeclareTreeZoneCommand>( child_zone ) );
-	    commands->Add( make_unique<DuplicateZoneCommand>() );
-		commands->Add( make_unique<JoinZoneCommand>(ti) );
-#endif		
-#endif		
         ti++;
     }
 
-#ifdef NEW
-    return make_unique<PopulateZoneCommand>( move(zone), move(child_commands) );
-#else
-    // Makes a free zone for the subcontainer
-    commands->AddAtStart( make_unique<DeclareFreeZoneCommand>(move(zone)) );    
-    return commands;
-#endif    
+    return make_unique<PopulateZoneCommand>( move(zone), move(child_commands) );    
 }
 
 
