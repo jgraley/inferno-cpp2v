@@ -39,14 +39,12 @@ Agent::CommandPtr EmbeddedSCRAgent::GenerateCommandImpl( const ReplaceKit &kit,
     auto commands = make_unique<CommandSequence>();
     
     PatternLink through_plink(this, GetThrough());
-    commands->Add( through_plink.GetChildAgent()->GenerateCommand(kit, through_plink) );    
-    
-    // Indicates that the embedded engine should act at the base
-    // of whatever's at the top of the stack, which should be the 
-    // though subtree due to the previous command.
-    commands->Add( make_unique<MarkBaseForEmbeddedCommand>( this ) );  
-    
-    return commands;
+    Agent::CommandPtr child_command = through_plink.GetChildAgent()->GenerateCommand(kit, through_plink);
+    auto child_pzc = dynamic_cast<PopulateZoneCommand *>(child_command.get());
+    ASSERT( child_pzc );
+    child_pzc->AddEmbeddedAgentBase( this );
+
+    return child_command;
 }                                         
 
 

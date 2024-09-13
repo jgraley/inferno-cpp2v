@@ -68,6 +68,8 @@ class PopulateZoneCommand : public Command
 public:
     PopulateZoneCommand( unique_ptr<Zone> &&zone_, vector<unique_ptr<Command>> &&child_expressions_ );
     PopulateZoneCommand( unique_ptr<Zone> &&zone_ );
+    void AddEmbeddedAgentBase( RequiresSubordinateSCREngine *embedded_agent );
+    
 	bool IsExpression() const final;
 	void DetermineOperandRegs( SSAAllocator &allocator ) const final;
 	Operands GetOperandRegs() const final;
@@ -81,6 +83,7 @@ private:
 	unique_ptr<Zone> zone;
 	vector<unique_ptr<Command>> child_expressions;
 	mutable SSAAllocator::Reg dest_reg = -1;
+	std::list<RequiresSubordinateSCREngine *> embedded_agents;
 };
 
 // ------------------------- DeclareFreeZoneCommand --------------------------

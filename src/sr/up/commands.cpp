@@ -62,6 +62,12 @@ PopulateZoneCommand::PopulateZoneCommand( unique_ptr<Zone> &&zone_ ) :
 }	
 
 
+void PopulateZoneCommand::AddEmbeddedAgentBase( RequiresSubordinateSCREngine *embedded_agent )
+{
+	embedded_agents.push_back( embedded_agent );
+}
+
+
 void PopulateZoneCommand::DetermineOperandRegs( SSAAllocator &allocator ) const
 {
 	dest_reg = allocator.Push();
@@ -106,6 +112,9 @@ void PopulateZoneCommand::Execute( const ExecKit &kit ) const
 	}
 	
 	free_zone.Populate(kit.x_tree_db, child_zones);
+	
+	for( RequiresSubordinateSCREngine *ea : embedded_agents )
+		free_zone.MarkBaseForEmbedded(kit.scr_engine, ea);
 	
 	(*kit.register_file)[dest_reg] = make_unique<FreeZone>(free_zone);
 }
