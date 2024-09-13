@@ -8,7 +8,6 @@
 #include "../link.hpp"
 #include "duplicate.hpp"
 #include "../scr_engine.hpp"
-#include "ssa_allocator.hpp"
 
 namespace SR 
 {
@@ -19,9 +18,7 @@ class XTreeDatabase;
 class Command : public Traceable
 {
 public:
-	typedef map<SSAAllocator::Reg, unique_ptr<Zone>> RegisterFile;
-
-    struct EvalKit
+    struct ExecKit
     {
 		// Note: unlike kits in sym, these pointers are non-const
 		// because we intend to actually change things here.
@@ -30,32 +27,11 @@ public:
         // For embedded patterns
         const SCREngine *scr_engine;
 	};
-	
-    struct ExecKit : EvalKit
-    {
-        // "Register bank" of free zones for workspace
-        RegisterFile *register_file;        
-    };
-
-	struct Operands
-	{
-		set<SSAAllocator::Reg> sources;
-		set<SSAAllocator::Reg> targets;
-		set<SSAAllocator::Reg> dests;
-	};
 
 	virtual bool IsExpression() const = 0;
-	virtual void DetermineOperandRegs( SSAAllocator &allocator ) const = 0;
-	virtual Operands GetOperandRegs() const = 0;
-	SSAAllocator::Reg GetSourceReg() const;	
-	SSAAllocator::Reg GetTargetReg() const;	
-	SSAAllocator::Reg GetDestReg() const;	
 
 	virtual unique_ptr<Zone> Evaluate( const ExecKit &kit ) const { ASSERTFAIL(); }
 	virtual void Execute( const ExecKit &kit ) const = 0;
-	
-protected:
-	string OpName( SSAAllocator::Reg reg ) const;
 };
 
 // ------------------------- PopulateZoneCommand --------------------------
@@ -72,8 +48,6 @@ public:
     void AddEmbeddedAgentBase( RequiresSubordinateSCREngine *embedded_agent );
     
 	bool IsExpression() const final;
-	void DetermineOperandRegs( SSAAllocator &allocator ) const final;
-	Operands GetOperandRegs() const final;
     const Zone *GetZone() const;
 
 	unique_ptr<Zone> Evaluate( const ExecKit &kit ) const final;	
@@ -84,7 +58,6 @@ public:
 private:
 	unique_ptr<Zone> zone;
 	vector<unique_ptr<Command>> child_expressions;
-	mutable SSAAllocator::Reg dest_reg = -1;
 	std::list<RequiresSubordinateSCREngine *> embedded_agents;
 };
 
@@ -98,8 +71,6 @@ class UpdateTreeCommand : public Command
 public:
     UpdateTreeCommand( const TreeZone &target_tree_zone_, unique_ptr<Command> child_expression_ );
 	bool IsExpression() const final;
-	void DetermineOperandRegs( SSAAllocator &allocator ) const final;
-	Operands GetOperandRegs() const final;
 
 	void Execute( const ExecKit &kit ) const final;	
 
@@ -108,7 +79,6 @@ public:
 private:
 	TreeZone target_tree_zone;
 	unique_ptr<Command> child_expression;
-	mutable SSAAllocator::Reg source_reg = -1;
 };
 
 // ------------------------- CommandSequence --------------------------
@@ -117,8 +87,6 @@ class CommandSequence : public Command
 {
 public:
 	bool IsExpression() const final;
-	void DetermineOperandRegs( SSAAllocator &allocator ) const final;
-	Operands GetOperandRegs() const final;
 
 	void Execute( const ExecKit &kit ) const final;	
 

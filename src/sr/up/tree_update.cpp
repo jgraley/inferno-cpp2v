@@ -10,21 +10,11 @@ using namespace SR;
 
 // ------------------------- Runners --------------------------
 
-FreeZone SR::Evaluate( const Command *cmd, const Command::EvalKit &eval_kit )
+FreeZone SR::RunForBuilder( const Command *cmd )
 {
 	ASSERT( cmd->IsExpression() );
 
-	// Calculate SSA indexes
-	SSAAllocator ssa_allocator;
-	cmd->DetermineOperandRegs( ssa_allocator );
-	ASSERT( !ssa_allocator.id_stack.empty() );
-    SSAAllocator::Reg out_reg = ssa_allocator.Pop();
-
-	// Execute it
-    Command::RegisterFile register_file;
-    Command::ExecKit exec_kit;
-    exec_kit.register_file = &register_file;
-    (Command::EvalKit &)exec_kit = eval_kit; 
+    Command::ExecKit exec_kit {nullptr, nullptr};
 	unique_ptr<Zone> zone = cmd->Evaluate( exec_kit );   
 	if( auto free_zone = dynamic_pointer_cast<FreeZone>(zone) )
 		return *free_zone;
@@ -33,23 +23,10 @@ FreeZone SR::Evaluate( const Command *cmd, const Command::EvalKit &eval_kit )
 }
 
 
-FreeZone SR::RunForBuilder( const Command *cmd )
-{
-	ASSERT( cmd->IsExpression() );
-
-    Command::EvalKit eval_kit {nullptr, nullptr};
-    
-    return Evaluate(cmd, eval_kit);
-}
-
-
 void SR::RunForReplace( const Command *cmd, const SCREngine *scr_engine, XTreeDatabase *x_tree_db )
 {
 	ASSERT( !cmd->IsExpression() );
 
-	// Calculate SSA indexes
-	SSAAllocator ssa_allocator;
-	cmd->DetermineOperandRegs( ssa_allocator );
 
 	// Uniqueness of tree zones
 	//TreeZoneOverlapFinder finder( x_tree_db, cmd.get() );
@@ -57,10 +34,7 @@ void SR::RunForReplace( const Command *cmd, const SCREngine *scr_engine, XTreeDa
 	// err...
 	
 	// Execute it
-    Command::RegisterFile register_file;    
-    Command::ExecKit exec_kit;
-    exec_kit.register_file = &register_file;
-    (Command::EvalKit &)exec_kit = Command::EvalKit{x_tree_db, scr_engine}; 
+    Command::ExecKit exec_kit {x_tree_db, scr_engine}; 
 	cmd->Execute( exec_kit );   
 }
 

@@ -8,7 +8,6 @@
 #include "../link.hpp"
 #include "duplicate.hpp"
 #include "../scr_engine.hpp"
-#include "ssa_allocator.hpp"
 #include "commands.hpp"
 
 namespace SR 
@@ -18,7 +17,6 @@ class DeclareTreeZoneCommand;
 
 // ------------------------- Runners --------------------------
 
-FreeZone Evaluate( const Command *cmd, const Command::EvalKit &eval_kit );
 FreeZone RunForBuilder( const Command *cmd );
 void RunForReplace( const Command *cmd, const SCREngine *scr_engine, XTreeDatabase *x_tree_db );
 	
@@ -35,19 +33,6 @@ private:
 };
 
 // ------------------------- EmptyZoneRemover --------------------------
-
-class EmptyZoneRemover
-{
-public:
-	struct OperandMaps
-	{
-		map<SSAAllocator::Reg, set<unique_ptr<Command> *>> as_source;
-		map<SSAAllocator::Reg, set<unique_ptr<Command> *>> as_target;
-		map<SSAAllocator::Reg, unique_ptr<Command> *> as_dest; // SSA so only one		
-	};
-	OperandMaps DetermineOpUsers( CommandSequence &seq );
-	void Apply( CommandSequence &seq );
-};
 
 }
 

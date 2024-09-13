@@ -10,35 +10,6 @@ using namespace SR;
 
 // ------------------------- Command --------------------------
 
-string Command::OpName( int reg ) const
-{
-	if( reg==-1 )
-		return "STACK";
-	else
-		return SSPrintf("Z%d", reg);
-}
-
-
-SSAAllocator::Reg Command::GetSourceReg() const
-{
-	Operands ops = GetOperandRegs();
-	return OnlyElementOf( ops.sources );
-}
-
-
-SSAAllocator::Reg Command::GetTargetReg() const
-{
-	Operands ops = GetOperandRegs();
-	return OnlyElementOf( ops.targets );
-}
-
-
-SSAAllocator::Reg Command::GetDestReg() const
-{
-	Operands ops = GetOperandRegs();
-	return OnlyElementOf( ops.dests );
-}
-
 // ------------------------- PopulateZoneCommand --------------------------
 
 bool PopulateZoneCommand::IsExpression() const
@@ -65,18 +36,6 @@ PopulateZoneCommand::PopulateZoneCommand( unique_ptr<Zone> &&zone_ ) :
 void PopulateZoneCommand::AddEmbeddedAgentBase( RequiresSubordinateSCREngine *embedded_agent )
 {
 	embedded_agents.push_back( embedded_agent );
-}
-
-
-void PopulateZoneCommand::DetermineOperandRegs( SSAAllocator &allocator ) const
-{
-	dest_reg = allocator.Push();
-}
-
-
-Command::Operands PopulateZoneCommand::GetOperandRegs() const
-{
-	return { {}, {}, {dest_reg} };
 }
 
 
@@ -108,7 +67,11 @@ unique_ptr<Zone> PopulateZoneCommand::Evaluate( const ExecKit &kit ) const
 	for( const unique_ptr<Command> &child_expression : child_expressions )
 	{
 		//FTRACE(child_expression)("\n");
-		child_zones.push_back( SR::Evaluate( child_expression.get(), kit ) );	
+		unique_ptr<Zone> zone = child_expression->Evaluate( kit );
+		if( auto free_zone = dynamic_pointer_cast<FreeZone>(zone) )
+			child_zones.push_back( *free_zone );
+		else
+			ASSERTFAIL(); // not a free zone	
 	}
 	
 	free_zone.Populate(kit.x_tree_db, child_zones);
@@ -122,13 +85,13 @@ unique_ptr<Zone> PopulateZoneCommand::Evaluate( const ExecKit &kit ) const
 	
 void PopulateZoneCommand::Execute( const ExecKit &kit ) const
 {
-	(*kit.register_file)[dest_reg] = Evaluate(kit);
+	ASSERTFAIL();
 }
 
 
 string PopulateZoneCommand::GetTrace() const
 {
-	return "PopulateZoneCommand TODOOOOOOOOOO "+Trace(*zone)+" -> "+OpName(dest_reg);
+	return "PopulateZoneCommand TODOOOOOOOOOO "+Trace(*zone)+" -> "+Trace(child_expressions);
 }
 
 // ------------------------- UpdateTreeCommand --------------------------
@@ -146,22 +109,13 @@ bool UpdateTreeCommand::IsExpression() const
 }
 
 
-void UpdateTreeCommand::DetermineOperandRegs( SSAAllocator &allocator ) const
-{
-}
-
-
-Command::Operands UpdateTreeCommand::GetOperandRegs() const
-{
-	return { {}, {}, {} };
-}
-
-
 void UpdateTreeCommand::Execute( const ExecKit &kit ) const
 {
     // New zone must be a free zone
-    auto source_free_zone = SR::Evaluate( child_expression.get(), kit );
-    target_tree_zone.Update( kit.x_tree_db, source_free_zone );
+	unique_ptr<Zone> zone = child_expression->Evaluate( kit );
+	auto source_free_zone = dynamic_pointer_cast<FreeZone>(zone);
+	ASSERT( source_free_zone );
+    target_tree_zone.Update( kit.x_tree_db, *source_free_zone );
 }
 
 
@@ -176,18 +130,6 @@ bool CommandSequence::IsExpression() const
 {
 	ASSERT(!seq.empty());
 	return seq.back()->IsExpression(); // like the comma operator
-}
-
-void CommandSequence::DetermineOperandRegs( SSAAllocator &allocator ) const
-{
-	for( const unique_ptr<Command> &cmd : seq )
-		cmd->DetermineOperandRegs( allocator );
-}
-
-
-Command::Operands CommandSequence::GetOperandRegs() const
-{
-	return { {}, {}, {} };
 }
 
 
