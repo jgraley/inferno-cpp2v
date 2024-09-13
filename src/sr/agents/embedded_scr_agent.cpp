@@ -35,13 +35,14 @@ void EmbeddedSCRAgent::MaybeChildrenPlanOverlay( PatternLink me_plink,
 Agent::CommandPtr EmbeddedSCRAgent::GenerateCommandImpl( const ReplaceKit &kit, 
                                                          PatternLink me_plink, 
                                                          XLink key_xlink )
-{
-    auto commands = make_unique<CommandSequence>();
-    
+{   
     PatternLink through_plink(this, GetThrough());
     Agent::CommandPtr child_command = through_plink.GetChildAgent()->GenerateCommand(kit, through_plink);
     auto child_pzc = dynamic_cast<PopulateZoneCommand *>(child_command.get());
     ASSERT( child_pzc );
+    
+    // Inform the update mechanism that, once it's done duplicating 
+    // nodes etc, it should mark this position for this embedded agent.
     child_pzc->AddEmbeddedAgentBase( this );
 
     return child_command;

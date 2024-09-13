@@ -125,48 +125,6 @@ string PopulateZoneCommand::GetTrace() const
 	return "PopulateZoneCommand "+Trace(*zone)+" -> "+OpName(dest_reg);
 }
 
-// ------------------------- DeclareFreeZoneCommand --------------------------
-
-bool DeclareFreeZoneCommand::IsExpression() const
-{
-	return true;
-}
-
-DeclareFreeZoneCommand::DeclareFreeZoneCommand( FreeZone &&zone_ ) :
-	zone(make_unique<FreeZone>(move(zone_)))
-{
-}	
-
-
-void DeclareFreeZoneCommand::DetermineOperandRegs( SSAAllocator &allocator ) const
-{
-	dest_reg = allocator.Push();
-}
-
-
-Command::Operands DeclareFreeZoneCommand::GetOperandRegs() const
-{
-	return { {}, {}, {dest_reg} };
-}
-
-
-const FreeZone *DeclareFreeZoneCommand::GetFreeZone() const
-{
-    return zone.get();
-}
-
-
-void DeclareFreeZoneCommand::Execute( const ExecKit &kit ) const
-{
-	(*kit.register_file)[dest_reg] = make_unique<FreeZone>(*zone);
-}
-
-
-string DeclareFreeZoneCommand::GetTrace() const
-{
-	return "DeclareFreeZoneCommand "+Trace(*zone)+" -> "+OpName(dest_reg);
-}
-
 // ------------------------- DeclareTreeZoneCommand --------------------------
 
 bool DeclareTreeZoneCommand::IsExpression() const
@@ -210,93 +168,6 @@ string DeclareTreeZoneCommand::GetTrace() const
 	return "DeclareTreeZoneCommand "+Trace(zone)+" -> "+OpName(dest_reg);
 }
 
-// ------------------------- DuplicateZoneCommand --------------------------
-
-bool DuplicateZoneCommand::IsExpression() const
-{
-	return true;
-}
-
-
-void DuplicateZoneCommand::DetermineOperandRegs( SSAAllocator &allocator ) const
-{
-	source_reg = allocator.Pop();
-	dest_reg = allocator.Push();
-	ASSERT( source_reg != dest_reg ); // SSA
-}
-
-
-Command::Operands DuplicateZoneCommand::GetOperandRegs() const
-{
-	return { {source_reg}, {}, {dest_reg} };
-}
-
-
-void DuplicateZoneCommand::Execute( const ExecKit &kit ) const
-{
-	TreeZone &source_zone = dynamic_cast<TreeZone &>(*(*kit.register_file)[source_reg]);
-    auto dest_zone = source_zone.Duplicate(kit.x_tree_db);
-    (*kit.register_file)[dest_reg] = make_unique<FreeZone>(dest_zone);      
-}
-
-
-string DuplicateZoneCommand::GetTrace() const
-{
-	return "DuplicateZoneCommand "+OpName(source_reg)+ " -> "+OpName(dest_reg);
-}
-
-// ------------------------- JoinZoneCommand --------------------------
-
-bool JoinZoneCommand::IsExpression() const
-{
-	return true;
-}
-
-
-JoinZoneCommand::JoinZoneCommand(int ti) :
-    terminus_index(ti)
-{
-}
-
-
-void JoinZoneCommand::DetermineOperandRegs( SSAAllocator &allocator ) const
-{
-	source_reg = allocator.Pop();
-	target_reg = allocator.Peek();
-}
-
-
-Command::Operands JoinZoneCommand::GetOperandRegs() const
-{
-	return { {source_reg}, {target_reg}, {} };
-}
-
-
-void JoinZoneCommand::SetSourceReg( SSAAllocator::Reg reg )
-{
-	source_reg = reg;
-}
-
-
-void JoinZoneCommand::Execute( const ExecKit &kit ) const
-{
-	// Only free zones can be joined
-	FreeZone source_zone = dynamic_cast<FreeZone &>(*(*kit.register_file)[source_reg]);
-	FreeZone &target_zone = dynamic_cast<FreeZone &>(*(*kit.register_file)[target_reg]);
-	target_zone.Join(source_zone, terminus_index);    
-}
-
-
-string JoinZoneCommand::GetTrace() const
-{
-	return "JoinZoneCommand " +
-	       OpName(target_reg) +
-	       SSPrintf("[%d]", terminus_index) +
-	       " joins " +
-  	       OpName(source_reg);
-
-}
-
 // ------------------------- UpdateTreeCommand --------------------------
 
 bool UpdateTreeCommand::IsExpression() const
@@ -336,49 +207,6 @@ void UpdateTreeCommand::Execute( const ExecKit &kit ) const
 string UpdateTreeCommand::GetTrace() const
 {
 	return "UpdateTreeCommand "+OpName(source_reg)+" over "+OpName(target_reg);
-}
-
-// ------------------------- MarkBaseForEmbeddedCommand --------------------------
-
-bool MarkBaseForEmbeddedCommand::IsExpression() const
-{
-	return true;
-}
-
-MarkBaseForEmbeddedCommand::MarkBaseForEmbeddedCommand( RequiresSubordinateSCREngine *embedded_agent_ ) :
-    embedded_agent( embedded_agent_ )
-{
-}
-    
-    
-void MarkBaseForEmbeddedCommand::DetermineOperandRegs( SSAAllocator &allocator ) const
-{
-	source_reg = allocator.Peek();
-}
-
-
-Command::Operands MarkBaseForEmbeddedCommand::GetOperandRegs() const
-{
-	return { {source_reg}, {}, {} };
-}
-
-
-void MarkBaseForEmbeddedCommand::SetSourceReg( SSAAllocator::Reg reg )
-{
-	source_reg = reg;
-}
-
-
-void MarkBaseForEmbeddedCommand::Execute( const ExecKit &kit ) const
-{
-	Zone &zone = *(*kit.register_file)[source_reg];
-	zone.MarkBaseForEmbedded(kit.scr_engine, embedded_agent);
-}
-
-    
-string MarkBaseForEmbeddedCommand::GetTrace() const
-{
-	return "MarkBaseForEmbeddedCommand "+OpName(source_reg);
 }
 
 // ------------------------- CommandSequence --------------------------

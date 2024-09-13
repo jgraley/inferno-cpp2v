@@ -86,27 +86,6 @@ private:
 	std::list<RequiresSubordinateSCREngine *> embedded_agents;
 };
 
-// ------------------------- DeclareFreeZoneCommand --------------------------
-
-// Create a new free zone
-class DeclareFreeZoneCommand : public Command
-{
-public:
-    DeclareFreeZoneCommand( FreeZone &&zone );
-	bool IsExpression() const final;
-	void DetermineOperandRegs( SSAAllocator &allocator ) const final;
-	Operands GetOperandRegs() const final;
-    const FreeZone *GetFreeZone() const;
-
-	void Execute( const ExecKit &kit ) const final;	
-
-	string GetTrace() const final;
-
-private:
-	unique_ptr<FreeZone> zone;
-	mutable SSAAllocator::Reg dest_reg = -1;
-};
-
 // ------------------------- DeclareTreeZoneCommand --------------------------
 
 // Create a new tree zone
@@ -128,48 +107,6 @@ private:
 	mutable SSAAllocator::Reg dest_reg = -1;
 };
 
-
-// ------------------------- DuplicateZoneCommand --------------------------
-
-// Duplicate a dest tree zone, making a new free zone
-class DuplicateZoneCommand : public Command
-{
-public:
-	bool IsExpression() const final;
-	void DetermineOperandRegs( SSAAllocator &allocator ) const final;
-	Operands GetOperandRegs() const final;
-
-	void Execute( const ExecKit &kit ) const final;	
-
-	string GetTrace() const final;
-
-private:
-	mutable SSAAllocator::Reg source_reg = -1;
-	mutable SSAAllocator::Reg dest_reg = -1;
-};
-
-// ------------------------- JoinZoneCommand --------------------------
-
-// Populate one terminus of a dest free zone with a source free zone
-class JoinZoneCommand : public Command
-{
-public:
-    explicit JoinZoneCommand(int ti);
-	bool IsExpression() const final;
-	void DetermineOperandRegs( SSAAllocator &allocator ) const final;
-	Operands GetOperandRegs() const final;
-	void SetSourceReg( SSAAllocator::Reg reg );
-
-	void Execute( const ExecKit &kit ) const final;	
-
-	string GetTrace() const final;
-
-private:
-	const int terminus_index;
-	mutable SSAAllocator::Reg source_reg = -1;
-	mutable SSAAllocator::Reg target_reg = -1;
-};
-
 // ------------------------- UpdateTreeCommand --------------------------
 
 // Replace that part of the tree represented by a target tree zone with
@@ -189,28 +126,6 @@ public:
 private:
 	mutable SSAAllocator::Reg source_reg = -1;
 	mutable SSAAllocator::Reg target_reg = -1;
-};
-
-// ------------------------- MarkBaseForEmbeddedCommand --------------------------
-
-// Takes the base of the zone at the top of the stack and remembers it as
-// the base to use for the configured embedded engine. No change to stack.
-class MarkBaseForEmbeddedCommand : public Command
-{
-public:
-    MarkBaseForEmbeddedCommand( RequiresSubordinateSCREngine *embedded_agent );
-	bool IsExpression() const final;
-	void DetermineOperandRegs( SSAAllocator &allocator ) const final;
-	Operands GetOperandRegs() const final;
-	void SetSourceReg( SSAAllocator::Reg reg );
-
-	void Execute( const ExecKit &kit ) const final;	
-
-	string GetTrace() const final;
-
-private:
-	RequiresSubordinateSCREngine * const embedded_agent;
-	mutable SSAAllocator::Reg source_reg = -1;
 };
 
 // ------------------------- CommandSequence --------------------------

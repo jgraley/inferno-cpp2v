@@ -129,12 +129,8 @@ Agent::CommandPtr IdentifierByNameAgent::GenerateCommandImpl( const ReplaceKit &
                                                               XLink key_xlink )
 {
     ASSERT(key_xlink)("Unkeyed agent seen in replace context");
-    auto new_zone = TreeZone::CreateSubtree( key_xlink );
-
-    auto commands = make_unique<CommandSequence>();
-	commands->Add( make_unique<DeclareTreeZoneCommand>( new_zone ) );
-	commands->Add( make_unique<DuplicateZoneCommand>() );
-	return commands;
+    auto new_zone = make_unique<TreeZone>(TreeZone::CreateSubtree( key_xlink ));
+	return make_unique<PopulateZoneCommand>( move(new_zone) );
 }
 
 

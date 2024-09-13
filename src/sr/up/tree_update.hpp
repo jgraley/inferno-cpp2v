@@ -34,15 +34,6 @@ private:
     map<const TreeZone *, set<const TreeZone *>> overlapping_zones;
 };
 
-// ------------------------- CommandSequenceFlattener --------------------------
-
-class CommandSequenceFlattener
-{
-public:
-	void Apply( CommandSequence &seq );
-	void Worker( CommandSequence &seq, list<unique_ptr<Command>> &commands );
-};
-
 // ------------------------- EmptyZoneRemover --------------------------
 
 class EmptyZoneRemover

@@ -104,30 +104,3 @@ TreeZoneOverlapFinder::TreeZoneOverlapFinder( const XTreeDatabase *db, CommandSe
     
     //FTRACE(overlapping_zones);
 }
-
-// ------------------------- CommandSequenceFlattener --------------------------
-
-void CommandSequenceFlattener::Apply( CommandSequence &seq )
-{
-	list<unique_ptr<Command>> commands( move(seq.GetCommands()) );
-	
-	Worker( seq, commands );
-}
-
-
-void CommandSequenceFlattener::Worker( CommandSequence &seq, list<unique_ptr<Command>> &commands )
-{
-	for( unique_ptr<Command> &cmd : commands )
-	{
-		ASSERT( cmd );
-		if( auto sub_seq = dynamic_pointer_cast<CommandSequence>(cmd) )
-		{
-			Worker( seq, sub_seq->GetCommands() );
-		}
-		else
-		{
-			seq.Add( move(cmd) );
-		}
-	}
-}
-
