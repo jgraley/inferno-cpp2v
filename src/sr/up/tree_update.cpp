@@ -25,11 +25,11 @@ FreeZone SR::Evaluate( const Command *cmd, const Command::EvalKit &eval_kit )
     Command::ExecKit exec_kit;
     exec_kit.register_file = &register_file;
     (Command::EvalKit &)exec_kit = eval_kit; 
-	cmd->Execute( exec_kit );   
-	
-	// Extract the result, a FreeZone
-	ASSERT( register_file.count(out_reg) > 0 );
-    return dynamic_cast<FreeZone &>(*register_file[out_reg]);
+	unique_ptr<Zone> zone = cmd->Evaluate( exec_kit );   
+	if( auto free_zone = dynamic_pointer_cast<FreeZone>(zone) )
+		return *free_zone;
+	else
+		ASSERTFAIL();
 }
 
 
@@ -65,7 +65,7 @@ void SR::RunForReplace( const Command *cmd, const SCREngine *scr_engine, XTreeDa
 }
 
 // ------------------------- TreeZoneOverlapFinder --------------------------
-
+/*
 TreeZoneOverlapFinder::TreeZoneOverlapFinder( const XTreeDatabase *db, CommandSequence *seq )
 {
 	// Put them all into one Overlapping set, pessamistically assuming they
@@ -103,4 +103,4 @@ TreeZoneOverlapFinder::TreeZoneOverlapFinder( const XTreeDatabase *db, CommandSe
     } );
     
     //FTRACE(overlapping_zones);
-}
+}*/

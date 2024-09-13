@@ -361,14 +361,11 @@ void SCREngine::RunEmbedded( PatternLink plink_to_embedded, XLink base_xlink )
 void SCREngine::Replace( XLink base_xlink )
 {
     INDENT("R");
-	auto commands = make_unique<CommandSequence>();
 
 	Agent::ReplaceKit replace_kit;
-    commands->Add(plan.base_agent->GenerateCommand(replace_kit, plan.base_plink));
-    commands->Add( make_unique<DeclareTreeZoneCommand>( TreeZone::CreateSubtree(base_xlink) ) );
-    commands->Add( make_unique<UpdateTreeCommand>() );
-	
-	plan.vn_sequence->RunUpdateCommand( move(commands), this );  
+    Agent::CommandPtr replace_zone = plan.base_agent->GenerateCommand(replace_kit, plan.base_plink);
+    auto command = make_unique<UpdateTreeCommand>(TreeZone::CreateSubtree(base_xlink), move(replace_zone));	
+	plan.vn_sequence->RunUpdateCommand( move(command), this );  
     
     plan.vn_sequence->CompleteDomainExtension();     
 

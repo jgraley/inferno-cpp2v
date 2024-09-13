@@ -86,7 +86,7 @@ const Zone *PopulateZoneCommand::GetZone() const
 }
 
 
-void PopulateZoneCommand::Execute( const ExecKit &kit ) const
+unique_ptr<Zone> PopulateZoneCommand::Evaluate( const ExecKit &kit ) const	
 {
 	//FTRACE(zone)("\n");
 	FreeZone free_zone;
@@ -108,67 +108,37 @@ void PopulateZoneCommand::Execute( const ExecKit &kit ) const
 	for( const unique_ptr<Command> &child_expression : child_expressions )
 	{
 		//FTRACE(child_expression)("\n");
-		child_zones.push_back( Evaluate( child_expression.get(), kit ) );	
+		child_zones.push_back( SR::Evaluate( child_expression.get(), kit ) );	
 	}
 	
 	free_zone.Populate(kit.x_tree_db, child_zones);
 	
 	for( RequiresSubordinateSCREngine *ea : embedded_agents )
 		free_zone.MarkBaseForEmbedded(kit.scr_engine, ea);
+		
+	return make_unique<FreeZone>(free_zone);
+}
 	
-	(*kit.register_file)[dest_reg] = make_unique<FreeZone>(free_zone);
+	
+void PopulateZoneCommand::Execute( const ExecKit &kit ) const
+{
+	(*kit.register_file)[dest_reg] = Evaluate(kit);
 }
 
 
 string PopulateZoneCommand::GetTrace() const
 {
-	return "PopulateZoneCommand "+Trace(*zone)+" -> "+OpName(dest_reg);
-}
-
-// ------------------------- DeclareTreeZoneCommand --------------------------
-
-bool DeclareTreeZoneCommand::IsExpression() const
-{
-	return true;
-}
-
-
-DeclareTreeZoneCommand::DeclareTreeZoneCommand( const TreeZone &zone_ ) :
-	zone( zone_ )
-{
-}
-
-
-void DeclareTreeZoneCommand::DetermineOperandRegs( SSAAllocator &allocator ) const
-{
-	dest_reg = allocator.Push();
-}
-
-
-Command::Operands DeclareTreeZoneCommand::GetOperandRegs() const
-{
-	return { {}, {}, {dest_reg} };
-}
-
-
-const TreeZone *DeclareTreeZoneCommand::GetTreeZone() const
-{
-    return &zone;
-}
-
-
-void DeclareTreeZoneCommand::Execute( const ExecKit &kit ) const
-{
-	(*kit.register_file)[dest_reg] = make_unique<TreeZone>(zone);
-}
-
-
-string DeclareTreeZoneCommand::GetTrace() const
-{
-	return "DeclareTreeZoneCommand "+Trace(zone)+" -> "+OpName(dest_reg);
+	return "PopulateZoneCommand TODOOOOOOOOOO "+Trace(*zone)+" -> "+OpName(dest_reg);
 }
 
 // ------------------------- UpdateTreeCommand --------------------------
+
+UpdateTreeCommand::UpdateTreeCommand( const TreeZone &target_tree_zone_, unique_ptr<Command> child_expression_ ) :
+	target_tree_zone( target_tree_zone_ ),
+	child_expression( move(child_expression_) )
+{
+}
+
 
 bool UpdateTreeCommand::IsExpression() const
 {
@@ -178,35 +148,26 @@ bool UpdateTreeCommand::IsExpression() const
 
 void UpdateTreeCommand::DetermineOperandRegs( SSAAllocator &allocator ) const
 {
-	target_reg = allocator.Pop();
-	source_reg = allocator.Pop();
 }
 
 
 Command::Operands UpdateTreeCommand::GetOperandRegs() const
 {
-	return { {source_reg}, {target_reg}, {} };
-}
-
-
-void UpdateTreeCommand::SetSourceReg( SSAAllocator::Reg reg )
-{
-	source_reg = reg;
+	return { {}, {}, {} };
 }
 
 
 void UpdateTreeCommand::Execute( const ExecKit &kit ) const
 {
     // New zone must be a free zone
-    auto target_tree_zone = dynamic_cast<TreeZone &>(*(*kit.register_file)[target_reg]);
-    auto source_free_zone = dynamic_cast<FreeZone &>(*(*kit.register_file)[source_reg]);
+    auto source_free_zone = SR::Evaluate( child_expression.get(), kit );
     target_tree_zone.Update( kit.x_tree_db, source_free_zone );
 }
 
 
 string UpdateTreeCommand::GetTrace() const
 {
-	return "UpdateTreeCommand "+OpName(source_reg)+" over "+OpName(target_reg);
+	return "UpdateTreeCommand "+Trace(child_expression)+" over "+Trace(target_tree_zone);
 }
 
 // ------------------------- CommandSequence --------------------------

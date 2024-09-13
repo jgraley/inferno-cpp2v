@@ -51,6 +51,7 @@ public:
 	SSAAllocator::Reg GetTargetReg() const;	
 	SSAAllocator::Reg GetDestReg() const;	
 
+	virtual unique_ptr<Zone> Evaluate( const ExecKit &kit ) const { ASSERTFAIL(); }
 	virtual void Execute( const ExecKit &kit ) const = 0;
 	
 protected:
@@ -59,7 +60,7 @@ protected:
 
 // ------------------------- PopulateZoneCommand --------------------------
 
-// Consureuct with any zone and optional marker M. On evaluate: populate the
+// Construct with any zone and optional marker M. On evaluate: populate the
 // zone, apply marker and return the resulting FreeZone. Note: Populate includes
 // duplication of tree zones where encountered, so that it's always a free zone 
 // that's modified and returned.
@@ -75,6 +76,7 @@ public:
 	Operands GetOperandRegs() const final;
     const Zone *GetZone() const;
 
+	unique_ptr<Zone> Evaluate( const ExecKit &kit ) const final;	
 	void Execute( const ExecKit &kit ) const final;	
 
 	string GetTrace() const final;
@@ -86,46 +88,27 @@ private:
 	std::list<RequiresSubordinateSCREngine *> embedded_agents;
 };
 
-// ------------------------- DeclareTreeZoneCommand --------------------------
-
-// Create a new tree zone
-class DeclareTreeZoneCommand : public Command
-{
-public:
-    DeclareTreeZoneCommand( const TreeZone &zone );
-	bool IsExpression() const final;
-	void DetermineOperandRegs( SSAAllocator &allocator ) const final;
-	Operands GetOperandRegs() const final;
-    const TreeZone *GetTreeZone() const;
-
-	void Execute( const ExecKit &kit ) const final;	
-
-	string GetTrace() const final;
-
-private:
-	TreeZone zone;
-	mutable SSAAllocator::Reg dest_reg = -1;
-};
 
 // ------------------------- UpdateTreeCommand --------------------------
 
 // Replace that part of the tree represented by a target tree zone with
-// the contents of a source free zone.
+// the contents of a source free zone returned by a child expression.
 class UpdateTreeCommand : public Command
 {
 public:
+    UpdateTreeCommand( const TreeZone &target_tree_zone_, unique_ptr<Command> child_expression_ );
 	bool IsExpression() const final;
 	void DetermineOperandRegs( SSAAllocator &allocator ) const final;
 	Operands GetOperandRegs() const final;
-	void SetSourceReg( SSAAllocator::Reg reg );
 
 	void Execute( const ExecKit &kit ) const final;	
 
 	string GetTrace() const final;
 
 private:
+	TreeZone target_tree_zone;
+	unique_ptr<Command> child_expression;
 	mutable SSAAllocator::Reg source_reg = -1;
-	mutable SSAAllocator::Reg target_reg = -1;
 };
 
 // ------------------------- CommandSequence --------------------------
