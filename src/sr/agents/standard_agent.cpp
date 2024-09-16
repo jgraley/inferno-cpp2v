@@ -666,7 +666,7 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
 
 					ASSERT( under_elt ); // present simplified scheme disallows nullptr
 					auto under_zone = make_unique<TreeZone>(TreeZone::CreateSubtree( XLink(under_node, &under_elt) ));
-					child_commands.push_back( make_unique<PopulateZoneCommand>(move(under_zone)) );		
+					child_commands.push_back( make_unique<PopulateTreeZoneCommand>(move(under_zone)) );		
 				}
 			}
         }            
@@ -688,7 +688,7 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
 			{
 				ASSERT( *under_singular );            
 				auto under_zone = make_unique<TreeZone>(TreeZone::CreateSubtree( XLink(under_node, under_singular) ));
-				child_commands.push_back( make_unique<PopulateZoneCommand>(move(under_zone)) );			
+				child_commands.push_back( make_unique<PopulateTreeZoneCommand>(move(under_zone)) );			
 			}
         }
         else
@@ -697,7 +697,7 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
         }
     }
     
-    return make_unique<PopulateZoneCommand>( move(zone), move(child_commands) );         
+    return make_unique<PopulateFreeZoneCommand>( move(zone), move(child_commands) );         
 }
 
 Agent::CommandPtr StandardAgent::GenerateCommandNormal( const ReplaceKit &kit, 
@@ -768,7 +768,7 @@ Agent::CommandPtr StandardAgent::GenerateCommandNormal( const ReplaceKit &kit,
         }       
     }
     
-    return make_unique<PopulateZoneCommand>( move(zone), move(child_commands) );     
+    return make_unique<PopulateFreeZoneCommand>( move(zone), move(child_commands) );     
 }
 
 

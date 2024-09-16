@@ -43,7 +43,7 @@ Agent::CommandPtr DepthAgent::GenerateCommandImpl( const ReplaceKit &kit,
     ASSERT(terminus_key_xlink);// this could mean replace is being attempted on a DepthAgent in an abnormal context
     auto new_zone = make_unique<TreeZone>( key_xlink, vector<XLink>{terminus_key_xlink} );   
 
-    return make_unique<PopulateZoneCommand>( move(new_zone), move(child_commands) );
+    return make_unique<PopulateTreeZoneCommand>( move(new_zone), move(child_commands) );
 }
 
 

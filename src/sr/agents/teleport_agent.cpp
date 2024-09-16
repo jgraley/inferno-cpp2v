@@ -84,7 +84,7 @@ Agent::CommandPtr TeleportAgent::GenerateCommandImpl( const ReplaceKit &kit,
 {
     ASSERT(key_xlink)("Unkeyed agent seen in replace context");
     auto new_zone = make_unique<TreeZone>(TreeZone::CreateSubtree( key_xlink ));
-	return make_unique<PopulateZoneCommand>( move(new_zone) );
+	return make_unique<PopulateTreeZoneCommand>( move(new_zone) );
 }
 
 

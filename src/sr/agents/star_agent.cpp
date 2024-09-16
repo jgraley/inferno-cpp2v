@@ -103,11 +103,11 @@ Agent::CommandPtr StarAgent::GenerateCommandImpl( const ReplaceKit &kit,
         zone->AddTerminus( ti, make_shared<ContainerTerminus>(dest_container, dest_it) );    
 
         auto child_zone = make_unique<TreeZone>(TreeZone::CreateSubtree( XLink(key_node, &key_elt) ));
-	    child_commands.push_back( make_unique<PopulateZoneCommand>(move(child_zone)) );
+	    child_commands.push_back( make_unique<PopulateTreeZoneCommand>(move(child_zone)) );
         ti++;
     }
 
-    return make_unique<PopulateZoneCommand>( move(zone), move(child_commands) );    
+    return make_unique<PopulateFreeZoneCommand>( move(zone), move(child_commands) );    
 }
 
 

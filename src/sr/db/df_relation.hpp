@@ -22,12 +22,12 @@ public:
 	{
 		// Siblings mean weakly removed i.e. supplied nodes could be 
 		// descendants of the actualk siblings. 
-		SAME,
-		LEFT_IS_ANCESTOR,
-		RIGHT_IS_ANCESTOR,
-		CONTAINER_SIBLINGS,
-		ITEM_SIBLINGS,
-		ROOT_SIBLINGS
+		SAME,               // 0, equal 
+		LEFT_IS_ANCESTOR,   // -1, l less than r
+		RIGHT_IS_ANCESTOR,  // +1, l greater than r
+		CONTAINER_SIBLINGS, // depends on child ptr order
+		ITEM_SIBLINGS,      // depends on child ptr order 
+		ROOT_SIBLINGS       // depends on child ptr order
 	};
 		
     DepthFirstRelation(const XTreeDatabase *db);

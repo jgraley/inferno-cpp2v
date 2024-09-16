@@ -27,9 +27,10 @@ void SR::RunForReplace( const Command *cmd, const SCREngine *scr_engine, XTreeDa
 {
 	ASSERT( !cmd->IsExpression() );
 
-
 	// Uniqueness of tree zones
-	//TreeZoneOverlapFinder finder( x_tree_db, cmd.get() );
+	const Command *expr = dynamic_cast<const UpdateTreeCommand &>(*cmd).GetExpression();
+	TreeZoneOverlapFinder overlaps( x_tree_db, expr );
+	FTRACE(overlaps);
 	
 	// err...
 	
@@ -39,19 +40,18 @@ void SR::RunForReplace( const Command *cmd, const SCREngine *scr_engine, XTreeDa
 }
 
 // ------------------------- TreeZoneOverlapFinder --------------------------
-/*
-TreeZoneOverlapFinder::TreeZoneOverlapFinder( const XTreeDatabase *db, CommandSequence *seq )
+
+TreeZoneOverlapFinder::TreeZoneOverlapFinder( const XTreeDatabase *db, const Command *cmd )
 {
 	// Put them all into one Overlapping set, pessamistically assuming they
-	// all overlap
-	
-	for( const unique_ptr<Command> &cmd : seq->GetCommands() )
+	// all COULD overlap	
+	cmd->ForWalk( [&](const Command *c)
 	{
-		if( auto tz_cmd = dynamic_cast<const DeclareTreeZoneCommand *>(cmd.get()) )
+		if( auto tz_cmd = dynamic_cast<const PopulateTreeZoneCommand *>(c) )
         {
             // Note that key is actually TreeZone *, so equal TreeZones get different 
             // rows which is why we InsertSolo()
-            const TreeZone *zone = tz_cmd->GetTreeZone();
+            const TreeZone *zone = tz_cmd->GetZone();
             
             // Zone should be known to the DB
             zone->DBCheck(db);
@@ -62,19 +62,33 @@ TreeZoneOverlapFinder::TreeZoneOverlapFinder( const XTreeDatabase *db, CommandSe
             // Start off with an empty overlapping set
             InsertSolo( overlapping_zones, make_pair( zone, set<const TreeZone *>() ) );
         }
-	}
+	}, nullptr);
 	
+	// Find the actual overlaps and add to the sets
     ForAllUnorderedPairs( tzps_to_commands, 
-                                    [&](const pair<const TreeZone *, const DeclareTreeZoneCommand *> &l, 
-                                        const pair<const TreeZone *, const DeclareTreeZoneCommand *> &r)
+                                    [&](const pair<const TreeZone *, const PopulateTreeZoneCommand *> &l, 
+                                        const pair<const TreeZone *, const PopulateTreeZoneCommand *> &r)
     {
         if( TreeZone::IsOverlap( db, *l.first, *r.first ) )
         {
-            // It's a symmentrical relationship so do it both ways around
+            // It's a symmetrical relationship so do it both ways around
             overlapping_zones[l.first].insert(r.first);
             overlapping_zones[r.first].insert(l.first);
         }
     } );
-    
-    //FTRACE(overlapping_zones);
-}*/
+          
+    // Discard empty sets
+	for (auto it = overlapping_zones.cbegin(); it != overlapping_zones.cend();)
+	{
+	    if (it->second.empty())	 
+		    it = overlapping_zones.erase(it);
+	    else
+			it++;	  
+	}			  
+}
+
+
+string TreeZoneOverlapFinder::GetTrace() const
+{
+	return Trace(overlapping_zones);
+}

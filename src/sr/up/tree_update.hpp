@@ -22,13 +22,15 @@ void RunForReplace( const Command *cmd, const SCREngine *scr_engine, XTreeDataba
 	
 // ------------------------- TreeZoneOverlapFinder --------------------------
 
-class TreeZoneOverlapFinder
+class TreeZoneOverlapFinder : public Traceable
 {
 public:
-	TreeZoneOverlapFinder( const XTreeDatabase *db, CommandSequence *seq );
+	TreeZoneOverlapFinder( const XTreeDatabase *db, const Command *cmd );
 	
+    string GetTrace() const final;
+
 private:	
-    map<const TreeZone *, const DeclareTreeZoneCommand *> tzps_to_commands;
+    map<const TreeZone *, const PopulateTreeZoneCommand *> tzps_to_commands;
     map<const TreeZone *, set<const TreeZone *>> overlapping_zones;
 };
 
