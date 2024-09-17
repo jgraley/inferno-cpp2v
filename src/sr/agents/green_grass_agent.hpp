@@ -19,7 +19,7 @@ class GreenGrassAgent : public virtual ColocatedAgent
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicColocatedQuery() const; 
 
-    FZExprPtr GenerateCommandImpl( const ReplaceKit &kit, 
+    FreeZoneExprPtr GenFreeZoneExprImpl( const ReplaceKit &kit, 
                                     PatternLink me_plink, 
                                     XLink key_xlink ) final;
 

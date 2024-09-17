@@ -21,7 +21,7 @@ public:
     bool ReplaceKeyerQuery( PatternLink me_plink, 
                             set<PatternLink> keyer_plinks ) final;                                  
 
-    FZExprPtr GenerateCommandImpl( const ReplaceKit &kit, 
+    FreeZoneExprPtr GenFreeZoneExprImpl( const ReplaceKit &kit, 
                                     PatternLink me_plink, 
                                     XLink key_xlink ) final;
                                             

@@ -24,14 +24,14 @@ Lazy<BooleanExpression> GreenGrassAgent::SymbolicColocatedQuery() const
 }
 
 
-Agent::FZExprPtr GreenGrassAgent::GenerateCommandImpl( const ReplaceKit &kit, 
+Agent::FreeZoneExprPtr GreenGrassAgent::GenFreeZoneExprImpl( const ReplaceKit &kit, 
                                                         PatternLink me_plink, 
                                                         XLink key_xlink )
 {
     auto plinks = pattern_query->GetNormalLinks();
     PatternLink replace_plink = OnlyElementOf(plinks);
     ASSERT( replace_plink );          
-    return replace_plink.GetChildAgent()->GenerateCommand(kit, replace_plink);    
+    return replace_plink.GetChildAgent()->GenFreeZoneExpr(kit, replace_plink);    
 }                                         
 
 

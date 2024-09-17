@@ -28,7 +28,7 @@ public:
                                                                
     SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuery() const override;                                       
 
-    FZExprPtr GenerateCommandImpl( const ReplaceKit &kit, 
+    FreeZoneExprPtr GenFreeZoneExprImpl( const ReplaceKit &kit, 
                                     PatternLink me_plink, 
                                     XLink key_xlink ) final;
 

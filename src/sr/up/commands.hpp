@@ -13,12 +13,10 @@ namespace SR
 {
 class XTreeDatabase;
 	
-// ------------------------- Command --------------------------
-    
-class Command : public Traceable
+	
+namespace UP
 {
-public:
-    struct ExecKit
+	struct ExecKit
     {
 		// Note: unlike kits in sym, these pointers are non-const
 		// because we intend to actually change things here.
@@ -27,49 +25,49 @@ public:
         // For embedded patterns
         const SCREngine *scr_engine;
 	};
-
-	virtual bool IsExpression() const = 0;
+}
 	
-	virtual void Execute( const ExecKit &kit ) const = 0;
+// ------------------------- Command --------------------------
+    
+class Command : public Traceable
+{
+public:	
+	virtual void Execute( const UP::ExecKit &kit ) const = 0;
 };
 
 // ------------------------- FreeZoneExpression --------------------------
 
-class FreeZoneExpression : public Command
+class FreeZoneExpression : public Traceable
 {
-public:
-	//bool IsExpression() const override;
-	
-    // These erally want to be in an Expression class
-	void ForWalk( function<void(const FreeZoneExpression *cmd)> func_in,
-		          function<void(const FreeZoneExpression *cmd)> func_out ) const;
-	virtual void WalkImpl(function<void(const FreeZoneExpression *cmd)> func_in,
-			              function<void(const FreeZoneExpression *cmd)> func_out) const { ASSERTFAIL(); }
-	virtual unique_ptr<Zone> Evaluate( const ExecKit &kit ) const { ASSERTFAIL(); }
+public:	
+	static void ForDepthFirstWalk( const FreeZoneExpression *base,
+	                               function<void(const FreeZoneExpression *cmd)> func_in,
+		                           function<void(const FreeZoneExpression *cmd)> func_out );
+	virtual void DepthFirstWalkImpl(function<void(const FreeZoneExpression *cmd)> func_in,
+			                        function<void(const FreeZoneExpression *cmd)> func_out) const { ASSERTFAIL(); }
+	virtual unique_ptr<Zone> Evaluate( const UP::ExecKit &kit ) const { ASSERTFAIL(); }
 };
 
-// ------------------------- PopulateZoneCommand --------------------------
+// ------------------------- PopulateZoneOperator --------------------------
 
 // Construct with any zone and optional marker M. On evaluate: populate the
 // zone, apply marker and return the resulting FreeZone. 
-class PopulateZoneCommand : public FreeZoneExpression
+class PopulateZoneOperator : public FreeZoneExpression
 {
 protected:
-    PopulateZoneCommand( vector<unique_ptr<FreeZoneExpression>> &&child_expressions_ );
-    PopulateZoneCommand();
+    PopulateZoneOperator( vector<unique_ptr<FreeZoneExpression>> &&child_expressions_ );
+    PopulateZoneOperator();
 
 public:
     void AddEmbeddedAgentBase( RequiresSubordinateSCREngine *embedded_agent );
     
-	bool IsExpression() const final;
     //const Zone *GetZone() const;
     int GetNumChildExpressions() const;
     
-	void WalkImpl(function<void(const FreeZoneExpression *cmd)> func_in,
-			      function<void(const FreeZoneExpression *cmd)> func_out) const final;
+	void DepthFirstWalkImpl(function<void(const FreeZoneExpression *cmd)> func_in,
+			                function<void(const FreeZoneExpression *cmd)> func_out) const final;
 
-	void PopulateFreeZone( FreeZone &free_zone, const ExecKit &kit ) const;	
-	void Execute( const ExecKit &kit ) const final;	
+	void PopulateFreeZone( FreeZone &free_zone, const UP::ExecKit &kit ) const;	
 
 	string GetTrace() const final;
 
@@ -80,35 +78,35 @@ private:
 };
 
 
-// ------------------------- PopulateTreeZoneCommand --------------------------
+// ------------------------- PopulateTreeZoneOperator --------------------------
 
 // Construct with tree zone and optional marker M. On evaluate: populate the
 // zone, apply marker and return the resulting FreeZone. 
-class PopulateTreeZoneCommand : public PopulateZoneCommand
+class PopulateTreeZoneOperator : public PopulateZoneOperator
 {
 public:
-    PopulateTreeZoneCommand( unique_ptr<TreeZone> &&zone_, vector<unique_ptr<FreeZoneExpression>> &&child_expressions );
-    PopulateTreeZoneCommand( unique_ptr<TreeZone> &&zone_ );
+    PopulateTreeZoneOperator( unique_ptr<TreeZone> &&zone_, vector<unique_ptr<FreeZoneExpression>> &&child_expressions );
+    PopulateTreeZoneOperator( unique_ptr<TreeZone> &&zone_ );
     
     const TreeZone *GetZone() const;
-	unique_ptr<Zone> Evaluate( const ExecKit &kit ) const final;	
+	unique_ptr<Zone> Evaluate( const UP::ExecKit &kit ) const final;	
     
 private:
 	unique_ptr<TreeZone> zone;
 };
 
-// ------------------------- PopulateFreeZoneCommand --------------------------
+// ------------------------- PopulateFreeZoneOperator --------------------------
 
 // Construct with free zone and optional marker M. On evaluate: populate the
 // zone, apply marker and return the resulting FreeZone. 
-class PopulateFreeZoneCommand : public PopulateZoneCommand
+class PopulateFreeZoneOperator : public PopulateZoneOperator
 {
 public:
-    PopulateFreeZoneCommand( unique_ptr<FreeZone> &&zone_, vector<unique_ptr<FreeZoneExpression>> &&child_expressions );
-    PopulateFreeZoneCommand( unique_ptr<FreeZone> &&zone_ );
+    PopulateFreeZoneOperator( unique_ptr<FreeZone> &&zone_, vector<unique_ptr<FreeZoneExpression>> &&child_expressions );
+    PopulateFreeZoneOperator( unique_ptr<FreeZone> &&zone_ );
 
     const FreeZone *GetZone() const;
-   	unique_ptr<Zone> Evaluate( const ExecKit &kit ) const final;	
+   	unique_ptr<Zone> Evaluate( const UP::ExecKit &kit ) const final;	
 
 private:
 	unique_ptr<FreeZone> zone;
@@ -122,10 +120,9 @@ class UpdateTreeCommand : public Command
 {
 public:
     UpdateTreeCommand( const TreeZone &target_tree_zone_, unique_ptr<FreeZoneExpression> child_expression_ );
-	bool IsExpression() const final;
 	const FreeZoneExpression *GetExpression() const;
 	
-	void Execute( const ExecKit &kit ) const final;	
+	void Execute( const UP::ExecKit &kit ) const final;	
 
 	string GetTrace() const final;
 
@@ -139,9 +136,7 @@ private:
 class CommandSequence : public Command
 {
 public:
-	bool IsExpression() const final;
-
-	void Execute( const ExecKit &kit ) const final;	
+	void Execute( const UP::ExecKit &kit ) const final;	
 
 	void Add( unique_ptr<Command> new_cmd );
 	void AddAtStart( unique_ptr<Command> new_cmd );

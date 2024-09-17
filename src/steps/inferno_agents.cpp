@@ -124,13 +124,13 @@ SYM::Lazy<SYM::BooleanExpression> IdentifierByNameAgent::SymbolicNormalLinkedQue
 }
 
 
-Agent::FZExprPtr IdentifierByNameAgent::GenerateCommandImpl( const ReplaceKit &kit, 
+Agent::FreeZoneExprPtr IdentifierByNameAgent::GenFreeZoneExprImpl( const ReplaceKit &kit, 
                                                               PatternLink me_plink, 
                                                               XLink key_xlink )
 {
     ASSERT(key_xlink)("Unkeyed agent seen in replace context");
     auto new_zone = make_unique<TreeZone>(TreeZone::CreateSubtree( key_xlink ));
-	return make_unique<PopulateTreeZoneCommand>( move(new_zone) );
+	return make_unique<PopulateTreeZoneOperator>( move(new_zone) );
 }
 
 

@@ -12,7 +12,7 @@ using namespace SR;
 
 FreeZone SR::RunForBuilder( const FreeZoneExpression *expr )
 {
-    Command::ExecKit exec_kit {nullptr, nullptr};
+    UP::ExecKit exec_kit {nullptr, nullptr};
 	unique_ptr<Zone> zone = expr->Evaluate( exec_kit );   
 	if( auto free_zone = dynamic_pointer_cast<FreeZone>(zone) )
 		return *free_zone;
@@ -23,8 +23,6 @@ FreeZone SR::RunForBuilder( const FreeZoneExpression *expr )
 
 void SR::RunForReplace( const Command *cmd, const SCREngine *scr_engine, XTreeDatabase *x_tree_db )
 {
-	ASSERT( !cmd->IsExpression() );
-
 	// Uniqueness of tree zones
 	const FreeZoneExpression *expr = dynamic_cast<const UpdateTreeCommand &>(*cmd).GetExpression();
 	TreeZoneOverlapFinder overlaps( x_tree_db, expr );
@@ -33,7 +31,7 @@ void SR::RunForReplace( const Command *cmd, const SCREngine *scr_engine, XTreeDa
 	// err...
 	
 	// Execute it
-    Command::ExecKit exec_kit {x_tree_db, scr_engine}; 
+    UP::ExecKit exec_kit {x_tree_db, scr_engine}; 
 	cmd->Execute( exec_kit );   
 }
 
@@ -43,9 +41,9 @@ TreeZoneOverlapFinder::TreeZoneOverlapFinder( const XTreeDatabase *db, const Fre
 {
 	// Put them all into one Overlapping set, pessamistically assuming they
 	// all COULD overlap	
-	base->ForWalk( [&](const FreeZoneExpression *expr)
+	FreeZoneExpression::ForDepthFirstWalk( base, [&](const FreeZoneExpression *expr)
 	{
-		if( auto ptz_cmd = dynamic_cast<const PopulateTreeZoneCommand *>(expr) )
+		if( auto ptz_cmd = dynamic_cast<const PopulateTreeZoneOperator *>(expr) )
         {
             // Note that key is actually TreeZone *, so equal TreeZones get different 
             // rows which is why we InsertSolo()
@@ -64,8 +62,8 @@ TreeZoneOverlapFinder::TreeZoneOverlapFinder( const XTreeDatabase *db, const Fre
 	
 	// Find the actual overlaps and add to the sets
     ForAllUnorderedPairs( tzps_to_commands, 
-                                    [&](const pair<const TreeZone *, const PopulateTreeZoneCommand *> &l, 
-                                        const pair<const TreeZone *, const PopulateTreeZoneCommand *> &r)
+                                    [&](const pair<const TreeZone *, const PopulateTreeZoneOperator *> &l, 
+                                        const pair<const TreeZone *, const PopulateTreeZoneOperator *> &r)
     {
         if( TreeZone::IsOverlap( db, *l.first, *r.first ) )
         {

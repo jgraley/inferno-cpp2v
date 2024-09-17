@@ -32,13 +32,13 @@ void EmbeddedSCRAgent::MaybeChildrenPlanOverlay( PatternLink me_plink,
 }
 
 
-Agent::FZExprPtr EmbeddedSCRAgent::GenerateCommandImpl( const ReplaceKit &kit, 
+Agent::FreeZoneExprPtr EmbeddedSCRAgent::GenFreeZoneExprImpl( const ReplaceKit &kit, 
                                                          PatternLink me_plink, 
                                                          XLink key_xlink )
 {   
     PatternLink through_plink(this, GetThrough());
-    Agent::FZExprPtr child_command = through_plink.GetChildAgent()->GenerateCommand(kit, through_plink);
-    auto child_pzc = dynamic_cast<PopulateZoneCommand *>(child_command.get());
+    Agent::FreeZoneExprPtr child_command = through_plink.GetChildAgent()->GenFreeZoneExpr(kit, through_plink);
+    auto child_pzc = dynamic_cast<PopulateZoneOperator *>(child_command.get());
     ASSERT( child_pzc );
     
     // Inform the update mechanism that, once it's done duplicating 

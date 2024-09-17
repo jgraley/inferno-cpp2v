@@ -16,7 +16,7 @@ class ConjunctionAgent : public virtual ColocatedAgent
 public:               
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
 
-    FZExprPtr GenerateCommandImpl( const ReplaceKit &kit, 
+    FreeZoneExprPtr GenFreeZoneExprImpl( const ReplaceKit &kit, 
                                     PatternLink me_plink, 
                                     XLink key_xlink ) final;
 

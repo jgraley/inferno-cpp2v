@@ -66,10 +66,10 @@ void DeltaAgent::StartPlanOverlay()
 }
 
 
-Agent::FZExprPtr DeltaAgent::GenerateCommandImpl( const ReplaceKit &kit, 
+Agent::FreeZoneExprPtr DeltaAgent::GenFreeZoneExprImpl( const ReplaceKit &kit, 
                                                    PatternLink me_plink, 
                                                    XLink key_xlink )
 {
     PatternLink overlay_plink(this, GetOverlay());
-    return overlay_plink.GetChildAgent()->GenerateCommand(kit, overlay_plink);    
+    return overlay_plink.GetChildAgent()->GenFreeZoneExpr(kit, overlay_plink);    
 }                                         

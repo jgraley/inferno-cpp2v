@@ -109,7 +109,7 @@ struct IdentifierByNameAgent : public virtual SearchLeafAgent
     virtual Block GetGraphBlockInfo() const;
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
 
-    FZExprPtr GenerateCommandImpl( const ReplaceKit &kit, 
+    FreeZoneExprPtr GenFreeZoneExprImpl( const ReplaceKit &kit, 
                                     PatternLink me_plink, 
                                     XLink key_xlink ) final;
 

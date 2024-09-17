@@ -16,7 +16,7 @@ shared_ptr<PatternQuery> ConjunctionAgent::GetPatternQuery() const
 }
 
 
-Agent::FZExprPtr ConjunctionAgent::GenerateCommandImpl( const ReplaceKit &kit, 
+Agent::FreeZoneExprPtr ConjunctionAgent::GenFreeZoneExprImpl( const ReplaceKit &kit, 
                                                          PatternLink me_plink, 
                                                          XLink key_xlink )
 {
@@ -24,7 +24,7 @@ Agent::FZExprPtr ConjunctionAgent::GenerateCommandImpl( const ReplaceKit &kit,
     // multiple conjuncts/disjuncts
     ASSERT(key_xlink)("Unkeyed boolean agent seen in replace context");
     auto new_zone = make_unique<TreeZone>(TreeZone::CreateSubtree( key_xlink ));
-	return make_unique<PopulateTreeZoneCommand>( move(new_zone) );
+	return make_unique<PopulateTreeZoneOperator>( move(new_zone) );
 }
 
 

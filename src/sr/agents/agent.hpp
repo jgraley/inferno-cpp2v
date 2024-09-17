@@ -26,7 +26,7 @@ public:
     };
 
     // really just to reduce the amount of typing if I change it
-    typedef unique_ptr<FreeZoneExpression> FZExprPtr;
+    typedef unique_ptr<FreeZoneExpression> FreeZoneExprPtr;
 
     typedef Graphable::Phase Phase;
     
@@ -84,7 +84,7 @@ public:
                                     set<PatternLink> keyer_plinks ) = 0;
 
     virtual TreePtr<Node> BuildForBuildersAnalysis( PatternLink me_plink ) = 0;
-    virtual FZExprPtr GenerateCommand( const ReplaceKit &kit, 
+    virtual FreeZoneExprPtr GenFreeZoneExpr( const ReplaceKit &kit, 
                                         PatternLink me_plink ) = 0;
     virtual list<PatternLink> GetChildren() const = 0;
     virtual list<PatternLink> GetVisibleChildren( Path v ) const = 0;                        

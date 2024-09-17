@@ -522,13 +522,13 @@ bool AgentCommon::ReplaceKeyerQuery( PatternLink me_plink,
 TreePtr<Node> AgentCommon::BuildForBuildersAnalysis( PatternLink me_plink )
 {
 	Agent::ReplaceKit kit;
-	auto commands = GenerateCommand(kit, me_plink);
+	auto commands = GenFreeZoneExpr(kit, me_plink);
     FreeZone zone = RunForBuilder( commands.get() );     
     return zone.GetBaseNode();
 }
 
 
-Agent::FZExprPtr AgentCommon::GenerateCommand( const ReplaceKit &kit, 
+Agent::FreeZoneExprPtr AgentCommon::GenFreeZoneExpr( const ReplaceKit &kit, 
                                                 PatternLink me_plink )
 {
     INDENT("C");
@@ -545,7 +545,7 @@ Agent::FZExprPtr AgentCommon::GenerateCommand( const ReplaceKit &kit,
 		      (*this)(" keyed with non-final node ")(key_xlink)("\n"); 
     }
 
-    return GenerateCommandImpl( kit, me_plink, key_xlink );
+    return GenFreeZoneExprImpl( kit, me_plink, key_xlink );
 }
 
 

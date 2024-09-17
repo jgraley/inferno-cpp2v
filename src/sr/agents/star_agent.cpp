@@ -70,7 +70,7 @@ void StarAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
 }
 
 
-Agent::FZExprPtr StarAgent::GenerateCommandImpl( const ReplaceKit &kit, 
+Agent::FreeZoneExprPtr StarAgent::GenFreeZoneExprImpl( const ReplaceKit &kit, 
                                                   PatternLink me_plink, 
                                                   XLink key_xlink ) 
 {
@@ -91,7 +91,7 @@ Agent::FZExprPtr StarAgent::GenerateCommandImpl( const ReplaceKit &kit,
     else
         ASSERT(0)("Please add new kind of container");
     
-    vector<Agent::FZExprPtr> child_commands;
+    vector<Agent::FreeZoneExprPtr> child_commands;
     auto zone = make_unique<FreeZone>(FreeZone::CreateSubtree(dest));
     int ti = 0;
 
@@ -103,11 +103,11 @@ Agent::FZExprPtr StarAgent::GenerateCommandImpl( const ReplaceKit &kit,
         zone->AddTerminus( ti, make_shared<ContainerTerminus>(dest_container, dest_it) );    
 
         auto child_zone = make_unique<TreeZone>(TreeZone::CreateSubtree( XLink(key_node, &key_elt) ));
-	    child_commands.push_back( make_unique<PopulateTreeZoneCommand>(move(child_zone)) );
+	    child_commands.push_back( make_unique<PopulateTreeZoneOperator>(move(child_zone)) );
         ti++;
     }
 
-    return make_unique<PopulateFreeZoneCommand>( move(zone), move(child_commands) );    
+    return make_unique<PopulateFreeZoneOperator>( move(zone), move(child_commands) );    
 }
 
 

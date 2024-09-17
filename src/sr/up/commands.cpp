@@ -10,59 +10,54 @@ using namespace SR;
 
 // ------------------------- FreeZoneExpression --------------------------
 
-void FreeZoneExpression::ForWalk( function<void(const FreeZoneExpression *cmd)> func_in,
-	                              function<void(const FreeZoneExpression *cmd)> func_out ) const try
+void FreeZoneExpression::ForDepthFirstWalk( const FreeZoneExpression *base,
+	                                        function<void(const FreeZoneExpression *cmd)> func_in,
+	                                        function<void(const FreeZoneExpression *cmd)> func_out ) try
 {
-	WalkImpl(func_in, func_out);
+	base->DepthFirstWalkImpl(func_in, func_out);
 }
 catch( BreakException )
 {
 }		       
 
-// ------------------------- PopulateZoneCommand --------------------------
+// ------------------------- PopulateZoneOperator --------------------------
 
-bool PopulateZoneCommand::IsExpression() const
-{
-	return true;
-}
-
-
-PopulateZoneCommand::PopulateZoneCommand( vector<unique_ptr<FreeZoneExpression>> &&child_expressions_ ) :
+PopulateZoneOperator::PopulateZoneOperator( vector<unique_ptr<FreeZoneExpression>> &&child_expressions_ ) :
 	child_expressions(move(child_expressions_))
 {
 }	
 
 
-PopulateZoneCommand::PopulateZoneCommand()
+PopulateZoneOperator::PopulateZoneOperator()
 {
 }	
 
 
-void PopulateZoneCommand::AddEmbeddedAgentBase( RequiresSubordinateSCREngine *embedded_agent )
+void PopulateZoneOperator::AddEmbeddedAgentBase( RequiresSubordinateSCREngine *embedded_agent )
 {
 	embedded_agents.push_back( embedded_agent );
 }
 
 
-int PopulateZoneCommand::GetNumChildExpressions() const
+int PopulateZoneOperator::GetNumChildExpressions() const
 {
 	return child_expressions.size();
 }
 
 
-void PopulateZoneCommand::WalkImpl(function<void(const FreeZoneExpression *cmd)> func_in,
-			                       function<void(const FreeZoneExpression *cmd)> func_out) const
+void PopulateZoneOperator::DepthFirstWalkImpl(function<void(const FreeZoneExpression *cmd)> func_in,
+			                                 function<void(const FreeZoneExpression *cmd)> func_out) const
 {
 	if( func_in )
 		func_in(this);
 	for( const unique_ptr<FreeZoneExpression> &child_expression : child_expressions )
-		child_expression->WalkImpl(func_in, func_out);
+		child_expression->DepthFirstWalkImpl(func_in, func_out);
 	if( func_out )
 		func_out(this);
 }
 
 
-void PopulateZoneCommand::PopulateFreeZone( FreeZone &free_zone, const ExecKit &kit ) const	
+void PopulateZoneOperator::PopulateFreeZone( FreeZone &free_zone, const UP::ExecKit &kit ) const	
 {
 	//FTRACE(free_zone)("\n");
 	vector<FreeZone> child_zones;
@@ -82,43 +77,37 @@ void PopulateZoneCommand::PopulateFreeZone( FreeZone &free_zone, const ExecKit &
 		free_zone.MarkBaseForEmbedded(kit.scr_engine, ea);		
 }
 	
-	
-void PopulateZoneCommand::Execute( const ExecKit &kit ) const
+
+string PopulateZoneOperator::GetTrace() const
 {
-	ASSERTFAIL();
+	return "PopulateZoneOperator TODOOOOOOOOOO "+Trace(child_expressions);
 }
 
+// ------------------------- PopulateTreeZoneOperator --------------------------
 
-string PopulateZoneCommand::GetTrace() const
-{
-	return "PopulateZoneCommand TODOOOOOOOOOO "+Trace(child_expressions);
-}
-
-// ------------------------- PopulateTreeZoneCommand --------------------------
-
-PopulateTreeZoneCommand::PopulateTreeZoneCommand( unique_ptr<TreeZone> &&zone_, 
+PopulateTreeZoneOperator::PopulateTreeZoneOperator( unique_ptr<TreeZone> &&zone_, 
                                                   vector<unique_ptr<FreeZoneExpression>> &&child_expressions ) :
-	PopulateZoneCommand( move(child_expressions) ),
+	PopulateZoneOperator( move(child_expressions) ),
 	zone(move(zone_))
 {
 	ASSERT( zone->GetNumTerminii() == GetNumChildExpressions() );	
 }	
 		
 
-PopulateTreeZoneCommand::PopulateTreeZoneCommand( unique_ptr<TreeZone> &&zone_ ) :
+PopulateTreeZoneOperator::PopulateTreeZoneOperator( unique_ptr<TreeZone> &&zone_ ) :
 	zone(move(zone_))
 {
 	ASSERT( zone->GetNumTerminii() == 0 );	
 }
 
 
-const TreeZone *PopulateTreeZoneCommand::GetZone() const
+const TreeZone *PopulateTreeZoneOperator::GetZone() const
 {
     return zone.get();
 }
 
 
-unique_ptr<Zone> PopulateTreeZoneCommand::Evaluate( const ExecKit &kit ) const
+unique_ptr<Zone> PopulateTreeZoneOperator::Evaluate( const UP::ExecKit &kit ) const
 {
 	FreeZone free_zone = zone->Duplicate( kit.x_tree_db );
 	PopulateFreeZone( free_zone, kit );
@@ -126,32 +115,32 @@ unique_ptr<Zone> PopulateTreeZoneCommand::Evaluate( const ExecKit &kit ) const
 }
 
 
-// ------------------------- PopulateFreeZoneCommand --------------------------
+// ------------------------- PopulateFreeZoneOperator --------------------------
 
-PopulateFreeZoneCommand::PopulateFreeZoneCommand( unique_ptr<FreeZone> &&zone_, 
+PopulateFreeZoneOperator::PopulateFreeZoneOperator( unique_ptr<FreeZone> &&zone_, 
                                                   vector<unique_ptr<FreeZoneExpression>> &&child_expressions ) :
-	PopulateZoneCommand( move(child_expressions) ),
+	PopulateZoneOperator( move(child_expressions) ),
 	zone(move(zone_))
 {
 	ASSERT( zone->GetNumTerminii() == GetNumChildExpressions() );	
 }
 
 		
-PopulateFreeZoneCommand::PopulateFreeZoneCommand( unique_ptr<FreeZone> &&zone_ ) :
-   	PopulateZoneCommand(),
+PopulateFreeZoneOperator::PopulateFreeZoneOperator( unique_ptr<FreeZone> &&zone_ ) :
+   	PopulateZoneOperator(),
    	zone(move(zone_))
 {
 	ASSERT( zone->GetNumTerminii() == 0 );	
 }
 
 
-const FreeZone *PopulateFreeZoneCommand::GetZone() const
+const FreeZone *PopulateFreeZoneOperator::GetZone() const
 {
     return zone.get();
 }
 
 
-unique_ptr<Zone> PopulateFreeZoneCommand::Evaluate( const ExecKit &kit ) const
+unique_ptr<Zone> PopulateFreeZoneOperator::Evaluate( const UP::ExecKit &kit ) const
 {
 	PopulateFreeZone( *zone, kit );
 	return make_unique<FreeZone>(*zone);
@@ -167,11 +156,6 @@ UpdateTreeCommand::UpdateTreeCommand( const TreeZone &target_tree_zone_,
 }
 
 
-bool UpdateTreeCommand::IsExpression() const
-{
-	return false;
-}
-
 const FreeZoneExpression *UpdateTreeCommand::GetExpression() const
 {
 	return child_expression.get();
@@ -179,7 +163,7 @@ const FreeZoneExpression *UpdateTreeCommand::GetExpression() const
 
 
 
-void UpdateTreeCommand::Execute( const ExecKit &kit ) const
+void UpdateTreeCommand::Execute( const UP::ExecKit &kit ) const
 {
     // New zone must be a free zone
 	unique_ptr<Zone> zone = child_expression->Evaluate( kit );
@@ -196,14 +180,7 @@ string UpdateTreeCommand::GetTrace() const
 
 // ------------------------- CommandSequence --------------------------
 
-bool CommandSequence::IsExpression() const
-{
-	ASSERT(!seq.empty());
-	return seq.back()->IsExpression(); // like the comma operator
-}
-
-
-void CommandSequence::Execute( const ExecKit &kit ) const
+void CommandSequence::Execute( const UP::ExecKit &kit ) const
 {
 	//FTRACE(" executing");
 	for( const unique_ptr<Command> &cmd : seq )

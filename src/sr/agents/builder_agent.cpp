@@ -33,7 +33,7 @@ bool BuilderAgent::ReplaceKeyerQuery( PatternLink me_plink,
 }
  
  
-Agent::FZExprPtr BuilderAgent::GenerateCommandImpl( const ReplaceKit &kit, 
+Agent::FreeZoneExprPtr BuilderAgent::GenFreeZoneExprImpl( const ReplaceKit &kit, 
                                                      PatternLink me_plink, 
                                                      XLink key_xlink )
 {
@@ -61,5 +61,5 @@ Agent::FZExprPtr BuilderAgent::GenerateCommandImpl( const ReplaceKit &kit,
     }
 
     // Make free zone without duplicating since this is first one
-    return make_unique<PopulateFreeZoneCommand>( make_unique<FreeZone>(FreeZone::CreateSubtree( new_node )) );
+    return make_unique<PopulateFreeZoneOperator>( make_unique<FreeZone>(FreeZone::CreateSubtree( new_node )) );
 }

@@ -110,7 +110,7 @@ void SCREngine::Plan::CategoriseAgents( const set<PatternLink> &enclosing_plinks
         if( enclosing_agents.count( plink.GetChildAgent() ) == 0 ) // exclude by agent
             my_plinks.insert( plink );
 
-    // Need the replace plinks in the same order that GenerateCommand() walks the tree
+    // Need the replace plinks in the same order that GenFreeZoneExpr() walks the tree
     for( PatternLink plink : visible_replace_plinks_postorder )
         if( enclosing_plinks.count(plink) == 0 ) // exclude by plink
         {
@@ -140,7 +140,7 @@ void SCREngine::Plan::WalkVisible( set<PatternLink> &visible,
 {
     visible.insert( plink );    
     
-    // Gee, I sure hope recovers children in the same order as GenerateCommandImpl()    
+    // Gee, I sure hope recovers children in the same order as GenFreeZoneExprImpl()    
     list<PatternLink> visible_child_plinks = plink.GetChildAgent()->GetVisibleChildren(path); 
     
     for( PatternLink visible_child_plink : visible_child_plinks )
@@ -363,7 +363,7 @@ void SCREngine::Replace( XLink base_xlink )
     INDENT("R");
 
 	Agent::ReplaceKit replace_kit;
-    Agent::FZExprPtr replace_zone = plan.base_agent->GenerateCommand(replace_kit, plan.base_plink);
+    Agent::FreeZoneExprPtr replace_zone = plan.base_agent->GenFreeZoneExpr(replace_kit, plan.base_plink);
     auto command = make_unique<UpdateTreeCommand>(TreeZone::CreateSubtree(base_xlink), move(replace_zone));	
 	plan.vn_sequence->RunUpdateCommand( move(command), this );  
     
@@ -539,7 +539,7 @@ void SCREngine::MarkBaseForEmbedded( RequiresSubordinateSCREngine *embedded_agen
                                      TreePtr<Node> embedded_through_subtree ) const
 {
     // permit multiple insertions while working on command sequence (so we can call
-    // GenerateCommand() more than once on the same subtree)
+    // GenFreeZoneExpr() more than once on the same subtree)
     //InsertSolo( bases_for_embedded, make_pair( embedded_agent, embedded_through_subtree ) );
     bases_for_embedded.insert( make_pair( embedded_agent, embedded_through_subtree ) );
 }

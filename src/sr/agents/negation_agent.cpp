@@ -46,14 +46,14 @@ void NegationAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
 }
 
 
-Agent::FZExprPtr NegationAgent::GenerateCommandImpl( const ReplaceKit &kit, 
+Agent::FreeZoneExprPtr NegationAgent::GenFreeZoneExprImpl( const ReplaceKit &kit, 
                                                       PatternLink me_plink, 
                                                       XLink key_xlink )
 {
     // Negation is ambiguous because of the negation property
     ASSERT(key_xlink)("Unkeyed boolean agent seen in replace context");
     auto new_zone = make_unique<TreeZone>(TreeZone::CreateSubtree( key_xlink ));
-	return make_unique<PopulateTreeZoneCommand>( move(new_zone) );
+	return make_unique<PopulateTreeZoneOperator>( move(new_zone) );
 }
 
 
