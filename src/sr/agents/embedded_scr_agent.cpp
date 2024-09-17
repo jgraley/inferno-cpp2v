@@ -32,12 +32,12 @@ void EmbeddedSCRAgent::MaybeChildrenPlanOverlay( PatternLink me_plink,
 }
 
 
-Agent::CommandPtr EmbeddedSCRAgent::GenerateCommandImpl( const ReplaceKit &kit, 
+Agent::FZExprPtr EmbeddedSCRAgent::GenerateCommandImpl( const ReplaceKit &kit, 
                                                          PatternLink me_plink, 
                                                          XLink key_xlink )
 {   
     PatternLink through_plink(this, GetThrough());
-    Agent::CommandPtr child_command = through_plink.GetChildAgent()->GenerateCommand(kit, through_plink);
+    Agent::FZExprPtr child_command = through_plink.GetChildAgent()->GenerateCommand(kit, through_plink);
     auto child_pzc = dynamic_cast<PopulateZoneCommand *>(child_command.get());
     ASSERT( child_pzc );
     

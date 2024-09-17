@@ -66,7 +66,7 @@ void DeltaAgent::StartPlanOverlay()
 }
 
 
-Agent::CommandPtr DeltaAgent::GenerateCommandImpl( const ReplaceKit &kit, 
+Agent::FZExprPtr DeltaAgent::GenerateCommandImpl( const ReplaceKit &kit, 
                                                    PatternLink me_plink, 
                                                    XLink key_xlink )
 {

@@ -46,7 +46,7 @@ void NegationAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
 }
 
 
-Agent::CommandPtr NegationAgent::GenerateCommandImpl( const ReplaceKit &kit, 
+Agent::FZExprPtr NegationAgent::GenerateCommandImpl( const ReplaceKit &kit, 
                                                       PatternLink me_plink, 
                                                       XLink key_xlink )
 {

@@ -29,25 +29,33 @@ public:
 	};
 
 	virtual bool IsExpression() const = 0;
-
-    // These erally want to be in an Expression class
-	void ForWalk( function<void(const Command *cmd)> func_in,
-		          function<void(const Command *cmd)> func_out ) const;
-	virtual void WalkImpl(function<void(const Command *cmd)> func_in,
-			              function<void(const Command *cmd)> func_out) const { ASSERTFAIL(); }
-	virtual unique_ptr<Zone> Evaluate( const ExecKit &kit ) const { ASSERTFAIL(); }
 	
 	virtual void Execute( const ExecKit &kit ) const = 0;
+};
+
+// ------------------------- FreeZoneExpression --------------------------
+
+class FreeZoneExpression : public Command
+{
+public:
+	//bool IsExpression() const override;
+	
+    // These erally want to be in an Expression class
+	void ForWalk( function<void(const FreeZoneExpression *cmd)> func_in,
+		          function<void(const FreeZoneExpression *cmd)> func_out ) const;
+	virtual void WalkImpl(function<void(const FreeZoneExpression *cmd)> func_in,
+			              function<void(const FreeZoneExpression *cmd)> func_out) const { ASSERTFAIL(); }
+	virtual unique_ptr<Zone> Evaluate( const ExecKit &kit ) const { ASSERTFAIL(); }
 };
 
 // ------------------------- PopulateZoneCommand --------------------------
 
 // Construct with any zone and optional marker M. On evaluate: populate the
 // zone, apply marker and return the resulting FreeZone. 
-class PopulateZoneCommand : public Command
+class PopulateZoneCommand : public FreeZoneExpression
 {
 protected:
-    PopulateZoneCommand( vector<unique_ptr<Command>> &&child_expressions_ );
+    PopulateZoneCommand( vector<unique_ptr<FreeZoneExpression>> &&child_expressions_ );
     PopulateZoneCommand();
 
 public:
@@ -57,8 +65,8 @@ public:
     //const Zone *GetZone() const;
     int GetNumChildExpressions() const;
     
-	void WalkImpl(function<void(const Command *cmd)> func_in,
-			      function<void(const Command *cmd)> func_out) const final;
+	void WalkImpl(function<void(const FreeZoneExpression *cmd)> func_in,
+			      function<void(const FreeZoneExpression *cmd)> func_out) const final;
 
 	void PopulateFreeZone( FreeZone &free_zone, const ExecKit &kit ) const;	
 	void Execute( const ExecKit &kit ) const final;	
@@ -67,7 +75,7 @@ public:
 
 private:
 	unique_ptr<Zone> zone;
-	vector<unique_ptr<Command>> child_expressions;
+	vector<unique_ptr<FreeZoneExpression>> child_expressions;
 	std::list<RequiresSubordinateSCREngine *> embedded_agents;
 };
 
@@ -79,7 +87,7 @@ private:
 class PopulateTreeZoneCommand : public PopulateZoneCommand
 {
 public:
-    PopulateTreeZoneCommand( unique_ptr<TreeZone> &&zone_, vector<unique_ptr<Command>> &&child_expressions );
+    PopulateTreeZoneCommand( unique_ptr<TreeZone> &&zone_, vector<unique_ptr<FreeZoneExpression>> &&child_expressions );
     PopulateTreeZoneCommand( unique_ptr<TreeZone> &&zone_ );
     
     const TreeZone *GetZone() const;
@@ -96,7 +104,7 @@ private:
 class PopulateFreeZoneCommand : public PopulateZoneCommand
 {
 public:
-    PopulateFreeZoneCommand( unique_ptr<FreeZone> &&zone_, vector<unique_ptr<Command>> &&child_expressions );
+    PopulateFreeZoneCommand( unique_ptr<FreeZone> &&zone_, vector<unique_ptr<FreeZoneExpression>> &&child_expressions );
     PopulateFreeZoneCommand( unique_ptr<FreeZone> &&zone_ );
 
     const FreeZone *GetZone() const;
@@ -113,9 +121,9 @@ private:
 class UpdateTreeCommand : public Command
 {
 public:
-    UpdateTreeCommand( const TreeZone &target_tree_zone_, unique_ptr<Command> child_expression_ );
+    UpdateTreeCommand( const TreeZone &target_tree_zone_, unique_ptr<FreeZoneExpression> child_expression_ );
 	bool IsExpression() const final;
-	const Command *GetExpression() const;
+	const FreeZoneExpression *GetExpression() const;
 	
 	void Execute( const ExecKit &kit ) const final;	
 
@@ -123,7 +131,7 @@ public:
 
 private:
 	TreeZone target_tree_zone;
-	unique_ptr<Command> child_expression;
+	unique_ptr<FreeZoneExpression> child_expression;
 };
 
 // ------------------------- CommandSequence --------------------------

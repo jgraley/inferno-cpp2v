@@ -135,15 +135,15 @@ private:
 public:
     virtual void MaybeChildrenPlanOverlay(      PatternLink me_plink, 
                                     PatternLink under_plink );
-    CommandPtr GenerateCommandImpl( const ReplaceKit &kit, 
+    FZExprPtr GenerateCommandImpl( const ReplaceKit &kit, 
                                     PatternLink me_plink, 
                                     XLink key_xlink ) final;
 
 private:	
-	CommandPtr GenerateCommandOverlay( const ReplaceKit &kit, 
+	FZExprPtr GenerateCommandOverlay( const ReplaceKit &kit, 
                                        PatternLink me_plink, 
                                        XLink key_xlink ); // under substitution if not nullptr
-    CommandPtr GenerateCommandNormal( const ReplaceKit &kit, 
+    FZExprPtr GenerateCommandNormal( const ReplaceKit &kit, 
                                       PatternLink me_plink );
     
 public:

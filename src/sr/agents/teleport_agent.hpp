@@ -54,7 +54,7 @@ public:
 
 	bool IsExtenderLess( const Extender &r ) const override;
 
-    CommandPtr GenerateCommandImpl( const ReplaceKit &kit, 
+    FZExprPtr GenerateCommandImpl( const ReplaceKit &kit, 
                                     PatternLink me_plink, 
                                     XLink key_xlink ) final;
 

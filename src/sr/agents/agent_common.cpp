@@ -528,7 +528,7 @@ TreePtr<Node> AgentCommon::BuildForBuildersAnalysis( PatternLink me_plink )
 }
 
 
-Agent::CommandPtr AgentCommon::GenerateCommand( const ReplaceKit &kit, 
+Agent::FZExprPtr AgentCommon::GenerateCommand( const ReplaceKit &kit, 
                                                 PatternLink me_plink )
 {
     INDENT("C");

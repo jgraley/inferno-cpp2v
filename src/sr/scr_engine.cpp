@@ -363,7 +363,7 @@ void SCREngine::Replace( XLink base_xlink )
     INDENT("R");
 
 	Agent::ReplaceKit replace_kit;
-    Agent::CommandPtr replace_zone = plan.base_agent->GenerateCommand(replace_kit, plan.base_plink);
+    Agent::FZExprPtr replace_zone = plan.base_agent->GenerateCommand(replace_kit, plan.base_plink);
     auto command = make_unique<UpdateTreeCommand>(TreeZone::CreateSubtree(base_xlink), move(replace_zone));	
 	plan.vn_sequence->RunUpdateCommand( move(command), this );  
     

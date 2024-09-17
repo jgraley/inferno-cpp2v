@@ -10,12 +10,10 @@ using namespace SR;
 
 // ------------------------- Runners --------------------------
 
-FreeZone SR::RunForBuilder( const Command *cmd )
+FreeZone SR::RunForBuilder( const FreeZoneExpression *expr )
 {
-	ASSERT( cmd->IsExpression() );
-
     Command::ExecKit exec_kit {nullptr, nullptr};
-	unique_ptr<Zone> zone = cmd->Evaluate( exec_kit );   
+	unique_ptr<Zone> zone = expr->Evaluate( exec_kit );   
 	if( auto free_zone = dynamic_pointer_cast<FreeZone>(zone) )
 		return *free_zone;
 	else
@@ -28,7 +26,7 @@ void SR::RunForReplace( const Command *cmd, const SCREngine *scr_engine, XTreeDa
 	ASSERT( !cmd->IsExpression() );
 
 	// Uniqueness of tree zones
-	const Command *expr = dynamic_cast<const UpdateTreeCommand &>(*cmd).GetExpression();
+	const FreeZoneExpression *expr = dynamic_cast<const UpdateTreeCommand &>(*cmd).GetExpression();
 	TreeZoneOverlapFinder overlaps( x_tree_db, expr );
 	//FTRACE(overlaps);
 	
@@ -41,23 +39,23 @@ void SR::RunForReplace( const Command *cmd, const SCREngine *scr_engine, XTreeDa
 
 // ------------------------- TreeZoneOverlapFinder --------------------------
 
-TreeZoneOverlapFinder::TreeZoneOverlapFinder( const XTreeDatabase *db, const Command *cmd )
+TreeZoneOverlapFinder::TreeZoneOverlapFinder( const XTreeDatabase *db, const FreeZoneExpression *base )
 {
 	// Put them all into one Overlapping set, pessamistically assuming they
 	// all COULD overlap	
-	cmd->ForWalk( [&](const Command *c)
+	base->ForWalk( [&](const FreeZoneExpression *expr)
 	{
-		if( auto tz_cmd = dynamic_cast<const PopulateTreeZoneCommand *>(c) )
+		if( auto ptz_cmd = dynamic_cast<const PopulateTreeZoneCommand *>(expr) )
         {
             // Note that key is actually TreeZone *, so equal TreeZones get different 
             // rows which is why we InsertSolo()
-            const TreeZone *zone = tz_cmd->GetZone();
+            const TreeZone *zone = ptz_cmd->GetZone();
             
             // Zone should be known to the DB
             zone->DBCheck(db);
             
             // Record zone and related command
-            InsertSolo( tzps_to_commands, make_pair( zone, tz_cmd ) );
+            InsertSolo( tzps_to_commands, make_pair( zone, ptz_cmd ) );
             
             // Start off with an empty overlapping set
             InsertSolo( overlapping_zones, make_pair( zone, set<const TreeZone *>() ) );

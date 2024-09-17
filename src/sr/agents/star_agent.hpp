@@ -37,7 +37,7 @@ public:
                                            const SolutionMap *hypothesis_links,
                                            const XTreeDatabase *x_tree_db ) const;                                                                                          
 
-    CommandPtr GenerateCommandImpl( const ReplaceKit &kit, 
+    FZExprPtr GenerateCommandImpl( const ReplaceKit &kit, 
                                     PatternLink me_plink, 
                                     XLink key_xlink ) final;
 

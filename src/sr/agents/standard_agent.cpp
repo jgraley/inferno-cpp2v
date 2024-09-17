@@ -523,7 +523,7 @@ void StandardAgent::MaybeChildrenPlanOverlay( PatternLink me_plink,
 }
 
 
-Agent::CommandPtr StandardAgent::GenerateCommandImpl( const ReplaceKit &kit, 
+Agent::FZExprPtr StandardAgent::GenerateCommandImpl( const ReplaceKit &kit, 
                                                       PatternLink me_plink, 
                                                       XLink key_xlink ) 
 {
@@ -554,7 +554,7 @@ Agent::CommandPtr StandardAgent::GenerateCommandImpl( const ReplaceKit &kit,
 }
 
 
-Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit, 
+Agent::FZExprPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit, 
                                                          PatternLink me_plink, 
                                                          XLink under_xlink )  // overlaying
 {
@@ -583,7 +583,7 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
     ASSERT( dest->IsFinal() )("About to build non-final ")(*dest)("\n"); 
 
     // Stuff for creating commands
-    vector<Agent::CommandPtr> child_commands;    
+    vector<Agent::FZExprPtr> child_commands;    
     auto zone = make_unique<FreeZone>(FreeZone::CreateSubtree(dest));
     int ti = 0;
 
@@ -700,7 +700,7 @@ Agent::CommandPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit,
     return make_unique<PopulateFreeZoneCommand>( move(zone), move(child_commands) );         
 }
 
-Agent::CommandPtr StandardAgent::GenerateCommandNormal( const ReplaceKit &kit, 
+Agent::FZExprPtr StandardAgent::GenerateCommandNormal( const ReplaceKit &kit, 
                                                         PatternLink me_plink ) 
 {
 	INDENT("N");
@@ -719,7 +719,7 @@ Agent::CommandPtr StandardAgent::GenerateCommandNormal( const ReplaceKit &kit,
     vector< Itemiser::Element * > dest_items = dest->Itemise(); 
 
     // Stuff for creating commands
-    vector<Agent::CommandPtr> child_commands;
+    vector<Agent::FZExprPtr> child_commands;
     auto zone = make_unique<FreeZone>(FreeZone::CreateSubtree(dest));
     int ti = 0;
 

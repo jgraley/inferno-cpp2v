@@ -24,7 +24,7 @@ Lazy<BooleanExpression> GreenGrassAgent::SymbolicColocatedQuery() const
 }
 
 
-Agent::CommandPtr GreenGrassAgent::GenerateCommandImpl( const ReplaceKit &kit, 
+Agent::FZExprPtr GreenGrassAgent::GenerateCommandImpl( const ReplaceKit &kit, 
                                                         PatternLink me_plink, 
                                                         XLink key_xlink )
 {

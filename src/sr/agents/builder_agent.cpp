@@ -33,7 +33,7 @@ bool BuilderAgent::ReplaceKeyerQuery( PatternLink me_plink,
 }
  
  
-Agent::CommandPtr BuilderAgent::GenerateCommandImpl( const ReplaceKit &kit, 
+Agent::FZExprPtr BuilderAgent::GenerateCommandImpl( const ReplaceKit &kit, 
                                                      PatternLink me_plink, 
                                                      XLink key_xlink )
 {

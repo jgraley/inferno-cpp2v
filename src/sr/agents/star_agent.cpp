@@ -70,7 +70,7 @@ void StarAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
 }
 
 
-Agent::CommandPtr StarAgent::GenerateCommandImpl( const ReplaceKit &kit, 
+Agent::FZExprPtr StarAgent::GenerateCommandImpl( const ReplaceKit &kit, 
                                                   PatternLink me_plink, 
                                                   XLink key_xlink ) 
 {
@@ -91,7 +91,7 @@ Agent::CommandPtr StarAgent::GenerateCommandImpl( const ReplaceKit &kit,
     else
         ASSERT(0)("Please add new kind of container");
     
-    vector<Agent::CommandPtr> child_commands;
+    vector<Agent::FZExprPtr> child_commands;
     auto zone = make_unique<FreeZone>(FreeZone::CreateSubtree(dest));
     int ti = 0;
 

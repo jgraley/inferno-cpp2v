@@ -78,7 +78,7 @@ bool TeleportAgent::IsExtenderLess( const Extender &r ) const
 }
 
 
-Agent::CommandPtr TeleportAgent::GenerateCommandImpl( const ReplaceKit &kit, 
+Agent::FZExprPtr TeleportAgent::GenerateCommandImpl( const ReplaceKit &kit, 
                                                       PatternLink me_plink, 
                                                       XLink key_xlink )
 {

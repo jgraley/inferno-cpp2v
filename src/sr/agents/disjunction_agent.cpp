@@ -59,7 +59,7 @@ SYM::Lazy<SYM::BooleanExpression> DisjunctionAgent::SymbolicNormalLinkedQuery() 
 }
 
 
-Agent::CommandPtr DisjunctionAgent::GenerateCommandImpl( const ReplaceKit &kit, 
+Agent::FZExprPtr DisjunctionAgent::GenerateCommandImpl( const ReplaceKit &kit, 
                                                          PatternLink me_plink, 
                                                          XLink key_xlink )
 {

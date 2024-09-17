@@ -16,7 +16,7 @@ shared_ptr<PatternQuery> ConjunctionAgent::GetPatternQuery() const
 }
 
 
-Agent::CommandPtr ConjunctionAgent::GenerateCommandImpl( const ReplaceKit &kit, 
+Agent::FZExprPtr ConjunctionAgent::GenerateCommandImpl( const ReplaceKit &kit, 
                                                          PatternLink me_plink, 
                                                          XLink key_xlink )
 {

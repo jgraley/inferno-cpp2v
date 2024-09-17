@@ -29,14 +29,14 @@ shared_ptr<PatternQuery> DepthAgent::GetPatternQuery() const
 }
 
 
-Agent::CommandPtr DepthAgent::GenerateCommandImpl( const ReplaceKit &kit, 
+Agent::FZExprPtr DepthAgent::GenerateCommandImpl( const ReplaceKit &kit, 
                                                    PatternLink me_plink, 
                                                    XLink key_xlink ) 
 {
     INDENT("#");
     
     PatternLink terminus_plink(this, &terminus);
-    vector<Agent::CommandPtr> child_commands;
+    vector<Agent::FZExprPtr> child_commands;
     child_commands.push_back( terminus_plink.GetChildAgent()->GenerateCommand(kit, terminus_plink) );
 
     XLink terminus_key_xlink = my_scr_engine->GetReplaceKey( terminus_plink );

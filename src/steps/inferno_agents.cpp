@@ -124,7 +124,7 @@ SYM::Lazy<SYM::BooleanExpression> IdentifierByNameAgent::SymbolicNormalLinkedQue
 }
 
 
-Agent::CommandPtr IdentifierByNameAgent::GenerateCommandImpl( const ReplaceKit &kit, 
+Agent::FZExprPtr IdentifierByNameAgent::GenerateCommandImpl( const ReplaceKit &kit, 
                                                               PatternLink me_plink, 
                                                               XLink key_xlink )
 {
