@@ -20,7 +20,7 @@ public:
                                   shared_ptr<SymbolExpression> option_true,
                                   shared_ptr<SymbolExpression> option_false = nullptr);
     virtual list<shared_ptr<Expression>> GetOperands() const override;
-    virtual unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit ) const override;
+    virtual unique_ptr<SymbolicResult> Evaluate( const EvalKit &kit ) const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     
@@ -42,7 +42,7 @@ public:
     explicit MultiConditionalOperator( vector<shared_ptr<BooleanExpression>> controls,
                                        vector<shared_ptr<SymbolExpression>> options );
     virtual list<shared_ptr<Expression>> GetOperands() const override;
-    virtual unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit ) const override;
+    virtual unique_ptr<SymbolicResult> Evaluate( const EvalKit &kit ) const override;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     

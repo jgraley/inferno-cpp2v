@@ -131,7 +131,7 @@ struct IdentifierByNameAgent : public virtual SearchLeafAgent
                                                    
         list<shared_ptr<SYM::SymbolExpression> *> GetSymbolOperandPointers() override;
         virtual unique_ptr<SYM::BooleanResult> Evaluate( const EvalKit &kit,
-                                                         list<unique_ptr<SYM::SymbolResultInterface>> &&op_results ) const override;
+                                                         list<unique_ptr<SYM::SymbolicResult>> &&op_results ) const override;
 
         shared_ptr<SYM::SymbolExpression> TrySolveFor( const SolveKit &kit, shared_ptr<SYM::SymbolVariable> target ) const override;
 
@@ -211,7 +211,7 @@ struct NestedAgent : public virtual TeleportAgent
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;                
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
 
-    TeleportResult RunTeleportQuery( const XTreeDatabase *db, DependencyReporter *dep_rep, XLink start_xlink ) const override;                
+    QueryReturnType RunTeleportQuery( const XTreeDatabase *db, DependencyReporter *dep_rep, XLink start_xlink ) const override;                
 
     virtual XLink Advance( XLink xlink, 
                            string *depth ) const = 0;
@@ -230,8 +230,8 @@ struct NestedAgent : public virtual TeleportAgent
         explicit NestingOperator( const NestedAgent *agent,
                                   shared_ptr<SymbolExpression> keyer ); 
         virtual list<shared_ptr<SYM::SymbolExpression>> GetSymbolOperands() const override;
-        virtual unique_ptr<SYM::SymbolResultInterface> Evaluate( const EvalKit &kit,
-                                                                 list<unique_ptr<SYM::SymbolResultInterface>> &&op_results ) const override;
+        virtual unique_ptr<SYM::SymbolicResult> Evaluate( const EvalKit &kit,
+                                                                 list<unique_ptr<SYM::SymbolicResult>> &&op_results ) const override;
 
         Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                            OrderProperty order_property ) const override;

@@ -33,24 +33,24 @@ ValueSelector::ValueSelector( const ConstraintSet &constraints_to_query_,
 #ifdef LOG_INDIVIDUAL_SUGGESTION_SETS
     TRACEC("given assignments:\n")(assignments)("\n");
 #endif    
-    list<unique_ptr<SYM::SetResult>> rl; 
+    list<unique_ptr<SYM::SubsetResult>> rl; 
     for( shared_ptr<Constraint> c : constraints_to_query )
     {                        
 		TRACEC("Querying ")(c)(" for suggestion set\n");       
-        unique_ptr<SYM::SetResult> r = c->GetSuggestedValues( assignments, my_var );
+        unique_ptr<SYM::SubsetResult> r = c->GetSuggestedValues( assignments, my_var );
         ASSERT( r );
 #ifdef LOG_INDIVIDUAL_SUGGESTION_SETS
         TRACEC("got suggestion ")(r)("\n");
         auto s = make_shared<set<Value>>(); // could be unique_ptr in C++14 when we can move-capture
-        bool sok = r->TryGetAsSetOfXLinks(*s);
+        bool sok = r->TryExtensionalise(*s);
 #endif    
         rl.push_back(move(r));
     }
 
-    unique_ptr<SYM::SetResult> result = SYM::SetResult::GetIntersection(move(rl));
+    unique_ptr<SYM::SubsetResult> result = SYM::SubsetResult::GetIntersection(move(rl));
     ASSERT( result );
     auto s = make_shared<set<Value>>(); // could be unique_ptr in C++14 when we can move-capture
-    bool sok = result->TryGetAsSetOfXLinks(*s);
+    bool sok = result->TryExtensionalise(*s);
        
 #ifdef GATHER_GSV
     gsv_n++;

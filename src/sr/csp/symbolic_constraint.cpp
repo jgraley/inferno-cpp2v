@@ -150,7 +150,7 @@ bool SymbolicConstraint::IsSatisfied( const Assignments &assignments ) const
 }
 
 
-unique_ptr<SYM::SetResult> SymbolicConstraint::GetSuggestedValues( const Assignments &assignments,
+unique_ptr<SYM::SubsetResult> SymbolicConstraint::GetSuggestedValues( const Assignments &assignments,
                                                                    const VariableId &target_var ) const
 {                                 
     ASSERT( target_var );
@@ -166,9 +166,9 @@ unique_ptr<SYM::SetResult> SymbolicConstraint::GetSuggestedValues( const Assignm
         return nullptr;
         
     shared_ptr<SYM::SymbolExpression> hint_expression = plan.suggestion_expressions.at(target_var).at(givens);
-    unique_ptr<SYM::SymbolResultInterface> hr = hint_expression->Evaluate( kit );
+    unique_ptr<SYM::SymbolicResult> hr = hint_expression->Evaluate( kit );
     ASSERT( hr );
-    unique_ptr<SYM::SetResult> hint_result = dynamic_pointer_cast<SYM::SetResult>(hr);
+    unique_ptr<SYM::SubsetResult> hint_result = dynamic_pointer_cast<SYM::SubsetResult>(hr);
     ASSERT( hint_result );
     return hint_result;
 }

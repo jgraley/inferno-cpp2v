@@ -18,7 +18,7 @@ namespace SYM
 
 class SymbolExpression;
 class SymbolVariable;
-class SymbolResultInterface;
+class SymbolicResult;
 class BooleanResult;
 
 // ------------------------- Expression --------------------------
@@ -125,7 +125,7 @@ public:
 class SymbolExpression : public Expression
 {    
 public:
-    virtual unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit ) const = 0;
+    virtual unique_ptr<SymbolicResult> Evaluate( const EvalKit &kit ) const = 0;
     
     // Solve methods are named per rule #527
     virtual shared_ptr<SymbolExpression> TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
@@ -156,7 +156,7 @@ public:
     virtual list<shared_ptr<Expression>> GetOperands() const override;
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit ) const override;
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit, 
-                                                list<unique_ptr<SymbolResultInterface>> &&op_results ) const;
+                                                list<unique_ptr<SymbolicResult>> &&op_results ) const;
 };
 
 // ------------------------- SymbolToSymbolExpression --------------------------
@@ -167,9 +167,9 @@ class SymbolToSymbolExpression : public SymbolExpression
 public:
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const;
     virtual list<shared_ptr<Expression>> GetOperands() const override;
-    virtual unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit ) const override;
-    virtual unique_ptr<SymbolResultInterface> Evaluate( const EvalKit &kit, 
-                                               list<unique_ptr<SymbolResultInterface>> &&op_results ) const;
+    virtual unique_ptr<SymbolicResult> Evaluate( const EvalKit &kit ) const override;
+    virtual unique_ptr<SymbolicResult> Evaluate( const EvalKit &kit, 
+                                               list<unique_ptr<SymbolicResult>> &&op_results ) const;
 };
 
 };

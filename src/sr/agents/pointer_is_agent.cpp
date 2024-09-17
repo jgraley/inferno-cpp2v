@@ -16,7 +16,7 @@ shared_ptr<PatternQuery> PointerIsAgent::GetPatternQuery() const
 }
 
 
-TeleportAgent::TeleportResult PointerIsAgent::RunTeleportQuery( const XTreeDatabase *db, DependencyReporter *dep_rep, XLink start_xlink ) const
+TeleportAgent::QueryReturnType PointerIsAgent::RunTeleportQuery( const XTreeDatabase *db, DependencyReporter *dep_rep, XLink start_xlink ) const
 {
 	// Report dependency on parent node
 	if( dep_rep )

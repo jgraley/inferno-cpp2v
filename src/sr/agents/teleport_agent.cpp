@@ -41,7 +41,7 @@ TreePtr<Node> TeleportAgent::GetDomainExtraNode( const XTreeDatabase *db, XLink 
 		return TreePtr<Node>(); // Failed pre-restriction so can't expand domain
 
 	DepRep dep_rep;
-	TeleportResult tp_result;
+	QueryReturnType tp_result;
 	try
 	{
 		tp_result = RunTeleportQuery( db, &dep_rep, start_xlink );
@@ -102,29 +102,29 @@ list<shared_ptr<SymbolExpression>> TeleportAgent::TeleportOperator::GetSymbolOpe
 }
 
 
-unique_ptr<SymbolResultInterface> TeleportAgent::TeleportOperator::Evaluate( const EvalKit &kit,
-                                                                             list<unique_ptr<SymbolResultInterface>> &&op_results ) const 
+unique_ptr<SymbolicResult> TeleportAgent::TeleportOperator::Evaluate( const EvalKit &kit,
+                                                                             list<unique_ptr<SymbolicResult>> &&op_results ) const 
 {
 	// Extract xlink from symbolic result
     ASSERT( op_results.size()==1 );            
-    unique_ptr<SymbolResultInterface> start_result = OnlyElementOf(move(op_results));
+    unique_ptr<SymbolicResult> start_result = OnlyElementOf(move(op_results));
     if( !start_result->IsDefinedAndUnique() )
-        return make_unique<SymbolResult>( SymbolResult::NOT_A_SYMBOL );
+        return make_unique<EmptyResult>();
     XLink start_xlink = start_result->GetOnlyXLink();
         
     // Apply the teleporting operation to the xlink. It may create new nodes
     // so it returns a TreePtr<Node> to avoid creating new xlink without base.
-    TeleportResult tp_result = agent->RunTeleportQuery( kit.x_tree_db, nullptr, start_xlink );
+    QueryReturnType tp_result = agent->RunTeleportQuery( kit.x_tree_db, nullptr, start_xlink );
 
     // Teleporting operation can fail: if so call it a NaS
     if( !tp_result.second )
-        return make_unique<SymbolResult>( SymbolResult::NOT_A_SYMBOL );        
+        return make_unique<EmptyResult>();        
         
     // If we got an XLink, just return it, don't bother Domain
     if( tp_result.first ) // parent link was supplied
     {
          ASSERT( tp_result.first.GetChildX() == tp_result.second );
-         return make_unique<SymbolResult>( tp_result.first );
+         return make_unique<UniqueResult>( tp_result.first );
 	}
 
     // We are required to have already added the new node to the domain
@@ -132,7 +132,7 @@ unique_ptr<SymbolResultInterface> TeleportAgent::TeleportOperator::Evaluate( con
     XLink unique_xlink = kit.x_tree_db->GetDEChannel(agent)->GetUniqueDomainExtension(start_xlink, tp_result.second);
     
     // Form a symbol result to return.       
-    return make_unique<SymbolResult>( unique_xlink );
+    return make_unique<UniqueResult>( unique_xlink );
 }
 
 

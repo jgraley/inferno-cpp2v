@@ -20,7 +20,7 @@ class Agent;
 
 namespace SYM
 {
-class SetResult;
+class SubsetResult;
 };
 
 namespace CSP
@@ -89,7 +89,7 @@ public:
      * 
      * @note the returned set is allowed to contain inconsistent values. 
      */
-    virtual unique_ptr<SYM::SetResult> GetSuggestedValues( const Assignments &assignments,
+    virtual unique_ptr<SYM::SubsetResult> GetSuggestedValues( const Assignments &assignments,
                                                            const VariableId &var ) const = 0;        
     
     string GetTrace() const;

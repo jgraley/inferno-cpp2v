@@ -30,7 +30,7 @@ void SR::RunForReplace( const Command *cmd, const SCREngine *scr_engine, XTreeDa
 	// Uniqueness of tree zones
 	const Command *expr = dynamic_cast<const UpdateTreeCommand &>(*cmd).GetExpression();
 	TreeZoneOverlapFinder overlaps( x_tree_db, expr );
-	FTRACE(overlaps);
+	//FTRACE(overlaps);
 	
 	// err...
 	

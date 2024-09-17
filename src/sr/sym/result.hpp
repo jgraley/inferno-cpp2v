@@ -45,37 +45,31 @@ private:
     bool value;
 };
 
-// ------------------------- SymbolResultInterface --------------------------
+// ------------------------- SymbolicResult --------------------------
 
-class SymbolResultInterface : public Traceable
+class SymbolicResult : public Traceable
 {
 public:
     virtual bool IsDefinedAndUnique() const = 0;
     virtual SR::XLink GetOnlyXLink() const = 0;   
-    virtual bool TryGetAsSetOfXLinks( set<SR::XLink> &links ) const = 0;     
-    virtual bool operator==( const SymbolResultInterface &other ) const = 0;    
+    virtual bool TryExtensionalise( set<SR::XLink> &links ) const = 0;     
+    virtual bool operator==( const SymbolicResult &other ) const = 0;    
 
     virtual string Render() const = 0;
     string GetTrace() const final;
 };
 
-// ------------------------- SymbolResult --------------------------
+// ------------------------- UniqueResult --------------------------
 
-class SymbolResult : public SymbolResultInterface
+class UniqueResult : public SymbolicResult
 {
 public:
-    enum Category
-    {
-        NOT_A_SYMBOL
-    };    
-
-    explicit SymbolResult( SR::XLink xlink );
-    explicit SymbolResult( Category cat );
+    explicit UniqueResult( SR::XLink xlink );
     
     bool IsDefinedAndUnique() const override;    
     SR::XLink GetOnlyXLink() const override;    
-    bool TryGetAsSetOfXLinks( set<SR::XLink> &links ) const override;
-    bool operator==( const SymbolResultInterface &other ) const override;    
+    bool TryExtensionalise( set<SR::XLink> &links ) const override;
+    bool operator==( const SymbolicResult &other ) const override;    
     
     string Render() const override;
 
@@ -83,32 +77,45 @@ private:
     SR::XLink xlink;
 };
 
-// ------------------------- SetResult --------------------------
+// ------------------------- EmptyResult --------------------------
 
-class SetResult : public SymbolResultInterface
+class EmptyResult : public SymbolicResult
 {
 public:
-    explicit SetResult( set<SR::XLink> xlinks = set<SR::XLink>(), bool complement_flag = false );
+    bool IsDefinedAndUnique() const override;    
+    SR::XLink GetOnlyXLink() const override;    
+    bool TryExtensionalise( set<SR::XLink> &links ) const override;
+    bool operator==( const SymbolicResult &other ) const override;    
+    
+    string Render() const override;
+};
+
+// ------------------------- SubsetResult --------------------------
+
+class SubsetResult : public SymbolicResult
+{
+public:
+    explicit SubsetResult( set<SR::XLink> xlinks = set<SR::XLink>(), bool complement_flag = false );
     
     // Use this to force other or unknown symbol results to extensionalise
-    explicit SetResult( unique_ptr<SymbolResultInterface> other );
+    explicit SubsetResult( unique_ptr<SymbolicResult> other );
     
     bool IsDefinedAndUnique() const override;    
     SR::XLink GetOnlyXLink() const override;    
-    bool TryGetAsSetOfXLinks( set<SR::XLink> &links ) const override;
-    bool operator==( const SymbolResultInterface &other ) const override;
+    bool TryExtensionalise( set<SR::XLink> &links ) const override;
+    bool operator==( const SymbolicResult &other ) const override;
 
-    unique_ptr<SetResult> GetComplement() const;
-    static unique_ptr<SetResult> GetUnion( list<unique_ptr<SetResult>> ops );
-    static unique_ptr<SetResult> GetIntersection( list<unique_ptr<SetResult>> ops );
+    unique_ptr<SubsetResult> GetComplement() const;
+    static unique_ptr<SubsetResult> GetUnion( list<unique_ptr<SubsetResult>> ops );
+    static unique_ptr<SubsetResult> GetIntersection( list<unique_ptr<SubsetResult>> ops );
 
     string Render() const override;
 
 private:    
-    static unique_ptr<SetResult> DeMorgan( function<unique_ptr<SetResult>( list<unique_ptr<SetResult>> )> lambda,
-                                                 list<unique_ptr<SetResult>> ops );
-    static unique_ptr<SetResult> UnionCore( list<unique_ptr<SetResult>> ops );
-    static unique_ptr<SetResult> IntersectionCore( list<unique_ptr<SetResult>> ops );
+    static unique_ptr<SubsetResult> DeMorgan( function<unique_ptr<SubsetResult>( list<unique_ptr<SubsetResult>> )> lambda,
+                                                 list<unique_ptr<SubsetResult>> ops );
+    static unique_ptr<SubsetResult> UnionCore( list<unique_ptr<SubsetResult>> ops );
+    static unique_ptr<SubsetResult> IntersectionCore( list<unique_ptr<SubsetResult>> ops );
 
     set<SR::XLink> xlinks;
     bool complement_flag;
@@ -116,7 +123,7 @@ private:
 
 // ------------------------- DepthFirstRangeResult --------------------------
 
-class DepthFirstRangeResult : public SymbolResultInterface
+class DepthFirstRangeResult : public SymbolicResult
 {
 public:
     // lower or upper can be null to exclude that limit
@@ -124,12 +131,12 @@ public:
     
     bool IsDefinedAndUnique() const override;    
     SR::XLink GetOnlyXLink() const override;    
-    bool TryGetAsSetOfXLinks( set<SR::XLink> &links ) const override;
-    bool operator==( const SymbolResultInterface &other ) const override;
+    bool TryExtensionalise( set<SR::XLink> &links ) const override;
+    bool operator==( const SymbolicResult &other ) const override;
 
-    //unique_ptr<SetResult> GetComplement() const;
-    //static unique_ptr<SetResult> GetUnion( list<unique_ptr<SetResult>> ops );
-    //static unique_ptr<SetResult> GetIntersection( list<unique_ptr<SetResult>> ops );
+    //unique_ptr<SubsetResult> GetComplement() const;
+    //static unique_ptr<SubsetResult> GetUnion( list<unique_ptr<SubsetResult>> ops );
+    //static unique_ptr<SubsetResult> GetIntersection( list<unique_ptr<SubsetResult>> ops );
 
     string Render() const override;
 
@@ -141,7 +148,7 @@ private:
 
 // ------------------------- SimpleCompareRangeResult --------------------------
 
-class SimpleCompareRangeResult : public SymbolResultInterface
+class SimpleCompareRangeResult : public SymbolicResult
 {
 public:
     // lower or upper can be null to exclude that limit
@@ -150,12 +157,12 @@ public:
     
     bool IsDefinedAndUnique() const override;    
     SR::XLink GetOnlyXLink() const override;    
-    bool TryGetAsSetOfXLinks( set<SR::XLink> &links ) const override;
-    bool operator==( const SymbolResultInterface &other ) const override;
+    bool TryExtensionalise( set<SR::XLink> &links ) const override;
+    bool operator==( const SymbolicResult &other ) const override;
 
-    //unique_ptr<SetResult> GetComplement() const;
-    //static unique_ptr<SetResult> GetUnion( list<unique_ptr<SetResult>> ops );
-    //static unique_ptr<SetResult> GetIntersection( list<unique_ptr<SetResult>> ops );
+    //unique_ptr<SubsetResult> GetComplement() const;
+    //static unique_ptr<SubsetResult> GetUnion( list<unique_ptr<SubsetResult>> ops );
+    //static unique_ptr<SubsetResult> GetIntersection( list<unique_ptr<SubsetResult>> ops );
 
     string Render() const override;
 
@@ -170,7 +177,7 @@ private:
 
 // ------------------------- CategoryRangeResult --------------------------
 
-class CategoryRangeResult : public SymbolResultInterface
+class CategoryRangeResult : public SymbolicResult
 {
 public:
     // Shared_ptr is OK since we don't mutate at eval time, just dereference
@@ -182,12 +189,12 @@ public:
     
     bool IsDefinedAndUnique() const override;    
     SR::XLink GetOnlyXLink() const override;    
-    bool TryGetAsSetOfXLinks( set<SR::XLink> &links ) const override;
-    bool operator==( const SymbolResultInterface &other ) const override;
+    bool TryExtensionalise( set<SR::XLink> &links ) const override;
+    bool operator==( const SymbolicResult &other ) const override;
 
-    //unique_ptr<SetResult> GetComplement() const;
-    //static unique_ptr<SetResult> GetUnion( list<unique_ptr<SetResult>> ops );
-    //static unique_ptr<SetResult> GetIntersection( list<unique_ptr<SetResult>> ops );
+    //unique_ptr<SubsetResult> GetComplement() const;
+    //static unique_ptr<SubsetResult> GetUnion( list<unique_ptr<SubsetResult>> ops );
+    //static unique_ptr<SubsetResult> GetIntersection( list<unique_ptr<SubsetResult>> ops );
 
     string Render() const override;
 

@@ -62,104 +62,126 @@ string BooleanResult::GetTrace() const
     return Render();
 }
 
-// ------------------------- SymbolResultInterface --------------------------
+// ------------------------- SymbolicResult --------------------------
 
-string SymbolResultInterface::GetTrace() const
+string SymbolicResult::GetTrace() const
 {
     return Render();
 }
 
-// ------------------------- SymbolResult --------------------------
+// ------------------------- UniqueResult --------------------------
 
-SymbolResult::SymbolResult( SR::XLink xlink_ ) :
+UniqueResult::UniqueResult( SR::XLink xlink_ ) :
     xlink( xlink_ )
 {
-    ASSERT( xlink_ )("Not allowed to construct with NULL; use other constructor instead");
+    ASSERT( xlink_ )("Not allowed to construct with NULL; use EmptyResult instead");
 }
 
 
-SymbolResult::SymbolResult( Category cat ) :
-    xlink()
+bool UniqueResult::IsDefinedAndUnique() const
 {
-    ASSERT( cat==NOT_A_SYMBOL )("Can only pass in NOT_A_SYMBOL; use other constructor instead");
+    return true;
 }
 
 
-bool SymbolResult::IsDefinedAndUnique() const
-{
-    return (bool)xlink;
-}
-
-
-SR::XLink SymbolResult::GetOnlyXLink() const
+SR::XLink UniqueResult::GetOnlyXLink() const
 {
     ASSERT( xlink );
     return xlink;
 }
 
 
-bool SymbolResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
+bool UniqueResult::TryExtensionalise( set<SR::XLink> &links ) const
 {
-    links = xlink ? set<SR::XLink>{ xlink } : set<SR::XLink>{};
+    links = set<SR::XLink>{ xlink };
     return true;
 }
 
 
-bool SymbolResult::operator==( const SymbolResultInterface &other ) const
+bool UniqueResult::operator==( const SymbolicResult &other ) const
 {
     auto o = GET_THAT_POINTER(&other);
     return o && xlink == o->xlink;
 }
 
 
-string SymbolResult::Render() const
+string UniqueResult::Render() const
 {
-    if( xlink )
-        return Trace(xlink);
-    else
-        return "NOT_A_SYMBOL";
+    return Trace(xlink);
 }
 
-// ------------------------- SetResult --------------------------
+// ------------------------- EmptyResult --------------------------
 
-SetResult::SetResult( set<SR::XLink> xlinks_, bool complement_flag_ ) :
+bool EmptyResult::IsDefinedAndUnique() const
+{
+    return false;
+}
+
+
+SR::XLink EmptyResult::GetOnlyXLink() const
+{
+    ASSERTFAIL();
+}
+
+
+bool EmptyResult::TryExtensionalise( set<SR::XLink> &links ) const
+{
+    links = set<SR::XLink>{};
+    return true;
+}
+
+
+bool EmptyResult::operator==( const SymbolicResult &other ) const
+{
+    return !!GET_THAT_POINTER(&other);
+}
+
+
+string EmptyResult::Render() const
+{
+    return "{}";
+}
+
+// ------------------------- SubsetResult --------------------------
+
+SubsetResult::SubsetResult( set<SR::XLink> xlinks_, bool complement_flag_ ) :
     xlinks( xlinks_ ),
     complement_flag( complement_flag_ )
 {
 }
 
 
-SetResult::SetResult( unique_ptr<SymbolResultInterface> other )
+SubsetResult::SubsetResult( unique_ptr<SymbolicResult> other )
 {
-    if( auto ssr = dynamic_pointer_cast<SetResult>(other) )
+    if( auto ssr = dynamic_pointer_cast<SubsetResult>(other) )
     {
         xlinks = ssr->xlinks;
         complement_flag = ssr->complement_flag;
     }
-    else // SymbolResultInterface
+    else // SymbolicResult
     {
         set<SR::XLink> links;
-        bool ok = other->TryGetAsSetOfXLinks( xlinks );
+        bool ok = other->TryExtensionalise( xlinks );
         ASSERTS(ok);
         complement_flag = false;
     }
 }
 
 
-bool SetResult::IsDefinedAndUnique() const
+bool SubsetResult::IsDefinedAndUnique() const
 {
     return !complement_flag && xlinks.size() == 1;
 }
 
 
-SR::XLink SetResult::GetOnlyXLink() const
+SR::XLink SubsetResult::GetOnlyXLink() const
 {
     ASSERT( !complement_flag )("Is complement so not unique");
     return OnlyElementOf(xlinks);
 }
 
 
-bool SetResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
+bool SubsetResult::TryExtensionalise( set<SR::XLink> &links ) const
 {
     if( complement_flag ) // Refusing to extensionalise a complement set
         return false;
@@ -168,24 +190,24 @@ bool SetResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
 }
 
 
-bool SetResult::operator==( const SymbolResultInterface &other ) const
+bool SubsetResult::operator==( const SymbolicResult &other ) const
 {
     auto o = GET_THAT_POINTER(&other);
     return o && xlinks == o->xlinks && complement_flag==o->complement_flag;
 }
 
 
-unique_ptr<SetResult> SetResult::GetComplement() const
+unique_ptr<SubsetResult> SubsetResult::GetComplement() const
 {
-    return make_unique<SetResult>(xlinks, !complement_flag);
+    return make_unique<SubsetResult>(xlinks, !complement_flag);
 }
 
 
-unique_ptr<SetResult> SetResult::GetUnion( list<unique_ptr<SetResult>> ops )
+unique_ptr<SubsetResult> SubsetResult::GetUnion( list<unique_ptr<SubsetResult>> ops )
 {
     int n = ops.size();
     int n_comp = 0;
-    for( const unique_ptr<SetResult> &op : ops )
+    for( const unique_ptr<SubsetResult> &op : ops )
         n_comp += op->complement_flag ? 1 : 0;
 
     if( n_comp > 0 )
@@ -195,11 +217,11 @@ unique_ptr<SetResult> SetResult::GetUnion( list<unique_ptr<SetResult>> ops )
 }
 
 
-unique_ptr<SetResult> SetResult::GetIntersection( list<unique_ptr<SetResult>> ops )
+unique_ptr<SubsetResult> SubsetResult::GetIntersection( list<unique_ptr<SubsetResult>> ops )
 {
     int n = ops.size();
     int n_comp = 0;
-    for( const unique_ptr<SetResult> &op : ops )
+    for( const unique_ptr<SubsetResult> &op : ops )
         n_comp += op->complement_flag ? 1 : 0;
 
     if( n_comp == n )
@@ -209,42 +231,42 @@ unique_ptr<SetResult> SetResult::GetIntersection( list<unique_ptr<SetResult>> op
 }
 
 
-unique_ptr<SetResult> SetResult::DeMorgan( function<unique_ptr<SetResult>( list<unique_ptr<SetResult>> )> lambda,
-                                                                           list<unique_ptr<SetResult>> ops )
+unique_ptr<SubsetResult> SubsetResult::DeMorgan( function<unique_ptr<SubsetResult>( list<unique_ptr<SubsetResult>> )> lambda,
+                                                                           list<unique_ptr<SubsetResult>> ops )
 {
-    list<unique_ptr<SetResult>> cops;
-    for( const unique_ptr<SetResult> &op : ops )
+    list<unique_ptr<SubsetResult>> cops;
+    for( const unique_ptr<SubsetResult> &op : ops )
         cops.push_back( op->GetComplement() );
 
-    unique_ptr<SetResult> cres = lambda(move(cops));
+    unique_ptr<SubsetResult> cres = lambda(move(cops));
 
     return cres->GetComplement();
 }                                                       
 
 
-unique_ptr<SetResult> SetResult::UnionCore( list<unique_ptr<SetResult>> ops )
+unique_ptr<SubsetResult> SubsetResult::UnionCore( list<unique_ptr<SubsetResult>> ops )
 {
     set<SR::XLink> result_xlinks;
-    for( const unique_ptr<SetResult> &op : ops )
+    for( const unique_ptr<SubsetResult> &op : ops )
     {
         ASSERTS( !op->complement_flag )("UnionCore requires no complements");
         result_xlinks = UnionOf( result_xlinks, op->xlinks );
     }
-    return make_unique<SetResult>( result_xlinks );   
+    return make_unique<SubsetResult>( result_xlinks );   
 }
 
 
-unique_ptr<SetResult> SetResult::IntersectionCore( list<unique_ptr<SetResult>> ops )
+unique_ptr<SubsetResult> SubsetResult::IntersectionCore( list<unique_ptr<SubsetResult>> ops )
 {
-    const unique_ptr<SetResult> *non_comp_op = nullptr;
-    for( const unique_ptr<SetResult> &op : ops )
+    const unique_ptr<SubsetResult> *non_comp_op = nullptr;
+    for( const unique_ptr<SubsetResult> &op : ops )
         if( !op->complement_flag )
             non_comp_op = &op;
     ASSERTS( non_comp_op )("IntersectionCore requires at least one non-complement");
 
     // DifferenceOf() is the key to combining complemented with non-complimented
     set<SR::XLink> result_xlinks = (*non_comp_op)->xlinks;
-    for( const unique_ptr<SetResult> &op : ops )
+    for( const unique_ptr<SubsetResult> &op : ops )
     {
         if( &op == non_comp_op )
             continue; // got this one already
@@ -253,11 +275,11 @@ unique_ptr<SetResult> SetResult::IntersectionCore( list<unique_ptr<SetResult>> o
         else
             result_xlinks = IntersectionOf( result_xlinks, op->xlinks );            
     }
-    return make_unique<SetResult>( result_xlinks );
+    return make_unique<SubsetResult>( result_xlinks );
 }
 
 
-string SetResult::Render() const
+string SubsetResult::Render() const
 {
     // ç is being used to mean complement of, since existing symbols not that great
     string s;
@@ -291,7 +313,7 @@ SR::XLink DepthFirstRangeResult::GetOnlyXLink() const
 }
 
 
-bool DepthFirstRangeResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
+bool DepthFirstRangeResult::TryExtensionalise( set<SR::XLink> &links ) const
 { 
 	const SR::Orderings::DepthFirstOrdering &index = x_tree_db->GetOrderings().depth_first_ordering;
     SR::Orderings::DepthFirstOrderingIterator it_lower, it_upper;
@@ -327,7 +349,7 @@ bool DepthFirstRangeResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
 }
 
 
-bool DepthFirstRangeResult::operator==( const SymbolResultInterface &other ) const
+bool DepthFirstRangeResult::operator==( const SymbolicResult &other ) const
 {
     ASSERTFAIL("TODO");
 }
@@ -379,7 +401,7 @@ SR::XLink SimpleCompareRangeResult::GetOnlyXLink() const
 }
 
 
-bool SimpleCompareRangeResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
+bool SimpleCompareRangeResult::TryExtensionalise( set<SR::XLink> &links ) const
 {        
     SR::Orderings::SimpleCompareOrderingIterator it_lower, it_upper;
 
@@ -412,7 +434,7 @@ bool SimpleCompareRangeResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) cons
 }
 
 
-bool SimpleCompareRangeResult::operator==( const SymbolResultInterface &other ) const
+bool SimpleCompareRangeResult::operator==( const SymbolicResult &other ) const
 {
     ASSERTFAIL("TODO");
 }
@@ -454,7 +476,7 @@ SR::XLink CategoryRangeResult::GetOnlyXLink() const
 }
 
 
-bool CategoryRangeResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
+bool CategoryRangeResult::TryExtensionalise( set<SR::XLink> &links ) const
 {        
     links.clear();
     for( const XLinkBounds &bounds : bounds_list )
@@ -480,7 +502,7 @@ bool CategoryRangeResult::TryGetAsSetOfXLinks( set<SR::XLink> &links ) const
 }
 
 
-bool CategoryRangeResult::operator==( const SymbolResultInterface &other ) const
+bool CategoryRangeResult::operator==( const SymbolicResult &other ) const
 {
     ASSERTFAIL("TODO");
 }

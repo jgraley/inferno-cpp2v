@@ -81,7 +81,7 @@ public:
 
     list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() override;
     unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
-                                        list<unique_ptr<SymbolResultInterface>> &&op_results ) const override;
+                                        list<unique_ptr<SymbolicResult>> &&op_results ) const override;
     bool IsCommutative() const override;
 
     shared_ptr<SymbolExpression> TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const override;
@@ -115,7 +115,7 @@ public:
     VariablesRequiringRows GetVariablesRequiringRows() const override;
     list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() override;
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
-                                                list<unique_ptr<SymbolResultInterface>> &&op_results ) const override final;
+                                                list<unique_ptr<SymbolicResult>> &&op_results ) const override final;
     shared_ptr<SymbolExpression> TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const override;
     virtual list<shared_ptr<SymbolExpression>> GetRanges() const = 0;
     virtual bool EvalBoolFromDiff( Orderable::Diff diff ) const = 0;
@@ -209,7 +209,7 @@ public:
 
     list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() override;
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
-                                                list<unique_ptr<SymbolResultInterface>> &&op_results ) const override;
+                                                list<unique_ptr<SymbolicResult>> &&op_results ) const override;
 
     shared_ptr<SymbolExpression> TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const override;
     bool IsCommutative() const override;
@@ -237,7 +237,7 @@ public:
 
     list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() override;
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
-                                                list<unique_ptr<SymbolResultInterface>> &&op_results ) const override;
+                                                list<unique_ptr<SymbolicResult>> &&op_results ) const override;
     shared_ptr<SymbolExpression> TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const override;
     Relationship GetRelationshipWith( shared_ptr<PredicateOperator> other ) const override;
 
@@ -270,7 +270,7 @@ public:
 
     list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() override;
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
-                                                list<unique_ptr<SymbolResultInterface>> &&op_results ) const override final;
+                                                list<unique_ptr<SymbolicResult>> &&op_results ) const override final;
 
     Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                            OrderProperty order_property ) const override;                                                
@@ -300,7 +300,7 @@ public:
 
     list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() override;
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
-                                                list<unique_ptr<SymbolResultInterface>> &&op_results ) const override;
+                                                list<unique_ptr<SymbolicResult>> &&op_results ) const override;
     
     shared_ptr<SymbolExpression> TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const override;
     bool IsCommutative() const override;
@@ -327,7 +327,7 @@ public:
 
     list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() override;
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
-                                                list<unique_ptr<SymbolResultInterface>> &&op_results ) const override final;
+                                                list<unique_ptr<SymbolicResult>> &&op_results ) const override final;
 
     Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                            OrderProperty order_property ) const override;                                                

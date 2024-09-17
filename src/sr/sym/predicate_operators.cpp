@@ -124,18 +124,18 @@ list<shared_ptr<SymbolExpression>*> IsEqualOperator::GetSymbolOperandPointers()
 
 
 unique_ptr<BooleanResult> IsEqualOperator::Evaluate( const EvalKit &kit,
-                                                     list<unique_ptr<SymbolResultInterface>> &&op_results ) const 
+                                                     list<unique_ptr<SymbolicResult>> &&op_results ) const 
 {
     ASSERT( op_results.size()==2 );
     // IEEE 754 Equals results in false if an operand is NaS. Not-equals has 
     // no operator class of it's own and is implemented as ¬(==) so will 
     // return true as required.
-    for( const unique_ptr<SymbolResultInterface> &ra : op_results )
+    for( const unique_ptr<SymbolicResult> &ra : op_results )
         if( !ra->IsDefinedAndUnique() )
             return make_unique<BooleanResult>( false );
 
-    unique_ptr<SymbolResultInterface> ra = move( op_results.front() );
-    unique_ptr<SymbolResultInterface> rb = move( op_results.back() );
+    unique_ptr<SymbolicResult> ra = move( op_results.front() );
+    unique_ptr<SymbolicResult> rb = move( op_results.back() );
 
     // For equality, it is sufficient to compare the x links
     // themselves, which have the required uniqueness properties
@@ -235,16 +235,16 @@ list<shared_ptr<SymbolExpression> *> DepthFirstComparisonOperator::GetSymbolOper
 
 
 unique_ptr<BooleanResult> DepthFirstComparisonOperator::Evaluate( const EvalKit &kit,
-                                                             list<unique_ptr<SymbolResultInterface>> &&op_results ) const 
+                                                             list<unique_ptr<SymbolicResult>> &&op_results ) const 
 {    
     ASSERT( op_results.size()==2 );
     // IEEE 754 All inequalities result in false if an operand is NaS
-    for( const unique_ptr<SymbolResultInterface> &ra : op_results )
+    for( const unique_ptr<SymbolicResult> &ra : op_results )
         if( !ra->IsDefinedAndUnique() )
             return make_unique<BooleanResult>( false );
 
-    unique_ptr<SymbolResultInterface> ra = move( op_results.front() );
-    unique_ptr<SymbolResultInterface> rb = move( op_results.back() );
+    unique_ptr<SymbolicResult> ra = move( op_results.front() );
+    unique_ptr<SymbolicResult> rb = move( op_results.back() );
 
     // For greater/less, we need to consult the x_tree_db. We use the 
     // depth-first relation.
@@ -524,16 +524,16 @@ list<shared_ptr<SymbolExpression> *> IsAllDiffOperator::GetSymbolOperandPointers
 
 
 unique_ptr<BooleanResult> IsAllDiffOperator::Evaluate( const EvalKit &kit,
-                                                     list<unique_ptr<SymbolResultInterface>> &&op_results ) const 
+                                                     list<unique_ptr<SymbolicResult>> &&op_results ) const 
 {
-    for( const unique_ptr<SymbolResultInterface> &ra : op_results )
+    for( const unique_ptr<SymbolicResult> &ra : op_results )
         if( !ra->IsDefinedAndUnique() )
             return make_unique<BooleanResult>( false );
     
     // Note: could be done faster using a set<XLink>
     bool m = true;
-    ForAllUnorderedPairs( op_results, [&](const unique_ptr<SymbolResultInterface> &ra,
-                                                    const unique_ptr<SymbolResultInterface> &rb) 
+    ForAllUnorderedPairs( op_results, [&](const unique_ptr<SymbolicResult> &ra,
+                                                    const unique_ptr<SymbolicResult> &rb) 
     {    
         // For equality, it is sufficient to compare the x links
         // themselves, which have the required uniqueness properties
@@ -621,12 +621,12 @@ list<shared_ptr<SymbolExpression> *> IsInCategoryOperator::GetSymbolOperandPoint
 
 
 unique_ptr<BooleanResult> IsInCategoryOperator::Evaluate( const EvalKit &kit,
-                                                          list<unique_ptr<SymbolResultInterface>> &&op_results ) const 
+                                                          list<unique_ptr<SymbolicResult>> &&op_results ) const 
 {
     ASSERT( op_results.size()==1 );        
     // IEEE 754 Kind-of can be said to be C(a) ∈ C(arch) where C propogates 
     // NaS. Possibly like a < ?
-    unique_ptr<SymbolResultInterface> ra = OnlyElementOf(move(op_results));
+    unique_ptr<SymbolicResult> ra = OnlyElementOf(move(op_results));
     if( !ra->IsDefinedAndUnique() )
         return make_unique<BooleanResult>( false );
     
@@ -730,12 +730,12 @@ list<shared_ptr<SymbolExpression> *> IsChildCollectionSizedOperator::GetSymbolOp
 
 
 unique_ptr<BooleanResult> IsChildCollectionSizedOperator::Evaluate( const EvalKit &kit,
-                                                                 list<unique_ptr<SymbolResultInterface>> &&op_results ) const
+                                                                 list<unique_ptr<SymbolicResult>> &&op_results ) const
 {
     ASSERT( op_results.size()==1 );        
 
     // Evaluate operand and ensure we got an XLink
-    unique_ptr<SymbolResultInterface> ra = OnlyElementOf(move(op_results));
+    unique_ptr<SymbolicResult> ra = OnlyElementOf(move(op_results));
 
     // IEEE 754 Kind-of can be said to be S(a) == S0 where S propogates 
     // NaS. So like ==
@@ -823,16 +823,16 @@ list<shared_ptr<SymbolExpression> *> IsSimpleCompareEquivalentOperator::GetSymbo
 
 
 unique_ptr<BooleanResult> IsSimpleCompareEquivalentOperator::Evaluate( const EvalKit &kit,
-                                                                       list<unique_ptr<SymbolResultInterface>> &&op_results ) const 
+                                                                       list<unique_ptr<SymbolicResult>> &&op_results ) const 
 {
     // IEEE 754 Kind-of can be said to be E(a) == E(b) where E propagates 
     // NaS. So like ==
-    for( const unique_ptr<SymbolResultInterface> &ra : op_results )
+    for( const unique_ptr<SymbolicResult> &ra : op_results )
         if( !ra->IsDefinedAndUnique() )
             return make_unique<BooleanResult>( false );
 
-    unique_ptr<SymbolResultInterface> ra = move( op_results.front() );
-    unique_ptr<SymbolResultInterface> rb = move( op_results.back() );
+    unique_ptr<SymbolicResult> ra = move( op_results.front() );
+    unique_ptr<SymbolicResult> rb = move( op_results.back() );
 
     Orderable::Diff res = equivalence_relation.Compare3Way( ra->GetOnlyXLink().GetChildX(), 
                                                             rb->GetOnlyXLink().GetChildX() );
@@ -912,12 +912,12 @@ list<shared_ptr<SymbolExpression> *> IsLocalMatchOperator::GetSymbolOperandPoint
 
 
 unique_ptr<BooleanResult> IsLocalMatchOperator::Evaluate( const EvalKit &kit,
-                                                          list<unique_ptr<SymbolResultInterface>> &&op_results ) const
+                                                          list<unique_ptr<SymbolicResult>> &&op_results ) const
 {
     ASSERT( op_results.size()==1 );        
 
     // Evaluate operand and ensure we got an XLink
-    unique_ptr<SymbolResultInterface> ra = OnlyElementOf(move(op_results));
+    unique_ptr<SymbolicResult> ra = OnlyElementOf(move(op_results));
 
     // IEEE 754 Kind-of can be said to be S(a) == S0 where S propogates 
     // NaS. So like ==

@@ -81,10 +81,10 @@ list<shared_ptr<SymbolExpression> *> GreenGrassAgent::IsGreenGrassOperator::GetS
 
 
 unique_ptr<BooleanResult> GreenGrassAgent::IsGreenGrassOperator::Evaluate( const EvalKit &kit,
-                                                                                    list<unique_ptr<SymbolResultInterface>> &&op_results ) const 
+                                                                                    list<unique_ptr<SymbolicResult>> &&op_results ) const 
 {
     ASSERT( op_results.size()==1 );        
-    unique_ptr<SymbolResultInterface> ra = OnlyElementOf(move(op_results));
+    unique_ptr<SymbolicResult> ra = OnlyElementOf(move(op_results));
     if( !ra->IsDefinedAndUnique() )
         return make_unique<BooleanResult>( false );
     

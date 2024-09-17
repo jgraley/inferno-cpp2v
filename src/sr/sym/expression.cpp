@@ -181,8 +181,8 @@ unique_ptr<BooleanResult> BooleanToBooleanExpression::Evaluate( const EvalKit &k
 }
 
 
-unique_ptr<SymbolResultInterface> SymbolToSymbolExpression::Evaluate( const EvalKit &kit, 
-                                                             list<unique_ptr<SymbolResultInterface>> &&op_results ) const
+unique_ptr<SymbolicResult> SymbolToSymbolExpression::Evaluate( const EvalKit &kit, 
+                                                             list<unique_ptr<SymbolicResult>> &&op_results ) const
 {
     ASSERTFAIL("Need to override one of the Evaluate() methods\n");
 }
@@ -204,9 +204,9 @@ list<shared_ptr<Expression>> SymbolToSymbolExpression::GetOperands() const
 }
 
 
-unique_ptr<SymbolResultInterface> SymbolToSymbolExpression::Evaluate( const EvalKit &kit ) const
+unique_ptr<SymbolicResult> SymbolToSymbolExpression::Evaluate( const EvalKit &kit ) const
 { 
-    list<unique_ptr<SymbolResultInterface>> op_results;
+    list<unique_ptr<SymbolicResult>> op_results;
     for( shared_ptr<SymbolExpression> a : GetSymbolOperands() )
         op_results.push_back( a->Evaluate(kit) );
     return Evaluate( kit, move(op_results) );
@@ -225,7 +225,7 @@ list<shared_ptr<Expression>> SymbolToBooleanExpression::GetOperands() const
 
 unique_ptr<BooleanResult> SymbolToBooleanExpression::Evaluate( const EvalKit &kit ) const
 { 
-    list<unique_ptr<SymbolResultInterface>> op_results;
+    list<unique_ptr<SymbolicResult>> op_results;
     for( shared_ptr<SymbolExpression> a : GetSymbolOperands() )
         op_results.push_back( a->Evaluate(kit) );
     return Evaluate( kit, move(op_results) );
@@ -233,7 +233,7 @@ unique_ptr<BooleanResult> SymbolToBooleanExpression::Evaluate( const EvalKit &ki
 
 
 unique_ptr<BooleanResult> SymbolToBooleanExpression::Evaluate( const EvalKit &kit, 
-                                                               list<unique_ptr<SymbolResultInterface>> &&op_results ) const
+                                                               list<unique_ptr<SymbolicResult>> &&op_results ) const
 {
     ASSERTFAIL("Need to override one of the Evaluate() methods\n");
 }

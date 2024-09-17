@@ -61,7 +61,7 @@ private:
     SYM::Expression::VariablesRequiringRows GetVariablesRequiringRows() const override;
     virtual void Start( const SR::XTreeDatabase *x_tree_db );    
     bool IsSatisfied( const Assignments &assignments ) const override;
-    unique_ptr<SYM::SetResult> GetSuggestedValues( const Assignments &assignments,
+    unique_ptr<SYM::SubsetResult> GetSuggestedValues( const Assignments &assignments,
                                                    const VariableId &var ) const override;               
     string GetTrace() const override;
     void Dump() const;

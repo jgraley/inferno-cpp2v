@@ -45,8 +45,8 @@ public:
      * 
      * Related: #689 #693 #696. Also see AugTreePtr<>.
      */
-    typedef pair<XLink, TreePtr<Node>> TeleportResult;    
-    virtual TeleportResult RunTeleportQuery( const XTreeDatabase *db, DependencyReporter *dep_rep, XLink start_xlink ) const = 0;
+    typedef pair<XLink, TreePtr<Node>> QueryReturnType;    
+    virtual QueryReturnType RunTeleportQuery( const XTreeDatabase *db, DependencyReporter *dep_rep, XLink start_xlink ) const = 0;
     
     TreePtr<Node> GetDomainExtraNode( const XTreeDatabase *db, XLink start_xlink, set<TreePtr<Node>> &deps ) const override;
 
@@ -65,8 +65,8 @@ public:
         explicit TeleportOperator( const TeleportAgent *agent,
                                    shared_ptr<SymbolExpression> keyer ); 
         virtual list<shared_ptr<SYM::SymbolExpression>> GetSymbolOperands() const override;
-        virtual unique_ptr<SYM::SymbolResultInterface> Evaluate( const EvalKit &kit,
-                                                                 list<unique_ptr<SYM::SymbolResultInterface>> &&op_results ) const override;
+        virtual unique_ptr<SYM::SymbolicResult> Evaluate( const EvalKit &kit,
+                                                                 list<unique_ptr<SYM::SymbolicResult>> &&op_results ) const override;
 
         Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                            OrderProperty order_property ) const override;
