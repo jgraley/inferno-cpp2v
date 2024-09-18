@@ -45,6 +45,12 @@ int PopulateZoneOperator::GetNumChildExpressions() const
 }
 
 
+string PopulateZoneOperator::GetChildExpressionsTrace() const
+{
+	return Trace(child_expressions);
+}
+
+
 void PopulateZoneOperator::DepthFirstWalkImpl(function<void(const FreeZoneExpression *cmd)> func_in,
 			                                 function<void(const FreeZoneExpression *cmd)> func_out) const
 {
@@ -77,12 +83,6 @@ void PopulateZoneOperator::PopulateFreeZone( FreeZone &free_zone, const UP::Exec
 		free_zone.MarkBaseForEmbedded(kit.scr_engine, ea);		
 }
 	
-
-string PopulateZoneOperator::GetTrace() const
-{
-	return "PopulateZoneOperator TODOOOOOOOOOO "+Trace(child_expressions);
-}
-
 // ------------------------- PopulateTreeZoneOperator --------------------------
 
 PopulateTreeZoneOperator::PopulateTreeZoneOperator( unique_ptr<TreeZone> &&zone_, 
@@ -115,6 +115,11 @@ unique_ptr<Zone> PopulateTreeZoneOperator::Evaluate( const UP::ExecKit &kit ) co
 }
 
 
+string PopulateTreeZoneOperator::GetTrace() const
+{
+	return "PopulateTreeZoneOperator( \nzone: "+Trace(zone)+",\nchildren: "+GetChildExpressionsTrace()+" )";
+}
+
 // ------------------------- PopulateFreeZoneOperator --------------------------
 
 PopulateFreeZoneOperator::PopulateFreeZoneOperator( unique_ptr<FreeZone> &&zone_, 
@@ -144,4 +149,10 @@ unique_ptr<Zone> PopulateFreeZoneOperator::Evaluate( const UP::ExecKit &kit ) co
 {
 	PopulateFreeZone( *zone, kit );
 	return make_unique<FreeZone>(*zone);
+}
+
+
+string PopulateFreeZoneOperator::GetTrace() const
+{
+	return "PopulateFreeZoneOperator( \nzone: "+Trace(zone)+",\nchildren: "+GetChildExpressionsTrace()+" )";
 }

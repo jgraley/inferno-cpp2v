@@ -189,10 +189,6 @@ bool TreeZone::IsOverlap( const XTreeDatabase *db, const TreeZone &l, const Tree
 
 string TreeZone::GetTrace() const
 {
-    list<string> elts;
-    for( const XLink &p : terminii )
-        elts.push_back( Trace(p) );
-
     string rhs;
     if( IsEmpty() )
     {
@@ -201,13 +197,10 @@ string TreeZone::GetTrace() const
     }
     else
     {
-        string arrow;
         if( terminii.empty() )
-            arrow = " → "; // Indicates the zone goes all the way to leaves i.e. subtree
+            rhs = " → "; // Indicates the zone goes all the way to leaves i.e. subtree
         else
-            arrow = " ⇥ "; // Indicates the zone terminates
-            
-        rhs = arrow + Join(elts, ", ");
+            rhs = " ⇥ " + Trace(terminii); // Indicates the zone terminates            
     }
     
     return "TreeZone(" + Trace(base) + rhs +")";

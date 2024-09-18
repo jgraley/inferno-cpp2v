@@ -13,6 +13,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <algorithm>
 
 using namespace std;
 
@@ -204,15 +205,35 @@ Tracer &Tracer::operator()(const string &s)
     if( (flags & DISABLE) || !(IsEnabled() || (flags & FORCE)) )
         return *this;
 
-    if( !require_endl ) 
-    {    	
+    if( !require_endl_at_destruct ) 
         MaybePrintBanner();
-        PrintPrefix();
-    }
     
-    clog << s;
+	stringstream ss(s);
+	string segment;
+	bool first = true;
+	int local_indent = 0;
+	while( getline(ss, segment, '\n') )
+	{
+		if( !first )
+			clog << endl; // put back the endls that getline() removed
+
+		if( !first || !require_endl_at_destruct ) 
+			PrintPrefix(local_indent); // provide prefix if we're in home column
+		
+		clog << segment;
+
+		local_indent += count(segment.begin(), segment.end(), '(');
+		local_indent += count(segment.begin(), segment.end(), '[');
+		local_indent += count(segment.begin(), segment.end(), '{');
+		local_indent -= count(segment.begin(), segment.end(), ')');
+		local_indent -= count(segment.begin(), segment.end(), ']');
+		local_indent -= count(segment.begin(), segment.end(), '}');
+
+		first = false;		
+	}
     
-    require_endl = (s.empty() || s.back() != '\n');
+    // Will we end up out of home column?
+    require_endl_at_destruct = (s.empty() || s.back() != '\n');
     return *this;    
 }
 
@@ -225,10 +246,10 @@ void Tracer::Enable( bool e )
 
 void Tracer::MaybePrintEndl()
 {
-    if( require_endl ) 
+    if( require_endl_at_destruct ) 
     {
         clog << endl;
-        require_endl = false;
+        require_endl_at_destruct = false;
     }   
 }
 
@@ -273,13 +294,14 @@ void Tracer::Descend::Indent(string sprogress)
 }
 
 
-void Tracer::PrintPrefix()
+void Tracer::PrintPrefix(int local_indent)
 {
     string sprogress = Progress::GetCurrent().GetPrefix(4) + " ";
     if( ReadArgs::trace_no_stack )
         clog << sprogress;
     else
         Descend::Indent( sprogress );
+    clog << string(local_indent, ' ');
 }
 
 
@@ -294,7 +316,7 @@ void Tracer::MaybePrintBanner()
     }    
 }
 
-bool Tracer::require_endl = false;
+bool Tracer::require_endl_at_destruct = false;
 bool Tracer::require_banner = true;
 bool Tracer::enable = false; ///< call Tracer::Enable(true) to begin tracing
 bool Tracer::disable = false;

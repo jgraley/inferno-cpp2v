@@ -51,6 +51,10 @@ public:
     typedef SimpleCompareOrdering::iterator SimpleCompareOrderingIterator;
     
     // We will provide a depth-first ordered version of the domain
+    // Why not use the X tree directly? Well, we have the DepthFirstRelation
+    // but would need to code up an extensionaliser that uses the X tree 
+    // (not too hard). Real reason is to keep the door open to future 
+    // combined orderings.
     typedef set<XLink, DepthFirstRelation> DepthFirstOrdering;
     typedef DepthFirstOrdering::iterator DepthFirstOrderingIterator;
 

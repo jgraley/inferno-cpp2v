@@ -54,13 +54,12 @@ public:
     
     //const Zone *GetZone() const;
     int GetNumChildExpressions() const;
+    string GetChildExpressionsTrace() const;
     
 	void DepthFirstWalkImpl(function<void(const FreeZoneExpression *cmd)> func_in,
-			                function<void(const FreeZoneExpression *cmd)> func_out) const final;
+			                function<void(const FreeZoneExpression *cmd)> func_out) const override;
 
 	void PopulateFreeZone( FreeZone &free_zone, const UP::ExecKit &kit ) const;	
-
-	string GetTrace() const final;
 
 private:
 	unique_ptr<Zone> zone;
@@ -82,6 +81,8 @@ public:
     const TreeZone *GetZone() const;
 	unique_ptr<Zone> Evaluate( const UP::ExecKit &kit ) const final;	
     
+	string GetTrace() const final;
+    
 private:
 	unique_ptr<TreeZone> zone;
 };
@@ -98,6 +99,8 @@ public:
 
     const FreeZone *GetZone() const;
    	unique_ptr<Zone> Evaluate( const UP::ExecKit &kit ) const final;	
+
+	string GetTrace() const final;
 
 private:
 	unique_ptr<FreeZone> zone;

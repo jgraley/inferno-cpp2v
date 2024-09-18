@@ -38,7 +38,7 @@ void UpdateTreeCommand::Execute( const UP::ExecKit &kit ) const
 
 string UpdateTreeCommand::GetTrace() const
 {
-	return "UpdateTreeCommand "+Trace(child_expression)+" over "+Trace(target_tree_zone);
+	return "UpdateTreeCommand( \ntarget: "+Trace(target_tree_zone)+",\nsource: "+Trace(child_expression)+" )";
 }
 
 // ------------------------- CommandSequence --------------------------

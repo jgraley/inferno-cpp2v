@@ -21,7 +21,7 @@ void SingularTerminus::Join( TreePtr<Node> node )
 
 string SingularTerminus::GetTrace() const
 {
-    return "(Singular " + Trace(tree_ptr) + ")";
+    return "⌾"+tree_ptr->GetTypeName();
 }
     
 // ------------------------- ContainerTerminus --------------------------    
@@ -95,20 +95,18 @@ TreePtr<Node> ContainerTerminus::GetPlaceholder()
 
 string ContainerTerminus::GetTrace() const
 {
-	int i=1, n=0;
+	int i=-1;
     for( ContainerInterface::iterator it=container->begin(); it!=container->end(); ++it )
     {
-		if( it == it_placeholder )
-			n = i;
 		i++;
+		if( it == it_placeholder )
+			break;
 	}
-    string s = "(";
-    if( n==0 )
-		s += "ERROR!";
+    string si;
+    if( i==-1 )
+		si = "ERROR!";
 	else
-		s += OrdinalString( n );
-	s += " in ";
-    s += Trace(*container) ;
-	return s + ")";
+		si = to_string(i);
+    return "⌾"+container->GetTypeName()+"["+si+"]";
 }
     

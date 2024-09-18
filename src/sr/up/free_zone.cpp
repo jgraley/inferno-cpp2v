@@ -168,10 +168,6 @@ void FreeZone::Join( FreeZone &child_zone, int ti )
 
 string FreeZone::GetTrace() const
 {
-    list<string> elts;
-    for( auto p : terminii )
-        elts.push_back( Trace(p.first)+":"+Trace(p.second) );
-    
     string arrow, rhs;
     if( IsEmpty() )
     {
@@ -180,11 +176,9 @@ string FreeZone::GetTrace() const
     else
     {
         if( terminii.empty() )
-            arrow = " → "; // Indicates the zone goes all the way to leaves i.e. subtree
+            rhs = " → "; // Indicates the zone goes all the way to leaves i.e. subtree
         else
-            arrow = " ⇥ "; // Indicates the zone terminates
-
-        rhs = arrow + ::Join(elts, ", ");
+            rhs = " ⇥ " + Trace(terminii); // Indicates the zone terminates            
     }
         
     return "FreeZone(" + Trace(base) + rhs +")";

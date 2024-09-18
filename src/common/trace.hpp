@@ -124,11 +124,9 @@ string Trace(tuple<TYPES...> const & t)
 template<typename T, class A>
 string Trace(const vector<T, A> &v) 
 {
-    int iw = max( (int)SSPrintf("%d", v.size()-1).size(), 1 );
-    string fmt = SSPrintf("%%%dd: ", iw);
     list<string> elts;
     for( int i=0; i<v.size(); i++ )
-        elts.push_back( SSPrintf(fmt.c_str(), i) + Trace(v.at(i)) );
+        elts.push_back( Trace(v.at(i)) );
     return Join( elts, CONTAINER_SEP, "[", "]" );
 }
 
@@ -303,7 +301,7 @@ public:
     static void MaybePrintEndl();
 
 private:    
-    void PrintPrefix();
+    void PrintPrefix( int local_indent = 0 );
     void MaybePrintBanner();
 
     const char * const file;
@@ -311,7 +309,7 @@ private:
     string instance;
     const char * const function;
     Flags flags;
-    static bool require_endl;
+    static bool require_endl_at_destruct;
     static bool require_banner;
     static bool enable;
     static bool disable;
