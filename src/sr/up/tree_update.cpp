@@ -23,11 +23,11 @@ FreeZone SR::RunForBuilder( const FreeZoneExpression *expr )
 
 void SR::RunForReplace( const Command *cmd, const SCREngine *scr_engine, XTreeDatabase *x_tree_db )
 {
-	FTRACE(cmd);
+	//FTRACE(cmd);
 	// Uniqueness of tree zones
 	const FreeZoneExpression *expr = dynamic_cast<const UpdateTreeCommand &>(*cmd).GetExpression();
 	TreeZoneOverlapFinder overlaps( x_tree_db, expr );
-	//FTRACE(overlaps);
+	FTRACE(overlaps);
 	
 	// err...
 	

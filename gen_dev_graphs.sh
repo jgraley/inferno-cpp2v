@@ -29,25 +29,27 @@ while [[ $# -gt 0 ]]; do
       shift # past argument
       ;;
     *)
-      echo "Usage: gen_dev_graphs.sh [-p] [-i] [-k] [-u]"
+      echo "Usage: gen_dev_graphs.sh [-p] [-d] [-i] [-k] [-u]"
       exit 1
       ;;
   esac
 done
 
-rm -rf ${BASE_DIR}/*/*
-
 if [ "$DOCS" = "1" ]; then
     mkdir -p ${BASE_DIR}/docs/
+	rm -rf ${BASE_DIR}/docs/*
     ./inferno.exe -g${COLOUR}d ${BASE_DIR}/docs/
     mkdir -p ${BASE_DIR}/docs-trace/
+	rm -rf ${BASE_DIR}/docs-trace/*
     ./inferno.exe -gt${COLOUR}d ${BASE_DIR}/docs-trace/
 fi
 
 if [ "$PATTERN" = "1" ]; then
     mkdir -p ${BASE_DIR}/pattern/
+	rm -rf ${BASE_DIR}/pattern/*
     ./inferno.exe -g${COLOUR}p ${BASE_DIR}/pattern/
     mkdir -p ${BASE_DIR}/pattern-trace/
+	rm -rf ${BASE_DIR}/pattern-trace/*
     ./inferno.exe -gt${COLOUR}p ${BASE_DIR}/pattern-trace/
 fi
 
@@ -61,8 +63,10 @@ do
     CASE=`basename ${FILE} .cpp`
 
     mkdir -p ${BASE_DIR}/intermediate/
+	rm -rf ${BASE_DIR}/intermediate/*
     ./inferno.exe -i test/examples/${CASE}.cpp -q${PROGRESS} -g${COLOUR}i > ${BASE_DIR}/intermediate/${CASE}_${PROGRESS}.dot
     mkdir -p ${BASE_DIR}/intermediate-trace/
+	rm -rf ${BASE_DIR}/intermediate-trace/*
     ./inferno.exe -i test/examples/${CASE}.cpp -q${PROGRESS} -gt${COLOUR}i > ${BASE_DIR}/intermediate-trace/${CASE}_${PROGRESS}.dot
 done
 
