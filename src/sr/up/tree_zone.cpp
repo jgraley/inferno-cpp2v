@@ -9,24 +9,24 @@ using namespace SR;
 
 // ------------------------- TreeZone --------------------------
 
-TreeZone TreeZone::CreateSubtree( XLink base )
+TreeZone TreeZone::CreateSubtree( const XTreeDatabase *db, XLink base )
 {
-    return TreeZone( base, {} );
+    return TreeZone( db, base, {} );
 }
 
 
-TreeZone TreeZone::CreateEmpty( XLink base )
+TreeZone TreeZone::CreateEmpty( const XTreeDatabase *db, XLink base )
 {
     ASSERTS( base );
-    return TreeZone( base, 
-                     { base } ); // One element, same as base
+    return TreeZone( db, base, { base } ); // One element, same as base
 }
 
 
-TreeZone::TreeZone( XLink base_, vector<XLink> terminii_ ) :
+TreeZone::TreeZone( const XTreeDatabase *db_, XLink base_, vector<XLink> terminii_ ) :
     base( base_ ),
     terminii( move(terminii_) )
 {
+	ASSERT( db_ );
     ASSERT( base ); // TreeZone is not nullable
     ASSERT( base.GetChildX() ); // Cannot be empty
 }

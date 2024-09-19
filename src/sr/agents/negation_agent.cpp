@@ -52,7 +52,7 @@ Agent::FreeZoneExprPtr NegationAgent::GenFreeZoneExprImpl( const ReplaceKit &kit
 {
     // Negation is ambiguous because of the negation property
     ASSERT(key_xlink)("Unkeyed boolean agent seen in replace context");
-    auto new_zone = make_unique<TreeZone>(TreeZone::CreateSubtree( key_xlink ));
+    auto new_zone = make_unique<TreeZone>(TreeZone::CreateSubtree( kit.x_tree_db, key_xlink ));
 	return make_unique<PopulateTreeZoneOperator>( move(new_zone) );
 }
 

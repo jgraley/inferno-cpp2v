@@ -22,10 +22,10 @@ class FreeZone;
 class TreeZone : public Zone
 { 
 public:
-    static TreeZone CreateSubtree( XLink base );
-    static TreeZone CreateEmpty( XLink base );
+    static TreeZone CreateSubtree( const XTreeDatabase *db, XLink base );
+    static TreeZone CreateEmpty( const XTreeDatabase *db, XLink base );
 
-    explicit TreeZone( XLink base, vector<XLink> terminii );
+    explicit TreeZone( const XTreeDatabase *db_, XLink base, vector<XLink> terminii );
       
     bool IsEmpty() const override;
 	int GetNumTerminii() const override;

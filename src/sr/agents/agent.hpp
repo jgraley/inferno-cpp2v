@@ -23,6 +23,7 @@ class Agent : public virtual Graphable,
 public:  
     struct ReplaceKit
     {
+		const XTreeDatabase *x_tree_db;
     };
 
     // really just to reduce the amount of typing if I change it

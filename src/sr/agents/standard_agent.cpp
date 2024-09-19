@@ -665,7 +665,7 @@ Agent::FreeZoneExprPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &
 					zone->AddTerminus( ti++, make_shared<ContainerTerminus>(dest_con, dest_it) );     
 
 					ASSERT( under_elt ); // present simplified scheme disallows nullptr
-					auto under_zone = make_unique<TreeZone>(TreeZone::CreateSubtree( XLink(under_node, &under_elt) ));
+					auto under_zone = make_unique<TreeZone>(TreeZone::CreateSubtree( kit.x_tree_db, XLink(under_node, &under_elt) ));
 					child_commands.push_back( make_unique<PopulateTreeZoneOperator>(move(under_zone)) );		
 				}
 			}
@@ -687,7 +687,7 @@ Agent::FreeZoneExprPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &
 			else
 			{
 				ASSERT( *under_singular );            
-				auto under_zone = make_unique<TreeZone>(TreeZone::CreateSubtree( XLink(under_node, under_singular) ));
+				auto under_zone = make_unique<TreeZone>(TreeZone::CreateSubtree( kit.x_tree_db, XLink(under_node, under_singular) ));
 				child_commands.push_back( make_unique<PopulateTreeZoneOperator>(move(under_zone)) );			
 			}
         }

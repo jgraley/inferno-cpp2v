@@ -129,7 +129,7 @@ Agent::FreeZoneExprPtr IdentifierByNameAgent::GenFreeZoneExprImpl( const Replace
                                                               XLink key_xlink )
 {
     ASSERT(key_xlink)("Unkeyed agent seen in replace context");
-    auto new_zone = make_unique<TreeZone>(TreeZone::CreateSubtree( key_xlink ));
+    auto new_zone = make_unique<TreeZone>(TreeZone::CreateSubtree( kit.x_tree_db, key_xlink ));
 	return make_unique<PopulateTreeZoneOperator>( move(new_zone) );
 }
 

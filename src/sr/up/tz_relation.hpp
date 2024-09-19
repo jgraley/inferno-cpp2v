@@ -6,11 +6,11 @@
 #include "common/standard.hpp"
 #include "node/specialise_oostd.hpp"
 #include "terminus.hpp"
-#include "tree_zone.hpp"
 
 namespace SR 
 {
 class XTreeDatabase;
+class TreeZone;
 
 class ZoneRelation
 {
