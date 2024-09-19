@@ -6,6 +6,8 @@
 #include "common/lambda_loops.hpp"
 #include "commands.hpp"
 
+#include <iostream>
+
 using namespace SR;
 
 // ------------------------- Runners --------------------------
@@ -26,8 +28,9 @@ void SR::RunForReplace( const Command *cmd, const SCREngine *scr_engine, XTreeDa
 	//FTRACE(cmd);
 	// Uniqueness of tree zones
 	const FreeZoneExpression *expr = dynamic_cast<const UpdateTreeCommand &>(*cmd).GetExpression();
+	TRACE("\n-----------------------------------------------------------------------------------\n");
 	TreeZoneOverlapFinder overlaps( x_tree_db, expr );
-	FTRACE(overlaps);
+	ASSERT(overlaps.overlapping_zones.empty())(overlaps); // Temproary: usually true but obviously not always
 	
 	// err...
 	
@@ -40,8 +43,6 @@ void SR::RunForReplace( const Command *cmd, const SCREngine *scr_engine, XTreeDa
 
 TreeZoneOverlapFinder::TreeZoneOverlapFinder( const XTreeDatabase *db, const FreeZoneExpression *base )
 {
-	// Put them all into one Overlapping set, pessamistically assuming they
-	// all COULD overlap	
 	FreeZoneExpression::ForDepthFirstWalk( base, [&](const FreeZoneExpression *expr)
 	{
 		if( auto ptz_cmd = dynamic_cast<const PopulateTreeZoneOperator *>(expr) )

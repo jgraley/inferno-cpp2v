@@ -29,7 +29,7 @@ public:
 	
     string GetTrace() const final;
 
-private:	
+//private:	
     map<const TreeZone *, const PopulateTreeZoneOperator *> tzps_to_commands;
     map<const TreeZone *, set<const TreeZone *>> overlapping_zones;
 };

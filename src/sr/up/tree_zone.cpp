@@ -132,10 +132,13 @@ bool TreeZone::IsOverlap( const XTreeDatabase *db, const TreeZone &l, const Tree
     const TreeZone *d;
     const TreeZone *a;
     
+	TRACES("l=")(l)(" r=")(r);
+    
     auto p_base = df_rel.CompareHierarchical(l.base, r.base);
     switch( p_base.second )
     {
         case DepthFirstRelation::SAME:
+			TRACES(" identical: overlap\n");
             return true; // identical
             
         case DepthFirstRelation::LEFT_IS_ANCESTOR:
@@ -151,26 +154,34 @@ bool TreeZone::IsOverlap( const XTreeDatabase *db, const TreeZone &l, const Tree
         case DepthFirstRelation::CONTAINER_SIBLINGS:
         case DepthFirstRelation::ITEM_SIBLINGS:
         case DepthFirstRelation::ROOT_SIBLINGS:
+			TRACES(" different branches: no overlap\n");
             return false; // weakly removed sibling bases cannot overlap
             
         default:
             ASSERTFAILS();
     }
     
+	TRACES(" same branch a=")(a)(" d=")(d);
+
     // If a has a terminus that is an ancestor (weakly)
     // to d's base, then they do not overlap. Otherwise, they do.
     for( XLink terminus : a->terminii )
     {
+		TRACES(" terminus: ")(terminus);
         auto p_term = df_rel.CompareHierarchical(terminus, d->base);
-        switch( p_base.second )
+        TRACES(" ")(p_term);
+        switch( p_term.second )
         {
             case DepthFirstRelation::SAME:
+				TRACES(" touching: no overlap\n");
                 return false; // close but no overlap, zone d begins at from a's terminus
                 
             case DepthFirstRelation::LEFT_IS_ANCESTOR:
+				TRACES(" aa dd: no overlap\n");
                 return false; // no overlap, zone d descends from a's terminus
                 
             case DepthFirstRelation::RIGHT_IS_ANCESTOR:
+				TRACES(" adad: overlap\n");
                 return true; // a's terminus descends from base of d, making the zones overlap
             
             case DepthFirstRelation::CONTAINER_SIBLINGS:
@@ -183,6 +194,7 @@ bool TreeZone::IsOverlap( const XTreeDatabase *db, const TreeZone &l, const Tree
         }                
     }
     
+	TRACES(" erm...?: overlap\n");
     return true; // None of a's terminii in path from a's base to zone d
 }
 

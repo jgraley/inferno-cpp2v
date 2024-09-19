@@ -217,7 +217,7 @@ Tracer &Tracer::operator()(const string &s)
 		if( !first )
 			clog << endl; // put back the endls that getline() removed
 
-		if( !first || !require_endl_at_destruct ) 
+		if( !require_endl_at_destruct || !first) 
 			PrintPrefix(local_indent); // provide prefix if we're in home column
 		
 		clog << segment;
@@ -233,7 +233,13 @@ Tracer &Tracer::operator()(const string &s)
 	}
     
     // Will we end up out of home column?
-    require_endl_at_destruct = (s.empty() || s.back() != '\n');
+    require_endl_at_destruct = true;
+    if( !s.empty() && s.back() == '\n' )
+    {
+		// getline didn't give us an empty line for the last \n
+		clog << endl; // put back the endl that getline() removed
+		require_endl_at_destruct = false;
+	}
     return *this;    
 }
 
