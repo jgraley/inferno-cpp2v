@@ -6,6 +6,7 @@
 #include "common/standard.hpp"
 #include "node/specialise_oostd.hpp"
 #include "terminus.hpp"
+#include "../db/df_relation.hpp"
 
 #include <unordered_set>
 
@@ -32,8 +33,7 @@ public:
     TreePtr<Node> GetBaseNode() const override;
 
     XLink GetBaseXLink() const;
-    vector<XLink> GetTerminusXLinks() const;
-    XLink GetTerminusXLink(int ti) const;
+    set<XLink, DepthFirstRelation> GetTerminusXLinks() const;
     void DBCheck( const XTreeDatabase *db ) const;
 
     FreeZone Duplicate( XTreeDatabase *x_tree_db ) const;
@@ -42,8 +42,10 @@ public:
     string GetTrace() const;
 
 private:
+    const XTreeDatabase * const db;
+	DepthFirstRelation df_rel;
     XLink base;    
-    vector<XLink> terminii;
+    set<XLink, DepthFirstRelation> terminii;    
 };
  
  

@@ -23,8 +23,10 @@ TreeZone TreeZone::CreateEmpty( const XTreeDatabase *db, XLink base )
 
 
 TreeZone::TreeZone( const XTreeDatabase *db_, XLink base_, vector<XLink> terminii_ ) :
+	db( db_ ),
+	df_rel( db ),
     base( base_ ),
-    terminii( move(terminii_) )
+    terminii( terminii_.begin(), terminii_.end(), df_rel )
 {
 	ASSERT( db_ );
     ASSERT( base ); // TreeZone is not nullable
@@ -57,17 +59,9 @@ XLink TreeZone::GetBaseXLink() const
 }
 
 
-vector<XLink> TreeZone::GetTerminusXLinks() const
+set<XLink, DepthFirstRelation> TreeZone::GetTerminusXLinks() const
 {
     return terminii;
-}
-
-
-XLink TreeZone::GetTerminusXLink(int ti) const
-{
-	ASSERT( ti >= 0 );
-	ASSERT( ti < terminii.size() );
-    return terminii.at(ti);
 }
 
 

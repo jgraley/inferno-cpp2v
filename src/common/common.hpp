@@ -596,4 +596,18 @@ string DiffTrace( const C &c0, const C &c1 )
     return s;
 }
 
+
+// 3-way compare for pre C++20 STL containers like set, map etc that implement == and <
+template <typename STL_TYPE>
+Orderable::Diff STLCompare3Way( const STL_TYPE &l, const STL_TYPE &r )
+{
+	if( l == r )
+		return 0;
+	else if( l < r )
+		return -1;
+	else
+		return 1;
+}
+
+
 #endif

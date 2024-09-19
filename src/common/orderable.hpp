@@ -5,6 +5,9 @@
 
 using namespace std;
 
+
+// Note: this is just the part of the orderings code that's relevent to tree node 
+// designers. See also STLCompare3Way and the various Relations
 class Orderable
 {
 public:

@@ -25,18 +25,11 @@ bool TreeZoneRelation::CompareEqual( const TreeZone &l, const TreeZone &r ) cons
 	if( l.GetBaseXLink() != r.GetBaseXLink() )
 		return false;
 	
-	int mnt = min(l.GetNumTerminii(), r.GetNumTerminii());
-	
-	for( int i=0; i<mnt; i++ )
-		if( l.GetTerminusXLinks()[i] != r.GetTerminusXLinks()[i] )
-			return false;
-		
-	if( l.GetNumTerminii() != r.GetNumTerminii() )
+	if( l.GetTerminusXLinks() != r.GetTerminusXLinks() )
 		return false;
 	
 	return true;
 }
-
 
 
 Orderable::Diff TreeZoneRelation::Compare3Way( const TreeZone &l, const TreeZone &r ) const
@@ -57,10 +50,14 @@ pair<Orderable::Diff, ZoneRelation::RelType> TreeZoneRelation::CompareHierarchic
     switch( p_base.second )
     {
         case DepthFirstRelation::SAME:
-			if( CompareEqual( l, r ) )
-				return make_pair(0, SAME);
+        {
+			// BAses are the same so what about the terminii
+			Orderable::Diff term_diff = STLCompare3Way(l.GetTerminusXLinks(), r.GetTerminusXLinks());
+			if( term_diff==0 )
+				return make_pair(term_diff, SAME);
 			else
-				return make_pair(0, OVERLAP_TERMINII);
+				return make_pair(term_diff, OVERLAP_TERMINII);
+		}
 			
         case DepthFirstRelation::LEFT_IS_ANCESTOR:
             a = &l;
