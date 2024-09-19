@@ -29,6 +29,8 @@ public:
 class TreeZoneRelation : public ZoneRelation
 {
 public:
+	typedef TreeZone Domain;
+	
     TreeZoneRelation(const XTreeDatabase *db);
 
     /// Less operator: for use with set, map etc
@@ -41,8 +43,26 @@ private:
 	const XTreeDatabase * const db;
 }; 
 	
+
+template<typename POINTEE_REL>
+class PointeeRelation
+{
+public:	
+	typedef POINTEE_REL PointeeRel;
+	PointeeRelation( const POINTEE_REL &pointee_rel_ ) :
+		pointee_rel( pointee_rel_ )
+	{
+	}
 	
+	bool operator()( const typename PointeeRel::Domain *l, 
+	                 const typename PointeeRel::Domain *r )
+	{
+		return pointee_rel( *l, *r );
+	}
 	
+private:
+	const PointeeRel &pointee_rel;
+};
 	
 }
 

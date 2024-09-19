@@ -51,7 +51,7 @@ pair<Orderable::Diff, ZoneRelation::RelType> TreeZoneRelation::CompareHierarchic
     {
         case DepthFirstRelation::SAME:
         {
-			// BAses are the same so what about the terminii
+			// Bases are the same so what about the terminii?
 			Orderable::Diff term_diff = STLCompare3Way(l.GetTerminusXLinks(), r.GetTerminusXLinks());
 			if( term_diff==0 )
 				return make_pair(term_diff, SAME);
