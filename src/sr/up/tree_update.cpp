@@ -5,6 +5,7 @@
 #include "tree/validate.hpp"
 #include "common/lambda_loops.hpp"
 #include "commands.hpp"
+#include "tz_relation.hpp"
 
 #include <iostream>
 
@@ -30,7 +31,7 @@ void SR::RunForReplace( const Command *cmd, const SCREngine *scr_engine, XTreeDa
 	const FreeZoneExpression *expr = dynamic_cast<const UpdateTreeCommand &>(*cmd).GetExpression();
 	TRACE("\n-----------------------------------------------------------------------------------\n");
 	TreeZoneOverlapFinder overlaps( x_tree_db, expr );
-	ASSERT(overlaps.overlapping_zones.empty())(overlaps); // Temproary: usually true but obviously not always
+	//ASSERT(overlaps.overlapping_zones.empty())(overlaps); // Temproary: usually true but obviously not always
 	
 	// err...
 	
@@ -43,6 +44,8 @@ void SR::RunForReplace( const Command *cmd, const SCREngine *scr_engine, XTreeDa
 
 TreeZoneOverlapFinder::TreeZoneOverlapFinder( const XTreeDatabase *db, const FreeZoneExpression *base )
 {
+	TreeZoneRelation tz_relation( db );
+	
 	FreeZoneExpression::ForDepthFirstWalk( base, [&](const FreeZoneExpression *expr)
 	{
 		if( auto ptz_cmd = dynamic_cast<const PopulateTreeZoneOperator *>(expr) )
@@ -67,7 +70,8 @@ TreeZoneOverlapFinder::TreeZoneOverlapFinder( const XTreeDatabase *db, const Fre
                                     [&](const pair<const TreeZone *, const PopulateTreeZoneOperator *> &l, 
                                         const pair<const TreeZone *, const PopulateTreeZoneOperator *> &r)
     {
-        if( TreeZone::IsOverlap( db, *l.first, *r.first ) )
+		auto p = tz_relation.CompareHierarchical( *l.first, *r.first );
+        if( p.second == ZoneRelation::OVERLAP_GENERAL || p.second == ZoneRelation::OVERLAP_TERMINII )
         {
             // It's a symmetrical relationship so do it both ways around
             overlapping_zones[l.first].insert(r.first);

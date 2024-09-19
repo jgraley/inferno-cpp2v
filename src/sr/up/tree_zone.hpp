@@ -38,8 +38,6 @@ public:
 
     FreeZone Duplicate( XTreeDatabase *x_tree_db ) const;
     void Update( XTreeDatabase *x_tree_db, const FreeZone &free_zone ) const;
-
-    static bool IsOverlap( const XTreeDatabase *db, const TreeZone &l, const TreeZone &r );
     
     string GetTrace() const;
 
