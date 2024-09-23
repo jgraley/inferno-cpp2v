@@ -84,7 +84,7 @@ public:
                          const shared_ptr<const Expression> &r ) const;
     };
     
-    // Fore more than 2 operands, this would mean "any permutation of operands
+    // For more than 2 operands, this would mean "any permutation of operands
     // gives same result". Should not affect unary/primary. Default is false.
     virtual bool IsCommutative() const;
 

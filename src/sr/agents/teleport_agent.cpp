@@ -103,7 +103,7 @@ list<shared_ptr<SymbolExpression>> TeleportAgent::TeleportOperator::GetSymbolOpe
 
 
 unique_ptr<SymbolicResult> TeleportAgent::TeleportOperator::Evaluate( const EvalKit &kit,
-                                                                             list<unique_ptr<SymbolicResult>> &&op_results ) const 
+                                                                      list<unique_ptr<SymbolicResult>> &&op_results ) const 
 {
 	// Extract xlink from symbolic result
     ASSERT( op_results.size()==1 );            

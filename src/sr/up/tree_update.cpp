@@ -16,11 +16,8 @@ using namespace SR;
 FreeZone SR::RunForBuilder( const FreeZoneExpression *expr )
 {
     UP::ExecKit exec_kit {nullptr, nullptr};
-	unique_ptr<Zone> zone = expr->Evaluate( exec_kit );   
-	if( auto free_zone = dynamic_pointer_cast<FreeZone>(zone) )
-		return *free_zone;
-	else
-		ASSERTFAIL();
+	unique_ptr<FreeZone> free_zone = expr->Evaluate( exec_kit );   
+	return *free_zone;
 }
 
 

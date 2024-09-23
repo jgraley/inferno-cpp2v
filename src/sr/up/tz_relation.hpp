@@ -12,6 +12,8 @@ namespace SR
 class XTreeDatabase;
 class TreeZone;
 
+// ------------------------- PointeeRelation --------------------------
+
 class ZoneRelation
 {
 public:
@@ -25,6 +27,7 @@ public:
 	};
 };
 
+// ------------------------- TreeZoneRelation --------------------------
 
 class TreeZoneRelation : public ZoneRelation
 {
@@ -43,6 +46,7 @@ private:
 	const XTreeDatabase * const db;
 }; 
 	
+// ------------------------- PointeeRelation template --------------------------
 
 template<typename POINTEE_REL>
 class PointeeRelation
@@ -58,6 +62,15 @@ public:
 	                 const typename PointeeRel::Domain *r )
 	{
 		return pointee_rel( *l, *r );
+	}
+	
+    Orderable::Diff Compare3Way( const typename PointeeRel::Domain *l, 
+	                             const typename PointeeRel::Domain *r ) const
+	{
+		ASSERT(l);
+		ASSERT(r);
+		
+		return pointee_rel.Compare3Way( *l, *r );				
 	}
 	
 private:

@@ -36,7 +36,7 @@ public:
 		                           function<void(const FreeZoneExpression *cmd)> func_out );
 	virtual void DepthFirstWalkImpl(function<void(const FreeZoneExpression *cmd)> func_in,
 			                        function<void(const FreeZoneExpression *cmd)> func_out) const { ASSERTFAIL(); }
-	virtual unique_ptr<Zone> Evaluate( const UP::ExecKit &kit ) const { ASSERTFAIL(); }
+	virtual unique_ptr<FreeZone> Evaluate( const UP::ExecKit &kit ) const = 0;
 };
 
 // ------------------------- PopulateZoneOperator --------------------------
@@ -79,7 +79,7 @@ public:
     PopulateTreeZoneOperator( unique_ptr<TreeZone> &&zone_ );
     
     const TreeZone *GetZone() const;
-	unique_ptr<Zone> Evaluate( const UP::ExecKit &kit ) const final;	
+	unique_ptr<FreeZone> Evaluate( const UP::ExecKit &kit ) const final;	
     
 	string GetTrace() const final;
     
@@ -98,7 +98,7 @@ public:
     PopulateFreeZoneOperator( unique_ptr<FreeZone> &&zone_ );
 
     const FreeZone *GetZone() const;
-   	unique_ptr<Zone> Evaluate( const UP::ExecKit &kit ) const final;	
+   	unique_ptr<FreeZone> Evaluate( const UP::ExecKit &kit ) const final;	
 
 	string GetTrace() const final;
 

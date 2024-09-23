@@ -66,18 +66,15 @@ void PopulateZoneOperator::DepthFirstWalkImpl(function<void(const FreeZoneExpres
 void PopulateZoneOperator::PopulateFreeZone( FreeZone &free_zone, const UP::ExecKit &kit ) const	
 {
 	//FTRACE(free_zone)("\n");
-	vector<FreeZone> child_zones;
+	vector<unique_ptr<FreeZone>> child_zones;
 	for( const unique_ptr<FreeZoneExpression> &child_expression : child_expressions )
 	{
 		//FTRACE(child_expression)("\n");
-		unique_ptr<Zone> zone = child_expression->Evaluate( kit );
-		if( auto free_zone = dynamic_pointer_cast<FreeZone>(zone) )
-			child_zones.push_back( *free_zone );
-		else
-			ASSERTFAIL(); // not a free zone	
+		unique_ptr<FreeZone> free_zone = child_expression->Evaluate( kit );
+		child_zones.push_back( move(free_zone) );
 	}
 	
-	free_zone.Populate(kit.x_tree_db, child_zones);
+	free_zone.Populate(kit.x_tree_db, move(child_zones));
 	
 	for( RequiresSubordinateSCREngine *ea : embedded_agents )
 		free_zone.MarkBaseForEmbedded(kit.scr_engine, ea);		
@@ -107,7 +104,7 @@ const TreeZone *PopulateTreeZoneOperator::GetZone() const
 }
 
 
-unique_ptr<Zone> PopulateTreeZoneOperator::Evaluate( const UP::ExecKit &kit ) const
+unique_ptr<FreeZone> PopulateTreeZoneOperator::Evaluate( const UP::ExecKit &kit ) const
 {
 	FreeZone free_zone = zone->Duplicate( kit.x_tree_db );
 	PopulateFreeZone( free_zone, kit );
@@ -145,7 +142,7 @@ const FreeZone *PopulateFreeZoneOperator::GetZone() const
 }
 
 
-unique_ptr<Zone> PopulateFreeZoneOperator::Evaluate( const UP::ExecKit &kit ) const
+unique_ptr<FreeZone> PopulateFreeZoneOperator::Evaluate( const UP::ExecKit &kit ) const
 {
 	PopulateFreeZone( *zone, kit );
 	return make_unique<FreeZone>(*zone);

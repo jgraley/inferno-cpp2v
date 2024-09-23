@@ -29,9 +29,7 @@ const FreeZoneExpression *UpdateTreeCommand::GetExpression() const
 void UpdateTreeCommand::Execute( const UP::ExecKit &kit ) const
 {
     // New zone must be a free zone
-	unique_ptr<Zone> zone = child_expression->Evaluate( kit );
-	auto source_free_zone = dynamic_pointer_cast<FreeZone>(zone);
-	ASSERT( source_free_zone );
+	unique_ptr<FreeZone> source_free_zone = child_expression->Evaluate( kit );
     target_tree_zone.Update( kit.x_tree_db, *source_free_zone );
 }
 
