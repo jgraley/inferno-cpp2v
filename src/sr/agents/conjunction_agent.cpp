@@ -24,7 +24,7 @@ Agent::FreeZoneExprPtr ConjunctionAgent::GenFreeZoneExprImpl( const ReplaceKit &
     // multiple conjuncts/disjuncts
     ASSERT(key_xlink)("Unkeyed boolean agent seen in replace context");
     auto new_zone = make_unique<TreeZone>(TreeZone::CreateSubtree( kit.x_tree_db, key_xlink ));
-	return make_unique<PopulateTreeZoneOperator>( move(new_zone) );
+    return make_unique<PopulateTreeZoneOperator>( move(new_zone) );
 }
 
 

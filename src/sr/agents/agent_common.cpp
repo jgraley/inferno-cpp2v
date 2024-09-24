@@ -49,15 +49,13 @@ void AgentCommon::SCRConfigure( const SCREngine *e,
           (*this)
           ("\nCould be result of coupling this node across sibling embedded engines - not allowed :(");
     my_scr_engine = e;
-    phase = phase_;
-
-	ASSERT( (int)phase != 0 );
     
+    pattern_query = GetPatternQuery();    
+    
+    phase = phase_;
+	ASSERT( (int)phase != 0 );
     if( phase != IN_REPLACE_ONLY )
     {
-        pattern_query = GetPatternQuery();
-        num_decisions = pattern_query->GetDecisions().size();
-
         // We will need a conjecture, so that we can iterate through multiple 
         // potentially valid values for the abnormals and multiplicities.
         nlq_conjecture = make_shared<Conjecture>(this);            

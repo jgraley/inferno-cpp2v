@@ -54,8 +54,8 @@ StandardAgent::Plan::Sequence::Sequence( int ii, Plan *plan, Phase phase, Sequen
     Item(ii),
     pattern(pattern_)
 {
-    if( phase == IN_REPLACE_ONLY )
-        return;
+    //if( phase == IN_REPLACE_ONLY )
+    //    return;
     
     num_non_star = 0;
     SequenceInterface::iterator pit_prev;
@@ -121,8 +121,8 @@ StandardAgent::Plan::Collection::Collection( int ii, Plan *plan, Phase phase, Co
     Item(ii),
     pattern(pattern_)
 {
-    if( phase == IN_REPLACE_ONLY )
-        return;
+    //if( phase == IN_REPLACE_ONLY )
+    //    return;
 
     p_star = nullptr;
     for( CollectionInterface::iterator pit = pattern->begin(); 
@@ -134,10 +134,15 @@ StandardAgent::Plan::Collection::Collection( int ii, Plan *plan, Phase phase, Co
 		ASSERTS( pe );
         if( dynamic_cast<StarAgent *>(pe->get()) ) // per the impl, the star in a collection is not linked
         {
-            ASSERTS( !p_star )("Only one star allowed in collections when in compare pattern");
-            
-            p_star = pe;
-            star_plink = plink;
+            ASSERTS( phase == IN_REPLACE_ONLY || !p_star )("Only one star allowed in collections when in compare pattern");
+            if( !p_star )
+            {
+				// TODO infrastructure for multiple stars as with sequences (for consistency)
+				// and move the assert to regen query which is where it hurts (we have to associate with one star plink)
+				// -> better for if we add support for category restriction on stars in collections
+				p_star = pe;
+				star_plink = plink;
+			}
         }
         else
         {

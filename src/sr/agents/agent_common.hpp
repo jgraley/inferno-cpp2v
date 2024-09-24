@@ -79,7 +79,6 @@ protected:
     Phase phase = UNDEFINED;
     
 private:    
-    int num_decisions;
     shared_ptr<Conjecture> nlq_conjecture;
 
     virtual string GetGraphId() const;
