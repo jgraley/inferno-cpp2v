@@ -124,16 +124,6 @@ SYM::Lazy<SYM::BooleanExpression> IdentifierByNameAgent::SymbolicNormalLinkedQue
 }
 
 
-Agent::FreeZoneExprPtr IdentifierByNameAgent::GenFreeZoneExprImpl( const ReplaceKit &kit, 
-                                                              PatternLink me_plink, 
-                                                              XLink key_xlink )
-{
-    ASSERT(key_xlink)("Unkeyed agent seen in replace context");
-    auto new_zone = make_unique<TreeZone>(TreeZone::CreateSubtree( kit.x_tree_db, key_xlink ));
-	return make_unique<PopulateTreeZoneOperator>( move(new_zone) );
-}
-
-
 IdentifierByNameAgent::IsIdentifierNamedOperator::IsIdentifierNamedOperator( const IdentifierByNameAgent *iba_,
                                                                              string name_,
                                                                              shared_ptr<SYM::SymbolExpression> a_ ) :

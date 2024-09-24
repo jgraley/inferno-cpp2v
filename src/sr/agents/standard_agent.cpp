@@ -488,7 +488,7 @@ void StandardAgent::RegenerationQueryCollection( DecidedQueryAgentInterface &que
     }    
 }
 
-// ---------------------------- Replace stuff ----------------------------------                                               
+// ---------------------------- Replace ----------------------------------                                               
 
 void StandardAgent::MaybeChildrenPlanOverlay( PatternLink me_plink, 
                                               PatternLink under_plink ) 
@@ -540,7 +540,7 @@ Agent::FreeZoneExprPtr StandardAgent::GenFreeZoneExprImpl( const ReplaceKit &kit
         // The under pattern node is in a different location from over (=this), 
         // but overlay planning has set up overlay_under_plink for us.
         XLink under_xlink = my_scr_engine->GetReplaceKey( overlay_under_plink );
-        return GenerateCommandOverlay( kit, me_plink, under_xlink );
+        return GenFreeZoneExprOverlay( kit, me_plink, under_xlink );
     }
     else if( key_xlink ) 
     {
@@ -548,18 +548,18 @@ Agent::FreeZoneExprPtr StandardAgent::GenFreeZoneExprImpl( const ReplaceKit &kit
         // The under and over pattern nodes are both this. AndRuleEngine 
         // has keyed this, and due wildcarding, key will be a final node
         // i.e. possibly a subclass of this node.
-        return GenerateCommandOverlay( kit, me_plink, key_xlink );
+        return GenFreeZoneExprOverlay( kit, me_plink, key_xlink );
     }
     else
     {
         // Free replace pattern, just duplicate it.
         ASSERT( me_plink.GetPattern()->IsFinal() ); 
-        return GenerateCommandNormal( kit, me_plink ); 
+        return GenFreeZoneExprNormal( kit, me_plink ); 
     }
 }
 
 
-Agent::FreeZoneExprPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &kit, 
+Agent::FreeZoneExprPtr StandardAgent::GenFreeZoneExprOverlay( const ReplaceKit &kit, 
                                                          PatternLink me_plink, 
                                                          XLink under_xlink )  // overlaying
 {
@@ -705,7 +705,7 @@ Agent::FreeZoneExprPtr StandardAgent::GenerateCommandOverlay( const ReplaceKit &
     return make_unique<PopulateFreeZoneOperator>( move(zone), move(child_commands) );         
 }
 
-Agent::FreeZoneExprPtr StandardAgent::GenerateCommandNormal( const ReplaceKit &kit, 
+Agent::FreeZoneExprPtr StandardAgent::GenFreeZoneExprNormal( const ReplaceKit &kit, 
                                                         PatternLink me_plink ) 
 {
 	INDENT("N");

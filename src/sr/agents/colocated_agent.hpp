@@ -7,16 +7,6 @@
 namespace SR
 {
 
-//---------------------------------- WeakColocatedAgent ------------------------------------    
-
-/// Intermediate for "conceptuially colocated" agents
-class WeakColocatedAgent : public virtual AgentCommon 
-{
-public:	
-   FreeZoneExprPtr GenFreeZoneExprImpl( const ReplaceKit &kit, 
-                                         PatternLink me_plink, 
-                                         XLink key_xlink ) override;                                         	
-};
 
 //---------------------------------- ColocatedAgent ------------------------------------    
 
@@ -27,7 +17,7 @@ public:
  * to build replace pattern. Subclasses may override 
  * RunColocatedQuery() to add additional restrictions. #271
  */
-class ColocatedAgent : public virtual WeakColocatedAgent 
+class ColocatedAgent : public virtual AgentCommon 
 {
 public:
     class PreRestrictionMismatch : public Mismatch {};
@@ -37,6 +27,10 @@ public:
     
     virtual void RunColocatedQuery(XLink common_xlink) const;
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicColocatedQuery() const; 
+
+    FreeZoneExprPtr GenFreeZoneExprImpl( const ReplaceKit &kit, 
+                                         PatternLink me_plink, 
+                                         XLink key_xlink ) override;
 };
 
 };

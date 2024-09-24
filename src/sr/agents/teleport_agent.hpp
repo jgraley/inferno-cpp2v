@@ -54,10 +54,6 @@ public:
 
 	bool IsExtenderLess( const Extender &r ) const override;
 
-    FreeZoneExprPtr GenFreeZoneExprImpl( const ReplaceKit &kit, 
-                                    PatternLink me_plink, 
-                                    XLink key_xlink ) final;
-
     class TeleportOperator : public SYM::SymbolToSymbolExpression
     {
     public:    

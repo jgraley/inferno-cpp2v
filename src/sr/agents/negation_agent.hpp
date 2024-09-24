@@ -25,10 +25,6 @@ public:
                                            const SolutionMap *hypothesis_links,
                                            const XTreeDatabase *x_tree_db ) const;                                              
 
-    FreeZoneExprPtr GenFreeZoneExprImpl( const ReplaceKit &kit, 
-                                    PatternLink me_plink, 
-                                    XLink key_xlink ) final;
-
     virtual Block GetGraphBlockInfo() const;
     
 private:

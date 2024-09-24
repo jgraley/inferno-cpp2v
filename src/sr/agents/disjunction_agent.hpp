@@ -6,7 +6,7 @@
 #include "../boolean_evaluator.hpp"
 #include "standard_agent.hpp"
 #include "../sym/predicate_operators.hpp"
-#include "colocated_agent.hpp"
+#include "special_agent.hpp"
 
 namespace SR
 {
@@ -14,7 +14,7 @@ namespace SR
 /// Boolean node that matches if any of the sub-patterns at the pointers in
 /// `patterns` do match i.e. an "or" operation. `patterns` point to abnormal 
 /// contexts since in an overall match, some sub-patterns may not match.
-class DisjunctionAgent : public virtual WeakColocatedAgent
+class DisjunctionAgent : public virtual AgentCommon
 {
 public:
     class NoOptionsMatchedMismatch : public Mismatch {};

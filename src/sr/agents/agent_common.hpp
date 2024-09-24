@@ -63,8 +63,8 @@ public:
     FreeZoneExprPtr GenFreeZoneExpr( const ReplaceKit &kit, 
                                 PatternLink me_plink ) override;
     virtual FreeZoneExprPtr GenFreeZoneExprImpl( const ReplaceKit &kit, 
-                                            PatternLink me_plink, 
-                                            XLink key_xlink ) = 0;
+                                         PatternLink me_plink, 
+                                         XLink key_xlink );
     TreePtr<Node> CloneNode( bool force_dirty ) const;
     virtual string GetTrace() const;
 

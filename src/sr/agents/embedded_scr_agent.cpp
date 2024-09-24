@@ -36,6 +36,7 @@ Agent::FreeZoneExprPtr EmbeddedSCRAgent::GenFreeZoneExprImpl( const ReplaceKit &
                                                          PatternLink me_plink, 
                                                          XLink key_xlink )
 {   
+	// Use colo algorithm but add marker
     Agent::FreeZoneExprPtr child_command = ColocatedAgent::GenFreeZoneExprImpl(kit, me_plink, key_xlink);
     
     auto child_pzc = dynamic_cast<PopulateZoneOperator *>(child_command.get());

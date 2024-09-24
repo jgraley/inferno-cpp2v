@@ -70,6 +70,7 @@ Agent::FreeZoneExprPtr DeltaAgent::GenFreeZoneExprImpl( const ReplaceKit &kit,
                                                    PatternLink me_plink, 
                                                    XLink key_xlink )
 {
+	// Recurse through the Overlay branch
     PatternLink overlay_plink(this, GetOverlay());
     return overlay_plink.GetChildAgent()->GenFreeZoneExpr(kit, overlay_plink);    
 }                                         

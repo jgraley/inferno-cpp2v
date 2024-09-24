@@ -140,10 +140,10 @@ public:
                                     XLink key_xlink ) final;
 
 private:	
-	FreeZoneExprPtr GenerateCommandOverlay( const ReplaceKit &kit, 
+	FreeZoneExprPtr GenFreeZoneExprOverlay( const ReplaceKit &kit, 
                                        PatternLink me_plink, 
                                        XLink key_xlink ); // under substitution if not nullptr
-    FreeZoneExprPtr GenerateCommandNormal( const ReplaceKit &kit, 
+    FreeZoneExprPtr GenFreeZoneExprNormal( const ReplaceKit &kit, 
                                       PatternLink me_plink );
     
 public:
