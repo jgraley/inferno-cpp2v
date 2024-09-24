@@ -30,7 +30,7 @@ public:
 class UpdateTreeCommand : public Command
 {
 public:
-    UpdateTreeCommand( const TreeZone &target_tree_zone_, unique_ptr<FreeZoneExpression> child_expression_ );
+    UpdateTreeCommand( const TreeZone &target_tree_zone_, shared_ptr<FreeZoneExpression> child_expression_ );
 	const FreeZoneExpression *GetExpression() const;
 	
 	void Execute( const UP::ExecKit &kit ) const final;	
@@ -39,7 +39,7 @@ public:
 
 private:
 	TreeZone target_tree_zone;
-	unique_ptr<FreeZoneExpression> child_expression;
+	shared_ptr<FreeZoneExpression> child_expression;
 };
 
 // ------------------------- CommandSequence --------------------------
@@ -49,16 +49,16 @@ class CommandSequence : public Command
 public:
 	void Execute( const UP::ExecKit &kit ) const final;	
 
-	void Add( unique_ptr<Command> new_cmd );
-	void AddAtStart( unique_ptr<Command> new_cmd );
+	void Add( shared_ptr<Command> new_cmd );
+	void AddAtStart( shared_ptr<Command> new_cmd );
     bool IsEmpty() const;
-    list<unique_ptr<Command>> &GetCommands();
+    list<shared_ptr<Command>> &GetCommands();
     void Clear();    
 	
 	string GetTrace() const final;
 
 private:
-	list<unique_ptr<Command>> seq;	
+	list<shared_ptr<Command>> seq;	
 };
 
 }

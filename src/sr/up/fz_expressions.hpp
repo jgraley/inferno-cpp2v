@@ -46,14 +46,15 @@ public:
 class PopulateZoneOperator : public FreeZoneExpression
 {
 protected:
-    PopulateZoneOperator( vector<unique_ptr<FreeZoneExpression>> &&child_expressions_ );
+    PopulateZoneOperator( vector<shared_ptr<FreeZoneExpression>> &&child_expressions_ );
     PopulateZoneOperator();
 
 public:
-    void AddEmbeddedAgentBase( RequiresSubordinateSCREngine *embedded_agent );
+    void AddEmbeddedMarker( RequiresSubordinateSCREngine *embedded_marker );
     
-    //const Zone *GetZone() const;
     int GetNumChildExpressions() const;
+	vector<shared_ptr<FreeZoneExpression>> &GetChildExpressions();
+	const vector<shared_ptr<FreeZoneExpression>> &GetChildExpressions() const;
     string GetChildExpressionsTrace() const;
     
 	void DepthFirstWalkImpl(function<void(const FreeZoneExpression *cmd)> func_in,
@@ -62,9 +63,8 @@ public:
 	void PopulateFreeZone( FreeZone &free_zone, const UP::ExecKit &kit ) const;	
 
 private:
-	unique_ptr<Zone> zone;
-	vector<unique_ptr<FreeZoneExpression>> child_expressions;
-	std::list<RequiresSubordinateSCREngine *> embedded_agents;
+	vector<shared_ptr<FreeZoneExpression>> child_expressions;
+	std::list<RequiresSubordinateSCREngine *> embedded_markers;
 };
 
 
@@ -75,8 +75,8 @@ private:
 class PopulateTreeZoneOperator : public PopulateZoneOperator
 {
 public:
-    PopulateTreeZoneOperator( unique_ptr<TreeZone> &&zone_, vector<unique_ptr<FreeZoneExpression>> &&child_expressions );
-    PopulateTreeZoneOperator( unique_ptr<TreeZone> &&zone_ );
+    PopulateTreeZoneOperator( TreeZone zone_, vector<shared_ptr<FreeZoneExpression>> &&child_expressions );
+    PopulateTreeZoneOperator( TreeZone zone_ );
     
     const TreeZone *GetZone() const;
 	unique_ptr<FreeZone> Evaluate( const UP::ExecKit &kit ) const final;	
@@ -84,7 +84,7 @@ public:
 	string GetTrace() const final;
     
 private:
-	unique_ptr<TreeZone> zone;
+	TreeZone zone;
 };
 
 // ------------------------- PopulateFreeZoneOperator --------------------------
@@ -94,8 +94,8 @@ private:
 class PopulateFreeZoneOperator : public PopulateZoneOperator
 {
 public:
-    PopulateFreeZoneOperator( unique_ptr<FreeZone> &&zone_, vector<unique_ptr<FreeZoneExpression>> &&child_expressions );
-    PopulateFreeZoneOperator( unique_ptr<FreeZone> &&zone_ );
+    PopulateFreeZoneOperator( FreeZone zone_, vector<shared_ptr<FreeZoneExpression>> &&child_expressions );
+    PopulateFreeZoneOperator( FreeZone zone_ );
 
     const FreeZone *GetZone() const;
    	unique_ptr<FreeZone> Evaluate( const UP::ExecKit &kit ) const final;	
@@ -103,7 +103,7 @@ public:
 	string GetTrace() const final;
 
 private:
-	unique_ptr<FreeZone> zone;
+	FreeZone zone;
 };
 
 }

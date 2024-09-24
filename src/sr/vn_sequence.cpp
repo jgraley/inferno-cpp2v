@@ -152,7 +152,7 @@ void VNSequence::CompleteDomainExtension()
 }
 
 
-void VNSequence::RunUpdateCommand( unique_ptr<Command> cmd, 
+void VNSequence::RunUpdateCommand( shared_ptr<Command> cmd, 
                                    const SCREngine *scr_engine )
 {
     ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");    

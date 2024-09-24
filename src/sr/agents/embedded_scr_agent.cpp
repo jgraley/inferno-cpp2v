@@ -44,7 +44,7 @@ Agent::FreeZoneExprPtr EmbeddedSCRAgent::GenFreeZoneExprImpl( const ReplaceKit &
     
     // Inform the update mechanism that, once it's done duplicating 
     // nodes etc, it should mark this position for this embedded agent.
-    child_pzc->AddEmbeddedAgentBase( this );
+    child_pzc->AddEmbeddedMarker( this );
 
     return child_command;
 }                                         

@@ -94,13 +94,13 @@ TreePtr<Node> FreeZone::GetBaseNode() const
 }
 
 
-void FreeZone::Populate( XTreeDatabase *x_tree_db, vector<unique_ptr<FreeZone>> child_zones ) 
+void FreeZone::Populate( XTreeDatabase *x_tree_db, vector<unique_ptr<FreeZone>> &&child_zones ) 
 {
 	ASSERT( terminii.size() == child_zones.size() );
 	int ti=0;
 	for( unique_ptr<FreeZone> &child_zone : child_zones )
 	{
-		Join(*child_zone, ti++);
+		Join(move(child_zone), ti++);
 	}		
 		
 	ASSERT( GetNumTerminii() == 0 );
@@ -137,32 +137,33 @@ void FreeZone::DropTerminus(int ti)
 }
 
 
-void FreeZone::Join( FreeZone &child_zone, int ti )
+void FreeZone::Join( unique_ptr<FreeZone> &&child_zone, int ti )
 {
-	if( child_zone.IsEmpty() )
+	if( child_zone->IsEmpty() )
 	{
 		// nothing happens	
 		return; 
 	}
 	else if( IsEmpty() )
 	{		
+		// child zone overwrites us
 		ASSERT(ti == 0);		
-		operator=(child_zone);
+		operator=(*child_zone);
 		return;
 	}
 	
 	// TODO support inserting the child's terminii. Do we renumber, or
 	// just assign new keys?
-	ASSERT( child_zone.GetNumTerminii() == 0 );
+	ASSERT( child_zone->GetNumTerminii() == 0 );
 	 
     shared_ptr<Terminus> terminus = GetTerminus(ti);
     DropTerminus(ti);
     
     // Populate terminus. Join() will expand SubContainers
-    ASSERT( child_zone.GetBaseNode() );
-    terminus->Join( child_zone.GetBaseNode() );
+    ASSERT( child_zone->GetBaseNode() );
+    terminus->Join( child_zone->GetBaseNode() );
     
-    //Validate()( zone->GetBaseNode() );     
+    //Validate()( child_zone->GetBaseNode() );     
 }
 
 

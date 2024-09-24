@@ -92,7 +92,7 @@ Agent::FreeZoneExprPtr StarAgent::GenFreeZoneExprImpl( const ReplaceKit &kit,
         ASSERT(0)("Please add new kind of container");
     
     vector<Agent::FreeZoneExprPtr> child_commands;
-    auto zone = make_unique<FreeZone>(FreeZone::CreateSubtree(dest));
+    FreeZone zone = FreeZone::CreateSubtree(dest);
     int ti = 0;
 
     TRACE("Walking container length %d\n", key_container->size() );
@@ -100,14 +100,14 @@ Agent::FreeZoneExprPtr StarAgent::GenFreeZoneExprImpl( const ReplaceKit &kit,
     for( const TreePtrInterface &key_elt : *key_container )
     {
         ContainerInterface::iterator dest_it = dest_container->insert( ContainerTerminus::GetPlaceholder() );
-        zone->AddTerminus( ti, make_shared<ContainerTerminus>(dest_container, dest_it) );    
+        zone.AddTerminus( ti, make_shared<ContainerTerminus>(dest_container, dest_it) );    
 
-        auto child_zone = make_unique<TreeZone>(TreeZone::CreateSubtree( kit.x_tree_db, XLink(key_node, &key_elt) ));
-	    child_commands.push_back( make_unique<PopulateTreeZoneOperator>(move(child_zone)) );
+        TreeZone child_zone = TreeZone::CreateSubtree( kit.x_tree_db, XLink(key_node, &key_elt) );
+	    child_commands.push_back( make_shared<PopulateTreeZoneOperator>(move(child_zone)) );
         ti++;
     }
 
-    return make_unique<PopulateFreeZoneOperator>( move(zone), move(child_commands) );    
+    return make_shared<PopulateFreeZoneOperator>( move(zone), move(child_commands) );    
 }
 
 

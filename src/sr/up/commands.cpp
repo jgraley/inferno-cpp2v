@@ -12,7 +12,7 @@ using namespace SR;
 // ------------------------- UpdateTreeCommand --------------------------
 
 UpdateTreeCommand::UpdateTreeCommand( const TreeZone &target_tree_zone_, 
-                                      unique_ptr<FreeZoneExpression> child_expression_ ) :
+                                      shared_ptr<FreeZoneExpression> child_expression_ ) :
 	target_tree_zone( target_tree_zone_ ),
 	child_expression( move(child_expression_) )
 {
@@ -44,18 +44,18 @@ string UpdateTreeCommand::GetTrace() const
 void CommandSequence::Execute( const UP::ExecKit &kit ) const
 {
 	//FTRACE(" executing");
-	for( const unique_ptr<Command> &cmd : seq )
+	for( const shared_ptr<Command> &cmd : seq )
 		cmd->Execute(kit);
 }
 	
     
-void CommandSequence::Add( unique_ptr<Command> new_cmd )
+void CommandSequence::Add( shared_ptr<Command> new_cmd )
 {
     seq.push_back(move(new_cmd));
 }
 
 
-void CommandSequence::AddAtStart( unique_ptr<Command> new_cmd )
+void CommandSequence::AddAtStart( shared_ptr<Command> new_cmd )
 {
     seq.push_front(move(new_cmd));
 }
@@ -67,7 +67,7 @@ bool CommandSequence::IsEmpty() const
 }
 
 
-list<unique_ptr<Command>> &CommandSequence::GetCommands()
+list<shared_ptr<Command>> &CommandSequence::GetCommands()
 {
 	return seq;
 }
@@ -82,7 +82,7 @@ void CommandSequence::Clear()
 string CommandSequence::GetTrace() const
 {
     list<string> elts;
-    for( const unique_ptr<Command> &pc : seq )
+    for( const shared_ptr<Command> &pc : seq )
         elts.push_back( Trace(*pc) );
     return Join( elts, "\n", "CommandSequence[\n", " ]\n" );
 }
