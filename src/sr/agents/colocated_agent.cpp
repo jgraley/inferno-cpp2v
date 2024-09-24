@@ -4,9 +4,36 @@
 #include "sym/boolean_operators.hpp"
 #include "sym/predicate_operators.hpp"
 #include "sym/symbol_operators.hpp"
+#include "up/fz_expressions.hpp"
 
 using namespace SR;
 using namespace SYM;
+
+
+//---------------------------------- WeakColocatedAgent ------------------------------------    
+
+Agent::FreeZoneExprPtr WeakColocatedAgent::GenFreeZoneExprImpl( const ReplaceKit &kit, 
+                                                            PatternLink me_plink, 
+                                                            XLink key_xlink )
+{
+    auto plinks = pattern_query->GetNormalLinks();
+    if( plinks.size() == 1 )
+    {
+		// Unambiguous path through replace pattern so we can continue to overlay
+		PatternLink replace_plink = OnlyElementOf(plinks);
+		ASSERT( replace_plink );          
+		return replace_plink.GetChildAgent()->GenFreeZoneExpr(kit, replace_plink);    
+	}
+	else
+	{
+		// Ambiguous or non-existant path, so just use the X subtree we keyed to
+		ASSERT(key_xlink)("Unkeyed ambiguous colocated agent seen in replace context");
+		auto new_zone = make_unique<TreeZone>(TreeZone::CreateSubtree( kit.x_tree_db, key_xlink ));
+		return make_unique<PopulateTreeZoneOperator>( move(new_zone) );		
+	}
+}                                         
+
+//---------------------------------- ColocatedAgent ------------------------------------    
 
 Lazy<BooleanExpression> ColocatedAgent::SymbolicNormalLinkedQuery() const
 {
@@ -32,5 +59,6 @@ void ColocatedAgent::RunColocatedQuery( XLink common_xlink ) const
 
 SYM::Lazy<SYM::BooleanExpression> ColocatedAgent::SymbolicColocatedQuery() const
 {
-	return SYM::MakeLazy<SYM::BooleanConstant>(true); 
+	return SYM::MakeLazy<SYM::BooleanConstant>(true); // TODO don't like this, belongs in ConjuctionAgent
 }
+

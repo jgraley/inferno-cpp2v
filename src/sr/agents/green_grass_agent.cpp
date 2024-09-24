@@ -4,7 +4,6 @@
 #include "link.hpp"
 #include "sym/symbol_operators.hpp"
 #include "sym/result.hpp"
-#include "up/commands.hpp"
 
 using namespace SR;
 using namespace SYM;
@@ -22,17 +21,6 @@ Lazy<BooleanExpression> GreenGrassAgent::SymbolicColocatedQuery() const
     auto keyer_expr = MakeLazy<SymbolVariable>(keyer_plink);
     return MakeLazy<IsGreenGrassOperator>(this, keyer_expr);
 }
-
-
-Agent::FreeZoneExprPtr GreenGrassAgent::GenFreeZoneExprImpl( const ReplaceKit &kit, 
-                                                        PatternLink me_plink, 
-                                                        XLink key_xlink )
-{
-    auto plinks = pattern_query->GetNormalLinks();
-    PatternLink replace_plink = OnlyElementOf(plinks);
-    ASSERT( replace_plink );          
-    return replace_plink.GetChildAgent()->GenFreeZoneExpr(kit, replace_plink);    
-}                                         
 
 
 Graphable::Block GreenGrassAgent::GetGraphBlockInfo() const

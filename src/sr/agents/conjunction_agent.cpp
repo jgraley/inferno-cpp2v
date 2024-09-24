@@ -16,18 +16,6 @@ shared_ptr<PatternQuery> ConjunctionAgent::GetPatternQuery() const
 }
 
 
-Agent::FreeZoneExprPtr ConjunctionAgent::GenFreeZoneExprImpl( const ReplaceKit &kit, 
-                                                         PatternLink me_plink, 
-                                                         XLink key_xlink )
-{
-    // Conjuction and disjunction are ambiguous because there are 
-    // multiple conjuncts/disjuncts
-    ASSERT(key_xlink)("Unkeyed boolean agent seen in replace context");
-    auto new_zone = make_unique<TreeZone>(TreeZone::CreateSubtree( kit.x_tree_db, key_xlink ));
-    return make_unique<PopulateTreeZoneOperator>( move(new_zone) );
-}
-
-
 Graphable::Block ConjunctionAgent::GetGraphBlockInfo() const
 {
 	// The Conjunction node appears as a diamond with a ∧ character inside it. The affected subtrees are 

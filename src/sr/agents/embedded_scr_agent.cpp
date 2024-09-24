@@ -36,11 +36,7 @@ Agent::FreeZoneExprPtr EmbeddedSCRAgent::GenFreeZoneExprImpl( const ReplaceKit &
                                                          PatternLink me_plink, 
                                                          XLink key_xlink )
 {   
-    auto plinks = pattern_query->GetNormalLinks();
-    PatternLink replace_plink = OnlyElementOf(plinks);
-    PatternLink through_plink(this, GetThrough());
-    ASSERT(replace_plink==through_plink);
-    Agent::FreeZoneExprPtr child_command = replace_plink.GetChildAgent()->GenFreeZoneExpr(kit, replace_plink);
+    Agent::FreeZoneExprPtr child_command = ColocatedAgent::GenFreeZoneExprImpl(kit, me_plink, key_xlink);
     
     auto child_pzc = dynamic_cast<PopulateZoneOperator *>(child_command.get());
     ASSERT( child_pzc );
