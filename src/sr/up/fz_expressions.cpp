@@ -10,15 +10,33 @@ using namespace SR;
 
 // ------------------------- FreeZoneExpression --------------------------
 
-void FreeZoneExpression::ForDepthFirstWalk( const FreeZoneExpression *base,
-	                                        function<void(const FreeZoneExpression *cmd)> func_in,
-	                                        function<void(const FreeZoneExpression *cmd)> func_out ) try
+void FreeZoneExpression::ForDepthFirstWalk( shared_ptr<FreeZoneExpression> &base,
+											function<void(shared_ptr<FreeZoneExpression> &expr)> func_in,
+	                                        function<void(shared_ptr<FreeZoneExpression> &expr)> func_out ) try
 {
+	if( func_in )
+		func_in(base);
 	base->DepthFirstWalkImpl(func_in, func_out);
+	if( func_out )
+		func_out(base);
 }
 catch( BreakException )
 {
 }		       
+
+
+void FreeZoneExpression::DepthFirstWalkImpl( function<void(shared_ptr<FreeZoneExpression> &expr)> func_in,
+			                                 function<void(shared_ptr<FreeZoneExpression> &expr)> func_out )
+{
+	ForChildren( [&](shared_ptr<FreeZoneExpression> &expr)
+	{
+		if( func_in )
+			func_in(expr);
+		expr->DepthFirstWalkImpl(func_in, func_out);
+		if( func_out )
+			func_out(expr);
+	} );
+}
 
 // ------------------------- PopulateZoneOperator --------------------------
 
@@ -63,15 +81,10 @@ string PopulateZoneOperator::GetChildExpressionsTrace() const
 }
 
 
-void PopulateZoneOperator::DepthFirstWalkImpl(function<void(const FreeZoneExpression *cmd)> func_in,
-			                                  function<void(const FreeZoneExpression *cmd)> func_out) const
+void PopulateZoneOperator::ForChildren(function<void(shared_ptr<FreeZoneExpression> &expr)> func)
 {
-	if( func_in )
-		func_in(this);
-	for( const shared_ptr<FreeZoneExpression> &child_expression : child_expressions )
-		child_expression->DepthFirstWalkImpl(func_in, func_out);
-	if( func_out )
-		func_out(this);
+	for( shared_ptr<FreeZoneExpression> &child_expression : child_expressions )
+		func(child_expression);
 }
 
 

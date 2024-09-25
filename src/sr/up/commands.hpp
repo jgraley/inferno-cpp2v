@@ -32,7 +32,8 @@ class UpdateTreeCommand : public Command
 public:
     UpdateTreeCommand( const TreeZone &target_tree_zone_, 
                        shared_ptr<FreeZoneExpression> child_expression_ );
-	const FreeZoneExpression *GetExpression() const;
+	shared_ptr<FreeZoneExpression> &GetExpression();
+	const shared_ptr<FreeZoneExpression> &GetExpression() const;
 	
 	void Execute( const UP::ExecKit &kit ) const final;	
 

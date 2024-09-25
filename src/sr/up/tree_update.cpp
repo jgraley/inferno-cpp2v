@@ -25,7 +25,7 @@ void SR::RunForReplace( const Command *cmd, const SCREngine *scr_engine, XTreeDa
 {
 	//FTRACE(cmd);
 	// Uniqueness of tree zones
-	const FreeZoneExpression *expr = dynamic_cast<const UpdateTreeCommand &>(*cmd).GetExpression();
+	shared_ptr<FreeZoneExpression> expr = dynamic_cast<const UpdateTreeCommand &>(*cmd).GetExpression();
 	TRACE("\n-----------------------------------------------------------------------------------\n");
 	TreeZoneOverlapFinder overlaps( x_tree_db, expr );
 	//ASSERT(overlaps.overlapping_zones.empty())(overlaps); // Temproary: usually true but obviously not always
@@ -39,13 +39,13 @@ void SR::RunForReplace( const Command *cmd, const SCREngine *scr_engine, XTreeDa
 
 // ------------------------- TreeZoneOverlapFinder --------------------------
 
-TreeZoneOverlapFinder::TreeZoneOverlapFinder( const XTreeDatabase *db, const FreeZoneExpression *base )
+TreeZoneOverlapFinder::TreeZoneOverlapFinder( const XTreeDatabase *db, shared_ptr<FreeZoneExpression> base )
 {
 	TreeZoneRelation tz_relation( db );
 	
-	FreeZoneExpression::ForDepthFirstWalk( base, [&](const FreeZoneExpression *expr)
+	FreeZoneExpression::ForDepthFirstWalk( base, [&](shared_ptr<FreeZoneExpression> &expr)
 	{
-		if( auto ptz_cmd = dynamic_cast<const PopulateTreeZoneOperator *>(expr) )
+		if( auto ptz_cmd = dynamic_pointer_cast<PopulateTreeZoneOperator>(expr) )
         {
             // Note that key is actually TreeZone *, so equal TreeZones get different 
             // rows which is why we InsertSolo()
@@ -55,7 +55,7 @@ TreeZoneOverlapFinder::TreeZoneOverlapFinder( const XTreeDatabase *db, const Fre
             zone->DBCheck(db);
             
             // Record zone and related command
-            InsertSolo( tzps_to_commands, make_pair( zone, ptz_cmd ) );
+            InsertSolo( tzps_to_commands, make_pair( zone, ptz_cmd.get() ) );
             
             // Start off with an empty overlapping set
             InsertSolo( overlapping_zones, make_pair( zone, set<const TreeZone *>() ) );
@@ -90,4 +90,15 @@ TreeZoneOverlapFinder::TreeZoneOverlapFinder( const XTreeDatabase *db, const Fre
 string TreeZoneOverlapFinder::GetTrace() const
 {
 	return Trace(overlapping_zones);
+}
+
+// ------------------------- EmptyZoneElider --------------------------
+
+EmptyZoneElider::EmptyZoneElider()
+{
+}
+	
+// Can change the supplied shared ptr
+void EmptyZoneElider::Run( shared_ptr<FreeZoneExpression> & )
+{
 }

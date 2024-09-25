@@ -31,12 +31,16 @@ namespace UP
 class FreeZoneExpression : public Traceable
 {
 public:	
-	static void ForDepthFirstWalk( const FreeZoneExpression *base,
-	                               function<void(const FreeZoneExpression *cmd)> func_in,
-		                           function<void(const FreeZoneExpression *cmd)> func_out );
-	virtual void DepthFirstWalkImpl(function<void(const FreeZoneExpression *cmd)> func_in,
-			                        function<void(const FreeZoneExpression *cmd)> func_out) const { ASSERTFAIL(); }
 	virtual unique_ptr<FreeZone> Evaluate( const UP::ExecKit &kit ) const = 0;
+	virtual void ForChildren(function<void(shared_ptr<FreeZoneExpression> &expr)> func) = 0;
+			                        
+	static void ForDepthFirstWalk( shared_ptr<FreeZoneExpression> &base,
+								   function<void(shared_ptr<FreeZoneExpression> &expr)> func_in,
+								   function<void(shared_ptr<FreeZoneExpression> &expr)> func_out );
+
+private:
+	virtual void DepthFirstWalkImpl(function<void(shared_ptr<FreeZoneExpression> &expr)> func_in,
+			                        function<void(shared_ptr<FreeZoneExpression> &expr)> func_out);
 };
 
 // ------------------------- PopulateZoneOperator --------------------------
@@ -59,9 +63,8 @@ public:
 	vector<shared_ptr<FreeZoneExpression>> &GetChildExpressions();
 	const vector<shared_ptr<FreeZoneExpression>> &GetChildExpressions() const;
     string GetChildExpressionsTrace() const;
-    
-	void DepthFirstWalkImpl(function<void(const FreeZoneExpression *cmd)> func_in,
-			                function<void(const FreeZoneExpression *cmd)> func_out) const override;
+
+	void ForChildren(function<void(shared_ptr<FreeZoneExpression> &expr)> func) override;
 
 	void PopulateFreeZone( FreeZone &free_zone, const UP::ExecKit &kit ) const;	
 

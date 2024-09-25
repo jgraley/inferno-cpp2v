@@ -25,7 +25,7 @@ void RunForReplace( const Command *cmd, const SCREngine *scr_engine, XTreeDataba
 class TreeZoneOverlapFinder : public Traceable
 {
 public:
-	TreeZoneOverlapFinder( const XTreeDatabase *db, const FreeZoneExpression *base );
+	TreeZoneOverlapFinder( const XTreeDatabase *db, shared_ptr<FreeZoneExpression> base );
 	
     string GetTrace() const final;
 
@@ -34,7 +34,15 @@ public:
     map<const TreeZone *, set<const TreeZone *>> overlapping_zones;
 };
 
-// ------------------------- EmptyZoneRemover --------------------------
+// ------------------------- EmptyZoneElider --------------------------
+
+class EmptyZoneElider
+{
+	EmptyZoneElider();
+	
+	// Can change the supplied shared ptr
+	void Run( shared_ptr<FreeZoneExpression> & );
+};
 
 }
 

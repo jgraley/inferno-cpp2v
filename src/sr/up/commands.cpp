@@ -19,11 +19,16 @@ UpdateTreeCommand::UpdateTreeCommand( const TreeZone &target_tree_zone_,
 }
 
 
-const FreeZoneExpression *UpdateTreeCommand::GetExpression() const
+shared_ptr<FreeZoneExpression> &UpdateTreeCommand::GetExpression()
 {
-	return child_expression.get();
+	return child_expression;
 }
 
+
+const shared_ptr<FreeZoneExpression> &UpdateTreeCommand::GetExpression() const
+{
+	return child_expression;
+}
 
 
 void UpdateTreeCommand::Execute( const UP::ExecKit &kit ) const
