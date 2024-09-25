@@ -110,6 +110,12 @@ PopulateTreeZoneOperator::PopulateTreeZoneOperator( TreeZone zone_ ) :
 }
 
 
+TreeZone *PopulateTreeZoneOperator::GetZone() 
+{
+    return &zone;
+}
+
+
 const TreeZone *PopulateTreeZoneOperator::GetZone() const
 {
     return &zone;
@@ -146,6 +152,12 @@ PopulateFreeZoneOperator::PopulateFreeZoneOperator( FreeZone zone_ ) :
    	zone(zone_)
 {
 	ASSERT( zone.GetNumTerminii() == 0 );	
+}
+
+
+FreeZone *PopulateFreeZoneOperator::GetZone()
+{
+    return &zone;
 }
 
 

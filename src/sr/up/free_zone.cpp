@@ -90,6 +90,7 @@ void FreeZone::AddTerminus(int ti, shared_ptr<Terminus> terminus)
 
 TreePtr<Node> FreeZone::GetBaseNode() const
 {
+	ASSERT(!IsEmpty());
     return base;
 }
 
@@ -109,6 +110,7 @@ void FreeZone::Populate( XTreeDatabase *x_tree_db, vector<unique_ptr<FreeZone>> 
 
 vector<shared_ptr<Terminus>> FreeZone::GetTerminusUpdaters() const
 {
+	ASSERT(!IsEmpty());
 	vector<shared_ptr<Terminus>> v;
 	for( int ti=0; ti<terminii.size(); ti++ )
 	{
@@ -122,6 +124,7 @@ vector<shared_ptr<Terminus>> FreeZone::GetTerminusUpdaters() const
 
 shared_ptr<Terminus> FreeZone::GetTerminus(int ti) const
 {
+	ASSERT(!IsEmpty());
 	ASSERT( ti >= 0 );
 	ASSERT( terminii.count(ti) > 0 );
     return terminii.at(ti);
@@ -130,6 +133,7 @@ shared_ptr<Terminus> FreeZone::GetTerminus(int ti) const
 
 void FreeZone::DropTerminus(int ti)
 {
+	ASSERT(!IsEmpty());
 	ASSERT( ti >= 0 );
 	ASSERT( terminii.count(ti) > 0 );
 	int ne = terminii.erase(ti);

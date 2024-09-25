@@ -5,6 +5,12 @@
 
 using namespace SR;
 
+bool Zone::IsSubtree() const
+{
+	return GetNumTerminii() == 0;
+}
+
+
 void Zone::MarkBaseForEmbedded(const SCREngine *scr_engine, RequiresSubordinateSCREngine *embedded_agent)
 {
     ASSERT( !IsEmpty() );

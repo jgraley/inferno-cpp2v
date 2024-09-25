@@ -52,6 +52,9 @@ protected:
 public:
     void AddEmbeddedMarker( RequiresSubordinateSCREngine *embedded_marker );
     
+    virtual Zone *GetZone() = 0;
+    virtual const Zone *GetZone() const = 0;
+    
     int GetNumChildExpressions() const;
 	vector<shared_ptr<FreeZoneExpression>> &GetChildExpressions();
 	const vector<shared_ptr<FreeZoneExpression>> &GetChildExpressions() const;
@@ -78,7 +81,8 @@ public:
     PopulateTreeZoneOperator( TreeZone zone_, vector<shared_ptr<FreeZoneExpression>> &&child_expressions );
     PopulateTreeZoneOperator( TreeZone zone_ );
     
-    const TreeZone *GetZone() const;
+    TreeZone *GetZone() override;
+    const TreeZone *GetZone() const override;
 	unique_ptr<FreeZone> Evaluate( const UP::ExecKit &kit ) const final;	
     
 	string GetTrace() const final;
@@ -97,7 +101,8 @@ public:
     PopulateFreeZoneOperator( FreeZone zone_, vector<shared_ptr<FreeZoneExpression>> &&child_expressions );
     PopulateFreeZoneOperator( FreeZone zone_ );
 
-    const FreeZone *GetZone() const;
+    FreeZone *GetZone() override;
+    const FreeZone *GetZone() const override;
    	unique_ptr<FreeZone> Evaluate( const UP::ExecKit &kit ) const final;	
 
 	string GetTrace() const final;

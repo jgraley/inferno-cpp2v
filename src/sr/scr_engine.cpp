@@ -364,7 +364,7 @@ void SCREngine::Replace( XLink base_xlink )
 
 	Agent::ReplaceKit replace_kit { x_tree_db.get() };
     Agent::FreeZoneExprPtr replace_zone = plan.base_agent->GenFreeZoneExpr(replace_kit, plan.base_plink);
-    auto command = make_unique<UpdateTreeCommand>(TreeZone::CreateSubtree(replace_kit.x_tree_db, base_xlink), move(replace_zone));	
+    auto command = make_shared<UpdateTreeCommand>(TreeZone::CreateSubtree(replace_kit.x_tree_db, base_xlink), move(replace_zone));	
 	plan.vn_sequence->RunUpdateCommand( move(command), this );  
     
     plan.vn_sequence->CompleteDomainExtension();     

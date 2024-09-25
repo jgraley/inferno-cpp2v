@@ -25,6 +25,7 @@ public:
 	virtual int GetNumTerminii() const = 0;
     virtual TreePtr<Node> GetBaseNode() const = 0;
         
+    bool IsSubtree() const;
     void MarkBaseForEmbedded(const SCREngine *scr_engine, RequiresSubordinateSCREngine *embedded_agent);
 };    
  
