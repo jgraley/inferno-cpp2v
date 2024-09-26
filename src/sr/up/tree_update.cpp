@@ -26,7 +26,10 @@ void SR::RunForReplace( const Command *cmd, const SCREngine *scr_engine, XTreeDa
 	//FTRACE(cmd);
 	// Uniqueness of tree zones
 	shared_ptr<FreeZoneExpression> expr = dynamic_cast<const UpdateTreeCommand &>(*cmd).GetExpression();
-	TRACE("\n-----------------------------------------------------------------------------------\n");
+	
+	EmptyZoneElider().Run(expr);
+	EmptyZoneElider().Check(expr);
+	
 	TreeZoneOverlapFinder overlaps( x_tree_db, expr );
 	//ASSERT(overlaps.overlapping_zones.empty())(overlaps); // Temproary: usually true but obviously not always
 	
@@ -98,7 +101,29 @@ EmptyZoneElider::EmptyZoneElider()
 {
 }
 	
-// Can change the supplied shared ptr
-void EmptyZoneElider::Run( shared_ptr<FreeZoneExpression> & )
+
+void EmptyZoneElider::Run( shared_ptr<FreeZoneExpression> &base )
 {
+	FreeZoneExpression::ForDepthFirstWalk( base, nullptr, [&](shared_ptr<FreeZoneExpression> &expr)
+	{
+		if( auto pz_op = dynamic_pointer_cast<PopulateZoneOperator>(expr) )
+            if( pz_op->GetZone()->IsEmpty() )
+            {
+				shared_ptr<FreeZoneExpression> child_expr = OnlyElementOf( pz_op->GetChildExpressions() );
+				if( auto child_pz_op = dynamic_pointer_cast<PopulateZoneOperator>(child_expr) )
+					child_pz_op->AddEmbeddedMarkers( pz_op->GetEmbeddedMarkers() );
+				expr = child_expr;
+			}
+	});	
 }
+
+
+void EmptyZoneElider::Check( shared_ptr<FreeZoneExpression> &base )
+{
+	FreeZoneExpression::ForDepthFirstWalk( base, nullptr, [&](shared_ptr<FreeZoneExpression> &expr)
+	{
+		if( auto pz_op = dynamic_pointer_cast<PopulateZoneOperator>(expr) )
+            ASSERT( !pz_op->GetZone()->IsEmpty() )("Found empty zone in populate op: ")(*pz_op->GetZone());
+	});	
+}
+

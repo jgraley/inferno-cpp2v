@@ -54,7 +54,9 @@ protected:
     PopulateZoneOperator();
 
 public:
-    void AddEmbeddedMarker( RequiresSubordinateSCREngine *embedded_marker );
+    void AddEmbeddedMarker( RequiresSubordinateSCREngine *new_marker );
+    void AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&new_markers );
+    list<RequiresSubordinateSCREngine *> GetEmbeddedMarkers() const;
     
     virtual Zone *GetZone() = 0;
     virtual const Zone *GetZone() const = 0;
@@ -70,7 +72,7 @@ public:
 
 private:
 	vector<shared_ptr<FreeZoneExpression>> child_expressions;
-	std::list<RequiresSubordinateSCREngine *> embedded_markers;
+	list<RequiresSubordinateSCREngine *> embedded_markers;
 };
 
 

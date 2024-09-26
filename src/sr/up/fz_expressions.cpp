@@ -51,9 +51,21 @@ PopulateZoneOperator::PopulateZoneOperator()
 }	
 
 
-void PopulateZoneOperator::AddEmbeddedMarker( RequiresSubordinateSCREngine *embedded_marker )
+void PopulateZoneOperator::AddEmbeddedMarker( RequiresSubordinateSCREngine *new_marker )
 {
-	embedded_markers.push_back( embedded_marker );
+	embedded_markers.push_back( new_marker );
+}
+
+
+void PopulateZoneOperator::AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&new_markers )
+{
+	embedded_markers.splice( embedded_markers.end(), move(new_markers) );
+}
+
+
+list<RequiresSubordinateSCREngine *> PopulateZoneOperator::GetEmbeddedMarkers() const
+{
+	return embedded_markers;
 }
 
 

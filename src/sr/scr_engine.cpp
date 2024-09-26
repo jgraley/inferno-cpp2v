@@ -342,6 +342,8 @@ void SCREngine::RunEmbedded( PatternLink plink_to_embedded, XLink base_xlink )
          (" and bases_for_embedded are\n")(bases_for_embedded)("\n");
    
     // Recall the base node of the subtree under through (after replace)
+    ASSERT(bases_for_embedded.count(embedded_agent) == 1)
+          ("No call to SCREngine::MarkBaseForEmbedded() for ")(embedded_agent);
     TreePtr<Node> through_subtree = bases_for_embedded.at(embedded_agent);
     EraseSolo( bases_for_embedded, embedded_agent); // not needed any more
     ASSERT( through_subtree );

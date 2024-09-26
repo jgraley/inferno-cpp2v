@@ -38,10 +38,14 @@ public:
 
 class EmptyZoneElider
 {
+public:	
 	EmptyZoneElider();
 	
 	// Can change the supplied shared ptr
 	void Run( shared_ptr<FreeZoneExpression> & );
+	
+	// Just ASSERT no empty zones
+	void Check( shared_ptr<FreeZoneExpression> & );
 };
 
 }
