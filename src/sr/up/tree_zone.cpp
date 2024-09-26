@@ -28,9 +28,9 @@ TreeZone::TreeZone( const XTreeDatabase *db_, XLink base_, vector<XLink> termini
     base( base_ ),
     terminii( terminii_.begin(), terminii_.end(), df_rel )
 {
-	ASSERT( db_ );
     ASSERT( base ); // TreeZone is not nullable
     ASSERT( base.GetChildX() ); // Cannot be empty
+	DBCheck();
 }
 
 
@@ -65,18 +65,9 @@ set<XLink, DepthFirstRelation> TreeZone::GetTerminusXLinks() const
 }
 
 
-void TreeZone::DBCheck( const XTreeDatabase *db ) const
+FreeZone TreeZone::Duplicate() const
 {
-	ASSERT( db->HasRow( base ) )(base);
-	for( XLink terminus_xlink : terminii )
-		ASSERT( db->HasRow( terminus_xlink ) )(terminus_xlink);
-}
-
-
-FreeZone TreeZone::Duplicate( XTreeDatabase *x_tree_db ) const
-{
-	if( x_tree_db ) // DB is optional
-		DBCheck(x_tree_db);
+	DBCheck();
 
     if( IsEmpty() )
 		return FreeZone::CreateEmpty();
@@ -88,7 +79,7 @@ FreeZone TreeZone::Duplicate( XTreeDatabase *x_tree_db ) const
         duplicator_terminus_map[terminus_upd] = { TreePtr<Node>(), shared_ptr<Terminus>() };
 
     // Duplicate the subtree, populating from the map.
-    TreePtr<Node> new_base_x = Duplicate::DuplicateSubtree( x_tree_db, 
+    TreePtr<Node> new_base_x = Duplicate::DuplicateSubtree( db, 
                                                             GetBaseXLink(), 
                                                             duplicator_terminus_map );   
     
@@ -137,4 +128,15 @@ string TreeZone::GetTrace() const
     }
     
     return "TreeZone(" + Trace(base) + rhs +")";
+}
+
+
+void TreeZone::DBCheck() const
+{
+	if( db ) // db is optional: builders leave it NULL
+	{
+		ASSERT( db->HasRow( base ) )(base);
+		for( XLink terminus_xlink : terminii )
+			ASSERT( db->HasRow( terminus_xlink ) )(terminus_xlink);
+	}
 }

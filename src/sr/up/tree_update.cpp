@@ -21,78 +21,108 @@ FreeZone SR::RunForBuilder( const FreeZoneExpression *expr )
 }
 
 
-void SR::RunForReplace( const Command *cmd, const SCREngine *scr_engine, XTreeDatabase *x_tree_db )
+void SR::RunForReplace( const Command *initial_cmd, const SCREngine *scr_engine, XTreeDatabase *x_tree_db )
 {
-	//FTRACE(cmd);
-	// Uniqueness of tree zones
-	shared_ptr<FreeZoneExpression> expr = dynamic_cast<const UpdateTreeCommand &>(*cmd).GetExpression();
+
+	shared_ptr<FreeZoneExpression> expr = dynamic_cast<const UpdateTreeCommand &>(*initial_cmd).GetExpression();
 	
 	EmptyZoneElider().Run(expr);
 	EmptyZoneElider().Check(expr);
 	
-	TreeZoneOverlapFinder overlaps( x_tree_db, expr );
-	//ASSERT(overlaps.overlapping_zones.empty())(overlaps); // Temproary: usually true but obviously not always
+	TreeZoneOverlapFinder( x_tree_db ).Run(expr);
+	TreeZoneOverlapFinder( x_tree_db ).Check(expr);
 	
-	// err...
+	// TODO deal with out-of-sequence (DF) tree zones
+	
+	// TODO enact the markers (I think)
+	
+	// TODO maximally merge free zones and tree zones
+		
+	// TODO reductive inversion using Quark algo
+	
+	// TODO merge TZs again and check initial update command is now trivial
 	
 	// Execute it
     UP::ExecKit exec_kit {x_tree_db, scr_engine}; 
-	cmd->Execute( exec_kit );   
+	initial_cmd->Execute( exec_kit );   
 }
 
 // ------------------------- TreeZoneOverlapFinder --------------------------
 
-TreeZoneOverlapFinder::TreeZoneOverlapFinder( const XTreeDatabase *db, shared_ptr<FreeZoneExpression> base )
+TreeZoneOverlapFinder::TreeZoneOverlapFinder( const XTreeDatabase *db_ ) :
+	db( db_ )
 {
-	TreeZoneRelation tz_relation( db );
-	
-	FreeZoneExpression::ForDepthFirstWalk( base, [&](shared_ptr<FreeZoneExpression> &expr)
-	{
-		if( auto ptz_cmd = dynamic_pointer_cast<PopulateTreeZoneOperator>(expr) )
-        {
-            // Note that key is actually TreeZone *, so equal TreeZones get different 
-            // rows which is why we InsertSolo()
-            const TreeZone *zone = ptz_cmd->GetZone();
-            
-            // Zone should be known to the DB
-            zone->DBCheck(db);
-            
-            // Record zone and related command
-            InsertSolo( tzps_to_commands, make_pair( zone, ptz_cmd.get() ) );
-            
-            // Start off with an empty overlapping set
-            InsertSolo( overlapping_zones, make_pair( zone, set<const TreeZone *>() ) );
-        }
-	}, nullptr);
-	
-	// Find the actual overlaps and add to the sets
-    ForAllUnorderedPairs( tzps_to_commands, 
-                                    [&](const pair<const TreeZone *, const PopulateTreeZoneOperator *> &l, 
-                                        const pair<const TreeZone *, const PopulateTreeZoneOperator *> &r)
-    {
-		auto p = tz_relation.CompareHierarchical( *l.first, *r.first );
-        if( p.second == ZoneRelation::OVERLAP_GENERAL || p.second == ZoneRelation::OVERLAP_TERMINII )
-        {
-            // It's a symmetrical relationship so do it both ways around
-            overlapping_zones[l.first].insert(r.first);
-            overlapping_zones[r.first].insert(l.first);
-        }
-    } );
-          
-    // Discard empty sets
-	for (auto it = overlapping_zones.cbegin(); it != overlapping_zones.cend();)
-	{
-	    if (it->second.empty())	 
-		    it = overlapping_zones.erase(it);
-	    else
-			it++;	  
-	}			  
 }
 
 
-string TreeZoneOverlapFinder::GetTrace() const
+void TreeZoneOverlapFinder::Run( shared_ptr<FreeZoneExpression> &base )
 {
-	return Trace(overlapping_zones);
+	TreeZoneRelation tz_relation( db );
+
+	// Inner and outer loops only look at PopulateTreeZoneOperator exprs
+	FreeZoneExpression::ForDepthFirstWalk( base, nullptr, [&](shared_ptr<FreeZoneExpression> &l_expr)
+	{
+		if( auto l_ptz_op = dynamic_pointer_cast<PopulateTreeZoneOperator>(l_expr) )
+		{			
+			// We will establish an increasing region of known non-overlapping tree zones. Detect
+			// when the new l has an overlap in that zone.
+			bool l_has_an_overlap = false;
+			FreeZoneExpression::ForDepthFirstWalk( base, nullptr, [&](shared_ptr<FreeZoneExpression> &r_expr)
+			{
+				if( auto r_ptz_op = dynamic_pointer_cast<PopulateTreeZoneOperator>(r_expr) )
+				{			
+					if( l_expr == r_expr ) // inner "r" loop stops before catching up with outer "l" loop
+						Break();
+					
+					auto p = tz_relation.CompareHierarchical( l_ptz_op->GetZone(), r_ptz_op->GetZone() );
+
+					// Act on any overlap including equality. 
+					if( p.second == ZoneRelation::OVERLAP_GENERAL || 
+						p.second == ZoneRelation::OVERLAP_TERMINII ||
+						p.second == ZoneRelation::EQUAL )
+					{
+						l_has_an_overlap = true;
+					}
+				}
+			} );
+			// If it does, duplicate it, which turns it into a free zone, so it will not be seen
+			// in future runs of the inner "r" loop.
+			if( l_has_an_overlap )
+			{				
+				l_expr = l_ptz_op->DuplicateToFree();
+			}	
+        }
+	} );	
+}
+
+
+void TreeZoneOverlapFinder::Check( shared_ptr<FreeZoneExpression> &base )
+{
+	TreeZoneRelation tz_relation( db );
+
+	FreeZoneExpression::ForDepthFirstWalk( base, nullptr, [&](shared_ptr<FreeZoneExpression> &l_expr)
+	{
+		if( auto l_ptz_op = dynamic_pointer_cast<PopulateTreeZoneOperator>(l_expr) )
+		{			
+
+			FreeZoneExpression::ForDepthFirstWalk( base, nullptr, [&](shared_ptr<FreeZoneExpression> &r_expr)
+			{
+				if( auto r_ptz_op = dynamic_pointer_cast<PopulateTreeZoneOperator>(r_expr) )
+				{			
+					if( l_expr == r_expr ) 
+						Break();
+					
+					auto p = tz_relation.CompareHierarchical( l_ptz_op->GetZone(), r_ptz_op->GetZone() );					
+					if( p.second == ZoneRelation::OVERLAP_GENERAL || 
+						p.second == ZoneRelation::OVERLAP_TERMINII ||
+						p.second == ZoneRelation::EQUAL )
+					{
+						ASSERT(false)("Tree zone overlap: ")(l_ptz_op->GetZone())(" and ")(r_ptz_op->GetZone());
+					}
+				}
+			} );
+        }
+	} );	
 }
 
 // ------------------------- EmptyZoneElider --------------------------
@@ -107,14 +137,14 @@ void EmptyZoneElider::Run( shared_ptr<FreeZoneExpression> &base )
 	FreeZoneExpression::ForDepthFirstWalk( base, nullptr, [&](shared_ptr<FreeZoneExpression> &expr)
 	{
 		if( auto pz_op = dynamic_pointer_cast<PopulateZoneOperator>(expr) )
-            if( pz_op->GetZone()->IsEmpty() )
+            if( pz_op->GetZone().IsEmpty() )
             {
 				shared_ptr<FreeZoneExpression> child_expr = OnlyElementOf( pz_op->GetChildExpressions() );
 				if( auto child_pz_op = dynamic_pointer_cast<PopulateZoneOperator>(child_expr) )
 					child_pz_op->AddEmbeddedMarkers( pz_op->GetEmbeddedMarkers() );
 				expr = child_expr;
 			}
-	});	
+	} );	
 }
 
 
@@ -123,7 +153,7 @@ void EmptyZoneElider::Check( shared_ptr<FreeZoneExpression> &base )
 	FreeZoneExpression::ForDepthFirstWalk( base, nullptr, [&](shared_ptr<FreeZoneExpression> &expr)
 	{
 		if( auto pz_op = dynamic_pointer_cast<PopulateZoneOperator>(expr) )
-            ASSERT( !pz_op->GetZone()->IsEmpty() )("Found empty zone in populate op: ")(*pz_op->GetZone());
-	});	
+            ASSERT( !pz_op->GetZone().IsEmpty() )("Found empty zone in populate op: ")(pz_op->GetZone());
+	} );	
 }
 

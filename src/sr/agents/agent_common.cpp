@@ -519,7 +519,7 @@ bool AgentCommon::ReplaceKeyerQuery( PatternLink me_plink,
                                   
 TreePtr<Node> AgentCommon::BuildForBuildersAnalysis( PatternLink me_plink )
 {
-	Agent::ReplaceKit kit;
+	Agent::ReplaceKit kit { nullptr };
 	auto commands = GenFreeZoneExpr(kit, me_plink);
     FreeZone zone = RunForBuilder( commands.get() );     
     return zone.GetBaseNode();

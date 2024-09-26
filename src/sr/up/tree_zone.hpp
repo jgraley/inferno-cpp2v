@@ -34,14 +34,15 @@ public:
 
     XLink GetBaseXLink() const;
     set<XLink, DepthFirstRelation> GetTerminusXLinks() const;
-    void DBCheck( const XTreeDatabase *db ) const;
 
-    FreeZone Duplicate( XTreeDatabase *x_tree_db ) const;
+    FreeZone Duplicate() const;
     void Update( XTreeDatabase *x_tree_db, const FreeZone &free_zone ) const;
     
     string GetTrace() const;
 
 private:
+    void DBCheck() const;
+
     const XTreeDatabase * const db;
 	DepthFirstRelation df_rel;
     XLink base;    

@@ -22,7 +22,7 @@ public:
 	{
 		// Siblings mean weakly removed i.e. supplied nodes could be 
 		// descendants of the actualk siblings. 
-		SAME,               // 0, equal 
+		EQUAL,               // 0, equal 
 		LEFT_IS_ANCESTOR,   // -1, l less than r
 		RIGHT_IS_ANCESTOR,  // +1, l greater than r
 		CONTAINER_SIBLINGS, // depends on child ptr order

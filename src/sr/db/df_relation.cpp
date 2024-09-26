@@ -41,7 +41,7 @@ pair<Orderable::Diff, DepthFirstRelation::RelType> DepthFirstRelation::CompareHi
     if( l_xlink == r_xlink )
     {
         //FTRACE("early out\n");
-        return make_pair(0, SAME);
+        return make_pair(0, EQUAL);
     }
     
     // Parent is lower in depth-first ordering

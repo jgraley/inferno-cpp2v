@@ -49,12 +49,12 @@ pair<Orderable::Diff, ZoneRelation::RelType> TreeZoneRelation::CompareHierarchic
     auto p_base = df_rel.CompareHierarchical(l.GetBaseXLink(), r.GetBaseXLink());
     switch( p_base.second )
     {
-        case DepthFirstRelation::SAME:
+        case DepthFirstRelation::EQUAL:
         {
 			// Bases are the same so what about the terminii?
 			Orderable::Diff term_diff = STLCompare3Way(l.GetTerminusXLinks(), r.GetTerminusXLinks());
 			if( term_diff==0 )
-				return make_pair(term_diff, SAME);
+				return make_pair(term_diff, EQUAL);
 			else
 				return make_pair(term_diff, OVERLAP_TERMINII);
 		}
@@ -90,7 +90,7 @@ pair<Orderable::Diff, ZoneRelation::RelType> TreeZoneRelation::CompareHierarchic
         TRACES(" ")(p_term);
         switch( p_term.second )
         {
-            case DepthFirstRelation::SAME:
+            case DepthFirstRelation::EQUAL:
 				TRACES(" touching: no overlap\n");
                 return make_pair(p_base.first, DISTINCT_SUBTREE); // close but no overlap, zone d begins at from a's terminus
                 

@@ -58,8 +58,8 @@ public:
     void AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&new_markers );
     list<RequiresSubordinateSCREngine *> GetEmbeddedMarkers() const;
     
-    virtual Zone *GetZone() = 0;
-    virtual const Zone *GetZone() const = 0;
+    virtual Zone &GetZone() = 0;
+    virtual const Zone &GetZone() const = 0;
     
     int GetNumChildExpressions() const;
 	vector<shared_ptr<FreeZoneExpression>> &GetChildExpressions();
@@ -86,9 +86,12 @@ public:
     PopulateTreeZoneOperator( TreeZone zone_, vector<shared_ptr<FreeZoneExpression>> &&child_expressions );
     PopulateTreeZoneOperator( TreeZone zone_ );
     
-    TreeZone *GetZone() override;
-    const TreeZone *GetZone() const override;
+    TreeZone &GetZone() override;
+    const TreeZone &GetZone() const override;
+	
 	unique_ptr<FreeZone> Evaluate( const UP::ExecKit &kit ) const final;	
+    
+    shared_ptr<FreeZoneExpression> DuplicateToFree() const;
     
 	string GetTrace() const final;
     
@@ -106,8 +109,9 @@ public:
     PopulateFreeZoneOperator( FreeZone zone_, vector<shared_ptr<FreeZoneExpression>> &&child_expressions );
     PopulateFreeZoneOperator( FreeZone zone_ );
 
-    FreeZone *GetZone() override;
-    const FreeZone *GetZone() const override;
+    FreeZone &GetZone() override;
+    const FreeZone &GetZone() const override;
+    
    	unique_ptr<FreeZone> Evaluate( const UP::ExecKit &kit ) const final;	
 
 	string GetTrace() const final;

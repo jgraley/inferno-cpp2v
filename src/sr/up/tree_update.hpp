@@ -22,16 +22,15 @@ void RunForReplace( const Command *cmd, const SCREngine *scr_engine, XTreeDataba
 	
 // ------------------------- TreeZoneOverlapFinder --------------------------
 
-class TreeZoneOverlapFinder : public Traceable
+class TreeZoneOverlapFinder 
 {
 public:
-	TreeZoneOverlapFinder( const XTreeDatabase *db, shared_ptr<FreeZoneExpression> base );
-	
-    string GetTrace() const final;
+	TreeZoneOverlapFinder( const XTreeDatabase *db );
+	void Run( shared_ptr<FreeZoneExpression> &base );
+	void Check( shared_ptr<FreeZoneExpression> &base );
 
-//private:	
-    map<const TreeZone *, const PopulateTreeZoneOperator *> tzps_to_commands;
-    map<const TreeZone *, set<const TreeZone *>> overlapping_zones;
+private:
+	const XTreeDatabase * const db;
 };
 
 // ------------------------- EmptyZoneElider --------------------------
@@ -42,10 +41,10 @@ public:
 	EmptyZoneElider();
 	
 	// Can change the supplied shared ptr
-	void Run( shared_ptr<FreeZoneExpression> & );
+	void Run( shared_ptr<FreeZoneExpression> &base );
 	
 	// Just ASSERT no empty zones
-	void Check( shared_ptr<FreeZoneExpression> & );
+	void Check( shared_ptr<FreeZoneExpression> &base );
 };
 
 }

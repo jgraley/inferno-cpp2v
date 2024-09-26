@@ -19,7 +19,7 @@ class ZoneRelation
 public:
 	enum RelType
 	{
-		SAME,              // Base and terminii are the same 
+		EQUAL,              // Base and terminii are the same 
 		OVERLAP_GENERAL,   // overlapping, base differs and terminii may differ
 		OVERLAP_TERMINII,  // overlapping, terminii differ 
 		DISTINCT_SUBTREE,  // no overlap due to terminus  (i.e. "Ab->At->Db->Dt?")

@@ -135,25 +135,35 @@ PopulateTreeZoneOperator::PopulateTreeZoneOperator( TreeZone zone_ ) :
 }
 
 
-TreeZone *PopulateTreeZoneOperator::GetZone() 
+TreeZone &PopulateTreeZoneOperator::GetZone() 
 {
-    return &zone;
+    return zone;
 }
 
 
-const TreeZone *PopulateTreeZoneOperator::GetZone() const
+const TreeZone &PopulateTreeZoneOperator::GetZone() const
 {
-    return &zone;
+    return zone;
 }
 
 
 unique_ptr<FreeZone> PopulateTreeZoneOperator::Evaluate( const UP::ExecKit &kit ) const
 {
 	// TODO probably consistent for Duplicate() to return unique_ptr<FreeZone>
-	auto temp_free_zone = make_unique<FreeZone>( zone.Duplicate( kit.x_tree_db ) );
+	auto temp_free_zone = make_unique<FreeZone>( zone.Duplicate() );
 	PopulateFreeZone( *temp_free_zone, kit );
 	return temp_free_zone;
 }
+
+
+shared_ptr<FreeZoneExpression> PopulateTreeZoneOperator::DuplicateToFree() const
+{
+	FreeZone free_zone = zone.Duplicate();
+	vector<shared_ptr<FreeZoneExpression>> c = GetChildExpressions();
+	auto pop_fz_op = make_shared<PopulateFreeZoneOperator>( free_zone, move(c) );
+	pop_fz_op->AddEmbeddedMarkers( GetEmbeddedMarkers() );
+	return pop_fz_op;
+}	
 
 
 string PopulateTreeZoneOperator::GetTrace() const
@@ -180,15 +190,15 @@ PopulateFreeZoneOperator::PopulateFreeZoneOperator( FreeZone zone_ ) :
 }
 
 
-FreeZone *PopulateFreeZoneOperator::GetZone()
+FreeZone &PopulateFreeZoneOperator::GetZone()
 {
-    return &zone;
+    return zone;
 }
 
 
-const FreeZone *PopulateFreeZoneOperator::GetZone() const
+const FreeZone &PopulateFreeZoneOperator::GetZone() const
 {
-    return &zone;
+    return zone;
 }
 
 
