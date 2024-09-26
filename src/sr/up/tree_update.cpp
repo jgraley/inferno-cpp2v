@@ -29,8 +29,8 @@ void SR::RunForReplace( const Command *initial_cmd, const SCREngine *scr_engine,
 	EmptyZoneElider().Run(expr);
 	EmptyZoneElider().Check(expr);
 	
-	TreeZoneOverlapFinder( x_tree_db ).Run(expr);
-	TreeZoneOverlapFinder( x_tree_db ).Check(expr);
+	TreeZoneOverlapHandler( x_tree_db ).Run(expr);
+	TreeZoneOverlapHandler( x_tree_db ).Check(expr);
 	
 	// TODO deal with out-of-sequence (DF) tree zones
 	
@@ -47,15 +47,15 @@ void SR::RunForReplace( const Command *initial_cmd, const SCREngine *scr_engine,
 	initial_cmd->Execute( exec_kit );   
 }
 
-// ------------------------- TreeZoneOverlapFinder --------------------------
+// ------------------------- TreeZoneOverlapHandler --------------------------
 
-TreeZoneOverlapFinder::TreeZoneOverlapFinder( const XTreeDatabase *db_ ) :
+TreeZoneOverlapHandler::TreeZoneOverlapHandler( const XTreeDatabase *db_ ) :
 	db( db_ )
 {
 }
 
 
-void TreeZoneOverlapFinder::Run( shared_ptr<FreeZoneExpression> &base )
+void TreeZoneOverlapHandler::Run( shared_ptr<FreeZoneExpression> &base )
 {
 	TreeZoneRelation tz_relation( db );
 
@@ -96,7 +96,7 @@ void TreeZoneOverlapFinder::Run( shared_ptr<FreeZoneExpression> &base )
 }
 
 
-void TreeZoneOverlapFinder::Check( shared_ptr<FreeZoneExpression> &base )
+void TreeZoneOverlapHandler::Check( shared_ptr<FreeZoneExpression> &base )
 {
 	TreeZoneRelation tz_relation( db );
 

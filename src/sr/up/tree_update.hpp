@@ -20,12 +20,12 @@ class DeclareTreeZoneCommand;
 FreeZone RunForBuilder( const FreeZoneExpression *expr );
 void RunForReplace( const Command *cmd, const SCREngine *scr_engine, XTreeDatabase *x_tree_db );
 	
-// ------------------------- TreeZoneOverlapFinder --------------------------
+// ------------------------- TreeZoneOverlapHandler --------------------------
 
-class TreeZoneOverlapFinder 
+class TreeZoneOverlapHandler 
 {
 public:
-	TreeZoneOverlapFinder( const XTreeDatabase *db );
+	TreeZoneOverlapHandler( const XTreeDatabase *db );
 	void Run( shared_ptr<FreeZoneExpression> &base );
 	void Check( shared_ptr<FreeZoneExpression> &base );
 
