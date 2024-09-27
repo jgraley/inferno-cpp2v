@@ -12,7 +12,7 @@ SingularTerminus::SingularTerminus( TreePtrInterface *tree_ptr_ ) :
 }
 
 
-void SingularTerminus::PopulateTerminus( TreePtr<Node> node )
+void SingularTerminus::Populate( TreePtr<Node> node )
 {
 	ASSERT( node ); // perhaps we tried to populate with an empty zone?
     *tree_ptr = node;
@@ -43,7 +43,7 @@ ContainerTerminus::ContainerTerminus( ContainerInterface *container_,
 }
 
 
-void ContainerTerminus::PopulateTerminus( TreePtr<Node> node )
+void ContainerTerminus::Populate( TreePtr<Node> node )
 {
 	ASSERT( node ); // perhaps we tried to populate with an empty zone?
     ASSERT( !joined );

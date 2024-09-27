@@ -21,6 +21,8 @@ namespace SR
 class FreeZone : public Zone
 { 
 public:
+	typedef list<shared_ptr<Terminus>>::iterator TerminusIterator;
+
     static FreeZone CreateSubtree( TreePtr<Node> base );
     static FreeZone CreateEmpty();
 
@@ -33,8 +35,8 @@ public:
 	int GetNumTerminii() const override;
     TreePtr<Node> GetBaseNode() const override;
     void PopulateAll( list<unique_ptr<FreeZone>> &&child_zones );     
-	list<shared_ptr<Terminus>>::iterator PopulateTerminus( list<shared_ptr<Terminus>>::iterator it_t, 
-                                                           unique_ptr<FreeZone> &&child_zone );
+	TerminusIterator PopulateTerminus( TerminusIterator it_t, 
+                                       unique_ptr<FreeZone> &&child_zone );
     void AddTerminus(shared_ptr<Terminus> terminus);      
     list<shared_ptr<Terminus>> &GetTerminii();
 

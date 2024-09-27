@@ -99,16 +99,14 @@ void FreeZone::PopulateAll( list<unique_ptr<FreeZone>> &&child_zones )
 		return;
 	}	
 	
-	list<unique_ptr<FreeZone>>::iterator it_cz;
-	list<shared_ptr<Terminus>>::iterator it_t;
-	for( it_cz = child_zones.begin(), it_t = terminii.begin();
-	     it_cz != child_zones.end() || it_t != terminii.end();
-	     it_cz++ /* it_t updated by PopulateTerminus() */ )
+	TerminusIterator it_t = terminii.begin();
+	for( unique_ptr<FreeZone> &child_zone : child_zones )
 	{	
-		ASSERT( it_cz != child_zones.end() && it_t != terminii.end() ); // length mismatch		
-		it_t = PopulateTerminus( it_t, move(*it_cz) );		
+		ASSERT( it_t != terminii.end() ); // length mismatch		
+		it_t = PopulateTerminus( it_t, move(child_zone) );		
 	}		
 		
+	ASSERT( it_t == terminii.end() ); // length mismatch		
 	ASSERT( GetNumTerminii() == 0 );
 }
 
@@ -131,14 +129,14 @@ list<shared_ptr<Terminus>>::iterator FreeZone::PopulateTerminus( list<shared_ptr
 	ASSERT( child_zone->GetNumTerminii() == 0 );
 	 
 	// Populate terminus. This will expand SubContainers
-	terminus->PopulateTerminus( child_zone->GetBaseNode() );
+	terminus->Populate( child_zone->GetBaseNode() );
 	
 	// it_t updated to the next terminus after the one we erased, or end()
 	return terminii.erase( it_t );		
 }
 
 
-list<shared_ptr<Terminus>> &FreeZone::GetTerminii() 
+list<shared_ptr<Terminus>> &FreeZone::GetTerminii() // TODO become eg GetTerminiiBegin(), GetTerminiiEnd()
 {
 	ASSERT(!IsEmpty());
     return terminii;
