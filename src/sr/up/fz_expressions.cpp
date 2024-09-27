@@ -111,7 +111,7 @@ void PopulateZoneOperator::PopulateFreeZone( FreeZone &free_zone, const UP::Exec
 		child_zones.push_back( move(free_zone) );
 	}
 	
-	free_zone.Populate(kit.x_tree_db, move(child_zones));
+	free_zone.PopulateAll(move(child_zones));
 	
 	for( RequiresSubordinateSCREngine *ea : embedded_markers )
 		free_zone.MarkBaseForEmbedded(kit.scr_engine, ea);		

@@ -27,9 +27,9 @@ FreeZone::FreeZone()
 }
 
 
-FreeZone::FreeZone( TreePtr<Node> base_, list<shared_ptr<Terminus>> terminii_ ) : // TODO rvalue ref+move()
+FreeZone::FreeZone( TreePtr<Node> base_, list<shared_ptr<Terminus>> &&terminii_ ) : 
     base( base_ ),
-    terminii( terminii_ )
+    terminii( move(terminii_) )
 {
     // An empty free zone is indicated by a NULL base and exactly one
     // terminus, which should also be NULL.
@@ -88,7 +88,7 @@ TreePtr<Node> FreeZone::GetBaseNode() const
 }
 
 
-void FreeZone::Populate( XTreeDatabase *x_tree_db, list<unique_ptr<FreeZone>> &&child_zones ) 
+void FreeZone::PopulateAll( list<unique_ptr<FreeZone>> &&child_zones ) 
 {
 	ASSERT( terminii.size() == child_zones.size() );
 	
@@ -103,10 +103,10 @@ void FreeZone::Populate( XTreeDatabase *x_tree_db, list<unique_ptr<FreeZone>> &&
 	list<shared_ptr<Terminus>>::iterator it_t;
 	for( it_cz = child_zones.begin(), it_t = terminii.begin();
 	     it_cz != child_zones.end() || it_t != terminii.end();
-	     it_cz++, it_t++ )
+	     it_cz++ )
 	{	
 		ASSERT( it_cz != child_zones.end() && it_t != terminii.end() ); // length mismatch
-		unique_ptr<FreeZone> &child_zone = *it_cz;
+		unique_ptr<FreeZone> child_zone = move(*it_cz);
 		shared_ptr<Terminus> terminus = *it_t;
 		
 		if( child_zone->IsEmpty() )
@@ -119,29 +119,44 @@ void FreeZone::Populate( XTreeDatabase *x_tree_db, list<unique_ptr<FreeZone>> &&
 		// just assign new keys?
 		ASSERT( child_zone->GetNumTerminii() == 0 );
 		 
-		// Populate terminus. Join() will expand SubContainers
-		ASSERT( child_zone->GetBaseNode() );
+		// Populate terminus. This will expand SubContainers
 		terminus->PopulateTerminus( child_zone->GetBaseNode() );
 		
-		//Validate()( child_zone->GetBaseNode() ); 
+		// it_t updated to the next terminus after the one we erased
+		it_t = terminii.erase( it_t );		
 	}		
-	
-	terminii.clear();
 		
 	ASSERT( GetNumTerminii() == 0 );
 }
 
 
-vector<shared_ptr<Terminus>> FreeZone::GetTerminusUpdaters() const // TODO return a list
+list<shared_ptr<Terminus>>::iterator FreeZone::PopulateTerminus( list<shared_ptr<Terminus>>::iterator it_t, 
+                                                                 unique_ptr<FreeZone> &&child_zone ) 
+{
+	if( child_zone->IsEmpty() )
+	{
+		// nothing happens to this terminus
+		return ++it_t; 
+	}		
+	
+	shared_ptr<Terminus> terminus = *it_t;
+
+	// TODO support inserting the child's terminii. Do we renumber, or
+	// just assign new keys?
+	ASSERT( child_zone->GetNumTerminii() == 0 );
+	 
+	// Populate terminus. This will expand SubContainers
+	terminus->PopulateTerminus( child_zone->GetBaseNode() );
+	
+	// it_t updated to the next terminus after the one we erased, or end()
+	return terminii.erase( it_t );		
+}
+
+
+list<shared_ptr<Terminus>> &FreeZone::GetTerminii() 
 {
 	ASSERT(!IsEmpty());
-	vector<shared_ptr<Terminus>> v;
-	for( shared_ptr<Terminus> t : terminii )
-	{
-		v.push_back( t );
-	}
-	
-    return v;
+    return terminii;
 }
 
 

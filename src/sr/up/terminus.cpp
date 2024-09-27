@@ -14,6 +14,7 @@ SingularTerminus::SingularTerminus( TreePtrInterface *tree_ptr_ ) :
 
 void SingularTerminus::PopulateTerminus( TreePtr<Node> node )
 {
+	ASSERT( node ); // perhaps we tried to populate with an empty zone?
     *tree_ptr = node;
     TRACE("Singular joined ")(node)("\n");    
 }
@@ -44,6 +45,7 @@ ContainerTerminus::ContainerTerminus( ContainerInterface *container_,
 
 void ContainerTerminus::PopulateTerminus( TreePtr<Node> node )
 {
+	ASSERT( node ); // perhaps we tried to populate with an empty zone?
     ASSERT( !joined );
     joined = true;
 

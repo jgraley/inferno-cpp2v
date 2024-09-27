@@ -91,7 +91,7 @@ FreeZone TreeZone::Duplicate() const
 	}
 
     // Create a new zone for the result.
-    return FreeZone( new_base_x, free_zone_terminii );
+    return FreeZone( new_base_x, move(free_zone_terminii) );
 }
 
 
