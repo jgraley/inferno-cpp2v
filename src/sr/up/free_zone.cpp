@@ -95,13 +95,41 @@ TreePtr<Node> FreeZone::GetBaseNode() const
 }
 
 
-void FreeZone::Populate( XTreeDatabase *x_tree_db, vector<unique_ptr<FreeZone>> &&child_zones ) 
+void FreeZone::Populate( XTreeDatabase *x_tree_db, list<unique_ptr<FreeZone>> &&child_zones ) 
 {
 	ASSERT( terminii.size() == child_zones.size() );
+	
+	if( IsEmpty() )
+	{		
+		// child zone overwrites us
+		operator=(*(child_zones.front()));
+		return;
+	}	
+	
 	int ti=0;
 	for( unique_ptr<FreeZone> &child_zone : child_zones )
-	{
-		PopulateTerminus(move(child_zone), ti++);
+	{	
+		if( child_zone->IsEmpty() )
+		{
+			// nothing happens to this terminus
+			ti++;
+			continue; 
+		}		
+		
+		// TODO support inserting the child's terminii. Do we renumber, or
+		// just assign new keys?
+		ASSERT( child_zone->GetNumTerminii() == 0 );
+		 
+		shared_ptr<Terminus> terminus = terminii.at(ti);
+		int ne = terminii.erase(ti);
+		ASSERT( ne==1 );
+		
+		// Populate terminus. Join() will expand SubContainers
+		ASSERT( child_zone->GetBaseNode() );
+		terminus->PopulateTerminus( child_zone->GetBaseNode() );
+		
+		//Validate()( child_zone->GetBaseNode() ); 
+		ti++;    
 	}		
 		
 	ASSERT( GetNumTerminii() == 0 );
@@ -139,54 +167,3 @@ string FreeZone::GetTrace() const
         
     return "FreeZone(" + Trace(base) + rhs +")";
 }
-
-
-shared_ptr<Terminus> FreeZone::GetTerminus(int ti) const
-{
-	ASSERT(!IsEmpty());
-	ASSERT( ti >= 0 );
-	ASSERT( terminii.count(ti) > 0 );
-    return terminii.at(ti);
-}
-
-
-void FreeZone::DropTerminus(int ti)
-{
-	ASSERT(!IsEmpty());
-	ASSERT( ti >= 0 );
-	ASSERT( terminii.count(ti) > 0 );
-	int ne = terminii.erase(ti);
-	ASSERT( ne==1 );
-}
-
-
-void FreeZone::PopulateTerminus( unique_ptr<FreeZone> &&child_zone, int ti )
-{
-	if( child_zone->IsEmpty() )
-	{
-		// nothing happens	
-		return; 
-	}
-	else if( IsEmpty() )
-	{		
-		// child zone overwrites us
-		ASSERT(ti == 0);		
-		operator=(*child_zone);
-		return;
-	}
-	
-	// TODO support inserting the child's terminii. Do we renumber, or
-	// just assign new keys?
-	ASSERT( child_zone->GetNumTerminii() == 0 );
-	 
-    shared_ptr<Terminus> terminus = GetTerminus(ti);
-    DropTerminus(ti);
-    
-    // Populate terminus. Join() will expand SubContainers
-    ASSERT( child_zone->GetBaseNode() );
-    terminus->PopulateTerminus( child_zone->GetBaseNode() );
-    
-    //Validate()( child_zone->GetBaseNode() );     
-}
-
-

@@ -103,7 +103,7 @@ void PopulateZoneOperator::ForChildren(function<void(shared_ptr<FreeZoneExpressi
 void PopulateZoneOperator::PopulateFreeZone( FreeZone &free_zone, const UP::ExecKit &kit ) const	
 {
 	//FTRACE(free_zone)("\n");
-	vector<unique_ptr<FreeZone>> child_zones;
+	list<unique_ptr<FreeZone>> child_zones;
 	for( const shared_ptr<FreeZoneExpression> &child_expression : child_expressions )
 	{
 		//FTRACE(child_expression)("\n");

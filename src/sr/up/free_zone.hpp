@@ -32,7 +32,7 @@ public:
     bool IsEmpty() const override;
 	int GetNumTerminii() const override;
     TreePtr<Node> GetBaseNode() const override;
-    void Populate( XTreeDatabase *x_tree_db, vector<unique_ptr<FreeZone>> &&child_zones ); 
+    void Populate( XTreeDatabase *x_tree_db, list<unique_ptr<FreeZone>> &&child_zones ); 
 
     void AddTerminus(int ti, shared_ptr<Terminus> terminus);      
     vector<shared_ptr<Terminus>> GetTerminusUpdaters() const;
@@ -40,12 +40,6 @@ public:
     string GetTrace() const;
     
 private:
-    shared_ptr<Terminus> GetTerminus(int ti) const;
-    void DropTerminus(int ti);
-    
-    void PopulateTerminus( unique_ptr<FreeZone> &&child_zone, int terminus_index );
-
-
     TreePtr<Node> base;
     map<int, shared_ptr<Terminus>> terminii;
 };
