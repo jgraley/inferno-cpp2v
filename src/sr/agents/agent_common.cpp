@@ -91,7 +91,7 @@ void AgentCommon::ConfigureCoupling( const Traceable *e,
         InsertSolo( residual_plinks, plink );
     }
 
-    // It works with a set, but if we lose this ordering hints from 
+    // It works with a set, but if we lose this ordering, hints from 
     // Colocated agent NLQs become less useful and CSP solver slows right
     // down.
     if( phase != IN_REPLACE_ONLY && keyer_plink )

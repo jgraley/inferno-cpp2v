@@ -67,29 +67,33 @@ public:
               const set<PatternLink> &surrounding_plinks,
               const set<PatternLink> &surrounding_keyer_plinks );
         void PlanningStageFive( shared_ptr<const Lacing> lacing );
-        void PopulateBoundaryStuff( PatternLink link,
+
+        void PopulateNormalAgents( set<Agent *> *normal_agents, 
+                                   set<PatternLink> *my_normal_links,
+                                   PatternLink link );
+        void PopulateBoundaryAgents( PatternLink link,
                                     const set<Agent *> &surrounding_agents );
+
         void DetermineKeyersModuloDisjunction( PatternLink plink,
                                                set<Agent *> *senior_agents,
-                                               set<Agent *> *disjunction_agents );
+                                               set<Agent *> *disjunction_agents );                                               
         void DetermineKeyers( PatternLink plink,
                               set<Agent *> surrounding_agents );
         void DetermineResiduals( Agent *agent,
                                  set<Agent *> surrounding_agents );
+                                 
         void ConfigureAgents();
-        void PopulateNormalAgents( set<Agent *> *normal_agents, 
-                                   set<PatternLink> *my_normal_links,
-                                   PatternLink link );
+        
+        void DeduceCSPVariables();
+        void CreateMyFullSymbolics();
+        void CreateBoundarySymbolics();
+        void SymbolicRewrites();
+
         void CreateSubordniateEngines( const set<Agent *> &normal_agents, 
                                        const set<PatternLink> &subordinate_surrounding_plinks, 
                                        const set<PatternLink> &subordinate_surrounding_keyer_plinks );
-        void CreateMyFullSymbolics();
-        void CreateSurroundingCouplingSymbolics();
-
-        void SymbolicRewrites();
 
         // CSP solver stuff
-        void DeduceCSPVariables();
         void CreateMyConstraints( list< shared_ptr<CSP::Constraint> > &constraints_list,
                                   shared_ptr<const Lacing> lacing );
         void Dump();

@@ -38,7 +38,8 @@ public:
 	TerminusIterator PopulateTerminus( TerminusIterator it_t, 
                                        unique_ptr<FreeZone> &&child_zone );
     void AddTerminus(shared_ptr<Terminus> terminus);      
-    list<shared_ptr<Terminus>> &GetTerminii();
+    TerminusIterator GetTerminiiBegin();
+    TerminusIterator GetTerminiiEnd();
 
     string GetTrace() const;
     

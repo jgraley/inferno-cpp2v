@@ -71,6 +71,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     set<Agent *> normal_agents;
     set<PatternLink> normal_links;
     PopulateNormalAgents( &normal_agents, &normal_links, base_plink );    
+    
     for( PatternLink plink : normal_links )
         if( surrounding_agents.count( plink.GetChildAgent() ) == 0 )
             my_normal_links.insert( plink );
@@ -78,7 +79,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     my_normal_agents = DifferenceOf( normal_agents, surrounding_agents );       
     reached_agents.clear();
     reached_links.clear();    
-    PopulateBoundaryStuff( base_plink, 
+    PopulateBoundaryAgents( base_plink, 
                            surrounding_agents );
 
     // Collect together the parent links to agents
@@ -104,10 +105,10 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
         
     my_fixed_keyer_links = { base_plink };
     
-    // ------------------ Log it ---------------------
+    // ------------------ Log the plan ---------------------
     Dump();
     
-    // ------------------ Check it ---------------------
+    // ------------------ Check the plan ---------------------
     // Well, obviously...
     ASSERT( my_normal_links_unique_by_agent.size()==my_normal_agents.size() );
     
@@ -131,7 +132,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     // ------------------ Set up Symbolics ---------------------
     DeduceCSPVariables(); 
     CreateMyFullSymbolics();
-    CreateSurroundingCouplingSymbolics();    
+    CreateBoundarySymbolics();    
     SymbolicRewrites();
     
     // ------------------ Configure subordinates ---------------------
@@ -173,7 +174,31 @@ void AndRuleEngine::Plan::PlanningStageFive( shared_ptr<const Lacing> lacing )
 }
 
 
-void AndRuleEngine::Plan::PopulateBoundaryStuff( PatternLink link,
+void AndRuleEngine::Plan::PopulateNormalAgents( set<Agent *> *normal_agents, 
+                                                set<PatternLink> *normal_links,
+                                                PatternLink link )
+{
+    // Note that different links can point to the same agent, so 
+    // unique agents is the stronger condition
+    
+    if( normal_links->count(link) != 0 )
+        return; // Links must be uniquified (weaker condition)
+    normal_links->insert(link);
+    
+    Agent *agent = link.GetChildAgent();    
+    if( normal_agents->count(agent) != 0 )
+        return; // Agents must be uniquified (stronger condition)
+    normal_agents->insert(agent);
+
+    shared_ptr<PatternQuery> pq = agent->GetPatternQuery();   
+    for( PatternLink link : pq->GetNormalLinks() )
+    {
+        PopulateNormalAgents( normal_agents, normal_links, link );        
+    }
+}
+
+
+void AndRuleEngine::Plan::PopulateBoundaryAgents( PatternLink link,
                                                  const set<Agent *> &surrounding_agents )
 {
     // Definition: it's a boundary link/agent if:
@@ -209,7 +234,7 @@ void AndRuleEngine::Plan::PopulateBoundaryStuff( PatternLink link,
         // Not yet at boundary so recurse
         shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
         for( PatternLink link : pq->GetNormalLinks() )
-            PopulateBoundaryStuff( link, surrounding_agents );        
+            PopulateBoundaryAgents( link, surrounding_agents );        
     }
 }
 
@@ -324,66 +349,17 @@ void AndRuleEngine::Plan::ConfigureAgents()
 }
 
 
-void AndRuleEngine::Plan::PopulateNormalAgents( set<Agent *> *normal_agents, 
-                                                set<PatternLink> *normal_links,
-                                                PatternLink link )
+void AndRuleEngine::Plan::DeduceCSPVariables()
 {
-    // Note that different links can point to the same agent, so 
-    // unique agents is the stronger condition
-    
-    if( normal_links->count(link) != 0 )
-        return; // Links must be uniquified (weaker condition)
-    normal_links->insert(link);
-    
-    Agent *agent = link.GetChildAgent();    
-    if( normal_agents->count(agent) != 0 )
-        return; // Agents must be uniquified (stronger condition)
-    normal_agents->insert(agent);
-
-    shared_ptr<PatternQuery> pq = agent->GetPatternQuery();   
-    for( PatternLink link : pq->GetNormalLinks() )
+    for( PatternLink link : normal_and_boundary_links_preorder )
     {
-        PopulateNormalAgents( normal_agents, normal_links, link );        
+        if( my_fixed_keyer_links.count(link)==0 )
+            free_normal_links_ordered.push_back( link );
+        current_solve_plinks.insert( link );
     }
-}
-
-
-void AndRuleEngine::Plan::CreateSubordniateEngines( const set<Agent *> &normal_agents, 
-                                                    const set<PatternLink> &subordinate_surrounding_plinks, 
-                                                    const set<PatternLink> &subordinate_surrounding_keyer_plinks )
-{
-    for( PatternLink plink : my_normal_links_unique_by_agent )
-    {
-        Agent *agent = plink.GetChildAgent();
-        
-        shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
-            
-        if( pq->GetEvaluator() )
-            my_evaluators.insert(agent);
-        
-        for( PatternLink link : pq->GetAbnormalLinks() )
-        {        
-            if( pq->GetEvaluator() )
-            {
-                my_evaluator_abnormal_engines[link] = make_shared<AndRuleEngine>( link, 
-                                                                                  subordinate_surrounding_plinks, 
-                                                                                  subordinate_surrounding_keyer_plinks );  
-            }
-            else
-            {
-                my_free_abnormal_engines[link] = make_shared<AndRuleEngine>( link, 
-                                                                             subordinate_surrounding_plinks, 
-                                                                             subordinate_surrounding_keyer_plinks );  
-            }
-        }
-        
-        for( PatternLink link : pq->GetMultiplicityLinks() )
-        {
-            my_multiplicity_engines[link] = make_shared<AndRuleEngine>( link, 
-                                                                        subordinate_surrounding_plinks, 
-                                                                        subordinate_surrounding_keyer_plinks );  
-        }
-    }
+    
+    for( PatternLink link : boundary_keyer_links )
+        current_solve_plinks.insert( link );    
 }
 
 
@@ -398,7 +374,7 @@ void AndRuleEngine::Plan::CreateMyFullSymbolics()
 }
 
 
-void AndRuleEngine::Plan::CreateSurroundingCouplingSymbolics()
+void AndRuleEngine::Plan::CreateBoundarySymbolics()
 {
 #ifdef CHECK_FOR_SURROUNDING_KEYERS
     // First do some checking
@@ -445,17 +421,42 @@ void AndRuleEngine::Plan::SymbolicRewrites()
 }
 
 
-void AndRuleEngine::Plan::DeduceCSPVariables()
+void AndRuleEngine::Plan::CreateSubordniateEngines( const set<Agent *> &normal_agents, 
+                                                    const set<PatternLink> &subordinate_surrounding_plinks, 
+                                                    const set<PatternLink> &subordinate_surrounding_keyer_plinks )
 {
-    for( PatternLink link : normal_and_boundary_links_preorder )
+    for( PatternLink plink : my_normal_links_unique_by_agent )
     {
-        if( my_fixed_keyer_links.count(link)==0 )
-            free_normal_links_ordered.push_back( link );
-        current_solve_plinks.insert( link );
+        Agent *agent = plink.GetChildAgent();
+        
+        shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
+            
+        if( pq->GetEvaluator() )
+            my_evaluators.insert(agent);
+        
+        for( PatternLink link : pq->GetAbnormalLinks() )
+        {        
+            if( pq->GetEvaluator() )
+            {
+                my_evaluator_abnormal_engines[link] = make_shared<AndRuleEngine>( link, 
+                                                                                  subordinate_surrounding_plinks, 
+                                                                                  subordinate_surrounding_keyer_plinks );  
+            }
+            else
+            {
+                my_free_abnormal_engines[link] = make_shared<AndRuleEngine>( link, 
+                                                                             subordinate_surrounding_plinks, 
+                                                                             subordinate_surrounding_keyer_plinks );  
+            }
+        }
+        
+        for( PatternLink link : pq->GetMultiplicityLinks() )
+        {
+            my_multiplicity_engines[link] = make_shared<AndRuleEngine>( link, 
+                                                                        subordinate_surrounding_plinks, 
+                                                                        subordinate_surrounding_keyer_plinks );  
+        }
     }
-    
-    for( PatternLink link : boundary_keyer_links )
-        current_solve_plinks.insert( link );    
 }
 
 

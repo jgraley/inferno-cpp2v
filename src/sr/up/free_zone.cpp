@@ -99,20 +99,20 @@ void FreeZone::PopulateAll( list<unique_ptr<FreeZone>> &&child_zones )
 		return;
 	}	
 	
-	TerminusIterator it_t = terminii.begin();
+	TerminusIterator it_t = GetTerminiiBegin();
 	for( unique_ptr<FreeZone> &child_zone : child_zones )
 	{	
-		ASSERT( it_t != terminii.end() ); // length mismatch		
+		ASSERT( it_t != GetTerminiiEnd() ); // length mismatch		
 		it_t = PopulateTerminus( it_t, move(child_zone) );		
 	}		
 		
-	ASSERT( it_t == terminii.end() ); // length mismatch		
+	ASSERT( it_t == GetTerminiiEnd() ); // length mismatch		
 	ASSERT( GetNumTerminii() == 0 );
 }
 
 
-list<shared_ptr<Terminus>>::iterator FreeZone::PopulateTerminus( list<shared_ptr<Terminus>>::iterator it_t, 
-                                                                 unique_ptr<FreeZone> &&child_zone ) 
+FreeZone::TerminusIterator FreeZone::PopulateTerminus( TerminusIterator it_t, 
+                                                       unique_ptr<FreeZone> &&child_zone ) 
 {
 	ASSERT( !IsEmpty() );
 	
@@ -121,25 +121,33 @@ list<shared_ptr<Terminus>>::iterator FreeZone::PopulateTerminus( list<shared_ptr
 		// nothing happens to this terminus
 		return ++it_t; 
 	}		
-	
-	shared_ptr<Terminus> terminus = *it_t;
-
-	// TODO support inserting the child's terminii. Do we renumber, or
-	// just assign new keys?
-	ASSERT( child_zone->GetNumTerminii() == 0 );
-	 
+		 
+	ASSERT( child_zone.get() != this ); 
+		
 	// Populate terminus. This will expand SubContainers
-	terminus->Populate( child_zone->GetBaseNode() );
+	(*it_t)->Populate( child_zone->GetBaseNode() );
 	
 	// it_t updated to the next terminus after the one we erased, or end()
-	return terminii.erase( it_t );		
+	it_t = terminii.erase( it_t );		
+	
+	// Insert the child zone's terminii before it_t, i.e. where we just
+	// erase()d from. I assume it_t now points after the inserted 
+	// terminii, i.e. at the same element it did after the erase()
+	terminii.splice( it_t, move(child_zone->terminii) );
+	
+	return it_t;
 }
 
 
-list<shared_ptr<Terminus>> &FreeZone::GetTerminii() // TODO become eg GetTerminiiBegin(), GetTerminiiEnd()
+FreeZone::TerminusIterator FreeZone::GetTerminiiBegin()
 {
-	ASSERT(!IsEmpty());
-    return terminii;
+	return terminii.begin();
+}
+
+
+FreeZone::TerminusIterator FreeZone::GetTerminiiEnd()
+{
+	return terminii.end();
 }
 
 
