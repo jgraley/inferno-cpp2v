@@ -36,14 +36,16 @@ public:
 
     void AddTerminus(int ti, shared_ptr<Terminus> terminus);      
     vector<shared_ptr<Terminus>> GetTerminusUpdaters() const;
-    shared_ptr<Terminus> GetTerminus(int ti) const;
-    void DropTerminus(int ti);
-    
-    void Join( unique_ptr<FreeZone> &&child_zone, int terminus_index );
 
     string GetTrace() const;
     
 private:
+    shared_ptr<Terminus> GetTerminus(int ti) const;
+    void DropTerminus(int ti);
+    
+    void PopulateTerminus( unique_ptr<FreeZone> &&child_zone, int terminus_index );
+
+
     TreePtr<Node> base;
     map<int, shared_ptr<Terminus>> terminii;
 };

@@ -101,7 +101,7 @@ void FreeZone::Populate( XTreeDatabase *x_tree_db, vector<unique_ptr<FreeZone>> 
 	int ti=0;
 	for( unique_ptr<FreeZone> &child_zone : child_zones )
 	{
-		Join(move(child_zone), ti++);
+		PopulateTerminus(move(child_zone), ti++);
 	}		
 		
 	ASSERT( GetNumTerminii() == 0 );
@@ -119,6 +119,25 @@ vector<shared_ptr<Terminus>> FreeZone::GetTerminusUpdaters() const
 	}
 	
     return v;
+}
+
+
+string FreeZone::GetTrace() const
+{
+    string arrow, rhs;
+    if( IsEmpty() )
+    {
+        rhs = " ↯ "; // Indicates zone is empty due to a terminus at base
+    }
+    else
+    {
+        if( terminii.empty() )
+            rhs = " → "; // Indicates the zone goes all the way to leaves i.e. subtree
+        else
+            rhs = " ⇥ " + Trace(terminii); // Indicates the zone terminates            
+    }
+        
+    return "FreeZone(" + Trace(base) + rhs +")";
 }
 
 
@@ -141,7 +160,7 @@ void FreeZone::DropTerminus(int ti)
 }
 
 
-void FreeZone::Join( unique_ptr<FreeZone> &&child_zone, int ti )
+void FreeZone::PopulateTerminus( unique_ptr<FreeZone> &&child_zone, int ti )
 {
 	if( child_zone->IsEmpty() )
 	{
@@ -165,28 +184,9 @@ void FreeZone::Join( unique_ptr<FreeZone> &&child_zone, int ti )
     
     // Populate terminus. Join() will expand SubContainers
     ASSERT( child_zone->GetBaseNode() );
-    terminus->Join( child_zone->GetBaseNode() );
+    terminus->PopulateTerminus( child_zone->GetBaseNode() );
     
     //Validate()( child_zone->GetBaseNode() );     
-}
-
-
-string FreeZone::GetTrace() const
-{
-    string arrow, rhs;
-    if( IsEmpty() )
-    {
-        rhs = " ↯ "; // Indicates zone is empty due to a terminus at base
-    }
-    else
-    {
-        if( terminii.empty() )
-            rhs = " → "; // Indicates the zone goes all the way to leaves i.e. subtree
-        else
-            rhs = " ⇥ " + Trace(terminii); // Indicates the zone terminates            
-    }
-        
-    return "FreeZone(" + Trace(base) + rhs +")";
 }
 
 

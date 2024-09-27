@@ -40,7 +40,7 @@ void FreeZoneExpression::DepthFirstWalkImpl( function<void(shared_ptr<FreeZoneEx
 
 // ------------------------- PopulateZoneOperator --------------------------
 
-PopulateZoneOperator::PopulateZoneOperator( vector<shared_ptr<FreeZoneExpression>> &&child_expressions_ ) :
+PopulateZoneOperator::PopulateZoneOperator( list<shared_ptr<FreeZoneExpression>> &&child_expressions_ ) :
 	child_expressions(move(child_expressions_))
 {
 }	
@@ -75,13 +75,13 @@ int PopulateZoneOperator::GetNumChildExpressions() const
 }
 
 
-vector<shared_ptr<FreeZoneExpression>> &PopulateZoneOperator::GetChildExpressions() 
+list<shared_ptr<FreeZoneExpression>> &PopulateZoneOperator::GetChildExpressions() 
 {
 	return child_expressions;
 }
 
 
-const vector<shared_ptr<FreeZoneExpression>> &PopulateZoneOperator::GetChildExpressions() const
+const list<shared_ptr<FreeZoneExpression>> &PopulateZoneOperator::GetChildExpressions() const
 {
 	return child_expressions;
 }
@@ -120,7 +120,7 @@ void PopulateZoneOperator::PopulateFreeZone( FreeZone &free_zone, const UP::Exec
 // ------------------------- PopulateTreeZoneOperator --------------------------
 
 PopulateTreeZoneOperator::PopulateTreeZoneOperator( TreeZone zone_, 
-                                                    vector<shared_ptr<FreeZoneExpression>> &&child_expressions ) :
+                                                    list<shared_ptr<FreeZoneExpression>> &&child_expressions ) :
 	PopulateZoneOperator( move(child_expressions) ),
 	zone(zone_)
 {
@@ -159,7 +159,7 @@ unique_ptr<FreeZone> PopulateTreeZoneOperator::Evaluate( const UP::ExecKit &kit 
 shared_ptr<FreeZoneExpression> PopulateTreeZoneOperator::DuplicateToFree() const
 {
 	FreeZone free_zone = zone.Duplicate();
-	vector<shared_ptr<FreeZoneExpression>> c = GetChildExpressions();
+	list<shared_ptr<FreeZoneExpression>> c = GetChildExpressions();
 	auto pop_fz_op = make_shared<PopulateFreeZoneOperator>( free_zone, move(c) );
 	pop_fz_op->AddEmbeddedMarkers( GetEmbeddedMarkers() );
 	return pop_fz_op;
@@ -174,7 +174,7 @@ string PopulateTreeZoneOperator::GetTrace() const
 // ------------------------- PopulateFreeZoneOperator --------------------------
 
 PopulateFreeZoneOperator::PopulateFreeZoneOperator( FreeZone zone_, 
-                                                    vector<shared_ptr<FreeZoneExpression>> &&child_expressions ) :
+                                                    list<shared_ptr<FreeZoneExpression>> &&child_expressions ) :
 	PopulateZoneOperator( move(child_expressions) ),
 	zone(zone_)
 {

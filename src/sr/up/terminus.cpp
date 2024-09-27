@@ -12,7 +12,7 @@ SingularTerminus::SingularTerminus( TreePtrInterface *tree_ptr_ ) :
 }
 
 
-void SingularTerminus::Join( TreePtr<Node> node )
+void SingularTerminus::PopulateTerminus( TreePtr<Node> node )
 {
     *tree_ptr = node;
     TRACE("Singular joined ")(node)("\n");    
@@ -42,7 +42,7 @@ ContainerTerminus::ContainerTerminus( ContainerInterface *container_,
 }
 
 
-void ContainerTerminus::Join( TreePtr<Node> node )
+void ContainerTerminus::PopulateTerminus( TreePtr<Node> node )
 {
     ASSERT( !joined );
     joined = true;

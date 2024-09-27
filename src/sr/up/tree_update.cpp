@@ -29,18 +29,18 @@ void SR::RunForReplace( const Command *initial_cmd, const SCREngine *scr_engine,
 	EmptyZoneElider().Run(expr);
 	EmptyZoneElider().Check(expr);
 	
+	// TODO maximally merge free zones
+
 	TreeZoneOverlapHandler( x_tree_db ).Run(expr);
 	TreeZoneOverlapHandler( x_tree_db ).Check(expr);
 	
 	// TODO deal with out-of-sequence (DF) tree zones
 	
 	// TODO enact the markers (I think)
-	
-	// TODO maximally merge free zones and tree zones
-		
+			
 	// TODO reductive inversion using Quark algo
 	
-	// TODO merge TZs again and check initial update command is now trivial
+	// TODO merge tree zones and check initial update command is now trivial
 	
 	// Execute it
     UP::ExecKit exec_kit {x_tree_db, scr_engine}; 
@@ -85,8 +85,8 @@ void TreeZoneOverlapHandler::Run( shared_ptr<FreeZoneExpression> &base )
 					}
 				}
 			} );
-			// If it does, duplicate it, which turns it into a free zone, so it will not be seen
-			// in future runs of the inner "r" loop.
+			// If it overlaps with something, duplicate it, which turns it into a free zone, so it will 
+			// not be seen in future runs of the inner "r" loop.
 			if( l_has_an_overlap )
 			{				
 				l_expr = l_ptz_op->DuplicateToFree();

@@ -50,7 +50,7 @@ private:
 class PopulateZoneOperator : public FreeZoneExpression
 {
 protected:
-    PopulateZoneOperator( vector<shared_ptr<FreeZoneExpression>> &&child_expressions_ );
+    PopulateZoneOperator( list<shared_ptr<FreeZoneExpression>> &&child_expressions_ );
     PopulateZoneOperator();
 
 public:
@@ -62,8 +62,8 @@ public:
     virtual const Zone &GetZone() const = 0;
     
     int GetNumChildExpressions() const;
-	vector<shared_ptr<FreeZoneExpression>> &GetChildExpressions();
-	const vector<shared_ptr<FreeZoneExpression>> &GetChildExpressions() const;
+	list<shared_ptr<FreeZoneExpression>> &GetChildExpressions();
+	const list<shared_ptr<FreeZoneExpression>> &GetChildExpressions() const;
     string GetChildExpressionsTrace() const;
 
 	void ForChildren(function<void(shared_ptr<FreeZoneExpression> &expr)> func) override;
@@ -71,7 +71,7 @@ public:
 	void PopulateFreeZone( FreeZone &free_zone, const UP::ExecKit &kit ) const;	
 
 private:
-	vector<shared_ptr<FreeZoneExpression>> child_expressions;
+	list<shared_ptr<FreeZoneExpression>> child_expressions;
 	list<RequiresSubordinateSCREngine *> embedded_markers;
 };
 
@@ -83,7 +83,7 @@ private:
 class PopulateTreeZoneOperator : public PopulateZoneOperator
 {
 public:
-    PopulateTreeZoneOperator( TreeZone zone_, vector<shared_ptr<FreeZoneExpression>> &&child_expressions );
+    PopulateTreeZoneOperator( TreeZone zone_, list<shared_ptr<FreeZoneExpression>> &&child_expressions );
     PopulateTreeZoneOperator( TreeZone zone_ );
     
     TreeZone &GetZone() override;
@@ -106,7 +106,7 @@ private:
 class PopulateFreeZoneOperator : public PopulateZoneOperator
 {
 public:
-    PopulateFreeZoneOperator( FreeZone zone_, vector<shared_ptr<FreeZoneExpression>> &&child_expressions );
+    PopulateFreeZoneOperator( FreeZone zone_, list<shared_ptr<FreeZoneExpression>> &&child_expressions );
     PopulateFreeZoneOperator( FreeZone zone_ );
 
     FreeZone &GetZone() override;

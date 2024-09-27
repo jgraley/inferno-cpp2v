@@ -588,7 +588,7 @@ Agent::FreeZoneExprPtr StandardAgent::GenFreeZoneExprOverlay( const ReplaceKit &
     ASSERT( dest->IsFinal() )("About to build non-final ")(*dest)("\n"); 
 
     // Stuff for creating commands
-    vector<Agent::FreeZoneExprPtr> child_commands;    
+    list<Agent::FreeZoneExprPtr> child_commands;    
     FreeZone zone = FreeZone::CreateSubtree(dest);
     int ti = 0;
 
@@ -724,7 +724,7 @@ Agent::FreeZoneExprPtr StandardAgent::GenFreeZoneExprNormal( const ReplaceKit &k
     vector< Itemiser::Element * > dest_items = dest->Itemise(); 
 
     // Stuff for creating commands
-    vector<Agent::FreeZoneExprPtr> child_commands;
+    list<Agent::FreeZoneExprPtr> child_commands;
     FreeZone zone = FreeZone::CreateSubtree(dest);
     int ti = 0;
 

@@ -91,7 +91,7 @@ Agent::FreeZoneExprPtr StarAgent::GenFreeZoneExprImpl( const ReplaceKit &kit,
     else
         ASSERT(0)("Please add new kind of container");
     
-    vector<Agent::FreeZoneExprPtr> child_commands;
+    list<Agent::FreeZoneExprPtr> child_commands;
     FreeZone zone = FreeZone::CreateSubtree(dest);
     int ti = 0;
 

@@ -37,7 +37,7 @@ Agent::FreeZoneExprPtr DepthAgent::GenFreeZoneExprImpl( const ReplaceKit &kit,
     
     // Recurse at the terminus
     PatternLink terminus_plink(this, &terminus);
-    vector<Agent::FreeZoneExprPtr> child_commands;
+    list<Agent::FreeZoneExprPtr> child_commands;
     child_commands.push_back( terminus_plink.GetChildAgent()->GenFreeZoneExpr(kit, terminus_plink) );
 
     // Make a tree zone for the nodes we covered
