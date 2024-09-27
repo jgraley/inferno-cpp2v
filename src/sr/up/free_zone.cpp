@@ -103,27 +103,10 @@ void FreeZone::PopulateAll( list<unique_ptr<FreeZone>> &&child_zones )
 	list<shared_ptr<Terminus>>::iterator it_t;
 	for( it_cz = child_zones.begin(), it_t = terminii.begin();
 	     it_cz != child_zones.end() || it_t != terminii.end();
-	     it_cz++ )
+	     it_cz++ /* it_t updated by PopulateTerminus() */ )
 	{	
-		ASSERT( it_cz != child_zones.end() && it_t != terminii.end() ); // length mismatch
-		unique_ptr<FreeZone> child_zone = move(*it_cz);
-		shared_ptr<Terminus> terminus = *it_t;
-		
-		if( child_zone->IsEmpty() )
-		{
-			// nothing happens to this terminus
-			continue; 
-		}		
-		
-		// TODO support inserting the child's terminii. Do we renumber, or
-		// just assign new keys?
-		ASSERT( child_zone->GetNumTerminii() == 0 );
-		 
-		// Populate terminus. This will expand SubContainers
-		terminus->PopulateTerminus( child_zone->GetBaseNode() );
-		
-		// it_t updated to the next terminus after the one we erased
-		it_t = terminii.erase( it_t );		
+		ASSERT( it_cz != child_zones.end() && it_t != terminii.end() ); // length mismatch		
+		it_t = PopulateTerminus( it_t, move(*it_cz) );		
 	}		
 		
 	ASSERT( GetNumTerminii() == 0 );
@@ -133,6 +116,8 @@ void FreeZone::PopulateAll( list<unique_ptr<FreeZone>> &&child_zones )
 list<shared_ptr<Terminus>>::iterator FreeZone::PopulateTerminus( list<shared_ptr<Terminus>>::iterator it_t, 
                                                                  unique_ptr<FreeZone> &&child_zone ) 
 {
+	ASSERT( !IsEmpty() );
+	
 	if( child_zone->IsEmpty() )
 	{
 		// nothing happens to this terminus
