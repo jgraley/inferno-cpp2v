@@ -27,15 +27,17 @@ FreeZone::FreeZone()
 }
 
 
-FreeZone::FreeZone( TreePtr<Node> base_, vector<shared_ptr<Terminus>> terminii_ ) :
+FreeZone::FreeZone( TreePtr<Node> base_, list<shared_ptr<Terminus>> terminii_ ) :
     base( base_ )
 {
 	// Fill the map
-	for( int ti=0; ti<terminii_.size(); ti++ )
+	int ti=0;
+	for( shared_ptr<Terminus> t : terminii_ )
 	{
-		terminii[ti] = terminii_.at(ti);
 		if( base )
-			ASSERT( terminii.at(ti) );
+			ASSERT( t );
+		terminii[ti] = t;
+		ti++;
 	}
 	
     // An empty free zone is indicated by a NULL base and exactly one
@@ -78,12 +80,13 @@ int FreeZone::GetNumTerminii() const
 }
 
 
-void FreeZone::AddTerminus(int ti, shared_ptr<Terminus> terminus)
+void FreeZone::AddTerminus(shared_ptr<Terminus> terminus)
 {
 	// Can't use this to make an empty zone
 	ASSERT( base );
 	ASSERT( terminus );
 	
+	int ti = terminii.size();
 	terminii[ti] = terminus;
 }
 

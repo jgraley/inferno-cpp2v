@@ -83,7 +83,7 @@ FreeZone TreeZone::Duplicate() const
                                                             GetBaseXLink(), 
                                                             duplicator_terminus_map );   
     
-    vector<shared_ptr<Terminus>> free_zone_terminii;
+    list<shared_ptr<Terminus>> free_zone_terminii;
     for( XLink terminus_upd : GetTerminusXLinks() )
     {
 		ASSERTS( duplicator_terminus_map[terminus_upd].updater );

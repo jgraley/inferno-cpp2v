@@ -25,7 +25,7 @@ public:
     static FreeZone CreateEmpty();
 
 	FreeZone();
-    explicit FreeZone( TreePtr<Node> base, vector<shared_ptr<Terminus>> terminii );
+    explicit FreeZone( TreePtr<Node> base, list<shared_ptr<Terminus>> terminii );
 
 	FreeZone &operator=( const FreeZone &other );
 
@@ -34,7 +34,7 @@ public:
     TreePtr<Node> GetBaseNode() const override;
     void Populate( XTreeDatabase *x_tree_db, list<unique_ptr<FreeZone>> &&child_zones ); 
 
-    void AddTerminus(int ti, shared_ptr<Terminus> terminus);      
+    void AddTerminus(shared_ptr<Terminus> terminus);      
     vector<shared_ptr<Terminus>> GetTerminusUpdaters() const;
 
     string GetTrace() const;

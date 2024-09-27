@@ -93,18 +93,16 @@ Agent::FreeZoneExprPtr StarAgent::GenFreeZoneExprImpl( const ReplaceKit &kit,
     
     list<Agent::FreeZoneExprPtr> child_commands;
     FreeZone zone = FreeZone::CreateSubtree(dest);
-    int ti = 0;
 
     TRACE("Walking container length %d\n", key_container->size() );
     ContainerInterface *dest_container = dynamic_cast<ContainerInterface *>(dest.get());
     for( const TreePtrInterface &key_elt : *key_container )
     {
         ContainerInterface::iterator dest_it = dest_container->insert( ContainerTerminus::GetPlaceholder() );
-        zone.AddTerminus( ti, make_shared<ContainerTerminus>(dest_container, dest_it) );    
+        zone.AddTerminus( make_shared<ContainerTerminus>(dest_container, dest_it) );    
 
         TreeZone child_zone = TreeZone::CreateSubtree( kit.x_tree_db, XLink(key_node, &key_elt) );
 	    child_commands.push_back( make_shared<PopulateTreeZoneOperator>(move(child_zone)) );
-        ti++;
     }
 
     return make_shared<PopulateFreeZoneOperator>( move(zone), move(child_commands) );    
