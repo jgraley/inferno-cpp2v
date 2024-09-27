@@ -27,25 +27,16 @@ FreeZone::FreeZone()
 }
 
 
-FreeZone::FreeZone( TreePtr<Node> base_, list<shared_ptr<Terminus>> terminii_ ) :
-    base( base_ )
+FreeZone::FreeZone( TreePtr<Node> base_, list<shared_ptr<Terminus>> terminii_ ) : // TODO rvalue ref+move()
+    base( base_ ),
+    terminii( terminii_ )
 {
-	// Fill the map
-	int ti=0;
-	for( shared_ptr<Terminus> t : terminii_ )
-	{
-		if( base )
-			ASSERT( t );
-		terminii[ti] = t;
-		ti++;
-	}
-	
     // An empty free zone is indicated by a NULL base and exactly one
     // terminus, which should also be NULL.
     if( !base )
     {
         ASSERT( terminii.size() == 1 );
-        ASSERT( !terminii.at(0) );
+        ASSERT( !terminii.front() );
     }
 
     // Checks all terminii are distinct
@@ -67,7 +58,7 @@ bool FreeZone::IsEmpty() const
     if( !base )
     {
         ASSERT( terminii.size() == 1 );
-        ASSERT( !terminii.at(0) );
+        ASSERT( !terminii.front() );
         return true;
     }
     return false;
@@ -86,8 +77,7 @@ void FreeZone::AddTerminus(shared_ptr<Terminus> terminus)
 	ASSERT( base );
 	ASSERT( terminus );
 	
-	int ti = terminii.size();
-	terminii[ti] = terminus;
+	terminii.push_back(terminus);
 }
 
 
@@ -109,13 +99,19 @@ void FreeZone::Populate( XTreeDatabase *x_tree_db, list<unique_ptr<FreeZone>> &&
 		return;
 	}	
 	
-	int ti=0;
-	for( unique_ptr<FreeZone> &child_zone : child_zones )
+	list<unique_ptr<FreeZone>>::iterator it_cz;
+	list<shared_ptr<Terminus>>::iterator it_t;
+	for( it_cz = child_zones.begin(), it_t = terminii.begin();
+	     it_cz != child_zones.end() || it_t != terminii.end();
+	     it_cz++, it_t++ )
 	{	
+		ASSERT( it_cz != child_zones.end() && it_t != terminii.end() ); // length mismatch
+		unique_ptr<FreeZone> &child_zone = *it_cz;
+		shared_ptr<Terminus> terminus = *it_t;
+		
 		if( child_zone->IsEmpty() )
 		{
 			// nothing happens to this terminus
-			ti++;
 			continue; 
 		}		
 		
@@ -123,30 +119,26 @@ void FreeZone::Populate( XTreeDatabase *x_tree_db, list<unique_ptr<FreeZone>> &&
 		// just assign new keys?
 		ASSERT( child_zone->GetNumTerminii() == 0 );
 		 
-		shared_ptr<Terminus> terminus = terminii.at(ti);
-		int ne = terminii.erase(ti);
-		ASSERT( ne==1 );
-		
 		// Populate terminus. Join() will expand SubContainers
 		ASSERT( child_zone->GetBaseNode() );
 		terminus->PopulateTerminus( child_zone->GetBaseNode() );
 		
 		//Validate()( child_zone->GetBaseNode() ); 
-		ti++;    
 	}		
+	
+	terminii.clear();
 		
 	ASSERT( GetNumTerminii() == 0 );
 }
 
 
-vector<shared_ptr<Terminus>> FreeZone::GetTerminusUpdaters() const
+vector<shared_ptr<Terminus>> FreeZone::GetTerminusUpdaters() const // TODO return a list
 {
 	ASSERT(!IsEmpty());
 	vector<shared_ptr<Terminus>> v;
-	for( int ti=0; ti<terminii.size(); ti++ )
+	for( shared_ptr<Terminus> t : terminii )
 	{
-		ASSERT( terminii.count(ti) > 0 );
-		v.push_back( terminii.at(ti) );
+		v.push_back( t );
 	}
 	
     return v;

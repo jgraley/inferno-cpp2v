@@ -41,7 +41,7 @@ public:
     
 private:
     TreePtr<Node> base;
-    map<int, shared_ptr<Terminus>> terminii;
+    list<shared_ptr<Terminus>> terminii;
 };
  
 }
