@@ -68,7 +68,7 @@ public:
 
 	void ForChildren(function<void(shared_ptr<FreeZoneExpression> &expr)> func) override;
 
-	void PopulateFreeZone( FreeZone &free_zone, const UP::ExecKit &kit ) const;	
+	void EvaluateWithFreeZone( FreeZone &free_zone, const UP::ExecKit &kit ) const;	
 
 private:
 	list<shared_ptr<FreeZoneExpression>> child_expressions;

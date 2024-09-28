@@ -79,7 +79,7 @@ void ContainerTerminus::Populate( TreePtr<Node> node )
      * It's to permit multiple terminii to refer to the same Sequence
      * with a well-defined relative order. We place a null element in
      * for each terminus so that iterators relative to different
-     * terminii have differnt values.
+     * terminii have different values.
      * 
      * Note: we must not determine the actual insertion iterator
      * (it_after) during construct, because the container is still

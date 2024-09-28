@@ -26,10 +26,12 @@ void SR::RunForReplace( const Command *initial_cmd, const SCREngine *scr_engine,
 
 	shared_ptr<FreeZoneExpression> expr = dynamic_cast<const UpdateTreeCommand &>(*initial_cmd).GetExpression();
 	
-	EmptyZoneElider().Run(expr);
-	EmptyZoneElider().Check(expr);
+	//EmptyZoneElider().Run(expr);
+	//EmptyZoneElider().Check(expr);
 	
 	// TODO maximally merge free zones
+	//FreeZoneMerger().Run(expr);
+	//FreeZoneMerger().Check(expr);
 
 	TreeZoneOverlapHandler( x_tree_db ).Run(expr);
 	TreeZoneOverlapHandler( x_tree_db ).Check(expr);
@@ -104,7 +106,6 @@ void TreeZoneOverlapHandler::Check( shared_ptr<FreeZoneExpression> &base )
 	{
 		if( auto l_ptz_op = dynamic_pointer_cast<PopulateTreeZoneOperator>(l_expr) )
 		{			
-
 			FreeZoneExpression::ForDepthFirstWalk( base, nullptr, [&](shared_ptr<FreeZoneExpression> &r_expr)
 			{
 				if( auto r_ptz_op = dynamic_pointer_cast<PopulateTreeZoneOperator>(r_expr) )
@@ -156,4 +157,46 @@ void EmptyZoneElider::Check( shared_ptr<FreeZoneExpression> &base )
             ASSERT( !pz_op->GetZone().IsEmpty() )("Found empty zone in populate op: ")(pz_op->GetZone());
 	} );	
 }
+
+// ------------------------- FreeZoneMerger --------------------------
+
+FreeZoneMerger::FreeZoneMerger()
+{
+}
+	
+
+void FreeZoneMerger::Run( shared_ptr<FreeZoneExpression> &base )
+{
+	FreeZoneExpression::ForDepthFirstWalk( base, nullptr, [&](shared_ptr<FreeZoneExpression> &expr)
+	{
+		if( auto pz_op = dynamic_pointer_cast<PopulateFreeZoneOperator>(expr) )
+        {
+			pz_op->ForChildren([&](shared_ptr<FreeZoneExpression> &child_expr)
+			{
+				// Presently only able to represent markers at base of zone, but if a child
+				// expr has one, after populating we'd need to put it our zone at some other
+				// location.
+				if( auto child_pz_op = dynamic_pointer_cast<PopulateFreeZoneOperator>(child_expr) )
+					ASSERT( child_pz_op->GetEmbeddedMarkers().size() == 0 );
+			} );
+		}
+	} );			
+}
+
+
+void FreeZoneMerger::Check( shared_ptr<FreeZoneExpression> &base )
+{
+	FreeZoneExpression::ForDepthFirstWalk( base, nullptr, [&](shared_ptr<FreeZoneExpression> &expr)
+	{
+		if( auto pz_op = dynamic_pointer_cast<PopulateFreeZoneOperator>(expr) )
+        {
+			pz_op->ForChildren([&](shared_ptr<FreeZoneExpression> &child_expr)
+			{
+				if( auto child_pz_op = dynamic_pointer_cast<PopulateFreeZoneOperator>(child_expr) )
+					ASSERT(false)("Free zone ")(*expr)(" touching another free zone ")(*child_expr);
+			} );
+		}
+	} );		
+}
+
 

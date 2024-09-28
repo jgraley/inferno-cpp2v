@@ -47,6 +47,21 @@ public:
 	void Check( shared_ptr<FreeZoneExpression> &base );
 };
 
+// ------------------------- FreeZoneMerger --------------------------
+
+class FreeZoneMerger
+{
+public:	
+	FreeZoneMerger();
+	
+	// Can change the supplied shared ptr
+	void Run( shared_ptr<FreeZoneExpression> &base );
+	
+	// Just ASSERT no empty zones
+	void Check( shared_ptr<FreeZoneExpression> &base );
+};
+
+
 }
 
 #endif

@@ -154,13 +154,13 @@ bool IsEqualOperator::IsCommutative() const
 shared_ptr<SymbolExpression> IsEqualOperator::TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const
 {
     shared_ptr<SymbolExpression> solution = nullptr;
-    ForAllDistinctPairs( list<shared_ptr<SymbolExpression>>{a, b}, 
+    ForAllDistinctPairs( list<shared_ptr<SymbolExpression>>{a, b},    // TODO add ForForwardAndReverse for clarity
                          [&](const shared_ptr<SymbolExpression> &first, 
                              const shared_ptr<SymbolExpression> &second)
     {    
         solution = first->TrySolveForToEqual( kit, target, second );
         if( solution )
-            Break();
+            Break(); // TODO add early return support to lambda loops via exception
     } );
 
     return solution;

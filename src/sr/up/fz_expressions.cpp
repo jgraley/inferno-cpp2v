@@ -100,12 +100,12 @@ void PopulateZoneOperator::ForChildren(function<void(shared_ptr<FreeZoneExpressi
 }
 
 
-void PopulateZoneOperator::PopulateFreeZone( FreeZone &free_zone, const UP::ExecKit &kit ) const	
+void PopulateZoneOperator::EvaluateWithFreeZone( FreeZone &free_zone, const UP::ExecKit &kit ) const	
 {
 	//FTRACE(free_zone)("\n");
 	list<unique_ptr<FreeZone>> child_zones;
 	for( const shared_ptr<FreeZoneExpression> &child_expression : child_expressions )
-	{
+	{	
 		//FTRACE(child_expression)("\n");
 		unique_ptr<FreeZone> free_zone = child_expression->Evaluate( kit );
 		child_zones.push_back( move(free_zone) );
@@ -114,7 +114,7 @@ void PopulateZoneOperator::PopulateFreeZone( FreeZone &free_zone, const UP::Exec
 	free_zone.PopulateAll(move(child_zones));
 	
 	for( RequiresSubordinateSCREngine *ea : embedded_markers )
-		free_zone.MarkBaseForEmbedded(kit.scr_engine, ea);		
+		free_zone.MarkBaseForEmbedded(kit.scr_engine, ea);	
 }
 	
 // ------------------------- PopulateTreeZoneOperator --------------------------
@@ -151,7 +151,7 @@ unique_ptr<FreeZone> PopulateTreeZoneOperator::Evaluate( const UP::ExecKit &kit 
 {
 	// TODO probably consistent for Duplicate() to return unique_ptr<FreeZone>
 	auto temp_free_zone = make_unique<FreeZone>( zone.Duplicate() );
-	PopulateFreeZone( *temp_free_zone, kit );
+	EvaluateWithFreeZone( *temp_free_zone, kit );
 	return temp_free_zone;
 }
 
@@ -168,7 +168,11 @@ shared_ptr<FreeZoneExpression> PopulateTreeZoneOperator::DuplicateToFree() const
 
 string PopulateTreeZoneOperator::GetTrace() const
 {
+#ifdef RECURSIVE_TRACE_OPERATOR
 	return "PopulateTreeZoneOperator( \nzone: "+Trace(zone)+",\nchildren: "+GetChildExpressionsTrace()+" )";
+#else
+	return "PopulateFreeZoneOperator( zone: "+Trace(zone)+", "+Trace(GetNumChildExpressions())+" children )";
+#endif
 }
 
 // ------------------------- PopulateFreeZoneOperator --------------------------
@@ -205,12 +209,16 @@ const FreeZone &PopulateFreeZoneOperator::GetZone() const
 unique_ptr<FreeZone> PopulateFreeZoneOperator::Evaluate( const UP::ExecKit &kit ) const
 {
 	auto temp_free_zone = make_unique<FreeZone>(zone);
-	PopulateFreeZone( *temp_free_zone, kit );
+	EvaluateWithFreeZone( *temp_free_zone, kit );
 	return temp_free_zone;
 }
 
 
 string PopulateFreeZoneOperator::GetTrace() const
 {
+#ifdef RECURSIVE_TRACE_OPERATOR
 	return "PopulateFreeZoneOperator( \nzone: "+Trace(zone)+",\nchildren: "+GetChildExpressionsTrace()+" )";
+#else
+	return "PopulateFreeZoneOperator( zone: "+Trace(zone)+", "+Trace(GetNumChildExpressions())+" children )";
+#endif	
 }

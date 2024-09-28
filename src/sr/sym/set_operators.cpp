@@ -144,7 +144,7 @@ unique_ptr<SymbolicResult> AllGreaterOperator::Evaluate( const EvalKit &kit,
                                                                 list<unique_ptr<SymbolicResult>> &&op_results ) const                                                                    
 {
     unique_ptr<SymbolicResult> ar = OnlyElementOf(move(op_results));       
-    return make_unique<DepthFirstRangeResult>( kit.x_tree_db, ar->GetOnlyXLink(), false, SR::XLink(), false );
+    return make_unique<DepthFirstRangeResult>( kit.x_tree_db, ar->GetOnlyXLink(), false, SR::XLink(), false ); // TODO ar could be a range
 }
 
 
