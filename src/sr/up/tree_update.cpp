@@ -26,19 +26,32 @@ void SR::RunForReplace( const Command *initial_cmd, const SCREngine *scr_engine,
 
 	shared_ptr<FreeZoneExpression> expr = dynamic_cast<const UpdateTreeCommand &>(*initial_cmd).GetExpression();
 	
-	//EmptyZoneElider().Run(expr);
-	//EmptyZoneElider().Check(expr);
+	// TODO enact free zone markers (I think)
+
+	EmptyZoneElider().Run(expr);
+	EmptyZoneElider().Check(expr);
 	
-	// TODO maximally merge free zones
-	//FreeZoneMerger().Run(expr);
+	//FreeZoneMerger().Run(expr); // TODO should work once FZ markers enacted
 	//FreeZoneMerger().Check(expr);
 
 	TreeZoneOverlapHandler( x_tree_db ).Run(expr);
 	TreeZoneOverlapHandler( x_tree_db ).Check(expr);
 	
 	// TODO deal with out-of-sequence (DF) tree zones
+	// Hand-code a walker which focusses on tree zones. Merge should ensure that
+	// we can get to child tree zones after ZERO or ONE layer, use an "if" for
+	// these cases and collect child TZs into a list. Or remove dependency on
+	// FZ merge by finding that list using a walk.
+	// On the way in:
+	// - maintain an "acceptable DF range" - anywhere at root, but under tree zones
+	//   it's determined by terminii. The end of the last acceptable range is TBD.
+	// - simplest algo: when a child TZ is found out of acceptable range, just duplicate
+	//   every TZ under it (use ForDFWalk) 
+	// - When we have multiple TZs we also have to check that they are in order
+	//   relative to each other. Use bases. This is a linear ordering problem and
+	//   it's good to begin by finding correctly ordered subsequences.
 	
-	// TODO enact the markers (I think)
+	// TODO enact tree zone markers (I think)
 			
 	// TODO reductive inversion using Quark algo
 	
@@ -171,14 +184,29 @@ void FreeZoneMerger::Run( shared_ptr<FreeZoneExpression> &base )
 	{
 		if( auto pz_op = dynamic_pointer_cast<PopulateFreeZoneOperator>(expr) )
         {
+			FreeZone &free_zone = pz_op->GetZone();
+			ASSERT( !free_zone.IsEmpty() );
+
+			FreeZone::TerminusIterator it_t = free_zone.GetTerminiiBegin();
 			pz_op->ForChildren([&](shared_ptr<FreeZoneExpression> &child_expr)
 			{
-				// Presently only able to represent markers at base of zone, but if a child
-				// expr has one, after populating we'd need to put it our zone at some other
-				// location.
+				ASSERT( it_t != free_zone.GetTerminiiEnd() ); // length mismatch		
 				if( auto child_pz_op = dynamic_pointer_cast<PopulateFreeZoneOperator>(child_expr) )
-					ASSERT( child_pz_op->GetEmbeddedMarkers().size() == 0 );
+				{	
+					FreeZone &child_free_zone = child_pz_op->GetZone();
+					// Presently only able to represent markers at base of zone, but if a child
+					// expr has one, after populating we'd need to put it our zone at some other
+					// location.
+					ASSERT( child_pz_op->GetEmbeddedMarkers().empty() );
+					
+					it_t = free_zone.PopulateTerminus( it_t, make_unique<FreeZone>(child_free_zone) );		
+				}	
+				else
+				{
+					it_t++;
+				}						
 			} );
+			ASSERT( it_t == free_zone.GetTerminiiEnd() ); // length mismatch	
 		}
 	} );			
 }
