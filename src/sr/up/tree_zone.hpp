@@ -23,6 +23,8 @@ class FreeZone;
 class TreeZone : public Zone
 { 
 public:
+	typedef set<XLink, DepthFirstRelation>::iterator TerminusIterator;
+
     static TreeZone CreateSubtree( const XTreeDatabase *db, XLink base );
     static TreeZone CreateEmpty( const XTreeDatabase *db, XLink base );
 
@@ -38,6 +40,9 @@ public:
     FreeZone Duplicate() const;
     void Update( XTreeDatabase *x_tree_db, const FreeZone &free_zone ) const;
     
+    TerminusIterator GetTerminiiBegin();
+    TerminusIterator GetTerminiiEnd();
+
     string GetTrace() const;
 
 private:

@@ -111,6 +111,18 @@ void TreeZone::Update( XTreeDatabase *x_tree_db, const FreeZone &free_zone ) con
 }
 
 
+TreeZone::TerminusIterator TreeZone::GetTerminiiBegin()
+{
+	return terminii.begin();
+}
+
+
+TreeZone::TerminusIterator TreeZone::GetTerminiiEnd()
+{
+	return terminii.end();
+}
+
+
 string TreeZone::GetTrace() const
 {
     string rhs;

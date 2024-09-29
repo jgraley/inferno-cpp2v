@@ -38,9 +38,8 @@ public:
 								   function<void(shared_ptr<FreeZoneExpression> &expr)> func_in,
 								   function<void(shared_ptr<FreeZoneExpression> &expr)> func_out );
 
-private:
 	virtual void DepthFirstWalkImpl(function<void(shared_ptr<FreeZoneExpression> &expr)> func_in,
-			                        function<void(shared_ptr<FreeZoneExpression> &expr)> func_out);
+			                        function<void(shared_ptr<FreeZoneExpression> &expr)> func_out) = 0;
 };
 
 // ------------------------- PopulateZoneOperator --------------------------
@@ -69,6 +68,9 @@ public:
 	void ForChildren(function<void(shared_ptr<FreeZoneExpression> &expr)> func) override;
 
 	void EvaluateWithFreeZone( FreeZone &free_zone, const UP::ExecKit &kit ) const;	
+	
+	void DepthFirstWalkImpl(function<void(shared_ptr<FreeZoneExpression> &expr)> func_in,
+			                function<void(shared_ptr<FreeZoneExpression> &expr)> func_out) override;
 
 private:
 	list<shared_ptr<FreeZoneExpression>> child_expressions;

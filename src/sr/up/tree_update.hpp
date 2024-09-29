@@ -61,6 +61,33 @@ public:
 	void Check( shared_ptr<FreeZoneExpression> &base );
 };
 
+// ------------------------- TreeZoneOrdering --------------------------
+
+class TreeZoneOrdering
+{
+public:	
+	TreeZoneOrdering(const XTreeDatabase *db_);
+	
+	// Can change the supplied shared ptr
+	void Run( shared_ptr<FreeZoneExpression> &base );
+	
+	// Just ASSERT no empty zones
+	void Check( shared_ptr<FreeZoneExpression> &base );
+
+private:	
+	void RunWorker( shared_ptr<FreeZoneExpression> &base, 
+                    XLink range_begin,
+                    XLink range_end,
+                    bool just_check );
+	void RunForTreeZone( shared_ptr<PopulateTreeZoneOperator> &op, 
+						 bool just_check );
+	void GatherTreeZoneOps( shared_ptr<FreeZoneExpression> &expr, 
+				      	    list<shared_ptr<PopulateTreeZoneOperator>> &tree_zones );
+				    	  
+	const XTreeDatabase * const db;
+	SR::DepthFirstRelation dfr;				    	  
+};
+
 
 }
 

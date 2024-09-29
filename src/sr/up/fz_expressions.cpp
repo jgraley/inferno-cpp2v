@@ -24,20 +24,6 @@ catch( BreakException )
 {
 }		       
 
-
-void FreeZoneExpression::DepthFirstWalkImpl( function<void(shared_ptr<FreeZoneExpression> &expr)> func_in,
-			                                 function<void(shared_ptr<FreeZoneExpression> &expr)> func_out )
-{
-	ForChildren( [&](shared_ptr<FreeZoneExpression> &expr)
-	{
-		if( func_in )
-			func_in(expr);
-		expr->DepthFirstWalkImpl(func_in, func_out);
-		if( func_out )
-			func_out(expr);
-	} );
-}
-
 // ------------------------- PopulateZoneOperator --------------------------
 
 PopulateZoneOperator::PopulateZoneOperator( list<shared_ptr<FreeZoneExpression>> &&child_expressions_ ) :
@@ -93,11 +79,14 @@ string PopulateZoneOperator::GetChildExpressionsTrace() const
 }
 
 
-void PopulateZoneOperator::ForChildren(function<void(shared_ptr<FreeZoneExpression> &expr)> func)
+void PopulateZoneOperator::ForChildren(function<void(shared_ptr<FreeZoneExpression> &expr)> func) try
 {
 	for( shared_ptr<FreeZoneExpression> &child_expression : child_expressions )
 		func(child_expression);
 }
+catch( BreakException )
+{
+}		       
 
 
 void PopulateZoneOperator::EvaluateWithFreeZone( FreeZone &free_zone, const UP::ExecKit &kit ) const	
@@ -115,6 +104,20 @@ void PopulateZoneOperator::EvaluateWithFreeZone( FreeZone &free_zone, const UP::
 	
 	for( RequiresSubordinateSCREngine *ea : embedded_markers )
 		free_zone.MarkBaseForEmbedded(kit.scr_engine, ea);	
+}
+	
+
+void PopulateZoneOperator::DepthFirstWalkImpl( function<void(shared_ptr<FreeZoneExpression> &expr)> func_in,
+			                                   function<void(shared_ptr<FreeZoneExpression> &expr)> func_out )
+{
+	for( shared_ptr<FreeZoneExpression> &expr : child_expressions )
+	{
+		if( func_in )
+			func_in(expr);
+		expr->DepthFirstWalkImpl(func_in, func_out);
+		if( func_out )
+			func_out(expr);
+	}
 }
 	
 // ------------------------- PopulateTreeZoneOperator --------------------------

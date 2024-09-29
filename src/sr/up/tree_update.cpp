@@ -26,22 +26,15 @@ void SR::RunForReplace( const Command *initial_cmd, const SCREngine *scr_engine,
 
 	shared_ptr<FreeZoneExpression> expr = dynamic_cast<const UpdateTreeCommand &>(*initial_cmd).GetExpression();
 	
-	// TODO enact free zone markers (I think)
-
 	EmptyZoneElider().Run(expr);
 	EmptyZoneElider().Check(expr);
 	
-	//FreeZoneMerger().Run(expr); // TODO should work once FZ markers enacted
-	//FreeZoneMerger().Check(expr);
-
 	TreeZoneOverlapHandler( x_tree_db ).Run(expr);
 	TreeZoneOverlapHandler( x_tree_db ).Check(expr);
 	
 	// TODO deal with out-of-sequence (DF) tree zones
-	// Hand-code a walker which focusses on tree zones. Merge should ensure that
-	// we can get to child tree zones after ZERO or ONE layer, use an "if" for
-	// these cases and collect child TZs into a list. Or remove dependency on
-	// FZ merge by finding that list using a walk.
+	// Hand-code a walker which focusses on tree zones, and gathers together 
+	// descenent tree zones for analysis.
 	// On the way in:
 	// - maintain an "acceptable DF range" - anywhere at root, but under tree zones
 	//   it's determined by terminii. The end of the last acceptable range is TBD.
@@ -51,8 +44,12 @@ void SR::RunForReplace( const Command *initial_cmd, const SCREngine *scr_engine,
 	//   relative to each other. Use bases. This is a linear ordering problem and
 	//   it's good to begin by finding correctly ordered subsequences.
 	
+	// TODO enact free and tree zone markers (I think) (don't enact until after we're done converting TZs into FZs)
 	// TODO enact tree zone markers (I think)
 			
+	//FreeZoneMerger().Run(expr); // TODO should work once FZ markers enacted
+	//FreeZoneMerger().Check(expr);
+
 	// TODO reductive inversion using Quark algo
 	
 	// TODO merge tree zones and check initial update command is now trivial
@@ -227,4 +224,111 @@ void FreeZoneMerger::Check( shared_ptr<FreeZoneExpression> &base )
 	} );		
 }
 
+// ------------------------- TreeZoneOrdering --------------------------
 
+
+TreeZoneOrdering::TreeZoneOrdering(const XTreeDatabase *db_) :
+	db( db_ ),
+	dfr( db )
+{
+}
+	
+
+void TreeZoneOrdering::Run( shared_ptr<FreeZoneExpression> &base )
+{
+	XLink root = db->GetRootXLink();
+	XLink last = db->GetLastDescendant(root);
+	RunWorker( base, root, last, false );
+}
+
+
+void TreeZoneOrdering::Check( shared_ptr<FreeZoneExpression> &base )
+{
+	XLink root = db->GetRootXLink();
+	XLink last = db->GetLastDescendant(root);
+	RunWorker( base, root, last, true );
+}
+
+
+void TreeZoneOrdering::RunWorker( shared_ptr<FreeZoneExpression> &base, 
+                                  XLink range_begin,
+                                  XLink range_end,
+                                  bool just_check )
+{
+	// Actions to take when we have a range. Use at root and for
+	// terminii of tree zones.
+	list<shared_ptr<PopulateTreeZoneOperator>> ptz_ops;
+	GatherTreeZoneOps( base, ptz_ops );
+	
+	XLink prev_tz_base;
+	for( shared_ptr<PopulateTreeZoneOperator> ptz_op : ptz_ops )
+	{
+		XLink tz_base = ptz_op->GetZone().GetBaseXLink();
+		
+		// Check in range supplied to us for root or parent TZ terminus
+		Orderable::Diff diff_begin = dfr.Compare3Way(tz_base, range_begin);
+		Orderable::Diff diff_end = dfr.Compare3Way(tz_base, range_end);
+		bool ok = diff_begin >= 0 && diff_end <= 0; // both inclusive
+		if( !ok )
+		{     
+			if( just_check )
+				ASSERTFAIL();
+			// Action: minimal is to duplicate ptz_op->GetZone() and
+			// every TZ under it into free zones. Could be improved later 
+		}
+		
+		// Check in order relative to previous tree zone base
+		if( prev_tz_base )
+		{
+			Orderable::Diff diff = dfr.Compare3Way(tz_base, prev_tz_base);
+			if( diff > 0 )
+			{     
+				if( just_check )
+					ASSERTFAIL();
+				// Action: minimal is to duplicate ptz_op->GetZone() and
+				// every TZ under it into free zones. Could be improved later 
+			}
+		}		
+		prev_tz_base = tz_base;
+		
+		// Recurse to check descendants of the current tree zone
+		RunForTreeZone( ptz_op, false );		
+	}
+}
+
+
+void TreeZoneOrdering::RunForTreeZone( shared_ptr<PopulateTreeZoneOperator> &ptz_op, 
+                                       bool just_check )
+{
+	// We have a tree zone. For each of its terminii, find the acceptable
+	// range of descendent tree zones and recurse.
+	TreeZone tree_zone = ptz_op->GetZone();
+	TreeZone::TerminusIterator it_t = tree_zone.GetTerminiiBegin();
+	ptz_op->ForChildren([&](shared_ptr<FreeZoneExpression> &child_expr)	
+	{
+		XLink range_begin = *it_t; // inclusive (terminus XLink equals base XLink of attached tree zone)
+		XLink range_end = db->GetLastDescendant(range_begin); // inclusive (is same or child of range_begin)
+		RunWorker( child_expr, range_begin, range_end, just_check );
+	} );
+}
+                                       
+
+void TreeZoneOrdering::GatherTreeZoneOps( shared_ptr<FreeZoneExpression> &expr, 
+              				  		      list<shared_ptr<PopulateTreeZoneOperator>> &tree_zones )
+{
+	// Get descendant reee zones, skipping over free zones, into a list for
+	// convenience.
+	if( auto ptz_op = dynamic_pointer_cast<PopulateTreeZoneOperator>(expr) )
+	{
+		tree_zones.push_back( ptz_op );
+	}
+	else if( auto pz_op = dynamic_pointer_cast<PopulateZoneOperator>(expr) )
+	{
+		pz_op->ForChildren( [&](shared_ptr<FreeZoneExpression> &child_expr)
+		{
+			GatherTreeZoneOps( child_expr, tree_zones );
+		} );
+	}
+}
+              						  
+              						  
