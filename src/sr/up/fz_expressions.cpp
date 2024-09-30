@@ -8,6 +8,8 @@
 
 using namespace SR;
 
+#define RECURSIVE_TRACE_OPERATOR
+
 // ------------------------- FreeZoneExpression --------------------------
 
 void FreeZoneExpression::ForDepthFirstWalk( shared_ptr<FreeZoneExpression> &base,

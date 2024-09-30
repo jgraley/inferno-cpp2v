@@ -61,12 +61,12 @@ public:
 	void Check( shared_ptr<FreeZoneExpression> &base );
 };
 
-// ------------------------- TreeZoneOrdering --------------------------
+// ------------------------- TreeZoneOrderingHandler --------------------------
 
-class TreeZoneOrdering
+class TreeZoneOrderingHandler
 {
 public:	
-	TreeZoneOrdering(const XTreeDatabase *db_);
+	TreeZoneOrderingHandler(const XTreeDatabase *db_);
 	
 	// Can change the supplied shared ptr
 	void Run( shared_ptr<FreeZoneExpression> &base );
@@ -82,7 +82,8 @@ private:
 	void RunForTreeZone( shared_ptr<PopulateTreeZoneOperator> &op, 
 						 bool just_check );
 	void GatherTreeZoneOps( shared_ptr<FreeZoneExpression> &expr, 
-				      	    list<shared_ptr<PopulateTreeZoneOperator>> &tree_zones );
+				      	    list<shared_ptr<FreeZoneExpression> *> &tree_zones );
+	void DuplicateTreeZone( shared_ptr<FreeZoneExpression> &expr );
 				    	  
 	const XTreeDatabase * const db;
 	SR::DepthFirstRelation dfr;				    	  
