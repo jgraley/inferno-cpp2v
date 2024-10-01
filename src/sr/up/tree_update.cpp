@@ -23,7 +23,6 @@ FreeZone SR::RunForBuilder( const FreeZoneExpression *expr )
 
 void SR::RunForReplace( const Command *initial_cmd, const SCREngine *scr_engine, XTreeDatabase *x_tree_db )
 {
-
 	shared_ptr<FreeZoneExpression> expr = dynamic_cast<const UpdateTreeCommand &>(*initial_cmd).GetExpression();
 	
 	EmptyZoneElider().Run(expr);
@@ -68,7 +67,6 @@ void TreeZoneOverlapHandler::Run( shared_ptr<FreeZoneExpression> &base )
 		{			
 			// We will establish an increasing region of known non-overlapping tree zones. Detect
 			// when the new l has an overlap in that zone.
-			bool l_has_an_overlap = false;
 			FreeZoneExpression::ForDepthFirstWalk( base, nullptr, [&](shared_ptr<FreeZoneExpression> &r_expr)
 			{
 				if( auto r_ptz_op = dynamic_pointer_cast<PopulateTreeZoneOperator>(r_expr) )
@@ -84,20 +82,28 @@ void TreeZoneOverlapHandler::Run( shared_ptr<FreeZoneExpression> &base )
 						p.second == ZoneRelation::EQUAL )
 					{
 						FTRACE("CH(")(l_ptz_op->GetZone())(", ")(r_ptz_op->GetZone())(") is ")(p)("\n");
-						l_has_an_overlap = true;
+						// TODO decide which to duplicated based on size of tree zone: dup the smallest.
+						// It should be possible to maintin "size of subtree" info for nodes
+						if( false ) // Assume r is samller because it's to the right in the DF ordering
+						{
+							FTRACE("Duplicate left ")(l_ptz_op)("\n");
+							l_expr = l_ptz_op->DuplicateToFree();
+							Break(); // no need to check any more r for this l
+						}
+						else
+						{
+							FTRACE("Duplicate right ")(r_ptz_op)("\n");
+							r_expr = r_ptz_op->DuplicateToFree();
+							// later iterations of r loop will skip over this because it's now a 
+							// PopulateFreeZoneOperator, not a PopulateTreeZoneOperator
+						}
+												
 						// TODO duplicate r here rather than l later: we'd prefer to duplicate r
 						// because it's more likely to be deeper or leaf. Future algos would recurse
 						// explicitly and make sure the one that gets duplciated is deeper.
 					}
 				}
 			} );
-			// If it overlaps with something, duplicate it, which turns it into a free zone, so it will 
-			// not be seen in future runs of the inner "r" loop.
-			if( l_has_an_overlap )
-			{				
-				FTRACE("Duplicate ")(l_ptz_op)("\n");
-				l_expr = l_ptz_op->DuplicateToFree();
-			}	
         }
 	} );	
 }

@@ -315,33 +315,33 @@ SR::XLink DepthFirstRangeResult::GetOnlyXLink() const
 
 bool DepthFirstRangeResult::TryExtensionalise( set<SR::XLink> &links ) const
 { 
-	const SR::Orderings::DepthFirstOrdering &index = x_tree_db->GetOrderings().depth_first_ordering;
+	const SR::Orderings::DepthFirstOrdering &ordering = x_tree_db->GetOrderings().depth_first_ordering;
     SR::Orderings::DepthFirstOrderingIterator it_lower, it_upper;
     
     if( lower )
     {
-        it_lower = index.find(lower);
-        ASSERT( it_lower != index.end() )
+        it_lower = ordering.find(lower);
+        ASSERT( it_lower != ordering.end() )
               ("lower=")(lower)(" upper=")(upper)("\n")
-              (index);
+              (ordering);
         if( !lower_incl )
             ++it_lower;
     }
     else
     {
-        it_lower = index.begin();
+        it_lower = ordering.begin();
     }
     
     if( upper )
     {
-        it_upper = index.find(upper);
-        ASSERT( it_lower != index.end() );
+        it_upper = ordering.find(upper);
+        ASSERT( it_lower != ordering.end() );
         if( upper_incl )
             ++it_upper;
     }
     else
     {
-        it_upper = index.end();
+        it_upper = ordering.end();
     }
     
     links = set<SR::XLink>( it_lower, it_upper );
