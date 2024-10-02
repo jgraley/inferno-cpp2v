@@ -24,6 +24,8 @@ FreeZone SR::RunForBuilder( const FreeZoneExpression *expr )
 void SR::RunForReplace( const Command *initial_cmd, const SCREngine *scr_engine, XTreeDatabase *x_tree_db )
 {
 	shared_ptr<FreeZoneExpression> expr = dynamic_cast<const UpdateTreeCommand &>(*initial_cmd).GetExpression();
+
+	// TODO automated enactment of free zone markers
 	
 	EmptyZoneElider().Run(expr);
 	EmptyZoneElider().Check(expr);
@@ -31,16 +33,17 @@ void SR::RunForReplace( const Command *initial_cmd, const SCREngine *scr_engine,
 	TreeZoneOverlapHandler( x_tree_db ).Run(expr);
 	TreeZoneOverlapHandler( x_tree_db ).Check(expr);
 	
-	//TreeZoneOrderingHandler( x_tree_db ).Check(expr);
+	TreeZoneOrderingHandler( x_tree_db ).Run(expr);
+	TreeZoneOrderingHandler( x_tree_db ).Check(expr);
 	
-	// TODO enact free and tree zone markers (I think) (don't enact until after we're done converting TZs into FZs)
-	// TODO enact tree zone markers (I think)
-			
-	//FreeZoneMerger().Run(expr); // TODO should work once FZ markers enacted
-	//FreeZoneMerger().Check(expr);
+	// TODO deep check for overlaps and ordering
 
+	// TODO merge free zones
+	
 	// TODO reductive inversion using Quark algo
 	
+	// TODO enact tree zone markers (here or in DB)
+
 	// TODO merge tree zones and check initial update command is now trivial
 	
 	// Execute it
@@ -81,18 +84,18 @@ void TreeZoneOverlapHandler::Run( shared_ptr<FreeZoneExpression> &base )
 						p.second == ZoneRelation::OVERLAP_TERMINII ||
 						p.second == ZoneRelation::EQUAL )
 					{
-						FTRACE("CH(")(l_ptz_op->GetZone())(", ")(r_ptz_op->GetZone())(") is ")(p)("\n");
+						TRACE("CH(")(l_ptz_op->GetZone())(", ")(r_ptz_op->GetZone())(") is ")(p)("\n");
 						// TODO decide which to duplicated based on size of tree zone: dup the smallest.
 						// It should be possible to maintin "size of subtree" info for nodes
 						if( false ) // Assume r is samller because it's to the right in the DF ordering
 						{
-							FTRACE("Duplicate left ")(l_ptz_op)("\n");
+							TRACE("Duplicate left ")(l_ptz_op)("\n");
 							l_expr = l_ptz_op->DuplicateToFree();
 							Break(); // no need to check any more r for this l
 						}
 						else
 						{
-							FTRACE("Duplicate right ")(r_ptz_op)("\n");
+							TRACE("Duplicate right ")(r_ptz_op)("\n");
 							r_expr = r_ptz_op->DuplicateToFree();
 							// later iterations of r loop will skip over this because it's now a 
 							// PopulateFreeZoneOperator, not a PopulateTreeZoneOperator
@@ -256,7 +259,7 @@ void TreeZoneOrderingHandler::RunWorker( shared_ptr<FreeZoneExpression> &base,
 										 XLink range_end,
 										 bool just_check )
 {
-	FTRACE("RunWorker() at ")(base)(" with range ")(range_begin)(" to ")(range_end)("\n");
+	TRACE("RunWorker() at ")(base)(" with range ")(range_begin)(" to ")(range_end)("\n");
 	// Actions to take when we have a range. Use at root and for
 	// terminii of tree zones.
 	list<shared_ptr<FreeZoneExpression> *> expr_list;
@@ -284,12 +287,12 @@ void TreeZoneOrderingHandler::RunWorker( shared_ptr<FreeZoneExpression> &base,
 			{
 				// Action: minimal is to duplicate ptz_op->GetZone() and
 				// every TZ under it into free zones. Could be improved later 
-				FTRACE("Duplicating ")(tz_base)("\n");
+				TRACE("Duplicating ")(tz_base)("\n");
 				DuplicateTreeZone( *expr );
 				continue; // no range threshold update or recurse
 			}
 		}
-		FTRACE(tz_base)(" OK\n");
+		TRACE(tz_base)(" OK\n");
 		
 	    // Narrow the acceptable range for the next tree zone
 		range_begin = tz_base;
@@ -303,7 +306,7 @@ void TreeZoneOrderingHandler::RunWorker( shared_ptr<FreeZoneExpression> &base,
 void TreeZoneOrderingHandler::RunForTreeZone( shared_ptr<PopulateTreeZoneOperator> &ptz_op, 
                                               bool just_check )
 {
-	FTRACE("RunForTreeZone() looking for free zones under ")(ptz_op)("\n");
+	TRACE("RunForTreeZone() looking for free zones under ")(ptz_op)("\n");
 	
 	// We have a tree zone. For each of its terminii, find the acceptable
 	// range of descendent tree zones and recurse.
@@ -347,7 +350,7 @@ void TreeZoneOrderingHandler::DuplicateTreeZone( shared_ptr<FreeZoneExpression> 
 	{
 		if( auto ptz_op = dynamic_pointer_cast<PopulateTreeZoneOperator>(child_expr) )
 		{		
-			FTRACE("Duplicate ")(ptz_op)("\n");
+			TRACE("Duplicate ")(ptz_op)("\n");
 			child_expr = ptz_op->DuplicateToFree();
 		}
 	} );	
