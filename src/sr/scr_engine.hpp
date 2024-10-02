@@ -127,7 +127,7 @@ public: // For top level engine/VN trans
                                  const SolutionMap *enclosing_solution );                                                                                               
     virtual void SetStopAfter( vector<int> ssa, int d=0 );
     static void SetMaxReps( int n, bool e );
-	void SetXTreeDb( shared_ptr<const XTreeDatabase> x_tree_db );
+	void SetXTreeDb( shared_ptr<XTreeDatabase> x_tree_db );
     set< shared_ptr<SYM::BooleanExpression> > GetExpressions() const;
     list<const AndRuleEngine *> GetAndRuleEngines() const;
     list<const SCREngine *> GetSCREngines() const;
@@ -161,7 +161,7 @@ private:
     vector<int> stop_after;
     int depth;    
     
-    shared_ptr<const XTreeDatabase> x_tree_db;
+    shared_ptr<XTreeDatabase> x_tree_db;
     mutable SolutionMap replace_solution;
     bool replace_solution_available = false;    
     mutable map< RequiresSubordinateSCREngine *, TreePtr<Node> > bases_for_embedded;

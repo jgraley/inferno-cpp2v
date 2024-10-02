@@ -15,17 +15,17 @@ using namespace SR;
 
 FreeZone SR::RunForBuilder( const FreeZoneExpression *expr )
 {
-    UP::ExecKit exec_kit {nullptr, nullptr};
-	unique_ptr<FreeZone> free_zone = expr->Evaluate( exec_kit );   
+	unique_ptr<FreeZone> free_zone = expr->Evaluate();   
 	return *free_zone;
 }
 
 
-void SR::RunForReplace( const Command *initial_cmd, const SCREngine *scr_engine, XTreeDatabase *x_tree_db )
+void SR::RunForReplace( const Command *initial_cmd )
 {
 	shared_ptr<FreeZoneExpression> expr = dynamic_cast<const UpdateTreeCommand &>(*initial_cmd).GetExpression();
 
-	// TODO automated enactment of free zone markers
+	// TODO automated enactment of free zone markers (Make them be lambdas first and don't 
+	// pass scr_engine into PopulateX expressions!). Marker -> OnLocatedAction
 	
 	EmptyZoneElider().Run(expr);
 	EmptyZoneElider().Check(expr);
@@ -47,8 +47,7 @@ void SR::RunForReplace( const Command *initial_cmd, const SCREngine *scr_engine,
 	// TODO merge tree zones and check initial update command is now trivial
 	
 	// Execute it
-    UP::ExecKit exec_kit {x_tree_db, scr_engine}; 
-	initial_cmd->Execute( exec_kit );   
+	initial_cmd->Execute();   
 }
 
 // ------------------------- TreeZoneOverlapHandler --------------------------

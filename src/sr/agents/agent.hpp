@@ -23,7 +23,7 @@ class Agent : public virtual Graphable,
 public:  
     struct ReplaceKit
     {
-		const XTreeDatabase *x_tree_db;
+		XTreeDatabase *x_tree_db;
     };
 
     // really just to reduce the amount of typing if I change it
@@ -74,7 +74,7 @@ public:
 
     virtual void ResetNLQConjecture() = 0;    
 
-    virtual const SCREngine *GetMasterSCREngine() const = 0;      
+    virtual const SCREngine *GetMasterSCREngine() const = 0;      // TODO unused
     virtual PatternLink GetKeyerPatternLink() const = 0;
     virtual set<PatternLink> GetResidualPatternLinks() const = 0;                                  
 

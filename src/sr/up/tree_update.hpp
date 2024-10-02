@@ -18,7 +18,7 @@ class DeclareTreeZoneCommand;
 // ------------------------- Runners --------------------------
 
 FreeZone RunForBuilder( const FreeZoneExpression *expr );
-void RunForReplace( const Command *cmd, const SCREngine *scr_engine, XTreeDatabase *x_tree_db );
+void RunForReplace( const Command *cmd );
 	
 // ------------------------- TreeZoneOverlapHandler --------------------------
 

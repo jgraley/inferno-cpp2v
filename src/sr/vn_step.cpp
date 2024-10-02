@@ -101,7 +101,7 @@ void VNStep::SetStopAfter( vector<int> ssa, int d )
 }  
 
 
-void VNStep::SetXTreeDb( shared_ptr<const XTreeDatabase> x_tree_db )
+void VNStep::SetXTreeDb( shared_ptr<XTreeDatabase> x_tree_db )
 {
 	top_level_engine->SetXTreeDb( x_tree_db );
 }

@@ -45,7 +45,7 @@ public:
     static void SetMaxReps( int n, bool e );
     void SetStopAfter( vector<int> ssa, int d=0 );    
             
-	void SetXTreeDb( shared_ptr<const XTreeDatabase> x_tree_db );
+	void SetXTreeDb( shared_ptr<XTreeDatabase> x_tree_db );
     void Transform();
         
     virtual Block GetGraphBlockInfo() const;

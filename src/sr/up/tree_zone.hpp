@@ -25,10 +25,10 @@ class TreeZone : public Zone
 public:
 	typedef set<XLink, DepthFirstRelation>::iterator TerminusIterator;
 
-    static TreeZone CreateSubtree( const XTreeDatabase *db, XLink base );
-    static TreeZone CreateEmpty( const XTreeDatabase *db, XLink base );
+    static TreeZone CreateSubtree( XTreeDatabase *db, XLink base );
+    static TreeZone CreateEmpty( XTreeDatabase *db, XLink base );
 
-    explicit TreeZone( const XTreeDatabase *db_, XLink base, vector<XLink> terminii );
+    explicit TreeZone( XTreeDatabase *db_, XLink base, vector<XLink> terminii );
       
     bool IsEmpty() const override;
 	int GetNumTerminii() const override;
@@ -38,7 +38,7 @@ public:
     set<XLink, DepthFirstRelation> GetTerminusXLinks() const;
 
     FreeZone Duplicate() const;
-    void Update( XTreeDatabase *x_tree_db, const FreeZone &free_zone ) const;
+    void Update( const FreeZone &free_zone ) const;
     
     TerminusIterator GetTerminiiBegin();
     TerminusIterator GetTerminiiEnd();
@@ -48,7 +48,7 @@ public:
 private:
     void DBCheck() const;
 
-    const XTreeDatabase * const db;
+    XTreeDatabase * const db;
 	DepthFirstRelation df_rel;
     XLink base;    
     set<XLink, DepthFirstRelation> terminii;    

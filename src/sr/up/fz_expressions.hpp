@@ -12,26 +12,13 @@
 namespace SR 
 {
 class XTreeDatabase;
-	
-namespace UP
-{
-	struct ExecKit
-    {
-		// Note: unlike kits in sym, these pointers are non-const
-		// because we intend to actually change things here.
-        XTreeDatabase *x_tree_db; 
-
-        // For embedded patterns
-        const SCREngine *scr_engine;
-	};
-}
 
 // ------------------------- FreeZoneExpression --------------------------
 
 class FreeZoneExpression : public Traceable
 {
 public:	
-	virtual unique_ptr<FreeZone> Evaluate( const UP::ExecKit &kit ) const = 0;
+	virtual unique_ptr<FreeZone> Evaluate() const = 0;
 	virtual void ForChildren(function<void(shared_ptr<FreeZoneExpression> &expr)> func) = 0;
 			                        
 	static void ForDepthFirstWalk( shared_ptr<FreeZoneExpression> &base,
@@ -49,8 +36,8 @@ public:
 class PopulateZoneOperator : public FreeZoneExpression
 {
 protected:
-    PopulateZoneOperator( list<shared_ptr<FreeZoneExpression>> &&child_expressions_ );
-    PopulateZoneOperator();
+    PopulateZoneOperator( const SCREngine *scr_engine_, list<shared_ptr<FreeZoneExpression>> &&child_expressions_ );
+    PopulateZoneOperator( const SCREngine *scr_engine_ );
 
 public:
     void AddEmbeddedMarker( RequiresSubordinateSCREngine *new_marker );
@@ -67,10 +54,13 @@ public:
 
 	void ForChildren(function<void(shared_ptr<FreeZoneExpression> &expr)> func) override;
 
-	void EvaluateWithFreeZone( FreeZone &free_zone, const UP::ExecKit &kit ) const;	
+	void EvaluateWithFreeZone( FreeZone &free_zone ) const;	
 	
 	void DepthFirstWalkImpl(function<void(shared_ptr<FreeZoneExpression> &expr)> func_in,
 			                function<void(shared_ptr<FreeZoneExpression> &expr)> func_out) override;
+
+protected:
+	const SCREngine * const scr_engine;
 
 private:
 	list<shared_ptr<FreeZoneExpression>> child_expressions;
@@ -85,13 +75,13 @@ private:
 class PopulateTreeZoneOperator : public PopulateZoneOperator
 {
 public:
-    PopulateTreeZoneOperator( TreeZone zone_, list<shared_ptr<FreeZoneExpression>> &&child_expressions );
-    PopulateTreeZoneOperator( TreeZone zone_ );
+    PopulateTreeZoneOperator( const SCREngine *scr_engine, TreeZone zone_, list<shared_ptr<FreeZoneExpression>> &&child_expressions );
+    PopulateTreeZoneOperator( const SCREngine *scr_engine, TreeZone zone_ );
     
     TreeZone &GetZone() override;
     const TreeZone &GetZone() const override;
 	
-	unique_ptr<FreeZone> Evaluate( const UP::ExecKit &kit ) const final;	
+	unique_ptr<FreeZone> Evaluate() const final;	
     
     shared_ptr<FreeZoneExpression> DuplicateToFree() const;
     
@@ -108,13 +98,13 @@ private:
 class PopulateFreeZoneOperator : public PopulateZoneOperator
 {
 public:
-    PopulateFreeZoneOperator( FreeZone zone_, list<shared_ptr<FreeZoneExpression>> &&child_expressions );
-    PopulateFreeZoneOperator( FreeZone zone_ );
+    PopulateFreeZoneOperator( const SCREngine *scr_engine, FreeZone zone_, list<shared_ptr<FreeZoneExpression>> &&child_expressions );
+    PopulateFreeZoneOperator( const SCREngine *scr_engine, FreeZone zone_ );
 
     FreeZone &GetZone() override;
     const FreeZone &GetZone() const override;
     
-   	unique_ptr<FreeZone> Evaluate( const UP::ExecKit &kit ) const final;	
+   	unique_ptr<FreeZone> Evaluate() const final;	
 
 	string GetTrace() const final;
 

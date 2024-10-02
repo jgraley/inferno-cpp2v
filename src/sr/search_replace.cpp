@@ -119,7 +119,7 @@ void CompareReplace::PlanningStageFive( shared_ptr<const Lacing> lacing )
 }
 
 
-void CompareReplace::SetXTreeDb( shared_ptr<const XTreeDatabase> x_tree_db_ )
+void CompareReplace::SetXTreeDb( shared_ptr<XTreeDatabase> x_tree_db_ )
 {
 	x_tree_db = x_tree_db_;
 	plan.scr_engine->SetXTreeDb( x_tree_db );

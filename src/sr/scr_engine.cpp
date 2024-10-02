@@ -484,7 +484,7 @@ void SCREngine::SetMaxReps( int n, bool e )
 }
 
 
-void SCREngine::SetXTreeDb( shared_ptr<const XTreeDatabase> x_tree_db_ )
+void SCREngine::SetXTreeDb( shared_ptr<XTreeDatabase> x_tree_db_ )
 {
     x_tree_db = x_tree_db_;
 

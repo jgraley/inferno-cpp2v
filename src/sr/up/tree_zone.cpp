@@ -9,20 +9,20 @@ using namespace SR;
 
 // ------------------------- TreeZone --------------------------
 
-TreeZone TreeZone::CreateSubtree( const XTreeDatabase *db, XLink base )
+TreeZone TreeZone::CreateSubtree( XTreeDatabase *db, XLink base )
 {
     return TreeZone( db, base, {} );
 }
 
 
-TreeZone TreeZone::CreateEmpty( const XTreeDatabase *db, XLink base )
+TreeZone TreeZone::CreateEmpty( XTreeDatabase *db, XLink base )
 {
     ASSERTS( base );
     return TreeZone( db, base, { base } ); // One element, same as base
 }
 
 
-TreeZone::TreeZone( const XTreeDatabase *db_, XLink base_, vector<XLink> terminii_ ) :
+TreeZone::TreeZone( XTreeDatabase *db_, XLink base_, vector<XLink> terminii_ ) :
 	db( db_ ),
 	df_rel( db ),
     base( base_ ),
@@ -95,19 +95,19 @@ FreeZone TreeZone::Duplicate() const
 }
 
 
-void TreeZone::Update( XTreeDatabase *x_tree_db, const FreeZone &free_zone ) const
+void TreeZone::Update( const FreeZone &free_zone ) const
 {
 	ASSERT( GetNumTerminii() == free_zone.GetNumTerminii() );	
 	ASSERT( GetNumTerminii() == 0 ); // TODO under #723
     
     // Update database 
-    x_tree_db->Delete( GetBaseXLink() );    
+    db->Delete( GetBaseXLink() );    
     
     // Patch the tree
     GetBaseXLink().SetXPtr( free_zone.GetBaseNode() );
     
     // Update database 
-    x_tree_db->Insert( GetBaseXLink() );   	
+    db->Insert( GetBaseXLink() );   	
 }
 
 

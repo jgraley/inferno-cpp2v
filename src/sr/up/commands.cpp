@@ -31,11 +31,11 @@ const shared_ptr<FreeZoneExpression> &UpdateTreeCommand::GetExpression() const
 }
 
 
-void UpdateTreeCommand::Execute( const UP::ExecKit &kit ) const
+void UpdateTreeCommand::Execute() const
 {
     // New zone must be a free zone
-	unique_ptr<FreeZone> source_free_zone = child_expression->Evaluate( kit );
-    target_tree_zone.Update( kit.x_tree_db, *source_free_zone );
+	unique_ptr<FreeZone> source_free_zone = child_expression->Evaluate();
+    target_tree_zone.Update( *source_free_zone );
 }
 
 
@@ -46,11 +46,11 @@ string UpdateTreeCommand::GetTrace() const
 
 // ------------------------- CommandSequence --------------------------
 
-void CommandSequence::Execute( const UP::ExecKit &kit ) const
+void CommandSequence::Execute() const
 {
 	//FTRACE(" executing");
 	for( const shared_ptr<Command> &cmd : seq )
-		cmd->Execute(kit);
+		cmd->Execute();
 }
 	
     

@@ -45,7 +45,7 @@ Agent::FreeZoneExprPtr DepthAgent::GenFreeZoneExprImpl( const ReplaceKit &kit,
     ASSERT(terminus_key_xlink);// this could mean replace is being attempted on a DepthAgent in an abnormal context
     TreeZone new_zone( kit.x_tree_db, key_xlink, vector<XLink>{terminus_key_xlink} );   
 
-    return make_shared<PopulateTreeZoneOperator>( move(new_zone), move(child_commands) );
+    return make_shared<PopulateTreeZoneOperator>( my_scr_engine, move(new_zone), move(child_commands) );
 }
 
 

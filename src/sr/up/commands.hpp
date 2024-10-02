@@ -20,7 +20,7 @@ class FreeZoneExpression;
 class Command : public Traceable
 {
 public:	
-	virtual void Execute( const UP::ExecKit &kit ) const = 0;
+	virtual void Execute() const = 0;
 };
 
 // ------------------------- UpdateTreeCommand --------------------------
@@ -35,7 +35,7 @@ public:
 	shared_ptr<FreeZoneExpression> &GetExpression();
 	const shared_ptr<FreeZoneExpression> &GetExpression() const;
 	
-	void Execute( const UP::ExecKit &kit ) const final;	
+	void Execute() const final;	
 
 	string GetTrace() const final;
 
@@ -49,7 +49,7 @@ private:
 class CommandSequence : public Command
 {
 public:
-	void Execute( const UP::ExecKit &kit ) const final;	
+	void Execute() const final;	
 
 	void Add( shared_ptr<Command> new_cmd );
 	void AddAtStart( shared_ptr<Command> new_cmd );
