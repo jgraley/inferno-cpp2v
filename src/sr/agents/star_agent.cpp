@@ -98,7 +98,7 @@ Agent::FreeZoneExprPtr StarAgent::GenFreeZoneExprImpl( const ReplaceKit &kit,
     ContainerInterface *dest_container = dynamic_cast<ContainerInterface *>(dest.get());
     for( const TreePtrInterface &key_elt : *key_container )
     {
-        ContainerInterface::iterator dest_it = dest_container->insert( ContainerTerminus::GetPlaceholder() );
+        ContainerInterface::iterator dest_it = dest_container->insert( ContainerTerminus::MakePlaceholder() );
         zone.AddTerminus( make_shared<ContainerTerminus>(dest_container, dest_it) );    
 
         TreeZone child_zone = TreeZone::CreateSubtree( kit.x_tree_db, XLink(key_node, &key_elt) );

@@ -63,48 +63,25 @@ void ContainerTerminus::Populate( TreePtr<Node> child_base,
 
 	ContainerInterface::iterator it_after = it_dest_placeholder;
 
-    // C++ insert() has "insert before" semantics, see https://cplusplus.com/reference/list/list/insert/
-    // (this is logical: there are n+1 possible insert positions and n+1 iterator values if you include end())
-    // so "insert before" the end, in order to preserve ordering.
-	++it_after; // Can be end(), I think this is OK.
+	++it_after;
     if( ContainerInterface *child_container = dynamic_cast<ContainerInterface *>(child_base.get()) )
     {            		
         // Child zone base has ContainerInterface, so it's a SubContainer. We get here due to         
-        // FreeZones created by StarAgent. Expand it and populate into the destination, which is also a SubContainer. 
-        
+        // FreeZones created by StarAgent. Expand it and populate into the destination, which is also a SubContainer.         
         for( ContainerInterface::iterator it_child = child_container->begin();
 			 it_child != child_container->end();
 			 ++it_child	)
         {
 			TreePtr<Node> child_element = (TreePtr<Node>)*it_child; 
-			if( child_element ) 
+			dest_container->insert( *it_after.GetUnderlyingIterator(), child_element ); // inserts before it_after
+
+			if( !child_element ) 
 			{
-				// If it's non-NULL, the StarAgent's FZ was previously populated. If it has terminii, they
-				// are deeper down in the tree, and can just be reused as-is. 
-				dest_container->insert( *it_after.GetUnderlyingIterator(), child_element ); 
-			}
-			else
-			{
-				// If it's NULL, nothing has acted on the StarAgent's FZ and so it terminates immediately.
+				// If child_element is NULL, the StarAgent's FZ terminates immediately at this element.
 				// That means it's the placeholder of that FZ's Terminus instance and child_container is
-				// its container. We need to give that terminus our container and a new placeholder.
-				shared_ptr<ContainerTerminus> child_con_terminus;
-				for( shared_ptr<Terminus> child_terminus : child_terminii )
-				{
-					if( auto cct = dynamic_pointer_cast<ContainerTerminus>( child_terminus ) ) 
-					{						
-						if( cct->dest_container == child_container && 
-						    cct->it_dest_placeholder == it_child )
-						{
-							ASSERT( !child_con_terminus )("Found multiple matching terminii including ")(child_con_terminus)(" and now ")(cct);
-							child_con_terminus = cct;
-						}
-					}
-				}
-				ASSERT( child_con_terminus );
-								
-				dest_container->insert( *it_after.GetUnderlyingIterator(), GetPlaceholder() ); 
-				
+				// the FZ base container. We need to build a new terminus for the FZ.
+				shared_ptr<ContainerTerminus> child_con_terminus = FindMatchingTerminus( child_container, it_child, child_terminii );
+												
 				ContainerInterface::iterator it_new_placeholder = it_after;
 				--it_new_placeholder; // back up to the newly inserted placeholder
 				*child_con_terminus = ContainerTerminus(dest_container, it_new_placeholder);							
@@ -119,27 +96,40 @@ void ContainerTerminus::Populate( TreePtr<Node> child_base,
     }
     
     // We don't need the placeholder any more
+    // TODO move up as initialise to it_after and drop the ++. But you'll need
+    // to add correct return value to erase() in OOStd
     dest_container->erase( *it_dest_placeholder.GetUnderlyingIterator() );  
-    
-    /**
-     * Why all this complicated placeholder business then?
-     * It's to permit multiple terminii to refer to the same Sequence
-     * with a well-defined relative order. We place a null element in
-     * for each terminus so that iterators relative to different
-     * terminii have different values.
-     * 
-     * Note: we must not determine the actual insertion iterator
-     * (it_after) during construct, because the container is still
-     * being filled, and we'll get end() when what we want is the next 
-     * element that will be there when we apply the update.
-     */     
 }
 
 
-TreePtr<Node> ContainerTerminus::GetPlaceholder()
+TreePtr<Node> ContainerTerminus::MakePlaceholder()
 {
     return TreePtr<Node>(); // It's just a NULL tree ptr!
 }
+
+
+shared_ptr<ContainerTerminus> ContainerTerminus::FindMatchingTerminus( ContainerInterface *container,
+                                                                       ContainerInterface::iterator it_placeholder,
+                                                                       list<shared_ptr<Terminus>> &candidate_terminii )
+{
+	shared_ptr<ContainerTerminus> found_terminus;
+
+	for( shared_ptr<Terminus> candidate_terminus : candidate_terminii )
+	{
+		if( auto candidate_container_terminus = dynamic_pointer_cast<ContainerTerminus>( candidate_terminus ) ) 
+		{						
+			if( candidate_container_terminus->dest_container == container && 
+				candidate_container_terminus->it_dest_placeholder == it_placeholder )
+			{
+				ASSERTS( !found_terminus )("Found multiple matching terminii including ")(*found_terminus)(" and now ")(*candidate_container_terminus);
+				found_terminus = candidate_container_terminus;
+			}
+		}
+	}
+	
+	ASSERTS( found_terminus );
+	return found_terminus;
+}                                                                       
 
 
 void ContainerTerminus::Validate() const

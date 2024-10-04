@@ -38,6 +38,19 @@ private:
     
 class ContainerTerminus : public Terminus
 {
+    /**
+     * Why all this complicated placeholder business then?
+     * It's to permit multiple terminii to refer to the same Sequence
+     * with a well-defined relative order. We place a null element in
+     * for each terminus so that iterators relative to different
+     * terminii have different values.
+     * 
+     * Note: we must not determine the actual insertion iterator
+     * (it_after) during construct, because the container is still
+     * being filled, and we'll get end() when what we want is the next 
+     * element that will be there when we apply the update.
+     */  
+     	
 public:
     explicit ContainerTerminus( ContainerInterface *dest_container_,
                                 ContainerInterface::iterator it_dest_placeholder_ );             
@@ -47,7 +60,12 @@ public:
     void Populate( TreePtr<Node> child_base, 
                    list<shared_ptr<Terminus>> child_terminii = {} ) final;
     
-    static TreePtr<Node> GetPlaceholder();
+    static TreePtr<Node> MakePlaceholder();
+    
+    static shared_ptr<ContainerTerminus> FindMatchingTerminus( ContainerInterface *container,
+                                                               ContainerInterface::iterator it_placeholder,
+                                                               list<shared_ptr<Terminus>> &candidate_terminii );
+    
     void Validate() const;
     string GetTrace() const;
 

@@ -650,7 +650,7 @@ Agent::FreeZoneExprPtr StandardAgent::GenFreeZoneExprOverlay( const ReplaceKit &
 				for( const TreePtrInterface &my_elt : *my_con )
 				{
 					// Make a placeholder in the dest container for the updater to point to
-					ContainerInterface::iterator dest_it = dest_con->insert( ContainerTerminus::GetPlaceholder() );
+					ContainerInterface::iterator dest_it = dest_con->insert( ContainerTerminus::MakePlaceholder() );
 					zone.AddTerminus( make_shared<ContainerTerminus>(dest_con, dest_it) );     
 					
 					ASSERT( my_elt )("Some element of member %d (", j)(*my_con)(") of ")(*this)(" was nullptr\n");
@@ -665,7 +665,7 @@ Agent::FreeZoneExprPtr StandardAgent::GenFreeZoneExprOverlay( const ReplaceKit &
 				for( const TreePtrInterface &under_elt : *under_container )
 				{
 					// Make a placeholder in the dest container for the updater to point to
-					ContainerInterface::iterator dest_it = dest_con->insert( ContainerTerminus::GetPlaceholder() );
+					ContainerInterface::iterator dest_it = dest_con->insert( ContainerTerminus::MakePlaceholder() );
 					zone.AddTerminus( make_shared<ContainerTerminus>(dest_con, dest_it) );     
 
 					ASSERT( under_elt ); // present simplified scheme disallows nullptr
@@ -748,7 +748,7 @@ Agent::FreeZoneExprPtr StandardAgent::GenFreeZoneExprNormal( const ReplaceKit &k
 		        TRACE("Got ")(*my_elt)("\n");
 		        
                 // Make a placeholder in the dest container for the updater to point to
-                ContainerInterface::iterator dest_it = dest_con->insert( ContainerTerminus::GetPlaceholder() );
+                ContainerInterface::iterator dest_it = dest_con->insert( ContainerTerminus::MakePlaceholder() );
                 zone.AddTerminus( make_shared<ContainerTerminus>(dest_con, dest_it) );    
 
                 PatternLink my_elt_plink( this, &my_elt );
