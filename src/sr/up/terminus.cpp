@@ -6,8 +6,8 @@ using namespace SR;
 
 // ------------------------- SingularTerminus --------------------------    
     
-SingularTerminus::SingularTerminus( TreePtrInterface *tree_ptr_ ) :
-    tree_ptr( tree_ptr_ )
+SingularTerminus::SingularTerminus( TreePtrInterface *dest_tree_ptr_ ) :
+    dest_tree_ptr( dest_tree_ptr_ )
 {
 }
 
@@ -23,7 +23,7 @@ void SingularTerminus::Populate( TreePtr<Node> child_base,
 	}
 	else
 	{
-		*tree_ptr = child_base;
+		*dest_tree_ptr = child_base;
 	}
     TRACE("Singular joined ")(child_base)("\n");    
 }
@@ -31,7 +31,7 @@ void SingularTerminus::Populate( TreePtr<Node> child_base,
 
 string SingularTerminus::GetTrace() const
 {
-    return "⌾"+tree_ptr->GetTypeName();
+    return "⌾"+dest_tree_ptr->GetTypeName();
 }
     
 // ------------------------- ContainerTerminus --------------------------    
@@ -71,13 +71,33 @@ void ContainerTerminus::Populate( TreePtr<Node> child_base,
         // FreeZones created by StarAgent. Expand it and populate into the destination, which is also a SubContainer. 
         for( const TreePtrInterface &child_element : *child_container )
         {
-            ASSERT( (TreePtr<Node>)child_element )("UNTESTED NULL element in supplied subcontainer: ")(*child_container);
-            // If it's non-NULL, the StarAgent's FZ was previously populated. If it has terminii, they
-            // are deeper down in the tree, and can just be reused as-is. 
-            // If it's NULL, nothing has acted on the StarAgent's FZ and so it terminates immediately.
-            // That means it's the placeholder of some OTHER Terminus instance and operand_sub_con is
-            // its container. We need to give that terminus our container and a new placeholder.
-            dest_container->insert( *it_after.GetUnderlyingIterator(), (TreePtr<Node>)child_element ); 
+			if( (TreePtr<Node>)child_element )
+			{
+				// If it's non-NULL, the StarAgent's FZ was previously populated. If it has terminii, they
+				// are deeper down in the tree, and can just be reused as-is. 
+				dest_container->insert( *it_after.GetUnderlyingIterator(), (TreePtr<Node>)child_element ); 
+			}
+			else
+			{
+				// If it's NULL, nothing has acted on the StarAgent's FZ and so it terminates immediately.
+				// That means it's the placeholder of some OTHER Terminus instance and child_container is
+				// its container. We need to give that terminus our container and a new placeholder.
+				for( shared_ptr<Terminus> child_terminus : child_terminii )
+				{
+					if( auto child_con_terminus = dynamic_pointer_cast<ContainerTerminus>( child_terminus ) ) 
+					{						
+						if( child_con_terminus->dest_container == child_container )
+						{
+							dest_container->insert( *it_after.GetUnderlyingIterator(), GetPlaceholder() ); 
+							child_con_terminus->dest_container = dest_container;
+							child_con_terminus->it_dest_placeholder = prev( it_after );							
+							// TODO check found exactly once, and pull this code out of search loop.							
+							// TODO could we keep it_dest_placeholder up to date thoughout the main loop?
+							// TODO could we then just assign *child_con_terminus = *this?
+						}
+					}
+				}			
+			}
         }                                    
     }
     else

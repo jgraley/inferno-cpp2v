@@ -24,14 +24,14 @@ public:
 class SingularTerminus : public Terminus
 {
 public:
-    explicit SingularTerminus( TreePtrInterface *tree_ptr );
+    explicit SingularTerminus( TreePtrInterface *dest_tree_ptr_ );
     void Populate( TreePtr<Node> child_base,                               
                    list<shared_ptr<Terminus>> child_terminii = {} ) final;
     
     string GetTrace() const;
 
 private:
-    TreePtrInterface * const tree_ptr;
+    TreePtrInterface * const dest_tree_ptr;
 };    
     
 // ------------------------- ContainerTerminus --------------------------    
@@ -48,7 +48,7 @@ public:
     string GetTrace() const;
 
 private:
-    ContainerInterface * const dest_container;
+    ContainerInterface *dest_container;
     ContainerInterface::iterator it_dest_placeholder;
     
     bool joined = false;

@@ -500,8 +500,8 @@ typename _Unique_if<T>::_Known_bound make_unique(Args&&...) = delete;
 // You will probably need to explicitly instantiate the template, and this is
 // done by providing the pointer type (not the pointed-to type).
 template<typename POINTER_TYPE>
-bool DereferencingCompare( const POINTER_TYPE &a, 
-                           const POINTER_TYPE &b )
+bool DereferencingLess( const POINTER_TYPE &a, 
+                        const POINTER_TYPE &b )
 {
     return *a < *b;
 }                                      

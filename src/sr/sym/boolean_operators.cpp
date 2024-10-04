@@ -119,7 +119,7 @@ unique_ptr<BooleanResult> AndOperator::Evaluate( const EvalKit &kit,
     // Lower certainly dominates
     return move( *min_element( op_results.begin(), 
                                op_results.end(), 
-                               DereferencingCompare<unique_ptr<BooleanResult>> ) );
+                               DereferencingLess<unique_ptr<BooleanResult>> ) );
 }
 
 
@@ -178,7 +178,7 @@ unique_ptr<BooleanResult> OrOperator::Evaluate( const EvalKit &kit,
     // Higher certainly dominates
     return move( *max_element( op_results.begin(), 
                                op_results.end(), 
-                               DereferencingCompare<unique_ptr<BooleanResult>> ) );
+                               DereferencingLess<unique_ptr<BooleanResult>> ) );
 }
 
 
