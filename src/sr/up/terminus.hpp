@@ -15,7 +15,7 @@ namespace SR
 class Terminus : public Traceable
 {
 public:
-    virtual void Populate( TreePtr<Node> node,                               
+    virtual void Populate( TreePtr<Node> child_base,                               
                            list<shared_ptr<Terminus>> child_terminii = {} ) = 0;
 };    
     
@@ -25,7 +25,7 @@ class SingularTerminus : public Terminus
 {
 public:
     explicit SingularTerminus( TreePtrInterface *tree_ptr );
-    void Populate( TreePtr<Node> node,                               
+    void Populate( TreePtr<Node> child_base,                               
                    list<shared_ptr<Terminus>> child_terminii = {} ) final;
     
     string GetTrace() const;
@@ -41,7 +41,7 @@ class ContainerTerminus : public Terminus
 public:
     explicit ContainerTerminus( ContainerInterface *dest_container_,
                                 ContainerInterface::iterator it_dest_placeholder_ );             
-    void Populate( TreePtr<Node> base, 
+    void Populate( TreePtr<Node> child_base, 
                    list<shared_ptr<Terminus>> child_terminii = {} ) final;
     
     static TreePtr<Node> GetPlaceholder();

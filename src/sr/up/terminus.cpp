@@ -12,12 +12,20 @@ SingularTerminus::SingularTerminus( TreePtrInterface *tree_ptr_ ) :
 }
 
 
-void SingularTerminus::Populate( TreePtr<Node> node, 
+void SingularTerminus::Populate( TreePtr<Node> child_base, 
                                  list<shared_ptr<Terminus>> child_terminii )
 {
-	ASSERT( node ); // perhaps we tried to populate with an empty zone?
-    *tree_ptr = node;
-    TRACE("Singular joined ")(node)("\n");    
+	ASSERT( child_base ); // perhaps we tried to populate with an empty zone?
+
+	if( ContainerInterface *child_container = dynamic_cast<ContainerInterface *>(child_base.get()) )
+	{
+		ASSERTFAIL();
+	}
+	else
+	{
+		*tree_ptr = child_base;
+	}
+    TRACE("Singular joined ")(child_base)("\n");    
 }
     
 
