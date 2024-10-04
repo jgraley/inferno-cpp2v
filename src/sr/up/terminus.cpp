@@ -66,37 +66,49 @@ void ContainerTerminus::Populate( TreePtr<Node> child_base,
     // so "insert before" the end, in order to preserve ordering.
 	++it_after; // Can be end(), I think this is OK.
     if( ContainerInterface *child_container = dynamic_cast<ContainerInterface *>(child_base.get()) )
-    {            
-        // Child zone base has ContainerInterface, so it's a SubContainer. We get here due to 
+    {            		
+        // Child zone base has ContainerInterface, so it's a SubContainer. We get here due to         
         // FreeZones created by StarAgent. Expand it and populate into the destination, which is also a SubContainer. 
-        for( const TreePtrInterface &child_element : *child_container )
+        
+        for( ContainerInterface::iterator it_child = child_container->begin();
+			 it_child != child_container->end();
+			 ++it_child	)
         {
-			if( (TreePtr<Node>)child_element )
+			TreePtr<Node> child_element = (TreePtr<Node>)*it_child; 
+			if( child_element ) 
 			{
 				// If it's non-NULL, the StarAgent's FZ was previously populated. If it has terminii, they
 				// are deeper down in the tree, and can just be reused as-is. 
-				dest_container->insert( *it_after.GetUnderlyingIterator(), (TreePtr<Node>)child_element ); 
+				dest_container->insert( *it_after.GetUnderlyingIterator(), child_element ); 
 			}
 			else
 			{
 				// If it's NULL, nothing has acted on the StarAgent's FZ and so it terminates immediately.
-				// That means it's the placeholder of some OTHER Terminus instance and child_container is
+				// That means it's the placeholder of that FZ's Terminus instance and child_container is
 				// its container. We need to give that terminus our container and a new placeholder.
+				shared_ptr<ContainerTerminus> child_con_terminus;
 				for( shared_ptr<Terminus> child_terminus : child_terminii )
 				{
-					if( auto child_con_terminus = dynamic_pointer_cast<ContainerTerminus>( child_terminus ) ) 
+					if( auto cct = dynamic_pointer_cast<ContainerTerminus>( child_terminus ) ) 
 					{						
-						if( child_con_terminus->dest_container == child_container )
+						if( cct->dest_container == child_container && 
+						    cct->it_dest_placeholder == it_child )
 						{
-							dest_container->insert( *it_after.GetUnderlyingIterator(), GetPlaceholder() ); 
-							child_con_terminus->dest_container = dest_container;
-							child_con_terminus->it_dest_placeholder = prev( it_after );							
-							// TODO check found exactly once, and pull this code out of search loop.							
-							// TODO could we keep it_dest_placeholder up to date thoughout the main loop?
-							// TODO could we then just assign *child_con_terminus = *this?
+							ASSERT( !child_con_terminus )("Found multiple matching terminii including ")(child_con_terminus)(" and now ")(cct);
+							child_con_terminus = cct;
 						}
 					}
-				}			
+				}
+				ASSERT( child_con_terminus );
+								
+				dest_container->insert( *it_after.GetUnderlyingIterator(), GetPlaceholder() ); 
+				
+				ContainerInterface::iterator it_new_placeholder = it_after;
+				--it_new_placeholder; // back up to the newly inserted placeholder
+				child_con_terminus->dest_container = dest_container;
+				child_con_terminus->it_dest_placeholder = it_new_placeholder;							
+				// TODO could we keep it_dest_placeholder up to date thoughout the main loop?
+				// TODO could we then just assign *child_con_terminus = *this? 
 			}
         }                                    
     }

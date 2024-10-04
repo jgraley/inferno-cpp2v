@@ -38,8 +38,8 @@ void SR::RunForReplace( const Command *initial_cmd, XTreeDatabase *x_tree_db )
 	
 	// TODO deep check for overlaps and ordering
 
-	//FreeZoneMerger().Run(expr);  // TODO fix me!!
-	//FreeZoneMerger().Check(expr);
+	FreeZoneMerger().Run(expr);  // TODO fix me!!
+	FreeZoneMerger().Check(expr);
 	
 	// TODO reductive inversion using Quark algo
 	
@@ -185,7 +185,7 @@ void FreeZoneMerger::Run( shared_ptr<FreeZoneExpression> &base )
 	{
 		if( auto pfz_op = dynamic_pointer_cast<PopulateFreeZoneOperator>(expr) )
         {
-			FTRACE("Parent PopulateFreeZoneOperator ")(*pfz_op)("\n");
+			TRACE("Parent PopulateFreeZoneOperator ")(*pfz_op)("\n");
 			FreeZone &free_zone = pfz_op->GetZone();
 			ASSERT( !free_zone.IsEmpty() );
 
@@ -197,22 +197,22 @@ void FreeZoneMerger::Run( shared_ptr<FreeZoneExpression> &base )
 				ASSERT( it_t != free_zone.GetTerminiiEnd() ); // length mismatch		
 				if( auto child_pfz_op = dynamic_pointer_cast<PopulateFreeZoneOperator>(*it_child) )
 				{	
-					FTRACE("Child PopulateFreeZoneOperator ")(*child_pfz_op)(" and terminus ")(*it_t)("\n");
+					TRACE("Child PopulateFreeZoneOperator ")(*child_pfz_op)(" and terminus ")(*it_t)("\n");
 					FreeZone &child_free_zone = child_pfz_op->GetZone();
 					it_t = free_zone.PopulateTerminus( it_t, make_unique<FreeZone>(child_free_zone) );		
-					FTRACE("Terminus OK\n");
+					TRACE("Terminus OK\n");
 					it_child = pfz_op->SpliceOver( it_child, child_pfz_op->MoveChildExpressions() );
-					FTRACE("Splice OK\n");
+					TRACE("Splice OK\n");
 				}	
 				else
 				{
-					FTRACE("Child PopulateTreeZoneOperator: SKIPPING and terminus ")(*it_t)("\n");
+					TRACE("Child PopulateTreeZoneOperator: SKIPPING and terminus ")(*it_t)("\n");
 					it_t++;
 					it_child++;
 				}						
 			} 
 			ASSERT( it_t == free_zone.GetTerminiiEnd() ); // length mismatch	
-			FTRACE("Loop OK\n");
+			TRACE("Loop OK\n");
 		}
 	} );			
 }
