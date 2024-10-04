@@ -41,14 +41,16 @@ ContainerTerminus::ContainerTerminus( ContainerInterface *dest_container_,
     dest_container( dest_container_ ),
     it_dest_placeholder( it_dest_placeholder_ )
 {
-    ASSERT( it_dest_placeholder != dest_container->end() );
-	bool found = false;
-    for( ContainerInterface::iterator it=dest_container->begin(); it!=dest_container->end(); ++it )
-    {
-		if( it == it_dest_placeholder )
-			found = true;		
-	}
-	ASSERT( found );
+    Validate();
+}
+
+
+ContainerTerminus &ContainerTerminus::operator=( const ContainerTerminus &other )
+{
+	dest_container = other.dest_container;
+	it_dest_placeholder = other.it_dest_placeholder;
+	Validate();
+	return *this;
 }
 
 
@@ -105,10 +107,7 @@ void ContainerTerminus::Populate( TreePtr<Node> child_base,
 				
 				ContainerInterface::iterator it_new_placeholder = it_after;
 				--it_new_placeholder; // back up to the newly inserted placeholder
-				child_con_terminus->dest_container = dest_container;
-				child_con_terminus->it_dest_placeholder = it_new_placeholder;							
-				// TODO could we keep it_dest_placeholder up to date thoughout the main loop?
-				// TODO could we then just assign *child_con_terminus = *this? 
+				*child_con_terminus = ContainerTerminus(dest_container, it_new_placeholder);							
 			}
         }                                    
     }
@@ -140,6 +139,20 @@ void ContainerTerminus::Populate( TreePtr<Node> child_base,
 TreePtr<Node> ContainerTerminus::GetPlaceholder()
 {
     return TreePtr<Node>(); // It's just a NULL tree ptr!
+}
+
+
+void ContainerTerminus::Validate() const
+{	
+    // important invariant: placeholder iterator must point to a member in the destination container
+    ASSERT( it_dest_placeholder != dest_container->end() );
+    bool found = false;
+    for( ContainerInterface::iterator it=dest_container->begin(); it!=dest_container->end(); ++it )
+    {
+		if( it == it_dest_placeholder )
+			found = true;		
+	}
+	ASSERT( found );
 }
 
 

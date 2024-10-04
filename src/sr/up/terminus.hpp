@@ -41,10 +41,14 @@ class ContainerTerminus : public Terminus
 public:
     explicit ContainerTerminus( ContainerInterface *dest_container_,
                                 ContainerInterface::iterator it_dest_placeholder_ );             
+
+	ContainerTerminus &operator=( const ContainerTerminus &other );
+
     void Populate( TreePtr<Node> child_base, 
                    list<shared_ptr<Terminus>> child_terminii = {} ) final;
     
     static TreePtr<Node> GetPlaceholder();
+    void Validate() const;
     string GetTrace() const;
 
 private:
