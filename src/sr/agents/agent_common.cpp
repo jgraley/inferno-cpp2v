@@ -554,7 +554,7 @@ Agent::FreeZoneExprPtr AgentCommon::GenFreeZoneExprImpl( const ReplaceKit &kit,
     // Default replace behaviour to just use the X subtree we keyed to, so we need to be keyed
 	ASSERT(key_xlink)("Agent ")(*this)(" in replace context is not keyed but needs to be");
 	TreeZone new_zone = TreeZone::CreateSubtree( kit.x_tree_db, key_xlink );
-	return make_shared<PopulateTreeZoneOperator>( my_scr_engine, move(new_zone) );		
+	return make_shared<PopulateTreeZoneOperator>( move(new_zone) );		
 } 
 
 

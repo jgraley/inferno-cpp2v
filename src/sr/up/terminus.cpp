@@ -43,9 +43,9 @@ ContainerTerminus::ContainerTerminus( ContainerInterface *container_,
 }
 
 
-void ContainerTerminus::Populate( TreePtr<Node> node )
+void ContainerTerminus::Populate( TreePtr<Node> child_base )
 {
-	ASSERT( node ); // perhaps we tried to populate with an empty zone?
+	ASSERT( child_base ); // perhaps we tried to populate with an empty zone?
     ASSERT( !joined );
     joined = true;
 
@@ -55,20 +55,26 @@ void ContainerTerminus::Populate( TreePtr<Node> node )
     // (this is logical: there are n+1 possible insert positions and n+1 iterator values if you include end())
     // so "insert before" the end, in order to preserve ordering.
 	++it_after; // Can be end(), I think this is OK.
-    if( ContainerInterface *operand_sub_con = dynamic_cast<ContainerInterface *>(node.get()) )
+    if( ContainerInterface *child_sub_con = dynamic_cast<ContainerInterface *>(child_base.get()) )
     {            
         // Operand zone base has container interface, so it's a SubContainer. Expand it and populate.
-        for( const TreePtrInterface &sub_elt : *operand_sub_con )
+        // We get here due to FreeZones created by StarAgent
+        for( const TreePtrInterface &sub_elt : *child_sub_con )
         {
-            ASSERT( (TreePtr<Node>)sub_elt );
+            ASSERT( (TreePtr<Node>)sub_elt )("UNTESTED NULL element in supplied subcontainer: ")(*child_sub_con);
+            // If it's non-NULL, the StarAgent's FZ was previously populated. If it has terminii, they
+            // are deeper down in the tree, and can just be reused as-is. 
+            // If it's NULL, nothing has acted on the StarAgent's FZ and so it terminates immediately.
+            // That means it's the placeholder of some OTHER Terminus instance and operand_sub_con is
+            // its container. We need to give that terminus our container and a new placeholder.
             container->insert( *it_after.GetUnderlyingIterator(), (TreePtr<Node>)sub_elt ); 
         }                                    
     }
     else
     {
         // Populate terminus with singular-based zone.
-        ASSERT( node );
-        container->insert( *it_after.GetUnderlyingIterator(), node ); 
+        ASSERT( child_base );
+        container->insert( *it_after.GetUnderlyingIterator(), child_base ); 
     }
     
     // We don't need the placeholder any more
@@ -109,6 +115,6 @@ string ContainerTerminus::GetTrace() const
 		si = "ERROR!";
 	else
 		si = to_string(i);
-    return "⌾"+container->GetTypeName()+"["+si+"]";
+    return "⌾"+container->GetTypeName()+"["+si+" of "+to_string(container->size())+"]";
 }
     

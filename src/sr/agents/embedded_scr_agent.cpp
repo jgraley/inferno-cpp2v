@@ -24,7 +24,7 @@ shared_ptr<PatternQuery> EmbeddedSCRAgent::GetPatternQuery() const
 
 
 void EmbeddedSCRAgent::MaybeChildrenPlanOverlay( PatternLink me_plink, 
-                                           PatternLink under_plink )
+                                                 PatternLink under_plink )
 {    
     // Make embedded engines "invisible" to Delta key propagation (i.e. Colocated see #342)
     PatternLink through_plink(this, GetThrough());
@@ -56,6 +56,30 @@ list<PatternLink> EmbeddedSCRAgent::GetVisibleChildren( Path v ) const
 	list<PatternLink> plinks;
 	plinks.push_back( PatternLink(this, GetThrough()) );
 	return plinks;
+}
+
+
+bool EmbeddedSCRAgent::IsSearch() const
+{ 
+	return is_search; 
+}
+
+
+void EmbeddedSCRAgent::MarkBaseForEmbedded( TreePtr<Node> embedded_through_subtree ) const
+{
+	my_scr_engine->MarkBaseForEmbedded( this, embedded_through_subtree );
+}
+
+
+TreePtr<Node> EmbeddedSCRAgent::GetSearchPattern() const 
+{ 
+	return search_pattern; 
+}
+
+
+TreePtr<Node> EmbeddedSCRAgent::GetReplacePattern() const 
+{ 
+	return replace_pattern; 
 }
 
 

@@ -670,7 +670,7 @@ Agent::FreeZoneExprPtr StandardAgent::GenFreeZoneExprOverlay( const ReplaceKit &
 
 					ASSERT( under_elt ); // present simplified scheme disallows nullptr
 					TreeZone under_zone = TreeZone::CreateSubtree( kit.x_tree_db, XLink(under_node, &under_elt) );
-					child_commands.push_back( make_shared<PopulateTreeZoneOperator>(my_scr_engine, move(under_zone)) );		
+					child_commands.push_back( make_shared<PopulateTreeZoneOperator>(move(under_zone)) );		
 				}
 			}
         }            
@@ -692,7 +692,7 @@ Agent::FreeZoneExprPtr StandardAgent::GenFreeZoneExprOverlay( const ReplaceKit &
 			{
 				ASSERT( *under_singular );            
 				TreeZone under_zone = TreeZone::CreateSubtree( kit.x_tree_db, XLink(under_node, under_singular) );
-				child_commands.push_back( make_shared<PopulateTreeZoneOperator>(my_scr_engine, move(under_zone)) );			
+				child_commands.push_back( make_shared<PopulateTreeZoneOperator>(move(under_zone)) );			
 			}
         }
         else
@@ -701,7 +701,7 @@ Agent::FreeZoneExprPtr StandardAgent::GenFreeZoneExprOverlay( const ReplaceKit &
         }
     }
     
-    return make_shared<PopulateFreeZoneOperator>( my_scr_engine, move(zone), move(child_commands) );         
+    return make_shared<PopulateFreeZoneOperator>( move(zone), move(child_commands) );         
 }
 
 Agent::FreeZoneExprPtr StandardAgent::GenFreeZoneExprNormal( const ReplaceKit &kit, 
@@ -771,7 +771,7 @@ Agent::FreeZoneExprPtr StandardAgent::GenFreeZoneExprNormal( const ReplaceKit &k
         }       
     }
     
-    return make_shared<PopulateFreeZoneOperator>( my_scr_engine, move(zone), move(child_commands) );     
+    return make_shared<PopulateFreeZoneOperator>( move(zone), move(child_commands) );     
 }
 
 

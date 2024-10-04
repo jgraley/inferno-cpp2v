@@ -26,7 +26,7 @@ public:
     virtual TreePtr<Node> GetBaseNode() const = 0;
         
     bool IsSubtree() const;
-    void MarkBaseForEmbedded(const SCREngine *scr_engine, RequiresSubordinateSCREngine *embedded_agent);
+    void MarkBaseForEmbedded(RequiresSubordinateSCREngine *embedded_agent);
 };    
  
 }

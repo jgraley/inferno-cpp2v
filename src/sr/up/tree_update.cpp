@@ -20,7 +20,7 @@ FreeZone SR::RunForBuilder( const FreeZoneExpression *expr )
 }
 
 
-void SR::RunForReplace( const Command *initial_cmd )
+void SR::RunForReplace( const Command *initial_cmd, XTreeDatabase *x_tree_db )
 {
 	shared_ptr<FreeZoneExpression> expr = dynamic_cast<const UpdateTreeCommand &>(*initial_cmd).GetExpression();
 
@@ -38,7 +38,8 @@ void SR::RunForReplace( const Command *initial_cmd )
 	
 	// TODO deep check for overlaps and ordering
 
-	// TODO merge free zones
+	//FreeZoneMerger().Run(expr);  // TODO fix me!!
+	//FreeZoneMerger().Check(expr);
 	
 	// TODO reductive inversion using Quark algo
 	
@@ -182,31 +183,36 @@ void FreeZoneMerger::Run( shared_ptr<FreeZoneExpression> &base )
 {
 	FreeZoneExpression::ForDepthFirstWalk( base, nullptr, [&](shared_ptr<FreeZoneExpression> &expr)
 	{
-		if( auto pz_op = dynamic_pointer_cast<PopulateFreeZoneOperator>(expr) )
+		if( auto pfz_op = dynamic_pointer_cast<PopulateFreeZoneOperator>(expr) )
         {
-			FreeZone &free_zone = pz_op->GetZone();
+			FTRACE("Parent PopulateFreeZoneOperator ")(*pfz_op)("\n");
+			FreeZone &free_zone = pfz_op->GetZone();
 			ASSERT( !free_zone.IsEmpty() );
 
 			FreeZone::TerminusIterator it_t = free_zone.GetTerminiiBegin();
-			pz_op->ForChildren([&](shared_ptr<FreeZoneExpression> &child_expr)
+			PopulateFreeZoneOperator::ChildExpressionIterator it_child = pfz_op->GetChildrenBegin();
+			
+			while( it_child != pfz_op->GetChildrenEnd() )
 			{
 				ASSERT( it_t != free_zone.GetTerminiiEnd() ); // length mismatch		
-				if( auto child_pz_op = dynamic_pointer_cast<PopulateFreeZoneOperator>(child_expr) )
+				if( auto child_pfz_op = dynamic_pointer_cast<PopulateFreeZoneOperator>(*it_child) )
 				{	
-					FreeZone &child_free_zone = child_pz_op->GetZone();
-					// Presently only able to represent markers at base of zone, but if a child
-					// expr has one, after populating we'd need to put it our zone at some other
-					// location.
-					ASSERT( child_pz_op->GetEmbeddedMarkers().empty() );
-					
+					FTRACE("Child PopulateFreeZoneOperator ")(*child_pfz_op)(" and terminus ")(*it_t)("\n");
+					FreeZone &child_free_zone = child_pfz_op->GetZone();
 					it_t = free_zone.PopulateTerminus( it_t, make_unique<FreeZone>(child_free_zone) );		
+					FTRACE("Terminus OK\n");
+					it_child = pfz_op->SpliceOver( it_child, child_pfz_op->MoveChildExpressions() );
+					FTRACE("Splice OK\n");
 				}	
 				else
 				{
+					FTRACE("Child PopulateTreeZoneOperator: SKIPPING and terminus ")(*it_t)("\n");
 					it_t++;
+					it_child++;
 				}						
-			} );
+			} 
 			ASSERT( it_t == free_zone.GetTerminiiEnd() ); // length mismatch	
+			FTRACE("Loop OK\n");
 		}
 	} );			
 }

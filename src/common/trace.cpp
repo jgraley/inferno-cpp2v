@@ -264,7 +264,6 @@ Tracer::Descend::Descend( string s ) :
     os(pre.size()) 
 { 
     ASSERT( s.length()>=1 );
-    ASSERT( !isspace(s[0]) );
     pre += s; 
     Tracer::MaybePrintEndl(); 
 } 

@@ -33,11 +33,16 @@ public:
                                     PatternLink me_plink, 
                                     XLink key_xlink ) final;
 
-    virtual list<PatternLink> GetVisibleChildren( Path v ) const;
-	virtual bool IsSearch() const { return is_search; }
-	virtual TreePtr<Node> GetSearchPattern() const { return search_pattern; }
-	virtual TreePtr<Node> GetReplacePattern() const { return replace_pattern; }
-    virtual Block GetGraphBlockInfo() const;
+    list<PatternLink> GetVisibleChildren( Path v ) const override;
+	virtual bool IsSearch() const;
+	
+	// Implement RequiresSubordinateSCREngine
+	void MarkBaseForEmbedded( TreePtr<Node> embedded_through_subtree ) const override;
+	TreePtr<Node> GetSearchPattern() const override;
+	TreePtr<Node> GetReplacePattern() const override;
+    
+    Block GetGraphBlockInfo() const override;
+    
     virtual TreePtr<Node> EvolveIntoEmbeddedCompareReplace() = 0;
 
     TreePtr<Node> search_pattern;

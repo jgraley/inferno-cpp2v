@@ -8,6 +8,7 @@
 #include "../link.hpp"
 #include "duplicate.hpp"
 #include "../scr_engine.hpp"
+#include <functional>
 
 namespace SR 
 {
@@ -35,21 +36,28 @@ public:
 // zone, apply marker and return the resulting FreeZone. 
 class PopulateZoneOperator : public FreeZoneExpression
 {
+public:
+	typedef list<shared_ptr<FreeZoneExpression>>::iterator ChildExpressionIterator;
+	
 protected:
-    PopulateZoneOperator( const SCREngine *scr_engine_, list<shared_ptr<FreeZoneExpression>> &&child_expressions_ );
-    PopulateZoneOperator( const SCREngine *scr_engine_ );
+    PopulateZoneOperator( list<shared_ptr<FreeZoneExpression>> &&child_expressions_ );
+    PopulateZoneOperator();
 
 public:
     void AddEmbeddedMarker( RequiresSubordinateSCREngine *new_marker );
-    void AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&new_markers );
-    list<RequiresSubordinateSCREngine *> GetEmbeddedMarkers() const;
+    virtual void AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&new_markers ) = 0;
+    virtual list<RequiresSubordinateSCREngine *> GetEmbeddedMarkers() const = 0;
     
     virtual Zone &GetZone() = 0;
     virtual const Zone &GetZone() const = 0;
     
     int GetNumChildExpressions() const;
+    ChildExpressionIterator GetChildrenBegin();
+    ChildExpressionIterator GetChildrenEnd();
 	list<shared_ptr<FreeZoneExpression>> &GetChildExpressions();
 	const list<shared_ptr<FreeZoneExpression>> &GetChildExpressions() const;
+	list<shared_ptr<FreeZoneExpression>> &&MoveChildExpressions();
+	
     string GetChildExpressionsTrace() const;
 
 	void ForChildren(function<void(shared_ptr<FreeZoneExpression> &expr)> func) override;
@@ -59,25 +67,27 @@ public:
 	void DepthFirstWalkImpl(function<void(shared_ptr<FreeZoneExpression> &expr)> func_in,
 			                function<void(shared_ptr<FreeZoneExpression> &expr)> func_out) override;
 
-protected:
-	const SCREngine * const scr_engine;
-
 private:
 	list<shared_ptr<FreeZoneExpression>> child_expressions;
-	list<RequiresSubordinateSCREngine *> embedded_markers;
 };
 
 
 // ------------------------- PopulateTreeZoneOperator --------------------------
 
-// Construct with tree zone and optional marker M. On evaluate: populate the
-// zone, apply marker and return the resulting FreeZone. 
+// Construct with tree zone and child expressions for terminii. Markers can 
+// then be added. On evaluate: duplicate into a free zone, apply markers,
+// populate it immediately (rule #726), and return the resulting FreeZone. 
+// Due to rule #726, we cannot provide a merge method (or we could add support 
+// for markers in interior possibly not at base).
 class PopulateTreeZoneOperator : public PopulateZoneOperator
 {
 public:
-    PopulateTreeZoneOperator( const SCREngine *scr_engine, TreeZone zone_, list<shared_ptr<FreeZoneExpression>> &&child_expressions );
-    PopulateTreeZoneOperator( const SCREngine *scr_engine, TreeZone zone_ );
+    PopulateTreeZoneOperator( TreeZone zone_, list<shared_ptr<FreeZoneExpression>> &&child_expressions );
+    PopulateTreeZoneOperator( TreeZone zone_ );
     
+    void AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&new_markers ) final;
+    list<RequiresSubordinateSCREngine *> GetEmbeddedMarkers() const final;
+
     TreeZone &GetZone() override;
     const TreeZone &GetZone() const override;
 	
@@ -89,20 +99,30 @@ public:
     
 private:
 	TreeZone zone;
+	list<RequiresSubordinateSCREngine *> embedded_markers;
 };
 
 // ------------------------- PopulateFreeZoneOperator --------------------------
 
-// Construct with free zone and optional marker M. On evaluate: populate the
-// zone, apply marker and return the resulting FreeZone. 
+// Construct with free zone and child expressions for terminii. Markers can 
+// then be added. On evaluate: populate the zone, and return the resulting 
+// FreeZone. Rule #726 means there can never be duplicate, clone, move etc, 
+// because we mark for embedded immediately (but this means we can merge 
+// without needing to represent markers in interior possibly not at base).
 class PopulateFreeZoneOperator : public PopulateZoneOperator
 {
 public:
-    PopulateFreeZoneOperator( const SCREngine *scr_engine, FreeZone zone_, list<shared_ptr<FreeZoneExpression>> &&child_expressions );
-    PopulateFreeZoneOperator( const SCREngine *scr_engine, FreeZone zone_ );
+    PopulateFreeZoneOperator( FreeZone zone_, list<shared_ptr<FreeZoneExpression>> &&child_expressions );
+    PopulateFreeZoneOperator( FreeZone zone_ );
 
-    FreeZone &GetZone() override;
-    const FreeZone &GetZone() const override;
+    void AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&new_markers ) final;
+    list<RequiresSubordinateSCREngine *> GetEmbeddedMarkers() const final;
+
+	ChildExpressionIterator SpliceOver( ChildExpressionIterator it_child, 
+                                        list<shared_ptr<FreeZoneExpression>> &&child_expressions );
+
+    FreeZone &GetZone() final;
+    const FreeZone &GetZone() const final;
     
    	unique_ptr<FreeZone> Evaluate() const final;	
 

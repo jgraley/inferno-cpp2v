@@ -157,7 +157,7 @@ void VNSequence::RunUpdateCommand( shared_ptr<Command> cmd,
 {
     ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");    
     
-	RunForReplace( cmd.get() );
+	RunForReplace( cmd.get(), x_tree_db.get() );
 }
 
 

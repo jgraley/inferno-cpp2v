@@ -39,7 +39,7 @@ class ContainerTerminus : public Terminus
 public:
     explicit ContainerTerminus( ContainerInterface *container,
                                ContainerInterface::iterator it_placeholder_ );             
-    void Populate( TreePtr<Node> node ) final;
+    void Populate( TreePtr<Node> base ) final;
     
     static TreePtr<Node> GetPlaceholder();
     string GetTrace() const;

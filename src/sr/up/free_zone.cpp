@@ -124,7 +124,8 @@ FreeZone::TerminusIterator FreeZone::PopulateTerminus( TerminusIterator it_t,
 		 
 	ASSERT( child_zone.get() != this ); 
 		
-	// Populate terminus. This will expand SubContainers
+	// Populate terminus. This will expand SubContainers. Remember that
+	// terminii are reference-like and so it's fine that we erase it.
 	(*it_t)->Populate( child_zone->GetBaseNode() );
 	
 	// it_t updated to the next terminus after the one we erased, or end()
@@ -133,6 +134,7 @@ FreeZone::TerminusIterator FreeZone::PopulateTerminus( TerminusIterator it_t,
 	// Insert the child zone's terminii before it_t, i.e. where we just
 	// erase()d from. I assume it_t now points after the inserted 
 	// terminii, i.e. at the same element it did after the erase()
+	ASSERT( child_zone->terminii.empty() )("UNTESTED!!");
 	terminii.splice( it_t, move(child_zone->terminii) );
 	
 	return it_t;

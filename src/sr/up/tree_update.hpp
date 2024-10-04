@@ -18,9 +18,19 @@ class DeclareTreeZoneCommand;
 // ------------------------- Runners --------------------------
 
 FreeZone RunForBuilder( const FreeZoneExpression *expr );
-void RunForReplace( const Command *cmd );
+void RunForReplace( const Command *cmd, XTreeDatabase *x_tree_db );
 	
 // ------------------------- TreeZoneOverlapHandler --------------------------
+
+// To optimise:
+// - Make a std::set/multiset of TZs ordered using TreeZoneRelation (idea 
+//   is that the order in the replace expression is irrelevent to this algo)
+// - Add a GetLastDescendant() so can form ranges for descendants which
+//   are the overlap candidates.
+// - TreeZoneRelation is secondary on terminii. Get matching base ranges 
+//   by just depth-first-incrementing the base for an exclusive end.
+// - Identical TZs are equal in TreeZoneRelation so if regular std::set 
+//   is used, they will be dropped and if std::multiset they will be kept.
 
 class TreeZoneOverlapHandler 
 {

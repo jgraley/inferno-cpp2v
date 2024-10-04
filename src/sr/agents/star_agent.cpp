@@ -102,10 +102,10 @@ Agent::FreeZoneExprPtr StarAgent::GenFreeZoneExprImpl( const ReplaceKit &kit,
         zone.AddTerminus( make_shared<ContainerTerminus>(dest_container, dest_it) );    
 
         TreeZone child_zone = TreeZone::CreateSubtree( kit.x_tree_db, XLink(key_node, &key_elt) );
-	    child_commands.push_back( make_shared<PopulateTreeZoneOperator>(my_scr_engine, move(child_zone)) );
+	    child_commands.push_back( make_shared<PopulateTreeZoneOperator>(move(child_zone)) );
     }
 
-    return make_shared<PopulateFreeZoneOperator>( my_scr_engine, move(zone), move(child_commands) );    
+    return make_shared<PopulateFreeZoneOperator>( move(zone), move(child_commands) );    
 }
 
 

@@ -33,6 +33,7 @@ class CommandSequence;
 class RequiresSubordinateSCREngine : public virtual Graphable
 {
 public:
+	virtual void MarkBaseForEmbedded( TreePtr<Node> embedded_through_subtree ) const = 0;
 	virtual TreePtr<Node> GetSearchPattern() const = 0;
 	virtual TreePtr<Node> GetReplacePattern() const = 0;
 };
@@ -137,7 +138,7 @@ public: // For agents
     // Note: this is const but RepeatingCompareReplace() isn't. Why?
     // Because we're not calling OUR RepeatingCompareReplace but
     // the embedded_engine's one - and that pointer is not const.
-    void MarkBaseForEmbedded( RequiresSubordinateSCREngine *embedded_agent, 
+    void MarkBaseForEmbedded( const RequiresSubordinateSCREngine *embedded_agent, 
                               TreePtr<Node> embedded_through_subtree ) const;    
     void SetReplaceKey( LocatedLink keyer_link ) const;
     XLink GetReplaceKey( PatternLink plink ) const;
@@ -164,7 +165,7 @@ private:
     shared_ptr<XTreeDatabase> x_tree_db;
     mutable SolutionMap replace_solution;
     bool replace_solution_available = false;    
-    mutable map< RequiresSubordinateSCREngine *, TreePtr<Node> > bases_for_embedded;
+    mutable map<const RequiresSubordinateSCREngine *, TreePtr<Node> > bases_for_embedded;
 };
 
 };

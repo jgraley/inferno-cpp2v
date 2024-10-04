@@ -8,7 +8,7 @@
 
 using namespace SR;
 
-#define RECURSIVE_TRACE_OPERATOR
+//#define RECURSIVE_TRACE_OPERATOR
 
 // ------------------------- FreeZoneExpression --------------------------
 
@@ -28,15 +28,13 @@ catch( BreakException )
 
 // ------------------------- PopulateZoneOperator --------------------------
 
-PopulateZoneOperator::PopulateZoneOperator( const SCREngine *scr_engine_, list<shared_ptr<FreeZoneExpression>> &&child_expressions_ ) :
-	scr_engine( scr_engine_ ),
+PopulateZoneOperator::PopulateZoneOperator( list<shared_ptr<FreeZoneExpression>> &&child_expressions_ ) :
 	child_expressions(move(child_expressions_))
 {
 }	
 
 
-PopulateZoneOperator::PopulateZoneOperator( const SCREngine *scr_engine_ ) :
-	scr_engine( scr_engine_ )
+PopulateZoneOperator::PopulateZoneOperator() 
 {
 }	
 
@@ -47,21 +45,21 @@ void PopulateZoneOperator::AddEmbeddedMarker( RequiresSubordinateSCREngine *new_
 }
 
 
-void PopulateZoneOperator::AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&new_markers )
-{
-	embedded_markers.splice( embedded_markers.end(), move(new_markers) );
-}
-
-
-list<RequiresSubordinateSCREngine *> PopulateZoneOperator::GetEmbeddedMarkers() const
-{
-	return embedded_markers;
-}
-
-
 int PopulateZoneOperator::GetNumChildExpressions() const
 {
 	return child_expressions.size();
+}
+
+
+PopulateZoneOperator::ChildExpressionIterator PopulateZoneOperator::GetChildrenBegin()
+{
+	return child_expressions.begin();
+}
+
+
+PopulateZoneOperator::ChildExpressionIterator PopulateZoneOperator::GetChildrenEnd()
+{
+	return child_expressions.end();
 }
 
 
@@ -74,6 +72,12 @@ list<shared_ptr<FreeZoneExpression>> &PopulateZoneOperator::GetChildExpressions(
 const list<shared_ptr<FreeZoneExpression>> &PopulateZoneOperator::GetChildExpressions() const
 {
 	return child_expressions;
+}
+
+
+list<shared_ptr<FreeZoneExpression>> &&PopulateZoneOperator::MoveChildExpressions()
+{
+	return move(child_expressions);
 }
 
 
@@ -105,9 +109,6 @@ void PopulateZoneOperator::EvaluateWithFreeZone( FreeZone &free_zone ) const
 	}
 	
 	free_zone.PopulateAll(move(child_zones));
-	
-	for( RequiresSubordinateSCREngine *ea : embedded_markers )
-		free_zone.MarkBaseForEmbedded(scr_engine, ea);	
 }
 	
 
@@ -126,22 +127,32 @@ void PopulateZoneOperator::DepthFirstWalkImpl( function<void(shared_ptr<FreeZone
 	
 // ------------------------- PopulateTreeZoneOperator --------------------------
 
-PopulateTreeZoneOperator::PopulateTreeZoneOperator( const SCREngine *scr_engine,
-                                                    TreeZone zone_, 
+PopulateTreeZoneOperator::PopulateTreeZoneOperator( TreeZone zone_, 
                                                     list<shared_ptr<FreeZoneExpression>> &&child_expressions ) :
-	PopulateZoneOperator( scr_engine, move(child_expressions) ),
+	PopulateZoneOperator( move(child_expressions) ),
 	zone(zone_)
 {
 	ASSERT( zone.GetNumTerminii() == GetNumChildExpressions() );	
 }	
 		
 
-PopulateTreeZoneOperator::PopulateTreeZoneOperator( const SCREngine *scr_engine,
-                                                    TreeZone zone_ ) :
-	PopulateZoneOperator( scr_engine ),
+PopulateTreeZoneOperator::PopulateTreeZoneOperator( TreeZone zone_ ) :
+	PopulateZoneOperator(),
 	zone(zone_)
 {
 	ASSERT( zone.GetNumTerminii() == 0 );	
+}
+
+
+void PopulateTreeZoneOperator::AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&new_markers )
+{
+	embedded_markers.splice( embedded_markers.end(), move(new_markers) );
+}
+
+
+list<RequiresSubordinateSCREngine *> PopulateTreeZoneOperator::GetEmbeddedMarkers() const
+{
+	return embedded_markers;
 }
 
 
@@ -161,6 +172,11 @@ unique_ptr<FreeZone> PopulateTreeZoneOperator::Evaluate() const
 {
 	// TODO probably consistent for Duplicate() to return unique_ptr<FreeZone>
 	auto temp_free_zone = make_unique<FreeZone>( zone.Duplicate() );
+
+	// Rule #726 now we've gone to free zone, mark immediately.
+	for( RequiresSubordinateSCREngine *ea : embedded_markers )
+		temp_free_zone->MarkBaseForEmbedded(ea);		
+	
 	EvaluateWithFreeZone( *temp_free_zone );
 	return temp_free_zone;
 }
@@ -170,7 +186,7 @@ shared_ptr<FreeZoneExpression> PopulateTreeZoneOperator::DuplicateToFree() const
 {
 	FreeZone free_zone = zone.Duplicate();
 	list<shared_ptr<FreeZoneExpression>> c = GetChildExpressions();
-	auto pop_fz_op = make_shared<PopulateFreeZoneOperator>( scr_engine, free_zone, move(c) );
+	auto pop_fz_op = make_shared<PopulateFreeZoneOperator>( free_zone, move(c) );
 	pop_fz_op->AddEmbeddedMarkers( GetEmbeddedMarkers() );
 	return pop_fz_op;
 }	
@@ -187,23 +203,51 @@ string PopulateTreeZoneOperator::GetTrace() const
 
 // ------------------------- PopulateFreeZoneOperator --------------------------
 
-PopulateFreeZoneOperator::PopulateFreeZoneOperator( const SCREngine *scr_engine,
-                                                    FreeZone zone_, 
+PopulateFreeZoneOperator::PopulateFreeZoneOperator( FreeZone zone_, 
                                                     list<shared_ptr<FreeZoneExpression>> &&child_expressions ) :
-	PopulateZoneOperator( scr_engine, move(child_expressions) ),
+	PopulateZoneOperator( move(child_expressions) ),
 	zone(zone_)
 {
 	ASSERT( zone.GetNumTerminii() == GetNumChildExpressions() );	
 }
 
 		
-PopulateFreeZoneOperator::PopulateFreeZoneOperator( const SCREngine *scr_engine,
-                                                    FreeZone zone_ ) :
-   	PopulateZoneOperator( scr_engine ),
+PopulateFreeZoneOperator::PopulateFreeZoneOperator( FreeZone zone_ ) :
+   	PopulateZoneOperator(),
    	zone(zone_)
 {
 	ASSERT( zone.GetNumTerminii() == 0 );	
 }
+
+
+void PopulateFreeZoneOperator::AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&new_markers )
+{
+	// Rule #726 requires us to mark free zones immediately
+	for( RequiresSubordinateSCREngine *ea : new_markers )
+		zone.MarkBaseForEmbedded(ea);	
+}
+
+
+list<RequiresSubordinateSCREngine *> PopulateFreeZoneOperator::GetEmbeddedMarkers() const
+{
+	return {}; // Rule #726 means therer aren't any
+}
+
+
+
+PopulateZoneOperator::ChildExpressionIterator PopulateFreeZoneOperator::SpliceOver( ChildExpressionIterator it_child, 
+                                                                                    list<shared_ptr<FreeZoneExpression>> &&child_exprs )
+{
+	// it_child updated to the next child after the one we erased, or end()
+	it_child = GetChildExpressions().erase( it_child );		
+	
+	// Insert the child before it_child, i.e. where we just
+	// erase()d from. I assume it_child now points after the inserted 
+	// child, i.e. at the same element it did after the erase()
+	GetChildExpressions().splice( it_child, move(child_exprs) );	
+	
+	return it_child;
+}                                               
 
 
 FreeZone &PopulateFreeZoneOperator::GetZone()
