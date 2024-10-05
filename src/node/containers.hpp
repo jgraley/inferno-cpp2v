@@ -88,7 +88,7 @@ public:
     virtual const iterator &insert_front( const TreePtrInterface &gx ) = 0;
     virtual const TreePtrInterface &front();
     virtual const TreePtrInterface &back();
-    virtual const iterator &erase1( const iterator_interface &it ) = 0;
+    virtual const iterator &erase( const iterator_interface &it ) = 0;
     const iterator &erase2( const iterator &it );
     virtual bool empty();
     virtual int size() const;
@@ -258,11 +258,11 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
     	}
 	};
 
-    using ContainerCommon<Impl>::erase;
+    using ContainerInterface::erase;
     virtual int erase( const TreePtrInterface &gx ) // Simulating the SimpleAssociatedContaner API 
     {
         // Like multiset, we erase all matching elemnts. Doing this though the API, bearing in 
-        // mind validity rules post-erase, is horrible. TODO now idiomatic to use the return of erase()
+        // mind validity rules post-erase, is horrible. TODO now idiomatic to use the return of erase(it)
         value_type sx( value_type::InferredDynamicCast(gx) );
         typename Impl::iterator it;
         int n = 0;
@@ -352,7 +352,7 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
         return Impl::back();
     }
 
-    const iterator &erase1( const typename ContainerInterface::iterator_interface &it ) override
+    const iterator &erase( const typename ContainerInterface::iterator_interface &it ) override
     {
         auto cit = dynamic_cast<const iterator *>( &it );
         ASSERT( cit ); // if this fails, you passed erase() the wrong kind of iterator        
@@ -518,7 +518,7 @@ struct SimpleAssociativeContainer : virtual ContainerCommon< ASSOCIATIVE_IMPL< T
 		return insert(gx);
 	}
 
-    const iterator &erase1( const typename ContainerInterface::iterator_interface &it ) override
+    const iterator &erase( const typename ContainerInterface::iterator_interface &it ) override
     {
         auto cit = dynamic_cast<const iterator *>( &it );
         ASSERT( cit ); // if this fails, you passed erase() the wrong kind of iterator        
