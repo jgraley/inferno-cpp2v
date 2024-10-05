@@ -62,7 +62,7 @@ void ContainerTerminus::Populate( TreePtr<Node> child_base,
     joined = true;
 
     // We don't need the placeholder any more
-	ContainerInterface::iterator it_after = dest_container->erase2( it_dest_placeholder );
+	ContainerInterface::iterator it_after = dest_container->erase( it_dest_placeholder );
 	
     if( ContainerInterface *child_container = dynamic_cast<ContainerInterface *>(child_base.get()) )
     {            		

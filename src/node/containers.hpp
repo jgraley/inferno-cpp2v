@@ -85,11 +85,12 @@ public:
     virtual const iterator &end() = 0;
     virtual const iterator &insert( const TreePtrInterface &gx ) = 0;
     virtual const iterator &insert( const iterator_interface &pos, const TreePtrInterface &gx ) = 0;
+    const iterator &insert( const iterator &pos, const TreePtrInterface &gx );
     virtual const iterator &insert_front( const TreePtrInterface &gx ) = 0;
     virtual const TreePtrInterface &front();
     virtual const TreePtrInterface &back();
     virtual const iterator &erase( const iterator_interface &it ) = 0;
-    const iterator &erase2( const iterator &it );
+    const iterator &erase( const iterator &it );
     virtual bool empty();
     virtual int size() const;
     //virtual int count( const TreePtrInterface &gx ) = 0;
