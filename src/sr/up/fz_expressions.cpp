@@ -10,11 +10,11 @@ using namespace SR;
 
 //#define RECURSIVE_TRACE_OPERATOR
 
-// ------------------------- FreeZoneExpression --------------------------
+// ------------------------- ZoneExpression --------------------------
 
-void FreeZoneExpression::ForDepthFirstWalk( shared_ptr<FreeZoneExpression> &base,
-											function<void(shared_ptr<FreeZoneExpression> &expr)> func_in,
-	                                        function<void(shared_ptr<FreeZoneExpression> &expr)> func_out ) try
+void ZoneExpression::ForDepthFirstWalk( shared_ptr<ZoneExpression> &base,
+											function<void(shared_ptr<ZoneExpression> &expr)> func_in,
+	                                        function<void(shared_ptr<ZoneExpression> &expr)> func_out ) try
 {
 	if( func_in )
 		func_in(base);
@@ -28,7 +28,7 @@ catch( BreakException )
 
 // ------------------------- PopulateZoneOperator --------------------------
 
-PopulateZoneOperator::PopulateZoneOperator( list<shared_ptr<FreeZoneExpression>> &&child_expressions_ ) :
+PopulateZoneOperator::PopulateZoneOperator( list<shared_ptr<ZoneExpression>> &&child_expressions_ ) :
 	child_expressions(move(child_expressions_))
 {
 }	
@@ -63,19 +63,19 @@ PopulateZoneOperator::ChildExpressionIterator PopulateZoneOperator::GetChildrenE
 }
 
 
-list<shared_ptr<FreeZoneExpression>> &PopulateZoneOperator::GetChildExpressions() 
+list<shared_ptr<ZoneExpression>> &PopulateZoneOperator::GetChildExpressions() 
 {
 	return child_expressions;
 }
 
 
-const list<shared_ptr<FreeZoneExpression>> &PopulateZoneOperator::GetChildExpressions() const
+const list<shared_ptr<ZoneExpression>> &PopulateZoneOperator::GetChildExpressions() const
 {
 	return child_expressions;
 }
 
 
-list<shared_ptr<FreeZoneExpression>> &&PopulateZoneOperator::MoveChildExpressions()
+list<shared_ptr<ZoneExpression>> &&PopulateZoneOperator::MoveChildExpressions()
 {
 	return move(child_expressions);
 }
@@ -87,9 +87,9 @@ string PopulateZoneOperator::GetChildExpressionsTrace() const
 }
 
 
-void PopulateZoneOperator::ForChildren(function<void(shared_ptr<FreeZoneExpression> &expr)> func) try
+void PopulateZoneOperator::ForChildren(function<void(shared_ptr<ZoneExpression> &expr)> func) try
 {
-	for( shared_ptr<FreeZoneExpression> &child_expression : child_expressions )
+	for( shared_ptr<ZoneExpression> &child_expression : child_expressions )
 		func(child_expression);
 }
 catch( BreakException )
@@ -101,7 +101,7 @@ void PopulateZoneOperator::EvaluateWithFreeZone( FreeZone &free_zone ) const
 {
 	//FTRACE(free_zone)("\n");
 	list<unique_ptr<FreeZone>> child_zones;
-	for( const shared_ptr<FreeZoneExpression> &child_expression : child_expressions )
+	for( const shared_ptr<ZoneExpression> &child_expression : child_expressions )
 	{	
 		//FTRACE(child_expression)("\n");
 		unique_ptr<FreeZone> free_zone = child_expression->Evaluate();
@@ -112,10 +112,10 @@ void PopulateZoneOperator::EvaluateWithFreeZone( FreeZone &free_zone ) const
 }
 	
 
-void PopulateZoneOperator::DepthFirstWalkImpl( function<void(shared_ptr<FreeZoneExpression> &expr)> func_in,
-			                                   function<void(shared_ptr<FreeZoneExpression> &expr)> func_out )
+void PopulateZoneOperator::DepthFirstWalkImpl( function<void(shared_ptr<ZoneExpression> &expr)> func_in,
+			                                   function<void(shared_ptr<ZoneExpression> &expr)> func_out )
 {
-	for( shared_ptr<FreeZoneExpression> &expr : child_expressions )
+	for( shared_ptr<ZoneExpression> &expr : child_expressions )
 	{
 		if( func_in )
 			func_in(expr);
@@ -128,7 +128,7 @@ void PopulateZoneOperator::DepthFirstWalkImpl( function<void(shared_ptr<FreeZone
 // ------------------------- PopulateTreeZoneOperator --------------------------
 
 PopulateTreeZoneOperator::PopulateTreeZoneOperator( TreeZone zone_, 
-                                                    list<shared_ptr<FreeZoneExpression>> &&child_expressions ) :
+                                                    list<shared_ptr<ZoneExpression>> &&child_expressions ) :
 	PopulateZoneOperator( move(child_expressions) ),
 	zone(zone_)
 {
@@ -182,10 +182,10 @@ unique_ptr<FreeZone> PopulateTreeZoneOperator::Evaluate() const
 }
 
 
-shared_ptr<FreeZoneExpression> PopulateTreeZoneOperator::DuplicateToFree() const
+shared_ptr<ZoneExpression> PopulateTreeZoneOperator::DuplicateToFree() const
 {
 	FreeZone free_zone = zone.Duplicate();
-	list<shared_ptr<FreeZoneExpression>> c = GetChildExpressions();
+	list<shared_ptr<ZoneExpression>> c = GetChildExpressions();
 	auto pop_fz_op = make_shared<PopulateFreeZoneOperator>( free_zone, move(c) );
 	pop_fz_op->AddEmbeddedMarkers( GetEmbeddedMarkers() );
 	return pop_fz_op;
@@ -204,7 +204,7 @@ string PopulateTreeZoneOperator::GetTrace() const
 // ------------------------- PopulateFreeZoneOperator --------------------------
 
 PopulateFreeZoneOperator::PopulateFreeZoneOperator( FreeZone zone_, 
-                                                    list<shared_ptr<FreeZoneExpression>> &&child_expressions ) :
+                                                    list<shared_ptr<ZoneExpression>> &&child_expressions ) :
 	PopulateZoneOperator( move(child_expressions) ),
 	zone(zone_)
 {
@@ -236,7 +236,7 @@ list<RequiresSubordinateSCREngine *> PopulateFreeZoneOperator::GetEmbeddedMarker
 
 
 PopulateZoneOperator::ChildExpressionIterator PopulateFreeZoneOperator::SpliceOver( ChildExpressionIterator it_child, 
-                                                                                    list<shared_ptr<FreeZoneExpression>> &&child_exprs )
+                                                                                    list<shared_ptr<ZoneExpression>> &&child_exprs )
 {
 	// it_child updated to the next child after the one we erased, or end()
 	it_child = GetChildExpressions().erase( it_child );		

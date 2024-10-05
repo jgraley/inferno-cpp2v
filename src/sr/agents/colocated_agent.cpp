@@ -39,7 +39,7 @@ SYM::Lazy<SYM::BooleanExpression> ColocatedAgent::SymbolicColocatedQuery() const
 }
 
 
-Agent::FreeZoneExprPtr ColocatedAgent::GenFreeZoneExprImpl( const ReplaceKit &kit, 
+Agent::ReplaceExprPtr ColocatedAgent::GenReplaceExprImpl( const ReplaceKit &kit, 
                                                             PatternLink me_plink, 
                                                             XLink key_xlink )
 {
@@ -49,10 +49,10 @@ Agent::FreeZoneExprPtr ColocatedAgent::GenFreeZoneExprImpl( const ReplaceKit &ki
 		// Unambiguous path through replace pattern so we can continue to overlay
 		PatternLink replace_plink = OnlyElementOf(plinks);
 		ASSERT( replace_plink );          
-		return replace_plink.GetChildAgent()->GenFreeZoneExpr(kit, replace_plink);    
+		return replace_plink.GetChildAgent()->GenReplaceExpr(kit, replace_plink);    
 	}
 	else
 	{
-		return AgentCommon::GenFreeZoneExprImpl(kit, me_plink, key_xlink);
+		return AgentCommon::GenReplaceExprImpl(kit, me_plink, key_xlink);
 	}
 }                                         

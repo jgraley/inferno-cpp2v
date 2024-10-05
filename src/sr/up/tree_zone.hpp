@@ -54,7 +54,6 @@ private:
     set<XLink, DepthFirstRelation> terminii;    
 };
  
- 
 }
 
 #endif

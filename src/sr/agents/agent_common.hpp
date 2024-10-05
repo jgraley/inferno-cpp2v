@@ -60,9 +60,9 @@ public:
     virtual bool ReplaceKeyerQuery( PatternLink me_plink, 
                                     set<PatternLink> keyer_plinks );                                  
     TreePtr<Node> BuildForBuildersAnalysis( PatternLink me_plink ) override;
-    FreeZoneExprPtr GenFreeZoneExpr( const ReplaceKit &kit, 
+    ReplaceExprPtr GenReplaceExpr( const ReplaceKit &kit, 
                                 PatternLink me_plink ) override;
-    virtual FreeZoneExprPtr GenFreeZoneExprImpl( const ReplaceKit &kit, 
+    virtual ReplaceExprPtr GenReplaceExprImpl( const ReplaceKit &kit, 
                                          PatternLink me_plink, 
                                          XLink key_xlink );
     TreePtr<Node> CloneNode( bool force_dirty ) const;

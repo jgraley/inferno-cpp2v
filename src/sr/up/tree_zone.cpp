@@ -145,10 +145,23 @@ string TreeZone::GetTrace() const
 
 void TreeZone::DBCheck() const
 {
-	if( db ) // db is optional: builders leave it NULL
+	if( !db ) // db is optional: builders leave it NULL - or do they?
+		return;
+		
+	ASSERT( db->HasRow( base ) )(base);
+	
+	if( IsEmpty() )
+		return; // We've checked enough for empty zones
+	// Now we've excluded legit empty zones, checks can be strict
+	
+	DepthFirstRelation dfr( db );
+	XLink prev_xlink = base;
+	for( XLink terminus_xlink : terminii )
 	{
-		ASSERT( db->HasRow( base ) )(base);
-		for( XLink terminus_xlink : terminii )
-			ASSERT( db->HasRow( terminus_xlink ) )(terminus_xlink);
-	}
+		ASSERT( db->HasRow( terminus_xlink ) )(terminus_xlink);
+		
+		ASSERT( dfr.Compare3Way( prev_xlink, terminus_xlink ) < 0 ); // strict: no repeated XLinks
+			
+		prev_xlink = terminus_xlink;
+	}	
 }

@@ -1,0 +1,34 @@
+#ifndef FZ_MERGE_HPP
+#define FZ_MERGE_HPP
+
+#include "common/common.hpp"
+#include "node/tree_ptr.hpp"
+#include "free_zone.hpp"
+#include "tree_zone.hpp"
+#include "../link.hpp"
+#include "duplicate.hpp"
+#include "../scr_engine.hpp"
+#include "commands.hpp"
+
+namespace SR 
+{
+
+class DeclareTreeZoneCommand;
+
+// ------------------------- FreeZoneMerger --------------------------
+
+class FreeZoneMerger
+{
+public:	
+	FreeZoneMerger();
+	
+	// Can change the supplied shared ptr
+	void Run( shared_ptr<ZoneExpression> &root_expr );
+	
+	// Just ASSERT no empty zones
+	void Check( shared_ptr<ZoneExpression> &root_expr );
+};
+
+}
+
+#endif

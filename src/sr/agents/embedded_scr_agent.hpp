@@ -29,7 +29,7 @@ public:
     virtual void MaybeChildrenPlanOverlay( PatternLink me_plink, 
                                   PatternLink under_plink );
 
-    FreeZoneExprPtr GenFreeZoneExprImpl( const ReplaceKit &kit, 
+    ReplaceExprPtr GenReplaceExprImpl( const ReplaceKit &kit, 
                                     PatternLink me_plink, 
                                     XLink key_xlink ) final;
 

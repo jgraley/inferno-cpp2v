@@ -520,14 +520,14 @@ bool AgentCommon::ReplaceKeyerQuery( PatternLink me_plink,
 TreePtr<Node> AgentCommon::BuildForBuildersAnalysis( PatternLink me_plink )
 {
 	Agent::ReplaceKit kit { nullptr };
-	auto commands = GenFreeZoneExpr(kit, me_plink);
+	auto commands = GenReplaceExpr(kit, me_plink);
     FreeZone zone = RunForBuilder( commands.get() );     
     return zone.GetBaseNode();
 }
 
 
-Agent::FreeZoneExprPtr AgentCommon::GenFreeZoneExpr( const ReplaceKit &kit, 
-                                                PatternLink me_plink )
+Agent::ReplaceExprPtr AgentCommon::GenReplaceExpr( const ReplaceKit &kit, 
+                                                   PatternLink me_plink )
 {
     INDENT("C");
     ASSERT( me_plink.GetChildAgent() == this );
@@ -543,13 +543,13 @@ Agent::FreeZoneExprPtr AgentCommon::GenFreeZoneExpr( const ReplaceKit &kit,
 		      (*this)(" keyed with non-final node ")(key_xlink)("\n"); 
     }
 
-    return GenFreeZoneExprImpl( kit, me_plink, key_xlink );
+    return GenReplaceExprImpl( kit, me_plink, key_xlink );
 }
 
 
-Agent::FreeZoneExprPtr AgentCommon::GenFreeZoneExprImpl( const ReplaceKit &kit, 
-                                                         PatternLink me_plink, 
-                                                         XLink key_xlink )
+Agent::ReplaceExprPtr AgentCommon::GenReplaceExprImpl( const ReplaceKit &kit, 
+                                                       PatternLink me_plink, 
+                                                       XLink key_xlink )
 {
     // Default replace behaviour to just use the X subtree we keyed to, so we need to be keyed
 	ASSERT(key_xlink)("Agent ")(*this)(" in replace context is not keyed but needs to be");

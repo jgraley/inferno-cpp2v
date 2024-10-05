@@ -528,7 +528,7 @@ void StandardAgent::MaybeChildrenPlanOverlay( PatternLink me_plink,
 }
 
 
-Agent::FreeZoneExprPtr StandardAgent::GenFreeZoneExprImpl( const ReplaceKit &kit, 
+Agent::ReplaceExprPtr StandardAgent::GenReplaceExprImpl( const ReplaceKit &kit, 
                                                       PatternLink me_plink, 
                                                       XLink key_xlink ) 
 {
@@ -559,7 +559,7 @@ Agent::FreeZoneExprPtr StandardAgent::GenFreeZoneExprImpl( const ReplaceKit &kit
 }
 
 
-Agent::FreeZoneExprPtr StandardAgent::GenFreeZoneExprOverlay( const ReplaceKit &kit, 
+Agent::ReplaceExprPtr StandardAgent::GenFreeZoneExprOverlay( const ReplaceKit &kit, 
                                                          PatternLink me_plink, 
                                                          XLink under_xlink )  // overlaying
 {
@@ -588,7 +588,7 @@ Agent::FreeZoneExprPtr StandardAgent::GenFreeZoneExprOverlay( const ReplaceKit &
     ASSERT( dest->IsFinal() )("About to build non-final ")(*dest)("\n"); 
 
     // Stuff for creating commands
-    list<Agent::FreeZoneExprPtr> child_commands;    
+    list<Agent::ReplaceExprPtr> child_commands;    
     FreeZone zone = FreeZone::CreateSubtree(dest);
 
     // Loop over all the elements of under_node and dest that do not appear in pattern or
@@ -656,7 +656,7 @@ Agent::FreeZoneExprPtr StandardAgent::GenFreeZoneExprOverlay( const ReplaceKit &
 					ASSERT( my_elt )("Some element of member %d (", j)(*my_con)(") of ")(*this)(" was nullptr\n");
 					TRACE("Got ")(*my_elt)("\n");
 					PatternLink my_elt_plink( this, &my_elt );
-					child_commands.push_back( my_elt_plink.GetChildAgent()->GenFreeZoneExpr(kit, my_elt_plink) );				
+					child_commands.push_back( my_elt_plink.GetChildAgent()->GenReplaceExpr(kit, my_elt_plink) );				
 				}
 			}	
 			else
@@ -686,7 +686,7 @@ Agent::FreeZoneExprPtr StandardAgent::GenFreeZoneExprOverlay( const ReplaceKit &
 				ASSERT(	my_singular );
 				ASSERT( *my_singular ); // Should not have marked this one for overlay if NULL
 				PatternLink my_singular_plink( this, my_singular );                    
-				child_commands.push_back( my_singular_plink.GetChildAgent()->GenFreeZoneExpr(kit, my_singular_plink) );           
+				child_commands.push_back( my_singular_plink.GetChildAgent()->GenReplaceExpr(kit, my_singular_plink) );           
 			}		
 			else
 			{
@@ -704,7 +704,7 @@ Agent::FreeZoneExprPtr StandardAgent::GenFreeZoneExprOverlay( const ReplaceKit &
     return make_shared<PopulateFreeZoneOperator>( move(zone), move(child_commands) );         
 }
 
-Agent::FreeZoneExprPtr StandardAgent::GenFreeZoneExprNormal( const ReplaceKit &kit, 
+Agent::ReplaceExprPtr StandardAgent::GenFreeZoneExprNormal( const ReplaceKit &kit, 
                                                         PatternLink me_plink ) 
 {
 	INDENT("N");
@@ -723,7 +723,7 @@ Agent::FreeZoneExprPtr StandardAgent::GenFreeZoneExprNormal( const ReplaceKit &k
     vector< Itemiser::Element * > dest_items = dest->Itemise(); 
 
     // Stuff for creating commands
-    list<Agent::FreeZoneExprPtr> child_commands;
+    list<Agent::ReplaceExprPtr> child_commands;
     FreeZone zone = FreeZone::CreateSubtree(dest);
 
     TRACE("Copying %d members pattern=", dest_items.size())(*this)(" dest=")(*dest)("\n");
@@ -752,7 +752,7 @@ Agent::FreeZoneExprPtr StandardAgent::GenFreeZoneExprNormal( const ReplaceKit &k
                 zone.AddTerminus( make_shared<ContainerTerminus>(dest_con, dest_it) );    
 
                 PatternLink my_elt_plink( this, &my_elt );
-				child_commands.push_back( my_elt_plink.GetChildAgent()->GenFreeZoneExpr(kit, my_elt_plink) );               
+				child_commands.push_back( my_elt_plink.GetChildAgent()->GenReplaceExpr(kit, my_elt_plink) );               
             }
         }            
         else if( TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[i]) )
@@ -763,7 +763,7 @@ Agent::FreeZoneExprPtr StandardAgent::GenFreeZoneExprNormal( const ReplaceKit &k
             zone.AddTerminus( make_shared<SingularTerminus>(dest_singular) );            
 
             PatternLink my_singular_plink( this, my_singular );                    
-			child_commands.push_back( my_singular_plink.GetChildAgent()->GenFreeZoneExpr(kit, my_singular_plink) );           
+			child_commands.push_back( my_singular_plink.GetChildAgent()->GenReplaceExpr(kit, my_singular_plink) );           
         }
         else
         {

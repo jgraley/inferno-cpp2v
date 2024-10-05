@@ -32,12 +32,12 @@ void EmbeddedSCRAgent::MaybeChildrenPlanOverlay( PatternLink me_plink,
 }
 
 
-Agent::FreeZoneExprPtr EmbeddedSCRAgent::GenFreeZoneExprImpl( const ReplaceKit &kit, 
+Agent::ReplaceExprPtr EmbeddedSCRAgent::GenReplaceExprImpl( const ReplaceKit &kit, 
                                                          PatternLink me_plink, 
                                                          XLink key_xlink )
 {   
 	// Use colo algorithm but add marker
-    Agent::FreeZoneExprPtr child_command = ColocatedAgent::GenFreeZoneExprImpl(kit, me_plink, key_xlink);
+    Agent::ReplaceExprPtr child_command = ColocatedAgent::GenReplaceExprImpl(kit, me_plink, key_xlink);
     
     auto child_pzc = dynamic_cast<PopulateZoneOperator *>(child_command.get());
     ASSERT( child_pzc );

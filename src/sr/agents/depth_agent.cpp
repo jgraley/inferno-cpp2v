@@ -29,7 +29,7 @@ shared_ptr<PatternQuery> DepthAgent::GetPatternQuery() const
 }
 
 
-Agent::FreeZoneExprPtr DepthAgent::GenFreeZoneExprImpl( const ReplaceKit &kit, 
+Agent::ReplaceExprPtr DepthAgent::GenReplaceExprImpl( const ReplaceKit &kit, 
                                                    PatternLink me_plink, 
                                                    XLink key_xlink ) 
 {
@@ -37,8 +37,8 @@ Agent::FreeZoneExprPtr DepthAgent::GenFreeZoneExprImpl( const ReplaceKit &kit,
     
     // Recurse at the terminus
     PatternLink terminus_plink(this, &terminus);
-    list<Agent::FreeZoneExprPtr> child_commands;
-    child_commands.push_back( terminus_plink.GetChildAgent()->GenFreeZoneExpr(kit, terminus_plink) );
+    list<Agent::ReplaceExprPtr> child_commands;
+    child_commands.push_back( terminus_plink.GetChildAgent()->GenReplaceExpr(kit, terminus_plink) );
 
     // Make a tree zone for the nodes we covered
     XLink terminus_key_xlink = my_scr_engine->GetReplaceKey( terminus_plink );

@@ -33,7 +33,7 @@ bool BuilderAgent::ReplaceKeyerQuery( PatternLink me_plink,
 }
  
  
-Agent::FreeZoneExprPtr BuilderAgent::GenFreeZoneExprImpl( const ReplaceKit &kit, 
+Agent::ReplaceExprPtr BuilderAgent::GenReplaceExprImpl( const ReplaceKit &kit, 
                                                           PatternLink me_plink, 
                                                           XLink key_xlink )
 {

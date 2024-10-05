@@ -14,33 +14,33 @@ namespace SR
 {
 class XTreeDatabase;
 
-// ------------------------- FreeZoneExpression --------------------------
+// ------------------------- ZoneExpression --------------------------
 
-class FreeZoneExpression : public Traceable
+class ZoneExpression : public Traceable
 {
 public:	
 	virtual unique_ptr<FreeZone> Evaluate() const = 0;
-	virtual void ForChildren(function<void(shared_ptr<FreeZoneExpression> &expr)> func) = 0;
+	virtual void ForChildren(function<void(shared_ptr<ZoneExpression> &expr)> func) = 0;
 			                        
-	static void ForDepthFirstWalk( shared_ptr<FreeZoneExpression> &base,
-								   function<void(shared_ptr<FreeZoneExpression> &expr)> func_in,
-								   function<void(shared_ptr<FreeZoneExpression> &expr)> func_out );
+	static void ForDepthFirstWalk( shared_ptr<ZoneExpression> &base,
+								   function<void(shared_ptr<ZoneExpression> &expr)> func_in,
+								   function<void(shared_ptr<ZoneExpression> &expr)> func_out );
 
-	virtual void DepthFirstWalkImpl(function<void(shared_ptr<FreeZoneExpression> &expr)> func_in,
-			                        function<void(shared_ptr<FreeZoneExpression> &expr)> func_out) = 0;
+	virtual void DepthFirstWalkImpl(function<void(shared_ptr<ZoneExpression> &expr)> func_in,
+			                        function<void(shared_ptr<ZoneExpression> &expr)> func_out) = 0;
 };
 
 // ------------------------- PopulateZoneOperator --------------------------
 
 // Construct with any zone and optional marker M. On evaluate: populate the
 // zone, apply marker and return the resulting FreeZone. 
-class PopulateZoneOperator : public FreeZoneExpression
+class PopulateZoneOperator : public ZoneExpression
 {
 public:
-	typedef list<shared_ptr<FreeZoneExpression>>::iterator ChildExpressionIterator;
+	typedef list<shared_ptr<ZoneExpression>>::iterator ChildExpressionIterator;
 	
 protected:
-    PopulateZoneOperator( list<shared_ptr<FreeZoneExpression>> &&child_expressions_ );
+    PopulateZoneOperator( list<shared_ptr<ZoneExpression>> &&child_expressions_ );
     PopulateZoneOperator();
 
 public:
@@ -54,21 +54,21 @@ public:
     int GetNumChildExpressions() const;
     ChildExpressionIterator GetChildrenBegin();
     ChildExpressionIterator GetChildrenEnd();
-	list<shared_ptr<FreeZoneExpression>> &GetChildExpressions();
-	const list<shared_ptr<FreeZoneExpression>> &GetChildExpressions() const;
-	list<shared_ptr<FreeZoneExpression>> &&MoveChildExpressions();
+	list<shared_ptr<ZoneExpression>> &GetChildExpressions();
+	const list<shared_ptr<ZoneExpression>> &GetChildExpressions() const;
+	list<shared_ptr<ZoneExpression>> &&MoveChildExpressions();
 	
     string GetChildExpressionsTrace() const;
 
-	void ForChildren(function<void(shared_ptr<FreeZoneExpression> &expr)> func) override;
+	void ForChildren(function<void(shared_ptr<ZoneExpression> &expr)> func) override;
 
 	void EvaluateWithFreeZone( FreeZone &free_zone ) const;	
 	
-	void DepthFirstWalkImpl(function<void(shared_ptr<FreeZoneExpression> &expr)> func_in,
-			                function<void(shared_ptr<FreeZoneExpression> &expr)> func_out) override;
+	void DepthFirstWalkImpl(function<void(shared_ptr<ZoneExpression> &expr)> func_in,
+			                function<void(shared_ptr<ZoneExpression> &expr)> func_out) override;
 
 private:
-	list<shared_ptr<FreeZoneExpression>> child_expressions;
+	list<shared_ptr<ZoneExpression>> child_expressions;
 };
 
 
@@ -82,7 +82,7 @@ private:
 class PopulateTreeZoneOperator : public PopulateZoneOperator
 {
 public:
-    PopulateTreeZoneOperator( TreeZone zone_, list<shared_ptr<FreeZoneExpression>> &&child_expressions );
+    PopulateTreeZoneOperator( TreeZone zone_, list<shared_ptr<ZoneExpression>> &&child_expressions );
     PopulateTreeZoneOperator( TreeZone zone_ );
     
     void AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&new_markers ) final;
@@ -93,7 +93,7 @@ public:
 	
 	unique_ptr<FreeZone> Evaluate() const final;	
     
-    shared_ptr<FreeZoneExpression> DuplicateToFree() const;
+    shared_ptr<ZoneExpression> DuplicateToFree() const;
     
 	string GetTrace() const final;
     
@@ -112,14 +112,14 @@ private:
 class PopulateFreeZoneOperator : public PopulateZoneOperator
 {
 public:
-    PopulateFreeZoneOperator( FreeZone zone_, list<shared_ptr<FreeZoneExpression>> &&child_expressions );
+    PopulateFreeZoneOperator( FreeZone zone_, list<shared_ptr<ZoneExpression>> &&child_expressions );
     PopulateFreeZoneOperator( FreeZone zone_ );
 
     void AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&new_markers ) final;
     list<RequiresSubordinateSCREngine *> GetEmbeddedMarkers() const final;
 
 	ChildExpressionIterator SpliceOver( ChildExpressionIterator it_child, 
-                                        list<shared_ptr<FreeZoneExpression>> &&child_expressions );
+                                        list<shared_ptr<ZoneExpression>> &&child_expressions );
 
     FreeZone &GetZone() final;
     const FreeZone &GetZone() const final;

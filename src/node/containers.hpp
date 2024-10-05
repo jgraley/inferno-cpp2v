@@ -262,24 +262,22 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
     using ContainerInterface::erase;
     virtual int erase( const TreePtrInterface &gx ) // Simulating the SimpleAssociatedContaner API 
     {
-        // Like multiset, we erase all matching elemnts. Doing this though the API, bearing in 
-        // mind validity rules post-erase, is horrible. TODO now idiomatic to use the return of erase(it)
+        // Like multiset, we erase all matching elemnts. 
         value_type sx( value_type::InferredDynamicCast(gx) );
         typename Impl::iterator it;
         int n = 0;
-        do 
-        {
-            for( it=begin(); it != end(); ++it )
-            {
-                if( *it==sx )
-                {
-                    Impl::erase(it);
-                    n++;
-                    break;
-                }
-            }
-        }
-        while( it != end() );
+		for( it=begin(); it != end(); )
+		{
+			if( *it==sx )
+			{
+				it = Impl::erase(it);
+				n++;
+			}
+			else
+			{
+				++it;
+			}
+		}
         return n;
     }
 	virtual void push_back( const TreePtrInterface &gx )

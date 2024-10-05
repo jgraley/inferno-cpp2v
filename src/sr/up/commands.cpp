@@ -12,20 +12,20 @@ using namespace SR;
 // ------------------------- UpdateTreeCommand --------------------------
 
 UpdateTreeCommand::UpdateTreeCommand( const TreeZone &target_tree_zone_, 
-                                      shared_ptr<FreeZoneExpression> child_expression_ ) :
+                                      shared_ptr<ZoneExpression> child_expression_ ) :
 	target_tree_zone( target_tree_zone_ ),
 	child_expression( move(child_expression_) )
 {
 }
 
 
-shared_ptr<FreeZoneExpression> &UpdateTreeCommand::GetExpression()
+shared_ptr<ZoneExpression> &UpdateTreeCommand::GetExpression()
 {
 	return child_expression;
 }
 
 
-const shared_ptr<FreeZoneExpression> &UpdateTreeCommand::GetExpression() const
+const shared_ptr<ZoneExpression> &UpdateTreeCommand::GetExpression() const
 {
 	return child_expression;
 }

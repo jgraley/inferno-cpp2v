@@ -70,7 +70,7 @@ void StarAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
 }
 
 
-Agent::FreeZoneExprPtr StarAgent::GenFreeZoneExprImpl( const ReplaceKit &kit, 
+Agent::ReplaceExprPtr StarAgent::GenReplaceExprImpl( const ReplaceKit &kit, 
                                                   PatternLink me_plink, 
                                                   XLink key_xlink ) 
 {
@@ -91,7 +91,7 @@ Agent::FreeZoneExprPtr StarAgent::GenFreeZoneExprImpl( const ReplaceKit &kit,
     else
         ASSERT(0)("Please add new kind of container");
     
-    list<Agent::FreeZoneExprPtr> child_commands;
+    list<Agent::ReplaceExprPtr> child_commands;
     FreeZone zone = FreeZone::CreateSubtree(dest);
 
     TRACE("Walking container length %d\n", key_container->size() );

@@ -14,7 +14,7 @@ class SCREngine;
 class AndRuleEngine;
 class Agent;
 class XTreeDatabase;
-class FreeZoneExpression;
+class ZoneExpression;
 
 /// Interface for Agents, which co-exist with pattern nodes and implement the search and replace funcitonality for each pattern node.
 class Agent : public virtual Graphable,
@@ -27,7 +27,7 @@ public:
     };
 
     // really just to reduce the amount of typing if I change it
-    typedef shared_ptr<FreeZoneExpression> FreeZoneExprPtr;
+    typedef shared_ptr<ZoneExpression> ReplaceExprPtr;
 
     typedef Graphable::Phase Phase;
     
@@ -85,7 +85,7 @@ public:
                                     set<PatternLink> keyer_plinks ) = 0;
 
     virtual TreePtr<Node> BuildForBuildersAnalysis( PatternLink me_plink ) = 0;
-    virtual FreeZoneExprPtr GenFreeZoneExpr( const ReplaceKit &kit, 
+    virtual ReplaceExprPtr GenReplaceExpr( const ReplaceKit &kit, 
                                         PatternLink me_plink ) = 0;
     virtual list<PatternLink> GetChildren() const = 0;
     virtual list<PatternLink> GetVisibleChildren( Path v ) const = 0;                        

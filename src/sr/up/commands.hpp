@@ -13,7 +13,7 @@
 namespace SR 
 {
 class XTreeDatabase;	
-class FreeZoneExpression;
+class ZoneExpression;
 	
 // ------------------------- Command --------------------------
     
@@ -31,9 +31,9 @@ class UpdateTreeCommand : public Command
 {
 public:
     UpdateTreeCommand( const TreeZone &target_tree_zone_, 
-                       shared_ptr<FreeZoneExpression> child_expression_ );
-	shared_ptr<FreeZoneExpression> &GetExpression();
-	const shared_ptr<FreeZoneExpression> &GetExpression() const;
+                       shared_ptr<ZoneExpression> child_expression_ );
+	shared_ptr<ZoneExpression> &GetExpression();
+	const shared_ptr<ZoneExpression> &GetExpression() const;
 	
 	void Execute() const final;	
 
@@ -41,7 +41,7 @@ public:
 
 private:
 	TreeZone target_tree_zone;
-	shared_ptr<FreeZoneExpression> child_expression;
+	shared_ptr<ZoneExpression> child_expression;
 };
 
 // ------------------------- CommandSequence --------------------------

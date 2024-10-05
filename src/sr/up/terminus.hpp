@@ -73,7 +73,7 @@ private:
     ContainerInterface *dest_container;
     ContainerInterface::iterator it_dest_placeholder;
     
-    bool joined = false;
+    bool populated = false;
 };    
     
 }

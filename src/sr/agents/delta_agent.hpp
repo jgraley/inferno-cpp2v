@@ -22,7 +22,7 @@ public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;                
     virtual list<PatternLink> GetVisibleChildren( Path v ) const;
 
-    FreeZoneExprPtr GenFreeZoneExprImpl( const ReplaceKit &kit, 
+    ReplaceExprPtr GenReplaceExprImpl( const ReplaceKit &kit, 
                                     PatternLink me_plink, 
                                     XLink key_xlink ) final;
 

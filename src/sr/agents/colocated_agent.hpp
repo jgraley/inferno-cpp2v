@@ -28,7 +28,7 @@ public:
     virtual void RunColocatedQuery(XLink common_xlink) const;
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicColocatedQuery() const; 
 
-    FreeZoneExprPtr GenFreeZoneExprImpl( const ReplaceKit &kit, 
+    ReplaceExprPtr GenReplaceExprImpl( const ReplaceKit &kit, 
                                          PatternLink me_plink, 
                                          XLink key_xlink ) override;
 };

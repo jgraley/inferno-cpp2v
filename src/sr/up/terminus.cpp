@@ -58,8 +58,8 @@ void ContainerTerminus::Populate( TreePtr<Node> child_base,
                                   list<shared_ptr<Terminus>> child_terminii )
 {
 	ASSERT( child_base ); // perhaps we tried to populate with an empty zone?
-    ASSERT( !joined );
-    joined = true;
+    ASSERT( !populated );
+    populated = true;
 
     // We don't need the placeholder any more
 	ContainerInterface::iterator it_after = dest_container->erase( it_dest_placeholder );
