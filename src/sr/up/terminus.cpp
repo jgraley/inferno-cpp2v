@@ -61,9 +61,9 @@ void ContainerTerminus::Populate( TreePtr<Node> child_base,
     ASSERT( !joined );
     joined = true;
 
-	ContainerInterface::iterator it_after = it_dest_placeholder;
-
-	++it_after;
+    // We don't need the placeholder any more
+	ContainerInterface::iterator it_after = dest_container->erase2( it_dest_placeholder );
+	
     if( ContainerInterface *child_container = dynamic_cast<ContainerInterface *>(child_base.get()) )
     {            		
         // Child zone base has ContainerInterface, so it's a SubContainer. We get here due to         
@@ -93,12 +93,7 @@ void ContainerTerminus::Populate( TreePtr<Node> child_base,
         // Populate terminus with singular-based zone.
         ASSERT( child_base );
         dest_container->insert( *it_after.GetUnderlyingIterator(), child_base ); 
-    }
-    
-    // We don't need the placeholder any more
-    // TODO move up as initialise to it_after and drop the ++. But you'll need
-    // to add correct return value to erase() in OOStd
-    dest_container->erase( *it_dest_placeholder.GetUnderlyingIterator() );  
+    }    
 }
 
 

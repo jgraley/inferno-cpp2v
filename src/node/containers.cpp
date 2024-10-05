@@ -249,6 +249,12 @@ const TreePtrInterface &ContainerInterface::back()
 }
 
 
+const ContainerInterface::iterator &ContainerInterface::erase2( const iterator &it ) // TODO lose the 2, same for erase1()
+{
+    return erase1( *it.GetUnderlyingIterator() );
+}
+
+
 bool ContainerInterface::empty() 
 { 
     return begin()==end(); 

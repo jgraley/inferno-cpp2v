@@ -88,7 +88,8 @@ public:
     virtual const iterator &insert_front( const TreePtrInterface &gx ) = 0;
     virtual const TreePtrInterface &front();
     virtual const TreePtrInterface &back();
-    virtual void erase( const iterator_interface &it ) = 0;
+    virtual const iterator &erase1( const iterator_interface &it ) = 0;
+    const iterator &erase2( const iterator &it );
     virtual bool empty();
     virtual int size() const;
     //virtual int count( const TreePtrInterface &gx ) = 0;
@@ -179,16 +180,6 @@ struct ContainerCommon : virtual ContainerInterface, CONTAINER_IMPL
 
 	typedef iterator const_iterator;
 
-    virtual void erase( const typename ContainerInterface::iterator &it )
-    {
-        erase( *it.GetUnderlyingIterator() );
-    }
-    void erase( const typename ContainerInterface::iterator_interface &it ) override
-    {
-        auto cit = dynamic_cast<const iterator *>( &it );
-        ASSERT( cit ); // if this fails, you passed erase() the wrong kind of iterator
-        Impl::erase( *(typename Impl::iterator *)cit );    
-    }
     bool empty() override
     {
         return Impl::empty();
@@ -271,7 +262,7 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
     virtual int erase( const TreePtrInterface &gx ) // Simulating the SimpleAssociatedContaner API 
     {
         // Like multiset, we erase all matching elemnts. Doing this though the API, bearing in 
-        // mind validity rules post-erase, is horrible.
+        // mind validity rules post-erase, is horrible. TODO now idiomatic to use the return of erase()
         value_type sx( value_type::InferredDynamicCast(gx) );
         typename Impl::iterator it;
         int n = 0;
@@ -313,16 +304,6 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
 		Impl::push_front( sx );
 	}
 
-	// Covariant style only works with refs and pointers, so force begin/end to return refs safely
-	// This complies with STL's thread safety model. To quote SGI,
-	// "The SGI implementation of STL is thread-safe only in the sense that simultaneous accesses
-	// to distinct containers are safe, and simultaneous read accesses to to shared containers are
-	// safe. If multiple threads access a single container, and at least one thread may potentially
-	// write, then the user is responsible for ensuring mutual exclusion between the threads during
-	// the container accesses."
-	// So that's OK then.
-    iterator my_begin, my_end, my_insert;
-
     const iterator &begin() override
     {
     	my_begin.Impl::iterator::operator=( Impl::begin() );
@@ -338,8 +319,8 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
         // Like multiset, we do allow more than one copy of the same element
 		value_type sx( value_type::InferredDynamicCast(gx) );
         Impl::push_back( sx );
-        my_insert.Impl::iterator::operator=( prev(Impl::end()) );
-        return my_insert;
+        my_inserted.Impl::iterator::operator=( prev(Impl::end()) );
+        return my_inserted;
 	}
 	const iterator &insert( const ContainerInterface::iterator_interface &pos, 
                             const TreePtrInterface &gx ) override // Simulating the SimpleAssociatedContaner API 
@@ -348,16 +329,16 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
         auto posit = dynamic_cast<const iterator *>( &pos );
         ASSERT( posit ); // if this fails, you passed insert() the wrong kind of iterator
         value_type sx( value_type::InferredDynamicCast(gx) );
-        my_insert.Impl::iterator::operator=( Impl::insert( *(typename Impl::iterator *)posit, sx ) );
-        return my_insert;
+        my_inserted.Impl::iterator::operator=( Impl::insert( *(typename Impl::iterator *)posit, sx ) );
+        return my_inserted;
 	}
 	const iterator &insert_front( const TreePtrInterface &gx ) override // Simulating the SimpleAssociatedContaner API 
 	{
         // Like multiset, we do allow more than one copy of the same element
 		value_type sx( value_type::InferredDynamicCast(gx) );
         Impl::push_front( sx );
-        my_insert.Impl::iterator::operator=( prev(Impl::end()) );
-        return my_insert;
+        my_inserted.Impl::iterator::operator=( prev(Impl::end()) );
+        return my_inserted;
     }
 
     const TreePtr<VALUE_TYPE> &front() override
@@ -369,6 +350,14 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
     {
         ASSERT( !ContainerCommon<Impl>::empty() )("Attempting to obtain back() of an empty sequence");
         return Impl::back();
+    }
+
+    const iterator &erase1( const typename ContainerInterface::iterator_interface &it ) override
+    {
+        auto cit = dynamic_cast<const iterator *>( &it );
+        ASSERT( cit ); // if this fails, you passed erase() the wrong kind of iterator        
+        my_erased.Impl::iterator::operator=( Impl::erase( *(typename Impl::iterator *)cit ) );   
+        return my_erased;
     }
 
 	Sequential( const ContainerInterface &cns )
@@ -404,6 +393,16 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
 	{
 		push_back( v );
 	}
+
+	// Covariant style only works with refs and pointers, so force begin/end to return refs safely
+	// This complies with STL's thread safety model. To quote SGI,
+	// "The SGI implementation of STL is thread-safe only in the sense that simultaneous accesses
+	// to distinct containers are safe, and simultaneous read accesses to to shared containers are
+	// safe. If multiple threads access a single container, and at least one thread may potentially
+	// write, then the user is responsible for ensuring mutual exclusion between the threads during
+	// the container accesses."
+	// So that's OK then.
+    iterator my_begin, my_end, my_inserted, my_erased;
 };
 
 
@@ -453,7 +452,6 @@ struct SimpleAssociativeContainer : virtual ContainerCommon< ASSOCIATIVE_IMPL< T
 		return Impl::erase( sx );
 	}
 
-	iterator my_begin, my_end, my_insert;
     const iterator &begin() override
     {
     	my_begin.Impl::iterator::operator=( Impl::begin() );
@@ -471,11 +469,11 @@ struct SimpleAssociativeContainer : virtual ContainerCommon< ASSOCIATIVE_IMPL< T
 		value_type sx( value_type::InferredDynamicCast(gx) );
 		auto p = Impl::insert( sx );
         if( p.second )
-            my_insert.Impl::iterator::operator=( p.first );
+            my_inserted.Impl::iterator::operator=( p.first );
         else
-            my_insert.Impl::iterator::operator=( Impl::end() );
-        my_insert.owner = this;
-        return my_insert;
+            my_inserted.Impl::iterator::operator=( Impl::end() );
+        my_inserted.owner = this;
+        return my_inserted;
 	}
 	const iterator &insert( const ContainerInterface::iterator_interface &pos, 
                             const TreePtrInterface &gx ) override
@@ -484,9 +482,9 @@ struct SimpleAssociativeContainer : virtual ContainerCommon< ASSOCIATIVE_IMPL< T
         ASSERT( posit ); // if this fails, you passed insert() the wrong kind of iterator
 		value_type sx( value_type::InferredDynamicCast(gx) );
 		auto p = Impl::insert( *(typename Impl::iterator *)posit, sx );
-        my_insert.Impl::iterator::operator=( p.first );
-        my_insert.owner = this;
-        return my_insert;
+        my_inserted.Impl::iterator::operator=( p.first );
+        my_inserted.owner = this;
+        return my_inserted;
 	}
 	const iterator &insert_front( const TreePtrInterface &gx ) override
 	{
@@ -498,11 +496,11 @@ struct SimpleAssociativeContainer : virtual ContainerCommon< ASSOCIATIVE_IMPL< T
 		value_type sx(gx);
 		auto p = Impl::insert( sx );
         if( p.second )
-            my_insert.Impl::iterator::operator=( p.first );
+            my_inserted.Impl::iterator::operator=( p.first );
         else
-            my_insert.Impl::iterator::operator=( Impl::end() );
-        my_insert.owner = this;
-        return my_insert;
+            my_inserted.Impl::iterator::operator=( Impl::end() );
+        my_inserted.owner = this;
+        return my_inserted;
 	}
 	template<typename OTHER>
 	const iterator &insert( const typename ContainerInterface::iterator_interface &pos, 
@@ -510,15 +508,23 @@ struct SimpleAssociativeContainer : virtual ContainerCommon< ASSOCIATIVE_IMPL< T
 	{
 		value_type sx( value_type::InferredDynamicCast(gx) );
 		auto p = Impl::insert( pos, sx );
-        my_insert.Impl::iterator::operator=( p.first );
-        my_insert.owner = this;
-        return my_insert;
+        my_inserted.Impl::iterator::operator=( p.first );
+        my_inserted.owner = this;
+        return my_inserted;
 	}
 	template<typename OTHER>
 	const iterator &insert_front( const OTHER &gx )
 	{
 		return insert(gx);
 	}
+
+    const iterator &erase1( const typename ContainerInterface::iterator_interface &it ) override
+    {
+        auto cit = dynamic_cast<const iterator *>( &it );
+        ASSERT( cit ); // if this fails, you passed erase() the wrong kind of iterator        
+        my_erased.Impl::iterator::operator=( Impl::erase( *(typename Impl::iterator *)cit ) );   
+        return my_erased;
+    }
 
     SimpleAssociativeContainer( const ContainerInterface &cns )
 	{
@@ -553,6 +559,9 @@ struct SimpleAssociativeContainer : virtual ContainerCommon< ASSOCIATIVE_IMPL< T
 	{
 		insert( v );
 	}
+	
+	// Permit return by reference for covariance.
+	iterator my_begin, my_end, my_inserted, my_erased;
 };
 
 
