@@ -73,18 +73,18 @@ void ContainerTerminus::Populate( TreePtr<Node> child_base,
 			 ++it_child	)
         {
 			TreePtr<Node> child_element = (TreePtr<Node>)*it_child; 
-			dest_container->insert( *it_after.GetUnderlyingIterator(), child_element ); // inserts before it_after
+			ContainerInterface::iterator it_new = dest_container->insert( it_after, child_element ); // inserts before it_after
 
-			if( !child_element ) 
+			if( child_element == MakePlaceholder() ) 
 			{
-				// If child_element is NULL, the StarAgent's FZ terminates immediately at this element.
-				// That means it's the placeholder of that FZ's Terminus instance and child_container is
-				// the FZ base container. We need to build a new terminus for the FZ.
-				shared_ptr<ContainerTerminus> child_con_terminus = FindMatchingTerminus( child_container, it_child, child_terminii );
-												
-				ContainerInterface::iterator it_new_placeholder = it_after;
-				--it_new_placeholder; // back up to the newly inserted placeholder
-				*child_con_terminus = ContainerTerminus(dest_container, it_new_placeholder);							
+				// If child_element is a placeholder, the child FZ terminates immediately at this element.
+				// So child_element *IS* the placeholder of that FZ's Terminus instance and child_container IS
+				// the FZ base container. We need to build a new terminus for the FZ that uses our dest 
+				// container because that's what will be kept.
+				// Note: Kept: our container, child terminii
+				// Discarded: this terminus, child base, child container
+				shared_ptr<ContainerTerminus> child_con_terminus = FindMatchingTerminus( child_container, it_child, child_terminii );												
+				*child_con_terminus = ContainerTerminus(dest_container, it_new);							
 			}
         }                                    
     }
@@ -92,7 +92,7 @@ void ContainerTerminus::Populate( TreePtr<Node> child_base,
     {
         // Populate terminus with singular-based zone.
         ASSERT( child_base );
-        dest_container->insert( *it_after.GetUnderlyingIterator(), child_base ); 
+        dest_container->insert( it_after, child_base ); // inserts before it_after
     }    
 }
 
