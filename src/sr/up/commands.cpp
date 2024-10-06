@@ -21,13 +21,22 @@ UpdateTreeCommand::UpdateTreeCommand( const TreeZone &target_tree_zone_,
 
 shared_ptr<ZoneExpression> &UpdateTreeCommand::GetExpression()
 {
+	ASSERT( this );
 	return child_expression;
 }
 
 
 const shared_ptr<ZoneExpression> &UpdateTreeCommand::GetExpression() const
 {
+	ASSERT( this );
 	return child_expression;
+}
+
+
+const TreeZone &UpdateTreeCommand::GetTargetTreeZone() const
+{
+	ASSERT( this );
+	return target_tree_zone;
 }
 
 

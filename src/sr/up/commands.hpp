@@ -34,6 +34,7 @@ public:
                        shared_ptr<ZoneExpression> child_expression_ );
 	shared_ptr<ZoneExpression> &GetExpression();
 	const shared_ptr<ZoneExpression> &GetExpression() const;
+	const TreeZone &GetTargetTreeZone() const;
 	
 	void Execute() const final;	
 

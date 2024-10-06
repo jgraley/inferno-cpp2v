@@ -13,8 +13,6 @@
 namespace SR 
 {
 
-class DeclareTreeZoneCommand;
-
 // ------------------------- Runners --------------------------
 
 FreeZone RunForBuilder( const ZoneExpression *expr );

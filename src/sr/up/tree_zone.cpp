@@ -34,6 +34,15 @@ TreeZone::TreeZone( XTreeDatabase *db_, XLink base_, vector<XLink> terminii_ ) :
 }
 
 
+TreeZone::TreeZone( const TreeZone &other ) :
+	db( other.db ),
+	df_rel( other.df_rel ),
+    base( other.base ),
+    terminii( other.terminii )
+{
+}
+
+
 bool TreeZone::IsEmpty() const
 {
     // There must be a base, so the only way to be empty is to terminate at the base

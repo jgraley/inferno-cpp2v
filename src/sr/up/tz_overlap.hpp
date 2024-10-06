@@ -13,8 +13,6 @@
 namespace SR 
 {
 
-class DeclareTreeZoneCommand;
-
 // ------------------------- TreeZoneOverlapHandler --------------------------
 
 // To optimise:

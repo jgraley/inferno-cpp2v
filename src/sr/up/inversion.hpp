@@ -12,8 +12,26 @@
 
 namespace SR 
 {
+
+// Inversi works on commands, not expressions
+class TreeZoneInverter 
+{
+public:
+	TreeZoneInverter( const Command *initial_cmd, const XTreeDatabase *db );
 	
-// TODO
+	void Run();
+	
+	const CommandSequence &GetSplitSeq();
+
+private:
+	bool TryInvertOne();
+
+	const XTreeDatabase * const db;
+	const UpdateTreeCommand * const root_update_cmd;
+	const shared_ptr<ZoneExpression> root_expr;
+	const TreeZone root_tree_zone;
+	CommandSequence split_seq;
+};
 
 }
 

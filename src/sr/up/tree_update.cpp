@@ -45,6 +45,8 @@ void SR::RunForReplace( const Command *initial_cmd, XTreeDatabase *x_tree_db )
 
 	// TODO enact tree zone markers (here or in DB)
 
+	TreeZoneInverter inverter( initial_cmd, x_tree_db );
+	inverter.Run();
 	// TODO reductive inversion using Quark algo	
 
 	// TODO merge tree zones and check initial update command is now trivial

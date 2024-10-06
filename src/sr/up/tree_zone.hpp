@@ -29,6 +29,7 @@ public:
     static TreeZone CreateEmpty( XTreeDatabase *db, XLink base );
 
     explicit TreeZone( XTreeDatabase *db_, XLink base, vector<XLink> terminii );
+    TreeZone( const TreeZone &other );
       
     bool IsEmpty() const override;
 	int GetNumTerminii() const override;
