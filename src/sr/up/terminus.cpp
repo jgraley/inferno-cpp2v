@@ -155,6 +155,6 @@ string ContainerTerminus::GetTrace() const
 		si = "ERROR!";
 	else
 		si = to_string(i);
-    return "⌾"+dest_container->GetTypeName()+"["+si+" of "+to_string(dest_container->size())+" in dest]";
+    return "⌾"+dest_container->GetTypeName()+"["+si+" of "+to_string(dest_container->size())+"]";
 }
     

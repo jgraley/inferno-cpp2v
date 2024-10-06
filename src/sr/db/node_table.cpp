@@ -83,7 +83,7 @@ string NodeTable::Row::GetTrace() const
     string s = "(";
 	
 	s += " parents=" + Trace(parents);
-	s += "declarers=" + Trace(declarers);
+	s += " declarers=" + Trace(declarers);
     
     s += ")";
     return s;

@@ -36,6 +36,7 @@ public:
     TreePtr<Node> GetBaseNode() const override;
 
     XLink GetBaseXLink() const;
+    XLink &GetBaseXLink();
     set<XLink, DepthFirstRelation> GetTerminusXLinks() const;
 
     FreeZone Duplicate() const;

@@ -25,7 +25,7 @@ FreeZone SR::RunForBuilder( const ZoneExpression *expr )
 }
 
 
-void SR::RunForReplace( const Command *initial_cmd, XTreeDatabase *x_tree_db )
+void SR::RunForReplace( Command *initial_cmd, XTreeDatabase *x_tree_db )
 {
 	shared_ptr<ZoneExpression> expr = dynamic_cast<const UpdateTreeCommand &>(*initial_cmd).GetExpression();
 	
@@ -43,12 +43,17 @@ void SR::RunForReplace( const Command *initial_cmd, XTreeDatabase *x_tree_db )
 	
 	AltTreeZoneOrderingChecker( x_tree_db ).Check(expr);
 
-	// TODO enact tree zone markers (here or in DB)
+	// TODO enact tree zone markers (here or in DB)!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-	TreeZoneInverter inverter( initial_cmd, x_tree_db );
-	inverter.Run();
-	// TODO reductive inversion using Quark algo	
-
+	// Trial mode spins on first match!!
+	static int n = 0;
+	if( n++ == 97 && false )
+	{
+		TreeZoneInverter inverter( initial_cmd, x_tree_db ); 
+		inverter.Run();
+		ASSERTFAIL();
+	}
+	
 	// TODO merge tree zones and check initial update command is now trivial
 	
 	// Execute it

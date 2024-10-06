@@ -17,20 +17,23 @@ namespace SR
 class TreeZoneInverter 
 {
 public:
-	TreeZoneInverter( const Command *initial_cmd, const XTreeDatabase *db );
+	TreeZoneInverter( Command *initial_cmd, XTreeDatabase *db );
 	
 	void Run();
 	
-	const CommandSequence &GetSplitSeq();
+	shared_ptr<CommandSequence> GetIncrementalSeq();
 
 private:
-	bool TryInvertOne();
+	typedef pair<XLink, shared_ptr<ZoneExpression> *> LocatedZoneExpression;
 
-	const XTreeDatabase * const db;
-	const UpdateTreeCommand * const root_update_cmd;
-	const shared_ptr<ZoneExpression> root_expr;
+	LocatedZoneExpression TryFindFreeZoneExpr(LocatedZoneExpression lze_root);
+	void Invert(LocatedZoneExpression lzfe);
+
+	XTreeDatabase * const db;
+	UpdateTreeCommand * const root_update_cmd;
+	shared_ptr<ZoneExpression> *root_expr;
 	const TreeZone root_tree_zone;
-	CommandSequence split_seq;
+	shared_ptr<CommandSequence> incremental_seq;
 };
 
 }

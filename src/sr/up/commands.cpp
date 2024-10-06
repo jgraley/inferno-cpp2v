@@ -50,7 +50,7 @@ void UpdateTreeCommand::Execute() const
 
 string UpdateTreeCommand::GetTrace() const
 {
-	return "UpdateTreeCommand( \ntarget: "+Trace(target_tree_zone)+",\nsource: "+Trace(child_expression)+" )";
+	return "UpdateTreeCommand( \nsource: "+Trace(child_expression)+", \ntarget: "+Trace(target_tree_zone)+" )";
 }
 
 // ------------------------- CommandSequence --------------------------
@@ -66,12 +66,6 @@ void CommandSequence::Execute() const
 void CommandSequence::Add( shared_ptr<Command> new_cmd )
 {
     seq.push_back(move(new_cmd));
-}
-
-
-void CommandSequence::AddAtStart( shared_ptr<Command> new_cmd )
-{
-    seq.push_front(move(new_cmd));
 }
 
 

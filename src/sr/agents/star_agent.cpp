@@ -92,20 +92,20 @@ Agent::ReplaceExprPtr StarAgent::GenReplaceExprImpl( const ReplaceKit &kit,
         ASSERT(0)("Please add new kind of container");
     
     list<Agent::ReplaceExprPtr> child_commands;
-    FreeZone zone = FreeZone::CreateSubtree(dest);
+    FreeZone dest_zone = FreeZone::CreateSubtree(dest);
 
     TRACE("Walking container length %d\n", key_container->size() );
     ContainerInterface *dest_container = dynamic_cast<ContainerInterface *>(dest.get());
     for( const TreePtrInterface &key_elt : *key_container )
     {
         ContainerInterface::iterator dest_it = dest_container->insert( ContainerTerminus::MakePlaceholder() );
-        zone.AddTerminus( make_shared<ContainerTerminus>(dest_container, dest_it) );    
+        dest_zone.AddTerminus( make_shared<ContainerTerminus>(dest_container, dest_it) );    
 
         TreeZone child_zone = TreeZone::CreateSubtree( kit.x_tree_db, XLink(key_node, &key_elt) );
 	    child_commands.push_back( make_shared<PopulateTreeZoneOperator>(move(child_zone)) );
     }
 
-    return make_shared<PopulateFreeZoneOperator>( move(zone), move(child_commands) );    
+    return make_shared<PopulateFreeZoneOperator>( move(dest_zone), move(child_commands) );    
 }
 
 

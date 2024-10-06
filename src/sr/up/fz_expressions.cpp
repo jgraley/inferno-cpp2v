@@ -97,8 +97,14 @@ catch( BreakException )
 }		       
 
 
-void PopulateZoneOperator::EvaluateWithFreeZone( FreeZone &free_zone ) const	
+void PopulateZoneOperator::EvaluateChildrenAndPopulate( FreeZone &free_zone ) const	
 {
+	// If no child expressions then either:
+	// - zone has no terminii and we're at a subtree -> no action required
+	// - zone's terminii are "exposed" and should be left in place
+	if( child_expressions.empty() )
+		return;
+	
 	//FTRACE(free_zone)("\n");
 	list<unique_ptr<FreeZone>> child_zones;
 	for( const shared_ptr<ZoneExpression> &child_expression : child_expressions )
@@ -140,7 +146,8 @@ PopulateTreeZoneOperator::PopulateTreeZoneOperator( TreeZone zone_ ) :
 	PopulateZoneOperator(),
 	zone(zone_)
 {
-	ASSERT( zone.GetNumTerminii() == 0 );	
+	// If zone has terminii, they will be "exposed" and will appear  
+	// in the free zone returned by Evaluate.
 }
 
 
@@ -177,7 +184,7 @@ unique_ptr<FreeZone> PopulateTreeZoneOperator::Evaluate() const
 	for( RequiresSubordinateSCREngine *ea : embedded_markers )
 		temp_free_zone->MarkBaseForEmbedded(ea);		
 	
-	EvaluateWithFreeZone( *temp_free_zone );
+	EvaluateChildrenAndPopulate( *temp_free_zone );
 	return temp_free_zone;
 }
 
@@ -197,7 +204,7 @@ string PopulateTreeZoneOperator::GetTrace() const
 #ifdef RECURSIVE_TRACE_OPERATOR
 	return "PopulateTreeZoneOperator( \nzone: "+Trace(zone)+",\nchildren: "+GetChildExpressionsTrace()+" )";
 #else
-	return "PopulateFreeZoneOperator( zone: "+Trace(zone)+", "+Trace(GetNumChildExpressions())+" children )";
+	return "PopulateTreeZoneOperator( zone: "+Trace(zone)+", "+Trace(GetNumChildExpressions())+" children )";
 #endif
 }
 
@@ -216,7 +223,8 @@ PopulateFreeZoneOperator::PopulateFreeZoneOperator( FreeZone zone_ ) :
    	PopulateZoneOperator(),
    	zone(zone_)
 {
-	ASSERT( zone.GetNumTerminii() == 0 );	
+	// If zone has terminii, they will be "exposed" and will remain 
+	// in the zone returned by Evaluate.
 }
 
 
@@ -265,7 +273,7 @@ const FreeZone &PopulateFreeZoneOperator::GetZone() const
 unique_ptr<FreeZone> PopulateFreeZoneOperator::Evaluate() const
 {
 	auto temp_free_zone = make_unique<FreeZone>(zone);
-	EvaluateWithFreeZone( *temp_free_zone );
+	EvaluateChildrenAndPopulate( *temp_free_zone );
 	return temp_free_zone;
 }
 

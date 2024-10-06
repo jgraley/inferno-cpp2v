@@ -68,6 +68,12 @@ XLink TreeZone::GetBaseXLink() const
 }
 
 
+XLink &TreeZone::GetBaseXLink()
+{
+    return base;
+}
+
+
 set<XLink, DepthFirstRelation> TreeZone::GetTerminusXLinks() const
 {
     return terminii;

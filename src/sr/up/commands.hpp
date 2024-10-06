@@ -53,7 +53,6 @@ public:
 	void Execute() const final;	
 
 	void Add( shared_ptr<Command> new_cmd );
-	void AddAtStart( shared_ptr<Command> new_cmd );
     bool IsEmpty() const;
     list<shared_ptr<Command>> &GetCommands();
     void Clear();    

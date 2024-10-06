@@ -62,7 +62,7 @@ public:
 
 	void ForChildren(function<void(shared_ptr<ZoneExpression> &expr)> func) override;
 
-	void EvaluateWithFreeZone( FreeZone &free_zone ) const;	
+	void EvaluateChildrenAndPopulate( FreeZone &free_zone ) const;	
 	
 	void DepthFirstWalkImpl(function<void(shared_ptr<ZoneExpression> &expr)> func_in,
 			                function<void(shared_ptr<ZoneExpression> &expr)> func_out) override;

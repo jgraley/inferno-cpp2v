@@ -306,7 +306,7 @@ void Tracer::PrintPrefix(int local_indent)
         clog << sprogress;
     else
         Descend::Indent( sprogress );
-    clog << string(local_indent, ' ');
+    clog << string(local_indent*4, ' ');
 }
 
 
