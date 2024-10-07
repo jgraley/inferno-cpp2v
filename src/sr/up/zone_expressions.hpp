@@ -1,5 +1,5 @@
-#ifndef FZ_EXPRESSIONS_HPP
-#define FZ_EXPRESSIONS_HPP
+#ifndef ZONE_EXPRESSIONS_HPP
+#define ZONE_EXPRESSIONS_HPP
 
 #include "common/common.hpp"
 #include "node/tree_ptr.hpp"
@@ -47,6 +47,7 @@ public:
     void AddEmbeddedMarker( RequiresSubordinateSCREngine *new_marker );
     virtual void AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&new_markers ) = 0;
     virtual list<RequiresSubordinateSCREngine *> GetEmbeddedMarkers() const = 0;
+    virtual void ClearEmbeddedMarkers() = 0;
     
     virtual Zone &GetZone() = 0;
     virtual const Zone &GetZone() const = 0;
@@ -87,6 +88,7 @@ public:
     
     void AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&new_markers ) final;
     list<RequiresSubordinateSCREngine *> GetEmbeddedMarkers() const final;
+    void ClearEmbeddedMarkers() final;
 
     TreeZone &GetZone() override;
     const TreeZone &GetZone() const override;
@@ -117,6 +119,7 @@ public:
 
     void AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&new_markers ) final;
     list<RequiresSubordinateSCREngine *> GetEmbeddedMarkers() const final;
+    void ClearEmbeddedMarkers() final;
 
 	ChildExpressionIterator SpliceOver( ChildExpressionIterator it_child, 
                                         list<shared_ptr<ZoneExpression>> &&child_expressions );

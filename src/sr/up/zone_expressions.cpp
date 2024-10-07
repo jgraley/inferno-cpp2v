@@ -1,4 +1,4 @@
-#include "fz_expressions.hpp"
+#include "zone_expressions.hpp"
 
 #include "db/x_tree_database.hpp"
 #include "common/read_args.hpp"
@@ -163,6 +163,12 @@ list<RequiresSubordinateSCREngine *> PopulateTreeZoneOperator::GetEmbeddedMarker
 }
 
 
+void PopulateTreeZoneOperator::ClearEmbeddedMarkers()
+{
+	embedded_markers.clear();
+}
+
+
 TreeZone &PopulateTreeZoneOperator::GetZone() 
 {
     return zone;
@@ -238,9 +244,14 @@ void PopulateFreeZoneOperator::AddEmbeddedMarkers( list<RequiresSubordinateSCREn
 
 list<RequiresSubordinateSCREngine *> PopulateFreeZoneOperator::GetEmbeddedMarkers() const
 {
-	return {}; // Rule #726 means therer aren't any
+	return {}; // Rule #726 means there aren't any
 }
 
+
+void PopulateFreeZoneOperator::ClearEmbeddedMarkers()
+{
+	// Rule #726 means there aren't any
+}
 
 
 PopulateZoneOperator::ChildExpressionIterator PopulateFreeZoneOperator::SpliceOver( ChildExpressionIterator it_child, 

@@ -6,7 +6,7 @@
 #include "common/lambda_loops.hpp"
 #include "commands.hpp"
 #include "tz_relation.hpp"
-#include "empty_zone.hpp"
+#include "up_utils.hpp"
 #include "tz_overlap.hpp"
 #include "tz_ordering.hpp"
 #include "fz_merge.hpp"
@@ -43,7 +43,9 @@ void SR::RunForReplace( Command *initial_cmd, XTreeDatabase *x_tree_db )
 	
 	AltTreeZoneOrderingChecker( x_tree_db ).Check(expr);
 
-	// TODO enact tree zone markers (here or in DB)!!!!!!!!!!!!!!!!!!!!!!!!!!
+	//Trouble: we'll mark tree zones that will subsequently get duplciated.
+	// Probably have to do this marking during inversion
+	//ZoneMarkEnacter( x_tree_db ).Run(expr);
 
 	// Trial mode spins on first match!!
 	static int n = 0;
