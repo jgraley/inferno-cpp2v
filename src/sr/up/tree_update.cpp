@@ -14,50 +14,60 @@
 
 #include <iostream>
 
+
 using namespace SR;
 
 // ------------------------- Runners --------------------------
 
-FreeZone SR::RunForBuilder( const ZoneExpression *expr )
+TreeUpdater::TreeUpdater(XTreeDatabase *x_tree_db) :
+    db( x_tree_db )
+{
+}
+
+
+FreeZone TreeUpdater::Evaluate( const ZoneExpression *expr )
 {
 	unique_ptr<FreeZone> free_zone = expr->Evaluate();   
 	return *free_zone;
 }
 
 
-void SR::RunForReplace( Command *initial_cmd, XTreeDatabase *x_tree_db )
+void TreeUpdater::TransformToIncrementalAndExecute( shared_ptr<Command> initial_cmd )
 {
+	ASSERT( db );
+	
 	shared_ptr<ZoneExpression> expr = dynamic_cast<const UpdateTreeCommand &>(*initial_cmd).GetExpression();
 	
 	EmptyZoneElider().Run(expr);
 	EmptyZoneElider().Check(expr);
 	
-	TreeZoneOverlapHandler( x_tree_db ).Run(expr);
-	TreeZoneOverlapHandler( x_tree_db ).Check(expr);
+	TreeZoneOverlapHandler( db ).Run(expr);
+	TreeZoneOverlapHandler( db ).Check(expr);
 	
-	TreeZoneOrderingHandler( x_tree_db ).Run(expr);
-	TreeZoneOrderingHandler( x_tree_db ).Check(expr);
+	TreeZoneOrderingHandler( db ).Run(expr);
+	TreeZoneOrderingHandler( db ).Check(expr);
 	
 	FreeZoneMerger().Run(expr);  // TODO fix me!!
 	FreeZoneMerger().Check(expr);
 	
-	AltTreeZoneOrderingChecker( x_tree_db ).Check(expr);
+	AltTreeZoneOrderingChecker( db ).Check(expr);
 
-	//Trouble: we'll mark tree zones that will subsequently get duplciated.
-	// Probably have to do this marking during inversion
-	//ZoneMarkEnacter( x_tree_db ).Run(expr);
-
-	// Trial mode spins on first match!!
-	static int n = 0;
-	if( n++ == 97 && false )
+	if( ReadArgs::use_incremental )
 	{
-		TreeZoneInverter inverter( initial_cmd, x_tree_db ); 
-		inverter.Run();
-		ASSERTFAIL();
+		// Enact the tree zones that will stick around
+		ZoneMarkEnacter(db).Run(expr);
+
+		// Inversion generates sequence of "small" update commands 
+		TreeZoneInverter inverter( db ); 
+		shared_ptr<Command> incremental_cmd = inverter.Run(initial_cmd);	
+			
+		FTRACE(incremental_cmd)("\n");		
+			
+		// Execute it
+		incremental_cmd->Execute();   
 	}
-	
-	// TODO merge tree zones and check initial update command is now trivial
-	
-	// Execute it
-	initial_cmd->Execute();   
+	else
+	{
+		initial_cmd->Execute();
+	}
 }

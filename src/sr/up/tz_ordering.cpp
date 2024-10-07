@@ -95,7 +95,7 @@ void TreeZoneOrderingHandler::RunForTreeZone( shared_ptr<PopulateTreeZoneOperato
 	// range of descendent tree zones and recurse.
 	TreeZone tree_zone = ptz_op->GetZone();
 	TreeZone::TerminusIterator it_t = tree_zone.GetTerminiiBegin();
-	ptz_op->ForChildren([&](shared_ptr<ZoneExpression> &child_expr)	
+	ptz_op->ForChildren( [&](shared_ptr<ZoneExpression> &child_expr)	
 	{
 		XLink range_begin = *it_t; // inclusive (terminus XLink equals base XLink of attached tree zone)
 		XLink range_end = db->GetLastDescendant(range_begin); // inclusive (is same or child of range_begin)

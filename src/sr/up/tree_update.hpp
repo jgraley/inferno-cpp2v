@@ -15,9 +15,17 @@ namespace SR
 
 // ------------------------- Runners --------------------------
 
-FreeZone RunForBuilder( const ZoneExpression *expr );
-void RunForReplace( Command *cmd, XTreeDatabase *x_tree_db );
+class TreeUpdater
+{
+public:
+	TreeUpdater(XTreeDatabase *x_tree_db = nullptr); // db optional
 	
+	FreeZone Evaluate( const ZoneExpression *expr );
+	void TransformToIncrementalAndExecute( shared_ptr<Command> cmd );
+	
+private:
+	XTreeDatabase * const db;
+};	
 
 }
 

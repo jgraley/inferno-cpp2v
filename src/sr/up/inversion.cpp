@@ -11,50 +11,45 @@
 
 using namespace SR;
 
-TreeZoneInverter::TreeZoneInverter( Command *initial_cmd, XTreeDatabase *db_ ) :
-	db( db_ ),
-	root_update_cmd( dynamic_cast<UpdateTreeCommand *>(initial_cmd) ),
-	root_expr( &root_update_cmd->GetExpression() ),
-	root_tree_zone( root_update_cmd->GetTargetTreeZone() )
+TreeZoneInverter::TreeZoneInverter( XTreeDatabase *db_ ) :
+	db( db_ )
 {
 }
 
 
-void TreeZoneInverter::Run()
+shared_ptr<Command> TreeZoneInverter::Run(shared_ptr<Command> initial_cmd)
 {
 	incremental_seq = make_shared<CommandSequence>();
 	
-	LocatedZoneExpression root_lze( root_tree_zone.GetBaseXLink(), root_expr );
-	while(true)
-	{
-		LocatedZoneExpression lfze = TryFindFreeZoneExpr( root_lze );
-		if( lfze.first && lfze.second )
-			Invert( lfze );
-		else
-			break;
-	}	
+	auto root_update_cmd = dynamic_pointer_cast<UpdateTreeCommand>(initial_cmd);
+	ASSERT( root_update_cmd ); // ASSUME command is UpdateTreeCommand (and not in a seq)
+	shared_ptr<ZoneExpression> root_expr = root_update_cmd->GetExpression();
+	TreeZone root_target = root_update_cmd->GetTargetTreeZone();
+	LocatedZoneExpression root_lze( root_target.GetBaseXLink(), root_expr );
+	WalkFreeZoneExpr( root_lze );
 	
-	FTRACE(incremental_seq)("\n");
-}
-
-
-shared_ptr<CommandSequence> TreeZoneInverter::GetIncrementalSeq()
-{
 	return incremental_seq;
 }
 
 
-TreeZoneInverter::LocatedZoneExpression TreeZoneInverter::TryFindFreeZoneExpr( LocatedZoneExpression lze )
+void TreeZoneInverter::WalkFreeZoneExpr( LocatedZoneExpression lze )
 {
 	// Really just a search for PopulateFreeZoneOperator that returns the base XLink from the 
 	// enclosing thing (root or a tree zone). 
 	// Inversion strategy: this XLink is available for every free zone because we did free zone
 	// merging (if parent was a free zone, we'd have no XLink)
-	if( auto pfz_op = dynamic_pointer_cast<PopulateFreeZoneOperator>(*lze.second) )
+	if( auto pfz_op = dynamic_pointer_cast<PopulateFreeZoneOperator>(lze.second) )
 	{
-		return lze; 
+		pfz_op->ForChildren( [&](shared_ptr<ZoneExpression> &child_expr)	
+		{
+			// We don't know the base if we're coming from a free zone
+			WalkFreeZoneExpr( make_pair( XLink(), child_expr ) );
+		} );
+	
+		// Invert the free zone while unwinding
+		Invert(lze); 
 	}
-	else if( auto ptz_op = dynamic_pointer_cast<PopulateTreeZoneOperator>(*lze.second) )
+	else if( auto ptz_op = dynamic_pointer_cast<PopulateTreeZoneOperator>(lze.second) )
 	{
 		// Co-loop over the chidren/terminii looking for a free zone
 		set<XLink, DepthFirstRelation> terminii = ptz_op->GetZone().GetTerminusXLinks();
@@ -63,9 +58,7 @@ TreeZoneInverter::LocatedZoneExpression TreeZoneInverter::TryFindFreeZoneExpr( L
 		{
 			ASSERT( it_child != ptz_op->GetChildrenEnd() ); // length mismatch
 			
-			LocatedZoneExpression lze_child = TryFindFreeZoneExpr( make_pair( terminus_xlink, &*it_child ) );
-			if( lze_child.first && lze_child.second )
-				return lze_child;
+			WalkFreeZoneExpr( make_pair( terminus_xlink, *it_child ) );
 						
 			++it_child;
 		}
@@ -73,9 +66,6 @@ TreeZoneInverter::LocatedZoneExpression TreeZoneInverter::TryFindFreeZoneExpr( L
 	}
 	else
 		ASSERTFAIL();
-		
-	// We didn't find any free zones
-	return LocatedZoneExpression(XLink(), nullptr);
 }
 
 
@@ -84,8 +74,8 @@ void TreeZoneInverter::Invert( LocatedZoneExpression lze )
 	ASSERT( lze.first && lze.second );
 	
 	XLink base_xlink = lze.first;
-	shared_ptr<ZoneExpression> *base_expr_p = lze.second;
-	auto pfz_op = dynamic_pointer_cast<PopulateFreeZoneOperator>( *base_expr_p );
+	ASSERT( base_xlink )("Got no base in our lze, perhaps parent was free zone?"); // FZ merging should prevent
+	auto pfz_op = dynamic_pointer_cast<PopulateFreeZoneOperator>( lze.second );
 	ASSERT( pfz_op )("Got LZE not a free zone: ")(lze); // TryFindFreeZoneExpr() found wrong kind of expr
 			
 	vector<XLink> terminii_xlinks;
@@ -99,18 +89,8 @@ void TreeZoneInverter::Invert( LocatedZoneExpression lze )
 		
 		terminii_xlinks.push_back( child_ptz_op->GetZone().GetBaseXLink() );
 	} );
-	
-	// Quark algo: trying to remove the FreeZone from the expression tree under the
-	// initial command causes TWO copes of the inverted tree zone to appear.
-	// The first is patched back into the initial tree (reducing FZ count by 1 in
-	// that tree) and the other is paired up with the free zone in a localised update
-	// tree command.
-	
-	// 1st copy of TZ: switch initial update command in place 
+		 
 	TreeZone inverted_tree_zone = TreeZone( db, base_xlink, terminii_xlinks );	
-	*base_expr_p = make_shared<PopulateTreeZoneOperator>( inverted_tree_zone, pfz_op->MoveChildExpressions() );
-	
-	// 2nd copy of TZ: make new, localised, update command and add to sequence
 	auto pfz_op_no_children = make_shared<PopulateFreeZoneOperator>( pfz_op->GetZone() ); // No children leaves terminii exposed, sort of.
 	auto incremental_command = make_shared<UpdateTreeCommand>( inverted_tree_zone, pfz_op_no_children );	
 	incremental_seq->Add(incremental_command);

@@ -521,7 +521,7 @@ TreePtr<Node> AgentCommon::BuildForBuildersAnalysis( PatternLink me_plink )
 {
 	Agent::ReplaceKit kit { nullptr };
 	auto commands = GenReplaceExpr(kit, me_plink);
-    FreeZone zone = RunForBuilder( commands.get() );     
+    FreeZone zone = TreeUpdater().Evaluate( commands.get() );     
     return zone.GetBaseNode();
 }
 
