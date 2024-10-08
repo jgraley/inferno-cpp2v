@@ -3,7 +3,7 @@
 #include "vn_step.hpp"
 #include "render/graph.hpp"
 #include "db/x_tree_database.hpp"
-#include "up/commands.hpp"
+#include "up/zone_commands.hpp"
 #include "up/tree_update.hpp"
 
 using namespace SR;

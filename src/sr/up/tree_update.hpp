@@ -3,12 +3,11 @@
 
 #include "common/common.hpp"
 #include "node/tree_ptr.hpp"
-#include "free_zone.hpp"
-#include "tree_zone.hpp"
+#include "../db/free_zone.hpp"
+#include "../db/tree_zone.hpp"
 #include "../link.hpp"
-#include "duplicate.hpp"
 #include "../scr_engine.hpp"
-#include "commands.hpp"
+#include "zone_commands.hpp"
 
 namespace SR 
 {
@@ -20,7 +19,11 @@ class TreeUpdater
 public:
 	TreeUpdater(XTreeDatabase *x_tree_db = nullptr); // db optional
 	
-	FreeZone Evaluate( const ZoneExpression *expr );
+	// Evaluate will always duplicate tree zones, but does not require db.
+	// Returns a free zone.
+	unique_ptr<FreeZone> Evaluate( shared_ptr<const ZoneExpression> expr );
+	
+	// Much as the name suggests. Db required and acts directly on it.
 	void TransformToIncrementalAndExecute( shared_ptr<Command> cmd );
 	
 private:

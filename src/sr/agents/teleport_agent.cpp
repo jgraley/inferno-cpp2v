@@ -10,7 +10,7 @@
 #include "sym/predicate_operators.hpp"
 #include "sym/symbol_operators.hpp"
 #include "sym/result.hpp"
-#include "up/commands.hpp"
+#include "up/zone_commands.hpp"
 
 #include <stdexcept>
 

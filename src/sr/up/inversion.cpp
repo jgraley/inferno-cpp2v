@@ -4,7 +4,7 @@
 #include "common/read_args.hpp"
 #include "tree/validate.hpp"
 #include "common/lambda_loops.hpp"
-#include "commands.hpp"
+#include "zone_commands.hpp"
 #include "tz_relation.hpp"
 
 #include <iostream>

@@ -4,7 +4,7 @@
 #include "common/read_args.hpp"
 #include "tree/validate.hpp"
 #include "common/lambda_loops.hpp"
-#include "commands.hpp"
+#include "zone_commands.hpp"
 #include "tz_relation.hpp"
 #include "up_utils.hpp"
 #include "tz_overlap.hpp"
@@ -25,10 +25,9 @@ TreeUpdater::TreeUpdater(XTreeDatabase *x_tree_db) :
 }
 
 
-FreeZone TreeUpdater::Evaluate( const ZoneExpression *expr )
+unique_ptr<FreeZone> TreeUpdater::Evaluate( shared_ptr<const ZoneExpression> expr )
 {
-	unique_ptr<FreeZone> free_zone = expr->Evaluate();   
-	return *free_zone;
+	return expr->Evaluate();   
 }
 
 
@@ -38,28 +37,35 @@ void TreeUpdater::TransformToIncrementalAndExecute( shared_ptr<Command> initial_
 	
 	shared_ptr<ZoneExpression> expr = dynamic_cast<const UpdateTreeCommand &>(*initial_cmd).GetExpression();
 	
-	EmptyZoneElider().Run(expr);
-	EmptyZoneElider().Check(expr);
+	EmptyZoneElider empty_zone_elider;
+	empty_zone_elider.Run(expr);
+	empty_zone_elider.Check(expr);
 	
-	TreeZoneOverlapHandler( db ).Run(expr);
-	TreeZoneOverlapHandler( db ).Check(expr);
+	TreeZoneOverlapHandler tree_zone_overlap_handler( db );
+	tree_zone_overlap_handler.Run(expr);
+	tree_zone_overlap_handler.Check(expr);
 	
-	TreeZoneOrderingHandler( db ).Run(expr);
-	TreeZoneOrderingHandler( db ).Check(expr);
+	TreeZoneOrderingHandler tree_zone_ordering_handler( db );
+	tree_zone_ordering_handler.Run(expr);
+	tree_zone_ordering_handler.Check(expr);
 	
-	FreeZoneMerger().Run(expr);  // TODO fix me!!
-	FreeZoneMerger().Check(expr);
+	FreeZoneMerger free_zone_merger;
+	free_zone_merger.Run(expr);  
+	free_zone_merger.Check(expr);
 	
-	AltTreeZoneOrderingChecker( db ).Check(expr);
+	AltTreeZoneOrderingChecker alt_free_zone_ordering_checker( db );
+	alt_free_zone_ordering_checker.Check(expr);
+
+	ZoneMarkEnacter zone_mark_enacter( db );
+	TreeZoneInverter tree_zone_inverter( db ); 
 
 	if( ReadArgs::use_incremental )
 	{
 		// Enact the tree zones that will stick around
-		ZoneMarkEnacter(db).Run(expr);
+		zone_mark_enacter.Run(expr);
 
-		// Inversion generates sequence of "small" update commands 
-		TreeZoneInverter inverter( db ); 
-		shared_ptr<Command> incremental_cmd = inverter.Run(initial_cmd);	
+		// Inversion generates sequence of separate "small" update commands 
+		shared_ptr<Command> incremental_cmd = tree_zone_inverter.Run(initial_cmd);	
 			
 		FTRACE(incremental_cmd)("\n");		
 			
@@ -68,6 +74,7 @@ void TreeUpdater::TransformToIncrementalAndExecute( shared_ptr<Command> initial_
 	}
 	else
 	{
+		// Execute initial command for testing
 		initial_cmd->Execute();
 	}
 }

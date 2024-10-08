@@ -1,9 +1,9 @@
 #include "embedded_scr_agent.hpp"
 #include "../search_replace.hpp" 
 #include "../scr_engine.hpp"
-#include "../up/duplicate.hpp"
+#include "../db/duplicate.hpp"
 #include "link.hpp"
-#include "up/commands.hpp"
+#include "up/zone_commands.hpp"
 
 using namespace SR;
 

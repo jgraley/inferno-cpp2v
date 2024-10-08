@@ -3,8 +3,8 @@
 #include "helpers/flatten.hpp"
 #include "db/df_relation.hpp"
 #include "db/x_tree_database.hpp"
-#include "free_zone.hpp"
-#include "tree_zone.hpp"
+#include "../db/free_zone.hpp"
+#include "../db/tree_zone.hpp"
 
 using namespace SR;
 

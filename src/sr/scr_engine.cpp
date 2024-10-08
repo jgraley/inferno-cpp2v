@@ -10,7 +10,7 @@
 #include "and_rule_engine.hpp"
 #include "link.hpp"
 #include "vn_sequence.hpp"
-#include "up/commands.hpp"
+#include "up/zone_commands.hpp"
 
 #include <list>
 

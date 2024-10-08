@@ -1,11 +1,11 @@
 #ifndef TZ_RELATION_HPP
 #define TZ_RELATION_HPP
 
-#include "zone.hpp"
+#include "../db/zone.hpp"
 #include "../link.hpp"
 #include "common/standard.hpp"
 #include "node/specialise_oostd.hpp"
-#include "terminus.hpp"
+#include "../db/terminus.hpp"
 
 namespace SR 
 {

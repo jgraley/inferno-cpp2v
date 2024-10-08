@@ -3,10 +3,10 @@
 
 #include "common/common.hpp"
 #include "node/tree_ptr.hpp"
-#include "free_zone.hpp"
-#include "tree_zone.hpp"
+#include "../db/free_zone.hpp"
+#include "../db/tree_zone.hpp"
 #include "../link.hpp"
-#include "duplicate.hpp"
+#include "../db/duplicate.hpp"
 #include "../scr_engine.hpp"
 #include <functional>
 

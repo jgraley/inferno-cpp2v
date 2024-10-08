@@ -1,8 +1,8 @@
 #include "tree_zone.hpp"
 
 #include "helpers/flatten.hpp"
-#include "db/df_relation.hpp"
-#include "db/x_tree_database.hpp"
+#include "df_relation.hpp"
+#include "x_tree_database.hpp"
 #include "free_zone.hpp"
 
 using namespace SR;
@@ -114,7 +114,7 @@ void TreeZone::Update( const FreeZone &free_zone ) const
 {
 	ASSERT( GetNumTerminii() == free_zone.GetNumTerminii() );	
 	ASSERT( GetNumTerminii() == 0 ); // TODO under #723
-    
+        
     // Update database 
     db->Delete( GetBaseXLink() );    
     

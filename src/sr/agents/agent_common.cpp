@@ -6,7 +6,7 @@
 #include "scr_engine.hpp"
 #include "and_rule_engine.hpp"
 #include "link.hpp"
-#include "up/duplicate.hpp"
+#include "db/duplicate.hpp"
 
 // Temporary
 #include "tree/cpptree.hpp"
@@ -16,7 +16,7 @@
 #include "sym/predicate_operators.hpp"
 #include "sym/symbol_operators.hpp"
 #include "sym/rewriters.hpp"
-#include "up/commands.hpp"
+#include "up/zone_commands.hpp"
 #include "up/tree_update.hpp"
 
 #include <stdexcept>
@@ -520,9 +520,9 @@ bool AgentCommon::ReplaceKeyerQuery( PatternLink me_plink,
 TreePtr<Node> AgentCommon::BuildForBuildersAnalysis( PatternLink me_plink )
 {
 	Agent::ReplaceKit kit { nullptr };
-	auto commands = GenReplaceExpr(kit, me_plink);
-    FreeZone zone = TreeUpdater().Evaluate( commands.get() );     
-    return zone.GetBaseNode();
+	shared_ptr<ZoneExpression> expr = GenReplaceExpr(kit, me_plink);
+    unique_ptr<FreeZone> zone = TreeUpdater().Evaluate( expr );     
+    return zone->GetBaseNode();
 }
 
 

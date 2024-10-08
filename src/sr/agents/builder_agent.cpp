@@ -3,7 +3,7 @@
 #include "sym/lazy_eval.hpp"
 #include "sym/lazy_eval.hpp"
 #include "sym/boolean_operators.hpp"
-#include "up/commands.hpp"
+#include "up/zone_commands.hpp"
 #include "helpers/simple_duplicate.hpp"
 
 using namespace SR;
