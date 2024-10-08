@@ -35,15 +35,17 @@ void Orderings::PrepareDelete( DBWalk::Actions &actions )
 {
 	actions.indexes_out = [=](const DBWalk::WalkInfo &walk_info)
 	{
-		TRACE("Erasing from indexes ")(walk_info.xlink)("\n");
+		TRACE("Erasing from orderings ")(walk_info.xlink)("\n");
 		EraseSolo( category_ordering, walk_info.xlink );       
 
 		EraseSolo( simple_compare_ordering, walk_info.xlink );
         
-        // We must delete SimpleCompare index entries for parents of the base
-        // node, since removing it will invalidate the SC ordering.
+        // We must delete SimpleCompare index entries for ancestors of the base
+        // node, since removing it will invalidate the SC ordering. Base is
+        // sufficient: what is ancestor of base is ancestor of every node in
+        // the zone. If we act at root, there won't be any.
         XLink ancestor_xlink = walk_info.xlink;
-        if( walk_info.context==DBWalk::UNKNOWN ) // at base
+        if( walk_info.context==DBWalk::UNKNOWN ) // at base 
         {
             while( ancestor_xlink = db->TryGetParentXLink(ancestor_xlink) )
             {
@@ -65,7 +67,9 @@ void Orderings::PrepareInsert(DBWalk::Actions &actions)
 		InsertSolo( simple_compare_ordering, walk_info.xlink );		
 
         // We may now re-instate SimpleCompare index entries for parents 
-        // of the base node so that the SC ordering is intact.
+        // of the base node so that the SC ordering is intact. Base is
+        // sufficient: what is ancestor of base is ancestor of every node in
+        // the zone. If we act at root, there won't be any.
         XLink ancestor_xlink = walk_info.xlink;
         if( walk_info.context==DBWalk::UNKNOWN ) // at base
         {

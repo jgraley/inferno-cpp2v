@@ -72,9 +72,9 @@ void TeleportAgent::Reset()
 }
 
 
-bool TeleportAgent::IsExtenderLess( const Extender &r ) const
+bool TeleportAgent::IsExtenderChannelLess( const Extender &r ) const
 {
-	return GetExtenderOrdinal() < r.GetExtenderOrdinal();
+	return GetExtenderChannelOrdinal() < r.GetExtenderChannelOrdinal();
 }
 
 
@@ -110,7 +110,7 @@ unique_ptr<SymbolicResult> TeleportAgent::TeleportOperator::Evaluate( const Eval
     if( !tp_result.second )
         return make_unique<EmptyResult>();        
         
-    // If we got an XLink, just return it, don't bother Domain
+    // If we got an XLink, just return it, don't bother DomainExtension
     if( tp_result.first ) // parent link was supplied
     {
          ASSERT( tp_result.first.GetChildX() == tp_result.second );

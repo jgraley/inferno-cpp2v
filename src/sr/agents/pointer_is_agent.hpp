@@ -20,7 +20,7 @@ public:
                  
     virtual Block GetGraphBlockInfo() const;
             
-	int GetExtenderOrdinal() const override;
+	int GetExtenderChannelOrdinal() const override;
                                            
 private:
     virtual const TreePtrInterface *GetPointer() const = 0;

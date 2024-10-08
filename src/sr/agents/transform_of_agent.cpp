@@ -79,7 +79,7 @@ string TransformOfAgent::GetName() const
 }
 
 
-bool TransformOfAgent::IsExtenderLess( const Extender &r ) const
+bool TransformOfAgent::IsExtenderChannelLess( const Extender &r ) const
 {
 	// If comparing two TransformOfAgent, secondary onto the transformation object's type
 	// TODO transformation object's state might matter, so should call into it
@@ -87,11 +87,11 @@ bool TransformOfAgent::IsExtenderLess( const Extender &r ) const
 		return typeid(*transformation).before(typeid(*rto->transformation));
 	
 	// Otherwise resort to the default compare
-	return TeleportAgent::IsExtenderLess(r);
+	return TeleportAgent::IsExtenderChannelLess(r);
 }
 
 
-int TransformOfAgent::GetExtenderOrdinal() const
+int TransformOfAgent::GetExtenderChannelOrdinal() const
 {
-	return 1;
+	return 1; // TODO class id as an ordinal?
 }

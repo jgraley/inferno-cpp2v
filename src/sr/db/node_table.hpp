@@ -17,7 +17,7 @@ public:
     {
     public:		
 		// Our node is the child of these links.
-		set<XLink> parents;
+		set<XLink> parents; // TODO use of the word "parent" is confusing: it's a link to us. "incoming"? 
 
 		// Declarative XLinks onto our node. 
 		// A subset of parents, so to get the declarer node, you'll need 

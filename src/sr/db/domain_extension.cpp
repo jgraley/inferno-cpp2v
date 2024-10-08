@@ -15,9 +15,9 @@ using namespace SR;
 
 // ------------------------- DomainExtension --------------------------
 
-bool DomainExtension::ExtenderClassRelation::operator()( const Extender *l, const Extender *r ) const
+bool DomainExtension::ExtenderChannelRelation::operator()( const Extender *l, const Extender *r ) const
 {
-	return l->IsExtenderLess( *r );
+	return l->IsExtenderChannelLess( *r );
 }
 
 

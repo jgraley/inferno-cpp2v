@@ -36,18 +36,18 @@ public:
 	{
 	public:
 		virtual TreePtr<Node> GetDomainExtraNode( const XTreeDatabase *db, XLink xlink, set<TreePtr<Node>> &deps ) const = 0;
-		virtual bool IsExtenderLess( const Extender &r ) const = 0;
-		virtual int GetExtenderOrdinal() const = 0;
+		virtual bool IsExtenderChannelLess( const Extender &r ) const = 0;
+		virtual int GetExtenderChannelOrdinal() const = 0;
 	};
 
-	class ExtenderClassRelation
+	class ExtenderChannelRelation
 	{
 	public:
 		/// Less operator: for use with set, map etc
 		bool operator()( const Extender *l, const Extender *r ) const;		
 	};
 	
-	typedef set<const Extender *, ExtenderClassRelation> ExtenderSet;
+	typedef set<const Extender *, ExtenderChannelRelation> ExtenderSet;
 
 	static ExtenderSet DetermineExtenders( const set<const SYM::Expression *> &sub_exprs );
 
@@ -75,7 +75,7 @@ public:
 private:
 	// Map equivalence classes of extender agents onto our channel objects
 	// so that we have one for each equaivalence class.
-  	map<const Extender *, unique_ptr<DomainExtensionChannel>, ExtenderClassRelation> channels;
+  	map<const Extender *, unique_ptr<DomainExtensionChannel>, ExtenderChannelRelation> channels;
 };    
     
 // ------------------------- DomainExtensionChannel --------------------------

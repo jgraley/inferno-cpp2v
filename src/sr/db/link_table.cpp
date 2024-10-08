@@ -32,9 +32,13 @@ void LinkTable::PrepareDelete( DBWalk::Actions &actions )
 {
 	actions.link_row_out = [=](const DBWalk::WalkInfo &walk_info)
 	{
-		if( walk_info.context != DBWalk::UNKNOWN )
+		if( walk_info.context != DBWalk::UNKNOWN ) // TODO we UNKNOWN will become BASE and we'll act on it
     		EraseSolo( rows, walk_info.p_x );
 	};
+
+    // Good practice to poison rows at terminii. Assuming walker tells us we're at a 
+    // terminus, we can put in bad stuff (NULL, -1, end() etc) or maybe just a flag
+    // for "parent valid". Do this in a new PoisonRow() like GenerateRow().
 }
 
 
@@ -42,7 +46,7 @@ void LinkTable::PrepareInsert(DBWalk::Actions &actions)
 {
 	actions.link_row_in = [=](const DBWalk::WalkInfo &walk_info)
 	{
-		if( walk_info.context != DBWalk::UNKNOWN )
+		if( walk_info.context != DBWalk::UNKNOWN ) // TODO we UNKNOWN will become BASE and we'll act on it
     		GenerateRow(walk_info);
 	};
 }
@@ -58,15 +62,20 @@ void LinkTable::GenerateRow(const DBWalk::WalkInfo &walk_info)
 		{
 			// Base ordinal filled on only for base xlinks, so that we retain
 			// locality.
-			row.base_ordinal = current_base_ordinal++;
+			row.base_ordinal = current_base_ordinal++; // TODO somehow be able to give same ordinal to each root on multiple calls
 			
-			row.my_container_front = walk_info.xlink;
+			// TODO wouldn't NULL ie XLink() be clearer? (and below) - no 'cause 
+			// then undefineds would get into bool eval in the syms. Instead we
+			// allow junk values - analysis of expressions could detect if these 
+			// make it anywhere they can do harm. But we could add a new 
+			// one-off link like MMAX and OffEndX? What about EmptyResult?
+			row.my_container_front = walk_info.xlink; 
 			row.my_container_back = walk_info.xlink;
 			break;
 		}	
 		case DBWalk::SINGULAR:
 		{
-			row.parent_node = walk_info.parent_x;
+			row.parent_node = walk_info.parent_x; 
 			row.item_ordinal = walk_info.item_ordinal;
 			row.my_container_front = walk_info.xlink;
 			row.my_container_back = walk_info.xlink;
@@ -104,7 +113,14 @@ void LinkTable::GenerateRow(const DBWalk::WalkInfo &walk_info)
 			break;
 		}
         default:
-            ASSERTFAIL(); // could be UNKNOWN but that's not allowed
+            ASSERTFAIL(); // could be UNKNOWN but that's not allowed 
+            // TODO we have to add support for this. Assuming it's called BASE, we'll need a base_context 
+            // object which could be returned from Delete() or a new getter method. Or the whole
+            // Delete->Insert cycle could be made a 2-beat transaction with its own classes. Delete()
+            // or whatever would get it from the current XLink row at the base location before deletion.
+            
+            // We also have to fix child node entries at terminii. Assuming walker tells us we're at a 
+            // terminus, we can look at children ourself (walker won't visit them) and fix up their rows.
 	}
 
 	// Add a row of x_tree_db

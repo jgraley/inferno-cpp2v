@@ -13,7 +13,7 @@ class DBWalk
 public:
     enum ContainmentContext
     {
-        UNKNOWN,
+        UNKNOWN, // TODO confusing. Is this just the base of the inserted/deleted zone? Then BASE. Otherwise there should be more than one enum for this
         ROOT,
         SINGULAR,
         IN_SEQUENCE,

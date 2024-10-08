@@ -37,7 +37,7 @@ XTreeDatabase::Plan::Plan( const XTreeDatabase *algo, shared_ptr<Lacing> lacing,
     domain( make_shared<Domain>() ),
     node_table( make_shared<NodeTable>() ),
     link_table( make_shared<LinkTable>() ),
-    indexes( make_shared<Orderings>(lacing, algo) ),
+    orderings( make_shared<Orderings>(lacing, algo) ),
     domain_extension( make_shared<DomainExtension>(algo, domain_extenders) )
 {
 }
@@ -51,7 +51,7 @@ void XTreeDatabase::InitialBuild()
 	// Full build incrementally
     DBWalk::Actions actions;
     plan.domain->PrepareInsert( actions );
-    plan.indexes->PrepareInsert( actions );
+    plan.orderings->PrepareInsert( actions );
     plan.link_table->PrepareInsert( actions );
     plan.node_table->PrepareInsert( actions );
     InitialWalk( &actions, root_xlink );
@@ -67,9 +67,12 @@ void XTreeDatabase::Delete(XLink base)
     DBWalk::Actions actions;
     plan.domain->PrepareDelete( actions );
     plan.domain_extension->PrepareDelete( actions );
-    plan.indexes->PrepareDelete( actions );
+    plan.orderings->PrepareDelete( actions );
     plan.link_table->PrepareDelete( actions );
     plan.node_table->PrepareDelete( actions );
+    // TODO be able to supply ROOT or the new BASE depending on whether 
+    // we're being asked to act at a root. Fix up eg in link table where 
+    // we need to tolerate multiple calls at ROOT not just one at InitalBuild()
     db_walker.Walk( &actions, base, DBWalk::UNKNOWN );   
 }
 
@@ -80,7 +83,7 @@ void XTreeDatabase::Insert(XLink base)
 
     DBWalk::Actions actions;
     plan.domain->PrepareInsert( actions );
-    plan.indexes->PrepareInsert( actions );
+    plan.orderings->PrepareInsert( actions );
     plan.link_table->PrepareInsert( actions );
     plan.node_table->PrepareInsert( actions );
     plan.domain_extension->PrepareInsert( actions );
@@ -94,7 +97,7 @@ void XTreeDatabase::InsertExtraZone(XLink extra_base)
     
 	DBWalk::Actions actions;
 	plan.domain->PrepareInsert( actions );
-	plan.indexes->PrepareInsert( actions );
+	plan.orderings->PrepareInsert( actions );
 	plan.link_table->PrepareInsert( actions );
 	plan.node_table->PrepareInsert( actions );
 	plan.domain_extension->PrepareInsertExtra( actions );
@@ -110,7 +113,7 @@ void XTreeDatabase::DeleteExtraZone(XLink extra_base)
     // xlink.
     DBWalk::Actions actions;
     plan.domain->PrepareDelete( actions );
-    plan.indexes->PrepareDelete( actions );
+    plan.orderings->PrepareDelete( actions );
     plan.link_table->PrepareDelete( actions );
     plan.node_table->PrepareDelete( actions );
     plan.domain_extension->PrepareDeleteExtra( actions );
@@ -231,7 +234,7 @@ XLink XTreeDatabase::GetLastDescendant(XLink xlink) const
 
 const Orderings &XTreeDatabase::GetOrderings() const
 {
-	return *plan.indexes;
+	return *plan.orderings;
 }
 
 
@@ -267,7 +270,7 @@ void XTreeDatabase::ClearDirtyGrass()
 
 void XTreeDatabase::Dump() const
 {
-    plan.indexes->Dump();
+    plan.orderings->Dump();
 }
 
 
@@ -339,6 +342,6 @@ void XTreeDatabase::TestRelations()
     if( ReadArgs::test_rel )
     {
 		plan.domain_extension->TestRelations( plan.domain->unordered_domain );
-		plan.indexes->TestRelations( plan.domain->unordered_domain );
+		plan.orderings->TestRelations( plan.domain->unordered_domain );
 	}		
 }

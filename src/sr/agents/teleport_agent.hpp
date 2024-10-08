@@ -52,7 +52,7 @@ public:
 
     virtual void Reset();    
 
-	bool IsExtenderLess( const Extender &r ) const override;
+	bool IsExtenderChannelLess( const Extender &r ) const override;
 
     class TeleportOperator : public SYM::SymbolToSymbolExpression
     {

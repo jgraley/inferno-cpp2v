@@ -33,7 +33,7 @@ private:
         shared_ptr<Domain> domain;
         shared_ptr<NodeTable> node_table;
         shared_ptr<LinkTable> link_table;
-        shared_ptr<Orderings> indexes;
+        shared_ptr<Orderings> orderings;
         shared_ptr<DomainExtension> domain_extension;
     } plan;
 

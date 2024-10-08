@@ -212,7 +212,7 @@ struct NestedAgent : public virtual TeleportAgent
     virtual XLink Advance( XLink xlink, 
                            string *depth ) const = 0;
 
-	int GetExtenderOrdinal() const override;
+	int GetExtenderChannelOrdinal() const override;
 
     virtual Block GetGraphBlockInfo() const;
     

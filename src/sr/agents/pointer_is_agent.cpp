@@ -64,7 +64,7 @@ Graphable::Block PointerIsAgent::GetGraphBlockInfo() const
 }
 
 
-int PointerIsAgent::GetExtenderOrdinal() const
+int PointerIsAgent::GetExtenderChannelOrdinal() const
 {
 	return 2;
 }

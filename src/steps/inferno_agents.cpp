@@ -273,7 +273,7 @@ TeleportAgent::QueryReturnType NestedAgent::RunTeleportQuery( const XTreeDatabas
 }    
 
 
-int NestedAgent::GetExtenderOrdinal() const
+int NestedAgent::GetExtenderChannelOrdinal() const
 {
 	return 3;
 }
