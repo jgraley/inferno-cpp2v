@@ -123,9 +123,9 @@ void XTreeDatabase::DeleteExtraTree(XLink root_xlink)
 void XTreeDatabase::InitialWalk( const DBWalk::Actions *actions,
                                  XLink main_root_xlink )
 {
+    db_walker.Walk( actions, main_root_xlink, DBWalk::ROOT );
     db_walker.Walk( actions, XLink::MMAX_Link, DBWalk::ROOT );
     db_walker.Walk( actions, XLink::OffEndXLink, DBWalk::ROOT );
-    db_walker.Walk( actions, main_root_xlink, DBWalk::ROOT );
 }                                 
 
 
