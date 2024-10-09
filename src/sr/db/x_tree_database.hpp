@@ -23,10 +23,10 @@ class XTreeDatabase : public Traceable,
                       public Duplicate::DirtyGrassUpdateInterface
 {
 public:
-    XTreeDatabase( XLink root_xlink, shared_ptr<Lacing> lacing, DomainExtension::ExtenderSet domain_extenders );
+    XTreeDatabase( XLink main_root_xlink, shared_ptr<Lacing> lacing, DomainExtension::ExtenderSet domain_extenders );
     
 private: 
-    const struct Plan : public Traceable
+    const struct Plan : public Traceable // TODO this is not a plan!!!
     {
         Plan( const XTreeDatabase *algo, shared_ptr<Lacing> lacing, DomainExtension::ExtenderSet domain_extenders );
         
@@ -45,8 +45,8 @@ public:
 	// Incremental strategy: perform updates on zones
     void Delete(XLink base);
     void Insert(XLink base);
-    void InsertExtraZone(XLink extra_base);
-    void DeleteExtraZone(XLink extra_base);
+    void InsertExtraTree(XLink extra_base);
+    void DeleteExtraTree(XLink extra_base);
 
     void InitialWalk( const DBWalk::Actions *actions,
                       XLink root_xlink );
@@ -69,8 +69,8 @@ public:
 	XLink GetLastDescendant(XLink xlink) const;
 
 	const Orderings &GetOrderings() const;
-	TreePtr<Node> GetRootNode() const;
-	XLink GetRootXLink() const;
+	TreePtr<Node> GetMainRootNode() const;
+	XLink GetMainRootXLink() const;
 
     bool IsDirtyGrass( TreePtr<Node> node ) const final;
     void AddDirtyGrass( TreePtr<Node> node ) const final;
@@ -87,7 +87,7 @@ private:
   	
     void TestRelations();
     
-  	XLink root_xlink;
+  	XLink main_root_xlink;
     DBWalk db_walker;
     
     mutable set< TreePtr<Node> > dirty_grass; // See #724 re mutable

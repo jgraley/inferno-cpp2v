@@ -23,7 +23,7 @@ TreeZoneOrderingHandler::TreeZoneOrderingHandler(const XTreeDatabase *db_) :
 
 void TreeZoneOrderingHandler::Run( shared_ptr<ZoneExpression> &root_expr )
 {
-	XLink root = db->GetRootXLink();
+	XLink root = db->GetMainRootXLink();
 	XLink last = db->GetLastDescendant(root);
 	RunWorker( root_expr, root, last, false );
 }
@@ -31,7 +31,7 @@ void TreeZoneOrderingHandler::Run( shared_ptr<ZoneExpression> &root_expr )
 
 void TreeZoneOrderingHandler::Check( shared_ptr<ZoneExpression> &root_expr )
 {
-	XLink root = db->GetRootXLink();
+	XLink root = db->GetMainRootXLink();
 	XLink last = db->GetLastDescendant(root);
 	RunWorker( root_expr, root, last, true );
 }

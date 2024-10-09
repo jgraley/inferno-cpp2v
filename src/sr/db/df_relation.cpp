@@ -62,8 +62,8 @@ pair<Orderable::Diff, DepthFirstRelation::RelType> DepthFirstRelation::CompareHi
             //FTRACE("Both at root, comparing root ordinals\n");
 			const LinkTable::Row &l_row = db->GetRow(l_cur_xlink);       
 			const LinkTable::Row &r_row = db->GetRow(r_cur_xlink);
-            ASSERT( l_row.base_ordinal != r_row.base_ordinal );
-            return make_pair(l_row.base_ordinal - r_row.base_ordinal, ROOT_SIBLINGS);
+            ASSERT( l_row.root_ordinal != r_row.root_ordinal );
+            return make_pair(l_row.root_ordinal - r_row.root_ordinal, ROOT_SIBLINGS);
         }
 
         if( l_parent_xlink )

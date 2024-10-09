@@ -6,7 +6,7 @@ using namespace SR;
 
 
 LinkTable::LinkTable() :
-    current_base_ordinal(0)
+    current_root_ordinal(0)
 {
 }
 
@@ -32,7 +32,9 @@ void LinkTable::PrepareDelete( DBWalk::Actions &actions )
 {
 	actions.link_row_out = [=](const DBWalk::WalkInfo &walk_info)
 	{
-		if( walk_info.context != DBWalk::UNKNOWN ) // TODO we UNKNOWN will become BASE and we'll act on it
+		// The link row for the base does not change because its 
+		// context does not change.
+		if( walk_info.context != DBWalk::BASE ) 
     		EraseSolo( rows, walk_info.p_x );
 	};
 
@@ -46,7 +48,9 @@ void LinkTable::PrepareInsert(DBWalk::Actions &actions)
 {
 	actions.link_row_in = [=](const DBWalk::WalkInfo &walk_info)
 	{
-		if( walk_info.context != DBWalk::UNKNOWN ) // TODO we UNKNOWN will become BASE and we'll act on it
+		// The link row for the base does not change because its 
+		// context does not change.
+		if( walk_info.context != DBWalk::BASE ) 
     		GenerateRow(walk_info);
 	};
 }
@@ -60,9 +64,9 @@ void LinkTable::GenerateRow(const DBWalk::WalkInfo &walk_info)
 	{
 		case DBWalk::ROOT:
 		{
-			// Base ordinal filled on only for base xlinks, so that we retain
+			// Root ordinal filled on only for root xlinks, so that we retain
 			// locality.
-			row.base_ordinal = current_base_ordinal++; // TODO somehow be able to give same ordinal to each root on multiple calls
+			row.root_ordinal = current_root_ordinal++; // TODO somehow be able to give same ordinal to each root on multiple calls
 			
 			// TODO wouldn't NULL ie XLink() be clearer? (and below) - no 'cause 
 			// then undefineds would get into bool eval in the syms. Instead we
@@ -160,7 +164,7 @@ string LinkTable::Row::GetTrace() const
         s += ", back=" + Trace(my_container_back);
     }
     s += SSPrintf(", co=%d", container_ordinal);
-    s += SSPrintf(", bo=%d", base_ordinal);
+    s += SSPrintf(", bo=%d", root_ordinal);
     s += ")";
     return s;
 }

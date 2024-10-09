@@ -105,7 +105,7 @@ void VNSequence::AnalysisStage( TreePtr<Node> root )
 
 TreePtr<Node> VNSequence::TransformStep( int step_index, TreePtr<Node> root )
 {
-    ASSERT( root == x_tree_db->GetRootNode() )("Unexpected root - re-run AnalysisStage() to change root");
+    ASSERT( root == x_tree_db->GetMainRootNode() )("Unexpected root - re-run AnalysisStage() to change root");
     
     x_tree_db->ClearDirtyGrass();	
 	    
@@ -116,7 +116,7 @@ TreePtr<Node> VNSequence::TransformStep( int step_index, TreePtr<Node> root )
     steps[step_index]->SetXTreeDb( x_tree_db );
     steps[step_index]->Transform();
     
-    return x_tree_db->GetRootNode();   
+    return x_tree_db->GetMainRootNode();   
 }
            
                  

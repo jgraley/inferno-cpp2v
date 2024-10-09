@@ -132,7 +132,7 @@ void CompareReplace::Transform()
     TRACE("Enter S&R instance ")(*this);
 
     SolutionMap empty_solution;    
-    (void)plan.scr_engine->RepeatingCompareReplace( x_tree_db->GetRootXLink(), 
+    (void)plan.scr_engine->RepeatingCompareReplace( x_tree_db->GetMainRootXLink(), 
                                                     &empty_solution );       
 }
 
