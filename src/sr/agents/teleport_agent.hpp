@@ -48,7 +48,7 @@ public:
     typedef pair<XLink, TreePtr<Node>> QueryReturnType;    
     virtual QueryReturnType RunTeleportQuery( const XTreeDatabase *db, DependencyReporter *dep_rep, XLink start_xlink ) const = 0;
     
-    TreePtr<Node> GetDomainExtraNode( const XTreeDatabase *db, XLink start_xlink, set<TreePtr<Node>> &deps ) const override;
+    DomainExtension::Extender::Info GetDomainExtension( const XTreeDatabase *db, XLink start_xlink ) const override;
 
     virtual void Reset();    
 

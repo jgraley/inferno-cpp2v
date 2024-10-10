@@ -31,38 +31,39 @@ SYM::Lazy<SYM::BooleanExpression> TeleportAgent::SymbolicNormalLinkedQueryPRed()
 }                     
 
 
-TreePtr<Node> TeleportAgent::GetDomainExtraNode( const XTreeDatabase *db, XLink start_xlink, set<TreePtr<Node>> &deps ) const
+DomainExtension::Extender::Info TeleportAgent::GetDomainExtension( const XTreeDatabase *db, XLink start_xlink ) const
 {
-	deps.clear();
+	DomainExtension::Extender::Info info;
 	
 	if( start_xlink == XLink::MMAX_Link )
-		return TreePtr<Node>(); // MMAX at base never expands domain because then, all child patterns are also MMAX
+		return info; // MMAX at base never expands domain because then, all child patterns are also MMAX
 	if( !IsPreRestrictionMatch(start_xlink) )
-		return TreePtr<Node>(); // Failed pre-restriction so can't expand domain
+		return info; // Failed pre-restriction so can't expand domain
 
 	DepRep dep_rep;
-	QueryReturnType tp_result;
+	QueryReturnType tq_result;
 	try
 	{
-		tp_result = RunTeleportQuery( db, &dep_rep, start_xlink );
+		tq_result = RunTeleportQuery( db, &dep_rep, start_xlink );
 	}
 	catch( ::Mismatch & ) 
 	{
-		return TreePtr<Node>();
+		return info;
 	}
-	if( !tp_result.second )
-		return TreePtr<Node>();       // NULL  
+	if( !tq_result.second )
+		return info;       // NULL  
 
-	deps = dep_rep.GetDeps();	
+	info.deps = dep_rep.GetDeps();	
     
-	if( tp_result.first ) // parent link was supplied
+	if( tq_result.first ) // parent link was supplied
 	{
-		ASSERT( tp_result.first.GetChildX() == tp_result.second ); // Consistency
-		ASSERT( deps.count( tp_result.first.GetChildX() ) > 0 ); // Result should be a dep
-		return TreePtr<Node>(); // Don't bother Domain when there's an XLink
+		ASSERT( tq_result.first.GetChildX() == tq_result.second ); // Consistency
+		ASSERT( info.deps.count( tq_result.first.GetChildX() ) > 0 ); // Result should be a dep
+		return info; // Don't bother Domain when there's an XLink
 	}		
 
-	return tp_result.second;               
+	info.induced_base_node = tq_result.second;
+	return info;
 }
 
 

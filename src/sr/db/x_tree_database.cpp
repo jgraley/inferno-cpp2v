@@ -18,18 +18,18 @@ XTreeDatabase::XTreeDatabase( XLink main_root_xlink_, shared_ptr<Lacing> lacing,
     plan( this, lacing, domain_extenders ),
     main_root_xlink( main_root_xlink_ )
 {
-    auto on_insert_extra_subtree = [=](XLink extra_base)
+    auto on_insert_extra_tree = [=](XLink extra_base)
     {
         InsertExtraTree( extra_base );        
     };
 
-    auto on_delete_extra_zone = [=](XLink extra_base)
+    auto on_delete_extra_tree = [=](XLink extra_base)
 	{
         DeleteExtraTree( extra_base );
     };
     
-    plan.domain_extension->SetOnExtraXLinkFunctions( on_insert_extra_subtree, 
-                                                     on_delete_extra_zone );
+    plan.domain_extension->SetOnExtraTreeFunctions( on_insert_extra_tree, 
+                                                     on_delete_extra_tree );
 }
 
 

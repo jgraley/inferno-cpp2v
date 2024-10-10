@@ -43,11 +43,11 @@ DomainExtension::DomainExtension( const XTreeDatabase *db, ExtenderSet extenders
 }
 	
 
-void DomainExtension::SetOnExtraXLinkFunctions( OnExtraSubtreeFunction on_insert_extra_zone_,
-                                                OnExtraSubtreeFunction on_delete_extra_zone_ )
+void DomainExtension::SetOnExtraTreeFunctions( OnExtraTreeFunction on_insert_extra_zone_,
+                                                OnExtraTreeFunction on_delete_extra_zone_ )
 {
 	for( auto &p : channels )
-		p.second->SetOnExtraXLinkFunctions( on_insert_extra_zone_, on_delete_extra_zone_ );
+		p.second->SetOnExtraTreeFunctions( on_insert_extra_zone_, on_delete_extra_zone_ );
 }
 
 
@@ -125,147 +125,142 @@ DomainExtensionChannel::DomainExtensionChannel( const XTreeDatabase *db_, const 
 }
 
 
-void DomainExtensionChannel::SetOnExtraXLinkFunctions( DomainExtension::OnExtraSubtreeFunction on_insert_extra_zone_,
-                                                       DomainExtension::OnExtraSubtreeFunction on_delete_extra_zone_ )
+void DomainExtensionChannel::SetOnExtraTreeFunctions( DomainExtension::OnExtraTreeFunction on_insert_extra_tree_,
+                                                       DomainExtension::OnExtraTreeFunction on_delete_extra_tree_ )
 {
-    on_insert_extra_subtree = on_insert_extra_zone_;
-    on_delete_extra_zone = on_delete_extra_zone_;
+    on_insert_extra_tree = on_insert_extra_tree_;
+    on_delete_extra_tree = on_delete_extra_tree_;
 }
 
 
 XLink DomainExtensionChannel::GetUniqueDomainExtension( XLink start_xlink, TreePtr<Node> node ) const
 {   
     ASSERT( node );
-	ASSERT( domain_extension_classes.count(node) > 0 )
-	      (node)(" not found in domain_extension_classes:\n")
-	      (domain_extension_classes);
+	ASSERT( extra_root_node_to_xlink_and_refcount.count(node) > 0 )
+	      (node)(" not found in extra_root_node_to_xlink_and_refcount:\n")
+	      (extra_root_node_to_xlink_and_refcount);
     
     // Cross-checks using start_xlink (rather than acting as a cache, 
     // which we can now do, see #700)
     ASSERT( start_xlink );
-    ASSERT( start_to_tracking.count(start_xlink)>0 );
-    TreePtr<Node> cached_node = start_to_tracking.at(start_xlink).extra_node;    
+    ASSERT( start_to_induced_and_deps.count(start_xlink)>0 );
+    TreePtr<Node> induced_base_node = start_to_induced_and_deps.at(start_xlink).induced_base_node;    
     SimpleCompare sc;
-    ASSERT( sc.Compare3Way(node, cached_node)==0 ); 
+    ASSERT( sc.Compare3Way(node, induced_base_node)==0 ); 
 
     // Actual uniquify is just a lookup in the map
-    return domain_extension_classes.at( node ).extra_xlink;
+    return extra_root_node_to_xlink_and_refcount.at( node ).induced_base_xlink;
 }
 
 
-void DomainExtensionChannel::AddExtraNode( TreePtr<Node> extra_node )
+void DomainExtensionChannel::AddExtraTree( TreePtr<Node> induced_base_node )
 {
-    ASSERT( extra_node );
-
-    // If there's already a class for this node, return it and early-out
-    // Note: this is done by simple compare, and identity is not 
-    // required. This makes for a very "powerful" search for existing
-    // candidates.
-    if( domain_extension_classes.count(extra_node) > 0 )
-    {
-        domain_extension_classes.at(extra_node).count++;
-        return; 
-    }
-        
-    // An extra subtree is required
+    ASSERT( induced_base_node );
   
     // To ensure compliance with rule #217 we must duplicate the tree that
     // we were given, in case it meanders into the main X tree not at an
     // identifier, causing illegal multiple parents. See #677
     // TODO maybe only do this if subtree actually would go wrong.
-    TreePtr<Node> extra_node_dup = SimpleDuplicate::DuplicateSubtree( extra_node );
+    TreePtr<Node> extra_root_node = SimpleDuplicate::DuplicateSubtree( induced_base_node );
   
     // Create an XLink that will allow us to track this subtree
-    XLink extra_xlink = XLink::CreateDistinct( extra_node_dup );    
-
-#ifdef TRACE_DOMAIN_EXTEND
-    TRACE("Zone is ")(extra_zone)("\n"); 
-#endif    
-        
+    XLink extra_root_xlink = XLink::CreateDistinct( extra_root_node );    
+   
     // Add this xlink to the extension classes as start. Count starts 
     // at 1 since there's one ref (this one)
-	(void)domain_extension_classes.insert( make_pair( extra_node_dup, ExtClass(extra_xlink, 1) ) );    
+	(void)extra_root_node_to_xlink_and_refcount.insert( make_pair( extra_root_node, ExtensionClass(extra_root_xlink, 1) ) );    
         
     // Add the whole subtree to the rest of the database
-    on_insert_extra_subtree( extra_xlink );        
+    on_insert_extra_tree( extra_root_xlink );        
     
-    // Ensure the original tree is found in the domain now (it wasn't 
+    // Ensure the original tree is found in the extension classes now (it wasn't 
     // earlier on) as an extra check
-    ASSERT( domain_extension_classes.count( extra_node ) == 1 );
+    ASSERT( extra_root_node_to_xlink_and_refcount.count( induced_base_node ) == 1 );
 }
 
 
 void DomainExtensionChannel::TryAddStartXLink( XLink start_xlink )
 {
-    set<TreePtr<Node>> deps;
-    TreePtr<Node> extra_node = extender->GetDomainExtraNode( db, start_xlink, deps );  
-    if( !extra_node )
+    DomainExtension::Extender::Info info = extender->GetDomainExtension( db, start_xlink );  
+    if( !info.induced_base_node )
         return;
     
     //ASSERT( deps.size() < 20 )("Big deps for ")(start_xlink)("\n")(deps);
     
-    start_to_tracking.insert( make_pair( start_xlink, TrackingRow(extra_node, deps) ) );
-    for( TreePtr<Node> dep : deps )
-        dep_to_starts[dep].insert(start_xlink);
+    start_to_induced_and_deps.insert( make_pair( start_xlink, TrackingRow(info.induced_base_node, info.deps) ) ); // TODO do we need this if there's already a class?
     
-    AddExtraNode( extra_node );
+    for( TreePtr<Node> dep : info.deps )
+        dep_to_all_starts[dep].insert(start_xlink); // TODO do we need this if there's already a class?
+    
+    // If there's already a class for this node, return it and early-out
+    // Note: this is done by simple compare, and identity is not 
+    // required. This makes for a very "powerful" search for existing
+    // candidates.
+    if( extra_root_node_to_xlink_and_refcount.count(info.induced_base_node) > 0 )
+    {
+        extra_root_node_to_xlink_and_refcount.at(info.induced_base_node).ref_count++;
+        return; 
+    }
+        
+    // An extra tree is required
+    AddExtraTree( info.induced_base_node );
 }
 
 
 void DomainExtensionChannel::DropStartXlink( XLink start_xlink )
 {
     // Be strict here: all these data structures need to remain in synch
-    ASSERT( start_to_tracking.count(start_xlink)>0 );
+    ASSERT( start_to_induced_and_deps.count(start_xlink)>0 );
     
-    TreePtr<Node> extra_node = start_to_tracking.at(start_xlink).extra_node;
-    set<TreePtr<Node>> &deps = start_to_tracking.at(start_xlink).deps;
+    TreePtr<Node> induced_base_node = start_to_induced_and_deps.at(start_xlink).induced_base_node;
+    set<TreePtr<Node>> &deps = start_to_induced_and_deps.at(start_xlink).deps;
 
     // Remove this starting xlink from deps structures, possibly dropping the
     // dep completely
     for( TreePtr<Node> dep : deps )
     {
-        ASSERT( dep_to_starts.count(dep)>0 );
-        ASSERT( !dep_to_starts.at(dep).empty() );
-        EraseSolo(dep_to_starts.at(dep), start_xlink);
-        if( dep_to_starts.at(dep).empty() )
-            EraseSolo(dep_to_starts, dep);
+        ASSERT( dep_to_all_starts.count(dep)>0 );
+        ASSERT( !dep_to_all_starts.at(dep).empty() );
+        EraseSolo(dep_to_all_starts.at(dep), start_xlink);
+        if( dep_to_all_starts.at(dep).empty() )
+            EraseSolo(dep_to_all_starts, dep);
     }
 
     // Remove this starting link from domain extension classes, possibly
     // dropping the extension class completely.
-    ASSERT( domain_extension_classes.count(extra_node) > 0 );
-    int nc = --domain_extension_classes.at(extra_node).count;
-    if( nc==0 )
-        EraseSolo( domain_extension_classes, extra_node );
+    ASSERT( extra_root_node_to_xlink_and_refcount.count(induced_base_node) > 0 );
+    int new_rc = --extra_root_node_to_xlink_and_refcount.at(induced_base_node).ref_count;
+    if( new_rc==0 )
+        EraseSolo( extra_root_node_to_xlink_and_refcount, induced_base_node ); // TODO use on_delete_extra_tree()
 
     // Remove tracking row for this starting xlink
-    EraseSolo(start_to_tracking, start_xlink);
+    EraseSolo(start_to_induced_and_deps, start_xlink);
 }
 
 
 void DomainExtensionChannel::Validate() const
 {
-	ASSERT( start_to_tracking.size() <= db->GetDomain().unordered_domain.size() );
+	ASSERT( start_to_induced_and_deps.size() <= db->GetDomain().unordered_domain.size() );
 	
-    for( auto p : start_to_tracking )
+    for( auto p : start_to_induced_and_deps )
     {
         XLink start_xlink = p.first;
         for( TreePtr<Node> dep : p.second.deps )
-            ASSERT( dep_to_starts.count(dep) == 1 );            
+            ASSERT( dep_to_all_starts.count(dep) == 1 );            
             
-        ASSERT( domain_extension_classes.count(p.second.extra_node)==1 );
-        ASSERT( domain_extension_classes.at(p.second.extra_node).count > 0 );
+        ASSERT( extra_root_node_to_xlink_and_refcount.count(p.second.induced_base_node)==1 );
+        ASSERT( extra_root_node_to_xlink_and_refcount.at(p.second.induced_base_node).ref_count > 0 );
         
         ASSERT( starts_to_redo.count(start_xlink) == 0 ); // should be disjoint
     }
     
-    for( auto p : dep_to_starts )
+    for( auto p : dep_to_all_starts )
     {
         for( XLink start_xlink : p.second )
-            ASSERT( start_to_tracking.count(start_xlink) == 1 );            
+            ASSERT( start_to_induced_and_deps.count(start_xlink) == 1 );            
     }
     
-	//FTRACE(extender)(" domain %d: %d starts, %d deps\n", db->GetDomain().unordered_domain.size(), start_to_tracking.size(), dep_to_starts.size());    
+	//FTRACE(extender)(" domain %d: %d starts, %d deps\n", db->GetDomain().unordered_domain.size(), start_to_induced_and_deps.size(), dep_to_all_starts.size());    
 }
 
 
@@ -305,7 +300,7 @@ void DomainExtensionChannel::Delete(const DBWalk::WalkInfo &walk_info)
     
     // First deal with the case where the deleted xlink is the start of a domain 
     // extension: in this case, we want to remove every trace of this extension.
-    if( start_to_tracking.count(xlink)>0 )
+    if( start_to_induced_and_deps.count(xlink)>0 )
     {
         DropStartXlink( xlink );
         // Don't add to redo: start was deleted, we won't want the DE back
@@ -321,12 +316,12 @@ void DomainExtensionChannel::Delete(const DBWalk::WalkInfo &walk_info)
     // Now deal with the case where the deleted xlink is a dependency of a domain 
     // extension: in this case, we want to remove it but remember that we want to 
     // redo the starting xlink at Complete() time.
-    if( dep_to_starts.count(x)>0 )
+    if( dep_to_all_starts.count(x)>0 )
     {
-        set<XLink> start_xlinks = dep_to_starts.at(x);
+        set<XLink> start_xlinks = dep_to_all_starts.at(x);
         for( XLink start_xlink : start_xlinks )
         {
-            ASSERT( start_to_tracking.count(start_xlink)>0 );
+            ASSERT( start_to_induced_and_deps.count(start_xlink)>0 );
             
             DropStartXlink( start_xlink );
             InsertSolo(starts_to_redo, start_xlink);
@@ -337,6 +332,9 @@ void DomainExtensionChannel::Delete(const DBWalk::WalkInfo &walk_info)
 
 void DomainExtensionChannel::InsertExtra(const DBWalk::WalkInfo &walk_info)
 {
+	// This is where we get to as a result of having added an extra tree.
+	// We could behave like Insert() and see if the extra tree induces
+	// anything more.
 }
 
 
@@ -345,27 +343,27 @@ void DomainExtensionChannel::DeleteExtra(const DBWalk::WalkInfo &walk_info)
 }
 
 
-DomainExtensionChannel::ExtClass::ExtClass( XLink extra_xlink_, int count_ ) :
-    extra_xlink( extra_xlink_ ),
-    count( count_ )
+DomainExtensionChannel::ExtensionClass::ExtensionClass( XLink induced_base_xlink_, int ref_count_ ) :
+    induced_base_xlink( induced_base_xlink_ ),
+    ref_count( ref_count_ )
 {
 }
 
 
-string DomainExtensionChannel::ExtClass::GetTrace() const 
+string DomainExtensionChannel::ExtensionClass::GetTrace() const 
 { 
-    return "(extra_xlink="+Trace(extra_xlink)+SSPrintf(", count=%d)", count); 
+    return "(induced_base_xlink="+Trace(induced_base_xlink)+SSPrintf(", ref_count=%d)", ref_count); 
 }
 
 
-DomainExtensionChannel::TrackingRow::TrackingRow( TreePtr<Node> extra_node_, set<TreePtr<Node>> deps_ ) :
-    extra_node( extra_node_ ),
-    deps( move(deps_) )
+DomainExtensionChannel::TrackingRow::TrackingRow( TreePtr<Node> induced_base_node_, set<TreePtr<Node>> deps_ ) :
+    induced_base_node( induced_base_node_ ),
+    deps( deps_ )
 {
 }
 
 
 string DomainExtensionChannel::TrackingRow::GetTrace() const 
 { 
-    return "(extra_node="+Trace(extra_node)+", deps=%"+Trace(deps)+")";
+    return "(induced_base_node="+Trace(induced_base_node)+", deps=%"+Trace(deps)+")";
 }

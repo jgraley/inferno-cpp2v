@@ -37,7 +37,7 @@ struct TreeKit
 
 
 // The augmented tree pointer is designed to act like a normal TreePtr
-// (to an extent) while hepling to meet the requirements of 
+// (to an extent) while hepling to meet the requirements of domain extension
 template<class VALUE_TYPE>
 class AugTreePtr : public TreePtr<VALUE_TYPE>
 {
@@ -125,7 +125,7 @@ public:
     template<class OTHER_VALUE_TYPE>
     AugTreePtr<OTHER_VALUE_TYPE> Descend( TreePtr<OTHER_VALUE_TYPE> *other_tree_ptr ) const
     {
-        // If we are Tree construct+return Tree style, otherwise reduce to Free style. This
+        // If we are Tree then construct+return Tree style, otherwise reduce to Free style. This
         // is to stop descendents of Free masquerading as Tree.
         if( p_tree_ptr )
             return AugTreePtr<OTHER_VALUE_TYPE>(other_tree_ptr, dep_rep);

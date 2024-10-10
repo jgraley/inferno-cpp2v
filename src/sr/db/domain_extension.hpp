@@ -35,7 +35,12 @@ public:
 	class Extender : public virtual Traceable
 	{
 	public:
-		virtual TreePtr<Node> GetDomainExtraNode( const XTreeDatabase *db, XLink xlink, set<TreePtr<Node>> &deps ) const = 0;
+		struct Info
+		{
+			TreePtr<Node> induced_base_node;
+			set<TreePtr<Node>> deps;
+		};
+		virtual Info GetDomainExtension( const XTreeDatabase *db, XLink xlink ) const = 0;
 		virtual bool IsExtenderChannelLess( const Extender &r ) const = 0;
 		virtual int GetExtenderChannelOrdinal() const = 0;
 	};
@@ -53,10 +58,10 @@ public:
 
 	DomainExtension( const XTreeDatabase *db, ExtenderSet extenders );
 		
-	typedef function<void(XLink)> OnExtraSubtreeFunction;
+	typedef function<void(XLink)> OnExtraTreeFunction;
 
-	void SetOnExtraXLinkFunctions( OnExtraSubtreeFunction on_insert_extra_subtree,
-                                   OnExtraSubtreeFunction on_delete_extra_zone = OnExtraSubtreeFunction() );
+	void SetOnExtraTreeFunctions( OnExtraTreeFunction on_insert_extra_tree,
+                                   OnExtraTreeFunction on_delete_extra_tree = OnExtraTreeFunction() );
 
     // Gain access to a channel
     const DomainExtensionChannel *GetChannel( const Extender *extender ) const;
@@ -87,11 +92,11 @@ class DomainExtensionChannel
 public:	
    	DomainExtensionChannel( const XTreeDatabase *db, const DomainExtension::Extender *extender );
 
-	void SetOnExtraXLinkFunctions( DomainExtension::OnExtraSubtreeFunction on_insert_extra_subtree,
-                                   DomainExtension::OnExtraSubtreeFunction on_delete_extra_zone = DomainExtension::OnExtraSubtreeFunction() );
+	void SetOnExtraTreeFunctions( DomainExtension::OnExtraTreeFunction on_insert_extra_tree,
+                                   DomainExtension::OnExtraTreeFunction on_delete_extra_tree = DomainExtension::OnExtraTreeFunction() );
 
 	XLink GetUniqueDomainExtension( XLink start_xlink, TreePtr<Node> node ) const;
-    void AddExtraNode( TreePtr<Node> node );
+    void AddExtraTree( TreePtr<Node> extra_root_node );
     void TryAddStartXLink( XLink start_xlink );
     void DropStartXlink( XLink start_xlink );
     void Validate() const;
@@ -107,39 +112,39 @@ private:
     const XTreeDatabase *db;
 	const DomainExtension::Extender *extender;
 
-    DomainExtension::OnExtraSubtreeFunction on_insert_extra_subtree;
-    DomainExtension::OnExtraSubtreeFunction on_delete_extra_zone;
+    DomainExtension::OnExtraTreeFunction on_insert_extra_tree;
+    DomainExtension::OnExtraTreeFunction on_delete_extra_tree;
 
     struct TrackingRow : Traceable
     {
         TrackingRow( TreePtr<Node> extra_node_, set<TreePtr<Node>> deps_ );
         string GetTrace() const override;
         
-        TreePtr<Node> extra_node;
+        TreePtr<Node> induced_base_node;
         set<TreePtr<Node>> deps;
     };
     
-    struct ExtClass : Traceable
+    struct ExtensionClass : Traceable
     {
-        ExtClass( XLink extra_xlink_, int count_ );
+        ExtensionClass( XLink induced_base_xlink_, int ref_count_ );
         string GetTrace() const override;
         
-        XLink extra_xlink;
-        int count;
+        XLink induced_base_xlink;
+        int ref_count;
     };
 
     // One for each start xlink, keeping track of the new node and dependencies
-    map<XLink, TrackingRow> start_to_tracking;
+    map<XLink, TrackingRow> start_to_induced_and_deps;
     
-    // A reversal of start_to_tracking for indexing on dependency
-    map<TreePtr<Node>, set<XLink>> dep_to_starts;
+    // A reversal of start_to_induced_and_deps for indexing on dependency
+    map<TreePtr<Node>, set<XLink>> dep_to_all_starts;
 
     // Here we collect domain extension start XLinks that we will re-create 
     // during Complete() and then clear.
     set<XLink> starts_to_redo;
     
     // SimpleCompare equivalence classes over the domain, with refcount = size of the class.
-    map<TreePtr<Node>, ExtClass, SimpleCompare> domain_extension_classes;
+    map<TreePtr<Node>, ExtensionClass, SimpleCompare> extra_root_node_to_xlink_and_refcount;
 };
         
 }
