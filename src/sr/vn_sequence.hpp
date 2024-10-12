@@ -46,9 +46,7 @@ public:
     void GenerateGraphRegions( int step_index, Graph &graph ) const;
     string GetStepName( int step_index ) const;
 
-    void CompleteDomainExtension();
-    void RunUpdateCommand( shared_ptr<Command> cmd, 
-                           const SCREngine *scr_engine );
+    void UpdateUsingCommand( shared_ptr<Command> cmd );
     
     void XTreeDbDump() const;
     void XTreeDbExpectMatches() const;

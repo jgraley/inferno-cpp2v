@@ -16,12 +16,12 @@ shared_ptr<PatternQuery> PointerIsAgent::GetPatternQuery() const
 }
 
 
-TeleportAgent::QueryReturnType PointerIsAgent::RunTeleportQuery( const XTreeDatabase *db, DependencyReporter *dep_rep, XLink start_xlink ) const
+TeleportAgent::QueryReturnType PointerIsAgent::RunTeleportQuery( const XTreeDatabase *db, DependencyReporter *dep_rep, XLink stimulus_xlink ) const
 {
 	// Report dependency on parent node
 	if( dep_rep )
 	{
-		TreePtr<Node> parent_node = db->GetRow(start_xlink).parent_node;
+		TreePtr<Node> parent_node = db->GetRow(stimulus_xlink).parent_node;
 		if( parent_node )
 		{	
 			// If no parent node, there's no dep to declare, assuming root xlink
@@ -31,7 +31,7 @@ TeleportAgent::QueryReturnType PointerIsAgent::RunTeleportQuery( const XTreeData
 	}
 	
     // Get the pointer that points to us - now from the keyer x link
-    const TreePtrInterface *px = start_xlink.GetXPtr();
+    const TreePtrInterface *px = stimulus_xlink.GetXPtr();
 	ASSERT(px);     
 	
 	// Make an archetypical node matching the pointer's type

@@ -68,7 +68,7 @@ public:
 
     // To be called after modifying the tree, and before any search/compare operation
     void InitialBuild();
-    void Complete();
+    void PostUpdateActions();
 
     void PrepareDelete(DBWalk::Actions &actions);
 	void PrepareInsert(DBWalk::Actions &actions);
@@ -93,15 +93,15 @@ public:
    	DomainExtensionChannel( const XTreeDatabase *db, const DomainExtension::Extender *extender );
 
 	void SetOnExtraTreeFunctions( DomainExtension::OnExtraTreeFunction on_insert_extra_tree,
-                                   DomainExtension::OnExtraTreeFunction on_delete_extra_tree = DomainExtension::OnExtraTreeFunction() );
+                                  DomainExtension::OnExtraTreeFunction on_delete_extra_tree = DomainExtension::OnExtraTreeFunction() );
 
-	XLink GetUniqueDomainExtension( XLink start_xlink, TreePtr<Node> node ) const;
-    void AddExtraTree( TreePtr<Node> extra_root_node );
-    void TryAddStartXLink( XLink start_xlink );
-    void DropStartXlink( XLink start_xlink );
+	XLink GetUniqueDomainExtension( XLink stimulus_xlink, TreePtr<Node> node ) const;
+    void InsertExtraTree( TreePtr<Node> extra_root_node );
+    void CheckStimulusXLink( XLink stimulus_xlink );
+    void DropStimulusXLink( XLink stimulus_xlink );
     void Validate() const;
     void InitialBuild();
-	void Complete();
+	void PostUpdateActions();
 
 	void Insert(const DBWalk::WalkInfo &walk_info);
 	void Delete(const DBWalk::WalkInfo &walk_info);
@@ -133,15 +133,15 @@ private:
         int ref_count;
     };
 
-    // One for each start xlink, keeping track of the new node and dependencies
-    map<XLink, TrackingRow> start_to_induced_and_deps;
+    // One for each stimulus xlink, keeping track of the new node and dependencies
+    map<XLink, TrackingRow> stimulus_to_induced_and_deps;
     
-    // A reversal of start_to_induced_and_deps for indexing on dependency
-    map<TreePtr<Node>, set<XLink>> dep_to_all_starts;
+    // A reversal of stimulus_to_induced_and_deps for indexing on dependency
+    map<TreePtr<Node>, set<XLink>> dep_to_all_stimulii;
 
-    // Here we collect domain extension start XLinks that we will re-create 
-    // during Complete() and then clear.
-    set<XLink> starts_to_redo;
+    // Here we collect domain extension stimulus XLinks that we will re-create 
+    // during PostUpdateActions() and then clear.
+    set<XLink> stimulii_to_recheck;
     
     // SimpleCompare equivalence classes over the domain, with refcount = size of the class.
     map<TreePtr<Node>, ExtensionClass, SimpleCompare> extra_root_node_to_xlink_and_refcount;

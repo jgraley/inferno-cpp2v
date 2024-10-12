@@ -136,10 +136,10 @@ const DomainExtensionChannel *XTreeDatabase::GetDEChannel( const DomainExtension
 }
 
 
-void XTreeDatabase::CompleteDomainExtension()
+void XTreeDatabase::PostUpdateActions()
 {
     ASSERT( main_root_xlink );
-	plan.domain_extension->Complete();
+	plan.domain_extension->PostUpdateActions();
 }
 
 	

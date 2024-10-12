@@ -52,7 +52,7 @@ public:
                       XLink root_xlink );
 
     const DomainExtensionChannel *GetDEChannel( const DomainExtension::Extender *extender ) const;
-    void CompleteDomainExtension();
+    void PostUpdateActions();
    	const Domain &GetDomain() const;
 
     const LinkTable &GetLinkTable() const;

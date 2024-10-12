@@ -20,8 +20,10 @@ public:
      * The teleport query can return any node within the XTree at any location or
      * it can return a "extra" subtree that isn't part of the X tree at all.
      * 
-     * Terminology: _start_ X link is the one RunTeleportQuery acts on. It generates
-     * an in-tree XLlink or an _extra_ node, and subtree. Dependencies (see later) 
+     * Terminology: _stimulus_ X link is the one RunTeleportQuery acts on. It generates
+     * an in-tree _result_ XLlink or an _induced_ node. Both are bases of subtrees. 
+     * In the induced case, this subtree is not part of the current input x tree and
+     * has been created by tyhe query (i.e. it's a free zone). Dependencies (see later) 
      * are just called _deps_. 
      * 
      * In the former case, `.first` of the return value (a pair) is non-NULL
@@ -37,7 +39,7 @@ public:
      * 
      * 1. To call `ReportTreeNode()` for any node in the tree that is a part of
      * determining the new subtree, and supply a pointer to the TreePtr instance
-     * that points to that node. Reason: these, the deps,  are the tree nodes that, 
+     * that points to that node. Reason: the deps, are the tree nodes that, 
      * if changed by a replace operation, force us to re-create the domain 
      * extension in case that needs to change too.
      * 
@@ -45,10 +47,12 @@ public:
      * 
      * Related: #689 #693 #696. Also see AugTreePtr<>.
      */
-    typedef pair<XLink, TreePtr<Node>> QueryReturnType;    
-    virtual QueryReturnType RunTeleportQuery( const XTreeDatabase *db, DependencyReporter *dep_rep, XLink start_xlink ) const = 0;
+    typedef pair<XLink, TreePtr<Node>> QueryReturnType;    // TODO if this is worth a comment that big, it's worth a struct, lol. 
+    // Just use a unique_ptr<Zone>: TreeZone = result, FreeZone = induced
+        
+    virtual QueryReturnType RunTeleportQuery( const XTreeDatabase *db, DependencyReporter *dep_rep, XLink stimulus_xlink ) const = 0;
     
-    DomainExtension::Extender::Info GetDomainExtension( const XTreeDatabase *db, XLink start_xlink ) const override;
+    DomainExtension::Extender::Info GetDomainExtension( const XTreeDatabase *db, XLink stimulus_xlink ) const override;
 
     virtual void Reset();    
 

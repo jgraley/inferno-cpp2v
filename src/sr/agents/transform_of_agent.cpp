@@ -13,7 +13,7 @@ shared_ptr<PatternQuery> TransformOfAgent::GetPatternQuery() const
 }
 
 
-TeleportAgent::QueryReturnType TransformOfAgent::RunTeleportQuery( const XTreeDatabase *db, DependencyReporter *dep_rep, XLink start_xlink ) const
+TeleportAgent::QueryReturnType TransformOfAgent::RunTeleportQuery( const XTreeDatabase *db, DependencyReporter *dep_rep, XLink stimulus_xlink ) const
 {
     // Transform the candidate expression, sharing the x_tree_db as a TreeKit
     // so that implementations can use handy features without needing to search
@@ -21,17 +21,17 @@ TeleportAgent::QueryReturnType TransformOfAgent::RunTeleportQuery( const XTreeDa
     // precision is lost.
     
     // Policy: Don't convert MMAX link to a node (will evaluate to EmptyResult)
-    if( start_xlink == XLink::MMAX_Link )
+    if( stimulus_xlink == XLink::MMAX_Link )
          return QueryReturnType(); 
          
-    TreePtr<Node> start_x = start_xlink.GetChildX();
+    TreePtr<Node> stimulus_x = stimulus_xlink.GetChildX();
 
     TreeKit kit { db, dep_rep };
 
     try
     {
-		AugTreePtr<Node> trans = transformation->ApplyTransformation( kit, start_x );   // TODO use AugTreePtr result, turn into pair<Xlink, TreePtr<Node>>   
-		ASSERT( !trans || ((TreePtr<Node>)trans)->IsFinal() )(*this)(" computed non-final ")((TreePtr<Node>)trans)(" from ")(start_x)("\n");                             
+		AugTreePtr<Node> trans = transformation->ApplyTransformation( kit, stimulus_x );   // TODO use AugTreePtr result, turn into pair<Xlink, TreePtr<Node>>   
+		ASSERT( !trans || ((TreePtr<Node>)trans)->IsFinal() )(*this)(" computed non-final ")((TreePtr<Node>)trans)(" from ")(stimulus_x)("\n");                             
 		if( !(TreePtr<Node>)trans ) // NULL
             return QueryReturnType(); 
         else if( trans.p_tree_ptr == nullptr ) // no parent specified

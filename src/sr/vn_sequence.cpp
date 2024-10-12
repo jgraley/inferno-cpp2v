@@ -145,19 +145,13 @@ string VNSequence::GetStepName( int step_index ) const
 }
 
 
-void VNSequence::CompleteDomainExtension()
-{
-    ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");    
-    x_tree_db->CompleteDomainExtension();
-}
-
-
-void VNSequence::RunUpdateCommand( shared_ptr<Command> cmd, 
-                                   const SCREngine *scr_engine )
+void VNSequence::UpdateUsingCommand( shared_ptr<Command> cmd )
 {
     ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");    
     
 	TreeUpdater( x_tree_db.get() ).TransformToIncrementalAndExecute( cmd );
+    
+    x_tree_db->PostUpdateActions();
 }
 
 
