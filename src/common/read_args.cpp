@@ -32,7 +32,6 @@ Progress ReadArgs::quitafter_progress;
 vector<int> ReadArgs::quitafter_counts;
 int ReadArgs::repetitions = 100; // default behaviour
 bool ReadArgs::rep_error = true; // default behaviour
-bool ReadArgs::assert_pedigree = false;
 bool ReadArgs::documentation_graphs = false;
 bool ReadArgs::output_all = false;
 bool ReadArgs::use_incremental = false;
@@ -54,7 +53,6 @@ void ReadArgs::Usage(string msg)
     		        "-su         Run unit tests and quit.\n"
     		        "-sc         Enable CSP solver self-test.\n"
     		        "-sr         Enable relation self-test.\n"
-    		        "-ap         Enable pedigree assertions in search and replace engine.\n"
                     "-q<p>.<c>...   Stop after stage+step <p>, and optional match count(s) <c>. Eg -qT12.2.3\n"
                     "               for transformation 12, root match 2, first embedded match 3.\n"    
                     "               Note: step is 0-based; counts are 1-based or 0 to disable.\n"
@@ -205,14 +203,6 @@ ReadArgs::ReadArgs( int ac, char *av[] )
                 test_rel = true;
             else
                 Usage("Unknown argument after -s");
-        }
-        else if( option=='a' )
-        {
-            char assert_option = argv[curarg][2];
-            if( assert_option=='p' )
-                assert_pedigree = true;
-            else
-                Usage("Unknown argument after -a");
         }
         else if( option=='q' )
         {
