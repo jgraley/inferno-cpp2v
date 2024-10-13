@@ -25,7 +25,7 @@ void TreeZoneOrderingHandler::Run( shared_ptr<ZoneExpression> &root_expr )
 {
 	XLink root = db->GetMainRootXLink();
 	XLink last = db->GetLastDescendant(root);
-	RunWorker( root_expr, root, last, false );
+	CheckRange( root_expr, root, last, false );
 }
 
 
@@ -33,16 +33,16 @@ void TreeZoneOrderingHandler::Check( shared_ptr<ZoneExpression> &root_expr )
 {
 	XLink root = db->GetMainRootXLink();
 	XLink last = db->GetLastDescendant(root);
-	RunWorker( root_expr, root, last, true );
+	CheckRange( root_expr, root, last, true );
 }
 
 
-void TreeZoneOrderingHandler::RunWorker( shared_ptr<ZoneExpression> &base, 
-										 XLink range_begin,
-										 XLink range_end,
-										 bool just_check )
+void TreeZoneOrderingHandler::CheckRange( shared_ptr<ZoneExpression> &base, 
+									  	  XLink range_begin,
+										  XLink range_end,
+										  bool just_check )
 {
-	TRACE("RunWorker() at ")(base)(" with range ")(range_begin)(" to ")(range_end)("\n");
+	TRACE("CheckRange() at ")(base)(" with range ")(range_begin)(" to ")(range_end)("\n");
 	// Actions to take when we have a range. Use at root and for
 	// terminii of tree zones.
 	list<shared_ptr<ZoneExpression> *> tree_zone_op_list;
@@ -99,7 +99,7 @@ void TreeZoneOrderingHandler::RunForTreeZone( shared_ptr<PopulateTreeZoneOperato
 	{
 		XLink range_begin = *it_t; // inclusive (terminus XLink equals base XLink of attached tree zone)
 		XLink range_end = db->GetLastDescendant(range_begin); // inclusive (is same or child of range_begin)
-		RunWorker( child_expr, range_begin, range_end, just_check );
+		CheckRange( child_expr, range_begin, range_end, just_check );
 	} );
 }
                                        
@@ -132,7 +132,7 @@ void TreeZoneOrderingHandler::DuplicateTreeZone( shared_ptr<ZoneExpression> &exp
 	// At present, for simplest algo, we DO recurse the entire subtree and 
 	// duplicate everything. But it shouldn't be too hard to just duplicate the
 	// supplied one and let checks continue on the children of the bad TZ. Would
-	// require RunWorker() to be stated-out so it can be invoked from a walk though.
+	// require CheckRange() to be stated-out so it can be invoked from a walk though.
 	ZoneExpression::ForDepthFirstWalk( expr, nullptr, [&](shared_ptr<ZoneExpression> &child_expr)
 	{
 		if( auto ptz_op = dynamic_pointer_cast<PopulateTreeZoneOperator>(child_expr) )

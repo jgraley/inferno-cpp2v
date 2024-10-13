@@ -26,10 +26,10 @@ public:
 	void Check( shared_ptr<ZoneExpression> &root_expr );
 
 private:	
-	void RunWorker( shared_ptr<ZoneExpression> &base, 
-                    XLink range_begin,
-                    XLink range_end,
-                    bool just_check );
+	void CheckRange( shared_ptr<ZoneExpression> &base, 
+                     XLink range_begin,
+                     XLink range_end,
+                     bool just_check );
 	void RunForTreeZone( shared_ptr<PopulateTreeZoneOperator> &op, 
 						 bool just_check );
 	void GatherTreeZoneOps( shared_ptr<ZoneExpression> &expr, 
