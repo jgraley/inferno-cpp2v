@@ -338,6 +338,7 @@ AugTreePtr<CPPTree::Type> HasType::GetSpecial( const TreeKit &kit, TreePtr<Opera
     }
 }
 
+
 AugTreePtr<CPPTree::Type> HasType::GetLiteral( const TreeKit &kit, TreePtr<Literal> l ) const
 {
     if( auto si = DynamicTreePtrCast<SpecificInteger>(l) )

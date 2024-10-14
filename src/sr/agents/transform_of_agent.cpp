@@ -30,17 +30,19 @@ TeleportAgent::QueryReturnType TransformOfAgent::RunTeleportQuery( const XTreeDa
 
     try
     {
-		AugTreePtr<Node> trans = transformation->ApplyTransformation( kit, stimulus_x );   // TODO use AugTreePtr result, turn into pair<Xlink, TreePtr<Node>>   
-		ASSERT( !trans || ((TreePtr<Node>)trans)->IsFinal() )(*this)(" computed non-final ")((TreePtr<Node>)trans)(" from ")(stimulus_x)("\n");                             
-		if( !(TreePtr<Node>)trans ) // NULL
-            return QueryReturnType(); 
-        else if( trans.p_tree_ptr == nullptr ) // no parent specified
-            return make_pair(XLink(), (TreePtr<Node>)trans); 
-        else // parent was specified
-        {
-            XLink xlink((TreePtr<Node>)trans, trans.p_tree_ptr);
-            return make_pair(xlink, (TreePtr<Node>)trans);             
-        }
+		AugTreePtr<Node> atp = transformation->ApplyTransformation( kit, stimulus_x );  
+		             
+		if( !atp ) // NULL
+            return QueryReturnType(); 		
+		
+		const TreePtrInterface *ptp = transformation->GetPTreePtr(atp);
+		TreePtr<Node> tp = transformation->GetTreePtr(atp);
+		ASSERT( tp->IsFinal() )(*this)(" computed non-final ")(tp)(" from ")(stimulus_x)("\n");                
+		
+        if( ptp ) 
+            return make_pair(XLink( tp, ptp ), tp);  // parent was specified             
+		else
+            return make_pair(XLink(), tp);  // no parent specified        
 	}
     catch( const ::Mismatch &e )
     {

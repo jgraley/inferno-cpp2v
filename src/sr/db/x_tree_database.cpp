@@ -319,11 +319,11 @@ set<NavigationUtils::LinkInfo> XTreeDatabase::GetDeclarers( TreePtr<Node> node )
     // Note that row.declarers is "precise", i.e. the XLinks are the actual
     // declaring xlinks, not just arbitrary parent links to the declaree.
     // Also correct for parallel links where only some declare.
-    for( XLink declarer_xlink : row.declarers )
+    for( XLink declarer_xlink : row.declarers ) // TODO give XLink a method to generate this
     {
         LinkInfo info;
         
-        // first is TreePtr to the declarer node. Loses info about which 
+        // first is TreePtr to the declarer node. Imprecise: loses info about which 
         // link declared (in case of parallel links) but gets you the declarer node.
         info.first = TryGetParentXLink(declarer_xlink).GetChildX();
 

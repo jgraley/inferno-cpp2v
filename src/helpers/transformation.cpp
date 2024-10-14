@@ -11,6 +11,12 @@ NavigationUtils::~NavigationUtils()
 }
 
 
+const TreePtrInterface *Transformation::GetPTreePtr( const AugTreePtrBase &atp )
+{
+	return atp.p_tree_ptr;
+}
+
+
 ReferenceNavigationUtils::ReferenceNavigationUtils( TreePtr<Node> root_ ) :
 	root( root_ )
 {

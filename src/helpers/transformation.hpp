@@ -15,6 +15,7 @@ public:
 	virtual void ReportTreeNode( TreePtr<Node> tree_ptr ) = 0;
 };
 
+
 class NavigationUtils
 {
 public:	
@@ -23,27 +24,56 @@ public:
     // Convention is that second points to one of first's TreePtrs
     typedef pair<TreePtr<Node>, const TreePtrInterface *> LinkInfo;
 
+    virtual ~NavigationUtils();
+
     virtual bool IsRequireReports() const = 0;
 	virtual set<LinkInfo> GetParents( TreePtr<Node> node ) const = 0;
-	virtual set<LinkInfo> GetDeclarers( TreePtr<Node> node ) const = 0;
-    virtual ~NavigationUtils();
+	virtual set<LinkInfo> GetDeclarers( TreePtr<Node> node ) const = 0;    
 };
 
-struct TreeKit
+
+class AugTreePtrBase
 {
-    const NavigationUtils *nav;
-    DependencyReporter *dep_rep;
+protected:
+    friend class Transformation;
+
+	explicit AugTreePtrBase() :
+        p_tree_ptr(nullptr),
+        dep_rep( nullptr )	
+	{
+	}
+	
+    explicit AugTreePtrBase(const TreePtrInterface *p_tree_ptr_, DependencyReporter *dep_rep_) :
+        p_tree_ptr(p_tree_ptr_),
+        dep_rep( dep_rep_ )
+    {
+        ASSERTS( *p_tree_ptr );
+        // Not a local automatic please, we're going to hang on to it.
+        ASSERTS( !ON_STACK(p_tree_ptr_) );
+  	}    
+
+	explicit AugTreePtrBase( const AugTreePtrBase &other ) :
+        p_tree_ptr(other.p_tree_ptr), 
+        dep_rep(other.dep_rep)
+    {
+	}
+
+	AugTreePtrBase &operator=(const AugTreePtrBase &other) = default;
+
+    const TreePtrInterface *p_tree_ptr;
+    DependencyReporter *dep_rep;	
 };
 
 
 // The augmented tree pointer is designed to act like a normal TreePtr
 // (to an extent) while hepling to meet the requirements of domain extension
 template<class VALUE_TYPE>
-class AugTreePtr : public TreePtr<VALUE_TYPE>
+class AugTreePtr : public TreePtr<VALUE_TYPE>,
+			       public AugTreePtrBase
 {
 public:
     AugTreePtr() :
-        p_tree_ptr(nullptr)
+        AugTreePtrBase()
     {
     }
     
@@ -51,12 +81,8 @@ public:
     template<class OTHER_VALUE_TYPE>
     explicit AugTreePtr(TreePtr<OTHER_VALUE_TYPE> tree_ptr_, const TreePtrInterface *p_tree_ptr_, DependencyReporter *dep_rep_) : 
         TreePtr<VALUE_TYPE>(tree_ptr_), 
-        p_tree_ptr(p_tree_ptr_),
-        dep_rep( dep_rep_ )
+        AugTreePtrBase(p_tree_ptr_, dep_rep_)
     {
-        ASSERTS( *p_tree_ptr );
-        // Not a local automatic please, we're going to hang on to it.
-        ASSERTS( !ON_STACK(p_tree_ptr_) );
         if( dep_rep )
 			dep_rep->ReportTreeNode( *this );
     }
@@ -66,12 +92,8 @@ public:
     template<class OTHER_VALUE_TYPE>
     explicit AugTreePtr(TreePtr<OTHER_VALUE_TYPE> *p_tree_ptr_, DependencyReporter *dep_rep_ ) : 
         TreePtr<VALUE_TYPE>(*p_tree_ptr_), 
-        p_tree_ptr(p_tree_ptr_),
-        dep_rep( dep_rep_ )
+        AugTreePtrBase(p_tree_ptr_, dep_rep_)
     {
-        ASSERTS( *p_tree_ptr );
-        // Not a local automatic please, we're going to hang on to it.
-        ASSERTS( !ON_STACK(p_tree_ptr_) );
         if( dep_rep )
 			dep_rep->ReportTreeNode( *this );
     }
@@ -80,18 +102,17 @@ public:
     template<class OTHER_VALUE_TYPE>
     explicit AugTreePtr(TreePtr<OTHER_VALUE_TYPE> tree_ptr) : 
         TreePtr<VALUE_TYPE>(tree_ptr), 
-        p_tree_ptr(nullptr),
-        dep_rep( nullptr )
+        AugTreePtrBase()
     {
     }
     
 private:
+   
 	// For the dyncast
     template<class OTHER_VALUE_TYPE>
     AugTreePtr(TreePtr<VALUE_TYPE> tree_ptr, const AugTreePtr<OTHER_VALUE_TYPE> &other) : 
         TreePtr<VALUE_TYPE>(tree_ptr), 
-        p_tree_ptr(other.p_tree_ptr), 
-        dep_rep(other.dep_rep)
+        AugTreePtrBase(other)
     {
     }
 
@@ -99,8 +120,7 @@ public:
     template<class OTHER_VALUE_TYPE>
     AugTreePtr(const AugTreePtr<OTHER_VALUE_TYPE> &other) : 
         TreePtr<VALUE_TYPE>(other), 
-        p_tree_ptr(other.p_tree_ptr), 
-        dep_rep(other.dep_rep)
+        AugTreePtrBase(other)
     {
     }
             
@@ -110,8 +130,7 @@ public:
     AugTreePtr<VALUE_TYPE> &operator=( const AugTreePtr<OTHER_VALUE_TYPE> &other )
     {
         TreePtr<VALUE_TYPE>::operator=(other); 
-        p_tree_ptr = other.p_tree_ptr;
-        dep_rep = other.dep_rep;
+        AugTreePtrBase::operator=(other);      
         return *this;
     }
    
@@ -133,14 +152,19 @@ public:
             return AugTreePtr<OTHER_VALUE_TYPE>(*other_tree_ptr);
     }
 
-
     template<class OTHER_VALUE_TYPE>
     static AugTreePtr<VALUE_TYPE> DynamicCast( const AugTreePtr<OTHER_VALUE_TYPE> &g )
     {
         return AugTreePtr(TreePtr<VALUE_TYPE>::DynamicCast(g), g);
     }
+};
 
-    const TreePtrInterface *p_tree_ptr;
+
+
+
+struct TreeKit
+{
+    const NavigationUtils *nav;
     DependencyReporter *dep_rep;
 };
 
@@ -158,6 +182,14 @@ public:
     // comment by RunTeleportQuery().
     virtual AugTreePtr<Node> ApplyTransformation( const TreeKit &kit, // Handy functions
     		                                      TreePtr<Node> node ) const = 0;    // Root of the subtree we want to modify    		                          
+
+    const TreePtrInterface *GetPTreePtr( const AugTreePtrBase &atp );
+	
+	template<class VALUE_TYPE>
+    TreePtr<Node> GetTreePtr( const AugTreePtr<VALUE_TYPE> &atp )
+    {
+		return (TreePtr<Node>)atp;
+	}
 };
 
 
