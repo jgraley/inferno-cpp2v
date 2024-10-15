@@ -26,7 +26,8 @@ TeleportAgent::QueryReturnType TransformOfAgent::RunTeleportQuery( const XTreeDa
          
     TreePtr<Node> stimulus_x = stimulus_xlink.GetChildX();
 
-    TreeKit kit { db, dep_rep };
+	NavigationUtils nav(db);
+    TreeKit kit { &nav, dep_rep };
 
     try
     {

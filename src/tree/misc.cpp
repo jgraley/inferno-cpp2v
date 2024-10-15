@@ -24,7 +24,7 @@ TreePtr<Identifier> GetIdentifierOfDeclaration( TreePtr<Declaration> d )
 	
 AugTreePtr<Node> HasDeclaration::ApplyTransformation( const TreeKit &kit, TreePtr<Node> node ) const try
 {    
-    set<NavigationUtils::LinkInfo> declarer_infos = kit.nav->GetDeclarers( node );
+    set<NavigationUtilsImpl::LinkInfo> declarer_infos = kit.nav->GetDeclarers( node );
     
     if( declarer_infos.empty() )
     {
@@ -43,13 +43,13 @@ AugTreePtr<Node> HasDeclaration::ApplyTransformation( const TreeKit &kit, TreePt
     
     // To be able to report the declarer as a node in the tree, we
     // must find its parent link
-    set<NavigationUtils::LinkInfo> parent_infos = kit.nav->GetParents( declarer );
+    set<NavigationUtilsImpl::LinkInfo> parent_infos = kit.nav->GetParents( declarer );
     const TreePtrInterface *declarer_parent_link = OnlyElementOf( parent_infos ).second;
 
     // Report and return
     return AugTreePtr<Node>(declarer, declarer_parent_link, kit.dep_rep); 
 }
-catch( NavigationUtils::UnknownNode &) 
+catch( NavigationUtilsImpl::UnknownNode &) 
 {
 #ifdef WARN_UNFOUND_DECL
     FTRACE("Warning: declaration of ")(node)(" not found (UnknownNode)\n");

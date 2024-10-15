@@ -58,6 +58,10 @@ TreePtr<Node> Render::GenerateRender( TreePtr<Node> context, TreePtr<Node> root 
 	// Render can only work on a whole program
 	ASSERT( context == root );
     
+   	ReferenceNavigationUtilsImpl nav_impl(root);
+	NavigationUtils nav(&nav_impl);
+    TreeKit kit { &nav };
+    
 #ifdef TEST_FOR_UNMODIFIED_TREE    
     temp_old_program = dynamic_pointer_cast<Program>(root);
     root = Duplicate::DuplicateSubtree(root);
@@ -80,10 +84,10 @@ TreePtr<Node> Render::GenerateRender( TreePtr<Node> context, TreePtr<Node> root 
 
     string s;
 
-    if( IsSystemC( program ) )
+    if( IsSystemC( kit, program ) )
         s += "#include \"isystemc.h\"\n\n";
 
-	s += RenderDeclarationCollection( program, ";\n", true ); // gets the .hpp stuff directly
+	s += RenderDeclarationCollection( kit, program, ";\n", true ); // gets the .hpp stuff directly
 
 	s += deferred_decls; // these could go in a .cpp file
 
@@ -107,7 +111,7 @@ TreePtr<Node> Render::GenerateRender( TreePtr<Node> context, TreePtr<Node> root 
 }
 
 
-bool Render::IsSystemC( TreePtr<Node> root )
+bool Render::IsSystemC( const TreeKit &kit, TreePtr<Node> root )
 { 
     Walk e(root, nullptr, nullptr);
     for( const TreePtrInterface &n : e )
@@ -117,14 +121,14 @@ bool Render::IsSystemC( TreePtr<Node> root )
 }
 
 
-string Render::RenderLiteral( TreePtr<Literal> sp ) try
+string Render::RenderLiteral( const TreeKit &kit, TreePtr<Literal> sp ) try
 {
 	return Sanitise( sp->GetRender() );
 }
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderIdentifier( TreePtr<Identifier> id ) try
+string Render::RenderIdentifier( const TreeKit &kit, TreePtr<Identifier> id ) try
 {
 	string ids;
 	if( id )
@@ -150,7 +154,7 @@ string Render::RenderIdentifier( TreePtr<Identifier> id ) try
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderScopePrefix( TreePtr<Identifier> id ) try
+string Render::RenderScopePrefix( const TreeKit &kit, TreePtr<Identifier> id ) try
 {
     TreePtr<Scope> scope = GetScope( program, id );
         
@@ -160,9 +164,9 @@ string Render::RenderScopePrefix( TreePtr<Identifier> id ) try
 	else if( scope == program )
 		return " ::";
 	else if( TreePtr<Enum> e = DynamicTreePtrCast<Enum>( scope ) ) // <- for enum
-		return RenderScopePrefix( e->identifier );    // omit scope for the enum itself
+		return RenderScopePrefix( kit, e->identifier );    // omit scope for the enum itself
 	else if( TreePtr<Record> r = DynamicTreePtrCast<Record>( scope ) ) // <- for class, struct, union
-		return RenderScopedIdentifier( r->identifier ) + "::";
+		return RenderScopedIdentifier( kit, r->identifier ) + "::";
 	else if( DynamicTreePtrCast<CallableParams>( scope ) ||  // <- this is for params
              DynamicTreePtrCast<Compound>( scope ) ||    // <- this is for locals in body
              DynamicTreePtrCast<StatementExpression>( scope ) )    // <- this is for locals in body
@@ -173,16 +177,16 @@ string Render::RenderScopePrefix( TreePtr<Identifier> id ) try
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderScopedIdentifier( TreePtr<Identifier> id ) try
+string Render::RenderScopedIdentifier( const TreeKit &kit, TreePtr<Identifier> id ) try
 {
-	string s = RenderScopePrefix( id ) + RenderIdentifier( id );
+	string s = RenderScopePrefix( kit, id ) + RenderIdentifier( kit, id );
 	TRACE("Render scoped identifier %s\n", s.c_str() );
 	return s;
 }
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderIntegralType( TreePtr<Integral> type, string object ) try
+string Render::RenderIntegralType( const TreeKit &kit, TreePtr<Integral> type, string object ) try
 {
 	bool ds;
 	int64_t width;
@@ -238,7 +242,7 @@ string Render::RenderIntegralType( TreePtr<Integral> type, string object ) try
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderFloatingType( TreePtr<Floating> type ) try
+string Render::RenderFloatingType( const TreeKit &kit, TreePtr<Floating> type ) try
 {
 	string s;
 	TreePtr<SpecificFloatSemantics> sem = DynamicTreePtrCast<SpecificFloatSemantics>(type->semantics);
@@ -258,7 +262,7 @@ string Render::RenderFloatingType( TreePtr<Floating> type ) try
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderType( TreePtr<Type> type, string object, bool constant ) try
+string Render::RenderType( const TreeKit &kit, TreePtr<Type> type, string object, bool constant ) try
 {
 	string sobject;
 	if( !object.empty() )
@@ -268,31 +272,36 @@ string Render::RenderType( TreePtr<Type> type, string object, bool constant ) tr
 
 	TRACE();
 	if( TreePtr<Integral> i = DynamicTreePtrCast< Integral >(type) )
-		return const_str + RenderIntegralType( i, object );
+		return const_str + RenderIntegralType( kit, i, object );
 	if( TreePtr<Floating> f = DynamicTreePtrCast< Floating >(type) )
-		return const_str + RenderFloatingType( f ) + sobject;
+		return const_str + RenderFloatingType( kit, f ) + sobject;
 	else if( DynamicTreePtrCast< Void >(type) )
 		return const_str + "void" + sobject;
 	else if( DynamicTreePtrCast< Boolean >(type) )
 		return const_str + "bool" + sobject;
 	else if( TreePtr<Constructor> c = DynamicTreePtrCast< Constructor >(type) )
-		return object + "(" + RenderDeclarationCollection(c, ", ", false) + ")" + const_str;
+		return object + "(" + RenderDeclarationCollection(kit, c, ", ", false) + ")" + const_str;
 	else if( TreePtr<Destructor> f = DynamicTreePtrCast< Destructor >(type) )
 		return object + "()" + const_str;
 	else if( TreePtr<Function> f = DynamicTreePtrCast< Function >(type) )
-		return RenderType( f->return_type, "(" + object + ")(" + RenderDeclarationCollection(f, ", ", false) + ")" + const_str );
+		return RenderType( kit, f->return_type, "(" + object + ")(" + RenderDeclarationCollection(kit, f, ", ", false) + ")" + const_str );
 	else if( TreePtr<Process> f = DynamicTreePtrCast< Process >(type) )
 		return "void " + object + "()" + const_str;
 	else if( TreePtr<Pointer> p = DynamicTreePtrCast< Pointer >(type) )
-		return RenderType( p->destination, const_str + "(*" + object + ")", false ); // TODO Pointer node to indicate constancy of pointed-to object - would go into this call to RenderType
+		return RenderType( kit, p->destination, const_str + "(*" + object + ")", false ); // TODO Pointer node to indicate constancy of pointed-to object - would go into this call to RenderType
 	else if( TreePtr<Reference> r = DynamicTreePtrCast< Reference >(type) )
-		return RenderType( r->destination, const_str + "(&" + object + ")" );
+		return RenderType( kit, r->destination, const_str + "(&" + object + ")" );
 	else if( TreePtr<Array> a = DynamicTreePtrCast< Array >(type) )
-		return RenderType( a->element, object.empty() ? "[" + RenderExpression(a->size) + "]" : "(" + object + "[" + RenderExpression(a->size) + "])", constant );
+		return RenderType( kit, 
+		                   a->element, 
+		                   object.empty() ? 
+		                       "[" + RenderExpression(kit, a->size) + "]" : 
+		                       "(" + object + "[" + RenderExpression(kit, a->size) + "])", 
+		                   constant );
 	else if( TreePtr<Typedef> t = DynamicTreePtrCast< Typedef >(type) )
-		return const_str + RenderIdentifier(t->identifier) + sobject;
+		return const_str + RenderIdentifier(kit, t->identifier) + sobject;
 	else if( TreePtr<SpecificTypeIdentifier> ti = DynamicTreePtrCast< SpecificTypeIdentifier >(type) )
-		return const_str + RenderScopedIdentifier(ti) + sobject;
+		return const_str + RenderScopedIdentifier(kit, ti) + sobject;
 	else if( shared_ptr<SCNamedIdentifier> sct = dynamic_pointer_cast< SCNamedIdentifier >(type) )
 		return const_str + sct->GetToken() + sobject;
     else if( dynamic_pointer_cast<Labeley>(type) )
@@ -321,47 +330,47 @@ string Render::Sanitise( string s ) try
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderOperator( TreePtr<Operator> op, Sequence<Expression> &operands ) try
+string Render::RenderOperator( const TreeKit &kit, TreePtr<Operator> op, Sequence<Expression> &operands ) try
 {
 	ASSERT(op);
     string s;
     Sequence<Expression>::iterator operands_it = operands.begin();
 	if( DynamicTreePtrCast< MakeArray >(op) )
     {
-		s = "{ " + RenderOperandSequence( operands, ", ", false ) + " }";
+		s = "{ " + RenderOperandSequence( kit, operands, ", ", false ) + " }";
     }
 	else if( DynamicTreePtrCast< ConditionalOperator >(op) )
     {
-		s = RenderExpression( *operands_it, true ) + " ? ";
+		s = RenderExpression( kit, *operands_it, true ) + " ? ";
         ++operands_it;
-		s += RenderExpression( *operands_it, true ) + " : ";
+		s += RenderExpression( kit, *operands_it, true ) + " : ";
         ++operands_it;
-        s += RenderExpression( *operands_it, true );           
+        s += RenderExpression( kit, *operands_it, true );           
     }
 	else if( DynamicTreePtrCast< Subscript >(op) )
 	{
-        s = RenderExpression( *operands_it, true ) + "[";
+        s = RenderExpression( kit, *operands_it, true ) + "[";
         ++operands_it;
-		s += RenderExpression( *operands_it, false ) + "]";
+		s += RenderExpression( kit, *operands_it, false ) + "]";
     }
 #define INFIX(TOK, TEXT, NODE_SHAPED, BASE, CAT) \
     else if( DynamicTreePtrCast<NODE_SHAPED>(op) ) \
 	{ \
-		s = RenderExpression( *operands_it, true ); \
+		s = RenderExpression( kit, *operands_it, true ); \
 		s += TEXT; \
         ++operands_it; \
-		s += RenderExpression( *operands_it, true ); \
+		s += RenderExpression( kit, *operands_it, true ); \
     }
 #define PREFIX(TOK, TEXT, NODE_SHAPED, BASE, CAT) \
 	else if( DynamicTreePtrCast<NODE_SHAPED>(op) ) \
     { \
 		s = TEXT; \
-		s += RenderExpression( *operands_it, true ); \
+		s += RenderExpression( kit, *operands_it, true ); \
     }
 #define POSTFIX(TOK, TEXT, NODE_SHAPED, BASE, CAT) \
 	else if( DynamicTreePtrCast<NODE_SHAPED>(op) ) \
     { \
-		s = RenderExpression( *operands_it, true ); \
+		s = RenderExpression( kit, *operands_it, true ); \
 		s += TEXT; \
     }
 #include "tree/operator_data.inc"
@@ -374,18 +383,16 @@ string Render::RenderOperator( TreePtr<Operator> op, Sequence<Expression> &opera
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderCall( TreePtr<Call> call ) try
+string Render::RenderCall( const TreeKit &kit, TreePtr<Call> call ) try
 {
 	string s;
 
 	// Render the expression that resolves to the function name unless this is
 	// a constructor call in which case just the name of the thing being constructed.
-	ReferenceNavigationUtils nav(program);
-    TreeKit kit { &nav };
 	if( TreePtr<Expression> base = HasType::instance.IsConstructorCall( kit, call ) )
-		s += RenderExpression( base, true );
+		s += RenderExpression( kit, base, true );
 	else
-		s += RenderExpression( call->callee, true );
+		s += RenderExpression( kit, call->callee, true );
 
 	s += "(";
 
@@ -393,7 +400,7 @@ string Render::RenderCall( TreePtr<Call> call ) try
 	TreePtr<Node> ctype = HasType::instance(call->callee, program);
 	ASSERT( ctype );
 	if( TreePtr<CallableParams> cp = DynamicTreePtrCast<CallableParams>(ctype) )
-		s += RenderMapInOrder( call, cp, ", ", false );
+		s += RenderMapInOrder( kit, call, cp, ", ", false );
 
 	s += ")";
 	return s;
@@ -401,7 +408,7 @@ string Render::RenderCall( TreePtr<Call> call ) try
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderExpression( TreePtr<Initialiser> expression, bool bracketize_operator ) try
+string Render::RenderExpression( const TreeKit &kit, TreePtr<Initialiser> expression, bool bracketize_operator ) try
 {
 	//TRACE("%p\n", expression.get());
 
@@ -414,27 +421,27 @@ string Render::RenderExpression( TreePtr<Initialiser> expression, bool bracketiz
     {
         AutoPush< TreePtr<Scope> > cs( scope_stack, ce );
         string s = "({ ";
-        s += RenderDeclarationCollection( ce, "; ", true ); // Must do this first to populate backing list
-        s += RenderSequence( ce->statements, "; ", true );
+        s += RenderDeclarationCollection( kit, ce, "; ", true ); // Must do this first to populate backing list
+        s += RenderSequence( kit, ce->statements, "; ", true );
         return s + "})";
     }
 	else if( TreePtr<SpecificLabelIdentifier> li = DynamicTreePtrCast< SpecificLabelIdentifier >(expression) )
 		return before +
-			   "&&" + RenderIdentifier( li ) + // label-as-variable (GCC extension)
+			   "&&" + RenderIdentifier( kit, li ) + // label-as-variable (GCC extension)
 			   after;
 	else if( TreePtr<InstanceIdentifier> ii = DynamicTreePtrCast< InstanceIdentifier >(expression) )
-		return RenderScopedIdentifier( ii );
+		return RenderScopedIdentifier( kit, ii );
 	else if( TreePtr<SizeOf> pot = DynamicTreePtrCast< SizeOf >(expression) )
 		return before +
-			   "sizeof(" + RenderType( pot->operand, "" ) + ")" +
+			   "sizeof(" + RenderType( kit, pot->operand, "" ) + ")" +
 			   after;
 	else if( TreePtr<AlignOf> pot = DynamicTreePtrCast< AlignOf >(expression) )
 		return before +
-			   "alignof(" + RenderType( pot->operand, "" ) + ")" +
+			   "alignof(" + RenderType( kit, pot->operand, "" ) + ")" +
 			   after;
 	else if( TreePtr<NonCommutativeOperator> nco = DynamicTreePtrCast< NonCommutativeOperator >(expression) )
 		return before +
-			   RenderOperator( nco, nco->operands ) +
+			   RenderOperator( kit, nco, nco->operands ) +
 			   after;
 	else if( TreePtr<CommutativeOperator> co = DynamicTreePtrCast< CommutativeOperator >(expression) )
 	{
@@ -443,44 +450,44 @@ string Render::RenderExpression( TreePtr<Initialiser> expression, bool bracketiz
 		for( TreePtr<Node> o : sc.GetTreePtrOrdering(co->operands) )
 			seq_operands.push_back( TreePtr<Expression>::DynamicCast(o) );
 		return before +
-			   RenderOperator( co, seq_operands ) +
+			   RenderOperator( kit, co, seq_operands ) +
 			   after;
 	}
 	else if( TreePtr<Call> c = DynamicTreePtrCast< Call >(expression) )
 		return before +
-			   RenderCall( c ) +
+			   RenderCall( kit, c ) +
 			   after;
 	else if( TreePtr<New> n = DynamicTreePtrCast< New >(expression) )
 		return before +
 			   (DynamicTreePtrCast<Global>(n->global) ? "::" : "") +
-			   "new(" + RenderOperandSequence( n->placement_arguments, ", ", false ) + ") " +
-			   RenderType( n->type, "" ) +
-			   (n->constructor_arguments.empty() ? "" : "(" + RenderOperandSequence( n->constructor_arguments, ", ", false ) + ")" ) +
+			   "new(" + RenderOperandSequence( kit, n->placement_arguments, ", ", false ) + ") " +
+			   RenderType( kit, n->type, "" ) +
+			   (n->constructor_arguments.empty() ? "" : "(" + RenderOperandSequence( kit, n->constructor_arguments, ", ", false ) + ")" ) +
 			   after;
 	else if( TreePtr<Delete> d = DynamicTreePtrCast< Delete >(expression) )
 		return before +
 			   (DynamicTreePtrCast<Global>(d->global) ? "::" : "") +
 			   "delete" +
 			   (DynamicTreePtrCast<DeleteArray>(d->array) ? "[]" : "") +
-			   " " + RenderExpression( d->pointer, true ) +
+			   " " + RenderExpression( kit, d->pointer, true ) +
 			   after;
 	else if( TreePtr<Lookup> a = DynamicTreePtrCast< Lookup >(expression) )
 		return before +
-			   RenderExpression( a->base, true ) + "." +
-			   RenderScopedIdentifier( a->member ) +
+			   RenderExpression( kit, a->base, true ) + "." +
+			   RenderScopedIdentifier( kit, a->member ) +
 			   after;
 	else if( TreePtr<Cast> c = DynamicTreePtrCast< Cast >(expression) )
 		return before +
-			   "(" + RenderType( c->type, "" ) + ")" +
-			   RenderExpression( c->operand, false ) +
+			   "(" + RenderType( kit, c->type, "" ) + ")" +
+			   RenderExpression( kit, c->operand, false ) +
 			   after;
 	else if( TreePtr<MakeRecord> ro = DynamicTreePtrCast< MakeRecord >(expression) )
 		return before +
-			   RenderMakeRecord( ro ) +
+			   RenderMakeRecord( kit, ro ) +
 			   after;
 	else if( TreePtr<Literal> l = DynamicTreePtrCast< Literal >(expression) )
 		return before +
-			   RenderLiteral( l ) +
+			   RenderLiteral( kit, l ) +
 			   after;
 	else if( DynamicTreePtrCast< This >(expression) )
 		return before +
@@ -496,29 +503,28 @@ string Render::RenderExpression( TreePtr<Initialiser> expression, bool bracketiz
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderMakeRecord( TreePtr<MakeRecord> ro ) try
+string Render::RenderMakeRecord( const TreeKit &kit, TreePtr<MakeRecord> ro ) try
 {
 	string s;
 
 	// Get the record
 	TreePtr<TypeIdentifier> id = DynamicTreePtrCast<TypeIdentifier>(ro->type);
 	ASSERT(id);
-	
-	ReferenceNavigationUtils nav(program);
-    TreeKit kit { &nav };
+
 	TreePtr<Record> r = GetRecordDeclaration(kit, id);
 
 	s += "(";
-	s += RenderType( ro->type, "" );
+	s += RenderType( kit, ro->type, "" );
 	s += "){ ";
-	s += RenderMapInOrder( ro, r, ", ", false );
+	s += RenderMapInOrder( kit, ro, r, ", ", false );
 	s += " }";
 	return s;
 }
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderMapInOrder( TreePtr<MapOperator> ro,
+string Render::RenderMapInOrder( const TreeKit &kit, 
+                                 TreePtr<MapOperator> ro,
                                  TreePtr<Scope> r,
                                  string separator,
                                  bool separate_last ) try
@@ -550,7 +556,7 @@ string Render::RenderMapInOrder( TreePtr<MapOperator> ro,
 					{
 						if( !first )
 							s += separator;
-						s += RenderExpression( mi->value );
+						s += RenderExpression( kit, mi->value );
 						first = false;
 					}
 				}
@@ -564,7 +570,7 @@ string Render::RenderMapInOrder( TreePtr<MapOperator> ro,
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderAccess( TreePtr<AccessSpec> current_access ) try
+string Render::RenderAccess( const TreeKit &kit, TreePtr<AccessSpec> current_access ) try
 {
 	if( DynamicTreePtrCast<Public>( current_access ) )
 		return "public";
@@ -578,7 +584,7 @@ string Render::RenderAccess( TreePtr<AccessSpec> current_access ) try
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderStorage( TreePtr<Instance> st ) try
+string Render::RenderStorage( const TreeKit &kit, TreePtr<Instance> st ) try
 {
 	if( DynamicTreePtrCast<Program>( scope_stack.top() ) )
 		return ""; // at top-level scope, everything is set to static, but don't actually output the word
@@ -604,7 +610,7 @@ string Render::RenderStorage( TreePtr<Instance> st ) try
 DEFAULT_CATCH_CLAUSE
 
 
-void Render::ExtractInits( Sequence<Statement> &body, Sequence<Statement> &inits, Sequence<Statement> &remainder )
+void Render::ExtractInits( const TreeKit &kit, Sequence<Statement> &body, Sequence<Statement> &inits, Sequence<Statement> &remainder )
 {
 	for( TreePtr<Statement> s : body )
 	{
@@ -612,8 +618,6 @@ void Render::ExtractInits( Sequence<Statement> &body, Sequence<Statement> &inits
 		{
             try
             {
-                ReferenceNavigationUtils nav(program);
-                TreeKit kit { &nav };
                 if( HasType::instance.IsConstructorCall( kit, o ) )
                 {
                     inits.push_back(s);
@@ -631,7 +635,7 @@ void Render::ExtractInits( Sequence<Statement> &body, Sequence<Statement> &inits
 }
 
 
-string Render::RenderInstance( TreePtr<Instance> o, string sep, bool showtype,
+string Render::RenderInstance( const TreeKit &kit, TreePtr<Instance> o, string sep, bool showtype,
                                bool showstorage, bool showinit, bool showscope ) try
 {
 	string s;
@@ -649,11 +653,11 @@ string Render::RenderInstance( TreePtr<Instance> o, string sep, bool showtype,
 
 	if( showstorage )
 	{
-		s += RenderStorage(o);
+		s += RenderStorage(kit, o);
 	}
 
 	if( showscope )
-		name += RenderScopePrefix(o->identifier);
+		name += RenderScopePrefix(kit, o->identifier);
 
 	TreePtr<Constructor> con = DynamicTreePtrCast<Constructor>(o->type);
 	TreePtr<Destructor> de = DynamicTreePtrCast<Destructor>(o->type);
@@ -662,15 +666,15 @@ string Render::RenderInstance( TreePtr<Instance> o, string sep, bool showtype,
 		TreePtr<Record> rec = DynamicTreePtrCast<Record>( GetScope( program, o->identifier ) );
 		ASSERT( rec );        
 		name += (de ? "~" : "");
-		name += RenderIdentifier(rec->identifier);
+		name += RenderIdentifier(kit, rec->identifier);
 	}
 	else
 	{
-		name += RenderIdentifier(o->identifier);
+		name += RenderIdentifier(kit, o->identifier);
 	}
 
 	if( showtype )
-		s += RenderType( o->type, name, constant );
+		s += RenderType( kit, o->type, name, constant );
 	else
 		s = name;
 
@@ -678,14 +682,12 @@ string Render::RenderInstance( TreePtr<Instance> o, string sep, bool showtype,
 
     // If object is really a module, bodge in a name as a constructor parameter
     // But not for fields - they need an init list, done in RenderDeclarationCollection()
-	ReferenceNavigationUtils nav(program);
-    TreeKit kit { &nav };
 	if( !DynamicTreePtrCast<Field>(o) )
 	    if( TreePtr<TypeIdentifier> tid = DynamicTreePtrCast<TypeIdentifier>(o->type) )
 	        if( TreePtr<Record> r = GetRecordDeclaration(kit, tid) )
 	            if( DynamicTreePtrCast<Module>(r) )
 	            {
-	                s += "(\"" + RenderIdentifier(o->identifier) + "\")" + sep;
+	                s += "(\"" + RenderIdentifier(kit, o->identifier) + "\")" + sep;
 	                return s;
 	            }
 	
@@ -716,20 +718,20 @@ string Render::RenderInstance( TreePtr<Instance> o, string sep, bool showtype,
 		// Seperate the statements into constructor initialisers and "other stuff"
 		Sequence<Statement> inits;
 		Sequence<Statement> remainder;
-		ExtractInits( code, inits, remainder );
+		ExtractInits( kit, code, inits, remainder );
 
 		// Render the constructor initialisers if there are any
 		if( !inits.empty() )
 		{
 			s += " : ";
-			s += RenderSequence( inits, ", ", false, TreePtr<Public>(), true );
+			s += RenderSequence( kit, inits, ", ", false, TreePtr<Public>(), true );
 		}
 
 		// Render the other stuff as a Compound so we always get {} in all cases
 		auto r = MakeTreeNode<Compound>();
 		r->members = members;
 		r->statements = remainder;
-		s += "\n" + RenderStatement(r, "");
+		s += "\n" + RenderStatement(kit, r, "");
     }
 	else
 	{
@@ -737,7 +739,7 @@ string Render::RenderInstance( TreePtr<Instance> o, string sep, bool showtype,
 		{
 			// Render expression with an assignment
 			AutoPush< TreePtr<Scope> > cs( scope_stack, GetScope( program, o->identifier ) );
-			s += " = " + RenderExpression(ei) + sep;
+			s += " = " + RenderExpression(kit, ei) + sep;
 		}
 		else
 		{
@@ -754,26 +756,27 @@ DEFAULT_CATCH_CLAUSE
 // get split into a part that goes into the record (main line of rendering) and
 // a part that goes separately (deferred_decls gets appended at the very end).
 // Do all functions, since SortDecls() ignores function bodies for dep analysis
-bool Render::ShouldSplitInstance( TreePtr<Instance> o ) 
+bool Render::ShouldSplitInstance( const TreeKit &kit, TreePtr<Instance> o ) 
 {
 	bool isfunc = !!DynamicTreePtrCast<Callable>( o->type );
 	bool isnumber = !!DynamicTreePtrCast<Numeric>( o->type );
-	ReferenceNavigationUtils nav(program);
-    TreeKit kit { &nav };
+
     if( TreePtr<TypeIdentifier> ti = DynamicTreePtrCast<TypeIdentifier>(o->type) )
         if( DynamicTreePtrCast<Enum>( GetRecordDeclaration(kit, ti) ) )
             isnumber = 1; // enum is like a number        
+
 	bool split_var = false;
 	if( TreePtr<Static> s = DynamicTreePtrCast<Static>(o) )
 		if( DynamicTreePtrCast<NonConst>(s->constancy) || !isnumber )
 			split_var = true;
+
 	return ( DynamicTreePtrCast<Record>( scope_stack.top() ) &&
 			   split_var ) || 
 			   isfunc;
 }
 
 
-string Render::RenderDeclaration( TreePtr<Declaration> declaration,
+string Render::RenderDeclaration( const TreeKit &kit, TreePtr<Declaration> declaration,
                                   string sep, TreePtr<AccessSpec> *current_access,
                                   bool showtype, bool force_incomplete, bool shownonfuncinit ) try
 {
@@ -792,29 +795,29 @@ string Render::RenderDeclaration( TreePtr<Declaration> declaration,
 	if( current_access && // nullptr means dont ever render access specs
 		typeid(*this_access) != typeid(**current_access) ) // current_access spec must have changed
 	{
-		s += RenderAccess( this_access ) + ":\n";
+		s += RenderAccess( kit, this_access ) + ":\n";
 		*current_access = this_access;
 	}
 
 	if( TreePtr<Instance> o = DynamicTreePtrCast<Instance>(declaration) )
 	{
-		if( ShouldSplitInstance(o) )
+		if( ShouldSplitInstance(kit, o) )
 		{
-			s += RenderInstance( o, sep, showtype, showtype, false, false );
+			s += RenderInstance( kit, o, sep, showtype, showtype, false, false );
 			{
 				AutoPush< TreePtr<Scope> > cs( scope_stack, program );
-				deferred_decls += string("\n") + RenderInstance( o, sep, showtype, false, true, true );
+				deferred_decls += string("\n") + RenderInstance( kit, o, sep, showtype, false, true, true );
 			}
 		}
 		else
 		{
 			// Otherwise, render everything directly using the default settings
-			s += RenderInstance( o, sep, showtype, showtype, shownonfuncinit, false );
+			s += RenderInstance( kit, o, sep, showtype, showtype, shownonfuncinit, false );
 		}
 	}
 	else if( TreePtr<Typedef> t = DynamicTreePtrCast< Typedef >(declaration) )
 	{
-		s += "typedef " + RenderType( t->type, RenderIdentifier(t->identifier) ) + sep;
+		s += "typedef " + RenderType( kit, t->type, RenderIdentifier(kit, t->identifier) ) + sep;
 	}
 	else if( TreePtr<Record> r = DynamicTreePtrCast< Record >(declaration) )
 	{
@@ -848,7 +851,7 @@ string Render::RenderDeclaration( TreePtr<Declaration> declaration,
 			return ERROR_UNSUPPORTED(declaration);
 
 		// Name of the record
-		s += " " + RenderIdentifier(r->identifier);
+		s += " " + RenderIdentifier(kit, r->identifier);
 
 		if( !force_incomplete )
 		{
@@ -871,7 +874,7 @@ string Render::RenderDeclaration( TreePtr<Declaration> declaration,
 						first=false;
                         auto b = TreePtr<Base>::DynamicCast(bn);
 						ASSERT( b );
-						s += RenderAccess(b->access) + " " + RenderIdentifier(b->record);
+						s += RenderAccess(kit, b->access) + " " + RenderIdentifier(kit, b->record);
 					}
 				}
 			}
@@ -879,14 +882,14 @@ string Render::RenderDeclaration( TreePtr<Declaration> declaration,
 			// Contents
 			AutoPush< TreePtr<Scope> > cs( scope_stack, r );
 			s += "\n{\n" +
-				 RenderDeclarationCollection( r, sep2, true, a, showtype ) +
+				 RenderDeclarationCollection( kit, r, sep2, true, a, showtype ) +
 				 "}";
 		}
 
 		s += ";\n";
 	}
 	else if( TreePtr<Label> l = DynamicTreePtrCast<Label>(declaration) )
-		return RenderIdentifier(l->identifier) + ":;\n"; // need ; after a label in case last in compound block
+		return RenderIdentifier(kit, l->identifier) + ":;\n"; // need ; after a label in case last in compound block
 	else
 		s += ERROR_UNSUPPORTED(declaration);
 
@@ -896,65 +899,65 @@ string Render::RenderDeclaration( TreePtr<Declaration> declaration,
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderStatement( TreePtr<Statement> statement, string sep ) try
+string Render::RenderStatement( const TreeKit &kit, TreePtr<Statement> statement, string sep ) try
 {
 	TRACE();
 	if( !statement )
 		return sep;
 	//printf( "%s %d things\n", typeid(*statement).name(), statement->Itemise().size() );
 	if( TreePtr<Declaration> d = DynamicTreePtrCast< Declaration >(statement) )
-		return RenderDeclaration( d, sep );
+		return RenderDeclaration( kit, d, sep );
 	else if( TreePtr<Compound> c = DynamicTreePtrCast< Compound >(statement) )
 	{
 		AutoPush< TreePtr<Scope> > cs( scope_stack, c );
 		string s = "{\n";
-		s += RenderDeclarationCollection( c, ";\n", true ); // Must do this first to populate backing list
-		s += RenderSequence( c->statements, ";\n", true );
+		s += RenderDeclarationCollection( kit, c, ";\n", true ); // Must do this first to populate backing list
+		s += RenderSequence( kit, c->statements, ";\n", true );
 		return s + "}\n";
 	}
 	else if( TreePtr<Expression> e = DynamicTreePtrCast< Expression >(statement) )
-		return RenderExpression(e) + sep;
+		return RenderExpression(kit, e) + sep;
 	else if( TreePtr<Return> es = DynamicTreePtrCast<Return>(statement) )
-		return "return " + RenderExpression(es->return_value) + sep;
+		return "return " + RenderExpression(kit, es->return_value) + sep;
 	else if( TreePtr<Goto> g = DynamicTreePtrCast<Goto>(statement) )
 	{
 		if( TreePtr<SpecificLabelIdentifier> li = DynamicTreePtrCast< SpecificLabelIdentifier >(g->destination) )
-			return "goto " + RenderIdentifier(li) + sep;  // regular goto
+			return "goto " + RenderIdentifier(kit, li) + sep;  // regular goto
 		else
-			return "goto *(" + RenderExpression(g->destination) + ")" + sep; // goto-a-variable (GCC extension)
+			return "goto *(" + RenderExpression(kit, g->destination) + ")" + sep; // goto-a-variable (GCC extension)
 	}
 	else if( TreePtr<If> i = DynamicTreePtrCast<If>(statement) )
 	{
 		string s;
-		s += "if( " + RenderExpression(i->condition) + " )\n";
+		s += "if( " + RenderExpression(kit, i->condition) + " )\n";
 		bool sub_if = !!DynamicTreePtrCast<If>(i->body);
 		if( sub_if )
 			 s += "{\n"; // Note: braces there to clarify else binding eg if(a) if(b) foo; else how_do_i_bind;
-	    s += RenderStatement(i->body, ";\n");
+	    s += RenderStatement(kit, i->body, ";\n");
 		if( sub_if )
 			 s += "}\n";
 		if( !DynamicTreePtrCast<Nop>(i->else_body) )  // Nop means no else clause
 			s += "else\n" +
-				 RenderStatement(i->else_body, ";\n");
+				 RenderStatement(kit, i->else_body, ";\n");
 		return s;
 	}
 	else if( TreePtr<While> w = DynamicTreePtrCast<While>(statement) )
-		return "while( " + RenderExpression(w->condition) + " )\n" +
-			   RenderStatement(w->body, ";\n");
+		return "while( " + RenderExpression(kit, w->condition) + " )\n" +
+			   RenderStatement(kit, w->body, ";\n");
 	else if( TreePtr<Do> d = DynamicTreePtrCast<Do>(statement) )
 		return "do\n" +
-			   RenderStatement(d->body, ";\n") +
-			   "while( " + RenderExpression(d->condition) + " )" + sep;
+			   RenderStatement(kit, d->body, ";\n") +
+			   "while( " + RenderExpression(kit, d->condition) + " )" + sep;
 	else if( TreePtr<For> f = DynamicTreePtrCast<For>(statement) )
-		return "for( " + RenderStatement(f->initialisation, "") + "; " + RenderExpression(f->condition) + "; "+ RenderStatement(f->increment, "") + " )\n" +
-			   RenderStatement(f->body, ";\n");
+		return "for( " + RenderStatement(kit, f->initialisation, "") + "; " + RenderExpression(kit, f->condition) + "; "+ RenderStatement(kit, f->increment, "") + " )\n" +
+			   RenderStatement(kit, f->body, ";\n");
 	else if( TreePtr<Switch> s = DynamicTreePtrCast<Switch>(statement) )
-		return "switch( " + RenderExpression(s->condition) + " )\n" +
-			   RenderStatement(s->body, ";\n");
+		return "switch( " + RenderExpression(kit, s->condition) + " )\n" +
+			   RenderStatement(kit, s->body, ";\n");
 	else if( TreePtr<Case> c = DynamicTreePtrCast<Case>(statement) )
-		return "case " + RenderExpression(c->value) + ":;\n";
+		return "case " + RenderExpression(kit, c->value) + ":;\n";
 	else if( TreePtr<RangeCase> rc = DynamicTreePtrCast<RangeCase>(statement) )
-		return "case " + RenderExpression(rc->value_lo) + " ... " + RenderExpression(rc->value_hi) + ":\n";
+		return "case " + RenderExpression(kit, rc->value_lo) + " ... " + RenderExpression(kit, rc->value_hi) + ":\n";
 	else if( DynamicTreePtrCast<Default>(statement) )
 		return "default:;\n";
 	else if( DynamicTreePtrCast<Continue>(statement) )
@@ -964,23 +967,23 @@ string Render::RenderStatement( TreePtr<Statement> statement, string sep ) try
 	else if( DynamicTreePtrCast<Nop>(statement) )
 		return sep;
 	else if( TreePtr<WaitDynamic> c = DynamicTreePtrCast<WaitDynamic>(statement) ) 
-	    return c->GetToken() + "( " + RenderExpression(c->event) + " );\n";
+	    return c->GetToken() + "( " + RenderExpression(kit, c->event) + " );\n";
 	else if( TreePtr<WaitStatic> c = DynamicTreePtrCast<WaitStatic>(statement) ) 
 	    return c->GetToken() + "();\n";
 	else if( TreePtr<WaitDelta> c = DynamicTreePtrCast<WaitDelta>(statement) )
 	    return c->GetToken() + "(SC_ZERO_TIME);\n";
 	else if( TreePtr<NextTriggerDynamic> c = DynamicTreePtrCast<NextTriggerDynamic>(statement) ) 
-	    return c->GetToken() + "( " + RenderExpression(c->event) + " );\n";
+	    return c->GetToken() + "( " + RenderExpression(kit, c->event) + " );\n";
 	else if( TreePtr<NextTriggerStatic> c = DynamicTreePtrCast<NextTriggerStatic>(statement) ) 
 	    return c->GetToken() + "();\n";
 	else if( TreePtr<NextTriggerDelta> c = DynamicTreePtrCast<NextTriggerDelta>(statement) ) 
 	    return c->GetToken() + "(SC_ZERO_TIME);\n";
 	else if( TreePtr<TerminationFunction> tf = DynamicTreePtrCast<TerminationFunction>(statement) )
-		return tf->GetToken() + "( " + RenderExpression(tf->code) + " );\n";
+		return tf->GetToken() + "( " + RenderExpression(kit, tf->code) + " );\n";
 	else if( TreePtr<NotifyImmediate> n = DynamicTreePtrCast<NotifyImmediate>(statement) )
-		return RenderExpression( n->event, true ) + "." + n->GetToken() + "();\n";
+		return RenderExpression( kit, n->event, true ) + "." + n->GetToken() + "();\n";
 	else if( TreePtr<NotifyDelta> n = DynamicTreePtrCast<NotifyDelta>(statement) )
-		return RenderExpression( n->event, true ) + "." + n->GetToken() + "(SC_ZERO_TIME);\n";
+		return RenderExpression( kit, n->event, true ) + "." + n->GetToken() + "(SC_ZERO_TIME);\n";
     else
 		return ERROR_UNSUPPORTED(statement);
 }
@@ -988,7 +991,8 @@ DEFAULT_CATCH_CLAUSE
 
 
 template< class ELEMENT >
-string Render::RenderSequence( Sequence<ELEMENT> spe,
+string Render::RenderSequence( const TreeKit &kit, 
+                               Sequence<ELEMENT> spe,
                                string separator,
                                bool separate_last,
                                TreePtr<AccessSpec> init_access,
@@ -1005,9 +1009,9 @@ string Render::RenderSequence( Sequence<ELEMENT> spe,
 		string sep = (separate_last || it!=last_it) ? separator : "";
 		TreePtr<ELEMENT> pe = *it;
 		if( TreePtr<Declaration> d = DynamicTreePtrCast< Declaration >(pe) )
-			s += RenderDeclaration( d, sep, init_access ? &init_access : nullptr, showtype, false, shownonfuncinit );
+			s += RenderDeclaration( kit, d, sep, init_access ? &init_access : nullptr, showtype, false, shownonfuncinit );
 		else if( TreePtr<Statement> st = DynamicTreePtrCast< Statement >(pe) )
-			s += RenderStatement( st, sep );
+			s += RenderStatement( kit, st, sep );
 		else
 			s += ERROR_UNSUPPORTED(pe);
 	}
@@ -1016,7 +1020,8 @@ string Render::RenderSequence( Sequence<ELEMENT> spe,
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderOperandSequence( Sequence<Expression> spe,
+string Render::RenderOperandSequence( const TreeKit &kit, 
+                                      Sequence<Expression> spe,
                                       string separator,
                                       bool separate_last ) try
 {
@@ -1029,14 +1034,15 @@ string Render::RenderOperandSequence( Sequence<Expression> spe,
 		//TRACE("%d %p\n", i, &i);
 		string sep = (separate_last || it!=last_it) ? separator : "";
 		TreePtr<Expression> pe = *it;
-		s += RenderExpression( pe ) + sep;
+		s += RenderExpression( kit, pe ) + sep;
 	}
 	return s;
 }
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderModuleCtor( TreePtr<Module> m,
+string Render::RenderModuleCtor( const TreeKit &kit, 
+                                 TreePtr<Module> m,
                                  TreePtr<AccessSpec> *access ) try
 {
     string s;
@@ -1047,15 +1053,13 @@ string Render::RenderModuleCtor( TreePtr<Module> m,
         s += "public:\n";
         *access = MakeTreeNode<Public>();// note that we left the access as public
     }
-    s += "SC_CTOR( " + RenderIdentifier( m->identifier ) + " )";
+    s += "SC_CTOR( " + RenderIdentifier( kit, m->identifier ) + " )";
     int first = true;             
     auto sorted_members = sc.GetTreePtrOrdering(m->members);
     for( TreePtr<Node> pd : sorted_members )
     {
         // Bodge an init list that names any fields we have that are modules
         // and initialises any fields with initialisers
-        ReferenceNavigationUtils nav(program);
-        TreeKit kit { &nav };
         if( TreePtr<Field> f = DynamicTreePtrCast<Field>(pd) )
             if( TreePtr<TypeIdentifier> tid = DynamicTreePtrCast<TypeIdentifier>(f->type) )
                 if( TreePtr<Record> r = GetRecordDeclaration(kit, tid) )
@@ -1065,7 +1069,7 @@ string Render::RenderModuleCtor( TreePtr<Module> m,
                             s += " :";
                         else
                             s += ",";
-                        string ids = RenderIdentifier(f->identifier);                           
+                        string ids = RenderIdentifier(kit, f->identifier);                           
                         s += "\n" + ids + "(\"" + ids + "\")";
                         first = false;
                     }   
@@ -1085,8 +1089,8 @@ string Render::RenderModuleCtor( TreePtr<Module> m,
                     s += " :";
                 else
                     s += ",";
-                string ids = RenderIdentifier(i->identifier);                           
-                string inits = RenderExpression(i->initialiser);
+                string ids = RenderIdentifier(kit, i->identifier);                           
+                string inits = RenderExpression(kit, i->initialiser);
                 s += "\n" + ids + "(" + inits + ")";
                 first = false;                 
             }
@@ -1096,7 +1100,7 @@ string Render::RenderModuleCtor( TreePtr<Module> m,
     for( TreePtr<Node> pd : sorted_members )
         if( TreePtr<Field> f = DynamicTreePtrCast<Field>(pd) )
             if( TreePtr<Process> r = DynamicTreePtrCast<Process>(f->type) )
-                s += r->GetToken() + "(" + RenderIdentifier( f->identifier ) + ");\n";
+                s += r->GetToken() + "(" + RenderIdentifier( kit, f->identifier ) + ");\n";
     s += "}\n";
     
     return s;
@@ -1104,7 +1108,8 @@ string Render::RenderModuleCtor( TreePtr<Module> m,
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderDeclarationCollection( TreePtr<Scope> sd,
+string Render::RenderDeclarationCollection( const TreeKit &kit, 
+                                            TreePtr<Scope> sd,
                                             string separator,
                                             bool separate_last,
                                             TreePtr<AccessSpec> init_access,
@@ -1120,20 +1125,20 @@ string Render::RenderDeclarationCollection( TreePtr<Scope> sd,
 	for( TreePtr<Declaration> pd : sorted ) //for( int i=0; i<sorted.size(); i++ )
 		if( TreePtr<Record> r = DynamicTreePtrCast<Record>(pd) ) // is a record
 			if( !DynamicTreePtrCast<Enum>(r) ) // but not an enum
-				s += RenderDeclaration( r, separator, init_access ? &init_access : nullptr, showtype, true );
+				s += RenderDeclaration( kit, r, separator, init_access ? &init_access : nullptr, showtype, true );
 
     // For SystemC modules, we generate a constructor based on the other decls in
     // the module. Nothing goes in the Inferno tree for a module constructor, since
     // it is an elaboration mechanism, not funcitonal.
     TreePtr<Module> sc_module = DynamicTreePtrCast<Module>(sd);
     if( sc_module )
-        s += RenderModuleCtor( sc_module, &init_access );
+        s += RenderModuleCtor( kit, sc_module, &init_access );
 
     // Emit the actual declarations, sorted for dependencies
     // Note that in SC modules there can be inits on non-funciton members, which we hide.
     // TODO not consistent with C++ classes in general, where the inits have already been
     // moved into constructor inits before rendering begins.
-    s += RenderSequence( sorted, separator, separate_last, init_access, showtype, !sc_module );
+    s += RenderSequence( kit, sorted, separator, separate_last, init_access, showtype, !sc_module );
 	TRACE();
 	return s;
 }

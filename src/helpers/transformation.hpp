@@ -7,6 +7,8 @@
 
 class Transformation;
 
+// ---------------------- DependencyReporter ---------------------------
+
 class DependencyReporter
 {
 public:	
@@ -15,8 +17,9 @@ public:
 	virtual void ReportTreeNode( TreePtr<Node> tree_ptr ) = 0;
 };
 
+// ---------------------- NavigationUtilsImpl ---------------------------
 
-class NavigationUtils
+class NavigationUtilsImpl
 {
 public:	
     class UnknownNode : public Exception {};
@@ -24,13 +27,12 @@ public:
     // Convention is that second points to one of first's TreePtrs
     typedef pair<TreePtr<Node>, const TreePtrInterface *> LinkInfo;
 
-    virtual ~NavigationUtils();
-
     virtual bool IsRequireReports() const = 0;
 	virtual set<LinkInfo> GetParents( TreePtr<Node> node ) const = 0;
 	virtual set<LinkInfo> GetDeclarers( TreePtr<Node> node ) const = 0;    
 };
 
+// ---------------------- AugTreePtrBase ---------------------------
 
 class AugTreePtrBase
 {
@@ -64,6 +66,7 @@ protected:
     DependencyReporter *dep_rep;	
 };
 
+// ---------------------- AugTreePtr ---------------------------
 
 // The augmented tree pointer is designed to act like a normal TreePtr
 // (to an extent) while hepling to meet the requirements of domain extension
@@ -159,15 +162,34 @@ public:
     }
 };
 
+// ---------------------- NavigationUtils ---------------------------
 
+class NavigationUtils
+{
+public:	
+    // Convention is that second points to one of first's TreePtrs
+    typedef pair<TreePtr<Node>, const TreePtrInterface *> LinkInfo;
 
+	explicit NavigationUtils( const NavigationUtilsImpl *impl_ );
+
+    bool IsRequireReports() const;
+	set<LinkInfo> GetParents( TreePtr<Node> node ) const; 
+	set<LinkInfo> GetDeclarers( TreePtr<Node> node ) const;
+	
+	
+private:	
+	const NavigationUtilsImpl * const impl;
+};
+
+// ---------------------- TreeKit ---------------------------
 
 struct TreeKit
 {
-    const NavigationUtils *nav;
+    NavigationUtils *nav;
     DependencyReporter *dep_rep;
 };
 
+// ---------------------- Transformation ---------------------------
 
 class Transformation : public virtual Graphable
 {
@@ -192,11 +214,12 @@ public:
 	}
 };
 
+// ---------------------- ReferenceNavigationUtilsImpl ---------------------------
 
-class ReferenceNavigationUtils : public NavigationUtils
+class ReferenceNavigationUtilsImpl : public NavigationUtilsImpl
 {
 public:	
-	ReferenceNavigationUtils( TreePtr<Node> root_ );
+	ReferenceNavigationUtilsImpl( TreePtr<Node> root_ );
 
     bool IsRequireReports() const override;
 	set<LinkInfo> GetParents( TreePtr<Node> node ) const override;

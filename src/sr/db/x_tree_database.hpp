@@ -19,7 +19,7 @@ namespace SR
 {    
     
 class XTreeDatabase : public Traceable, 
-                      public NavigationUtils,
+                      public NavigationUtilsImpl,
                       public Duplicate::DirtyGrassUpdateInterface
 {
 public:

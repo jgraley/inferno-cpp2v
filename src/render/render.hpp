@@ -22,49 +22,55 @@ private:
     // map in the parser.
     map< TreePtr<CPPTree::Scope>, Sequence<CPPTree::Declaration> > backing_ordering;
 
-    bool IsSystemC( TreePtr<Node> root );
-    string RenderLiteral( TreePtr<CPPTree::Literal> sp );
-    string RenderIdentifier( TreePtr<CPPTree::Identifier> id );
-    string RenderScopePrefix( TreePtr<CPPTree::Identifier> id );
-    string RenderScopedIdentifier( TreePtr<CPPTree::Identifier> id );
-    string RenderIntegralType( TreePtr<CPPTree::Integral> type, string object=string() );
-    string RenderFloatingType( TreePtr<CPPTree::Floating> type );
-    string RenderType( TreePtr<CPPTree::Type> type, string object=string(), bool constant=false );
+    bool IsSystemC( const TreeKit &kit, TreePtr<Node> root );
+    string RenderLiteral( const TreeKit &kit, TreePtr<CPPTree::Literal> sp );
+    string RenderIdentifier( const TreeKit &kit, TreePtr<CPPTree::Identifier> id );
+    string RenderScopePrefix( const TreeKit &kit, TreePtr<CPPTree::Identifier> id );
+    string RenderScopedIdentifier( const TreeKit &kit, TreePtr<CPPTree::Identifier> id );
+    string RenderIntegralType( const TreeKit &kit, TreePtr<CPPTree::Integral> type, string object=string() );
+    string RenderFloatingType( const TreeKit &kit, TreePtr<CPPTree::Floating> type );
+    string RenderType( const TreeKit &kit, TreePtr<CPPTree::Type> type, string object=string(), bool constant=false );
     string Sanitise( string s );
-    string RenderOperator( TreePtr<CPPTree::Operator> op, Sequence<CPPTree::Expression> &operands );
-    string RenderCall( TreePtr<CPPTree::Call> call );
-    string RenderExpression( TreePtr<CPPTree::Initialiser> expression, bool bracketize_operator=false );
-    string RenderMakeRecord( TreePtr<CPPTree::MakeRecord> ro );
-    string RenderMapInOrder( TreePtr<CPPTree::MapOperator> ro,
+    string RenderOperator( const TreeKit &kit, TreePtr<CPPTree::Operator> op, Sequence<CPPTree::Expression> &operands );
+    string RenderCall( const TreeKit &kit, TreePtr<CPPTree::Call> call );
+    string RenderExpression( const TreeKit &kit, TreePtr<CPPTree::Initialiser> expression, bool bracketize_operator=false );
+    string RenderMakeRecord( const TreeKit &kit, TreePtr<CPPTree::MakeRecord> ro );
+    string RenderMapInOrder( const TreeKit &kit, 
+                             TreePtr<CPPTree::MapOperator> ro,
     		                 TreePtr<CPPTree::Scope> r,
                              string separator,
                              bool separate_last );
-    string RenderAccess( TreePtr<CPPTree::AccessSpec> current_access );
-    string RenderStorage( TreePtr<CPPTree::Instance> st );
-    void ExtractInits( Sequence<CPPTree::Statement> &body, Sequence<CPPTree::Statement> &inits, Sequence<CPPTree::Statement> &remainder );
-    string RenderInstance( TreePtr<CPPTree::Instance> o, string sep, bool showtype = true,
+    string RenderAccess( const TreeKit &kit, TreePtr<CPPTree::AccessSpec> current_access );
+    string RenderStorage( const TreeKit &kit, TreePtr<CPPTree::Instance> st );
+    void ExtractInits( const TreeKit &kit, Sequence<CPPTree::Statement> &body, Sequence<CPPTree::Statement> &inits, Sequence<CPPTree::Statement> &remainder );
+    string RenderInstance( const TreeKit &kit, TreePtr<CPPTree::Instance> o, string sep, bool showtype = true,
                            bool showstorage = true, bool showinit = true, bool showscope = false );
-    bool ShouldSplitInstance( TreePtr<CPPTree::Instance> o );
-    string RenderDeclaration( TreePtr<CPPTree::Declaration> declaration, 
+    bool ShouldSplitInstance( const TreeKit &kit, TreePtr<CPPTree::Instance> o );
+    string RenderDeclaration( const TreeKit &kit, 
+                              TreePtr<CPPTree::Declaration> declaration, 
                               string sep, 
                               TreePtr<CPPTree::AccessSpec> *current_access = nullptr,
                               bool showtype = true, 
                               bool force_incomplete = false,
                               bool shownonfuncinit = true );
-    string RenderStatement( TreePtr<CPPTree::Statement> statement, string sep );
+    string RenderStatement( const TreeKit &kit, TreePtr<CPPTree::Statement> statement, string sep );
     template< class ELEMENT >
-    string RenderSequence( Sequence<ELEMENT> spe, 
+    string RenderSequence( const TreeKit &kit, 
+                           Sequence<ELEMENT> spe, 
                            string separator, 
                            bool separate_last,
                            TreePtr<CPPTree::AccessSpec> init_access = TreePtr<CPPTree::AccessSpec>(),
                            bool showtype = true,
                            bool shownonfuncinit = true );
-    string RenderOperandSequence( Sequence<CPPTree::Expression> spe, 
+    string RenderOperandSequence( const TreeKit &kit, 
+                                  Sequence<CPPTree::Expression> spe, 
                                   string separator, 
                                   bool separate_last );
-    string RenderModuleCtor( TreePtr<SCTree::Module> m,
+    string RenderModuleCtor( const TreeKit &kit, 
+                             TreePtr<SCTree::Module> m,
                              TreePtr<CPPTree::AccessSpec> *access );    
-    string RenderDeclarationCollection( TreePtr<CPPTree::Scope> sd,
+    string RenderDeclarationCollection( const TreeKit &kit, 
+                                        TreePtr<CPPTree::Scope> sd,
 			                            string separator, 
 			                            bool separate_last,
 			                            TreePtr<CPPTree::AccessSpec> init_access = TreePtr<CPPTree::AccessSpec>(),
