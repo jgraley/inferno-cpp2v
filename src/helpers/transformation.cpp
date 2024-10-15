@@ -39,6 +39,11 @@ void AugTreePtrBase::Init( TreePtr<Node> tree_ptr )
 }
 
 
+AugTreePtrBase::operator bool()
+{
+    return GetTreePtr(); 
+}
+
 // ---------------------- TreeUtils ---------------------------
 
 TreeUtils::TreeUtils( const NavigationInterface *nav_ ) :
