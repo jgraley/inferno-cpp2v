@@ -752,9 +752,9 @@ private:
 			// At this point, when we have the instance (and hence the type) and the initialiser
 			// we can detect when an array initialiser has been inserted for a record instance and
 			// change it.
-			ReferenceNavigationUtilsImpl nav_impl(all_decls);
-			NavigationUtils nav(&nav_impl);
-            TreeKit kit { &nav };
+			SimpleNavigation nav(all_decls);
+			TreeUtils utils(&nav);
+            TreeKit kit { &utils };
 			if ( TreePtr<MakeArray> ai = DynamicTreePtrCast<MakeArray>(o->initialiser) )
 				if ( TreePtr<TypeIdentifier> ti = DynamicTreePtrCast<TypeIdentifier>(o->type) )
 					if ( TreePtr<Record> r = GetRecordDeclaration(kit, ti) )
@@ -1553,9 +1553,9 @@ private:
 		TreePtr<Node> tbase = HasType::instance( a->base, all_decls );
 		TreePtr<TypeIdentifier> tibase = DynamicTreePtrCast<TypeIdentifier>(tbase);
 		ASSERT( tibase );
-        ReferenceNavigationUtilsImpl nav_impl(all_decls);
-		NavigationUtils nav(&nav_impl);
-        TreeKit kit { &nav };
+        SimpleNavigation nav(all_decls);
+		TreeUtils utils(&nav);
+        TreeKit kit { &utils };
 		TreePtr<Record> rbase = GetRecordDeclaration(kit, tibase);
 		ASSERT( rbase )( "thing on left of ./-> is not a record/record ptr" );
 		TreePtr<Instance> m = FindMemberByName( kit, rbase, string(Member.getName()) );
@@ -1916,9 +1916,9 @@ private:
 	{
 		TreePtr<TypeIdentifier> id = DynamicTreePtrCast<TypeIdentifier>(t);
 		ASSERT(id);
-        ReferenceNavigationUtilsImpl nav_impl(all_decls);
-		NavigationUtils nav(&nav_impl);
-        TreeKit kit { &nav };
+        SimpleNavigation nav(all_decls);
+		TreeUtils utils(&nav);
+        TreeKit kit { &utils };
 		TreePtr<Record> r = GetRecordDeclaration( kit, id );
 
 		for( TreePtr<Declaration> d : r->members )
@@ -2045,9 +2045,9 @@ private:
 		// At this point, when we have the instance (and hence the type) and the initialiser
 		// we can detect when an array initialiser has been inserted for a record instance and
 		// change it.
-        ReferenceNavigationUtilsImpl nav_impl(all_decls);
-		NavigationUtils nav(&nav_impl);
-        TreeKit kit { &nav };
+        SimpleNavigation nav(all_decls);
+		TreeUtils utils(&nav);
+        TreeKit kit { &utils };
 		if( TreePtr<MakeArray> ai = DynamicTreePtrCast<MakeArray>(e) )
 			if( TreePtr<TypeIdentifier> ti = DynamicTreePtrCast<TypeIdentifier>(t) )
 				if( TreePtr<Record> r = GetRecordDeclaration(kit, ti) )

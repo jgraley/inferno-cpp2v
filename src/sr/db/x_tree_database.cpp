@@ -280,7 +280,7 @@ bool XTreeDatabase::IsRequireReports() const
 }    
 
 
-set<NavigationUtilsImpl::LinkInfo> XTreeDatabase::GetParents( TreePtr<Node> node ) const
+set<NavigationInterface::LinkInfo> XTreeDatabase::GetParents( TreePtr<Node> node ) const
 {
     set<LinkInfo> infos;
    
@@ -308,7 +308,7 @@ set<NavigationUtilsImpl::LinkInfo> XTreeDatabase::GetParents( TreePtr<Node> node
 }
 
 
-set<NavigationUtilsImpl::LinkInfo> XTreeDatabase::GetDeclarers( TreePtr<Node> node ) const
+set<NavigationInterface::LinkInfo> XTreeDatabase::GetDeclarers( TreePtr<Node> node ) const
 {
     set<LinkInfo> infos;
    

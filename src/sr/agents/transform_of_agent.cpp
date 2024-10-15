@@ -26,8 +26,8 @@ TeleportAgent::QueryReturnType TransformOfAgent::RunTeleportQuery( const XTreeDa
          
     TreePtr<Node> stimulus_x = stimulus_xlink.GetChildX();
 
-	NavigationUtils nav(db);
-    TreeKit kit { &nav, dep_rep };
+	TreeUtils utils(db);
+    TreeKit kit { &utils, dep_rep };
 
     try
     {
@@ -36,8 +36,8 @@ TeleportAgent::QueryReturnType TransformOfAgent::RunTeleportQuery( const XTreeDa
 		if( !atp ) // NULL
             return QueryReturnType(); 		
 		
-		const TreePtrInterface *ptp = transformation->GetPTreePtr(atp);
-		TreePtr<Node> tp = transformation->GetTreePtr(atp);
+		const TreePtrInterface *ptp = utils.GetPTreePtr(atp);
+		TreePtr<Node> tp = utils.GetTreePtr(atp);
 		ASSERT( tp->IsFinal() )(*this)(" computed non-final ")(tp)(" from ")(stimulus_x)("\n");                
 		
         if( ptp ) 

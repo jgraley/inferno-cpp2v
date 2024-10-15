@@ -27,9 +27,9 @@ AugTreePtr<CPPTree::Type> HasType::Get( const TreeKit &kit, TreePtr<Expression> 
     if( auto ii = DynamicTreePtrCast<SpecificInstanceIdentifier>(o) ) // object or function instance
     {        
         AugTreePtr<Node> n = HasDeclaration().ApplyTransformation(kit, ii);
-        TreePtr<Instance> i = DynamicTreePtrCast<Instance>(n);
+        auto i = AugTreePtr<Instance>::DynamicCast(n);
         ASSERT(i);
-        return n.Descend<Type>(&i->type); 
+        return n.GetChild<Type>(&i->type); 
     }
     else if( auto op = DynamicTreePtrCast<NonCommutativeOperator>(o) ) // operator
     {
@@ -55,8 +55,8 @@ AugTreePtr<CPPTree::Type> HasType::Get( const TreeKit &kit, TreePtr<Expression> 
     {
         AugTreePtr<Type> t = Get(kit, c->callee); // get type of the function itself
         ASSERT( dynamic_pointer_cast<Callable>(t) )( "Trying to call something that is not Callable");
-        if( auto f = DynamicTreePtrCast<Function>(t) )
-        	return t.Descend<Type>(&f->return_type);
+        if( auto f = AugTreePtr<Function>::DynamicCast(t) )
+        	return t.GetChild<Type>(&f->return_type);
         else
         	return AugTreePtr<Type>(MakeTreeNode<Void>());
     }
@@ -121,8 +121,8 @@ AugTreePtr<CPPTree::Type> HasType::GetOperator( const TreeKit &kit, TreePtr<Oper
 	// - Arrays go to pointers
 	for( AugTreePtr<Type> &t : optypes )
 	{
-		while( auto r = DynamicTreePtrCast<Reference>(t) )
-			t = t.Descend<Type>(&r->destination);
+		while( auto r = AugTreePtr<Reference>::DynamicCast(t) )
+			t = t.GetChild<Type>(&r->destination);
 		if( auto a = DynamicTreePtrCast<Array>(t) )
 		{
 			auto p = MakeTreeNode<Pointer>();
@@ -301,10 +301,10 @@ AugTreePtr<CPPTree::Type> HasType::GetSpecial( const TreeKit &kit, TreePtr<Opera
 {
     if( dynamic_pointer_cast<Dereference>(op) || dynamic_pointer_cast<Subscript>(op) )
     {
-        if( TreePtr<Pointer> o2 = DynamicTreePtrCast<Pointer>( optypes.front() ) )
-            return optypes.front().Descend<Type>(&o2->destination);
-        else if( TreePtr<Array> o2 = DynamicTreePtrCast<Array>( optypes.front() ) )
-            return optypes.front().Descend<Type>(&o2->element);
+        if( auto o2 = AugTreePtr<Pointer>::DynamicCast( optypes.front() ) )
+            return optypes.front().GetChild<Type>(&o2->destination);
+        else if( auto o2 = AugTreePtr<Array>::DynamicCast( optypes.front() ) )
+            return optypes.front().GetChild<Type>(&o2->element);
         else
             throw DereferenceUsageMismatch();
             //ASSERTFAIL( "dereferencing non-pointer" );

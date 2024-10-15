@@ -5,53 +5,85 @@
 #include "flatten.hpp"
 #include "transformation.hpp"
 
-// ---------------------- NavigationUtils ---------------------------
+// ---------------------- AugTreePtrBase ---------------------------
 
-NavigationUtils::NavigationUtils( const NavigationUtilsImpl *impl_ ) :
-	impl(impl_)
+AugTreePtrBase::AugTreePtrBase() :
+	p_tree_ptr(nullptr),
+	dep_rep( nullptr )	
+{
+}
+
+
+AugTreePtrBase::AugTreePtrBase(const TreePtrInterface *p_tree_ptr_, DependencyReporter *dep_rep_) :
+	p_tree_ptr(p_tree_ptr_),
+	dep_rep( dep_rep_ )
+{
+	ASSERTS( *p_tree_ptr );
+	// Not a local automatic please, we're going to hang on to it.
+	ASSERTS( !ON_STACK(p_tree_ptr_) );	
+}    
+
+
+AugTreePtrBase::AugTreePtrBase( const AugTreePtrBase &other ) :
+	p_tree_ptr(other.p_tree_ptr), 
+	dep_rep(other.dep_rep)
+{
+}
+
+
+void AugTreePtrBase::Init( TreePtr<Node> tree_ptr )
+{
+	// Because TreePtr base doesn't exist when our constructor is called
+    if( dep_rep )
+		dep_rep->ReportTreeNode( tree_ptr );	
+}
+
+
+// ---------------------- TreeUtils ---------------------------
+
+TreeUtils::TreeUtils( const NavigationInterface *nav_ ) :
+	nav(nav_)
 {
 }	
 
-bool NavigationUtils::IsRequireReports() const
+bool TreeUtils::IsRequireReports() const
 {
-	return impl->IsRequireReports();
+	return nav->IsRequireReports();
 }
 
 
-set<NavigationUtils::LinkInfo> NavigationUtils::GetParents( TreePtr<Node> node ) const
+set<TreeUtils::LinkInfo> TreeUtils::GetParents( TreePtr<Node> node ) const
 {
-	return impl->GetParents(node); // TODO convert to a set of AugTreePtr
+	return nav->GetParents(node); // TODO convert to a set of AugTreePtr
 }
 
 
-set<NavigationUtils::LinkInfo> NavigationUtils::GetDeclarers( TreePtr<Node> node ) const
+set<TreeUtils::LinkInfo> TreeUtils::GetDeclarers( TreePtr<Node> node ) const
 {
-	return impl->GetDeclarers(node); // TODO convert to a set of AugTreePtr
+	return nav->GetDeclarers(node); // TODO convert to a set of AugTreePtr
 } 
 
 
-// ---------------------- Transformation ---------------------------
-
-const TreePtrInterface *Transformation::GetPTreePtr( const AugTreePtrBase &atp )
+const TreePtrInterface *TreeUtils::GetPTreePtr( const AugTreePtrBase &atp ) const
 {
 	return atp.p_tree_ptr;
 }
 
-// ---------------------- ReferenceNavigationUtilsImpl ---------------------------
+// ---------------------- SimpleNavigation ---------------------------
 
-ReferenceNavigationUtilsImpl::ReferenceNavigationUtilsImpl( TreePtr<Node> root_ ) :
+SimpleNavigation::SimpleNavigation( TreePtr<Node> root_ ) :
 	root( root_ )
 {
 }
 
 	
-bool ReferenceNavigationUtilsImpl::IsRequireReports() const
+bool SimpleNavigation::IsRequireReports() const
 {
     return false; // No we don't, we're just the reference one
 }    
 
 
-set<NavigationUtilsImpl::LinkInfo> ReferenceNavigationUtilsImpl::GetParents( TreePtr<Node> node ) const
+set<NavigationInterface::LinkInfo> SimpleNavigation::GetParents( TreePtr<Node> node ) const
 {
 	set<LinkInfo> infos;
 	
@@ -73,7 +105,7 @@ set<NavigationUtilsImpl::LinkInfo> ReferenceNavigationUtilsImpl::GetParents( Tre
 }
 
 
-set<NavigationUtilsImpl::LinkInfo> ReferenceNavigationUtilsImpl::GetDeclarers( TreePtr<Node> node ) const
+set<NavigationInterface::LinkInfo> SimpleNavigation::GetDeclarers( TreePtr<Node> node ) const
 {
 	set<LinkInfo> infos;
 	
@@ -98,8 +130,8 @@ set<NavigationUtilsImpl::LinkInfo> ReferenceNavigationUtilsImpl::GetDeclarers( T
 AugTreePtr<Node> Transformation::operator()( TreePtr<Node> node, 
     		                                 TreePtr<Node> root	) const
 {
-    ReferenceNavigationUtilsImpl nav_impl(root);
-    NavigationUtils nav(&nav_impl);
-    TreeKit kit { &nav };
+    SimpleNavigation nav(root);
+    TreeUtils utils(&nav);
+    TreeKit kit { &utils };
     return ApplyTransformation( kit, node );
 }

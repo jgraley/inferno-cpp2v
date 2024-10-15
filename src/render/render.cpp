@@ -58,9 +58,9 @@ TreePtr<Node> Render::GenerateRender( TreePtr<Node> context, TreePtr<Node> root 
 	// Render can only work on a whole program
 	ASSERT( context == root );
     
-   	ReferenceNavigationUtilsImpl nav_impl(root);
-	NavigationUtils nav(&nav_impl);
-    TreeKit kit { &nav };
+   	SimpleNavigation nav(root);
+	TreeUtils utils(&nav);
+    TreeKit kit { &utils };
     
 #ifdef TEST_FOR_UNMODIFIED_TREE    
     temp_old_program = dynamic_pointer_cast<Program>(root);

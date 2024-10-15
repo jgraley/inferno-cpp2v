@@ -17,9 +17,9 @@ public:
 	virtual void ReportTreeNode( TreePtr<Node> tree_ptr ) = 0;
 };
 
-// ---------------------- NavigationUtilsImpl ---------------------------
+// ---------------------- NavigationInterface ---------------------------
 
-class NavigationUtilsImpl
+class NavigationInterface
 {
 public:	
     class UnknownNode : public Exception {};
@@ -37,30 +37,16 @@ public:
 class AugTreePtrBase
 {
 protected:
-    friend class Transformation;
+    friend class TreeUtils;
 
-	explicit AugTreePtrBase() :
-        p_tree_ptr(nullptr),
-        dep_rep( nullptr )	
-	{
-	}
+	explicit AugTreePtrBase();
+    explicit AugTreePtrBase(const TreePtrInterface *p_tree_ptr_, DependencyReporter *dep_rep_);
+	explicit AugTreePtrBase( const AugTreePtrBase &other );
 	
-    explicit AugTreePtrBase(const TreePtrInterface *p_tree_ptr_, DependencyReporter *dep_rep_) :
-        p_tree_ptr(p_tree_ptr_),
-        dep_rep( dep_rep_ )
-    {
-        ASSERTS( *p_tree_ptr );
-        // Not a local automatic please, we're going to hang on to it.
-        ASSERTS( !ON_STACK(p_tree_ptr_) );
-  	}    
-
-	explicit AugTreePtrBase( const AugTreePtrBase &other ) :
-        p_tree_ptr(other.p_tree_ptr), 
-        dep_rep(other.dep_rep)
-    {
-	}
-
 	AugTreePtrBase &operator=(const AugTreePtrBase &other) = default;
+
+	void Init( TreePtr<Node> tree_ptr );
+	virtual TreePtr<Node> GetTreePtr() const = 0;
 
     const TreePtrInterface *p_tree_ptr;
     DependencyReporter *dep_rep;	
@@ -78,6 +64,7 @@ public:
     AugTreePtr() :
         AugTreePtrBase()
     {
+		Init(static_cast<TreePtr<Node>>(*this));
     }
     
     // Explicit constructor
@@ -86,8 +73,7 @@ public:
         TreePtr<VALUE_TYPE>(tree_ptr_), 
         AugTreePtrBase(p_tree_ptr_, dep_rep_)
     {
-        if( dep_rep )
-			dep_rep->ReportTreeNode( *this );
+		Init(static_cast<TreePtr<Node>>(*this));
     }
         
     // Tree style constructor: if a pointer was provided we keep the pointer. Usage style
@@ -97,8 +83,7 @@ public:
         TreePtr<VALUE_TYPE>(*p_tree_ptr_), 
         AugTreePtrBase(p_tree_ptr_, dep_rep_)
     {
-        if( dep_rep )
-			dep_rep->ReportTreeNode( *this );
+		Init(static_cast<TreePtr<Node>>(*this));
     }
         
     // Free style constructor: if a value was provided the pointer is NULL 
@@ -107,6 +92,7 @@ public:
         TreePtr<VALUE_TYPE>(tree_ptr), 
         AugTreePtrBase()
     {
+		Init(static_cast<TreePtr<Node>>(*this));
     }
     
 private:
@@ -136,6 +122,11 @@ public:
         AugTreePtrBase::operator=(other);      
         return *this;
     }
+      
+	TreePtr<Node> GetTreePtr() const final
+	{
+		return static_cast<TreePtr<Node>>( *this ); 
+	}
    
     operator bool()
     {
@@ -143,9 +134,9 @@ public:
     }
 
     // Use Tree style when parent is another AugTreePtr. Should always be
-    // a.Descend(&b->c) where b is a dyncast of a.
+    // a.GetChild(&b->c) where b is a dyncast of a.
     template<class OTHER_VALUE_TYPE>
-    AugTreePtr<OTHER_VALUE_TYPE> Descend( TreePtr<OTHER_VALUE_TYPE> *other_tree_ptr ) const
+    AugTreePtr<OTHER_VALUE_TYPE> GetChild( TreePtr<OTHER_VALUE_TYPE> *other_tree_ptr ) const
     {
         // If we are Tree then construct+return Tree style, otherwise reduce to Free style. This
         // is to stop descendents of Free masquerading as Tree.
@@ -162,30 +153,38 @@ public:
     }
 };
 
-// ---------------------- NavigationUtils ---------------------------
+// ---------------------- TreeUtils ---------------------------
 
-class NavigationUtils
+class TreeUtils
 {
 public:	
     // Convention is that second points to one of first's TreePtrs
     typedef pair<TreePtr<Node>, const TreePtrInterface *> LinkInfo;
 
-	explicit NavigationUtils( const NavigationUtilsImpl *impl_ );
+	explicit TreeUtils( const NavigationInterface *nav_ );
 
-    bool IsRequireReports() const;
+	// Getters for AugTreePtr - back end only
+    const TreePtrInterface *GetPTreePtr( const AugTreePtrBase &atp ) const;	
+	template<class VALUE_TYPE>
+    TreePtr<Node> GetTreePtr( const AugTreePtr<VALUE_TYPE> &atp ) const 
+    {
+		return (TreePtr<Node>)atp;
+	}
+	
+	// Forwarding methods from NavigationInterface
+	bool IsRequireReports() const;
 	set<LinkInfo> GetParents( TreePtr<Node> node ) const; 
 	set<LinkInfo> GetDeclarers( TreePtr<Node> node ) const;
-	
-	
+		
 private:	
-	const NavigationUtilsImpl * const impl;
+	const NavigationInterface * const nav;
 };
 
 // ---------------------- TreeKit ---------------------------
 
 struct TreeKit
 {
-    NavigationUtils *nav;
+    TreeUtils *utils;
     DependencyReporter *dep_rep;
 };
 
@@ -204,22 +203,14 @@ public:
     // comment by RunTeleportQuery().
     virtual AugTreePtr<Node> ApplyTransformation( const TreeKit &kit, // Handy functions
     		                                      TreePtr<Node> node ) const = 0;    // Root of the subtree we want to modify    		                          
-
-    const TreePtrInterface *GetPTreePtr( const AugTreePtrBase &atp );
-	
-	template<class VALUE_TYPE>
-    TreePtr<Node> GetTreePtr( const AugTreePtr<VALUE_TYPE> &atp )
-    {
-		return (TreePtr<Node>)atp;
-	}
 };
 
-// ---------------------- ReferenceNavigationUtilsImpl ---------------------------
+// ---------------------- SimpleNavigation ---------------------------
 
-class ReferenceNavigationUtilsImpl : public NavigationUtilsImpl
+class SimpleNavigation : public NavigationInterface
 {
 public:	
-	ReferenceNavigationUtilsImpl( TreePtr<Node> root_ );
+	SimpleNavigation( TreePtr<Node> root_ );
 
     bool IsRequireReports() const override;
 	set<LinkInfo> GetParents( TreePtr<Node> node ) const override;
