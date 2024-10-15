@@ -134,7 +134,7 @@ public:
     }
 
     // Use Tree style when parent is another AugTreePtr. Should always be
-    // a.GetChild(&b->c) where b is a dyncast of a.
+    // a.GetChild(&a->c)
     template<class OTHER_VALUE_TYPE>
     AugTreePtr<OTHER_VALUE_TYPE> GetChild( TreePtr<OTHER_VALUE_TYPE> *other_tree_ptr ) const
     {

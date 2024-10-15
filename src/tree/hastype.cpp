@@ -29,7 +29,7 @@ AugTreePtr<CPPTree::Type> HasType::Get( const TreeKit &kit, TreePtr<Expression> 
         AugTreePtr<Node> n = HasDeclaration().ApplyTransformation(kit, ii);
         auto i = AugTreePtr<Instance>::DynamicCast(n);
         ASSERT(i);
-        return n.GetChild<Type>(&i->type); 
+        return i.GetChild<Type>(&i->type); 
     }
     else if( auto op = DynamicTreePtrCast<NonCommutativeOperator>(o) ) // operator
     {
@@ -56,7 +56,7 @@ AugTreePtr<CPPTree::Type> HasType::Get( const TreeKit &kit, TreePtr<Expression> 
         AugTreePtr<Type> t = Get(kit, c->callee); // get type of the function itself
         ASSERT( dynamic_pointer_cast<Callable>(t) )( "Trying to call something that is not Callable");
         if( auto f = AugTreePtr<Function>::DynamicCast(t) )
-        	return t.GetChild<Type>(&f->return_type);
+        	return f.GetChild<Type>(&f->return_type);
         else
         	return AugTreePtr<Type>(MakeTreeNode<Void>());
     }
@@ -122,7 +122,7 @@ AugTreePtr<CPPTree::Type> HasType::GetOperator( const TreeKit &kit, TreePtr<Oper
 	for( AugTreePtr<Type> &t : optypes )
 	{
 		while( auto r = AugTreePtr<Reference>::DynamicCast(t) )
-			t = t.GetChild<Type>(&r->destination);
+			t = r.GetChild<Type>(&r->destination);
 		if( auto a = DynamicTreePtrCast<Array>(t) )
 		{
 			auto p = MakeTreeNode<Pointer>();
@@ -302,9 +302,9 @@ AugTreePtr<CPPTree::Type> HasType::GetSpecial( const TreeKit &kit, TreePtr<Opera
     if( dynamic_pointer_cast<Dereference>(op) || dynamic_pointer_cast<Subscript>(op) )
     {
         if( auto o2 = AugTreePtr<Pointer>::DynamicCast( optypes.front() ) )
-            return optypes.front().GetChild<Type>(&o2->destination);
+            return o2.GetChild<Type>(&o2->destination);
         else if( auto o2 = AugTreePtr<Array>::DynamicCast( optypes.front() ) )
-            return optypes.front().GetChild<Type>(&o2->element);
+            return o2.GetChild<Type>(&o2->element);
         else
             throw DereferenceUsageMismatch();
             //ASSERTFAIL( "dereferencing non-pointer" );
