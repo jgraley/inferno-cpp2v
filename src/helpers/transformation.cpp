@@ -7,35 +7,31 @@
 
 // ---------------------- AugTreePtrBase ---------------------------
 
-AugTreePtrBase::AugTreePtrBase() :
+AugTreePtrBase::AugTreePtrBase( TreePtr<Node> tree_ptr_ ) :
+	tree_ptr(tree_ptr_),
 	p_tree_ptr(nullptr),
 	dep_rep( nullptr )	
 {
 }
 
 
-AugTreePtrBase::AugTreePtrBase(const TreePtrInterface *p_tree_ptr_, DependencyReporter *dep_rep_) :
+AugTreePtrBase::AugTreePtrBase(const TreePtrInterface *p_tree_ptr_, DependencyReporter *dep_rep_) : // tree
+    tree_ptr(*p_tree_ptr_),
 	p_tree_ptr(p_tree_ptr_),
 	dep_rep( dep_rep_ )
 {
 	ASSERTS( *p_tree_ptr );
 	// Not a local automatic please, we're going to hang on to it.
 	ASSERTS( !ON_STACK(p_tree_ptr_) );	
+
+    if( dep_rep )
+		dep_rep->ReportTreeNode( tree_ptr );	
 }    
 
 
-AugTreePtrBase::AugTreePtrBase( const AugTreePtrBase &other ) :
-	p_tree_ptr(other.p_tree_ptr), 
-	dep_rep(other.dep_rep)
+TreePtr<Node> AugTreePtrBase::GetTreePtr() const
 {
-}
-
-
-void AugTreePtrBase::Init( TreePtr<Node> tree_ptr )
-{
-	// Because TreePtr base doesn't exist when our constructor is called
-    if( dep_rep )
-		dep_rep->ReportTreeNode( tree_ptr );	
+	return tree_ptr;
 }
 
 
