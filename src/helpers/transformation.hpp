@@ -36,9 +36,7 @@ public:
 
 class AugTreePtrBase
 {
-protected:
-    friend class TreeUtils;
-
+public:
 	explicit AugTreePtrBase( TreePtr<Node> tree_ptr_ );
     explicit AugTreePtrBase( const TreePtrInterface *p_tree_ptr_, DependencyReporter *dep_rep_ );
 	AugTreePtrBase( const AugTreePtrBase &other ) = default;
@@ -46,11 +44,29 @@ protected:
 	AugTreePtrBase &operator=(const AugTreePtrBase &other) = default;
 
 	TreePtr<Node> GetTreePtr() const;
+	void SetTreePtr(TreePtr<Node> tree_ptr_);
 
-public:
     operator bool();
 
+    template<class OTHER_VALUE_TYPE>
+    AugTreePtrBase GetChild( const TreePtr<OTHER_VALUE_TYPE> *other_tree_ptr ) const
+	{
+		// If we are Tree then construct+return Tree style, otherwise reduce to Free style. This
+		// is to stop descendents of Free masquerading as Tree.	
+		if( p_tree_ptr )
+		{
+			ASSERT( !ON_STACK(other_tree_ptr) );
+			return AugTreePtrBase(other_tree_ptr, dep_rep); // tree
+		}
+		else
+		{
+			return AugTreePtrBase(*other_tree_ptr); // free
+		}
+	}
+
 protected:
+    friend class TreeUtils;
+
     TreePtr<Node> tree_ptr;
     const TreePtrInterface *p_tree_ptr;
     DependencyReporter *dep_rep;	
@@ -94,8 +110,6 @@ public:
         AugTreePtrBase(tree_ptr)
     {
     }
-    
-private:
    
 	// For the dyncast
     AugTreePtr(TreePtr<VALUE_TYPE> tree_ptr, const AugTreePtrBase &ob) : 
@@ -104,7 +118,6 @@ private:
     {
     }
 
-public:
     template<class OTHER_VALUE_TYPE>
     AugTreePtr(const AugTreePtr<OTHER_VALUE_TYPE> &other) : 
         TreePtr<VALUE_TYPE>(other), 
@@ -123,29 +136,28 @@ public:
     }     
    
     // Use Tree style when parent is another AugTreePtr. Should always be
-    // a.GetChild(a->c)
+    // a.GetChild(&a->c)
     template<class OTHER_VALUE_TYPE>
-    AugTreePtr<OTHER_VALUE_TYPE> GetChild( const TreePtr<OTHER_VALUE_TYPE> &other_tree_ptr ) const
+    AugTreePtr<OTHER_VALUE_TYPE> GetChild( const TreePtr<OTHER_VALUE_TYPE> *other_tree_ptr ) const
     {
-        // If we are Tree then construct+return Tree style, otherwise reduce to Free style. This
-        // is to stop descendents of Free masquerading as Tree.
-        if( p_tree_ptr )
-            return AugTreePtr<OTHER_VALUE_TYPE>(&other_tree_ptr, dep_rep); // tree
-        else
-            return AugTreePtr<OTHER_VALUE_TYPE>(other_tree_ptr); // free
+		ASSERT( !ON_STACK(other_tree_ptr) );		
+        return AugTreePtr<OTHER_VALUE_TYPE>(*other_tree_ptr, AugTreePtrBase::GetChild(other_tree_ptr)); // free
     }
 
     template<class OTHER_VALUE_TYPE>
     static AugTreePtr<VALUE_TYPE> DynamicCast( const AugTreePtr<OTHER_VALUE_TYPE> &g )
     {
-        return AugTreePtr(TreePtr<VALUE_TYPE>::DynamicCast(g), g);
+		auto new_tree_ptr = TreePtr<VALUE_TYPE>::DynamicCast(g);
+        auto new_atp = AugTreePtr(new_tree_ptr, g);
+		new_atp.SetTreePtr(new_tree_ptr); // could be NULL if dyn cast fails
+		return new_atp;
     }
 };
 
 // Note that, in the case of soft nodes, this macro could stringize the FIELD, which
 // would be the recommended style (as long as the field names are legal
 // symbol values for the C++ preprocessor)
-#define CHILD_OF( ATP, FIELD ) ((ATP).GetChild((ATP)->FIELD))
+#define CHILD_OF( ATP, FIELD ) ((ATP).GetChild(&(ATP)->FIELD))
 
 
 // ---------------------- TreeUtils ---------------------------

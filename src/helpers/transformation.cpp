@@ -35,10 +35,17 @@ TreePtr<Node> AugTreePtrBase::GetTreePtr() const
 }
 
 
+void AugTreePtrBase::SetTreePtr(TreePtr<Node> tree_ptr_)
+{
+	tree_ptr = tree_ptr_;
+}
+
+
 AugTreePtrBase::operator bool()
 {
     return GetTreePtr(); 
 }
+
 
 // ---------------------- TreeUtils ---------------------------
 
