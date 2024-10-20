@@ -145,13 +145,12 @@ public:
         return AugTreePtr<OTHER_VALUE_TYPE>(*other_tree_ptr, AugTreePtrBase::GetChild(other_tree_ptr)); 
     }
 
-    // Use Tree style when parent is another AugTreePtr. Should always be
-    // a.GetChild(&a->c)
-    template<class OTHER_VALUE_TYPE>
-    void SetChild( const TreePtr<OTHER_VALUE_TYPE> *other_tree_ptr, AugTreePtr<OTHER_VALUE_TYPE> new_val )
+    // Should always be a.SetChild(&a->c, newval)
+    template<class OTHER_VALUE_TYPE, class NEW_VALUE_TYPE>
+    void SetChild( TreePtr<OTHER_VALUE_TYPE> *other_tree_ptr, AugTreePtr<NEW_VALUE_TYPE> new_val )
     {
 		ASSERT( !ON_STACK(other_tree_ptr) );		
-		*other_tree_ptr = (TreePtr<OTHER_VALUE_TYPE>)new_val; // Update the type-safe free tree
+		*other_tree_ptr = (TreePtr<NEW_VALUE_TYPE>)new_val; // Update the type-safe free tree
         AugTreePtrBase::SetChild(other_tree_ptr, new_val); // Let base decide what to do
     }
 
@@ -166,7 +165,7 @@ public:
 };
 
 template<typename VALUE_TYPE, typename ... CP>
-TreePtr<VALUE_TYPE> AugMakeTreeNode(const CP &...cp) 
+AugTreePtr<VALUE_TYPE> AugMakeTreeNode(const CP &...cp) 
 {
     return AugTreePtr<VALUE_TYPE>( MakeTreeNode<VALUE_TYPE>(cp...) );
 }
@@ -177,6 +176,12 @@ TreePtr<VALUE_TYPE> AugMakeTreeNode(const CP &...cp)
 #define GET_CHILD( ATP, FIELD ) ((ATP).GetChild(&(ATP)->FIELD))
 #define SET_CHILD( ATP, FIELD, NEWVAL ) ((ATP).SetChild(&(ATP)->FIELD, (NEWVAL)))
 
+// TODO:
+// Implement ATP::operator-> as a dep leak and do not use in these macros.
+// Cast to bool is also a dep leak
+// Add macros for: With container iterator, front, back
+// With -> we're a smart pointer. No need to derive from TreePtr but
+// still contain one and still be a template. 
 
 // ---------------------- TreeUtils ---------------------------
 

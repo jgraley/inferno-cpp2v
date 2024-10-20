@@ -8,7 +8,7 @@
 // Really, Declaration should point to an Identifier and that would be that, but at present
 // there are differnent kinds of Declaration that point to different kinds of Node.
 // TODO refactor this away
-TreePtr<CPPTree::Identifier> GetIdentifierOfDeclaration( TreePtr<CPPTree::Declaration> d );
+AugTreePtr<CPPTree::Identifier> GetIdentifierOfDeclaration( AugTreePtr<CPPTree::Declaration> d );
 
 class HasDeclaration : public Transformation
 {

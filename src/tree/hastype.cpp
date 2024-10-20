@@ -85,13 +85,13 @@ AugTreePtr<CPPTree::Type> HasType::Get( const TreeKit &kit, AugTreePtr<Expressio
     	AugTreePtr<Integral> n;
         n = AugMakeTreeNode<Unsigned>();
        	auto sz = AugMakeTreeNode<SpecificInteger>( TypeDb::size_t_bits );
-    	n->width = sz;
+    	SET_CHILD(n, width, sz);
         return n;
     }
     else if( auto n = AugTreePtr<New>::DynamicCast(o) )
     {
         auto p = AugMakeTreeNode<Pointer>();
-        p->destination = n->type;
+        SET_CHILD(p, destination, GET_CHILD(n, type));
         return p;
     }
     else if( AugTreePtr<Delete>::DynamicCast(o) )
@@ -100,7 +100,7 @@ AugTreePtr<CPPTree::Type> HasType::Get( const TreeKit &kit, AugTreePtr<Expressio
     }
     else if( auto ce = AugTreePtr<StatementExpression>::DynamicCast(o) )
     {
-        if( ce->statements.empty() )
+        if( ce->statements.empty() ) // TODO trap operator -> as a dep leak
             return AugMakeTreeNode<Void>(); 
         AugTreePtr<Statement> last = ce.GetChild(&ce->statements.back()); // TODO BACK_CHILD_OF()
         if( auto e = AugTreePtr<Expression>::DynamicCast(last) )
@@ -127,10 +127,10 @@ AugTreePtr<CPPTree::Type> HasType::GetOperator( const TreeKit &kit, AugTreePtr<O
 	{
 		while( auto r = AugTreePtr<Reference>::DynamicCast(t) )
 			t = GET_CHILD(r, destination);
-		if( auto a = DynamicTreePtrCast<Array>(t) )
+		if( auto a = AugTreePtr<Array>::DynamicCast(t) )
 		{
 			auto p = AugMakeTreeNode<Pointer>();
-			p->destination = a->element;
+			SET_CHILD(p, destination, GET_CHILD(a, element));
 			t = AugTreePtr<Type>(p);
 		}
 		// Check we finished the job
@@ -143,11 +143,11 @@ AugTreePtr<CPPTree::Type> HasType::GetOperator( const TreeKit &kit, AugTreePtr<O
     {
     	auto a = AugMakeTreeNode<Array>();
     	auto sz = AugMakeTreeNode<SpecificInteger>( (int)(optypes.size()) ); // TODO make it work with size_t and remove the cast
-    	a->size = sz;
+    	SET_CHILD(a, size, sz);
     	if( optypes.empty() )
-			a->element = AugMakeTreeNode<Void>(); // array has no elements so cannot determine type
+			SET_CHILD(a, element, AugMakeTreeNode<Void>()); // array has no elements so cannot determine type
 		else
-			a->element = optypes.front();
+			SET_CHILD(a, element, optypes.front());
         return AugTreePtr<Type>(a);
     }
 
@@ -166,7 +166,7 @@ AugTreePtr<CPPTree::Type> HasType::GetOperator( const TreeKit &kit, AugTreePtr<O
 		{
 			auto i = AugMakeTreeNode<Signed>();
 			auto nc = AugMakeTreeNode<SpecificInteger>( TypeDb::integral_bits[INT] );
-			i->width = nc; // TODO need eg SetChild() to pull nc into deps
+			SET_CHILD(i, width, nc); // TODO need eg SetChild() to pull nc into deps
 			return i;
 		}
 	}
@@ -239,9 +239,9 @@ AugTreePtr<CPPTree::Type> HasType::GetStandardOnNumerics( const TreeKit &kit, li
 	for( AugTreePtr<Type> optype : optypes ) // TODO why drop Numeric?
 	{
 		// Floats take priority
-		if( auto f = DynamicTreePtrCast<Floating>(optype) )
+		if( auto f = AugTreePtr<Floating>::DynamicCast(optype) )
 		{
-			TreePtr<SpecificFloatSemantics> sfs = DynamicTreePtrCast<SpecificFloatSemantics>(f->semantics);
+			auto sfs = AugTreePtr<SpecificFloatSemantics>::DynamicCast(GET_CHILD(f, semantics));
 			ASSERT(sfs)("Floating point type seen with semantics not specific");
 			unsigned int sl = llvm::APFloat::semanticsPrecision( *sfs );
 			unsigned int sr = llvm::APFloat::semanticsPrecision( *maxwidth_float );
@@ -250,23 +250,23 @@ AugTreePtr<CPPTree::Type> HasType::GetStandardOnNumerics( const TreeKit &kit, li
 		}
 
 		// Should only have Integrals from here on
-		TreePtr<Integral> intop = DynamicTreePtrCast<Integral>(optype);
+		auto intop = AugTreePtr<Integral>::DynamicCast(optype);
         if( !intop )
             throw NumericalOperatorUsageMismatch2();
         //ASSERT( intop )(*optype)(" is not Floating or Integral, please add to HasType class" );
 
         // Do a max algorithm on the width
-		auto siwidth = DynamicTreePtrCast<SpecificInteger>(intop->width);
+		auto siwidth = AugTreePtr<SpecificInteger>::DynamicCast(GET_CHILD(intop, width));
         if( !siwidth )
             throw NumericalOperatorUsageMismatch3();
 		//ASSERT( siwidth )( "Integral size ")(*(intop->width))(" is not specific, cannot decide result type");
 		int64_t width = siwidth->GetInt64(); // here we assume int64_t can hold the widths of integer variablkes
 
-		if( DynamicTreePtrCast<Signed>(optype) )
+		if( AugTreePtr<Signed>::DynamicCast(optype) )
 		{
             maxwidth_signed = max( width, maxwidth_signed );
 		}
-		else if( DynamicTreePtrCast<Unsigned>(optype) )
+		else if( AugTreePtr<Unsigned>::DynamicCast(optype) )
 		{
             maxwidth_unsigned = max( width, maxwidth_unsigned );
 		}
@@ -280,7 +280,7 @@ AugTreePtr<CPPTree::Type> HasType::GetStandardOnNumerics( const TreeKit &kit, li
 	if( maxwidth_float )
 	{
 		auto result = AugMakeTreeNode<Floating>();
-		result->semantics = AugMakeTreeNode<SpecificFloatSemantics>( *maxwidth_float );
+		SET_CHILD(result, semantics, AugMakeTreeNode<SpecificFloatSemantics>( *maxwidth_float ));
 		return AugTreePtr<Type>(result);
 	}
 
@@ -290,12 +290,12 @@ AugTreePtr<CPPTree::Type> HasType::GetStandardOnNumerics( const TreeKit &kit, li
 	{
         // Use the unsigned size if unsigned operand exists and at least as big as int size
 		result = AugMakeTreeNode<Unsigned>();
-		result->width = AugMakeTreeNode<SpecificInteger>(maxwidth_unsigned);
+		SET_CHILD(result, width, AugMakeTreeNode<SpecificInteger>(maxwidth_unsigned));
 	}
 	else
 	{
 		result = AugMakeTreeNode<Signed>();
-		result->width = AugMakeTreeNode<SpecificInteger>(maxwidth_signed);
+		SET_CHILD( result, width, AugMakeTreeNode<SpecificInteger>(maxwidth_signed));
 	}
 	return result;
 }
@@ -316,7 +316,7 @@ AugTreePtr<CPPTree::Type> HasType::GetSpecial( const TreeKit &kit, AugTreePtr<Op
     else if( AugTreePtr<AddressOf>::DynamicCast(op) )
     {
         auto p = AugMakeTreeNode<Pointer>();
-        p->destination = optypes.front();
+        SET_CHILD(p, destination, optypes.front());
         return AugTreePtr<Type>(p);
     }
     else if( AugTreePtr<Comma>::DynamicCast(op) )
@@ -353,14 +353,14 @@ AugTreePtr<CPPTree::Type> HasType::GetLiteral( const TreeKit &kit, AugTreePtr<Li
         	it = AugMakeTreeNode<Signed>();
         else
         	it = AugMakeTreeNode<Unsigned>();
-        it->width = AugMakeTreeNode<SpecificInteger>( si->GetWidth() );
+        SET_CHILD(it, width, AugMakeTreeNode<SpecificInteger>( si->GetWidth() ));
         return it;
     }
     else if( auto sf = AugTreePtr<SpecificFloat>::DynamicCast(l) )
     {
     	// Get the info from Clang, and make an Inferno type for it
     	auto ft = AugMakeTreeNode<Floating>();
-    	ft->semantics = AugMakeTreeNode<SpecificFloatSemantics>( &sf->getSemantics() );
+    	SET_CHILD(ft, semantics, AugMakeTreeNode<SpecificFloatSemantics>( &sf->getSemantics() ));
         return ft;
     }
     else if( AugTreePtr<Bool>::DynamicCast(l) )
@@ -375,9 +375,9 @@ AugTreePtr<CPPTree::Type> HasType::GetLiteral( const TreeKit &kit, AugTreePtr<Li
     	else
     		n = AugMakeTreeNode<Unsigned>();
     	auto sz = AugMakeTreeNode<SpecificInteger>( TypeDb::char_bits );
-    	n->width = sz;
+    	SET_CHILD(n, width, sz);
     	auto p = AugMakeTreeNode<Pointer>();
-    	p->destination = n;
+    	SET_CHILD(p, destination, n);
         return p;
     }
     else

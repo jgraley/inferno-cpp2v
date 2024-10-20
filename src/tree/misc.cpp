@@ -9,16 +9,16 @@
 
 using namespace CPPTree;
 
-TreePtr<Identifier> GetIdentifierOfDeclaration( TreePtr<Declaration> d )
+AugTreePtr<Identifier> GetIdentifierOfDeclaration( AugTreePtr<Declaration> d )
 {
-    if( TreePtr<Instance> i = DynamicTreePtrCast<Instance>( d ) )
-        return i->identifier;
-    else if( TreePtr<UserType> t = DynamicTreePtrCast<UserType>( d ) )
-        return t->identifier;
-    else if( TreePtr<Label> l = DynamicTreePtrCast<Label>( d ) )
-        return l->identifier;
+    if( auto i = AugTreePtr<Instance>::DynamicCast( d ) )
+        return GET_CHILD(i, identifier);
+    else if( auto t = AugTreePtr<UserType>::DynamicCast( d ) )
+        return GET_CHILD(t, identifier);
+    else if( auto l = AugTreePtr<Label>::DynamicCast( d ) )
+        return GET_CHILD(l, identifier);
     else
-        return TreePtr<Identifier>(); // was a declaration without an identifier, ie a base class
+        return AugTreePtr<Identifier>(); // was a declaration without an identifier, ie a base class
 }
 
 	
