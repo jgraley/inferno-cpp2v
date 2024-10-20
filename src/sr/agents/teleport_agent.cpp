@@ -49,12 +49,12 @@ DomainExtension::Extender::Info TeleportAgent::GetDomainExtension( const XTreeDa
 	{
 		return DomainExtension::Extender::Info();
 	}
-	if( !tq_result.second )
+	if( !tq_result.second && !tq_result.first )
 		return DomainExtension::Extender::Info();       // NULL  
 
 	if( tq_result.first ) // parent link was supplied
 	{
-		ASSERT( tq_result.first.GetChildX() == tq_result.second ); // Consistency
+		ASSERT( !tq_result.second ); // Consistency
 		ASSERT( dep_rep.GetDeps().count( tq_result.first.GetChildX() ) > 0 ); // Result should be a dep
 		return DomainExtension::Extender::Info(); // Don't bother Domain when there's an XLink
 	}		
@@ -109,13 +109,13 @@ unique_ptr<SymbolicResult> TeleportAgent::TeleportOperator::Evaluate( const Eval
     QueryReturnType tp_result = agent->RunTeleportQuery( kit.x_tree_db, nullptr, stimulus_xlink );
 
     // Teleporting operation can fail: if so call it a NaS
-    if( !tp_result.second )
+    if( !tp_result.second && !tp_result.first )
         return make_unique<EmptyResult>();        
         
     // If we got an XLink, just return it, don't bother DomainExtension
     if( tp_result.first ) // parent link was supplied
     {
-         ASSERT( tp_result.first.GetChildX() == tp_result.second );
+         ASSERT( !tp_result.second );
          return make_unique<UniqueResult>( tp_result.first );
 	}
 

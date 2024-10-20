@@ -41,9 +41,9 @@ TeleportAgent::QueryReturnType TransformOfAgent::RunTeleportQuery( const XTreeDa
 		ASSERT( tp->IsFinal() )(*this)(" computed non-final ")(tp)(" from ")(stimulus_x)("\n");                
 		
         if( ptp ) 
-            return make_pair(db->GetXLink( ptp ), tp);  // parent was specified (tp is parent! TODO)            
+            return make_pair(db->GetXLink( ptp ), nullptr);  // parent was specified      
 		else
-            return make_pair(XLink(), tp);  // no parent specified (tp is not parent, is actual node! TODO)
+            return make_pair(XLink(), tp);  // no parent specified 
 	}
     catch( const ::Mismatch &e )
     {

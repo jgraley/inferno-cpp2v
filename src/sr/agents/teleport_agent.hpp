@@ -27,7 +27,7 @@ public:
      * are just called _deps_. 
      * 
      * In the former case, `.first` of the return value (a pair) is non-NULL
-     * and is the XLink in question. `.second` must be consistent. Nothing more
+     * and is the XLink in question. `.second` must be NULL. Nothing more
      * of these instructions need to be observed in this case. Reason: no extension
      * is required so there's nothing to maintain.
      * 
