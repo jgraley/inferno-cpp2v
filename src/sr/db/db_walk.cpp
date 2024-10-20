@@ -30,7 +30,7 @@ void DBWalk::VisitBase( const WalkKit &kit,
 
 
 void DBWalk::VisitSingular( const WalkKit &kit, 
-                            const TreePtrInterface *p_x_singular, 
+                            const TreePtrInterface *p_x_singular, // should  be inside xlink's child
                             XLink xlink,
                             int item_ordinal )
 {
@@ -43,7 +43,7 @@ void DBWalk::VisitSingular( const WalkKit &kit,
         return;
         		
     TreePtr<Node> x = xlink.GetChildX();
-    XLink child_xlink( x, p_x_singular );   
+    XLink child_xlink( x, p_x_singular ); // p_x_singular should be inside x
     
     VisitLink( kit, 
              { x, 
@@ -55,12 +55,12 @@ void DBWalk::VisitSingular( const WalkKit &kit,
                ContainerInterface::iterator(),
                p_x_singular, 
                child_xlink, 
-               child_xlink.GetChildX() } );
+               child_xlink.GetChildX() } ); 
 }
 
 
 void DBWalk::VisitSequence( const WalkKit &kit, 
-                            SequenceInterface *x_seq, 
+                            SequenceInterface *x_seq, // should  be inside xlink's child 
                             XLink xlink,
                             int item_ordinal )
 {
@@ -71,7 +71,7 @@ void DBWalk::VisitSequence( const WalkKit &kit,
          xit != x_seq->end();
          ++xit )
     {
-        XLink child_xlink( x, &*xit );
+        XLink child_xlink( x, &*xit ); // &*xit should be inside x
         VisitLink( kit, 
                  { x, 
                    item_ordinal,
@@ -111,14 +111,14 @@ void DBWalk::VisitCollection( const WalkKit &kit,
                    xit,
                    &*xit, 
                    child_xlink, 
-                   child_xlink.GetChildX() } );
+                   child_xlink.GetChildX() } ); // should be child_xlink's child
         i++;
     }
 }
 
 
 void DBWalk::VisitLink( const WalkKit &kit, 
-                        const WalkInfo &walk_info )
+                        const WalkInfo &walk_info ) // .x should be .xlink's child
 {
     INDENT(".");            
     TRACE("Visiting link ")(walk_info.xlink)("\n");    
@@ -126,18 +126,17 @@ void DBWalk::VisitLink( const WalkKit &kit,
     WindInActions( kit, walk_info );        
             
     // Recurse into our child nodes
-    VisitItemise( kit, walk_info.xlink, walk_info.x ); 
+    VisitItemise( kit, walk_info.xlink ); 
 
     UnwindActions( kit, walk_info );                          
 }
 
 
 void DBWalk::VisitItemise( const WalkKit &kit, 
-                           XLink xlink, 
-                           TreePtr<Node> x )
+                           XLink xlink ) // should be xlink's child
 {
-    ASSERT(x)("This probably means we're walking an incomplete tree");
-    vector< Itemiser::Element * > x_items = x->Itemise();
+    ASSERT(xlink)("This probably means we're walking an incomplete tree");
+    vector< Itemiser::Element * > x_items = xlink.GetChildX()->Itemise();
     for( int item_ordinal=0; item_ordinal<x_items.size(); item_ordinal++ )
     {
         Itemiser::Element *xe = x_items[item_ordinal];

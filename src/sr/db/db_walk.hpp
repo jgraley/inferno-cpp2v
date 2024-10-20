@@ -79,8 +79,7 @@ private:
     void VisitLink( const WalkKit &kit, 
                     const WalkInfo &walk_info );
     void VisitItemise( const WalkKit &kit, 
-                       XLink xlink,
-                       TreePtr<Node> x );
+                       XLink xlink );
 
     void WindInActions( const WalkKit &kit, 
                         const WalkInfo &walk_info );

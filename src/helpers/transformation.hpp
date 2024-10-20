@@ -171,7 +171,7 @@ public:
     template<class VALUE_TYPE>
     AugTreePtr<VALUE_TYPE> CreateAugTree(TreePtr<VALUE_TYPE> tree_ptr, const TreePtrInterface *p_tree_ptr)
     {
-		return AugTreePtr<VALUE_TYPE>(tree_ptr, p_tree_ptr, dep_rep);
+		return AugTreePtr<VALUE_TYPE>(tree_ptr, AugTreePtrBase(p_tree_ptr, dep_rep));
 	}	
 
     template<class VALUE_TYPE>
