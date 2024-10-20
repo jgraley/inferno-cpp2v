@@ -33,12 +33,11 @@ SYM::Lazy<SYM::BooleanExpression> TeleportAgent::SymbolicNormalLinkedQueryPRed()
 
 DomainExtension::Extender::Info TeleportAgent::GetDomainExtension( const XTreeDatabase *db, XLink stimulus_xlink ) const
 {
-	DomainExtension::Extender::Info info;
 	
 	if( stimulus_xlink == XLink::MMAX_Link )
-		return info; // MMAX at base never expands domain because then, all child patterns are also MMAX
+		return DomainExtension::Extender::Info(); // MMAX at base never expands domain because then, all child patterns are also MMAX
 	if( !IsPreRestrictionMatch(stimulus_xlink) )
-		return info; // Failed pre-restriction so can't expand domain
+		return DomainExtension::Extender::Info(); // Failed pre-restriction so can't expand domain
 
 	DepRep dep_rep;
 	QueryReturnType tq_result;
@@ -48,20 +47,22 @@ DomainExtension::Extender::Info TeleportAgent::GetDomainExtension( const XTreeDa
 	}
 	catch( ::Mismatch & ) 
 	{
-		return info;
+		return DomainExtension::Extender::Info();
 	}
 	if( !tq_result.second )
-		return info;       // NULL  
+		return DomainExtension::Extender::Info();       // NULL  
 
-	info.deps = dep_rep.GetDeps();	
-    
 	if( tq_result.first ) // parent link was supplied
 	{
 		ASSERT( tq_result.first.GetChildX() == tq_result.second ); // Consistency
-		ASSERT( info.deps.count( tq_result.first.GetChildX() ) > 0 ); // Result should be a dep
-		return info; // Don't bother Domain when there's an XLink
+		ASSERT( dep_rep.GetDeps().count( tq_result.first.GetChildX() ) > 0 ); // Result should be a dep
+		return DomainExtension::Extender::Info(); // Don't bother Domain when there's an XLink
 	}		
 
+	//ASSERT( dep_rep.GetDeps().count( tq_result.second ) > 0 ); // Result should be a dep
+
+	DomainExtension::Extender::Info info;
+	info.deps = dep_rep.GetDeps();	    
 	info.induced_base_node = tq_result.second;
 	return info;
 }

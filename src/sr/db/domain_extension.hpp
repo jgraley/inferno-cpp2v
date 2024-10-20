@@ -115,9 +115,9 @@ private:
     DomainExtension::OnExtraTreeFunction on_insert_extra_tree;
     DomainExtension::OnExtraTreeFunction on_delete_extra_tree;
 
-    struct TrackingRow : Traceable
+    struct InducedAndDeps : Traceable
     {
-        TrackingRow( TreePtr<Node> extra_node_, set<TreePtr<Node>> deps_ );
+        InducedAndDeps( TreePtr<Node> induced_base_node_, set<TreePtr<Node>> deps_ );
         string GetTrace() const override;
         
         TreePtr<Node> induced_base_node;
@@ -134,7 +134,7 @@ private:
     };
 
     // One for each stimulus xlink, keeping track of the new node and dependencies
-    map<XLink, TrackingRow> stimulus_to_induced_and_deps;
+    map<XLink, InducedAndDeps> stimulus_to_induced_and_deps;
     
     // A reversal of stimulus_to_induced_and_deps for indexing on dependency
     map<TreePtr<Node>, set<XLink>> dep_to_all_stimulii;

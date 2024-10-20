@@ -66,11 +66,11 @@ AugTreePtr<CPPTree::Type> HasType::Get( const TreeKit &kit, TreePtr<Expression> 
     }
     else if( auto c = DynamicTreePtrCast<Cast>(o) )
     {
-        return AugTreePtr<Type>(&c->type, kit.dep_rep);
+        return kit.utils->CreateAugTree(&c->type);
     }
     else if( auto rl = DynamicTreePtrCast<MakeRecord>(o) )
     {
-        return AugTreePtr<Type>(&rl->type, kit.dep_rep);
+        return kit.utils->CreateAugTree(&rl->type);
     }
     else if( DynamicTreePtrCast<LabelIdentifier>(o) )
     {
@@ -395,7 +395,7 @@ AugTreePtr<CPPTree::Expression> HasType::IsConstructorCall( const TreeKit &kit, 
     {
 		ASSERT(lf->member);
 		if( DynamicTreePtrCast<Constructor>( Get( kit, lf->member ) ) )
-			e = AugTreePtr<Expression>(&lf->base, kit.dep_rep);
+			e = kit.utils->CreateAugTree(&lf->base);
     }
 
     return e;

@@ -7,11 +7,20 @@
 
 // ---------------------- AugTreePtrBase ---------------------------
 
+AugTreePtrBase::AugTreePtrBase() :
+	tree_ptr(nullptr),
+	p_tree_ptr(nullptr),
+	dep_rep( nullptr )	
+{
+}
+
+
 AugTreePtrBase::AugTreePtrBase( TreePtr<Node> tree_ptr_ ) :
 	tree_ptr(tree_ptr_),
 	p_tree_ptr(nullptr),
 	dep_rep( nullptr )	
 {
+	ASSERT( tree_ptr );
 }
 
 
@@ -20,9 +29,11 @@ AugTreePtrBase::AugTreePtrBase(const TreePtrInterface *p_tree_ptr_, DependencyRe
 	p_tree_ptr(p_tree_ptr_),
 	dep_rep( dep_rep_ )
 {
-	ASSERTS( *p_tree_ptr );
+	ASSERT( tree_ptr );
+	ASSERT( p_tree_ptr );
+	ASSERT( *p_tree_ptr );
 	// Not a local automatic please, we're going to hang on to it.
-	ASSERTS( !ON_STACK(p_tree_ptr_) );	
+	ASSERT( !ON_STACK(p_tree_ptr_) );	
 
     if( dep_rep )
 		dep_rep->ReportTreeNode( tree_ptr );	
@@ -49,8 +60,9 @@ AugTreePtrBase::operator bool()
 
 // ---------------------- TreeUtils ---------------------------
 
-TreeUtils::TreeUtils( const NavigationInterface *nav_ ) :
-	nav(nav_)
+TreeUtils::TreeUtils( const NavigationInterface *nav_, DependencyReporter *dep_rep_ ) :
+	nav(nav_),
+	dep_rep(dep_rep_)
 {
 }	
 
@@ -75,6 +87,18 @@ set<TreeUtils::LinkInfo> TreeUtils::GetDeclarers( TreePtr<Node> node ) const
 const TreePtrInterface *TreeUtils::GetPTreePtr( const AugTreePtrBase &atp ) const
 {
 	return atp.p_tree_ptr;
+}
+
+
+TreePtr<Node> TreeUtils::GetTreePtr( const AugTreePtrBase &atp ) const
+{
+	return atp.tree_ptr;
+}
+
+
+DependencyReporter *TreeUtils::GetDepRep() const
+{
+	return dep_rep;
 }
 
 // ---------------------- SimpleNavigation ---------------------------

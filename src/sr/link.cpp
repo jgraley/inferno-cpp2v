@@ -204,10 +204,20 @@ XLink::XLink() :
 XLink::XLink( shared_ptr<const Node> parent_x,
               const TreePtrInterface *px,
               void *whodat_ ) :
-    asp_x( parent_x, px )              
+    asp_x( parent_x, px ) 
+    // From Cppreference: 
+    // 		template<class Y> 
+    // 		shared_ptr( const shared_ptr<Y>& r, element_type* ptr ) noexcept
+    //  Y is function template = const Node
+    //  element_type = T is class template = const TreePtrInterface
+    //  r is parent_x
+    //  ptr is px
+    // So, the shareD_ptr mechanism will keep parent_x alive as with TreePtr
+    // but .get() will return px, whichh points to one of parent_x's pointers.
 {
     ASSERT( parent_x );
     ASSERT( px );
+    //ASSERT( parent_x != GetChildX() ); // TODO
 #ifdef KEEP_WHODAT_INFO
     whodat = whodat_ ? whodat_ : WHODAT();
 #endif  

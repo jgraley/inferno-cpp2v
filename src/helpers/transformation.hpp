@@ -37,6 +37,7 @@ public:
 class AugTreePtrBase
 {
 public:
+	explicit AugTreePtrBase();
 	explicit AugTreePtrBase( TreePtr<Node> tree_ptr_ );
     explicit AugTreePtrBase( const TreePtrInterface *p_tree_ptr_, DependencyReporter *dep_rep_ );
 	AugTreePtrBase( const AugTreePtrBase &other ) = default;
@@ -81,27 +82,22 @@ class AugTreePtr : public TreePtr<VALUE_TYPE>,
 			       public AugTreePtrBase
 {
 public:
+    friend class TreeUtils;
+
     AugTreePtr() :
-        AugTreePtrBase(nullptr)
+        AugTreePtrBase()
     {
     }
     
-    // Explicit constructor
+private:
+    // Tree style constructor
     template<class OTHER_VALUE_TYPE>
     explicit AugTreePtr(TreePtr<OTHER_VALUE_TYPE> tree_ptr_, const TreePtrInterface *p_tree_ptr_, DependencyReporter *dep_rep_) : 
         TreePtr<VALUE_TYPE>(tree_ptr_), 
         AugTreePtrBase(p_tree_ptr_, dep_rep_)
     {
-    }
-        
-    // Tree style constructor: if a pointer was provided we keep the pointer. Usage style
-    // is typically AugTreePtr<NodeType>( &parent->child_ptr );
-    template<class OTHER_VALUE_TYPE>
-    explicit AugTreePtr( const TreePtr<OTHER_VALUE_TYPE> *p_tree_ptr_, DependencyReporter *dep_rep_ ) : 
-        TreePtr<VALUE_TYPE>(*p_tree_ptr_), 
-        AugTreePtrBase(p_tree_ptr_, dep_rep_)
-    {
-    }
+    }        
+public:
         
     // Free style constructor: if a value was provided the pointer is NULL 
     template<class OTHER_VALUE_TYPE>
@@ -168,31 +164,43 @@ public:
     // Convention is that second points to one of first's TreePtrs
     typedef pair<TreePtr<Node>, const TreePtrInterface *> LinkInfo;
 
-	explicit TreeUtils( const NavigationInterface *nav_ );
+	explicit TreeUtils( const NavigationInterface *nav_, 
+	                    DependencyReporter *dep_rep_ = nullptr );
+
+	// Create AugTreePtr
+    template<class VALUE_TYPE>
+    AugTreePtr<VALUE_TYPE> CreateAugTree(TreePtr<VALUE_TYPE> tree_ptr, const TreePtrInterface *p_tree_ptr)
+    {
+		return AugTreePtr<VALUE_TYPE>(tree_ptr, p_tree_ptr, dep_rep);
+	}	
+
+    template<class VALUE_TYPE>
+    AugTreePtr<VALUE_TYPE> CreateAugTree(const TreePtr<VALUE_TYPE> *p_tree_ptr)
+    {
+		return CreateAugTree(*p_tree_ptr, p_tree_ptr); // TODO Wrong: XLink requires parent node
+	}	
 
 	// Getters for AugTreePtr - back end only
     const TreePtrInterface *GetPTreePtr( const AugTreePtrBase &atp ) const;	
-	template<class VALUE_TYPE>
-    TreePtr<Node> GetTreePtr( const AugTreePtr<VALUE_TYPE> &atp ) const 
-    {
-		return (TreePtr<Node>)atp;
-	}
+    TreePtr<Node> GetTreePtr( const AugTreePtrBase &atp ) const;
 	
 	// Forwarding methods from NavigationInterface
 	bool IsRequireReports() const;
 	set<LinkInfo> GetParents( TreePtr<Node> node ) const; 
 	set<LinkInfo> GetDeclarers( TreePtr<Node> node ) const;
+	
+	DependencyReporter *GetDepRep() const;
 		
 private:	
 	const NavigationInterface * const nav;
+	DependencyReporter *dep_rep;	
 };
 
 // ---------------------- TreeKit ---------------------------
 
 struct TreeKit
 {
-    TreeUtils *utils;
-    DependencyReporter *dep_rep;
+    TreeUtils *utils;    
 };
 
 // ---------------------- Transformation ---------------------------

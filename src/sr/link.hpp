@@ -87,6 +87,8 @@ private: friend class LocatedLink;
            void *whodat=nullptr );
            
     shared_ptr<const TreePtrInterface> asp_x;
+    // So .get() will return const TreePtrInterface*
+    
 #ifdef KEEP_WHODAT_INFO
     void *whodat; 
 #endif
