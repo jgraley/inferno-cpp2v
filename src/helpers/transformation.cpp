@@ -83,6 +83,19 @@ set<TreeUtils::LinkInfo> TreeUtils::GetDeclarers( TreePtr<Node> node ) const
 	return nav->GetDeclarers(node); // TODO convert to a set of AugTreePtr
 } 
 
+/*
+set<AugTreePtr<Node>> TreeUtils::GetParents( AugTreePtr<Node> atp ) const
+{
+	ASSERTFAIL(); // TODO
+	set<TreeUtils::LinkInfo> li_set = GetParents( atp.tree_ptr );
+}
+
+
+set<AugTreePtr<Node>> TreeUtils::GetDeclarers( AugTreePtr<Node> node ) const
+{
+	ASSERTFAIL(); // TODO
+}
+*/
 
 const TreePtrInterface *TreeUtils::GetPTreePtr( const AugTreePtrBase &atp ) const
 {
@@ -159,11 +172,11 @@ set<NavigationInterface::LinkInfo> SimpleNavigation::GetDeclarers( TreePtr<Node>
 }
 
 
-AugTreePtr<Node> Transformation::operator()( TreePtr<Node> node, 
+AugTreePtr<Node> Transformation::operator()( AugTreePtr<Node> atp, 
     		                                 TreePtr<Node> root	) const
 {
     SimpleNavigation nav(root);
     TreeUtils utils(&nav);
     TreeKit kit { &utils };
-    return ApplyTransformation( kit, node );
+    return ApplyTransformation( kit, atp );
 }

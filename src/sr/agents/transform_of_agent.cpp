@@ -24,7 +24,7 @@ TeleportAgent::QueryReturnType TransformOfAgent::RunTeleportQuery( const XTreeDa
     if( stimulus_xlink == XLink::MMAX_Link )
          return QueryReturnType(); 
          
-    TreePtr<Node> stimulus_x = stimulus_xlink.GetChildX();
+    AugTreePtr<Node> stimulus_x = AugTreePtr<Node>(stimulus_xlink.GetChildX()); // TODO don't assume "free" mkind
 
 	TreeUtils utils(db, dep_rep);
     TreeKit kit { &utils };

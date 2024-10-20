@@ -23,15 +23,15 @@ public:
     class NumericalOperatorUsageMismatch4 : public NumericalOperatorUsageMismatch {};
     class DereferenceUsageMismatch : public UsageMismatch {};
 
-    AugTreePtr<Node> ApplyTransformation( const TreeKit &kit, TreePtr<Node> node ) const override;
+    AugTreePtr<Node> ApplyTransformation( const TreeKit &kit, AugTreePtr<Node> node ) const override;
 
     // Is this call really a constructor call? If so return the object being
     // constructed. Otherwise, return nullptr
-    AugTreePtr<CPPTree::Expression> IsConstructorCall( const TreeKit &kit, TreePtr<CPPTree::Call> call ) const;
+    AugTreePtr<CPPTree::Expression> IsConstructorCall( const TreeKit &kit, AugTreePtr<CPPTree::Call> call ) const;
 
 private:    
     // TODO make these private
-    AugTreePtr<CPPTree::Type> Get( const TreeKit &kit, TreePtr<CPPTree::Expression> o ) const;
+    AugTreePtr<CPPTree::Type> Get( const TreeKit &kit, AugTreePtr<CPPTree::Expression> o ) const;
     AugTreePtr<CPPTree::Type> GetOperator( const TreeKit &kit, TreePtr<CPPTree::Operator> op, list<AugTreePtr<CPPTree::Type>> optypes ) const;
     AugTreePtr<CPPTree::Type> GetStandard( const TreeKit &kit, list<AugTreePtr<CPPTree::Type>> &optypes ) const;
     AugTreePtr<CPPTree::Type> GetStandardOnNumerics( const TreeKit &kit, list<AugTreePtr<CPPTree::Numeric>> &optypes ) const;

@@ -90,8 +90,9 @@ public:
     }
          
     // Free style constructor: if a value was provided the pointer is NULL 
+    // Not explicit so we can come in from parse and render
     template<class OTHER_VALUE_TYPE>
-    explicit AugTreePtr(TreePtr<OTHER_VALUE_TYPE> tree_ptr) : 
+    AugTreePtr(TreePtr<OTHER_VALUE_TYPE> tree_ptr) : 
         TreePtr<VALUE_TYPE>(tree_ptr), 
         AugTreePtrBase(tree_ptr)
     {
@@ -126,7 +127,7 @@ public:
     AugTreePtr<OTHER_VALUE_TYPE> GetChild( const TreePtr<OTHER_VALUE_TYPE> *other_tree_ptr ) const
     {
 		ASSERT( !ON_STACK(other_tree_ptr) );		
-        return AugTreePtr<OTHER_VALUE_TYPE>(*other_tree_ptr, AugTreePtrBase::GetChild(other_tree_ptr)); // free
+        return AugTreePtr<OTHER_VALUE_TYPE>(*other_tree_ptr, AugTreePtrBase::GetChild(other_tree_ptr)); 
     }
 
     template<class OTHER_VALUE_TYPE>
@@ -178,6 +179,9 @@ public:
 	set<LinkInfo> GetParents( TreePtr<Node> node ) const; 
 	set<LinkInfo> GetDeclarers( TreePtr<Node> node ) const;
 	
+	//set<AugTreePtr<Node>> GetParents( AugTreePtr<Node> node ) const; 
+	//set<AugTreePtr<Node>> GetDeclarers( AugTreePtr<Node> node ) const; 
+	
 	DependencyReporter *GetDepRep() const;
 		
 private:	
@@ -199,14 +203,14 @@ class Transformation : public virtual Graphable
 public:       
     // Apply this transformation to tree at node, using root for decls etc.
     // This entry point is for non-VN use cases, without dmain extension.
-    AugTreePtr<Node> operator()( TreePtr<Node> node, 
+    AugTreePtr<Node> operator()( AugTreePtr<Node> node, 
     		                     TreePtr<Node> root ) const;
                                          	                          
     // Apply this transformation to tree at node, using kit for decls etc.
     // Vida Nova implementation with a TreeKit for VN integration: see
     // comment by RunTeleportQuery().
     virtual AugTreePtr<Node> ApplyTransformation( const TreeKit &kit, // Handy functions
-    		                                      TreePtr<Node> node ) const = 0;    // Root of the subtree we want to modify    		                          
+    		                                      AugTreePtr<Node> node ) const = 0;    // Root of the subtree we want to modify    		                          
 };
 
 // ---------------------- SimpleNavigation ---------------------------

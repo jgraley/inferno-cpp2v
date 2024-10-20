@@ -10,9 +10,9 @@ using namespace CPPTree;
 
 #define INT 0
 
-AugTreePtr<Node> HasType::ApplyTransformation( const TreeKit &kit, TreePtr<Node> node ) const
+AugTreePtr<Node> HasType::ApplyTransformation( const TreeKit &kit, AugTreePtr<Node> node ) const
 {
-	auto e = TreePtr<CPPTree::Expression>::DynamicCast(node);
+	auto e = AugTreePtr<CPPTree::Expression>::DynamicCast(node);
 	AugTreePtr<Node> n;
 	if( e ) // if the tree at root is not an expression, return nullptr
 		n = Get( kit, e );
@@ -20,63 +20,67 @@ AugTreePtr<Node> HasType::ApplyTransformation( const TreeKit &kit, TreePtr<Node>
 }
 
 
-AugTreePtr<CPPTree::Type> HasType::Get( const TreeKit &kit, TreePtr<Expression> o ) const
+AugTreePtr<CPPTree::Type> HasType::Get( const TreeKit &kit, AugTreePtr<Expression> o ) const
 {
     ASSERT(o);
     
-    if( auto ii = DynamicTreePtrCast<SpecificInstanceIdentifier>(o) ) // object or function instance
+    if( auto ii = AugTreePtr<SpecificInstanceIdentifier>::DynamicCast(o) ) // object or function instance
     {        
         AugTreePtr<Node> n = HasDeclaration().ApplyTransformation(kit, ii);
         auto i = AugTreePtr<Instance>::DynamicCast(n);
         ASSERT(i);
         return CHILD_OF(i, type); 
     }
-    else if( auto op = DynamicTreePtrCast<NonCommutativeOperator>(o) ) // operator
+    else if( auto op = AugTreePtr<NonCommutativeOperator>::DynamicCast(o) ) // operator
     {
         // Get the types of all the operands to the operator first
         list<AugTreePtr<Type>> optypes;
-        for( TreePtr<Expression> o : op->operands )
-            optypes.push_back( Get(kit, o) );
+        for( TreePtr<Expression> &o : op->operands )		
+		{
+			AugTreePtr<Expression> o_atp = op.GetChild(&o);
+			AugTreePtr<Type> type = Get(kit, o_atp);
+            optypes.push_back( type );
+		}
         return GetOperator( kit, op, optypes );
     }
-    else if( auto op = DynamicTreePtrCast<CommutativeOperator>(o) ) // operator
+    else if( auto op = AugTreePtr<CommutativeOperator>::DynamicCast(o) ) // operator
     {
         // Get the types of all the operands to the operator first
         list<AugTreePtr<Type>> optypes;
-        for( TreePtr<Expression> o : op->operands )
-                 optypes.push_back( Get(kit, o) );
+        for( TreePtr<Expression> &o : op->operands )
+             optypes.push_back( Get(kit, op.GetChild(&o)) );
         return GetOperator( kit, op, optypes );
     }
-    else if( auto l = DynamicTreePtrCast<Literal>(o) )
+    else if( auto l = AugTreePtr<Literal>::DynamicCast(o) )
     {
         return GetLiteral( kit, l );
     }
-    else if( auto c = DynamicTreePtrCast<Call>(o) )
+    else if( auto c = AugTreePtr<Call>::DynamicCast(o) )
     {
-        AugTreePtr<Type> t = Get(kit, c->callee); // get type of the function itself
+        AugTreePtr<Type> t = Get(kit, CHILD_OF(c, callee)); // get type of the function itself
         ASSERT( dynamic_pointer_cast<Callable>(t) )( "Trying to call something that is not Callable");
         if( auto f = AugTreePtr<Function>::DynamicCast(t) )
         	return CHILD_OF(f, return_type);
         else
         	return AugTreePtr<Type>(MakeTreeNode<Void>());
     }
-    else if( auto l = DynamicTreePtrCast<Lookup>(o) ) // a.b; just return type of b
+    else if( auto l = AugTreePtr<Lookup>::DynamicCast(o) ) // a.b; just return type of b
     {
-        return Get( kit, l->member );
+        return Get( kit, CHILD_OF(l, member) );
     }
-    else if( auto c = DynamicTreePtrCast<Cast>(o) )
+    else if( auto c = AugTreePtr<Cast>::DynamicCast(o) )
     {
         return kit.utils->CreateAugTree(&c->type);
     }
-    else if( auto rl = DynamicTreePtrCast<MakeRecord>(o) )
+    else if( auto rl = AugTreePtr<MakeRecord>::DynamicCast(o) )
     {
         return kit.utils->CreateAugTree(&rl->type);
     }
-    else if( DynamicTreePtrCast<LabelIdentifier>(o) )
+    else if( AugTreePtr<LabelIdentifier>::DynamicCast(o) )
     {
         return AugTreePtr<Type>(MakeTreeNode<Labeley>()); 
     }
-    else if( DynamicTreePtrCast<SizeOf>(o) || DynamicTreePtrCast<AlignOf>(o) )
+    else if( AugTreePtr<SizeOf>::DynamicCast(o) || AugTreePtr<AlignOf>::DynamicCast(o) )
     {
     	TreePtr<Integral> n;
         n = MakeTreeNode<Unsigned>();
@@ -84,22 +88,22 @@ AugTreePtr<CPPTree::Type> HasType::Get( const TreeKit &kit, TreePtr<Expression> 
     	n->width = sz;
         return AugTreePtr<Type>(n);
     }
-    else if( auto n = DynamicTreePtrCast<New>(o) )
+    else if( auto n = AugTreePtr<New>::DynamicCast(o) )
     {
         auto p = MakeTreeNode<Pointer>();
         p->destination = n->type;
         return AugTreePtr<Type>(p);
     }
-    else if( DynamicTreePtrCast<Delete>(o) )
+    else if( AugTreePtr<Delete>::DynamicCast(o) )
     {
         return AugTreePtr<Type>(MakeTreeNode<Void>()); 
     }
-    else if( auto ce = DynamicTreePtrCast<StatementExpression>(o) )
+    else if( auto ce = AugTreePtr<StatementExpression>::DynamicCast(o) )
     {
         if( ce->statements.empty() )
             return AugTreePtr<Type>(MakeTreeNode<Void>()); 
-        TreePtr<Statement> last = ce->statements.back();
-        if( TreePtr<Expression> e = DynamicTreePtrCast<Expression>(last) )
+        AugTreePtr<Statement> last = ce.GetChild(&ce->statements.back()); // TODO BACK_CHILD_OF()
+        if( auto e = AugTreePtr<Expression>::DynamicCast(last) )
             return Get(kit, e);
         else
             return AugTreePtr<Type>(MakeTreeNode<Void>()); 
@@ -387,14 +391,14 @@ AugTreePtr<CPPTree::Type> HasType::GetLiteral( const TreeKit &kit, TreePtr<Liter
 
 // Is this call really a constructor call? If so return the object being
 // constructed. Otherwise, return nullptr
-AugTreePtr<CPPTree::Expression> HasType::IsConstructorCall( const TreeKit &kit, TreePtr<Call> call ) const
+AugTreePtr<CPPTree::Expression> HasType::IsConstructorCall( const TreeKit &kit, AugTreePtr<Call> call ) const
 {
 	AugTreePtr<CPPTree::Expression> e;
 
-    if( auto lf = DynamicTreePtrCast<Lookup>(call->callee) )
+    if( auto lf = AugTreePtr<Lookup>::DynamicCast(CHILD_OF(call, callee)) )
     {
 		ASSERT(lf->member);
-		if( DynamicTreePtrCast<Constructor>( Get( kit, lf->member ) ) )
+		if( AugTreePtr<Constructor>::DynamicCast( Get( kit, CHILD_OF(lf, member) ) ) )
 			e = kit.utils->CreateAugTree(&lf->base);
     }
 

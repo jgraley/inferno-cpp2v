@@ -22,7 +22,7 @@ TreePtr<Identifier> GetIdentifierOfDeclaration( TreePtr<Declaration> d )
 }
 
 	
-AugTreePtr<Node> HasDeclaration::ApplyTransformation( const TreeKit &kit, TreePtr<Node> node ) const try
+AugTreePtr<Node> HasDeclaration::ApplyTransformation( const TreeKit &kit, AugTreePtr<Node> node ) const try
 {    
     set<NavigationInterface::LinkInfo> declarer_infos = kit.utils->GetDeclarers( node );
     
@@ -62,45 +62,51 @@ catch( NavigationInterface::UnknownNode &)
 HasDeclaration HasDeclaration::instance; // TODO Use this instead of constructing a temp (could contain lookup tables etc in the future)
 
 // Look for a record, skipping over typedefs. Returns nullptr if not a record.
-TreePtr<Record> GetRecordDeclaration( const TreeKit &kit, TreePtr<TypeIdentifier> id )
+AugTreePtr<Record> GetRecordDeclaration( const TreeKit &kit, AugTreePtr<TypeIdentifier> id )
 {
-	TreePtr<Node> ut = HasDeclaration().ApplyTransformation( kit, id );
-	while( TreePtr<Typedef> td = DynamicTreePtrCast<Typedef>(ut) )
+	AugTreePtr<Node> ut = HasDeclaration().ApplyTransformation( kit, id );
+	while( auto td = AugTreePtr<Typedef>::DynamicCast(ut) )
 	{
-	    TreePtr<TypeIdentifier> ti = DynamicTreePtrCast<TypeIdentifier>(td->type);
+	    auto ti = AugTreePtr<TypeIdentifier>::DynamicCast( CHILD_OF(td, type) );
 	    if(ti)
 	        ut = HasDeclaration().ApplyTransformation( kit, ti );
 	    else
-	        return TreePtr<Record>(); // not a record
+	        return AugTreePtr<Record>(); // not a record
 	}
-	TreePtr<Record> r = DynamicTreePtrCast<Record>(ut);
+	auto r = AugTreePtr<Record>::DynamicCast(ut);
 	return r;
 }
 
 
 // Hunt through a record and its bases to find the named member (actually, render string)
-TreePtr<Instance> FindMemberByName( const TreeKit &kit, TreePtr<Record> r, string name )
+AugTreePtr<Instance> FindMemberByName( const TreeKit &kit, AugTreePtr<Record> r, string name )
 {
     TRACE("Record has %d members\n", r->members.size() );
     
     // Try the instance members (objects and functions) for a name match
-    for( TreePtr<Declaration> d : r->members )
-        if( TreePtr<Instance> i = DynamicTreePtrCast<Instance>(d) )
-            if( TreePtr<SpecificInstanceIdentifier> sss = DynamicTreePtrCast<SpecificInstanceIdentifier>(i->identifier) )
+    for( TreePtr<Declaration> &d : r->members )
+    {
+		AugTreePtr<Declaration> d_atp = r.GetChild(&d);
+        if( auto i = AugTreePtr<Instance>::DynamicCast(d_atp) )
+            if( auto sss = AugTreePtr<SpecificInstanceIdentifier>::DynamicCast(CHILD_OF(i, identifier)) )
                 if( sss->GetRender() == name )
                     return i;
+	}
                 
     // Try recursing through the base classes, if there are any
-    if( TreePtr<InheritanceRecord> ir = DynamicTreePtrCast<InheritanceRecord>( r ) )
-        for( TreePtr<Base> b : ir->bases )
+    if( auto ir = AugTreePtr<InheritanceRecord>::DynamicCast( r ) )
+    {
+        for( TreePtr<Base> &b : ir->bases )
         {
-            TreePtr<Node> ut = HasDeclaration().ApplyTransformation( kit, b->record );
-            TreePtr<InheritanceRecord> ir = DynamicTreePtrCast<InheritanceRecord>(ut);
+			AugTreePtr<Base> b_atp = ir.GetChild(&b);
+            AugTreePtr<Node> ut = HasDeclaration().ApplyTransformation( kit, CHILD_OF(b_atp, record) );
+            auto ir = AugTreePtr<InheritanceRecord>::DynamicCast(ut);
             ASSERT(ir);
-            if( TreePtr<Instance> i = FindMemberByName( kit, ir, name ) )
+            if( AugTreePtr<Instance> i = FindMemberByName( kit, ir, name ) )
                 return i;
         }
+	}
     
     // We failed. Hang our head in shame.                
-    return TreePtr<Instance>();
+    return AugTreePtr<Instance>();
 }                

@@ -71,11 +71,11 @@ void Validate::operator()( TreePtr<Node> root,
 			if( context )
             {
                 if(TreePtr<Expression> e = DynamicTreePtrCast<Expression>(x) )
-                    (void)HasType::instance(e, context);
+                    (void)HasType::instance(AugTreePtr<Expression>(e), context);
 
                 // Check that every identifier has a declaration
                 if( TreePtr<InstanceIdentifier> ii = DynamicTreePtrCast<InstanceIdentifier>(x) )
-                    (void)HasDeclaration()(ii, context);
+                    (void)HasDeclaration()(AugTreePtr<InstanceIdentifier>(ii), context);
             }
 
 			// if x is missing its NODE_FUNCTIONS macro, then the Clone we get (y) will be a clone

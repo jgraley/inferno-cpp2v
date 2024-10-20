@@ -15,16 +15,17 @@ class HasDeclaration : public Transformation
 public:
     class DeclarationNotFound : public ::Mismatch {};
     
-    AugTreePtr<Node> ApplyTransformation( const TreeKit &kit, TreePtr<Node> node ) const override;
+    AugTreePtr<Node> ApplyTransformation( const TreeKit &kit, 
+                                          AugTreePtr<Node> node ) const override;
     static HasDeclaration instance;
 };
 
 // Look for a record, skipping over typedefs. Returns nullptr if not a record.
 // TODO make this a Transformation
-TreePtr<CPPTree::Record> GetRecordDeclaration( const TreeKit &kit, TreePtr<CPPTree::TypeIdentifier> id );
+AugTreePtr<CPPTree::Record> GetRecordDeclaration( const TreeKit &kit, AugTreePtr<CPPTree::TypeIdentifier> id );
 
 // Hunt through a record and its bases to find the named member
-TreePtr<CPPTree::Instance> FindMemberByName( const TreeKit &kit, TreePtr<CPPTree::Record> r, string name );
+AugTreePtr<CPPTree::Instance> FindMemberByName( const TreeKit &kit, AugTreePtr<CPPTree::Record> r, string name );
 
 // concatenate sequences by adding them, like strings etc
 // TODO move to common/
