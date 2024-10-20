@@ -140,6 +140,12 @@ public:
     }
 };
 
+template<typename VALUE_TYPE, typename ... CP>
+TreePtr<VALUE_TYPE> AugMakeTreeNode(const CP &...cp) 
+{
+    return AugTreePtr<VALUE_TYPE>( MakeTreeNode<VALUE_TYPE>(cp...) );
+}
+
 // Note that, in the case of soft nodes, this macro could stringize the FIELD, which
 // would be the recommended style (as long as the field names are legal
 // symbol values for the C++ preprocessor)
