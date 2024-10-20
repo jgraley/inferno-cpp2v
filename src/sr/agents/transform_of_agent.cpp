@@ -36,13 +36,12 @@ TeleportAgent::QueryReturnType TransformOfAgent::RunTeleportQuery( const XTreeDa
 		if( !atp ) // NULL
             return QueryReturnType(); 		
 		
-		TreePtr<Node> parent_tp = utils.GetTreePtr(atp); // TODO
 		const TreePtrInterface *ptp = utils.GetPTreePtr(atp);
 		TreePtr<Node> tp = utils.GetTreePtr(atp);
 		ASSERT( tp->IsFinal() )(*this)(" computed non-final ")(tp)(" from ")(stimulus_x)("\n");                
 		
         if( ptp ) 
-            return make_pair(XLink( parent_tp, ptp ), tp);  // parent was specified (tp is parent! TODO)            
+            return make_pair(db->GetXLink( ptp ), tp);  // parent was specified (tp is parent! TODO)            
 		else
             return make_pair(XLink(), tp);  // no parent specified (tp is not parent, is actual node! TODO)
 	}

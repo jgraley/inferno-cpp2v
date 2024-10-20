@@ -47,7 +47,7 @@ AugTreePtr<Node> HasDeclaration::ApplyTransformation( const TreeKit &kit, TreePt
     const TreePtrInterface *declarer_parent_link = OnlyElementOf( parent_infos ).second;
 
     // Report and return
-    return kit.utils->CreateAugTree(declarer, declarer_parent_link); 
+    return kit.utils->CreateAugTree<Node>(declarer_parent_link); 
 }
 catch( NavigationInterface::UnknownNode &) 
 {

@@ -203,6 +203,21 @@ XLink XTreeDatabase::TryGetParentXLink(XLink xlink) const
 }
 
 
+XLink XTreeDatabase::GetXLink( const TreePtrInterface *px ) const
+{
+	TreePtr<Node> child_node = (TreePtr<Node>)*px;
+	
+    NodeTable::Row row = plan.node_table->GetRow(child_node);
+    ASSERT( !row.parents.empty() )("child_node=")(child_node);
+
+    for( XLink xlink : row.parents )
+		if( xlink.GetXPtr() == px )
+			return xlink;
+	
+    ASSERTFAIL(); // Could not find matching XLink even though there were candidates	
+}
+
+
 XLink XTreeDatabase::GetLastDescendant(XLink xlink) const
 {
     TreePtr<Node> x = xlink.GetChildX();

@@ -217,7 +217,7 @@ XLink::XLink( shared_ptr<const Node> parent_x,
 {
     ASSERT( parent_x );
     ASSERT( px );
-    //ASSERT( parent_x != GetChildX() ); // TODO
+    ASSERT( parent_x != GetChildX() );
 #ifdef KEEP_WHODAT_INFO
     whodat = whodat_ ? whodat_ : WHODAT();
 #endif  

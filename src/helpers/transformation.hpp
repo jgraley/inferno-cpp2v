@@ -88,17 +88,7 @@ public:
         AugTreePtrBase()
     {
     }
-    
-private:
-    // Tree style constructor
-    template<class OTHER_VALUE_TYPE>
-    explicit AugTreePtr(TreePtr<OTHER_VALUE_TYPE> tree_ptr_, const TreePtrInterface *p_tree_ptr_, DependencyReporter *dep_rep_) : 
-        TreePtr<VALUE_TYPE>(tree_ptr_), 
-        AugTreePtrBase(p_tree_ptr_, dep_rep_)
-    {
-    }        
-public:
-        
+         
     // Free style constructor: if a value was provided the pointer is NULL 
     template<class OTHER_VALUE_TYPE>
     explicit AugTreePtr(TreePtr<OTHER_VALUE_TYPE> tree_ptr) : 
@@ -107,7 +97,6 @@ public:
     {
     }
    
-	// For the dyncast
     AugTreePtr(TreePtr<VALUE_TYPE> tree_ptr, const AugTreePtrBase &ob) : 
         TreePtr<VALUE_TYPE>(tree_ptr), 
         AugTreePtrBase(ob)
@@ -169,15 +158,15 @@ public:
 
 	// Create AugTreePtr
     template<class VALUE_TYPE>
-    AugTreePtr<VALUE_TYPE> CreateAugTree(TreePtr<VALUE_TYPE> tree_ptr, const TreePtrInterface *p_tree_ptr)
+    AugTreePtr<VALUE_TYPE> CreateAugTree(const TreePtrInterface *p_tree_ptr)
     {
-		return AugTreePtr<VALUE_TYPE>(tree_ptr, AugTreePtrBase(p_tree_ptr, dep_rep));
+		return AugTreePtr<VALUE_TYPE>((TreePtr<VALUE_TYPE>)*p_tree_ptr, AugTreePtrBase(p_tree_ptr, dep_rep));
 	}	
 
     template<class VALUE_TYPE>
     AugTreePtr<VALUE_TYPE> CreateAugTree(const TreePtr<VALUE_TYPE> *p_tree_ptr)
     {
-		return CreateAugTree(*p_tree_ptr, p_tree_ptr); // TODO Wrong: XLink requires parent node
+		return AugTreePtr<VALUE_TYPE>((TreePtr<VALUE_TYPE>)*p_tree_ptr, AugTreePtrBase(p_tree_ptr, dep_rep));
 	}	
 
 	// Getters for AugTreePtr - back end only

@@ -61,8 +61,11 @@ public:
     const NodeTable::Row &GetNodeRow(TreePtr<Node> node) const;
     bool HasNodeRow(TreePtr<Node> node) const;
     
-    // Parent X link if not a base
+    // Parent X link if not a root
 	XLink TryGetParentXLink(XLink xlink) const;
+	
+	// XLink from TPI ptr
+  	XLink GetXLink( const TreePtrInterface *ptp ) const;
     
     // Last of the descendents in depth first order. If no 
     // descendents, it will be the supplied node. 
