@@ -175,7 +175,7 @@ TreePtr<VALUE_TYPE> AugMakeTreeNode(const CP &...cp)
 // would be the recommended style (as long as the field names are legal
 // symbol values for the C++ preprocessor)
 #define GET_CHILD( ATP, FIELD ) ((ATP).GetChild(&(ATP)->FIELD))
-#define SET_CHILD( ATP, FIELD ) ((ATP).SetChild(&(ATP)->FIELD))
+#define SET_CHILD( ATP, FIELD, NEWVAL ) ((ATP).SetChild(&(ATP)->FIELD, (NEWVAL)))
 
 
 // ---------------------- TreeUtils ---------------------------

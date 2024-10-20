@@ -70,11 +70,11 @@ AugTreePtr<CPPTree::Type> HasType::Get( const TreeKit &kit, AugTreePtr<Expressio
     }
     else if( auto c = AugTreePtr<Cast>::DynamicCast(o) )
     {
-        return kit.utils->CreateAugTree(&c->type);
+        return GET_CHILD(c, type);
     }
     else if( auto rl = AugTreePtr<MakeRecord>::DynamicCast(o) )
     {
-        return kit.utils->CreateAugTree(&rl->type);
+        return GET_CHILD(rl, type);
     }
     else if( AugTreePtr<LabelIdentifier>::DynamicCast(o) )
     {
