@@ -118,7 +118,7 @@ AugTreePtr<CPPTree::Type> HasType::Get( const TreeKit &kit, AugTreePtr<Expressio
 
 // Just discover the type of operators, where the types of the operands have already been determined
 // Note we always get a Sequence, even when the operator is commutative
-AugTreePtr<CPPTree::Type> HasType::GetOperator( const TreeKit &kit, TreePtr<Operator> op, list<AugTreePtr<Type>> optypes ) const
+AugTreePtr<CPPTree::Type> HasType::GetOperator( const TreeKit &kit, AugTreePtr<Operator> op, list<AugTreePtr<Type>> optypes ) const
 {
 	// Lower types that masquerade as other types in preparation for operand analysis
 	// - References go to the referenced type
@@ -134,15 +134,15 @@ AugTreePtr<CPPTree::Type> HasType::GetOperator( const TreeKit &kit, TreePtr<Oper
 			t = AugTreePtr<Type>(p);
 		}
 		// Check we finished the job
-		ASSERT( !DynamicTreePtrCast<Reference>(t) );
-		ASSERT( !DynamicTreePtrCast<Array>(t) );
+		ASSERT( !AugTreePtr<Reference>::DynamicCast(t) );
+		ASSERT( !AugTreePtr<Array>::DynamicCast(t) );
 	}
 
 	// Turn an array literal into an array
-    if( auto al = DynamicTreePtrCast<MakeArray>(op) )
+    if( auto al = AugTreePtr<MakeArray>::DynamicCast(op) )
     {
-    	auto a = MakeTreeNode<Array>();
-    	auto sz = MakeTreeNode<SpecificInteger>( (int)(optypes.size()) ); // TODO make it work with size_t and remove the cast
+    	auto a = AugTreePtr<Array>( MakeTreeNode<Array>() );
+    	auto sz = AugTreePtr<SpecificInteger>( MakeTreeNode<SpecificInteger>( (int)(optypes.size()) ) ); // TODO make it work with size_t and remove the cast
     	a->size = sz;
     	if( optypes.empty() )
 			a->element = AugTreePtr<Type>(MakeTreeNode<Void>()); // array has no elements so cannot determine type
@@ -152,27 +152,27 @@ AugTreePtr<CPPTree::Type> HasType::GetOperator( const TreeKit &kit, TreePtr<Oper
     }
 
 	// Assignment operators return their left-hand operand type in all cases
-	if( DynamicTreePtrCast<AssignmentOperator>(op) )
+	if( AugTreePtr<AssignmentOperator>::DynamicCast(op) )
 	{
 		return optypes.front();
 	}
 
 	// Pointer arithmetic: a subtract involving two pointers returns int
 	// we are not bothering to check that the pointer types are compatible.
-	if( dynamic_pointer_cast<Subtract>(op) )
+	if( AugTreePtr<Subtract>::DynamicCast(op) )
 	{
-		if( DynamicTreePtrCast<Pointer>(optypes.front()) && 
-            DynamicTreePtrCast<Pointer>(optypes.back()) )
+		if( AugTreePtr<Pointer>::DynamicCast(optypes.front()) && 
+            AugTreePtr<Pointer>::DynamicCast(optypes.back()) )
 		{
-			auto i = MakeTreeNode<Signed>();
-			auto nc = MakeTreeNode<SpecificInteger>( TypeDb::integral_bits[INT] );
-			i->width = nc;
-			return AugTreePtr<Type>(i);
+			auto i = AugTreePtr<Signed>( MakeTreeNode<Signed>() );
+			auto nc = AugTreePtr<SpecificInteger>( MakeTreeNode<SpecificInteger>( TypeDb::integral_bits[INT] ) );
+			i->width = nc; // TODO need eg SetChild() to pull nc into deps
+			return i;
 		}
 	}
 
 	// Pointer arithmetic: an add or subtract involving a pointer returns that pointer type
-	if( DynamicTreePtrCast<Add>(op) || DynamicTreePtrCast<Subtract>(op) )
+	if( AugTreePtr<Add>::DynamicCast(op) || AugTreePtr<Subtract>::DynamicCast(op) )
 	{
 		for( AugTreePtr<Type> t : optypes )
 			if( auto p = AugTreePtr<Pointer>::DynamicCast(t) )
@@ -301,9 +301,9 @@ AugTreePtr<CPPTree::Type> HasType::GetStandardOnNumerics( const TreeKit &kit, li
 }
 
 
-AugTreePtr<CPPTree::Type> HasType::GetSpecial( const TreeKit &kit, TreePtr<Operator> op, list<AugTreePtr<Type>> &optypes ) const
+AugTreePtr<CPPTree::Type> HasType::GetSpecial( const TreeKit &kit, AugTreePtr<Operator> op, list<AugTreePtr<Type>> &optypes ) const
 {
-    if( dynamic_pointer_cast<Dereference>(op) || dynamic_pointer_cast<Subscript>(op) )
+    if( AugTreePtr<Dereference>::DynamicCast(op) || AugTreePtr<Subscript>::DynamicCast(op) )
     {
         if( auto o2 = AugTreePtr<Pointer>::DynamicCast( optypes.front() ) )
             return CHILD_OF(o2, destination);
@@ -313,23 +313,23 @@ AugTreePtr<CPPTree::Type> HasType::GetSpecial( const TreeKit &kit, TreePtr<Opera
             throw DereferenceUsageMismatch();
             //ASSERTFAIL( "dereferencing non-pointer" );
     }
-    else if( DynamicTreePtrCast<AddressOf>(op) )
+    else if( AugTreePtr<AddressOf>::DynamicCast(op) )
     {
-        auto p = MakeTreeNode<Pointer>();
+        auto p = AugTreePtr<Pointer>( MakeTreeNode<Pointer>() );
         p->destination = optypes.front();
         return AugTreePtr<Type>(p);
     }
-    else if( DynamicTreePtrCast<Comma>(op) )
+    else if( AugTreePtr<Comma>::DynamicCast(op) )
     {
         return optypes.back();
     }
-    else if( DynamicTreePtrCast<ConditionalOperator>(op) )
+    else if( AugTreePtr<ConditionalOperator>::DynamicCast(op) )
 	{
         list<AugTreePtr<Type>>::iterator optypes_it = optypes.begin();
         ++optypes_it;
 		return *optypes_it; // middle element TODO do this properly, consider cond ? nullptr : &x
 	}
-    else if( DynamicTreePtrCast<This>(op) )
+    else if( AugTreePtr<This>::DynamicCast(op) )
     {
     	throw UnsupportedThisMismatch(); // TODO add support
         //ASSERTFAIL(""); 
@@ -343,42 +343,42 @@ AugTreePtr<CPPTree::Type> HasType::GetSpecial( const TreeKit &kit, TreePtr<Opera
 }
 
 
-AugTreePtr<CPPTree::Type> HasType::GetLiteral( const TreeKit &kit, TreePtr<Literal> l ) const
+AugTreePtr<CPPTree::Type> HasType::GetLiteral( const TreeKit &kit, AugTreePtr<Literal> l ) const
 {
-    if( auto si = DynamicTreePtrCast<SpecificInteger>(l) )
+    if( auto si = AugTreePtr<SpecificInteger>::DynamicCast(l) )
     {
     	// Get the info from Clang, and make an Inferno type for it
-    	TreePtr<Integral> it;
+    	AugTreePtr<Integral> it;
         if( si->IsSigned() )
-        	it = MakeTreeNode<Signed>();
+        	it = AugTreePtr<Signed>(MakeTreeNode<Signed>());
         else
-        	it = MakeTreeNode<Unsigned>();
+        	it = AugTreePtr<Unsigned>(MakeTreeNode<Unsigned>());
         it->width = MakeTreeNode<SpecificInteger>( si->GetWidth() );
-        return AugTreePtr<Type>(it);
+        return it;
     }
-    else if( auto sf = DynamicTreePtrCast<SpecificFloat>(l) )
+    else if( auto sf = AugTreePtr<SpecificFloat>::DynamicCast(l) )
     {
     	// Get the info from Clang, and make an Inferno type for it
-    	auto ft = MakeTreeNode<Floating>();
-    	ft->semantics = MakeTreeNode<SpecificFloatSemantics>( &sf->getSemantics() );
-        return AugTreePtr<Type>(ft);
+    	auto ft = AugTreePtr<Floating>( MakeTreeNode<Floating>() );
+    	ft->semantics = AugTreePtr<SpecificFloatSemantics>( MakeTreeNode<SpecificFloatSemantics>( &sf->getSemantics() ) );
+        return ft;
     }
-    else if( DynamicTreePtrCast<Bool>(l) )
+    else if( AugTreePtr<Bool>::DynamicCast(l) )
     {
         return AugTreePtr<Type>(MakeTreeNode<Boolean>());
     }
-    else if( DynamicTreePtrCast<String>(l) )
+    else if( AugTreePtr<String>::DynamicCast(l) )
     {
-    	TreePtr<Integral> n;
+    	AugTreePtr<Integral> n;
     	if( TypeDb::char_default_signed )
-    		n = MakeTreeNode<Signed>();
+    		n = AugTreePtr<Signed>(MakeTreeNode<Signed>());
     	else
-    		n = MakeTreeNode<Unsigned>();
-    	auto sz = MakeTreeNode<SpecificInteger>( TypeDb::char_bits );
+    		n = AugTreePtr<Unsigned>(MakeTreeNode<Unsigned>());
+    	auto sz = AugTreePtr<SpecificInteger>( MakeTreeNode<SpecificInteger>( TypeDb::char_bits ) );
     	n->width = sz;
-    	auto p = MakeTreeNode<Pointer>();
+    	auto p = AugTreePtr<Pointer>( MakeTreeNode<Pointer>() );
     	p->destination = n;
-        return AugTreePtr<Type>(p);
+        return p;
     }
     else
     {
