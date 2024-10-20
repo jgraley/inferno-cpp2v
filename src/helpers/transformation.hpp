@@ -65,6 +65,21 @@ public:
 		}
 	}
 
+    template<class OTHER_VALUE_TYPE>
+    void SetChild( const TreePtr<OTHER_VALUE_TYPE> *other_tree_ptr, AugTreePtrBase new_val ) const
+	{
+		// If we are Tree then construct+return Tree style, otherwise reduce to Free style. This
+		// is to stop descendents of Free masquerading as Tree.	
+		if( p_tree_ptr )
+		{
+			ASSERT(new_val.p_tree_ptr); // can't have tree style -> free style: would modify tree
+			ASSERT( !ON_STACK(other_tree_ptr) );
+		}
+		else if( new_val.p_tree_ptr )
+		{
+			// TODO add a terminus to free zone
+		}
+	}
 protected:
     friend class TreeUtils;
 
@@ -130,6 +145,16 @@ public:
         return AugTreePtr<OTHER_VALUE_TYPE>(*other_tree_ptr, AugTreePtrBase::GetChild(other_tree_ptr)); 
     }
 
+    // Use Tree style when parent is another AugTreePtr. Should always be
+    // a.GetChild(&a->c)
+    template<class OTHER_VALUE_TYPE>
+    void SetChild( const TreePtr<OTHER_VALUE_TYPE> *other_tree_ptr, AugTreePtr<OTHER_VALUE_TYPE> new_val )
+    {
+		ASSERT( !ON_STACK(other_tree_ptr) );		
+		*other_tree_ptr = (TreePtr<OTHER_VALUE_TYPE>)new_val; // Update the type-safe free tree
+        AugTreePtrBase::SetChild(other_tree_ptr, new_val); // Let base decide what to do
+    }
+
     template<class OTHER_VALUE_TYPE>
     static AugTreePtr<VALUE_TYPE> DynamicCast( const AugTreePtr<OTHER_VALUE_TYPE> &g )
     {
@@ -149,7 +174,8 @@ TreePtr<VALUE_TYPE> AugMakeTreeNode(const CP &...cp)
 // Note that, in the case of soft nodes, this macro could stringize the FIELD, which
 // would be the recommended style (as long as the field names are legal
 // symbol values for the C++ preprocessor)
-#define CHILD_OF( ATP, FIELD ) ((ATP).GetChild(&(ATP)->FIELD))
+#define GET_CHILD( ATP, FIELD ) ((ATP).GetChild(&(ATP)->FIELD))
+#define SET_CHILD( ATP, FIELD ) ((ATP).SetChild(&(ATP)->FIELD))
 
 
 // ---------------------- TreeUtils ---------------------------

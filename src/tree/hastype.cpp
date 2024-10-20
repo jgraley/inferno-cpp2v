@@ -29,7 +29,7 @@ AugTreePtr<CPPTree::Type> HasType::Get( const TreeKit &kit, AugTreePtr<Expressio
         AugTreePtr<Node> n = HasDeclaration().ApplyTransformation(kit, ii);
         auto i = AugTreePtr<Instance>::DynamicCast(n);
         ASSERT(i);
-        return CHILD_OF(i, type); 
+        return GET_CHILD(i, type); 
     }
     else if( auto op = AugTreePtr<NonCommutativeOperator>::DynamicCast(o) ) // operator
     {
@@ -57,16 +57,16 @@ AugTreePtr<CPPTree::Type> HasType::Get( const TreeKit &kit, AugTreePtr<Expressio
     }
     else if( auto c = AugTreePtr<Call>::DynamicCast(o) )
     {
-        AugTreePtr<Type> t = Get(kit, CHILD_OF(c, callee)); // get type of the function itself
+        AugTreePtr<Type> t = Get(kit, GET_CHILD(c, callee)); // get type of the function itself
         ASSERT( dynamic_pointer_cast<Callable>(t) )( "Trying to call something that is not Callable");
         if( auto f = AugTreePtr<Function>::DynamicCast(t) )
-        	return CHILD_OF(f, return_type);
+        	return GET_CHILD(f, return_type);
         else
         	return AugMakeTreeNode<Void>();
     }
     else if( auto l = AugTreePtr<Lookup>::DynamicCast(o) ) // a.b; just return type of b
     {
-        return Get( kit, CHILD_OF(l, member) );
+        return Get( kit, GET_CHILD(l, member) );
     }
     else if( auto c = AugTreePtr<Cast>::DynamicCast(o) )
     {
@@ -126,7 +126,7 @@ AugTreePtr<CPPTree::Type> HasType::GetOperator( const TreeKit &kit, AugTreePtr<O
 	for( AugTreePtr<Type> &t : optypes )
 	{
 		while( auto r = AugTreePtr<Reference>::DynamicCast(t) )
-			t = CHILD_OF(r, destination);
+			t = GET_CHILD(r, destination);
 		if( auto a = DynamicTreePtrCast<Array>(t) )
 		{
 			auto p = AugMakeTreeNode<Pointer>();
@@ -306,9 +306,9 @@ AugTreePtr<CPPTree::Type> HasType::GetSpecial( const TreeKit &kit, AugTreePtr<Op
     if( AugTreePtr<Dereference>::DynamicCast(op) || AugTreePtr<Subscript>::DynamicCast(op) )
     {
         if( auto o2 = AugTreePtr<Pointer>::DynamicCast( optypes.front() ) )
-            return CHILD_OF(o2, destination);
+            return GET_CHILD(o2, destination);
         else if( auto o2 = AugTreePtr<Array>::DynamicCast( optypes.front() ) )
-            return CHILD_OF(o2, element);
+            return GET_CHILD(o2, element);
         else
             throw DereferenceUsageMismatch();
             //ASSERTFAIL( "dereferencing non-pointer" );
@@ -395,11 +395,11 @@ AugTreePtr<CPPTree::Expression> HasType::IsConstructorCall( const TreeKit &kit, 
 {
 	AugTreePtr<CPPTree::Expression> e;
 
-    if( auto lf = AugTreePtr<Lookup>::DynamicCast(CHILD_OF(call, callee)) )
+    if( auto lf = AugTreePtr<Lookup>::DynamicCast(GET_CHILD(call, callee)) )
     {
 		ASSERT(lf->member);
-		if( AugTreePtr<Constructor>::DynamicCast( Get( kit, CHILD_OF(lf, member) ) ) )
-			e = kit.utils->CreateAugTree(&lf->base);
+		if( AugTreePtr<Constructor>::DynamicCast( Get( kit, GET_CHILD(lf, member) ) ) )
+			e = GET_CHILD(lf, base);
     }
 
     return e;

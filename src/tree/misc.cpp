@@ -67,7 +67,7 @@ AugTreePtr<Record> GetRecordDeclaration( const TreeKit &kit, AugTreePtr<TypeIden
 	AugTreePtr<Node> ut = HasDeclaration().ApplyTransformation( kit, id );
 	while( auto td = AugTreePtr<Typedef>::DynamicCast(ut) )
 	{
-	    auto ti = AugTreePtr<TypeIdentifier>::DynamicCast( CHILD_OF(td, type) );
+	    auto ti = AugTreePtr<TypeIdentifier>::DynamicCast( GET_CHILD(td, type) );
 	    if(ti)
 	        ut = HasDeclaration().ApplyTransformation( kit, ti );
 	    else
@@ -88,7 +88,7 @@ AugTreePtr<Instance> FindMemberByName( const TreeKit &kit, AugTreePtr<Record> r,
     {
 		AugTreePtr<Declaration> d_atp = r.GetChild(&d);
         if( auto i = AugTreePtr<Instance>::DynamicCast(d_atp) )
-            if( auto sss = AugTreePtr<SpecificInstanceIdentifier>::DynamicCast(CHILD_OF(i, identifier)) )
+            if( auto sss = AugTreePtr<SpecificInstanceIdentifier>::DynamicCast(GET_CHILD(i, identifier)) )
                 if( sss->GetRender() == name )
                     return i;
 	}
@@ -99,7 +99,7 @@ AugTreePtr<Instance> FindMemberByName( const TreeKit &kit, AugTreePtr<Record> r,
         for( TreePtr<Base> &b : ir->bases )
         {
 			AugTreePtr<Base> b_atp = ir.GetChild(&b);
-            AugTreePtr<Node> ut = HasDeclaration().ApplyTransformation( kit, CHILD_OF(b_atp, record) );
+            AugTreePtr<Node> ut = HasDeclaration().ApplyTransformation( kit, GET_CHILD(b_atp, record) );
             auto ir = AugTreePtr<InheritanceRecord>::DynamicCast(ut);
             ASSERT(ir);
             if( AugTreePtr<Instance> i = FindMemberByName( kit, ir, name ) )
