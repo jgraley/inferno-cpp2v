@@ -35,7 +35,7 @@ void TreeZoneOverlapHandler::Run( shared_ptr<ZoneExpression> &root_expr )
 				if( auto r_ptz_op = dynamic_pointer_cast<PopulateTreeZoneOperator>(r_expr) )
 				{			
 					if( l_expr == r_expr ) // inner "r" loop stops before catching up with outer "l" loop
-						Break();
+						LLBreak();
 					
 					auto p = tz_relation.CompareHierarchical( l_ptz_op->GetZone(), r_ptz_op->GetZone() );
 
@@ -51,7 +51,7 @@ void TreeZoneOverlapHandler::Run( shared_ptr<ZoneExpression> &root_expr )
 						{
 							TRACE("Duplicate left ")(l_ptz_op)("\n");
 							l_expr = l_ptz_op->DuplicateToFree();
-							Break(); // no need to check any more r for this l
+							LLBreak(); // no need to check any more r for this l
 						}
 						else
 						{
@@ -85,7 +85,7 @@ void TreeZoneOverlapHandler::Check( shared_ptr<ZoneExpression> &root_expr )
 				if( auto r_ptz_op = dynamic_pointer_cast<PopulateTreeZoneOperator>(r_expr) )
 				{			
 					if( l_expr == r_expr ) 
-						Break();
+						LLBreak();
 					
 					auto p = tz_relation.CompareHierarchical( l_ptz_op->GetZone(), r_ptz_op->GetZone() );					
 					if( p.second == ZoneRelation::OVERLAP_GENERAL || 

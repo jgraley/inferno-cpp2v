@@ -18,7 +18,7 @@ class BreakException : exception
 
 
 // Break out of one of these loops
-void Break();
+void LLBreak();
 // For "continue", just return out of the lambda
 
 // Acting on a container such as [1, 2, 3, 4], will call func with (1, 2), 

@@ -3,6 +3,7 @@
 
 #include "node/specialise_oostd.hpp"
 #include "node/graphable.hpp"
+#include "common/lambda_loops.hpp"
 #include <functional>
 
 class Transformation;
@@ -162,6 +163,20 @@ public:
 		new_atp.SetTreePtr(new_tree_ptr); // could be NULL if dyn cast fails
 		return new_atp;
     }
+    
+	template<typename C>
+	void ForAugContainer( C *container, 
+						  function<void(const AugTreePtr<typename C::value_type::value_type> &x_atp)> func) const try
+	{
+		for( const auto &x : *container )
+		{
+			AugTreePtr<typename C::value_type::value_type> x_atp = GetChild(&x);
+			func( x_atp );
+		}
+	}
+	catch( BreakException )
+	{
+	}    
 };
 
 template<typename VALUE_TYPE, typename ... CP>
@@ -173,13 +188,18 @@ AugTreePtr<VALUE_TYPE> AugMakeTreeNode(const CP &...cp)
 // Note that, in the case of soft nodes, this macro could stringize the FIELD, which
 // would be the recommended style (as long as the field names are legal
 // symbol values for the C++ preprocessor)
-#define GET_CHILD( ATP, FIELD ) ((ATP).GetChild(&(ATP)->FIELD))
-#define SET_CHILD( ATP, FIELD, NEWVAL ) ((ATP).SetChild(&(ATP)->FIELD, (NEWVAL)))
+#define GET_CHILD( ATP, FIELD ) ((ATP).GetChild(&(ATP)->FIELD)) // singular
+#define SET_CHILD( ATP, FIELD, NEWVAL ) ((ATP).SetChild(&(ATP)->FIELD, (NEWVAL))) // singular
+
+#define GET_CHILD_BACK( ATP, FIELD ) ((ATP).GetChild(&(ATP)->FIELD.back()))
+#define GET_CHILD_FRONT( ATP, FIELD ) ((ATP).GetChild(&(ATP)->FIELD.front()))
+
+#define FOR_AUG_CONTAINER( ATP, FIELD, BODY ) ((ATP).ForAugContainer(&(ATP)->FIELD, (BODY)))
+
 
 // TODO:
 // Implement ATP::operator-> as a dep leak and do not use in these macros.
 // Cast to bool is also a dep leak
-// Add macros for: With container iterator, front, back
 // With -> we're a smart pointer. No need to derive from TreePtr but
 // still contain one and still be a template. 
 

@@ -160,7 +160,7 @@ shared_ptr<SymbolExpression> IsEqualOperator::TrySolveFor( const SolveKit &kit, 
     {    
         solution = first->TrySolveForToEqual( kit, target, second );
         if( solution )
-            Break(); // TODO add early return support to lambda loops via exception
+            LLBreak(); // TODO add early return support to lambda loops via exception
     } );
 
     return solution;
@@ -541,7 +541,7 @@ unique_ptr<BooleanResult> IsAllDiffOperator::Evaluate( const EvalKit &kit,
         if( ra->GetOnlyXLink() == rb->GetOnlyXLink() )
         {
             m = false;
-            Break();
+            LLBreak();
         }
     } );
     return make_unique<BooleanResult>( m );   
@@ -859,7 +859,7 @@ shared_ptr<SymbolExpression> IsSimpleCompareEquivalentOperator::TrySolveFor( con
                                                                                       second, BoundingRole::MAXIMUS, true);
         solution = first->TrySolveForToEqual( kit, target, r );
         if( solution )
-            Break();
+            LLBreak();
     } );
     
     return nullptr;

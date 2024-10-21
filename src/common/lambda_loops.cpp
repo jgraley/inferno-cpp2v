@@ -5,7 +5,7 @@
 
 #include <string>
 
-void Break()
+void LLBreak()
 {
     // I am not worried about this use of exceptions, and neither should you be.
     throw BreakException();

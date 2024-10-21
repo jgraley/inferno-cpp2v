@@ -35,20 +35,22 @@ AugTreePtr<CPPTree::Type> HasType::Get( const TreeKit &kit, AugTreePtr<Expressio
     {
         // Get the types of all the operands to the operator first
         list<AugTreePtr<Type>> optypes;
-        for( TreePtr<Expression> &o : op->operands )		
+        FOR_AUG_CONTAINER( op, operands, [&](AugTreePtr<Expression> o_atp)		
 		{
-			AugTreePtr<Expression> o_atp = op.GetChild(&o);
 			AugTreePtr<Type> type = Get(kit, o_atp);
             optypes.push_back( type );
-		}
+		} );
         return GetOperator( kit, op, optypes );
     }
     else if( auto op = AugTreePtr<CommutativeOperator>::DynamicCast(o) ) // operator
     {
         // Get the types of all the operands to the operator first
         list<AugTreePtr<Type>> optypes;
-        for( TreePtr<Expression> &o : op->operands )
-             optypes.push_back( Get(kit, op.GetChild(&o)) );
+        FOR_AUG_CONTAINER( op, operands, [&](AugTreePtr<Expression> o_atp)		
+		{
+			AugTreePtr<Type> type = Get(kit, o_atp);
+            optypes.push_back( type );
+		} );
         return GetOperator( kit, op, optypes );
     }
     else if( auto l = AugTreePtr<Literal>::DynamicCast(o) )
@@ -102,7 +104,7 @@ AugTreePtr<CPPTree::Type> HasType::Get( const TreeKit &kit, AugTreePtr<Expressio
     {
         if( ce->statements.empty() ) // TODO trap operator -> as a dep leak
             return AugMakeTreeNode<Void>(); 
-        AugTreePtr<Statement> last = ce.GetChild(&ce->statements.back()); // TODO BACK_CHILD_OF()
+        AugTreePtr<Statement> last = GET_CHILD_BACK(ce, statements);
         if( auto e = AugTreePtr<Expression>::DynamicCast(last) )
             return Get(kit, e);
         else

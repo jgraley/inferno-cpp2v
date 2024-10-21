@@ -84,29 +84,32 @@ AugTreePtr<Instance> FindMemberByName( const TreeKit &kit, AugTreePtr<Record> r,
     TRACE("Record has %d members\n", r->members.size() );
     
     // Try the instance members (objects and functions) for a name match
-    for( TreePtr<Declaration> &d : r->members )
+    AugTreePtr<Instance> i;
+    FOR_AUG_CONTAINER( r, members, [&](AugTreePtr<Declaration> d_atp)
     {
-		AugTreePtr<Declaration> d_atp = r.GetChild(&d);
-        if( auto i = AugTreePtr<Instance>::DynamicCast(d_atp) )
+        if( i = AugTreePtr<Instance>::DynamicCast(d_atp) )
             if( auto sss = AugTreePtr<SpecificInstanceIdentifier>::DynamicCast(GET_CHILD(i, identifier)) )
                 if( sss->GetRender() == name )
-                    return i;
-	}
+                    LLBreak();
+	} );
+	if( i )
+		return i;
                 
     // Try recursing through the base classes, if there are any
     if( auto ir = AugTreePtr<InheritanceRecord>::DynamicCast( r ) )
     {
-        for( TreePtr<Base> &b : ir->bases )
+        FOR_AUG_CONTAINER( ir, bases, [&](AugTreePtr<Base> b_atp)
         {
-			AugTreePtr<Base> b_atp = ir.GetChild(&b);
             AugTreePtr<Node> ut = HasDeclaration().ApplyTransformation( kit, GET_CHILD(b_atp, record) );
             auto ir = AugTreePtr<InheritanceRecord>::DynamicCast(ut);
             ASSERT(ir);
             if( AugTreePtr<Instance> i = FindMemberByName( kit, ir, name ) )
-                return i;
-        }
+                LLBreak();
+        } );
 	}
-    
+	if( i )
+		return i;
+		    
     // We failed. Hang our head in shame.                
     return AugTreePtr<Instance>();
 }                
