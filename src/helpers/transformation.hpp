@@ -100,6 +100,7 @@ class AugTreePtr : public TreePtr<VALUE_TYPE>,
 public:
     friend class TreeUtils;
 
+	// ------------ Constructors etc --------------
     AugTreePtr() :
         AugTreePtrBase()
     {
@@ -122,7 +123,7 @@ public:
 
     template<class OTHER_VALUE_TYPE>
     AugTreePtr(const AugTreePtr<OTHER_VALUE_TYPE> &other) : 
-        TreePtr<VALUE_TYPE>(other), 
+        TreePtr<VALUE_TYPE>(other.GetTypedTreePtr()), 
         AugTreePtrBase(other)
     {
     }
@@ -132,13 +133,29 @@ public:
     template<class OTHER_VALUE_TYPE>
     AugTreePtr<VALUE_TYPE> &operator=( const AugTreePtr<OTHER_VALUE_TYPE> &other )
     {
-        TreePtr<VALUE_TYPE>::operator=(other); 
+        SetTypedTreePtr( other.GetTypedTreePtr() ); 
         AugTreePtrBase::operator=(other);      
         return *this;
     }     
+   	
+	// ------------ Access the wrapped, typed TreePtr() -------------
+    TreePtr<VALUE_TYPE> &GetTypedTreePtr()
+	{
+		return *(TreePtr<VALUE_TYPE> *)this;
+	}
    
-    // Use Tree style when parent is another AugTreePtr. Should always be
-    // a.GetChild(&a->c)
+    const TreePtr<VALUE_TYPE> &GetTypedTreePtr() const 
+	{
+		return *(const TreePtr<VALUE_TYPE> *)this;
+	}
+   
+    template<class OTHER_VALUE_TYPE>
+    void SetTypedTreePtr(const TreePtr<OTHER_VALUE_TYPE> &new_val)
+	{
+		*(TreePtr<VALUE_TYPE> *)this = new_val;
+	}   
+      
+    // ----------- Implementations for API -------------
     template<class OTHER_VALUE_TYPE>
     AugTreePtr<OTHER_VALUE_TYPE> GetChild( const TreePtr<OTHER_VALUE_TYPE> *other_tree_ptr ) const
     {
@@ -151,14 +168,14 @@ public:
     void SetChild( TreePtr<OTHER_VALUE_TYPE> *other_tree_ptr, AugTreePtr<NEW_VALUE_TYPE> new_val )
     {
 		ASSERT( !ON_STACK(other_tree_ptr) );		
-		*other_tree_ptr = (TreePtr<NEW_VALUE_TYPE>)new_val; // Update the type-safe free tree
+		*other_tree_ptr = new_val.GetTypedTreePtr(); // Update the type-safe free tree
         AugTreePtrBase::SetChild(other_tree_ptr, new_val); // Let base decide what to do
     }
 
     template<class OTHER_VALUE_TYPE>
     static AugTreePtr<VALUE_TYPE> DynamicCast( const AugTreePtr<OTHER_VALUE_TYPE> &g )
     {
-		auto new_tree_ptr = TreePtr<VALUE_TYPE>::DynamicCast(g);
+		auto new_tree_ptr = TreePtr<VALUE_TYPE>::DynamicCast(g.GetTypedTreePtr());
         auto new_atp = AugTreePtr(new_tree_ptr, g);
 		new_atp.SetTreePtr(new_tree_ptr); // could be NULL if dyn cast fails
 		return new_atp;
@@ -177,6 +194,26 @@ public:
 	catch( BreakException )
 	{
 	}    
+	
+	// Smart pointer methods (will report a dep leak)
+	TreePtr<VALUE_TYPE> operator->()
+	{
+		// Dep leak!!
+		return GetTypedTreePtr();
+	}
+
+	const VALUE_TYPE &operator*()
+	{
+		// Dep leak!!
+		return *GetTypedTreePtr();
+	}
+	
+	// Not allowed!!
+	template<typename C>
+	void operator[](C c) = delete;
+
+	template<typename C>
+	void operator->*(C c) = delete;
 };
 
 template<typename VALUE_TYPE, typename ... CP>
