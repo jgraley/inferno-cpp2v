@@ -22,7 +22,7 @@ TreePtr<Scope> GetScope( TreePtr<Program> program, TreePtr<Identifier> id )
         {
             for( TreePtr<Declaration> d : s->members )
             {
-                if( id == GetIdentifierOfDeclaration( d ) ) 
+                if( id == (TreePtr<Identifier>)GetIdentifierOfDeclaration( d ) ) 
                     return s;
             }
         }
