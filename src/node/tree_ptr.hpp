@@ -116,13 +116,13 @@ struct TreePtr : virtual TreePtrCommon,
     {
     }
 
-    operator shared_ptr<Node>() const final
+    operator shared_ptr<Node>() const override
     {
         const shared_ptr<VALUE_TYPE> p = (const shared_ptr<VALUE_TYPE>)*this;
         return p;
     }
 
-	operator TreePtr<Node>() const final
+	operator TreePtr<Node>() const override
 	{
         const shared_ptr<VALUE_TYPE> p1 = *(const shared_ptr<VALUE_TYPE> *)this;
         return TreePtr<Node>( p1 );

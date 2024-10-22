@@ -109,14 +109,14 @@ public:
     // Free style constructor: if a value was provided the pointer is NULL 
     // Not explicit so we can come in from parse and render
     template<class OTHER_VALUE_TYPE>
-    AugTreePtr(TreePtr<OTHER_VALUE_TYPE> tree_ptr) : 
-        TreePtr<VALUE_TYPE>(tree_ptr), 
-        AugTreePtrBase(tree_ptr)
+    AugTreePtr(TreePtr<OTHER_VALUE_TYPE> tree_ptr_) : 
+        TreePtr<VALUE_TYPE>(tree_ptr_), 
+        AugTreePtrBase(tree_ptr_)
     {
     }
    
-    AugTreePtr(TreePtr<VALUE_TYPE> tree_ptr, const AugTreePtrBase &ob) : 
-        TreePtr<VALUE_TYPE>(tree_ptr), 
+    AugTreePtr(TreePtr<VALUE_TYPE> tree_ptr_, const AugTreePtrBase &ob) : 
+        TreePtr<VALUE_TYPE>(tree_ptr_), 
         AugTreePtrBase(ob)
     {
     }
@@ -195,7 +195,7 @@ public:
 	{
 	}    
 	
-	// Smart pointer methods (will report a dep leak)
+	// -------------- Smart pointer methods (will report a dep leak) -----------------
 	TreePtr<VALUE_TYPE> operator->()
 	{
 		// Dep leak!!
@@ -214,6 +214,14 @@ public:
 
 	template<typename C>
 	void operator->*(C c) = delete;
+		
+	operator TreePtr<VALUE_TYPE>() const
+	{
+		// Dep leak!!
+		return GetTypedTreePtr();
+	}
+	
+	// -------------- data members -----------------	
 };
 
 template<typename VALUE_TYPE, typename ... CP>

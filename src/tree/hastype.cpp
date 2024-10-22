@@ -60,7 +60,7 @@ AugTreePtr<CPPTree::Type> HasType::Get( const TreeKit &kit, AugTreePtr<Expressio
     else if( auto c = AugTreePtr<Call>::DynamicCast(o) )
     {
         AugTreePtr<Type> t = Get(kit, GET_CHILD(c, callee)); // get type of the function itself
-        ASSERT( dynamic_pointer_cast<Callable>(t) )( "Trying to call something that is not Callable");
+        ASSERT( AugTreePtr<Function>::DynamicCast(t) )( "Trying to call something that is not Callable");
         if( auto f = AugTreePtr<Function>::DynamicCast(t) )
         	return GET_CHILD(f, return_type);
         else
