@@ -389,7 +389,7 @@ string Render::RenderCall( const TreeKit &kit, TreePtr<Call> call ) try
 
 	// Render the expression that resolves to the function name unless this is
 	// a constructor call in which case just the name of the thing being constructed.
-	if( TreePtr<Expression> base = HasType::instance.IsConstructorCall( kit, call ) )
+	if( TreePtr<Expression> base = HasType::instance.TryGetConstructedExpression( kit, call ) )
 		s += RenderExpression( kit, base, true );
 	else
 		s += RenderExpression( kit, call->callee, true );
@@ -618,7 +618,7 @@ void Render::ExtractInits( const TreeKit &kit, Sequence<Statement> &body, Sequen
 		{
             try
             {
-                if( HasType::instance.IsConstructorCall( kit, o ) )
+                if( HasType::instance.TryGetConstructedExpression( kit, o ) )
                 {
                     inits.push_back(s);
                     continue;

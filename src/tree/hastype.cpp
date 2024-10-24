@@ -60,11 +60,13 @@ AugTreePtr<CPPTree::Type> HasType::Get( const TreeKit &kit, AugTreePtr<Expressio
     else if( auto c = AugTreePtr<Call>::DynamicCast(o) )
     {
         AugTreePtr<Type> t = Get(kit, GET_CHILD(c, callee)); // get type of the function itself
-        ASSERT( AugTreePtr<Function>::DynamicCast(t) )( "Trying to call something that is not Callable");
+        ASSERT( AugTreePtr<Callable>::DynamicCast(t) )( "Trying to call something that is not Callable: ")(*t);
         if( auto f = AugTreePtr<Function>::DynamicCast(t) )
         	return GET_CHILD(f, return_type);
+        else if( auto e = TryGetConstructedExpression( kit, c ) )
+			return Get( kit, e ); // recurse with the object (presumably) that's being constructed
         else
-        	return AugMakeTreeNode<Void>();
+        	return AugMakeTreeNode<Void>(); 
     }
     else if( auto l = AugTreePtr<Lookup>::DynamicCast(o) ) // a.b; just return type of b
     {
@@ -393,7 +395,7 @@ AugTreePtr<CPPTree::Type> HasType::GetLiteral( const TreeKit &kit, AugTreePtr<Li
 
 // Is this call really a constructor call? If so return the object being
 // constructed. Otherwise, return nullptr
-AugTreePtr<CPPTree::Expression> HasType::IsConstructorCall( const TreeKit &kit, AugTreePtr<Call> call ) const
+AugTreePtr<CPPTree::Expression> HasType::TryGetConstructedExpression( const TreeKit &kit, AugTreePtr<Call> call ) const
 {
 	AugTreePtr<CPPTree::Expression> e;
 

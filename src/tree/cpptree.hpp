@@ -503,6 +503,11 @@ struct Function : CallableParamsReturn
 };
 
 /// A C++ constructor. The init list is just zero or more calls to constructors in the body
+/** We don't return the object being constructed because construction does not imply
+ * return value semantics. Instead we model as a call on the already-existing object
+ * that returns void. Similar for destructor. We're just allowing a non-constructed state 
+ * for the object.
+ */
 struct Constructor : Procedure { NODE_FUNCTIONS_FINAL };
 
 /// A C++ destructor
