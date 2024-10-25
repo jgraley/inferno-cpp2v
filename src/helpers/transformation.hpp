@@ -6,6 +6,8 @@
 #include "common/lambda_loops.hpp"
 #include <functional>
 
+//#define NEWCODE
+
 class Transformation;
 
 // ---------------------- DependencyReporter ---------------------------
@@ -76,10 +78,26 @@ protected:
 
 // ---------------------- AugTreePtr ---------------------------
 
+#ifdef NEWCODE
+#define TREE_PTR_CONS typed_tree_ptr
+#define TREE_PTR_METH typed_tree_ptr
+#define TREE_PTR_METH_CONST typed_tree_ptr
+#else			       
+#define TREE_PTR_CONS TreePtr<VALUE_TYPE>
+#define TREE_PTR_METH *(TreePtr<VALUE_TYPE> *)this
+#define TREE_PTR_METH_CONST *(const TreePtr<VALUE_TYPE> *)this
+#endif				   
+
+
 // The augmented tree pointer is designed to act like a normal TreePtr
 // (to an extent) while hepling to meet the requirements of domain extension
 template<class VALUE_TYPE>
-class AugTreePtr : public TreePtr<VALUE_TYPE>,
+class AugTreePtr : 
+#ifdef NEWCODE	
+			       public Traceable,
+#else			       
+				   public TreePtr<VALUE_TYPE>,
+#endif				   
 			       public AugTreePtrBase
 {
 public:
@@ -95,20 +113,20 @@ public:
     // Not explicit so we can come in from parse and render
     template<class OTHER_VALUE_TYPE>
     AugTreePtr(TreePtr<OTHER_VALUE_TYPE> tree_ptr_) : 
-        TreePtr<VALUE_TYPE>(tree_ptr_), 
+        TREE_PTR_CONS(tree_ptr_), 
         AugTreePtrBase(tree_ptr_)
     {
     }
    
     AugTreePtr(TreePtr<VALUE_TYPE> tree_ptr_, const AugTreePtrBase &ob) : 
-        TreePtr<VALUE_TYPE>(tree_ptr_), 
+        TREE_PTR_CONS(tree_ptr_), 
         AugTreePtrBase(ob)
     {
     }
 
     template<class OTHER_VALUE_TYPE>
     AugTreePtr(const AugTreePtr<OTHER_VALUE_TYPE> &other) : 
-        TreePtr<VALUE_TYPE>(other.GetTypedTreePtr()), 
+        TREE_PTR_CONS(other.GetTypedTreePtr()), 
         AugTreePtrBase(other)
     {
     }
@@ -126,18 +144,18 @@ public:
 	// ------------ Access the wrapped, typed TreePtr() -------------
     TreePtr<VALUE_TYPE> &GetTypedTreePtr()
 	{
-		return *(TreePtr<VALUE_TYPE> *)this;
+		return TREE_PTR_METH;
 	}
    
     const TreePtr<VALUE_TYPE> &GetTypedTreePtr() const 
 	{
-		return *(const TreePtr<VALUE_TYPE> *)this;
+		return TREE_PTR_METH_CONST;
 	}
    
     template<class OTHER_VALUE_TYPE>
     void SetTypedTreePtr(const TreePtr<OTHER_VALUE_TYPE> &new_val)
 	{
-		*(TreePtr<VALUE_TYPE> *)this = new_val;
+		TREE_PTR_METH = new_val;
 	}   
       
     // ----------- Implementations for API -------------
@@ -200,13 +218,31 @@ public:
 	template<typename C>
 	void operator->*(C c) = delete;
 		
+	// -------------- Other methods to be a useful type ------------------
+		
+    template<class OTHER_VALUE_TYPE>
+	bool operator <( const AugTreePtr<OTHER_VALUE_TYPE> &r )
+	{
+		return GetTypedTreePtr() < r.GetTypedTreePtr();
+	}	
+		
 	operator TreePtr<VALUE_TYPE>() const
 	{
 		// Dep leak!!
 		return GetTypedTreePtr();
 	}
+
+#ifdef NEWCODE	
+	string GetTrace() const override
+	{
+		return GetTypedTreePtr().Trace();
+	}
+#endif	
 	
 	// -------------- data members -----------------	
+#ifdef NEWCODE	
+	TreePtr<VALUE_TYPE> typed_tree_ptr;
+#endif
 };
 
 template<typename VALUE_TYPE, typename ... CP>
@@ -316,6 +352,8 @@ public:
 
 // ---------------------- SimpleNavigation ---------------------------
 
+// For when you don't have a database - searches for things from the
+// supplied root.
 class SimpleNavigation : public NavigationInterface
 {
 public:	
