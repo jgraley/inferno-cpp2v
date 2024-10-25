@@ -78,26 +78,11 @@ protected:
 
 // ---------------------- AugTreePtr ---------------------------
 
-#ifdef NEWCODE
-#define TREE_PTR_CONS typed_tree_ptr
-#define TREE_PTR_METH typed_tree_ptr
-#define TREE_PTR_METH_CONST typed_tree_ptr
-#else			       
-#define TREE_PTR_CONS TreePtr<VALUE_TYPE>
-#define TREE_PTR_METH *(TreePtr<VALUE_TYPE> *)this
-#define TREE_PTR_METH_CONST *(const TreePtr<VALUE_TYPE> *)this
-#endif				   
-
-
 // The augmented tree pointer is designed to act like a normal TreePtr
 // (to an extent) while hepling to meet the requirements of domain extension
 template<class VALUE_TYPE>
 class AugTreePtr : 
-#ifdef NEWCODE	
-			       public Traceable,
-#else			       
-				   public TreePtr<VALUE_TYPE>,
-#endif				   
+			       public Traceable,				   
 			       public AugTreePtrBase
 {
 public:
@@ -113,20 +98,20 @@ public:
     // Not explicit so we can come in from parse and render
     template<class OTHER_VALUE_TYPE>
     AugTreePtr(TreePtr<OTHER_VALUE_TYPE> tree_ptr_) : 
-        TREE_PTR_CONS(tree_ptr_), 
+        typed_tree_ptr(tree_ptr_), 
         AugTreePtrBase(tree_ptr_)
     {
     }
    
     AugTreePtr(TreePtr<VALUE_TYPE> tree_ptr_, const AugTreePtrBase &ob) : 
-        TREE_PTR_CONS(tree_ptr_), 
+        typed_tree_ptr(tree_ptr_), 
         AugTreePtrBase(ob)
     {
     }
 
     template<class OTHER_VALUE_TYPE>
     AugTreePtr(const AugTreePtr<OTHER_VALUE_TYPE> &other) : 
-        TREE_PTR_CONS(other.GetTypedTreePtr()), 
+        typed_tree_ptr(other.GetTypedTreePtr()), 
         AugTreePtrBase(other)
     {
     }
@@ -144,18 +129,18 @@ public:
 	// ------------ Access the wrapped, typed TreePtr() -------------
     TreePtr<VALUE_TYPE> &GetTypedTreePtr()
 	{
-		return TREE_PTR_METH;
+		return typed_tree_ptr;
 	}
    
     const TreePtr<VALUE_TYPE> &GetTypedTreePtr() const 
 	{
-		return TREE_PTR_METH_CONST;
+		return typed_tree_ptr;
 	}
    
     template<class OTHER_VALUE_TYPE>
     void SetTypedTreePtr(const TreePtr<OTHER_VALUE_TYPE> &new_val)
 	{
-		TREE_PTR_METH = new_val;
+		typed_tree_ptr = new_val;
 	}   
       
     // ----------- Implementations for API -------------
@@ -232,17 +217,13 @@ public:
 		return GetTypedTreePtr();
 	}
 
-#ifdef NEWCODE	
 	string GetTrace() const override
 	{
 		return GetTypedTreePtr().GetTrace();
 	}
-#endif	
 	
 	// -------------- data members -----------------	
-#ifdef NEWCODE	
 	TreePtr<VALUE_TYPE> typed_tree_ptr;
-#endif
 };
 
 template<typename VALUE_TYPE, typename ... CP>
