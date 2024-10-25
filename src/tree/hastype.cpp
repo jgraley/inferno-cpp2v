@@ -190,18 +190,18 @@ AugTreePtr<CPPTree::Type> HasType::GetOperator( const TreeKit &kit, AugTreePtr<O
 #define SHIFT optypes.front()
 #define SPECIAL GetSpecial( kit, op, optypes )
 
-    if(0) {}
+    if(false) {}
 #define INFIX(TOK, TEXT, NODE, BASE, CAT) \
-	else if( DynamicTreePtrCast<NODE>(op) ) \
+	else if( AugTreePtr<NODE>::DynamicCast(op) ) \
 		return CAT;
 #define PREFIX(TOK, TEXT, NODE, BASE, CAT) \
-	else if( DynamicTreePtrCast<NODE>(op) ) \
+	else if( AugTreePtr<NODE>::DynamicCast(op) ) \
 		return CAT;
 #define POSTFIX(TOK, TEXT, NODE, BASE, CAT) \
-	else if( DynamicTreePtrCast<NODE>(op) ) \
+	else if( AugTreePtr<NODE>::DynamicCast(op) ) \
 		return CAT;
 #define OTHER(TOK, TEXT, NODE, BASE, CAT) \
-	else if( DynamicTreePtrCast<NODE>(op) ) \
+	else if( AugTreePtr<NODE>::DynamicCast(op) ) \
 		return CAT;
 #include "tree/operator_data.inc"
     else
@@ -237,7 +237,7 @@ AugTreePtr<CPPTree::Type> HasType::GetStandardOnNumerics( const TreeKit &kit, li
 	// minimum result type for standard operators
     int64_t maxwidth_signed = TypeDb::integral_bits[INT];
 	int64_t maxwidth_unsigned = 0;
-	TreePtr<SpecificFloatSemantics> maxwidth_float;
+	AugTreePtr<SpecificFloatSemantics> maxwidth_float;
 
 	// Look at the operands in turn
 	for( AugTreePtr<Type> optype : optypes ) // TODO why drop Numeric?

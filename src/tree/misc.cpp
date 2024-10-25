@@ -24,9 +24,9 @@ AugTreePtr<Identifier> GetIdentifierOfDeclaration( AugTreePtr<Declaration> d )
 	
 AugTreePtr<Node> HasDeclaration::ApplyTransformation( const TreeKit &kit, AugTreePtr<Node> node ) const try
 {    
-    set<NavigationInterface::LinkInfo> declarer_infos = kit.utils->GetDeclarers( node );
+    set<AugTreePtr<Node>> declarers = kit.utils->GetDeclarers( node );
     
-    if( declarer_infos.empty() )
+    if( declarers.empty() )
     {
 #ifdef WARN_UNFOUND_DECL
         FTRACE("Warning: declaration of ")(node)(" not found (has no declarer links)\n");
@@ -35,19 +35,7 @@ AugTreePtr<Node> HasDeclaration::ApplyTransformation( const TreeKit &kit, AugTre
     }
     
     // function decl/def are folded, so we expect only one declarer
-    TreePtr<Node> declarer = OnlyElementOf( declarer_infos ).first;
-    
-    // If we don't require reports, just return the node and we're done
-    if( !kit.utils->IsRequireReports() )
-        return AugTreePtr<Node>(declarer);
-    
-    // To be able to report the declarer as a node in the tree, we
-    // must find its parent link
-    set<NavigationInterface::LinkInfo> parent_infos = kit.utils->GetParents( declarer );
-    const TreePtrInterface *declarer_parent_link = OnlyElementOf( parent_infos ).second;
-
-    // Report and return
-    return kit.utils->CreateAugTree<Node>(declarer_parent_link); 
+    return OnlyElementOf( declarers ); 
 }
 catch( NavigationInterface::UnknownNode &) 
 {

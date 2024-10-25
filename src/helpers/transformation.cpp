@@ -57,7 +57,6 @@ AugTreePtrBase::operator bool()
     return GetTreePtr(); 
 }
 
-
 // ---------------------- TreeUtils ---------------------------
 
 TreeUtils::TreeUtils( const NavigationInterface *nav_, DependencyReporter *dep_rep_ ) :
@@ -83,19 +82,35 @@ set<TreeUtils::LinkInfo> TreeUtils::GetDeclarers( TreePtr<Node> node ) const
 	return nav->GetDeclarers(node); // TODO convert to a set of AugTreePtr
 } 
 
-/*
-set<AugTreePtr<Node>> TreeUtils::GetParents( AugTreePtr<Node> atp ) const
-{
-	ASSERTFAIL(); // TODO
-	set<TreeUtils::LinkInfo> li_set = GetParents( atp.tree_ptr );
-}
-
 
 set<AugTreePtr<Node>> TreeUtils::GetDeclarers( AugTreePtr<Node> node ) const
 {
-	ASSERTFAIL(); // TODO
+    set<NavigationInterface::LinkInfo> declarer_infos = GetDeclarers( node.GetTreePtr() );  
+    
+    // Generate ATPs from declarers
+	set<AugTreePtr<Node>> atp_declarers;	
+    for( NavigationInterface::LinkInfo declarer : declarer_infos )
+    {   
+		// To be able to report the declarer as a node in the tree, we
+		// must find its parent link
+		set<NavigationInterface::LinkInfo> parent_infos = GetParents( declarer.first );
+		if( parent_infos.empty() )
+		{
+			// No parent link found, so we have to assume this is a free subtree
+			atp_declarers.insert( AugTreePtr<Node>(declarer.first) );
+		}
+		else
+		{
+			const TreePtrInterface *declarer_parent_link = OnlyElementOf( parent_infos ).second;
+
+			// Report and return
+			atp_declarers.insert( CreateAugTree<Node>(declarer_parent_link) ); 
+		}
+	}
+	
+	return atp_declarers;
 }
-*/
+
 
 const TreePtrInterface *TreeUtils::GetPTreePtr( const AugTreePtrBase &atp ) const
 {
@@ -112,6 +127,17 @@ TreePtr<Node> TreeUtils::GetTreePtr( const AugTreePtrBase &atp ) const
 DependencyReporter *TreeUtils::GetDepRep() const
 {
 	return dep_rep;
+}
+
+// ---------------------- Transformation ---------------------------
+
+AugTreePtr<Node> Transformation::operator()( AugTreePtr<Node> atp, 
+    		                                 TreePtr<Node> root	) const
+{
+    SimpleNavigation nav(root);
+    TreeUtils utils(&nav);
+    TreeKit kit { &utils };
+    return ApplyTransformation( kit, atp );
 }
 
 // ---------------------- SimpleNavigation ---------------------------
@@ -169,14 +195,4 @@ set<NavigationInterface::LinkInfo> SimpleNavigation::GetDeclarers( TreePtr<Node>
 	}
 	
 	return infos;
-}
-
-
-AugTreePtr<Node> Transformation::operator()( AugTreePtr<Node> atp, 
-    		                                 TreePtr<Node> root	) const
-{
-    SimpleNavigation nav(root);
-    TreeUtils utils(&nav);
-    TreeKit kit { &utils };
-    return ApplyTransformation( kit, atp );
 }

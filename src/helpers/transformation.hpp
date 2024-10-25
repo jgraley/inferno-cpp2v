@@ -18,21 +18,6 @@ public:
 	virtual void ReportTreeNode( TreePtr<Node> tree_ptr ) = 0;
 };
 
-// ---------------------- NavigationInterface ---------------------------
-
-class NavigationInterface
-{
-public:	
-    class UnknownNode : public Exception {};
-	
-    // Convention is that second points to one of first's TreePtrs
-    typedef pair<TreePtr<Node>, const TreePtrInterface *> LinkInfo;
-
-    virtual bool IsRequireReports() const = 0;
-	virtual set<LinkInfo> GetParents( TreePtr<Node> node ) const = 0;
-	virtual set<LinkInfo> GetDeclarers( TreePtr<Node> node ) const = 0;    
-};
-
 // ---------------------- AugTreePtrBase ---------------------------
 
 class AugTreePtrBase
@@ -248,6 +233,21 @@ AugTreePtr<VALUE_TYPE> AugMakeTreeNode(const CP &...cp)
 // With -> we're a smart pointer. No need to derive from TreePtr but
 // still contain one and still be a template. 
 
+// ---------------------- NavigationInterface ---------------------------
+
+class NavigationInterface
+{
+public:	
+    class UnknownNode : public Exception {};
+	
+    // Convention is that second points to one of first's TreePtrs
+    typedef pair<TreePtr<Node>, const TreePtrInterface *> LinkInfo;
+
+    virtual bool IsRequireReports() const = 0;
+	virtual set<LinkInfo> GetParents( TreePtr<Node> node ) const = 0;
+	virtual set<LinkInfo> GetDeclarers( TreePtr<Node> node ) const = 0;    
+};
+
 // ---------------------- TreeUtils ---------------------------
 
 class TreeUtils
@@ -261,13 +261,13 @@ public:
 
 	// Create AugTreePtr
     template<class VALUE_TYPE>
-    AugTreePtr<VALUE_TYPE> CreateAugTree(const TreePtrInterface *p_tree_ptr)
+    AugTreePtr<VALUE_TYPE> CreateAugTree(const TreePtrInterface *p_tree_ptr) const
     {
 		return AugTreePtr<VALUE_TYPE>((TreePtr<VALUE_TYPE>)*p_tree_ptr, AugTreePtrBase(p_tree_ptr, dep_rep));
 	}	
 
     template<class VALUE_TYPE>
-    AugTreePtr<VALUE_TYPE> CreateAugTree(const TreePtr<VALUE_TYPE> *p_tree_ptr)
+    AugTreePtr<VALUE_TYPE> CreateAugTree(const TreePtr<VALUE_TYPE> *p_tree_ptr) const
     {
 		return AugTreePtr<VALUE_TYPE>((TreePtr<VALUE_TYPE>)*p_tree_ptr, AugTreePtrBase(p_tree_ptr, dep_rep));
 	}	
@@ -281,8 +281,7 @@ public:
 	set<LinkInfo> GetParents( TreePtr<Node> node ) const; 
 	set<LinkInfo> GetDeclarers( TreePtr<Node> node ) const;
 	
-	//set<AugTreePtr<Node>> GetParents( AugTreePtr<Node> node ) const; 
-	//set<AugTreePtr<Node>> GetDeclarers( AugTreePtr<Node> node ) const; 
+	set<AugTreePtr<Node>> GetDeclarers( AugTreePtr<Node> node ) const;
 	
 	DependencyReporter *GetDepRep() const;
 		
