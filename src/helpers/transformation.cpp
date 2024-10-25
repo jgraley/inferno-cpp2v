@@ -59,12 +59,6 @@ void AugTreePtrBase::SetGenericTreePtr(TreePtr<Node> generic_tree_ptr_)
 	generic_tree_ptr = generic_tree_ptr_;
 }
 
-
-AugTreePtrBase::operator bool()
-{
-    return GetGenericTreePtr(); 
-}
-
 // ---------------------- TreeUtils ---------------------------
 
 TreeUtils::TreeUtils( const NavigationInterface *nav_, DependencyReporter *dep_rep_ ) :
@@ -93,7 +87,7 @@ set<TreeUtils::LinkInfo> TreeUtils::GetDeclarers( TreePtr<Node> node ) const
 
 set<AugTreePtr<Node>> TreeUtils::GetDeclarers( AugTreePtr<Node> node ) const
 {
-    set<NavigationInterface::LinkInfo> declarer_infos = GetDeclarers( node.GetGenericTreePtr() );  
+    set<NavigationInterface::LinkInfo> declarer_infos = GetDeclarers( node.GetTreePtr() );  
     
     // Generate ATPs from declarers
 	set<AugTreePtr<Node>> atp_declarers;	

@@ -37,8 +37,6 @@ public:
 	TreePtr<Node> GetGenericTreePtr() const;
 	void SetGenericTreePtr(TreePtr<Node> generic_tree_ptr_);
 
-    operator bool();
-
     template<class OTHER_VALUE_TYPE>
     AugTreePtrBase GetChild( const TreePtr<OTHER_VALUE_TYPE> *other_tree_ptr ) const
 	{
@@ -101,20 +99,20 @@ public:
     template<class OTHER_VALUE_TYPE>
     AugTreePtr(TreePtr<OTHER_VALUE_TYPE> tree_ptr_) : 
         AugTreePtrBase(tree_ptr_),
-        typed_tree_ptr(tree_ptr_) 
+        tree_ptr(tree_ptr_) 
     {
     }
    
     AugTreePtr(TreePtr<VALUE_TYPE> tree_ptr_, const AugTreePtrBase &ob) : 
         AugTreePtrBase(ob),
-        typed_tree_ptr(tree_ptr_)
+        tree_ptr(tree_ptr_)
     {
     }
 
     template<class OTHER_VALUE_TYPE>
     AugTreePtr(const AugTreePtr<OTHER_VALUE_TYPE> &other) : 
         AugTreePtrBase(other),
-        typed_tree_ptr(other.GetTreePtr())
+        tree_ptr(other.GetTreePtr())
     {
     }
             
@@ -124,19 +122,19 @@ public:
     AugTreePtr<VALUE_TYPE> &operator=( const AugTreePtr<OTHER_VALUE_TYPE> &other )
     {
         AugTreePtrBase::operator=(other);      
-        typed_tree_ptr = other.GetTreePtr(); 
+        tree_ptr = other.GetTreePtr(); 
         return *this;
     }     
    	
 	// ------------ Access the wrapped, typed TreePtr() -------------
     TreePtr<VALUE_TYPE> &GetTreePtr()
 	{
-		return typed_tree_ptr;
+		return tree_ptr;
 	}
    
     const TreePtr<VALUE_TYPE> &GetTreePtr() const 
 	{
-		return typed_tree_ptr;
+		return tree_ptr;
 	}
       
     // ----------- Implementations for API -------------
@@ -204,14 +202,19 @@ public:
 	{
 		return GetTreePtr() < r.GetTreePtr();
 	}	
+	
+    operator bool()
+    {
+		return !!GetGenericTreePtr();
+	}
 		
 	string GetTrace() const override
 	{
-		return GetTreePtr().GetTrace();
+		return GetTreePtr().GetTrace()+"(Aug)";
 	}
 	
 	// -------------- data members -----------------	
-	TreePtr<VALUE_TYPE> typed_tree_ptr;
+	TreePtr<VALUE_TYPE> tree_ptr;
 };
 
 template<typename VALUE_TYPE, typename ... CP>
