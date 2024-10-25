@@ -67,6 +67,27 @@ TreeUtils::TreeUtils( const NavigationInterface *nav_, DependencyReporter *dep_r
 {
 }	
 
+
+AugTreePtr<Node> TreeUtils::CreateAugTreeStyle(const TreePtrInterface *p_tree_ptr) const
+{
+	return AugTreePtr<Node>((TreePtr<Node>)*p_tree_ptr, AugTreePtrBase(p_tree_ptr, dep_rep));
+}	
+
+
+const TreePtrInterface *TreeUtils::GetPTreePtr( const AugTreePtrBase &atp ) const
+{
+	return atp.p_tree_ptr; // TODO eg atp.GetImpl()->GetPTreePtr()
+	// but then later, transformation_agent can do eg atp.GetImpl()->GetXLink() etc
+	// possibly with a dyncast to an API that knows about XLinks 
+}
+
+
+TreePtr<Node> TreeUtils::GetGenericTreePtr( const AugTreePtrBase &atp ) const
+{
+	return atp.generic_tree_ptr; // TODO eg atp.GetImpl()->GetGenericTreePtr()
+}
+
+
 bool TreeUtils::IsRequireReports() const
 {
 	return nav->IsRequireReports();
@@ -106,23 +127,11 @@ set<AugTreePtr<Node>> TreeUtils::GetDeclarers( AugTreePtr<Node> node ) const
 			const TreePtrInterface *declarer_parent_link = OnlyElementOf( parent_infos ).second;
 
 			// Report and return
-			atp_declarers.insert( CreateAugTree<Node>(declarer_parent_link) ); 
+			atp_declarers.insert( CreateAugTreeStyle(declarer_parent_link) ); 
 		}
 	}
 	
 	return atp_declarers;
-}
-
-
-const TreePtrInterface *TreeUtils::GetPTreePtr( const AugTreePtrBase &atp ) const
-{
-	return atp.p_tree_ptr;
-}
-
-
-TreePtr<Node> TreeUtils::GetGenericTreePtr( const AugTreePtrBase &atp ) const
-{
-	return atp.generic_tree_ptr;
 }
 
 

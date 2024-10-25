@@ -88,6 +88,9 @@ class AugTreePtr : public AugTreePtrBase,
 public:
     friend class TreeUtils;
 
+	template<class OTHER_VALUE_TYPE>
+	friend class AugTreePtr;
+
 	// ------------ Constructors etc --------------
     AugTreePtr() :
         AugTreePtrBase()
@@ -96,6 +99,7 @@ public:
          
     // Free style constructor: if a value was provided the pointer is NULL 
     // Not explicit so we can come in from parse and render
+	// Construct from other type, safe casts only
     template<class OTHER_VALUE_TYPE>
     AugTreePtr(TreePtr<OTHER_VALUE_TYPE> tree_ptr_) : 
         AugTreePtrBase(tree_ptr_),
@@ -103,12 +107,15 @@ public:
     {
     }
    
-    AugTreePtr(TreePtr<VALUE_TYPE> tree_ptr_, const AugTreePtrBase &ob) : 
+private:	
+    explicit AugTreePtr(TreePtr<VALUE_TYPE> tree_ptr_, const AugTreePtrBase &ob) : 
         AugTreePtrBase(ob),
         tree_ptr(tree_ptr_)
     {
     }
 
+public:
+	// Copy-construct from other type, safe casts only
     template<class OTHER_VALUE_TYPE>
     AugTreePtr(const AugTreePtr<OTHER_VALUE_TYPE> &other) : 
         AugTreePtrBase(other),
@@ -213,6 +220,8 @@ public:
 		return GetTreePtr().GetTrace()+"(Aug)";
 	}
 	
+	
+	
 	// -------------- data members -----------------	
 	TreePtr<VALUE_TYPE> tree_ptr;
 };
@@ -268,18 +277,8 @@ public:
 	                    DependencyReporter *dep_rep_ = nullptr );
 
 	// Create AugTreePtr
-    template<class VALUE_TYPE>
-    AugTreePtr<VALUE_TYPE> CreateAugTree(const TreePtrInterface *p_tree_ptr) const
-    {
-		return AugTreePtr<VALUE_TYPE>((TreePtr<VALUE_TYPE>)*p_tree_ptr, AugTreePtrBase(p_tree_ptr, dep_rep));
-	}	
-
-    template<class VALUE_TYPE>
-    AugTreePtr<VALUE_TYPE> CreateAugTree(const TreePtr<VALUE_TYPE> *p_tree_ptr) const
-    {
-		return AugTreePtr<VALUE_TYPE>((TreePtr<VALUE_TYPE>)*p_tree_ptr, AugTreePtrBase(p_tree_ptr, dep_rep));
-	}	
-
+    AugTreePtr<Node> CreateAugTreeStyle(const TreePtrInterface *p_tree_ptr) const;
+	
 	// Getters for AugTreePtr - back end only
     const TreePtrInterface *GetPTreePtr( const AugTreePtrBase &atp ) const;	
     TreePtr<Node> GetGenericTreePtr( const AugTreePtrBase &atp ) const;
