@@ -6,7 +6,7 @@
 #include "common/lambda_loops.hpp"
 #include <functional>
 
-//#define NEWCODE
+#define NEWCODE
 
 class Transformation;
 
@@ -221,7 +221,7 @@ public:
 	// -------------- Other methods to be a useful type ------------------
 		
     template<class OTHER_VALUE_TYPE>
-	bool operator <( const AugTreePtr<OTHER_VALUE_TYPE> &r )
+	bool operator <( const AugTreePtr<OTHER_VALUE_TYPE> &r ) const
 	{
 		return GetTypedTreePtr() < r.GetTypedTreePtr();
 	}	
@@ -235,7 +235,7 @@ public:
 #ifdef NEWCODE	
 	string GetTrace() const override
 	{
-		return GetTypedTreePtr().Trace();
+		return GetTypedTreePtr().GetTrace();
 	}
 #endif	
 	
