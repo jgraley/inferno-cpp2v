@@ -26,14 +26,14 @@ class AugTreePtrBase
 {
 public:
 	explicit AugTreePtrBase();
-	explicit AugTreePtrBase( TreePtr<Node> tree_ptr_ );
+	explicit AugTreePtrBase( TreePtr<Node> generic_tree_ptr_ );
     explicit AugTreePtrBase( const TreePtrInterface *p_tree_ptr_, DependencyReporter *dep_rep_ );
 	AugTreePtrBase( const AugTreePtrBase &other ) = default;
 	
 	AugTreePtrBase &operator=(const AugTreePtrBase &other) = default;
 
-	TreePtr<Node> GetTreePtr() const;
-	void SetTreePtr(TreePtr<Node> tree_ptr_);
+	TreePtr<Node> GetGenericTreePtr() const;
+	void SetGenericTreePtr(TreePtr<Node> generic_tree_ptr_);
 
     operator bool();
 
@@ -71,7 +71,7 @@ public:
 protected:
     friend class TreeUtils;
 
-    TreePtr<Node> tree_ptr;
+    TreePtr<Node> generic_tree_ptr;
     const TreePtrInterface *p_tree_ptr;
     DependencyReporter *dep_rep;	
 };
@@ -81,9 +81,9 @@ protected:
 // The augmented tree pointer is designed to act like a normal TreePtr
 // (to an extent) while hepling to meet the requirements of domain extension
 template<class VALUE_TYPE>
-class AugTreePtr : 
-			       public Traceable,				   
-			       public AugTreePtrBase
+class AugTreePtr : public AugTreePtrBase,
+			       public Traceable			   
+			       
 {
 public:
     friend class TreeUtils;
@@ -98,21 +98,21 @@ public:
     // Not explicit so we can come in from parse and render
     template<class OTHER_VALUE_TYPE>
     AugTreePtr(TreePtr<OTHER_VALUE_TYPE> tree_ptr_) : 
-        typed_tree_ptr(tree_ptr_), 
-        AugTreePtrBase(tree_ptr_)
+        AugTreePtrBase(tree_ptr_),
+        typed_tree_ptr(tree_ptr_) 
     {
     }
    
     AugTreePtr(TreePtr<VALUE_TYPE> tree_ptr_, const AugTreePtrBase &ob) : 
-        typed_tree_ptr(tree_ptr_), 
-        AugTreePtrBase(ob)
+        AugTreePtrBase(ob),
+        typed_tree_ptr(tree_ptr_)
     {
     }
 
     template<class OTHER_VALUE_TYPE>
     AugTreePtr(const AugTreePtr<OTHER_VALUE_TYPE> &other) : 
-        typed_tree_ptr(other.GetTypedTreePtr()), 
-        AugTreePtrBase(other)
+        AugTreePtrBase(other),
+        typed_tree_ptr(other.GetTreePtr())
     {
     }
             
@@ -121,27 +121,21 @@ public:
     template<class OTHER_VALUE_TYPE>
     AugTreePtr<VALUE_TYPE> &operator=( const AugTreePtr<OTHER_VALUE_TYPE> &other )
     {
-        SetTypedTreePtr( other.GetTypedTreePtr() ); 
         AugTreePtrBase::operator=(other);      
+        typed_tree_ptr = other.GetTreePtr(); 
         return *this;
     }     
    	
 	// ------------ Access the wrapped, typed TreePtr() -------------
-    TreePtr<VALUE_TYPE> &GetTypedTreePtr()
+    TreePtr<VALUE_TYPE> &GetTreePtr()
 	{
 		return typed_tree_ptr;
 	}
    
-    const TreePtr<VALUE_TYPE> &GetTypedTreePtr() const 
+    const TreePtr<VALUE_TYPE> &GetTreePtr() const 
 	{
 		return typed_tree_ptr;
 	}
-   
-    template<class OTHER_VALUE_TYPE>
-    void SetTypedTreePtr(const TreePtr<OTHER_VALUE_TYPE> &new_val)
-	{
-		typed_tree_ptr = new_val;
-	}   
       
     // ----------- Implementations for API -------------
     template<class OTHER_VALUE_TYPE>
@@ -156,16 +150,16 @@ public:
     void SetChild( TreePtr<OTHER_VALUE_TYPE> *other_tree_ptr, AugTreePtr<NEW_VALUE_TYPE> new_val )
     {
 		ASSERT( !ON_STACK(other_tree_ptr) );		
-		*other_tree_ptr = new_val.GetTypedTreePtr(); // Update the type-safe free tree
+		*other_tree_ptr = new_val.GetTreePtr(); // Update the type-safe free tree
         AugTreePtrBase::SetChild(other_tree_ptr, new_val); // Let base decide what to do
     }
 
     template<class OTHER_VALUE_TYPE>
     static AugTreePtr<VALUE_TYPE> DynamicCast( const AugTreePtr<OTHER_VALUE_TYPE> &g )
     {
-		auto new_tree_ptr = TreePtr<VALUE_TYPE>::DynamicCast(g.GetTypedTreePtr());
+		auto new_tree_ptr = TreePtr<VALUE_TYPE>::DynamicCast(g.GetTreePtr());
         auto new_atp = AugTreePtr(new_tree_ptr, g);
-		new_atp.SetTreePtr(new_tree_ptr); // could be NULL if dyn cast fails
+		new_atp.SetGenericTreePtr(new_tree_ptr); // could be NULL if dyn cast fails
 		return new_atp;
     }
     
@@ -187,13 +181,13 @@ public:
 	TreePtr<VALUE_TYPE> operator->()
 	{
 		// Dep leak!!
-		return GetTypedTreePtr();
+		return GetTreePtr();
 	}
 
 	const VALUE_TYPE &operator*()
 	{
 		// Dep leak!!
-		return *GetTypedTreePtr();
+		return *GetTreePtr();
 	}
 	
 	// Not allowed!!
@@ -208,18 +202,12 @@ public:
     template<class OTHER_VALUE_TYPE>
 	bool operator <( const AugTreePtr<OTHER_VALUE_TYPE> &r ) const
 	{
-		return GetTypedTreePtr() < r.GetTypedTreePtr();
+		return GetTreePtr() < r.GetTreePtr();
 	}	
 		
-	operator TreePtr<VALUE_TYPE>() const
-	{
-		// Dep leak!!
-		return GetTypedTreePtr();
-	}
-
 	string GetTrace() const override
 	{
-		return GetTypedTreePtr().GetTrace();
+		return GetTreePtr().GetTrace();
 	}
 	
 	// -------------- data members -----------------	
@@ -291,7 +279,7 @@ public:
 
 	// Getters for AugTreePtr - back end only
     const TreePtrInterface *GetPTreePtr( const AugTreePtrBase &atp ) const;	
-    TreePtr<Node> GetTreePtr( const AugTreePtrBase &atp ) const;
+    TreePtr<Node> GetGenericTreePtr( const AugTreePtrBase &atp ) const;
 	
 	// Forwarding methods from NavigationInterface
 	bool IsRequireReports() const;

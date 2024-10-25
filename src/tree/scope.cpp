@@ -22,7 +22,7 @@ TreePtr<Scope> GetScope( TreePtr<Program> program, TreePtr<Identifier> id )
         {
             for( TreePtr<Declaration> d : s->members )
             {
-                if( id == GetIdentifierOfDeclaration( d ).GetTypedTreePtr() ) 
+                if( id == GetIdentifierOfDeclaration( d ).GetTreePtr() ) 
                     return s;
             }
         }
@@ -36,7 +36,7 @@ TreePtr<Scope> GetScope( TreePtr<Program> program, TreePtr<Identifier> id )
 			for( TreePtr<Statement> s : c->statements )
 			{
 				if( TreePtr<Instance> d = DynamicTreePtrCast<Instance>(s) )
-					if( id == GetIdentifierOfDeclaration( d ).GetTypedTreePtr() )
+					if( id == GetIdentifierOfDeclaration( d ).GetTreePtr() )
 						return c;
 			}
 	}

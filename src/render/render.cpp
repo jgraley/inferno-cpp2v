@@ -389,7 +389,7 @@ string Render::RenderCall( const TreeKit &kit, TreePtr<Call> call ) try
 
 	// Render the expression that resolves to the function name unless this is
 	// a constructor call in which case just the name of the thing being constructed.
-	if( TreePtr<Expression> base = HasType::instance.TryGetConstructedExpression( kit, call ).GetTypedTreePtr() )
+	if( TreePtr<Expression> base = HasType::instance.TryGetConstructedExpression( kit, call ).GetTreePtr() )
 		s += RenderExpression( kit, base, true );
 	else
 		s += RenderExpression( kit, call->callee, true );
@@ -397,7 +397,7 @@ string Render::RenderCall( const TreeKit &kit, TreePtr<Call> call ) try
 	s += "(";
 
 	// If CallableParams, generate some arguments, resolving the order using the original function type
-	TreePtr<Node> ctype = HasType::instance(call->callee, program).GetTypedTreePtr();
+	TreePtr<Node> ctype = HasType::instance(call->callee, program).GetTreePtr();
 	ASSERT( ctype );
 	if( TreePtr<CallableParams> cp = DynamicTreePtrCast<CallableParams>(ctype) )
 		s += RenderMapInOrder( kit, call, cp, ", ", false );
@@ -511,7 +511,7 @@ string Render::RenderMakeRecord( const TreeKit &kit, TreePtr<MakeRecord> ro ) tr
 	TreePtr<TypeIdentifier> id = DynamicTreePtrCast<TypeIdentifier>(ro->type);
 	ASSERT(id);
 
-	TreePtr<Record> r = GetRecordDeclaration(kit, id).GetTypedTreePtr();
+	TreePtr<Record> r = GetRecordDeclaration(kit, id).GetTreePtr();
 
 	s += "(";
 	s += RenderType( kit, ro->type, "" );
@@ -684,7 +684,7 @@ string Render::RenderInstance( const TreeKit &kit, TreePtr<Instance> o, string s
     // But not for fields - they need an init list, done in RenderDeclarationCollection()
 	if( !DynamicTreePtrCast<Field>(o) )
 	    if( TreePtr<TypeIdentifier> tid = DynamicTreePtrCast<TypeIdentifier>(o->type) )
-	        if( TreePtr<Record> r = GetRecordDeclaration(kit, tid).GetTypedTreePtr() )
+	        if( TreePtr<Record> r = GetRecordDeclaration(kit, tid).GetTreePtr() )
 	            if( DynamicTreePtrCast<Module>(r) )
 	            {
 	                s += "(\"" + RenderIdentifier(kit, o->identifier) + "\")" + sep;
@@ -762,7 +762,7 @@ bool Render::ShouldSplitInstance( const TreeKit &kit, TreePtr<Instance> o )
 	bool isnumber = !!DynamicTreePtrCast<Numeric>( o->type );
 
     if( TreePtr<TypeIdentifier> ti = DynamicTreePtrCast<TypeIdentifier>(o->type) )
-        if( DynamicTreePtrCast<Enum>( GetRecordDeclaration(kit, ti).GetTypedTreePtr() ) )
+        if( DynamicTreePtrCast<Enum>( GetRecordDeclaration(kit, ti).GetTreePtr() ) )
             isnumber = 1; // enum is like a number        
 
 	bool split_var = false;
@@ -1062,7 +1062,7 @@ string Render::RenderModuleCtor( const TreeKit &kit,
         // and initialises any fields with initialisers
         if( TreePtr<Field> f = DynamicTreePtrCast<Field>(pd) )
             if( TreePtr<TypeIdentifier> tid = DynamicTreePtrCast<TypeIdentifier>(f->type) )
-                if( TreePtr<Record> r = GetRecordDeclaration(kit, tid).GetTypedTreePtr() )
+                if( TreePtr<Record> r = GetRecordDeclaration(kit, tid).GetTreePtr() )
                     if( DynamicTreePtrCast<Module>(r) )
                     {
                         if( first )

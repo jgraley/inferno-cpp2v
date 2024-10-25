@@ -757,7 +757,7 @@ private:
             TreeKit kit { &utils };
 			if ( TreePtr<MakeArray> ai = DynamicTreePtrCast<MakeArray>(o->initialiser) )
 				if ( TreePtr<TypeIdentifier> ti = DynamicTreePtrCast<TypeIdentifier>(o->type) )
-					if ( TreePtr<Record> r = GetRecordDeclaration(kit, ti).GetTypedTreePtr() )
+					if ( TreePtr<Record> r = GetRecordDeclaration(kit, ti).GetTreePtr() )
 						o->initialiser = CreateRecordLiteralFromArrayLiteral(
 								ai, r);
 		}
@@ -1059,7 +1059,7 @@ private:
 		c->callee = callee;
 
 		// If CallableParams, fill in the args map based on the supplied args and original function type
-		TreePtr<Node> t = HasType::instance(callee, all_decls).GetTypedTreePtr();
+		TreePtr<Node> t = HasType::instance(callee, all_decls).GetTreePtr();
 		if( TreePtr<CallableParams> p = DynamicTreePtrCast<CallableParams>(t) )
 		    PopulateMapOperator( c, args, p );
 
@@ -1550,15 +1550,15 @@ private:
 		}
 
 		// Find the specified member in the record implied by the expression on the left of .
-		TreePtr<Node> tbase = HasType::instance( a->base, all_decls ).GetTypedTreePtr();
+		TreePtr<Node> tbase = HasType::instance( a->base, all_decls ).GetTreePtr();
 		TreePtr<TypeIdentifier> tibase = DynamicTreePtrCast<TypeIdentifier>(tbase);
 		ASSERT( tibase );
         SimpleNavigation nav(all_decls);
 		TreeUtils utils(&nav);
         TreeKit kit { &utils };
-		TreePtr<Record> rbase = GetRecordDeclaration(kit, tibase).GetTypedTreePtr();
+		TreePtr<Record> rbase = GetRecordDeclaration(kit, tibase).GetTreePtr();
 		ASSERT( rbase )( "thing on left of ./-> is not a record/record ptr" );
-		TreePtr<Instance> m = FindMemberByName( kit, rbase, string(Member.getName()) ).GetTypedTreePtr();
+		TreePtr<Instance> m = FindMemberByName( kit, rbase, string(Member.getName()) ).GetTreePtr();
 		ASSERT(m)("in r.m or (&r)->m, could not find m in r\n"
 		          "m is %s, r is ", 
 		          Member.getName())
@@ -1820,7 +1820,7 @@ private:
 			ASSERT(0)("typeof() only supported on types at the moment");
 			// TODO This is wrong because we'll get 2 refs to the type, need to duplicate,
 			// or maybe add an alternative node and convert in a S&R
-			p->operand = TreePtr<Type>::DynamicCast( HasType::instance( hold_expr.FromRaw(TyOrEx), all_decls ).GetTypedTreePtr() );
+			p->operand = TreePtr<Type>::DynamicCast( HasType::instance( hold_expr.FromRaw(TyOrEx), all_decls ).GetTreePtr() );
 		}
 		return hold_expr.ToRaw( p );
 	}
@@ -1919,7 +1919,7 @@ private:
         SimpleNavigation nav(all_decls);
 		TreeUtils utils(&nav);
         TreeKit kit { &utils };
-		TreePtr<Record> r = GetRecordDeclaration( kit, id ).GetTypedTreePtr();
+		TreePtr<Record> r = GetRecordDeclaration( kit, id ).GetTreePtr();
 
 		for( TreePtr<Declaration> d : r->members )
 		{
@@ -2050,7 +2050,7 @@ private:
         TreeKit kit { &utils };
 		if( TreePtr<MakeArray> ai = DynamicTreePtrCast<MakeArray>(e) )
 			if( TreePtr<TypeIdentifier> ti = DynamicTreePtrCast<TypeIdentifier>(t) )
-				if( TreePtr<Record> r = GetRecordDeclaration(kit, ti).GetTypedTreePtr() )
+				if( TreePtr<Record> r = GetRecordDeclaration(kit, ti).GetTreePtr() )
 					e = CreateRecordLiteralFromArrayLiteral( ai, r );
 
 		return hold_expr.ToRaw( e );

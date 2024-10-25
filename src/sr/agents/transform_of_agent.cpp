@@ -37,7 +37,7 @@ TeleportAgent::QueryReturnType TransformOfAgent::RunTeleportQuery( const XTreeDa
             return QueryReturnType(); 		
 		
 		const TreePtrInterface *ptp = utils.GetPTreePtr(atp);
-		TreePtr<Node> tp = utils.GetTreePtr(atp);
+		TreePtr<Node> tp = utils.GetGenericTreePtr(atp);
 		ASSERT( tp->IsFinal() )(*this)(" computed non-final ")(tp)(" from ")(stimulus_x)("\n");                
 		
         if( ptp ) 

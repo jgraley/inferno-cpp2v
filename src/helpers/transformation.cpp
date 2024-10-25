@@ -8,53 +8,53 @@
 // ---------------------- AugTreePtrBase ---------------------------
 
 AugTreePtrBase::AugTreePtrBase() :
-	tree_ptr(nullptr),
+	generic_tree_ptr(nullptr),
 	p_tree_ptr(nullptr),
 	dep_rep( nullptr )	
 {
 }
 
 
-AugTreePtrBase::AugTreePtrBase( TreePtr<Node> tree_ptr_ ) :
-	tree_ptr(tree_ptr_),
+AugTreePtrBase::AugTreePtrBase( TreePtr<Node> generic_tree_ptr_ ) :
+	generic_tree_ptr(generic_tree_ptr_),
 	p_tree_ptr(nullptr),
 	dep_rep( nullptr )	
 {
-	ASSERT( tree_ptr );
+	ASSERT( generic_tree_ptr );
 }
 
 
 AugTreePtrBase::AugTreePtrBase(const TreePtrInterface *p_tree_ptr_, DependencyReporter *dep_rep_) : // tree
-    tree_ptr(*p_tree_ptr_),
+    generic_tree_ptr(*p_tree_ptr_),
 	p_tree_ptr(p_tree_ptr_),
 	dep_rep( dep_rep_ )
 {
-	ASSERT( tree_ptr );
+	ASSERT( generic_tree_ptr );
 	ASSERT( p_tree_ptr );
 	ASSERT( *p_tree_ptr );
 	// Not a local automatic please, we're going to hang on to it.
 	ASSERT( !ON_STACK(p_tree_ptr_) );	
 
     if( dep_rep )
-		dep_rep->ReportTreeNode( tree_ptr );	
+		dep_rep->ReportTreeNode( generic_tree_ptr );	
 }    
 
 
-TreePtr<Node> AugTreePtrBase::GetTreePtr() const
+TreePtr<Node> AugTreePtrBase::GetGenericTreePtr() const
 {
-	return tree_ptr;
+	return generic_tree_ptr;
 }
 
 
-void AugTreePtrBase::SetTreePtr(TreePtr<Node> tree_ptr_)
+void AugTreePtrBase::SetGenericTreePtr(TreePtr<Node> generic_tree_ptr_)
 {
-	tree_ptr = tree_ptr_;
+	generic_tree_ptr = generic_tree_ptr_;
 }
 
 
 AugTreePtrBase::operator bool()
 {
-    return GetTreePtr(); 
+    return GetGenericTreePtr(); 
 }
 
 // ---------------------- TreeUtils ---------------------------
@@ -85,7 +85,7 @@ set<TreeUtils::LinkInfo> TreeUtils::GetDeclarers( TreePtr<Node> node ) const
 
 set<AugTreePtr<Node>> TreeUtils::GetDeclarers( AugTreePtr<Node> node ) const
 {
-    set<NavigationInterface::LinkInfo> declarer_infos = GetDeclarers( node.GetTreePtr() );  
+    set<NavigationInterface::LinkInfo> declarer_infos = GetDeclarers( node.GetGenericTreePtr() );  
     
     // Generate ATPs from declarers
 	set<AugTreePtr<Node>> atp_declarers;	
@@ -118,9 +118,9 @@ const TreePtrInterface *TreeUtils::GetPTreePtr( const AugTreePtrBase &atp ) cons
 }
 
 
-TreePtr<Node> TreeUtils::GetTreePtr( const AugTreePtrBase &atp ) const
+TreePtr<Node> TreeUtils::GetGenericTreePtr( const AugTreePtrBase &atp ) const
 {
-	return atp.tree_ptr;
+	return atp.generic_tree_ptr;
 }
 
 
