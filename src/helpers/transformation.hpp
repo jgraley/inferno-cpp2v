@@ -28,6 +28,8 @@ public:
 	explicit AugTreePtrBase();
 	explicit AugTreePtrBase( TreePtr<Node> generic_tree_ptr_ );
     explicit AugTreePtrBase( const TreePtrInterface *p_tree_ptr_, DependencyReporter *dep_rep_ );
+	explicit AugTreePtrBase( const AugTreePtrBase &other, TreePtr<Node> generic_tree_ptr_ ); // for dyncast
+
 	AugTreePtrBase( const AugTreePtrBase &other ) = default;
 	
 	AugTreePtrBase &operator=(const AugTreePtrBase &other) = default;
@@ -158,9 +160,7 @@ public:
     static AugTreePtr<VALUE_TYPE> DynamicCast( const AugTreePtr<OTHER_VALUE_TYPE> &g )
     {
 		auto new_tree_ptr = TreePtr<VALUE_TYPE>::DynamicCast(g.GetTreePtr());
-        auto new_atp = AugTreePtr(new_tree_ptr, g);
-		new_atp.SetGenericTreePtr(new_tree_ptr); // could be NULL if dyn cast fails
-		return new_atp;
+        return AugTreePtr(new_tree_ptr, AugTreePtrBase(g, new_tree_ptr));
     }
     
 	template<typename C>

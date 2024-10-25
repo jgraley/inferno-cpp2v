@@ -40,6 +40,14 @@ AugTreePtrBase::AugTreePtrBase(const TreePtrInterface *p_tree_ptr_, DependencyRe
 }    
 
 
+AugTreePtrBase::AugTreePtrBase( const AugTreePtrBase &other, TreePtr<Node> generic_tree_ptr_ ) :
+    generic_tree_ptr(generic_tree_ptr_),
+	p_tree_ptr(other.p_tree_ptr),
+	dep_rep(other.dep_rep)
+{	
+}
+
+
 TreePtr<Node> AugTreePtrBase::GetGenericTreePtr() const
 {
 	return generic_tree_ptr;
