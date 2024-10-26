@@ -5,9 +5,9 @@
 #include "flatten.hpp"
 #include "transformation.hpp"
 
-// ---------------------- AugTreePtrImpl ---------------------------
+// ---------------------- DomainExtensionAugBE ---------------------------
 
-AugTreePtrImpl::AugTreePtrImpl() :
+DomainExtensionAugBE::DomainExtensionAugBE() :
 	generic_tree_ptr(nullptr),
 	p_tree_ptr(nullptr),
 	dep_rep( nullptr )	
@@ -15,7 +15,7 @@ AugTreePtrImpl::AugTreePtrImpl() :
 }
 
 
-AugTreePtrImpl::AugTreePtrImpl( TreePtr<Node> generic_tree_ptr_ ) :
+DomainExtensionAugBE::DomainExtensionAugBE( TreePtr<Node> generic_tree_ptr_ ) :
 	generic_tree_ptr(generic_tree_ptr_),
 	p_tree_ptr(nullptr),
 	dep_rep( nullptr )	
@@ -23,7 +23,7 @@ AugTreePtrImpl::AugTreePtrImpl( TreePtr<Node> generic_tree_ptr_ ) :
 }
 
 
-AugTreePtrImpl::AugTreePtrImpl( const TreePtrInterface *p_tree_ptr_, DependencyReporter *dep_rep_ ) :
+DomainExtensionAugBE::DomainExtensionAugBE( const TreePtrInterface *p_tree_ptr_, DependencyReporter *dep_rep_ ) :
     generic_tree_ptr(*p_tree_ptr_),
 	p_tree_ptr(p_tree_ptr_),
 	dep_rep( dep_rep_ )
@@ -39,50 +39,50 @@ AugTreePtrImpl::AugTreePtrImpl( const TreePtrInterface *p_tree_ptr_, DependencyR
 }
 
 
-AugTreePtrImpl *AugTreePtrImpl::Clone() const
+DomainExtensionAugBE *DomainExtensionAugBE::Clone() const
 {
-	return new AugTreePtrImpl( *this );
+	return new DomainExtensionAugBE( *this );
 }
 
 
-TreePtr<Node> AugTreePtrImpl::GetGenericTreePtr() const
+TreePtr<Node> DomainExtensionAugBE::GetGenericTreePtr() const
 {
 	return generic_tree_ptr;
 }
 
 
-const TreePtrInterface *AugTreePtrImpl::GetPTreePtr() const
+const TreePtrInterface *DomainExtensionAugBE::GetPTreePtr() const
 {
 	return p_tree_ptr;
 }
 
 
-AugTreePtrImpl *AugTreePtrImpl::GetChild( const TreePtrInterface *other_tree_ptr ) const
+DomainExtensionAugBE *DomainExtensionAugBE::OnGetChild( const TreePtrInterface *other_tree_ptr ) const
 {
 	// If we are Tree then construct+return Tree style, otherwise reduce to Free style. This
 	// is to stop descendents of Free masquerading as Tree.	
 	if( p_tree_ptr )
 	{
 		ASSERT( !ON_STACK(other_tree_ptr) );
-		return new AugTreePtrImpl(other_tree_ptr, dep_rep); // tree
+		return new DomainExtensionAugBE(other_tree_ptr, dep_rep); // tree
 	}
 	else
 	{
-		return new AugTreePtrImpl((TreePtr<Node>)*other_tree_ptr); // free
+		return new DomainExtensionAugBE((TreePtr<Node>)*other_tree_ptr); // free
 	}
 }
 
 
-void AugTreePtrImpl::SetChildChecks( const TreePtrInterface *other_tree_ptr, const AugTreePtrImpl *new_val ) const
+void DomainExtensionAugBE::OnSetChild( const TreePtrInterface *other_tree_ptr, const AugBEInterface *new_val ) const
 {
 	// If we are Tree then construct+return Tree style, otherwise reduce to Free style. This
 	// is to stop descendents of Free masquerading as Tree.	
-	if( p_tree_ptr )
+	if( GetPTreePtr() )
 	{
-		ASSERT(new_val->p_tree_ptr); // can't have tree style -> free style: would modify tree
+		ASSERT(new_val->GetPTreePtr()); // can't have tree style -> free style: would modify tree
 		ASSERT( !ON_STACK(other_tree_ptr) );
 	}
-	else if( new_val->p_tree_ptr )
+	else if( new_val->GetPTreePtr() )
 	{
 		// TODO add a terminus to free zone
 	}
@@ -96,51 +96,38 @@ AugTreePtrBase::AugTreePtrBase() :
 }
 
 
-AugTreePtrBase::AugTreePtrBase( TreePtr<Node> generic_tree_ptr_ ) :
-	impl( new AugTreePtrImpl(generic_tree_ptr_) )
-{
-}
-
-
-AugTreePtrBase::AugTreePtrBase(const TreePtrInterface *p_tree_ptr_, DependencyReporter *dep_rep_) : // tree
-	impl( new AugTreePtrImpl(p_tree_ptr_, dep_rep_) )
-{
-}    
-
-
-AugTreePtrBase::AugTreePtrBase( ValuePtr<AugTreePtrImpl> &&impl_ ) :
+AugTreePtrBase::AugTreePtrBase( ValuePtr<AugBEInterface> &&impl_ ) :
     impl( move(impl_) )
 {
 }
 
 
-const AugTreePtrImpl *AugTreePtrBase::GetImpl() const
+ValuePtr<AugBEInterface> AugTreePtrBase::GetImpl() const
 {
 	ASSERT( impl );
-	return impl.get();
+	return impl;
 }
 
 
-AugTreePtrBase AugTreePtrBase::GetChild( const TreePtrInterface *other_tree_ptr ) const
+AugTreePtrBase AugTreePtrBase::OnGetChild( const TreePtrInterface *other_tree_ptr ) const
 {
 	if( impl )
 	{
-		ValuePtr<AugTreePtrImpl> child_impl( impl->GetChild(other_tree_ptr) );
+		ValuePtr<AugBEInterface> child_impl( impl->OnGetChild(other_tree_ptr) );
 		return AugTreePtrBase(move(child_impl)); 
 	}
 	else
 	{
-		return AugTreePtrBase( (TreePtr<Node>)*other_tree_ptr );
+		return AugTreePtrBase();
 	}
 }
 
 
-void AugTreePtrBase::SetChildChecks( const TreePtrInterface *other_tree_ptr, AugTreePtrBase new_val ) const
+void AugTreePtrBase::OnSetChild( const TreePtrInterface *other_tree_ptr, AugTreePtrBase new_val ) const
 {
 	if( impl )
-		impl->SetChildChecks(other_tree_ptr, new_val.impl.get());
+		impl->OnSetChild(other_tree_ptr, new_val.impl.get());
 }
-
 
 // ---------------------- TreeUtils ---------------------------
 
@@ -154,7 +141,7 @@ TreeUtils::TreeUtils( const NavigationInterface *nav_, DependencyReporter *dep_r
 AugTreePtr<Node> TreeUtils::CreateAugTreePtr(const TreePtrInterface *p_tree_ptr) const
 {
 	return AugTreePtr<Node>((TreePtr<Node>)*p_tree_ptr, 
-	                        AugTreePtrBase(ValuePtr<AugTreePtrImpl>::Make(p_tree_ptr, dep_rep)));
+	                        ValuePtr<DomainExtensionAugBE>::Make(p_tree_ptr, dep_rep));
 }	
 
 

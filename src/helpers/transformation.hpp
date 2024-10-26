@@ -20,22 +20,41 @@ public:
 	virtual void ReportTreeNode( TreePtr<Node> tree_ptr ) = 0;
 };
 
-// ---------------------- AugTreePtrImpl ---------------------------
+// ---------------------- AugBEInterface ---------------------------
 
-class AugTreePtrImpl
+
+class AugBEInterface
 {
 public:
-	explicit AugTreePtrImpl();
-	explicit AugTreePtrImpl( TreePtr<Node> generic_tree_ptr_ );
-    explicit AugTreePtrImpl( const TreePtrInterface *p_tree_ptr_, DependencyReporter *dep_rep_ );
-	AugTreePtrImpl( const AugTreePtrImpl &other ) = default;	
-	AugTreePtrImpl &operator=(const AugTreePtrImpl &other) = default;
-	virtual AugTreePtrImpl *Clone() const;
+	virtual ~AugBEInterface() = default;
+	virtual AugBEInterface *Clone() const = 0;
 
-	TreePtr<Node> GetGenericTreePtr() const;
-	const TreePtrInterface *GetPTreePtr() const;	
-    AugTreePtrImpl *GetChild( const TreePtrInterface *other_tree_ptr ) const;
-    void SetChildChecks( const TreePtrInterface *other_tree_ptr, const AugTreePtrImpl *new_val ) const;
+	virtual TreePtr<Node> GetGenericTreePtr() const = 0;
+	virtual const TreePtrInterface *GetPTreePtr() const = 0;	
+    virtual AugBEInterface *OnGetChild( const TreePtrInterface *other_tree_ptr ) const = 0;
+    virtual void OnSetChild( const TreePtrInterface *other_tree_ptr, const AugBEInterface *new_val ) const = 0;	
+};
+
+// ---------------------- DomainExtensionAugBE ---------------------------
+
+class DomainExtensionAugBE : public AugBEInterface
+{
+public:	
+	explicit DomainExtensionAugBE();
+	explicit DomainExtensionAugBE( TreePtr<Node> generic_tree_ptr_ );
+    explicit DomainExtensionAugBE( const TreePtrInterface *p_tree_ptr_, DependencyReporter *dep_rep_ );
+	DomainExtensionAugBE( const DomainExtensionAugBE &other ) = default;	
+	DomainExtensionAugBE &operator=(const DomainExtensionAugBE &other) = default;
+	DomainExtensionAugBE *Clone() const override;
+
+	// TODO remove getters from AugBEInterface class:
+	// - use GET_THAT_POINTER internally
+	// - and ValuePtr<>::DynamicCast externally
+
+	TreePtr<Node> GetGenericTreePtr() const override;
+	const TreePtrInterface *GetPTreePtr() const override;	
+    DomainExtensionAugBE *OnGetChild( const TreePtrInterface *other_tree_ptr ) const override;
+    void OnSetChild( const TreePtrInterface *other_tree_ptr, const AugBEInterface *new_val ) const override;
 
 private:
     friend class TreeUtils;
@@ -51,24 +70,19 @@ class AugTreePtrBase
 {
 public:
 	explicit AugTreePtrBase();
-	explicit AugTreePtrBase( TreePtr<Node> generic_tree_ptr_ );
-    explicit AugTreePtrBase( const TreePtrInterface *p_tree_ptr_, DependencyReporter *dep_rep_ );
-private:
-
-	explicit AugTreePtrBase( ValuePtr<AugTreePtrImpl> &&impl_ );
-public:
+	explicit AugTreePtrBase( ValuePtr<AugBEInterface> &&impl_ );
 
 	AugTreePtrBase( const AugTreePtrBase &other ) = default;	
 	AugTreePtrBase &operator=(const AugTreePtrBase &other) = default;
 
-	const AugTreePtrImpl *GetImpl() const;
-    AugTreePtrBase GetChild( const TreePtrInterface *other_tree_ptr ) const;
-    void SetChildChecks( const TreePtrInterface *other_tree_ptr, AugTreePtrBase new_val ) const;
+	ValuePtr<AugBEInterface> GetImpl() const;
+    AugTreePtrBase OnGetChild( const TreePtrInterface *other_tree_ptr ) const;
+    void OnSetChild( const TreePtrInterface *other_tree_ptr, AugTreePtrBase new_val ) const;
     
 protected:
     friend class TreeUtils;
 
-	ValuePtr<AugTreePtrImpl> impl;
+	ValuePtr<AugBEInterface> impl;
 };
 
 // ---------------------- AugTreePtr ---------------------------
@@ -97,18 +111,23 @@ public:
 	// Construct from other type, safe casts only
     template<class OTHER_VALUE_TYPE>
     AugTreePtr(TreePtr<OTHER_VALUE_TYPE> tree_ptr_) : 
-        AugTreePtrBase(tree_ptr_), // No back-end if derived from a TreePtr (legacy usage)
-        tree_ptr(tree_ptr_) 
+        tree_ptr(tree_ptr_)  // No back-end if derived from a TreePtr (legacy usage)        
     {
     }
    
 private:	
-    explicit AugTreePtr(TreePtr<VALUE_TYPE> tree_ptr_, const AugTreePtrBase &ob) : 
-        AugTreePtrBase(ob),
+    explicit AugTreePtr(TreePtr<VALUE_TYPE> tree_ptr_, ValuePtr<DomainExtensionAugBE> &&impl_) : 
+        AugTreePtrBase(move(impl_)),
         tree_ptr(tree_ptr_)
     {
     }
 
+    explicit AugTreePtr(TreePtr<VALUE_TYPE> tree_ptr_, AugTreePtrBase base_) : 
+        AugTreePtrBase(base_),
+        tree_ptr(tree_ptr_)
+    {
+    }
+    
 public:
 	// Copy-construct from other type, safe casts only
     template<class OTHER_VALUE_TYPE>
@@ -144,7 +163,7 @@ public:
     AugTreePtr<OTHER_VALUE_TYPE> GetChild( const TreePtr<OTHER_VALUE_TYPE> *other_tree_ptr ) const
     {
 		ASSERT( !ON_STACK(other_tree_ptr) );		
-        return AugTreePtr<OTHER_VALUE_TYPE>(*other_tree_ptr, AugTreePtrBase::GetChild(other_tree_ptr)); 
+        return AugTreePtr<OTHER_VALUE_TYPE>(*other_tree_ptr, OnGetChild(other_tree_ptr)); 
     }
 
     // Should always be a.SetChild(&a->c, newval)
@@ -153,7 +172,7 @@ public:
     {
 		ASSERT( !ON_STACK(other_tree_ptr) );		
 		*other_tree_ptr = new_val.GetTreePtr(); // Update the type-safe free tree
-        AugTreePtrBase::SetChildChecks(other_tree_ptr, new_val); // Let base decide what to do
+        AugTreePtrBase::OnSetChild(other_tree_ptr, new_val); // Let base decide what to do
     }
 
     template<class OTHER_VALUE_TYPE>
@@ -275,8 +294,7 @@ public:
 	AugTreePtr<VALUE_TYPE> MakeAugTreeNode(const CP &...cp) 
 	{
 		auto tp = MakeTreeNode<VALUE_TYPE>(cp...);
-		return AugTreePtr<VALUE_TYPE>( tp,
-		                               AugTreePtrBase(ValuePtr<AugTreePtrImpl>::Make(tp)) );
+		return AugTreePtr<VALUE_TYPE>( tp, ValuePtr<DomainExtensionAugBE>::Make(tp) );
 	}
 	
 	// Getters for AugTreePtr - back end only

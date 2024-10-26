@@ -639,13 +639,20 @@ public:
 		return *this;
 	}	
 	
-	
+	// Instead of make_unique<X>() do ValuePtr<X>::Make()
 	template<typename ... CP>
 	static ValuePtr<VALUE_TYPE> Make(const CP &...cp) 
 	{
 		return ValuePtr<VALUE_TYPE>( new VALUE_TYPE(cp...) );
 	}
-
+	
+	// Dynamic cast: has my preferred semantics (move if and only if cast successful)
+	template<typename OTHER_VALUE_TYPE>
+	static ValuePtr<VALUE_TYPE> DynamicCast(ValuePtr<OTHER_VALUE_TYPE> &&other) 
+	{
+		// Using our extension of dynamic_pointer_cast to unique_ptr
+		return ValuePtr<VALUE_TYPE>( dynamic_pointer_cast<VALUE_TYPE>(other) );
+	}
 };
 
 
