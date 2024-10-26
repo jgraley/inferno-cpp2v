@@ -226,11 +226,6 @@ public:
 	TreePtr<VALUE_TYPE> tree_ptr;
 };
 
-template<typename VALUE_TYPE, typename ... CP>
-AugTreePtr<VALUE_TYPE> AugMakeTreeNode(const CP &...cp) 
-{
-    return AugTreePtr<VALUE_TYPE>( MakeTreeNode<VALUE_TYPE>(cp...) );
-}
 
 // Note that, in the case of soft nodes, this macro could stringize the FIELD, which
 // would be the recommended style (as long as the field names are legal
@@ -277,7 +272,13 @@ public:
 	                    DependencyReporter *dep_rep_ = nullptr );
 
 	// Create AugTreePtr
-    AugTreePtr<Node> CreateAugTreeStyle(const TreePtrInterface *p_tree_ptr) const;
+    AugTreePtr<Node> CreateAugTreePtr(const TreePtrInterface *p_tree_ptr) const;
+	
+	template<typename VALUE_TYPE, typename ... CP>
+	AugTreePtr<VALUE_TYPE> MakeAugTreePtr(const CP &...cp) 
+	{
+		return AugTreePtr<VALUE_TYPE>( MakeTreeNode<VALUE_TYPE>(cp...) );
+	}
 	
 	// Getters for AugTreePtr - back end only
     const TreePtrInterface *GetPTreePtr( const AugTreePtrBase &atp ) const;	

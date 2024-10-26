@@ -68,7 +68,7 @@ TreeUtils::TreeUtils( const NavigationInterface *nav_, DependencyReporter *dep_r
 }	
 
 
-AugTreePtr<Node> TreeUtils::CreateAugTreeStyle(const TreePtrInterface *p_tree_ptr) const
+AugTreePtr<Node> TreeUtils::CreateAugTreePtr(const TreePtrInterface *p_tree_ptr) const
 {
 	return AugTreePtr<Node>((TreePtr<Node>)*p_tree_ptr, AugTreePtrBase(p_tree_ptr, dep_rep));
 }	
@@ -127,7 +127,7 @@ set<AugTreePtr<Node>> TreeUtils::GetDeclarers( AugTreePtr<Node> node ) const
 			const TreePtrInterface *declarer_parent_link = OnlyElementOf( parent_infos ).second;
 
 			// Report and return
-			atp_declarers.insert( CreateAugTreeStyle(declarer_parent_link) ); 
+			atp_declarers.insert( CreateAugTreePtr(declarer_parent_link) ); 
 		}
 	}
 	
