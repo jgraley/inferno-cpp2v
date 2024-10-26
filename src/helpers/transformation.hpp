@@ -41,8 +41,7 @@ private:
 
     TreePtr<Node> generic_tree_ptr;
     const TreePtrInterface *p_tree_ptr;
-    DependencyReporter *dep_rep;	    
-};
+    DependencyReporter *dep_rep;	};
 
 // ---------------------- AugTreePtrBase ---------------------------
 
@@ -54,8 +53,8 @@ public:
     explicit AugTreePtrBase( const TreePtrInterface *p_tree_ptr_, DependencyReporter *dep_rep_ );
 
 	// Temporary - TODO just AugTreePtrBase( ValuePtr<AugTreePtrImpl> &&impl_)
-	explicit AugTreePtrBase( ValuePtr<AugTreePtrImpl> &&impl_, TreePtr<Node> generic_tree_ptr_ );
-    explicit AugTreePtrBase( ValuePtr<AugTreePtrImpl> &&impl_, const TreePtrInterface *p_tree_ptr_, DependencyReporter *dep_rep_ );
+	explicit AugTreePtrBase( ValuePtr<AugTreePtrImpl> &&impl_ );
+    explicit AugTreePtrBase( ValuePtr<AugTreePtrImpl> &&impl_, const TreePtrInterface *p_tree_ptr_ );
 
 	AugTreePtrBase( const AugTreePtrBase &other ) = default;	
 	AugTreePtrBase &operator=(const AugTreePtrBase &other) = default;
@@ -69,9 +68,7 @@ protected:
 
 	ValuePtr<AugTreePtrImpl> impl;
 
-    TreePtr<Node> generic_tree_ptr;
     const TreePtrInterface *p_tree_ptr;
-    DependencyReporter *dep_rep;	    
 };
 
 // ---------------------- AugTreePtr ---------------------------

@@ -34,8 +34,8 @@ AugTreePtrImpl::AugTreePtrImpl( const TreePtrInterface *p_tree_ptr_, DependencyR
 	// Not a local automatic please, we're going to hang on to it.
 	ASSERT( !ON_STACK(p_tree_ptr_) );	
 
-    //if( dep_rep )
-	//	dep_rep->ReportTreeNode( generic_tree_ptr );	
+    if( dep_rep )
+		dep_rep->ReportTreeNode( generic_tree_ptr );	
 }
 
 
@@ -86,63 +86,36 @@ void AugTreePtrImpl::SetChildChecks( const TreePtrInterface *other_tree_ptr, con
 
 AugTreePtrBase::AugTreePtrBase() :
 	impl(nullptr),
-	generic_tree_ptr(nullptr),
-	p_tree_ptr(nullptr),
-	dep_rep( nullptr )	
+	p_tree_ptr(nullptr)
 {
 }
 
 
 AugTreePtrBase::AugTreePtrBase( TreePtr<Node> generic_tree_ptr_ ) :
 	impl( new AugTreePtrImpl(generic_tree_ptr_) ),
-	generic_tree_ptr(generic_tree_ptr_),
-	p_tree_ptr(nullptr),
-	dep_rep( nullptr )	
+	p_tree_ptr(nullptr)
 {
-	ASSERT( generic_tree_ptr );
 }
 
 
 AugTreePtrBase::AugTreePtrBase(const TreePtrInterface *p_tree_ptr_, DependencyReporter *dep_rep_) : // tree
 	impl( new AugTreePtrImpl(p_tree_ptr_, dep_rep_) ),
-    generic_tree_ptr(*p_tree_ptr_),
-	p_tree_ptr(p_tree_ptr_),
-	dep_rep( dep_rep_ )
+	p_tree_ptr(p_tree_ptr_)
 {
-	ASSERT( generic_tree_ptr );
-	ASSERT( p_tree_ptr );
-	ASSERT( *p_tree_ptr );
-	// Not a local automatic please, we're going to hang on to it.
-	ASSERT( !ON_STACK(p_tree_ptr_) );	
-
-    if( dep_rep )
-		dep_rep->ReportTreeNode( generic_tree_ptr );	
 }    
 
 
-AugTreePtrBase::AugTreePtrBase( ValuePtr<AugTreePtrImpl> &&impl_, TreePtr<Node> generic_tree_ptr_ ) :
+AugTreePtrBase::AugTreePtrBase( ValuePtr<AugTreePtrImpl> &&impl_ ) :
     impl( move(impl_) ),
-	generic_tree_ptr(generic_tree_ptr_),
-	p_tree_ptr(nullptr),
-	dep_rep( nullptr )	    
+	p_tree_ptr(nullptr)
 {
 }
 
     
-AugTreePtrBase::AugTreePtrBase( ValuePtr<AugTreePtrImpl> &&impl_, const TreePtrInterface *p_tree_ptr_, DependencyReporter *dep_rep_ ) :
+AugTreePtrBase::AugTreePtrBase( ValuePtr<AugTreePtrImpl> &&impl_, const TreePtrInterface *p_tree_ptr_ ) :
     impl( move(impl_) ),
-    generic_tree_ptr(*p_tree_ptr_),
-	p_tree_ptr(p_tree_ptr_),
-	dep_rep( dep_rep_ )
-{
-	ASSERT( generic_tree_ptr );
-	ASSERT( p_tree_ptr );
-	ASSERT( *p_tree_ptr );
-	// Not a local automatic please, we're going to hang on to it.
-	ASSERT( !ON_STACK(p_tree_ptr_) );	
-
-    if( dep_rep )
-		dep_rep->ReportTreeNode( generic_tree_ptr );	
+	p_tree_ptr(p_tree_ptr_)
+{	
 }    
 
 
@@ -155,42 +128,28 @@ TreePtr<Node> AugTreePtrBase::GetGenericTreePtr() const
 
 AugTreePtrBase AugTreePtrBase::GetChild( const TreePtrInterface *other_tree_ptr ) const
 {
-	ASSERT( impl );
-	ValuePtr<AugTreePtrImpl> child_impl( impl->GetChild(other_tree_ptr) );
-	
-	// If we are Tree then construct+return Tree style, otherwise reduce to Free style. This
-	// is to stop descendents of Free masquerading as Tree.	
-	if( p_tree_ptr )
+	if( impl )
 	{
-		ASSERT( !ON_STACK(other_tree_ptr) );
-		return AugTreePtrBase(move(child_impl),
-		                      other_tree_ptr, 
-		                      dep_rep) ; // tree
+		ValuePtr<AugTreePtrImpl> child_impl( impl->GetChild(other_tree_ptr) );
+		//TODO return AugTreePtrBase(move(child_impl);
+		
+		if( p_tree_ptr )
+			return AugTreePtrBase(move(child_impl), other_tree_ptr) ; // tree
+		else
+			return AugTreePtrBase(move(child_impl)); // free
 	}
 	else
 	{
-		return AugTreePtrBase(move(child_impl),
-		                      (TreePtr<Node>)*other_tree_ptr); // free
+		return AugTreePtrBase( (TreePtr<Node>)*other_tree_ptr );
 	}
+
 }
 
 
 void AugTreePtrBase::SetChildChecks( const TreePtrInterface *other_tree_ptr, AugTreePtrBase new_val ) const
 {
-	ASSERT( impl );
-	impl->SetChildChecks(other_tree_ptr, new_val.impl.get());
-	
-	// If we are Tree then construct+return Tree style, otherwise reduce to Free style. This
-	// is to stop descendents of Free masquerading as Tree.	
-	if( p_tree_ptr )
-	{
-		ASSERT(new_val.p_tree_ptr); // can't have tree style -> free style: would modify tree
-		ASSERT( !ON_STACK(other_tree_ptr) );
-	}
-	else if( new_val.p_tree_ptr )
-	{
-		// TODO add a terminus to free zone
-	}
+	if( impl )
+		impl->SetChildChecks(other_tree_ptr, new_val.impl.get());
 }
 
 
