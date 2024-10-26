@@ -11,7 +11,9 @@
 class Cloner
 {
 public:
-    virtual shared_ptr<Cloner> Clone() const = 0;
+    // TODO Duplicate must return shared_ptr but Clone() could just return Cloner *
+    // Then move ValuePtr in here. 
+    virtual shared_ptr<Cloner> Clone() const = 0; 
     virtual shared_ptr<Cloner> Duplicate( shared_ptr<Cloner> p );
     
     template< class TYPE >

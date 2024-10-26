@@ -29,12 +29,17 @@ public:
 	explicit AugTreePtrImpl( TreePtr<Node> generic_tree_ptr_ );
     explicit AugTreePtrImpl( const TreePtrInterface *p_tree_ptr_, DependencyReporter *dep_rep_ );
 
-	AugTreePtrImpl( const AugTreePtrImpl &other ) = default;
-	
+	AugTreePtrImpl( const AugTreePtrImpl &other ) = default;	
 	AugTreePtrImpl &operator=(const AugTreePtrImpl &other) = default;
 	
+	virtual AugTreePtrImpl *Clone() const;
+
 private:
     friend class TreeUtils;
+
+    TreePtr<Node> generic_tree_ptr;
+    const TreePtrInterface *p_tree_ptr;
+    DependencyReporter *dep_rep;	    
 };
 
 // ---------------------- AugTreePtrBase ---------------------------
@@ -46,8 +51,8 @@ public:
 	explicit AugTreePtrBase( TreePtr<Node> generic_tree_ptr_ );
     explicit AugTreePtrBase( const TreePtrInterface *p_tree_ptr_, DependencyReporter *dep_rep_ );
 
-	AugTreePtrBase( const AugTreePtrBase &other );	
-	AugTreePtrBase &operator=(const AugTreePtrBase &other);
+	AugTreePtrBase( const AugTreePtrBase &other ) = default;	
+	AugTreePtrBase &operator=(const AugTreePtrBase &other) = default;
 
 	TreePtr<Node> GetGenericTreePtr() const;
 
@@ -57,7 +62,7 @@ public:
 protected:
     friend class TreeUtils;
 
-	unique_ptr<AugTreePtrImpl> impl;
+	ValuePtr<AugTreePtrImpl> impl;
 
     TreePtr<Node> generic_tree_ptr;
     const TreePtrInterface *p_tree_ptr;
@@ -90,7 +95,7 @@ public:
 	// Construct from other type, safe casts only
     template<class OTHER_VALUE_TYPE>
     AugTreePtr(TreePtr<OTHER_VALUE_TYPE> tree_ptr_) : 
-        AugTreePtrBase(tree_ptr_),
+        AugTreePtrBase(tree_ptr_), // No back-end if derived from a TreePtr (legacy usage)
         tree_ptr(tree_ptr_) 
     {
     }

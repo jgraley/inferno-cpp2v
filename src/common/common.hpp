@@ -609,5 +609,36 @@ Orderable::Diff STLCompare3Way( const STL_TYPE &l, const STL_TYPE &r )
 		return 1;
 }
 
+// Unique ptr with full value semantics plus nullability. Clones on copy/assign.
+// Makes you happy by permitting default copy constructor etc
+// Assuming polymorphic, VALUE_TYPE must have 
+// virtual VALUE_TYPE *Clone() const;
+template<typename VALUE_TYPE>
+class ValuePtr : public unique_ptr<VALUE_TYPE>
+{
+public:
+	// Expose all of unique_ptr's constructors
+	using unique_ptr<VALUE_TYPE>::unique_ptr;
+	
+	// Un-delete copy constructor and copy-assignment. Our versions will
+	// call Clone() (the only way to prevent slicing) on non-NULL other.
+	//template<typename OTHER_VALUE_TYPE>
+	ValuePtr(const ValuePtr<VALUE_TYPE> &other) :
+		unique_ptr<VALUE_TYPE>( other ? 
+		                        other->Clone() : 
+		                        nullptr )
+	{		
+	}
+	
+	//template<typename OTHER_VALUE_TYPE>
+	ValuePtr &operator=(const ValuePtr<VALUE_TYPE> &other)
+	{
+		unique_ptr<VALUE_TYPE>::operator=( other ? 
+		                                   unique_ptr<VALUE_TYPE>(other->Clone()) : 
+		                                   nullptr );
+		return *this;
+	}	
+};
+
 
 #endif
