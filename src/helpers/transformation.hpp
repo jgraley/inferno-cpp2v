@@ -28,7 +28,6 @@ public:
 	explicit AugTreePtrImpl();
 	explicit AugTreePtrImpl( TreePtr<Node> generic_tree_ptr_ );
     explicit AugTreePtrImpl( const TreePtrInterface *p_tree_ptr_, DependencyReporter *dep_rep_ );
-	explicit AugTreePtrImpl( const AugTreePtrImpl &other, TreePtr<Node> generic_tree_ptr_ ); // for dyncast
 
 	AugTreePtrImpl( const AugTreePtrImpl &other ) = default;
 	
@@ -46,45 +45,15 @@ public:
 	explicit AugTreePtrBase();
 	explicit AugTreePtrBase( TreePtr<Node> generic_tree_ptr_ );
     explicit AugTreePtrBase( const TreePtrInterface *p_tree_ptr_, DependencyReporter *dep_rep_ );
-	explicit AugTreePtrBase( const AugTreePtrBase &other, TreePtr<Node> generic_tree_ptr_ ); // for dyncast
 
-	AugTreePtrBase( const AugTreePtrBase &other );
-	
+	AugTreePtrBase( const AugTreePtrBase &other );	
 	AugTreePtrBase &operator=(const AugTreePtrBase &other);
 
 	TreePtr<Node> GetGenericTreePtr() const;
 
-    template<class OTHER_VALUE_TYPE>
-    AugTreePtrBase GetChild( const TreePtr<OTHER_VALUE_TYPE> *other_tree_ptr ) const
-	{
-		// If we are Tree then construct+return Tree style, otherwise reduce to Free style. This
-		// is to stop descendents of Free masquerading as Tree.	
-		if( p_tree_ptr )
-		{
-			ASSERT( !ON_STACK(other_tree_ptr) );
-			return AugTreePtrBase(other_tree_ptr, dep_rep); // tree
-		}
-		else
-		{
-			return AugTreePtrBase(*other_tree_ptr); // free
-		}
-	}
-
-    template<class OTHER_VALUE_TYPE>
-    void SetChild( const TreePtr<OTHER_VALUE_TYPE> *other_tree_ptr, AugTreePtrBase new_val ) const
-	{
-		// If we are Tree then construct+return Tree style, otherwise reduce to Free style. This
-		// is to stop descendents of Free masquerading as Tree.	
-		if( p_tree_ptr )
-		{
-			ASSERT(new_val.p_tree_ptr); // can't have tree style -> free style: would modify tree
-			ASSERT( !ON_STACK(other_tree_ptr) );
-		}
-		else if( new_val.p_tree_ptr )
-		{
-			// TODO add a terminus to free zone
-		}
-	}
+    AugTreePtrBase GetChild( const TreePtrInterface *other_tree_ptr ) const;
+    void SetChild( const TreePtrInterface *other_tree_ptr, AugTreePtrBase new_val ) const;
+    
 protected:
     friend class TreeUtils;
 
@@ -184,7 +153,10 @@ public:
     static AugTreePtr<VALUE_TYPE> DynamicCast( const AugTreePtr<OTHER_VALUE_TYPE> &g )
     {
 		auto new_tree_ptr = TreePtr<VALUE_TYPE>::DynamicCast(g.GetTreePtr());
-        return AugTreePtr(new_tree_ptr, AugTreePtrBase(g, new_tree_ptr));
+		if( new_tree_ptr ) // Dynamic cast can fail
+			return AugTreePtr(new_tree_ptr, g); // success, keep the same Base
+		else
+			return AugTreePtr(); // failed, all to NULL
     }
     
 	template<typename C>

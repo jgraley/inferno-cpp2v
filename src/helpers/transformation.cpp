@@ -21,11 +21,6 @@ AugTreePtrImpl::AugTreePtrImpl( const TreePtrInterface *p_tree_ptr_, DependencyR
 {
 }
 
-
-AugTreePtrImpl::AugTreePtrImpl( const AugTreePtrImpl &other, TreePtr<Node> generic_tree_ptr_ )
-{
-}
-
 // ---------------------- AugTreePtrBase ---------------------------
 
 AugTreePtrBase::AugTreePtrBase() :
@@ -64,15 +59,6 @@ AugTreePtrBase::AugTreePtrBase(const TreePtrInterface *p_tree_ptr_, DependencyRe
 }    
 
 
-AugTreePtrBase::AugTreePtrBase( const AugTreePtrBase &other, TreePtr<Node> generic_tree_ptr_ ) :
-	impl( new AugTreePtrImpl(*other.impl, generic_tree_ptr_) ),
-    generic_tree_ptr(generic_tree_ptr_),
-	p_tree_ptr(other.p_tree_ptr),
-	dep_rep(other.dep_rep)
-{	
-}
-
-
 AugTreePtrBase::AugTreePtrBase( const AugTreePtrBase &other ) :
 	impl( new AugTreePtrImpl(*other.impl) ),
     generic_tree_ptr(other.generic_tree_ptr),
@@ -97,6 +83,39 @@ TreePtr<Node> AugTreePtrBase::GetGenericTreePtr() const
 {
 	return generic_tree_ptr;
 }
+
+
+AugTreePtrBase AugTreePtrBase::GetChild( const TreePtrInterface *other_tree_ptr ) const
+{
+	// If we are Tree then construct+return Tree style, otherwise reduce to Free style. This
+	// is to stop descendents of Free masquerading as Tree.	
+	if( p_tree_ptr )
+	{
+		ASSERT( !ON_STACK(other_tree_ptr) );
+		return AugTreePtrBase(other_tree_ptr, dep_rep); // tree
+	}
+	else
+	{
+		return AugTreePtrBase((TreePtr<Node>)*other_tree_ptr); // free
+	}
+}
+
+
+void AugTreePtrBase::SetChild( const TreePtrInterface *other_tree_ptr, AugTreePtrBase new_val ) const
+{
+	// If we are Tree then construct+return Tree style, otherwise reduce to Free style. This
+	// is to stop descendents of Free masquerading as Tree.	
+	if( p_tree_ptr )
+	{
+		ASSERT(new_val.p_tree_ptr); // can't have tree style -> free style: would modify tree
+		ASSERT( !ON_STACK(other_tree_ptr) );
+	}
+	else if( new_val.p_tree_ptr )
+	{
+		// TODO add a terminus to free zone
+	}
+}
+
 
 // ---------------------- TreeUtils ---------------------------
 
