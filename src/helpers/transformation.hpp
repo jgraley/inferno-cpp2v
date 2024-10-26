@@ -28,11 +28,13 @@ public:
 	explicit AugTreePtrImpl();
 	explicit AugTreePtrImpl( TreePtr<Node> generic_tree_ptr_ );
     explicit AugTreePtrImpl( const TreePtrInterface *p_tree_ptr_, DependencyReporter *dep_rep_ );
-
 	AugTreePtrImpl( const AugTreePtrImpl &other ) = default;	
 	AugTreePtrImpl &operator=(const AugTreePtrImpl &other) = default;
-	
 	virtual AugTreePtrImpl *Clone() const;
+
+	TreePtr<Node> GetGenericTreePtr() const;
+    AugTreePtrImpl *GetChild( const TreePtrInterface *other_tree_ptr ) const;
+    void SetChildChecks( const TreePtrInterface *other_tree_ptr, const AugTreePtrImpl *new_val ) const;
 
 private:
     friend class TreeUtils;
@@ -51,13 +53,16 @@ public:
 	explicit AugTreePtrBase( TreePtr<Node> generic_tree_ptr_ );
     explicit AugTreePtrBase( const TreePtrInterface *p_tree_ptr_, DependencyReporter *dep_rep_ );
 
+	// Temporary - TODO just AugTreePtrBase( ValuePtr<AugTreePtrImpl> &&impl_)
+	explicit AugTreePtrBase( ValuePtr<AugTreePtrImpl> &&impl_, TreePtr<Node> generic_tree_ptr_ );
+    explicit AugTreePtrBase( ValuePtr<AugTreePtrImpl> &&impl_, const TreePtrInterface *p_tree_ptr_, DependencyReporter *dep_rep_ );
+
 	AugTreePtrBase( const AugTreePtrBase &other ) = default;	
 	AugTreePtrBase &operator=(const AugTreePtrBase &other) = default;
 
 	TreePtr<Node> GetGenericTreePtr() const;
-
     AugTreePtrBase GetChild( const TreePtrInterface *other_tree_ptr ) const;
-    void SetChild( const TreePtrInterface *other_tree_ptr, AugTreePtrBase new_val ) const;
+    void SetChildChecks( const TreePtrInterface *other_tree_ptr, AugTreePtrBase new_val ) const;
     
 protected:
     friend class TreeUtils;
@@ -151,7 +156,7 @@ public:
     {
 		ASSERT( !ON_STACK(other_tree_ptr) );		
 		*other_tree_ptr = new_val.GetTreePtr(); // Update the type-safe free tree
-        AugTreePtrBase::SetChild(other_tree_ptr, new_val); // Let base decide what to do
+        AugTreePtrBase::SetChildChecks(other_tree_ptr, new_val); // Let base decide what to do
     }
 
     template<class OTHER_VALUE_TYPE>
@@ -208,15 +213,13 @@ public:
 	
     operator bool()
     {
-		return !!GetGenericTreePtr();
+		return !!tree_ptr;
 	}
 		
 	string GetTrace() const override
 	{
 		return GetTreePtr().GetTrace()+"(Aug)";
-	}
-	
-	
+	}		
 	
 	// -------------- data members -----------------	
 	TreePtr<VALUE_TYPE> tree_ptr;
