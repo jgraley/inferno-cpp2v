@@ -66,7 +66,7 @@ AugTreePtr<CPPTree::Type> HasType::Get( const TreeKit &kit, AugTreePtr<Expressio
         else if( auto e = TryGetConstructedExpression( kit, c ) )
 			return Get( kit, e ); // recurse with the object (presumably) that's being constructed
         else
-        	return kit.utils->MakeAugTreePtr<Void>(); 
+        	return kit.utils->MakeAugTreeNode<Void>(); 
     }
     else if( auto l = AugTreePtr<Lookup>::DynamicCast(o) ) // a.b; just return type of b
     {
@@ -82,35 +82,35 @@ AugTreePtr<CPPTree::Type> HasType::Get( const TreeKit &kit, AugTreePtr<Expressio
     }
     else if( AugTreePtr<LabelIdentifier>::DynamicCast(o) )
     {
-        return kit.utils->MakeAugTreePtr<Labeley>(); 
+        return kit.utils->MakeAugTreeNode<Labeley>(); 
     }
     else if( AugTreePtr<SizeOf>::DynamicCast(o) || AugTreePtr<AlignOf>::DynamicCast(o) )
     {
     	AugTreePtr<Integral> n;
-        n = kit.utils->MakeAugTreePtr<Unsigned>();
-       	auto sz = kit.utils->MakeAugTreePtr<SpecificInteger>( TypeDb::size_t_bits );
+        n = kit.utils->MakeAugTreeNode<Unsigned>();
+       	auto sz = kit.utils->MakeAugTreeNode<SpecificInteger>( TypeDb::size_t_bits );
     	SET_CHILD(n, width, sz);
         return n;
     }
     else if( auto n = AugTreePtr<New>::DynamicCast(o) )
     {
-        auto p = kit.utils->MakeAugTreePtr<Pointer>();
+        auto p = kit.utils->MakeAugTreeNode<Pointer>();
         SET_CHILD(p, destination, GET_CHILD(n, type));
         return p;
     }
     else if( AugTreePtr<Delete>::DynamicCast(o) )
     {
-        return kit.utils->MakeAugTreePtr<Void>(); 
+        return kit.utils->MakeAugTreeNode<Void>(); 
     }
     else if( auto ce = AugTreePtr<StatementExpression>::DynamicCast(o) )
     {
         if( ce->statements.empty() ) // TODO trap operator -> as a dep leak
-            return kit.utils->MakeAugTreePtr<Void>(); 
+            return kit.utils->MakeAugTreeNode<Void>(); 
         AugTreePtr<Statement> last = GET_CHILD_BACK(ce, statements);
         if( auto e = AugTreePtr<Expression>::DynamicCast(last) )
             return Get(kit, e);
         else
-            return kit.utils->MakeAugTreePtr<Void>(); 
+            return kit.utils->MakeAugTreeNode<Void>(); 
     }
     else 
     {
@@ -133,7 +133,7 @@ AugTreePtr<CPPTree::Type> HasType::GetOperator( const TreeKit &kit, AugTreePtr<O
 			t = GET_CHILD(r, destination);
 		if( auto a = AugTreePtr<Array>::DynamicCast(t) )
 		{
-			auto p = kit.utils->MakeAugTreePtr<Pointer>();
+			auto p = kit.utils->MakeAugTreeNode<Pointer>();
 			SET_CHILD(p, destination, GET_CHILD(a, element));
 			t = AugTreePtr<Type>(p);
 		}
@@ -145,11 +145,11 @@ AugTreePtr<CPPTree::Type> HasType::GetOperator( const TreeKit &kit, AugTreePtr<O
 	// Turn an array literal into an array
     if( auto al = AugTreePtr<MakeArray>::DynamicCast(op) )
     {
-    	auto a = kit.utils->MakeAugTreePtr<Array>();
-    	auto sz = kit.utils->MakeAugTreePtr<SpecificInteger>( (int)(optypes.size()) ); // TODO make it work with size_t and remove the cast
+    	auto a = kit.utils->MakeAugTreeNode<Array>();
+    	auto sz = kit.utils->MakeAugTreeNode<SpecificInteger>( (int)(optypes.size()) ); // TODO make it work with size_t and remove the cast
     	SET_CHILD(a, size, sz);
     	if( optypes.empty() )
-			SET_CHILD(a, element, kit.utils->MakeAugTreePtr<Void>()); // array has no elements so cannot determine type
+			SET_CHILD(a, element, kit.utils->MakeAugTreeNode<Void>()); // array has no elements so cannot determine type
 		else
 			SET_CHILD(a, element, optypes.front());
         return AugTreePtr<Type>(a);
@@ -168,8 +168,8 @@ AugTreePtr<CPPTree::Type> HasType::GetOperator( const TreeKit &kit, AugTreePtr<O
 		if( AugTreePtr<Pointer>::DynamicCast(optypes.front()) && 
             AugTreePtr<Pointer>::DynamicCast(optypes.back()) )
 		{
-			auto i = kit.utils->MakeAugTreePtr<Signed>();
-			auto nc = kit.utils->MakeAugTreePtr<SpecificInteger>( TypeDb::integral_bits[INT] );
+			auto i = kit.utils->MakeAugTreeNode<Signed>();
+			auto nc = kit.utils->MakeAugTreeNode<SpecificInteger>( TypeDb::integral_bits[INT] );
 			SET_CHILD(i, width, nc); // TODO need eg SetChild() to pull nc into deps
 			return i;
 		}
@@ -185,8 +185,8 @@ AugTreePtr<CPPTree::Type> HasType::GetOperator( const TreeKit &kit, AugTreePtr<O
 
 #define ARITHMETIC GetStandard( kit, optypes )
 #define BITWISE GetStandard( kit, optypes )
-#define LOGICAL kit.utils->MakeAugTreePtr<Boolean>()
-#define COMPARISON kit.utils->MakeAugTreePtr<Boolean>()
+#define LOGICAL kit.utils->MakeAugTreeNode<Boolean>()
+#define COMPARISON kit.utils->MakeAugTreeNode<Boolean>()
 #define SHIFT optypes.front()
 #define SPECIAL GetSpecial( kit, op, optypes )
 
@@ -283,8 +283,8 @@ AugTreePtr<CPPTree::Type> HasType::GetStandardOnNumerics( const TreeKit &kit, li
 
 	if( maxwidth_float )
 	{
-		auto result = kit.utils->MakeAugTreePtr<Floating>();
-		SET_CHILD(result, semantics, kit.utils->MakeAugTreePtr<SpecificFloatSemantics>( *maxwidth_float ));
+		auto result = kit.utils->MakeAugTreeNode<Floating>();
+		SET_CHILD(result, semantics, kit.utils->MakeAugTreeNode<SpecificFloatSemantics>( *maxwidth_float ));
 		return AugTreePtr<Type>(result);
 	}
 
@@ -293,13 +293,13 @@ AugTreePtr<CPPTree::Type> HasType::GetStandardOnNumerics( const TreeKit &kit, li
 	if( maxwidth_unsigned && maxwidth_unsigned >= maxwidth_signed )
 	{
         // Use the unsigned size if unsigned operand exists and at least as big as int size
-		result = kit.utils->MakeAugTreePtr<Unsigned>();
-		SET_CHILD(result, width, kit.utils->MakeAugTreePtr<SpecificInteger>(maxwidth_unsigned));
+		result = kit.utils->MakeAugTreeNode<Unsigned>();
+		SET_CHILD(result, width, kit.utils->MakeAugTreeNode<SpecificInteger>(maxwidth_unsigned));
 	}
 	else
 	{
-		result = kit.utils->MakeAugTreePtr<Signed>();
-		SET_CHILD( result, width, kit.utils->MakeAugTreePtr<SpecificInteger>(maxwidth_signed));
+		result = kit.utils->MakeAugTreeNode<Signed>();
+		SET_CHILD( result, width, kit.utils->MakeAugTreeNode<SpecificInteger>(maxwidth_signed));
 	}
 	return result;
 }
@@ -319,7 +319,7 @@ AugTreePtr<CPPTree::Type> HasType::GetSpecial( const TreeKit &kit, AugTreePtr<Op
     }
     else if( AugTreePtr<AddressOf>::DynamicCast(op) )
     {
-        auto p = kit.utils->MakeAugTreePtr<Pointer>();
+        auto p = kit.utils->MakeAugTreeNode<Pointer>();
         SET_CHILD(p, destination, optypes.front());
         return AugTreePtr<Type>(p);
     }
@@ -354,33 +354,33 @@ AugTreePtr<CPPTree::Type> HasType::GetLiteral( const TreeKit &kit, AugTreePtr<Li
     	// Get the info from Clang, and make an Inferno type for it
     	AugTreePtr<Integral> it;
         if( si->IsSigned() )
-        	it = kit.utils->MakeAugTreePtr<Signed>();
+        	it = kit.utils->MakeAugTreeNode<Signed>();
         else
-        	it = kit.utils->MakeAugTreePtr<Unsigned>();
-        SET_CHILD(it, width, kit.utils->MakeAugTreePtr<SpecificInteger>( si->GetWidth() ));
+        	it = kit.utils->MakeAugTreeNode<Unsigned>();
+        SET_CHILD(it, width, kit.utils->MakeAugTreeNode<SpecificInteger>( si->GetWidth() ));
         return it;
     }
     else if( auto sf = AugTreePtr<SpecificFloat>::DynamicCast(l) )
     {
     	// Get the info from Clang, and make an Inferno type for it
-    	auto ft = kit.utils->MakeAugTreePtr<Floating>();
-    	SET_CHILD(ft, semantics, kit.utils->MakeAugTreePtr<SpecificFloatSemantics>( &sf->getSemantics() ));
+    	auto ft = kit.utils->MakeAugTreeNode<Floating>();
+    	SET_CHILD(ft, semantics, kit.utils->MakeAugTreeNode<SpecificFloatSemantics>( &sf->getSemantics() ));
         return ft;
     }
     else if( AugTreePtr<Bool>::DynamicCast(l) )
     {
-        return kit.utils->MakeAugTreePtr<Boolean>();
+        return kit.utils->MakeAugTreeNode<Boolean>();
     }
     else if( AugTreePtr<String>::DynamicCast(l) )
     {
     	AugTreePtr<Integral> n;
     	if( TypeDb::char_default_signed )
-    		n = kit.utils->MakeAugTreePtr<Signed>();
+    		n = kit.utils->MakeAugTreeNode<Signed>();
     	else
-    		n = kit.utils->MakeAugTreePtr<Unsigned>();
-    	auto sz = kit.utils->MakeAugTreePtr<SpecificInteger>( TypeDb::char_bits );
+    		n = kit.utils->MakeAugTreeNode<Unsigned>();
+    	auto sz = kit.utils->MakeAugTreeNode<SpecificInteger>( TypeDb::char_bits );
     	SET_CHILD(n, width, sz);
-    	auto p = kit.utils->MakeAugTreePtr<Pointer>();
+    	auto p = kit.utils->MakeAugTreeNode<Pointer>();
     	SET_CHILD(p, destination, n);
         return p;
     }

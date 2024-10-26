@@ -5,9 +5,31 @@
 #include "flatten.hpp"
 #include "transformation.hpp"
 
+// ---------------------- AugTreePtrImpl ---------------------------
+
+AugTreePtrImpl::AugTreePtrImpl()
+{
+}
+
+
+AugTreePtrImpl::AugTreePtrImpl( TreePtr<Node> generic_tree_ptr_ )
+{
+}
+
+
+AugTreePtrImpl::AugTreePtrImpl( const TreePtrInterface *p_tree_ptr_, DependencyReporter *dep_rep_ )
+{
+}
+
+
+AugTreePtrImpl::AugTreePtrImpl( const AugTreePtrImpl &other, TreePtr<Node> generic_tree_ptr_ )
+{
+}
+
 // ---------------------- AugTreePtrBase ---------------------------
 
 AugTreePtrBase::AugTreePtrBase() :
+	impl(nullptr),
 	generic_tree_ptr(nullptr),
 	p_tree_ptr(nullptr),
 	dep_rep( nullptr )	
@@ -16,6 +38,7 @@ AugTreePtrBase::AugTreePtrBase() :
 
 
 AugTreePtrBase::AugTreePtrBase( TreePtr<Node> generic_tree_ptr_ ) :
+	impl( new AugTreePtrImpl(generic_tree_ptr_) ),
 	generic_tree_ptr(generic_tree_ptr_),
 	p_tree_ptr(nullptr),
 	dep_rep( nullptr )	
@@ -25,6 +48,7 @@ AugTreePtrBase::AugTreePtrBase( TreePtr<Node> generic_tree_ptr_ ) :
 
 
 AugTreePtrBase::AugTreePtrBase(const TreePtrInterface *p_tree_ptr_, DependencyReporter *dep_rep_) : // tree
+	impl( new AugTreePtrImpl(p_tree_ptr_, dep_rep_) ),
     generic_tree_ptr(*p_tree_ptr_),
 	p_tree_ptr(p_tree_ptr_),
 	dep_rep( dep_rep_ )
@@ -41,6 +65,7 @@ AugTreePtrBase::AugTreePtrBase(const TreePtrInterface *p_tree_ptr_, DependencyRe
 
 
 AugTreePtrBase::AugTreePtrBase( const AugTreePtrBase &other, TreePtr<Node> generic_tree_ptr_ ) :
+	impl( new AugTreePtrImpl(*other.impl, generic_tree_ptr_) ),
     generic_tree_ptr(generic_tree_ptr_),
 	p_tree_ptr(other.p_tree_ptr),
 	dep_rep(other.dep_rep)
@@ -48,15 +73,29 @@ AugTreePtrBase::AugTreePtrBase( const AugTreePtrBase &other, TreePtr<Node> gener
 }
 
 
-TreePtr<Node> AugTreePtrBase::GetGenericTreePtr() const
-{
-	return generic_tree_ptr;
+AugTreePtrBase::AugTreePtrBase( const AugTreePtrBase &other ) :
+	impl( new AugTreePtrImpl(*other.impl) ),
+    generic_tree_ptr(other.generic_tree_ptr),
+	p_tree_ptr(other.p_tree_ptr),
+	dep_rep(other.dep_rep)
+{	
 }
 
 
-void AugTreePtrBase::SetGenericTreePtr(TreePtr<Node> generic_tree_ptr_)
+AugTreePtrBase &AugTreePtrBase::operator=(const AugTreePtrBase &other)
 {
-	generic_tree_ptr = generic_tree_ptr_;
+	impl = make_unique<AugTreePtrImpl>(*other.impl);
+    generic_tree_ptr = other.generic_tree_ptr;
+	p_tree_ptr = other.p_tree_ptr;
+	dep_rep = other.dep_rep;
+	return *this;
+}
+
+
+
+TreePtr<Node> AugTreePtrBase::GetGenericTreePtr() const
+{
+	return generic_tree_ptr;
 }
 
 // ---------------------- TreeUtils ---------------------------

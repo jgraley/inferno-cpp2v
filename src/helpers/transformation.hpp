@@ -20,6 +20,24 @@ public:
 	virtual void ReportTreeNode( TreePtr<Node> tree_ptr ) = 0;
 };
 
+// ---------------------- AugTreePtrImpl ---------------------------
+
+class AugTreePtrImpl
+{
+public:
+	explicit AugTreePtrImpl();
+	explicit AugTreePtrImpl( TreePtr<Node> generic_tree_ptr_ );
+    explicit AugTreePtrImpl( const TreePtrInterface *p_tree_ptr_, DependencyReporter *dep_rep_ );
+	explicit AugTreePtrImpl( const AugTreePtrImpl &other, TreePtr<Node> generic_tree_ptr_ ); // for dyncast
+
+	AugTreePtrImpl( const AugTreePtrImpl &other ) = default;
+	
+	AugTreePtrImpl &operator=(const AugTreePtrImpl &other) = default;
+	
+private:
+    friend class TreeUtils;
+};
+
 // ---------------------- AugTreePtrBase ---------------------------
 
 class AugTreePtrBase
@@ -30,12 +48,11 @@ public:
     explicit AugTreePtrBase( const TreePtrInterface *p_tree_ptr_, DependencyReporter *dep_rep_ );
 	explicit AugTreePtrBase( const AugTreePtrBase &other, TreePtr<Node> generic_tree_ptr_ ); // for dyncast
 
-	AugTreePtrBase( const AugTreePtrBase &other ) = default;
+	AugTreePtrBase( const AugTreePtrBase &other );
 	
-	AugTreePtrBase &operator=(const AugTreePtrBase &other) = default;
+	AugTreePtrBase &operator=(const AugTreePtrBase &other);
 
 	TreePtr<Node> GetGenericTreePtr() const;
-	void SetGenericTreePtr(TreePtr<Node> generic_tree_ptr_);
 
     template<class OTHER_VALUE_TYPE>
     AugTreePtrBase GetChild( const TreePtr<OTHER_VALUE_TYPE> *other_tree_ptr ) const
@@ -71,9 +88,11 @@ public:
 protected:
     friend class TreeUtils;
 
+	unique_ptr<AugTreePtrImpl> impl;
+
     TreePtr<Node> generic_tree_ptr;
     const TreePtrInterface *p_tree_ptr;
-    DependencyReporter *dep_rep;	
+    DependencyReporter *dep_rep;	    
 };
 
 // ---------------------- AugTreePtr ---------------------------
@@ -271,11 +290,12 @@ public:
 	explicit TreeUtils( const NavigationInterface *nav_, 
 	                    DependencyReporter *dep_rep_ = nullptr );
 
-	// Create AugTreePtr
+	// Create AugTreePtr from a link
     AugTreePtr<Node> CreateAugTreePtr(const TreePtrInterface *p_tree_ptr) const;
 	
+	// Create Node and AugTreePtr 
 	template<typename VALUE_TYPE, typename ... CP>
-	AugTreePtr<VALUE_TYPE> MakeAugTreePtr(const CP &...cp) 
+	AugTreePtr<VALUE_TYPE> MakeAugTreeNode(const CP &...cp) 
 	{
 		return AugTreePtr<VALUE_TYPE>( MakeTreeNode<VALUE_TYPE>(cp...) );
 	}
