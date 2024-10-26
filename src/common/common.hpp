@@ -638,6 +638,14 @@ public:
 		                                   nullptr );
 		return *this;
 	}	
+	
+	
+	template<typename ... CP>
+	static ValuePtr<VALUE_TYPE> Make(const CP &...cp) 
+	{
+		return ValuePtr<VALUE_TYPE>( new VALUE_TYPE(cp...) );
+	}
+
 };
 
 

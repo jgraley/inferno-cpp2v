@@ -51,6 +51,12 @@ TreePtr<Node> AugTreePtrImpl::GetGenericTreePtr() const
 }
 
 
+const TreePtrInterface *AugTreePtrImpl::GetPTreePtr() const
+{
+	return p_tree_ptr;
+}
+
+
 AugTreePtrImpl *AugTreePtrImpl::GetChild( const TreePtrInterface *other_tree_ptr ) const
 {
 	// If we are Tree then construct+return Tree style, otherwise reduce to Free style. This
@@ -85,44 +91,33 @@ void AugTreePtrImpl::SetChildChecks( const TreePtrInterface *other_tree_ptr, con
 // ---------------------- AugTreePtrBase ---------------------------
 
 AugTreePtrBase::AugTreePtrBase() :
-	impl(nullptr),
-	p_tree_ptr(nullptr)
+	impl(nullptr)
 {
 }
 
 
 AugTreePtrBase::AugTreePtrBase( TreePtr<Node> generic_tree_ptr_ ) :
-	impl( new AugTreePtrImpl(generic_tree_ptr_) ),
-	p_tree_ptr(nullptr)
+	impl( new AugTreePtrImpl(generic_tree_ptr_) )
 {
 }
 
 
 AugTreePtrBase::AugTreePtrBase(const TreePtrInterface *p_tree_ptr_, DependencyReporter *dep_rep_) : // tree
-	impl( new AugTreePtrImpl(p_tree_ptr_, dep_rep_) ),
-	p_tree_ptr(p_tree_ptr_)
+	impl( new AugTreePtrImpl(p_tree_ptr_, dep_rep_) )
 {
 }    
 
 
 AugTreePtrBase::AugTreePtrBase( ValuePtr<AugTreePtrImpl> &&impl_ ) :
-    impl( move(impl_) ),
-	p_tree_ptr(nullptr)
+    impl( move(impl_) )
 {
 }
 
-    
-AugTreePtrBase::AugTreePtrBase( ValuePtr<AugTreePtrImpl> &&impl_, const TreePtrInterface *p_tree_ptr_ ) :
-    impl( move(impl_) ),
-	p_tree_ptr(p_tree_ptr_)
-{	
-}    
 
-
-TreePtr<Node> AugTreePtrBase::GetGenericTreePtr() const
+const AugTreePtrImpl *AugTreePtrBase::GetImpl() const
 {
 	ASSERT( impl );
-	return impl->GetGenericTreePtr();
+	return impl.get();
 }
 
 
@@ -131,18 +126,12 @@ AugTreePtrBase AugTreePtrBase::GetChild( const TreePtrInterface *other_tree_ptr 
 	if( impl )
 	{
 		ValuePtr<AugTreePtrImpl> child_impl( impl->GetChild(other_tree_ptr) );
-		//TODO return AugTreePtrBase(move(child_impl);
-		
-		if( p_tree_ptr )
-			return AugTreePtrBase(move(child_impl), other_tree_ptr) ; // tree
-		else
-			return AugTreePtrBase(move(child_impl)); // free
+		return AugTreePtrBase(move(child_impl)); 
 	}
 	else
 	{
 		return AugTreePtrBase( (TreePtr<Node>)*other_tree_ptr );
 	}
-
 }
 
 
@@ -164,21 +153,22 @@ TreeUtils::TreeUtils( const NavigationInterface *nav_, DependencyReporter *dep_r
 
 AugTreePtr<Node> TreeUtils::CreateAugTreePtr(const TreePtrInterface *p_tree_ptr) const
 {
-	return AugTreePtr<Node>((TreePtr<Node>)*p_tree_ptr, AugTreePtrBase(p_tree_ptr, dep_rep));
+	return AugTreePtr<Node>((TreePtr<Node>)*p_tree_ptr, 
+	                        AugTreePtrBase(ValuePtr<AugTreePtrImpl>::Make(p_tree_ptr, dep_rep)));
 }	
 
 
 const TreePtrInterface *TreeUtils::GetPTreePtr( const AugTreePtrBase &atp ) const
 {
-	return atp.p_tree_ptr; // TODO eg atp.GetImpl()->GetPTreePtr()
-	// but then later, transformation_agent can do eg atp.GetImpl()->GetXLink() etc
+	return atp.GetImpl()->GetPTreePtr(); 
+	// TODO transformation_agent can do eg atp.GetImpl()->GetXLink() etc
 	// possibly with a dyncast to an API that knows about XLinks 
 }
 
 
 TreePtr<Node> TreeUtils::GetGenericTreePtr( const AugTreePtrBase &atp ) const
 {
-	return atp.GetGenericTreePtr();
+	return atp.GetImpl()->GetGenericTreePtr();
 }
 
 

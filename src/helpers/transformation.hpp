@@ -33,6 +33,7 @@ public:
 	virtual AugTreePtrImpl *Clone() const;
 
 	TreePtr<Node> GetGenericTreePtr() const;
+	const TreePtrInterface *GetPTreePtr() const;	
     AugTreePtrImpl *GetChild( const TreePtrInterface *other_tree_ptr ) const;
     void SetChildChecks( const TreePtrInterface *other_tree_ptr, const AugTreePtrImpl *new_val ) const;
 
@@ -41,7 +42,8 @@ private:
 
     TreePtr<Node> generic_tree_ptr;
     const TreePtrInterface *p_tree_ptr;
-    DependencyReporter *dep_rep;	};
+    DependencyReporter *dep_rep;	
+};
 
 // ---------------------- AugTreePtrBase ---------------------------
 
@@ -51,15 +53,15 @@ public:
 	explicit AugTreePtrBase();
 	explicit AugTreePtrBase( TreePtr<Node> generic_tree_ptr_ );
     explicit AugTreePtrBase( const TreePtrInterface *p_tree_ptr_, DependencyReporter *dep_rep_ );
+private:
 
-	// Temporary - TODO just AugTreePtrBase( ValuePtr<AugTreePtrImpl> &&impl_)
 	explicit AugTreePtrBase( ValuePtr<AugTreePtrImpl> &&impl_ );
-    explicit AugTreePtrBase( ValuePtr<AugTreePtrImpl> &&impl_, const TreePtrInterface *p_tree_ptr_ );
+public:
 
 	AugTreePtrBase( const AugTreePtrBase &other ) = default;	
 	AugTreePtrBase &operator=(const AugTreePtrBase &other) = default;
 
-	TreePtr<Node> GetGenericTreePtr() const;
+	const AugTreePtrImpl *GetImpl() const;
     AugTreePtrBase GetChild( const TreePtrInterface *other_tree_ptr ) const;
     void SetChildChecks( const TreePtrInterface *other_tree_ptr, AugTreePtrBase new_val ) const;
     
@@ -67,8 +69,6 @@ protected:
     friend class TreeUtils;
 
 	ValuePtr<AugTreePtrImpl> impl;
-
-    const TreePtrInterface *p_tree_ptr;
 };
 
 // ---------------------- AugTreePtr ---------------------------
@@ -274,7 +274,9 @@ public:
 	template<typename VALUE_TYPE, typename ... CP>
 	AugTreePtr<VALUE_TYPE> MakeAugTreeNode(const CP &...cp) 
 	{
-		return AugTreePtr<VALUE_TYPE>( MakeTreeNode<VALUE_TYPE>(cp...) );
+		auto tp = MakeTreeNode<VALUE_TYPE>(cp...);
+		return AugTreePtr<VALUE_TYPE>( tp,
+		                               AugTreePtrBase(ValuePtr<AugTreePtrImpl>::Make(tp)) );
 	}
 	
 	// Getters for AugTreePtr - back end only
