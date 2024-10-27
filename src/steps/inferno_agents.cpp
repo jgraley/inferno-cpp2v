@@ -254,7 +254,7 @@ SYM::Lazy<SYM::BooleanExpression> NestedAgent::SymbolicNormalLinkedQueryPRed() c
 }                     
 
 
-TeleportAgent::QueryReturnType NestedAgent::RunTeleportQuery( const XTreeDatabase *db, DependencyReporter *dep_rep, XLink stimulus_xlink ) const
+TeleportAgent::QueryReturnType NestedAgent::RunTeleportQuery( const XTreeDatabase *db, Dependencies *deps, XLink stimulus_xlink ) const
 {   
     // Compare the depth with the supplied pattern if present
     if( depth )
@@ -264,7 +264,7 @@ TeleportAgent::QueryReturnType NestedAgent::RunTeleportQuery( const XTreeDatabas
         int i = 0;
         XLink xlink = stimulus_xlink;
         while( XLink next_xlink = Advance(xlink, &s) )
-            xlink = next_xlink;
+            xlink = next_xlink; // TODO we should be adding deps
 
         return make_pair(XLink(), MakeTreeNode<Node>()); // TODO obviously wrong see #679
     }

@@ -5,75 +5,75 @@
 
 using namespace SR;
 
-// ---------------------- TransformOfAugBE ---------------------------
+// ---------------------- TransformOfAgent::AugBE ---------------------------
 
-TransformOfAugBE::TransformOfAugBE() :
+TransformOfAgent::AugBE::AugBE() :
 	generic_tree_ptr(nullptr),
 	p_tree_ptr(nullptr),
-	dep_rep( nullptr )	
+	dest_deps( nullptr )	
 {
 }
 
 
-TransformOfAugBE::TransformOfAugBE( TreePtr<Node> generic_tree_ptr_ ) :
+TransformOfAgent::AugBE::AugBE( TreePtr<Node> generic_tree_ptr_ ) :
 	generic_tree_ptr(generic_tree_ptr_),
 	p_tree_ptr(nullptr),
-	dep_rep( nullptr )	
+	dest_deps( nullptr )	
 {
 }
 
 
-TransformOfAugBE::TransformOfAugBE( const TreePtrInterface *p_tree_ptr_, TeleportAgent::DependencyReporter *dep_rep_ ) :
+TransformOfAgent::AugBE::AugBE( const TreePtrInterface *p_tree_ptr_, Dependencies *dest_deps_ ) :
     generic_tree_ptr(*p_tree_ptr_),
 	p_tree_ptr(p_tree_ptr_),
-	dep_rep( dep_rep_ )
+	dest_deps( dest_deps_ )
 {
-	ASSERT( generic_tree_ptr );
+/*	ASSERT( generic_tree_ptr );
 	ASSERT( p_tree_ptr );
 	ASSERT( *p_tree_ptr );
 	// Not a local automatic please, we're going to hang on to it.
 	ASSERT( !ON_STACK(p_tree_ptr_) );	
-
-    if( dep_rep )
-		dep_rep->ReportTreeNode( generic_tree_ptr );	
+*/
+    if( dest_deps )
+		dest_deps->AddTreeNode( generic_tree_ptr );	
 }
 
 
-TransformOfAugBE *TransformOfAugBE::Clone() const
+TransformOfAgent::AugBE *TransformOfAgent::AugBE::Clone() const
 {
-	return new TransformOfAugBE( *this );
+	return new TransformOfAgent::AugBE( *this );
 }
 
 
-TreePtr<Node> TransformOfAugBE::GetGenericTreePtr() const
+TreePtr<Node> TransformOfAgent::AugBE::GetGenericTreePtr() const
 {
 	return generic_tree_ptr;
 }
 
 
-const TreePtrInterface *TransformOfAugBE::GetPTreePtr() const
+const TreePtrInterface *TransformOfAgent::AugBE::GetPTreePtr() const
 {
 	return p_tree_ptr;
 }
 
 
-TransformOfAugBE *TransformOfAugBE::OnGetChild( const TreePtrInterface *other_tree_ptr )
+TransformOfAgent::AugBE *TransformOfAgent::AugBE::OnGetChild( const TreePtrInterface *other_tree_ptr )
 {
 	// If we are Tree then construct+return Tree style, otherwise reduce to Free style. This
 	// is to stop descendents of Free masquerading as Tree.	
 	if( p_tree_ptr )
 	{
 		ASSERT( !ON_STACK(other_tree_ptr) );
-		return new TransformOfAugBE(other_tree_ptr, dep_rep); // tree
+		return new TransformOfAgent::AugBE(other_tree_ptr, dest_deps); // tree
 	}
 	else
 	{
-		return new TransformOfAugBE((TreePtr<Node>)*other_tree_ptr); // free
+		return new TransformOfAgent::AugBE((TreePtr<Node>)*other_tree_ptr); // free
 	}
 }
 
 
-void TransformOfAugBE::OnSetChild( const TreePtrInterface *other_tree_ptr, AugBEInterface *new_val )
+void TransformOfAgent::AugBE::OnSetChild( const TreePtrInterface *other_tree_ptr, AugBEInterface *new_val )
 {
     auto n = GET_THAT_POINTER(new_val);
 
@@ -90,48 +90,48 @@ void TransformOfAugBE::OnSetChild( const TreePtrInterface *other_tree_ptr, AugBE
 	}
 }
 
-void TransformOfAugBE::OnDepLeak()
+void TransformOfAgent::AugBE::OnDepLeak()
 {
 	// TODO report all our deps
 }
 
-// ---------------------- TransformOfUtils ---------------------------
+// ---------------------- TransformOfAgent::TransUtils ---------------------------
 
-TransformOfUtils::TransformOfUtils( const NavigationInterface *nav_, TeleportAgent::DependencyReporter *dep_rep_ ) :
+TransformOfAgent::TransUtils::TransUtils( const NavigationInterface *nav_, Dependencies *deps_ ) :
 	nav(nav_),
-	dep_rep(dep_rep_)
+	deps(deps_)
 {
 }	
 
 
-AugTreePtr<Node> TransformOfUtils::CreateAugTreePtr(const TreePtrInterface *p_tree_ptr) const
+AugTreePtr<Node> TransformOfAgent::TransUtils::CreateAugTreePtr(const TreePtrInterface *p_tree_ptr) const
 {
 	return AugTreePtr<Node>((TreePtr<Node>)*p_tree_ptr, 
-	                        ValuePtr<TransformOfAugBE>::Make(p_tree_ptr, dep_rep));
+	                        ValuePtr<TransformOfAgent::AugBE>::Make(p_tree_ptr, deps));
 }	
 
 
-ValuePtr<AugBEInterface> TransformOfUtils::CreateBE( TreePtr<Node> tp ) const 
+ValuePtr<AugBEInterface> TransformOfAgent::TransUtils::CreateBE( TreePtr<Node> tp ) const 
 {
-	return ValuePtr<TransformOfAugBE>::Make(tp);
+	return ValuePtr<TransformOfAgent::AugBE>::Make(tp);
 }
 
 
-const TreePtrInterface *TransformOfUtils::GetPTreePtr( const AugTreePtrBase &atp ) const
+const TreePtrInterface *TransformOfAgent::TransUtils::GetPTreePtr( const AugTreePtrBase &atp ) const
 {
-	auto be = ValuePtr<TransformOfAugBE>::DynamicCast(atp.GetImpl());
+	auto be = ValuePtr<TransformOfAgent::AugBE>::DynamicCast(atp.GetImpl());
 	return be->GetPTreePtr(); 
 }
 
 
-TreePtr<Node> TransformOfUtils::GetGenericTreePtr( const AugTreePtrBase &atp ) const
+TreePtr<Node> TransformOfAgent::TransUtils::GetGenericTreePtr( const AugTreePtrBase &atp ) const
 {
-	auto be = ValuePtr<TransformOfAugBE>::DynamicCast(atp.GetImpl());
+	auto be = ValuePtr<TransformOfAgent::AugBE>::DynamicCast(atp.GetImpl());
 	return be->GetGenericTreePtr();
 }
 
 
-set<AugTreePtr<Node>> TransformOfUtils::GetDeclarers( AugTreePtr<Node> node ) const
+set<AugTreePtr<Node>> TransformOfAgent::TransUtils::GetDeclarers( AugTreePtr<Node> node ) const
 {
     set<NavigationInterface::LinkInfo> declarer_infos = nav->GetDeclarers( node.GetTreePtr() );  
     
@@ -160,9 +160,9 @@ set<AugTreePtr<Node>> TransformOfUtils::GetDeclarers( AugTreePtr<Node> node ) co
 }
 
 
-TeleportAgent::DependencyReporter *TransformOfUtils::GetDepRep() const
+TeleportAgent::Dependencies *TransformOfAgent::TransUtils::GetDepRep() const
 {
-	return dep_rep;
+	return deps;
 }
 
 // ---------------------- TransformOfAgent ---------------------------
@@ -175,7 +175,7 @@ shared_ptr<PatternQuery> TransformOfAgent::GetPatternQuery() const
 }
 
 
-TeleportAgent::QueryReturnType TransformOfAgent::RunTeleportQuery( const XTreeDatabase *db, DependencyReporter *dep_rep, XLink stimulus_xlink ) const
+TeleportAgent::QueryReturnType TransformOfAgent::RunTeleportQuery( const XTreeDatabase *db, Dependencies *deps, XLink stimulus_xlink ) const
 {
     // Transform the candidate expression, sharing the x_tree_db as a TransKit
     // so that implementations can use handy features without needing to search
@@ -186,7 +186,7 @@ TeleportAgent::QueryReturnType TransformOfAgent::RunTeleportQuery( const XTreeDa
     if( stimulus_xlink == XLink::MMAX_Link )
          return QueryReturnType(); 
          
-	TransformOfUtils utils(db, dep_rep);
+	TransformOfAgent::TransUtils utils(db, deps);
     TransKit kit { &utils };
 
     try

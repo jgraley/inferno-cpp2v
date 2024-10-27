@@ -8,14 +8,14 @@
 
 class Transformation;
 
-// ---------------------- DependencyReporter ---------------------------
+// ---------------------- Dependencies ---------------------------
 
-class DependencyReporter
+class Dependencies
 {
 public:	
 	// We actually require a pointer to the parent node's TreePtr 
 	// to the node in question.
-	virtual void ReportTreeNode( TreePtr<Node> tree_ptr ) = 0;
+	virtual void AddTreeNode( TreePtr<Node> tree_ptr ) = 0;
 };
 
 // ---------------------- AugBEInterface ---------------------------

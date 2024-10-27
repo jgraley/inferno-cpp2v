@@ -17,28 +17,28 @@
 using namespace SR;
 using namespace SYM;
 
-//---------------------------------- TeleportAgent::DependencyReporter ------------------------------------    
+//---------------------------------- TeleportAgent::Dependencies ------------------------------------    
 
-void TeleportAgent::DependencyReporter::ReportTreeNode( TreePtr<Node> tree_ptr )
+void TeleportAgent::Dependencies::AddTreeNode( TreePtr<Node> tree_ptr )
 {
     deps.insert( tree_ptr );
 }
 
 
-void TeleportAgent::DependencyReporter::ReportAll( const DependencyReporter &other )
+void TeleportAgent::Dependencies::AddAll( const Dependencies &other )
 {
     for( TreePtr<Node> d : deps )
-		ReportTreeNode(d);
+		AddTreeNode(d);
 }
 
 
-set<TreePtr<Node>> TeleportAgent::DependencyReporter::GetDeps() const
+set<TreePtr<Node>> TeleportAgent::Dependencies::GetDeps() const
 {
 	return deps;
 }
 
 
-void TeleportAgent::DependencyReporter::Clear()
+void TeleportAgent::Dependencies::Clear()
 {
 	deps.clear();
 }	
@@ -65,11 +65,11 @@ DomainExtension::Extender::Info TeleportAgent::GetDomainExtension( const XTreeDa
 	if( !IsPreRestrictionMatch(stimulus_xlink) )
 		return DomainExtension::Extender::Info(); // Failed pre-restriction so can't expand domain
 
-	DependencyReporter dep_rep;
+	Dependencies deps;
 	QueryReturnType tq_result;
 	try
 	{
-		tq_result = RunTeleportQuery( db, &dep_rep, stimulus_xlink );
+		tq_result = RunTeleportQuery( db, &deps, stimulus_xlink );
 	}
 	catch( ::Mismatch & ) 
 	{
@@ -81,14 +81,14 @@ DomainExtension::Extender::Info TeleportAgent::GetDomainExtension( const XTreeDa
 	if( tq_result.first ) // parent link was supplied
 	{
 		ASSERT( !tq_result.second ); // Consistency
-		ASSERT( dep_rep.GetDeps().count( tq_result.first.GetChildX() ) > 0 ); // Result should be a dep
+		ASSERT( deps.GetDeps().count( tq_result.first.GetChildX() ) > 0 ); // Result should be a dep
 		return DomainExtension::Extender::Info(); // Don't bother Domain when there's an XLink
 	}		
 
-	//ASSERT( dep_rep.GetDeps().count( tq_result.second ) > 0 ); // Result should be a dep
+	//ASSERT( deps.GetDeps().count( tq_result.second ) > 0 ); // Result should be a dep
 
 	DomainExtension::Extender::Info info;
-	info.deps = dep_rep.GetDeps();	    
+	info.deps = deps.GetDeps();	    
 	info.induced_base_node = tq_result.second;
 	return info;
 }

@@ -16,17 +16,17 @@ shared_ptr<PatternQuery> PointerIsAgent::GetPatternQuery() const
 }
 
 
-TeleportAgent::QueryReturnType PointerIsAgent::RunTeleportQuery( const XTreeDatabase *db, DependencyReporter *dep_rep, XLink stimulus_xlink ) const
+TeleportAgent::QueryReturnType PointerIsAgent::RunTeleportQuery( const XTreeDatabase *db, Dependencies *deps, XLink stimulus_xlink ) const
 {
 	// Report dependency on parent node
-	if( dep_rep )
+	if( deps )
 	{
 		TreePtr<Node> parent_node = db->GetRow(stimulus_xlink).parent_node;
 		if( parent_node )
 		{	
 			// If no parent node, there's no dep to declare, assuming root xlink
 			// pointer type cannot change. Might be better to refuse the whole teleport, TBD.
-			dep_rep->ReportTreeNode( parent_node );
+			deps->AddTreeNode( parent_node );
 		}
 	}
 	

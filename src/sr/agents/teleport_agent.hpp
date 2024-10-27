@@ -16,11 +16,11 @@ class TeleportAgent : public PreRestrictedAgent, public DomainExtension::Extende
 public:    
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
     
-    class DependencyReporter
+    class Dependencies
 	{
 	public:	
-		void ReportTreeNode( TreePtr<Node> tree_ptr );
-		void ReportAll( const DependencyReporter &other );
+		void AddTreeNode( TreePtr<Node> tree_ptr );
+		void AddAll( const Dependencies &other );
 
 		set<TreePtr<Node>> GetDeps() const;
 		void Clear();
@@ -48,9 +48,9 @@ public:
      * In this case, domain extension will be required, and Vida Nova needs to be 
      * able to indentify when that domain extension might have gone out of date. A 
      * teleporter implmentation must report certain information to the supplied 
-     * `DependencyReporter` object.
+     * `Dependencies` object.
      * 
-     * 1. To call `ReportTreeNode()` for any node in the tree that is a part of
+     * 1. To call `AddTreeNode()` for any node in the tree that is a part of
      * determining the new subtree, and supply a pointer to the TreePtr instance
      * that points to that node. Reason: the deps, are the tree nodes that, 
      * if changed by a replace operation, force us to re-create the domain 
@@ -63,7 +63,7 @@ public:
     typedef pair<XLink, TreePtr<Node>> QueryReturnType;    // TODO if this is worth a comment that big, it's worth a struct, lol. 
     // Just use a unique_ptr<Zone>: TreeZone = result, FreeZone = induced
         
-    virtual QueryReturnType RunTeleportQuery( const XTreeDatabase *db, DependencyReporter *dep_rep, XLink stimulus_xlink ) const = 0;
+    virtual QueryReturnType RunTeleportQuery( const XTreeDatabase *db, Dependencies *deps, XLink stimulus_xlink ) const = 0;
     
     DomainExtension::Extender::Info GetDomainExtension( const XTreeDatabase *db, XLink stimulus_xlink ) const override;
 

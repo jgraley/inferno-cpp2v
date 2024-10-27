@@ -11,57 +11,6 @@
 namespace SR
 {
 	
-// ---------------------- TransformOfAugBE ---------------------------
-
-class TransformOfAugBE : public AugBEInterface
-{
-public:	
-	explicit TransformOfAugBE();
-	explicit TransformOfAugBE( TreePtr<Node> generic_tree_ptr_ );
-    explicit TransformOfAugBE( const TreePtrInterface *p_tree_ptr_, TeleportAgent::DependencyReporter *dep_rep_ );
-	TransformOfAugBE( const TransformOfAugBE &other ) = default;	
-	TransformOfAugBE &operator=(const TransformOfAugBE &other) = default;
-	TransformOfAugBE *Clone() const override;
-
-	TreePtr<Node> GetGenericTreePtr() const;
-	const TreePtrInterface *GetPTreePtr() const;	
-    TransformOfAugBE *OnGetChild( const TreePtrInterface *other_tree_ptr ) override;
-    void OnSetChild( const TreePtrInterface *other_tree_ptr, AugBEInterface *new_val ) override;
-    void OnDepLeak() override;
-
-private:
-    TreePtr<Node> generic_tree_ptr;
-    const TreePtrInterface *p_tree_ptr;
-    TeleportAgent::DependencyReporter *dep_rep;	
-};
-
-// ---------------------- TransformOfUtils ---------------------------
-
-class TransformOfUtils : public TransUtilsInterface
-{
-public:	
-	explicit TransformOfUtils( const NavigationInterface *nav_, 
-	                           TeleportAgent::DependencyReporter *dep_rep_ );
-
-	// Create AugTreePtr from a link
-    AugTreePtr<Node> CreateAugTreePtr(const TreePtrInterface *p_tree_ptr) const;
-
-    ValuePtr<AugBEInterface> CreateBE( TreePtr<Node> tp ) const override;
-		
-	// Getters for AugTreePtr - back end only
-    const TreePtrInterface *GetPTreePtr( const AugTreePtrBase &atp ) const;	
-    TreePtr<Node> GetGenericTreePtr( const AugTreePtrBase &atp ) const;
-	
-	set<AugTreePtr<Node>> GetDeclarers( AugTreePtr<Node> node ) const override;
-	
-	TeleportAgent::DependencyReporter *GetDepRep() const;
-		
-private:	
-	const NavigationInterface * const nav;
-	TeleportAgent::DependencyReporter *dep_rep;	
-};
-
-
 // ---------------------- TransformOfAgent ---------------------------
 	
 /// Matches the output of `transformation` when applied to the current tree node
@@ -73,6 +22,58 @@ private:
 class TransformOfAgent : public virtual TeleportAgent
 {
 public:
+	// ---------------------- AugBE ---------------------------
+	class AugBE : public AugBEInterface, 
+	              public Traceable
+	{
+	public:	
+		explicit AugBE();
+		explicit AugBE( TreePtr<Node> generic_tree_ptr_ );
+		explicit AugBE( const TreePtrInterface *p_tree_ptr_, Dependencies *dest_deps_ );
+		AugBE( const TransformOfAgent::AugBE &other ) = default;	
+		AugBE &operator=(const TransformOfAgent::AugBE &other) = default;
+		AugBE *Clone() const override;
+
+		TreePtr<Node> GetGenericTreePtr() const;
+		const TreePtrInterface *GetPTreePtr() const;	
+		AugBE *OnGetChild( const TreePtrInterface *other_tree_ptr ) override;
+		void OnSetChild( const TreePtrInterface *other_tree_ptr, AugBEInterface *new_val ) override;
+		void OnDepLeak() override;
+
+	private:
+		TreePtr<Node> generic_tree_ptr;
+		const TreePtrInterface *p_tree_ptr;
+		Dependencies *dest_deps;	
+		string GetTrace() const { return "TODO"; }
+	};
+
+	// ---------------------- TransUtils ---------------------------
+	class TransUtils : public TransUtilsInterface
+	{
+	public:	
+		explicit TransUtils( const NavigationInterface *nav_, 
+							 Dependencies *deps_ );
+
+		// Create AugTreePtr from a link
+		AugTreePtr<Node> CreateAugTreePtr(const TreePtrInterface *p_tree_ptr) const;
+
+		ValuePtr<AugBEInterface> CreateBE( TreePtr<Node> tp ) const override;
+			
+		// Getters for AugTreePtr - back end only
+		const TreePtrInterface *GetPTreePtr( const AugTreePtrBase &atp ) const;	
+		TreePtr<Node> GetGenericTreePtr( const AugTreePtrBase &atp ) const;
+		
+		set<AugTreePtr<Node>> GetDeclarers( AugTreePtr<Node> node ) const override;
+		
+		Dependencies *GetDepRep() const;
+			
+	private:	
+		const NavigationInterface * const nav;
+		Dependencies *deps;	
+	};
+
+	// ---------------------- TransformOfAgent ---------------------------
+
     TransformOfAgent( Transformation *t, TreePtr<Node> p=TreePtr<Node>() ) :
     	transformation(t),
     	pattern(p)
@@ -80,7 +81,7 @@ public:
     }
 
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    QueryReturnType RunTeleportQuery( const XTreeDatabase *db, DependencyReporter *dep_rep, XLink stimulus_xlink ) const override;                
+    QueryReturnType RunTeleportQuery( const XTreeDatabase *db, Dependencies *deps, XLink stimulus_xlink ) const override;                
 
     virtual Block GetGraphBlockInfo() const;
     string GetName() const override;
