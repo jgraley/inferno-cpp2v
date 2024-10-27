@@ -58,9 +58,9 @@ TreePtr<Node> Render::GenerateRender( TreePtr<Node> context, TreePtr<Node> root 
 	// Render can only work on a whole program
 	ASSERT( context == root );
     
-   	SimpleNavigation nav(root);
-	TreeUtils utils(&nav);
-    TreeKit kit { &utils };
+   	DefaultNavigation nav(root);
+	DefaultTransUtils utils(&nav);
+    TransKit kit { &utils };
     
 #ifdef TEST_FOR_UNMODIFIED_TREE    
     temp_old_program = dynamic_pointer_cast<Program>(root);
@@ -111,7 +111,7 @@ TreePtr<Node> Render::GenerateRender( TreePtr<Node> context, TreePtr<Node> root 
 }
 
 
-bool Render::IsSystemC( const TreeKit &kit, TreePtr<Node> root )
+bool Render::IsSystemC( const TransKit &kit, TreePtr<Node> root )
 { 
     Walk e(root, nullptr, nullptr);
     for( const TreePtrInterface &n : e )
@@ -121,14 +121,14 @@ bool Render::IsSystemC( const TreeKit &kit, TreePtr<Node> root )
 }
 
 
-string Render::RenderLiteral( const TreeKit &kit, TreePtr<Literal> sp ) try
+string Render::RenderLiteral( const TransKit &kit, TreePtr<Literal> sp ) try
 {
 	return Sanitise( sp->GetRender() );
 }
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderIdentifier( const TreeKit &kit, TreePtr<Identifier> id ) try
+string Render::RenderIdentifier( const TransKit &kit, TreePtr<Identifier> id ) try
 {
 	string ids;
 	if( id )
@@ -154,7 +154,7 @@ string Render::RenderIdentifier( const TreeKit &kit, TreePtr<Identifier> id ) tr
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderScopePrefix( const TreeKit &kit, TreePtr<Identifier> id ) try
+string Render::RenderScopePrefix( const TransKit &kit, TreePtr<Identifier> id ) try
 {
     TreePtr<Scope> scope = GetScope( program, id );
         
@@ -177,7 +177,7 @@ string Render::RenderScopePrefix( const TreeKit &kit, TreePtr<Identifier> id ) t
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderScopedIdentifier( const TreeKit &kit, TreePtr<Identifier> id ) try
+string Render::RenderScopedIdentifier( const TransKit &kit, TreePtr<Identifier> id ) try
 {
 	string s = RenderScopePrefix( kit, id ) + RenderIdentifier( kit, id );
 	TRACE("Render scoped identifier %s\n", s.c_str() );
@@ -186,7 +186,7 @@ string Render::RenderScopedIdentifier( const TreeKit &kit, TreePtr<Identifier> i
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderIntegralType( const TreeKit &kit, TreePtr<Integral> type, string object ) try
+string Render::RenderIntegralType( const TransKit &kit, TreePtr<Integral> type, string object ) try
 {
 	bool ds;
 	int64_t width;
@@ -242,7 +242,7 @@ string Render::RenderIntegralType( const TreeKit &kit, TreePtr<Integral> type, s
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderFloatingType( const TreeKit &kit, TreePtr<Floating> type ) try
+string Render::RenderFloatingType( const TransKit &kit, TreePtr<Floating> type ) try
 {
 	string s;
 	TreePtr<SpecificFloatSemantics> sem = DynamicTreePtrCast<SpecificFloatSemantics>(type->semantics);
@@ -262,7 +262,7 @@ string Render::RenderFloatingType( const TreeKit &kit, TreePtr<Floating> type ) 
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderType( const TreeKit &kit, TreePtr<Type> type, string object, bool constant ) try
+string Render::RenderType( const TransKit &kit, TreePtr<Type> type, string object, bool constant ) try
 {
 	string sobject;
 	if( !object.empty() )
@@ -330,7 +330,7 @@ string Render::Sanitise( string s ) try
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderOperator( const TreeKit &kit, TreePtr<Operator> op, Sequence<Expression> &operands ) try
+string Render::RenderOperator( const TransKit &kit, TreePtr<Operator> op, Sequence<Expression> &operands ) try
 {
 	ASSERT(op);
     string s;
@@ -383,7 +383,7 @@ string Render::RenderOperator( const TreeKit &kit, TreePtr<Operator> op, Sequenc
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderCall( const TreeKit &kit, TreePtr<Call> call ) try
+string Render::RenderCall( const TransKit &kit, TreePtr<Call> call ) try
 {
 	string s;
 
@@ -408,7 +408,7 @@ string Render::RenderCall( const TreeKit &kit, TreePtr<Call> call ) try
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderExpression( const TreeKit &kit, TreePtr<Initialiser> expression, bool bracketize_operator ) try
+string Render::RenderExpression( const TransKit &kit, TreePtr<Initialiser> expression, bool bracketize_operator ) try
 {
 	//TRACE("%p\n", expression.get());
 
@@ -503,7 +503,7 @@ string Render::RenderExpression( const TreeKit &kit, TreePtr<Initialiser> expres
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderMakeRecord( const TreeKit &kit, TreePtr<MakeRecord> ro ) try
+string Render::RenderMakeRecord( const TransKit &kit, TreePtr<MakeRecord> ro ) try
 {
 	string s;
 
@@ -523,7 +523,7 @@ string Render::RenderMakeRecord( const TreeKit &kit, TreePtr<MakeRecord> ro ) tr
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderMapInOrder( const TreeKit &kit, 
+string Render::RenderMapInOrder( const TransKit &kit, 
                                  TreePtr<MapOperator> ro,
                                  TreePtr<Scope> r,
                                  string separator,
@@ -570,7 +570,7 @@ string Render::RenderMapInOrder( const TreeKit &kit,
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderAccess( const TreeKit &kit, TreePtr<AccessSpec> current_access ) try
+string Render::RenderAccess( const TransKit &kit, TreePtr<AccessSpec> current_access ) try
 {
 	if( DynamicTreePtrCast<Public>( current_access ) )
 		return "public";
@@ -584,7 +584,7 @@ string Render::RenderAccess( const TreeKit &kit, TreePtr<AccessSpec> current_acc
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderStorage( const TreeKit &kit, TreePtr<Instance> st ) try
+string Render::RenderStorage( const TransKit &kit, TreePtr<Instance> st ) try
 {
 	if( DynamicTreePtrCast<Program>( scope_stack.top() ) )
 		return ""; // at top-level scope, everything is set to static, but don't actually output the word
@@ -610,7 +610,7 @@ string Render::RenderStorage( const TreeKit &kit, TreePtr<Instance> st ) try
 DEFAULT_CATCH_CLAUSE
 
 
-void Render::ExtractInits( const TreeKit &kit, Sequence<Statement> &body, Sequence<Statement> &inits, Sequence<Statement> &remainder )
+void Render::ExtractInits( const TransKit &kit, Sequence<Statement> &body, Sequence<Statement> &inits, Sequence<Statement> &remainder )
 {
 	for( TreePtr<Statement> s : body )
 	{
@@ -635,7 +635,7 @@ void Render::ExtractInits( const TreeKit &kit, Sequence<Statement> &body, Sequen
 }
 
 
-string Render::RenderInstance( const TreeKit &kit, TreePtr<Instance> o, string sep, bool showtype,
+string Render::RenderInstance( const TransKit &kit, TreePtr<Instance> o, string sep, bool showtype,
                                bool showstorage, bool showinit, bool showscope ) try
 {
 	string s;
@@ -756,7 +756,7 @@ DEFAULT_CATCH_CLAUSE
 // get split into a part that goes into the record (main line of rendering) and
 // a part that goes separately (deferred_decls gets appended at the very end).
 // Do all functions, since SortDecls() ignores function bodies for dep analysis
-bool Render::ShouldSplitInstance( const TreeKit &kit, TreePtr<Instance> o ) 
+bool Render::ShouldSplitInstance( const TransKit &kit, TreePtr<Instance> o ) 
 {
 	bool isfunc = !!DynamicTreePtrCast<Callable>( o->type );
 	bool isnumber = !!DynamicTreePtrCast<Numeric>( o->type );
@@ -776,7 +776,7 @@ bool Render::ShouldSplitInstance( const TreeKit &kit, TreePtr<Instance> o )
 }
 
 
-string Render::RenderDeclaration( const TreeKit &kit, TreePtr<Declaration> declaration,
+string Render::RenderDeclaration( const TransKit &kit, TreePtr<Declaration> declaration,
                                   string sep, TreePtr<AccessSpec> *current_access,
                                   bool showtype, bool force_incomplete, bool shownonfuncinit ) try
 {
@@ -899,7 +899,7 @@ string Render::RenderDeclaration( const TreeKit &kit, TreePtr<Declaration> decla
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderStatement( const TreeKit &kit, TreePtr<Statement> statement, string sep ) try
+string Render::RenderStatement( const TransKit &kit, TreePtr<Statement> statement, string sep ) try
 {
 	TRACE();
 	if( !statement )
@@ -991,7 +991,7 @@ DEFAULT_CATCH_CLAUSE
 
 
 template< class ELEMENT >
-string Render::RenderSequence( const TreeKit &kit, 
+string Render::RenderSequence( const TransKit &kit, 
                                Sequence<ELEMENT> spe,
                                string separator,
                                bool separate_last,
@@ -1020,7 +1020,7 @@ string Render::RenderSequence( const TreeKit &kit,
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderOperandSequence( const TreeKit &kit, 
+string Render::RenderOperandSequence( const TransKit &kit, 
                                       Sequence<Expression> spe,
                                       string separator,
                                       bool separate_last ) try
@@ -1041,7 +1041,7 @@ string Render::RenderOperandSequence( const TreeKit &kit,
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderModuleCtor( const TreeKit &kit, 
+string Render::RenderModuleCtor( const TransKit &kit, 
                                  TreePtr<Module> m,
                                  TreePtr<AccessSpec> *access ) try
 {
@@ -1108,7 +1108,7 @@ string Render::RenderModuleCtor( const TreeKit &kit,
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderDeclarationCollection( const TreeKit &kit, 
+string Render::RenderDeclarationCollection( const TransKit &kit, 
                                             TreePtr<Scope> sd,
                                             string separator,
                                             bool separate_last,

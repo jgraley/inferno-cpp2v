@@ -28,40 +28,10 @@ class AugBEInterface
 public:
 	virtual ~AugBEInterface() = default;
 	virtual AugBEInterface *Clone() const = 0;
-
-	virtual TreePtr<Node> GetGenericTreePtr() const = 0;
-	virtual const TreePtrInterface *GetPTreePtr() const = 0;	
-    virtual AugBEInterface *OnGetChild( const TreePtrInterface *other_tree_ptr ) const = 0;
-    virtual void OnSetChild( const TreePtrInterface *other_tree_ptr, const AugBEInterface *new_val ) const = 0;	
-};
-
-// ---------------------- DomainExtensionAugBE ---------------------------
-
-class DomainExtensionAugBE : public AugBEInterface
-{
-public:	
-	explicit DomainExtensionAugBE();
-	explicit DomainExtensionAugBE( TreePtr<Node> generic_tree_ptr_ );
-    explicit DomainExtensionAugBE( const TreePtrInterface *p_tree_ptr_, DependencyReporter *dep_rep_ );
-	DomainExtensionAugBE( const DomainExtensionAugBE &other ) = default;	
-	DomainExtensionAugBE &operator=(const DomainExtensionAugBE &other) = default;
-	DomainExtensionAugBE *Clone() const override;
-
-	// TODO remove getters from AugBEInterface class:
-	// - use GET_THAT_POINTER internally
-	// - and ValuePtr<>::DynamicCast externally
-
-	TreePtr<Node> GetGenericTreePtr() const override;
-	const TreePtrInterface *GetPTreePtr() const override;	
-    DomainExtensionAugBE *OnGetChild( const TreePtrInterface *other_tree_ptr ) const override;
-    void OnSetChild( const TreePtrInterface *other_tree_ptr, const AugBEInterface *new_val ) const override;
-
-private:
-    friend class TreeUtils;
-
-    TreePtr<Node> generic_tree_ptr;
-    const TreePtrInterface *p_tree_ptr;
-    DependencyReporter *dep_rep;	
+	
+    virtual AugBEInterface *OnGetChild( const TreePtrInterface *other_tree_ptr ) = 0;
+    virtual void OnSetChild( const TreePtrInterface *other_tree_ptr, AugBEInterface *new_val ) = 0;	
+    virtual void OnDepLeak() = 0;
 };
 
 // ---------------------- AugTreePtrBase ---------------------------
@@ -78,10 +48,9 @@ public:
 	ValuePtr<AugBEInterface> GetImpl() const;
     AugTreePtrBase OnGetChild( const TreePtrInterface *other_tree_ptr ) const;
     void OnSetChild( const TreePtrInterface *other_tree_ptr, AugTreePtrBase new_val ) const;
-    
-protected:
-    friend class TreeUtils;
+    void OnDepLeak() const;
 
+protected:
 	ValuePtr<AugBEInterface> impl;
 };
 
@@ -95,10 +64,6 @@ class AugTreePtr : public AugTreePtrBase,
 			       
 {
 public:
-    friend class TreeUtils;
-
-	template<class OTHER_VALUE_TYPE>
-	friend class AugTreePtr;
 
 	// ------------ Constructors etc --------------
     AugTreePtr() :
@@ -114,9 +79,8 @@ public:
         tree_ptr(tree_ptr_)  // No back-end if derived from a TreePtr (legacy usage)        
     {
     }
-   
-private:	
-    explicit AugTreePtr(TreePtr<VALUE_TYPE> tree_ptr_, ValuePtr<DomainExtensionAugBE> &&impl_) : 
+   	
+    explicit AugTreePtr(TreePtr<VALUE_TYPE> tree_ptr_, ValuePtr<AugBEInterface> &&impl_) : 
         AugTreePtrBase(move(impl_)),
         tree_ptr(tree_ptr_)
     {
@@ -128,7 +92,6 @@ private:
     {
     }
     
-public:
 	// Copy-construct from other type, safe casts only
     template<class OTHER_VALUE_TYPE>
     AugTreePtr(const AugTreePtr<OTHER_VALUE_TYPE> &other) : 
@@ -202,13 +165,13 @@ public:
 	// -------------- Smart pointer methods (will report a dep leak) -----------------
 	TreePtr<VALUE_TYPE> operator->()
 	{
-		// Dep leak!!
+		OnDepLeak();
 		return GetTreePtr();
 	}
 
 	const VALUE_TYPE &operator*()
 	{
-		// Dep leak!!
+		OnDepLeak();
 		return *GetTreePtr();
 	}
 	
@@ -224,11 +187,15 @@ public:
     template<class OTHER_VALUE_TYPE>
 	bool operator <( const AugTreePtr<OTHER_VALUE_TYPE> &r ) const
 	{
+		// Not reporting a dep leak because this are only used by 
+		// std::set, std::map etc
+		// TODO make private and friend them
 		return GetTreePtr() < r.GetTreePtr();
 	}	
 	
     operator bool()
     {
+		OnDepLeak();		
 		return !!tree_ptr;
 	}
 		
@@ -245,20 +212,13 @@ public:
 // Note that, in the case of soft nodes, this macro could stringize the FIELD, which
 // would be the recommended style (as long as the field names are legal
 // symbol values for the C++ preprocessor)
-#define GET_CHILD( ATP, FIELD ) ((ATP).GetChild(&(ATP)->FIELD)) // singular
-#define SET_CHILD( ATP, FIELD, NEWVAL ) ((ATP).SetChild(&(ATP)->FIELD, (NEWVAL))) // singular
+#define GET_CHILD( ATP, FIELD ) ((ATP).GetChild(&(ATP).GetTreePtr()->FIELD)) // singular
+#define SET_CHILD( ATP, FIELD, NEWVAL ) ((ATP).SetChild(&(ATP).GetTreePtr()->FIELD, (NEWVAL))) // singular
 
-#define GET_CHILD_BACK( ATP, FIELD ) ((ATP).GetChild(&(ATP)->FIELD.back()))
-#define GET_CHILD_FRONT( ATP, FIELD ) ((ATP).GetChild(&(ATP)->FIELD.front()))
+#define GET_CHILD_BACK( ATP, FIELD ) ((ATP).GetChild(&(ATP).GetTreePtr()->FIELD.back()))
+#define GET_CHILD_FRONT( ATP, FIELD ) ((ATP).GetChild(&(ATP).GetTreePtr()->FIELD.front()))
 
-#define FOR_AUG_CONTAINER( ATP, FIELD, BODY ) ((ATP).ForAugContainer(&(ATP)->FIELD, (BODY)))
-
-
-// TODO:
-// Implement ATP::operator-> as a dep leak and do not use in these macros.
-// Cast to bool is also a dep leak
-// With -> we're a smart pointer. No need to derive from TreePtr but
-// still contain one and still be a template. 
+#define FOR_AUG_CONTAINER( ATP, FIELD, BODY ) ((ATP).ForAugContainer(&(ATP).GetTreePtr()->FIELD, (BODY)))
 
 // ---------------------- NavigationInterface ---------------------------
 
@@ -275,51 +235,58 @@ public:
 	virtual set<LinkInfo> GetDeclarers( TreePtr<Node> node ) const = 0;    
 };
 
-// ---------------------- TreeUtils ---------------------------
+// ---------------------- DefaultNavigation ---------------------------
 
-class TreeUtils
+// For when you don't have a database - searches for things from the
+// supplied root.
+class DefaultNavigation : public NavigationInterface
 {
 public:	
-    // Convention is that second points to one of first's TreePtrs
-    typedef pair<TreePtr<Node>, const TreePtrInterface *> LinkInfo;
+	DefaultNavigation( TreePtr<Node> root_ );
 
-	explicit TreeUtils( const NavigationInterface *nav_, 
-	                    DependencyReporter *dep_rep_ = nullptr );
-
-	// Create AugTreePtr from a link
-    AugTreePtr<Node> CreateAugTreePtr(const TreePtrInterface *p_tree_ptr) const;
+    bool IsRequireReports() const override;
+	set<LinkInfo> GetParents( TreePtr<Node> node ) const override;
+	set<LinkInfo> GetDeclarers( TreePtr<Node> node ) const override;
 	
+private:
+	TreePtr<Node> root;
+};
+
+// ---------------------- TransUtilsInterface ---------------------------
+
+class TransUtilsInterface
+{
+public:	
+    virtual ValuePtr<AugBEInterface> CreateBE( TreePtr<Node> tp ) const = 0;
+	virtual set<AugTreePtr<Node>> GetDeclarers( AugTreePtr<Node> node ) const = 0;
+
 	// Create Node and AugTreePtr 
 	template<typename VALUE_TYPE, typename ... CP>
 	AugTreePtr<VALUE_TYPE> MakeAugTreeNode(const CP &...cp) 
 	{
 		auto tp = MakeTreeNode<VALUE_TYPE>(cp...);
-		return AugTreePtr<VALUE_TYPE>( tp, ValuePtr<DomainExtensionAugBE>::Make(tp) );
+		return AugTreePtr<VALUE_TYPE>( tp, CreateBE(tp) );
 	}
-	
-	// Getters for AugTreePtr - back end only
-    const TreePtrInterface *GetPTreePtr( const AugTreePtrBase &atp ) const;	
-    TreePtr<Node> GetGenericTreePtr( const AugTreePtrBase &atp ) const;
-	
-	// Forwarding methods from NavigationInterface
-	bool IsRequireReports() const;
-	set<LinkInfo> GetParents( TreePtr<Node> node ) const; 
-	set<LinkInfo> GetDeclarers( TreePtr<Node> node ) const;
-	
-	set<AugTreePtr<Node>> GetDeclarers( AugTreePtr<Node> node ) const;
-	
-	DependencyReporter *GetDepRep() const;
-		
-private:	
-	const NavigationInterface * const nav;
-	DependencyReporter *dep_rep;	
 };
 
-// ---------------------- TreeKit ---------------------------
+// ---------------------- DefaultTransUtils ---------------------------
 
-struct TreeKit
+class DefaultTransUtils : public TransUtilsInterface
 {
-    TreeUtils *utils;    
+public:	
+	explicit DefaultTransUtils( const NavigationInterface *nav_ );	                           
+    ValuePtr<AugBEInterface> CreateBE( TreePtr<Node> tp ) const override;			
+	set<AugTreePtr<Node>> GetDeclarers( AugTreePtr<Node> node ) const override;
+			
+private:	
+	const NavigationInterface * const nav;
+};
+
+// ---------------------- TransKit ---------------------------
+
+struct TransKit
+{
+    TransUtilsInterface *utils;    
 };
 
 // ---------------------- Transformation ---------------------------
@@ -333,28 +300,10 @@ public:
     		                     TreePtr<Node> root ) const;
                                          	                          
     // Apply this transformation to tree at node, using kit for decls etc.
-    // Vida Nova implementation with a TreeKit for VN integration: see
+    // Vida Nova implementation with a TransKit for VN integration: see
     // comment by RunTeleportQuery().
-    virtual AugTreePtr<Node> ApplyTransformation( const TreeKit &kit, // Handy functions
+    virtual AugTreePtr<Node> ApplyTransformation( const TransKit &kit, // Handy functions
     		                                      AugTreePtr<Node> node ) const = 0;    // Root of the subtree we want to modify    		                          
 };
-
-// ---------------------- SimpleNavigation ---------------------------
-
-// For when you don't have a database - searches for things from the
-// supplied root.
-class SimpleNavigation : public NavigationInterface
-{
-public:	
-	SimpleNavigation( TreePtr<Node> root_ );
-
-    bool IsRequireReports() const override;
-	set<LinkInfo> GetParents( TreePtr<Node> node ) const override;
-	set<LinkInfo> GetDeclarers( TreePtr<Node> node ) const override;
-	
-private:
-	TreePtr<Node> root;
-};
-
 
 #endif

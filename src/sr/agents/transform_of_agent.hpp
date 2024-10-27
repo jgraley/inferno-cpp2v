@@ -10,6 +10,8 @@
 
 namespace SR
 {
+// ---------------------- TransformOfAgent ---------------------------
+	
 /// Matches the output of `transformation` when applied to the current tree node
 /// against the sub-pattern at `pattern`. This permits an arbitrary `Transformation`
 /// implementation to be "injected" into the search and replace operation.
@@ -43,6 +45,7 @@ protected:
     TransformOfAgent() {}    
 };
 
+// ---------------------- TransformOf<> ---------------------------
 
 /// Match the output of some transformation against the child pattern 
 template<class PRE_RESTRICTION>
@@ -63,5 +66,56 @@ public:
     {
     }
 };
+
+// ---------------------- TransformOfAugBE ---------------------------
+
+class TransformOfAugBE : public AugBEInterface
+{
+public:	
+	explicit TransformOfAugBE();
+	explicit TransformOfAugBE( TreePtr<Node> generic_tree_ptr_ );
+    explicit TransformOfAugBE( const TreePtrInterface *p_tree_ptr_, DependencyReporter *dep_rep_ );
+	TransformOfAugBE( const TransformOfAugBE &other ) = default;	
+	TransformOfAugBE &operator=(const TransformOfAugBE &other) = default;
+	TransformOfAugBE *Clone() const override;
+
+	TreePtr<Node> GetGenericTreePtr() const;
+	const TreePtrInterface *GetPTreePtr() const;	
+    TransformOfAugBE *OnGetChild( const TreePtrInterface *other_tree_ptr ) override;
+    void OnSetChild( const TreePtrInterface *other_tree_ptr, AugBEInterface *new_val ) override;
+    void OnDepLeak() override;
+
+private:
+    TreePtr<Node> generic_tree_ptr;
+    const TreePtrInterface *p_tree_ptr;
+    DependencyReporter *dep_rep;	
+};
+
+// ---------------------- TransformOfUtils ---------------------------
+
+class TransformOfUtils : public TransUtilsInterface
+{
+public:	
+	explicit TransformOfUtils( const NavigationInterface *nav_, 
+	                           DependencyReporter *dep_rep_ );
+
+	// Create AugTreePtr from a link
+    AugTreePtr<Node> CreateAugTreePtr(const TreePtrInterface *p_tree_ptr) const;
+
+    ValuePtr<AugBEInterface> CreateBE( TreePtr<Node> tp ) const override;
+		
+	// Getters for AugTreePtr - back end only
+    const TreePtrInterface *GetPTreePtr( const AugTreePtrBase &atp ) const;	
+    TreePtr<Node> GetGenericTreePtr( const AugTreePtrBase &atp ) const;
+	
+	set<AugTreePtr<Node>> GetDeclarers( AugTreePtr<Node> node ) const override;
+	
+	DependencyReporter *GetDepRep() const;
+		
+private:	
+	const NavigationInterface * const nav;
+	DependencyReporter *dep_rep;	
+};
+
 };
 #endif

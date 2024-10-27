@@ -10,7 +10,7 @@ using namespace CPPTree;
 
 #define INT 0
 
-AugTreePtr<Node> HasType::ApplyTransformation( const TreeKit &kit, AugTreePtr<Node> node ) const
+AugTreePtr<Node> HasType::ApplyTransformation( const TransKit &kit, AugTreePtr<Node> node ) const
 {
 	auto e = AugTreePtr<CPPTree::Expression>::DynamicCast(node);
 	AugTreePtr<Node> n;
@@ -20,7 +20,7 @@ AugTreePtr<Node> HasType::ApplyTransformation( const TreeKit &kit, AugTreePtr<No
 }
 
 
-AugTreePtr<CPPTree::Type> HasType::Get( const TreeKit &kit, AugTreePtr<Expression> o ) const
+AugTreePtr<CPPTree::Type> HasType::Get( const TransKit &kit, AugTreePtr<Expression> o ) const
 {
     ASSERT(o);
     
@@ -122,7 +122,7 @@ AugTreePtr<CPPTree::Type> HasType::Get( const TreeKit &kit, AugTreePtr<Expressio
 
 // Just discover the type of operators, where the types of the operands have already been determined
 // Note we always get a Sequence, even when the operator is commutative
-AugTreePtr<CPPTree::Type> HasType::GetOperator( const TreeKit &kit, AugTreePtr<Operator> op, list<AugTreePtr<Type>> optypes ) const
+AugTreePtr<CPPTree::Type> HasType::GetOperator( const TransKit &kit, AugTreePtr<Operator> op, list<AugTreePtr<Type>> optypes ) const
 {
 	// Lower types that masquerade as other types in preparation for operand analysis
 	// - References go to the referenced type
@@ -213,7 +213,7 @@ AugTreePtr<CPPTree::Type> HasType::GetOperator( const TreeKit &kit, AugTreePtr<O
 }
 
 
-AugTreePtr<CPPTree::Type> HasType::GetStandard( const TreeKit &kit, list<AugTreePtr<Type>> &optypes ) const
+AugTreePtr<CPPTree::Type> HasType::GetStandard( const TransKit &kit, list<AugTreePtr<Type>> &optypes ) const
 {
 	list<AugTreePtr<Numeric>> nums;
 	for( AugTreePtr<Type> optype : optypes )
@@ -231,7 +231,7 @@ AugTreePtr<CPPTree::Type> HasType::GetStandard( const TreeKit &kit, list<AugTree
 }
 
 
-AugTreePtr<CPPTree::Type> HasType::GetStandardOnNumerics( const TreeKit &kit, list<AugTreePtr<Numeric>> &optypes ) const
+AugTreePtr<CPPTree::Type> HasType::GetStandardOnNumerics( const TransKit &kit, list<AugTreePtr<Numeric>> &optypes ) const
 {
 	// Start the width and signedness as per regular "int" since this is the
 	// minimum result type for standard operators
@@ -305,7 +305,7 @@ AugTreePtr<CPPTree::Type> HasType::GetStandardOnNumerics( const TreeKit &kit, li
 }
 
 
-AugTreePtr<CPPTree::Type> HasType::GetSpecial( const TreeKit &kit, AugTreePtr<Operator> op, list<AugTreePtr<Type>> &optypes ) const
+AugTreePtr<CPPTree::Type> HasType::GetSpecial( const TransKit &kit, AugTreePtr<Operator> op, list<AugTreePtr<Type>> &optypes ) const
 {
     if( AugTreePtr<Dereference>::DynamicCast(op) || AugTreePtr<Subscript>::DynamicCast(op) )
     {
@@ -347,7 +347,7 @@ AugTreePtr<CPPTree::Type> HasType::GetSpecial( const TreeKit &kit, AugTreePtr<Op
 }
 
 
-AugTreePtr<CPPTree::Type> HasType::GetLiteral( const TreeKit &kit, AugTreePtr<Literal> l ) const
+AugTreePtr<CPPTree::Type> HasType::GetLiteral( const TransKit &kit, AugTreePtr<Literal> l ) const
 {
     if( auto si = AugTreePtr<SpecificInteger>::DynamicCast(l) )
     {
@@ -395,7 +395,7 @@ AugTreePtr<CPPTree::Type> HasType::GetLiteral( const TreeKit &kit, AugTreePtr<Li
 
 // Is this call really a constructor call? If so return the object being
 // constructed. Otherwise, return nullptr
-AugTreePtr<CPPTree::Expression> HasType::TryGetConstructedExpression( const TreeKit &kit, AugTreePtr<Call> call ) const
+AugTreePtr<CPPTree::Expression> HasType::TryGetConstructedExpression( const TransKit &kit, AugTreePtr<Call> call ) const
 {
 	AugTreePtr<CPPTree::Expression> e;
 

@@ -610,16 +610,16 @@ Orderable::Diff STLCompare3Way( const STL_TYPE &l, const STL_TYPE &r )
 }
 
 // Unique ptr with full value semantics plus nullability. Clones on copy/assign.
-// Makes you happy by permitting default copy constructor etc
+// Makes you happy by permitting default copy constructor etc for containing class.
 // Assuming polymorphic, VALUE_TYPE must have 
 // virtual VALUE_TYPE *Clone() const;
 template<typename VALUE_TYPE>
 class ValuePtr : public unique_ptr<VALUE_TYPE>
-{
+{	
 public:
 	// Expose all of unique_ptr's constructors
 	using unique_ptr<VALUE_TYPE>::unique_ptr;
-	
+
 	// Un-delete copy constructor and copy-assignment. Our versions will
 	// call Clone() (the only way to prevent slicing) on non-NULL other.
 	//template<typename OTHER_VALUE_TYPE>
@@ -638,7 +638,21 @@ public:
 		                                   nullptr );
 		return *this;
 	}	
-	
+
+	// Create from unique_ptr by rvalue/move (respecting unique_ptr semantics)
+	ValuePtr(unique_ptr<VALUE_TYPE> &&uptr) :
+		unique_ptr<VALUE_TYPE>( move(uptr) )
+	{		
+	}
+
+	// Convert to unique ptr by cloning (our semantics)
+	operator unique_ptr<VALUE_TYPE>() 
+	{
+		return *this ? 
+		       unique_ptr<VALUE_TYPE>((*this)->Clone()) : 
+		       nullptr;
+	}
+
 	// Instead of make_unique<X>() do ValuePtr<X>::Make()
 	template<typename ... CP>
 	static ValuePtr<VALUE_TYPE> Make(const CP &...cp) 

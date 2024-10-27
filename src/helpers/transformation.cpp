@@ -5,89 +5,6 @@
 #include "flatten.hpp"
 #include "transformation.hpp"
 
-// ---------------------- DomainExtensionAugBE ---------------------------
-
-DomainExtensionAugBE::DomainExtensionAugBE() :
-	generic_tree_ptr(nullptr),
-	p_tree_ptr(nullptr),
-	dep_rep( nullptr )	
-{
-}
-
-
-DomainExtensionAugBE::DomainExtensionAugBE( TreePtr<Node> generic_tree_ptr_ ) :
-	generic_tree_ptr(generic_tree_ptr_),
-	p_tree_ptr(nullptr),
-	dep_rep( nullptr )	
-{
-}
-
-
-DomainExtensionAugBE::DomainExtensionAugBE( const TreePtrInterface *p_tree_ptr_, DependencyReporter *dep_rep_ ) :
-    generic_tree_ptr(*p_tree_ptr_),
-	p_tree_ptr(p_tree_ptr_),
-	dep_rep( dep_rep_ )
-{
-	ASSERT( generic_tree_ptr );
-	ASSERT( p_tree_ptr );
-	ASSERT( *p_tree_ptr );
-	// Not a local automatic please, we're going to hang on to it.
-	ASSERT( !ON_STACK(p_tree_ptr_) );	
-
-    if( dep_rep )
-		dep_rep->ReportTreeNode( generic_tree_ptr );	
-}
-
-
-DomainExtensionAugBE *DomainExtensionAugBE::Clone() const
-{
-	return new DomainExtensionAugBE( *this );
-}
-
-
-TreePtr<Node> DomainExtensionAugBE::GetGenericTreePtr() const
-{
-	return generic_tree_ptr;
-}
-
-
-const TreePtrInterface *DomainExtensionAugBE::GetPTreePtr() const
-{
-	return p_tree_ptr;
-}
-
-
-DomainExtensionAugBE *DomainExtensionAugBE::OnGetChild( const TreePtrInterface *other_tree_ptr ) const
-{
-	// If we are Tree then construct+return Tree style, otherwise reduce to Free style. This
-	// is to stop descendents of Free masquerading as Tree.	
-	if( p_tree_ptr )
-	{
-		ASSERT( !ON_STACK(other_tree_ptr) );
-		return new DomainExtensionAugBE(other_tree_ptr, dep_rep); // tree
-	}
-	else
-	{
-		return new DomainExtensionAugBE((TreePtr<Node>)*other_tree_ptr); // free
-	}
-}
-
-
-void DomainExtensionAugBE::OnSetChild( const TreePtrInterface *other_tree_ptr, const AugBEInterface *new_val ) const
-{
-	// If we are Tree then construct+return Tree style, otherwise reduce to Free style. This
-	// is to stop descendents of Free masquerading as Tree.	
-	if( GetPTreePtr() )
-	{
-		ASSERT(new_val->GetPTreePtr()); // can't have tree style -> free style: would modify tree
-		ASSERT( !ON_STACK(other_tree_ptr) );
-	}
-	else if( new_val->GetPTreePtr() )
-	{
-		// TODO add a terminus to free zone
-	}
-}
-
 // ---------------------- AugTreePtrBase ---------------------------
 
 AugTreePtrBase::AugTreePtrBase() :
@@ -129,114 +46,28 @@ void AugTreePtrBase::OnSetChild( const TreePtrInterface *other_tree_ptr, AugTree
 		impl->OnSetChild(other_tree_ptr, new_val.impl.get());
 }
 
-// ---------------------- TreeUtils ---------------------------
 
-TreeUtils::TreeUtils( const NavigationInterface *nav_, DependencyReporter *dep_rep_ ) :
-	nav(nav_),
-	dep_rep(dep_rep_)
+void AugTreePtrBase::OnDepLeak() const
 {
-}	
-
-
-AugTreePtr<Node> TreeUtils::CreateAugTreePtr(const TreePtrInterface *p_tree_ptr) const
-{
-	return AugTreePtr<Node>((TreePtr<Node>)*p_tree_ptr, 
-	                        ValuePtr<DomainExtensionAugBE>::Make(p_tree_ptr, dep_rep));
-}	
-
-
-const TreePtrInterface *TreeUtils::GetPTreePtr( const AugTreePtrBase &atp ) const
-{
-	return atp.GetImpl()->GetPTreePtr(); 
-	// TODO transformation_agent can do eg atp.GetImpl()->GetXLink() etc
-	// possibly with a dyncast to an API that knows about XLinks 
+	if( impl )
+		impl->OnDepLeak();	
 }
 
+// ---------------------- DefaultNavigation ---------------------------
 
-TreePtr<Node> TreeUtils::GetGenericTreePtr( const AugTreePtrBase &atp ) const
-{
-	return atp.GetImpl()->GetGenericTreePtr();
-}
-
-
-bool TreeUtils::IsRequireReports() const
-{
-	return nav->IsRequireReports();
-}
-
-
-set<TreeUtils::LinkInfo> TreeUtils::GetParents( TreePtr<Node> node ) const
-{
-	return nav->GetParents(node); // TODO convert to a set of AugTreePtr
-}
-
-
-set<TreeUtils::LinkInfo> TreeUtils::GetDeclarers( TreePtr<Node> node ) const
-{
-	return nav->GetDeclarers(node); // TODO convert to a set of AugTreePtr
-} 
-
-
-set<AugTreePtr<Node>> TreeUtils::GetDeclarers( AugTreePtr<Node> node ) const
-{
-    set<NavigationInterface::LinkInfo> declarer_infos = GetDeclarers( node.GetTreePtr() );  
-    
-    // Generate ATPs from declarers
-	set<AugTreePtr<Node>> atp_declarers;	
-    for( NavigationInterface::LinkInfo declarer : declarer_infos )
-    {   
-		// To be able to report the declarer as a node in the tree, we
-		// must find its parent link
-		set<NavigationInterface::LinkInfo> parent_infos = GetParents( declarer.first );
-		if( parent_infos.empty() )
-		{
-			// No parent link found, so we have to assume this is a free subtree
-			atp_declarers.insert( AugTreePtr<Node>(declarer.first) );
-		}
-		else
-		{
-			const TreePtrInterface *declarer_parent_link = OnlyElementOf( parent_infos ).second;
-
-			// Report and return
-			atp_declarers.insert( CreateAugTreePtr(declarer_parent_link) ); 
-		}
-	}
-	
-	return atp_declarers;
-}
-
-
-DependencyReporter *TreeUtils::GetDepRep() const
-{
-	return dep_rep;
-}
-
-// ---------------------- Transformation ---------------------------
-
-AugTreePtr<Node> Transformation::operator()( AugTreePtr<Node> atp, 
-    		                                 TreePtr<Node> root	) const
-{
-    SimpleNavigation nav(root);
-    TreeUtils utils(&nav);
-    TreeKit kit { &utils };
-    return ApplyTransformation( kit, atp );
-}
-
-// ---------------------- SimpleNavigation ---------------------------
-
-SimpleNavigation::SimpleNavigation( TreePtr<Node> root_ ) :
+DefaultNavigation::DefaultNavigation( TreePtr<Node> root_ ) :
 	root( root_ )
 {
 }
 
 	
-bool SimpleNavigation::IsRequireReports() const
+bool DefaultNavigation::IsRequireReports() const
 {
     return false; // No we don't, we're just the reference one
 }    
 
 
-set<NavigationInterface::LinkInfo> SimpleNavigation::GetParents( TreePtr<Node> node ) const
+set<NavigationInterface::LinkInfo> DefaultNavigation::GetParents( TreePtr<Node> node ) const
 {
 	set<LinkInfo> infos;
 	
@@ -258,7 +89,7 @@ set<NavigationInterface::LinkInfo> SimpleNavigation::GetParents( TreePtr<Node> n
 }
 
 
-set<NavigationInterface::LinkInfo> SimpleNavigation::GetDeclarers( TreePtr<Node> node ) const
+set<NavigationInterface::LinkInfo> DefaultNavigation::GetDeclarers( TreePtr<Node> node ) const
 {
 	set<LinkInfo> infos;
 	
@@ -278,3 +109,41 @@ set<NavigationInterface::LinkInfo> SimpleNavigation::GetDeclarers( TreePtr<Node>
 	
 	return infos;
 }
+
+// ---------------------- DefaultTransUtils ---------------------------
+
+DefaultTransUtils::DefaultTransUtils( const NavigationInterface *nav_ ) :
+	nav(nav_)
+{
+}	
+
+
+ValuePtr<AugBEInterface> DefaultTransUtils::CreateBE( TreePtr<Node> tp ) const 
+{
+	return nullptr;
+}
+
+
+set<AugTreePtr<Node>> DefaultTransUtils::GetDeclarers( AugTreePtr<Node> node ) const
+{
+    set<NavigationInterface::LinkInfo> declarer_infos = nav->GetDeclarers( node.GetTreePtr() );  
+    
+    // Generate ATPs from declarers
+	set<AugTreePtr<Node>> atp_declarers;	
+    for( NavigationInterface::LinkInfo declarer : declarer_infos )
+		atp_declarers.insert( AugTreePtr<Node>(declarer.first) );
+	
+	return atp_declarers;
+}
+
+// ---------------------- Transformation ---------------------------
+
+AugTreePtr<Node> Transformation::operator()( AugTreePtr<Node> atp, 
+    		                                 TreePtr<Node> root	) const
+{
+    DefaultNavigation nav(root);
+    DefaultTransUtils utils(&nav);
+    TransKit kit { &utils };
+    return ApplyTransformation( kit, atp );
+}
+

@@ -22,7 +22,7 @@ AugTreePtr<Identifier> GetIdentifierOfDeclaration( AugTreePtr<Declaration> d )
 }
 
 	
-AugTreePtr<Node> HasDeclaration::ApplyTransformation( const TreeKit &kit, AugTreePtr<Node> node ) const try
+AugTreePtr<Node> HasDeclaration::ApplyTransformation( const TransKit &kit, AugTreePtr<Node> node ) const try
 {    
     set<AugTreePtr<Node>> declarers = kit.utils->GetDeclarers( node );
     
@@ -50,7 +50,7 @@ catch( NavigationInterface::UnknownNode &)
 HasDeclaration HasDeclaration::instance; // TODO Use this instead of constructing a temp (could contain lookup tables etc in the future)
 
 // Look for a record, skipping over typedefs. Returns nullptr if not a record.
-AugTreePtr<Record> GetRecordDeclaration( const TreeKit &kit, AugTreePtr<TypeIdentifier> id )
+AugTreePtr<Record> GetRecordDeclaration( const TransKit &kit, AugTreePtr<TypeIdentifier> id )
 {
 	AugTreePtr<Node> ut = HasDeclaration().ApplyTransformation( kit, id );
 	while( auto td = AugTreePtr<Typedef>::DynamicCast(ut) )
@@ -67,7 +67,7 @@ AugTreePtr<Record> GetRecordDeclaration( const TreeKit &kit, AugTreePtr<TypeIden
 
 
 // Hunt through a record and its bases to find the named member (actually, render string)
-AugTreePtr<Instance> FindMemberByName( const TreeKit &kit, AugTreePtr<Record> r, string name )
+AugTreePtr<Instance> FindMemberByName( const TransKit &kit, AugTreePtr<Record> r, string name )
 {
     TRACE("Record has %d members\n", r->members.size() );
     

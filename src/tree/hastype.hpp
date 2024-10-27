@@ -23,20 +23,20 @@ public:
     class NumericalOperatorUsageMismatch4 : public NumericalOperatorUsageMismatch {};
     class DereferenceUsageMismatch : public UsageMismatch {};
 
-    AugTreePtr<Node> ApplyTransformation( const TreeKit &kit, AugTreePtr<Node> node ) const override;
+    AugTreePtr<Node> ApplyTransformation( const TransKit &kit, AugTreePtr<Node> node ) const override;
 
     // Is this call really a constructor call? If so return the object being
     // constructed. Otherwise, return nullptr
-    AugTreePtr<CPPTree::Expression> TryGetConstructedExpression( const TreeKit &kit, AugTreePtr<CPPTree::Call> call ) const;
+    AugTreePtr<CPPTree::Expression> TryGetConstructedExpression( const TransKit &kit, AugTreePtr<CPPTree::Call> call ) const;
 
 private:    
     // TODO make these private
-    AugTreePtr<CPPTree::Type> Get( const TreeKit &kit, AugTreePtr<CPPTree::Expression> o ) const;
-    AugTreePtr<CPPTree::Type> GetOperator( const TreeKit &kit, AugTreePtr<CPPTree::Operator> op, list<AugTreePtr<CPPTree::Type>> optypes ) const;
-    AugTreePtr<CPPTree::Type> GetStandard( const TreeKit &kit, list<AugTreePtr<CPPTree::Type>> &optypes ) const;
-    AugTreePtr<CPPTree::Type> GetStandardOnNumerics( const TreeKit &kit, list<AugTreePtr<CPPTree::Numeric>> &optypes ) const;
-    AugTreePtr<CPPTree::Type> GetSpecial( const TreeKit &kit, AugTreePtr<CPPTree::Operator> op, list<AugTreePtr<CPPTree::Type>> &optypes ) const;
-    AugTreePtr<CPPTree::Type> GetLiteral( const TreeKit &kit, AugTreePtr<CPPTree::Literal> l ) const;
+    AugTreePtr<CPPTree::Type> Get( const TransKit &kit, AugTreePtr<CPPTree::Expression> o ) const;
+    AugTreePtr<CPPTree::Type> GetOperator( const TransKit &kit, AugTreePtr<CPPTree::Operator> op, list<AugTreePtr<CPPTree::Type>> optypes ) const;
+    AugTreePtr<CPPTree::Type> GetStandard( const TransKit &kit, list<AugTreePtr<CPPTree::Type>> &optypes ) const;
+    AugTreePtr<CPPTree::Type> GetStandardOnNumerics( const TransKit &kit, list<AugTreePtr<CPPTree::Numeric>> &optypes ) const;
+    AugTreePtr<CPPTree::Type> GetSpecial( const TransKit &kit, AugTreePtr<CPPTree::Operator> op, list<AugTreePtr<CPPTree::Type>> &optypes ) const;
+    AugTreePtr<CPPTree::Type> GetLiteral( const TransKit &kit, AugTreePtr<CPPTree::Literal> l ) const;
     
 public:
     static HasType instance; 

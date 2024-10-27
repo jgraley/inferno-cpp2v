@@ -82,7 +82,7 @@ public:
     void Dump() const;
 	
 private:    
-    // TreeKit implementation
+    // TransKit implementation
     bool IsRequireReports() const override;
    
   	set<LinkInfo> GetParents( TreePtr<Node> node ) const override;
