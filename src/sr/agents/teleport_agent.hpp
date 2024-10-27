@@ -16,7 +16,20 @@ class TeleportAgent : public PreRestrictedAgent, public DomainExtension::Extende
 public:    
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
     
-    /*
+    class DependencyReporter
+	{
+	public:	
+		void ReportTreeNode( TreePtr<Node> tree_ptr );
+		void ReportAll( const DependencyReporter &other );
+
+		set<TreePtr<Node>> GetDeps() const;
+		void Clear();
+		
+	private:
+		set<TreePtr<Node>> deps;
+	};
+	
+	/*
      * The teleport query can return any node within the XTree at any location or
      * it can return a "extra" subtree that isn't part of the X tree at all.
      * 
@@ -78,19 +91,7 @@ public:
     protected:
         const TeleportAgent *agent;
         shared_ptr<SymbolExpression> keyer;
-    };
-    
-    class DepRep : public DependencyReporter
-	{
-	public:	
-		void ReportTreeNode( TreePtr<Node> tree_ptr ) override;
-
-		set<TreePtr<Node>> GetDeps() const;
-		void Clear();
-		
-	private:
-		set<TreePtr<Node>> deps;
-	};
+    };    
 };
 
 };

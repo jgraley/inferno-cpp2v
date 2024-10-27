@@ -6,8 +6,6 @@
 #include "common/lambda_loops.hpp"
 #include <functional>
 
-#define NEWCODE
-
 class Transformation;
 
 // ---------------------- DependencyReporter ---------------------------

@@ -17,6 +17,32 @@
 using namespace SR;
 using namespace SYM;
 
+//---------------------------------- TeleportAgent::DependencyReporter ------------------------------------    
+
+void TeleportAgent::DependencyReporter::ReportTreeNode( TreePtr<Node> tree_ptr )
+{
+    deps.insert( tree_ptr );
+}
+
+
+void TeleportAgent::DependencyReporter::ReportAll( const DependencyReporter &other )
+{
+    for( TreePtr<Node> d : deps )
+		ReportTreeNode(d);
+}
+
+
+set<TreePtr<Node>> TeleportAgent::DependencyReporter::GetDeps() const
+{
+	return deps;
+}
+
+
+void TeleportAgent::DependencyReporter::Clear()
+{
+	deps.clear();
+}	
+
 //---------------------------------- TeleportAgent ------------------------------------    
 
 SYM::Lazy<SYM::BooleanExpression> TeleportAgent::SymbolicNormalLinkedQueryPRed() const                                      
@@ -39,7 +65,7 @@ DomainExtension::Extender::Info TeleportAgent::GetDomainExtension( const XTreeDa
 	if( !IsPreRestrictionMatch(stimulus_xlink) )
 		return DomainExtension::Extender::Info(); // Failed pre-restriction so can't expand domain
 
-	DepRep dep_rep;
+	DependencyReporter dep_rep;
 	QueryReturnType tq_result;
 	try
 	{
@@ -154,21 +180,4 @@ const TeleportAgent *TeleportAgent::TeleportOperator::GetAgent() const
 	return agent;
 }
 
-
-void TeleportAgent::DepRep::ReportTreeNode( TreePtr<Node> tree_ptr )
-{
-    deps.insert( tree_ptr );
-}
-
-
-set<TreePtr<Node>> TeleportAgent::DepRep::GetDeps() const
-{
-	return deps;
-}
-
-
-void TeleportAgent::DepRep::Clear()
-{
-	deps.clear();
-}	
 	
