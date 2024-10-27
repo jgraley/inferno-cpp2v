@@ -23,19 +23,42 @@ TransformOfAgent::AugBE::AugBE( TreePtr<Node> generic_tree_ptr_ ) :
 }
 
 
-TransformOfAgent::AugBE::AugBE( const TreePtrInterface *p_tree_ptr_, Dependencies *dest_deps_ ) :
+TransformOfAgent::AugBE::AugBE( const TreePtrInterface *p_tree_ptr_, Dependencies *dest_deps_) :
     generic_tree_ptr(*p_tree_ptr_),
 	p_tree_ptr(p_tree_ptr_),
 	dest_deps( dest_deps_ )
 {
-/*	ASSERT( generic_tree_ptr );
 	ASSERT( p_tree_ptr );
 	ASSERT( *p_tree_ptr );
 	// Not a local automatic please, we're going to hang on to it.
 	ASSERT( !ON_STACK(p_tree_ptr_) );	
-*/
+
+	my_deps.AddTreeNode( generic_tree_ptr );
+
+#ifndef DEFER_POLICY
     if( dest_deps )
 		dest_deps->AddTreeNode( generic_tree_ptr );	
+#endif		
+}
+
+
+TransformOfAgent::AugBE::AugBE( const AugBE &other, const TreePtrInterface *p_tree_ptr_ ) :
+    generic_tree_ptr(*p_tree_ptr_),
+	p_tree_ptr(p_tree_ptr_),
+	dest_deps( other.dest_deps ),
+	my_deps( other.my_deps )
+{	
+	ASSERT( p_tree_ptr );
+	ASSERT( *p_tree_ptr );
+	// Not a local automatic please, we're going to hang on to it.
+	ASSERT( !ON_STACK(p_tree_ptr_) );
+	
+	my_deps.AddTreeNode( generic_tree_ptr );
+
+#ifndef DEFER_POLICY
+    if( dest_deps )
+		dest_deps->AddTreeNode( generic_tree_ptr );	
+#endif		
 }
 
 
@@ -64,10 +87,12 @@ TransformOfAgent::AugBE *TransformOfAgent::AugBE::OnGetChild( const TreePtrInter
 	if( p_tree_ptr )
 	{
 		ASSERT( !ON_STACK(other_tree_ptr) );
-		return new TransformOfAgent::AugBE(other_tree_ptr, dest_deps); // tree
+		// DEFER_POLICY: my_deps will be handed to the new node, which will add itself
+		return new TransformOfAgent::AugBE(*this, other_tree_ptr); // tree
 	}
 	else
 	{
+		// No deps tracking because free node is not in the tree
 		return new TransformOfAgent::AugBE((TreePtr<Node>)*other_tree_ptr); // free
 	}
 }
@@ -77,22 +102,21 @@ void TransformOfAgent::AugBE::OnSetChild( const TreePtrInterface *other_tree_ptr
 {
     auto n = GET_THAT_POINTER(new_val);
 
-	// If we are Tree then construct+return Tree style, otherwise reduce to Free style. This
-	// is to stop descendents of Free masquerading as Tree.	
-	if( p_tree_ptr )
-	{
-		ASSERT(n->p_tree_ptr); // can't have tree style -> free style: would modify tree
-		ASSERT( !ON_STACK(other_tree_ptr) );
-	}
-	else if( n->p_tree_ptr )
-	{
-		// TODO add a terminus to free zone
-	}
+	// We have to be free
+	ASSERT( !p_tree_ptr )("Transformation attempts to modify the tree!");
+	
+	if( !n->p_tree_ptr )
+		return; // No action if child is free
+	
+	// Meandering into the tree:
+	// TODO DEFER_POLICY add new_val's deps to ours
 }
 
 void TransformOfAgent::AugBE::OnDepLeak()
 {
-	// TODO report all our deps
+#ifdef DEFER_POLICY
+	dest_deps->Add( my_deps );
+#endif	
 }
 
 // ---------------------- TransformOfAgent::TransUtils ---------------------------
@@ -194,6 +218,9 @@ TeleportAgent::QueryReturnType TransformOfAgent::RunTeleportQuery( const XTreeDa
 		AugTreePtr<Node> stimulus_x = utils.CreateAugTreePtr( stimulus_xlink.GetXPtr() );
 		AugTreePtr<Node> atp = transformation->ApplyTransformation( kit, stimulus_x );  
 
+		// TODO do the dyncast here so we only do it once and ASSERT it.
+		// Drop unused methods from Utils.
+		// Then: Extract my_deps and add them to deps here, for clarity (DEFER_POLICY)
 		const TreePtrInterface *ptp = utils.GetPTreePtr(atp);
 		TreePtr<Node> tp = utils.GetGenericTreePtr(atp);
 		ASSERT( tp->IsFinal() )(*this)(" computed non-final ")(tp)(" from ")(stimulus_x)("\n");                

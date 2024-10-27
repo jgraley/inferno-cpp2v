@@ -28,8 +28,9 @@ public:
 	{
 	public:	
 		explicit AugBE();
-		explicit AugBE( TreePtr<Node> generic_tree_ptr_ );
-		explicit AugBE( const TreePtrInterface *p_tree_ptr_, Dependencies *dest_deps_ );
+		AugBE( TreePtr<Node> generic_tree_ptr_ );
+		AugBE( const TreePtrInterface *p_tree_ptr_, Dependencies *dest_deps_ );
+		AugBE( const AugBE &other, const TreePtrInterface *p_tree_ptr_ );
 		AugBE( const TransformOfAgent::AugBE &other ) = default;	
 		AugBE &operator=(const TransformOfAgent::AugBE &other) = default;
 		AugBE *Clone() const override;
@@ -44,6 +45,7 @@ public:
 		TreePtr<Node> generic_tree_ptr;
 		const TreePtrInterface *p_tree_ptr;
 		Dependencies *dest_deps;	
+		Dependencies my_deps;	
 		string GetTrace() const { return "TODO"; }
 	};
 
