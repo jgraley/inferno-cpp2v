@@ -60,12 +60,6 @@ DefaultNavigation::DefaultNavigation( TreePtr<Node> root_ ) :
 {
 }
 
-	
-bool DefaultNavigation::IsRequireReports() const
-{
-    return false; // No we don't, we're just the reference one
-}    
-
 
 set<NavigationInterface::LinkInfo> DefaultNavigation::GetParents( TreePtr<Node> node ) const
 {

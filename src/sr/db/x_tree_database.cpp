@@ -289,12 +289,6 @@ void XTreeDatabase::Dump() const
 }
 
 
-bool XTreeDatabase::IsRequireReports() const
-{
-    return true; // Yes we do, we're the actual database, and must maintain domain extension info
-}    
-
-
 set<NavigationInterface::LinkInfo> XTreeDatabase::GetParents( TreePtr<Node> node ) const
 {
     set<LinkInfo> infos;

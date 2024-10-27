@@ -22,7 +22,6 @@ public:
 
 // ---------------------- AugBEInterface ---------------------------
 
-
 class AugBEInterface
 {
 public:
@@ -224,13 +223,15 @@ public:
 
 class NavigationInterface
 {
-public:	
+public:		
     class UnknownNode : public Exception {};
 	
-    // Convention is that second points to one of first's TreePtrs
+    // Convention is that second points to one of first's TreePtrs, similar
+    // to the requirements of XLink constructor
     typedef pair<TreePtr<Node>, const TreePtrInterface *> LinkInfo;
 
-    virtual bool IsRequireReports() const = 0;
+	virtual ~NavigationInterface() = default;
+
 	virtual set<LinkInfo> GetParents( TreePtr<Node> node ) const = 0;
 	virtual set<LinkInfo> GetDeclarers( TreePtr<Node> node ) const = 0;    
 };
@@ -244,7 +245,6 @@ class DefaultNavigation : public NavigationInterface
 public:	
 	DefaultNavigation( TreePtr<Node> root_ );
 
-    bool IsRequireReports() const override;
 	set<LinkInfo> GetParents( TreePtr<Node> node ) const override;
 	set<LinkInfo> GetDeclarers( TreePtr<Node> node ) const override;
 	
@@ -256,8 +256,11 @@ private:
 
 class TransUtilsInterface
 {
-public:	
-    virtual ValuePtr<AugBEInterface> CreateBE( TreePtr<Node> tp ) const = 0;
+public:    
+	virtual ~TransUtilsInterface() = default;
+
+	// TODO there is no reason not to implement GetParents() along the same lines
+	// here and in the two impl classes.
 	virtual set<AugTreePtr<Node>> GetDeclarers( AugTreePtr<Node> node ) const = 0;
 
 	// Create Node and AugTreePtr 
@@ -267,6 +270,9 @@ public:
 		auto tp = MakeTreeNode<VALUE_TYPE>(cp...);
 		return AugTreePtr<VALUE_TYPE>( tp, CreateBE(tp) );
 	}
+
+protected:	
+    virtual ValuePtr<AugBEInterface> CreateBE( TreePtr<Node> tp ) const = 0;
 };
 
 // ---------------------- DefaultTransUtils ---------------------------
@@ -275,10 +281,10 @@ class DefaultTransUtils : public TransUtilsInterface
 {
 public:	
 	explicit DefaultTransUtils( const NavigationInterface *nav_ );	                           
-    ValuePtr<AugBEInterface> CreateBE( TreePtr<Node> tp ) const override;			
 	set<AugTreePtr<Node>> GetDeclarers( AugTreePtr<Node> node ) const override;
 			
 private:	
+    ValuePtr<AugBEInterface> CreateBE( TreePtr<Node> tp ) const override;			
 	const NavigationInterface * const nav;
 };
 

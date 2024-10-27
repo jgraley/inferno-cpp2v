@@ -26,13 +26,12 @@ TeleportAgent::QueryReturnType TransformOfAgent::RunTeleportQuery( const XTreeDa
     if( stimulus_xlink == XLink::MMAX_Link )
          return QueryReturnType(); 
          
-    AugTreePtr<Node> stimulus_x = AugTreePtr<Node>(stimulus_xlink.GetChildX()); // TODO don't assume "free" mkind
-
 	TransformOfUtils utils(db, dep_rep);
     TransKit kit { &utils };
 
     try
     {
+		AugTreePtr<Node> stimulus_x = utils.CreateAugTreePtr( stimulus_xlink.GetXPtr() );
 		AugTreePtr<Node> atp = transformation->ApplyTransformation( kit, stimulus_x );  
 		             
 		if( !atp ) // NULL
