@@ -298,6 +298,8 @@ struct TransKit
 class Transformation : public virtual Graphable
 {
 public:       
+    class TransformationFailedMismatch : public Mismatch {};
+
     // Apply this transformation to tree at node, using root for decls etc.
     // This entry point is for non-VN use cases, without dmain extension.
     AugTreePtr<Node> operator()( AugTreePtr<Node> node, 
@@ -306,8 +308,11 @@ public:
     // Apply this transformation to tree at node, using kit for decls etc.
     // Vida Nova implementation with a TransKit for VN integration: see
     // comment by RunTeleportQuery().
-    virtual AugTreePtr<Node> ApplyTransformation( const TransKit &kit, // Handy functions
-    		                                      AugTreePtr<Node> node ) const = 0;    // Root of the subtree we want to modify    		                          
+    virtual AugTreePtr<Node> TryApplyTransformation( const TransKit &kit, // Handy functions
+    		                                         AugTreePtr<Node> node ) const = 0;    // Root of the subtree we want to modify    		                          
+
+    AugTreePtr<Node> ApplyTransformation( const TransKit &kit, // Handy functions
+                                          AugTreePtr<Node> node ) const;    // Root of the subtree we want to modify    		                          
 };
 
 #endif

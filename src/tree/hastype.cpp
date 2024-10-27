@@ -10,7 +10,7 @@ using namespace CPPTree;
 
 #define INT 0
 
-AugTreePtr<Node> HasType::ApplyTransformation( const TransKit &kit, AugTreePtr<Node> node ) const
+AugTreePtr<Node> HasType::TryApplyTransformation( const TransKit &kit, AugTreePtr<Node> node ) const
 {
 	auto e = AugTreePtr<CPPTree::Expression>::DynamicCast(node);
 	AugTreePtr<Node> n;
@@ -26,7 +26,7 @@ AugTreePtr<CPPTree::Type> HasType::Get( const TransKit &kit, AugTreePtr<Expressi
     
     if( auto ii = AugTreePtr<SpecificInstanceIdentifier>::DynamicCast(o) ) // object or function instance
     {        
-        AugTreePtr<Node> n = HasDeclaration().ApplyTransformation(kit, ii);
+        AugTreePtr<Node> n = HasDeclaration().TryApplyTransformation(kit, ii);
         auto i = AugTreePtr<Instance>::DynamicCast(n);
         ASSERT(i);
         return GET_CHILD(i, type); 

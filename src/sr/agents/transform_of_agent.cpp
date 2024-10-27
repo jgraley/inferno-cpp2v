@@ -193,10 +193,7 @@ TeleportAgent::QueryReturnType TransformOfAgent::RunTeleportQuery( const XTreeDa
     {
 		AugTreePtr<Node> stimulus_x = utils.CreateAugTreePtr( stimulus_xlink.GetXPtr() );
 		AugTreePtr<Node> atp = transformation->ApplyTransformation( kit, stimulus_x );  
-		             
-		if( !atp ) // NULL
-            return QueryReturnType(); 		
-		
+
 		const TreePtrInterface *ptp = utils.GetPTreePtr(atp);
 		TreePtr<Node> tp = utils.GetGenericTreePtr(atp);
 		ASSERT( tp->IsFinal() )(*this)(" computed non-final ")(tp)(" from ")(stimulus_x)("\n");                

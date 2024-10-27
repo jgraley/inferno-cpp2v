@@ -23,7 +23,7 @@ public:
     class NumericalOperatorUsageMismatch4 : public NumericalOperatorUsageMismatch {};
     class DereferenceUsageMismatch : public UsageMismatch {};
 
-    AugTreePtr<Node> ApplyTransformation( const TransKit &kit, AugTreePtr<Node> node ) const override;
+    AugTreePtr<Node> TryApplyTransformation( const TransKit &kit, AugTreePtr<Node> node ) const override;
 
     // Is this call really a constructor call? If so return the object being
     // constructed. Otherwise, return nullptr

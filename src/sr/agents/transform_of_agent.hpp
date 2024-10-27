@@ -73,8 +73,6 @@ private:
 class TransformOfAgent : public virtual TeleportAgent
 {
 public:
-    class TransformationFailedMismatch : public Mismatch {};
-
     TransformOfAgent( Transformation *t, TreePtr<Node> p=TreePtr<Node>() ) :
     	transformation(t),
     	pattern(p)

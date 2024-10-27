@@ -138,6 +138,17 @@ AugTreePtr<Node> Transformation::operator()( AugTreePtr<Node> atp,
     DefaultNavigation nav(root);
     DefaultTransUtils utils(&nav);
     TransKit kit { &utils };
-    return ApplyTransformation( kit, atp );
+    return TryApplyTransformation( kit, atp );
 }
+
+
+AugTreePtr<Node> Transformation::ApplyTransformation( const TransKit &kit, // Handy functions
+                                                      AugTreePtr<Node> node ) const    // Root of the subtree we want to modify    		                          
+{
+	AugTreePtr<Node> n = TryApplyTransformation(kit, node);
+	if( !n )
+		throw TransformationFailedMismatch();
+	else
+		return n;
+}                                      
 

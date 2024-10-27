@@ -15,7 +15,7 @@ class HasDeclaration : public Transformation
 public:
     class DeclarationNotFound : public ::Mismatch {};
     
-    AugTreePtr<Node> ApplyTransformation( const TransKit &kit, 
+    AugTreePtr<Node> TryApplyTransformation( const TransKit &kit, 
                                           AugTreePtr<Node> node ) const override;
     static HasDeclaration instance;
 };
