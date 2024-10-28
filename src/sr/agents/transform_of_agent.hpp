@@ -27,12 +27,12 @@ public:
 	              public Traceable
 	{
 	public:	
-		explicit AugBE();
-		AugBE( TreePtr<Node> generic_tree_ptr_ );
+		AugBE( TreePtr<Node> generic_tree_ptr_, Dependencies *dest_deps_ );
 		AugBE( const TreePtrInterface *p_tree_ptr_, Dependencies *dest_deps_ );
+		AugBE( const AugBE &other, TreePtr<Node> generic_tree_ptr_ );
 		AugBE( const AugBE &other, const TreePtrInterface *p_tree_ptr_ );
-		AugBE( const TransformOfAgent::AugBE &other ) = default;	
-		AugBE &operator=(const TransformOfAgent::AugBE &other) = default;
+		AugBE( const AugBE &other ) = default;	
+		AugBE &operator=(const AugBE &other) = default;
 		AugBE *Clone() const override;
 
 		TreePtr<Node> GetGenericTreePtr() const;
@@ -41,12 +41,13 @@ public:
 		void OnSetChild( const TreePtrInterface *other_tree_ptr, AugBEInterface *new_val ) override;
 		void OnDepLeak() override;
 
+		string GetTrace() const;
+
 	private:
 		TreePtr<Node> generic_tree_ptr;
 		const TreePtrInterface *p_tree_ptr;
 		Dependencies *dest_deps;	
 		Dependencies my_deps;	
-		string GetTrace() const { return "TODO"; }
 	};
 
 	// ---------------------- TransUtils ---------------------------

@@ -7,19 +7,12 @@ using namespace SR;
 
 // ---------------------- TransformOfAgent::AugBE ---------------------------
 
-TransformOfAgent::AugBE::AugBE() :
-	generic_tree_ptr(nullptr),
-	p_tree_ptr(nullptr),
-	dest_deps( nullptr )	
-{
-}
-
-
-TransformOfAgent::AugBE::AugBE( TreePtr<Node> generic_tree_ptr_ ) :
+TransformOfAgent::AugBE::AugBE( TreePtr<Node> generic_tree_ptr_, Dependencies *dest_deps_ ) :
 	generic_tree_ptr(generic_tree_ptr_),
 	p_tree_ptr(nullptr),
-	dest_deps( nullptr )	
+	dest_deps( dest_deps_ )	
 {
+	ASSERT( dest_deps );
 }
 
 
@@ -28,6 +21,7 @@ TransformOfAgent::AugBE::AugBE( const TreePtrInterface *p_tree_ptr_, Dependencie
 	p_tree_ptr(p_tree_ptr_),
 	dest_deps( dest_deps_ )
 {
+	ASSERT( dest_deps );
 	ASSERT( p_tree_ptr );
 	ASSERT( *p_tree_ptr );
 	// Not a local automatic please, we're going to hang on to it.
@@ -42,12 +36,27 @@ TransformOfAgent::AugBE::AugBE( const TreePtrInterface *p_tree_ptr_, Dependencie
 }
 
 
+TransformOfAgent::AugBE::AugBE( const AugBE &other, TreePtr<Node> generic_tree_ptr_ ) :
+	generic_tree_ptr(generic_tree_ptr_),
+	p_tree_ptr(nullptr),
+	dest_deps( other.dest_deps ),
+	my_deps( other.my_deps )
+{
+	ASSERT( dest_deps );
+#ifndef DEFER_POLICY
+    if( dest_deps )
+		dest_deps->AddTreeNode( generic_tree_ptr );	
+#endif	
+}
+
+
 TransformOfAgent::AugBE::AugBE( const AugBE &other, const TreePtrInterface *p_tree_ptr_ ) :
     generic_tree_ptr(*p_tree_ptr_),
 	p_tree_ptr(p_tree_ptr_),
 	dest_deps( other.dest_deps ),
 	my_deps( other.my_deps )
 {	
+	ASSERT( dest_deps );
 	ASSERT( p_tree_ptr );
 	ASSERT( *p_tree_ptr );
 	// Not a local automatic please, we're going to hang on to it.
@@ -82,6 +91,7 @@ const TreePtrInterface *TransformOfAgent::AugBE::GetPTreePtr() const
 
 TransformOfAgent::AugBE *TransformOfAgent::AugBE::OnGetChild( const TreePtrInterface *other_tree_ptr )
 {
+	ASSERT( dest_deps );
 	// If we are Tree then construct+return Tree style, otherwise reduce to Free style. This
 	// is to stop descendents of Free masquerading as Tree.	
 	if( p_tree_ptr )
@@ -92,14 +102,15 @@ TransformOfAgent::AugBE *TransformOfAgent::AugBE::OnGetChild( const TreePtrInter
 	}
 	else
 	{
-		// No deps tracking because free node is not in the tree
-		return new TransformOfAgent::AugBE((TreePtr<Node>)*other_tree_ptr); // free
+		// DEFER_POLICY: my_deps will be handed to the new node, which will add itself
+		return new TransformOfAgent::AugBE(*this, (TreePtr<Node>)*other_tree_ptr); // free
 	}
 }
 
 
 void TransformOfAgent::AugBE::OnSetChild( const TreePtrInterface *other_tree_ptr, AugBEInterface *new_val )
 {
+	ASSERT( dest_deps );
     auto n = GET_THAT_POINTER(new_val);
 
 	// We have to be free
@@ -108,15 +119,23 @@ void TransformOfAgent::AugBE::OnSetChild( const TreePtrInterface *other_tree_ptr
 	if( !n->p_tree_ptr )
 		return; // No action if child is free
 	
-	// Meandering into the tree:
-	// TODO DEFER_POLICY add new_val's deps to ours
+	// DEFER_POLICY: Meandering into the tree: parent inherits child deps
+	my_deps.AddAll( n->my_deps );
 }
+
 
 void TransformOfAgent::AugBE::OnDepLeak()
 {
-#ifdef DEFER_POLICY
-	dest_deps->Add( my_deps );
-#endif	
+	// DEFER_POLICY: Leap dumps our deps stright into dest
+	// (dest is the resultant dep set for the whole transformation)
+	ASSERT( dest_deps );
+	dest_deps->AddAll( my_deps );
+}
+
+
+string TransformOfAgent::AugBE::GetTrace() const 
+{ 
+	return "TODO"; 
 }
 
 // ---------------------- TransformOfAgent::TransUtils ---------------------------
@@ -137,7 +156,7 @@ AugTreePtr<Node> TransformOfAgent::TransUtils::CreateAugTreePtr(const TreePtrInt
 
 ValuePtr<AugBEInterface> TransformOfAgent::TransUtils::CreateBE( TreePtr<Node> tp ) const 
 {
-	return ValuePtr<TransformOfAgent::AugBE>::Make(tp);
+	return ValuePtr<TransformOfAgent::AugBE>::Make(tp, deps);
 }
 
 

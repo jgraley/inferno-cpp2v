@@ -132,7 +132,9 @@ unique_ptr<SymbolicResult> TeleportAgent::TeleportOperator::Evaluate( const Eval
         
     // Apply the teleporting operation to the xlink. It may create new nodes
     // so it returns a TreePtr<Node> to avoid creating new xlink without base.
-    QueryReturnType tp_result = agent->RunTeleportQuery( kit.x_tree_db, nullptr, stimulus_xlink );
+    // TODO can't we fish this out of the database? or do both and compare?
+	Dependencies deps;
+    QueryReturnType tp_result = agent->RunTeleportQuery( kit.x_tree_db, &deps, stimulus_xlink );
 
     // Teleporting operation can fail: if so call it a NaS
     if( !tp_result.second && !tp_result.first )
