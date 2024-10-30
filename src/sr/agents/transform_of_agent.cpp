@@ -235,18 +235,17 @@ TeleportAgent::QueryReturnType TransformOfAgent::RunTeleportQuery( const XTreeDa
     try
     {
 		AugTreePtr<Node> stimulus_x = utils.CreateAugTreePtr( stimulus_xlink.GetXPtr() );
+		
 		AugTreePtr<Node> atp = transformation->ApplyTransformation( kit, stimulus_x );  
-
-		// Then: Extract my_deps and add them to deps here, for clarity (DEFER_POLICY)
+		
 		ValuePtr<AugBE> be = utils.GetBE(atp);
-		const TreePtrInterface *ptp = be->GetPTreePtr(); 
-		TreePtr<Node> tp = be->GetGenericTreePtr();
 		
 		// Grab the final deps stored in the ATP. Same as a dep leak, but explicit for clarity.
 		deps->AddAll( be->GetDeps() );
 		
-		ASSERT( tp->IsFinal() )(*this)(" computed non-final ")(tp)(" from ")(stimulus_x)("\n");                
-		
+		const TreePtrInterface *ptp = be->GetPTreePtr(); 
+		TreePtr<Node> tp = be->GetGenericTreePtr();		
+		ASSERT( tp->IsFinal() )(*this)(" computed non-final ")(tp)(" from ")(stimulus_x)("\n");                				
         if( ptp ) 
             return make_pair(db->GetXLink( ptp ), nullptr);  // parent was specified      
 		else
