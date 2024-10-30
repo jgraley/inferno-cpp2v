@@ -23,7 +23,6 @@ public:
 		void AddAll( const Dependencies &other );
 
 		set<const TreePtrInterface *> GetDeps() const;
-		//set<XLink> GetDepsXLinks(const XTreeDatabase *db) const;
 		void Clear();
 		
 	private:

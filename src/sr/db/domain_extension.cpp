@@ -185,17 +185,16 @@ void DomainExtensionChannel::CheckStimulusXLink( XLink stimulus_xlink )
     if( !info.induced_base_node )
         return;
     
-	set<TreePtr<Node>> tp_deps;
+	set<XLink> xlink_deps;
 	for( const TreePtrInterface *p : info.deps )
-		tp_deps.insert( (TreePtr<Node>)*p );
-    
-    
+		if( XLink xlink = db->TryGetXLink(p) )
+			xlink_deps.insert( xlink );
     
     //ASSERT( deps.size() < 20 )("Big deps for ")(stimulus_xlink)("\n")(deps);
     
-    stimulus_to_induced_and_deps.insert( make_pair( stimulus_xlink, InducedAndDeps(info.induced_base_node, tp_deps) ) ); // TODO do we need this if there's already a class?
+    stimulus_to_induced_and_deps.insert( make_pair( stimulus_xlink, InducedAndDeps(info.induced_base_node, xlink_deps) ) ); // TODO do we need this if there's already a class?
     
-    for( TreePtr<Node> dep : tp_deps )
+    for( XLink dep : xlink_deps )
         dep_to_all_stimulii[dep].insert(stimulus_xlink); // TODO do we need this if there's already a class?
     
     // If there's already a class for this node, return it and early-out
@@ -219,11 +218,11 @@ void DomainExtensionChannel::DropStimulusXLink( XLink stimulus_xlink )
     ASSERT( stimulus_to_induced_and_deps.count(stimulus_xlink)>0 );
     
     TreePtr<Node> induced_base_node = stimulus_to_induced_and_deps.at(stimulus_xlink).induced_base_node;
-    set<TreePtr<Node>> &deps = stimulus_to_induced_and_deps.at(stimulus_xlink).deps;
+    set<XLink> &deps = stimulus_to_induced_and_deps.at(stimulus_xlink).deps;
 
     // Remove this stimulus xlink from deps structures, possibly dropping the
     // dep completely
-    for( TreePtr<Node> dep : deps )
+    for( XLink dep : deps )
     {
         ASSERT( dep_to_all_stimulii.count(dep)>0 );
         ASSERT( !dep_to_all_stimulii.at(dep).empty() );
@@ -251,7 +250,7 @@ void DomainExtensionChannel::Validate() const
     for( auto p : stimulus_to_induced_and_deps )
     {
         XLink stimulus_xlink = p.first;
-        for( TreePtr<Node> dep : p.second.deps )
+        for( XLink dep : p.second.deps )
             ASSERT( dep_to_all_stimulii.count(dep) == 1 );            
             
         ASSERT( extra_root_node_to_xlink_and_refcount.count(p.second.induced_base_node)==1 );
@@ -316,15 +315,13 @@ void DomainExtensionChannel::Delete(const DBWalk::WalkInfo &walk_info)
         // Remove from recheck set: we won't want the DE back
         EraseSolo(stimulii_to_recheck, xlink);
     }
-    
-    TreePtr<Node> x = xlink.GetChildX();
-    
+        
     // Now deal with the case where the deleted xlink is a dependency of a domain 
     // extension: in this case, we want to remove it but remember that we want to 
     // recheck the stimulus xlink after updates are done.
-    if( dep_to_all_stimulii.count(x)>0 )
+    if( dep_to_all_stimulii.count(xlink)>0 )
     {
-        const set<XLink> stimulus_xlinks = dep_to_all_stimulii.at(x);
+        const set<XLink> stimulus_xlinks = dep_to_all_stimulii.at(xlink);
         for( XLink stimulus_xlink : stimulus_xlinks )
         {
             ASSERT( stimulus_to_induced_and_deps.count(stimulus_xlink)>0 );
@@ -366,7 +363,7 @@ string DomainExtensionChannel::ExtensionClass::GetTrace() const
 }
 
 
-DomainExtensionChannel::InducedAndDeps::InducedAndDeps( TreePtr<Node> induced_base_node_, set<TreePtr<Node>> deps_ ) :
+DomainExtensionChannel::InducedAndDeps::InducedAndDeps( TreePtr<Node> induced_base_node_, set<XLink> deps_ ) :
     induced_base_node( induced_base_node_ ),
     deps( deps_ )
 {

@@ -117,11 +117,11 @@ private:
 
     struct InducedAndDeps : Traceable
     {
-        InducedAndDeps( TreePtr<Node> induced_base_node_, set<TreePtr<Node>> deps_ );
+        InducedAndDeps( TreePtr<Node> induced_base_node_, set<XLink> deps_ );
         string GetTrace() const override;
         
         TreePtr<Node> induced_base_node;
-        set<TreePtr<Node>> deps;
+        set<XLink> deps;
     };
     
     struct ExtensionClass : Traceable
@@ -137,7 +137,7 @@ private:
     map<XLink, InducedAndDeps> stimulus_to_induced_and_deps;
     
     // A reversal of stimulus_to_induced_and_deps for indexing on dependency
-    map<TreePtr<Node>, set<XLink>> dep_to_all_stimulii;
+    map<XLink, set<XLink>> dep_to_all_stimulii;
 
     // Here we collect domain extension stimulus XLinks that we will re-create 
     // during PostUpdateActions() and then clear.

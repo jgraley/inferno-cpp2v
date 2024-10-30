@@ -65,6 +65,7 @@ public:
 	XLink TryGetParentXLink(XLink xlink) const;
 	
 	// XLink from TPI ptr
+  	XLink TryGetXLink( const TreePtrInterface *ptp ) const;
   	XLink GetXLink( const TreePtrInterface *ptp ) const;
     
     // Last of the descendents in depth first order. If no 
