@@ -19,9 +19,7 @@ public:
     class Dependencies
 	{
 	public:	
-		void AddDep( TreePtr<Node> tree_ptr );
-		void AddDep( const TreePtrInterface *p_tree_ptr );				
-		
+		void AddDep( const TreePtrInterface *p_tree_ptr );						
 		void AddAll( const Dependencies &other );
 
 		set<TreePtr<Node>> GetDeps() const;
@@ -29,7 +27,7 @@ public:
 		void Clear();
 		
 	private:
-		set<TreePtr<Node>> deps;
+		set<const TreePtrInterface *> deps;
 	};
 	
 	/*

@@ -15,7 +15,9 @@ TransformOfAgent::AugBE::AugBE( TreePtr<Node> generic_tree_ptr_, const TransUtil
 	utils( utils_ )	
 {
 	ASSERT( utils );
+#ifdef DEFER_POLICY
 	my_deps.AddDep( generic_tree_ptr );	
+#endif
 }
 
 

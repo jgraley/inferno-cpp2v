@@ -19,28 +19,25 @@ using namespace SYM;
 
 //---------------------------------- TeleportAgent::Dependencies ------------------------------------    
 
-void TeleportAgent::Dependencies::AddDep( TreePtr<Node> tree_ptr )
-{
-    deps.insert( tree_ptr );
-}
-
-
 void TeleportAgent::Dependencies::AddDep( const TreePtrInterface *p_tree_ptr )
 {
-	AddDep( (TreePtr<Node>)*p_tree_ptr );
+	deps.insert( p_tree_ptr );
 }		
 
 
 void TeleportAgent::Dependencies::AddAll( const Dependencies &other )
 {
-    for( TreePtr<Node> d : deps )
-		AddDep(d);
+    for( const TreePtrInterface *p : deps )
+		AddDep(p);
 }
 
 
 set<TreePtr<Node>> TeleportAgent::Dependencies::GetDeps() const
 {
-	return deps;
+	set<TreePtr<Node>> stp;
+	for( const TreePtrInterface *p : deps )
+		stp.insert( (TreePtr<Node>)*p );
+	return stp;
 }
 
 
