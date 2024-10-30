@@ -15,7 +15,7 @@ class Dependencies
 public:	
 	// We actually require a pointer to the parent node's TreePtr 
 	// to the node in question.
-	virtual void AddTreeNode( TreePtr<Node> tree_ptr ) = 0;
+	virtual void AddDep( TreePtr<Node> tree_ptr ) = 0;
 };
 
 // ---------------------- AugBEInterface ---------------------------

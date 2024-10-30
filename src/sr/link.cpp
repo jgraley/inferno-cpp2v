@@ -310,7 +310,7 @@ TreePtr<Node> XLink::GetChildX() const
 }
 
 
-const TreePtrInterface *XLink::GetXPtr() const
+const TreePtrInterface *XLink::GetTreePtrInterface() const
 {
     return asp_x.get();
 }

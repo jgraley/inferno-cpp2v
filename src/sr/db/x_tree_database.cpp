@@ -211,7 +211,7 @@ XLink XTreeDatabase::GetXLink( const TreePtrInterface *px ) const
     ASSERT( !row.parents.empty() )("child_node=")(child_node);
 
     for( XLink xlink : row.parents )
-		if( xlink.GetXPtr() == px )
+		if( xlink.GetTreePtrInterface() == px )
 			return xlink;
 	
     ASSERTFAIL(); // Could not find matching XLink even though there were candidates	
@@ -308,7 +308,7 @@ set<NavigationInterface::LinkInfo> XTreeDatabase::GetParents( TreePtr<Node> node
 
         // second is TreePtrInterface * to the declarer's pointer to declaree
         // Retains precise info about which link.
-        info.second = parent_xlink.GetXPtr();
+        info.second = parent_xlink.GetTreePtrInterface();
         
         infos.insert( info );
     }
@@ -338,7 +338,7 @@ set<NavigationInterface::LinkInfo> XTreeDatabase::GetDeclarers( TreePtr<Node> no
 
         // second is TreePtrInterface * to the declarer's pointer to declaree
         // Retains precise info about which link.
-        info.second = declarer_xlink.GetXPtr();
+        info.second = declarer_xlink.GetTreePtrInterface();
         
         infos.insert( info );
     }

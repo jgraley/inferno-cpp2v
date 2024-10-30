@@ -19,16 +19,22 @@ using namespace SYM;
 
 //---------------------------------- TeleportAgent::Dependencies ------------------------------------    
 
-void TeleportAgent::Dependencies::AddTreeNode( TreePtr<Node> tree_ptr )
+void TeleportAgent::Dependencies::AddDep( TreePtr<Node> tree_ptr )
 {
     deps.insert( tree_ptr );
 }
 
 
+void TeleportAgent::Dependencies::AddDep( const TreePtrInterface *p_tree_ptr )
+{
+	AddDep( (TreePtr<Node>)*p_tree_ptr );
+}		
+
+
 void TeleportAgent::Dependencies::AddAll( const Dependencies &other )
 {
     for( TreePtr<Node> d : deps )
-		AddTreeNode(d);
+		AddDep(d);
 }
 
 
@@ -36,6 +42,14 @@ set<TreePtr<Node>> TeleportAgent::Dependencies::GetDeps() const
 {
 	return deps;
 }
+
+
+/*set<XLink> TeleportAgent::Dependencies::GetDepsXLinks(const XTreeDatabase *db) const
+{
+	set<XLink> sx;
+	for( TreePtr<Node> d : deps )
+	    sx.
+}*/
 
 
 void TeleportAgent::Dependencies::Clear()

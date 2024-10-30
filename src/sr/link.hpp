@@ -74,7 +74,7 @@ public:
     explicit operator bool() const;
 	bool HasChildX() const;
     TreePtr<Node> GetChildX() const;
-    const TreePtrInterface *GetXPtr() const;
+    const TreePtrInterface *GetTreePtrInterface() const;
     void ClearXPtr() const;
     void SetXPtr(const TreePtrInterface &x) const;
     

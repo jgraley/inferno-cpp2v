@@ -15,7 +15,7 @@ TransformOfAgent::AugBE::AugBE( TreePtr<Node> generic_tree_ptr_, const TransUtil
 	utils( utils_ )	
 {
 	ASSERT( utils );
-	my_deps.AddTreeNode( generic_tree_ptr );	
+	my_deps.AddDep( generic_tree_ptr );	
 }
 
 
@@ -31,9 +31,9 @@ TransformOfAgent::AugBE::AugBE( const TreePtrInterface *p_tree_ptr_, const Trans
 	ASSERT( !ON_STACK(p_tree_ptr_) );	
 
 #ifdef DEFER_POLICY
-	my_deps.AddTreeNode( generic_tree_ptr );		
+	my_deps.AddDep( generic_tree_ptr );		
 #else	
-	utils->GetDeps()->AddTreeNode( generic_tree_ptr );	
+	utils->GetDeps()->AddDep( p_tree_ptr );	
 #endif		
 }
 
@@ -61,9 +61,9 @@ TransformOfAgent::AugBE::AugBE( const AugBE &other, const TreePtrInterface *p_tr
 	ASSERT( !ON_STACK(p_tree_ptr_) );
 	
 #ifdef DEFER_POLICY
-	my_deps.AddTreeNode( generic_tree_ptr );
+	my_deps.AddDep( generic_tree_ptr );
 #else
-	utils->GetDeps()->AddTreeNode( generic_tree_ptr );	
+	utils->GetDeps()->AddDep( p_tree_ptr );	
 #endif		
 }
 
@@ -233,7 +233,7 @@ TeleportAgent::QueryReturnType TransformOfAgent::RunTeleportQuery( const XTreeDa
 
     try
     {
-		AugTreePtr<Node> stimulus_x = utils.CreateAugTreePtr( stimulus_xlink.GetXPtr() );
+		AugTreePtr<Node> stimulus_x = utils.CreateAugTreePtr( stimulus_xlink.GetTreePtrInterface() );
 		
 		AugTreePtr<Node> atp = transformation->ApplyTransformation( kit, stimulus_x );  
 		

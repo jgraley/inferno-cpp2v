@@ -17,14 +17,14 @@ const LinkTable::Row &LinkTable::GetRow(XLink xlink) const
     ASSERT( HasRow(xlink) )
           ("X tree database: no row for ")(xlink)("\n")
           ("Rows: ")(rows);
-    return rows.at(xlink.GetXPtr());
+    return rows.at(xlink.GetTreePtrInterface());
 }
 
 
 bool LinkTable::HasRow(XLink xlink) const
 {
     ASSERT( xlink );
-    return rows.count(xlink.GetXPtr()) > 0;
+    return rows.count(xlink.GetTreePtrInterface()) > 0;
 }
 
 

@@ -19,10 +19,13 @@ public:
     class Dependencies
 	{
 	public:	
-		void AddTreeNode( TreePtr<Node> tree_ptr );
+		void AddDep( TreePtr<Node> tree_ptr );
+		void AddDep( const TreePtrInterface *p_tree_ptr );				
+		
 		void AddAll( const Dependencies &other );
 
 		set<TreePtr<Node>> GetDeps() const;
+		//set<XLink> GetDepsXLinks(const XTreeDatabase *db) const;
 		void Clear();
 		
 	private:
@@ -50,7 +53,7 @@ public:
      * teleporter implmentation must report certain information to the supplied 
      * `Dependencies` object.
      * 
-     * 1. To call `AddTreeNode()` for any node in the tree that is a part of
+     * 1. To call `AddDep()` for any node in the tree that is a part of
      * determining the new subtree, and supply a pointer to the TreePtr instance
      * that points to that node. Reason: the deps, are the tree nodes that, 
      * if changed by a replace operation, force us to re-create the domain 

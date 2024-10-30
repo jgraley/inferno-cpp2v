@@ -478,7 +478,7 @@ void StandardAgent::RegenerationQueryCollection( DecidedQueryAgentInterface &que
         // Determine the set of non-star tree pointers 
         SubCollectionRange::ExclusionSet excluded_x;
         for( PatternLink plink : plan_col.non_stars ) // independent of p_x_col
-            excluded_x.insert( hypothesis_links->at(plink).GetXPtr() );
+            excluded_x.insert( hypothesis_links->at(plink).GetTreePtrInterface() );
 
         // Now handle the p_star; all the non-star matches are excluded, leaving only the star matches.
         XLink keyer_xlink = hypothesis_links->at(keyer_plink);

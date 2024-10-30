@@ -26,12 +26,15 @@ TeleportAgent::QueryReturnType PointerIsAgent::RunTeleportQuery( const XTreeData
 		{	
 			// If no parent node, there's no dep to declare, assuming root xlink
 			// pointer type cannot change. Might be better to refuse the whole teleport, TBD.
-			deps->AddTreeNode( parent_node );
+			set<XLink> parents = db->GetNodeRow(parent_node).parents;
+			ASSERT( parents.size() == 1 ); // parent_node has children so it should only have one parent (rule #217)
+			
+			deps->AddDep( OnlyElementOf(parents).GetTreePtrInterface() );			
 		}
 	}
 	
     // Get the pointer that points to us - now from the keyer x link
-    const TreePtrInterface *px = stimulus_xlink.GetXPtr();
+    const TreePtrInterface *px = stimulus_xlink.GetTreePtrInterface();
 	ASSERT(px);     
 	
 	// Make an archetypical node matching the pointer's type

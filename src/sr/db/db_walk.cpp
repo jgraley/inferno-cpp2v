@@ -23,7 +23,7 @@ void DBWalk::VisitBase( const WalkKit &kit,
                -1,
                ContainerInterface::iterator(), 
                ContainerInterface::iterator(),
-               base_xlink.GetXPtr(), 
+               base_xlink.GetTreePtrInterface(), 
                base_xlink, 
                base_xlink.GetChildX() } );
 }
