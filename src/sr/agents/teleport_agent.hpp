@@ -26,7 +26,7 @@ public:
 		void Clear();
 		
 	private:
-		set<const TreePtrInterface *> deps;
+		set<const TreePtrInterface *> deps; // TODO: this class to XLink, then AugBE's p_tree_ptr, then CreateAugTreePtr() and tie off		
 	};
 	
 	/*

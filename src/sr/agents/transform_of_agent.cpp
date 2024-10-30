@@ -185,7 +185,7 @@ set<AugTreePtr<Node>> TransformOfAgent::TransUtils::GetDeclarers( AugTreePtr<Nod
     {   
 		// To be able to report the declarer as a node in the tree, we
 		// must find its parent link
-		set<NavigationInterface::LinkInfo> parent_infos = nav->GetParents( declarer.first );
+		set<NavigationInterface::LinkInfo> parent_infos = nav->GetParents( declarer.first ); // TODO don't use nav interface, in fact scrap the whole thing, just use db
 		if( parent_infos.empty() )
 		{
 			// No parent link found, so we have to assume this is a free subtree
