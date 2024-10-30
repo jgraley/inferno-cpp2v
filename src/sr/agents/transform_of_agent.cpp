@@ -15,6 +15,7 @@ TransformOfAgent::AugBE::AugBE( TreePtr<Node> generic_tree_ptr_, Dependencies *d
 	dest_deps( dest_deps_ )	
 {
 	ASSERT( dest_deps );
+	my_deps.AddTreeNode( generic_tree_ptr );	
 }
 
 
@@ -29,11 +30,10 @@ TransformOfAgent::AugBE::AugBE( const TreePtrInterface *p_tree_ptr_, Dependencie
 	// Not a local automatic please, we're going to hang on to it.
 	ASSERT( !ON_STACK(p_tree_ptr_) );	
 
-	my_deps.AddTreeNode( generic_tree_ptr );
-
-#ifndef DEFER_POLICY
-    if( dest_deps )
-		dest_deps->AddTreeNode( generic_tree_ptr );	
+#ifdef DEFER_POLICY
+	my_deps.AddTreeNode( generic_tree_ptr );		
+#else	
+	dest_deps->AddTreeNode( generic_tree_ptr );	
 #endif		
 }
 
@@ -45,9 +45,11 @@ TransformOfAgent::AugBE::AugBE( const AugBE &other, TreePtr<Node> generic_tree_p
 	my_deps( other.my_deps )
 {
 	ASSERT( dest_deps );
-#ifndef DEFER_POLICY
-    if( dest_deps )
-		dest_deps->AddTreeNode( generic_tree_ptr );	
+
+#ifdef DEFER_POLICY
+	my_deps.AddTreeNode( generic_tree_ptr );
+#else
+	dest_deps->AddTreeNode( generic_tree_ptr );	
 #endif	
 }
 
@@ -64,11 +66,10 @@ TransformOfAgent::AugBE::AugBE( const AugBE &other, const TreePtrInterface *p_tr
 	// Not a local automatic please, we're going to hang on to it.
 	ASSERT( !ON_STACK(p_tree_ptr_) );
 	
+#ifdef DEFER_POLICY
 	my_deps.AddTreeNode( generic_tree_ptr );
-
-#ifndef DEFER_POLICY
-    if( dest_deps )
-		dest_deps->AddTreeNode( generic_tree_ptr );	
+#else
+	dest_deps->AddTreeNode( generic_tree_ptr );	
 #endif		
 }
 
@@ -127,8 +128,10 @@ void TransformOfAgent::AugBE::OnSetChild( const TreePtrInterface *other_tree_ptr
 	if( !n->p_tree_ptr )
 		return; // No action if child is free
 	
+#ifdef DEFER_POLICY
 	// DEFER_POLICY: Meandering into the tree: parent inherits child deps
 	my_deps.AddAll( n->my_deps );
+#endif	
 }
 
 
@@ -137,7 +140,9 @@ void TransformOfAgent::AugBE::OnDepLeak()
 	// DEFER_POLICY: Leap dumps our deps stright into dest
 	// (dest is the resultant dep set for the whole transformation)
 	ASSERT( dest_deps );
+#ifdef DEFER_POLICY
 	dest_deps->AddAll( my_deps );
+#endif	
 }
 
 
@@ -240,8 +245,10 @@ TeleportAgent::QueryReturnType TransformOfAgent::RunTeleportQuery( const XTreeDa
 		
 		ValuePtr<AugBE> be = utils.GetBE(atp);
 		
+#ifdef DEFER_POLICY
 		// Grab the final deps stored in the ATP. Same as a dep leak, but explicit for clarity.
 		deps->AddAll( be->GetDeps() );
+#endif
 		
 		const TreePtrInterface *ptp = be->GetPTreePtr(); 
 		TreePtr<Node> tp = be->GetGenericTreePtr();		
