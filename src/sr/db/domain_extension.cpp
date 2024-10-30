@@ -185,11 +185,17 @@ void DomainExtensionChannel::CheckStimulusXLink( XLink stimulus_xlink )
     if( !info.induced_base_node )
         return;
     
+	set<TreePtr<Node>> tp_deps;
+	for( const TreePtrInterface *p : info.deps )
+		tp_deps.insert( (TreePtr<Node>)*p );
+    
+    
+    
     //ASSERT( deps.size() < 20 )("Big deps for ")(stimulus_xlink)("\n")(deps);
     
-    stimulus_to_induced_and_deps.insert( make_pair( stimulus_xlink, InducedAndDeps(info.induced_base_node, info.deps) ) ); // TODO do we need this if there's already a class?
+    stimulus_to_induced_and_deps.insert( make_pair( stimulus_xlink, InducedAndDeps(info.induced_base_node, tp_deps) ) ); // TODO do we need this if there's already a class?
     
-    for( TreePtr<Node> dep : info.deps )
+    for( TreePtr<Node> dep : tp_deps )
         dep_to_all_stimulii[dep].insert(stimulus_xlink); // TODO do we need this if there's already a class?
     
     // If there's already a class for this node, return it and early-out
