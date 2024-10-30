@@ -37,6 +37,8 @@ public:
 
 		TreePtr<Node> GetGenericTreePtr() const;
 		const TreePtrInterface *GetPTreePtr() const;	
+		const Dependencies &GetDeps() const;
+
 		AugBE *OnGetChild( const TreePtrInterface *other_tree_ptr ) override;
 		void OnSetChild( const TreePtrInterface *other_tree_ptr, AugBEInterface *new_val ) override;
 		void OnDepLeak() override;
@@ -63,8 +65,7 @@ public:
 		ValuePtr<AugBEInterface> CreateBE( TreePtr<Node> tp ) const override;
 			
 		// Getters for AugTreePtr - back end only
-		const TreePtrInterface *GetPTreePtr( const AugTreePtrBase &atp ) const;	
-		TreePtr<Node> GetGenericTreePtr( const AugTreePtrBase &atp ) const;
+		ValuePtr<TransformOfAgent::AugBE> GetBE( const AugTreePtrBase &atp ) const;
 		
 		set<AugTreePtr<Node>> GetDeclarers( AugTreePtr<Node> node ) const override;
 		

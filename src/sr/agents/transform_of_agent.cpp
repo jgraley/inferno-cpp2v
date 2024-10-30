@@ -5,6 +5,8 @@
 
 using namespace SR;
 
+//#define DEFER_POLICY
+
 // ---------------------- TransformOfAgent::AugBE ---------------------------
 
 TransformOfAgent::AugBE::AugBE( TreePtr<Node> generic_tree_ptr_, Dependencies *dest_deps_ ) :
@@ -89,6 +91,12 @@ const TreePtrInterface *TransformOfAgent::AugBE::GetPTreePtr() const
 }
 
 
+const TransformOfAgent::Dependencies &TransformOfAgent::AugBE::GetDeps() const
+{
+	return my_deps;
+}
+
+
 TransformOfAgent::AugBE *TransformOfAgent::AugBE::OnGetChild( const TreePtrInterface *other_tree_ptr )
 {
 	ASSERT( dest_deps );
@@ -160,17 +168,9 @@ ValuePtr<AugBEInterface> TransformOfAgent::TransUtils::CreateBE( TreePtr<Node> t
 }
 
 
-const TreePtrInterface *TransformOfAgent::TransUtils::GetPTreePtr( const AugTreePtrBase &atp ) const
+ValuePtr<TransformOfAgent::AugBE> TransformOfAgent::TransUtils::GetBE( const AugTreePtrBase &atp ) const
 {
-	auto be = ValuePtr<TransformOfAgent::AugBE>::DynamicCast(atp.GetImpl());
-	return be->GetPTreePtr(); 
-}
-
-
-TreePtr<Node> TransformOfAgent::TransUtils::GetGenericTreePtr( const AugTreePtrBase &atp ) const
-{
-	auto be = ValuePtr<TransformOfAgent::AugBE>::DynamicCast(atp.GetImpl());
-	return be->GetGenericTreePtr();
+	return ValuePtr<TransformOfAgent::AugBE>::DynamicCast(atp.GetImpl());	
 }
 
 
@@ -237,11 +237,14 @@ TeleportAgent::QueryReturnType TransformOfAgent::RunTeleportQuery( const XTreeDa
 		AugTreePtr<Node> stimulus_x = utils.CreateAugTreePtr( stimulus_xlink.GetXPtr() );
 		AugTreePtr<Node> atp = transformation->ApplyTransformation( kit, stimulus_x );  
 
-		// TODO do the dyncast here so we only do it once and ASSERT it.
-		// Drop unused methods from Utils.
 		// Then: Extract my_deps and add them to deps here, for clarity (DEFER_POLICY)
-		const TreePtrInterface *ptp = utils.GetPTreePtr(atp);
-		TreePtr<Node> tp = utils.GetGenericTreePtr(atp);
+		ValuePtr<AugBE> be = utils.GetBE(atp);
+		const TreePtrInterface *ptp = be->GetPTreePtr(); 
+		TreePtr<Node> tp = be->GetGenericTreePtr();
+		
+		// Grab the final deps stored in the ATP. Same as a dep leak, but explicit for clarity.
+		deps->AddAll( be->GetDeps() );
+		
 		ASSERT( tp->IsFinal() )(*this)(" computed non-final ")(tp)(" from ")(stimulus_x)("\n");                
 		
         if( ptp ) 
