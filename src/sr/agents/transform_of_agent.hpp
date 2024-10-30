@@ -21,14 +21,16 @@ namespace SR
 /// the tree.
 class TransformOfAgent : public virtual TeleportAgent
 {
-public:
-	// ---------------------- AugBE ---------------------------
+public:    
+	class TransUtils;
+
+	// ---------------------- AugBE ---------------------------	
 	class AugBE : public AugBEInterface, 
 	              public Traceable
 	{
 	public:	
-		AugBE( TreePtr<Node> generic_tree_ptr_, Dependencies *dest_deps_ );
-		AugBE( const TreePtrInterface *p_tree_ptr_, Dependencies *dest_deps_ );
+		AugBE( TreePtr<Node> generic_tree_ptr_, const TransUtils *utils_ );
+		AugBE( const TreePtrInterface *p_tree_ptr_, const TransUtils *utils_ );
 		AugBE( const AugBE &other, TreePtr<Node> generic_tree_ptr_ );
 		AugBE( const AugBE &other, const TreePtrInterface *p_tree_ptr_ );
 		AugBE( const AugBE &other ) = default;	
@@ -48,7 +50,7 @@ public:
 	private:
 		TreePtr<Node> generic_tree_ptr;
 		const TreePtrInterface *p_tree_ptr;
-		Dependencies *dest_deps;	
+		const TransUtils * const utils;	
 		Dependencies my_deps;	
 	};
 
@@ -69,11 +71,11 @@ public:
 		
 		set<AugTreePtr<Node>> GetDeclarers( AugTreePtr<Node> node ) const override;
 		
-		Dependencies *GetDepRep() const;
+		Dependencies *GetDeps() const;
 			
 	private:	
 		const NavigationInterface * const nav;
-		Dependencies *deps;	
+		Dependencies * const deps;	
 	};
 
 	// ---------------------- TransformOfAgent ---------------------------

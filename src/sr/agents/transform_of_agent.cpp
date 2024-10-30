@@ -9,22 +9,22 @@ using namespace SR;
 
 // ---------------------- TransformOfAgent::AugBE ---------------------------
 
-TransformOfAgent::AugBE::AugBE( TreePtr<Node> generic_tree_ptr_, Dependencies *dest_deps_ ) :
+TransformOfAgent::AugBE::AugBE( TreePtr<Node> generic_tree_ptr_, const TransUtils *utils_ ) :
 	generic_tree_ptr(generic_tree_ptr_),
 	p_tree_ptr(nullptr),
-	dest_deps( dest_deps_ )	
+	utils( utils_ )	
 {
-	ASSERT( dest_deps );
+	ASSERT( utils );
 	my_deps.AddTreeNode( generic_tree_ptr );	
 }
 
 
-TransformOfAgent::AugBE::AugBE( const TreePtrInterface *p_tree_ptr_, Dependencies *dest_deps_) :
+TransformOfAgent::AugBE::AugBE( const TreePtrInterface *p_tree_ptr_, const TransUtils *utils_) :
     generic_tree_ptr(*p_tree_ptr_),
 	p_tree_ptr(p_tree_ptr_),
-	dest_deps( dest_deps_ )
+	utils( utils_ )
 {
-	ASSERT( dest_deps );
+	ASSERT( utils );
 	ASSERT( p_tree_ptr );
 	ASSERT( *p_tree_ptr );
 	// Not a local automatic please, we're going to hang on to it.
@@ -33,7 +33,7 @@ TransformOfAgent::AugBE::AugBE( const TreePtrInterface *p_tree_ptr_, Dependencie
 #ifdef DEFER_POLICY
 	my_deps.AddTreeNode( generic_tree_ptr );		
 #else	
-	dest_deps->AddTreeNode( generic_tree_ptr );	
+	utils->GetDeps()->AddTreeNode( generic_tree_ptr );	
 #endif		
 }
 
@@ -41,26 +41,20 @@ TransformOfAgent::AugBE::AugBE( const TreePtrInterface *p_tree_ptr_, Dependencie
 TransformOfAgent::AugBE::AugBE( const AugBE &other, TreePtr<Node> generic_tree_ptr_ ) :
 	generic_tree_ptr(generic_tree_ptr_),
 	p_tree_ptr(nullptr),
-	dest_deps( other.dest_deps ),
+	utils( other.utils ),
 	my_deps( other.my_deps )
 {
-	ASSERT( dest_deps );
-
-#ifdef DEFER_POLICY
-	my_deps.AddTreeNode( generic_tree_ptr );
-#else
-	dest_deps->AddTreeNode( generic_tree_ptr );	
-#endif	
+	ASSERT( utils );
 }
 
 
 TransformOfAgent::AugBE::AugBE( const AugBE &other, const TreePtrInterface *p_tree_ptr_ ) :
     generic_tree_ptr(*p_tree_ptr_),
 	p_tree_ptr(p_tree_ptr_),
-	dest_deps( other.dest_deps ),
+	utils( other.utils ),
 	my_deps( other.my_deps )
 {	
-	ASSERT( dest_deps );
+	ASSERT( utils );
 	ASSERT( p_tree_ptr );
 	ASSERT( *p_tree_ptr );
 	// Not a local automatic please, we're going to hang on to it.
@@ -69,7 +63,7 @@ TransformOfAgent::AugBE::AugBE( const AugBE &other, const TreePtrInterface *p_tr
 #ifdef DEFER_POLICY
 	my_deps.AddTreeNode( generic_tree_ptr );
 #else
-	dest_deps->AddTreeNode( generic_tree_ptr );	
+	utils->GetDeps()->AddTreeNode( generic_tree_ptr );	
 #endif		
 }
 
@@ -100,7 +94,7 @@ const TransformOfAgent::Dependencies &TransformOfAgent::AugBE::GetDeps() const
 
 TransformOfAgent::AugBE *TransformOfAgent::AugBE::OnGetChild( const TreePtrInterface *other_tree_ptr )
 {
-	ASSERT( dest_deps );
+	ASSERT( utils );
 	// If we are Tree then construct+return Tree style, otherwise reduce to Free style. This
 	// is to stop descendents of Free masquerading as Tree.	
 	if( p_tree_ptr )
@@ -119,7 +113,7 @@ TransformOfAgent::AugBE *TransformOfAgent::AugBE::OnGetChild( const TreePtrInter
 
 void TransformOfAgent::AugBE::OnSetChild( const TreePtrInterface *other_tree_ptr, AugBEInterface *new_val )
 {
-	ASSERT( dest_deps );
+	ASSERT( utils );
     auto n = GET_THAT_POINTER(new_val);
 
 	// We have to be free
@@ -139,9 +133,9 @@ void TransformOfAgent::AugBE::OnDepLeak()
 {
 	// DEFER_POLICY: Leap dumps our deps stright into dest
 	// (dest is the resultant dep set for the whole transformation)
-	ASSERT( dest_deps );
+	ASSERT( utils );
 #ifdef DEFER_POLICY
-	dest_deps->AddAll( my_deps );
+	utils->GetDeps().AddAll( my_deps );
 #endif	
 }
 
@@ -163,13 +157,13 @@ TransformOfAgent::TransUtils::TransUtils( const NavigationInterface *nav_, Depen
 AugTreePtr<Node> TransformOfAgent::TransUtils::CreateAugTreePtr(const TreePtrInterface *p_tree_ptr) const
 {
 	return AugTreePtr<Node>((TreePtr<Node>)*p_tree_ptr, 
-	                        ValuePtr<TransformOfAgent::AugBE>::Make(p_tree_ptr, deps));
+	                        ValuePtr<TransformOfAgent::AugBE>::Make(p_tree_ptr, this));
 }	
 
 
 ValuePtr<AugBEInterface> TransformOfAgent::TransUtils::CreateBE( TreePtr<Node> tp ) const 
 {
-	return ValuePtr<TransformOfAgent::AugBE>::Make(tp, deps);
+	return ValuePtr<TransformOfAgent::AugBE>::Make(tp, this);
 }
 
 
@@ -208,7 +202,7 @@ set<AugTreePtr<Node>> TransformOfAgent::TransUtils::GetDeclarers( AugTreePtr<Nod
 }
 
 
-TeleportAgent::Dependencies *TransformOfAgent::TransUtils::GetDepRep() const
+TeleportAgent::Dependencies *TransformOfAgent::TransUtils::GetDeps() const
 {
 	return deps;
 }

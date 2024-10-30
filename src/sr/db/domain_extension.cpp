@@ -311,7 +311,7 @@ void DomainExtensionChannel::Delete(const DBWalk::WalkInfo &walk_info)
         EraseSolo(stimulii_to_recheck, xlink);
     }
     
-    TreePtr<Node> x = walk_info.x;
+    TreePtr<Node> x = xlink.GetChildX();
     
     // Now deal with the case where the deleted xlink is a dependency of a domain 
     // extension: in this case, we want to remove it but remember that we want to 
