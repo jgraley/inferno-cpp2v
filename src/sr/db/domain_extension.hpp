@@ -38,7 +38,7 @@ public:
 		struct Info
 		{
 			TreePtr<Node> induced_base_node;
-			set<const TreePtrInterface *> deps;
+			set<XLink> deps;
 		}; 
 		virtual Info GetDomainExtension( const XTreeDatabase *db, XLink xlink ) const = 0;
 		virtual bool IsExtenderChannelLess( const Extender &r ) const = 0;

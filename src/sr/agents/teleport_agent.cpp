@@ -32,9 +32,13 @@ void TeleportAgent::Dependencies::AddAll( const Dependencies &other )
 }
 
 
-set<const TreePtrInterface *> TeleportAgent::Dependencies::GetDeps() const
+set<XLink> TeleportAgent::Dependencies::GetAll(const XTreeDatabase *db) const
 {
-	return deps;
+	set<XLink> xlink_deps;
+	for( const TreePtrInterface *p : deps )
+		if( XLink xlink = db->TryGetXLink(p) )
+			xlink_deps.insert( xlink );
+	return xlink_deps;
 }
 
 
@@ -89,14 +93,14 @@ DomainExtension::Extender::Info TeleportAgent::GetDomainExtension( const XTreeDa
 	if( tq_result.first ) // parent link was supplied
 	{
 		ASSERT( !tq_result.second ); // Consistency
-		ASSERT( deps.GetDeps().count( tq_result.first.GetTreePtrInterface() ) > 0 ); // Result should be a dep
+		ASSERT( deps.GetAll(db).count( tq_result.first ) > 0 ); // Result should be a dep
 		return DomainExtension::Extender::Info(); // Don't bother Domain when there's an XLink
 	}		
 
 	//ASSERT( deps.GetDeps().count( tq_result.second ) > 0 ); // Result should be a dep
 
 	DomainExtension::Extender::Info info;
-	info.deps = deps.GetDeps();	    
+	info.deps = deps.GetAll(db);	    
 	info.induced_base_node = tq_result.second;
 	return info;
 }
