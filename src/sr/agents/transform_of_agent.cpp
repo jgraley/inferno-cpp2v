@@ -6,8 +6,6 @@
 
 using namespace SR;
 
-#define DEFER_POLICY 
-
 // ---------------------- TransformOfAgent::AugBE ---------------------------
 
 TransformOfAgent::AugBE::AugBE( TreePtr<Node> generic_tree_ptr_, const TransUtils *utils_ ) :
@@ -16,6 +14,8 @@ TransformOfAgent::AugBE::AugBE( TreePtr<Node> generic_tree_ptr_, const TransUtil
 	generic_tree_ptr(generic_tree_ptr_),
 	my_deps(make_shared<Dependencies>())
 {
+	// When constructed from TreePtr, we can assume it's new and free
+	// We have nothing we can depend on.
 	ASSERT( utils );
 }
 
@@ -29,11 +29,9 @@ TransformOfAgent::AugBE::AugBE( XLink xlink_, const TransUtils *utils_) :
 	ASSERT( utils );
 	ASSERT( xlink );
 
-#ifdef DEFER_POLICY
-	my_deps->AddDep( xlink );		
-#else	
-	utils->GetDeps()->AddDep( xlink );
-#endif		
+	// When constructed from XLink, we can assume it came from the tree
+	// Policy: when constructing from tree, depend on self
+	my_deps->AddDep( xlink );			
 }
 
 
@@ -41,8 +39,11 @@ TransformOfAgent::AugBE::AugBE( const AugBE &other, TreePtr<Node> generic_tree_p
 	utils( other.utils ),
 	xlink(),
 	generic_tree_ptr(generic_tree_ptr_),
-	my_deps( other.my_deps )
+	my_deps( other.my_deps ) // TODO take a copy
 {
+	// Partial copy-construct with TreePtr, we can assume it's new and free
+	// Policy: copy in the deps, but we have nothing to add
+
 	ASSERT( utils );
 }
 
@@ -51,16 +52,14 @@ TransformOfAgent::AugBE::AugBE( const AugBE &other, XLink xlink_ ) :
 	utils( other.utils ),
 	xlink(xlink_),
     generic_tree_ptr(xlink.GetChildTreePtr()),
-	my_deps( other.my_deps )
+	my_deps( other.my_deps ) // TODO take a copy
 {	
 	ASSERT( utils );
 	ASSERT( xlink );
 	
-#ifdef DEFER_POLICY
-	my_deps->AddDep( xlink );
-#else
-	utils->GetDeps()->AddDep( xlink );	
-#endif		
+	// Partial copy-construct with xlink, we can assume it came from tree
+	// Policy: copy in the deps, and add in self as another dependency
+	my_deps->AddDep( xlink );	
 }
 
 
@@ -96,13 +95,13 @@ TransformOfAgent::AugBE *TransformOfAgent::AugBE::OnGetChild( const TreePtrInter
 	{
 		// We're roaming the x tree
 		ASSERT( !ON_STACK(other_tree_ptr) );
-		// DEFER_POLICY: my_deps will be shared with the new node, which will add itself
+		// Policy: my_deps will be copied into with the new node, which will add itself
 		return new TransformOfAgent::AugBE(*this, utils->db->GetXLink(other_tree_ptr)); // tree
 	}
 	else
 	{
 		// We're moving through our free tree - not illegal
-		// DEFER_POLICY: my_deps will be shared with the new node, which will add itself
+		// Policy: my_deps will be copied into the new node
 		return new TransformOfAgent::AugBE(*this, (TreePtr<Node>)*other_tree_ptr); // free
 	}
 }
@@ -116,33 +115,27 @@ void TransformOfAgent::AugBE::OnSetChild( const TreePtrInterface *other_tree_ptr
 	// We have to be free
 	ASSERT( !xlink )("Transformation attempts to modify the tree!");
 	
-	if( n->xlink )
+	if( n->xlink ) // TODO both bodies are the same
 	{	
 		// we've meandered into the x tree
-#ifdef DEFER_POLICY
-		// DEFER_POLICY: Meandering into the tree: parent indirects to child deps
+		// Policy: parent indirects to child's deps 
 		my_deps->AddInd( n->my_deps );
-#endif
 	}	
 	else
 	{
-#ifdef DEFER_POLICY
 		// we're building our free tree
-		// DEFER_POLICY: Construction: parent indirects to child deps
+		// Policy: parent indirects to child's deps 
 		my_deps->AddInd( n->my_deps );
-#endif
 	}
 }
 
 
 void TransformOfAgent::AugBE::OnDepLeak()
 {
-	// DEFER_POLICY: Leap dumps our deps stright into dest
+	// Policy: Leap dumps our deps stright into dest
 	// (dest is the resultant dep set for the whole transformation)
 	ASSERT( utils );
-#ifdef DEFER_POLICY
 	utils->GetDeps()->AddAll( *my_deps );
-#endif	
 }
 
 
@@ -236,10 +229,8 @@ TeleportAgent::QueryReturnType TransformOfAgent::RunTeleportQuery( const XTreeDa
 		
 		ValuePtr<AugBE> be = utils.GetBE(atp);
 		
-#ifdef DEFER_POLICY
 		// Grab the final deps stored in the ATP. Same as a dep leak, but explicit for clarity.
 		deps->AddAll( be->GetDeps() );
-#endif
 		
 		XLink xlink = be->GetXLink(); 
 		TreePtr<Node> tp = be->GetGenericTreePtr();		
