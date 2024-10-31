@@ -6,7 +6,7 @@
 
 using namespace SR;
 
-//#define DEFER_POLICY
+#define DEFER_POLICY
 
 // ---------------------- TransformOfAgent::AugBE ---------------------------
 
@@ -141,7 +141,7 @@ void TransformOfAgent::AugBE::OnDepLeak()
 	// (dest is the resultant dep set for the whole transformation)
 	ASSERT( utils );
 #ifdef DEFER_POLICY
-	utils->GetDeps().AddAll( *my_deps );
+	utils->GetDeps()->AddAll( *my_deps );
 #endif	
 }
 
