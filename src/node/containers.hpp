@@ -22,7 +22,7 @@
 
 //----------------------- ContainerInterface -------------------------
 
-class ContainerInterface : public virtual Traceable, public virtual Itemiser::Element
+class ContainerInterface : public virtual Itemiser::Element
 {
 public:
 	// Abstract base class for the implementation-specific iterators in containers.

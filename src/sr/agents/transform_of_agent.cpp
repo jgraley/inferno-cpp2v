@@ -2,6 +2,7 @@
 #include "../scr_engine.hpp"
 #include "link.hpp"
 #include "db/x_tree_database.hpp"
+#include "../../tree/cpptree.hpp"
 
 using namespace SR;
 
@@ -35,8 +36,8 @@ TransformOfAgent::AugBE::AugBE( const TreePtrInterface *p_tree_ptr_, const Trans
 #ifdef DEFER_POLICY
 	my_deps.AddDep( generic_tree_ptr );		
 #else	
-    if( XLink xlink = utils->db->TryGetXLink(p_tree_ptr) )
-		utils->GetDeps()->AddDep( xlink );	
+    XLink xlink = utils->db->GetXLink(p_tree_ptr);
+	utils->GetDeps()->AddDep( xlink );
 #endif		
 }
 
@@ -66,8 +67,8 @@ TransformOfAgent::AugBE::AugBE( const AugBE &other, const TreePtrInterface *p_tr
 #ifdef DEFER_POLICY
 	my_deps.AddDep( generic_tree_ptr );
 #else
-    if( XLink xlink = utils->db->TryGetXLink(p_tree_ptr) )
-		utils->GetDeps()->AddDep( xlink );	
+    XLink xlink = utils->db->GetXLink(p_tree_ptr);
+	utils->GetDeps()->AddDep( xlink );	
 #endif		
 }
 
@@ -228,7 +229,7 @@ TeleportAgent::QueryReturnType TransformOfAgent::RunTeleportQuery( const XTreeDa
 
     try
     {
-		AugTreePtr<Node> stimulus_x = utils.CreateAugTreePtr( stimulus_xlink );
+		AugTreePtr<Node> stimulus_x = utils.CreateAugTreePtr( stimulus_xlink );	
 		
 		AugTreePtr<Node> atp = transformation->ApplyTransformation( kit, stimulus_x );  
 		

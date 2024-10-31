@@ -86,8 +86,13 @@ void XTreeDatabase::Insert(XLink base_xlink)
     plan.orderings->PrepareInsert( actions );
     plan.link_table->PrepareInsert( actions );
     plan.node_table->PrepareInsert( actions );
-    plan.domain_extension->PrepareInsert( actions );
     db_walker.Walk( &actions, base_xlink, DBWalk::BASE );
+    
+    // Domain extension wants to meander around the XTree, consulting
+    // parents, children, anything really. So we need a separate pass.
+    DBWalk::Actions actions2;
+    plan.domain_extension->PrepareInsert( actions2 );
+    db_walker.Walk( &actions2, base_xlink, DBWalk::BASE );
 }
 
 

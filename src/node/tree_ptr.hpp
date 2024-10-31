@@ -31,7 +31,7 @@ struct TreePtr;
 // An interface for our TreePtr object. This interface works regardless of pointed-to
 // type; it also masquerades as a TreePtr to Node type, which should be the
 // base class of the pointed-to things.
-struct TreePtrInterface : virtual Itemiser::Element, public Traceable
+struct TreePtrInterface : virtual Itemiser::Element
 {
     // Convert to and from shared_ptr<VALUE_INTERFACE> and TreePtr<VALUE_INTERFACE>
 	virtual explicit operator shared_ptr<Node>() const = 0; 

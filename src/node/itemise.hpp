@@ -19,7 +19,7 @@ using namespace std;
 class Itemiser : public virtual Traceable
 {
 public:
-    class Element
+    class Element : public virtual Traceable
     {
     public:
         virtual ~Element() {}
@@ -37,7 +37,7 @@ public:
                 //TRACE("Itemiser caught ptr %p which is offset %d\n", this, ofs );
             }
             return *this;
-        }
+        }        
     };
     
 	template< class ITEMISE_TYPE >
