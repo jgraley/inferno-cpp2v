@@ -13,25 +13,24 @@ using namespace SR;
 TransformOfAgent::AugBE::AugBE( TreePtr<Node> generic_tree_ptr_, const TransUtils *utils_ ) :
 	utils( utils_ ),	
 	xlink(),
-	generic_tree_ptr(generic_tree_ptr_)
+	generic_tree_ptr(generic_tree_ptr_),
+	my_deps(make_shared<Dependencies>())
 {
 	ASSERT( utils );
-#ifdef DEFER_POLICY
-	my_deps.AddDep( generic_tree_ptr );	
-#endif
 }
 
 
 TransformOfAgent::AugBE::AugBE( XLink xlink_, const TransUtils *utils_) :
 	utils( utils_ ),
 	xlink(xlink_),
-    generic_tree_ptr(xlink.GetChildTreePtr())
+    generic_tree_ptr(xlink.GetChildTreePtr()),
+	my_deps(make_shared<Dependencies>())
 {
 	ASSERT( utils );
 	ASSERT( xlink );
 
 #ifdef DEFER_POLICY
-	my_deps.AddDep( generic_tree_ptr );		
+	my_deps->AddDep( xlink );		
 #else	
 	utils->GetDeps()->AddDep( xlink );
 #endif		
@@ -58,7 +57,7 @@ TransformOfAgent::AugBE::AugBE( const AugBE &other, XLink xlink_ ) :
 	ASSERT( xlink );
 	
 #ifdef DEFER_POLICY
-	my_deps.AddDep( generic_tree_ptr );
+	my_deps->AddDep( xlink );
 #else
 	utils->GetDeps()->AddDep( xlink );	
 #endif		
@@ -77,15 +76,15 @@ TreePtr<Node> TransformOfAgent::AugBE::GetGenericTreePtr() const
 }
 
 
-const TreePtrInterface *TransformOfAgent::AugBE::GetPTreePtr() const
+XLink TransformOfAgent::AugBE::GetXLink() const
 {
-	return xlink.GetTreePtrInterface();
+	return xlink;
 }
 
 
 const TransformOfAgent::Dependencies &TransformOfAgent::AugBE::GetDeps() const
 {
-	return my_deps;
+	return *my_deps;
 }
 
 
@@ -95,13 +94,15 @@ TransformOfAgent::AugBE *TransformOfAgent::AugBE::OnGetChild( const TreePtrInter
 	// is to stop descendents of Free masquerading as Tree.	
 	if( xlink )
 	{
+		// We're roaming the x tree
 		ASSERT( !ON_STACK(other_tree_ptr) );
-		// DEFER_POLICY: my_deps will be handed to the new node, which will add itself
+		// DEFER_POLICY: my_deps will be shared with the new node, which will add itself
 		return new TransformOfAgent::AugBE(*this, utils->db->GetXLink(other_tree_ptr)); // tree
 	}
 	else
 	{
-		// DEFER_POLICY: my_deps will be handed to the new node, which will add itself
+		// We're moving through our free tree - not illegal
+		// DEFER_POLICY: my_deps will be shared with the new node, which will add itself
 		return new TransformOfAgent::AugBE(*this, (TreePtr<Node>)*other_tree_ptr); // free
 	}
 }
@@ -115,13 +116,22 @@ void TransformOfAgent::AugBE::OnSetChild( const TreePtrInterface *other_tree_ptr
 	// We have to be free
 	ASSERT( !xlink )("Transformation attempts to modify the tree!");
 	
-	if( !n->xlink )
-		return; // No action if child is free
-	
+	if( n->xlink )
+	{	
+		// we've meandered into the x tree
 #ifdef DEFER_POLICY
-	// DEFER_POLICY: Meandering into the tree: parent inherits child deps
-	my_deps.AddAll( n->my_deps );
-#endif	
+		// DEFER_POLICY: Meandering into the tree: parent indirects to child deps
+		my_deps->AddInd( n->my_deps );
+#endif
+	}	
+	else
+	{
+#ifdef DEFER_POLICY
+		// we're building our free tree
+		// DEFER_POLICY: Construction: parent indirects to child deps
+		my_deps->AddInd( n->my_deps );
+#endif
+	}
 }
 
 
@@ -131,7 +141,7 @@ void TransformOfAgent::AugBE::OnDepLeak()
 	// (dest is the resultant dep set for the whole transformation)
 	ASSERT( utils );
 #ifdef DEFER_POLICY
-	utils->GetDeps().AddAll( my_deps );
+	utils->GetDeps().AddAll( *my_deps );
 #endif	
 }
 
@@ -231,13 +241,13 @@ TeleportAgent::QueryReturnType TransformOfAgent::RunTeleportQuery( const XTreeDa
 		deps->AddAll( be->GetDeps() );
 #endif
 		
-		const TreePtrInterface *ptp = be->GetPTreePtr(); 
+		XLink xlink = be->GetXLink(); 
 		TreePtr<Node> tp = be->GetGenericTreePtr();		
 		ASSERT( tp->IsFinal() )(*this)(" computed non-final ")(tp)(" from ")(stimulus_x)("\n");                				
-        if( ptp ) 
-            return make_pair(db->GetXLink( ptp ), nullptr);  // parent was specified      
+        if( xlink ) 
+            return make_pair(xlink, nullptr);  // tree      
 		else
-            return make_pair(XLink(), tp);  // no parent specified 
+            return make_pair(XLink(), tp);  // free 
 	}
     catch( const ::Mismatch &e )
     {
@@ -292,4 +302,6 @@ int TransformOfAgent::GetExtenderChannelOrdinal() const
 {
 	return 1; // TODO class id as an ordinal?
 }
+
+
 

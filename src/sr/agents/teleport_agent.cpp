@@ -25,20 +25,32 @@ void TeleportAgent::Dependencies::AddDep( XLink dep )
 }		
 
 
+void TeleportAgent::Dependencies::AddInd( shared_ptr<Dependencies> ind )
+{
+	inds.insert( ind );
+}
+
+
 void TeleportAgent::Dependencies::AddAll( const Dependencies &other )
 {
-    for( XLink d : deps )
+    for( XLink d : other.deps )    
 		AddDep(d);
+    for( shared_ptr<Dependencies> i : other.inds )    
+		AddInd(i);
 }
 
 
 set<XLink> TeleportAgent::Dependencies::GetAll() const
 {
-	/*set<XLink> xlink_deps;
-	for( const TreePtrInterface *p : deps )
-		if( XLink xlink = db->TryGetXLink(p) )
-			xlink_deps.insert( xlink );*/
-	return deps;
+	set<XLink> all_deps = deps;
+    for( shared_ptr<Dependencies> i : inds )    
+	{
+		set<XLink> i_deps = i->GetAll();
+		for( XLink d : i_deps )   
+			all_deps.insert(d);
+	}	
+	
+	return all_deps;
 }
 
 

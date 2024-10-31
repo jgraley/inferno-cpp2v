@@ -38,7 +38,7 @@ public:
 		AugBE *Clone() const override;
 
 		TreePtr<Node> GetGenericTreePtr() const;
-		const TreePtrInterface *GetPTreePtr() const;	
+		XLink GetXLink() const;	
 		const Dependencies &GetDeps() const;
 
 		AugBE *OnGetChild( const TreePtrInterface *other_tree_ptr ) override;
@@ -51,7 +51,7 @@ public:
 		const TransUtils * const utils;	
 		XLink xlink;
 		TreePtr<Node> generic_tree_ptr;
-		Dependencies my_deps;	
+		shared_ptr<Dependencies> my_deps;			
 	};
 
 	// ---------------------- TransUtils ---------------------------
