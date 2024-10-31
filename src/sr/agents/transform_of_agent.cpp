@@ -6,7 +6,7 @@
 
 using namespace SR;
 
-#define DEFER_POLICY
+#define DEFER_POLICY 
 
 // ---------------------- TransformOfAgent::AugBE ---------------------------
 
