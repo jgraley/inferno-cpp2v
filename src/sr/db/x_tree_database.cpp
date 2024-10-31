@@ -301,58 +301,13 @@ void XTreeDatabase::Dump() const
 
 set<NavigationInterface::LinkInfo> XTreeDatabase::GetParents( TreePtr<Node> node ) const
 {
-    set<LinkInfo> infos;
-   
-    if( !plan.node_table->HasRow(node) ) // not found
-        throw UnknownNode();
-        
-    NodeTable::Row row = plan.node_table->GetRow(node);
-    ASSERT( !row.parents.empty() )("node=")(node);
-    for( XLink parent_xlink : row.parents )
-    {
-        LinkInfo info;
-        
-        // first is TreePtr to the declarer node. Loses info about which 
-        // link declared (in case of parallel links) but gets you the declarer node.
-        info.first = TryGetParentXLink(parent_xlink).GetChildX();
-
-        // second is TreePtrInterface * to the declarer's pointer to declaree
-        // Retains precise info about which link.
-        info.second = parent_xlink.GetTreePtrInterface();
-        
-        infos.insert( info );
-    }
-    ASSERT( !infos.empty() )("node=")(node);
-    return infos;
+    ASSERTFAIL(); // deprecated
 }
 
 
 set<NavigationInterface::LinkInfo> XTreeDatabase::GetDeclarers( TreePtr<Node> node ) const
 {
-    set<LinkInfo> infos;
-   
-    if( !plan.node_table->HasRow(node) ) // not found
-        throw UnknownNode();
-        
-    NodeTable::Row row = plan.node_table->GetRow(node);
-    // Note that row.declarers is "precise", i.e. the XLinks are the actual
-    // declaring xlinks, not just arbitrary parent links to the declaree.
-    // Also correct for parallel links where only some declare.
-    for( XLink declarer_xlink : row.declarers ) // TODO give XLink a method to generate this
-    {
-        LinkInfo info;
-        
-        // first is TreePtr to the declarer node. Imprecise: loses info about which 
-        // link declared (in case of parallel links) but gets you the declarer node.
-        info.first = TryGetParentXLink(declarer_xlink).GetChildX();
-
-        // second is TreePtrInterface * to the declarer's pointer to declaree
-        // Retains precise info about which link.
-        info.second = declarer_xlink.GetTreePtrInterface();
-        
-        infos.insert( info );
-    }
-    return infos;
+    ASSERTFAIL(); // deprecated
 }
 
 

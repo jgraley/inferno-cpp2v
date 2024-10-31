@@ -158,10 +158,10 @@ TransformOfAgent::TransUtils::TransUtils( const XTreeDatabase *db_, Dependencies
 }	
 
 
-AugTreePtr<Node> TransformOfAgent::TransUtils::CreateAugTreePtr(const TreePtrInterface *p_tree_ptr) const
+AugTreePtr<Node> TransformOfAgent::TransUtils::CreateAugTreePtr(XLink xlink) const
 {
-	return AugTreePtr<Node>((TreePtr<Node>)*p_tree_ptr, 
-	                        ValuePtr<TransformOfAgent::AugBE>::Make(p_tree_ptr, this));
+	return AugTreePtr<Node>(xlink.GetChildX(), 
+	                        ValuePtr<TransformOfAgent::AugBE>::Make(xlink.GetTreePtrInterface(), this));
 }	
 
 
@@ -179,26 +179,30 @@ ValuePtr<TransformOfAgent::AugBE> TransformOfAgent::TransUtils::GetBE( const Aug
 
 set<AugTreePtr<Node>> TransformOfAgent::TransUtils::GetDeclarers( AugTreePtr<Node> node ) const
 {
-    set<NavigationInterface::LinkInfo> declarer_infos = db->GetDeclarers( node.GetTreePtr() );  
+    if( !db->HasNodeRow(node.GetTreePtr()) ) // not found
+        throw NavigationInterface::UnknownNode();
+
+    NodeTable::Row node_row = db->GetNodeRow( node.GetTreePtr() );  
     
     // Generate ATPs from declarers
 	set<AugTreePtr<Node>> atp_declarers;	
-    for( NavigationInterface::LinkInfo declarer : declarer_infos )
+    for( XLink declarer_xlink : node_row.declarers )
     {   
 		// To be able to report the declarer as a node in the tree, we
 		// must find its parent link
-		set<NavigationInterface::LinkInfo> parent_infos = db->GetParents( declarer.first ); // TODO don't use nav interface, in fact scrap the whole thing, just use db
-		if( parent_infos.empty() )
+		TreePtr<Node> declarer_node = db->TryGetParentXLink(declarer_xlink).GetChildX();
+		NodeTable::Row declarer_row = db->GetNodeRow(declarer_node);
+		if( declarer_row.parents.empty() )
 		{
 			// No parent link found, so we have to assume this is a free subtree
-			atp_declarers.insert( AugTreePtr<Node>(declarer.first) );
+			atp_declarers.insert( AugTreePtr<Node>(declarer_node) );
 		}
 		else
 		{
-			const TreePtrInterface *declarer_parent_link = OnlyElementOf( parent_infos ).second;
+			XLink declarer_xlink = OnlyElementOf( declarer_row.parents );
 
 			// Report and return
-			atp_declarers.insert( CreateAugTreePtr(declarer_parent_link) ); 
+			atp_declarers.insert( CreateAugTreePtr(declarer_xlink) ); 
 		}
 	}
 	
@@ -237,7 +241,7 @@ TeleportAgent::QueryReturnType TransformOfAgent::RunTeleportQuery( const XTreeDa
 
     try
     {
-		AugTreePtr<Node> stimulus_x = utils.CreateAugTreePtr( stimulus_xlink.GetTreePtrInterface() );
+		AugTreePtr<Node> stimulus_x = utils.CreateAugTreePtr( stimulus_xlink );
 		
 		AugTreePtr<Node> atp = transformation->ApplyTransformation( kit, stimulus_x );  
 		

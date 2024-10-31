@@ -62,7 +62,7 @@ public:
 							 Dependencies *deps_ );
 
 		// Create AugTreePtr from a link
-		AugTreePtr<Node> CreateAugTreePtr(const TreePtrInterface *p_tree_ptr) const;
+		AugTreePtr<Node> CreateAugTreePtr(XLink xlink) const;
 
 		ValuePtr<AugBEInterface> CreateBE( TreePtr<Node> tp ) const override;
 			
