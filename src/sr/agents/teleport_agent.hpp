@@ -23,12 +23,16 @@ public:
 		void AddChainTo( shared_ptr<Dependencies> chain );						
 		void CopyAllFrom( const Dependencies &other );
 
-		set<XLink> GetAll() const; // TODO recurse
+		set<XLink> GetAll() const; 
 		void Clear();
 		
 	private:
-		set<XLink> deps; // TODO: this class to XLink, then AugBE's p_tree_ptr, then CreateAugTreePtr() and tie off		
-		set<shared_ptr<Dependencies>> chains;
+		set<XLink> deps; 
+		set<shared_ptr<Dependencies>> chains; // TODO try weak_ptr
+		// Note on chaining: this allows us to say, "This ATP's deps will always 
+		// include that ATP's deps, even if that ATP's deps change later". It
+		// effects propagation in the reverse direction of the chaining which
+		// is executed at the end by GetAll().
 	};
 	
 	/*
@@ -63,7 +67,12 @@ public:
      * Related: #689 #693 #696. Also see AugTreePtr<>.
      */
     typedef pair<XLink, TreePtr<Node>> QueryReturnType;    // TODO if this is worth a comment that big, it's worth a struct, lol. 
-    // Just use a unique_ptr<Zone>: TreeZone = result, FreeZone = induced
+    // Just use a unique_ptr<Zone>: TreeZone = result, FreeZone = induced - NO, that would not be a FreeZone
+    // Discriminator has 3 values: XTREE, INDUCED, FAILED
+    // TODO inculude the deps here? Otherwise, just use set<Xlink>
+    // TODO clean out Navigation stuff, just put in DefaultUtils
+    // TODO something I forgot
+    // TODO a checker: walk entire subtree: boundary XLinks to be in deps; they and all below should be in database
         
     virtual QueryReturnType RunTeleportQuery( const XTreeDatabase *db, Dependencies *deps, XLink stimulus_xlink ) const = 0;
     
