@@ -25,28 +25,28 @@ void TeleportAgent::Dependencies::AddDep( XLink dep )
 }		
 
 
-void TeleportAgent::Dependencies::AddInd( shared_ptr<Dependencies> ind )
+void TeleportAgent::Dependencies::AddChainTo( shared_ptr<Dependencies> chain )
 {
-	inds.insert( ind );
+	chains.insert( chain );
 }
 
 
-void TeleportAgent::Dependencies::AddAll( const Dependencies &other )
+void TeleportAgent::Dependencies::CopyAllFrom( const Dependencies &other )
 {
     for( XLink d : other.deps )    
 		AddDep(d);
-    for( shared_ptr<Dependencies> i : other.inds )    
-		AddInd(i);
+    for( shared_ptr<Dependencies> c : other.chains )    
+		AddChainTo(c);
 }
 
 
 set<XLink> TeleportAgent::Dependencies::GetAll() const
 {
 	set<XLink> all_deps = deps;
-    for( shared_ptr<Dependencies> i : inds )    
+    for( shared_ptr<Dependencies> c : chains )    
 	{
-		set<XLink> i_deps = i->GetAll();
-		for( XLink d : i_deps )   
+		set<XLink> c_deps = c->GetAll();
+		for( XLink d : c_deps )   
 			all_deps.insert(d);
 	}	
 	

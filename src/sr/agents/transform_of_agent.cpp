@@ -39,10 +39,11 @@ TransformOfAgent::AugBE::AugBE( const AugBE &other, TreePtr<Node> generic_tree_p
 	utils( other.utils ),
 	xlink(),
 	generic_tree_ptr(generic_tree_ptr_),
-	my_deps( other.my_deps ) // TODO take a copy
+	my_deps(make_shared<Dependencies>())	
 {
 	// Partial copy-construct with TreePtr, we can assume it's new and free
 	// Policy: copy in the deps, but we have nothing to add
+	my_deps->CopyAllFrom( *other.my_deps );
 
 	ASSERT( utils );
 }
@@ -52,13 +53,14 @@ TransformOfAgent::AugBE::AugBE( const AugBE &other, XLink xlink_ ) :
 	utils( other.utils ),
 	xlink(xlink_),
     generic_tree_ptr(xlink.GetChildTreePtr()),
-	my_deps( other.my_deps ) // TODO take a copy
+	my_deps(make_shared<Dependencies>())	
 {	
 	ASSERT( utils );
 	ASSERT( xlink );
 	
 	// Partial copy-construct with xlink, we can assume it came from tree
 	// Policy: copy in the deps, and add in self as another dependency
+	my_deps->CopyAllFrom( *other.my_deps );
 	my_deps->AddDep( xlink );	
 }
 
@@ -114,19 +116,10 @@ void TransformOfAgent::AugBE::OnSetChild( const TreePtrInterface *other_tree_ptr
 
 	// We have to be free
 	ASSERT( !xlink )("Transformation attempts to modify the tree!");
-	
-	if( n->xlink ) // TODO both bodies are the same
-	{	
-		// we've meandered into the x tree
-		// Policy: parent indirects to child's deps 
-		my_deps->AddInd( n->my_deps );
-	}	
-	else
-	{
-		// we're building our free tree
-		// Policy: parent indirects to child's deps 
-		my_deps->AddInd( n->my_deps );
-	}
+			
+	// We're building our free tree OR we're meandering into the x tree
+	// Policy: parent indirects to child's deps 
+	my_deps->AddChainTo( n->my_deps );
 }
 
 
@@ -135,7 +128,7 @@ void TransformOfAgent::AugBE::OnDepLeak()
 	// Policy: Leap dumps our deps stright into dest
 	// (dest is the resultant dep set for the whole transformation)
 	ASSERT( utils );
-	utils->GetDeps()->AddAll( *my_deps );
+	utils->GetDeps()->CopyAllFrom( *my_deps );
 }
 
 
@@ -230,7 +223,7 @@ TeleportAgent::QueryReturnType TransformOfAgent::RunTeleportQuery( const XTreeDa
 		ValuePtr<AugBE> be = utils.GetBE(atp);
 		
 		// Grab the final deps stored in the ATP. Same as a dep leak, but explicit for clarity.
-		deps->AddAll( be->GetDeps() );
+		deps->CopyAllFrom( be->GetDeps() );
 		
 		XLink xlink = be->GetXLink(); 
 		TreePtr<Node> tp = be->GetGenericTreePtr();		

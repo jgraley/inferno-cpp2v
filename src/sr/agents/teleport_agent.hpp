@@ -20,15 +20,15 @@ public:
 	{
 	public:	
 		void AddDep( XLink dep );						
-		void AddInd( shared_ptr<Dependencies> ind );						
-		void AddAll( const Dependencies &other );
+		void AddChainTo( shared_ptr<Dependencies> chain );						
+		void CopyAllFrom( const Dependencies &other );
 
 		set<XLink> GetAll() const; // TODO recurse
 		void Clear();
 		
 	private:
 		set<XLink> deps; // TODO: this class to XLink, then AugBE's p_tree_ptr, then CreateAugTreePtr() and tie off		
-		set<shared_ptr<Dependencies>> inds;
+		set<shared_ptr<Dependencies>> chains;
 	};
 	
 	/*
