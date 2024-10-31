@@ -19,14 +19,14 @@ public:
     class Dependencies
 	{
 	public:	
-		void AddDep( const TreePtrInterface *p_tree_ptr );						
+		void AddDep( XLink dep );						
 		void AddAll( const Dependencies &other );
 
-		set<XLink> GetAll(const XTreeDatabase *db) const;
+		set<XLink> GetAll() const;
 		void Clear();
 		
 	private:
-		set<const TreePtrInterface *> deps; // TODO: this class to XLink, then AugBE's p_tree_ptr, then CreateAugTreePtr() and tie off		
+		set<XLink> deps; // TODO: this class to XLink, then AugBE's p_tree_ptr, then CreateAugTreePtr() and tie off		
 	};
 	
 	/*

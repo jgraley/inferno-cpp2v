@@ -58,7 +58,7 @@ public:
 	class TransUtils : public TransUtilsInterface
 	{
 	public:	
-		explicit TransUtils( const NavigationInterface *nav_, 
+		explicit TransUtils( const XTreeDatabase *db_, 
 							 Dependencies *deps_ );
 
 		// Create AugTreePtr from a link
@@ -73,8 +73,8 @@ public:
 		
 		Dependencies *GetDeps() const;
 			
-	private:	
-		const NavigationInterface * const nav;
+	public: // TODO private:	
+		const XTreeDatabase * const db;
 		Dependencies * const deps;	
 	};
 

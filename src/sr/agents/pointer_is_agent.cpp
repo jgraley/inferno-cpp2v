@@ -29,7 +29,7 @@ TeleportAgent::QueryReturnType PointerIsAgent::RunTeleportQuery( const XTreeData
 			set<XLink> parent_xlinks = db->GetNodeRow(parent_node).parents;
 			ASSERT( parent_xlinks.size() == 1 ); // parent_node has children so it should only have one parent (rule #217)
 			
-			deps->AddDep( OnlyElementOf(parent_xlinks).GetTreePtrInterface() );			
+			deps->AddDep( OnlyElementOf(parent_xlinks) );			
 		}
 	}
 	

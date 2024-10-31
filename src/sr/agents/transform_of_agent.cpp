@@ -35,7 +35,8 @@ TransformOfAgent::AugBE::AugBE( const TreePtrInterface *p_tree_ptr_, const Trans
 #ifdef DEFER_POLICY
 	my_deps.AddDep( generic_tree_ptr );		
 #else	
-	utils->GetDeps()->AddDep( p_tree_ptr );	
+    if( XLink xlink = utils->db->TryGetXLink(p_tree_ptr) )
+		utils->GetDeps()->AddDep( xlink );	
 #endif		
 }
 
@@ -65,7 +66,8 @@ TransformOfAgent::AugBE::AugBE( const AugBE &other, const TreePtrInterface *p_tr
 #ifdef DEFER_POLICY
 	my_deps.AddDep( generic_tree_ptr );
 #else
-	utils->GetDeps()->AddDep( p_tree_ptr );	
+    if( XLink xlink = utils->db->TryGetXLink(p_tree_ptr) )
+		utils->GetDeps()->AddDep( xlink );	
 #endif		
 }
 
@@ -149,8 +151,8 @@ string TransformOfAgent::AugBE::GetTrace() const
 
 // ---------------------- TransformOfAgent::TransUtils ---------------------------
 
-TransformOfAgent::TransUtils::TransUtils( const NavigationInterface *nav_, Dependencies *deps_ ) :
-	nav(nav_),
+TransformOfAgent::TransUtils::TransUtils( const XTreeDatabase *db_, Dependencies *deps_ ) :
+	db(db_),
 	deps(deps_)
 {
 }	
@@ -177,7 +179,7 @@ ValuePtr<TransformOfAgent::AugBE> TransformOfAgent::TransUtils::GetBE( const Aug
 
 set<AugTreePtr<Node>> TransformOfAgent::TransUtils::GetDeclarers( AugTreePtr<Node> node ) const
 {
-    set<NavigationInterface::LinkInfo> declarer_infos = nav->GetDeclarers( node.GetTreePtr() );  
+    set<NavigationInterface::LinkInfo> declarer_infos = db->GetDeclarers( node.GetTreePtr() );  
     
     // Generate ATPs from declarers
 	set<AugTreePtr<Node>> atp_declarers;	
@@ -185,7 +187,7 @@ set<AugTreePtr<Node>> TransformOfAgent::TransUtils::GetDeclarers( AugTreePtr<Nod
     {   
 		// To be able to report the declarer as a node in the tree, we
 		// must find its parent link
-		set<NavigationInterface::LinkInfo> parent_infos = nav->GetParents( declarer.first ); // TODO don't use nav interface, in fact scrap the whole thing, just use db
+		set<NavigationInterface::LinkInfo> parent_infos = db->GetParents( declarer.first ); // TODO don't use nav interface, in fact scrap the whole thing, just use db
 		if( parent_infos.empty() )
 		{
 			// No parent link found, so we have to assume this is a free subtree

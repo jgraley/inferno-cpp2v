@@ -82,11 +82,11 @@ public:
     
     void Dump() const;
 	
-private:    
     // NavigationInterface implementation
   	set<LinkInfo> GetParents( TreePtr<Node> node ) const override;
   	set<LinkInfo> GetDeclarers( TreePtr<Node> node ) const override;
   	
+private:    
     void TestRelations();
     
   	XLink main_root_xlink;

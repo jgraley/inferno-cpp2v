@@ -206,7 +206,7 @@ XLink XTreeDatabase::TryGetParentXLink(XLink xlink) const
 XLink XTreeDatabase::GetXLink( const TreePtrInterface *px ) const
 {
 	XLink xlink = TryGetXLink(px);
-	ASSERT( xlink );
+	ASSERT( xlink )("GetXLink() could not find link for ")(px);
 	return xlink;
 }
 

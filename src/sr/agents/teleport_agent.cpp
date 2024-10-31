@@ -19,35 +19,27 @@ using namespace SYM;
 
 //---------------------------------- TeleportAgent::Dependencies ------------------------------------    
 
-void TeleportAgent::Dependencies::AddDep( const TreePtrInterface *p_tree_ptr )
+void TeleportAgent::Dependencies::AddDep( XLink dep )
 {
-	deps.insert( p_tree_ptr );
+	deps.insert( dep );
 }		
 
 
 void TeleportAgent::Dependencies::AddAll( const Dependencies &other )
 {
-    for( const TreePtrInterface *p : deps )
-		AddDep(p);
+    for( XLink d : deps )
+		AddDep(d);
 }
 
 
-set<XLink> TeleportAgent::Dependencies::GetAll(const XTreeDatabase *db) const
+set<XLink> TeleportAgent::Dependencies::GetAll() const
 {
-	set<XLink> xlink_deps;
+	/*set<XLink> xlink_deps;
 	for( const TreePtrInterface *p : deps )
 		if( XLink xlink = db->TryGetXLink(p) )
-			xlink_deps.insert( xlink );
-	return xlink_deps;
+			xlink_deps.insert( xlink );*/
+	return deps;
 }
-
-
-/*set<XLink> TeleportAgent::Dependencies::GetDepsXLinks(const XTreeDatabase *db) const
-{
-	set<XLink> sx;
-	for( TreePtr<Node> d : deps )
-	    sx.
-}*/
 
 
 void TeleportAgent::Dependencies::Clear()
@@ -93,14 +85,14 @@ DomainExtension::Extender::Info TeleportAgent::GetDomainExtension( const XTreeDa
 	if( tq_result.first ) // parent link was supplied
 	{
 		ASSERT( !tq_result.second ); // Consistency
-		ASSERT( deps.GetAll(db).count( tq_result.first ) > 0 ); // Result should be a dep
+		ASSERT( deps.GetAll().count( tq_result.first ) > 0 ); // Result should be a dep
 		return DomainExtension::Extender::Info(); // Don't bother Domain when there's an XLink
 	}		
 
 	//ASSERT( deps.GetDeps().count( tq_result.second ) > 0 ); // Result should be a dep
 
 	DomainExtension::Extender::Info info;
-	info.deps = deps.GetAll(db);	    
+	info.deps = deps.GetAll();	    
 	info.induced_base_node = tq_result.second;
 	return info;
 }
