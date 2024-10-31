@@ -351,7 +351,7 @@ void SCREngine::RunEmbedded( PatternLink plink_to_embedded, XLink base_xlink )
     // Obtain a pointer to the though link that will be updated by the 
     // embedded. 
 	NodeTable::Row nn = x_tree_db->GetNodeRow(through_subtree);
-	XLink target_xlink = OnlyElementOf(nn.parents);
+	XLink target_xlink = OnlyElementOf(nn.incoming_xlinks);
 
     // Run the embedded's engine on this subtree and overwrite through ptr via p_through_x
     int hits = embedded_engine->RepeatingCompareReplace( target_xlink, &replace_solution );

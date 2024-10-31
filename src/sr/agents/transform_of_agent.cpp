@@ -186,24 +186,11 @@ set<AugTreePtr<Node>> TransformOfAgent::TransUtils::GetDeclarers( AugTreePtr<Nod
     
     // Generate ATPs from declarers
 	set<AugTreePtr<Node>> atp_declarers;	
-    for( XLink declarer_xlink : node_row.declarers )
+    for( XLink declaring_xlink : node_row.declaring_xlinks )
     {   
-		// To be able to report the declarer as a node in the tree, we
-		// must find its parent link
-		TreePtr<Node> declarer_node = db->TryGetParentXLink(declarer_xlink).GetChildX();
-		NodeTable::Row declarer_row = db->GetNodeRow(declarer_node);
-		if( declarer_row.parents.empty() )
-		{
-			// No parent link found, so we have to assume this is a free subtree
-			atp_declarers.insert( AugTreePtr<Node>(declarer_node) );
-		}
-		else
-		{
-			XLink declarer_xlink = OnlyElementOf( declarer_row.parents );
-
-			// Report and return
-			atp_declarers.insert( CreateAugTreePtr(declarer_xlink) ); 
-		}
+		// We want the XLink that points to the declarer
+		XLink declarer_xlink = db->TryGetParentXLink(declaring_xlink);
+		atp_declarers.insert( CreateAugTreePtr(declarer_xlink) ); 
 	}
 	
 	return atp_declarers;

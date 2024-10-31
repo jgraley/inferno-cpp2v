@@ -17,15 +17,15 @@ public:
     {
     public:		
 		// Our node is the child of these links.
-		set<XLink> parents; // TODO use of the word "parent" is confusing: it's a link to us. "incoming"? 
+		set<XLink> incoming_xlinks; 
 
 		// Declarative XLinks onto our node. 
-		// A subset of parents, so to get the declarer node, you'll need 
+		// A subset of incoming_xlinks, so to get the declarer node, you'll need 
 		// to use eg Row::TryGetParentXLink().GetChildX(). Why have I done 
 		// this? So that this info is unambiguous across parallel links:
 		// We'll uniquely specify the correct one if only one is a 
 		// declaring link (precision). Taking parent discards that info.
-		set<XLink> declarers;
+		set<XLink> declaring_xlinks;
 		
         string GetTrace() const;
     };

@@ -26,7 +26,7 @@ TeleportAgent::QueryReturnType PointerIsAgent::RunTeleportQuery( const XTreeData
 		{	
 			// If no parent node, there's no dep to declare, assuming root xlink
 			// pointer type cannot change. Might be better to refuse the whole teleport, TBD.
-			set<XLink> parent_xlinks = db->GetNodeRow(parent_node).parents;
+			set<XLink> parent_xlinks = db->GetNodeRow(parent_node).incoming_xlinks;
 			ASSERT( parent_xlinks.size() == 1 ); // parent_node has children so it should only have one parent (rule #217)
 			
 			deps->AddDep( OnlyElementOf(parent_xlinks) );			

@@ -184,11 +184,11 @@ bool XTreeDatabase::HasNodeRow(TreePtr<Node> node) const
 
 XLink XTreeDatabase::TryGetParentXLink(XLink xlink) const
 {
-	TreePtr<Node> parent_node = plan.link_table->GetRow(xlink).parent_node;
+	TreePtr<Node> parent_node = GetRow(xlink).parent_node;
 	if( !parent_node )
 		return XLink();
 		
-	const set<XLink> &ps = plan.node_table->GetRow(parent_node).parents;
+	const set<XLink> &ps = GetNodeRow(parent_node).incoming_xlinks;
 
     // Note that the parent is unique because:
     // - row is relative to a link, not a node,
@@ -215,12 +215,12 @@ XLink XTreeDatabase::TryGetXLink( const TreePtrInterface *px ) const
 {
 	TreePtr<Node> child_node = (TreePtr<Node>)*px;
 
-	if( !plan.node_table->HasRow(child_node) )
+	if( !HasNodeRow(child_node) )
 		return XLink(); // fail
 	
-    NodeTable::Row row = plan.node_table->GetRow(child_node);
+    NodeTable::Row row = GetNodeRow(child_node);
 
-    for( XLink xlink : row.parents )
+    for( XLink xlink : row.incoming_xlinks )
 		if( xlink.GetTreePtrInterface() == px )
 			return xlink;
 	

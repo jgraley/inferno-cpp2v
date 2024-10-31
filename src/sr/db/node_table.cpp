@@ -54,11 +54,11 @@ void NodeTable::PrepareDelete( DBWalk::Actions &actions )
         // Should already be there
         Row &row = rows.at(walk_info.x);
         
-        EraseSolo( row.parents, walk_info.xlink );    		
+        EraseSolo( row.incoming_xlinks, walk_info.xlink );    		
         if( IsDeclarer(walk_info) )
-            EraseSolo( row.declarers, walk_info.xlink );
+            EraseSolo( row.declaring_xlinks, walk_info.xlink );
             
-        if( row.parents.empty() )
+        if( row.incoming_xlinks.empty() )
             EraseSolo( rows, walk_info.x );
 	};
 }
@@ -71,9 +71,9 @@ void NodeTable::PrepareInsert(DBWalk::Actions &actions)
         // Create if not already there
         Row &row = rows[walk_info.x];
         
-        InsertSolo( row.parents, walk_info.xlink );    		
+        InsertSolo( row.incoming_xlinks, walk_info.xlink );    		
         if( IsDeclarer(walk_info) )
-            InsertSolo( row.declarers, walk_info.xlink );
+            InsertSolo( row.declaring_xlinks, walk_info.xlink );
 	};
 }
 
@@ -82,8 +82,8 @@ string NodeTable::Row::GetTrace() const
 {
     string s = "(";
 	
-	s += " parents=" + Trace(parents);
-	s += " declarers=" + Trace(declarers);
+	s += " incoming=" + Trace(incoming_xlinks);
+	s += " declaring=" + Trace(declaring_xlinks);
     
     s += ")";
     return s;
