@@ -630,7 +630,7 @@ unique_ptr<BooleanResult> IsInCategoryOperator::Evaluate( const EvalKit &kit,
     if( !ra->IsDefinedAndUnique() )
         return make_unique<BooleanResult>( false );
     
-    bool matches = archetype_node->IsSubcategory( *(ra->GetOnlyXLink().GetChildX()) );
+    bool matches = archetype_node->IsSubcategory( *(ra->GetOnlyXLink().GetChildTreePtr()) );
     return make_unique<BooleanResult>( matches );
 }
 
@@ -744,12 +744,12 @@ unique_ptr<BooleanResult> IsChildCollectionSizedOperator::Evaluate( const EvalKi
 
     // XLink must match our referee (i.e. be non-strict subtype)
     // If not, we will say that the size was wrong
-    if( !archetype_node->IsSubcategory( *(ra->GetOnlyXLink().GetChildX()) ) )
+    if( !archetype_node->IsSubcategory( *(ra->GetOnlyXLink().GetChildTreePtr()) ) )
         return make_unique<BooleanResult>( false ); 
     
     // Itemise the child node of the XLink we got, according to the "schema"
     // of the referee node (note: link number is only valid wrt referee)
-    vector< Itemiser::Element * > keyer_items = archetype_node->Itemise( ra->GetOnlyXLink().GetChildX().get() );   
+    vector< Itemiser::Element * > keyer_items = archetype_node->Itemise( ra->GetOnlyXLink().GetChildTreePtr().get() );   
     ASSERT( item_index < keyer_items.size() );     
     
     // Cast based on assumption that we'll be looking at a collection
@@ -834,8 +834,8 @@ unique_ptr<BooleanResult> IsSimpleCompareEquivalentOperator::Evaluate( const Eva
     unique_ptr<SymbolicResult> ra = move( op_results.front() );
     unique_ptr<SymbolicResult> rb = move( op_results.back() );
 
-    Orderable::Diff res = equivalence_relation.Compare3Way( ra->GetOnlyXLink().GetChildX(), 
-                                                            rb->GetOnlyXLink().GetChildX() );
+    Orderable::Diff res = equivalence_relation.Compare3Way( ra->GetOnlyXLink().GetChildTreePtr(), 
+                                                            rb->GetOnlyXLink().GetChildTreePtr() );
     return make_unique<BooleanResult>( res == 0 );    
 }
 
@@ -925,7 +925,7 @@ unique_ptr<BooleanResult> IsLocalMatchOperator::Evaluate( const EvalKit &kit,
         return make_unique<BooleanResult>( false );
 
     // Use IsLocalMatch on the pattern node 
-    bool match = pattern_node->IsLocalMatch( *(ra->GetOnlyXLink().GetChildX()) );
+    bool match = pattern_node->IsLocalMatch( *(ra->GetOnlyXLink().GetChildTreePtr()) );
     return make_unique<BooleanResult>( match );
 }
 

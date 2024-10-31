@@ -46,8 +46,8 @@ void StarAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
     INDENT("*");
     ASSERT(keyer_xlink);
                 
-    auto x_ci = dynamic_cast<ContainerInterface *>(keyer_xlink.GetChildX().get());
-    auto x_sc = TreePtr<SubContainer>::DynamicCast(keyer_xlink.GetChildX());
+    auto x_ci = dynamic_cast<ContainerInterface *>(keyer_xlink.GetChildTreePtr().get());
+    auto x_sc = TreePtr<SubContainer>::DynamicCast(keyer_xlink.GetChildTreePtr());
 
     // Nodes must be a SubContainer, since * matches multiple things
     if( !( x_sc && x_ci ) )
@@ -76,7 +76,7 @@ Agent::ReplaceExprPtr StarAgent::GenReplaceExprImpl( const ReplaceKit &kit,
 {
     INDENT("*");
     ASSERT( key_xlink );
-    TreePtr<Node> key_node = key_xlink.GetChildX();
+    TreePtr<Node> key_node = key_xlink.GetChildTreePtr();
     
     // Key needs to implement ContainerInterface
     ContainerInterface *key_container = dynamic_cast<ContainerInterface *>(key_node.get());
@@ -145,8 +145,8 @@ unique_ptr<BooleanResult> StarAgent::IsSubcontainerInCategoryOperator::Evaluate(
     if( !ra->IsDefinedAndUnique() )
         return make_unique<BooleanResult>( false );
 
-    auto x_ci = dynamic_cast<ContainerInterface *>(ra->GetOnlyXLink().GetChildX().get());
-    auto x_sc = TreePtr<SubContainer>::DynamicCast(ra->GetOnlyXLink().GetChildX());
+    auto x_ci = dynamic_cast<ContainerInterface *>(ra->GetOnlyXLink().GetChildTreePtr().get());
+    auto x_sc = TreePtr<SubContainer>::DynamicCast(ra->GetOnlyXLink().GetChildTreePtr());
 
     // Nodes must be a SubContainer, since * matches multiple things
     if( !( x_sc && x_ci ) )

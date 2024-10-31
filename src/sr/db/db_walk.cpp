@@ -25,7 +25,7 @@ void DBWalk::VisitBase( const WalkKit &kit,
                ContainerInterface::iterator(),
                base_xlink.GetTreePtrInterface(), 
                base_xlink, 
-               base_xlink.GetChildX() } );
+               base_xlink.GetChildTreePtr() } );
 }
 
 
@@ -42,7 +42,7 @@ void DBWalk::VisitSingular( const WalkKit &kit,
     if( !*p_x_singular )
         return;
         		
-    TreePtr<Node> x = xlink.GetChildX();
+    TreePtr<Node> x = xlink.GetChildTreePtr();
     XLink child_xlink( x, p_x_singular ); // p_x_singular should be inside x
     
     VisitLink( kit, 
@@ -55,7 +55,7 @@ void DBWalk::VisitSingular( const WalkKit &kit,
                ContainerInterface::iterator(),
                p_x_singular, 
                child_xlink, 
-               child_xlink.GetChildX() } ); 
+               child_xlink.GetChildTreePtr() } ); 
 }
 
 
@@ -64,7 +64,7 @@ void DBWalk::VisitSequence( const WalkKit &kit,
                             XLink xlink,
                             int item_ordinal )
 {
-    TreePtr<Node> x = xlink.GetChildX();
+    TreePtr<Node> x = xlink.GetChildTreePtr();
     SequenceInterface::iterator xit_predecessor = x_seq->end();    
     int i=0;
     for( SequenceInterface::iterator xit = x_seq->begin();
@@ -82,7 +82,7 @@ void DBWalk::VisitSequence( const WalkKit &kit,
                    xit,
                    &*xit, 
                    child_xlink, 
-                   child_xlink.GetChildX() } );
+                   child_xlink.GetChildTreePtr() } );
         xit_predecessor = xit;
         i++;
     }
@@ -94,7 +94,7 @@ void DBWalk::VisitCollection( const WalkKit &kit,
                               XLink xlink,
                               int item_ordinal )
 {
-    TreePtr<Node> x = xlink.GetChildX();    
+    TreePtr<Node> x = xlink.GetChildTreePtr();    
     int i=0;
     for( CollectionInterface::iterator xit = x_col->begin();
          xit != x_col->end();
@@ -111,7 +111,7 @@ void DBWalk::VisitCollection( const WalkKit &kit,
                    xit,
                    &*xit, 
                    child_xlink, 
-                   child_xlink.GetChildX() } ); // should be child_xlink's child
+                   child_xlink.GetChildTreePtr() } ); // should be child_xlink's child
         i++;
     }
 }
@@ -136,7 +136,7 @@ void DBWalk::VisitItemise( const WalkKit &kit,
                            XLink xlink ) // should be xlink's child
 {
     ASSERT(xlink)("This probably means we're walking an incomplete tree");
-    vector< Itemiser::Element * > x_items = xlink.GetChildX()->Itemise();
+    vector< Itemiser::Element * > x_items = xlink.GetChildTreePtr()->Itemise();
     for( int item_ordinal=0; item_ordinal<x_items.size(); item_ordinal++ )
     {
         Itemiser::Element *xe = x_items[item_ordinal];

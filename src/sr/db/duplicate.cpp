@@ -31,7 +31,7 @@ TreePtr<Node> Duplicate::DuplicateSubtree( const DirtyGrassUpdateInterface *dirt
                                            XLink source_base_xlink )
 {
     TerminiiMap empty_terminii_map;
-	TreePtr<Node> source_base = source_base_xlink.GetChildX();
+	TreePtr<Node> source_base = source_base_xlink.GetChildTreePtr();
     return DuplicateSubtreeWorker( dirty_grass, source_base, empty_terminii_map );
 }
     
@@ -62,7 +62,7 @@ TreePtr<Node> Duplicate::DuplicateSubtree( const DirtyGrassUpdateInterface *dirt
         return dest_terminus;
     }
 
-	TreePtr<Node> source_base = source_base_xlink.GetChildX();
+	TreePtr<Node> source_base = source_base_xlink.GetChildTreePtr();
 
     return DuplicateSubtreeWorker( dirty_grass,
                                    source_base,
@@ -121,7 +121,7 @@ TreePtr<Node> Duplicate::DuplicateSubtreeWorker( const DirtyGrassUpdateInterface
                 {
                      //TRACES("Duplicating ")(*source_elt)("\n");
                     TreePtr<Node> dest_elt = DuplicateSubtreeWorker( dirty_grass,
-                                                                     source_child_xlink.GetChildX(), 
+                                                                     source_child_xlink.GetChildTreePtr(), 
                                                                      terminii_map );
                     //TRACE("inserting ")(*dest_elt)(" directly\n");
                     dest_container->insert( dest_elt );
@@ -150,7 +150,7 @@ TreePtr<Node> Duplicate::DuplicateSubtreeWorker( const DirtyGrassUpdateInterface
             else
             {
                 *dest_singular = DuplicateSubtreeWorker( dirty_grass,
-                                                         source_child_xlink.GetChildX(), 
+                                                         source_child_xlink.GetChildTreePtr(), 
                                                          terminii_map );
 				ASSERTS( *dest_singular );
 				ASSERTS( TreePtr<Node>(*dest_singular)->IsFinal() );            

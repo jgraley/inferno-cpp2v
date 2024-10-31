@@ -77,8 +77,8 @@ void DecidedQueryCommon::AssertMatchingLinks( const DecidedQueryCommon::Links &m
         XLink ref_xlink = rp.second;
         ASSERT( mut_links.count(plink) == 1 );
         XLink mut_xlink = mut_links.at(plink);        
-        if( auto mxssr = dynamic_cast<SubContainer *>(mut_xlink.GetChildX().get()) )        
-            mxssr->AssertMatchingContents( ref_xlink.GetChildX() ); // only the contents will actually match        
+        if( auto mxssr = dynamic_cast<SubContainer *>(mut_xlink.GetChildTreePtr().get()) )        
+            mxssr->AssertMatchingContents( ref_xlink.GetChildTreePtr() ); // only the contents will actually match        
         else // some other node: should match by link        
             ASSERT( mut_xlink == ref_xlink );        
     }
@@ -95,7 +95,7 @@ string DecidedQueryCommon::TraceLinks( const DecidedQueryCommon::Links &links )
             s += ",\n";
         first = false;                
         s += Trace((PatternLink)link) + ":=";
-        if( auto xsc = dynamic_cast<SubContainer *>( link.GetChildX().get() ) )
+        if( auto xsc = dynamic_cast<SubContainer *>( link.GetChildTreePtr().get() ) )
             s += xsc->GetContentsTrace(); // normal trace is not enough info
         else
             s += Trace((XLink)link);

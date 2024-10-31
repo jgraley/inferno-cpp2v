@@ -356,7 +356,7 @@ void SCREngine::RunEmbedded( PatternLink plink_to_embedded, XLink base_xlink )
     // Run the embedded's engine on this subtree and overwrite through ptr via p_through_x
     int hits = embedded_engine->RepeatingCompareReplace( target_xlink, &replace_solution );
 
-    UpdateEmbeddedActionRequests( through_subtree, target_xlink.GetChildX() );
+    UpdateEmbeddedActionRequests( through_subtree, target_xlink.GetChildTreePtr() );
 }
 
 

@@ -73,7 +73,7 @@ public:
     size_t GetHash() const noexcept;    
     explicit operator bool() const;
 	bool HasChildX() const;
-    TreePtr<Node> GetChildX() const;
+    TreePtr<Node> GetChildTreePtr() const;
     const TreePtrInterface *GetTreePtrInterface() const;
     void ClearXPtr() const;
     void SetXPtr(const TreePtrInterface &x) const;
@@ -122,7 +122,7 @@ public:
     operator pair<const PatternLink, XLink>() const;
     Agent *GetChildAgent() const;
     const TreePtrInterface *GetPatternTreePtr() const;
-    TreePtr<Node> GetChildX() const;
+    TreePtr<Node> GetChildTreePtr() const;
     void SetX( const XLink &xlink );
     void SetPattern( const PatternLink &plink );
     explicit operator PatternLink() const;

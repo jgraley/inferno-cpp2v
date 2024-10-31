@@ -311,13 +311,13 @@ unique_ptr<SymbolicResult> AllInSimpleCompareRangeOperator::Evaluate( const Eval
 
 	if( lower_role != BoundingRole::NONE )
 	{
-		auto node = MakeTreeNode<SR::SimpleCompareRelation::MinimaxNode>( lower_xlink.GetChildX(), lower_role );
+		auto node = MakeTreeNode<SR::SimpleCompareRelation::MinimaxNode>( lower_xlink.GetChildTreePtr(), lower_role );
 		lower_xlink = SR::XLink::CreateDistinct( node );
 	}
 
 	if( upper_role != BoundingRole::NONE )
 	{
-		auto node = MakeTreeNode<SR::SimpleCompareRelation::MinimaxNode>( upper_xlink.GetChildX(), upper_role );
+		auto node = MakeTreeNode<SR::SimpleCompareRelation::MinimaxNode>( upper_xlink.GetChildTreePtr(), upper_role );
 		upper_xlink = SR::XLink::CreateDistinct( node );
 	}
 

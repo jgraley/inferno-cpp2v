@@ -88,7 +88,7 @@ void XTreeDatabase::Insert(XLink base_xlink)
     plan.node_table->PrepareInsert( actions );
     db_walker.Walk( &actions, base_xlink, DBWalk::BASE );
     
-    // Domain extension wants to meander around the XTree, consulting
+    // Domain extension wants to roam around the XTree, consulting
     // parents, children, anything really. So we need a separate pass.
     DBWalk::Actions actions2;
     plan.domain_extension->PrepareInsert( actions2 );
@@ -235,7 +235,7 @@ XLink XTreeDatabase::TryGetXLink( const TreePtrInterface *px ) const
 
 XLink XTreeDatabase::GetLastDescendant(XLink xlink) const
 {
-    TreePtr<Node> x = xlink.GetChildX();
+    TreePtr<Node> x = xlink.GetChildTreePtr();
     ASSERT(x)("This probably means we're walking an incomplete tree");
     vector< Itemiser::Element * > x_items = x->Itemise();
 
@@ -270,7 +270,7 @@ const Orderings &XTreeDatabase::GetOrderings() const
 
 TreePtr<Node> XTreeDatabase::GetMainRootNode() const
 {
-	return main_root_xlink.GetChildX();
+	return main_root_xlink.GetChildTreePtr();
 }
 
 

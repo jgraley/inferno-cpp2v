@@ -657,7 +657,7 @@ void AndRuleEngine::CompareMultiplicityLinks( LocatedLink link,
     shared_ptr<AndRuleEngine> e = plan.my_multiplicity_engines.at( (PatternLink)link );
     TRACE("Checking multiplicity ")(link)("\n");
         
-    auto xsc = dynamic_cast<SubContainer *>( link.GetChildX().get() );
+    auto xsc = dynamic_cast<SubContainer *>( link.GetChildTreePtr().get() );
     
     if( auto xscr = dynamic_cast<SubContainerRange *>(xsc) )
     {

@@ -57,7 +57,7 @@ Agent::ReplaceExprPtr BuilderAgent::GenReplaceExprImpl( const ReplaceKit &kit,
         ASSERT( key_xlink ); // we're on residual plink
         
         // Duplicate to keep free zones distinct since not first one
-        new_node = SimpleDuplicate::DuplicateSubtree(key_xlink.GetChildX());
+        new_node = SimpleDuplicate::DuplicateSubtree(key_xlink.GetChildTreePtr());
     }
 
     // Make free zone without duplicating since this is first one

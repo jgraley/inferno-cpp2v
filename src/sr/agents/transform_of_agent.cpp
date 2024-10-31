@@ -25,7 +25,7 @@ TransformOfAgent::AugBE::AugBE( TreePtr<Node> generic_tree_ptr_, const TransUtil
 TransformOfAgent::AugBE::AugBE( XLink xlink_, const TransUtils *utils_) :
 	utils( utils_ ),
 	xlink(xlink_),
-    generic_tree_ptr(xlink.GetChildX())
+    generic_tree_ptr(xlink.GetChildTreePtr())
 {
 	ASSERT( utils );
 	ASSERT( xlink );
@@ -51,7 +51,7 @@ TransformOfAgent::AugBE::AugBE( const AugBE &other, TreePtr<Node> generic_tree_p
 TransformOfAgent::AugBE::AugBE( const AugBE &other, XLink xlink_ ) :
 	utils( other.utils ),
 	xlink(xlink_),
-    generic_tree_ptr(xlink.GetChildX()),
+    generic_tree_ptr(xlink.GetChildTreePtr()),
 	my_deps( other.my_deps )
 {	
 	ASSERT( utils );
@@ -152,7 +152,7 @@ TransformOfAgent::TransUtils::TransUtils( const XTreeDatabase *db_, Dependencies
 
 AugTreePtr<Node> TransformOfAgent::TransUtils::CreateAugTreePtr(XLink xlink) const
 {
-	return AugTreePtr<Node>(xlink.GetChildX(), 
+	return AugTreePtr<Node>(xlink.GetChildTreePtr(), 
 	                        ValuePtr<TransformOfAgent::AugBE>::Make(xlink, this));
 }	
 

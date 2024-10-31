@@ -154,7 +154,7 @@ unique_ptr<SYM::BooleanResult> IdentifierByNameAgent::IsIdentifierNamedOperator:
     if( !ra->IsDefinedAndUnique() )
         return make_unique<SYM::BooleanResult>( false );
     
-    TreePtr<Node> base_x = ra->GetOnlyXLink().GetChildX(); // TODO dynamic_pointer_cast support for TreePtrInterface #27
+    TreePtr<Node> base_x = ra->GetOnlyXLink().GetChildTreePtr(); // TODO dynamic_pointer_cast support for TreePtrInterface #27
     if( auto si_x = DynamicTreePtrCast<CPPTree::SpecificIdentifier>(base_x) )
     {
         TRACE("Comparing ")(si_x->GetRender())(" with ")(name);
@@ -374,7 +374,7 @@ SYM::Expression::Precedence NestedAgent::NestingOperator::GetPrecedence() const
 XLink NestedArrayAgent::Advance( XLink xlink, 
                                  string *depth ) const
 {
-    if( auto a = TreePtr<Array>::DynamicCast(xlink.GetChildX()) )         
+    if( auto a = TreePtr<Array>::DynamicCast(xlink.GetChildTreePtr()) )         
         return XLink(a, &(a->element)); // TODO support depth string (or integer)
     else
         return XLink();
@@ -385,12 +385,12 @@ XLink NestedArrayAgent::Advance( XLink xlink,
 XLink NestedSubscriptLookupAgent::Advance( XLink xlink, 
                                            string *depth ) const
 {
-    if( auto s = DynamicTreePtrCast<Subscript>(xlink.GetChildX()) )            
+    if( auto s = DynamicTreePtrCast<Subscript>(xlink.GetChildTreePtr()) )            
     {
         *depth += "S";
         return XLink(s, &(s->operands.front())); // the base, not the index
     }
-    else if( auto l = DynamicTreePtrCast<Lookup>(xlink.GetChildX()) )            
+    else if( auto l = DynamicTreePtrCast<Lookup>(xlink.GetChildTreePtr()) )            
     {
         *depth += "L";
         return XLink(l, &(l->member)); 

@@ -217,7 +217,7 @@ XLink::XLink( shared_ptr<const Node> parent_x,
 {
     ASSERT( parent_x );
     ASSERT( px );
-    ASSERT( parent_x != GetChildX() );
+    ASSERT( parent_x != GetChildTreePtr() );
 #ifdef KEEP_WHODAT_INFO
     whodat = whodat_ ? whodat_ : WHODAT();
 #endif  
@@ -304,7 +304,7 @@ bool XLink::HasChildX() const
 }
 
 
-TreePtr<Node> XLink::GetChildX() const
+TreePtr<Node> XLink::GetChildTreePtr() const
 {
     return (TreePtr<Node>)*asp_x;
 }
@@ -447,9 +447,9 @@ const TreePtrInterface *LocatedLink::GetPatternTreePtr() const
 }
 
 
-TreePtr<Node> LocatedLink::GetChildX() const
+TreePtr<Node> LocatedLink::GetChildTreePtr() const
 {
-    return xlink.GetChildX();
+    return xlink.GetChildTreePtr();
 }
 
 

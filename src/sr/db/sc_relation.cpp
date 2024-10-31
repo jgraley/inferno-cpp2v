@@ -24,8 +24,8 @@ bool SimpleCompareRelation::operator()( XLink l_xlink, XLink r_xlink ) const
 
 Orderable::Diff SimpleCompareRelation::Compare3Way( XLink l_xlink, XLink r_xlink ) const
 {
-    TreePtr<Node> l_node = l_xlink.GetChildX();
-    TreePtr<Node> r_node = r_xlink.GetChildX();    
+    TreePtr<Node> l_node = l_xlink.GetChildTreePtr();
+    TreePtr<Node> r_node = r_xlink.GetChildTreePtr();    
 
     auto l_minimax = TreePtr<MinimaxNode>::DynamicCast( l_node );
     if( l_minimax )

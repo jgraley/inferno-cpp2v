@@ -29,8 +29,8 @@ bool CategoryRelation::operator() (XLink l_xlink, XLink r_xlink) const
 
 Orderable::Diff CategoryRelation::Compare3Way(XLink l_xlink, XLink r_xlink) const
 {
-    TreePtr<Node> l_node = l_xlink.GetChildX();
-    TreePtr<Node> r_node = r_xlink.GetChildX();    
+    TreePtr<Node> l_node = l_xlink.GetChildTreePtr();
+    TreePtr<Node> r_node = r_xlink.GetChildTreePtr();    
 
 #ifdef TRACE_CATEGORY_RELATION
     INDENT("@");
@@ -110,7 +110,7 @@ void CategoryRelation::Test( const unordered_set<XLink> &xlinks )
         // TODO maybe we could just calculate i directly from randval and the lacing size?
         
         // Consult the lacing for lacing indices
-        auto rl = lacing->TryGetRangeListForCategory( x.GetChildX() );
+        auto rl = lacing->TryGetRangeListForCategory( x.GetChildTreePtr() );
         
         // Only nodes seen in cat clauses during planning will succeed
         if( rl.empty() )

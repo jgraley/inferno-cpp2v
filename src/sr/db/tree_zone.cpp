@@ -29,7 +29,7 @@ TreeZone::TreeZone( XTreeDatabase *db_, XLink base_, vector<XLink> terminii_ ) :
     terminii( terminii_.begin(), terminii_.end(), df_rel )
 {
     ASSERT( base ); // TreeZone is not nullable
-    ASSERT( base.GetChildX() ); // Cannot be empty
+    ASSERT( base.GetChildTreePtr() ); // Cannot be empty
 	DBCheck();
 }
 
@@ -58,7 +58,7 @@ int TreeZone::GetNumTerminii() const
 
 TreePtr<Node> TreeZone::GetBaseNode() const
 {
-	return base.GetChildX();
+	return base.GetChildTreePtr();
 }
 
 

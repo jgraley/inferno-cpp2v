@@ -241,7 +241,7 @@ bool AgentCommon::IsPreRestrictionMatch( TreePtr<Node> x ) const
 
 bool AgentCommon::IsPreRestrictionMatch( XLink x ) const
 {
-    return IsPreRestrictionMatch( x.GetChildX() );
+    return IsPreRestrictionMatch( x.GetChildTreePtr() );
 }
 
 
@@ -539,7 +539,7 @@ Agent::ReplaceExprPtr AgentCommon::GenReplaceExpr( const ReplaceKit &kit,
     if( keyer_plink )
     {
         key_xlink = my_scr_engine->GetReplaceKey( keyer_plink );
-		ASSERT( !key_xlink || key_xlink.GetChildX()->IsFinal() )
+		ASSERT( !key_xlink || key_xlink.GetChildTreePtr()->IsFinal() )
 		      (*this)(" keyed with non-final node ")(key_xlink)("\n"); 
     }
 
