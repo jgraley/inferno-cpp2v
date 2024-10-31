@@ -11,9 +11,9 @@ using namespace SR;
 // ---------------------- TransformOfAgent::AugBE ---------------------------
 
 TransformOfAgent::AugBE::AugBE( TreePtr<Node> generic_tree_ptr_, const TransUtils *utils_ ) :
-	generic_tree_ptr(generic_tree_ptr_),
-	p_tree_ptr(nullptr),
-	utils( utils_ )	
+	utils( utils_ ),	
+	xlink(),
+	generic_tree_ptr(generic_tree_ptr_)
 {
 	ASSERT( utils );
 #ifdef DEFER_POLICY
@@ -22,52 +22,44 @@ TransformOfAgent::AugBE::AugBE( TreePtr<Node> generic_tree_ptr_, const TransUtil
 }
 
 
-TransformOfAgent::AugBE::AugBE( const TreePtrInterface *p_tree_ptr_, const TransUtils *utils_) :
-    generic_tree_ptr(*p_tree_ptr_),
-	p_tree_ptr(p_tree_ptr_),
-	utils( utils_ )
+TransformOfAgent::AugBE::AugBE( XLink xlink_, const TransUtils *utils_) :
+	utils( utils_ ),
+	xlink(xlink_),
+    generic_tree_ptr(xlink.GetChildX())
 {
 	ASSERT( utils );
-	ASSERT( p_tree_ptr );
-	ASSERT( *p_tree_ptr );
-	// Not a local automatic please, we're going to hang on to it.
-	ASSERT( !ON_STACK(p_tree_ptr_) );	
+	ASSERT( xlink );
 
 #ifdef DEFER_POLICY
 	my_deps.AddDep( generic_tree_ptr );		
 #else	
-    XLink xlink = utils->db->GetXLink(p_tree_ptr);
 	utils->GetDeps()->AddDep( xlink );
 #endif		
 }
 
 
 TransformOfAgent::AugBE::AugBE( const AugBE &other, TreePtr<Node> generic_tree_ptr_ ) :
-	generic_tree_ptr(generic_tree_ptr_),
-	p_tree_ptr(nullptr),
 	utils( other.utils ),
+	xlink(),
+	generic_tree_ptr(generic_tree_ptr_),
 	my_deps( other.my_deps )
 {
 	ASSERT( utils );
 }
 
 
-TransformOfAgent::AugBE::AugBE( const AugBE &other, const TreePtrInterface *p_tree_ptr_ ) :
-    generic_tree_ptr(*p_tree_ptr_),
-	p_tree_ptr(p_tree_ptr_),
+TransformOfAgent::AugBE::AugBE( const AugBE &other, XLink xlink_ ) :
 	utils( other.utils ),
+	xlink(xlink_),
+    generic_tree_ptr(xlink.GetChildX()),
 	my_deps( other.my_deps )
 {	
 	ASSERT( utils );
-	ASSERT( p_tree_ptr );
-	ASSERT( *p_tree_ptr );
-	// Not a local automatic please, we're going to hang on to it.
-	ASSERT( !ON_STACK(p_tree_ptr_) );
+	ASSERT( xlink );
 	
 #ifdef DEFER_POLICY
 	my_deps.AddDep( generic_tree_ptr );
 #else
-    XLink xlink = utils->db->GetXLink(p_tree_ptr);
 	utils->GetDeps()->AddDep( xlink );	
 #endif		
 }
@@ -87,7 +79,7 @@ TreePtr<Node> TransformOfAgent::AugBE::GetGenericTreePtr() const
 
 const TreePtrInterface *TransformOfAgent::AugBE::GetPTreePtr() const
 {
-	return p_tree_ptr;
+	return xlink.GetTreePtrInterface();
 }
 
 
@@ -99,14 +91,13 @@ const TransformOfAgent::Dependencies &TransformOfAgent::AugBE::GetDeps() const
 
 TransformOfAgent::AugBE *TransformOfAgent::AugBE::OnGetChild( const TreePtrInterface *other_tree_ptr )
 {
-	ASSERT( utils );
 	// If we are Tree then construct+return Tree style, otherwise reduce to Free style. This
 	// is to stop descendents of Free masquerading as Tree.	
-	if( p_tree_ptr )
+	if( xlink )
 	{
 		ASSERT( !ON_STACK(other_tree_ptr) );
 		// DEFER_POLICY: my_deps will be handed to the new node, which will add itself
-		return new TransformOfAgent::AugBE(*this, other_tree_ptr); // tree
+		return new TransformOfAgent::AugBE(*this, utils->db->GetXLink(other_tree_ptr)); // tree
 	}
 	else
 	{
@@ -122,9 +113,9 @@ void TransformOfAgent::AugBE::OnSetChild( const TreePtrInterface *other_tree_ptr
     auto n = GET_THAT_POINTER(new_val);
 
 	// We have to be free
-	ASSERT( !p_tree_ptr )("Transformation attempts to modify the tree!");
+	ASSERT( !xlink )("Transformation attempts to modify the tree!");
 	
-	if( !n->p_tree_ptr )
+	if( !n->xlink )
 		return; // No action if child is free
 	
 #ifdef DEFER_POLICY
@@ -162,7 +153,7 @@ TransformOfAgent::TransUtils::TransUtils( const XTreeDatabase *db_, Dependencies
 AugTreePtr<Node> TransformOfAgent::TransUtils::CreateAugTreePtr(XLink xlink) const
 {
 	return AugTreePtr<Node>(xlink.GetChildX(), 
-	                        ValuePtr<TransformOfAgent::AugBE>::Make(xlink.GetTreePtrInterface(), this));
+	                        ValuePtr<TransformOfAgent::AugBE>::Make(xlink, this));
 }	
 
 

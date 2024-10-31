@@ -28,6 +28,9 @@ ValuePtr<AugBEInterface> AugTreePtrBase::GetImpl() const
 
 AugTreePtrBase AugTreePtrBase::OnGetChild( const TreePtrInterface *other_tree_ptr ) const
 {
+	// Not a local automatic please, we're going to hang on to it.
+	ASSERT( !ON_STACK(other_tree_ptr) );
+	
 	if( impl )
 	{
 		ValuePtr<AugBEInterface> child_impl( impl->OnGetChild(other_tree_ptr) );

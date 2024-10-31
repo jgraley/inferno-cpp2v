@@ -30,9 +30,9 @@ public:
 	{
 	public:	
 		AugBE( TreePtr<Node> generic_tree_ptr_, const TransUtils *utils_ );
-		AugBE( const TreePtrInterface *p_tree_ptr_, const TransUtils *utils_ );
+		AugBE( XLink xlink_, const TransUtils *utils_ );
 		AugBE( const AugBE &other, TreePtr<Node> generic_tree_ptr_ );
-		AugBE( const AugBE &other, const TreePtrInterface *p_tree_ptr_ );
+		AugBE( const AugBE &other, XLink xlink_ );
 		AugBE( const AugBE &other ) = default;	
 		AugBE &operator=(const AugBE &other) = default;
 		AugBE *Clone() const override;
@@ -48,9 +48,9 @@ public:
 		string GetTrace() const;
 
 	private:
-		TreePtr<Node> generic_tree_ptr;
-		const TreePtrInterface *p_tree_ptr;
 		const TransUtils * const utils;	
+		XLink xlink;
+		TreePtr<Node> generic_tree_ptr;
 		Dependencies my_deps;	
 	};
 
