@@ -73,6 +73,7 @@ public:
     // TODO clean out Navigation stuff, just put in DefaultUtils
     // TODO is this struct really just our MeanderingSubtree?
     // TODO a checker: walk entire subtree: boundary XLinks to be in deps; they and all below should be in database
+    // TODO rewrite above comment
         
     virtual QueryReturnType RunTeleportQuery( const XTreeDatabase *db, Dependencies *deps, XLink stimulus_xlink ) const = 0;
     
