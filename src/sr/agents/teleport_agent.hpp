@@ -37,7 +37,7 @@ public:
 	
 	/*
      * The teleport query can return any node within the XTree at any location or
-     * it can return a "extra" subtree that isn't part of the X tree at all.
+     * it can return an "induced" subtree that isn't part of the X tree at all.
      * 
      * Terminology: _stimulus_ X link is the one RunTeleportQuery acts on. It generates
      * an in-tree _result_ XLlink or an _induced_ node. Both are bases of subtrees. 
@@ -71,7 +71,7 @@ public:
     // Discriminator has 3 values: XTREE, INDUCED, FAILED
     // TODO inculude the deps here? Otherwise, just use set<Xlink>
     // TODO clean out Navigation stuff, just put in DefaultUtils
-    // TODO something I forgot
+    // TODO is this struct really just our MeanderingSubtree?
     // TODO a checker: walk entire subtree: boundary XLinks to be in deps; they and all below should be in database
         
     virtual QueryReturnType RunTeleportQuery( const XTreeDatabase *db, Dependencies *deps, XLink stimulus_xlink ) const = 0;
