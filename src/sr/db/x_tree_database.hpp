@@ -17,26 +17,22 @@
 
 namespace SR 
 {    
-    
+      
 class XTreeDatabase : public Traceable, 
                       public Duplicate::DirtyGrassUpdateInterface
 {
 public:
     XTreeDatabase( XLink main_root_xlink, shared_ptr<Lacing> lacing, DomainExtension::ExtenderSet domain_extenders );
     
-public:
 	// Use both monolithic and incremental updates in order 
 	// to build full db during analysis stage
     void InitialBuild();
 
 	// Incremental strategy: perform updates on zones
-    void Insert(XLink base, DBWalk::Context context);
-    void Delete(XLink base, DBWalk::Context context);
-    void InsertExtraTree(XLink extra_base, DBWalk::Context context);
-    void DeleteExtraTree(XLink extra_base, DBWalk::Context context);
-
-    void InitialWalk( const DBWalk::Actions *actions,
-                      XLink root_xlink );
+    void Insert(XLink xlink, DBWalk::Context context);
+    void Delete(XLink xlink, DBWalk::Context context);
+    void InsertExtraTree(XLink xlink, DBWalk::Context context);
+    void DeleteExtraTree(XLink xlink, DBWalk::Context context);
 
     const DomainExtensionChannel *GetDEChannel( const DomainExtension::Extender *extender ) const;
     void PostUpdateActions();
@@ -79,8 +75,11 @@ private:
     const shared_ptr<Orderings> orderings;
     const shared_ptr<DomainExtension> domain_extension;
 
+	map<XLink, RootRecord> roots;
+
   	XLink main_root_xlink;
     DBWalk db_walker;
+    RootOrdinal next_root_ordinal;
     
     mutable set< TreePtr<Node> > dirty_grass; // See #724 re mutable
 };    

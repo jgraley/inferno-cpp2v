@@ -43,19 +43,25 @@ void XTreeDatabase::InitialBuild()
     INDENT("p");
     ASSERT( main_root_xlink );
 	
-	// Full build incrementally
     DBWalk::Actions actions;
     domain->PrepareInsert( actions );
     orderings->PrepareInsert( actions );
     link_table->PrepareInsert( actions );
     node_table->PrepareInsert( actions );
-    InitialWalk( &actions, main_root_xlink );
+    
+	roots[main_root_xlink] = { RootOrdinal::MAIN };
+	roots[XLink::MMAX_Link] = { RootOrdinal::MMAX };
+	roots[XLink::OffEndXLink] = { RootOrdinal::OFF_END };
+	next_root_ordinal = RootOrdinal::EXTRAS;
+	
+	for( auto p : roots )
+		db_walker.Walk( &actions, p.first, DBWalk::ROOT, &p.second );
 
     domain_extension->InitialBuild();
 }
 
 
-void XTreeDatabase::Insert(XLink base_xlink, DBWalk::Context context)
+void XTreeDatabase::Insert(XLink xlink, DBWalk::Context context)
 {
     INDENT("i");
 
@@ -64,17 +70,17 @@ void XTreeDatabase::Insert(XLink base_xlink, DBWalk::Context context)
     orderings->PrepareInsert( actions );
     link_table->PrepareInsert( actions );
     node_table->PrepareInsert( actions );
-    db_walker.Walk( &actions, base_xlink, context );
+    db_walker.Walk( &actions, xlink, context, &roots[xlink] );
     
     // Domain extension wants to roam around the XTree, consulting
     // parents, children, anything really. So we need a separate pass.
     DBWalk::Actions actions2;
     domain_extension->PrepareInsert( actions2 );
-    db_walker.Walk( &actions2, base_xlink, context );
+    db_walker.Walk( &actions2, xlink, context, &roots[xlink] );
 }
 
 
-void XTreeDatabase::Delete(XLink base_xlink, DBWalk::Context context)
+void XTreeDatabase::Delete(XLink xlink, DBWalk::Context context)
 {
     INDENT("d");
 
@@ -87,29 +93,34 @@ void XTreeDatabase::Delete(XLink base_xlink, DBWalk::Context context)
     // TODO be able to supply ROOT or the new BASE depending on whether 
     // we're being asked to act at a root. Fix up eg in link table where 
     // we need to tolerate multiple calls at ROOT not just one at InitalBuild()
-    db_walker.Walk( &actions, base_xlink, context );   
+    db_walker.Walk( &actions, xlink, context, &roots[xlink] );   
 }
 
 
-void XTreeDatabase::InsertExtraTree(XLink root_xlink, DBWalk::Context context)
+void XTreeDatabase::InsertExtraTree(XLink xlink, DBWalk::Context context)
 {
     INDENT("e");
+    
+	roots[xlink] = { next_root_ordinal };    
+    ((int &)next_root_ordinal)++;
     
 	DBWalk::Actions actions;
 	domain->PrepareInsert( actions );
 	orderings->PrepareInsert( actions );
 	link_table->PrepareInsert( actions );
 	node_table->PrepareInsert( actions );
-	db_walker.Walk( &actions, root_xlink, context );
+	db_walker.Walk( &actions, xlink, context, &roots[xlink] );
 
 	DBWalk::Actions actions2;
 	domain_extension->PrepareInsertExtra( actions2 );
-	db_walker.Walk( &actions2, root_xlink, context );
+	db_walker.Walk( &actions2, xlink, context, &roots[xlink] );
 }
 
 
-void XTreeDatabase::DeleteExtraTree(XLink root_xlink, DBWalk::Context context)
+void XTreeDatabase::DeleteExtraTree(XLink xlink, DBWalk::Context context)
 {
+	roots.erase(xlink);
+	
     // Note not symmetrical with InsertExtra(): we
     // will be invoked with every xlink in the extra
     // zones and on each call we delete just that
@@ -120,16 +131,8 @@ void XTreeDatabase::DeleteExtraTree(XLink root_xlink, DBWalk::Context context)
     link_table->PrepareDelete( actions );
     node_table->PrepareDelete( actions );
     domain_extension->PrepareDeleteExtra( actions );
-    db_walker.Walk( &actions, root_xlink, context );   
+    db_walker.Walk( &actions, xlink, context, &roots[xlink] );   
 }
-
-void XTreeDatabase::InitialWalk( const DBWalk::Actions *actions,
-                                 XLink main_root_xlink )
-{
-    db_walker.Walk( actions, main_root_xlink, DBWalk::ROOT );
-    db_walker.Walk( actions, XLink::MMAX_Link, DBWalk::ROOT );
-    db_walker.Walk( actions, XLink::OffEndXLink, DBWalk::ROOT );
-}                                 
 
 
 const DomainExtensionChannel *XTreeDatabase::GetDEChannel( const DomainExtension::Extender *extender ) const

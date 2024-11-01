@@ -4,9 +4,10 @@ using namespace SR;
 
 void DBWalk::Walk( const Actions *actions,
                    XLink base_xlink,
-                   Context base_context )
+                   Context base_context,
+                   const RootRecord *root_record )
 {
-    WalkKit kit { actions, base_xlink };
+    WalkKit kit { actions, base_xlink, root_record };
 	VisitBase( kit, base_context );  
 }
 
