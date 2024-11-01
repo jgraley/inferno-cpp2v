@@ -22,14 +22,14 @@ XTreeDatabase::XTreeDatabase( XLink main_root_xlink_, shared_ptr<Lacing> lacing,
     domain_extension( make_shared<DomainExtension>(this, domain_extenders) ),    
     main_root_xlink( main_root_xlink_ )
 {
-    auto on_insert_extra_tree = [=](XLink extra_base)
+    auto on_insert_extra_tree = [=](XLink extra_root)
     {
-        InsertExtraTree( extra_base );        
+        de_extra_queue.push(extra_root);
     };
 
-    auto on_delete_extra_tree = [=](XLink extra_base)
+    auto on_delete_extra_tree = [=](XLink extra_root)
 	{
-        DeleteExtraTree( extra_base );
+        de_extra_queue.push(extra_root);
     };
     
     domain_extension->SetOnExtraTreeFunctions( on_insert_extra_tree, 
@@ -42,6 +42,7 @@ void XTreeDatabase::InitialBuild()
 {      
     INDENT("p");
     ASSERT( main_root_xlink );
+    ASSERT( de_extra_queue.empty() );
 	
     DBWalk::Actions actions;
     domain->PrepareInsert( actions );
@@ -58,12 +59,20 @@ void XTreeDatabase::InitialBuild()
 		db_walker.Walk( &actions, p.first, DBWalk::ROOT, &p.second );
 
     domain_extension->InitialBuild();
+    
+    while(!de_extra_queue.empty())
+    {
+		InsertExtraTree( de_extra_queue.front() );
+		de_extra_queue.pop();
+	}    
 }
 
 
 void XTreeDatabase::InsertMainTree(XLink xlink)
 {
     INDENT("i");
+    
+    ASSERT( de_extra_queue.empty() );
     
 	DBWalk::Context context;
 	if( xlink == main_root_xlink ) 	
@@ -83,12 +92,20 @@ void XTreeDatabase::InsertMainTree(XLink xlink)
     DBWalk::Actions actions2;
     domain_extension->PrepareInsert( actions2 );
     db_walker.Walk( &actions2, xlink, context, &roots[main_root_xlink] );
+    
+    while(!de_extra_queue.empty())
+    {
+		InsertExtraTree( de_extra_queue.front() );
+		de_extra_queue.pop();
+	}
 }
 
 
 void XTreeDatabase::DeleteMainTree(XLink xlink)
 {
     INDENT("d");
+
+    ASSERT( de_extra_queue.empty() );
 
 	DBWalk::Context context;
 	if( xlink == main_root_xlink ) 	
@@ -106,6 +123,12 @@ void XTreeDatabase::DeleteMainTree(XLink xlink)
     // we're being asked to act at a root. Fix up eg in link table where 
     // we need to tolerate multiple calls at ROOT not just one at InitalBuild()
     db_walker.Walk( &actions, xlink, context, &roots[main_root_xlink] );   
+
+    while(!de_extra_queue.empty())
+    {
+		DeleteExtraTree( de_extra_queue.front() );
+		de_extra_queue.pop();
+	}
 }
 
 

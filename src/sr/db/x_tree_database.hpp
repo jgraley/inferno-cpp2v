@@ -12,6 +12,7 @@
 #include "domain_extension.hpp"
 #include "orderings.hpp"
 #include "db_walk.hpp"
+#include <queue>
 
 //#define DB_ENABLE_COMPARATIVE_TEST
 
@@ -82,6 +83,8 @@ private:
     DBCommon::RootOrdinal next_root_ordinal;
     
     mutable set< TreePtr<Node> > dirty_grass; // See #724 re mutable
+    
+    queue<XLink> de_extra_queue;
 };    
     
 };
