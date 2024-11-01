@@ -21,9 +21,9 @@ class AutolocatingAgent : public virtual AgentCommon // names finalised in rule 
 {
 public:
     class PreRestrictionMismatch : public Mismatch {};
-    class ColocationMismatch : public Mismatch {};
+    class AutolocationMismatch : public Mismatch {};
                                                  
-    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuery() const override; 
+    SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuery() const override; 
     
     virtual void RunAutolocatingQuery(XLink common_xlink) const;
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicAutolocatingQuery() const; 

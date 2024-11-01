@@ -34,7 +34,7 @@ public:
 /**
  * Commits agent to having no children
  */ 
-class SearchLeafAgent : public PreRestrictedAgent
+class NonlocatingAgent : public PreRestrictedAgent // names finalised in rule #729
 {
     virtual shared_ptr<PatternQuery> GetPatternQuery() const override;                
 };

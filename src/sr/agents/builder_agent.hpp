@@ -10,7 +10,7 @@ namespace SR
 /**
  * Agent matches basically anything and builds new subtree during replace
  */ 
-struct BuilderAgent : public virtual SearchLeafAgent    
+struct BuilderAgent : public virtual NonlocatingAgent    
 {
 public:
 	// TODO do this via a transformation as with TransformOf/TransformOf

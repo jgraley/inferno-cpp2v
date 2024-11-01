@@ -25,11 +25,11 @@ shared_ptr<PatternQuery> NegationAgent::GetPatternQuery() const
     return pq;
 }
 
-
+/*
 SYM::Lazy<SYM::BooleanExpression> NegationAgent::SymbolicNormalLinkedQueryPRed() const
 {
     return MakeLazy<SYM::BooleanConstant>(true);
-}                                      
+} */                                     
 
 
 void NegationAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,

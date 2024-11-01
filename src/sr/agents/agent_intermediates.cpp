@@ -38,9 +38,9 @@ SYM::Lazy<SYM::BooleanExpression> PreRestrictedAgent::SymbolicNormalLinkedQueryM
     return SymbolicPreRestriction() & SymbolicNormalLinkedQueryPRed();
 }                  
 
-//---------------------------------- SearchLeafAgent ------------------------------------    
+//---------------------------------- NonlocatingAgent ------------------------------------    
 
-shared_ptr<PatternQuery> SearchLeafAgent::GetPatternQuery() const
+shared_ptr<PatternQuery> NonlocatingAgent::GetPatternQuery() const
 { 
     return make_shared<PatternQuery>();
 }

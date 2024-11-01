@@ -103,7 +103,7 @@ private:
 /// a minimum due to the risk of co-incidentla unwanted matches and the 
 /// general principle that identifier names should not be important (it is
 /// the identiy proprty itself that matters with identifiers). 
-struct IdentifierByNameAgent : public virtual SearchLeafAgent 
+struct IdentifierByNameAgent : public virtual NonlocatingAgent 
 {
     IdentifierByNameAgent( string n ) : name(n) {}
     virtual Block GetGraphBlockInfo() const;

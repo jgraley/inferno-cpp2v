@@ -34,6 +34,7 @@ shared_ptr<PatternQuery> DisjunctionAgent::GetPatternQuery() const
 
 SYM::Lazy<SYM::BooleanExpression> DisjunctionAgent::SymbolicNormalLinkedQuery() const
 {
+	// TODO implement SymbolicAutolocatingQuery()?
     ASSERT( GetDisjuncts().size() == 2 )
           ("Got %d choices; to support more than 2 disjuncts, enable SplitDisjunctions; fewer than 2 not allowed", GetDisjuncts().size());
 
