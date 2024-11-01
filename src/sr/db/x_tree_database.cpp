@@ -55,23 +55,6 @@ void XTreeDatabase::InitialBuild()
 }
 
 
-void XTreeDatabase::Delete(XLink base_xlink)
-{
-    INDENT("d");
-
-    DBWalk::Actions actions;
-    domain->PrepareDelete( actions );
-    domain_extension->PrepareDelete( actions );
-    orderings->PrepareDelete( actions );
-    link_table->PrepareDelete( actions );
-    node_table->PrepareDelete( actions );
-    // TODO be able to supply ROOT or the new BASE depending on whether 
-    // we're being asked to act at a root. Fix up eg in link table where 
-    // we need to tolerate multiple calls at ROOT not just one at InitalBuild()
-    db_walker.Walk( &actions, base_xlink, DBWalk::BASE );   
-}
-
-
 void XTreeDatabase::Insert(XLink base_xlink)
 {
     INDENT("i");
@@ -91,6 +74,23 @@ void XTreeDatabase::Insert(XLink base_xlink)
 }
 
 
+void XTreeDatabase::Delete(XLink base_xlink)
+{
+    INDENT("d");
+
+    DBWalk::Actions actions;
+    domain->PrepareDelete( actions );
+    domain_extension->PrepareDelete( actions );
+    orderings->PrepareDelete( actions );
+    link_table->PrepareDelete( actions );
+    node_table->PrepareDelete( actions );
+    // TODO be able to supply ROOT or the new BASE depending on whether 
+    // we're being asked to act at a root. Fix up eg in link table where 
+    // we need to tolerate multiple calls at ROOT not just one at InitalBuild()
+    db_walker.Walk( &actions, base_xlink, DBWalk::BASE );   
+}
+
+
 void XTreeDatabase::InsertExtraTree(XLink root_xlink)
 {
     INDENT("e");
@@ -100,8 +100,11 @@ void XTreeDatabase::InsertExtraTree(XLink root_xlink)
 	orderings->PrepareInsert( actions );
 	link_table->PrepareInsert( actions );
 	node_table->PrepareInsert( actions );
-	domain_extension->PrepareInsertExtra( actions );
 	db_walker.Walk( &actions, root_xlink, DBWalk::ROOT );
+
+	DBWalk::Actions actions2;
+	domain_extension->PrepareInsertExtra( actions2 );
+	db_walker.Walk( &actions2, root_xlink, DBWalk::ROOT );
 }
 
 

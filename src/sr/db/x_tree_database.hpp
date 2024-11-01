@@ -24,21 +24,14 @@ class XTreeDatabase : public Traceable,
 public:
     XTreeDatabase( XLink main_root_xlink, shared_ptr<Lacing> lacing, DomainExtension::ExtenderSet domain_extenders );
     
-private: 
-    const shared_ptr<Domain> domain;
-    const shared_ptr<NodeTable> node_table;
-    const shared_ptr<LinkTable> link_table;
-    const shared_ptr<Orderings> orderings;
-    const shared_ptr<DomainExtension> domain_extension;
-
 public:
 	// Use both monolithic and incremental updates in order 
 	// to build full db during analysis stage
     void InitialBuild();
 
 	// Incremental strategy: perform updates on zones
-    void Delete(XLink base);
     void Insert(XLink base);
+    void Delete(XLink base);
     void InsertExtraTree(XLink extra_base);
     void DeleteExtraTree(XLink extra_base);
 
@@ -79,6 +72,13 @@ public:
 private:    
     void TestRelations();
     
+private: 
+    const shared_ptr<Domain> domain;
+    const shared_ptr<NodeTable> node_table;
+    const shared_ptr<LinkTable> link_table;
+    const shared_ptr<Orderings> orderings;
+    const shared_ptr<DomainExtension> domain_extension;
+
   	XLink main_root_xlink;
     DBWalk db_walker;
     
