@@ -11,7 +11,7 @@ namespace SR
 class DBWalk
 {   
 public:
-    enum ContainmentContext
+    enum Context
     {
         ROOT,
         BASE,
@@ -24,7 +24,7 @@ public:
     {
         TreePtr<Node> parent_x;
         int item_ordinal;
-		ContainmentContext context;
+		Context context;
         ContainerInterface *p_xcon;
         int container_ordinal;
         ContainerInterface::iterator xit_predecessor;
@@ -54,7 +54,7 @@ public:
     
     void Walk( const Actions *actions,
                XLink base_xlink,
-               ContainmentContext base_context );
+               Context base_context );
 private:
     struct WalkKit
     {
@@ -63,7 +63,7 @@ private:
     };
 
     void VisitBase( const WalkKit &kit, 
-                    ContainmentContext context );
+                    Context context );
     void VisitSingular( const WalkKit &kit, 
                         const TreePtrInterface *p_x_singular, 
                         XLink xlink,

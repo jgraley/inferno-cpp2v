@@ -24,12 +24,12 @@ XTreeDatabase::XTreeDatabase( XLink main_root_xlink_, shared_ptr<Lacing> lacing,
 {
     auto on_insert_extra_tree = [=](XLink extra_base)
     {
-        InsertExtraTree( extra_base );        
+        InsertExtraTree( extra_base, DBWalk::Context::ROOT );        
     };
 
     auto on_delete_extra_tree = [=](XLink extra_base)
 	{
-        DeleteExtraTree( extra_base );
+        DeleteExtraTree( extra_base, DBWalk::Context::ROOT );
     };
     
     domain_extension->SetOnExtraTreeFunctions( on_insert_extra_tree, 
@@ -55,7 +55,7 @@ void XTreeDatabase::InitialBuild()
 }
 
 
-void XTreeDatabase::Insert(XLink base_xlink)
+void XTreeDatabase::Insert(XLink base_xlink, DBWalk::Context context)
 {
     INDENT("i");
 
@@ -64,17 +64,17 @@ void XTreeDatabase::Insert(XLink base_xlink)
     orderings->PrepareInsert( actions );
     link_table->PrepareInsert( actions );
     node_table->PrepareInsert( actions );
-    db_walker.Walk( &actions, base_xlink, DBWalk::BASE );
+    db_walker.Walk( &actions, base_xlink, context );
     
     // Domain extension wants to roam around the XTree, consulting
     // parents, children, anything really. So we need a separate pass.
     DBWalk::Actions actions2;
     domain_extension->PrepareInsert( actions2 );
-    db_walker.Walk( &actions2, base_xlink, DBWalk::BASE );
+    db_walker.Walk( &actions2, base_xlink, context );
 }
 
 
-void XTreeDatabase::Delete(XLink base_xlink)
+void XTreeDatabase::Delete(XLink base_xlink, DBWalk::Context context)
 {
     INDENT("d");
 
@@ -87,11 +87,11 @@ void XTreeDatabase::Delete(XLink base_xlink)
     // TODO be able to supply ROOT or the new BASE depending on whether 
     // we're being asked to act at a root. Fix up eg in link table where 
     // we need to tolerate multiple calls at ROOT not just one at InitalBuild()
-    db_walker.Walk( &actions, base_xlink, DBWalk::BASE );   
+    db_walker.Walk( &actions, base_xlink, context );   
 }
 
 
-void XTreeDatabase::InsertExtraTree(XLink root_xlink)
+void XTreeDatabase::InsertExtraTree(XLink root_xlink, DBWalk::Context context)
 {
     INDENT("e");
     
@@ -100,15 +100,15 @@ void XTreeDatabase::InsertExtraTree(XLink root_xlink)
 	orderings->PrepareInsert( actions );
 	link_table->PrepareInsert( actions );
 	node_table->PrepareInsert( actions );
-	db_walker.Walk( &actions, root_xlink, DBWalk::ROOT );
+	db_walker.Walk( &actions, root_xlink, context );
 
 	DBWalk::Actions actions2;
 	domain_extension->PrepareInsertExtra( actions2 );
-	db_walker.Walk( &actions2, root_xlink, DBWalk::ROOT );
+	db_walker.Walk( &actions2, root_xlink, context );
 }
 
 
-void XTreeDatabase::DeleteExtraTree(XLink root_xlink)
+void XTreeDatabase::DeleteExtraTree(XLink root_xlink, DBWalk::Context context)
 {
     // Note not symmetrical with InsertExtra(): we
     // will be invoked with every xlink in the extra
@@ -120,7 +120,7 @@ void XTreeDatabase::DeleteExtraTree(XLink root_xlink)
     link_table->PrepareDelete( actions );
     node_table->PrepareDelete( actions );
     domain_extension->PrepareDeleteExtra( actions );
-    db_walker.Walk( &actions, root_xlink, DBWalk::ROOT );   
+    db_walker.Walk( &actions, root_xlink, context );   
 }
 
 void XTreeDatabase::InitialWalk( const DBWalk::Actions *actions,

@@ -19,7 +19,7 @@ public:
     public:
         string GetTrace() const;
 
-        DBWalk::ContainmentContext containment_context;
+        DBWalk::Context containment_context;
         
         TreePtr<Node> parent_node;
         

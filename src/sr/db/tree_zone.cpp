@@ -116,13 +116,13 @@ void TreeZone::Update( const FreeZone &free_zone ) const
 	ASSERT( GetNumTerminii() == 0 ); // TODO under #723
         
     // Update database 
-    db->Delete( GetBaseXLink() );    
+    db->Delete( GetBaseXLink(), DBWalk::Context::BASE );    
     
     // Patch the tree
     GetBaseXLink().SetXPtr( free_zone.GetBaseNode() );
     
     // Update database 
-    db->Insert( GetBaseXLink() );   	
+    db->Insert( GetBaseXLink(), DBWalk::Context::BASE );   	
 }
 
 

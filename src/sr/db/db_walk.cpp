@@ -4,7 +4,7 @@ using namespace SR;
 
 void DBWalk::Walk( const Actions *actions,
                    XLink base_xlink,
-                   ContainmentContext base_context )
+                   Context base_context )
 {
     WalkKit kit { actions, base_xlink };
 	VisitBase( kit, base_context );  
@@ -12,7 +12,7 @@ void DBWalk::Walk( const Actions *actions,
 
 
 void DBWalk::VisitBase( const WalkKit &kit,                         
-                        ContainmentContext context )
+                        Context context )
 {
     XLink base_xlink = kit.base_xlink;
     VisitLink( kit, 
