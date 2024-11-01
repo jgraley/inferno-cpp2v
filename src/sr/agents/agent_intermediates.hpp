@@ -39,6 +39,15 @@ class SearchLeafAgent : public PreRestrictedAgent
     virtual shared_ptr<PatternQuery> GetPatternQuery() const override;                
 };
 
+
+/**
+ * Pattern child follows X child
+ */
+class ColocatingAgent : public PreRestrictedAgent // names finalised in rule #729
+{
+};
+
+
 };
 
 #endif

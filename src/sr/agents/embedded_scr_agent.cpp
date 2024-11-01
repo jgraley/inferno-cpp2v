@@ -26,7 +26,7 @@ shared_ptr<PatternQuery> EmbeddedSCRAgent::GetPatternQuery() const
 void EmbeddedSCRAgent::MaybeChildrenPlanOverlay( PatternLink me_plink, 
                                                  PatternLink under_plink )
 {    
-    // Make embedded engines "invisible" to Delta key propagation (i.e. Colocated see #342)
+    // Make embedded engines "invisible" to Delta key propagation (i.e. Autolocated see #342)
     PatternLink through_plink(this, GetThrough());
     through_plink.GetChildAgent()->PlanOverlay(through_plink, under_plink);   
 }

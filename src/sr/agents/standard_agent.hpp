@@ -17,7 +17,7 @@ namespace SR
 /// constructed using `MakePatternNode`. All the `TreePtr` members are treated
 /// as pointers to sub-patterns and must match. Direct members (i.e. not in a 
 /// `Collection`) may be nullptr to indicate a full wildcard (matches anything). 
-class StandardAgent : public virtual PreRestrictedAgent
+class StandardAgent : public virtual ColocatingAgent
 {
 public:
     class Mismatch : public ::Mismatch {};
