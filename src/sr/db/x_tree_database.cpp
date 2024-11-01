@@ -49,10 +49,10 @@ void XTreeDatabase::InitialBuild()
     link_table->PrepareInsert( actions );
     node_table->PrepareInsert( actions );
     
-	roots[main_root_xlink] = { RootOrdinal::MAIN };
-	roots[XLink::MMAX_Link] = { RootOrdinal::MMAX };
-	roots[XLink::OffEndXLink] = { RootOrdinal::OFF_END };
-	next_root_ordinal = RootOrdinal::EXTRAS;
+	roots[main_root_xlink] = { DBCommon::RootOrdinal::MAIN };
+	roots[XLink::MMAX_Link] = { DBCommon::RootOrdinal::MMAX };
+	roots[XLink::OffEndXLink] = { DBCommon::RootOrdinal::OFF_END };
+	next_root_ordinal = DBCommon::RootOrdinal::EXTRAS;
 	
 	for( auto p : roots )
 		db_walker.Walk( &actions, p.first, DBWalk::ROOT, &p.second );

@@ -7,19 +7,6 @@
 
 namespace SR 
 {
-enum class RootOrdinal
-{
-	MAIN,
-	MMAX,
-	OFF_END,
-	EXTRAS // EXTRAS+i
-};
-
-struct RootRecord
-{
-	RootOrdinal ordinal;
-};
-
 class DBWalk
 {   
 public:
@@ -44,6 +31,7 @@ public:
         const TreePtrInterface *p_x;
         XLink xlink;
         TreePtr<Node> x;
+        const DBCommon::RootRecord *root_record;        
 	};
 
 	struct Actions
@@ -67,13 +55,13 @@ public:
     void Walk( const Actions *actions,
                XLink base_xlink,
                Context base_context,
-               const RootRecord *root_record );
+               const DBCommon::RootRecord *root_record );
 private:
     struct WalkKit
     {
         const Actions *actions;
         XLink base_xlink;
-		const RootRecord *root_record;        
+		const DBCommon::RootRecord *root_record;        
     };
 
     void VisitBase( const WalkKit &kit, 

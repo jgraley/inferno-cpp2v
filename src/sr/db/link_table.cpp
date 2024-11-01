@@ -66,7 +66,7 @@ void LinkTable::GenerateRow(const DBWalk::WalkInfo &walk_info)
 		{
 			// Root ordinal filled on only for root xlinks, so that we retain
 			// locality.
-			row.root_ordinal = current_root_ordinal++; // TODO somehow be able to give same ordinal to each root on multiple calls
+			row.root_ordinal = walk_info.root_record->ordinal; 
 			
 			// TODO wouldn't NULL ie XLink() be clearer? (and below) - no 'cause 
 			// then undefineds would get into bool eval in the syms. Instead we

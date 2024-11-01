@@ -42,7 +42,7 @@ public:
 
         // Ordinals
         DBCommon::OrdinalType container_ordinal = -1; 
-        DBCommon::OrdinalType root_ordinal = -1;      // TODO this is for eg X tree vs domain trees vs MMAX etc
+        DBCommon::RootOrdinal root_ordinal = (DBCommon::RootOrdinal)(-1);      // TODO this is for eg X tree vs domain trees vs MMAX etc
     };
     
     const Row &GetRow(XLink xlink) const;

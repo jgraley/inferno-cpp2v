@@ -5,7 +5,7 @@ using namespace SR;
 void DBWalk::Walk( const Actions *actions,
                    XLink base_xlink,
                    Context base_context,
-                   const RootRecord *root_record )
+                   const DBCommon::RootRecord *root_record )
 {
     WalkKit kit { actions, base_xlink, root_record };
 	VisitBase( kit, base_context );  
@@ -26,7 +26,8 @@ void DBWalk::VisitBase( const WalkKit &kit,
                ContainerInterface::iterator(),
                base_xlink.GetTreePtrInterface(), 
                base_xlink, 
-               base_xlink.GetChildTreePtr() } );
+               base_xlink.GetChildTreePtr(),
+               kit.root_record } );
 }
 
 
@@ -56,7 +57,8 @@ void DBWalk::VisitSingular( const WalkKit &kit,
                ContainerInterface::iterator(),
                p_x_singular, 
                child_xlink, 
-               child_xlink.GetChildTreePtr() } ); 
+               child_xlink.GetChildTreePtr(),
+               kit.root_record } ); 
 }
 
 
@@ -83,7 +85,8 @@ void DBWalk::VisitSequence( const WalkKit &kit,
                    xit,
                    &*xit, 
                    child_xlink, 
-                   child_xlink.GetChildTreePtr() } );
+                   child_xlink.GetChildTreePtr(),
+                   kit.root_record } );
         xit_predecessor = xit;
         i++;
     }
@@ -112,7 +115,8 @@ void DBWalk::VisitCollection( const WalkKit &kit,
                    xit,
                    &*xit, 
                    child_xlink, 
-                   child_xlink.GetChildTreePtr() } ); // should be child_xlink's child
+                   child_xlink.GetChildTreePtr(),
+                   kit.root_record } ); // should be child_xlink's child
         i++;
     }
 }

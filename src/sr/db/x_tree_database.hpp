@@ -75,11 +75,11 @@ private:
     const shared_ptr<Orderings> orderings;
     const shared_ptr<DomainExtension> domain_extension;
 
-	map<XLink, RootRecord> roots;
+	map<XLink, DBCommon::RootRecord> roots;
 
   	XLink main_root_xlink;
     DBWalk db_walker;
-    RootOrdinal next_root_ordinal;
+    DBCommon::RootOrdinal next_root_ordinal;
     
     mutable set< TreePtr<Node> > dirty_grass; // See #724 re mutable
 };    
