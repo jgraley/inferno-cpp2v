@@ -3,7 +3,7 @@
 
 #include "../search_replace.hpp"
 #include "helpers/transformation.hpp"
-#include "teleport_agent.hpp"
+#include "relocated_agent.hpp"
 #include "delta_agent.hpp"
 #include "embedded_scr_agent.hpp"
 #include "special_agent.hpp"
@@ -19,7 +19,7 @@ namespace SR
 /// The transformation should be invarient during any single search operation
 /// but can change when replace acts to change the tree. Thus it can depend on
 /// the tree.
-class TransformOfAgent : public virtual TeleportAgent
+class TransformOfAgent : public virtual RelocatedAgent
 {
 public:    
 	class TransUtils;
@@ -87,7 +87,7 @@ public:
     }
 
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    QueryReturnType RunTeleportQuery( const XTreeDatabase *db, XLink stimulus_xlink ) const override;                
+    RelocatedQueryResult RunRelocatedQuery( const XTreeDatabase *db, XLink stimulus_xlink ) const override;                
 
     virtual Block GetGraphBlockInfo() const;
     string GetName() const override;

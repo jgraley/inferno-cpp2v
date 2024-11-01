@@ -1,4 +1,4 @@
-#include "teleport_agent.hpp"
+#include "relocated_agent.hpp"
 
 #include "link.hpp"
 
@@ -17,21 +17,21 @@
 using namespace SR;
 using namespace SYM;
 
-//---------------------------------- TeleportAgent::Dependencies ------------------------------------    
+//---------------------------------- RelocatedAgent::Dependencies ------------------------------------    
 
-void TeleportAgent::Dependencies::AddDep( XLink dep )
+void RelocatedAgent::Dependencies::AddDep( XLink dep )
 {
 	deps.insert( dep );
 }		
 
 
-void TeleportAgent::Dependencies::AddChainTo( shared_ptr<Dependencies> chain )
+void RelocatedAgent::Dependencies::AddChainTo( shared_ptr<Dependencies> chain )
 {
 	chains.insert( chain );
 }
 
 
-void TeleportAgent::Dependencies::CopyAllFrom( const Dependencies &other )
+void RelocatedAgent::Dependencies::CopyAllFrom( const Dependencies &other )
 {
     for( XLink d : other.deps )    
 		AddDep(d);
@@ -40,7 +40,7 @@ void TeleportAgent::Dependencies::CopyAllFrom( const Dependencies &other )
 }
 
 
-set<XLink> TeleportAgent::Dependencies::GetAll() const
+set<XLink> RelocatedAgent::Dependencies::GetAll() const
 {
 	set<XLink> all_deps = deps;
     for( shared_ptr<Dependencies> c : chains )    
@@ -54,66 +54,66 @@ set<XLink> TeleportAgent::Dependencies::GetAll() const
 }
 
 
-void TeleportAgent::Dependencies::Clear()
+void RelocatedAgent::Dependencies::Clear()
 {
 	deps.clear();
 }	
 
 
-//---------------------------------- QueryReturnType ------------------------------------    
+//---------------------------------- RelocatedQueryResult ------------------------------------    
 
-TeleportAgent::QueryReturnType::QueryReturnType() :
+RelocatedAgent::RelocatedQueryResult::RelocatedQueryResult() :
 	de_info({ nullptr, {} }),
 	base_xlink()
 {
 }
 	
 	
-TeleportAgent::QueryReturnType::QueryReturnType( XLink base_xlink_ ) :
+RelocatedAgent::RelocatedQueryResult::RelocatedQueryResult( XLink base_xlink_ ) :
 	de_info({ nullptr, {} }),
 	base_xlink( base_xlink_ )
 {
 }
 	
 	
-TeleportAgent::QueryReturnType::QueryReturnType( TreePtr<Node> induced_base_node, const set<XLink> &deps ) :
+RelocatedAgent::RelocatedQueryResult::RelocatedQueryResult( TreePtr<Node> induced_base_node, const set<XLink> &deps ) :
 	de_info{ induced_base_node, deps },
 	base_xlink()
 {
 }
 
 
-TeleportAgent::QueryReturnType::QueryReturnType( TreePtr<Node> induced_base_node, const Dependencies &deps ) :
-    QueryReturnType( induced_base_node, deps.GetAll() )
+RelocatedAgent::RelocatedQueryResult::RelocatedQueryResult( TreePtr<Node> induced_base_node, const Dependencies &deps ) :
+    RelocatedQueryResult( induced_base_node, deps.GetAll() )
 {
 }   
 
 
-bool TeleportAgent::QueryReturnType::IsValid() const
+bool RelocatedAgent::RelocatedQueryResult::IsValid() const
 {
 	return de_info.induced_base_node || base_xlink;
 }
 
 
-bool TeleportAgent::QueryReturnType::IsXTree() const
+bool RelocatedAgent::RelocatedQueryResult::IsXTree() const
 {
 	return !!base_xlink;
 }
 
 	
-bool TeleportAgent::QueryReturnType::IsInduced() const
+bool RelocatedAgent::RelocatedQueryResult::IsInduced() const
 {
 	return !!de_info.induced_base_node;
 }
 
 	
-DomainExtension::Extender::Info TeleportAgent::QueryReturnType::TryGetDEInfo() const
+DomainExtension::Extender::Info RelocatedAgent::RelocatedQueryResult::TryGetDEInfo() const
 {
 	return de_info;
 }
 
 
-XLink TeleportAgent::QueryReturnType::GetBaseXLink() const
+XLink RelocatedAgent::RelocatedQueryResult::GetBaseXLink() const
 {
 	ASSERTS( IsValid() );
 	ASSERTS( IsXTree() );
@@ -121,9 +121,9 @@ XLink TeleportAgent::QueryReturnType::GetBaseXLink() const
 }
 
 
-//---------------------------------- TeleportAgent ------------------------------------    
+//---------------------------------- RelocatedAgent ------------------------------------    
 
-SYM::Lazy<SYM::BooleanExpression> TeleportAgent::SymbolicNormalLinkedQueryPRed() const                                      
+SYM::Lazy<SYM::BooleanExpression> RelocatedAgent::SymbolicNormalLinkedQueryPRed() const                                      
 {             
     shared_ptr<PatternQuery> my_pq = GetPatternQuery();         
     PatternLink child_plink = OnlyElementOf( my_pq->GetNormalLinks() );
@@ -135,7 +135,7 @@ SYM::Lazy<SYM::BooleanExpression> TeleportAgent::SymbolicNormalLinkedQueryPRed()
 }                     
 
 
-DomainExtension::Extender::Info TeleportAgent::GetDomainExtension( const XTreeDatabase *db, XLink stimulus_xlink ) const
+DomainExtension::Extender::Info RelocatedAgent::GetDomainExtension( const XTreeDatabase *db, XLink stimulus_xlink ) const
 {
 	
 	if( stimulus_xlink == XLink::MMAX_Link )
@@ -143,10 +143,10 @@ DomainExtension::Extender::Info TeleportAgent::GetDomainExtension( const XTreeDa
 	if( !IsPreRestrictionMatch(stimulus_xlink) )
 		return DomainExtension::Extender::Info(); // Failed pre-restriction so can't expand domain
 
-	QueryReturnType tq_result;
+	RelocatedQueryResult tq_result;
 	try
 	{
-		tq_result = RunTeleportQuery( db, stimulus_xlink );
+		tq_result = RunRelocatedQuery( db, stimulus_xlink );
 	}
 	catch( ::Mismatch & ) 
 	{
@@ -157,19 +157,19 @@ DomainExtension::Extender::Info TeleportAgent::GetDomainExtension( const XTreeDa
 }
 
 
-void TeleportAgent::Reset()
+void RelocatedAgent::Reset()
 {
     AgentCommon::Reset();
 }
 
 
-bool TeleportAgent::IsExtenderChannelLess( const Extender &r ) const
+bool RelocatedAgent::IsExtenderChannelLess( const Extender &r ) const
 {
 	return GetExtenderChannelOrdinal() < r.GetExtenderChannelOrdinal();
 }
 
 
-TeleportAgent::TeleportOperator::TeleportOperator( const TeleportAgent *agent_,
+RelocatedAgent::TeleportOperator::TeleportOperator( const RelocatedAgent *agent_,
                                                    shared_ptr<SymbolExpression> keyer_ ) :
     agent( agent_ ),
     keyer( keyer_ )
@@ -177,13 +177,13 @@ TeleportAgent::TeleportOperator::TeleportOperator( const TeleportAgent *agent_,
 }                                                
 
 
-list<shared_ptr<SymbolExpression>> TeleportAgent::TeleportOperator::GetSymbolOperands() const
+list<shared_ptr<SymbolExpression>> RelocatedAgent::TeleportOperator::GetSymbolOperands() const
 {
     return { keyer };
 }
 
 
-unique_ptr<SymbolicResult> TeleportAgent::TeleportOperator::Evaluate( const EvalKit &kit,
+unique_ptr<SymbolicResult> RelocatedAgent::TeleportOperator::Evaluate( const EvalKit &kit,
                                                                       list<unique_ptr<SymbolicResult>> &&op_results ) const 
 {
 	// Extract xlink from symbolic result
@@ -196,7 +196,7 @@ unique_ptr<SymbolicResult> TeleportAgent::TeleportOperator::Evaluate( const Eval
     // Apply the teleporting operation to the xlink. It may create new nodes
     // so it returns a TreePtr<Node> to avoid creating new xlink without base.
     // TODO can't we fish this out of the database? or do both and compare?
-    QueryReturnType tq_result = agent->RunTeleportQuery( kit.x_tree_db, stimulus_xlink );
+    RelocatedQueryResult tq_result = agent->RunRelocatedQuery( kit.x_tree_db, stimulus_xlink );
 
     // Teleporting operation can fail: if so call it a NaS
     if( tq_result.IsInduced() )
@@ -220,7 +220,7 @@ unique_ptr<SymbolicResult> TeleportAgent::TeleportOperator::Evaluate( const Eval
 }
 
 
-Orderable::Diff TeleportAgent::TeleportOperator::OrderCompare3WayCovariant( const Orderable &right, 
+Orderable::Diff RelocatedAgent::TeleportOperator::OrderCompare3WayCovariant( const Orderable &right, 
                                                                       OrderProperty order_property ) const 
 {
     auto &r = GET_THAT_REFERENCE(right);
@@ -229,19 +229,19 @@ Orderable::Diff TeleportAgent::TeleportOperator::OrderCompare3WayCovariant( cons
 }  
 
 
-string TeleportAgent::TeleportOperator::Render() const
+string RelocatedAgent::TeleportOperator::Render() const
 {
     return agent->GetName() + "(" + keyer->Render() + ")"; 
 }
 
 
-Expression::Precedence TeleportAgent::TeleportOperator::GetPrecedence() const
+Expression::Precedence RelocatedAgent::TeleportOperator::GetPrecedence() const
 {
     return Precedence::PREFIX;
 }
 
 
-const TeleportAgent *TeleportAgent::TeleportOperator::GetAgent() const
+const RelocatedAgent *RelocatedAgent::TeleportOperator::GetAgent() const
 {
 	return agent;
 }

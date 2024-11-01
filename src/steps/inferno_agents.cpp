@@ -248,13 +248,13 @@ SYM::Lazy<SYM::BooleanExpression> NestedAgent::SymbolicNormalLinkedQueryPRed() c
     SYM::Lazy<SYM::BooleanExpression> expr = SYM::MakeLazy<NestingOperator>( this, keyer_expr ) == child_expr;
     
     if( depth )
-        expr &= TeleportAgent::SymbolicNormalLinkedQueryPRed();
+        expr &= RelocatedAgent::SymbolicNormalLinkedQueryPRed();
         
     return expr;
 }                     
 
 
-TeleportAgent::QueryReturnType NestedAgent::RunTeleportQuery( const XTreeDatabase *db, XLink stimulus_xlink ) const
+RelocatedAgent::RelocatedQueryResult NestedAgent::RunRelocatedQuery( const XTreeDatabase *db, XLink stimulus_xlink ) const
 {   
     // Compare the depth with the supplied pattern if present
     if( depth )
@@ -269,10 +269,10 @@ TeleportAgent::QueryReturnType NestedAgent::RunTeleportQuery( const XTreeDatabas
             xlink = next_xlink; 
 			deps.insert( xlink );
 		}
-        return QueryReturnType(MakeTreeNode<SpecificString>(s), deps); 
+        return RelocatedQueryResult(MakeTreeNode<SpecificString>(s), deps); 
     }
     
-    return QueryReturnType();
+    return RelocatedQueryResult();
 }    
 
 

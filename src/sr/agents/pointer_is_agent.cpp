@@ -16,7 +16,7 @@ shared_ptr<PatternQuery> PointerIsAgent::GetPatternQuery() const
 }
 
 
-TeleportAgent::QueryReturnType PointerIsAgent::RunTeleportQuery( const XTreeDatabase *db, XLink stimulus_xlink ) const
+RelocatedAgent::RelocatedQueryResult PointerIsAgent::RunRelocatedQuery( const XTreeDatabase *db, XLink stimulus_xlink ) const
 {
 	// Report dependency on parent node
 	Dependencies deps;
@@ -39,7 +39,7 @@ TeleportAgent::QueryReturnType PointerIsAgent::RunTeleportQuery( const XTreeData
     TreePtr<Node> tnode = px->MakeValueArchetype();
     
     // Package up to indicate we don't have a parent for the new node
-	return QueryReturnType( tnode, deps );
+	return RelocatedQueryResult( tnode, deps );
 }
 
 

@@ -185,7 +185,7 @@ set<AugTreePtr<Node>> TransformOfAgent::TransUtils::GetDeclarers( AugTreePtr<Nod
 }
 
 
-TeleportAgent::Dependencies *TransformOfAgent::TransUtils::GetDeps() const
+RelocatedAgent::Dependencies *TransformOfAgent::TransUtils::GetDeps() const
 {
 	return deps;
 }
@@ -200,7 +200,7 @@ shared_ptr<PatternQuery> TransformOfAgent::GetPatternQuery() const
 }
 
 
-TeleportAgent::QueryReturnType TransformOfAgent::RunTeleportQuery( const XTreeDatabase *db, XLink stimulus_xlink ) const
+RelocatedAgent::RelocatedQueryResult TransformOfAgent::RunRelocatedQuery( const XTreeDatabase *db, XLink stimulus_xlink ) const
 {
     // Transform the candidate expression, sharing the x_tree_db as a TransKit
     // so that implementations can use handy features without needing to search
@@ -209,7 +209,7 @@ TeleportAgent::QueryReturnType TransformOfAgent::RunTeleportQuery( const XTreeDa
     
     // Policy: Don't convert MMAX link to a node (will evaluate to EmptyResult)
     if( stimulus_xlink == XLink::MMAX_Link )
-         return QueryReturnType(); 
+         return RelocatedQueryResult(); 
 	
 	Dependencies deps;
 	TransformOfAgent::TransUtils utils(db, &deps);
@@ -230,14 +230,14 @@ TeleportAgent::QueryReturnType TransformOfAgent::RunTeleportQuery( const XTreeDa
 		TreePtr<Node> tp = be->GetGenericTreePtr();		
 		ASSERT( tp->IsFinal() )(*this)(" computed non-final ")(tp)(" from ")(stimulus_x)("\n");                				
         if( xlink ) 
-            return QueryReturnType( xlink );  // tree      
+            return RelocatedQueryResult( xlink );  // tree      
 		else
-            return QueryReturnType( tp, deps );  // free 
+            return RelocatedQueryResult( tp, deps );  // free 
 	}
     catch( const ::Mismatch &e )
     {
 		TRACE("Caught ")(e)("; query fails\n");
-		return QueryReturnType(); // NULL
+		return RelocatedQueryResult(); // NULL
 	}
 }
 
@@ -279,7 +279,7 @@ bool TransformOfAgent::IsExtenderChannelLess( const Extender &r ) const
 		return typeid(*transformation).before(typeid(*rto->transformation));
 	
 	// Otherwise resort to the default compare
-	return TeleportAgent::IsExtenderChannelLess(r);
+	return RelocatedAgent::IsExtenderChannelLess(r);
 }
 
 

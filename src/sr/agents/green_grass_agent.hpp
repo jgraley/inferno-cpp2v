@@ -2,7 +2,7 @@
 #define GREEN_GRASS_AGENT_HPP
 
 #include "common/common.hpp"
-#include "colocated_agent.hpp"
+#include "autolocated_agent.hpp"
 #include "../sym/expression.hpp"
 #include "../sym/predicate_operators.hpp"
 
@@ -14,10 +14,10 @@ namespace SR
 /// it does not match any part of the working graph that was created by an earlier
 /// replace operation in the same step. This departs from the reductive style, 
 /// so should be used with care.
-class GreenGrassAgent : public virtual ColocatedAgent 
+class GreenGrassAgent : public virtual AutolocatedAgent 
 {               
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicColocatedQuery() const; 
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicAutolocatedQuery() const; 
 
     virtual Block GetGraphBlockInfo() const;
     virtual const TreePtrInterface *GetThrough() const = 0;

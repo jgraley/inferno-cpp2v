@@ -2,7 +2,7 @@
 #define DELTA_AGENT_HPP
 
 #include "common/common.hpp"
-#include "colocated_agent.hpp"
+#include "autolocated_agent.hpp"
 #include "../scr_engine.hpp" 
 
 namespace SR
@@ -15,7 +15,7 @@ namespace SR
 /// If the replace pattern under `overlay` contains wildcards, these will 
 /// be overlayed over the pattern under `through`, to the extent that this
 /// is unambiguous and the structures of the two subtrees match.
-class DeltaAgent : public virtual ColocatedAgent,
+class DeltaAgent : public virtual AutolocatedAgent,
                    public StartsOverlay
 {  
 public:

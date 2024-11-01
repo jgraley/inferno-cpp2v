@@ -4,7 +4,7 @@
 #include "x_tree_database.hpp"
 
 #include "../agents/agent.hpp"
-#include "../agents/teleport_agent.hpp"
+#include "../agents/relocated_agent.hpp"
 #include "helpers/simple_duplicate.hpp"
 
 //#define TRACE_DOMAIN_EXTEND
@@ -26,7 +26,7 @@ DomainExtension::ExtenderSet DomainExtension::DetermineExtenders( const set<cons
 	ExtenderSet extenders;
     for( auto sub_expr : sub_exprs )
     {
-        if( auto tp_op = dynamic_cast<const TeleportAgent::TeleportOperator *>(sub_expr) )
+        if( auto tp_op = dynamic_cast<const RelocatedAgent::TeleportOperator *>(sub_expr) )
         { 
             extenders.insert( tp_op->GetAgent() );
         }

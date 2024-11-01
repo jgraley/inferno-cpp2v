@@ -1,4 +1,4 @@
-#include "colocated_agent.hpp"
+#include "autolocated_agent.hpp"
 #include "conjecture.hpp"
 #include "link.hpp"
 #include "sym/boolean_operators.hpp"
@@ -9,9 +9,9 @@
 using namespace SR;
 using namespace SYM;
 
-//---------------------------------- ColocatedAgent ------------------------------------    
+//---------------------------------- AutolocatedAgent ------------------------------------    
 
-Lazy<BooleanExpression> ColocatedAgent::SymbolicNormalLinkedQuery() const
+Lazy<BooleanExpression> AutolocatedAgent::SymbolicNormalLinkedQuery() const
 {
 	Lazy<BooleanExpression> my_expr = SYM::MakeLazy<SYM::BooleanConstant>(true);
 
@@ -19,7 +19,7 @@ Lazy<BooleanExpression> ColocatedAgent::SymbolicNormalLinkedQuery() const
 		my_expr = my_expr & MakeLazy<SymbolVariable>(keyer_plink) == MakeLazy<SymbolVariable>(plink);
 	
 	my_expr = my_expr &
-	          SymbolicColocatedQuery() &
+	          SymbolicAutolocatedQuery() &
    		      ( SymbolicPreRestriction() |
 		        MakeLazy<SymbolVariable>(keyer_plink) == MakeLazy<SymbolConstant>(XLink::MMAX_Link) );
 
@@ -27,19 +27,19 @@ Lazy<BooleanExpression> ColocatedAgent::SymbolicNormalLinkedQuery() const
 }
 
 
-void ColocatedAgent::RunColocatedQuery( XLink common_xlink ) const
+void AutolocatedAgent::RunAutolocatedQuery( XLink common_xlink ) const
 {
     // No restriction by default
 }
 
 
-SYM::Lazy<SYM::BooleanExpression> ColocatedAgent::SymbolicColocatedQuery() const
+SYM::Lazy<SYM::BooleanExpression> AutolocatedAgent::SymbolicAutolocatedQuery() const
 {
 	return SYM::MakeLazy<SYM::BooleanConstant>(true); // TODO don't like this, belongs in ConjuctionAgent
 }
 
 
-Agent::ReplaceExprPtr ColocatedAgent::GenReplaceExprImpl( const ReplaceKit &kit, 
+Agent::ReplaceExprPtr AutolocatedAgent::GenReplaceExprImpl( const ReplaceKit &kit, 
                                                             PatternLink me_plink, 
                                                             XLink key_xlink )
 {

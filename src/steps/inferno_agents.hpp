@@ -1,7 +1,7 @@
 #ifndef INFERNO_AGENTS_HPP
 #define INFERNO_AGENTS_HPP
 
-#include "sr/agents/teleport_agent.hpp"
+#include "sr/agents/relocated_agent.hpp"
 #include "tree/cpptree.hpp" 
 #include "helpers/transformation.hpp"
 #include "tree/sctree.hpp"
@@ -202,12 +202,12 @@ struct LabelIdentifierByNameAgent : Special<CPPTree::LabelIdentifier>,
 /// when accessing arrays. The `terminus` is the node to be found at the end of
 /// the recursion and `depth` is a string matching the steps taken to 
 /// reach the terminus.
-struct NestedAgent : public virtual TeleportAgent
+struct NestedAgent : public virtual RelocatedAgent
 {
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;                
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
 
-    QueryReturnType RunTeleportQuery( const XTreeDatabase *db, XLink stimulus_xlink ) const override;                
+    RelocatedQueryResult RunRelocatedQuery( const XTreeDatabase *db, XLink stimulus_xlink ) const override;                
 
     virtual XLink Advance( XLink xlink, 
                            string *depth ) const = 0;

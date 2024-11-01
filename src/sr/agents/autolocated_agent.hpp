@@ -1,5 +1,5 @@
-#ifndef COLOCATED_AGENT_HPP
-#define COLOCATED_AGENT_HPP
+#ifndef AUTOLOCATED_AGENT_HPP
+#define AUTOLOCATED_AGENT_HPP
 
 #include "agent_common.hpp"
 #include "special_agent.hpp"
@@ -8,16 +8,16 @@ namespace SR
 {
 
 
-//---------------------------------- ColocatedAgent ------------------------------------    
+//---------------------------------- AutolocatedAgent ------------------------------------    
 
 /**
- * Intermediate class for agents that are colocated under the
+ * Intermediate class for agents that are autolocated under the
  * "arrow-head with MMAX" model. Only applies to normal links.
  * Links are extracted from pattern query and front() link is used
  * to build replace pattern. Subclasses may override 
- * RunColocatedQuery() to add additional restrictions. #271
+ * RunAutolocatedQuery() to add additional restrictions. #271
  */
-class ColocatedAgent : public virtual AgentCommon 
+class AutolocatedAgent : public virtual AgentCommon // names finalised in rule #729
 {
 public:
     class PreRestrictionMismatch : public Mismatch {};
@@ -25,8 +25,8 @@ public:
                                                  
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuery() const override; 
     
-    virtual void RunColocatedQuery(XLink common_xlink) const;
-    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicColocatedQuery() const; 
+    virtual void RunAutolocatedQuery(XLink common_xlink) const;
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicAutolocatedQuery() const; 
 
     ReplaceExprPtr GenReplaceExprImpl( const ReplaceKit &kit, 
                                          PatternLink me_plink, 
