@@ -70,7 +70,6 @@ public:
     // Just use a unique_ptr<Zone>: TreeZone = result, FreeZone = induced - NO, that would not be a FreeZone
     // Discriminator has 3 values: XTREE, INDUCED, FAILED
     // TODO inculude the deps here? Otherwise, just use set<Xlink>
-    // TODO clean out Navigation stuff, just put in DefaultUtils
     // TODO is this struct really just our MeanderingSubtree?
     // TODO a checker: walk entire subtree: boundary XLinks to be in deps; they and all below should be in database
     // TODO rewrite above comment
@@ -91,7 +90,7 @@ public:
                                    shared_ptr<SymbolExpression> keyer ); 
         virtual list<shared_ptr<SYM::SymbolExpression>> GetSymbolOperands() const override;
         virtual unique_ptr<SYM::SymbolicResult> Evaluate( const EvalKit &kit,
-                                                                 list<unique_ptr<SYM::SymbolicResult>> &&op_results ) const override;
+                                                          list<unique_ptr<SYM::SymbolicResult>> &&op_results ) const override;
 
         Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                            OrderProperty order_property ) const override;

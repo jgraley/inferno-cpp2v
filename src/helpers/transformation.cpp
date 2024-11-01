@@ -70,19 +70,34 @@ ValuePtr<AugBEInterface> DefaultTransUtils::CreateBE( TreePtr<Node> tp ) const
 }
 
 
-set<AugTreePtr<Node>> DefaultTransUtils::GetDeclarers( AugTreePtr<Node> node ) const
+set<AugTreePtr<Node>> DefaultTransUtils::GetDeclarers( AugTreePtr<Node> atp_node ) const
 {
-    set<DefaultTransUtils::LinkInfo> declarer_infos = GetDeclarers( node.GetTreePtr() );  
+	TreePtr<Node> node = atp_node.GetTreePtr();
+	set<TreePtr<Node>> declarers;
+	
+	Walk w(root, nullptr, nullptr);
+	for( const TreePtrInterface &n : w )
+	{
+		set<const TreePtrInterface *> declared = ((TreePtr<Node>)n)->GetDeclared();
+		for( const TreePtrInterface *pd : declared )
+		{
+            if( node == (TreePtr<Node>)( *pd ) )
+            {
+				declarers.insert( (TreePtr<Node>)n );
+			}	            
+		}
+	}
     
     // Generate ATPs from declarers
 	set<AugTreePtr<Node>> atp_declarers;	
-    for( LinkInfo declarer : declarer_infos )
-		atp_declarers.insert( AugTreePtr<Node>(declarer.first) );
+    for( TreePtr<Node> declarer : declarers )
+		atp_declarers.insert( AugTreePtr<Node>(declarer) );
 	
 	return atp_declarers;
 }
 
 
+/*
 set<DefaultTransUtils::LinkInfo> DefaultTransUtils::GetParents( TreePtr<Node> node ) const
 {
 	set<LinkInfo> infos;
@@ -103,29 +118,7 @@ set<DefaultTransUtils::LinkInfo> DefaultTransUtils::GetParents( TreePtr<Node> no
 	
 	return infos;
 }
-
-
-set<DefaultTransUtils::LinkInfo> DefaultTransUtils::GetDeclarers( TreePtr<Node> node ) const
-{
-	set<LinkInfo> infos;
-	
-	Walk w(root, nullptr, nullptr);
-	for( const TreePtrInterface &n : w )
-	{
-		set<const TreePtrInterface *> declared = ((TreePtr<Node>)n)->GetDeclared();
-		for( const TreePtrInterface *pd : declared )
-		{
-            if( node == (TreePtr<Node>)( *pd ) )
-            {
-				LinkInfo info( (TreePtr<Node>)n, pd );
-				infos.insert( info );
-			}	            
-		}
-	}
-	
-	return infos;
-}
-
+*/
 
 // ---------------------- Transformation ---------------------------
 

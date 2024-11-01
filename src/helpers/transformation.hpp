@@ -224,10 +224,6 @@ class TransUtilsInterface
 public:    
     class UnknownNode : public Exception {};
 
-    // Convention is that second points to one of first's TreePtrs, similar
-    // to the requirements of XLink constructor
-    typedef pair<TreePtr<Node>, const TreePtrInterface *> LinkInfo;
-
 	virtual ~TransUtilsInterface() = default;
 
 	// TODO there is no reason not to implement GetParents() along the same lines
@@ -255,10 +251,6 @@ public:
 	set<AugTreePtr<Node>> GetDeclarers( AugTreePtr<Node> node ) const override;
 			
 private:	
-	set<LinkInfo> GetParents( TreePtr<Node> node ) const;
-	set<LinkInfo> GetDeclarers( TreePtr<Node> node ) const;
-
-
     ValuePtr<AugBEInterface> CreateBE( TreePtr<Node> tp ) const override;			
 	TreePtr<Node> root;
 };

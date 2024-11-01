@@ -81,9 +81,6 @@ public:
     
     void Dump() const;
 	
-  	set<TransUtilsInterface::LinkInfo> GetParents( TreePtr<Node> node ) const;
-  	set<TransUtilsInterface::LinkInfo> GetDeclarers( TreePtr<Node> node ) const;
-  	
 private:    
     void TestRelations();
     

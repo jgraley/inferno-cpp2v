@@ -304,18 +304,6 @@ void XTreeDatabase::Dump() const
 }
 
 
-set<TransUtilsInterface::LinkInfo> XTreeDatabase::GetParents( TreePtr<Node> node ) const
-{
-    ASSERTFAIL(); // deprecated
-}
-
-
-set<TransUtilsInterface::LinkInfo> XTreeDatabase::GetDeclarers( TreePtr<Node> node ) const
-{
-    ASSERTFAIL(); // deprecated
-}
-
-
 void XTreeDatabase::TestRelations()
 {
     if( ReadArgs::test_rel )
