@@ -69,20 +69,39 @@ TeleportAgent::QueryReturnType::QueryReturnType() :
 }
 	
 	
-TeleportAgent::QueryReturnType::QueryReturnType( TreePtr<Node> induced_base_node, const set<XLink> &deps, XLink base_xlink_ ) :
-	de_info{ induced_base_node, deps },
+TeleportAgent::QueryReturnType::QueryReturnType( XLink base_xlink_ ) :
+	de_info({ nullptr, {} }),
 	base_xlink( base_xlink_ )
+{
+}
+	
+	
+TeleportAgent::QueryReturnType::QueryReturnType( TreePtr<Node> induced_base_node, const set<XLink> &deps ) :
+	de_info{ induced_base_node, deps },
+	base_xlink()
 {
 }
 
 
-TeleportAgent::QueryReturnType::QueryReturnType( TreePtr<Node> induced_base_node, const Dependencies &deps, XLink base_xlink_ ) :
-    QueryReturnType( induced_base_node, deps.GetAll(), base_xlink_ )
+TeleportAgent::QueryReturnType::QueryReturnType( TreePtr<Node> induced_base_node, const Dependencies &deps ) :
+    QueryReturnType( induced_base_node, deps.GetAll() )
 {
 }   
 
 
 bool TeleportAgent::QueryReturnType::IsValid() const
+{
+	return de_info.induced_base_node || base_xlink;
+}
+
+
+bool TeleportAgent::QueryReturnType::IsXTree() const
+{
+	return !!base_xlink;
+}
+
+	
+bool TeleportAgent::QueryReturnType::IsInduced() const
 {
 	return !!de_info.induced_base_node;
 }
@@ -91,14 +110,8 @@ bool TeleportAgent::QueryReturnType::IsValid() const
 DomainExtension::Extender::Info TeleportAgent::QueryReturnType::GetDEInfo() const
 {
 	ASSERTS( IsValid() );
+	ASSERTS( !IsXTree() );
 	return de_info;
-}
-
-
-bool TeleportAgent::QueryReturnType::IsXTree() const
-{
-	ASSERTS( IsValid() );
-	return !!base_xlink;
 }
 
 
@@ -142,16 +155,19 @@ DomainExtension::Extender::Info TeleportAgent::GetDomainExtension( const XTreeDa
 	{
 		return DomainExtension::Extender::Info();
 	}
-	if( !tq_result.IsValid() )
-		return DomainExtension::Extender::Info();       // NULL  
-
-	if( tq_result.IsXTree() ) // parent link was supplied
+	
+	if( tq_result.IsInduced() )
 	{
-		ASSERT( tq_result.GetDEInfo().deps.count( tq_result.GetBaseXLink() ) > 0 ); // Result should be a dep
+		return tq_result.GetDEInfo();
+	}
+	else if( tq_result.IsXTree() ) // parent link was supplied
+	{
 		return DomainExtension::Extender::Info(); // Don't bother Domain when there's an XLink
 	}		
-
-	return tq_result.GetDEInfo();
+	else // invalid
+	{
+		return DomainExtension::Extender::Info();       // NULL  
+	}
 }
 
 
@@ -198,21 +214,24 @@ unique_ptr<SymbolicResult> TeleportAgent::TeleportOperator::Evaluate( const Eval
     QueryReturnType tq_result = agent->RunTeleportQuery( kit.x_tree_db, &deps, stimulus_xlink );
 
     // Teleporting operation can fail: if so call it a NaS
-    if( !tq_result.IsValid() )
-        return make_unique<EmptyResult>();        
-        
-    // If we got an XLink, just return it, don't bother DomainExtension
-    if( tq_result.IsXTree() ) // parent link was supplied
+    if( tq_result.IsInduced() )
     {
-         return make_unique<UniqueResult>( tq_result.GetBaseXLink() );
-	}
-
-    // We are required to have already added the new node to the domain
-    // during domain extension, so use the node to fetch the unique XLink
-    XLink unique_xlink = kit.x_tree_db->GetDEChannel(agent)->GetUniqueDomainExtension(stimulus_xlink, tq_result.GetDEInfo().induced_base_node);
+	    // We are required to have already added the new node to the domain
+		// during domain extension, so use the node to fetch the unique XLink
+		XLink unique_xlink = kit.x_tree_db->GetDEChannel(agent)->GetUniqueDomainExtension(stimulus_xlink, tq_result.GetDEInfo().induced_base_node);
     
-    // Form a symbol result to return.       
-    return make_unique<UniqueResult>( unique_xlink );
+		// Form a symbol result to return.       
+		return make_unique<UniqueResult>( unique_xlink );
+	}
+    else if( tq_result.IsXTree() ) // parent link was supplied
+    {
+	    // If we got an XLink, just return it, don't bother DomainExtension
+        return make_unique<UniqueResult>( tq_result.GetBaseXLink() );
+	}
+	else // invalid
+	{
+        return make_unique<EmptyResult>();        
+	}
 }
 
 

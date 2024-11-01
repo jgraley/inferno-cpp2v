@@ -66,11 +66,6 @@ public:
      * 
      * Related: #689 #693 #696. Also see AugTreePtr<>.
      */
-    //typedef pair<XLink, TreePtr<Node>> QueryReturnType;    // TODO if this is worth a comment that big, it's worth a struct, lol. 
-    // Just use a unique_ptr<Zone>: TreeZone = result, FreeZone = induced - NO, that would not be a FreeZone
-    // Discriminator has 3 values: XTREE, INDUCED, FAILED
-    // TODO inculude the deps here? Otherwise, just use set<Xlink>
-    // TODO is this struct really just our MeanderingSubtree?
     // TODO a checker: walk entire subtree: boundary XLinks to be in deps; they and all below should be in database
     // TODO rewrite above comment
 
@@ -79,13 +74,15 @@ public:
     class QueryReturnType
     {
 	public:
-		QueryReturnType(); // Invalid
-		QueryReturnType( TreePtr<Node> induced_base_node, const set<XLink> &deps, XLink base_xlink = XLink() ); // Valid
-		QueryReturnType( TreePtr<Node> induced_base_node, const Dependencies &deps, XLink base_xlink = XLink() ); // Valid
+		QueryReturnType(); // Invalid (relocation failed)
+		QueryReturnType( XLink base_xlink ); // Inside X tree
+		QueryReturnType( TreePtr<Node> induced_base_node, const set<XLink> &deps ); // Induced
+		QueryReturnType( TreePtr<Node> induced_base_node, const Dependencies &deps ); // Induced
 		
 		bool IsValid() const;
-		DomainExtension::Extender::Info GetDEInfo() const;
 		bool IsXTree() const;
+		bool IsInduced() const;
+		DomainExtension::Extender::Info GetDEInfo() const;
 		XLink GetBaseXLink() const;
 	
 	private:

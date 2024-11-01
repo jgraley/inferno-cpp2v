@@ -229,7 +229,7 @@ TeleportAgent::QueryReturnType TransformOfAgent::RunTeleportQuery( const XTreeDa
 		TreePtr<Node> tp = be->GetGenericTreePtr();		
 		ASSERT( tp->IsFinal() )(*this)(" computed non-final ")(tp)(" from ")(stimulus_x)("\n");                				
         if( xlink ) 
-            return QueryReturnType( tp, *deps, xlink );  // tree      
+            return QueryReturnType( xlink );  // tree      
 		else
             return QueryReturnType( tp, *deps );  // free 
 	}
