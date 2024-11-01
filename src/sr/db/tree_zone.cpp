@@ -116,13 +116,13 @@ void TreeZone::Update( const FreeZone &free_zone ) const
 	ASSERT( GetNumTerminii() == 0 ); // TODO under #723
         
     // Update database 
-    db->Delete( GetBaseXLink(), DBWalk::Context::BASE );    
+    db->DeleteMainTree( GetBaseXLink() );    
     
     // Patch the tree
-    GetBaseXLink().SetXPtr( free_zone.GetBaseNode() );
+    GetBaseXLink().SetXPtr( free_zone.GetBaseNode() ); // acts on all copies of the xlink, due to indirection, possibly including root as held by db TODO move into DB
     
     // Update database 
-    db->Insert( GetBaseXLink(), DBWalk::Context::BASE );   	
+    db->InsertMainTree( GetBaseXLink() );   	
 }
 
 

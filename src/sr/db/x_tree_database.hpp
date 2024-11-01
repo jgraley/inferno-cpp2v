@@ -29,10 +29,10 @@ public:
     void InitialBuild();
 
 	// Incremental strategy: perform updates on zones
-    void Insert(XLink xlink, DBWalk::Context context);
-    void Delete(XLink xlink, DBWalk::Context context);
-    void InsertExtraTree(XLink xlink, DBWalk::Context context);
-    void DeleteExtraTree(XLink xlink, DBWalk::Context context);
+    void InsertMainTree(XLink xlink);
+    void DeleteMainTree(XLink xlink);
+    void InsertExtraTree(XLink xlink);
+    void DeleteExtraTree(XLink xlink);
 
     const DomainExtensionChannel *GetDEChannel( const DomainExtension::Extender *extender ) const;
     void PostUpdateActions();

@@ -72,8 +72,6 @@ public:
 
     void PrepareDelete(DBWalk::Actions &actions);
 	void PrepareInsert(DBWalk::Actions &actions);
-    void PrepareDeleteExtra(DBWalk::Actions &actions);
-	void PrepareInsertExtra(DBWalk::Actions &actions);
 
     void TestRelations( const unordered_set<XLink> &xlinks );
 
@@ -105,8 +103,6 @@ public:
 
 	void Insert(const DBWalk::WalkInfo &walk_info);
 	void Delete(const DBWalk::WalkInfo &walk_info);
-	void InsertExtra(const DBWalk::WalkInfo &walk_info);
-	void DeleteExtra(const DBWalk::WalkInfo &walk_info);
 
 private:
     const XTreeDatabase *db;

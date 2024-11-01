@@ -24,12 +24,12 @@ XTreeDatabase::XTreeDatabase( XLink main_root_xlink_, shared_ptr<Lacing> lacing,
 {
     auto on_insert_extra_tree = [=](XLink extra_base)
     {
-        InsertExtraTree( extra_base, DBWalk::Context::ROOT );        
+        InsertExtraTree( extra_base );        
     };
 
     auto on_delete_extra_tree = [=](XLink extra_base)
 	{
-        DeleteExtraTree( extra_base, DBWalk::Context::ROOT );
+        DeleteExtraTree( extra_base );
     };
     
     domain_extension->SetOnExtraTreeFunctions( on_insert_extra_tree, 
@@ -61,29 +61,41 @@ void XTreeDatabase::InitialBuild()
 }
 
 
-void XTreeDatabase::Insert(XLink xlink, DBWalk::Context context)
+void XTreeDatabase::InsertMainTree(XLink xlink)
 {
     INDENT("i");
+    
+	DBWalk::Context context;
+	if( xlink == main_root_xlink ) 	
+		context = DBWalk::Context::ROOT;
+	else
+		context = DBWalk::Context::BASE;	
 
     DBWalk::Actions actions;
     domain->PrepareInsert( actions );
     orderings->PrepareInsert( actions );
     link_table->PrepareInsert( actions );
     node_table->PrepareInsert( actions );
-    db_walker.Walk( &actions, xlink, context, &roots[xlink] );
+    db_walker.Walk( &actions, xlink, context, &roots[main_root_xlink] );
     
     // Domain extension wants to roam around the XTree, consulting
     // parents, children, anything really. So we need a separate pass.
     DBWalk::Actions actions2;
     domain_extension->PrepareInsert( actions2 );
-    db_walker.Walk( &actions2, xlink, context, &roots[xlink] );
+    db_walker.Walk( &actions2, xlink, context, &roots[main_root_xlink] );
 }
 
 
-void XTreeDatabase::Delete(XLink xlink, DBWalk::Context context)
+void XTreeDatabase::DeleteMainTree(XLink xlink)
 {
     INDENT("d");
 
+	DBWalk::Context context;
+	if( xlink == main_root_xlink ) 	
+		context = DBWalk::Context::ROOT;
+	else
+		context = DBWalk::Context::BASE;	
+	
     DBWalk::Actions actions;
     domain->PrepareDelete( actions );
     domain_extension->PrepareDelete( actions );
@@ -93,13 +105,16 @@ void XTreeDatabase::Delete(XLink xlink, DBWalk::Context context)
     // TODO be able to supply ROOT or the new BASE depending on whether 
     // we're being asked to act at a root. Fix up eg in link table where 
     // we need to tolerate multiple calls at ROOT not just one at InitalBuild()
-    db_walker.Walk( &actions, xlink, context, &roots[xlink] );   
+    db_walker.Walk( &actions, xlink, context, &roots[main_root_xlink] );   
 }
 
 
-void XTreeDatabase::InsertExtraTree(XLink xlink, DBWalk::Context context)
+void XTreeDatabase::InsertExtraTree(XLink xlink)
 {
     INDENT("e");
+    
+    ASSERT( xlink != main_root_xlink );
+    ASSERT( roots.count(xlink) == 0 );
     
 	roots[xlink] = { next_root_ordinal };    
     ((int &)next_root_ordinal)++;
@@ -109,18 +124,19 @@ void XTreeDatabase::InsertExtraTree(XLink xlink, DBWalk::Context context)
 	orderings->PrepareInsert( actions );
 	link_table->PrepareInsert( actions );
 	node_table->PrepareInsert( actions );
-	db_walker.Walk( &actions, xlink, context, &roots[xlink] );
+	db_walker.Walk( &actions, xlink, DBWalk::Context::ROOT, &roots[xlink] );
 
 	DBWalk::Actions actions2;
-	domain_extension->PrepareInsertExtra( actions2 );
-	db_walker.Walk( &actions2, xlink, context, &roots[xlink] );
+	domain_extension->PrepareInsert( actions2 );
+	db_walker.Walk( &actions2, xlink, DBWalk::Context::ROOT, &roots[xlink] );
 }
 
 
-void XTreeDatabase::DeleteExtraTree(XLink xlink, DBWalk::Context context)
-{
-	roots.erase(xlink);
-	
+void XTreeDatabase::DeleteExtraTree(XLink xlink)
+{		
+    ASSERT( xlink != main_root_xlink );
+    ASSERT( roots.count(xlink) == 1 );
+
     // Note not symmetrical with InsertExtra(): we
     // will be invoked with every xlink in the extra
     // zones and on each call we delete just that
@@ -130,8 +146,10 @@ void XTreeDatabase::DeleteExtraTree(XLink xlink, DBWalk::Context context)
     orderings->PrepareDelete( actions );
     link_table->PrepareDelete( actions );
     node_table->PrepareDelete( actions );
-    domain_extension->PrepareDeleteExtra( actions );
-    db_walker.Walk( &actions, xlink, context, &roots[xlink] );   
+    domain_extension->PrepareDelete( actions );
+    db_walker.Walk( &actions, xlink, DBWalk::Context::ROOT, &roots[xlink] );   
+    
+   	roots.erase(xlink);
 }
 
 
