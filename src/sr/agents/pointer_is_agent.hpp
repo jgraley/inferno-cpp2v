@@ -16,7 +16,7 @@ class PointerIsAgent : public virtual TeleportAgent
 {
 public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    QueryReturnType RunTeleportQuery( const XTreeDatabase *db, Dependencies *deps, XLink stimulus_xlink ) const override;
+    QueryReturnType RunTeleportQuery( const XTreeDatabase *db, XLink stimulus_xlink ) const override;
                  
     virtual Block GetGraphBlockInfo() const;
             

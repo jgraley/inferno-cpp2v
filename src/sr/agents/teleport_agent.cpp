@@ -143,11 +143,10 @@ DomainExtension::Extender::Info TeleportAgent::GetDomainExtension( const XTreeDa
 	if( !IsPreRestrictionMatch(stimulus_xlink) )
 		return DomainExtension::Extender::Info(); // Failed pre-restriction so can't expand domain
 
-	Dependencies deps;
 	QueryReturnType tq_result;
 	try
 	{
-		tq_result = RunTeleportQuery( db, &deps, stimulus_xlink );
+		tq_result = RunTeleportQuery( db, stimulus_xlink );
 	}
 	catch( ::Mismatch & ) 
 	{
@@ -197,8 +196,7 @@ unique_ptr<SymbolicResult> TeleportAgent::TeleportOperator::Evaluate( const Eval
     // Apply the teleporting operation to the xlink. It may create new nodes
     // so it returns a TreePtr<Node> to avoid creating new xlink without base.
     // TODO can't we fish this out of the database? or do both and compare?
-	Dependencies deps;
-    QueryReturnType tq_result = agent->RunTeleportQuery( kit.x_tree_db, &deps, stimulus_xlink );
+    QueryReturnType tq_result = agent->RunTeleportQuery( kit.x_tree_db, stimulus_xlink );
 
     // Teleporting operation can fail: if so call it a NaS
     if( tq_result.IsInduced() )

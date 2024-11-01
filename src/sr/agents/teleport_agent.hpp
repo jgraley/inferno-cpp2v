@@ -92,7 +92,7 @@ public:
         
 	//---------------------------------- TeleportAgent ------------------------------------    
 
-    virtual QueryReturnType RunTeleportQuery( const XTreeDatabase *db, Dependencies *deps, XLink stimulus_xlink ) const = 0;
+    virtual QueryReturnType RunTeleportQuery( const XTreeDatabase *db, XLink stimulus_xlink ) const = 0;
     
     DomainExtension::Extender::Info GetDomainExtension( const XTreeDatabase *db, XLink stimulus_xlink ) const override;
 

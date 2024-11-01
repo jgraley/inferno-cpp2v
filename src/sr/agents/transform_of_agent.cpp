@@ -200,7 +200,7 @@ shared_ptr<PatternQuery> TransformOfAgent::GetPatternQuery() const
 }
 
 
-TeleportAgent::QueryReturnType TransformOfAgent::RunTeleportQuery( const XTreeDatabase *db, Dependencies *deps, XLink stimulus_xlink ) const
+TeleportAgent::QueryReturnType TransformOfAgent::RunTeleportQuery( const XTreeDatabase *db, XLink stimulus_xlink ) const
 {
     // Transform the candidate expression, sharing the x_tree_db as a TransKit
     // so that implementations can use handy features without needing to search
@@ -210,8 +210,9 @@ TeleportAgent::QueryReturnType TransformOfAgent::RunTeleportQuery( const XTreeDa
     // Policy: Don't convert MMAX link to a node (will evaluate to EmptyResult)
     if( stimulus_xlink == XLink::MMAX_Link )
          return QueryReturnType(); 
-         
-	TransformOfAgent::TransUtils utils(db, deps);
+	
+	Dependencies deps;
+	TransformOfAgent::TransUtils utils(db, &deps);
     TransKit kit { &utils };
 
     try
@@ -223,7 +224,7 @@ TeleportAgent::QueryReturnType TransformOfAgent::RunTeleportQuery( const XTreeDa
 		ValuePtr<AugBE> be = utils.GetBE(atp);
 		
 		// Grab the final deps stored in the ATP. Same as a dep leak, but explicit for clarity.
-		deps->CopyAllFrom( be->GetDeps() );
+		deps.CopyAllFrom( be->GetDeps() );
 		
 		XLink xlink = be->GetXLink(); 
 		TreePtr<Node> tp = be->GetGenericTreePtr();		
@@ -231,7 +232,7 @@ TeleportAgent::QueryReturnType TransformOfAgent::RunTeleportQuery( const XTreeDa
         if( xlink ) 
             return QueryReturnType( xlink );  // tree      
 		else
-            return QueryReturnType( tp, *deps );  // free 
+            return QueryReturnType( tp, deps );  // free 
 	}
     catch( const ::Mismatch &e )
     {
