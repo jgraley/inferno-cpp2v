@@ -15,7 +15,11 @@ using namespace SR;
 //#define DB_TEST_THE_TEST
 
 XTreeDatabase::XTreeDatabase( XLink main_root_xlink_, shared_ptr<Lacing> lacing, DomainExtension::ExtenderSet domain_extenders ) :
-    plan( this, lacing, domain_extenders ),
+    domain( make_shared<Domain>() ),
+    node_table( make_shared<NodeTable>() ),
+    link_table( make_shared<LinkTable>() ),
+    orderings( make_shared<Orderings>(lacing, this) ),
+    domain_extension( make_shared<DomainExtension>(this, domain_extenders) ),    
     main_root_xlink( main_root_xlink_ )
 {
     auto on_insert_extra_tree = [=](XLink extra_base)
@@ -28,19 +32,10 @@ XTreeDatabase::XTreeDatabase( XLink main_root_xlink_, shared_ptr<Lacing> lacing,
         DeleteExtraTree( extra_base );
     };
     
-    plan.domain_extension->SetOnExtraTreeFunctions( on_insert_extra_tree, 
+    domain_extension->SetOnExtraTreeFunctions( on_insert_extra_tree, 
                                                      on_delete_extra_tree );
 }
 
-
-XTreeDatabase::Plan::Plan( const XTreeDatabase *algo, shared_ptr<Lacing> lacing, DomainExtension::ExtenderSet domain_extenders ) :
-    domain( make_shared<Domain>() ),
-    node_table( make_shared<NodeTable>() ),
-    link_table( make_shared<LinkTable>() ),
-    orderings( make_shared<Orderings>(lacing, algo) ),
-    domain_extension( make_shared<DomainExtension>(algo, domain_extenders) )
-{
-}
 
     
 void XTreeDatabase::InitialBuild()
@@ -50,13 +45,13 @@ void XTreeDatabase::InitialBuild()
 	
 	// Full build incrementally
     DBWalk::Actions actions;
-    plan.domain->PrepareInsert( actions );
-    plan.orderings->PrepareInsert( actions );
-    plan.link_table->PrepareInsert( actions );
-    plan.node_table->PrepareInsert( actions );
+    domain->PrepareInsert( actions );
+    orderings->PrepareInsert( actions );
+    link_table->PrepareInsert( actions );
+    node_table->PrepareInsert( actions );
     InitialWalk( &actions, main_root_xlink );
 
-    plan.domain_extension->InitialBuild();
+    domain_extension->InitialBuild();
 }
 
 
@@ -65,11 +60,11 @@ void XTreeDatabase::Delete(XLink base_xlink)
     INDENT("d");
 
     DBWalk::Actions actions;
-    plan.domain->PrepareDelete( actions );
-    plan.domain_extension->PrepareDelete( actions );
-    plan.orderings->PrepareDelete( actions );
-    plan.link_table->PrepareDelete( actions );
-    plan.node_table->PrepareDelete( actions );
+    domain->PrepareDelete( actions );
+    domain_extension->PrepareDelete( actions );
+    orderings->PrepareDelete( actions );
+    link_table->PrepareDelete( actions );
+    node_table->PrepareDelete( actions );
     // TODO be able to supply ROOT or the new BASE depending on whether 
     // we're being asked to act at a root. Fix up eg in link table where 
     // we need to tolerate multiple calls at ROOT not just one at InitalBuild()
@@ -82,16 +77,16 @@ void XTreeDatabase::Insert(XLink base_xlink)
     INDENT("i");
 
     DBWalk::Actions actions;
-    plan.domain->PrepareInsert( actions );
-    plan.orderings->PrepareInsert( actions );
-    plan.link_table->PrepareInsert( actions );
-    plan.node_table->PrepareInsert( actions );
+    domain->PrepareInsert( actions );
+    orderings->PrepareInsert( actions );
+    link_table->PrepareInsert( actions );
+    node_table->PrepareInsert( actions );
     db_walker.Walk( &actions, base_xlink, DBWalk::BASE );
     
     // Domain extension wants to roam around the XTree, consulting
     // parents, children, anything really. So we need a separate pass.
     DBWalk::Actions actions2;
-    plan.domain_extension->PrepareInsert( actions2 );
+    domain_extension->PrepareInsert( actions2 );
     db_walker.Walk( &actions2, base_xlink, DBWalk::BASE );
 }
 
@@ -101,11 +96,11 @@ void XTreeDatabase::InsertExtraTree(XLink root_xlink)
     INDENT("e");
     
 	DBWalk::Actions actions;
-	plan.domain->PrepareInsert( actions );
-	plan.orderings->PrepareInsert( actions );
-	plan.link_table->PrepareInsert( actions );
-	plan.node_table->PrepareInsert( actions );
-	plan.domain_extension->PrepareInsertExtra( actions );
+	domain->PrepareInsert( actions );
+	orderings->PrepareInsert( actions );
+	link_table->PrepareInsert( actions );
+	node_table->PrepareInsert( actions );
+	domain_extension->PrepareInsertExtra( actions );
 	db_walker.Walk( &actions, root_xlink, DBWalk::ROOT );
 }
 
@@ -117,11 +112,11 @@ void XTreeDatabase::DeleteExtraTree(XLink root_xlink)
     // zones and on each call we delete just that
     // xlink.
     DBWalk::Actions actions;
-    plan.domain->PrepareDelete( actions );
-    plan.orderings->PrepareDelete( actions );
-    plan.link_table->PrepareDelete( actions );
-    plan.node_table->PrepareDelete( actions );
-    plan.domain_extension->PrepareDeleteExtra( actions );
+    domain->PrepareDelete( actions );
+    orderings->PrepareDelete( actions );
+    link_table->PrepareDelete( actions );
+    node_table->PrepareDelete( actions );
+    domain_extension->PrepareDeleteExtra( actions );
     db_walker.Walk( &actions, root_xlink, DBWalk::ROOT );   
 }
 
@@ -137,53 +132,53 @@ void XTreeDatabase::InitialWalk( const DBWalk::Actions *actions,
 const DomainExtensionChannel *XTreeDatabase::GetDEChannel( const DomainExtension::Extender *extender ) const
 {
     ASSERT( main_root_xlink );
-	return plan.domain_extension->GetChannel(extender);
+	return domain_extension->GetChannel(extender);
 }
 
 
 void XTreeDatabase::PostUpdateActions()
 {
     ASSERT( main_root_xlink );
-	plan.domain_extension->PostUpdateActions();
+	domain_extension->PostUpdateActions();
 }
 
 	
 const Domain &XTreeDatabase::GetDomain() const
 {
-	return *plan.domain;
+	return *domain;
 }
 
 
 const LinkTable &XTreeDatabase::GetLinkTable() const
 {
-	return *plan.link_table;
+	return *link_table;
 }
 
 
 const LinkTable::Row &XTreeDatabase::GetRow(XLink xlink) const
 {
     ASSERT( main_root_xlink )("XTreeDatabase@%p has no main tree", this);
-	return plan.link_table->GetRow(xlink);
+	return link_table->GetRow(xlink);
 }
 
 
 bool XTreeDatabase::HasRow(XLink xlink) const
 {
     ASSERT( main_root_xlink );
-	return plan.link_table->HasRow(xlink);
+	return link_table->HasRow(xlink);
 }
 
 
 const NodeTable::Row &XTreeDatabase::GetNodeRow(TreePtr<Node> node) const
 {
     ASSERT( main_root_xlink );
-	return plan.node_table->GetRow(node);
+	return node_table->GetRow(node);
 }
 
 
 bool XTreeDatabase::HasNodeRow(TreePtr<Node> node) const
 {
-	return plan.node_table->HasRow(node);
+	return node_table->HasRow(node);
 }
 
 
@@ -264,7 +259,7 @@ XLink XTreeDatabase::GetLastDescendant(XLink xlink) const
 
 const Orderings &XTreeDatabase::GetOrderings() const
 {
-	return *plan.orderings;
+	return *orderings;
 }
 
 
@@ -300,7 +295,7 @@ void XTreeDatabase::ClearDirtyGrass()
 
 void XTreeDatabase::Dump() const
 {
-    plan.orderings->Dump();
+    orderings->Dump();
 }
 
 
@@ -308,7 +303,7 @@ void XTreeDatabase::TestRelations()
 {
     if( ReadArgs::test_rel )
     {
-		plan.domain_extension->TestRelations( plan.domain->unordered_domain );
-		plan.orderings->TestRelations( plan.domain->unordered_domain );
+		domain_extension->TestRelations( domain->unordered_domain );
+		orderings->TestRelations( domain->unordered_domain );
 	}		
 }

@@ -25,16 +25,11 @@ public:
     XTreeDatabase( XLink main_root_xlink, shared_ptr<Lacing> lacing, DomainExtension::ExtenderSet domain_extenders );
     
 private: 
-    const struct Plan : public Traceable // TODO this is not a plan!!!
-    {
-        Plan( const XTreeDatabase *algo, shared_ptr<Lacing> lacing, DomainExtension::ExtenderSet domain_extenders );
-        
-        shared_ptr<Domain> domain;
-        shared_ptr<NodeTable> node_table;
-        shared_ptr<LinkTable> link_table;
-        shared_ptr<Orderings> orderings;
-        shared_ptr<DomainExtension> domain_extension;
-    } plan;
+    const shared_ptr<Domain> domain;
+    const shared_ptr<NodeTable> node_table;
+    const shared_ptr<LinkTable> link_table;
+    const shared_ptr<Orderings> orderings;
+    const shared_ptr<DomainExtension> domain_extension;
 
 public:
 	// Use both monolithic and incremental updates in order 
