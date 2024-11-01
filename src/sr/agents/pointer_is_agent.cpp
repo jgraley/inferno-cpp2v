@@ -16,7 +16,7 @@ shared_ptr<PatternQuery> PointerIsAgent::GetPatternQuery() const
 }
 
 
-RelocatedAgent::RelocatedQueryResult PointerIsAgent::RunRelocatedQuery( const XTreeDatabase *db, XLink stimulus_xlink ) const
+RelocatingAgent::RelocatingQueryResult PointerIsAgent::RunRelocatingQuery( const XTreeDatabase *db, XLink stimulus_xlink ) const
 {
 	// Report dependency on parent node
 	Dependencies deps;
@@ -39,7 +39,7 @@ RelocatedAgent::RelocatedQueryResult PointerIsAgent::RunRelocatedQuery( const XT
     TreePtr<Node> tnode = px->MakeValueArchetype();
     
     // Package up to indicate we don't have a parent for the new node
-	return RelocatedQueryResult( tnode, deps );
+	return RelocatingQueryResult( tnode, deps );
 }
 
 

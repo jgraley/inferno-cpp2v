@@ -1,5 +1,5 @@
-#ifndef RELOCATED_AGENT_HPP
-#define RELOCATED_AGENT_HPP
+#ifndef RELOCATING_AGENT_HPP
+#define RELOCATING_AGENT_HPP
 
 #include "agent_intermediates.hpp"
 #include "common/common.hpp"
@@ -11,7 +11,7 @@
 namespace SR
 { 
 
-class RelocatedAgent : public PreRestrictedAgent, public DomainExtension::Extender // names finalised in rule #729
+class RelocatingAgent : public PreRestrictedAgent, public DomainExtension::Extender // names finalised in rule #729
 {
 public:    
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
@@ -35,15 +35,15 @@ public:
 		// is executed at the end by GetAll().
 	};
 	
-	//---------------------------------- RelocatedQueryResult ------------------------------------    
+	//---------------------------------- RelocatingQueryResult ------------------------------------    
     
-    class RelocatedQueryResult
+    class RelocatingQueryResult
     {
 	public:
-		RelocatedQueryResult(); // Invalid (relocation failed)
-		RelocatedQueryResult( XLink base_xlink ); // Inside X tree
-		RelocatedQueryResult( TreePtr<Node> induced_base_node, const set<XLink> &deps ); // Induced
-		RelocatedQueryResult( TreePtr<Node> induced_base_node, const Dependencies &deps ); // Induced
+		RelocatingQueryResult(); // Invalid (relocation failed)
+		RelocatingQueryResult( XLink base_xlink ); // Inside X tree
+		RelocatingQueryResult( TreePtr<Node> induced_base_node, const set<XLink> &deps ); // Induced
+		RelocatingQueryResult( TreePtr<Node> induced_base_node, const Dependencies &deps ); // Induced
 		
 		bool IsValid() const;
 		bool IsXTree() const;
@@ -56,27 +56,27 @@ public:
 		XLink base_xlink; // NULL if the base is outside of X tree
 	};
         
-	//---------------------------------- RelocatedAgent ------------------------------------    
+	//---------------------------------- RelocatingAgent ------------------------------------    
 
    	/*
      * The relocation query can return any node within the XTree at any location or
      * it can return an "induced" subtree that isn't part of the X tree at all.
      * 
-     * Terminology: _stimulus_ X link is the one RunRelocatedQuery acts on. It generates
+     * Terminology: _stimulus_ X link is the one RunRelocatingQuery acts on. It generates
      * an in-tree _result_ XLlink or an _induced_ node. Both are bases of subtrees. 
      * In the induced case, this subtree is not part of the current input x tree and
      * has been created by tyhe query (i.e. it's a free zone). Dependencies (see later) 
      * are just called _deps_. 
 	 * 
-	 * Use RelocatedQueryResult for the results of a query. If the result is inside 
+	 * Use RelocatingQueryResult for the results of a query. If the result is inside 
 	 * the X tree, use XLink constructor. If outside, use the induced_base_node/deps
 	 * constructor. Deps are required in this case: either provide a simple set of
 	 * XLinks (we're only interested in deps inside the x tree) or use the 
-	 * Dependencies class (chains are collapsed on passing to RelocatedQueryResult
+	 * Dependencies class (chains are collapsed on passing to RelocatingQueryResult
 	 * constructor).
      */
     // TODO a checker: walk entire subtree: boundary XLinks to be in deps; they and all below should be in database
-	virtual RelocatedQueryResult RunRelocatedQuery( const XTreeDatabase *db, XLink stimulus_xlink ) const = 0;
+	virtual RelocatingQueryResult RunRelocatingQuery( const XTreeDatabase *db, XLink stimulus_xlink ) const = 0;
     
     DomainExtension::Extender::Info GetDomainExtension( const XTreeDatabase *db, XLink stimulus_xlink ) const override;
 
@@ -84,11 +84,11 @@ public:
 
 	bool IsExtenderChannelLess( const Extender &r ) const override;
 
-    class TeleportOperator : public SYM::SymbolToSymbolExpression
+    class RelocateOperator : public SYM::SymbolToSymbolExpression
     {
     public:    
         typedef SymbolExpression NominalType;
-        explicit TeleportOperator( const RelocatedAgent *agent,
+        explicit RelocateOperator( const RelocatingAgent *agent,
                                    shared_ptr<SymbolExpression> keyer ); 
         virtual list<shared_ptr<SYM::SymbolExpression>> GetSymbolOperands() const override;
         virtual unique_ptr<SYM::SymbolicResult> Evaluate( const EvalKit &kit,
@@ -99,10 +99,10 @@ public:
 
         virtual string Render() const override;
         virtual Precedence GetPrecedence() const override;
-		const RelocatedAgent *GetAgent() const;
+		const RelocatingAgent *GetAgent() const;
         
     protected:
-        const RelocatedAgent *agent;
+        const RelocatingAgent *agent;
         shared_ptr<SymbolExpression> keyer;
     };    
 };

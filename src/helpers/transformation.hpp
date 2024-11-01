@@ -276,7 +276,7 @@ public:
                                          	                          
     // Apply this transformation to tree at node, using kit for decls etc.
     // Vida Nova implementation with a TransKit for VN integration: see
-    // comment by RunRelocatedQuery().
+    // comment by RunRelocatingQuery().
     virtual AugTreePtr<Node> TryApplyTransformation( const TransKit &kit, // Handy functions
     		                                         AugTreePtr<Node> node ) const = 0;    // Root of the subtree we want to modify    		                          
 

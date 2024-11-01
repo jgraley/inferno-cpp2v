@@ -4,7 +4,7 @@
 #include "common/common.hpp"
 #include "common/read_args.hpp"
 #include "../scr_engine.hpp" 
-#include "autolocated_agent.hpp"
+#include "autolocating_agent.hpp"
 #include "standard_agent.hpp"
 #include "special_agent.hpp"
 
@@ -19,7 +19,7 @@ class SearchReplace;
 /// the embedded SCR engines operate on the tree at the position of the EmbeddedSCR
 /// agent, performing search and replace operations via the `search_pattern` and 
 /// `replace_pattern` pointers until no more matches are found (the usual reductive style).  
-class EmbeddedSCRAgent : public virtual AutolocatedAgent, 
+class EmbeddedSCRAgent : public virtual AutolocatingAgent, 
                          public RequiresSubordinateSCREngine 
 {
 public:

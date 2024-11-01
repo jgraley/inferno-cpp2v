@@ -185,7 +185,7 @@ set<AugTreePtr<Node>> TransformOfAgent::TransUtils::GetDeclarers( AugTreePtr<Nod
 }
 
 
-RelocatedAgent::Dependencies *TransformOfAgent::TransUtils::GetDeps() const
+RelocatingAgent::Dependencies *TransformOfAgent::TransUtils::GetDeps() const
 {
 	return deps;
 }
@@ -200,7 +200,7 @@ shared_ptr<PatternQuery> TransformOfAgent::GetPatternQuery() const
 }
 
 
-RelocatedAgent::RelocatedQueryResult TransformOfAgent::RunRelocatedQuery( const XTreeDatabase *db, XLink stimulus_xlink ) const
+RelocatingAgent::RelocatingQueryResult TransformOfAgent::RunRelocatingQuery( const XTreeDatabase *db, XLink stimulus_xlink ) const
 {
     // Transform the candidate expression, sharing the x_tree_db as a TransKit
     // so that implementations can use handy features without needing to search
@@ -209,7 +209,7 @@ RelocatedAgent::RelocatedQueryResult TransformOfAgent::RunRelocatedQuery( const 
     
     // Policy: Don't convert MMAX link to a node (will evaluate to EmptyResult)
     if( stimulus_xlink == XLink::MMAX_Link )
-         return RelocatedQueryResult(); 
+         return RelocatingQueryResult(); 
 	
 	Dependencies deps;
 	TransformOfAgent::TransUtils utils(db, &deps);
@@ -230,14 +230,14 @@ RelocatedAgent::RelocatedQueryResult TransformOfAgent::RunRelocatedQuery( const 
 		TreePtr<Node> tp = be->GetGenericTreePtr();		
 		ASSERT( tp->IsFinal() )(*this)(" computed non-final ")(tp)(" from ")(stimulus_x)("\n");                				
         if( xlink ) 
-            return RelocatedQueryResult( xlink );  // tree      
+            return RelocatingQueryResult( xlink );  // tree      
 		else
-            return RelocatedQueryResult( tp, deps );  // free 
+            return RelocatingQueryResult( tp, deps );  // free 
 	}
     catch( const ::Mismatch &e )
     {
 		TRACE("Caught ")(e)("; query fails\n");
-		return RelocatedQueryResult(); // NULL
+		return RelocatingQueryResult(); // NULL
 	}
 }
 
@@ -279,7 +279,7 @@ bool TransformOfAgent::IsExtenderChannelLess( const Extender &r ) const
 		return typeid(*transformation).before(typeid(*rto->transformation));
 	
 	// Otherwise resort to the default compare
-	return RelocatedAgent::IsExtenderChannelLess(r);
+	return RelocatingAgent::IsExtenderChannelLess(r);
 }
 
 

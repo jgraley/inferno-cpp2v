@@ -2,7 +2,7 @@
 #define CONJUNCTION_AGENT_HPP
 
 #include "../search_replace.hpp"
-#include "autolocated_agent.hpp"
+#include "autolocating_agent.hpp"
 #include "../boolean_evaluator.hpp"
 
 namespace SR
@@ -11,7 +11,7 @@ namespace SR
 /// Boolean node that matches if all of the sub-patterns at the pointers in
 /// `patterns` do match i.e. an "and" operation. `patterns` point to  
 /// normal contexts, since the global and-rule is preserved.
-class ConjunctionAgent : public virtual AutolocatedAgent 
+class ConjunctionAgent : public virtual AutolocatingAgent 
 {
 public:               
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;

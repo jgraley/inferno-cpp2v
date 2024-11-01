@@ -2,7 +2,7 @@
 #define POINTER_IS_AGENT_HPP
 
 #include "../search_replace.hpp"
-#include "relocated_agent.hpp"
+#include "relocating_agent.hpp"
 
 namespace SR
 {
@@ -12,11 +12,11 @@ namespace SR
 /// original pointer object for the purposes of comparison, so if the
 /// original pointer is unavailable, as may be the case if it was 
 /// created locally, this agent will not work correctly.
-class PointerIsAgent : public virtual RelocatedAgent
+class PointerIsAgent : public virtual RelocatingAgent
 {
 public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    RelocatedQueryResult RunRelocatedQuery( const XTreeDatabase *db, XLink stimulus_xlink ) const override;
+    RelocatingQueryResult RunRelocatingQuery( const XTreeDatabase *db, XLink stimulus_xlink ) const override;
                  
     virtual Block GetGraphBlockInfo() const;
             

@@ -37,7 +37,7 @@ Agent::ReplaceExprPtr EmbeddedSCRAgent::GenReplaceExprImpl( const ReplaceKit &ki
                                                          XLink key_xlink )
 {   
 	// Use colo algorithm but add marker
-    Agent::ReplaceExprPtr child_command = AutolocatedAgent::GenReplaceExprImpl(kit, me_plink, key_xlink);
+    Agent::ReplaceExprPtr child_command = AutolocatingAgent::GenReplaceExprImpl(kit, me_plink, key_xlink);
     
     auto child_pzc = dynamic_cast<PopulateZoneOperator *>(child_command.get());
     ASSERT( child_pzc );
