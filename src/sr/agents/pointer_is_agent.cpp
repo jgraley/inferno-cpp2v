@@ -41,7 +41,7 @@ TeleportAgent::QueryReturnType PointerIsAgent::RunTeleportQuery( const XTreeData
     TreePtr<Node> tnode = px->MakeValueArchetype();
     
     // Package up to indicate we don't have a parent for the new node
-	return make_pair( XLink(), tnode );
+	return QueryReturnType( tnode, *deps );
 }
 
 
