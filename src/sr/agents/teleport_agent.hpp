@@ -82,7 +82,7 @@ public:
 		bool IsValid() const;
 		bool IsXTree() const;
 		bool IsInduced() const;
-		DomainExtension::Extender::Info GetDEInfo() const;
+		DomainExtension::Extender::Info TryGetDEInfo() const;
 		XLink GetBaseXLink() const;
 	
 	private:

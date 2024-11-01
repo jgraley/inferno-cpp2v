@@ -107,10 +107,8 @@ bool TeleportAgent::QueryReturnType::IsInduced() const
 }
 
 	
-DomainExtension::Extender::Info TeleportAgent::QueryReturnType::GetDEInfo() const
+DomainExtension::Extender::Info TeleportAgent::QueryReturnType::TryGetDEInfo() const
 {
-	ASSERTS( IsValid() );
-	ASSERTS( !IsXTree() );
 	return de_info;
 }
 
@@ -156,18 +154,7 @@ DomainExtension::Extender::Info TeleportAgent::GetDomainExtension( const XTreeDa
 		return DomainExtension::Extender::Info();
 	}
 	
-	if( tq_result.IsInduced() )
-	{
-		return tq_result.GetDEInfo();
-	}
-	else if( tq_result.IsXTree() ) // parent link was supplied
-	{
-		return DomainExtension::Extender::Info(); // Don't bother Domain when there's an XLink
-	}		
-	else // invalid
-	{
-		return DomainExtension::Extender::Info();       // NULL  
-	}
+	return tq_result.TryGetDEInfo();
 }
 
 
@@ -218,7 +205,7 @@ unique_ptr<SymbolicResult> TeleportAgent::TeleportOperator::Evaluate( const Eval
     {
 	    // We are required to have already added the new node to the domain
 		// during domain extension, so use the node to fetch the unique XLink
-		XLink unique_xlink = kit.x_tree_db->GetDEChannel(agent)->GetUniqueDomainExtension(stimulus_xlink, tq_result.GetDEInfo().induced_base_node);
+		XLink unique_xlink = kit.x_tree_db->GetDEChannel(agent)->GetUniqueDomainExtension(stimulus_xlink, tq_result.TryGetDEInfo().induced_base_node);
     
 		// Form a symbol result to return.       
 		return make_unique<UniqueResult>( unique_xlink );
