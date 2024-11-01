@@ -3,14 +3,14 @@
 #include "type_data.hpp"
 #include "helpers/walk.hpp"
 #include "misc.hpp"
-#include "hastype.hpp"
+#include "typeof.hpp"
 
 using namespace CPPTree;
 
 
 #define INT 0
 
-AugTreePtr<Node> HasType::TryApplyTransformation( const TransKit &kit, AugTreePtr<Node> node ) const
+AugTreePtr<Node> TypeOf::TryApplyTransformation( const TransKit &kit, AugTreePtr<Node> node ) const
 {
 	auto e = AugTreePtr<CPPTree::Expression>::DynamicCast(node);
 	AugTreePtr<Node> n;
@@ -20,13 +20,13 @@ AugTreePtr<Node> HasType::TryApplyTransformation( const TransKit &kit, AugTreePt
 }
 
 
-AugTreePtr<CPPTree::Type> HasType::Get( const TransKit &kit, AugTreePtr<Expression> o ) const
+AugTreePtr<CPPTree::Type> TypeOf::Get( const TransKit &kit, AugTreePtr<Expression> o ) const
 {
     ASSERT(o);
     
     if( auto ii = AugTreePtr<SpecificInstanceIdentifier>::DynamicCast(o) ) // object or function instance
     {        
-        AugTreePtr<Node> n = HasDeclaration().TryApplyTransformation(kit, ii);
+        AugTreePtr<Node> n = DeclarationOf().TryApplyTransformation(kit, ii);
         auto i = AugTreePtr<Instance>::DynamicCast(n);
         ASSERT(i);
         return GET_CHILD(i, type); 
@@ -115,14 +115,14 @@ AugTreePtr<CPPTree::Type> HasType::Get( const TransKit &kit, AugTreePtr<Expressi
     else 
     {
         throw UnsupportedExpressionMismatch();
-        //ASSERT(0)("Unknown expression ")(*o)(", please add to HasType class");
+        //ASSERT(0)("Unknown expression ")(*o)(", please add to TypeOf class");
         //ASSERTFAIL("");
     }
 }
 
 // Just discover the type of operators, where the types of the operands have already been determined
 // Note we always get a Sequence, even when the operator is commutative
-AugTreePtr<CPPTree::Type> HasType::GetOperator( const TransKit &kit, AugTreePtr<Operator> op, list<AugTreePtr<Type>> optypes ) const
+AugTreePtr<CPPTree::Type> TypeOf::GetOperator( const TransKit &kit, AugTreePtr<Operator> op, list<AugTreePtr<Type>> optypes ) const
 {
 	// Lower types that masquerade as other types in preparation for operand analysis
 	// - References go to the referenced type
@@ -207,13 +207,13 @@ AugTreePtr<CPPTree::Type> HasType::GetOperator( const TransKit &kit, AugTreePtr<
     else
     {
         throw UnsupportedOperatorMismatch();
-        //ASSERT(0)("Unknown operator ")(*op)(" (not in operator_data.inc), please add to HasType class");
+        //ASSERT(0)("Unknown operator ")(*op)(" (not in operator_data.inc), please add to TypeOf class");
         //ASSERTFAIL("");
     }
 }
 
 
-AugTreePtr<CPPTree::Type> HasType::GetStandard( const TransKit &kit, list<AugTreePtr<Type>> &optypes ) const
+AugTreePtr<CPPTree::Type> TypeOf::GetStandard( const TransKit &kit, list<AugTreePtr<Type>> &optypes ) const
 {
 	list<AugTreePtr<Numeric>> nums;
 	for( AugTreePtr<Type> optype : optypes )
@@ -224,14 +224,14 @@ AugTreePtr<CPPTree::Type> HasType::GetStandard( const TransKit &kit, list<AugTre
 
     throw NumericalOperatorUsageMismatch1();
 //	if( optypes.size() == 2 )
-//		ASSERT(0)("Standard operator unknown usage, please add to HasType class");
+//		ASSERT(0)("Standard operator unknown usage, please add to TypeOf class");
 //	else
-//		ASSERT(0)("Standard operator unknown usage, please add to HasType class");
+//		ASSERT(0)("Standard operator unknown usage, please add to TypeOf class");
 //    ASSERTFAIL();
 }
 
 
-AugTreePtr<CPPTree::Type> HasType::GetStandardOnNumerics( const TransKit &kit, list<AugTreePtr<Numeric>> &optypes ) const
+AugTreePtr<CPPTree::Type> TypeOf::GetStandardOnNumerics( const TransKit &kit, list<AugTreePtr<Numeric>> &optypes ) const
 {
 	// Start the width and signedness as per regular "int" since this is the
 	// minimum result type for standard operators
@@ -257,7 +257,7 @@ AugTreePtr<CPPTree::Type> HasType::GetStandardOnNumerics( const TransKit &kit, l
 		auto intop = AugTreePtr<Integral>::DynamicCast(optype);
         if( !intop )
             throw NumericalOperatorUsageMismatch2();
-        //ASSERT( intop )(*optype)(" is not Floating or Integral, please add to HasType class" );
+        //ASSERT( intop )(*optype)(" is not Floating or Integral, please add to TypeOf class" );
 
         // Do a max algorithm on the width
 		auto siwidth = AugTreePtr<SpecificInteger>::DynamicCast(GET_CHILD(intop, width));
@@ -277,7 +277,7 @@ AugTreePtr<CPPTree::Type> HasType::GetStandardOnNumerics( const TransKit &kit, l
 		else
         {
             throw NumericalOperatorUsageMismatch4();
-			//ASSERT( 0 )(*intop)(" is not Signed or Unsigned, please add to HasType class");
+			//ASSERT( 0 )(*intop)(" is not Signed or Unsigned, please add to TypeOf class");
         }
 	}
 
@@ -305,7 +305,7 @@ AugTreePtr<CPPTree::Type> HasType::GetStandardOnNumerics( const TransKit &kit, l
 }
 
 
-AugTreePtr<CPPTree::Type> HasType::GetSpecial( const TransKit &kit, AugTreePtr<Operator> op, list<AugTreePtr<Type>> &optypes ) const
+AugTreePtr<CPPTree::Type> TypeOf::GetSpecial( const TransKit &kit, AugTreePtr<Operator> op, list<AugTreePtr<Type>> &optypes ) const
 {
     if( AugTreePtr<Dereference>::DynamicCast(op) || AugTreePtr<Subscript>::DynamicCast(op) )
     {
@@ -341,13 +341,13 @@ AugTreePtr<CPPTree::Type> HasType::GetSpecial( const TransKit &kit, AugTreePtr<O
     else
     {
         throw UnsupportedSpecialMismatch();
-        //ASSERT(0)("Unknown SPECIAL operator ")(*op)(", please add to HasType class");
+        //ASSERT(0)("Unknown SPECIAL operator ")(*op)(", please add to TypeOf class");
         //ASSERTFAIL("");
     }
 }
 
 
-AugTreePtr<CPPTree::Type> HasType::GetLiteral( const TransKit &kit, AugTreePtr<Literal> l ) const
+AugTreePtr<CPPTree::Type> TypeOf::GetLiteral( const TransKit &kit, AugTreePtr<Literal> l ) const
 {
     if( auto si = AugTreePtr<SpecificInteger>::DynamicCast(l) )
     {
@@ -387,7 +387,7 @@ AugTreePtr<CPPTree::Type> HasType::GetLiteral( const TransKit &kit, AugTreePtr<L
     else
     {
         throw UnsupportedLiteralMismatch();
-        //ASSERT(0)("Unknown literal ")(*l)(", please add to HasType class");
+        //ASSERT(0)("Unknown literal ")(*l)(", please add to TypeOf class");
         //ASSERTFAIL("");
     }
 }
@@ -395,7 +395,7 @@ AugTreePtr<CPPTree::Type> HasType::GetLiteral( const TransKit &kit, AugTreePtr<L
 
 // Is this call really a constructor call? If so return the object being
 // constructed. Otherwise, return nullptr
-AugTreePtr<CPPTree::Expression> HasType::TryGetConstructedExpression( const TransKit &kit, AugTreePtr<Call> call ) const
+AugTreePtr<CPPTree::Expression> TypeOf::TryGetConstructedExpression( const TransKit &kit, AugTreePtr<Call> call ) const
 {
 	AugTreePtr<CPPTree::Expression> e;
 
@@ -409,5 +409,5 @@ AugTreePtr<CPPTree::Expression> HasType::TryGetConstructedExpression( const Tran
     return e;
 }
 
-HasType HasType::instance; 
+TypeOf TypeOf::instance; 
 

@@ -65,7 +65,7 @@ UseTempForReturnValue::UseTempForReturnValue()
     auto s_return = MakeTreeNode<Return>();
     auto s_and = MakeTreeNode< Conjunction<Expression> >();
     s_return->return_value = s_and;
-    auto retval = MakePatternNode< TransformOf<Expression> >( &HasType::instance );
+    auto retval = MakePatternNode< TransformOf<Expression> >( &TypeOf::instance );
     auto type = MakePatternNode<Type>();
     retval->pattern = type;
     
@@ -73,7 +73,7 @@ UseTempForReturnValue::UseTempForReturnValue()
     auto cs_stuff = MakeTreeNode< Stuff<Expression> >(); // TODO the exclusion Stuff<GetDec<Automatic>> is too strong;
                                                                     // use Not<GetDec<Temp>>
     s_and->conjuncts = ( retval, cs_stuff );
-    auto cs_id = MakePatternNode< TransformOf<InstanceIdentifier> >( &HasDeclaration::instance );
+    auto cs_id = MakePatternNode< TransformOf<InstanceIdentifier> >( &DeclarationOf::instance );
     cs_stuff->terminus = cs_id;
     auto cs_instance = MakeTreeNode<Instance>();
     cs_id->pattern = cs_instance;

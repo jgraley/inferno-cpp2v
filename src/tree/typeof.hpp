@@ -5,7 +5,7 @@
 #include "cpptree.hpp"
 
 // Really a GetTypeOf class, but named for the way it appears in pattern graphs
-class HasType : public Transformation
+class TypeOf : public Transformation
 {
 public:
     class UnsupportedMismatch : public Mismatch {};
@@ -39,7 +39,7 @@ private:
     AugTreePtr<CPPTree::Type> GetLiteral( const TransKit &kit, AugTreePtr<CPPTree::Literal> l ) const;
     
 public:
-    static HasType instance; 
+    static TypeOf instance; 
 };
 
 #endif

@@ -9,7 +9,7 @@
 #include "tree/cpptree.hpp"
 #include "common/common.hpp"
 #include "sr/agents/all.hpp"
-#include "tree/hastype.hpp"
+#include "tree/typeof.hpp"
 #include "tree/misc.hpp"
 #include "inferno_agents.hpp"
 
@@ -56,7 +56,7 @@ CleanupStatementExpression::CleanupStatementExpression() // LIMITAION: decls in 
     auto body = MakePatternNode< Star<Statement> >();
     auto decls = MakePatternNode< Star<Declaration> >();
     auto r_temp = MakePatternNode<Temporary>();
-    auto last = MakePatternNode< TransformOf<Expression> >( &HasType::instance );
+    auto last = MakePatternNode< TransformOf<Expression> >( &TypeOf::instance );
     auto r_temp_id = MakePatternNode<BuildInstanceIdentifierAgent>("result");
     auto r_assign = MakePatternNode<Assign>();
     auto overlay = MakePatternNode< Delta<Expression> >();
@@ -409,7 +409,7 @@ ReduceVoidStatementExpression::ReduceVoidStatementExpression()
     auto decls = MakePatternNode< Star<Declaration> >();
     auto stmts = MakePatternNode< Star<Statement> >();
     auto last = MakePatternNode< Negation<Statement> >();
-    auto sx_expr = MakePatternNode< TransformOf<Expression> >( &HasType::instance );
+    auto sx_expr = MakePatternNode< TransformOf<Expression> >( &TypeOf::instance );
     auto sx_type_not = MakePatternNode< Negation<Type> >();
     auto sx_void = MakePatternNode<Void>();
     auto r_comp = MakePatternNode<Compound>();
@@ -437,7 +437,7 @@ CleanupUnusedVariables::CleanupUnusedVariables()
     auto nested_array = MakePatternNode<NestedArrayAgent>();
     auto sx_not = MakePatternNode< Negation<Type> >();
     auto sx_any = MakePatternNode< Disjunction<Type> >();
-    auto getdecl = MakePatternNode< TransformOf<TypeIdentifier> >( &HasDeclaration::instance ); // TODO should be modulo typedefs
+    auto getdecl = MakePatternNode< TransformOf<TypeIdentifier> >( &DeclarationOf::instance ); // TODO should be modulo typedefs
     auto id = MakePatternNode<InstanceIdentifier>();
     auto stuff1 = MakePatternNode< Stuff<Scope> >();
     auto s_stuff2 = MakePatternNode< Stuff<Scope> >();

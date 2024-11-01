@@ -4,7 +4,7 @@
 #include "tree/sctree.hpp"
 #include "common/common.hpp"
 #include "sr/agents/all.hpp"
-#include "tree/hastype.hpp"
+#include "tree/typeof.hpp"
 #include "tree/misc.hpp"
 #include "inferno_agents.hpp"
 
@@ -382,7 +382,7 @@ LabelVarsToEnum::LabelVarsToEnum()
     auto msx_not2 = MakePatternNode< Negation<Statement> >();
     auto msx_not3 = MakePatternNode< Negation<Statement> >();
     auto over = MakePatternNode< Delta<Type> >();
-    auto s_index = MakePatternNode< TransformOf<Expression> >( &HasType::instance );
+    auto s_index = MakePatternNode< TransformOf<Expression> >( &TypeOf::instance );
     auto type = MakePatternNode<TypeIdentifier>();
     auto l_over = MakePatternNode< Delta<Expression> >();
     auto m_over = MakePatternNode< Delta<Expression> >();
@@ -509,7 +509,7 @@ AddStateEnumVar::AddStateEnumVar()
     auto ls_sub = MakePatternNode<Subscript>();
     auto lr_sub = MakePatternNode<Subscript>();
     auto array = MakePatternNode<InstanceIdentifier>();
-    auto s_index = MakePatternNode< TransformOf<Expression> >( &HasType::instance );
+    auto s_index = MakePatternNode< TransformOf<Expression> >( &TypeOf::instance );
     auto type = MakePatternNode<Integral>(); // TODO use the enum type, and ensure properly supported in TypeOf
     
     ls_goto->destination = ls_sub;

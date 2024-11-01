@@ -1,7 +1,7 @@
 #include "tree/cpptree.hpp"
 #include "tree/sctree.hpp"
 #include "helpers/transformation.hpp"
-#include "tree/hastype.hpp"
+#include "tree/typeof.hpp"
 #include "common/trace.hpp"
 #include "common/read_args.hpp"
 #include "tree/type_data.hpp"
@@ -388,7 +388,7 @@ string Render::RenderCall( const TransKit &kit, TreePtr<Call> call ) try
 
 	// Render the expression that resolves to the function name unless this is
 	// a constructor call in which case just the name of the thing being constructed.
-	if( TreePtr<Expression> base = HasType::instance.TryGetConstructedExpression( kit, call ).GetTreePtr() )
+	if( TreePtr<Expression> base = TypeOf::instance.TryGetConstructedExpression( kit, call ).GetTreePtr() )
 		s += RenderExpression( kit, base, true );
 	else
 		s += RenderExpression( kit, call->callee, true );
@@ -396,7 +396,7 @@ string Render::RenderCall( const TransKit &kit, TreePtr<Call> call ) try
 	s += "(";
 
 	// If CallableParams, generate some arguments, resolving the order using the original function type
-	TreePtr<Node> ctype = HasType::instance(call->callee, program).GetTreePtr();
+	TreePtr<Node> ctype = TypeOf::instance(call->callee, program).GetTreePtr();
 	ASSERT( ctype );
 	if( TreePtr<CallableParams> cp = DynamicTreePtrCast<CallableParams>(ctype) )
 		s += RenderMapInOrder( kit, call, cp, ", ", false );
@@ -617,7 +617,7 @@ void Render::ExtractInits( const TransKit &kit, Sequence<Statement> &body, Seque
 		{
             try
             {
-                if( HasType::instance.TryGetConstructedExpression( kit, o ) )
+                if( TypeOf::instance.TryGetConstructedExpression( kit, o ) )
                 {
                     inits.push_back(s);
                     continue;

@@ -31,7 +31,7 @@
 #include "common/trace.hpp"
 #include "tree/type_data.hpp"
 #include "tree/misc.hpp"
-#include "tree/hastype.hpp"
+#include "tree/typeof.hpp"
 
 #include "rc_hold.hpp"
 #include "identifier_tracker.hpp"
@@ -1058,7 +1058,7 @@ private:
 		c->callee = callee;
 
 		// If CallableParams, fill in the args map based on the supplied args and original function type
-		TreePtr<Node> t = HasType::instance(callee, all_decls).GetTreePtr();
+		TreePtr<Node> t = TypeOf::instance(callee, all_decls).GetTreePtr();
 		if( TreePtr<CallableParams> p = DynamicTreePtrCast<CallableParams>(t) )
 		    PopulateMapOperator( c, args, p );
 
@@ -1549,7 +1549,7 @@ private:
 		}
 
 		// Find the specified member in the record implied by the expression on the left of .
-		TreePtr<Node> tbase = HasType::instance( a->base, all_decls ).GetTreePtr();
+		TreePtr<Node> tbase = TypeOf::instance( a->base, all_decls ).GetTreePtr();
 		TreePtr<TypeIdentifier> tibase = DynamicTreePtrCast<TypeIdentifier>(tbase);
 		ASSERT( tibase );
 		DefaultTransUtils utils(all_decls);
@@ -1818,7 +1818,7 @@ private:
 			ASSERT(0)("typeof() only supported on types at the moment");
 			// TODO This is wrong because we'll get 2 refs to the type, need to duplicate,
 			// or maybe add an alternative node and convert in a S&R
-			p->operand = TreePtr<Type>::DynamicCast( HasType::instance( hold_expr.FromRaw(TyOrEx), all_decls ).GetTreePtr() );
+			p->operand = TreePtr<Type>::DynamicCast( TypeOf::instance( hold_expr.FromRaw(TyOrEx), all_decls ).GetTreePtr() );
 		}
 		return hold_expr.ToRaw( p );
 	}

@@ -22,7 +22,7 @@ AugTreePtr<Identifier> GetIdentifierOfDeclaration( AugTreePtr<Declaration> d )
 }
 
 	
-AugTreePtr<Node> HasDeclaration::TryApplyTransformation( const TransKit &kit, AugTreePtr<Node> node ) const try
+AugTreePtr<Node> DeclarationOf::TryApplyTransformation( const TransKit &kit, AugTreePtr<Node> node ) const try
 {    
     set<AugTreePtr<Node>> declarers = kit.utils->GetDeclarers( node );
     
@@ -47,17 +47,17 @@ catch( TransUtilsInterface::UnknownNode &)
     
 
 
-HasDeclaration HasDeclaration::instance; // TODO Use this instead of constructing a temp (could contain lookup tables etc in the future)
+DeclarationOf DeclarationOf::instance; // TODO Use this instead of constructing a temp (could contain lookup tables etc in the future)
 
 // Look for a record, skipping over typedefs. Returns nullptr if not a record.
 AugTreePtr<Record> GetRecordDeclaration( const TransKit &kit, AugTreePtr<TypeIdentifier> id )
 {
-	AugTreePtr<Node> ut = HasDeclaration().TryApplyTransformation( kit, id );
+	AugTreePtr<Node> ut = DeclarationOf().TryApplyTransformation( kit, id );
 	while( auto td = AugTreePtr<Typedef>::DynamicCast(ut) )
 	{
 	    auto ti = AugTreePtr<TypeIdentifier>::DynamicCast( GET_CHILD(td, type) );
 	    if(ti)
-	        ut = HasDeclaration().TryApplyTransformation( kit, ti );
+	        ut = DeclarationOf().TryApplyTransformation( kit, ti );
 	    else
 	        return AugTreePtr<Record>(); // not a record
 	}
@@ -88,7 +88,7 @@ AugTreePtr<Instance> FindMemberByName( const TransKit &kit, AugTreePtr<Record> r
     {
         FOR_AUG_CONTAINER( ir, bases, [&](AugTreePtr<Base> b_atp)
         {
-            AugTreePtr<Node> ut = HasDeclaration().TryApplyTransformation( kit, GET_CHILD(b_atp, record) );
+            AugTreePtr<Node> ut = DeclarationOf().TryApplyTransformation( kit, GET_CHILD(b_atp, record) );
             auto ir = AugTreePtr<InheritanceRecord>::DynamicCast(ut);
             ASSERT(ir);
             if( AugTreePtr<Instance> i = FindMemberByName( kit, ir, name ) )

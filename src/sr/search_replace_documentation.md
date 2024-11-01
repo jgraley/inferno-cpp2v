@@ -201,15 +201,15 @@ When the search engine encounters a `TransformOf<>` node, it applies the transfo
 
 Transformer nodes allow you to couple both the transformer node itself (keying as the untransformed input program subtree) and the node pointed to by `pattern` (keying as the input program subtree after transformation).
 
-### 7.1 `HasType`
+### 7.1 `TypeOf`
 
-`HasType` is a utility transformation in the form of a singleton class, which we can embed by constructing `TransformOf<Expression> mynode( &HasType::instance )`. It is used in the context of an `Expression`. During a search, the `HasType` algorithm will determine the type of an expression in the input program subtree, and then compare that with the type pointed to by the `pattern` member (note that types and expressions are represented as subtrees under `Type` and `Expression`, respectively). 
+`TypeOf` is a utility transformation in the form of a singleton class, which we can embed by constructing `TransformOf<Expression> mynode( &TypeOf::instance )`. It is used in the context of an `Expression`. During a search, the `TypeOf` algorithm will determine the type of an expression in the input program subtree, and then compare that with the type pointed to by the `pattern` member (note that types and expressions are represented as subtrees under `Type` and `Expression`, respectively). 
 
-Note that if the pattern is maximally wild, then `HasType` will match any valid expression. However, it can be convenient to couple the `Type` wildcard with another `Type` in the search pattern, to restrict for type equivalence, or with a node in the replace pattern, to reproduce the type in the output program.
+Note that if the pattern is maximally wild, then `TypeOf` will match any valid expression. However, it can be convenient to couple the `Type` wildcard with another `Type` in the search pattern, to restrict for type equivalence, or with a node in the replace pattern, to reproduce the type in the output program.
 
-### 7.2 `HasDeclaration`
+### 7.2 `DeclarationOf`
 
-HasDeclaration is a utility transformation in the form of a singleton class, which we can embed by constructing `TransformOf<InstanceIdentifier> mynode( &HasDeclaration::instance )`. It is used in the context of an `InstanceIdentifier`. During a search, the `HasDeclaration` algorithm will search for the declaration of an identifier in the input program, and then compare that with the declaration pointed to by the `pattern` member. 
+DeclarationOf is a utility transformation in the form of a singleton class, which we can embed by constructing `TransformOf<InstanceIdentifier> mynode( &DeclarationOf::instance )`. It is used in the context of an `InstanceIdentifier`. During a search, the `DeclarationOf` algorithm will search for the declaration of an identifier in the input program, and then compare that with the declaration pointed to by the `pattern` member. 
 
 ### 7.3 Notes on transformation interface
 

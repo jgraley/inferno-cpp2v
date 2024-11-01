@@ -10,14 +10,14 @@
 // TODO refactor this away
 AugTreePtr<CPPTree::Identifier> GetIdentifierOfDeclaration( AugTreePtr<CPPTree::Declaration> d );
 
-class HasDeclaration : public Transformation
+class DeclarationOf : public Transformation
 {
 public:
     class DeclarationNotFound : public ::Mismatch {};
     
     AugTreePtr<Node> TryApplyTransformation( const TransKit &kit, 
                                           AugTreePtr<Node> node ) const override;
-    static HasDeclaration instance;
+    static DeclarationOf instance;
 };
 
 // Look for a record, skipping over typedefs. Returns nullptr if not a record.

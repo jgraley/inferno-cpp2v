@@ -8,7 +8,7 @@
 #ifndef GENERATE_STACKS_HPP
 #define GENERATE_STACKS_HPP
 
-#include "tree/hastype.hpp"
+#include "tree/typeof.hpp"
 #include "tree/misc.hpp"
 #include "sr/vn_step.hpp"
 
