@@ -752,8 +752,7 @@ private:
 			// At this point, when we have the instance (and hence the type) and the initialiser
 			// we can detect when an array initialiser has been inserted for a record instance and
 			// change it.
-			DefaultNavigation nav(all_decls);
-			DefaultTransUtils utils(&nav);
+			DefaultTransUtils utils(all_decls);
             TransKit kit { &utils };
 			if ( TreePtr<MakeArray> ai = DynamicTreePtrCast<MakeArray>(o->initialiser) )
 				if ( TreePtr<TypeIdentifier> ti = DynamicTreePtrCast<TypeIdentifier>(o->type) )
@@ -1553,8 +1552,7 @@ private:
 		TreePtr<Node> tbase = HasType::instance( a->base, all_decls ).GetTreePtr();
 		TreePtr<TypeIdentifier> tibase = DynamicTreePtrCast<TypeIdentifier>(tbase);
 		ASSERT( tibase );
-        DefaultNavigation nav(all_decls);
-		DefaultTransUtils utils(&nav);
+		DefaultTransUtils utils(all_decls);
         TransKit kit { &utils };
 		TreePtr<Record> rbase = GetRecordDeclaration(kit, tibase).GetTreePtr();
 		ASSERT( rbase )( "thing on left of ./-> is not a record/record ptr" );
@@ -1916,8 +1914,7 @@ private:
 	{
 		TreePtr<TypeIdentifier> id = DynamicTreePtrCast<TypeIdentifier>(t);
 		ASSERT(id);
-        DefaultNavigation nav(all_decls);
-		DefaultTransUtils utils(&nav);
+		DefaultTransUtils utils(all_decls);
         TransKit kit { &utils };
 		TreePtr<Record> r = GetRecordDeclaration( kit, id ).GetTreePtr();
 
@@ -2045,8 +2042,7 @@ private:
 		// At this point, when we have the instance (and hence the type) and the initialiser
 		// we can detect when an array initialiser has been inserted for a record instance and
 		// change it.
-        DefaultNavigation nav(all_decls);
-		DefaultTransUtils utils(&nav);
+		DefaultTransUtils utils(all_decls);
         TransKit kit { &utils };
 		if( TreePtr<MakeArray> ai = DynamicTreePtrCast<MakeArray>(e) )
 			if( TreePtr<TypeIdentifier> ti = DynamicTreePtrCast<TypeIdentifier>(t) )

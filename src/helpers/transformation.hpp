@@ -217,44 +217,17 @@ public:
 
 #define FOR_AUG_CONTAINER( ATP, FIELD, BODY ) ((ATP).ForAugContainer(&(ATP).GetTreePtr()->FIELD, (BODY)))
 
-// ---------------------- NavigationInterface ---------------------------
-
-class NavigationInterface
-{
-public:		
-    class UnknownNode : public Exception {};
-	
-    // Convention is that second points to one of first's TreePtrs, similar
-    // to the requirements of XLink constructor
-    typedef pair<TreePtr<Node>, const TreePtrInterface *> LinkInfo;
-
-	virtual ~NavigationInterface() = default;
-
-	virtual set<LinkInfo> GetParents( TreePtr<Node> node ) const = 0;
-	virtual set<LinkInfo> GetDeclarers( TreePtr<Node> node ) const = 0;    
-};
-
-// ---------------------- DefaultNavigation ---------------------------
-
-// For when you don't have a database - searches for things from the
-// supplied root.
-class DefaultNavigation : public NavigationInterface
-{
-public:	
-	DefaultNavigation( TreePtr<Node> root_ );
-
-	set<LinkInfo> GetParents( TreePtr<Node> node ) const override;
-	set<LinkInfo> GetDeclarers( TreePtr<Node> node ) const override;
-	
-private:
-	TreePtr<Node> root;
-};
-
 // ---------------------- TransUtilsInterface ---------------------------
 
 class TransUtilsInterface
 {
 public:    
+    class UnknownNode : public Exception {};
+
+    // Convention is that second points to one of first's TreePtrs, similar
+    // to the requirements of XLink constructor
+    typedef pair<TreePtr<Node>, const TreePtrInterface *> LinkInfo;
+
 	virtual ~TransUtilsInterface() = default;
 
 	// TODO there is no reason not to implement GetParents() along the same lines
@@ -278,12 +251,16 @@ protected:
 class DefaultTransUtils : public TransUtilsInterface
 {
 public:	
-	explicit DefaultTransUtils( const NavigationInterface *nav_ );	                           
+	explicit DefaultTransUtils( TreePtr<Node> root_ );	                           
 	set<AugTreePtr<Node>> GetDeclarers( AugTreePtr<Node> node ) const override;
 			
 private:	
+	set<LinkInfo> GetParents( TreePtr<Node> node ) const;
+	set<LinkInfo> GetDeclarers( TreePtr<Node> node ) const;
+
+
     ValuePtr<AugBEInterface> CreateBE( TreePtr<Node> tp ) const override;			
-	const NavigationInterface * const nav;
+	TreePtr<Node> root;
 };
 
 // ---------------------- TransKit ---------------------------

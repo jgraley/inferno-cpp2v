@@ -37,7 +37,7 @@ AugTreePtr<Node> HasDeclaration::TryApplyTransformation( const TransKit &kit, Au
     // function decl/def are folded, so we expect only one declarer
     return OnlyElementOf( declarers ); 
 }
-catch( NavigationInterface::UnknownNode &) 
+catch( TransUtilsInterface::UnknownNode &) 
 {
 #ifdef WARN_UNFOUND_DECL
     FTRACE("Warning: declaration of ")(node)(" not found (UnknownNode)\n");

@@ -304,13 +304,13 @@ void XTreeDatabase::Dump() const
 }
 
 
-set<NavigationInterface::LinkInfo> XTreeDatabase::GetParents( TreePtr<Node> node ) const
+set<TransUtilsInterface::LinkInfo> XTreeDatabase::GetParents( TreePtr<Node> node ) const
 {
     ASSERTFAIL(); // deprecated
 }
 
 
-set<NavigationInterface::LinkInfo> XTreeDatabase::GetDeclarers( TreePtr<Node> node ) const
+set<TransUtilsInterface::LinkInfo> XTreeDatabase::GetDeclarers( TreePtr<Node> node ) const
 {
     ASSERTFAIL(); // deprecated
 }

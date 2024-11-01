@@ -19,7 +19,6 @@ namespace SR
 {    
     
 class XTreeDatabase : public Traceable, 
-                      public NavigationInterface,
                       public Duplicate::DirtyGrassUpdateInterface
 {
 public:
@@ -82,9 +81,8 @@ public:
     
     void Dump() const;
 	
-    // NavigationInterface implementation
-  	set<LinkInfo> GetParents( TreePtr<Node> node ) const override;
-  	set<LinkInfo> GetDeclarers( TreePtr<Node> node ) const override;
+  	set<TransUtilsInterface::LinkInfo> GetParents( TreePtr<Node> node ) const;
+  	set<TransUtilsInterface::LinkInfo> GetDeclarers( TreePtr<Node> node ) const;
   	
 private:    
     void TestRelations();

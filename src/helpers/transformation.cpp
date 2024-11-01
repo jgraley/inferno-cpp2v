@@ -56,15 +56,34 @@ void AugTreePtrBase::OnDepLeak() const
 		impl->OnDepLeak();	
 }
 
-// ---------------------- DefaultNavigation ---------------------------
+// ---------------------- DefaultTransUtils ---------------------------
 
-DefaultNavigation::DefaultNavigation( TreePtr<Node> root_ ) :
+DefaultTransUtils::DefaultTransUtils( TreePtr<Node> root_ ) :
 	root( root_ )
 {
+}	
+
+
+ValuePtr<AugBEInterface> DefaultTransUtils::CreateBE( TreePtr<Node> tp ) const 
+{
+	return nullptr;
 }
 
 
-set<NavigationInterface::LinkInfo> DefaultNavigation::GetParents( TreePtr<Node> node ) const
+set<AugTreePtr<Node>> DefaultTransUtils::GetDeclarers( AugTreePtr<Node> node ) const
+{
+    set<DefaultTransUtils::LinkInfo> declarer_infos = GetDeclarers( node.GetTreePtr() );  
+    
+    // Generate ATPs from declarers
+	set<AugTreePtr<Node>> atp_declarers;	
+    for( LinkInfo declarer : declarer_infos )
+		atp_declarers.insert( AugTreePtr<Node>(declarer.first) );
+	
+	return atp_declarers;
+}
+
+
+set<DefaultTransUtils::LinkInfo> DefaultTransUtils::GetParents( TreePtr<Node> node ) const
 {
 	set<LinkInfo> infos;
 	
@@ -86,7 +105,7 @@ set<NavigationInterface::LinkInfo> DefaultNavigation::GetParents( TreePtr<Node> 
 }
 
 
-set<NavigationInterface::LinkInfo> DefaultNavigation::GetDeclarers( TreePtr<Node> node ) const
+set<DefaultTransUtils::LinkInfo> DefaultTransUtils::GetDeclarers( TreePtr<Node> node ) const
 {
 	set<LinkInfo> infos;
 	
@@ -107,39 +126,13 @@ set<NavigationInterface::LinkInfo> DefaultNavigation::GetDeclarers( TreePtr<Node
 	return infos;
 }
 
-// ---------------------- DefaultTransUtils ---------------------------
-
-DefaultTransUtils::DefaultTransUtils( const NavigationInterface *nav_ ) :
-	nav(nav_)
-{
-}	
-
-
-ValuePtr<AugBEInterface> DefaultTransUtils::CreateBE( TreePtr<Node> tp ) const 
-{
-	return nullptr;
-}
-
-
-set<AugTreePtr<Node>> DefaultTransUtils::GetDeclarers( AugTreePtr<Node> node ) const
-{
-    set<NavigationInterface::LinkInfo> declarer_infos = nav->GetDeclarers( node.GetTreePtr() );  
-    
-    // Generate ATPs from declarers
-	set<AugTreePtr<Node>> atp_declarers;	
-    for( NavigationInterface::LinkInfo declarer : declarer_infos )
-		atp_declarers.insert( AugTreePtr<Node>(declarer.first) );
-	
-	return atp_declarers;
-}
 
 // ---------------------- Transformation ---------------------------
 
 AugTreePtr<Node> Transformation::operator()( AugTreePtr<Node> atp, 
     		                                 TreePtr<Node> root	) const
 {
-    DefaultNavigation nav(root);
-    DefaultTransUtils utils(&nav);
+    DefaultTransUtils utils(root);
     TransKit kit { &utils };
     return TryApplyTransformation( kit, atp );
 }

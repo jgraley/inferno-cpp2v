@@ -168,7 +168,7 @@ ValuePtr<TransformOfAgent::AugBE> TransformOfAgent::TransUtils::GetBE( const Aug
 set<AugTreePtr<Node>> TransformOfAgent::TransUtils::GetDeclarers( AugTreePtr<Node> node ) const
 {
     if( !db->HasNodeRow(node.GetTreePtr()) ) // not found
-        throw NavigationInterface::UnknownNode();
+        throw TransUtilsInterface::UnknownNode();
 
     NodeTable::Row node_row = db->GetNodeRow( node.GetTreePtr() );  
     
