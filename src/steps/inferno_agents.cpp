@@ -259,14 +259,17 @@ TeleportAgent::QueryReturnType NestedAgent::RunTeleportQuery( const XTreeDatabas
     // Compare the depth with the supplied pattern if present
     if( depth )
     {
+		set<XLink> deps = {stimulus_xlink};
         string s;
         // Keep advancing until we get nullptr, and remember the last non-null position
         int i = 0;
         XLink xlink = stimulus_xlink;
         while( XLink next_xlink = Advance(xlink, &s) )
-            xlink = next_xlink; // TODO we should be adding deps
-
-        return QueryReturnType(MakeTreeNode<Node>(), set<XLink>()); // TODO obviously wrong see #679
+        {			
+            xlink = next_xlink; 
+			deps.insert( xlink );
+		}
+        return QueryReturnType(MakeTreeNode<SpecificString>(s), deps); 
     }
     
     return QueryReturnType();
