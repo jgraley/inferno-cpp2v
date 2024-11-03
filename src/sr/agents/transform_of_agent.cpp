@@ -196,7 +196,7 @@ ValuePtr<AugBEInterface> TransformOfAgent::TransUtils::CreateBE( TreePtr<Node> t
 ValuePtr<TransformOfAgent::AugBECommon> TransformOfAgent::TransUtils::GetBE( const AugTreePtrBase &atp ) const
 {
 	ValuePtr<AugBEInterface> p = atp.GetImpl();
-	ValuePtr<AugBECommon> be = ValuePtr<AugBECommon>::DynamicCast(p);	
+	ValuePtr<AugBECommon> be = ValuePtr<AugBECommon>::DynamicCast(move(p));	
 	ASSERTS(be);
 	return be;
 }
@@ -262,12 +262,12 @@ RelocatingAgent::RelocatingQueryResult TransformOfAgent::RunRelocatingQuery( con
 		// Grab the final deps stored in the ATP. Same as a dep leak, but explicit for clarity.
 		deps.CopyAllFrom( be->GetDeps() );
 		
-		if( auto bem = ValuePtr<AugBEMeandering>::DynamicCast(be) ) 
+		if( auto bem = ValuePtr<AugBEMeandering>::DynamicCast(move(be)) ) 
 		{			
 			TreePtr<Node> tp = bem->GetGenericTreePtr();		
 			return RelocatingQueryResult( tp, deps );  // free 
         }
-        else if( auto ber = ValuePtr<AugBERoaming>::DynamicCast(be) ) 
+        else if( auto ber = ValuePtr<AugBERoaming>::DynamicCast(move(be)) ) 
         {
 			XLink xlink = ber->GetXLink(); 
 			ASSERT( xlink );

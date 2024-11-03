@@ -560,7 +560,7 @@ void ScatterInto( vector<VALUE_TYPE> &dest_vec, const map<int, VALUE_TYPE> &my_m
 // the dynamic cast to a true rvalue. 
 // https://stackoverflow.com/questions/11002641/dynamic-casting-for-unique-ptr
 template <typename T_DEST, typename T_SRC>
-std::unique_ptr<T_DEST> dynamic_pointer_cast(std::unique_ptr<T_SRC>& src)
+std::unique_ptr<T_DEST> dynamic_pointer_cast(std::unique_ptr<T_SRC>&& src)
 {
     // When nullptr, just return nullptr
     if (!src) 
@@ -622,7 +622,8 @@ public:
 
 	// Un-delete copy constructor and copy-assignment. Our versions will
 	// call Clone() (the only way to prevent slicing) on non-NULL other.
-	//template<typename OTHER_VALUE_TYPE>
+	// template<typename OTHER_VALUE_TYPE>. Note: Clone() always produces the
+	// final type, even though we may be templated on an intermediate.
 	ValuePtr(const ValuePtr<VALUE_TYPE> &other) :
 		unique_ptr<VALUE_TYPE>( other ? 
 		                        static_cast<VALUE_TYPE *>(other->Clone()) : 
@@ -662,11 +663,14 @@ public:
 	
 	// Dynamic cast: has my preferred semantics (move if and only if cast successful)
 	template<typename OTHER_VALUE_TYPE>
-	static ValuePtr<VALUE_TYPE> DynamicCast(ValuePtr<OTHER_VALUE_TYPE> &other) 
+	static ValuePtr<VALUE_TYPE> DynamicCast(ValuePtr<OTHER_VALUE_TYPE> &&other) 
 	{
 		// Using our extension of dynamic_pointer_cast to unique_ptr
-		return ValuePtr<VALUE_TYPE>( dynamic_pointer_cast<VALUE_TYPE>(other) );
+		return ValuePtr<VALUE_TYPE>( dynamic_pointer_cast<VALUE_TYPE>(move(other)) );
 	}
+	
+	// TODO could add a dyn-cast on const ref, eg try the raw pointer dyncast and if
+	// successful, Clone() for a return value.
 };
 
 

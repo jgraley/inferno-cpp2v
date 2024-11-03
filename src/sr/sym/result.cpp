@@ -153,7 +153,7 @@ SubsetResult::SubsetResult( set<SR::XLink> xlinks_, bool complement_flag_ ) :
 
 SubsetResult::SubsetResult( unique_ptr<SymbolicResult> other )
 {
-    if( auto ssr = dynamic_pointer_cast<SubsetResult>(other) )
+    if( auto ssr = dynamic_pointer_cast<SubsetResult>(move(other)) )
     {
         xlinks = ssr->xlinks;
         complement_flag = ssr->complement_flag;

@@ -168,7 +168,7 @@ unique_ptr<SYM::SubsetResult> SymbolicConstraint::GetSuggestedValues( const Assi
     shared_ptr<SYM::SymbolExpression> hint_expression = plan.suggestion_expressions.at(target_var).at(givens);
     unique_ptr<SYM::SymbolicResult> hr = hint_expression->Evaluate( kit );
     ASSERT( hr );
-    unique_ptr<SYM::SubsetResult> hint_result = dynamic_pointer_cast<SYM::SubsetResult>(hr);
+    unique_ptr<SYM::SubsetResult> hint_result = dynamic_pointer_cast<SYM::SubsetResult>(move(hr));
     ASSERT( hint_result );
     return hint_result;
 }
