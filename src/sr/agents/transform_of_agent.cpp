@@ -70,19 +70,13 @@ TransformOfAgent::AugBERoaming *TransformOfAgent::AugBERoaming::Clone() const
 }
 
 
-TreePtr<Node> TransformOfAgent::AugBERoaming::GetGenericTreePtr() const
-{
-	return xlink.GetChildTreePtr();
-}
-
-
 XLink TransformOfAgent::AugBERoaming::GetXLink() const
 {
 	return xlink;
 }
 
 
-AugBEInterface *TransformOfAgent::AugBERoaming::OnGetChild( const TreePtrInterface *other_tree_ptr )
+TransformOfAgent::AugBERoaming *TransformOfAgent::AugBERoaming::OnGetChild( const TreePtrInterface *other_tree_ptr )
 {
 	ASSERT( !ON_STACK(other_tree_ptr) );
 	// We're roaming the x tree so construct+return Tree style
@@ -138,18 +132,19 @@ TreePtr<Node> TransformOfAgent::AugBEMeandering::GetGenericTreePtr() const
 }
 
 
-XLink TransformOfAgent::AugBEMeandering::GetXLink() const
-{
-	ASSERTFAIL();
-}
-
-
 AugBEInterface *TransformOfAgent::AugBEMeandering::OnGetChild( const TreePtrInterface *other_tree_ptr )
 {
-	// We're moving through our free tree - not illegal. Reduce to Free style
+	// We're moving through our free tree - not illegal. We get here if a free section of tree was
+	// already created (eg using AugBEMeandering::OnSetChild()) and we're re-analysiing it, for 
+	// example if a transformation has invoked a different transformation and must now pick a 
+	// base node from within that other transformation's output.
+	
 	// Policy: my_deps will be copied into the new node 
-	// TODO what if we reached a tree node?
-	return new TransformOfAgent::AugBEMeandering(*this, (TreePtr<Node>)*other_tree_ptr); // free
+	if( XLink xlink = utils->db->TryGetXLink(other_tree_ptr) )
+		return new TransformOfAgent::AugBERoaming(*this, xlink); // meandered into X tree, now we're roaming
+	
+	
+	return new TransformOfAgent::AugBEMeandering(*this, (TreePtr<Node>)*other_tree_ptr); // still in free section
 }
 
 
@@ -195,8 +190,7 @@ ValuePtr<AugBEInterface> TransformOfAgent::TransUtils::CreateBE( TreePtr<Node> t
 
 ValuePtr<TransformOfAgent::AugBECommon> TransformOfAgent::TransUtils::GetBE( const AugTreePtrBase &atp ) const
 {
-	ValuePtr<AugBEInterface> p = atp.GetImpl();
-	ValuePtr<AugBECommon> be = ValuePtr<AugBECommon>::DynamicCast(move(p));	
+	auto be = ValuePtr<AugBECommon>::DynamicCast(atp.GetImpl());	
 	ASSERTS(be);
 	return be;
 }

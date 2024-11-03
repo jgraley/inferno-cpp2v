@@ -54,10 +54,9 @@ public:
 		AugBERoaming &operator=(const AugBERoaming &other) = default;
 		AugBERoaming *Clone() const final;
 
-		TreePtr<Node> GetGenericTreePtr() const;
 		XLink GetXLink() const;	
 
-		AugBEInterface *OnGetChild( const TreePtrInterface *other_tree_ptr ) override;
+		AugBERoaming *OnGetChild( const TreePtrInterface *other_tree_ptr ) override;
 		void OnSetChild( const TreePtrInterface *other_tree_ptr, AugBEInterface *new_val ) override;
 
 		string GetTrace() const;
@@ -77,7 +76,6 @@ public:
 		AugBEMeandering *Clone() const final;
 
 		TreePtr<Node> GetGenericTreePtr() const;
-		XLink GetXLink() const;	
 
 		AugBEInterface *OnGetChild( const TreePtrInterface *other_tree_ptr ) override;
 		void OnSetChild( const TreePtrInterface *other_tree_ptr, AugBEInterface *new_val ) override;
