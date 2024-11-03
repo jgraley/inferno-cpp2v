@@ -34,12 +34,15 @@ public:
 		AugBECommon( const AugBECommon &other ) = default;
 		AugBECommon &operator=(const AugBECommon &other) = default;
 
+		const TransUtils *GetUtils() const;
+		Dependencies &GetDeps();
+		shared_ptr<Dependencies> GetDepsPtr();
 		const Dependencies &GetDeps() const;
 		void OnDepLeak() override;
 
 		string GetTrace() const;
 
-	//protected:
+	private:
 		const TransUtils * const utils;	
 		const shared_ptr<Dependencies> my_deps;			
 	};

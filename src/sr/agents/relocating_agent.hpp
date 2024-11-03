@@ -19,9 +19,13 @@ public:
     class Dependencies
 	{
 	public:	
+		Dependencies() = default;
+		Dependencies( const Dependencies & ) = default;
+		Dependencies &operator=( const Dependencies & ) = default;
+
 		void AddDep( XLink dep );						
 		void AddChainTo( shared_ptr<Dependencies> chain );						
-		void CopyAllFrom( const Dependencies &other );
+		void AddAllFrom( const Dependencies &other );
 
 		set<XLink> GetAll() const; 
 		void Clear();

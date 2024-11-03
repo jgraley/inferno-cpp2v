@@ -31,7 +31,7 @@ void RelocatingAgent::Dependencies::AddChainTo( shared_ptr<Dependencies> chain )
 }
 
 
-void RelocatingAgent::Dependencies::CopyAllFrom( const Dependencies &other )
+void RelocatingAgent::Dependencies::AddAllFrom( const Dependencies &other )
 {
     for( XLink d : other.deps )    
 		AddDep(d);
