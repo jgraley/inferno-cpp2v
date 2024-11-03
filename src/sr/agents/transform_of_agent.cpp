@@ -6,25 +6,19 @@
 
 using namespace SR;
 
-// ---------------------- TransformOfAgent::AugBE ---------------------------
+// ---------------------- TransformOfAgent::AugBECommon ---------------------------	
 
-TransformOfAgent::AugBE::AugBE( TreePtr<Node> generic_tree_ptr_, const TransUtils *utils_ ) :
-	utils( utils_ ),	
-	xlink(),
-	generic_tree_ptr(generic_tree_ptr_),
-	my_deps(make_shared<Dependencies>())
+TransformOfAgent::AugBECommon::AugBECommon( const TransUtils *utils_ ) :
+	utils( utils_ ),
+	my_deps(make_shared<Dependencies>())	
 {
-	// When constructed from TreePtr, we can assume it's new and free
-	// We have nothing we can depend on.
-	ASSERT( utils );
 }
 
+// ---------------------- TransformOfAgent::AugBERoaming ---------------------------
 
-TransformOfAgent::AugBE::AugBE( XLink xlink_, const TransUtils *utils_) :
-	utils( utils_ ),
-	xlink(xlink_),
-    generic_tree_ptr(xlink.GetChildTreePtr()),
-	my_deps(make_shared<Dependencies>())
+TransformOfAgent::AugBERoaming::AugBERoaming( XLink xlink_, const TransUtils *utils_) :
+	AugBECommon( utils_ ),
+	xlink(xlink_)
 {
 	ASSERT( utils );
 	ASSERT( xlink );
@@ -35,11 +29,115 @@ TransformOfAgent::AugBE::AugBE( XLink xlink_, const TransUtils *utils_) :
 }
 
 
-TransformOfAgent::AugBE::AugBE( const AugBE &other, TreePtr<Node> generic_tree_ptr_ ) :
-	utils( other.utils ),
+TransformOfAgent::AugBERoaming::AugBERoaming( const AugBECommon &other, XLink xlink_ ) :
+	AugBECommon( other.utils ),
+	xlink(xlink_)
+{	
+	ASSERT( utils );
+	ASSERT( xlink );
+	
+	// Partial copy-construct with xlink, we can assume it came from tree
+	// Policy: copy in the deps, and add in self as another dependency
+	my_deps->CopyAllFrom( *other.my_deps );
+	my_deps->AddDep( xlink );	
+}
+
+
+TransformOfAgent::AugBERoaming *TransformOfAgent::AugBERoaming::Clone() const
+{
+	return new TransformOfAgent::AugBERoaming( *this );
+}
+
+
+TreePtr<Node> TransformOfAgent::AugBERoaming::GetGenericTreePtr() const
+{
+	return xlink.GetChildTreePtr();
+}
+
+
+XLink TransformOfAgent::AugBERoaming::GetXLink() const
+{
+	return xlink;
+}
+
+
+const TransformOfAgent::Dependencies &TransformOfAgent::AugBERoaming::GetDeps() const
+{
+	return *my_deps;
+}
+
+
+AugBEInterface *TransformOfAgent::AugBERoaming::OnGetChild( const TreePtrInterface *other_tree_ptr )
+{
+	// If we are Tree then construct+return Tree style, otherwise reduce to Free style. This
+	// is to stop descendents of Free masquerading as Tree.	
+	if( xlink )
+	{
+		// We're roaming the x tree
+		ASSERT( !ON_STACK(other_tree_ptr) );
+		// Policy: my_deps will be copied into with the new node, which will add itself
+		return new TransformOfAgent::AugBERoaming(*this, utils->db->GetXLink(other_tree_ptr)); // tree
+	}
+	else
+	{
+		// We're moving through our free tree - not illegal
+		// Policy: my_deps will be copied into the new node
+		return new TransformOfAgent::AugBE(*this, (TreePtr<Node>)*other_tree_ptr); // free
+	}
+}
+
+
+void TransformOfAgent::AugBERoaming::OnSetChild( const TreePtrInterface *other_tree_ptr, AugBEInterface *new_val )
+{
+	ASSERTFAIL(); // would modify the x-tree, not allowed
+}
+
+
+void TransformOfAgent::AugBERoaming::OnDepLeak()
+{
+	// Policy: Leap dumps our deps stright into dest
+	// (dest is the resultant dep set for the whole transformation)
+	ASSERT( utils );
+	utils->GetDeps()->CopyAllFrom( *my_deps );
+}
+
+
+string TransformOfAgent::AugBERoaming::GetTrace() const 
+{ 
+	return "TODO"; 
+}
+
+// ---------------------- TransformOfAgent::AugBE ---------------------------
+
+TransformOfAgent::AugBE::AugBE( TreePtr<Node> generic_tree_ptr_, const TransUtils *utils_ ) :
+	AugBECommon( utils_ ),	
 	xlink(),
-	generic_tree_ptr(generic_tree_ptr_),
-	my_deps(make_shared<Dependencies>())	
+	generic_tree_ptr(generic_tree_ptr_)
+{
+	// When constructed from TreePtr, we can assume it's new and free
+	// We have nothing we can depend on.
+	ASSERT( utils );
+}
+
+
+TransformOfAgent::AugBE::AugBE( XLink xlink_, const TransUtils *utils_) :
+	AugBECommon( utils_ ),
+	xlink(xlink_),
+    generic_tree_ptr(xlink.GetChildTreePtr())
+{
+	ASSERT( utils );
+	ASSERT( xlink );
+
+	// When constructed from XLink, we can assume it came from the tree
+	// Policy: when constructing from tree, depend on self
+	my_deps->AddDep( xlink );			
+}
+
+
+TransformOfAgent::AugBE::AugBE( const AugBECommon &other, TreePtr<Node> generic_tree_ptr_ ) :
+	AugBECommon( other.utils ),
+	xlink(),
+	generic_tree_ptr(generic_tree_ptr_)
 {
 	// Partial copy-construct with TreePtr, we can assume it's new and free
 	// Policy: copy in the deps, but we have nothing to add
@@ -49,11 +147,10 @@ TransformOfAgent::AugBE::AugBE( const AugBE &other, TreePtr<Node> generic_tree_p
 }
 
 
-TransformOfAgent::AugBE::AugBE( const AugBE &other, XLink xlink_ ) :
-	utils( other.utils ),
+TransformOfAgent::AugBE::AugBE( const AugBECommon &other, XLink xlink_ ) :
+	AugBECommon( other.utils ),
 	xlink(xlink_),
-    generic_tree_ptr(xlink.GetChildTreePtr()),
-	my_deps(make_shared<Dependencies>())	
+    generic_tree_ptr(xlink.GetChildTreePtr())
 {	
 	ASSERT( utils );
 	ASSERT( xlink );
@@ -112,10 +209,9 @@ TransformOfAgent::AugBE *TransformOfAgent::AugBE::OnGetChild( const TreePtrInter
 void TransformOfAgent::AugBE::OnSetChild( const TreePtrInterface *other_tree_ptr, AugBEInterface *new_val )
 {
 	ASSERT( utils );
-    auto n = GET_THAT_POINTER(new_val);
-
-	// We have to be free
-	ASSERT( !xlink )("Transformation attempts to modify the tree!");
+	ASSERT( new_val );
+    AugBECommon *n = dynamic_cast<AugBECommon *>(new_val);
+    ASSERT( n );
 			
 	// We're building our free tree OR we're meandering into the x tree
 	// Policy: parent indirects to child's deps 
@@ -149,7 +245,7 @@ TransformOfAgent::TransUtils::TransUtils( const XTreeDatabase *db_, Dependencies
 AugTreePtr<Node> TransformOfAgent::TransUtils::CreateAugTreePtr(XLink xlink) const
 {
 	return AugTreePtr<Node>(xlink.GetChildTreePtr(), 
-	                        ValuePtr<TransformOfAgent::AugBE>::Make(xlink, this));
+	                        ValuePtr<TransformOfAgent::AugBERoaming>::Make(xlink, this));
 }	
 
 
@@ -159,9 +255,15 @@ ValuePtr<AugBEInterface> TransformOfAgent::TransUtils::CreateBE( TreePtr<Node> t
 }
 
 
-ValuePtr<TransformOfAgent::AugBE> TransformOfAgent::TransUtils::GetBE( const AugTreePtrBase &atp ) const
+ValuePtr<TransformOfAgent::AugBE> TransformOfAgent::TransUtils::TryGetBE( const AugTreePtrBase &atp ) const
 {
 	return ValuePtr<TransformOfAgent::AugBE>::DynamicCast(atp.GetImpl());	
+}
+
+
+ValuePtr<TransformOfAgent::AugBERoaming> TransformOfAgent::TransUtils::TryGetBERoaming( const AugTreePtrBase &atp ) const
+{
+	return ValuePtr<TransformOfAgent::AugBERoaming>::DynamicCast(atp.GetImpl());	
 }
 
 
@@ -221,18 +323,32 @@ RelocatingAgent::RelocatingQueryResult TransformOfAgent::RunRelocatingQuery( con
 		
 		AugTreePtr<Node> atp = transformation->ApplyTransformation( kit, stimulus_x );  
 		
-		ValuePtr<AugBE> be = utils.GetBE(atp);
-		
-		// Grab the final deps stored in the ATP. Same as a dep leak, but explicit for clarity.
-		deps.CopyAllFrom( be->GetDeps() );
-		
-		XLink xlink = be->GetXLink(); 
-		TreePtr<Node> tp = be->GetGenericTreePtr();		
-		ASSERT( tp->IsFinal() )(*this)(" computed non-final ")(tp)(" from ")(stimulus_x)("\n");                				
-        if( xlink ) 
-            return RelocatingQueryResult( xlink );  // tree      
-		else
-            return RelocatingQueryResult( tp, deps );  // free 
+		if( ValuePtr<AugBE> be = utils.TryGetBE(atp) ) // TODO: get common (must succeed), do the deps, then if-else with casts
+		{
+			// Grab the final deps stored in the ATP. Same as a dep leak, but explicit for clarity.
+			deps.CopyAllFrom( be->GetDeps() );
+			
+			XLink xlink = be->GetXLink(); 
+			TreePtr<Node> tp = be->GetGenericTreePtr();		
+			ASSERT( tp->IsFinal() )(*this)(" computed non-final ")(tp)(" from ")(stimulus_x)("\n");                				
+			if( xlink ) 
+				return RelocatingQueryResult( xlink );  // tree      
+			else
+				return RelocatingQueryResult( tp, deps );  // free 
+         }
+         else if( ValuePtr<AugBERoaming> be = utils.TryGetBERoaming(atp) )
+         {
+			// Grab the final deps stored in the ATP. Same as a dep leak, but explicit for clarity.
+			deps.CopyAllFrom( be->GetDeps() );
+			
+			XLink xlink = be->GetXLink(); 
+			ASSERT( xlink );
+			return RelocatingQueryResult( xlink );  // tree      
+		 }
+		 else
+		 {
+			 ASSERTFAIL(); // Unknown BE class
+		 }
 	}
     catch( const ::Mismatch &e )
     {
