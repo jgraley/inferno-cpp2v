@@ -49,8 +49,8 @@ public:
 
 	private:
 		const TransUtils * const utils;	
-		XLink xlink;
-		TreePtr<Node> generic_tree_ptr;
+		const XLink xlink;
+		const TreePtr<Node> generic_tree_ptr;
 		const shared_ptr<Dependencies> my_deps;			
 	};
 

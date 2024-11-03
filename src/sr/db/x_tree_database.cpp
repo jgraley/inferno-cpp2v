@@ -36,7 +36,6 @@ XTreeDatabase::XTreeDatabase( XLink main_root_xlink_, shared_ptr<Lacing> lacing,
                                                      on_delete_extra_tree );
 }
 
-
     
 void XTreeDatabase::InitialBuild()
 {      
