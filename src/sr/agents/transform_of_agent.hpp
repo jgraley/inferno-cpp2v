@@ -23,15 +23,21 @@ class TransformOfAgent : public virtual RelocatingAgent
 {
 public:    
 	class TransUtils;
-	class AugBE;
+	class AugBEMeandering;
 
 	// ---------------------- AugBECommon ---------------------------	
-	class AugBECommon : public Traceable
+	class AugBECommon : public AugBEInterface, 
+					    public Traceable
 	{
 	public:
 		AugBECommon( const TransUtils *utils_ );
 		AugBECommon( const AugBECommon &other ) = default;
 		AugBECommon &operator=(const AugBECommon &other) = default;
+
+		const Dependencies &GetDeps() const;
+		void OnDepLeak() override;
+
+		string GetTrace() const;
 
 	//protected:
 		const TransUtils * const utils;	
@@ -39,23 +45,20 @@ public:
 	};
 	
 	// ---------------------- AugBERoaming ---------------------------	
-	class AugBERoaming : public AugBEInterface, 
-					   public AugBECommon
+	class AugBERoaming : public AugBECommon
 	{
 	public:	
 		AugBERoaming( XLink xlink_, const TransUtils *utils_ );
 		AugBERoaming( const AugBECommon &other, XLink xlink_ );
 		AugBERoaming( const AugBERoaming &other ) = default;	
 		AugBERoaming &operator=(const AugBERoaming &other) = default;
-		AugBERoaming *Clone() const override;
+		AugBERoaming *Clone() const final;
 
 		TreePtr<Node> GetGenericTreePtr() const;
 		XLink GetXLink() const;	
-		const Dependencies &GetDeps() const;
 
 		AugBEInterface *OnGetChild( const TreePtrInterface *other_tree_ptr ) override;
 		void OnSetChild( const TreePtrInterface *other_tree_ptr, AugBEInterface *new_val ) override;
-		void OnDepLeak() override;
 
 		string GetTrace() const;
 
@@ -63,31 +66,25 @@ public:
 		const XLink xlink;
 	};
 	
-	// ---------------------- AugBE ---------------------------	
-	class AugBE : public AugBEInterface, 
-  			      public AugBECommon
+	// ---------------------- AugBEMeandering ---------------------------	
+	class AugBEMeandering : public AugBECommon
 	{
 	public:	
-		AugBE( TreePtr<Node> generic_tree_ptr_, const TransUtils *utils_ );
-		AugBE( XLink xlink_, const TransUtils *utils_ );
-		AugBE( const AugBECommon &other, TreePtr<Node> generic_tree_ptr_ );
-		AugBE( const AugBECommon &other, XLink xlink_ );
-		AugBE( const AugBE &other ) = default;	
-		AugBE &operator=(const AugBE &other) = default;
-		AugBE *Clone() const override;
+		AugBEMeandering( TreePtr<Node> generic_tree_ptr_, const TransUtils *utils_ );
+		AugBEMeandering( const AugBECommon &other, TreePtr<Node> generic_tree_ptr_ );
+		AugBEMeandering( const AugBEMeandering &other ) = default;	
+		AugBEMeandering &operator=(const AugBEMeandering &other) = default;
+		AugBEMeandering *Clone() const final;
 
 		TreePtr<Node> GetGenericTreePtr() const;
 		XLink GetXLink() const;	
-		const Dependencies &GetDeps() const;
 
-		AugBE *OnGetChild( const TreePtrInterface *other_tree_ptr ) override;
+		AugBEInterface *OnGetChild( const TreePtrInterface *other_tree_ptr ) override;
 		void OnSetChild( const TreePtrInterface *other_tree_ptr, AugBEInterface *new_val ) override;
-		void OnDepLeak() override;
 
 		string GetTrace() const;
 
 	private:
-		const XLink xlink;
 		const TreePtr<Node> generic_tree_ptr;
 	};
 
@@ -99,13 +96,13 @@ public:
 							 Dependencies *deps_ );
 
 		// Create AugTreePtr from a link
-		AugTreePtr<Node> CreateAugTreePtr(XLink xlink) const;
+		AugTreePtr<Node> CreateAugTreePtrRoaming(XLink xlink) const;
 
 		ValuePtr<AugBEInterface> CreateBE( TreePtr<Node> tp ) const override;
 			
 		// Getters for AugTreePtr - back end only
-		ValuePtr<TransformOfAgent::AugBE> TryGetBE( const AugTreePtrBase &atp ) const;
-		ValuePtr<TransformOfAgent::AugBERoaming> TryGetBERoaming( const AugTreePtrBase &atp ) const;
+		ValuePtr<TransformOfAgent::AugBECommon> GetBE( const AugTreePtrBase &atp ) const;
+
 		
 		set<AugTreePtr<Node>> GetDeclarers( AugTreePtr<Node> node ) const override;
 		

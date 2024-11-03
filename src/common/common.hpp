@@ -625,7 +625,7 @@ public:
 	//template<typename OTHER_VALUE_TYPE>
 	ValuePtr(const ValuePtr<VALUE_TYPE> &other) :
 		unique_ptr<VALUE_TYPE>( other ? 
-		                        other->Clone() : 
+		                        static_cast<VALUE_TYPE *>(other->Clone()) : 
 		                        nullptr )
 	{		
 	}
@@ -662,7 +662,7 @@ public:
 	
 	// Dynamic cast: has my preferred semantics (move if and only if cast successful)
 	template<typename OTHER_VALUE_TYPE>
-	static ValuePtr<VALUE_TYPE> DynamicCast(ValuePtr<OTHER_VALUE_TYPE> &&other) 
+	static ValuePtr<VALUE_TYPE> DynamicCast(ValuePtr<OTHER_VALUE_TYPE> &other) 
 	{
 		// Using our extension of dynamic_pointer_cast to unique_ptr
 		return ValuePtr<VALUE_TYPE>( dynamic_pointer_cast<VALUE_TYPE>(other) );
