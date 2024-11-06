@@ -48,6 +48,12 @@ public:
 	};
 	
 	// ---------------------- AugBERoaming ---------------------------	
+	/**
+	 * Roaming back-end for AugTreePtr: this refers the an XLink inside
+	 * the X tree, db etc. Roaming refers to moving around within the X 
+	 * tree, possibly with the help of the database navigation features
+	 * like GetDeclarers().
+	 */ 
 	class AugBERoaming : public AugBECommon
 	{
 	public:	
@@ -69,6 +75,14 @@ public:
 	};
 	
 	// ---------------------- AugBEMeandering ---------------------------	
+	/**
+	 * Meandering back-end for AugTreePtr: this refers to a TreePtr not
+	 * inside the X tree. Meandering refers to the fact that we're moving
+	 * around in a space outside the X tree and could move into the X tree,
+	 * at which point we would begin roaming. Our implemntation keeps 
+	 * track of the current TreePtr, not XLink, because it's not in the 
+	 * x tree and hence db etc.
+	 */
 	class AugBEMeandering : public AugBECommon
 	{
 	public:	

@@ -39,7 +39,7 @@ shared_ptr<TransformOfAgent::Dependencies> TransformOfAgent::AugBECommon::GetDep
 
 void TransformOfAgent::AugBECommon::OnDepLeak()
 {
-	// Policy: Leap dumps our deps stright into dest
+	// Policy: Leak dumps our deps stright into dest
 	// (dest is the resultant dep set for the whole transformation)
 	ASSERT( utils );
 	utils->GetDeps()->AddAllFrom( *my_deps );
@@ -66,14 +66,13 @@ TransformOfAgent::AugBERoaming::AugBERoaming( XLink xlink_, const TransUtils *ut
 
 
 TransformOfAgent::AugBERoaming::AugBERoaming( const AugBECommon &other, XLink xlink_ ) :
-	AugBECommon( other.GetUtils() ),
+	AugBECommon( other ),
 	xlink(xlink_)
 {	
 	ASSERT( xlink );
 	
 	// Partial copy-construct with xlink, we can assume it came from tree
-	// Policy: copy in the deps, and add in self as another dependency
-	GetDeps().AddAllFrom( other.GetDeps() );
+	// Policy: copy in the deps (copy constructor), and add in self as another dependency
 	GetDeps().AddDep( xlink );	
 }
 
@@ -122,12 +121,11 @@ TransformOfAgent::AugBEMeandering::AugBEMeandering( TreePtr<Node> generic_tree_p
 
 
 TransformOfAgent::AugBEMeandering::AugBEMeandering( const AugBECommon &other, TreePtr<Node> generic_tree_ptr_ ) :
-	AugBECommon( other.GetUtils() ),
+	AugBECommon( other ),
 	generic_tree_ptr(generic_tree_ptr_)
 {
 	// Partial copy-construct with TreePtr, we can assume it's new and free
-	// Policy: copy in the deps, but we have nothing to add
-	GetDeps().AddAllFrom( other.GetDeps() );
+	// Policy: copy in the deps (copy constructor), but we have nothing to add
 }
 
 
@@ -207,10 +205,14 @@ ValuePtr<TransformOfAgent::AugBECommon> TransformOfAgent::TransUtils::GetBE( con
 
 set<AugTreePtr<Node>> TransformOfAgent::TransUtils::GetDeclarers( AugTreePtr<Node> node ) const
 {
-    if( !db->HasNodeRow(node.GetTreePtr()) ) // not found
+	auto be = ValuePtr<AugBERoaming>::DynamicCast(node.GetImpl());	
+	if( !be ) // Not roaming
+        throw TransUtilsInterface::UnknownNode();
+		
+    if( !db->HasNodeRow(be->GetXLink().GetChildTreePtr()) ) // not found
         throw TransUtilsInterface::UnknownNode();
 
-    NodeTable::Row node_row = db->GetNodeRow( node.GetTreePtr() );  
+    NodeTable::Row node_row = db->GetNodeRow( be->GetXLink().GetChildTreePtr() );  
     
     // Generate ATPs from declarers
 	set<AugTreePtr<Node>> atp_declarers;	
@@ -257,23 +259,25 @@ RelocatingAgent::RelocatingQueryResult TransformOfAgent::RunRelocatingQuery( con
 
     try
     {
+		// We always begin by roaming because stimulus XLinks are in the X tree.
 		AugTreePtr<Node> stimulus_x = utils.CreateAugTreePtrRoaming( stimulus_xlink );	
 		
-		AugTreePtr<Node> atp = transformation->ApplyTransformation( kit, stimulus_x );  
+		AugTreePtr<Node> base_atp = transformation->ApplyTransformation( kit, stimulus_x );  
 		
-		ValuePtr<AugBECommon> be = utils.GetBE(atp);		
-		if( auto bem = ValuePtr<AugBEMeandering>::DynamicCast(move(be)) ) 
+		ValuePtr<AugBECommon> base_be = utils.GetBE(base_atp);		
+		// Grab the final deps stored in the ATP. Same as a dep leak, but explicit for clarity.
+		deps.AddAllFrom( base_be->GetDeps() );
+				
+		if( auto base_bem = ValuePtr<AugBEMeandering>::DynamicCast(move(base_be)) ) 
 		{			
-			// Grab the final deps stored in the ATP. Same as a dep leak, but explicit for clarity.
-			deps.AddAllFrom( bem->GetDeps() );
-			
-			TreePtr<Node> tp = bem->GetGenericTreePtr();		
+			// Base is outside the X tree, so domain extension will be required						
+			TreePtr<Node> tp = base_bem->GetGenericTreePtr();		
 			return RelocatingQueryResult( tp, deps );  // free 
         }
-        else if( auto ber = ValuePtr<AugBERoaming>::DynamicCast(move(be)) ) 
+        else if( auto base_ber = ValuePtr<AugBERoaming>::DynamicCast(move(base_be)) ) 
         {
-			XLink xlink = ber->GetXLink(); 
-			ASSERT( xlink );
+			// Base is inside the X tree, so domain extension will not be required
+			XLink xlink = base_ber->GetXLink(); 
 			return RelocatingQueryResult( xlink );  // tree      
 		}
 		else
