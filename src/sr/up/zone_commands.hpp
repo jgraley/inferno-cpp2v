@@ -20,7 +20,7 @@ class ZoneExpression;
 class Command : public Traceable
 {
 public:	
-	virtual void Execute() const = 0;
+	virtual void Execute(const UpEvalExecKit &kit) const = 0;
 };
 
 // ------------------------- UpdateTreeCommand --------------------------
@@ -36,7 +36,7 @@ public:
 	const shared_ptr<ZoneExpression> &GetExpression() const;
 	const TreeZone &GetTargetTreeZone() const;
 	
-	void Execute() const final;	
+	void Execute(const UpEvalExecKit &kit) const final;	
 
 	string GetTrace() const final;
 
@@ -50,7 +50,7 @@ private:
 class CommandSequence : public Command
 {
 public:
-	void Execute() const final;	
+	void Execute(const UpEvalExecKit &kit) const final;	
 
 	void Add( shared_ptr<Command> new_cmd );
     bool IsEmpty() const;

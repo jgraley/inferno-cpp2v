@@ -25,7 +25,7 @@ struct UpEvalExecKit
 class ZoneExpression : public Traceable
 {
 public:	
-	virtual unique_ptr<FreeZone> Evaluate() const = 0;
+	virtual unique_ptr<FreeZone> Evaluate(const UpEvalExecKit &kit) const = 0;
 	virtual void ForChildren(function<void(shared_ptr<ZoneExpression> &expr)> func) = 0;
 			                        
 	static void ForDepthFirstWalk( shared_ptr<ZoneExpression> &base,
@@ -69,7 +69,7 @@ public:
 
 	void ForChildren(function<void(shared_ptr<ZoneExpression> &expr)> func) override;
 
-	void EvaluateChildrenAndPopulate( FreeZone &free_zone ) const;	
+	void EvaluateChildrenAndPopulate( const UpEvalExecKit &kit, FreeZone &free_zone ) const;	
 	
 	void DepthFirstWalkImpl(function<void(shared_ptr<ZoneExpression> &expr)> func_in,
 			                function<void(shared_ptr<ZoneExpression> &expr)> func_out) override;
@@ -99,9 +99,9 @@ public:
     TreeZone &GetZone() override;
     const TreeZone &GetZone() const override;
 	
-	unique_ptr<FreeZone> Evaluate() const final;	
+	unique_ptr<FreeZone> Evaluate(const UpEvalExecKit &kit) const final;	
     
-    shared_ptr<ZoneExpression> DuplicateToFree() const;
+    shared_ptr<ZoneExpression> DuplicateToFree(const XTreeDatabase *db) const;
     
 	string GetTrace() const final;
     
@@ -133,7 +133,7 @@ public:
     FreeZone &GetZone() final;
     const FreeZone &GetZone() const final;
     
-   	unique_ptr<FreeZone> Evaluate() const final;	
+   	unique_ptr<FreeZone> Evaluate(const UpEvalExecKit &kit) const final;	
 
 	string GetTrace() const final;
 

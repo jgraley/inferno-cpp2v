@@ -97,7 +97,7 @@ catch( BreakException )
 }		       
 
 
-void PopulateZoneOperator::EvaluateChildrenAndPopulate( FreeZone &free_zone ) const	
+void PopulateZoneOperator::EvaluateChildrenAndPopulate( const UpEvalExecKit &kit, FreeZone &free_zone ) const	
 {
 	// If no child expressions then either:
 	// - zone has no terminii and we're at a subtree -> no action required
@@ -110,7 +110,7 @@ void PopulateZoneOperator::EvaluateChildrenAndPopulate( FreeZone &free_zone ) co
 	for( const shared_ptr<ZoneExpression> &child_expression : child_expressions )
 	{	
 		//FTRACE(child_expression)("\n");
-		unique_ptr<FreeZone> free_zone = child_expression->Evaluate();
+		unique_ptr<FreeZone> free_zone = child_expression->Evaluate(kit);
 		child_zones.push_back( move(free_zone) );
 	}
 	
@@ -181,23 +181,23 @@ const TreeZone &PopulateTreeZoneOperator::GetZone() const
 }
 
 
-unique_ptr<FreeZone> PopulateTreeZoneOperator::Evaluate() const
+unique_ptr<FreeZone> PopulateTreeZoneOperator::Evaluate(const UpEvalExecKit &kit) const
 {
 	// TODO probably consistent for Duplicate() to return unique_ptr<FreeZone>
-	auto temp_free_zone = make_unique<FreeZone>( zone.Duplicate() );
+	auto temp_free_zone = make_unique<FreeZone>( zone.Duplicate(kit.x_tree_db) );
 
 	// Rule #726 now we've gone to free zone, mark immediately.
 	for( RequiresSubordinateSCREngine *ea : embedded_markers )
 		temp_free_zone->MarkBaseForEmbedded(ea);		
 	
-	EvaluateChildrenAndPopulate( *temp_free_zone );
+	EvaluateChildrenAndPopulate( kit, *temp_free_zone );
 	return temp_free_zone;
 }
 
 
-shared_ptr<ZoneExpression> PopulateTreeZoneOperator::DuplicateToFree() const
+shared_ptr<ZoneExpression> PopulateTreeZoneOperator::DuplicateToFree(const XTreeDatabase *db) const
 {
-	FreeZone free_zone = zone.Duplicate();
+	FreeZone free_zone = zone.Duplicate(db);
 	list<shared_ptr<ZoneExpression>> c = GetChildExpressions();
 	auto pop_fz_op = make_shared<PopulateFreeZoneOperator>( free_zone, move(c) );
 	pop_fz_op->AddEmbeddedMarkers( GetEmbeddedMarkers() );
@@ -281,10 +281,10 @@ const FreeZone &PopulateFreeZoneOperator::GetZone() const
 }
 
 
-unique_ptr<FreeZone> PopulateFreeZoneOperator::Evaluate() const
+unique_ptr<FreeZone> PopulateFreeZoneOperator::Evaluate(const UpEvalExecKit &kit) const
 {
 	auto temp_free_zone = make_unique<FreeZone>(zone);
-	EvaluateChildrenAndPopulate( *temp_free_zone );
+	EvaluateChildrenAndPopulate( kit, *temp_free_zone );
 	return temp_free_zone;
 }
 

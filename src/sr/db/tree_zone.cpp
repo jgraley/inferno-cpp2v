@@ -78,7 +78,7 @@ vector<XLink> TreeZone::GetTerminusXLinks() const
 }
 
 
-FreeZone TreeZone::Duplicate() const
+FreeZone TreeZone::Duplicate(const Duplicate::DirtyGrassUpdateInterface *dirty_grass) const
 {
 	DBCheck();
 
@@ -92,7 +92,7 @@ FreeZone TreeZone::Duplicate() const
         duplicator_terminus_map[terminus_upd] = { TreePtr<Node>(), shared_ptr<Terminus>() };
 
     // Duplicate the subtree, populating from the map.
-    TreePtr<Node> new_base_x = Duplicate::DuplicateSubtree( db, 
+    TreePtr<Node> new_base_x = Duplicate::DuplicateSubtree( dirty_grass, 
                                                             GetBaseXLink(), 
                                                             duplicator_terminus_map );   
     

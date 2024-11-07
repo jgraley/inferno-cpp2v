@@ -40,10 +40,10 @@ const TreeZone &UpdateTreeCommand::GetTargetTreeZone() const
 }
 
 
-void UpdateTreeCommand::Execute() const
+void UpdateTreeCommand::Execute(const UpEvalExecKit &kit) const
 {
     // New zone must be a free zone
-	unique_ptr<FreeZone> source_free_zone = child_expression->Evaluate();
+	unique_ptr<FreeZone> source_free_zone = child_expression->Evaluate(kit);
     target_tree_zone.Update( *source_free_zone );
 }
 
@@ -55,11 +55,11 @@ string UpdateTreeCommand::GetTrace() const
 
 // ------------------------- CommandSequence --------------------------
 
-void CommandSequence::Execute() const
+void CommandSequence::Execute(const UpEvalExecKit &kit) const
 {
 	//FTRACE(" executing");
 	for( const shared_ptr<Command> &cmd : seq )
-		cmd->Execute();
+		cmd->Execute(kit);
 }
 	
     

@@ -27,7 +27,8 @@ TreeUpdater::TreeUpdater(XTreeDatabase *x_tree_db) :
 
 unique_ptr<FreeZone> TreeUpdater::Evaluate( shared_ptr<const ZoneExpression> expr )
 {
-	return expr->Evaluate();   
+	UpEvalExecKit kit { nullptr };
+	return expr->Evaluate(kit);   
 }
 
 
@@ -70,11 +71,13 @@ void TreeUpdater::TransformToIncrementalAndExecute( shared_ptr<Command> initial_
 		FTRACE(incremental_cmd)("\n");		
 			
 		// Execute it
-		incremental_cmd->Execute();   
+		UpEvalExecKit kit { db };
+		incremental_cmd->Execute(kit);   
 	}
 	else
 	{
 		// Execute initial command for testing
-		initial_cmd->Execute();
+		UpEvalExecKit kit { db };
+		initial_cmd->Execute(kit);
 	}
 }

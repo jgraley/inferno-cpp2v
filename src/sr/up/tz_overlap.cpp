@@ -50,13 +50,13 @@ void TreeZoneOverlapHandler::Run( shared_ptr<ZoneExpression> &root_expr )
 						if( false ) // Assume r is samller because it's to the right in the DF ordering
 						{
 							TRACE("Duplicate left ")(l_ptz_op)("\n");
-							l_expr = l_ptz_op->DuplicateToFree();
+							l_expr = l_ptz_op->DuplicateToFree(db);
 							LLBreak(); // no need to check any more r for this l
 						}
 						else
 						{
 							TRACE("Duplicate right ")(r_ptz_op)("\n");
-							r_expr = r_ptz_op->DuplicateToFree();
+							r_expr = r_ptz_op->DuplicateToFree(db);
 							// later iterations of r loop will skip over this because it's now a 
 							// PopulateFreeZoneOperator, not a PopulateTreeZoneOperator
 						}

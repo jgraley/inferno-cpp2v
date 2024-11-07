@@ -7,6 +7,7 @@
 #include "node/specialise_oostd.hpp"
 #include "terminus.hpp"
 #include "df_relation.hpp"
+#include "duplicate.hpp"
 
 #include <unordered_set>
 
@@ -39,7 +40,7 @@ public:
     XLink &GetBaseXLink();
     vector<XLink> GetTerminusXLinks() const;
 
-    FreeZone Duplicate() const;
+    FreeZone Duplicate(const Duplicate::DirtyGrassUpdateInterface *dirty_grass) const;
     void Update( const FreeZone &free_zone ) const;
     
     TerminusIterator GetTerminiiBegin();
