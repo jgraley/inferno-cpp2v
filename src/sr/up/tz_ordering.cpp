@@ -171,7 +171,7 @@ void AltTreeZoneOrderingChecker::Worker( shared_ptr<ZoneExpression> expr, bool b
 		CheckXlink( tree_zone.GetBaseXLink(), base_equal_ok );
 		
 		// Co-loop over the chidren/terminii
-		set<XLink, DepthFirstRelation> terminii = tree_zone.GetTerminusXLinks();
+		vector<XLink> terminii = tree_zone.GetTerminusXLinks();
 		PopulateFreeZoneOperator::ChildExpressionIterator it_child = ptz_op->GetChildrenBegin();		
 		for( XLink terminus_xlink : terminii )
 		{

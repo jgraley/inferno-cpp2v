@@ -52,7 +52,7 @@ void TreeZoneInverter::WalkFreeZoneExpr( LocatedZoneExpression lze )
 	else if( auto ptz_op = dynamic_pointer_cast<PopulateTreeZoneOperator>(lze.second) )
 	{
 		// Co-loop over the chidren/terminii looking for a free zone
-		set<XLink, DepthFirstRelation> terminii = ptz_op->GetZone().GetTerminusXLinks();
+		vector<XLink> terminii = ptz_op->GetZone().GetTerminusXLinks();
 		PopulateFreeZoneOperator::ChildExpressionIterator it_child = ptz_op->GetChildrenBegin();		
 		for( XLink terminus_xlink : terminii )
 		{

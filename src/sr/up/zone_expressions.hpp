@@ -14,6 +14,12 @@ namespace SR
 {
 class XTreeDatabase;
 
+struct UpEvalExecKit
+{
+	XTreeDatabase *x_tree_db;
+};
+
+
 // ------------------------- ZoneExpression --------------------------
 
 class ZoneExpression : public Traceable

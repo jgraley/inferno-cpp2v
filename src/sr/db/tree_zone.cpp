@@ -24,9 +24,8 @@ TreeZone TreeZone::CreateEmpty( XTreeDatabase *db, XLink base )
 
 TreeZone::TreeZone( XTreeDatabase *db_, XLink base_, vector<XLink> terminii_ ) :
 	db( db_ ),
-	df_rel( db ),
     base( base_ ),
-    terminii( terminii_.begin(), terminii_.end(), df_rel )
+    terminii( terminii_ )
 {
     ASSERT( base ); // TreeZone is not nullable
     ASSERT( base.GetChildTreePtr() ); // Cannot be empty
@@ -36,7 +35,6 @@ TreeZone::TreeZone( XTreeDatabase *db_, XLink base_, vector<XLink> terminii_ ) :
 
 TreeZone::TreeZone( const TreeZone &other ) :
 	db( other.db ),
-	df_rel( other.df_rel ),
     base( other.base ),
     terminii( other.terminii )
 {
@@ -74,7 +72,7 @@ XLink &TreeZone::GetBaseXLink()
 }
 
 
-set<XLink, DepthFirstRelation> TreeZone::GetTerminusXLinks() const
+vector<XLink> TreeZone::GetTerminusXLinks() const
 {
     return terminii;
 }
