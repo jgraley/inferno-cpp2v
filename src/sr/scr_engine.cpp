@@ -364,9 +364,15 @@ void SCREngine::Replace( XLink base_xlink )
 {
     INDENT("R");
 
+	// Get an expression that evaluates to the new X tree
 	Agent::ReplaceKit replace_kit { x_tree_db.get() };
-    Agent::ReplaceExprPtr replace_zone = plan.base_agent->GenReplaceExpr(replace_kit, plan.base_plink);
-    auto command = make_shared<UpdateTreeCommand>(TreeZone::CreateSubtree(replace_kit.x_tree_db, base_xlink), move(replace_zone));	
+    Agent::ReplaceExprPtr new_expr = plan.base_agent->GenReplaceExpr(replace_kit, plan.base_plink);
+    
+    // Create a command to replace the current X tree with this expression
+    TreeZone dest_zone = TreeZone::CreateSubtree(replace_kit.x_tree_db, base_xlink);
+    auto command = make_shared<UpdateTreeCommand>(dest_zone, move(new_expr));	
+    
+    // Request to update the tree
 	plan.vn_sequence->UpdateUsingCommand( move(command) );  
     
     TRACE("Replace done\n");
