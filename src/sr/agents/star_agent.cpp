@@ -101,7 +101,7 @@ Agent::ReplaceExprPtr StarAgent::GenReplaceExprImpl( const ReplaceKit &kit,
         ContainerInterface::iterator dest_it = dest_container->insert( ContainerTerminus::MakePlaceholder() );
         dest_zone.AddTerminus( make_shared<ContainerTerminus>(dest_container, dest_it) );    
 
-        TreeZone child_zone = TreeZone::CreateSubtree( kit.x_tree_db, XLink(key_node, &key_elt) );
+        TreeZone child_zone = TreeZone::CreateSubtree(XLink(key_node, &key_elt) );
 	    child_commands.push_back( make_shared<PopulateTreeZoneOperator>(move(child_zone)) );
     }
 

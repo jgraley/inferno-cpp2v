@@ -38,8 +38,8 @@ public:
                                            const XTreeDatabase *x_tree_db ) const;                                                                                          
 
     ReplaceExprPtr GenReplaceExprImpl( const ReplaceKit &kit, 
-                                    PatternLink me_plink, 
-                                    XLink key_xlink ) final;
+                                       PatternLink me_plink, 
+                                       XLink key_xlink ) final;
 
     virtual Block GetGraphBlockInfo() const;
     

@@ -90,7 +90,7 @@ void TreeZoneInverter::Invert( LocatedZoneExpression lze )
 		terminii_xlinks.push_back( child_ptz_op->GetZone().GetBaseXLink() );
 	} );
 		 
-	TreeZone inverted_tree_zone = TreeZone( db, base_xlink, terminii_xlinks );	
+	TreeZone inverted_tree_zone = TreeZone( base_xlink, terminii_xlinks );	
 	auto pfz_op_no_children = make_shared<PopulateFreeZoneOperator>( pfz_op->GetZone() ); // No children leaves terminii exposed, sort of.
 	auto incremental_command = make_shared<UpdateTreeCommand>( inverted_tree_zone, pfz_op_no_children );	
 	incremental_seq->Add(incremental_command);

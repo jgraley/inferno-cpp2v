@@ -26,10 +26,10 @@ class TreeZone : public Zone
 public:
 	typedef vector<XLink>::iterator TerminusIterator;
 
-    static TreeZone CreateSubtree( XTreeDatabase *db, XLink base );
-    static TreeZone CreateEmpty( XTreeDatabase *db, XLink base );
+    static TreeZone CreateSubtree( XLink base );
+    static TreeZone CreateEmpty( XLink base );
 
-    explicit TreeZone( XTreeDatabase *db_, XLink base, vector<XLink> terminii );
+    explicit TreeZone( XLink base, vector<XLink> terminii );
     TreeZone( const TreeZone &other );
       
     bool IsEmpty() const override;
@@ -41,17 +41,16 @@ public:
     vector<XLink> GetTerminusXLinks() const;
 
     FreeZone Duplicate(const Duplicate::DirtyGrassUpdateInterface *dirty_grass) const;
-    void Update( const FreeZone &free_zone ) const;
     
     TerminusIterator GetTerminiiBegin();
     TerminusIterator GetTerminiiEnd();
 
     string GetTrace() const;
 
-private:
-    void DBCheck() const;
+    void DBCheck(const XTreeDatabase *db) const;
 
-    XTreeDatabase * const db;
+private:
+
     XLink base;    
     vector<XLink> terminii;    
 };

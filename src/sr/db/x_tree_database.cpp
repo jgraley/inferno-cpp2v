@@ -3,6 +3,8 @@
 #include "lacing.hpp"
 
 #include "common/read_args.hpp"
+#include "tree_zone.hpp"
+#include "free_zone.hpp"
 
 using namespace SR;    
 
@@ -64,6 +66,24 @@ void XTreeDatabase::InitialBuild()
 		InsertExtraTree( de_extra_queue.front() );
 		de_extra_queue.pop();
 	}    
+}
+
+
+void XTreeDatabase::UpdateMainTree( const TreeZone &target_tree_zone, const FreeZone &source_free_zone )
+{
+	ASSERT( target_tree_zone.GetNumTerminii() == source_free_zone.GetNumTerminii() );	
+	ASSERT( target_tree_zone.GetNumTerminii() == 0 ); // TODO under #723
+	target_tree_zone.DBCheck(this);
+        
+    // Update database 
+    DeleteMainTree( target_tree_zone.GetBaseXLink() );    
+    
+    // Patch the tree
+    // acts on all copies of the xlink, due to indirection, possibly including root as held by db 
+    target_tree_zone.GetBaseXLink().SetXPtr( source_free_zone.GetBaseNode() ); 
+    
+    // Update database 
+    InsertMainTree( target_tree_zone.GetBaseXLink() );   	
 }
 
 

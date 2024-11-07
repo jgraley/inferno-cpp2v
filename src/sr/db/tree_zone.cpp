@@ -9,32 +9,29 @@ using namespace SR;
 
 // ------------------------- TreeZone --------------------------
 
-TreeZone TreeZone::CreateSubtree( XTreeDatabase *db, XLink base )
+TreeZone TreeZone::CreateSubtree( XLink base )
 {
-    return TreeZone( db, base, {} );
+    return TreeZone( base, {} );
 }
 
 
-TreeZone TreeZone::CreateEmpty( XTreeDatabase *db, XLink base )
+TreeZone TreeZone::CreateEmpty( XLink base )
 {
     ASSERTS( base );
-    return TreeZone( db, base, { base } ); // One element, same as base
+    return TreeZone( base, { base } ); // One element, same as base
 }
 
 
-TreeZone::TreeZone( XTreeDatabase *db_, XLink base_, vector<XLink> terminii_ ) :
-	db( db_ ),
+TreeZone::TreeZone( XLink base_, vector<XLink> terminii_ ) :
     base( base_ ),
     terminii( terminii_ )
 {
     ASSERT( base ); // TreeZone is not nullable
     ASSERT( base.GetChildTreePtr() ); // Cannot be empty
-	DBCheck();
 }
 
 
 TreeZone::TreeZone( const TreeZone &other ) :
-	db( other.db ),
     base( other.base ),
     terminii( other.terminii )
 {
@@ -80,8 +77,6 @@ vector<XLink> TreeZone::GetTerminusXLinks() const
 
 FreeZone TreeZone::Duplicate(const Duplicate::DirtyGrassUpdateInterface *dirty_grass) const
 {
-	DBCheck();
-
     if( IsEmpty() )
 		return FreeZone::CreateEmpty();
     	
@@ -105,22 +100,6 @@ FreeZone TreeZone::Duplicate(const Duplicate::DirtyGrassUpdateInterface *dirty_g
 
     // Create a new zone for the result.
     return FreeZone( new_base_x, move(free_zone_terminii) );
-}
-
-
-void TreeZone::Update( const FreeZone &free_zone ) const
-{
-	ASSERT( GetNumTerminii() == free_zone.GetNumTerminii() );	
-	ASSERT( GetNumTerminii() == 0 ); // TODO under #723
-        
-    // Update database 
-    db->DeleteMainTree( GetBaseXLink() );    
-    
-    // Patch the tree
-    GetBaseXLink().SetXPtr( free_zone.GetBaseNode() ); // acts on all copies of the xlink, due to indirection, possibly including root as held by db TODO move into DB
-    
-    // Update database 
-    db->InsertMainTree( GetBaseXLink() );   	
 }
 
 
@@ -156,7 +135,7 @@ string TreeZone::GetTrace() const
 }
 
 
-void TreeZone::DBCheck() const
+void TreeZone::DBCheck(const XTreeDatabase *db) const
 {
 	if( !db ) // db is optional: builders leave it NULL - or do they?
 		return;

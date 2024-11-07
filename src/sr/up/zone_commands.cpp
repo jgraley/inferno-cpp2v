@@ -44,7 +44,7 @@ void UpdateTreeCommand::Execute(const UpEvalExecKit &kit) const
 {
     // New zone must be a free zone
 	unique_ptr<FreeZone> source_free_zone = child_expression->Evaluate(kit);
-    target_tree_zone.Update( *source_free_zone );
+    kit.x_tree_db->UpdateMainTree( target_tree_zone, *source_free_zone );
 }
 
 

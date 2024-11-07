@@ -43,7 +43,7 @@ Agent::ReplaceExprPtr DepthAgent::GenReplaceExprImpl( const ReplaceKit &kit,
     // Make a tree zone for the nodes we covered
     XLink terminus_key_xlink = my_scr_engine->GetReplaceKey( terminus_plink );
     ASSERT(terminus_key_xlink);// this could mean replace is being attempted on a DepthAgent in an abnormal context
-    TreeZone new_zone( kit.x_tree_db, key_xlink, vector<XLink>{terminus_key_xlink} );   
+    TreeZone new_zone( key_xlink, vector<XLink>{terminus_key_xlink} );   
 
     return make_shared<PopulateTreeZoneOperator>( move(new_zone), move(child_commands) );
 }

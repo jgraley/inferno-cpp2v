@@ -19,6 +19,9 @@
 namespace SR 
 {    
       
+class FreeZone;
+class TreeZone;     
+      
 class XTreeDatabase : public Traceable, 
                       public Duplicate::DirtyGrassUpdateInterface
 {
@@ -30,6 +33,8 @@ public:
     void InitialBuild();
 
 	// Incremental strategy: perform updates on zones
+    void UpdateMainTree( const TreeZone &target_tree_zone, const FreeZone &source_free_zone );
+		
     void InsertMainTree(XLink xlink);
     void DeleteMainTree(XLink xlink);
     void InsertExtraTree(XLink xlink);

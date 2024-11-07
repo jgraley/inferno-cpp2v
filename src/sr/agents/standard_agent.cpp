@@ -669,7 +669,7 @@ Agent::ReplaceExprPtr StandardAgent::GenFreeZoneExprOverlay( const ReplaceKit &k
 					zone.AddTerminus( make_shared<ContainerTerminus>(dest_con, dest_it) );     
 
 					ASSERT( under_elt ); // present simplified scheme disallows nullptr
-					TreeZone under_zone = TreeZone::CreateSubtree( kit.x_tree_db, XLink(under_node, &under_elt) );
+					TreeZone under_zone = TreeZone::CreateSubtree(XLink(under_node, &under_elt) );
 					child_commands.push_back( make_shared<PopulateTreeZoneOperator>(move(under_zone)) );		
 				}
 			}
@@ -691,7 +691,7 @@ Agent::ReplaceExprPtr StandardAgent::GenFreeZoneExprOverlay( const ReplaceKit &k
 			else
 			{
 				ASSERT( *under_singular );            
-				TreeZone under_zone = TreeZone::CreateSubtree( kit.x_tree_db, XLink(under_node, under_singular) );
+				TreeZone under_zone = TreeZone::CreateSubtree(XLink(under_node, under_singular) );
 				child_commands.push_back( make_shared<PopulateTreeZoneOperator>(move(under_zone)) );			
 			}
         }
