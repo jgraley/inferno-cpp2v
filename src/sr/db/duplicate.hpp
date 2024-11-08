@@ -11,13 +11,6 @@ class SCREngine;
 class Duplicate
 {
 public:
-    class DirtyGrassUpdateInterface
-    {
-    public:
-        virtual bool IsDirtyGrass( TreePtr<Node> node ) const = 0;
-        virtual void AddDirtyGrass( TreePtr<Node> node ) const = 0;
-    };
-    
     struct TerminusInfo
     {
         // Actions on finding terminus:

@@ -600,18 +600,6 @@ const CompareReplace * SCREngine::GetOverallMaster() const
 }
 
 
-bool SCREngine::IsDirtyGrass( TreePtr<Node> node ) const
-{
-	return plan.vn_sequence->IsDirtyGrass( node );
-}
-
-
-void SCREngine::AddDirtyGrass( TreePtr<Node> node ) const
-{
-	plan.vn_sequence->AddDirtyGrass( node );
-}
-
-
 string SCREngine::GetTrace() const
 {
     string s = Traceable::GetName() + GetSerialString();

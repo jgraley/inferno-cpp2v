@@ -46,8 +46,7 @@ public:
 
 /// Common implementation for search+replace, compare+replace and embeddeds
 class SCREngine : public virtual GraphIdable,
-                  public SerialNumber,
-                  public Duplicate::DirtyGrassUpdateInterface
+                  public SerialNumber
 {      
 public:
     SCREngine( VNSequence *vn_sequence,
@@ -146,8 +145,6 @@ public: // For agents
     bool IsKeyed( PatternLink plink ) const; 
     bool IsKeyed( Agent *agent ) const; 
     const CompareReplace * GetOverallMaster() const;
-    bool IsDirtyGrass( TreePtr<Node> node ) const override;
-    void AddDirtyGrass( TreePtr<Node> node ) const override;
     
     friend class Conjecture; 
 

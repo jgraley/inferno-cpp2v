@@ -22,8 +22,7 @@ namespace SR
 class FreeZone;
 class TreeZone;     
       
-class XTreeDatabase : public Traceable, 
-                      public Duplicate::DirtyGrassUpdateInterface
+class XTreeDatabase : public Traceable
 {
 public:
     XTreeDatabase( XLink main_root_xlink, shared_ptr<Lacing> lacing, DomainExtension::ExtenderSet domain_extenders );
@@ -64,10 +63,6 @@ public:
 	const Orderings &GetOrderings() const;
 	TreePtr<Node> GetMainRootNode() const;
 	XLink GetMainRootXLink() const;
-
-    bool IsDirtyGrass( TreePtr<Node> node ) const final;
-    void AddDirtyGrass( TreePtr<Node> node ) const final;
-    void ClearDirtyGrass();
     
     void Dump() const;
 	
@@ -86,9 +81,7 @@ private:
   	XLink main_root_xlink;
     DBWalk db_walker;
     DBCommon::RootOrdinal next_root_ordinal;
-    
-    mutable set< TreePtr<Node> > dirty_grass; // See #724 re mutable
-    
+        
     queue<XLink> de_extra_queue;
 };    
     

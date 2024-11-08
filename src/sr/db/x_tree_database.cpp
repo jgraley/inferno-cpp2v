@@ -341,24 +341,6 @@ XLink XTreeDatabase::GetMainRootXLink() const
 }
 
 
-bool XTreeDatabase::IsDirtyGrass( TreePtr<Node> node ) const
-{
-	return dirty_grass.count(node) > 0;
-}
-
-
-void XTreeDatabase::AddDirtyGrass( TreePtr<Node> node ) const
-{
-	dirty_grass.insert(node);
-}
-
-
-void XTreeDatabase::ClearDirtyGrass()
-{
-    dirty_grass.clear();
-}
-
-
 void XTreeDatabase::Dump() const
 {
     orderings->Dump();
