@@ -12,6 +12,7 @@
  * to store an Agent * (we can forward declare it and agents live
  * long enough for C pointer to be fine). Can then get to step via eg
  * agent->GetSCREngine()->GetSearchReplace()->GetVNStep()->GetStepIndex().
+ * Agent does SetInvented(this);
  */ 
 
 /// Track the "invention" of nodes. Invention propagates through 
