@@ -560,32 +560,35 @@ Agent::ReplaceExprPtr StandardAgent::GenReplaceExprImpl( const ReplaceKit &kit,
 
 
 Agent::ReplaceExprPtr StandardAgent::GenFreeZoneExprOverlay( const ReplaceKit &kit, 
-                                                         PatternLink me_plink, 
-                                                         XLink under_xlink )  // overlaying
+                                                             PatternLink me_plink, 
+                                                             XLink under_xlink )  // overlaying
 {
 	INDENT("O");
     ASSERT( under_xlink );
-    ASSERT( under_xlink.GetChildTreePtr()->IsFinal() ); 
-    ASSERT( IsSubcategory(*under_xlink.GetChildTreePtr()) ); 
     TreePtr<Node> under_node = under_xlink.GetChildTreePtr();
     
-    ASSERT( IsSubcategory(*under_node) ) 
-		  (" must be a non-strict superclass of under_node=")
+    ASSERT( under_node->IsFinal() )
 		  (*under_node)
-		  (", so that it does not have more members");
-    TreePtr<Node> dest;
+		  (" must be a final class.");
+    ASSERT( IsSubcategory(*under_node) ) 
+		  (*under_node)
+		  (" must be a non-strict subclass of ")
+		  (*this)
+		  (", so that it has a super-set of members");
         
     // If I am the same type as under, duplicate me (and dest's local 
-    // data members will come from me) otherwise duplicate  under (and 
+    // data members will come from me) otherwise duplicate under (and 
     // they will appear to come from under). #593 will improve on this.
     // Make a new node, we will overlay from pattern, so resulting node will be dirty.    
     // Use of DuplicateNode()/CloneNode() ensures correct behaviour with identifiers. 
-    ASSERT( under_node->IsFinal() )("About to build non-final ")(*dest)("\n"); 
+    TreePtr<Node> dest;
     if( under_node->IsSubcategory(*GetPatternPtr()) ) 
-        dest = AgentCommon::CloneNode( true );
+        dest = AgentCommon::CloneNode();
     else
-        dest = Duplicate::DuplicateNode( my_scr_engine, under_node, true );
-    ASSERT( dest->IsFinal() )("About to build non-final ")(*dest)("\n"); 
+        dest = Duplicate::DuplicateNode( my_scr_engine, under_node);
+
+	// We "invent" dest, because of information coming from this pattern node.
+	my_scr_engine->AddDirtyGrass( dest );
 
     // Stuff for creating commands
     list<Agent::ReplaceExprPtr> child_commands;    
@@ -705,16 +708,21 @@ Agent::ReplaceExprPtr StandardAgent::GenFreeZoneExprOverlay( const ReplaceKit &k
 }
 
 Agent::ReplaceExprPtr StandardAgent::GenFreeZoneExprNormal( const ReplaceKit &kit, 
-                                                        PatternLink me_plink ) 
+                                                            PatternLink me_plink ) 
 {
 	INDENT("N");
  
+    ASSERT( IsFinal() )("Trying to build non-final ")(*this); 
+
 	// Make a new node, force dirty because from pattern
     // Use clone here because we never want to place an Agent object in the output program tree.
     // Identifiers that have multiple references in the pattern will be coupled, and  
     // after the first hit, GenerateCommandOverlay() will handle the rest and it uses Duplicate()
-    TreePtr<Node> dest = AgentCommon::CloneNode(true);
-    ASSERT( dest->IsFinal() )(*this)(" about to build non-final ")(*dest)("\n"); 
+    TreePtr<Node> dest = AgentCommon::CloneNode();
+    ASSERT( dest->IsFinal() )(*this)(" trying to build non-final ")(*dest)("\n"); 
+
+	// We "invent" dest, because of information coming from this pattern node.
+	my_scr_engine->AddDirtyGrass( dest );
 
     // Itemise the members. Note that the itemiser internally does a
     // dynamic_cast onto the type of pattern, and itemises over that type. dest must

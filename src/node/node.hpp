@@ -10,6 +10,7 @@
 #include "graphable.hpp"
 #include "coloured.hpp"
 #include "relationship.hpp"
+#include "invented.hpp"
 #include "common/serial.hpp"
 #include "common/orderable.hpp"
 

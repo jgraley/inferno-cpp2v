@@ -135,11 +135,8 @@ string TreeZone::GetTrace() const
 }
 
 
-void TreeZone::DBCheck(const XTreeDatabase *db) const
+void TreeZone::DBCheck(const XTreeDatabase *db) const // TODO maybe move to database?
 {
-	if( !db ) // db is optional: builders leave it NULL - or do they?
-		return;
-		
 	ASSERT( db->HasRow( base ) )(base);
 	
 	if( IsEmpty() )

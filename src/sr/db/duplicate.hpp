@@ -31,8 +31,7 @@ public:
     typedef map<XLink, TerminusInfo> TerminiiMap;
 
     static TreePtr<Node> DuplicateNode( const DirtyGrassUpdateInterface *dirty_grass,
-                                        TreePtr<Node> pattern,
-                                        bool force_dirty );
+                                        TreePtr<Node> pattern );
 
     static TreePtr<Node> DuplicateSubtree( const DirtyGrassUpdateInterface *dirty_grass,
                                            XLink source_base_xlink );

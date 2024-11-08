@@ -558,18 +558,14 @@ Agent::ReplaceExprPtr AgentCommon::GenReplaceExprImpl( const ReplaceKit &kit,
 } 
 
 
-TreePtr<Node> AgentCommon::CloneNode( bool force_dirty ) const
+TreePtr<Node> AgentCommon::CloneNode() const
 {
     INDENT("D");
 
     // Make the new node (destination node)
     shared_ptr<Cloner> dup_dest = Clone();
     TreePtr<Node> dest( dynamic_pointer_cast<Node>( dup_dest ) );
-    
-    // Source will be a pattern node, so cannot be dirty
-    if( force_dirty )
-        my_scr_engine->AddDirtyGrass( dest );
-        
+            
     return dest;
 }
 

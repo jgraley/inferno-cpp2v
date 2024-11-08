@@ -65,7 +65,7 @@ public:
     virtual ReplaceExprPtr GenReplaceExprImpl( const ReplaceKit &kit, 
                                          PatternLink me_plink, 
                                          XLink key_xlink );
-    TreePtr<Node> CloneNode( bool force_dirty ) const;
+    TreePtr<Node> CloneNode() const;
     virtual string GetTrace() const;
 
 protected:                                  

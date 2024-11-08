@@ -4,8 +4,7 @@
 using namespace SR;
 
 TreePtr<Node> Duplicate::DuplicateNode( const DirtyGrassUpdateInterface *dirty_grass,
-                                        TreePtr<Node> source,
-                                        bool force_dirty )
+                                        TreePtr<Node> source )
 {
     // Make the new node (destination node)
     shared_ptr<Cloner> dup_dest = source->Duplicate(source);
@@ -14,9 +13,7 @@ TreePtr<Node> Duplicate::DuplicateNode( const DirtyGrassUpdateInterface *dirty_g
 
     if( dirty_grass )
     {
-        bool source_dirty = dirty_grass->IsDirtyGrass( source );
-        if( force_dirty || // requested by caller
-            source_dirty ) // source was dirty
+        if( dirty_grass->IsDirtyGrass( source ) ) // source was dirty
         {
             //TRACE("dirtying ")(*dest)(" force=%d source=%d (")(*source)(")\n", force_dirty, source_dirty);        
             dirty_grass->AddDirtyGrass( dest );
@@ -75,7 +72,7 @@ TreePtr<Node> Duplicate::DuplicateSubtreeWorker( const DirtyGrassUpdateInterface
                                                  TerminiiMap &terminii_map )
 {
     // Make a new node, since we're substituting, preserve dirtyness        
-    TreePtr<Node> dest = DuplicateNode( dirty_grass, source, false );
+    TreePtr<Node> dest = DuplicateNode( dirty_grass, source );
 
     // Itemise the members. Note that the itemiser internally does a
     // dynamic_cast onto the type of source, and itemises over that type. dest must
