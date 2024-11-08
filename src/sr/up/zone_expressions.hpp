@@ -101,7 +101,7 @@ public:
 	
 	unique_ptr<FreeZone> Evaluate(const UpEvalExecKit &kit) const final;	
     
-    shared_ptr<ZoneExpression> DuplicateToFree(const XTreeDatabase *db) const;
+    shared_ptr<ZoneExpression> DuplicateToFree() const;
     
 	string GetTrace() const final;
     

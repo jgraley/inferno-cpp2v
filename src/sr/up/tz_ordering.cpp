@@ -138,7 +138,7 @@ void TreeZoneOrderingHandler::DuplicateTreeZone( shared_ptr<ZoneExpression> &exp
 		if( auto ptz_op = dynamic_pointer_cast<PopulateTreeZoneOperator>(child_expr) )
 		{		
 			TRACE("Duplicate ")(ptz_op)("\n");
-			child_expr = ptz_op->DuplicateToFree(db);
+			child_expr = ptz_op->DuplicateToFree();
 		}
 	} );	
 }

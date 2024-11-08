@@ -40,7 +40,7 @@ public:
     XLink &GetBaseXLink();
     vector<XLink> GetTerminusXLinks() const;
 
-    FreeZone Duplicate(const Duplicate::DirtyGrassUpdateInterface *dirty_grass) const;
+    FreeZone Duplicate() const;
     
     TerminusIterator GetTerminiiBegin();
     TerminusIterator GetTerminiiEnd();

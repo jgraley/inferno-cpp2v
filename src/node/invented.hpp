@@ -16,16 +16,15 @@ public:
 	{
 	}
 	
-	void Invent()
+	void SetInventedHere()
 	{
-		ASSERT( step == Progress::NO_STEP );
 		step = Progress::GetCurrent().GetStep();
 		ASSERT( step != Progress::NO_STEP );				
 	}
 	
-	bool IsOld() const
+	bool WasInventedDuringCurrentStep() const
 	{
-		return (Progress::GetCurrent().GetStep() > step);
+		return (Progress::GetCurrent().GetStep() == step);
 	}
 
 	int step;

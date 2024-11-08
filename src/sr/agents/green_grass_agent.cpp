@@ -74,9 +74,11 @@ unique_ptr<BooleanResult> GreenGrassAgent::IsGreenGrassOperator::Evaluate( const
     ASSERT( op_results.size()==1 );        
     unique_ptr<SymbolicResult> ra = OnlyElementOf(move(op_results));
     if( !ra->IsDefinedAndUnique() )
-        return make_unique<BooleanResult>( false );
+        return make_unique<BooleanResult>( false );    
+    TreePtr<Node> tp = ra->GetOnlyXLink().GetChildTreePtr();
     
-    bool green = !( agent->my_scr_engine->IsDirtyGrass( ra->GetOnlyXLink().GetChildTreePtr() ) ); 
+	bool green = !tp->WasInventedDuringCurrentStep();
+		
     return make_unique<BooleanResult>( green );         
 }
 

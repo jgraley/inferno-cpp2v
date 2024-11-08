@@ -3,46 +3,33 @@
 
 using namespace SR;
 
-TreePtr<Node> Duplicate::DuplicateNode( const DirtyGrassUpdateInterface *dirty_grass,
-                                        TreePtr<Node> source )
+TreePtr<Node> Duplicate::DuplicateNode( TreePtr<Node> source )
 {
     // Make the new node (destination node)
     shared_ptr<Cloner> dup_dest = source->Duplicate(source);
     TreePtr<Node> dest( dynamic_pointer_cast<Node>( dup_dest ) );
     ASSERTS(dest);
 
-    if( dirty_grass )
-    {
-        if( dirty_grass->IsDirtyGrass( source ) ) // source was dirty
-        {
-            //TRACE("dirtying ")(*dest)(" force=%d source=%d (")(*source)(")\n", force_dirty, source_dirty);        
-            dirty_grass->AddDirtyGrass( dest );
-        }
-    }
-    
     return dest;    
 }                                                     
 
 
-TreePtr<Node> Duplicate::DuplicateSubtree( const DirtyGrassUpdateInterface *dirty_grass,
-                                           XLink source_base_xlink )
+TreePtr<Node> Duplicate::DuplicateSubtree( XLink source_base_xlink )
 {
     TerminiiMap empty_terminii_map;
 	TreePtr<Node> source_base = source_base_xlink.GetChildTreePtr();
-    return DuplicateSubtreeWorker( dirty_grass, source_base, empty_terminii_map );
+    return DuplicateSubtreeWorker( source_base, empty_terminii_map );
 }
     
     
-TreePtr<Node> Duplicate::DuplicateSubtree( const DirtyGrassUpdateInterface *dirty_grass,
-                                           TreePtr<Node> source_base )
+TreePtr<Node> Duplicate::DuplicateSubtree( TreePtr<Node> source_base )
 {
     TerminiiMap empty_terminii_map;
-    return DuplicateSubtreeWorker( dirty_grass, source_base, empty_terminii_map );
+    return DuplicateSubtreeWorker( source_base, empty_terminii_map );
 }
     
     
-TreePtr<Node> Duplicate::DuplicateSubtree( const DirtyGrassUpdateInterface *dirty_grass,
-                                           XLink source_base_xlink,
+TreePtr<Node> Duplicate::DuplicateSubtree( XLink source_base_xlink,
                                            TerminiiMap &terminii_map )
 {
     ASSERTS( source_base_xlink );
@@ -61,18 +48,16 @@ TreePtr<Node> Duplicate::DuplicateSubtree( const DirtyGrassUpdateInterface *dirt
 
 	TreePtr<Node> source_base = source_base_xlink.GetChildTreePtr();
 
-    return DuplicateSubtreeWorker( dirty_grass,
-                                   source_base,
+    return DuplicateSubtreeWorker( source_base,
                                    terminii_map );
 }
 
 
-TreePtr<Node> Duplicate::DuplicateSubtreeWorker( const DirtyGrassUpdateInterface *dirty_grass,
-                                                 TreePtr<Node> source,
+TreePtr<Node> Duplicate::DuplicateSubtreeWorker( TreePtr<Node> source,
                                                  TerminiiMap &terminii_map )
 {
     // Make a new node, since we're substituting, preserve dirtyness        
-    TreePtr<Node> dest = DuplicateNode( dirty_grass, source );
+    TreePtr<Node> dest = DuplicateNode( source );
 
     // Itemise the members. Note that the itemiser internally does a
     // dynamic_cast onto the type of source, and itemises over that type. dest must
@@ -117,8 +102,7 @@ TreePtr<Node> Duplicate::DuplicateSubtreeWorker( const DirtyGrassUpdateInterface
                 else
                 {
                      //TRACES("Duplicating ")(*source_elt)("\n");
-                    TreePtr<Node> dest_elt = DuplicateSubtreeWorker( dirty_grass,
-                                                                     source_child_xlink.GetChildTreePtr(), 
+                    TreePtr<Node> dest_elt = DuplicateSubtreeWorker( source_child_xlink.GetChildTreePtr(), 
                                                                      terminii_map );
                     //TRACE("inserting ")(*dest_elt)(" directly\n");
                     dest_container->insert( dest_elt );
@@ -146,8 +130,7 @@ TreePtr<Node> Duplicate::DuplicateSubtreeWorker( const DirtyGrassUpdateInterface
             }
             else
             {
-                *dest_singular = DuplicateSubtreeWorker( dirty_grass,
-                                                         source_child_xlink.GetChildTreePtr(), 
+                *dest_singular = DuplicateSubtreeWorker( source_child_xlink.GetChildTreePtr(), 
                                                          terminii_map );
 				ASSERTS( *dest_singular );
 				ASSERTS( TreePtr<Node>(*dest_singular)->IsFinal() );            

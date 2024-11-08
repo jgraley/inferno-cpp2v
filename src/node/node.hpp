@@ -31,8 +31,9 @@ struct NodeBases : Magic,
                    Orderable,
                    Itemiser,
                    Cloner,
-                   SerialNumber,
-                   ChildRelationship
+                   SerialNumber,                   
+                   ChildRelationship,
+                   Invented
 {
 };
 

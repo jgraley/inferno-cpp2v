@@ -184,7 +184,7 @@ const TreeZone &PopulateTreeZoneOperator::GetZone() const
 unique_ptr<FreeZone> PopulateTreeZoneOperator::Evaluate(const UpEvalExecKit &kit) const
 {
 	// TODO probably consistent for Duplicate() to return unique_ptr<FreeZone>
-	auto temp_free_zone = make_unique<FreeZone>( zone.Duplicate(kit.x_tree_db) );
+	auto temp_free_zone = make_unique<FreeZone>( zone.Duplicate() );
 
 	// Rule #726 now we've gone to free zone, mark immediately.
 	for( RequiresSubordinateSCREngine *ea : embedded_markers )
@@ -195,9 +195,9 @@ unique_ptr<FreeZone> PopulateTreeZoneOperator::Evaluate(const UpEvalExecKit &kit
 }
 
 
-shared_ptr<ZoneExpression> PopulateTreeZoneOperator::DuplicateToFree(const XTreeDatabase *db) const
+shared_ptr<ZoneExpression> PopulateTreeZoneOperator::DuplicateToFree() const
 {
-	FreeZone free_zone = zone.Duplicate(db);
+	FreeZone free_zone = zone.Duplicate();
 	list<shared_ptr<ZoneExpression>> c = GetChildExpressions();
 	auto pop_fz_op = make_shared<PopulateFreeZoneOperator>( free_zone, move(c) );
 	pop_fz_op->AddEmbeddedMarkers( GetEmbeddedMarkers() );

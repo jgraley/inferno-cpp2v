@@ -585,10 +585,10 @@ Agent::ReplaceExprPtr StandardAgent::GenFreeZoneExprOverlay( const ReplaceKit &k
     if( under_node->IsSubcategory(*GetPatternPtr()) ) 
         dest = AgentCommon::CloneNode();
     else
-        dest = Duplicate::DuplicateNode( my_scr_engine, under_node);
+        dest = Duplicate::DuplicateNode(under_node);
 
 	// We "invent" dest, because of information coming from this pattern node.
-	my_scr_engine->AddDirtyGrass( dest );
+	dest->SetInventedHere();
 
     // Stuff for creating commands
     list<Agent::ReplaceExprPtr> child_commands;    
@@ -722,7 +722,7 @@ Agent::ReplaceExprPtr StandardAgent::GenFreeZoneExprNormal( const ReplaceKit &ki
     ASSERT( dest->IsFinal() )(*this)(" trying to build non-final ")(*dest)("\n"); 
 
 	// We "invent" dest, because of information coming from this pattern node.
-	my_scr_engine->AddDirtyGrass( dest );
+	dest->SetInventedHere();
 
     // Itemise the members. Note that the itemiser internally does a
     // dynamic_cast onto the type of pattern, and itemises over that type. dest must
