@@ -32,7 +32,7 @@ public:
     void InitialBuild();
 
 	// Incremental strategy: perform updates on zones
-    void UpdateMainTree( const TreeZone &target_tree_zone, const FreeZone &source_free_zone );
+    void UpdateMainTree( TreeZone target_tree_zone, FreeZone source_free_zone );
 
 	// Scaffolding for incremental roll-out: assets not yet converted are deleted/inserted here
 	// and applied to the SCR base xlink just once as before incremental

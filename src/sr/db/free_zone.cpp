@@ -88,6 +88,31 @@ TreePtr<Node> FreeZone::GetBaseNode() const
 }
 
 
+void FreeZone::PopulateAll( const list<TreePtr<Node>> &child_nodes ) 
+{
+	ASSERT( terminii.size() == child_nodes.size() );
+	
+	ASSERT( !IsEmpty() ); // There's nothing in the zone to modify
+	
+	TerminusIterator it_t = GetTerminiiBegin();
+	for( TreePtr<Node> child_node : child_nodes )
+	{	
+		ASSERT( it_t != GetTerminiiEnd() ); // length mismatch		
+		//it_t = MergeTerminus( it_t, move(child_zone) );		
+		
+		// Populate terminus. This will expand SubContainers. Remember that
+		// terminii are reference-like and so it's fine that we erase it.
+		(*it_t)->Populate( child_node );
+		
+		// it_t updated to the next terminus after the one we erased, or end()
+		it_t = terminii.erase( it_t );				
+	}		
+		
+	ASSERT( it_t == GetTerminiiEnd() ); // length mismatch		
+	ASSERT( GetNumTerminii() == 0 );
+}
+
+
 void FreeZone::MergeAll( list<unique_ptr<FreeZone>> &&child_zones ) 
 {
 	ASSERT( terminii.size() == child_zones.size() );

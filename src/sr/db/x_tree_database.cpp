@@ -69,17 +69,16 @@ void XTreeDatabase::InitialBuild()
 }
 
 
-void XTreeDatabase::UpdateMainTree( const TreeZone &target_tree_zone, const FreeZone &source_free_zone )
+void XTreeDatabase::UpdateMainTree( TreeZone target_tree_zone, FreeZone source_free_zone )
 {
 	ASSERT( target_tree_zone.GetNumTerminii() == source_free_zone.GetNumTerminii() );	
-	ASSERT( target_tree_zone.GetNumTerminii() == 0 ); // TODO under #723
 
     // Update database 
     DeleteMainTree( target_tree_zone.GetBaseXLink(), true );    
 
     // Patch the tree
     // acts on all copies of the xlink, due to indirection, possibly including root as held by db 
-    target_tree_zone.GetBaseXLink().SetXPtr( source_free_zone.GetBaseNode() ); 
+    target_tree_zone.InstallFreeZone( move(source_free_zone) ); 
 
     // Update database 
     InsertMainTree( target_tree_zone.GetBaseXLink(), true );   	

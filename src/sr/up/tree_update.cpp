@@ -66,16 +66,14 @@ void TreeUpdater::TransformToIncrementalAndExecute( shared_ptr<Command> initial_
 	TreeZone root_target = root_update_cmd->GetTargetTreeZone();
 	db->PreUpdateMainTree( root_target );
 
-	if( ReadArgs::use_incremental )
+	if( ReadArgs::use_incremental ) // use I="-ui" 
 	{
 		// Enact the tree zones that will stick around
 		zone_mark_enacter.Run(expr);
 
 		// Inversion generates sequence of separate "small" update commands 
 		shared_ptr<Command> incremental_cmd = tree_zone_inverter.Run(initial_cmd);	
-			
-		FTRACE(incremental_cmd)("\n");		
-			
+						
 		// Execute it
 		UpEvalExecKit kit { db };
 		incremental_cmd->Execute(kit);   

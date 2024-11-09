@@ -114,6 +114,19 @@ TreeZone::TerminusIterator TreeZone::GetTerminiiEnd()
 }
 
 
+void TreeZone::InstallFreeZone( FreeZone &&free_zone )
+{
+	list<TreePtr<Node>> terminus_nodes;
+    for( XLink terminus_xlink : terminii )
+		terminus_nodes.push_back( terminus_xlink.GetChildTreePtr() );
+		
+    // Acts on all copies of the xlink, due to indirection, possibly including root as held by db 
+    base.SetXPtr( free_zone.GetBaseNode() ); 
+
+	free_zone.PopulateAll( terminus_nodes );
+}
+
+
 string TreeZone::GetTrace() const
 {
     string rhs;
