@@ -60,6 +60,12 @@ void TreeUpdater::TransformToIncrementalAndExecute( shared_ptr<Command> initial_
 	ZoneMarkEnacter zone_mark_enacter( db );
 	TreeZoneInverter tree_zone_inverter( db ); 
 
+	// Scaffolding for transition to incremental
+	auto root_update_cmd = dynamic_pointer_cast<UpdateTreeCommand>(initial_cmd);
+	ASSERT(root_update_cmd);
+	TreeZone root_target = root_update_cmd->GetTargetTreeZone();
+	db->PreUpdateMainTree( root_target );
+
 	if( ReadArgs::use_incremental )
 	{
 		// Enact the tree zones that will stick around
@@ -80,4 +86,6 @@ void TreeUpdater::TransformToIncrementalAndExecute( shared_ptr<Command> initial_
 		UpEvalExecKit kit { db };
 		initial_cmd->Execute(kit);
 	}
+	
+	db->PostUpdateMainTree( root_target );
 }

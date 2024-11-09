@@ -73,21 +73,40 @@ void XTreeDatabase::UpdateMainTree( const TreeZone &target_tree_zone, const Free
 {
 	ASSERT( target_tree_zone.GetNumTerminii() == source_free_zone.GetNumTerminii() );	
 	ASSERT( target_tree_zone.GetNumTerminii() == 0 ); // TODO under #723
-	target_tree_zone.DBCheck(this);
-        
+
     // Update database 
-    DeleteMainTree( target_tree_zone.GetBaseXLink() );    
-    
+    DeleteMainTree( target_tree_zone.GetBaseXLink(), true );    
+
     // Patch the tree
     // acts on all copies of the xlink, due to indirection, possibly including root as held by db 
     target_tree_zone.GetBaseXLink().SetXPtr( source_free_zone.GetBaseNode() ); 
-    
+
     // Update database 
-    InsertMainTree( target_tree_zone.GetBaseXLink() );   	
+    InsertMainTree( target_tree_zone.GetBaseXLink(), true );   	
 }
 
 
-void XTreeDatabase::InsertMainTree(XLink xlink)
+void XTreeDatabase::PreUpdateMainTree( const TreeZone &target_tree_zone )
+{
+	ASSERT( target_tree_zone.GetNumTerminii() == 0 ); // Should be everything
+
+	target_tree_zone.DBCheck(this); // Move back to UpdateMainTree once this is empty
+        
+    // Update database 
+    DeleteMainTree( target_tree_zone.GetBaseXLink(), false );    
+}
+
+
+void XTreeDatabase::PostUpdateMainTree( const TreeZone &target_tree_zone )
+{   
+	ASSERT( target_tree_zone.GetNumTerminii() == 0 ); // Should be everything
+
+    // Update database 
+    InsertMainTree( target_tree_zone.GetBaseXLink(), false );   	
+}
+
+
+void XTreeDatabase::InsertMainTree(XLink xlink, bool incremental)
 {
     INDENT("i");
     
@@ -100,27 +119,33 @@ void XTreeDatabase::InsertMainTree(XLink xlink)
 		context = DBWalk::Context::BASE;	
 
     DBWalk::Actions actions;
-    domain->PrepareInsert( actions );
-    orderings->PrepareInsert( actions );
-    link_table->PrepareInsert( actions );
-    node_table->PrepareInsert( actions );
+    if( !incremental )
+    {
+		domain->PrepareInsert( actions );
+		orderings->PrepareInsert( actions );
+		link_table->PrepareInsert( actions );
+		node_table->PrepareInsert( actions );
+	}
     db_walker.Walk( &actions, xlink, context, &roots[main_root_xlink] );
     
-    // Domain extension wants to roam around the XTree, consulting
-    // parents, children, anything really. So we need a separate pass.
-    DBWalk::Actions actions2;
-    domain_extension->PrepareInsert( actions2 );
-    db_walker.Walk( &actions2, xlink, context, &roots[main_root_xlink] );
-    
-    while(!de_extra_queue.empty())
+    if( !incremental )
     {
-		InsertExtraTree( de_extra_queue.front() );
-		de_extra_queue.pop();
+		// Domain extension wants to roam around the XTree, consulting
+		// parents, children, anything really. So we need a separate pass.
+		DBWalk::Actions actions2;
+		domain_extension->PrepareInsert( actions2 );
+		db_walker.Walk( &actions2, xlink, context, &roots[main_root_xlink] );
+	
+		while(!de_extra_queue.empty())
+		{
+			InsertExtraTree( de_extra_queue.front() );
+			de_extra_queue.pop();
+		}
 	}
 }
 
 
-void XTreeDatabase::DeleteMainTree(XLink xlink)
+void XTreeDatabase::DeleteMainTree(XLink xlink, bool incremental)
 {
     INDENT("d");
 
@@ -133,20 +158,26 @@ void XTreeDatabase::DeleteMainTree(XLink xlink)
 		context = DBWalk::Context::BASE;	
 	
     DBWalk::Actions actions;
-    domain->PrepareDelete( actions );
-    domain_extension->PrepareDelete( actions );
-    orderings->PrepareDelete( actions );
-    link_table->PrepareDelete( actions );
-    node_table->PrepareDelete( actions );
+    if( !incremental )
+    {
+		domain->PrepareDelete( actions );
+		domain_extension->PrepareDelete( actions );
+		orderings->PrepareDelete( actions );
+		link_table->PrepareDelete( actions );
+		node_table->PrepareDelete( actions );
+	}
     // TODO be able to supply ROOT or the new BASE depending on whether 
     // we're being asked to act at a root. Fix up eg in link table where 
     // we need to tolerate multiple calls at ROOT not just one at InitalBuild()
     db_walker.Walk( &actions, xlink, context, &roots[main_root_xlink] );   
 
-    while(!de_extra_queue.empty())
+    if( !incremental )
     {
-		DeleteExtraTree( de_extra_queue.front() );
-		de_extra_queue.pop();
+		while(!de_extra_queue.empty())
+		{
+			DeleteExtraTree( de_extra_queue.front() );
+			de_extra_queue.pop();
+		}
 	}
 }
 
