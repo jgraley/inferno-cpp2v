@@ -26,68 +26,68 @@ catch( BreakException )
 {
 }		       
 
-// ------------------------- PopulateZoneOperator --------------------------
+// ------------------------- MergeZoneOperator --------------------------
 
-PopulateZoneOperator::PopulateZoneOperator( list<shared_ptr<ZoneExpression>> &&child_expressions_ ) :
+MergeZoneOperator::MergeZoneOperator( list<shared_ptr<ZoneExpression>> &&child_expressions_ ) :
 	child_expressions(move(child_expressions_))
 {
 }	
 
 
-PopulateZoneOperator::PopulateZoneOperator() 
+MergeZoneOperator::MergeZoneOperator() 
 {
 }	
 
 
-void PopulateZoneOperator::AddEmbeddedMarker( RequiresSubordinateSCREngine *new_marker )
+void MergeZoneOperator::AddEmbeddedMarker( RequiresSubordinateSCREngine *new_marker )
 {
 	AddEmbeddedMarkers( { new_marker } );
 }
 
 
-int PopulateZoneOperator::GetNumChildExpressions() const
+int MergeZoneOperator::GetNumChildExpressions() const
 {
 	return child_expressions.size();
 }
 
 
-PopulateZoneOperator::ChildExpressionIterator PopulateZoneOperator::GetChildrenBegin()
+MergeZoneOperator::ChildExpressionIterator MergeZoneOperator::GetChildrenBegin()
 {
 	return child_expressions.begin();
 }
 
 
-PopulateZoneOperator::ChildExpressionIterator PopulateZoneOperator::GetChildrenEnd()
+MergeZoneOperator::ChildExpressionIterator MergeZoneOperator::GetChildrenEnd()
 {
 	return child_expressions.end();
 }
 
 
-list<shared_ptr<ZoneExpression>> &PopulateZoneOperator::GetChildExpressions() 
+list<shared_ptr<ZoneExpression>> &MergeZoneOperator::GetChildExpressions() 
 {
 	return child_expressions;
 }
 
 
-const list<shared_ptr<ZoneExpression>> &PopulateZoneOperator::GetChildExpressions() const
+const list<shared_ptr<ZoneExpression>> &MergeZoneOperator::GetChildExpressions() const
 {
 	return child_expressions;
 }
 
 
-list<shared_ptr<ZoneExpression>> &&PopulateZoneOperator::MoveChildExpressions()
+list<shared_ptr<ZoneExpression>> &&MergeZoneOperator::MoveChildExpressions()
 {
 	return move(child_expressions);
 }
 
 
-string PopulateZoneOperator::GetChildExpressionsTrace() const
+string MergeZoneOperator::GetChildExpressionsTrace() const
 {
 	return Trace(child_expressions);
 }
 
 
-void PopulateZoneOperator::ForChildren(function<void(shared_ptr<ZoneExpression> &expr)> func) try
+void MergeZoneOperator::ForChildren(function<void(shared_ptr<ZoneExpression> &expr)> func) try
 {
 	for( shared_ptr<ZoneExpression> &child_expression : child_expressions )
 		func(child_expression);
@@ -97,7 +97,7 @@ catch( BreakException )
 }		       
 
 
-void PopulateZoneOperator::EvaluateChildrenAndPopulate( const UpEvalExecKit &kit, FreeZone &free_zone ) const	
+void MergeZoneOperator::EvaluateChildrenAndPopulate( const UpEvalExecKit &kit, FreeZone &free_zone ) const	
 {
 	// If no child expressions then either:
 	// - zone has no terminii and we're at a subtree -> no action required
@@ -114,11 +114,11 @@ void PopulateZoneOperator::EvaluateChildrenAndPopulate( const UpEvalExecKit &kit
 		child_zones.push_back( move(free_zone) );
 	}
 	
-	free_zone.PopulateAll(move(child_zones));
+	free_zone.MergeAll(move(child_zones));
 }
 	
 
-void PopulateZoneOperator::DepthFirstWalkImpl( function<void(shared_ptr<ZoneExpression> &expr)> func_in,
+void MergeZoneOperator::DepthFirstWalkImpl( function<void(shared_ptr<ZoneExpression> &expr)> func_in,
 			                                   function<void(shared_ptr<ZoneExpression> &expr)> func_out )
 {
 	for( shared_ptr<ZoneExpression> &expr : child_expressions )
@@ -131,19 +131,19 @@ void PopulateZoneOperator::DepthFirstWalkImpl( function<void(shared_ptr<ZoneExpr
 	}
 }
 	
-// ------------------------- PopulateTreeZoneOperator --------------------------
+// ------------------------- DupMergeTreeZoneOperator --------------------------
 
-PopulateTreeZoneOperator::PopulateTreeZoneOperator( TreeZone zone_, 
+DupMergeTreeZoneOperator::DupMergeTreeZoneOperator( TreeZone zone_, 
                                                     list<shared_ptr<ZoneExpression>> &&child_expressions ) :
-	PopulateZoneOperator( move(child_expressions) ),
+	MergeZoneOperator( move(child_expressions) ),
 	zone(zone_)
 {
 	ASSERT( zone.GetNumTerminii() == GetNumChildExpressions() );	
 }	
 		
 
-PopulateTreeZoneOperator::PopulateTreeZoneOperator( TreeZone zone_ ) :
-	PopulateZoneOperator(),
+DupMergeTreeZoneOperator::DupMergeTreeZoneOperator( TreeZone zone_ ) :
+	MergeZoneOperator(),
 	zone(zone_)
 {
 	// If zone has terminii, they will be "exposed" and will appear  
@@ -151,37 +151,37 @@ PopulateTreeZoneOperator::PopulateTreeZoneOperator( TreeZone zone_ ) :
 }
 
 
-void PopulateTreeZoneOperator::AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&new_markers )
+void DupMergeTreeZoneOperator::AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&new_markers )
 {
 	embedded_markers.splice( embedded_markers.end(), move(new_markers) );
 }
 
 
-list<RequiresSubordinateSCREngine *> PopulateTreeZoneOperator::GetEmbeddedMarkers() const
+list<RequiresSubordinateSCREngine *> DupMergeTreeZoneOperator::GetEmbeddedMarkers() const
 {
 	return embedded_markers;
 }
 
 
-void PopulateTreeZoneOperator::ClearEmbeddedMarkers()
+void DupMergeTreeZoneOperator::ClearEmbeddedMarkers()
 {
 	embedded_markers.clear();
 }
 
 
-TreeZone &PopulateTreeZoneOperator::GetZone() 
+TreeZone &DupMergeTreeZoneOperator::GetZone() 
 {
     return zone;
 }
 
 
-const TreeZone &PopulateTreeZoneOperator::GetZone() const
+const TreeZone &DupMergeTreeZoneOperator::GetZone() const
 {
     return zone;
 }
 
 
-unique_ptr<FreeZone> PopulateTreeZoneOperator::Evaluate(const UpEvalExecKit &kit) const
+unique_ptr<FreeZone> DupMergeTreeZoneOperator::Evaluate(const UpEvalExecKit &kit) const
 {
 	// TODO probably consistent for Duplicate() to return unique_ptr<FreeZone>
 	auto temp_free_zone = make_unique<FreeZone>( zone.Duplicate() );
@@ -195,38 +195,38 @@ unique_ptr<FreeZone> PopulateTreeZoneOperator::Evaluate(const UpEvalExecKit &kit
 }
 
 
-shared_ptr<ZoneExpression> PopulateTreeZoneOperator::DuplicateToFree() const
+shared_ptr<ZoneExpression> DupMergeTreeZoneOperator::DuplicateToFree() const
 {
 	FreeZone free_zone = zone.Duplicate();
 	list<shared_ptr<ZoneExpression>> c = GetChildExpressions();
-	auto pop_fz_op = make_shared<PopulateFreeZoneOperator>( free_zone, move(c) );
+	auto pop_fz_op = make_shared<MergeFreeZoneOperator>( free_zone, move(c) );
 	pop_fz_op->AddEmbeddedMarkers( GetEmbeddedMarkers() );
 	return pop_fz_op;
 }	
 
 
-string PopulateTreeZoneOperator::GetTrace() const
+string DupMergeTreeZoneOperator::GetTrace() const
 {
 #ifdef RECURSIVE_TRACE_OPERATOR
-	return "PopulateTreeZoneOperator( \nzone: "+Trace(zone)+",\nchildren: "+GetChildExpressionsTrace()+" )";
+	return "DupMergeTreeZoneOperator( \nzone: "+Trace(zone)+",\nchildren: "+GetChildExpressionsTrace()+" )";
 #else
-	return "PopulateTreeZoneOperator( zone: "+Trace(zone)+", "+Trace(GetNumChildExpressions())+" children )";
+	return "DupMergeTreeZoneOperator( zone: "+Trace(zone)+", "+Trace(GetNumChildExpressions())+" children )";
 #endif
 }
 
-// ------------------------- PopulateFreeZoneOperator --------------------------
+// ------------------------- MergeFreeZoneOperator --------------------------
 
-PopulateFreeZoneOperator::PopulateFreeZoneOperator( FreeZone zone_, 
+MergeFreeZoneOperator::MergeFreeZoneOperator( FreeZone zone_, 
                                                     list<shared_ptr<ZoneExpression>> &&child_expressions ) :
-	PopulateZoneOperator( move(child_expressions) ),
+	MergeZoneOperator( move(child_expressions) ),
 	zone(zone_)
 {
 	ASSERT( zone.GetNumTerminii() == GetNumChildExpressions() );	
 }
 
 		
-PopulateFreeZoneOperator::PopulateFreeZoneOperator( FreeZone zone_ ) :
-   	PopulateZoneOperator(),
+MergeFreeZoneOperator::MergeFreeZoneOperator( FreeZone zone_ ) :
+   	MergeZoneOperator(),
    	zone(zone_)
 {
 	// If zone has terminii, they will be "exposed" and will remain 
@@ -234,7 +234,7 @@ PopulateFreeZoneOperator::PopulateFreeZoneOperator( FreeZone zone_ ) :
 }
 
 
-void PopulateFreeZoneOperator::AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&new_markers )
+void MergeFreeZoneOperator::AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&new_markers )
 {
 	// Rule #726 requires us to mark free zones immediately
 	for( RequiresSubordinateSCREngine *ea : new_markers )
@@ -242,19 +242,19 @@ void PopulateFreeZoneOperator::AddEmbeddedMarkers( list<RequiresSubordinateSCREn
 }
 
 
-list<RequiresSubordinateSCREngine *> PopulateFreeZoneOperator::GetEmbeddedMarkers() const
+list<RequiresSubordinateSCREngine *> MergeFreeZoneOperator::GetEmbeddedMarkers() const
 {
 	return {}; // Rule #726 means there aren't any
 }
 
 
-void PopulateFreeZoneOperator::ClearEmbeddedMarkers()
+void MergeFreeZoneOperator::ClearEmbeddedMarkers()
 {
 	// Rule #726 means there aren't any
 }
 
 
-PopulateZoneOperator::ChildExpressionIterator PopulateFreeZoneOperator::SpliceOver( ChildExpressionIterator it_child, 
+MergeZoneOperator::ChildExpressionIterator MergeFreeZoneOperator::SpliceOver( ChildExpressionIterator it_child, 
                                                                                     list<shared_ptr<ZoneExpression>> &&child_exprs )
 {
 	// it_child updated to the next child after the one we erased, or end()
@@ -269,19 +269,19 @@ PopulateZoneOperator::ChildExpressionIterator PopulateFreeZoneOperator::SpliceOv
 }                                               
 
 
-FreeZone &PopulateFreeZoneOperator::GetZone()
+FreeZone &MergeFreeZoneOperator::GetZone()
 {
     return zone;
 }
 
 
-const FreeZone &PopulateFreeZoneOperator::GetZone() const
+const FreeZone &MergeFreeZoneOperator::GetZone() const
 {
     return zone;
 }
 
 
-unique_ptr<FreeZone> PopulateFreeZoneOperator::Evaluate(const UpEvalExecKit &kit) const
+unique_ptr<FreeZone> MergeFreeZoneOperator::Evaluate(const UpEvalExecKit &kit) const
 {
 	auto temp_free_zone = make_unique<FreeZone>(zone);
 	EvaluateChildrenAndPopulate( kit, *temp_free_zone );
@@ -289,11 +289,11 @@ unique_ptr<FreeZone> PopulateFreeZoneOperator::Evaluate(const UpEvalExecKit &kit
 }
 
 
-string PopulateFreeZoneOperator::GetTrace() const
+string MergeFreeZoneOperator::GetTrace() const
 {
 #ifdef RECURSIVE_TRACE_OPERATOR
-	return "PopulateFreeZoneOperator( \nzone: "+Trace(zone)+",\nchildren: "+GetChildExpressionsTrace()+" )";
+	return "MergeFreeZoneOperator( \nzone: "+Trace(zone)+",\nchildren: "+GetChildExpressionsTrace()+" )";
 #else
-	return "PopulateFreeZoneOperator( zone: "+Trace(zone)+", "+Trace(GetNumChildExpressions())+" children )";
+	return "MergeFreeZoneOperator( zone: "+Trace(zone)+", "+Trace(GetNumChildExpressions())+" children )";
 #endif	
 }

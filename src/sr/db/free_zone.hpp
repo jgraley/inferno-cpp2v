@@ -34,8 +34,8 @@ public:
     bool IsEmpty() const override;
 	int GetNumTerminii() const override;
     TreePtr<Node> GetBaseNode() const override;
-    void PopulateAll( list<unique_ptr<FreeZone>> &&child_zones );     
-	TerminusIterator PopulateTerminus( TerminusIterator it_t, 
+    void MergeAll( list<unique_ptr<FreeZone>> &&child_zones );     
+	TerminusIterator MergeTerminus( TerminusIterator it_t, 
                                        unique_ptr<FreeZone> &&child_zone );
     void AddTerminus(shared_ptr<Terminus> terminus);      
     TerminusIterator GetTerminiiBegin();

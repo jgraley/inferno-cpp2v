@@ -673,7 +673,7 @@ Agent::ReplaceExprPtr StandardAgent::GenFreeZoneExprOverlay( const ReplaceKit &k
 
 					ASSERT( under_elt ); // present simplified scheme disallows nullptr
 					TreeZone under_zone = TreeZone::CreateSubtree(XLink(under_node, &under_elt) );
-					child_commands.push_back( make_shared<PopulateTreeZoneOperator>(move(under_zone)) );		
+					child_commands.push_back( make_shared<DupMergeTreeZoneOperator>(move(under_zone)) );		
 				}
 			}
         }            
@@ -695,7 +695,7 @@ Agent::ReplaceExprPtr StandardAgent::GenFreeZoneExprOverlay( const ReplaceKit &k
 			{
 				ASSERT( *under_singular );            
 				TreeZone under_zone = TreeZone::CreateSubtree(XLink(under_node, under_singular) );
-				child_commands.push_back( make_shared<PopulateTreeZoneOperator>(move(under_zone)) );			
+				child_commands.push_back( make_shared<DupMergeTreeZoneOperator>(move(under_zone)) );			
 			}
         }
         else
@@ -704,7 +704,7 @@ Agent::ReplaceExprPtr StandardAgent::GenFreeZoneExprOverlay( const ReplaceKit &k
         }
     }
     
-    return make_shared<PopulateFreeZoneOperator>( move(zone), move(child_commands) );         
+    return make_shared<MergeFreeZoneOperator>( move(zone), move(child_commands) );         
 }
 
 Agent::ReplaceExprPtr StandardAgent::GenFreeZoneExprNormal( const ReplaceKit &kit, 
@@ -779,7 +779,7 @@ Agent::ReplaceExprPtr StandardAgent::GenFreeZoneExprNormal( const ReplaceKit &ki
         }       
     }
     
-    return make_shared<PopulateFreeZoneOperator>( move(zone), move(child_commands) );     
+    return make_shared<MergeFreeZoneOperator>( move(zone), move(child_commands) );     
 }
 
 

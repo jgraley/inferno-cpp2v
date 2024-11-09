@@ -50,7 +50,7 @@ void TreeZoneOrderingHandler::CheckRange( shared_ptr<ZoneExpression> &base,
 	
 	for( shared_ptr<ZoneExpression> *expr : tree_zone_op_list )
 	{
-		auto ptz_op = dynamic_pointer_cast<PopulateTreeZoneOperator>(*expr);
+		auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(*expr);
 		ASSERT( ptz_op ); // should succeed due GatherTreeZoneOps()
 		XLink tz_base = ptz_op->GetZone().GetBaseXLink();
 		
@@ -86,7 +86,7 @@ void TreeZoneOrderingHandler::CheckRange( shared_ptr<ZoneExpression> &base,
 }
 
 
-void TreeZoneOrderingHandler::RunForTreeZone( shared_ptr<PopulateTreeZoneOperator> &ptz_op, 
+void TreeZoneOrderingHandler::RunForTreeZone( shared_ptr<DupMergeTreeZoneOperator> &ptz_op, 
                                               bool just_check )
 {
 	TRACE("RunForTreeZone() looking for free zones under ")(ptz_op)("\n");
@@ -109,11 +109,11 @@ void TreeZoneOrderingHandler::GatherTreeZoneOps( shared_ptr<ZoneExpression> &exp
 {
 	// Get descendant tree zones, skipping over free zones, into a list for
 	// convenience.
-	if( auto ptz_op = dynamic_pointer_cast<PopulateTreeZoneOperator>(expr) )
+	if( auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(expr) )
 	{
 		tree_zones.push_back( &expr );
 	}
-	else if( auto pfz_op = dynamic_pointer_cast<PopulateFreeZoneOperator>(expr) )
+	else if( auto pfz_op = dynamic_pointer_cast<MergeFreeZoneOperator>(expr) )
 	{
 		pfz_op->ForChildren( [&](shared_ptr<ZoneExpression> &child_expr)
 		{
@@ -135,7 +135,7 @@ void TreeZoneOrderingHandler::DuplicateTreeZone( shared_ptr<ZoneExpression> &exp
 	// require CheckRange() to be stated-out so it can be invoked from a walk though.
 	ZoneExpression::ForDepthFirstWalk( expr, nullptr, [&](shared_ptr<ZoneExpression> &child_expr)
 	{
-		if( auto ptz_op = dynamic_pointer_cast<PopulateTreeZoneOperator>(child_expr) )
+		if( auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(child_expr) )
 		{		
 			TRACE("Duplicate ")(ptz_op)("\n");
 			child_expr = ptz_op->DuplicateToFree();
@@ -163,7 +163,7 @@ void AltTreeZoneOrderingChecker::Check( shared_ptr<ZoneExpression> root_expr )
 
 void AltTreeZoneOrderingChecker::Worker( shared_ptr<ZoneExpression> expr, bool base_equal_ok )
 {
-	if( auto ptz_op = dynamic_pointer_cast<PopulateTreeZoneOperator>(expr) )
+	if( auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(expr) )
 	{
 		INDENT(" T");
 		// Got a TreeZone - check ordering of its base, strictness depending on who called us
@@ -172,7 +172,7 @@ void AltTreeZoneOrderingChecker::Worker( shared_ptr<ZoneExpression> expr, bool b
 		
 		// Co-loop over the chidren/terminii
 		vector<XLink> terminii = tree_zone.GetTerminusXLinks();
-		PopulateFreeZoneOperator::ChildExpressionIterator it_child = ptz_op->GetChildrenBegin();		
+		MergeFreeZoneOperator::ChildExpressionIterator it_child = ptz_op->GetChildrenBegin();		
 		for( XLink terminus_xlink : terminii )
 		{
 			ASSERT( it_child != ptz_op->GetChildrenEnd() ); // length mismatch
@@ -191,7 +191,7 @@ void AltTreeZoneOrderingChecker::Worker( shared_ptr<ZoneExpression> expr, bool b
 		}
 		ASSERT( it_child == ptz_op->GetChildrenEnd() ); // length mismatch
 	}
-	else if( auto pfz_op = dynamic_pointer_cast<PopulateFreeZoneOperator>(expr) )
+	else if( auto pfz_op = dynamic_pointer_cast<MergeFreeZoneOperator>(expr) )
 	{
 		INDENT(" F");
 		pfz_op->ForChildren( [&](shared_ptr<ZoneExpression> &child_expr)

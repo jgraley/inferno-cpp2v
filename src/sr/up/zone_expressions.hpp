@@ -36,18 +36,18 @@ public:
 			                        function<void(shared_ptr<ZoneExpression> &expr)> func_out) = 0;
 };
 
-// ------------------------- PopulateZoneOperator --------------------------
+// ------------------------- MergeZoneOperator --------------------------
 
 // Construct with any zone and optional marker M. On evaluate: populate the
 // zone, apply marker and return the resulting FreeZone. 
-class PopulateZoneOperator : public ZoneExpression
+class MergeZoneOperator : public ZoneExpression
 {
 public:
 	typedef list<shared_ptr<ZoneExpression>>::iterator ChildExpressionIterator;
 	
 protected:
-    PopulateZoneOperator( list<shared_ptr<ZoneExpression>> &&child_expressions_ );
-    PopulateZoneOperator();
+    MergeZoneOperator( list<shared_ptr<ZoneExpression>> &&child_expressions_ );
+    MergeZoneOperator();
 
 public:
     void AddEmbeddedMarker( RequiresSubordinateSCREngine *new_marker );
@@ -79,18 +79,18 @@ private:
 };
 
 
-// ------------------------- PopulateTreeZoneOperator --------------------------
+// ------------------------- DupMergeTreeZoneOperator --------------------------
 
 // Construct with tree zone and child expressions for terminii. Markers can 
 // then be added. On evaluate: duplicate into a free zone, apply markers,
 // populate it immediately (rule #726), and return the resulting FreeZone. 
 // Due to rule #726, we cannot provide a merge method (or we could add support 
 // for markers in interior possibly not at base).
-class PopulateTreeZoneOperator : public PopulateZoneOperator
+class DupMergeTreeZoneOperator : public MergeZoneOperator
 {
 public:
-    PopulateTreeZoneOperator( TreeZone zone_, list<shared_ptr<ZoneExpression>> &&child_expressions );
-    PopulateTreeZoneOperator( TreeZone zone_ );
+    DupMergeTreeZoneOperator( TreeZone zone_, list<shared_ptr<ZoneExpression>> &&child_expressions );
+    DupMergeTreeZoneOperator( TreeZone zone_ );
     
     void AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&new_markers ) final;
     list<RequiresSubordinateSCREngine *> GetEmbeddedMarkers() const final;
@@ -110,18 +110,18 @@ private:
 	list<RequiresSubordinateSCREngine *> embedded_markers;
 };
 
-// ------------------------- PopulateFreeZoneOperator --------------------------
+// ------------------------- MergeFreeZoneOperator --------------------------
 
 // Construct with free zone and child expressions for terminii. Markers can 
 // then be added. On evaluate: populate the zone, and return the resulting 
 // FreeZone. Rule #726 means there can never be duplicate, clone, move etc, 
 // because we mark for embedded immediately (but this means we can merge 
 // without needing to represent markers in interior possibly not at base).
-class PopulateFreeZoneOperator : public PopulateZoneOperator
+class MergeFreeZoneOperator : public MergeZoneOperator
 {
 public:
-    PopulateFreeZoneOperator( FreeZone zone_, list<shared_ptr<ZoneExpression>> &&child_expressions );
-    PopulateFreeZoneOperator( FreeZone zone_ );
+    MergeFreeZoneOperator( FreeZone zone_, list<shared_ptr<ZoneExpression>> &&child_expressions );
+    MergeFreeZoneOperator( FreeZone zone_ );
 
     void AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&new_markers ) final;
     list<RequiresSubordinateSCREngine *> GetEmbeddedMarkers() const final;

@@ -102,10 +102,10 @@ Agent::ReplaceExprPtr StarAgent::GenReplaceExprImpl( const ReplaceKit &kit,
         dest_zone.AddTerminus( make_shared<ContainerTerminus>(dest_container, dest_it) );    
 
         TreeZone child_zone = TreeZone::CreateSubtree(XLink(key_node, &key_elt) );
-	    child_commands.push_back( make_shared<PopulateTreeZoneOperator>(move(child_zone)) );
+	    child_commands.push_back( make_shared<DupMergeTreeZoneOperator>(move(child_zone)) );
     }
 
-    return make_shared<PopulateFreeZoneOperator>( move(dest_zone), move(child_commands) );    
+    return make_shared<MergeFreeZoneOperator>( move(dest_zone), move(child_commands) );    
 }
 
 

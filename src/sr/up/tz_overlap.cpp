@@ -23,16 +23,16 @@ void TreeZoneOverlapHandler::Run( shared_ptr<ZoneExpression> &root_expr )
 {
 	TreeZoneRelation tz_relation( db );
 
-	// Inner and outer loops only look at PopulateTreeZoneOperator exprs
+	// Inner and outer loops only look at DupMergeTreeZoneOperator exprs
 	ZoneExpression::ForDepthFirstWalk( root_expr, nullptr, [&](shared_ptr<ZoneExpression> &l_expr)
 	{
-		if( auto l_ptz_op = dynamic_pointer_cast<PopulateTreeZoneOperator>(l_expr) )
+		if( auto l_ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(l_expr) )
 		{			
 			// We will establish an increasing region of known non-overlapping tree zones. Detect
 			// when the new l has an overlap in that zone.
 			ZoneExpression::ForDepthFirstWalk( root_expr, nullptr, [&](shared_ptr<ZoneExpression> &r_expr)
 			{
-				if( auto r_ptz_op = dynamic_pointer_cast<PopulateTreeZoneOperator>(r_expr) )
+				if( auto r_ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(r_expr) )
 				{			
 					if( l_expr == r_expr ) // inner "r" loop stops before catching up with outer "l" loop
 						LLBreak();
@@ -58,7 +58,7 @@ void TreeZoneOverlapHandler::Run( shared_ptr<ZoneExpression> &root_expr )
 							TRACE("Duplicate right ")(r_ptz_op)("\n");
 							r_expr = r_ptz_op->DuplicateToFree();
 							// later iterations of r loop will skip over this because it's now a 
-							// PopulateFreeZoneOperator, not a PopulateTreeZoneOperator
+							// MergeFreeZoneOperator, not a DupMergeTreeZoneOperator
 						}
 												
 						// TODO duplicate r here rather than l later: we'd prefer to duplicate r
@@ -78,11 +78,11 @@ void TreeZoneOverlapHandler::Check( shared_ptr<ZoneExpression> &root_expr )
 
 	ZoneExpression::ForDepthFirstWalk( root_expr, nullptr, [&](shared_ptr<ZoneExpression> &l_expr)
 	{
-		if( auto l_ptz_op = dynamic_pointer_cast<PopulateTreeZoneOperator>(l_expr) )
+		if( auto l_ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(l_expr) )
 		{			
 			ZoneExpression::ForDepthFirstWalk( root_expr, nullptr, [&](shared_ptr<ZoneExpression> &r_expr)
 			{
-				if( auto r_ptz_op = dynamic_pointer_cast<PopulateTreeZoneOperator>(r_expr) )
+				if( auto r_ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(r_expr) )
 				{			
 					if( l_expr == r_expr ) 
 						LLBreak();

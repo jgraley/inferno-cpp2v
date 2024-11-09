@@ -30,7 +30,7 @@ private:
                      XLink range_begin,
                      XLink range_end,
                      bool just_check );
-	void RunForTreeZone( shared_ptr<PopulateTreeZoneOperator> &op, 
+	void RunForTreeZone( shared_ptr<DupMergeTreeZoneOperator> &op, 
 						 bool just_check );
 	void GatherTreeZoneOps( shared_ptr<ZoneExpression> &expr, 
 				      	    list<shared_ptr<ZoneExpression> *> &tree_zones );

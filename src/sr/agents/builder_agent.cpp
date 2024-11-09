@@ -61,5 +61,5 @@ Agent::ReplaceExprPtr BuilderAgent::GenReplaceExprImpl( const ReplaceKit &kit,
     }
 
     // Make free zone without duplicating since this is first one
-    return make_shared<PopulateFreeZoneOperator>( FreeZone::CreateSubtree( new_node ) );
+    return make_shared<MergeFreeZoneOperator>( FreeZone::CreateSubtree( new_node ) );
 }

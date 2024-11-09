@@ -88,7 +88,7 @@ TreePtr<Node> FreeZone::GetBaseNode() const
 }
 
 
-void FreeZone::PopulateAll( list<unique_ptr<FreeZone>> &&child_zones ) 
+void FreeZone::MergeAll( list<unique_ptr<FreeZone>> &&child_zones ) 
 {
 	ASSERT( terminii.size() == child_zones.size() );
 	
@@ -103,7 +103,7 @@ void FreeZone::PopulateAll( list<unique_ptr<FreeZone>> &&child_zones )
 	for( unique_ptr<FreeZone> &child_zone : child_zones )
 	{	
 		ASSERT( it_t != GetTerminiiEnd() ); // length mismatch		
-		it_t = PopulateTerminus( it_t, move(child_zone) );		
+		it_t = MergeTerminus( it_t, move(child_zone) );		
 	}		
 		
 	ASSERT( it_t == GetTerminiiEnd() ); // length mismatch		
@@ -111,7 +111,7 @@ void FreeZone::PopulateAll( list<unique_ptr<FreeZone>> &&child_zones )
 }
 
 
-FreeZone::TerminusIterator FreeZone::PopulateTerminus( TerminusIterator it_t, 
+FreeZone::TerminusIterator FreeZone::MergeTerminus( TerminusIterator it_t, 
                                                        unique_ptr<FreeZone> &&child_zone ) 
 {
 	ASSERT( !IsEmpty() );

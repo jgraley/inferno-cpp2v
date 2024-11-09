@@ -554,7 +554,7 @@ Agent::ReplaceExprPtr AgentCommon::GenReplaceExprImpl( const ReplaceKit &kit,
     // Default replace behaviour to just use the X subtree we keyed to, so we need to be keyed
 	ASSERT(key_xlink)("Agent ")(*this)(" in replace context is not keyed but needs to be");
 	TreeZone new_zone = TreeZone::CreateSubtree(key_xlink );
-	return make_shared<PopulateTreeZoneOperator>( move(new_zone) );		
+	return make_shared<DupMergeTreeZoneOperator>( move(new_zone) );		
 } 
 
 
