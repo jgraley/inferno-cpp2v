@@ -15,18 +15,18 @@ Domain::Domain()
 	
 void Domain::PrepareDelete( DBWalk::Actions &actions )
 {
-	actions.domain_out = [=](const DBWalk::WalkInfo &walk_info)
+	actions.push_back( [=](const DBWalk::WalkInfo &walk_info)
 	{        
 		EraseSolo( unordered_domain, walk_info.xlink );
-	};
+	} );
 }
 
 
 void Domain::PrepareInsert(DBWalk::Actions &actions)
 {
-	actions.domain_in = [=](const DBWalk::WalkInfo &walk_info)
+	actions.push_back( [=](const DBWalk::WalkInfo &walk_info)
 	{        
 		InsertSolo( unordered_domain, walk_info.xlink );   
-	};
+	} );
 }
 

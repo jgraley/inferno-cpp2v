@@ -74,21 +74,21 @@ void DomainExtension::PostUpdateActions()
 
 void DomainExtension::PrepareDelete( DBWalk::Actions &actions )
 {
-	actions.domain_extension_out = [=](const DBWalk::WalkInfo &walk_info)
+	actions.push_back( [=](const DBWalk::WalkInfo &walk_info)
 	{        
 		for( auto &p : channels )
 			 p.second->Delete( walk_info );
-	};
+	} );
 }
 
 
 void DomainExtension::PrepareInsert(DBWalk::Actions &actions)
 {
-	actions.domain_extension_in = [=](const DBWalk::WalkInfo &walk_info)
+	actions.push_back( [=](const DBWalk::WalkInfo &walk_info)
 	{        
 		for( auto &p : channels )
 			 p.second->Insert( walk_info );			 
-	};
+	} );
 }
 
 

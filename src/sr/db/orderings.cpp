@@ -33,7 +33,7 @@ const Lacing *Orderings::GetLacing() const
 
 void Orderings::PrepareDelete( DBWalk::Actions &actions )
 {
-	actions.orderings_out = [=](const DBWalk::WalkInfo &walk_info)
+	actions.push_back( [=](const DBWalk::WalkInfo &walk_info)
 	{
 		TRACE("Erasing from orderings ")(walk_info.xlink)("\n");
 		EraseSolo( category_ordering, walk_info.xlink );       
@@ -54,13 +54,13 @@ void Orderings::PrepareDelete( DBWalk::Actions &actions )
         }
 
 		EraseSolo( depth_first_ordering, walk_info.xlink );
-	};
+	} );
 }
 
 
 void Orderings::PrepareInsert(DBWalk::Actions &actions)
 {
-	actions.orderings_in = [=](const DBWalk::WalkInfo &walk_info)
+	actions.push_back( [=](const DBWalk::WalkInfo &walk_info)
 	{ 
         InsertSolo( category_ordering, walk_info.xlink );
 
@@ -80,7 +80,7 @@ void Orderings::PrepareInsert(DBWalk::Actions &actions)
         }
 
         InsertSolo( depth_first_ordering, walk_info.xlink );
-	};
+	} );
 }
 
 

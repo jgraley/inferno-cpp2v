@@ -49,7 +49,7 @@ bool NodeTable::IsDeclarer(const DBWalk::WalkInfo &walk_info) const
 
 void NodeTable::PrepareDelete( DBWalk::Actions &actions )
 {
-	actions.node_row_out = [=](const DBWalk::WalkInfo &walk_info)
+	actions.push_back( [=](const DBWalk::WalkInfo &walk_info)
 	{
         // Should already be there
         Row &row = rows.at(walk_info.x);
@@ -60,13 +60,13 @@ void NodeTable::PrepareDelete( DBWalk::Actions &actions )
             
         if( row.incoming_xlinks.empty() )
             EraseSolo( rows, walk_info.x );
-	};
+	} );
 }
 
 
 void NodeTable::PrepareInsert(DBWalk::Actions &actions)
 {
-	actions.node_row_in = [=](const DBWalk::WalkInfo &walk_info)
+	actions.push_back( [=](const DBWalk::WalkInfo &walk_info)
 	{
         // Create if not already there
         Row &row = rows[walk_info.x];
@@ -74,7 +74,7 @@ void NodeTable::PrepareInsert(DBWalk::Actions &actions)
         InsertSolo( row.incoming_xlinks, walk_info.xlink );    		
         if( IsDeclarer(walk_info) )
             InsertSolo( row.declaring_xlinks, walk_info.xlink );
-	};
+	} );
 }
 
 

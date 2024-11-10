@@ -40,23 +40,7 @@ public:
         const DBCommon::RootRecord *root_record;        
 	};
 
-	struct Actions
-	{
-		function<void (const WalkInfo &)> domain_in;
-		function<void (const WalkInfo &)> domain_out;
-
-		function<void (const WalkInfo &)> domain_extension_in;
-		function<void (const WalkInfo &)> domain_extension_out;
-
-		function<void (const WalkInfo &)> link_row_in;
-		function<void (const WalkInfo &)> link_row_out;
-
-		function<void (const WalkInfo &)> node_row_in;
-		function<void (const WalkInfo &)> node_row_out;
-
-		function<void (const WalkInfo &)> orderings_in;
-		function<void (const WalkInfo &)> orderings_out;
-	};
+	typedef std::list< function<void (const WalkInfo &)> > Actions;
     
     void Walk( const Actions *actions,
                XLink base_xlink,
@@ -90,11 +74,6 @@ private:
                     const WalkInfo &walk_info );
     void VisitItemise( const WalkKit &kit, 
                        XLink xlink );
-
-    void WindInActions( const WalkKit &kit, 
-                        const WalkInfo &walk_info );
-    void UnwindActions( const WalkKit &kit, 
-                        const WalkInfo &walk_info );
 };    
     
 }
