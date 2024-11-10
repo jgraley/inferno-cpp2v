@@ -48,8 +48,8 @@ public:
     const Row &GetRow(XLink xlink) const;
     bool HasRow(XLink xlink) const;
     
-    void PrepareDelete(DBWalk::Actions &actions);
-	void PrepareInsert(DBWalk::Actions &actions);
+    DBWalk::Action GetDeleteAction();
+	DBWalk::Action GetInsertAction();
 	
 	void GenerateRow(const DBWalk::WalkInfo &walk_info);
 	

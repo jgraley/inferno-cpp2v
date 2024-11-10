@@ -130,14 +130,14 @@ void DBWalk::VisitLink( const WalkKit &kit,
     TRACE("Visiting link ")(walk_info.xlink)("\n");    
             
     if( kit.wind == WIND_IN )
-		for( auto action : *(kit.actions) )
+		for( Action action : *(kit.actions) )
 			action(walk_info);
             
     // Recurse into our child nodes
     VisitItemise( kit, walk_info.xlink ); 
 
     if( kit.wind == WIND_OUT )
-		for( auto action : *(kit.actions) )
+		for( Action action : *(kit.actions) )
 			action(walk_info);         
 }
 

@@ -35,9 +35,9 @@ public:
     
     bool IsDeclarer(const DBWalk::WalkInfo &walk_info) const;
     
-    void PrepareDelete(DBWalk::Actions &actions);
-	void PrepareInsert(DBWalk::Actions &actions);
-
+    DBWalk::Action GetDeleteAction();
+	DBWalk::Action GetInsertAction();
+	
 	string GetTrace() const;
 private:
     // Node-to-row-of-x_tree_db map

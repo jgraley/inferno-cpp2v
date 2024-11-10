@@ -70,9 +70,9 @@ public:
     void InitialBuild();
     void PostUpdateActions();
 
-    void PrepareDelete(DBWalk::Actions &actions);
-	void PrepareInsert(DBWalk::Actions &actions);
-
+    DBWalk::Action GetDeleteAction();
+	DBWalk::Action GetInsertAction();
+	
     void TestRelations( const unordered_set<XLink> &xlinks );
 
 private:

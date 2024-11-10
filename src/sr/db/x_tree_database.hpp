@@ -31,18 +31,20 @@ public:
 	// to build full db during analysis stage
     void InitialBuild();
 
-	// Incremental strategy: perform updates on zones
-    void UpdateMainTree( TreeZone target_tree_zone, FreeZone source_free_zone );
-
 	// Scaffolding for incremental roll-out: assets not yet converted are deleted/inserted here
 	// and applied to the SCR base xlink just once as before incremental
     void PreUpdateMainTree( const TreeZone &target_tree_zone );
+
+	// Incremental strategy: perform updates on zones
+    void UpdateMainTree( TreeZone target_tree_zone, FreeZone source_free_zone );
+
     void PostUpdateMainTree( const TreeZone &target_tree_zone );
 		
-    void InsertMainTree(XLink xlink, bool incremental);
     void DeleteMainTree(XLink xlink, bool incremental);
-    void InsertExtraTree(XLink xlink);
+    void InsertMainTree(XLink xlink, bool incremental);
+
     void DeleteExtraTree(XLink xlink);
+    void InsertExtraTree(XLink xlink);
 
     const DomainExtensionChannel *GetDEChannel( const DomainExtension::Extender *extender ) const;
     void PostUpdateActions();
@@ -76,8 +78,8 @@ private:
     
 private: 
     const shared_ptr<Domain> domain;
-    const shared_ptr<NodeTable> node_table;
     const shared_ptr<LinkTable> link_table;
+    const shared_ptr<NodeTable> node_table;
     const shared_ptr<Orderings> orderings;
     const shared_ptr<DomainExtension> domain_extension;
 

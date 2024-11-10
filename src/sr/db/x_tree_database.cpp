@@ -18,8 +18,8 @@ using namespace SR;
 
 XTreeDatabase::XTreeDatabase( XLink main_root_xlink_, shared_ptr<Lacing> lacing, DomainExtension::ExtenderSet domain_extenders ) :
     domain( make_shared<Domain>() ),
-    node_table( make_shared<NodeTable>() ),
     link_table( make_shared<LinkTable>() ),
+    node_table( make_shared<NodeTable>() ),
     orderings( make_shared<Orderings>(lacing, this) ),
     domain_extension( make_shared<DomainExtension>(this, domain_extenders) ),    
     main_root_xlink( main_root_xlink_ )
@@ -46,10 +46,10 @@ void XTreeDatabase::InitialBuild()
     ASSERT( de_extra_queue.empty() );
 	
     DBWalk::Actions actions;
-    domain->PrepareInsert( actions );
-    link_table->PrepareInsert( actions );
-    node_table->PrepareInsert( actions );
-    orderings->PrepareInsert( actions );
+    actions.push_back( domain->GetInsertAction() );
+    actions.push_back( link_table->GetInsertAction() );
+    actions.push_back( node_table->GetInsertAction() );
+    actions.push_back( orderings->GetInsertAction() );
     
 	roots[main_root_xlink] = { DBCommon::RootOrdinal::MAIN };
 	roots[XLink::MMAX_Link] = { DBCommon::RootOrdinal::MMAX };
@@ -69,6 +69,17 @@ void XTreeDatabase::InitialBuild()
 }
 
 
+void XTreeDatabase::PreUpdateMainTree( const TreeZone &target_tree_zone )
+{
+	ASSERT( target_tree_zone.GetNumTerminii() == 0 ); // Should be everything
+
+	target_tree_zone.DBCheck(this); // Move back to UpdateMainTree once this is empty
+        
+    // Update database 
+    DeleteMainTree( target_tree_zone.GetBaseXLink(), false );    
+}
+
+
 void XTreeDatabase::UpdateMainTree( TreeZone target_tree_zone, FreeZone source_free_zone )
 {
 	ASSERT( target_tree_zone.GetNumTerminii() == source_free_zone.GetNumTerminii() );	
@@ -84,62 +95,12 @@ void XTreeDatabase::UpdateMainTree( TreeZone target_tree_zone, FreeZone source_f
 }
 
 
-void XTreeDatabase::PreUpdateMainTree( const TreeZone &target_tree_zone )
-{
-	ASSERT( target_tree_zone.GetNumTerminii() == 0 ); // Should be everything
-
-	target_tree_zone.DBCheck(this); // Move back to UpdateMainTree once this is empty
-        
-    // Update database 
-    DeleteMainTree( target_tree_zone.GetBaseXLink(), false );    
-}
-
-
 void XTreeDatabase::PostUpdateMainTree( const TreeZone &target_tree_zone )
 {   
 	ASSERT( target_tree_zone.GetNumTerminii() == 0 ); // Should be everything
 
     // Update database 
     InsertMainTree( target_tree_zone.GetBaseXLink(), false );   	
-}
-
-
-void XTreeDatabase::InsertMainTree(XLink xlink, bool incremental)
-{
-    INDENT("i");
-    
-    ASSERT( de_extra_queue.empty() );
-    
-	DBWalk::Context context;
-	if( xlink == main_root_xlink ) 	
-		context = DBWalk::Context::ROOT;
-	else
-		context = DBWalk::Context::BASE;	
-
-    DBWalk::Actions actions;
-    if( !incremental )
-    {
-		domain->PrepareInsert( actions );
-		link_table->PrepareInsert( actions );
-		node_table->PrepareInsert( actions );
-		orderings->PrepareInsert( actions );
-	}
-    db_walker.Walk( &actions, xlink, context, &roots[main_root_xlink], DBWalk::WIND_IN );
-    
-    if( !incremental )
-    {
-		// Domain extension wants to roam around the XTree, consulting
-		// parents, children, anything really. So we need a separate pass.
-		DBWalk::Actions actions2;
-		domain_extension->PrepareInsert( actions2 );
-		db_walker.Walk( &actions2, xlink, context, &roots[main_root_xlink], DBWalk::WIND_IN );
-	
-		while(!de_extra_queue.empty())
-		{
-			InsertExtraTree( de_extra_queue.front() );
-			de_extra_queue.pop();
-		}
-	}
 }
 
 
@@ -158,11 +119,11 @@ void XTreeDatabase::DeleteMainTree(XLink xlink, bool incremental)
     DBWalk::Actions actions;
     if( !incremental )
     {
-		domain_extension->PrepareDelete( actions );
-		orderings->PrepareDelete( actions );
-		node_table->PrepareDelete( actions );
-		link_table->PrepareDelete( actions );
-		domain->PrepareDelete( actions );
+		actions.push_back( domain_extension->GetDeleteAction() );
+		actions.push_back( orderings->GetDeleteAction() );
+		actions.push_back( node_table->GetDeleteAction() );
+		actions.push_back( link_table->GetDeleteAction() );
+		actions.push_back( domain->GetDeleteAction() );
 	}
     // TODO be able to supply ROOT or the new BASE depending on whether 
     // we're being asked to act at a root. Fix up eg in link table where 
@@ -180,26 +141,42 @@ void XTreeDatabase::DeleteMainTree(XLink xlink, bool incremental)
 }
 
 
-void XTreeDatabase::InsertExtraTree(XLink xlink)
+void XTreeDatabase::InsertMainTree(XLink xlink, bool incremental)
 {
-    INDENT("e");
+    INDENT("i");
     
-    ASSERT( xlink != main_root_xlink );
-    ASSERT( roots.count(xlink) == 0 );
+    ASSERT( de_extra_queue.empty() );
     
-	roots[xlink] = { next_root_ordinal };    
-    ((int &)next_root_ordinal)++;
-    
-	DBWalk::Actions actions;
-	domain->PrepareInsert( actions );
-	link_table->PrepareInsert( actions );
-	node_table->PrepareInsert( actions );
-	orderings->PrepareInsert( actions );
-	db_walker.Walk( &actions, xlink, DBWalk::Context::ROOT, &roots[xlink], DBWalk::WIND_IN );
+	DBWalk::Context context;
+	if( xlink == main_root_xlink ) 	
+		context = DBWalk::Context::ROOT;
+	else
+		context = DBWalk::Context::BASE;	
 
-	DBWalk::Actions actions2;
-	domain_extension->PrepareInsert( actions2 );
-	db_walker.Walk( &actions2, xlink, DBWalk::Context::ROOT, &roots[xlink], DBWalk::WIND_IN );
+    DBWalk::Actions actions;
+    if( !incremental )
+    {
+		actions.push_back( domain->GetInsertAction() );
+		actions.push_back( link_table->GetInsertAction() );
+		actions.push_back( node_table->GetInsertAction() );
+		actions.push_back( orderings->GetInsertAction() );
+	}
+    db_walker.Walk( &actions, xlink, context, &roots[main_root_xlink], DBWalk::WIND_IN );
+    
+    if( !incremental )
+    {
+		// Domain extension wants to roam around the XTree, consulting
+		// parents, children, anything really. So we need a separate pass.
+		DBWalk::Actions actions2;
+		actions2.push_back( domain_extension->GetInsertAction());
+		db_walker.Walk( &actions2, xlink, context, &roots[main_root_xlink], DBWalk::WIND_IN );
+	
+		while(!de_extra_queue.empty())
+		{
+			InsertExtraTree( de_extra_queue.front() );
+			de_extra_queue.pop();
+		}
+	}
 }
 
 
@@ -213,14 +190,37 @@ void XTreeDatabase::DeleteExtraTree(XLink xlink)
     // zones and on each call we delete just that
     // xlink.
     DBWalk::Actions actions;
-    domain_extension->PrepareDelete( actions );
-    orderings->PrepareDelete( actions );
-    node_table->PrepareDelete( actions );
-    link_table->PrepareDelete( actions );
-    domain->PrepareDelete( actions );
+	actions.push_back( domain_extension->GetDeleteAction() );
+	actions.push_back( orderings->GetDeleteAction() );
+	actions.push_back( node_table->GetDeleteAction() );
+	actions.push_back( link_table->GetDeleteAction() );
+	actions.push_back( domain->GetDeleteAction() );
     db_walker.Walk( &actions, xlink, DBWalk::Context::ROOT, &roots[xlink], DBWalk::WIND_OUT );   
     
    	roots.erase(xlink);
+}
+
+
+void XTreeDatabase::InsertExtraTree(XLink xlink)
+{
+    INDENT("e");
+    
+    ASSERT( xlink != main_root_xlink );
+    ASSERT( roots.count(xlink) == 0 );
+    
+	roots[xlink] = { next_root_ordinal };    
+    ((int &)next_root_ordinal)++;
+    
+	DBWalk::Actions actions;
+    actions.push_back( domain->GetInsertAction() );
+    actions.push_back( link_table->GetInsertAction() );
+    actions.push_back( node_table->GetInsertAction() );
+    actions.push_back( orderings->GetInsertAction() );
+	db_walker.Walk( &actions, xlink, DBWalk::Context::ROOT, &roots[xlink], DBWalk::WIND_IN );
+
+	DBWalk::Actions actions2;
+	actions2.push_back( domain_extension->GetInsertAction());
+	db_walker.Walk( &actions2, xlink, DBWalk::Context::ROOT, &roots[xlink], DBWalk::WIND_IN );
 }
 
 

@@ -28,31 +28,31 @@ bool LinkTable::HasRow(XLink xlink) const
 }
 
 
-void LinkTable::PrepareDelete( DBWalk::Actions &actions )
+DBWalk::Action LinkTable::GetInsertAction()
 {
-	actions.push_back( [=](const DBWalk::WalkInfo &walk_info)
-	{
-		// The link row for the base does not change because its 
-		// context does not change.
-		if( walk_info.context != DBWalk::BASE ) 
-    		EraseSolo( rows, walk_info.p_x );
-	} );
-
-    // Good practice to poison rows at terminii. Assuming walker tells us we're at a 
-    // terminus, we can put in bad stuff (NULL, -1, end() etc) or maybe just a flag
-    // for "parent valid". Do this in a new PoisonRow() like GenerateRow().
-}
-
-
-void LinkTable::PrepareInsert(DBWalk::Actions &actions)
-{
-	actions.push_back( [=](const DBWalk::WalkInfo &walk_info)
+	return [=](const DBWalk::WalkInfo &walk_info)
 	{
 		// The link row for the base does not change because its 
 		// context does not change.
 		if( walk_info.context != DBWalk::BASE ) 
     		GenerateRow(walk_info);
-	} );
+	};
+}
+
+
+DBWalk::Action LinkTable::GetDeleteAction()
+{
+	return [=](const DBWalk::WalkInfo &walk_info)
+	{
+		// The link row for the base does not change because its 
+		// context does not change.
+		if( walk_info.context != DBWalk::BASE ) 
+    		EraseSolo( rows, walk_info.p_x );
+	};
+
+    // Good practice to poison rows at terminii. Assuming walker tells us we're at a 
+    // terminus, we can put in bad stuff (NULL, -1, end() etc) or maybe just a flag
+    // for "parent valid". Do this in a new PoisonRow() like GenerateRow().
 }
 
 

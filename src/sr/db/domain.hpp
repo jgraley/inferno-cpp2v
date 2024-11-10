@@ -20,8 +20,8 @@ class Domain
 public:
 	Domain();
 
-    void PrepareDelete(DBWalk::Actions &actions);
-	void PrepareInsert(DBWalk::Actions &actions);
+    DBWalk::Action GetDeleteAction();
+	DBWalk::Action GetInsertAction();
     
     // Global domain of possible xlink values
     unordered_set<XLink> unordered_domain;            

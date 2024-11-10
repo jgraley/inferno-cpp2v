@@ -12,21 +12,22 @@ using namespace SR;
 Domain::Domain()
 {
 }
-	
-void Domain::PrepareDelete( DBWalk::Actions &actions )
+
+
+DBWalk::Action Domain::GetDeleteAction()
 {
-	actions.push_back( [=](const DBWalk::WalkInfo &walk_info)
+	return [=](const DBWalk::WalkInfo &walk_info)
 	{        
 		EraseSolo( unordered_domain, walk_info.xlink );
-	} );
+	};
 }
 
 
-void Domain::PrepareInsert(DBWalk::Actions &actions)
+DBWalk::Action Domain::GetInsertAction()
 {
-	actions.push_back( [=](const DBWalk::WalkInfo &walk_info)
+	return [=](const DBWalk::WalkInfo &walk_info)
 	{        
 		InsertSolo( unordered_domain, walk_info.xlink );   
-	} );
+	};
 }
 

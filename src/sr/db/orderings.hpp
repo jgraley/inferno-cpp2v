@@ -36,9 +36,9 @@ private:
 public:
     const Lacing *GetLacing() const;
 
-    void PrepareDelete(DBWalk::Actions &actions);
-	void PrepareInsert(DBWalk::Actions &actions);
-    
+    DBWalk::Action GetDeleteAction();
+	DBWalk::Action GetInsertAction();
+	    
     void Dump() const;
     void TestRelations( const unordered_set<XLink> &xlinks );
 

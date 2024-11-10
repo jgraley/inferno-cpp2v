@@ -40,7 +40,8 @@ public:
         const DBCommon::RootRecord *root_record;        
 	};
 
-	typedef std::list< function<void (const WalkInfo &)> > Actions;
+	typedef function<void (const WalkInfo &)> Action;
+	typedef list< Action > Actions;
     
     void Walk( const Actions *actions,
                XLink base_xlink,
