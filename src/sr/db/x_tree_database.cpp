@@ -77,8 +77,7 @@ void XTreeDatabase::UpdateMainTree( TreeZone target_tree_zone, FreeZone source_f
     DeleteMainTree( target_tree_zone.GetBaseXLink(), true );    
 
     // Patch the tree
-    // acts on all copies of the xlink, due to indirection, possibly including root as held by db 
-    target_tree_zone.InstallFreeZone( move(source_free_zone) ); 
+    target_tree_zone.ReplaceWithFreeZone( move(source_free_zone) ); 
 
     // Update database 
     InsertMainTree( target_tree_zone.GetBaseXLink(), true );   	

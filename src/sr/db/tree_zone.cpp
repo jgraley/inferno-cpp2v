@@ -114,7 +114,7 @@ TreeZone::TerminusIterator TreeZone::GetTerminiiEnd()
 }
 
 
-void TreeZone::InstallFreeZone( FreeZone &&free_zone )
+void TreeZone::ReplaceWithFreeZone( FreeZone &&free_zone )
 {
 	list<TreePtr<Node>> terminus_nodes;
     for( XLink terminus_xlink : terminii )

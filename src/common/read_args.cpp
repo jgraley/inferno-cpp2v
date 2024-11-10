@@ -34,7 +34,7 @@ int ReadArgs::repetitions = 100; // default behaviour
 bool ReadArgs::rep_error = true; // default behaviour
 bool ReadArgs::documentation_graphs = false;
 bool ReadArgs::output_all = false;
-bool ReadArgs::use_incremental = false;
+bool ReadArgs::use_incremental = false; 
  
 
 void ReadArgs::Usage(string msg)

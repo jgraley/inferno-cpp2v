@@ -45,7 +45,7 @@ public:
     TerminusIterator GetTerminiiBegin();
     TerminusIterator GetTerminiiEnd();
     
-    void InstallFreeZone( FreeZone &&free_zone );
+    void ReplaceWithFreeZone( FreeZone &&free_zone );
 
     string GetTrace() const;
 
