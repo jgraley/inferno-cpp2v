@@ -5,9 +5,10 @@ using namespace SR;
 void DBWalk::Walk( const Actions *actions,
                    XLink base_xlink,
                    Context base_context,
-                   const DBCommon::RootRecord *root_record )
+                   const DBCommon::RootRecord *root_record, 
+                   Wind wind )
 {
-    WalkKit kit { actions, base_xlink, root_record };
+    WalkKit kit { actions, base_xlink, root_record, wind };
 	VisitBase( kit, base_context );  
 }
 
@@ -128,12 +129,14 @@ void DBWalk::VisitLink( const WalkKit &kit,
     INDENT(".");            
     TRACE("Visiting link ")(walk_info.xlink)("\n");    
             
-    WindInActions( kit, walk_info );        
+    if( kit.wind == WIND_IN )
+		WindInActions( kit, walk_info );        
             
     // Recurse into our child nodes
     VisitItemise( kit, walk_info.xlink ); 
 
-    UnwindActions( kit, walk_info );                          
+    if( kit.wind == WIND_OUT )
+		UnwindActions( kit, walk_info );                          
 }
 
 
@@ -170,8 +173,8 @@ void DBWalk::WindInActions( const WalkKit &kit,
     if( kit.actions->node_row_in )
 		kit.actions->node_row_in( walk_info );        
 
-    if( kit.actions->indexes_in )
-		kit.actions->indexes_in( walk_info );                    
+    if( kit.actions->orderings_in )
+		kit.actions->orderings_in( walk_info );                    
 
     if( kit.actions->domain_extension_in )
 		kit.actions->domain_extension_in( walk_info );        
@@ -184,8 +187,8 @@ void DBWalk::UnwindActions( const WalkKit &kit,
     if( kit.actions->domain_extension_out )
 		kit.actions->domain_extension_out( walk_info );        
 
-    if( kit.actions->indexes_out )
-		kit.actions->indexes_out( walk_info );                    
+    if( kit.actions->orderings_out )
+		kit.actions->orderings_out( walk_info );                    
 
     if( kit.actions->node_row_out )
 		kit.actions->node_row_out( walk_info );        

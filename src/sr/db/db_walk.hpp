@@ -19,6 +19,12 @@ public:
         IN_COLLECTION
     };
     
+    enum Wind
+    {
+        WIND_IN,
+        WIND_OUT
+    };
+
     struct WalkInfo
     {
         TreePtr<Node> parent_x;
@@ -48,20 +54,22 @@ public:
 		function<void (const WalkInfo &)> node_row_in;
 		function<void (const WalkInfo &)> node_row_out;
 
-		function<void (const WalkInfo &)> indexes_in;
-		function<void (const WalkInfo &)> indexes_out;
+		function<void (const WalkInfo &)> orderings_in;
+		function<void (const WalkInfo &)> orderings_out;
 	};
     
     void Walk( const Actions *actions,
                XLink base_xlink,
                Context base_context,
-               const DBCommon::RootRecord *root_record );
+               const DBCommon::RootRecord *root_record,
+               Wind wind );
 private:
     struct WalkKit
     {
         const Actions *actions;
         XLink base_xlink;
 		const DBCommon::RootRecord *root_record;        
+		Wind wind;
     };
 
     void VisitBase( const WalkKit &kit, 
