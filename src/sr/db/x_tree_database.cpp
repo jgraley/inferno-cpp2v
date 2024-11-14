@@ -104,7 +104,7 @@ void XTreeDatabase::PostUpdateMainTree( const TreeZone &target_tree_zone )
 }
 
 
-void XTreeDatabase::DeleteMainTree(XLink xlink, bool incremental)
+void XTreeDatabase::DeleteMainTree(XLink xlink, bool in_parts)
 {
     INDENT("d");
 
@@ -117,23 +117,24 @@ void XTreeDatabase::DeleteMainTree(XLink xlink, bool incremental)
 		context = DBWalk::Context::BASE;	
 	
     DBWalk::Actions actions;
-    if( incremental )
-    {
-		actions.push_back( domain->GetDeleteAction() );
-	}
-	else
+    if( !in_parts )
     {
 		actions.push_back( domain_extension->GetDeleteAction() );
 		actions.push_back( orderings->GetDeleteAction() );
 		actions.push_back( node_table->GetDeleteAction() );
 		actions.push_back( link_table->GetDeleteAction() );
+		actions.push_back( domain->GetDeleteAction() );
 	}
+	else
+    {
+	}
+
     // TODO be able to supply ROOT or the new BASE depending on whether 
     // we're being asked to act at a root. Fix up eg in link table where 
     // we need to tolerate multiple calls at ROOT not just one at InitalBuild()
     db_walker.Walk( &actions, xlink, context, &roots[main_root_xlink], DBWalk::WIND_OUT );   
 
-    if( !incremental )
+    if( !in_parts )
     {
 		while(!de_extra_queue.empty())
 		{
@@ -144,7 +145,7 @@ void XTreeDatabase::DeleteMainTree(XLink xlink, bool incremental)
 }
 
 
-void XTreeDatabase::InsertMainTree(XLink xlink, bool incremental)
+void XTreeDatabase::InsertMainTree(XLink xlink, bool in_parts)
 {
     INDENT("i");
     
@@ -157,19 +158,19 @@ void XTreeDatabase::InsertMainTree(XLink xlink, bool incremental)
 		context = DBWalk::Context::BASE;	
 
     DBWalk::Actions actions;
-    if( incremental )
+    if( in_parts )
     {
-		actions.push_back( domain->GetInsertAction() );
 	}
 	else
 	{
+		actions.push_back( domain->GetInsertAction() );
 		actions.push_back( link_table->GetInsertAction() );
 		actions.push_back( node_table->GetInsertAction() );
 		actions.push_back( orderings->GetInsertAction() );
 	}
     db_walker.Walk( &actions, xlink, context, &roots[main_root_xlink], DBWalk::WIND_IN );
     
-    if( !incremental )
+    if( !in_parts )
     {
 		// Domain extension wants to roam around the XTree, consulting
 		// parents, children, anything really. So we need a separate pass.
