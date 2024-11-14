@@ -117,13 +117,16 @@ void XTreeDatabase::DeleteMainTree(XLink xlink, bool incremental)
 		context = DBWalk::Context::BASE;	
 	
     DBWalk::Actions actions;
-    if( !incremental )
+    if( incremental )
+    {
+		actions.push_back( domain->GetDeleteAction() );
+	}
+	else
     {
 		actions.push_back( domain_extension->GetDeleteAction() );
 		actions.push_back( orderings->GetDeleteAction() );
 		actions.push_back( node_table->GetDeleteAction() );
 		actions.push_back( link_table->GetDeleteAction() );
-		actions.push_back( domain->GetDeleteAction() );
 	}
     // TODO be able to supply ROOT or the new BASE depending on whether 
     // we're being asked to act at a root. Fix up eg in link table where 
@@ -154,9 +157,12 @@ void XTreeDatabase::InsertMainTree(XLink xlink, bool incremental)
 		context = DBWalk::Context::BASE;	
 
     DBWalk::Actions actions;
-    if( !incremental )
+    if( incremental )
     {
 		actions.push_back( domain->GetInsertAction() );
+	}
+	else
+	{
 		actions.push_back( link_table->GetInsertAction() );
 		actions.push_back( node_table->GetInsertAction() );
 		actions.push_back( orderings->GetInsertAction() );
