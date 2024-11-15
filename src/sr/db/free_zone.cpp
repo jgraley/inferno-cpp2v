@@ -98,19 +98,29 @@ void FreeZone::PopulateAll( const list<TreePtr<Node>> &child_nodes )
 	for( TreePtr<Node> child_node : child_nodes )
 	{	
 		ASSERT( it_t != GetTerminiiEnd() ); // length mismatch		
-		//it_t = MergeTerminus( it_t, move(child_zone) );		
-		
-		// Populate terminus. This will expand SubContainers. Remember that
-		// terminii are reference-like and so it's fine that we erase it.
-		(*it_t)->Populate( child_node );
-		
-		// it_t updated to the next terminus after the one we erased, or end()
-		it_t = terminii.erase( it_t );				
+		it_t = PopulateTerminus( it_t, child_node );				
 	}		
 		
 	ASSERT( it_t == GetTerminiiEnd() ); // length mismatch		
 	ASSERT( GetNumTerminii() == 0 );
 }
+
+
+FreeZone::TerminusIterator FreeZone::PopulateTerminus( TerminusIterator it_t, 
+													   TreePtr<Node> child_node )
+{
+	ASSERT( !IsEmpty() );
+	
+	// Populate terminus. This will expand SubContainers. Remember that
+	// terminii are reference-like and so it's fine that we erase it.
+	(*it_t)->Populate( child_node );
+		
+	// it_t updated to the next terminus after the one we erased, or end()
+	it_t = terminii.erase( it_t );				
+	
+	return it_t;	
+}     						     
+
 
 
 void FreeZone::MergeAll( list<unique_ptr<FreeZone>> &&child_zones ) 
@@ -137,7 +147,7 @@ void FreeZone::MergeAll( list<unique_ptr<FreeZone>> &&child_zones )
 
 
 FreeZone::TerminusIterator FreeZone::MergeTerminus( TerminusIterator it_t, 
-                                                       unique_ptr<FreeZone> &&child_zone ) 
+                                                    unique_ptr<FreeZone> &&child_zone ) 
 {
 	ASSERT( !IsEmpty() );
 	

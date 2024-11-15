@@ -115,15 +115,30 @@ TreeZone::TerminusIterator TreeZone::GetTerminiiEnd()
 
 
 void TreeZone::ReplaceWithFreeZone( FreeZone &&free_zone )
-{
-	list<TreePtr<Node>> terminus_nodes;
-    for( XLink terminus_xlink : terminii )
-		terminus_nodes.push_back( terminus_xlink.GetChildTreePtr() );
-		
+{	
     // Acts on all copies of the xlink, due to indirection, possibly including root as held by db 
     base.SetXPtr( free_zone.GetBaseNode() ); 
-
-	free_zone.PopulateAll( terminus_nodes );
+    
+	// Do a co-walk and populate one at a time. Update our terminii as we go. Cannot use 
+	// SetXPtr() because we need to change the PARENT node, so we need a whole new XLink. Do this
+	// under a validity check that all our XLins are inside the new tree.
+	// This is needed because UpdateMainTree() will pass us to InsertMainTree()
+	FreeZone::TerminusIterator it_t = free_zone.GetTerminiiBegin();	
+    for( XLink &tree_terminus_xlink : terminii )
+	{
+		ASSERT( it_t != free_zone.GetTerminiiEnd() ); // length mismatch	
+		shared_ptr<Terminus> free_terminus = *it_t;
+		
+		TreePtr<Node> boundary_node = tree_terminus_xlink.GetChildTreePtr(); // outside the zone		
+		ASSERT( !dynamic_cast<ContainerInterface *>(boundary_node.get()) ); // requirement for GetTreePtrInterface()
+		it_t = free_zone.PopulateTerminus( it_t, boundary_node );		
+		
+		TreePtr<Node> free_parent_node = free_terminus->GetParentNode();
+		const TreePtrInterface *free_tpi = free_terminus->GetTreePtrInterface(); // must be taken after the populate		
+		ASSERT( *free_tpi == boundary_node );
+		tree_terminus_xlink = XLink(free_parent_node, free_tpi);
+	} 
+	ASSERT( it_t == free_zone.GetTerminiiEnd() ); // length mismatch	
 }
 
 

@@ -85,8 +85,8 @@ void XTreeDatabase::UpdateMainTree( TreeZone target_tree_zone, FreeZone source_f
 	ASSERT( target_tree_zone.GetNumTerminii() == source_free_zone.GetNumTerminii() );	
 
     // Update database 
-    DeleteMainTree( target_tree_zone.GetBaseXLink(), true );    
-
+    DeleteMainTree( target_tree_zone.GetBaseXLink(), true );   
+    
     // Patch the tree
     target_tree_zone.ReplaceWithFreeZone( move(source_free_zone) ); 
 

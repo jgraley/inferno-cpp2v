@@ -4,9 +4,24 @@
 
 using namespace SR;
 
+// ------------------------- Terminus --------------------------    
+
+Terminus::Terminus( TreePtr<Node> parent_node_ ) :
+	parent_node( parent_node_ )
+{
+	ASSERT( parent_node );
+}	
+
+
+TreePtr<Node> Terminus::GetParentNode() const
+{
+	return parent_node;
+}
+
 // ------------------------- SingularTerminus --------------------------    
     
-SingularTerminus::SingularTerminus( TreePtrInterface *dest_tree_ptr_ ) :
+SingularTerminus::SingularTerminus( TreePtr<Node> parent_node, TreePtrInterface *dest_tree_ptr_ ) :
+    Terminus( parent_node ),
     dest_tree_ptr( dest_tree_ptr_ )
 {
 }
@@ -29,6 +44,13 @@ void SingularTerminus::Populate( TreePtr<Node> child_base,
 }
     
 
+const TreePtrInterface *SingularTerminus::GetTreePtrInterface() const
+{	
+	ASSERT( dest_tree_ptr );
+	return dest_tree_ptr;
+}  
+
+
 string SingularTerminus::GetTrace() const
 {
     return "⌾"+dest_tree_ptr->GetTypeName();
@@ -36,10 +58,13 @@ string SingularTerminus::GetTrace() const
     
 // ------------------------- ContainerTerminus --------------------------    
     
-ContainerTerminus::ContainerTerminus( ContainerInterface *dest_container_,
+ContainerTerminus::ContainerTerminus( TreePtr<Node> parent_node, 
+                                      ContainerInterface *dest_container_,
                                       ContainerInterface::iterator it_dest_placeholder_ ) :
+    Terminus( parent_node ),
     dest_container( dest_container_ ),
-    it_dest_placeholder( it_dest_placeholder_ )
+    it_dest_placeholder( it_dest_placeholder_ ),
+    it_dest_populated( dest_container->end() )
 {
     Validate();
 }
@@ -84,7 +109,7 @@ void ContainerTerminus::Populate( TreePtr<Node> child_base,
 				// Note: Kept: our container, child terminii
 				// Discarded: this terminus, child base, child container
 				shared_ptr<ContainerTerminus> child_con_terminus = FindMatchingTerminus( child_container, it_child, child_terminii );												
-				*child_con_terminus = ContainerTerminus(dest_container, it_new);							
+				*child_con_terminus = ContainerTerminus(GetParentNode(), dest_container, it_new);							
 			}
         }                                    
     }
@@ -93,6 +118,8 @@ void ContainerTerminus::Populate( TreePtr<Node> child_base,
         // Populate terminus with singular-based zone.
         ASSERT( child_base );
         dest_container->insert( it_after, child_base ); // inserts before it_after
+        it_dest_populated = it_after;
+        --it_dest_populated;
     }    
 }
 
@@ -124,7 +151,18 @@ shared_ptr<ContainerTerminus> ContainerTerminus::FindMatchingTerminus( Container
 	
 	ASSERTS( found_terminus );
 	return found_terminus;
-}                                                                       
+}                                  
+
+
+const TreePtrInterface *ContainerTerminus::GetTreePtrInterface() const
+{	
+	// Must have populated, and not with a SubContainer
+	ASSERT( it_dest_populated != dest_container->end() ); 
+	
+	const TreePtrInterface *dest_tree_ptr = &*it_dest_populated;
+	ASSERT( dest_tree_ptr );	
+	return dest_tree_ptr;
+}                                     
 
 
 void ContainerTerminus::Validate() const

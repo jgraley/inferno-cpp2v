@@ -97,7 +97,7 @@ TreePtr<Node> Duplicate::DuplicateSubtreeWorker( TreePtr<Node> source,
                     ContainerInterface::iterator dest_it = dest_container->insert( dest_terminus );
                     // NULL value was provided, so consider it a placeholder for an updater
                     if( !dest_terminus )
-                        terminus_info.updater = make_shared<ContainerTerminus>( dest_container, dest_it );
+                        terminus_info.updater = make_shared<ContainerTerminus>( dest, dest_container, dest_it );
                 }
                 else
                 {
@@ -126,7 +126,7 @@ TreePtr<Node> Duplicate::DuplicateSubtreeWorker( TreePtr<Node> source,
                 *dest_singular = dest_terminus;
                 // NULL value was provided, so consider it a placeholder for an updater
                 if( !dest_terminus )
-                    terminus_info.updater = make_shared<SingularTerminus>( dest_singular );
+                    terminus_info.updater = make_shared<SingularTerminus>( dest, dest_singular );
             }
             else
             {

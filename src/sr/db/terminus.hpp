@@ -15,8 +15,17 @@ namespace SR
 class Terminus : public Traceable
 {
 public:
+	Terminus( TreePtr<Node> parent_node_ );
+	
     virtual void Populate( TreePtr<Node> child_base,                               
                            list<shared_ptr<Terminus>> child_terminii = {} ) = 0;
+	TreePtr<Node> GetParentNode() const;
+	
+	// Only valid after populate
+	virtual const TreePtrInterface *GetTreePtrInterface() const = 0;
+
+private:
+	TreePtr<Node> parent_node;
 };    
     
 // ------------------------- SingularTerminus --------------------------    
@@ -24,9 +33,10 @@ public:
 class SingularTerminus : public Terminus
 {
 public:
-    explicit SingularTerminus( TreePtrInterface *dest_tree_ptr_ );
+    explicit SingularTerminus( TreePtr<Node> parent_node, TreePtrInterface *dest_tree_ptr_ );
     void Populate( TreePtr<Node> child_base,                               
                    list<shared_ptr<Terminus>> child_terminii = {} ) final;
+	const TreePtrInterface *GetTreePtrInterface() const final;
     
     string GetTrace() const;
 
@@ -52,7 +62,8 @@ class ContainerTerminus : public Terminus
      */  
      	
 public:
-    explicit ContainerTerminus( ContainerInterface *dest_container_,
+    explicit ContainerTerminus( TreePtr<Node> parent_node, 
+								ContainerInterface *dest_container_,
                                 ContainerInterface::iterator it_dest_placeholder_ );             
 
 	ContainerTerminus &operator=( const ContainerTerminus &other );
@@ -65,6 +76,7 @@ public:
     static shared_ptr<ContainerTerminus> FindMatchingTerminus( ContainerInterface *container,
                                                                ContainerInterface::iterator it_placeholder,
                                                                list<shared_ptr<Terminus>> &candidate_terminii );
+	const TreePtrInterface *GetTreePtrInterface() const final;
     
     void Validate() const;
     string GetTrace() const;
@@ -72,6 +84,7 @@ public:
 private:
     ContainerInterface *dest_container;
     ContainerInterface::iterator it_dest_placeholder;
+    ContainerInterface::iterator it_dest_populated;
     
     bool populated = false;
 };    
