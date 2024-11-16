@@ -122,10 +122,10 @@ void XTreeDatabase::DeleteMainTree(TreeZone zone, bool in_parts)
 		actions.push_back( domain_extension->GetDeleteAction() );
 		actions.push_back( orderings->GetDeleteAction() );
 		actions.push_back( node_table->GetDeleteAction() );
-		actions.push_back( link_table->GetDeleteAction() );
 	}
 	else
     {
+		actions.push_back( link_table->GetDeleteAction() );
 		actions.push_back( domain->GetDeleteAction() );
 	}
 
@@ -161,10 +161,10 @@ void XTreeDatabase::InsertMainTree(TreeZone zone, bool in_parts)
     if( in_parts )
     {
 		actions.push_back( domain->GetInsertAction() );
+		actions.push_back( link_table->GetInsertAction() );
 	}
 	else
 	{
-		actions.push_back( link_table->GetInsertAction() );
 		actions.push_back( node_table->GetInsertAction() );
 		actions.push_back( orderings->GetInsertAction() );
 	}
