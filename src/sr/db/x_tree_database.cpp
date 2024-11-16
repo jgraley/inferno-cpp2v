@@ -123,10 +123,10 @@ void XTreeDatabase::DeleteMainTree(TreeZone zone, bool in_parts)
 		actions.push_back( orderings->GetDeleteAction() );
 		actions.push_back( node_table->GetDeleteAction() );
 		actions.push_back( link_table->GetDeleteAction() );
-		actions.push_back( domain->GetDeleteAction() );
 	}
 	else
     {
+		actions.push_back( domain->GetDeleteAction() );
 	}
 
     // TODO be able to supply ROOT or the new BASE depending on whether 
@@ -160,10 +160,10 @@ void XTreeDatabase::InsertMainTree(TreeZone zone, bool in_parts)
     DBWalk::Actions actions;
     if( in_parts )
     {
+		actions.push_back( domain->GetInsertAction() );
 	}
 	else
 	{
-		actions.push_back( domain->GetInsertAction() );
 		actions.push_back( link_table->GetInsertAction() );
 		actions.push_back( node_table->GetInsertAction() );
 		actions.push_back( orderings->GetInsertAction() );
