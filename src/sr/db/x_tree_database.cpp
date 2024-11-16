@@ -76,7 +76,7 @@ void XTreeDatabase::PreUpdateMainTree( const TreeZone &target_tree_zone )
 	target_tree_zone.DBCheck(this); // Move back to UpdateMainTree once this is empty
         
     // Update database 
-    DeleteMainTree( target_tree_zone.GetBaseXLink(), false );    
+    DeleteMainTree( target_tree_zone, false );    
 }
 
 
@@ -85,13 +85,13 @@ void XTreeDatabase::UpdateMainTree( TreeZone target_tree_zone, FreeZone source_f
 	ASSERT( target_tree_zone.GetNumTerminii() == source_free_zone.GetNumTerminii() );	
 
     // Update database 
-    DeleteMainTree( target_tree_zone.GetBaseXLink(), true );   
+    DeleteMainTree( target_tree_zone, true );   
     
     // Patch the tree
     target_tree_zone.ReplaceWithFreeZone( move(source_free_zone) ); 
 
     // Update database 
-    InsertMainTree( target_tree_zone.GetBaseXLink(), true );   	
+    InsertMainTree( target_tree_zone, true );   	
 }
 
 
@@ -100,18 +100,18 @@ void XTreeDatabase::PostUpdateMainTree( const TreeZone &target_tree_zone )
 	ASSERT( target_tree_zone.GetNumTerminii() == 0 ); // Should be everything
 
     // Update database 
-    InsertMainTree( target_tree_zone.GetBaseXLink(), false );   	
+    InsertMainTree( target_tree_zone, false );   	
 }
 
 
-void XTreeDatabase::DeleteMainTree(XLink xlink, bool in_parts)
+void XTreeDatabase::DeleteMainTree(TreeZone zone, bool in_parts)
 {
     INDENT("d");
 
     ASSERT( de_extra_queue.empty() );
 
 	DBWalk::Context context;
-	if( xlink == main_root_xlink ) 	
+	if( zone.GetBaseXLink() == main_root_xlink ) 	
 		context = DBWalk::Context::ROOT;
 	else
 		context = DBWalk::Context::BASE;	
@@ -132,7 +132,7 @@ void XTreeDatabase::DeleteMainTree(XLink xlink, bool in_parts)
     // TODO be able to supply ROOT or the new BASE depending on whether 
     // we're being asked to act at a root. Fix up eg in link table where 
     // we need to tolerate multiple calls at ROOT not just one at InitalBuild()
-    db_walker.Walk( &actions, xlink, context, &roots[main_root_xlink], DBWalk::WIND_OUT );   
+    db_walker.Walk( &actions, zone.GetBaseXLink(), context, &roots[main_root_xlink], DBWalk::WIND_OUT );   
 
     if( !in_parts )
     {
@@ -145,14 +145,14 @@ void XTreeDatabase::DeleteMainTree(XLink xlink, bool in_parts)
 }
 
 
-void XTreeDatabase::InsertMainTree(XLink xlink, bool in_parts)
+void XTreeDatabase::InsertMainTree(TreeZone zone, bool in_parts)
 {
     INDENT("i");
     
     ASSERT( de_extra_queue.empty() );
     
 	DBWalk::Context context;
-	if( xlink == main_root_xlink ) 	
+	if( zone.GetBaseXLink() == main_root_xlink ) 	
 		context = DBWalk::Context::ROOT;
 	else
 		context = DBWalk::Context::BASE;	
@@ -168,7 +168,7 @@ void XTreeDatabase::InsertMainTree(XLink xlink, bool in_parts)
 		actions.push_back( node_table->GetInsertAction() );
 		actions.push_back( orderings->GetInsertAction() );
 	}
-    db_walker.Walk( &actions, xlink, context, &roots[main_root_xlink], DBWalk::WIND_IN );
+    db_walker.Walk( &actions, zone.GetBaseXLink(), context, &roots[main_root_xlink], DBWalk::WIND_IN );
     
     if( !in_parts )
     {
@@ -176,7 +176,7 @@ void XTreeDatabase::InsertMainTree(XLink xlink, bool in_parts)
 		// parents, children, anything really. So we need a separate pass.
 		DBWalk::Actions actions2;
 		actions2.push_back( domain_extension->GetInsertAction());
-		db_walker.Walk( &actions2, xlink, context, &roots[main_root_xlink], DBWalk::WIND_IN );
+		db_walker.Walk( &actions2, zone.GetBaseXLink(), context, &roots[main_root_xlink], DBWalk::WIND_IN );
 	
 		while(!de_extra_queue.empty())
 		{

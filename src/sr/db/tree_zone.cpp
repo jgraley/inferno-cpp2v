@@ -102,13 +102,13 @@ FreeZone TreeZone::Duplicate() const
 }
 
 
-TreeZone::TerminusIterator TreeZone::GetTerminiiBegin()
+TreeZone::TerminusIterator TreeZone::GetTerminiiBegin() const
 {
 	return terminii.begin();
 }
 
 
-TreeZone::TerminusIterator TreeZone::GetTerminiiEnd()
+TreeZone::TerminusIterator TreeZone::GetTerminiiEnd() const
 {
 	return terminii.end();
 }

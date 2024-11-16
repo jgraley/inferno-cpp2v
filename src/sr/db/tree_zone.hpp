@@ -24,7 +24,7 @@ class FreeZone;
 class TreeZone : public Zone
 { 
 public:
-	typedef vector<XLink>::iterator TerminusIterator;
+	typedef vector<XLink>::const_iterator TerminusIterator;
 
     static TreeZone CreateSubtree( XLink base );
     static TreeZone CreateEmpty( XLink base );
@@ -42,8 +42,8 @@ public:
 
     FreeZone Duplicate() const;
     
-    TerminusIterator GetTerminiiBegin();
-    TerminusIterator GetTerminiiEnd();
+    TerminusIterator GetTerminiiBegin() const;
+    TerminusIterator GetTerminiiEnd() const;
     
     void ReplaceWithFreeZone( FreeZone &&free_zone );
 

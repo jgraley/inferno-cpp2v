@@ -4,6 +4,7 @@
 #include "../link.hpp"
 #include "common/standard.hpp"
 #include "db_common.hpp"
+#include "tree_zone.hpp"
 
 namespace SR 
 {
@@ -37,7 +38,8 @@ public:
         const TreePtrInterface *p_x;
         XLink xlink;
         TreePtr<Node> x;
-        const DBCommon::RootRecord *root_record;        
+        const DBCommon::RootRecord *root_record;   
+        bool terminus;     
 	};
 
 	typedef function<void (const WalkInfo &)> Action;
@@ -48,13 +50,19 @@ public:
                Context base_context,
                const DBCommon::RootRecord *root_record,
                Wind wind );
+    void Walk( const Actions *actions,
+               TreeZone zone,
+               Context base_context,
+               const DBCommon::RootRecord *root_record,
+               Wind wind );
 private:
     struct WalkKit
     {
         const Actions *actions;
-        XLink base_xlink;
+        TreeZone zone;
 		const DBCommon::RootRecord *root_record;        
 		Wind wind;
+		mutable TreeZone::TerminusIterator next_terminus_it;
     };
 
     void VisitBase( const WalkKit &kit, 
@@ -72,7 +80,7 @@ private:
                           XLink xlink,
                           int item_ordinal );
     void VisitLink( const WalkKit &kit, 
-                    const WalkInfo &walk_info );
+                    WalkInfo &&walk_info );
     void VisitItemise( const WalkKit &kit, 
                        XLink xlink );
 };    

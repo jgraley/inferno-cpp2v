@@ -40,8 +40,8 @@ public:
 
     void PostUpdateMainTree( const TreeZone &target_tree_zone );
 		
-    void DeleteMainTree(XLink xlink, bool in_parts);
-    void InsertMainTree(XLink xlink, bool in_parts);
+    void DeleteMainTree(TreeZone zone, bool in_parts);
+    void InsertMainTree(TreeZone zone, bool in_parts);
 
     void DeleteExtraTree(XLink xlink);
     void InsertExtraTree(XLink xlink);

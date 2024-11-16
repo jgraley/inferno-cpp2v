@@ -8,15 +8,26 @@ void DBWalk::Walk( const Actions *actions,
                    const DBCommon::RootRecord *root_record, 
                    Wind wind )
 {
-    WalkKit kit { actions, base_xlink, root_record, wind };
+    Walk( actions, TreeZone::CreateSubtree(base_xlink), base_context, root_record, wind );
+}
+
+
+void DBWalk::Walk( const Actions *actions,
+                   TreeZone zone,
+                   Context base_context,
+                   const DBCommon::RootRecord *root_record, 
+                   Wind wind )
+{
+    WalkKit kit { actions, zone, root_record, wind, zone.GetTerminiiBegin() };
 	VisitBase( kit, base_context );  
+	ASSERT( kit.next_terminus_it == kit.zone.GetTerminiiEnd() ); // should have visited all the terminii
 }
 
 
 void DBWalk::VisitBase( const WalkKit &kit,                         
                         Context context )
 {
-    XLink base_xlink = kit.base_xlink;
+    XLink base_xlink = kit.zone.GetBaseXLink();
     VisitLink( kit, 
              { TreePtr<Node>(), 
                -1,
@@ -28,7 +39,8 @@ void DBWalk::VisitBase( const WalkKit &kit,
                base_xlink.GetTreePtrInterface(), 
                base_xlink, 
                base_xlink.GetChildTreePtr(),
-               kit.root_record } );
+               kit.root_record,
+               false } );
 }
 
 
@@ -59,7 +71,8 @@ void DBWalk::VisitSingular( const WalkKit &kit,
                p_x_singular, 
                child_xlink, 
                child_xlink.GetChildTreePtr(),
-               kit.root_record } ); 
+               kit.root_record,
+               false } ); 
 }
 
 
@@ -87,7 +100,8 @@ void DBWalk::VisitSequence( const WalkKit &kit,
                    &*xit, 
                    child_xlink, 
                    child_xlink.GetChildTreePtr(),
-                   kit.root_record } );
+                   kit.root_record,
+                   false } );
         xit_predecessor = xit;
         i++;
     }
@@ -117,24 +131,31 @@ void DBWalk::VisitCollection( const WalkKit &kit,
                    &*xit, 
                    child_xlink, 
                    child_xlink.GetChildTreePtr(),
-                   kit.root_record } ); // should be child_xlink's child
+                   kit.root_record,
+                   false } ); // should be child_xlink's child
         i++;
     }
 }
 
 
 void DBWalk::VisitLink( const WalkKit &kit, 
-                        const WalkInfo &walk_info ) // .x should be .xlink's child
+                        WalkInfo &&walk_info ) // .x should be .xlink's child
 {
     INDENT(".");            
     TRACE("Visiting link ")(walk_info.xlink)("\n");    
-            
+                
+	walk_info.terminus = (kit.next_terminus_it != kit.zone.GetTerminiiEnd() &&
+	                 walk_info.xlink == *(kit.next_terminus_it));
+	if( walk_info.terminus )
+		++(kit.next_terminus_it);
+      
     if( kit.wind == WIND_IN )
 		for( Action action : *(kit.actions) )
 			action(walk_info);
             
-    // Recurse into our child nodes
-    VisitItemise( kit, walk_info.xlink ); 
+    // Recurse into our child nodes but stop at terminii
+    if( !walk_info.terminus )
+		VisitItemise( kit, walk_info.xlink ); 
 
     if( kit.wind == WIND_OUT )
 		for( Action action : *(kit.actions) )
