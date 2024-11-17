@@ -45,7 +45,7 @@ DBWalk::Action Orderings::GetDeleteAction()
         // sufficient: what is ancestor of base is ancestor of every node in
         // the zone. If we act at root, there won't be any.
         XLink ancestor_xlink = walk_info.xlink;
-        if( walk_info.context==DBWalk::BASE ) // at base 
+        if( walk_info.base ) // at base 
         {
             while( ancestor_xlink = db->TryGetParentXLink(ancestor_xlink) )
             {
@@ -71,7 +71,7 @@ DBWalk::Action Orderings::GetInsertAction()
         // sufficient: what is ancestor of base is ancestor of every node in
         // the zone. If we act at root, there won't be any.
         XLink ancestor_xlink = walk_info.xlink;
-        if( walk_info.context==DBWalk::BASE ) // at base
+        if( walk_info.base ) // at base
         {
             while( ancestor_xlink = db->TryGetParentXLink(ancestor_xlink) )
             {

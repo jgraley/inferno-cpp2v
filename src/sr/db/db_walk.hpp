@@ -16,7 +16,7 @@ public:
     enum Context
     {
         ROOT,
-        BASE,
+        LEGACY_BASE,
         SINGULAR,
         IN_SEQUENCE,
         IN_COLLECTION
@@ -43,6 +43,7 @@ public:
         
         const DBCommon::RootRecord *root_record;   
         bool terminus;     
+        bool base;
 	};
 
 	typedef function<void (const WalkInfo &)> Action;

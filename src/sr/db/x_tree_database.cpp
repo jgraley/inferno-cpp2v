@@ -117,7 +117,7 @@ void XTreeDatabase::DeleteMainTree(TreeZone zone, bool in_parts, const LinkTable
 	if( zone.GetBaseXLink() == main_root_xlink ) 	
 		context = DBWalk::Context::ROOT;
 	else
-		context = DBWalk::Context::BASE;	
+		context = DBWalk::Context::LEGACY_BASE;	
 	
     DBWalk::Actions actions;
     if( !in_parts )
@@ -158,7 +158,7 @@ void XTreeDatabase::InsertMainTree(TreeZone zone, bool in_parts, const LinkTable
 	if( zone.GetBaseXLink() == main_root_xlink ) 	
 		context = DBWalk::Context::ROOT;
 	else
-		context = DBWalk::Context::BASE;	
+		context = DBWalk::Context::LEGACY_BASE;	// TODO when full incremental and in-parts, should be able to drop LEGACY_BASE
 
     DBWalk::Actions actions;
     if( in_parts )

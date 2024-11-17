@@ -45,7 +45,8 @@ void DBWalk::VisitBase( const WalkKit &kit,
 					  base_xlink, 
 					  base_xlink.GetChildTreePtr(),
 					  kit.root_record,
-					  false };
+					  false,
+					  true };
 	else
 		walk_info = { TreePtr<Node>(), 
 					  -1,
@@ -58,7 +59,8 @@ void DBWalk::VisitBase( const WalkKit &kit,
 					  base_xlink, 
 					  base_xlink.GetChildTreePtr(),
 					  kit.root_record,
-					  false };
+					  false,
+					  true };
 
     VisitLink( kit, move(walk_info) );
 }
@@ -92,6 +94,7 @@ void DBWalk::VisitSingular( const WalkKit &kit,
                child_xlink, 
                child_xlink.GetChildTreePtr(),
                kit.root_record,
+               false,
                false } ); 
 }
 
@@ -121,6 +124,7 @@ void DBWalk::VisitSequence( const WalkKit &kit,
                    child_xlink, 
                    child_xlink.GetChildTreePtr(),
                    kit.root_record,
+                   false,
                    false } );
         xit_predecessor = xit;
         i++;
@@ -152,7 +156,8 @@ void DBWalk::VisitCollection( const WalkKit &kit,
                    child_xlink, 
                    child_xlink.GetChildTreePtr(),
                    kit.root_record,
-                   false } ); // should be child_xlink's child
+                   false,
+				   false } ); // should be child_xlink's child
         i++;
     }
 }
