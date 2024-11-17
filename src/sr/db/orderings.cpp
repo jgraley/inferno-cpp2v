@@ -35,6 +35,9 @@ DBWalk::Action Orderings::GetDeleteAction()
 {	
 	return [=](const DBWalk::WalkInfo &walk_info)
 	{
+		if( walk_info.terminus )
+			return;
+
 		TRACE("Erasing from orderings ")(walk_info.xlink)("\n");
 		EraseSolo( category_ordering, walk_info.xlink );       
 
@@ -62,6 +65,9 @@ DBWalk::Action Orderings::GetInsertAction()
 {
 	return [=](const DBWalk::WalkInfo &walk_info)
 	{ 
+		if( walk_info.terminus )
+			return;
+		
         InsertSolo( category_ordering, walk_info.xlink );
 
 		InsertSolo( simple_compare_ordering, walk_info.xlink );		

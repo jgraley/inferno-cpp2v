@@ -21,7 +21,7 @@
 //   - Move DBCheck back to Update
 // Factor out LinkContext from link row and walk info. 
 //   - It's defined in DBWalk but acts as a base for both WalkInfo and LinkTable::Row
-
+// Drop -ui arg
 
 namespace SR 
 {    
