@@ -16,6 +16,13 @@
 
 //#define DB_ENABLE_COMPARATIVE_TEST
 
+// TODO: drop trace and thin out asserts on queues
+// Drop Pre and Post and in_parts
+//   - Move DBCheck back to Update
+// Factor out LinkContext from link row and walk info. 
+//   - It's defined in DBWalk but acts as a base for both WalkInfo and LinkTable::Row
+
+
 namespace SR 
 {    
       
@@ -89,7 +96,8 @@ private:
     DBWalk db_walker;
     DBCommon::RootOrdinal next_root_ordinal;
         
-    queue<XLink> de_extra_queue;
+    queue<XLink> de_extra_insert_queue;
+    queue<XLink> de_extra_delete_queue;
 };    
     
 };

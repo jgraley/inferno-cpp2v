@@ -10,6 +10,7 @@ using namespace std;
 #include <list>
 #include <set>
 #include <map>
+#include <queue>
 #include <unordered_set>
 #include <unordered_map>
 #include <exception>
@@ -127,6 +128,19 @@ string Trace(const vector<T, A> &v)
     list<string> elts;
     for( int i=0; i<v.size(); i++ )
         elts.push_back( Trace(v.at(i)) );
+    return Join( elts, CONTAINER_SEP, "[", "]" );
+}
+
+
+template<typename T, class C>
+string Trace(queue<T, C> q)  // By value!!
+{
+    list<string> elts;
+    while( !q.empty() )
+    {
+        elts.push_back( Trace(q.front()) );
+        q.pop();
+	}
     return Join( elts, CONTAINER_SEP, "[", "]" );
 }
 
