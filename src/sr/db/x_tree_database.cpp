@@ -124,10 +124,10 @@ void XTreeDatabase::DeleteMainTree(TreeZone zone, bool in_parts, const LinkTable
     {
 		actions.push_back( domain_extension->GetDeleteAction() );
 		actions.push_back( orderings->GetDeleteAction() );
-		actions.push_back( node_table->GetDeleteAction() );
 	}
 	else
     {
+		actions.push_back( node_table->GetDeleteAction() );
 		actions.push_back( link_table->GetDeleteAction() );
 		actions.push_back( domain->GetDeleteAction() );
 	}
@@ -165,10 +165,10 @@ void XTreeDatabase::InsertMainTree(TreeZone zone, bool in_parts, const LinkTable
     {
 		actions.push_back( domain->GetInsertAction() );
 		actions.push_back( link_table->GetInsertAction() );
+		actions.push_back( node_table->GetInsertAction() );
 	}
 	else
 	{
-		actions.push_back( node_table->GetInsertAction() );
 		actions.push_back( orderings->GetInsertAction() );
 	}
     db_walker.Walk( &actions, zone.GetBaseXLink(), context, &roots[main_root_xlink], DBWalk::WIND_IN, base_link_row );
