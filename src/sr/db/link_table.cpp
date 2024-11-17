@@ -27,7 +27,7 @@ bool LinkTable::HasRow(XLink xlink) const
     return rows.count(xlink.GetTreePtrInterface()) > 0;
 }
 
-
+ 
 DBWalk::Action LinkTable::GetInsertAction()
 {
 	return [=](const DBWalk::WalkInfo &walk_info)
@@ -89,7 +89,9 @@ void LinkTable::GenerateRow(const DBWalk::WalkInfo &walk_info)
 		{
 			row.parent_node = walk_info.parent_x;
 			row.item_ordinal = walk_info.item_ordinal;
-			row.my_container_it = walk_info.xit;        
+			row.p_xcon = walk_info.p_xcon;
+			row.my_container_it_predecessor = walk_info.xit_predecessor;
+			row.my_container_it = walk_info.xit;     
 			row.my_container_front = XLink( walk_info.parent_x, &walk_info.p_xcon->front() );
 			row.my_container_back = XLink( walk_info.parent_x, &walk_info.p_xcon->back() );
 			row.container_ordinal = walk_info.container_ordinal;
@@ -109,6 +111,8 @@ void LinkTable::GenerateRow(const DBWalk::WalkInfo &walk_info)
 		{
 			row.parent_node = walk_info.parent_x;
 			row.item_ordinal = walk_info.item_ordinal;
+			row.p_xcon = walk_info.p_xcon;
+			row.my_container_it_predecessor = walk_info.xit_predecessor;
 			row.my_container_it = walk_info.xit;
 			row.my_container_front = XLink( walk_info.parent_x, &*(walk_info.p_xcon->begin()) );
 			// Note: in real STL containers, one would use *(x_col->rbegin())
@@ -132,7 +136,7 @@ void LinkTable::GenerateRow(const DBWalk::WalkInfo &walk_info)
 }
 
 
-string LinkTable::Row::GetTrace() const
+string LinkTableRow::GetTrace() const
 {
     string s = "(cc=";
 

@@ -1,4 +1,5 @@
 #include "db_walk.hpp"
+#include "link_table.hpp"
 
 using namespace SR;    
 
@@ -6,9 +7,10 @@ void DBWalk::Walk( const Actions *actions,
                    XLink base_xlink,
                    Context base_context,
                    const DBCommon::RootRecord *root_record, 
-                   Wind wind )
+                   Wind wind,
+                   const LinkTable::Row *base_link_row )
 {
-    Walk( actions, TreeZone::CreateSubtree(base_xlink), base_context, root_record, wind );
+    Walk( actions, TreeZone::CreateSubtree(base_xlink), base_context, root_record, wind, base_link_row );
 }
 
 
@@ -16,31 +18,49 @@ void DBWalk::Walk( const Actions *actions,
                    TreeZone zone,
                    Context base_context,
                    const DBCommon::RootRecord *root_record, 
-                   Wind wind )
+                   Wind wind,
+                   const LinkTable::Row *base_link_row )
 {
     WalkKit kit { actions, zone, root_record, wind, zone.GetTerminiiBegin() };
-	VisitBase( kit, base_context );  
+	VisitBase( kit, base_context, base_link_row );  
 	ASSERT( kit.next_terminus_it == kit.zone.GetTerminiiEnd() ); // should have visited all the terminii
 }
 
 
 void DBWalk::VisitBase( const WalkKit &kit,                         
-                        Context context )
+                        Context context,
+                        const LinkTable::Row *base_link_row )
 {
     XLink base_xlink = kit.zone.GetBaseXLink();
-    VisitLink( kit, 
-             { TreePtr<Node>(), 
-               -1,
-               context,	 
-               nullptr,
-               -1,
-               ContainerInterface::iterator(), 
-               ContainerInterface::iterator(),
-               base_xlink.GetTreePtrInterface(), 
-               base_xlink, 
-               base_xlink.GetChildTreePtr(),
-               kit.root_record,
-               false } );
+	WalkInfo walk_info;
+	if( base_link_row )
+		walk_info = { base_link_row->parent_node, 
+					  base_link_row->item_ordinal,
+					  base_link_row->containment_context,	 
+					  base_link_row->p_xcon,
+					  base_link_row->container_ordinal,
+					  base_link_row->my_container_it_predecessor, 
+					  base_link_row->my_container_it,
+					  base_xlink.GetTreePtrInterface(), 
+					  base_xlink, 
+					  base_xlink.GetChildTreePtr(),
+					  kit.root_record,
+					  false };
+	else
+		walk_info = { TreePtr<Node>(), 
+					  -1,
+					  context,	 
+					  nullptr,
+					  -1,
+					  ContainerInterface::iterator(), 
+					  ContainerInterface::iterator(),
+					  base_xlink.GetTreePtrInterface(), 
+					  base_xlink, 
+					  base_xlink.GetChildTreePtr(),
+					  kit.root_record,
+					  false };
+
+    VisitLink( kit, move(walk_info) );
 }
 
 

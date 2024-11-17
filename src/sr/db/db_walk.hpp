@@ -8,6 +8,8 @@
 
 namespace SR 
 {
+class LinkTableRow;
+
 class DBWalk
 {   
 public:
@@ -38,6 +40,7 @@ public:
         const TreePtrInterface *p_x;
         XLink xlink;
         TreePtr<Node> x;
+        
         const DBCommon::RootRecord *root_record;   
         bool terminus;     
 	};
@@ -49,12 +52,14 @@ public:
                XLink base_xlink,
                Context base_context,
                const DBCommon::RootRecord *root_record,
-               Wind wind );
+               Wind wind,
+               const LinkTableRow *base_link_row );
     void Walk( const Actions *actions,
                TreeZone zone,
                Context base_context,
                const DBCommon::RootRecord *root_record,
-               Wind wind );
+               Wind wind,
+               const LinkTableRow *base_link_row );
 private:
     struct WalkKit
     {
@@ -66,7 +71,8 @@ private:
     };
 
     void VisitBase( const WalkKit &kit, 
-                    Context context );
+                    Context context,
+                    const LinkTableRow *base_link_row );
     void VisitSingular( const WalkKit &kit, 
                         const TreePtrInterface *p_x_singular, 
                         XLink xlink,
