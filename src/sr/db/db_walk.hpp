@@ -42,8 +42,8 @@ public:
         TreePtr<Node> x;
         
         const DBCommon::RootRecord *root_record;   
-        bool terminus;     
-        bool base;
+        bool at_terminus;     
+        bool at_base;
 	};
 
 	typedef function<void (const WalkInfo &)> Action;

@@ -35,7 +35,7 @@ DBWalk::Action Orderings::GetDeleteAction()
 {	
 	return [=](const DBWalk::WalkInfo &walk_info)
 	{
-		if( walk_info.terminus )
+		if( walk_info.at_terminus )
 			return;
 
 		TRACE("Erasing from orderings ")(walk_info.xlink)("\n");
@@ -48,7 +48,7 @@ DBWalk::Action Orderings::GetDeleteAction()
         // sufficient: what is ancestor of base is ancestor of every node in
         // the zone. If we act at root, there won't be any.
         XLink ancestor_xlink = walk_info.xlink;
-        if( walk_info.base ) // at base 
+        if( walk_info.at_base ) // at base 
         {
             while( ancestor_xlink = db->TryGetParentXLink(ancestor_xlink) )
             {
@@ -65,7 +65,7 @@ DBWalk::Action Orderings::GetInsertAction()
 {
 	return [=](const DBWalk::WalkInfo &walk_info)
 	{ 
-		if( walk_info.terminus )
+		if( walk_info.at_terminus )
 			return;
 		
         InsertSolo( category_ordering, walk_info.xlink );
@@ -77,7 +77,7 @@ DBWalk::Action Orderings::GetInsertAction()
         // sufficient: what is ancestor of base is ancestor of every node in
         // the zone. If we act at root, there won't be any.
         XLink ancestor_xlink = walk_info.xlink;
-        if( walk_info.base ) // at base
+        if( walk_info.at_base ) // at base
         {
             while( ancestor_xlink = db->TryGetParentXLink(ancestor_xlink) )
             {
