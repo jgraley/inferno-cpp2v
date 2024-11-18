@@ -1,34 +1,34 @@
-#include "terminus.hpp"
+#include "free_terminus.hpp"
 
 #include "helpers/flatten.hpp"
 
 using namespace SR;
 
-// ------------------------- Terminus --------------------------    
+// ------------------------- FreeTerminus --------------------------    
 
-Terminus::Terminus( TreePtr<Node> parent_node_ ) :
+FreeTerminus::FreeTerminus( TreePtr<Node> parent_node_ ) :
 	parent_node( parent_node_ )
 {
 	ASSERT( parent_node );
 }	
 
 
-TreePtr<Node> Terminus::GetParentNode() const
+TreePtr<Node> FreeTerminus::GetParentNode() const
 {
 	return parent_node;
 }
 
-// ------------------------- SingularTerminus --------------------------    
+// ------------------------- FreeSingularTerminus --------------------------    
     
-SingularTerminus::SingularTerminus( TreePtr<Node> parent_node, TreePtrInterface *dest_tree_ptr_ ) :
-    Terminus( parent_node ),
+FreeSingularTerminus::FreeSingularTerminus( TreePtr<Node> parent_node, TreePtrInterface *dest_tree_ptr_ ) :
+    FreeTerminus( parent_node ),
     dest_tree_ptr( dest_tree_ptr_ )
 {
 }
 
 
-void SingularTerminus::Populate( TreePtr<Node> child_base, 
-                                 list<shared_ptr<Terminus>> child_terminii )
+void FreeSingularTerminus::Populate( TreePtr<Node> child_base, 
+                                 list<shared_ptr<FreeTerminus>> child_terminii )
 {
 	ASSERT( child_base ); // perhaps we tried to populate with an empty zone?
 
@@ -44,24 +44,24 @@ void SingularTerminus::Populate( TreePtr<Node> child_base,
 }
     
 
-const TreePtrInterface *SingularTerminus::GetTreePtrInterface() const
+const TreePtrInterface *FreeSingularTerminus::GetTreePtrInterface() const
 {	
 	ASSERT( dest_tree_ptr );
 	return dest_tree_ptr;
 }  
 
 
-string SingularTerminus::GetTrace() const
+string FreeSingularTerminus::GetTrace() const
 {
     return "⌾"+dest_tree_ptr->GetTypeName();
 }
     
-// ------------------------- ContainerTerminus --------------------------    
+// ------------------------- FreeContainerTerminus --------------------------    
     
-ContainerTerminus::ContainerTerminus( TreePtr<Node> parent_node, 
+FreeContainerTerminus::FreeContainerTerminus( TreePtr<Node> parent_node, 
                                       ContainerInterface *dest_container_,
                                       ContainerInterface::iterator it_dest_placeholder_ ) :
-    Terminus( parent_node ),
+    FreeTerminus( parent_node ),
     dest_container( dest_container_ ),
     it_dest_placeholder( it_dest_placeholder_ ),
     it_dest_populated( dest_container->end() )
@@ -70,7 +70,7 @@ ContainerTerminus::ContainerTerminus( TreePtr<Node> parent_node,
 }
 
 
-ContainerTerminus &ContainerTerminus::operator=( const ContainerTerminus &other )
+FreeContainerTerminus &FreeContainerTerminus::operator=( const FreeContainerTerminus &other )
 {
 	dest_container = other.dest_container;
 	it_dest_placeholder = other.it_dest_placeholder;
@@ -79,8 +79,8 @@ ContainerTerminus &ContainerTerminus::operator=( const ContainerTerminus &other 
 }
 
 
-void ContainerTerminus::Populate( TreePtr<Node> child_base, 
-                                  list<shared_ptr<Terminus>> child_terminii )
+void FreeContainerTerminus::Populate( TreePtr<Node> child_base, 
+                                  list<shared_ptr<FreeTerminus>> child_terminii )
 {
 	ASSERT( child_base ); // perhaps we tried to populate with an empty zone?
     ASSERT( !populated );
@@ -103,13 +103,13 @@ void ContainerTerminus::Populate( TreePtr<Node> child_base,
 			if( child_element == MakePlaceholder() ) 
 			{
 				// If child_element is a placeholder, the child FZ terminates immediately at this element.
-				// So child_element *IS* the placeholder of that FZ's Terminus instance and child_container IS
+				// So child_element *IS* the placeholder of that FZ's FreeTerminus instance and child_container IS
 				// the FZ base container. We need to build a new terminus for the FZ that uses our dest 
 				// container because that's what will be kept.
 				// Note: Kept: our container, child terminii
 				// Discarded: this terminus, child base, child container
-				shared_ptr<ContainerTerminus> child_con_terminus = FindMatchingTerminus( child_container, it_child, child_terminii );												
-				*child_con_terminus = ContainerTerminus(GetParentNode(), dest_container, it_new);							
+				shared_ptr<FreeContainerTerminus> child_con_terminus = FindMatchingTerminus( child_container, it_child, child_terminii );												
+				*child_con_terminus = FreeContainerTerminus(GetParentNode(), dest_container, it_new);							
 			}
         }                                    
     }
@@ -124,21 +124,21 @@ void ContainerTerminus::Populate( TreePtr<Node> child_base,
 }
 
 
-TreePtr<Node> ContainerTerminus::MakePlaceholder()
+TreePtr<Node> FreeContainerTerminus::MakePlaceholder()
 {
     return TreePtr<Node>(); // It's just a NULL tree ptr!
 }
 
 
-shared_ptr<ContainerTerminus> ContainerTerminus::FindMatchingTerminus( ContainerInterface *container,
+shared_ptr<FreeContainerTerminus> FreeContainerTerminus::FindMatchingTerminus( ContainerInterface *container,
                                                                        ContainerInterface::iterator it_placeholder,
-                                                                       list<shared_ptr<Terminus>> &candidate_terminii )
+                                                                       list<shared_ptr<FreeTerminus>> &candidate_terminii )
 {
-	shared_ptr<ContainerTerminus> found_terminus;
+	shared_ptr<FreeContainerTerminus> found_terminus;
 
-	for( shared_ptr<Terminus> candidate_terminus : candidate_terminii )
+	for( shared_ptr<FreeTerminus> candidate_terminus : candidate_terminii )
 	{
-		if( auto candidate_container_terminus = dynamic_pointer_cast<ContainerTerminus>( candidate_terminus ) ) 
+		if( auto candidate_container_terminus = dynamic_pointer_cast<FreeContainerTerminus>( candidate_terminus ) ) 
 		{						
 			if( candidate_container_terminus->dest_container == container && 
 				candidate_container_terminus->it_dest_placeholder == it_placeholder )
@@ -154,7 +154,7 @@ shared_ptr<ContainerTerminus> ContainerTerminus::FindMatchingTerminus( Container
 }                                  
 
 
-const TreePtrInterface *ContainerTerminus::GetTreePtrInterface() const
+const TreePtrInterface *FreeContainerTerminus::GetTreePtrInterface() const
 {	
 	// Must have populated, and not with a SubContainer
 	ASSERT( it_dest_populated != dest_container->end() ); 
@@ -165,7 +165,7 @@ const TreePtrInterface *ContainerTerminus::GetTreePtrInterface() const
 }                                     
 
 
-void ContainerTerminus::Validate() const
+void FreeContainerTerminus::Validate() const
 {	
     // important invariant: placeholder iterator must point to a member in the destination container
     ASSERT( it_dest_placeholder != dest_container->end() );
@@ -179,7 +179,7 @@ void ContainerTerminus::Validate() const
 }
 
 
-string ContainerTerminus::GetTrace() const
+string FreeContainerTerminus::GetTrace() const
 {
 	int i=-1;
     for( ContainerInterface::iterator it=dest_container->begin(); it!=dest_container->end(); ++it )

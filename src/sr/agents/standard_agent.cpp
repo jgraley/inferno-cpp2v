@@ -653,8 +653,8 @@ Agent::ReplaceExprPtr StandardAgent::GenFreeZoneExprOverlay( const ReplaceKit &k
 				for( const TreePtrInterface &my_elt : *my_con )
 				{
 					// Make a placeholder in the dest container for the updater to point to
-					ContainerInterface::iterator dest_it = dest_con->insert( ContainerTerminus::MakePlaceholder() );
-					zone.AddTerminus( make_shared<ContainerTerminus>(dest, dest_con, dest_it) );     
+					ContainerInterface::iterator dest_it = dest_con->insert( FreeContainerTerminus::MakePlaceholder() );
+					zone.AddTerminus( make_shared<FreeContainerTerminus>(dest, dest_con, dest_it) );     
 					
 					ASSERT( my_elt )("Some element of member %d (", j)(*my_con)(") of ")(*this)(" was nullptr\n");
 					TRACE("Got ")(*my_elt)("\n");
@@ -668,8 +668,8 @@ Agent::ReplaceExprPtr StandardAgent::GenFreeZoneExprOverlay( const ReplaceKit &k
 				for( const TreePtrInterface &under_elt : *under_container )
 				{
 					// Make a placeholder in the dest container for the updater to point to
-					ContainerInterface::iterator dest_it = dest_con->insert( ContainerTerminus::MakePlaceholder() );
-					zone.AddTerminus( make_shared<ContainerTerminus>(dest, dest_con, dest_it) );     
+					ContainerInterface::iterator dest_it = dest_con->insert( FreeContainerTerminus::MakePlaceholder() );
+					zone.AddTerminus( make_shared<FreeContainerTerminus>(dest, dest_con, dest_it) );     
 
 					ASSERT( under_elt ); // present simplified scheme disallows nullptr
 					TreeZone under_zone = TreeZone::CreateSubtree(XLink(under_node, &under_elt) );
@@ -681,7 +681,7 @@ Agent::ReplaceExprPtr StandardAgent::GenFreeZoneExprOverlay( const ReplaceKit &k
         {
 			TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
 			ASSERT( dest_singular )( "itemise for target didn't match itemise for pattern");
-			zone.AddTerminus( make_shared<SingularTerminus>(dest, dest_singular) );            
+			zone.AddTerminus( make_shared<FreeSingularTerminus>(dest, dest_singular) );            
 
 			if( should_overlay )
 			{
@@ -756,8 +756,8 @@ Agent::ReplaceExprPtr StandardAgent::GenFreeZoneExprNormal( const ReplaceKit &ki
 		        TRACE("Got ")(*my_elt)("\n");
 		        
                 // Make a placeholder in the dest container for the updater to point to
-                ContainerInterface::iterator dest_it = dest_con->insert( ContainerTerminus::MakePlaceholder() );
-                zone.AddTerminus( make_shared<ContainerTerminus>(dest, dest_con, dest_it) );    
+                ContainerInterface::iterator dest_it = dest_con->insert( FreeContainerTerminus::MakePlaceholder() );
+                zone.AddTerminus( make_shared<FreeContainerTerminus>(dest, dest_con, dest_it) );    
 
                 PatternLink my_elt_plink( this, &my_elt );
 				child_commands.push_back( my_elt_plink.GetChildAgent()->GenReplaceExpr(kit, my_elt_plink) );               
@@ -768,7 +768,7 @@ Agent::ReplaceExprPtr StandardAgent::GenFreeZoneExprNormal( const ReplaceKit &ki
             TRACE("Copying single element\n");
             ASSERT( *my_singular )("Member %d (", i)(*my_singular)(") of ")(*this)(" was nullptr when not overlaying\n");            
             TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
-            zone.AddTerminus( make_shared<SingularTerminus>(dest, dest_singular) );            
+            zone.AddTerminus( make_shared<FreeSingularTerminus>(dest, dest_singular) );            
 
             PatternLink my_singular_plink( this, my_singular );                    
 			child_commands.push_back( my_singular_plink.GetChildAgent()->GenReplaceExpr(kit, my_singular_plink) );           

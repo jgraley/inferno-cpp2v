@@ -34,14 +34,14 @@ TreePtr<Node> Duplicate::DuplicateSubtree( XLink source_base_xlink,
 {
     ASSERTS( source_base_xlink );
 
-    // Terminus at root: we can subsitute but we can't make an updater.
+    // FreeTerminus at root: we can subsitute but we can't make an updater.
     if( terminii_map.count(source_base_xlink) == 1 ) 
     {
         TerminusInfo &terminus_info = terminii_map.at(source_base_xlink);
         TreePtr<Node> dest_terminus = terminus_info.dest;
         TRACES("Reached source terminus ")(source_base_xlink)
               (" and substituting ")(dest_terminus)("\n");
-        ASSERT( terminus_info.dest ); // Can't make an Terminus for the base
+        ASSERT( terminus_info.dest ); // Can't make an FreeTerminus for the base
         terminus_info.dest = TreePtr<Node>();
         return dest_terminus;
     }
@@ -97,7 +97,7 @@ TreePtr<Node> Duplicate::DuplicateSubtreeWorker( TreePtr<Node> source,
                     ContainerInterface::iterator dest_it = dest_container->insert( dest_terminus );
                     // NULL value was provided, so consider it a placeholder for an updater
                     if( !dest_terminus )
-                        terminus_info.updater = make_shared<ContainerTerminus>( dest, dest_container, dest_it );
+                        terminus_info.updater = make_shared<FreeContainerTerminus>( dest, dest_container, dest_it );
                 }
                 else
                 {
@@ -126,7 +126,7 @@ TreePtr<Node> Duplicate::DuplicateSubtreeWorker( TreePtr<Node> source,
                 *dest_singular = dest_terminus;
                 // NULL value was provided, so consider it a placeholder for an updater
                 if( !dest_terminus )
-                    terminus_info.updater = make_shared<SingularTerminus>( dest, dest_singular );
+                    terminus_info.updater = make_shared<FreeSingularTerminus>( dest, dest_singular );
             }
             else
             {

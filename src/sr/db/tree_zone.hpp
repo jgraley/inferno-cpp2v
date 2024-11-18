@@ -5,7 +5,7 @@
 #include "../link.hpp"
 #include "common/standard.hpp"
 #include "node/specialise_oostd.hpp"
-#include "terminus.hpp"
+#include "free_terminus.hpp"
 #include "df_relation.hpp"
 #include "duplicate.hpp"
 

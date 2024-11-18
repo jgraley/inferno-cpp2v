@@ -39,7 +39,7 @@ void FreeZoneMerger::Run( shared_ptr<ZoneExpression> &root_expr )
 					TRACE("Child MergeFreeZoneOperator ")(*child_pfz_op)(" and terminus ")(*it_t)("\n");
 					FreeZone &child_free_zone = child_pfz_op->GetZone();
 					it_t = free_zone.MergeTerminus( it_t, make_unique<FreeZone>(child_free_zone) );		
-					TRACE("Terminus OK\n");
+					TRACE("FreeTerminus OK\n");
 					it_child = pfz_op->SpliceOver( it_child, child_pfz_op->MoveChildExpressions() );
 					TRACE("Splice OK\n");
 				}	

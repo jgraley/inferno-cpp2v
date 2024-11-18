@@ -5,7 +5,7 @@
 #include "../link.hpp"
 #include "common/standard.hpp"
 #include "node/specialise_oostd.hpp"
-#include "../db/terminus.hpp"
+#include "../db/free_terminus.hpp"
 
 namespace SR 
 {

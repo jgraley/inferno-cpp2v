@@ -84,13 +84,13 @@ FreeZone TreeZone::Duplicate() const
     // DuplicateSubtree() to use.
     Duplicate::TerminiiMap duplicator_terminus_map;
     for( XLink terminus_upd : GetTerminusXLinks() ) 
-        duplicator_terminus_map[terminus_upd] = { TreePtr<Node>(), shared_ptr<Terminus>() };
+        duplicator_terminus_map[terminus_upd] = { TreePtr<Node>(), shared_ptr<FreeTerminus>() };
 
     // Duplicate the subtree, populating from the map.
     TreePtr<Node> new_base_x = Duplicate::DuplicateSubtree( GetBaseXLink(), 
                                                             duplicator_terminus_map );   
     
-    list<shared_ptr<Terminus>> free_zone_terminii;
+    list<shared_ptr<FreeTerminus>> free_zone_terminii;
     for( XLink terminus_upd : GetTerminusXLinks() )
     {
 		ASSERTS( duplicator_terminus_map[terminus_upd].updater );
@@ -127,7 +127,7 @@ void TreeZone::ReplaceWithFreeZone( FreeZone &&free_zone )
     for( XLink &tree_terminus_xlink : terminii )
 	{
 		ASSERT( it_t != free_zone.GetTerminiiEnd() ); // length mismatch	
-		shared_ptr<Terminus> free_terminus = *it_t;
+		shared_ptr<FreeTerminus> free_terminus = *it_t;
 		
 		TreePtr<Node> boundary_node = tree_terminus_xlink.GetChildTreePtr(); // outside the zone		
 		ASSERT( !dynamic_cast<ContainerInterface *>(boundary_node.get()) ); // requirement for GetTreePtrInterface()
