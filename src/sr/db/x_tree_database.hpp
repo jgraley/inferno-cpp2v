@@ -38,18 +38,12 @@ public:
 	// Use both monolithic and incremental updates in order 
 	// to build full db during analysis stage
     void InitialBuild();
-
-	// Scaffolding for incremental roll-out: assets not yet converted are deleted/inserted here
-	// and applied to the SCR base xlink just once as before incremental
-    void PreUpdateMainTree( const TreeZone &target_tree_zone );
-
+    
 	// Incremental strategy: perform updates on zones
     void UpdateMainTree( TreeZone target_tree_zone, FreeZone source_free_zone );
-
-    void PostUpdateMainTree( const TreeZone &target_tree_zone );
 		
-    void DeleteMainTree(TreeZone zone, bool in_parts, const LinkTable::Row *base_link_row);
-    void InsertMainTree(TreeZone zone, bool in_parts, const LinkTable::Row *base_link_row);
+    void DeleteMainTree(TreeZone zone, const LinkTable::Row *base_link_row);
+    void InsertMainTree(TreeZone zone, const LinkTable::Row *base_link_row);
 
     void DeleteExtraTree(XLink xlink);
     void InsertExtraTree(XLink xlink);
