@@ -17,7 +17,6 @@
 //#define DB_ENABLE_COMPARATIVE_TEST
 
 // TODO: drop trace and thin out asserts on queues
-// Drop LEGACY_BASE
 // Factor out LinkContext from link row and walk info. 
 //   - It's defined in DBWalk but acts as a base for both WalkInfo and LinkTable::Row
 // Drop -ui arg

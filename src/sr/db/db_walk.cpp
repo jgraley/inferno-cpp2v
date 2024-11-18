@@ -5,30 +5,27 @@ using namespace SR;
 
 void DBWalk::Walk( const Actions *actions,
                    XLink base_xlink,
-                   Context base_context,
                    const DBCommon::RootRecord *root_record, 
                    Wind wind,
                    const LinkTable::Row *base_link_row )
 {
-    Walk( actions, TreeZone::CreateSubtree(base_xlink), base_context, root_record, wind, base_link_row );
+    Walk( actions, TreeZone::CreateSubtree(base_xlink), root_record, wind, base_link_row );
 }
 
 
 void DBWalk::Walk( const Actions *actions,
                    TreeZone zone,
-                   Context base_context,
                    const DBCommon::RootRecord *root_record, 
                    Wind wind,
                    const LinkTable::Row *base_link_row )
 {
     WalkKit kit { actions, zone, root_record, wind, zone.GetTerminiiBegin() };
-	VisitBase( kit, base_context, base_link_row );  
+	VisitBase( kit, base_link_row );  
 	ASSERT( kit.next_terminus_it == kit.zone.GetTerminiiEnd() ); // should have visited all the terminii
 }
 
 
 void DBWalk::VisitBase( const WalkKit &kit,                         
-                        Context context,
                         const LinkTable::Row *base_link_row )
 {
     XLink base_xlink = kit.zone.GetBaseXLink();
@@ -50,7 +47,7 @@ void DBWalk::VisitBase( const WalkKit &kit,
 	else
 		walk_info = { TreePtr<Node>(), 
 					  -1,
-					  context,	 
+					  ROOT,	 // no base row is taken to mean a true ROOT
 					  nullptr,
 					  -1,
 					  ContainerInterface::iterator(), 

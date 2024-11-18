@@ -51,13 +51,11 @@ public:
     
     void Walk( const Actions *actions,
                XLink base_xlink,
-               Context base_context,
                const DBCommon::RootRecord *root_record,
                Wind wind,
                const LinkTableRow *base_link_row );
     void Walk( const Actions *actions,
                TreeZone zone,
-               Context base_context,
                const DBCommon::RootRecord *root_record,
                Wind wind,
                const LinkTableRow *base_link_row );
@@ -72,7 +70,6 @@ private:
     };
 
     void VisitBase( const WalkKit &kit, 
-                    Context context,
                     const LinkTableRow *base_link_row );
     void VisitSingular( const WalkKit &kit, 
                         const TreePtrInterface *p_x_singular, 
