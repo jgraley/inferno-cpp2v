@@ -62,32 +62,32 @@ void XTreeDatabase::InitialBuild()
     
     while(!de_extra_insert_queue.empty())
     {
-		InsertExtraTree( de_extra_insert_queue.front() );
+		ExtraTreeInsert( de_extra_insert_queue.front() );
 		de_extra_insert_queue.pop();
 	}    
 }
 
 
-void XTreeDatabase::UpdateMainTree( TreeZone target_tree_zone, FreeZone source_free_zone )
+void XTreeDatabase::MainTreeReplace( TreeZone target_tree_zone, FreeZone source_free_zone )
 {
 	ASSERT( target_tree_zone.GetNumTerminii() == source_free_zone.GetNumTerminii() );	
-	target_tree_zone.DBCheck(this); // Move back to UpdateMainTree once this is empty
+	target_tree_zone.DBCheck(this); // Move back to MainTreeReplace once this is empty
 	
 	// Store the link row for the base locally (requires link table insert/delete in parts).
 	LinkTable::Row base_link_row = link_table->GetRow( target_tree_zone.GetBaseXLink() );
 
     // Update database 
-    DeleteMainTree( target_tree_zone, &base_link_row );   
+    MainTreeDelete( target_tree_zone, &base_link_row );   
     
     // Patch the tree
-    target_tree_zone.ReplaceWithFreeZone( move(source_free_zone) ); 
+    target_tree_zone.Patch( move(source_free_zone) ); 
 
     // Update database 
-    InsertMainTree( target_tree_zone, &base_link_row );   	
+    MainTreeInsert( target_tree_zone, &base_link_row );   	
 }
 
 
-void XTreeDatabase::DeleteMainTree(TreeZone zone, const LinkTable::Row *base_link_row)
+void XTreeDatabase::MainTreeDelete(TreeZone zone, const LinkTable::Row *base_link_row)
 {
     INDENT("d");
 
@@ -107,13 +107,13 @@ void XTreeDatabase::DeleteMainTree(TreeZone zone, const LinkTable::Row *base_lin
 
 	while(!de_extra_delete_queue.empty())
 	{
-		DeleteExtraTree( de_extra_delete_queue.front() );
+		ExtraTreeDelete( de_extra_delete_queue.front() );
 		de_extra_delete_queue.pop();
 	}
 }
 
 
-void XTreeDatabase::InsertMainTree(TreeZone zone, const LinkTable::Row *base_link_row)
+void XTreeDatabase::MainTreeInsert(TreeZone zone, const LinkTable::Row *base_link_row)
 {
     INDENT("i");
 	ASSERT( de_extra_insert_queue.empty() );
@@ -133,13 +133,13 @@ void XTreeDatabase::InsertMainTree(TreeZone zone, const LinkTable::Row *base_lin
 
 	while(!de_extra_insert_queue.empty())
 	{
-		InsertExtraTree( de_extra_insert_queue.front() );
+		ExtraTreeInsert( de_extra_insert_queue.front() );
 		de_extra_insert_queue.pop();
 	}
 }
 
 
-void XTreeDatabase::DeleteExtraTree(XLink xlink)
+void XTreeDatabase::ExtraTreeDelete(XLink xlink)
 {		
     ASSERT( xlink != main_root_xlink );
     ASSERT( roots.count(xlink) == 1 );
@@ -160,7 +160,7 @@ void XTreeDatabase::DeleteExtraTree(XLink xlink)
 }
 
 
-void XTreeDatabase::InsertExtraTree(XLink xlink)
+void XTreeDatabase::ExtraTreeInsert(XLink xlink)
 {
     INDENT("e");
     
@@ -197,7 +197,7 @@ void XTreeDatabase::PostUpdateActions()
 	
     while(!de_extra_insert_queue.empty())
     {
-		InsertExtraTree( de_extra_insert_queue.front() );
+		ExtraTreeInsert( de_extra_insert_queue.front() );
 		de_extra_insert_queue.pop();
 	}	
 }

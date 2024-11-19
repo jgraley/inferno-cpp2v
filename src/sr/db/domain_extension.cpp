@@ -133,7 +133,7 @@ XLink DomainExtensionChannel::GetUniqueDomainExtension( XLink stimulus_xlink, Tr
 }
 
 
-void DomainExtensionChannel::InsertExtraTree( TreePtr<Node> induced_base_node )
+void DomainExtensionChannel::ExtraTreeInsert( TreePtr<Node> induced_base_node )
 {
     ASSERT( induced_base_node );
   
@@ -183,7 +183,7 @@ void DomainExtensionChannel::CheckStimulusXLink( XLink stimulus_xlink )
     }
         
     // An extra tree is required
-    InsertExtraTree( info.induced_base_node );
+    ExtraTreeInsert( info.induced_base_node );
 }
 
 

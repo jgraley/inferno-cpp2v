@@ -370,10 +370,10 @@ void SCREngine::Replace( XLink base_xlink )
     
     // Create a command to replace the current X tree with this expression
     TreeZone target_tree_zone = TreeZone::CreateSubtree(base_xlink);
-    auto update_command = make_shared<UpdateTreeCommand>(target_tree_zone, move(source_expr));	
+    auto replace_command = make_shared<ReplaceCommand>(target_tree_zone, move(source_expr));	
     
     // Request to update the tree
-	plan.vn_sequence->UpdateUsingCommand( move(update_command) );  
+	plan.vn_sequence->UpdateUsingCommand( move(replace_command) );  
     
     TRACE("Replace done\n");
 }

@@ -94,7 +94,7 @@ public:
                                   DomainExtension::OnExtraTreeFunction on_delete_extra_tree = DomainExtension::OnExtraTreeFunction() );
 
 	XLink GetUniqueDomainExtension( XLink stimulus_xlink, TreePtr<Node> node ) const;
-    void InsertExtraTree( TreePtr<Node> extra_root_node );
+    void ExtraTreeInsert( TreePtr<Node> extra_root_node );
     void CheckStimulusXLink( XLink stimulus_xlink );
     void DropStimulusXLink( XLink stimulus_xlink );
     void Validate() const;

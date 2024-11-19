@@ -9,9 +9,9 @@
 
 using namespace SR;
 
-// ------------------------- UpdateTreeCommand --------------------------
+// ------------------------- ReplaceCommand --------------------------
 
-UpdateTreeCommand::UpdateTreeCommand( const TreeZone &target_tree_zone_, 
+ReplaceCommand::ReplaceCommand( const TreeZone &target_tree_zone_, 
                                       shared_ptr<ZoneExpression> child_expression_ ) :
 	target_tree_zone( target_tree_zone_ ),
 	child_expression( move(child_expression_) )
@@ -19,38 +19,38 @@ UpdateTreeCommand::UpdateTreeCommand( const TreeZone &target_tree_zone_,
 }
 
 
-shared_ptr<ZoneExpression> &UpdateTreeCommand::GetExpression()
+shared_ptr<ZoneExpression> &ReplaceCommand::GetExpression()
 {
 	ASSERT( this );
 	return child_expression;
 }
 
 
-const shared_ptr<ZoneExpression> &UpdateTreeCommand::GetExpression() const
+const shared_ptr<ZoneExpression> &ReplaceCommand::GetExpression() const
 {
 	ASSERT( this );
 	return child_expression;
 }
 
 
-const TreeZone &UpdateTreeCommand::GetTargetTreeZone() const
+const TreeZone &ReplaceCommand::GetTargetTreeZone() const
 {
 	ASSERT( this );
 	return target_tree_zone;
 }
 
 
-void UpdateTreeCommand::Execute(const UpEvalExecKit &kit) const
+void ReplaceCommand::Execute(const UpEvalExecKit &kit) const
 {
     // New zone must be a free zone
 	unique_ptr<FreeZone> source_free_zone = child_expression->Evaluate(kit);
-    kit.x_tree_db->UpdateMainTree( target_tree_zone, *source_free_zone );
+    kit.x_tree_db->MainTreeReplace( target_tree_zone, *source_free_zone );
 }
 
 
-string UpdateTreeCommand::GetTrace() const
+string ReplaceCommand::GetTrace() const
 {
-	return "UpdateTreeCommand( \nsource: "+Trace(child_expression)+", \ntarget: "+Trace(target_tree_zone)+" )";
+	return "ReplaceCommand( \nsource: "+Trace(child_expression)+", \ntarget: "+Trace(target_tree_zone)+" )";
 }
 
 // ------------------------- CommandSequence --------------------------

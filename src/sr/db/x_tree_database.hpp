@@ -37,13 +37,13 @@ public:
     void InitialBuild();
     
 	// Incremental strategy: perform updates on zones
-    void UpdateMainTree( TreeZone target_tree_zone, FreeZone source_free_zone );
+    void MainTreeReplace( TreeZone target_tree_zone, FreeZone source_free_zone );
 		
-    void DeleteMainTree(TreeZone zone, const LinkTable::Row *base_link_row);
-    void InsertMainTree(TreeZone zone, const LinkTable::Row *base_link_row);
+    void MainTreeDelete(TreeZone zone, const LinkTable::Row *base_link_row);
+    void MainTreeInsert(TreeZone zone, const LinkTable::Row *base_link_row);
 
-    void DeleteExtraTree(XLink xlink);
-    void InsertExtraTree(XLink xlink);
+    void ExtraTreeDelete(XLink xlink);
+    void ExtraTreeInsert(XLink xlink);
 
     const DomainExtensionChannel *GetDEChannel( const DomainExtension::Extender *extender ) const;
     void PostUpdateActions();

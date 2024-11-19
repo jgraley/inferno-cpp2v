@@ -23,14 +23,14 @@ public:
 	virtual void Execute(const UpEvalExecKit &kit) const = 0;
 };
 
-// ------------------------- UpdateTreeCommand --------------------------
+// ------------------------- ReplaceCommand --------------------------
 
 // Replace that part of the tree represented by a target tree zone with
 // the contents of a source free zone returned by a child expression.
-class UpdateTreeCommand : public Command
+class ReplaceCommand : public Command
 {
 public:
-    UpdateTreeCommand( const TreeZone &target_tree_zone_, 
+    ReplaceCommand( const TreeZone &target_tree_zone_, 
                        shared_ptr<ZoneExpression> child_expression_ );
 	shared_ptr<ZoneExpression> &GetExpression();
 	const shared_ptr<ZoneExpression> &GetExpression() const;

@@ -36,7 +36,7 @@ void TreeUpdater::TransformToIncrementalAndExecute( shared_ptr<Command> initial_
 {
 	ASSERT( db );
 	
-	shared_ptr<ZoneExpression> expr = dynamic_cast<const UpdateTreeCommand &>(*initial_cmd).GetExpression();
+	shared_ptr<ZoneExpression> expr = dynamic_cast<const ReplaceCommand &>(*initial_cmd).GetExpression();
 	
 	EmptyZoneElider empty_zone_elider;
 	empty_zone_elider.Run(expr);

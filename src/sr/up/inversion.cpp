@@ -21,8 +21,8 @@ shared_ptr<Command> TreeZoneInverter::Run(shared_ptr<Command> initial_cmd)
 {
 	incremental_seq = make_shared<CommandSequence>();
 	
-	auto root_update_cmd = dynamic_pointer_cast<UpdateTreeCommand>(initial_cmd);
-	ASSERT( root_update_cmd ); // ASSUME command is UpdateTreeCommand (and not in a seq)
+	auto root_update_cmd = dynamic_pointer_cast<ReplaceCommand>(initial_cmd);
+	ASSERT( root_update_cmd ); // ASSUME command is ReplaceCommand (and not in a seq)
 	shared_ptr<ZoneExpression> root_expr = root_update_cmd->GetExpression();
 	TreeZone root_target = root_update_cmd->GetTargetTreeZone();
 	LocatedZoneExpression root_lze( root_target.GetBaseXLink(), root_expr );
@@ -92,6 +92,6 @@ void TreeZoneInverter::Invert( LocatedZoneExpression lze )
 		 
 	TreeZone inverted_tree_zone = TreeZone( base_xlink, terminii_xlinks );	
 	auto pfz_op_no_children = make_shared<MergeFreeZoneOperator>( pfz_op->GetZone() ); // No children leaves terminii exposed, sort of.
-	auto incremental_command = make_shared<UpdateTreeCommand>( inverted_tree_zone, pfz_op_no_children );	
+	auto incremental_command = make_shared<ReplaceCommand>( inverted_tree_zone, pfz_op_no_children );	
 	incremental_seq->Add(incremental_command);
 }
