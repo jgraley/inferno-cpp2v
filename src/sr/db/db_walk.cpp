@@ -1,5 +1,4 @@
 #include "db_walk.hpp"
-#include "link_table.hpp"
 
 using namespace SR;    
 
@@ -30,7 +29,7 @@ void DBWalk::VisitBase( const WalkKit &kit,
 {
     XLink base_xlink = kit.zone.GetBaseXLink();
 	WalkInfo walk_info;
-	if( base_info )
+	if( base_info ) // "boot" the walk from the supplied core info
 		walk_info = { *base_info, 			          
 					  base_xlink.GetTreePtrInterface(), 
 					  base_xlink, 
@@ -38,7 +37,7 @@ void DBWalk::VisitBase( const WalkKit &kit,
 					  kit.root_record,
 					  false,
 					  true };
-	else
+	else // Self-boot for root (it's mostly NULLs)
 		walk_info = { { TreePtr<Node>(), 			          
 					    -1,
 					    ROOT,  // no base row is taken to mean a true ROOT				

@@ -128,7 +128,7 @@ void LinkTable::GenerateRow(const DBWalk::WalkInfo &walk_info)
 }
 
 
-string LinkTableRow::GetTrace() const
+string LinkTable::Row::GetTrace() const
 {
     string s = "(cc=";
 

@@ -8,8 +8,6 @@
 
 namespace SR 
 {
-class LinkTableRow;
-
 class DBWalk
 {   
 public:
@@ -27,6 +25,11 @@ public:
         WIND_OUT
     };
 
+	// This structure is embedded inside our WalkInfo, and in LinkTable::Row.
+	// We can fill it in successfully for all nodes only if walking from 
+	// the true root of a tree. If we need to walk a subtree, we need to
+	// be "booted" by receiving a copy if this info. We get that from the 
+	// LinkTable.
     struct CoreInfo
     {
 		TreePtr<Node> parent_node;
