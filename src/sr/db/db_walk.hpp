@@ -47,7 +47,6 @@ public:
 		// Iterator on my_container that dereferences to me, if 
 		// IN_SEQUENCE or IN_COLLECTION. Note: only used in regeneration
 		// queries.
-        ContainerInterface::iterator container_it_predecessor;
         ContainerInterface::iterator container_it;
 	};
 	

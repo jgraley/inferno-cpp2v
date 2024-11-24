@@ -44,7 +44,6 @@ void DBWalk::VisitBase( const WalkKit &kit,
 					    ROOT,  // no base row is taken to mean a true ROOT				
 					    nullptr,
 					    -1,	 	  					  					  
-					    ContainerInterface::iterator(), 
 					    ContainerInterface::iterator() },
 					  base_xlink.GetTreePtrInterface(), 
 					  base_xlink, 
@@ -79,7 +78,6 @@ void DBWalk::VisitSingular( const WalkKit &kit,
 				 SINGULAR,
 				 nullptr,
 				 -1,                
-                 ContainerInterface::iterator(),
                  ContainerInterface::iterator() },
                p_x_singular, 
                child_xlink, 
@@ -96,7 +94,6 @@ void DBWalk::VisitSequence( const WalkKit &kit,
                             int item_ordinal )
 {
     TreePtr<Node> x = xlink.GetChildTreePtr();
-    SequenceInterface::iterator xit_predecessor = x_seq->end();    
     int i=0;
     for( SequenceInterface::iterator xit = x_seq->begin();
          xit != x_seq->end();
@@ -109,7 +106,6 @@ void DBWalk::VisitSequence( const WalkKit &kit,
 					 IN_SEQUENCE,
 					 x_seq,
                      i,
-                     xit_predecessor,
                      xit },
                    &*xit, 
                    child_xlink, 
@@ -117,7 +113,6 @@ void DBWalk::VisitSequence( const WalkKit &kit,
                    kit.root_record,
                    false,
                    false } );
-        xit_predecessor = xit;
         i++;
     }
 }
@@ -141,7 +136,6 @@ void DBWalk::VisitCollection( const WalkKit &kit,
 					 IN_COLLECTION,
 					 x_col,                    
                      i,
-				     ContainerInterface::iterator(),
                      xit },
                    &*xit, 
                    child_xlink, 

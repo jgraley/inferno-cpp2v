@@ -82,8 +82,14 @@ void LinkTable::GenerateRow(const DBWalk::WalkInfo &walk_info)
 			row.container_front = XLink( walk_info.core.parent_node, &walk_info.core.p_container->front() );
 			row.container_back = XLink( walk_info.core.parent_node, &walk_info.core.p_container->back() );
 			
-			if( walk_info.core.container_it_predecessor != walk_info.core.p_container->end() )
-				row.sequence_predecessor = XLink( walk_info.core.parent_node, &*walk_info.core.container_it_predecessor );
+			SequenceInterface::iterator xit_predecessor = walk_info.core.container_it;
+			if( xit_predecessor != walk_info.core.p_container->begin() )
+			{
+			    --xit_predecessor;
+				row.sequence_predecessor = XLink( walk_info.core.parent_node, &*xit_predecessor );
+			}
+			else
+				row.sequence_predecessor = XLink::OffEndXLink;        
 
 			SequenceInterface::iterator xit_successor = walk_info.core.container_it;
 			++xit_successor;
