@@ -28,6 +28,12 @@ bool LinkTable::HasRow(XLink xlink) const
 }
 
  
+const DBWalk::CoreInfo &LinkTable::GetCoreInfo(XLink xlink) const
+{
+    return *(DBWalk::CoreInfo *)&(GetRow(xlink));	
+}
+ 
+ 
 DBWalk::Action LinkTable::GetInsertAction()
 {
 	return [=](const DBWalk::WalkInfo &walk_info)

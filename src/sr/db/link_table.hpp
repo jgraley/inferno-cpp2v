@@ -43,6 +43,8 @@ public:
     const Row &GetRow(XLink xlink) const;
     bool HasRow(XLink xlink) const;
     
+    const DBWalk::CoreInfo &GetCoreInfo(XLink xlink) const;
+    
     DBWalk::Action GetDeleteAction();
 	DBWalk::Action GetInsertAction();
 	

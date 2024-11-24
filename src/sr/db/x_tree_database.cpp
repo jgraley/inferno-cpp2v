@@ -74,20 +74,20 @@ void XTreeDatabase::MainTreeReplace( TreeZone target_tree_zone, FreeZone source_
 	target_tree_zone.DBCheck(this); // Move back to MainTreeReplace once this is empty
 	
 	// Store the link row for the base locally (requires link table insert/delete in parts).
-	LinkTable::Row base_link_row = link_table->GetRow( target_tree_zone.GetBaseXLink() );
+	const DBWalk::CoreInfo base_info = link_table->GetCoreInfo( target_tree_zone.GetBaseXLink() );
 
     // Update database 
-    MainTreeDelete( target_tree_zone, &base_link_row );   
+    MainTreeDelete( target_tree_zone, &base_info );   
     
     // Patch the tree
     target_tree_zone.Patch( move(source_free_zone) ); 
 
     // Update database 
-    MainTreeInsert( target_tree_zone, &base_link_row );   	
+    MainTreeInsert( target_tree_zone, &base_info );   	
 }
 
 
-void XTreeDatabase::MainTreeDelete(TreeZone zone, const LinkTable::Row *base_link_row)
+void XTreeDatabase::MainTreeDelete(TreeZone zone, const DBWalk::CoreInfo *base_info)
 {
     INDENT("d");
 
@@ -103,7 +103,7 @@ void XTreeDatabase::MainTreeDelete(TreeZone zone, const LinkTable::Row *base_lin
     // TODO be able to supply ROOT or the new BASE depending on whether 
     // we're being asked to act at a root. Fix up eg in link table where 
     // we need to tolerate multiple calls at ROOT not just one at InitalBuild()
-    db_walker.Walk( &actions, zone.GetBaseXLink(), &roots[main_root_xlink], DBWalk::WIND_OUT, base_link_row );   
+    db_walker.Walk( &actions, zone.GetBaseXLink(), &roots[main_root_xlink], DBWalk::WIND_OUT, base_info );   
 
 	while(!de_extra_delete_queue.empty())
 	{
@@ -113,7 +113,7 @@ void XTreeDatabase::MainTreeDelete(TreeZone zone, const LinkTable::Row *base_lin
 }
 
 
-void XTreeDatabase::MainTreeInsert(TreeZone zone, const LinkTable::Row *base_link_row)
+void XTreeDatabase::MainTreeInsert(TreeZone zone, const DBWalk::CoreInfo *base_info)
 {
     INDENT("i");
 	ASSERT( de_extra_insert_queue.empty() );
@@ -123,13 +123,13 @@ void XTreeDatabase::MainTreeInsert(TreeZone zone, const LinkTable::Row *base_lin
 	actions.push_back( link_table->GetInsertAction() );
 	actions.push_back( node_table->GetInsertAction() );
 	actions.push_back( orderings->GetInsertAction() );
-    db_walker.Walk( &actions, zone.GetBaseXLink(), &roots[main_root_xlink], DBWalk::WIND_IN, base_link_row );
+    db_walker.Walk( &actions, zone.GetBaseXLink(), &roots[main_root_xlink], DBWalk::WIND_IN, base_info );
     
 	// Domain extension wants to roam around the XTree, consulting
 	// parents, children, anything really. So we need a separate pass.
 	DBWalk::Actions actions2;
 	actions2.push_back( domain_extension->GetInsertAction());
-	db_walker.Walk( &actions2, zone.GetBaseXLink(), &roots[main_root_xlink], DBWalk::WIND_IN, base_link_row );
+	db_walker.Walk( &actions2, zone.GetBaseXLink(), &roots[main_root_xlink], DBWalk::WIND_IN, base_info );
 
 	while(!de_extra_insert_queue.empty())
 	{

@@ -67,12 +67,12 @@ public:
                XLink base_xlink,
                const DBCommon::RootRecord *root_record,
                Wind wind,
-               const LinkTableRow *base_link_row );
+               const CoreInfo *base_info );
     void Walk( const Actions *actions,
                TreeZone zone,
                const DBCommon::RootRecord *root_record,
                Wind wind,
-               const LinkTableRow *base_link_row );
+               const CoreInfo *base_info );
 private:
     struct WalkKit
     {
@@ -84,7 +84,7 @@ private:
     };
 
     void VisitBase( const WalkKit &kit, 
-                    const LinkTableRow *base_link_row );
+                    const CoreInfo *base_info );
     void VisitSingular( const WalkKit &kit, 
                         const TreePtrInterface *p_x_singular, 
                         XLink xlink,

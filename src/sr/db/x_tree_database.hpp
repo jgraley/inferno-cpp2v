@@ -34,8 +34,8 @@ public:
 	// Incremental strategy: perform updates on zones
     void MainTreeReplace( TreeZone target_tree_zone, FreeZone source_free_zone );
 		
-    void MainTreeDelete(TreeZone zone, const LinkTable::Row *base_link_row);
-    void MainTreeInsert(TreeZone zone, const LinkTable::Row *base_link_row);
+    void MainTreeDelete(TreeZone zone, const DBWalk::CoreInfo *base_info);
+    void MainTreeInsert(TreeZone zone, const DBWalk::CoreInfo *base_info);
 
     void ExtraTreeDelete(XLink xlink);
     void ExtraTreeInsert(XLink xlink);

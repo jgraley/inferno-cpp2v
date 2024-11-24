@@ -7,9 +7,9 @@ void DBWalk::Walk( const Actions *actions,
                    XLink base_xlink,
                    const DBCommon::RootRecord *root_record, 
                    Wind wind,
-                   const LinkTable::Row *base_link_row )
+                   const CoreInfo *base_info )
 {
-    Walk( actions, TreeZone::CreateSubtree(base_xlink), root_record, wind, base_link_row );
+    Walk( actions, TreeZone::CreateSubtree(base_xlink), root_record, wind, base_info );
 }
 
 
@@ -17,21 +17,21 @@ void DBWalk::Walk( const Actions *actions,
                    TreeZone zone,
                    const DBCommon::RootRecord *root_record, 
                    Wind wind,
-                   const LinkTable::Row *base_link_row )
+                   const CoreInfo *base_info )
 {
     WalkKit kit { actions, zone, root_record, wind, zone.GetTerminiiBegin() };
-	VisitBase( kit, base_link_row );  
+	VisitBase( kit, base_info );  
 	ASSERT( kit.next_terminus_it == kit.zone.GetTerminiiEnd() ); // should have visited all the terminii
 }
 
 
 void DBWalk::VisitBase( const WalkKit &kit,                         
-                        const LinkTable::Row *base_link_row )
+                        const CoreInfo *base_info )
 {
     XLink base_xlink = kit.zone.GetBaseXLink();
 	WalkInfo walk_info;
-	if( base_link_row )
-		walk_info = { *(CoreInfo *)base_link_row, 			          
+	if( base_info )
+		walk_info = { *base_info, 			          
 					  base_xlink.GetTreePtrInterface(), 
 					  base_xlink, 
 					  base_xlink.GetChildTreePtr(),
