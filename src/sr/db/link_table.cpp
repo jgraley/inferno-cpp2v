@@ -53,8 +53,8 @@ DBWalk::Action LinkTable::GetDeleteAction()
 void LinkTable::GenerateRow(const DBWalk::WalkInfo &walk_info)
 {
 	Row row;        
-	row.containment_context = walk_info.context;
-	switch( row.containment_context )
+	*(DBWalk::CoreInfo *)(&row) = walk_info.core;
+	switch( row.context_type )
 	{
 		case DBWalk::ROOT:
 		{
@@ -67,51 +67,37 @@ void LinkTable::GenerateRow(const DBWalk::WalkInfo &walk_info)
 			// allow junk values - analysis of expressions could detect if these 
 			// make it anywhere they can do harm. But we could add a new 
 			// one-off link like MMAX and OffEndX? What about EmptyResult?
-			row.my_container_front = walk_info.xlink; 
-			row.my_container_back = walk_info.xlink;
+			row.container_front = walk_info.xlink; 
+			row.container_back = walk_info.xlink;
 			break;
 		}	
 		case DBWalk::SINGULAR:
 		{
-			row.parent_node = walk_info.parent_x; 
-			row.item_ordinal = walk_info.item_ordinal;
-			row.my_container_front = walk_info.xlink;
-			row.my_container_back = walk_info.xlink;
+			row.container_front = walk_info.xlink;
+			row.container_back = walk_info.xlink;
 			break;
 		}
 		case DBWalk::IN_SEQUENCE:
-		{
-			row.parent_node = walk_info.parent_x;
-			row.item_ordinal = walk_info.item_ordinal;
-			row.p_xcon = walk_info.p_xcon;
-			row.my_container_it_predecessor = walk_info.xit_predecessor;
-			row.my_container_it = walk_info.xit;     
-			row.my_container_front = XLink( walk_info.parent_x, &walk_info.p_xcon->front() );
-			row.my_container_back = XLink( walk_info.parent_x, &walk_info.p_xcon->back() );
-			row.container_ordinal = walk_info.container_ordinal;
+		{  
+			row.container_front = XLink( walk_info.core.parent_node, &walk_info.core.p_container->front() );
+			row.container_back = XLink( walk_info.core.parent_node, &walk_info.core.p_container->back() );
 			
-			if( walk_info.xit_predecessor != walk_info.p_xcon->end() )
-				row.my_sequence_predecessor = XLink( walk_info.parent_x, &*walk_info.xit_predecessor );
+			if( walk_info.core.container_it_predecessor != walk_info.core.p_container->end() )
+				row.sequence_predecessor = XLink( walk_info.core.parent_node, &*walk_info.core.container_it_predecessor );
 
-			SequenceInterface::iterator xit_successor = walk_info.xit;
+			SequenceInterface::iterator xit_successor = walk_info.core.container_it;
 			++xit_successor;
-			if( xit_successor != walk_info.p_xcon->end() )
-				row.my_sequence_successor = XLink( walk_info.parent_x, &*xit_successor );
+			if( xit_successor != walk_info.core.p_container->end() )
+				row.sequence_successor = XLink( walk_info.core.parent_node, &*xit_successor );
 			else
-				row.my_sequence_successor = XLink::OffEndXLink;        
+				row.sequence_successor = XLink::OffEndXLink;        
 			break;
 		}
 		case DBWalk::IN_COLLECTION:
 		{
-			row.parent_node = walk_info.parent_x;
-			row.item_ordinal = walk_info.item_ordinal;
-			row.p_xcon = walk_info.p_xcon;
-			row.my_container_it_predecessor = walk_info.xit_predecessor;
-			row.my_container_it = walk_info.xit;
-			row.my_container_front = XLink( walk_info.parent_x, &*(walk_info.p_xcon->begin()) );
+			row.container_front = XLink( walk_info.core.parent_node, &*(walk_info.core.p_container->begin()) );
 			// Note: in real STL containers, one would use *(x_col->rbegin())
-			row.my_container_back = XLink( walk_info.parent_x, &(walk_info.p_xcon->back()) );
-			row.container_ordinal = walk_info.container_ordinal;
+			row.container_back = XLink( walk_info.core.parent_node, &(walk_info.core.p_container->back()) );
 			break;
 		}
         default:
@@ -136,7 +122,7 @@ string LinkTableRow::GetTrace() const
 
     bool par = false;
     bool cont = false;
-    switch( containment_context )
+    switch( context_type )
     {
         case DBWalk::ROOT:
             s += "ROOT";
@@ -158,8 +144,8 @@ string LinkTableRow::GetTrace() const
         s += ", parent_node=" + Trace(parent_node);
     if( cont )
     {
-        s += ", front=" + Trace(my_container_front);
-        s += ", back=" + Trace(my_container_back);
+        s += ", front=" + Trace(container_front);
+        s += ", back=" + Trace(container_back);
     }
     s += SSPrintf(", co=%d", container_ordinal);
     s += SSPrintf(", bo=%d", root_ordinal);

@@ -421,7 +421,7 @@ SR::XLink MyContainerFrontOperator::EvalXLinkFromRow( const EvalKit &kit,
                                                       const SR::LinkTable::Row &row ) const
 {
   
-    return row.my_container_front;
+    return row.container_front;
 }
 
 
@@ -436,7 +436,7 @@ SR::XLink MyContainerBackOperator::EvalXLinkFromRow( const EvalKit &kit,
                                                      SR::XLink xlink, 
                                                      const SR::LinkTable::Row &row ) const
 {
-    return row.my_container_back;
+    return row.container_back;
 }
 
 
@@ -451,7 +451,7 @@ SR::XLink MySequenceSuccessorOperator::EvalXLinkFromRow( const EvalKit &kit,
                                                          SR::XLink xlink, 
                                                          const SR::LinkTable::Row &row ) const
 {  
-    return row.my_sequence_successor;
+    return row.sequence_successor;
 }
 
 
@@ -475,7 +475,7 @@ SR::XLink MySequencePredecessorOperator::EvalXLinkFromRow( const EvalKit &kit,
                                                            SR::XLink xlink, 
                                                            const SR::LinkTable::Row &row ) const
 {  
-    return row.my_sequence_predecessor;
+    return row.sequence_predecessor;
 }
 
 

@@ -28,15 +28,32 @@ public:
         WIND_OUT
     };
 
+    struct CoreInfo
+    {
+		TreePtr<Node> parent_node;
+		
+		// Index into itemisation of the parent node
+		int item_ordinal;
+		
+		// What type of container is the incoming link?
+		Context context_type;
+		
+		// Pointer to the container (if really a container)
+		ContainerInterface *p_container;
+		
+		// Index inside container (if really a container)
+		DBCommon::OrdinalType container_ordinal; 
+
+		// Iterator on my_container that dereferences to me, if 
+		// IN_SEQUENCE or IN_COLLECTION. Note: only used in regeneration
+		// queries.
+        ContainerInterface::iterator container_it_predecessor;
+        ContainerInterface::iterator container_it;
+	};
+	
     struct WalkInfo
     {
-        TreePtr<Node> parent_x;
-        int item_ordinal;
-		Context context;
-        ContainerInterface *p_xcon;
-        int container_ordinal;
-        ContainerInterface::iterator xit_predecessor;
-        ContainerInterface::iterator xit;
+		CoreInfo core;                		
         const TreePtrInterface *p_x;
         XLink xlink;
         TreePtr<Node> x;

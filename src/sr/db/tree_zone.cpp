@@ -117,7 +117,9 @@ TreeZone::TerminusIterator TreeZone::GetTerminiiEnd() const
 void TreeZone::Patch( FreeZone &&free_zone )
 {	
     // Acts on all copies of the xlink, due to indirection, possibly including root as held by db 
-    base.SetXPtr( free_zone.GetBaseNode() ); 
+    const TreePtrInterface *const_tpi = base.GetTreePtrInterface();
+    TreePtrInterface *tpi = const_cast<TreePtrInterface *>(const_tpi);
+    *tpi = free_zone.GetBaseNode(); 
     
 	// Do a co-walk and populate one at a time. Update our terminii as we go. Cannot use 
 	// SetXPtr() because we need to change the PARENT node, so we need a whole new XLink. Do this

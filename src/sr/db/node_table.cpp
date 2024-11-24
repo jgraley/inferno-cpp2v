@@ -30,13 +30,13 @@ bool NodeTable::HasRow(TreePtr<Node> node) const
 
 bool NodeTable::IsDeclarer(const DBWalk::WalkInfo &walk_info) const
 {
-    switch( walk_info.context )
+    switch( walk_info.core.context_type )
     {
         case DBWalk::SINGULAR:
         case DBWalk::IN_SEQUENCE:
         case DBWalk::IN_COLLECTION:
         {
-            set<const TreePtrInterface *> declared = walk_info.parent_x->GetDeclared();
+            set<const TreePtrInterface *> declared = walk_info.core.parent_node->GetDeclared();
             return declared.count( walk_info.p_x ) > 0;
         }
         default:
