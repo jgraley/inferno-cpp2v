@@ -37,7 +37,7 @@ bool NodeTable::IsDeclarer(const DBWalk::WalkInfo &walk_info) const
         case DBWalk::IN_COLLECTION:
         {
             set<const TreePtrInterface *> declared = walk_info.core.parent_node->GetDeclared();
-            return declared.count( walk_info.p_x ) > 0;
+            return declared.count( walk_info.p_tree_ptr_interface ) > 0;
         }
         default:
         {
@@ -52,7 +52,7 @@ DBWalk::Action NodeTable::GetInsertAction()
 	return [=](const DBWalk::WalkInfo &walk_info)
 	{
         // Create if not already there
-        Row &row = rows[walk_info.x];
+        Row &row = rows[walk_info.node];
         
         InsertSolo( row.incoming_xlinks, walk_info.xlink );    		
         if( IsDeclarer(walk_info) )
@@ -66,14 +66,14 @@ DBWalk::Action NodeTable::GetDeleteAction()
 	return [=](const DBWalk::WalkInfo &walk_info)
 	{
         // Should already be there
-        Row &row = rows.at(walk_info.x);
+        Row &row = rows.at(walk_info.node);
         
         EraseSolo( row.incoming_xlinks, walk_info.xlink );    		
         if( IsDeclarer(walk_info) )
             EraseSolo( row.declaring_xlinks, walk_info.xlink );
             
         if( row.incoming_xlinks.empty() )
-            EraseSolo( rows, walk_info.x );
+            EraseSolo( rows, walk_info.node );
 	};
 }
 

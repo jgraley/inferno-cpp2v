@@ -34,7 +34,6 @@ int ReadArgs::repetitions = 100; // default behaviour
 bool ReadArgs::rep_error = true; // default behaviour
 bool ReadArgs::documentation_graphs = false;
 bool ReadArgs::output_all = false;
-bool ReadArgs::use_incremental = false; 
  
 
 void ReadArgs::Usage(string msg)
@@ -67,7 +66,7 @@ void ReadArgs::Usage(string msg)
                     "-rn<n>      Stop search and replace after n repetitions and do not generate an error.\n"
                     "-re<n>      Stop search and replace after n repetitions and do generate an error.\n"
                     "-f          Output all intermediates: .cpp and .dot. <outfile> is path/basename.\n"
-                    "-ui         Use the more incremental under-construction database update.\n",
+                    "-u<x>       Use feature x.\n",
     		        exename.c_str() );
     exit(1);
 }
@@ -221,10 +220,7 @@ ReadArgs::ReadArgs( int ac, char *av[] )
         else if( option=='u' )
         {
             char use_option = argv[curarg][2];
-            if( use_option=='i' )
-                use_incremental = true;
-            else 
-                Usage("Unknown argument after -u");
+            Usage("Unknown argument after -u");
         }
         else 
         {

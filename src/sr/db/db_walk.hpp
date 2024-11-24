@@ -16,7 +16,6 @@ public:
     enum Context
     {
         ROOT,
-        LEGACY_BASE,
         SINGULAR,
         IN_SEQUENCE,
         IN_COLLECTION
@@ -38,25 +37,24 @@ public:
 		// What type of container is the incoming link?
 		Context context_type;
 		
-		// Pointer to the container (if really a container)
+		// Pointer to the container (if in a container)
 		ContainerInterface *p_container;
 		
-		// Index inside container (if really a container)
+		// Index inside container (if in a container)
 		DBCommon::OrdinalType container_ordinal; 
 
-		// Iterator on my_container that dereferences to me, if 
-		// IN_SEQUENCE or IN_COLLECTION. Note: only used in regeneration
-		// queries.
+		// Iterator on my_container that dereferences to me, if IN_SEQUENCE 
+		// or IN_COLLECTION. Note: only used in regeneration queries.
         ContainerInterface::iterator container_it;
 	};
 	
     struct WalkInfo
     {
-		CoreInfo core;                		
-        const TreePtrInterface *p_x;
+		CoreInfo core;              
+		  		
+        const TreePtrInterface *p_tree_ptr_interface;
         XLink xlink;
-        TreePtr<Node> x;
-        
+        TreePtr<Node> node;        
         const DBCommon::RootRecord *root_record;   
         bool at_terminus;     
         bool at_base;

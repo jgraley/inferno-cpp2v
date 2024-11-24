@@ -41,7 +41,7 @@ DBWalk::Action LinkTable::GetDeleteAction()
 {
 	return [=](const DBWalk::WalkInfo &walk_info)
 	{
-   		EraseSolo( rows, walk_info.p_x );
+   		EraseSolo( rows, walk_info.p_tree_ptr_interface );
 	};
 
     // Good practice to poison rows at terminii. Assuming walker tells us we're at a 
@@ -118,7 +118,7 @@ void LinkTable::GenerateRow(const DBWalk::WalkInfo &walk_info)
 	}
 
 	// Add a row of x_tree_db
-	InsertSolo( rows, make_pair(walk_info.p_x, row) );
+	InsertSolo( rows, make_pair(walk_info.p_tree_ptr_interface, row) );
 }
 
 
