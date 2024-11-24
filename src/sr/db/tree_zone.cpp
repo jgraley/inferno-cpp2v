@@ -122,7 +122,7 @@ void TreeZone::Patch( FreeZone &&free_zone )
     *tpi = free_zone.GetBaseNode(); 
     
 	// Do a co-walk and populate one at a time. Update our terminii as we go. Cannot use 
-	// SetXPtr() because we need to change the PARENT node, so we need a whole new XLink. Do this
+	// TPI because we need to change the PARENT node, so we need a whole new XLink. Do this
 	// under a validity check that all our XLins are inside the new tree.
 	// This is needed because MainTreeReplace() will pass us to MainTreeInsert()
 	FreeZone::TerminusIterator it_t = free_zone.GetTerminiiBegin();	
