@@ -73,7 +73,8 @@ void XTreeDatabase::MainTreeReplace( TreeZone target_tree_zone, FreeZone source_
 	ASSERT( target_tree_zone.GetNumTerminii() == source_free_zone.GetNumTerminii() );	
 	target_tree_zone.DBCheck(this); // Move back to MainTreeReplace once this is empty
 	
-	// Store the link row for the base locally (requires link table insert/delete in parts).
+	// Store the core info for the base locally since the link table will change
+	// as this function executes.
 	const DBWalk::CoreInfo base_info = link_table->GetCoreInfo( target_tree_zone.GetBaseXLink() );
 
     // Update database 
