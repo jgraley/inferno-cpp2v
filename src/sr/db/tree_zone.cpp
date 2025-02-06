@@ -116,21 +116,26 @@ TreeZone::TerminusIterator TreeZone::GetTerminiiEnd() const
 
 void TreeZone::Patch( FreeZone &&free_zone )
 {	
+	//FreeZone displaced_free_zone( base, {} );
+
     // Acts on all copies of the xlink, due to indirection, possibly including root as held by db 
     const TreePtrInterface *const_tpi = base.GetTreePtrInterface();
     TreePtrInterface *tpi = const_cast<TreePtrInterface *>(const_tpi);
-    *tpi = free_zone.GetBaseNode(); 
+    *tpi = free_zone.GetBaseNode(); 	
     
 	// Do a co-walk and populate one at a time. Update our terminii as we go. Cannot use 
 	// TPI because we need to change the PARENT node, so we need a whole new XLink. Do this
-	// under a validity check that all our XLins are inside the new tree.
+	// under a validity check that all our XLinks are inside the new tree.
 	// This is needed because MainTreeReplace() will pass us to MainTreeInsert()
 	FreeZone::TerminusIterator it_t = free_zone.GetTerminiiBegin();	
     for( XLink &tree_terminus_xlink : terminii )
 	{
 		ASSERT( it_t != free_zone.GetTerminiiEnd() ); // length mismatch	
-		shared_ptr<FreeTerminus> free_terminus = *it_t;
 		
+		//displaced_free_zone.AddTerminus( 
+		
+		
+		shared_ptr<FreeTerminus> free_terminus = *it_t;		
 		TreePtr<Node> boundary_node = tree_terminus_xlink.GetChildTreePtr(); // outside the zone		
 		ASSERT( !dynamic_cast<ContainerInterface *>(boundary_node.get()) ); // requirement for GetTreePtrInterface()
 		it_t = free_zone.PopulateTerminus( it_t, boundary_node );		

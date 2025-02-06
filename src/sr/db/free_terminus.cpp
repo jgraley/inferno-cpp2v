@@ -63,8 +63,7 @@ FreeContainerTerminus::FreeContainerTerminus( TreePtr<Node> parent_node,
                                       ContainerInterface::iterator it_dest_placeholder_ ) :
     FreeTerminus( parent_node ),
     dest_container( dest_container_ ),
-    it_dest_placeholder( it_dest_placeholder_ ),
-    it_dest_populated( dest_container->end() )
+    it_dest_placeholder( it_dest_placeholder_ )
 {
     Validate();
 }
@@ -85,12 +84,12 @@ void FreeContainerTerminus::Populate( TreePtr<Node> child_base,
 	ASSERT( child_base ); // perhaps we tried to populate with an empty zone?
     ASSERT( !populated );
     populated = true;
-
-    // We don't need the placeholder any more
-	ContainerInterface::iterator it_after = dest_container->erase( it_dest_placeholder );
 	
     if( ContainerInterface *child_container = dynamic_cast<ContainerInterface *>(child_base.get()) )
     {            		
+		// We don't need the placeholder any more
+		ContainerInterface::iterator it_after = dest_container->erase( it_dest_placeholder );
+		
         // Child zone base has ContainerInterface, so it's a SubContainer. We get here due to         
         // FreeZones created by StarAgent. Expand it and populate into the destination, which is also a SubContainer.         
         for( ContainerInterface::iterator it_child = child_container->begin();
@@ -116,10 +115,7 @@ void FreeContainerTerminus::Populate( TreePtr<Node> child_base,
     else
     {
         // Populate terminus with singular-based zone.
-        ASSERT( child_base );
-        dest_container->insert( it_after, child_base ); // inserts before it_after
-        it_dest_populated = it_after;
-        --it_dest_populated;
+        it_dest_placeholder.Overwrite(&child_base); 
     }    
 }
 
@@ -157,9 +153,10 @@ shared_ptr<FreeContainerTerminus> FreeContainerTerminus::FindMatchingTerminus( C
 const TreePtrInterface *FreeContainerTerminus::GetTreePtrInterface() const
 {	
 	// Must have populated, and not with a SubContainer
-	ASSERT( it_dest_populated != dest_container->end() ); 
+	ASSERT( populated ); 
+	ASSERT( it_dest_placeholder );
 	
-	const TreePtrInterface *dest_tree_ptr = &*it_dest_populated;
+	const TreePtrInterface *dest_tree_ptr = &*it_dest_placeholder;
 	ASSERT( dest_tree_ptr );	
 	return dest_tree_ptr;
 }                                     

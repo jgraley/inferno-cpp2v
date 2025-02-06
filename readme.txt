@@ -61,6 +61,8 @@ indent        (makes reading inferno C output easier)
 doxygen       (automated class documentation)
 imagemagick   (only for web page generation TODO don't need this now using svg)
 binutils-gold (installing this makes gcc use the gold linker which speeds up builds)
+valgrind      (profiling and other handy stuff)
+kcachegrind   (GUI for profiles)
 
 You also need to install SystemC (version 2.2.0) and set up a symlink in this directory pointing to the installation. See docs/program/systemc_installation_notes.txt for more info.
 

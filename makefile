@@ -63,7 +63,7 @@ clean_libclang%.a :
 STANDARD_LIBS += -lstdc++
 BOOST_LIBS += -lboost_context
 inferno.exe : makefile makefile.common build/inferno.a $(LLVM_CLANG_LIB_PATHS)
-	$(ICC) build/inferno.a $(LLVM_CLANG_LIB_PATHS) $(STANDARD_LIBS) $(BOOST_LIBS) -fuse-ld=gold -ggdb -pg -no-pie -o inferno.exe
+	$(ICC) build/inferno.a $(LLVM_CLANG_LIB_PATHS) $(STANDARD_LIBS) $(BOOST_LIBS) -fuse-ld=gold $(OPTIONS) -no-pie -o inferno.exe
 
 #
 # Build the doxygen docs
