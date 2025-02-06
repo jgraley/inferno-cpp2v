@@ -2,7 +2,7 @@
 #define DUPLICATE_HPP
 
 #include "../link.hpp"
-#include "free_terminus.hpp"
+#include "mutator.hpp"
 
 namespace SR
 { 
@@ -14,11 +14,11 @@ public:
     struct TerminusInfo
     {
         // Actions on finding terminus:
-        // 1. FreeTerminus is overwritten with dest, which can be NULL.
+        // 1. Terminus is overwritten with dest, which can be NULL.
         // 2. dest is set to NULL so you can check we got them all.
-        // 3. If dest was NULL (=placeholder value), updater is created on it.
+        // 3. If dest was NULL (=placeholder value), mutator is created on it.
         TreePtr<Node> dest;
-        shared_ptr<FreeTerminus> updater;
+        shared_ptr<Mutator> mutator;
     };
     
     typedef map<XLink, TerminusInfo> TerminiiMap;

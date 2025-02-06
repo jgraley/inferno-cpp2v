@@ -84,17 +84,17 @@ FreeZone TreeZone::Duplicate() const
     // DuplicateSubtree() to use.
     Duplicate::TerminiiMap duplicator_terminus_map;
     for( XLink terminus_upd : GetTerminusXLinks() ) 
-        duplicator_terminus_map[terminus_upd] = { TreePtr<Node>(), shared_ptr<FreeTerminus>() };
+        duplicator_terminus_map[terminus_upd] = { TreePtr<Node>(), shared_ptr<Mutator>() };
 
     // Duplicate the subtree, populating from the map.
     TreePtr<Node> new_base_x = Duplicate::DuplicateSubtree( GetBaseXLink(), 
                                                             duplicator_terminus_map );   
     
-    list<shared_ptr<FreeTerminus>> free_zone_terminii;
+    list<shared_ptr<Mutator>> free_zone_terminii;
     for( XLink terminus_upd : GetTerminusXLinks() )
     {
-		ASSERTS( duplicator_terminus_map[terminus_upd].updater );
-        free_zone_terminii.push_back( duplicator_terminus_map[terminus_upd].updater );
+		ASSERTS( duplicator_terminus_map[terminus_upd].mutator );
+        free_zone_terminii.push_back( duplicator_terminus_map[terminus_upd].mutator );
 	}
 
     // Create a new zone for the result.
@@ -135,13 +135,13 @@ void TreeZone::Patch( FreeZone &&free_zone )
 		//displaced_free_zone.AddTerminus( 
 		
 		
-		shared_ptr<FreeTerminus> free_terminus = *it_t;		
+		shared_ptr<Mutator> mutator = *it_t;		
 		TreePtr<Node> boundary_node = tree_terminus_xlink.GetChildTreePtr(); // outside the zone		
 		ASSERT( !dynamic_cast<ContainerInterface *>(boundary_node.get()) ); // requirement for GetTreePtrInterface()
 		it_t = free_zone.PopulateTerminus( it_t, boundary_node );		
 		
-		TreePtr<Node> free_parent_node = free_terminus->GetParentNode();
-		const TreePtrInterface *free_tpi = free_terminus->GetTreePtrInterface(); // must be taken after the populate		
+		TreePtr<Node> free_parent_node = mutator->GetParentNode();
+		const TreePtrInterface *free_tpi = mutator->GetTreePtrInterface(); // must be taken after the populate		
 		ASSERT( *free_tpi == boundary_node );
 		tree_terminus_xlink = XLink(free_parent_node, free_tpi);
 	} 

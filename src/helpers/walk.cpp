@@ -228,7 +228,7 @@ bool Walk_iterator::operator==( const ContainerInterface::iterator_interface &ib
 }
 
 
-void Walk_iterator::Overwrite( Walk_iterator::pointer v ) const
+void Walk_iterator::Mutate( Walk_iterator::pointer v ) const
 {
     ASSERT( !done )("Already advanced over everything; reached end of walk");
     ASSERT( !IsAtEndOfChildren() );
@@ -239,7 +239,7 @@ void Walk_iterator::Overwrite( Walk_iterator::pointer v ) const
     }
     else
     {
-        state.back().iterator.Overwrite( v );
+        state.back().iterator.Mutate( v );
     }
 }
 

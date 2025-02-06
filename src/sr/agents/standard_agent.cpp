@@ -652,9 +652,9 @@ Agent::ReplaceExprPtr StandardAgent::GenFreeZoneExprOverlay( const ReplaceKit &k
 				TRACE("Copying container size %d from my_con\n", (*my_con).size() );
 				for( const TreePtrInterface &my_elt : *my_con )
 				{
-					// Make a placeholder in the dest container for the updater to point to
-					ContainerInterface::iterator dest_it = dest_con->insert( FreeContainerTerminus::MakePlaceholder() );
-					zone.AddTerminus( make_shared<FreeContainerTerminus>(dest, dest_con, dest_it) );     
+					// Make a placeholder in the dest container for the mutator to point to
+					ContainerInterface::iterator dest_it = dest_con->insert( ContainerMutator::MakePlaceholder() );
+					zone.AddTerminus( make_shared<ContainerMutator>(dest, dest_con, dest_it) );     
 					
 					ASSERT( my_elt )("Some element of member %d (", j)(*my_con)(") of ")(*this)(" was nullptr\n");
 					TRACE("Got ")(*my_elt)("\n");
@@ -667,9 +667,9 @@ Agent::ReplaceExprPtr StandardAgent::GenFreeZoneExprOverlay( const ReplaceKit &k
 				TRACE("Copying container size %d from key\n", under_container->size() );
 				for( const TreePtrInterface &under_elt : *under_container )
 				{
-					// Make a placeholder in the dest container for the updater to point to
-					ContainerInterface::iterator dest_it = dest_con->insert( FreeContainerTerminus::MakePlaceholder() );
-					zone.AddTerminus( make_shared<FreeContainerTerminus>(dest, dest_con, dest_it) );     
+					// Make a placeholder in the dest container for the mutator to point to
+					ContainerInterface::iterator dest_it = dest_con->insert( ContainerMutator::MakePlaceholder() );
+					zone.AddTerminus( make_shared<ContainerMutator>(dest, dest_con, dest_it) );     
 
 					ASSERT( under_elt ); // present simplified scheme disallows nullptr
 					TreeZone under_zone = TreeZone::CreateSubtree(XLink(under_node, &under_elt) );
@@ -681,7 +681,7 @@ Agent::ReplaceExprPtr StandardAgent::GenFreeZoneExprOverlay( const ReplaceKit &k
         {
 			TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
 			ASSERT( dest_singular )( "itemise for target didn't match itemise for pattern");
-			zone.AddTerminus( make_shared<FreeSingularTerminus>(dest, dest_singular) );            
+			zone.AddTerminus( make_shared<SingularMutator>(dest, dest_singular) );            
 
 			if( should_overlay )
 			{
@@ -755,9 +755,9 @@ Agent::ReplaceExprPtr StandardAgent::GenFreeZoneExprNormal( const ReplaceKit &ki
 		        ASSERT( my_elt )("Some element of member %d (", i)(*my_con)(") of ")(*this)(" was nullptr\n");
 		        TRACE("Got ")(*my_elt)("\n");
 		        
-                // Make a placeholder in the dest container for the updater to point to
-                ContainerInterface::iterator dest_it = dest_con->insert( FreeContainerTerminus::MakePlaceholder() );
-                zone.AddTerminus( make_shared<FreeContainerTerminus>(dest, dest_con, dest_it) );    
+                // Make a placeholder in the dest container for the mutator to point to
+                ContainerInterface::iterator dest_it = dest_con->insert( ContainerMutator::MakePlaceholder() );
+                zone.AddTerminus( make_shared<ContainerMutator>(dest, dest_con, dest_it) );    
 
                 PatternLink my_elt_plink( this, &my_elt );
 				child_commands.push_back( my_elt_plink.GetChildAgent()->GenReplaceExpr(kit, my_elt_plink) );               
@@ -768,7 +768,7 @@ Agent::ReplaceExprPtr StandardAgent::GenFreeZoneExprNormal( const ReplaceKit &ki
             TRACE("Copying single element\n");
             ASSERT( *my_singular )("Member %d (", i)(*my_singular)(") of ")(*this)(" was nullptr when not overlaying\n");            
             TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
-            zone.AddTerminus( make_shared<FreeSingularTerminus>(dest, dest_singular) );            
+            zone.AddTerminus( make_shared<SingularMutator>(dest, dest_singular) );            
 
             PatternLink my_singular_plink( this, my_singular );                    
 			child_commands.push_back( my_singular_plink.GetChildAgent()->GenReplaceExpr(kit, my_singular_plink) );           
@@ -788,7 +788,7 @@ Graphable::Block StandardAgent::GetGraphBlockInfo() const
 	// Inject a non-trivial pre-restriction detector
 	Block block = Node::GetGraphBlockInfo();
 
-	// Overwrite link phase depending on the phase we're in
+	// Over-write link phase depending on the phase we're in
     for( Graphable::SubBlock &sub_block : block.sub_blocks ) 
         for( shared_ptr<Graphable::Link> link : sub_block.links )
             link->phase = phase;

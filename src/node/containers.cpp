@@ -183,11 +183,11 @@ bool ContainerInterface::iterator::operator!=( const iterator &i ) const // cova
 }
 
 
-void ContainerInterface::iterator::Overwrite( const value_type *v ) const
+void ContainerInterface::iterator::Mutate( const value_type *v ) const
 {
     CHECK_NOT_REACHED_ON_SUBCLASS
-    ASSERT(pib)("Attempt to Overwrite through uninitialised iterator");
-    pib->Overwrite( v );
+    ASSERT(pib)("Attempt to Mutate through uninitialised iterator");
+    pib->Mutate( v );
 }
         
 

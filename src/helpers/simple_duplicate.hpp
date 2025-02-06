@@ -1,4 +1,4 @@
-// A deep copy for trees or subtrees. FreeTerminus support removed because not precise 
+// A deep copy for trees or subtrees. Mutator support removed because not precise 
 // enough to find the right link (and unused)
 
 #ifndef SIMPLE_DUPLICATE_HPP

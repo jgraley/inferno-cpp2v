@@ -18,7 +18,7 @@ FreeZone FreeZone::CreateSubtree( TreePtr<Node> base )
 FreeZone FreeZone::CreateEmpty()
 {
     return FreeZone( TreePtr<Node>(), // NULL
-                     { shared_ptr<FreeTerminus>() } ); // One element, NULL
+                     { shared_ptr<Mutator>() } ); // One element, NULL
 }
 
 
@@ -27,7 +27,7 @@ FreeZone::FreeZone()
 }
 
 
-FreeZone::FreeZone( TreePtr<Node> base_, list<shared_ptr<FreeTerminus>> &&terminii_ ) : 
+FreeZone::FreeZone( TreePtr<Node> base_, list<shared_ptr<Mutator>> &&terminii_ ) : 
     base( base_ ),
     terminii( move(terminii_) )
 {
@@ -71,7 +71,7 @@ int FreeZone::GetNumTerminii() const
 }
 
 
-void FreeZone::AddTerminus(shared_ptr<FreeTerminus> terminus)
+void FreeZone::AddTerminus(shared_ptr<Mutator> terminus)
 {
 	// Can't use this to make an empty zone
 	ASSERT( base );

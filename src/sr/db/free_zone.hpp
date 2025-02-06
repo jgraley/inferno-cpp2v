@@ -5,7 +5,7 @@
 #include "../link.hpp"
 #include "common/standard.hpp"
 #include "node/specialise_oostd.hpp"
-#include "free_terminus.hpp"
+#include "mutator.hpp"
 
 #include <unordered_set>
 
@@ -21,13 +21,13 @@ namespace SR
 class FreeZone : public Zone
 { 
 public:
-	typedef list<shared_ptr<FreeTerminus>>::iterator TerminusIterator;
+	typedef list<shared_ptr<Mutator>>::iterator TerminusIterator;
 
     static FreeZone CreateSubtree( TreePtr<Node> base );
     static FreeZone CreateEmpty();
 
 	FreeZone();
-    explicit FreeZone( TreePtr<Node> base, list<shared_ptr<FreeTerminus>> &&terminii );
+    explicit FreeZone( TreePtr<Node> base, list<shared_ptr<Mutator>> &&terminii );
 
 	FreeZone &operator=( const FreeZone &other );
 
@@ -41,7 +41,7 @@ public:
     void MergeAll( list<unique_ptr<FreeZone>> &&child_zones );     
 	TerminusIterator MergeTerminus( TerminusIterator it_t, 
                                     unique_ptr<FreeZone> &&child_zone );
-    void AddTerminus(shared_ptr<FreeTerminus> terminus);      
+    void AddTerminus(shared_ptr<Mutator> terminus);      
     TerminusIterator GetTerminiiBegin();
     TerminusIterator GetTerminiiEnd();
 
@@ -49,7 +49,7 @@ public:
     
 private:
     TreePtr<Node> base;
-    list<shared_ptr<FreeTerminus>> terminii;
+    list<shared_ptr<Mutator>> terminii;
 };
  
 }

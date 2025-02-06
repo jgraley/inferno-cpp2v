@@ -177,11 +177,11 @@ bool FlattenNode_iterator::operator==( const ContainerInterface::iterator_interf
 }*/
 
 
-void FlattenNode_iterator::Overwrite( FlattenNode_iterator::pointer v ) const
+void FlattenNode_iterator::Mutate( FlattenNode_iterator::pointer v ) const
 {
     ASSERT( !IsAtEnd() );
 	if( dynamic_cast<ContainerInterface *>(GetCurrentMember()) )
-        cit.Overwrite( v );
+        cit.Mutate( v );
     else if( TreePtrInterface *singular = dynamic_cast<TreePtrInterface *>(GetCurrentMember()) )
         *singular = *v;
     else

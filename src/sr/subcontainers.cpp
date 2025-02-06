@@ -149,10 +149,10 @@ bool SubContainerRangeExclusions::exclusion_iterator::operator!=( const exclusio
 }
 
 
-void SubContainerRangeExclusions::exclusion_iterator::Overwrite( const value_type *v ) const
+void SubContainerRangeExclusions::exclusion_iterator::Mutate( const value_type *v ) const
 {
-    ASSERT(pib)("Attempt to Overwrite through uninitialised iterator");
-    pib->Overwrite( v );
+    ASSERT(pib)("Attempt to Mutate through uninitialised iterator");
+    pib->Mutate( v );
 }
 
         

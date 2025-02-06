@@ -1,5 +1,5 @@
-#ifndef FREE_TERMINUS_HPP
-#define FREE_TERMINUS_HPP
+#ifndef MUTATOR_HPP
+#define MUTATOR_HPP
 
 #include "../link.hpp"
 #include "common/standard.hpp"
@@ -10,15 +10,15 @@
 namespace SR 
 {
 
-// ------------------------- FreeTerminus --------------------------    
+// ------------------------- Mutator --------------------------    
     
-class FreeTerminus : public Traceable
+class Mutator : public Traceable
 {
 public:
-	FreeTerminus( TreePtr<Node> parent_node_ );
+	Mutator( TreePtr<Node> parent_node_ );
 	
     virtual void Populate( TreePtr<Node> child_base,                               
-                           list<shared_ptr<FreeTerminus>> child_terminii = {} ) = 0;
+                           list<shared_ptr<Mutator>> child_terminii = {} ) = 0;
 	TreePtr<Node> GetParentNode() const;
 	
 	// Only valid after populate
@@ -28,14 +28,14 @@ private:
 	TreePtr<Node> parent_node;
 };    
     
-// ------------------------- FreeSingularTerminus --------------------------    
+// ------------------------- SingularMutator --------------------------    
     
-class FreeSingularTerminus : public FreeTerminus
+class SingularMutator : public Mutator
 {
 public:
-    explicit FreeSingularTerminus( TreePtr<Node> parent_node, TreePtrInterface *dest_tree_ptr_ );
+    explicit SingularMutator( TreePtr<Node> parent_node, TreePtrInterface *dest_tree_ptr_ );
     void Populate( TreePtr<Node> child_base,                               
-                   list<shared_ptr<FreeTerminus>> child_terminii = {} ) final;
+                   list<shared_ptr<Mutator>> child_terminii = {} ) final;
 	const TreePtrInterface *GetTreePtrInterface() const final;
     
     string GetTrace() const;
@@ -44,9 +44,9 @@ private:
     TreePtrInterface * const dest_tree_ptr;
 };    
     
-// ------------------------- FreeContainerTerminus --------------------------    
+// ------------------------- ContainerMutator --------------------------    
     
-class FreeContainerTerminus : public FreeTerminus
+class ContainerMutator : public Mutator
 {
     /**
      * Why all this complicated placeholder business then?
@@ -62,20 +62,20 @@ class FreeContainerTerminus : public FreeTerminus
      */  
      	
 public:
-    explicit FreeContainerTerminus( TreePtr<Node> parent_node, 
+    explicit ContainerMutator( TreePtr<Node> parent_node, 
 								ContainerInterface *dest_container_,
                                 ContainerInterface::iterator it_dest_placeholder_ );             
 
-	FreeContainerTerminus &operator=( const FreeContainerTerminus &other );
+	ContainerMutator &operator=( const ContainerMutator &other );
 
     void Populate( TreePtr<Node> child_base, 
-                   list<shared_ptr<FreeTerminus>> child_terminii = {} ) final;
+                   list<shared_ptr<Mutator>> child_terminii = {} ) final;
     
     static TreePtr<Node> MakePlaceholder();
     
-    static shared_ptr<FreeContainerTerminus> FindMatchingTerminus( ContainerInterface *container,
+    static shared_ptr<ContainerMutator> FindMatchingTerminus( ContainerInterface *container,
                                                                ContainerInterface::iterator it_placeholder,
-                                                               list<shared_ptr<FreeTerminus>> &candidate_terminii );
+                                                               list<shared_ptr<Mutator>> &candidate_terminii );
 	const TreePtrInterface *GetTreePtrInterface() const final;
     
     void Validate() const;

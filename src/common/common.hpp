@@ -539,7 +539,7 @@ map<typename KEYS_TYPE::value_type, typename VALUES_TYPE::value_type> ZipToMap( 
 }
 
 
-// Overwrite some values of a vector as dictated by a map. dest_vec must already be big enough.
+// Over-write some values of a vector as dictated by a map. dest_vec must already be big enough.
 template<typename VALUE_TYPE>
 void ScatterInto( vector<VALUE_TYPE> &dest_vec, const map<int, VALUE_TYPE> &my_map )
 {

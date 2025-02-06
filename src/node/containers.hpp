@@ -35,7 +35,7 @@ public:
         virtual const TreePtrInterface &operator*() const = 0;
         virtual const TreePtrInterface *operator->() const = 0;
 		virtual bool operator==( const iterator_interface &ib ) const = 0;
-		virtual void Overwrite( const TreePtrInterface *v ) const = 0;
+		virtual void Mutate( const TreePtrInterface *v ) const = 0;
 		virtual const bool IsOrdered() const = 0;
 	};
 
@@ -66,7 +66,7 @@ public:
         bool operator==( const iterator &i ) const; // covariant param;
 		bool operator!=( const iterator_interface &ib ) const; // isovariant param;
 		bool operator!=( const iterator &i ) const; // covariant param;
-		void Overwrite( const value_type *v ) const;
+		void Mutate( const value_type *v ) const;
 		const bool IsOrdered() const;
 		iterator_interface *GetUnderlyingIterator() const;
 		explicit operator string() const;
@@ -245,9 +245,9 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
             ni->Impl::iterator::operator=( (typename Impl::iterator &)*this );
 			return ni;
 		}
-    	virtual void Overwrite( const TreePtrInterface *v ) const
+    	virtual void Mutate( const TreePtrInterface *v ) const
 		{
-		    // JSG Overwrite() just writes through the pointer got from dereferencing the iterator,
+		    // JSG Mutate() just writes through the pointer got from dereferencing the iterator,
 		    // because in Sequences (ordererd containers) elements may be modified.
             // Avoid delegating to ContainerInterface::iterator.
     		value_type x( value_type::InferredDynamicCast(*v) );
@@ -427,11 +427,11 @@ struct SimpleAssociativeContainer : virtual ContainerCommon< ASSOCIATIVE_IMPL< T
             ni->Impl::iterator::operator=( (typename Impl::iterator &)*this );
 			return ni;
 		}
-    	virtual void Overwrite( const TreePtrInterface *v ) const
+    	virtual void Mutate( const TreePtrInterface *v ) const
 		{
 		    // SimpleAssociativeContainers (unordered containers) do not allow elements to be modified
 		    // because the internal data structure depends on element values. So we 
-		    // erase the old element and insert the new one; thus, Overwrite() should not be assumed O(1)
+		    // erase the old element and insert the new one; thus, Mutate() should not be assumed O(1)
             // Avoid delegating to ContainerInterface::iterator.
     		value_type s( value_type::InferredDynamicCast(*v) );
     		((Impl *)owner)->erase( *this );

@@ -150,7 +150,7 @@ void PatternLink::Redirect( const TreePtrInterface &new_parent_pattern )
 #else
 #error If associative containers are to be used in nodes, the const \
 cast wont be safe and this function needs to be able to call \
-Overwrite() on the container.
+Mutate() on the container.
 #endif
 }
 
