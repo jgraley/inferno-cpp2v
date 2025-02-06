@@ -45,17 +45,29 @@ public:
     TerminusIterator GetTerminiiBegin() const;
     TerminusIterator GetTerminiiEnd() const;
     
-    void Patch( FreeZone &&free_zone );
-
     string GetTrace() const;
 
     void DBCheck(const XTreeDatabase *db) const;
 
-private:
-
+protected:
     XLink base;    
     vector<XLink> terminii;    
 };
+
+// ------------------------- MutableTreeZone --------------------------
+ 
+class MutableTreeZone : public TreeZone
+{
+public:
+	explicit MutableTreeZone( TreeZone tz, unique_ptr<Mutator> &&base_mutator_ );
+
+    void Patch( FreeZone &&free_zone );
+	
+private:
+	unique_ptr<Mutator> base_mutator;
+};
+ 
+ 
  
 }
 

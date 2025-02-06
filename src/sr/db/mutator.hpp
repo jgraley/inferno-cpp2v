@@ -17,8 +17,8 @@ class Mutator : public Traceable
 public:
 	Mutator( TreePtr<Node> parent_node_ );
 	
-    virtual void Populate( TreePtr<Node> child_base,                               
-                           list<shared_ptr<Mutator>> child_terminii = {} ) = 0;
+    virtual void Mutate( TreePtr<Node> child_base,                               
+                         list<shared_ptr<Mutator>> child_terminii = {} ) = 0;
 	TreePtr<Node> GetParentNode() const;
 	
 	// Only valid after populate
@@ -34,8 +34,8 @@ class SingularMutator : public Mutator
 {
 public:
     explicit SingularMutator( TreePtr<Node> parent_node, TreePtrInterface *dest_tree_ptr_ );
-    void Populate( TreePtr<Node> child_base,                               
-                   list<shared_ptr<Mutator>> child_terminii = {} ) final;
+    void Mutate( TreePtr<Node> child_base,                               
+                 list<shared_ptr<Mutator>> child_terminii = {} ) final;
 	const TreePtrInterface *GetTreePtrInterface() const final;
     
     string GetTrace() const;
@@ -68,8 +68,8 @@ public:
 
 	ContainerMutator &operator=( const ContainerMutator &other );
 
-    void Populate( TreePtr<Node> child_base, 
-                   list<shared_ptr<Mutator>> child_terminii = {} ) final;
+    void Mutate( TreePtr<Node> child_base, 
+                 list<shared_ptr<Mutator>> child_terminii = {} ) final;
     
     static TreePtr<Node> MakePlaceholder();
     

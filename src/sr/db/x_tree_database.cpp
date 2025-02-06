@@ -72,19 +72,20 @@ void XTreeDatabase::MainTreeReplace( TreeZone target_tree_zone, FreeZone source_
 {
 	ASSERT( target_tree_zone.GetNumTerminii() == source_free_zone.GetNumTerminii() );	
 	target_tree_zone.DBCheck(this); // Move back to MainTreeReplace once this is empty
+	MutableTreeZone mutable_target_tree_zone( target_tree_zone, link_table->GetMutator(target_tree_zone.GetBaseXLink()) );
 	
 	// Store the core info for the base locally since the link table will change
 	// as this function executes.
 	const DBWalk::CoreInfo base_info = link_table->GetCoreInfo( target_tree_zone.GetBaseXLink() );
 
     // Update database 
-    MainTreeDelete( target_tree_zone, &base_info );   
+    MainTreeDelete( mutable_target_tree_zone, &base_info );   
     
     // Patch the tree
-    target_tree_zone.Patch( move(source_free_zone) ); 
+    mutable_target_tree_zone.Patch( move(source_free_zone) ); 
 
     // Update database 
-    MainTreeInsert( target_tree_zone, &base_info );   	
+    MainTreeInsert( mutable_target_tree_zone, &base_info );   	
 }
 
 

@@ -49,8 +49,10 @@ public:
 	
 	void GenerateRow(const DBWalk::WalkInfo &walk_info);
 	
-	string GetTrace() const;
+	unique_ptr<Mutator> GetMutator(XLink xlink) const;
 
+	string GetTrace() const;
+	
 //private:
 	typedef const TreePtrInterface * Key;
 

@@ -9,7 +9,6 @@ using namespace SR;
 Mutator::Mutator( TreePtr<Node> parent_node_ ) :
 	parent_node( parent_node_ )
 {
-	ASSERT( parent_node );
 }	
 
 
@@ -27,8 +26,8 @@ SingularMutator::SingularMutator( TreePtr<Node> parent_node, TreePtrInterface *d
 }
 
 
-void SingularMutator::Populate( TreePtr<Node> child_base, 
-                                 list<shared_ptr<Mutator>> child_terminii )
+void SingularMutator::Mutate( TreePtr<Node> child_base, 
+                              list<shared_ptr<Mutator>> child_terminii )
 {
 	ASSERT( child_base ); // perhaps we tried to populate with an empty zone?
 
@@ -78,8 +77,8 @@ ContainerMutator &ContainerMutator::operator=( const ContainerMutator &other )
 }
 
 
-void ContainerMutator::Populate( TreePtr<Node> child_base, 
-                                  list<shared_ptr<Mutator>> child_terminii )
+void ContainerMutator::Mutate( TreePtr<Node> child_base, 
+                               list<shared_ptr<Mutator>> child_terminii )
 {
 	ASSERT( child_base ); // perhaps we tried to populate with an empty zone?
     ASSERT( !populated );

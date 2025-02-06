@@ -112,19 +112,42 @@ void LinkTable::GenerateRow(const DBWalk::WalkInfo &walk_info)
 			row.container_back = XLink( walk_info.core.parent_node, &(walk_info.core.p_container->back()) );
 			break;
 		}
-        default:
-            ASSERTFAIL(); // could be UNKNOWN but that's not allowed 
-            // TODO we have to add support for this. Assuming it's called BASE, we'll need a base_context 
-            // object which could be returned from Delete() or a new getter method. Or the whole
-            // Delete->Insert cycle could be made a 2-beat transaction with its own classes. Delete()
-            // or whatever would get it from the current XLink row at the base location before deletion.
-            
-            // We also have to fix child node entries at terminii. Assuming walker tells us we're at a 
-            // terminus, we can look at children ourself (walker won't visit them) and fix up their rows.
 	}
 
 	// Add a row of x_tree_db
 	InsertSolo( rows, make_pair(walk_info.p_tree_ptr_interface, row) );
+}
+
+
+unique_ptr<Mutator> LinkTable::GetMutator(XLink xlink) const
+{
+	const LinkTable::Row &row = GetRow(xlink);
+	
+	switch( row.context_type )
+	{
+		case DBWalk::ROOT:
+		{
+			// We're still const casting here, TODO
+			const TreePtrInterface *const_tpi = xlink.GetTreePtrInterface();
+			TreePtrInterface *tpi = const_cast<TreePtrInterface *>(const_tpi);
+			return make_unique<SingularMutator>( row.parent_node, tpi );
+		}	
+		case DBWalk::SINGULAR:
+		{
+			vector< Itemiser::Element * > x_items = row.parent_node->Itemise();
+			Itemiser::Element *xe = x_items[row.item_ordinal];		
+			auto p_x_singular = dynamic_cast<TreePtrInterface *>(xe);
+			ASSERT( p_x_singular );
+			return make_unique<SingularMutator>( row.parent_node, p_x_singular );
+		}
+		case DBWalk::IN_SEQUENCE:
+		case DBWalk::IN_COLLECTION: 
+		{
+			// COLLECTION is the motivating case: its elements are const, so we neet Mutate() to change them
+			return make_unique<ContainerMutator>( row.parent_node, row.p_container, row.container_it );			
+		}
+	}	
+	ASSERTFAIL();
 }
 
 
