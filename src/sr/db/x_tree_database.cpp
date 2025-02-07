@@ -104,7 +104,7 @@ void XTreeDatabase::MainTreeDelete(TreeZone zone, const DBWalk::CoreInfo *base_i
 	actions2.push_back( node_table->GetDeleteAction() );
 	actions2.push_back( link_table->GetDeleteAction() );
 	actions2.push_back( domain->GetDeleteAction() );
-    db_walker.WalkSubtree( &actions2, zone.GetBaseXLink(), &roots[main_root_xlink], DBWalk::WIND_OUT, base_info );   
+    db_walker.WalkZone( &actions2, zone, &roots[main_root_xlink], DBWalk::WIND_OUT, base_info );   
 }
 
 
@@ -117,7 +117,7 @@ void XTreeDatabase::MainTreeInsert(TreeZone zone, const DBWalk::CoreInfo *base_i
 	actions.push_back( domain->GetInsertAction() );
 	actions.push_back( link_table->GetInsertAction() );
 	actions.push_back( node_table->GetInsertAction() );
-    db_walker.WalkSubtree( &actions, zone.GetBaseXLink(), &roots[main_root_xlink], DBWalk::WIND_IN, base_info );
+    db_walker.WalkZone( &actions, zone, &roots[main_root_xlink], DBWalk::WIND_IN, base_info );
 
 	DBWalk::Actions actions3;
 	actions3.push_back( orderings->GetInsertAction() );

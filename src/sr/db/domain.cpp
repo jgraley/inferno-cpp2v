@@ -18,8 +18,7 @@ DBWalk::Action Domain::GetDeleteAction()
 {
 	return [=](const DBWalk::WalkInfo &walk_info)
 	{        
-		if( !walk_info.at_terminus )
-			EraseSolo( unordered_domain, walk_info.xlink );
+		EraseSolo( unordered_domain, walk_info.xlink );
 	};
 }
 
@@ -28,8 +27,7 @@ DBWalk::Action Domain::GetInsertAction()
 {
 	return [=](const DBWalk::WalkInfo &walk_info)
 	{        
-		if( !walk_info.at_terminus )
-			InsertSolo( unordered_domain, walk_info.xlink );   
+		InsertSolo( unordered_domain, walk_info.xlink );   
 	};
 }
 
