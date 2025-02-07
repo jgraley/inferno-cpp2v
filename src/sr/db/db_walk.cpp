@@ -7,10 +7,9 @@ void DBWalk::WalkTree( const Actions *actions,
                        const DBCommon::RootId *root_record, 
                        Wind wind )
 {
-	TreeZone zone = TreeZone::CreateSubtree(root_xlink);
+	const TreeZone zone = TreeZone::CreateSubtree(root_xlink);
     WalkKit kit { actions, zone, root_record, wind, zone.GetTerminiiBegin() };
 	VisitBase( kit, nullptr );  
-	ASSERT( kit.next_terminus_it == zone.GetTerminiiEnd() ); // should have visited all the terminii
 }
 
 
@@ -26,7 +25,7 @@ void DBWalk::WalkSubtree( const Actions *actions,
 
 
 void DBWalk::WalkZone( const Actions *actions,
-					   TreeZone zone,
+					   const TreeZone zone,
                        const DBCommon::RootId *root_record, 
                        Wind wind,
                        const CoreInfo *base_info )

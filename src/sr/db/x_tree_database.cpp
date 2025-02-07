@@ -98,20 +98,13 @@ void XTreeDatabase::MainTreeDelete(TreeZone zone, const DBWalk::CoreInfo *base_i
     DBWalk::Actions actions;
 	actions.push_back( domain_extension->GetDeleteAction() );
 	actions.push_back( orderings->GetDeleteAction() );
-	actions.push_back( node_table->GetDeleteAction() );
-	actions.push_back( link_table->GetDeleteAction() );
-	actions.push_back( domain->GetDeleteAction() );
+    db_walker.WalkZone( &actions, zone, &roots[main_root_xlink], DBWalk::WIND_OUT, base_info );   
 
-    // TODO be able to supply ROOT or the new BASE depending on whether 
-    // we're being asked to act at a root. Fix up eg in link table where 
-    // we need to tolerate multiple calls at ROOT not just one at InitalBuild()
-    db_walker.WalkSubtree( &actions, zone.GetBaseXLink(), &roots[main_root_xlink], DBWalk::WIND_OUT, base_info );   
-
-	while(!de_extra_delete_queue.empty())
-	{
-		ExtraTreeDelete( de_extra_delete_queue.front() );
-		de_extra_delete_queue.pop();
-	}
+	DBWalk::Actions actions2;
+	actions2.push_back( node_table->GetDeleteAction() );
+	actions2.push_back( link_table->GetDeleteAction() );
+	actions2.push_back( domain->GetDeleteAction() );
+    db_walker.WalkSubtree( &actions2, zone.GetBaseXLink(), &roots[main_root_xlink], DBWalk::WIND_OUT, base_info );   
 }
 
 
@@ -124,15 +117,23 @@ void XTreeDatabase::MainTreeInsert(TreeZone zone, const DBWalk::CoreInfo *base_i
 	actions.push_back( domain->GetInsertAction() );
 	actions.push_back( link_table->GetInsertAction() );
 	actions.push_back( node_table->GetInsertAction() );
-	actions.push_back( orderings->GetInsertAction() );
     db_walker.WalkSubtree( &actions, zone.GetBaseXLink(), &roots[main_root_xlink], DBWalk::WIND_IN, base_info );
+
+	DBWalk::Actions actions3;
+	actions3.push_back( orderings->GetInsertAction() );
+    db_walker.WalkZone( &actions3, zone, &roots[main_root_xlink], DBWalk::WIND_IN, base_info );
     
 	// Domain extension wants to roam around the XTree, consulting
 	// parents, children, anything really. So we need a separate pass.
 	DBWalk::Actions actions2;
 	actions2.push_back( domain_extension->GetInsertAction());
-	db_walker.WalkSubtree( &actions2, zone.GetBaseXLink(), &roots[main_root_xlink], DBWalk::WIND_IN, base_info );
+	db_walker.WalkZone( &actions2, zone, &roots[main_root_xlink], DBWalk::WIND_IN, base_info );
 
+	while(!de_extra_delete_queue.empty())
+	{
+		ExtraTreeDelete( de_extra_delete_queue.front() );
+		de_extra_delete_queue.pop();
+	}
 	while(!de_extra_insert_queue.empty())
 	{
 		ExtraTreeInsert( de_extra_insert_queue.front() );

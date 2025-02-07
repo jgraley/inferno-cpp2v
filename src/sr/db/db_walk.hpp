@@ -84,7 +84,7 @@ private:
     struct WalkKit
     {
         const Actions *actions;
-        TreeZone zone;
+        const TreeZone &zone;
 		const DBCommon::RootId *root_record;        
 		Wind wind;
 		mutable TreeZone::TerminusIterator next_terminus_it;

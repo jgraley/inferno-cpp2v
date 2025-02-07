@@ -5,8 +5,6 @@
 #include "x_tree_database.hpp"
 #include "free_zone.hpp"
 
-#define NEW
-
 using namespace SR;
 
 // ------------------------- TreeZone --------------------------

@@ -35,8 +35,7 @@ DBWalk::Action Orderings::GetDeleteAction()
 {	
 	return [=](const DBWalk::WalkInfo &walk_info)
 	{
-		if( walk_info.at_terminus )
-			return;
+		EraseSolo( depth_first_ordering, walk_info.xlink );
 
 		TRACE("Erasing from orderings ")(walk_info.xlink)("\n");
 		EraseSolo( category_ordering, walk_info.xlink );       
@@ -55,8 +54,6 @@ DBWalk::Action Orderings::GetDeleteAction()
                 EraseSolo( simple_compare_ordering, ancestor_xlink );
             }
         }
-
-		EraseSolo( depth_first_ordering, walk_info.xlink );
 	};
 }
 
@@ -65,8 +62,7 @@ DBWalk::Action Orderings::GetInsertAction()
 {
 	return [=](const DBWalk::WalkInfo &walk_info)
 	{ 
-		if( walk_info.at_terminus )
-			return;
+        InsertSolo( depth_first_ordering, walk_info.xlink );
 		
         InsertSolo( category_ordering, walk_info.xlink );
 
@@ -84,8 +80,6 @@ DBWalk::Action Orderings::GetInsertAction()
                 InsertSolo( simple_compare_ordering, ancestor_xlink );
             }
         }
-
-        InsertSolo( depth_first_ordering, walk_info.xlink );
 	};
 }
 
