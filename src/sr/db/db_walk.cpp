@@ -2,25 +2,39 @@
 
 using namespace SR;    
 
-void DBWalk::Walk( const Actions *actions,
-                   XLink base_xlink,
-                   const DBCommon::RootRecord *root_record, 
-                   Wind wind,
-                   const CoreInfo *base_info )
+void DBWalk::WalkTree( const Actions *actions,
+                       XLink root_xlink,
+                       const DBCommon::RootId *root_record, 
+                       Wind wind )
 {
-    Walk( actions, TreeZone::CreateSubtree(base_xlink), root_record, wind, base_info );
+	TreeZone zone = TreeZone::CreateSubtree(root_xlink);
+    WalkKit kit { actions, zone, root_record, wind, zone.GetTerminiiBegin() };
+	VisitBase( kit, nullptr );  
+	ASSERT( kit.next_terminus_it == zone.GetTerminiiEnd() ); // should have visited all the terminii
 }
 
 
-void DBWalk::Walk( const Actions *actions,
-                   TreeZone zone,
-                   const DBCommon::RootRecord *root_record, 
-                   Wind wind,
-                   const CoreInfo *base_info )
+void DBWalk::WalkSubtree( const Actions *actions,
+						  XLink base_xlink,
+						  const DBCommon::RootId *root_record, 
+						  Wind wind,
+						  const CoreInfo *base_info )
 {
+	ASSERT( base_info );
+    WalkZone( actions, TreeZone::CreateSubtree(base_xlink), root_record, wind, base_info );
+}
+
+
+void DBWalk::WalkZone( const Actions *actions,
+					   TreeZone zone,
+                       const DBCommon::RootId *root_record, 
+                       Wind wind,
+                       const CoreInfo *base_info )
+{
+	ASSERT( base_info );
     WalkKit kit { actions, zone, root_record, wind, zone.GetTerminiiBegin() };
 	VisitBase( kit, base_info );  
-	ASSERT( kit.next_terminus_it == kit.zone.GetTerminiiEnd() ); // should have visited all the terminii
+	ASSERT( kit.next_terminus_it == zone.GetTerminiiEnd() ); // should have visited all the terminii
 }
 
 

@@ -58,7 +58,7 @@ public:
         const TreePtrInterface *p_tree_ptr_interface;
         XLink xlink;
         TreePtr<Node> node;        
-        const DBCommon::RootRecord *root_record;   
+        const DBCommon::RootId *root_record;   
         bool at_terminus;     
         bool at_base;
 	};
@@ -66,22 +66,26 @@ public:
 	typedef function<void (const WalkInfo &)> Action;
 	typedef list< Action > Actions;
     
-    void Walk( const Actions *actions,
-               XLink base_xlink,
-               const DBCommon::RootRecord *root_record,
-               Wind wind,
-               const CoreInfo *base_info );
-    void Walk( const Actions *actions,
-               TreeZone zone,
-               const DBCommon::RootRecord *root_record,
-               Wind wind,
-               const CoreInfo *base_info );
+	void WalkTree( const Actions *actions,
+				   XLink root_xlink,
+				   const DBCommon::RootId *root_record, 
+				   Wind wind );
+    void WalkSubtree( const Actions *actions,
+					  XLink base_xlink,
+					  const DBCommon::RootId *root_record,
+					  Wind wind,
+					  const CoreInfo *base_info );
+    void WalkZone( const Actions *actions,
+                   TreeZone zone,
+                   const DBCommon::RootId *root_record,
+                   Wind wind,
+                   const CoreInfo *base_info );
 private:
     struct WalkKit
     {
         const Actions *actions;
         TreeZone zone;
-		const DBCommon::RootRecord *root_record;        
+		const DBCommon::RootId *root_record;        
 		Wind wind;
 		mutable TreeZone::TerminusIterator next_terminus_it;
     };

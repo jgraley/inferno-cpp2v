@@ -19,7 +19,7 @@ public:
 		EXTRAS // EXTRAS+i
 	};
 
-	struct RootRecord
+	struct RootId
 	{
 		RootOrdinal ordinal;
 	};    

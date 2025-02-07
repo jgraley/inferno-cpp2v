@@ -77,7 +77,7 @@ private:
     const shared_ptr<Orderings> orderings;
     const shared_ptr<DomainExtension> domain_extension;
 
-	map<XLink, DBCommon::RootRecord> roots;
+	map<XLink, DBCommon::RootId> roots;
 
   	XLink main_root_xlink;
     DBWalk db_walker;
