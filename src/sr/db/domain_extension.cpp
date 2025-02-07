@@ -211,8 +211,12 @@ void DomainExtensionChannel::DropStimulusXLink( XLink stimulus_xlink )
     ASSERT( extra_root_node_to_xlink_and_refcount.count(induced_base_node) > 0 );
     int new_rc = --extra_root_node_to_xlink_and_refcount.at(induced_base_node).ref_count;
     if( new_rc==0 )
-        EraseSolo( extra_root_node_to_xlink_and_refcount, induced_base_node ); // TODO use on_delete_extra_tree()
-
+    {
+		XLink root_xlink = extra_root_node_to_xlink_and_refcount.at(induced_base_node).induced_base_xlink;
+        EraseSolo( extra_root_node_to_xlink_and_refcount, induced_base_node );
+		on_delete_extra_tree(root_xlink);
+	}
+	
     // Remove tracking row for this stimulus xlink
     EraseSolo(stimulus_to_induced_and_deps, stimulus_xlink);
 }
