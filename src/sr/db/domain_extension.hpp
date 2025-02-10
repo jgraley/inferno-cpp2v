@@ -58,10 +58,11 @@ public:
 
 	DomainExtension( const XTreeDatabase *db, ExtenderSet extenders );
 		
-	typedef function<void(XLink)> OnExtraTreeFunction;
+	typedef function<DBCommon::RootOrdinal(XLink)> InsertExtraTreeFunction;
+	typedef function<void(XLink)> DeleteExtraTreeFunction;
 
-	void SetOnExtraTreeFunctions( OnExtraTreeFunction on_insert_extra_tree,
-                                   OnExtraTreeFunction on_delete_extra_tree = OnExtraTreeFunction() );
+	void SetOnExtraTreeFunctions( InsertExtraTreeFunction on_insert_extra_tree,
+                                  DeleteExtraTreeFunction on_delete_extra_tree );
 
     // Gain access to a channel
     const DomainExtensionChannel *GetChannel( const Extender *extender ) const;
@@ -90,9 +91,8 @@ class DomainExtensionChannel
 public:	
    	DomainExtensionChannel( const XTreeDatabase *db, const DomainExtension::Extender *extender );
 
-	void SetOnExtraTreeFunctions( DomainExtension::OnExtraTreeFunction on_insert_extra_tree,
-                                  DomainExtension::OnExtraTreeFunction on_delete_extra_tree = DomainExtension::OnExtraTreeFunction() );
-
+	void SetOnExtraTreeFunctions( DomainExtension::InsertExtraTreeFunction on_insert_extra_tree,
+                                  DomainExtension::DeleteExtraTreeFunction on_delete_extra_tree );
 	XLink GetUniqueDomainExtension( XLink stimulus_xlink, TreePtr<Node> node ) const;
     void ExtraTreeInsert( TreePtr<Node> extra_root_node );
     void CheckStimulusXLink( XLink stimulus_xlink );
@@ -108,8 +108,8 @@ private:
     const XTreeDatabase *db;
 	const DomainExtension::Extender *extender;
 
-    DomainExtension::OnExtraTreeFunction on_insert_extra_tree;
-    DomainExtension::OnExtraTreeFunction on_delete_extra_tree;
+    DomainExtension::InsertExtraTreeFunction on_insert_extra_tree;
+    DomainExtension::DeleteExtraTreeFunction on_delete_extra_tree;
 
     struct InducedAndDeps : Traceable
     {
@@ -122,10 +122,11 @@ private:
     
     struct ExtensionClass : Traceable
     {
-        ExtensionClass( XLink induced_base_xlink_, int ref_count_ );
+        ExtensionClass( XLink induced_base_xlink_, DBCommon::RootOrdinal tree_ordinal_, int ref_count_ );
         string GetTrace() const override;
         
         XLink induced_base_xlink;
+        DBCommon::RootOrdinal tree_ordinal;
         int ref_count;
     };
 

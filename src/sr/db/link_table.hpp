@@ -13,7 +13,7 @@ class NodeTable;
 class LinkTable : public Traceable
 {
 public:
-	class Row : public DBWalk::CoreInfo,
+	class Row : public DBCommon::CoreInfo,
 	 		    public Traceable
 	{
 	public:
@@ -42,7 +42,7 @@ public:
     const Row &GetRow(XLink xlink) const;
     bool HasRow(XLink xlink) const;
     
-    const DBWalk::CoreInfo &GetCoreInfo(XLink xlink) const;
+    const DBCommon::CoreInfo &GetCoreInfo(XLink xlink) const;
     
     DBWalk::Action GetDeleteAction();
 	DBWalk::Action GetInsertAction();

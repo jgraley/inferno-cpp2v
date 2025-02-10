@@ -28,9 +28,9 @@ bool LinkTable::HasRow(XLink xlink) const
 }
 
  
-const DBWalk::CoreInfo &LinkTable::GetCoreInfo(XLink xlink) const
+const DBCommon::CoreInfo &LinkTable::GetCoreInfo(XLink xlink) const
 {
-    return *(DBWalk::CoreInfo *)&(GetRow(xlink));	
+    return *(DBCommon::CoreInfo *)&(GetRow(xlink));	
 }
  
  
@@ -59,14 +59,14 @@ DBWalk::Action LinkTable::GetDeleteAction()
 void LinkTable::GenerateRow(const DBWalk::WalkInfo &walk_info)
 {
 	Row row;        
-	*(DBWalk::CoreInfo *)(&row) = walk_info.core;
+	*(DBCommon::CoreInfo *)(&row) = walk_info.core;
 	switch( row.context_type )
 	{
-		case DBWalk::ROOT:
+		case DBCommon::ROOT:
 		{
 			// Root ordinal filled on only for root xlinks, so that we retain
 			// locality.
-			row.root_ordinal = walk_info.root_record->ordinal; 
+			row.root_ordinal = walk_info.root_id; 
 			
 			// TODO wouldn't NULL ie XLink() be clearer? (and below) - no 'cause 
 			// then undefineds would get into bool eval in the syms. Instead we
@@ -77,13 +77,13 @@ void LinkTable::GenerateRow(const DBWalk::WalkInfo &walk_info)
 			row.container_back = walk_info.xlink;
 			break;
 		}	
-		case DBWalk::SINGULAR:
+		case DBCommon::SINGULAR:
 		{
 			row.container_front = walk_info.xlink;
 			row.container_back = walk_info.xlink;
 			break;
 		}
-		case DBWalk::IN_SEQUENCE:
+		case DBCommon::IN_SEQUENCE:
 		{  
 			row.container_front = XLink( walk_info.core.parent_node, &walk_info.core.p_container->front() );
 			row.container_back = XLink( walk_info.core.parent_node, &walk_info.core.p_container->back() );
@@ -105,7 +105,7 @@ void LinkTable::GenerateRow(const DBWalk::WalkInfo &walk_info)
 				row.sequence_successor = XLink::OffEndXLink;        
 			break;
 		}
-		case DBWalk::IN_COLLECTION:
+		case DBCommon::IN_COLLECTION:
 		{
 			row.container_front = XLink( walk_info.core.parent_node, &*(walk_info.core.p_container->begin()) );
 			// Note: in real STL containers, one would use *(x_col->rbegin())
@@ -125,14 +125,14 @@ unique_ptr<Mutator> LinkTable::GetMutator(XLink xlink) const
 	
 	switch( row.context_type )
 	{
-		case DBWalk::ROOT:
+		case DBCommon::ROOT:
 		{
 			// We're still const casting here, TODO
 			const TreePtrInterface *const_tpi = xlink.GetTreePtrInterface();
 			TreePtrInterface *tpi = const_cast<TreePtrInterface *>(const_tpi);
 			return make_unique<SingularMutator>( row.parent_node, tpi );
 		}	
-		case DBWalk::SINGULAR:
+		case DBCommon::SINGULAR:
 		{
 			vector< Itemiser::Element * > x_items = row.parent_node->Itemise();
 			Itemiser::Element *xe = x_items[row.item_ordinal];		
@@ -140,8 +140,8 @@ unique_ptr<Mutator> LinkTable::GetMutator(XLink xlink) const
 			ASSERT( p_x_singular );
 			return make_unique<SingularMutator>( row.parent_node, p_x_singular );
 		}
-		case DBWalk::IN_SEQUENCE:
-		case DBWalk::IN_COLLECTION: 
+		case DBCommon::IN_SEQUENCE:
+		case DBCommon::IN_COLLECTION: 
 		{
 			// COLLECTION is the motivating case: its elements are const, so we neet Mutate() to change them
 			return make_unique<ContainerMutator>( row.parent_node, row.p_container, row.container_it );			
@@ -159,18 +159,18 @@ string LinkTable::Row::GetTrace() const
     bool cont = false;
     switch( context_type )
     {
-        case DBWalk::ROOT:
+        case DBCommon::ROOT:
             s += "ROOT";
             break;
-        case DBWalk::SINGULAR:
+        case DBCommon::SINGULAR:
             s += "SINGULAR";
             par = true;
             break;
-        case DBWalk::IN_SEQUENCE:
+        case DBCommon::IN_SEQUENCE:
             s += "IN_SEQUENCE";
             par = cont = true;
             break;
-        case DBWalk::IN_COLLECTION:
+        case DBCommon::IN_COLLECTION:
             s += "IN_COLLECTION";
             par = cont = true;
             break;

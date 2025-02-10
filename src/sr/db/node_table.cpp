@@ -32,9 +32,9 @@ bool NodeTable::IsDeclarer(const DBWalk::WalkInfo &walk_info) const
 {
     switch( walk_info.core.context_type )
     {
-        case DBWalk::SINGULAR:
-        case DBWalk::IN_SEQUENCE:
-        case DBWalk::IN_COLLECTION:
+        case DBCommon::SINGULAR:
+        case DBCommon::IN_SEQUENCE:
+        case DBCommon::IN_COLLECTION:
         {
             set<const TreePtrInterface *> declared = walk_info.core.parent_node->GetDeclared();
             return declared.count( walk_info.p_tree_ptr_interface ) > 0;

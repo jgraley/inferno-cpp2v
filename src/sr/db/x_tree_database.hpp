@@ -34,11 +34,11 @@ public:
 	// Incremental strategy: perform updates on zones
     void MainTreeReplace( TreeZone target_tree_zone, FreeZone source_free_zone );
 		
-    void MainTreeDelete(TreeZone zone, const DBWalk::CoreInfo *base_info);
-    void MainTreeInsert(TreeZone zone, const DBWalk::CoreInfo *base_info);
+    void MainTreeDelete(TreeZone zone, const DBCommon::CoreInfo *base_info);
+    void MainTreeInsert(TreeZone zone, const DBCommon::CoreInfo *base_info);
 
     void ExtraTreeDelete(XLink xlink);
-    void ExtraTreeInsert(XLink xlink);
+    void ExtraTreeInsert(DBCommon::RootOrdinal tree_id);
 
     const DomainExtensionChannel *GetDEChannel( const DomainExtension::Extender *extender ) const;
     void PostUpdateActions();
@@ -77,13 +77,14 @@ private:
     const shared_ptr<Orderings> orderings;
     const shared_ptr<DomainExtension> domain_extension;
 
-	map<XLink, DBCommon::RootId> roots;
+	map<XLink, DBCommon::RootId> roots_by_xlink;
+	map<DBCommon::RootId, XLink> roots_by_id;
 
   	XLink main_root_xlink;
     DBWalk db_walker;
     DBCommon::RootOrdinal next_root_ordinal;
         
-    queue<XLink> de_extra_insert_queue;
+    queue<DBCommon::RootOrdinal> de_extra_insert_queue;
     queue<XLink> de_extra_delete_queue;
 };    
     
