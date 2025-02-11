@@ -27,6 +27,12 @@ class XTreeDatabase : public Traceable
 public:
     XTreeDatabase( XLink main_root_xlink, shared_ptr<Lacing> lacing, DomainExtension::ExtenderSet domain_extenders );
     
+    // Update and access our trees. Some are created by the DB, others (the extra ones) are
+    // allocated and freed here.
+    DBCommon::TreeOrdinal AllocateExtraTree(XLink root_xlink);
+    void FreeExtraTree(DBCommon::TreeOrdinal tree_ordinal);
+    XLink GetRootXLink(DBCommon::TreeOrdinal tree_ordinal) const;
+    
 	// Use both monolithic and incremental updates in order 
 	// to build full db during analysis stage
     void InitialBuild();
@@ -37,6 +43,7 @@ public:
     void MainTreeDelete(TreeZone zone, const DBCommon::CoreInfo *base_info);
     void MainTreeInsert(TreeZone zone, const DBCommon::CoreInfo *base_info);
 
+	void PerformQueuedExtraTreeActions();
     void ExtraTreeDelete(DBCommon::TreeOrdinal tree_ordinal);
     void ExtraTreeInsert(DBCommon::TreeOrdinal tree_ordinal);
 
@@ -62,6 +69,7 @@ public:
 	XLink GetLastDescendant(XLink xlink) const;
 
 	const Orderings &GetOrderings() const;
+	
 	TreePtr<Node> GetMainRootNode() const;
 	XLink GetMainRootXLink() const;
     
@@ -77,13 +85,14 @@ private:
     const shared_ptr<Orderings> orderings;
     const shared_ptr<DomainExtension> domain_extension;
 
-	map<DBCommon::TreeOrdinal, XLink> trees_by_oridnal;
+	map<DBCommon::TreeOrdinal, XLink> trees_by_ordinal;
+	queue<DBCommon::TreeOrdinal> free_tree_ordinals;
 
     DBWalk db_walker;
     DBCommon::TreeOrdinal next_tree_ordinal;
         
     queue<DBCommon::TreeOrdinal> de_extra_insert_queue;
-    queue<DBCommon::TreeOrdinal> de_extra_delete_queue;
+    queue<DBCommon::TreeOrdinal> extra_tree_destroy_queue;
 };    
     
 };

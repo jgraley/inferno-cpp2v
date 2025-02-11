@@ -43,11 +43,11 @@ DomainExtension::DomainExtension( const XTreeDatabase *db, ExtenderSet extenders
 }
 	
 
-void DomainExtension::SetOnExtraTreeFunctions( InsertExtraTreeFunction on_insert_extra_tree_,
-                                               DeleteExtraTreeFunction on_delete_extra_tree_ )
+void DomainExtension::SetOnExtraTreeFunctions( CreateExtraTreeFunction on_create_extra_tree_,
+                                               DestroyExtraTreeFunction on_destroy_extra_tree_ )
 {
 	for( auto &p : channels )
-		p.second->SetOnExtraTreeFunctions( on_insert_extra_tree_, on_delete_extra_tree_ );
+		p.second->SetOnExtraTreeFunctions( on_create_extra_tree_, on_destroy_extra_tree_ );
 }
 
 
@@ -105,11 +105,11 @@ DomainExtensionChannel::DomainExtensionChannel( const XTreeDatabase *db_, const 
 }
 
 
-void DomainExtensionChannel::SetOnExtraTreeFunctions( DomainExtension::InsertExtraTreeFunction on_insert_extra_tree_,
-                                                      DomainExtension::DeleteExtraTreeFunction on_delete_extra_tree_ )
+void DomainExtensionChannel::SetOnExtraTreeFunctions( DomainExtension::CreateExtraTreeFunction on_create_extra_tree_,
+                                                      DomainExtension::DestroyExtraTreeFunction on_destroy_extra_tree_ )
 {
-    on_insert_extra_tree = on_insert_extra_tree_;
-    on_delete_extra_tree = on_delete_extra_tree_;
+    on_create_extra_tree = on_create_extra_tree_;
+    on_destroy_extra_tree = on_destroy_extra_tree_;
 }
 
 
@@ -129,7 +129,7 @@ XLink DomainExtensionChannel::GetUniqueDomainExtension( XLink stimulus_xlink, Tr
     ASSERT( sc.Compare3Way(node, induced_base_node)==0 ); 
 
     // Actual uniquify is just a lookup in the map
-    return extra_root_node_to_xlink_and_refcount.at( node ).induced_base_xlink;
+    return db->GetRootXLink( extra_root_node_to_xlink_and_refcount.at( node ).tree_ordinal );
 }
 
 
@@ -146,12 +146,12 @@ void DomainExtensionChannel::ExtraTreeInsert( TreePtr<Node> induced_base_node )
     // Create an XLink that will allow us to track this subtree
     XLink extra_root_xlink = XLink::CreateDistinct( extra_root_node );    
    
-    // Add the whole subtree to the rest of the database
-    DBCommon::TreeOrdinal tree_ordinal = on_insert_extra_tree( extra_root_xlink );        
+    // Add the whole subtree to the rest of the database as a new tree
+    DBCommon::TreeOrdinal tree_ordinal = on_create_extra_tree( extra_root_xlink );        
 
     // Add this xlink and ordinal to the extension classes as stimulus. 
     // Count begins at 1 since there's one ref (this one)
-	(void)extra_root_node_to_xlink_and_refcount.insert( make_pair( extra_root_node, ExtensionClass(extra_root_xlink, tree_ordinal, 1) ) );    
+	(void)extra_root_node_to_xlink_and_refcount.insert( make_pair( extra_root_node, ExtensionClass(tree_ordinal, 1) ) );    
             
     // Ensure the original tree is found in the extension classes now (it wasn't 
     // earlier on) as an extra check
@@ -214,7 +214,7 @@ void DomainExtensionChannel::DropStimulusXLink( XLink stimulus_xlink )
     {
 		DBCommon::TreeOrdinal tree_ordinal = extra_root_node_to_xlink_and_refcount.at(induced_base_node).tree_ordinal;
         EraseSolo( extra_root_node_to_xlink_and_refcount, induced_base_node );
-		on_delete_extra_tree(tree_ordinal);
+		on_destroy_extra_tree(tree_ordinal);
 	}
 	
     // Remove tracking row for this stimulus xlink
@@ -312,8 +312,7 @@ void DomainExtensionChannel::Delete(const DBWalk::WalkInfo &walk_info)
 }
 
 
-DomainExtensionChannel::ExtensionClass::ExtensionClass( XLink induced_base_xlink_, DBCommon::TreeOrdinal tree_ordinal_, int ref_count_ ) :
-    induced_base_xlink( induced_base_xlink_ ),
+DomainExtensionChannel::ExtensionClass::ExtensionClass( DBCommon::TreeOrdinal tree_ordinal_, int ref_count_ ) :
     tree_ordinal( tree_ordinal_ ),
     ref_count( ref_count_ )
 {
@@ -322,7 +321,7 @@ DomainExtensionChannel::ExtensionClass::ExtensionClass( XLink induced_base_xlink
 
 string DomainExtensionChannel::ExtensionClass::GetTrace() const 
 { 
-    return "(induced_base_xlink="+Trace(induced_base_xlink)+SSPrintf(", ref_count=%d)", ref_count); 
+    return "(tree_ordinal="+Trace((int)tree_ordinal)+SSPrintf(", ref_count=%d)", ref_count); 
 }
 
 

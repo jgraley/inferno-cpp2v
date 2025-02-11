@@ -58,11 +58,11 @@ public:
 
 	DomainExtension( const XTreeDatabase *db, ExtenderSet extenders );
 		
-	typedef function<DBCommon::TreeOrdinal(XLink)> InsertExtraTreeFunction;
-	typedef function<void(DBCommon::TreeOrdinal)> DeleteExtraTreeFunction;
+	typedef function<DBCommon::TreeOrdinal(XLink)> CreateExtraTreeFunction;
+	typedef function<void(DBCommon::TreeOrdinal)> DestroyExtraTreeFunction;
 
-	void SetOnExtraTreeFunctions( InsertExtraTreeFunction on_insert_extra_tree,
-                                  DeleteExtraTreeFunction on_delete_extra_tree );
+	void SetOnExtraTreeFunctions( CreateExtraTreeFunction on_create_extra_tree,
+                                  DestroyExtraTreeFunction on_destroy_extra_tree );
 
     // Gain access to a channel
     const DomainExtensionChannel *GetChannel( const Extender *extender ) const;
@@ -91,8 +91,8 @@ class DomainExtensionChannel
 public:	
    	DomainExtensionChannel( const XTreeDatabase *db, const DomainExtension::Extender *extender );
 
-	void SetOnExtraTreeFunctions( DomainExtension::InsertExtraTreeFunction on_insert_extra_tree,
-                                  DomainExtension::DeleteExtraTreeFunction on_delete_extra_tree );
+	void SetOnExtraTreeFunctions( DomainExtension::CreateExtraTreeFunction on_create_extra_tree,
+                                  DomainExtension::DestroyExtraTreeFunction on_destroy_extra_tree );
 	XLink GetUniqueDomainExtension( XLink stimulus_xlink, TreePtr<Node> node ) const;
     void ExtraTreeInsert( TreePtr<Node> extra_root_node );
     void CheckStimulusXLink( XLink stimulus_xlink );
@@ -108,8 +108,8 @@ private:
     const XTreeDatabase *db;
 	const DomainExtension::Extender *extender;
 
-    DomainExtension::InsertExtraTreeFunction on_insert_extra_tree;
-    DomainExtension::DeleteExtraTreeFunction on_delete_extra_tree;
+    DomainExtension::CreateExtraTreeFunction on_create_extra_tree;
+    DomainExtension::DestroyExtraTreeFunction on_destroy_extra_tree;
 
     struct InducedAndDeps : Traceable
     {
@@ -122,10 +122,9 @@ private:
     
     struct ExtensionClass : Traceable
     {
-        ExtensionClass( XLink induced_base_xlink_, DBCommon::TreeOrdinal tree_ordinal_, int ref_count_ );
+        ExtensionClass( DBCommon::TreeOrdinal tree_ordinal_, int ref_count_ );
         string GetTrace() const override;
         
-        XLink induced_base_xlink;
         DBCommon::TreeOrdinal tree_ordinal;
         int ref_count;
     };
