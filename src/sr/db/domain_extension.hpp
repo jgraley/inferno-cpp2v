@@ -58,8 +58,8 @@ public:
 
 	DomainExtension( const XTreeDatabase *db, ExtenderSet extenders );
 		
-	typedef function<DBCommon::RootOrdinal(XLink)> InsertExtraTreeFunction;
-	typedef function<void(XLink)> DeleteExtraTreeFunction;
+	typedef function<DBCommon::TreeOrdinal(XLink)> InsertExtraTreeFunction;
+	typedef function<void(DBCommon::TreeOrdinal)> DeleteExtraTreeFunction;
 
 	void SetOnExtraTreeFunctions( InsertExtraTreeFunction on_insert_extra_tree,
                                   DeleteExtraTreeFunction on_delete_extra_tree );
@@ -122,11 +122,11 @@ private:
     
     struct ExtensionClass : Traceable
     {
-        ExtensionClass( XLink induced_base_xlink_, DBCommon::RootOrdinal tree_ordinal_, int ref_count_ );
+        ExtensionClass( XLink induced_base_xlink_, DBCommon::TreeOrdinal tree_ordinal_, int ref_count_ );
         string GetTrace() const override;
         
         XLink induced_base_xlink;
-        DBCommon::RootOrdinal tree_ordinal;
+        DBCommon::TreeOrdinal tree_ordinal;
         int ref_count;
     };
 

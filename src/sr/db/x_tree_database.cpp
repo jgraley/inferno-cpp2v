@@ -16,39 +16,38 @@ using namespace SR;
 //   when testing the test
 //#define DB_TEST_THE_TEST
 
-XTreeDatabase::XTreeDatabase( XLink main_root_xlink_, shared_ptr<Lacing> lacing, DomainExtension::ExtenderSet domain_extenders ) :
+XTreeDatabase::XTreeDatabase( XLink main_root_xlink, shared_ptr<Lacing> lacing, DomainExtension::ExtenderSet domain_extenders ) :
     domain( make_shared<Domain>() ),
     link_table( make_shared<LinkTable>() ),
     node_table( make_shared<NodeTable>() ),
     orderings( make_shared<Orderings>(lacing, this) ),
-    domain_extension( make_shared<DomainExtension>(this, domain_extenders) ),    
-    main_root_xlink( main_root_xlink_ )
+    domain_extension( make_shared<DomainExtension>(this, domain_extenders) )
 {
-    auto on_insert_extra_tree = [=](XLink extra_root) -> DBCommon::RootOrdinal
-    {
-		ASSERT( extra_root != main_root_xlink );
-		ASSERT( roots_by_xlink.count(extra_root) == 0 );
-    
-		DBCommon::RootOrdinal assigned_ordinal = next_root_ordinal;
-		((int &)next_root_ordinal)++;
-		roots_by_xlink[extra_root] = assigned_ordinal;    
-		roots_by_id[assigned_ordinal] = extra_root;
+    ASSERT( main_root_xlink );
+    trees_by_oridnal[DBCommon::TreeOrdinal::MAIN] = main_root_xlink;
+	trees_by_oridnal[DBCommon::TreeOrdinal::MMAX] = XLink::MMAX_Link;
+	trees_by_oridnal[DBCommon::TreeOrdinal::OFF_END] = XLink::OffEndXLink;
+	next_tree_ordinal = DBCommon::TreeOrdinal::EXTRAS;
+
+    auto on_insert_extra_tree = [=](XLink extra_root) -> DBCommon::TreeOrdinal
+    {   
+		DBCommon::TreeOrdinal assigned_ordinal = next_tree_ordinal;
+		((int &)next_tree_ordinal)++;
+		trees_by_oridnal[assigned_ordinal] = extra_root;
 
         de_extra_insert_queue.push( assigned_ordinal );
         
         return assigned_ordinal;
     };
 
-    auto on_delete_extra_tree = [=](XLink extra_root)
+    auto on_delete_extra_tree = [=](DBCommon::TreeOrdinal tree_ordinal)
 	{
-        de_extra_delete_queue.push(extra_root);
+        de_extra_delete_queue.push(tree_ordinal);
         // TODO
-        // feed though the ordinals so that we don't need roots_by_xlink and drop it
-        // Choose a name!! TreeOrdinal, tree_ordinal
         // Extract functions for: inserting, deleting, access and use from DE so it doesn't hold the root XLink
         // Stop ordinal wrapping from malfunctioning (reuse?)
-        // Clarify that the main root XLink in roots_by_id is the true root, owned by this class - VN etc classes etc have to ask for it
-        // Audit GetTreePtrInterface()
+        // Clarify that the main root XLink in trees_by_oridnal is the true root, owned by this class - VN etc classes etc have to ask for it
+        // Avoid the const cast in GetMutator() by keeping non-const TPI* alongside XLink in trees_by_oridnal[]
         // Tix: do we still always need to DuplicateSubtree() in DomainExtensionChannel::ExtraTreeInsert()?
     };
     
@@ -60,24 +59,15 @@ XTreeDatabase::XTreeDatabase( XLink main_root_xlink_, shared_ptr<Lacing> lacing,
 void XTreeDatabase::InitialBuild()
 {      
     INDENT("p");
-    ASSERT( main_root_xlink );
 	
     DBWalk::Actions actions;
     actions.push_back( domain->GetInsertAction() );
     actions.push_back( link_table->GetInsertAction() );
     actions.push_back( node_table->GetInsertAction() );
     actions.push_back( orderings->GetInsertAction() );
-    
-	roots_by_id[DBCommon::RootOrdinal::MAIN] = main_root_xlink;
-	roots_by_id[DBCommon::RootOrdinal::MMAX] = XLink::MMAX_Link;
-	roots_by_id[DBCommon::RootOrdinal::OFF_END] = XLink::OffEndXLink;
-	next_root_ordinal = DBCommon::RootOrdinal::EXTRAS;
-	
-	for( auto p : roots_by_id )
-	{
-		roots_by_xlink[p.second] = p.first;
+    	
+	for( auto p : trees_by_oridnal )
 		db_walker.WalkTree( &actions, p.second, p.first, DBWalk::WIND_IN );
-	}
 
     domain_extension->InitialBuild();
     
@@ -119,13 +109,13 @@ void XTreeDatabase::MainTreeDelete(TreeZone zone, const DBCommon::CoreInfo *base
     DBWalk::Actions actions;
 	actions.push_back( domain_extension->GetDeleteAction() );
 	actions.push_back( orderings->GetDeleteAction() );
-    db_walker.WalkZone( &actions, zone, DBCommon::RootOrdinal::MAIN, DBWalk::WIND_OUT, base_info );   
+    db_walker.WalkZone( &actions, zone, DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_OUT, base_info );   
 
 	DBWalk::Actions actions2;
 	actions2.push_back( node_table->GetDeleteAction() );
 	actions2.push_back( link_table->GetDeleteAction() );
 	actions2.push_back( domain->GetDeleteAction() );
-    db_walker.WalkZone( &actions2, zone, DBCommon::RootOrdinal::MAIN, DBWalk::WIND_OUT, base_info );   
+    db_walker.WalkZone( &actions2, zone, DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_OUT, base_info );   
 }
 
 
@@ -138,17 +128,17 @@ void XTreeDatabase::MainTreeInsert(TreeZone zone, const DBCommon::CoreInfo *base
 	actions.push_back( domain->GetInsertAction() );
 	actions.push_back( link_table->GetInsertAction() );
 	actions.push_back( node_table->GetInsertAction() );
-    db_walker.WalkZone( &actions, zone, DBCommon::RootOrdinal::MAIN, DBWalk::WIND_IN, base_info );
+    db_walker.WalkZone( &actions, zone, DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_IN, base_info );
 
 	DBWalk::Actions actions3;
 	actions3.push_back( orderings->GetInsertAction() );
-    db_walker.WalkZone( &actions3, zone, DBCommon::RootOrdinal::MAIN, DBWalk::WIND_IN, base_info );
+    db_walker.WalkZone( &actions3, zone, DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_IN, base_info );
     
 	// Domain extension wants to roam around the XTree, consulting
 	// parents, children, anything really. So we need a separate pass.
 	DBWalk::Actions actions2;
 	actions2.push_back( domain_extension->GetInsertAction());
-	db_walker.WalkZone( &actions2, zone, DBCommon::RootOrdinal::MAIN, DBWalk::WIND_IN, base_info );
+	db_walker.WalkZone( &actions2, zone, DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_IN, base_info );
 
 	while(!de_extra_delete_queue.empty())
 	{
@@ -163,10 +153,10 @@ void XTreeDatabase::MainTreeInsert(TreeZone zone, const DBCommon::CoreInfo *base
 }
 
 
-void XTreeDatabase::ExtraTreeDelete(XLink xlink)
+void XTreeDatabase::ExtraTreeDelete(DBCommon::TreeOrdinal tree_ordinal)
 {		
-    ASSERT( xlink != main_root_xlink );
-    DBCommon::RootId root_id = roots_by_xlink[xlink];
+    ASSERT( tree_ordinal >= DBCommon::TreeOrdinal::EXTRAS );
+    XLink xlink = trees_by_oridnal[tree_ordinal];
 
     // Note not symmetrical with InsertExtra(): we
     // will be invoked with every xlink in the extra
@@ -178,42 +168,38 @@ void XTreeDatabase::ExtraTreeDelete(XLink xlink)
 	actions.push_back( node_table->GetDeleteAction() );
 	actions.push_back( link_table->GetDeleteAction() );
 	actions.push_back( domain->GetDeleteAction() );
-    db_walker.WalkTree( &actions, xlink, root_id, DBWalk::WIND_OUT );   
+    db_walker.WalkTree( &actions, xlink, tree_ordinal, DBWalk::WIND_OUT );   
     
-   	roots_by_xlink.erase(xlink);
-	roots_by_id.erase(root_id);
+	trees_by_oridnal.erase(tree_ordinal);
 }
 
 
-void XTreeDatabase::ExtraTreeInsert(DBCommon::RootOrdinal tree_id)
+void XTreeDatabase::ExtraTreeInsert(DBCommon::TreeOrdinal tree_ordinal)
 {		
-    ASSERT( tree_id >= DBCommon::RootOrdinal::EXTRAS );
-    XLink xlink = roots_by_id[tree_id];
-    INDENT("e");   
+    ASSERT( tree_ordinal >= DBCommon::TreeOrdinal::EXTRAS );
+    XLink xlink = trees_by_oridnal[tree_ordinal];
     
 	DBWalk::Actions actions;
     actions.push_back( domain->GetInsertAction() );
     actions.push_back( link_table->GetInsertAction() );
     actions.push_back( node_table->GetInsertAction() );
     actions.push_back( orderings->GetInsertAction() );
-	db_walker.WalkTree( &actions, xlink, roots_by_xlink[xlink], DBWalk::WIND_IN );
+	db_walker.WalkTree( &actions, xlink, tree_ordinal, DBWalk::WIND_IN );
 
 	DBWalk::Actions actions2;
 	actions2.push_back( domain_extension->GetInsertAction());
-	db_walker.WalkTree( &actions2, xlink, roots_by_xlink[xlink], DBWalk::WIND_IN );
+	db_walker.WalkTree( &actions2, xlink, tree_ordinal, DBWalk::WIND_IN );
 }
 
 
 const DomainExtensionChannel *XTreeDatabase::GetDEChannel( const DomainExtension::Extender *extender ) const
 {
-    ASSERT( main_root_xlink );
 	return domain_extension->GetChannel(extender);
 }
 
 
 void XTreeDatabase::PostUpdateActions()
 {
-    ASSERT( main_root_xlink );
 	domain_extension->PostUpdateActions();
 	
     while(!de_extra_insert_queue.empty())
@@ -238,21 +224,18 @@ const LinkTable &XTreeDatabase::GetLinkTable() const
 
 const LinkTable::Row &XTreeDatabase::GetRow(XLink xlink) const
 {
-    ASSERT( main_root_xlink )("XTreeDatabase@%p has no main tree", this);
 	return link_table->GetRow(xlink);
 }
 
 
 bool XTreeDatabase::HasRow(XLink xlink) const
 {
-    ASSERT( main_root_xlink );
 	return link_table->HasRow(xlink);
 }
 
 
 const NodeTable::Row &XTreeDatabase::GetNodeRow(TreePtr<Node> node) const
 {
-    ASSERT( main_root_xlink );
 	return node_table->GetRow(node);
 }
 
@@ -346,13 +329,13 @@ const Orderings &XTreeDatabase::GetOrderings() const
 
 TreePtr<Node> XTreeDatabase::GetMainRootNode() const
 {
-	return main_root_xlink.GetChildTreePtr();
+	return GetMainRootXLink().GetChildTreePtr();
 }
 
 
 XLink XTreeDatabase::GetMainRootXLink() const
 {
-	return main_root_xlink;
+	return trees_by_oridnal.at(DBCommon::TreeOrdinal::MAIN);
 }
 
 

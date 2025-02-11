@@ -4,7 +4,7 @@ using namespace SR;
 
 void DBWalk::WalkTree( const Actions *actions,
                        XLink root_xlink,
-                       const DBCommon::RootId root_id, 
+                       const DBCommon::TreeOrdinal tree_ordinal, 
                        Wind wind )
 {
 	ASSERT(root_xlink);
@@ -16,30 +16,30 @@ void DBWalk::WalkTree( const Actions *actions,
 										   ContainerInterface::iterator() };
 										   
 	const TreeZone zone = TreeZone::CreateSubtree(root_xlink);
-    WalkKit kit { actions, zone, root_id, wind, zone.GetTerminiiBegin() };
+    WalkKit kit { actions, zone, tree_ordinal, wind, zone.GetTerminiiBegin() };
 	VisitBase( kit, &root_info );  
 }
 
 
 void DBWalk::WalkSubtree( const Actions *actions,
 						  XLink base_xlink,
-						  const DBCommon::RootId root_id, 
+						  const DBCommon::TreeOrdinal tree_ordinal, 
 						  Wind wind,
 						  const DBCommon::CoreInfo *base_info )
 {
 	ASSERT( base_info );
-    WalkZone( actions, TreeZone::CreateSubtree(base_xlink), root_id, wind, base_info );
+    WalkZone( actions, TreeZone::CreateSubtree(base_xlink), tree_ordinal, wind, base_info );
 }
 
 
 void DBWalk::WalkZone( const Actions *actions,
 					   const TreeZone zone,
-                       const DBCommon::RootId root_id, 
+                       const DBCommon::TreeOrdinal tree_ordinal, 
                        Wind wind,
                        const DBCommon::CoreInfo *base_info )
 {
 	ASSERT( base_info );
-    WalkKit kit { actions, zone, root_id, wind, zone.GetTerminiiBegin() };
+    WalkKit kit { actions, zone, tree_ordinal, wind, zone.GetTerminiiBegin() };
 	VisitBase( kit, base_info );  
 	ASSERT( kit.next_terminus_it == zone.GetTerminiiEnd() ); // should have visited all the terminii
 }
@@ -55,7 +55,7 @@ void DBWalk::VisitBase( const WalkKit &kit,
 						   base_xlink.GetTreePtrInterface(), 
 						   base_xlink, 
 						   base_xlink.GetChildTreePtr(),
-						   kit.root_id,
+						   kit.tree_ordinal,
 						   false,
 						   true };
 
@@ -89,7 +89,7 @@ void DBWalk::VisitSingular( const WalkKit &kit,
                p_x_singular, 
                child_xlink, 
                child_xlink.GetChildTreePtr(),
-               kit.root_id,
+               kit.tree_ordinal,
                false,
                false } ); 
 }
@@ -117,7 +117,7 @@ void DBWalk::VisitSequence( const WalkKit &kit,
                    &*xit, 
                    child_xlink, 
                    child_xlink.GetChildTreePtr(),
-                   kit.root_id,
+                   kit.tree_ordinal,
                    false,
                    false } );
         i++;
@@ -147,7 +147,7 @@ void DBWalk::VisitCollection( const WalkKit &kit,
                    &*xit, 
                    child_xlink, 
                    child_xlink.GetChildTreePtr(),
-                   kit.root_id,
+                   kit.tree_ordinal,
                    false,
 				   false } ); // should be child_xlink's child
         i++;

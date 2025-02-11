@@ -66,7 +66,7 @@ void LinkTable::GenerateRow(const DBWalk::WalkInfo &walk_info)
 		{
 			// Root ordinal filled on only for root xlinks, so that we retain
 			// locality.
-			row.root_ordinal = walk_info.root_id; 
+			row.tree_ordinal = walk_info.tree_ordinal; 
 			
 			// TODO wouldn't NULL ie XLink() be clearer? (and below) - no 'cause 
 			// then undefineds would get into bool eval in the syms. Instead we
@@ -183,7 +183,7 @@ string LinkTable::Row::GetTrace() const
         s += ", back=" + Trace(container_back);
     }
     s += SSPrintf(", co=%d", container_ordinal);
-    s += SSPrintf(", bo=%d", root_ordinal);
+    s += SSPrintf(", to=%d", tree_ordinal);
     s += ")";
     return s;
 }

@@ -31,7 +31,7 @@ public:
 		XLink sequence_successor = XLink();
 
 		// Ordinals
-		DBCommon::RootOrdinal root_ordinal = (DBCommon::RootOrdinal)(-1);      // TODO this is for eg X tree vs domain trees vs MMAX etc
+		DBCommon::TreeOrdinal tree_ordinal = (DBCommon::TreeOrdinal)(-1);      // TODO this is for eg X tree vs domain trees vs MMAX etc
 
 		string GetTrace() const;
 	};

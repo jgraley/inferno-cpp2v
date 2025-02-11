@@ -11,15 +11,14 @@ class DBCommon
 public:  
     typedef int OrdinalType; // other ordinals...
 
-	enum class RootOrdinal
+	enum class TreeOrdinal
 	{
 		MAIN,
 		MMAX,
 		OFF_END,
-		EXTRAS // EXTRAS+i
+		EXTRAS
+		// ...continues, EXTRAS+i
 	};
-
-	typedef RootOrdinal RootId;   
     
     enum Context
     {

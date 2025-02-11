@@ -37,8 +37,8 @@ public:
     void MainTreeDelete(TreeZone zone, const DBCommon::CoreInfo *base_info);
     void MainTreeInsert(TreeZone zone, const DBCommon::CoreInfo *base_info);
 
-    void ExtraTreeDelete(XLink xlink);
-    void ExtraTreeInsert(DBCommon::RootOrdinal tree_id);
+    void ExtraTreeDelete(DBCommon::TreeOrdinal tree_ordinal);
+    void ExtraTreeInsert(DBCommon::TreeOrdinal tree_ordinal);
 
     const DomainExtensionChannel *GetDEChannel( const DomainExtension::Extender *extender ) const;
     void PostUpdateActions();
@@ -77,15 +77,13 @@ private:
     const shared_ptr<Orderings> orderings;
     const shared_ptr<DomainExtension> domain_extension;
 
-	map<XLink, DBCommon::RootId> roots_by_xlink;
-	map<DBCommon::RootId, XLink> roots_by_id;
+	map<DBCommon::TreeOrdinal, XLink> trees_by_oridnal;
 
-  	XLink main_root_xlink;
     DBWalk db_walker;
-    DBCommon::RootOrdinal next_root_ordinal;
+    DBCommon::TreeOrdinal next_tree_ordinal;
         
-    queue<DBCommon::RootOrdinal> de_extra_insert_queue;
-    queue<XLink> de_extra_delete_queue;
+    queue<DBCommon::TreeOrdinal> de_extra_insert_queue;
+    queue<DBCommon::TreeOrdinal> de_extra_delete_queue;
 };    
     
 };

@@ -147,7 +147,7 @@ void DomainExtensionChannel::ExtraTreeInsert( TreePtr<Node> induced_base_node )
     XLink extra_root_xlink = XLink::CreateDistinct( extra_root_node );    
    
     // Add the whole subtree to the rest of the database
-    DBCommon::RootOrdinal tree_ordinal = on_insert_extra_tree( extra_root_xlink );        
+    DBCommon::TreeOrdinal tree_ordinal = on_insert_extra_tree( extra_root_xlink );        
 
     // Add this xlink and ordinal to the extension classes as stimulus. 
     // Count begins at 1 since there's one ref (this one)
@@ -212,9 +212,9 @@ void DomainExtensionChannel::DropStimulusXLink( XLink stimulus_xlink )
     int new_rc = --extra_root_node_to_xlink_and_refcount.at(induced_base_node).ref_count;
     if( new_rc==0 )
     {
-		XLink root_xlink = extra_root_node_to_xlink_and_refcount.at(induced_base_node).induced_base_xlink;
+		DBCommon::TreeOrdinal tree_ordinal = extra_root_node_to_xlink_and_refcount.at(induced_base_node).tree_ordinal;
         EraseSolo( extra_root_node_to_xlink_and_refcount, induced_base_node );
-		on_delete_extra_tree(root_xlink);
+		on_delete_extra_tree(tree_ordinal);
 	}
 	
     // Remove tracking row for this stimulus xlink
@@ -312,7 +312,7 @@ void DomainExtensionChannel::Delete(const DBWalk::WalkInfo &walk_info)
 }
 
 
-DomainExtensionChannel::ExtensionClass::ExtensionClass( XLink induced_base_xlink_, DBCommon::RootOrdinal tree_ordinal_, int ref_count_ ) :
+DomainExtensionChannel::ExtensionClass::ExtensionClass( XLink induced_base_xlink_, DBCommon::TreeOrdinal tree_ordinal_, int ref_count_ ) :
     induced_base_xlink( induced_base_xlink_ ),
     tree_ordinal( tree_ordinal_ ),
     ref_count( ref_count_ )

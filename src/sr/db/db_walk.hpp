@@ -24,7 +24,7 @@ public:
         const TreePtrInterface *p_tree_ptr_interface;
         XLink xlink;
         TreePtr<Node> node;        
-        const DBCommon::RootId root_id;   // TODO surely in the core info as const across walk?
+        const DBCommon::TreeOrdinal tree_ordinal;   // TODO surely in the core info as const across walk?
         bool at_terminus;     
         bool at_base;
 	};
@@ -34,16 +34,16 @@ public:
     
 	void WalkTree( const Actions *actions,
 				   XLink root_xlink,
-				   const DBCommon::RootId root_id, 
+				   const DBCommon::TreeOrdinal tree_ordinal, 
 				   Wind wind );
     void WalkSubtree( const Actions *actions,
 					  XLink base_xlink,
-					  const DBCommon::RootId root_id,
+					  const DBCommon::TreeOrdinal tree_ordinal,
 					  Wind wind,
 					  const DBCommon::CoreInfo *base_info );
     void WalkZone( const Actions *actions,
                    TreeZone zone,
-                   const DBCommon::RootId root_id,
+                   const DBCommon::TreeOrdinal tree_ordinal,
                    Wind wind,
                    const DBCommon::CoreInfo *base_info );
 private:
@@ -51,7 +51,7 @@ private:
     {
         const Actions *actions;
         const TreeZone &zone;
-		const DBCommon::RootId root_id;        
+		const DBCommon::TreeOrdinal tree_ordinal;        
 		Wind wind;
 		mutable TreeZone::TerminusIterator next_terminus_it;
     };
