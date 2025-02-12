@@ -22,7 +22,7 @@ public:
     
     struct TreeRecord
     {
-		XLink root_xlink;
+		XLink root_xlink; // TODO do we really need to store this when we have sp_tp_root_node?
 		shared_ptr<TreePtr<Node>> sp_tp_root_node;
 		static const shared_ptr<TreePtr<Node>> IMMUTABLE;
 	};
