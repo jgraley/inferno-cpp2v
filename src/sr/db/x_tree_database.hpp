@@ -25,7 +25,7 @@ class TreeZone;
 class XTreeDatabase : public Traceable
 {
 public:
-    XTreeDatabase( XLink main_root_xlink, shared_ptr<Lacing> lacing, DomainExtension::ExtenderSet domain_extenders );
+    XTreeDatabase( TreePtr<Node> main_root, shared_ptr<Lacing> lacing, DomainExtension::ExtenderSet domain_extenders );
     
     // Update and access our trees. Some are created by the DB, others (the extra ones) are
     // allocated and freed here.
@@ -72,7 +72,9 @@ public:
 	
 	TreePtr<Node> GetMainRootNode() const;
 	XLink GetMainRootXLink() const;
-    
+
+   	unique_ptr<Mutator> GetMutator(XLink xlink);
+
     void Dump() const;
 	
 private:    
@@ -85,7 +87,7 @@ private:
     const shared_ptr<Orderings> orderings;
     const shared_ptr<DomainExtension> domain_extension;
 
-	map<DBCommon::TreeOrdinal, XLink> trees_by_ordinal;
+	map<DBCommon::TreeOrdinal, DBCommon::TreeRecord> trees_by_ordinal;
 	queue<DBCommon::TreeOrdinal> free_tree_ordinals;
 
     DBWalk db_walker;

@@ -20,6 +20,13 @@ public:
 		// ...continues, EXTRAS+i
 	};
     
+    struct TreeRecord
+    {
+		XLink root_xlink;
+		shared_ptr<TreePtr<Node>> sp_tp_root_node;
+		static const shared_ptr<TreePtr<Node>> IMMUTABLE;
+	};
+    
     enum Context
     {
         ROOT,

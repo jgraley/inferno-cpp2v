@@ -16,17 +16,20 @@ using namespace SR;
 //   when testing the test
 //#define DB_TEST_THE_TEST
 
-XTreeDatabase::XTreeDatabase( XLink main_root_xlink, shared_ptr<Lacing> lacing, DomainExtension::ExtenderSet domain_extenders ) :
+XTreeDatabase::XTreeDatabase( TreePtr<Node> main_root, shared_ptr<Lacing> lacing, DomainExtension::ExtenderSet domain_extenders ) :
     domain( make_shared<Domain>() ),
     link_table( make_shared<LinkTable>() ),
     node_table( make_shared<NodeTable>() ),
     orderings( make_shared<Orderings>(lacing, this) ),
     domain_extension( make_shared<DomainExtension>(this, domain_extenders) )
 {
+	auto sp_main_root = make_shared<TreePtr<Node>>(main_root);
+    XLink main_root_xlink = XLink::CreateDistinct(sp_main_root);    
+
     ASSERT( main_root_xlink );
-    trees_by_ordinal[DBCommon::TreeOrdinal::MAIN] = main_root_xlink;
-	trees_by_ordinal[DBCommon::TreeOrdinal::MMAX] = XLink::MMAX_Link;
-	trees_by_ordinal[DBCommon::TreeOrdinal::OFF_END] = XLink::OffEndXLink;
+    trees_by_ordinal[DBCommon::TreeOrdinal::MAIN] = {main_root_xlink, sp_main_root};
+	trees_by_ordinal[DBCommon::TreeOrdinal::MMAX] = {XLink::MMAX_Link, DBCommon::TreeRecord::IMMUTABLE};
+	trees_by_ordinal[DBCommon::TreeOrdinal::OFF_END] = {XLink::OffEndXLink, DBCommon::TreeRecord::IMMUTABLE};
 	next_tree_ordinal = DBCommon::TreeOrdinal::EXTRAS;
 
     auto on_create_extra_tree = [=](XLink root_xlink) -> DBCommon::TreeOrdinal
@@ -39,10 +42,6 @@ XTreeDatabase::XTreeDatabase( XLink main_root_xlink, shared_ptr<Lacing> lacing, 
     auto on_destroy_extra_tree = [=](DBCommon::TreeOrdinal tree_ordinal)
 	{
         extra_tree_destroy_queue.push(tree_ordinal);
-        // TODO
-        // Clarify that the main root XLink in trees_by_ordinal is the true root, owned by this class - VN etc classes etc have to ask for it
-        // Avoid the const cast in GetMutator() by keeping non-const TPI* alongside XLink in trees_by_ordinal[]
-        // Tix: do we still always need to DuplicateSubtree() in DomainExtensionChannel::ExtraTreeInsert()?
     };
     
     domain_extension->SetOnExtraTreeFunctions( on_create_extra_tree, 
@@ -63,7 +62,7 @@ DBCommon::TreeOrdinal XTreeDatabase::AllocateExtraTree(XLink root_xlink)
 		assigned_ordinal = free_tree_ordinals.front();
 		free_tree_ordinals.pop();
 	}
-	trees_by_ordinal[assigned_ordinal] = root_xlink;
+	trees_by_ordinal[assigned_ordinal] = {root_xlink, DBCommon::TreeRecord::IMMUTABLE};
 	return assigned_ordinal;
 }
 
@@ -77,7 +76,7 @@ void XTreeDatabase::FreeExtraTree(DBCommon::TreeOrdinal tree_ordinal)
 
 XLink XTreeDatabase::GetRootXLink(DBCommon::TreeOrdinal tree_ordinal) const
 {
-	return trees_by_ordinal.at(tree_ordinal);
+	return trees_by_ordinal.at(tree_ordinal).root_xlink;
 }
 
 
@@ -92,7 +91,7 @@ void XTreeDatabase::InitialBuild()
     actions.push_back( orderings->GetInsertAction() );
     	
 	for( auto p : trees_by_ordinal )
-		db_walker.WalkTree( &actions, p.second, p.first, DBWalk::WIND_IN );
+		db_walker.WalkTree( &actions, p.second.root_xlink, p.first, DBWalk::WIND_IN );
 
     domain_extension->InitialBuild();
     
@@ -108,7 +107,7 @@ void XTreeDatabase::MainTreeReplace( TreeZone target_tree_zone, FreeZone source_
 {
 	ASSERT( target_tree_zone.GetNumTerminii() == source_free_zone.GetNumTerminii() );	
 	target_tree_zone.DBCheck(this); // Move back to MainTreeReplace once this is empty
-	MutableTreeZone mutable_target_tree_zone( target_tree_zone, link_table->GetMutator(target_tree_zone.GetBaseXLink()) );
+	MutableTreeZone mutable_target_tree_zone( target_tree_zone, GetMutator(target_tree_zone.GetBaseXLink()) );
 	
 	// Store the core info for the base locally since the link table will change
 	// as this function executes.
@@ -369,6 +368,41 @@ TreePtr<Node> XTreeDatabase::GetMainRootNode() const
 XLink XTreeDatabase::GetMainRootXLink() const
 {
 	return GetRootXLink(DBCommon::TreeOrdinal::MAIN);
+}
+
+
+unique_ptr<Mutator> XTreeDatabase::GetMutator(XLink xlink)
+{
+	const LinkTable::Row &row = link_table->GetRow(xlink);
+	
+	switch( row.context_type )
+	{
+		case DBCommon::ROOT:
+		{
+			// This shared_ptr points to the same TreePtr<> instance referenced by the root XLink.
+			// By holding it separately, we can avoid a const cast, and in fact constness propagates
+			// correctly from the XTreeDatabase object, which is why this method cannot be const.
+			ASSERT( (int)(row.tree_ordinal) >= 0 ); // Should be valid whenever context is ROOT
+			shared_ptr<TreePtr<Node>> sp_tp_root_node = trees_by_ordinal[row.tree_ordinal].sp_tp_root_node;
+			ASSERT( sp_tp_root_node != DBCommon::TreeRecord::IMMUTABLE ); // Tree must be mutable
+			return make_unique<SingularMutator>( row.parent_node, sp_tp_root_node.get() );
+		}	
+		case DBCommon::SINGULAR:
+		{
+			vector< Itemiser::Element * > x_items = row.parent_node->Itemise();
+			Itemiser::Element *xe = x_items[row.item_ordinal];		
+			auto p_x_singular = dynamic_cast<TreePtrInterface *>(xe);
+			ASSERT( p_x_singular );
+			return make_unique<SingularMutator>( row.parent_node, p_x_singular );
+		}
+		case DBCommon::IN_SEQUENCE:
+		case DBCommon::IN_COLLECTION: 
+		{
+			// COLLECTION is the motivating case: its elements are const, so we neet Mutate() to change them
+			return make_unique<ContainerMutator>( row.parent_node, row.p_container, row.container_it );			
+		}
+	}	
+	ASSERTFAIL();
 }
 
 

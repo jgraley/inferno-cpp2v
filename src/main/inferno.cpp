@@ -512,7 +512,7 @@ void Inferno::RunTransformationStep(const Step &sp)
     if( !ReadArgs::trace_quiet )
         fprintf(stderr, "%s at T%03d-%s\n", ReadArgs::infile.c_str(), sp.step_index, vn_sequence->GetStepName(sp.step_index).c_str() ); 
     VNSequence *vp = vn_sequence.get(); 
-    program = vn_sequence->TransformStep( sp.step_index, program );
+    program = vn_sequence->TransformStep( sp.step_index );
     if( ReadArgs::output_all )
     {
         Render r( ReadArgs::outfile+SSPrintf("_%03d.cpp", sp.step_index) );

@@ -116,9 +116,9 @@ void DomainExtensionChannel::SetOnExtraTreeFunctions( DomainExtension::CreateExt
 XLink DomainExtensionChannel::GetUniqueDomainExtension( XLink stimulus_xlink, TreePtr<Node> node ) const
 {   
     ASSERT( node );
-	ASSERT( extra_root_node_to_xlink_and_refcount.count(node) > 0 )
-	      (node)(" not found in extra_root_node_to_xlink_and_refcount:\n")
-	      (extra_root_node_to_xlink_and_refcount);
+	ASSERT( induced_subtree_by_value_to_base_xlink_and_refcount.count(node) > 0 )
+	      (node)(" not found in induced_subtree_by_value_to_base_xlink_and_refcount:\n")
+	      (induced_subtree_by_value_to_base_xlink_and_refcount);
     
     // Cross-checks using stimulus_xlink (rather than acting as a cache, 
     // which we can now do, see #700)
@@ -129,7 +129,7 @@ XLink DomainExtensionChannel::GetUniqueDomainExtension( XLink stimulus_xlink, Tr
     ASSERT( sc.Compare3Way(node, induced_base_node)==0 ); 
 
     // Actual uniquify is just a lookup in the map
-    return db->GetRootXLink( extra_root_node_to_xlink_and_refcount.at( node ).tree_ordinal );
+    return db->GetRootXLink( induced_subtree_by_value_to_base_xlink_and_refcount.at( node ).tree_ordinal );
 }
 
 
@@ -151,11 +151,11 @@ void DomainExtensionChannel::ExtraTreeInsert( TreePtr<Node> induced_base_node )
 
     // Add this xlink and ordinal to the extension classes as stimulus. 
     // Count begins at 1 since there's one ref (this one)
-	(void)extra_root_node_to_xlink_and_refcount.insert( make_pair( extra_root_node, ExtensionClass(tree_ordinal, 1) ) );    
+	(void)induced_subtree_by_value_to_base_xlink_and_refcount.insert( make_pair( extra_root_node, ExtensionClass(tree_ordinal, 1) ) );    
             
     // Ensure the original tree is found in the extension classes now (it wasn't 
     // earlier on) as an extra check
-    ASSERT( extra_root_node_to_xlink_and_refcount.count( induced_base_node ) == 1 );
+    ASSERT( induced_subtree_by_value_to_base_xlink_and_refcount.count( induced_base_node ) == 1 );
 }
 
 
@@ -176,9 +176,12 @@ void DomainExtensionChannel::CheckStimulusXLink( XLink stimulus_xlink )
     // Note: this is done by simple compare, and identity is not 
     // required. This makes for a very "powerful" search for existing
     // candidates.
-    if( extra_root_node_to_xlink_and_refcount.count(info.induced_base_node) > 0 )
+    // TODO try SC search over entire DB. Early-out if in main tree. Otherwise
+    // continue, but induced_subtree_by_value_to_base_xlink_and_refcount is now keyed by
+    // tree id (even if the hit was not at base). This provides the required keep-alive effect.
+    if( induced_subtree_by_value_to_base_xlink_and_refcount.count(info.induced_base_node) > 0 )
     {
-        extra_root_node_to_xlink_and_refcount.at(info.induced_base_node).ref_count++;
+        induced_subtree_by_value_to_base_xlink_and_refcount.at(info.induced_base_node).ref_count++;
         return; 
     }
         
@@ -208,12 +211,12 @@ void DomainExtensionChannel::DropStimulusXLink( XLink stimulus_xlink )
 
     // Remove this stimulus xlink from domain extension classes, possibly
     // dropping the extension class completely.
-    ASSERT( extra_root_node_to_xlink_and_refcount.count(induced_base_node) > 0 );
-    int new_rc = --extra_root_node_to_xlink_and_refcount.at(induced_base_node).ref_count;
+    ASSERT( induced_subtree_by_value_to_base_xlink_and_refcount.count(induced_base_node) > 0 );
+    int new_rc = --induced_subtree_by_value_to_base_xlink_and_refcount.at(induced_base_node).ref_count;
     if( new_rc==0 )
     {
-		DBCommon::TreeOrdinal tree_ordinal = extra_root_node_to_xlink_and_refcount.at(induced_base_node).tree_ordinal;
-        EraseSolo( extra_root_node_to_xlink_and_refcount, induced_base_node );
+		DBCommon::TreeOrdinal tree_ordinal = induced_subtree_by_value_to_base_xlink_and_refcount.at(induced_base_node).tree_ordinal;
+        EraseSolo( induced_subtree_by_value_to_base_xlink_and_refcount, induced_base_node );
 		on_destroy_extra_tree(tree_ordinal);
 	}
 	
@@ -232,8 +235,8 @@ void DomainExtensionChannel::Validate() const
         for( XLink dep : p.second.deps )
             ASSERT( dep_to_all_stimulii.count(dep) == 1 );            
             
-        ASSERT( extra_root_node_to_xlink_and_refcount.count(p.second.induced_base_node)==1 );
-        ASSERT( extra_root_node_to_xlink_and_refcount.at(p.second.induced_base_node).ref_count > 0 );
+        ASSERT( induced_subtree_by_value_to_base_xlink_and_refcount.count(p.second.induced_base_node)==1 );
+        ASSERT( induced_subtree_by_value_to_base_xlink_and_refcount.at(p.second.induced_base_node).ref_count > 0 );
         
         ASSERT( stimulii_to_recheck.count(stimulus_xlink) == 0 ); // should be disjoint
     }

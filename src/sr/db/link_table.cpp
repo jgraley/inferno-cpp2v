@@ -119,38 +119,6 @@ void LinkTable::GenerateRow(const DBWalk::WalkInfo &walk_info)
 }
 
 
-unique_ptr<Mutator> LinkTable::GetMutator(XLink xlink) const
-{
-	const LinkTable::Row &row = GetRow(xlink);
-	
-	switch( row.context_type )
-	{
-		case DBCommon::ROOT:
-		{
-			// We're still const casting here, TODO
-			const TreePtrInterface *const_tpi = xlink.GetTreePtrInterface();
-			TreePtrInterface *tpi = const_cast<TreePtrInterface *>(const_tpi);
-			return make_unique<SingularMutator>( row.parent_node, tpi );
-		}	
-		case DBCommon::SINGULAR:
-		{
-			vector< Itemiser::Element * > x_items = row.parent_node->Itemise();
-			Itemiser::Element *xe = x_items[row.item_ordinal];		
-			auto p_x_singular = dynamic_cast<TreePtrInterface *>(xe);
-			ASSERT( p_x_singular );
-			return make_unique<SingularMutator>( row.parent_node, p_x_singular );
-		}
-		case DBCommon::IN_SEQUENCE:
-		case DBCommon::IN_COLLECTION: 
-		{
-			// COLLECTION is the motivating case: its elements are const, so we neet Mutate() to change them
-			return make_unique<ContainerMutator>( row.parent_node, row.p_container, row.container_it );			
-		}
-	}	
-	ASSERTFAIL();
-}
-
-
 string LinkTable::Row::GetTrace() const
 {
     string s = "(cc=";

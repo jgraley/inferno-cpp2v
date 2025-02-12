@@ -38,7 +38,7 @@ public:
     void SetStopAfter( int step_index, vector<int> ssa, int d=0 );    
         
     void AnalysisStage( TreePtr<Node> root );
-    TreePtr<Node> TransformStep( int step_index, TreePtr<Node> root );
+    TreePtr<Node> TransformStep( int step_index );
     
     void ForSteps( function<void(int)> body );
     

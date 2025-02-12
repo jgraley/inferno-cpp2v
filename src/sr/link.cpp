@@ -234,10 +234,16 @@ XLink::XLink( const LocatedLink &l ) :
 XLink XLink::CreateDistinct( const TreePtr<Node> &tp_x )
 {
     auto sp_tp_x = make_shared< TreePtr<Node> >( tp_x ); 
-    return XLink(sp_tp_x, WHODAT());
+    return CreateDistinct(sp_tp_x);
 }
               
               
+XLink XLink::CreateDistinct( shared_ptr<TreePtr<Node>> sp_tp_x )
+{
+    return XLink(sp_tp_x, WHODAT());
+}
+
+
 bool XLink::operator<(const XLink &other) const
 {
     return Compare3Way(*this, other) < 0;
