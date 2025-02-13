@@ -108,8 +108,8 @@ DomainExtensionChannel::DomainExtensionChannel( const XTreeDatabase *db_, const 
 void DomainExtensionChannel::SetOnExtraTreeFunctions( DomainExtension::CreateExtraTreeFunction on_create_extra_tree_,
                                                       DomainExtension::DestroyExtraTreeFunction on_destroy_extra_tree_ )
 {
-    on_create_extra_tree = on_create_extra_tree_;
-    on_destroy_extra_tree = on_destroy_extra_tree_;
+    create_extra_tree = on_create_extra_tree_;
+    destroy_extra_tree = on_destroy_extra_tree_;
 }
 
 
@@ -133,7 +133,7 @@ XLink DomainExtensionChannel::GetUniqueDomainExtension( XLink stimulus_xlink, Tr
 }
 
 
-void DomainExtensionChannel::ExtraTreeInsert( TreePtr<Node> induced_base_node )
+void DomainExtensionChannel::CreateExtraTree( TreePtr<Node> induced_base_node )
 {
     ASSERT( induced_base_node );
   
@@ -142,20 +142,13 @@ void DomainExtensionChannel::ExtraTreeInsert( TreePtr<Node> induced_base_node )
     // identifier, causing illegal multiple parents. See #677
     // TODO maybe only do this if subtree actually would go wrong.
     TreePtr<Node> extra_root_node = SimpleDuplicate::DuplicateSubtree( induced_base_node );
-  
-    // Create an XLink that will allow us to track this subtree
-    //XLink extra_root_xlink = XLink::CreateDistinct( extra_root_node );    
    
     // Add the whole subtree to the rest of the database as a new tree
-    DBCommon::TreeOrdinal tree_ordinal = on_create_extra_tree( extra_root_node );        
+    DBCommon::TreeOrdinal tree_ordinal = create_extra_tree( extra_root_node );        
 
     // Add this xlink and ordinal to the extension classes as stimulus. 
     // Count begins at 1 since there's one ref (this one)
 	(void)induced_subtree_by_value_to_extra_subtree_and_refcount.insert( make_pair( extra_root_node, ExtensionClass(tree_ordinal, 1) ) );    
-            
-    // Ensure the original tree is found in the extension classes now (it wasn't 
-    // earlier on) as an extra check
-    ASSERT( induced_subtree_by_value_to_extra_subtree_and_refcount.count( induced_base_node ) == 1 );
 }
 
 
@@ -186,7 +179,7 @@ void DomainExtensionChannel::CheckStimulusXLink( XLink stimulus_xlink )
     }
         
     // An extra tree is required
-    ExtraTreeInsert( info.induced_base_node );
+    CreateExtraTree( info.induced_base_node );
 }
 
 
@@ -217,7 +210,7 @@ void DomainExtensionChannel::DropStimulusXLink( XLink stimulus_xlink )
     {
 		DBCommon::TreeOrdinal tree_ordinal = induced_subtree_by_value_to_extra_subtree_and_refcount.at(induced_base_node).tree_ordinal;
         EraseSolo( induced_subtree_by_value_to_extra_subtree_and_refcount, induced_base_node );
-		on_destroy_extra_tree(tree_ordinal);
+		destroy_extra_tree(tree_ordinal);
 	}
 	
     // Remove tracking row for this stimulus xlink

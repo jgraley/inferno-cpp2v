@@ -61,8 +61,8 @@ public:
 	typedef function<DBCommon::TreeOrdinal(TreePtr<Node>)> CreateExtraTreeFunction;
 	typedef function<void(DBCommon::TreeOrdinal)> DestroyExtraTreeFunction;
 
-	void SetOnExtraTreeFunctions( CreateExtraTreeFunction on_create_extra_tree,
-                                  DestroyExtraTreeFunction on_destroy_extra_tree );
+	void SetOnExtraTreeFunctions( CreateExtraTreeFunction create_extra_tree,
+                                  DestroyExtraTreeFunction destroy_extra_tree );
 
     // Gain access to a channel
     const DomainExtensionChannel *GetChannel( const Extender *extender ) const;
@@ -91,10 +91,10 @@ class DomainExtensionChannel
 public:	
    	DomainExtensionChannel( const XTreeDatabase *db, const DomainExtension::Extender *extender );
 
-	void SetOnExtraTreeFunctions( DomainExtension::CreateExtraTreeFunction on_create_extra_tree,
-                                  DomainExtension::DestroyExtraTreeFunction on_destroy_extra_tree );
+	void SetOnExtraTreeFunctions( DomainExtension::CreateExtraTreeFunction create_extra_tree,
+                                  DomainExtension::DestroyExtraTreeFunction destroy_extra_tree );
 	XLink GetUniqueDomainExtension( XLink stimulus_xlink, TreePtr<Node> node ) const;
-    void ExtraTreeInsert( TreePtr<Node> extra_root_node );
+    void CreateExtraTree( TreePtr<Node> extra_root_node );
     void CheckStimulusXLink( XLink stimulus_xlink );
     void DropStimulusXLink( XLink stimulus_xlink );
     void Validate() const;
@@ -108,8 +108,8 @@ private:
     const XTreeDatabase *db;
 	const DomainExtension::Extender *extender;
 
-    DomainExtension::CreateExtraTreeFunction on_create_extra_tree;
-    DomainExtension::DestroyExtraTreeFunction on_destroy_extra_tree;
+    DomainExtension::CreateExtraTreeFunction create_extra_tree;
+    DomainExtension::DestroyExtraTreeFunction destroy_extra_tree;
 
     struct InducedAndDeps : Traceable
     {

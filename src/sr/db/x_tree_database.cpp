@@ -30,20 +30,20 @@ XTreeDatabase::XTreeDatabase( TreePtr<Node> main_root, shared_ptr<Lacing> lacing
     trees_by_ordinal[DBCommon::TreeOrdinal::MAIN] = {sp_main_root};
 	next_tree_ordinal = DBCommon::TreeOrdinal::EXTRAS;
 
-    auto on_create_extra_tree = [=](TreePtr<Node> root_node) -> DBCommon::TreeOrdinal
+    auto create_extra_tree = [=](TreePtr<Node> root_node) -> DBCommon::TreeOrdinal
     {   
 		DBCommon::TreeOrdinal tree_ordinal = AllocateExtraTree(root_node);
         de_extra_insert_queue.push( tree_ordinal );       
         return tree_ordinal;
     };
 
-    auto on_destroy_extra_tree = [=](DBCommon::TreeOrdinal tree_ordinal)
+    auto destroy_extra_tree = [=](DBCommon::TreeOrdinal tree_ordinal)
 	{
         extra_tree_destroy_queue.push(tree_ordinal);
     };
     
-    domain_extension->SetOnExtraTreeFunctions( on_create_extra_tree, 
-                                               on_destroy_extra_tree );
+    domain_extension->SetOnExtraTreeFunctions( create_extra_tree, 
+                                               destroy_extra_tree );
 }
 
     
