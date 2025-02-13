@@ -351,7 +351,11 @@ unique_ptr<SymbolicResult> XTreeDbToSymbolOperator::Evaluate( const EvalKit &kit
     unique_ptr<SymbolicResult> ar = OnlyElementOf(move(op_results));       
 
     if( !ar->IsDefinedAndUnique() )
-        return ar;
+        return ar; // TODO what if non-unique?
+        
+    // These DB operations only work on XLinks supported by the DB. Does not include eg MMAX.   
+    if( !kit.x_tree_db->HasRow(ar->GetOnlyXLink()) )
+		return make_unique<EmptyResult>();
         
     const SR::LinkTable::Row &row( kit.x_tree_db->GetRow(ar->GetOnlyXLink()) );   
     SR::XLink result_xlink = EvalXLinkFromRow( kit, ar->GetOnlyXLink(), row );

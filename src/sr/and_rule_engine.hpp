@@ -161,7 +161,6 @@ public:
 	void SetXTreeDb( shared_ptr<const XTreeDatabase> x_tree_db );
     SolutionMap Compare( XLink base_xlink,
                          const SolutionMap *surrounding_solution );
-    SolutionMap Compare( TreePtr<Node> base_xnode );
 
     const set<Agent *> &GetKeyedAgents() const;
     const set<PatternLink> GetKeyerPatternLinks() const;

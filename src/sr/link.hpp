@@ -66,7 +66,7 @@ public:
     virtual ~XLink() {}
     // Make a copy of tp_x which acts as a new, distinct value 
     static XLink CreateDistinct( const TreePtr<Node> &tp_x ); 
-	static XLink CreateDistinct( shared_ptr<TreePtr<Node>> sp_tp_x );
+	static XLink CreateFrom( shared_ptr<TreePtr<Node>> sp_tp_x );
     bool operator<(const XLink &other) const;
     bool operator!=(const XLink &other) const;
     bool operator==(const XLink &other) const;

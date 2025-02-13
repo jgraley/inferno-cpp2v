@@ -5,4 +5,3 @@
 
 using namespace SR;
 
-const shared_ptr<TreePtr<Node>> DBCommon::TreeRecord::IMMUTABLE = nullptr;

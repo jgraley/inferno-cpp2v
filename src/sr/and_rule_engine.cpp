@@ -860,16 +860,6 @@ SolutionMap AndRuleEngine::Compare( XLink base_xlink,
 }
 
 
-// This one operates from base for a stand-alone compare operation and
-// no surrounding keys.
-SolutionMap AndRuleEngine::Compare( TreePtr<Node> base_xnode )
-{
-    SolutionMap empty_solution;
-    XLink base_xlink = XLink::CreateDistinct(base_xnode);
-    return Compare( base_xlink, &empty_solution );
-}
-
-
 const set<Agent *> &AndRuleEngine::GetKeyedAgents() const
 {
    // We will key all our normal agents

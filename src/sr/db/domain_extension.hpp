@@ -58,7 +58,7 @@ public:
 
 	DomainExtension( const XTreeDatabase *db, ExtenderSet extenders );
 		
-	typedef function<DBCommon::TreeOrdinal(XLink)> CreateExtraTreeFunction;
+	typedef function<DBCommon::TreeOrdinal(TreePtr<Node>)> CreateExtraTreeFunction;
 	typedef function<void(DBCommon::TreeOrdinal)> DestroyExtraTreeFunction;
 
 	void SetOnExtraTreeFunctions( CreateExtraTreeFunction on_create_extra_tree,
@@ -140,7 +140,7 @@ private:
     set<XLink> stimulii_to_recheck;
     
     // SimpleCompare equivalence classes over the domain, with refcount = size of the class.
-    map<TreePtr<Node>, ExtensionClass, SimpleCompare> induced_subtree_by_value_to_base_xlink_and_refcount;
+    map<TreePtr<Node>, ExtensionClass, SimpleCompare> induced_subtree_by_value_to_extra_subtree_and_refcount;
 };
         
 }

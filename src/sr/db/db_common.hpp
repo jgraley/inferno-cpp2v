@@ -14,17 +14,13 @@ public:
 	enum class TreeOrdinal
 	{
 		MAIN,
-		MMAX,
-		OFF_END,
 		EXTRAS
 		// ...continues, EXTRAS+i
 	};
     
     struct TreeRecord
     {
-		XLink root_xlink; // TODO do we really need to store this when we have sp_tp_root_node?
 		shared_ptr<TreePtr<Node>> sp_tp_root_node;
-		static const shared_ptr<TreePtr<Node>> IMMUTABLE;
 	};
     
     enum Context

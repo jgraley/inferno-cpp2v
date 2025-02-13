@@ -24,17 +24,15 @@ XTreeDatabase::XTreeDatabase( TreePtr<Node> main_root, shared_ptr<Lacing> lacing
     domain_extension( make_shared<DomainExtension>(this, domain_extenders) )
 {
 	auto sp_main_root = make_shared<TreePtr<Node>>(main_root);
-    XLink main_root_xlink = XLink::CreateDistinct(sp_main_root);    
+    XLink main_root_xlink = XLink::CreateFrom(sp_main_root);    
 
     ASSERT( main_root_xlink );
-    trees_by_ordinal[DBCommon::TreeOrdinal::MAIN] = {main_root_xlink, sp_main_root};
-	trees_by_ordinal[DBCommon::TreeOrdinal::MMAX] = {XLink::MMAX_Link, DBCommon::TreeRecord::IMMUTABLE};
-	trees_by_ordinal[DBCommon::TreeOrdinal::OFF_END] = {XLink::OffEndXLink, DBCommon::TreeRecord::IMMUTABLE};
+    trees_by_ordinal[DBCommon::TreeOrdinal::MAIN] = {sp_main_root};
 	next_tree_ordinal = DBCommon::TreeOrdinal::EXTRAS;
 
-    auto on_create_extra_tree = [=](XLink root_xlink) -> DBCommon::TreeOrdinal
+    auto on_create_extra_tree = [=](TreePtr<Node> root_node) -> DBCommon::TreeOrdinal
     {   
-		DBCommon::TreeOrdinal tree_ordinal = AllocateExtraTree(root_xlink);
+		DBCommon::TreeOrdinal tree_ordinal = AllocateExtraTree(root_node);
         de_extra_insert_queue.push( tree_ordinal );       
         return tree_ordinal;
     };
@@ -49,8 +47,10 @@ XTreeDatabase::XTreeDatabase( TreePtr<Node> main_root, shared_ptr<Lacing> lacing
 }
 
     
-DBCommon::TreeOrdinal XTreeDatabase::AllocateExtraTree(XLink root_xlink)
+DBCommon::TreeOrdinal XTreeDatabase::AllocateExtraTree(TreePtr<Node> root_node)
 {
+	auto sp_root = make_shared<TreePtr<Node>>(root_node);
+	XLink root_xlink = XLink::CreateFrom(sp_root);    
 	DBCommon::TreeOrdinal assigned_ordinal;
 	if( free_tree_ordinals.empty() )
 	{
@@ -62,7 +62,7 @@ DBCommon::TreeOrdinal XTreeDatabase::AllocateExtraTree(XLink root_xlink)
 		assigned_ordinal = free_tree_ordinals.front();
 		free_tree_ordinals.pop();
 	}
-	trees_by_ordinal[assigned_ordinal] = {root_xlink, DBCommon::TreeRecord::IMMUTABLE};
+	trees_by_ordinal[assigned_ordinal] = {sp_root};
 	return assigned_ordinal;
 }
 
@@ -76,7 +76,7 @@ void XTreeDatabase::FreeExtraTree(DBCommon::TreeOrdinal tree_ordinal)
 
 XLink XTreeDatabase::GetRootXLink(DBCommon::TreeOrdinal tree_ordinal) const
 {
-	return trees_by_ordinal.at(tree_ordinal).root_xlink;
+	return XLink::CreateFrom( trees_by_ordinal.at(tree_ordinal).sp_tp_root_node );
 }
 
 
@@ -91,7 +91,7 @@ void XTreeDatabase::InitialBuild()
     actions.push_back( orderings->GetInsertAction() );
     	
 	for( auto p : trees_by_ordinal )
-		db_walker.WalkTree( &actions, p.second.root_xlink, p.first, DBWalk::WIND_IN );
+		db_walker.WalkTree( &actions, GetRootXLink(p.first), p.first, DBWalk::WIND_IN );
 
     domain_extension->InitialBuild();
     
@@ -384,7 +384,6 @@ unique_ptr<Mutator> XTreeDatabase::GetMutator(XLink xlink)
 			// correctly from the XTreeDatabase object, which is why this method cannot be const.
 			ASSERT( (int)(row.tree_ordinal) >= 0 ); // Should be valid whenever context is ROOT
 			shared_ptr<TreePtr<Node>> sp_tp_root_node = trees_by_ordinal[row.tree_ordinal].sp_tp_root_node;
-			ASSERT( sp_tp_root_node != DBCommon::TreeRecord::IMMUTABLE ); // Tree must be mutable
 			return make_unique<SingularMutator>( row.parent_node, sp_tp_root_node.get() );
 		}	
 		case DBCommon::SINGULAR:

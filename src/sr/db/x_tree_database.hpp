@@ -29,7 +29,7 @@ public:
     
     // Update and access our trees. Some are created by the DB, others (the extra ones) are
     // allocated and freed here.
-    DBCommon::TreeOrdinal AllocateExtraTree(XLink root_xlink);
+    DBCommon::TreeOrdinal AllocateExtraTree(TreePtr<Node> root_node);
     void FreeExtraTree(DBCommon::TreeOrdinal tree_ordinal);
     XLink GetRootXLink(DBCommon::TreeOrdinal tree_ordinal) const;
     
