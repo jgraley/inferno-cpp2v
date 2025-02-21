@@ -52,7 +52,7 @@ Inferno works with gcc/g++ 4.4.5, 4.7.? and 4.8.5
 On a Debian/Ubuntu system, you need approximately the following apt packages:
     
 make
-build-essentials
+build-essential
 flex
 bison
 libboost-all-dev
