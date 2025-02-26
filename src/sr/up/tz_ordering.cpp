@@ -23,9 +23,17 @@ TreeZoneOrderingHandler::TreeZoneOrderingHandler(const XTreeDatabase *db_) :
 
 void TreeZoneOrderingHandler::Run( shared_ptr<ZoneExpression> &root_expr )
 {
+	out_of_order_list.clear();
 	XLink root = db->GetMainRootXLink();
 	XLink last = db->GetLastDescendant(root);
 	RunForRange( root_expr, root, last, false );
+	
+	for( shared_ptr<ZoneExpression> *expr : out_of_order_list )
+	{
+		auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(*expr);
+		ASSERT( ptz_op );
+		*expr = ptz_op->DuplicateToFree();
+	}
 }
 
 
@@ -63,7 +71,7 @@ void TreeZoneOrderingHandler::RunForRange( shared_ptr<ZoneExpression> &base,
 	// Actions to take when we have a range. Use at root and for
 	// terminii of tree zones.
 	ZoneExprPtrList tree_zone_op_list;
-	InsertTZBypassingFZs( base, tree_zone_op_list, tree_zone_op_list.end() );
+	InsertTZsBypassingFZs( base, tree_zone_op_list, tree_zone_op_list.end() );
 	
 	for( ZoneExprPtrList::iterator it = tree_zone_op_list.begin();
 	     it != tree_zone_op_list.end();
@@ -71,7 +79,7 @@ void TreeZoneOrderingHandler::RunForRange( shared_ptr<ZoneExpression> &base,
 	{
 		shared_ptr<ZoneExpression> *expr = *it;
 		auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(*expr);
-		ASSERT( ptz_op ); // should succeed due InsertTZBypassingFZs()
+		ASSERT( ptz_op ); // should succeed due InsertTZsBypassingFZs()
 				
 		// Check in range supplied to us for root or parent TZ terminus
 		XLink tz_base = ptz_op->GetZone().GetBaseXLink();
@@ -89,14 +97,21 @@ void TreeZoneOrderingHandler::RunForRange( shared_ptr<ZoneExpression> &base,
 			}
 			else
 			{
-				// Duplicate the TZ that's in the wrong place into a free zone
-				TRACE("Out of sequence: duplicating ")(tz_base)("\n");
-				*expr = ptz_op->DuplicateToFree();
-				
-				// Insert the first layer of TZs underneath it into our current
-				// work list, because they become visible at the current level of recursion.
+				// The current TZ op is in the wrong place. It will be turned into
+				// a free zone. Free zones are "invisible" in this scheme, so we update
+				// our current work list to include its children (bypassing FZs).
 				ZoneExprPtrList::iterator next_it = next(it);
-				InsertTZBypassingFZs( *expr, tree_zone_op_list, next_it );
+				ptz_op->ForChildren( [&](shared_ptr<ZoneExpression> &child_expr)
+				{
+					InsertTZsBypassingFZs( child_expr, tree_zone_op_list, next_it );
+				} );
+				
+				// Duplicate the TZ that's in the wrong place into a free zone. 
+				// Hopefully because we already dealt with children, we could
+				// just mark this in side data.
+				TRACE("Out of sequence: duplicating ")(tz_base)("\n");
+				out_of_order_list.push_back(expr);
+				
 				continue; // no range threshold update or recurse
 			}
 		}
@@ -112,9 +127,9 @@ void TreeZoneOrderingHandler::RunForRange( shared_ptr<ZoneExpression> &base,
 }
                                        
 
-void TreeZoneOrderingHandler::InsertTZBypassingFZs( shared_ptr<ZoneExpression> &expr, 
-              				  		                list<shared_ptr<ZoneExpression> *> &tree_zones,
-              				  		                list<shared_ptr<ZoneExpression> *>::iterator pos )
+void TreeZoneOrderingHandler::InsertTZsBypassingFZs( shared_ptr<ZoneExpression> &expr, 
+              				  		                 list<shared_ptr<ZoneExpression> *> &tree_zones,
+              				  		                 list<shared_ptr<ZoneExpression> *>::iterator pos )
 {
 	// Insert descendent tree zones, skipping over free zones, into a list for
 	// convenience.
@@ -126,7 +141,7 @@ void TreeZoneOrderingHandler::InsertTZBypassingFZs( shared_ptr<ZoneExpression> &
 	{
 		pfz_op->ForChildren( [&](shared_ptr<ZoneExpression> &child_expr)
 		{
-			InsertTZBypassingFZs( child_expr, tree_zones, pos );
+			InsertTZsBypassingFZs( child_expr, tree_zones, pos );
 		} );
 	}
 	else

@@ -17,6 +17,8 @@ namespace SR
 class TreeZoneOrderingHandler
 {
 public:	
+	typedef list<shared_ptr<ZoneExpression> *> OOOZoneExprPtrList;
+
 	TreeZoneOrderingHandler(const XTreeDatabase *db_);
 	
 	// Can change the supplied shared ptr
@@ -34,12 +36,13 @@ private:
                       XLink range_last,
                       XLink range_end,
                       bool just_check );
-	void InsertTZBypassingFZs( shared_ptr<ZoneExpression> &expr, 
-			     	           ZoneExprPtrList &tree_zones,
-				      	       ZoneExprPtrList::iterator pos );
+	void InsertTZsBypassingFZs( shared_ptr<ZoneExpression> &expr, 
+			     	            ZoneExprPtrList &tree_zones,
+				      	        ZoneExprPtrList::iterator pos );
 				    	  
 	const XTreeDatabase * const db;
-	SR::DepthFirstRelation dfr;				    	  
+	SR::DepthFirstRelation dfr;		
+	OOOZoneExprPtrList out_of_order_list;		    	  
 };
 
 // ------------------------- AltTreeZoneOrderingChecker --------------------------
