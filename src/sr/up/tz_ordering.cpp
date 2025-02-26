@@ -37,6 +37,22 @@ void TreeZoneOrderingHandler::Check( shared_ptr<ZoneExpression> &root_expr )
 }
 
 
+void TreeZoneOrderingHandler::RunForTreeZone( shared_ptr<DupMergeTreeZoneOperator> &ptz_op, 
+                                              bool just_check )
+{
+	// We have a tree zone. For each of its terminii, find the acceptable
+	// range of descendent tree zones and recurse.
+	TreeZone tree_zone = ptz_op->GetZone();
+	TreeZone::TerminusIterator it_t = tree_zone.GetTerminiiBegin();
+	ptz_op->ForChildren( [&](shared_ptr<ZoneExpression> &child_expr)	
+	{
+		XLink range_first = *it_t; // inclusive (terminus XLink equals base XLink of attached tree zone)
+		XLink range_last = db->GetLastDescendant(range_first); // inclusive (is same or child of range_first)
+		RunForRange( child_expr, range_first, range_last, just_check );
+	} );
+}
+
+
 void TreeZoneOrderingHandler::RunForRange( shared_ptr<ZoneExpression> &base, 
 								 	  	   XLink range_first,
 							 			   XLink range_last,
@@ -86,22 +102,6 @@ void TreeZoneOrderingHandler::RunForRange( shared_ptr<ZoneExpression> &base,
 		TRACE("Recursing on ")(ptz_op)("...\n");
 		RunForTreeZone( ptz_op, false );
 	}
-}
-
-
-void TreeZoneOrderingHandler::RunForTreeZone( shared_ptr<DupMergeTreeZoneOperator> &ptz_op, 
-                                              bool just_check )
-{
-	// We have a tree zone. For each of its terminii, find the acceptable
-	// range of descendent tree zones and recurse.
-	TreeZone tree_zone = ptz_op->GetZone();
-	TreeZone::TerminusIterator it_t = tree_zone.GetTerminiiBegin();
-	ptz_op->ForChildren( [&](shared_ptr<ZoneExpression> &child_expr)	
-	{
-		XLink range_first = *it_t; // inclusive (terminus XLink equals base XLink of attached tree zone)
-		XLink range_last = db->GetLastDescendant(range_first); // inclusive (is same or child of range_first)
-		RunForRange( child_expr, range_first, range_last, just_check );
-	} );
 }
                                        
 
