@@ -38,11 +38,12 @@ void TreeZoneOrderingHandler::Check( shared_ptr<ZoneExpression> &root_expr )
 
 
 void TreeZoneOrderingHandler::CheckRange( shared_ptr<ZoneExpression> &base, 
-									  	  XLink range_begin,
-										  XLink range_end,
+									  	  XLink range_first,
+										  XLink range_last,
 										  bool just_check )
 {
-	TRACE("CheckRange() at ")(base)(" with range ")(range_begin)(" to ")(range_end)("\n");
+	INDENT(just_check?"c":"C");
+	TRACE("Starting ")(just_check ? "cross-check" : "transfomation")(" at ")(base)(" with range ")(range_first)(" to ")(range_last)(" inclusive\n");
 	// Actions to take when we have a range. Use at root and for
 	// terminii of tree zones.
 	list<shared_ptr<ZoneExpression> *> tree_zone_op_list;
@@ -52,36 +53,38 @@ void TreeZoneOrderingHandler::CheckRange( shared_ptr<ZoneExpression> &base,
 	{
 		auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(*expr);
 		ASSERT( ptz_op ); // should succeed due GatherTreeZoneOps()
-		XLink tz_base = ptz_op->GetZone().GetBaseXLink();
-		
+				
 		// Check in range supplied to us for root or parent TZ terminus
-		Orderable::Diff diff_begin = dfr.Compare3Way(tz_base, range_begin);
-		Orderable::Diff diff_end = dfr.Compare3Way(tz_base, range_end);
+		XLink tz_base = ptz_op->GetZone().GetBaseXLink();
+		TRACE("Checking ")(tz_base)("...\n");
+		Orderable::Diff diff_begin = dfr.Compare3Way(tz_base, range_first);
+		Orderable::Diff diff_end = dfr.Compare3Way(tz_base, range_last);
 		bool ok = diff_begin >= 0 && diff_end <= 0; // both inclusive
 		if( !ok )
 		{     
 			if( just_check )
 			{
 				FTRACE(db->GetOrderings().depth_first_ordering)("\n");
-				ASSERT(diff_begin >= 0)("Tree zone base ")(tz_base)(" appears before limit ")(range_begin)(" in X tree");
-				ASSERT(diff_end <= 0)("Tree zone base ")(tz_base)(" appears after limit ")(range_end)(" in X tree");
+				ASSERT(diff_begin >= 0)("Tree zone base ")(tz_base)(" appears before limit ")(range_first)(" in X tree");
+				ASSERT(diff_end <= 0)("Tree zone base ")(tz_base)(" appears after limit ")(range_last)(" in X tree");
 			}
 			else
 			{
 				// Action: minimal is to duplicate ptz_op->GetZone() and
 				// every TZ under it into free zones. Could be improved later 
-				TRACE("Duplicating ")(tz_base)("\n");
+				TRACE("Out of sequence: duplicating ")(tz_base)("\n");
 				DuplicateTreeZone( *expr );
 				continue; // no range threshold update or recurse
 			}
 		}
-		TRACE(tz_base)(" OK\n");
+		TRACE("OK, updating start of range\n");
 		
 	    // Narrow the acceptable range for the next tree zone
-		range_begin = tz_base;
+		range_first = tz_base;		
 
-		// Recurse to check descendents of the tree zone
-		RunForTreeZone( ptz_op, false );		
+		// Recurse to check descendents of the tree zone. 
+		TRACE("Recursing on ")(ptz_op)("...\n");
+		RunForTreeZone( ptz_op, false );
 	}
 }
 
@@ -89,17 +92,15 @@ void TreeZoneOrderingHandler::CheckRange( shared_ptr<ZoneExpression> &base,
 void TreeZoneOrderingHandler::RunForTreeZone( shared_ptr<DupMergeTreeZoneOperator> &ptz_op, 
                                               bool just_check )
 {
-	TRACE("RunForTreeZone() looking for free zones under ")(ptz_op)("\n");
-	
 	// We have a tree zone. For each of its terminii, find the acceptable
 	// range of descendent tree zones and recurse.
 	TreeZone tree_zone = ptz_op->GetZone();
 	TreeZone::TerminusIterator it_t = tree_zone.GetTerminiiBegin();
 	ptz_op->ForChildren( [&](shared_ptr<ZoneExpression> &child_expr)	
 	{
-		XLink range_begin = *it_t; // inclusive (terminus XLink equals base XLink of attached tree zone)
-		XLink range_end = db->GetLastDescendant(range_begin); // inclusive (is same or child of range_begin)
-		CheckRange( child_expr, range_begin, range_end, just_check );
+		XLink range_first = *it_t; // inclusive (terminus XLink equals base XLink of attached tree zone)
+		XLink range_last = db->GetLastDescendant(range_first); // inclusive (is same or child of range_first)
+		CheckRange( child_expr, range_first, range_last, just_check );
 	} );
 }
                                        
@@ -137,7 +138,6 @@ void TreeZoneOrderingHandler::DuplicateTreeZone( shared_ptr<ZoneExpression> &exp
 	{
 		if( auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(child_expr) )
 		{		
-			TRACE("Duplicate ")(ptz_op)("\n");
 			child_expr = ptz_op->DuplicateToFree();
 		}
 	} );	

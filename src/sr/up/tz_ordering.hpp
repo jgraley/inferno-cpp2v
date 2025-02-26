@@ -27,7 +27,7 @@ public:
 
 private:	
 	void CheckRange( shared_ptr<ZoneExpression> &base, 
-                     XLink range_begin,
+                     XLink range_last,
                      XLink range_end,
                      bool just_check );
 	void RunForTreeZone( shared_ptr<DupMergeTreeZoneOperator> &op, 
