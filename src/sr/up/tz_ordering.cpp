@@ -73,59 +73,76 @@ void TreeZoneOrderingHandler::RunForRange( shared_ptr<ZoneExpression> &base,
 	ZoneExprPtrList tree_zone_op_list;
 	InsertTZsBypassingFZs( base, tree_zone_op_list, tree_zone_op_list.end() );
 	
-	ZoneExprPtrList::iterator next_it;
-	for( ZoneExprPtrList::iterator it = tree_zone_op_list.begin();
-	     it != tree_zone_op_list.end();
-	     it = next_it )
+	int prev_size;
+	do
 	{
-		next_it = next(it);
-		shared_ptr<ZoneExpression> *expr = *it;
+		prev_size = tree_zone_op_list.size();
+		
+		OOOItList out_of_order_its;
+		ZoneExprPtrList::iterator next_it;
+		for( ZoneExprPtrList::iterator it = tree_zone_op_list.begin();
+			 it != tree_zone_op_list.end();
+			 it = next_it )
+		{
+			next_it = next(it);
+			shared_ptr<ZoneExpression> *expr = *it;
+			auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(*expr);
+			ASSERT( ptz_op ); // should succeed due InsertTZsBypassingFZs()
+					
+			// Check in range supplied to us for root or parent TZ terminus
+			XLink tz_base = ptz_op->GetZone().GetBaseXLink();
+			TRACE("Checking ")(tz_base)("...\n");
+			Orderable::Diff diff_begin = dfr.Compare3Way(tz_base, range_first);
+			Orderable::Diff diff_end = dfr.Compare3Way(tz_base, range_last);
+			bool ok = diff_begin >= 0 && diff_end <= 0; // both inclusive
+			if( !ok )
+			{     
+				if( just_check )
+				{
+					FTRACE(db->GetOrderings().depth_first_ordering)("\n");
+					ASSERT(diff_begin >= 0)("Tree zone base ")(tz_base)(" appears before limit ")(range_first)(" in X tree");
+					ASSERT(diff_end <= 0)("Tree zone base ")(tz_base)(" appears after limit ")(range_last)(" in X tree");
+					ASSERTFAIL(); // we aint goin nowhere
+				}
+
+#ifdef NEW
+				out_of_order_its.push_back(it);
+#else
+				// The current TZ op is in the wrong place. It will be turned into
+				// a free zone. Free zones are "invisible" in this scheme, so we update
+				// our current work list to include its children (bypassing FZs).			
+				ptz_op->ForChildren( [&](shared_ptr<ZoneExpression> &child_expr)
+				{
+					InsertTZsBypassingFZs( child_expr, tree_zone_op_list, next_it );
+				} );
+				next_it = tree_zone_op_list.erase(it);
+#endif				
+				// Duplicate the TZ that's in the wrong place into a free zone. 
+				// Hopefully because we already dealt with children, we could
+				// just mark this in side data.
+				TRACE("Out of sequence: duplicating ")(tz_base)("\n");
+				out_of_order_list.push_back(expr);
+				
+				continue; // no range threshold update or recurse
+			}
+					
+			TRACE("OK, updating start of range\n");
+			
+			// Narrow the acceptable range for the next tree zone
+			range_first = tz_base;		
+		}	
+		
+	} while(tree_zone_op_list.size() > prev_size);
+	
+	// Recurse to check descendents of the tree zones. 
+	for( shared_ptr<ZoneExpression> *expr : tree_zone_op_list )
+	{
 		auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(*expr);
 		ASSERT( ptz_op ); // should succeed due InsertTZsBypassingFZs()
-				
-		// Check in range supplied to us for root or parent TZ terminus
-		XLink tz_base = ptz_op->GetZone().GetBaseXLink();
-		TRACE("Checking ")(tz_base)("...\n");
-		Orderable::Diff diff_begin = dfr.Compare3Way(tz_base, range_first);
-		Orderable::Diff diff_end = dfr.Compare3Way(tz_base, range_last);
-		bool ok = diff_begin >= 0 && diff_end <= 0; // both inclusive
-		if( !ok )
-		{     
-			if( just_check )
-			{
-				FTRACE(db->GetOrderings().depth_first_ordering)("\n");
-				ASSERT(diff_begin >= 0)("Tree zone base ")(tz_base)(" appears before limit ")(range_first)(" in X tree");
-				ASSERT(diff_end <= 0)("Tree zone base ")(tz_base)(" appears after limit ")(range_last)(" in X tree");
-				ASSERTFAIL(); // we aint goin nowhere
-			}
 
-			// The current TZ op is in the wrong place. It will be turned into
-			// a free zone. Free zones are "invisible" in this scheme, so we update
-			// our current work list to include its children (bypassing FZs).
-			ptz_op->ForChildren( [&](shared_ptr<ZoneExpression> &child_expr)
-			{
-				InsertTZsBypassingFZs( child_expr, tree_zone_op_list, next_it );
-			} );
-			next_it = tree_zone_op_list.erase(it);
-			
-			// Duplicate the TZ that's in the wrong place into a free zone. 
-			// Hopefully because we already dealt with children, we could
-			// just mark this in side data.
-			TRACE("Out of sequence: duplicating ")(tz_base)("\n");
-			out_of_order_list.push_back(expr);
-			
-			continue; // no range threshold update or recurse
-		}
-				
-		TRACE("OK, updating start of range\n");
-		
-	    // Narrow the acceptable range for the next tree zone
-		range_first = tz_base;		
-
-		// Recurse to check descendents of the tree zone. 
 		TRACE("Recursing on ")(ptz_op)("...\n");
 		RunForTreeZone( ptz_op, false );
-	}
+	}	
 }
                                        
 
