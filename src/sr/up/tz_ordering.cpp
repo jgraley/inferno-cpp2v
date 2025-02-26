@@ -104,7 +104,7 @@ void TreeZoneOrderingHandler::RunForRange( shared_ptr<ZoneExpression> &base,
 					ASSERT(diff_end <= 0)("Tree zone base ")(tz_base)(" appears after limit ")(range_last)(" in X tree");
 					ASSERTFAIL(); // we aint goin nowhere
 				}
-
+//#define NEW
 #ifdef NEW
 				out_of_order_its.push_back(it);
 #else
@@ -131,6 +131,25 @@ void TreeZoneOrderingHandler::RunForRange( shared_ptr<ZoneExpression> &base,
 			// Narrow the acceptable range for the next tree zone
 			range_first = tz_base;		
 		}	
+		
+#ifdef NEW
+		for( ZoneExprPtrList::iterator it : out_of_order_its )
+		{
+			shared_ptr<ZoneExpression> *expr = *it;
+			auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(*expr);
+			ASSERT( ptz_op ); // should succeed due InsertTZsBypassingFZs()
+
+			// The current TZ op is in the wrong place. It will be turned into
+			// a free zone. Free zones are "invisible" in this scheme, so we update
+			// our current work list to include its children (bypassing FZs).			
+			ZoneExprPtrList::iterator next_it = next(it);
+			ptz_op->ForChildren( [&](shared_ptr<ZoneExpression> &child_expr)
+			{
+				InsertTZsBypassingFZs( child_expr, tree_zone_op_list, next_it );
+			} );
+			tree_zone_op_list.erase(it);
+		}		
+#endif
 		
 	} while(tree_zone_op_list.size() > prev_size);
 	
