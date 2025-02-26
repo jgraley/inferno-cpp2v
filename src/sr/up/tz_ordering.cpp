@@ -25,7 +25,7 @@ void TreeZoneOrderingHandler::Run( shared_ptr<ZoneExpression> &root_expr )
 {
 	XLink root = db->GetMainRootXLink();
 	XLink last = db->GetLastDescendant(root);
-	CheckRange( root_expr, root, last, false );
+	RunForRange( root_expr, root, last, false );
 }
 
 
@@ -33,14 +33,14 @@ void TreeZoneOrderingHandler::Check( shared_ptr<ZoneExpression> &root_expr )
 {
 	XLink root = db->GetMainRootXLink();
 	XLink last = db->GetLastDescendant(root);
-	CheckRange( root_expr, root, last, true );
+	RunForRange( root_expr, root, last, true );
 }
 
 
-void TreeZoneOrderingHandler::CheckRange( shared_ptr<ZoneExpression> &base, 
-									  	  XLink range_first,
-										  XLink range_last,
-										  bool just_check )
+void TreeZoneOrderingHandler::RunForRange( shared_ptr<ZoneExpression> &base, 
+								 	  	   XLink range_first,
+							 			   XLink range_last,
+						 				   bool just_check )
 {
 	INDENT(just_check?"c":"C");
 	TRACE("Starting ")(just_check ? "cross-check" : "transfomation")(" at ")(base)(" with range ")(range_first)(" to ")(range_last)(" inclusive\n");
@@ -100,7 +100,7 @@ void TreeZoneOrderingHandler::RunForTreeZone( shared_ptr<DupMergeTreeZoneOperato
 	{
 		XLink range_first = *it_t; // inclusive (terminus XLink equals base XLink of attached tree zone)
 		XLink range_last = db->GetLastDescendant(range_first); // inclusive (is same or child of range_first)
-		CheckRange( child_expr, range_first, range_last, just_check );
+		RunForRange( child_expr, range_first, range_last, just_check );
 	} );
 }
                                        
@@ -133,7 +133,7 @@ void TreeZoneOrderingHandler::DuplicateTreeZone( shared_ptr<ZoneExpression> &exp
 	// At present, for simplest algo, we DO recurse the entire subtree and 
 	// duplicate everything. But it shouldn't be too hard to just duplicate the
 	// supplied one and let checks continue on the children of the bad TZ. Would
-	// require CheckRange() to be stated-out so it can be invoked from a walk though.
+	// require RunForRange() to be stated-out so it can be invoked from a walk though.
 	ZoneExpression::ForDepthFirstWalk( expr, nullptr, [&](shared_ptr<ZoneExpression> &child_expr)
 	{
 		if( auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(child_expr) )

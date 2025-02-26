@@ -26,7 +26,7 @@ public:
 	void Check( shared_ptr<ZoneExpression> &root_expr );
 
 private:	
-	void CheckRange( shared_ptr<ZoneExpression> &base, 
+	void RunForRange( shared_ptr<ZoneExpression> &base, 
                      XLink range_last,
                      XLink range_end,
                      bool just_check );
