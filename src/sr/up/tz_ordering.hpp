@@ -26,15 +26,17 @@ public:
 	void Check( shared_ptr<ZoneExpression> &root_expr );
 
 private:	
+	typedef list<shared_ptr<ZoneExpression> *> ZoneExprPtrList;
+
 	void RunForTreeZone( shared_ptr<DupMergeTreeZoneOperator> &op, 
 						 bool just_check );
 	void RunForRange( shared_ptr<ZoneExpression> &base, 
                       XLink range_last,
                       XLink range_end,
                       bool just_check );
-	void GatherTreeZoneOps( shared_ptr<ZoneExpression> &expr, 
-				      	    list<shared_ptr<ZoneExpression> *> &tree_zones );
-	void DuplicateTreeZone( shared_ptr<ZoneExpression> &expr );
+	void InsertTZBypassingFZs( shared_ptr<ZoneExpression> &expr, 
+			     	           ZoneExprPtrList &tree_zones,
+				      	       ZoneExprPtrList::iterator pos );
 				    	  
 	const XTreeDatabase * const db;
 	SR::DepthFirstRelation dfr;				    	  

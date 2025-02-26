@@ -62,13 +62,16 @@ void TreeZoneOrderingHandler::RunForRange( shared_ptr<ZoneExpression> &base,
 	TRACE("Starting ")(just_check ? "cross-check" : "transfomation")(" at ")(base)(" with range ")(range_first)(" to ")(range_last)(" inclusive\n");
 	// Actions to take when we have a range. Use at root and for
 	// terminii of tree zones.
-	list<shared_ptr<ZoneExpression> *> tree_zone_op_list;
-	GatherTreeZoneOps( base, tree_zone_op_list );
+	ZoneExprPtrList tree_zone_op_list;
+	InsertTZBypassingFZs( base, tree_zone_op_list, tree_zone_op_list.end() );
 	
-	for( shared_ptr<ZoneExpression> *expr : tree_zone_op_list )
+	for( ZoneExprPtrList::iterator it = tree_zone_op_list.begin();
+	     it != tree_zone_op_list.end();
+	     ++it )
 	{
+		shared_ptr<ZoneExpression> *expr = *it;
 		auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(*expr);
-		ASSERT( ptz_op ); // should succeed due GatherTreeZoneOps()
+		ASSERT( ptz_op ); // should succeed due InsertTZBypassingFZs()
 				
 		// Check in range supplied to us for root or parent TZ terminus
 		XLink tz_base = ptz_op->GetZone().GetBaseXLink();
@@ -86,10 +89,14 @@ void TreeZoneOrderingHandler::RunForRange( shared_ptr<ZoneExpression> &base,
 			}
 			else
 			{
-				// Action: minimal is to duplicate ptz_op->GetZone() and
-				// every TZ under it into free zones. Could be improved later 
+				// Duplicate the TZ that's in the wrong place into a free zone
 				TRACE("Out of sequence: duplicating ")(tz_base)("\n");
-				DuplicateTreeZone( *expr );
+				*expr = ptz_op->DuplicateToFree();
+				
+				// Insert the first layer of TZs underneath it into our current
+				// work list, because they become visible at the current level of recursion.
+				ZoneExprPtrList::iterator next_it = next(it);
+				InsertTZBypassingFZs( *expr, tree_zone_op_list, next_it );
 				continue; // no range threshold update or recurse
 			}
 		}
@@ -105,43 +112,28 @@ void TreeZoneOrderingHandler::RunForRange( shared_ptr<ZoneExpression> &base,
 }
                                        
 
-void TreeZoneOrderingHandler::GatherTreeZoneOps( shared_ptr<ZoneExpression> &expr, 
-              				  		             list<shared_ptr<ZoneExpression> *> &tree_zones )
+void TreeZoneOrderingHandler::InsertTZBypassingFZs( shared_ptr<ZoneExpression> &expr, 
+              				  		                list<shared_ptr<ZoneExpression> *> &tree_zones,
+              				  		                list<shared_ptr<ZoneExpression> *>::iterator pos )
 {
-	// Get descendant tree zones, skipping over free zones, into a list for
+	// Insert descendent tree zones, skipping over free zones, into a list for
 	// convenience.
 	if( auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(expr) )
 	{
-		tree_zones.push_back( &expr );
+		tree_zones.insert( pos, &expr );
 	}
 	else if( auto pfz_op = dynamic_pointer_cast<MergeFreeZoneOperator>(expr) )
 	{
 		pfz_op->ForChildren( [&](shared_ptr<ZoneExpression> &child_expr)
 		{
-			GatherTreeZoneOps( child_expr, tree_zones );
+			InsertTZBypassingFZs( child_expr, tree_zones, pos );
 		} );
 	}
 	else
 	{
 		ASSERTFAIL();
 	}
-}
-              						  
-              						  
-void TreeZoneOrderingHandler::DuplicateTreeZone( shared_ptr<ZoneExpression> &expr )
-{
-	// At present, for simplest algo, we DO recurse the entire subtree and 
-	// duplicate everything. But it shouldn't be too hard to just duplicate the
-	// supplied one and let checks continue on the children of the bad TZ. Would
-	// require RunForRange() to be stated-out so it can be invoked from a walk though.
-	ZoneExpression::ForDepthFirstWalk( expr, nullptr, [&](shared_ptr<ZoneExpression> &child_expr)
-	{
-		if( auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(child_expr) )
-		{		
-			child_expr = ptz_op->DuplicateToFree();
-		}
-	} );	
-}
+}              						               				
 
 // ------------------------- AltTreeZoneOrderingChecker --------------------------
 
