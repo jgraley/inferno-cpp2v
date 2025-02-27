@@ -51,6 +51,8 @@ private:
 		    	  	     XLink range_first,
 						 XLink range_last,
 						 bool just_check );
+	shared_ptr<DupMergeTreeZoneOperator> GetOperator(const Thing &thing) const;
+	XLink GetBaseXLink(const Thing &thing) const;
 				    	  
 	const XTreeDatabase * const db;
 	SR::DepthFirstRelation dfr;		

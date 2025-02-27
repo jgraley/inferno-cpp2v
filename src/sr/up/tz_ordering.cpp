@@ -95,24 +95,16 @@ void TreeZoneOrderingHandler::RunForRangeList( ThingVector &things,
 		if( (it == things.end() || !it->out_of_order) && 
 			(prev_it != things.end() && prev_it->out_of_order) )
 		{
-			// End of an OOO run
+			// End of an OOO run. Book-end the children by the intersection
+			// of the supplied range and the range implied by the nearest 
+			// in-order TZs
 			XLink child_first = range_first;
 			if( prev_in_order_it != things.end() )
-			{
-				shared_ptr<ZoneExpression> *prev_in_order_expr = prev_in_order_it->expr_ptr;
-				auto prev_in_order_ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(*prev_in_order_expr);
-				ASSERT( prev_in_order_ptz_op ); // should succeed due AddTZsBypassingFZs()				                     :
-				child_first = prev_in_order_ptz_op->GetZone().GetBaseXLink();				  
-			}
+				child_first = GetBaseXLink( *prev_in_order_it );				  
 			
 			XLink child_last = range_last;
 			if( it != things.end() )
-			{
-				shared_ptr<ZoneExpression> *expr = it->expr_ptr;
-				auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(*expr);
-				ASSERT( ptz_op ); // should succeed due AddTZsBypassingFZs()				                     :
-				child_last = ptz_op->GetZone().GetBaseXLink();				  
-			}
+				child_last = GetBaseXLink( *it );				  
 							
 			RunForRangeList( children_list, 
 							 child_first, 
@@ -127,25 +119,19 @@ void TreeZoneOrderingHandler::RunForRangeList( ThingVector &things,
 
 		if( it->out_of_order )
 		{
-			shared_ptr<ZoneExpression> *expr = it->expr_ptr;			
-			auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(*expr);
-			ASSERT( ptz_op ); // should succeed due AddTZsBypassingFZs()
-
+			auto ptz_op = GetOperator(*it);
 			ptz_op->ForChildren( [&](shared_ptr<ZoneExpression> &child_expr)
 			{
 				AddTZsBypassingFZs( child_expr, children_list );
 			} );		
 
 			// Mark as out of order. 
-			TRACE("Out of sequence: marking ")(*expr)("\n");
-			out_of_order_list.push_back(expr);
+			TRACE("Out of sequence: marking ")(it->expr_ptr)("\n");
+			out_of_order_list.push_back(it->expr_ptr);
 		}
 		else
 		{
-			shared_ptr<ZoneExpression> *expr = it->expr_ptr;			
-			auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(*expr);
-			ASSERT( ptz_op ); // should succeed due AddTZsBypassingFZs()
-
+			auto ptz_op = GetOperator(*it);
 			TRACE("Recursing on ")(ptz_op)("...\n");
 			RunForTreeZone( ptz_op, just_check );
 			
@@ -196,16 +182,14 @@ void TreeZoneOrderingHandler::FindOutOfOrder( ThingVector &things,
 	// Map from starts to run lengths
 	map<int, int> runs_by_first_index;
 	
+	// Find runs of in-order things, breaking on things outside the supplied range
 	XLink prev_tz_base;      
 	int i=0, run_start_i=0;
 	for( Thing &thing : things )
 	{
-		shared_ptr<ZoneExpression> *expr = thing.expr_ptr;
-		auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(*expr);
-		ASSERT( ptz_op ); // should succeed due AddTZsBypassingFZs()
-				
+		XLink tz_base = GetBaseXLink( thing );
+
 		// Check in range supplied to us for root or parent TZ terminus
-		XLink tz_base = ptz_op->GetZone().GetBaseXLink();
 		TRACE("Checking ")(tz_base)("...\n");
 		Orderable::Diff diff_begin = dfr.Compare3Way(tz_base, range_first);
 		Orderable::Diff diff_end = dfr.Compare3Way(tz_base, range_last);
@@ -232,7 +216,7 @@ void TreeZoneOrderingHandler::FindOutOfOrder( ThingVector &things,
 			}						
 			
 			// Completed run if:
-			// - seen a node since startup or broken run, and
+			// - seen a node since startup and not broken run, and
 			// - not monotonic wrt DF ordering
 			if( prev_tz_base && !monotonic )
 			{
@@ -258,7 +242,7 @@ void TreeZoneOrderingHandler::FindOutOfOrder( ThingVector &things,
 	}
 	
 	// Completed final run if:
-	// - seen a node since startup or broken run
+	// - seen a node since startup and not broken run
 	if(prev_tz_base)
 	{
 		int length = i - run_start_i;
@@ -266,10 +250,13 @@ void TreeZoneOrderingHandler::FindOutOfOrder( ThingVector &things,
 		runs_by_first_index.insert( make_pair(run_start_i, length) );
 	}
 
+	// Solve ordering problem
 	while(runs_by_length.size() > 1)
 	{
-		// We have more than one run, which means the things are not ordered
-		// Policy is to define the shortest run as out-of-order
+		// We have more than one run, which means the things are not ordered.
+		// Policy is to define the shortest run as out-of-order.
+		// We will remove it and maybe concatenate the neighbouring runs.
+		// This reduces the number of runs, so should terminate.
 		auto it_rbl_shortest = runs_by_length.begin(); // (joint) smallest run
 		auto it_rbl_ooo = it_rbl_shortest; // policy		
 		
@@ -287,26 +274,20 @@ void TreeZoneOrderingHandler::FindOutOfOrder( ThingVector &things,
 
 		// Maybe we can concatenate the two neighbouring runs now?
 		if( it_rbfi_next==runs_by_first_index.begin() || it_rbfi_next==runs_by_first_index.end() )
-			continue; // No: was the first or last run
+			continue; // Don't concatenate: was the first or last run
 		
 		// Deduce stuff about the first thing in the next indexed run		
 		int i_next_first = it_rbfi_next->first;
-		shared_ptr<ZoneExpression> *expr_next_first = things[i_next_first].expr_ptr;
-		auto ptz_op_next_first = dynamic_pointer_cast<DupMergeTreeZoneOperator>(*expr_next_first);
-		ASSERT( ptz_op_next_first ); // should succeed due AddTZsBypassingFZs()
-		XLink tz_base_next_first = ptz_op_next_first->GetZone().GetBaseXLink();
+		XLink tz_base_next_first = GetBaseXLink( things[i_next_first] );
 		
 		// Deduce stuff about the last thing in the previous indexed run		
 		auto it_rbfi_prev = prev(it_rbfi_next);
 		int i_prev_last = it_rbfi_prev->first + it_rbfi_prev->second - 1;
-		shared_ptr<ZoneExpression> *expr_prev_last = things[i_prev_last].expr_ptr;
-		auto ptz_op_prev_last = dynamic_pointer_cast<DupMergeTreeZoneOperator>(*expr_prev_last);
-		ASSERT( ptz_op_prev_last ); // should succeed due AddTZsBypassingFZs()
-		XLink tz_base_prev_last = ptz_op_prev_last->GetZone().GetBaseXLink();
+		XLink tz_base_prev_last = GetBaseXLink( things[i_prev_last] );
 		
 		// Check that the two neighbouring runs would form a run if concatenated
 		if( dfr.Compare3Way(tz_base_next_first, tz_base_prev_last) < 0 )
-			continue; // No: would not be monotonic
+			continue; // Don't concatenate: would not be monotonic
 
 		// Deduce stuff about the new concatenated run
 		int i_concatenated_first = it_rbfi_prev->first;
@@ -322,6 +303,22 @@ void TreeZoneOrderingHandler::FindOutOfOrder( ThingVector &things,
 		runs_by_length.insert( make_pair(l_concatenated, i_concatenated_first) );
 		runs_by_first_index.insert( make_pair(i_concatenated_first, l_concatenated) );
 	}
+}
+
+
+shared_ptr<DupMergeTreeZoneOperator> TreeZoneOrderingHandler::GetOperator(const Thing &thing) const
+{
+	shared_ptr<ZoneExpression> *expr = thing.expr_ptr;
+	auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(*expr);
+	ASSERT( ptz_op ); // Things should only be tree pointer ops
+	return ptz_op;
+}
+
+
+XLink TreeZoneOrderingHandler::GetBaseXLink(const Thing &thing) const
+{
+	shared_ptr<DupMergeTreeZoneOperator> ptz_op = GetOperator(thing);
+	return ptz_op->GetZone().GetBaseXLink();
 }
 
 // ------------------------- AltTreeZoneOrderingChecker --------------------------
