@@ -41,7 +41,7 @@ private:
                       XLink range_last,
                       XLink range_end,
                       bool just_check );
-	void RunForRangeList( ZoneExprPtrList &expr_ptr_list, 
+	void RunForRangeList( ZoneExprPtrList &expr_ptrs, 
 		    	  	      XLink range_first,
 						  XLink range_last,
 						  bool just_check );
