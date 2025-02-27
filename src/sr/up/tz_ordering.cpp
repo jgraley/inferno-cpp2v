@@ -111,11 +111,18 @@ void TreeZoneOrderingHandler::RunForRange( shared_ptr<ZoneExpression> &base,
 		}	
 		
 		bool any_ooo = false;
+		ZoneExprPtrList::iterator next_in_order_it = tree_zone_op_list.begin();
+		ZoneExprPtrList::iterator prev_in_order_it = tree_zone_op_list.end(); // really "off the beginning"
 		for( ZoneExprPtrList::iterator it = tree_zone_op_list.begin();
 			 it != tree_zone_op_list.end();
 			 it = next_it )
 		{
 			next_it = next(it);
+			while( next_in_order_it != tree_zone_op_list.end() && 
+			       ( next_in_order_it->out_of_order || 
+			         next_in_order_it==it ) )
+				++next_in_order_it;
+				
 			if( it->out_of_order )
 			{
 				shared_ptr<ZoneExpression> *expr = it->expr_ptr;			
@@ -137,6 +144,10 @@ void TreeZoneOrderingHandler::RunForRange( shared_ptr<ZoneExpression> &base,
 				out_of_order_list.push_back(expr);
 				
 				any_ooo = true;
+			}
+			else
+			{
+				prev_in_order_it = it;
 			}
 		}
 		
