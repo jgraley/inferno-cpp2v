@@ -194,7 +194,7 @@ void TreeZoneOrderingHandler::FindOutOfOrder( ThingVector &things,
 	set<pair<int, int>> runs_by_length; 
 	
 	// Map from starts to run lengths
-	map<int, int> runs_by_start; // -> _by_first +etc
+	map<int, int> runs_by_first_index;
 	
 	XLink prev_tz_base;      
 	int i=0, run_start_i=0;
@@ -238,7 +238,7 @@ void TreeZoneOrderingHandler::FindOutOfOrder( ThingVector &things,
 			{
 				int length = i - run_start_i;
 				runs_by_length.insert( make_pair(length, run_start_i) );
-				runs_by_start.insert( make_pair(run_start_i, length) );
+				runs_by_first_index.insert( make_pair(run_start_i, length) );
 			}
 			
 			// Need new run if:
@@ -263,55 +263,64 @@ void TreeZoneOrderingHandler::FindOutOfOrder( ThingVector &things,
 	{
 		int length = i - run_start_i;
 		runs_by_length.insert( make_pair(length, run_start_i) );
-		runs_by_start.insert( make_pair(run_start_i, length) );
+		runs_by_first_index.insert( make_pair(run_start_i, length) );
 	}
 
 	while(runs_by_length.size() > 1)
 	{
-		auto it_rbl_smallest = runs_by_length.begin(); // (joint) smallest run
-		auto it_rbl_ooo = it_rbl_smallest; // policy		
+		// We have more than one run, which means the things are not ordered
+		// Policy is to define the shortest run as out-of-order
+		auto it_rbl_shortest = runs_by_length.begin(); // (joint) smallest run
+		auto it_rbl_ooo = it_rbl_shortest; // policy		
 		
-		int l_ooo, i_ooo; // -> i_ooo_first
-		tie(l_ooo, i_ooo) = *it_rbl_ooo; 
-		auto it_rbs_ooo = runs_by_start.find(i_ooo);
-		auto it_rbs_next = next(it_rbs_ooo);
+		// Find out some stuff about the run, and the next one in index order
+		int l_ooo, i_ooo_first; 
+		tie(l_ooo, i_ooo_first) = *it_rbl_ooo; 
+		auto it_rbfi_ooo = runs_by_first_index.find(i_ooo_first);
+		auto it_rbfi_next = next(it_rbfi_ooo);
 		
-		for( int i=i_ooo; i<i_ooo+l_ooo; i++ )
+		// Mark thnigs in this run as out of order and remove from runs info
+		for( int i=i_ooo_first; i<i_ooo_first+l_ooo; i++ )
 			things[i].out_of_order = true;
-		runs_by_length.erase(make_pair(l_ooo, i_ooo)); 
-		runs_by_start.erase(i_ooo);
+		runs_by_length.erase(make_pair(l_ooo, i_ooo_first)); 
+		runs_by_first_index.erase(i_ooo_first);
 
-		// maybe we can merge runs now?
-		if( it_rbs_next==runs_by_start.begin() || it_rbs_next==runs_by_start.end() )
-			continue; // No: was the first or last thing
-				
-		int i_next_first = it_rbs_next->first;
+		// Maybe we can concatenate the two neighbouring runs now?
+		if( it_rbfi_next==runs_by_first_index.begin() || it_rbfi_next==runs_by_first_index.end() )
+			continue; // No: was the first or last run
+		
+		// Deduce stuff about the first thing in the next indexed run		
+		int i_next_first = it_rbfi_next->first;
 		shared_ptr<ZoneExpression> *expr_next_first = things[i_next_first].expr_ptr;
 		auto ptz_op_next_first = dynamic_pointer_cast<DupMergeTreeZoneOperator>(*expr_next_first);
 		ASSERT( ptz_op_next_first ); // should succeed due AddTZsBypassingFZs()
 		XLink tz_base_next_first = ptz_op_next_first->GetZone().GetBaseXLink();
 		
-		auto it_rbs_prev = prev(it_rbs_next);
-
-		int i_prev_last = it_rbs_prev->first + it_rbs_prev->second - 1;
+		// Deduce stuff about the last thing in the previous indexed run		
+		auto it_rbfi_prev = prev(it_rbfi_next);
+		int i_prev_last = it_rbfi_prev->first + it_rbfi_prev->second - 1;
 		shared_ptr<ZoneExpression> *expr_prev_last = things[i_prev_last].expr_ptr;
 		auto ptz_op_prev_last = dynamic_pointer_cast<DupMergeTreeZoneOperator>(*expr_prev_last);
 		ASSERT( ptz_op_prev_last ); // should succeed due AddTZsBypassingFZs()
 		XLink tz_base_prev_last = ptz_op_prev_last->GetZone().GetBaseXLink();
 		
+		// Check that the two neighbouring runs would form a run if concatenated
 		if( dfr.Compare3Way(tz_base_next_first, tz_base_prev_last) < 0 )
 			continue; // No: would not be monotonic
 
-		int i_new_first = it_rbs_prev->first;
-		int l_new = it_rbs_prev->second + it_rbs_next->second;
+		// Deduce stuff about the new concatenated run
+		int i_concatenated_first = it_rbfi_prev->first;
+		int l_concatenated = it_rbfi_prev->second + it_rbfi_next->second;
 			
-		runs_by_length.erase(make_pair(it_rbs_next->second, it_rbs_next->first)); 
-		runs_by_start.erase(it_rbs_next);
-		runs_by_length.erase(make_pair(it_rbs_prev->second, it_rbs_prev->first)); 
-		runs_by_start.erase(it_rbs_prev);
+		// Drop the original neighbouring runs
+		runs_by_length.erase(make_pair(it_rbfi_next->second, it_rbfi_next->first)); 
+		runs_by_first_index.erase(it_rbfi_next);
+		runs_by_length.erase(make_pair(it_rbfi_prev->second, it_rbfi_prev->first)); 
+		runs_by_first_index.erase(it_rbfi_prev);
 		
-		runs_by_length.insert( make_pair(l_new, i_new_first) );
-		runs_by_start.insert( make_pair(i_new_first, l_new) );
+		// Insert concatenated run
+		runs_by_length.insert( make_pair(l_concatenated, i_concatenated_first) );
+		runs_by_first_index.insert( make_pair(i_concatenated_first, l_concatenated) );
 	}
 }
 
