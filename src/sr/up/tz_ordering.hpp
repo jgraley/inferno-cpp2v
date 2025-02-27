@@ -34,7 +34,6 @@ private:
 		bool out_of_order; 
 	};
 	typedef list<Thing> ZoneExprPtrList;
-	typedef list<ZoneExprPtrList::iterator> OOOItList;
 
 	void RunForTreeZone( shared_ptr<DupMergeTreeZoneOperator> &op, 
 						 bool just_check );

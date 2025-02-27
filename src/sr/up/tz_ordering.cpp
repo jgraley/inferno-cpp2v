@@ -75,7 +75,6 @@ void TreeZoneOrderingHandler::RunForRange( shared_ptr<ZoneExpression> &base,
 	
 	while(true)
 	{		
-		OOOItList out_of_order_its;
 		ZoneExprPtrList::iterator next_it;
 		for( ZoneExprPtrList::iterator it = tree_zone_op_list.begin();
 			 it != tree_zone_op_list.end();
@@ -105,7 +104,6 @@ void TreeZoneOrderingHandler::RunForRange( shared_ptr<ZoneExpression> &base,
 
 				// The current TZ op is in the wrong place. 
 				TRACE("Out of sequence: storing iterator for ")(*expr)("\n");
-				out_of_order_its.push_back(it);				
 						
 				continue; // no range threshold update
 			}
