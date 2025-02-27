@@ -67,5 +67,13 @@ void TreeUpdater::TransformToIncrementalAndExecute( shared_ptr<Command> initial_
 						
 	// Execute it
 	UpEvalExecKit kit { db };
+#ifdef NEW	
+	ZoneExpression::ForDepthFirstWalk( expr, nullptr, [&](shared_ptr<ZoneExpression> &expr)
+	{
+		if( auto replace_op = dynamic_pointer_cast<ReplaceOperator>(expr) )
+			replace_op->Execute(kit);
+	} );
+#else	
 	incremental_cmd->Execute(kit);   
+#endif	
 }
