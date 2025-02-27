@@ -70,14 +70,22 @@ void TreeZoneOrderingHandler::RunForRange( shared_ptr<ZoneExpression> &base,
 	TRACE("Starting ")(just_check ? "cross-check" : "transfomation")(" at ")(base)(" with range ")(range_first)(" to ")(range_last)(" inclusive\n");
 	// Actions to take when we have a range. Use at root and for
 	// terminii of tree zones.
-	ZoneExprPtrList tree_zone_op_list;
-	InsertTZsBypassingFZs( base, tree_zone_op_list, tree_zone_op_list.end() );
+	ZoneExprPtrList expr_ptr_list;
+	InsertTZsBypassingFZs( base, expr_ptr_list, expr_ptr_list.end() );
+	RunForRangeList(expr_ptr_list, range_first, range_last, just_check);
+}
+
 	
+void TreeZoneOrderingHandler::RunForRangeList( ZoneExprPtrList &expr_ptr_list, 
+								 	  	       XLink range_first,
+							 			       XLink range_last,
+						 				       bool just_check )
+{						 				       
 	while(true)
 	{		
 		ZoneExprPtrList::iterator next_it;
-		for( ZoneExprPtrList::iterator it = tree_zone_op_list.begin();
-			 it != tree_zone_op_list.end();
+		for( ZoneExprPtrList::iterator it = expr_ptr_list.begin();
+			 it != expr_ptr_list.end();
 			 it = next_it )
 		{
 			next_it = next(it);
@@ -111,14 +119,16 @@ void TreeZoneOrderingHandler::RunForRange( shared_ptr<ZoneExpression> &base,
 		}	
 		
 		bool any_ooo = false;
-		ZoneExprPtrList::iterator next_in_order_it = tree_zone_op_list.begin();
-		ZoneExprPtrList::iterator prev_in_order_it = tree_zone_op_list.end(); // really "off the beginning"
-		for( ZoneExprPtrList::iterator it = tree_zone_op_list.begin();
-			 it != tree_zone_op_list.end();
+		ZoneExprPtrList children_list;
+		ZoneExprPtrList::iterator next_in_order_it = expr_ptr_list.begin();
+		ZoneExprPtrList::iterator prev_in_order_it = expr_ptr_list.end(); // really "off the beginning"
+		ZoneExprPtrList::iterator prev_it = expr_ptr_list.end(); // really "off the beginning"
+		for( ZoneExprPtrList::iterator it = expr_ptr_list.begin();
+			 it != expr_ptr_list.end();
 			 it = next_it )
 		{
 			next_it = next(it);
-			while( next_in_order_it != tree_zone_op_list.end() && 
+			while( next_in_order_it != expr_ptr_list.end() && 
 			       ( next_in_order_it->out_of_order || 
 			         next_in_order_it==it ) )
 				++next_in_order_it;
@@ -129,16 +139,23 @@ void TreeZoneOrderingHandler::RunForRange( shared_ptr<ZoneExpression> &base,
 				auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(*expr);
 				ASSERT( ptz_op ); // should succeed due InsertTZsBypassingFZs()
 
+#ifdef NEW
+				ptz_op->ForChildren( [&](shared_ptr<ZoneExpression> &child_expr)
+				{
+					InsertTZsBypassingFZs( child_expr, children_list, children_list.end() );
+				} );
+				
+#else
 				// This tree zone will be turned into a free zone. Free zones 
 				// are "invisible" in this scheme, so we update our current work 
 				// list to include its children (bypassing FZs).			
 				TRACE("Out of sequence: inserting children of ")(ptz_op)("\n");
-				next_it = tree_zone_op_list.erase(it);
+				next_it = expr_ptr_list.erase(it);
 				ptz_op->ForChildren( [&](shared_ptr<ZoneExpression> &child_expr)
 				{
-					InsertTZsBypassingFZs( child_expr, tree_zone_op_list, next_it );
+					InsertTZsBypassingFZs( child_expr, expr_ptr_list, next_it );
 				} );
-
+#endif
 				// Mark as out of order. 
 				TRACE("Out of sequence: marking ")(*expr)("\n");
 				out_of_order_list.push_back(expr);
@@ -147,8 +164,20 @@ void TreeZoneOrderingHandler::RunForRange( shared_ptr<ZoneExpression> &base,
 			}
 			else
 			{
+#ifdef NEW
+				if( prev_it != end && prev_it->out_of_order )
+				{
+					// End of an OOO run
+					RunForRangeList( children_list, 
+					                 prev_in_order_it.base else range_first, 
+					                 it.base else range_last, 
+					                 just_check );
+					children_list.clear();
+				}
+#endif				
 				prev_in_order_it = it;
 			}
+			prev_it = it;
 		}
 		
 		if( !any_ooo )
@@ -156,7 +185,7 @@ void TreeZoneOrderingHandler::RunForRange( shared_ptr<ZoneExpression> &base,
 	} 
 	
 	// Recurse to check descendents of the tree zones. 
-	for( Thing thing : tree_zone_op_list )
+	for( Thing thing : expr_ptr_list )
 	{
 		ASSERT( !thing.out_of_order );
 		shared_ptr<ZoneExpression> *expr = thing.expr_ptr;			

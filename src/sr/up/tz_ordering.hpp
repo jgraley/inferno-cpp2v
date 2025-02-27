@@ -41,6 +41,10 @@ private:
                       XLink range_last,
                       XLink range_end,
                       bool just_check );
+	void RunForRangeList( ZoneExprPtrList &expr_ptr_list, 
+		    	  	      XLink range_first,
+						  XLink range_last,
+						  bool just_check );
 	void InsertTZsBypassingFZs( shared_ptr<ZoneExpression> &expr, 
 			     	            ZoneExprPtrList &tree_zones,
 				      	        ZoneExprPtrList::iterator pos );
