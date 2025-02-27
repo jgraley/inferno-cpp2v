@@ -25,12 +25,12 @@ public:
 	void Check( shared_ptr<ZoneExpression> &root_expr );
 };
 
-// ------------------------- ZoneMarkEnacter --------------------------
+// ------------------------- BaseForEmbeddedMarkPropagation --------------------------
 
-class ZoneMarkEnacter 
+class BaseForEmbeddedMarkPropagation 
 {
 public:
-	ZoneMarkEnacter( const XTreeDatabase *db );
+	BaseForEmbeddedMarkPropagation( const XTreeDatabase *db );
 	void Run( shared_ptr<ZoneExpression> &root_expr );
 	void Check( shared_ptr<ZoneExpression> &root_expr );
 

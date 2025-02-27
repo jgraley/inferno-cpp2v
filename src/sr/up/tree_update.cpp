@@ -57,13 +57,12 @@ void TreeUpdater::TransformToIncrementalAndExecute( shared_ptr<Command> initial_
 	AltTreeZoneOrderingChecker alt_free_zone_ordering_checker( db );
 	alt_free_zone_ordering_checker.Check(expr);
 
-	ZoneMarkEnacter zone_mark_enacter( db );
-	TreeZoneInverter tree_zone_inverter( db ); 
-
 	// Enact the tree zones that will stick around
-	zone_mark_enacter.Run(expr);
+	BaseForEmbeddedMarkPropagation bfe_mark_propagation( db );
+	bfe_mark_propagation.Run(expr);
 
 	// Inversion generates sequence of separate "small" update commands 
+	TreeZoneInverter tree_zone_inverter( db ); 
 	shared_ptr<Command> incremental_cmd = tree_zone_inverter.Run(initial_cmd);	
 						
 	// Execute it

@@ -36,15 +36,43 @@ public:
 			                        function<void(shared_ptr<ZoneExpression> &expr)> func_out) = 0;
 };
 
+// ------------------------- LayoutOperator --------------------------
+
+class LayoutOperator : public ZoneExpression
+{
+public:
+	typedef list<shared_ptr<ZoneExpression>>::iterator ChildExpressionIterator;
+
+protected:
+    LayoutOperator( list<shared_ptr<ZoneExpression>> &&child_expressions_ );
+    LayoutOperator();
+    
+public:
+    int GetNumChildExpressions() const;
+    ChildExpressionIterator GetChildrenBegin();
+    ChildExpressionIterator GetChildrenEnd();
+	list<shared_ptr<ZoneExpression>> &GetChildExpressions();
+	const list<shared_ptr<ZoneExpression>> &GetChildExpressions() const;
+	list<shared_ptr<ZoneExpression>> &&MoveChildExpressions();
+	
+    string GetChildExpressionsTrace() const;
+
+	void ForChildren(function<void(shared_ptr<ZoneExpression> &expr)> func) override;
+
+	void DepthFirstWalkImpl(function<void(shared_ptr<ZoneExpression> &expr)> func_in,
+			                function<void(shared_ptr<ZoneExpression> &expr)> func_out) override;
+
+private:
+	list<shared_ptr<ZoneExpression>> child_expressions;
+
+};
+
 // ------------------------- MergeZoneOperator --------------------------
 
 // Construct with any zone and optional marker M. On evaluate: populate the
 // zone, apply marker and return the resulting FreeZone. 
-class MergeZoneOperator : public ZoneExpression
+class MergeZoneOperator : public LayoutOperator
 {
-public:
-	typedef list<shared_ptr<ZoneExpression>>::iterator ChildExpressionIterator;
-	
 protected:
     MergeZoneOperator( list<shared_ptr<ZoneExpression>> &&child_expressions_ );
     MergeZoneOperator();
@@ -58,24 +86,7 @@ public:
     virtual Zone &GetZone() = 0;
     virtual const Zone &GetZone() const = 0;
     
-    int GetNumChildExpressions() const;
-    ChildExpressionIterator GetChildrenBegin();
-    ChildExpressionIterator GetChildrenEnd();
-	list<shared_ptr<ZoneExpression>> &GetChildExpressions();
-	const list<shared_ptr<ZoneExpression>> &GetChildExpressions() const;
-	list<shared_ptr<ZoneExpression>> &&MoveChildExpressions();
-	
-    string GetChildExpressionsTrace() const;
-
-	void ForChildren(function<void(shared_ptr<ZoneExpression> &expr)> func) override;
-
-	void EvaluateChildrenAndPopulate( const UpEvalExecKit &kit, FreeZone &free_zone ) const;	
-	
-	void DepthFirstWalkImpl(function<void(shared_ptr<ZoneExpression> &expr)> func_in,
-			                function<void(shared_ptr<ZoneExpression> &expr)> func_out) override;
-
-private:
-	list<shared_ptr<ZoneExpression>> child_expressions;
+ 	void EvaluateChildrenAndPopulate( const UpEvalExecKit &kit, FreeZone &free_zone ) const;		
 };
 
 
@@ -139,6 +150,22 @@ public:
 
 private:
 	FreeZone zone;
+};
+
+// ------------------------- ReplaceOperator --------------------------
+
+class ReplaceOperator : public LayoutOperator
+{
+public:	
+	ReplaceOperator( TreeZone target_tree_zone_, 
+	                 shared_ptr<Zone> source_zone_,
+	                 list<shared_ptr<ZoneExpression>> &&child_expressions );
+	unique_ptr<FreeZone> Evaluate(const UpEvalExecKit &kit) const override;
+	void Execute(const UpEvalExecKit &kit) const;
+
+private:
+	TreeZone target_tree_zone;
+	shared_ptr<Zone> source_zone;
 };
 
 }

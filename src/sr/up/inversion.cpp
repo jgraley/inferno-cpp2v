@@ -99,7 +99,12 @@ void TreeZoneInverter::Invert( LocatedZoneExpression lze )
 	// Make the inverted TZ
 	TreeZone inverted_tree_zone = TreeZone( base_xlink, terminii_xlinks );	
 	
-	// Create and add a command to swap the FZ in over the inverted TZ
+	// NEW: Modify the expression to include inverted TZ as target
+	*lze.second = make_shared<ReplaceOperator>( inverted_tree_zone,
+	                                            make_shared<FreeZone>( pfz_op->GetZone() ),
+	                                            pfz_op->MoveChildExpressions() );   	
+	
+	// OLD: Create and add a command to swap the FZ in over the inverted TZ
 	auto pfz_op_no_children = make_shared<MergeFreeZoneOperator>( pfz_op->GetZone() ); // No children leaves terminii exposed, sort of.
 	auto incremental_command = make_shared<ReplaceCommand>( inverted_tree_zone, pfz_op_no_children );	
 	incremental_seq->Add(incremental_command);

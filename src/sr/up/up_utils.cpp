@@ -43,15 +43,15 @@ void EmptyZoneElider::Check( shared_ptr<ZoneExpression> &root_expr )
 	} );	
 }
 
-// ------------------------- ZoneMarkEnacter --------------------------
+// ------------------------- BaseForEmbeddedMarkPropagation --------------------------
 
-ZoneMarkEnacter::ZoneMarkEnacter( const XTreeDatabase *db_ ) :
+BaseForEmbeddedMarkPropagation::BaseForEmbeddedMarkPropagation( const XTreeDatabase *db_ ) :
 	db( db_ )
 {
 }
 
 
-void ZoneMarkEnacter::Run( shared_ptr<ZoneExpression> &root_expr )
+void BaseForEmbeddedMarkPropagation::Run( shared_ptr<ZoneExpression> &root_expr )
 {
 	TreeZoneRelation tz_relation( db );
 

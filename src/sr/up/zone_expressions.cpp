@@ -26,10 +26,88 @@ catch( BreakException )
 {
 }		       
 
+// ------------------------- LayoutOperator --------------------------
+
+LayoutOperator::LayoutOperator( list<shared_ptr<ZoneExpression>> &&child_expressions_ ) :
+	child_expressions(move(child_expressions_))
+{
+}	
+
+
+LayoutOperator::LayoutOperator() 
+{
+}	
+
+
+int LayoutOperator::GetNumChildExpressions() const
+{
+	return child_expressions.size();
+}
+
+
+LayoutOperator::ChildExpressionIterator LayoutOperator::GetChildrenBegin()
+{
+	return child_expressions.begin();
+}
+
+
+LayoutOperator::ChildExpressionIterator LayoutOperator::GetChildrenEnd()
+{
+	return child_expressions.end();
+}
+
+
+list<shared_ptr<ZoneExpression>> &LayoutOperator::GetChildExpressions() 
+{
+	return child_expressions;
+}
+
+
+const list<shared_ptr<ZoneExpression>> &LayoutOperator::GetChildExpressions() const
+{
+	return child_expressions;
+}
+
+
+list<shared_ptr<ZoneExpression>> &&LayoutOperator::MoveChildExpressions()
+{
+	return move(child_expressions);
+}
+
+
+string LayoutOperator::GetChildExpressionsTrace() const
+{
+	return Trace(child_expressions);
+}
+
+
+void LayoutOperator::ForChildren(function<void(shared_ptr<ZoneExpression> &expr)> func) try
+{
+	for( shared_ptr<ZoneExpression> &child_expression : child_expressions )
+		func(child_expression);
+}
+catch( BreakException )
+{
+}		       
+
+
+void LayoutOperator::DepthFirstWalkImpl( function<void(shared_ptr<ZoneExpression> &expr)> func_in,
+			                             function<void(shared_ptr<ZoneExpression> &expr)> func_out )
+{
+	for( shared_ptr<ZoneExpression> &expr : child_expressions )
+	{
+		if( func_in )
+			func_in(expr);
+		expr->DepthFirstWalkImpl(func_in, func_out);
+		if( func_out )
+			func_out(expr);
+	}
+}
+
 // ------------------------- MergeZoneOperator --------------------------
 
 MergeZoneOperator::MergeZoneOperator( list<shared_ptr<ZoneExpression>> &&child_expressions_ ) :
-	child_expressions(move(child_expressions_))
+	LayoutOperator(move(child_expressions_))
 {
 }	
 
@@ -45,69 +123,17 @@ void MergeZoneOperator::AddEmbeddedMarker( RequiresSubordinateSCREngine *new_mar
 }
 
 
-int MergeZoneOperator::GetNumChildExpressions() const
-{
-	return child_expressions.size();
-}
-
-
-MergeZoneOperator::ChildExpressionIterator MergeZoneOperator::GetChildrenBegin()
-{
-	return child_expressions.begin();
-}
-
-
-MergeZoneOperator::ChildExpressionIterator MergeZoneOperator::GetChildrenEnd()
-{
-	return child_expressions.end();
-}
-
-
-list<shared_ptr<ZoneExpression>> &MergeZoneOperator::GetChildExpressions() 
-{
-	return child_expressions;
-}
-
-
-const list<shared_ptr<ZoneExpression>> &MergeZoneOperator::GetChildExpressions() const
-{
-	return child_expressions;
-}
-
-
-list<shared_ptr<ZoneExpression>> &&MergeZoneOperator::MoveChildExpressions()
-{
-	return move(child_expressions);
-}
-
-
-string MergeZoneOperator::GetChildExpressionsTrace() const
-{
-	return Trace(child_expressions);
-}
-
-
-void MergeZoneOperator::ForChildren(function<void(shared_ptr<ZoneExpression> &expr)> func) try
-{
-	for( shared_ptr<ZoneExpression> &child_expression : child_expressions )
-		func(child_expression);
-}
-catch( BreakException )
-{
-}		       
-
-
 void MergeZoneOperator::EvaluateChildrenAndPopulate( const UpEvalExecKit &kit, FreeZone &free_zone ) const	
 {
 	// If no child expressions then either:
 	// - zone has no terminii and we're at a subtree -> no action required
 	// - zone's terminii are "exposed" and should be left in place
-	if( child_expressions.empty() )
+	if( GetNumChildExpressions() == 0 )
 		return;
 	
 	//FTRACE(free_zone)("\n");
 	list<unique_ptr<FreeZone>> child_zones;
-	for( const shared_ptr<ZoneExpression> &child_expression : child_expressions )
+	for( const shared_ptr<ZoneExpression> &child_expression : GetChildExpressions() )
 	{	
 		//FTRACE(child_expression)("\n");
 		unique_ptr<FreeZone> free_zone = child_expression->Evaluate(kit);
@@ -115,20 +141,6 @@ void MergeZoneOperator::EvaluateChildrenAndPopulate( const UpEvalExecKit &kit, F
 	}
 	
 	free_zone.MergeAll(move(child_zones));
-}
-	
-
-void MergeZoneOperator::DepthFirstWalkImpl( function<void(shared_ptr<ZoneExpression> &expr)> func_in,
-			                                   function<void(shared_ptr<ZoneExpression> &expr)> func_out )
-{
-	for( shared_ptr<ZoneExpression> &expr : child_expressions )
-	{
-		if( func_in )
-			func_in(expr);
-		expr->DepthFirstWalkImpl(func_in, func_out);
-		if( func_out )
-			func_out(expr);
-	}
 }
 	
 // ------------------------- DupMergeTreeZoneOperator --------------------------
@@ -297,3 +309,33 @@ string MergeFreeZoneOperator::GetTrace() const
 	return "MergeFreeZoneOperator( zone: "+Trace(zone)+", "+Trace(GetNumChildExpressions())+" children )";
 #endif	
 }
+
+// ------------------------- ReplaceOperator --------------------------
+
+ReplaceOperator::ReplaceOperator( TreeZone target_tree_zone_, 
+                                  shared_ptr<Zone> source_zone_,
+                                  list<shared_ptr<ZoneExpression>> &&child_expressions ) :
+	LayoutOperator( move(child_expressions) ),
+	target_tree_zone(target_tree_zone_),
+	source_zone(source_zone_)
+{
+	ASSERT( target_tree_zone.GetNumTerminii() == source_zone->GetNumTerminii() );
+	ASSERT( target_tree_zone.GetNumTerminii() == GetNumChildExpressions() );	
+}
+
+
+unique_ptr<FreeZone> ReplaceOperator::Evaluate(const UpEvalExecKit &kit) const 
+{
+    ASSERTFAIL(); // TODO restructure so we don't need to do this
+}
+
+void ReplaceOperator::Execute(const UpEvalExecKit &kit) const 
+{
+    // Source zone must be a free zone. 
+	auto source_free_zone = dynamic_pointer_cast<FreeZone>(source_zone);
+	ASSERT( source_free_zone );
+    kit.x_tree_db->MainTreeReplace( target_tree_zone, *source_free_zone );
+    
+    // We do not recurse to children.
+}
+
