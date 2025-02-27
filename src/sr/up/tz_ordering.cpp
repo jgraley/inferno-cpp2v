@@ -185,12 +185,18 @@ void TreeZoneOrderingHandler::FindOutOfOrder( ThingVector &things,
 											  bool just_check )
 {						 				       
 	// runs of things that are monotonic wrt DF ordering
-	// multimap from run length to start index. Will be ordered:
+	
+	// set of pairs: run length to start index. Will be ordered:
 	// - primarily by run length
 	// - secondarily by index into vector (via preserved insertion order)
-	multimap<int, int> runs; 
-	XLink prev_tz_base;
-	      
+	// Note: multimap makes it hard to remove a single element if you don't
+	// already have the required iterator.
+	set<pair<int, int>> runs_by_length; 
+	
+	// Map from starts to run lengths
+	map<int, int> runs_by_start; // -> _by_first +etc
+	
+	XLink prev_tz_base;      
 	int i=0, run_start_i=0;
 	for( Thing &thing : things )
 	{
@@ -205,20 +211,41 @@ void TreeZoneOrderingHandler::FindOutOfOrder( ThingVector &things,
 		Orderable::Diff diff_end = dfr.Compare3Way(tz_base, range_last);
 		bool ok = diff_begin >= 0 && diff_end <= 0; // both inclusive
 		thing.out_of_order = !ok;
+
+		if( just_check && !ok )
+		{
+			FTRACE(db->GetOrderings().depth_first_ordering)("\n");
+			ASSERT(diff_begin >= 0)("Tree zone base ")(tz_base)(" appears before limit ")(range_first)(" in X tree");
+			ASSERT(diff_end <= 0)("Tree zone base ")(tz_base)(" appears after limit ")(range_last)(" in X tree");
+			ASSERTFAIL(); // we aint goin nowhere
+		}			
 		
 		if( ok )
 		{
+			bool monotonic = prev_tz_base ? dfr.Compare3Way(tz_base, prev_tz_base) >= 0 : true;
+			if( just_check && !monotonic )
+			{
+				FTRACE(db->GetOrderings().depth_first_ordering)("\n");
+				ASSERT(diff_begin >= 0)("Tree zone base ")(tz_base)(" appears before limit ")(range_first)(" in X tree");
+				ASSERT(diff_end <= 0)("Tree zone base ")(tz_base)(" appears after limit ")(range_last)(" in X tree");
+				ASSERTFAIL(); // we aint goin nowhere
+			}						
+			
 			// Completed run if:
 			// - seen a node since startup or broken run, and
 			// - not monotonic wrt DF ordering
-			if( prev_tz_base && dfr.Compare3Way(tz_base, prev_tz_base) < 0 )
-				runs.insert( make_pair(i - run_start_i, run_start_i) );
-				
+			if( prev_tz_base && !monotonic )
+			{
+				int length = i - run_start_i;
+				runs_by_length.insert( make_pair(length, run_start_i) );
+				runs_by_start.insert( make_pair(run_start_i, length) );
+			}
+			
 			// Need new run if:
 			// - starting up, or
 			// - run broken by going out of supplied range, or
 			// - not monotonic wrt DF ordering
-			if( !prev_tz_base || dfr.Compare3Way(tz_base, prev_tz_base) < 0 )
+			if( !prev_tz_base || !monotonic )
 				run_start_i = i; // start new run here
 						
 			prev_tz_base = tz_base;
@@ -233,38 +260,59 @@ void TreeZoneOrderingHandler::FindOutOfOrder( ThingVector &things,
 	// Completed final run if:
 	// - seen a node since startup or broken run
 	if(prev_tz_base)
-		runs.insert( make_pair(i - run_start_i, run_start_i) );
-
-
-	for( Thing &thing : things )
 	{
-		shared_ptr<ZoneExpression> *expr = thing.expr_ptr;
-		auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(*expr);
-		ASSERT( ptz_op ); // should succeed due AddTZsBypassingFZs()
-				
-		// Check in range supplied to us for root or parent TZ terminus
-		XLink tz_base = ptz_op->GetZone().GetBaseXLink();
-		TRACE("Checking ")(tz_base)("...\n");
-		Orderable::Diff diff_begin = dfr.Compare3Way(tz_base, range_first);
-		Orderable::Diff diff_end = dfr.Compare3Way(tz_base, range_last);
-		bool ok = diff_begin >= 0 && diff_end <= 0; // both inclusive
-		thing.out_of_order = !ok;
+		int length = i - run_start_i;
+		runs_by_length.insert( make_pair(length, run_start_i) );
+		runs_by_start.insert( make_pair(run_start_i, length) );
+	}
+
+	while(runs_by_length.size() > 1)
+	{
+		auto it_rbl_smallest = runs_by_length.begin(); // (joint) smallest run
+		auto it_rbl_ooo = it_rbl_smallest; // policy		
 		
-		if( just_check && !ok )
-		{
-			FTRACE(db->GetOrderings().depth_first_ordering)("\n");
-			ASSERT(diff_begin >= 0)("Tree zone base ")(tz_base)(" appears before limit ")(range_first)(" in X tree");
-			ASSERT(diff_end <= 0)("Tree zone base ")(tz_base)(" appears after limit ")(range_last)(" in X tree");
-			ASSERTFAIL(); // we aint goin nowhere
-		}			
+		int l_ooo, i_ooo; // -> i_ooo_first
+		tie(l_ooo, i_ooo) = *it_rbl_ooo; 
+		auto it_rbs_ooo = runs_by_start.find(i_ooo);
+		auto it_rbs_next = next(it_rbs_ooo);
+		
+		for( int i=i_ooo; i<i_ooo+l_ooo; i++ )
+			things[i].out_of_order = true;
+		runs_by_length.erase(make_pair(l_ooo, i_ooo)); 
+		runs_by_start.erase(i_ooo);
+
+		// maybe we can merge runs now?
+		if( it_rbs_next==runs_by_start.begin() || it_rbs_next==runs_by_start.end() )
+			continue; // No: was the first or last thing
 				
-		if( ok )
-		{
-			// Narrow the acceptable range for the next tree zone
-			TRACE("OK, updating start of range\n");		
-			range_first = tz_base;		
-		}
-	}	
+		int i_next_first = it_rbs_next->first;
+		shared_ptr<ZoneExpression> *expr_next_first = things[i_next_first].expr_ptr;
+		auto ptz_op_next_first = dynamic_pointer_cast<DupMergeTreeZoneOperator>(*expr_next_first);
+		ASSERT( ptz_op_next_first ); // should succeed due AddTZsBypassingFZs()
+		XLink tz_base_next_first = ptz_op_next_first->GetZone().GetBaseXLink();
+		
+		auto it_rbs_prev = prev(it_rbs_next);
+
+		int i_prev_last = it_rbs_prev->first + it_rbs_prev->second - 1;
+		shared_ptr<ZoneExpression> *expr_prev_last = things[i_prev_last].expr_ptr;
+		auto ptz_op_prev_last = dynamic_pointer_cast<DupMergeTreeZoneOperator>(*expr_prev_last);
+		ASSERT( ptz_op_prev_last ); // should succeed due AddTZsBypassingFZs()
+		XLink tz_base_prev_last = ptz_op_prev_last->GetZone().GetBaseXLink();
+		
+		if( dfr.Compare3Way(tz_base_next_first, tz_base_prev_last) < 0 )
+			continue; // No: would not be monotonic
+
+		int i_new_first = it_rbs_prev->first;
+		int l_new = it_rbs_prev->second + it_rbs_next->second;
+			
+		runs_by_length.erase(make_pair(it_rbs_next->second, it_rbs_next->first)); 
+		runs_by_start.erase(it_rbs_next);
+		runs_by_length.erase(make_pair(it_rbs_prev->second, it_rbs_prev->first)); 
+		runs_by_start.erase(it_rbs_prev);
+		
+		runs_by_length.insert( make_pair(l_new, i_new_first) );
+		runs_by_start.insert( make_pair(i_new_first, l_new) );
+	}
 }
 
 // ------------------------- AltTreeZoneOrderingChecker --------------------------
