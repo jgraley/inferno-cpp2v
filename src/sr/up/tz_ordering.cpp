@@ -81,129 +81,107 @@ void TreeZoneOrderingHandler::RunForRangeList( ZoneExprPtrList &expr_ptrs,
 							 			       XLink range_last,
 						 				       bool just_check )
 {						 				       
-	while(true)
-	{		
-		ZoneExprPtrList::iterator next_it;
-		for( ZoneExprPtrList::iterator it = expr_ptrs.begin();
-			 it != expr_ptrs.end();
-			 it = next_it )
+	ZoneExprPtrList::iterator next_it;
+	for( ZoneExprPtrList::iterator it = expr_ptrs.begin();
+		 it != expr_ptrs.end();
+		 it = next_it )
+	{
+		next_it = next(it);
+		shared_ptr<ZoneExpression> *expr = it->expr_ptr;
+		auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(*expr);
+		ASSERT( ptz_op ); // should succeed due InsertTZsBypassingFZs()
+				
+		// Check in range supplied to us for root or parent TZ terminus
+		XLink tz_base = ptz_op->GetZone().GetBaseXLink();
+		TRACE("Checking ")(tz_base)("...\n");
+		Orderable::Diff diff_begin = dfr.Compare3Way(tz_base, range_first);
+		Orderable::Diff diff_end = dfr.Compare3Way(tz_base, range_last);
+		bool ok = diff_begin >= 0 && diff_end <= 0; // both inclusive
+		it->out_of_order = !ok;
+		if( !ok )
+		{     
+			if( just_check )
+			{
+				FTRACE(db->GetOrderings().depth_first_ordering)("\n");
+				ASSERT(diff_begin >= 0)("Tree zone base ")(tz_base)(" appears before limit ")(range_first)(" in X tree");
+				ASSERT(diff_end <= 0)("Tree zone base ")(tz_base)(" appears after limit ")(range_last)(" in X tree");
+				ASSERTFAIL(); // we aint goin nowhere
+			}
+			continue; // no range threshold update
+		}
+				
+		TRACE("OK, updating start of range\n");
+		
+		// Narrow the acceptable range for the next tree zone
+		range_first = tz_base;		
+	}	
+	
+	bool any_ooo = false;
+	ZoneExprPtrList children_list;
+	ZoneExprPtrList::iterator prev_in_order_it = expr_ptrs.end(); // really "off the beginning"
+	ZoneExprPtrList::iterator prev_it = expr_ptrs.end(); // really "off the beginning"
+	for( ZoneExprPtrList::iterator it = expr_ptrs.begin();
+		 true ;
+		 ++it )
+	{
+		// End-inclusive body starts here
+		if( (it == expr_ptrs.end() || !it->out_of_order) && 
+			(prev_it != expr_ptrs.end() && prev_it->out_of_order) )
 		{
-			next_it = next(it);
-			shared_ptr<ZoneExpression> *expr = it->expr_ptr;
+			// End of an OOO run
+			XLink child_first = range_first;
+			if( prev_in_order_it != expr_ptrs.end() )
+			{
+				shared_ptr<ZoneExpression> *prev_in_order_expr = prev_in_order_it->expr_ptr;
+				auto prev_in_order_ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(*prev_in_order_expr);
+				ASSERT( prev_in_order_ptz_op ); // should succeed due InsertTZsBypassingFZs()				                     :
+				child_first = prev_in_order_ptz_op->GetZone().GetBaseXLink();				  
+			}
+			
+			XLink child_last = range_last;
+			if( it != expr_ptrs.end() )
+			{
+				shared_ptr<ZoneExpression> *expr = it->expr_ptr;
+				auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(*expr);
+				ASSERT( ptz_op ); // should succeed due InsertTZsBypassingFZs()				                     :
+				child_last = ptz_op->GetZone().GetBaseXLink();				  
+			}
+							
+			RunForRangeList( children_list, 
+							 child_first, 
+							 child_last, 
+							 just_check );
+			children_list.clear();
+		}
+
+		// end-inclusive body ends here
+		if( it==expr_ptrs.end() )
+			break;
+
+		if( it->out_of_order )
+		{
+			shared_ptr<ZoneExpression> *expr = it->expr_ptr;			
 			auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(*expr);
 			ASSERT( ptz_op ); // should succeed due InsertTZsBypassingFZs()
-					
-			// Check in range supplied to us for root or parent TZ terminus
-			XLink tz_base = ptz_op->GetZone().GetBaseXLink();
-			TRACE("Checking ")(tz_base)("...\n");
-			Orderable::Diff diff_begin = dfr.Compare3Way(tz_base, range_first);
-			Orderable::Diff diff_end = dfr.Compare3Way(tz_base, range_last);
-			bool ok = diff_begin >= 0 && diff_end <= 0; // both inclusive
-			it->out_of_order = !ok;
-			if( !ok )
-			{     
-				if( just_check )
-				{
-					FTRACE(db->GetOrderings().depth_first_ordering)("\n");
-					ASSERT(diff_begin >= 0)("Tree zone base ")(tz_base)(" appears before limit ")(range_first)(" in X tree");
-					ASSERT(diff_end <= 0)("Tree zone base ")(tz_base)(" appears after limit ")(range_last)(" in X tree");
-					ASSERTFAIL(); // we aint goin nowhere
-				}
-				continue; // no range threshold update
-			}
-					
-			TRACE("OK, updating start of range\n");
+
+			ptz_op->ForChildren( [&](shared_ptr<ZoneExpression> &child_expr)
+			{
+				InsertTZsBypassingFZs( child_expr, children_list, children_list.end() );
+			} );
 			
-			// Narrow the acceptable range for the next tree zone
-			range_first = tz_base;		
-		}	
-		
-		bool any_ooo = false;
-		ZoneExprPtrList children_list;
-		ZoneExprPtrList::iterator prev_in_order_it = expr_ptrs.end(); // really "off the beginning"
-		ZoneExprPtrList::iterator prev_it = expr_ptrs.end(); // really "off the beginning"
-		for( ZoneExprPtrList::iterator it = expr_ptrs.begin();
-			 true ;
-			 it = next_it )
-		{
-			// End-inclusive body starts here
-#ifdef NEW
-			if( (it == expr_ptrs.end() || !it->out_of_order) && 
-				(prev_it != expr_ptrs.end() && prev_it->out_of_order) )
-			{
-				// End of an OOO run
-				XLink child_first = range_first;
-				if( prev_in_order_it != expr_ptrs.end() )
-				{
-					shared_ptr<ZoneExpression> *prev_in_order_expr = prev_in_order_it->expr_ptr;
-					auto prev_in_order_ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(*prev_in_order_expr);
-					ASSERT( prev_in_order_ptz_op ); // should succeed due InsertTZsBypassingFZs()				                     :
-				    child_first = prev_in_order_ptz_op->GetZone().GetBaseXLink();				  
-			    }
-			    
-				XLink child_last = range_last;
-				if( it != expr_ptrs.end() )
-				{
-					shared_ptr<ZoneExpression> *expr = it->expr_ptr;
-					auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(*expr);
-					ASSERT( ptz_op ); // should succeed due InsertTZsBypassingFZs()				                     :
-				    child_last = ptz_op->GetZone().GetBaseXLink();				  
-			    }
-			    			    
-				RunForRangeList( children_list, 
-								 child_first, 
-								 child_last, 
-								 just_check );
-				children_list.clear();
-			}
-#endif				
-			// end-inclusive body ends here
-			if( it==expr_ptrs.end() )
-				break;
-
-			next_it = next(it);
-
-			if( it->out_of_order )
-			{
-				shared_ptr<ZoneExpression> *expr = it->expr_ptr;			
-				auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(*expr);
-				ASSERT( ptz_op ); // should succeed due InsertTZsBypassingFZs()
-
-#ifdef NEW
-				ptz_op->ForChildren( [&](shared_ptr<ZoneExpression> &child_expr)
-				{
-					InsertTZsBypassingFZs( child_expr, children_list, children_list.end() );
-				} );
-				
-#else
-				// This tree zone will be turned into a free zone. Free zones 
-				// are "invisible" in this scheme, so we update our current work 
-				// list to include its children (bypassing FZs).			
-				TRACE("Out of sequence: inserting children of ")(ptz_op)("\n");
-				next_it = expr_ptrs.erase(it);
-				ptz_op->ForChildren( [&](shared_ptr<ZoneExpression> &child_expr)
-				{
-					InsertTZsBypassingFZs( child_expr, expr_ptrs, next_it );
-				} );
-#endif
-				// Mark as out of order. 
-				TRACE("Out of sequence: marking ")(*expr)("\n");
-				out_of_order_list.push_back(expr);
-				
-				any_ooo = true;
-			}
-			else
-			{
-				prev_in_order_it = it;
-			}
-			prev_it = it;
+			// Mark as out of order. 
+			TRACE("Out of sequence: marking ")(*expr)("\n");
+			out_of_order_list.push_back(expr);
+			
+			any_ooo = true;
 		}
-		
-#ifndef NEW
-		if( !any_ooo )
-#endif
-			break;			
-	} 
+		else
+		{
+			prev_in_order_it = it;
+		}
+		prev_it = it;
+	}
+
 	
 	// Recurse to check descendents of the tree zones. 
 	for( Thing thing : expr_ptrs )
