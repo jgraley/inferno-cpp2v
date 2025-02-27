@@ -33,7 +33,7 @@ private:
 		shared_ptr<ZoneExpression> *expr_ptr; // Double pointer to expr node so we can mutate
 		bool out_of_order; 
 	};
-	typedef list<Thing> ZoneExprPtrList;
+	typedef vector<Thing> ThingVector;
 
 	void RunForTreeZone( shared_ptr<DupMergeTreeZoneOperator> &op, 
 						 bool just_check );
@@ -41,13 +41,16 @@ private:
                       XLink range_last,
                       XLink range_end,
                       bool just_check );
-	void RunForRangeList( ZoneExprPtrList &expr_ptrs, 
+	void RunForRangeList( ThingVector &things, 
 		    	  	      XLink range_first,
 						  XLink range_last,
 						  bool just_check );
-	void InsertTZsBypassingFZs( shared_ptr<ZoneExpression> &expr, 
-			     	            ZoneExprPtrList &tree_zones,
-				      	        ZoneExprPtrList::iterator pos );
+	void AddTZsBypassingFZs( shared_ptr<ZoneExpression> &expr, 
+			     	         ThingVector &tree_zones );
+	void FindOutOfOrder( ThingVector &things, 
+		    	  	     XLink range_first,
+						 XLink range_last,
+						 bool just_check );
 				    	  
 	const XTreeDatabase * const db;
 	SR::DepthFirstRelation dfr;		
