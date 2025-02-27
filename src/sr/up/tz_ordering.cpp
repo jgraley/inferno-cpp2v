@@ -81,11 +81,9 @@ void TreeZoneOrderingHandler::RunForRangeList( ZoneExprPtrList &expr_ptrs,
 							 			       XLink range_last,
 						 				       bool just_check )
 {						 				       
-	for( ZoneExprPtrList::iterator it = expr_ptrs.begin();
-		 it != expr_ptrs.end();
-		 ++it )
+	for( Thing &thing : expr_ptrs )
 	{
-		shared_ptr<ZoneExpression> *expr = it->expr_ptr;
+		shared_ptr<ZoneExpression> *expr = thing.expr_ptr;
 		auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(*expr);
 		ASSERT( ptz_op ); // should succeed due InsertTZsBypassingFZs()
 				
@@ -95,7 +93,7 @@ void TreeZoneOrderingHandler::RunForRangeList( ZoneExprPtrList &expr_ptrs,
 		Orderable::Diff diff_begin = dfr.Compare3Way(tz_base, range_first);
 		Orderable::Diff diff_end = dfr.Compare3Way(tz_base, range_last);
 		bool ok = diff_begin >= 0 && diff_end <= 0; // both inclusive
-		it->out_of_order = !ok;
+		thing.out_of_order = !ok;
 		
 		if( just_check && !ok )
 		{
