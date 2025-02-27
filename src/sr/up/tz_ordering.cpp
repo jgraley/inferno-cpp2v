@@ -75,7 +75,7 @@ void TreeZoneOrderingHandler::RunForRange( shared_ptr<ZoneExpression> &base,
 	RunForRangeList(expr_ptrs, range_first, range_last, just_check);
 }
 
-#define NEW	
+
 void TreeZoneOrderingHandler::RunForRangeList( ZoneExprPtrList &expr_ptrs, 
 								 	  	       XLink range_first,
 							 			       XLink range_last,
@@ -100,6 +100,10 @@ void TreeZoneOrderingHandler::RunForRangeList( ZoneExprPtrList &expr_ptrs,
 		it->out_of_order = !ok;
 		if( !ok )
 		{     
+			// Mark as out of order. 
+			TRACE("Out of sequence: marking ")(*expr)("\n");
+			out_of_order_list.push_back(expr);
+
 			if( just_check )
 			{
 				FTRACE(db->GetOrderings().depth_first_ordering)("\n");
@@ -116,7 +120,6 @@ void TreeZoneOrderingHandler::RunForRangeList( ZoneExprPtrList &expr_ptrs,
 		range_first = tz_base;		
 	}	
 	
-	bool any_ooo = false;
 	ZoneExprPtrList children_list;
 	ZoneExprPtrList::iterator prev_in_order_it = expr_ptrs.end(); // really "off the beginning"
 	ZoneExprPtrList::iterator prev_it = expr_ptrs.end(); // really "off the beginning"
@@ -167,35 +170,31 @@ void TreeZoneOrderingHandler::RunForRangeList( ZoneExprPtrList &expr_ptrs,
 			ptz_op->ForChildren( [&](shared_ptr<ZoneExpression> &child_expr)
 			{
 				InsertTZsBypassingFZs( child_expr, children_list, children_list.end() );
-			} );
-			
-			// Mark as out of order. 
-			TRACE("Out of sequence: marking ")(*expr)("\n");
-			out_of_order_list.push_back(expr);
-			
-			any_ooo = true;
+			} );		
 		}
 		else
 		{
+			shared_ptr<ZoneExpression> *expr = it->expr_ptr;			
+			auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(*expr);
+			ASSERT( ptz_op ); // should succeed due InsertTZsBypassingFZs()
+
+			// We have a tree zone. For each of its terminii, find the acceptable
+			// range of descendent tree zones and recurse.
+			TRACE("Recursing on ")(ptz_op)("...\n");
+			TreeZone tree_zone = ptz_op->GetZone();
+			TreeZone::TerminusIterator it_t = tree_zone.GetTerminiiBegin();
+			ptz_op->ForChildren( [&](shared_ptr<ZoneExpression> &child_expr)	
+			{
+				XLink child_first = *it_t; // inclusive (terminus XLink equals base XLink of attached tree zone)
+				XLink child_last = db->GetLastDescendant(range_first); // inclusive (is same or child of range_first)
+				RunForRange( child_expr, child_last, range_last, just_check );
+			} );
+			//RunForTreeZone( ptz_op, false );
+			
 			prev_in_order_it = it;
 		}
 		prev_it = it;
 	}
-
-	
-	// Recurse to check descendents of the tree zones. 
-	for( Thing thing : expr_ptrs )
-	{
-		if( !thing.out_of_order )
-		{
-			shared_ptr<ZoneExpression> *expr = thing.expr_ptr;			
-			auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(*expr);
-			ASSERT( ptz_op ); // should succeed due InsertTZsBypassingFZs()
-
-			TRACE("Recursing on ")(ptz_op)("...\n");
-			RunForTreeZone( ptz_op, false );
-		}
-	}	
 }
                                        
 
