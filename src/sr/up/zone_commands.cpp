@@ -26,6 +26,13 @@ shared_ptr<ZoneExpression> &ReplaceCommand::GetExpression()
 }
 
 
+shared_ptr<ZoneExpression> *ReplaceCommand::GetExpressionPtr()
+{
+	ASSERT( this );
+	return &child_expression;
+}
+
+
 const shared_ptr<ZoneExpression> &ReplaceCommand::GetExpression() const
 {
 	ASSERT( this );

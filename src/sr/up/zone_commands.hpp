@@ -33,6 +33,7 @@ public:
     ReplaceCommand( const TreeZone &target_tree_zone_, 
                        shared_ptr<ZoneExpression> child_expression_ );
 	shared_ptr<ZoneExpression> &GetExpression();
+	shared_ptr<ZoneExpression> *GetExpressionPtr();
 	const shared_ptr<ZoneExpression> &GetExpression() const;
 	const TreeZone &GetTargetTreeZone() const;
 	

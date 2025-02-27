@@ -23,9 +23,9 @@ shared_ptr<Command> TreeZoneInverter::Run(shared_ptr<Command> initial_cmd)
 	
 	auto root_update_cmd = dynamic_pointer_cast<ReplaceCommand>(initial_cmd);
 	ASSERT( root_update_cmd ); // ASSUME command is ReplaceCommand (and not in a seq)
-	shared_ptr<ZoneExpression> root_expr = root_update_cmd->GetExpression();
-	TreeZone root_target = root_update_cmd->GetTargetTreeZone();
-	LocatedZoneExpression root_lze( root_target.GetBaseXLink(), root_expr );
+	shared_ptr<ZoneExpression> *root_expr_ptr = root_update_cmd->GetExpressionPtr();
+	TreeZone root_target                      = root_update_cmd->GetTargetTreeZone();
+	LocatedZoneExpression root_lze( root_target.GetBaseXLink(), root_expr_ptr );
 	WalkFreeZoneExpr( root_lze );
 	
 	return incremental_seq;
@@ -34,31 +34,36 @@ shared_ptr<Command> TreeZoneInverter::Run(shared_ptr<Command> initial_cmd)
 
 void TreeZoneInverter::WalkFreeZoneExpr( LocatedZoneExpression lze )
 {
-	// Really just a search for MergeFreeZoneOperator that returns the base XLink from the 
-	// enclosing thing (root or a tree zone). 
+	// Really just a search for MergeFreeZoneOperator that fills in the target base XLink from the 
+	// enclosing thing (if it's root or a tree zone). 
 	// Inversion strategy: this XLink is available for every free zone because we did free zone
 	// merging (if parent was a free zone, we'd have no XLink)
-	if( auto pfz_op = dynamic_pointer_cast<MergeFreeZoneOperator>(lze.second) )
+	if( auto pfz_op = dynamic_pointer_cast<MergeFreeZoneOperator>(*lze.second) )
 	{
+		// Free zone: recurse and then invert locally
 		pfz_op->ForChildren( [&](shared_ptr<ZoneExpression> &child_expr)	
 		{
 			// We don't know the base if we're coming from a free zone
-			WalkFreeZoneExpr( make_pair( XLink(), child_expr ) );
+			ASSERT( dynamic_pointer_cast<DupMergeTreeZoneOperator>(child_expr) )
+			      ("FZ under another FZ (probably), cannot determine target XLink");
+			LocatedZoneExpression child_lze( XLink(), &child_expr );
+			WalkFreeZoneExpr( child_lze );
 		} );
 	
 		// Invert the free zone while unwinding
 		Invert(lze); 
 	}
-	else if( auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(lze.second) )
+	else if( auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(*lze.second) )
 	{
-		// Co-loop over the chidren/terminii looking for a free zone
+		// Recurse, co-looping over the children/terminii so we can fill in target bases
 		vector<XLink> terminii = ptz_op->GetZone().GetTerminusXLinks();
 		MergeFreeZoneOperator::ChildExpressionIterator it_child = ptz_op->GetChildrenBegin();		
 		for( XLink terminus_xlink : terminii )
 		{
 			ASSERT( it_child != ptz_op->GetChildrenEnd() ); // length mismatch
 			
-			WalkFreeZoneExpr( make_pair( terminus_xlink, *it_child ) );
+			LocatedZoneExpression child_lze( terminus_xlink, &*it_child );
+			WalkFreeZoneExpr( child_lze );
 						
 			++it_child;
 		}
@@ -71,13 +76,14 @@ void TreeZoneInverter::WalkFreeZoneExpr( LocatedZoneExpression lze )
 
 void TreeZoneInverter::Invert( LocatedZoneExpression lze )
 {
-	ASSERT( lze.first && lze.second );
-	
+	// Checks
+	ASSERT( lze.first && lze.second && *lze.second);
 	XLink base_xlink = lze.first;
 	ASSERT( base_xlink )("Got no base in our lze, perhaps parent was free zone?"); // FZ merging should prevent
-	auto pfz_op = dynamic_pointer_cast<MergeFreeZoneOperator>( lze.second );
-	ASSERT( pfz_op )("Got LZE not a free zone: ")(lze); // TryFindFreeZoneExpr() found wrong kind of expr
+	auto pfz_op = dynamic_pointer_cast<MergeFreeZoneOperator>( *lze.second );
+	ASSERT( pfz_op )("Got LZE not a free zone: ")(lze); // WalkFreeZoneExpr() gave us wrong kind of expr
 			
+	// Collect base xlinks for child zones (which must be tree zones)
 	vector<XLink> terminii_xlinks;
 	pfz_op->ForChildren([&](shared_ptr<ZoneExpression> &child_expr)	
 	{
@@ -90,7 +96,10 @@ void TreeZoneInverter::Invert( LocatedZoneExpression lze )
 		terminii_xlinks.push_back( child_ptz_op->GetZone().GetBaseXLink() );
 	} );
 		 
+	// Make the inverted TZ
 	TreeZone inverted_tree_zone = TreeZone( base_xlink, terminii_xlinks );	
+	
+	// Create and add a command to swap the FZ in over the inverted TZ
 	auto pfz_op_no_children = make_shared<MergeFreeZoneOperator>( pfz_op->GetZone() ); // No children leaves terminii exposed, sort of.
 	auto incremental_command = make_shared<ReplaceCommand>( inverted_tree_zone, pfz_op_no_children );	
 	incremental_seq->Add(incremental_command);

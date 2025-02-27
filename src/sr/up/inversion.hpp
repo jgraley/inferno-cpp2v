@@ -22,7 +22,7 @@ public:
 	
 private:
 	// .first is NULL: base not known
-	typedef pair<XLink, shared_ptr<ZoneExpression>> LocatedZoneExpression;
+	typedef pair<XLink, shared_ptr<ZoneExpression> *> LocatedZoneExpression;
 
 	void WalkFreeZoneExpr(LocatedZoneExpression lze_root);
 	void Invert(LocatedZoneExpression lzfe);
