@@ -28,7 +28,12 @@ public:
 	void Check( shared_ptr<ZoneExpression> &root_expr );
 
 private:	
-	typedef list<shared_ptr<ZoneExpression> *> ZoneExprPtrList;
+	struct Thing
+	{
+		shared_ptr<ZoneExpression> *expr_ptr; // Double pointer to expr node so we can mutate
+		bool out_of_order; 
+	};
+	typedef list<Thing> ZoneExprPtrList;
 	typedef list<ZoneExprPtrList::iterator> OOOItList;
 
 	void RunForTreeZone( shared_ptr<DupMergeTreeZoneOperator> &op, 

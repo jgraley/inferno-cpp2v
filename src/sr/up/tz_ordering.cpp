@@ -82,7 +82,7 @@ void TreeZoneOrderingHandler::RunForRange( shared_ptr<ZoneExpression> &base,
 			 it = next_it )
 		{
 			next_it = next(it);
-			shared_ptr<ZoneExpression> *expr = *it;
+			shared_ptr<ZoneExpression> *expr = it->expr_ptr;
 			auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(*expr);
 			ASSERT( ptz_op ); // should succeed due InsertTZsBypassingFZs()
 					
@@ -92,6 +92,7 @@ void TreeZoneOrderingHandler::RunForRange( shared_ptr<ZoneExpression> &base,
 			Orderable::Diff diff_begin = dfr.Compare3Way(tz_base, range_first);
 			Orderable::Diff diff_end = dfr.Compare3Way(tz_base, range_last);
 			bool ok = diff_begin >= 0 && diff_end <= 0; // both inclusive
+			it->out_of_order = !ok;
 			if( !ok )
 			{     
 				if( just_check )
@@ -103,9 +104,10 @@ void TreeZoneOrderingHandler::RunForRange( shared_ptr<ZoneExpression> &base,
 				}
 
 				// The current TZ op is in the wrong place. 
-				out_of_order_its.push_back(it);
+				TRACE("Out of sequence: storing iterator for ")(*expr)("\n");
+				out_of_order_its.push_back(it);				
 						
-				continue; // no range threshold update or recurse
+				continue; // no range threshold update
 			}
 					
 			TRACE("OK, updating start of range\n");
@@ -114,36 +116,45 @@ void TreeZoneOrderingHandler::RunForRange( shared_ptr<ZoneExpression> &base,
 			range_first = tz_base;		
 		}	
 		
-		if( out_of_order_its.empty() )
-			break;
-			
-		for( ZoneExprPtrList::iterator it : out_of_order_its )
+		bool any_ooo = false;
+		for( ZoneExprPtrList::iterator it = tree_zone_op_list.begin();
+			 it != tree_zone_op_list.end();
+			 it = next_it )
 		{
-			shared_ptr<ZoneExpression> *expr = *it;
-			auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(*expr);
-			ASSERT( ptz_op ); // should succeed due InsertTZsBypassingFZs()
-
-			// This tree zone will be turned into a free zone. Free zones 
-			// are "invisible" in this scheme, so we update our current work 
-			// list to include its children (bypassing FZs).			
-			ZoneExprPtrList::iterator next_it = next(it);
-			ptz_op->ForChildren( [&](shared_ptr<ZoneExpression> &child_expr)
+			next_it = next(it);
+			if( it->out_of_order )
 			{
-				InsertTZsBypassingFZs( child_expr, tree_zone_op_list, next_it );
-			} );
-			tree_zone_op_list.erase(it);
+				shared_ptr<ZoneExpression> *expr = it->expr_ptr;			
+				auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(*expr);
+				ASSERT( ptz_op ); // should succeed due InsertTZsBypassingFZs()
 
-			// Duplicate the TZ that's in the wrong place into a free zone. 
-			// Hopefully because we already dealt with children, we could
-			// just mark this in side data.
-			TRACE("Out of sequence: duplicating ")(*expr)("\n");
-			out_of_order_list.push_back(expr);
-		}			
+				// This tree zone will be turned into a free zone. Free zones 
+				// are "invisible" in this scheme, so we update our current work 
+				// list to include its children (bypassing FZs).			
+				TRACE("Out of sequence: inserting children of ")(ptz_op)("\n");
+				next_it = tree_zone_op_list.erase(it);
+				ptz_op->ForChildren( [&](shared_ptr<ZoneExpression> &child_expr)
+				{
+					InsertTZsBypassingFZs( child_expr, tree_zone_op_list, next_it );
+				} );
+
+				// Mark as out of order. 
+				TRACE("Out of sequence: marking ")(*expr)("\n");
+				out_of_order_list.push_back(expr);
+				
+				any_ooo = true;
+			}
+		}
+		
+		if( !any_ooo )
+			break;			
 	} 
 	
 	// Recurse to check descendents of the tree zones. 
-	for( shared_ptr<ZoneExpression> *expr : tree_zone_op_list )
+	for( Thing thing : tree_zone_op_list )
 	{
+		ASSERT( !thing.out_of_order );
+		shared_ptr<ZoneExpression> *expr = thing.expr_ptr;			
 		auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(*expr);
 		ASSERT( ptz_op ); // should succeed due InsertTZsBypassingFZs()
 
@@ -154,14 +165,14 @@ void TreeZoneOrderingHandler::RunForRange( shared_ptr<ZoneExpression> &base,
                                        
 
 void TreeZoneOrderingHandler::InsertTZsBypassingFZs( shared_ptr<ZoneExpression> &expr, 
-              				  		                 list<shared_ptr<ZoneExpression> *> &tree_zones,
-              				  		                 list<shared_ptr<ZoneExpression> *>::iterator pos )
+              				  		                 ZoneExprPtrList &tree_zones,
+              				  		                 ZoneExprPtrList::iterator pos )
 {
 	// Insert descendent tree zones, skipping over free zones, into a list for
 	// convenience.
 	if( auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(expr) )
 	{
-		tree_zones.insert( pos, &expr );
+		tree_zones.insert( pos, { &expr, false } );
 	}
 	else if( auto pfz_op = dynamic_pointer_cast<MergeFreeZoneOperator>(expr) )
 	{
