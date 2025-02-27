@@ -101,10 +101,6 @@ void TreeZoneOrderingHandler::RunForRange( shared_ptr<ZoneExpression> &base,
 					ASSERT(diff_end <= 0)("Tree zone base ")(tz_base)(" appears after limit ")(range_last)(" in X tree");
 					ASSERTFAIL(); // we aint goin nowhere
 				}
-
-				// The current TZ op is in the wrong place. 
-				TRACE("Out of sequence: storing iterator for ")(*expr)("\n");
-						
 				continue; // no range threshold update
 			}
 					
