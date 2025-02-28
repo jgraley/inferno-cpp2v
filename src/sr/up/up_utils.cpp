@@ -22,12 +22,12 @@ void EmptyZoneElider::Run( shared_ptr<Patch> &layout )
 {
 	Patch::ForDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
 	{
-		if( auto pz_op = dynamic_pointer_cast<ZonePatch>(patch) )
-            if( pz_op->GetZone().IsEmpty() )
+		if( auto free_patch = dynamic_pointer_cast<ZonePatch>(patch) )
+            if( free_patch->GetZone().IsEmpty() )
             {
-				shared_ptr<Patch> child_patch = OnlyElementOf( pz_op->GetChildExpressions() );
-				if( auto child_pz_op = dynamic_pointer_cast<ZonePatch>(child_patch) )
-					child_pz_op->AddEmbeddedMarkers( pz_op->GetEmbeddedMarkers() );
+				shared_ptr<Patch> child_patch = OnlyElementOf( free_patch->GetChildExpressions() );
+				if( auto child_zone_patch = dynamic_pointer_cast<ZonePatch>(child_patch) )
+					child_zone_patch->AddEmbeddedMarkers( free_patch->GetEmbeddedMarkers() );
 				patch = child_patch;
 			}
 	} );	
@@ -38,8 +38,8 @@ void EmptyZoneElider::Check( shared_ptr<Patch> &layout )
 {
 	Patch::ForDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
 	{
-		if( auto pz_op = dynamic_pointer_cast<ZonePatch>(patch) )
-            ASSERT( !pz_op->GetZone().IsEmpty() )("Found empty zone in populate op: ")(pz_op->GetZone());
+		if( auto free_patch = dynamic_pointer_cast<ZonePatch>(patch) )
+            ASSERT( !free_patch->GetZone().IsEmpty() )("Found empty zone in populate op: ")(free_patch->GetZone());
 	} );	
 }
 
@@ -58,13 +58,13 @@ void BaseForEmbeddedMarkPropagation::Run( shared_ptr<Patch> &layout )
 	// Inner and outer loops only look at TreeZonePatch patches
 	Patch::ForDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
 	{
-		if( auto pz_op = dynamic_pointer_cast<ZonePatch>(patch) )
+		if( auto free_patch = dynamic_pointer_cast<ZonePatch>(patch) )
 		{	
-			for( RequiresSubordinateSCREngine *agent : pz_op->GetEmbeddedMarkers() )
+			for( RequiresSubordinateSCREngine *agent : free_patch->GetEmbeddedMarkers() )
 			{
-				pz_op->GetZone().MarkBaseForEmbedded(agent);
+				free_patch->GetZone().MarkBaseForEmbedded(agent);
 			}
-			pz_op->ClearEmbeddedMarkers();
+			free_patch->ClearEmbeddedMarkers();
 		}
 	} );
 }

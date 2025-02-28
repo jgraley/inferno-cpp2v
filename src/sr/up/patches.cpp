@@ -174,9 +174,9 @@ shared_ptr<Patch> TreeZonePatch::DuplicateToFree() const
 {
 	FreeZone free_zone = zone.Duplicate();
 	list<shared_ptr<Patch>> c = GetChildExpressions();
-	auto pop_fz_op = make_shared<FreeZonePatch>( free_zone, move(c) );
-	pop_fz_op->AddEmbeddedMarkers( GetEmbeddedMarkers() );
-	return pop_fz_op;
+	auto pop_free_patch = make_shared<FreeZonePatch>( free_zone, move(c) );
+	pop_free_patch->AddEmbeddedMarkers( GetEmbeddedMarkers() );
+	return pop_free_patch;
 }	
 
 

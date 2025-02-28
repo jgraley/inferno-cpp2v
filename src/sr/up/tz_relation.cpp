@@ -92,7 +92,7 @@ pair<Orderable::Diff, ZoneRelation::RelType> TreeZoneRelation::CompareHierarchic
         {
             case DepthFirstRelation::EQUAL:
 				TRACES(" touching: no overlap\n");
-                return make_pair(p_base.first, DISTINCT_SUBTREE); // close but no overlap, zone d begins at from a's terminus
+                return make_pair(p_base.first, DISTINCT_SUBTREE); // close but no overlap, zone d begins at a's terminus
                 
             case DepthFirstRelation::LEFT_IS_ANCESTOR:
 				TRACES(" aa dd: no overlap\n");

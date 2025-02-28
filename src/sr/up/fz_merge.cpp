@@ -61,11 +61,11 @@ void FreeZoneMerger::Check( shared_ptr<Patch> &layout )
 {
 	Patch::ForDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
 	{
-		if( auto pz_op = dynamic_pointer_cast<FreeZonePatch>(patch) )
+		if( auto free_patch = dynamic_pointer_cast<FreeZonePatch>(patch) )
         {
-			pz_op->ForChildren([&](shared_ptr<Patch> &child_patch)
+			free_patch->ForChildren([&](shared_ptr<Patch> &child_patch)
 			{
-				if( auto child_pz_op = dynamic_pointer_cast<FreeZonePatch>(child_patch) )
+				if( dynamic_pointer_cast<FreeZonePatch>(child_patch) )
 					ASSERT(false)("Free zone ")(*patch)(" touching another free zone ")(*child_patch);
 			} );
 		}

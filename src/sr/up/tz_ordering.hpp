@@ -28,12 +28,12 @@ public:
 	void Check( shared_ptr<Patch> &layout );
 
 private:	
-	struct Thing
+	struct PatchRecord
 	{
 		shared_ptr<Patch> *patch_ptr; // Double pointer to patch node so we can mutate
 		bool out_of_order; 
 	};
-	typedef vector<Thing> ThingVector;
+	typedef vector<PatchRecord> PatchRecords;
 
 	void RunForTreeZone( shared_ptr<TreeZonePatch> &op, 
 						 bool just_check );
@@ -41,18 +41,18 @@ private:
                       XLink range_last,
                       XLink range_end,
                       bool just_check );
-	void RunForRangeList( ThingVector &things, 
+	void RunForRangeList( PatchRecords &patch_records, 
 		    	  	      XLink range_first,
 						  XLink range_last,
 						  bool just_check );
 	void AddTZsBypassingFZs( shared_ptr<Patch> &patch, 
-			     	         ThingVector &tree_zones );
-	void FindOutOfOrder( ThingVector &things, 
+			     	         PatchRecords &patch_records );
+	void FindOutOfOrder( PatchRecords &patch_records, 
 		    	  	     XLink range_first,
 						 XLink range_last,
 						 bool just_check );
-	shared_ptr<TreeZonePatch> GetOperator(const Thing &thing) const;
-	XLink GetBaseXLink(const Thing &thing) const;
+	shared_ptr<TreeZonePatch> GetTreePatch(const PatchRecord &patch_record) const;
+	XLink GetBaseXLink(const PatchRecord &patch_record) const;
 				    	  
 	const XTreeDatabase * const db;
 	SR::DepthFirstRelation dfr;		
