@@ -24,10 +24,22 @@ TreeUpdater::TreeUpdater(XTreeDatabase *x_tree_db) :
 }
 
 
-unique_ptr<FreeZone> TreeUpdater::Evaluate( shared_ptr<const ZoneExpression> expr )
+unique_ptr<FreeZone> TreeUpdater::TransformToSingleFreeZone( shared_ptr<ZoneExpression> source_layout )
 {
-	UpEvalExecKit kit { nullptr };
-	return expr->Evaluate(kit);   
+	DuplicateAllToFree all_to_free;
+	all_to_free.Run(source_layout);  
+	all_to_free.Check(source_layout);
+	
+	FreeZoneMerger free_zone_merger;
+	free_zone_merger.Run(source_layout);  
+	free_zone_merger.Check(source_layout);
+
+	auto pfz_op = dynamic_pointer_cast<MergeFreeZoneOperator>(source_layout);
+	ASSERT( pfz_op );
+	ASSERT( pfz_op->GetNumChildExpressions() == 0 );
+	FreeZone free_zone = pfz_op->GetZone();
+	ASSERT( free_zone.GetNumTerminii() == 0 );
+	return make_unique<FreeZone>(free_zone);
 }
 
 
@@ -63,10 +75,13 @@ void TreeUpdater::TransformToIncrementalAndExecute( TreeZone target_tree_zone, s
 	tree_zone_inverter.Run(target_tree_zone, &source_layout);	
 			
 	// Execute it
-	UpEvalExecKit kit { db };
 	ZoneExpression::ForDepthFirstWalk( source_layout, nullptr, [&](shared_ptr<ZoneExpression> &part)
 	{
 		if( auto replace_part = dynamic_pointer_cast<ReplaceOperator>(part) )
-			replace_part->Execute(kit);
+		{
+			auto source_free_zone = dynamic_pointer_cast<FreeZone>(replace_part->GetSourceZone());
+			ASSERT( source_free_zone );
+			db->MainTreeReplace( replace_part->GetTargetTreeZone(), *source_free_zone );
+		}
 	} );
 }

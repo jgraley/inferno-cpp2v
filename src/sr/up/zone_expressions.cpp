@@ -329,13 +329,15 @@ unique_ptr<FreeZone> ReplaceOperator::Evaluate(const UpEvalExecKit &kit) const
     ASSERTFAIL(); // TODO restructure so we don't need to do this
 }
 
-void ReplaceOperator::Execute(const UpEvalExecKit &kit) const 
+
+const TreeZone &ReplaceOperator::GetTargetTreeZone() const
 {
-    // Source zone must be a free zone. 
-	auto source_free_zone = dynamic_pointer_cast<FreeZone>(source_zone);
-	ASSERT( source_free_zone );
-    kit.x_tree_db->MainTreeReplace( target_tree_zone, *source_free_zone );
-    
-    // We do not recurse to children.
+	return target_tree_zone;
+}
+
+
+shared_ptr<Zone> ReplaceOperator::GetSourceZone() const
+{
+	return source_zone;
 }
 

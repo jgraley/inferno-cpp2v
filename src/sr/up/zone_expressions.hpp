@@ -161,7 +161,8 @@ public:
 	                 shared_ptr<Zone> source_zone_,
 	                 list<shared_ptr<ZoneExpression>> &&child_expressions );
 	unique_ptr<FreeZone> Evaluate(const UpEvalExecKit &kit) const override;
-	void Execute(const UpEvalExecKit &kit) const;
+    const TreeZone &GetTargetTreeZone() const;
+    shared_ptr<Zone> GetSourceZone() const;
 
 private:
 	TreeZone target_tree_zone;

@@ -519,8 +519,8 @@ bool AgentCommon::ReplaceKeyerQuery( PatternLink me_plink,
 TreePtr<Node> AgentCommon::BuildForBuildersAnalysis( PatternLink me_plink )
 {
 	Agent::ReplaceKit kit { nullptr };
-	shared_ptr<ZoneExpression> expr = GenReplaceExpr(kit, me_plink);
-    unique_ptr<FreeZone> zone = TreeUpdater().Evaluate( expr );     
+	shared_ptr<ZoneExpression> layout = GenReplaceExpr(kit, me_plink);
+    unique_ptr<FreeZone> zone = TreeUpdater().TransformToSingleFreeZone( layout );     
     return zone->GetBaseNode();
 }
 

@@ -37,6 +37,20 @@ private:
 	const XTreeDatabase * const db;
 };
 
+// ------------------------- DuplicateAllToFree --------------------------
+
+class DuplicateAllToFree
+{
+public:	
+	DuplicateAllToFree();
+	
+	// Can change the supplied shared ptr
+	void Run( shared_ptr<ZoneExpression> &root_expr );
+	
+	// Just ASSERT all free zones
+	void Check( shared_ptr<ZoneExpression> &root_expr );
+};
+
 }
 
 #endif

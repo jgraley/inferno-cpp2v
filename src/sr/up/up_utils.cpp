@@ -68,3 +68,32 @@ void BaseForEmbeddedMarkPropagation::Run( shared_ptr<ZoneExpression> &root_expr 
 		}
 	} );
 }
+
+// ------------------------- DuplicateAllToFree --------------------------
+
+DuplicateAllToFree::DuplicateAllToFree()
+{
+}
+	
+
+void DuplicateAllToFree::Run( shared_ptr<ZoneExpression> &root_expr )
+{
+	ZoneExpression::ForDepthFirstWalk( root_expr, nullptr, [&](shared_ptr<ZoneExpression> &expr)
+	{
+		if( auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(expr) )
+        {
+			expr = ptz_op->DuplicateToFree();
+		}
+	} );	
+}
+
+
+void DuplicateAllToFree::Check( shared_ptr<ZoneExpression> &root_expr )
+{
+	ZoneExpression::ForDepthFirstWalk( root_expr, nullptr, [&](shared_ptr<ZoneExpression> &expr)
+	{
+		ASSERT( dynamic_pointer_cast<MergeFreeZoneOperator>(expr) );
+	} );	
+}
+
+
