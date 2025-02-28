@@ -63,17 +63,14 @@ void TreeUpdater::TransformToIncrementalAndExecute( shared_ptr<Command> initial_
 
 	// Inversion generates sequence of separate "small" update commands 
 	TreeZoneInverter tree_zone_inverter( db ); 
-	shared_ptr<Command> incremental_cmd = tree_zone_inverter.Run(initial_cmd);	
-						
+	shared_ptr<CommandSequence> incremental_cmd = tree_zone_inverter.Run(initial_cmd);	
+    expr = dynamic_cast<const ReplaceCommand &>(*initial_cmd).GetExpression(); // might have changed
+			
 	// Execute it
 	UpEvalExecKit kit { db };
-#ifdef NEW	
 	ZoneExpression::ForDepthFirstWalk( expr, nullptr, [&](shared_ptr<ZoneExpression> &expr)
 	{
 		if( auto replace_op = dynamic_pointer_cast<ReplaceOperator>(expr) )
 			replace_op->Execute(kit);
 	} );
-#else	
-	incremental_cmd->Execute(kit);   
-#endif	
 }

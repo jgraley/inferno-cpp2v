@@ -17,7 +17,7 @@ TreeZoneInverter::TreeZoneInverter( XTreeDatabase *db_ ) :
 }
 
 
-shared_ptr<Command> TreeZoneInverter::Run(shared_ptr<Command> initial_cmd)
+shared_ptr<CommandSequence> TreeZoneInverter::Run(shared_ptr<Command> initial_cmd)
 {
 	incremental_seq = make_shared<CommandSequence>();
 	

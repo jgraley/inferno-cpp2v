@@ -18,7 +18,7 @@ class TreeZoneInverter
 public:
 	TreeZoneInverter( XTreeDatabase *db );
 	
-	shared_ptr<Command> Run(shared_ptr<Command> initial_cmd);
+	shared_ptr<CommandSequence> Run(shared_ptr<Command> initial_cmd);
 	
 private:
 	// .first is NULL: base not known
