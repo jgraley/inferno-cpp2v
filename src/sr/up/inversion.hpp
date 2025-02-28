@@ -7,7 +7,6 @@
 #include "../db/tree_zone.hpp"
 #include "../link.hpp"
 #include "../scr_engine.hpp"
-#include "zone_commands.hpp"
 
 namespace SR 
 {
@@ -18,7 +17,7 @@ class TreeZoneInverter
 public:
 	TreeZoneInverter( XTreeDatabase *db );
 	
-	shared_ptr<CommandSequence> Run(shared_ptr<Command> initial_cmd);
+	void Run(TreeZone root_target, shared_ptr<ZoneExpression> *source_layout_ptr);
 	
 private:
 	// .first is NULL: base not known
@@ -28,7 +27,6 @@ private:
 	void Invert(LocatedZoneExpression lzfe);
 
 	XTreeDatabase * const db;
-	shared_ptr<CommandSequence> incremental_seq;
 };
 
 }

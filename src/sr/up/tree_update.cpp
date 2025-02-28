@@ -4,7 +4,6 @@
 #include "common/read_args.hpp"
 #include "tree/validate.hpp"
 #include "common/lambda_loops.hpp"
-#include "zone_commands.hpp"
 #include "tz_relation.hpp"
 #include "up_utils.hpp"
 #include "tz_overlap.hpp"
@@ -32,45 +31,42 @@ unique_ptr<FreeZone> TreeUpdater::Evaluate( shared_ptr<const ZoneExpression> exp
 }
 
 
-void TreeUpdater::TransformToIncrementalAndExecute( shared_ptr<Command> initial_cmd )
+void TreeUpdater::TransformToIncrementalAndExecute( TreeZone target_tree_zone, shared_ptr<ZoneExpression> source_layout )
 {
 	ASSERT( db );
-	
-	shared_ptr<ZoneExpression> expr = dynamic_cast<const ReplaceCommand &>(*initial_cmd).GetExpression();
-	
+		
 	EmptyZoneElider empty_zone_elider;
-	empty_zone_elider.Run(expr);
-	empty_zone_elider.Check(expr);
+	empty_zone_elider.Run(source_layout);
+	empty_zone_elider.Check(source_layout);
 	
 	TreeZoneOverlapHandler tree_zone_overlap_handler( db );
-	tree_zone_overlap_handler.Run(expr);
-	tree_zone_overlap_handler.Check(expr);
+	tree_zone_overlap_handler.Run(source_layout);
+	tree_zone_overlap_handler.Check(source_layout);
 	
 	TreeZoneOrderingHandler tree_zone_ordering_handler( db );
-	tree_zone_ordering_handler.Run(expr);
-	tree_zone_ordering_handler.Check(expr);
+	tree_zone_ordering_handler.Run(source_layout);
+	tree_zone_ordering_handler.Check(source_layout);
 	
 	FreeZoneMerger free_zone_merger;
-	free_zone_merger.Run(expr);  
-	free_zone_merger.Check(expr);
+	free_zone_merger.Run(source_layout);  
+	free_zone_merger.Check(source_layout);
 	
 	AltTreeZoneOrderingChecker alt_free_zone_ordering_checker( db );
-	alt_free_zone_ordering_checker.Check(expr);
+	alt_free_zone_ordering_checker.Check(source_layout);
 
 	// Enact the tree zones that will stick around
 	BaseForEmbeddedMarkPropagation bfe_mark_propagation( db );
-	bfe_mark_propagation.Run(expr);
+	bfe_mark_propagation.Run(source_layout);
 
 	// Inversion generates sequence of separate "small" update commands 
 	TreeZoneInverter tree_zone_inverter( db ); 
-	shared_ptr<CommandSequence> incremental_cmd = tree_zone_inverter.Run(initial_cmd);	
-    expr = dynamic_cast<const ReplaceCommand &>(*initial_cmd).GetExpression(); // might have changed
+	tree_zone_inverter.Run(target_tree_zone, &source_layout);	
 			
 	// Execute it
 	UpEvalExecKit kit { db };
-	ZoneExpression::ForDepthFirstWalk( expr, nullptr, [&](shared_ptr<ZoneExpression> &expr)
+	ZoneExpression::ForDepthFirstWalk( source_layout, nullptr, [&](shared_ptr<ZoneExpression> &part)
 	{
-		if( auto replace_op = dynamic_pointer_cast<ReplaceOperator>(expr) )
-			replace_op->Execute(kit);
+		if( auto replace_part = dynamic_pointer_cast<ReplaceOperator>(part) )
+			replace_part->Execute(kit);
 	} );
 }

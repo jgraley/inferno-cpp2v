@@ -10,7 +10,6 @@
 #include "and_rule_engine.hpp"
 #include "link.hpp"
 #include "vn_sequence.hpp"
-#include "up/zone_commands.hpp"
 
 #include <list>
 
@@ -370,10 +369,9 @@ void SCREngine::Replace( XLink base_xlink )
     
     // Create a command to replace the current X tree with this expression
     TreeZone target_tree_zone = TreeZone::CreateSubtree(base_xlink);
-    auto replace_command = make_shared<ReplaceCommand>(target_tree_zone, move(source_expr));	
     
     // Request to update the tree
-	plan.vn_sequence->UpdateUsingCommand( move(replace_command) );  
+	plan.vn_sequence->UpdateUsingCommand( target_tree_zone, move(source_expr) );  
     
     TRACE("Replace done\n");
 }

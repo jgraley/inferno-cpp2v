@@ -7,6 +7,7 @@
 #include "../conjecture.hpp"
 #include "../query.hpp"
 #include "../sym/lazy_eval.hpp"
+#include "../up/zone_expressions.hpp"
 
 namespace SR
 { 

@@ -7,7 +7,6 @@
 #include "../db/tree_zone.hpp"
 #include "../link.hpp"
 #include "../scr_engine.hpp"
-#include "zone_commands.hpp"
 
 namespace SR 
 {
@@ -24,7 +23,7 @@ public:
 	unique_ptr<FreeZone> Evaluate( shared_ptr<const ZoneExpression> expr );
 	
 	// Much as the name suggests. Db required and acts directly on it.
-	void TransformToIncrementalAndExecute( shared_ptr<Command> cmd );
+	void TransformToIncrementalAndExecute( TreeZone target_tree_zone, shared_ptr<ZoneExpression> source_layout );
 	
 private:
 	XTreeDatabase * const db;

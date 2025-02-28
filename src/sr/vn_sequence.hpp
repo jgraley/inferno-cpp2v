@@ -16,7 +16,6 @@ namespace SR
 
 class VNStep;
 class XTreeDatabase;
-class Command;
 
 /**
  * Vida Nova Sequence
@@ -46,7 +45,7 @@ public:
     void GenerateGraphRegions( int step_index, Graph &graph ) const;
     string GetStepName( int step_index ) const;
 
-    void UpdateUsingCommand( shared_ptr<Command> cmd );
+    void UpdateUsingCommand( TreeZone target_tree_zone, shared_ptr<ZoneExpression> source_layout );
     
     void XTreeDbDump() const;
     void XTreeDbExpectMatches() const;

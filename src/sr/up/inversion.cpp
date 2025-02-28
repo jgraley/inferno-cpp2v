@@ -1,10 +1,10 @@
 #include "inversion.hpp"
 
+#include "zone_expressions.hpp"
 #include "db/x_tree_database.hpp"
 #include "common/read_args.hpp"
 #include "tree/validate.hpp"
 #include "common/lambda_loops.hpp"
-#include "zone_commands.hpp"
 #include "tz_relation.hpp"
 
 #include <iostream>
@@ -17,18 +17,10 @@ TreeZoneInverter::TreeZoneInverter( XTreeDatabase *db_ ) :
 }
 
 
-shared_ptr<CommandSequence> TreeZoneInverter::Run(shared_ptr<Command> initial_cmd)
+void TreeZoneInverter::Run(TreeZone root_target, shared_ptr<ZoneExpression> *source_layout_ptr)
 {
-	incremental_seq = make_shared<CommandSequence>();
-	
-	auto root_update_cmd = dynamic_pointer_cast<ReplaceCommand>(initial_cmd);
-	ASSERT( root_update_cmd ); // ASSUME command is ReplaceCommand (and not in a seq)
-	shared_ptr<ZoneExpression> *root_expr_ptr = root_update_cmd->GetExpressionPtr();
-	TreeZone root_target                      = root_update_cmd->GetTargetTreeZone();
-	LocatedZoneExpression root_lze( root_target.GetBaseXLink(), root_expr_ptr );
+	LocatedZoneExpression root_lze( root_target.GetBaseXLink(), source_layout_ptr );
 	WalkFreeZoneExpr( root_lze );
-	
-	return incremental_seq;
 }
 
 
@@ -99,13 +91,8 @@ void TreeZoneInverter::Invert( LocatedZoneExpression lze )
 	// Make the inverted TZ
 	TreeZone inverted_tree_zone = TreeZone( base_xlink, terminii_xlinks );	
 	
-	// NEW: Modify the expression to include inverted TZ as target
+	// Modify the expression to include inverted TZ as target
 	*lze.second = make_shared<ReplaceOperator>( inverted_tree_zone,
 	                                            make_shared<FreeZone>( pfz_op->GetZone() ),
-	                                            pfz_op->MoveChildExpressions() );   	
-	
-	// OLD: Create and add a command to swap the FZ in over the inverted TZ
-	auto pfz_op_no_children = make_shared<MergeFreeZoneOperator>( pfz_op->GetZone() ); // No children leaves terminii exposed, sort of.
-	auto incremental_command = make_shared<ReplaceCommand>( inverted_tree_zone, pfz_op_no_children );	
-	incremental_seq->Add(incremental_command);
+	                                            pfz_op->MoveChildExpressions() );   		
 }

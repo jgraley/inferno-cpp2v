@@ -5,7 +5,6 @@
 #include "sym/predicate_operators.hpp"
 #include "sym/symbol_operators.hpp"
 #include "sym/result.hpp"
-#include "up/zone_commands.hpp"
 
 using namespace SR;
 using namespace SYM;

@@ -3,7 +3,6 @@
 #include "vn_step.hpp"
 #include "render/graph.hpp"
 #include "db/x_tree_database.hpp"
-#include "up/zone_commands.hpp"
 #include "up/tree_update.hpp"
 
 using namespace SR;
@@ -139,11 +138,11 @@ string VNSequence::GetStepName( int step_index ) const
 }
 
 
-void VNSequence::UpdateUsingCommand( shared_ptr<Command> cmd )
+void VNSequence::UpdateUsingCommand( TreeZone target_tree_zone, shared_ptr<ZoneExpression> source_layout )
 {
     ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");    
     
-	TreeUpdater( x_tree_db.get() ).TransformToIncrementalAndExecute( cmd );
+	TreeUpdater( x_tree_db.get() ).TransformToIncrementalAndExecute( target_tree_zone, source_layout );
     
     x_tree_db->PostUpdateActions();
 }

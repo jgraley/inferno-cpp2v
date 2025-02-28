@@ -1,13 +1,13 @@
 #ifndef TZ_ORDERING_HPP
 #define TZ_ORDERING_HPP
 
+#include "zone_expressions.hpp"
 #include "common/common.hpp"
 #include "node/tree_ptr.hpp"
 #include "../db/free_zone.hpp"
 #include "../db/tree_zone.hpp"
 #include "../link.hpp"
 #include "../scr_engine.hpp"
-#include "zone_commands.hpp"
 
 namespace SR 
 {
