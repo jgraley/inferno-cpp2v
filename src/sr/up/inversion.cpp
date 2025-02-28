@@ -17,7 +17,7 @@ TreeZoneInverter::TreeZoneInverter( XTreeDatabase *db_ ) :
 }
 
 
-void TreeZoneInverter::Run(TreeZone root_target, shared_ptr<ZoneExpression> *source_layout_ptr)
+void TreeZoneInverter::Run(TreeZone root_target, shared_ptr<Layout> *source_layout_ptr)
 {
 	LocatedZoneExpression root_lze( root_target.GetBaseXLink(), source_layout_ptr );
 	WalkFreeZoneExpr( root_lze );
@@ -33,7 +33,7 @@ void TreeZoneInverter::WalkFreeZoneExpr( LocatedZoneExpression lze )
 	if( auto pfz_op = dynamic_pointer_cast<MergeFreeZoneOperator>(*lze.second) )
 	{
 		// Free zone: recurse and then invert locally
-		pfz_op->ForChildren( [&](shared_ptr<ZoneExpression> &child_expr)	
+		pfz_op->ForChildren( [&](shared_ptr<Layout> &child_expr)	
 		{
 			// We don't know the base if we're coming from a free zone
 			ASSERT( dynamic_pointer_cast<DupMergeTreeZoneOperator>(child_expr) )
@@ -77,7 +77,7 @@ void TreeZoneInverter::Invert( LocatedZoneExpression lze )
 			
 	// Collect base xlinks for child zones (which must be tree zones)
 	vector<XLink> terminii_xlinks;
-	pfz_op->ForChildren([&](shared_ptr<ZoneExpression> &child_expr)	
+	pfz_op->ForChildren([&](shared_ptr<Layout> &child_expr)	
 	{
 		auto child_ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>( child_expr );		
 		// Inversion strategy: we're based on a free zone and FZ merging should 

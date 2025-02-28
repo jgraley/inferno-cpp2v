@@ -18,9 +18,9 @@ FreeZoneMerger::FreeZoneMerger()
 }
 	
 
-void FreeZoneMerger::Run( shared_ptr<ZoneExpression> &root_expr )
+void FreeZoneMerger::Run( shared_ptr<Layout> &root_expr )
 {
-	ZoneExpression::ForDepthFirstWalk( root_expr, nullptr, [&](shared_ptr<ZoneExpression> &expr)
+	Layout::ForDepthFirstWalk( root_expr, nullptr, [&](shared_ptr<Layout> &expr)
 	{
 		if( auto pfz_op = dynamic_pointer_cast<MergeFreeZoneOperator>(expr) )
         {
@@ -57,13 +57,13 @@ void FreeZoneMerger::Run( shared_ptr<ZoneExpression> &root_expr )
 }
 
 
-void FreeZoneMerger::Check( shared_ptr<ZoneExpression> &root_expr )
+void FreeZoneMerger::Check( shared_ptr<Layout> &root_expr )
 {
-	ZoneExpression::ForDepthFirstWalk( root_expr, nullptr, [&](shared_ptr<ZoneExpression> &expr)
+	Layout::ForDepthFirstWalk( root_expr, nullptr, [&](shared_ptr<Layout> &expr)
 	{
 		if( auto pz_op = dynamic_pointer_cast<MergeFreeZoneOperator>(expr) )
         {
-			pz_op->ForChildren([&](shared_ptr<ZoneExpression> &child_expr)
+			pz_op->ForChildren([&](shared_ptr<Layout> &child_expr)
 			{
 				if( auto child_pz_op = dynamic_pointer_cast<MergeFreeZoneOperator>(child_expr) )
 					ASSERT(false)("Free zone ")(*expr)(" touching another free zone ")(*child_expr);

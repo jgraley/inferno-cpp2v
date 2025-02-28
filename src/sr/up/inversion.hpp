@@ -17,11 +17,11 @@ class TreeZoneInverter
 public:
 	TreeZoneInverter( XTreeDatabase *db );
 	
-	void Run(TreeZone root_target, shared_ptr<ZoneExpression> *source_layout_ptr);
+	void Run(TreeZone root_target, shared_ptr<Layout> *source_layout_ptr);
 	
 private:
 	// .first is NULL: base not known
-	typedef pair<XLink, shared_ptr<ZoneExpression> *> LocatedZoneExpression;
+	typedef pair<XLink, shared_ptr<Layout> *> LocatedZoneExpression;
 
 	void WalkFreeZoneExpr(LocatedZoneExpression lze_root);
 	void Invert(LocatedZoneExpression lzfe);

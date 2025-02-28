@@ -18,10 +18,10 @@ public:
 	EmptyZoneElider();
 	
 	// Can change the supplied shared ptr
-	void Run( shared_ptr<ZoneExpression> &root_expr );
+	void Run( shared_ptr<Layout> &root_expr );
 	
 	// Just ASSERT no empty zones
-	void Check( shared_ptr<ZoneExpression> &root_expr );
+	void Check( shared_ptr<Layout> &root_expr );
 };
 
 // ------------------------- BaseForEmbeddedMarkPropagation --------------------------
@@ -30,8 +30,8 @@ class BaseForEmbeddedMarkPropagation
 {
 public:
 	BaseForEmbeddedMarkPropagation( const XTreeDatabase *db );
-	void Run( shared_ptr<ZoneExpression> &root_expr );
-	void Check( shared_ptr<ZoneExpression> &root_expr );
+	void Run( shared_ptr<Layout> &root_expr );
+	void Check( shared_ptr<Layout> &root_expr );
 
 private:
 	const XTreeDatabase * const db;
@@ -45,10 +45,10 @@ public:
 	DuplicateAllToFree();
 	
 	// Can change the supplied shared ptr
-	void Run( shared_ptr<ZoneExpression> &root_expr );
+	void Run( shared_ptr<Layout> &root_expr );
 	
 	// Just ASSERT all free zones
-	void Check( shared_ptr<ZoneExpression> &root_expr );
+	void Check( shared_ptr<Layout> &root_expr );
 };
 
 }

@@ -27,8 +27,8 @@ class TreeZoneOverlapHandler
 {
 public:
 	TreeZoneOverlapHandler( const XTreeDatabase *db );
-	void Run( shared_ptr<ZoneExpression> &root_expr );
-	void Check( shared_ptr<ZoneExpression> &root_expr );
+	void Run( shared_ptr<Layout> &root_expr );
+	void Check( shared_ptr<Layout> &root_expr );
 
 private:
 	const XTreeDatabase * const db;

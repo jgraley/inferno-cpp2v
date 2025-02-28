@@ -14,7 +14,7 @@ class SCREngine;
 class AndRuleEngine;
 class Agent;
 class XTreeDatabase;
-class ZoneExpression;
+class Layout;
 
 /// Interface for Agents, which co-exist with pattern nodes and implement the search and replace funcitonality for each pattern node.
 class Agent : public virtual Graphable,
@@ -27,7 +27,7 @@ public:
     };
 
     // really just to reduce the amount of typing if I change it
-    typedef shared_ptr<ZoneExpression> ReplaceExprPtr;
+    typedef shared_ptr<Layout> ReplaceExprPtr;
 
     typedef Graphable::Phase Phase;
     

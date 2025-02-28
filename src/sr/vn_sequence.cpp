@@ -138,7 +138,7 @@ string VNSequence::GetStepName( int step_index ) const
 }
 
 
-void VNSequence::UpdateUsingCommand( TreeZone target_tree_zone, shared_ptr<ZoneExpression> source_layout )
+void VNSequence::UpdateUsingCommand( TreeZone target_tree_zone, shared_ptr<Layout> source_layout )
 {
     ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");    
     

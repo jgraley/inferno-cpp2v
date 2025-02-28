@@ -24,7 +24,7 @@ TreeUpdater::TreeUpdater(XTreeDatabase *x_tree_db) :
 }
 
 
-unique_ptr<FreeZone> TreeUpdater::TransformToSingleFreeZone( shared_ptr<ZoneExpression> source_layout )
+unique_ptr<FreeZone> TreeUpdater::TransformToSingleFreeZone( shared_ptr<Layout> source_layout )
 {
 	DuplicateAllToFree all_to_free;
 	all_to_free.Run(source_layout);  
@@ -43,7 +43,7 @@ unique_ptr<FreeZone> TreeUpdater::TransformToSingleFreeZone( shared_ptr<ZoneExpr
 }
 
 
-void TreeUpdater::TransformToIncrementalAndExecute( TreeZone target_tree_zone, shared_ptr<ZoneExpression> source_layout )
+void TreeUpdater::TransformToIncrementalAndExecute( TreeZone target_tree_zone, shared_ptr<Layout> source_layout )
 {
 	ASSERT( db );
 		
@@ -75,7 +75,7 @@ void TreeUpdater::TransformToIncrementalAndExecute( TreeZone target_tree_zone, s
 	tree_zone_inverter.Run(target_tree_zone, &source_layout);	
 			
 	// Execute it
-	ZoneExpression::ForDepthFirstWalk( source_layout, nullptr, [&](shared_ptr<ZoneExpression> &part)
+	Layout::ForDepthFirstWalk( source_layout, nullptr, [&](shared_ptr<Layout> &part)
 	{
 		if( auto replace_part = dynamic_pointer_cast<ReplaceOperator>(part) )
 		{

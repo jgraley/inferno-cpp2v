@@ -10,11 +10,11 @@ using namespace SR;
 
 //#define RECURSIVE_TRACE_OPERATOR
 
-// ------------------------- ZoneExpression --------------------------
+// ------------------------- Layout --------------------------
 
-void ZoneExpression::ForDepthFirstWalk( shared_ptr<ZoneExpression> &base,
-											function<void(shared_ptr<ZoneExpression> &expr)> func_in,
-	                                        function<void(shared_ptr<ZoneExpression> &expr)> func_out ) try
+void Layout::ForDepthFirstWalk( shared_ptr<Layout> &base,
+											function<void(shared_ptr<Layout> &expr)> func_in,
+	                                        function<void(shared_ptr<Layout> &expr)> func_out ) try
 {
 	if( func_in )
 		func_in(base);
@@ -28,7 +28,7 @@ catch( BreakException )
 
 // ------------------------- LayoutOperator --------------------------
 
-LayoutOperator::LayoutOperator( list<shared_ptr<ZoneExpression>> &&child_expressions_ ) :
+LayoutOperator::LayoutOperator( list<shared_ptr<Layout>> &&child_expressions_ ) :
 	child_expressions(move(child_expressions_))
 {
 }	
@@ -57,19 +57,19 @@ LayoutOperator::ChildExpressionIterator LayoutOperator::GetChildrenEnd()
 }
 
 
-list<shared_ptr<ZoneExpression>> &LayoutOperator::GetChildExpressions() 
+list<shared_ptr<Layout>> &LayoutOperator::GetChildExpressions() 
 {
 	return child_expressions;
 }
 
 
-const list<shared_ptr<ZoneExpression>> &LayoutOperator::GetChildExpressions() const
+const list<shared_ptr<Layout>> &LayoutOperator::GetChildExpressions() const
 {
 	return child_expressions;
 }
 
 
-list<shared_ptr<ZoneExpression>> &&LayoutOperator::MoveChildExpressions()
+list<shared_ptr<Layout>> &&LayoutOperator::MoveChildExpressions()
 {
 	return move(child_expressions);
 }
@@ -81,9 +81,9 @@ string LayoutOperator::GetChildExpressionsTrace() const
 }
 
 
-void LayoutOperator::ForChildren(function<void(shared_ptr<ZoneExpression> &expr)> func) try
+void LayoutOperator::ForChildren(function<void(shared_ptr<Layout> &expr)> func) try
 {
-	for( shared_ptr<ZoneExpression> &child_expression : child_expressions )
+	for( shared_ptr<Layout> &child_expression : child_expressions )
 		func(child_expression);
 }
 catch( BreakException )
@@ -91,10 +91,10 @@ catch( BreakException )
 }		       
 
 
-void LayoutOperator::DepthFirstWalkImpl( function<void(shared_ptr<ZoneExpression> &expr)> func_in,
-			                             function<void(shared_ptr<ZoneExpression> &expr)> func_out )
+void LayoutOperator::DepthFirstWalkImpl( function<void(shared_ptr<Layout> &expr)> func_in,
+			                             function<void(shared_ptr<Layout> &expr)> func_out )
 {
-	for( shared_ptr<ZoneExpression> &expr : child_expressions )
+	for( shared_ptr<Layout> &expr : child_expressions )
 	{
 		if( func_in )
 			func_in(expr);
@@ -106,7 +106,7 @@ void LayoutOperator::DepthFirstWalkImpl( function<void(shared_ptr<ZoneExpression
 
 // ------------------------- MergeZoneOperator --------------------------
 
-MergeZoneOperator::MergeZoneOperator( list<shared_ptr<ZoneExpression>> &&child_expressions_ ) :
+MergeZoneOperator::MergeZoneOperator( list<shared_ptr<Layout>> &&child_expressions_ ) :
 	LayoutOperator(move(child_expressions_))
 {
 }	
@@ -122,31 +122,10 @@ void MergeZoneOperator::AddEmbeddedMarker( RequiresSubordinateSCREngine *new_mar
 	AddEmbeddedMarkers( { new_marker } );
 }
 
-
-void MergeZoneOperator::EvaluateChildrenAndPopulate( const UpEvalExecKit &kit, FreeZone &free_zone ) const	
-{
-	// If no child expressions then either:
-	// - zone has no terminii and we're at a subtree -> no action required
-	// - zone's terminii are "exposed" and should be left in place
-	if( GetNumChildExpressions() == 0 )
-		return;
-	
-	//FTRACE(free_zone)("\n");
-	list<unique_ptr<FreeZone>> child_zones;
-	for( const shared_ptr<ZoneExpression> &child_expression : GetChildExpressions() )
-	{	
-		//FTRACE(child_expression)("\n");
-		unique_ptr<FreeZone> free_zone = child_expression->Evaluate(kit);
-		child_zones.push_back( move(free_zone) );
-	}
-	
-	free_zone.MergeAll(move(child_zones));
-}
-	
 // ------------------------- DupMergeTreeZoneOperator --------------------------
 
 DupMergeTreeZoneOperator::DupMergeTreeZoneOperator( TreeZone zone_, 
-                                                    list<shared_ptr<ZoneExpression>> &&child_expressions ) :
+                                                    list<shared_ptr<Layout>> &&child_expressions ) :
 	MergeZoneOperator( move(child_expressions) ),
 	zone(zone_)
 {
@@ -158,8 +137,7 @@ DupMergeTreeZoneOperator::DupMergeTreeZoneOperator( TreeZone zone_ ) :
 	MergeZoneOperator(),
 	zone(zone_)
 {
-	// If zone has terminii, they will be "exposed" and will appear  
-	// in the free zone returned by Evaluate.
+	// If zone has terminii, they will be "exposed".
 }
 
 
@@ -193,24 +171,10 @@ const TreeZone &DupMergeTreeZoneOperator::GetZone() const
 }
 
 
-unique_ptr<FreeZone> DupMergeTreeZoneOperator::Evaluate(const UpEvalExecKit &kit) const
-{
-	// TODO probably consistent for Duplicate() to return unique_ptr<FreeZone>
-	auto temp_free_zone = make_unique<FreeZone>( zone.Duplicate() );
-
-	// Rule #726 now we've gone to free zone, mark immediately.
-	for( RequiresSubordinateSCREngine *ea : embedded_markers )
-		temp_free_zone->MarkBaseForEmbedded(ea);		
-	
-	EvaluateChildrenAndPopulate( kit, *temp_free_zone );
-	return temp_free_zone;
-}
-
-
-shared_ptr<ZoneExpression> DupMergeTreeZoneOperator::DuplicateToFree() const
+shared_ptr<Layout> DupMergeTreeZoneOperator::DuplicateToFree() const
 {
 	FreeZone free_zone = zone.Duplicate();
-	list<shared_ptr<ZoneExpression>> c = GetChildExpressions();
+	list<shared_ptr<Layout>> c = GetChildExpressions();
 	auto pop_fz_op = make_shared<MergeFreeZoneOperator>( free_zone, move(c) );
 	pop_fz_op->AddEmbeddedMarkers( GetEmbeddedMarkers() );
 	return pop_fz_op;
@@ -229,7 +193,7 @@ string DupMergeTreeZoneOperator::GetTrace() const
 // ------------------------- MergeFreeZoneOperator --------------------------
 
 MergeFreeZoneOperator::MergeFreeZoneOperator( FreeZone zone_, 
-                                                    list<shared_ptr<ZoneExpression>> &&child_expressions ) :
+                                                    list<shared_ptr<Layout>> &&child_expressions ) :
 	MergeZoneOperator( move(child_expressions) ),
 	zone(zone_)
 {
@@ -267,7 +231,7 @@ void MergeFreeZoneOperator::ClearEmbeddedMarkers()
 
 
 MergeZoneOperator::ChildExpressionIterator MergeFreeZoneOperator::SpliceOver( ChildExpressionIterator it_child, 
-                                                                                    list<shared_ptr<ZoneExpression>> &&child_exprs )
+                                                                                    list<shared_ptr<Layout>> &&child_exprs )
 {
 	// it_child updated to the next child after the one we erased, or end()
 	it_child = GetChildExpressions().erase( it_child );		
@@ -293,14 +257,6 @@ const FreeZone &MergeFreeZoneOperator::GetZone() const
 }
 
 
-unique_ptr<FreeZone> MergeFreeZoneOperator::Evaluate(const UpEvalExecKit &kit) const
-{
-	auto temp_free_zone = make_unique<FreeZone>(zone);
-	EvaluateChildrenAndPopulate( kit, *temp_free_zone );
-	return temp_free_zone;
-}
-
-
 string MergeFreeZoneOperator::GetTrace() const
 {
 #ifdef RECURSIVE_TRACE_OPERATOR
@@ -314,19 +270,13 @@ string MergeFreeZoneOperator::GetTrace() const
 
 ReplaceOperator::ReplaceOperator( TreeZone target_tree_zone_, 
                                   shared_ptr<Zone> source_zone_,
-                                  list<shared_ptr<ZoneExpression>> &&child_expressions ) :
+                                  list<shared_ptr<Layout>> &&child_expressions ) :
 	LayoutOperator( move(child_expressions) ),
 	target_tree_zone(target_tree_zone_),
 	source_zone(source_zone_)
 {
 	ASSERT( target_tree_zone.GetNumTerminii() == source_zone->GetNumTerminii() );
 	ASSERT( target_tree_zone.GetNumTerminii() == GetNumChildExpressions() );	
-}
-
-
-unique_ptr<FreeZone> ReplaceOperator::Evaluate(const UpEvalExecKit &kit) const 
-{
-    ASSERTFAIL(); // TODO restructure so we don't need to do this
 }
 
 

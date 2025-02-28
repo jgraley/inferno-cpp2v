@@ -20,50 +20,49 @@ struct UpEvalExecKit
 };
 
 
-// ------------------------- ZoneExpression --------------------------
+// ------------------------- Layout --------------------------
 
-class ZoneExpression : public Traceable
+class Layout : public Traceable
 {
 public:	
-	virtual unique_ptr<FreeZone> Evaluate(const UpEvalExecKit &kit) const = 0;
-	virtual void ForChildren(function<void(shared_ptr<ZoneExpression> &expr)> func) = 0;
+	virtual void ForChildren(function<void(shared_ptr<Layout> &expr)> func) = 0;
 			                        
-	static void ForDepthFirstWalk( shared_ptr<ZoneExpression> &base,
-								   function<void(shared_ptr<ZoneExpression> &expr)> func_in,
-								   function<void(shared_ptr<ZoneExpression> &expr)> func_out );
+	static void ForDepthFirstWalk( shared_ptr<Layout> &base,
+								   function<void(shared_ptr<Layout> &expr)> func_in,
+								   function<void(shared_ptr<Layout> &expr)> func_out );
 
-	virtual void DepthFirstWalkImpl(function<void(shared_ptr<ZoneExpression> &expr)> func_in,
-			                        function<void(shared_ptr<ZoneExpression> &expr)> func_out) = 0;
+	virtual void DepthFirstWalkImpl(function<void(shared_ptr<Layout> &expr)> func_in,
+			                        function<void(shared_ptr<Layout> &expr)> func_out) = 0;
 };
 
 // ------------------------- LayoutOperator --------------------------
 
-class LayoutOperator : public ZoneExpression
+class LayoutOperator : public Layout
 {
 public:
-	typedef list<shared_ptr<ZoneExpression>>::iterator ChildExpressionIterator;
+	typedef list<shared_ptr<Layout>>::iterator ChildExpressionIterator;
 
 protected:
-    LayoutOperator( list<shared_ptr<ZoneExpression>> &&child_expressions_ );
+    LayoutOperator( list<shared_ptr<Layout>> &&child_expressions_ );
     LayoutOperator();
     
 public:
     int GetNumChildExpressions() const;
     ChildExpressionIterator GetChildrenBegin();
     ChildExpressionIterator GetChildrenEnd();
-	list<shared_ptr<ZoneExpression>> &GetChildExpressions();
-	const list<shared_ptr<ZoneExpression>> &GetChildExpressions() const;
-	list<shared_ptr<ZoneExpression>> &&MoveChildExpressions();
+	list<shared_ptr<Layout>> &GetChildExpressions();
+	const list<shared_ptr<Layout>> &GetChildExpressions() const;
+	list<shared_ptr<Layout>> &&MoveChildExpressions();
 	
     string GetChildExpressionsTrace() const;
 
-	void ForChildren(function<void(shared_ptr<ZoneExpression> &expr)> func) override;
+	void ForChildren(function<void(shared_ptr<Layout> &expr)> func) override;
 
-	void DepthFirstWalkImpl(function<void(shared_ptr<ZoneExpression> &expr)> func_in,
-			                function<void(shared_ptr<ZoneExpression> &expr)> func_out) override;
+	void DepthFirstWalkImpl(function<void(shared_ptr<Layout> &expr)> func_in,
+			                function<void(shared_ptr<Layout> &expr)> func_out) override;
 
 private:
-	list<shared_ptr<ZoneExpression>> child_expressions;
+	list<shared_ptr<Layout>> child_expressions;
 
 };
 
@@ -74,7 +73,7 @@ private:
 class MergeZoneOperator : public LayoutOperator
 {
 protected:
-    MergeZoneOperator( list<shared_ptr<ZoneExpression>> &&child_expressions_ );
+    MergeZoneOperator( list<shared_ptr<Layout>> &&child_expressions_ );
     MergeZoneOperator();
 
 public:
@@ -100,7 +99,7 @@ public:
 class DupMergeTreeZoneOperator : public MergeZoneOperator
 {
 public:
-    DupMergeTreeZoneOperator( TreeZone zone_, list<shared_ptr<ZoneExpression>> &&child_expressions );
+    DupMergeTreeZoneOperator( TreeZone zone_, list<shared_ptr<Layout>> &&child_expressions );
     DupMergeTreeZoneOperator( TreeZone zone_ );
     
     void AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&new_markers ) final;
@@ -109,10 +108,8 @@ public:
 
     TreeZone &GetZone() override;
     const TreeZone &GetZone() const override;
-	
-	unique_ptr<FreeZone> Evaluate(const UpEvalExecKit &kit) const final;	
-    
-    shared_ptr<ZoneExpression> DuplicateToFree() const;
+	  
+    shared_ptr<Layout> DuplicateToFree() const;
     
 	string GetTrace() const final;
     
@@ -131,7 +128,7 @@ private:
 class MergeFreeZoneOperator : public MergeZoneOperator
 {
 public:
-    MergeFreeZoneOperator( FreeZone zone_, list<shared_ptr<ZoneExpression>> &&child_expressions );
+    MergeFreeZoneOperator( FreeZone zone_, list<shared_ptr<Layout>> &&child_expressions );
     MergeFreeZoneOperator( FreeZone zone_ );
 
     void AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&new_markers ) final;
@@ -139,13 +136,11 @@ public:
     void ClearEmbeddedMarkers() final;
 
 	ChildExpressionIterator SpliceOver( ChildExpressionIterator it_child, 
-                                        list<shared_ptr<ZoneExpression>> &&child_expressions );
+                                        list<shared_ptr<Layout>> &&child_expressions );
 
     FreeZone &GetZone() final;
     const FreeZone &GetZone() const final;
     
-   	unique_ptr<FreeZone> Evaluate(const UpEvalExecKit &kit) const final;	
-
 	string GetTrace() const final;
 
 private:
@@ -159,8 +154,7 @@ class ReplaceOperator : public LayoutOperator
 public:	
 	ReplaceOperator( TreeZone target_tree_zone_, 
 	                 shared_ptr<Zone> source_zone_,
-	                 list<shared_ptr<ZoneExpression>> &&child_expressions );
-	unique_ptr<FreeZone> Evaluate(const UpEvalExecKit &kit) const override;
+	                 list<shared_ptr<Layout>> &&child_expressions );
     const TreeZone &GetTargetTreeZone() const;
     shared_ptr<Zone> GetSourceZone() const;
 

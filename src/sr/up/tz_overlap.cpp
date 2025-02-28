@@ -19,18 +19,18 @@ TreeZoneOverlapHandler::TreeZoneOverlapHandler( const XTreeDatabase *db_ ) :
 }
 
 
-void TreeZoneOverlapHandler::Run( shared_ptr<ZoneExpression> &root_expr )
+void TreeZoneOverlapHandler::Run( shared_ptr<Layout> &root_expr )
 {
 	TreeZoneRelation tz_relation( db );
 
 	// Inner and outer loops only look at DupMergeTreeZoneOperator exprs
-	ZoneExpression::ForDepthFirstWalk( root_expr, nullptr, [&](shared_ptr<ZoneExpression> &l_expr)
+	Layout::ForDepthFirstWalk( root_expr, nullptr, [&](shared_ptr<Layout> &l_expr)
 	{
 		if( auto l_ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(l_expr) )
 		{			
 			// We will establish an increasing region of known non-overlapping tree zones. Detect
 			// when the new l has an overlap in that zone.
-			ZoneExpression::ForDepthFirstWalk( root_expr, nullptr, [&](shared_ptr<ZoneExpression> &r_expr)
+			Layout::ForDepthFirstWalk( root_expr, nullptr, [&](shared_ptr<Layout> &r_expr)
 			{
 				if( auto r_ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(r_expr) )
 				{			
@@ -72,15 +72,15 @@ void TreeZoneOverlapHandler::Run( shared_ptr<ZoneExpression> &root_expr )
 }
 
 
-void TreeZoneOverlapHandler::Check( shared_ptr<ZoneExpression> &root_expr )
+void TreeZoneOverlapHandler::Check( shared_ptr<Layout> &root_expr )
 {
 	TreeZoneRelation tz_relation( db );
 
-	ZoneExpression::ForDepthFirstWalk( root_expr, nullptr, [&](shared_ptr<ZoneExpression> &l_expr)
+	Layout::ForDepthFirstWalk( root_expr, nullptr, [&](shared_ptr<Layout> &l_expr)
 	{
 		if( auto l_ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(l_expr) )
 		{			
-			ZoneExpression::ForDepthFirstWalk( root_expr, nullptr, [&](shared_ptr<ZoneExpression> &r_expr)
+			Layout::ForDepthFirstWalk( root_expr, nullptr, [&](shared_ptr<Layout> &r_expr)
 			{
 				if( auto r_ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(r_expr) )
 				{			
