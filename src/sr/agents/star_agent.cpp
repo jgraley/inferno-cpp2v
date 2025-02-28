@@ -69,7 +69,7 @@ void StarAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
 }
 
 
-Agent::ReplaceExprPtr StarAgent::GenReplaceExprImpl( const ReplaceKit &kit, 
+Agent::ReplacePatchPtr StarAgent::GenReplaceLayoutImpl( const ReplaceKit &kit, 
                                                   PatternLink me_plink, 
                                                   XLink key_xlink ) 
 {
@@ -90,7 +90,7 @@ Agent::ReplaceExprPtr StarAgent::GenReplaceExprImpl( const ReplaceKit &kit,
     else
         ASSERT(0)("Please add new kind of container");
     
-    list<Agent::ReplaceExprPtr> child_commands;
+    list<Agent::ReplacePatchPtr> child_commands;
     FreeZone dest_zone = FreeZone::CreateSubtree(dest);
 
     TRACE("Walking container length %d\n", key_container->size() );
@@ -101,10 +101,10 @@ Agent::ReplaceExprPtr StarAgent::GenReplaceExprImpl( const ReplaceKit &kit,
         dest_zone.AddTerminus( make_shared<ContainerMutator>(dest, dest_container, dest_it) );    
 
         TreeZone child_zone = TreeZone::CreateSubtree(XLink(key_node, &key_elt) );
-	    child_commands.push_back( make_shared<DupMergeTreeZoneOperator>(move(child_zone)) );
+	    child_commands.push_back( make_shared<TreeZonePatch>(move(child_zone)) );
     }
 
-    return make_shared<MergeFreeZoneOperator>( move(dest_zone), move(child_commands) );    
+    return make_shared<FreeZonePatch>( move(dest_zone), move(child_commands) );    
 }
 
 

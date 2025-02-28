@@ -31,19 +31,19 @@ void EmbeddedSCRAgent::MaybeChildrenPlanOverlay( PatternLink me_plink,
 }
 
 
-Agent::ReplaceExprPtr EmbeddedSCRAgent::GenReplaceExprImpl( const ReplaceKit &kit, 
+Agent::ReplacePatchPtr EmbeddedSCRAgent::GenReplaceLayoutImpl( const ReplaceKit &kit, 
                                                          PatternLink me_plink, 
                                                          XLink key_xlink )
 {   
 	// Use auto algorithm but add marker
-    Agent::ReplaceExprPtr child_command = AutolocatingAgent::GenReplaceExprImpl(kit, me_plink, key_xlink);
+    Agent::ReplacePatchPtr child_command = AutolocatingAgent::GenReplaceLayoutImpl(kit, me_plink, key_xlink);
     
-    auto child_pzc = dynamic_cast<MergeZoneOperator *>(child_command.get());
-    ASSERT( child_pzc );
+    auto child_patch = dynamic_cast<ZonePatch *>(child_command.get());
+    ASSERT( child_patch );
     
     // Inform the update mechanism that, once it's done duplicating 
     // nodes etc, it should mark this position for this embedded agent.
-    child_pzc->AddEmbeddedMarker( this );
+    child_patch->AddEmbeddedMarker( this );
 
     return child_command;
 }                                         

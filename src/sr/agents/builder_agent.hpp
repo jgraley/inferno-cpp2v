@@ -21,7 +21,7 @@ public:
     bool ReplaceKeyerQuery( PatternLink me_plink, 
                             set<PatternLink> keyer_plinks ) final;                                  
 
-    ReplaceExprPtr GenReplaceExprImpl( const ReplaceKit &kit, 
+    ReplacePatchPtr GenReplaceLayoutImpl( const ReplaceKit &kit, 
                                     PatternLink me_plink, 
                                     XLink key_xlink ) final;
                                             

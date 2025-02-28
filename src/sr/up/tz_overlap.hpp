@@ -15,7 +15,7 @@ namespace SR
 
 // To optimise:
 // - Make a std::set/multiset of TZs ordered using TreeZoneRelation (idea 
-//   is that the order in the replace expression is irrelevent to this algo)
+//   is that the order in the replace layout is irrelevent to this algo)
 // - Add a GetLastDescendant() so can form ranges for descendants which
 //   are the overlap candidates.
 // - TreeZoneRelation is secondary on terminii. Get matching base ranges 
@@ -27,8 +27,8 @@ class TreeZoneOverlapHandler
 {
 public:
 	TreeZoneOverlapHandler( const XTreeDatabase *db );
-	void Run( shared_ptr<Layout> &root_expr );
-	void Check( shared_ptr<Layout> &root_expr );
+	void Run( shared_ptr<Patch> &layout );
+	void Check( shared_ptr<Patch> &layout );
 
 private:
 	const XTreeDatabase * const db;

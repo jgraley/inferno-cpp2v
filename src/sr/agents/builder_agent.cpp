@@ -32,7 +32,7 @@ bool BuilderAgent::ReplaceKeyerQuery( PatternLink me_plink,
 }
  
  
-Agent::ReplaceExprPtr BuilderAgent::GenReplaceExprImpl( const ReplaceKit &kit, 
+Agent::ReplacePatchPtr BuilderAgent::GenReplaceLayoutImpl( const ReplaceKit &kit, 
                                                           PatternLink me_plink, 
                                                           XLink key_xlink )
 {
@@ -60,5 +60,5 @@ Agent::ReplaceExprPtr BuilderAgent::GenReplaceExprImpl( const ReplaceKit &kit,
     }
 
     // Make free zone without duplicating since this is first one
-    return make_shared<MergeFreeZoneOperator>( FreeZone::CreateSubtree( new_node ) );
+    return make_shared<FreeZonePatch>( FreeZone::CreateSubtree( new_node ) );
 }

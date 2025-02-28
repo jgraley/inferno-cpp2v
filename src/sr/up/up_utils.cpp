@@ -1,6 +1,6 @@
 #include "up_utils.hpp"
 
-#include "zone_expressions.hpp"
+#include "patches.hpp"
 #include "db/x_tree_database.hpp"
 #include "common/read_args.hpp"
 #include "tree/validate.hpp"
@@ -18,27 +18,27 @@ EmptyZoneElider::EmptyZoneElider()
 }
 	
 
-void EmptyZoneElider::Run( shared_ptr<Layout> &root_expr )
+void EmptyZoneElider::Run( shared_ptr<Patch> &layout )
 {
-	Layout::ForDepthFirstWalk( root_expr, nullptr, [&](shared_ptr<Layout> &expr)
+	Patch::ForDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
 	{
-		if( auto pz_op = dynamic_pointer_cast<MergeZoneOperator>(expr) )
+		if( auto pz_op = dynamic_pointer_cast<ZonePatch>(patch) )
             if( pz_op->GetZone().IsEmpty() )
             {
-				shared_ptr<Layout> child_expr = OnlyElementOf( pz_op->GetChildExpressions() );
-				if( auto child_pz_op = dynamic_pointer_cast<MergeZoneOperator>(child_expr) )
+				shared_ptr<Patch> child_patch = OnlyElementOf( pz_op->GetChildExpressions() );
+				if( auto child_pz_op = dynamic_pointer_cast<ZonePatch>(child_patch) )
 					child_pz_op->AddEmbeddedMarkers( pz_op->GetEmbeddedMarkers() );
-				expr = child_expr;
+				patch = child_patch;
 			}
 	} );	
 }
 
 
-void EmptyZoneElider::Check( shared_ptr<Layout> &root_expr )
+void EmptyZoneElider::Check( shared_ptr<Patch> &layout )
 {
-	Layout::ForDepthFirstWalk( root_expr, nullptr, [&](shared_ptr<Layout> &expr)
+	Patch::ForDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
 	{
-		if( auto pz_op = dynamic_pointer_cast<MergeZoneOperator>(expr) )
+		if( auto pz_op = dynamic_pointer_cast<ZonePatch>(patch) )
             ASSERT( !pz_op->GetZone().IsEmpty() )("Found empty zone in populate op: ")(pz_op->GetZone());
 	} );	
 }
@@ -51,14 +51,14 @@ BaseForEmbeddedMarkPropagation::BaseForEmbeddedMarkPropagation( const XTreeDatab
 }
 
 
-void BaseForEmbeddedMarkPropagation::Run( shared_ptr<Layout> &root_expr )
+void BaseForEmbeddedMarkPropagation::Run( shared_ptr<Patch> &layout )
 {
 	TreeZoneRelation tz_relation( db );
 
-	// Inner and outer loops only look at DupMergeTreeZoneOperator exprs
-	Layout::ForDepthFirstWalk( root_expr, nullptr, [&](shared_ptr<Layout> &expr)
+	// Inner and outer loops only look at TreeZonePatch patches
+	Patch::ForDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
 	{
-		if( auto pz_op = dynamic_pointer_cast<MergeZoneOperator>(expr) )
+		if( auto pz_op = dynamic_pointer_cast<ZonePatch>(patch) )
 		{	
 			for( RequiresSubordinateSCREngine *agent : pz_op->GetEmbeddedMarkers() )
 			{
@@ -76,23 +76,23 @@ DuplicateAllToFree::DuplicateAllToFree()
 }
 	
 
-void DuplicateAllToFree::Run( shared_ptr<Layout> &root_expr )
+void DuplicateAllToFree::Run( shared_ptr<Patch> &layout )
 {
-	Layout::ForDepthFirstWalk( root_expr, nullptr, [&](shared_ptr<Layout> &expr)
+	Patch::ForDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
 	{
-		if( auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(expr) )
+		if( auto tree_patch = dynamic_pointer_cast<TreeZonePatch>(patch) )
         {
-			expr = ptz_op->DuplicateToFree();
+			patch = tree_patch->DuplicateToFree();
 		}
 	} );	
 }
 
 
-void DuplicateAllToFree::Check( shared_ptr<Layout> &root_expr )
+void DuplicateAllToFree::Check( shared_ptr<Patch> &layout )
 {
-	Layout::ForDepthFirstWalk( root_expr, nullptr, [&](shared_ptr<Layout> &expr)
+	Patch::ForDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
 	{
-		ASSERT( dynamic_pointer_cast<MergeFreeZoneOperator>(expr) );
+		ASSERT( dynamic_pointer_cast<FreeZonePatch>(patch) );
 	} );	
 }
 

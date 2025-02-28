@@ -14,7 +14,7 @@ class SCREngine;
 class AndRuleEngine;
 class Agent;
 class XTreeDatabase;
-class Layout;
+class Patch;
 
 /// Interface for Agents, which co-exist with pattern nodes and implement the search and replace funcitonality for each pattern node.
 class Agent : public virtual Graphable,
@@ -27,7 +27,7 @@ public:
     };
 
     // really just to reduce the amount of typing if I change it
-    typedef shared_ptr<Layout> ReplaceExprPtr;
+    typedef shared_ptr<Patch> ReplacePatchPtr;
 
     typedef Graphable::Phase Phase;
     
@@ -85,7 +85,7 @@ public:
                                     set<PatternLink> keyer_plinks ) = 0;
 
     virtual TreePtr<Node> BuildForBuildersAnalysis( PatternLink me_plink ) = 0;
-    virtual ReplaceExprPtr GenReplaceExpr( const ReplaceKit &kit, 
+    virtual ReplacePatchPtr GenReplaceLayout( const ReplaceKit &kit, 
                                         PatternLink me_plink ) = 0;
     virtual list<PatternLink> GetChildren() const = 0;
     virtual list<PatternLink> GetVisibleChildren( Path v ) const = 0;                        

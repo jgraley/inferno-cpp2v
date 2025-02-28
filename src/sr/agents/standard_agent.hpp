@@ -135,15 +135,15 @@ private:
 public:
     virtual void MaybeChildrenPlanOverlay(      PatternLink me_plink, 
                                     PatternLink under_plink );
-    ReplaceExprPtr GenReplaceExprImpl( const ReplaceKit &kit, 
+    ReplacePatchPtr GenReplaceLayoutImpl( const ReplaceKit &kit, 
                                     PatternLink me_plink, 
                                     XLink key_xlink ) final;
 
 private:	
-	ReplaceExprPtr GenFreeZoneExprOverlay( const ReplaceKit &kit, 
+	ReplacePatchPtr GenFreeZoneExprOverlay( const ReplaceKit &kit, 
                                        PatternLink me_plink, 
                                        XLink key_xlink ); // under substitution if not nullptr
-    ReplaceExprPtr GenFreeZoneExprNormal( const ReplaceKit &kit, 
+    ReplacePatchPtr GenFreeZoneExprNormal( const ReplaceKit &kit, 
                                       PatternLink me_plink );
     
 public:

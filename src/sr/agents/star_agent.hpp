@@ -37,7 +37,7 @@ public:
                                            const SolutionMap *hypothesis_links,
                                            const XTreeDatabase *x_tree_db ) const;                                                                                          
 
-    ReplaceExprPtr GenReplaceExprImpl( const ReplaceKit &kit, 
+    ReplacePatchPtr GenReplaceLayoutImpl( const ReplaceKit &kit, 
                                        PatternLink me_plink, 
                                        XLink key_xlink ) final;
 

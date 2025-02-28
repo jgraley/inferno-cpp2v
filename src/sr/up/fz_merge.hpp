@@ -19,10 +19,10 @@ public:
 	FreeZoneMerger();
 	
 	// Can change the supplied shared ptr
-	void Run( shared_ptr<Layout> &root_expr );
+	void Run( shared_ptr<Patch> &layout );
 	
 	// Just ASSERT no empty zones
-	void Check( shared_ptr<Layout> &root_expr );
+	void Check( shared_ptr<Patch> &layout );
 };
 
 }

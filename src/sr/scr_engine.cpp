@@ -109,7 +109,7 @@ void SCREngine::Plan::CategoriseAgents( const set<PatternLink> &enclosing_plinks
         if( enclosing_agents.count( plink.GetChildAgent() ) == 0 ) // exclude by agent
             my_plinks.insert( plink );
 
-    // Need the replace plinks in the same order that GenReplaceExpr() walks the tree
+    // Need the replace plinks in the same order that GenReplaceLayout() walks the tree
     for( PatternLink plink : visible_replace_plinks_postorder )
         if( enclosing_plinks.count(plink) == 0 ) // exclude by plink
         {
@@ -139,7 +139,7 @@ void SCREngine::Plan::WalkVisible( set<PatternLink> &visible,
 {
     visible.insert( plink );    
     
-    // Gee, I sure hope recovers children in the same order as GenReplaceExprImpl()    
+    // Gee, I sure hope recovers children in the same order as GenReplaceLayoutImpl()    
     list<PatternLink> visible_child_plinks = plink.GetChildAgent()->GetVisibleChildren(path); 
     
     for( PatternLink visible_child_plink : visible_child_plinks )
@@ -365,13 +365,13 @@ void SCREngine::Replace( XLink base_xlink )
 
 	// Get an expression that evaluates to the new X tree
 	Agent::ReplaceKit replace_kit { x_tree_db.get() };
-    Agent::ReplaceExprPtr source_expr = plan.base_agent->GenReplaceExpr(replace_kit, plan.base_plink);
+    Agent::ReplacePatchPtr source_expr = plan.base_agent->GenReplaceLayout(replace_kit, plan.base_plink);
     
     // Create a command to replace the current X tree with this expression
     TreeZone target_tree_zone = TreeZone::CreateSubtree(base_xlink);
     
     // Request to update the tree
-	plan.vn_sequence->UpdateUsingCommand( target_tree_zone, move(source_expr) );  
+	plan.vn_sequence->UpdateUsingLayout( target_tree_zone, move(source_expr) );  
     
     TRACE("Replace done\n");
 }
@@ -543,7 +543,7 @@ void SCREngine::MarkBaseForEmbedded( const RequiresSubordinateSCREngine *embedde
                                      TreePtr<Node> embedded_through_subtree ) const
 {
     // permit multiple insertions while working on command sequence (so we can call
-    // GenReplaceExpr() more than once on the same subtree)
+    // GenReplaceLayout() more than once on the same subtree)
     //InsertSolo( bases_for_embedded, make_pair( embedded_agent, embedded_through_subtree ) );
     bases_for_embedded.insert( make_pair( embedded_agent, embedded_through_subtree ) );
 }

@@ -519,13 +519,13 @@ bool AgentCommon::ReplaceKeyerQuery( PatternLink me_plink,
 TreePtr<Node> AgentCommon::BuildForBuildersAnalysis( PatternLink me_plink )
 {
 	Agent::ReplaceKit kit { nullptr };
-	shared_ptr<Layout> layout = GenReplaceExpr(kit, me_plink);
+	shared_ptr<Patch> layout = GenReplaceLayout(kit, me_plink);
     unique_ptr<FreeZone> zone = TreeUpdater().TransformToSingleFreeZone( layout );     
     return zone->GetBaseNode();
 }
 
 
-Agent::ReplaceExprPtr AgentCommon::GenReplaceExpr( const ReplaceKit &kit, 
+Agent::ReplacePatchPtr AgentCommon::GenReplaceLayout( const ReplaceKit &kit, 
                                                    PatternLink me_plink )
 {
     INDENT("C");
@@ -542,18 +542,18 @@ Agent::ReplaceExprPtr AgentCommon::GenReplaceExpr( const ReplaceKit &kit,
 		      (*this)(" keyed with non-final node ")(key_xlink)("\n"); 
     }
 
-    return GenReplaceExprImpl( kit, me_plink, key_xlink );
+    return GenReplaceLayoutImpl( kit, me_plink, key_xlink );
 }
 
 
-Agent::ReplaceExprPtr AgentCommon::GenReplaceExprImpl( const ReplaceKit &kit, 
+Agent::ReplacePatchPtr AgentCommon::GenReplaceLayoutImpl( const ReplaceKit &kit, 
                                                        PatternLink me_plink, 
                                                        XLink key_xlink )
 {
     // Default replace behaviour to just use the X subtree we keyed to, so we need to be keyed
 	ASSERT(key_xlink)("Agent ")(*this)(" in replace context is not keyed but needs to be");
 	TreeZone new_zone = TreeZone::CreateSubtree(key_xlink );
-	return make_shared<DupMergeTreeZoneOperator>( move(new_zone) );		
+	return make_shared<TreeZonePatch>( move(new_zone) );		
 } 
 
 

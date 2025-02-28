@@ -28,7 +28,7 @@ public:
     virtual void RunAutolocatingQuery(XLink common_xlink) const;
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicAutolocatingQuery() const; 
 
-    ReplaceExprPtr GenReplaceExprImpl( const ReplaceKit &kit, 
+    ReplacePatchPtr GenReplaceLayoutImpl( const ReplaceKit &kit, 
                                          PatternLink me_plink, 
                                          XLink key_xlink ) override;
 };

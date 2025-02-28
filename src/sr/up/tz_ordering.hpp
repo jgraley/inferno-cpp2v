@@ -1,7 +1,7 @@
 #ifndef TZ_ORDERING_HPP
 #define TZ_ORDERING_HPP
 
-#include "zone_expressions.hpp"
+#include "patches.hpp"
 #include "common/common.hpp"
 #include "node/tree_ptr.hpp"
 #include "../db/free_zone.hpp"
@@ -17,27 +17,27 @@ namespace SR
 class TreeZoneOrderingHandler
 {
 public:	
-	typedef list<shared_ptr<Layout> *> OOOZoneExprPtrList;
+	typedef list<shared_ptr<Patch> *> OOOZoneExprPtrList;
 
 	TreeZoneOrderingHandler(const XTreeDatabase *db_);
 	
 	// Can change the supplied shared ptr
-	void Run( shared_ptr<Layout> &root_expr );
+	void Run( shared_ptr<Patch> &layout );
 	
 	// Just ASSERT no empty zones
-	void Check( shared_ptr<Layout> &root_expr );
+	void Check( shared_ptr<Patch> &layout );
 
 private:	
 	struct Thing
 	{
-		shared_ptr<Layout> *expr_ptr; // Double pointer to expr node so we can mutate
+		shared_ptr<Patch> *patch_ptr; // Double pointer to patch node so we can mutate
 		bool out_of_order; 
 	};
 	typedef vector<Thing> ThingVector;
 
-	void RunForTreeZone( shared_ptr<DupMergeTreeZoneOperator> &op, 
+	void RunForTreeZone( shared_ptr<TreeZonePatch> &op, 
 						 bool just_check );
-	void RunForRange( shared_ptr<Layout> &base, 
+	void RunForRange( shared_ptr<Patch> &base, 
                       XLink range_last,
                       XLink range_end,
                       bool just_check );
@@ -45,13 +45,13 @@ private:
 		    	  	      XLink range_first,
 						  XLink range_last,
 						  bool just_check );
-	void AddTZsBypassingFZs( shared_ptr<Layout> &expr, 
+	void AddTZsBypassingFZs( shared_ptr<Patch> &patch, 
 			     	         ThingVector &tree_zones );
 	void FindOutOfOrder( ThingVector &things, 
 		    	  	     XLink range_first,
 						 XLink range_last,
 						 bool just_check );
-	shared_ptr<DupMergeTreeZoneOperator> GetOperator(const Thing &thing) const;
+	shared_ptr<TreeZonePatch> GetOperator(const Thing &thing) const;
 	XLink GetBaseXLink(const Thing &thing) const;
 				    	  
 	const XTreeDatabase * const db;
@@ -66,10 +66,10 @@ class AltTreeZoneOrderingChecker
 public:
 	AltTreeZoneOrderingChecker(const XTreeDatabase *db_);
 	
-	void Check( shared_ptr<Layout> root_expr );
+	void Check( shared_ptr<Patch> layout );
 
 private:
-	void Worker( shared_ptr<Layout> expr, bool base_equal_ok );
+	void Worker( shared_ptr<Patch> patch, bool base_equal_ok );
 	void CheckXlink( XLink x, bool equal_ok );
 		
 	const XTreeDatabase * const db;

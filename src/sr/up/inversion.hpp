@@ -11,17 +11,19 @@
 namespace SR 
 {
 
-// Inversi works on commands, not expressions
+// Convert free patches into targetted patches by matching them up against 
+// surrounding tree patches and the supplied overall tree zone. TODO 
+// in fact we only need the base XLink.
 class TreeZoneInverter 
 {
 public:
 	TreeZoneInverter( XTreeDatabase *db );
 	
-	void Run(TreeZone root_target, shared_ptr<Layout> *source_layout_ptr);
+	void Run(TreeZone target_base, shared_ptr<Patch> *source_layout_ptr);
 	
 private:
 	// .first is NULL: base not known
-	typedef pair<XLink, shared_ptr<Layout> *> LocatedZoneExpression;
+	typedef pair<XLink, shared_ptr<Patch> *> LocatedZoneExpression;
 
 	void WalkFreeZoneExpr(LocatedZoneExpression lze_root);
 	void Invert(LocatedZoneExpression lzfe);

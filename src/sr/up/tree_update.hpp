@@ -19,10 +19,10 @@ public:
 	TreeUpdater(XTreeDatabase *x_tree_db = nullptr); // db optional
 	
 	// Duplicates all the tree zones and merges everything into one
-	unique_ptr<FreeZone> TransformToSingleFreeZone( shared_ptr<Layout> expr );
+	unique_ptr<FreeZone> TransformToSingleFreeZone( shared_ptr<Patch> source_layout );
 	
 	// Much as the name suggests. Db required and acts directly on it.
-	void TransformToIncrementalAndExecute( TreeZone target_tree_zone, shared_ptr<Layout> source_layout );
+	void TransformToIncrementalAndExecute( TreeZone target_tree_zone, shared_ptr<Patch> source_layout );
 	
 private:
 	XTreeDatabase * const db;

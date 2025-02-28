@@ -7,7 +7,7 @@
 #include "../conjecture.hpp"
 #include "../query.hpp"
 #include "../sym/lazy_eval.hpp"
-#include "../up/zone_expressions.hpp"
+#include "../up/patches.hpp"
 
 namespace SR
 { 
@@ -61,9 +61,9 @@ public:
     virtual bool ReplaceKeyerQuery( PatternLink me_plink, 
                                     set<PatternLink> keyer_plinks );                                  
     TreePtr<Node> BuildForBuildersAnalysis( PatternLink me_plink ) override;
-    ReplaceExprPtr GenReplaceExpr( const ReplaceKit &kit, 
+    ReplacePatchPtr GenReplaceLayout( const ReplaceKit &kit, 
                                 PatternLink me_plink ) override;
-    virtual ReplaceExprPtr GenReplaceExprImpl( const ReplaceKit &kit, 
+    virtual ReplacePatchPtr GenReplaceLayoutImpl( const ReplaceKit &kit, 
                                          PatternLink me_plink, 
                                          XLink key_xlink );
     TreePtr<Node> CloneNode() const;

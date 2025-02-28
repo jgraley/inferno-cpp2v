@@ -20,47 +20,47 @@ TreeZoneOrderingHandler::TreeZoneOrderingHandler(const XTreeDatabase *db_) :
 }
 	
 
-void TreeZoneOrderingHandler::Run( shared_ptr<Layout> &root_expr )
+void TreeZoneOrderingHandler::Run( shared_ptr<Patch> &layout )
 {
 	out_of_order_list.clear();
 	XLink root = db->GetMainRootXLink();
 	XLink last = db->GetLastDescendant(root);
-	RunForRange( root_expr, root, last, false );
+	RunForRange( layout, root, last, false );
 	
-	for( shared_ptr<Layout> *expr : out_of_order_list )
+	for( shared_ptr<Patch> *patch : out_of_order_list )
 	{
-		auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(*expr);
-		ASSERT( ptz_op );
-		*expr = ptz_op->DuplicateToFree();
+		auto tree_patch = dynamic_pointer_cast<TreeZonePatch>(*patch);
+		ASSERT( tree_patch );
+		*patch = tree_patch->DuplicateToFree();
 	}
 }
 
 
-void TreeZoneOrderingHandler::Check( shared_ptr<Layout> &root_expr )
+void TreeZoneOrderingHandler::Check( shared_ptr<Patch> &layout )
 {
 	XLink root = db->GetMainRootXLink();
 	XLink last = db->GetLastDescendant(root);
-	RunForRange( root_expr, root, last, true );
+	RunForRange( layout, root, last, true );
 }
 
 
-void TreeZoneOrderingHandler::RunForTreeZone( shared_ptr<DupMergeTreeZoneOperator> &ptz_op, 
+void TreeZoneOrderingHandler::RunForTreeZone( shared_ptr<TreeZonePatch> &tree_patch, 
                                               bool just_check )
 {
 	// We have a tree zone. For each of its terminii, find the acceptable
 	// range of descendent tree zones and recurse.
-	TreeZone tree_zone = ptz_op->GetZone();
+	TreeZone tree_zone = tree_patch->GetZone();
 	TreeZone::TerminusIterator it_t = tree_zone.GetTerminiiBegin();
-	ptz_op->ForChildren( [&](shared_ptr<Layout> &child_expr)	
+	tree_patch->ForChildren( [&](shared_ptr<Patch> &child_patch)	
 	{
 		XLink range_first = *it_t++; // inclusive (terminus XLink equals base XLink of attached tree zone)
 		XLink range_last = db->GetLastDescendant(range_first); // inclusive (is same or child of range_first)
-		RunForRange( child_expr, range_first, range_last, just_check );
+		RunForRange( child_patch, range_first, range_last, just_check );
 	} );
 }
 
 
-void TreeZoneOrderingHandler::RunForRange( shared_ptr<Layout> &base, 
+void TreeZoneOrderingHandler::RunForRange( shared_ptr<Patch> &base, 
 								 	  	   XLink range_first,
 							 			   XLink range_last,
 						 				   bool just_check )
@@ -118,21 +118,21 @@ void TreeZoneOrderingHandler::RunForRangeList( ThingVector &things,
 
 		if( it->out_of_order )
 		{
-			auto ptz_op = GetOperator(*it);
-			ptz_op->ForChildren( [&](shared_ptr<Layout> &child_expr)
+			auto tree_patch = GetOperator(*it);
+			tree_patch->ForChildren( [&](shared_ptr<Patch> &child_patch)
 			{
-				AddTZsBypassingFZs( child_expr, children_list );
+				AddTZsBypassingFZs( child_patch, children_list );
 			} );		
 
 			// Mark as out of order. 
-			TRACE("Out of sequence: marking ")(it->expr_ptr)("\n");
-			out_of_order_list.push_back(it->expr_ptr);
+			TRACE("Out of sequence: marking ")(it->patch_ptr)("\n");
+			out_of_order_list.push_back(it->patch_ptr);
 		}
 		else
 		{
-			auto ptz_op = GetOperator(*it);
-			TRACE("Recursing on ")(ptz_op)("...\n");
-			RunForTreeZone( ptz_op, just_check );
+			auto tree_patch = GetOperator(*it);
+			TRACE("Recursing on ")(tree_patch)("...\n");
+			RunForTreeZone( tree_patch, just_check );
 			
 			prev_in_order_it = it;
 		}
@@ -141,20 +141,20 @@ void TreeZoneOrderingHandler::RunForRangeList( ThingVector &things,
 }
                                        
 
-void TreeZoneOrderingHandler::AddTZsBypassingFZs( shared_ptr<Layout> &expr, 
+void TreeZoneOrderingHandler::AddTZsBypassingFZs( shared_ptr<Patch> &patch, 
               				  		              ThingVector &tree_zones )
 {
 	// Insert descendent tree zones, skipping over free zones, into a list for
 	// convenience.
-	if( auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(expr) )
+	if( auto tree_patch = dynamic_pointer_cast<TreeZonePatch>(patch) )
 	{
-		tree_zones.push_back( { &expr, false } );
+		tree_zones.push_back( { &patch, false } );
 	}
-	else if( auto pfz_op = dynamic_pointer_cast<MergeFreeZoneOperator>(expr) )
+	else if( auto free_patch = dynamic_pointer_cast<FreeZonePatch>(patch) )
 	{
-		pfz_op->ForChildren( [&](shared_ptr<Layout> &child_expr)
+		free_patch->ForChildren( [&](shared_ptr<Patch> &child_patch)
 		{
-			AddTZsBypassingFZs( child_expr, tree_zones );
+			AddTZsBypassingFZs( child_patch, tree_zones );
 		} );
 	}
 	else
@@ -305,19 +305,19 @@ void TreeZoneOrderingHandler::FindOutOfOrder( ThingVector &things,
 }
 
 
-shared_ptr<DupMergeTreeZoneOperator> TreeZoneOrderingHandler::GetOperator(const Thing &thing) const
+shared_ptr<TreeZonePatch> TreeZoneOrderingHandler::GetOperator(const Thing &thing) const
 {
-	shared_ptr<Layout> *expr = thing.expr_ptr;
-	auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(*expr);
-	ASSERT( ptz_op ); // Things should only be tree pointer ops
-	return ptz_op;
+	shared_ptr<Patch> *patch = thing.patch_ptr;
+	auto tree_patch = dynamic_pointer_cast<TreeZonePatch>(*patch);
+	ASSERT( tree_patch ); // Things should only be tree pointer ops
+	return tree_patch;
 }
 
 
 XLink TreeZoneOrderingHandler::GetBaseXLink(const Thing &thing) const
 {
-	shared_ptr<DupMergeTreeZoneOperator> ptz_op = GetOperator(thing);
-	return ptz_op->GetZone().GetBaseXLink();
+	shared_ptr<TreeZonePatch> tree_patch = GetOperator(thing);
+	return tree_patch->GetZone().GetBaseXLink();
 }
 
 // ------------------------- AltTreeZoneOrderingChecker --------------------------
@@ -331,28 +331,28 @@ AltTreeZoneOrderingChecker::AltTreeZoneOrderingChecker(const XTreeDatabase *db_)
 }
 	
 
-void AltTreeZoneOrderingChecker::Check( shared_ptr<Layout> root_expr )
+void AltTreeZoneOrderingChecker::Check( shared_ptr<Patch> layout )
 {
 	prev_xlink = XLink();
-	Worker(root_expr, true);
+	Worker(layout, true);
 }
 
 
-void AltTreeZoneOrderingChecker::Worker( shared_ptr<Layout> expr, bool base_equal_ok )
+void AltTreeZoneOrderingChecker::Worker( shared_ptr<Patch> patch, bool base_equal_ok )
 {
-	if( auto ptz_op = dynamic_pointer_cast<DupMergeTreeZoneOperator>(expr) )
+	if( auto tree_patch = dynamic_pointer_cast<TreeZonePatch>(patch) )
 	{
 		INDENT(" T");
 		// Got a TreeZone - check ordering of its base, strictness depending on who called us
-		const TreeZone &tree_zone = ptz_op->GetZone();
+		const TreeZone &tree_zone = tree_patch->GetZone();
 		CheckXlink( tree_zone.GetBaseXLink(), base_equal_ok );
 		
 		// Co-loop over the chidren/terminii
 		vector<XLink> terminii = tree_zone.GetTerminusXLinks();
-		MergeFreeZoneOperator::ChildExpressionIterator it_child = ptz_op->GetChildrenBegin();		
+		FreeZonePatch::ChildExpressionIterator it_child = tree_patch->GetChildrenBegin();		
 		for( XLink terminus_xlink : terminii )
 		{
-			ASSERT( it_child != ptz_op->GetChildrenEnd() ); // length mismatch
+			ASSERT( it_child != tree_patch->GetChildrenEnd() ); // length mismatch
 			
 			// Check this terminus start point is in order. Should not have seen the terminus before.
 			CheckXlink( terminus_xlink, false );
@@ -366,16 +366,16 @@ void AltTreeZoneOrderingChecker::Worker( shared_ptr<Layout> expr, bool base_equa
 			
 			++it_child;
 		}
-		ASSERT( it_child == ptz_op->GetChildrenEnd() ); // length mismatch
+		ASSERT( it_child == tree_patch->GetChildrenEnd() ); // length mismatch
 	}
-	else if( auto pfz_op = dynamic_pointer_cast<MergeFreeZoneOperator>(expr) )
+	else if( auto free_patch = dynamic_pointer_cast<FreeZonePatch>(patch) )
 	{
 		INDENT(" F");
-		pfz_op->ForChildren( [&](shared_ptr<Layout> &child_expr)
+		free_patch->ForChildren( [&](shared_ptr<Patch> &child_patch)
 		{
 		    // Got a FreeZone - recurse looking for tree zones to check. But this FZ
 		    // provides "padding" so do not expect to see terminus again.
-			Worker( child_expr, false );
+			Worker( child_patch, false );
 		} );
 	}
 	else

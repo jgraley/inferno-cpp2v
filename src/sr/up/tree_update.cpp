@@ -24,7 +24,7 @@ TreeUpdater::TreeUpdater(XTreeDatabase *x_tree_db) :
 }
 
 
-unique_ptr<FreeZone> TreeUpdater::TransformToSingleFreeZone( shared_ptr<Layout> source_layout )
+unique_ptr<FreeZone> TreeUpdater::TransformToSingleFreeZone( shared_ptr<Patch> source_layout )
 {
 	DuplicateAllToFree all_to_free;
 	all_to_free.Run(source_layout);  
@@ -34,16 +34,16 @@ unique_ptr<FreeZone> TreeUpdater::TransformToSingleFreeZone( shared_ptr<Layout> 
 	free_zone_merger.Run(source_layout);  
 	free_zone_merger.Check(source_layout);
 
-	auto pfz_op = dynamic_pointer_cast<MergeFreeZoneOperator>(source_layout);
-	ASSERT( pfz_op );
-	ASSERT( pfz_op->GetNumChildExpressions() == 0 );
-	FreeZone free_zone = pfz_op->GetZone();
+	auto free_patch = dynamic_pointer_cast<FreeZonePatch>(source_layout);
+	ASSERT( free_patch );
+	ASSERT( free_patch->GetNumChildExpressions() == 0 );
+	FreeZone free_zone = free_patch->GetZone();
 	ASSERT( free_zone.GetNumTerminii() == 0 );
 	return make_unique<FreeZone>(free_zone);
 }
 
 
-void TreeUpdater::TransformToIncrementalAndExecute( TreeZone target_tree_zone, shared_ptr<Layout> source_layout )
+void TreeUpdater::TransformToIncrementalAndExecute( TreeZone target_tree_zone, shared_ptr<Patch> source_layout )
 {
 	ASSERT( db );
 		
@@ -74,10 +74,10 @@ void TreeUpdater::TransformToIncrementalAndExecute( TreeZone target_tree_zone, s
 	TreeZoneInverter tree_zone_inverter( db ); 
 	tree_zone_inverter.Run(target_tree_zone, &source_layout);	
 			
-	// Execute it
-	Layout::ForDepthFirstWalk( source_layout, nullptr, [&](shared_ptr<Layout> &part)
+	// For each targetted patch in the layout, perform replace operation on the DB
+	Patch::ForDepthFirstWalk( source_layout, nullptr, [&](shared_ptr<Patch> &part)
 	{
-		if( auto replace_part = dynamic_pointer_cast<ReplaceOperator>(part) )
+		if( auto replace_part = dynamic_pointer_cast<TargettedPatch>(part) )
 		{
 			auto source_free_zone = dynamic_pointer_cast<FreeZone>(replace_part->GetSourceZone());
 			ASSERT( source_free_zone );

@@ -65,11 +65,11 @@ void DeltaAgent::StartPlanOverlay()
 }
 
 
-Agent::ReplaceExprPtr DeltaAgent::GenReplaceExprImpl( const ReplaceKit &kit, 
+Agent::ReplacePatchPtr DeltaAgent::GenReplaceLayoutImpl( const ReplaceKit &kit, 
                                                    PatternLink me_plink, 
                                                    XLink key_xlink )
 {
 	// Recurse through the Overlay branch
     PatternLink overlay_plink(this, GetOverlay());
-    return overlay_plink.GetChildAgent()->GenReplaceExpr(kit, overlay_plink);    
+    return overlay_plink.GetChildAgent()->GenReplaceLayout(kit, overlay_plink);    
 }                                         

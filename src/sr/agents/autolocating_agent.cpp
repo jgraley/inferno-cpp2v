@@ -4,7 +4,7 @@
 #include "sym/boolean_operators.hpp"
 #include "sym/predicate_operators.hpp"
 #include "sym/symbol_operators.hpp"
-#include "up/zone_expressions.hpp"
+#include "up/patches.hpp"
 
 using namespace SR;
 using namespace SYM;
@@ -39,7 +39,7 @@ SYM::Lazy<SYM::BooleanExpression> AutolocatingAgent::SymbolicAutolocatingQuery()
 }
 
 
-Agent::ReplaceExprPtr AutolocatingAgent::GenReplaceExprImpl( const ReplaceKit &kit, 
+Agent::ReplacePatchPtr AutolocatingAgent::GenReplaceLayoutImpl( const ReplaceKit &kit, 
                                                             PatternLink me_plink, 
                                                             XLink key_xlink )
 {
@@ -49,10 +49,10 @@ Agent::ReplaceExprPtr AutolocatingAgent::GenReplaceExprImpl( const ReplaceKit &k
 		// Unambiguous path through replace pattern so we can continue to overlay
 		PatternLink replace_plink = OnlyElementOf(plinks);
 		ASSERT( replace_plink );          
-		return replace_plink.GetChildAgent()->GenReplaceExpr(kit, replace_plink);    
+		return replace_plink.GetChildAgent()->GenReplaceLayout(kit, replace_plink);    
 	}
 	else
 	{
-		return AgentCommon::GenReplaceExprImpl(kit, me_plink, key_xlink);
+		return AgentCommon::GenReplaceLayoutImpl(kit, me_plink, key_xlink);
 	}
 }                                         

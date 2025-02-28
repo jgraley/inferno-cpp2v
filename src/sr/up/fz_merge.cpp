@@ -1,6 +1,6 @@
 #include "fz_merge.hpp"
 
-#include "zone_expressions.hpp"
+#include "patches.hpp"
 #include "db/x_tree_database.hpp"
 #include "common/read_args.hpp"
 #include "tree/validate.hpp"
@@ -18,34 +18,34 @@ FreeZoneMerger::FreeZoneMerger()
 }
 	
 
-void FreeZoneMerger::Run( shared_ptr<Layout> &root_expr )
+void FreeZoneMerger::Run( shared_ptr<Patch> &layout )
 {
-	Layout::ForDepthFirstWalk( root_expr, nullptr, [&](shared_ptr<Layout> &expr)
+	Patch::ForDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
 	{
-		if( auto pfz_op = dynamic_pointer_cast<MergeFreeZoneOperator>(expr) )
+		if( auto free_patch = dynamic_pointer_cast<FreeZonePatch>(patch) )
         {
-			TRACE("Parent MergeFreeZoneOperator ")(*pfz_op)("\n");
-			FreeZone &free_zone = pfz_op->GetZone();
+			TRACE("Parent FreeZonePatch ")(*free_patch)("\n");
+			FreeZone &free_zone = free_patch->GetZone();
 			ASSERT( !free_zone.IsEmpty() );
 
 			FreeZone::TerminusIterator it_t = free_zone.GetTerminiiBegin();
-			MergeFreeZoneOperator::ChildExpressionIterator it_child = pfz_op->GetChildrenBegin();
+			FreeZonePatch::ChildExpressionIterator it_child = free_patch->GetChildrenBegin();
 			
-			while( it_child != pfz_op->GetChildrenEnd() )
+			while( it_child != free_patch->GetChildrenEnd() )
 			{
 				ASSERT( it_t != free_zone.GetTerminiiEnd() ); // length mismatch		
-				if( auto child_pfz_op = dynamic_pointer_cast<MergeFreeZoneOperator>(*it_child) )
+				if( auto child_free_patch = dynamic_pointer_cast<FreeZonePatch>(*it_child) )
 				{	
-					TRACE("Child MergeFreeZoneOperator ")(*child_pfz_op)(" and terminus ")(*it_t)("\n");
-					FreeZone &child_free_zone = child_pfz_op->GetZone();
+					TRACE("Child FreeZonePatch ")(*child_free_patch)(" and terminus ")(*it_t)("\n");
+					FreeZone &child_free_zone = child_free_patch->GetZone();
 					it_t = free_zone.MergeTerminus( it_t, make_unique<FreeZone>(child_free_zone) );		
 					TRACE("Mutator OK\n");
-					it_child = pfz_op->SpliceOver( it_child, child_pfz_op->MoveChildExpressions() );
+					it_child = free_patch->SpliceOver( it_child, child_free_patch->MoveChildExpressions() );
 					TRACE("Splice OK\n");
 				}	
 				else
 				{
-					TRACE("Child DupMergeTreeZoneOperator: SKIPPING and terminus ")(*it_t)("\n");
+					TRACE("Child TreeZonePatch: SKIPPING and terminus ")(*it_t)("\n");
 					it_t++;
 					it_child++;
 				}						
@@ -57,16 +57,16 @@ void FreeZoneMerger::Run( shared_ptr<Layout> &root_expr )
 }
 
 
-void FreeZoneMerger::Check( shared_ptr<Layout> &root_expr )
+void FreeZoneMerger::Check( shared_ptr<Patch> &layout )
 {
-	Layout::ForDepthFirstWalk( root_expr, nullptr, [&](shared_ptr<Layout> &expr)
+	Patch::ForDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
 	{
-		if( auto pz_op = dynamic_pointer_cast<MergeFreeZoneOperator>(expr) )
+		if( auto pz_op = dynamic_pointer_cast<FreeZonePatch>(patch) )
         {
-			pz_op->ForChildren([&](shared_ptr<Layout> &child_expr)
+			pz_op->ForChildren([&](shared_ptr<Patch> &child_patch)
 			{
-				if( auto child_pz_op = dynamic_pointer_cast<MergeFreeZoneOperator>(child_expr) )
-					ASSERT(false)("Free zone ")(*expr)(" touching another free zone ")(*child_expr);
+				if( auto child_pz_op = dynamic_pointer_cast<FreeZonePatch>(child_patch) )
+					ASSERT(false)("Free zone ")(*patch)(" touching another free zone ")(*child_patch);
 			} );
 		}
 	} );		

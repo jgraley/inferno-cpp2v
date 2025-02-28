@@ -22,7 +22,7 @@ public:
 
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;                
 
-    ReplaceExprPtr GenReplaceExprImpl( const ReplaceKit &kit, 
+    ReplacePatchPtr GenReplaceLayoutImpl( const ReplaceKit &kit, 
                                     PatternLink me_plink, 
                                     XLink key_xlink ) final;
 
