@@ -1,19 +1,26 @@
 .PHONY: test minitest srtest minisrtest reptest graphtest
  
 # Slower ones first for optimial multi-core usage (whole suite time)
-CASES = sctest13 sctest03 sctest11 sctest12 sctest08 sctest10 sctest02 
-CASES += sctest01 sctest04 sctest05 sctest06 sctest07 sctest09 sctest15
-CASES += issue677 issue667
+SC_CASES = sctest13 sctest03 sctest11 sctest12 sctest08 sctest10 sctest02 
+SC_CASES += sctest01 sctest04 sctest05 sctest06 sctest07 sctest09 sctest15
+SC_CASES += issue677 issue667
 
 # Quicker ones first for exploratory (max feedback ASAP)
-#CASES =  sctest09 sctest15 sctest06 sctest07 
-#CASES += sctest04 sctest05 sctest01 sctest03
-#CASES += sctest10 sctest02 sctest12 sctest08 sctest13 sctest11
+#SC_CASES =  sctest09 sctest15 sctest06 sctest07 
+#SC_CASES += sctest04 sctest05 sctest01 sctest03
+#SC_CASES += sctest10 sctest02 sctest12 sctest08 sctest13 sctest11
 
 # Use pointeris (very quick to test) as "canary" even more so "small"
-SRCASES = small pointeris sc10_reduce ${CASES} 
-MINICASES = sctest02 sctest03 sctest01 sctest07 sctest09 sctest06 sctest05 sctest04 sctest15
-MINISRCASES = small pointeris ${MINICASES} 
+SR_CASES = small pointeris sc10_reduce ${SC_CASES} 
+MINI_SC_CASES = sctest02 sctest03 sctest01 sctest07 sctest09 sctest06 sctest05 sctest04 sctest15
+MINI_SC_SR_CASES = small pointeris ${MINI_SC_CASES} 
+
+# The original C/C++ test cases, no SystemC
+CPP_CASES = test02 test03 test04 test05 test06 test07 test09 test10
+CPP_CASES += test11 test12 test13 test14 test15 test16
+
+# The whole lot for the benefit of auto rules
+ALL_CASES = ${SC_CASES} ${CPP_CASES} ${SR_CASES}
 
 # Arguments to inferno executable:
 # Args supplied via eg I=-uc will be squished together and appended to the
@@ -35,33 +42,40 @@ IARG="${DEFAULT_I_ARG} ${I}"
 test/autotestd : autotestd.cpp
 	g++ autotestd.cpp -o autotestd
 
-$(CASES:%=${RESULTS_PATH}/execution/%.pass) : ${RESULTS_PATH}/execution/%.pass : test/examples/%.cpp test/makefile inferno.exe test/test.sh ${RESOURCE_ARTEFACTS}
+$(ALL_CASES:%=${RESULTS_PATH}/execution/%.pass) : ${RESULTS_PATH}/execution/%.pass : test/examples/%.cpp test/makefile inferno.exe test/test.sh ${RESOURCE_ARTEFACTS}
 	@mkdir -p ${RESULTS_PATH}/execution
 	@rm -f ${RESULTS_PATH}/execution/$*.
 	test/test.sh $< ${RESULTS_PATH}/execution ${IARG} 2>&1 > ${RESULTS_PATH}/execution/$*.log
 	touch ${RESULTS_PATH}/execution/$*.pass
 		
-test : $(CASES:%=${RESULTS_PATH}/execution/%.pass)
+test : $(SC_CASES:%=${RESULTS_PATH}/execution/%.pass)
 	@echo ------------------------------------------
 	@echo -n "Tests Run: "
 	@date
 	@echo "EXECUTION TESTS PASSED"
 	@spd-say -i 0 -r -100 -p -100 "the tests have parssed"
 
-minitest : $(MINICASES:%=${RESULTS_PATH}/execution/%.pass)
+minitest : $(MINI_SC_CASES:%=${RESULTS_PATH}/execution/%.pass)
 	@echo ------------------------------------------
 	@echo -n "Tests Run: "
 	@date
 	@echo "MINI EXECUTION TESTS PASSED"
 	@spd-say -i 0 -r -100 -p -100 "the tests have parssed"
 
-$(SRCASES:%=${RESULTS_PATH}/sr/%.pass) : ${RESULTS_PATH}/sr/%.pass : test/examples/%.cpp test/makefile inferno.exe test/srtest.sh
+cpptest : $(CPP_CASES:%=${RESULTS_PATH}/execution/%.pass)
+	@echo ------------------------------------------
+	@echo -n "Tests Run: "
+	@date
+	@echo "CPP EXECUTION TESTS PASSED"
+	@spd-say -i 0 -r -100 -p -100 "the tests have parssed"
+
+$(SR_CASES:%=${RESULTS_PATH}/sr/%.pass) : ${RESULTS_PATH}/sr/%.pass : test/examples/%.cpp test/makefile inferno.exe test/srtest.sh
 	@mkdir -p ${RESULTS_PATH}/sr
 	@rm -f ${RESULTS_PATH}/sr/$*.
 	test/srtest.sh $< ${REFERENCE_PATH}/sr ${RESULTS_PATH}/sr ${IARG}
 	@touch ${RESULTS_PATH}/sr/$*.pass
 	
-srtest : $(SRCASES:%=${RESULTS_PATH}/sr/%.pass)
+srtest : $(SR_CASES:%=${RESULTS_PATH}/sr/%.pass)
 	@touch $@
 	@echo ------------------------------------------
 	@echo -n "Tests Run: "
@@ -69,7 +83,7 @@ srtest : $(SRCASES:%=${RESULTS_PATH}/sr/%.pass)
 	@echo "SR TESTS PASSED"
 	@spd-say -i 0 -r -100 -p -100 "the tests have parssed"
 
-minisrtest : $(MINISRCASES:%=${RESULTS_PATH}/sr/%.pass)
+minisrtest : $(MINI_SC_SR_CASES:%=${RESULTS_PATH}/sr/%.pass)
 	@touch $@
 	@echo ------------------------------------------
 	@echo -n "Tests Run: "
@@ -77,13 +91,13 @@ minisrtest : $(MINISRCASES:%=${RESULTS_PATH}/sr/%.pass)
 	@echo "MINI SR TESTS PASSED"
 	@spd-say -i 0 -r -100 -p -100 "the mini search and replace tests have parssed"
 
-$(CASES:%=${RESULTS_PATH}/rep/%.pass) : ${RESULTS_PATH}/rep/%.pass : test/examples/%.cpp test/makefile inferno.exe test/reptest.sh ${RESOURCE_ARTEFACTS}
+$(SC_CASES:%=${RESULTS_PATH}/rep/%.pass) : ${RESULTS_PATH}/rep/%.pass : test/examples/%.cpp test/makefile inferno.exe test/reptest.sh ${RESOURCE_ARTEFACTS}
 	@mkdir -p ${RESULTS_PATH}/rep
 	@rm -f ${RESULTS_PATH}/rep/$*.
 	test/reptest.sh $< -tq 2>&1 > ${RESULTS_PATH}/rep/$*.log 
 	touch ${RESULTS_PATH}/rep/$*.pass
 	
-reptest : $(CASES:%=${RESULTS_PATH}/rep/%.pass)
+reptest : $(SC_CASES:%=${RESULTS_PATH}/rep/%.pass)
 	@touch $@
 	@echo ------------------------------------------
 	@echo -n "Tests Run: "

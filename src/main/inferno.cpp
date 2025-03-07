@@ -44,7 +44,7 @@ void BuildDefaultSequence( vector< shared_ptr<VNStep> > *sequence )
     }
     
     // SystemC detection, converts implicit SystemC to explicit. Always at the top
-    // because we never want to process implicit SystemC.
+    // because we cannot render+compile implicit SystemC.
     DetectAllSCTypes::Build(sequence);
 
 #ifdef TEST_754
