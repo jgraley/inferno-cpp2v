@@ -1,5 +1,6 @@
 
 #include "systemc_detection.hpp"
+#include "clean_up.hpp"
 #include "tree/cpptree.hpp"
 #include "tree/typeof.hpp"
 #include "inferno_agents.hpp"
@@ -345,5 +346,6 @@ void DetectAllSCTypes::Build( vector< shared_ptr<VNStep> > *sequence )
     sequence->push_back( make_shared<DetectSCNotifyDelta>() );
     sequence->push_back( make_shared<RemoveEmptyModuleConstructors>() );
     sequence->push_back( make_shared<RemoveVoidInstances>() );
+	sequence->push_back( make_shared<CleanupUnusedVariables>() );    // for SC_ZERO_TIME
 }
 
