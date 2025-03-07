@@ -8,7 +8,7 @@
 
 using namespace SR;
 
-//#define RECURSIVE_TRACE_OPERATOR
+#define RECURSIVE_TRACE_OPERATOR
 
 // ------------------------- Patch --------------------------
 

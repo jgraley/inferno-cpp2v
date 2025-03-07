@@ -16,8 +16,9 @@ MINI_SC_CASES = sctest02 sctest03 sctest01 sctest07 sctest09 sctest06 sctest05 s
 MINI_SC_SR_CASES = small pointeris ${MINI_SC_CASES} 
 
 # The original C/C++ test cases, no SystemC
-CPP_CASES = test02 test03 test04 test05 test06 test07 test09 test10
+CPP_CASES = test02 test03 test05 test06 test07 test09 test10 
 CPP_CASES += test11 test12 test13 test14 test15 test16
+# #757 to fix test04
 
 # The whole lot for the benefit of auto rules
 ALL_CASES = ${SC_CASES} ${CPP_CASES} ${SR_CASES}

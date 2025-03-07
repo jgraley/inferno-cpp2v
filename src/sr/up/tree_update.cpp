@@ -47,6 +47,8 @@ void TreeUpdater::TransformToIncrementalAndExecute( TreeZone target_tree_zone, s
 {
 	ASSERT( db );
 		
+	FTRACE("Starting with layout:\n")(source_layout)("\n");
+		
 	EmptyZoneElider empty_zone_elider;
 	empty_zone_elider.Run(source_layout);
 	empty_zone_elider.Check(source_layout);

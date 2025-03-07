@@ -124,16 +124,20 @@ DroppedTreeZone::DroppedTreeZone()
 {
     // For #754
     auto root_stuff = MakePatternNode< Stuff<Scope> >();
-    auto root_delta = MakePatternNode< Delta<Expression> >(); // pre-restriction forces result to be type-correct
-    auto mid_child = MakePatternNode< Child<Expression> >(); // anti-spin
-    auto mid_stuff = MakePatternNode< Stuff<Expression> >();
+    auto root_delta = MakePatternNode< Delta<Statement> >(); // pre-restriction forces result to be type-correct
+    auto mid_stuff = MakePatternNode< Stuff<Statement> >();
+    auto mid_child = MakePatternNode< Child<Statement> >(); // anti-spin
+    auto sub_stuff = MakePatternNode< Stuff<Expression> >(); // end will be StandardAgent which makes a FreeZone, so get a non-empty tree zone in here
+    auto sub_child = MakePatternNode< Child<Expression> >(); // anti-spin
     auto end = MakePatternNode< InstanceIdentifier >();
 
     root_stuff->terminus = root_delta;
     root_delta->through = mid_stuff;
-    root_delta->overlay = end; // Drops the tree zone matching mid_stuff
+    root_delta->overlay = sub_stuff; // Drops the tree zone matching mid_stuff
     mid_stuff->terminus = mid_child;
-    mid_child->terminus = end;
+    mid_child->terminus = sub_stuff;
+    sub_stuff->terminus = sub_child;
+    sub_child->terminus = end;
         
     Configure( COMPARE_REPLACE, root_stuff );
 }
