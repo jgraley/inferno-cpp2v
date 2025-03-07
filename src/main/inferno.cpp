@@ -26,6 +26,8 @@
 
 #include <cstdlib>
 
+//#define TEST_754
+
 using namespace Steps;
 
 // Build a vector of transformations, in the order that we will run them
@@ -33,6 +35,11 @@ using namespace Steps;
 void BuildDefaultSequence( vector< shared_ptr<VNStep> > *sequence )
 {
     ASSERT( sequence );
+    
+#ifdef TEST_754
+	//sequence->push_back( make_shared<DroppedTreeZone>() );
+	return;
+#endif
     
     // Test steps that change (fix) the tree - do these first so 
     // intermediates are used (requres EXPECTATION_RUN in test examples)

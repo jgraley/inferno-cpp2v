@@ -16,11 +16,7 @@ Lacing::Lacing() :
 
 
 void Lacing::Build( const set<const SYM::Expression *> &sub_exprs )
-{
-    // Warning: there are a few places that declare an empty x_tree_db
-    if( sub_exprs.empty() )
-        return;
-    
+{    
     // Extract all the non-final archetypes from the IsInCategoryOperator nodes 
     // into a set so that they are uniqued by SimpleCompare equality. These
     // are the categories.

@@ -32,11 +32,18 @@ public:
     FixCrazyNumber();   
 };
 
-class FixCrazyNumberEmb : public VNStep // find 29258 under assign and turn it into 3 for 667
+class FixCrazyNumberEmb : public VNStep // find 29258 under assign and turn it into 3 for #667
 {
 public:
     FixCrazyNumberEmb();   
 };
+
+class DroppedTreeZone : public VNStep // #754
+{
+public:
+    DroppedTreeZone();   
+};
+
 
 }; // end namespace
 

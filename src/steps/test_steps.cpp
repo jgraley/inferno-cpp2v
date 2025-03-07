@@ -118,3 +118,23 @@ FixCrazyNumberEmb::FixCrazyNumberEmb()
 
     Configure( SEARCH_REPLACE, ss, sr );
 }
+
+
+DroppedTreeZone::DroppedTreeZone()
+{
+    // For #754
+    auto root_stuff = MakePatternNode< Stuff<Scope> >();
+    auto root_delta = MakePatternNode< Delta<Expression> >(); // pre-restriction forces result to be type-correct
+    auto mid_child = MakePatternNode< Child<Expression> >(); // anti-spin
+    auto mid_stuff = MakePatternNode< Stuff<Expression> >();
+    auto end = MakePatternNode< InstanceIdentifier >();
+
+    root_stuff->terminus = root_delta;
+    root_delta->through = mid_stuff;
+    root_delta->overlay = end; // Drops the tree zone matching mid_stuff
+    mid_stuff->terminus = mid_child;
+    mid_child->terminus = end;
+        
+    Configure( COMPARE_REPLACE, root_stuff );
+}
+
