@@ -590,7 +590,7 @@ string Render::RenderStorage( const TransKit &kit, TreePtr<Instance> st ) try
 	else if( DynamicTreePtrCast<Static>( st ) )
 		return "static ";
 	else if( DynamicTreePtrCast<Automatic>( st ) )
-		return "auto ";
+		return ""; // Assume automatic allocation is the default
 	else if( DynamicTreePtrCast<Temporary>( st ) )
 		return "/*temp*/ ";
 	else if( TreePtr<Field> no = DynamicTreePtrCast<Field>( st ) )
