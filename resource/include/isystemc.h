@@ -15,7 +15,7 @@
 
 class sc_event
 { 
-    void notify( void p1 );
+    void notify( int p1 );
 };
 
 class sc_module;
@@ -23,22 +23,22 @@ class sc_module;
 
 class sc_interface;
 
-void wait( void p1 );
-void next_trigger( void p1 );
-void SC_THREAD( void func );
-void SC_CTHREAD( void func, void clock );
-void SC_METHOD( void func );
+void wait( int p1 );
+void next_trigger( int p1 );
+void SC_THREAD( void (*func)() );
+void SC_CTHREAD( void (*func)(), int clock );
+void SC_METHOD( void (*func)() );
 
 /// Not really SystemC, but we detect exit and represent natively as Exit so as to 
 /// get a way of extracting results from programs.
-void exit( void p1 );
-void cease( void p1 );
+void exit( int p1 );
+void cease( int p1 );
 
 // Allow SC_CTOR to parse as a constructor
 #define SC_CTOR(X) X( const char *name ) 
 
 // Allow this symbol
-void SC_ZERO_TIME;
+int SC_ZERO_TIME;
 
 #else
 // Parsed by native compiler
