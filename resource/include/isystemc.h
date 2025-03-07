@@ -31,8 +31,8 @@ void SC_METHOD( void (*func)() );
 
 /// Not really SystemC, but we detect exit and represent natively as Exit so as to 
 /// get a way of extracting results from programs.
-void exit( int p1 );
-void cease( int p1 );
+void exit( int exit_code );
+void cease( unsigned char exit_code );
 
 // Allow SC_CTOR to parse as a constructor
 #define SC_CTOR(X) X( const char *name ) 

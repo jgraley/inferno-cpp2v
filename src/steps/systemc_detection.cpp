@@ -120,7 +120,7 @@ DetectTerminationFunction::DetectTerminationFunction( TreePtr<TerminationFunctio
     auto s_call = MakePatternNode< Call >();
     auto s_arg = MakePatternNode< MapOperand >();
     auto s_token = MakePatternNode< InstanceIdentifierByNameAgent >( r_tf->GetToken() ); 
-    auto s_param_id = MakePatternNode< InstanceIdentifierByNameAgent >( "p1" ); 
+    auto s_param_id = MakePatternNode< InstanceIdentifierByNameAgent >( "exit_code" ); 
             
     s_call->callee = s_token;       
     s_call->operands = (s_arg);

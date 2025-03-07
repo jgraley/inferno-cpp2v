@@ -35,12 +35,7 @@ using namespace Steps;
 void BuildDefaultSequence( vector< shared_ptr<VNStep> > *sequence )
 {
     ASSERT( sequence );
-    
-#ifdef TEST_754
-	//sequence->push_back( make_shared<DroppedTreeZone>() );
-	return;
-#endif
-    
+        
     // Test steps that change (fix) the tree - do these first so 
     // intermediates are used (requres EXPECTATION_RUN in test examples)
     {
@@ -51,6 +46,11 @@ void BuildDefaultSequence( vector< shared_ptr<VNStep> > *sequence )
     // SystemC detection, converts implicit SystemC to explicit. Always at the top
     // because we never want to process implicit SystemC.
     DetectAllSCTypes::Build(sequence);
+
+#ifdef TEST_754
+	//sequence->push_back( make_shared<DroppedTreeZone>() );
+	return;
+#endif
 
     { // establish what is locally uncombable
         sequence->push_back( make_shared<DetectUncombableSwitch>() );
