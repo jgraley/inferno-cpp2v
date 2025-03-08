@@ -455,7 +455,7 @@ string SimpleCompareRangeResult::Render() const
 
 // ------------------------- CategoryRangeResult --------------------------
 
-CategoryRangeResult::CategoryRangeResult( const SR::XTreeDatabase *x_tree_db_, XLinkBoundsList &&bounds_list_, bool lower_incl_, bool upper_incl_ ) :
+CategoryRangeResult::CategoryRangeResult( const SR::XTreeDatabase *x_tree_db_, CatBoundsList &&bounds_list_, bool lower_incl_, bool upper_incl_ ) :
     x_tree_db( x_tree_db_ ),
     bounds_list( move(bounds_list_) ),
     lower_incl( lower_incl_ ),
@@ -479,7 +479,7 @@ SR::XLink CategoryRangeResult::GetOnlyXLink() const
 bool CategoryRangeResult::TryExtensionalise( set<SR::XLink> &links ) const
 {        
     links.clear();
-    for( const XLinkBounds &bounds : bounds_list )
+    for( const CatBounds &bounds : bounds_list )
     {
         SR::Orderings::SimpleCompareOrderingIterator it_lower, it_upper;
 
@@ -512,7 +512,7 @@ string CategoryRangeResult::Render() const
 {
     // ∈ etc means elt included (closed bound); ∉ means elt not included (open bound)
     list<string> terms;
-    for( const XLinkBounds &bounds : bounds_list )
+    for( const CatBounds &bounds : bounds_list )
     {
         list<string> restrictions;
         restrictions.push_back( string(lower_incl?"∈":"∉") + bounds.first->GetTrace() );

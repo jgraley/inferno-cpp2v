@@ -368,7 +368,7 @@ list<shared_ptr<SymbolExpression>> AllInCategoryRangeOperator::GetSymbolOperands
 
 unique_ptr<SymbolicResult> AllInCategoryRangeOperator::Evaluate( const EvalKit &kit ) const                                                                    
 {        
-    CategoryRangeResult::XLinkBoundsList xlink_bounds_list;
+    CategoryRangeResult::CatBoundsList xlink_bounds_list;
     for( const ExprBounds &bounds : bounds_list )
     {
         SR::XLink lower_xlink = bounds.first->Evaluate(kit)->GetOnlyXLink();

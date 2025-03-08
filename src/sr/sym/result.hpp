@@ -181,11 +181,11 @@ class CategoryRangeResult : public SymbolicResult
 {
 public:
     // Shared_ptr is OK since we don't mutate at eval time, just dereference
-    typedef pair<shared_ptr<SR::XLink>, shared_ptr<SR::XLink>> XLinkBounds;
-    typedef list<XLinkBounds> XLinkBoundsList;
+    typedef pair<shared_ptr<SR::XLink>, shared_ptr<SR::XLink>> CatBounds;
+    typedef list<CatBounds> CatBoundsList;
 
     // lower or upper can be null to exclude that limit
-    CategoryRangeResult( const SR::XTreeDatabase *x_tree_db, XLinkBoundsList &&bounds_list, bool lower_incl, bool upper_incl );
+    CategoryRangeResult( const SR::XTreeDatabase *x_tree_db, CatBoundsList &&bounds_list, bool lower_incl, bool upper_incl );
     
     bool IsDefinedAndUnique() const override;    
     SR::XLink GetOnlyXLink() const override;    
@@ -200,7 +200,7 @@ public:
 
 private:    
     const SR::XTreeDatabase *x_tree_db;
-    const XLinkBoundsList bounds_list;
+    const CatBoundsList bounds_list;
     const bool lower_incl, upper_incl;
 };
 
