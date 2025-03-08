@@ -322,6 +322,12 @@ string TransformOfAgent::GetName() const
 }
 
 
+string TransformOfAgent::GetTrace() const
+{
+	return TransformOfAgent::GetName(); // No v-call, use our one
+}
+
+
 bool TransformOfAgent::IsExtenderChannelLess( const Extender &r ) const
 {
 	// If comparing two TransformOfAgent, secondary onto the transformation object's type

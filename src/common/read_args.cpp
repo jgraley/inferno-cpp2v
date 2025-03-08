@@ -51,7 +51,7 @@ void ReadArgs::Usage(string msg)
                     "-ts         Trace but don't show mini-stacks (for when re-architecting).\n"
     		        "-su         Run unit tests and quit.\n"
     		        "-sc         Enable CSP solver self-test.\n"
-    		        "-sd         Enable database self-checks including relation integrity and compare with new build.\n"
+    		        "-sd         Enable DB self-checks: relation integrity and compare with new build.\n"
                     "-q<p>.<c>...   Stop after stage+step <p>, and optional match count(s) <c>. Eg -qT12.2.3\n"
                     "               for transformation 12, root match 2, first embedded match 3.\n"    
                     "               Note: step is 0-based; counts are 1-based or 0 to disable.\n"

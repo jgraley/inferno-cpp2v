@@ -64,9 +64,11 @@ void VNSequence::PlanningStageFour()
 		} );
    	}
    	
+   	// Use thes eto establish the lacing
    	lacing = make_shared<Lacing>();
     lacing->Build( sub_exprs );   
     
+    // ...and to set up the domain extension channels (actioned in analysis stage)
     domain_extenders = DomainExtension::DetermineExtenders(sub_exprs);
 }
 

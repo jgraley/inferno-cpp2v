@@ -177,6 +177,9 @@ void DomainExtensionChannel::CheckStimulusXLink( XLink stimulus_xlink )
         induced_subtree_by_value_to_extra_subtree_and_refcount.at(info.induced_base_node).ref_count++;
         return; 
     }
+
+    TRACE("Stimulus XLink ")(stimulus_xlink)(" induces ")(info.induced_base_node)("\n");
+
         
     // An extra tree is required
     CreateExtraTree( info.induced_base_node );
@@ -247,6 +250,8 @@ void DomainExtensionChannel::Validate() const
 
 void DomainExtensionChannel::InitialBuild()
 {
+	TRACE("Initial DE build for extender ")(*extender)("\n");
+
     for( XLink xlink : db->GetDomain().unordered_domain )
         CheckStimulusXLink( xlink );
 	

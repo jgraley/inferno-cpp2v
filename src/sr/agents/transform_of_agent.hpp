@@ -141,6 +141,7 @@ public:
 
     virtual Block GetGraphBlockInfo() const;
     string GetName() const override;
+    string GetTrace() const override;
     
  	bool IsExtenderChannelLess( const Extender &r ) const override;
 	int GetExtenderChannelOrdinal() const override;
