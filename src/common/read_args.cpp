@@ -66,7 +66,8 @@ void ReadArgs::Usage(string msg)
                     "-rn<n>      Stop search and replace after n repetitions and do not generate an error.\n"
                     "-re<n>      Stop search and replace after n repetitions and do generate an error.\n"
                     "-f          Output all intermediates: .cpp and .dot. <outfile> is path/basename.\n"
-                    "-u<x>       Use feature x.\n",
+                    "-u<x>       Use feature x.\n"
+                    "Hint: use eg I=-sd or I=\"-sd -t\" with make\n",
     		        exename.c_str() );
     exit(1);
 }
