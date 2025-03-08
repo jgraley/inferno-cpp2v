@@ -40,7 +40,7 @@ public:
     static bool rep_error;
     static bool test_units;
     static bool test_csp;
-    static bool test_rel;
+    static bool test_db;
     static bool documentation_graphs;
     static bool output_all;
     

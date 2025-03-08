@@ -37,7 +37,6 @@ DBWalk::Action Orderings::GetDeleteAction()
 	{
 		EraseSolo( depth_first_ordering, walk_info.xlink );
 
-		TRACE("Erasing from orderings ")(walk_info.xlink)("\n");
 		EraseSolo( category_ordering, walk_info.xlink );       
 
 		EraseSolo( simple_compare_ordering, walk_info.xlink );
@@ -64,7 +63,7 @@ DBWalk::Action Orderings::GetInsertAction()
 	{ 
         InsertSolo( depth_first_ordering, walk_info.xlink );
 		
-        InsertSolo( category_ordering, walk_info.xlink );
+		InsertSolo( category_ordering, walk_info.xlink );
 
 		InsertSolo( simple_compare_ordering, walk_info.xlink );		
 
@@ -90,7 +89,7 @@ void Orderings::Dump() const
 }
 
 
-void Orderings::TestRelations( const unordered_set<XLink> &xlinks )
+void Orderings::CheckRelations( const unordered_set<XLink> &xlinks )
 {
 	SimpleCompareRelation scr;
 	scr.Test( xlinks );
@@ -114,4 +113,16 @@ void Orderings::TestRelations( const unordered_set<XLink> &xlinks )
                         "depth_first_ordering" );
 }
 
+template<typename ORDERING>
+void CheckEqualOrdering( string name, const ORDERING &l, const ORDERING &r )
+{
+	ASSERT( l == r )(name)(" ordering mismatch:\n")(DiffTrace(l, r));
+}
 
+
+void Orderings::CheckEqual( shared_ptr<Orderings> l, shared_ptr<Orderings> r )
+{
+	CheckEqualOrdering( "DF", l->depth_first_ordering, r->depth_first_ordering );
+	CheckEqualOrdering( "CAT", l->category_ordering, r->category_ordering );
+	CheckEqualOrdering( "SC", l->simple_compare_ordering, r->simple_compare_ordering );
+}

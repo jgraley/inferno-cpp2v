@@ -24,7 +24,7 @@ bool ReadArgs::trace_no_stack = false;
 string ReadArgs::hits_format;
 bool ReadArgs::test_units = false;
 bool ReadArgs::test_csp = false;
-bool ReadArgs::test_rel = false;
+bool ReadArgs::test_db = false;
 int ReadArgs::runonlystep = 0; 
 bool ReadArgs::runonlyenable = false; 
 bool ReadArgs::quitafter = false;
@@ -51,7 +51,7 @@ void ReadArgs::Usage(string msg)
                     "-ts         Trace but don't show mini-stacks (for when re-architecting).\n"
     		        "-su         Run unit tests and quit.\n"
     		        "-sc         Enable CSP solver self-test.\n"
-    		        "-sr         Enable relation self-test.\n"
+    		        "-sd         Enable database self-checks including relation integrity and compare with new build.\n"
                     "-q<p>.<c>...   Stop after stage+step <p>, and optional match count(s) <c>. Eg -qT12.2.3\n"
                     "               for transformation 12, root match 2, first embedded match 3.\n"    
                     "               Note: step is 0-based; counts are 1-based or 0 to disable.\n"
@@ -198,8 +198,8 @@ ReadArgs::ReadArgs( int ac, char *av[] )
                 test_units = true;
             else if( assert_option=='c' )
                 test_csp = true;
-            else if( assert_option=='r' )
-                test_rel = true;
+            else if( assert_option=='d' )
+                test_db = true;
             else
                 Usage("Unknown argument after -s");
         }
@@ -224,7 +224,7 @@ ReadArgs::ReadArgs( int ac, char *av[] )
         }
         else 
         {
-            Usage("Unknown option");
+            Usage( string("Unknown option: ") + string(argv[curarg]) );
         }
     }    
 }

@@ -247,12 +247,12 @@ void SR::TestRelationProperties( const unordered_set<XLink> &xlinks,
     }    
         
     // See #210 for some results
-    FTRACE("Relation tests for ")(relation_name)(" passed. Coverage:\n")
-          ("Made %d special of %d total XLinks\n", tspecial, tlinks)
-          ("Stability ")(tstab)("\n")
-          ("Reflexive ")(tr)("\n")
-          ("Symmetric/antisymmetric ")(ts)("\n")
-          ("Transitive ")(tt)("\n")
-          ("Totality ")(ttot)("\n");
+    TRACE("Relation tests for ")(relation_name)(" passed. Coverage:\n")
+         ("Made %d special of %d total XLinks\n", tspecial, tlinks)
+         ("Stability ")(tstab)("\n")
+         ("Reflexive ")(tr)("\n")
+         ("Symmetric/antisymmetric ")(ts)("\n")
+         ("Transitive ")(tt)("\n")
+         ("Totality ")(ttot)("\n");
 }
 

@@ -92,7 +92,7 @@ DBWalk::Action DomainExtension::GetDeleteAction()
 }
 
 
-void DomainExtension::TestRelations( const unordered_set<XLink> &xlinks )
+void DomainExtension::CheckRelations( const unordered_set<XLink> &xlinks )
 {	
 }
 

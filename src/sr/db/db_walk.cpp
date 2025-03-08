@@ -159,24 +159,30 @@ void DBWalk::VisitLink( const WalkKit &kit,
                         WalkInfo &&walk_info ) // .x should be .xlink's child
 {
     INDENT(".");            
-    TRACE("Visiting link ")(walk_info.xlink)("\n");    
                 
 	walk_info.at_terminus = (kit.next_terminus_it != kit.zone.GetTerminiiEnd() &&
 	                         walk_info.xlink == *(kit.next_terminus_it));
 	if( walk_info.at_terminus )
 		++(kit.next_terminus_it);
+	ASSERT( !(walk_info.at_terminus && walk_info.at_base) );
       
     if( kit.wind == WIND_IN )
+    {
+	    TRACE("Visiting ")(walk_info.at_base?"base ":"")(walk_info.at_terminus?"terminus ":"")(walk_info.xlink)(" (Wind-in)\n");    
 		for( Action action : *(kit.actions) )
 			action(walk_info);
+	}
             
     // Recurse into our child nodes but stop at terminii
     if( !walk_info.at_terminus )
 		VisitItemise( kit, walk_info.xlink ); 
 
     if( kit.wind == WIND_OUT )
+    {
+	    TRACE("Visiting ")(walk_info.at_base?"base ":"")(walk_info.at_terminus?"terminus ":"")(walk_info.xlink)(" (Wind-out)\n");    		
 		for( Action action : *(kit.actions) )
 			action(walk_info);         
+	}
 }
 
 

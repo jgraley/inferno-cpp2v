@@ -55,8 +55,8 @@ void TestOrderingIntact( const ORDERING &ordering,
         t++;
     } );
 
-    FTRACE("Ordering intactness tests for ")(ordering_name)(" passed. Coverage:\n")
-          ("Pairs checked %d\n", t);
+    TRACE("Ordering intactness tests for ")(ordering_name)(" passed. Coverage:\n")
+         ("Pairs checked %d\n", t);
 }
 
 };

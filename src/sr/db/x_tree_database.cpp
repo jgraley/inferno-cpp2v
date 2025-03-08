@@ -16,7 +16,8 @@ using namespace SR;
 //   when testing the test
 //#define DB_TEST_THE_TEST
 
-XTreeDatabase::XTreeDatabase( TreePtr<Node> main_root, shared_ptr<Lacing> lacing, DomainExtension::ExtenderSet domain_extenders ) :
+XTreeDatabase::XTreeDatabase( TreePtr<Node> main_root, shared_ptr<Lacing> lacing_, DomainExtension::ExtenderSet domain_extenders ) :
+	lacing( lacing_ ),
     domain( make_shared<Domain>() ),
     link_table( make_shared<LinkTable>() ),
     node_table( make_shared<NodeTable>() ),
@@ -80,6 +81,14 @@ XLink XTreeDatabase::GetRootXLink(DBCommon::TreeOrdinal tree_ordinal) const
 }
 
 
+void XTreeDatabase::WalkAllTrees(const DBWalk::Actions *actions,
+								 DBWalk::Wind wind)
+{
+	for( auto p : trees_by_ordinal )
+		db_walker.WalkTree( actions, GetRootXLink(p.first), p.first, wind );
+}
+								 
+
 void XTreeDatabase::InitialBuild()
 {      
     INDENT("p");
@@ -90,8 +99,7 @@ void XTreeDatabase::InitialBuild()
     actions.push_back( node_table->GetInsertAction() );
     actions.push_back( orderings->GetInsertAction() );
     	
-	for( auto p : trees_by_ordinal )
-		db_walker.WalkTree( &actions, GetRootXLink(p.first), p.first, DBWalk::WIND_IN );
+	WalkAllTrees( &actions, DBWalk::WIND_IN );
 
     domain_extension->InitialBuild();
     
@@ -105,6 +113,14 @@ void XTreeDatabase::InitialBuild()
 
 void XTreeDatabase::MainTreeReplace( TreeZone target_tree_zone, FreeZone source_free_zone )
 {
+	TRACE("Whole main tree walk for your convenience:\n");
+	if( Tracer::IsEnabled() )
+	{
+		DBWalk::Actions actions;
+		db_walker.WalkTree( &actions, GetRootXLink(DBCommon::TreeOrdinal::MAIN), DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_IN );
+	}
+
+	TRACE("Replacing target TreeZone:\n")(target_tree_zone)("\nwith source FreeZone:\n")(source_free_zone)("\n");
 	ASSERT( target_tree_zone.GetNumTerminii() == source_free_zone.GetNumTerminii() );	
 	target_tree_zone.DBCheck(this); // Move back to MainTreeReplace once this is empty
 	MutableTreeZone mutable_target_tree_zone( target_tree_zone, GetMutator(target_tree_zone.GetBaseXLink()) );
@@ -122,8 +138,11 @@ void XTreeDatabase::MainTreeReplace( TreeZone target_tree_zone, FreeZone source_
     // Update database 
     MainTreeInsert( mutable_target_tree_zone, &base_info );   	
     
-    // Update domain extnsion extra trees
+    // Update domain extension extra trees
     PerformQueuedExtraTreeActions();
+    
+    if( ReadArgs::test_db )
+        Checks();
 }
 
 
@@ -411,11 +430,22 @@ void XTreeDatabase::Dump() const
 }
 
 
-void XTreeDatabase::TestRelations()
+void XTreeDatabase::Checks()
 {
-    if( ReadArgs::test_rel )
-    {
-		domain_extension->TestRelations( domain->unordered_domain );
-		orderings->TestRelations( domain->unordered_domain );
-	}		
+    INDENT("?");
+
+	// ---------- Relation checks ------------
+	domain_extension->CheckRelations( domain->unordered_domain );
+	orderings->CheckRelations( domain->unordered_domain );
+
+	// ---------- Checks against reference ------------
+    auto ref_domain = make_shared<Domain>();
+	DBWalk::Actions actions1 { ref_domain->GetInsertAction() };
+	WalkAllTrees( &actions1, DBWalk::WIND_IN );
+	Domain::CheckEqual(ref_domain, domain);
+	
+    auto ref_orderings = make_shared<Orderings>(lacing, this);
+	DBWalk::Actions actions2 { ref_orderings->GetInsertAction() };
+	WalkAllTrees( &actions2, DBWalk::WIND_IN );
+	Orderings::CheckEqual(ref_orderings, orderings);
 }

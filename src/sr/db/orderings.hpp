@@ -40,7 +40,8 @@ public:
 	DBWalk::Action GetInsertAction();
 	    
     void Dump() const;
-    void TestRelations( const unordered_set<XLink> &xlinks );
+    void CheckRelations( const unordered_set<XLink> &xlinks );
+	static void CheckEqual( shared_ptr<Orderings> l, shared_ptr<Orderings> r );
 
     // Category ordering TODO merge with SimpleCompare ordering
     typedef set<XLink, CategoryRelation> CategoryOrdering;
