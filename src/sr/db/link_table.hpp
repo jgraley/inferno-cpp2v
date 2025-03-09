@@ -57,10 +57,7 @@ public:
 	typedef XLink Key;
 
     // XLink-to-row-of-x_tree_db map
-    unordered_map<Key, Row> rows;
-    
-    // Base ordering
-    int current_root_ordinal;    
+    unordered_map<Key, Row> rows; 
 };    
     
 };

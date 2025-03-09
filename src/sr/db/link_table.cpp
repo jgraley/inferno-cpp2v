@@ -5,8 +5,7 @@
 using namespace SR;    
 
 
-LinkTable::LinkTable() :
-    current_root_ordinal(0)
+LinkTable::LinkTable()
 {
 }
 

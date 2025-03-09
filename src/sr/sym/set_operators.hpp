@@ -177,7 +177,7 @@ public:
     typedef list<ExprBounds> ExprBoundsList;
 
     typedef SymbolExpression NominalType;
-    AllInCategoryRangeOperator( ExprBoundsList &&bounds_list, bool lower_incl, bool upper_incl );
+    AllInCategoryRangeOperator( ExprBoundsList &&bounds_exprs_list_, bool lower_incl, bool upper_incl );
     list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     
     // Note we override the version without the operand solves - we'll do that here
@@ -186,7 +186,7 @@ public:
     Precedence GetPrecedence() const override;
     
 private:
-    ExprBoundsList bounds_list;
+    const ExprBoundsList bounds_exprs_list;
     const bool lower_incl, upper_incl;
 };
 

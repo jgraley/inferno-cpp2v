@@ -369,7 +369,7 @@ string DepthFirstRangeResult::Render() const
 
 // ------------------------- SimpleCompareRangeResult --------------------------
 
-SimpleCompareRangeResult::SimpleCompareRangeResult( const SR::XTreeDatabase *x_tree_db_, SR::XLink lower_, bool lower_incl_, SR::XLink upper_, bool upper_incl_ ) :
+SimpleCompareRangeResult::SimpleCompareRangeResult( const SR::XTreeDatabase *x_tree_db_, KeyType lower_, bool lower_incl_, KeyType upper_, bool upper_incl_ ) :
     x_tree_db( x_tree_db_ ),
     lower( lower_ ),
     lower_incl( lower_incl_ ),
@@ -381,9 +381,17 @@ SimpleCompareRangeResult::SimpleCompareRangeResult( const SR::XTreeDatabase *x_t
 
 SimpleCompareRangeResult::SimpleCompareRangeResult( const SR::XTreeDatabase *x_tree_db_, TreePtr<Node> lower_, bool lower_incl_, TreePtr<Node> upper_, bool upper_incl_ ) :
     x_tree_db( x_tree_db_ ),
+#ifdef SC_KEY_IS_NODE
+    lower( lower_ ),
+#else
     lower( SR::XLink::CreateDistinct( lower_ ) ),
+#endif
     lower_incl( lower_incl_ ),
+#ifdef SC_KEY_IS_NODE
+    upper( upper_ ),
+#else    
     upper( SR::XLink::CreateDistinct( upper_ ) ),
+#endif    
     upper_incl( upper_incl_ )
 {
 }
@@ -403,6 +411,7 @@ SR::XLink SimpleCompareRangeResult::GetOnlyXLink() const
 
 bool SimpleCompareRangeResult::TryExtensionalise( set<SR::XLink> &links ) const
 {        
+    links.clear();
     SR::Orderings::SimpleCompareOrderingIterator it_lower, it_upper;
 
     if( lower )
@@ -426,10 +435,17 @@ bool SimpleCompareRangeResult::TryExtensionalise( set<SR::XLink> &links ) const
     }
     else
     {
-        it_upper = x_tree_db->GetOrderings().simple_compare_ordering.begin();
+        it_upper = x_tree_db->GetOrderings().simple_compare_ordering.end();
     }
-
+    
+#ifdef SC_KEY_IS_NODE
+	for( SR::Orderings::CategoryOrderingIterator it = it_lower;
+		 it != it_upper;
+		 ++it )
+		links = UnionOf( links, db->GetNodeRow(*it).incoming_xlinks );
+#else       
     links = set<SR::XLink>( it_lower, it_upper );
+#endif    
     return true;
 }
 
@@ -481,7 +497,7 @@ bool CategoryRangeResult::TryExtensionalise( set<SR::XLink> &links ) const
     links.clear();
     for( const CatBounds &bounds : bounds_list )
     {
-        SR::Orderings::SimpleCompareOrderingIterator it_lower, it_upper;
+        SR::Orderings::CategoryOrderingIterator it_lower, it_upper; 
 
         ASSERT( &bounds );
         ASSERT( bounds.first );
@@ -496,7 +512,14 @@ bool CategoryRangeResult::TryExtensionalise( set<SR::XLink> &links ) const
         else
             it_upper = x_tree_db->GetOrderings().category_ordering.lower_bound(*bounds.second);
 
+#ifdef CAT_KEY_IS_NODE
+		for( SR::Orderings::CategoryOrderingIterator it = it_lower;
+			 it != it_upper;
+			 ++it )
+		links = UnionOf( links, db->GetNodeRow(*it).incoming_xlinks );
+#else
         links = UnionOf( links, set<SR::XLink>( it_lower, it_upper ) );
+#endif
     }
     return true;
 }

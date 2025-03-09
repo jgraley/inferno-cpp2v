@@ -321,7 +321,13 @@ unique_ptr<SymbolicResult> AllInSimpleCompareRangeOperator::Evaluate( const Eval
 		upper_xlink = SR::XLink::CreateDistinct( node );
 	}
 
+#ifdef SC_KEY_IS_NODE
+    return make_unique<SimpleCompareRangeResult>( kit.x_tree_db, 
+                                                  lower_xlink.GetChildTreePtr(), lower_incl, 
+                                                  upper_xlink.GetChildTreePtr(), upper_incl ); 
+#else
     return make_unique<SimpleCompareRangeResult>( kit.x_tree_db, lower_xlink, lower_incl, upper_xlink, upper_incl ); 
+#endif    
 }
 
 
@@ -346,8 +352,8 @@ Expression::Precedence AllInSimpleCompareRangeOperator::GetPrecedence() const
 
 // ------------------------- AllInCategoryRangeOperator --------------------------
 
-AllInCategoryRangeOperator::AllInCategoryRangeOperator( ExprBoundsList &&bounds_list_, bool lower_incl_, bool upper_incl_ ) :
-    bounds_list( move(bounds_list_) ),
+AllInCategoryRangeOperator::AllInCategoryRangeOperator( ExprBoundsList &&bounds_exprs_list_, bool lower_incl_, bool upper_incl_ ) :
+    bounds_exprs_list( move(bounds_exprs_list_) ),
     lower_incl( lower_incl_ ),
     upper_incl( upper_incl_ )
 {
@@ -357,10 +363,10 @@ AllInCategoryRangeOperator::AllInCategoryRangeOperator( ExprBoundsList &&bounds_
 list<shared_ptr<SymbolExpression>> AllInCategoryRangeOperator::GetSymbolOperands() const
 {
     list<shared_ptr<SymbolExpression>> ops;
-    for( const ExprBounds &bounds : bounds_list )
+    for( const ExprBounds &bounds_exprs : bounds_exprs_list )
     {
-        ops.push_back( bounds.first );
-        ops.push_back( bounds.second );
+        ops.push_back( bounds_exprs.first );
+        ops.push_back( bounds_exprs.second );
     }
     return ops;
 }
@@ -368,20 +374,25 @@ list<shared_ptr<SymbolExpression>> AllInCategoryRangeOperator::GetSymbolOperands
 
 unique_ptr<SymbolicResult> AllInCategoryRangeOperator::Evaluate( const EvalKit &kit ) const                                                                    
 {        
-    CategoryRangeResult::CatBoundsList xlink_bounds_list;
-    for( const ExprBounds &bounds : bounds_list )
+    CategoryRangeResult::CatBoundsList bounds_list;
+    for( const ExprBounds &bound_exprs : bounds_exprs_list )
     {
-        SR::XLink lower_xlink = bounds.first->Evaluate(kit)->GetOnlyXLink();
+        SR::XLink lower_xlink = bound_exprs.first->Evaluate(kit)->GetOnlyXLink();
 
         // Optimise case when operands are equal by only evaluating once
-        SR::XLink upper_xlink = (bounds.second==bounds.first) ? 
+        SR::XLink upper_xlink = (bound_exprs.second==bound_exprs.first) ? 
                                 lower_xlink : 
-                                bounds.second->Evaluate(kit)->GetOnlyXLink();
+                                bound_exprs.second->Evaluate(kit)->GetOnlyXLink();
                               
-        xlink_bounds_list.push_back( make_pair( make_unique<SR::XLink>(lower_xlink),
-                                                make_unique<SR::XLink>(upper_xlink) ) );
+#ifdef CAT_KEY_IS_NODE
+        bounds_list.push_back( make_pair( make_unique<TreePtr<Node>>(lower_xlink.GetChildTreePtr()),
+                                          make_unique<TreePtr<Node>>(upper_xlink.GetChildTreePtr()) ) );
+#else
+        bounds_list.push_back( make_pair( make_unique<SR::XLink>(lower_xlink),
+                                          make_unique<SR::XLink>(upper_xlink) ) );
+#endif
     }
-    return make_unique<CategoryRangeResult>( kit.x_tree_db, move(xlink_bounds_list), lower_incl, upper_incl );    
+    return make_unique<CategoryRangeResult>( kit.x_tree_db, move(bounds_list), lower_incl, upper_incl );    
 }
 
 
@@ -389,11 +400,11 @@ string AllInCategoryRangeOperator::Render() const
 {
     // ∈ etc means elt included (closed bound); ∉ means elt not included (open bound)
     list<string> terms;;
-    for( const ExprBounds &bounds : bounds_list )
+    for( const ExprBounds &bound_exprs : bounds_exprs_list )
     {
         list<string> restrictions;
-        restrictions.push_back( string(lower_incl?"∈":"∉") + bounds.first->Render() );
-        restrictions.push_back( bounds.second->Render() + string(upper_incl?"∋":"∌") );
+        restrictions.push_back( string(lower_incl?"∈":"∉") + bound_exprs.first->Render() );
+        restrictions.push_back( bound_exprs.second->Render() + string(upper_incl?"∋":"∌") );
         terms.push_back( Join(restrictions, ", ") );
     }
     return Join(terms, " ∪ ", "{CAT ", "}");

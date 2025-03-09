@@ -3,6 +3,9 @@
 
 #include "common/common.hpp"
 #include "../link.hpp"
+#include "../db/sc_relation.hpp"
+#include "../db/cat_relation.hpp"
+#include "../db/df_relation.hpp"
 
 #if 1
 #define unique_ptr unique_ptr
@@ -127,7 +130,8 @@ class DepthFirstRangeResult : public SymbolicResult
 {
 public:
     // lower or upper can be null to exclude that limit
-    DepthFirstRangeResult( const SR::XTreeDatabase *x_tree_db, SR::XLink lower, bool lower_incl, SR::XLink upper, bool upper_incl );
+    typedef SR::DepthFirstRelation::KeyType KeyType;
+    DepthFirstRangeResult( const SR::XTreeDatabase *x_tree_db, KeyType lower, bool lower_incl, KeyType upper, bool upper_incl );
     
     bool IsDefinedAndUnique() const override;    
     SR::XLink GetOnlyXLink() const override;    
@@ -152,7 +156,8 @@ class SimpleCompareRangeResult : public SymbolicResult
 {
 public:
     // lower or upper can be null to exclude that limit
-    SimpleCompareRangeResult( const SR::XTreeDatabase *x_tree_db, SR::XLink lower, bool lower_incl, SR::XLink upper, bool upper_incl );
+    typedef SR::SimpleCompareRelation::KeyType KeyType;
+    SimpleCompareRangeResult( const SR::XTreeDatabase *x_tree_db, KeyType lower, bool lower_incl, KeyType upper, bool upper_incl );
     SimpleCompareRangeResult( const SR::XTreeDatabase *x_tree_db, TreePtr<Node> lower, bool lower_incl, TreePtr<Node> upper, bool upper_incl );
     
     bool IsDefinedAndUnique() const override;    
@@ -168,9 +173,9 @@ public:
 
 private:    
     const SR::XTreeDatabase *x_tree_db;
-    SR::XLink lower;
+    KeyType lower;
     bool lower_incl;
-    SR::XLink upper;
+    KeyType upper;
     bool upper_incl;
 };
 
@@ -181,7 +186,8 @@ class CategoryRangeResult : public SymbolicResult
 {
 public:
     // Shared_ptr is OK since we don't mutate at eval time, just dereference
-    typedef pair<shared_ptr<SR::XLink>, shared_ptr<SR::XLink>> CatBounds;
+    typedef SR::CategoryRelation::KeyType KeyType;
+    typedef pair<shared_ptr<KeyType>, shared_ptr<KeyType>> CatBounds;   
     typedef list<CatBounds> CatBoundsList;
 
     // lower or upper can be null to exclude that limit
