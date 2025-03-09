@@ -5,6 +5,8 @@
 #include "common/standard.hpp"
 #include "db_walk.hpp"
 
+//#define CAT_KEY_IS_NODE
+
 namespace SYM
 {
     class BooleanExpression;

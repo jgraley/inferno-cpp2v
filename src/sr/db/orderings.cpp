@@ -39,13 +39,21 @@ DBWalk::Action Orderings::GetDeleteAction()
 
 #ifdef CAT_KEY_IS_NODE
 		// Only remove if node table has also removed
-		if( !db.HasNodeRow(walk_info.node) )
+		if( !db->HasNodeRow(walk_info.node) )
 			EraseSolo( category_ordering, walk_info.node );       		
 #else
 		EraseSolo( category_ordering, walk_info.xlink );       
 #endif
 
+#ifdef SC_KEY_IS_NODE
+		// Only remove if node table has also removed
+		if( !db->HasNodeRow(walk_info.node) )
+			EraseSolo( simple_compare_ordering, walk_info.node );       		
+#else
 		EraseSolo( simple_compare_ordering, walk_info.xlink );
+#endif
+        
+		//TODO
         
         // We must delete SimpleCompare index entries for ancestors of the base
         // node, since removing it will invalidate the SC ordering. Base is
@@ -70,7 +78,7 @@ DBWalk::Action Orderings::GetInsertAction()
         InsertSolo( depth_first_ordering, walk_info.xlink );
 		
 #ifdef CAT_KEY_IS_NODE
-		ASSERT( db.HasNodeRow(walk_info.node) );
+		ASSERT( db->HasNodeRow(walk_info.node) );
 		// Only if not already
 		if( !category_ordering.count(walk_info.node)==0 )
 			InsertSolo( category_ordering, walk_info.node );       		
@@ -78,7 +86,15 @@ DBWalk::Action Orderings::GetInsertAction()
 		InsertSolo( category_ordering, walk_info.xlink );
 #endif
 
+#ifdef SC_KEY_IS_NODE
+		ASSERT( db->HasNodeRow(walk_info.node) );
+		// Only if not already
+		if( !category_ordering.count(walk_info.node)==0 )
+			InsertSolo( simple_compare_ordering, walk_info.node );       		
+#else
 		InsertSolo( simple_compare_ordering, walk_info.xlink );		
+#endif
+		// TODO
 
         // We may now re-instate SimpleCompare index entries for parents 
         // of the base node so that the SC ordering is intact. Base is
