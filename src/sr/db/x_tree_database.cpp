@@ -449,6 +449,6 @@ void XTreeDatabase::Checks()
 
 	// ---------- Relation checks ------------
 	// Do these last as they have more deps on other DB stuff
-	domain_extension->CheckRelations( domain->unordered_domain );
-	orderings->CheckRelations( domain->unordered_domain );
+	orderings->CheckRelations( link_table->GetXLinkDomainAsVector(),
+							   node_table->GetNodeDomainAsVector() );
 }

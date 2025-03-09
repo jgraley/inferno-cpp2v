@@ -49,10 +49,12 @@ public:
 	
 	void GenerateRow(const DBWalk::WalkInfo &walk_info);
 	
+	vector<XLink> GetXLinkDomainAsVector() const;
+	
 	string GetTrace() const;
 	
 //private:
-	typedef const TreePtrInterface * Key;
+	typedef XLink Key;
 
     // XLink-to-row-of-x_tree_db map
     unordered_map<Key, Row> rows;

@@ -38,6 +38,8 @@ public:
     DBWalk::Action GetDeleteAction();
 	DBWalk::Action GetInsertAction();
 	
+	vector<TreePtr<Node>> GetNodeDomainAsVector() const;
+	
 	string GetTrace() const;
 private:
     // Node-to-row-of-x_tree_db map

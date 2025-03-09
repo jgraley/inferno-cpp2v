@@ -17,14 +17,14 @@ const LinkTable::Row &LinkTable::GetRow(XLink xlink) const
     ASSERT( HasRow(xlink) )
           ("X tree database: no row for ")(xlink)("\n")
           ("Rows: ")(rows);
-    return rows.at(xlink.GetTreePtrInterface());
+    return rows.at(xlink);
 }
 
 
 bool LinkTable::HasRow(XLink xlink) const
 {
     ASSERT( xlink );
-    return rows.count(xlink.GetTreePtrInterface()) > 0;
+    return rows.count(xlink) > 0;
 }
 
  
@@ -47,7 +47,7 @@ DBWalk::Action LinkTable::GetDeleteAction()
 {
 	return [=](const DBWalk::WalkInfo &walk_info)
 	{
-   		EraseSolo( rows, walk_info.p_tree_ptr_interface );
+   		EraseSolo( rows, walk_info.xlink );
 	};
 
     // Good practice to poison rows at terminii. Assuming walker tells us we're at a 
@@ -115,7 +115,7 @@ void LinkTable::GenerateRow(const DBWalk::WalkInfo &walk_info)
 	}
 
 	// Add a row of x_tree_db
-	InsertSolo( rows, make_pair(walk_info.p_tree_ptr_interface, row) );
+	InsertSolo( rows, make_pair(walk_info.xlink, row) );
 }
 
 
@@ -154,6 +154,15 @@ string LinkTable::Row::GetTrace() const
     s += SSPrintf(", to=%d", tree_ordinal);
     s += ")";
     return s;
+}
+
+
+vector<XLink> LinkTable::GetXLinkDomainAsVector() const
+{
+	vector<XLink> v;
+	for( auto p : rows )
+		v.push_back(p.first);
+	return v;
 }
 
 

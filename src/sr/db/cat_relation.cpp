@@ -104,7 +104,7 @@ Orderable::Diff CategoryRelation::Compare3Way(KeyType l_key, KeyType r_key) cons
 }
 
 
-void CategoryRelation::Test( const unordered_set<KeyType> &keys )
+void CategoryRelation::Test( const vector<KeyType> &keys )
 {
 	using namespace std::placeholders;
 

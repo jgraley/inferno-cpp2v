@@ -8,7 +8,7 @@ using namespace SR;
 
 
 template<typename KeyType>
-void SR::TestRelationProperties( const unordered_set<KeyType> &keys,
+void SR::TestRelationProperties( const vector<KeyType> &keys,
                                  bool expect_totality,
                                  string relation_name, 
                                  function<string()> log_on_fail,
@@ -23,14 +23,8 @@ void SR::TestRelationProperties( const unordered_set<KeyType> &keys,
     static map<string, map<string, int>> tt;     
     static map<string, int> ttot;
 
-    // Need a random access container because we will in fact randomly access it
-    vector<KeyType> vkeys;
-    
-    for( KeyType key : keys )
-        vkeys.push_back(key);
-
     std::mt19937 random_gen;  // everyone's favourite engine: fast, long period
-    std::uniform_int_distribution<int> random_index(0, vkeys.size()-1);  // numbers in the range [0, vkeys.size())
+    std::uniform_int_distribution<int> random_index(0, keys.size()-1);  // numbers in the range [0, keys.size())
     std::uniform_int_distribution<int> random_special(0, RANDVAL_RANGE*2-1);  // numbers in the range [0, RANDVAL_RANGE*2)
     static const unsigned long int seed = 0;
     random_gen.seed(seed);
@@ -42,9 +36,9 @@ void SR::TestRelationProperties( const unordered_set<KeyType> &keys,
         if( get_special && randval < RANDVAL_RANGE ) // Try to return special
         {
             KeyType new_key, key;
-            for( int t=0; t<vkeys.size(); t++ ) // Only make this many attempts
+            for( int t=0; t<keys.size(); t++ ) // Only make this many attempts
             {
-                key = vkeys[random_index(random_gen)];
+                key = keys[random_index(random_gen)];
                 new_key = get_special( key, randval );       
                 if( new_key != key ) // Success
                 {
@@ -55,11 +49,11 @@ void SR::TestRelationProperties( const unordered_set<KeyType> &keys,
             // Ran out of tries for special
         }
         // Return a link from the supplied set
-        return vkeys[random_index(random_gen)];            
+        return keys[random_index(random_gen)];            
     };        
 
     // Stability property
-    for( int i=0; i<vkeys.size()*10; i++ )
+    for( int i=0; i<keys.size()*10; i++ )
     {
         KeyType a_key = get_random_key();
         KeyType b_key = get_random_key();
@@ -77,7 +71,7 @@ void SR::TestRelationProperties( const unordered_set<KeyType> &keys,
     if( expect_totality )
     {
         // Totality property
-        for( int i=0; i<vkeys.size()*10; i++ )
+        for( int i=0; i<keys.size()*10; i++ )
         {
             KeyType a_key = get_random_key();
             KeyType b_key = get_random_key();
@@ -95,7 +89,7 @@ void SR::TestRelationProperties( const unordered_set<KeyType> &keys,
     }
 
     // Reflexive property
-    for( KeyType a_key : vkeys )
+    for( KeyType a_key : keys )
     {
         Orderable::Diff aa_diff = compare(a_key, a_key);
         ASSERT( aa_diff == 0 )
@@ -106,7 +100,7 @@ void SR::TestRelationProperties( const unordered_set<KeyType> &keys,
     }
     
     // Symmetric/antisymmetric property
-    for( int i=0; i<vkeys.size()*10; i++ )
+    for( int i=0; i<keys.size()*10; i++ )
     {
         KeyType a_key = get_random_key();
         KeyType b_key = get_random_key();
@@ -143,7 +137,7 @@ void SR::TestRelationProperties( const unordered_set<KeyType> &keys,
     }
      
     // Transitive property
-    for( int i=0; i<vkeys.size()*10; i++ )
+    for( int i=0; i<keys.size()*10; i++ )
     {
         KeyType a_key = get_random_key();
         KeyType b_key = get_random_key();
@@ -260,7 +254,7 @@ void SR::TestRelationProperties( const unordered_set<KeyType> &keys,
 
 // --------------------- Explicit instantiations for the types we use as keys --------------------------
 
-template void SR::TestRelationProperties<XLink>( const unordered_set<XLink> &keys,
+template void SR::TestRelationProperties<XLink>( const vector<XLink> &keys,
 										         bool expect_totality,
 										         string relation_name, 
 										         function<string()> log_on_fail,
@@ -268,7 +262,7 @@ template void SR::TestRelationProperties<XLink>( const unordered_set<XLink> &key
 										         function<bool(XLink l, XLink r)> is_equal_native, 
 										         function<XLink(XLink x, int randval)> get_special );
 
-template void SR::TestRelationProperties<TreePtr<Node>>( const unordered_set<TreePtr<Node>> &keys,
+template void SR::TestRelationProperties<TreePtr<Node>>( const vector<TreePtr<Node>> &keys,
 														 bool expect_totality,
 														 string relation_name, 
 														 function<string()> log_on_fail,

@@ -21,7 +21,7 @@ template<class K, class V>
 const K &GetKey( const pair<K, V> &x ) { return x.first; }
 
 template<typename KeyType>
-void TestRelationProperties( const unordered_set<KeyType> &xlinks,
+void TestRelationProperties( const vector<KeyType> &xlinks,
                              bool expect_totality,
                              string relation_name, 
                              function<string()> log_on_fail,

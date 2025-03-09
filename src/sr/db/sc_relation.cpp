@@ -65,7 +65,7 @@ Orderable::Diff SimpleCompareRelation::Compare3Way( KeyType l_key, KeyType r_key
 }
 
 
-void SimpleCompareRelation::Test( const unordered_set<KeyType> &keys )
+void SimpleCompareRelation::Test( const vector<KeyType> &keys )
 {
 	using namespace std::placeholders;
 

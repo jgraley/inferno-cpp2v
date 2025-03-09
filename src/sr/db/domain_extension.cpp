@@ -91,11 +91,6 @@ DBWalk::Action DomainExtension::GetDeleteAction()
 	};
 }
 
-
-void DomainExtension::CheckRelations( const unordered_set<XLink> &xlinks )
-{	
-}
-
 // ------------------------- DomainExtensionChannel --------------------------
 
 DomainExtensionChannel::DomainExtensionChannel( const XTreeDatabase *db_, const DomainExtension::Extender *extender_ ) :

@@ -32,7 +32,7 @@ public:
 	bool operator() (KeyType l_key, KeyType r_key) const;
 	Orderable::Diff Compare3Way(KeyType l_key, KeyType r_key) const;
 	
-    void Test( const unordered_set<KeyType> &keys );
+    void Test( const vector<KeyType> &keys );
 
 	// Create a node here so that a regular XLink can be used and passed
 	// through the sym stuff by value. Is minimus because intervals on this

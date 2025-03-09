@@ -74,8 +74,6 @@ public:
     DBWalk::Action GetDeleteAction();
 	DBWalk::Action GetInsertAction();
 	
-    void CheckRelations( const unordered_set<XLink> &xlinks );
-
 private:
 	// Map equivalence classes of extender agents onto our channel objects
 	// so that we have one for each equaivalence class.

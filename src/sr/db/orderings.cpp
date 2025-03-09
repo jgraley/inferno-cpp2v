@@ -37,7 +37,13 @@ DBWalk::Action Orderings::GetDeleteAction()
 	{
 		EraseSolo( depth_first_ordering, walk_info.xlink );
 
+#ifdef CAT_KEY_IS_NODE
+		// Only remove if node table has also removed
+		if( !db.HasNodeRow(walk_info.node) )
+			EraseSolo( category_ordering, walk_info.node );       		
+#else
 		EraseSolo( category_ordering, walk_info.xlink );       
+#endif
 
 		EraseSolo( simple_compare_ordering, walk_info.xlink );
         
@@ -63,7 +69,14 @@ DBWalk::Action Orderings::GetInsertAction()
 	{ 
         InsertSolo( depth_first_ordering, walk_info.xlink );
 		
+#ifdef CAT_KEY_IS_NODE
+		ASSERT( db.HasNodeRow(walk_info.node) );
+		// Only if not already
+		if( !category_ordering.count(walk_info.node)==0 )
+			InsertSolo( category_ordering, walk_info.node );       		
+#else
 		InsertSolo( category_ordering, walk_info.xlink );
+#endif
 
 		InsertSolo( simple_compare_ordering, walk_info.xlink );		
 
@@ -89,24 +102,33 @@ void Orderings::Dump() const
 }
 
 
-void Orderings::CheckRelations( const unordered_set<XLink> &xlinks )
+void Orderings::CheckRelations( const vector<XLink> &xlink_domain,  
+                                const vector<TreePtr<Node>> &node_domain )
 {
 	SimpleCompareRelation scr;
-	scr.Test( xlinks );
+#ifdef SC_KEY_IS_NODE
+	scr.Test( node_domain );
+#else	
+	scr.Test( xlink_domain );
+#endif	
 
     TestOrderingIntact( simple_compare_ordering,
                         true,
                         "simple_compare_ordering" );
 
 	CategoryRelation cat_r( plan.lacing );
-	cat_r.Test( xlinks );
+#ifdef CAT_KEY_IS_NODE
+	cat_r.Test( node_domain );
+#else	
+	cat_r.Test( xlink_domain );
+#endif	
 	
     TestOrderingIntact( category_ordering,
                         true,
                         "category_ordering" );
 
 	DepthFirstRelation dfr( db );
-	dfr.Test( xlinks );	
+	dfr.Test( xlink_domain );	
 
     TestOrderingIntact( depth_first_ordering,
                         true,

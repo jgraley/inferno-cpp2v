@@ -129,7 +129,7 @@ pair<Orderable::Diff, DepthFirstRelation::RelType> DepthFirstRelation::CompareHi
 }
 
 
-void DepthFirstRelation::Test( const unordered_set<KeyType> &keys )
+void DepthFirstRelation::Test( const vector<KeyType> &keys )
 {
 	using namespace std::placeholders;
 

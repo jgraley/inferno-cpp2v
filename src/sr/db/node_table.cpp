@@ -90,6 +90,15 @@ string NodeTable::Row::GetTrace() const
 }
 
 
+vector<TreePtr<Node>> NodeTable::GetNodeDomainAsVector() const
+{
+	vector<TreePtr<Node>> v;
+	for( auto p : rows )
+		v.push_back(p.first);
+	return v;
+}
+
+
 string NodeTable::GetTrace() const
 {
 	return Trace(rows);

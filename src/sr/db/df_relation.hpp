@@ -39,7 +39,7 @@ public:
     Orderable::Diff Compare3Way( KeyType l_key, KeyType r_key ) const;
     pair<Orderable::Diff, RelType> CompareHierarchical( KeyType l_key, KeyType r_key ) const;
 
-    void Test( const unordered_set<KeyType> &keys );
+    void Test( const vector<KeyType> &keys );
     
 private:
 	const XTreeDatabase * const db;
