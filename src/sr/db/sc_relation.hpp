@@ -17,13 +17,15 @@ namespace SR
 class SimpleCompareRelation
 {
 public:
+	typedef XLink KeyType;
+
     SimpleCompareRelation();
 
     /// Less operator: for use with set, map etc
-    bool operator()( XLink l_xlink, XLink r_xlink ) const;
-    Orderable::Diff Compare3Way( XLink l_xlink, XLink r_xlink ) const;
+    bool operator()( KeyType l_key, KeyType r_key ) const;
+    Orderable::Diff Compare3Way( KeyType l_key, KeyType r_key ) const;
 
-    void Test( const unordered_set<XLink> &xlinks );
+    void Test( const unordered_set<KeyType> &keys );
 
 	// Create a node here so that a regular XLink can be used and passed
 	// through the sym stuff by value. Is minimus because intervals on this

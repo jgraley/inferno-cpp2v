@@ -18,6 +18,8 @@ class XTreeDatabase;
 class DepthFirstRelation
 {
 public:
+	typedef XLink KeyType;
+
 	enum RelType
 	{
 		// Siblings mean weakly removed i.e. supplied nodes could be 
@@ -33,11 +35,11 @@ public:
     DepthFirstRelation(const XTreeDatabase *db);
 
     /// Less operator: for use with set, map etc
-    bool operator()( XLink l_xlink, XLink r_xlink ) const;
-    Orderable::Diff Compare3Way( XLink l_xlink, XLink r_xlink ) const;
-    pair<Orderable::Diff, RelType> CompareHierarchical( XLink l_xlink, XLink r_xlink ) const;
+    bool operator()( KeyType l_key, KeyType r_key ) const;
+    Orderable::Diff Compare3Way( KeyType l_key, KeyType r_key ) const;
+    pair<Orderable::Diff, RelType> CompareHierarchical( KeyType l_key, KeyType r_key ) const;
 
-    void Test( const unordered_set<XLink> &xlinks );
+    void Test( const unordered_set<KeyType> &keys );
     
 private:
 	const XTreeDatabase * const db;

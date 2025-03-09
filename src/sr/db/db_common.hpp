@@ -4,6 +4,9 @@
 #include "../link.hpp"
 #include "common/standard.hpp"
 
+#define CAT_BY_NODE
+
+
 namespace SR 
 {
 class DBCommon

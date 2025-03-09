@@ -21,16 +21,16 @@ CategoryRelation& CategoryRelation::operator=(const CategoryRelation &other)
 }
 
 
-bool CategoryRelation::operator() (XLink l_xlink, XLink r_xlink) const
+bool CategoryRelation::operator() (KeyType l_key, KeyType r_key) const
 {
-	return Compare3Way(l_xlink, r_xlink) < 0;
+	return Compare3Way(l_key, r_key) < 0;
 }
 
 
-Orderable::Diff CategoryRelation::Compare3Way(XLink l_xlink, XLink r_xlink) const
+Orderable::Diff CategoryRelation::Compare3Way(KeyType l_key, KeyType r_key) const
 {
-    TreePtr<Node> l_node = l_xlink.GetChildTreePtr();
-    TreePtr<Node> r_node = r_xlink.GetChildTreePtr();    
+    TreePtr<Node> l_node = l_key.GetChildTreePtr();
+    TreePtr<Node> r_node = r_key.GetChildTreePtr();    
 
 #ifdef TRACE_CATEGORY_RELATION
     INDENT("@");
@@ -58,7 +58,7 @@ Orderable::Diff CategoryRelation::Compare3Way(XLink l_xlink, XLink r_xlink) cons
    	    if( d )
 		    return d;	
 		    
-        return XLink::Compare3Way(l_xlink, r_xlink);
+        return XLink::Compare3Way(l_key, r_key);
     }
     else if( l_minimus && r_minimus )
     {
@@ -68,7 +68,7 @@ Orderable::Diff CategoryRelation::Compare3Way(XLink l_xlink, XLink r_xlink) cons
 		ri = r_minimus->GetMinimusOrdinal();
         if( Orderable::Diff d = li - ri )
             return d;
-		return XLink::Compare3Way(l_xlink, r_xlink);
+		return XLink::Compare3Way(l_key, r_key);
 	}
     else if( l_minimus && !r_minimus )
 	{
@@ -89,20 +89,20 @@ Orderable::Diff CategoryRelation::Compare3Way(XLink l_xlink, XLink r_xlink) cons
 }
 
 
-void CategoryRelation::Test( const unordered_set<XLink> &xlinks )
+void CategoryRelation::Test( const unordered_set<KeyType> &keys )
 {
 	using namespace std::placeholders;
 
-	TestRelationProperties( xlinks,
-                            true,
-                            "CategoryRelation",
-                            function<string()>(),
-                            bind(&CategoryRelation::Compare3Way, *this, _1, _2), 
-	[&](XLink l, XLink r)
+	TestRelationProperties<KeyType>( keys,
+									 true,
+									 "CategoryRelation",
+									 function<string()>(),
+									 bind(&CategoryRelation::Compare3Way, *this, _1, _2), 
+	[&](KeyType l, KeyType r) -> bool
     { 
         return l==r; 
     }, 
-    [&](XLink x, int randval)
+    [&](KeyType x, int randval) -> KeyType
     {
         // We wish to inject "special" nodes which will be minimax 
         // xlinks that we attempt to generate from the already-selected xlink

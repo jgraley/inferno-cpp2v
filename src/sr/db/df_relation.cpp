@@ -16,19 +16,19 @@ DepthFirstRelation::DepthFirstRelation(const XTreeDatabase *db_) :
 }
 
 
-bool DepthFirstRelation::operator()( XLink l_xlink, XLink r_xlink ) const
+bool DepthFirstRelation::operator()( KeyType l_key, KeyType r_key ) const
 {
-    return Compare3Way(l_xlink, r_xlink) < 0;
+    return Compare3Way(l_key, r_key) < 0;
 }
 
 
-Orderable::Diff DepthFirstRelation::Compare3Way( const XLink l_xlink, const XLink r_xlink ) const
+Orderable::Diff DepthFirstRelation::Compare3Way( KeyType l_key, KeyType r_key ) const
 {
-	return CompareHierarchical( l_xlink, r_xlink ).first;
+	return CompareHierarchical( l_key, r_key ).first;
 }
 
 
-pair<Orderable::Diff, DepthFirstRelation::RelType> DepthFirstRelation::CompareHierarchical( XLink l_xlink, XLink r_xlink ) const
+pair<Orderable::Diff, DepthFirstRelation::RelType> DepthFirstRelation::CompareHierarchical( KeyType l_key, KeyType r_key ) const
 {
     // Maps a parent xlink to two optional child xlinks: the first is 
     // a weak ancestor of l and second of r. We fill in first from the
@@ -38,7 +38,7 @@ pair<Orderable::Diff, DepthFirstRelation::RelType> DepthFirstRelation::CompareHi
 
     //FTRACE("\nComparing ")(l_xlink)(" with ")(r_xlink)("\n");
     
-    if( l_xlink == r_xlink )
+    if( l_key == r_key )
     {
         //FTRACE("early out\n");
         return make_pair(0, EQUAL);
@@ -46,8 +46,8 @@ pair<Orderable::Diff, DepthFirstRelation::RelType> DepthFirstRelation::CompareHi
     
     // Parent is lower in depth-first ordering
     
-    XLink l_cur_xlink = l_xlink;
-    XLink r_cur_xlink = r_xlink;
+    XLink l_cur_xlink = l_key;
+    XLink r_cur_xlink = r_key;
     while(true)
     {
         XLink l_parent_xlink = db->TryGetParentXLink(l_cur_xlink);    
@@ -69,7 +69,7 @@ pair<Orderable::Diff, DepthFirstRelation::RelType> DepthFirstRelation::CompareHi
         if( l_parent_xlink )
         {            
             // If l hits r0 then l0 was a descendent of it. Use parent to spot sooner.
-            if( l_parent_xlink == r_xlink )
+            if( l_parent_xlink == r_key )
                 return make_pair(1, RIGHT_IS_ANCESTOR);
                 
             // If we share a parent, l0 and r0 are weakly removed siblings
@@ -89,7 +89,7 @@ pair<Orderable::Diff, DepthFirstRelation::RelType> DepthFirstRelation::CompareHi
         if( r_parent_xlink )
         {
             // If r hits l0 then r0 was a descendent of it. Use parent to spot sooner.
-            if( r_parent_xlink == l_xlink )
+            if( r_parent_xlink == l_key )
                 return make_pair(-1, LEFT_IS_ANCESTOR);
 
             // If we share a parent, l0 and r0 are weakly removed siblings
@@ -122,23 +122,23 @@ pair<Orderable::Diff, DepthFirstRelation::RelType> DepthFirstRelation::CompareHi
         return make_pair(d, CONTAINER_SIBLINGS);
         
     ASSERT(false)
-          ("Comparing ")(l_xlink)(" with ")(r_xlink)("\n")
+          ("Comparing ")(l_key)(" with ")(r_key)("\n")
           ("Got to ")(l_cur_xlink)(" and ")(r_cur_xlink)("\n")
           (candidate_mutuals);
     ASSERTFAIL();
 }
 
 
-void DepthFirstRelation::Test( const unordered_set<XLink> &xlinks )
+void DepthFirstRelation::Test( const unordered_set<KeyType> &keys )
 {
 	using namespace std::placeholders;
 
-	TestRelationProperties( xlinks,
-                            true,
-                            "DepthFirstRelation",
-                            [&](){ return string(); },                            
-                            bind(&DepthFirstRelation::Compare3Way, *this, _1, _2), 
-    [&](XLink l, XLink r)
+	TestRelationProperties<KeyType>( keys,
+									 true,
+									 "DepthFirstRelation",
+									 [&](){ return string(); },                            
+									 bind(&DepthFirstRelation::Compare3Way, *this, _1, _2), 
+    [&](KeyType l, KeyType r) -> bool
     { 
         return l==r; 
     } );

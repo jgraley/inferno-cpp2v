@@ -8,6 +8,9 @@
 
 #include <functional>
 
+namespace SR
+{
+
 // K is probably an element of a set so it's its own key.
 template<class K>
 const K &GetKey( const K &x ) { return x; }
@@ -17,17 +20,14 @@ const K &GetKey( const K &x ) { return x; }
 template<class K, class V>
 const K &GetKey( const pair<K, V> &x ) { return x.first; }
 
-
-namespace SR
-{
-
-void TestRelationProperties( const unordered_set<XLink> &xlinks,
+template<typename KeyType>
+void TestRelationProperties( const unordered_set<KeyType> &xlinks,
                              bool expect_totality,
                              string relation_name, 
                              function<string()> log_on_fail,
-                             function<Orderable::Diff(XLink l, XLink r)> compare,
-                             function<bool(XLink l, XLink r)> is_equal_native, 
-				     		 function<XLink(XLink x, int randval)> get_special = function<XLink(XLink x, int randval)>() );
+                             function<Orderable::Diff(KeyType l, KeyType r)> compare,
+                             function<bool(KeyType l, KeyType r)> is_equal_native, 
+				     		 function<KeyType(KeyType x, int randval)> get_special = function<KeyType(KeyType x, int randval)>() );
 
 template<class ORDERING>
 void TestOrderingIntact( const ORDERING &ordering,

@@ -16,16 +16,16 @@ SimpleCompareRelation::SimpleCompareRelation() :
 }
 
 
-bool SimpleCompareRelation::operator()( XLink l_xlink, XLink r_xlink ) const
+bool SimpleCompareRelation::operator()( KeyType l_key, KeyType r_key ) const
 {
-    return Compare3Way(l_xlink, r_xlink) < 0;
+    return Compare3Way(l_key, r_key) < 0;
 }
 
 
-Orderable::Diff SimpleCompareRelation::Compare3Way( XLink l_xlink, XLink r_xlink ) const
+Orderable::Diff SimpleCompareRelation::Compare3Way( KeyType l_key, KeyType r_key ) const
 {
-    TreePtr<Node> l_node = l_xlink.GetChildTreePtr();
-    TreePtr<Node> r_node = r_xlink.GetChildTreePtr();    
+    TreePtr<Node> l_node = l_key.GetChildTreePtr();
+    TreePtr<Node> r_node = r_key.GetChildTreePtr();    
 
     auto l_minimax = TreePtr<MinimaxNode>::DynamicCast( l_node );
     if( l_minimax )
@@ -40,7 +40,7 @@ Orderable::Diff SimpleCompareRelation::Compare3Way( XLink l_xlink, XLink r_xlink
 
     if( !l_minimax && !r_minimax )
     {
-		return XLink::Compare3Way(l_xlink, r_xlink);			
+		return XLink::Compare3Way(l_key, r_key);			
 	}
     else if( l_minimax && r_minimax )
     {
@@ -61,16 +61,16 @@ Orderable::Diff SimpleCompareRelation::Compare3Way( XLink l_xlink, XLink r_xlink
 }
 
 
-void SimpleCompareRelation::Test( const unordered_set<XLink> &xlinks )
+void SimpleCompareRelation::Test( const unordered_set<KeyType> &keys )
 {
 	using namespace std::placeholders;
 
-	TestRelationProperties( xlinks,
-                            true,
-                            "SimpleCompareRelation",
-                            function<string()>(),
-                            bind(&SimpleCompareRelation::Compare3Way, *this, _1, _2), 
-    [&](XLink l, XLink r)
+	TestRelationProperties<KeyType>( keys,
+									 true,
+									 "SimpleCompareRelation",
+									 function<string()>(),
+									 bind(&SimpleCompareRelation::Compare3Way, *this, _1, _2), 
+    [&](KeyType l, KeyType r) -> bool
     { 
         return l==r; 
     } );
