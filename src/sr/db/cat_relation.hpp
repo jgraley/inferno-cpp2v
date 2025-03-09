@@ -19,7 +19,11 @@ class XTreeDatabase;
 class CategoryRelation
 {
 public:
+#ifdef CAT_KEY_IS_NODE
+	typedef TreePtr<Node> KeyType;
+#else	
 	typedef XLink KeyType;
+#endif	
 
 	//CategoryRelation();
 	CategoryRelation( shared_ptr<Lacing> lacing );

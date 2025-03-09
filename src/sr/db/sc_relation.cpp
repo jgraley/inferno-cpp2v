@@ -40,7 +40,11 @@ Orderable::Diff SimpleCompareRelation::Compare3Way( KeyType l_key, KeyType r_key
 
     if( !l_minimax && !r_minimax )
     {
-		return XLink::Compare3Way(l_key, r_key);			
+#ifdef CAT_KEY_IS_NODE
+		return 0;
+#else		
+        return XLink::Compare3Way(l_key, r_key);
+#endif  		
 	}
     else if( l_minimax && r_minimax )
     {

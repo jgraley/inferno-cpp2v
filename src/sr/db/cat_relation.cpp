@@ -29,8 +29,13 @@ bool CategoryRelation::operator() (KeyType l_key, KeyType r_key) const
 
 Orderable::Diff CategoryRelation::Compare3Way(KeyType l_key, KeyType r_key) const
 {
+#ifdef CAT_KEY_IS_NODE
+    TreePtr<Node> l_node = l_key;
+    TreePtr<Node> r_node = r_key;    
+#else    
     TreePtr<Node> l_node = l_key.GetChildTreePtr();
     TreePtr<Node> r_node = r_key.GetChildTreePtr();    
+#endif
 
 #ifdef TRACE_CATEGORY_RELATION
     INDENT("@");
@@ -55,10 +60,14 @@ Orderable::Diff CategoryRelation::Compare3Way(KeyType l_key, KeyType r_key) cons
         ASSERT( (d<0) == (d1<0) );
         ASSERT( (d==0) == (d1==0) );
 #endif
+#ifdef CAT_KEY_IS_NODE
+		return d;
+#else		
    	    if( d )
 		    return d;	
 		    
         return XLink::Compare3Way(l_key, r_key);
+#endif        
     }
     else if( l_minimus && r_minimus )
     {
@@ -66,9 +75,15 @@ Orderable::Diff CategoryRelation::Compare3Way(KeyType l_key, KeyType r_key) cons
         // keep the ordering total for the benefit of the test.
 		li = l_minimus->GetMinimusOrdinal();
 		ri = r_minimus->GetMinimusOrdinal();
-        if( Orderable::Diff d = li - ri )
-            return d;
-		return XLink::Compare3Way(l_key, r_key);
+        Orderable::Diff d = li - ri;
+#ifdef CAT_KEY_IS_NODE
+		return d;
+#else		
+   	    if( d )
+		    return d;	
+		    
+        return XLink::Compare3Way(l_key, r_key);
+#endif  
 	}
     else if( l_minimus && !r_minimus )
 	{
