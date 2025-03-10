@@ -38,7 +38,7 @@ DBWalk::Action Orderings::GetDeleteAction()
 		EraseSolo( depth_first_ordering, walk_info.xlink );
 
 #ifdef CAT_KEY_IS_NODE
-		// Only remove if node table has also removed
+		// Only remove if this was the last incoming XLink to the node
 		if( !db->HasNodeRow(walk_info.node) )
 			EraseSolo( category_ordering, walk_info.node );       		
 #else
@@ -46,14 +46,14 @@ DBWalk::Action Orderings::GetDeleteAction()
 #endif
 
 #ifdef SC_KEY_IS_NODE
-		// Only remove if node table has also removed
+		// Only remove if this was the last incoming XLink to the node
 		if( !db->HasNodeRow(walk_info.node) )
 			EraseSolo( simple_compare_ordering, walk_info.node );       		
 #else
 		EraseSolo( simple_compare_ordering, walk_info.xlink );
 #endif
         
-		//TODO
+		//TODO refactor duplication
         
         // We must delete SimpleCompare index entries for ancestors of the base
         // node, since removing it will invalidate the SC ordering. Base is
@@ -64,7 +64,14 @@ DBWalk::Action Orderings::GetDeleteAction()
         {
             while( ancestor_xlink = db->TryGetParentXLink(ancestor_xlink) )
             {
+#ifdef SC_KEY_IS_NODE
+				// Assume there was only one incoming XLink to the node because not a leaf
+				TreePtr<Node> ancestor_node = ancestor_xlink.GetChildTreePtr();
+				ASSERT( !db->HasNodeRow(ancestor_node) );
+				EraseSolo( simple_compare_ordering, ancestor_node );       		
+#else				
                 EraseSolo( simple_compare_ordering, ancestor_xlink );
+#endif                
             }
         }
 	};
@@ -105,7 +112,14 @@ DBWalk::Action Orderings::GetInsertAction()
         {
             while( ancestor_xlink = db->TryGetParentXLink(ancestor_xlink) )
             {
+#ifdef SC_KEY_IS_NODE
+				// Assume there is only one incoming XLink to the node because not a leaf
+				TreePtr<Node> ancestor_node = ancestor_xlink.GetChildTreePtr();
+				ASSERT( db->HasNodeRow(ancestor_node) );
+				InsertSolo( simple_compare_ordering, ancestor_xlink.GetChildTreePtr() );       		
+#else
                 InsertSolo( simple_compare_ordering, ancestor_xlink );
+#endif                
             }
         }
 	};
