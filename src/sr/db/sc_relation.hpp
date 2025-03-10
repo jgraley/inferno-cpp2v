@@ -10,6 +10,8 @@
 
 #include <memory>
 
+//#define SC_KEY_IS_NODE
+
 class SimpleCompare;
 
 namespace SR

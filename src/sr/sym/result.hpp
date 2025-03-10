@@ -158,8 +158,9 @@ public:
     // lower or upper can be null to exclude that limit
     typedef SR::SimpleCompareRelation::KeyType KeyType;
     SimpleCompareRangeResult( const SR::XTreeDatabase *x_tree_db, KeyType lower, bool lower_incl, KeyType upper, bool upper_incl );
+#ifndef SC_KEY_IS_NODE
     SimpleCompareRangeResult( const SR::XTreeDatabase *x_tree_db, TreePtr<Node> lower, bool lower_incl, TreePtr<Node> upper, bool upper_incl );
-    
+#endif    
     bool IsDefinedAndUnique() const override;    
     SR::XLink GetOnlyXLink() const override;    
     bool TryExtensionalise( set<SR::XLink> &links ) const override;

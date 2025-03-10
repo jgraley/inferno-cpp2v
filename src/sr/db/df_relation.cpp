@@ -136,7 +136,6 @@ void DepthFirstRelation::Test( const vector<KeyType> &keys )
 	TestRelationProperties<KeyType>( keys,
 									 true,
 									 "DepthFirstRelation",
-									 [&](){ return string(); },                            
 									 bind(&DepthFirstRelation::Compare3Way, *this, _1, _2), 
     [&](KeyType l, KeyType r) -> bool
     { 

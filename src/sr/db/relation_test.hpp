@@ -24,7 +24,6 @@ template<typename KeyType>
 void TestRelationProperties( const vector<KeyType> &xlinks,
                              bool expect_totality,
                              string relation_name, 
-                             function<string()> log_on_fail,
                              function<Orderable::Diff(KeyType l, KeyType r)> compare,
                              function<bool(KeyType l, KeyType r)> is_equal_native, 
 				     		 function<KeyType(KeyType x, int randval)> get_special = function<KeyType(KeyType x, int randval)>() );

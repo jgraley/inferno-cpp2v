@@ -24,8 +24,13 @@ bool SimpleCompareRelation::operator()( KeyType l_key, KeyType r_key ) const
 
 Orderable::Diff SimpleCompareRelation::Compare3Way( KeyType l_key, KeyType r_key ) const
 {
+#ifdef SC_KEY_IS_NODE
+    TreePtr<Node> l_node = l_key;
+    TreePtr<Node> r_node = r_key;    
+#else    
     TreePtr<Node> l_node = l_key.GetChildTreePtr();
     TreePtr<Node> r_node = r_key.GetChildTreePtr();    
+#endif    
 
     auto l_minimax = TreePtr<MinimaxNode>::DynamicCast( l_node );
     if( l_minimax )
@@ -40,8 +45,8 @@ Orderable::Diff SimpleCompareRelation::Compare3Way( KeyType l_key, KeyType r_key
 
     if( !l_minimax && !r_minimax )
     {
-#ifdef CAT_KEY_IS_NODE
-		return 0;
+#ifdef SC_KEY_IS_NODE
+		return TreePtr<Node>::Compare3Way( l_key, r_key );
 #else		
         return XLink::Compare3Way(l_key, r_key);
 #endif  		
@@ -72,7 +77,6 @@ void SimpleCompareRelation::Test( const vector<KeyType> &keys )
 	TestRelationProperties<KeyType>( keys,
 									 true,
 									 "SimpleCompareRelation",
-									 function<string()>(),
 									 bind(&SimpleCompareRelation::Compare3Way, *this, _1, _2), 
     [&](KeyType l, KeyType r) -> bool
     { 

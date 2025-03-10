@@ -379,22 +379,16 @@ SimpleCompareRangeResult::SimpleCompareRangeResult( const SR::XTreeDatabase *x_t
 }
 
 
+#ifndef SC_KEY_IS_NODE
 SimpleCompareRangeResult::SimpleCompareRangeResult( const SR::XTreeDatabase *x_tree_db_, TreePtr<Node> lower_, bool lower_incl_, TreePtr<Node> upper_, bool upper_incl_ ) :
     x_tree_db( x_tree_db_ ),
-#ifdef SC_KEY_IS_NODE
-    lower( lower_ ),
-#else
     lower( SR::XLink::CreateDistinct( lower_ ) ),
-#endif
     lower_incl( lower_incl_ ),
-#ifdef SC_KEY_IS_NODE
-    upper( upper_ ),
-#else    
-    upper( SR::XLink::CreateDistinct( upper_ ) ),
-#endif    
+    upper( SR::XLink::CreateDistinct( upper_ ) ),  
     upper_incl( upper_incl_ )
 {
 }
+#endif
 
 
 bool SimpleCompareRangeResult::IsDefinedAndUnique() const
@@ -439,10 +433,10 @@ bool SimpleCompareRangeResult::TryExtensionalise( set<SR::XLink> &links ) const
     }
     
 #ifdef SC_KEY_IS_NODE
-	for( SR::Orderings::CategoryOrderingIterator it = it_lower;
+	for( SR::Orderings::SimpleCompareOrderingIterator it = it_lower;
 		 it != it_upper;
 		 ++it )
-		links = UnionOf( links, db->GetNodeRow(*it).incoming_xlinks );
+		links = UnionOf( links, x_tree_db->GetNodeRow(*it).incoming_xlinks );
 #else       
     links = set<SR::XLink>( it_lower, it_upper );
 #endif    
@@ -462,9 +456,9 @@ string SimpleCompareRangeResult::Render() const
     list<string> restrictions;
     
     if( lower )
-        restrictions.push_back( string(lower_incl?"∈":"∉") + lower.GetTrace() );
+        restrictions.push_back( string(lower_incl?"∈ ":"∉ ") + lower.GetTrace() );
     if( upper )
-        restrictions.push_back( upper.GetTrace() + string(upper_incl?"∋":"∌") );
+        restrictions.push_back( upper.GetTrace() + string(upper_incl?"∋ ":"∌ ") );
         
     return Join(restrictions, ", ", "{SC ", "}");
 }
@@ -516,11 +510,14 @@ bool CategoryRangeResult::TryExtensionalise( set<SR::XLink> &links ) const
 		for( SR::Orderings::CategoryOrderingIterator it = it_lower;
 			 it != it_upper;
 			 ++it )
-		links = UnionOf( links, db->GetNodeRow(*it).incoming_xlinks );
+			links = UnionOf( links, x_tree_db->GetNodeRow(*it).incoming_xlinks );
 #else
         links = UnionOf( links, set<SR::XLink>( it_lower, it_upper ) );
 #endif
     }
+    // TODO with CAT_KEY_IS_NODE defined we get zero XLinks here
+    // Try #define 0 or 1
+    //ASSERT(links.size()==0);
     return true;
 }
 
@@ -538,8 +535,8 @@ string CategoryRangeResult::Render() const
     for( const CatBounds &bounds : bounds_list )
     {
         list<string> restrictions;
-        restrictions.push_back( string(lower_incl?"∈":"∉") + bounds.first->GetTrace() );
-        restrictions.push_back( bounds.second->GetTrace() + string(upper_incl?"∋":"∌") );
+        restrictions.push_back( string(lower_incl?"∈ ":"∉ ") + bounds.first->GetTrace() );
+        restrictions.push_back( bounds.second->GetTrace() + string(upper_incl?"∋ ":"∌ ") );
         terms.push_back( Join(restrictions, ", ") );
     }
     return Join(terms, " ∪ ", "{CAT ", "}");

@@ -11,7 +11,6 @@ template<typename KeyType>
 void SR::TestRelationProperties( const vector<KeyType> &keys,
                                  bool expect_totality,
                                  string relation_name, 
-                                 function<string()> log_on_fail,
                                  function<Orderable::Diff(KeyType l, KeyType r)> compare,
                                  function<bool(KeyType l, KeyType r)> is_equal_native, 
                                  function<KeyType(KeyType x, int randval)> get_special ) 
@@ -62,7 +61,6 @@ void SR::TestRelationProperties( const vector<KeyType> &keys,
         if( ab_eq_native ) // Natively equal
         {
             ASSERT( ab_diff == 0)
-                  (log_on_fail())("\n")
                   (relation_name)(" failed stability:\n")(a_key)(" ")(b_key);
             tstab["a !equiv b"]++;
         }
@@ -80,7 +78,6 @@ void SR::TestRelationProperties( const vector<KeyType> &keys,
             if( !ab_eq_native ) // Natively not equal
             {
                 ASSERT( ab_diff != 0)
-                      (log_on_fail())("\n")
                       (relation_name)(" failed totality:\n")
                       (a_key)(" != ")(b_key);
                 ttot["a!=b"]++;
@@ -93,7 +90,6 @@ void SR::TestRelationProperties( const vector<KeyType> &keys,
     {
         Orderable::Diff aa_diff = compare(a_key, a_key);
         ASSERT( aa_diff == 0 )
-              (log_on_fail())("\n")
               (relation_name)(" failed reflexivity:\n")
               (a_key);
         tr++;
@@ -109,7 +105,6 @@ void SR::TestRelationProperties( const vector<KeyType> &keys,
         if( ab_diff == 0 )            // a == b
         {
             ASSERT( ba_diff == 0 )
-                  (log_on_fail())("\n")
                   (relation_name)(" failed symmetry:\n")
                   (a_key)(" equiv ")(b_key);       
             ts["a equiv b"]++;
@@ -117,7 +112,6 @@ void SR::TestRelationProperties( const vector<KeyType> &keys,
         else if( ab_diff < 0 )        // a < b
         {
             ASSERT( ba_diff > 0)
-                  (log_on_fail())("\n")
                   (relation_name)(" failed antisymmetry:\n")
                   (a_key)(" < ")(b_key);
             ts["a<b"]++;
@@ -125,7 +119,6 @@ void SR::TestRelationProperties( const vector<KeyType> &keys,
         else if( ab_diff > 0 )        // a > b
         {
             ASSERT( ba_diff < 0)
-                  (log_on_fail())("\n")
                   (relation_name)(" failed antisymmetry:\n")
                   (a_key)(" > ")(b_key);
             ts["a>b"]++;
@@ -151,7 +144,6 @@ void SR::TestRelationProperties( const vector<KeyType> &keys,
             if( bc_diff == 0 )            // b == c
             {
                 ASSERT( ac_diff == 0 )
-                      (log_on_fail())("\n")
                       (relation_name)(" failed transitivity:\n")
                       (a_key)(" equiv ")(b_key)(" equiv ")(c_key);
                 t["b equiv c"]++;
@@ -159,7 +151,6 @@ void SR::TestRelationProperties( const vector<KeyType> &keys,
             else if( bc_diff < 0 )        // b < c
             {
                 ASSERT( ac_diff < 0 )
-                      (log_on_fail())("\n")
                       (relation_name)(" failed transitivity:\n")
                       (a_key)(" equiv ")(b_key)(" < ")(c_key);
                 t["b<c"]++;
@@ -167,7 +158,6 @@ void SR::TestRelationProperties( const vector<KeyType> &keys,
             else if( bc_diff > 0 )        // b > c
             {
                 ASSERT( ac_diff > 0 )
-                      (log_on_fail())("\n")
                       (relation_name)(" failed transitivity:\n")
                       (a_key)(" equiv ")(b_key)(" > ")(c_key);
                 t["b>c"]++;
@@ -184,7 +174,6 @@ void SR::TestRelationProperties( const vector<KeyType> &keys,
             if( bc_diff == 0 )            // b == c
             {
                 ASSERT( ac_diff < 0 )
-                      (log_on_fail())("\n")
                       (relation_name)(" failed transitivity:\n")
                       (a_key)(" < ")(b_key)(" equiv ")(c_key);
                 t["b equiv c"]++;
@@ -192,7 +181,6 @@ void SR::TestRelationProperties( const vector<KeyType> &keys,
             else if( bc_diff < 0 )        // b < c
             {
                 ASSERT( ac_diff < 0 )
-					  (log_on_fail())("\n")
                       (relation_name)(" failed transitivity:\n")
                       (a_key)(" < ")(b_key)(" < ")(c_key);
                 t["b<c"]++;
@@ -213,7 +201,6 @@ void SR::TestRelationProperties( const vector<KeyType> &keys,
             if( bc_diff == 0 )            // b == c
             {
                 ASSERT( ac_diff > 0 )
-                      (log_on_fail())("\n")
                       (relation_name)(" failed transitivity:\n")
                       (a_key)(" ")(b_key)(" ")(c_key);
                 t["b equiv c"]++;
@@ -226,7 +213,6 @@ void SR::TestRelationProperties( const vector<KeyType> &keys,
             else if( bc_diff > 0 )        // b > c
             {
                 ASSERT( ac_diff > 0 )
-                      (log_on_fail())("\n")
                       (relation_name)(" failed transitivity:\n")
                       (a_key)(" ")(b_key)(" ")(c_key);
                 t["b>c"]++;
@@ -257,7 +243,6 @@ void SR::TestRelationProperties( const vector<KeyType> &keys,
 template void SR::TestRelationProperties<XLink>( const vector<XLink> &keys,
 										         bool expect_totality,
 										         string relation_name, 
-										         function<string()> log_on_fail,
 										         function<Orderable::Diff(XLink l, XLink r)> compare,
 										         function<bool(XLink l, XLink r)> is_equal_native, 
 										         function<XLink(XLink x, int randval)> get_special );
@@ -265,7 +250,6 @@ template void SR::TestRelationProperties<XLink>( const vector<XLink> &keys,
 template void SR::TestRelationProperties<TreePtr<Node>>( const vector<TreePtr<Node>> &keys,
 														 bool expect_totality,
 														 string relation_name, 
-														 function<string()> log_on_fail,
 														 function<Orderable::Diff(TreePtr<Node> l, TreePtr<Node> r)> compare,
 														 function<bool(TreePtr<Node> l, TreePtr<Node> r)> is_equal_native, 
 														 function<TreePtr<Node>(TreePtr<Node> x, int randval)> get_special );

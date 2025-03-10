@@ -337,9 +337,9 @@ string AllInSimpleCompareRangeOperator::Render() const
     list<string> restrictions;
     
     if( lower )
-        restrictions.push_back( string(lower_incl?"∈":"∉") + lower->Render() );
+        restrictions.push_back( string(lower_incl?"∈ ":"∉ ") + lower->Render() );
     if( upper )
-        restrictions.push_back( upper->Render() + string(upper_incl?"∋":"∌") );
+        restrictions.push_back( upper->Render() + string(upper_incl?"∋ ":"∌ ") );
         
     return Join(restrictions, ", ", "{SC ", "}");
 }
@@ -403,8 +403,8 @@ string AllInCategoryRangeOperator::Render() const
     for( const ExprBounds &bound_exprs : bounds_exprs_list )
     {
         list<string> restrictions;
-        restrictions.push_back( string(lower_incl?"∈":"∉") + bound_exprs.first->Render() );
-        restrictions.push_back( bound_exprs.second->Render() + string(upper_incl?"∋":"∌") );
+        restrictions.push_back( string(lower_incl?"∈ ":"∉ ") + bound_exprs.first->Render() );
+        restrictions.push_back( bound_exprs.second->Render() + string(upper_incl?"∋ ":"∌ ") );
         terms.push_back( Join(restrictions, ", ") );
     }
     return Join(terms, " ∪ ", "{CAT ", "}");

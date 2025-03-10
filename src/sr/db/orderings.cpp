@@ -67,7 +67,6 @@ DBWalk::Action Orderings::GetDeleteAction()
 #ifdef SC_KEY_IS_NODE
 				// Assume there was only one incoming XLink to the node because not a leaf
 				TreePtr<Node> ancestor_node = ancestor_xlink.GetChildTreePtr();
-				ASSERT( !db->HasNodeRow(ancestor_node) );
 				EraseSolo( simple_compare_ordering, ancestor_node );       		
 #else				
                 EraseSolo( simple_compare_ordering, ancestor_xlink );
@@ -96,7 +95,7 @@ DBWalk::Action Orderings::GetInsertAction()
 #ifdef SC_KEY_IS_NODE
 		ASSERT( db->HasNodeRow(walk_info.node) );
 		// Only if not already
-		if( !category_ordering.count(walk_info.node)==0 )
+		if( !simple_compare_ordering.count(walk_info.node)==0 )
 			InsertSolo( simple_compare_ordering, walk_info.node );       		
 #else
 		InsertSolo( simple_compare_ordering, walk_info.xlink );		
@@ -115,7 +114,6 @@ DBWalk::Action Orderings::GetInsertAction()
 #ifdef SC_KEY_IS_NODE
 				// Assume there is only one incoming XLink to the node because not a leaf
 				TreePtr<Node> ancestor_node = ancestor_xlink.GetChildTreePtr();
-				ASSERT( db->HasNodeRow(ancestor_node) );
 				InsertSolo( simple_compare_ordering, ancestor_xlink.GetChildTreePtr() );       		
 #else
                 InsertSolo( simple_compare_ordering, ancestor_xlink );

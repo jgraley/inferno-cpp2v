@@ -76,12 +76,12 @@ Orderable::Diff CategoryRelation::Compare3Way(KeyType l_key, KeyType r_key) cons
 		li = l_minimus->GetMinimusOrdinal();
 		ri = r_minimus->GetMinimusOrdinal();
         Orderable::Diff d = li - ri;
-#ifdef CAT_KEY_IS_NODE
-		return d;
-#else		
    	    if( d )
 		    return d;	
 		    
+#ifdef CAT_KEY_IS_NODE
+		return TreePtr<Node>::Compare3Way( l_key, r_key );
+#else				    
         return XLink::Compare3Way(l_key, r_key);
 #endif  
 	}
@@ -111,7 +111,6 @@ void CategoryRelation::Test( const vector<KeyType> &keys )
 	TestRelationProperties<KeyType>( keys,
 									 true,
 									 "CategoryRelation",
-									 function<string()>(),
 									 bind(&CategoryRelation::Compare3Way, *this, _1, _2), 
 	[&](KeyType l, KeyType r) -> bool
     { 
@@ -125,7 +124,11 @@ void CategoryRelation::Test( const vector<KeyType> &keys )
         // TODO maybe we could just calculate i directly from randval and the lacing size?
         
         // Consult the lacing for lacing indices
+#ifdef CAT_KEY_IS_NODE
+        auto rl = lacing->TryGetRangeListForCategory( x );
+#else        
         auto rl = lacing->TryGetRangeListForCategory( x.GetChildTreePtr() );
+#endif        
         
         // Only nodes seen in cat clauses during planning will succeed
         if( rl.empty() )
@@ -137,7 +140,11 @@ void CategoryRelation::Test( const vector<KeyType> &keys )
         
         // Make minimus node (this relation always uses minimus because half-open
         TreePtr<Node> node = MakeTreeNode<SR::CategoryRelation::MinimusNode>(i);
+#ifdef CAT_KEY_IS_NODE
+		return node;
+#else
         return XLink::CreateDistinct( node );
+#endif        
     } );
 }
 

@@ -45,11 +45,11 @@ public:
 	static void CheckEqual( shared_ptr<Orderings> l, shared_ptr<Orderings> r );
 
     // Category ordering TODO merge with SimpleCompare ordering
-    typedef set<XLink, CategoryRelation> CategoryOrdering;
+    typedef set<CategoryRelation::KeyType, CategoryRelation> CategoryOrdering;
     typedef CategoryOrdering::iterator CategoryOrderingIterator;
 
     // We will provide a SimpleCompare ordered version of the domain
-    typedef set<XLink, SimpleCompareRelation> SimpleCompareOrdering;
+    typedef set<SimpleCompareRelation::KeyType, SimpleCompareRelation> SimpleCompareOrdering;
     typedef SimpleCompareOrdering::iterator SimpleCompareOrderingIterator;
     
     // We will provide a depth-first ordered version of the domain
