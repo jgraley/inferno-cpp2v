@@ -46,7 +46,7 @@ public:
 		MinimusNode( int lacing_ordinal );
 		MinimusNode(); ///< default constructor, for making archetypes 
 		int GetMinimusOrdinal() const;
-		string GetName() const override;
+		string GetName() const final;
 	private:
 		int lacing_ordinal;
 	};

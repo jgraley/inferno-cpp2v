@@ -141,5 +141,5 @@ string Node::GetGraphId() const
 
 string Node::GetTrace() const
 {
-    return Traceable::GetName() + GetSerialString();
+    return GetName() + GetSerialString();
 }

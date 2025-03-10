@@ -86,7 +86,7 @@ DBWalk::Action Orderings::GetInsertAction()
 #ifdef CAT_KEY_IS_NODE
 		ASSERT( db->HasNodeRow(walk_info.node) );
 		// Only if not already
-		if( !category_ordering.count(walk_info.node)==0 )
+		if( category_ordering.count(walk_info.node)==0 )
 			InsertSolo( category_ordering, walk_info.node );       		
 #else
 		InsertSolo( category_ordering, walk_info.xlink );
@@ -95,7 +95,7 @@ DBWalk::Action Orderings::GetInsertAction()
 #ifdef SC_KEY_IS_NODE
 		ASSERT( db->HasNodeRow(walk_info.node) );
 		// Only if not already
-		if( !simple_compare_ordering.count(walk_info.node)==0 )
+		if( simple_compare_ordering.count(walk_info.node)==0 )
 			InsertSolo( simple_compare_ordering, walk_info.node );       		
 #else
 		InsertSolo( simple_compare_ordering, walk_info.xlink );		
@@ -163,10 +163,11 @@ void Orderings::CheckRelations( const vector<XLink> &xlink_domain,
                         "depth_first_ordering" );
 }
 
+
 template<typename ORDERING>
 void CheckEqualOrdering( string name, const ORDERING &l, const ORDERING &r )
 {
-	ASSERT( l == r )(name)(" ordering mismatch:\n")(DiffTrace(l, r));
+	ASSERT(IsEquivalent(l, r))(name)(" ordering mismatch:\n")(DiffTrace(l, r))("\nReference ordering:\n")(l);
 }
 
 

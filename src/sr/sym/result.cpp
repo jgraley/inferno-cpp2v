@@ -514,10 +514,9 @@ bool CategoryRangeResult::TryExtensionalise( set<SR::XLink> &links ) const
 #else
         links = UnionOf( links, set<SR::XLink>( it_lower, it_upper ) );
 #endif
-    }
+	}
     // TODO with CAT_KEY_IS_NODE defined we get zero XLinks here
     // Try #define 0 or 1
-    //ASSERT(links.size()==0);
     return true;
 }
 

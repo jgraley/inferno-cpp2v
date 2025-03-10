@@ -218,10 +218,13 @@ void XTreeDatabase::ExtraTreeDelete(DBCommon::TreeOrdinal tree_ordinal)
     DBWalk::Actions actions;
 	actions.push_back( domain_extension->GetDeleteAction() );
 	actions.push_back( orderings->GetDeleteAction() );
-	actions.push_back( node_table->GetDeleteAction() );
-	actions.push_back( link_table->GetDeleteAction() );
-	actions.push_back( domain->GetDeleteAction() );
     db_walker.WalkTree( &actions, xlink, tree_ordinal, DBWalk::WIND_OUT );       
+
+    DBWalk::Actions actions2;
+	actions2.push_back( node_table->GetDeleteAction() );
+	actions2.push_back( link_table->GetDeleteAction() );
+	actions2.push_back( domain->GetDeleteAction() );
+    db_walker.WalkTree( &actions2, xlink, tree_ordinal, DBWalk::WIND_OUT );       
 }
 
 
@@ -234,8 +237,11 @@ void XTreeDatabase::ExtraTreeInsert(DBCommon::TreeOrdinal tree_ordinal)
     actions.push_back( domain->GetInsertAction() );
     actions.push_back( link_table->GetInsertAction() );
     actions.push_back( node_table->GetInsertAction() );
-    actions.push_back( orderings->GetInsertAction() );
 	db_walker.WalkTree( &actions, xlink, tree_ordinal, DBWalk::WIND_IN );
+
+	DBWalk::Actions actions3;
+    actions3.push_back( orderings->GetInsertAction() );
+	db_walker.WalkTree( &actions3, xlink, tree_ordinal, DBWalk::WIND_IN );
 
 	DBWalk::Actions actions2;
 	actions2.push_back( domain_extension->GetInsertAction());
@@ -436,15 +442,19 @@ void XTreeDatabase::Checks()
 
 	// ---------- Checks against reference ------------
 	// No deps on other parts of DB so check first
+    TRACE("Making reference domain for checks\n");
     auto ref_domain = make_shared<Domain>();
 	DBWalk::Actions actions1 { ref_domain->GetInsertAction() };
 	WalkAllTrees( &actions1, DBWalk::WIND_IN );
+    TRACE("Checking\n");
 	Domain::CheckEqual(ref_domain, domain);
 	
 	// Orderings have deps on LinkTablke for finding parent
+    TRACE("Making reference orderings for checks\n");
     auto ref_orderings = make_shared<Orderings>(lacing, this);
 	DBWalk::Actions actions2 { ref_orderings->GetInsertAction() };
 	WalkAllTrees( &actions2, DBWalk::WIND_IN );
+    TRACE("Checking\n");
 	Orderings::CheckEqual(ref_orderings, orderings);
 
 	// ---------- Relation checks ------------

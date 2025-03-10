@@ -60,12 +60,12 @@ Orderable::Diff CategoryRelation::Compare3Way(KeyType l_key, KeyType r_key) cons
         ASSERT( (d<0) == (d1<0) );
         ASSERT( (d==0) == (d1==0) );
 #endif
-#ifdef CAT_KEY_IS_NODE
-		return d;
-#else		
    	    if( d )
 		    return d;	
 		    
+#ifdef CAT_KEY_IS_NODE
+		return TreePtr<Node>::Compare3Way( l_key, r_key );
+#else				    
         return XLink::Compare3Way(l_key, r_key);
 #endif        
     }
@@ -169,5 +169,5 @@ int CategoryRelation::MinimusNode::GetMinimusOrdinal() const
 
 string CategoryRelation::MinimusNode::GetName() const
 {
-    return SSPrintf("Cat-Minimus(%d)", lacing_ordinal);
+    return SSPrintf("Cat::Minimus(%d)", lacing_ordinal);
 }

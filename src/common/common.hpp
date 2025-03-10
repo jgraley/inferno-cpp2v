@@ -273,6 +273,19 @@ inline bool IsIncludes( const C1 &c1, const C2 &c2 )
 }
 
 
+// Is c1 equivalent to c2? NOT THE SAME AS c1==c2!!!
+//  - IsEquivalent() uses the relation set for c1
+//  - == requires all the elements to compare equal with ==
+template< typename C1, typename C2 >
+inline bool IsEquivalent( const C1 &c1, const C2 &c2 )
+{
+	// Prefer includes twice over set_symmetric_difference once
+	// because includes only returns a bool and isn't building things.
+    return includes( c1.begin(), c1.end(), c2.begin(), c2.end(), c1.key_comp() ) && 
+		   includes( c2.begin(), c2.end(), c1.begin(), c1.end(), c1.key_comp() );
+}
+
+
 // Is c1 a submap of c2?
 template< typename K, typename V, typename C >
 inline bool IsIncludes( const map<K, V, C> &m1, const map<K, V, C> &m2 )

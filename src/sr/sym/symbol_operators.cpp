@@ -40,7 +40,7 @@ SR::XLink SymbolConstant::GetOnlyXLink() const
 
 
 Orderable::Diff SymbolConstant::OrderCompare3WayCovariant( const Orderable &right, 
-                                                       OrderProperty order_property ) const 
+                                                           OrderProperty order_property ) const 
 {
     auto &r = GET_THAT_REFERENCE(right);
 
