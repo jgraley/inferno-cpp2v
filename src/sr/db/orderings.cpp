@@ -33,13 +33,22 @@ const Lacing *Orderings::GetLacing() const
 
 DBWalk::Action Orderings::GetDeleteAction()
 {	
+	xlinks_reached_for_node.clear();
+	
 	return [=](const DBWalk::WalkInfo &walk_info)
 	{
 		EraseSolo( depth_first_ordering, walk_info.xlink );
 
+		// Node table hasn't been updated yet, so node should be in there.
+		NodeTable::Row row = db->GetNodeRow(walk_info.node); 
+		ASSERT( row.incoming_xlinks.count(walk_info.xlink)==1 );
+		
+		// Track the xlinks we've reached for each node
+		xlinks_reached_for_node[walk_info.node].insert(walk_info.xlink);		
+
 #ifdef CAT_KEY_IS_NODE
 		// Only remove if this was the last incoming XLink to the node
-		if( !db->HasNodeRow(walk_info.node) )
+		if( xlinks_reached_for_node.at(walk_info.node) == row.incoming_xlinks )
 			EraseSolo( category_ordering, walk_info.node );       		
 #else
 		EraseSolo( category_ordering, walk_info.xlink );       
@@ -47,7 +56,7 @@ DBWalk::Action Orderings::GetDeleteAction()
 
 #ifdef SC_KEY_IS_NODE
 		// Only remove if this was the last incoming XLink to the node
-		if( !db->HasNodeRow(walk_info.node) )
+		if( xlinks_reached_for_node.at(walk_info.node) == row.incoming_xlinks ) // TODO merge these ifs
 			EraseSolo( simple_compare_ordering, walk_info.node );       		
 #else
 		EraseSolo( simple_compare_ordering, walk_info.xlink );

@@ -72,6 +72,7 @@ public:
 
 private:
     const XTreeDatabase *db;
+    map<TreePtr<Node>, set<XLink>> xlinks_reached_for_node;
 };    
     
 }
