@@ -5,6 +5,8 @@
 #include "common/standard.hpp"
 #include "db_walk.hpp"
 
+#include <unordered_map>
+
 namespace SR 
 {    
     
@@ -43,7 +45,7 @@ public:
 	string GetTrace() const;
 private:
     // Node-to-row-of-x_tree_db map
-    map<TreePtr<Node>, Row> rows;
+    unordered_map<TreePtr<Node>, Row> rows;
 };    
     
 };

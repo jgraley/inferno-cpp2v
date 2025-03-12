@@ -272,4 +272,18 @@ TreePtr<VALUE_TYPE> MakeTreeNode(const CP &...cp)
     return TreePtr<VALUE_TYPE>( new VALUE_TYPE(cp...) );
 }
 
+// The hashing functions we require in order to use links as keys to
+// unordered_set, unordered_map
+namespace std
+{
+    template<typename X> struct hash<TreePtr<X>>
+    {
+        size_t operator()(const TreePtr<X> &tp_x) const noexcept
+        {
+            return std::hash<decltype(tp_x.get())>()(tp_x.get()) >> HASHING_POINTERS_ALIGNMENT_BITS; 
+        }
+    };
+}
+
+
 #endif 

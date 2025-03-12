@@ -10,8 +10,6 @@ using namespace SR;
 #define WHODAT() nullptr
 #endif
  
-#define ALIGNMENT_BITS 3 
-
 // Tests the not-on-stack tests themseleves
 //#define TEST_ASSERT_NOT_ON_STACK
 
@@ -109,7 +107,7 @@ Orderable::Diff PatternLink::Compare3Way(const PatternLink &l, const PatternLink
 
 size_t PatternLink::GetHash() const noexcept
 {
-    return std::hash<decltype(asp_pattern)>()(asp_pattern) >> ALIGNMENT_BITS;
+    return std::hash<decltype(asp_pattern)>()(asp_pattern) >> HASHING_POINTERS_ALIGNMENT_BITS;
 }
 
 
@@ -294,7 +292,7 @@ Orderable::Diff XLink::Compare3Way(const XLink &l, const XLink &r)
 
 size_t XLink::GetHash() const noexcept
 {
-    return std::hash<decltype(asp_x)>()(asp_x) >> ALIGNMENT_BITS; 
+    return std::hash<decltype(asp_x)>()(asp_x) >> HASHING_POINTERS_ALIGNMENT_BITS; 
 }
 
 

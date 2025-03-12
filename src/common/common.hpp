@@ -686,5 +686,8 @@ public:
 	// successful, Clone() for a return value.
 };
 
+// The hashing algo for pointers MAY just be a simple cast. So, shift out the alignment
+// bits from the address for better hashing.
+#define HASHING_POINTERS_ALIGNMENT_BITS 3 
 
 #endif
