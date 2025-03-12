@@ -108,6 +108,11 @@ void XTreeDatabase::InitialBuild()
 		ExtraTreeInsert( de_extra_insert_queue.front() );
 		de_extra_insert_queue.pop();
 	}    
+	
+
+	// ---------- Relation checks ------------
+	orderings->CheckRelations( link_table->GetXLinkDomainAsVector(),
+							   node_table->GetNodeDomainAsVector() );
 }
 
 
