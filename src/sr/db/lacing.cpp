@@ -61,7 +61,7 @@ void Lacing::FixupCategories(const CategorySet &raw_categories_)
             {
                 // A handy place to check that node ordering is always at least
                 // as strict as catecory equivalence.
-                ASSERT( Node::OrderCompare3Way( *x, *y, Orderable::STRICT ) );
+                ASSERT( Node::OrderCompare3Way( *x, *y, Orderable::TOTAL ) );
                 ASSERT( Node::OrderCompare3Way( *x, *y, Orderable::REPEATABLE ) );
             }
             

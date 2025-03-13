@@ -62,7 +62,7 @@ The comparison should be equivalent to `*this - candidate` so that the return va
  - positive if `*this` is _after_ `candidate`;
  - zero otherwise.
  
-`order_property` should be checked: if `STRICT` then a strict ordering should be implemented, even if this requires comparison of pointers. If `REPEATABLE`, only repeatable comparisons should be included.
+`order_property` should be checked: if `TOTAL` then a total ordering should be implemented, even if this requires comparison of pointers. If `REPEATABLE`, only repeatable comparisons should be included.
 
 ### 3.3 `Itemiser`
 

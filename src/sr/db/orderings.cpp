@@ -92,22 +92,21 @@ DBWalk::Action Orderings::GetInsertAction()
 	{ 
         InsertSolo( depth_first_ordering, walk_info.xlink );
 		
+		const NodeTable::Row &row = db->GetNodeRow(walk_info.node);
 #ifdef CAT_KEY_IS_NODE
-		ASSERT( db->HasNodeRow(walk_info.node) );
 		// Only if not already
 		if( category_ordering.count(walk_info.node)==0 )
-			InsertSolo( category_ordering, walk_info.node );       		
+			InsertSolo( category_ordering, make_pair(walk_info.node, &row) );       		
 #else
-		InsertSolo( category_ordering, walk_info.xlink );
+		InsertSolo( category_ordering, make_pair(walk_info.xlink, &row) );
 #endif
 
 #ifdef SC_KEY_IS_NODE
-		ASSERT( db->HasNodeRow(walk_info.node) );
 		// Only if not already
 		if( simple_compare_ordering.count(walk_info.node)==0 )
-			InsertSolo( simple_compare_ordering, walk_info.node );       		
+			InsertSolo( simple_compare_ordering, make_pair(walk_info.node, &row) );       		
 #else
-		InsertSolo( simple_compare_ordering, walk_info.xlink );		
+		InsertSolo( simple_compare_ordering, make_pair(walk_info.xlink, &row) );		
 #endif
 		// TODO
 
@@ -123,9 +122,9 @@ DBWalk::Action Orderings::GetInsertAction()
 #ifdef SC_KEY_IS_NODE
 				// Assume there is only one incoming XLink to the node because not a leaf
 				TreePtr<Node> ancestor_node = ancestor_xlink.GetChildTreePtr();
-				InsertSolo( simple_compare_ordering, ancestor_xlink.GetChildTreePtr() );       		
+				InsertSolo( simple_compare_ordering, make_pair(ancestor_node, &db->GetNodeRow(ancestor_node)) );       		
 #else
-                InsertSolo( simple_compare_ordering, ancestor_xlink );
+                InsertSolo( simple_compare_ordering, make_pair(ancestor_node, nullptr /* not expecting to need*/) );
 #endif                
             }
         }
@@ -176,7 +175,9 @@ void Orderings::CheckRelations( const vector<XLink> &xlink_domain,
 template<typename ORDERING>
 void CheckEqualOrdering( string name, const ORDERING &l, const ORDERING &r )
 {
-	ASSERT(IsEquivalent(l, r))(name)(" ordering mismatch:\n")(DiffTrace(l, r))("\nReference ordering:\n")(l);
+	auto lk = KeysToSet(l);
+	auto rk = KeysToSet(r);
+	ASSERT(IsEquivalent(lk, rk))(name)(" ordering mismatch:\n")(DiffTrace(lk, rk))("\nReference ordering:\n")(l);
 }
 
 

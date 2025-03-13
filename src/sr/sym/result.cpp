@@ -316,7 +316,7 @@ SR::XLink DepthFirstRangeResult::GetOnlyXLink() const
 bool DepthFirstRangeResult::TryExtensionalise( set<SR::XLink> &links ) const
 { 
 	const SR::Orderings::DepthFirstOrdering &ordering = x_tree_db->GetOrderings().depth_first_ordering;
-    SR::Orderings::DepthFirstOrderingIterator it_lower, it_upper;
+    SR::Orderings::DepthFirstOrdering::iterator it_lower, it_upper;
     
     if( lower )
     {
@@ -406,7 +406,7 @@ SR::XLink SimpleCompareRangeResult::GetOnlyXLink() const
 bool SimpleCompareRangeResult::TryExtensionalise( set<SR::XLink> &links ) const
 {        
     links.clear();
-    SR::Orderings::SimpleCompareOrderingIterator it_lower, it_upper;
+    SR::Orderings::SimpleCompareOrdering::const_iterator it_lower, it_upper;
 
     if( lower )
     {
@@ -433,10 +433,10 @@ bool SimpleCompareRangeResult::TryExtensionalise( set<SR::XLink> &links ) const
     }
     
 #ifdef SC_KEY_IS_NODE
-	for( SR::Orderings::SimpleCompareOrderingIterator it = it_lower;
+	for( SR::Orderings::SimpleCompareOrdering::const_iterator it = it_lower;
 		 it != it_upper;
 		 ++it )
-		links = UnionOf( links, x_tree_db->GetNodeRow(*it).incoming_xlinks );
+		links = UnionOf( links, it->second->incoming_xlinks );
 #else       
     links = set<SR::XLink>( it_lower, it_upper );
 #endif    
@@ -491,7 +491,7 @@ bool CategoryRangeResult::TryExtensionalise( set<SR::XLink> &links ) const
     links.clear();
     for( const CatBounds &bounds : bounds_list )
     {
-        SR::Orderings::CategoryOrderingIterator it_lower, it_upper; 
+        SR::Orderings::CategoryOrdering::const_iterator it_lower, it_upper; 
 
         ASSERT( &bounds );
         ASSERT( bounds.first );
@@ -507,10 +507,10 @@ bool CategoryRangeResult::TryExtensionalise( set<SR::XLink> &links ) const
             it_upper = x_tree_db->GetOrderings().category_ordering.lower_bound(*bounds.second);
 
 #ifdef CAT_KEY_IS_NODE
-		for( SR::Orderings::CategoryOrderingIterator it = it_lower;
+		for( SR::Orderings::CategoryOrdering::const_iterator it = it_lower;
 			 it != it_upper;
 			 ++it )
-			links = UnionOf( links, x_tree_db->GetNodeRow(*it).incoming_xlinks );
+			links = UnionOf( links, it->second->incoming_xlinks );
 #else
         links = UnionOf( links, set<SR::XLink>( it_lower, it_upper ) );
 #endif

@@ -318,7 +318,7 @@ Orderable::Diff SpecificFloatSemantics::OrderCompare3WayCovariant( const Orderab
     Orderable::Diff d;
     switch( order_property )
     {
-    case STRICT:
+    case TOTAL:
         // Don't use any particular ordering apart from where the 
         // llvm::fltSemantics are being stored.
         d = (int)(value > r.value) - (int)(value < r.value);

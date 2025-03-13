@@ -16,7 +16,7 @@ public:
     // Use a reference to SimpleCompare so derived classes can use it.
     typedef multiset<reference_wrapper<Node>, const SimpleCompare &> NodeOrdering;
 
-    SimpleCompare( Orderable::OrderProperty order_property = Orderable::STRICT );
+    SimpleCompare( Orderable::OrderProperty order_property = Orderable::TOTAL );
     SimpleCompare &operator=(const SimpleCompare &other);
 
     /// Less operator: for use with set, map etc

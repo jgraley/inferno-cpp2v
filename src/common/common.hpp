@@ -286,6 +286,25 @@ inline bool IsEquivalent( const C1 &c1, const C2 &c2 )
 }
 
 
+// Get the keys of a map into a set
+template<typename KEY, typename VALUE, typename KEY_COMP>
+set<KEY, KEY_COMP> KeysToSet( const map<KEY, VALUE, KEY_COMP> &m )
+{
+	set<KEY, KEY_COMP> s( m.key_comp() );
+	for( auto p : m )
+		s.insert(p.first);
+    return s;
+}
+
+// Can call on set, does nothing
+template<typename KEY, typename KEY_COMP>
+set<KEY, KEY_COMP> KeysToSet( const set<KEY, KEY_COMP> &s )
+{
+    return s;
+}
+
+
+
 // Is c1 a submap of c2?
 template< typename K, typename V, typename C >
 inline bool IsIncludes( const map<K, V, C> &m1, const map<K, V, C> &m2 )

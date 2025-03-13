@@ -16,7 +16,7 @@ public:
     enum OrderProperty
     {
         // Objects with different values must compare non-equal
-        STRICT,     
+        TOTAL,     
         
         // Objects with different values may compare equal if this
         // avoids non-repeatable behaviour eg memory allocation dependencies 
@@ -33,7 +33,7 @@ public:
     
     static Orderable::Diff OrderCompare3Way( const Orderable &l, 
                                              const Orderable &r, 
-                                             OrderProperty order_property = STRICT );
+                                             OrderProperty order_property = TOTAL );
     virtual Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                                    OrderProperty order_property ) const;
     virtual Orderable::Diff OrderCompare3WayChildren( const Orderable &right, 

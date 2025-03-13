@@ -7,6 +7,7 @@
 #include "cat_relation.hpp"
 #include "df_relation.hpp"
 #include "db_walk.hpp"
+#include "node_table.hpp"
 
 namespace SYM
 {
@@ -45,20 +46,22 @@ public:
 	static void CheckEqual( shared_ptr<Orderings> l, shared_ptr<Orderings> r );
 
     // Category ordering TODO merge with SimpleCompare ordering
-    typedef set<CategoryRelation::KeyType, CategoryRelation> CategoryOrdering;
-    typedef CategoryOrdering::iterator CategoryOrderingIterator;
+    typedef map<CategoryRelation::KeyType, 
+                const NodeTable::Row *, 
+                CategoryRelation> CategoryOrdering;
 
     // We will provide a SimpleCompare ordered version of the domain
-    typedef set<SimpleCompareRelation::KeyType, SimpleCompareRelation> SimpleCompareOrdering;
-    typedef SimpleCompareOrdering::iterator SimpleCompareOrderingIterator;
+    typedef map<SimpleCompareRelation::KeyType, 
+                const NodeTable::Row *, 
+                SimpleCompareRelation> SimpleCompareOrdering;
     
     // We will provide a depth-first ordered version of the domain
     // Why not use the X tree directly? Well, we have the DepthFirstRelation
     // but would need to code up an extensionaliser that uses the X tree 
     // (not too hard). Real reason is to keep the door open to future 
     // combined orderings.
-    typedef set<XLink, DepthFirstRelation> DepthFirstOrdering;
-    typedef DepthFirstOrdering::iterator DepthFirstOrderingIterator;
+    typedef set<DepthFirstRelation::KeyType, 
+                DepthFirstRelation> DepthFirstOrdering;
 
     // Global domain of possible xlink values - new version
     DepthFirstOrdering depth_first_ordering;            
