@@ -44,8 +44,14 @@ protected:
     SerialNumber &operator=( const SerialNumber &other );
 
 public:
-    static Orderable::Diff Compare3WayIdentity(const SerialNumber &l, const SerialNumber &r);
-
+    static inline Orderable::Diff Compare3WayIdentity(const SerialNumber &l, const SerialNumber &r)
+	{
+		if( l.progress != r.progress )
+			return Progress::Compare3Way(l.progress, r.progress);
+			
+		return l.serial - r.serial;
+	}
+	
     inline SNType GetSerialNumber() const;
     string GetSerialString() const; 
 	void SetHook(shared_ptr<Hook> h) const;
@@ -78,7 +84,10 @@ public:
     explicit SatelliteSerial( const SerialNumber *mother, const void *satellite );
 
     string GetSerialString() const;
-    static Orderable::Diff Compare3WayIdentity(const SatelliteSerial &l, const SatelliteSerial &r);
+    static inline Orderable::Diff Compare3WayIdentity(const SatelliteSerial &l, const SatelliteSerial &r)
+    {
+		return l.serial - r.serial;
+	}
         
 private:
 	// These are hooked to the mother SerialNumber instance

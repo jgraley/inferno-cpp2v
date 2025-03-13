@@ -8,6 +8,12 @@
 // To reduce clutter in log diffs when satellite serial numbers are not in synch
 //#define SUPPRESS_SATELLITE_NUMBERS
 
+// Ordering on node is not a requirement for repeatability. I think it's only there to
+// keep logs nice by grouping similar nodes. But it slows down set<TreePtr<>> and
+// set<XLink> quite a lot.
+//#define TREE_PTR_ORDERED_ON_NODE
+
+
 // -------------------------- TreePtrInterface ----------------------------    
 
 TreePtrInterface &TreePtrInterface::operator=( const TreePtrInterface &o )
@@ -49,10 +55,12 @@ Orderable::Diff TreePtrInterface::Compare3Way(const TreePtrInterface &l, const T
     ASSERTS( l );
     ASSERTS( r );
 
+#ifdef TREE_PTR_ORDERED_ON_NODE
     // Secondary ordering is on the value of the node (not including subtree) which will
     // help with orderings of sets of things in the trace logs.
     if( Orderable::Diff d_nv = Node::OrderCompare3Way( *l, *r ) )
         return d_nv;
+#endif
 
     // Tertiary ordering is on the identities of the nodes, which corresponds to the values of 
     // the TreePtrs.

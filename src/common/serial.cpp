@@ -33,7 +33,7 @@ inline SerialNumber &SerialNumber::operator=( const SerialNumber &other )
 	return *this;
 }
 
-
+/*
 Orderable::Diff SerialNumber::Compare3WayIdentity(const SerialNumber &l, const SerialNumber &r)
 {
 	if( l.progress != r.progress )
@@ -41,7 +41,7 @@ Orderable::Diff SerialNumber::Compare3WayIdentity(const SerialNumber &l, const S
 		
 	return l.serial - r.serial;
 }
-
+*/
 
 SerialNumber::SNType SerialNumber::GetSerialNumber() const 
 {
@@ -121,7 +121,7 @@ string SatelliteSerial::GetSerialString() const
         return SSPrintf("#%d", serial);
 }
 
-
+/*
 Orderable::Diff SatelliteSerial::Compare3WayIdentity(const SatelliteSerial &l, const SatelliteSerial &r)
 {
     Orderable::Diff d = l.serial - r.serial;
@@ -137,7 +137,7 @@ Orderable::Diff SatelliteSerial::Compare3WayIdentity(const SatelliteSerial &l, c
                ("r=")(r.GetSerialString())(" at %p mb=%p\n", &r, r.p_mother_block);
 	return d;
 }
-
+*/
 
 int SatelliteSerial::MotherBlock::AssignSerial(const SatelliteSerial *ss_for_trace)
 {
