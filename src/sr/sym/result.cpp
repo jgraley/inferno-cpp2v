@@ -436,7 +436,7 @@ bool SimpleCompareRangeResult::TryExtensionalise( set<SR::XLink> &links ) const
 	for( SR::Orderings::SimpleCompareOrdering::const_iterator it = it_lower;
 		 it != it_upper;
 		 ++it )
-		links = UnionOf( links, it->second->incoming_xlinks );
+		links = UnionOf( links, x_tree_db->GetNodeRow(*it).incoming_xlinks );
 #else       
     links = set<SR::XLink>( it_lower, it_upper );
 #endif    
@@ -510,7 +510,7 @@ bool CategoryRangeResult::TryExtensionalise( set<SR::XLink> &links ) const
 		for( SR::Orderings::CategoryOrdering::const_iterator it = it_lower;
 			 it != it_upper;
 			 ++it )
-			links = UnionOf( links, it->second->incoming_xlinks );
+			links = UnionOf( links, x_tree_db->GetNodeRow(*it).incoming_xlinks );
 #else
         links = UnionOf( links, set<SR::XLink>( it_lower, it_upper ) );
 #endif

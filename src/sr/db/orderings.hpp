@@ -46,13 +46,11 @@ public:
 	static void CheckEqual( shared_ptr<Orderings> l, shared_ptr<Orderings> r );
 
     // Category ordering TODO merge with SimpleCompare ordering
-    typedef map<CategoryRelation::KeyType, 
-                const NodeTable::Row *, 
+    typedef set<CategoryRelation::KeyType, 
                 CategoryRelation> CategoryOrdering;
 
     // We will provide a SimpleCompare ordered version of the domain
-    typedef map<SimpleCompareRelation::KeyType, 
-                const NodeTable::Row *, 
+    typedef set<SimpleCompareRelation::KeyType, 
                 SimpleCompareRelation> SimpleCompareOrdering;
     
     // We will provide a depth-first ordered version of the domain

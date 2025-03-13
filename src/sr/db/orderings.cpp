@@ -39,6 +39,11 @@ DBWalk::Action Orderings::GetDeleteAction()
 	{
 		EraseSolo( depth_first_ordering, walk_info.xlink );
 
+		// Intrinsic orderings are keyed on nodes, and we don't need to update on the boundary layer
+		ASSERT( !(walk_info.at_terminus && walk_info.at_base) );
+        if( walk_info.at_terminus )
+			return;
+		
 		// Node table hasn't been updated yet, so node should be in there.
 		NodeTable::Row row = db->GetNodeRow(walk_info.node); 
 		ASSERT( row.incoming_xlinks.count(walk_info.xlink)==1 );
@@ -91,22 +96,27 @@ DBWalk::Action Orderings::GetInsertAction()
 	return [=](const DBWalk::WalkInfo &walk_info)
 	{ 
         InsertSolo( depth_first_ordering, walk_info.xlink );
+        
+		// Intrinsic orderings are keyed on nodes, and we don't need to update on the boundary layer
+		ASSERT( !(walk_info.at_terminus && walk_info.at_base) );
+        if( walk_info.at_terminus )
+			return;
 		
 		const NodeTable::Row &row = db->GetNodeRow(walk_info.node);
 #ifdef CAT_KEY_IS_NODE
 		// Only if not already
 		if( category_ordering.count(walk_info.node)==0 )
-			InsertSolo( category_ordering, make_pair(walk_info.node, &row) );       		
+			InsertSolo( category_ordering, walk_info.node );       		
 #else
-		InsertSolo( category_ordering, make_pair(walk_info.xlink, &row) );
+		InsertSolo( category_ordering, walk_info.xlink );
 #endif
 
 #ifdef SC_KEY_IS_NODE
 		// Only if not already
 		if( simple_compare_ordering.count(walk_info.node)==0 )
-			InsertSolo( simple_compare_ordering, make_pair(walk_info.node, &row) );       		
+			InsertSolo( simple_compare_ordering, walk_info.node );       		
 #else
-		InsertSolo( simple_compare_ordering, make_pair(walk_info.xlink, &row) );		
+		InsertSolo( simple_compare_ordering, walk_info.xlink );		
 #endif
 		// TODO
 
@@ -122,9 +132,9 @@ DBWalk::Action Orderings::GetInsertAction()
 #ifdef SC_KEY_IS_NODE
 				// Assume there is only one incoming XLink to the node because not a leaf
 				TreePtr<Node> ancestor_node = ancestor_xlink.GetChildTreePtr();
-				InsertSolo( simple_compare_ordering, make_pair(ancestor_node, &db->GetNodeRow(ancestor_node)) );       		
+				InsertSolo( simple_compare_ordering, ancestor_node );       		
 #else
-                InsertSolo( simple_compare_ordering, make_pair(ancestor_node, nullptr /* not expecting to need*/) );
+                InsertSolo( simple_compare_ordering, ancestor_node );
 #endif                
             }
         }
