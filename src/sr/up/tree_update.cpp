@@ -10,6 +10,7 @@
 #include "tz_ordering.hpp"
 #include "fz_merge.hpp"
 #include "inversion.hpp"
+#include "complement.hpp"
 
 #include <iostream>
 
@@ -71,6 +72,9 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink target_origin, shared_
 	// Enact the tree zones that will stick around
 	BaseForEmbeddedMarkPropagation bfe_mark_propagation( db );
 	bfe_mark_propagation.Run(source_layout);
+
+	TreeZoneComplementer tree_zone_complementor( db );
+	tree_zone_complementor.Run(target_origin, source_layout);
 
 	// Inversion generates sequence of separate "small" update commands 
 	TreeZoneInverter tree_zone_inverter( db ); 

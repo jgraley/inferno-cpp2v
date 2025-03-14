@@ -34,6 +34,8 @@ void TreeZoneComplementer::Run(XLink target_origin, shared_ptr<Patch> source_lay
 	} );
 	
 	WalkTreeZones(target_origin);
+	
+	FTRACE(complement);
 }
 
 
@@ -50,8 +52,7 @@ void TreeZoneComplementer::WalkTreeZones(XLink target_base)
 	else
 	{
 		// make a complement TZ and store it.
-		CreateComplementTZ(target_base);
-		
+		CreateComplementTZ(target_base);		
 	}
 
 }
@@ -66,7 +67,8 @@ void TreeZoneComplementer::CreateComplementTZ(XLink target_base)
 	// The first element in the ordering which is not ordered before target_base.
 	// target_base is not in there, so we're at first child if there are any.
 	// Loop through children	
-	while( df_rel.CompareHierarchical(target_base, it->first).second == DepthFirstRelation::RelType::LEFT_IS_ANCESTOR )
+	while( it != source_tzs_df_by_base.end() && 
+	       df_rel.CompareHierarchical(target_base, it->first).second == DepthFirstRelation::RelType::LEFT_IS_ANCESTOR )
 	{
 		XLink child = it->first;
 	
@@ -78,7 +80,8 @@ void TreeZoneComplementer::CreateComplementTZ(XLink target_base)
 
 		++it;
 		// Loop PAST any children of this child
-		while( df_rel.CompareHierarchical(child, it->first).second == DepthFirstRelation::RelType::LEFT_IS_ANCESTOR )
+		while( it != source_tzs_df_by_base.end() && 
+			   df_rel.CompareHierarchical(child, it->first).second == DepthFirstRelation::RelType::LEFT_IS_ANCESTOR )
 			++it;
 	}
 	
