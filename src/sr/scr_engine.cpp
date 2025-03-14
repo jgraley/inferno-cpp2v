@@ -359,19 +359,16 @@ void SCREngine::RunEmbedded( PatternLink plink_to_embedded, XLink base_xlink )
 }
 
 
-void SCREngine::Replace( XLink base_xlink )
+void SCREngine::Replace( XLink origin_xlink )
 {
     INDENT("R");
 
 	// Get an expression that evaluates to the new X tree
 	Agent::ReplaceKit replace_kit { x_tree_db.get() };
     Agent::ReplacePatchPtr source_expr = plan.base_agent->GenReplaceLayout(replace_kit, plan.base_plink);
-    
-    // Create a command to replace the current X tree with this expression
-    TreeZone target_tree_zone = TreeZone::CreateSubtree(base_xlink);
-    
+        
     // Request to update the tree
-	plan.vn_sequence->UpdateUsingLayout( target_tree_zone, move(source_expr) );  
+	plan.vn_sequence->UpdateUsingLayout( origin_xlink, move(source_expr) );  
     
     TRACE("Replace done\n");
 }

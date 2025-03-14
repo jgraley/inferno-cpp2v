@@ -1,4 +1,4 @@
-#include "inversion.hpp"
+#include "complement.hpp"
 
 #include "patches.hpp"
 #include "db/x_tree_database.hpp"
@@ -11,20 +11,30 @@
 
 using namespace SR;
 
-TreeZoneInverter::TreeZoneInverter( XTreeDatabase *db_ ) :
-	db( db_ )
+TreeZoneComplementer::TreeZoneComplementer( XTreeDatabase *db_ ) :
+	db( db_ ),
+	df_rel( db ),
+	tree_zones_depth_first_by_base( df_rel )	
 {
 }
 
 
-void TreeZoneInverter::Run(XLink target_origin, shared_ptr<Patch> *source_layout_ptr)
-{
-	LocatedPatch base_lze( target_origin, source_layout_ptr );
-	WalkLocatedPatches( base_lze );
+void TreeZoneComplementer::Run(XLink target_origin, shared_ptr<Patch> layout)
+{	
+	Patch::ForDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
+	{
+		if( auto tz_patch = dynamic_pointer_cast<TreeZonePatch>(patch) )
+		{	
+			const TreeZone &tz = tz_patch->GetZone();
+			tree_zones_depth_first_by_base.emplace( tz.GetBaseXLink(), tz );
+		}
+	} );
+	
+	//WalkTreeByZones(target_base.GetBase())
 }
 
-
-void TreeZoneInverter::WalkLocatedPatches( LocatedPatch lze )
+/*
+void TreeZoneComplementer::WalkTreeByZones( XLink current_base )
 {
 	// Really just a search for FreeZonePatch that fills in the target base XLink from the 
 	// enclosing thing (if it's root or a tree zone). 
@@ -66,7 +76,7 @@ void TreeZoneInverter::WalkLocatedPatches( LocatedPatch lze )
 }
 
 
-void TreeZoneInverter::Invert( LocatedPatch lze )
+void TreeZoneComplementer::Invert( LocatedPatch lze )
 {
 	// Checks
 	ASSERT( lze.first && lze.second && *lze.second);
@@ -96,3 +106,4 @@ void TreeZoneInverter::Invert( LocatedPatch lze )
 	                                           make_shared<FreeZone>( free_patch->GetZone() ),
 	                                           free_patch->MoveChildExpressions() );   		
 }
+*/

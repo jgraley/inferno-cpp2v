@@ -22,7 +22,7 @@ public:
 	unique_ptr<FreeZone> TransformToSingleFreeZone( shared_ptr<Patch> source_layout );
 	
 	// Much as the name suggests. Db required and acts directly on it.
-	void TransformToIncrementalAndExecute( TreeZone target_tree_zone, shared_ptr<Patch> source_layout );
+	void TransformToIncrementalAndExecute( XLink target_origin, shared_ptr<Patch> source_layout );
 	
 private:
 	XTreeDatabase * const db;

@@ -43,7 +43,7 @@ unique_ptr<FreeZone> TreeUpdater::TransformToSingleFreeZone( shared_ptr<Patch> s
 }
 
 
-void TreeUpdater::TransformToIncrementalAndExecute( TreeZone target_tree_zone, shared_ptr<Patch> source_layout )
+void TreeUpdater::TransformToIncrementalAndExecute( XLink target_origin, shared_ptr<Patch> source_layout )
 {
 	ASSERT( db );
 		
@@ -74,7 +74,7 @@ void TreeUpdater::TransformToIncrementalAndExecute( TreeZone target_tree_zone, s
 
 	// Inversion generates sequence of separate "small" update commands 
 	TreeZoneInverter tree_zone_inverter( db ); 
-	tree_zone_inverter.Run(target_tree_zone, &source_layout);	
+	tree_zone_inverter.Run(target_origin, &source_layout);	
 			
 	// For each targetted patch in the layout, perform replace operation on the DB
 	Patch::ForDepthFirstWalk( source_layout, nullptr, [&](shared_ptr<Patch> &part)

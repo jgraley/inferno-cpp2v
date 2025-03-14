@@ -140,11 +140,11 @@ string VNSequence::GetStepName( int step_index ) const
 }
 
 
-void VNSequence::UpdateUsingLayout( TreeZone target_tree_zone, shared_ptr<Patch> source_layout )
+void VNSequence::UpdateUsingLayout( XLink target_origin, shared_ptr<Patch> source_layout )
 {
     ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");    
     
-	TreeUpdater( x_tree_db.get() ).TransformToIncrementalAndExecute( target_tree_zone, source_layout );
+	TreeUpdater( x_tree_db.get() ).TransformToIncrementalAndExecute( target_origin, source_layout );
     
     x_tree_db->PostUpdateActions();
 }

@@ -45,7 +45,7 @@ public:
     void GenerateGraphRegions( int step_index, Graph &graph ) const;
     string GetStepName( int step_index ) const;
 
-    void UpdateUsingLayout( TreeZone target_tree_zone, shared_ptr<Patch> source_layout );
+    void UpdateUsingLayout( XLink target_base, shared_ptr<Patch> source_layout );
     
     void XTreeDbDump() const;
     void XTreeDbExpectMatches() const;
