@@ -35,7 +35,7 @@ void TreeZoneComplementer::Run(XLink target_origin, shared_ptr<Patch> source_lay
 	
 	WalkTreeZones(target_origin);
 	
-	FTRACE(complement);
+	//FTRACE(complement);
 }
 
 
@@ -54,8 +54,8 @@ void TreeZoneComplementer::WalkTreeZones(XLink target_base)
 		// make a complement TZ and store it.
 		CreateComplementTZ(target_base);		
 	}
-
 }
+
 
 void TreeZoneComplementer::CreateComplementTZ(XLink target_base)
 {
