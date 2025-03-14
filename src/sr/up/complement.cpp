@@ -14,96 +14,74 @@ using namespace SR;
 TreeZoneComplementer::TreeZoneComplementer( XTreeDatabase *db_ ) :
 	db( db_ ),
 	df_rel( db ),
-	tree_zones_depth_first_by_base( df_rel )	
+	source_tzs_df_by_base( df_rel )	
 {
 }
 
 
-void TreeZoneComplementer::Run(XLink target_origin, shared_ptr<Patch> layout)
+void TreeZoneComplementer::Run(XLink target_origin, shared_ptr<Patch> source_layout)
 {	
-	Patch::ForDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
+	// Gather all the tree zones from the patches in the source layout, and
+	// put them in a depth-first ordering on base (i.e. ordered relative to CURRENT tree)
+	Patch::ForDepthFirstWalk( source_layout, nullptr, [&](shared_ptr<Patch> &patch)
 	{
 		if( auto tz_patch = dynamic_pointer_cast<TreeZonePatch>(patch) )
 		{	
 			const TreeZone &tz = tz_patch->GetZone();
-			tree_zones_depth_first_by_base.emplace( tz.GetBaseXLink(), tz );
+			
+			source_tzs_df_by_base.emplace( tz.GetBaseXLink(), tz );
 		}
 	} );
 	
-	//WalkTreeByZones(target_base.GetBase())
+	WalkTreeZones(target_origin);
 }
 
-/*
-void TreeZoneComplementer::WalkTreeByZones( XLink current_base )
+
+void TreeZoneComplementer::WalkTreeZones(XLink target_base)
 {
-	// Really just a search for FreeZonePatch that fills in the target base XLink from the 
-	// enclosing thing (if it's root or a tree zone). 
-	// Inversion strategy: this XLink is available for every free zone because we did free zone
-	// merging (if parent was a free zone, we'd have no XLink)
-	if( auto free_patch = dynamic_pointer_cast<FreeZonePatch>(*lze.second) )
+	if( source_tzs_df_by_base.count(target_base) > 0 )
 	{
-		// Free zone: recurse and then invert locally
-		free_patch->ForChildren( [&](shared_ptr<Patch> &child_patch)	
-		{
-			// We don't know the base if we're coming from a free zone
-			ASSERT( dynamic_pointer_cast<TreeZonePatch>(child_patch) )
-			      ("FZ under another FZ (probably), cannot determine target XLink");
-			LocatedPatch child_lze( XLink(), &child_patch );
-			WalkLocatedPatches( child_lze );
-		} );
-	
-		// Invert the free zone while unwinding
-		Invert(lze); 
-	}
-	else if( auto tree_patch = dynamic_pointer_cast<TreeZonePatch>(*lze.second) )
-	{
-		// Recurse, co-looping over the children/terminii so we can fill in target bases
-		vector<XLink> terminii = tree_patch->GetZone().GetTerminusXLinks();
-		FreeZonePatch::ChildExpressionIterator it_child = tree_patch->GetChildrenBegin();		
-		for( XLink terminus_xlink : terminii )
-		{
-			ASSERT( it_child != tree_patch->GetChildrenEnd() ); // length mismatch
-			
-			LocatedPatch child_lze( terminus_xlink, &*it_child );
-			WalkLocatedPatches( child_lze );
-						
-			++it_child;
-		}
-		ASSERT( it_child == tree_patch->GetChildrenEnd() ); // length mismatch
+		// There's a TZ in the layout, so recurse.
+		const TreeZone &found_tz = source_tzs_df_by_base.at(target_base);
+		for( XLink terminus : found_tz.GetTerminusXLinks() )
+			WalkTreeZones( terminus );
+
 	}
 	else
-		ASSERTFAIL();
-}
-
-
-void TreeZoneComplementer::Invert( LocatedPatch lze )
-{
-	// Checks
-	ASSERT( lze.first && lze.second && *lze.second);
-	XLink base_xlink = lze.first;
-	ASSERT( base_xlink )("Got no base in our lze, perhaps parent was free zone?"); // FZ merging should prevent
-	auto free_patch = dynamic_pointer_cast<FreeZonePatch>( *lze.second );
-	ASSERT( free_patch )("Got LZE not a free zone: ")(lze); // WalkLocatedPatches() gave us wrong kind of patch
-			
-	// Collect base xlinks for child zones (which must be tree zones)
-	vector<XLink> terminii_xlinks;
-	free_patch->ForChildren([&](shared_ptr<Patch> &child_patch)	
 	{
-		auto child_tree_patch = dynamic_pointer_cast<TreeZonePatch>( child_patch );		
-		// Inversion strategy: we're based on a free zone and FZ merging should 
-		// have ensured we'll see only tree zones as children. Each base is a terminus 
-		// for the new tree zone.
-		ASSERT( child_tree_patch ); 
+		// make a complement TZ and store it.
+		CreateComplementTZ(target_base);
 		
-		terminii_xlinks.push_back( child_tree_patch->GetZone().GetBaseXLink() );
-	} );
-		 
-	// Make the inverted TZ
-	TreeZone inverted_tree_zone = TreeZone( base_xlink, terminii_xlinks );	
-	
-	// Modify the expression to include inverted TZ as target
-	*lze.second = make_shared<TargettedPatch>( inverted_tree_zone,
-	                                           make_shared<FreeZone>( free_patch->GetZone() ),
-	                                           free_patch->MoveChildExpressions() );   		
+	}
+
 }
-*/
+
+void TreeZoneComplementer::CreateComplementTZ(XLink target_base)
+{
+	ASSERT( source_tzs_df_by_base.count(target_base) == 0 );
+	
+	vector<XLink> complement_terminii;
+	
+	DepthFirstOrderingZones::const_iterator it = source_tzs_df_by_base.lower_bound(target_base);
+	// The first element in the ordering which is not ordered before target_base.
+	// target_base is not in there, so we're at first child if there are any.
+	// Loop through children	
+	while( df_rel.CompareHierarchical(target_base, it->first).second == DepthFirstRelation::RelType::LEFT_IS_ANCESTOR )
+	{
+		XLink child = it->first;
+	
+		// On the unwind now
+		complement_terminii.push_back( child );
+
+		// Recurse on children
+		WalkTreeZones( child );
+
+		++it;
+		// Loop PAST any children of this child
+		while( df_rel.CompareHierarchical(child, it->first).second == DepthFirstRelation::RelType::LEFT_IS_ANCESTOR )
+			++it;
+	}
+	
+	complement.push_back( TreeZone( target_base, complement_terminii ) );
+}
+
