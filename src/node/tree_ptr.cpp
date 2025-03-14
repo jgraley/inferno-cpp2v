@@ -23,21 +23,21 @@ TreePtrInterface &TreePtrInterface::operator=( const TreePtrInterface &o )
 }
 
 
-bool TreePtrInterface::operator<(const TreePtrInterface &other) const
+bool TreePtrInterface::operator<(const TreePtrInterface &r) const
 {
-	return Compare3Way(*this, other) < 0;
+	return get() < r.get();
 }
 
 
-bool TreePtrInterface::operator==(const TreePtrInterface &other) const
+bool TreePtrInterface::operator==(const TreePtrInterface &r) const
 {
-	return get() == other.get();
+	return get() == r.get();
 }
 
 
-bool TreePtrInterface::operator!=(const TreePtrInterface &other) const
+bool TreePtrInterface::operator!=(const TreePtrInterface &r) const
 {
-	return get() != other.get();
+	return get() != r.get();
 }
 
 

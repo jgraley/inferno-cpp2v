@@ -67,10 +67,6 @@ public:
     // Make a copy of tp_x which acts as a new, distinct value 
     static XLink CreateDistinct( const TreePtr<Node> &tp_x ); 
 	static XLink CreateFrom( shared_ptr<TreePtr<Node>> sp_tp_x );
-    bool operator<(const XLink &other) const;
-    bool operator!=(const XLink &other) const;
-    bool operator==(const XLink &other) const;
-    static Orderable::Diff Compare3Way(const XLink &l, const XLink &r);
     size_t GetHash() const noexcept;    
     explicit operator bool() const;
 	bool HasChildX() const;
@@ -80,6 +76,21 @@ public:
     string GetTrace() const; // used for debug
     string GetName() const;
     string GetShortName() const;
+
+	inline bool operator<(const XLink &r) const
+	{
+		return asp_x < r.asp_x;  
+	}
+		
+	inline bool operator!=(const XLink &r) const
+	{
+		return asp_x != r.asp_x;    
+	}
+
+	inline bool operator==(const XLink &r) const
+	{
+		return asp_x == r.asp_x;    
+	}
 
 private: friend class LocatedLink;
     XLink( shared_ptr<const TreePtrInterface> px,

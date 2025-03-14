@@ -242,54 +242,6 @@ XLink XLink::CreateFrom( shared_ptr<TreePtr<Node>> sp_tp_x )
 }
 
 
-bool XLink::operator<(const XLink &other) const
-{
-    return Compare3Way(*this, other) < 0;
-}
-
-    
-bool XLink::operator!=(const XLink &other) const
-{
-    return asp_x != other.asp_x;    
-}
-
-
-bool XLink::operator==(const XLink &other) const
-{
-    return asp_x == other.asp_x;    
-}
-
-
-Orderable::Diff XLink::Compare3Way(const XLink &l, const XLink &r)
-{
-	// Checking for broken references
-    ASSERTS( &l );
-    ASSERTS( &r );
-    
-    // NULLness is primary ordering because we wish to dereference both pointers. 
-    // If both are NULL we'll call that equal, and drop out. Also do fast-out on 
-    // equal pointers.
-    if( r.asp_x==l.asp_x )
-        return 0; // for == case
-    else if( !r.asp_x )
-        return 1; // for > case
-    else if( !l.asp_x )
-        return -1; // for < case
-    
-    // Secondary ordering is on the value of the TreePtr which will
-    // help with orderings of sets of things in the trace logs.
-    if( Orderable::Diff d_node = TreePtrInterface::Compare3Way( *l.asp_x, *r.asp_x ) )
-		return d_node;
-		
-    // Tertiary ordering is on the identities of the TreePtrs, which 
-    // corresponds to the values of the XLinks.
-    if( Orderable::Diff d_tpi = TreePtrInterface::Compare3WayIdentity( *l.asp_x, *r.asp_x ) )
-		return d_tpi;
-       
-    return 0;
-}
-
-
 size_t XLink::GetHash() const noexcept
 {
     return std::hash<decltype(asp_x)>()(asp_x) >> HASHING_POINTERS_ALIGNMENT_BITS; 
