@@ -21,6 +21,8 @@ public:
 	
 	void Run(XLink target_origin, shared_ptr<Patch> source_layout);
 	
+	const list<TreeZone> &GetComplement() const;
+	
 private:
 	void WalkTreeZones(XLink target_base);
 	void CreateComplementTZ(XLink target_base);

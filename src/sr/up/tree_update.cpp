@@ -11,6 +11,7 @@
 #include "fz_merge.hpp"
 #include "inversion.hpp"
 #include "complement.hpp"
+#include "gap_finder.hpp"
 
 #include <iostream>
 
@@ -54,6 +55,11 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink target_origin, shared_
 	empty_zone_elider.Run(source_layout);
 	empty_zone_elider.Check(source_layout);
 	
+	TreeZoneGapFinder tree_zone_gap_finder( db );
+	tree_zone_gap_finder.Run(source_layout);	
+	if( !tree_zone_gap_finder.GetGaps().empty() )
+		FTRACE(tree_zone_gap_finder.GetGaps());
+
 	TreeZoneOverlapHandler tree_zone_overlap_handler( db );
 	tree_zone_overlap_handler.Run(source_layout);
 	tree_zone_overlap_handler.Check(source_layout);

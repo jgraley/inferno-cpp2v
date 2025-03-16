@@ -21,6 +21,7 @@ TreeZoneComplementer::TreeZoneComplementer( XTreeDatabase *db_ ) :
 
 void TreeZoneComplementer::Run(XLink target_origin, shared_ptr<Patch> source_layout)
 {	
+	source_tzs_df_by_base.clear();
 	// Gather all the tree zones from the patches in the source layout, and
 	// put them in a depth-first ordering on base (i.e. ordered relative to CURRENT tree)
 	Patch::ForDepthFirstWalk( source_layout, nullptr, [&](shared_ptr<Patch> &patch)
@@ -33,9 +34,14 @@ void TreeZoneComplementer::Run(XLink target_origin, shared_ptr<Patch> source_lay
 		}
 	} );
 	
+	complement.clear();	
 	WalkTreeZones(target_origin);
-	
-	//FTRACE(complement);
+}
+
+
+const list<TreeZone> &TreeZoneComplementer::GetComplement() const
+{
+	return complement;
 }
 
 

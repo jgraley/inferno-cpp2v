@@ -177,9 +177,6 @@ void MutableTreeZone::Patch( FreeZone &&free_zone )
 	{
 		ASSERT( it_t != free_zone.GetTerminiiEnd() ); // length mismatch	
 		
-		//displaced_free_zone.AddTerminus( 
-		
-		
 		shared_ptr<Mutator> mutator = *it_t;		
 		TreePtr<Node> boundary_node = tree_terminus_xlink.GetChildTreePtr(); // outside the zone		
 		ASSERT( !dynamic_cast<ContainerInterface *>(boundary_node.get()) ); // requirement for GetTreePtrInterface()
