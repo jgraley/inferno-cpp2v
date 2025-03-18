@@ -185,7 +185,7 @@ void TreeZoneOrderingHandler::FindOutOfOrder( PatchRecords &patch_records,
 	set<pair<int, int>> runs_by_length; 
 	
 	// Map from starts to run lengths
-	map<int, int> runs_by_first_index;
+	map<int, int> runs_by_first_index; // TODO first->front etc
 	
 	// Get the patch records in depth-first order
 	set<XLink, DepthFirstRelation> xlinks_dfo(dfr);
@@ -283,54 +283,73 @@ void TreeZoneOrderingHandler::FindOutOfOrder( PatchRecords &patch_records,
 		auto it_rbl_ooo = it_rbl_shortest; // policy		
 		
 		// Find out some stuff about the run, and the next one in index order
-		int l_ooo, i_ooo_first; 
+		int l_ooo, i_ooo_first; // TODO first -> front etc
 		tie(l_ooo, i_ooo_first) = *it_rbl_ooo; 
 		auto it_rbfi_ooo = runs_by_first_index.find(i_ooo_first);
 		auto it_rbfi_next = next(it_rbfi_ooo);
+		// TODO some of the above not needed
 		
 		// Mark patch records in this run as out of order and remove from runs info
 		//FTRACE("Run of %d OOO\n", l_ooo);
 		for( int i=i_ooo_first; i<i_ooo_first+l_ooo; i++ )
 		{
 			patch_records[i].out_of_order = true;
+			// Can already have been erased eg if we concatenate across a removal, and 
+			// then that run gets removed.
+			xlinks_dfo.erase( GetBaseXLink( patch_records[i] ) );
 			//FTRACE(i)(" ")(patch_records[i].patch_ptr)("\n");
 		}
-		runs_by_length.erase(make_pair(l_ooo, i_ooo_first)); 
-		runs_by_first_index.erase(i_ooo_first);
+		EraseSolo( runs_by_length, make_pair(l_ooo, i_ooo_first) ); 
+		EraseSolo( runs_by_first_index, i_ooo_first );
 
-		// Maybe we can concatenate the two neighbouring runs now?
-		if( it_rbfi_next==runs_by_first_index.begin() || it_rbfi_next==runs_by_first_index.end() )
-			continue; // Don't concatenate: was the first or last run
+		// Look for concatenation opportunties
+		bool first = true;
+		int prev_i_front, prev_i_back;
 		
-		// Deduce stuff about the first thing in the next indexed run		
-		int i_next_first = it_rbfi_next->first;
-		XLink tz_base_next_first = GetBaseXLink( patch_records[i_next_first] );
-		
-		// Deduce stuff about the last thing in the previous indexed run		
-		auto it_rbfi_prev = prev(it_rbfi_next);
-		int i_prev_last = it_rbfi_prev->first + it_rbfi_prev->second - 1;
-		XLink tz_base_prev_last = GetBaseXLink( patch_records[i_prev_last] );
-		
-		//FTRACE("i_nf=%d i_pl=%d ", i_next_first, i_prev_last)(tz_base_next_first)(" ")(tz_base_prev_last)("\n");
-		// Check that the two neighbouring runs would form a run if concatenated
-		set<XLink, DepthFirstRelation>::iterator tz_base_prev_last_dfo_it = xlinks_dfo.find(tz_base_prev_last);
-		set<XLink, DepthFirstRelation>::iterator tz_base_next_first_dfo_it = xlinks_dfo.find(tz_base_next_first);
-		if( next(tz_base_prev_last_dfo_it) != tz_base_next_first_dfo_it )
-			continue; // Don't concatenate: would not be consecutive
+		// We could do two concatenations after a removal:
+		// Concatenate where it was removed from (OOO location)
+		// Concatenate where it would have been according to DF ordering (now consecutive)
+		for( map<const int, int>::iterator it = runs_by_first_index.begin();
+		     it != runs_by_first_index.end();
+		     ++it )
+		{
+			int i_front = it->first;
+			int i_back = it->first + it->second - 1;
 
-		// Deduce stuff about the new concatenated run
-		int i_concatenated_first = it_rbfi_prev->first;
-		int l_concatenated = it_rbfi_prev->second + it_rbfi_next->second + l_ooo; // Remember that ooo is still there in the array!
+			if( !first )
+			{
+				//FTRACE("prev back: %d of %d\n", prev_i_back, patch_records.size());
+				XLink prev_tz_base_back = GetBaseXLink( patch_records[prev_i_back] );
+				set<XLink, DepthFirstRelation>::iterator prev_tz_base_back_dfo_it = xlinks_dfo.find(prev_tz_base_back);
+				//FTRACE("front: %d of %d\n", i_front, patch_records.size());
+				XLink tz_base_front = GetBaseXLink( patch_records[i_front] );
+				set<XLink, DepthFirstRelation>::iterator tz_base_front_dfo_it = xlinks_dfo.find(tz_base_front);
+						
+				if( next(prev_tz_base_back_dfo_it) == tz_base_front_dfo_it )
+				{
+					// Deduce stuff about the new concatenated run
+					int concatenated_i_front = prev_i_front;
+					int concatenated_i_back  = i_back; 
+						
+					// Drop the original neighbouring runs
+					runs_by_length.erase(make_pair(prev_i_back - prev_i_front + 1, prev_i_front)); 
+					runs_by_first_index.erase(prev_i_front);
+					runs_by_length.erase(make_pair(i_back - i_front + 1, i_front)); 
+					runs_by_first_index.erase(i_front);
+					
+					// Insert concatenated run and pretend the concatenated one is the current one (becomes "prev" on next iteration)
+					runs_by_length.insert( make_pair(concatenated_i_back - concatenated_i_front + 1, concatenated_i_front) );
+					it = runs_by_first_index.insert( make_pair(concatenated_i_front, concatenated_i_back - concatenated_i_front + 1) ).first;		
+					// TODO InsertSolo to return .first	
+					i_front = concatenated_i_front;
+					i_back = concatenated_i_back;
+				}
+			}
 			
-		// Drop the original neighbouring runs
-		runs_by_length.erase(make_pair(it_rbfi_next->second, it_rbfi_next->first)); 
-		runs_by_first_index.erase(it_rbfi_next);
-		runs_by_length.erase(make_pair(it_rbfi_prev->second, it_rbfi_prev->first)); 
-		runs_by_first_index.erase(it_rbfi_prev);
-		
-		// Insert concatenated run
-		runs_by_length.insert( make_pair(l_concatenated, i_concatenated_first) );
-		runs_by_first_index.insert( make_pair(i_concatenated_first, l_concatenated) );
+			prev_i_front = i_front;
+			prev_i_back = i_back;
+			first = false;
+		}		
 	}
 }
 
@@ -338,6 +357,8 @@ void TreeZoneOrderingHandler::FindOutOfOrder( PatchRecords &patch_records,
 shared_ptr<TreeZonePatch> TreeZoneOrderingHandler::GetTreePatch(const PatchRecord &patch_record) const
 {
 	shared_ptr<Patch> *patch = patch_record.patch_ptr;
+	ASSERT( patch );
+	ASSERT( *patch );
 	auto tree_patch = dynamic_pointer_cast<TreeZonePatch>(*patch);
 	ASSERT( tree_patch ); // Things should only be tree pointer ops
 	return tree_patch;
