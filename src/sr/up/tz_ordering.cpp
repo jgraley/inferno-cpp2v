@@ -30,8 +30,8 @@ void TreeZoneOrderingHandler::Run( shared_ptr<Patch> &layout )
 	if( !out_of_order_list.empty() )
 	{
 		//FTRACE(out_of_order_list)("\n");
-		//FTRACE(layout)("\n");
 	}
+	//FTRACE(layout)("\n");
 	
 	for( shared_ptr<Patch> *patch : out_of_order_list )
 	{
@@ -59,35 +59,38 @@ void TreeZoneOrderingHandler::RunForTreeZone( shared_ptr<TreeZonePatch> &tree_pa
 	TreeZone::TerminusIterator it_t = tree_zone.GetTerminiiBegin();
 	tree_patch->ForChildren( [&](shared_ptr<Patch> &child_patch)	
 	{
-		XLink range_first = *it_t++; // inclusive (terminus XLink equals base XLink of attached tree zone)
-		XLink range_last = db->GetLastDescendant(range_first); // inclusive (is same or child of range_first)
-		RunForRange( child_patch, range_first, range_last, just_check );
+		XLink range_front = *it_t++; // inclusive (terminus XLink equals base XLink of attached tree zone)
+		XLink range_back = db->GetLastDescendant(range_front); // inclusive (is same or child of range_front)
+		RunForRange( child_patch, range_front, range_back, just_check );
 	} );
 }
 
 
 void TreeZoneOrderingHandler::RunForRange( shared_ptr<Patch> &base, 
-								 	  	   XLink range_first,
-							 			   XLink range_last,
+								 	  	   XLink range_front,
+							 			   XLink range_back,
 						 				   bool just_check )
 {
 	INDENT(just_check?"c":"C");
-	TRACE("Starting ")(just_check ? "cross-check" : "transfomation")(" at ")(base)(" with range ")(range_first)(" to ")(range_last)(" inclusive\n");
+	TRACE("Starting ")(just_check ? "cross-check" : "transfomation")(" at ")(base)(" with range ")(range_front)(" to ")(range_back)(" inclusive\n");
 	// Actions to take when we have a range. Use at root and for
 	// terminii of tree zones.
 	PatchRecords patch_records;
 	AddTZsBypassingFZs( base, patch_records );
-	RunForRangeList(patch_records, range_first, range_last, just_check);
+	RunForRangeList(patch_records, range_front, range_back, just_check);
 }
 
 
 void TreeZoneOrderingHandler::RunForRangeList( PatchRecords &patch_records, 
-								 	  	       XLink range_first,
-							 			       XLink range_last,
+								 	  	       XLink range_front,
+							 			       XLink range_back,
 						 				       bool just_check )
 {						 				       
+	if( patch_records.empty() )
+		return;
+		
 	// patch_records is updated in-place with correct out_of_range values
-	FindOutOfOrder( patch_records, range_first, range_last, just_check );	
+	FindOutOfOrder( patch_records, range_front, range_back, just_check );	
 	
 	PatchRecords children_list;
 	PatchRecords::iterator prev_in_order_it = patch_records.end(); // really "off the beginning"
@@ -103,11 +106,11 @@ void TreeZoneOrderingHandler::RunForRangeList( PatchRecords &patch_records,
 			// End of an OOO run. Book-end the children by the intersection
 			// of the supplied range and the range implied by the nearest 
 			// in-order TZs
-			XLink child_first = range_first;
+			XLink child_first = range_front;
 			if( prev_in_order_it != patch_records.end() )
 				child_first = GetBaseXLink( *prev_in_order_it );				  
 			
-			XLink child_last = range_last;
+			XLink child_last = range_back;
 			if( it != patch_records.end() )
 				child_last = GetBaseXLink( *it );				  
 							
@@ -171,21 +174,23 @@ void TreeZoneOrderingHandler::AddTZsBypassingFZs( shared_ptr<Patch> &patch,
 
 
 void TreeZoneOrderingHandler::FindOutOfOrder( PatchRecords &patch_records, 
-											  XLink range_first,
-											  XLink range_last,
+											  XLink range_front,
+											  XLink range_back,
 											  bool just_check )
 {						 				       
-	// runs of things that are monotonic wrt DF ordering
+	ASSERT( !patch_records.empty() );
 	
-	// set of pairs: run length to start index. Will be ordered:
+	// Data structures for runs of things that are consecutive wrt DF ordering
+	
+	// set of pairs: run length to front index. Will be ordered:
 	// - primarily by run length
 	// - secondarily by index into vector (via preserved insertion order)
 	// Note: multimap makes it hard to remove a single element if you don't
 	// already have the required iterator.
 	set<pair<int, int>> runs_by_length; 
 	
-	// Map from starts to run lengths
-	map<int, int> runs_by_first_index; // TODO first->front etc
+	// Map from the fronts of runs to the run lengths
+	map<int, int> runs_by_front_index; // TODO first->front etc
 	
 	// Get the patch records in depth-first order
 	set<XLink, DepthFirstRelation> xlinks_dfo(dfr);
@@ -195,8 +200,11 @@ void TreeZoneOrderingHandler::FindOutOfOrder( PatchRecords &patch_records,
 		xlinks_dfo.insert( GetBaseXLink( patch_record ) );
 		v.push_back( GetBaseXLink( patch_record ) );
 	}
+	
+	//FTRACE("Depth-first order: ")(xlinks_dfo)("\n");
 
-	// Find runs of in-order things, breaking on things outside the supplied range
+	// Find runs of patch records that are consecutive both in the layout and
+	// the DF ordering, breaking on patch records outside the supplied overall range.
 	XLink prev_tz_base;      
 	int i=0, run_start_i=0;
 	bool first = true;			
@@ -207,45 +215,45 @@ void TreeZoneOrderingHandler::FindOutOfOrder( PatchRecords &patch_records,
 		set<XLink, DepthFirstRelation>::iterator tz_base_dfo_it = xlinks_dfo.find(tz_base);
 		//FTRACE(tz_base)("  ");
 
-		// Check in range supplied to us for root or parent TZ terminus
+		// Check the tree zone base is in overall range supplied to us for root or parent TZ terminus
 		TRACE("Checking ")(tz_base)("...\n");
-		Orderable::Diff diff_begin = dfr.Compare3Way(tz_base, range_first);
-		Orderable::Diff diff_end = dfr.Compare3Way(tz_base, range_last);
-		bool ok = diff_begin >= 0 && diff_end <= 0; // both inclusive
-		patch_record.out_of_order = !ok;
+		Orderable::Diff diff_front = dfr.Compare3Way(tz_base, range_front);
+		Orderable::Diff diff_back = dfr.Compare3Way(tz_base, range_back);
+		bool ok = diff_front >= 0 && diff_back <= 0; // both inclusive		
 
 		if( just_check && !ok )
 		{
 			//FTRACE(db->GetOrderings().depth_first_ordering)("\n");
-			ASSERT(diff_begin >= 0)("Tree zone base ")(tz_base)(" appears before limit ")(range_first)(" in X tree");
-			ASSERT(diff_end <= 0)("Tree zone base ")(tz_base)(" appears after limit ")(range_last)(" in X tree");
+			ASSERT(diff_front >= 0)("Tree zone base ")(tz_base)(" appears before limit ")(range_front)(" in X tree");
+			ASSERT(diff_back <= 0)("Tree zone base ")(tz_base)(" appears after limit ")(range_back)(" in X tree");
 			ASSERTFAIL(); // we aint goin nowhere
 		}			
 		
 		if( ok )
 		{
+			// First patch record gets it for free, then we have to check the DF ordering
 			bool consecutive = first || next(prev_tz_base_dfo_it) == tz_base_dfo_it;
+			
 			if( just_check && !consecutive )
 			{
 				FTRACE("AS SUPPLIED\n")(v)("\nORDERED DEPTH FIRST\n")(xlinks_dfo)("\nWERE AT: ")(tz_base)("\n");
-				ASSERT(diff_begin >= 0)("Tree zone base ")(tz_base)(" appears before limit ")(range_first)(" in X tree");
-				ASSERT(diff_end <= 0)("Tree zone base ")(tz_base)(" appears after limit ")(range_last)(" in X tree");
+				ASSERT(diff_front >= 0)("Tree zone base ")(tz_base)(" appears before limit ")(range_front)(" in X tree");
+				ASSERT(diff_back <= 0)("Tree zone base ")(tz_base)(" appears after limit ")(range_back)(" in X tree");
 				ASSERTFAIL(); // we aint goin nowhere
 			}						
 			
 			// Completed run if:
-			// - seen a node since startup and not broken run, and
+			// - seen at least one patch record since start, and
 			// - not consecutive wrt DF ordering
 			if( !first && !consecutive )
 			{
 				int length = i - run_start_i;
 				runs_by_length.insert( make_pair(length, run_start_i) );
-				runs_by_first_index.insert( make_pair(run_start_i, length) );
+				runs_by_front_index.insert( make_pair(run_start_i, length) );
 			}
 			
 			// Need new run if:
 			// - starting up, or
-			// - run broken by going out of supplied range, or
 			// - not consecutive wrt DF ordering
 			if( first || !consecutive )
 				run_start_i = i; // start new run here
@@ -256,61 +264,63 @@ void TreeZoneOrderingHandler::FindOutOfOrder( PatchRecords &patch_records,
 		}
 		else
 		{
-			first = true;
+			// Outside overall range. But we don't need to break up the 
+			// current run: it's enough to remove from local DF ordering 
+			// and set out_of_order flag.
+			EraseSolo( xlinks_dfo, *tz_base_dfo_it );
+			patch_record.out_of_order = true;
 		}	
 		i++;		
 	}
 	
-	// Completed final run if:
-	// - seen a node since startup and not broken run
-	if(!first)
-	{
-		int length = i - run_start_i;
-		runs_by_length.insert( make_pair(length, run_start_i) );
-		runs_by_first_index.insert( make_pair(run_start_i, length) );
-	}
+	// Complete the final run.
+	int length = i - run_start_i;
+	runs_by_length.insert( make_pair(length, run_start_i) );
+	runs_by_front_index.insert( make_pair(run_start_i, length) );
 
-	//FTRACE("Runs by length ")(runs_by_length)("\n");
-
-	// Solve ordering problem
+	// Solve ordering problem reductively
 	while(runs_by_length.size() > 1)
 	{
-		// We have more than one run, which means the things are not ordered.
+		//FTRACE("Runs by length ")(runs_by_length)("\n");
+		// We have more than one run, which means the things are disordered.
 		// Policy is to define the shortest run as out-of-order.
-		// We will remove it and maybe concatenate the neighbouring runs.
+		// We will try to remove it and maybe concatenate the neighbouring runs,
+		// as well as any consecutive runs that are now consecutive in the DF ordering.
 		// This reduces the number of runs, so should terminate.
 		auto it_rbl_shortest = runs_by_length.begin(); // (joint) smallest run
 		auto it_rbl_ooo = it_rbl_shortest; // policy		
 		
 		// Find out some stuff about the run, and the next one in index order
-		int l_ooo, i_ooo_first; // TODO first -> front etc
-		tie(l_ooo, i_ooo_first) = *it_rbl_ooo; 
-		auto it_rbfi_ooo = runs_by_first_index.find(i_ooo_first);
-		auto it_rbfi_next = next(it_rbfi_ooo);
-		// TODO some of the above not needed
+		int l_ooo, i_ooo_front; 
+		tie(l_ooo, i_ooo_front) = *it_rbl_ooo; 
 		
-		// Mark patch records in this run as out of order and remove from runs info
-		//FTRACE("Run of %d OOO\n", l_ooo);
-		for( int i=i_ooo_first; i<i_ooo_first+l_ooo; i++ )
+		// Mark patch records in this run as out of order and remove from:
+		// - local DF ordering
+		// - runs data structures
+		//FTRACE("Removing run of %d OOO:\n", l_ooo);
+		for( int i=i_ooo_front; i<i_ooo_front+l_ooo; i++ )
 		{
+			XLink i_tz_base = GetBaseXLink( patch_records[i] );
+			if( patch_records[i].out_of_order )
+				ASSERT( xlinks_dfo.count( i_tz_base ) == 0 ); // should already be gone
+			else
+				EraseSolo( xlinks_dfo, i_tz_base ); // remove it exactly once
+				
 			patch_records[i].out_of_order = true;
-			// Can already have been erased eg if we concatenate across a removal, and 
-			// then that run gets removed.
-			xlinks_dfo.erase( GetBaseXLink( patch_records[i] ) );
-			//FTRACE(i)(" ")(patch_records[i].patch_ptr)("\n");
+			//FTRACE(i)(": ")(patch_records[i].patch_ptr)("\n");
 		}
-		EraseSolo( runs_by_length, make_pair(l_ooo, i_ooo_first) ); 
-		EraseSolo( runs_by_first_index, i_ooo_first );
+		EraseSolo( runs_by_length, make_pair(l_ooo, i_ooo_front) ); 
+		EraseSolo( runs_by_front_index, i_ooo_front );
 
 		// Look for concatenation opportunties
+		// We could do two concatenations after a removal:
+		// - where it was removed from (OOO location), and
+		// - where it would have been according to DF ordering (now consecutive)
+		//FTRACE("Looking for concatenations:\n", l_ooo);
 		bool first = true;
 		int prev_i_front, prev_i_back;
-		
-		// We could do two concatenations after a removal:
-		// Concatenate where it was removed from (OOO location)
-		// Concatenate where it would have been according to DF ordering (now consecutive)
-		for( map<const int, int>::iterator it = runs_by_first_index.begin();
-		     it != runs_by_first_index.end();
+		for( map<const int, int>::iterator it = runs_by_front_index.begin();
+		     it != runs_by_front_index.end();
 		     ++it )
 		{
 			int i_front = it->first;
@@ -318,28 +328,29 @@ void TreeZoneOrderingHandler::FindOutOfOrder( PatchRecords &patch_records,
 
 			if( !first )
 			{
-				//FTRACE("prev back: %d of %d\n", prev_i_back, patch_records.size());
+				//FTRACE("prev back: %d of %d, ", prev_i_back, patch_records.size());
 				XLink prev_tz_base_back = GetBaseXLink( patch_records[prev_i_back] );
 				set<XLink, DepthFirstRelation>::iterator prev_tz_base_back_dfo_it = xlinks_dfo.find(prev_tz_base_back);
 				//FTRACE("front: %d of %d\n", i_front, patch_records.size());
 				XLink tz_base_front = GetBaseXLink( patch_records[i_front] );
 				set<XLink, DepthFirstRelation>::iterator tz_base_front_dfo_it = xlinks_dfo.find(tz_base_front);
 						
-				if( next(prev_tz_base_back_dfo_it) == tz_base_front_dfo_it )
+				if( next(prev_tz_base_back_dfo_it) == tz_base_front_dfo_it ) // Does local DF ordering say we can concatenate?
 				{
+					//FTRACE("concatenating\n");
 					// Deduce stuff about the new concatenated run
 					int concatenated_i_front = prev_i_front;
 					int concatenated_i_back  = i_back; 
 						
 					// Drop the original neighbouring runs
 					runs_by_length.erase(make_pair(prev_i_back - prev_i_front + 1, prev_i_front)); 
-					runs_by_first_index.erase(prev_i_front);
+					runs_by_front_index.erase(prev_i_front);
 					runs_by_length.erase(make_pair(i_back - i_front + 1, i_front)); 
-					runs_by_first_index.erase(i_front);
+					runs_by_front_index.erase(i_front);
 					
 					// Insert concatenated run and pretend the concatenated one is the current one (becomes "prev" on next iteration)
 					runs_by_length.insert( make_pair(concatenated_i_back - concatenated_i_front + 1, concatenated_i_front) );
-					it = runs_by_first_index.insert( make_pair(concatenated_i_front, concatenated_i_back - concatenated_i_front + 1) ).first;		
+					it = runs_by_front_index.insert( make_pair(concatenated_i_front, concatenated_i_back - concatenated_i_front + 1) ).first;		
 					// TODO InsertSolo to return .first	
 					i_front = concatenated_i_front;
 					i_back = concatenated_i_back;

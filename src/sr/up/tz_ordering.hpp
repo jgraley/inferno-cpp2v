@@ -38,18 +38,18 @@ private:
 	void RunForTreeZone( shared_ptr<TreeZonePatch> &op, 
 						 bool just_check );
 	void RunForRange( shared_ptr<Patch> &base, 
-                      XLink range_last,
-                      XLink range_end,
+                      XLink range_front,
+                      XLink range_back,
                       bool just_check );
 	void RunForRangeList( PatchRecords &patch_records, 
-		    	  	      XLink range_first,
-						  XLink range_last,
+		    	  	      XLink range_front,
+						  XLink range_back,
 						  bool just_check );
 	void AddTZsBypassingFZs( shared_ptr<Patch> &patch, 
 			     	         PatchRecords &patch_records );
 	void FindOutOfOrder( PatchRecords &patch_records, 
-		    	  	     XLink range_first,
-						 XLink range_last,
+		    	  	     XLink range_front,
+						 XLink range_back,
 						 bool just_check );
 	shared_ptr<TreeZonePatch> GetTreePatch(const PatchRecord &patch_record) const;
 	XLink GetBaseXLink(const PatchRecord &patch_record) const;
