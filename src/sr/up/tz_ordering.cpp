@@ -350,8 +350,7 @@ void TreeZoneOrderingHandler::FindOutOfOrder( PatchRecords &patch_records,
 					
 					// Insert concatenated run and pretend the concatenated one is the current one (becomes "prev" on next iteration)
 					runs_by_length.insert( make_pair(concatenated_i_back - concatenated_i_front + 1, concatenated_i_front) );
-					it = runs_by_front_index.insert( make_pair(concatenated_i_front, concatenated_i_back - concatenated_i_front + 1) ).first;		
-					// TODO InsertSolo to return .first	
+					it = InsertSolo( runs_by_front_index, make_pair(concatenated_i_front, concatenated_i_back - concatenated_i_front + 1) );		
 					i_front = concatenated_i_front;
 					i_back = concatenated_i_back;
 				}

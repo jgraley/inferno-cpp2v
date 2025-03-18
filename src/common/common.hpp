@@ -36,11 +36,13 @@ private:
 };
 
 
+// Returns an interator to that which was inserted
 template< typename S >
-inline void InsertSolo( S &s, const typename S::value_type &p )
+inline typename S::iterator InsertSolo( S &s, const typename S::value_type &p )
 {
     auto pr = s.insert( p );
     ASSERT( pr.second )("Already in container");
+    return pr.first;
 }
 
 
@@ -255,14 +257,6 @@ inline list< pair<typename T0::value_type, typename T1::value_type> > Zip( const
         result.push_back( make_pair(*it0++, *it1++) );
     return result;
 }    
-
-
-template< typename KEY >
-inline void InsertSolo( set<KEY> &s, const typename set<KEY>::value_type &x )
-{
-    ASSERT( s.count(x) == 0 )(x)(" already in set ")(s);
-    s.insert( x );
-}
 
 
 // Is c1 a subset of c2?
