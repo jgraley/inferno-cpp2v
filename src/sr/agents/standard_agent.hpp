@@ -142,13 +142,13 @@ public:
 private:	
 	ReplacePatchPtr GenReplaceLayoutOverlay( const ReplaceKit &kit, 
                                              PatternLink me_plink, 
-                                             XLink key_xlink ); // under substitution if not nullptr
+                                             XLink under_xlink ); // under substitution if not nullptr
 	ReplacePatchPtr GenReplaceLayoutOverlayUsingPattern( const ReplaceKit &kit, 
                                                          PatternLink me_plink, 
-                                                         TreePtr<Node> under_node );
+                                                         XLink under_xlink );
 	ReplacePatchPtr GenReplaceLayoutOverlayUsingX( const ReplaceKit &kit, 
                                                    PatternLink me_plink, 
-                                                   TreePtr<Node> under_node ); 
+                                                   XLink under_xlink ); 
     ReplacePatchPtr GenReplaceLayoutNormal( const ReplaceKit &kit, 
                                             PatternLink me_plink );
     

@@ -580,16 +580,18 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlay( const ReplaceKit 
     // and the new node will get its locals. Otherwise use keyed X (=under) as
     // the template. #593 will improve on this.
     if( same_type ) 
-		return GenReplaceLayoutOverlayUsingPattern( kit, me_plink, under_node );
+		return GenReplaceLayoutOverlayUsingPattern( kit, me_plink, under_xlink );
 	else 
-		return GenReplaceLayoutOverlayUsingX( kit, me_plink, under_node );
+		return GenReplaceLayoutOverlayUsingX( kit, me_plink, under_xlink );
 }
 
 
 Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingPattern( const ReplaceKit &kit, 
                                                                            PatternLink me_plink, 
-                                                                           TreePtr<Node> under_node ) 
+                                                                           XLink under_xlink ) 
 {	
+	TreePtr<Node> under_node = under_xlink.GetChildTreePtr();
+
     // clone me (and dest's local data members will come from me)
     // Pattern nodes must be cloned because they don't want to share their identifiers
 	TreePtr<Node> dest = AgentCommon::CloneNode(); 
@@ -717,8 +719,10 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingPattern( const
 
 Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingX( const ReplaceKit &kit, 
                                                                      PatternLink me_plink, 
-                                                                     TreePtr<Node> under_node )  
+                                                                     XLink under_xlink )  
 {
+	TreePtr<Node> under_node = under_xlink.GetChildTreePtr();
+
 	// Duplicate under (and dest's local variables will appear to come from under)
     TreePtr<Node> dest = Duplicate::DuplicateNode(under_node); 
 
