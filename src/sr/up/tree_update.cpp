@@ -55,10 +55,8 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink target_origin, shared_
 	empty_zone_elider.Run(source_layout);
 	empty_zone_elider.Check(source_layout);
 	
-	TreeZoneGapFinder tree_zone_gap_finder( db );
-	tree_zone_gap_finder.Run(source_layout);	
-	if( !tree_zone_gap_finder.GetGaps().empty() )
-		FTRACE(tree_zone_gap_finder.GetGaps());
+	TreeZoneComplementer tree_zone_complementor( db );
+	tree_zone_complementor.Run(target_origin, source_layout);
 
 	TreeZoneOverlapHandler tree_zone_overlap_handler( db );
 	tree_zone_overlap_handler.Run(source_layout);
@@ -68,6 +66,11 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink target_origin, shared_
 	tree_zone_ordering_handler.Run(source_layout);
 	tree_zone_ordering_handler.Check(source_layout);
 	
+	TreeZoneGapFinder tree_zone_gap_finder( db );
+	tree_zone_gap_finder.Run(source_layout);	
+	if( !tree_zone_gap_finder.GetGaps().empty() )
+		FTRACE(tree_zone_gap_finder.GetGaps());
+
 	FreeZoneMerger free_zone_merger;
 	free_zone_merger.Run(source_layout);  
 	free_zone_merger.Check(source_layout);
@@ -78,9 +81,6 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink target_origin, shared_
 	// Enact the tree zones that will stick around
 	BaseForEmbeddedMarkPropagation bfe_mark_propagation( db );
 	bfe_mark_propagation.Run(source_layout);
-
-	TreeZoneComplementer tree_zone_complementor( db );
-	tree_zone_complementor.Run(target_origin, source_layout);
 
 	// Inversion generates sequence of separate "small" update commands 
 	TreeZoneInverter tree_zone_inverter( db ); 

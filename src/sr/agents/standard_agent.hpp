@@ -140,10 +140,10 @@ public:
                                     XLink key_xlink ) final;
 
 private:	
-	ReplacePatchPtr GenFreeZoneExprOverlay( const ReplaceKit &kit, 
+	ReplacePatchPtr GenReplaceLayoutOverlay( const ReplaceKit &kit, 
                                        PatternLink me_plink, 
                                        XLink key_xlink ); // under substitution if not nullptr
-    ReplacePatchPtr GenFreeZoneExprNormal( const ReplaceKit &kit, 
+    ReplacePatchPtr GenReplaceLayoutNormal( const ReplaceKit &kit, 
                                       PatternLink me_plink );
     
 public:

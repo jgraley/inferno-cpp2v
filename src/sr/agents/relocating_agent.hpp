@@ -10,6 +10,7 @@
 
 namespace SR
 { 
+//---------------------------------- RelocatingAgent ------------------------------------    
 
 class RelocatingAgent : public PreRestrictedAgent, public DomainExtension::Extender // names finalised in rule #729
 {
@@ -60,8 +61,6 @@ public:
 		XLink base_xlink; // NULL if the base is outside of X tree
 	};
         
-	//---------------------------------- RelocatingAgent ------------------------------------    
-
    	/*
      * The relocation query can return any node within the XTree at any location or
      * it can return an "induced" subtree that isn't part of the X tree at all.

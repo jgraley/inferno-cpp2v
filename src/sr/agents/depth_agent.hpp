@@ -15,7 +15,7 @@ namespace SR
 
 /// Agent that tries to match the sub-pattern under `terminus` to any element
 /// within some container of nodes. 
-class DepthAgent : public virtual PreRestrictedAgent
+class DepthAgent : public virtual ColocatingAgent
 {
 public:
     class TerminusMismatch : public Mismatch {};
