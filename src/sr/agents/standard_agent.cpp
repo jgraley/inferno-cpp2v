@@ -575,19 +575,152 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlay( const ReplaceKit 
 		  (*this)
 		  (", so that it has a super-set of members");
 	bool same_type = under_node->IsSubcategory(*GetPatternPtr()); // See the above assert
-	if( same_type )
-		ASSERT( IsFinal() );
         
-    // If I am the same type as under, clone me (and dest's local 
-    // data members will come from me) otherwise duplicate under (and 
-    // they will appear to come from under). #593 will improve on this.
-    // Make a new node, we will overlay from pattern, so resulting node will be dirty.    
-    // Use of DuplicateNode()/CloneNode() ensures correct behaviour with identifiers. 
-    TreePtr<Node> dest;
+    // Policy: if type is same then use pattern as a template
+    // and the new node will get its locals. Otherwise use keyed X (=under) as
+    // the template. #593 will improve on this.
     if( same_type ) 
-        dest = AgentCommon::CloneNode(); // Pattern nodes must be cloned because they don't want to share their identifiers
-    else
-        dest = Duplicate::DuplicateNode(under_node); 
+		return GenReplaceLayoutOverlayUsingPattern( kit, me_plink, under_node );
+	else 
+		return GenReplaceLayoutOverlayUsingX( kit, me_plink, under_node );
+}
+
+
+Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingPattern( const ReplaceKit &kit, 
+                                                                           PatternLink me_plink, 
+                                                                           TreePtr<Node> under_node ) 
+{	
+    // clone me (and dest's local data members will come from me)
+    // Pattern nodes must be cloned because they don't want to share their identifiers
+	TreePtr<Node> dest = AgentCommon::CloneNode(); 
+	
+	// We "invent" dest, because of information coming from this pattern node.
+	dest->SetInventedHere();
+
+    // Stuff for creating commands
+    list<Agent::ReplacePatchPtr> child_patches;    
+    FreeZone zone = FreeZone::CreateSubtree(dest);
+
+    // Loop over all the elements of under_node and dest that do not appear in pattern or
+    // appear in pattern but are nullptr TreePtr<>s. Duplicate from under_node into dest.
+    vector< Itemiser::Element * > under_items = under_node->Itemise();
+    vector< Itemiser::Element * > dest_items = under_node->Itemise( dest.get() ); 
+    ASSERT( under_items.size() == dest_items.size() );
+
+    // Loop over the child elements of me (=over) and dest, limited to elements
+    // present in me, which is a non-strict superclass of under_node and dest.
+    // Overlay or overwrite pattern over a duplicate of dest. Keep track of 
+    // corresponding elements of dest. 
+    vector< Itemiser::Element * > my_items = Itemise();
+    vector< Itemiser::Element * > dest_items_in_me = Itemise( dest.get() ); // Get the members of dest corresponding to pattern's class
+    ASSERT( my_items.size() == dest_items_in_me.size() );        
+    
+    TRACE("Copying %d members from under_node=", dest_items.size())(*under_node)(" dest=")(*dest)("\n");
+    // i tracks items in under/dest, j tracks items in me
+	bool in_me;
+    for( int i=0, j=0; i<dest_items.size(); i++, in_me && j++ )
+    {
+        ASSERT( under_items[i] )( "itemise returned null element" );
+        ASSERT( dest_items[i] )( "itemise returned null element" );
+
+        in_me = j < dest_items_in_me.size() && dest_items[i]==dest_items_in_me[j];
+        
+        bool should_overlay;
+        if( in_me )
+        {
+			should_overlay = true; // in me...
+			if( TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[j]) )
+				if( !*my_singular )
+					should_overlay = false; // but is a NULL singular
+		}
+		else
+        {
+			should_overlay = false; // not in me (I'm a super-category)
+		}
+                    
+		if( should_overlay )
+		{
+		    ASSERT( my_items[j] )( "itemise returned null element" );
+			ASSERT( dest_items_in_me[j] )( "itemise returned null element" );
+		}
+		
+    	TRACE("Member %d from key\n", i );
+        if( ContainerInterface *under_container = dynamic_cast<ContainerInterface *>(under_items[i]) )                
+        {
+    		ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_items[i]);
+			ASSERT( dest_con )( "itemise for dest didn't match itemise for my_con");
+    		dest_con->clear();
+    		
+			if( should_overlay )
+			{	
+				ContainerInterface *my_con = dynamic_cast<ContainerInterface *>(my_items[j]);
+				ASSERT(my_con);
+				
+				TRACE("Copying container size %d from my_con\n", (*my_con).size() );
+				for( const TreePtrInterface &my_elt : *my_con )
+				{
+					// Make a placeholder in the dest container for the mutator to point to
+					ContainerInterface::iterator dest_it = dest_con->insert( ContainerMutator::MakePlaceholder() );
+					zone.AddTerminus( make_shared<ContainerMutator>(dest, dest_con, dest_it) );     
+					
+					ASSERT( my_elt )("Some element of member %d (", j)(*my_con)(") of ")(*this)(" was nullptr\n");
+					TRACE("Got ")(*my_elt)("\n");
+					PatternLink my_elt_plink( this, &my_elt );
+					child_patches.push_back( my_elt_plink.GetChildAgent()->GenReplaceLayout(kit, my_elt_plink) );				
+				}
+			}	
+			else
+			{
+				TRACE("Copying container size %d from key\n", under_container->size() );
+				for( const TreePtrInterface &under_elt : *under_container )
+				{
+					// Make a placeholder in the dest container for the mutator to point to
+					ContainerInterface::iterator dest_it = dest_con->insert( ContainerMutator::MakePlaceholder() );
+					zone.AddTerminus( make_shared<ContainerMutator>(dest, dest_con, dest_it) );     
+
+					ASSERT( under_elt ); // present simplified scheme disallows nullptr
+					TreeZone under_zone = TreeZone::CreateSubtree(XLink(under_node, &under_elt) );
+					child_patches.push_back( make_shared<TreeZonePatch>(move(under_zone)) );		
+				}
+			}
+        }            
+        else if( TreePtrInterface *under_singular = dynamic_cast<TreePtrInterface *>(under_items[i]) )
+        {
+			TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
+			ASSERT( dest_singular )( "itemise for target didn't match itemise for pattern");
+			zone.AddTerminus( make_shared<SingularMutator>(dest, dest_singular) );            
+
+			if( should_overlay )
+			{
+				TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[j]);		
+				ASSERT(	my_singular );
+				ASSERT( *my_singular ); // Should not have marked this one for overlay if NULL
+				PatternLink my_singular_plink( this, my_singular );                    
+				child_patches.push_back( my_singular_plink.GetChildAgent()->GenReplaceLayout(kit, my_singular_plink) );           
+			}		
+			else
+			{
+				ASSERT( *under_singular );            
+				TreeZone under_zone = TreeZone::CreateSubtree(XLink(under_node, under_singular) );
+				child_patches.push_back( make_shared<TreeZonePatch>(move(under_zone)) );			
+			}
+        }
+        else
+        {
+            ASSERTFAIL("got something from itemise that isn't a sequence or a shared pointer");
+        }
+    }
+    
+    return make_shared<FreeZonePatch>( move(zone), move(child_patches) );         
+}
+
+
+Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingX( const ReplaceKit &kit, 
+                                                                     PatternLink me_plink, 
+                                                                     TreePtr<Node> under_node )  
+{
+	// Duplicate under (and dest's local variables will appear to come from under)
+    TreePtr<Node> dest = Duplicate::DuplicateNode(under_node); 
 
 	// We "invent" dest, because of information coming from this pattern node.
 	dest->SetInventedHere();

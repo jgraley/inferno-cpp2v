@@ -141,10 +141,16 @@ public:
 
 private:	
 	ReplacePatchPtr GenReplaceLayoutOverlay( const ReplaceKit &kit, 
-                                       PatternLink me_plink, 
-                                       XLink key_xlink ); // under substitution if not nullptr
+                                             PatternLink me_plink, 
+                                             XLink key_xlink ); // under substitution if not nullptr
+	ReplacePatchPtr GenReplaceLayoutOverlayUsingPattern( const ReplaceKit &kit, 
+                                                         PatternLink me_plink, 
+                                                         TreePtr<Node> under_node );
+	ReplacePatchPtr GenReplaceLayoutOverlayUsingX( const ReplaceKit &kit, 
+                                                   PatternLink me_plink, 
+                                                   TreePtr<Node> under_node ); 
     ReplacePatchPtr GenReplaceLayoutNormal( const ReplaceKit &kit, 
-                                      PatternLink me_plink );
+                                            PatternLink me_plink );
     
 public:
     virtual Block GetGraphBlockInfo() const;
