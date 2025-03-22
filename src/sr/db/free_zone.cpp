@@ -199,18 +199,19 @@ FreeZone::TerminusIterator FreeZone::GetTerminiiEnd()
 
 string FreeZone::GetTrace() const
 {
-    string arrow, rhs;
+    string arrow, s;
     if( IsEmpty() )
     {
-        rhs = " ↯ "; // Indicates zone is empty due to a terminus at base
+        s = " ↯ "; // Indicates zone is empty due to a terminus at base
     }
     else
     {
+		s = Trace(base);
         if( terminii.empty() )
-            rhs = " → "; // Indicates the zone goes all the way to leaves i.e. subtree
+            s += " → "; // Indicates the zone goes all the way to leaves i.e. subtree
         else
-            rhs = " ⇥ " + Trace(terminii); // Indicates the zone terminates            
+            s += " ⇥ " + Trace(terminii); // Indicates the zone terminates            
     }
         
-    return "FreeZone(" + Trace(base) + rhs +")";
+    return "FreeZone(" + s + ")";
 }

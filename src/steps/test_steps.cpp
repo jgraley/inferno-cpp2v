@@ -123,7 +123,7 @@ FixCrazyNumberEmb::FixCrazyNumberEmb()
 DroppedTreeZone::DroppedTreeZone()
 {
     // For #754
-    auto root_stuff = MakePatternNode< Stuff<Scope> >();
+    auto root_stuff = MakePatternNode< Stuff<Compound> >();
     auto delta = MakePatternNode< Delta<Statement> >(); // pre-restriction forces result to be type-correct
     auto mid_stuff = MakePatternNode< Stuff<Statement> >();
     auto mid_child = MakePatternNode< Child<Statement> >(); // anti-spin
@@ -137,6 +137,6 @@ DroppedTreeZone::DroppedTreeZone()
     mid_child->terminus = sub_stuff;
     sub_stuff->terminus = leaf;
         
-    Configure( COMPARE_REPLACE, root_stuff );
+    Configure( SEARCH_REPLACE, root_stuff );
 }
 

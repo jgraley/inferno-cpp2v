@@ -1146,6 +1146,6 @@ DEFAULT_CATCH_CLAUSE
 
 string Render::RenderMismatchException( string fname, const Mismatch &me )
 {
-    return "«"+fname+"() caught "+me.What()+"»";
+    return "«"+fname+"() error: "+me.What()+"»";
 }
 

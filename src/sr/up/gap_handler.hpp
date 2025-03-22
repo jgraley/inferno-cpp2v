@@ -11,23 +11,18 @@
 namespace SR 
 {
 
-// Find non-contiguous gaps between tree zones.
-class TreeZoneGapFinder
+// Find non-contiguous gaps between tree zones. Insert empty free zones into these gaps.
+class TreeZoneGapHandler
 {
 public:
-	typedef set<pair<XLink, XLink>> GapSet;
-
-	TreeZoneGapFinder( XTreeDatabase *db );
+	TreeZoneGapHandler( XTreeDatabase *db );
 	
 	void Run(shared_ptr<Patch> source_layout);
-	
-	const GapSet &GetGaps() const;
-	
+		
 private:
 	void CheckPatch(shared_ptr<TreeZonePatch> patch);
 
 	XTreeDatabase * const db;
-	GapSet gaps;
 };
 
 }

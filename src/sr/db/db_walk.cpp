@@ -164,7 +164,6 @@ void DBWalk::VisitLink( const WalkKit &kit,
 	                         walk_info.xlink == *(kit.next_terminus_it));
 	if( walk_info.at_terminus )
 		++(kit.next_terminus_it);
-	ASSERT( !(walk_info.at_terminus && walk_info.at_base) );
       
     if( kit.wind == WIND_IN )
     {

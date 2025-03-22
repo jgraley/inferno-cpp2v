@@ -403,7 +403,7 @@ void AltTreeZoneOrderingChecker::Worker( shared_ptr<Patch> patch, bool base_equa
 {
 	if( auto tree_patch = dynamic_pointer_cast<TreeZonePatch>(patch) )
 	{
-		INDENT(" T");
+		INDENT("T");
 		// Got a TreeZone - check ordering of its base, strictness depending on who called us
 		const TreeZone &tree_zone = tree_patch->GetZone();
 		CheckXlink( tree_zone.GetBaseXLink(), base_equal_ok );
@@ -431,7 +431,7 @@ void AltTreeZoneOrderingChecker::Worker( shared_ptr<Patch> patch, bool base_equa
 	}
 	else if( auto free_patch = dynamic_pointer_cast<FreeZonePatch>(patch) )
 	{
-		INDENT(" F");
+		INDENT("F");
 		free_patch->ForChildren( [&](shared_ptr<Patch> &child_patch)
 		{
 		    // Got a FreeZone - recurse looking for tree zones to check. But this FZ
@@ -452,9 +452,9 @@ void AltTreeZoneOrderingChecker::CheckXlink( XLink x, bool equal_ok )
 	{
 		TRACE("Check ")(x)(equal_ok?" non-strict":" strict")("\n");
 		if( equal_ok )
-			ASSERT( dfr.Compare3Way( prev_xlink, x ) <= 0 );
+			ASSERT( dfr.Compare3Way( prev_xlink, x ) <= 0 )("prev_xlink=")(prev_xlink)(" x=")(x);
 		else
-			ASSERT( dfr.Compare3Way( prev_xlink, x ) < 0 );
+			ASSERT( dfr.Compare3Way( prev_xlink, x ) < 0 )("prev_xlink=")(prev_xlink)(" x=")(x);
 	}
 	
 	prev_xlink = x;

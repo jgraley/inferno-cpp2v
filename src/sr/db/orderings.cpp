@@ -40,34 +40,33 @@ DBWalk::Action Orderings::GetDeleteAction()
 		EraseSolo( depth_first_ordering, walk_info.xlink );
 
 		// Intrinsic orderings are keyed on nodes, and we don't need to update on the boundary layer
-		ASSERT( !(walk_info.at_terminus && walk_info.at_base) );
-        if( walk_info.at_terminus )
-			return;
-		
-		// Node table hasn't been updated yet, so node should be in there.
-		NodeTable::Row row = db->GetNodeRow(walk_info.node); 
-		ASSERT( row.incoming_xlinks.count(walk_info.xlink)==1 );
-		
-		// Track the xlinks we've reached for each node
-		xlinks_reached_for_node[walk_info.node].insert(walk_info.xlink);		
+        if( !walk_info.at_terminus )
+		{
+			
+			// Node table hasn't been updated yet, so node should be in there.
+			NodeTable::Row row = db->GetNodeRow(walk_info.node); 
+			ASSERT( row.incoming_xlinks.count(walk_info.xlink)==1 );
+			
+			// Track the xlinks we've reached for each node
+			xlinks_reached_for_node[walk_info.node].insert(walk_info.xlink);		
 
 #ifdef CAT_KEY_IS_NODE
-		// Only remove if this was the last incoming XLink to the node
-		if( xlinks_reached_for_node.at(walk_info.node) == row.incoming_xlinks )
-			EraseSolo( category_ordering, walk_info.node );       		
+			// Only remove if this was the last incoming XLink to the node
+			if( xlinks_reached_for_node.at(walk_info.node) == row.incoming_xlinks )
+				EraseSolo( category_ordering, walk_info.node );       		
 #else
-		EraseSolo( category_ordering, walk_info.xlink );       
+			EraseSolo( category_ordering, walk_info.xlink );       
 #endif
 
 #ifdef SC_KEY_IS_NODE
-		// Only remove if this was the last incoming XLink to the node
-		if( xlinks_reached_for_node.at(walk_info.node) == row.incoming_xlinks ) // TODO merge these ifs
-			EraseSolo( simple_compare_ordering, walk_info.node );       		
+			// Only remove if this was the last incoming XLink to the node
+			if( xlinks_reached_for_node.at(walk_info.node) == row.incoming_xlinks ) // TODO merge these ifs
+				EraseSolo( simple_compare_ordering, walk_info.node );       		
 #else
-		EraseSolo( simple_compare_ordering, walk_info.xlink );
+			EraseSolo( simple_compare_ordering, walk_info.xlink );
 #endif
-        
-		//TODO refactor duplication
+			//TODO refactor duplication
+		} 
         
         // We must delete SimpleCompare index entries for ancestors of the base
         // node, since removing it will invalidate the SC ordering. Base is
@@ -98,28 +97,27 @@ DBWalk::Action Orderings::GetInsertAction()
         InsertSolo( depth_first_ordering, walk_info.xlink );
         
 		// Intrinsic orderings are keyed on nodes, and we don't need to update on the boundary layer
-		ASSERT( !(walk_info.at_terminus && walk_info.at_base) );
-        if( walk_info.at_terminus )
-			return;
+        if( !walk_info.at_terminus )
+		{
 		
-		const NodeTable::Row &row = db->GetNodeRow(walk_info.node);
+			const NodeTable::Row &row = db->GetNodeRow(walk_info.node);
 #ifdef CAT_KEY_IS_NODE
-		// Only if not already
-		if( category_ordering.count(walk_info.node)==0 )
-			InsertSolo( category_ordering, walk_info.node );       		
+			// Only if not already
+			if( category_ordering.count(walk_info.node)==0 )
+				InsertSolo( category_ordering, walk_info.node );       		
 #else
-		InsertSolo( category_ordering, walk_info.xlink );
+			InsertSolo( category_ordering, walk_info.xlink );
 #endif
 
 #ifdef SC_KEY_IS_NODE
-		// Only if not already
-		if( simple_compare_ordering.count(walk_info.node)==0 )
-			InsertSolo( simple_compare_ordering, walk_info.node );       		
+			// Only if not already
+			if( simple_compare_ordering.count(walk_info.node)==0 )
+				InsertSolo( simple_compare_ordering, walk_info.node );       		
 #else
-		InsertSolo( simple_compare_ordering, walk_info.xlink );		
+			InsertSolo( simple_compare_ordering, walk_info.xlink );		
 #endif
-		// TODO
-
+		}
+	
         // We may now re-instate SimpleCompare index entries for parents 
         // of the base node so that the SC ordering is intact. Base is
         // sufficient: what is ancestor of base is ancestor of every node in

@@ -11,7 +11,7 @@
 #include "fz_merge.hpp"
 #include "inversion.hpp"
 #include "complement.hpp"
-#include "gap_finder.hpp"
+#include "gap_handler.hpp"
 
 #include <iostream>
 
@@ -48,9 +48,7 @@ unique_ptr<FreeZone> TreeUpdater::TransformToSingleFreeZone( shared_ptr<Patch> s
 void TreeUpdater::TransformToIncrementalAndExecute( XLink target_origin, shared_ptr<Patch> source_layout )
 {
 	ASSERT( db );
-		
-	//FTRACE("Starting with layout:\n")(source_layout)("\n");
-		
+				
 	TreeZoneComplementer tree_zone_complementor( db );
 	tree_zone_complementor.Run(target_origin, source_layout);
 
@@ -62,17 +60,15 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink target_origin, shared_
 	tree_zone_ordering_handler.Run(source_layout);
 	tree_zone_ordering_handler.Check(source_layout);
 	
-	TreeZoneGapFinder tree_zone_gap_finder( db );
-	tree_zone_gap_finder.Run(source_layout);	
-	if( !tree_zone_gap_finder.GetGaps().empty() )
-		FTRACE(tree_zone_gap_finder.GetGaps());
+	TreeZoneGapHandler tree_zone_gap_handler( db );
+	tree_zone_gap_handler.Run(source_layout);	
 
 	FreeZoneMerger free_zone_merger;
 	free_zone_merger.Run(source_layout);  
 	free_zone_merger.Check(source_layout);
 	
-	AltTreeZoneOrderingChecker alt_free_zone_ordering_checker( db );
-	alt_free_zone_ordering_checker.Check(source_layout);
+	AltTreeZoneOrderingChecker alt_tree_zone_ordering_checker( db );
+	alt_tree_zone_ordering_checker.Check(source_layout);
 
 	// Enact the tree zones that will stick around
 	BaseForEmbeddedMarkPropagation bfe_mark_propagation( db );
