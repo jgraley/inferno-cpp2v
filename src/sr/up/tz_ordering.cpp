@@ -416,7 +416,7 @@ void AltTreeZoneOrderingChecker::Worker( shared_ptr<Patch> patch, bool base_equa
 			ASSERT( it_child != tree_patch->GetChildrenEnd() ); // length mismatch
 			
 			// Check this terminus start point is in order. Should not have seen the terminus before.
-			CheckXlink( terminus_xlink, false );
+			CheckXlink( terminus_xlink, tree_zone.IsEmpty() );
 			
 			// Check everything under the corresponding child is in order. Could see terminus again.
 			Worker( *it_child, true );
@@ -436,7 +436,7 @@ void AltTreeZoneOrderingChecker::Worker( shared_ptr<Patch> patch, bool base_equa
 		{
 		    // Got a FreeZone - recurse looking for tree zones to check. But this FZ
 		    // provides "padding" so do not expect to see terminus again.
-			Worker( child_patch, false );
+			Worker( child_patch, free_patch->GetZone().IsEmpty() );
 		} );
 	}
 	else

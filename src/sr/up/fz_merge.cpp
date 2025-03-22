@@ -26,7 +26,6 @@ void FreeZoneMerger::Run( shared_ptr<Patch> &layout )
         {
 			TRACE("Parent FreeZonePatch ")(*free_patch)("\n");
 			FreeZone &free_zone = free_patch->GetZone();
-			ASSERT( !free_zone.IsEmpty() );
 
 			FreeZone::TerminusIterator it_t = free_zone.GetTerminiiBegin();
 			FreeZonePatch::ChildExpressionIterator it_child = free_patch->GetChildrenBegin();

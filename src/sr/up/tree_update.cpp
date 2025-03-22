@@ -51,10 +51,6 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink target_origin, shared_
 		
 	//FTRACE("Starting with layout:\n")(source_layout)("\n");
 		
-	EmptyZoneElider empty_zone_elider;
-	empty_zone_elider.Run(source_layout);
-	empty_zone_elider.Check(source_layout);
-	
 	TreeZoneComplementer tree_zone_complementor( db );
 	tree_zone_complementor.Run(target_origin, source_layout);
 

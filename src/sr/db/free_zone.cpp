@@ -91,9 +91,7 @@ TreePtr<Node> FreeZone::GetBaseNode() const
 void FreeZone::PopulateAll( const list<TreePtr<Node>> &child_nodes ) 
 {
 	ASSERT( terminii.size() == child_nodes.size() );
-	
-	ASSERT( !IsEmpty() ); // There's nothing in the zone to modify
-	
+		
 	TerminusIterator it_t = GetTerminiiBegin();
 	for( TreePtr<Node> child_node : child_nodes )
 	{	
@@ -108,12 +106,18 @@ void FreeZone::PopulateAll( const list<TreePtr<Node>> &child_nodes )
 
 FreeZone::TerminusIterator FreeZone::PopulateTerminus( TerminusIterator it_t, 
 													   TreePtr<Node> child_node )
-{
-	ASSERT( !IsEmpty() );
-	
-	// Populate terminus. This will expand SubContainers. Remember that
-	// terminii are reference-like and so it's fine that we erase it.
-	(*it_t)->Mutate( child_node );
+{	
+	if( IsEmpty() )
+	{		
+		// Child zone overwrites us
+		base = child_node;		
+	}	
+	else 	
+	{
+		// Populate terminus. This will expand SubContainers. Remember that
+		// terminii are reference-like and so it's fine that we erase it.
+		(*it_t)->Mutate( child_node );
+	}
 		
 	// it_t updated to the next terminus after the one we erased, or end()
 	it_t = terminii.erase( it_t );				
@@ -149,19 +153,25 @@ void FreeZone::MergeAll( list<unique_ptr<FreeZone>> &&child_zones )
 FreeZone::TerminusIterator FreeZone::MergeTerminus( TerminusIterator it_t, 
                                                     unique_ptr<FreeZone> &&child_zone ) 
 {
-	ASSERT( !IsEmpty() );
-	
+	ASSERT( child_zone.get() != this ); 
+
 	if( child_zone->IsEmpty() )
 	{
-		// nothing happens to this terminus
+		// Nothing happens to this terminus. If we're empty, we'll stay empty.
 		return ++it_t; 
-	}		
-		 
-	ASSERT( child_zone.get() != this ); 
-		
-	// Populate terminus. This will expand SubContainers. Remember that
-	// terminii are reference-like and so it's fine that we erase it.
-	(*it_t)->Mutate( child_zone->base, child_zone->terminii );
+	}	
+	
+	if( IsEmpty() )
+	{		
+		// Child zone overwrites us
+		base = child_zone->base;		
+	}	
+	else 	
+	{
+		// Populate terminus. This will expand SubContainers. Remember that
+		// terminii are reference-like and so it's fine that we erase it.
+		(*it_t)->Mutate( child_zone->base, child_zone->terminii );
+	}
 	
 	// it_t updated to the next terminus after the one we erased, or end()
 	it_t = terminii.erase( it_t );		

@@ -22,14 +22,16 @@ void EmptyZoneElider::Run( shared_ptr<Patch> &layout )
 {
 	Patch::ForDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
 	{
-		if( auto free_patch = dynamic_pointer_cast<ZonePatch>(patch) )
-            if( free_patch->GetZone().IsEmpty() )
-            {
-				shared_ptr<Patch> child_patch = OnlyElementOf( free_patch->GetChildExpressions() );
+		if( auto zone_patch = dynamic_pointer_cast<TreeZonePatch>(patch) )
+		{
+            if( zone_patch->GetZone().IsEmpty() )
+            {			
+				shared_ptr<Patch> child_patch = OnlyElementOf( zone_patch->GetChildExpressions() );
 				if( auto child_zone_patch = dynamic_pointer_cast<ZonePatch>(child_patch) )
-					child_zone_patch->AddEmbeddedMarkers( free_patch->GetEmbeddedMarkers() );
+					child_zone_patch->AddEmbeddedMarkers( zone_patch->GetEmbeddedMarkers() );
 				patch = child_patch;
 			}
+		}
 	} );	
 }
 
@@ -54,19 +56,32 @@ BaseForEmbeddedMarkPropagation::BaseForEmbeddedMarkPropagation( const XTreeDatab
 void BaseForEmbeddedMarkPropagation::Run( shared_ptr<Patch> &layout )
 {
 	TreeZoneRelation tz_relation( db );
+	
+	list<RequiresSubordinateSCREngine *> markers;
 
-	// Inner and outer loops only look at TreeZonePatch patches
-	Patch::ForDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
+	Patch::ForDepthFirstWalk( layout, [&](shared_ptr<Patch> &patch) // Act on wind-in
 	{
-		if( auto free_patch = dynamic_pointer_cast<ZonePatch>(patch) )
+		auto zone_patch = dynamic_pointer_cast<ZonePatch>(patch);
+		ASSERT( zone_patch );
+		if( true )
 		{	
-			for( RequiresSubordinateSCREngine *agent : free_patch->GetEmbeddedMarkers() )
+			// Append to our list
+			markers.splice( markers.end(), zone_patch->GetEmbeddedMarkers() );
+			zone_patch->ClearEmbeddedMarkers();
+			
+			if( !zone_patch->GetZone().IsEmpty() )
 			{
-				free_patch->GetZone().MarkBaseForEmbedded(agent);
+				for( RequiresSubordinateSCREngine *agent : markers )
+					zone_patch->GetZone().MarkBaseForEmbedded(agent);
+				markers.clear();
 			}
-			free_patch->ClearEmbeddedMarkers();
+			// If zone is empty, it has one child, which we will meet at the next iteration
+			// of the depth-first walk. That's the one where we should enact the marker. 
+			// Unless it's empty too, in which case repeat - we must find non-empty eventually!
 		}
-	} );
+	}, nullptr );
+	
+	ASSERT( markers.empty() ); // could not place marker because we saw only empty zones.
 }
 
 // ------------------------- DuplicateAllToFree --------------------------

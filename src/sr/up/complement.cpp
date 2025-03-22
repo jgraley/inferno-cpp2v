@@ -30,7 +30,8 @@ void TreeZoneComplementer::Run(XLink target_origin, shared_ptr<Patch> source_lay
 		{	
 			const TreeZone &tz = tz_patch->GetZone();
 			
-			source_tzs_df_by_base.emplace( tz.GetBaseXLink(), tz );
+			if( !tz.IsEmpty() )
+				source_tzs_df_by_base.emplace( tz.GetBaseXLink(), tz );
 		}
 	} );
 	
@@ -78,7 +79,6 @@ void TreeZoneComplementer::CreateComplementTZ(XLink target_base)
 	{
 		XLink child = it->first;
 	
-		// On the unwind now
 		complement_terminii.push_back( child );
 
 		// Recurse on children
