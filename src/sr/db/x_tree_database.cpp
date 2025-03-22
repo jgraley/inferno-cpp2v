@@ -116,7 +116,7 @@ void XTreeDatabase::InitialBuild()
 }
 
 
-void XTreeDatabase::MainTreeReplace( TreeZone target_tree_zone, FreeZone source_free_zone )
+FreeZone XTreeDatabase::MainTreeExchange( TreeZone target_tree_zone, FreeZone source_free_zone )
 {
 	TRACE("Whole main tree walk for your convenience:\n");
 	if( Tracer::IsEnabled() )
@@ -127,12 +127,13 @@ void XTreeDatabase::MainTreeReplace( TreeZone target_tree_zone, FreeZone source_
 
 	TRACE("Replacing target TreeZone:\n")(target_tree_zone)("\nwith source FreeZone:\n")(source_free_zone)("\n");
 	ASSERT( target_tree_zone.GetNumTerminii() == source_free_zone.GetNumTerminii() );	
-	target_tree_zone.DBCheck(this); // Move back to MainTreeReplace once this is empty
+	target_tree_zone.DBCheck(this); 
 	MutableTreeZone mutable_target_tree_zone( target_tree_zone, GetMutator(target_tree_zone.GetBaseXLink()) );
 	
 	// Store the core info for the base locally since the link table will change
 	// as this function executes.
 	const DBCommon::CoreInfo base_info = link_table->GetCoreInfo( target_tree_zone.GetBaseXLink() );
+	FreeZone old_zone = mutable_target_tree_zone.MakeFreeZone(this);
 
     // Update database 
     MainTreeDelete( mutable_target_tree_zone, &base_info );   
@@ -148,6 +149,8 @@ void XTreeDatabase::MainTreeReplace( TreeZone target_tree_zone, FreeZone source_
     
     if( ReadArgs::test_db )
         Checks();
+        
+    return old_zone;
 }
 
 
@@ -401,7 +404,7 @@ XLink XTreeDatabase::GetMainRootXLink() const
 }
 
 
-unique_ptr<Mutator> XTreeDatabase::GetMutator(XLink xlink)
+unique_ptr<Mutator> XTreeDatabase::GetMutator(XLink xlink) const
 {
 	const LinkTable::Row &row = link_table->GetRow(xlink);
 	
@@ -413,13 +416,13 @@ unique_ptr<Mutator> XTreeDatabase::GetMutator(XLink xlink)
 			// By holding it separately, we can avoid a const cast, and in fact constness propagates
 			// correctly from the XTreeDatabase object, which is why this method cannot be const.
 			ASSERT( (int)(row.tree_ordinal) >= 0 ); // Should be valid whenever context is ROOT
-			shared_ptr<TreePtr<Node>> sp_tp_root_node = trees_by_ordinal[row.tree_ordinal].sp_tp_root_node;
+			shared_ptr<TreePtr<Node>> sp_tp_root_node = trees_by_ordinal.at(row.tree_ordinal).sp_tp_root_node;
 			return make_unique<SingularMutator>( row.parent_node, sp_tp_root_node.get() );
 		}	
 		case DBCommon::SINGULAR:
 		{
-			vector< Itemiser::Element * > x_items = row.parent_node->Itemise();
-			Itemiser::Element *xe = x_items[row.item_ordinal];		
+			const vector< Itemiser::Element * > x_items = row.parent_node->Itemise();
+			Itemiser::Element *xe = x_items.at(row.item_ordinal);		
 			auto p_x_singular = dynamic_cast<TreePtrInterface *>(xe);
 			ASSERT( p_x_singular );
 			return make_unique<SingularMutator>( row.parent_node, p_x_singular );

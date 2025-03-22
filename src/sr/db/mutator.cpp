@@ -17,6 +17,14 @@ TreePtr<Node> Mutator::GetParentNode() const
 	return parent_node;
 }
 
+
+XLink Mutator::GetXLink() const
+{
+	ASSERT( parent_node ); 
+	return XLink(parent_node, GetTreePtrInterface() );
+}
+
+
 // ------------------------- SingularMutator --------------------------    
     
 SingularMutator::SingularMutator( TreePtr<Node> parent_node, TreePtrInterface *dest_tree_ptr_ ) :

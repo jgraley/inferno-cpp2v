@@ -41,7 +41,7 @@ public:
     void InitialBuild();
     
 	// Incremental strategy: perform updates on zones
-    void MainTreeReplace( TreeZone target_tree_zone, FreeZone source_free_zone );
+    FreeZone MainTreeExchange( TreeZone target_tree_zone, FreeZone source_free_zone );
 		
     void MainTreeDelete(TreeZone zone, const DBCommon::CoreInfo *base_info);
     void MainTreeInsert(TreeZone zone, const DBCommon::CoreInfo *base_info);
@@ -76,7 +76,7 @@ public:
 	TreePtr<Node> GetMainRootNode() const;
 	XLink GetMainRootXLink() const;
 
-   	unique_ptr<Mutator> GetMutator(XLink xlink);
+   	unique_ptr<Mutator> GetMutator(XLink xlink) const;
 
     void Dump() const;
 	

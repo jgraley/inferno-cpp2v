@@ -21,8 +21,9 @@ public:
                          list<shared_ptr<Mutator>> child_terminii = {} ) = 0;
 	TreePtr<Node> GetParentNode() const;
 	
-	// Only valid after populate
-	virtual const TreePtrInterface *GetTreePtrInterface() const = 0;
+	// After population, a mutator can now provide an XLink that's valid for the new boundary
+	virtual const TreePtrInterface *GetTreePtrInterface() const = 0; // Only valid after populate
+	XLink GetXLink() const; // Only valid after populate
 
 private:
 	TreePtr<Node> parent_node;

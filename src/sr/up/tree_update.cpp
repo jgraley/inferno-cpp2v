@@ -85,7 +85,7 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink target_origin, shared_
 		{
 			auto source_free_zone = dynamic_pointer_cast<FreeZone>(replace_part->GetSourceZone());
 			ASSERT( source_free_zone );
-			db->MainTreeReplace( replace_part->GetTargetTreeZone(), *source_free_zone );
+			db->MainTreeExchange( replace_part->GetTargetTreeZone(), *source_free_zone );
 		}
 	} );
 }

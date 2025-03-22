@@ -41,6 +41,7 @@ public:
     vector<XLink> GetTerminusXLinks() const;
 
     FreeZone Duplicate() const;
+	FreeZone MakeFreeZone(const XTreeDatabase *db) const;
     
     TerminusIterator GetTerminiiBegin() const;
     TerminusIterator GetTerminiiEnd() const;
@@ -61,7 +62,7 @@ class MutableTreeZone : public TreeZone
 public:
 	explicit MutableTreeZone( TreeZone tz, unique_ptr<Mutator> &&base_mutator_ );
 
-    void Patch( FreeZone &&free_zone );
+    void Patch( FreeZone &&new_zone );
 	
 private:
 	unique_ptr<Mutator> base_mutator;
