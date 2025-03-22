@@ -19,7 +19,7 @@ class TreeZoneOrderingHandler
 public:	
 	typedef list<shared_ptr<Patch> *> OOOZoneExprPtrList;
 
-	TreeZoneOrderingHandler(const XTreeDatabase *db_);
+	TreeZoneOrderingHandler(XTreeDatabase *db_);
 	
 	// Can change the supplied shared ptr
 	void Run( shared_ptr<Patch> &layout );
@@ -54,7 +54,7 @@ private:
 	shared_ptr<TreeZonePatch> GetTreePatch(const PatchRecord &patch_record) const;
 	XLink GetBaseXLink(const PatchRecord &patch_record) const;
 				    	  
-	const XTreeDatabase * const db;
+	XTreeDatabase * const db;
 	SR::DepthFirstRelation dfr;		
 	OOOZoneExprPtrList out_of_order_list;		    	  
 };

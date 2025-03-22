@@ -13,6 +13,18 @@
 #include "itemise.hpp"
 #include "node.hpp"
 
+// Scaffold nodes for temporary insertion into the tree.
+// Scaffold nodes need to match the type of an existing TreePtr, so we have
+// to template them and create them from TreePtrs.
+template<typename VALUE_TYPE>
+struct Scaffold : VALUE_TYPE
+{
+	NODE_FUNCTIONS
+
+	// Vector of TreePtr will appear to be a number of singular ones.
+	vector<TreePtr<Node>> child_ptrs;
+};
+
 
 //    
 // This is the interface for TreePtr<>. It may be used like shared_ptr, with 
@@ -26,7 +38,6 @@ template<typename VALUE_TYPE>
 struct TreePtr;
 
 // -------------------------- TreePtrInterface ----------------------------    
-
 
 // An interface for our TreePtr object. This interface works regardless of pointed-to
 // type; it also masquerades as a TreePtr to Node type, which should be the
@@ -49,6 +60,8 @@ struct TreePtrInterface : virtual Itemiser::Element
     static Orderable::Diff Compare3Way(const TreePtrInterface &l, const TreePtrInterface &r);
     static Orderable::Diff Compare3WayIdentity(const TreePtrInterface &l, const TreePtrInterface &r);
     virtual TreePtr<Node> MakeValueArchetype() const = 0; // construct an object of the VALUE_TYPE type (NOT a clone)
+	virtual pair<TreePtr<Node>, vector<TreePtr<Node>> *> MakeScaffold() const = 0;
+
     virtual string GetName() const = 0;
     virtual string GetShortName() const = 0;
     string GetTrace() const override;
@@ -235,6 +248,11 @@ struct TreePtr : virtual TreePtrCommon,
 	TreePtr<Node> MakeValueArchetype() const final
 	{
         return TreePtr<Node>(new VALUE_TYPE); // means VALUE_TYPE must be constructable
+    }
+	pair<TreePtr<Node>, vector<TreePtr<Node>> *> MakeScaffold() const final
+	{
+        auto scaffold = new Scaffold<VALUE_TYPE>(); 
+        return make_pair( TreePtr<Node>(scaffold), &scaffold->child_ptrs );
     }
 };
 

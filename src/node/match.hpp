@@ -38,7 +38,7 @@ struct Matcher
 #define MATCHER_FUNCTION \
     virtual bool IsSubcategory( const Matcher &source_archetype ) const \
     { \
-        return IsSubcategoryStatic( *this, source_archetype ); \
+        return Matcher::IsSubcategoryStatic( *this, source_archetype ); \
     }
 
 #endif

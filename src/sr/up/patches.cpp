@@ -103,6 +103,12 @@ void Patch::DepthFirstWalkImpl( function<void(shared_ptr<Patch> &patch)> func_in
 	}
 }
 
+
+list<shared_ptr<Patch>> Patch::GetChildren() const
+{
+	return child_patches;
+}
+
 // ------------------------- ZonePatch --------------------------
 
 ZonePatch::ZonePatch( list<shared_ptr<Patch>> &&child_patches_ ) :

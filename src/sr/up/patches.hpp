@@ -44,6 +44,8 @@ public:
 	void DepthFirstWalkImpl(function<void(shared_ptr<Patch> &patch)> func_in,
 			                function<void(shared_ptr<Patch> &patch)> func_out);
 
+	list<shared_ptr<Patch>> GetChildren() const;
+
 private:
 	list<shared_ptr<Patch>> child_patches;
 
