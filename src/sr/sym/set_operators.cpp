@@ -321,13 +321,9 @@ unique_ptr<SymbolicResult> AllInSimpleCompareRangeOperator::Evaluate( const Eval
 		upper_xlink = SR::XLink::CreateDistinct( node );
 	}
 
-#ifdef SC_KEY_IS_NODE
     return make_unique<SimpleCompareRangeResult>( kit.x_tree_db, 
                                                   lower_xlink.GetChildTreePtr(), lower_incl, 
-                                                  upper_xlink.GetChildTreePtr(), upper_incl ); 
-#else
-    return make_unique<SimpleCompareRangeResult>( kit.x_tree_db, lower_xlink, lower_incl, upper_xlink, upper_incl ); 
-#endif    
+                                                  upper_xlink.GetChildTreePtr(), upper_incl );   
 }
 
 
@@ -384,13 +380,8 @@ unique_ptr<SymbolicResult> AllInCategoryRangeOperator::Evaluate( const EvalKit &
                                 lower_xlink : 
                                 bound_exprs.second->Evaluate(kit)->GetOnlyXLink();
                               
-#ifdef CAT_KEY_IS_NODE
         bounds_list.push_back( make_pair( make_unique<TreePtr<Node>>(lower_xlink.GetChildTreePtr()),
                                           make_unique<TreePtr<Node>>(upper_xlink.GetChildTreePtr()) ) );
-#else
-        bounds_list.push_back( make_pair( make_unique<SR::XLink>(lower_xlink),
-                                          make_unique<SR::XLink>(upper_xlink) ) );
-#endif
     }
     return make_unique<CategoryRangeResult>( kit.x_tree_db, move(bounds_list), lower_incl, upper_incl );    
 }

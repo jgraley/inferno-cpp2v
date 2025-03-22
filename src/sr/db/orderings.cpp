@@ -50,21 +50,13 @@ DBWalk::Action Orderings::GetDeleteAction()
 			// Track the xlinks we've reached for each node
 			xlinks_reached_for_node[walk_info.node].insert(walk_info.xlink);		
 
-#ifdef CAT_KEY_IS_NODE
 			// Only remove if this was the last incoming XLink to the node
 			if( xlinks_reached_for_node.at(walk_info.node) == row.incoming_xlinks )
 				EraseSolo( category_ordering, walk_info.node );       		
-#else
-			EraseSolo( category_ordering, walk_info.xlink );       
-#endif
 
-#ifdef SC_KEY_IS_NODE
 			// Only remove if this was the last incoming XLink to the node
 			if( xlinks_reached_for_node.at(walk_info.node) == row.incoming_xlinks ) // TODO merge these ifs
 				EraseSolo( simple_compare_ordering, walk_info.node );       		
-#else
-			EraseSolo( simple_compare_ordering, walk_info.xlink );
-#endif
 			//TODO refactor duplication
 		} 
         
@@ -77,13 +69,9 @@ DBWalk::Action Orderings::GetDeleteAction()
         {
             while( ancestor_xlink = db->TryGetParentXLink(ancestor_xlink) )
             {
-#ifdef SC_KEY_IS_NODE
 				// Assume there was only one incoming XLink to the node because not a leaf
 				TreePtr<Node> ancestor_node = ancestor_xlink.GetChildTreePtr();
-				EraseSolo( simple_compare_ordering, ancestor_node );       		
-#else				
-                EraseSolo( simple_compare_ordering, ancestor_xlink );
-#endif                
+				EraseSolo( simple_compare_ordering, ancestor_node );       		               
             }
         }
 	};
@@ -101,21 +89,13 @@ DBWalk::Action Orderings::GetInsertAction()
 		{
 		
 			const NodeTable::Row &row = db->GetNodeRow(walk_info.node);
-#ifdef CAT_KEY_IS_NODE
 			// Only if not already
 			if( category_ordering.count(walk_info.node)==0 )
 				InsertSolo( category_ordering, walk_info.node );       		
-#else
-			InsertSolo( category_ordering, walk_info.xlink );
-#endif
 
-#ifdef SC_KEY_IS_NODE
 			// Only if not already
 			if( simple_compare_ordering.count(walk_info.node)==0 )
 				InsertSolo( simple_compare_ordering, walk_info.node );       		
-#else
-			InsertSolo( simple_compare_ordering, walk_info.xlink );		
-#endif
 		}
 	
         // We may now re-instate SimpleCompare index entries for parents 
@@ -127,13 +107,9 @@ DBWalk::Action Orderings::GetInsertAction()
         {
             while( ancestor_xlink = db->TryGetParentXLink(ancestor_xlink) )
             {
-#ifdef SC_KEY_IS_NODE
 				// Assume there is only one incoming XLink to the node because not a leaf
 				TreePtr<Node> ancestor_node = ancestor_xlink.GetChildTreePtr();
-				InsertSolo( simple_compare_ordering, ancestor_node );       		
-#else
-                InsertSolo( simple_compare_ordering, ancestor_node );
-#endif                
+				InsertSolo( simple_compare_ordering, ancestor_node );       		               
             }
         }
 	};
@@ -150,22 +126,14 @@ void Orderings::CheckRelations( const vector<XLink> &xlink_domain,
                                 const vector<TreePtr<Node>> &node_domain )
 {
 	SimpleCompareRelation scr;
-#ifdef SC_KEY_IS_NODE
 	scr.Test( node_domain );
-#else	
-	scr.Test( xlink_domain );
-#endif	
 
     TestOrderingIntact( simple_compare_ordering,
                         true,
                         "simple_compare_ordering" );
 
 	CategoryRelation cat_r( plan.lacing );
-#ifdef CAT_KEY_IS_NODE
-	cat_r.Test( node_domain );
-#else	
-	cat_r.Test( xlink_domain );
-#endif	
+	cat_r.Test( node_domain );	
 	
     TestOrderingIntact( category_ordering,
                         true,

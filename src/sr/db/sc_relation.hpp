@@ -10,8 +10,6 @@
 
 #include <memory>
 
-#define SC_KEY_IS_NODE
-
 class SimpleCompare;
 
 namespace SR
@@ -19,11 +17,8 @@ namespace SR
 class SimpleCompareRelation
 {
 public:
-#ifdef SC_KEY_IS_NODE
 	typedef TreePtr<Node> KeyType;
-#else	
-	typedef XLink KeyType;
-#endif	
+
     SimpleCompareRelation();
 
     /// Less operator: for use with set, map etc

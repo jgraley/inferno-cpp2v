@@ -29,13 +29,8 @@ bool CategoryRelation::operator() (KeyType l_key, KeyType r_key) const
 
 Orderable::Diff CategoryRelation::Compare3Way(KeyType l_key, KeyType r_key) const
 {
-#ifdef CAT_KEY_IS_NODE
     TreePtr<Node> l_node = l_key;
     TreePtr<Node> r_node = r_key;    
-#else    
-    TreePtr<Node> l_node = l_key.GetChildTreePtr();
-    TreePtr<Node> r_node = r_key.GetChildTreePtr();    
-#endif
 
 #ifdef TRACE_CATEGORY_RELATION
     INDENT("@");
@@ -63,11 +58,7 @@ Orderable::Diff CategoryRelation::Compare3Way(KeyType l_key, KeyType r_key) cons
    	    if( d )
 		    return d;	
 		    
-#ifdef CAT_KEY_IS_NODE
-		return TreePtr<Node>::Compare3Way( l_key, r_key );
-#else				    
-        return XLink::Compare3Way(l_key, r_key);
-#endif        
+		return TreePtr<Node>::Compare3Way( l_key, r_key );       
     }
     else if( l_minimus && r_minimus )
     {
@@ -79,11 +70,7 @@ Orderable::Diff CategoryRelation::Compare3Way(KeyType l_key, KeyType r_key) cons
    	    if( d )
 		    return d;	
 		    
-#ifdef CAT_KEY_IS_NODE
 		return TreePtr<Node>::Compare3Way( l_key, r_key );
-#else				    
-        return XLink::Compare3Way(l_key, r_key);
-#endif  
 	}
     else if( l_minimus && !r_minimus )
 	{
@@ -124,11 +111,7 @@ void CategoryRelation::Test( const vector<KeyType> &keys )
         // TODO maybe we could just calculate i directly from randval and the lacing size?
         
         // Consult the lacing for lacing indices
-#ifdef CAT_KEY_IS_NODE
-        auto rl = lacing->TryGetRangeListForCategory( x );
-#else        
-        auto rl = lacing->TryGetRangeListForCategory( x.GetChildTreePtr() );
-#endif        
+        auto rl = lacing->TryGetRangeListForCategory( x );      
         
         // Only nodes seen in cat clauses during planning will succeed
         if( rl.empty() )
@@ -140,11 +123,7 @@ void CategoryRelation::Test( const vector<KeyType> &keys )
         
         // Make minimus node (this relation always uses minimus because half-open
         TreePtr<Node> node = MakeTreeNode<SR::CategoryRelation::MinimusNode>(i);
-#ifdef CAT_KEY_IS_NODE
-		return node;
-#else
-        return XLink::CreateDistinct( node );
-#endif        
+		return node;      
     } );
 }
 

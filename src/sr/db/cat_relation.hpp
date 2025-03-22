@@ -5,7 +5,6 @@
 #include "common/standard.hpp"
 #include "db_walk.hpp"
 
-#define CAT_KEY_IS_NODE
 
 namespace SYM
 {
@@ -21,11 +20,7 @@ class XTreeDatabase;
 class CategoryRelation
 {
 public:
-#ifdef CAT_KEY_IS_NODE
-	typedef TreePtr<Node> KeyType;
-#else	
-	typedef XLink KeyType;
-#endif	
+	typedef TreePtr<Node> KeyType;	
 
 	//CategoryRelation();
 	CategoryRelation( shared_ptr<Lacing> lacing );
