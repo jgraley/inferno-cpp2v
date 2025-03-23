@@ -144,9 +144,7 @@ void VNSequence::UpdateUsingLayout( XLink target_origin, shared_ptr<Patch> sourc
 {
     ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");    
     
-	TreeUpdater( x_tree_db.get() ).TransformToIncrementalAndExecute( target_origin, source_layout );
-    
-    x_tree_db->PostUpdateActions();
+	TreeUpdater( x_tree_db.get() ).TransformToIncrementalAndExecute( target_origin, source_layout );   
 }
 
 

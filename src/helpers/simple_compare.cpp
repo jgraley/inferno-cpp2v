@@ -18,7 +18,7 @@ SimpleCompare &SimpleCompare::operator=(const SimpleCompare &other)
 // Inputs must be non-NULL (though we do handle NULL in itemise, see below)
 bool SimpleCompare::operator()( TreePtr<Node> l, TreePtr<Node> r ) const
 {
-    //FTRACE("SC::operator() ")(xl)(" - ")(yl)("\n");
+    //FTRACE("SC::operator() ")(l)(" - ")(r)("\n");
     return Compare3Way(l, r) < 0;
 }
 
@@ -33,7 +33,7 @@ Orderable::Diff SimpleCompare::Compare3Way( TreePtr<Node> l, TreePtr<Node> r ) c
     
 bool SimpleCompare::operator()( const Node &l, const Node &r ) const
 {
-    //FTRACE("SC::operator() ")(xl)(" - ")(yl)("\n");
+    //FTRACE("SC::operator() ")(l)(" - ")(r)("\n");
     return Compare3Way(l, r) < 0;
 }
 

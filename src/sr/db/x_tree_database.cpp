@@ -146,7 +146,7 @@ FreeZone XTreeDatabase::MainTreeExchange( TreeZone target_tree_zone, FreeZone so
     
     // Update domain extension extra trees
     PerformQueuedExtraTreeActions();
-    
+        
     if( ReadArgs::test_db )
         Checks();
         
@@ -198,6 +198,8 @@ void XTreeDatabase::MainTreeInsert(TreeZone zone, const DBCommon::CoreInfo *base
 
 void XTreeDatabase::PerformQueuedExtraTreeActions()
 {
+	domain_extension->PostUpdateActions();
+
 	while(!extra_tree_destroy_queue.empty())
 	{
 		ExtraTreeDelete( extra_tree_destroy_queue.front() );
@@ -263,18 +265,6 @@ const DomainExtensionChannel *XTreeDatabase::GetDEChannel( const DomainExtension
 }
 
 
-void XTreeDatabase::PostUpdateActions()
-{
-	domain_extension->PostUpdateActions();
-	
-    while(!de_extra_insert_queue.empty())
-    {
-		ExtraTreeInsert( de_extra_insert_queue.front() );
-		de_extra_insert_queue.pop();
-	}	
-}
-
-	
 const Domain &XTreeDatabase::GetDomain() const
 {
 	return *domain;

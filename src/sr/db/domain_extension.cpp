@@ -137,10 +137,10 @@ void DomainExtensionChannel::CreateExtraTree( TreePtr<Node> induced_root )
     // identifier, causing illegal multiple parents. See #677
     // TODO maybe only do this if subtree actually would go wrong.
     TreePtr<Node> extra_root_node = SimpleDuplicate::DuplicateSubtree( induced_root );
-   
+
     // Add the whole subtree to the rest of the database as a new tree
     DBCommon::TreeOrdinal tree_ordinal = create_extra_tree( extra_root_node );        
-
+ 
     // Add this xlink and ordinal to the extension classes as stimulus. 
     // Count begins at 1 since there's one ref (this one)
 	(void)induced_root_to_tree_ordinal_and_ref_count.insert( make_pair( extra_root_node, ExtensionClass(tree_ordinal, 1) ) );    
@@ -155,6 +155,10 @@ void DomainExtensionChannel::CheckStimulusXLink( XLink stimulus_xlink )
         
     //ASSERT( deps.size() < 20 )("Big deps for ")(stimulus_xlink)("\n")(deps);
     
+    TRACE("Extender ")(extender)(":")
+          (" stimulus XLink ")(stimulus_xlink)
+          (" induces ")(info.induced_base_node)
+          (" deps ")(info.deps)("\n");
     stimulus_to_induced_root_and_deps.insert( make_pair( stimulus_xlink, InducedAndDeps(info.induced_base_node, info.deps) ) ); // TODO do we need this if there's already a class?
     
     for( XLink dep : info.deps )
@@ -172,17 +176,15 @@ void DomainExtensionChannel::CheckStimulusXLink( XLink stimulus_xlink )
         induced_root_to_tree_ordinal_and_ref_count.at(info.induced_base_node).ref_count++;
         return; 
     }
-
-    TRACE("Stimulus XLink ")(stimulus_xlink)(" induces ")(info.induced_base_node)("\n");
-
         
     // An extra tree is required
     CreateExtraTree( info.induced_base_node );
 }
-
+#include "../tree/cpptree.hpp"
 
 void DomainExtensionChannel::DropStimulusXLink( XLink stimulus_xlink )
 {
+	TRACE("Stimulus: ")(stimulus_xlink)("\n");
     // Be strict here: all these data structures need to remain in synch
     ASSERT( stimulus_to_induced_root_and_deps.count(stimulus_xlink)>0 );
     
@@ -198,7 +200,18 @@ void DomainExtensionChannel::DropStimulusXLink( XLink stimulus_xlink )
         EraseSolo(dep_to_all_stimulii.at(dep), stimulus_xlink);
         if( dep_to_all_stimulii.at(dep).empty() )
             EraseSolo(dep_to_all_stimulii, dep);
-    }
+    }    
+    
+/*    if( induced_root_to_tree_ordinal_and_ref_count.count(induced_root) == 0 )
+    {
+		TreePtr<Node> front = induced_root_to_tree_ordinal_and_ref_count.begin()->first;
+		SimpleCompare sc;
+		TreePtr<Node> front_width = TreePtr<CPPTree::Signed>::DynamicCast(front)->width;
+		TreePtr<Node> ir_width = TreePtr<CPPTree::Signed>::DynamicCast(induced_root)->width;
+		FTRACE("Front: ")(front)(" Induced root: ")(induced_root)("\n");
+		FTRACE("Front width: ")(front_width)(" Induced root width: ")(ir_width)("\n");
+		FTRACE(" SC result=")( sc.Compare3Way(front, induced_root) )("\n"); 
+	} */
 
     // Remove a reference to this induced root from domain extension classes, possibly
     // dropping the extension class completely.
@@ -277,12 +290,14 @@ void DomainExtensionChannel::Insert(const DBWalk::WalkInfo &walk_info)
 
 void DomainExtensionChannel::Delete(const DBWalk::WalkInfo &walk_info)
 {
+	INDENT("D");
     XLink xlink = walk_info.xlink;
-    
+
     // First deal with the case where the deleted xlink is the stimulus for a domain 
     // extension: in this case, we want to remove every trace of this extension.
     if( stimulus_to_induced_root_and_deps.count(xlink)>0 )
     {
+		TRACE("Extender ")(extender)(": drop stimulus: ")(xlink)("\n");
         DropStimulusXLink( xlink );
         // Don't add to recheck set: stimulus was deleted, we won't want the DE back
     }
@@ -302,6 +317,7 @@ void DomainExtensionChannel::Delete(const DBWalk::WalkInfo &walk_info)
         {
             ASSERT( stimulus_to_induced_root_and_deps.count(stimulus_xlink)>0 );
             
+			TRACE("Extender ")(extender)(": drop stimulus: ")(stimulus_xlink)(" via dep: ")(xlink)("\n");
             DropStimulusXLink( stimulus_xlink );
             InsertSolo(stimulii_to_recheck, stimulus_xlink);
         }

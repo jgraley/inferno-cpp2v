@@ -51,7 +51,6 @@ public:
     void ExtraTreeInsert(DBCommon::TreeOrdinal tree_ordinal);
 
     const DomainExtensionChannel *GetDEChannel( const DomainExtension::Extender *extender ) const;
-    void PostUpdateActions();
    	const Domain &GetDomain() const;
 
     const LinkTable &GetLinkTable() const;
