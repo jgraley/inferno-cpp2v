@@ -111,10 +111,10 @@ private:
 
     struct InducedAndDeps : Traceable
     {
-        InducedAndDeps( TreePtr<Node> induced_base_node_, set<XLink> deps_ );
+        InducedAndDeps( TreePtr<Node> induced_root_, set<XLink> deps_ );
         string GetTrace() const override;
         
-        TreePtr<Node> induced_base_node;
+        TreePtr<Node> induced_root;
         set<XLink> deps;
     };
     
@@ -128,9 +128,9 @@ private:
     };
 
     // One for each stimulus xlink, keeping track of the new node and dependencies
-    map<XLink, InducedAndDeps> stimulus_to_induced_and_deps;
+    map<XLink, InducedAndDeps> stimulus_to_induced_root_and_deps;
     
-    // A reversal of stimulus_to_induced_and_deps for indexing on dependency
+    // A reversal of stimulus_to_induced_root_and_deps for indexing on dependency
     map<XLink, set<XLink>> dep_to_all_stimulii;
 
     // Here we collect domain extension stimulus XLinks that we will re-create 
@@ -138,7 +138,7 @@ private:
     set<XLink> stimulii_to_recheck;
     
     // SimpleCompare equivalence classes over the domain, with refcount = size of the class.
-    map<TreePtr<Node>, ExtensionClass, SimpleCompare> induced_subtree_by_value_to_extra_subtree_and_refcount;
+    map<TreePtr<Node>, ExtensionClass, SimpleCompare> induced_root_to_tree_ordinal_and_ref_count;
 };
         
 }

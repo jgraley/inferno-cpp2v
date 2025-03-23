@@ -38,10 +38,13 @@ void DBWalk::WalkZone( const Actions *actions,
                        Wind wind,
                        const DBCommon::CoreInfo *base_info )
 {
+	//FTRACE("Walking zone: ")(zone)("\n");
 	ASSERT( base_info );
     WalkKit kit { actions, zone, tree_ordinal, wind, zone.GetTerminiiBegin() };
 	VisitBase( kit, base_info );  
-	ASSERT( kit.next_terminus_it == zone.GetTerminiiEnd() ); // should have visited all the terminii
+	ASSERT( kit.next_terminus_it == zone.GetTerminiiEnd() )
+	      ("Zone has %d terminii", zone.GetNumTerminii())
+	      (kit.next_terminus_it==zone.GetTerminiiBegin()?" (no terminii visited)":""); // should have visited all the terminii
 }
 
 
@@ -159,7 +162,6 @@ void DBWalk::VisitLink( const WalkKit &kit,
                         WalkInfo &&walk_info ) // .x should be .xlink's child
 {
     INDENT(".");            
-                
 	walk_info.at_terminus = (kit.next_terminus_it != kit.zone.GetTerminiiEnd() &&
 	                         walk_info.xlink == *(kit.next_terminus_it));
 	if( walk_info.at_terminus )
@@ -167,7 +169,7 @@ void DBWalk::VisitLink( const WalkKit &kit,
       
     if( kit.wind == WIND_IN )
     {
-	    TRACE("Visiting ")(walk_info.at_base?"base ":"")(walk_info.at_terminus?"terminus ":"")(walk_info.xlink)(" (Wind-in)\n");    
+	    //FTRACE("Visiting ")(walk_info.at_base?"base ":"")(walk_info.at_terminus?"terminus ":"")(walk_info.xlink)(" (Wind-in)\n");    
 		for( Action action : *(kit.actions) )
 			action(walk_info);
 	}
@@ -178,7 +180,7 @@ void DBWalk::VisitLink( const WalkKit &kit,
 
     if( kit.wind == WIND_OUT )
     {
-	    TRACE("Visiting ")(walk_info.at_base?"base ":"")(walk_info.at_terminus?"terminus ":"")(walk_info.xlink)(" (Wind-out)\n");    		
+	    //FTRACE("Visiting ")(walk_info.at_base?"base ":"")(walk_info.at_terminus?"terminus ":"")(walk_info.xlink)(" (Wind-out)\n");    		
 		for( Action action : *(kit.actions) )
 			action(walk_info);         
 	}

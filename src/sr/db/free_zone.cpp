@@ -22,6 +22,25 @@ FreeZone FreeZone::CreateEmpty()
 }
 
 
+FreeZone FreeZone::CreateScaffold(const TreePtrInterface *tpi_base, int num_terminii)
+{
+	// Create the scaffolding, of type that matches the supplied TreePtr<>
+	auto pair = tpi_base->MakeScaffold();		
+	
+	// Set the base as the scaffolding node
+	FreeZone zone( pair.first, {} );
+	
+	// Set the terminii as the scaffolding node's child pointers
+	for( int i; i<num_terminii; i++ )
+	{
+		ContainerInterface::iterator it = pair.second->insert( ContainerMutator::MakePlaceholder() );
+		zone.AddTerminus( make_shared<ContainerMutator>(pair.first, pair.second, it) );     
+	}
+
+	return zone;
+}
+
+
 FreeZone::FreeZone()
 {
 }

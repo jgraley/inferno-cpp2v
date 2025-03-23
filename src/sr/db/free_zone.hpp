@@ -25,6 +25,7 @@ public:
 
     static FreeZone CreateSubtree( TreePtr<Node> base );
     static FreeZone CreateEmpty();
+	static FreeZone CreateScaffold(const TreePtrInterface *tpi_base, int num_terminii);
 
 	FreeZone();
     explicit FreeZone( TreePtr<Node> base, list<shared_ptr<Mutator>> &&terminii );

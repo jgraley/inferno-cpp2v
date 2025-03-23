@@ -37,32 +37,25 @@ void TreeZoneOrderingHandler::Run( shared_ptr<Patch> &layout )
 	for( shared_ptr<Patch> *patch : out_of_order_list )
 	{
 		// Get the tree zone
-		auto from_patch = dynamic_pointer_cast<TreeZonePatch>(*patch);
-		ASSERT( from_patch );
-		TreeZone from_tz = from_patch->GetZone();
+		auto to_patch = dynamic_pointer_cast<TreeZonePatch>(*patch);
+		ASSERT( to_patch );
+		TreeZone from_tz = to_patch->GetZone();
 		
-		// Make a scaffold of the type required by the tree zone's base
-		auto scaffold_pair = from_tz.GetBaseXLink().GetTreePtrInterface()->MakeScaffold();		
-
+		// Create the scaffold in a free zone
+		auto scaffold_fz = FreeZone::CreateScaffold( from_tz.GetBaseXLink().GetTreePtrInterface(), 
+		                                             from_tz.GetNumTerminii() );
+		//FTRACE("Scaffold free zone: ")(scaffold_fz)("\n");
+		
 #ifdef NEW_OOO
-		// Loop over terminii, giving the scaffold children and creating
-		// mutators on those chidren for the scaffold free zone
-		list<shared_ptr<Mutator>> scaffold_terminii;
-		for( XLink t : from_tz.GetTerminusXLinks() )
-			scaffold_pair.second->push_back( TreePtr<Node>() );
-			auto scaff_child_mut = make_shared<SingularMutator>(scaffold_pair.first, &scaffold_pair.second->back());
-			scaffold_terminii.push_back( scaff_child_mut );
-		
-		// Create the free zone	containing the scaffolding
-		FreeZone scaffold_fz( scaffold_pair.first, move(scaffold_terminii) );
-		
 		// Put the scaffold into the "from" part of the tree, and get back the original contents, which we shall move
 		FreeZone moving_fz = db->MainTreeExchange( from_tz, scaffold_fz );
 		
 		// Make a new patch based on this moving free zone
-		*patch = make_shared<FreeZonePatch>( moving_fz, from_patch->GetChildren() );
+		auto free_patch = make_shared<FreeZonePatch>( moving_fz, to_patch->GetChildren() );
+		free_patch->AddEmbeddedMarkers( to_patch->GetEmbeddedMarkers() );
+		*patch = free_patch;
 #else
-		*patch = from_patch->DuplicateToFree();
+		*patch = to_patch->DuplicateToFree();
 #endif
 	}
 }

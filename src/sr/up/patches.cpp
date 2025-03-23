@@ -76,8 +76,8 @@ catch( BreakException )
 
 
 void Patch::ForDepthFirstWalk( shared_ptr<Patch> &base,
-											function<void(shared_ptr<Patch> &patch)> func_in,
-	                                        function<void(shared_ptr<Patch> &patch)> func_out ) try
+							   function<void(shared_ptr<Patch> &patch)> func_in,
+	                           function<void(shared_ptr<Patch> &patch)> func_out ) try
 {
 	if( func_in )
 		func_in(base);
@@ -91,7 +91,7 @@ catch( BreakException )
 
 
 void Patch::DepthFirstWalkImpl( function<void(shared_ptr<Patch> &patch)> func_in,
-			                             function<void(shared_ptr<Patch> &patch)> func_out )
+			                    function<void(shared_ptr<Patch> &patch)> func_out )
 {
 	for( shared_ptr<Patch> &patch : child_patches )
 	{
@@ -130,7 +130,7 @@ void ZonePatch::AddEmbeddedMarker( RequiresSubordinateSCREngine *new_marker )
 // ------------------------- TreeZonePatch --------------------------
 
 TreeZonePatch::TreeZonePatch( TreeZone zone_, 
-                                                    list<shared_ptr<Patch>> &&child_patches ) :
+                              list<shared_ptr<Patch>> &&child_patches ) :
 	ZonePatch( move(child_patches) ),
 	zone(zone_)
 {
@@ -198,7 +198,7 @@ string TreeZonePatch::GetTrace() const
 // ------------------------- FreeZonePatch --------------------------
 
 FreeZonePatch::FreeZonePatch( FreeZone zone_, 
-                                                    list<shared_ptr<Patch>> &&child_patches ) :
+                              list<shared_ptr<Patch>> &&child_patches ) :
 	ZonePatch( move(child_patches) ),
 	zone(zone_)
 {
@@ -274,8 +274,8 @@ string FreeZonePatch::GetTrace() const
 // ------------------------- TargettedPatch --------------------------
 
 TargettedPatch::TargettedPatch( TreeZone target_tree_zone_, 
-                                  shared_ptr<Zone> source_zone_,
-                                  list<shared_ptr<Patch>> &&child_patches ) :
+                                shared_ptr<Zone> source_zone_,
+                                list<shared_ptr<Patch>> &&child_patches ) :
 	Patch( move(child_patches) ),
 	target_tree_zone(target_tree_zone_),
 	source_zone(source_zone_)
