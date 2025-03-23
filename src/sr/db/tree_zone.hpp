@@ -62,7 +62,7 @@ class MutableTreeZone : public TreeZone
 public:
 	explicit MutableTreeZone( TreeZone tz, unique_ptr<Mutator> &&base_mutator_ );
 
-    void Patch( FreeZone &&new_zone );
+    void Exchange( FreeZone &&new_zone );
 	
 private:
 	unique_ptr<Mutator> base_mutator;

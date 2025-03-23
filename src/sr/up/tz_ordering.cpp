@@ -8,7 +8,7 @@
 
 #include <iostream>
 
-//#define NEW_OOO
+#define NEW_OOO
 
 using namespace SR;                   
 
@@ -36,6 +36,7 @@ void TreeZoneOrderingHandler::Run( shared_ptr<Patch> &layout )
 	
 	for( shared_ptr<Patch> *patch : out_of_order_list )
 	{
+		TRACE("patch: ")(*patch)("\n");
 		// Get the tree zone
 		auto to_patch = dynamic_pointer_cast<TreeZonePatch>(*patch);
 		ASSERT( to_patch );
@@ -47,6 +48,7 @@ void TreeZoneOrderingHandler::Run( shared_ptr<Patch> &layout )
 		//FTRACE("Scaffold free zone: ")(scaffold_fz)("\n");
 		
 #ifdef NEW_OOO
+		TRACE("from_tz: ")(from_tz)("\nscaffold_fz: ")(scaffold_fz)("\n");
 		// Put the scaffold into the "from" part of the tree, and get back the original contents, which we shall move
 		FreeZone moving_fz = db->MainTreeExchange( from_tz, scaffold_fz );
 		

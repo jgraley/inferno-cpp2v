@@ -23,6 +23,32 @@ void TreeZoneOverlapHandler::Run( shared_ptr<Patch> &layout )
 {
 	TreeZoneRelation tz_relation( db );
 
+	// First we must duplicate any tree zones that are in domain extensions
+	// because we want them to stick around. If we added these to the layout 
+	// they'd be detected anyway, but this is simpler, and ensures we duplicate
+	// into the main tree and leave the extra tree alone (less confusing if
+	// DomainExtension is the only thing that changes them).
+	// TODO pop out into another pass.
+	auto extra_root_xlinks = db->GetExtraRootXLinks();
+	for( XLink xlink : extra_root_xlinks )
+	{
+		auto extra_tree = TreeZone::CreateSubtree(xlink);
+		Patch::ForDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &r_patch)
+		{
+			if( auto right_tree_patch = dynamic_pointer_cast<TreeZonePatch>(r_patch) )
+			{			
+				auto p = tz_relation.CompareHierarchical( extra_tree, right_tree_patch->GetZone() );
+				if( p.second == ZoneRelation::OVERLAP_GENERAL || 
+					p.second == ZoneRelation::OVERLAP_TERMINII ||
+					p.second == ZoneRelation::EQUAL )
+				{
+					r_patch = right_tree_patch->DuplicateToFree();
+				}
+			}
+		});
+	}	
+	
+	// The main algorithm for finding overlaps, now operates only on main tree.
 	// Inner and outer loops only look at TreeZonePatch patches
 	Patch::ForDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &l_patch)
 	{
@@ -47,7 +73,7 @@ void TreeZoneOverlapHandler::Run( shared_ptr<Patch> &layout )
 						TRACE("CH(")(left_tree_patch->GetZone())(", ")(right_tree_patch->GetZone())(") is ")(p)("\n");
 						// TODO decide which to duplicated based on size of tree zone: dup the smallest.
 						// It should be possible to maintin "size of subtree" info for nodes
-						if( false ) // Assume r is samller because it's to the right in the DF ordering
+						if( false ) // Assume r is smaller because it's to the right in the DF ordering
 						{
 							TRACE("Duplicate left ")(left_tree_patch)("\n");
 							l_patch = left_tree_patch->DuplicateToFree();

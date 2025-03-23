@@ -81,6 +81,21 @@ XLink XTreeDatabase::GetRootXLink(DBCommon::TreeOrdinal tree_ordinal) const
 }
 
 
+vector<XLink> XTreeDatabase::GetExtraRootXLinks() const
+{
+	vector<XLink> xlinks;
+	for( auto p : trees_by_ordinal )
+	{
+		if( p.first != DBCommon::TreeOrdinal::MAIN )
+		{
+			xlinks.push_back( XLink::CreateFrom( p.second.sp_tp_root_node ) );
+		}
+	}
+	
+	return xlinks;
+}
+
+
 void XTreeDatabase::WalkAllTrees(const DBWalk::Actions *actions,
 								 DBWalk::Wind wind)
 {
@@ -139,8 +154,8 @@ FreeZone XTreeDatabase::MainTreeExchange( TreeZone target_tree_zone, FreeZone so
     MainTreeDelete( mutable_target_tree_zone, &base_info );   
     
     // Patch the tree
-    mutable_target_tree_zone.Patch( move(source_free_zone) ); 
-
+    mutable_target_tree_zone.Exchange( move(source_free_zone) ); 
+	
     // Update database 
     MainTreeInsert( mutable_target_tree_zone, &base_info );   	
     

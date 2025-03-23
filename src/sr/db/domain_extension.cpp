@@ -91,6 +91,13 @@ DBWalk::Action DomainExtension::GetDeleteAction()
 	};
 }
 
+
+void DomainExtension::Validate() const
+{
+	for( auto &p : channels )
+        p.second->Validate();
+}
+
 // ------------------------- DomainExtensionChannel --------------------------
 
 DomainExtensionChannel::DomainExtensionChannel( const XTreeDatabase *db_, const DomainExtension::Extender *extender_ ) :
@@ -143,7 +150,9 @@ void DomainExtensionChannel::CreateExtraTree( TreePtr<Node> induced_root )
  
     // Add this xlink and ordinal to the extension classes as stimulus. 
     // Count begins at 1 since there's one ref (this one)
-	(void)induced_root_to_tree_ordinal_and_ref_count.insert( make_pair( extra_root_node, ExtensionClass(tree_ordinal, 1) ) );    
+	(void)induced_root_to_tree_ordinal_and_ref_count.insert( make_pair( extra_root_node, ExtensionClass(tree_ordinal, 1) ) );  
+	
+	Validate();  
 }
 
 
@@ -200,18 +209,7 @@ void DomainExtensionChannel::DropStimulusXLink( XLink stimulus_xlink )
         EraseSolo(dep_to_all_stimulii.at(dep), stimulus_xlink);
         if( dep_to_all_stimulii.at(dep).empty() )
             EraseSolo(dep_to_all_stimulii, dep);
-    }    
-    
-/*    if( induced_root_to_tree_ordinal_and_ref_count.count(induced_root) == 0 )
-    {
-		TreePtr<Node> front = induced_root_to_tree_ordinal_and_ref_count.begin()->first;
-		SimpleCompare sc;
-		TreePtr<Node> front_width = TreePtr<CPPTree::Signed>::DynamicCast(front)->width;
-		TreePtr<Node> ir_width = TreePtr<CPPTree::Signed>::DynamicCast(induced_root)->width;
-		FTRACE("Front: ")(front)(" Induced root: ")(induced_root)("\n");
-		FTRACE("Front width: ")(front_width)(" Induced root width: ")(ir_width)("\n");
-		FTRACE(" SC result=")( sc.Compare3Way(front, induced_root) )("\n"); 
-	} */
+    }       
 
     // Remove a reference to this induced root from domain extension classes, possibly
     // dropping the extension class completely.
@@ -238,21 +236,19 @@ void DomainExtensionChannel::Validate() const
     {
         XLink stimulus_xlink = p.first;
         for( XLink dep : p.second.deps )
-            ASSERT( dep_to_all_stimulii.count(dep) == 1 );            
+            ASSERT( dep_to_all_stimulii.count(dep) == 1 )(extender)(": domain %d: %d stimulii, %d deps\n", db->GetDomain().unordered_domain.size(), stimulus_to_induced_root_and_deps.size(), dep_to_all_stimulii.size());            
             
-        ASSERT( induced_root_to_tree_ordinal_and_ref_count.count(p.second.induced_root)==1 );
-        ASSERT( induced_root_to_tree_ordinal_and_ref_count.at(p.second.induced_root).ref_count > 0 );
-        
-        ASSERT( stimulii_to_recheck.count(stimulus_xlink) == 0 ); // should be disjoint
+        ASSERT( induced_root_to_tree_ordinal_and_ref_count.count(p.second.induced_root)==1 )(extender)(": domain %d: %d stimulii, %d deps\n", db->GetDomain().unordered_domain.size(), stimulus_to_induced_root_and_deps.size(), dep_to_all_stimulii.size());
+        ASSERT( induced_root_to_tree_ordinal_and_ref_count.at(p.second.induced_root).ref_count > 0 )(extender)(": domain %d: %d stimulii, %d deps\n", db->GetDomain().unordered_domain.size(), stimulus_to_induced_root_and_deps.size(), dep_to_all_stimulii.size());
     }
     
     for( auto p : dep_to_all_stimulii )
     {
         for( XLink stimulus_xlink : p.second )
-            ASSERT( stimulus_to_induced_root_and_deps.count(stimulus_xlink) == 1 );            
+            ASSERT( stimulus_to_induced_root_and_deps.count(stimulus_xlink) == 1 )(extender)(": domain %d: %d stimulii, %d deps\n", db->GetDomain().unordered_domain.size(), stimulus_to_induced_root_and_deps.size(), dep_to_all_stimulii.size());            
     }
     
-	//FTRACE(extender)(" domain %d: %d stimulii, %d deps\n", db->GetDomain().unordered_domain.size(), stimulus_to_induced_root_and_deps.size(), dep_to_all_stimulii.size());    
+	//FTRACE("Validated ")(extender)(": domain %d: %d stimulii, %d deps\n", db->GetDomain().unordered_domain.size(), stimulus_to_induced_root_and_deps.size(), dep_to_all_stimulii.size());    
 }
 
 

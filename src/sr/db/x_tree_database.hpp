@@ -32,6 +32,7 @@ public:
     DBCommon::TreeOrdinal AllocateExtraTree(TreePtr<Node> root_node);
     void FreeExtraTree(DBCommon::TreeOrdinal tree_ordinal);
     XLink GetRootXLink(DBCommon::TreeOrdinal tree_ordinal) const;
+    vector<XLink> GetExtraRootXLinks() const;
     
 	void WalkAllTrees(const DBWalk::Actions *actions,
 		 			  DBWalk::Wind wind);

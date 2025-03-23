@@ -177,7 +177,7 @@ MutableTreeZone::MutableTreeZone( TreeZone tz, unique_ptr<Mutator> &&base_mutato
 {
 }
 
-void MutableTreeZone::Patch( FreeZone &&new_zone )
+void MutableTreeZone::Exchange( FreeZone &&new_zone )
 {	
 	//FreeZone displaced_free_zone( base, {} );
 	bool empty_new_zone = new_zone.IsEmpty();
