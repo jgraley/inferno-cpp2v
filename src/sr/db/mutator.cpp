@@ -31,6 +31,8 @@ SingularMutator::SingularMutator( TreePtr<Node> parent_node, TreePtrInterface *d
     Mutator( parent_node ),
     dest_tree_ptr( dest_tree_ptr_ )
 {
+	// Ensure there's no child where we have a mutator
+	TreePtr<Node>(*dest_tree_ptr) = nullptr;
 }
 
 
@@ -130,6 +132,7 @@ void ContainerMutator::Mutate( TreePtr<Node> child_base,
 
 TreePtr<Node> ContainerMutator::MakePlaceholder()
 {
+    // There should be no child where we have a mutator
     return TreePtr<Node>(); // It's just a NULL tree ptr!
 }
 

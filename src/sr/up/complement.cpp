@@ -33,16 +33,16 @@ void TreeZoneComplementer::Run(XLink target_origin, shared_ptr<Patch> source_lay
 			if( !tz.IsEmpty() )
 				source_tzs_df_by_base.emplace( tz.GetBaseXLink(), tz );
 		}
+		else if( auto fz_patch = dynamic_pointer_cast<FreeZonePatch>(patch) )
+		{
+			// Delete intrinsic tables/orderings for this free zone in the layout
+			// Doing this here on the theory that by doing intrinsic inserts and deletes
+			// in the same pass will make them consistent with one another.
+			db->MainTreeInsertIntrinsic( fz_patch->GetZone() );
+		}
 	} );
 	
-	complement.clear();	
 	WalkTreeZones(target_origin);
-}
-
-
-const list<TreeZone> &TreeZoneComplementer::GetComplement() const
-{
-	return complement;
 }
 
 
@@ -91,6 +91,7 @@ void TreeZoneComplementer::CreateComplementTZ(XLink target_base)
 			++it;
 	}
 	
-	complement.push_back( TreeZone( target_base, complement_terminii ) );
+	// Delete intrinsic tables/orderings for this unreferenced tree zone
+	db->MainTreeDeleteIntrinsic( TreeZone( target_base, complement_terminii ) );
 }
 

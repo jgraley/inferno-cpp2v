@@ -5,6 +5,7 @@
 #include "common/standard.hpp"
 #include "db_common.hpp"
 #include "tree_zone.hpp"
+#include "free_zone.hpp"
 
 namespace SR 
 {
@@ -41,16 +42,20 @@ public:
 					  const DBCommon::TreeOrdinal tree_ordinal,
 					  Wind wind,
 					  const DBCommon::CoreInfo *base_info );
-    void WalkZone( const Actions *actions,
-                   TreeZone zone,
-                   const DBCommon::TreeOrdinal tree_ordinal,
-                   Wind wind,
-                   const DBCommon::CoreInfo *base_info );
+    void WalkTreeZone( const Actions *actions,
+                       TreeZone zone,
+                       const DBCommon::TreeOrdinal tree_ordinal,
+                       Wind wind,
+                       const DBCommon::CoreInfo *base_info );
+	void WalkFreeZone( const Actions *actions,
+					   const FreeZone zone,
+					   Wind wind );
+
 private:
     struct WalkKit
     {
         const Actions *actions;
-        const TreeZone &zone;
+        const TreeZone *zone;
 		const DBCommon::TreeOrdinal tree_ordinal;        
 		Wind wind;
 		mutable TreeZone::TerminusIterator next_terminus_it;

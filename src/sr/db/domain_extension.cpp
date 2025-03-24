@@ -72,7 +72,7 @@ void DomainExtension::PostUpdateActions()
 }
 
 
-DBWalk::Action DomainExtension::GetInsertAction()
+DBWalk::Action DomainExtension::GetInsertGeometricAction()
 {
 	return [=](const DBWalk::WalkInfo &walk_info)
 	{        
@@ -82,7 +82,7 @@ DBWalk::Action DomainExtension::GetInsertAction()
 }
 
 
-DBWalk::Action DomainExtension::GetDeleteAction()
+DBWalk::Action DomainExtension::GetDeleteGeometricAction()
 {	
 	return [=](const DBWalk::WalkInfo &walk_info)
 	{        

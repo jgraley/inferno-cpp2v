@@ -33,7 +33,7 @@ const DBCommon::CoreInfo &LinkTable::GetCoreInfo(XLink xlink) const
 }
  
  
-DBWalk::Action LinkTable::GetInsertAction()
+DBWalk::Action LinkTable::GetInsertGeometricAction()
 {
 	return [=](const DBWalk::WalkInfo &walk_info)
 	{
@@ -42,7 +42,7 @@ DBWalk::Action LinkTable::GetInsertAction()
 }
 
 
-DBWalk::Action LinkTable::GetDeleteAction()
+DBWalk::Action LinkTable::GetDeleteGeometricAction()
 {
 	return [=](const DBWalk::WalkInfo &walk_info)
 	{
@@ -110,6 +110,11 @@ void LinkTable::GenerateRow(const DBWalk::WalkInfo &walk_info)
 			// Note: in real STL containers, one would use *(x_col->rbegin())
 			row.container_back = XLink( walk_info.core.parent_node, &(walk_info.core.p_container->back()) );
 			break;
+		}
+		case DBCommon::FREE_BASE:
+		{
+			// No way to reach parent so do nothing
+			return;
 		}
 	}
 

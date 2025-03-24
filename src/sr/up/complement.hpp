@@ -30,7 +30,6 @@ private:
 	XTreeDatabase * const db;
 	const DepthFirstRelation df_rel;
     DepthFirstOrderingZones source_tzs_df_by_base;
-	list<TreeZone> complement;
 };
 
 }

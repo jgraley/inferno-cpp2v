@@ -44,8 +44,11 @@ public:
 	// Incremental strategy: perform updates on zones
     FreeZone MainTreeExchange( TreeZone target_tree_zone, FreeZone source_free_zone );
 		
-    void MainTreeDelete(TreeZone zone, const DBCommon::CoreInfo *base_info);
-    void MainTreeInsert(TreeZone zone, const DBCommon::CoreInfo *base_info);
+    void MainTreeDeleteGeometric(TreeZone zone, const DBCommon::CoreInfo *base_info);
+    void MainTreeInsertGeometric(TreeZone zone, const DBCommon::CoreInfo *base_info);
+
+    void MainTreeDeleteIntrinsic(TreeZone zone);
+    void MainTreeInsertIntrinsic(FreeZone zone);
 
 	void PerformQueuedExtraTreeActions();
     void ExtraTreeDelete(DBCommon::TreeOrdinal tree_ordinal);
@@ -69,7 +72,7 @@ public:
     
     // Last of the descendents in depth first order. If no 
     // descendents, it will be the supplied node. 
-	XLink GetLastDescendant(XLink xlink) const;
+	static XLink GetLastDescendant(XLink xlink);
 
 	const Orderings &GetOrderings() const;
 	

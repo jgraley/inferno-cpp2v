@@ -28,7 +28,8 @@ public:
         ROOT,
         SINGULAR,
         IN_SEQUENCE,
-        IN_COLLECTION
+        IN_COLLECTION,
+		FREE_BASE
     };
     
    	// This structure is embedded inside our DBWalk::WalkInfo, and in LinkTable::Row.

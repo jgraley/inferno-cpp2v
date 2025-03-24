@@ -47,7 +47,7 @@ bool NodeTable::IsDeclarer(const DBWalk::WalkInfo &walk_info) const
 }
 
 
-DBWalk::Action NodeTable::GetInsertAction()
+DBWalk::Action NodeTable::GetInsertGeometricAction()
 {
 	return [=](const DBWalk::WalkInfo &walk_info)
 	{
@@ -61,7 +61,7 @@ DBWalk::Action NodeTable::GetInsertAction()
 }
 
 
-DBWalk::Action NodeTable::GetDeleteAction()
+DBWalk::Action NodeTable::GetDeleteGeometricAction()
 {
 	return [=](const DBWalk::WalkInfo &walk_info)
 	{

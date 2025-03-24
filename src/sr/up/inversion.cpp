@@ -21,6 +21,17 @@ void TreeZoneInverter::Run(XLink target_origin, shared_ptr<Patch> *source_layout
 {
 	LocatedPatch base_lze( target_origin, source_layout_ptr );
 	WalkLocatedPatches( base_lze );
+	
+	// For each targetted patch in the layout, perform replace operation on the DB
+	Patch::ForDepthFirstWalk( *source_layout_ptr, nullptr, [&](shared_ptr<Patch> &part)
+	{
+		if( auto replace_part = dynamic_pointer_cast<TargettedPatch>(part) )
+		{
+			auto source_free_zone = dynamic_pointer_cast<FreeZone>(replace_part->GetSourceZone());
+			ASSERT( source_free_zone );
+			db->MainTreeExchange( replace_part->GetTargetTreeZone(), *source_free_zone );
+		}
+	} );	
 }
 
 

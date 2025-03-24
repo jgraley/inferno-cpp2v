@@ -31,7 +31,7 @@ const Lacing *Orderings::GetLacing() const
 }
 
 
-DBWalk::Action Orderings::GetDeleteAction()
+DBWalk::Action Orderings::GetDeleteGeometricAction()
 {	
 	xlinks_reached_for_node.clear();
 	
@@ -78,7 +78,7 @@ DBWalk::Action Orderings::GetDeleteAction()
 }
 
 		
-DBWalk::Action Orderings::GetInsertAction()
+DBWalk::Action Orderings::GetInsertGeometricAction()
 {
 	return [=](const DBWalk::WalkInfo &walk_info)
 	{ 

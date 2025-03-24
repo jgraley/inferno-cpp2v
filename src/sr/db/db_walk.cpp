@@ -16,7 +16,7 @@ void DBWalk::WalkTree( const Actions *actions,
 										   ContainerInterface::iterator() };
 										   
 	const TreeZone zone = TreeZone::CreateSubtree(root_xlink);
-    WalkKit kit { actions, zone, tree_ordinal, wind, zone.GetTerminiiBegin() };
+    WalkKit kit { actions, &zone, tree_ordinal, wind, zone.GetTerminiiBegin() };
 	VisitBase( kit, &root_info );  
 }
 
@@ -28,23 +28,43 @@ void DBWalk::WalkSubtree( const Actions *actions,
 						  const DBCommon::CoreInfo *base_info )
 {
 	ASSERT( base_info );
-    WalkZone( actions, TreeZone::CreateSubtree(base_xlink), tree_ordinal, wind, base_info );
+    WalkTreeZone( actions, TreeZone::CreateSubtree(base_xlink), tree_ordinal, wind, base_info );
 }
 
 
-void DBWalk::WalkZone( const Actions *actions,
-					   const TreeZone zone,
-                       const DBCommon::TreeOrdinal tree_ordinal, 
-                       Wind wind,
-                       const DBCommon::CoreInfo *base_info )
+void DBWalk::WalkTreeZone( const Actions *actions,
+						   const TreeZone zone,
+						   const DBCommon::TreeOrdinal tree_ordinal, 
+						   Wind wind,
+						   const DBCommon::CoreInfo *base_info )
 {
 	//FTRACE("Walking zone: ")(zone)("\n");
 	ASSERT( base_info );
-    WalkKit kit { actions, zone, tree_ordinal, wind, zone.GetTerminiiBegin() };
+    WalkKit kit { actions, &zone, tree_ordinal, wind, zone.GetTerminiiBegin() };
 	VisitBase( kit, base_info );  
 	ASSERT( kit.next_terminus_it == zone.GetTerminiiEnd() )
 	      ("Zone has %d terminii", zone.GetNumTerminii())
 	      (kit.next_terminus_it==zone.GetTerminiiBegin()?" (no terminii visited)":""); // should have visited all the terminii
+}
+
+
+void DBWalk::WalkFreeZone( const Actions *actions,
+						   const FreeZone zone,
+						   Wind wind )
+{
+    // Behaviour for free zones:
+    // - Context is FREE_BASE for base of zone, walk_info similar to ROOT
+    // - We do not visit terminii, so at_terminus is always false 
+ 
+	//FTRACE("Walking zone: ")(zone)("\n");
+	const DBCommon::CoreInfo base_info = { TreePtr<Node>(), 			          
+										   -1,
+										   DBCommon::FREE_BASE,  				
+										   nullptr,
+										   -1,	 	  					  					  
+										   ContainerInterface::iterator() };
+    WalkKit kit { actions, nullptr, (SR::DBCommon::TreeOrdinal)(-1), wind };
+	VisitBase( kit, &base_info );  
 }
 
 
@@ -53,14 +73,14 @@ void DBWalk::VisitBase( const WalkKit &kit,
 {
 	ASSERT( base_info );
 
-    XLink base_xlink = kit.zone.GetBaseXLink();
+    XLink base_xlink = kit.zone->GetBaseXLink();
 	WalkInfo walk_info = { *base_info, 			          
 						   base_xlink.GetTreePtrInterface(), 
 						   base_xlink, 
 						   base_xlink.GetChildTreePtr(),
 						   kit.tree_ordinal,
-						   false,
-						   true };
+						   false, // at_terminus
+						   true }; // at_base
 
     VisitLink( kit, move(walk_info) );
 }
@@ -162,7 +182,8 @@ void DBWalk::VisitLink( const WalkKit &kit,
                         WalkInfo &&walk_info ) // .x should be .xlink's child
 {
     INDENT(".");            
-	walk_info.at_terminus = (kit.next_terminus_it != kit.zone.GetTerminiiEnd() &&
+	walk_info.at_terminus = (kit.zone &&
+	                         kit.next_terminus_it != kit.zone->GetTerminiiEnd() && // TODO store end iterator directly in kit
 	                         walk_info.xlink == *(kit.next_terminus_it));
 	if( walk_info.at_terminus )
 		++(kit.next_terminus_it);

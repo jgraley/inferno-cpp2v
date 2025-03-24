@@ -4,6 +4,7 @@
 
 #include "helpers/flatten.hpp"
 #include "node/node.hpp"
+#include "../db/x_tree_database.hpp"
 
 using namespace SYM;
 
@@ -409,7 +410,7 @@ SR::XLink LastDescendantOperator::EvalXLinkFromRow( const EvalKit &kit,
                                                     const SR::LinkTable::Row &row ) const
 {
   
-    return kit.x_tree_db->GetLastDescendant(xlink);
+    return SR::XTreeDatabase::GetLastDescendant(xlink);
 }
 
 

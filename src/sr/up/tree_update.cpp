@@ -60,7 +60,7 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink target_origin, shared_
 	tree_zone_ordering_handler.Run(source_layout);
 	tree_zone_ordering_handler.Check(source_layout);
 	
-	TreeZoneGapHandler tree_zone_gap_handler( db );
+	TreeZoneGapHandler tree_zone_gap_handler;
 	tree_zone_gap_handler.Run(source_layout);	
 
 	FreeZoneMerger free_zone_merger;
@@ -76,16 +76,5 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink target_origin, shared_
 
 	// Inversion generates sequence of separate "small" update commands 
 	TreeZoneInverter tree_zone_inverter( db ); 
-	tree_zone_inverter.Run(target_origin, &source_layout);	
-			
-	// For each targetted patch in the layout, perform replace operation on the DB
-	Patch::ForDepthFirstWalk( source_layout, nullptr, [&](shared_ptr<Patch> &part)
-	{
-		if( auto replace_part = dynamic_pointer_cast<TargettedPatch>(part) )
-		{
-			auto source_free_zone = dynamic_pointer_cast<FreeZone>(replace_part->GetSourceZone());
-			ASSERT( source_free_zone );
-			db->MainTreeExchange( replace_part->GetTargetTreeZone(), *source_free_zone );
-		}
-	} );
+	tree_zone_inverter.Run(target_origin, &source_layout);				
 }

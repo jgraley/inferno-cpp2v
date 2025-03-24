@@ -15,14 +15,12 @@ namespace SR
 class TreeZoneGapHandler
 {
 public:
-	TreeZoneGapHandler( XTreeDatabase *db );
+	TreeZoneGapHandler();
 	
 	void Run(shared_ptr<Patch> source_layout);
 		
 private:
 	void CheckPatch(shared_ptr<TreeZonePatch> patch);
-
-	XTreeDatabase * const db;
 };
 
 }

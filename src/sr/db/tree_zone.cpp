@@ -185,7 +185,7 @@ void MutableTreeZone::Exchange( FreeZone &&new_zone )
 	// Do a co-walk and populate one at a time. Update our terminii as we go. Cannot use 
 	// TPI because we need to change the PARENT node, so we need a whole new XLink. Do this
 	// under a validity check that all our XLinks are inside the new tree.
-	// This is needed because MainTreeExchange() will pass us to MainTreeInsert()
+	// This is needed because MainTreeExchange() will pass us to MainTreeInsertGeometric()
 	FreeZone::TerminusIterator new_it = new_zone.GetTerminiiBegin();	
     for( XLink &tree_terminus_xlink : terminii )
 	{

@@ -8,8 +8,6 @@
 
 #include <iostream>
 
-#define NEW_OOO
-
 using namespace SR;                   
 
 // ------------------------- TreeZoneOrderingHandler --------------------------
@@ -25,7 +23,7 @@ void TreeZoneOrderingHandler::Run( shared_ptr<Patch> &layout )
 {
 	out_of_order_list.clear();
 	XLink root = db->GetMainRootXLink();
-	XLink last = db->GetLastDescendant(root);
+	XLink last = XTreeDatabase::GetLastDescendant(root);
 	RunForRange( layout, root, last, false );
 	
 	if( !out_of_order_list.empty() )
@@ -47,7 +45,6 @@ void TreeZoneOrderingHandler::Run( shared_ptr<Patch> &layout )
 		                                             from_tz.GetNumTerminii() );
 		//FTRACE("Scaffold free zone: ")(scaffold_fz)("\n");
 		
-#ifdef NEW_OOO
 		TRACE("from_tz: ")(from_tz)("\nscaffold_fz: ")(scaffold_fz)("\n");
 		// Put the scaffold into the "from" part of the tree, and get back the original contents, which we shall move
 		FreeZone moving_fz = db->MainTreeExchange( from_tz, scaffold_fz );
@@ -56,9 +53,12 @@ void TreeZoneOrderingHandler::Run( shared_ptr<Patch> &layout )
 		auto free_patch = make_shared<FreeZonePatch>( moving_fz, to_patch->GetChildren() );
 		free_patch->AddEmbeddedMarkers( to_patch->GetEmbeddedMarkers() );
 		*patch = free_patch;
-#else
-		*patch = to_patch->DuplicateToFree();
-#endif
+		
+		// How does the scaffold not end up in the updated tree?
+		// The best argument is that, after this pass, none of the
+		// scaffold nodes are inside any of the patches in our layout.
+		// So, if subsequent passes and the DB act correctly, they 
+		// will be deleted from the tree.				
 	}
 }
 
@@ -66,7 +66,7 @@ void TreeZoneOrderingHandler::Run( shared_ptr<Patch> &layout )
 void TreeZoneOrderingHandler::Check( shared_ptr<Patch> &layout )
 {
 	XLink root = db->GetMainRootXLink();
-	XLink last = db->GetLastDescendant(root);
+	XLink last = XTreeDatabase::GetLastDescendant(root);
 	RunForRange( layout, root, last, true );
 }
 
@@ -81,7 +81,7 @@ void TreeZoneOrderingHandler::RunForTreeZone( shared_ptr<TreeZonePatch> &tree_pa
 	tree_patch->ForChildren( [&](shared_ptr<Patch> &child_patch)	
 	{
 		XLink range_front = *it_t++; // inclusive (terminus XLink equals base XLink of attached tree zone)
-		XLink range_back = db->GetLastDescendant(range_front); // inclusive (is same or child of range_front)
+		XLink range_back = XTreeDatabase::GetLastDescendant(range_front); // inclusive (is same or child of range_front)
 		RunForRange( child_patch, range_front, range_back, just_check );
 	} );
 }
@@ -444,7 +444,7 @@ void AltTreeZoneOrderingChecker::Worker( shared_ptr<Patch> patch, bool base_equa
 			
 			// Check last xlink under terminus is in order. Could have seen last xlink
 			// during recurse. 
-			CheckXlink( db->GetLastDescendant(terminus_xlink), true );
+			CheckXlink( XTreeDatabase::GetLastDescendant(terminus_xlink), true );
 			
 			++it_child;
 		}

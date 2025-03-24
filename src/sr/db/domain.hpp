@@ -20,8 +20,8 @@ class Domain
 public:
 	Domain();
 
-    DBWalk::Action GetDeleteAction();
-	DBWalk::Action GetInsertAction();
+    DBWalk::Action GetDeleteGeometricAction();
+	DBWalk::Action GetInsertGeometricAction();
 	
 	static void CheckEqual( shared_ptr<Domain> l, shared_ptr<Domain> r );	
     

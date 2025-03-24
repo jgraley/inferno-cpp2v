@@ -14,7 +14,7 @@ Domain::Domain()
 }
 
 
-DBWalk::Action Domain::GetDeleteAction()
+DBWalk::Action Domain::GetDeleteGeometricAction()
 {
 	return [=](const DBWalk::WalkInfo &walk_info)
 	{        
@@ -24,7 +24,7 @@ DBWalk::Action Domain::GetDeleteAction()
 }
 
 
-DBWalk::Action Domain::GetInsertAction()
+DBWalk::Action Domain::GetInsertGeometricAction()
 {
 	return [=](const DBWalk::WalkInfo &walk_info)
 	{        

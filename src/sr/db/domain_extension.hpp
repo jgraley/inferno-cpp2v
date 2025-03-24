@@ -71,8 +71,8 @@ public:
     void InitialBuild();
     void PostUpdateActions();
 
-    DBWalk::Action GetDeleteAction();
-	DBWalk::Action GetInsertAction();
+    DBWalk::Action GetDeleteGeometricAction();
+	DBWalk::Action GetInsertGeometricAction();
 	
 	void Validate() const;
 	
