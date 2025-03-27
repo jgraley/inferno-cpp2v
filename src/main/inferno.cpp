@@ -37,8 +37,8 @@ void BuildDefaultSequence( vector< shared_ptr<VNStep> > *sequence )
     ASSERT( sequence );
         
 #ifdef TEST_754
-	sequence->push_back( make_shared<DroppedTreeZone>() );
-	return;
+    sequence->push_back( make_shared<DroppedTreeZone>() );
+    return;
 #endif
 
     // Test steps that change (fix) the tree - do these first so 
@@ -417,7 +417,7 @@ Inferno::Plan::Plan(Inferno *algo_) :
 void Inferno::RunStage( Stage stage )
 {
     if( !ReadArgs::trace_quiet )
-		fprintf(stderr, "%s\n", stage.text.c_str());     
+        fprintf(stderr, "%s\n", stage.text.c_str());     
     
     switch( Progress(stage.progress_stage).GetSteppiness() )
     {
@@ -508,8 +508,8 @@ void Inferno::GeneratePatternGraphs()
 
 void Inferno::GenerateGraphRegions( const Step &sp, Graph &graph )
 {
-	vn_sequence->DoGraph( sp.step_index, graph );
-	if( ReadArgs::graph_trace )    
+    vn_sequence->DoGraph( sp.step_index, graph );
+    if( ReadArgs::graph_trace )    
         vn_sequence->GenerateGraphRegions(sp.step_index, graph);
 }
    
@@ -567,7 +567,7 @@ int main( int argc, char *argv[] )
     Progress(Progress::BUILDING_STEPS).SetAsCurrent();    
     vector< shared_ptr<SR::VNStep> > sequence;
     if( !ReadArgs::trace_quiet )
-		fprintf(stderr, "Building patterns\n"); 
+        fprintf(stderr, "Building patterns\n"); 
     if( ReadArgs::documentation_graphs )
         BuildDocSequence( &sequence );
     else

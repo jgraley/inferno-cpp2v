@@ -16,17 +16,17 @@ namespace SR
 class TreeUpdater
 {
 public:
-	TreeUpdater(XTreeDatabase *x_tree_db = nullptr); // db optional
-	
-	// Duplicates all the tree zones and merges everything into one
-	unique_ptr<FreeZone> TransformToSingleFreeZone( shared_ptr<Patch> source_layout );
-	
-	// Much as the name suggests. Db required and acts directly on it.
-	void TransformToIncrementalAndExecute( XLink target_origin, shared_ptr<Patch> source_layout );
-	
+    TreeUpdater(XTreeDatabase *x_tree_db = nullptr); // db optional
+    
+    // Duplicates all the tree zones and merges everything into one
+    unique_ptr<FreeZone> TransformToSingleFreeZone( shared_ptr<Patch> source_layout );
+    
+    // Much as the name suggests. Db required and acts directly on it.
+    void TransformToIncrementalAndExecute( XLink target_origin, shared_ptr<Patch> source_layout );
+    
 private:
-	XTreeDatabase * const db;
-};	
+    XTreeDatabase * const db;
+};    
 
 }
 

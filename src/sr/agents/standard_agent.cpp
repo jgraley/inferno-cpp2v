@@ -72,7 +72,7 @@ StandardAgent::Plan::Sequence::Sequence( int ii, Plan *plan, Phase phase, Sequen
         stars_queue.clear();            
     };
     
-	for( SequenceInterface::iterator pit = pattern->begin(); 
+    for( SequenceInterface::iterator pit = pattern->begin(); 
          pit != pattern->end(); 
          ++pit ) 
     {
@@ -130,18 +130,18 @@ StandardAgent::Plan::Collection::Collection( int ii, Plan *plan, Phase phase, Co
     {
         const TreePtrInterface *pe = &*pit; 
         PatternLink plink(plan->algo, &*pit);
-		ASSERTS( pe );
+        ASSERTS( pe );
         if( dynamic_cast<StarAgent *>(pe->get()) ) // per the impl, the star in a collection is not linked
         {
             ASSERTS( phase == IN_REPLACE_ONLY || !p_star )("Only one star allowed in collections when in compare pattern");
             if( !p_star )
             {
-				// TODO infrastructure for multiple stars as with sequences (for consistency)
-				// and move the assert to regen query which is where it hurts (we have to associate with one star plink)
-				// -> better for if we add support for category restriction on stars in collections
-				p_star = pe;
-				star_plink = plink;
-			}
+                // TODO infrastructure for multiple stars as with sequences (for consistency)
+                // and move the assert to regen query which is where it hurts (we have to associate with one star plink)
+                // -> better for if we add support for category restriction on stars in collections
+                p_star = pe;
+                star_plink = plink;
+            }
         }
         else
         {
@@ -218,12 +218,12 @@ void StandardAgent::IncrPatternQueryCollection( const Plan::Collection &plan_col
         if( !dynamic_cast<StarAgent *>(pe->get()) ) // per the impl, the star in a collection is not linked
         {
             pattern_query->RegisterDecision( false ); // Exclusive, please
-            pattern_query->RegisterNormalLink(PatternLink(this, pe));    	     
+            pattern_query->RegisterNormalLink(PatternLink(this, pe));             
         }
     }
     if( plan_col.star_plink )
     {
-        pattern_query->RegisterAbnormalLink( plan_col.star_plink );   		                    
+        pattern_query->RegisterAbnormalLink( plan_col.star_plink );                               
     }
 }
 
@@ -238,7 +238,7 @@ void StandardAgent::IncrPatternQuerySingular( const Plan::Singular &plan_sing,
                                                
 Lazy<BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryPRed() const
 {
-	auto expr = MakeLazy<IsLocalMatchOperator>(GetPatternPtr().get(), MakeLazy<SymbolVariable>(keyer_plink));
+    auto expr = MakeLazy<IsLocalMatchOperator>(GetPatternPtr().get(), MakeLazy<SymbolVariable>(keyer_plink));
 
     for( const Plan::Singular &plan_sing : plan.singulars )
         expr &= SymbolicNormalLinkedQuerySingular( plan_sing );
@@ -255,7 +255,7 @@ Lazy<BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryPRed() const
                                                
 Lazy<BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySequence(const Plan::Sequence &plan_seq) const
 {
-	auto expr = MakeLazy<BooleanConstant>(true);
+    auto expr = MakeLazy<BooleanConstant>(true);
 
     // Require that every candidate x link is in the correct container. Binary 
     // constraint with keyer and candidate, for each candidate.
@@ -401,7 +401,7 @@ void StandardAgent::RegenerationQuerySequence( DecidedQueryAgentInterface &query
     // of the bounds of the x sequence and the surrounding non-star child x values. 
     for( shared_ptr<Plan::Sequence::Run> run : plan_seq.star_runs )
     {
-      	ContainerInterface::iterator xit, xit_star_limit;
+          ContainerInterface::iterator xit, xit_star_limit;
 
         if( run->predecessor )
         {
@@ -562,42 +562,42 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlay( const ReplaceKit 
                                                                PatternLink me_plink, 
                                                                XLink under_xlink )  // overlaying
 {
-	INDENT("O");
+    INDENT("O");
     ASSERT( under_xlink );
     TreePtr<Node> under_node = under_xlink.GetChildTreePtr();
     
     ASSERT( under_node->IsFinal() )
-		  (*under_node)
-		  (" must be a final class.");
+          (*under_node)
+          (" must be a final class.");
     ASSERT( IsSubcategory(*under_node) ) 
-		  (*under_node)
-		  (" must be a non-strict subclass of ")
-		  (*this)
-		  (", so that it has a super-set of members");
-	bool same_type = under_node->IsSubcategory(*GetPatternPtr()); // See the above assert
+          (*under_node)
+          (" must be a non-strict subclass of ")
+          (*this)
+          (", so that it has a super-set of members");
+    bool same_type = under_node->IsSubcategory(*GetPatternPtr()); // See the above assert
         
     // Policy: if type is same then use pattern as a template
     // and the new node will get its locals. Otherwise use keyed X (=under) as
     // the template. #593 will improve on this.
     if( same_type ) 
-		return GenReplaceLayoutOverlayUsingPattern( kit, me_plink, under_xlink );
-	else 
-		return GenReplaceLayoutOverlayUsingX( kit, me_plink, under_xlink );
+        return GenReplaceLayoutOverlayUsingPattern( kit, me_plink, under_xlink );
+    else 
+        return GenReplaceLayoutOverlayUsingX( kit, me_plink, under_xlink );
 }
 
 
 Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingPattern( const ReplaceKit &kit, 
                                                                            PatternLink me_plink, 
                                                                            XLink under_xlink ) 
-{	
-	TreePtr<Node> under_node = under_xlink.GetChildTreePtr();
+{    
+    TreePtr<Node> under_node = under_xlink.GetChildTreePtr();
 
     // clone me (and dest's local data members will come from me)
     // Pattern nodes must be cloned because they don't want to share their identifiers
-	TreePtr<Node> dest = AgentCommon::CloneNode(); 
-	
-	// We "invent" dest, because of information coming from this pattern node.
-	dest->SetInventedHere();
+    TreePtr<Node> dest = AgentCommon::CloneNode(); 
+    
+    // We "invent" dest, because of information coming from this pattern node.
+    dest->SetInventedHere();
 
     // Stuff for creating commands
     list<Agent::ReplacePatchPtr> child_patches;    
@@ -619,7 +619,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingPattern( const
     
     TRACE("Copying %d members from under_node=", dest_items.size())(*under_node)(" dest=")(*dest)("\n");
     // i tracks items in under/dest, j tracks items in me
-	bool in_me;
+    bool in_me;
     for( vector< Itemiser::Element * >::size_type i=0, j=0; i<dest_items.size(); i++, in_me && j++ )
     {
         ASSERT( under_items[i] )( "itemise returned null element" );
@@ -630,82 +630,82 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingPattern( const
         bool should_overlay;
         if( in_me )
         {
-			should_overlay = true; // in me...
-			if( TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[j]) )
-				if( !*my_singular )
-					should_overlay = false; // but is a NULL singular
-		}
-		else
+            should_overlay = true; // in me...
+            if( TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[j]) )
+                if( !*my_singular )
+                    should_overlay = false; // but is a NULL singular
+        }
+        else
         {
-			should_overlay = false; // not in me (I'm a super-category)
-		}
+            should_overlay = false; // not in me (I'm a super-category)
+        }
                     
-		if( should_overlay )
-		{
-		    ASSERT( my_items[j] )( "itemise returned null element" );
-			ASSERT( dest_items_in_me[j] )( "itemise returned null element" );
-		}
-		
-    	TRACE("Member %d from key\n", i );
+        if( should_overlay )
+        {
+            ASSERT( my_items[j] )( "itemise returned null element" );
+            ASSERT( dest_items_in_me[j] )( "itemise returned null element" );
+        }
+        
+        TRACE("Member %d from key\n", i );
         if( ContainerInterface *under_container = dynamic_cast<ContainerInterface *>(under_items[i]) )                
         {
-    		ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_items[i]);
-			ASSERT( dest_con )( "itemise for dest didn't match itemise for my_con");
-    		dest_con->clear();
-    		
-			if( should_overlay )
-			{	
-				ContainerInterface *my_con = dynamic_cast<ContainerInterface *>(my_items[j]);
-				ASSERT(my_con);
-				
-				TRACE("Copying container size %d from my_con\n", (*my_con).size() );
-				for( const TreePtrInterface &my_elt : *my_con )
-				{
-					// Make a placeholder in the dest container for the mutator to point to
-					ContainerInterface::iterator dest_it = dest_con->insert( ContainerMutator::MakePlaceholder() );
-					zone.AddTerminus( make_shared<ContainerMutator>(dest, dest_con, dest_it) );     
-					
-					ASSERT( my_elt )("Some element of member %d (", j)(*my_con)(") of ")(*this)(" was nullptr\n");
-					TRACE("Got ")(*my_elt)("\n");
-					PatternLink my_elt_plink( this, &my_elt );
-					child_patches.push_back( my_elt_plink.GetChildAgent()->GenReplaceLayout(kit, my_elt_plink) );				
-				}
-			}	
-			else
-			{
-				TRACE("Copying container size %d from key\n", under_container->size() );
-				for( const TreePtrInterface &under_elt : *under_container )
-				{
-					// Make a placeholder in the dest container for the mutator to point to
-					ContainerInterface::iterator dest_it = dest_con->insert( ContainerMutator::MakePlaceholder() );
-					zone.AddTerminus( make_shared<ContainerMutator>(dest, dest_con, dest_it) );     
+            ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_items[i]);
+            ASSERT( dest_con )( "itemise for dest didn't match itemise for my_con");
+            dest_con->clear();
+            
+            if( should_overlay )
+            {    
+                ContainerInterface *my_con = dynamic_cast<ContainerInterface *>(my_items[j]);
+                ASSERT(my_con);
+                
+                TRACE("Copying container size %d from my_con\n", (*my_con).size() );
+                for( const TreePtrInterface &my_elt : *my_con )
+                {
+                    // Make a placeholder in the dest container for the mutator to point to
+                    ContainerInterface::iterator dest_it = dest_con->insert( ContainerMutator::MakePlaceholder() );
+                    zone.AddTerminus( make_shared<ContainerMutator>(dest, dest_con, dest_it) );     
+                    
+                    ASSERT( my_elt )("Some element of member %d (", j)(*my_con)(") of ")(*this)(" was nullptr\n");
+                    TRACE("Got ")(*my_elt)("\n");
+                    PatternLink my_elt_plink( this, &my_elt );
+                    child_patches.push_back( my_elt_plink.GetChildAgent()->GenReplaceLayout(kit, my_elt_plink) );                
+                }
+            }    
+            else
+            {
+                TRACE("Copying container size %d from key\n", under_container->size() );
+                for( const TreePtrInterface &under_elt : *under_container )
+                {
+                    // Make a placeholder in the dest container for the mutator to point to
+                    ContainerInterface::iterator dest_it = dest_con->insert( ContainerMutator::MakePlaceholder() );
+                    zone.AddTerminus( make_shared<ContainerMutator>(dest, dest_con, dest_it) );     
 
-					ASSERT( under_elt ); // present simplified scheme disallows nullptr
-					TreeZone under_zone = TreeZone::CreateSubtree(XLink(under_node, &under_elt) );
-					child_patches.push_back( make_shared<TreeZonePatch>(move(under_zone)) );		
-				}
-			}
+                    ASSERT( under_elt ); // present simplified scheme disallows nullptr
+                    TreeZone under_zone = TreeZone::CreateSubtree(XLink(under_node, &under_elt) );
+                    child_patches.push_back( make_shared<TreeZonePatch>(move(under_zone)) );        
+                }
+            }
         }            
         else if( TreePtrInterface *under_singular = dynamic_cast<TreePtrInterface *>(under_items[i]) )
         {
-			TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
-			ASSERT( dest_singular )( "itemise for target didn't match itemise for pattern");
-			zone.AddTerminus( make_shared<SingularMutator>(dest, dest_singular) );            
+            TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
+            ASSERT( dest_singular )( "itemise for target didn't match itemise for pattern");
+            zone.AddTerminus( make_shared<SingularMutator>(dest, dest_singular) );            
 
-			if( should_overlay )
-			{
-				TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[j]);		
-				ASSERT(	my_singular );
-				ASSERT( *my_singular ); // Should not have marked this one for overlay if NULL
-				PatternLink my_singular_plink( this, my_singular );                    
-				child_patches.push_back( my_singular_plink.GetChildAgent()->GenReplaceLayout(kit, my_singular_plink) );           
-			}		
-			else
-			{
-				ASSERT( *under_singular );            
-				TreeZone under_zone = TreeZone::CreateSubtree(XLink(under_node, under_singular) );
-				child_patches.push_back( make_shared<TreeZonePatch>(move(under_zone)) );			
-			}
+            if( should_overlay )
+            {
+                TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[j]);        
+                ASSERT(    my_singular );
+                ASSERT( *my_singular ); // Should not have marked this one for overlay if NULL
+                PatternLink my_singular_plink( this, my_singular );                    
+                child_patches.push_back( my_singular_plink.GetChildAgent()->GenReplaceLayout(kit, my_singular_plink) );           
+            }        
+            else
+            {
+                ASSERT( *under_singular );            
+                TreeZone under_zone = TreeZone::CreateSubtree(XLink(under_node, under_singular) );
+                child_patches.push_back( make_shared<TreeZonePatch>(move(under_zone)) );            
+            }
         }
         else
         {
@@ -721,13 +721,13 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingX( const Repla
                                                                      PatternLink me_plink, 
                                                                      XLink under_xlink )  
 {
-	TreePtr<Node> under_node = under_xlink.GetChildTreePtr();
+    TreePtr<Node> under_node = under_xlink.GetChildTreePtr();
 
-	// Duplicate under (and dest's local variables will appear to come from under)
+    // Duplicate under (and dest's local variables will appear to come from under)
     TreePtr<Node> dest = Duplicate::DuplicateNode(under_node); 
 
-	// We "invent" dest, because of information coming from this pattern node.
-	dest->SetInventedHere();
+    // We "invent" dest, because of information coming from this pattern node.
+    dest->SetInventedHere();
 
     // Stuff for creating commands
     list<Agent::ReplacePatchPtr> child_patches;    
@@ -749,7 +749,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingX( const Repla
     
     TRACE("Copying %d members from under_node=", dest_items.size())(*under_node)(" dest=")(*dest)("\n");
     // i tracks items in under/dest, j tracks items in me
-	bool in_me;
+    bool in_me;
     for( vector< Itemiser::Element * >::size_type i=0, j=0; i<dest_items.size(); i++, in_me && j++ )
     {
         ASSERT( under_items[i] )( "itemise returned null element" );
@@ -760,82 +760,82 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingX( const Repla
         bool should_overlay;
         if( in_me )
         {
-			should_overlay = true; // in me...
-			if( TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[j]) )
-				if( !*my_singular )
-					should_overlay = false; // but is a NULL singular
-		}
-		else
+            should_overlay = true; // in me...
+            if( TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[j]) )
+                if( !*my_singular )
+                    should_overlay = false; // but is a NULL singular
+        }
+        else
         {
-			should_overlay = false; // not in me (I'm a super-category)
-		}
+            should_overlay = false; // not in me (I'm a super-category)
+        }
                     
-		if( should_overlay )
-		{
-		    ASSERT( my_items[j] )( "itemise returned null element" );
-			ASSERT( dest_items_in_me[j] )( "itemise returned null element" );
-		}
-		
-    	TRACE("Member %d from key\n", i );
+        if( should_overlay )
+        {
+            ASSERT( my_items[j] )( "itemise returned null element" );
+            ASSERT( dest_items_in_me[j] )( "itemise returned null element" );
+        }
+        
+        TRACE("Member %d from key\n", i );
         if( ContainerInterface *under_container = dynamic_cast<ContainerInterface *>(under_items[i]) )                
         {
-    		ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_items[i]);
-			ASSERT( dest_con )( "itemise for dest didn't match itemise for my_con");
-    		dest_con->clear();
-    		
-			if( should_overlay )
-			{	
-				ContainerInterface *my_con = dynamic_cast<ContainerInterface *>(my_items[j]);
-				ASSERT(my_con);
-				
-				TRACE("Copying container size %d from my_con\n", (*my_con).size() );
-				for( const TreePtrInterface &my_elt : *my_con )
-				{
-					// Make a placeholder in the dest container for the mutator to point to
-					ContainerInterface::iterator dest_it = dest_con->insert( ContainerMutator::MakePlaceholder() );
-					zone.AddTerminus( make_shared<ContainerMutator>(dest, dest_con, dest_it) );     
-					
-					ASSERT( my_elt )("Some element of member %d (", j)(*my_con)(") of ")(*this)(" was nullptr\n");
-					TRACE("Got ")(*my_elt)("\n");
-					PatternLink my_elt_plink( this, &my_elt );
-					child_patches.push_back( my_elt_plink.GetChildAgent()->GenReplaceLayout(kit, my_elt_plink) );				
-				}
-			}	
-			else
-			{
-				TRACE("Copying container size %d from key\n", under_container->size() );
-				for( const TreePtrInterface &under_elt : *under_container )
-				{
-					// Make a placeholder in the dest container for the mutator to point to
-					ContainerInterface::iterator dest_it = dest_con->insert( ContainerMutator::MakePlaceholder() );
-					zone.AddTerminus( make_shared<ContainerMutator>(dest, dest_con, dest_it) );     
+            ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_items[i]);
+            ASSERT( dest_con )( "itemise for dest didn't match itemise for my_con");
+            dest_con->clear();
+            
+            if( should_overlay )
+            {    
+                ContainerInterface *my_con = dynamic_cast<ContainerInterface *>(my_items[j]);
+                ASSERT(my_con);
+                
+                TRACE("Copying container size %d from my_con\n", (*my_con).size() );
+                for( const TreePtrInterface &my_elt : *my_con )
+                {
+                    // Make a placeholder in the dest container for the mutator to point to
+                    ContainerInterface::iterator dest_it = dest_con->insert( ContainerMutator::MakePlaceholder() );
+                    zone.AddTerminus( make_shared<ContainerMutator>(dest, dest_con, dest_it) );     
+                    
+                    ASSERT( my_elt )("Some element of member %d (", j)(*my_con)(") of ")(*this)(" was nullptr\n");
+                    TRACE("Got ")(*my_elt)("\n");
+                    PatternLink my_elt_plink( this, &my_elt );
+                    child_patches.push_back( my_elt_plink.GetChildAgent()->GenReplaceLayout(kit, my_elt_plink) );                
+                }
+            }    
+            else
+            {
+                TRACE("Copying container size %d from key\n", under_container->size() );
+                for( const TreePtrInterface &under_elt : *under_container )
+                {
+                    // Make a placeholder in the dest container for the mutator to point to
+                    ContainerInterface::iterator dest_it = dest_con->insert( ContainerMutator::MakePlaceholder() );
+                    zone.AddTerminus( make_shared<ContainerMutator>(dest, dest_con, dest_it) );     
 
-					ASSERT( under_elt ); // present simplified scheme disallows nullptr
-					TreeZone under_zone = TreeZone::CreateSubtree(XLink(under_node, &under_elt) );
-					child_patches.push_back( make_shared<TreeZonePatch>(move(under_zone)) );		
-				}
-			}
+                    ASSERT( under_elt ); // present simplified scheme disallows nullptr
+                    TreeZone under_zone = TreeZone::CreateSubtree(XLink(under_node, &under_elt) );
+                    child_patches.push_back( make_shared<TreeZonePatch>(move(under_zone)) );        
+                }
+            }
         }            
         else if( TreePtrInterface *under_singular = dynamic_cast<TreePtrInterface *>(under_items[i]) )
         {
-			TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
-			ASSERT( dest_singular )( "itemise for target didn't match itemise for pattern");
-			zone.AddTerminus( make_shared<SingularMutator>(dest, dest_singular) );            
+            TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
+            ASSERT( dest_singular )( "itemise for target didn't match itemise for pattern");
+            zone.AddTerminus( make_shared<SingularMutator>(dest, dest_singular) );            
 
-			if( should_overlay )
-			{
-				TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[j]);		
-				ASSERT(	my_singular );
-				ASSERT( *my_singular ); // Should not have marked this one for overlay if NULL
-				PatternLink my_singular_plink( this, my_singular );                    
-				child_patches.push_back( my_singular_plink.GetChildAgent()->GenReplaceLayout(kit, my_singular_plink) );           
-			}		
-			else
-			{
-				ASSERT( *under_singular );            
-				TreeZone under_zone = TreeZone::CreateSubtree(XLink(under_node, under_singular) );
-				child_patches.push_back( make_shared<TreeZonePatch>(move(under_zone)) );			
-			}
+            if( should_overlay )
+            {
+                TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[j]);        
+                ASSERT(    my_singular );
+                ASSERT( *my_singular ); // Should not have marked this one for overlay if NULL
+                PatternLink my_singular_plink( this, my_singular );                    
+                child_patches.push_back( my_singular_plink.GetChildAgent()->GenReplaceLayout(kit, my_singular_plink) );           
+            }        
+            else
+            {
+                ASSERT( *under_singular );            
+                TreeZone under_zone = TreeZone::CreateSubtree(XLink(under_node, under_singular) );
+                child_patches.push_back( make_shared<TreeZonePatch>(move(under_zone)) );            
+            }
         }
         else
         {
@@ -850,19 +850,19 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingX( const Repla
 Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutNormal( const ReplaceKit &kit, 
                                                               PatternLink me_plink ) 
 {
-	INDENT("N");
+    INDENT("N");
  
     ASSERT( IsFinal() )("Trying to build non-final ")(*this); 
 
-	// Make a new node, force dirty because from pattern
+    // Make a new node, force dirty because from pattern
     // Use clone here because we never want to place an Agent object in the output program tree.
     // Identifiers that have multiple references in the pattern will be coupled, and  
     // after the first hit, GenerateCommandOverlay() will handle the rest and it uses Duplicate()
     TreePtr<Node> dest = AgentCommon::CloneNode();
     ASSERT( dest->IsFinal() )(*this)(" trying to build non-final ")(*dest)("\n"); 
 
-	// We "invent" dest, because of information coming from this pattern node.
-	dest->SetInventedHere();
+    // We "invent" dest, because of information coming from this pattern node.
+    dest->SetInventedHere();
 
     // Itemise the members. Note that the itemiser internally does a
     // dynamic_cast onto the type of pattern, and itemises over that type. dest must
@@ -880,7 +880,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutNormal( const ReplaceKit &
     // duplicates to the destination.
     for( vector< Itemiser::Element * >::size_type i=0; i<dest_items.size(); i++ )
     {
-    	TRACE("Copying member %d\n", i );
+        TRACE("Copying member %d\n", i );
         ASSERT( my_items[i] )( "itemise returned null element" );
         ASSERT( dest_items[i] )( "itemise returned null element" );
         
@@ -890,17 +890,17 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutNormal( const ReplaceKit &
             dest_con->clear();
             
             TRACE("Copying container size %d\n", my_con->size() );
-	        for( const TreePtrInterface &my_elt : *my_con )
-	        {
-		        ASSERT( my_elt )("Some element of member %d (", i)(*my_con)(") of ")(*this)(" was nullptr\n");
-		        TRACE("Got ")(*my_elt)("\n");
-		        
+            for( const TreePtrInterface &my_elt : *my_con )
+            {
+                ASSERT( my_elt )("Some element of member %d (", i)(*my_con)(") of ")(*this)(" was nullptr\n");
+                TRACE("Got ")(*my_elt)("\n");
+                
                 // Make a placeholder in the dest container for the mutator to point to
                 ContainerInterface::iterator dest_it = dest_con->insert( ContainerMutator::MakePlaceholder() );
                 zone.AddTerminus( make_shared<ContainerMutator>(dest, dest_con, dest_it) );    
 
                 PatternLink my_elt_plink( this, &my_elt );
-				child_patches.push_back( my_elt_plink.GetChildAgent()->GenReplaceLayout(kit, my_elt_plink) );               
+                child_patches.push_back( my_elt_plink.GetChildAgent()->GenReplaceLayout(kit, my_elt_plink) );               
             }
         }            
         else if( TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[i]) )
@@ -911,7 +911,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutNormal( const ReplaceKit &
             zone.AddTerminus( make_shared<SingularMutator>(dest, dest_singular) );            
 
             PatternLink my_singular_plink( this, my_singular );                    
-			child_patches.push_back( my_singular_plink.GetChildAgent()->GenReplaceLayout(kit, my_singular_plink) );           
+            child_patches.push_back( my_singular_plink.GetChildAgent()->GenReplaceLayout(kit, my_singular_plink) );           
         }
         else
         {
@@ -925,13 +925,13 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutNormal( const ReplaceKit &
 
 Graphable::Block StandardAgent::GetGraphBlockInfo() const
 {
-	// Inject a non-trivial pre-restriction detector
-	Block block = Node::GetGraphBlockInfo();
+    // Inject a non-trivial pre-restriction detector
+    Block block = Node::GetGraphBlockInfo();
 
-	// Over-write link phase depending on the phase we're in
+    // Over-write link phase depending on the phase we're in
     for( Graphable::SubBlock &sub_block : block.sub_blocks ) 
         for( shared_ptr<Graphable::Link> link : sub_block.links )
             link->phase = phase;
 
-	return block;
+    return block;
 }

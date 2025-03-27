@@ -17,48 +17,48 @@ public:
         WIND_IN,
         WIND_OUT
     };
-	
+    
     struct WalkInfo
     {
-		DBCommon::CoreInfo core;              
-		  		
+        DBCommon::CoreInfo core;              
+                  
         const TreePtrInterface *p_tree_ptr_interface;
         XLink xlink;
         TreePtr<Node> node;        
         const DBCommon::TreeOrdinal tree_ordinal;   // TODO surely in the core info as const across walk?
         bool at_terminus;     
         bool at_base;
-	};
+    };
 
-	typedef function<void (const WalkInfo &)> Action;
-	typedef list< Action > Actions;
+    typedef function<void (const WalkInfo &)> Action;
+    typedef list< Action > Actions;
     
-	void WalkTree( const Actions *actions,
-				   XLink root_xlink,
-				   const DBCommon::TreeOrdinal tree_ordinal, 
-				   Wind wind );
+    void WalkTree( const Actions *actions,
+                   XLink root_xlink,
+                   const DBCommon::TreeOrdinal tree_ordinal, 
+                   Wind wind );
     void WalkSubtree( const Actions *actions,
-					  XLink base_xlink,
-					  const DBCommon::TreeOrdinal tree_ordinal,
-					  Wind wind,
-					  const DBCommon::CoreInfo *base_info );
+                      XLink base_xlink,
+                      const DBCommon::TreeOrdinal tree_ordinal,
+                      Wind wind,
+                      const DBCommon::CoreInfo *base_info );
     void WalkTreeZone( const Actions *actions,
                        TreeZone zone,
                        const DBCommon::TreeOrdinal tree_ordinal,
                        Wind wind,
                        const DBCommon::CoreInfo *base_info );
-	void WalkFreeZone( const Actions *actions,
-					   const FreeZone zone,
-					   Wind wind );
+    void WalkFreeZone( const Actions *actions,
+                       const FreeZone zone,
+                       Wind wind );
 
 private:
     struct WalkKit
     {
         const Actions *actions;
         const TreeZone *zone;
-		const DBCommon::TreeOrdinal tree_ordinal;        
-		Wind wind;
-		mutable TreeZone::TerminusIterator next_terminus_it;
+        const DBCommon::TreeOrdinal tree_ordinal;        
+        Wind wind;
+        mutable TreeZone::TerminusIterator next_terminus_it;
     };
 
     void VisitBase( const WalkKit &kit, 

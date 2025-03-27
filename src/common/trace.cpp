@@ -208,38 +208,38 @@ Tracer &Tracer::operator()(const string &s)
     if( !require_endl_at_destruct ) 
         MaybePrintBanner();
     
-	stringstream ss(s);
-	string segment;
-	bool first = true;
-	int local_indent = 0;
-	while( getline(ss, segment, '\n') )
-	{
-		if( !first )
-			clog << endl; // put back the endls that getline() removed
+    stringstream ss(s);
+    string segment;
+    bool first = true;
+    int local_indent = 0;
+    while( getline(ss, segment, '\n') )
+    {
+        if( !first )
+            clog << endl; // put back the endls that getline() removed
 
-		if( !require_endl_at_destruct || !first) 
-			PrintPrefix(local_indent); // provide prefix if we're in home column
-		
-		clog << segment;
+        if( !require_endl_at_destruct || !first) 
+            PrintPrefix(local_indent); // provide prefix if we're in home column
+        
+        clog << segment;
 
-		local_indent += count(segment.begin(), segment.end(), '(');
-		local_indent += count(segment.begin(), segment.end(), '[');
-		local_indent += count(segment.begin(), segment.end(), '{');
-		local_indent -= count(segment.begin(), segment.end(), ')');
-		local_indent -= count(segment.begin(), segment.end(), ']');
-		local_indent -= count(segment.begin(), segment.end(), '}');
+        local_indent += count(segment.begin(), segment.end(), '(');
+        local_indent += count(segment.begin(), segment.end(), '[');
+        local_indent += count(segment.begin(), segment.end(), '{');
+        local_indent -= count(segment.begin(), segment.end(), ')');
+        local_indent -= count(segment.begin(), segment.end(), ']');
+        local_indent -= count(segment.begin(), segment.end(), '}');
 
-		first = false;		
-	}
+        first = false;        
+    }
     
     // Will we end up out of home column?
     require_endl_at_destruct = true;
     if( !s.empty() && s.back() == '\n' )
     {
-		// getline didn't give us an empty line for the last \n
-		clog << endl; // put back the endl that getline() removed
-		require_endl_at_destruct = false;
-	}
+        // getline didn't give us an empty line for the last \n
+        clog << endl; // put back the endl that getline() removed
+        require_endl_at_destruct = false;
+    }
     return *this;    
 }
 

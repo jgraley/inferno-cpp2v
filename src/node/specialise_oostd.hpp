@@ -18,10 +18,10 @@ template< typename ITERATOR, typename ... CP >
 class ContainerFromIterator : public ContainerInterface
 {
 public:
-	typedef ITERATOR iterator; /// So that the standard Container::iterator requirement is met
-	ContainerFromIterator( CP ...cp ) : my_begin( cp... ), my_end() {}
+    typedef ITERATOR iterator; /// So that the standard Container::iterator requirement is met
+    ContainerFromIterator( CP ...cp ) : my_begin( cp... ), my_end() {}
     
-	const iterator &begin() final { return my_begin; }
+    const iterator &begin() final { return my_begin; }
     const iterator &end() final   { return my_end; }
     const iterator &erase( const ContainerInterface::iterator_interface & ) final { ASSERTFAIL("Cannot modify ContainerFromIterator<>"); }
     void clear() final                                     { ASSERTFAIL("Cannot modify ContainerFromIterator<>"); }    

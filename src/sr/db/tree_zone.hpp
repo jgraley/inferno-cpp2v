@@ -24,7 +24,7 @@ class FreeZone;
 class TreeZone : public Zone
 { 
 public:
-	typedef vector<XLink>::const_iterator TerminusIterator;
+    typedef vector<XLink>::const_iterator TerminusIterator;
 
     static TreeZone CreateSubtree( XLink base );
     static TreeZone CreateEmpty( XLink base );
@@ -33,7 +33,7 @@ public:
     TreeZone( const TreeZone &other );
       
     bool IsEmpty() const override;
-	int GetNumTerminii() const override;
+    int GetNumTerminii() const override;
     TreePtr<Node> GetBaseNode() const override;
 
     XLink GetBaseXLink() const;
@@ -41,7 +41,7 @@ public:
     vector<XLink> GetTerminusXLinks() const;
 
     FreeZone Duplicate() const;
-	FreeZone MakeFreeZone(const XTreeDatabase *db) const;
+    FreeZone MakeFreeZone(const XTreeDatabase *db) const;
     
     TerminusIterator GetTerminiiBegin() const;
     TerminusIterator GetTerminiiEnd() const;
@@ -60,12 +60,12 @@ protected:
 class MutableTreeZone : public TreeZone
 {
 public:
-	explicit MutableTreeZone( TreeZone tz, unique_ptr<Mutator> &&base_mutator_ );
+    explicit MutableTreeZone( TreeZone tz, unique_ptr<Mutator> &&base_mutator_ );
 
     void Exchange( FreeZone &&new_zone );
-	
+    
 private:
-	unique_ptr<Mutator> base_mutator;
+    unique_ptr<Mutator> base_mutator;
 };
  
  

@@ -13,7 +13,7 @@ SpecificString::SpecificString()
 
 
 SpecificString::SpecificString( string s ) :
-  	value(s) 
+      value(s) 
 {
 }
 

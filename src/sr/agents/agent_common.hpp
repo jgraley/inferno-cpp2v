@@ -32,10 +32,10 @@ public:
     bool IsNonTrivialPreRestrictionNP(const TreePtrInterface *pptr) const override;
     bool IsNonTrivialPreRestriction() const;
     bool ShouldGenerateCategoryClause() const override;                                
-	virtual SYM::Lazy<SYM::BooleanExpression> SymbolicPreRestriction() const;
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicPreRestriction() const;
     bool IsPreRestrictionMatch( TreePtr<Node> x ) const; // return true if matches
     bool IsPreRestrictionMatch( XLink x ) const; // return true if matches
-	
+    
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            const SolutionMap *hypothesis_links,
                                            const XTreeDatabase *x_tree_db ) const;

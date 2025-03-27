@@ -52,7 +52,7 @@ void AgentCommon::SCRConfigure( const SCREngine *e,
     pattern_query = GetPatternQuery();    
     
     phase = phase_;
-	ASSERT( (int)phase != 0 );
+    ASSERT( (int)phase != 0 );
     if( phase != IN_REPLACE_ONLY )
     {
         // We will need a conjecture, so that we can iterate through multiple 
@@ -116,7 +116,7 @@ void AgentCommon::AddResiduals( set<PatternLink> residual_plinks_ )
 
 list<PatternLink> AgentCommon::GetChildren() const
 {
-	// Normally all children should be visible 
+    // Normally all children should be visible 
     typedef ContainerFromIterator< FlattenNode_iterator, const Node * > FlattenNodePtr;
     auto con = make_shared<FlattenNodePtr>(this);
     // Note: a pattern query should be just as good...
@@ -149,19 +149,19 @@ shared_ptr<DecidedQuery> AgentCommon::CreateDecidedQuery() const
 
 Lazy<BooleanExpression> AgentCommon::SymbolicQuery( bool coupling_only ) const 
 {
-	auto cq_expr = SymbolicCouplingQuery();
+    auto cq_expr = SymbolicCouplingQuery();
     if( coupling_only )
         return cq_expr;
 
     auto nlq_expr = SymbolicNormalLinkedQuery();
-   	return cq_expr & nlq_expr; 
+       return cq_expr & nlq_expr; 
 }
 
 
 Lazy<BooleanExpression> AgentCommon::SymbolicCouplingQuery() const
 {
     ASSERT( my_keyer_engine )(*this)(" has not been configured for couplings");
-	
+    
     // This class establishes the policy for couplings in one place.
     // And it always will be: see #121; para starting at "No!!"
 
@@ -222,7 +222,7 @@ SYM::Lazy<SYM::BooleanExpression> AgentCommon::SymbolicPreRestriction() const
     if( ShouldGenerateCategoryClause() )
     {
         auto keyer_expr = MakeLazy<SymbolVariable>(keyer_plink);
-	    return MakeLazy<IsInCategoryOperator>(GetArchetypeNode(), keyer_expr);
+        return MakeLazy<IsInCategoryOperator>(GetArchetypeNode(), keyer_expr);
     }
     else
     {
@@ -518,8 +518,8 @@ bool AgentCommon::ReplaceKeyerQuery( PatternLink me_plink,
                                   
 TreePtr<Node> AgentCommon::BuildForBuildersAnalysis( PatternLink me_plink )
 {
-	Agent::ReplaceKit kit { nullptr };
-	shared_ptr<Patch> layout = GenReplaceLayout(kit, me_plink);
+    Agent::ReplaceKit kit { nullptr };
+    shared_ptr<Patch> layout = GenReplaceLayout(kit, me_plink);
     unique_ptr<FreeZone> zone = TreeUpdater().TransformToSingleFreeZone( layout );     
     return zone->GetBaseNode();
 }
@@ -538,8 +538,8 @@ Agent::ReplacePatchPtr AgentCommon::GenReplaceLayout( const ReplaceKit &kit,
     if( keyer_plink )
     {
         key_xlink = my_scr_engine->GetReplaceKey( keyer_plink );
-		ASSERT( !key_xlink || key_xlink.GetChildTreePtr()->IsFinal() )
-		      (*this)(" keyed with non-final node ")(key_xlink)("\n"); 
+        ASSERT( !key_xlink || key_xlink.GetChildTreePtr()->IsFinal() )
+              (*this)(" keyed with non-final node ")(key_xlink)("\n"); 
     }
 
     return GenReplaceLayoutImpl( kit, me_plink, key_xlink );
@@ -551,9 +551,9 @@ Agent::ReplacePatchPtr AgentCommon::GenReplaceLayoutImpl( const ReplaceKit &kit,
                                                        XLink key_xlink )
 {
     // Default replace behaviour to just use the X subtree we keyed to, so we need to be keyed
-	ASSERT(key_xlink)("Agent ")(*this)(" in replace context is not keyed but needs to be");
-	TreeZone new_zone = TreeZone::CreateSubtree(key_xlink );
-	return make_shared<TreeZonePatch>( move(new_zone) );		
+    ASSERT(key_xlink)("Agent ")(*this)(" in replace context is not keyed but needs to be");
+    TreeZone new_zone = TreeZone::CreateSubtree(key_xlink );
+    return make_shared<TreeZonePatch>( move(new_zone) );        
 } 
 
 
@@ -577,7 +577,7 @@ string AgentCommon::GetTrace() const
 
 string AgentCommon::GetGraphId() const
 {
-	return GetSerialString();
+    return GetSerialString();
 }
 
 

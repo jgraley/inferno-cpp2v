@@ -20,12 +20,12 @@ public:
                  
     virtual Block GetGraphBlockInfo() const;
             
-	int GetExtenderChannelOrdinal() const override;
+    int GetExtenderChannelOrdinal() const override;
                                            
 private:
     virtual const TreePtrInterface *GetPointer() const = 0;
 };
-	
+    
     
 template<class PRE_RESTRICTION>
 class PointerIs : public Special<PRE_RESTRICTION>,

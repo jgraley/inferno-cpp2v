@@ -29,46 +29,46 @@ Orderable::Diff SimpleCompareRelation::Compare3Way( KeyType l_key, KeyType r_key
 
     auto l_minimax = TreePtr<MinimaxNode>::DynamicCast( l_node );
     if( l_minimax )
-		l_node = l_minimax->GetGuide();
-		
+        l_node = l_minimax->GetGuide();
+        
     auto r_minimax = TreePtr<MinimaxNode>::DynamicCast( r_node );
     if( r_minimax )
-		r_node = r_minimax->GetGuide();
+        r_node = r_minimax->GetGuide();
 
     if( Orderable::Diff d = simple_compare->Compare3Way( l_node, r_node ) )
-		return d;
+        return d;
 
     if( !l_minimax && !r_minimax )
     {
-		return TreePtr<Node>::Compare3Way( l_key, r_key );
-	}
+        return TreePtr<Node>::Compare3Way( l_key, r_key );
+    }
     else if( l_minimax && r_minimax )
     {
-		return (int)l_minimax->GetRole() - (int)r_minimax->GetRole();        
-	}	
+        return (int)l_minimax->GetRole() - (int)r_minimax->GetRole();        
+    }    
     else if( l_minimax && !r_minimax )
     {
-		return (int)l_minimax->GetRole();        
-	}	
+        return (int)l_minimax->GetRole();        
+    }    
     else if( !l_minimax && r_minimax )
     {
-		return - (int)r_minimax->GetRole();        
-	}	
-	else
+        return - (int)r_minimax->GetRole();        
+    }    
+    else
     {
-		ASSERTFAIL();
-	}
+        ASSERTFAIL();
+    }
 }
 
 
 void SimpleCompareRelation::Test( const vector<KeyType> &keys )
 {
-	using namespace std::placeholders;
+    using namespace std::placeholders;
 
-	TestRelationProperties<KeyType>( keys,
-									 true,
-									 "SimpleCompareRelation",
-									 bind(&SimpleCompareRelation::Compare3Way, *this, _1, _2), 
+    TestRelationProperties<KeyType>( keys,
+                                     true,
+                                     "SimpleCompareRelation",
+                                     bind(&SimpleCompareRelation::Compare3Way, *this, _1, _2), 
     [&](KeyType l, KeyType r) -> bool
     { 
         return l==r; 
@@ -77,28 +77,28 @@ void SimpleCompareRelation::Test( const vector<KeyType> &keys )
 
 
 SimpleCompareRelation::MinimaxNode::MinimaxNode( TreePtr<Node> guide_, BoundingRole role_ ) :
-	guide(guide_),
-	role(role_)
+    guide(guide_),
+    role(role_)
 {
 }
 
 
 SimpleCompareRelation::MinimaxNode::MinimaxNode() :
-	guide(nullptr),
-	role(Orderable::BoundingRole::NONE)
+    guide(nullptr),
+    role(Orderable::BoundingRole::NONE)
 {
 }
 
 
 TreePtr<Node> SimpleCompareRelation::MinimaxNode::GetGuide() const
 {
-	return guide;
+    return guide;
 }
 
 
 Orderable::BoundingRole SimpleCompareRelation::MinimaxNode::GetRole() const
 {
-	return role;
+    return role;
 }
 
 

@@ -346,6 +346,6 @@ void DetectAllSCTypes::Build( vector< shared_ptr<VNStep> > *sequence )
     sequence->push_back( make_shared<DetectSCNotifyDelta>() );
     sequence->push_back( make_shared<RemoveEmptyModuleConstructors>() );
     sequence->push_back( make_shared<RemoveVoidInstances>() );
-	sequence->push_back( make_shared<CleanupUnusedVariables>() );    // for SC_ZERO_TIME
+    sequence->push_back( make_shared<CleanupUnusedVariables>() );    // for SC_ZERO_TIME
 }
 

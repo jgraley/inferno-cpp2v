@@ -37,7 +37,7 @@ private:
     string RenderMakeRecord( const TransKit &kit, TreePtr<CPPTree::MakeRecord> ro );
     string RenderMapInOrder( const TransKit &kit, 
                              TreePtr<CPPTree::MapOperator> ro,
-    		                 TreePtr<CPPTree::Scope> r,
+                             TreePtr<CPPTree::Scope> r,
                              string separator,
                              bool separate_last );
     string RenderAccess( const TransKit &kit, TreePtr<CPPTree::AccessSpec> current_access );
@@ -71,12 +71,12 @@ private:
                              TreePtr<CPPTree::AccessSpec> *access );    
     string RenderDeclarationCollection( const TransKit &kit, 
                                         TreePtr<CPPTree::Scope> sd,
-			                            string separator, 
-			                            bool separate_last,
-			                            TreePtr<CPPTree::AccessSpec> init_access = TreePtr<CPPTree::AccessSpec>(),
-			                            bool showtype=true );
+                                        string separator, 
+                                        bool separate_last,
+                                        TreePtr<CPPTree::AccessSpec> init_access = TreePtr<CPPTree::AccessSpec>(),
+                                        bool showtype=true );
     string RenderMismatchException( string fname, const Mismatch &me );
-    const string outfile;			                         
+    const string outfile;                                     
     SimpleCompare sc;
 };
 

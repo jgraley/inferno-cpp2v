@@ -17,7 +17,7 @@ EmbeddedSCRAgent::EmbeddedSCRAgent( TreePtr<Node> sp, TreePtr<Node> rp, bool is_
 shared_ptr<PatternQuery> EmbeddedSCRAgent::GetPatternQuery() const
 {
     auto pq = make_shared<PatternQuery>();
-	pq->RegisterNormalLink( PatternLink(this, GetThrough()) );
+    pq->RegisterNormalLink( PatternLink(this, GetThrough()) );
     return pq;
 }
 
@@ -35,7 +35,7 @@ Agent::ReplacePatchPtr EmbeddedSCRAgent::GenReplaceLayoutImpl( const ReplaceKit 
                                                          PatternLink me_plink, 
                                                          XLink key_xlink )
 {   
-	// Use auto algorithm but add marker
+    // Use auto algorithm but add marker
     Agent::ReplacePatchPtr child_command = AutolocatingAgent::GenReplaceLayoutImpl(kit, me_plink, key_xlink);
     
     auto child_patch = dynamic_cast<ZonePatch *>(child_command.get());
@@ -51,34 +51,34 @@ Agent::ReplacePatchPtr EmbeddedSCRAgent::GenReplaceLayoutImpl( const ReplaceKit 
 
 list<PatternLink> EmbeddedSCRAgent::GetVisibleChildren( Path v ) const
 {
-	// it's an embedded engines, so set up a container containing only "through", not "compare" or "replace"
-	list<PatternLink> plinks;
-	plinks.push_back( PatternLink(this, GetThrough()) );
-	return plinks;
+    // it's an embedded engines, so set up a container containing only "through", not "compare" or "replace"
+    list<PatternLink> plinks;
+    plinks.push_back( PatternLink(this, GetThrough()) );
+    return plinks;
 }
 
 
 bool EmbeddedSCRAgent::IsSearch() const
 { 
-	return is_search; 
+    return is_search; 
 }
 
 
 void EmbeddedSCRAgent::MarkBaseForEmbedded( TreePtr<Node> embedded_through_subtree ) const
 {
-	my_scr_engine->MarkBaseForEmbedded( this, embedded_through_subtree );
+    my_scr_engine->MarkBaseForEmbedded( this, embedded_through_subtree );
 }
 
 
 TreePtr<Node> EmbeddedSCRAgent::GetSearchPattern() const 
 { 
-	return search_pattern; 
+    return search_pattern; 
 }
 
 
 TreePtr<Node> EmbeddedSCRAgent::GetReplacePattern() const 
 { 
-	return replace_pattern; 
+    return replace_pattern; 
 }
 
 

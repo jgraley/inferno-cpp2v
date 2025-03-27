@@ -51,8 +51,8 @@ public:
         string title;        
     };
     
-	struct Figure : Region
-	{        
+    struct Figure : Region
+    {        
         struct LinkDetails
         {
             LinkPlannedAs planned_as;
@@ -67,15 +67,15 @@ public:
             const Graphable *g;
             list<Link> incoming_links;
         };
-		list<Agent> interior_agents;
-		list<Agent> exterior_agents;
+        list<Agent> interior_agents;
+        list<Agent> exterior_agents;
         list< pair<GraphIdable *, Agent> > subordinate_engines_and_base_agents;
-	};
+    };
 
     Graph( string of, string title );
     ~Graph();
     void GenerateGraph( SR::VNStep *root ); // Graph the search/replace pattern
-	void GenerateGraph( const Figure &figure ); // graph just the specified ojects
+    void GenerateGraph( const Figure &figure ); // graph just the specified ojects
     TreePtr<Node> GenerateGraph( TreePtr<Node> root ); // graph the subtree under root node
 
 private:
@@ -109,23 +109,23 @@ private:
     struct RegionAppearance : Region
     {
         RegionAppearance( string bg ) : background_colour(bg) {}
-		string background_colour;
-	};
+        string background_colour;
+    };
 
     typedef map<string, string> Atts;
 
     void PopulateFromTransformation( list<const Graphable *> &graphables, SR::VNStep *root );
     void PopulateFrom( list<const Graphable *> &graphables, const Graphable *g );
-	void PopulateFromSubBlocks( list<const Graphable *> &graphables, const Graphable::Block &block );
+    void PopulateFromSubBlocks( list<const Graphable *> &graphables, const Graphable::Block &block );
 
     shared_ptr<MyLink> FindLink( list<MyBlock> &blocks_to_act_on, 
                                  const Graphable *target_child_g,
                                  string target_trace_label );
     void CheckLinks( list<MyBlock> blocks );
-	list<MyBlock> GetBlocks( list<const Graphable *> graphables,
-	                         const Region *region );
-	MyBlock GetBlock( const Graphable *g,
-	                  const Region *region );
+    list<MyBlock> GetBlocks( list<const Graphable *> graphables,
+                             const Region *region );
+    MyBlock GetBlock( const Graphable *g,
+                      const Region *region );
     void TrimLinksByChild( list<MyBlock> &blocks,
                            list<const Graphable *> to_keep );
     void TrimLinksByChild( list<MyBlock> &blocks,
@@ -182,9 +182,9 @@ private:
     set<const Graphable *> reached;
     set<string> block_ids_show_prerestriction;
     const RegionAppearance base_region;
-	const string line_colour;
-	const string font_colour;
-	const string external_font_colour;
+    const string line_colour;
+    const string font_colour;
+    const string external_font_colour;
     const string backgrounded_font_colour;
     string all_dot;
 };

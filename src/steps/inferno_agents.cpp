@@ -20,13 +20,13 @@ using namespace CPPTree;
 
 Graphable::Block BuildIdentifierAgent::GetGraphBlockInfo() const
 {
-	// The BuildIdentifier node appears as a parallelogram (rectangle pushed to the side) with
-	// the printf format string that controls the name of the generated identifier inside it.
-	// TODO indicate whether it's building instance, label or type identifier
+    // The BuildIdentifier node appears as a parallelogram (rectangle pushed to the side) with
+    // the printf format string that controls the name of the generated identifier inside it.
+    // TODO indicate whether it's building instance, label or type identifier
     Block block;
-	block.bold = true;
-	block.title = "'"+format+"'!"; // text from program code, so use single quotes
-	block.shape = "parallelogram";
+    block.bold = true;
+    block.title = "'"+format+"'!"; // text from program code, so use single quotes
+    block.shape = "parallelogram";
     block.block_type = Graphable::NODE_SHAPED;
     block.node = GetPatternPtr();
     block.sub_blocks = Node::GetSubblocks(const_cast<Sequence<CPPTree::Identifier> *>(&sources), phase);
@@ -102,14 +102,14 @@ TreePtr<Node> BuildLabelIdentifierAgent::BuildNewSubtree()
 
 Graphable::Block IdentifierByNameAgent::GetGraphBlockInfo() const
 {
-	// The IdentifierByNameBase node appears as a trapezium (rectangle narrower at the top) with
-	// the string that must be matched inside it.
-	// TODO indicate whether it's matching instance, label or type identifier
+    // The IdentifierByNameBase node appears as a trapezium (rectangle narrower at the top) with
+    // the string that must be matched inside it.
+    // TODO indicate whether it's matching instance, label or type identifier
     // Update: PreRestriction indicator seems to be doing that now
     Block block;
-	block.bold = true;
-    block.title = "'" + name + "'?";	
-	block.shape = "trapezium";
+    block.bold = true;
+    block.title = "'" + name + "'?";    
+    block.shape = "trapezium";
     block.block_type = Graphable::NODE_SHAPED;
     block.node = GetPatternPtr();
     return block;
@@ -229,9 +229,9 @@ pair<TreePtr<Node>, TreePtr<Node>> LabelIdentifierByNameAgent::GetBounds( string
 shared_ptr<PatternQuery> NestedAgent::GetPatternQuery() const
 {
     auto pq = make_shared<PatternQuery>();
-	pq->RegisterNormalLink( PatternLink(this, &terminus) );
-	if( depth )
-		pq->RegisterNormalLink( PatternLink(this, &depth) ); // local
+    pq->RegisterNormalLink( PatternLink(this, &terminus) );
+    if( depth )
+        pq->RegisterNormalLink( PatternLink(this, &depth) ); // local
     return pq;
 }
 
@@ -258,15 +258,15 @@ RelocatingAgent::RelocatingQueryResult NestedAgent::RunRelocatingQuery( const XT
     // Compare the depth with the supplied pattern if present
     if( depth )
     {
-		set<XLink> deps = {stimulus_xlink};
+        set<XLink> deps = {stimulus_xlink};
         string s;
         // Keep advancing until we get nullptr, and remember the last non-null position
         XLink xlink = stimulus_xlink;
         while( XLink next_xlink = Advance(xlink, &s) )
-        {			
+        {            
             xlink = next_xlink; 
-			deps.insert( xlink );
-		}
+            deps.insert( xlink );
+        }
         return RelocatingQueryResult(MakeTreeNode<SpecificString>(s), deps); 
     }
     
@@ -276,16 +276,16 @@ RelocatingAgent::RelocatingQueryResult NestedAgent::RunRelocatingQuery( const XT
 
 int NestedAgent::GetExtenderChannelOrdinal() const
 {
-	return 3;
+    return 3;
 }
 
 
 Graphable::Block NestedAgent::GetGraphBlockInfo() const
 {
     Block block;
-	block.bold = false;
-	block.title = GetName();
-	block.shape = "plaintext";
+    block.bold = false;
+    block.title = GetName();
+    block.shape = "plaintext";
     block.block_type = Graphable::NODE_EXPANDED;
     block.node = GetPatternPtr();
     if( terminus )
@@ -405,13 +405,13 @@ XLink NestedSubscriptLookupAgent::Advance( XLink xlink,
 
 TreePtr<Node> BuildContainerSizeAgent::BuildNewSubtree()
 {
-	ASSERT( container );
+    ASSERT( container );
     PatternLink container_plink(this, &container);
     TreePtr<Node> new_node = container_plink.GetChildAgent()->BuildForBuildersAnalysis(container_plink);
     ASSERT( new_node );
-	ContainerInterface *new_container = dynamic_cast<ContainerInterface *>(new_node.get());
-	ASSERT( new_container );
-	int size = new_container->size();
+    ContainerInterface *new_container = dynamic_cast<ContainerInterface *>(new_node.get());
+    ASSERT( new_container );
+    int size = new_container->size();
     return MakeTreeNode<SpecificInteger>(size); 
 }                                                   
 
@@ -420,9 +420,9 @@ Graphable::Block BuildContainerSizeAgent::GetGraphBlockInfo() const
 {
 
     Block block;
-	block.bold = false;
-	block.title = GetName();
-	block.shape = "egg";
+    block.bold = false;
+    block.title = GetName();
+    block.shape = "egg";
     block.block_type = Graphable::NODE_SHAPED;
     block.node = GetPatternPtr();
     if( container )

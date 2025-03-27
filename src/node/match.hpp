@@ -7,7 +7,7 @@
 
 #include <typeinfo>
 #include <string>
-#include <typeindex>		
+#include <typeindex>        
 
 /// Support class allowing hierarchical type comparisons between nodes
 struct Matcher
@@ -21,9 +21,9 @@ struct Matcher
     {
     };
 
-	virtual bool IsSubcategory( const Matcher &source_archetype ) const = 0;
-	virtual bool IsLocalMatch( const Matcher &candidate ) const;
-	virtual bool IsLocalMatchCovariant( const Matcher &candidate ) const;
+    virtual bool IsSubcategory( const Matcher &source_archetype ) const = 0;
+    virtual bool IsLocalMatch( const Matcher &candidate ) const;
+    virtual bool IsLocalMatchCovariant( const Matcher &candidate ) const;
     virtual ~Matcher();
     template< class TARGET_TYPE >
     static inline bool IsSubcategoryStatic( const TARGET_TYPE &target_archetype, const Matcher &source_archetype )

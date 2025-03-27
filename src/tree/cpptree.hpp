@@ -119,13 +119,13 @@ struct String : Literal { NODE_FUNCTIONS };
  comment in test harness in search_replace.cpp. */
 struct SpecificString : String
 {
-	NODE_FUNCTIONS_FINAL
+    NODE_FUNCTIONS_FINAL
     SpecificString(); ///< default constructor, for making archetypes 
     SpecificString( string s ); /// Construct with a given STL string
-	virtual bool IsLocalMatchCovariant( const Matcher &candidate ) const; /// Overloaded comparison for search&replace
+    virtual bool IsLocalMatchCovariant( const Matcher &candidate ) const; /// Overloaded comparison for search&replace
     virtual Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
-	virtual string GetRender() const; /// Produce a string for debug
+    virtual string GetRender() const; /// Produce a string for debug
     virtual string GetTrace() const;
     
 private:
@@ -149,7 +149,7 @@ struct Integer : Number { NODE_FUNCTIONS };
  value must always be filled in. */
 struct SpecificInteger : Integer
 {
-	NODE_FUNCTIONS_FINAL
+    NODE_FUNCTIONS_FINAL
     SpecificInteger(); ///< default constructor, for making archetypes 
     SpecificInteger( llvm::APSInt i ); ///< Construct with an LLVM-style integer
     SpecificInteger( int i ); ///< Construct with a signed int
@@ -159,10 +159,10 @@ struct SpecificInteger : Integer
     bool IsSigned() const;
     int64_t GetWidth() const;
 
-	virtual bool IsLocalMatchCovariant( const Matcher &candidate ) const; /// Overloaded comparison for search&replace
+    virtual bool IsLocalMatchCovariant( const Matcher &candidate ) const; /// Overloaded comparison for search&replace
     virtual Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
-	virtual string GetRender() const; /// Produce a string for debug
+    virtual string GetRender() const; /// Produce a string for debug
     virtual string GetTrace() const;
     
 private:
@@ -178,13 +178,13 @@ struct Float : Number { NODE_FUNCTIONS };
  always be filled in. To determine the type, use llvm::getSemantics() */
 struct SpecificFloat : Float, llvm::APFloat
 {
-	NODE_FUNCTIONS_FINAL
+    NODE_FUNCTIONS_FINAL
     SpecificFloat(); ///< default constructor, for making archetypes 
     SpecificFloat( llvm::APFloat v ); ///< Construct with an LLVM-style float
-	virtual bool IsLocalMatchCovariant( const Matcher &candidate ) const; /// Overloaded comparison for search&replace
+    virtual bool IsLocalMatchCovariant( const Matcher &candidate ) const; /// Overloaded comparison for search&replace
     virtual Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
-	virtual string GetRender() const; /// Produce a string for graphing
+    virtual string GetRender() const; /// Produce a string for graphing
     virtual string GetTrace() const;
 };
 
@@ -196,15 +196,15 @@ struct Bool : Literal { NODE_FUNCTIONS };
 /// Property node for boolean value true 
 struct True : Bool
 {
-	NODE_FUNCTIONS_FINAL
-	virtual string GetRender() const { return "true"; } ///< Produce a string for debug
+    NODE_FUNCTIONS_FINAL
+    virtual string GetRender() const { return "true"; } ///< Produce a string for debug
 };
 
 /// Property node for boolean value false 
 struct False : Bool
 {
-	NODE_FUNCTIONS_FINAL
-	virtual string GetRender() const { return "false"; } 
+    NODE_FUNCTIONS_FINAL
+    virtual string GetRender() const { return "false"; } 
 };
 
 //////////////////////////// Declarations //////////////////////////// 
@@ -234,19 +234,19 @@ struct SpecificIdentifier : virtual Property
 { 
     NODE_FUNCTIONS
         
-	SpecificIdentifier(); ///< default constructor, for making archetypes 
-	SpecificIdentifier( string s, BoundingRole addr_bounding_role = BoundingRole::NONE ); ///< construct with a given name
+    SpecificIdentifier(); ///< default constructor, for making archetypes 
+    SpecificIdentifier( string s, BoundingRole addr_bounding_role = BoundingRole::NONE ); ///< construct with a given name
     virtual shared_ptr<Cloner> Duplicate( shared_ptr<Cloner> p ); /// Overloaded duplication function for search&replace
-	virtual bool IsLocalMatchCovariant( const Matcher &candidate ) const; /// Overloaded comparison for search&replace
+    virtual bool IsLocalMatchCovariant( const Matcher &candidate ) const; /// Overloaded comparison for search&replace
     virtual Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
-	virtual string GetRender() const; /// This is relied upon to just return the identifier name for rendering
+    virtual string GetRender() const; /// This is relied upon to just return the identifier name for rendering
     virtual string GetGraphName() const;
     virtual string GetTrace() const;
 
 protected:
     BoundingRole addr_bounding_role;
-	string name;
+    string name;
 };
 
 /// Identifier for any Instance (variable or object or function)
@@ -261,10 +261,10 @@ struct InstanceIdentifier : Identifier,
 struct SpecificInstanceIdentifier : InstanceIdentifier,
                                     SpecificIdentifier
 {
-	SpecificInstanceIdentifier() {} ///< Default constructor
-	SpecificInstanceIdentifier( string s, BoundingRole addr_bounding_role = BoundingRole::NONE ) : 
+    SpecificInstanceIdentifier() {} ///< Default constructor
+    SpecificInstanceIdentifier( string s, BoundingRole addr_bounding_role = BoundingRole::NONE ) : 
         SpecificIdentifier(s, addr_bounding_role) {} ///< make identifier with the given name
-	NODE_FUNCTIONS_FINAL
+    NODE_FUNCTIONS_FINAL
 };
                             
 
@@ -280,10 +280,10 @@ struct TypeIdentifier : Identifier,
 struct SpecificTypeIdentifier : TypeIdentifier,
                                 SpecificIdentifier
 {
-	SpecificTypeIdentifier() {} ///< Default constructor
-	SpecificTypeIdentifier( string s, BoundingRole addr_bounding_role = BoundingRole::NONE ) : 
+    SpecificTypeIdentifier() {} ///< Default constructor
+    SpecificTypeIdentifier( string s, BoundingRole addr_bounding_role = BoundingRole::NONE ) : 
         SpecificIdentifier(s, addr_bounding_role) {} ///< make identifier with the given name
-	NODE_FUNCTIONS_FINAL
+    NODE_FUNCTIONS_FINAL
 };
 
 // General note about identifiers: in a valid program tree, there should
@@ -297,7 +297,7 @@ struct Virtuality : Property { NODE_FUNCTIONS };
 /// Property for a virtual member funciton
 struct Virtual : Virtuality
 {
-	NODE_FUNCTIONS_FINAL
+    NODE_FUNCTIONS_FINAL
     // TODO pure when supported by clang
 };
 /// Property for a non-virtual member funciton
@@ -364,7 +364,7 @@ struct Instance : Declaration,
  regarded as a compile-time constant. A static constant function may be regarded as idempotent. */
 struct Static : Instance
 {
-	NODE_FUNCTIONS_FINAL
+    NODE_FUNCTIONS_FINAL
     TreePtr<Constancy> constancy; ///< is the instance constant (ie compile time value)?
 };
 
@@ -376,8 +376,8 @@ struct Static : Instance
  Note that static members are Static, not Field */
 struct Field : Instance
 {
-	NODE_FUNCTIONS_FINAL
-	TreePtr<Virtuality> virt; ///< Is the field virtual?
+    NODE_FUNCTIONS_FINAL
+    TreePtr<Virtuality> virt; ///< Is the field virtual?
     TreePtr<AccessSpec> access; ///< Is it accessible outside the current Scope?
     TreePtr<Constancy> constancy; ///< Is the field constant (ie only written by constructor)
 };
@@ -385,7 +385,7 @@ struct Field : Instance
 /// Any variable local to a Compound-statement. Cannot be a function.
 struct LocalVariable : Instance
 {
-	NODE_FUNCTIONS
+    NODE_FUNCTIONS
 };
 
 /// A local variable with automatic allocation
@@ -394,7 +394,7 @@ struct LocalVariable : Instance
     are Static, not Automatic. */
 struct Automatic : LocalVariable
 {
-	NODE_FUNCTIONS_FINAL
+    NODE_FUNCTIONS_FINAL
 };
 
 /// A local temp variable not preserved across function calls
@@ -403,13 +403,13 @@ struct Automatic : LocalVariable
  Static, Field or Automatic since it supports only those guarantees common to all). */
 struct Temporary : LocalVariable
 {
-	NODE_FUNCTIONS_FINAL
+    NODE_FUNCTIONS_FINAL
 };
 
 /// Node for a base class within a class declaration, specifies another class from which to inherit
 struct Base : Declaration
 {
-	NODE_FUNCTIONS_FINAL
+    NODE_FUNCTIONS_FINAL
     TreePtr<AccessSpec> access; ///< Can inherited members be accessed?
     TreePtr<TypeIdentifier> record; ///< what do we inherit? must refer to InheritanceRecord
 };              
@@ -431,10 +431,10 @@ struct LabelIdentifier : Identifier,
 struct SpecificLabelIdentifier : LabelIdentifier,
                                  SpecificIdentifier
 {
-	SpecificLabelIdentifier() {} ///< Default constructor
-	SpecificLabelIdentifier( string s, BoundingRole addr_bounding_role = BoundingRole::NONE ) : 
+    SpecificLabelIdentifier() {} ///< Default constructor
+    SpecificLabelIdentifier( string s, BoundingRole addr_bounding_role = BoundingRole::NONE ) : 
         SpecificIdentifier(s, addr_bounding_role) {} ///< construct with initial name
-	NODE_FUNCTIONS_FINAL
+    NODE_FUNCTIONS_FINAL
 };
 
 /// Declaration of a label for switch, goto etc.
@@ -445,7 +445,7 @@ struct Label : Declaration, //TODO commonize with Case and Default
                Statement,
                Uncombable
 {
-	NODE_FUNCTIONS_FINAL
+    NODE_FUNCTIONS_FINAL
     TreePtr<LabelIdentifier> identifier; ///< a handle for the label to be referenced elewhere
     virtual string GetColour() const { return Declaration::GetColour(); } // Declaration wins
     set<const TreePtrInterface *> GetDeclared() override { return { &identifier }; };
@@ -499,7 +499,7 @@ struct Procedure : CallableParams
 /// A function like in C, Pascal; params and a single return value of the specified type.
 struct Function : CallableParamsReturn
 {
-	NODE_FUNCTIONS_FINAL
+    NODE_FUNCTIONS_FINAL
 };
 
 /// A C++ constructor. The init list is just zero or more calls to constructors in the body
@@ -516,7 +516,7 @@ struct Destructor : Subroutine { NODE_FUNCTIONS_FINAL };
 /// This is the type of an array that contains the specified number of elements of the specified type.
 struct Array : Type
 {
-	NODE_FUNCTIONS_FINAL
+    NODE_FUNCTIONS_FINAL
     TreePtr<Type> element; ///< the element type
     TreePtr<Initialiser> size; ///< evaluates to the size or Uninitialised if not given eg []
 };
@@ -569,21 +569,21 @@ struct FloatSemantics : Property { NODE_FUNCTIONS };
 /// Property for the details of a specific floating point behaviour
 struct SpecificFloatSemantics : FloatSemantics
 {
-	NODE_FUNCTIONS_FINAL
+    NODE_FUNCTIONS_FINAL
     SpecificFloatSemantics(); ///< default constructor, for making archetypes 
     SpecificFloatSemantics( const llvm::fltSemantics *s ); /// Construct from LLVM's class
-	virtual bool IsLocalMatchCovariant( const Matcher &candidate ) const; /// Overloaded comparison for search&replace
+    virtual bool IsLocalMatchCovariant( const Matcher &candidate ) const; /// Overloaded comparison for search&replace
     virtual Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
-	operator const llvm::fltSemantics &() const; /// convert back to LLVM's class
-	// TODO no render?
+    operator const llvm::fltSemantics &() const; /// convert back to LLVM's class
+    // TODO no render?
     const llvm::fltSemantics *value;
 };    
 
 /// Type of a floating point number.
 struct Floating : Numeric 
 { 
-	NODE_FUNCTIONS_FINAL
+    NODE_FUNCTIONS_FINAL
     TreePtr<FloatSemantics> semantics; ///< These are the semantics of the representation
 }; 
 
@@ -593,7 +593,7 @@ struct Floating : Numeric
 /// at a particular position, use Label.
 struct Labeley : Type
 {
-	NODE_FUNCTIONS_FINAL   
+    NODE_FUNCTIONS_FINAL   
 };
 
 //////////////////////////// User-defined Types ////////////////////////////
@@ -614,7 +614,7 @@ struct UserType : Declaration
     them for as long as possible */
 struct Typedef : UserType
 {
-	NODE_FUNCTIONS_FINAL
+    NODE_FUNCTIONS_FINAL
     TreePtr<Type> type; ///< emulate this type
 }; 
 
@@ -658,21 +658,21 @@ struct Class : InheritanceRecord { NODE_FUNCTIONS_FINAL };
 //TODO maybe fix the number of operands for binop and unop categories.
 struct Operator : Expression
 {
-	NODE_FUNCTIONS
+    NODE_FUNCTIONS
 };
 
 /// An operator with operands whose order is defined
 struct NonCommutativeOperator : Operator
 {
-	NODE_FUNCTIONS
-	Sequence<Expression> operands; ///< the operands are here, order preserved
+    NODE_FUNCTIONS
+    Sequence<Expression> operands; ///< the operands are here, order preserved
 };
 
 /// An operator with operands whose order does not matter
 struct CommutativeOperator : Operator
 {
-	NODE_FUNCTIONS
-	Collection<Expression> operands; ///< the operands are here, order not preserved
+    NODE_FUNCTIONS
+    Collection<Expression> operands; ///< the operands are here, order not preserved
 };
 
 // Intermediate categories of operators. We categorise based on
@@ -730,7 +730,7 @@ struct DeleteNonArray : DeleteArrayness { NODE_FUNCTIONS_FINAL };
 /** gives all the syntactical elements required for allocation and initialisation */
 struct New : Operator
 {
-	NODE_FUNCTIONS_FINAL
+    NODE_FUNCTIONS_FINAL
     TreePtr<Type> type; ///< Type of object to be constructed
     Sequence<Expression> placement_arguments; ///< arguments for placement usage
     Sequence<Expression> constructor_arguments; ///< arguments to the constructor
@@ -740,7 +740,7 @@ struct New : Operator
 /// Node for C++ delete operator
 struct Delete : Operator // TODO Statement surely? (clang forces it to be an Expression)
 {
-	NODE_FUNCTIONS_FINAL
+    NODE_FUNCTIONS_FINAL
     TreePtr<Expression> pointer; ///< pointer to object to delete
     TreePtr<DeleteArrayness> array; ///< whether array delete
     TreePtr<Globality> global; ///< whether global placement
@@ -751,7 +751,7 @@ struct Delete : Operator // TODO Statement surely? (clang forces it to be an Exp
  be detected using a search pattern if desired. */
 struct Lookup : Operator
 {
-	NODE_FUNCTIONS_FINAL
+    NODE_FUNCTIONS_FINAL
     TreePtr<Expression> base; ///< the Record we look in
     TreePtr<InstanceIdentifier> member; ///< the member to find
 };
@@ -760,7 +760,7 @@ struct Lookup : Operator
 // TODO C++ casts are not in here yet and C casts will be harmonised into whatever scheme I use for that.
 struct Cast : Operator
 {
-	NODE_FUNCTIONS_FINAL
+    NODE_FUNCTIONS_FINAL
     TreePtr<Expression> operand; ///< the expression to cast
     TreePtr<Type> type; ///< the desired new type
 };
@@ -769,9 +769,9 @@ struct Cast : Operator
 /** Basically a key-value pair of identifier and value. Use in Maps. */
 struct MapOperand : virtual Node
 {
-	NODE_FUNCTIONS_FINAL
-	TreePtr<InstanceIdentifier> identifier; ///< the handle for this particualar operand
-	TreePtr<Expression> value; ///< the Expression for this operand
+    NODE_FUNCTIONS_FINAL
+    TreePtr<InstanceIdentifier> identifier; ///< the handle for this particualar operand
+    TreePtr<Expression> value; ///< the Expression for this operand
     virtual string GetColour() const { return "/set28/8"; }    
 };
 
@@ -779,8 +779,8 @@ struct MapOperand : virtual Node
 /** Maps a multiplicity of Instances to Expressions via their InstanceIdentifiers.*/
 struct MapOperator : Operator
 {
-	NODE_FUNCTIONS
-	Collection<MapOperand> operands; ///< Operands whose relationship is established via identifiers
+    NODE_FUNCTIONS
+    Collection<MapOperand> operands; ///< Operands whose relationship is established via identifiers
 };
 
 /// A function call to specified function passing in specified arguments
@@ -790,7 +790,7 @@ struct MapOperator : Operator
  type (if it's a CallableParams). */
 struct Call : MapOperator, Uncombable
 {
-	NODE_FUNCTIONS_FINAL
+    NODE_FUNCTIONS_FINAL
     TreePtr<Expression> callee; ///< evaluates to the Callable Instance we must call
 };
 
@@ -800,8 +800,8 @@ struct Call : MapOperator, Uncombable
  not enough information. */
 struct MakeRecord : MapOperator
 {
-	NODE_FUNCTIONS_FINAL
-	TreePtr<TypeIdentifier> type; ///< handle of the type of the record we are making
+    NODE_FUNCTIONS_FINAL
+    TreePtr<TypeIdentifier> type; ///< handle of the type of the record we are making
 };
 
 /// Operator that operates on data types as parameters. 
@@ -854,7 +854,7 @@ struct StatementExpression : Expression, ///< Evaluates to whatever the last sta
  Uninitialised if none is present. */
 struct Return : Statement
 {
-	NODE_FUNCTIONS_FINAL
+    NODE_FUNCTIONS_FINAL
     TreePtr<Initialiser> return_value; ///< return value or Uninitialised
 };
 
@@ -865,7 +865,7 @@ struct Return : Statement
  must evaluate to one. No * or && needed. */
 struct Goto : Statement, Uncombable
 {
-	NODE_FUNCTIONS_FINAL
+    NODE_FUNCTIONS_FINAL
     // Dest is an expression for goto-a-variable support.
     // Ordinary gotos will have Label here.
     TreePtr<Expression> destination; ///< where to go to, expresison allowed
@@ -874,7 +874,7 @@ struct Goto : Statement, Uncombable
 /// If statement
 struct If : Statement
 {
-	NODE_FUNCTIONS_FINAL
+    NODE_FUNCTIONS_FINAL
     TreePtr<Expression> condition; ///< condition to test
     TreePtr<Statement> body;       ///< executes when true
     TreePtr<Statement> else_body;  ///< executes when false, can be Nop if no else clause
@@ -900,21 +900,21 @@ struct Loop : Breakable { NODE_FUNCTIONS };
 /// While loop
 struct While : Loop, Uncombable
 {
-	NODE_FUNCTIONS_FINAL
+    NODE_FUNCTIONS_FINAL
     TreePtr<Expression> condition; ///< Tested before each iteration; false terminates immediately
 };
 
 /// Do loop (first iteration always runs)
 struct Do : Loop, Uncombable // a do..while() construct 
 {
-	NODE_FUNCTIONS_FINAL
+    NODE_FUNCTIONS_FINAL
     TreePtr<Expression> condition; ///< Tested after each iteration; false terminates immediately
 };
 
 /// C-style for loop. 
 struct For : Loop
 {
-	NODE_FUNCTIONS_FINAL
+    NODE_FUNCTIONS_FINAL
     TreePtr<Statement> initialisation; // Initialiser; use Nop if absent
     TreePtr<Expression> condition;     // Condition; use True if absent
     TreePtr<Statement> increment;      // Increment; use Nop if absent
@@ -927,7 +927,7 @@ struct For : Loop
  Compound with a goto-a-variable at the top and some mapping. */
 struct Switch : Breakable
 {
-	NODE_FUNCTIONS_FINAL
+    NODE_FUNCTIONS_FINAL
     TreePtr<Expression> condition; ///< Evaluates to a value whose case we'll jump to
 };
 
@@ -937,7 +937,7 @@ struct SwitchTarget : Statement { NODE_FUNCTIONS };
 /// Case label, supporting range extension in case useful for optimisation
 struct RangeCase : SwitchTarget
 {
-	NODE_FUNCTIONS_FINAL
+    NODE_FUNCTIONS_FINAL
     // support gcc extension of case x..y:
     TreePtr<Expression> value_lo; ///< start of range, inclusive
     TreePtr<Expression> value_hi; ///< end of range, inclusive
@@ -946,7 +946,7 @@ struct RangeCase : SwitchTarget
 /// Case label
 struct Case : SwitchTarget
 {
-	NODE_FUNCTIONS_FINAL
+    NODE_FUNCTIONS_FINAL
     TreePtr<Expression> value; ///< Switch jumps here when condition is this value
 };
 

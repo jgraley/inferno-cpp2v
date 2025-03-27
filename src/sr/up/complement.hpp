@@ -15,20 +15,20 @@ namespace SR
 class TreeZoneComplementer
 {
 public:
-	typedef map<XLink, TreeZone, DepthFirstRelation> DepthFirstOrderingZones;
+    typedef map<XLink, TreeZone, DepthFirstRelation> DepthFirstOrderingZones;
 
-	TreeZoneComplementer( XTreeDatabase *db );
-	
-	void Run(XLink target_origin, shared_ptr<Patch> source_layout);
-	
-	const list<TreeZone> &GetComplement() const;
-	
+    TreeZoneComplementer( XTreeDatabase *db );
+    
+    void Run(XLink target_origin, shared_ptr<Patch> source_layout);
+    
+    const list<TreeZone> &GetComplement() const;
+    
 private:
-	void WalkTreeZones(XLink target_base);
-	void CreateComplementTZ(XLink target_base);
+    void WalkTreeZones(XLink target_base);
+    void CreateComplementTZ(XLink target_base);
 
-	XTreeDatabase * const db;
-	const DepthFirstRelation df_rel;
+    XTreeDatabase * const db;
+    const DepthFirstRelation df_rel;
     DepthFirstOrderingZones source_tzs_df_by_base;
 };
 

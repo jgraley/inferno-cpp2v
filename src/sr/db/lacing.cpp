@@ -497,10 +497,10 @@ Orderable::Diff Lacing::OrdinalCompare( TreePtr<Node> lnode, TreePtr<Node> rnode
             ASSERTFAIL();            
         }
         
-		ASSERT( lmax >= GetOrdinalForNode(lnode) );
-		ASSERT( lmin <= GetOrdinalForNode(lnode) );
-		ASSERT( rmax >= GetOrdinalForNode(rnode) );
-		ASSERT( rmin <= GetOrdinalForNode(rnode) );
+        ASSERT( lmax >= GetOrdinalForNode(lnode) );
+        ASSERT( lmin <= GetOrdinalForNode(lnode) );
+        ASSERT( rmax >= GetOrdinalForNode(rnode) );
+        ASSERT( rmin <= GetOrdinalForNode(rnode) );
 
         // Do we have a result yet?
         if( lmax < rmin )
@@ -526,10 +526,10 @@ Orderable::Diff Lacing::OrdinalCompare( TreePtr<Node> lnode, TreePtr<Node> rnode
             ASSERTFAIL();            
         }
         
-		ASSERT( lmax >= GetOrdinalForNode(lnode) );
-		ASSERT( lmin <= GetOrdinalForNode(lnode) );
-		ASSERT( rmax >= GetOrdinalForNode(rnode) );
-		ASSERT( rmin <= GetOrdinalForNode(rnode) );
+        ASSERT( lmax >= GetOrdinalForNode(lnode) );
+        ASSERT( lmin <= GetOrdinalForNode(lnode) );
+        ASSERT( rmax >= GetOrdinalForNode(rnode) );
+        ASSERT( rmin <= GetOrdinalForNode(rnode) );
 
         // Do we have a result yet?
         if( lmax < rmin )

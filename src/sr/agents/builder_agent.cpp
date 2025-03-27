@@ -38,7 +38,7 @@ Agent::ReplacePatchPtr BuilderAgent::GenReplaceLayoutImpl( const ReplaceKit &kit
 {
     INDENT("%");
 
-	TreePtr<Node> new_node;
+    TreePtr<Node> new_node;
     if( me_plink == keyer_plink )
     {
         ASSERT( !key_xlink ); // we're on keyer plink

@@ -29,25 +29,25 @@ bool LinkTable::HasRow(XLink xlink) const
  
 const DBCommon::CoreInfo &LinkTable::GetCoreInfo(XLink xlink) const
 {
-    return *(DBCommon::CoreInfo *)&(GetRow(xlink));	
+    return *(DBCommon::CoreInfo *)&(GetRow(xlink));    
 }
  
  
 DBWalk::Action LinkTable::GetInsertGeometricAction()
 {
-	return [=](const DBWalk::WalkInfo &walk_info)
-	{
-   		GenerateRow(walk_info);
-	};
+    return [=](const DBWalk::WalkInfo &walk_info)
+    {
+           GenerateRow(walk_info);
+    };
 }
 
 
 DBWalk::Action LinkTable::GetDeleteGeometricAction()
 {
-	return [=](const DBWalk::WalkInfo &walk_info)
-	{
-   		EraseSolo( rows, walk_info.xlink );
-	};
+    return [=](const DBWalk::WalkInfo &walk_info)
+    {
+           EraseSolo( rows, walk_info.xlink );
+    };
 
     // Good practice to poison rows at terminii. Assuming walker tells us we're at a 
     // terminus, we can put in bad stuff (NULL, -1, end() etc) or maybe just a flag
@@ -57,69 +57,69 @@ DBWalk::Action LinkTable::GetDeleteGeometricAction()
 
 void LinkTable::GenerateRow(const DBWalk::WalkInfo &walk_info)
 {
-	Row row;        
-	*(DBCommon::CoreInfo *)(&row) = walk_info.core;
-	switch( row.context_type )
-	{
-		case DBCommon::ROOT:
-		{
-			// Root ordinal filled on only for root xlinks, so that we retain
-			// locality.
-			row.tree_ordinal = walk_info.tree_ordinal; 
-			
-			// TODO wouldn't NULL ie XLink() be clearer? (and below) - no 'cause 
-			// then undefineds would get into bool eval in the syms. Instead we
-			// allow junk values - analysis of expressions could detect if these 
-			// make it anywhere they can do harm. But we could add a new 
-			// one-off link like MMAX and OffEndX? What about EmptyResult?
-			row.container_front = walk_info.xlink; 
-			row.container_back = walk_info.xlink;
-			break;
-		}	
-		case DBCommon::SINGULAR:
-		{
-			row.container_front = walk_info.xlink;
-			row.container_back = walk_info.xlink;
-			break;
-		}
-		case DBCommon::IN_SEQUENCE:
-		{  
-			row.container_front = XLink( walk_info.core.parent_node, &walk_info.core.p_container->front() );
-			row.container_back = XLink( walk_info.core.parent_node, &walk_info.core.p_container->back() );
-			
-			SequenceInterface::iterator xit_predecessor = walk_info.core.container_it;
-			if( xit_predecessor != walk_info.core.p_container->begin() )
-			{
-			    --xit_predecessor;
-				row.sequence_predecessor = XLink( walk_info.core.parent_node, &*xit_predecessor );
-			}
-			else
-				row.sequence_predecessor = XLink::OffEndXLink;        
+    Row row;        
+    *(DBCommon::CoreInfo *)(&row) = walk_info.core;
+    switch( row.context_type )
+    {
+        case DBCommon::ROOT:
+        {
+            // Root ordinal filled on only for root xlinks, so that we retain
+            // locality.
+            row.tree_ordinal = walk_info.tree_ordinal; 
+            
+            // TODO wouldn't NULL ie XLink() be clearer? (and below) - no 'cause 
+            // then undefineds would get into bool eval in the syms. Instead we
+            // allow junk values - analysis of expressions could detect if these 
+            // make it anywhere they can do harm. But we could add a new 
+            // one-off link like MMAX and OffEndX? What about EmptyResult?
+            row.container_front = walk_info.xlink; 
+            row.container_back = walk_info.xlink;
+            break;
+        }    
+        case DBCommon::SINGULAR:
+        {
+            row.container_front = walk_info.xlink;
+            row.container_back = walk_info.xlink;
+            break;
+        }
+        case DBCommon::IN_SEQUENCE:
+        {  
+            row.container_front = XLink( walk_info.core.parent_node, &walk_info.core.p_container->front() );
+            row.container_back = XLink( walk_info.core.parent_node, &walk_info.core.p_container->back() );
+            
+            SequenceInterface::iterator xit_predecessor = walk_info.core.container_it;
+            if( xit_predecessor != walk_info.core.p_container->begin() )
+            {
+                --xit_predecessor;
+                row.sequence_predecessor = XLink( walk_info.core.parent_node, &*xit_predecessor );
+            }
+            else
+                row.sequence_predecessor = XLink::OffEndXLink;        
 
-			SequenceInterface::iterator xit_successor = walk_info.core.container_it;
-			++xit_successor;
-			if( xit_successor != walk_info.core.p_container->end() )
-				row.sequence_successor = XLink( walk_info.core.parent_node, &*xit_successor );
-			else
-				row.sequence_successor = XLink::OffEndXLink;        
-			break;
-		}
-		case DBCommon::IN_COLLECTION:
-		{
-			row.container_front = XLink( walk_info.core.parent_node, &*(walk_info.core.p_container->begin()) );
-			// Note: in real STL containers, one would use *(x_col->rbegin())
-			row.container_back = XLink( walk_info.core.parent_node, &(walk_info.core.p_container->back()) );
-			break;
-		}
-		case DBCommon::FREE_BASE:
-		{
-			// No way to reach parent so do nothing
-			return;
-		}
-	}
+            SequenceInterface::iterator xit_successor = walk_info.core.container_it;
+            ++xit_successor;
+            if( xit_successor != walk_info.core.p_container->end() )
+                row.sequence_successor = XLink( walk_info.core.parent_node, &*xit_successor );
+            else
+                row.sequence_successor = XLink::OffEndXLink;        
+            break;
+        }
+        case DBCommon::IN_COLLECTION:
+        {
+            row.container_front = XLink( walk_info.core.parent_node, &*(walk_info.core.p_container->begin()) );
+            // Note: in real STL containers, one would use *(x_col->rbegin())
+            row.container_back = XLink( walk_info.core.parent_node, &(walk_info.core.p_container->back()) );
+            break;
+        }
+        case DBCommon::FREE_BASE:
+        {
+            // No way to reach parent so do nothing
+            return;
+        }
+    }
 
-	// Add a row of x_tree_db
-	InsertSolo( rows, make_pair(walk_info.xlink, row) );
+    // Add a row of x_tree_db
+    InsertSolo( rows, make_pair(walk_info.xlink, row) );
 }
 
 
@@ -163,14 +163,14 @@ string LinkTable::Row::GetTrace() const
 
 vector<XLink> LinkTable::GetXLinkDomainAsVector() const
 {
-	vector<XLink> v;
-	for( auto p : rows )
-		v.push_back(p.first);
-	return v;
+    vector<XLink> v;
+    for( auto p : rows )
+        v.push_back(p.first);
+    return v;
 }
 
 
 string LinkTable::GetTrace() const
 {
-	return SSPrintf("Link Table with %d rows", rows.size());
+    return SSPrintf("Link Table with %d rows", rows.size());
 }

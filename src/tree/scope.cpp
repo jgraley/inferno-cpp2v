@@ -16,9 +16,9 @@ TreePtr<Scope> GetScope( TreePtr<Program> program, TreePtr<Identifier> id )
 
     // Look through the members of all scopes (Program, Records, CallableParams, Compounds)
     Walk walkr(program, nullptr, nullptr);
-	for( const TreePtrInterface &n : walkr )
-	{
-    	if( TreePtr<Scope> s = DynamicTreePtrCast<Scope>((TreePtr<Node>)n) )
+    for( const TreePtrInterface &n : walkr )
+    {
+        if( TreePtr<Scope> s = DynamicTreePtrCast<Scope>((TreePtr<Node>)n) )
         {
             for( TreePtr<Declaration> d : s->members )
             {
@@ -26,25 +26,25 @@ TreePtr<Scope> GetScope( TreePtr<Program> program, TreePtr<Identifier> id )
                     return s;
             }
         }
-	}
-	
-	// Special additional processing for Compounds - look for statements that are really Instance Declarations
-	Walk walkc(program, nullptr, nullptr);
-	for( const TreePtrInterface &n : walkc )
-	{
-    	if( TreePtr<Compound> c = DynamicTreePtrCast<Compound>((TreePtr<Node>)n) )
-			for( TreePtr<Statement> s : c->statements )
-			{
-				if( TreePtr<Instance> d = DynamicTreePtrCast<Instance>(s) )
-					if( id == GetIdentifierOfDeclaration( d ).GetTreePtr() )
-						return c;
-			}
-	}
-	
-	if( TreePtr<SpecificIdentifier> sid = DynamicTreePtrCast<SpecificIdentifier>( id ) )
-		throw ScopeNotFoundMismatch();
-	else
-		throw ScopeOnNonSpecificMismatch();
-	// Every identifier should have a scope - if this fails, we've missed out a kind of scope
-	return TreePtr<Scope>();
+    }
+    
+    // Special additional processing for Compounds - look for statements that are really Instance Declarations
+    Walk walkc(program, nullptr, nullptr);
+    for( const TreePtrInterface &n : walkc )
+    {
+        if( TreePtr<Compound> c = DynamicTreePtrCast<Compound>((TreePtr<Node>)n) )
+            for( TreePtr<Statement> s : c->statements )
+            {
+                if( TreePtr<Instance> d = DynamicTreePtrCast<Instance>(s) )
+                    if( id == GetIdentifierOfDeclaration( d ).GetTreePtr() )
+                        return c;
+            }
+    }
+    
+    if( TreePtr<SpecificIdentifier> sid = DynamicTreePtrCast<SpecificIdentifier>( id ) )
+        throw ScopeNotFoundMismatch();
+    else
+        throw ScopeOnNonSpecificMismatch();
+    // Every identifier should have a scope - if this fails, we've missed out a kind of scope
+    return TreePtr<Scope>();
 }

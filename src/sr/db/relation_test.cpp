@@ -140,7 +140,7 @@ void SR::TestRelationProperties( const vector<KeyType> &keys,
         Orderable::Diff ac_diff = compare(a_key, c_key);
         if( ab_diff == 0 )            // a == b
         {
-			map<string, int> &t = tt["a==b"];
+            map<string, int> &t = tt["a==b"];
             if( bc_diff == 0 )            // b == c
             {
                 ASSERT( ac_diff == 0 )
@@ -169,7 +169,7 @@ void SR::TestRelationProperties( const vector<KeyType> &keys,
         }
         else if( ab_diff < 0 )        // a < b
         {
-			map<string, int> &t = tt["a<b"];
+            map<string, int> &t = tt["a<b"];
             t["b>c"];
             if( bc_diff == 0 )            // b == c
             {
@@ -197,7 +197,7 @@ void SR::TestRelationProperties( const vector<KeyType> &keys,
         }
         else if( ab_diff > 0 )        // a > b
         {
-			map<string, int> &t = tt["a>b"];
+            map<string, int> &t = tt["a>b"];
             if( bc_diff == 0 )            // b == c
             {
                 ASSERT( ac_diff > 0 )
@@ -241,15 +241,15 @@ void SR::TestRelationProperties( const vector<KeyType> &keys,
 // --------------------- Explicit instantiations for the types we use as keys --------------------------
 
 template void SR::TestRelationProperties<XLink>( const vector<XLink> &keys,
-										         bool expect_totality,
-										         string relation_name, 
-										         function<Orderable::Diff(XLink l, XLink r)> compare,
-										         function<bool(XLink l, XLink r)> is_equal_native, 
-										         function<XLink(XLink x, int randval)> get_special );
+                                                 bool expect_totality,
+                                                 string relation_name, 
+                                                 function<Orderable::Diff(XLink l, XLink r)> compare,
+                                                 function<bool(XLink l, XLink r)> is_equal_native, 
+                                                 function<XLink(XLink x, int randval)> get_special );
 
 template void SR::TestRelationProperties<TreePtr<Node>>( const vector<TreePtr<Node>> &keys,
-														 bool expect_totality,
-														 string relation_name, 
-														 function<Orderable::Diff(TreePtr<Node> l, TreePtr<Node> r)> compare,
-														 function<bool(TreePtr<Node> l, TreePtr<Node> r)> is_equal_native, 
-														 function<TreePtr<Node>(TreePtr<Node> x, int randval)> get_special );
+                                                         bool expect_totality,
+                                                         string relation_name, 
+                                                         function<Orderable::Diff(TreePtr<Node> l, TreePtr<Node> r)> compare,
+                                                         function<bool(TreePtr<Node> l, TreePtr<Node> r)> is_equal_native, 
+                                                         function<TreePtr<Node>(TreePtr<Node> x, int randval)> get_special );

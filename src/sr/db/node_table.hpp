@@ -17,18 +17,18 @@ public:
 
     class Row : public Traceable
     {
-    public:		
-		// Our node is the child of these links.
-		set<XLink> incoming_xlinks; 
+    public:        
+        // Our node is the child of these links.
+        set<XLink> incoming_xlinks; 
 
-		// Declarative XLinks onto our node. 
-		// A subset of incoming_xlinks, so to get the declarer node, you'll need 
-		// to use eg Row::TryGetParentXLink().GetChildTreePtr(). Why have I done 
-		// this? So that this info is unambiguous across parallel links:
-		// We'll uniquely specify the correct one if only one is a 
-		// declaring link (precision). Taking parent discards that info.
-		set<XLink> declaring_xlinks;
-		
+        // Declarative XLinks onto our node. 
+        // A subset of incoming_xlinks, so to get the declarer node, you'll need 
+        // to use eg Row::TryGetParentXLink().GetChildTreePtr(). Why have I done 
+        // this? So that this info is unambiguous across parallel links:
+        // We'll uniquely specify the correct one if only one is a 
+        // declaring link (precision). Taking parent discards that info.
+        set<XLink> declaring_xlinks;
+        
         string GetTrace() const;
     };
 
@@ -38,11 +38,11 @@ public:
     bool IsDeclarer(const DBWalk::WalkInfo &walk_info) const;
     
     DBWalk::Action GetDeleteGeometricAction();
-	DBWalk::Action GetInsertGeometricAction();
-	
-	vector<TreePtr<Node>> GetNodeDomainAsVector() const;
-	
-	string GetTrace() const;
+    DBWalk::Action GetInsertGeometricAction();
+    
+    vector<TreePtr<Node>> GetNodeDomainAsVector() const;
+    
+    string GetTrace() const;
 private:
     // Node-to-row-of-x_tree_db map
     unordered_map<TreePtr<Node>, Row> rows;

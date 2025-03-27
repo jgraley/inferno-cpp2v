@@ -15,14 +15,14 @@ namespace SR
 
 class FreeZoneMerger
 {
-public:	
-	FreeZoneMerger();
-	
-	// Can change the supplied shared ptr
-	void Run( shared_ptr<Patch> &layout );
-	
-	// Just ASSERT no empty zones
-	void Check( shared_ptr<Patch> &layout );
+public:    
+    FreeZoneMerger();
+    
+    // Can change the supplied shared ptr
+    void Run( shared_ptr<Patch> &layout );
+    
+    // Just ASSERT no empty zones
+    void Check( shared_ptr<Patch> &layout );
 };
 
 }

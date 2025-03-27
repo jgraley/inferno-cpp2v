@@ -94,12 +94,12 @@ Orderable::Diff PatternLink::Compare3Way(const PatternLink &l, const PatternLink
     // Secondary ordering is on the value of the TreePtr which will
     // help with orderings of sets of things in the trace logs.
     if( Orderable::Diff d_node = TreePtrInterface::Compare3Way( *l.asp_pattern, *r.asp_pattern ) )
-		return d_node;
+        return d_node;
 
     // Tertiary ordering is on the identities of the TreePtrs, which 
     // corresponds to the values of the PatternLinks.
     if( Orderable::Diff d_tpi = TreePtrInterface::Compare3WayIdentity( *l.asp_pattern, *r.asp_pattern ) )
-		return d_tpi;
+        return d_tpi;
        
     return 0;
 }
@@ -204,8 +204,8 @@ XLink::XLink( shared_ptr<const Node> parent_x,
               void *whodat_ ) :
     asp_x( parent_x, px ) 
     // From Cppreference: 
-    // 		template<class Y> 
-    // 		shared_ptr( const shared_ptr<Y>& r, element_type* ptr ) noexcept
+    //         template<class Y> 
+    //         shared_ptr( const shared_ptr<Y>& r, element_type* ptr ) noexcept
     //  Y is function template = const Node
     //  element_type = T is class template = const TreePtrInterface
     //  r is parent_x

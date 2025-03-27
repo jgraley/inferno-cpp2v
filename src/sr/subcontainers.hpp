@@ -64,40 +64,40 @@ struct SubContainerRangeExclusions : SubContainerRange
 {
     typedef set<const TreePtrInterface *> ExclusionSet;
 
-	class exclusion_iterator : public ContainerInterface::iterator
-	{
-	public:    
-		typedef forward_iterator_tag iterator_category;
-		typedef TreePtrInterface value_type;
-		typedef int difference_type;
-		typedef const value_type *pointer;
-		typedef const value_type &reference;
+    class exclusion_iterator : public ContainerInterface::iterator
+    {
+    public:    
+        typedef forward_iterator_tag iterator_category;
+        typedef TreePtrInterface value_type;
+        typedef int difference_type;
+        typedef const value_type *pointer;
+        typedef const value_type &reference;
 
-		exclusion_iterator();
-		exclusion_iterator( const exclusion_iterator &i );
-		exclusion_iterator( const iterator_interface &ib,
+        exclusion_iterator();
+        exclusion_iterator( const exclusion_iterator &i );
+        exclusion_iterator( const iterator_interface &ib,
                             weak_ptr<const SubContainerRangeExclusions> container_ );
-		exclusion_iterator &operator=( const iterator_interface &ib );
-		exclusion_iterator &operator++();
-		exclusion_iterator &operator--();
-		const value_type &operator*() const;
-		const value_type *operator->() const;
-		bool operator==( const iterator_interface &ib ) const;
-		bool operator==( const exclusion_iterator &i ) const;
-		bool operator!=( const iterator_interface &ib ) const;
-		bool operator!=( const exclusion_iterator &i ) const;
-		void Mutate( const value_type *v ) const;
-		const bool IsOrdered() const;
-		iterator_interface *GetUnderlyingIterator() const;
-		virtual unique_ptr<iterator_interface> Clone() const;
-		operator string();
+        exclusion_iterator &operator=( const iterator_interface &ib );
+        exclusion_iterator &operator++();
+        exclusion_iterator &operator--();
+        const value_type &operator*() const;
+        const value_type *operator->() const;
+        bool operator==( const iterator_interface &ib ) const;
+        bool operator==( const exclusion_iterator &i ) const;
+        bool operator!=( const iterator_interface &ib ) const;
+        bool operator!=( const exclusion_iterator &i ) const;
+        void Mutate( const value_type *v ) const;
+        const bool IsOrdered() const;
+        iterator_interface *GetUnderlyingIterator() const;
+        virtual unique_ptr<iterator_interface> Clone() const;
+        operator string();
 
-	private:
+    private:
         void NormaliseForward();
         void NormaliseReverse();
-		shared_ptr<iterator_interface> pib;
+        shared_ptr<iterator_interface> pib;
         weak_ptr<const SubContainerRangeExclusions> container;
-	};        
+    };        
     
     SubContainerRangeExclusions() {}
     SubContainerRangeExclusions( TreePtr<Node> parent_x, 

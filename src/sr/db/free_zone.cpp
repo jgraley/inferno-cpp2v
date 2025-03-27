@@ -24,22 +24,22 @@ FreeZone FreeZone::CreateEmpty()
 
 FreeZone FreeZone::CreateScaffold(const TreePtrInterface *tpi_base, int num_terminii)
 {
-	// Create the scaffolding, of type that matches the supplied TreePtr<>
-	auto pair = tpi_base->MakeScaffold();		
-	
-	// Set the base as the scaffolding node
-	FreeZone zone( pair.first, {} );
-	
-	// Set the terminii as the scaffolding node's child pointers
-	for( int i=0; i<num_terminii; i++ )
-	{
-		ContainerInterface::iterator it = pair.second->insert( ContainerMutator::MakePlaceholder() );
-		zone.AddTerminus( make_shared<ContainerMutator>(pair.first, pair.second, it) );     
-	}
-	
-	//FTRACES("Created scaffold with %d terminii\n", num_terminii)("\n");
+    // Create the scaffolding, of type that matches the supplied TreePtr<>
+    auto pair = tpi_base->MakeScaffold();        
+    
+    // Set the base as the scaffolding node
+    FreeZone zone( pair.first, {} );
+    
+    // Set the terminii as the scaffolding node's child pointers
+    for( int i=0; i<num_terminii; i++ )
+    {
+        ContainerInterface::iterator it = pair.second->insert( ContainerMutator::MakePlaceholder() );
+        zone.AddTerminus( make_shared<ContainerMutator>(pair.first, pair.second, it) );     
+    }
+    
+    //FTRACES("Created scaffold with %d terminii\n", num_terminii)("\n");
 
-	return zone;
+    return zone;
 }
 
 
@@ -67,9 +67,9 @@ FreeZone::FreeZone( TreePtr<Node> base_, list<shared_ptr<Mutator>> &&terminii_ )
 
 FreeZone &FreeZone::operator=( const FreeZone &other )
 {
-	base = other.base;
-	terminii = other.terminii;
-	return *this;
+    base = other.base;
+    terminii = other.terminii;
+    return *this;
 }
 
 
@@ -94,127 +94,127 @@ int FreeZone::GetNumTerminii() const
 
 void FreeZone::AddTerminus(shared_ptr<Mutator> terminus)
 {
-	// Can't use this to make an empty zone
-	ASSERT( base );
-	ASSERT( terminus );
-	
-	terminii.push_back(terminus);
+    // Can't use this to make an empty zone
+    ASSERT( base );
+    ASSERT( terminus );
+    
+    terminii.push_back(terminus);
 }
 
 
 TreePtr<Node> FreeZone::GetBaseNode() const
 {
-	ASSERT(!IsEmpty());
+    ASSERT(!IsEmpty());
     return base;
 }
 
 
 void FreeZone::PopulateAll( const list<TreePtr<Node>> &child_nodes ) 
 {
-	ASSERT( terminii.size() == child_nodes.size() );
-		
-	TerminusIterator it_t = GetTerminiiBegin();
-	for( TreePtr<Node> child_node : child_nodes )
-	{	
-		ASSERT( it_t != GetTerminiiEnd() ); // length mismatch		
-		it_t = PopulateTerminus( it_t, child_node );				
-	}		
-		
-	ASSERT( it_t == GetTerminiiEnd() ); // length mismatch		
-	ASSERT( GetNumTerminii() == 0 );
+    ASSERT( terminii.size() == child_nodes.size() );
+        
+    TerminusIterator it_t = GetTerminiiBegin();
+    for( TreePtr<Node> child_node : child_nodes )
+    {    
+        ASSERT( it_t != GetTerminiiEnd() ); // length mismatch        
+        it_t = PopulateTerminus( it_t, child_node );                
+    }        
+        
+    ASSERT( it_t == GetTerminiiEnd() ); // length mismatch        
+    ASSERT( GetNumTerminii() == 0 );
 }
 
 
 FreeZone::TerminusIterator FreeZone::PopulateTerminus( TerminusIterator it_t, 
-													   TreePtr<Node> child_node )
-{	
-	if( IsEmpty() )
-	{		
-		// Child zone overwrites us
-		base = child_node;		
-	}	
-	else 	
-	{
-		// Populate terminus. This will expand SubContainers. Remember that
-		// terminii are reference-like and so it's fine that we erase it.
-		(*it_t)->Mutate( child_node );
-	}
-		
-	// it_t updated to the next terminus after the one we erased, or end()
-	it_t = terminii.erase( it_t );				
-	
-	return it_t;	
-}     						     
+                                                       TreePtr<Node> child_node )
+{    
+    if( IsEmpty() )
+    {        
+        // Child zone overwrites us
+        base = child_node;        
+    }    
+    else     
+    {
+        // Populate terminus. This will expand SubContainers. Remember that
+        // terminii are reference-like and so it's fine that we erase it.
+        (*it_t)->Mutate( child_node );
+    }
+        
+    // it_t updated to the next terminus after the one we erased, or end()
+    it_t = terminii.erase( it_t );                
+    
+    return it_t;    
+}                                  
 
 
 
 void FreeZone::MergeAll( list<unique_ptr<FreeZone>> &&child_zones ) 
 {
-	ASSERT( terminii.size() == child_zones.size() );
-	
-	if( IsEmpty() )
-	{		
-		// child zone overwrites us
-		operator=(*(child_zones.front()));
-		return;
-	}	
-	
-	TerminusIterator it_t = GetTerminiiBegin();
-	for( unique_ptr<FreeZone> &child_zone : child_zones )
-	{	
-		ASSERT( it_t != GetTerminiiEnd() ); // length mismatch		
-		it_t = MergeTerminus( it_t, move(child_zone) );		
-	}		
-		
-	ASSERT( it_t == GetTerminiiEnd() ); // length mismatch		
-	ASSERT( GetNumTerminii() == 0 );
+    ASSERT( terminii.size() == child_zones.size() );
+    
+    if( IsEmpty() )
+    {        
+        // child zone overwrites us
+        operator=(*(child_zones.front()));
+        return;
+    }    
+    
+    TerminusIterator it_t = GetTerminiiBegin();
+    for( unique_ptr<FreeZone> &child_zone : child_zones )
+    {    
+        ASSERT( it_t != GetTerminiiEnd() ); // length mismatch        
+        it_t = MergeTerminus( it_t, move(child_zone) );        
+    }        
+        
+    ASSERT( it_t == GetTerminiiEnd() ); // length mismatch        
+    ASSERT( GetNumTerminii() == 0 );
 }
 
 
 FreeZone::TerminusIterator FreeZone::MergeTerminus( TerminusIterator it_t, 
                                                     unique_ptr<FreeZone> &&child_zone ) 
 {
-	ASSERT( child_zone.get() != this ); 
+    ASSERT( child_zone.get() != this ); 
 
-	if( child_zone->IsEmpty() )
-	{
-		// Nothing happens to this terminus. If we're empty, we'll stay empty.
-		return ++it_t; 
-	}	
-	
-	if( IsEmpty() )
-	{		
-		// Child zone overwrites us
-		base = child_zone->base;		
-	}	
-	else 	
-	{
-		// Populate terminus. This will expand SubContainers. Remember that
-		// terminii are reference-like and so it's fine that we erase it.
-		(*it_t)->Mutate( child_zone->base, child_zone->terminii );
-	}
-	
-	// it_t updated to the next terminus after the one we erased, or end()
-	it_t = terminii.erase( it_t );		
-	
-	// Insert the child zone's terminii before it_t, i.e. where we just
-	// erase()d from. I assume it_t now points after the inserted 
-	// terminii, i.e. at the same element it did after the erase()
-	terminii.splice( it_t, move(child_zone->terminii) );
-	
-	return it_t;
+    if( child_zone->IsEmpty() )
+    {
+        // Nothing happens to this terminus. If we're empty, we'll stay empty.
+        return ++it_t; 
+    }    
+    
+    if( IsEmpty() )
+    {        
+        // Child zone overwrites us
+        base = child_zone->base;        
+    }    
+    else     
+    {
+        // Populate terminus. This will expand SubContainers. Remember that
+        // terminii are reference-like and so it's fine that we erase it.
+        (*it_t)->Mutate( child_zone->base, child_zone->terminii );
+    }
+    
+    // it_t updated to the next terminus after the one we erased, or end()
+    it_t = terminii.erase( it_t );        
+    
+    // Insert the child zone's terminii before it_t, i.e. where we just
+    // erase()d from. I assume it_t now points after the inserted 
+    // terminii, i.e. at the same element it did after the erase()
+    terminii.splice( it_t, move(child_zone->terminii) );
+    
+    return it_t;
 }
 
 
 FreeZone::TerminusIterator FreeZone::GetTerminiiBegin()
 {
-	return terminii.begin();
+    return terminii.begin();
 }
 
 
 FreeZone::TerminusIterator FreeZone::GetTerminiiEnd()
 {
-	return terminii.end();
+    return terminii.end();
 }
 
 
@@ -227,7 +227,7 @@ string FreeZone::GetTrace() const
     }
     else
     {
-		s = Trace(base);
+        s = Trace(base);
         if( terminii.empty() )
             s += " → "; // Indicates the zone goes all the way to leaves i.e. subtree
         else

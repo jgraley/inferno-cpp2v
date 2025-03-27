@@ -21,26 +21,26 @@ namespace SR
 class FreeZone : public Zone
 { 
 public:
-	typedef list<shared_ptr<Mutator>>::iterator TerminusIterator;
+    typedef list<shared_ptr<Mutator>>::iterator TerminusIterator;
 
     static FreeZone CreateSubtree( TreePtr<Node> base );
     static FreeZone CreateEmpty();
-	static FreeZone CreateScaffold(const TreePtrInterface *tpi_base, int num_terminii);
+    static FreeZone CreateScaffold(const TreePtrInterface *tpi_base, int num_terminii);
 
-	FreeZone();
+    FreeZone();
     explicit FreeZone( TreePtr<Node> base, list<shared_ptr<Mutator>> &&terminii );
 
-	FreeZone &operator=( const FreeZone &other );
+    FreeZone &operator=( const FreeZone &other );
 
     bool IsEmpty() const override;
-	int GetNumTerminii() const override;
+    int GetNumTerminii() const override;
     TreePtr<Node> GetBaseNode() const override;
     
-	void PopulateAll( const list<TreePtr<Node>> &child_nodes );
-	TerminusIterator PopulateTerminus( TerminusIterator it_t, 
-									   TreePtr<Node> child_node );
+    void PopulateAll( const list<TreePtr<Node>> &child_nodes );
+    TerminusIterator PopulateTerminus( TerminusIterator it_t, 
+                                       TreePtr<Node> child_node );
     void MergeAll( list<unique_ptr<FreeZone>> &&child_zones );     
-	TerminusIterator MergeTerminus( TerminusIterator it_t, 
+    TerminusIterator MergeTerminus( TerminusIterator it_t, 
                                     unique_ptr<FreeZone> &&child_zone );
     void AddTerminus(shared_ptr<Mutator> terminus);      
     TerminusIterator GetTerminiiBegin();

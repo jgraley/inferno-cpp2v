@@ -13,10 +13,10 @@ using namespace CPPTree;
 string VisibleIdentifiers::MakeUniqueName( string b, unsigned n ) // note static
 {
 #ifdef UID_FORMAT_HINT 
-	if( n>0 )
-		return SSPrintf( UID_FORMAT_HINT, b.c_str(), n );
-	else
-		return b; // n==0 means no change to identifier name; the "_0" is implied in this case
+    if( n>0 )
+        return SSPrintf( UID_FORMAT_HINT, b.c_str(), n );
+    else
+        return b; // n==0 means no change to identifier name; the "_0" is implied in this case
 #endif
 #ifdef UID_FORMAT_PURE 
     (void)b;
@@ -27,14 +27,14 @@ string VisibleIdentifiers::MakeUniqueName( string b, unsigned n ) // note static
 
 void VisibleIdentifiers::SplitName( TreePtr<SpecificIdentifier> i, string *b, unsigned *n ) // note static
 {
-	string original_name = i->GetRender();
+    string original_name = i->GetRender();
 #ifdef UID_FORMAT_HINT 
-	char cb[1024]; // hope that's big enough!
-	int c = sscanf( original_name.c_str(), UID_FORMAT_HINT, cb, n ); // TODO maybe add %s at the end to catch junk after the number
-	if( c == 2 && *n > 0 ) // note that x_0 is *not* in standard form, so it become eg x_0_1 etc
-	{
-		*b = string(cb);        
-	}    
+    char cb[1024]; // hope that's big enough!
+    int c = sscanf( original_name.c_str(), UID_FORMAT_HINT, cb, n ); // TODO maybe add %s at the end to catch junk after the number
+    if( c == 2 && *n > 0 ) // note that x_0 is *not* in standard form, so it become eg x_0_1 etc
+    {
+        *b = string(cb);        
+    }    
     else
     {
         *n = 0;
@@ -50,50 +50,50 @@ void VisibleIdentifiers::SplitName( TreePtr<SpecificIdentifier> i, string *b, un
 
 string VisibleIdentifiers::AddIdentifierNumber( NameUsage &nu, TreePtr<SpecificIdentifier> i, string b, unsigned n )
 {
-	// Uniqueify the number n, by incrementing it until there are no conflicts
-	bool tryagain;
-	do
-	{
-		// See if the number n is already used
-		tryagain = false;
-		for( unsigned u : nu )
-			if( u == n )
-			{
-				tryagain = true;
-				break;
-			}
+    // Uniqueify the number n, by incrementing it until there are no conflicts
+    bool tryagain;
+    do
+    {
+        // See if the number n is already used
+        tryagain = false;
+        for( unsigned u : nu )
+            if( u == n )
+            {
+                tryagain = true;
+                break;
+            }
 
-		// if so, try another number
-		if( tryagain )
-			n++;
+        // if so, try another number
+        if( tryagain )
+            n++;
 
-	} while(tryagain);
+    } while(tryagain);
 
-	// Store the number
-	nu.insert( n );
+    // Store the number
+    nu.insert( n );
 
-	// Return the name that the new identifier should take
-	return MakeUniqueName( b, n );
+    // Return the name that the new identifier should take
+    return MakeUniqueName( b, n );
 }
 
 
 string VisibleIdentifiers::AddIdentifier( TreePtr<SpecificIdentifier> i )
 {
-	// Get canonical form of identifier name
-	string b;
-	unsigned n;
-	SplitName( i, &b, &n );
+    // Get canonical form of identifier name
+    string b;
+    unsigned n;
+    SplitName( i, &b, &n );
 
-	// Do we have the base name already? If so, add this new instance
-	for( NameUsagePair &p : name_usages )
-	    if( b == p.first )
-	       	return AddIdentifierNumber( p.second, i, b, n );
+    // Do we have the base name already? If so, add this new instance
+    for( NameUsagePair &p : name_usages )
+        if( b == p.first )
+               return AddIdentifierNumber( p.second, i, b, n );
 
-	// Otherwise start a new record for this base name.
-	NameUsage nu;
-	string nn = AddIdentifierNumber( nu, i, b, n );
-	name_usages.insert( NameUsagePair( b, nu ) );
-	return nn;
+    // Otherwise start a new record for this base name.
+    NameUsage nu;
+    string nn = AddIdentifierNumber( nu, i, b, n );
+    name_usages.insert( NameUsagePair( b, nu ) );
+    return nn;
 }
 
 //////////////////////////// UniquifyCompare ///////////////////////////////

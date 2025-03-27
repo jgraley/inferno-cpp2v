@@ -28,53 +28,53 @@ TreeUpdater::TreeUpdater(XTreeDatabase *x_tree_db) :
 
 unique_ptr<FreeZone> TreeUpdater::TransformToSingleFreeZone( shared_ptr<Patch> source_layout )
 {
-	DuplicateAllToFree all_to_free;
-	all_to_free.Run(source_layout);  
-	all_to_free.Check(source_layout);
-	
-	FreeZoneMerger free_zone_merger;
-	free_zone_merger.Run(source_layout);  
-	free_zone_merger.Check(source_layout);
+    DuplicateAllToFree all_to_free;
+    all_to_free.Run(source_layout);  
+    all_to_free.Check(source_layout);
+    
+    FreeZoneMerger free_zone_merger;
+    free_zone_merger.Run(source_layout);  
+    free_zone_merger.Check(source_layout);
 
-	auto free_patch = dynamic_pointer_cast<FreeZonePatch>(source_layout);
-	ASSERT( free_patch );
-	ASSERT( free_patch->GetNumChildExpressions() == 0 );
-	FreeZone free_zone = free_patch->GetZone();
-	ASSERT( free_zone.GetNumTerminii() == 0 );
-	return make_unique<FreeZone>(free_zone);
+    auto free_patch = dynamic_pointer_cast<FreeZonePatch>(source_layout);
+    ASSERT( free_patch );
+    ASSERT( free_patch->GetNumChildExpressions() == 0 );
+    FreeZone free_zone = free_patch->GetZone();
+    ASSERT( free_zone.GetNumTerminii() == 0 );
+    return make_unique<FreeZone>(free_zone);
 }
 
 
 void TreeUpdater::TransformToIncrementalAndExecute( XLink target_origin, shared_ptr<Patch> source_layout )
 {
-	ASSERT( db );
-				
-	TreeZoneComplementer tree_zone_complementor( db );
-	tree_zone_complementor.Run(target_origin, source_layout);
+    ASSERT( db );
+                
+    TreeZoneComplementer tree_zone_complementor( db );
+    tree_zone_complementor.Run(target_origin, source_layout);
 
-	TreeZoneOverlapHandler tree_zone_overlap_handler( db );
-	tree_zone_overlap_handler.Run(source_layout);
-	tree_zone_overlap_handler.Check(source_layout);
-	
-	TreeZoneOrderingHandler tree_zone_ordering_handler( db );
-	tree_zone_ordering_handler.Run(source_layout);
-	tree_zone_ordering_handler.Check(source_layout);
-	
-	TreeZoneGapHandler tree_zone_gap_handler;
-	tree_zone_gap_handler.Run(source_layout);	
+    TreeZoneOverlapHandler tree_zone_overlap_handler( db );
+    tree_zone_overlap_handler.Run(source_layout);
+    tree_zone_overlap_handler.Check(source_layout);
+    
+    TreeZoneOrderingHandler tree_zone_ordering_handler( db );
+    tree_zone_ordering_handler.Run(source_layout);
+    tree_zone_ordering_handler.Check(source_layout);
+    
+    TreeZoneGapHandler tree_zone_gap_handler;
+    tree_zone_gap_handler.Run(source_layout);    
 
-	FreeZoneMerger free_zone_merger;
-	free_zone_merger.Run(source_layout);  
-	free_zone_merger.Check(source_layout);
-	
-	AltTreeZoneOrderingChecker alt_tree_zone_ordering_checker( db );
-	alt_tree_zone_ordering_checker.Check(source_layout);
+    FreeZoneMerger free_zone_merger;
+    free_zone_merger.Run(source_layout);  
+    free_zone_merger.Check(source_layout);
+    
+    AltTreeZoneOrderingChecker alt_tree_zone_ordering_checker( db );
+    alt_tree_zone_ordering_checker.Check(source_layout);
 
-	// Enact the tree zones that will stick around
-	BaseForEmbeddedMarkPropagation bfe_mark_propagation( db );
-	bfe_mark_propagation.Run(source_layout);
+    // Enact the tree zones that will stick around
+    BaseForEmbeddedMarkPropagation bfe_mark_propagation( db );
+    bfe_mark_propagation.Run(source_layout);
 
-	// Inversion generates sequence of separate "small" update commands 
-	TreeZoneInverter tree_zone_inverter( db ); 
-	tree_zone_inverter.Run(target_origin, &source_layout);				
+    // Inversion generates sequence of separate "small" update commands 
+    TreeZoneInverter tree_zone_inverter( db ); 
+    tree_zone_inverter.Run(target_origin, &source_layout);                
 }

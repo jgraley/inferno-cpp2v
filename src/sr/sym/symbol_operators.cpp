@@ -356,7 +356,7 @@ unique_ptr<SymbolicResult> XTreeDbToSymbolOperator::Evaluate( const EvalKit &kit
         
     // These DB operations only work on XLinks supported by the DB. Does not include eg MMAX.   
     if( !kit.x_tree_db->HasRow(ar->GetOnlyXLink()) )
-		return make_unique<EmptyResult>();
+        return make_unique<EmptyResult>();
         
     const SR::LinkTable::Row &row( kit.x_tree_db->GetRow(ar->GetOnlyXLink()) );   
     SR::XLink result_xlink = EvalXLinkFromRow( kit, ar->GetOnlyXLink(), row );

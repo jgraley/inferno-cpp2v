@@ -17,13 +17,13 @@ using namespace SR;
 
 bool DomainExtension::ExtenderChannelRelation::operator()( const Extender *l, const Extender *r ) const
 {
-	return l->IsExtenderChannelLess( *r );
+    return l->IsExtenderChannelLess( *r );
 }
 
 
 DomainExtension::ExtenderSet DomainExtension::DetermineExtenders( const set<const SYM::Expression *> &sub_exprs )
 {
-	ExtenderSet extenders;
+    ExtenderSet extenders;
     for( auto sub_expr : sub_exprs )
     {
         if( auto tp_op = dynamic_cast<const RelocatingAgent::RelocateOperator *>(sub_expr) )
@@ -38,16 +38,16 @@ DomainExtension::ExtenderSet DomainExtension::DetermineExtenders( const set<cons
 
 DomainExtension::DomainExtension( const XTreeDatabase *db, ExtenderSet extenders )
 {
-	for( const Extender *extender : extenders )
-	     channels[extender] = make_unique<DomainExtensionChannel>(db, extender);
+    for( const Extender *extender : extenders )
+         channels[extender] = make_unique<DomainExtensionChannel>(db, extender);
 }
-	
+    
 
 void DomainExtension::SetOnExtraTreeFunctions( CreateExtraTreeFunction on_create_extra_tree_,
                                                DestroyExtraTreeFunction on_destroy_extra_tree_ )
 {
-	for( auto &p : channels )
-		p.second->SetOnExtraTreeFunctions( on_create_extra_tree_, on_destroy_extra_tree_ );
+    for( auto &p : channels )
+        p.second->SetOnExtraTreeFunctions( on_create_extra_tree_, on_destroy_extra_tree_ );
 }
 
 
@@ -60,41 +60,41 @@ const DomainExtensionChannel *DomainExtension::GetChannel( const Extender *exten
 
 void DomainExtension::InitialBuild()
 {
-	for( auto &p : channels )
+    for( auto &p : channels )
         p.second->InitialBuild();
 }
 
 
 void DomainExtension::PostUpdateActions()
 {
-	for( auto &p : channels )
+    for( auto &p : channels )
         p.second->PostUpdateActions();
 }
 
 
 DBWalk::Action DomainExtension::GetInsertGeometricAction()
 {
-	return [=](const DBWalk::WalkInfo &walk_info)
-	{        
-		for( auto &p : channels )
-			 p.second->Insert( walk_info );			 
-	};
+    return [=](const DBWalk::WalkInfo &walk_info)
+    {        
+        for( auto &p : channels )
+             p.second->Insert( walk_info );             
+    };
 }
 
 
 DBWalk::Action DomainExtension::GetDeleteGeometricAction()
-{	
-	return [=](const DBWalk::WalkInfo &walk_info)
-	{        
-		for( auto &p : channels )
-			 p.second->Delete( walk_info );
-	};
+{    
+    return [=](const DBWalk::WalkInfo &walk_info)
+    {        
+        for( auto &p : channels )
+             p.second->Delete( walk_info );
+    };
 }
 
 
 void DomainExtension::Validate() const
 {
-	for( auto &p : channels )
+    for( auto &p : channels )
         p.second->Validate();
 }
 
@@ -118,9 +118,9 @@ void DomainExtensionChannel::SetOnExtraTreeFunctions( DomainExtension::CreateExt
 XLink DomainExtensionChannel::GetUniqueDomainExtension( XLink stimulus_xlink, TreePtr<Node> generated_root ) const
 {   
     ASSERT( generated_root );
-	ASSERT( induced_root_to_tree_ordinal_and_ref_count.count(generated_root) > 0 )
-	      ("Generated root ")(generated_root)(" not found in induced_root_to_tree_ordinal_and_ref_count:\n")
-	      (induced_root_to_tree_ordinal_and_ref_count);
+    ASSERT( induced_root_to_tree_ordinal_and_ref_count.count(generated_root) > 0 )
+          ("Generated root ")(generated_root)(" not found in induced_root_to_tree_ordinal_and_ref_count:\n")
+          (induced_root_to_tree_ordinal_and_ref_count);
     
     // Cross-checks using stimulus_xlink (rather than acting as a cache, 
     // which we can now do, see #700)
@@ -150,9 +150,9 @@ void DomainExtensionChannel::CreateExtraTree( TreePtr<Node> induced_root )
  
     // Add this xlink and ordinal to the extension classes as stimulus. 
     // Count begins at 1 since there's one ref (this one)
-	(void)induced_root_to_tree_ordinal_and_ref_count.insert( make_pair( extra_root_node, ExtensionClass(tree_ordinal, 1) ) );  
-	
-	Validate();  
+    (void)induced_root_to_tree_ordinal_and_ref_count.insert( make_pair( extra_root_node, ExtensionClass(tree_ordinal, 1) ) );  
+    
+    Validate();  
 }
 
 
@@ -193,7 +193,7 @@ void DomainExtensionChannel::CheckStimulusXLink( XLink stimulus_xlink )
 
 void DomainExtensionChannel::DropStimulusXLink( XLink stimulus_xlink )
 {
-	TRACE("Stimulus: ")(stimulus_xlink)("\n");
+    TRACE("Stimulus: ")(stimulus_xlink)("\n");
     // Be strict here: all these data structures need to remain in synch
     ASSERT( stimulus_to_induced_root_and_deps.count(stimulus_xlink)>0 );
     
@@ -218,11 +218,11 @@ void DomainExtensionChannel::DropStimulusXLink( XLink stimulus_xlink )
     int new_rc = --induced_root_to_tree_ordinal_and_ref_count.at(induced_root).ref_count;
     if( new_rc==0 )
     {
-		DBCommon::TreeOrdinal tree_ordinal = induced_root_to_tree_ordinal_and_ref_count.at(induced_root).tree_ordinal;
+        DBCommon::TreeOrdinal tree_ordinal = induced_root_to_tree_ordinal_and_ref_count.at(induced_root).tree_ordinal;
         EraseSolo( induced_root_to_tree_ordinal_and_ref_count, induced_root );
-		destroy_extra_tree(tree_ordinal);
-	}
-	
+        destroy_extra_tree(tree_ordinal);
+    }
+    
     // Remove tracking row for this stimulus xlink
     EraseSolo(stimulus_to_induced_root_and_deps, stimulus_xlink);
 }
@@ -230,8 +230,8 @@ void DomainExtensionChannel::DropStimulusXLink( XLink stimulus_xlink )
 
 void DomainExtensionChannel::Validate() const
 {
-	ASSERT( stimulus_to_induced_root_and_deps.size() <= db->GetDomain().unordered_domain.size() );
-	
+    ASSERT( stimulus_to_induced_root_and_deps.size() <= db->GetDomain().unordered_domain.size() );
+    
     for( auto p : stimulus_to_induced_root_and_deps )
     {
         XLink stimulus_xlink = p.first;
@@ -248,18 +248,18 @@ void DomainExtensionChannel::Validate() const
             ASSERT( stimulus_to_induced_root_and_deps.count(stimulus_xlink) == 1 )(extender)(": domain %d: %d stimulii, %d deps\n", db->GetDomain().unordered_domain.size(), stimulus_to_induced_root_and_deps.size(), dep_to_all_stimulii.size());            
     }
     
-	//FTRACE("Validated ")(extender)(": domain %d: %d stimulii, %d deps\n", db->GetDomain().unordered_domain.size(), stimulus_to_induced_root_and_deps.size(), dep_to_all_stimulii.size());    
+    //FTRACE("Validated ")(extender)(": domain %d: %d stimulii, %d deps\n", db->GetDomain().unordered_domain.size(), stimulus_to_induced_root_and_deps.size(), dep_to_all_stimulii.size());    
 }
 
 
 
 void DomainExtensionChannel::InitialBuild()
 {
-	TRACE("Initial DE build for extender ")(*extender)("\n");
+    TRACE("Initial DE build for extender ")(*extender)("\n");
 
     for( XLink xlink : db->GetDomain().unordered_domain )
         CheckStimulusXLink( xlink );
-	
+    
     Validate();
 }
 
@@ -286,14 +286,14 @@ void DomainExtensionChannel::Insert(const DBWalk::WalkInfo &walk_info)
 
 void DomainExtensionChannel::Delete(const DBWalk::WalkInfo &walk_info)
 {
-	INDENT("D");
+    INDENT("D");
     XLink xlink = walk_info.xlink;
 
     // First deal with the case where the deleted xlink is the stimulus for a domain 
     // extension: in this case, we want to remove every trace of this extension.
     if( stimulus_to_induced_root_and_deps.count(xlink)>0 )
     {
-		TRACE("Extender ")(extender)(": drop stimulus: ")(xlink)("\n");
+        TRACE("Extender ")(extender)(": drop stimulus: ")(xlink)("\n");
         DropStimulusXLink( xlink );
         // Don't add to recheck set: stimulus was deleted, we won't want the DE back
     }
@@ -313,7 +313,7 @@ void DomainExtensionChannel::Delete(const DBWalk::WalkInfo &walk_info)
         {
             ASSERT( stimulus_to_induced_root_and_deps.count(stimulus_xlink)>0 );
             
-			TRACE("Extender ")(extender)(": drop stimulus: ")(stimulus_xlink)(" via dep: ")(xlink)("\n");
+            TRACE("Extender ")(extender)(": drop stimulus: ")(stimulus_xlink)(" via dep: ")(xlink)("\n");
             DropStimulusXLink( stimulus_xlink );
             InsertSolo(stimulii_to_recheck, stimulus_xlink);
         }

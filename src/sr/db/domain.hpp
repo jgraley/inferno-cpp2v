@@ -18,12 +18,12 @@ namespace SR
 class Domain
 {   
 public:
-	Domain();
+    Domain();
 
     DBWalk::Action GetDeleteGeometricAction();
-	DBWalk::Action GetInsertGeometricAction();
-	
-	static void CheckEqual( shared_ptr<Domain> l, shared_ptr<Domain> r );	
+    DBWalk::Action GetInsertGeometricAction();
+    
+    static void CheckEqual( shared_ptr<Domain> l, shared_ptr<Domain> r );    
     
     // Global domain of possible xlink values
     unordered_set<XLink> unordered_domain;            

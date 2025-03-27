@@ -32,36 +32,36 @@ class DomainExtensionChannel;
 class DomainExtension
 {   
 public:
-	class Extender : public virtual Traceable
-	{
-	public:
-		struct Info
-		{
-			TreePtr<Node> induced_base_node;
-			set<XLink> deps;
-		}; 
-		virtual Info GetDomainExtension( const XTreeDatabase *db, XLink xlink ) const = 0;
-		virtual bool IsExtenderChannelLess( const Extender &r ) const = 0;
-		virtual int GetExtenderChannelOrdinal() const = 0;
-	};
+    class Extender : public virtual Traceable
+    {
+    public:
+        struct Info
+        {
+            TreePtr<Node> induced_base_node;
+            set<XLink> deps;
+        }; 
+        virtual Info GetDomainExtension( const XTreeDatabase *db, XLink xlink ) const = 0;
+        virtual bool IsExtenderChannelLess( const Extender &r ) const = 0;
+        virtual int GetExtenderChannelOrdinal() const = 0;
+    };
 
-	class ExtenderChannelRelation
-	{
-	public:
-		/// Less operator: for use with set, map etc
-		bool operator()( const Extender *l, const Extender *r ) const;		
-	};
-	
-	typedef set<const Extender *, ExtenderChannelRelation> ExtenderSet;
+    class ExtenderChannelRelation
+    {
+    public:
+        /// Less operator: for use with set, map etc
+        bool operator()( const Extender *l, const Extender *r ) const;        
+    };
+    
+    typedef set<const Extender *, ExtenderChannelRelation> ExtenderSet;
 
-	static ExtenderSet DetermineExtenders( const set<const SYM::Expression *> &sub_exprs );
+    static ExtenderSet DetermineExtenders( const set<const SYM::Expression *> &sub_exprs );
 
-	DomainExtension( const XTreeDatabase *db, ExtenderSet extenders );
-		
-	typedef function<DBCommon::TreeOrdinal(TreePtr<Node>)> CreateExtraTreeFunction;
-	typedef function<void(DBCommon::TreeOrdinal)> DestroyExtraTreeFunction;
+    DomainExtension( const XTreeDatabase *db, ExtenderSet extenders );
+        
+    typedef function<DBCommon::TreeOrdinal(TreePtr<Node>)> CreateExtraTreeFunction;
+    typedef function<void(DBCommon::TreeOrdinal)> DestroyExtraTreeFunction;
 
-	void SetOnExtraTreeFunctions( CreateExtraTreeFunction create_extra_tree,
+    void SetOnExtraTreeFunctions( CreateExtraTreeFunction create_extra_tree,
                                   DestroyExtraTreeFunction destroy_extra_tree );
 
     // Gain access to a channel
@@ -72,14 +72,14 @@ public:
     void PostUpdateActions();
 
     DBWalk::Action GetDeleteGeometricAction();
-	DBWalk::Action GetInsertGeometricAction();
-	
-	void Validate() const;
-	
+    DBWalk::Action GetInsertGeometricAction();
+    
+    void Validate() const;
+    
 private:
-	// Map equivalence classes of extender agents onto our channel objects
-	// so that we have one for each equaivalence class.
-  	map<const Extender *, unique_ptr<DomainExtensionChannel>, ExtenderChannelRelation> channels;
+    // Map equivalence classes of extender agents onto our channel objects
+    // so that we have one for each equaivalence class.
+      map<const Extender *, unique_ptr<DomainExtensionChannel>, ExtenderChannelRelation> channels;
 };    
     
 // ------------------------- DomainExtensionChannel --------------------------
@@ -88,25 +88,25 @@ private:
 // covers whole domain for that extender algorithm.
 class DomainExtensionChannel
 {
-public:	
-   	DomainExtensionChannel( const XTreeDatabase *db, const DomainExtension::Extender *extender );
+public:    
+       DomainExtensionChannel( const XTreeDatabase *db, const DomainExtension::Extender *extender );
 
-	void SetOnExtraTreeFunctions( DomainExtension::CreateExtraTreeFunction create_extra_tree,
+    void SetOnExtraTreeFunctions( DomainExtension::CreateExtraTreeFunction create_extra_tree,
                                   DomainExtension::DestroyExtraTreeFunction destroy_extra_tree );
-	XLink GetUniqueDomainExtension( XLink stimulus_xlink, TreePtr<Node> node ) const;
+    XLink GetUniqueDomainExtension( XLink stimulus_xlink, TreePtr<Node> node ) const;
     void CreateExtraTree( TreePtr<Node> extra_root_node );
     void CheckStimulusXLink( XLink stimulus_xlink );
     void DropStimulusXLink( XLink stimulus_xlink );
     void Validate() const;
     void InitialBuild();
-	void PostUpdateActions();
+    void PostUpdateActions();
 
-	void Insert(const DBWalk::WalkInfo &walk_info);
-	void Delete(const DBWalk::WalkInfo &walk_info);
+    void Insert(const DBWalk::WalkInfo &walk_info);
+    void Delete(const DBWalk::WalkInfo &walk_info);
 
 private:
     const XTreeDatabase *db;
-	const DomainExtension::Extender *extender;
+    const DomainExtension::Extender *extender;
 
     DomainExtension::CreateExtraTreeFunction create_extra_tree;
     DomainExtension::DestroyExtraTreeFunction destroy_extra_tree;

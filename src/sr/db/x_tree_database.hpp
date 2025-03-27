@@ -34,28 +34,28 @@ public:
     XLink GetRootXLink(DBCommon::TreeOrdinal tree_ordinal) const;
     vector<XLink> GetExtraRootXLinks() const;
     
-	void WalkAllTrees(const DBWalk::Actions *actions,
-		 			  DBWalk::Wind wind);
-									 
-	// Use both monolithic and incremental updates in order 
-	// to build full db during analysis stage
+    void WalkAllTrees(const DBWalk::Actions *actions,
+                       DBWalk::Wind wind);
+                                     
+    // Use both monolithic and incremental updates in order 
+    // to build full db during analysis stage
     void InitialBuild();
     
-	// Incremental strategy: perform updates on zones
+    // Incremental strategy: perform updates on zones
     FreeZone MainTreeExchange( TreeZone target_tree_zone, FreeZone source_free_zone );
-		
+        
     void MainTreeDeleteGeometric(TreeZone zone, const DBCommon::CoreInfo *base_info);
     void MainTreeInsertGeometric(TreeZone zone, const DBCommon::CoreInfo *base_info);
 
     void MainTreeDeleteIntrinsic(TreeZone zone);
     void MainTreeInsertIntrinsic(FreeZone zone);
 
-	void PerformQueuedExtraTreeActions();
+    void PerformQueuedExtraTreeActions();
     void ExtraTreeDelete(DBCommon::TreeOrdinal tree_ordinal);
     void ExtraTreeInsert(DBCommon::TreeOrdinal tree_ordinal);
 
     const DomainExtensionChannel *GetDEChannel( const DomainExtension::Extender *extender ) const;
-   	const Domain &GetDomain() const;
+       const Domain &GetDomain() const;
 
     const LinkTable &GetLinkTable() const;
     const LinkTable::Row &GetRow(XLink xlink) const;
@@ -64,38 +64,38 @@ public:
     bool HasNodeRow(TreePtr<Node> node) const;
     
     // Parent X link if not a root
-	XLink TryGetParentXLink(XLink xlink) const;
-	
-	// XLink from TPI ptr
-  	XLink TryGetXLink( const TreePtrInterface *ptp ) const;
-  	XLink GetXLink( const TreePtrInterface *ptp ) const;
+    XLink TryGetParentXLink(XLink xlink) const;
+    
+    // XLink from TPI ptr
+      XLink TryGetXLink( const TreePtrInterface *ptp ) const;
+      XLink GetXLink( const TreePtrInterface *ptp ) const;
     
     // Last of the descendents in depth first order. If no 
     // descendents, it will be the supplied node. 
-	static XLink GetLastDescendant(XLink xlink);
+    static XLink GetLastDescendant(XLink xlink);
 
-	const Orderings &GetOrderings() const;
-	
-	TreePtr<Node> GetMainRootNode() const;
-	XLink GetMainRootXLink() const;
+    const Orderings &GetOrderings() const;
+    
+    TreePtr<Node> GetMainRootNode() const;
+    XLink GetMainRootXLink() const;
 
-   	unique_ptr<Mutator> GetMutator(XLink xlink) const;
+       unique_ptr<Mutator> GetMutator(XLink xlink) const;
 
     void Dump() const;
-	
+    
 private:    
     void Checks();
     
 private: 
-	const shared_ptr<Lacing> lacing;
+    const shared_ptr<Lacing> lacing;
     const shared_ptr<Domain> domain;
     const shared_ptr<LinkTable> link_table;
     const shared_ptr<NodeTable> node_table;
     const shared_ptr<Orderings> orderings;
     const shared_ptr<DomainExtension> domain_extension;
 
-	map<DBCommon::TreeOrdinal, DBCommon::TreeRecord> trees_by_ordinal;
-	queue<DBCommon::TreeOrdinal> free_tree_ordinals;
+    map<DBCommon::TreeOrdinal, DBCommon::TreeRecord> trees_by_ordinal;
+    queue<DBCommon::TreeOrdinal> free_tree_ordinals;
 
     DBWalk db_walker;
     DBCommon::TreeOrdinal next_tree_ordinal;

@@ -42,25 +42,25 @@ using namespace CPPTree;
 Graph::Graph( string of, string title ) :
     outfile(of),
     base_region( ReadArgs::graph_dark ? "black" : "antiquewhite1" ),
-	line_colour( ReadArgs::graph_dark ? "grey85" : "black" ),
+    line_colour( ReadArgs::graph_dark ? "grey85" : "black" ),
     font_colour( ReadArgs::graph_dark ? "white" : "black" ),
     external_font_colour( ReadArgs::graph_dark ? "grey60" : "grey40" ),
     backgrounded_font_colour( "black" )
 {
-	if( !outfile.empty() )
-	{
-		filep = fopen( outfile.c_str(), "wt" );
-		ASSERT( filep )( "Cannot open output file \"%s\"", outfile.c_str() );
+    if( !outfile.empty() )
+    {
+        filep = fopen( outfile.c_str(), "wt" );
+        ASSERT( filep )( "Cannot open output file \"%s\"", outfile.c_str() );
     }
     
-	Disburse( DoHeader(title) );
+    Disburse( DoHeader(title) );
 }
 
 
 Graph::~Graph()
 {
-	Disburse( all_dot );
-	Disburse( DoFooter() );
+    Disburse( all_dot );
+    Disburse( DoFooter() );
 
     if( !outfile.empty() )
     {
@@ -76,7 +76,7 @@ void Graph::GenerateGraph( SR::VNStep *root )
     list<const Graphable *> my_graphables;
     list<MyBlock> my_blocks;
 
-	reached.clear();
+    reached.clear();
     PopulateFromTransformation(my_graphables, root);
     my_blocks = GetBlocks( my_graphables, nullptr );
     TrimLinksByChild( my_blocks, my_graphables );
@@ -85,7 +85,7 @@ void Graph::GenerateGraph( SR::VNStep *root )
     s += DoBlocks(my_blocks, base_region);
     s += DoLinks(my_blocks);
     s += "\n";
-	Remember(s);
+    Remember(s);
     
     CheckLinks(my_blocks);    
 }
@@ -204,7 +204,7 @@ void Graph::GenerateGraph( const Figure &figure )
     PostProcessBlocks(exterior_blocks);
     PostProcessBlocks(interior_blocks);
     for( auto p : figure.subordinate_engines_and_base_agents ) 
-		PostProcessBlocks( subordinate_blocks[p.first] );
+        PostProcessBlocks( subordinate_blocks[p.first] );
     
     // Check for broken links (no block with matching child id)
     list<MyBlock> all_blocks = interior_blocks + exterior_blocks;
@@ -225,15 +225,15 @@ void Graph::GenerateGraph( const Figure &figure )
 
     for( auto p : figure.subordinate_engines_and_base_agents )
     {
-		RegionAppearance subordinate_region = interior_region;
-		subordinate_region.title = p.first->GetGraphId();
-		subordinate_region.id = GetRegionGraphId(&figure, p.first);
-		subordinate_region.background_colour = ReadArgs::graph_dark ? "gray25" : "antiquewhite3";
+        RegionAppearance subordinate_region = interior_region;
+        subordinate_region.title = p.first->GetGraphId();
+        subordinate_region.id = GetRegionGraphId(&figure, p.first);
+        subordinate_region.background_colour = ReadArgs::graph_dark ? "gray25" : "antiquewhite3";
 
         list<MyBlock> sub_blocks = subordinate_blocks.at(p.first);        
-	    string s_subordinate = DoBlocks(sub_blocks, subordinate_region); 
-		s_interior += DoRegion(s_subordinate, subordinate_region);
-	}
+        string s_subordinate = DoBlocks(sub_blocks, subordinate_region); 
+        s_interior += DoRegion(s_subordinate, subordinate_region);
+    }
 
     s += DoRegion(s_interior, interior_region);
 
@@ -243,7 +243,7 @@ void Graph::GenerateGraph( const Figure &figure )
     s += DoLinks(all_blocks); 
     s += "\n";        
 
-	Remember( s );
+    Remember( s );
 }
 
 
@@ -256,51 +256,51 @@ TreePtr<Node> Graph::GenerateGraph( TreePtr<Node> root )
 
     reached.clear();
     Graphable *g = dynamic_cast<Graphable *>(root.get());
-	PopulateFrom( my_graphables, g );
-	my_blocks = GetBlocks( my_graphables, nullptr );
+    PopulateFrom( my_graphables, g );
+    my_blocks = GetBlocks( my_graphables, nullptr );
     TrimLinksByChild( my_blocks, my_graphables );
     PostProcessBlocks(my_blocks);
     s += DoBlocks(my_blocks, base_region);
     s += DoLinks(my_blocks);
     s += "\n";
-	Remember( s );
+    Remember( s );
     
     CheckLinks(my_blocks);
 
-	return root; // no change
+    return root; // no change
 }
 
 
 void Graph::PopulateFromTransformation( list<const Graphable *> &graphables, SR::VNStep *root )
 {    
-	reached.clear();
-	PopulateFrom( graphables, root );
+    reached.clear();
+    PopulateFrom( graphables, root );
 }
 
                    
 void Graph::PopulateFrom( list<const Graphable *> &graphables, const Graphable *g )
 {
-	ASSERT(g);
+    ASSERT(g);
     graphables.push_back(g);
 
-    Graphable::Block block = g->GetGraphBlockInfo();	        
+    Graphable::Block block = g->GetGraphBlockInfo();            
     PopulateFromSubBlocks( graphables, block );
 }
 
 
 void Graph::PopulateFromSubBlocks( list<const Graphable *> &graphables, const Graphable::Block &block )
 {
-	for( const Graphable::SubBlock &sub_block : block.sub_blocks )
-	{
-		for( shared_ptr<const Graphable::Link> link : sub_block.links )
-		{
-			if( link->child && reached.count(link->child)==0 )
-			{
-				PopulateFrom( graphables, link->child );
-				reached.insert( link->child );
-			}
-		}
-	}
+    for( const Graphable::SubBlock &sub_block : block.sub_blocks )
+    {
+        for( shared_ptr<const Graphable::Link> link : sub_block.links )
+        {
+            if( link->child && reached.count(link->child)==0 )
+            {
+                PopulateFrom( graphables, link->child );
+                reached.insert( link->child );
+            }
+        }
+    }
 }
 
   
@@ -311,8 +311,8 @@ shared_ptr<Graph::MyLink> Graph::FindLink( list<MyBlock> &blocks_to_act_on,
     TRACE("UpdateLinksDetails( target_child_g=")(target_child_g)(" target_trace_label=")(target_trace_label)(" )\n");         
     // Loop over all the links in all the blocks that we might need to 
     // redirect (ones in the interior of the figure)
-	for( MyBlock &block_to_act_on : blocks_to_act_on )
-	{
+    for( MyBlock &block_to_act_on : blocks_to_act_on )
+    {
         TRACEC("    Block: ")(block_to_act_on.base_id)("\n");
         for( Graphable::SubBlock &sub_block_to_act_on : block_to_act_on.sub_blocks )
         {
@@ -346,11 +346,11 @@ void Graph::CheckLinks( list<MyBlock> blocks )
 {
     set<string> base_ids;
 
-  	for( MyBlock &block : blocks )
+      for( MyBlock &block : blocks )
         base_ids.insert( block.base_id );
     
-  	for( MyBlock &block : blocks )
-	{
+      for( MyBlock &block : blocks )
+    {
         for( Graphable::SubBlock &sub_block : block.sub_blocks )
         {
             for( shared_ptr<const Graphable::Link> link : sub_block.links )
@@ -370,12 +370,12 @@ void Graph::CheckLinks( list<MyBlock> blocks )
 list<Graph::MyBlock> Graph::GetBlocks( list<const Graphable *> graphables,
                                        const Region *region )
 {
-	list<MyBlock> blocks;
+    list<MyBlock> blocks;
 
-	for( const Graphable *g : graphables )	
-        blocks.push_back( GetBlock( g, region ) );	
+    for( const Graphable *g : graphables )    
+        blocks.push_back( GetBlock( g, region ) );    
 
-	return blocks;
+    return blocks;
 }
 
 
@@ -402,10 +402,10 @@ void Graph::TrimLinksByChild( list<MyBlock> &blocks,
 void Graph::TrimLinksByChild( list<MyBlock> &blocks,
                               set<const Graphable *> to_keep )
 {
-	for( MyBlock &block : blocks )
-	{       
+    for( MyBlock &block : blocks )
+    {       
         for( Graphable::SubBlock &sub_block : block.sub_blocks )
-        {			
+        {            
             list< shared_ptr<Graphable::Link> > new_links;
             for( shared_ptr<Graphable::Link> link : sub_block.links )
             {
@@ -417,17 +417,17 @@ void Graph::TrimLinksByChild( list<MyBlock> &blocks,
             }
             sub_block.links = new_links;
         }
-	}
+    }
 }
 
 
 void Graph::TrimLinksByPhase( list<MyBlock> &blocks,
                               set<Graphable::Phase> to_keep )
 {
-	for( MyBlock &block : blocks )
-	{       
+    for( MyBlock &block : blocks )
+    {       
         for( Graphable::SubBlock &sub_block : block.sub_blocks )
-        {			
+        {            
             list< shared_ptr<Graphable::Link> > new_links;
             for( shared_ptr<Graphable::Link> link : sub_block.links )
             {
@@ -436,7 +436,7 @@ void Graph::TrimLinksByPhase( list<MyBlock> &blocks,
             }
             sub_block.links = new_links;
         }
-	}
+    }
 }
 
 
@@ -444,9 +444,9 @@ Graph::MyBlock Graph::CreateInvisibleBlock( string id,
                                            list< tuple<const Graphable *, string, Graphable::Phase> > links_info,  
                                            const Region *region )
 {
-	MyBlock block;
-	block.title = "";     
-	block.bold = false;
+    MyBlock block;
+    block.title = "";     
+    block.bold = false;
     block.block_type = Graphable::INVISIBLE;
     block.prerestriction_name = "";
     block.colour = "";
@@ -471,7 +471,7 @@ Graph::MyBlock Graph::CreateInvisibleBlock( string id,
         sub_block.links.push_back( my_link );
     }
     block.sub_blocks.push_back( sub_block );
-		    
+            
                 
     return block;
 }
@@ -481,8 +481,8 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
                                        const Graphable *g,
                                        const Region *region )
 {
-	ASSERT(g);
-	const Node *pnode = dynamic_cast<const Node *>(g);
+    ASSERT(g);
+    const Node *pnode = dynamic_cast<const Node *>(g);
     const SpecialBase *pspecial = pnode ? dynamic_cast<const SpecialBase *>(pnode) : nullptr;
 
     // Fill in everything in my block 
@@ -493,8 +493,8 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
     my_block.base_id = GetRegionGraphId(region, g);
     
     // Capture the node (if there is one: might be NULL)
-	if( pspecial )
-		my_block.prerestriction_name = (*(pspecial->SpecialGetArchetypeNode())).GetName();
+    if( pspecial )
+        my_block.prerestriction_name = (*(pspecial->SpecialGetArchetypeNode())).GetName();
     
     // In graph trace mode, nodes get their serial number added in as an extra sub-block (with no links)
     if( ReadArgs::graph_trace && pnode )
@@ -506,7 +506,7 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
     // different policies for control blocks vs node blocks.
     switch( block.block_type )
     {
-	case Graphable::CONTROL:
+    case Graphable::CONTROL:
         my_block.title = RemoveAllTemplateParam(my_block.title); 
         my_block.title = RemoveOneOuterScope(my_block.title); 
         my_block.colour = "transparent";
@@ -521,20 +521,20 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::Block &block,
         break;
 
     default:
-		ASSERTFAIL("Unknown block type");
-		break;
-	}
-	    
+        ASSERTFAIL("Unknown block type");
+        break;
+    }
+        
     // Actions for sub-blocks
     for( Graphable::SubBlock &sub_block : my_block.sub_blocks )
-    {			
+    {            
         // Actions for links
         for( shared_ptr<Graphable::Link> &link : sub_block.links )
-        {							
+        {                            
             // Fill in everything in my link 
             auto my_link = make_shared<MyLink>( link, 
                                                 GetRegionGraphId(region, link->child), 
-                                                LINK_DEFAULT );		
+                                                LINK_DEFAULT );        
             
             // Detect pre-restrictions. If link has no pptr, we can't do it. We also 
             // only want to do it if the child is a special agent. Standard agents already
@@ -623,11 +623,11 @@ string Graph::DoBlock( const MyBlock &block,
 {
     Atts title_font_atts, subblock_font_atts, table_atts;
 
-	string s;
-	if( block.colour=="transparent" )
-		s += "fillcolor = " + region.background_colour + "\n";
-	else if(block.colour != "")
-		s += "fillcolor = \"" + block.colour + "\"\n";
+    string s;
+    if( block.colour=="transparent" )
+        s += "fillcolor = " + region.background_colour + "\n";
+    else if(block.colour != "")
+        s += "fillcolor = \"" + block.colour + "\"\n";
 
     if( block.external_text != "" )
         s += "xlabel = \""+ EscapeForGraphviz(block.external_text) + "\"\n";       
@@ -666,19 +666,19 @@ string Graph::DoBlock( const MyBlock &block,
         // Ignoring sub-block (above check means there will only be one: it
         // is assumed that the title is sufficiently informative)
         s += "shape = \"" + block.shape + "\"\n";
-		s += "label = " + DoNodeBlockLabel( block, title_font_atts, title ) + "\n";
-		s += "style = \"filled\"\n";
+        s += "label = " + DoNodeBlockLabel( block, title_font_atts, title ) + "\n";
+        s += "style = \"filled\"\n";
         s += "penwidth = 0.0\n";
 
-		if( !block.symbol.empty() )
-		{
-			s += "fixedsize = true\n";
-			s += "width = " NS_SMALL "\n";
-			s += "height = " NS_SMALL "\n";
-		}
+        if( !block.symbol.empty() )
+        {
+            s += "fixedsize = true\n";
+            s += "width = " NS_SMALL "\n";
+            s += "height = " NS_SMALL "\n";
+        }
         break;
 
-	case Graphable::NODE_EXPANDED:
+    case Graphable::NODE_EXPANDED:
         title_font_atts["COLOR"] = backgrounded_font_colour;
         subblock_font_atts["POINT-SIZE"] = to_string(FS_MIDDLE);
         subblock_font_atts["COLOR"] = backgrounded_font_colour;
@@ -686,11 +686,11 @@ string Graph::DoBlock( const MyBlock &block,
         table_atts["CELLBORDER"] = "0";
         table_atts["CELLSPACING"] = "0";
         s += "shape = \"plaintext\"\n";
-		s += "label = " + DoExpandedBlockLabel( block, title_font_atts, subblock_font_atts, table_atts, title, true );
-		s += "style = \"rounded,filled\"\n";
+        s += "label = " + DoExpandedBlockLabel( block, title_font_atts, subblock_font_atts, table_atts, title, true );
+        s += "style = \"rounded,filled\"\n";
         break;
-	
-	case Graphable::CONTROL:
+    
+    case Graphable::CONTROL:
         title_font_atts["COLOR"] = font_colour;
         subblock_font_atts["POINT-SIZE"] = to_string(FS_MIDDLE);
         subblock_font_atts["COLOR"] = font_colour;
@@ -703,23 +703,23 @@ string Graph::DoBlock( const MyBlock &block,
         s += "color = " + line_colour + "\n";
         break;
     
-	case Graphable::INVISIBLE:    
+    case Graphable::INVISIBLE:    
         s += "shape = \"none\"\n";
         s += "style = \"invisible\"\n";
         break;
         
     default: 
         ASSERTFAIL();
-	}
-	string sc;
+    }
+    string sc;
     sc += "// -------- block " + block.base_id + " ----------\n";
     sc += "\""+block.base_id+"\"";
-	sc += " [\n";
+    sc += " [\n";
     sc += Indent(s);
-	sc += "];\n";
+    sc += "];\n";
     sc += "\n";
         
-	return sc;
+    return sc;
 }
 
 
@@ -741,8 +741,8 @@ string Graph::DoExpandedBlockLabel( const MyBlock &block,
 {
     title = ApplyTagPair(title, "FONT", title_font_atts);
 
-	string s;
-	string row = ApplyTagPair(title, "TD");
+    string s;
+    string row = ApplyTagPair(title, "TD");
     s += " " + ApplyTagPair(row, "TR") + "\n";
     
     int porti=0;
@@ -767,13 +767,13 @@ string Graph::DoExpandedBlockLabel( const MyBlock &block,
     }
     
     string table = ApplyTagPair("\n"+s, "TABLE", table_atts);
-	return MakeHTMLForGraphViz(table)+"\n";
+    return MakeHTMLForGraphViz(table)+"\n";
 }
 
 
 string Graph::DoLinks( const list<MyBlock> &blocks )
 {
-	string s;
+    string s;
     
     for( const MyBlock &block : blocks )
         s += DoLinks(block);
@@ -791,12 +791,12 @@ string Graph::DoLinks( const MyBlock &block )
     {
         for( shared_ptr<const Graphable::Link> link : sub_block.links )
         {
-			s += DoLink( porti, block, link );
-		}
+            s += DoLink( porti, block, link );
+        }
         porti++;
     }
 
-	return s;
+    return s;
 }
 
 
@@ -827,24 +827,24 @@ string Graph::DoLink( int port_index,
     atts += "fontcolor = " + font_colour + "\n";
 
     // GraphViz output
-	string s;
-	s += "\""+block.base_id+"\"";
+    string s;
+    s += "\""+block.base_id+"\"";
     if( block.specify_ports )
         s += ":" + SeqField(port_index);
-	s += " -> ";
-	s += "\""+my_link->child_id+"\"";
-	s += " [\n"+Indent(atts)+"];\n";
+    s += " -> ";
+    s += "\""+my_link->child_id+"\"";
+    s += " [\n"+Indent(atts)+"];\n";
     s += "\n";
-	return s;
+    return s;
 }
 
 
 string Graph::DoHeader(string title)
 {
-	string sg, sn, se;
-	sg += "rankdir = \"LR\"\n"; // left-to-right looks more like source code
-	sg += "ranksep = 0.3\n"; // separation parent-child (default 0.5)
-	//sg += "size = \"14,20\"\n"; // make it smaller
+    string sg, sn, se;
+    sg += "rankdir = \"LR\"\n"; // left-to-right looks more like source code
+    sg += "ranksep = 0.3\n"; // separation parent-child (default 0.5)
+    //sg += "size = \"14,20\"\n"; // make it smaller
   //  sg += "concentrate = \"true\"\n"; 
     sg += "bgcolor = " + base_region.background_colour + "\n";
     sg += "color = " + line_colour + "\n";
@@ -856,29 +856,29 @@ string Graph::DoHeader(string title)
 #endif    
     
     string s;
-	s += "digraph \""+title+"\" {\n"; 
+    s += "digraph \""+title+"\" {\n"; 
     s += "label = \""+title+"\"\n";
     s += "labelloc = t\n";
     SSPrintf("fontsize = \"%d\"\n", FS_TITLE);
-	s += "graph [\n";
+    s += "graph [\n";
     s += Indent(sg);
     s += "];\n";
-	s += "node [\n";
+    s += "node [\n";
     s += Indent(sn);
-	s += "];\n";
-	s += "edge [\n";
+    s += "];\n";
+    s += "edge [\n";
     s += Indent(se);
-	s += "];\n";
+    s += "];\n";
     s += "\n";
-	return s;
+    return s;
 }
 
 
 string Graph::DoFooter()
 {
-	string s;
-	s += "}\n";
-	return s;
+    string s;
+    s += "}\n";
+    return s;
 }
 
 
@@ -888,9 +888,9 @@ string Graph::DoRegion(string ss, const RegionAppearance &region)
     string s;
     s += "label = \"" + region.title + "\"\n";
     s += "style = \"filled\"\n";
-	s += "color = " + region.background_colour + "\n";
+    s += "color = " + region.background_colour + "\n";
     s += SSPrintf("fontsize = \"%d\"\n", fs);
-	s += ss;
+    s += ss;
  
     string sc;
     sc += "// -------- region " + region.id + " ----------\n";
@@ -904,58 +904,58 @@ string Graph::DoRegion(string ss, const RegionAppearance &region)
 
 string Graph::SeqField( int i )
 {
-	char s[20];
-	sprintf( s, "port%d", i );
-	return s;
+    char s[20];
+    sprintf( s, "port%d", i );
+    return s;
 }
 
 
 string Graph::EscapeForGraphviz( string s )
 {
     string o;
-	for( string::size_type i=0; i<s.size(); i++ )
-	{
-		if( s[i] == '\"' )
-		{
-			o += "\\\"";
-		}
-		else if( s[i] == '<' )
-		{
-			o += "&lt;";
-		}
-		else if( s[i] == '>' )
-		{
-			o += "&gt;";
-		}
-		else if( s[i] == '&' )
-		{
-			o += "&amp;";
-		}
-		else
-		{
-			o += s[i];
-		}
-	}
-	return o;
+    for( string::size_type i=0; i<s.size(); i++ )
+    {
+        if( s[i] == '\"' )
+        {
+            o += "\\\"";
+        }
+        else if( s[i] == '<' )
+        {
+            o += "&lt;";
+        }
+        else if( s[i] == '>' )
+        {
+            o += "&gt;";
+        }
+        else if( s[i] == '&' )
+        {
+            o += "&amp;";
+        }
+        else
+        {
+            o += s[i];
+        }
+    }
+    return o;
 }
 
 
 void Graph::Disburse( string s )
 {
-	if( outfile.empty() )
-	{
-		puts( s.c_str() );
-	}
-	else
-	{
-		fputs( s.c_str(), filep );
-	}
+    if( outfile.empty() )
+    {
+        puts( s.c_str() );
+    }
+    else
+    {
+        fputs( s.c_str(), filep );
+    }
 }
 
 
 void Graph::Remember( string s )
 {
-	all_dot = s + all_dot; // dot seems to reverse the graphs
+    all_dot = s + all_dot; // dot seems to reverse the graphs
 }
 
 
@@ -1000,16 +1000,16 @@ string Graph::LinkStyleAtt(LinkPlannedAs incoming_link_planned_as, Graphable::Ph
 
 string Graph::GetRegionGraphId(const Region *region, const GraphIdable *g)
 {
-	return GetRegionGraphId(region, g->GetGraphId());
+    return GetRegionGraphId(region, g->GetGraphId());
 }
 
 
 string Graph::GetRegionGraphId(const Region *region, string id)
 {
-	if( !region )
-		return id;
-	else
-		return region->id+"/"+id;
+    if( !region )
+        return id;
+    else
+        return region->id+"/"+id;
 }
 
 

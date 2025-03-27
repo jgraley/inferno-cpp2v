@@ -127,10 +127,10 @@ string JoinInstanceFunction( string instance, string function )
 
 string OrdinalString( int i )
 {
-	string s = to_string(i);
-	if( i%10==1 && i%100!=11 )
-		return s+"st";
-	if( i%10==2 && i%100!=12 )
-		return s+"nd";
-	return s+"th";	
+    string s = to_string(i);
+    if( i%10==1 && i%100!=11 )
+        return s+"st";
+    if( i%10==2 && i%100!=12 )
+        return s+"nd";
+    return s+"th";    
 }

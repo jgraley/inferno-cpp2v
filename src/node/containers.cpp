@@ -251,7 +251,7 @@ const TreePtrInterface &ContainerInterface::back()
 
 const ContainerInterface::iterator &ContainerInterface::insert( const iterator &pos, const TreePtrInterface &gx )
 {
-	return insert( *pos.GetUnderlyingIterator(), gx );
+    return insert( *pos.GetUnderlyingIterator(), gx );
 }
 
 
@@ -274,8 +274,8 @@ int ContainerInterface::size() const
     int n=0;
     for( const TreePtrInterface &x : *nct )
     {
-		(void)x;
+        (void)x;
         n++;
-	}
+    }
     return n;
 }

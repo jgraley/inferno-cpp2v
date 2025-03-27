@@ -172,9 +172,9 @@ void DecidedQuery::RegisterMultiplicityLink( PatternLink plink, XLink xlink )
 
 void PatternQuery::RegisterEvaluator( shared_ptr<BooleanEvaluator> e )
 {
-	ASSERT( !evaluator ); // should not register more than one
-	evaluator = e;
-}	
+    ASSERT( !evaluator ); // should not register more than one
+    evaluator = e;
+}    
 
 
 void DecidedQuery::Invalidate( Choices::size_type bc )
@@ -288,7 +288,7 @@ void DecidedQuery::CompleteDecisionsWithEmpty()
 void DecidedQuery::Reset()
 {
     normal_links.clear();
-	abnormal_links.clear();
+    abnormal_links.clear();
     multiplicity_links.clear();
     next_decision = decisions.begin();  
     next_choice = choices.begin();  
@@ -334,13 +334,13 @@ string DecidedQueryCommon::Range::GetTrace() const
     list<string> vs;
     if( container )
     {
-		vs.push_back( SSPrintf("container-size=%d", container->size()) );    
+        vs.push_back( SSPrintf("container-size=%d", container->size()) );    
         vs.push_back( "begin=@" + (begin==container->end() ? string("END") : Trace(*begin)) );
         vs.push_back( "end=@" + (end==container->end() ? string("END") : Trace(*end)) );
     }
         
     vs.push_back( "inclusive=" + Trace(inclusive) );
-	
+    
     list<string> vs2;
     for( ContainerInterface::iterator it = begin;
          it != end;

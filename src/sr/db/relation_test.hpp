@@ -26,7 +26,7 @@ void TestRelationProperties( const vector<KeyType> &xlinks,
                              string relation_name, 
                              function<Orderable::Diff(KeyType l, KeyType r)> compare,
                              function<bool(KeyType l, KeyType r)> is_equal_native, 
-				     		 function<KeyType(KeyType x, int randval)> get_special = function<KeyType(KeyType x, int randval)>() );
+                              function<KeyType(KeyType x, int randval)> get_special = function<KeyType(KeyType x, int randval)>() );
 
 template<class ORDERING>
 void TestOrderingIntact( const ORDERING &ordering,

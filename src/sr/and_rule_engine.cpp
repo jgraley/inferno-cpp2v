@@ -165,12 +165,12 @@ void AndRuleEngine::Plan::PlanningStageFive( shared_ptr<const Lacing> lacing )
     solver_holder->CheckPlan();   
     
     // ------------------ Stage five on subordinates ---------------------
-	for( auto p : my_free_abnormal_engines )
-		p.second->PlanningStageFive(lacing);
-	for( auto p : my_evaluator_abnormal_engines )
-		p.second->PlanningStageFive(lacing);
-	for( auto p : my_multiplicity_engines )
-		p.second->PlanningStageFive(lacing);    
+    for( auto p : my_free_abnormal_engines )
+        p.second->PlanningStageFive(lacing);
+    for( auto p : my_evaluator_abnormal_engines )
+        p.second->PlanningStageFive(lacing);
+    for( auto p : my_multiplicity_engines )
+        p.second->PlanningStageFive(lacing);    
 }
 
 
@@ -367,8 +367,8 @@ void AndRuleEngine::Plan::CreateMyFullSymbolics()
 {
     for( PatternLink keyer_plink : my_normal_links_unique_by_agent ) // Only one constraint per agent
     {
-		Agent *agent = keyer_plink.GetChildAgent();
-		SYM::Lazy<SYM::BooleanExpression> op = agent->SymbolicQuery(false);
+        Agent *agent = keyer_plink.GetChildAgent();
+        SYM::Lazy<SYM::BooleanExpression> op = agent->SymbolicQuery(false);
         expressions_from_agents.insert( op );
     }
 }
@@ -391,8 +391,8 @@ void AndRuleEngine::Plan::CreateBoundarySymbolics()
     
     for( PatternLink keyer_plink : boundary_keyer_links )
     {                                    
-		Agent *agent = keyer_plink.GetChildAgent();
-		SYM::Lazy<SYM::BooleanExpression> op = agent->SymbolicQuery(true);
+        Agent *agent = keyer_plink.GetChildAgent();
+        SYM::Lazy<SYM::BooleanExpression> op = agent->SymbolicQuery(true);
         expressions_from_agents.insert( op );
     }
 }
@@ -400,9 +400,9 @@ void AndRuleEngine::Plan::CreateBoundarySymbolics()
 
 void AndRuleEngine::Plan::SymbolicRewrites()
 {
-	for( shared_ptr<SYM::BooleanExpression> expr : expressions_from_agents )
-		SYM::PredicateAnalysis::CheckRegularPredicateForm( expr );
-		
+    for( shared_ptr<SYM::BooleanExpression> expr : expressions_from_agents )
+        SYM::PredicateAnalysis::CheckRegularPredicateForm( expr );
+        
     //TRACE("expressions_from_agents:\n")(expressions_from_agents)("\n");
     expressions_split = SYM::PreprocessForEngine()(expressions_from_agents);
     //TRACE("expressions_split:\n")(expressions_split)("\n");
@@ -464,7 +464,7 @@ void AndRuleEngine::Plan::CreateMyConstraints( list< shared_ptr<CSP::Constraint>
                                                shared_ptr<const Lacing> lacing )
 {
     for( auto bexpr : expressions_for_current_solve )
-    {		
+    {        
         // Constraint will require these variables
         set<PatternLink> required_plinks = bexpr->GetRequiredVariables();
         
@@ -500,7 +500,7 @@ void AndRuleEngine::Plan::CreateMyConstraints( list< shared_ptr<CSP::Constraint>
         list<shared_ptr<SYM::BooleanExpression>> bexpr_list = ToList(p.second);        
         shared_ptr<SYM::BooleanExpression> bexpr = SYM::CreateTidiedOperator<SYM::AndOperator>(true)(bexpr_list);
 
-		SYM::PredicateAnalysis::CheckRegularPredicateForm( bexpr );
+        SYM::PredicateAnalysis::CheckRegularPredicateForm( bexpr );
 
         auto c = make_shared<CSP::SymbolicConstraint>(bexpr, lacing);
         constraints_list.push_back(c);    
@@ -559,7 +559,7 @@ void AndRuleEngine::Plan::Dump()
         { "free_normal_links_ordered",
           Trace(free_normal_links_ordered) },
         { "current_solve_plinks",
-          Trace(current_solve_plinks) }	  	
+          Trace(current_solve_plinks) }          
     };
     TRACE("=============================================== ")
          (*this)(":\n")(plan_as_strings)("\n");
@@ -613,7 +613,7 @@ void AndRuleEngine::CompareEvaluatorLinks( Agent *agent,
     INDENT("E");
     auto pq = agent->GetPatternQuery();
     shared_ptr<BooleanEvaluator> evaluator = pq->GetEvaluator();
-	ASSERT( evaluator );
+    ASSERT( evaluator );
 
     // Follow up on any blocks that were noted by the agent impl    
     int i=0;
@@ -633,18 +633,18 @@ void AndRuleEngine::CompareEvaluatorLinks( Agent *agent,
         }
         catch( const ::Mismatch &e )
         {
-			TRACE("Caught ")(e)("\n");
+            TRACE("Caught ")(e)("\n");
             compare_results.push_back( false );
         }
 
         i++;
     }
     
-	TRACE("Evaluating: ");
-	for(bool b : compare_results)
-	    TRACEC(b)(" ");
+    TRACE("Evaluating: ");
+    for(bool b : compare_results)
+        TRACEC(b)(" ");
     TRACEC("\n");
-	if( !(*evaluator)( compare_results ) )
+    if( !(*evaluator)( compare_results ) )
         throw EvaluatorFalse();
 }
 
@@ -792,12 +792,12 @@ void AndRuleEngine::SetXTreeDb( shared_ptr<const XTreeDatabase> x_tree_db_ )
     x_tree_db = x_tree_db_;
 
     // ------------------ Stage five on subordinates ---------------------
-	for( auto p : plan.my_free_abnormal_engines )
-		p.second->SetXTreeDb(x_tree_db);
-	for( auto p : plan.my_evaluator_abnormal_engines )
-		p.second->SetXTreeDb(x_tree_db);
-	for( auto p : plan.my_multiplicity_engines )
-		p.second->SetXTreeDb(x_tree_db);    
+    for( auto p : plan.my_free_abnormal_engines )
+        p.second->SetXTreeDb(x_tree_db);
+    for( auto p : plan.my_evaluator_abnormal_engines )
+        p.second->SetXTreeDb(x_tree_db);
+    for( auto p : plan.my_multiplicity_engines )
+        p.second->SetXTreeDb(x_tree_db);    
 }
 
 
@@ -888,15 +888,15 @@ set< shared_ptr<SYM::BooleanExpression> > AndRuleEngine::GetExpressions() const
 
 list<const AndRuleEngine *> AndRuleEngine::GetAndRuleEngines() const
 {
-	list<const AndRuleEngine *> engines;
-	engines.push_back( this );
-	for( auto p : plan.my_free_abnormal_engines )
-		engines = engines + p.second->GetAndRuleEngines();
-	for( auto p : plan.my_evaluator_abnormal_engines )
-		engines = engines + p.second->GetAndRuleEngines();
-	for( auto p : plan.my_multiplicity_engines )
-		engines = engines + p.second->GetAndRuleEngines();
-	return engines;
+    list<const AndRuleEngine *> engines;
+    engines.push_back( this );
+    for( auto p : plan.my_free_abnormal_engines )
+        engines = engines + p.second->GetAndRuleEngines();
+    for( auto p : plan.my_evaluator_abnormal_engines )
+        engines = engines + p.second->GetAndRuleEngines();
+    for( auto p : plan.my_multiplicity_engines )
+        engines = engines + p.second->GetAndRuleEngines();
+    return engines;
 }
 
 
@@ -908,19 +908,19 @@ string AndRuleEngine::GetTrace() const
 
 string AndRuleEngine::GetGraphId() const
 {
-	return "And"+GetSerialString();
+    return "And"+GetSerialString();
 }
 
 
 void AndRuleEngine::GenerateGraphRegions( Graph &graph, string scr_engine_id ) const
 {
-	GenerateMyGraphRegion(graph, scr_engine_id); // this engine
-	for( auto p : plan.my_free_abnormal_engines )
-		p.second->GenerateGraphRegions(graph, "");
-	for( auto p : plan.my_evaluator_abnormal_engines )
-		p.second->GenerateGraphRegions(graph, "");
-	for( auto p : plan.my_multiplicity_engines )
-		p.second->GenerateGraphRegions(graph, "");
+    GenerateMyGraphRegion(graph, scr_engine_id); // this engine
+    for( auto p : plan.my_free_abnormal_engines )
+        p.second->GenerateGraphRegions(graph, "");
+    for( auto p : plan.my_evaluator_abnormal_engines )
+        p.second->GenerateGraphRegions(graph, "");
+    for( auto p : plan.my_multiplicity_engines )
+        p.second->GenerateGraphRegions(graph, "");
 }
 
 
@@ -928,12 +928,12 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
 {
     TRACE(" parent_residual_links_to_boundary_agents ")( plan.parent_residual_links_to_boundary_agents )("\n");
     TRACE(" boundary_agents ")( plan.boundary_agents )("\n");
-	TRACE("Specifying figure nodes for ")(*this)("\n");
-	Graph::Figure figure;
-	figure.id = GetGraphId();
-	figure.title = scr_engine_id.empty() ? GetGraphId() : scr_engine_id+" / "+GetGraphId();
+    TRACE("Specifying figure nodes for ")(*this)("\n");
+    Graph::Figure figure;
+    figure.id = GetGraphId();
+    figure.title = scr_engine_id.empty() ? GetGraphId() : scr_engine_id+" / "+GetGraphId();
     
-	auto agents_lambda = [&](const map< Agent *, set<PatternLink> > &parent_links_to_agents,
+    auto agents_lambda = [&](const map< Agent *, set<PatternLink> > &parent_links_to_agents,
                              const set<PatternLink> &keyers,
                              const set<PatternLink> &residuals ) -> list<Graph::Figure::Agent>
     {
@@ -958,18 +958,18 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
             figure_agents.push_back(gf_agent);
         }
         return figure_agents;
-	};
+    };
     
-	TRACE("   Interior (my agents/links):\n");    
+    TRACE("   Interior (my agents/links):\n");    
     figure.interior_agents = agents_lambda( plan.parent_links_to_my_normal_agents,
                                             plan.coupling_keyer_links_all,
                                             plan.coupling_residual_links );
-	TRACE("   Exterior (boundary agents/links):\n");    
+    TRACE("   Exterior (boundary agents/links):\n");    
     figure.exterior_agents = agents_lambda( plan.parent_residual_links_to_boundary_agents,
                                             plan.boundary_keyer_links, // Won't show up as not in p_r_l_t_b_a, but could generate invisible nodes and links?
                                             plan.my_boundary_links );       
         
-	auto subordinates_lambda = [&](const map< PatternLink, shared_ptr<AndRuleEngine> > &engines, Graph::LinkPlannedAs incoming_link_planned_as )
+    auto subordinates_lambda = [&](const map< PatternLink, shared_ptr<AndRuleEngine> > &engines, Graph::LinkPlannedAs incoming_link_planned_as )
     {
         set< shared_ptr<AndRuleEngine> > reached;
         for( auto p : engines )
@@ -986,14 +986,14 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
             TRACEC(p.second.get())(" : ( ")(incoming_link.short_name)("->")(base_agent.g->GetGraphId())(" )\n");
             figure.subordinate_engines_and_base_agents.push_back( make_pair(p.second.get(), base_agent) );
         }
-	};
-	TRACE("   Subordinates (my free abnormals):\n");    
+    };
+    TRACE("   Subordinates (my free abnormals):\n");    
     subordinates_lambda( plan.my_free_abnormal_engines, Graph::LINK_ABDEFAULT );
-	TRACE("   Subordinates (my evaluator abnormals):\n");    
+    TRACE("   Subordinates (my evaluator abnormals):\n");    
     subordinates_lambda( plan.my_evaluator_abnormal_engines, Graph::LINK_EVALUATOR );
-	TRACE("   Subordinates (my multiplicity engines):\n");    
+    TRACE("   Subordinates (my multiplicity engines):\n");    
     subordinates_lambda( plan.my_multiplicity_engines, Graph::LINK_MULTIPLICITY );
-	TRACE("Ready to render\n");
-	graph.GenerateGraph(figure);
+    TRACE("Ready to render\n");
+    graph.GenerateGraph(figure);
 }
 

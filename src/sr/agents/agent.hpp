@@ -23,7 +23,7 @@ class Agent : public virtual Graphable,
 public:  
     struct ReplaceKit
     {
-		XTreeDatabase *x_tree_db;
+        XTreeDatabase *x_tree_db;
     };
 
     // really just to reduce the amount of typing if I change it
@@ -49,7 +49,7 @@ public:
     class CouplingMismatch : public Mismatch {};
         
     Agent& operator=(Agent& other);
-	virtual void SCRConfigure( const SCREngine *e,
+    virtual void SCRConfigure( const SCREngine *e,
                                Phase phase ) = 0;
     virtual void ConfigureCoupling( const Traceable *e,
                                     PatternLink keyer_plink_, 
@@ -91,10 +91,10 @@ public:
     virtual list<PatternLink> GetVisibleChildren( Path v ) const = 0;                        
     virtual bool ShouldGenerateCategoryClause() const = 0;                                
 
-	static Agent *AsAgent( shared_ptr<Node> node );
-	static Agent *TryAsAgent( shared_ptr<Node> node );
-	static const Agent *AsAgentConst( shared_ptr<const Node> node );
-	static const Agent *TryAsAgentConst( shared_ptr<const Node> node );
+    static Agent *AsAgent( shared_ptr<Node> node );
+    static Agent *TryAsAgent( shared_ptr<Node> node );
+    static const Agent *AsAgentConst( shared_ptr<const Node> node );
+    static const Agent *TryAsAgentConst( shared_ptr<const Node> node );
     // Note the constness: do not try to mutate the agent via this function
     virtual shared_ptr<const Node> GetPatternPtr() const = 0;
     virtual TreePtr<Node> GetArchetypeNode() const = 0;

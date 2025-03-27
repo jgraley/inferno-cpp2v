@@ -14,7 +14,7 @@ using namespace std;
 #include <unordered_set>
 #include <unordered_map>
 #include <exception>
-	
+    
 #define CONTAINER_SEP ", "    
 //#define SUPPRESS_ADDRESSES    
     
@@ -140,7 +140,7 @@ string Trace(queue<T, C> q)  // By value!!
     {
         elts.push_back( Trace(q.front()) );
         q.pop();
-	}
+    }
     return Join( elts, CONTAINER_SEP, "[", "]" );
 }
 
@@ -284,9 +284,9 @@ public:
     class Descend
     {
     public:
-    	Descend( string s="." );
-    	~Descend();
-    	static void Indent(string sprogress);
+        Descend( string s="." );
+        ~Descend();
+        static void Indent(string sprogress);
     private:
         static string pre;
         static string last_traced_pre, leftmost_pre;
@@ -299,13 +299,13 @@ public:
     public:
         // To undo the effect (i.e. go back to the standard setting),
         // create one and pass in false
-    	inline RAIIDisable( bool disable_ = true ) : 
-    	    old_disable(disable) 
-    	{ 
+        inline RAIIDisable( bool disable_ = true ) : 
+            old_disable(disable) 
+        { 
             disable = disable_; 
         } 
-    	inline ~RAIIDisable() 
-    	{ 
+        inline ~RAIIDisable() 
+        { 
             disable = old_disable; 
         } 
     private:

@@ -12,7 +12,7 @@ using namespace SYM;
 shared_ptr<PatternQuery> NegationAgent::GetPatternQuery() const
 {
     auto pq = make_shared<PatternQuery>();
-	pq->RegisterAbnormalLink( PatternLink(this, GetNegand()) );
+    pq->RegisterAbnormalLink( PatternLink(this, GetNegand()) );
     
     auto evaluator = make_shared<BooleanEvaluator>( [this](list<bool> inputs) -> bool
     {
@@ -20,7 +20,7 @@ shared_ptr<PatternQuery> NegationAgent::GetPatternQuery() const
         return !inputs.front();        
     });
     
-	pq->RegisterEvaluator( evaluator );
+    pq->RegisterEvaluator( evaluator );
     return pq;
 }
 
@@ -47,17 +47,17 @@ void NegationAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
 
 Graphable::Block NegationAgent::GetGraphBlockInfo() const
 {
-	// The Negation node appears as a diamond with a ¬ character inside it. The affected subtree is 
-	// on the right.
-	// NOTE this node controls the action of the search engine in Inferno search/replace. It is not 
+    // The Negation node appears as a diamond with a ¬ character inside it. The affected subtree is 
+    // on the right.
+    // NOTE this node controls the action of the search engine in Inferno search/replace. It is not 
     // a node that represents a boolean operation in the program being processed. Those nodes would 
     // appear as rounded rectangles with the name at the top. Their names may be found in
-	// src/tree/operator_db.txt  
+    // src/tree/operator_db.txt  
     Block block;
-	block.bold = true;
+    block.bold = true;
     block.title = "Negation";
-	block.symbol = string("¬");
-	block.shape = "diamond";
+    block.symbol = string("¬");
+    block.shape = "diamond";
     block.block_type = Graphable::NODE_SHAPED;
     block.node = GetPatternPtr();
     auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(GetNegand()->get()), 

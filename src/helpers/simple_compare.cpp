@@ -142,7 +142,7 @@ SimpleCompare::NodeOrdering SimpleCompare::GetNodeOrdering( ContainerInterface &
 {
     NodeOrdering ordering( *this );
     for( const TreePtrInterface &e : c )
-    	ordering.insert( *(TreePtr<Node>)e );
+        ordering.insert( *(TreePtr<Node>)e );
     return ordering; 
 }
 
@@ -151,6 +151,6 @@ SimpleCompare::TreePtrOrdering SimpleCompare::GetTreePtrOrdering( ContainerInter
 {
     TreePtrOrdering ordering( *this );
     for( const TreePtrInterface &e : c )
-    	ordering.insert( (TreePtr<Node>)e );
+        ordering.insert( (TreePtr<Node>)e );
     return ordering; 
 }

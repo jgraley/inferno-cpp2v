@@ -21,7 +21,7 @@ AugTreePtr<Identifier> GetIdentifierOfDeclaration( AugTreePtr<Declaration> d )
         return AugTreePtr<Identifier>(); // was a declaration without an identifier, ie a base class
 }
 
-	
+    
 AugTreePtr<Node> DeclarationOf::TryApplyTransformation( const TransKit &kit, AugTreePtr<Node> node ) const try
 {    
     set<AugTreePtr<Node>> declarers = kit.utils->GetDeclarers( node );
@@ -52,17 +52,17 @@ DeclarationOf DeclarationOf::instance; // TODO Use this instead of constructing 
 // Look for a record, skipping over typedefs. Returns nullptr if not a record.
 AugTreePtr<Record> GetRecordDeclaration( const TransKit &kit, AugTreePtr<TypeIdentifier> id )
 {
-	AugTreePtr<Node> ut = DeclarationOf().TryApplyTransformation( kit, id );
-	while( auto td = AugTreePtr<Typedef>::DynamicCast(ut) )
-	{
-	    auto ti = AugTreePtr<TypeIdentifier>::DynamicCast( GET_CHILD(td, type) );
-	    if(ti)
-	        ut = DeclarationOf().TryApplyTransformation( kit, ti );
-	    else
-	        return AugTreePtr<Record>(); // not a record
-	}
-	auto r = AugTreePtr<Record>::DynamicCast(ut);
-	return r;
+    AugTreePtr<Node> ut = DeclarationOf().TryApplyTransformation( kit, id );
+    while( auto td = AugTreePtr<Typedef>::DynamicCast(ut) )
+    {
+        auto ti = AugTreePtr<TypeIdentifier>::DynamicCast( GET_CHILD(td, type) );
+        if(ti)
+            ut = DeclarationOf().TryApplyTransformation( kit, ti );
+        else
+            return AugTreePtr<Record>(); // not a record
+    }
+    auto r = AugTreePtr<Record>::DynamicCast(ut);
+    return r;
 }
 
 
@@ -79,9 +79,9 @@ AugTreePtr<Instance> FindMemberByName( const TransKit &kit, AugTreePtr<Record> r
             if( auto sss = AugTreePtr<SpecificInstanceIdentifier>::DynamicCast(GET_CHILD(i, identifier)) )
                 if( sss->GetRender() == name )
                     LLBreak();
-	} );
-	if( i )
-		return i;
+    } );
+    if( i )
+        return i;
                 
     // Try recursing through the base classes, if there are any
     if( auto ir = AugTreePtr<InheritanceRecord>::DynamicCast( r ) )
@@ -94,10 +94,10 @@ AugTreePtr<Instance> FindMemberByName( const TransKit &kit, AugTreePtr<Record> r
             if( AugTreePtr<Instance> i = FindMemberByName( kit, ir, name ) )
                 LLBreak();
         } );
-	}
-	if( i )
-		return i;
-		    
+    }
+    if( i )
+        return i;
+            
     // We failed. Hang our head in shame.                
     return AugTreePtr<Instance>();
 }                

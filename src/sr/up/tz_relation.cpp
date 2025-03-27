@@ -22,28 +22,28 @@ bool TreeZoneRelation::operator()( const TreeZone &l, const TreeZone &r ) const
 
 bool TreeZoneRelation::CompareEqual( const TreeZone &l, const TreeZone &r ) const
 {
-	if( l.GetBaseXLink() != r.GetBaseXLink() )
-		return false;
-	
-	if( l.GetTerminusXLinks() != r.GetTerminusXLinks() )
-		return false;
-	
-	return true;
+    if( l.GetBaseXLink() != r.GetBaseXLink() )
+        return false;
+    
+    if( l.GetTerminusXLinks() != r.GetTerminusXLinks() )
+        return false;
+    
+    return true;
 }
 
 
 Orderable::Diff TreeZoneRelation::Compare3Way( const TreeZone &l, const TreeZone &r ) const
 {
-	return CompareHierarchical( l, r ).first;
+    return CompareHierarchical( l, r ).first;
 }
 
 
 
 pair<Orderable::Diff, ZoneRelation::RelType> TreeZoneRelation::CompareHierarchical( const TreeZone &l, const TreeZone &r ) const 
 {
-    TRACES("l=")(l)(" r=")(r);	
-	DepthFirstRelation df_rel(db);
-	
+    TRACES("l=")(l)(" r=")(r);    
+    DepthFirstRelation df_rel(db);
+    
     const TreeZone *d;
     const TreeZone *a;        
     auto p_base = df_rel.CompareHierarchical(l.GetBaseXLink(), r.GetBaseXLink());
@@ -51,14 +51,14 @@ pair<Orderable::Diff, ZoneRelation::RelType> TreeZoneRelation::CompareHierarchic
     {
         case DepthFirstRelation::EQUAL:
         {
-			// Bases are the same so what about the terminii?
-			Orderable::Diff term_diff = STLCompare3Way(l.GetTerminusXLinks(), r.GetTerminusXLinks());
-			if( term_diff==0 )
-				return make_pair(term_diff, EQUAL);
-			else
-				return make_pair(term_diff, OVERLAP_TERMINII);
-		}
-			
+            // Bases are the same so what about the terminii?
+            Orderable::Diff term_diff = STLCompare3Way(l.GetTerminusXLinks(), r.GetTerminusXLinks());
+            if( term_diff==0 )
+                return make_pair(term_diff, EQUAL);
+            else
+                return make_pair(term_diff, OVERLAP_TERMINII);
+        }
+            
         case DepthFirstRelation::LEFT_IS_ANCESTOR:
             a = &l;
             d = &r;
@@ -72,34 +72,34 @@ pair<Orderable::Diff, ZoneRelation::RelType> TreeZoneRelation::CompareHierarchic
         case DepthFirstRelation::CONTAINER_SIBLINGS:
         case DepthFirstRelation::ITEM_SIBLINGS:
         case DepthFirstRelation::ROOT_SIBLINGS:
-			TRACES(" different branches: no overlap\n");
+            TRACES(" different branches: no overlap\n");
             return make_pair(p_base.first, DISTINCT_SIBLINGS); // weakly removed sibling bases cannot overlap
             
         default:
             ASSERTFAILS();
     }
     
-	TRACES(" same branch a=")(a)(" d=")(d);
+    TRACES(" same branch a=")(a)(" d=")(d);
 
     // If a has a terminus that is an ancestor (weakly)
     // to d's base, then they do not overlap. Otherwise, they do.
     for( XLink terminus : a->GetTerminusXLinks() )
     {
-		TRACES(" terminus: ")(terminus);
+        TRACES(" terminus: ")(terminus);
         auto p_term = df_rel.CompareHierarchical(terminus, d->GetBaseXLink());
         TRACES(" ")(p_term);
         switch( p_term.second )
         {
             case DepthFirstRelation::EQUAL:
-				TRACES(" touching: no overlap\n");
+                TRACES(" touching: no overlap\n");
                 return make_pair(p_base.first, DISTINCT_SUBTREE); // close but no overlap, zone d begins at a's terminus
                 
             case DepthFirstRelation::LEFT_IS_ANCESTOR:
-				TRACES(" aa dd: no overlap\n");
+                TRACES(" aa dd: no overlap\n");
                 return make_pair(p_base.first, DISTINCT_SUBTREE); // no overlap, zone d descends from a's terminus
                 
             case DepthFirstRelation::RIGHT_IS_ANCESTOR:
-				TRACES(" adad: overlap\n");
+                TRACES(" adad: overlap\n");
                 return make_pair(p_base.first, OVERLAP_GENERAL); // a's terminus descends from base of d, making the zones overlap
             
             case DepthFirstRelation::CONTAINER_SIBLINGS:
@@ -112,6 +112,6 @@ pair<Orderable::Diff, ZoneRelation::RelType> TreeZoneRelation::CompareHierarchic
         }                
     }
     
-	TRACES(" add: overlap\n");
+    TRACES(" add: overlap\n");
     return make_pair(p_base.first, OVERLAP_GENERAL); // None of a's terminii in path from a's base to zone d, so a goes to leaf through d
 }

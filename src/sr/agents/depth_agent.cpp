@@ -18,8 +18,8 @@ shared_ptr<PatternQuery> DepthAgent::GetPatternQuery() const
 {
     auto pq = make_shared<PatternQuery>();
     
-	pq->RegisterDecision( false ); // Exclusive, please.
-	pq->RegisterNormalLink( PatternLink(this, &terminus) );
+    pq->RegisterDecision( false ); // Exclusive, please.
+    pq->RegisterNormalLink( PatternLink(this, &terminus) );
     
     // Allow subclasses to further restrict
     PatternQueryRestrictions( pq );
@@ -51,7 +51,7 @@ Agent::ReplacePatchPtr DepthAgent::GenReplaceLayoutImpl( const ReplaceKit &kit,
 Graphable::Block DepthAgent::GetGraphBlockInfo() const
 {
     Block block;
-	block.bold = true;
+    block.bold = true;
     block.shape = "square";
     block.block_type = Graphable::NODE_SHAPED;
     block.node = GetPatternPtr();
@@ -79,11 +79,11 @@ SYM::Lazy<SYM::BooleanExpression> ChildAgent::SymbolicNormalLinkedQueryPRed() co
 
 Graphable::Block ChildAgent::GetGraphBlockInfo() const
 {
-	// The Child node appears as a small circle with the text #==1 in it. The terminus block emerges from the
-	// right of the circle. 1 implies the tendancy to match exactly one level. See #256.
+    // The Child node appears as a small circle with the text #==1 in it. The terminus block emerges from the
+    // right of the circle. 1 implies the tendancy to match exactly one level. See #256.
     Block block = DepthAgent::GetGraphBlockInfo();
     block.title = "Child";
-	block.symbol = "#=1"; // TODO this can be generated when Stuff nodes are generalised, see #256
+    block.symbol = "#=1"; // TODO this can be generated when Stuff nodes are generalised, see #256
     return block;
 }
 
@@ -146,12 +146,12 @@ void StuffAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
     
 Graphable::Block StuffAgent::GetGraphBlockInfo() const
 {
-	// The Stuff node appears as a small square with a # character inside it. The terminus block emerges from the
-	// right of the circle. # is chosen (as is the name Stuff) for its addr_bounding_role to * because
-	// the nodes are both able to wildcard multiple nodes in the input tree.
+    // The Stuff node appears as a small square with a # character inside it. The terminus block emerges from the
+    // right of the circle. # is chosen (as is the name Stuff) for its addr_bounding_role to * because
+    // the nodes are both able to wildcard multiple nodes in the input tree.
     Block block = DepthAgent::GetGraphBlockInfo();
-	block.title = "Stuff"; 
-	block.symbol = "#"; 
+    block.title = "Stuff"; 
+    block.symbol = "#"; 
     if( recurse_restriction )
     {
         auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(recurse_restriction.get()), 

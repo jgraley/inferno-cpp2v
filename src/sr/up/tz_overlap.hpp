@@ -26,12 +26,12 @@ namespace SR
 class TreeZoneOverlapHandler 
 {
 public:
-	TreeZoneOverlapHandler( const XTreeDatabase *db );
-	void Run( shared_ptr<Patch> &layout );
-	void Check( shared_ptr<Patch> &layout );
+    TreeZoneOverlapHandler( const XTreeDatabase *db );
+    void Run( shared_ptr<Patch> &layout );
+    void Check( shared_ptr<Patch> &layout );
 
 private:
-	const XTreeDatabase * const db;
+    const XTreeDatabase * const db;
 };
 
 }

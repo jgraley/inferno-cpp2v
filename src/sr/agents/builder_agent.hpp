@@ -13,7 +13,7 @@ namespace SR
 struct BuilderAgent : public virtual NonlocatingAgent    
 {
 public:
-	// TODO do this via a transformation as with TransformOf/TransformOf
+    // TODO do this via a transformation as with TransformOf/TransformOf
     BuilderAgent() {}
 
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const final;                                       

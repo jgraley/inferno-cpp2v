@@ -8,7 +8,7 @@ using namespace SR;
 shared_ptr<PatternQuery> DeltaAgent::GetPatternQuery() const
 {
     auto pq = make_shared<PatternQuery>();
-	pq->RegisterNormalLink( PatternLink(this, GetThrough()) );
+    pq->RegisterNormalLink( PatternLink(this, GetThrough()) );
     return pq;
 }
 
@@ -38,8 +38,8 @@ Graphable::Block DeltaAgent::GetGraphBlockInfo() const
 
 
 list<PatternLink> DeltaAgent::GetVisibleChildren( Path v ) const
-{	
-	list<PatternLink> plinks;
+{    
+    list<PatternLink> plinks;
     switch(v)
     {
     case COMPARE_PATH:
@@ -49,7 +49,7 @@ list<PatternLink> DeltaAgent::GetVisibleChildren( Path v ) const
         plinks.push_back( PatternLink(this, GetOverlay()) );
         break;
     }
-	return plinks;
+    return plinks;
 }
 
 
@@ -69,7 +69,7 @@ Agent::ReplacePatchPtr DeltaAgent::GenReplaceLayoutImpl( const ReplaceKit &kit,
                                                    PatternLink me_plink, 
                                                    XLink key_xlink )
 {
-	// Recurse through the Overlay branch
+    // Recurse through the Overlay branch
     PatternLink overlay_plink(this, GetOverlay());
     return overlay_plink.GetChildAgent()->GenReplaceLayout(kit, overlay_plink);    
 }                                         

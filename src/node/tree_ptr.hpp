@@ -36,8 +36,8 @@ struct TreePtr;
 struct TreePtrInterface : virtual Itemiser::Element
 {
     // Convert to and from shared_ptr<VALUE_INTERFACE> and TreePtr<VALUE_INTERFACE>
-	virtual explicit operator shared_ptr<Node>() const = 0; 
-	virtual explicit operator TreePtr<Node>() const = 0; 
+    virtual explicit operator shared_ptr<Node>() const = 0; 
+    virtual explicit operator TreePtr<Node>() const = 0; 
 
     virtual explicit operator bool() const = 0; // for testing against nullptr
     virtual const SatelliteSerial &GetSS() const = 0;
@@ -51,7 +51,7 @@ struct TreePtrInterface : virtual Itemiser::Element
     static Orderable::Diff Compare3Way(const TreePtrInterface &l, const TreePtrInterface &r);
     static Orderable::Diff Compare3WayIdentity(const TreePtrInterface &l, const TreePtrInterface &r);
     virtual TreePtr<Node> MakeValueArchetype() const = 0; // construct an object of the VALUE_TYPE type (NOT a clone)
-	virtual pair<TreePtr<Node>, Sequence<Node> *> MakeScaffold() const = 0;
+    virtual pair<TreePtr<Node>, Sequence<Node> *> MakeScaffold() const = 0;
 
     virtual string GetName() const = 0;
     virtual string GetShortName() const = 0;
@@ -62,9 +62,9 @@ struct TreePtrInterface : virtual Itemiser::Element
 
 struct TreePtrCommon : virtual TreePtrInterface, public SatelliteSerial
 {
-	TreePtrCommon();
-	
-	explicit TreePtrCommon( Node *o );
+    TreePtrCommon();
+    
+    explicit TreePtrCommon( Node *o );
     TreePtrCommon( nullptr_t o );
     
     template< typename OTHER >
@@ -126,21 +126,21 @@ struct TreePtr : virtual TreePtrCommon,
         return p;
     }
 
-	operator TreePtr<Node>() const override
-	{
+    operator TreePtr<Node>() const override
+    {
         const shared_ptr<VALUE_TYPE> p1 = *(const shared_ptr<VALUE_TYPE> *)this;
         return TreePtr<Node>( p1 );
-	}
+    }
 
     VALUE_TYPE *get() const final
     {
-    	VALUE_TYPE *e = shared_ptr<VALUE_TYPE>::get();
-    	return e;
+        VALUE_TYPE *e = shared_ptr<VALUE_TYPE>::get();
+        return e;
     }
 
     VALUE_TYPE &operator *() const final
     {
-    	return shared_ptr<VALUE_TYPE>::operator *();
+        return shared_ptr<VALUE_TYPE>::operator *();
     }
 
     TreePtr &operator=( const shared_ptr<Node> &n )
@@ -149,34 +149,34 @@ struct TreePtr : virtual TreePtrCommon,
         {
             shared_ptr<VALUE_TYPE> p = dynamic_pointer_cast<VALUE_TYPE>(n);
             ASSERT( p )("TreePtr inferred dynamic cast has failed: from ")(*n)
-			           (" to type ")(TYPE_ID_NAME( VALUE_TYPE ))("\n");
-         	(void)shared_ptr<VALUE_TYPE>::operator=( p );
+                       (" to type ")(TYPE_ID_NAME( VALUE_TYPE ))("\n");
+             (void)shared_ptr<VALUE_TYPE>::operator=( p );
         }
         else
         {
             (void)shared_ptr<VALUE_TYPE>::operator=( shared_ptr<VALUE_TYPE>() );
         }
         (void)SatelliteSerial::operator=( SatelliteSerial( n.get(), this ) );
-    	return *this;
+        return *this;
     }
 
     template< typename OTHER >
     TreePtr &operator=( const shared_ptr<OTHER> &n )
     {
-    	(void)shared_ptr<VALUE_TYPE>::operator=( (n) );
-    	return *this;
+        (void)shared_ptr<VALUE_TYPE>::operator=( (n) );
+        return *this;
     }
     
     TreePtr &operator=( const TreePtrInterface &n ) final
     {
-    	(void)TreePtr::operator=( shared_ptr<Node>(n) );        
-    	return *this;
+        (void)TreePtr::operator=( shared_ptr<Node>(n) );        
+        return *this;
     }
     
     TreePtrInterface &operator=( nullptr_t n ) final
     {
-    	(void)shared_ptr<VALUE_TYPE>::operator=( n );
-    	return *this;	
+        (void)shared_ptr<VALUE_TYPE>::operator=( n );
+        return *this;    
     }
    
     bool operator<(const TreePtr<VALUE_TYPE> &other) const
@@ -203,47 +203,47 @@ struct TreePtr : virtual TreePtrCommon,
 
     operator bool() const final
     {
-    	return !!*(const shared_ptr<VALUE_TYPE> *)this;
+        return !!*(const shared_ptr<VALUE_TYPE> *)this;
     }
 
-	static TreePtr<VALUE_TYPE>
-	    DynamicCast( const TreePtrInterface &g )
-	{
-		if( g )
-		{
-			shared_ptr<VALUE_TYPE> v = dynamic_pointer_cast<VALUE_TYPE>(shared_ptr<Node>(g));
-			return TreePtr<VALUE_TYPE>(v);
-		}
-		else
-		{
-			return TreePtr<VALUE_TYPE>();
-		}
-	}
-	
-	// For when OOStd itself needs to dyncast, as opposed to the user asking for it.
-	static TreePtr<VALUE_TYPE>
-	    InferredDynamicCast( const TreePtrInterface &g )
-	{
-		if( g )
-		{
-			shared_ptr<VALUE_TYPE> v = dynamic_pointer_cast<VALUE_TYPE>(shared_ptr<Node>(g));
-			ASSERTS( v )("OOStd inferred dynamic cast has failed: from ")(*g)
-			            (" to type ")(TYPE_ID_NAME( VALUE_TYPE ))("\n");
-			return TreePtr<VALUE_TYPE>(v);
-		}
-		else
-		{
-		    // Null came in, null goes out.
-			return TreePtr<VALUE_TYPE>();
-		}
-	}
-	
-	TreePtr<Node> MakeValueArchetype() const final
-	{
+    static TreePtr<VALUE_TYPE>
+        DynamicCast( const TreePtrInterface &g )
+    {
+        if( g )
+        {
+            shared_ptr<VALUE_TYPE> v = dynamic_pointer_cast<VALUE_TYPE>(shared_ptr<Node>(g));
+            return TreePtr<VALUE_TYPE>(v);
+        }
+        else
+        {
+            return TreePtr<VALUE_TYPE>();
+        }
+    }
+    
+    // For when OOStd itself needs to dyncast, as opposed to the user asking for it.
+    static TreePtr<VALUE_TYPE>
+        InferredDynamicCast( const TreePtrInterface &g )
+    {
+        if( g )
+        {
+            shared_ptr<VALUE_TYPE> v = dynamic_pointer_cast<VALUE_TYPE>(shared_ptr<Node>(g));
+            ASSERTS( v )("OOStd inferred dynamic cast has failed: from ")(*g)
+                        (" to type ")(TYPE_ID_NAME( VALUE_TYPE ))("\n");
+            return TreePtr<VALUE_TYPE>(v);
+        }
+        else
+        {
+            // Null came in, null goes out.
+            return TreePtr<VALUE_TYPE>();
+        }
+    }
+    
+    TreePtr<Node> MakeValueArchetype() const final
+    {
         return TreePtr<Node>(new VALUE_TYPE); // means VALUE_TYPE must be constructable
     }
     
-	pair<TreePtr<Node>, Sequence<Node> *> MakeScaffold() const final;
+    pair<TreePtr<Node>, Sequence<Node> *> MakeScaffold() const final;
 };
 
 // -------------------------- Extra bits ----------------------------    
@@ -259,17 +259,17 @@ TreePtr<VALUE_TYPE> DynamicTreePtrCast( const TreePtrInterface &g )
 // to having the same subbase and base target
 template< typename X, typename Y >
 bool operator==( const TreePtr<X> &x,
-		         const TreePtr<Y> &y)
+                 const TreePtr<Y> &y)
 {
-	return operator==( (const shared_ptr<X> &)x, (const shared_ptr<Y> &)y );
+    return operator==( (const shared_ptr<X> &)x, (const shared_ptr<Y> &)y );
 }
 
 
 template< typename X, typename Y >
 bool operator!=( const TreePtr<X> &x,
-		         const TreePtr<Y> &y)
+                 const TreePtr<Y> &y)
 {
-	return operator!=( (const shared_ptr<X> &)x, (const shared_ptr<Y> &)y );
+    return operator!=( (const shared_ptr<X> &)x, (const shared_ptr<Y> &)y );
 }
 
 

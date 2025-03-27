@@ -26,7 +26,7 @@ OPTIONS += -Wreturn-type
 # Warn if variable looks like used before init
 OPTIONS += -Wuninitialized -Wmaybe-uninitialized
 
-OPTIONS += -Wunused-variable
+OPTIONS += -Werror=misleading-indentation
 #OPTIONS += -Wall
 
 # Treat all warnings as errors 

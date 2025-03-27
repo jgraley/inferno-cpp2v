@@ -50,7 +50,7 @@ void SolverHolder::Start( const Assignments &forces,
         }
         catch(const exception &e)
         {
-			// Don't log the exception because we'll re-throw
+            // Don't log the exception because we'll re-throw
             solver_exception = current_exception();
             (*sink)( {} );
         }

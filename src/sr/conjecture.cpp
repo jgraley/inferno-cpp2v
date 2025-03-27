@@ -16,11 +16,11 @@ Conjecture::Plan::Plan( set<Agent *> my_agents, const Agent *base_agent )
 
     for( const Agent *agent : my_agents )
     {
-		AgentRecord record;
+        AgentRecord record;
         record.pq = agent->GetPatternQuery();
         record.query = agent->CreateDecidedQuery();
-		agent_records[agent] = record;
-	}        
+        agent_records[agent] = record;
+    }        
     AgentRecords::iterator base_rit = agent_records.find(base_agent);
     ASSERT( base_rit != agent_records.end() );
     RecordWalk( base_rit );
@@ -143,16 +143,16 @@ bool Conjecture::IncrementAgent( AgentRecords::const_iterator rit, int bc )
             return false;
         else
             return IncrementAgent( rit, bc - 1 );
-	}
+    }
 
-	if( back_choice.iter != back_decision.end ) 
-	{
+    if( back_choice.iter != back_decision.end ) 
+    {
         //TRACEC("Increment iterator\n");
         ++back_choice.iter; 
         query->SetChoice( bc, back_choice );
         //TRACEC("Choice=")(back_choice.GetTrace(back_decision))("\n");
     }
-		
+        
     // Exclusive case - we don't let the choice be end
     if( !back_decision.inclusive && back_choice.iter == back_decision.end )
     {
@@ -162,8 +162,8 @@ bool Conjecture::IncrementAgent( AgentRecords::const_iterator rit, int bc )
             return false;
         else
             return IncrementAgent( rit, bc - 1 );
-	}
-		
+    }
+        
     return true;
 }
 
@@ -206,7 +206,7 @@ bool Conjecture::IncrementConjecture(AgentRecords::const_iterator rit)
             return IncrementConjecture( record.previous_agent );
         else
             return false;
-	}
+    }
  
     return true;
 }

@@ -32,9 +32,9 @@ class VNSequence;
 class RequiresSubordinateSCREngine : public virtual Graphable
 {
 public:
-	virtual void MarkBaseForEmbedded( TreePtr<Node> embedded_through_subtree ) const = 0;
-	virtual TreePtr<Node> GetSearchPattern() const = 0;
-	virtual TreePtr<Node> GetReplacePattern() const = 0;
+    virtual void MarkBaseForEmbedded( TreePtr<Node> embedded_through_subtree ) const = 0;
+    virtual TreePtr<Node> GetSearchPattern() const = 0;
+    virtual TreePtr<Node> GetReplacePattern() const = 0;
 };
 
 class StartsOverlay : public virtual Graphable
@@ -126,7 +126,7 @@ public: // For top level engine/VN trans
                                  const SolutionMap *enclosing_solution );                                                                                               
     virtual void SetStopAfter( vector<int> ssa, int d=0 );
     static void SetMaxReps( int n, bool e );
-	void SetXTreeDb( shared_ptr<XTreeDatabase> x_tree_db );
+    void SetXTreeDb( shared_ptr<XTreeDatabase> x_tree_db );
     set< shared_ptr<SYM::BooleanExpression> > GetExpressions() const;
     list<const AndRuleEngine *> GetAndRuleEngines() const;
     list<const SCREngine *> GetSCREngines() const;

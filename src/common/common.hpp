@@ -162,8 +162,8 @@ inline unordered_set<S> DifferenceOf( const unordered_set<S> &s1, const unordere
     unordered_set<S> result;
     
     for( const S &s : s1 )
-		if( s2.count(s)==0 )
-			result.insert(s);
+        if( s2.count(s)==0 )
+            result.insert(s);
        
     return result; 
 }    
@@ -273,10 +273,10 @@ inline bool IsIncludes( const C1 &c1, const C2 &c2 )
 template< typename C1, typename C2 >
 inline bool IsEquivalent( const C1 &c1, const C2 &c2 )
 {
-	// Prefer includes twice over set_symmetric_difference once
-	// because includes only returns a bool and isn't building things.
+    // Prefer includes twice over set_symmetric_difference once
+    // because includes only returns a bool and isn't building things.
     return includes( c1.begin(), c1.end(), c2.begin(), c2.end(), c1.key_comp() ) && 
-		   includes( c2.begin(), c2.end(), c1.begin(), c1.end(), c1.key_comp() );
+           includes( c2.begin(), c2.end(), c1.begin(), c1.end(), c1.key_comp() );
 }
 
 
@@ -284,9 +284,9 @@ inline bool IsEquivalent( const C1 &c1, const C2 &c2 )
 template<typename KEY, typename VALUE, typename KEY_COMP>
 set<KEY, KEY_COMP> KeysToSet( const map<KEY, VALUE, KEY_COMP> &m )
 {
-	set<KEY, KEY_COMP> s( m.key_comp() );
-	for( auto p : m )
-		s.insert(p.first);
+    set<KEY, KEY_COMP> s( m.key_comp() );
+    for( auto p : m )
+        s.insert(p.first);
     return s;
 }
 
@@ -627,12 +627,12 @@ string DiffTrace( const C &c0, const C &c1 )
 template <typename STL_TYPE>
 Orderable::Diff STLCompare3Way( const STL_TYPE &l, const STL_TYPE &r )
 {
-	if( l == r )
-		return 0;
-	else if( l < r )
-		return -1;
-	else
-		return 1;
+    if( l == r )
+        return 0;
+    else if( l < r )
+        return -1;
+    else
+        return 1;
 }
 
 // Unique ptr with full value semantics plus nullability. Clones on copy/assign.
@@ -641,62 +641,62 @@ Orderable::Diff STLCompare3Way( const STL_TYPE &l, const STL_TYPE &r )
 // virtual VALUE_TYPE *Clone() const;
 template<typename VALUE_TYPE>
 class ValuePtr : public unique_ptr<VALUE_TYPE>
-{	
+{    
 public:
-	// Expose all of unique_ptr's constructors
-	using unique_ptr<VALUE_TYPE>::unique_ptr;
+    // Expose all of unique_ptr's constructors
+    using unique_ptr<VALUE_TYPE>::unique_ptr;
 
-	// Un-delete copy constructor and copy-assignment. Our versions will
-	// call Clone() (the only way to prevent slicing) on non-NULL other.
-	// template<typename OTHER_VALUE_TYPE>. Note: Clone() always produces the
-	// final type, even though we may be templated on an intermediate.
-	ValuePtr(const ValuePtr<VALUE_TYPE> &other) :
-		unique_ptr<VALUE_TYPE>( other ? 
-		                        static_cast<VALUE_TYPE *>(other->Clone()) : 
-		                        nullptr )
-	{		
-	}
-	
-	//template<typename OTHER_VALUE_TYPE>
-	ValuePtr &operator=(const ValuePtr<VALUE_TYPE> &other)
-	{
-		unique_ptr<VALUE_TYPE>::operator=( other ? 
-		                                   unique_ptr<VALUE_TYPE>(other->Clone()) : 
-		                                   nullptr );
-		return *this;
-	}	
+    // Un-delete copy constructor and copy-assignment. Our versions will
+    // call Clone() (the only way to prevent slicing) on non-NULL other.
+    // template<typename OTHER_VALUE_TYPE>. Note: Clone() always produces the
+    // final type, even though we may be templated on an intermediate.
+    ValuePtr(const ValuePtr<VALUE_TYPE> &other) :
+        unique_ptr<VALUE_TYPE>( other ? 
+                                static_cast<VALUE_TYPE *>(other->Clone()) : 
+                                nullptr )
+    {        
+    }
+    
+    //template<typename OTHER_VALUE_TYPE>
+    ValuePtr &operator=(const ValuePtr<VALUE_TYPE> &other)
+    {
+        unique_ptr<VALUE_TYPE>::operator=( other ? 
+                                           unique_ptr<VALUE_TYPE>(other->Clone()) : 
+                                           nullptr );
+        return *this;
+    }    
 
-	// Create from unique_ptr by rvalue/move (respecting unique_ptr semantics)
-	ValuePtr(unique_ptr<VALUE_TYPE> &&uptr) :
-		unique_ptr<VALUE_TYPE>( move(uptr) )
-	{		
-	}
+    // Create from unique_ptr by rvalue/move (respecting unique_ptr semantics)
+    ValuePtr(unique_ptr<VALUE_TYPE> &&uptr) :
+        unique_ptr<VALUE_TYPE>( move(uptr) )
+    {        
+    }
 
-	// Convert to unique ptr by cloning (our semantics)
-	operator unique_ptr<VALUE_TYPE>() 
-	{
-		return *this ? 
-		       unique_ptr<VALUE_TYPE>((*this)->Clone()) : 
-		       nullptr;
-	}
+    // Convert to unique ptr by cloning (our semantics)
+    operator unique_ptr<VALUE_TYPE>() 
+    {
+        return *this ? 
+               unique_ptr<VALUE_TYPE>((*this)->Clone()) : 
+               nullptr;
+    }
 
-	// Instead of make_unique<X>() do ValuePtr<X>::Make()
-	template<typename ... CP>
-	static ValuePtr<VALUE_TYPE> Make(const CP &...cp) 
-	{
-		return ValuePtr<VALUE_TYPE>( new VALUE_TYPE(cp...) );
-	}
-	
-	// Dynamic cast: has my preferred semantics (move if and only if cast successful)
-	template<typename OTHER_VALUE_TYPE>
-	static ValuePtr<VALUE_TYPE> DynamicCast(ValuePtr<OTHER_VALUE_TYPE> &&other) 
-	{
-		// Using our extension of dynamic_pointer_cast to unique_ptr
-		return ValuePtr<VALUE_TYPE>( dynamic_pointer_cast<VALUE_TYPE>(move(other)) );
-	}
-	
-	// TODO could add a dyn-cast on const ref, eg try the raw pointer dyncast and if
-	// successful, Clone() for a return value.
+    // Instead of make_unique<X>() do ValuePtr<X>::Make()
+    template<typename ... CP>
+    static ValuePtr<VALUE_TYPE> Make(const CP &...cp) 
+    {
+        return ValuePtr<VALUE_TYPE>( new VALUE_TYPE(cp...) );
+    }
+    
+    // Dynamic cast: has my preferred semantics (move if and only if cast successful)
+    template<typename OTHER_VALUE_TYPE>
+    static ValuePtr<VALUE_TYPE> DynamicCast(ValuePtr<OTHER_VALUE_TYPE> &&other) 
+    {
+        // Using our extension of dynamic_pointer_cast to unique_ptr
+        return ValuePtr<VALUE_TYPE>( dynamic_pointer_cast<VALUE_TYPE>(move(other)) );
+    }
+    
+    // TODO could add a dyn-cast on const ref, eg try the raw pointer dyncast and if
+    // successful, Clone() for a return value.
 };
 
 // The hashing algo for pointers MAY just be a simple cast. So, shift out the alignment

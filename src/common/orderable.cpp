@@ -3,7 +3,7 @@
 #include "standard.hpp"
 
 #include <typeinfo>
-#include <typeindex>		
+#include <typeindex>        
 
 Orderable::Diff Orderable::OrderCompare3Way( const Orderable &l, 
                                              const Orderable &r, 
@@ -43,16 +43,16 @@ Orderable::Diff Orderable::OrderCompare3WayChildren( const Orderable &right,
 
 string Orderable::RoleToString( BoundingRole role )
 {
-	switch( role )
-	{
-		case BoundingRole::MINIMUS:
-			return "MINIMUS";
-		case BoundingRole::NONE:
-			return "NONE";
-		case BoundingRole::MAXIMUS:
-			return "MAXIMUS";			
-	}
-	ASSERTFAIL();
+    switch( role )
+    {
+        case BoundingRole::MINIMUS:
+            return "MINIMUS";
+        case BoundingRole::NONE:
+            return "NONE";
+        case BoundingRole::MAXIMUS:
+            return "MAXIMUS";            
+    }
+    ASSERTFAIL();
 }
 
 

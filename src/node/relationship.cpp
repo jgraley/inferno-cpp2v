@@ -7,6 +7,6 @@
 
 set<const TreePtrInterface *> ChildRelationship::GetDeclared() 
 {
-	// By default none of the children are declared
-	return set<const TreePtrInterface *> {};
+    // By default none of the children are declared
+    return set<const TreePtrInterface *> {};
 }

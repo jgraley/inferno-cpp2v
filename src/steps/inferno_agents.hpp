@@ -31,7 +31,7 @@ using namespace SR;
 /// in some sense you are "merging" objects with identifiers.
 struct BuildIdentifierAgent : public virtual BuilderAgent    
 {
-	// TODO do this via a transformation as with TransformOf/TransformOf
+    // TODO do this via a transformation as with TransformOf/TransformOf
     BuildIdentifierAgent( string s, int f=0 ) : format(s), flags(f) {}
     virtual Block GetGraphBlockInfo() const;
     Sequence<CPPTree::Identifier> sources;
@@ -212,7 +212,7 @@ struct NestedAgent : public virtual RelocatingAgent
     virtual XLink Advance( XLink xlink, 
                            string *depth ) const = 0;
 
-	int GetExtenderChannelOrdinal() const override;
+    int GetExtenderChannelOrdinal() const override;
 
     virtual Block GetGraphBlockInfo() const;
     

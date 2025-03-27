@@ -23,22 +23,22 @@ class Invented
 {
 public: 
     Invented() :
-		step(Progress::NO_STEP)
-	{
-	}
-	
-	void SetInventedHere()
-	{
-		step = Progress::GetCurrent().GetStep();
-		ASSERT( step != Progress::NO_STEP );				
-	}
-	
-	bool WasInventedDuringCurrentStep() const
-	{
-		return (Progress::GetCurrent().GetStep() == step);
-	}
+        step(Progress::NO_STEP)
+    {
+    }
+    
+    void SetInventedHere()
+    {
+        step = Progress::GetCurrent().GetStep();
+        ASSERT( step != Progress::NO_STEP );                
+    }
+    
+    bool WasInventedDuringCurrentStep() const
+    {
+        return (Progress::GetCurrent().GetStep() == step);
+    }
 
-	int step;
+    int step;
 };
 
 #endif

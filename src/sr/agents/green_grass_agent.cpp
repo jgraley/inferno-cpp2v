@@ -25,14 +25,14 @@ Lazy<BooleanExpression> GreenGrassAgent::SymbolicAutolocatingQuery() const
 
 Graphable::Block GreenGrassAgent::GetGraphBlockInfo() const
 {
-	// The GreenGrass node appears as a cylinder containing four vertical line characters,
-	// like this: ||||. These are meant to represent the blades of grass. It was late and I was
-	// tired.
+    // The GreenGrass node appears as a cylinder containing four vertical line characters,
+    // like this: ||||. These are meant to represent the blades of grass. It was late and I was
+    // tired.
     Block block;
-	block.bold = true;
+    block.bold = true;
     block.title = "GreenGrass";
-	block.symbol = "||||";
-	block.shape = "cylinder";
+    block.symbol = "||||";
+    block.shape = "cylinder";
     block.block_type = Graphable::NODE_SHAPED;
     block.node = GetPatternPtr();
     auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>( GetThrough()->get() ), 
@@ -77,8 +77,8 @@ unique_ptr<BooleanResult> GreenGrassAgent::IsGreenGrassOperator::Evaluate( const
         return make_unique<BooleanResult>( false );    
     TreePtr<Node> tp = ra->GetOnlyXLink().GetChildTreePtr();
     
-	bool green = !tp->WasInventedDuringCurrentStep();
-		
+    bool green = !tp->WasInventedDuringCurrentStep();
+        
     return make_unique<BooleanResult>( green );         
 }
 
@@ -94,7 +94,7 @@ Orderable::Diff GreenGrassAgent::IsGreenGrassOperator::OrderCompare3WayCovariant
 
 string GreenGrassAgent::IsGreenGrassOperator::RenderNF() const
 {
-	// TODO put the agent trace in the <>
+    // TODO put the agent trace in the <>
     return "IsGreenGrass<>(" + a->Render() + ")"; 
 }
 

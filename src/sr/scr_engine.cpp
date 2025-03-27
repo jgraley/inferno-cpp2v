@@ -311,8 +311,8 @@ void SCREngine::UpdateEmbeddedActionRequests( TreePtr<Node> through_subtree, Tre
 {
     INDENT("F");
     
-	// We need to fix up any remaining action requests at the same level as the one
-	// that just ran if they have the same through node as the one we just changed.
+    // We need to fix up any remaining action requests at the same level as the one
+    // that just ran if they have the same through node as the one we just changed.
     for( auto &p : bases_for_embedded ) // ref important - we're modifying!
     {
         if( p.second == through_subtree )
@@ -349,13 +349,13 @@ void SCREngine::RunEmbedded( PatternLink plink_to_embedded, XLink base_xlink )
     
     // Obtain a pointer to the though link that will be updated by the 
     // embedded. 
-	NodeTable::Row nn = x_tree_db->GetNodeRow(through_subtree);
-	XLink target_xlink = OnlyElementOf(nn.incoming_xlinks);
+    NodeTable::Row nn = x_tree_db->GetNodeRow(through_subtree);
+    XLink target_xlink = OnlyElementOf(nn.incoming_xlinks);
 
     // Run the embedded's engine on this subtree and overwrite through ptr via p_through_x
     int hits = embedded_engine->RepeatingCompareReplace( target_xlink, &replace_solution );
-	(void)hits;
-	
+    (void)hits;
+    
     UpdateEmbeddedActionRequests( through_subtree, target_xlink.GetChildTreePtr() );
 }
 
@@ -364,12 +364,12 @@ void SCREngine::Replace( XLink origin_xlink )
 {
     INDENT("R");
 
-	// Get an expression that evaluates to the new X tree
-	Agent::ReplaceKit replace_kit { x_tree_db.get() };
+    // Get an expression that evaluates to the new X tree
+    Agent::ReplaceKit replace_kit { x_tree_db.get() };
     Agent::ReplacePatchPtr source_expr = plan.base_agent->GenReplaceLayout(replace_kit, plan.base_plink);
         
     // Request to update the tree
-	plan.vn_sequence->UpdateUsingLayout( origin_xlink, move(source_expr) );  
+    plan.vn_sequence->UpdateUsingLayout( origin_xlink, move(source_expr) );  
     
     TRACE("Replace done\n");
 }
@@ -396,7 +396,7 @@ void SCREngine::SingleCompareReplace( XLink base_xlink,
     // Now replace according to the couplings
     Replace(base_xlink);
 
-	// Now run the embedded SCR engines (LATER model)
+    // Now run the embedded SCR engines (LATER model)
     for( PatternLink plink_to_embedded : plan.my_subordinate_plinks_postorder )
     {
         TRACE("Running embedded ")(plink_to_embedded)(" base xlink=")(base_xlink)("\n");
@@ -508,32 +508,32 @@ set< shared_ptr<SYM::BooleanExpression> > SCREngine::GetExpressions() const
 
 list<const AndRuleEngine *> SCREngine::GetAndRuleEngines() const
 {
-	list<const AndRuleEngine *> engines;
-	engines = plan.and_rule_engine->GetAndRuleEngines();
-	for( auto p : plan.my_engines )
+    list<const AndRuleEngine *> engines;
+    engines = plan.and_rule_engine->GetAndRuleEngines();
+    for( auto p : plan.my_engines )
     {
-		//engines.push_back(nullptr);
-		engines = engines + p.second->GetAndRuleEngines();
-	}
-	return engines;
+        //engines.push_back(nullptr);
+        engines = engines + p.second->GetAndRuleEngines();
+    }
+    return engines;
 }
 
 
 list<const SCREngine *> SCREngine::GetSCREngines() const
 {
-	list<const SCREngine *> engines;
-	engines.push_back( this );
-	for( auto p : plan.my_engines )
-		engines = engines + p.second->GetSCREngines();
-	return engines;
+    list<const SCREngine *> engines;
+    engines.push_back( this );
+    for( auto p : plan.my_engines )
+        engines = engines + p.second->GetSCREngines();
+    return engines;
 }
 
 
 void SCREngine::GenerateGraphRegions( Graph &graph ) const
 {
-	plan.and_rule_engine->GenerateGraphRegions(graph, GetGraphId());
-	for( auto p : plan.my_engines )
-		p.second->GenerateGraphRegions(graph);	
+    plan.and_rule_engine->GenerateGraphRegions(graph, GetGraphId());
+    for( auto p : plan.my_engines )
+        p.second->GenerateGraphRegions(graph);    
 }
 
 
@@ -605,5 +605,5 @@ string SCREngine::GetTrace() const
 
 string SCREngine::GetGraphId() const
 {
-	return "SCR"+GetSerialString();
+    return "SCR"+GetSerialString();
 }

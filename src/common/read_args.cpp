@@ -40,35 +40,35 @@ void ReadArgs::Usage(string msg)
 {
     fprintf(stderr, "%s\n", msg.c_str());
     fprintf(stderr, "Usage:\n"
-    		        "%s <options> \n"
-    		        "\n"
-    		        "-i<infile>  Read input program (C/C++) from <infile>.\n"
-    		        "-o<outfile> Write output program to <outfile>. C/C++ by default. Writes to stdout if omitted.\n"
-    		        "-t          Turn on tracing internals (very verbose).\n"    		        
+                    "%s <options> \n"
+                    "\n"
+                    "-i<infile>  Read input program (C/C++) from <infile>.\n"
+                    "-o<outfile> Write output program to <outfile>. C/C++ by default. Writes to stdout if omitted.\n"
+                    "-t          Turn on tracing internals (very verbose).\n"                    
                     "-th<fmt>    Dump hit counts at the end of execution based on <fmt>.\n"
                     "            Note: use -th? for help on <fmt>.\n"
                     "-tq         No output to console.\n"
                     "-ts         Trace but don't show mini-stacks (for when re-architecting).\n"
-    		        "-su         Run unit tests and quit.\n"
-    		        "-sc         Enable CSP solver self-test.\n"
-    		        "-sd         Enable DB self-checks: relation integrity and compare with new build.\n"
+                    "-su         Run unit tests and quit.\n"
+                    "-sc         Enable CSP solver self-test.\n"
+                    "-sd         Enable DB self-checks: relation integrity and compare with new build.\n"
                     "-q<p>.<c>...   Stop after stage+step <p>, and optional match count(s) <c>. Eg -qT12.2.3\n"
                     "               for transformation 12, root match 2, first embedded match 3.\n"    
                     "               Note: step is 0-based; counts are 1-based or 0 to disable.\n"
                     "               Note: -qT<n> makes -t and -r operate only on step n.\n"                
                     "               Note: if quitting after parse or later, output is attempted.\n"     
                     "-n<n>       Only run step <n>. User must ensure input program meets any restrictions of the step.\n"                    
-	                "-g[t][k]i      Generate Graphviz dot file for output or intermediate if used with -q.\n"
-	                "-g[t][k]p<n>   Generate dot file for specified transformation step n or by name,\n"
+                    "-g[t][k]i      Generate Graphviz dot file for output or intermediate if used with -q.\n"
+                    "-g[t][k]p<n>   Generate dot file for specified transformation step n or by name,\n"
                     "               or generate all into a directory if name ends in /.\n"
-	                "-g[t][k]d      Generate dot files for documentation; -o specifies directory.\n"
-	                "            Note: t enables trace details in graph; k enables dark colour-scheme.\n"
+                    "-g[t][k]d      Generate dot files for documentation; -o specifies directory.\n"
+                    "            Note: t enables trace details in graph; k enables dark colour-scheme.\n"
                     "-rn<n>      Stop search and replace after n repetitions and do not generate an error.\n"
                     "-re<n>      Stop search and replace after n repetitions and do generate an error.\n"
                     "-f          Output all intermediates: .cpp and .dot. <outfile> is path/basename.\n"
                     "-u<x>       Use feature x.\n"
                     "Hint: use eg I=-sd or I=\"-sd -t\" with make\n",
-    		        exename.c_str() );
+                    exename.c_str() );
     exit(1);
 }
 
@@ -91,14 +91,14 @@ ReadArgs::ReadArgs( int ac, char *av[] )
 { 
     argc = ac;
     argv = av;
-	exename = argv[0];
+    exename = argv[0];
     for( curarg=1; curarg<argc; curarg++ )
     {
-    	if( argv[curarg][0] != '-' )
+        if( argv[curarg][0] != '-' )
             Usage("Expecting \"-\"");
             
         if( ((string)(argv[curarg])).size()<2 )
-    		Usage("Missing option letter");
+            Usage("Missing option letter");
 
         char option = argv[curarg][1];
         
@@ -210,8 +210,8 @@ ReadArgs::ReadArgs( int ac, char *av[] )
         }
         else if( option=='n' )
         {
-        	runonlystep = strtoul( GetArg().c_str(), nullptr, 10 );
-        	runonlyenable = true;
+            runonlystep = strtoul( GetArg().c_str(), nullptr, 10 );
+            runonlyenable = true;
         }
         else if( option=='f' )
         {

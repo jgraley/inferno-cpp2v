@@ -101,7 +101,7 @@ Agent::ReplacePatchPtr StarAgent::GenReplaceLayoutImpl( const ReplaceKit &kit,
         dest_zone.AddTerminus( make_shared<ContainerMutator>(dest, dest_container, dest_it) );    
 
         TreeZone child_zone = TreeZone::CreateSubtree(XLink(key_node, &key_elt) );
-	    child_commands.push_back( make_shared<TreeZonePatch>(move(child_zone)) );
+        child_commands.push_back( make_shared<TreeZonePatch>(move(child_zone)) );
     }
 
     return make_shared<FreeZonePatch>( move(dest_zone), move(child_commands) );    
@@ -110,13 +110,13 @@ Agent::ReplacePatchPtr StarAgent::GenReplaceLayoutImpl( const ReplaceKit &kit,
 
 Graphable::Block StarAgent::GetGraphBlockInfo() const
 {
-	// The Star node appears as a small circle with a * character inside it. * is chosen for its role in 
-	// filename wildcarding, which is semantically equiviant only when used in a Sequence.
+    // The Star node appears as a small circle with a * character inside it. * is chosen for its role in 
+    // filename wildcarding, which is semantically equiviant only when used in a Sequence.
     Block block;
-	block.bold = true;
-	block.title = "Star";
-	block.symbol = "*";
-	block.shape = "circle";
+    block.bold = true;
+    block.title = "Star";
+    block.symbol = "*";
+    block.shape = "circle";
     block.block_type = Graphable::NODE_SHAPED;
     block.node = GetPatternPtr();
     if( *GetRestriction() )

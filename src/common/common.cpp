@@ -45,8 +45,8 @@ string RemoveAllTemplateParam( string s )
 string RemoveOneOuterScope( string s )
 {
     string::size_type n = s.find("::");
-	if( n != string::npos )
-	    s = s.substr( n+2 );
+    if( n != string::npos )
+        s = s.substr( n+2 );
     return s;
 }
 

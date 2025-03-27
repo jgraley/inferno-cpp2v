@@ -53,7 +53,7 @@ int TreeZone::GetNumTerminii() const
 
 TreePtr<Node> TreeZone::GetBaseNode() const
 {
-	return base.GetChildTreePtr();
+    return base.GetChildTreePtr();
 }
 
 
@@ -78,8 +78,8 @@ vector<XLink> TreeZone::GetTerminusXLinks() const
 FreeZone TreeZone::Duplicate() const
 {
     if( IsEmpty() )
-		return FreeZone::CreateEmpty();
-    	
+        return FreeZone::CreateEmpty();
+        
     // Iterate over terminii and operand zones together, filling the map for
     // DuplicateSubtree() to use.
     Duplicate::TerminiiMap duplicator_terminus_map;
@@ -93,9 +93,9 @@ FreeZone TreeZone::Duplicate() const
     list<shared_ptr<Mutator>> free_zone_terminii;
     for( XLink terminus_upd : GetTerminusXLinks() )
     {
-		ASSERTS( duplicator_terminus_map[terminus_upd].mutator );
+        ASSERTS( duplicator_terminus_map[terminus_upd].mutator );
         free_zone_terminii.push_back( duplicator_terminus_map[terminus_upd].mutator );
-	}
+    }
 
     // Create a new zone for the result.
     return FreeZone( new_base_x, move(free_zone_terminii) );
@@ -103,27 +103,27 @@ FreeZone TreeZone::Duplicate() const
 
 
 FreeZone TreeZone::MakeFreeZone(const XTreeDatabase *db) const
-{	
-	if( IsEmpty() )
-		return FreeZone::CreateEmpty();
-		
-	FreeZone free_zone( base.GetChildTreePtr(), {} );
+{    
+    if( IsEmpty() )
+        return FreeZone::CreateEmpty();
+        
+    FreeZone free_zone( base.GetChildTreePtr(), {} );
     for( XLink terminus : terminii )
-		free_zone.AddTerminus( db->GetMutator( terminus ) );
-	
-	return free_zone;
+        free_zone.AddTerminus( db->GetMutator( terminus ) );
+    
+    return free_zone;
 }
 
 
 TreeZone::TerminusIterator TreeZone::GetTerminiiBegin() const
 {
-	return terminii.begin();
+    return terminii.begin();
 }
 
 
 TreeZone::TerminusIterator TreeZone::GetTerminiiEnd() const
 {
-	return terminii.end();
+    return terminii.end();
 }
 
 
@@ -138,7 +138,7 @@ string TreeZone::GetTrace() const
     }
     else
     {
-		s = Trace(base);
+        s = Trace(base);
         if( terminii.empty() )
             s += " → "; // Indicates the zone goes all the way to leaves i.e. subtree
         else
@@ -151,66 +151,66 @@ string TreeZone::GetTrace() const
 
 void TreeZone::DBCheck(const XTreeDatabase *db) const // TODO maybe move to database?
 {
-	ASSERT( db->HasRow( base ) )(base);
-	
-	if( IsEmpty() )
-		return; // We've checked enough for empty zones
-	// Now we've excluded legit empty zones, checks can be strict
-	
-	DepthFirstRelation dfr( db );
-	XLink prev_xlink = base;
-	for( XLink terminus_xlink : terminii )
-	{
-		ASSERT( db->HasRow( terminus_xlink ) )(terminus_xlink);
-		
-		ASSERT( dfr.Compare3Way( prev_xlink, terminus_xlink ) < 0 ); // strict: no repeated XLinks
-			
-		prev_xlink = terminus_xlink;
-	}	
+    ASSERT( db->HasRow( base ) )(base);
+    
+    if( IsEmpty() )
+        return; // We've checked enough for empty zones
+    // Now we've excluded legit empty zones, checks can be strict
+    
+    DepthFirstRelation dfr( db );
+    XLink prev_xlink = base;
+    for( XLink terminus_xlink : terminii )
+    {
+        ASSERT( db->HasRow( terminus_xlink ) )(terminus_xlink);
+        
+        ASSERT( dfr.Compare3Way( prev_xlink, terminus_xlink ) < 0 ); // strict: no repeated XLinks
+            
+        prev_xlink = terminus_xlink;
+    }    
 }
 
 // ------------------------- MutableTreeZone --------------------------
 
 MutableTreeZone::MutableTreeZone( TreeZone tz, unique_ptr<Mutator> &&base_mutator_ ) :
-	TreeZone(tz),
-	base_mutator(move(base_mutator_))
+    TreeZone(tz),
+    base_mutator(move(base_mutator_))
 {
 }
 
 void MutableTreeZone::Exchange( FreeZone &&new_zone )
-{	
-	//FreeZone displaced_free_zone( base, {} );
-	bool empty_new_zone = new_zone.IsEmpty();
+{    
+    //FreeZone displaced_free_zone( base, {} );
+    bool empty_new_zone = new_zone.IsEmpty();
     
-	// Do a co-walk and populate one at a time. Update our terminii as we go. Cannot use 
-	// TPI because we need to change the PARENT node, so we need a whole new XLink. Do this
-	// under a validity check that all our XLinks are inside the new tree.
-	// This is needed because MainTreeExchange() will pass us to MainTreeInsertGeometric()
-	FreeZone::TerminusIterator new_it = new_zone.GetTerminiiBegin();	
+    // Do a co-walk and populate one at a time. Update our terminii as we go. Cannot use 
+    // TPI because we need to change the PARENT node, so we need a whole new XLink. Do this
+    // under a validity check that all our XLinks are inside the new tree.
+    // This is needed because MainTreeExchange() will pass us to MainTreeInsertGeometric()
+    FreeZone::TerminusIterator new_it = new_zone.GetTerminiiBegin();    
     for( XLink &tree_terminus_xlink : terminii )
-	{
-		ASSERT( new_it != new_zone.GetTerminiiEnd() ); // length mismatch	
-		
-		// Make the FZ terminus match the TZ terminus
-		shared_ptr<Mutator> new_mutator = *new_it;		
-		TreePtr<Node> boundary_node = tree_terminus_xlink.GetChildTreePtr(); // outside the zone		
-		ASSERT( !dynamic_cast<ContainerInterface *>(boundary_node.get()) ); // requirement for GetTreePtrInterface()
-		new_it = new_zone.PopulateTerminus( new_it, boundary_node ); // Note: ensures free zone not empty	
-		
-		// Update the tree zone terminus
-		if( !empty_new_zone )		
-			tree_terminus_xlink = new_mutator->GetXLink();		
-	} 
-	ASSERT( new_it == new_zone.GetTerminiiEnd() ); // length mismatch	
+    {
+        ASSERT( new_it != new_zone.GetTerminiiEnd() ); // length mismatch    
+        
+        // Make the FZ terminus match the TZ terminus
+        shared_ptr<Mutator> new_mutator = *new_it;        
+        TreePtr<Node> boundary_node = tree_terminus_xlink.GetChildTreePtr(); // outside the zone        
+        ASSERT( !dynamic_cast<ContainerInterface *>(boundary_node.get()) ); // requirement for GetTreePtrInterface()
+        new_it = new_zone.PopulateTerminus( new_it, boundary_node ); // Note: ensures free zone not empty    
+        
+        // Update the tree zone terminus
+        if( !empty_new_zone )        
+            tree_terminus_xlink = new_mutator->GetXLink();        
+    } 
+    ASSERT( new_it == new_zone.GetTerminiiEnd() ); // length mismatch    
 
-	// Do this after, since free zone is now not empty 
-	base_mutator->Mutate( new_zone.GetBaseNode() );
+    // Do this after, since free zone is now not empty 
+    base_mutator->Mutate( new_zone.GetBaseNode() );
 
-	if( empty_new_zone )
-	{
-		// Become an empty tree zone
-		terminii = { base };
-	}
+    if( empty_new_zone )
+    {
+        // Become an empty tree zone
+        terminii = { base };
+    }
 }
 
 

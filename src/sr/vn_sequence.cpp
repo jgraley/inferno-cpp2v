@@ -43,7 +43,7 @@ void VNSequence::PlanningStageThree( int step_index )
 
 void VNSequence::PlanningStageFour()
 {
-	// TODO factor all this somewhere else
+    // TODO factor all this somewhere else
     // Determine the full set of expressions across all the steps
     set< shared_ptr<SYM::BooleanExpression> > clauses;
     for( shared_ptr<VNStep> vnt : steps )
@@ -58,14 +58,14 @@ void VNSequence::PlanningStageFour()
     set<const SYM::Expression *> sub_exprs;
     for( shared_ptr<SYM::BooleanExpression> clause : clauses )
     {
-		clause->ForDepthFirstWalk([&](const SYM::Expression *sub_expr)
-		{
-			sub_exprs.insert(sub_expr);
-		} );
-   	}
-   	
-   	// Use thes eto establish the lacing
-   	lacing = make_shared<Lacing>();
+        clause->ForDepthFirstWalk([&](const SYM::Expression *sub_expr)
+        {
+            sub_exprs.insert(sub_expr);
+        } );
+       }
+       
+       // Use thes eto establish the lacing
+       lacing = make_shared<Lacing>();
     lacing->Build( sub_exprs );   
     
     // ...and to set up the domain extension channels (actioned in analysis stage)
@@ -97,15 +97,15 @@ void VNSequence::AnalysisStage( TreePtr<Node> root )
     ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");    
     
 #ifndef X_TREE_DB_EACH_STEP
-	x_tree_db->InitialBuild();
-#endif        	
+    x_tree_db->InitialBuild();
+#endif            
 }
 
 
 TreePtr<Node> VNSequence::TransformStep( int step_index )
-{   	    
+{           
 #ifdef X_TREE_DB_EACH_STEP
-	x_tree_db->InitialBuild();
+    x_tree_db->InitialBuild();
 #endif        
 
     steps[step_index]->SetXTreeDb( x_tree_db );
@@ -144,7 +144,7 @@ void VNSequence::UpdateUsingLayout( XLink target_origin, shared_ptr<Patch> sourc
 {
     ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");    
     
-	TreeUpdater( x_tree_db.get() ).TransformToIncrementalAndExecute( target_origin, source_layout );   
+    TreeUpdater( x_tree_db.get() ).TransformToIncrementalAndExecute( target_origin, source_layout );   
 }
 
 

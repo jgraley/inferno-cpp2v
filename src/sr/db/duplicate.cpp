@@ -17,7 +17,7 @@ TreePtr<Node> Duplicate::DuplicateNode( TreePtr<Node> source )
 TreePtr<Node> Duplicate::DuplicateSubtree( XLink source_base_xlink )
 {
     TerminiiMap empty_terminii_map;
-	TreePtr<Node> source_base = source_base_xlink.GetChildTreePtr();
+    TreePtr<Node> source_base = source_base_xlink.GetChildTreePtr();
     return DuplicateSubtreeWorker( source_base, empty_terminii_map );
 }
     
@@ -46,7 +46,7 @@ TreePtr<Node> Duplicate::DuplicateSubtree( XLink source_base_xlink,
         return dest_terminus;
     }
 
-	TreePtr<Node> source_base = source_base_xlink.GetChildTreePtr();
+    TreePtr<Node> source_base = source_base_xlink.GetChildTreePtr();
 
     return DuplicateSubtreeWorker( source_base,
                                    terminii_map );
@@ -132,8 +132,8 @@ TreePtr<Node> Duplicate::DuplicateSubtreeWorker( TreePtr<Node> source,
             {
                 *dest_singular = DuplicateSubtreeWorker( source_child_xlink.GetChildTreePtr(), 
                                                          terminii_map );
-				ASSERTS( *dest_singular );
-				ASSERTS( TreePtr<Node>(*dest_singular)->IsFinal() );            
+                ASSERTS( *dest_singular );
+                ASSERTS( TreePtr<Node>(*dest_singular)->IsFinal() );            
             }
         }
         else

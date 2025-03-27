@@ -39,7 +39,7 @@ public:
     class SurplusXCollectionMismatch : public CollectionMismatch {};
     class InsufficientXCollectionMismatch : public CollectionMismatch {};
     
-	virtual void SCRConfigure( const SCREngine *e,
+    virtual void SCRConfigure( const SCREngine *e,
                                Phase phase );
 
     struct Plan : public virtual Traceable
@@ -139,14 +139,14 @@ public:
                                     PatternLink me_plink, 
                                     XLink key_xlink ) final;
 
-private:	
-	ReplacePatchPtr GenReplaceLayoutOverlay( const ReplaceKit &kit, 
+private:    
+    ReplacePatchPtr GenReplaceLayoutOverlay( const ReplaceKit &kit, 
                                              PatternLink me_plink, 
                                              XLink under_xlink ); // under substitution if not nullptr
-	ReplacePatchPtr GenReplaceLayoutOverlayUsingPattern( const ReplaceKit &kit, 
+    ReplacePatchPtr GenReplaceLayoutOverlayUsingPattern( const ReplaceKit &kit, 
                                                          PatternLink me_plink, 
                                                          XLink under_xlink );
-	ReplacePatchPtr GenReplaceLayoutOverlayUsingX( const ReplaceKit &kit, 
+    ReplacePatchPtr GenReplaceLayoutOverlayUsingX( const ReplaceKit &kit, 
                                                    PatternLink me_plink, 
                                                    XLink under_xlink ); 
     ReplacePatchPtr GenReplaceLayoutNormal( const ReplaceKit &kit, 
@@ -169,7 +169,7 @@ class StandardAgentWrapper : public virtual NODE_TYPE,
 public:
     StandardAgentWrapper() : NODE_TYPE() {}
 
-	template<typename ... CP>
+    template<typename ... CP>
     StandardAgentWrapper(const CP &...cp) : 
         NODE_TYPE(cp...) {}
     
@@ -245,8 +245,8 @@ public:
 template<typename NODE_TYPE, typename ... CP>
 TreePtr<NODE_TYPE> MakePatternNode(const CP &...cp)
 {
-    // Find out at compile time whether the NODE_TYPE is already an Agent.	
-	return MakePatternNodeHelper<is_base_of<Agent, NODE_TYPE>::value, NODE_TYPE>::MakeNode(cp...); 
+    // Find out at compile time whether the NODE_TYPE is already an Agent.    
+    return MakePatternNodeHelper<is_base_of<Agent, NODE_TYPE>::value, NODE_TYPE>::MakeNode(cp...); 
 };
 
 };

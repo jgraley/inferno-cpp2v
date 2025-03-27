@@ -24,7 +24,7 @@ bool DepthFirstRelation::operator()( KeyType l_key, KeyType r_key ) const
 
 Orderable::Diff DepthFirstRelation::Compare3Way( KeyType l_key, KeyType r_key ) const
 {
-	return CompareHierarchical( l_key, r_key ).first;
+    return CompareHierarchical( l_key, r_key ).first;
 }
 
 
@@ -60,8 +60,8 @@ pair<Orderable::Diff, DepthFirstRelation::RelType> DepthFirstRelation::CompareHi
         if( !l_parent_xlink && !r_parent_xlink )
         {
             //FTRACE("Both at root, comparing root ordinals\n");
-			const LinkTable::Row &l_row = db->GetRow(l_cur_xlink);       
-			const LinkTable::Row &r_row = db->GetRow(r_cur_xlink);
+            const LinkTable::Row &l_row = db->GetRow(l_cur_xlink);       
+            const LinkTable::Row &r_row = db->GetRow(r_cur_xlink);
             ASSERT( l_row.tree_ordinal != r_row.tree_ordinal );
             return make_pair(static_cast<int>(l_row.tree_ordinal) - static_cast<int>(r_row.tree_ordinal), ROOT_SIBLINGS);
         }
@@ -131,12 +131,12 @@ pair<Orderable::Diff, DepthFirstRelation::RelType> DepthFirstRelation::CompareHi
 
 void DepthFirstRelation::Test( const vector<KeyType> &keys )
 {
-	using namespace std::placeholders;
+    using namespace std::placeholders;
 
-	TestRelationProperties<KeyType>( keys,
-									 true,
-									 "DepthFirstRelation",
-									 bind(&DepthFirstRelation::Compare3Way, *this, _1, _2), 
+    TestRelationProperties<KeyType>( keys,
+                                     true,
+                                     "DepthFirstRelation",
+                                     bind(&DepthFirstRelation::Compare3Way, *this, _1, _2), 
     [&](KeyType l, KeyType r) -> bool
     { 
         return l==r; 

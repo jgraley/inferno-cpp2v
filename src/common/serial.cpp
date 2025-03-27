@@ -22,30 +22,30 @@ SerialNumber::SerialNumber()
 
 
 SerialNumber::SerialNumber( const SerialNumber &other ) :
-	SerialNumber() // Identity semantics: ignore "other"
+    SerialNumber() // Identity semantics: ignore "other"
 {      
 }
 
 
 inline SerialNumber &SerialNumber::operator=( const SerialNumber &other )
 {
-	// Identity semantics: ignore "other"
-	return *this;
+    // Identity semantics: ignore "other"
+    return *this;
 }
 
 /*
 Orderable::Diff SerialNumber::Compare3WayIdentity(const SerialNumber &l, const SerialNumber &r)
 {
-	if( l.progress != r.progress )
-		return Progress::Compare3Way(l.progress, r.progress);
-		
-	return l.serial - r.serial;
+    if( l.progress != r.progress )
+        return Progress::Compare3Way(l.progress, r.progress);
+        
+    return l.serial - r.serial;
 }
 */
 
 SerialNumber::SNType SerialNumber::GetSerialNumber() const 
 {
-	return serial; // This is enough for uniqueness
+    return serial; // This is enough for uniqueness
 }
 
 
@@ -58,19 +58,19 @@ string SerialNumber::GetSerialString() const
 
 void SerialNumber::SetHook(shared_ptr<Hook> h) const
 {
-	hook = h;
+    hook = h;
 }
 
 
 bool SerialNumber::HasHook() const
 {
-	return (bool)hook;
+    return (bool)hook;
 }
 
 
 shared_ptr<SerialNumber::Hook> SerialNumber::GetHook() const
 {
-	return hook;
+    return hook;
 }
 
 
@@ -99,17 +99,17 @@ SatelliteSerial::SatelliteSerial( const SerialNumber *mother, const void *satell
 
 
 SatelliteSerial::SatelliteSerial( const SatelliteSerial &other ) :
-	p_mother_block( other.p_mother_block ),
+    p_mother_block( other.p_mother_block ),
     serial( p_mother_block ? p_mother_block->AssignSerial(this) : -1 )
-{			
+{            
 }
 
 
 SatelliteSerial &SatelliteSerial::operator=( const SatelliteSerial &other )
 {
-	p_mother_block = other.p_mother_block;
+    p_mother_block = other.p_mother_block;
     serial = p_mother_block ? p_mother_block->AssignSerial(this) : -1;
-	return *this;
+    return *this;
 }
     
     
@@ -126,16 +126,16 @@ Orderable::Diff SatelliteSerial::Compare3WayIdentity(const SatelliteSerial &l, c
 {
     Orderable::Diff d = l.serial - r.serial;
 
-	// Check that we're really getting an identity relation
-	if( d==0 )
-		ASSERTS( &l == &r )
-		       ("l=")(l.GetSerialString())(" at %p mb=%p\n", &l, l.p_mother_block)
+    // Check that we're really getting an identity relation
+    if( d==0 )
+        ASSERTS( &l == &r )
+               ("l=")(l.GetSerialString())(" at %p mb=%p\n", &l, l.p_mother_block)
                ("r=")(r.GetSerialString())(" at %p mb=%p\n", &r, r.p_mother_block);
-	else
-		ASSERTS( &l != &r )
-		       ("l=")(l.GetSerialString())(" at %p mb=%p\n", &l, l.p_mother_block)
+    else
+        ASSERTS( &l != &r )
+               ("l=")(l.GetSerialString())(" at %p mb=%p\n", &l, l.p_mother_block)
                ("r=")(r.GetSerialString())(" at %p mb=%p\n", &r, r.p_mother_block);
-	return d;
+    return d;
 }
 */
 
@@ -152,38 +152,38 @@ shared_ptr<SatelliteSerial::MotherBlock> SatelliteSerial::GetMotherBlock( const 
     if( !mother )
     {
         return nullptr;
-	}
+    }
     
-	shared_ptr<MotherBlock> mother_block;
-	if( mother->HasHook() )
-	{
-		mother_block = dynamic_pointer_cast<MotherBlock>( mother->GetHook() );
-		ASSERT( mother_block ); // Will be NULL if wrong type of block on hook
-	}
-	else
-	{
-		mother_block = make_shared<MotherBlock>();
-		mother->SetHook(mother_block); 
-	}
-	
-	return mother_block;
+    shared_ptr<MotherBlock> mother_block;
+    if( mother->HasHook() )
+    {
+        mother_block = dynamic_pointer_cast<MotherBlock>( mother->GetHook() );
+        ASSERT( mother_block ); // Will be NULL if wrong type of block on hook
+    }
+    else
+    {
+        mother_block = make_shared<MotherBlock>();
+        mother->SetHook(mother_block); 
+    }
+    
+    return mother_block;
 }
 
 
 //////////////////////////// LeakCheck ///////////////////////////////
 
 LeakCheck::LeakCheck() :
-	origin( GetOrigin() )
+    origin( GetOrigin() )
 { 
-	Construct();       
+    Construct();       
 }
 
 
 LeakCheck::LeakCheck( const LeakCheck &other ) :
-	origin( GetOrigin() )
+    origin( GetOrigin() )
 {
-	// Identity semantics: ignore "other"
-	Construct();        
+    // Identity semantics: ignore "other"
+    Construct();        
 }
 
 

@@ -309,17 +309,17 @@ unique_ptr<SymbolicResult> AllInSimpleCompareRangeOperator::Evaluate( const Eval
                             lower_xlink : 
                             upper->Evaluate(kit)->GetOnlyXLink();
 
-	if( lower_role != BoundingRole::NONE )
-	{
-		auto node = MakeTreeNode<SR::SimpleCompareRelation::MinimaxNode>( lower_xlink.GetChildTreePtr(), lower_role );
-		lower_xlink = SR::XLink::CreateDistinct( node );
-	}
+    if( lower_role != BoundingRole::NONE )
+    {
+        auto node = MakeTreeNode<SR::SimpleCompareRelation::MinimaxNode>( lower_xlink.GetChildTreePtr(), lower_role );
+        lower_xlink = SR::XLink::CreateDistinct( node );
+    }
 
-	if( upper_role != BoundingRole::NONE )
-	{
-		auto node = MakeTreeNode<SR::SimpleCompareRelation::MinimaxNode>( upper_xlink.GetChildTreePtr(), upper_role );
-		upper_xlink = SR::XLink::CreateDistinct( node );
-	}
+    if( upper_role != BoundingRole::NONE )
+    {
+        auto node = MakeTreeNode<SR::SimpleCompareRelation::MinimaxNode>( upper_xlink.GetChildTreePtr(), upper_role );
+        upper_xlink = SR::XLink::CreateDistinct( node );
+    }
 
     return make_unique<SimpleCompareRangeResult>( kit.x_tree_db, 
                                                   lower_xlink.GetChildTreePtr(), lower_incl, 

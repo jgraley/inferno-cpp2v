@@ -20,14 +20,14 @@ using namespace SR;
 class ExplicitiseReturn : public VNStep
 {
 public:
-	ExplicitiseReturn();
+    ExplicitiseReturn();
 };
 
 /** Convey return value through a module-level variable */
 class UseTempForReturnValue : public VNStep
 {
 public:
-	UseTempForReturnValue();
+    UseTempForReturnValue();
 };
 
 /** Pass parameters in to functions via class-level temps */
@@ -56,7 +56,7 @@ public:
 class GenerateStacks : public VNStep
 {
 public:
-	GenerateStacks();
+    GenerateStacks();
 };
 
 /** Merge ordinary functions into the thread that calls them -
@@ -66,7 +66,7 @@ public:
 class MergeFunctions : public VNStep
 {
 public:
-	MergeFunctions();
+    MergeFunctions();
 };
 
 }; // end namespace

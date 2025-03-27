@@ -23,7 +23,7 @@ CategoryRelation& CategoryRelation::operator=(const CategoryRelation &other)
 
 bool CategoryRelation::operator() (KeyType l_key, KeyType r_key) const
 {
-	return Compare3Way(l_key, r_key) < 0;
+    return Compare3Way(l_key, r_key) < 0;
 }
 
 
@@ -55,30 +55,30 @@ Orderable::Diff CategoryRelation::Compare3Way(KeyType l_key, KeyType r_key) cons
         ASSERT( (d<0) == (d1<0) );
         ASSERT( (d==0) == (d1==0) );
 #endif
-   	    if( d )
-		    return d;	
-		    
-		return TreePtr<Node>::Compare3Way( l_key, r_key );       
+           if( d )
+            return d;    
+            
+        return TreePtr<Node>::Compare3Way( l_key, r_key );       
     }
     else if( l_minimus && r_minimus )
     {
         // This case only expected during test. Fall back to XLink to
         // keep the ordering total for the benefit of the test.
-		li = l_minimus->GetMinimusOrdinal();
-		ri = r_minimus->GetMinimusOrdinal();
+        li = l_minimus->GetMinimusOrdinal();
+        ri = r_minimus->GetMinimusOrdinal();
         Orderable::Diff d = li - ri;
-   	    if( d )
-		    return d;	
-		    
-		return TreePtr<Node>::Compare3Way( l_key, r_key );
-	}
+           if( d )
+            return d;    
+            
+        return TreePtr<Node>::Compare3Way( l_key, r_key );
+    }
     else if( l_minimus && !r_minimus )
-	{
+    {
         li = l_minimus->GetMinimusOrdinal();
         ri = lacing->GetOrdinalForNode( r_node );
         return (li*2-1) - (ri*2); // minimus is on the left
-	}
-	else if( !l_minimus && r_minimus )
+    }
+    else if( !l_minimus && r_minimus )
     {
         li = lacing->GetOrdinalForNode( l_node );
         ri = r_minimus->GetMinimusOrdinal();      
@@ -86,20 +86,20 @@ Orderable::Diff CategoryRelation::Compare3Way(KeyType l_key, KeyType r_key) cons
     }
     else
     {
-		ASSERTFAIL();
-	}
+        ASSERTFAIL();
+    }
 }
 
 
 void CategoryRelation::Test( const vector<KeyType> &keys )
 {
-	using namespace std::placeholders;
+    using namespace std::placeholders;
 
-	TestRelationProperties<KeyType>( keys,
-									 true,
-									 "CategoryRelation",
-									 bind(&CategoryRelation::Compare3Way, *this, _1, _2), 
-	[&](KeyType l, KeyType r) -> bool
+    TestRelationProperties<KeyType>( keys,
+                                     true,
+                                     "CategoryRelation",
+                                     bind(&CategoryRelation::Compare3Way, *this, _1, _2), 
+    [&](KeyType l, KeyType r) -> bool
     { 
         return l==r; 
     }, 
@@ -123,7 +123,7 @@ void CategoryRelation::Test( const vector<KeyType> &keys )
         
         // Make minimus node (this relation always uses minimus because half-open
         TreePtr<Node> node = MakeTreeNode<SR::CategoryRelation::MinimusNode>(i);
-		return node;      
+        return node;      
     } );
 }
 

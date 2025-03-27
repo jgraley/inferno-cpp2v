@@ -49,41 +49,41 @@ bool NodeTable::IsDeclarer(const DBWalk::WalkInfo &walk_info) const
 
 DBWalk::Action NodeTable::GetInsertGeometricAction()
 {
-	return [=](const DBWalk::WalkInfo &walk_info)
-	{
+    return [=](const DBWalk::WalkInfo &walk_info)
+    {
         // Create if not already there
         Row &row = rows[walk_info.node];
         
-        InsertSolo( row.incoming_xlinks, walk_info.xlink );    		
+        InsertSolo( row.incoming_xlinks, walk_info.xlink );            
         if( IsDeclarer(walk_info) )
             InsertSolo( row.declaring_xlinks, walk_info.xlink );
-	};
+    };
 }
 
 
 DBWalk::Action NodeTable::GetDeleteGeometricAction()
 {
-	return [=](const DBWalk::WalkInfo &walk_info)
-	{
+    return [=](const DBWalk::WalkInfo &walk_info)
+    {
         // Should already be there
         Row &row = rows.at(walk_info.node);
         
-        EraseSolo( row.incoming_xlinks, walk_info.xlink );    		
+        EraseSolo( row.incoming_xlinks, walk_info.xlink );            
         if( IsDeclarer(walk_info) )
             EraseSolo( row.declaring_xlinks, walk_info.xlink );
             
         if( row.incoming_xlinks.empty() )
             EraseSolo( rows, walk_info.node );
-	};
+    };
 }
 
 
 string NodeTable::Row::GetTrace() const
 {
     string s = "(";
-	
-	s += " incoming=" + Trace(incoming_xlinks);
-	s += " declaring=" + Trace(declaring_xlinks);
+    
+    s += " incoming=" + Trace(incoming_xlinks);
+    s += " declaring=" + Trace(declaring_xlinks);
     
     s += ")";
     return s;
@@ -92,14 +92,14 @@ string NodeTable::Row::GetTrace() const
 
 vector<TreePtr<Node>> NodeTable::GetNodeDomainAsVector() const
 {
-	vector<TreePtr<Node>> v;
-	for( auto p : rows )
-		v.push_back(p.first);
-	return v;
+    vector<TreePtr<Node>> v;
+    for( auto p : rows )
+        v.push_back(p.first);
+    return v;
 }
 
 
 string NodeTable::GetTrace() const
 {
-	return Trace(rows);
+    return Trace(rows);
 }

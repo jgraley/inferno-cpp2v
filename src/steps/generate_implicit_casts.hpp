@@ -20,7 +20,7 @@ using namespace SR;
 class GenerateImplicitCasts : public VNStep
 {
 public:
-	GenerateImplicitCasts();
+    GenerateImplicitCasts();
 };
 
 }; // end namespace

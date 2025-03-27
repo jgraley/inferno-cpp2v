@@ -11,10 +11,10 @@ class UniqueWalkNoBody_iterator : public UniqueWalk::iterator
 public:
     UniqueWalkNoBody_iterator( TreePtr<Node> &root ) : UniqueWalk::iterator(root) {}        
     UniqueWalkNoBody_iterator() : UniqueWalk::iterator() {}
-	virtual unique_ptr<ContainerInterface::iterator_interface> Clone() const
-	{
-   	    return make_unique<UniqueWalkNoBody_iterator>(*this);
-	}      
+    virtual unique_ptr<ContainerInterface::iterator_interface> Clone() const
+    {
+           return make_unique<UniqueWalkNoBody_iterator>(*this);
+    }      
 protected:
     virtual shared_ptr<ContainerInterface> GetChildContainer( TreePtr<Node> n ) const
     {
@@ -45,10 +45,10 @@ class UniqueWalkNoBodyOrIndirection_iterator : public UniqueWalkNoBody::iterator
 public:
     UniqueWalkNoBodyOrIndirection_iterator( TreePtr<Node> &root ) : UniqueWalkNoBody::iterator(root) {}        
     UniqueWalkNoBodyOrIndirection_iterator() : UniqueWalkNoBody::iterator() {}
-	virtual unique_ptr<ContainerInterface::iterator_interface> Clone() const
-	{
-   	    return make_unique<UniqueWalkNoBodyOrIndirection_iterator>(*this);
-	}      
+    virtual unique_ptr<ContainerInterface::iterator_interface> Clone() const
+    {
+           return make_unique<UniqueWalkNoBodyOrIndirection_iterator>(*this);
+    }      
 private:
     virtual shared_ptr<ContainerInterface> GetChildContainer( TreePtr<Node> n ) const
     {
@@ -70,13 +70,13 @@ typedef ContainerFromIterator< UniqueWalkNoBodyOrIndirection_iterator, TreePtr<N
 // Does a depend on b?
 bool IsDependOn( TreePtr<Declaration> a, TreePtr<Declaration> b, bool ignore_indirection_to_record )
 {
-	if( a == b )
-	    return false;
-	
+    if( a == b )
+        return false;
+    
     const TreePtr<Record> recb = DynamicTreePtrCast<Record>(b); // 2 unrelated uses
-	
-	// Only ignore pointers and refs if we're checking dependency on a record; typedefs
-	// still apply (since you can't forward declare a typedef).
+    
+    // Only ignore pointers and refs if we're checking dependency on a record; typedefs
+    // still apply (since you can't forward declare a typedef).
     bool ignore_indirection = ignore_indirection_to_record && recb;
 
     // Actually, we really want to see whether declaration a depends on the identifier of b
@@ -84,7 +84,7 @@ bool IsDependOn( TreePtr<Declaration> a, TreePtr<Declaration> b, bool ignore_ind
     TreePtr<Identifier> ib = GetIdentifierOfDeclaration( b ).GetTreePtr();
     ASSERT(ib);
           
-  	//TRACE("Looking for dependencies on ")(*b)(" (identifier ")(*ib)(") under ")(*a)(ignore_indirection?"":" not")(" ignoring indirection\n");      
+      //TRACE("Looking for dependencies on ")(*b)(" (identifier ")(*ib)(") under ")(*a)(ignore_indirection?"":" not")(" ignoring indirection\n");      
           
     // Always ignore function bodies since these are taken outboard by the renderer anyway      
     UniqueWalkNoBody wnb( a );
@@ -95,18 +95,18 @@ bool IsDependOn( TreePtr<Declaration> a, TreePtr<Declaration> b, bool ignore_ind
     while(!(wa == w->end()))
     {
         //TRACE("Seen node ")(**wa)("\n");
-    /*	if( ignore_indirection ) // are we to ignore pointers/refs?
-    	{
-    		if( TreePtr<Indirection> inda = TreePtr<Indirection>::DynamicCast(*wa) ) // is a a pointer or ref?
-    		{
-    			if( dynamic_pointer_cast<Identifier>(inda->destination) == ib ) // does it depend on b?
-    	        {
-    	        	wa.AdvanceOver(); // Then skip it
-    	        	continue;
-    	        }
-    		}
-    	}
-    	*/
+    /*    if( ignore_indirection ) // are we to ignore pointers/refs?
+        {
+            if( TreePtr<Indirection> inda = TreePtr<Indirection>::DynamicCast(*wa) ) // is a a pointer or ref?
+            {
+                if( dynamic_pointer_cast<Identifier>(inda->destination) == ib ) // does it depend on b?
+                {
+                    wa.AdvanceOver(); // Then skip it
+                    continue;
+                }
+            }
+        }
+        */
         if( TreePtr<Node>(*wa) == TreePtr<Node>(ib) ) // If we see b in *any* other context under a's type, there's dep.
         {
             //TRACE("Found dependency\n");
@@ -120,9 +120,9 @@ bool IsDependOn( TreePtr<Declaration> a, TreePtr<Declaration> b, bool ignore_ind
     // the dependency might be on something buried in the record.
     if( recb )
     {
-    	for( TreePtr<Declaration> memberb : recb->members )
-    	    if( IsDependOn( a, memberb, ignore_indirection_to_record ) )
-    	        return true;
+        for( TreePtr<Declaration> memberb : recb->members )
+            if( IsDependOn( a, memberb, ignore_indirection_to_record ) )
+                return true;
     }
     //TRACE("Did not find dependency\n");
     return false; 
@@ -131,62 +131,62 @@ bool IsDependOn( TreePtr<Declaration> a, TreePtr<Declaration> b, bool ignore_ind
 
 Sequence<Declaration> SortDecls( ContainerInterface &c, bool ignore_indirection_to_record, const UniquifyIdentifiers *unique )
 {
-	Sequence<Declaration> s;
+    Sequence<Declaration> s;
     int ocs = c.size();
     
     // Our algorithm will modify the source container, so make a copy of it
     Sequence<Declaration> cc;
     for( const TreePtrInterface &a : c )
-    	cc.push_back( a );
+        cc.push_back( a );
 
-	// Uncomment one of these to stress the sorter
-	//cc = ReverseDecls( cc );
-	//cc = JumbleDecls( cc );
+    // Uncomment one of these to stress the sorter
+    //cc = ReverseDecls( cc );
+    //cc = JumbleDecls( cc );
 
     // Sort using SimpleCompare first: this should improve reproducibility
     cc = PreSortDecls( cc, unique );
 
-	// Keep searching our local container of decls (cc) for decls that do not depend
+    // Keep searching our local container of decls (cc) for decls that do not depend
     // on anything else in the container. Such a decl may be safely rendered before the
     // rest of the decls, so place it at the end of the sequence we are building up
     // (s) and remove from the container cc since cc only holds the ones we have still to
     // place in s. Repeat until we've done all the decls at which point cc is empty.
     // If no non-dependent decl may be found in cc then it's irredemably circular and
     // we fail. This looks like O(N^3). Well, that's just a damn shame.
-	TRACE("Adding decls in dep order: ");
-	while( !cc.empty() )
-	{
-		bool found = false; // just for ASSERT check
-		for( const TreePtr<Declaration> &a : cc )
-		{
-			bool a_has_deps=false;
-			for( const TreePtr<Declaration> &b : cc )
-		    {
-		        TreePtr<Declaration> aid = dynamic_cast< const TreePtr<Declaration> & >(a);
-		    	a_has_deps |= IsDependOn( aid, b, ignore_indirection_to_record );
-		    }
-		    if( !a_has_deps )
-		    {
-		        TRACE(*a)(" ");
-				s.push_back(a);
-				cc.erase(a);
-				found = true;
-		        break;
-		    }
-		}
+    TRACE("Adding decls in dep order: ");
+    while( !cc.empty() )
+    {
+        bool found = false; // just for ASSERT check
+        for( const TreePtr<Declaration> &a : cc )
+        {
+            bool a_has_deps=false;
+            for( const TreePtr<Declaration> &b : cc )
+            {
+                TreePtr<Declaration> aid = dynamic_cast< const TreePtr<Declaration> & >(a);
+                a_has_deps |= IsDependOn( aid, b, ignore_indirection_to_record );
+            }
+            if( !a_has_deps )
+            {
+                TRACE(*a)(" ");
+                s.push_back(a);
+                cc.erase(a);
+                found = true;
+                break;
+            }
+        }
 
-		if( !found )
-		{   
-		    TRACE("\nRemaining unsequenceable decls: ");
-		    for( const TreePtr<Declaration> &a : cc )
-   		        TRACE(*a)(" ");
-		}
-		ASSERT( found )("\nfailed to find a decl to add without dependencies, maybe circular\n");
-		//TRACE("%d %d\n", s.size(), c.size() );
-	}
+        if( !found )
+        {   
+            TRACE("\nRemaining unsequenceable decls: ");
+            for( const TreePtr<Declaration> &a : cc )
+                   TRACE(*a)(" ");
+        }
+        ASSERT( found )("\nfailed to find a decl to add without dependencies, maybe circular\n");
+        //TRACE("%d %d\n", s.size(), c.size() );
+    }
     TRACE("\n");
-	ASSERT( s.size() == ocs );
-	return s;
+    ASSERT( s.size() == ocs );
+    return s;
 }
 
 
@@ -200,7 +200,7 @@ Sequence<Declaration> PreSortDecls( Sequence<Declaration> c, const UniquifyIdent
     //SimpleCompare(Orderable::REPEATABLE).GetTreePtrOrdering(c);
 
     // Extract the decls from the set, now in SimpleCompare order
-	Sequence<Declaration> s;
+    Sequence<Declaration> s;
     for( TreePtr<Node> e : sco )
     {
         auto d = TreePtr<Declaration>::DynamicCast(e);
@@ -219,45 +219,45 @@ Sequence<Declaration> PreSortDecls( Sequence<Declaration> c, const UniquifyIdent
 
 Sequence<Declaration> JumbleDecls( Sequence<Declaration> c )
 {
-	srand(99);
-	
-	Sequence<Declaration> s;
-	for( TreePtr<Declaration> to_insert : c ) // we will insert each element from the collection
-	{
-		// Idea is to insert each new element just before the first exiting element that
-		// depends on it. This is the latest position we can insert the new element.
-		Sequence<Declaration>::iterator i;
-		int n = rand() % (s.size()+1);
-		for( i = s.begin(); i != s.end(); ++i )
-   	    {
-   	    	if( n-- == 0 )
-   	    	{
-   	    		// Found element that depends on the one we want to insert. So insert just 
-   	    		// before the found element.
-   	    		break;    		
-   	    	}
-   	    }
-   	    
-   	    // Insert the element. If we didn't find a dependency, we'll be off the end of
-   	    // the sequence and hopefully insert() will actually push_back()
-  		s.insert( i, (const TreePtrInterface &)to_insert ); 
-	}
-	
-	ASSERT( s.size() == c.size() );
-	return s;
+    srand(99);
+    
+    Sequence<Declaration> s;
+    for( TreePtr<Declaration> to_insert : c ) // we will insert each element from the collection
+    {
+        // Idea is to insert each new element just before the first exiting element that
+        // depends on it. This is the latest position we can insert the new element.
+        Sequence<Declaration>::iterator i;
+        int n = rand() % (s.size()+1);
+        for( i = s.begin(); i != s.end(); ++i )
+           {
+               if( n-- == 0 )
+               {
+                   // Found element that depends on the one we want to insert. So insert just 
+                   // before the found element.
+                   break;            
+               }
+           }
+           
+           // Insert the element. If we didn't find a dependency, we'll be off the end of
+           // the sequence and hopefully insert() will actually push_back()
+          s.insert( i, (const TreePtrInterface &)to_insert ); 
+    }
+    
+    ASSERT( s.size() == c.size() );
+    return s;
 }
 
 Sequence<Declaration> ReverseDecls( Sequence<Declaration> c )
 {
-	Sequence<Declaration> s;
-	for( TreePtr<Declaration> to_insert : c ) // we will insert each element from the collection
-	{
-   	    // Insert the element. If we didn't find a dependency, we'll be off the end of
-   	    // the sequence and hopefully insert() will actually push_back()
-  		s.insert( s.begin(), (const TreePtrInterface &)to_insert ); 
-	}
-	
-	ASSERT( s.size() == c.size() );
-	return s;
+    Sequence<Declaration> s;
+    for( TreePtr<Declaration> to_insert : c ) // we will insert each element from the collection
+    {
+           // Insert the element. If we didn't find a dependency, we'll be off the end of
+           // the sequence and hopefully insert() will actually push_back()
+          s.insert( s.begin(), (const TreePtrInterface &)to_insert ); 
+    }
+    
+    ASSERT( s.size() == c.size() );
+    return s;
 }
 

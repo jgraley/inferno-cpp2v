@@ -18,20 +18,20 @@ class XTreeDatabase;
 class DepthFirstRelation
 {
 public:
-	typedef XLink KeyType;
+    typedef XLink KeyType;
 
-	enum RelType
-	{
-		// Siblings mean weakly removed i.e. supplied nodes could be 
-		// descendants of the actualk siblings. 
-		EQUAL,               // 0, equal 
-		LEFT_IS_ANCESTOR,   // -1, l less than r
-		RIGHT_IS_ANCESTOR,  // +1, l greater than r
-		CONTAINER_SIBLINGS, // depends on child ptr order
-		ITEM_SIBLINGS,      // depends on child ptr order 
-		ROOT_SIBLINGS       // depends on child ptr order
-	};
-		
+    enum RelType
+    {
+        // Siblings mean weakly removed i.e. supplied nodes could be 
+        // descendants of the actualk siblings. 
+        EQUAL,               // 0, equal 
+        LEFT_IS_ANCESTOR,   // -1, l less than r
+        RIGHT_IS_ANCESTOR,  // +1, l greater than r
+        CONTAINER_SIBLINGS, // depends on child ptr order
+        ITEM_SIBLINGS,      // depends on child ptr order 
+        ROOT_SIBLINGS       // depends on child ptr order
+    };
+        
     DepthFirstRelation(const XTreeDatabase *db);
 
     /// Less operator: for use with set, map etc
@@ -42,7 +42,7 @@ public:
     void Test( const vector<KeyType> &keys );
     
 private:
-	const XTreeDatabase * const db;
+    const XTreeDatabase * const db;
 }; 
 
 };

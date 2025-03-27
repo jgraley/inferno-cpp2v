@@ -10,7 +10,7 @@ using namespace Steps;
 
 SplitInstanceDeclarations::SplitInstanceDeclarations()
 {
-	// Match a compound with an ini9tialised decl in the statements. Replace
+    // Match a compound with an ini9tialised decl in the statements. Replace
     // with an uninitialised decl and an assign. Put the new decl in the 
     // decls section of the compound.
     auto sc = MakePatternNode<Compound>();
@@ -36,11 +36,11 @@ SplitInstanceDeclarations::SplitInstanceDeclarations()
 
     Configure( SEARCH_REPLACE,sc, rc);
 }
-	
-	
+    
+    
 MoveInstanceDeclarations::MoveInstanceDeclarations()
-{	
-	// Just move the decl to the decls collection
+{    
+    // Just move the decl to the decls collection
     auto sc = MakePatternNode<Compound>();
     auto var = MakePatternNode<LocalVariable>();
     auto decls = MakePatternNode< Star<Declaration> >();
@@ -59,7 +59,7 @@ MoveInstanceDeclarations::MoveInstanceDeclarations()
 
 SplitInstanceDeclarations2::SplitInstanceDeclarations2()
 {
-	// Match a compound with an ini9tialised decl in the statements. Replace
+    // Match a compound with an ini9tialised decl in the statements. Replace
     // with an uninitialised decl and an assign. Put the new decl in the 
     // decls section of the compound.
     auto sc = MakePatternNode<Compound>();
@@ -84,7 +84,7 @@ SplitInstanceDeclarations2::SplitInstanceDeclarations2()
 
     Configure( SEARCH_REPLACE,sc, rc);
 }
-	
-	
+    
+    
 
 

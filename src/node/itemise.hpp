@@ -32,7 +32,7 @@ public:
 
                 for( uintptr_t x : v )
                     if( x==ofs )
-                    	return *this; // don't insert if in there already, see above
+                        return *this; // don't insert if in there already, see above
                 v.push_back( ofs );
                 //TRACE("Itemiser caught ptr %p which is offset %d\n", this, ofs );
             }
@@ -40,64 +40,64 @@ public:
         }        
     };
     
-	template< class ITEMISE_TYPE >
-	inline static vector< uintptr_t > ItemiseImpl( const ITEMISE_TYPE *itemise_archetype )
-	{
-		//TRACES("Static itemise %s ", typeid(*itemise_archetype).name() );
-		(void)itemise_archetype;
-		ITEMISE_TYPE d( *itemise_archetype );
-		ITEMISE_TYPE s( *itemise_archetype );
-		dstart = (char *)&d;
-		dend = dstart + sizeof(d);
-		v.clear();
+    template< class ITEMISE_TYPE >
+    inline static vector< uintptr_t > ItemiseImpl( const ITEMISE_TYPE *itemise_archetype )
+    {
+        //TRACES("Static itemise %s ", typeid(*itemise_archetype).name() );
+        (void)itemise_archetype;
+        ITEMISE_TYPE d( *itemise_archetype );
+        ITEMISE_TYPE s( *itemise_archetype );
+        dstart = (char *)&d;
+        dend = dstart + sizeof(d);
+        v.clear();
         //TRACES("Starting itemise d=")(d)(" *arch=")(*itemise_archetype)(", ptr range %p to %p\n", dstart, dend );
 
-		// This is the assignment that will be detected
-		//TRACES("Assigning ");
-		d = s;
-		//TRACES(" done\n");
+        // This is the assignment that will be detected
+        //TRACES("Assigning ");
+        d = s;
+        //TRACES(" done\n");
 
-		return v;
-	}
+        return v;
+    }
 
-	template< class ITEMISE_TYPE >
-	inline static const vector< uintptr_t > &BasicItemiseStatic( const ITEMISE_TYPE *itemise_archetype )
-	{
-		// Just a cache on ItemiseImpl()
-		static thread_local vector< uintptr_t > v;
-		static thread_local bool done=false;
-		if(!done)
-		{
-			//TRACES("Not cached *arch=")(*itemise_archetype)(", caching at %p\n", &v);
-			v = ItemiseImpl( itemise_archetype );
-			done = true;
-		}
-		else
-		{
-			//TRACES("Using cached *arch=")(*itemise_archetype)(" at %p\n", &v);
-		}
+    template< class ITEMISE_TYPE >
+    inline static const vector< uintptr_t > &BasicItemiseStatic( const ITEMISE_TYPE *itemise_archetype )
+    {
+        // Just a cache on ItemiseImpl()
+        static thread_local vector< uintptr_t > v;
+        static thread_local bool done=false;
+        if(!done)
+        {
+            //TRACES("Not cached *arch=")(*itemise_archetype)(", caching at %p\n", &v);
+            v = ItemiseImpl( itemise_archetype );
+            done = true;
+        }
+        else
+        {
+            //TRACES("Using cached *arch=")(*itemise_archetype)(" at %p\n", &v);
+        }
 
 
-		return v;
-	}
+        return v;
+    }
 
-	template< class ITEMISE_TYPE >
+    template< class ITEMISE_TYPE >
     inline static const vector< Itemiser::Element * > ItemiseStatic( const ITEMISE_TYPE *itemise_archetype,
                                                                      const Itemiser *itemise_object )
     {
-		//TRACES("Itemise() arch=%p *arch=", itemise_archetype)(*itemise_archetype)
-		//      ("obj=%p *obj=", itemise_object)(*itemise_object)("\n");
+        //TRACES("Itemise() arch=%p *arch=", itemise_archetype)(*itemise_archetype)
+        //      ("obj=%p *obj=", itemise_object)(*itemise_object)("\n");
         ASSERTS( itemise_archetype )("Itemiser got itemise_archetype=nullptr\n");
         ASSERTS( itemise_object )("Itemiser got itemise_object=nullptr\n");
         
         // Do a safety check: itemise_object we're itemising must be same as or derived
-		// from the archetype, so that all the archetype's members are also in itemise_object.        
+        // from the archetype, so that all the archetype's members are also in itemise_object.        
         ASSERTS( dynamic_cast<const ITEMISE_TYPE *>(itemise_object) )
                ( "Cannot itemise because itemise_object=")(*itemise_object)
                ( " is not a nonstrict subclass of itemise_archetype=")(*itemise_archetype);
-		
-		// Do the pointer math to get "elements of A in B" type behaviour
-		// This must be done in bounce because we need the archetype's type for the dynamic_cast
+        
+        // Do the pointer math to get "elements of A in B" type behaviour
+        // This must be done in bounce because we need the archetype's type for the dynamic_cast
         const vector< uintptr_t > &vofs = BasicItemiseStatic( itemise_archetype );
 
         const ITEMISE_TYPE *target_object = dynamic_cast<const ITEMISE_TYPE *>(itemise_object);
@@ -108,30 +108,30 @@ public:
         return vout;
     }
 
-	template< class ITEMISE_TYPE >
-	inline static Itemiser::Element *ItemiseIndexStatic( const ITEMISE_TYPE *itemise_object,
-			                                             vector< uintptr_t >::size_type i )
-	{
-		//TRACE("ItemiseIndex() index=%d obj=%p *obj=", i, itemise_object)(*itemise_object)(" size=%d\n", sizeof(*itemise_object));
-		const vector< uintptr_t > &v = BasicItemiseStatic( itemise_object );
-		ASSERTS( i>=0 )("i=%d size=%d", i, v.size());
-		ASSERTS( i<v.size() )("i=%d size=%d", i, v.size());
-		uintptr_t ofs = v[i];
-		Element *res = (Element *)((const char *)itemise_object + ofs);
-		//TRACE("ofs=%d result=%p\n", ofs, res);
-		return res;
-	}
+    template< class ITEMISE_TYPE >
+    inline static Itemiser::Element *ItemiseIndexStatic( const ITEMISE_TYPE *itemise_object,
+                                                         vector< uintptr_t >::size_type i )
+    {
+        //TRACE("ItemiseIndex() index=%d obj=%p *obj=", i, itemise_object)(*itemise_object)(" size=%d\n", sizeof(*itemise_object));
+        const vector< uintptr_t > &v = BasicItemiseStatic( itemise_object );
+        ASSERTS( i>=0 )("i=%d size=%d", i, v.size());
+        ASSERTS( i<v.size() )("i=%d size=%d", i, v.size());
+        uintptr_t ofs = v[i];
+        Element *res = (Element *)((const char *)itemise_object + ofs);
+        //TRACE("ofs=%d result=%p\n", ofs, res);
+        return res;
+    }
 
-	template< class ITEMISE_TYPE >
-	inline static int ItemiseSizeStatic( const ITEMISE_TYPE *itemise_object )
-	{
-		//TRACES("ItemiseSize() obj=")(*itemise_object)("\n");
-		const vector< uintptr_t > &v = BasicItemiseStatic( itemise_object );
-		//TRACES("size result=%d\n", v.size());
-		return v.size();
-	}
+    template< class ITEMISE_TYPE >
+    inline static int ItemiseSizeStatic( const ITEMISE_TYPE *itemise_object )
+    {
+        //TRACES("ItemiseSize() obj=")(*itemise_object)("\n");
+        const vector< uintptr_t > &v = BasicItemiseStatic( itemise_object );
+        //TRACES("size result=%d\n", v.size());
+        return v.size();
+    }
 
-	static thread_local const char *dstart;
+    static thread_local const char *dstart;
     static thread_local const char *dend;
     static thread_local vector<uintptr_t> v;
     
@@ -147,8 +147,8 @@ public:
     { \
         return Itemiser::ItemiseIndexStatic( this, i ); \
     } \
-	virtual int ItemiseSize() const  \
-	{ \
-		return Itemiser::ItemiseSizeStatic( this ); \
-	}
+    virtual int ItemiseSize() const  \
+    { \
+        return Itemiser::ItemiseSizeStatic( this ); \
+    }
 #endif

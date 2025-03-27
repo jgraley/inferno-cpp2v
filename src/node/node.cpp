@@ -9,18 +9,18 @@
 
 struct MyNode : Node
 {
-	NODE_FUNCTIONS
-	Sequence<Node> s;
+    NODE_FUNCTIONS
+    Sequence<Node> s;
 };
 
 
 void GenericsTest()
 {
-	TRACE();
+    TRACE();
     auto n = make_shared<MyNode>();
-	TRACE();
+    TRACE();
     vector< Itemiser::Element * > i = n->Itemise();
-	TRACE();
+    TRACE();
     //for( int e=0; e<i.size(); e++ )
     //    TRACE("element at %p\n", i[e]);
     ASSERT( i.size() == 1 )("%d elements\n", i.size());
@@ -29,26 +29,26 @@ void GenericsTest()
 
 Graphable::Block Node::GetGraphBlockInfo() const
 {    
-	Graphable::Block block;
-	block.title = GetGraphName();     
-	block.bold = false;
-	block.shape = "plaintext";
+    Graphable::Block block;
+    block.title = GetGraphName();     
+    block.bold = false;
+    block.shape = "plaintext";
     block.block_type = Graphable::NODE_EXPANDED;
     TreePtr<Node> sp_this( const_pointer_cast<Node>( shared_from_this() ) );
     block.node = sp_this;
         
     vector< Itemiser::Element * > members = Itemise();
-	for( vector< Itemiser::Element * >::size_type i=0; i<members.size(); i++ )
-	{
-		if( SequenceInterface *seq = dynamic_cast<SequenceInterface *>(members[i]) )
+    for( vector< Itemiser::Element * >::size_type i=0; i<members.size(); i++ )
+    {
+        if( SequenceInterface *seq = dynamic_cast<SequenceInterface *>(members[i]) )
             block.sub_blocks = block.sub_blocks + GetSubblocks(seq);
-		else if( CollectionInterface *col = dynamic_cast<CollectionInterface *>(members[i]) )
+        else if( CollectionInterface *col = dynamic_cast<CollectionInterface *>(members[i]) )
             block.sub_blocks = block.sub_blocks + GetSubblocks(col);
-		else if( TreePtrInterface *singular = dynamic_cast<TreePtrInterface *>(members[i]) )
+        else if( TreePtrInterface *singular = dynamic_cast<TreePtrInterface *>(members[i]) )
             block.sub_blocks = block.sub_blocks + GetSubblocks(singular);
-		else
-			ASSERT(0);
-	}
+        else
+            ASSERT(0);
+    }
     
     return block;
 }

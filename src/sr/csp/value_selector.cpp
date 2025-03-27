@@ -29,14 +29,14 @@ ValueSelector::ValueSelector( const ConstraintSet &constraints_to_query_,
     constraints_to_query( constraints_to_query_ )
 {
     INDENT("V");
-	TRACE("Making value selector for ")(my_var)("\n"); 		
+    TRACE("Making value selector for ")(my_var)("\n");         
 #ifdef LOG_INDIVIDUAL_SUGGESTION_SETS
     TRACEC("given assignments:\n")(assignments)("\n");
 #endif    
     list<unique_ptr<SYM::SubsetResult>> rl; 
     for( shared_ptr<Constraint> c : constraints_to_query )
     {                        
-		TRACEC("Querying ")(c)(" for suggestion set\n");       
+        TRACEC("Querying ")(c)(" for suggestion set\n");       
         unique_ptr<SYM::SubsetResult> r = c->GetSuggestedValues( assignments, my_var );
         ASSERT( r );
 #ifdef LOG_INDIVIDUAL_SUGGESTION_SETS
@@ -64,14 +64,14 @@ ValueSelector::ValueSelector( const ConstraintSet &constraints_to_query_,
               
     if( sok )
     {
-		TRACEC("Intersection of suggestions is ")(*s)(" - make queue from this\n"); 		
+        TRACEC("Intersection of suggestions is ")(*s)(" - make queue from this\n");         
         SetupSuggestionGenerator( s );
-	}
+    }
     else
     {
-		TRACEC("No suggestion - make default queue\n"); 		
+        TRACEC("No suggestion - make default queue\n");         
         SetupDefaultGenerator();
-	}
+    }
 }
 
        

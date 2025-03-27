@@ -35,8 +35,8 @@ public:
 
     Lacing();
 
-	// Build lacing strucutres based on clausal expressions from the patterns
-	void Build( const set<const SYM::Expression *> &sub_exprs );
+    // Build lacing strucutres based on clausal expressions from the patterns
+    void Build( const set<const SYM::Expression *> &sub_exprs );
 
     // Build the lacing data structures including decision tree. Only needed
     // once, at planning time for the whole sequence.

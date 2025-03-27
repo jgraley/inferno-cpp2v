@@ -35,8 +35,8 @@ public:
     typedef uint64_t SNType;
     struct Hook
     {
-		virtual ~Hook() {};
-	};
+        virtual ~Hook() {};
+    };
     
 protected:
     SerialNumber();
@@ -45,19 +45,19 @@ protected:
 
 public:
     static inline Orderable::Diff Compare3WayIdentity(const SerialNumber &l, const SerialNumber &r)
-	{
-		if( l.progress != r.progress )
-			return Progress::Compare3Way(l.progress, r.progress);
-			
-		return l.serial - r.serial;
-	}
-	
+    {
+        if( l.progress != r.progress )
+            return Progress::Compare3Way(l.progress, r.progress);
+            
+        return l.serial - r.serial;
+    }
+    
     inline SNType GetSerialNumber() const;
     string GetSerialString() const; 
-	void SetHook(shared_ptr<Hook> h) const;
-	bool HasHook() const;
-	shared_ptr<Hook> GetHook() const;
-	
+    void SetHook(shared_ptr<Hook> h) const;
+    bool HasHook() const;
+    shared_ptr<Hook> GetHook() const;
+    
 private:    
     SNType serial;
     Progress progress;
@@ -86,11 +86,11 @@ public:
     string GetSerialString() const;
     static inline Orderable::Diff Compare3WayIdentity(const SatelliteSerial &l, const SatelliteSerial &r)
     {
-		return l.serial - r.serial;
-	}
+        return l.serial - r.serial;
+    }
         
 private:
-	// These are hooked to the mother SerialNumber instance
+    // These are hooked to the mother SerialNumber instance
     struct MotherBlock : SerialNumber::Hook
     {
         int next_serial=0;
@@ -99,9 +99,9 @@ private:
 
     static shared_ptr<MotherBlock> GetMotherBlock( const SerialNumber *mother, const void *satellite );
 
-	// Ordinary pointer is OK as long as we keep mother object alive, which
-	// we do if used with TreePtr
-	MotherBlock *p_mother_block;
+    // Ordinary pointer is OK as long as we keep mother object alive, which
+    // we do if used with TreePtr
+    MotherBlock *p_mother_block;
     SatelliteSNType serial;
 };
 

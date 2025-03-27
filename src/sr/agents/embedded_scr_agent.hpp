@@ -34,12 +34,12 @@ public:
                                     XLink key_xlink ) final;
 
     list<PatternLink> GetVisibleChildren( Path v ) const override;
-	virtual bool IsSearch() const;
-	
-	// Implement RequiresSubordinateSCREngine
-	void MarkBaseForEmbedded( TreePtr<Node> embedded_through_subtree ) const override;
-	TreePtr<Node> GetSearchPattern() const override;
-	TreePtr<Node> GetReplacePattern() const override;
+    virtual bool IsSearch() const;
+    
+    // Implement RequiresSubordinateSCREngine
+    void MarkBaseForEmbedded( TreePtr<Node> embedded_through_subtree ) const override;
+    TreePtr<Node> GetSearchPattern() const override;
+    TreePtr<Node> GetReplacePattern() const override;
     
     Block GetGraphBlockInfo() const override;
     

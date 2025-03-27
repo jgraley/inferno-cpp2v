@@ -18,26 +18,26 @@
 
 TreePtrInterface &TreePtrInterface::operator=( const TreePtrInterface &o )
 {
-	(void)Itemiser::Element::operator=( o ); 
-	return *this;
+    (void)Itemiser::Element::operator=( o ); 
+    return *this;
 }
 
 
 bool TreePtrInterface::operator<(const TreePtrInterface &r) const
 {
-	return get() < r.get();
+    return get() < r.get();
 }
 
 
 bool TreePtrInterface::operator==(const TreePtrInterface &r) const
 {
-	return get() == r.get();
+    return get() == r.get();
 }
 
 
 bool TreePtrInterface::operator!=(const TreePtrInterface &r) const
 {
-	return get() != r.get();
+    return get() != r.get();
 }
 
 
@@ -64,7 +64,7 @@ Orderable::Diff TreePtrInterface::Compare3Way(const TreePtrInterface &l, const T
 
     // Tertiary ordering is on the identities of the nodes, which corresponds to the values of 
     // the TreePtrs.
-	if( Orderable::Diff d_ni = Node::Compare3WayIdentity( *l, *r ) )
+    if( Orderable::Diff d_ni = Node::Compare3WayIdentity( *l, *r ) )
         return d_ni;
         
     // Check that last claim
@@ -75,13 +75,13 @@ Orderable::Diff TreePtrInterface::Compare3Way(const TreePtrInterface &l, const T
 
 Orderable::Diff TreePtrInterface::Compare3WayIdentity(const TreePtrInterface &l, const TreePtrInterface &r)
 {
-	return SatelliteSerial::Compare3WayIdentity( l.GetSS(), r.GetSS() );
+    return SatelliteSerial::Compare3WayIdentity( l.GetSS(), r.GetSS() );
 }
 
 
 string TreePtrInterface::GetTrace() const
 {
-	return GetName();
+    return GetName();
 }    
 
 // -------------------------- TreePtrCommon ----------------------------    
@@ -92,52 +92,52 @@ TreePtrCommon::TreePtrCommon()
 
 
 TreePtrCommon::TreePtrCommon( Node *o ) :
-	SatelliteSerial( o, this )
+    SatelliteSerial( o, this )
 {
 }
 
 
 TreePtrCommon::TreePtrCommon( nullptr_t o ) :
-	SatelliteSerial( nullptr, this )
+    SatelliteSerial( nullptr, this )
 {
 }
 
 
 const SatelliteSerial &TreePtrCommon::GetSS() const
 {
-	return *this;
+    return *this;
 }
 
 
 string TreePtrCommon::GetName() const
 {
-	if( !operator bool() )           
-		return string("NULL");
+    if( !operator bool() )           
+        return string("NULL");
 
 #ifdef SUPPRESS_SATELLITE_NUMBERS
-	string s = "#?->";
+    string s = "#?->";
 #else
-	// Use the serial string of the TreePtr itself #625
-	string s = SatelliteSerial::GetSerialString() + "->";
+    // Use the serial string of the TreePtr itself #625
+    string s = SatelliteSerial::GetSerialString() + "->";
 #endif  
-	
-	s += get()->GetTrace();
-	return s;
+    
+    s += get()->GetTrace();
+    return s;
 }  
 
 
 string TreePtrCommon::GetShortName() const
 {
-	if( !operator bool() )           
-		return string("NULL");
+    if( !operator bool() )           
+        return string("NULL");
 
 #ifdef SUPPRESS_SATELLITE_NUMBERS
-	string s = "#?->";
+    string s = "#?->";
 #else
-	// Use the serial string of the TreePtr itself #625
-	string s = SatelliteSerial::GetSerialString() + "->";
+    // Use the serial string of the TreePtr itself #625
+    string s = SatelliteSerial::GetSerialString() + "->";
 #endif  
-	
-	s += get()->GetSerialString(); 
-	return s;
+    
+    s += get()->GetSerialString(); 
+    return s;
 }  

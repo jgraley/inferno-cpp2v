@@ -32,12 +32,12 @@ void ForOverlappingAdjacentPairs( const T &container,
                                                 const typename T::value_type &second)> func) try
 {
     const typename T::value_type *prev_x = nullptr;
-	for( const auto &x : container )
+    for( const auto &x : container )
     {
         if( prev_x )
             func( *prev_x, x );
- 		prev_x = &x;
-	}
+         prev_x = &x;
+    }
 }
 catch( BreakException )
 {
@@ -51,15 +51,15 @@ void ForAllUnorderedPairs( const T &container,
                            function<void(const typename T::value_type &first, 
                                          const typename T::value_type &second)> func ) try
 {
-	for( typename T::const_iterator oit=container.begin(); oit != container.end(); ++oit )
+    for( typename T::const_iterator oit=container.begin(); oit != container.end(); ++oit )
     {
         // Starting at oit gets us "Unordered"
         for( typename T::const_iterator iit=oit; iit != container.end(); ++iit )
         {
             if( oit != iit ) // Gets us "Distinct"
                 func( *iit, *oit );
- 		}
-	}
+         }
+    }
 }
 catch( BreakException )
 {
@@ -73,15 +73,15 @@ void ForAllDistinctPairs( const T &container,
                           function<void(const typename T::value_type &first, 
                                         const typename T::value_type &second)> func ) try
 {
-	for( typename T::const_iterator oit=container.begin(); oit != container.end(); ++oit )
+    for( typename T::const_iterator oit=container.begin(); oit != container.end(); ++oit )
     {
         // Starting at oit gets us "Commutative"
         for( typename T::const_iterator iit=container.begin(); iit != container.end(); ++iit )
         {
             if( oit != iit ) // Gets us "Distinct"
                 func( *iit, *oit );
- 		}
-	}
+         }
+    }
 }
 catch( BreakException )
 {

@@ -158,7 +158,7 @@ private:
                            const SolutionMap *surrounding_solution );
     
 public:
-	void SetXTreeDb( shared_ptr<const XTreeDatabase> x_tree_db );
+    void SetXTreeDb( shared_ptr<const XTreeDatabase> x_tree_db );
     SolutionMap Compare( XLink base_xlink,
                          const SolutionMap *surrounding_solution );
 

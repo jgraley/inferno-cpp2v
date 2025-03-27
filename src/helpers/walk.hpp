@@ -20,22 +20,22 @@ public:
 class Walk_iterator : public ContainerInterface::iterator
 {
 public:
-	// Standard types for stl compliance (note that the iterators are implicitly const)
+    // Standard types for stl compliance (note that the iterators are implicitly const)
     typedef forward_iterator_tag iterator_category;
-	typedef TreePtrInterface value_type;
-	typedef int difference_type;
-	typedef const value_type *pointer;
-	typedef const value_type &reference;
+    typedef TreePtrInterface value_type;
+    typedef int difference_type;
+    typedef const value_type *pointer;
+    typedef const value_type &reference;
 
-	// Copy constructor and standard iterator operations
-	Walk_iterator( const Walk_iterator & other );
-	virtual unique_ptr<ContainerInterface::iterator_interface> Clone() const;
-	virtual Walk_iterator &operator++();
-	virtual reference operator*() const;
-	virtual pointer operator->() const;
-	virtual bool operator==( const ContainerInterface::iterator_interface &ib ) const;
-	virtual bool operator!=( const ContainerInterface::iterator_interface &ib ) const { return !operator==(ib); }
-	virtual void Mutate( pointer v ) const;
+    // Copy constructor and standard iterator operations
+    Walk_iterator( const Walk_iterator & other );
+    virtual unique_ptr<ContainerInterface::iterator_interface> Clone() const;
+    virtual Walk_iterator &operator++();
+    virtual reference operator*() const;
+    virtual pointer operator->() const;
+    virtual bool operator==( const ContainerInterface::iterator_interface &ib ) const;
+    virtual bool operator!=( const ContainerInterface::iterator_interface &ib ) const { return !operator==(ib); }
+    virtual void Mutate( pointer v ) const;
     virtual const bool IsOrdered() const;
     // Some additional operations specific to walk iterators
     string GetName() const;
@@ -44,7 +44,7 @@ public:
     Walk_iterator(); // makes "end" iterator
     Walk_iterator( TreePtr<Node> &root,
                    Filter *out_filter = nullptr,
-    		       Filter *recurse_filter = nullptr );
+                   Filter *recurse_filter = nullptr );
     virtual TreePtr<Node> GetParent(int grandness=0) const; // Go back a whole step
     virtual const TreePtrInterface *GetNodePointerInParent(int grandness=0) const;// Go back half a step
     // Get all the true recursions made so far (i.e. excluding root and current position)
@@ -105,7 +105,7 @@ public:
     ParentWalk_iterator( const ParentWalk_iterator &other );
     ParentWalk_iterator &operator=( const ParentWalk_iterator &other );
     ParentWalk_iterator( TreePtr<Node> &root );
-	virtual unique_ptr<ContainerInterface::iterator_interface> Clone() const;    
+    virtual unique_ptr<ContainerInterface::iterator_interface> Clone() const;    
 protected:
     UniqueFilter *unique_filter;
 };
@@ -125,7 +125,7 @@ public:
     UniqueWalk_iterator( const UniqueWalk_iterator &other );        
     UniqueWalk_iterator &operator=( const UniqueWalk_iterator &other );
     UniqueWalk_iterator( TreePtr<Node> &root );
-	virtual unique_ptr<ContainerInterface::iterator_interface> Clone() const;    
+    virtual unique_ptr<ContainerInterface::iterator_interface> Clone() const;    
 protected:
     UniqueFilter *unique_filter;
 };

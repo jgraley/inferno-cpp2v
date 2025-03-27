@@ -17,14 +17,14 @@ class TreeZone;
 class ZoneRelation
 {
 public:
-	enum RelType
-	{
-		EQUAL,              // Base and terminii are the same 
-		OVERLAP_GENERAL,   // overlapping, base differs and terminii may differ
-		OVERLAP_TERMINII,  // overlapping, terminii differ 
-		DISTINCT_SUBTREE,  // no overlap due to terminus  (i.e. "Ab->At->Db->Dt?")
-		DISTINCT_SIBLINGS  // no overlap, on different branches 
-	};
+    enum RelType
+    {
+        EQUAL,              // Base and terminii are the same 
+        OVERLAP_GENERAL,   // overlapping, base differs and terminii may differ
+        OVERLAP_TERMINII,  // overlapping, terminii differ 
+        DISTINCT_SUBTREE,  // no overlap due to terminus  (i.e. "Ab->At->Db->Dt?")
+        DISTINCT_SIBLINGS  // no overlap, on different branches 
+    };
 };
 
 // ------------------------- TreeZoneRelation --------------------------
@@ -32,51 +32,51 @@ public:
 class TreeZoneRelation : public ZoneRelation
 {
 public:
-	typedef TreeZone Domain;
-	
+    typedef TreeZone Domain;
+    
     TreeZoneRelation(const XTreeDatabase *db);
 
     /// Less operator: for use with set, map etc
     bool operator()( const TreeZone &l, const TreeZone &r ) const;
     Orderable::Diff Compare3Way( const TreeZone &l, const TreeZone &r ) const;
-	bool CompareEqual( const TreeZone &l, const TreeZone &r ) const;
+    bool CompareEqual( const TreeZone &l, const TreeZone &r ) const;
     pair<Orderable::Diff, RelType> CompareHierarchical( const TreeZone &l, const TreeZone &r ) const;
     
 private:
-	const XTreeDatabase * const db;
+    const XTreeDatabase * const db;
 }; 
-	
+    
 // ------------------------- PointeeRelation template --------------------------
 
 template<typename POINTEE_REL>
 class PointeeRelation
 {
-public:	
-	typedef POINTEE_REL PointeeRel;
-	PointeeRelation( const POINTEE_REL &pointee_rel_ ) :
-		pointee_rel( pointee_rel_ )
-	{
-	}
-	
-	bool operator()( const typename PointeeRel::Domain *l, 
-	                 const typename PointeeRel::Domain *r )
-	{
-		return pointee_rel( *l, *r );
-	}
-	
+public:    
+    typedef POINTEE_REL PointeeRel;
+    PointeeRelation( const POINTEE_REL &pointee_rel_ ) :
+        pointee_rel( pointee_rel_ )
+    {
+    }
+    
+    bool operator()( const typename PointeeRel::Domain *l, 
+                     const typename PointeeRel::Domain *r )
+    {
+        return pointee_rel( *l, *r );
+    }
+    
     Orderable::Diff Compare3Way( const typename PointeeRel::Domain *l, 
-	                             const typename PointeeRel::Domain *r ) const
-	{
-		ASSERT(l);
-		ASSERT(r);
-		
-		return pointee_rel.Compare3Way( *l, *r );				
-	}
-	
+                                 const typename PointeeRel::Domain *r ) const
+    {
+        ASSERT(l);
+        ASSERT(r);
+        
+        return pointee_rel.Compare3Way( *l, *r );                
+    }
+    
 private:
-	const PointeeRel &pointee_rel;
+    const PointeeRel &pointee_rel;
 };
-	
+    
 }
 
 #endif

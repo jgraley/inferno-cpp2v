@@ -25,63 +25,63 @@
 class ContainerInterface : public virtual Itemiser::Element
 {
 public:
-	// Abstract base class for the implementation-specific iterators in containers.
-	struct iterator_interface : public Traceable
-	{
-		// TODO const iterator and const versions of begin(), end()
-		virtual unique_ptr<iterator_interface> Clone() const = 0; // Make another copy of the present iterator
-		virtual iterator_interface &operator++() = 0;
-		virtual iterator_interface &operator--();
+    // Abstract base class for the implementation-specific iterators in containers.
+    struct iterator_interface : public Traceable
+    {
+        // TODO const iterator and const versions of begin(), end()
+        virtual unique_ptr<iterator_interface> Clone() const = 0; // Make another copy of the present iterator
+        virtual iterator_interface &operator++() = 0;
+        virtual iterator_interface &operator--();
         virtual const TreePtrInterface &operator*() const = 0;
         virtual const TreePtrInterface *operator->() const = 0;
-		virtual bool operator==( const iterator_interface &ib ) const = 0;
-		virtual void Mutate( const TreePtrInterface *v ) const = 0;
-		virtual const bool IsOrdered() const = 0;
-	};
+        virtual bool operator==( const iterator_interface &ib ) const = 0;
+        virtual void Mutate( const TreePtrInterface *v ) const = 0;
+        virtual const bool IsOrdered() const = 0;
+    };
 
 public:
-	// Wrapper for iterator_interface, uses std::unique_ptr<> and Clone() to manage the real iterator
-	// and forwards all the operations using co-variance where possible. These can be passed around
-	// by value, and always-copy semantics are used for simplicity.
+    // Wrapper for iterator_interface, uses std::unique_ptr<> and Clone() to manage the real iterator
+    // and forwards all the operations using co-variance where possible. These can be passed around
+    // by value, and always-copy semantics are used for simplicity.
     // Since C++ range-for uses the return type of begin() to determine loop index type, we have
     // to return a reference to this class (not iterator_interface) from begin() on generic container
     // types. And to retain covariant return s from begin() and end(), we have to include this class 
     // in the hierarchy of iterators. So we ensure that those iterators aren't unwittingly delegating 
     // into our methods using CHECK_NOT_REACHED_ON_SUBCLASS.
-	class iterator : public iterator_interface, public std::iterator<forward_iterator_tag, const TreePtrInterface>
-	{
-	public:
-		iterator();
-		iterator( const iterator &ib );
-		iterator &operator=( const iterator &ib );
-		virtual ~iterator();
+    class iterator : public iterator_interface, public std::iterator<forward_iterator_tag, const TreePtrInterface>
+    {
+    public:
+        iterator();
+        iterator( const iterator &ib );
+        iterator &operator=( const iterator &ib );
+        virtual ~iterator();
         
-		iterator( const iterator_interface &ib );
-		iterator &operator=( const iterator_interface &ib );
-		iterator &operator++();
-		iterator &operator--();
-		const value_type &operator*() const;
-		const value_type *operator->() const;
+        iterator( const iterator_interface &ib );
+        iterator &operator=( const iterator_interface &ib );
+        iterator &operator++();
+        iterator &operator--();
+        const value_type &operator*() const;
+        const value_type *operator->() const;
         bool operator==( const iterator_interface &ib ) const; // isovariant param
         bool operator==( const iterator &i ) const; // covariant param;
-		bool operator!=( const iterator_interface &ib ) const; // isovariant param;
-		bool operator!=( const iterator &i ) const; // covariant param;
-		void Mutate( const value_type *v ) const;
-		const bool IsOrdered() const;
-		iterator_interface *GetUnderlyingIterator() const;
-		explicit operator string() const;
-		explicit operator bool() const;
-	
+        bool operator!=( const iterator_interface &ib ) const; // isovariant param;
+        bool operator!=( const iterator &i ) const; // covariant param;
+        void Mutate( const value_type *v ) const;
+        const bool IsOrdered() const;
+        iterator_interface *GetUnderlyingIterator() const;
+        explicit operator string() const;
+        explicit operator bool() const;
+    
     protected:
-   		virtual unique_ptr<iterator_interface> Clone() const;
+           virtual unique_ptr<iterator_interface> Clone() const;
     
     private:
-		unique_ptr<iterator_interface> pib;
-	};
-	typedef iterator const_iterator; // TODO const iterators properly
+        unique_ptr<iterator_interface> pib;
+    };
+    typedef iterator const_iterator; // TODO const iterators properly
 
-	// These direct calls to the container are designed to support co-variance.
-	virtual const iterator &begin() = 0;
+    // These direct calls to the container are designed to support co-variance.
+    virtual const iterator &begin() = 0;
     virtual const iterator &end() = 0;
     virtual const iterator &insert( const TreePtrInterface &gx ) = 0;
     virtual const iterator &insert( const iterator_interface &pos, const TreePtrInterface &gx ) = 0;
@@ -127,10 +127,10 @@ struct ContainerCommon : virtual ContainerInterface, CONTAINER_IMPL
         return *this;
     }
     
-	struct iterator : public Impl::iterator,
-	                  public ContainerInterface::iterator
-	{
-		iterator() {}
+    struct iterator : public Impl::iterator,
+                      public ContainerInterface::iterator
+    {
+        iterator() {}
 
         iterator( const iterator &ib ) :
             Impl::iterator( (typename Impl::iterator &)ib )
@@ -138,7 +138,7 @@ struct ContainerCommon : virtual ContainerInterface, CONTAINER_IMPL
             // Avoid delegating to ContainerInterface::iterator
         }
         
-		iterator &operator=( const iterator &ib )
+        iterator &operator=( const iterator &ib )
         {
             Impl::iterator::operator=( (typename Impl::iterator &)ib );
             // Avoid delegating to ContainerInterface::iterator
@@ -146,40 +146,40 @@ struct ContainerCommon : virtual ContainerInterface, CONTAINER_IMPL
         }
         
         virtual iterator &operator++()
-		{
-			Impl::iterator::operator++();
-		    return *this;
-		}
+        {
+            Impl::iterator::operator++();
+            return *this;
+        }
 
-		virtual iterator &operator--()
-		{
-			Impl::iterator::operator--();
-		    return *this;
-		}
+        virtual iterator &operator--()
+        {
+            Impl::iterator::operator--();
+            return *this;
+        }
 
-		virtual const value_type &operator*() const
-		{
-			return Impl::iterator::operator*();
-		}
+        virtual const value_type &operator*() const
+        {
+            return Impl::iterator::operator*();
+        }
 
-		virtual const value_type *operator->() const
-		{
-			return Impl::iterator::operator->();
-		}
+        virtual const value_type *operator->() const
+        {
+            return Impl::iterator::operator->();
+        }
 
-		virtual bool operator==( const typename ContainerInterface::iterator_interface &ib ) const
-		{
-		    const typename Impl::iterator *pi = dynamic_cast<const typename Impl::iterator *>(&ib);
-		    ASSERT(pi)("Comparing iterators of different type");
-			return *(const typename Impl::iterator *)this == *pi;
-		}
-		virtual bool operator!=( const typename ContainerInterface::iterator_interface &ib ) const
-		{
-			return !operator==(ib);
-		}
-	};
+        virtual bool operator==( const typename ContainerInterface::iterator_interface &ib ) const
+        {
+            const typename Impl::iterator *pi = dynamic_cast<const typename Impl::iterator *>(&ib);
+            ASSERT(pi)("Comparing iterators of different type");
+            return *(const typename Impl::iterator *)this == *pi;
+        }
+        virtual bool operator!=( const typename ContainerInterface::iterator_interface &ib ) const
+        {
+            return !operator==(ib);
+        }
+    };
 
-	typedef iterator const_iterator;
+    typedef iterator const_iterator;
 
     bool empty() override
     {
@@ -191,17 +191,17 @@ struct ContainerCommon : virtual ContainerInterface, CONTAINER_IMPL
     }
     virtual int count( const TreePtrInterface &gx )
     {
-		value_type sx( value_type::InferredDynamicCast(gx) );
+        value_type sx( value_type::InferredDynamicCast(gx) );
         return std::count( Impl::begin(), Impl::end(), sx );
     }
     void clear() override
     {
-    	return Impl::clear();
+        return Impl::clear();
     }
-	virtual operator string() const
-	{
+    virtual operator string() const
+    {
         return TYPE_ID_NAME( value_type );
-	}
+    }
 };
 
 
@@ -224,40 +224,40 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
 
     using Impl::insert; // due to silly C++ rule where different overloads hide each other
     inline Sequential<VALUE_TYPE>() {}
-	struct iterator : public ContainerCommon<Impl>::iterator
+    struct iterator : public ContainerCommon<Impl>::iterator
     {
-		inline iterator( typename Impl::iterator &i ) : Impl::iterator(i) {}
-		inline iterator() {}
-		virtual value_type &operator*() const
-		{
+        inline iterator( typename Impl::iterator &i ) : Impl::iterator(i) {}
+        inline iterator() {}
+        virtual value_type &operator*() const
+        {
             ASSERT(this);
-			return Impl::iterator::operator*();
-		}
-		virtual value_type *operator->() const
-		{
+            return Impl::iterator::operator*();
+        }
+        virtual value_type *operator->() const
+        {
             ASSERT(this);
-			return Impl::iterator::operator->();
-		}
-		virtual unique_ptr<typename ContainerInterface::iterator_interface> Clone() const
-		{
+            return Impl::iterator::operator->();
+        }
+        virtual unique_ptr<typename ContainerInterface::iterator_interface> Clone() const
+        {
             // Avoid delegating to ContainerInterface::iterator.
-			auto ni = make_unique<iterator>();
+            auto ni = make_unique<iterator>();
             ni->Impl::iterator::operator=( (typename Impl::iterator &)*this );
-			return ni;
-		}
-    	virtual void Mutate( const TreePtrInterface *v ) const
-		{
-		    // JSG Mutate() just writes through the pointer got from dereferencing the iterator,
-		    // because in Sequences (ordererd containers) elements may be modified.
+            return ni;
+        }
+        virtual void Mutate( const TreePtrInterface *v ) const
+        {
+            // JSG Mutate() just writes through the pointer got from dereferencing the iterator,
+            // because in Sequences (ordererd containers) elements may be modified.
             // Avoid delegating to ContainerInterface::iterator.
-    		value_type x( value_type::InferredDynamicCast(*v) );
-		    Impl::iterator::operator*() = x;
-		}
-    	virtual const bool IsOrdered() const
-    	{
-    		return true; // yes, Sequences are ordered
-    	}
-	};
+            value_type x( value_type::InferredDynamicCast(*v) );
+            Impl::iterator::operator*() = x;
+        }
+        virtual const bool IsOrdered() const
+        {
+            return true; // yes, Sequences are ordered
+        }
+    };
 
     using ContainerInterface::erase;
     virtual int erase( const TreePtrInterface &gx ) // Simulating the SimpleAssociatedContaner API 
@@ -266,75 +266,75 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
         value_type sx( value_type::InferredDynamicCast(gx) );
         typename Impl::iterator it;
         int n = 0;
-		for( it=begin(); it != end(); )
-		{
-			if( *it==sx )
-			{
-				it = Impl::erase(it);
-				n++;
-			}
-			else
-			{
-				++it;
-			}
-		}
+        for( it=begin(); it != end(); )
+        {
+            if( *it==sx )
+            {
+                it = Impl::erase(it);
+                n++;
+            }
+            else
+            {
+                ++it;
+            }
+        }
         return n;
     }
-	virtual void push_back( const TreePtrInterface &gx )
-	{
-		value_type sx( value_type::InferredDynamicCast(gx) );
-		Impl::push_back( sx );
-	}
-	template<typename OTHER>
-	inline void push_back( const OTHER &gx )
-	{
-		value_type sx(gx);
-		Impl::push_back( sx );
-	}
-	virtual void push_front( const TreePtrInterface &gx )
-	{
-		value_type sx( value_type::InferredDynamicCast(gx) );
-		Impl::push_front( sx );
-	}
-	template<typename OTHER>
-	inline void push_front( const OTHER &gx )
-	{
-		value_type sx(gx);
-		Impl::push_front( sx );
-	}
+    virtual void push_back( const TreePtrInterface &gx )
+    {
+        value_type sx( value_type::InferredDynamicCast(gx) );
+        Impl::push_back( sx );
+    }
+    template<typename OTHER>
+    inline void push_back( const OTHER &gx )
+    {
+        value_type sx(gx);
+        Impl::push_back( sx );
+    }
+    virtual void push_front( const TreePtrInterface &gx )
+    {
+        value_type sx( value_type::InferredDynamicCast(gx) );
+        Impl::push_front( sx );
+    }
+    template<typename OTHER>
+    inline void push_front( const OTHER &gx )
+    {
+        value_type sx(gx);
+        Impl::push_front( sx );
+    }
 
     const iterator &begin() override
     {
-    	my_begin.Impl::iterator::operator=( Impl::begin() );
-    	return my_begin;
+        my_begin.Impl::iterator::operator=( Impl::begin() );
+        return my_begin;
     }
     const iterator &end() override
     {
-    	my_end.Impl::iterator::operator=( Impl::end() );
-    	return my_end;
+        my_end.Impl::iterator::operator=( Impl::end() );
+        return my_end;
     }  
-	const iterator &insert( const TreePtrInterface &gx ) override // Simulating the SimpleAssociatedContaner API 
-	{
+    const iterator &insert( const TreePtrInterface &gx ) override // Simulating the SimpleAssociatedContaner API 
+    {
         // Like multiset, we do allow more than one copy of the same element
-		value_type sx( value_type::InferredDynamicCast(gx) );
+        value_type sx( value_type::InferredDynamicCast(gx) );
         Impl::push_back( sx );
         my_inserted.Impl::iterator::operator=( prev(Impl::end()) );
         return my_inserted;
-	}
-	const iterator &insert( const ContainerInterface::iterator_interface &pos, 
+    }
+    const iterator &insert( const ContainerInterface::iterator_interface &pos, 
                             const TreePtrInterface &gx ) override // Simulating the SimpleAssociatedContaner API 
-	{
-        // Like multiset, we do allow more than one copy of the same element		
+    {
+        // Like multiset, we do allow more than one copy of the same element        
         auto posit = dynamic_cast<const iterator *>( &pos );
         ASSERT( posit ); // if this fails, you passed insert() the wrong kind of iterator
         value_type sx( value_type::InferredDynamicCast(gx) );
         my_inserted.Impl::iterator::operator=( Impl::insert( *(typename Impl::iterator *)posit, sx ) );
         return my_inserted;
-	}
-	const iterator &insert_front( const TreePtrInterface &gx ) override // Simulating the SimpleAssociatedContaner API 
-	{
+    }
+    const iterator &insert_front( const TreePtrInterface &gx ) override // Simulating the SimpleAssociatedContaner API 
+    {
         // Like multiset, we do allow more than one copy of the same element
-		value_type sx( value_type::InferredDynamicCast(gx) );
+        value_type sx( value_type::InferredDynamicCast(gx) );
         Impl::push_front( sx );
         my_inserted.Impl::iterator::operator=( prev(Impl::end()) );
         return my_inserted;
@@ -359,48 +359,48 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
         return my_erased;
     }
 
-	Sequential( const ContainerInterface &cns )
-	{
-		// TODO support const_interator properly and get rid of this const_cast
-		ContainerInterface *ns = const_cast< ContainerInterface * >( &cns );
-		for( typename ContainerInterface::iterator i=ns->begin();
-		     i != ns->end();
-		     ++i )
-		{
+    Sequential( const ContainerInterface &cns )
+    {
+        // TODO support const_interator properly and get rid of this const_cast
+        ContainerInterface *ns = const_cast< ContainerInterface * >( &cns );
+        for( typename ContainerInterface::iterator i=ns->begin();
+             i != ns->end();
+             ++i )
+        {
             Impl::push_back( (value_type)*i );
-		}
-	}
-	explicit Sequential( const TreePtrInterface &nx )
-	{
-		value_type sx( value_type::InferredDynamicCast(nx) );
-		Impl::push_back( sx );
-	}
-	template<typename L, typename R>
-	explicit inline Sequential( const pair<L, R> &p )
-	{
-		*this = Sequential<VALUE_TYPE>( p.first );
-		Sequential<VALUE_TYPE> t( p.second );
+        }
+    }
+    explicit Sequential( const TreePtrInterface &nx )
+    {
+        value_type sx( value_type::InferredDynamicCast(nx) );
+        Impl::push_back( sx );
+    }
+    template<typename L, typename R>
+    explicit inline Sequential( const pair<L, R> &p )
+    {
+        *this = Sequential<VALUE_TYPE>( p.first );
+        Sequential<VALUE_TYPE> t( p.second );
 
-		for( typename Sequential<VALUE_TYPE>::iterator i=t.begin();
-		     i != t.end();
-		     ++i )
-		{
+        for( typename Sequential<VALUE_TYPE>::iterator i=t.begin();
+             i != t.end();
+             ++i )
+        {
             Impl::push_back( *i );
-		}
-	}
-	explicit inline Sequential( const value_type &v )
-	{
-		push_back( v );
-	}
+        }
+    }
+    explicit inline Sequential( const value_type &v )
+    {
+        push_back( v );
+    }
 
-	// Covariant style only works with refs and pointers, so force begin/end to return refs safely
-	// This complies with STL's thread safety model. To quote SGI,
-	// "The SGI implementation of STL is thread-safe only in the sense that simultaneous accesses
-	// to distinct containers are safe, and simultaneous read accesses to to shared containers are
-	// safe. If multiple threads access a single container, and at least one thread may potentially
-	// write, then the user is responsible for ensuring mutual exclusion between the threads during
-	// the container accesses."
-	// So that's OK then.
+    // Covariant style only works with refs and pointers, so force begin/end to return refs safely
+    // This complies with STL's thread safety model. To quote SGI,
+    // "The SGI implementation of STL is thread-safe only in the sense that simultaneous accesses
+    // to distinct containers are safe, and simultaneous read accesses to to shared containers are
+    // safe. If multiple threads access a single container, and at least one thread may potentially
+    // write, then the user is responsible for ensuring mutual exclusion between the threads during
+    // the container accesses."
+    // So that's OK then.
     iterator my_begin, my_end, my_inserted, my_erased;
 };
 
@@ -416,106 +416,106 @@ struct SimpleAssociativeContainer : virtual ContainerCommon< ASSOCIATIVE_IMPL< T
     typedef TreePtr<VALUE_TYPE> value_type;
 
     inline SimpleAssociativeContainer<VALUE_TYPE>() {}
-	struct iterator : public ContainerCommon<Impl>::iterator
+    struct iterator : public ContainerCommon<Impl>::iterator
     {
-		inline iterator( typename Impl::iterator &i ) : Impl::iterator(i) {}
-		inline iterator() {}
-		virtual unique_ptr<typename ContainerInterface::iterator_interface> Clone() const
-		{
+        inline iterator( typename Impl::iterator &i ) : Impl::iterator(i) {}
+        inline iterator() {}
+        virtual unique_ptr<typename ContainerInterface::iterator_interface> Clone() const
+        {
             // Avoid delegating to ContainerInterface::iterator.
-			auto ni = make_unique<iterator>();
+            auto ni = make_unique<iterator>();
             ni->Impl::iterator::operator=( (typename Impl::iterator &)*this );
-			return ni;
-		}
-    	virtual void Mutate( const TreePtrInterface *v ) const
-		{
-		    // SimpleAssociativeContainers (unordered containers) do not allow elements to be modified
-		    // because the internal data structure depends on element values. So we 
-		    // erase the old element and insert the new one; thus, Mutate() should not be assumed O(1)
+            return ni;
+        }
+        virtual void Mutate( const TreePtrInterface *v ) const
+        {
+            // SimpleAssociativeContainers (unordered containers) do not allow elements to be modified
+            // because the internal data structure depends on element values. So we 
+            // erase the old element and insert the new one; thus, Mutate() should not be assumed O(1)
             // Avoid delegating to ContainerInterface::iterator.
-    		value_type s( value_type::InferredDynamicCast(*v) );
-    		((Impl *)owner)->erase( *this );
-		    *(typename Impl::iterator *)this = ((Impl *)owner)->insert( s ); // become an iterator for the newly inserted element
- 		}
-    	virtual const bool IsOrdered() const
-    	{
-    		return false; // no, SimpleAssociativeContainers are not ordered
-    	}
+            value_type s( value_type::InferredDynamicCast(*v) );
+            ((Impl *)owner)->erase( *this );
+            *(typename Impl::iterator *)this = ((Impl *)owner)->insert( s ); // become an iterator for the newly inserted element
+         }
+        virtual const bool IsOrdered() const
+        {
+            return false; // no, SimpleAssociativeContainers are not ordered
+        }
         SimpleAssociativeContainer<VALUE_TYPE> *owner;
-	};
+    };
 
     using ContainerCommon<Impl>::erase;
-	int erase( const TreePtrInterface &gx ) override
-	{
-		value_type sx( value_type::InferredDynamicCast(gx) );
-		return Impl::erase( sx );
-	}
+    int erase( const TreePtrInterface &gx ) override
+    {
+        value_type sx( value_type::InferredDynamicCast(gx) );
+        return Impl::erase( sx );
+    }
 
     const iterator &begin() override
     {
-    	my_begin.Impl::iterator::operator=( Impl::begin() );
-    	my_begin.owner = this;
-    	return my_begin;
+        my_begin.Impl::iterator::operator=( Impl::begin() );
+        my_begin.owner = this;
+        return my_begin;
     }
     const iterator &end() override
     {
-    	my_end.Impl::iterator::operator=( Impl::end() );
-    	my_end.owner = this;
-    	return my_end;
+        my_end.Impl::iterator::operator=( Impl::end() );
+        my_end.owner = this;
+        return my_end;
     }
-	const iterator &insert( const TreePtrInterface &gx ) override
-	{
-		value_type sx( value_type::InferredDynamicCast(gx) );
-		auto p = Impl::insert( sx );
+    const iterator &insert( const TreePtrInterface &gx ) override
+    {
+        value_type sx( value_type::InferredDynamicCast(gx) );
+        auto p = Impl::insert( sx );
         if( p.second )
             my_inserted.Impl::iterator::operator=( p.first );
         else
             my_inserted.Impl::iterator::operator=( Impl::end() );
         my_inserted.owner = this;
         return my_inserted;
-	}
-	const iterator &insert( const ContainerInterface::iterator_interface &pos, 
+    }
+    const iterator &insert( const ContainerInterface::iterator_interface &pos, 
                             const TreePtrInterface &gx ) override
-	{
+    {
         auto posit = dynamic_cast<const iterator *>( &pos );
         ASSERT( posit ); // if this fails, you passed insert() the wrong kind of iterator
-		value_type sx( value_type::InferredDynamicCast(gx) );
-		auto p = Impl::insert( *(typename Impl::iterator *)posit, sx );
+        value_type sx( value_type::InferredDynamicCast(gx) );
+        auto p = Impl::insert( *(typename Impl::iterator *)posit, sx );
         my_inserted.Impl::iterator::operator=( p.first );
         my_inserted.owner = this;
         return my_inserted;
-	}
-	const iterator &insert_front( const TreePtrInterface &gx ) override
-	{
-		return insert(gx);
-	}
-	template<typename OTHER>
-	const iterator &insert( const OTHER &gx )
-	{
-		value_type sx(gx);
-		auto p = Impl::insert( sx );
+    }
+    const iterator &insert_front( const TreePtrInterface &gx ) override
+    {
+        return insert(gx);
+    }
+    template<typename OTHER>
+    const iterator &insert( const OTHER &gx )
+    {
+        value_type sx(gx);
+        auto p = Impl::insert( sx );
         if( p.second )
             my_inserted.Impl::iterator::operator=( p.first );
         else
             my_inserted.Impl::iterator::operator=( Impl::end() );
         my_inserted.owner = this;
         return my_inserted;
-	}
-	template<typename OTHER>
-	const iterator &insert( const typename ContainerInterface::iterator_interface &pos, 
+    }
+    template<typename OTHER>
+    const iterator &insert( const typename ContainerInterface::iterator_interface &pos, 
                             const OTHER &gx )
-	{
-		value_type sx( value_type::InferredDynamicCast(gx) );
-		auto p = Impl::insert( pos, sx );
+    {
+        value_type sx( value_type::InferredDynamicCast(gx) );
+        auto p = Impl::insert( pos, sx );
         my_inserted.Impl::iterator::operator=( p.first );
         my_inserted.owner = this;
         return my_inserted;
-	}
-	template<typename OTHER>
-	const iterator &insert_front( const OTHER &gx )
-	{
-		return insert(gx);
-	}
+    }
+    template<typename OTHER>
+    const iterator &insert_front( const OTHER &gx )
+    {
+        return insert(gx);
+    }
 
     const iterator &erase( const typename ContainerInterface::iterator_interface &it ) override
     {
@@ -526,41 +526,41 @@ struct SimpleAssociativeContainer : virtual ContainerCommon< ASSOCIATIVE_IMPL< T
     }
 
     SimpleAssociativeContainer( const ContainerInterface &cns )
-	{
-		// TODO support const_interator properly and get rid of this const_cast
-    	ContainerInterface *ns = const_cast< ContainerInterface * >( &cns );
-		for( typename ContainerInterface::iterator i=ns->begin();
-		     i != ns->end();
-		     ++i )
-		{
+    {
+        // TODO support const_interator properly and get rid of this const_cast
+        ContainerInterface *ns = const_cast< ContainerInterface * >( &cns );
+        for( typename ContainerInterface::iterator i=ns->begin();
+             i != ns->end();
+             ++i )
+        {
             Impl::insert( *i );
-		}
-	}
+        }
+    }
     explicit SimpleAssociativeContainer( const TreePtrInterface &nx )
-	{
-		value_type sx( value_type::InferredDynamicCast(nx) );
+    {
+        value_type sx( value_type::InferredDynamicCast(nx) );
         Impl::insert( sx );
-	}
-	template<typename L, typename R>
-	explicit inline SimpleAssociativeContainer( const pair<L, R> &p )
-	{
-		*this = SimpleAssociativeContainer<VALUE_TYPE>( p.first );
-		SimpleAssociativeContainer<VALUE_TYPE> t( p.second );
+    }
+    template<typename L, typename R>
+    explicit inline SimpleAssociativeContainer( const pair<L, R> &p )
+    {
+        *this = SimpleAssociativeContainer<VALUE_TYPE>( p.first );
+        SimpleAssociativeContainer<VALUE_TYPE> t( p.second );
 
-		for( typename SimpleAssociativeContainer<VALUE_TYPE>::iterator i=t.begin();
-		     i != t.end();
-		     ++i )
-		{
+        for( typename SimpleAssociativeContainer<VALUE_TYPE>::iterator i=t.begin();
+             i != t.end();
+             ++i )
+        {
             Impl::insert( *i );
-		}
-	}
-	explicit inline SimpleAssociativeContainer( const value_type &v )
-	{
-		insert( v );
-	}
-	
-	// Permit return by reference for covariance.
-	iterator my_begin, my_end, my_inserted, my_erased;
+        }
+    }
+    explicit inline SimpleAssociativeContainer( const value_type &v )
+    {
+        insert( v );
+    }
+    
+    // Permit return by reference for covariance.
+    iterator my_begin, my_end, my_inserted, my_erased;
 };
 
 
@@ -585,28 +585,28 @@ template<typename VALUE_TYPE>
 struct Sequence : virtual Sequential< VALUE_TYPE >,
                   virtual SequenceInterface
 {
-// 	using Sequential< VALUE_TYPE >::Sequential;
+//     using Sequential< VALUE_TYPE >::Sequential;
 
-	inline Sequence() {}
-	template<typename L, typename R>
-	inline Sequence( const pair<L, R> &p ) : // explicit missing due usage in steps
-		Sequential< VALUE_TYPE >( p ) {}
-	template< typename OTHER >
-	inline Sequence( const TreePtr<OTHER> &v ) : // explicit missing due usage in steps
-		Sequential< VALUE_TYPE >( v ) {}
+    inline Sequence() {}
+    template<typename L, typename R>
+    inline Sequence( const pair<L, R> &p ) : // explicit missing due usage in steps
+        Sequential< VALUE_TYPE >( p ) {}
+    template< typename OTHER >
+    inline Sequence( const TreePtr<OTHER> &v ) : // explicit missing due usage in steps
+        Sequential< VALUE_TYPE >( v ) {}
 };
 
 template<typename VALUE_TYPE> 
 struct Collection : virtual COLLECTION_BASE< VALUE_TYPE >,
                     virtual CollectionInterface
 {
- 	inline Collection<VALUE_TYPE>() {}
-	template<typename L, typename R>
-	inline Collection( const pair<L, R> &p ) : // explicit missing due usage in steps
-		COLLECTION_BASE< VALUE_TYPE >( p ) {}
-	template< typename OTHER >
-	inline Collection( const TreePtr<OTHER> &v ) : // explicit missing due usage in steps
-		COLLECTION_BASE< VALUE_TYPE >( v ) {}
+     inline Collection<VALUE_TYPE>() {}
+    template<typename L, typename R>
+    inline Collection( const pair<L, R> &p ) : // explicit missing due usage in steps
+        COLLECTION_BASE< VALUE_TYPE >( p ) {}
+    template< typename OTHER >
+    inline Collection( const TreePtr<OTHER> &v ) : // explicit missing due usage in steps
+        COLLECTION_BASE< VALUE_TYPE >( v ) {}
 };
 
 
@@ -616,16 +616,16 @@ struct Collection : virtual COLLECTION_BASE< VALUE_TYPE >,
 template<typename VALUE_TYPE>
 struct Scaffold : VALUE_TYPE
 {
-	NODE_FUNCTIONS_FINAL
-	Sequence<Node> child_ptrs;	
+    NODE_FUNCTIONS_FINAL
+    Sequence<Node> child_ptrs;    
 };
 
 template<typename VALUE_TYPE>
 pair<TreePtr<Node>, Sequence<Node> *> TreePtr<VALUE_TYPE>::MakeScaffold() const
 {
-	// Don't instance TreePtr<Scaffold<X>> because very bad things happen
-	// including gcc 10.5 spinning forver chewing up memory (presumably
-	// its contemplating TreePtr<Scaffold<Scaffold<X>>> etc). 
+    // Don't instance TreePtr<Scaffold<X>> because very bad things happen
+    // including gcc 10.5 spinning forver chewing up memory (presumably
+    // its contemplating TreePtr<Scaffold<Scaffold<X>>> etc). 
     auto scaffold_sp = make_shared<Scaffold<VALUE_TYPE>>(); 
     TreePtr<Node> scaffold( scaffold_sp );
     return make_pair( scaffold, &(scaffold_sp->child_ptrs) );

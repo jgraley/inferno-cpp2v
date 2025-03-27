@@ -9,7 +9,7 @@ using namespace SR;
 void CombinePatterns::DoPatternTransformation( const PatternKnowledge &pk )
 {    
     TreePtr<Node> scp = pk.search_compare_root_pattern;
-	TreePtr<Node> rp = pk.replace_root_pattern;
+    TreePtr<Node> rp = pk.replace_root_pattern;
     FixupPointers( pk, scp, rp );
     pk.top_level_engine->Configure( scp, rp );
     

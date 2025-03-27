@@ -12,6 +12,6 @@ void PatternTransformationVector::operator()( VNStep &vnt )
         TRACE("Running pattern transformation\n"); 
         (*t)(vnt);
     }                            
-}		                           
+}                                   
 
 

@@ -11,19 +11,19 @@ using namespace SR;
 class EmbeddedSCRTest : public VNStep
 {
 public:
-	EmbeddedSCRTest();
+    EmbeddedSCRTest();
 };
 
 class EmbeddedSCRTest2 : public VNStep
 {
 public:
-	EmbeddedSCRTest2();
+    EmbeddedSCRTest2();
 };
 
 class EmbeddedSCRTest3 : public VNStep
 {
 public:
-	EmbeddedSCRTest3();
+    EmbeddedSCRTest3();
 };
 
 class FixCrazyNumber : public VNStep // find 29258 and turn it into 3 for #576

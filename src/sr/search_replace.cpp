@@ -45,7 +45,7 @@ void CompareReplace::Plan::PlanningStageOne(VNSequence *vn_sequence)
     scr_engine = make_shared<SCREngine>(vn_sequence, algo, agent_phases, compare_pattern, replace_pattern);
 
     list<const SCREngine *> scrs = scr_engine->GetSCREngines();
-	TRACE("SCR engines for this step: ")(scrs)("\n");
+    TRACE("SCR engines for this step: ")(scrs)("\n");
 }
 
     
@@ -96,7 +96,7 @@ void CompareReplace::Configure( TreePtr<Node> cp,
 
 void CompareReplace::PlanningStageOne(VNSequence *vn_sequence_)
 {
-	vn_sequence = vn_sequence_;
+    vn_sequence = vn_sequence_;
     plan.PlanningStageOne(vn_sequence);
 }
 
@@ -121,8 +121,8 @@ void CompareReplace::PlanningStageFive( shared_ptr<const Lacing> lacing )
 
 void CompareReplace::SetXTreeDb( shared_ptr<XTreeDatabase> x_tree_db_ )
 {
-	x_tree_db = x_tree_db_;
-	plan.scr_engine->SetXTreeDb( x_tree_db );
+    x_tree_db = x_tree_db_;
+    plan.scr_engine->SetXTreeDb( x_tree_db );
 }
 
 
@@ -169,13 +169,13 @@ Graphable::Block CompareReplace::GetGraphBlockInfo() const
 
 string CompareReplace::GetGraphId() const
 {
-	return "CR"+GetSerialString();
+    return "CR"+GetSerialString();
 }
 
 
 void CompareReplace::GenerateGraphRegions( Graph &graph ) const
 {
-	plan.scr_engine->GenerateGraphRegions(graph);
+    plan.scr_engine->GenerateGraphRegions(graph);
 }
 
 

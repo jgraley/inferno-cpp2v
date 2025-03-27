@@ -19,7 +19,7 @@ class XTreeDatabase;
 class Patch : public Traceable
 {
 public:
-	typedef list<shared_ptr<Patch>>::iterator ChildExpressionIterator;
+    typedef list<shared_ptr<Patch>>::iterator ChildExpressionIterator;
 
 protected:
     Patch( list<shared_ptr<Patch>> &&child_patches_ );
@@ -29,25 +29,25 @@ public:
     int GetNumChildExpressions() const;
     ChildExpressionIterator GetChildrenBegin();
     ChildExpressionIterator GetChildrenEnd();
-	list<shared_ptr<Patch>> &GetChildExpressions();
-	const list<shared_ptr<Patch>> &GetChildExpressions() const;
-	list<shared_ptr<Patch>> &&MoveChildExpressions();
-	
+    list<shared_ptr<Patch>> &GetChildExpressions();
+    const list<shared_ptr<Patch>> &GetChildExpressions() const;
+    list<shared_ptr<Patch>> &&MoveChildExpressions();
+    
     string GetChildExpressionsTrace() const;
 
-	void ForChildren(function<void(shared_ptr<Patch> &patch)> func);
+    void ForChildren(function<void(shared_ptr<Patch> &patch)> func);
 
-	static void ForDepthFirstWalk( shared_ptr<Patch> &base,
-								   function<void(shared_ptr<Patch> &patch)> func_in,
-								   function<void(shared_ptr<Patch> &patch)> func_out );
+    static void ForDepthFirstWalk( shared_ptr<Patch> &base,
+                                   function<void(shared_ptr<Patch> &patch)> func_in,
+                                   function<void(shared_ptr<Patch> &patch)> func_out );
 
-	void DepthFirstWalkImpl(function<void(shared_ptr<Patch> &patch)> func_in,
-			                function<void(shared_ptr<Patch> &patch)> func_out);
+    void DepthFirstWalkImpl(function<void(shared_ptr<Patch> &patch)> func_in,
+                            function<void(shared_ptr<Patch> &patch)> func_out);
 
-	list<shared_ptr<Patch>> GetChildren() const;
+    list<shared_ptr<Patch>> GetChildren() const;
 
 private:
-	list<shared_ptr<Patch>> child_patches;
+    list<shared_ptr<Patch>> child_patches;
 
 };
 
@@ -91,14 +91,14 @@ public:
 
     TreeZone &GetZone() override;
     const TreeZone &GetZone() const override;
-	  
+      
     shared_ptr<Patch> DuplicateToFree() const;
     
-	string GetTrace() const final;
+    string GetTrace() const final;
     
 private:
-	TreeZone zone;
-	list<RequiresSubordinateSCREngine *> embedded_markers;
+    TreeZone zone;
+    list<RequiresSubordinateSCREngine *> embedded_markers;
 };
 
 // ------------------------- FreeZonePatch --------------------------
@@ -118,32 +118,32 @@ public:
     list<RequiresSubordinateSCREngine *> GetEmbeddedMarkers() const final;
     void ClearEmbeddedMarkers() final;
 
-	ChildExpressionIterator SpliceOver( ChildExpressionIterator it_child, 
+    ChildExpressionIterator SpliceOver( ChildExpressionIterator it_child, 
                                         list<shared_ptr<Patch>> &&child_patches );
 
     FreeZone &GetZone() final;
     const FreeZone &GetZone() const final;
     
-	string GetTrace() const final;
+    string GetTrace() const final;
 
 private:
-	FreeZone zone;
+    FreeZone zone;
 };
 
 // ------------------------- TargettedPatch --------------------------
 
 class TargettedPatch : public Patch
 {
-public:	
-	TargettedPatch( TreeZone target_tree_zone_, 
-	                 shared_ptr<Zone> source_zone_,
-	                 list<shared_ptr<Patch>> &&child_patches );
+public:    
+    TargettedPatch( TreeZone target_tree_zone_, 
+                     shared_ptr<Zone> source_zone_,
+                     list<shared_ptr<Patch>> &&child_patches );
     const TreeZone &GetTargetTreeZone() const;
     shared_ptr<Zone> GetSourceZone() const;
 
 private:
-	TreeZone target_tree_zone;
-	shared_ptr<Zone> source_zone;
+    TreeZone target_tree_zone;
+    shared_ptr<Zone> source_zone;
 };
 
 }

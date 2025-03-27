@@ -15,18 +15,18 @@ namespace SR
 class Mutator : public Traceable
 {
 public:
-	Mutator( TreePtr<Node> parent_node_ );
-	
+    Mutator( TreePtr<Node> parent_node_ );
+    
     virtual void Mutate( TreePtr<Node> child_base,                               
                          list<shared_ptr<Mutator>> child_terminii = {} ) = 0;
-	TreePtr<Node> GetParentNode() const;
-	
-	// After population, a mutator can now provide an XLink that's valid for the new boundary
-	virtual const TreePtrInterface *GetTreePtrInterface() const = 0; // Only valid after populate
-	XLink GetXLink() const; // Only valid after populate
+    TreePtr<Node> GetParentNode() const;
+    
+    // After population, a mutator can now provide an XLink that's valid for the new boundary
+    virtual const TreePtrInterface *GetTreePtrInterface() const = 0; // Only valid after populate
+    XLink GetXLink() const; // Only valid after populate
 
 private:
-	TreePtr<Node> parent_node;
+    TreePtr<Node> parent_node;
 };    
     
 // ------------------------- SingularMutator --------------------------    
@@ -37,7 +37,7 @@ public:
     explicit SingularMutator( TreePtr<Node> parent_node, TreePtrInterface *dest_tree_ptr_ );
     void Mutate( TreePtr<Node> child_base,                               
                  list<shared_ptr<Mutator>> child_terminii = {} ) final;
-	const TreePtrInterface *GetTreePtrInterface() const final;
+    const TreePtrInterface *GetTreePtrInterface() const final;
     
     string GetTrace() const;
 
@@ -61,13 +61,13 @@ class ContainerMutator : public Mutator
      * being filled, and we'll get end() when what we want is the next 
      * element that will be there when we apply the update.
      */  
-     	
+         
 public:
     explicit ContainerMutator( TreePtr<Node> parent_node, 
-								ContainerInterface *dest_container_,
+                                ContainerInterface *dest_container_,
                                 ContainerInterface::iterator it_dest_placeholder_ );             
 
-	ContainerMutator &operator=( const ContainerMutator &other );
+    ContainerMutator &operator=( const ContainerMutator &other );
 
     void Mutate( TreePtr<Node> child_base, 
                  list<shared_ptr<Mutator>> child_terminii = {} ) final;
@@ -77,7 +77,7 @@ public:
     static shared_ptr<ContainerMutator> FindMatchingTerminus( ContainerInterface *container,
                                                                ContainerInterface::iterator it_placeholder,
                                                                list<shared_ptr<Mutator>> &candidate_terminii );
-	const TreePtrInterface *GetTreePtrInterface() const final;
+    const TreePtrInterface *GetTreePtrInterface() const final;
     
     void Validate() const;
     string GetTrace() const;

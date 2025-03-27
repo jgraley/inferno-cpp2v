@@ -20,64 +20,64 @@ using namespace SYM;
 
 void RelocatingAgent::Dependencies::AddDep( XLink dep )
 {
-	deps.insert( dep );
-}		
+    deps.insert( dep );
+}        
 
 
 void RelocatingAgent::Dependencies::AddChainTo( shared_ptr<Dependencies> chain )
 {
-	chains.insert( chain );
+    chains.insert( chain );
 }
 
 
 void RelocatingAgent::Dependencies::AddAllFrom( const Dependencies &other )
 {
     for( XLink d : other.deps )    
-		AddDep(d);
+        AddDep(d);
     for( shared_ptr<Dependencies> c : other.chains )    
-		AddChainTo(c);
+        AddChainTo(c);
 }
 
 
 set<XLink> RelocatingAgent::Dependencies::GetAll() const
 {
-	set<XLink> all_deps = deps;
+    set<XLink> all_deps = deps;
     for( shared_ptr<Dependencies> c : chains )    
-	{
-		set<XLink> c_deps = c->GetAll();
-		for( XLink d : c_deps )   
-			all_deps.insert(d);
-	}	
-	
-	return all_deps;
+    {
+        set<XLink> c_deps = c->GetAll();
+        for( XLink d : c_deps )   
+            all_deps.insert(d);
+    }    
+    
+    return all_deps;
 }
 
 
 void RelocatingAgent::Dependencies::Clear()
 {
-	deps.clear();
-}	
+    deps.clear();
+}    
 
 
 //---------------------------------- RelocatingQueryResult ------------------------------------    
 
 RelocatingAgent::RelocatingQueryResult::RelocatingQueryResult() :
-	de_info({ nullptr, {} }),
-	base_xlink()
+    de_info({ nullptr, {} }),
+    base_xlink()
 {
 }
-	
-	
+    
+    
 RelocatingAgent::RelocatingQueryResult::RelocatingQueryResult( XLink base_xlink_ ) :
-	de_info({ nullptr, {} }),
-	base_xlink( base_xlink_ )
+    de_info({ nullptr, {} }),
+    base_xlink( base_xlink_ )
 {
 }
-	
-	
+    
+    
 RelocatingAgent::RelocatingQueryResult::RelocatingQueryResult( TreePtr<Node> induced_base_node, const set<XLink> &deps ) :
-	de_info{ induced_base_node, deps },
-	base_xlink()
+    de_info{ induced_base_node, deps },
+    base_xlink()
 {
 }
 
@@ -90,33 +90,33 @@ RelocatingAgent::RelocatingQueryResult::RelocatingQueryResult( TreePtr<Node> ind
 
 bool RelocatingAgent::RelocatingQueryResult::IsValid() const
 {
-	return de_info.induced_base_node || base_xlink;
+    return de_info.induced_base_node || base_xlink;
 }
 
 
 bool RelocatingAgent::RelocatingQueryResult::IsXTree() const
 {
-	return !!base_xlink;
+    return !!base_xlink;
 }
 
-	
+    
 bool RelocatingAgent::RelocatingQueryResult::IsInduced() const
 {
-	return !!de_info.induced_base_node;
+    return !!de_info.induced_base_node;
 }
 
-	
+    
 DomainExtension::Extender::Info RelocatingAgent::RelocatingQueryResult::TryGetDEInfo() const
 {
-	return de_info;
+    return de_info;
 }
 
 
 XLink RelocatingAgent::RelocatingQueryResult::GetBaseXLink() const
 {
-	ASSERTS( IsValid() );
-	ASSERTS( IsXTree() );
-	return base_xlink;
+    ASSERTS( IsValid() );
+    ASSERTS( IsXTree() );
+    return base_xlink;
 }
 
 
@@ -136,23 +136,23 @@ SYM::Lazy<SYM::BooleanExpression> RelocatingAgent::SymbolicNormalLinkedQueryPRed
 
 DomainExtension::Extender::Info RelocatingAgent::GetDomainExtension( const XTreeDatabase *db, XLink stimulus_xlink ) const
 {
-	
-	if( stimulus_xlink == XLink::MMAX_Link )
-		return DomainExtension::Extender::Info(); // MMAX at base never expands domain because then, all child patterns are also MMAX
-	if( !IsPreRestrictionMatch(stimulus_xlink) )
-		return DomainExtension::Extender::Info(); // Failed pre-restriction so can't expand domain
+    
+    if( stimulus_xlink == XLink::MMAX_Link )
+        return DomainExtension::Extender::Info(); // MMAX at base never expands domain because then, all child patterns are also MMAX
+    if( !IsPreRestrictionMatch(stimulus_xlink) )
+        return DomainExtension::Extender::Info(); // Failed pre-restriction so can't expand domain
 
-	RelocatingQueryResult tq_result;
-	try
-	{
-		tq_result = RunRelocatingQuery( db, stimulus_xlink );
-	}
-	catch( ::Mismatch & ) 
-	{
-		return DomainExtension::Extender::Info();
-	}
-	
-	return tq_result.TryGetDEInfo();
+    RelocatingQueryResult tq_result;
+    try
+    {
+        tq_result = RunRelocatingQuery( db, stimulus_xlink );
+    }
+    catch( ::Mismatch & ) 
+    {
+        return DomainExtension::Extender::Info();
+    }
+    
+    return tq_result.TryGetDEInfo();
 }
 
 
@@ -164,7 +164,7 @@ void RelocatingAgent::Reset()
 
 bool RelocatingAgent::IsExtenderChannelLess( const Extender &r ) const
 {
-	return GetExtenderChannelOrdinal() < r.GetExtenderChannelOrdinal();
+    return GetExtenderChannelOrdinal() < r.GetExtenderChannelOrdinal();
 }
 
 
@@ -185,7 +185,7 @@ list<shared_ptr<SymbolExpression>> RelocatingAgent::RelocateOperator::GetSymbolO
 unique_ptr<SymbolicResult> RelocatingAgent::RelocateOperator::Evaluate( const EvalKit &kit,
                                                                       list<unique_ptr<SymbolicResult>> &&op_results ) const 
 {
-	// Extract xlink from symbolic result
+    // Extract xlink from symbolic result
     ASSERT( op_results.size()==1 );            
     unique_ptr<SymbolicResult> stimulus_linkset = OnlyElementOf(move(op_results));
     if( !stimulus_linkset->IsDefinedAndUnique() )
@@ -200,22 +200,22 @@ unique_ptr<SymbolicResult> RelocatingAgent::RelocateOperator::Evaluate( const Ev
     // Relocation operation can fail: if so call it a NaS
     if( tq_result.IsInduced() )
     {
-	    // We are required to have already added the new node to the domain
-		// during domain extension, so use the node to fetch the unique XLink
-		XLink unique_xlink = kit.x_tree_db->GetDEChannel(agent)->GetUniqueDomainExtension(stimulus_xlink, tq_result.TryGetDEInfo().induced_base_node);
+        // We are required to have already added the new node to the domain
+        // during domain extension, so use the node to fetch the unique XLink
+        XLink unique_xlink = kit.x_tree_db->GetDEChannel(agent)->GetUniqueDomainExtension(stimulus_xlink, tq_result.TryGetDEInfo().induced_base_node);
     
-		// Form a symbol result to return.       
-		return make_unique<UniqueResult>( unique_xlink );
-	}
+        // Form a symbol result to return.       
+        return make_unique<UniqueResult>( unique_xlink );
+    }
     else if( tq_result.IsXTree() ) // parent link was supplied
     {
-	    // If we got an XLink, just return it, don't bother DomainExtension
+        // If we got an XLink, just return it, don't bother DomainExtension
         return make_unique<UniqueResult>( tq_result.GetBaseXLink() );
-	}
-	else // invalid
-	{
+    }
+    else // invalid
+    {
         return make_unique<EmptyResult>();        
-	}
+    }
 }
 
 
@@ -242,7 +242,7 @@ Expression::Precedence RelocatingAgent::RelocateOperator::GetPrecedence() const
 
 const RelocatingAgent *RelocatingAgent::RelocateOperator::GetAgent() const
 {
-	return agent;
+    return agent;
 }
 
-	
+    
