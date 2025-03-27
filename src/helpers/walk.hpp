@@ -89,6 +89,7 @@ typedef ContainerFromIterator< Walk_iterator, TreePtr<Node>, Filter *, Filter * 
 /// Filter that only matches each Node one time, then not again until Reset() is called
 struct UniqueFilter : public Filter
 {
+	virtual ~UniqueFilter() = default;
     virtual bool IsMatch( TreePtr<Node> context,
                           TreePtr<Node> root );
     void Reset() { seen.clear(); }                         
