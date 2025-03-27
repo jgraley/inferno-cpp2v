@@ -26,8 +26,8 @@ OPTIONS += -Wreturn-type
 # Warn if variable looks like used before init
 OPTIONS += -Wuninitialized -Wmaybe-uninitialized
 
-OPTIONS += -Werror=nonnull-compare
-#OPTIONS += -Wall
+OPTIONS += -Werror=frame-address
+OPTIONS += -Wall
 
 # Treat all warnings as errors 
 OPTIONS += -Werror

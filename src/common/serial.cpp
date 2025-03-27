@@ -218,28 +218,14 @@ void LeakCheck::DumpCounts( int min )
                    (" %llu instances\n", p.second.count)
                    ("destructs: ")(p.second.destructs)("\n");
 }
-
-#define TRY(SEQ, LEVEL) \
-    if( !ON_STACK( __builtin_frame_address(LEVEL) ) ) \
-        break; \
-    SEQ.push_back( __builtin_extract_return_addr(__builtin_return_address(LEVEL)) ); 
  
 
 LeakCheck::Origin LeakCheck::GetOrigin()
 {
     Origin o;
-    do 
-    {
-        TRY(o, 1)
-        TRY(o, 2)
-        TRY(o, 3)
-        TRY(o, 4)
-        TRY(o, 5)
-    } while(0);
+    // This was doing __builtin_frame_address() with non-zero argument, but this is not now allowed under -Wall
     return o;
 }
-
-#undef TRY
 
 
 map<LeakCheck::Origin, LeakCheck::Block> LeakCheck::instance_counts;
