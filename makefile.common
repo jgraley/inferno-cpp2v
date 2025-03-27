@@ -32,6 +32,9 @@ OPTIONS += -I.
 # Warn if return is missing
 OPTIONS += -Wreturn-type
 
+# Warn if variable looks like used before init
+OPTIONS += -Wuninitialized -Wmaybe-uninitialized
+
 # Treat all warnings as errors 
 OPTIONS += -Werror
 
@@ -39,7 +42,7 @@ OPTIONS += -Werror
 OPTIONS += -Wfatal-errors
 
 # Optimisation level.
-OPTIONS += -O2
+OPTIONS += -Og
 
 # We supply an ASSERT handler in common/trace.cpp
 OPTIONS += -DBOOST_ENABLE_ASSERT_HANDLER

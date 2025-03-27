@@ -270,6 +270,7 @@ private:
 				sign = false;
 				break;
 			case clang::DeclSpec::TSS_unspecified:
+			default:
 				sign = default_signed;
 				break;
 			}

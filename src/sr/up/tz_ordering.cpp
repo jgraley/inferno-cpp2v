@@ -8,6 +8,8 @@
 
 #include <iostream>
 
+//#define DEBUG
+
 using namespace SR;                   
 
 // ------------------------- TreeZoneOrderingHandler --------------------------
@@ -339,7 +341,7 @@ void TreeZoneOrderingHandler::FindOutOfOrder( PatchRecords &patch_records,
 		// - where it would have been according to DF ordering (now consecutive)
 		//FTRACE("Looking for concatenations:\n", l_ooo);
 		bool first = true;
-		int prev_i_front, prev_i_back;
+		int prev_i_front=0, prev_i_back=0;
 		for( map<const int, int>::iterator it = runs_by_front_index.begin();
 		     it != runs_by_front_index.end();
 		     ++it )

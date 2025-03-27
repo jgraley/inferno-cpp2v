@@ -609,6 +609,7 @@ struct Collection : virtual COLLECTION_BASE< VALUE_TYPE >,
 		COLLECTION_BASE< VALUE_TYPE >( v ) {}
 };
 
+
 // Scaffold nodes for temporary insertion into the tree.
 // Scaffold nodes need to match the type of an existing TreePtr, so we have
 // to template them and create them from TreePtrs.
@@ -616,15 +617,20 @@ template<typename VALUE_TYPE>
 struct Scaffold : VALUE_TYPE
 {
 	NODE_FUNCTIONS_FINAL
-	Sequence<Node> child_ptrs;
+	Sequence<Node> child_ptrs;	
 };
 
 template<typename VALUE_TYPE>
 pair<TreePtr<Node>, Sequence<Node> *> TreePtr<VALUE_TYPE>::MakeScaffold() const
 {
-    auto scaffold = new Scaffold<VALUE_TYPE>(); 
-    return make_pair( TreePtr<Node>(scaffold), &(scaffold->child_ptrs) );
+	// Don't instance TreePtr<Scaffold<X>> because very bad things happen
+	// including gcc 10.5 spinning forver chewing up memory (presumably
+	// its contemplating TreePtr<Scaffold<Scaffold<X>>> etc). 
+    auto scaffold_sp = make_shared<Scaffold<VALUE_TYPE>>(); 
+    TreePtr<Node> scaffold( scaffold_sp );
+    return make_pair( scaffold, &(scaffold_sp->child_ptrs) );
 }
+
 
 
 #endif /* GENERICS_HPP */

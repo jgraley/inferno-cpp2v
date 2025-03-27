@@ -325,6 +325,7 @@ Orderable::Diff SpecificFloatSemantics::OrderCompare3WayCovariant( const Orderab
         // Note: just subtracting could overflow
         break;
     case REPEATABLE:
+    default:
         // Repeatable ordering stops at type
         d = 0;
         break;
