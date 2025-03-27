@@ -38,7 +38,7 @@ Graphable::Block Node::GetGraphBlockInfo() const
     block.node = sp_this;
         
     vector< Itemiser::Element * > members = Itemise();
-	for( int i=0; i<members.size(); i++ )
+	for( vector< Itemiser::Element * >::size_type i=0; i<members.size(); i++ )
 	{
 		if( SequenceInterface *seq = dynamic_cast<SequenceInterface *>(members[i]) )
             block.sub_blocks = block.sub_blocks + GetSubblocks(seq);

@@ -22,7 +22,7 @@ shared_ptr<IdentifierTracker::TNode> IdentifierTracker::Find( shared_ptr<Node> n
 {
     ASSERT( node );
     shared_ptr<TNode> found;
-    for( int i=0; i<tnodes.size(); i++ )
+    for( deque< shared_ptr<TNode> >::size_type i=0; i<tnodes.size(); i++ )
     {
         //TRACE("%d of %d T%p\n", i, tnodes.size(), tnodes[i].get() );
         if( tnodes[i]->node == node )
@@ -151,7 +151,7 @@ string IdentifierTracker::ToString( shared_ptr<TNode> tss )
         return string("T<nil>");
 
     string s;
-    int i=0;
+    deque< shared_ptr<TNode> >::size_type i=0;
     shared_ptr<TNode> ts = tss;
     while( ts )
     {        
@@ -283,7 +283,7 @@ shared_ptr<Node> IdentifierTracker::TryGet( const clang::IdentifierInfo *II, sha
         
     int best_distance=NOMATCH;
     shared_ptr<TNode> best_tnode;
-    for( int i=0; i<tnodes.size(); i++ )
+    for( deque< shared_ptr<TNode> >::size_type i=0; i<tnodes.size(); i++ )
     {
         
         int distance = IsIdentifierMatch( II, start, tnodes[i], recurse );

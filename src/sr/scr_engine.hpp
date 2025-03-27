@@ -156,7 +156,7 @@ private:
     static bool rep_error;
     
     vector<int> stop_after;
-    int depth;    
+    vector<int>::size_type depth;    
     
     shared_ptr<XTreeDatabase> x_tree_db;
     mutable SolutionMap replace_solution;

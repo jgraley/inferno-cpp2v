@@ -22,12 +22,12 @@ string GetInnermostTemplateParam( string s )
 
 string RemoveAllTemplateParam( string s )
 {
-    int n;
+    string::size_type n;
     for( n=0; n<s.size(); n++ )
     {
         if( s[n] == '<' )        
         {
-            int nn;
+            string::size_type nn;
             for( nn=n; nn<s.size(); nn++ )
             {            
                 if( s[nn] == '>' )        
@@ -44,7 +44,7 @@ string RemoveAllTemplateParam( string s )
 
 string RemoveOneOuterScope( string s )
 {
-    int n = s.find("::");
+    string::size_type n = s.find("::");
 	if( n != string::npos )
 	    s = s.substr( n+2 );
     return s;
@@ -63,8 +63,8 @@ void RemoveCommonPrefix( string &s1, string &s2 )
 
 string RemoveOuterTemplate( string s )
 {
-    size_t open_pos = s.find('<');
-    size_t close_pos = s.rfind('>');
+    string::size_type open_pos = s.find('<');
+    string::size_type close_pos = s.rfind('>');
     if( open_pos != string::npos && close_pos != string::npos )
         s = s.substr(open_pos+1, close_pos-(open_pos+1));
     return s;

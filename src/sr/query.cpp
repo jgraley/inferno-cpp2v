@@ -116,7 +116,7 @@ string DecidedQuery::GetTrace() const
 
     bool first = true;
     s += "Decisions: [";
-    for( int i=0; i<decisions.size(); i++ )
+    for( Ranges::size_type i=0; i<decisions.size(); i++ )
     {
         if( !first )
             s += ",\n";
@@ -177,7 +177,7 @@ void PatternQuery::RegisterEvaluator( shared_ptr<BooleanEvaluator> e )
 }	
 
 
-void DecidedQuery::Invalidate( int bc )
+void DecidedQuery::Invalidate( Choices::size_type bc )
 {
     // TODO may not need all thes preconditions
     ASSERT( !choices.empty() );
@@ -191,7 +191,7 @@ void DecidedQuery::Invalidate( int bc )
 }
 
 
-void DecidedQuery::SetChoice( int bc, Choice newc )
+void DecidedQuery::SetChoice( Choices::size_type bc, Choice newc )
 {
     ASSERT( !choices.empty() );
     ASSERT( bc >= 0 );

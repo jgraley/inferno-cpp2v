@@ -105,7 +105,7 @@ void Conjecture::FillChoicesWithHardBegin( AgentRecords::const_iterator rit )
     AgentRecord record = rit->second;
     auto query = record.query;
 
-    for( int i=0; i<query->GetChoices().size(); i++ )
+    for( Choices::size_type i=0; i<query->GetChoices().size(); i++ )
     {
         DecidedQueryCommon::Choice new_choice;
         new_choice.mode = DecidedQueryCommon::Choice::BEGIN;

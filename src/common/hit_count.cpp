@@ -4,7 +4,7 @@
 bool operator<( const HitCount::Category &l, const HitCount::Category &r )
 {
     // prioritise the comparisons in a way that makes for a nice dump when dumped in order
-    for( int i=0; i<ReadArgs::hits_format.size(); i++ )
+    for( string::size_type i=0; i<ReadArgs::hits_format.size(); i++ )
     {
         switch( ReadArgs::hits_format[i] )
         {

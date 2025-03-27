@@ -151,8 +151,8 @@ public:
     virtual const Links &GetMultiplicityLinks() const = 0; 
     virtual Links GetAllLinks() const = 0; 
     
-    virtual void Invalidate( int bc ) = 0;
-    virtual void SetChoice( int bc, Choice newc ) = 0;
+    virtual void Invalidate( Choices::size_type bc ) = 0;
+    virtual void SetChoice( Choices::size_type bc, Choice newc ) = 0;
     virtual void PushBackChoice( Choice newc ) = 0;    
 };
 
@@ -166,30 +166,30 @@ public:
     void Start();
     void Reset();
 
-    ContainerInterface::iterator RegisterDecision( const Range &d );
+    ContainerInterface::iterator RegisterDecision( const Range &d ) final;
     ContainerInterface::iterator RegisterDecision( ContainerInterface::iterator begin,
                                                    ContainerInterface::iterator end,
                                                    bool inclusive,
-                                                   std::shared_ptr<ContainerInterface> container=nullptr );
-    ContainerInterface::iterator RegisterDecision( std::shared_ptr<ContainerInterface> container, bool inclusive );
+                                                   std::shared_ptr<ContainerInterface> container=nullptr ) final;
+    ContainerInterface::iterator RegisterDecision( std::shared_ptr<ContainerInterface> container, bool inclusive ) final;
     ContainerInterface::iterator RegisterDecision( const Sequence<Node> &container, bool inclusive );
     ContainerInterface::iterator RegisterDecision( const Collection<Node> &container, bool inclusive );
-    void CompleteDecisionsWithEmpty();
+    void CompleteDecisionsWithEmpty() final;
 
-    void RegisterNormalLink( PatternLink plink, XLink xlink ); 
-    void RegisterAbnormalLink( PatternLink plink, XLink xlink ); 
-    void RegisterMultiplicityLink( PatternLink plink, XLink xlink ); 
+    void RegisterNormalLink( PatternLink plink, XLink xlink ) final; 
+    void RegisterAbnormalLink( PatternLink plink, XLink xlink ) final; 
+    void RegisterMultiplicityLink( PatternLink plink, XLink xlink ) final; 
                                                   
-    const Links &GetNormalLinks() const { return normal_links; } 
-    const Links &GetAbnormalLinks() const { return abnormal_links; }
-    const Links &GetMultiplicityLinks() const { return multiplicity_links; }
-    Links GetAllLinks() const; 
+    const Links &GetNormalLinks() const final { return normal_links; } 
+    const Links &GetAbnormalLinks() const final { return abnormal_links; }
+    const Links &GetMultiplicityLinks() const final { return multiplicity_links; }
+    Links GetAllLinks() const final; 
      
-    const Choices &GetChoices() const { return choices; }
-    const Ranges &GetDecisions() const { return decisions; }
-    void Invalidate( int bc );
-    void SetChoice( int bc, Choice newc );
-    void PushBackChoice( Choice newc );    
+    const Choices &GetChoices() const final { return choices; }
+    const Ranges &GetDecisions() const final { return decisions; }
+    void Invalidate( Choices::size_type bc ) final;
+    void SetChoice( Choices::size_type bc, Choice newc ) final;
+    void PushBackChoice( Choice newc ) final;    
     string GetTrace() const;    
     
 private: friend class Conjecture;

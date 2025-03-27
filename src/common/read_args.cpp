@@ -72,7 +72,7 @@ void ReadArgs::Usage(string msg)
     exit(1);
 }
 
-string ReadArgs::GetArg( int al )
+string ReadArgs::GetArg( size_t al )
 {
     if( strlen(argv[curarg]) > al+1 )
     {
@@ -237,13 +237,12 @@ void ReadArgs::ParseQuitAfter(string arg)
 {
     quitafter = true;
 
-    int p = 0;
-    int i = 0;
-    int dot = 0;
+    string::size_type p = 0;
+    string::size_type dot = 0;
     bool first = true;
     do
     {
-        dot = arg.find('.', p);
+        string::size_type dot = arg.find('.', p);
         string s;
         if( dot != string::npos )   
             s = arg.substr(p, dot-p);

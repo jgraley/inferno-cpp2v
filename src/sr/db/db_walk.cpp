@@ -213,7 +213,7 @@ void DBWalk::VisitItemise( const WalkKit &kit,
 {
     ASSERT(xlink)("This probably means we're walking an incomplete tree");
     vector< Itemiser::Element * > x_items = xlink.GetChildTreePtr()->Itemise();
-    for( int item_ordinal=0; item_ordinal<x_items.size(); item_ordinal++ )
+    for( vector< Itemiser::Element * >::size_type item_ordinal=0; item_ordinal<x_items.size(); item_ordinal++ )
     {
         Itemiser::Element *xe = x_items[item_ordinal];
         if( auto x_seq = dynamic_cast<SequenceInterface *>(xe) )

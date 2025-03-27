@@ -117,7 +117,7 @@ TreePtr<Node> VNSequence::TransformStep( int step_index )
                  
 void VNSequence::ForSteps( function<void(int)> body )
 {
-    for( int i=0; i<steps.size(); i++ )
+    for( vector< shared_ptr<VNStep> >::size_type i=0; i<steps.size(); i++ )
         body( i );
 }
                  

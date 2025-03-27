@@ -126,7 +126,7 @@ template<typename T, class A>
 string Trace(const vector<T, A> &v) 
 {
     list<string> elts;
-    for( int i=0; i<v.size(); i++ )
+    for( vector<void*>::size_type i=0; i<v.size(); i++ )
         elts.push_back( Trace(v.at(i)) );
     return Join( elts, CONTAINER_SEP, "[", "]" );
 }

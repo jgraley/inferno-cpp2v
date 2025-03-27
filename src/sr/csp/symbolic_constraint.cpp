@@ -64,7 +64,7 @@ void SymbolicConstraint::Plan::DetermineHintExpressions()
         ForPower<bool>( other_vars_vec.size(), index_range_bool, [&](vector<bool> indices)
         {
             SYM::TruthTableSolver::GivenSymbolSet givens;
-            for( int i=0; i<other_vars_vec.size(); i++ )            
+            for( vector<VariableId>::size_type i=0; i<other_vars_vec.size(); i++ )            
                 if( indices.at(i) )
                     givens.insert( other_vars_vec[i] );
             

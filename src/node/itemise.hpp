@@ -110,7 +110,7 @@ public:
 
 	template< class ITEMISE_TYPE >
 	inline static Itemiser::Element *ItemiseIndexStatic( const ITEMISE_TYPE *itemise_object,
-			                                             int i )
+			                                             vector< uintptr_t >::size_type i )
 	{
 		//TRACE("ItemiseIndex() index=%d obj=%p *obj=", i, itemise_object)(*itemise_object)(" size=%d\n", sizeof(*itemise_object));
 		const vector< uintptr_t > &v = BasicItemiseStatic( itemise_object );
@@ -143,7 +143,7 @@ public:
     { \
         return Itemiser::ItemiseStatic( this, itemise_object ? itemise_object : this ); \
     } \
-    virtual Itemiser::Element *ItemiseIndex( int i ) const  \
+    virtual Itemiser::Element *ItemiseIndex( vector< uintptr_t >::size_type i ) const  \
     { \
         return Itemiser::ItemiseIndexStatic( this, i ); \
     } \

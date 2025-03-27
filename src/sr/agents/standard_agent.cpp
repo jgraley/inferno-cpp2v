@@ -504,7 +504,7 @@ void StandardAgent::MaybeChildrenPlanOverlay( PatternLink me_plink,
     // Loop over all the members of under (which can be a subset of dest)
     // and for non-nullptr members, duplicate them by recursing and write the
     // duplicates to the destination.
-    for( int i=0; i<my_items.size(); i++ )
+    for( vector< Itemiser::Element * >::size_type i=0; i<my_items.size(); i++ )
     {
         ASSERT( my_items[i] )( "itemise returned null element" );
         ASSERT( under_items[i] )( "itemise returned null element" );
@@ -620,7 +620,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingPattern( const
     TRACE("Copying %d members from under_node=", dest_items.size())(*under_node)(" dest=")(*dest)("\n");
     // i tracks items in under/dest, j tracks items in me
 	bool in_me;
-    for( int i=0, j=0; i<dest_items.size(); i++, in_me && j++ )
+    for( vector< Itemiser::Element * >::size_type i=0, j=0; i<dest_items.size(); i++, in_me && j++ )
     {
         ASSERT( under_items[i] )( "itemise returned null element" );
         ASSERT( dest_items[i] )( "itemise returned null element" );
@@ -750,7 +750,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingX( const Repla
     TRACE("Copying %d members from under_node=", dest_items.size())(*under_node)(" dest=")(*dest)("\n");
     // i tracks items in under/dest, j tracks items in me
 	bool in_me;
-    for( int i=0, j=0; i<dest_items.size(); i++, in_me && j++ )
+    for( vector< Itemiser::Element * >::size_type i=0, j=0; i<dest_items.size(); i++, in_me && j++ )
     {
         ASSERT( under_items[i] )( "itemise returned null element" );
         ASSERT( dest_items[i] )( "itemise returned null element" );
@@ -878,7 +878,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutNormal( const ReplaceKit &
     // Loop over all the members of pattern (which can be a subset of dest)
     // and for non-nullptr members, duplicate them by recursing and write the
     // duplicates to the destination.
-    for( int i=0; i<dest_items.size(); i++ )
+    for( vector< Itemiser::Element * >::size_type i=0; i<dest_items.size(); i++ )
     {
     	TRACE("Copying member %d\n", i );
         ASSERT( my_items[i] )( "itemise returned null element" );

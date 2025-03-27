@@ -41,7 +41,7 @@ void ReferenceSolver::Plan::DeduceVariables()
 {   
     set<VariableId> free_variables_set;
     free_variables_to_indices.clear();
-    for( int i=0; i<free_variables.size(); i++ )   
+    for( set<VariableId>::size_type i=0; i<free_variables.size(); i++ )   
     {    
         const VariableId &v = free_variables.at(i);
         InsertSolo(free_variables_set, v); // Checks free vars are unique
@@ -99,11 +99,11 @@ void ReferenceSolver::Plan::DeduceVariables()
         {
             // Which variables complete this contraint
             set<int> cumulative_free_vars;
-            for( int i=0; i<free_variables.size(); i++ )      
+            for( set<int>::size_type i=0; i<free_variables.size(); i++ )      
             {
                 cumulative_free_vars.insert(i);
                 bool got_all_c_free_vars = true;
-                for( int j : c_free_var_indices )
+                for( set<int>::size_type j : c_free_var_indices )
                     if( cumulative_free_vars.count(j) == 0 )
                         got_all_c_free_vars = false;
                 if( got_all_c_free_vars )

@@ -58,7 +58,7 @@ Orderable::Diff SimpleCompare::Compare3Way( const Node &l, const Node &r ) const
     if( sd != 0 )
         return sd; 
     
-    for( int i=0; i<l_items.size(); i++ )
+    for( vector< Itemiser::Element * >::size_type i=0; i<l_items.size(); i++ )
     {
         ASSERT( l_items[i] )( "itemise returned null element");
         ASSERT( r_items[i] )( "itemise returned null element");

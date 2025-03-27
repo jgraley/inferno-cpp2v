@@ -35,7 +35,7 @@ void SR::TestRelationProperties( const vector<KeyType> &keys,
         if( get_special && randval < RANDVAL_RANGE ) // Try to return special
         {
             KeyType new_key, key;
-            for( int t=0; t<keys.size(); t++ ) // Only make this many attempts
+            for( typename vector<KeyType>::size_type t=0; t<keys.size(); t++ ) // Only make this many attempts
             {
                 key = keys[random_index(random_gen)];
                 new_key = get_special( key, randval );       
@@ -52,7 +52,7 @@ void SR::TestRelationProperties( const vector<KeyType> &keys,
     };        
 
     // Stability property
-    for( int i=0; i<keys.size()*10; i++ )
+    for( typename vector<KeyType>::size_type i=0; i<keys.size()*10; i++ )
     {
         KeyType a_key = get_random_key();
         KeyType b_key = get_random_key();
@@ -69,7 +69,7 @@ void SR::TestRelationProperties( const vector<KeyType> &keys,
     if( expect_totality )
     {
         // Totality property
-        for( int i=0; i<keys.size()*10; i++ )
+        for( typename vector<KeyType>::size_type i=0; i<keys.size()*10; i++ )
         {
             KeyType a_key = get_random_key();
             KeyType b_key = get_random_key();
@@ -96,7 +96,7 @@ void SR::TestRelationProperties( const vector<KeyType> &keys,
     }
     
     // Symmetric/antisymmetric property
-    for( int i=0; i<keys.size()*10; i++ )
+    for( typename vector<KeyType>::size_type i=0; i<keys.size()*10; i++ )
     {
         KeyType a_key = get_random_key();
         KeyType b_key = get_random_key();
@@ -130,7 +130,7 @@ void SR::TestRelationProperties( const vector<KeyType> &keys,
     }
      
     // Transitive property
-    for( int i=0; i<keys.size()*10; i++ )
+    for( typename vector<KeyType>::size_type i=0; i<keys.size()*10; i++ )
     {
         KeyType a_key = get_random_key();
         KeyType b_key = get_random_key();

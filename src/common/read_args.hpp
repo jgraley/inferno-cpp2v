@@ -15,7 +15,7 @@ class ReadArgs
 {
 public:
     void Usage(string msg);
-    std::string GetArg( int al=1 );
+    std::string GetArg( size_t al=1 );
     ReadArgs( int argc, char *argv[] );
 
     static std::string exename;

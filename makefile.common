@@ -26,6 +26,9 @@ OPTIONS += -Wreturn-type
 # Warn if variable looks like used before init
 OPTIONS += -Wuninitialized -Wmaybe-uninitialized
 
+#OPTIONS += -Wsign-compare
+#OPTIONS += -Wall
+
 # Treat all warnings as errors 
 OPTIONS += -Werror
 
@@ -47,6 +50,7 @@ OPTIONS += -ggdb3
 # Workaround compile error with SystemC
 OPTIONS += -fpermissive
 
+# Position-independent code
 OPTIONS += -fPIC
 
 # Generate include deps

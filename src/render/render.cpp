@@ -316,7 +316,7 @@ DEFAULT_CATCH_CLAUSE
 string Render::Sanitise( string s ) try
 {
 	string o;
-	for( int i=0; i<s.size(); i++ )
+	for( string::size_type i=0; i<s.size(); i++ )
 	{
 		char c[10];
 		if( s[i] < ' ' )
