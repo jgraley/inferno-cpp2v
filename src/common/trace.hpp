@@ -245,7 +245,7 @@ class NewtonsCradle
 {
 public:    
     // The actual work should be done in here
-    virtual NewtonsCradle &operator()(const string &s) = 0; 
+    virtual NewtonsCradle &operator()(const string &s) { return *this; } 
 
     // And optionally in here if the defualt behaviour is no good
     virtual NewtonsCradle &operator()();    
@@ -357,21 +357,21 @@ private:
 //     without resorting to gdb.
 //
 // Note: all of these except ASSERTFAIL use Newton's Cradle style args
-// Note: else used to avoid ambiguating when used inside an if 
+// Note: ?: is used instead of if/else to avoid dangling-else warnings 
 //
 
 // Plain tracing...
 #define INDENT(P) Tracer::Descend indent_(P); HITP(Tracer::GetPrefix());
-#define TRACE if(!Tracer::IsEnabled()) {} else Tracer( __FILE__, __LINE__, GetTrace(), __func__ )
+#define TRACE (!Tracer::IsEnabled()) ? NewtonsCradle() : Tracer( __FILE__, __LINE__, GetTrace(), __func__ )
 #define FTRACE Tracer( __FILE__, __LINE__, GetTrace(), __func__, Tracer::FORCE )
-#define TRACES if(!Tracer::IsEnabled()) {} else Tracer( __FILE__, __LINE__, "", __func__ )
+#define TRACES (!Tracer::IsEnabled()) ? NewtonsCradle() : Tracer( __FILE__, __LINE__, "", __func__ )
 #define FTRACES Tracer( __FILE__, __LINE__, "", __func__, Tracer::FORCE )
-#define TRACEC if(!Tracer::IsEnabled()) {} else Tracer()
+#define TRACEC (!Tracer::IsEnabled()) ? NewtonsCradle() : Tracer()
 #define FTRACEC Tracer{Tracer::FORCE}
 
 // Asserts and such...
-#define ASSERT(CONDITION) if(CONDITION) {} else Tracer( __FILE__, __LINE__, GetTrace(), __func__, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #CONDITION )
-#define ASSERTS(CONDITION) if(CONDITION) {} else Tracer( __FILE__, __LINE__, "", __func__, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #CONDITION )
+#define ASSERT(CONDITION) (CONDITION) ? NewtonsCradle() : Tracer( __FILE__, __LINE__, GetTrace(), __func__, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #CONDITION )
+#define ASSERTS(CONDITION) (CONDITION) ? NewtonsCradle() : Tracer( __FILE__, __LINE__, "", __func__, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #CONDITION )
 
 // TODO difficult to implement now that compilers assume "this" is always non-null. Apparently, you have to 
 // write your program to avoid undefined behaviour, and therefore you have no need for any help in detecting
@@ -388,6 +388,6 @@ private:
 #define ASSERT_NOT_ON_STACK(POINTER) ASSERT( !ON_STACK(POINTER) )("\nObject at %p seems like it's probably on the stack, usually a bad sign\n", POINTER)
 
 // Tracing onto a string...
-#define TRACE_TO(DEST) if(!Tracer::IsEnabled()) {} else (TraceTo(DEST))
+#define TRACE_TO(DEST) (!Tracer::IsEnabled()) ? NewtonsCradle() : (TraceTo(DEST))
 #define FTRACE_TO(DEST) (TraceTo(DEST))
 #endif
