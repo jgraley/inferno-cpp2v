@@ -131,8 +131,8 @@ public:
     // ---------------------- TransformOfAgent ---------------------------
 
     TransformOfAgent( Transformation *t, TreePtr<Node> p=TreePtr<Node>() ) :
-        transformation(t),
-        pattern(p)
+        pattern(p),
+        transformation(t)
     {
     }
 

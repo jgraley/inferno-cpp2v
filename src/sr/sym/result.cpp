@@ -293,8 +293,8 @@ string SubsetResult::Render() const
 DepthFirstRangeResult::DepthFirstRangeResult( const SR::XTreeDatabase *x_tree_db_, SR::XLink lower_, bool lower_incl_, SR::XLink upper_, bool upper_incl_ ) :
     x_tree_db( x_tree_db_ ),
     lower( lower_ ),
-    lower_incl( lower_incl_ ),
     upper( upper_ ),
+    lower_incl( lower_incl_ ),
     upper_incl( upper_incl_ )
 {
 }
@@ -371,8 +371,8 @@ string DepthFirstRangeResult::Render() const
 SimpleCompareRangeResult::SimpleCompareRangeResult( const SR::XTreeDatabase *x_tree_db_, KeyType lower_, bool lower_incl_, KeyType upper_, bool upper_incl_ ) :
     x_tree_db( x_tree_db_ ),
     lower( lower_ ),
-    lower_incl( lower_incl_ ),
     upper( upper_ ),
+    lower_incl( lower_incl_ ),
     upper_incl( upper_incl_ )
 {
 }

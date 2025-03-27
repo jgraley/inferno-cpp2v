@@ -145,18 +145,18 @@ FlattenNode_iterator::pointer FlattenNode_iterator::operator->() const
 
 bool FlattenNode_iterator::operator==( const ContainerInterface::iterator_interface &ciii_o ) const
 { 
-    const FlattenNode_iterator &o = *dynamic_cast<const FlattenNode_iterator *>(&ciii_o);
-    ASSERT(&o)("Comparing flattern iterator with something else ")(ciii_o);
+    const FlattenNode_iterator *o = dynamic_cast<const FlattenNode_iterator *>(&ciii_o);
+    ASSERT(o)("Comparing flattern iterator with something else ")(ciii_o);
 
-    if( IsAtEnd() || o.IsAtEnd() )
-        return IsAtEnd() && o.IsAtEnd();
-    if( root != o.root )
+    if( IsAtEnd() || o->IsAtEnd() )
+        return IsAtEnd() && o->IsAtEnd();
+    if( root != o->root )
         return false;
-    if( mit != o.mit )
+    if( mit != o->mit )
         return false;
-    ASSERT( GetCurrentMember() == o.GetCurrentMember() ); // because the mits match
+    ASSERT( GetCurrentMember() == o->GetCurrentMember() ); // because the mits match
     if( dynamic_cast<ContainerInterface *>(GetCurrentMember()) )
-        if( cit != o.cit )
+        if( cit != o->cit )
             return false;
     return true;
 }

@@ -17,8 +17,8 @@ using namespace SYM;
 
 TruthTableSolver::TruthTableSolver( const Expression::SolveKit &kit_,
                                     shared_ptr<BooleanExpression> initial_expression_ ) :
-    kit( kit_ ),
-    initial_expression( initial_expression_ )
+    initial_expression( initial_expression_ ),
+    kit( kit_ )
 {
 }
 

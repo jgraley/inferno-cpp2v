@@ -68,8 +68,8 @@ public:
     
     // EmbeddedSearchReplace must be constructed using constructor
     EmbeddedSCR( TreePtr<PRE_RESTRICTION> t, TreePtr<Node> sp, TreePtr<Node> rp, bool is_search ) :
-        through( t ),
-        EmbeddedSCRAgent( sp, rp, is_search )
+        EmbeddedSCRAgent( sp, rp, is_search ),
+        through( t )
     {
     }
 

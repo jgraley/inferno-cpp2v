@@ -95,28 +95,28 @@ struct TreePtr : virtual TreePtrCommon,
     TreePtr() {}
 
     explicit TreePtr( VALUE_TYPE *o ) : 
-        shared_ptr<VALUE_TYPE>( o ),
-        TreePtrCommon( o )
+        TreePtrCommon( o ),
+        shared_ptr<VALUE_TYPE>( o )
     {
     }
 
     TreePtr( nullptr_t o ) : 
-        shared_ptr<VALUE_TYPE>( nullptr ),
-        TreePtrCommon( o )
+        TreePtrCommon( o ),
+        shared_ptr<VALUE_TYPE>( nullptr )
     {
     }
 
     template< typename OTHER >
     explicit TreePtr( const shared_ptr<OTHER> &o ) :
-        shared_ptr<VALUE_TYPE>( o ),
-        TreePtrCommon( o )
+        TreePtrCommon( o ),
+        shared_ptr<VALUE_TYPE>( o )
     {
     }
 
     template< typename OTHER >
     TreePtr( const TreePtr<OTHER> &o ) :
-        shared_ptr<VALUE_TYPE>( (shared_ptr<OTHER>)(o) ),
-        TreePtrCommon( o )
+        TreePtrCommon( o ),
+        shared_ptr<VALUE_TYPE>( (shared_ptr<OTHER>)(o) )
     {
     }
 

@@ -7,9 +7,9 @@
 using namespace SR;
 
 EmbeddedSCRAgent::EmbeddedSCRAgent( TreePtr<Node> sp, TreePtr<Node> rp, bool is_search_ ) :
-    is_search( is_search_ ),
     search_pattern( sp ),
-    replace_pattern( rp )
+    replace_pattern( rp ),
+    is_search( is_search_ )
 {
 }
 

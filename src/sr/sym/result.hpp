@@ -146,8 +146,8 @@ public:
 
 private:    
     const SR::XTreeDatabase *x_tree_db;
-    SR::XLink lower, upper;
-    bool lower_incl, upper_incl;
+    const SR::XLink lower, upper;
+    const bool lower_incl, upper_incl;
 };
 
 // ------------------------- SimpleCompareRangeResult --------------------------
@@ -171,10 +171,8 @@ public:
 
 private:    
     const SR::XTreeDatabase *x_tree_db;
-    KeyType lower;
-    bool lower_incl;
-    KeyType upper;
-    bool upper_incl;
+    const KeyType lower, upper;
+    const bool lower_incl, upper_incl;
 };
 
 
