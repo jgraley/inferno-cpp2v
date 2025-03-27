@@ -31,8 +31,6 @@ SingularMutator::SingularMutator( TreePtr<Node> parent_node, TreePtrInterface *d
     Mutator( parent_node ),
     dest_tree_ptr( dest_tree_ptr_ )
 {
-	// Ensure there's no child where we have a mutator
-	TreePtr<Node>(*dest_tree_ptr) = nullptr;
 }
 
 
@@ -41,7 +39,7 @@ void SingularMutator::Mutate( TreePtr<Node> child_base,
 {
 	ASSERT( child_base ); // perhaps we tried to populate with an empty zone?
 
-	if( ContainerInterface *child_container = dynamic_cast<ContainerInterface *>(child_base.get()) )
+	if( dynamic_cast<ContainerInterface *>(child_base.get()) )
 	{
 		ASSERTFAIL();
 	}

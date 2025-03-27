@@ -261,7 +261,6 @@ RelocatingAgent::RelocatingQueryResult NestedAgent::RunRelocatingQuery( const XT
 		set<XLink> deps = {stimulus_xlink};
         string s;
         // Keep advancing until we get nullptr, and remember the last non-null position
-        int i = 0;
         XLink xlink = stimulus_xlink;
         while( XLink next_xlink = Advance(xlink, &s) )
         {			
@@ -342,7 +341,6 @@ unique_ptr<SYM::SymbolicResult> NestedAgent::NestingOperator::Evaluate( const Ev
     
     // Keep advancing until we get nullptr, and remember the last non-null position
     string s;
-    int i = 0;
     XLink xlink = keyer_xlink;
     while( XLink next_xlink = agent->Advance(xlink, &s) )
         xlink = next_xlink;

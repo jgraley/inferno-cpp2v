@@ -273,6 +273,9 @@ int ContainerInterface::size() const
     ContainerInterface *nct = const_cast<ContainerInterface *>(this);
     int n=0;
     for( const TreePtrInterface &x : *nct )
+    {
+		(void)x;
         n++;
+	}
     return n;
 }

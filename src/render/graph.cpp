@@ -637,7 +637,6 @@ string Graph::DoBlock( const MyBlock &block,
     s += SSPrintf("fontsize = \"%d\"\n", FS_MIDDLE);
     s += "fontcolor = " + external_font_colour + "\n";
 
-    int tfs;
     string title;
     if( !block.symbol.empty() )
     {

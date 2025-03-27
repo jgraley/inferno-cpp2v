@@ -184,7 +184,6 @@ void IdentifierFingerprinter::ProcessSequence( SequenceInterface *x_seq, int &in
 void IdentifierFingerprinter::ProcessCollection( CollectionInterface *x_col, int &index )
 {
     TreePtr<Node> prev_x;
-    int index_offset = 0;
     int prev_start_index = 0;
     for( TreePtr<Node> x : comparer.GetTreePtrOrdering(*x_col) )
     {

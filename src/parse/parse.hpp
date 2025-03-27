@@ -416,8 +416,7 @@ private:
 				{
 					// TODO attributes
 					TRACE("pointer to...\n");
-					const clang::DeclaratorChunk::PointerTypeInfo &pchunk =
-							chunk.Ptr;
+					//const clang::DeclaratorChunk::PointerTypeInfo &pchunk = chunk.Ptr;
 					auto p = MakeTreeNode<Pointer>();
 					p->destination = CreateTypeNode(D, depth + 1);
 					return p;
@@ -427,8 +426,7 @@ private:
 				{
 					// TODO attributes
 					TRACE("reference to...\n");
-					const clang::DeclaratorChunk::ReferenceTypeInfo &rchunk =
-							chunk.Ref;
+					//const clang::DeclaratorChunk::ReferenceTypeInfo &rchunk = chunk.Ref;
 					auto r = MakeTreeNode<Reference>();
 					ASSERT(r);
 					r->destination = CreateTypeNode(D, depth + 1);
@@ -438,8 +436,7 @@ private:
 				case clang::DeclaratorChunk::Array:
 				{
 					// TODO attributes
-					const clang::DeclaratorChunk::ArrayTypeInfo &achunk =
-							chunk.Arr;
+					const clang::DeclaratorChunk::ArrayTypeInfo &achunk = chunk.Arr;
 					TRACE("array [%d] of...\n", achunk.NumElts);
 					auto a = MakeTreeNode<Array>();
 					ASSERT(a);
@@ -1373,7 +1370,7 @@ private:
 			clang::Declarator &D, ExprTy *BitfieldWidth,
 			ExprTy *Init, DeclTy *LastInGroup)
 	{
-		const clang::DeclSpec &DS = D.getDeclSpec();
+		//const clang::DeclSpec &DS = D.getDeclSpec();
 		//TRACE("Element %p\n", Init);
 		TreePtr<Declaration> d = CreateDelcaration( S, D, ConvertAccess( AS ) );
 		TreePtr<Instance> o = DynamicTreePtrCast<Instance>(d);

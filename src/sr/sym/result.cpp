@@ -205,7 +205,6 @@ unique_ptr<SubsetResult> SubsetResult::GetComplement() const
 
 unique_ptr<SubsetResult> SubsetResult::GetUnion( list<unique_ptr<SubsetResult>> ops )
 {
-    int n = ops.size();
     int n_comp = 0;
     for( const unique_ptr<SubsetResult> &op : ops )
         n_comp += op->complement_flag ? 1 : 0;

@@ -42,7 +42,6 @@ DBWalk::Action Orderings::GetDeleteGeometricAction()
 		// Intrinsic orderings are keyed on nodes, and we don't need to update on the boundary layer
         if( !walk_info.at_terminus )
 		{
-			
 			// Node table hasn't been updated yet, so node should be in there.
 			NodeTable::Row row = db->GetNodeRow(walk_info.node); 
 			ASSERT( row.incoming_xlinks.count(walk_info.xlink)==1 );
@@ -86,9 +85,7 @@ DBWalk::Action Orderings::GetInsertGeometricAction()
         
 		// Intrinsic orderings are keyed on nodes, and we don't need to update on the boundary layer
         if( !walk_info.at_terminus )
-		{
-		
-			const NodeTable::Row &row = db->GetNodeRow(walk_info.node);
+		{		
 			// Only if not already
 			if( category_ordering.count(walk_info.node)==0 )
 				InsertSolo( category_ordering, walk_info.node );       		

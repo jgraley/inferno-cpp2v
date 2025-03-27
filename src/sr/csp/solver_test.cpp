@@ -31,7 +31,6 @@ void SolverTest::Run( const SolutionReportFunction &solution_report_function,
     
     // Run solver-under-test and check both solutions and rejections
     TRACE("############ RUNNING SOLVER UNDER TEST #############\n");
-    int nsol = 0;
     auto under_test_srl = [&](const Solution &solution)
     { 
         ASSERT( reference_solutions.count( solution ) > 0 );

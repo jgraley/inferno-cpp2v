@@ -286,7 +286,6 @@ shared_ptr<TruthTable::SliceSpec> TruthTable::TryFindBestKarnaughSlice( CellType
             candidate_counts[c]++;
         }
 
-        int slice_size = 1<<(degree-candidate_slice->size());
         int candidate_new_count = so_far.CountInSlice( *candidate_slice, target_value );
 
         // NECCESSARY conditions
@@ -420,8 +419,6 @@ string TruthTable::Render( set<int> column_axes, vector<string> pred_labels, uns
     ASSERT( columns_size >= 1 );
     ASSERT( render_table_cells.size() == rows_size );
     ASSERT( render_table_cells.at(0).size() == columns_size );
-    unsigned num_rows = render_column_labels.size() + rows_size;
-    unsigned num_columns = render_row_labels.size() + columns_size;
     
     // Join the labels to the table padding dead space with empty strings
     vector<vector<string>> render_figure;

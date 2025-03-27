@@ -220,7 +220,7 @@ ReadArgs::ReadArgs( int ac, char *av[] )
         }
         else if( option=='u' )
         {
-            char use_option = argv[curarg][2];
+            //char use_option = argv[curarg][2];
             Usage("Unknown argument after -u");
         }
         else 
