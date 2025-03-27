@@ -373,6 +373,11 @@ private:
 #define ASSERT(CONDITION) if(CONDITION) {} else Tracer( __FILE__, __LINE__, GetTrace(), __func__, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #CONDITION )
 #define ASSERTS(CONDITION) if(CONDITION) {} else Tracer( __FILE__, __LINE__, "", __func__, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #CONDITION )
 
+// TODO difficult to implement now that compilers assume "this" is always non-null. Apparently, you have to 
+// write your program to avoid undefined behaviour, and therefore you have no need for any help in detecting
+// whether your program invokes undefined behaviour. Duh.
+#define ASSERTTHIS()
+
 // This one does an abort() in-line so you don't get "missing return" warning (which
 // we make an error). You can supply a message but no printf() formatting or arguments or std::string.
 #define ASSERTFAIL(MESSAGE) do { Tracer( __FILE__, __LINE__, GetTrace(), __func__, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #MESSAGE ); abort(); } while(0);

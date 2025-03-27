@@ -116,7 +116,7 @@ void StuffAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            const XTreeDatabase *x_tree_db ) const
 {
     INDENT("#");
-    ASSERT( this );
+    ASSERTTHIS();
     ASSERT( terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
 
     if( !recurse_restriction )

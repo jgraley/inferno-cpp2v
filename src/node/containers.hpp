@@ -230,12 +230,12 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
         inline iterator() {}
         virtual value_type &operator*() const
         {
-            ASSERT(this);
+            ASSERTTHIS();
             return Impl::iterator::operator*();
         }
         virtual value_type *operator->() const
         {
-            ASSERT(this);
+            ASSERTTHIS();
             return Impl::iterator::operator->();
         }
         virtual unique_ptr<typename ContainerInterface::iterator_interface> Clone() const

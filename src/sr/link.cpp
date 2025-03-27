@@ -78,9 +78,6 @@ bool PatternLink::operator==(const LocatedLink &other) const
 
 Orderable::Diff PatternLink::Compare3Way(const PatternLink &l, const PatternLink &r)
 {
-    ASSERTS( &l );
-    ASSERTS( &r );
-    
     // NULLness is primary ordering because we wish to dereference both pointers. 
     // If both are NULL we'll call that equal, and drop out. Also do fast-out on 
     // equal pointers.

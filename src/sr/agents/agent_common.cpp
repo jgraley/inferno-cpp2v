@@ -530,7 +530,7 @@ Agent::ReplacePatchPtr AgentCommon::GenReplaceLayout( const ReplaceKit &kit,
 {
     INDENT("C");
     ASSERT( me_plink.GetChildAgent() == this );
-    ASSERT(this);
+    ASSERTTHIS();
     ASSERT(my_scr_engine)("Agent ")(*this)(" appears not to have been configured");
     ASSERT( phase != IN_COMPARE_ONLY )(*this)(" is configured for compare only");
     
