@@ -16,15 +16,6 @@ ILC_OPTIONS +=
  
 # Use the C++11 standard 
 OPTIONS += -std=c++11
- 
-# [for clang] There are LOTS of missing overrides see #452
-OPTIONS += -Wno-inconsistent-missing-override 
-
-# [for clang] our TRACE and ASSERT macros use dangling else in a safe way
-OPTIONS += -Wno-dangling-else
-
-# [for clang] don't worry about side-effects in typeid() expressions
-OPTIONS += -Wno-potentially-evaluated-expression
 
 # No path needed when include file is in same directory
 OPTIONS += -I.

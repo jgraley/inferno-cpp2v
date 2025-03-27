@@ -32,30 +32,30 @@ LLVM_LIB_PATH = $(LLVM)/$(LLVM_BUILD)/lib
 LLVM_CLANG_LIBS =  libclangDriver.a libclangParse.a libclangLex.a libclangBasic.a   
 LLVM_CLANG_LIBS += libLLVMBitWriter.a libLLVMBitReader.a libLLVMSupport.a libLLVMSystem.a 	
 LLVM_CLANG_LIB_PATHS = $(LLVM_CLANG_LIBS:%=$(LLVM_LIB_PATH)/%)
-LLVM_CLANG_OPTIONS := ENABLE_OPTIMIZED=$(ENABLE_OPTIMIZED) 
+LLVM_CLANG_ARGS := ENABLE_OPTIMIZED=$(ENABLE_OPTIMIZED) 
 # Strangely, on C++11, we get problems with inferred rvalue refs, and below 11
 # the clang code tries to use alignof. We work around the latter here.
-LLVM_CLANG_OPTIONS += CXXFLAGS="-include cstdio -include stdint.h -std=c++03 $(ILC_OPTIONS) -fPIC"
-LLVM_CLANG_OPTIONS += CFLAGS=$(ILC_OPTIONS)
-LLVM_CLANG_OPTIONS += --jobs=$(JOBS)
+LLVM_CLANG_ARGS += CXXFLAGS="-include cstdio -include stdint.h -std=c++03 -fPIC"
+LLVM_CLANG_ARGS += CFLAGS=$(ILC_OPTIONS)
+LLVM_CLANG_ARGS += --jobs=$(JOBS)
 
 $(LLVM_LIB_PATH)/libLLVMBit%.a : force_subordinate_makefiles
-	cd llvm/lib/Bitcode/$(patsubst libLLVMBit%.a,%,$(notdir $@)) && $(MAKE) $(LLVM_CLANG_OPTIONS)	
+	cd llvm/lib/Bitcode/$(patsubst libLLVMBit%.a,%,$(notdir $@)) && $(MAKE) $(LLVM_CLANG_ARGS)	
 
 clean_libLLVMBit%.a : 
-	-cd llvm/lib/Bitcode/$(patsubst clean_libLLVMBit%.a,%,$@) && $(MAKE) $(LLVM_CLANG_OPTIONS)	clean	
+	-cd llvm/lib/Bitcode/$(patsubst clean_libLLVMBit%.a,%,$@) && $(MAKE) $(LLVM_CLANG_ARGS)	clean	
 
 $(LLVM_LIB_PATH)/libLLVM%.a : force_subordinate_makefiles
-	cd llvm/lib/$(patsubst libLLVM%.a,%,$(notdir $@)) && $(MAKE) $(LLVM_CLANG_OPTIONS)	
+	cd llvm/lib/$(patsubst libLLVM%.a,%,$(notdir $@)) && $(MAKE) $(LLVM_CLANG_ARGS)	
 
 clean_libLLVM%.a : 
-	-cd llvm/lib/$(patsubst clean_libLLVM%.a,%,$$@) && $(MAKE) $(LLVM_CLANG_OPTIONS)	clean
+	-cd llvm/lib/$(patsubst clean_libLLVM%.a,%,$$@) && $(MAKE) $(LLVM_CLANG_ARGS)	clean
 
 $(LLVM_LIB_PATH)/libclang%.a : force_subordinate_makefiles
-	cd llvm/tools/clang/lib/$(patsubst libclang%.a,%,$(notdir $@)) && $(MAKE) $(LLVM_CLANG_OPTIONS)	
+	cd llvm/tools/clang/lib/$(patsubst libclang%.a,%,$(notdir $@)) && $(MAKE) $(LLVM_CLANG_ARGS)	
     	   	
 clean_libclang%.a : 
-	-cd llvm/tools/clang/lib/$(patsubst clean_libclang%.a,%,$@) && $(MAKE) $(LLVM_CLANG_OPTIONS) clean	
+	-cd llvm/tools/clang/lib/$(patsubst clean_libclang%.a,%,$@) && $(MAKE) $(LLVM_CLANG_ARGS) clean	
     	   	
 #
 # Link inferno executable
