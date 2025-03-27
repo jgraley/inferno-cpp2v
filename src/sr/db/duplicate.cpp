@@ -69,7 +69,7 @@ TreePtr<Node> Duplicate::DuplicateSubtreeWorker( TreePtr<Node> source,
     // Loop over all the members of source (which can be a subset of dest)
     // and for non-nullptr members, duplicate them by recursing and write the
     // duplicates to the destination.
-    for( int i=0; i<dest_items.size(); i++ )
+    for( vector< Itemiser::Element * >::size_type i=0; i<dest_items.size(); i++ )
     {
         //TRACES("Duplicating member %d\n", i );
         ASSERTS( source_items[i] )( "itemise returned null element" );

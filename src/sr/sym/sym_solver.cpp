@@ -72,7 +72,7 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveForGiven( shared_ptr<Symb
     // Categorise the preds
     set<shared_ptr<PredicateOperator>> evaluatable_preds;
     map<shared_ptr<PredicateOperator>, shared_ptr<SymbolExpression>> pred_solves;
-    for( int axis=0; axis<ttwp->GetDegree(); axis++ )
+    for( unsigned axis=0; axis<ttwp->GetDegree(); axis++ )
     {
         auto pred = ttwp->GetFrontPredicate(axis);
         if( !DifferenceOf(pred->GetRequiredVariables(), givens_and_target).empty() )
@@ -89,7 +89,7 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveForGiven( shared_ptr<Symb
     // - ones that are neither evaulatable nor solvable, i.e. they contain the target but solving failed
     // - as well as ones that refer to symbol variables that were not target or in the "given" set
     set<int> dead_axes;
-    for( int axis=0; axis<ttwp->GetDegree(); axis++ )
+    for( unsigned axis=0; axis<ttwp->GetDegree(); axis++ )
     {
         auto pred = ttwp->GetFrontPredicate(axis);
         if( evaluatable_preds.count(pred)==0 && pred_solves.count(pred)==0 )
@@ -102,7 +102,7 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveForGiven( shared_ptr<Symb
     // Get axis numbers for the evaluatables and solveables, now that we've finished 
     // folding, which changes them. 
     vector<int> evaluatable_axes, solveable_axes;
-    for( int axis=0; axis<folded_ttwp.GetDegree(); axis++ )
+    for( unsigned axis=0; axis<folded_ttwp.GetDegree(); axis++ )
         if( pred_solves.count(folded_ttwp.GetFrontPredicate(axis)) ) 
             solveable_axes.push_back(axis);
     TRACE("Truth table after fold out dead: ")(folded_ttwp.Render( ToSet(solveable_axes), false ))("\n");
@@ -220,7 +220,7 @@ shared_ptr<BooleanExpression> TruthTableSolver::GetAltExpressionForTesting() con
     
     // We'll make a big consitional. Controls are the predicates.
     vector<shared_ptr<BooleanExpression>> controls;
-    for( int ia=0; ia<ttwp->GetDegree(); ia++ )
+    for( unsigned ia=0; ia<ttwp->GetDegree(); ia++ )
         controls.push_back( ttwp->GetFrontPredicate(ia) );
 
     // Options are bool constants taken from the cells of the truth table
@@ -261,7 +261,7 @@ void TruthTableSolver::ConstrainByEvaluating()
             
             // Forces must be set up on *all* the predicates that may be reached
             // while evaluating the expression, even if they are equal.
-            for( int j=0; j<ttwp->GetDegree(); j++ )
+            for( unsigned j=0; j<ttwp->GetDegree(); j++ )
                 for( shared_ptr<PredicateOperator> pred : ttwp->GetPredicateSet(j) )
                     pred->SetForceExpression( vbe[j] );       
                 
@@ -285,11 +285,11 @@ void TruthTableSolver::ConstrainUsingDerived()
     typedef shared_ptr<PredicateOperator> DerivedPred;
 
     // These derived_pred_to_... maps will unique-ize on equality of Pk 
-    map<shared_ptr<PredicateOperator>, set<set<int>>, Expression::Relation> derived_pred_to_init_indices;
+    map<shared_ptr<PredicateOperator>, set<set<unsigned>>, Expression::Relation> derived_pred_to_init_indices;
     map<shared_ptr<PredicateOperator>, EqualPredicateSet, Expression::Relation> derived_pred_to_derived_equal_pred_set;
-    for( int i=0; i<ttwp->GetDegree(); i++ )
+    for( unsigned i=0; i<ttwp->GetDegree(); i++ )
     {
-        for( int j=0; j<ttwp->GetDegree(); j++ )
+        for( unsigned j=0; j<ttwp->GetDegree(); j++ )
         {
             if( i==j )
                 continue;
@@ -334,9 +334,9 @@ void TruthTableSolver::ConstrainUsingDerived()
     // Search all pairs of predicates Pi, Pk for derivations, which should
     // all now be interpolations if we expanded the truth table. If we didn't
     // then we'll now only work with interpolations and ignore extrapolations.
-    for( int i=0; i<ttwp->GetDegree(); i++ )
+    for( unsigned i=0; i<ttwp->GetDegree(); i++ )
     {
-        for( int j=0; j<ttwp->GetDegree(); j++ )
+        for( unsigned j=0; j<ttwp->GetDegree(); j++ )
         {
             if( i==j )
                 continue;
@@ -384,7 +384,7 @@ void TruthTableSolver::ConstrainUsingDerived()
     if( should_extend )
     {
         set<int> fold_axes;
-        for( int k0=0; k0<derived_preds.size(); k0++ )
+        for( unsigned k0=0; k0<derived_preds.size(); k0++ )
             fold_axes.insert(original_degree + k0);
 
         *ttwp = ttwp->GetFolded( fold_axes );
@@ -525,7 +525,7 @@ string TruthTableSolver::RenderInitialExpressionInTermsOfPredNames()
 {
     string s;
     vector<shared_ptr<string>> pred_names(ttwp->GetDegree());
-    for( int j=0; j<ttwp->GetDegree(); j++ )
+    for( unsigned j=0; j<ttwp->GetDegree(); j++ )
     {
         pred_names[j] = make_shared<string>(PredicateName(j));
         for( shared_ptr<PredicateOperator> pred : ttwp->GetPredicateSet(j) )

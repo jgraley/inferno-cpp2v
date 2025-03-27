@@ -384,7 +384,7 @@ Multiplexor::Multiplexor( vector<shared_ptr<BooleanExpression>> controls_,
     controls( controls_ ),
     options( options_ )
 {
-    ASSERT( options.size() == 1<<controls.size() );
+    ASSERT( options.size() == 1U<<controls.size() );
 }
 
     
@@ -403,7 +403,7 @@ list<shared_ptr<BooleanExpression>> Multiplexor::GetBooleanOperands() const
 unique_ptr<BooleanResult> Multiplexor::Evaluate( const EvalKit &kit ) const
 {
     unsigned int int_control = 0;
-    for( int i=0; i<controls.size(); i++ )
+    for( vector<shared_ptr<BooleanExpression>>::size_type i=0; i<controls.size(); i++ )
     {
         unique_ptr<BooleanResult> r = controls[i]->Evaluate(kit);
         

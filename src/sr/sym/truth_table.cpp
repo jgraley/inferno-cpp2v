@@ -10,7 +10,7 @@ using namespace SYM;
 
 // ------------------------- TruthTable --------------------------
 
-TruthTable::TruthTable( int degree_, CellType initval ) :
+TruthTable::TruthTable( unsigned degree_, CellType initval ) :
     degree( degree_ )
 {
     SizeType ncells = (SizeType)1 << degree;
@@ -46,7 +46,7 @@ void TruthTable::SetSlice( SliceSpec slice, CellType new_value )
     
     // Determine what the free axes must be
     vector<int> free_axes;
-    for( int i=0; i<degree; i++ )
+    for( unsigned i=0; i<degree; i++ )
         if( slice.count(i) == 0 )
             free_axes.push_back(i);
     ASSERT( free_axes.size() + slice.size() == degree );
@@ -74,7 +74,7 @@ void TruthTable::SetSlice( SliceSpec slice, const TruthTable &new_values )
     
     // Determine what the free axes must be
     vector<int> free_axes;
-    for( int i=0; i<degree; i++ )
+    for( unsigned i=0; i<degree; i++ )
         if( slice.count(i) == 0 )
             free_axes.push_back(i);
     ASSERT( free_axes.size() + slice.size() == degree );
@@ -96,12 +96,12 @@ void TruthTable::SetSlice( SliceSpec slice, const TruthTable &new_values )
 }
 
 
-void TruthTable::Extend( int new_degree )
+void TruthTable::Extend( unsigned new_degree )
 {
     SizeType new_ncells = (SizeType)1 << new_degree;
     cells.resize(new_ncells);
 
-    for( int axis=degree; axis<new_degree; axis++ )
+    for( unsigned axis=degree; axis<new_degree; axis++ )
     {
         SizeType ncells = (SizeType)1 << axis;
         copy( cells.begin(),
@@ -113,7 +113,7 @@ void TruthTable::Extend( int new_degree )
 }
 
 
-int TruthTable::GetDegree() const
+unsigned TruthTable::GetDegree() const
 {
     return degree;
 }
@@ -131,7 +131,7 @@ TruthTable TruthTable::GetSlice( SliceSpec slice ) const
     
     // Determine what the free axes must be
     vector<int> dest_axes;
-    for( int i=0; i<degree; i++ )
+    for( unsigned i=0; i<degree; i++ )
         if( slice.count(i) == 0 )
             dest_axes.push_back(i);
     ASSERT( dest_axes.size() + slice.size() == degree );
@@ -162,7 +162,7 @@ TruthTable TruthTable::GetFolded( set<int> fold_axes ) const
 
     // Determine what the destination axes must be
     vector<int> dest_axes;
-    for( int i=0; i<degree; i++ )
+    for( unsigned i=0; i<degree; i++ )
         if( fold_axes.count(i) == 0 )
             dest_axes.push_back(i);
     ASSERT( dest_axes.size() + fold_axes.size() == degree );
@@ -215,7 +215,7 @@ int TruthTable::CountInSlice( SliceSpec slice, CellType target_value ) const
     
     // Determine what the free axes must be
     vector<int> free_axes;
-    for( int i=0; i<degree; i++ )
+    for( unsigned i=0; i<degree; i++ )
         if( slice.count(i) == 0 )
             free_axes.push_back(i);
     ASSERT( free_axes.size() + slice.size() == degree );
@@ -268,7 +268,7 @@ shared_ptr<TruthTable::SliceSpec> TruthTable::TryFindBestKarnaughSlice( CellType
     {     
         auto candidate_slice = make_shared<SliceSpec>();
         map<KarnaughClass, int> candidate_counts;
-        for( int i=0; i<degree; i++ )
+        for( unsigned i=0; i<degree; i++ )
         {
             // Make slice across the FREE axes, located by the other ones
             KarnaughClass c = k_classes.at(i);
@@ -329,16 +329,16 @@ bool TruthTable::operator<( const TruthTable &other ) const
 }
 
 
-string TruthTable::Render( set<int> column_axes, vector<string> pred_labels, int render_cell_size ) const
+string TruthTable::Render( set<int> column_axes, vector<string> pred_labels, unsigned render_cell_size ) const
 {
     ASSERT( column_axes.size() <= degree );
     ASSERT( render_cell_size >= 2 );
-    for( int i : column_axes )
+    for( unsigned i : column_axes )
         ASSERT( i>=0 && i<degree )("axis out of range\n")(column_axes)("\ndegree=%d\n", degree);
     
     // Determine what the row axes must be
     vector<int> row_axes;
-    for( int i=0; i<degree; i++ )
+    for( unsigned i=0; i<degree; i++ )
         if( column_axes.count(i) == 0 )
             row_axes.push_back(i);
     ASSERT( row_axes.size() + column_axes.size() == degree )
@@ -392,11 +392,11 @@ string TruthTable::Render( set<int> column_axes, vector<string> pred_labels, int
     auto labels_lambda = [&](vector<int> layers)
     {
         vector<vector<string>> render_my_labels;
-        for( int layer=0; layer<layers.size(); layer++ )
+        for( unsigned layer=0; layer<layers.size(); layer++ )
         {
             vector<string> render_layer_labels;
-            int len = 1 << layers.size(); // The size must be 2^num layers to get all combos in
-            for( int i=0; i<len; i++ )
+            unsigned len = 1U << layers.size(); // The size must be 2^num layers to get all combos in
+            for( unsigned i=0; i<len; i++ )
             {
                 string str_label;
                 if( (i & (1<<layer))==0 ) 
@@ -414,41 +414,41 @@ string TruthTable::Render( set<int> column_axes, vector<string> pred_labels, int
     vector<vector<string>> render_column_labels = labels_lambda( ToVector(column_axes) );
     
     // Cross-check everything fits together and then determine size of render
-    int rows_size = 1 << row_axes.size();
-    int columns_size = 1 << column_axes.size();
+    unsigned rows_size = 1 << row_axes.size();
+    unsigned columns_size = 1 << column_axes.size();
     ASSERT( rows_size >= 1 );
     ASSERT( columns_size >= 1 );
     ASSERT( render_table_cells.size() == rows_size );
     ASSERT( render_table_cells.at(0).size() == columns_size );
-    int num_rows = render_column_labels.size() + rows_size;
-    int num_columns = render_row_labels.size() + columns_size;
+    unsigned num_rows = render_column_labels.size() + rows_size;
+    unsigned num_columns = render_row_labels.size() + columns_size;
     
     // Join the labels to the table padding dead space with empty strings
     vector<vector<string>> render_figure;
-    for( int row=0; row<render_column_labels.size(); row++ )
+    for( unsigned row=0; row<render_column_labels.size(); row++ )
     {
         vector<string> render_row;
-        for( int col=0; col<render_row_labels.size(); col++ )
+        for( unsigned col=0; col<render_row_labels.size(); col++ )
             render_row.push_back( string(render_cell_size, ' ') );
-        for( int col=0; col<columns_size; col++ )
+        for( unsigned col=0; col<columns_size; col++ )
             render_row.push_back(render_column_labels.at(row).at(col));      
         render_figure.push_back(render_row);
     }
-    for( int row=0; row<rows_size; row++ )
+    for( unsigned row=0; row<rows_size; row++ )
     {
         vector<string> render_row;
-        for( int col=0; col<render_row_labels.size(); col++ )
+        for( unsigned col=0; col<render_row_labels.size(); col++ )
             render_row.push_back(render_row_labels.at(col).at(row));
-        for( int col=0; col<columns_size; col++ )
+        for( unsigned col=0; col<columns_size; col++ )
             render_row.push_back(render_table_cells.at(row).at(col));            
         render_figure.push_back(render_row);
     }
     
     // Combine into a single string with spacing and newlines
     string str_figure;
-    for( int row=0; row<render_figure.size(); row++ )
+    for( unsigned row=0; row<render_figure.size(); row++ )
     {
-        for( int col=0; col<render_figure.at(row).size(); col++ )    
+        for( unsigned col=0; col<render_figure.at(row).size(); col++ )    
             str_figure += render_figure.at(row).at(col) + " ";    
         str_figure += "\n";
     }
@@ -462,7 +462,7 @@ TruthTable::SizeType TruthTable::GetCellIndex( vector<bool> full_indices ) const
 {
     ASSERT( full_indices.size() == degree );
     SizeType cindex = 0;
-    for( int j=0; j<full_indices.size(); j++ )
+    for( unsigned j=0; j<full_indices.size(); j++ )
         cindex |= (SizeType)(full_indices.at(j)?1:0) << j;
     return cindex;
 }

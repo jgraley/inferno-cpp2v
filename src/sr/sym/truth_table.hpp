@@ -31,7 +31,7 @@ public:
     // free ones are the remaining ones.
     typedef map<int, bool> SliceSpec;
 
-    explicit TruthTable( int degree, CellType initval );
+    explicit TruthTable( unsigned degree, CellType initval );
     TruthTable( const TruthTable &other );
     TruthTable &operator=( const TruthTable &other );
 
@@ -47,9 +47,9 @@ public:
 
     // Increase the degree by additional_degree, replicating
     // existing cell values. In-place.
-    void Extend( int new_degree );
+    void Extend( unsigned new_degree );
 
-    int GetDegree() const;
+    unsigned GetDegree() const;
 
     // Get a single cell value given a full fector of indices
     CellType Get( vector<bool> full_indices ) const;
@@ -81,13 +81,13 @@ public:
      
     // Draw a nice picture. column_axes along the top, 
     // others down the side
-    string Render( set<int> column_axes, vector<string> pred_labels, int render_cell_size ) const; 
+    string Render( set<int> column_axes, vector<string> pred_labels, unsigned render_cell_size ) const; 
      
 private:
     typedef vector<bool>::size_type SizeType;
     SizeType GetCellIndex( vector<bool> full_indices ) const;
 
-    int degree;
+    unsigned degree;
     vector<CellType> cells;
 };
 

@@ -64,7 +64,7 @@ class ChildToSymbolOperator : public SymbolToSymbolExpression
 public:    
     typedef SymbolExpression NominalType;
     explicit ChildToSymbolOperator( TreePtr<Node> archetype_node,
-                                      int item, 
+                                      vector< Itemiser::Element * >::size_type item_index_, 
                                       shared_ptr<SymbolExpression> a );
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     virtual unique_ptr<SymbolicResult> Evaluate( const EvalKit &kit,
@@ -81,7 +81,7 @@ public:
     
 protected:
     const TreePtr<Node> archetype_node;
-    const int item_index;
+    const vector< Itemiser::Element * >::size_type item_index;
     const shared_ptr<SymbolExpression> a;
 };
 

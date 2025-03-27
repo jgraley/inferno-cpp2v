@@ -263,7 +263,7 @@ class IsChildCollectionSizedOperator : public PredicateOperator
 public:    
     typedef BooleanExpression NominalType;
     explicit IsChildCollectionSizedOperator( TreePtr<Node> archetype_node,
-                                          int item, 
+                                          vector< Itemiser::Element * >::size_type item_index_, 
                                           shared_ptr<SymbolExpression> a,
                                           int size );
     shared_ptr<PredicateOperator> Clone() const override;
@@ -280,7 +280,7 @@ public:
     
 private:
     const TreePtr<Node> archetype_node;
-    const int item_index;
+    const vector< Itemiser::Element * >::size_type item_index;
     shared_ptr<SymbolExpression> a;
     const int size;
 };

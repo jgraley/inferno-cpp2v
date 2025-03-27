@@ -204,9 +204,9 @@ Inferno::Plan::Plan(Inferno *algo_) :
             steps.resize(ReadArgs::quitafter_progress.GetStep() + 1);
             steps.back().allow_stop = true;
         }
-        for( int i=0; i<steps.size()-1; i++ )
+        for( vector<Step>::size_type i=0; i<steps.size()-1; i++ )
             steps[i].allow_trace = steps[i].allow_hits = steps[i].allow_reps = steps[i].allow_stop = false;
-        for( int i=0; i<steps.size(); i++ )
+        for( vector<Step>::size_type i=0; i<steps.size(); i++ )
             TRACE("Step %03d ALLOWS: trace=", i)
                  (steps[i].allow_trace)(" hits=")
                  (steps[i].allow_hits)(" reps=")
@@ -470,7 +470,7 @@ void Inferno::GeneratePatternGraphs()
         if( ReadArgs::pattern_graph_name.empty() )
         {
             ASSERT( ReadArgs::pattern_graph_index >= 0 )("Negative step number is silly\n");
-            ASSERT( ReadArgs::pattern_graph_index < plan.steps.size() )("There are only %d steps at present\n", plan.steps.size() );
+            ASSERT( ReadArgs::pattern_graph_index < (int)(plan.steps.size()) )("There are only %d steps at present\n", plan.steps.size() );
             my_sp = plan.steps[ReadArgs::pattern_graph_index];
             found = true;
         }

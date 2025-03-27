@@ -74,7 +74,7 @@ MultiConditionalOperator::MultiConditionalOperator( vector<shared_ptr<BooleanExp
     controls( controls_ ),
     options( options_ )
 {
-    ASSERT( options.size() == 1<<controls.size() );
+    ASSERT( options.size() == 1U<<controls.size() );
 }
 
     
@@ -93,7 +93,7 @@ list<shared_ptr<Expression>> MultiConditionalOperator::GetOperands() const
 unique_ptr<SymbolicResult> MultiConditionalOperator::Evaluate( const EvalKit &kit ) const
 {
     unsigned int int_control = 0;
-    for( int i=0; i<controls.size(); i++ )
+    for( vector<shared_ptr<BooleanExpression>>::size_type i=0; i<controls.size(); i++ )
     {
         unique_ptr<BooleanResult> r = controls[i]->Evaluate(kit);
         

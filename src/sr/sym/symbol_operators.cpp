@@ -145,7 +145,7 @@ Expression::Precedence SymbolVariable::GetPrecedence() const
 // ------------------------- ChildToSymbolOperator --------------------------
 
 ChildToSymbolOperator::ChildToSymbolOperator( TreePtr<Node> archetype_node_,
-                                                  int item_index_, 
+                                                  vector< Itemiser::Element * >::size_type item_index_, 
                                                   shared_ptr<SymbolExpression> a_ ) :
     archetype_node( archetype_node_ ),
     item_index( item_index_ ),

@@ -98,7 +98,7 @@ protected:
     const SR::XTreeDatabase *x_tree_db;
     Assignments forced_assignments;
         
-    int current_var_index;
+    vector<VariableId>::size_type current_var_index;
     Assignments assignments;
     map< int, shared_ptr<ValueSelector> > value_selectors;
     map< int, int > success_count;

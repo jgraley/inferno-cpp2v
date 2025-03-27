@@ -120,7 +120,7 @@ void ReferenceSolver::Plan::DeduceVariables()
     TRACE("Variables supplied by engine: cross-checking\n");
     // Ensure that every free variable supplied to our constructor is
     // used by at least one constraint.
-    for( int i=0; i<free_variables.size(); i++ )
+    for( vector<VariableId>::size_type i=0; i<free_variables.size(); i++ )
         ASSERT( free_variables_used_by_constraints.count(i) == 1 )
               ("free_variables:\n")(free_variables)
               ("\nfree_variables_used_by_constraints:\n")(free_variables_used_by_constraints); 

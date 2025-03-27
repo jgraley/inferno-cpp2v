@@ -297,7 +297,7 @@ private:
 				            const clang::DeclaratorChunk::FunctionTypeInfo &fchunk)
 		{
 			backing_ordering[p].clear(); // ensure at least an empty sequence is in the map
-			for (int i = 0; i < fchunk.NumArgs; i++)
+			for (unsigned i = 0; i < fchunk.NumArgs; i++)
 			{
 				TreePtr<Declaration> d = hold_decl.FromRaw(
 						fchunk.ArgInfo[i].Param);
@@ -308,7 +308,7 @@ private:
 			}
 		}
 
-		TreePtr<Type> CreateTypeNode(clang::Declarator &D, int depth = 0)
+		TreePtr<Type> CreateTypeNode(clang::Declarator &D, unsigned depth = 0)
 		{
 			ASSERT( depth>=0 );
 			ASSERT( depth<=D.getNumTypeObjects() );
@@ -1148,7 +1148,7 @@ private:
 		// TODO helper fn for MultiStmtArg, like FromClang. Maybe.
 		auto s = MakeTreeNode<Compound>();
 
-		for( int i=0; i<Elts.size(); i++ )
+		for( unsigned i=0; i<Elts.size(); i++ )
 		AddStatementToCompound( s, hold_stmt.FromRaw( Elts.get()[i] ) );
 
 		return ToStmt( s );
@@ -1637,7 +1637,7 @@ private:
 		// even if it's really a struct init. We'll come along later and replace with a
 		// RecordInitialiser when we can see what the struct is.
 		auto ao = MakeTreeNode<MakeArray>();
-		for(int i=0; i<NumInit; i++)
+		for(unsigned i=0; i<NumInit; i++)
 		{
 			TreePtr<Expression> e = hold_expr.FromRaw( InitList[i] );
 			ao->operands.push_back( e );
@@ -1772,7 +1772,7 @@ private:
 		TreePtr<Declaration> d( hold_decl.FromRaw( EnumDecl ) );
 		TreePtr<Enum> e( DynamicTreePtrCast<Enum>(d) );
 		ASSERT( e )( "expected the declaration to be an enum");
-		for( int i=0; i<NumElements; i++ )
+		for( unsigned i=0; i<NumElements; i++ )
 		    e->members.insert( hold_decl.FromRaw( Elements[i] ) );
 	}
 
@@ -1855,7 +1855,7 @@ private:
 		TreePtr<InheritanceRecord> ih( DynamicTreePtrCast<InheritanceRecord>(cd) );
 		ASSERT( ih );
 
-		for( int i=0; i<NumBases; i++ )
+		for( unsigned i=0; i<NumBases; i++ )
 		{
 			ih->bases.insert( hold_base.FromRaw( Bases[i] ) );
 		}
@@ -1977,7 +1977,7 @@ private:
 
 	void CollectArgs( Sequence<Expression> *ps, ExprTy **Args, unsigned NumArgs )
 	{
-		for(int i=0; i<NumArgs; i++ )
+		for(unsigned i=0; i<NumArgs; i++ )
 		ps->push_back( hold_expr.FromRaw(Args[i]) );
 	}
 

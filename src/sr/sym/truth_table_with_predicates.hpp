@@ -27,7 +27,7 @@ public:
     TruthTableWithPredicates( const TruthTableWithPredicates &other );    
     TruthTableWithPredicates &operator=( const TruthTableWithPredicates &other ); 
     
-    int GetDegree() const;
+    unsigned GetDegree() const;
     shared_ptr<PredicateOperator> GetFrontPredicate( int axis ) const;
     EqualPredicateSet GetPredicateSet( int axis ) const;
     void Extend( vector<EqualPredicateSet> new_predicates );

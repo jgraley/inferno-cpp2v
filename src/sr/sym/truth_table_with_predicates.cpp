@@ -27,7 +27,7 @@ TruthTableWithPredicates::TruthTableWithPredicates( vector<EqualPredicateSet> pr
 {    
     UpdatePredToIndex();
 
-    for( int i=0; i<GetDegree(); i++ )
+    for( unsigned i=0; i<GetDegree(); i++ )
         pred_labels.push_back( SSPrintf(label_fmt.c_str(), next_pred_num++) );    
 }
  
@@ -56,7 +56,7 @@ TruthTableWithPredicates &TruthTableWithPredicates::operator=( const TruthTableW
 }
 
 
-int TruthTableWithPredicates::GetDegree() const
+unsigned TruthTableWithPredicates::GetDegree() const
 {
     ASSERT( truth_table->GetDegree() == predicates.size() );
     return truth_table->GetDegree();
@@ -81,7 +81,7 @@ void TruthTableWithPredicates::Extend( vector<EqualPredicateSet> new_predicates 
     truth_table->Extend( GetDegree() + new_predicates.size() ); 
     predicates = predicates + new_predicates;
     UpdatePredToIndex();
-    for( int i=0; i<new_predicates.size(); i++ )
+    for( unsigned i=0; i<new_predicates.size(); i++ )
         pred_labels.push_back( SSPrintf(label_fmt.c_str(), next_pred_num++) );    
 }
 
@@ -90,7 +90,7 @@ TruthTableWithPredicates TruthTableWithPredicates::GetSlice( TruthTable::SliceSp
 {
     vector<EqualPredicateSet> new_predicates;
     vector<string> new_pred_labels;
-    for( int axis=0; axis<GetDegree(); axis++ )
+    for( unsigned axis=0; axis<GetDegree(); axis++ )
     {  
         if( slice.count(axis) == 0 ) // this is NOT one of the fixed axes
         {
@@ -111,7 +111,7 @@ TruthTableWithPredicates TruthTableWithPredicates::GetFolded( set<int> fold_axes
 {
     vector<EqualPredicateSet> new_predicates;
     vector<string> new_pred_labels;
-    for( int axis=0; axis<GetDegree(); axis++ )
+    for( unsigned axis=0; axis<GetDegree(); axis++ )
     {  
         if( fold_axes.count(axis) == 0 ) // this is NOT one of the fold axes
         {
@@ -145,7 +145,7 @@ string TruthTableWithPredicates::Render( set<int> column_axes, bool give_preds )
 {    
     string s = "\n"; // Work around trace prefix
     if( give_preds )
-        for( int axis=0; axis<GetDegree(); axis++ )
+        for( unsigned axis=0; axis<GetDegree(); axis++ )
             s += pred_labels.at(axis) + " := " + GetFrontPredicate(axis)->Render() + "\n";
     s += truth_table->Render( column_axes, pred_labels, render_cell_size );
     return s;
@@ -174,6 +174,6 @@ TruthTableWithPredicates::TruthTableWithPredicates( string label_var_name_,
 void TruthTableWithPredicates::UpdatePredToIndex()
 {
     pred_to_index.clear();
-    for( int i=0; i<GetDegree(); i++ )
+    for( unsigned i=0; i<GetDegree(); i++ )
         pred_to_index[GetFrontPredicate(i)] = i;
 }

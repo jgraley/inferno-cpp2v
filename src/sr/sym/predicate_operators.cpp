@@ -705,7 +705,7 @@ TreePtr<Node> IsInCategoryOperator::GetArchetypeNode() const
 // ------------------------- IsChildCollectionSizedOperator --------------------------
 
 IsChildCollectionSizedOperator::IsChildCollectionSizedOperator( TreePtr<Node> archetype_node_,
-                                                          int item_index_, 
+                                                          vector< Itemiser::Element * >::size_type item_index_, 
                                                           shared_ptr<SymbolExpression> a_,
                                                           int size_ ) :
     archetype_node( archetype_node_ ),
