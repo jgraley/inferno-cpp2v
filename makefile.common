@@ -11,8 +11,11 @@ RCC ?= g++
 AR ?= ar
 MAKE ?= make
  
-# Options applied to Inferno, LLVM and clang 
-LC_OPTIONS +=
+# Dependencies to add for all compiles
+DEPS = makefile.common makefile src/makefile
+
+# ------------------- Common options --------------------
+OPTIONS =
  
 # Use the C++11 standard 
 OPTIONS += -std=c++11
@@ -58,25 +61,25 @@ OPTIONS += -DBOOST_CONTEXT_STATIC_LINK
 OPTIONS += -DBOOST_NO_CXX14_STD_EXCHANGE
 OPTIONS += -DBOOST_NO_CXX17_STD_INVOKE
 
-VN_OPTIONS = $(OPTIONS)
+# -------------------- Options applied to Inferno/Vida Nova --------------------
+IVN_OPTIONS = $(OPTIONS)
 
-VN_OPTIONS += -Werror=parentheses
-//VN_OPTIONS += -Wall
+IVN_OPTIONS += -Werror=unused-function
+#IVN_OPTIONS += -Wall
 
-SC_OPTIONS = $(OPTIONS)
+IVN_OPTIONS += -I$(LLVM)/include -I$(CLANG)/include
+IVN_OPTIONS += -D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS
 
-LINK_OPTIONS = $(OPTIONS)
+# -------------------- Options applied to LLVM and clang --------------------
+LC_OPTIONS +=
 
 # For including llvm/clang header files
 BUILD = Debug
 LLVM = $(LEVEL)/llvm
 CLANG = $(LLVM)/tools/clang
-VN_OPTIONS += -I$(LLVM)/include -I$(CLANG)/include
-VN_OPTIONS += -D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS
 
-# Dependencies to add for all compiles
-DEPS = makefile.common makefile src/makefile
+# -------------------- Options applied to SystemC --------------------
+SC_OPTIONS = $(OPTIONS)
 
-# For compiling on multi-core machines
-JOBS=3
-
+# -------------------- Options applied to linking --------------------
+LINK_OPTIONS = $(OPTIONS)

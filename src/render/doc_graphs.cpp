@@ -20,9 +20,10 @@ static void Output( TreePtr<Node> root, string name )
     g.GenerateGraph( root ); 
 }
 
+// Suppress unused function warning because we might want to bring it back
 /// Output a graph for search and replace documentation. For eg section 2.3a use major=2
 /// minor=3 and subsection="a". If no letter, leave subsection empty.
-static void OutputSR( TreePtr<Node> root, int major, int minor, string subsection, string tag )
+static __attribute__ ((unused)) void OutputSR( TreePtr<Node> root, int major, int minor, string subsection, string tag ) 
 {
     string name = SSPrintf( "srdoc_%d_%d%s_%s\n", major, minor, subsection.c_str(), tag.c_str() );
     Output(root, name); 

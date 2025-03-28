@@ -15,7 +15,7 @@ RENDER = $(SRC)/render
 STEPS = $(SRC)/steps
 MAIN = $(SRC)/main
 
-SRC_OPTIONS = $(VN_OPTIONS) -I$(SRC)
+SRC_OPTIONS = $(IVN_OPTIONS) -I$(SRC)
 SRC_SR_OPTIONS = $(SRC_OPTIONS) -I$(SR)
 
 COMMON_MODULES = $(COMMON)/standard $(COMMON)/common $(COMMON)/read_args $(COMMON)/trace $(COMMON)/hit_count $(COMMON)/mismatch $(COMMON)/serial $(COMMON)/progress $(COMMON)/orderable
