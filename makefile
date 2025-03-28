@@ -36,7 +36,7 @@ LLVM_CLANG_ARGS := ENABLE_OPTIMIZED=$(ENABLE_OPTIMIZED)
 # Strangely, on C++11, we get problems with inferred rvalue refs, and below 11
 # the clang code tries to use alignof. We work around the latter here.
 LLVM_CLANG_ARGS += CXXFLAGS="-include cstdio -include stdint.h -std=c++03 -fPIC"
-LLVM_CLANG_ARGS += CFLAGS=$(ILC_OPTIONS)
+LLVM_CLANG_ARGS += CFLAGS=$(LC_OPTIONS)
 LLVM_CLANG_ARGS += --jobs=$(JOBS)
 
 $(LLVM_LIB_PATH)/libLLVMBit%.a : force_subordinate_makefiles
@@ -63,7 +63,7 @@ clean_libclang%.a :
 STANDARD_LIBS += -lstdc++
 BOOST_LIBS += -lboost_context
 inferno.exe : makefile makefile.common build/inferno.a $(LLVM_CLANG_LIB_PATHS)
-	$(ICC) build/inferno.a $(LLVM_CLANG_LIB_PATHS) $(STANDARD_LIBS) $(BOOST_LIBS) -fuse-ld=gold $(OPTIONS) -no-pie -o inferno.exe
+	$(ICC) build/inferno.a $(LLVM_CLANG_LIB_PATHS) $(STANDARD_LIBS) $(BOOST_LIBS) -fuse-ld=gold $(LINK_OPTIONS) -no-pie -o inferno.exe
 
 #
 # Build the doxygen docs

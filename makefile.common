@@ -12,7 +12,7 @@ AR ?= ar
 MAKE ?= make
  
 # Options applied to Inferno, LLVM and clang 
-ILC_OPTIONS +=
+LC_OPTIONS +=
  
 # Use the C++11 standard 
 OPTIONS += -std=c++11
@@ -25,9 +25,6 @@ OPTIONS += -Wreturn-type
 
 # Warn if variable looks like used before init
 OPTIONS += -Wuninitialized -Wmaybe-uninitialized
-
-OPTIONS += -Werror=dangling-else
-#OPTIONS += -Wall
 
 # Treat all warnings as errors 
 OPTIONS += -Werror
@@ -61,12 +58,21 @@ OPTIONS += -DBOOST_CONTEXT_STATIC_LINK
 OPTIONS += -DBOOST_NO_CXX14_STD_EXCHANGE
 OPTIONS += -DBOOST_NO_CXX17_STD_INVOKE
 
+VN_OPTIONS = $(OPTIONS)
+
+VN_OPTIONS += -Werror=parentheses
+//VN_OPTIONS += -Wall
+
+SC_OPTIONS = $(OPTIONS)
+
+LINK_OPTIONS = $(OPTIONS)
+
 # For including llvm/clang header files
 BUILD = Debug
 LLVM = $(LEVEL)/llvm
 CLANG = $(LLVM)/tools/clang
-OPTIONS += -I$(LLVM)/include -I$(CLANG)/include
-OPTIONS += -D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS
+VN_OPTIONS += -I$(LLVM)/include -I$(CLANG)/include
+VN_OPTIONS += -D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS
 
 # Dependencies to add for all compiles
 DEPS = makefile.common makefile src/makefile

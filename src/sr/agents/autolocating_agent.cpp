@@ -16,12 +16,11 @@ Lazy<BooleanExpression> AutolocatingAgent::SymbolicNormalLinkedQuery() const
     Lazy<BooleanExpression> my_expr = SYM::MakeLazy<SYM::BooleanConstant>(true);
 
     for( PatternLink plink : pattern_query->GetNormalLinks() )
-        my_expr = my_expr & MakeLazy<SymbolVariable>(keyer_plink) == MakeLazy<SymbolVariable>(plink);
+        my_expr &= MakeLazy<SymbolVariable>(keyer_plink) == MakeLazy<SymbolVariable>(plink);
     
-    my_expr = my_expr &
-              SymbolicAutolocatingQuery() &
-                 ( SymbolicPreRestriction() |
-                MakeLazy<SymbolVariable>(keyer_plink) == MakeLazy<SymbolConstant>(XLink::MMAX_Link) );
+    my_expr &= SymbolicAutolocatingQuery();
+    my_expr &= SymbolicPreRestriction() |
+                 (MakeLazy<SymbolVariable>(keyer_plink) == MakeLazy<SymbolConstant>(XLink::MMAX_Link));
 
     return my_expr;
 }

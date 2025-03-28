@@ -70,7 +70,7 @@ void Patch::ForChildren(function<void(shared_ptr<Patch> &patch)> func) try
     for( shared_ptr<Patch> &child_patch : child_patches )
         func(child_patch);
 }
-catch( BreakException )
+catch( const BreakException & )
 {
 }               
 
@@ -85,7 +85,7 @@ void Patch::ForDepthFirstWalk( shared_ptr<Patch> &base,
     if( func_out )
         func_out(base);
 }
-catch( BreakException )
+catch( const BreakException & )
 {
 }               
 

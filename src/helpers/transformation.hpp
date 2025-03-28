@@ -155,7 +155,7 @@ public:
             func( x_atp );
         }
     }
-    catch( BreakException )
+    catch( const BreakException & )
     {
     }    
     

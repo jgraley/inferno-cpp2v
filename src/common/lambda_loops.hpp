@@ -39,7 +39,7 @@ void ForOverlappingAdjacentPairs( const T &container,
          prev_x = &x;
     }
 }
-catch( BreakException )
+catch( const BreakException & )
 {
 }
 
@@ -61,7 +61,7 @@ void ForAllUnorderedPairs( const T &container,
          }
     }
 }
-catch( BreakException )
+catch( const BreakException & )
 {
 }
 
@@ -83,7 +83,7 @@ void ForAllDistinctPairs( const T &container,
          }
     }
 }
-catch( BreakException )
+catch( const BreakException & )
 {
 }
 
@@ -108,7 +108,7 @@ void ForPower( int degree, vector<AXIS_TYPE> index_range, function<void(vector<A
     }
     while( !IncrementIndices( int_indices, index_range.size() ) );
 }
-catch( BreakException )
+catch( const BreakException & )
 {
 }
 

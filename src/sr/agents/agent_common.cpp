@@ -176,9 +176,9 @@ Lazy<BooleanExpression> AgentCommon::SymbolicCouplingQuery() const
         
         // Policy: Accept SimpleCompare equivalence of current 
         // residual to keyer, or either one being MMAX
-        expr &= ( MakeLazy<IsSimpleCompareEquivalentOperator>( keyer_expr, residual_expr ) |
-                  keyer_expr == mmax_expr | // See thought on #384
-                  residual_expr == mmax_expr );
+        expr &= MakeLazy<IsSimpleCompareEquivalentOperator>( keyer_expr, residual_expr ) |
+                (keyer_expr == mmax_expr) | // See thought on #384
+                (residual_expr == mmax_expr);
     }
     return expr;
 }
