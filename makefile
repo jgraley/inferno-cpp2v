@@ -37,7 +37,7 @@ LLVM_CLANG_ARGS := ENABLE_OPTIMIZED=$(ENABLE_OPTIMIZED)
 # the clang code tries to use alignof. We work around the latter here.
 LLVM_CLANG_ARGS += CXXFLAGS="-include cstdio -include stdint.h -std=c++03 -fPIC"
 LLVM_CLANG_ARGS += CFLAGS=$(LC_OPTIONS)
-LLVM_CLANG_ARGS += --jobs=$(JOBS)
+LLVM_CLANG_ARGS += --jobs=$(LC_JOBS)
 
 $(LLVM_LIB_PATH)/libLLVMBit%.a : force_subordinate_makefiles
 	cd llvm/lib/Bitcode/$(patsubst libLLVMBit%.a,%,$(notdir $@)) && $(MAKE) $(LLVM_CLANG_ARGS)	

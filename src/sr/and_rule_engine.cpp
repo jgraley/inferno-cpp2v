@@ -856,7 +856,7 @@ SolutionMap AndRuleEngine::Compare( XLink base_xlink,
     }
     
     // By now, we succeeded and basic_solution is the right set of keys
-    return move(basic_solution);
+    return basic_solution;
 }
 
 

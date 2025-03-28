@@ -282,7 +282,6 @@ void TruthTableSolver::ConstrainUsingDerived()
     
     // Get all the extrapolations into maps, keyed by expression equality
     typedef TruthTableWithPredicates::EqualPredicateSet EqualPredicateSet;
-    typedef shared_ptr<PredicateOperator> DerivedPred;
 
     // These derived_pred_to_... maps will unique-ize on equality of Pk 
     map<shared_ptr<PredicateOperator>, set<set<unsigned>>, Expression::Relation> derived_pred_to_init_indices;

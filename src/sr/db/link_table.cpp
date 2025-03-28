@@ -146,6 +146,9 @@ string LinkTable::Row::GetTrace() const
             s += "IN_COLLECTION";
             par = cont = true;
             break;
+        case DBCommon::FREE_BASE:
+			s += "FREE_BASE";
+			break;
     }    
     if( par )
         s += ", parent_node=" + Trace(parent_node);
