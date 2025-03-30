@@ -244,7 +244,7 @@ void Walk_iterator::Mutate( Walk_iterator::pointer v ) const
 }
 
 
-const bool Walk_iterator::IsOrdered() const
+bool Walk_iterator::IsOrdered() const
 {
     return true; // walk walks tree in order generally
 }

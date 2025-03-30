@@ -20,13 +20,16 @@ Progress::Progress( string s )
         if( s.substr(0, stage_code.size()) != stage_code)
             continue;
             
+        if( s.size() == stage_code.size() )
+        {
+			step = NO_STEP;
+			return; // No step given so we're done
+		}			
+        
         switch( p.second.steppiness )
         {
         case NON_STEPPY:
-            if( s.size() != stage_code.size() )
-                break;            
-            step = NO_STEP;
-            return; // success: no step        
+            break; // Step given: an error              
         
         case STEPPY:        
             string ss = s.substr(stage_code.size());                

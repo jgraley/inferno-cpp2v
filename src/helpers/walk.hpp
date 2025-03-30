@@ -36,7 +36,7 @@ public:
     virtual bool operator==( const ContainerInterface::iterator_interface &ib ) const;
     virtual bool operator!=( const ContainerInterface::iterator_interface &ib ) const { return !operator==(ib); }
     virtual void Mutate( pointer v ) const;
-    virtual const bool IsOrdered() const;
+    virtual bool IsOrdered() const;
     // Some additional operations specific to walk iterators
     string GetName() const;
     virtual void AdvanceOver();

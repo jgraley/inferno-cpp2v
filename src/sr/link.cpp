@@ -5,13 +5,19 @@ using namespace SR;
 
 // For debugging
 #ifdef KEEP_WHODAT_INFO
-#define WHODAT() __builtin_extract_return_addr (__builtin_return_address (0))
+#define WHODAT() RETURN_ADDR()
 #else
 #define WHODAT() nullptr
 #endif
  
 // Tests the not-on-stack tests themseleves
 //#define TEST_ASSERT_NOT_ON_STACK
+
+#ifdef TREE_POINTER_REF_COUNTS
+#define XLINK_TREE_POINTER_REF_COUNTS
+#endif
+
+//#define XLINK_LIFECYCLE_TRACE
 
 //////////////////////////// PatternLink ///////////////////////////////
 
@@ -193,7 +199,115 @@ XLink::XLink() :
 #ifdef KEEP_WHODAT_INFO
     whodat = WHODAT();
 #endif
+#ifdef XLINK_LIFECYCLE_TRACE
+	FTRACE(this)("\n");
+#endif	
 }
+
+
+XLink::~XLink() 
+{
+#ifdef XLINK_LIFECYCLE_TRACE
+	FTRACE(this)("\n");
+#endif
+#ifdef XLINK_TREE_POINTER_REF_COUNTS
+	if( asp_x ) 
+		asp_x->RemoveRef(this);
+#endif
+}
+
+
+XLink::XLink(const XLink &other) :
+    asp_x( other.asp_x )
+{
+#ifdef KEEP_WHODAT_INFO
+    whodat = WHODAT();
+#endif
+#ifdef XLINK_LIFECYCLE_TRACE
+	FTRACE(this)("\n");
+#endif
+#ifdef XLINK_TREE_POINTER_REF_COUNTS
+	if( asp_x ) 
+		asp_x->AddRef(this);
+#endif
+}
+
+
+XLink &XLink::operator=(const XLink &other)
+{
+	ASSERT( &other != this );
+	
+#ifdef KEEP_WHODAT_INFO
+    whodat = WHODAT();
+#endif
+#ifdef XLINK_LIFECYCLE_TRACE
+	FTRACE(this)("\n");
+#endif
+#ifdef XLINK_TREE_POINTER_REF_COUNTS
+	if( asp_x ) 
+		asp_x->RemoveRef(this);
+#endif
+		
+	asp_x = other.asp_x;
+	
+#ifdef XLINK_TREE_POINTER_REF_COUNTS
+	if( asp_x )
+		asp_x->AddRef(this);	
+#endif
+	return *this;
+}
+
+
+XLink::XLink(XLink &&other) :
+    asp_x( other.asp_x )
+{
+#ifdef KEEP_WHODAT_INFO
+    whodat = WHODAT();
+#endif
+#ifdef XLINK_LIFECYCLE_TRACE
+	FTRACE(this)(" move from ")(&other)("\n");
+#endif
+#ifdef XLINK_TREE_POINTER_REF_COUNTS
+	if( other.asp_x ) 
+	{
+		other.asp_x->RemoveRef(&other);
+		other.asp_x = nullptr;
+	}
+	if( asp_x ) 
+		asp_x->AddRef(this);
+#endif
+}
+
+
+XLink &XLink::operator=(XLink &&other)
+{
+	ASSERT( &other != this );
+#ifdef KEEP_WHODAT_INFO
+    whodat = WHODAT();
+#endif
+#ifdef XLINK_LIFECYCLE_TRACE
+	FTRACE(this)(" move from ")(&other)("\n");
+#endif
+#ifdef XLINK_TREE_POINTER_REF_COUNTS
+	if( asp_x ) 
+		asp_x->RemoveRef(this);
+#endif
+
+	asp_x = other.asp_x;
+
+#ifdef XLINK_TREE_POINTER_REF_COUNTS
+	if( other.asp_x ) 
+	{
+		other.asp_x->RemoveRef(&other);
+		other.asp_x = nullptr;
+	}
+	if( asp_x ) 
+		asp_x->AddRef(this);
+#endif
+	return *this;
+}
+
+
 
 
 XLink::XLink( shared_ptr<const Node> parent_x,
@@ -210,13 +324,19 @@ XLink::XLink( shared_ptr<const Node> parent_x,
     // So, the shareD_ptr mechanism will keep parent_x alive as with TreePtr
     // but .get() will return px, whichh points to one of parent_x's pointers.
 {
-    ASSERT( parent_x );
-    ASSERT( px );
-    ASSERT( parent_x != GetChildTreePtr() );
 #ifdef KEEP_WHODAT_INFO
     whodat = whodat_ ? whodat_ : WHODAT();
 #endif  
+    ASSERT( parent_x );
+    ASSERT( px );
+    ASSERT( parent_x != GetChildTreePtr() );
     ASSERT_NOT_ON_STACK( px )( *this );
+#ifdef XLINK_LIFECYCLE_TRACE
+	FTRACE(this)("\n");
+#endif
+#ifdef XLINK_TREE_POINTER_REF_COUNTS
+	asp_x->AddRef(this);
+#endif	
 }
 
 
@@ -224,6 +344,25 @@ XLink::XLink( const LocatedLink &l ) :
     XLink( l.xlink )              
 {
 }
+
+
+XLink::XLink( shared_ptr<const TreePtrInterface> px,
+              void *whodat_ ) :
+    asp_x( px )
+{
+#ifdef KEEP_WHODAT_INFO
+    whodat = whodat_ ? whodat_ : WHODAT();
+#endif  
+
+    ASSERT(px);
+
+#ifdef XLINK_LIFECYCLE_TRACE
+	FTRACE(this)("\n");
+#endif
+#ifdef XLINK_TREE_POINTER_REF_COUNTS
+	asp_x->AddRef(this);
+#endif	
+}              
 
 
 XLink XLink::CreateDistinct( const TreePtr<Node> &tp_x )
@@ -273,7 +412,7 @@ string XLink::GetTrace() const
 {
     string s = GetName();
 #ifdef KEEP_WHODAT_INFO    
-    s += SSPrintf("@%lX", (unsigned long)whodat);
+    s += SSPrintf("@%" PRIxPTR, (uintptr_t)whodat);
 #endif
     return s;
 }
@@ -293,19 +432,6 @@ string XLink::GetShortName() const
         return "NULL";
     return "&"+asp_x->GetShortName();
 }
-
-
-XLink::XLink( shared_ptr<const TreePtrInterface> px,
-              void *whodat_ ) :
-    asp_x( px )
-{
-    ASSERT(px);
-
-#ifdef KEEP_WHODAT_INFO
-    whodat = whodat_ ? whodat_ : WHODAT();
-#endif  
-}              
-
 
 const XLink XLink::MMAX_Link = XLink::CreateDistinct( MakeTreeNode<XLink::MMAX>() );
 const XLink XLink::OffEndXLink = XLink::CreateDistinct( MakeTreeNode<XLink::OffEnd>() );

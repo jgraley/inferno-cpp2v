@@ -56,7 +56,7 @@ struct Node : NodeBases,
               enable_shared_from_this<Node>
 {
     // C++11 fix
-    Node& operator=(Node& other)
+    Node& operator=(Node&)
     {
         // Must do nothing - will get invoked mutliple times due
         // virtual MI diamonds

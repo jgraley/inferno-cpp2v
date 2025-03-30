@@ -23,7 +23,7 @@ public:
     {
     public:
         virtual ~Element() {}
-        Element &operator=( const Element &other )
+        Element &operator=( const Element & )
         {
             if( (uintptr_t)this >= (uintptr_t)dstart &&
                 (uintptr_t)this < (uintptr_t)dend )

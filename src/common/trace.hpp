@@ -58,8 +58,11 @@ string Trace(const T *p)
 {
     if( p )
     {
-        // Note: already does SUPPRESS_ADDRESSES
+#ifdef SUPPRESS_ADDRESSES
         return string("&") + Trace(*p);        
+#else    
+        return SSPrintf("%p->", p) + Trace(*p);
+#endif         
     }
     else
     {
@@ -245,7 +248,7 @@ class NewtonsCradle
 {
 public:    
     // The actual work should be done in here
-    virtual NewtonsCradle &operator()(const string &s) { return *this; } 
+    virtual NewtonsCradle &operator()(const string &) { return *this; } 
 
     // And optionally in here if the defualt behaviour is no good
     virtual NewtonsCradle &operator()();    
@@ -386,6 +389,7 @@ private:
 #define STACK_BASE 0x7f0000000000ULL
 #define ON_STACK(POINTER) (((uint64_t)(POINTER) & STACK_BASE) == STACK_BASE)
 #define ASSERT_NOT_ON_STACK(POINTER) ASSERT( !ON_STACK(POINTER) )("\nObject at %p seems like it's probably on the stack, usually a bad sign\n", POINTER)
+#define RETURN_ADDR() (__builtin_extract_return_addr (__builtin_return_address (0)))
 
 // Tracing onto a string...
 #define TRACE_TO(DEST) (!Tracer::IsEnabled()) ? NewtonsCradle() : (TraceTo(DEST))

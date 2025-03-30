@@ -14,6 +14,9 @@
 #include "node.hpp"
 
 
+//#define TREE_POINTER_REF_COUNTS
+//#define TREE_POINTER_REF_TRACKING
+
 template<typename VALUE_TYPE>
 struct Sequence;
 
@@ -53,6 +56,11 @@ struct TreePtrInterface : virtual Itemiser::Element
     virtual TreePtr<Node> MakeValueArchetype() const = 0; // construct an object of the VALUE_TYPE type (NOT a clone)
     virtual pair<TreePtr<Node>, Sequence<Node> *> MakeScaffold() const = 0;
 
+#ifdef TREE_POINTER_REF_COUNTS
+	virtual void AddRef(const Traceable *ref) const = 0;
+	virtual void RemoveRef(const Traceable *ref) const = 0;
+#endif
+	
     virtual string GetName() const = 0;
     virtual string GetShortName() const = 0;
     string GetTrace() const override;
@@ -63,6 +71,11 @@ struct TreePtrInterface : virtual Itemiser::Element
 struct TreePtrCommon : virtual TreePtrInterface, public SatelliteSerial
 {
     TreePtrCommon();
+#ifdef TREE_POINTER_REF_COUNTS
+    ~TreePtrCommon();
+#endif
+    TreePtrCommon(const TreePtrCommon &other);
+    //TreePtrCommon &operator=(const TreePtrCommon &other);
     
     explicit TreePtrCommon( Node *o );
     TreePtrCommon( nullptr_t o );
@@ -79,9 +92,21 @@ struct TreePtrCommon : virtual TreePtrInterface, public SatelliteSerial
     {
     }
 
+#ifdef TREE_POINTER_REF_COUNTS
+    void AddRef(const Traceable *ref) const final;
+    void RemoveRef(const Traceable *ref) const final;    
+#endif
+
     const SatelliteSerial &GetSS() const override;
     string GetName() const final;
-    string GetShortName() const;
+    string GetShortName() const;    
+    
+#ifdef TREE_POINTER_REF_COUNTS
+	mutable unsigned ref_count = 0;
+#ifdef TREE_POINTER_REF_TRACKING
+	mutable set<const Traceable *> references;
+#endif	
+#endif
 };
 
 // -------------------------- TreePtr template ----------------------------    

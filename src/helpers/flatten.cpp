@@ -189,7 +189,7 @@ void FlattenNode_iterator::Mutate( FlattenNode_iterator::pointer v ) const
 }
 
 
-const bool FlattenNode_iterator::IsOrdered() const
+bool FlattenNode_iterator::IsOrdered() const
 {
     return true; // traverse walks tree in order generally
 }

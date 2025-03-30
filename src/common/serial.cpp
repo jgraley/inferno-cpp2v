@@ -21,13 +21,13 @@ SerialNumber::SerialNumber()
 }    
 
 
-SerialNumber::SerialNumber( const SerialNumber &other ) :
+SerialNumber::SerialNumber( const SerialNumber & ) :
     SerialNumber() // Identity semantics: ignore "other"
 {      
 }
 
 
-inline SerialNumber &SerialNumber::operator=( const SerialNumber &other )
+inline SerialNumber &SerialNumber::operator=( const SerialNumber & )
 {
     // Identity semantics: ignore "other"
     return *this;

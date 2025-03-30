@@ -91,16 +91,69 @@ TreePtrCommon::TreePtrCommon()
 }
 
 
+#ifdef TREE_POINTER_REF_COUNTS
+TreePtrCommon::~TreePtrCommon()
+{
+	// Use ASSERT for static since we're in a destructor and our concrete class has gone away
+	ASSERTS( ref_count==0 )
+	       ("Ref count at delete: %u\n", ref_count)
+#ifdef TREE_POINTER_REF_TRACKING
+	       (references)
+#endif
+           ;
+}
+#endif
+
+
 TreePtrCommon::TreePtrCommon( Node *o ) :
     SatelliteSerial( o, this )
 {
 }
 
 
-TreePtrCommon::TreePtrCommon( nullptr_t o ) :
+TreePtrCommon::TreePtrCommon( nullptr_t ) :
     SatelliteSerial( nullptr, this )
 {
 }
+
+
+TreePtrCommon::TreePtrCommon(const TreePtrCommon &other) :
+    SatelliteSerial( other )
+{
+}
+
+
+/*TreePtrCommon &TreePtrCommon::operator=(const TreePtrCommon &other)
+{
+	SatelliteSerial::operator=(other);
+	return *this;
+}*/
+
+
+#ifdef TREE_POINTER_REF_COUNTS
+void TreePtrCommon::AddRef(const Traceable *ref) const
+{ 
+	//FTRACE("Add ref ")(ref)("\n");
+	ref_count++; 
+#ifdef TREE_POINTER_REF_TRACKING
+	if( references.count(ref) )
+		FTRACE(references)("\n");
+	InsertSolo( references, ref );
+#endif	
+}
+
+
+void TreePtrCommon::RemoveRef(const Traceable *ref) const 
+{ 
+	//FTRACE("Remove ref ")(ref)("\n");
+	ASSERT( ref_count>0 )("Ref count decrement past zero");
+	ref_count--; 
+#ifdef TREE_POINTER_REF_TRACKING
+	EraseSolo( references, ref );
+#endif	
+}    
+#endif
+
 
 
 const SatelliteSerial &TreePtrCommon::GetSS() const

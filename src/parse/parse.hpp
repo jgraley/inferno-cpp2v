@@ -70,7 +70,11 @@ public:
         clang::HeaderSearch headers(fm);
         
         std::vector<clang::DirectoryLookup> dirs;
-        dirs.push_back( clang::DirectoryLookup( fm.getDirectory( string(get_current_dir_name()) + string("/resource/include") ), 
+        const char *dirname_c = get_current_dir_name();
+        ASSERT(dirname_c);
+        string dirname(dirname_c);
+        free((void *)dirname_c);
+        dirs.push_back( clang::DirectoryLookup( fm.getDirectory( dirname + string("/resource/include") ), 
                                                 clang::SrcMgr::C_System, 
                                                 true, 
                                                 false ) ); // TODO would prefer based on location of exe rather than CWD

@@ -20,6 +20,14 @@
 #define ASSOCIATIVE_IMPL multiset
 #define SEQUENCE_IMPL list
 
+
+// If defined, make Mutate() perform erase+insert as with associative containers.
+// This should ensure that the TreePtr<X> instance is deleted and re-created, 
+// rather than just modified. This invalidates any TreePtrInterface * or XLink
+// that pointed to it. The aliassing shared pointer in the XLink doesn't help
+// because it only keeps the node alive, not the contqainer element.  
+//#define FORCE_DEEP_MUTATE
+
 //----------------------- ContainerInterface -------------------------
 
 class ContainerInterface : public virtual Itemiser::Element
@@ -36,7 +44,7 @@ public:
         virtual const TreePtrInterface *operator->() const = 0;
         virtual bool operator==( const iterator_interface &ib ) const = 0;
         virtual void Mutate( const TreePtrInterface *v ) const = 0;
-        virtual const bool IsOrdered() const = 0;
+        virtual bool IsOrdered() const = 0;
     };
 
 public:
@@ -67,7 +75,7 @@ public:
         bool operator!=( const iterator_interface &ib ) const; // isovariant param;
         bool operator!=( const iterator &i ) const; // covariant param;
         void Mutate( const value_type *v ) const;
-        const bool IsOrdered() const;
+        bool IsOrdered() const;
         iterator_interface *GetUnderlyingIterator() const;
         explicit operator string() const;
         explicit operator bool() const;
@@ -243,6 +251,9 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
             // Avoid delegating to ContainerInterface::iterator.
             auto ni = make_unique<iterator>();
             ni->Impl::iterator::operator=( (typename Impl::iterator &)*this );
+#ifdef FORCE_DEEP_MUTATE
+			ni->owner = owner;
+#endif			
             return ni;
         }
         virtual void Mutate( const TreePtrInterface *v ) const
@@ -251,12 +262,20 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
             // because in Sequences (ordererd containers) elements may be modified.
             // Avoid delegating to ContainerInterface::iterator.
             value_type x( value_type::InferredDynamicCast(*v) );
-            Impl::iterator::operator*() = x;
-        }
-        virtual const bool IsOrdered() const
+#ifdef FORCE_DEEP_MUTATE
+    		auto it_pos = ((Impl *)owner)->erase( *this );
+		    *(typename Impl::iterator *)this = ((Impl *)owner)->insert( it_pos, x ); // become an iterator for the newly inserted element
+#else
+		    Impl::iterator::operator*() = x;
+#endif        
+		}
+        virtual bool IsOrdered() const
         {
             return true; // yes, Sequences are ordered
         }
+#ifdef FORCE_DEEP_MUTATE
+        Sequential<VALUE_TYPE> *owner = nullptr;
+#endif
     };
 
     using ContainerInterface::erase;
@@ -306,11 +325,19 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
     const iterator &begin() override
     {
         my_begin.Impl::iterator::operator=( Impl::begin() );
+#ifdef FORCE_DEEP_MUTATE
+		ASSERTTHIS();
+    	my_begin.owner = this;
+#endif  
         return my_begin;
     }
     const iterator &end() override
     {
         my_end.Impl::iterator::operator=( Impl::end() );
+#ifdef FORCE_DEEP_MUTATE
+		ASSERTTHIS();
+    	my_end.owner = this;
+#endif 
         return my_end;
     }  
     const iterator &insert( const TreePtrInterface &gx ) override // Simulating the SimpleAssociatedContaner API 
@@ -319,6 +346,10 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
         value_type sx( value_type::InferredDynamicCast(gx) );
         Impl::push_back( sx );
         my_inserted.Impl::iterator::operator=( prev(Impl::end()) );
+#ifdef FORCE_DEEP_MUTATE
+		ASSERTTHIS();
+    	my_inserted.owner = this;
+#endif 
         return my_inserted;
     }
     const iterator &insert( const ContainerInterface::iterator_interface &pos, 
@@ -329,6 +360,10 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
         ASSERT( posit ); // if this fails, you passed insert() the wrong kind of iterator
         value_type sx( value_type::InferredDynamicCast(gx) );
         my_inserted.Impl::iterator::operator=( Impl::insert( *(typename Impl::iterator *)posit, sx ) );
+#ifdef FORCE_DEEP_MUTATE
+		ASSERTTHIS();
+    	my_inserted.owner = this;
+#endif 
         return my_inserted;
     }
     const iterator &insert_front( const TreePtrInterface &gx ) override // Simulating the SimpleAssociatedContaner API 
@@ -337,6 +372,10 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
         value_type sx( value_type::InferredDynamicCast(gx) );
         Impl::push_front( sx );
         my_inserted.Impl::iterator::operator=( prev(Impl::end()) );
+#ifdef FORCE_DEEP_MUTATE
+		ASSERTTHIS();
+    	my_inserted.owner = this;
+#endif 
         return my_inserted;
     }
 
@@ -356,6 +395,10 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
         auto cit = dynamic_cast<const iterator *>( &it );
         ASSERT( cit ); // if this fails, you passed erase() the wrong kind of iterator        
         my_erased.Impl::iterator::operator=( Impl::erase( *(typename Impl::iterator *)cit ) );   
+#ifdef FORCE_DEEP_MUTATE
+		ASSERTTHIS();
+    	my_erased.owner = this;
+#endif 
         return my_erased;
     }
 
@@ -437,7 +480,7 @@ struct SimpleAssociativeContainer : virtual ContainerCommon< ASSOCIATIVE_IMPL< T
             ((Impl *)owner)->erase( *this );
             *(typename Impl::iterator *)this = ((Impl *)owner)->insert( s ); // become an iterator for the newly inserted element
          }
-        virtual const bool IsOrdered() const
+        virtual bool IsOrdered() const
         {
             return false; // no, SimpleAssociativeContainers are not ordered
         }
@@ -625,7 +668,7 @@ pair<TreePtr<Node>, Sequence<Node> *> TreePtr<VALUE_TYPE>::MakeScaffold() const
 {
     // Don't instance TreePtr<Scaffold<X>> because very bad things happen
     // including gcc 10.5 spinning forver chewing up memory (presumably
-    // its contemplating TreePtr<Scaffold<Scaffold<X>>> etc). 
+    // it's contemplating TreePtr<Scaffold<Scaffold<X>>> etc). 
     auto scaffold_sp = make_shared<Scaffold<VALUE_TYPE>>(); 
     TreePtr<Node> scaffold( scaffold_sp );
     return make_pair( scaffold, &(scaffold_sp->child_ptrs) );

@@ -7,9 +7,6 @@
 
 using namespace CSP;
 
-#define NEW_CORO_ORDER
-
-
 SolverHolder::SolverHolder( shared_ptr<Solver> solver_ ) :
     solver( solver_ )
 {
@@ -36,10 +33,10 @@ void SolverHolder::Start( const Assignments &forces,
     
     auto lambda = [&](Coroutine::push_type& sink_)
     {        
-        auto solution_report_lambda = [&](const Solution &solution)
-        { 
-            ReportSolution(solution); 
-        };
+		auto solution_report_lambda = [&](const Solution &solution)
+		{ 
+			ReportSolution(solution); 
+		};
 
         sink = &sink_;
         (*sink)( {} ); // Yield so we don't do "real work" until GetNextSolution(), rule #393
@@ -60,8 +57,13 @@ void SolverHolder::Start( const Assignments &forces,
     source = new Coroutine::pull_type(lambda);    
     MaybeRethrow();
 #else
+	auto solution_report_lambda = [&](const Solution &solution)
+	{ 
+		ReportSolution(solution); 
+	};
+
     solutions_queue.clear();
-    solver->Run( this, forces, x_tree_db);
+    solver->Run( solution_report_lambda, Solver::RejectionReportFunction() );
 #endif
 }
 

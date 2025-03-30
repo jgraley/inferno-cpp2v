@@ -24,16 +24,16 @@ Orderable::Diff Orderable::OrderCompare3Way( const Orderable &l,
 }
 
 
-Orderable::Diff Orderable::OrderCompare3WayCovariant( const Orderable &right, 
-                                                      OrderProperty order_property ) const 
+Orderable::Diff Orderable::OrderCompare3WayCovariant( const Orderable &, 
+                                                      OrderProperty ) const 
 {
     // Often, there are no contents to compare
     return 0; 
 }
 
 
-Orderable::Diff Orderable::OrderCompare3WayChildren( const Orderable &right, 
-                                                     OrderProperty order_property ) const 
+Orderable::Diff Orderable::OrderCompare3WayChildren( const Orderable &, 
+                                                     OrderProperty ) const 
 {
     // Sometimes we don't incorprorate children in this ordering 
     // (i.e. local ordering only is required)

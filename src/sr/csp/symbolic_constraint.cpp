@@ -121,7 +121,7 @@ SYM::Expression::VariablesRequiringRows SymbolicConstraint::GetVariablesRequirin
 void SymbolicConstraint::Start( const SR::XTreeDatabase *x_tree_db_ )
 {
     ASSERT( x_tree_db_ );
-    x_tree_db = x_tree_db_;
+	x_tree_db = x_tree_db_;
 }   
 
 

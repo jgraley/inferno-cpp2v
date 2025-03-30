@@ -197,15 +197,13 @@ Inferno::Plan::Plan(Inferno *algo_) :
         steps = { steps[ReadArgs::runonlystep] };
 
     // If we're to quit after a particular step, restrict all stepped stages
-    if( ReadArgs::quitafter )
+    if( ReadArgs::quitafter &&
+        ReadArgs::quitafter_progress.GetStep() != Progress::NO_STEP )
     {
-        if( ReadArgs::quitafter_progress.GetStep() != Progress::NO_STEP )
-        {
-            steps.resize(ReadArgs::quitafter_progress.GetStep() + 1);
-            steps.back().allow_stop = true;
-        }
+        steps.resize(ReadArgs::quitafter_progress.GetStep() + 1);
+        steps.back().allow_stop = true;
         for( vector<Step>::size_type i=0; i<steps.size()-1; i++ )
-            steps[i].allow_trace = steps[i].allow_hits = steps[i].allow_reps = steps[i].allow_stop = false;
+            steps[i].allow_trace = steps[i].allow_hits = steps[i].allow_reps = steps[i].allow_stop = false;        
         for( vector<Step>::size_type i=0; i<steps.size(); i++ )
             TRACE("Step %03d ALLOWS: trace=", i)
                  (steps[i].allow_trace)(" hits=")

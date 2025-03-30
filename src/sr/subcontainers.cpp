@@ -156,7 +156,7 @@ void SubContainerRangeExclusions::exclusion_iterator::Mutate( const value_type *
 }
 
         
-const bool SubContainerRangeExclusions::exclusion_iterator::IsOrdered() const
+bool SubContainerRangeExclusions::exclusion_iterator::IsOrdered() const
 {
     return pib->IsOrdered();
 }

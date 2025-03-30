@@ -27,7 +27,7 @@ public:
     virtual bool operator!=( const ContainerInterface::iterator_interface &ciii_o ) const { return !operator==(ciii_o); }
     //virtual bool operator<( const FlattenNode_iterator &o ) const;
     virtual void Mutate( pointer v ) const;
-    virtual const bool IsOrdered() const;
+    virtual bool IsOrdered() const;
     // Some additional operations specific to walk iterators
     string GetName() const;
     FlattenNode_iterator(); // makes "end" iterator

@@ -52,8 +52,9 @@ void ReadArgs::Usage(string msg)
                     "-su         Run unit tests and quit.\n"
                     "-sc         Enable CSP solver self-test.\n"
                     "-sd         Enable DB self-checks: relation integrity and compare with new build.\n"
-                    "-q<p>.<c>...   Stop after stage+step <p>, and optional match count(s) <c>. Eg -qT12.2.3\n"
-                    "               for transformation 12, root match 2, first embedded match 3.\n"    
+                    "-q<p>.<c>...   Stop after stage+step <p>, and optional match count(s) <c>. Eg -qA\n"
+                    "               to stop after analysis, or -qT12.2.3 to stop after transformation 12,\n"
+                    "               root match 2, first embedded match 3.\n"    
                     "               Note: step is 0-based; counts are 1-based or 0 to disable.\n"
                     "               Note: -qT<n> makes -t and -r operate only on step n.\n"                
                     "               Note: if quitting after parse or later, output is attempted.\n"     
@@ -242,7 +243,7 @@ void ReadArgs::ParseQuitAfter(string arg)
     bool first = true;
     do
     {
-        string::size_type dot = arg.find('.', p);
+        dot = arg.find('.', p);
         string s;
         if( dot != string::npos )   
             s = arg.substr(p, dot-p);

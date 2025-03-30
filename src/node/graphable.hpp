@@ -97,7 +97,7 @@ public:
     };
     
     // If you don't know about pre-restrictions, you don't have one.
-    virtual bool IsNonTrivialPreRestrictionNP(const TreePtrInterface *pptr) const { return false; }
+    virtual bool IsNonTrivialPreRestrictionNP(const TreePtrInterface *) const { return false; }
 };
 
 #endif

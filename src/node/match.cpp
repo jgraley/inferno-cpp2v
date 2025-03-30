@@ -14,7 +14,7 @@ bool Matcher::IsLocalMatch( const Matcher &candidate ) const
 }
 
 
-bool Matcher::IsLocalMatchCovariant( const Matcher &candidate ) const
+bool Matcher::IsLocalMatchCovariant( const Matcher & ) const
 {
     // Default local matching criterion checks only the type of the candidate. If the
     // candidate's class is a (non-strict) subclass of this class, we have a match.

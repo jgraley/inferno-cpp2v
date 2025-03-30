@@ -181,12 +181,6 @@ unique_ptr<BooleanResult> BooleanToBooleanExpression::Evaluate( const EvalKit &k
 }
 
 
-unique_ptr<SymbolicResult> SymbolToSymbolExpression::Evaluate( const EvalKit &kit, 
-                                                             list<unique_ptr<SymbolicResult>> &&op_results ) const
-{
-    ASSERTFAIL("Need to override one of the Evaluate() methods\n");
-}
-
 // ------------------------- SymbolToSymbolExpression --------------------------
 
 list<shared_ptr<SymbolExpression>> SymbolToSymbolExpression::GetSymbolOperands() const
@@ -210,6 +204,12 @@ unique_ptr<SymbolicResult> SymbolToSymbolExpression::Evaluate( const EvalKit &ki
     for( shared_ptr<SymbolExpression> a : GetSymbolOperands() )
         op_results.push_back( a->Evaluate(kit) );
     return Evaluate( kit, move(op_results) );
+}
+
+unique_ptr<SymbolicResult> SymbolToSymbolExpression::Evaluate( const EvalKit &kit, 
+                                                             list<unique_ptr<SymbolicResult>> &&op_results ) const
+{
+    ASSERTFAIL("Need to override one of the Evaluate() methods\n");
 }
 
 // ------------------------- SymbolToBooleanExpression --------------------------

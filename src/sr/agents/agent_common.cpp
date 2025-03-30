@@ -49,8 +49,8 @@ void AgentCommon::SCRConfigure( const SCREngine *e,
           ("\nCould be result of coupling this node across sibling embedded engines - not allowed :(");
     my_scr_engine = e;
     
-    pattern_query = GetPatternQuery();    
-    
+	pattern_query = GetPatternQuery();    
+        
     phase = phase_;
     ASSERT( (int)phase != 0 );
     if( phase != IN_REPLACE_ONLY )

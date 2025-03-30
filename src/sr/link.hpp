@@ -59,11 +59,20 @@ class XLink : public Traceable
 {
 public:
     XLink();
+    virtual ~XLink();
+    XLink(const XLink &other);
+    XLink &operator=(const XLink &other);
+    XLink(XLink &&other);
+    XLink &operator=(XLink &&other);
     XLink( shared_ptr<const Node> parent_x,
            const TreePtrInterface *px,
            void *whodat=nullptr );
     XLink( const LocatedLink &l );
-    virtual ~XLink() {}
+private: friend class LocatedLink;
+    XLink( shared_ptr<const TreePtrInterface> px,
+           void *whodat=nullptr );
+public:   
+   
     // Make a copy of tp_x which acts as a new, distinct value 
     static XLink CreateDistinct( const TreePtr<Node> &tp_x ); 
     static XLink CreateFrom( shared_ptr<TreePtr<Node>> sp_tp_x );
@@ -93,9 +102,7 @@ public:
     }
 
 private: friend class LocatedLink;
-    XLink( shared_ptr<const TreePtrInterface> px,
-           void *whodat=nullptr );
-           
+
     shared_ptr<const TreePtrInterface> asp_x;
     // So .get() will return const TreePtrInterface*
     

@@ -9,7 +9,15 @@
 
 #define COROUTINE_HOLDER
 
+
 #ifdef COROUTINE_HOLDER
+
+// Needs boost to be rebuilt with valgrind=on on b2 command line according to https://stackoverflow.com/questions/29180589/is-it-safe-to-use-spawn-directly-in-an-asio-stackful-coroutine
+#define BOOST_USE_VALGRIND
+
+// Needs boost to be rebuilt with context-impl=ucontext according to https://github.com/boostorg/coroutine/issues/30#issuecomment-325583085
+#define BOOST_USE_ASAN
+
 #include <boost/coroutine2/coroutine.hpp>
 #endif
 
@@ -71,7 +79,7 @@ public:
     void CheckPlan() const;
     
 private:
-    void ReportSolution( const Solution &solution );
+    void ReportSolution( const Solution &solution );    
 #ifdef COROUTINE_HOLDER
     void ReapSource();
     void MaybeRethrow();

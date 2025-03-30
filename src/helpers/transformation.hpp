@@ -123,7 +123,9 @@ public:
     AugTreePtr<OTHER_VALUE_TYPE> GetChild( const TreePtr<OTHER_VALUE_TYPE> *other_tree_ptr ) const
     {
         ASSERT( !ON_STACK(other_tree_ptr) );        
-        return AugTreePtr<OTHER_VALUE_TYPE>(*other_tree_ptr, OnGetChild(other_tree_ptr)); 
+        auto ogc = OnGetChild(other_tree_ptr);
+        auto atp = AugTreePtr<OTHER_VALUE_TYPE>(*other_tree_ptr, ogc);
+        return atp; 
     }
 
     // Should always be a.SetChild(&a->c, newval)

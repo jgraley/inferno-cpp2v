@@ -191,7 +191,7 @@ void ContainerInterface::iterator::Mutate( const value_type *v ) const
 }
         
 
-const bool ContainerInterface::iterator::IsOrdered() const
+bool ContainerInterface::iterator::IsOrdered() const
 {
     CHECK_NOT_REACHED_ON_SUBCLASS
     return pib->IsOrdered();
