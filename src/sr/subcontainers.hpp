@@ -23,7 +23,7 @@ struct SubContainer : Node // TODO #69
     // These functions operate on links held within the subcontainer,
     // which typically will be in the domain.
     virtual string GetContentsTrace() { return ""; } 
-    virtual void AssertMatchingContents( TreePtr<Node> other ) { ASSERTFAIL(); }
+    virtual void AssertMatchingContents( TreePtr<Node> ) { ASSERTFAIL(); }
 };
 
 
@@ -44,7 +44,7 @@ public:
     const iterator &begin() override;
     const iterator &end() override;
     const iterator &insert( const TreePtrInterface & ) final       { ASSERTFAIL("Cannot modify SubContainerRange"); }
-    const iterator &insert( const ContainerInterface::iterator_interface &pos, const TreePtrInterface & ) final       { ASSERTFAIL("Cannot modify SubContainerRange"); }
+    const iterator &insert( const ContainerInterface::iterator_interface &, const TreePtrInterface & ) final       { ASSERTFAIL("Cannot modify SubContainerRange"); }
     const iterator &insert_front( const TreePtrInterface & ) final { ASSERTFAIL("Cannot modify SubContainerRange"); }
     const iterator &erase( const iterator_interface & ) final      { ASSERTFAIL("Cannot modify SubContainerRange"); }
     void clear() final                                  { ASSERTFAIL("Cannot modify SubContainerRange"); }    

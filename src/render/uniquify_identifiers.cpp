@@ -48,7 +48,7 @@ void VisibleIdentifiers::SplitName( TreePtr<SpecificIdentifier> i, string *b, un
 }
 
 
-string VisibleIdentifiers::AddIdentifierNumber( NameUsage &nu, TreePtr<SpecificIdentifier> i, string b, unsigned n )
+string VisibleIdentifiers::AddIdentifierNumber( NameUsage &nu, TreePtr<SpecificIdentifier>, string b, unsigned n )
 {
     // Uniqueify the number n, by incrementing it until there are no conflicts
     bool tryagain;

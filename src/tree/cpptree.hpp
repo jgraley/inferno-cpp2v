@@ -1,14 +1,10 @@
 #ifndef CPPTREE_HPP
 #define CPPTREE_HPP
 
-#include "clang/Basic/SourceLocation.h"
-#include "clang/Basic/TokenKinds.h"
-#include "llvm/ADT/APSInt.h"
-#include "llvm/ADT/APFloat.h"
-#include <string>
+#include "include_clang_llvm.hpp"
 #include "node/specialise_oostd.hpp"
-#include "clang/Parse/DeclSpec.h"
 #include "tree/type_data.hpp"
+#include <string>
 
 /// CPPTree namespace contains node definitions that represent elements of the C++ language
 namespace CPPTree {

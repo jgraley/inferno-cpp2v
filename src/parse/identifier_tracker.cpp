@@ -1,7 +1,6 @@
 #include "common/common.hpp"
-#include "clang/Parse/Parser.h"
-#include "clang/Parse/DeclSpec.h"
-#include "clang/Parse/Scope.h"
+
+#include "include_clang_llvm.hpp"
 #include "identifier_tracker.hpp"
 
 

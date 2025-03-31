@@ -110,7 +110,7 @@ TreePtr<Node> Render::GenerateRender( TreePtr<Node> context, TreePtr<Node> root 
 }
 
 
-bool Render::IsSystemC( const TransKit &kit, TreePtr<Node> root )
+bool Render::IsSystemC( const TransKit &, TreePtr<Node> root )
 { 
     Walk e(root, nullptr, nullptr);
     for( const TreePtrInterface &n : e )

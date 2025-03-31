@@ -26,7 +26,7 @@ bool SpecificString::IsLocalMatchCovariant( const Matcher &candidate ) const
 
  
 Orderable::Diff SpecificString::OrderCompare3WayCovariant( const Orderable &right, 
-                                                           OrderProperty order_property ) const
+                                                           OrderProperty ) const
 {
     auto &r = GET_THAT_REFERENCE(right);
     return value.compare(r.value);
@@ -109,7 +109,7 @@ bool SpecificInteger::IsLocalMatchCovariant( const Matcher &candidate ) const
 
 
 Orderable::Diff SpecificInteger::OrderCompare3WayCovariant( const Orderable &right, 
-                                                            OrderProperty order_property ) const
+                                                            OrderProperty ) const
 {
     auto &r = GET_THAT_REFERENCE(right);
 

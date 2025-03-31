@@ -65,7 +65,12 @@ OPTIONS += -DBOOST_NO_CXX17_STD_INVOKE
 IVN_OPTIONS = $(OPTIONS)
 
 IVN_OPTIONS += -Wall 
-#-Wextra
+#IVN_OPTIONS += -Werror=unused-parameter
+#IVN_OPTIONS += -Wextra
+
+# #780 to re-instate
+IVN_OPTIONS += -Wno-deprecated-copy 
+
 
 IVN_OPTIONS += -I$(LLVM)/include -I$(CLANG)/include
 IVN_OPTIONS += -D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS

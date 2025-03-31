@@ -139,7 +139,7 @@ Orderable::Diff SatelliteSerial::Compare3WayIdentity(const SatelliteSerial &l, c
 }
 */
 
-int SatelliteSerial::MotherBlock::AssignSerial(const SatelliteSerial *ss_for_trace)
+int SatelliteSerial::MotherBlock::AssignSerial(const SatelliteSerial *)
 {
     int ns = next_serial;
     next_serial++;
@@ -147,7 +147,7 @@ int SatelliteSerial::MotherBlock::AssignSerial(const SatelliteSerial *ss_for_tra
 }
 
 
-shared_ptr<SatelliteSerial::MotherBlock> SatelliteSerial::GetMotherBlock( const SerialNumber *mother, const void *satellite )
+shared_ptr<SatelliteSerial::MotherBlock> SatelliteSerial::GetMotherBlock( const SerialNumber *mother, const void * )
 {
     if( !mother )
     {
@@ -179,7 +179,7 @@ LeakCheck::LeakCheck() :
 }
 
 
-LeakCheck::LeakCheck( const LeakCheck &other ) :
+LeakCheck::LeakCheck( const LeakCheck & ) :
     origin( GetOrigin() )
 {
     // Identity semantics: ignore "other"
@@ -194,7 +194,7 @@ LeakCheck::~LeakCheck()
 }
 
 
-LeakCheck &LeakCheck::operator=( const LeakCheck &other )
+LeakCheck &LeakCheck::operator=( const LeakCheck &)
 {
     // Identity semantics: ignore "other"
     return *this;

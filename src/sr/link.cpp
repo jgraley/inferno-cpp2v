@@ -39,6 +39,8 @@ PatternLink::PatternLink(shared_ptr<const Node> parent_pattern,
     ASSERT( *ppattern );
 #ifdef KEEP_WHODAT_INFO
     whodat = whodat_ ? whodat_ : WHODAT();
+#else
+	(void)whodat_;
 #endif    
     ASSERT_NOT_ON_STACK( ppattern )( *this );
 }
@@ -188,6 +190,8 @@ PatternLink::PatternLink(shared_ptr<const TreePtrInterface> ppattern,
 {
 #ifdef KEEP_WHODAT_INFO
     whodat = whodat_ ? whodat_ : WHODAT();
+#else
+	(void)whodat_;
 #endif    
 }
 
@@ -326,6 +330,8 @@ XLink::XLink( shared_ptr<const Node> parent_x,
 {
 #ifdef KEEP_WHODAT_INFO
     whodat = whodat_ ? whodat_ : WHODAT();
+#else
+	(void)whodat_;
 #endif  
     ASSERT( parent_x );
     ASSERT( px );
@@ -352,6 +358,8 @@ XLink::XLink( shared_ptr<const TreePtrInterface> px,
 {
 #ifdef KEEP_WHODAT_INFO
     whodat = whodat_ ? whodat_ : WHODAT();
+#else
+	(void)whodat_;
 #endif  
 
     ASSERT(px);

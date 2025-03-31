@@ -26,7 +26,7 @@ public:
     const iterator &erase( const ContainerInterface::iterator_interface & ) final { ASSERTFAIL("Cannot modify ContainerFromIterator<>"); }
     void clear() final                                     { ASSERTFAIL("Cannot modify ContainerFromIterator<>"); }    
     const iterator &insert( const TreePtrInterface & ) final          { ASSERTFAIL("Cannot modify ContainerFromIterator<>"); }
-    const iterator &insert( const ContainerInterface::iterator_interface &pos, 
+    const iterator &insert( const ContainerInterface::iterator_interface &, 
                             const TreePtrInterface & ) final          { ASSERTFAIL("Cannot modify ContainerFromIterator<>"); }
     const iterator &insert_front( const TreePtrInterface & ) final    { ASSERTFAIL("Cannot modify ContainerFromIterator<>"); }
 private:
