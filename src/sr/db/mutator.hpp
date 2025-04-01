@@ -65,7 +65,7 @@ class ContainerMutator : public Mutator
 public:
     explicit ContainerMutator( TreePtr<Node> parent_node, 
                                 ContainerInterface *dest_container_,
-                                ContainerInterface::iterator it_dest_placeholder_ );             
+                                ContainerInterface::iterator it_dest_ );             
 
     ContainerMutator &operator=( const ContainerMutator &other );
 
@@ -84,7 +84,7 @@ public:
 
 private:
     ContainerInterface *dest_container;
-    ContainerInterface::iterator it_dest_placeholder;
+    ContainerInterface::iterator it_dest;
     ContainerInterface::iterator it_dest_populated;
     
     bool populated = false;

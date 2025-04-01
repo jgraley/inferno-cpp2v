@@ -60,15 +60,16 @@ protected:
 class MutableTreeZone : public TreeZone
 {
 public:
-    explicit MutableTreeZone( TreeZone tz, unique_ptr<Mutator> &&base_mutator_ );
+    explicit MutableTreeZone( TreeZone tz, 
+                              unique_ptr<Mutator> &&base_mutator_, 
+                              vector<shared_ptr<Mutator>> &&terminii_mutators_ );
 
-    void Exchange( FreeZone &&new_zone );
+    FreeZone Exchange( FreeZone &&new_zone );
     
 private:
     unique_ptr<Mutator> base_mutator;
+    vector<shared_ptr<Mutator>> terminii_mutators;
 };
- 
- 
  
 }
 

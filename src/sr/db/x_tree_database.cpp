@@ -144,20 +144,22 @@ FreeZone XTreeDatabase::MainTreeExchange( TreeZone target_tree_zone, FreeZone so
     ASSERT( target_tree_zone.GetNumTerminii() == source_free_zone.GetNumTerminii() )
           ("Target TZ:%d, source FZ:%d", target_tree_zone.GetNumTerminii(), source_free_zone.GetNumTerminii());    
     target_tree_zone.DBCheck(this); 
-    MutableTreeZone mutable_target_tree_zone( target_tree_zone, GetMutator(target_tree_zone.GetBaseXLink()) );
+    vector<shared_ptr<Mutator>> tmuts;
+    for( XLink t : target_tree_zone.GetTerminusXLinks() )
+		tmuts.push_back( GetMutator(t) );
+    MutableTreeZone mutable_target_tree_zone( target_tree_zone, GetMutator(target_tree_zone.GetBaseXLink()), move(tmuts) );
     
     // Store the core info for the base locally since the link table will change
     // as this function executes.
     const DBCommon::CoreInfo base_info = link_table->GetCoreInfo( target_tree_zone.GetBaseXLink() );
-    FreeZone old_zone = mutable_target_tree_zone.MakeFreeZone(this);
 
-    // Update database 
+    // Remove geometric info that will be invalidated by the exchange 
     MainTreeDeleteGeometric( mutable_target_tree_zone, &base_info );   
     
-    // Patch the tree
-    mutable_target_tree_zone.Exchange( move(source_free_zone) ); 
+    // Update the tree. mutable_target_tree_zone becomes the valid new tree zone.
+    FreeZone old_zone = mutable_target_tree_zone.Exchange( move(source_free_zone) ); 
     
-    // Update database 
+    // Re-insert geometric info based on new tree zone
     MainTreeInsertGeometric( mutable_target_tree_zone, &base_info );       
     
     // Update domain extension extra trees

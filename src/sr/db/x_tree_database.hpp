@@ -79,7 +79,7 @@ public:
     TreePtr<Node> GetMainRootNode() const;
     XLink GetMainRootXLink() const;
 
-       unique_ptr<Mutator> GetMutator(XLink xlink) const;
+    unique_ptr<Mutator> GetMutator(XLink xlink) const;
 
     void Dump() const;
     

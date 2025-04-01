@@ -21,7 +21,9 @@ TreePtr<Node> Mutator::GetParentNode() const
 XLink Mutator::GetXLink() const
 {
     ASSERT( parent_node ); 
-    return XLink(parent_node, GetTreePtrInterface() );
+    XLink xlink(parent_node, GetTreePtrInterface() );
+    ASSERT( xlink );
+    return xlink;
 }
 
 
@@ -47,7 +49,7 @@ void SingularMutator::Mutate( TreePtr<Node> child_base,
     {
         *dest_tree_ptr = child_base;
     }
-    TRACE("Singular joined ")(child_base)("\n");    
+    TRACE("Singular mutated ")(child_base)("\n");    
 }
     
 
@@ -67,10 +69,10 @@ string SingularMutator::GetTrace() const
     
 ContainerMutator::ContainerMutator( TreePtr<Node> parent_node, 
                                       ContainerInterface *dest_container_,
-                                      ContainerInterface::iterator it_dest_placeholder_ ) :
+                                      ContainerInterface::iterator it_dest_ ) :
     Mutator( parent_node ),
     dest_container( dest_container_ ),
-    it_dest_placeholder( it_dest_placeholder_ )
+    it_dest( it_dest_ )
 {
     Validate();
 }
@@ -79,7 +81,7 @@ ContainerMutator::ContainerMutator( TreePtr<Node> parent_node,
 ContainerMutator &ContainerMutator::operator=( const ContainerMutator &other )
 {
     dest_container = other.dest_container;
-    it_dest_placeholder = other.it_dest_placeholder;
+    it_dest = other.it_dest;
     Validate();
     return *this;
 }
@@ -89,13 +91,11 @@ void ContainerMutator::Mutate( TreePtr<Node> child_base,
                                list<shared_ptr<Mutator>> child_terminii )
 {
     ASSERT( child_base ); // perhaps we tried to populate with an empty zone?
-    ASSERT( !populated );
-    populated = true;
     
     if( ContainerInterface *child_container = dynamic_cast<ContainerInterface *>(child_base.get()) )
     {                    
         // We don't need the placeholder any more
-        ContainerInterface::iterator it_after = dest_container->erase( it_dest_placeholder );
+        ContainerInterface::iterator it_after = dest_container->erase( it_dest );
         
         // Child zone base has ContainerInterface, so it's a SubContainer. We get here due to         
         // FreeZones created by StarAgent. Expand it and populate into the destination, which is also a SubContainer.         
@@ -123,7 +123,7 @@ void ContainerMutator::Mutate( TreePtr<Node> child_base,
     {
         // Populate terminus with singular-based zone. We tee into Mutate() in case our container
         // is not order-preserving i.e. std::set<>.        
-        it_dest_placeholder.Mutate(&child_base); 
+        it_dest.Mutate(&child_base); 
     }    
 }
 
@@ -146,7 +146,7 @@ shared_ptr<ContainerMutator> ContainerMutator::FindMatchingTerminus( ContainerIn
         if( auto candidate_container_terminus = dynamic_pointer_cast<ContainerMutator>( candidate_terminus ) ) 
         {                        
             if( candidate_container_terminus->dest_container == container && 
-                candidate_container_terminus->it_dest_placeholder == it_placeholder )
+                candidate_container_terminus->it_dest == it_placeholder )
             {
                 ASSERTS( !found_terminus )("Found multiple matching terminii including ")(*found_terminus)(" and now ")(*candidate_container_terminus);
                 found_terminus = candidate_container_terminus;
@@ -161,11 +161,11 @@ shared_ptr<ContainerMutator> ContainerMutator::FindMatchingTerminus( ContainerIn
 
 const TreePtrInterface *ContainerMutator::GetTreePtrInterface() const
 {    
-    // Must have populated, and not with a SubContainer
-    ASSERT( populated ); 
-    ASSERT( it_dest_placeholder );
+    // Mutating to a ContainerInterface can do this, and then it's ambiguous whet
+    // we should use: there can be zero or many candidates.
+    ASSERT( it_dest != dest_container->end() );
     
-    const TreePtrInterface *dest_tree_ptr = &*it_dest_placeholder;
+    const TreePtrInterface *dest_tree_ptr = &*it_dest;
     ASSERT( dest_tree_ptr );    
     return dest_tree_ptr;
 }                                     
@@ -174,11 +174,11 @@ const TreePtrInterface *ContainerMutator::GetTreePtrInterface() const
 void ContainerMutator::Validate() const
 {    
     // important invariant: placeholder iterator must point to a member in the destination container
-    ASSERT( it_dest_placeholder != dest_container->end() );
+    ASSERT( it_dest != dest_container->end() );
     bool found = false;
     for( ContainerInterface::iterator it=dest_container->begin(); it!=dest_container->end(); ++it )
     {
-        if( it == it_dest_placeholder )
+        if( it == it_dest )
             found = true;        
     }
     ASSERT( found );
@@ -191,7 +191,7 @@ string ContainerMutator::GetTrace() const
     for( ContainerInterface::iterator it=dest_container->begin(); it!=dest_container->end(); ++it )
     {
         i++;
-        if( it == it_dest_placeholder )
+        if( it == it_dest )
             break;
     }
     string si;
