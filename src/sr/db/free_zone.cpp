@@ -109,6 +109,13 @@ TreePtr<Node> FreeZone::GetBaseNode() const
 }
 
 
+void FreeZone::SetBase( TreePtr<Node> base_ )
+{
+	ASSERT(base_); // No trying to make an empty zone this way
+	base = base_;
+}
+
+
 void FreeZone::MergeAll( list<unique_ptr<FreeZone>> &&child_zones ) 
 {
     ASSERT( terminii.size() == child_zones.size() );

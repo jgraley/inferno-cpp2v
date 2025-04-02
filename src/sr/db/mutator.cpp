@@ -90,7 +90,7 @@ ContainerMutator &ContainerMutator::operator=( const ContainerMutator &other )
 void ContainerMutator::Mutate( TreePtr<Node> child_base, 
                                list<shared_ptr<Mutator>> child_terminii )
 {
-    ASSERT( child_base ); // perhaps we tried to populate with an empty zone?
+    //ASSERT( child_base ); // perhaps we tried to populate with an empty zone?
     
     if( ContainerInterface *child_container = dynamic_cast<ContainerInterface *>(child_base.get()) )
     {                    
@@ -161,7 +161,7 @@ shared_ptr<ContainerMutator> ContainerMutator::FindMatchingTerminus( ContainerIn
 
 const TreePtrInterface *ContainerMutator::GetTreePtrInterface() const
 {    
-    // Mutating to a ContainerInterface can do this, and then it's ambiguous whet
+    // Mutating to a ContainerInterface can do this, and then it's ambiguous where
     // we should use: there can be zero or many candidates.
     ASSERT( it_dest != dest_container->end() );
     
