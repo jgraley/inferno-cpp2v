@@ -182,6 +182,8 @@ MutableTreeZone::MutableTreeZone( TreeZone tz,
 
 FreeZone MutableTreeZone::Exchange( FreeZone &&new_free_zone )
 {    
+	ASSERT( !new_free_zone.IsEmpty() ); // Could add support but apparently don't need it rn
+	
     FreeZone old_free_zone;
         
     if( IsEmpty() )
@@ -191,9 +193,6 @@ FreeZone MutableTreeZone::Exchange( FreeZone &&new_free_zone )
     for( shared_ptr<Mutator> tmut : terminii_mutators )
         old_free_zone.AddTerminus( tmut );
     terminii_mutators.clear();
-    
-    //FreeZone displaced_free_zone( base, {} );
-    bool new_zone_is_empty = new_free_zone.IsEmpty();
     
     // Do a co-walk and populate one at a time. Update our terminii as we go. Cannot use 
     // TPI because we need to change the PARENT node, so we need a whole new XLink. Do this
@@ -211,24 +210,15 @@ FreeZone MutableTreeZone::Exchange( FreeZone &&new_free_zone )
         new_it = new_free_zone.PopulateTerminus( new_it, boundary_node ); // Note: ensures free zone not empty    
         
         // Update the tree zone terminus
-        if( !new_zone_is_empty )        
-        {
-            tree_terminus_xlink = new_mutator->GetXLink();   
-            terminii_mutators.push_back( new_mutator );
-		}
+        tree_terminus_xlink = new_mutator->GetXLink();   
+        terminii_mutators.push_back( new_mutator );		
     } 
     ASSERT( new_it == new_free_zone.GetTerminiiEnd() ); // length mismatch  
-    ASSERT( new_free_zone.GetNumTerminii() == 0 ); // PopulateTerminus() consumed them all  
+    ASSERT( new_free_zone.GetNumTerminii() == 0 ); // Consumed them all  
 
     // Do this after, since free zone is now not empty 
     base_mutator->Mutate( new_free_zone.GetBaseNode() );
 
-    if( new_zone_is_empty )
-    {
-        // Become an empty tree zone
-        terminii = { base };
-    }
-    
     return old_free_zone;
 }
 
