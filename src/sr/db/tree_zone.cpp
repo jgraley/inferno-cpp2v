@@ -205,16 +205,17 @@ FreeZone MutableTreeZone::Exchange( FreeZone &&new_free_zone )
         
         // Make the FZ terminus match the TZ terminus
         shared_ptr<Mutator> new_mutator( *new_it );        
-        TreePtr<Node> boundary_node = tree_terminus_xlink.GetChildTreePtr(); // outside the zone        
-        ASSERT( !dynamic_cast<ContainerInterface *>(boundary_node.get()) ); // requirement for GetTreePtrInterface()
-        new_it = new_free_zone.PopulateTerminus( new_it, boundary_node ); // Note: ensures free zone not empty    
+        TreePtr<Node> tz_boundary_node = tree_terminus_xlink.GetChildTreePtr(); // outside the zone        
+        ASSERT( !dynamic_cast<ContainerInterface *>(tz_boundary_node.get()) ); // requirement for GetTreePtrInterface()
+        (*new_it)->Mutate( tz_boundary_node );    
         
         // Update the tree zone terminus
         tree_terminus_xlink = new_mutator->GetXLink();   
         terminii_mutators.push_back( new_mutator );		
+        
+        new_it++;
     } 
     ASSERT( new_it == new_free_zone.GetTerminiiEnd() ); // length mismatch  
-    ASSERT( new_free_zone.GetNumTerminii() == 0 ); // Consumed them all  
 
     // Do this after, since free zone is now not empty 
     base_mutator->Mutate( new_free_zone.GetBaseNode() );
