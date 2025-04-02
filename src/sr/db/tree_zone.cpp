@@ -185,7 +185,7 @@ FreeZone MutableTreeZone::Exchange( FreeZone &&new_free_zone )
     FreeZone old_free_zone;
         
     if( IsEmpty() )
-        return old_free_zone = FreeZone::CreateEmpty();
+        return FreeZone::CreateEmpty();
         
     old_free_zone = FreeZone( base.GetChildTreePtr(), {} );
     for( shared_ptr<Mutator> tmut : terminii_mutators )
