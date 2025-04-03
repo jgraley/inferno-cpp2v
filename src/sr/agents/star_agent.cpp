@@ -97,8 +97,8 @@ Agent::ReplacePatchPtr StarAgent::GenReplaceLayoutImpl( const ReplaceKit &kit,
     ContainerInterface *dest_container = dynamic_cast<ContainerInterface *>(dest.get());
     for( const TreePtrInterface &key_elt : *key_container )
     {
-        ContainerInterface::iterator dest_it = dest_container->insert( ContainerMutator::MakePlaceholder() );
-        dest_zone.AddTerminus( make_shared<ContainerMutator>(dest, dest_container, dest_it) );    
+        ContainerInterface::iterator dest_it = dest_container->insert( Mutator::MakePlaceholder() );
+        dest_zone.AddTerminus( Mutator::MakeContainerMutator(dest, dest_container, dest_it) );    
 
         TreeZone child_zone = TreeZone::CreateSubtree(XLink(key_node, &key_elt) );
         child_commands.push_back( make_shared<TreeZonePatch>(move(child_zone)) );

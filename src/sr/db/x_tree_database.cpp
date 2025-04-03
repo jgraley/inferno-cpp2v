@@ -445,7 +445,7 @@ shared_ptr<Mutator> XTreeDatabase::GetMutator(XLink xlink) const
             // correctly from the XTreeDatabase object, which is why this method cannot be const.
             ASSERT( (int)(row.tree_ordinal) >= 0 ); // Should be valid whenever context is ROOT
             shared_ptr<TreePtr<Node>> sp_tp_root_node = trees_by_ordinal.at(row.tree_ordinal).sp_tp_root_node;
-            return make_shared<SingularMutator>( row.parent_node, sp_tp_root_node.get() );
+            return Mutator::MakeRootMutator( sp_tp_root_node.get() );
         }    
         case DBCommon::SINGULAR:
         {
@@ -453,17 +453,17 @@ shared_ptr<Mutator> XTreeDatabase::GetMutator(XLink xlink) const
             Itemiser::Element *xe = x_items.at(row.item_ordinal);        
             auto p_x_singular = dynamic_cast<TreePtrInterface *>(xe);
             ASSERT( p_x_singular );
-            return make_shared<SingularMutator>( row.parent_node, p_x_singular );
+            return Mutator::MakeSingularMutator( row.parent_node, p_x_singular );
         }
         case DBCommon::IN_SEQUENCE:
         case DBCommon::IN_COLLECTION: 
         {
             // COLLECTION is the motivating case: its elements are const, so we neet Mutate() to change them
-            return make_shared<ContainerMutator>( row.parent_node, row.p_container, row.container_it );            
+            return Mutator::MakeContainerMutator( row.parent_node, row.p_container, row.container_it );            
         }
         case DBCommon::FREE_BASE:
         {
-            ASSERTFAIL(); // No way to get to parent
+            ASSERTFAIL(); // Base of free zone is just a node, so there's no unique mutator for it
         }
     }    
     ASSERTFAIL();

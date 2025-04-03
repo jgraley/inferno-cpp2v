@@ -6,44 +6,51 @@ using namespace SR;
 
 // ------------------------- Mutator --------------------------    
 
-Mutator::Mutator( TreePtr<Node> parent_node_ ) :
-    parent_node( parent_node_ ) // NULL parent means at root of tree
+shared_ptr<Mutator> Mutator::MakeRootMutator( TreePtrInterface *dest_tree_ptr )
+{
+	return shared_ptr<Mutator>(new Mutator(dest_tree_ptr));
+}
+
+										  		  
+shared_ptr<Mutator> Mutator::MakeSingularMutator( TreePtr<Node> parent_node, 
+										  		  TreePtrInterface *dest_tree_ptr )
+{
+	return shared_ptr<Mutator>(new Mutator(parent_node, dest_tree_ptr));
+}
+
+										  		  
+shared_ptr<Mutator> Mutator::MakeContainerMutator( TreePtr<Node> parent_node, 
+												   ContainerInterface *dest_container,
+												   ContainerInterface::iterator it_dest )
+{
+	return shared_ptr<ContainerMutator>(new ContainerMutator(parent_node, dest_container, it_dest));
+}
+
+
+Mutator::Mutator( Mode mode_, TreePtr<Node> parent_node_ ) :
+	mode( mode_ ),
+    parent_node( parent_node_ ) 
 {
 }    
 
 
-TreePtr<Node> Mutator::GetParentNode() const
-{
-    return parent_node;
-}
-
-
-bool Mutator::IsAtRoot() const
-{
-	return !parent_node;
-}
-
-
-XLink Mutator::GetXLink() const
-{
-    ASSERT( !IsAtRoot() ); 
-    
-    XLink xlink(parent_node, GetTreePtrInterface() );
-    ASSERT( xlink );
-    return xlink;
-}
-
-
-// ------------------------- SingularMutator --------------------------    
-    
-SingularMutator::SingularMutator( TreePtr<Node> parent_node, TreePtrInterface *dest_tree_ptr_ ) :
-    Mutator( parent_node ),
+Mutator::Mutator( TreePtrInterface *dest_tree_ptr_ ) :
+	mode( Mode::Root ),
+    parent_node( nullptr ),
     dest_tree_ptr( dest_tree_ptr_ )
 {
 }
 
 
-TreePtr<Node> SingularMutator::ExchangeChild( TreePtr<Node> new_child, 
+Mutator::Mutator( TreePtr<Node> parent_node, TreePtrInterface *dest_tree_ptr_ ) :
+	mode( Mode::Singular ),
+    parent_node( parent_node ),
+    dest_tree_ptr( dest_tree_ptr_ )
+{
+}
+
+
+TreePtr<Node> Mutator::ExchangeChild( TreePtr<Node> new_child, 
                                        list<shared_ptr<Mutator>> child_terminii )
 {
     ASSERT( new_child ); // perhaps we tried to populate with an empty zone?
@@ -64,24 +71,55 @@ TreePtr<Node> SingularMutator::ExchangeChild( TreePtr<Node> new_child,
 }
     
 
-const TreePtrInterface *SingularMutator::GetTreePtrInterface() const
+const TreePtrInterface *Mutator::GetTreePtrInterface() const
 {    
     ASSERT( dest_tree_ptr );
     return dest_tree_ptr;
 }  
 
 
-string SingularMutator::GetTrace() const
+string Mutator::GetTrace() const
 {
     return "⌾"+dest_tree_ptr->GetTypeName();
 }
+
+
+TreePtr<Node> Mutator::GetParentNode() const
+{
+	ASSERT( mode != Mode::Root );
+    return parent_node;
+}
+
+
+bool Mutator::IsAtRoot() const
+{
+	return mode == Mode::Root;
+}
+
+
+XLink Mutator::GetXLink() const
+{
+	ASSERT( mode != Mode::Root );
+    
+    XLink xlink(parent_node, GetTreePtrInterface() );
+    ASSERT( xlink );
+    return xlink;
+}
+
+
+TreePtr<Node> Mutator::MakePlaceholder()
+{
+    // There should be no child where we have a mutator
+    return TreePtr<Node>(); // It's just a NULL tree ptr!
+}
+    
     
 // ------------------------- ContainerMutator --------------------------    
     
 ContainerMutator::ContainerMutator( TreePtr<Node> parent_node, 
                                       ContainerInterface *dest_container_,
                                       ContainerInterface::iterator it_dest_ ) :
-    Mutator( parent_node ),
+    Mutator( Mode::Container, parent_node ),
     dest_container( dest_container_ ),
     it_dest( it_dest_ )
 {
@@ -139,13 +177,6 @@ TreePtr<Node> ContainerMutator::ExchangeChild( TreePtr<Node> new_child,
     }    
     
     return old_child;
-}
-
-
-TreePtr<Node> ContainerMutator::MakePlaceholder()
-{
-    // There should be no child where we have a mutator
-    return TreePtr<Node>(); // It's just a NULL tree ptr!
 }
 
 

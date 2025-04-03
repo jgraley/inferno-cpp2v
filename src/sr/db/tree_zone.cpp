@@ -181,14 +181,12 @@ MutableTreeZone::MutableTreeZone( TreeZone tz,
 }
 
 // TODO 
-// free_zone arg should be non-const by-ref and not returned!!
+// Coalesce the Mutator classes
 // Turn the new FZ terminii into placeholders with a new DetachChild() etc
 //    BUT we shouldn't need to : exchanging PARENT should leave the CHILDren
 //    unchanged: FZ terminus child is NULL on the way in and should still 
 //    be NULL on the way out.
-// Rename Mutate() to MutateChild()
 // Have it return the old base TreePtr<Node>
-// Avoid dodgy language by saying ExchangeChild() etc
 
 FreeZone MutableTreeZone::Exchange( FreeZone free_zone )
 {    
@@ -207,9 +205,12 @@ FreeZone MutableTreeZone::Exchange( FreeZone free_zone )
     {
         ASSERT( free_mut_it != free_zone.GetTerminiiEnd() ); // length mismatch    
         ASSERT( tree_mut_it != terminii_mutators.end() ); // length mismatch    
-                
+                                
         // Mutate the FZ terminus match the TZ terminus
         shared_ptr<Mutator> tree_mutator = *tree_mut_it;
+
+        //ASSERT( typeid(*tree_mutator) == typeid(**free_mut_it) )("Tree: ")(*tree_mutator)("\nFree: ")(**free_mut_it);
+
 
         TreePtr<Node> tz_boundary_node = tree_mutator->GetXLink().GetChildTreePtr(); // outside the zone        
         ASSERT( !dynamic_cast<ContainerInterface *>(tz_boundary_node.get()) ); // requirement for GetTreePtrInterface()

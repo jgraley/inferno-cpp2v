@@ -14,37 +14,46 @@ namespace SR
     
 class Mutator : public Traceable
 {
-public:
-    Mutator( TreePtr<Node> parent_node_ );
+protected:
+	enum class Mode
+	{
+		Root,
+		Singular,
+		Container		
+	};
+	
+public:	
+	static shared_ptr<Mutator> MakeRootMutator( TreePtrInterface *dest_tree_ptr );
+	static shared_ptr<Mutator> MakeSingularMutator( TreePtr<Node> parent_node, 
+	                                                TreePtrInterface *dest_tree_ptr );
+	static shared_ptr<Mutator> MakeContainerMutator( TreePtr<Node> parent_node, 
+                                                     ContainerInterface *dest_container,
+                                                     ContainerInterface::iterator it_dest );
+	
+protected:
+    Mutator( Mode mode_, TreePtr<Node> parent_node_ );    
+    explicit Mutator( TreePtrInterface *dest_tree_ptr_ );
+    explicit Mutator( TreePtr<Node> parent_node, TreePtrInterface *dest_tree_ptr_ );
     
+public:    
     virtual TreePtr<Node> ExchangeChild( TreePtr<Node> new_child,                               
-                                         list<shared_ptr<Mutator>> child_terminii = {} ) = 0;
+                                         list<shared_ptr<Mutator>> child_terminii = {} );
     TreePtr<Node> GetParentNode() const;
     bool IsAtRoot() const;
     
     // After population, a mutator can now provide an XLink that's valid for the new boundary
-    virtual const TreePtrInterface *GetTreePtrInterface() const = 0; // Only valid after populate
+    virtual const TreePtrInterface *GetTreePtrInterface() const; // Only valid after populate
     XLink GetXLink() const; // Only valid after populate
+    
+    static TreePtr<Node> MakePlaceholder();    
 
-private:
-    TreePtr<Node> parent_node;
-};    
-    
-// ------------------------- SingularMutator --------------------------    
-    
-class SingularMutator : public Mutator
-{
-public:
-    explicit SingularMutator( TreePtr<Node> parent_node, TreePtrInterface *dest_tree_ptr_ );
-    TreePtr<Node> ExchangeChild( TreePtr<Node> new_child,                               
-                          list<shared_ptr<Mutator>> child_terminii = {} ) final;
-    const TreePtrInterface *GetTreePtrInterface() const final;
-    
     string GetTrace() const;
 
 private:
-    TreePtrInterface * const dest_tree_ptr;
-};    
+	Mode mode;
+    TreePtr<Node> parent_node;
+    TreePtrInterface * dest_tree_ptr;    
+};        
     
 // ------------------------- ContainerMutator --------------------------    
     
@@ -63,18 +72,17 @@ class ContainerMutator : public Mutator
      * element that will be there when we apply the update.
      */  
          
-public:
+private: friend class Mutator;
     explicit ContainerMutator( TreePtr<Node> parent_node, 
-                                ContainerInterface *dest_container_,
-                                ContainerInterface::iterator it_dest_ );             
+                               ContainerInterface *dest_container_,
+                               ContainerInterface::iterator it_dest_ );             
 
+public:
     ContainerMutator &operator=( const ContainerMutator &other );
 
     TreePtr<Node> ExchangeChild( TreePtr<Node> new_child, 
                           list<shared_ptr<Mutator>> child_terminii = {} ) final;
-    
-    static TreePtr<Node> MakePlaceholder();
-    
+        
     static shared_ptr<ContainerMutator> FindMatchingTerminus( ContainerInterface *container,
                                                                ContainerInterface::iterator it_placeholder,
                                                                list<shared_ptr<Mutator>> &candidate_terminii );

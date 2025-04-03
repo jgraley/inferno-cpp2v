@@ -33,8 +33,8 @@ FreeZone FreeZone::CreateScaffold(const TreePtrInterface *tpi_base, int num_term
     // Set the terminii as the scaffolding node's child pointers
     for( int i=0; i<num_terminii; i++ )
     {
-        ContainerInterface::iterator it = pair.second->insert( ContainerMutator::MakePlaceholder() );
-        zone.AddTerminus( make_shared<ContainerMutator>(pair.first, pair.second, it) );     
+        ContainerInterface::iterator it = pair.second->insert( Mutator::MakePlaceholder() );
+        zone.AddTerminus( Mutator::MakeContainerMutator(pair.first, pair.second, it) );     
     }
     
     //FTRACES("Created scaffold with %d terminii\n", num_terminii)("\n");
