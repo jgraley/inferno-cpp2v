@@ -68,7 +68,7 @@ TreePtr<Node> Mutator::ExchangeChild( TreePtr<Node> new_child,
 		case Mode::Container:
 			//...TODO
 			break;
-	}
+	}	
     
     return old_child;
 }
@@ -76,8 +76,19 @@ TreePtr<Node> Mutator::ExchangeChild( TreePtr<Node> new_child,
 
 const TreePtrInterface *Mutator::GetTreePtrInterface() const
 {    
-    ASSERT( dest_tree_ptr );
-    return dest_tree_ptr;
+	switch( mode )
+	{
+		case Mode::Root:
+		case Mode::Singular:
+			ASSERT( dest_tree_ptr );
+			return dest_tree_ptr;
+
+		case Mode::Container:
+			//...TODO
+			return nullptr;
+	}			
+	
+	ASSERTFAIL();
 }  
 
 
