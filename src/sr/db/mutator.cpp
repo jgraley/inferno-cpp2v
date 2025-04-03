@@ -56,16 +56,19 @@ TreePtr<Node> Mutator::ExchangeChild( TreePtr<Node> new_child,
     ASSERT( new_child ); // perhaps we tried to populate with an empty zone?
 	TreePtr<Node> old_child = (TreePtr<Node>)*dest_tree_ptr;
 
-    if( dynamic_cast<ContainerInterface *>(new_child.get()) )
-    {
-        ASSERTFAIL();
-    }
-    else
-    {
-        *dest_tree_ptr = new_child;
-        
-    }
-    TRACE("Singular mutated ")(new_child)("\n");    
+	switch( mode )
+	{
+		case Mode::Root:
+		case Mode::Singular:
+			ASSERT( !dynamic_cast<ContainerInterface *>(new_child.get()) )("Cannot accept wide here");
+			*dest_tree_ptr = new_child;
+			TRACE("Singular mutated ")(new_child)("\n");   
+			break;
+			
+		case Mode::Container:
+			//...TODO
+			break;
+	}
     
     return old_child;
 }
