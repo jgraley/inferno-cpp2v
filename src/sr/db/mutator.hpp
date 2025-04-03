@@ -92,7 +92,6 @@ public:
 private:
     ContainerInterface *dest_container;
     ContainerInterface::iterator it_dest;
-    ContainerInterface::iterator it_dest_populated;
 };    
     
 }
