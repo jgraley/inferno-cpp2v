@@ -64,7 +64,7 @@ public:
                               unique_ptr<Mutator> &&base_mutator_, 
                               vector<shared_ptr<Mutator>> &&terminii_mutators_ );
 
-    FreeZone Exchange( FreeZone &&new_zone );
+    FreeZone Exchange( FreeZone new_zone );
     
 private:
     unique_ptr<Mutator> base_mutator;

@@ -7,7 +7,7 @@ using namespace SR;
 // ------------------------- Mutator --------------------------    
 
 Mutator::Mutator( TreePtr<Node> parent_node_ ) :
-    parent_node( parent_node_ )
+    parent_node( parent_node_ ) // NULL parent means at root of tree
 {
 }    
 
@@ -18,9 +18,16 @@ TreePtr<Node> Mutator::GetParentNode() const
 }
 
 
+bool Mutator::IsAtRoot() const
+{
+	return !parent_node;
+}
+
+
 XLink Mutator::GetXLink() const
 {
-    ASSERT( parent_node ); 
+    ASSERT( !IsAtRoot() ); 
+    
     XLink xlink(parent_node, GetTreePtrInterface() );
     ASSERT( xlink );
     return xlink;
@@ -36,20 +43,24 @@ SingularMutator::SingularMutator( TreePtr<Node> parent_node, TreePtrInterface *d
 }
 
 
-void SingularMutator::Mutate( TreePtr<Node> child_base, 
-                              list<shared_ptr<Mutator>> child_terminii )
+TreePtr<Node> SingularMutator::ExchangeChild( TreePtr<Node> new_child, 
+                                       list<shared_ptr<Mutator>> child_terminii )
 {
-    ASSERT( child_base ); // perhaps we tried to populate with an empty zone?
+    ASSERT( new_child ); // perhaps we tried to populate with an empty zone?
+	TreePtr<Node> old_child = (TreePtr<Node>)*dest_tree_ptr;
 
-    if( dynamic_cast<ContainerInterface *>(child_base.get()) )
+    if( dynamic_cast<ContainerInterface *>(new_child.get()) )
     {
         ASSERTFAIL();
     }
     else
     {
-        *dest_tree_ptr = child_base;
+        *dest_tree_ptr = new_child;
+        
     }
-    TRACE("Singular mutated ")(child_base)("\n");    
+    TRACE("Singular mutated ")(new_child)("\n");    
+    
+    return old_child;
 }
     
 
@@ -87,12 +98,13 @@ ContainerMutator &ContainerMutator::operator=( const ContainerMutator &other )
 }
 
 
-void ContainerMutator::Mutate( TreePtr<Node> child_base, 
-                               list<shared_ptr<Mutator>> child_terminii )
+TreePtr<Node> ContainerMutator::ExchangeChild( TreePtr<Node> new_child, 
+                                        list<shared_ptr<Mutator>> child_terminii )
 {
-    //ASSERT( child_base ); // perhaps we tried to populate with an empty zone?
+    //ASSERT( new_child ); // perhaps we tried to populate with an empty zone?
+	TreePtr<Node> old_child = (TreePtr<Node>)*it_dest;
     
-    if( ContainerInterface *child_container = dynamic_cast<ContainerInterface *>(child_base.get()) )
+    if( ContainerInterface *child_container = dynamic_cast<ContainerInterface *>(new_child.get()) )
     {                    
         // We don't need the placeholder any more
         ContainerInterface::iterator it_after = dest_container->erase( it_dest );
@@ -123,8 +135,10 @@ void ContainerMutator::Mutate( TreePtr<Node> child_base,
     {
         // Populate terminus with singular-based zone. We tee into Mutate() in case our container
         // is not order-preserving i.e. std::set<>.        
-        it_dest.Mutate(&child_base); 
+        it_dest.Mutate(&new_child); 
     }    
+    
+    return old_child;
 }
 
 

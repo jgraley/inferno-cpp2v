@@ -17,9 +17,10 @@ class Mutator : public Traceable
 public:
     Mutator( TreePtr<Node> parent_node_ );
     
-    virtual void Mutate( TreePtr<Node> child_base,                               
-                         list<shared_ptr<Mutator>> child_terminii = {} ) = 0;
+    virtual TreePtr<Node> ExchangeChild( TreePtr<Node> new_child,                               
+                                         list<shared_ptr<Mutator>> child_terminii = {} ) = 0;
     TreePtr<Node> GetParentNode() const;
+    bool IsAtRoot() const;
     
     // After population, a mutator can now provide an XLink that's valid for the new boundary
     virtual const TreePtrInterface *GetTreePtrInterface() const = 0; // Only valid after populate
@@ -35,8 +36,8 @@ class SingularMutator : public Mutator
 {
 public:
     explicit SingularMutator( TreePtr<Node> parent_node, TreePtrInterface *dest_tree_ptr_ );
-    void Mutate( TreePtr<Node> child_base,                               
-                 list<shared_ptr<Mutator>> child_terminii = {} ) final;
+    TreePtr<Node> ExchangeChild( TreePtr<Node> new_child,                               
+                          list<shared_ptr<Mutator>> child_terminii = {} ) final;
     const TreePtrInterface *GetTreePtrInterface() const final;
     
     string GetTrace() const;
@@ -69,8 +70,8 @@ public:
 
     ContainerMutator &operator=( const ContainerMutator &other );
 
-    void Mutate( TreePtr<Node> child_base, 
-                 list<shared_ptr<Mutator>> child_terminii = {} ) final;
+    TreePtr<Node> ExchangeChild( TreePtr<Node> new_child, 
+                          list<shared_ptr<Mutator>> child_terminii = {} ) final;
     
     static TreePtr<Node> MakePlaceholder();
     

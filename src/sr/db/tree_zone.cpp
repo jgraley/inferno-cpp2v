@@ -190,12 +190,12 @@ MutableTreeZone::MutableTreeZone( TreeZone tz,
 // Have it return the old base TreePtr<Node>
 // Avoid dodgy language by saying ExchangeChild() etc
 
-FreeZone MutableTreeZone::Exchange( FreeZone &&free_zone )
+FreeZone MutableTreeZone::Exchange( FreeZone free_zone )
 {    
 	ASSERT( !free_zone.IsEmpty() ); // Could add support but apparently don't need it rn
 	        
     if( IsEmpty() )
-        return FreeZone::CreateEmpty();
+        return FreeZone::CreateEmpty(); // Dodgy but it is reached
             
     // Do a co-walk and populate one at a time. Update our terminii as we go. Cannot use 
     // TPI because we need to change the PARENT node, so we need a whole new XLink. Do this
@@ -211,7 +211,7 @@ FreeZone MutableTreeZone::Exchange( FreeZone &&free_zone )
         // Mutate the FZ terminus match the TZ terminus
         TreePtr<Node> tz_boundary_node = (*tree_mut_it)->GetXLink().GetChildTreePtr(); // outside the zone        
         ASSERT( !dynamic_cast<ContainerInterface *>(tz_boundary_node.get()) ); // requirement for GetTreePtrInterface()
-        (*free_mut_it)->Mutate( tz_boundary_node );    
+        (*free_mut_it)->ExchangeChild( tz_boundary_node );    
         
         // Update the tree zone terminus
         swap( *tree_mut_it, *free_mut_it );		
@@ -226,11 +226,14 @@ FreeZone MutableTreeZone::Exchange( FreeZone &&free_zone )
     ASSERT( tree_mut_it == terminii_mutators.end() ); // length mismatch    
 
     // Deal with the bases
-    auto temp2 = base.GetChildTreePtr();    
-    base_mutator->Mutate( free_zone.GetBaseNode() );	
-	free_zone.SetBase( temp2 );
-
-    return free_zone;
+    TreePtr<Node> free_base = free_zone.GetBaseNode();
+    TreePtr<Node> old_base = base_mutator->ExchangeChild( free_base );	
+    if( !base_mutator->IsAtRoot() )
+		base = base_mutator->GetXLink();   
+    
+	free_zone.SetBase( old_base );
+	
+	return free_zone;
 }
 
 
