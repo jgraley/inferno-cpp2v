@@ -67,8 +67,8 @@ public:
     XLink TryGetParentXLink(XLink xlink) const;
     
     // XLink from TPI ptr
-      XLink TryGetXLink( const TreePtrInterface *ptp ) const;
-      XLink GetXLink( const TreePtrInterface *ptp ) const;
+    XLink TryGetXLink( const TreePtrInterface *ptp ) const;
+    XLink GetXLink( const TreePtrInterface *ptp ) const;
     
     // Last of the descendents in depth first order. If no 
     // descendents, it will be the supplied node. 
@@ -79,7 +79,7 @@ public:
     TreePtr<Node> GetMainRootNode() const;
     XLink GetMainRootXLink() const;
 
-    unique_ptr<Mutator> GetMutator(XLink xlink) const;
+    shared_ptr<Mutator> GetMutator(XLink xlink) const;
 
     void Dump() const;
     

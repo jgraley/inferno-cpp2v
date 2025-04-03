@@ -172,7 +172,7 @@ void TreeZone::DBCheck(const XTreeDatabase *db) const // TODO maybe move to data
 // ------------------------- MutableTreeZone --------------------------
 
 MutableTreeZone::MutableTreeZone( TreeZone tz, 
-                                  unique_ptr<Mutator> &&base_mutator_, 
+                                  shared_ptr<Mutator> &&base_mutator_, 
                                   vector<shared_ptr<Mutator>> &&terminii_mutators_ ) :
     TreeZone(tz),
     base_mutator(move(base_mutator_)),
@@ -209,12 +209,15 @@ FreeZone MutableTreeZone::Exchange( FreeZone free_zone )
         ASSERT( tree_mut_it != terminii_mutators.end() ); // length mismatch    
                 
         // Mutate the FZ terminus match the TZ terminus
-        TreePtr<Node> tz_boundary_node = (*tree_mut_it)->GetXLink().GetChildTreePtr(); // outside the zone        
+        shared_ptr<Mutator> tree_mutator = *tree_mut_it;
+
+        TreePtr<Node> tz_boundary_node = tree_mutator->GetXLink().GetChildTreePtr(); // outside the zone        
         ASSERT( !dynamic_cast<ContainerInterface *>(tz_boundary_node.get()) ); // requirement for GetTreePtrInterface()
         (*free_mut_it)->ExchangeChild( tz_boundary_node );    
         
         // Update the tree zone terminus
-        swap( *tree_mut_it, *free_mut_it );		
+        *tree_mut_it = *free_mut_it;
+        *free_mut_it = tree_mutator;
 
         tree_terminus_xlink = (*tree_mut_it)->GetXLink();   
         

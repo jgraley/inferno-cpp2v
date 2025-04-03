@@ -432,7 +432,7 @@ XLink XTreeDatabase::GetMainRootXLink() const
 }
 
 
-unique_ptr<Mutator> XTreeDatabase::GetMutator(XLink xlink) const
+shared_ptr<Mutator> XTreeDatabase::GetMutator(XLink xlink) const
 {
     const LinkTable::Row &row = link_table->GetRow(xlink);
     
@@ -445,7 +445,7 @@ unique_ptr<Mutator> XTreeDatabase::GetMutator(XLink xlink) const
             // correctly from the XTreeDatabase object, which is why this method cannot be const.
             ASSERT( (int)(row.tree_ordinal) >= 0 ); // Should be valid whenever context is ROOT
             shared_ptr<TreePtr<Node>> sp_tp_root_node = trees_by_ordinal.at(row.tree_ordinal).sp_tp_root_node;
-            return make_unique<SingularMutator>( row.parent_node, sp_tp_root_node.get() );
+            return make_shared<SingularMutator>( row.parent_node, sp_tp_root_node.get() );
         }    
         case DBCommon::SINGULAR:
         {
@@ -453,13 +453,13 @@ unique_ptr<Mutator> XTreeDatabase::GetMutator(XLink xlink) const
             Itemiser::Element *xe = x_items.at(row.item_ordinal);        
             auto p_x_singular = dynamic_cast<TreePtrInterface *>(xe);
             ASSERT( p_x_singular );
-            return make_unique<SingularMutator>( row.parent_node, p_x_singular );
+            return make_shared<SingularMutator>( row.parent_node, p_x_singular );
         }
         case DBCommon::IN_SEQUENCE:
         case DBCommon::IN_COLLECTION: 
         {
             // COLLECTION is the motivating case: its elements are const, so we neet Mutate() to change them
-            return make_unique<ContainerMutator>( row.parent_node, row.p_container, row.container_it );            
+            return make_shared<ContainerMutator>( row.parent_node, row.p_container, row.container_it );            
         }
         case DBCommon::FREE_BASE:
         {
