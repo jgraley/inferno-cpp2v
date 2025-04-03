@@ -24,30 +24,30 @@ protected:
 	};
 	
 public:	
-	static shared_ptr<Mutator> MakeRootMutator( TreePtrInterface *dest_tree_ptr );
+	static shared_ptr<Mutator> MakeRootMutator( TreePtrInterface *parent_singular );
 	static shared_ptr<Mutator> MakeSingularMutator( TreePtr<Node> parent_node, 
-	                                                TreePtrInterface *dest_tree_ptr );
+	                                                TreePtrInterface *parent_singular );
 	static shared_ptr<Mutator> MakeContainerMutator( TreePtr<Node> parent_node, 
-                                                     ContainerInterface *dest_container,
-                                                     ContainerInterface::iterator it_dest );
+                                                     ContainerInterface *parent_container,
+                                                     ContainerInterface::iterator container_iterator );
 	
-protected:
-    Mutator( Mode mode_, TreePtr<Node> parent_node_ );    
-    explicit Mutator( TreePtrInterface *dest_tree_ptr_ );
-    explicit Mutator( TreePtr<Node> parent_node, TreePtrInterface *dest_tree_ptr_ );
-    explicit Mutator( TreePtr<Node> parent_node, 
-                      ContainerInterface *dest_container_,
-                      ContainerInterface::iterator it_dest_ );             
+private:           
+    explicit Mutator( Mode mode_,
+                      TreePtr<Node> parent_node, 
+					  TreePtrInterface *parent_singular_,
+                      ContainerInterface *parent_container_,
+                      ContainerInterface::iterator container_iterator_ );             
 
 public:    
-    virtual TreePtr<Node> ExchangeChild( TreePtr<Node> new_child,                               
-                                         list<shared_ptr<Mutator>> child_terminii = {} );
+    TreePtr<Node> ExchangeChild( TreePtr<Node> new_child,                               
+                                 list<shared_ptr<Mutator>> child_terminii = {} );
     TreePtr<Node> GetParentNode() const;
+
     bool IsAtRoot() const;
     
     // After population, a mutator can now provide an XLink that's valid for the new boundary
-    virtual const TreePtrInterface *GetTreePtrInterface() const; // Only valid after populate
     XLink GetXLink() const; // Only valid after populate
+    const TreePtrInterface *GetTreePtrInterface() const; // Only valid after populate
     
     static TreePtr<Node> MakePlaceholder();    
 
@@ -62,9 +62,9 @@ public:
 private:
 	Mode mode;
     TreePtr<Node> parent_node;
-    TreePtrInterface *dest_tree_ptr;    
-    ContainerInterface *dest_container;
-    ContainerInterface::iterator it_dest;
+    TreePtrInterface *parent_singular;    // TODO could combine into an Itemiser::Element *
+    ContainerInterface *parent_container;
+    ContainerInterface::iterator container_iterator;
 };        
     
 
