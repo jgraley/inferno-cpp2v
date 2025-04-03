@@ -55,7 +55,6 @@ TreePtr<Node> Mutator::ExchangeChild( TreePtr<Node> new_child,
 {
     ASSERT( new_child ); // perhaps we tried to populate with an empty zone?
 	
-
 	switch( mode )
 	{
 		case Mode::Root:
@@ -200,7 +199,6 @@ string Mutator::GetTrace() const
 	}	
 }
 
-// ------------------------- ContainerMutator --------------------------    
     
 Mutator::Mutator( TreePtr<Node> parent_node_, 
                   ContainerInterface *dest_container_,
@@ -236,16 +234,30 @@ shared_ptr<Mutator> Mutator::FindMatchingTerminus( ContainerInterface *container
 }                                  
 
 
-void Mutator::Validate() const
+void Mutator::Validate() const // TODO call this more
 {    
-    // important invariant: placeholder iterator must point to a member in the destination container
-    ASSERT( it_dest != dest_container->end() );
-    bool found = false;
-    for( ContainerInterface::iterator it=dest_container->begin(); it!=dest_container->end(); ++it )
-    {
-        if( it == it_dest )
-            found = true;        
-    }
-    ASSERT( found );
+ 	switch( mode )
+	{
+		case Mode::Root:
+		case Mode::Singular:
+			ASSERT( dest_tree_ptr );
+			// TODO but is dest_tree_ptr inside parent_node????
+			break;
+			
+		case Mode::Container:
+		{
+			// important invariant: placeholder iterator must point to a member in the destination container
+			// TODO but is dest_container inside parent_node????
+			ASSERT( it_dest != dest_container->end() );
+			bool found = false;
+			for( ContainerInterface::iterator it=dest_container->begin(); it!=dest_container->end(); ++it )
+			{
+				if( it == it_dest )
+					found = true;        
+			}
+			ASSERT( found );
+			break;
+		}
+	}
 }
 

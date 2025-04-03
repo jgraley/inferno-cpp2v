@@ -15,6 +15,7 @@ namespace SR
 class Mutator : public Traceable
 {
 protected:
+	// It is a "mode" because it can change
 	enum class Mode
 	{
 		Root,
@@ -61,35 +62,25 @@ public:
 private:
 	Mode mode;
     TreePtr<Node> parent_node;
-    TreePtrInterface * dest_tree_ptr;    
+    TreePtrInterface *dest_tree_ptr;    
     ContainerInterface *dest_container;
     ContainerInterface::iterator it_dest;
 };        
     
-// ------------------------- ContainerMutator --------------------------    
-    
-class ContainerMutator : public Mutator
-{
-    /**
-     * Why all this complicated placeholder business then?
-     * It's to permit multiple terminii to refer to the same Sequence
-     * with a well-defined relative order. We place a null element in
-     * for each terminus so that iterators relative to different
-     * terminii have different values.
-     * 
-     * Note: we must not determine the actual insertion iterator
-     * (it_after) during construct, because the container is still
-     * being filled, and we'll get end() when what we want is the next 
-     * element that will be there when we apply the update.
-     */  
-         
-private: friend class Mutator;
 
-
-
-private:
-
-};    
+/**
+ * Why all this complicated placeholder business then?
+ * It's to permit multiple terminii to refer to the same Sequence
+ * with a well-defined relative order. We place a null element in
+ * for each terminus so that iterators relative to different
+ * terminii have different values.
+ * 
+ * Note: we must not determine the actual insertion iterator
+ * (it_after) during construct, because the container is still
+ * being filled, and we'll get end() when what we want is the next 
+ * element that will be there when we apply the update.
+ */  
+	  
     
 }
 
