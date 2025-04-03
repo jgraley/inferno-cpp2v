@@ -34,7 +34,10 @@ protected:
     Mutator( Mode mode_, TreePtr<Node> parent_node_ );    
     explicit Mutator( TreePtrInterface *dest_tree_ptr_ );
     explicit Mutator( TreePtr<Node> parent_node, TreePtrInterface *dest_tree_ptr_ );
-    
+    explicit Mutator( TreePtr<Node> parent_node, 
+                      ContainerInterface *dest_container_,
+                      ContainerInterface::iterator it_dest_ );             
+
 public:    
     virtual TreePtr<Node> ExchangeChild( TreePtr<Node> new_child,                               
                                          list<shared_ptr<Mutator>> child_terminii = {} );
@@ -47,12 +50,20 @@ public:
     
     static TreePtr<Node> MakePlaceholder();    
 
+    static shared_ptr<Mutator> FindMatchingTerminus( ContainerInterface *container,
+                                                     ContainerInterface::iterator it_placeholder,
+                                                     list<shared_ptr<Mutator>> &candidate_terminii );
+    
+    void Validate() const;
+
     string GetTrace() const;
 
 private:
 	Mode mode;
     TreePtr<Node> parent_node;
     TreePtrInterface * dest_tree_ptr;    
+    ContainerInterface *dest_container;
+    ContainerInterface::iterator it_dest;
 };        
     
 // ------------------------- ContainerMutator --------------------------    
@@ -73,25 +84,11 @@ class ContainerMutator : public Mutator
      */  
          
 private: friend class Mutator;
-    explicit ContainerMutator( TreePtr<Node> parent_node, 
-                               ContainerInterface *dest_container_,
-                               ContainerInterface::iterator it_dest_ );             
 
-public:
-    TreePtr<Node> ExchangeChild( TreePtr<Node> new_child, 
-                          list<shared_ptr<Mutator>> child_terminii = {} ) final;
-        
-    static shared_ptr<ContainerMutator> FindMatchingTerminus( ContainerInterface *container,
-                                                               ContainerInterface::iterator it_placeholder,
-                                                               list<shared_ptr<Mutator>> &candidate_terminii );
-    const TreePtrInterface *GetTreePtrInterface() const final;
-    
-    void Validate() const;
-    string GetTrace() const;
+
 
 private:
-    ContainerInterface *dest_container;
-    ContainerInterface::iterator it_dest;
+
 };    
     
 }
