@@ -86,16 +86,11 @@ const TreePtrInterface *Mutator::GetTreePtrInterface() const
 		case Mode::Container:
 			//...TODO
 			return nullptr;
+			
+		default: 
+			ASSERTFAIL();
 	}			
-	
-	ASSERTFAIL();
 }  
-
-
-string Mutator::GetTrace() const
-{
-    return "⌾"+dest_tree_ptr->GetTypeName();
-}
 
 
 TreePtr<Node> Mutator::GetParentNode() const
@@ -128,6 +123,24 @@ TreePtr<Node> Mutator::MakePlaceholder()
 }
     
     
+string Mutator::GetTrace() const
+{
+ 	switch( mode )
+	{
+		case Mode::Root:
+		case Mode::Singular:
+			ASSERT( dest_tree_ptr );
+			return "⌾"+dest_tree_ptr->GetTypeName();
+		
+		case Mode::Container:
+			//...?
+			return "";
+		
+		default:
+			ASSERTFAIL();
+	}	
+}
+
 // ------------------------- ContainerMutator --------------------------    
     
 ContainerMutator::ContainerMutator( TreePtr<Node> parent_node, 
