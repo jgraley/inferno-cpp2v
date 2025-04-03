@@ -129,7 +129,7 @@ ContainerMutator::ContainerMutator( TreePtr<Node> parent_node,
     Validate();
 }
 
-
+/*
 ContainerMutator &ContainerMutator::operator=( const ContainerMutator &other )
 {
     dest_container = other.dest_container;
@@ -137,10 +137,10 @@ ContainerMutator &ContainerMutator::operator=( const ContainerMutator &other )
     Validate();
     return *this;
 }
-
+*/
 
 TreePtr<Node> ContainerMutator::ExchangeChild( TreePtr<Node> new_child, 
-                                        list<shared_ptr<Mutator>> child_terminii )
+                                               list<shared_ptr<Mutator>> child_terminii )
 {
     //ASSERT( new_child ); // perhaps we tried to populate with an empty zone?
 	TreePtr<Node> old_child = (TreePtr<Node>)*it_dest;

@@ -78,7 +78,7 @@ private: friend class Mutator;
                                ContainerInterface::iterator it_dest_ );             
 
 public:
-    ContainerMutator &operator=( const ContainerMutator &other );
+    //ContainerMutator &operator=( const ContainerMutator &other );
 
     TreePtr<Node> ExchangeChild( TreePtr<Node> new_child, 
                           list<shared_ptr<Mutator>> child_terminii = {} ) final;
