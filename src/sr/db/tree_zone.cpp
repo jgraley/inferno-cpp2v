@@ -180,6 +180,8 @@ MutableTreeZone::MutableTreeZone( TreeZone tz,
 {
 }
 
+#define NEWSTUFF
+
 // TODO 
 // Coalesce the Mutator classes
 // Turn the new FZ terminii into placeholders with a new DetachChild() etc
