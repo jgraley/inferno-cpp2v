@@ -206,11 +206,13 @@ FreeZone MutableTreeZone::Exchange( FreeZone free_zone )
         ASSERT( free_mut_it != free_zone.GetTerminiiEnd() ); // length mismatch    
         ASSERT( tree_mut_it != terminii_mutators.end() ); // length mismatch    
                                 
+#ifdef NEWSTUFF
+		(*tree_mut_it)->ExchangeParent(**free_mut_it);
+#else		
         // Mutate the FZ terminus match the TZ terminus
         shared_ptr<Mutator> tree_mutator = *tree_mut_it;
 
-        //ASSERT( typeid(*tree_mutator) == typeid(**free_mut_it) )("Tree: ")(*tree_mutator)("\nFree: ")(**free_mut_it);
-
+        ASSERT( typeid(*tree_mutator) == typeid(**free_mut_it) )("Tree: ")(*tree_mutator)("\nFree: ")(**free_mut_it);
 
         TreePtr<Node> tz_boundary_node = tree_mutator->GetXLink().GetChildTreePtr(); // outside the zone        
         ASSERT( !dynamic_cast<ContainerInterface *>(tz_boundary_node.get()) ); // requirement for GetTreePtrInterface()
@@ -219,10 +221,9 @@ FreeZone MutableTreeZone::Exchange( FreeZone free_zone )
         // Update the tree zone terminus
         *tree_mut_it = *free_mut_it;
         *free_mut_it = tree_mutator;
-
+#endif
         tree_terminus_xlink = (*tree_mut_it)->GetXLink();   
-        
-        
+                
         free_mut_it++;
         tree_mut_it++;
     } 
