@@ -45,8 +45,6 @@ Mutator::Mutator( Mode mode_,
 TreePtr<Node> Mutator::ExchangeChild( TreePtr<Node> new_child, 
                                        list<shared_ptr<Mutator>> child_terminii )
 {
-    ASSERT( new_child ); // perhaps we tried to populate with an empty zone?
-	
 	switch( mode )
 	{
 		case Mode::Root:
@@ -94,6 +92,7 @@ TreePtr<Node> Mutator::ExchangeChild( TreePtr<Node> new_child,
 				// Populate terminus with singular-based zone. We tee into Mutate() in case our container
 				// is not order-preserving i.e. std::set<>.        
 				container_iterator.Mutate(&new_child); 
+				TRACE("Container mutated ")(new_child)("\n");   
 			}    
 			return old_child;
 		}
@@ -106,16 +105,11 @@ TreePtr<Node> Mutator::ExchangeChild( TreePtr<Node> new_child,
     
 void Mutator::ExchangeParent( Mutator &other_mut )
 {
-    //TreePtr<Node> other_child_node = other_mut.GetXLink().GetChildTreePtr(); // outside the zone        
-    TreePtr<Node> my_child_node = GetXLink().GetChildTreePtr(); // outside the zone        
+    TreePtr<Node> other_child_node = other_mut.GetXLink().GetChildTreePtr(); // outside the zone        
+    TreePtr<Node> my_child_node =  ExchangeChild( other_child_node );    
     other_mut.ExchangeChild( my_child_node );    
-    //ExchangeChild( other_child_node );    
         
-    swap(mode, other_mut.mode);
-    swap(parent_node, other_mut.parent_node);
-    swap(parent_singular, other_mut.parent_singular);
-    swap(parent_container, other_mut.parent_container);
-    swap(container_iterator, other_mut.container_iterator);	
+    swap(*this, other_mut);
 }
     
     

@@ -131,7 +131,7 @@ void XTreeDatabase::InitialBuild()
 }
 
 
-FreeZone XTreeDatabase::MainTreeExchange( TreeZone target_tree_zone, FreeZone source_free_zone )
+FreeZone XTreeDatabase::MainTreeExchange( TreeZone target_tree_zone, FreeZone free_zone )
 {
     TRACE("Whole main tree walk for your convenience:\n");
     if( Tracer::IsEnabled() )
@@ -140,9 +140,9 @@ FreeZone XTreeDatabase::MainTreeExchange( TreeZone target_tree_zone, FreeZone so
         db_walker.WalkTree( &actions, GetRootXLink(DBCommon::TreeOrdinal::MAIN), DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_IN );
     }
 
-    TRACE("Replacing target TreeZone:\n")(target_tree_zone)("\nwith source FreeZone:\n")(source_free_zone)("\n");
-    ASSERT( target_tree_zone.GetNumTerminii() == source_free_zone.GetNumTerminii() )
-          ("Target TZ:%d, source FZ:%d", target_tree_zone.GetNumTerminii(), source_free_zone.GetNumTerminii());    
+    TRACE("Replacing target TreeZone:\n")(target_tree_zone)("\nwith source FreeZone:\n")(free_zone)("\n");
+    ASSERT( target_tree_zone.GetNumTerminii() == free_zone.GetNumTerminii() )
+          ("Target TZ:%d, source FZ:%d", target_tree_zone.GetNumTerminii(), free_zone.GetNumTerminii());    
     target_tree_zone.DBCheck(this); 
     vector<shared_ptr<Mutator>> tmuts;
     for( XLink t : target_tree_zone.GetTerminusXLinks() )
@@ -157,7 +157,7 @@ FreeZone XTreeDatabase::MainTreeExchange( TreeZone target_tree_zone, FreeZone so
     MainTreeDeleteGeometric( mutable_target_tree_zone, &base_info );   
     
     // Update the tree. mutable_target_tree_zone becomes the valid new tree zone.
-    FreeZone old_zone = mutable_target_tree_zone.Exchange( move(source_free_zone) ); 
+    mutable_target_tree_zone.Exchange( free_zone ); 
     
     // Re-insert geometric info based on new tree zone
     MainTreeInsertGeometric( mutable_target_tree_zone, &base_info );       
@@ -168,7 +168,7 @@ FreeZone XTreeDatabase::MainTreeExchange( TreeZone target_tree_zone, FreeZone so
     if( ReadArgs::test_db )
         Checks();
         
-    return old_zone;
+    return free_zone;
 }
 
 
