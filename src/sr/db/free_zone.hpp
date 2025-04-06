@@ -33,6 +33,7 @@ public:
     FreeZone &operator=( const FreeZone &other );
 
     bool IsEmpty() const override;
+    ContainerInterface *TryGetContainerBase() const;
     int GetNumTerminii() const override;
     TreePtr<Node> GetBaseNode() const override;
     void SetBase( TreePtr<Node> base );

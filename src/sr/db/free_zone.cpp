@@ -86,6 +86,13 @@ bool FreeZone::IsEmpty() const
 }
 
 
+ContainerInterface *FreeZone::TryGetContainerBase() const
+{
+	return dynamic_cast<ContainerInterface *>(base.get());
+}
+
+
+
 int FreeZone::GetNumTerminii() const
 {
     return terminii.size();
@@ -157,7 +164,7 @@ FreeZone::TerminusIterator FreeZone::MergeTerminus( TerminusIterator it_t,
     }    
     else     
     {
-		if( auto child_base_container = dynamic_cast<ContainerInterface *>(child_zone->base.get()) )
+		if( auto child_base_container = child_zone->TryGetContainerBase() )
 		    (*it_t)->ExchangeContainer( child_base_container, child_zone->terminii );
 		else
 			(*it_t)->ExchangeChild( child_zone->base );

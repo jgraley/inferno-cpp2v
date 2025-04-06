@@ -49,6 +49,14 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink target_origin, shared_
 {
     ASSERT( db );
                 
+    // Free Zones with collection bases (aka poor man's wide zones) lack flexibility
+    // and eg can only be merged into another free zone, so we merge them here. The
+    // check is stronger and will fail on any collection base, which constrains what
+    // we can accept from GenReplaceLayout() etc.
+    FreeZoneMergeCollectionBases free_zone_merge_cb;
+    free_zone_merge_cb.Run(source_layout);
+    free_zone_merge_cb.Check(source_layout);
+                                    
     TreeZoneComplementer tree_zone_complementor( db );
     tree_zone_complementor.Run(target_origin, source_layout);
 

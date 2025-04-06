@@ -11,19 +11,49 @@
 namespace SR 
 {
 
+// ------------------------- FreeZoneMergeImpl --------------------------
+
+class FreeZoneMergeImpl
+{
+public:    
+	typedef function<bool (const FreeZone &zone, const FreeZone &child_zone)> PolicyFunction;
+   
+    // Can change the supplied shared ptr
+    void Run( shared_ptr<Patch> &layout, PolicyFunction decider );
+    
+    void Check( shared_ptr<Patch> &layout, PolicyFunction decider );
+};
+
 // ------------------------- FreeZoneMerger --------------------------
 
 class FreeZoneMerger
 {
-public:    
-    FreeZoneMerger();
-    
+public:       
     // Can change the supplied shared ptr
     void Run( shared_ptr<Patch> &layout );
     
-    // Just ASSERT no empty zones
     void Check( shared_ptr<Patch> &layout );
+    
+private:    
+    bool Policy(const FreeZone &zone, const FreeZone &child_zone) const;
+    FreeZoneMergeImpl impl;
 };
+
+// ------------------------- FreeZoneMergeCollectionBases --------------------------
+
+class FreeZoneMergeCollectionBases
+{
+public:       
+    // Can change the supplied shared ptr
+    void Run( shared_ptr<Patch> &layout );
+    
+    void Check( shared_ptr<Patch> &layout );
+
+private:    
+    bool Policy(const FreeZone &zone, const FreeZone &child_zone) const;
+    FreeZoneMergeImpl impl;
+};
+
 
 }
 

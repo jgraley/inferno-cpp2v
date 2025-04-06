@@ -93,6 +93,7 @@ catch( const BreakException & )
 void Patch::DepthFirstWalkImpl( function<void(shared_ptr<Patch> &patch)> func_in,
                                 function<void(shared_ptr<Patch> &patch)> func_out )
 {
+	INDENT(".");
     for( shared_ptr<Patch> &patch : child_patches )
     {
         if( func_in )
