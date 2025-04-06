@@ -195,21 +195,21 @@ void MutableTreeZone::Exchange( FreeZone &free_zone )
     // Do a co-walk and exchange one at a time. We want to modify the parent
     // sides of the terminii in-place, leaving valid mutators behind. 
     FreeZone::TerminusIterator free_mut_it = free_zone.GetTerminiiBegin();    
-    vector<shared_ptr<Mutator>>::iterator tree_mut_it = terminii_mutators.begin();
-    for( XLink &tree_terminus_xlink : terminii )
+    vector<XLink>::iterator tree_xlink_it = terminii.begin();
+    for( shared_ptr<Mutator> tree_terminus : terminii_mutators )
     {
         ASSERT( free_mut_it != free_zone.GetTerminiiEnd() ); // length mismatch    
-        ASSERT( tree_mut_it != terminii_mutators.end() ); // length mismatch    
+        ASSERT( tree_xlink_it != terminii.end() ); // length mismatch    
                                 	
-		(*tree_mut_it)->ExchangeParent(**free_mut_it); // deep
+		tree_terminus->ExchangeParent(**free_mut_it); // deep
 
-        tree_terminus_xlink = (*tree_mut_it)->GetXLink();   
+        *tree_xlink_it = tree_terminus->GetXLink();   
                 
         free_mut_it++;
-        tree_mut_it++;
+        tree_xlink_it++;
     } 
     ASSERT( free_mut_it == free_zone.GetTerminiiEnd() ); // length mismatch  
-    ASSERT( tree_mut_it == terminii_mutators.end() ); // length mismatch    
+    ASSERT( tree_xlink_it == terminii.end() ); // length mismatch    
 
     // Exchange the base. We want to modify the child side of the base
     // in-place, leaving valid mutators behind. 
