@@ -39,17 +39,15 @@ private:
                       ContainerInterface::iterator container_iterator_ );             
 
 public:    
-    TreePtr<Node> ExchangeChild( TreePtr<Node> new_child,                               
-                                 list<shared_ptr<Mutator>> child_terminii = {} );
+    TreePtr<Node> ExchangeChild( TreePtr<Node> new_child );
+    TreePtr<Node> ExchangeContainer( ContainerInterface *child_container,                               
+                                     list<shared_ptr<Mutator>> child_terminii = {} );
     void ExchangeParent( Mutator& other_mut );
+    
     TreePtr<Node> GetParentNode() const;
-
-    bool IsAtRoot() const;
-    
-    // After population, a mutator can now provide an XLink that's valid for the new boundary
-    XLink GetXLink() const; // Only valid after populate
-    const TreePtrInterface *GetTreePtrInterface() const; // Only valid after populate
-    
+    bool IsAtRoot() const;        
+    XLink GetXLink() const; 
+    const TreePtrInterface *GetTreePtrInterface() const;
     static TreePtr<Node> MakePlaceholder();    
 
     static shared_ptr<Mutator> FindMatchingTerminus( ContainerInterface *container,
@@ -57,7 +55,6 @@ public:
                                                      list<shared_ptr<Mutator>> &candidate_terminii );
     
     void Validate() const;
-
     string GetTrace() const;
 
 private:

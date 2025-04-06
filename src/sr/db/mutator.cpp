@@ -42,16 +42,17 @@ Mutator::Mutator( Mode mode_,
 }
 
 
-TreePtr<Node> Mutator::ExchangeChild( TreePtr<Node> new_child, 
-                                       list<shared_ptr<Mutator>> child_terminii )
-{
+TreePtr<Node> Mutator::ExchangeChild( TreePtr<Node> new_child )
+{	
+	// Free zone merging should get rid of these, and things will change with general wide zone support
+	ASSERT( !dynamic_cast<ContainerInterface *>(new_child.get()) )("Cannot accept wide here");
+
 	switch( mode )
 	{
 		case Mode::Root:
 		case Mode::Singular:
 		{
 			TreePtr<Node> old_child = (TreePtr<Node>)*parent_singular;
-			ASSERT( !dynamic_cast<ContainerInterface *>(new_child.get()) )("Cannot accept wide here");
 			*parent_singular = new_child;
 			TRACE("Singular mutated ")(new_child)("\n");   
 			return old_child;
@@ -60,46 +61,49 @@ TreePtr<Node> Mutator::ExchangeChild( TreePtr<Node> new_child,
 		case Mode::Container:
 		{
 			TreePtr<Node> old_child = (TreePtr<Node>)*container_iterator;
-			if( ContainerInterface *child_container = dynamic_cast<ContainerInterface *>(new_child.get()) )
-			{                    
-				// We don't need the placeholder any more
-				ContainerInterface::iterator it_after = parent_container->erase( container_iterator );
-				
-				// Child zone base has ContainerInterface, so it's a SubContainer. We get here due to         
-				// FreeZones created by StarAgent. Expand it and populate into the parent, which is also a SubContainer.         
-				for( ContainerInterface::iterator it_child = child_container->begin();
-					 it_child != child_container->end();
-					 ++it_child    )
-				{
-					TreePtr<Node> child_element = (TreePtr<Node>)*it_child; 
-					ContainerInterface::iterator it_new = parent_container->insert( it_after, child_element ); // inserts before it_after
-
-					if( child_element == MakePlaceholder() ) 
-					{
-						// If child_element is a placeholder, the child FZ terminates immediately at this element.
-						// So child_element *IS* the placeholder of that FZ's Mutator instance and child_container IS
-						// the FZ base container. We need to build a new terminus for the FZ that uses our parent 
-						// container because that's what will be kept.
-						// Note: Kept: our container, child terminii
-						// Discarded: this terminus, child base, child container
-						shared_ptr<Mutator> child_con_terminus = FindMatchingTerminus( child_container, it_child, child_terminii );                                                
-						*child_con_terminus = *MakeContainerMutator(GetParentNode(), parent_container, it_new);                            
-					}
-				}                                    
-			}
-			else
-			{
-				// Populate terminus with singular-based zone. We tee into Mutate() in case our container
-				// is not order-preserving i.e. std::set<>.        
-				container_iterator.Mutate(&new_child); 
-				TRACE("Container mutated ")(new_child)("\n");   
-			}    
+			container_iterator.Mutate(&new_child); 
+			TRACE("Container mutated ")(new_child)("\n");   
 			return old_child;
 		}
 		
 		default: 
 			ASSERTFAIL();
 	}	    
+}
+    
+    
+TreePtr<Node> Mutator::ExchangeContainer( ContainerInterface *child_container, 
+                                          list<shared_ptr<Mutator>> zone_terminii )
+{
+	ASSERT( mode==Mode::Container );
+	TreePtr<Node> old_child = (TreePtr<Node>)*container_iterator;
+	
+	// We don't need the placeholder any more
+	ContainerInterface::iterator it_after = parent_container->erase( container_iterator );
+	
+	// Child zone base has ContainerInterface, so it's a SubContainer. We get here due to         
+	// FreeZones created by StarAgent. Expand it and populate into the parent, which is also a SubContainer.         
+	for( ContainerInterface::iterator it_child = child_container->begin();
+		 it_child != child_container->end();
+		 ++it_child    )
+	{
+		TreePtr<Node> child_element = (TreePtr<Node>)*it_child; 
+		ContainerInterface::iterator it_new = parent_container->insert( it_after, child_element ); // inserts before it_after
+
+		if( child_element == MakePlaceholder() ) 
+		{
+			// If child_element is a placeholder, some zone terminates immediately at this element.
+			// So child_element *IS* the placeholder of one of that zone's Mutators and child_container IS
+			// the zone's base container. We need to build a new terminus for the zone that uses our parent 
+			// container because that's what will be kept.
+			// Note: Kept: parent container, other child terminii
+			// Discarded: child terminus, child base, child container
+			shared_ptr<Mutator> child_terminus = FindMatchingTerminus( child_container, it_child, zone_terminii );                                                
+			*child_terminus = *MakeContainerMutator(parent_node, parent_container, it_new);                            
+		}
+	}                   
+	                     
+	return old_child;	
 }
     
     
