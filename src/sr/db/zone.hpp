@@ -22,7 +22,7 @@ public:
 	virtual ~Zone() = default;
 
     virtual bool IsEmpty() const = 0;
-	virtual int GetNumTerminii() const = 0;
+	virtual size_t GetNumTerminii() const = 0;
     virtual TreePtr<Node> GetBaseNode() const = 0;
         
     bool IsSubtree() const;

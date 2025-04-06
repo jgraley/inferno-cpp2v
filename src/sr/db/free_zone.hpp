@@ -34,7 +34,7 @@ public:
 
     bool IsEmpty() const override;
     ContainerInterface *TryGetContainerBase() const;
-    int GetNumTerminii() const override;
+    size_t GetNumTerminii() const override;
     TreePtr<Node> GetBaseNode() const override;
     void SetBase( TreePtr<Node> base );
     

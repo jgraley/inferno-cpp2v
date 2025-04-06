@@ -16,7 +16,7 @@ void DBWalk::WalkTree( const Actions *actions,
                                            ContainerInterface::iterator() };
                                            
     const TreeZone zone = TreeZone::CreateSubtree(root_xlink);
-    WalkKit kit { actions, &zone, tree_ordinal, wind, zone.GetTerminiiBegin() };
+    WalkKit kit { actions, &zone, tree_ordinal, wind, 0U };
     VisitBase( kit, &root_info );  
 }
 
@@ -40,11 +40,11 @@ void DBWalk::WalkTreeZone( const Actions *actions,
 {
     //FTRACE("Walking zone: ")(zone)("\n");
     ASSERT( base_info );
-    WalkKit kit { actions, &zone, tree_ordinal, wind, zone.GetTerminiiBegin() };
+    WalkKit kit { actions, &zone, tree_ordinal, wind, 0U };
     VisitBase( kit, base_info );  
-    ASSERT( kit.next_terminus_it == zone.GetTerminiiEnd() )
+    ASSERT( kit.next_terminus_index == zone.GetNumTerminii() )
           ("Zone has %d terminii", zone.GetNumTerminii())
-          (kit.next_terminus_it==zone.GetTerminiiBegin()?" (no terminii visited)":""); // should have visited all the terminii
+          (kit.next_terminus_index==0?" (no terminii visited)":""); // should have visited all the terminii
 }
 
 
@@ -63,7 +63,7 @@ void DBWalk::WalkFreeZone( const Actions *actions,
                                            nullptr,
                                            -1,                                                       
                                            ContainerInterface::iterator() };
-    WalkKit kit { actions, nullptr, (SR::DBCommon::TreeOrdinal)(-1), wind };
+    WalkKit kit { actions, nullptr, (SR::DBCommon::TreeOrdinal)(-1), wind, 0U };
     VisitBase( kit, &base_info );  
 }
 
@@ -183,10 +183,10 @@ void DBWalk::VisitLink( const WalkKit &kit,
 {
     INDENT(".");            
     walk_info.at_terminus = (kit.zone &&
-                             kit.next_terminus_it != kit.zone->GetTerminiiEnd() && // TODO store end iterator directly in kit
-                             walk_info.xlink == *(kit.next_terminus_it));
+                             kit.next_terminus_index < kit.zone->GetNumTerminii() && // TODO store end iterator directly in kit
+                             walk_info.xlink == kit.zone->GetTerminusXLink(kit.next_terminus_index));
     if( walk_info.at_terminus )
-        ++(kit.next_terminus_it);
+        ++(kit.next_terminus_index);
       
     if( kit.wind == WIND_IN )
     {

@@ -26,7 +26,7 @@ protected:
     Patch();
     
 public:
-    int GetNumChildExpressions() const;
+    size_t GetNumChildExpressions() const;
     ChildExpressionIterator GetChildrenBegin();
     ChildExpressionIterator GetChildrenEnd();
     list<shared_ptr<Patch>> &GetChildExpressions();

@@ -23,7 +23,7 @@ Patch::Patch()
 }    
 
 
-int Patch::GetNumChildExpressions() const
+size_t Patch::GetNumChildExpressions() const
 {
     return child_patches.size();
 }

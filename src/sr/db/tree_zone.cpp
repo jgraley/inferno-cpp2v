@@ -45,7 +45,7 @@ bool TreeZone::IsEmpty() const
 }
 
 
-int TreeZone::GetNumTerminii() const
+size_t TreeZone::GetNumTerminii() const
 {
     return terminii.size();
 }
@@ -75,7 +75,7 @@ vector<XLink> TreeZone::GetTerminusXLinks() const
 }
 
 
-XLink TreeZone::GetTerminusXLink(vector<XLink>::size_type index) const
+XLink TreeZone::GetTerminusXLink(size_t index) const
 {
 	return terminii[index];
 }
@@ -119,19 +119,6 @@ FreeZone TreeZone::MakeFreeZone(const XTreeDatabase *db) const
     
     return free_zone;
 }
-
-
-TreeZone::TerminusIterator TreeZone::GetTerminiiBegin() const
-{
-    return terminii.begin();
-}
-
-
-TreeZone::TerminusIterator TreeZone::GetTerminiiEnd() const
-{
-    return terminii.end();
-}
-
 
 
 string TreeZone::GetTrace() const

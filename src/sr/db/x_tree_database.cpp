@@ -142,7 +142,7 @@ FreeZone XTreeDatabase::MainTreeExchange( TreeZone target_tree_zone, FreeZone fr
 
     TRACE("Replacing target TreeZone:\n")(target_tree_zone)("\nwith source FreeZone:\n")(free_zone)("\n");
     ASSERT( target_tree_zone.GetNumTerminii() == free_zone.GetNumTerminii() )
-          ("Target TZ:%d, source FZ:%d", target_tree_zone.GetNumTerminii(), free_zone.GetNumTerminii());    
+          ("Target TZ:%lu, source FZ:%lu", target_tree_zone.GetNumTerminii(), free_zone.GetNumTerminii());    
     target_tree_zone.DBCheck(this); 
     vector<shared_ptr<Mutator>> tmuts;
     for( XLink t : target_tree_zone.GetTerminusXLinks() )

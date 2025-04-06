@@ -93,7 +93,7 @@ ContainerInterface *FreeZone::TryGetContainerBase() const
 
 
 
-int FreeZone::GetNumTerminii() const
+size_t FreeZone::GetNumTerminii() const
 {
     return terminii.size();
 }

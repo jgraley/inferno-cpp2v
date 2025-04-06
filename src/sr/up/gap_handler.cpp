@@ -31,10 +31,10 @@ void TreeZoneGapHandler::Run(shared_ptr<Patch> layout)
 void TreeZoneGapHandler::CheckPatch(shared_ptr<TreeZonePatch> patch)
 {
 	TreeZone tz = patch->GetZone();
-	TreeZone::TerminusIterator it_t = tz.GetTerminiiBegin();
+	size_t index = 0;
 	patch->ForChildren( [&](shared_ptr<Patch> &child_patch)	
 	{
-		XLink terminus_xlink = *it_t++; // inclusive (terminus XLink equals base XLink of attached tree zone)
+		XLink terminus_xlink = tz.GetTerminusXLink(index++); // inclusive (terminus XLink equals base XLink of attached tree zone)
 		if( auto child_tz_patch = dynamic_pointer_cast<TreeZonePatch>(child_patch) ) // Child IS a tree zone...
 		{
 			XLink child_base_xlink = child_tz_patch->GetZone().GetBaseXLink();

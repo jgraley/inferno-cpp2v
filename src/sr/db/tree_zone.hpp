@@ -33,19 +33,16 @@ public:
     TreeZone( const TreeZone &other );
       
     bool IsEmpty() const override;
-    int GetNumTerminii() const override;
+    size_t GetNumTerminii() const override;
     TreePtr<Node> GetBaseNode() const override;
 
     XLink GetBaseXLink() const;
     XLink &GetBaseXLink();
     vector<XLink> GetTerminusXLinks() const;
-    XLink GetTerminusXLink(vector<XLink>::size_type index) const;
+    XLink GetTerminusXLink(size_t index) const;
 
     FreeZone Duplicate() const;
     FreeZone MakeFreeZone(const XTreeDatabase *db) const;
-    
-    TerminusIterator GetTerminiiBegin() const;
-    TerminusIterator GetTerminiiEnd() const;
     
     string GetTrace() const;
 

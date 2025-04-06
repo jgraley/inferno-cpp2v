@@ -58,7 +58,7 @@ private:
         const TreeZone *zone;
         const DBCommon::TreeOrdinal tree_ordinal;        
         Wind wind;
-        mutable TreeZone::TerminusIterator next_terminus_it;
+        mutable size_t next_terminus_index;
     };
 
     void VisitBase( const WalkKit &kit, 
