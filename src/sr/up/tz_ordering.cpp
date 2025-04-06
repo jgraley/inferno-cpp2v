@@ -79,10 +79,10 @@ void TreeZoneOrderingHandler::RunForTreeZone( shared_ptr<TreeZonePatch> &tree_pa
     // We have a tree zone. For each of its terminii, find the acceptable
     // range of descendent tree zones and recurse.
     TreeZone tree_zone = tree_patch->GetZone();
-    TreeZone::TerminusIterator it_t = tree_zone.GetTerminiiBegin();
+    size_t i=0;
     tree_patch->ForChildren( [&](shared_ptr<Patch> &child_patch)    
     {
-        XLink range_front = *it_t++; // inclusive (terminus XLink equals base XLink of attached tree zone)
+        XLink range_front = tree_zone.GetTerminusXLink(i++); // inclusive (terminus XLink equals base XLink of attached tree zone)
         XLink range_back = XTreeDatabase::GetLastDescendant(range_front); // inclusive (is same or child of range_front)
         RunForRange( child_patch, range_front, range_back, just_check );
     } );

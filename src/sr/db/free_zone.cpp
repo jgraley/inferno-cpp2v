@@ -169,8 +169,7 @@ FreeZone::TerminusIterator FreeZone::MergeTerminus( TerminusIterator it_t,
 		else
 			(*it_t)->ExchangeChild( child_zone->base );
         // Populate terminus. This will expand SubContainers. Remember that
-        // terminii are reference-like and so it's fine that we erase it.
-        
+        // terminii are reference-like and so it's fine that we erase it.        
     }
     
     // it_t updated to the next terminus after the one we erased, or end()

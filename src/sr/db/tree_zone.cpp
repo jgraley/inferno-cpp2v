@@ -75,6 +75,12 @@ vector<XLink> TreeZone::GetTerminusXLinks() const
 }
 
 
+XLink TreeZone::GetTerminusXLink(vector<XLink>::size_type index) const
+{
+	return terminii[index];
+}
+
+
 FreeZone TreeZone::Duplicate() const
 {
     if( IsEmpty() )

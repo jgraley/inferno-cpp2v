@@ -39,6 +39,7 @@ public:
     XLink GetBaseXLink() const;
     XLink &GetBaseXLink();
     vector<XLink> GetTerminusXLinks() const;
+    XLink GetTerminusXLink(vector<XLink>::size_type index) const;
 
     FreeZone Duplicate() const;
     FreeZone MakeFreeZone(const XTreeDatabase *db) const;
