@@ -24,8 +24,8 @@ class TreeZone : public Zone
     virtual vector<XLink> GetTerminusXLinks() const = 0;
     virtual XLink GetTerminusXLink(size_t index) const = 0;
 
-    virtual FreeZone Duplicate() const = 0;
-    virtual FreeZone MakeFreeZone(const XTreeDatabase *db) const = 0;	
+    virtual unique_ptr<FreeZone> Duplicate() const = 0;
+    virtual unique_ptr<FreeZone> MakeFreeZone(const XTreeDatabase *db) const = 0;	
 };
 // ------------------------- XTreeZone --------------------------
 
@@ -50,8 +50,8 @@ public:
     vector<XLink> GetTerminusXLinks() const override;
     XLink GetTerminusXLink(size_t index) const override;
 
-    FreeZone Duplicate() const;
-    FreeZone MakeFreeZone(const XTreeDatabase *db) const;
+    unique_ptr<FreeZone> Duplicate() const;
+    unique_ptr<FreeZone> MakeFreeZone(const XTreeDatabase *db) const;
     
     string GetTrace() const;
 

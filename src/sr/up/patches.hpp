@@ -111,8 +111,8 @@ private:
 class FreeZonePatch : public ZonePatch
 {
 public:
-    FreeZonePatch( FreeZone zone_, list<shared_ptr<Patch>> &&child_patches );
-    FreeZonePatch( FreeZone zone_ );
+    FreeZonePatch( unique_ptr<FreeZone> zone_, list<shared_ptr<Patch>> &&child_patches );
+    FreeZonePatch( unique_ptr<FreeZone> zone_ );
 
     void AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&new_markers ) final;
     list<RequiresSubordinateSCREngine *> GetEmbeddedMarkers() const final;
@@ -127,7 +127,7 @@ public:
     string GetTrace() const final;
 
 private:
-    FreeZone zone;
+    unique_ptr<FreeZone> zone;
 };
 
 // ------------------------- TargettedPatch --------------------------

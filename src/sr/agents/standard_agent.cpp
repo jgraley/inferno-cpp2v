@@ -601,7 +601,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingPattern( const
 
     // Stuff for creating commands
     list<Agent::ReplacePatchPtr> child_patches;    
-    FreeZone zone = FreeZone::CreateSubtree(dest);
+    auto zone = FreeZone::CreateSubtree(dest);
 
     // Loop over all the elements of under_node and dest that do not appear in pattern or
     // appear in pattern but are nullptr TreePtr<>s. Duplicate from under_node into dest.
@@ -663,7 +663,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingPattern( const
                 {
                     // Make a placeholder in the dest container for the mutator to point to
                     ContainerInterface::iterator dest_it = dest_con->insert( Mutator::MakePlaceholder() );
-                    zone.AddTerminus( Mutator::MakeContainerMutator(dest, dest_con, dest_it) );     
+                    zone->AddTerminus( Mutator::MakeContainerMutator(dest, dest_con, dest_it) );     
                     
                     ASSERT( my_elt )("Some element of member %d (", j)(*my_con)(") of ")(*this)(" was nullptr\n");
                     TRACE("Got ")(*my_elt)("\n");
@@ -678,7 +678,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingPattern( const
                 {
                     // Make a placeholder in the dest container for the mutator to point to
                     ContainerInterface::iterator dest_it = dest_con->insert( Mutator::MakePlaceholder() );
-                    zone.AddTerminus( Mutator::MakeContainerMutator(dest, dest_con, dest_it) );     
+                    zone->AddTerminus( Mutator::MakeContainerMutator(dest, dest_con, dest_it) );     
 
                     ASSERT( under_elt ); // present simplified scheme disallows nullptr
                     auto under_zone = XTreeZone::CreateSubtree(XLink(under_node, &under_elt) );
@@ -690,7 +690,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingPattern( const
         {
             TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
             ASSERT( dest_singular )( "itemise for target didn't match itemise for pattern");
-            zone.AddTerminus( Mutator::MakeSingularMutator(dest, dest_singular) );            
+            zone->AddTerminus( Mutator::MakeSingularMutator(dest, dest_singular) );            
 
             if( should_overlay )
             {
@@ -731,7 +731,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingX( const Repla
 
     // Stuff for creating commands
     list<Agent::ReplacePatchPtr> child_patches;    
-    FreeZone zone = FreeZone::CreateSubtree(dest);
+    auto zone = FreeZone::CreateSubtree(dest);
 
     // Loop over all the elements of under_node and dest that do not appear in pattern or
     // appear in pattern but are nullptr TreePtr<>s. Duplicate from under_node into dest.
@@ -793,7 +793,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingX( const Repla
                 {
                     // Make a placeholder in the dest container for the mutator to point to
                     ContainerInterface::iterator dest_it = dest_con->insert( Mutator::MakePlaceholder() );
-                    zone.AddTerminus( Mutator::MakeContainerMutator(dest, dest_con, dest_it) );     
+                    zone->AddTerminus( Mutator::MakeContainerMutator(dest, dest_con, dest_it) );     
                     
                     ASSERT( my_elt )("Some element of member %d (", j)(*my_con)(") of ")(*this)(" was nullptr\n");
                     TRACE("Got ")(*my_elt)("\n");
@@ -808,7 +808,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingX( const Repla
                 {
                     // Make a placeholder in the dest container for the mutator to point to
                     ContainerInterface::iterator dest_it = dest_con->insert( Mutator::MakePlaceholder() );
-                    zone.AddTerminus( Mutator::MakeContainerMutator(dest, dest_con, dest_it) );     
+                    zone->AddTerminus( Mutator::MakeContainerMutator(dest, dest_con, dest_it) );     
 
                     ASSERT( under_elt ); // present simplified scheme disallows nullptr
                     auto under_zone = XTreeZone::CreateSubtree(XLink(under_node, &under_elt) );
@@ -820,7 +820,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingX( const Repla
         {
             TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
             ASSERT( dest_singular )( "itemise for target didn't match itemise for pattern");
-            zone.AddTerminus( Mutator::MakeSingularMutator(dest, dest_singular) );            
+            zone->AddTerminus( Mutator::MakeSingularMutator(dest, dest_singular) );            
 
             if( should_overlay )
             {
@@ -872,7 +872,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutNormal( const ReplaceKit &
 
     // Stuff for creating commands
     list<Agent::ReplacePatchPtr> child_patches;
-    FreeZone zone = FreeZone::CreateSubtree(dest);
+    auto zone = FreeZone::CreateSubtree(dest);
 
     TRACE("Copying %d members pattern=", dest_items.size())(*this)(" dest=")(*dest)("\n");
     // Loop over all the members of pattern (which can be a subset of dest)
@@ -897,7 +897,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutNormal( const ReplaceKit &
                 
                 // Make a placeholder in the dest container for the mutator to point to
                 ContainerInterface::iterator dest_it = dest_con->insert( Mutator::MakePlaceholder() );
-                zone.AddTerminus( Mutator::MakeContainerMutator(dest, dest_con, dest_it) );    
+                zone->AddTerminus( Mutator::MakeContainerMutator(dest, dest_con, dest_it) );    
 
                 PatternLink my_elt_plink( this, &my_elt );
                 child_patches.push_back( my_elt_plink.GetChildAgent()->GenReplaceLayout(kit, my_elt_plink) );               
@@ -908,7 +908,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutNormal( const ReplaceKit &
             TRACE("Copying single element\n");
             ASSERT( *my_singular )("Member %d (", i)(*my_singular)(") of ")(*this)(" was nullptr when not overlaying\n");            
             TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
-            zone.AddTerminus( Mutator::MakeSingularMutator(dest, dest_singular) );            
+            zone->AddTerminus( Mutator::MakeSingularMutator(dest, dest_singular) );            
 
             PatternLink my_singular_plink( this, my_singular );                    
             child_patches.push_back( my_singular_plink.GetChildAgent()->GenReplaceLayout(kit, my_singular_plink) );           

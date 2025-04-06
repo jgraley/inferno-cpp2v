@@ -547,8 +547,8 @@ Agent::ReplacePatchPtr AgentCommon::GenReplaceLayout( const ReplaceKit &kit,
 
 
 Agent::ReplacePatchPtr AgentCommon::GenReplaceLayoutImpl( const ReplaceKit &kit, 
-                                                       PatternLink me_plink, 
-                                                       XLink key_xlink )
+                                                          PatternLink me_plink, 
+                                                          XLink key_xlink )
 {
     // Default replace behaviour to just use the X subtree we keyed to, so we need to be keyed
     ASSERT(key_xlink)("Agent ")(*this)(" in replace context is not keyed but needs to be");

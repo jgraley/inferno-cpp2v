@@ -74,7 +74,7 @@ XLink XTreeZone::GetTerminusXLink(size_t index) const
 }
 
 
-FreeZone XTreeZone::Duplicate() const
+unique_ptr<FreeZone> XTreeZone::Duplicate() const
 {
     if( IsEmpty() )
         return FreeZone::CreateEmpty();
@@ -97,18 +97,18 @@ FreeZone XTreeZone::Duplicate() const
     }
 
     // Create a new zone for the result.
-    return FreeZone( new_base_x, move(free_zone_terminii) );
+    return make_unique<FreeZone>( new_base_x, move(free_zone_terminii) );
 }
 
 
-FreeZone XTreeZone::MakeFreeZone(const XTreeDatabase *db) const
+unique_ptr<FreeZone> XTreeZone::MakeFreeZone(const XTreeDatabase *db) const
 {    
     if( IsEmpty() )
         return FreeZone::CreateEmpty();
         
-    FreeZone free_zone( base.GetChildTreePtr(), {} );
+    auto free_zone = FreeZone::CreateSubtree( base.GetChildTreePtr() );
     for( XLink terminus : terminii )
-        free_zone.AddTerminus( db->GetMutator( terminus ) );
+        free_zone->AddTerminus( db->GetMutator( terminus ) );
     
     return free_zone;
 }
@@ -174,7 +174,7 @@ void MutableTreeZone::Exchange( FreeZone &free_zone )
 	        
     if( IsEmpty() )
     {
-        free_zone = FreeZone::CreateEmpty(); // Dodgy but it is reached
+        free_zone = *FreeZone::CreateEmpty(); // Dodgy but it is reached
         return;
 	}
             

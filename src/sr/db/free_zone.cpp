@@ -9,32 +9,33 @@ using namespace SR;
 
 // ------------------------- FreeZone --------------------------
 
-FreeZone FreeZone::CreateSubtree( TreePtr<Node> base )
+unique_ptr<FreeZone> FreeZone::CreateSubtree( TreePtr<Node> base )
 {
-    return FreeZone( base, {} );
+    return make_unique<FreeZone>( base, list<shared_ptr<Mutator>>{} );
 }
 
 
-FreeZone FreeZone::CreateEmpty()
+unique_ptr<FreeZone> FreeZone::CreateEmpty()
 {
-    return FreeZone( TreePtr<Node>(), // NULL
-                     { shared_ptr<Mutator>() } ); // One element, NULL
+    return make_unique<FreeZone>( TreePtr<Node>(), // NULL
+                                  list<shared_ptr<Mutator>>{ shared_ptr<Mutator>() } ); // One element, NULL
 }
 
 
-FreeZone FreeZone::CreateScaffold(const TreePtrInterface *tpi_base, int num_terminii)
+unique_ptr<FreeZone> FreeZone::CreateScaffold(const TreePtrInterface *tpi_base, int num_terminii)
 {
     // Create the scaffolding, of type that matches the supplied TreePtr<>
     auto pair = tpi_base->MakeScaffold();        
     
     // Set the base as the scaffolding node
-    FreeZone zone( pair.first, {} );
+    auto zone = make_unique<FreeZone>( pair.first, list<shared_ptr<Mutator>>{} );
     
-    // Set the terminii as the scaffolding node's child pointers
+    // Set the terminii as the scaffolding node's scaffold child pointers (the
+    // underlying node type's children will be left empty/NULL)
     for( int i=0; i<num_terminii; i++ )
     {
         ContainerInterface::iterator it = pair.second->insert( Mutator::MakePlaceholder() );
-        zone.AddTerminus( Mutator::MakeContainerMutator(pair.first, pair.second, it) );     
+        zone->AddTerminus( Mutator::MakeContainerMutator(pair.first, pair.second, it) );     
     }
     
     //FTRACES("Created scaffold with %d terminii\n", num_terminii)("\n");

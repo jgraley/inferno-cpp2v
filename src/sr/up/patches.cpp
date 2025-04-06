@@ -179,9 +179,9 @@ const XTreeZone *TreeZonePatch::GetZone() const
 
 shared_ptr<Patch> TreeZonePatch::DuplicateToFree() const
 {
-    FreeZone free_zone = zone->Duplicate();
+    unique_ptr<FreeZone> free_zone = zone->Duplicate();
     list<shared_ptr<Patch>> c = GetChildExpressions();
-    auto pop_free_patch = make_shared<FreeZonePatch>( free_zone, move(c) );
+    auto pop_free_patch = make_shared<FreeZonePatch>( move(free_zone), move(c) );
     pop_free_patch->AddEmbeddedMarkers( GetEmbeddedMarkers() );
     return pop_free_patch;
 }    
@@ -198,18 +198,18 @@ string TreeZonePatch::GetTrace() const
 
 // ------------------------- FreeZonePatch --------------------------
 
-FreeZonePatch::FreeZonePatch( FreeZone zone_, 
+FreeZonePatch::FreeZonePatch( unique_ptr<FreeZone> zone_, 
                               list<shared_ptr<Patch>> &&child_patches ) :
     ZonePatch( move(child_patches) ),
-    zone(zone_)
+    zone(move(zone_))
 {
-    ASSERT( zone.GetNumTerminii() == GetNumChildExpressions() );    
+    ASSERT( zone->GetNumTerminii() == GetNumChildExpressions() );    
 }
 
         
-FreeZonePatch::FreeZonePatch( FreeZone zone_ ) :
+FreeZonePatch::FreeZonePatch( unique_ptr<FreeZone> zone_ ) :
        ZonePatch(),
-       zone(zone_)
+       zone(move(zone_))
 {
     // If zone has terminii, they will be "exposed" and will remain 
     // in the zone returned by Evaluate.
@@ -220,7 +220,7 @@ void FreeZonePatch::AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&n
 {
     // Rule #726 requires us to mark free zones immediately
     for( RequiresSubordinateSCREngine *ea : new_markers )
-        zone.MarkBaseForEmbedded(ea);    
+        zone->MarkBaseForEmbedded(ea);    
 }
 
 
@@ -253,22 +253,22 @@ ZonePatch::ChildExpressionIterator FreeZonePatch::SpliceOver( ChildExpressionIte
 
 FreeZone *FreeZonePatch::GetZone()
 {
-    return &zone;
+    return zone.get();
 }
 
 
 const FreeZone *FreeZonePatch::GetZone() const
 {
-    return &zone;
+    return zone.get();
 }
 
 
 string FreeZonePatch::GetTrace() const
 {
 #ifdef RECURSIVE_TRACE_OPERATOR
-    return "FreeZonePatch( \nzone: "+Trace(zone)+",\nchildren: "+GetChildExpressionsTrace()+" )";
+    return "FreeZonePatch( \nzone: "+Trace(*zone)+",\nchildren: "+GetChildExpressionsTrace()+" )";
 #else
-    return "FreeZonePatch( zone: "+Trace(zone)+", "+Trace(GetNumChildExpressions())+" children )";
+    return "FreeZonePatch( zone: "+Trace(*zone)+", "+Trace(GetNumChildExpressions())+" children )";
 #endif    
 }
 

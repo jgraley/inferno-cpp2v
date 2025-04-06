@@ -47,13 +47,12 @@ void TreeZoneOrderingHandler::Run( shared_ptr<Patch> &layout )
                                                      from_tz->GetNumTerminii() );
         //FTRACE("Scaffold free zone: ")(scaffold_fz)("\n");
         
-        TRACE("from_tz: ")(*from_tz)("\nscaffold_fz: ")(scaffold_fz)("\n");
+        TRACE("from_tz: ")(*from_tz)("\nscaffold_fz: ")(*scaffold_fz)("\n");
         // Put the scaffold into the "from" part of the tree, and get back the original contents, which we shall move
-        db->MainTreeExchange( from_tz, &scaffold_fz );
-        FreeZone &moving_fz = scaffold_fz; // rename since Excahnge changed it
+        db->MainTreeExchange( from_tz, scaffold_fz.get() );
         
         // Make a new patch based on this moving free zone
-        auto free_patch = make_shared<FreeZonePatch>( moving_fz, to_patch->GetChildren() );
+        auto free_patch = make_shared<FreeZonePatch>( move(scaffold_fz), to_patch->GetChildren() );
         free_patch->AddEmbeddedMarkers( to_patch->GetEmbeddedMarkers() );
         *patch = free_patch;
         

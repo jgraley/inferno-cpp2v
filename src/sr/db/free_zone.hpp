@@ -23,9 +23,9 @@ class FreeZone : public Zone
 public:
     typedef list<shared_ptr<Mutator>>::iterator TerminusIterator;
 
-    static FreeZone CreateSubtree( TreePtr<Node> base );
-    static FreeZone CreateEmpty();
-    static FreeZone CreateScaffold(const TreePtrInterface *tpi_base, int num_terminii);
+    static unique_ptr<FreeZone> CreateSubtree( TreePtr<Node> base );
+    static unique_ptr<FreeZone> CreateEmpty();
+    static unique_ptr<FreeZone> CreateScaffold(const TreePtrInterface *tpi_base, int num_terminii);
 
     FreeZone();
     explicit FreeZone( TreePtr<Node> base, list<shared_ptr<Mutator>> &&terminii );

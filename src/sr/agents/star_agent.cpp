@@ -91,14 +91,14 @@ Agent::ReplacePatchPtr StarAgent::GenReplaceLayoutImpl( const ReplaceKit &kit,
         ASSERT(0)("Please add new kind of container");
     
     list<Agent::ReplacePatchPtr> child_commands;
-    FreeZone dest_zone = FreeZone::CreateSubtree(dest);
+    auto dest_zone = FreeZone::CreateSubtree(dest);
 
     TRACE("Walking container length %d\n", key_container->size() );
     ContainerInterface *dest_container = dynamic_cast<ContainerInterface *>(dest.get());
     for( const TreePtrInterface &key_elt : *key_container )
     {
         ContainerInterface::iterator dest_it = dest_container->insert( Mutator::MakePlaceholder() );
-        dest_zone.AddTerminus( Mutator::MakeContainerMutator(dest, dest_container, dest_it) );    
+        dest_zone->AddTerminus( Mutator::MakeContainerMutator(dest, dest_container, dest_it) );    
 
         auto child_zone = XTreeZone::CreateSubtree(XLink(key_node, &key_elt) );
         child_commands.push_back( make_shared<TreeZonePatch>(move(child_zone)) );
