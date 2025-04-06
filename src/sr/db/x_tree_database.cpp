@@ -131,7 +131,7 @@ void XTreeDatabase::InitialBuild()
 }
 
 
-void XTreeDatabase::MainTreeExchange( XTreeZone *target_tree_zone, FreeZone *free_zone )
+void XTreeDatabase::MainTreeExchange( TreeZone *target_tree_zone, FreeZone *free_zone )
 {
     TRACE("Whole main tree walk for your convenience:\n");
     if( Tracer::IsEnabled() )
@@ -143,11 +143,13 @@ void XTreeDatabase::MainTreeExchange( XTreeZone *target_tree_zone, FreeZone *fre
     TRACE("Replacing target XTreeZone:\n")(*target_tree_zone)("\nwith source FreeZone:\n")(*free_zone)("\n");
     ASSERT( target_tree_zone->GetNumTerminii() == free_zone->GetNumTerminii() )
           ("Target TZ:%lu, source FZ:%lu", target_tree_zone->GetNumTerminii(), free_zone->GetNumTerminii());    
-    target_tree_zone->DBCheck(this); 
+    XTreeZone *target_xtree_zone = dynamic_cast<XTreeZone *>(target_tree_zone);
+    ASSERT( target_xtree_zone );
+    target_xtree_zone->DBCheck(this); 
     vector<shared_ptr<Mutator>> tmuts;
     for( XLink t : target_tree_zone->GetTerminusXLinks() )
 		tmuts.push_back( GetMutator(t) );
-    MutableTreeZone mutable_target_tree_zone( target_tree_zone, GetMutator(target_tree_zone->GetBaseXLink()), move(tmuts) );
+    MutableTreeZone mutable_target_tree_zone( target_xtree_zone, GetMutator(target_tree_zone->GetBaseXLink()), move(tmuts) );
     
     // Store the core info for the base locally since the link table will change
     // as this function executes.

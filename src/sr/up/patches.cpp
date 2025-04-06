@@ -130,7 +130,7 @@ void ZonePatch::AddEmbeddedMarker( RequiresSubordinateSCREngine *new_marker )
 
 // ------------------------- TreeZonePatch --------------------------
 
-TreeZonePatch::TreeZonePatch( unique_ptr<XTreeZone> zone_, 
+TreeZonePatch::TreeZonePatch( unique_ptr<TreeZone> zone_, 
                               list<shared_ptr<Patch>> &&child_patches ) :
     ZonePatch( move(child_patches) ),
     zone(move(zone_))
@@ -139,7 +139,7 @@ TreeZonePatch::TreeZonePatch( unique_ptr<XTreeZone> zone_,
 }    
         
 
-TreeZonePatch::TreeZonePatch( unique_ptr<XTreeZone> zone_ ) :
+TreeZonePatch::TreeZonePatch( unique_ptr<TreeZone> zone_ ) :
     ZonePatch(),
     zone(move(zone_))
 {
@@ -165,13 +165,13 @@ void TreeZonePatch::ClearEmbeddedMarkers()
 }
 
 
-XTreeZone *TreeZonePatch::GetZone() 
+TreeZone *TreeZonePatch::GetZone() 
 {
     return zone.get();
 }
 
 
-const XTreeZone *TreeZonePatch::GetZone() const
+const TreeZone *TreeZonePatch::GetZone() const
 {
     return zone.get();
 }

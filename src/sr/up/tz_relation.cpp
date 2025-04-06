@@ -14,13 +14,13 @@ TreeZoneRelation::TreeZoneRelation(const XTreeDatabase *db_) :
 }
 
 
-bool TreeZoneRelation::operator()( const XTreeZone &l, const XTreeZone &r ) const
+bool TreeZoneRelation::operator()( const TreeZone &l, const TreeZone &r ) const
 {
     return Compare3Way(l, r) < 0;
 }
 
 
-bool TreeZoneRelation::CompareEqual( const XTreeZone &l, const XTreeZone &r ) const
+bool TreeZoneRelation::CompareEqual( const TreeZone &l, const TreeZone &r ) const
 {
     if( l.GetBaseXLink() != r.GetBaseXLink() )
         return false;
@@ -32,20 +32,20 @@ bool TreeZoneRelation::CompareEqual( const XTreeZone &l, const XTreeZone &r ) co
 }
 
 
-Orderable::Diff TreeZoneRelation::Compare3Way( const XTreeZone &l, const XTreeZone &r ) const
+Orderable::Diff TreeZoneRelation::Compare3Way( const TreeZone &l, const TreeZone &r ) const
 {
     return CompareHierarchical( l, r ).first;
 }
 
 
 
-pair<Orderable::Diff, ZoneRelation::RelType> TreeZoneRelation::CompareHierarchical( const XTreeZone &l, const XTreeZone &r ) const 
+pair<Orderable::Diff, ZoneRelation::RelType> TreeZoneRelation::CompareHierarchical( const TreeZone &l, const TreeZone &r ) const 
 {
     TRACES("l=")(l)(" r=")(r);    
     DepthFirstRelation df_rel(db);
     
-    const XTreeZone *d;
-    const XTreeZone *a;        
+    const TreeZone *d;
+    const TreeZone *a;        
     auto p_base = df_rel.CompareHierarchical(l.GetBaseXLink(), r.GetBaseXLink());
     switch( p_base.second )
     {

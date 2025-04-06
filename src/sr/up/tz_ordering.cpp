@@ -40,7 +40,7 @@ void TreeZoneOrderingHandler::Run( shared_ptr<Patch> &layout )
         // Get the tree zone
         auto to_patch = dynamic_pointer_cast<TreeZonePatch>(*patch);
         ASSERT( to_patch );
-        XTreeZone *from_tz = to_patch->GetZone();
+        TreeZone *from_tz = to_patch->GetZone();
         
         // Create the scaffold in a free zone
         auto scaffold_fz = FreeZone::CreateScaffold( from_tz->GetBaseXLink().GetTreePtrInterface(), 
@@ -78,7 +78,7 @@ void TreeZoneOrderingHandler::RunForTreeZone( shared_ptr<TreeZonePatch> &tree_pa
 {
     // We have a tree zone. For each of its terminii, find the acceptable
     // range of descendent tree zones and recurse.
-    XTreeZone *tree_zone = tree_patch->GetZone();
+    TreeZone *tree_zone = tree_patch->GetZone();
     size_t i=0;
     tree_patch->ForChildren( [&](shared_ptr<Patch> &child_patch)    
     {
@@ -428,7 +428,7 @@ void AltTreeZoneOrderingChecker::Worker( shared_ptr<Patch> patch, bool base_equa
     {
         INDENT("T");
         // Got a XTreeZone - check ordering of its base, strictness depending on who called us
-        const XTreeZone *tree_zone = tree_patch->GetZone();
+        const TreeZone *tree_zone = tree_patch->GetZone();
         CheckXlink( tree_zone->GetBaseXLink(), base_equal_ok );
         
         // Co-loop over the chidren/terminii

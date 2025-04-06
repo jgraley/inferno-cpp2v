@@ -30,7 +30,7 @@ void TreeZoneGapHandler::Run(shared_ptr<Patch> layout)
 
 void TreeZoneGapHandler::CheckPatch(shared_ptr<TreeZonePatch> patch)
 {
-	XTreeZone *tz = patch->GetZone();
+	TreeZone *tz = patch->GetZone();
 	size_t index = 0;
 	patch->ForChildren( [&](shared_ptr<Patch> &child_patch)	
 	{

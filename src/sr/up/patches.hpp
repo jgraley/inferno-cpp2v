@@ -82,22 +82,22 @@ public:
 class TreeZonePatch : public ZonePatch
 {
 public:
-    TreeZonePatch( unique_ptr<XTreeZone> zone_, list<shared_ptr<Patch>> &&child_patches );
-    TreeZonePatch( unique_ptr<XTreeZone> zone_ );
+    TreeZonePatch( unique_ptr<TreeZone> zone_, list<shared_ptr<Patch>> &&child_patches );
+    TreeZonePatch( unique_ptr<TreeZone> zone_ );
     
     void AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&new_markers ) final;
     list<RequiresSubordinateSCREngine *> GetEmbeddedMarkers() const final;
     void ClearEmbeddedMarkers() final;
 
-    XTreeZone *GetZone() override;
-    const XTreeZone *GetZone() const override;
+    TreeZone *GetZone() override;
+    const TreeZone *GetZone() const override;
       
     shared_ptr<Patch> DuplicateToFree() const;
     
     string GetTrace() const final;
     
 private:
-    unique_ptr<XTreeZone> zone;
+    unique_ptr<TreeZone> zone;
     list<RequiresSubordinateSCREngine *> embedded_markers;
 };
 

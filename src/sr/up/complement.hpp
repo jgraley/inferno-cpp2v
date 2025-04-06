@@ -15,7 +15,7 @@ namespace SR
 class TreeZoneComplementer
 {
 public:
-    typedef map<XLink, XTreeZone *, DepthFirstRelation> DepthFirstOrderingZones;
+    typedef map<XLink, TreeZone *, DepthFirstRelation> DepthFirstOrderingZones;
 
     TreeZoneComplementer( XTreeDatabase *db );
     

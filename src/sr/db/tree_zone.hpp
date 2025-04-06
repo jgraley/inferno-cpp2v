@@ -17,8 +17,10 @@ class XTreeDatabase;
 class FreeZone;
 
 // ------------------------- TreeZone --------------------------
+
 class TreeZone : public Zone
 {
+public:
     virtual XLink GetBaseXLink() const = 0;
     virtual XLink &GetBaseXLink() = 0;
     virtual vector<XLink> GetTerminusXLinks() const = 0;
@@ -27,6 +29,7 @@ class TreeZone : public Zone
     virtual unique_ptr<FreeZone> Duplicate() const = 0;
     virtual unique_ptr<FreeZone> MakeFreeZone(const XTreeDatabase *db) const = 0;	
 };
+
 // ------------------------- XTreeZone --------------------------
 
 // XTreeZone is for zones that are within the current x tree. All
