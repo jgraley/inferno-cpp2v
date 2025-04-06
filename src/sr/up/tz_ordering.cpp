@@ -427,7 +427,7 @@ void AltTreeZoneOrderingChecker::Worker( shared_ptr<Patch> patch, bool base_equa
     if( auto tree_patch = dynamic_pointer_cast<TreeZonePatch>(patch) )
     {
         INDENT("T");
-        // Got a XTreeZone - check ordering of its base, strictness depending on who called us
+        // Got a TreeZone - check ordering of its base, strictness depending on who called us
         const TreeZone *tree_zone = tree_patch->GetZone();
         CheckXlink( tree_zone->GetBaseXLink(), base_equal_ok );
         

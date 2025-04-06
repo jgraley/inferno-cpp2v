@@ -135,14 +135,14 @@ private:
 class TargettedPatch : public Patch
 {
 public:    
-    TargettedPatch( unique_ptr<XTreeZone> target_tree_zone, 
+    TargettedPatch( unique_ptr<TreeZone> target_tree_zone, 
                     shared_ptr<Zone> source_zone_,
                     list<shared_ptr<Patch>> &&child_patches );
-    XTreeZone *GetTargetTreeZone() const;
+    TreeZone *GetTargetTreeZone() const;
     shared_ptr<Zone> GetSourceZone() const;
 
 private:
-    unique_ptr<XTreeZone> target_tree_zone;
+    unique_ptr<TreeZone> target_tree_zone;
     shared_ptr<Zone> source_zone;
 };
 

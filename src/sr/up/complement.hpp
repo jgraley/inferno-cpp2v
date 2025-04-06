@@ -20,9 +20,7 @@ public:
     TreeZoneComplementer( XTreeDatabase *db );
     
     void Run(XLink target_origin, shared_ptr<Patch> source_layout);
-    
-    const list<XTreeZone> &GetComplement() const;
-    
+        
 private:
     void WalkTreeZones(XLink target_base);
     void CreateComplementTZ(XLink target_base);

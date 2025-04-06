@@ -140,7 +140,7 @@ void XTreeDatabase::MainTreeExchange( TreeZone *target_tree_zone, FreeZone *free
         db_walker.WalkTree( &actions, GetRootXLink(DBCommon::TreeOrdinal::MAIN), DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_IN );
     }
 
-    TRACE("Replacing target XTreeZone:\n")(*target_tree_zone)("\nwith source FreeZone:\n")(*free_zone)("\n");
+    TRACE("Replacing target TreeZone:\n")(*target_tree_zone)("\nwith source FreeZone:\n")(*free_zone)("\n");
     ASSERT( target_tree_zone->GetNumTerminii() == free_zone->GetNumTerminii() )
           ("Target TZ:%lu, source FZ:%lu", target_tree_zone->GetNumTerminii(), free_zone->GetNumTerminii());    
     XTreeZone *target_xtree_zone = dynamic_cast<XTreeZone *>(target_tree_zone);
@@ -172,7 +172,7 @@ void XTreeDatabase::MainTreeExchange( TreeZone *target_tree_zone, FreeZone *free
 }
 
 
-void XTreeDatabase::MainTreeDeleteGeometric(XTreeZone *zone, const DBCommon::CoreInfo *base_info)
+void XTreeDatabase::MainTreeDeleteGeometric(TreeZone *zone, const DBCommon::CoreInfo *base_info)
 {
     INDENT("d");
     ASSERT( extra_tree_destroy_queue.empty() );
@@ -190,7 +190,7 @@ void XTreeDatabase::MainTreeDeleteGeometric(XTreeZone *zone, const DBCommon::Cor
 }
 
 
-void XTreeDatabase::MainTreeInsertGeometric(XTreeZone *zone, const DBCommon::CoreInfo *base_info)
+void XTreeDatabase::MainTreeInsertGeometric(TreeZone *zone, const DBCommon::CoreInfo *base_info)
 {
     INDENT("i");
     ASSERT( de_extra_insert_queue.empty() );
@@ -213,7 +213,7 @@ void XTreeDatabase::MainTreeInsertGeometric(XTreeZone *zone, const DBCommon::Cor
 }
 
 
-void XTreeDatabase::MainTreeDeleteIntrinsic( XTreeZone *zone )
+void XTreeDatabase::MainTreeDeleteIntrinsic( TreeZone *zone )
 {
     INDENT("d");
     ASSERT( extra_tree_destroy_queue.empty() );

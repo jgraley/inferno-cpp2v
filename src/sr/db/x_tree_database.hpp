@@ -44,10 +44,10 @@ public:
     // Incremental strategy: perform updates on zones
     void MainTreeExchange( TreeZone *target_tree_zone, FreeZone *free_zone );
         
-    void MainTreeDeleteGeometric(XTreeZone *zone, const DBCommon::CoreInfo *base_info);
-    void MainTreeInsertGeometric(XTreeZone *zone, const DBCommon::CoreInfo *base_info);
+    void MainTreeDeleteGeometric(TreeZone *zone, const DBCommon::CoreInfo *base_info);
+    void MainTreeInsertGeometric(TreeZone *zone, const DBCommon::CoreInfo *base_info);
 
-    void MainTreeDeleteIntrinsic(XTreeZone *zone);
+    void MainTreeDeleteIntrinsic(TreeZone *zone);
     void MainTreeInsertIntrinsic(FreeZone *zone);
 
     void PerformQueuedExtraTreeActions();

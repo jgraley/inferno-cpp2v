@@ -15,9 +15,8 @@ void DBWalk::WalkTree( const Actions *actions,
                                            -1,                                                       
                                            ContainerInterface::iterator() };
                                            
-    const auto zone = XTreeZone::CreateSubtree(root_xlink);
-    WalkKit kit { actions, zone.get(), tree_ordinal, wind, 0U };
-    VisitBase( kit, &root_info );  
+    WalkKit kit { actions, nullptr, tree_ordinal, wind, 0U };
+    VisitBase( kit, root_xlink, &root_info );  
 }
 
 
@@ -28,13 +27,13 @@ void DBWalk::WalkSubtree( const Actions *actions,
                           const DBCommon::CoreInfo *base_info )
 {
     ASSERT( base_info );
-    const auto zone = XTreeZone::CreateSubtree(base_xlink);
-    WalkTreeZone( actions, zone.get(), tree_ordinal, wind, base_info );
+	WalkKit kit { actions, nullptr, tree_ordinal, wind, 0U };
+    VisitBase( kit, base_xlink, base_info );
 }
 
 
 void DBWalk::WalkTreeZone( const Actions *actions,
-                           const XTreeZone *zone,
+                           const TreeZone *zone,
                            const DBCommon::TreeOrdinal tree_ordinal, 
                            Wind wind,
                            const DBCommon::CoreInfo *base_info )
@@ -42,7 +41,7 @@ void DBWalk::WalkTreeZone( const Actions *actions,
     //FTRACE("Walking zone: ")(*zone)("\n");
     ASSERT( base_info );
     WalkKit kit { actions, zone, tree_ordinal, wind, 0U };
-    VisitBase( kit, base_info );  
+    VisitBase( kit, zone->GetBaseXLink(), base_info );  
     ASSERT( kit.next_terminus_index == zone->GetNumTerminii() )
           ("Zone has %d terminii", zone->GetNumTerminii())
           (kit.next_terminus_index==0?" (no terminii visited)":""); // should have visited all the terminii
@@ -53,6 +52,8 @@ void DBWalk::WalkFreeZone( const Actions *actions,
                            const FreeZone *zone,
                            Wind wind )
 {
+	ASSERTFAIL(); // Broken!
+	
     // Behaviour for free zones:
     // - Context is FREE_BASE for base of zone, walk_info similar to ROOT
     // - We do not visit terminii, so at_terminus is always false 
@@ -65,16 +66,15 @@ void DBWalk::WalkFreeZone( const Actions *actions,
                                            -1,                                                       
                                            ContainerInterface::iterator() };
     WalkKit kit { actions, nullptr, (SR::DBCommon::TreeOrdinal)(-1), wind, 0U };
-    VisitBase( kit, &base_info );  
+    VisitBase( kit, XLink(), &base_info );  
 }
 
 
-void DBWalk::VisitBase( const WalkKit &kit,                         
+void DBWalk::VisitBase( const WalkKit &kit,   
+						XLink base_xlink,
                         const DBCommon::CoreInfo *base_info )
 {
     ASSERT( base_info );
-
-    XLink base_xlink = kit.zone->GetBaseXLink();
     WalkInfo walk_info = { *base_info,                       
                            base_xlink.GetTreePtrInterface(), 
                            base_xlink, 

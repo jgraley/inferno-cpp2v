@@ -43,7 +43,7 @@ public:
                       Wind wind,
                       const DBCommon::CoreInfo *base_info );
     void WalkTreeZone( const Actions *actions,
-                       const XTreeZone *zone,
+                       const TreeZone *zone,
                        const DBCommon::TreeOrdinal tree_ordinal,
                        Wind wind,
                        const DBCommon::CoreInfo *base_info );
@@ -55,13 +55,14 @@ private:
     struct WalkKit
     {
         const Actions *actions;
-        const XTreeZone *zone;
+        const TreeZone *zone;
         const DBCommon::TreeOrdinal tree_ordinal;        
         Wind wind;
         mutable size_t next_terminus_index;
     };
 
     void VisitBase( const WalkKit &kit, 
+					XLink base_xlink,
                     const DBCommon::CoreInfo *base_info );
     void VisitSingular( const WalkKit &kit, 
                         const TreePtrInterface *p_x_singular, 

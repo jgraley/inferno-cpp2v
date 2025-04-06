@@ -274,7 +274,7 @@ string FreeZonePatch::GetTrace() const
 
 // ------------------------- TargettedPatch --------------------------
 
-TargettedPatch::TargettedPatch( unique_ptr<XTreeZone> target_tree_zone_, 
+TargettedPatch::TargettedPatch( unique_ptr<TreeZone> target_tree_zone_, 
                                 shared_ptr<Zone> source_zone_,
                                 list<shared_ptr<Patch>> &&child_patches ) :
     Patch( move(child_patches) ),
@@ -286,7 +286,7 @@ TargettedPatch::TargettedPatch( unique_ptr<XTreeZone> target_tree_zone_,
 }
 
 
-XTreeZone *TargettedPatch::GetTargetTreeZone() const
+TreeZone *TargettedPatch::GetTargetTreeZone() const
 {
     return target_tree_zone.get();
 }
