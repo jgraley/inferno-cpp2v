@@ -15,31 +15,40 @@ namespace SR
 {
 class XTreeDatabase;    
 class FreeZone;
-// ------------------------- TreeZone --------------------------
 
-// TreeZone is for zones that are within the current x tree. All
+// ------------------------- TreeZone --------------------------
+class TreeZone : public Zone
+{
+    virtual XLink GetBaseXLink() const = 0;
+    virtual XLink &GetBaseXLink() = 0;
+    virtual vector<XLink> GetTerminusXLinks() const = 0;
+    virtual XLink GetTerminusXLink(size_t index) const = 0;
+
+    virtual FreeZone Duplicate() const = 0;
+    virtual FreeZone MakeFreeZone(const XTreeDatabase *db) const = 0;	
+};
+// ------------------------- XTreeZone --------------------------
+
+// XTreeZone is for zones that are within the current x tree. All
 // nodes in the tree have an XLink, including at the root, and we
 // prefer to keep track of the XLink to the base node for precision
 // and convenience. See #623.
-class TreeZone : public Zone
+class XTreeZone : public TreeZone
 { 
 public:
-    typedef vector<XLink>::const_iterator TerminusIterator;
+    static unique_ptr<XTreeZone> CreateSubtree( XLink base );
+    static unique_ptr<XTreeZone> CreateEmpty( XLink base );
 
-    static TreeZone CreateSubtree( XLink base );
-    static TreeZone CreateEmpty( XLink base );
-
-    explicit TreeZone( XLink base, vector<XLink> terminii );
-    TreeZone( const TreeZone &other );
+    explicit XTreeZone( XLink base, vector<XLink> terminii );
       
     bool IsEmpty() const override;
     size_t GetNumTerminii() const override;
     TreePtr<Node> GetBaseNode() const override;
 
-    XLink GetBaseXLink() const;
-    XLink &GetBaseXLink();
-    vector<XLink> GetTerminusXLinks() const;
-    XLink GetTerminusXLink(size_t index) const;
+    XLink GetBaseXLink() const override;
+    XLink &GetBaseXLink() override;
+    vector<XLink> GetTerminusXLinks() const override;
+    XLink GetTerminusXLink(size_t index) const override;
 
     FreeZone Duplicate() const;
     FreeZone MakeFreeZone(const XTreeDatabase *db) const;
@@ -55,10 +64,10 @@ protected:
 
 // ------------------------- MutableTreeZone --------------------------
  
-class MutableTreeZone : public TreeZone
+class MutableTreeZone : public XTreeZone
 {
 public:
-    explicit MutableTreeZone( TreeZone tz, 
+    explicit MutableTreeZone( XTreeZone *tz, 
                               shared_ptr<Mutator> &&base_mutator_, 
                               vector<shared_ptr<Mutator>> &&terminii_mutators_ );
 

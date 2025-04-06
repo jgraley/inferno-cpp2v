@@ -39,9 +39,9 @@ unique_ptr<FreeZone> TreeUpdater::TransformToSingleFreeZone( shared_ptr<Patch> s
     auto free_patch = dynamic_pointer_cast<FreeZonePatch>(source_layout);
     ASSERT( free_patch );
     ASSERT( free_patch->GetNumChildExpressions() == 0 );
-    FreeZone free_zone = free_patch->GetZone();
-    ASSERT( free_zone.GetNumTerminii() == 0 );
-    return make_unique<FreeZone>(free_zone);
+    FreeZone *free_zone = free_patch->GetZone();
+    ASSERT( free_zone->GetNumTerminii() == 0 );
+    return make_unique<FreeZone>(*free_zone);
 }
 
 

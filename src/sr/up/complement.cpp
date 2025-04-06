@@ -28,10 +28,10 @@ void TreeZoneComplementer::Run(XLink target_origin, shared_ptr<Patch> source_lay
     {
         if( auto tz_patch = dynamic_pointer_cast<TreeZonePatch>(patch) )
         {    
-            const TreeZone &tz = tz_patch->GetZone();
+            XTreeZone *tz = tz_patch->GetZone();
             
-            if( !tz.IsEmpty() )
-                source_tzs_df_by_base.emplace( tz.GetBaseXLink(), tz );
+            if( !tz->IsEmpty() )
+                source_tzs_df_by_base.emplace( tz->GetBaseXLink(), tz );
         }
         else if( auto fz_patch = dynamic_pointer_cast<FreeZonePatch>(patch) )
         {
@@ -51,8 +51,8 @@ void TreeZoneComplementer::WalkTreeZones(XLink target_base)
     if( source_tzs_df_by_base.count(target_base) > 0 )
     {
         // There's a TZ in the layout, so recurse.
-        const TreeZone &found_tz = source_tzs_df_by_base.at(target_base);
-        for( XLink terminus : found_tz.GetTerminusXLinks() )
+        const XTreeZone *found_tz = source_tzs_df_by_base.at(target_base);
+        for( XLink terminus : found_tz->GetTerminusXLinks() )
             WalkTreeZones( terminus );
 
     }
@@ -92,6 +92,7 @@ void TreeZoneComplementer::CreateComplementTZ(XLink target_base)
     }
     
     // Delete intrinsic tables/orderings for this unreferenced tree zone
-    db->MainTreeDeleteIntrinsic( TreeZone( target_base, complement_terminii ) );
+    auto target_zone = make_unique<XTreeZone>( target_base, complement_terminii );
+    db->MainTreeDeleteIntrinsic( target_zone.get() );
 }
 

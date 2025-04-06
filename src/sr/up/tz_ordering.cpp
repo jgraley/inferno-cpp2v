@@ -40,16 +40,17 @@ void TreeZoneOrderingHandler::Run( shared_ptr<Patch> &layout )
         // Get the tree zone
         auto to_patch = dynamic_pointer_cast<TreeZonePatch>(*patch);
         ASSERT( to_patch );
-        TreeZone from_tz = to_patch->GetZone();
+        XTreeZone *from_tz = to_patch->GetZone();
         
         // Create the scaffold in a free zone
-        auto scaffold_fz = FreeZone::CreateScaffold( from_tz.GetBaseXLink().GetTreePtrInterface(), 
-                                                     from_tz.GetNumTerminii() );
+        auto scaffold_fz = FreeZone::CreateScaffold( from_tz->GetBaseXLink().GetTreePtrInterface(), 
+                                                     from_tz->GetNumTerminii() );
         //FTRACE("Scaffold free zone: ")(scaffold_fz)("\n");
         
-        TRACE("from_tz: ")(from_tz)("\nscaffold_fz: ")(scaffold_fz)("\n");
+        TRACE("from_tz: ")(*from_tz)("\nscaffold_fz: ")(scaffold_fz)("\n");
         // Put the scaffold into the "from" part of the tree, and get back the original contents, which we shall move
-        FreeZone moving_fz = db->MainTreeExchange( from_tz, scaffold_fz );
+        db->MainTreeExchange( from_tz, &scaffold_fz );
+        FreeZone &moving_fz = scaffold_fz; // rename since Excahnge changed it
         
         // Make a new patch based on this moving free zone
         auto free_patch = make_shared<FreeZonePatch>( moving_fz, to_patch->GetChildren() );
@@ -78,11 +79,11 @@ void TreeZoneOrderingHandler::RunForTreeZone( shared_ptr<TreeZonePatch> &tree_pa
 {
     // We have a tree zone. For each of its terminii, find the acceptable
     // range of descendent tree zones and recurse.
-    TreeZone tree_zone = tree_patch->GetZone();
+    XTreeZone *tree_zone = tree_patch->GetZone();
     size_t i=0;
     tree_patch->ForChildren( [&](shared_ptr<Patch> &child_patch)    
     {
-        XLink range_front = tree_zone.GetTerminusXLink(i++); // inclusive (terminus XLink equals base XLink of attached tree zone)
+        XLink range_front = tree_zone->GetTerminusXLink(i++); // inclusive (terminus XLink equals base XLink of attached tree zone)
         XLink range_back = XTreeDatabase::GetLastDescendant(range_front); // inclusive (is same or child of range_front)
         RunForRange( child_patch, range_front, range_back, just_check );
     } );
@@ -401,7 +402,7 @@ shared_ptr<TreeZonePatch> TreeZoneOrderingHandler::GetTreePatch(const PatchRecor
 XLink TreeZoneOrderingHandler::GetBaseXLink(const PatchRecord &patch_record) const
 {
     shared_ptr<TreeZonePatch> tree_patch = GetTreePatch(patch_record);
-    return tree_patch->GetZone().GetBaseXLink();
+    return tree_patch->GetZone()->GetBaseXLink();
 }
 
 // ------------------------- AltTreeZoneOrderingChecker --------------------------
@@ -427,19 +428,19 @@ void AltTreeZoneOrderingChecker::Worker( shared_ptr<Patch> patch, bool base_equa
     if( auto tree_patch = dynamic_pointer_cast<TreeZonePatch>(patch) )
     {
         INDENT("T");
-        // Got a TreeZone - check ordering of its base, strictness depending on who called us
-        const TreeZone &tree_zone = tree_patch->GetZone();
-        CheckXlink( tree_zone.GetBaseXLink(), base_equal_ok );
+        // Got a XTreeZone - check ordering of its base, strictness depending on who called us
+        const XTreeZone *tree_zone = tree_patch->GetZone();
+        CheckXlink( tree_zone->GetBaseXLink(), base_equal_ok );
         
         // Co-loop over the chidren/terminii
-        vector<XLink> terminii = tree_zone.GetTerminusXLinks();
+        vector<XLink> terminii = tree_zone->GetTerminusXLinks();
         FreeZonePatch::ChildExpressionIterator it_child = tree_patch->GetChildrenBegin();        
         for( XLink terminus_xlink : terminii )
         {
             ASSERT( it_child != tree_patch->GetChildrenEnd() ); // length mismatch
             
             // Check this terminus start point is in order. Should not have seen the terminus before.
-            CheckXlink( terminus_xlink, tree_zone.IsEmpty() );
+            CheckXlink( terminus_xlink, tree_zone->IsEmpty() );
             
             // Check everything under the corresponding child is in order. Could see terminus again.
             Worker( *it_child, true );
@@ -459,7 +460,7 @@ void AltTreeZoneOrderingChecker::Worker( shared_ptr<Patch> patch, bool base_equa
         {
             // Got a FreeZone - recurse looking for tree zones to check. But this FZ
             // provides "padding" so do not expect to see terminus again.
-            Worker( child_patch, free_patch->GetZone().IsEmpty() );
+            Worker( child_patch, free_patch->GetZone()->IsEmpty() );
         } );
     }
     else

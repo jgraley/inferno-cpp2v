@@ -32,12 +32,12 @@ void TreeZoneOverlapHandler::Run( shared_ptr<Patch> &layout )
     auto extra_root_xlinks = db->GetExtraRootXLinks();
     for( XLink xlink : extra_root_xlinks )
     {
-        auto extra_tree = TreeZone::CreateSubtree(xlink);
+        auto extra_tree = XTreeZone::CreateSubtree(xlink);
         Patch::ForDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &r_patch)
         {
             if( auto right_tree_patch = dynamic_pointer_cast<TreeZonePatch>(r_patch) )
             {            
-                auto p = tz_relation.CompareHierarchical( extra_tree, right_tree_patch->GetZone() );
+                auto p = tz_relation.CompareHierarchical( *extra_tree, *right_tree_patch->GetZone() );
                 if( p.second == ZoneRelation::OVERLAP_GENERAL || 
                     p.second == ZoneRelation::OVERLAP_TERMINII ||
                     p.second == ZoneRelation::EQUAL )
@@ -63,7 +63,7 @@ void TreeZoneOverlapHandler::Run( shared_ptr<Patch> &layout )
                     if( l_patch == r_patch ) // inner "r" loop stops before catching up with outer "l" loop
                         LLBreak();
                     
-                    auto p = tz_relation.CompareHierarchical( left_tree_patch->GetZone(), right_tree_patch->GetZone() );
+                    auto p = tz_relation.CompareHierarchical( *left_tree_patch->GetZone(), *right_tree_patch->GetZone() );
 
                     // Act on any overlap including equality. 
                     if( p.second == ZoneRelation::OVERLAP_GENERAL || 
@@ -113,7 +113,7 @@ void TreeZoneOverlapHandler::Check( shared_ptr<Patch> &layout )
                     if( l_patch == r_patch ) 
                         LLBreak();
                     
-                    auto p = tz_relation.CompareHierarchical( left_tree_patch->GetZone(), right_tree_patch->GetZone() );                    
+                    auto p = tz_relation.CompareHierarchical( *left_tree_patch->GetZone(), *right_tree_patch->GetZone() );                    
                     if( p.second == ZoneRelation::OVERLAP_GENERAL || 
                         p.second == ZoneRelation::OVERLAP_TERMINII ||
                         p.second == ZoneRelation::EQUAL )

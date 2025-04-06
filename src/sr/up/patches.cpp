@@ -130,18 +130,18 @@ void ZonePatch::AddEmbeddedMarker( RequiresSubordinateSCREngine *new_marker )
 
 // ------------------------- TreeZonePatch --------------------------
 
-TreeZonePatch::TreeZonePatch( TreeZone zone_, 
+TreeZonePatch::TreeZonePatch( unique_ptr<XTreeZone> zone_, 
                               list<shared_ptr<Patch>> &&child_patches ) :
     ZonePatch( move(child_patches) ),
-    zone(zone_)
+    zone(move(zone_))
 {
-    ASSERT( zone.GetNumTerminii() == GetNumChildExpressions() );    
+    ASSERT( zone->GetNumTerminii() == GetNumChildExpressions() );    
 }    
         
 
-TreeZonePatch::TreeZonePatch( TreeZone zone_ ) :
+TreeZonePatch::TreeZonePatch( unique_ptr<XTreeZone> zone_ ) :
     ZonePatch(),
-    zone(zone_)
+    zone(move(zone_))
 {
     // If zone has terminii, they will be "exposed".
 }
@@ -165,21 +165,21 @@ void TreeZonePatch::ClearEmbeddedMarkers()
 }
 
 
-TreeZone &TreeZonePatch::GetZone() 
+XTreeZone *TreeZonePatch::GetZone() 
 {
-    return zone;
+    return zone.get();
 }
 
 
-const TreeZone &TreeZonePatch::GetZone() const
+const XTreeZone *TreeZonePatch::GetZone() const
 {
-    return zone;
+    return zone.get();
 }
 
 
 shared_ptr<Patch> TreeZonePatch::DuplicateToFree() const
 {
-    FreeZone free_zone = zone.Duplicate();
+    FreeZone free_zone = zone->Duplicate();
     list<shared_ptr<Patch>> c = GetChildExpressions();
     auto pop_free_patch = make_shared<FreeZonePatch>( free_zone, move(c) );
     pop_free_patch->AddEmbeddedMarkers( GetEmbeddedMarkers() );
@@ -190,9 +190,9 @@ shared_ptr<Patch> TreeZonePatch::DuplicateToFree() const
 string TreeZonePatch::GetTrace() const
 {
 #ifdef RECURSIVE_TRACE_OPERATOR
-    return "TreeZonePatch( \nzone: "+Trace(zone)+",\nchildren: "+GetChildExpressionsTrace()+" )";
+    return "TreeZonePatch( \nzone: "+Trace(*zone)+",\nchildren: "+GetChildExpressionsTrace()+" )";
 #else
-    return "TreeZonePatch( zone: "+Trace(zone)+", "+Trace(GetNumChildExpressions())+" children )";
+    return "TreeZonePatch( zone: "+Trace(*zone)+", "+Trace(GetNumChildExpressions())+" children )";
 #endif
 }
 
@@ -251,15 +251,15 @@ ZonePatch::ChildExpressionIterator FreeZonePatch::SpliceOver( ChildExpressionIte
 }                                               
 
 
-FreeZone &FreeZonePatch::GetZone()
+FreeZone *FreeZonePatch::GetZone()
 {
-    return zone;
+    return &zone;
 }
 
 
-const FreeZone &FreeZonePatch::GetZone() const
+const FreeZone *FreeZonePatch::GetZone() const
 {
-    return zone;
+    return &zone;
 }
 
 
@@ -274,21 +274,21 @@ string FreeZonePatch::GetTrace() const
 
 // ------------------------- TargettedPatch --------------------------
 
-TargettedPatch::TargettedPatch( TreeZone target_tree_zone_, 
+TargettedPatch::TargettedPatch( unique_ptr<XTreeZone> target_tree_zone_, 
                                 shared_ptr<Zone> source_zone_,
                                 list<shared_ptr<Patch>> &&child_patches ) :
     Patch( move(child_patches) ),
-    target_tree_zone(target_tree_zone_),
+    target_tree_zone(move(target_tree_zone_)),
     source_zone(source_zone_)
 {
-    ASSERT( target_tree_zone.GetNumTerminii() == source_zone->GetNumTerminii() );
-    ASSERT( target_tree_zone.GetNumTerminii() == GetNumChildExpressions() );    
+    ASSERT( target_tree_zone->GetNumTerminii() == source_zone->GetNumTerminii() );
+    ASSERT( target_tree_zone->GetNumTerminii() == GetNumChildExpressions() );    
 }
 
 
-const TreeZone &TargettedPatch::GetTargetTreeZone() const
+XTreeZone *TargettedPatch::GetTargetTreeZone() const
 {
-    return target_tree_zone;
+    return target_tree_zone.get();
 }
 
 

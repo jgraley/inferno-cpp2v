@@ -20,7 +20,7 @@ namespace SR
 {    
       
 class FreeZone;
-class TreeZone;     
+class XTreeZone;     
       
 class XTreeDatabase : public Traceable
 {
@@ -42,13 +42,13 @@ public:
     void InitialBuild();
     
     // Incremental strategy: perform updates on zones
-    FreeZone MainTreeExchange( TreeZone target_tree_zone, FreeZone free_zone );
+    void MainTreeExchange( XTreeZone *target_tree_zone, FreeZone *free_zone );
         
-    void MainTreeDeleteGeometric(TreeZone zone, const DBCommon::CoreInfo *base_info);
-    void MainTreeInsertGeometric(TreeZone zone, const DBCommon::CoreInfo *base_info);
+    void MainTreeDeleteGeometric(XTreeZone *zone, const DBCommon::CoreInfo *base_info);
+    void MainTreeInsertGeometric(XTreeZone *zone, const DBCommon::CoreInfo *base_info);
 
-    void MainTreeDeleteIntrinsic(TreeZone zone);
-    void MainTreeInsertIntrinsic(FreeZone zone);
+    void MainTreeDeleteIntrinsic(XTreeZone *zone);
+    void MainTreeInsertIntrinsic(FreeZone *zone);
 
     void PerformQueuedExtraTreeActions();
     void ExtraTreeDelete(DBCommon::TreeOrdinal tree_ordinal);

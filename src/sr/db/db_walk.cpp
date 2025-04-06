@@ -15,8 +15,8 @@ void DBWalk::WalkTree( const Actions *actions,
                                            -1,                                                       
                                            ContainerInterface::iterator() };
                                            
-    const TreeZone zone = TreeZone::CreateSubtree(root_xlink);
-    WalkKit kit { actions, &zone, tree_ordinal, wind, 0U };
+    const auto zone = XTreeZone::CreateSubtree(root_xlink);
+    WalkKit kit { actions, zone.get(), tree_ordinal, wind, 0U };
     VisitBase( kit, &root_info );  
 }
 
@@ -28,35 +28,36 @@ void DBWalk::WalkSubtree( const Actions *actions,
                           const DBCommon::CoreInfo *base_info )
 {
     ASSERT( base_info );
-    WalkTreeZone( actions, TreeZone::CreateSubtree(base_xlink), tree_ordinal, wind, base_info );
+    const auto zone = XTreeZone::CreateSubtree(base_xlink);
+    WalkTreeZone( actions, zone.get(), tree_ordinal, wind, base_info );
 }
 
 
 void DBWalk::WalkTreeZone( const Actions *actions,
-                           const TreeZone zone,
+                           const XTreeZone *zone,
                            const DBCommon::TreeOrdinal tree_ordinal, 
                            Wind wind,
                            const DBCommon::CoreInfo *base_info )
 {
-    //FTRACE("Walking zone: ")(zone)("\n");
+    //FTRACE("Walking zone: ")(*zone)("\n");
     ASSERT( base_info );
-    WalkKit kit { actions, &zone, tree_ordinal, wind, 0U };
+    WalkKit kit { actions, zone, tree_ordinal, wind, 0U };
     VisitBase( kit, base_info );  
-    ASSERT( kit.next_terminus_index == zone.GetNumTerminii() )
-          ("Zone has %d terminii", zone.GetNumTerminii())
+    ASSERT( kit.next_terminus_index == zone->GetNumTerminii() )
+          ("Zone has %d terminii", zone->GetNumTerminii())
           (kit.next_terminus_index==0?" (no terminii visited)":""); // should have visited all the terminii
 }
 
 
 void DBWalk::WalkFreeZone( const Actions *actions,
-                           const FreeZone zone,
+                           const FreeZone *zone,
                            Wind wind )
 {
     // Behaviour for free zones:
     // - Context is FREE_BASE for base of zone, walk_info similar to ROOT
     // - We do not visit terminii, so at_terminus is always false 
  
-    //FTRACE("Walking zone: ")(zone)("\n");
+    //FTRACE("Walking zone: ")(*zone)("\n");
     const DBCommon::CoreInfo base_info = { TreePtr<Node>(),                       
                                            -1,
                                            DBCommon::FREE_BASE,                  

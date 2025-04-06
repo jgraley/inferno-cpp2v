@@ -131,7 +131,7 @@ void XTreeDatabase::InitialBuild()
 }
 
 
-FreeZone XTreeDatabase::MainTreeExchange( TreeZone target_tree_zone, FreeZone free_zone )
+void XTreeDatabase::MainTreeExchange( XTreeZone *target_tree_zone, FreeZone *free_zone )
 {
     TRACE("Whole main tree walk for your convenience:\n");
     if( Tracer::IsEnabled() )
@@ -140,39 +140,37 @@ FreeZone XTreeDatabase::MainTreeExchange( TreeZone target_tree_zone, FreeZone fr
         db_walker.WalkTree( &actions, GetRootXLink(DBCommon::TreeOrdinal::MAIN), DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_IN );
     }
 
-    TRACE("Replacing target TreeZone:\n")(target_tree_zone)("\nwith source FreeZone:\n")(free_zone)("\n");
-    ASSERT( target_tree_zone.GetNumTerminii() == free_zone.GetNumTerminii() )
-          ("Target TZ:%lu, source FZ:%lu", target_tree_zone.GetNumTerminii(), free_zone.GetNumTerminii());    
-    target_tree_zone.DBCheck(this); 
+    TRACE("Replacing target XTreeZone:\n")(*target_tree_zone)("\nwith source FreeZone:\n")(*free_zone)("\n");
+    ASSERT( target_tree_zone->GetNumTerminii() == free_zone->GetNumTerminii() )
+          ("Target TZ:%lu, source FZ:%lu", target_tree_zone->GetNumTerminii(), free_zone->GetNumTerminii());    
+    target_tree_zone->DBCheck(this); 
     vector<shared_ptr<Mutator>> tmuts;
-    for( XLink t : target_tree_zone.GetTerminusXLinks() )
+    for( XLink t : target_tree_zone->GetTerminusXLinks() )
 		tmuts.push_back( GetMutator(t) );
-    MutableTreeZone mutable_target_tree_zone( target_tree_zone, GetMutator(target_tree_zone.GetBaseXLink()), move(tmuts) );
+    MutableTreeZone mutable_target_tree_zone( target_tree_zone, GetMutator(target_tree_zone->GetBaseXLink()), move(tmuts) );
     
     // Store the core info for the base locally since the link table will change
     // as this function executes.
-    const DBCommon::CoreInfo base_info = link_table->GetCoreInfo( target_tree_zone.GetBaseXLink() );
+    const DBCommon::CoreInfo base_info = link_table->GetCoreInfo( target_tree_zone->GetBaseXLink() );
 
     // Remove geometric info that will be invalidated by the exchange 
-    MainTreeDeleteGeometric( mutable_target_tree_zone, &base_info );   
+    MainTreeDeleteGeometric( &mutable_target_tree_zone, &base_info );   
     
     // Update the tree. mutable_target_tree_zone becomes the valid new tree zone.
-    mutable_target_tree_zone.Exchange( free_zone ); 
+    mutable_target_tree_zone.Exchange( *free_zone ); 
     
     // Re-insert geometric info based on new tree zone
-    MainTreeInsertGeometric( mutable_target_tree_zone, &base_info );       
+    MainTreeInsertGeometric( &mutable_target_tree_zone, &base_info );       
     
     // Update domain extension extra trees
     PerformQueuedExtraTreeActions();
         
     if( ReadArgs::test_db )
         Checks();
-        
-    return free_zone;
 }
 
 
-void XTreeDatabase::MainTreeDeleteGeometric(TreeZone zone, const DBCommon::CoreInfo *base_info)
+void XTreeDatabase::MainTreeDeleteGeometric(XTreeZone *zone, const DBCommon::CoreInfo *base_info)
 {
     INDENT("d");
     ASSERT( extra_tree_destroy_queue.empty() );
@@ -190,7 +188,7 @@ void XTreeDatabase::MainTreeDeleteGeometric(TreeZone zone, const DBCommon::CoreI
 }
 
 
-void XTreeDatabase::MainTreeInsertGeometric(TreeZone zone, const DBCommon::CoreInfo *base_info)
+void XTreeDatabase::MainTreeInsertGeometric(XTreeZone *zone, const DBCommon::CoreInfo *base_info)
 {
     INDENT("i");
     ASSERT( de_extra_insert_queue.empty() );
@@ -213,19 +211,19 @@ void XTreeDatabase::MainTreeInsertGeometric(TreeZone zone, const DBCommon::CoreI
 }
 
 
-void XTreeDatabase::MainTreeDeleteIntrinsic( TreeZone zone )
+void XTreeDatabase::MainTreeDeleteIntrinsic( XTreeZone *zone )
 {
     INDENT("d");
     ASSERT( extra_tree_destroy_queue.empty() );
     
-    const DBCommon::CoreInfo base_info = link_table->GetCoreInfo( zone.GetBaseXLink() );
+    const DBCommon::CoreInfo base_info = link_table->GetCoreInfo( zone->GetBaseXLink() );
     
     // TODO first use bind() on the existing (Geometric) actions to clean things up a bit
     // before putting in the Intrinsic versions.
 }
 
 
-void XTreeDatabase::MainTreeInsertIntrinsic(FreeZone zone)
+void XTreeDatabase::MainTreeInsertIntrinsic(FreeZone *zone)
 {
     INDENT("i");
     ASSERT( de_extra_insert_queue.empty() );

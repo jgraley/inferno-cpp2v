@@ -67,8 +67,8 @@ public:
     virtual list<RequiresSubordinateSCREngine *> GetEmbeddedMarkers() const = 0;
     virtual void ClearEmbeddedMarkers() = 0;
     
-    virtual Zone &GetZone() = 0;
-    virtual const Zone &GetZone() const = 0;
+    virtual Zone *GetZone() = 0;
+    virtual const Zone *GetZone() const = 0;
 };
 
 
@@ -82,22 +82,22 @@ public:
 class TreeZonePatch : public ZonePatch
 {
 public:
-    TreeZonePatch( TreeZone zone_, list<shared_ptr<Patch>> &&child_patches );
-    TreeZonePatch( TreeZone zone_ );
+    TreeZonePatch( unique_ptr<XTreeZone> zone_, list<shared_ptr<Patch>> &&child_patches );
+    TreeZonePatch( unique_ptr<XTreeZone> zone_ );
     
     void AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&new_markers ) final;
     list<RequiresSubordinateSCREngine *> GetEmbeddedMarkers() const final;
     void ClearEmbeddedMarkers() final;
 
-    TreeZone &GetZone() override;
-    const TreeZone &GetZone() const override;
+    XTreeZone *GetZone() override;
+    const XTreeZone *GetZone() const override;
       
     shared_ptr<Patch> DuplicateToFree() const;
     
     string GetTrace() const final;
     
 private:
-    TreeZone zone;
+    unique_ptr<XTreeZone> zone;
     list<RequiresSubordinateSCREngine *> embedded_markers;
 };
 
@@ -121,8 +121,8 @@ public:
     ChildExpressionIterator SpliceOver( ChildExpressionIterator it_child, 
                                         list<shared_ptr<Patch>> &&child_patches );
 
-    FreeZone &GetZone() final;
-    const FreeZone &GetZone() const final;
+    FreeZone *GetZone() final;
+    const FreeZone *GetZone() const final;
     
     string GetTrace() const final;
 
@@ -135,14 +135,14 @@ private:
 class TargettedPatch : public Patch
 {
 public:    
-    TargettedPatch( TreeZone target_tree_zone_, 
-                     shared_ptr<Zone> source_zone_,
-                     list<shared_ptr<Patch>> &&child_patches );
-    const TreeZone &GetTargetTreeZone() const;
+    TargettedPatch( unique_ptr<XTreeZone> target_tree_zone, 
+                    shared_ptr<Zone> source_zone_,
+                    list<shared_ptr<Patch>> &&child_patches );
+    XTreeZone *GetTargetTreeZone() const;
     shared_ptr<Zone> GetSourceZone() const;
 
 private:
-    TreeZone target_tree_zone;
+    unique_ptr<XTreeZone> target_tree_zone;
     shared_ptr<Zone> source_zone;
 };
 

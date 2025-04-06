@@ -23,13 +23,13 @@ void TreeZoneInverter::Run(XLink target_origin, shared_ptr<Patch> *source_layout
     WalkLocatedPatches( base_lze );
     
     // For each targetted patch in the layout, perform replace operation on the DB
-    Patch::ForDepthFirstWalk( *source_layout_ptr, nullptr, [&](shared_ptr<Patch> &part)
+    Patch::ForDepthFirstWalk( *source_layout_ptr, nullptr, [&](shared_ptr<Patch> &patch)
     {
-        if( auto replace_part = dynamic_pointer_cast<TargettedPatch>(part) )
+        if( auto replace_patch = dynamic_pointer_cast<TargettedPatch>(patch) )
         {
-            auto source_free_zone = dynamic_pointer_cast<FreeZone>(replace_part->GetSourceZone());
+            auto source_free_zone = dynamic_pointer_cast<FreeZone>(replace_patch->GetSourceZone());
             ASSERT( source_free_zone );
-            db->MainTreeExchange( replace_part->GetTargetTreeZone(), *source_free_zone );
+            db->MainTreeExchange( replace_patch->GetTargetTreeZone(), source_free_zone.get() );
         }
     } );    
 }
@@ -59,7 +59,7 @@ void TreeZoneInverter::WalkLocatedPatches( LocatedPatch lze )
     else if( auto tree_patch = dynamic_pointer_cast<TreeZonePatch>(*lze.second) )
     {
         // Recurse, co-looping over the children/terminii so we can fill in target bases
-        vector<XLink> terminii = tree_patch->GetZone().GetTerminusXLinks();
+        vector<XLink> terminii = tree_patch->GetZone()->GetTerminusXLinks();
         FreeZonePatch::ChildExpressionIterator it_child = tree_patch->GetChildrenBegin();        
         for( XLink terminus_xlink : terminii )
         {
@@ -96,14 +96,14 @@ void TreeZoneInverter::Invert( LocatedPatch lze )
         // for the new tree zone.
         ASSERT( child_tree_patch ); 
         
-        terminii_xlinks.push_back( child_tree_patch->GetZone().GetBaseXLink() );
+        terminii_xlinks.push_back( child_tree_patch->GetZone()->GetBaseXLink() );
     } );
          
     // Make the inverted TZ
-    TreeZone inverted_tree_zone = TreeZone( base_xlink, terminii_xlinks );    
+    unique_ptr<XTreeZone> inverted_tree_zone = make_unique<XTreeZone>( base_xlink, terminii_xlinks );    
     
     // Modify the expression to include inverted TZ as target
-    *lze.second = make_shared<TargettedPatch>( inverted_tree_zone,
-                                               make_shared<FreeZone>( free_patch->GetZone() ),
+    *lze.second = make_shared<TargettedPatch>( move(inverted_tree_zone),
+                                               make_shared<FreeZone>( *free_patch->GetZone() ),
                                                free_patch->MoveChildExpressions() );           
 }
