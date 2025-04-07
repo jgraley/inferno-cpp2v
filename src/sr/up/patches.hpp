@@ -136,14 +136,14 @@ class TargettedPatch : public Patch
 {
 public:    
     TargettedPatch( unique_ptr<TreeZone> target_tree_zone, 
-                    shared_ptr<Zone> source_zone_,
+                    unique_ptr<FreeZone> source_zone_,
                     list<shared_ptr<Patch>> &&child_patches );
     TreeZone *GetTargetTreeZone() const;
-    shared_ptr<Zone> GetSourceZone() const;
+    FreeZone *GetSourceZone() const;
 
 private:
     unique_ptr<TreeZone> target_tree_zone;
-    shared_ptr<Zone> source_zone;
+    unique_ptr<FreeZone> source_zone;
 };
 
 }

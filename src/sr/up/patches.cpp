@@ -275,11 +275,11 @@ string FreeZonePatch::GetTrace() const
 // ------------------------- TargettedPatch --------------------------
 
 TargettedPatch::TargettedPatch( unique_ptr<TreeZone> target_tree_zone_, 
-                                shared_ptr<Zone> source_zone_,
+                                unique_ptr<FreeZone> source_zone_,
                                 list<shared_ptr<Patch>> &&child_patches ) :
     Patch( move(child_patches) ),
     target_tree_zone(move(target_tree_zone_)),
-    source_zone(source_zone_)
+    source_zone(move(source_zone_))
 {
     ASSERT( target_tree_zone->GetNumTerminii() == source_zone->GetNumTerminii() );
     ASSERT( target_tree_zone->GetNumTerminii() == GetNumChildExpressions() );    
@@ -292,8 +292,8 @@ TreeZone *TargettedPatch::GetTargetTreeZone() const
 }
 
 
-shared_ptr<Zone> TargettedPatch::GetSourceZone() const
+FreeZone *TargettedPatch::GetSourceZone() const
 {
-    return source_zone;
+    return source_zone.get();
 }
 

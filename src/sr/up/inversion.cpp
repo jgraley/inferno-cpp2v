@@ -27,9 +27,7 @@ void TreeZoneInverter::Run(XLink target_origin, shared_ptr<Patch> *source_layout
     {
         if( auto replace_patch = dynamic_pointer_cast<TargettedPatch>(patch) )
         {
-            auto source_free_zone = dynamic_pointer_cast<FreeZone>(replace_patch->GetSourceZone());
-            ASSERT( source_free_zone );
-            db->MainTreeExchange( replace_patch->GetTargetTreeZone(), source_free_zone.get() );
+            db->MainTreeExchange( replace_patch->GetTargetTreeZone(), replace_patch->GetSourceZone() );
         }
     } );    
 }
@@ -104,6 +102,6 @@ void TreeZoneInverter::Invert( LocatedPatch lze )
     
     // Modify the expression to include inverted TZ as target
     *lze.second = make_shared<TargettedPatch>( move(inverted_tree_zone),
-                                               make_shared<FreeZone>( *free_patch->GetZone() ),
+                                               make_unique<FreeZone>( *free_patch->GetZone() ),
                                                free_patch->MoveChildExpressions() );           
 }
