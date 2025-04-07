@@ -57,13 +57,13 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink target_origin, shared_
     free_zone_merge_cb.Run(source_layout);
     free_zone_merge_cb.Check(source_layout);
                                     
-    TreeZoneComplementer tree_zone_complementor( db );
-    tree_zone_complementor.Run(target_origin, source_layout);
-
     TreeZoneOverlapHandler tree_zone_overlap_handler( db );
     tree_zone_overlap_handler.Run(source_layout);
     tree_zone_overlap_handler.Check(source_layout);
     
+    TreeZoneComplementer tree_zone_complementor( db );
+    tree_zone_complementor.Run(target_origin, source_layout);
+
     TreeZoneOrderingHandler tree_zone_ordering_handler( db );
     tree_zone_ordering_handler.Run(source_layout);
     tree_zone_ordering_handler.Check(source_layout);

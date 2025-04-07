@@ -74,7 +74,7 @@ public:
                               shared_ptr<Mutator> &&base_mutator_, 
                               vector<shared_ptr<Mutator>> &&terminii_mutators_ );
 
-    void Exchange( FreeZone &free_zone );
+    void Exchange( FreeZone *free_zone );
     
 private:
     shared_ptr<Mutator> base_mutator;

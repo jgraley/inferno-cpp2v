@@ -168,23 +168,23 @@ MutableTreeZone::MutableTreeZone( XTreeZone *tz,
 
 
 
-void MutableTreeZone::Exchange( FreeZone &free_zone )
+void MutableTreeZone::Exchange( FreeZone *free_zone )
 {    
-	ASSERT( !free_zone.IsEmpty() ); // Could add support but apparently don't need it rn
+	ASSERT( !free_zone->IsEmpty() ); // Could add support but apparently don't need it rn
 	        
     if( IsEmpty() )
     {
-        free_zone = *FreeZone::CreateEmpty(); // Dodgy but it is reached
+        *free_zone = *FreeZone::CreateEmpty(); // Dodgy but it is reached
         return;
 	}
             
     // Do a co-walk and exchange one at a time. We want to modify the parent
     // sides of the terminii in-place, leaving valid mutators behind. 
-    FreeZone::TerminusIterator free_mut_it = free_zone.GetTerminiiBegin();    
+    FreeZone::TerminusIterator free_mut_it = free_zone->GetTerminiiBegin();    
     vector<XLink>::iterator tree_xlink_it = terminii.begin();
     for( shared_ptr<Mutator> tree_terminus : terminii_mutators )
     {
-        ASSERT( free_mut_it != free_zone.GetTerminiiEnd() ); // length mismatch    
+        ASSERT( free_mut_it != free_zone->GetTerminiiEnd() ); // length mismatch    
         ASSERT( tree_xlink_it != terminii.end() ); // length mismatch    
                                 	
 		tree_terminus->ExchangeParent(**free_mut_it); // deep
@@ -194,17 +194,17 @@ void MutableTreeZone::Exchange( FreeZone &free_zone )
         free_mut_it++;
         tree_xlink_it++;
     } 
-    ASSERT( free_mut_it == free_zone.GetTerminiiEnd() ); // length mismatch  
+    ASSERT( free_mut_it == free_zone->GetTerminiiEnd() ); // length mismatch  
     ASSERT( tree_xlink_it == terminii.end() ); // length mismatch    
 
     // Exchange the base. We want to modify the child side of the base
     // in-place, leaving valid mutators behind. 
-    TreePtr<Node> free_base = free_zone.GetBaseNode();
+    TreePtr<Node> free_base = free_zone->GetBaseNode();
     TreePtr<Node> old_base = base_mutator->ExchangeChild( free_base );	// deep
     if( !base_mutator->IsAtRoot() )
 		base = base_mutator->GetXLink();   
     
-	free_zone.SetBase( old_base );	
+	free_zone->SetBase( old_base );	
 }
 
 
