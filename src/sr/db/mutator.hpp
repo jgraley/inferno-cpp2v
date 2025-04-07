@@ -24,7 +24,7 @@ protected:
 	};
 	
 public:	
-	static shared_ptr<Mutator> MakeRootMutator( TreePtrInterface *parent_singular );
+	static shared_ptr<Mutator> MakeRootMutator( shared_ptr<TreePtr<Node>> sp_tp_root_node );
 	static shared_ptr<Mutator> MakeSingularMutator( TreePtr<Node> parent_node, 
 	                                                TreePtrInterface *parent_singular );
 	static shared_ptr<Mutator> MakeContainerMutator( TreePtr<Node> parent_node, 
@@ -36,7 +36,8 @@ private:
                       TreePtr<Node> parent_node, 
 					  TreePtrInterface *parent_singular_,
                       ContainerInterface *parent_container_,
-                      ContainerInterface::iterator container_iterator_ );             
+                      ContainerInterface::iterator container_iterator_,
+                      shared_ptr<TreePtr<Node>> sp_tp_root_node_ );             
 
 public:    
     TreePtr<Node> ExchangeChild( TreePtr<Node> new_child );
@@ -63,6 +64,7 @@ private:
     TreePtrInterface *parent_singular;    // TODO could combine into an Itemiser::Element *
     ContainerInterface *parent_container;
     ContainerInterface::iterator container_iterator;
+    shared_ptr<TreePtr<Node>> sp_tp_root_node;
 };        
     
 

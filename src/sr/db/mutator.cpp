@@ -6,16 +6,16 @@ using namespace SR;
 
 // ------------------------- Mutator --------------------------    
 
-shared_ptr<Mutator> Mutator::MakeRootMutator( TreePtrInterface *parent_singular )
+shared_ptr<Mutator> Mutator::MakeRootMutator( shared_ptr<TreePtr<Node>> sp_tp_root_node )
 {
-	return shared_ptr<Mutator>(new Mutator(Mode::Root, nullptr, parent_singular, nullptr, ContainerInterface::iterator()));
+	return shared_ptr<Mutator>(new Mutator(Mode::Root, nullptr, nullptr, nullptr, ContainerInterface::iterator(), sp_tp_root_node));
 }
 
 										  		  
 shared_ptr<Mutator> Mutator::MakeSingularMutator( TreePtr<Node> parent_node, 
 										  		  TreePtrInterface *parent_singular )
 {
-	return shared_ptr<Mutator>(new Mutator(Mode::Singular, parent_node, parent_singular, nullptr, ContainerInterface::iterator()));
+	return shared_ptr<Mutator>(new Mutator(Mode::Singular, parent_node, parent_singular, nullptr, ContainerInterface::iterator(), nullptr));
 }
 
 										  		  
@@ -23,7 +23,7 @@ shared_ptr<Mutator> Mutator::MakeContainerMutator( TreePtr<Node> parent_node,
 												   ContainerInterface *parent_container,
 												   ContainerInterface::iterator container_iterator )
 {
-	return shared_ptr<Mutator>(new Mutator(Mode::Container, parent_node, nullptr, parent_container, container_iterator));
+	return shared_ptr<Mutator>(new Mutator(Mode::Container, parent_node, nullptr, parent_container, container_iterator, nullptr));
 }
 
 
@@ -31,12 +31,14 @@ Mutator::Mutator( Mode mode_,
                   TreePtr<Node> parent_node_, 
                   TreePtrInterface *parent_singular_, 
                   ContainerInterface *parent_container_,
-                  ContainerInterface::iterator container_iterator_ ) :
+                  ContainerInterface::iterator container_iterator_,
+                  shared_ptr<TreePtr<Node>> sp_tp_root_node_ ) :
 	mode( mode_ ),
     parent_node( parent_node_ ),
     parent_singular( parent_singular_ ),
     parent_container( parent_container_ ),
-    container_iterator( container_iterator_ )
+    container_iterator( container_iterator_ ),
+    sp_tp_root_node( sp_tp_root_node_ )
 {
     Validate();
 }
@@ -50,6 +52,13 @@ TreePtr<Node> Mutator::ExchangeChild( TreePtr<Node> new_child )
 	switch( mode )
 	{
 		case Mode::Root:
+		{
+			TreePtr<Node> old_child = *sp_tp_root_node;
+			*sp_tp_root_node = new_child;
+			TRACE("Singular mutated ")(new_child)("\n");   
+			return old_child;
+		}
+
 		case Mode::Singular:
 		{
 			TreePtr<Node> old_child = (TreePtr<Node>)*parent_singular;
@@ -133,9 +142,11 @@ bool Mutator::IsAtRoot() const
 
 XLink Mutator::GetXLink() const
 {
-	ASSERT( mode != Mode::Root );
-    
-    XLink xlink(parent_node, GetTreePtrInterface() );
+	XLink xlink;
+	if( mode == Mode::Root )
+		xlink = XLink::CreateFrom(sp_tp_root_node);
+	else
+	    xlink = XLink(parent_node, GetTreePtrInterface() );
     ASSERT( xlink );
     return xlink;
 }
@@ -146,6 +157,9 @@ const TreePtrInterface *Mutator::GetTreePtrInterface() const
 	switch( mode )
 	{
 		case Mode::Root:
+			ASSERT( sp_tp_root_node );
+			return sp_tp_root_node.get();
+		
 		case Mode::Singular:
 			ASSERT( parent_singular );
 			return parent_singular;
@@ -201,6 +215,9 @@ void Mutator::Validate() const // TODO call this more
  	switch( mode )
 	{
 		case Mode::Root:
+			ASSERT( sp_tp_root_node );
+			break;
+			
 		case Mode::Singular:
 			ASSERT( parent_singular );
 			// TODO but is parent_singular inside parent_node????
@@ -229,6 +246,9 @@ string Mutator::GetTrace() const
  	switch( mode )
 	{
 		case Mode::Root:
+			ASSERT( sp_tp_root_node );
+			return "⌻";
+		
 		case Mode::Singular:
 			ASSERT( parent_singular );
 			return "⌾"+parent_singular->GetTypeName();
@@ -247,7 +267,7 @@ string Mutator::GetTrace() const
 				si = "ERROR!";
 			else
 				si = to_string(i);
-			return "⌾"+parent_container->GetTypeName()+"["+si+" of "+to_string(parent_container->size())+"]";			//...?
+			return "⍟"+parent_container->GetTypeName()+"["+si+" of "+to_string(parent_container->size())+"]";			//...?
 		}
 		
 		default:

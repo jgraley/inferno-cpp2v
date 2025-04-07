@@ -149,7 +149,7 @@ void XTreeDatabase::MainTreeExchange( TreeZone *target_tree_zone, FreeZone *free
 		vector<shared_ptr<Mutator>> tmuts;
 		for( XLink t : target_tree_zone->GetTerminusXLinks() )
 			tmuts.push_back( GetMutator(t) );
-		target_tree_zone = new MutableTreeZone( target_xtree_zone, GetMutator(target_tree_zone->GetBaseXLink()), move(tmuts) );
+		target_tree_zone = new MutableTreeZone( GetMutator(target_tree_zone->GetBaseXLink()), move(tmuts) );
 	}
 
     MutableTreeZone *mutable_target_tree_zone = dynamic_cast<MutableTreeZone *>(target_tree_zone);
@@ -454,7 +454,7 @@ shared_ptr<Mutator> XTreeDatabase::GetMutator(XLink xlink) const
             // correctly from the XTreeDatabase object, which is why this method cannot be const.
             ASSERT( (int)(row.tree_ordinal) >= 0 ); // Should be valid whenever context is ROOT
             shared_ptr<TreePtr<Node>> sp_tp_root_node = trees_by_ordinal.at(row.tree_ordinal).sp_tp_root_node;
-            return Mutator::MakeRootMutator( sp_tp_root_node.get() );
+            return Mutator::MakeRootMutator( sp_tp_root_node );
         }    
         case DBCommon::SINGULAR:
         {

@@ -7,6 +7,69 @@
 
 using namespace SR;
 
+unique_ptr<FreeZone> TreeZone::Duplicate() const
+{
+    if( IsEmpty() )
+        return FreeZone::CreateEmpty();
+        
+    // Iterate over terminii and operand zones together, filling the map for
+    // DuplicateSubtree() to use.
+    Duplicate::TerminiiMap duplicator_terminus_map;
+    for( XLink terminus_upd : GetTerminusXLinks() ) 
+        duplicator_terminus_map[terminus_upd] = { TreePtr<Node>(), shared_ptr<Mutator>() };
+
+    // Duplicate the subtree, populating from the map.
+    TreePtr<Node> new_base_x = Duplicate::DuplicateSubtree( GetBaseXLink(), 
+                                                            duplicator_terminus_map );   
+    
+    list<shared_ptr<Mutator>> free_zone_terminii;
+    for( XLink terminus_upd : GetTerminusXLinks() )
+    {
+        ASSERTS( duplicator_terminus_map[terminus_upd].mutator );
+        free_zone_terminii.push_back( duplicator_terminus_map[terminus_upd].mutator );
+    }
+
+    // Create a new zone for the result.
+    return make_unique<FreeZone>( new_base_x, move(free_zone_terminii) );
+}
+
+
+unique_ptr<FreeZone> TreeZone::MakeFreeZone(const XTreeDatabase *db) const
+{    
+    if( IsEmpty() )
+        return FreeZone::CreateEmpty();
+        
+    auto free_zone = FreeZone::CreateSubtree( GetBaseXLink().GetChildTreePtr() );
+    for( XLink terminus_xlink : GetTerminusXLinks() )
+        free_zone->AddTerminus( db->GetMutator( terminus_xlink ) );
+    
+    return free_zone;
+}
+
+
+void TreeZone::DBCheck(const XTreeDatabase *db) const // TODO maybe move to database?
+{
+    ASSERT( db->HasRow( GetBaseXLink() ) )(GetBaseXLink());
+    
+    if( IsEmpty() )
+        return; // We've checked enough for empty zones
+    // Now we've excluded legit empty zones, checks can be strict
+    
+    DepthFirstRelation dfr( db );
+    XLink prev_xlink = GetBaseXLink();
+    //FTRACE(prev_xlink)("\n");
+    for( XLink terminus_xlink : GetTerminusXLinks() )
+    {
+        ASSERT( db->HasRow( terminus_xlink ) )(terminus_xlink);
+        
+        ASSERT( prev_xlink != terminus_xlink )(prev_xlink)(" vs ")(terminus_xlink); // already checked we're not empty
+        
+        ASSERT( dfr.Compare3Way( prev_xlink, terminus_xlink ) < 0 ); // strict: no repeated XLinks
+            
+        prev_xlink = terminus_xlink;        
+    }    
+}
+
 // ------------------------- XTreeZone --------------------------
 
 unique_ptr<XTreeZone> XTreeZone::CreateSubtree( XLink base )
@@ -34,7 +97,7 @@ XTreeZone::XTreeZone( XLink base_, vector<XLink> terminii_ ) :
 bool XTreeZone::IsEmpty() const
 {
     // There must be a base, so the only way to be empty is to terminate at the base
-    return terminii.size()==1 && OnlyElementOf(terminii)==base;
+    return terminii.size()==1 && OnlyElementOf(terminii)==base;    
 }
 
 
@@ -56,12 +119,6 @@ XLink XTreeZone::GetBaseXLink() const
 }
 
 
-XLink &XTreeZone::GetBaseXLink()
-{
-    return base;
-}
-
-
 vector<XLink> XTreeZone::GetTerminusXLinks() const
 {
     return terminii;
@@ -73,45 +130,6 @@ XLink XTreeZone::GetTerminusXLink(size_t index) const
 	return terminii[index];
 }
 
-
-unique_ptr<FreeZone> XTreeZone::Duplicate() const
-{
-    if( IsEmpty() )
-        return FreeZone::CreateEmpty();
-        
-    // Iterate over terminii and operand zones together, filling the map for
-    // DuplicateSubtree() to use.
-    Duplicate::TerminiiMap duplicator_terminus_map;
-    for( XLink terminus_upd : GetTerminusXLinks() ) 
-        duplicator_terminus_map[terminus_upd] = { TreePtr<Node>(), shared_ptr<Mutator>() };
-
-    // Duplicate the subtree, populating from the map.
-    TreePtr<Node> new_base_x = Duplicate::DuplicateSubtree( GetBaseXLink(), 
-                                                            duplicator_terminus_map );   
-    
-    list<shared_ptr<Mutator>> free_zone_terminii;
-    for( XLink terminus_upd : GetTerminusXLinks() )
-    {
-        ASSERTS( duplicator_terminus_map[terminus_upd].mutator );
-        free_zone_terminii.push_back( duplicator_terminus_map[terminus_upd].mutator );
-    }
-
-    // Create a new zone for the result.
-    return make_unique<FreeZone>( new_base_x, move(free_zone_terminii) );
-}
-
-
-unique_ptr<FreeZone> XTreeZone::MakeFreeZone(const XTreeDatabase *db) const
-{    
-    if( IsEmpty() )
-        return FreeZone::CreateEmpty();
-        
-    auto free_zone = FreeZone::CreateSubtree( base.GetChildTreePtr() );
-    for( XLink terminus : terminii )
-        free_zone->AddTerminus( db->GetMutator( terminus ) );
-    
-    return free_zone;
-}
 
 
 string XTreeZone::GetTrace() const
@@ -134,38 +152,60 @@ string XTreeZone::GetTrace() const
     return "XTreeZone(" + s +")";
 }
 
-
-void XTreeZone::DBCheck(const XTreeDatabase *db) const // TODO maybe move to database?
-{
-    ASSERT( db->HasRow( base ) )(base);
-    
-    if( IsEmpty() )
-        return; // We've checked enough for empty zones
-    // Now we've excluded legit empty zones, checks can be strict
-    
-    DepthFirstRelation dfr( db );
-    XLink prev_xlink = base;
-    for( XLink terminus_xlink : terminii )
-    {
-        ASSERT( db->HasRow( terminus_xlink ) )(terminus_xlink);
-        
-        ASSERT( dfr.Compare3Way( prev_xlink, terminus_xlink ) < 0 ); // strict: no repeated XLinks
-            
-        prev_xlink = terminus_xlink;
-    }    
-}
-
 // ------------------------- MutableTreeZone --------------------------
 
-MutableTreeZone::MutableTreeZone( XTreeZone *tz, 
-                                  shared_ptr<Mutator> &&base_mutator_, 
-                                  vector<shared_ptr<Mutator>> &&terminii_mutators_ ) :
-    XTreeZone(*tz),
-    base_mutator(move(base_mutator_)),
-    terminii_mutators(move(terminii_mutators_))
+MutableTreeZone::MutableTreeZone( shared_ptr<Mutator> &&base_, 
+                                  vector<shared_ptr<Mutator>> &&terminii_ ) :
+    base(move(base_)),
+    terminii(move(terminii_))
 {
 }
 
+
+bool MutableTreeZone::IsEmpty() const
+{
+    // There must be a base, so the only way to be empty is to terminate at the base
+    return terminii.size()==1 && OnlyElementOf(terminii)->GetXLink() == base->GetXLink();
+
+    // TODO if we don't convert to XLinks, DBCheck() fails because IsEmpty() returned
+    // false but the XLinks for base and some terminus compare equal. I can see 
+    // terminii with different modes comparing unequal, but how are we getting a
+    // terminus with mode Singular for a root node? Is parent_node just NULL in the 
+    // XLink? How did the XLink get created? Did it cheat and start a new shared_ptr?
+}
+
+
+size_t MutableTreeZone::GetNumTerminii() const
+{
+    return terminii.size();
+}
+
+
+TreePtr<Node> MutableTreeZone::GetBaseNode() const
+{
+    return base->GetXLink().GetChildTreePtr(); // TODO Mutator::GetChildTreePtr() 
+}
+
+
+XLink MutableTreeZone::GetBaseXLink() const
+{
+    return base->GetXLink();
+}
+
+
+vector<XLink> MutableTreeZone::GetTerminusXLinks() const
+{
+	vector<XLink> xlinks;
+    for( shared_ptr<Mutator> terminus : terminii )
+		xlinks.push_back( terminus->GetXLink() );
+	return xlinks;
+}
+
+
+XLink MutableTreeZone::GetTerminusXLink(size_t index) const
+{
+	return terminii[index]->GetXLink();
+}
 
 
 void MutableTreeZone::Exchange( FreeZone *free_zone )
@@ -181,31 +221,49 @@ void MutableTreeZone::Exchange( FreeZone *free_zone )
     // Do a co-walk and exchange one at a time. We want to modify the parent
     // sides of the terminii in-place, leaving valid mutators behind. 
     FreeZone::TerminusIterator free_mut_it = free_zone->GetTerminiiBegin();    
-    vector<XLink>::iterator tree_xlink_it = terminii.begin();
-    for( shared_ptr<Mutator> tree_terminus : terminii_mutators )
+    //vector<XLink>::iterator tree_xlink_it = terminii.begin();
+    for( shared_ptr<Mutator> tree_terminus : terminii )
     {
         ASSERT( free_mut_it != free_zone->GetTerminiiEnd() ); // length mismatch    
-        ASSERT( tree_xlink_it != terminii.end() ); // length mismatch    
+        //ASSERT( tree_xlink_it != terminii.end() ); // length mismatch    
                                 	
 		tree_terminus->ExchangeParent(**free_mut_it); // deep
 
-        *tree_xlink_it = tree_terminus->GetXLink();   
+        //*tree_xlink_it = tree_terminus->GetXLink();   
                 
         free_mut_it++;
-        tree_xlink_it++;
+        //tree_xlink_it++;
     } 
     ASSERT( free_mut_it == free_zone->GetTerminiiEnd() ); // length mismatch  
-    ASSERT( tree_xlink_it == terminii.end() ); // length mismatch    
+    //ASSERT( tree_xlink_it == terminii.end() ); // length mismatch    
 
     // Exchange the base. We want to modify the child side of the base
     // in-place, leaving valid mutators behind. 
     TreePtr<Node> free_base = free_zone->GetBaseNode();
-    TreePtr<Node> old_base = base_mutator->ExchangeChild( free_base );	// deep
-    if( !base_mutator->IsAtRoot() )
-		base = base_mutator->GetXLink();   
+    TreePtr<Node> old_base = base->ExchangeChild( free_base );	// deep
+    //if( !base_mutator->IsAtRoot() )
+	//	base = base_mutator->GetXLink();   
     
 	free_zone->SetBase( old_base );	
 }
 
 
-
+string MutableTreeZone::GetTrace() const
+{
+    string s;
+    if( IsEmpty() )
+    {
+        s = " ↯ "; // Indicates zone is empty due to a terminus at base
+                   // (we still give the base, for info)
+    }
+    else
+    {
+        s = Trace(base);
+        if( terminii.empty() )
+            s += " → "; // Indicates the zone goes all the way to leaves i.e. subtree
+        else
+            s += " ⇥ " + Trace(terminii); // Indicates the zone terminates            
+    }
+    
+    return "XTreeZone(" + s +")";
+}

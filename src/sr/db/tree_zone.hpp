@@ -22,12 +22,12 @@ class TreeZone : public Zone
 {
 public:
     virtual XLink GetBaseXLink() const = 0;
-    virtual XLink &GetBaseXLink() = 0;
     virtual vector<XLink> GetTerminusXLinks() const = 0;
     virtual XLink GetTerminusXLink(size_t index) const = 0;
 
-    virtual unique_ptr<FreeZone> Duplicate() const = 0;
-    virtual unique_ptr<FreeZone> MakeFreeZone(const XTreeDatabase *db) const = 0;	
+    unique_ptr<FreeZone> Duplicate() const;
+    unique_ptr<FreeZone> MakeFreeZone(const XTreeDatabase *db) const;	
+    void DBCheck(const XTreeDatabase *db) const;
 };
 
 // ------------------------- XTreeZone --------------------------
@@ -49,16 +49,10 @@ public:
     TreePtr<Node> GetBaseNode() const override;
 
     XLink GetBaseXLink() const override;
-    XLink &GetBaseXLink() override;
     vector<XLink> GetTerminusXLinks() const override;
     XLink GetTerminusXLink(size_t index) const override;
-
-    unique_ptr<FreeZone> Duplicate() const;
-    unique_ptr<FreeZone> MakeFreeZone(const XTreeDatabase *db) const;
     
-    string GetTrace() const;
-
-    void DBCheck(const XTreeDatabase *db) const;
+    string GetTrace() const override;
 
 protected:
     XLink base;    
@@ -67,18 +61,27 @@ protected:
 
 // ------------------------- MutableTreeZone --------------------------
  
-class MutableTreeZone : public XTreeZone
+class MutableTreeZone : public TreeZone
 {
 public:
-    explicit MutableTreeZone( XTreeZone *tz, 
-                              shared_ptr<Mutator> &&base_mutator_, 
-                              vector<shared_ptr<Mutator>> &&terminii_mutators_ );
+    explicit MutableTreeZone( shared_ptr<Mutator> &&base_, 
+                              vector<shared_ptr<Mutator>> &&terminii_ );
+
+    bool IsEmpty() const override;
+    size_t GetNumTerminii() const override;
+    TreePtr<Node> GetBaseNode() const override;
+
+    XLink GetBaseXLink() const override;
+    vector<XLink> GetTerminusXLinks() const override;
+    XLink GetTerminusXLink(size_t index) const override;
 
     void Exchange( FreeZone *free_zone );
     
+    string GetTrace() const override;
+    
 private:
-    shared_ptr<Mutator> base_mutator;
-    vector<shared_ptr<Mutator>> terminii_mutators;
+    shared_ptr<Mutator> base;
+    vector<shared_ptr<Mutator>> terminii;
 };
  
 }
