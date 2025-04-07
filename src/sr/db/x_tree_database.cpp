@@ -143,16 +143,16 @@ void XTreeDatabase::MainTreeExchange( TreeZone *target_tree_zone, FreeZone *free
     TRACE("Replacing target TreeZone:\n")(*target_tree_zone)("\nwith source FreeZone:\n")(*free_zone)("\n");
     ASSERT( target_tree_zone->GetNumTerminii() == free_zone->GetNumTerminii() )
           ("Target TZ:%lu, source FZ:%lu", target_tree_zone->GetNumTerminii(), free_zone->GetNumTerminii());    
-    XTreeZone *target_xtree_zone = dynamic_cast<XTreeZone *>(target_tree_zone);
-    if( target_xtree_zone )
+    MutableTreeZone *mutable_target_tree_zone = dynamic_cast<MutableTreeZone *>(target_tree_zone);
+    bool delete_please = false;
+    if( !mutable_target_tree_zone )
     {
 		vector<shared_ptr<Mutator>> tmuts;
 		for( XLink t : target_tree_zone->GetTerminusXLinks() )
 			tmuts.push_back( GetMutator(t) );
-		target_tree_zone = new MutableTreeZone( GetMutator(target_tree_zone->GetBaseXLink()), move(tmuts) );
+		mutable_target_tree_zone = new MutableTreeZone( GetMutator(target_tree_zone->GetBaseXLink()), move(tmuts) );
+		delete_please = true;
 	}
-
-    MutableTreeZone *mutable_target_tree_zone = dynamic_cast<MutableTreeZone *>(target_tree_zone);
     ASSERT( mutable_target_tree_zone );
 
 	mutable_target_tree_zone->DBCheck(this); 
@@ -176,8 +176,8 @@ void XTreeDatabase::MainTreeExchange( TreeZone *target_tree_zone, FreeZone *free
     if( ReadArgs::test_db )
         Checks();
 
-    if( target_xtree_zone )
-		delete target_tree_zone;
+    if( delete_please )
+		delete mutable_target_tree_zone;
 }
 
 
