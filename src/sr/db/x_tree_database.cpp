@@ -144,14 +144,12 @@ void XTreeDatabase::MainTreeExchange( TreeZone *target_tree_zone, FreeZone *free
     ASSERT( target_tree_zone->GetNumTerminii() == free_zone->GetNumTerminii() )
           ("Target TZ:%lu, source FZ:%lu", target_tree_zone->GetNumTerminii(), free_zone->GetNumTerminii());    
     MutableTreeZone *mutable_target_tree_zone = dynamic_cast<MutableTreeZone *>(target_tree_zone);
-    bool delete_please = false;
+    unique_ptr<MutableTreeZone> local_tz;
     if( !mutable_target_tree_zone )
     {
-		vector<shared_ptr<Mutator>> tmuts;
-		for( XLink t : target_tree_zone->GetTerminusXLinks() )
-			tmuts.push_back( MakeMutator(t) );
-		mutable_target_tree_zone = new MutableTreeZone( MakeMutator(target_tree_zone->GetBaseXLink()), move(tmuts) );
-		delete_please = true;
+		local_tz = MakeMutableTreeZone( target_tree_zone->GetBaseXLink(),
+		                                target_tree_zone->GetTerminusXLinks() );
+		mutable_target_tree_zone = local_tz.get();                                
 	}
     ASSERT( mutable_target_tree_zone );
 
@@ -175,9 +173,6 @@ void XTreeDatabase::MainTreeExchange( TreeZone *target_tree_zone, FreeZone *free
         
     if( ReadArgs::test_db )
         Checks();
-
-    if( delete_please )
-		delete mutable_target_tree_zone;
 }
 
 
@@ -479,12 +474,12 @@ shared_ptr<Mutator> XTreeDatabase::MakeMutator(XLink xlink) const
 }
 
 
-unique_ptr<MutableTreeZone> MakeMutableTreeZone(XLink xlink,
-                                                vector<XLink> terminii) const
+unique_ptr<MutableTreeZone> XTreeDatabase::MakeMutableTreeZone(XLink base,
+                                                               vector<XLink> terminii) const
 {
-	shared_ptr<Mutator> base_mutator = MakeMutator(target_tree_zone->GetBaseXLink())
+	shared_ptr<Mutator> base_mutator = MakeMutator(base);
 	vector<shared_ptr<Mutator>> terminii_mutators;
-	for( XLink t : target_tree_zone->GetTerminusXLinks() )
+	for( XLink t : terminii )
 		terminii_mutators.push_back( MakeMutator(t) );
 	return make_unique<MutableTreeZone>( move(base_mutator), move(terminii_mutators) );
 }                                                
