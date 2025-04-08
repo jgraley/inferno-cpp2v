@@ -44,6 +44,37 @@ Mutator::Mutator( Mode mode_,
 }
 
 
+bool Mutator::operator==( const Mutator &right ) const
+{
+	if( mode != right.mode )
+		return false;
+		
+	switch( mode )
+	{
+		case Mode::Root:
+		return sp_tp_root_node == right.sp_tp_root_node;
+
+		case Mode::Singular:
+		return parent_node == right.parent_node &&
+			   parent_singular == right.parent_singular;
+			
+		case Mode::Container:
+		return parent_node == right.parent_node &&
+			   parent_container == right.parent_container &&
+			   container_iterator == right.container_iterator;
+		
+		default: 
+			ASSERTFAIL();
+	}	   
+}
+
+
+bool Mutator::operator!=( const Mutator &right ) const
+{
+	return !operator==(right);
+}
+
+
 TreePtr<Node> Mutator::ExchangeChild( TreePtr<Node> new_child )
 {	
 	// Free zone merging should get rid of these, and things will change with general wide zone support

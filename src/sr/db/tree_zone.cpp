@@ -165,13 +165,7 @@ MutableTreeZone::MutableTreeZone( shared_ptr<Mutator> &&base_,
 bool MutableTreeZone::IsEmpty() const
 {
     // There must be a base, so the only way to be empty is to terminate at the base
-    return terminii.size()==1 && OnlyElementOf(terminii)->GetXLink() == base->GetXLink();
-
-    // TODO if we don't convert to XLinks, DBCheck() fails because IsEmpty() returned
-    // false but the XLinks for base and some terminus compare equal. I can see 
-    // terminii with different modes comparing unequal, but how are we getting a
-    // terminus with mode Singular for a root node? Is parent_node just NULL in the 
-    // XLink? How did the XLink get created? Did it cheat and start a new shared_ptr?
+    return terminii.size()==1 && *OnlyElementOf(terminii) == *base;
 }
 
 
@@ -212,7 +206,7 @@ void MutableTreeZone::Exchange( FreeZone *free_zone )
 {    
 	ASSERT( !free_zone->IsEmpty() ); // Could add support but apparently don't need it rn
 	        
-    if( IsEmpty() )
+    if( terminii.size()==1 && OnlyElementOf(terminii)->GetXLink() == base->GetXLink() )
     {
         *free_zone = *FreeZone::CreateEmpty(); // Dodgy but it is reached
         return;
