@@ -436,7 +436,7 @@ XLink XTreeDatabase::GetMainRootXLink() const
 }
 
 
-shared_ptr<Mutator> XTreeDatabase::MakeMutator(XLink xlink) const
+shared_ptr<Mutator> XTreeDatabase::MakeTreeMutator(XLink xlink) const
 {
     const LinkTable::Row &row = link_table->GetRow(xlink);
     
@@ -477,10 +477,10 @@ shared_ptr<Mutator> XTreeDatabase::MakeMutator(XLink xlink) const
 unique_ptr<MutableTreeZone> XTreeDatabase::MakeMutableTreeZone(XLink base,
                                                                vector<XLink> terminii) const
 {
-	shared_ptr<Mutator> base_mutator = MakeMutator(base);
+	shared_ptr<Mutator> base_mutator = MakeTreeMutator(base);
 	vector<shared_ptr<Mutator>> terminii_mutators;
 	for( XLink t : terminii )
-		terminii_mutators.push_back( MakeMutator(t) );
+		terminii_mutators.push_back( MakeTreeMutator(t) );
 	return make_unique<MutableTreeZone>( move(base_mutator), move(terminii_mutators) );
 }                                                
 

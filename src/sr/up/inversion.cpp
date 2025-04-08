@@ -97,9 +97,7 @@ void TreeZoneInverter::Invert( LocatedPatch lze )
         terminii_xlinks.push_back( child_tree_patch->GetZone()->GetBaseXLink() );
     } );
          
-    // Make the inverted TZ
-    //shared_ptr<Mutator> base_mutator = db->MakeMutator(base_xlink);
-    
+    // Make the inverted TZ    
     unique_ptr<TreeZone> inverted_tree_zone = db->MakeMutableTreeZone( base_xlink, terminii_xlinks );    
     
     // Modify the expression to include inverted TZ as target

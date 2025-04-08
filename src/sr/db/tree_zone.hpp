@@ -26,7 +26,6 @@ public:
     virtual XLink GetTerminusXLink(size_t index) const = 0;
 
     unique_ptr<FreeZone> Duplicate() const;
-    unique_ptr<FreeZone> MakeFreeZone(const XTreeDatabase *db) const;	
     void DBCheck(const XTreeDatabase *db) const;
 };
 
@@ -64,7 +63,10 @@ protected:
 class MutableTreeZone : public TreeZone
 {
 public:
-    explicit MutableTreeZone( shared_ptr<Mutator> &&base_, 
+    static unique_ptr<MutableTreeZone> CreateSubtree( shared_ptr<Mutator> base );
+    static unique_ptr<MutableTreeZone> CreateEmpty( shared_ptr<Mutator> base );
+
+    explicit MutableTreeZone( shared_ptr<Mutator> base_, 
                               vector<shared_ptr<Mutator>> &&terminii_ );
 
     bool IsEmpty() const override;

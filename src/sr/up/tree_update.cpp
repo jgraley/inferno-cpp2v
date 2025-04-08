@@ -49,6 +49,9 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink target_origin, shared_
 {
     ASSERT( db );
                 
+	TreeZonesToMutable tree_zones_to_mutable( db );
+	tree_zones_to_mutable.Run(source_layout);
+
     // Free Zones with collection bases (aka poor man's wide zones) lack flexibility
     // and eg can only be merged into another free zone, so we merge them here. The
     // check is stronger and will fail on any collection base, which constrains what
@@ -81,9 +84,6 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink target_origin, shared_
     // Enact the tree zones that will stick around
     BaseForEmbeddedMarkPropagation bfe_mark_propagation( db );
     bfe_mark_propagation.Run(source_layout);
-
-	TreeZonesToMutable tree_zones_to_mutable( db );
-	tree_zones_to_mutable.Run(source_layout);
 
     // Inversion generates sequence of separate "small" update commands 
     TreeZoneInverter tree_zone_inverter( db ); 

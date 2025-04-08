@@ -136,3 +136,10 @@ void TreeZonesToMutable::Run( shared_ptr<Patch> &layout )
     } );    
 }
 
+// TODO
+// - Get Inversion to use the mutators it gets from tree zones to make 
+//   the inverted zones without converting to XLink and back
+// - Fit out DB with optional uniquifying map XLink -> sp<Mutator>
+// - Supply such a map in TreeZonesToMutable
+// - Be sure to clear/destruct it since XLinks will be invalidated
+

@@ -34,19 +34,6 @@ unique_ptr<FreeZone> TreeZone::Duplicate() const
 }
 
 
-unique_ptr<FreeZone> TreeZone::MakeFreeZone(const XTreeDatabase *db) const
-{    
-    if( IsEmpty() )
-        return FreeZone::CreateEmpty();
-        
-    auto free_zone = FreeZone::CreateSubtree( GetBaseXLink().GetChildTreePtr() );
-    for( XLink terminus_xlink : GetTerminusXLinks() )
-        free_zone->AddTerminus( db->MakeMutator( terminus_xlink ) );
-    
-    return free_zone;
-}
-
-
 void TreeZone::DBCheck(const XTreeDatabase *db) const // TODO maybe move to database?
 {
     ASSERT( db->HasRow( GetBaseXLink() ) )(GetBaseXLink());
@@ -154,9 +141,21 @@ string XTreeZone::GetTrace() const
 
 // ------------------------- MutableTreeZone --------------------------
 
-MutableTreeZone::MutableTreeZone( shared_ptr<Mutator> &&base_, 
+unique_ptr<MutableTreeZone> MutableTreeZone::CreateSubtree( shared_ptr<Mutator> base )
+{
+    return make_unique<MutableTreeZone>( base, vector<shared_ptr<Mutator>>() );
+}
+
+
+unique_ptr<MutableTreeZone> MutableTreeZone::CreateEmpty( shared_ptr<Mutator> base )
+{
+    return make_unique<MutableTreeZone>( base, vector<shared_ptr<Mutator>>{ base } ); // One element, same as base
+}
+
+
+MutableTreeZone::MutableTreeZone( shared_ptr<Mutator> base_, 
                                   vector<shared_ptr<Mutator>> &&terminii_ ) :
-    base(move(base_)),
+    base(base_),
     terminii(move(terminii_))
 {
 }
@@ -259,5 +258,5 @@ string MutableTreeZone::GetTrace() const
             s += " ⇥ " + Trace(terminii); // Indicates the zone terminates            
     }
     
-    return "XTreeZone(" + s +")";
+    return "MutableTreeZone(" + s +")";
 }

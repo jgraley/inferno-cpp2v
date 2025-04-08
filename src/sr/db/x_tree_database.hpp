@@ -79,7 +79,7 @@ public:
     TreePtr<Node> GetMainRootNode() const;
     XLink GetMainRootXLink() const;
 
-    shared_ptr<Mutator> MakeMutator(XLink xlink) const;
+    shared_ptr<Mutator> MakeTreeMutator(XLink xlink) const;
     unique_ptr<MutableTreeZone> MakeMutableTreeZone(XLink xlink,
                                                     vector<XLink> terminii) const;
 
@@ -104,6 +104,8 @@ private:
         
     queue<DBCommon::TreeOrdinal> de_extra_insert_queue;
     queue<DBCommon::TreeOrdinal> extra_tree_destroy_queue;
+    
+   	set<shared_ptr<Mutator>> all_tree_mutators;
 };    
     
 };
