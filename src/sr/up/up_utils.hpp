@@ -51,6 +51,20 @@ public:
     void Check( shared_ptr<Patch> &layout );
 };
 
+// ------------------------- TreeZonesToMutable --------------------------
+
+class TreeZonesToMutable
+{
+public:    
+    TreeZonesToMutable(XTreeDatabase *db_);
+    
+    // Can change the supplied shared ptr
+    void Run( shared_ptr<Patch> &layout );
+
+private:
+    XTreeDatabase * const db;
+};
+
 }
 
 #endif

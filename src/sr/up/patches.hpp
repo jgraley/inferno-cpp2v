@@ -91,7 +91,8 @@ public:
 
     TreeZone *GetZone() override;
     const TreeZone *GetZone() const override;
-      
+    void SetZone( unique_ptr<TreeZone> &&new_zone );
+    
     shared_ptr<Patch> DuplicateToFree() const;
     
     string GetTrace() const final;

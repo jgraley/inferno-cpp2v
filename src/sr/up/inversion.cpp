@@ -100,7 +100,7 @@ void TreeZoneInverter::Invert( LocatedPatch lze )
     // Make the inverted TZ
     //shared_ptr<Mutator> base_mutator = db->MakeMutator(base_xlink);
     
-    unique_ptr<XTreeZone> inverted_tree_zone = make_unique<XTreeZone>( base_xlink, terminii_xlinks );    
+    unique_ptr<TreeZone> inverted_tree_zone = db->MakeMutableTreeZone( base_xlink, terminii_xlinks );    
     
     // Modify the expression to include inverted TZ as target
     *lze.second = make_shared<TargettedPatch>( move(inverted_tree_zone),

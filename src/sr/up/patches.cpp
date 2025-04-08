@@ -177,6 +177,12 @@ const TreeZone *TreeZonePatch::GetZone() const
 }
 
 
+void TreeZonePatch::SetZone( unique_ptr<TreeZone> &&new_zone )
+{
+	zone = move(new_zone);
+}
+
+
 shared_ptr<Patch> TreeZonePatch::DuplicateToFree() const
 {
     unique_ptr<FreeZone> free_zone = zone->Duplicate();

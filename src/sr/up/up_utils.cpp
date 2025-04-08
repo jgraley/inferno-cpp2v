@@ -111,4 +111,28 @@ void DuplicateAllToFree::Check( shared_ptr<Patch> &layout )
     } );    
 }
 
+// ------------------------- TreeZonesToMutable --------------------------
+
+TreeZonesToMutable::TreeZonesToMutable(XTreeDatabase *db_) :
+    db(db_)
+{
+}
+    
+
+void TreeZonesToMutable::Run( shared_ptr<Patch> &layout )
+{
+    Patch::ForDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
+    {
+        if( auto zone_patch = dynamic_pointer_cast<TreeZonePatch>(patch) )
+        {
+			TreeZone *zone = zone_patch->GetZone();
+            if( !dynamic_cast<MutableTreeZone *>(zone) )
+			{			
+				auto mutable_zone = db->MakeMutableTreeZone( zone->GetBaseXLink(),
+															 zone->GetTerminusXLinks() );
+				zone_patch->SetZone(move(mutable_zone));                                
+			}
+        }
+    } );    
+}
 

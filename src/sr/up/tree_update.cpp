@@ -82,6 +82,9 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink target_origin, shared_
     BaseForEmbeddedMarkPropagation bfe_mark_propagation( db );
     bfe_mark_propagation.Run(source_layout);
 
+	TreeZonesToMutable tree_zones_to_mutable( db );
+	tree_zones_to_mutable.Run(source_layout);
+
     // Inversion generates sequence of separate "small" update commands 
     TreeZoneInverter tree_zone_inverter( db ); 
     tree_zone_inverter.Run(target_origin, &source_layout);                
