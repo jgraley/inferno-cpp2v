@@ -79,7 +79,9 @@ public:
     TreePtr<Node> GetMainRootNode() const;
     XLink GetMainRootXLink() const;
 
-    shared_ptr<Mutator> GetMutator(XLink xlink) const;
+    shared_ptr<Mutator> MakeMutator(XLink xlink) const;
+    unique_ptr<MutableTreeZone> MakeMutableTreeZone(XLink xlink,
+                                                    vector<XLink> terminii) const;
 
     void Dump() const;
     

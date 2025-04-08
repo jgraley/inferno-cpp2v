@@ -41,7 +41,7 @@ unique_ptr<FreeZone> TreeZone::MakeFreeZone(const XTreeDatabase *db) const
         
     auto free_zone = FreeZone::CreateSubtree( GetBaseXLink().GetChildTreePtr() );
     for( XLink terminus_xlink : GetTerminusXLinks() )
-        free_zone->AddTerminus( db->GetMutator( terminus_xlink ) );
+        free_zone->AddTerminus( db->MakeMutator( terminus_xlink ) );
     
     return free_zone;
 }

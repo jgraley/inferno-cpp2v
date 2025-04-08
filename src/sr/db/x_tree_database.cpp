@@ -149,8 +149,8 @@ void XTreeDatabase::MainTreeExchange( TreeZone *target_tree_zone, FreeZone *free
     {
 		vector<shared_ptr<Mutator>> tmuts;
 		for( XLink t : target_tree_zone->GetTerminusXLinks() )
-			tmuts.push_back( GetMutator(t) );
-		mutable_target_tree_zone = new MutableTreeZone( GetMutator(target_tree_zone->GetBaseXLink()), move(tmuts) );
+			tmuts.push_back( MakeMutator(t) );
+		mutable_target_tree_zone = new MutableTreeZone( MakeMutator(target_tree_zone->GetBaseXLink()), move(tmuts) );
 		delete_please = true;
 	}
     ASSERT( mutable_target_tree_zone );
@@ -441,7 +441,7 @@ XLink XTreeDatabase::GetMainRootXLink() const
 }
 
 
-shared_ptr<Mutator> XTreeDatabase::GetMutator(XLink xlink) const
+shared_ptr<Mutator> XTreeDatabase::MakeMutator(XLink xlink) const
 {
     const LinkTable::Row &row = link_table->GetRow(xlink);
     
@@ -477,6 +477,17 @@ shared_ptr<Mutator> XTreeDatabase::GetMutator(XLink xlink) const
     }    
     ASSERTFAIL();
 }
+
+
+unique_ptr<MutableTreeZone> MakeMutableTreeZone(XLink xlink,
+                                                vector<XLink> terminii) const
+{
+	shared_ptr<Mutator> base_mutator = MakeMutator(target_tree_zone->GetBaseXLink())
+	vector<shared_ptr<Mutator>> terminii_mutators;
+	for( XLink t : target_tree_zone->GetTerminusXLinks() )
+		terminii_mutators.push_back( MakeMutator(t) );
+	return make_unique<MutableTreeZone>( move(base_mutator), move(terminii_mutators) );
+}                                                
 
 
 void XTreeDatabase::Dump() const
