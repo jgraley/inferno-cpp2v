@@ -26,7 +26,7 @@ void TreeZoneOrderingHandler::Run( shared_ptr<Patch> &layout )
     out_of_order_patch_ptrs.clear();
     XLink root = db->GetMainRootXLink();
     XLink last = XTreeDatabase::GetLastDescendant(root);
-    CheckAnyPatchAgainstRange( layout, root, last, false );
+    ConstrainAnyPatchToRange( layout, root, last, false );
     
     if( !out_of_order_patch_ptrs.empty() )
     {
@@ -69,14 +69,14 @@ void TreeZoneOrderingHandler::Check( shared_ptr<Patch> &layout )
 {
     XLink root = db->GetMainRootXLink();
     XLink last = XTreeDatabase::GetLastDescendant(root);
-    CheckAnyPatchAgainstRange( layout, root, last, true );
+    ConstrainAnyPatchToRange( layout, root, last, true );
 }
 
 
-void TreeZoneOrderingHandler::CheckAnyPatchAgainstRange( shared_ptr<Patch> &start_patch, 
-													     XLink range_front,
-													     XLink range_back,
-													     bool just_check )
+void TreeZoneOrderingHandler::ConstrainAnyPatchToRange( shared_ptr<Patch> &start_patch, 
+													    XLink range_front,
+													    XLink range_back,
+													    bool just_check )
 {
     INDENT(just_check?"c":"C");
     TRACE("Starting ")(just_check ? "cross-check" : "transfomation")(" at ")(start_patch)(" with range ")(range_front)(" to ")(range_back)(" inclusive\n");
@@ -84,14 +84,14 @@ void TreeZoneOrderingHandler::CheckAnyPatchAgainstRange( shared_ptr<Patch> &star
     // terminii of tree zones.
     PatchRecords patch_records;
     AppendNextDescendantTreePatches( start_patch, patch_records );
-    CheckTreePatchesAgainstRange(patch_records, range_front, range_back, just_check);
+    ConstrainTreePatchesToRange(patch_records, range_front, range_back, just_check);
 }
 
 
-void TreeZoneOrderingHandler::CheckTreePatchesAgainstRange( PatchRecords &patch_records, 
-                                                            XLink range_front,
-                                                            XLink range_back,
-                                                            bool just_check )
+void TreeZoneOrderingHandler::ConstrainTreePatchesToRange( PatchRecords &patch_records, 
+                                                           XLink range_front,
+                                                           XLink range_back,
+                                                           bool just_check )
 {                                                
     if( patch_records.empty() )
         return;
@@ -113,6 +113,7 @@ void TreeZoneOrderingHandler::CheckTreePatchesAgainstRange( PatchRecords &patch_
 		
         if( last )
         {
+			// Nothing
 		}
         else if( it->out_of_order ) // out-of-order patch
         {
@@ -135,7 +136,7 @@ void TreeZoneOrderingHandler::CheckTreePatchesAgainstRange( PatchRecords &patch_
 			// new ranges and recurse.
             auto tree_patch = GetTreePatch(*it);
             TRACE("Recursing on ")(tree_patch)("...\n");
-            CheckTreePatchTerminii( tree_patch, just_check );
+            ConstrainChildrenToTerminii( tree_patch, just_check );
         }
 
         // Are we just past the end of an out-of-order run?
@@ -147,14 +148,14 @@ void TreeZoneOrderingHandler::CheckTreePatchesAgainstRange( PatchRecords &patch_
             XLink before_first_ooo = seen_in_order ? GetBaseXLink( *prev_in_order_it ) : range_front;                       
             XLink after_last_ooo = last ? range_back : GetBaseXLink( *it );                 
                             
-			// Use these constrain the range for our descendants. 
+			// Use these to constrain the range for our descendants. 
 			// Since the OOO patches will become free zones, we don't 
 			// have a structural constraint but sill have the DF ordering
 			// to satisfy so we can check the run together (weaker) 
-			CheckTreePatchesAgainstRange( next_descendant_tree_patches, 
-										  before_first_ooo, 
-										  after_last_ooo, 
-										  just_check );
+			ConstrainTreePatchesToRange( next_descendant_tree_patches, 
+										 before_first_ooo, 
+										 after_last_ooo, 
+										 just_check );
             next_descendant_tree_patches.clear();
         }
 
@@ -169,8 +170,8 @@ void TreeZoneOrderingHandler::CheckTreePatchesAgainstRange( PatchRecords &patch_
 }
                                        
 
-void TreeZoneOrderingHandler::CheckTreePatchTerminii( shared_ptr<TreeZonePatch> &tree_patch, 
-                                                      bool just_check )
+void TreeZoneOrderingHandler::ConstrainChildrenToTerminii( shared_ptr<TreeZonePatch> &tree_patch, 
+                                                           bool just_check )
 {
     // We have a tree zone. For each of its terminii, find the acceptable
     // range of descendent tree zones and recurse.
@@ -180,7 +181,7 @@ void TreeZoneOrderingHandler::CheckTreePatchTerminii( shared_ptr<TreeZonePatch> 
     {
         XLink range_front = tree_zone->GetTerminusXLink(i++); // inclusive (terminus XLink equals base XLink of attached tree zone)
         XLink range_back = XTreeDatabase::GetLastDescendant(range_front); // inclusive (is same or child of range_front)
-        CheckAnyPatchAgainstRange( child_patch, range_front, range_back, just_check );
+        ConstrainAnyPatchToRange( child_patch, range_front, range_back, just_check );
     } );
 }
 

@@ -35,16 +35,16 @@ private:
     };
     typedef vector<PatchRecord> PatchRecords;
 
-    void CheckAnyPatchAgainstRange( shared_ptr<Patch> &start_patch, 
-								    XLink range_front,
-								    XLink range_back,
-								    bool just_check );
-    void CheckTreePatchesAgainstRange( PatchRecords &patch_records, 
-                                       XLink range_front,
-                                       XLink range_back,
-                                       bool just_check );
-    void CheckTreePatchTerminii( shared_ptr<TreeZonePatch> &op, 
-                                 bool just_check );
+    void ConstrainAnyPatchToRange( shared_ptr<Patch> &start_patch, 
+								   XLink range_front,
+								   XLink range_back,
+								   bool just_check );
+    void ConstrainTreePatchesToRange( PatchRecords &patch_records, 
+                                      XLink range_front,
+                                      XLink range_back,
+                                      bool just_check );
+    void ConstrainChildrenToTerminii( shared_ptr<TreeZonePatch> &tree_patch, 
+                                      bool just_check );
     void AppendNextDescendantTreePatches( shared_ptr<Patch> &patch, 
                                       PatchRecords &patch_records );
     void FindOutOfOrderTreePatches( PatchRecords &patch_records, 
