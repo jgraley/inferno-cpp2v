@@ -19,7 +19,7 @@ class TreeZoneInverter
 public:
     TreeZoneInverter( XTreeDatabase *db );
     
-    void Run(XLink target_origin, shared_ptr<Patch> *source_layout_ptr);
+    void Run(shared_ptr<Mutator> origin_mutator, shared_ptr<Patch> *source_layout_ptr);
     
 private:
     // .first is NULL: base not known

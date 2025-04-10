@@ -17,9 +17,9 @@ TreeZoneInverter::TreeZoneInverter( XTreeDatabase *db_ ) :
 }
 
 
-void TreeZoneInverter::Run(XLink target_origin, shared_ptr<Patch> *source_layout_ptr)
+void TreeZoneInverter::Run(shared_ptr<Mutator> origin_mutator, shared_ptr<Patch> *source_layout_ptr)
 {
-    LocatedPatch base_lze( target_origin, source_layout_ptr );
+    LocatedPatch base_lze( origin_mutator->GetXLink(), source_layout_ptr );
     WalkLocatedPatches( base_lze );
     
     // For each targetted patch in the layout, perform replace operation on the DB

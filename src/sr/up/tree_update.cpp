@@ -45,12 +45,13 @@ unique_ptr<FreeZone> TreeUpdater::TransformToSingleFreeZone( shared_ptr<Patch> s
 }
 
 
-void TreeUpdater::TransformToIncrementalAndExecute( XLink target_origin, shared_ptr<Patch> source_layout )
+void TreeUpdater::TransformToIncrementalAndExecute( XLink origin_xlink, shared_ptr<Patch> source_layout )
 {
     ASSERT( db );
                 
 	TreeZonesToMutable tree_zones_to_mutable( db );
 	tree_zones_to_mutable.Run(source_layout);
+	shared_ptr<Mutator> origin_mutator = db->MakeTreeMutator(origin_xlink);
 
     // Free Zones with collection bases (aka poor man's wide zones) lack flexibility
     // and eg can only be merged into another free zone, so we merge them here. The
@@ -65,7 +66,7 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink target_origin, shared_
     tree_zone_overlap_handler.Check(source_layout);
     
     TreeZoneComplementer tree_zone_complementor( db );
-    tree_zone_complementor.Run(target_origin, source_layout);
+    tree_zone_complementor.Run(origin_mutator, source_layout);
 
     TreeZoneOrderingHandler tree_zone_ordering_handler( db );
     tree_zone_ordering_handler.Run(source_layout);
@@ -87,5 +88,5 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink target_origin, shared_
 
     // Inversion generates sequence of separate "small" update commands 
     TreeZoneInverter tree_zone_inverter( db ); 
-    tree_zone_inverter.Run(target_origin, &source_layout);                
+    tree_zone_inverter.Run(origin_mutator, &source_layout);                
 }

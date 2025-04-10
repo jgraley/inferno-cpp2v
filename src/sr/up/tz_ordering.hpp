@@ -17,7 +17,7 @@ namespace SR
 class TreeZoneOrderingHandler
 {
 public:    
-    typedef list<shared_ptr<Patch> *> OOOZoneExprPtrList;
+    typedef list<shared_ptr<Patch> *> PatchPtrList;
 
     TreeZoneOrderingHandler(XTreeDatabase *db_);
     
@@ -35,28 +35,28 @@ private:
     };
     typedef vector<PatchRecord> PatchRecords;
 
-    void RunForTreeZone( shared_ptr<TreeZonePatch> &op, 
-                         bool just_check );
-    void RunForRange( shared_ptr<Patch> &base, 
-                      XLink range_front,
-                      XLink range_back,
-                      bool just_check );
-    void RunForRangeList( PatchRecords &patch_records, 
-                            XLink range_front,
-                          XLink range_back,
-                          bool just_check );
-    void AddTZsBypassingFZs( shared_ptr<Patch> &patch, 
-                              PatchRecords &patch_records );
-    void FindOutOfOrder( PatchRecords &patch_records, 
-                           XLink range_front,
-                         XLink range_back,
-                         bool just_check );
+    void CheckAnyPatchAgainstRange( shared_ptr<Patch> &start_patch, 
+								    XLink range_front,
+								    XLink range_back,
+								    bool just_check );
+    void CheckTreePatchesAgainstRange( PatchRecords &patch_records, 
+                                       XLink range_front,
+                                       XLink range_back,
+                                       bool just_check );
+    void CheckTreePatchTerminii( shared_ptr<TreeZonePatch> &op, 
+                                 bool just_check );
+    void AppendNextDescendantTreePatches( shared_ptr<Patch> &patch, 
+                                      PatchRecords &patch_records );
+    void FindOutOfOrderTreePatches( PatchRecords &patch_records, 
+									XLink range_front,
+									XLink range_back,
+									bool just_check );
     shared_ptr<TreeZonePatch> GetTreePatch(const PatchRecord &patch_record) const;
     XLink GetBaseXLink(const PatchRecord &patch_record) const;
                           
     XTreeDatabase * const db;
     SR::DepthFirstRelation dfr;        
-    OOOZoneExprPtrList out_of_order_list;                  
+    PatchPtrList out_of_order_patch_ptrs;                  
 };
 
 // ------------------------- AltTreeZoneOrderingChecker --------------------------

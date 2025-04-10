@@ -19,7 +19,7 @@ TreeZoneComplementer::TreeZoneComplementer( XTreeDatabase *db_ ) :
 }
 
 
-void TreeZoneComplementer::Run(XLink target_origin, shared_ptr<Patch> source_layout)
+void TreeZoneComplementer::Run(shared_ptr<Mutator> origin_mutator, shared_ptr<Patch> source_layout)
 {    
     source_tzs_df_by_base.clear();
     // Gather all the tree zones from the patches in the source layout, and
@@ -42,7 +42,7 @@ void TreeZoneComplementer::Run(XLink target_origin, shared_ptr<Patch> source_lay
         }
     } );
     
-    WalkTreeZones(target_origin);
+    WalkTreeZones(origin_mutator->GetXLink());
 }
 
 
