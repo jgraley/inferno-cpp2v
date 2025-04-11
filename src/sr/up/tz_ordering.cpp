@@ -9,6 +9,7 @@
 #include <iostream>
 
 //#define DEBUG
+//#define ON_THE_FLY
 
 using namespace SR;                   
 
@@ -24,86 +25,81 @@ TreeZoneOrderingHandler::TreeZoneOrderingHandler(XTreeDatabase *db_) :
 void TreeZoneOrderingHandler::Run( shared_ptr<Patch> &layout )
 {
     out_of_order_patch_ptrs.clear();
+    
     shared_ptr<Mutator> root = db->GetMainRootMutator();
-    shared_ptr<Mutator> last = db->GetLastDescendantMutator(root);
-    ConstrainAnyPatchToRange( layout, root, last, false );
+    ConstrainAnyPatchToDescendants( layout, root, false );
     
-    if( !out_of_order_patch_ptrs.empty() )
-    {
-        //FTRACE(out_of_order_patch_ptrs)("\n");
-    }
     //FTRACE(layout)("\n");
-    
-    for( shared_ptr<Patch> *target_patch : out_of_order_patch_ptrs )
-    {
-        TRACE("patch: ")(*target_patch)("\n");
-        // Get the tree zone
-        auto target_tree_patch = dynamic_pointer_cast<TreeZonePatch>(*target_patch);
-        ASSERT( target_tree_patch );
-        MutableTreeZone *target_tree_zone = dynamic_cast<MutableTreeZone *>(target_tree_patch->GetZone());
-        ASSERT( target_tree_zone );
-        
-        // Create the scaffold in a free zone
-        auto free_zone = FreeZone::CreateScaffold( target_tree_zone->GetBaseMutator()->GetTreePtrInterface(), 
-                                                   target_tree_zone->GetNumTerminii() );
-        //FTRACE("Scaffold free zone: ")(scaffold_fz)("\n");
-        
-        TRACE("target_tree_zone: ")(*target_tree_zone)("\nfree_zone: ")(*free_zone)("\n");
-        // Put the scaffold into the "from" part of the tree, displacing 
-        // the original contents, which we shall move
-        db->MainTreeExchange( target_tree_zone, free_zone.get() );
-        
-        // free_zone is the part of the tree that we just displaced. Make 
-        // a new patch based on it.
-        auto free_patch = make_shared<FreeZonePatch>( move(free_zone), target_tree_patch->GetChildren() );
-        
-        // Install the new patch into the layout
-        free_patch->AddEmbeddedMarkers( target_tree_patch->GetEmbeddedMarkers() );               
-        *target_patch = free_patch;
-        
-        // How does the scaffold not end up in the updated tree?
-        // The best argument is that, after this pass, none of the
-        // scaffold nodes are inside any of the patches in our layout.
-        // The layout is intended contents of the update tree. So, if 
-        // subsequent passes and the DB act correctly, the scaffolds 
-        // will be deleted from the tree.                
-    }
+    for( shared_ptr<Patch> *target_patch : out_of_order_patch_ptrs )    
+		MoveTreeZoneToFreePatch( target_patch );	
+}
+
+
+void TreeZoneOrderingHandler::MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch)
+{
+	//FTRACE("Patch: ")(*target_patch)("\n");
+	// Get the tree zone
+	auto target_tree_patch = dynamic_pointer_cast<TreeZonePatch>(*target_patch);
+	ASSERT( target_tree_patch );
+	MutableTreeZone *target_tree_zone = dynamic_cast<MutableTreeZone *>(target_tree_patch->GetZone());
+	ASSERT( target_tree_zone );
+	
+	// Create the scaffold in a free zone
+	auto free_zone = FreeZone::CreateScaffold( target_tree_zone->GetBaseMutator()->GetTreePtrInterface(), 
+											   target_tree_zone->GetNumTerminii() );
+	
+	//FTRACE("target_tree_zone: ")(*target_tree_zone)("\nfree_zone: ")(*free_zone)("\n");
+	// Put the scaffold into the "from" part of the tree, displacing 
+	// the original contents, which we shall move
+	db->MainTreeExchange( target_tree_zone, free_zone.get() );
+	// free_zone is the part of the tree that we just displaced. Make 
+	// a new patch based on it.
+	auto free_patch = make_shared<FreeZonePatch>( move(free_zone), target_tree_patch->GetChildren() );
+	
+	// Install the new patch into the layout
+	free_patch->AddEmbeddedMarkers( target_tree_patch->GetEmbeddedMarkers() );               
+	*target_patch = free_patch;
+	
+	// How does the scaffold not end up in the updated tree?
+	// The best argument is that, after this pass, none of the
+	// scaffold nodes are inside any of the patches in our layout.
+	// The layout is intended contents of the update tree. So, if 
+	// subsequent passes and the DB act correctly, the scaffolds 
+	// will be deleted from the tree.                
 }
 
 
 void TreeZoneOrderingHandler::Check( shared_ptr<Patch> &layout )
 {
     shared_ptr<Mutator> root = db->GetMainRootMutator();
-    shared_ptr<Mutator> last = db->GetLastDescendantMutator(root);
-    ConstrainAnyPatchToRange( layout, root, last, true );
+    ConstrainAnyPatchToDescendants( layout, root, true );
 }
 
 
-void TreeZoneOrderingHandler::ConstrainAnyPatchToRange( shared_ptr<Patch> &start_patch, 
-													    shared_ptr<Mutator> range_front,
-													    shared_ptr<Mutator> range_back,
-													    bool just_check )
+void TreeZoneOrderingHandler::ConstrainAnyPatchToDescendants( shared_ptr<Patch> &start_patch, 
+													          shared_ptr<Mutator> ancestor,
+													          bool just_check )
 {
     INDENT(just_check?"c":"C");
-    TRACE("Starting ")(just_check ? "cross-check" : "transfomation")(" at ")(start_patch)(" with range ")(range_front)(" to ")(range_back)(" inclusive\n");
+    TRACE("Starting ")(just_check ? "cross-check" : "transfomation")(" at ")(start_patch)(" with ancestor ")(ancestor)("\n");
     // Actions to take when we have a range. Use at root and for
     // terminii of tree zones.
     PatchRecords patch_records;
     AppendNextDescendantTreePatches( start_patch, patch_records );
-    ConstrainTreePatchesToRange(patch_records, range_front, range_back, just_check);
+    ConstrainTreePatchesToRange(patch_records, ancestor, ancestor, just_check);
 }
 
 
 void TreeZoneOrderingHandler::ConstrainTreePatchesToRange( PatchRecords &patch_records, 
-                                                           shared_ptr<Mutator> range_front,
-                                                           shared_ptr<Mutator> range_back,
+                                                           shared_ptr<Mutator> front_ancestor,
+                                                           shared_ptr<Mutator> back_ancestor,
                                                            bool just_check )
 {                                                
     if( patch_records.empty() )
         return;
         
     // patch_records is updated in-place with correct out_of_range values
-    FindOutOfOrderTreePatches( patch_records, range_front->GetXLink(), range_back->GetXLink(), just_check );    
+    FindOutOfOrderTreePatches( patch_records, front_ancestor->GetXLink(), back_ancestor->GetXLink(), just_check );    
     
     // Loop over patches, with their associated out-of-order flags
     PatchRecords next_descendant_tree_patches;
@@ -123,11 +119,6 @@ void TreeZoneOrderingHandler::ConstrainTreePatchesToRange( PatchRecords &patch_r
 		}
         else if( it->out_of_order ) // out-of-order patch
         {
-            // Mark as out of order so that the patch itself will be 
-            // switched to a free zone patch.
-            TRACE("Out of sequence: marking ")(it->patch_ptr)("\n");
-            out_of_order_patch_ptrs.push_back(it->patch_ptr);
-
 			// The tree-zone descendants of this patch still need to be checked for OOO.
 			// Accumulate a list of patch records for them. 
             auto tree_patch = GetTreePatch(*it);
@@ -135,6 +126,15 @@ void TreeZoneOrderingHandler::ConstrainTreePatchesToRange( PatchRecords &patch_r
             {
                 AppendNextDescendantTreePatches( child_patch, next_descendant_tree_patches );
             } );        
+
+            // Mark as out of order so that the patch itself will be 
+            // switched to a free zone patch.
+            TRACE("Out of sequence: moving ")(it->patch_ptr)("\n");
+#ifdef ON_THE_FLY
+            MoveTreeZoneToFreePatch(it->patch_ptr, range_back);
+#else
+            out_of_order_patch_ptrs.push_back(it->patch_ptr);
+#endif
         }
         else // in-order patch
         {
@@ -151,9 +151,9 @@ void TreeZoneOrderingHandler::ConstrainTreePatchesToRange( PatchRecords &patch_r
             // Book-end the descendants by the intersection of the supplied 
             // range and the range implied by the bases of the nearest in-order tree patches. 
             // We want to use the in-order ones because they will remain as tree zones.
-            shared_ptr<Mutator> before_first_ooo = seen_in_order ? GetBaseMutator( *prev_in_order_it ) : range_front;                       
-            shared_ptr<Mutator> after_last_ooo = last ? range_back : GetBaseMutator( *it );                 
-                            
+            shared_ptr<Mutator> before_first_ooo = seen_in_order ? GetBaseMutator( *prev_in_order_it ) : front_ancestor;                       
+            shared_ptr<Mutator> after_last_ooo = last ? back_ancestor : GetBaseMutator( *it );                                             
+
 			// Use these to constrain the range for our descendants. 
 			// Since the OOO patches will become free zones, we don't 
 			// have a structural constraint but still have the DF ordering
@@ -186,9 +186,8 @@ void TreeZoneOrderingHandler::ConstrainChildrenToTerminii( shared_ptr<TreeZonePa
     size_t i=0;
     tree_patch->ForChildren( [&](shared_ptr<Patch> &child_patch)    
     {
-        shared_ptr<Mutator> range_front = mutable_tree_zone->GetTerminusMutator(i++); // inclusive (terminus equals base of attached tree zone)
-        shared_ptr<Mutator> range_back = db->GetLastDescendantMutator(range_front); // inclusive (is same or child of range_front)
-        ConstrainAnyPatchToRange( child_patch, range_front, range_back, just_check );
+        shared_ptr<Mutator> terminus = mutable_tree_zone->GetTerminusMutator(i++); 
+        ConstrainAnyPatchToDescendants( child_patch, terminus, just_check );
     } );
 }
 
@@ -217,11 +216,15 @@ void TreeZoneOrderingHandler::AppendNextDescendantTreePatches( shared_ptr<Patch>
 
 
 void TreeZoneOrderingHandler::FindOutOfOrderTreePatches( PatchRecords &patch_records, 
-														 XLink range_front,
-														 XLink range_back,
+														 XLink front_ancestor,
+														 XLink back_ancestor,
 														 bool just_check )
 {                                                
-    ASSERT( !patch_records.empty() );
+	ASSERT( !patch_records.empty() );
+	XLink range_front = front_ancestor;
+	XLink range_back = db->GetLastDescendantXLink(back_ancestor);
+	ASSERT( db->HasRow(range_back) );
+	//FTRACE("Range: ")(range_front)(" to ")(range_back)(" inclusive\n");
     
     // Data structures for runs of things that are consecutive wrt DF ordering
     
@@ -256,10 +259,9 @@ void TreeZoneOrderingHandler::FindOutOfOrderTreePatches( PatchRecords &patch_rec
     {
         XLink tz_base = GetBaseXLink( patch_record );
         set<XLink, DepthFirstRelation>::iterator tz_base_dfo_it = xlinks_dfo.find(tz_base);
-        //FTRACE(tz_base)("  ");
 
         // Check the tree zone base is in overall range supplied to us for root or parent TZ terminus
-        TRACE("Checking ")(tz_base)("...\n");
+        //FTRACE("Checking ")(tz_base)("...\n");
         Orderable::Diff diff_front = dfr.Compare3Way(tz_base, range_front);
         Orderable::Diff diff_back = dfr.Compare3Way(tz_base, range_back);
         bool ok = diff_front >= 0 && diff_back <= 0; // both inclusive        

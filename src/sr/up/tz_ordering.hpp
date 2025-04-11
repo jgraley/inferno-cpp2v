@@ -35,21 +35,21 @@ private:
     };
     typedef vector<PatchRecord> PatchRecords;
 
-    void ConstrainAnyPatchToRange( shared_ptr<Patch> &start_patch, 
-								   shared_ptr<Mutator> range_front,
-								   shared_ptr<Mutator> range_back,
-								   bool just_check );
+	void MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch );
+    void ConstrainAnyPatchToDescendants( shared_ptr<Patch> &start_patch, 
+								         shared_ptr<Mutator> ancestor,
+								         bool just_check );
     void ConstrainTreePatchesToRange( PatchRecords &patch_records, 
-                                      shared_ptr<Mutator> range_front,
-                                      shared_ptr<Mutator> range_back,
+                                      shared_ptr<Mutator> front_ancestor,
+                                      shared_ptr<Mutator> back_ancestor,
                                       bool just_check );
     void ConstrainChildrenToTerminii( shared_ptr<TreeZonePatch> &tree_patch, 
                                       bool just_check );
     void AppendNextDescendantTreePatches( shared_ptr<Patch> &patch, 
                                       PatchRecords &patch_records );
     void FindOutOfOrderTreePatches( PatchRecords &patch_records, 
-									XLink range_front,
-									XLink range_back,
+									XLink front_ancestor,
+									XLink back_ancestor,
 									bool just_check );
     shared_ptr<TreeZonePatch> GetTreePatch(const PatchRecord &patch_record) const;
     XLink GetBaseXLink(const PatchRecord &patch_record) const;
