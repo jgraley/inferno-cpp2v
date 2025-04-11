@@ -24,9 +24,9 @@ TreeZoneOrderingHandler::TreeZoneOrderingHandler(XTreeDatabase *db_) :
 void TreeZoneOrderingHandler::Run( shared_ptr<Patch> &layout )
 {
     out_of_order_patch_ptrs.clear();
-    XLink root = db->GetMainRootXLink();
-    XLink last = XTreeDatabase::GetLastDescendant(root);
-    ConstrainAnyPatchToRange( layout, root, last, false );
+    shared_ptr<Mutator> root = db->GetMainRootMutator();
+    shared_ptr<Mutator> last = db->GetLastDescendantMutator(root);
+    ConstrainAnyPatchToRange( layout, root->GetXLink(), last->GetXLink(), false );
     
     if( !out_of_order_patch_ptrs.empty() )
     {
@@ -73,7 +73,7 @@ void TreeZoneOrderingHandler::Run( shared_ptr<Patch> &layout )
 void TreeZoneOrderingHandler::Check( shared_ptr<Patch> &layout )
 {
     XLink root = db->GetMainRootXLink();
-    XLink last = XTreeDatabase::GetLastDescendant(root);
+    XLink last = XTreeDatabase::GetLastDescendantXLink(root);
     ConstrainAnyPatchToRange( layout, root, last, true );
 }
 
@@ -185,7 +185,7 @@ void TreeZoneOrderingHandler::ConstrainChildrenToTerminii( shared_ptr<TreeZonePa
     tree_patch->ForChildren( [&](shared_ptr<Patch> &child_patch)    
     {
         XLink range_front = tree_zone->GetTerminusXLink(i++); // inclusive (terminus XLink equals base XLink of attached tree zone)
-        XLink range_back = XTreeDatabase::GetLastDescendant(range_front); // inclusive (is same or child of range_front)
+        XLink range_back = XTreeDatabase::GetLastDescendantXLink(range_front); // inclusive (is same or child of range_front)
         ConstrainAnyPatchToRange( child_patch, range_front, range_back, just_check );
     } );
 }
@@ -464,7 +464,7 @@ void AltTreeZoneOrderingChecker::Worker( shared_ptr<Patch> patch, bool base_equa
             
             // Check last xlink under terminus is in order. Could have seen last xlink
             // during recurse. 
-            CheckXlink( XTreeDatabase::GetLastDescendant(terminus_xlink), true );
+            CheckXlink( XTreeDatabase::GetLastDescendantXLink(terminus_xlink), true );
             
             ++it_child;
         }

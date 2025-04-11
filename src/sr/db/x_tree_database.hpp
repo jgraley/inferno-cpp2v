@@ -72,16 +72,20 @@ public:
     
     // Last of the descendents in depth first order. If no 
     // descendents, it will be the supplied node. 
-    static XLink GetLastDescendant(XLink xlink);
+    static XLink GetLastDescendantXLink(XLink base);
+    shared_ptr<Mutator> GetLastDescendantMutator(shared_ptr<Mutator> base);
 
     const Orderings &GetOrderings() const;
     
     TreePtr<Node> GetMainRootNode() const;
     XLink GetMainRootXLink() const;
+	shared_ptr<Mutator> GetMainRootMutator() const;
 
     shared_ptr<Mutator> MakeTreeMutator(XLink xlink) const;
     unique_ptr<MutableTreeZone> MakeMutableTreeZone(XLink xlink,
                                                     vector<XLink> terminii) const;
+
+	void ClearMutatorCache();
 
     void Dump() const;
     
@@ -105,7 +109,13 @@ private:
     queue<DBCommon::TreeOrdinal> de_extra_insert_queue;
     queue<DBCommon::TreeOrdinal> extra_tree_destroy_queue;
     
-   	set<shared_ptr<Mutator>> all_tree_mutators;
+    // Mutator cache holds shared pointers but is really a set of
+    // Mutators, i.e. no two equal mutators allowed even though they
+    // are separate objects and so the shared_ptrs differ.
+    typedef DereferencingHash<shared_ptr<Mutator>, Mutator> SPMHasher;
+    typedef DereferencingEqual<shared_ptr<Mutator>> SPMEqualPred;
+    
+   	mutable unordered_set<shared_ptr<Mutator>, SPMHasher, SPMEqualPred> mutator_cache;
 };    
     
 };

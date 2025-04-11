@@ -40,6 +40,7 @@ private:
                       shared_ptr<TreePtr<Node>> sp_tp_root_node_ );             
 
 public:  
+    bool operator<(const Mutator &right) const;
 	bool operator==( const Mutator &right ) const;
 	bool operator!=( const Mutator &right ) const;
   
@@ -57,7 +58,7 @@ public:
     static shared_ptr<Mutator> FindMatchingTerminus( ContainerInterface *container,
                                                      ContainerInterface::iterator it_placeholder,
                                                      list<shared_ptr<Mutator>> &candidate_terminii );
-    
+        
     void Validate() const;
     string GetTrace() const;
 
@@ -83,8 +84,17 @@ private:
  * being filled, and we'll get end() when what we want is the next 
  * element that will be there when we apply the update.
  */  
-	  
-    
 }
-
+	  
+namespace std
+{
+    template<> struct hash<SR::Mutator>
+    {
+        size_t operator()(const SR::Mutator &mutator) const noexcept
+        {
+            return hash<SR::XLink>()(mutator.GetXLink());
+        }
+    };
+}
+    
 #endif

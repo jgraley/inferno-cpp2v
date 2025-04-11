@@ -26,10 +26,10 @@ void TreeZoneInverter::Run(shared_ptr<Mutator> origin_mutator, shared_ptr<Patch>
 
 void TreeZoneInverter::WalkLocatedPatches( LocatedPatch lze )
 {
-    // Really just a search for FreeZonePatch that fills in the target base XLink from the 
+    // Really just a search for FreeZonePatch that fills in the target base mutator from the 
     // enclosing thing (if it's root or a tree zone). 
-    // Inversion strategy: this XLink is available for every free zone because we did free zone
-    // merging (if parent was a free zone, we'd have no XLink)
+    // Inversion strategy: this mutator is available for every free zone because we did free zone
+    // merging (if parent was a free zone, we'd have no such mutator)
     if( auto free_patch = dynamic_pointer_cast<FreeZonePatch>(*lze.second) )
     {
         // Free zone: recurse and then invert locally
@@ -37,7 +37,7 @@ void TreeZoneInverter::WalkLocatedPatches( LocatedPatch lze )
         {
             // We don't know the base if we're coming from a free zone
             ASSERT( dynamic_pointer_cast<TreeZonePatch>(child_patch) )
-                  ("FZ under another FZ (probably), cannot determine target XLink");
+                  ("FZ under another FZ (probably), cannot determine target");
             LocatedPatch child_lze( nullptr, &child_patch );
             WalkLocatedPatches( child_lze );
         } );

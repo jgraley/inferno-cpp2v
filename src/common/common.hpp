@@ -526,11 +526,32 @@ typename _Unique_if<T>::_Known_bound make_unique(Args&&...) = delete;
 // You will probably need to explicitly instantiate the template, and this is
 // done by providing the pointer type (not the pointed-to type).
 template<typename POINTER_TYPE>
-bool DereferencingLess( const POINTER_TYPE &a, 
+bool DereferencingIsLess( const POINTER_TYPE &a, 
                         const POINTER_TYPE &b )
 {
     return *a < *b;
-}                                      
+}                 
+
+
+template<typename POINTER_TYPE>
+struct DereferencingEqual
+{
+	bool operator()( const POINTER_TYPE &a, 
+                     const POINTER_TYPE &b ) const noexcept
+	{
+		return *a == *b;
+	}
+};
+
+
+template<typename POINTER_TYPE, typename POINTEE_TYPE>
+struct DereferencingHash
+{
+	size_t operator()( const POINTER_TYPE &a ) const noexcept
+	{
+		return hash<POINTEE_TYPE>()(*a);
+	}
+};
 
 
 // 2 differences from std::lexicographical_compare():

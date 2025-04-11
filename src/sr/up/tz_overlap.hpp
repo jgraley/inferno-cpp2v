@@ -16,7 +16,7 @@ namespace SR
 // To optimise:
 // - Make a std::set/multiset of TZs ordered using TreeZoneRelation (idea 
 //   is that the order in the replace layout is irrelevent to this algo)
-// - Add a GetLastDescendant() so can form ranges for descendants which
+// - Add a GetLastDescendantXLink() so can form ranges for descendants which
 //   are the overlap candidates.
 // - TreeZoneRelation is secondary on terminii. Get matching base ranges 
 //   by just depth-first-incrementing the base for an exclusive end.

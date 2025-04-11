@@ -44,6 +44,12 @@ Mutator::Mutator( Mode mode_,
 }
 
 
+bool Mutator::operator<(const Mutator &r) const
+{
+	return GetXLink() < r.GetXLink();
+}
+
+
 bool Mutator::operator==( const Mutator &right ) const
 {
 	if( mode != right.mode )

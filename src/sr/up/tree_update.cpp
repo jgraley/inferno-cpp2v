@@ -88,5 +88,8 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink origin_xlink, shared_p
 
     // Inversion generates sequence of separate "small" update commands 
     TreeZoneInverter tree_zone_inverter( db ); 
-    tree_zone_inverter.Run(origin_mutator, &source_layout);                
+    tree_zone_inverter.Run(origin_mutator, &source_layout);     
+    
+    // Avoid ginormous memory leak
+    db->ClearMutatorCache();           
 }

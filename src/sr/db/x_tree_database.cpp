@@ -380,9 +380,9 @@ XLink XTreeDatabase::TryGetXLink( const TreePtrInterface *px ) const
 }
 
 
-XLink XTreeDatabase::GetLastDescendant(XLink xlink) 
+XLink XTreeDatabase::GetLastDescendantXLink(XLink base) 
 {
-    TreePtr<Node> x = xlink.GetChildTreePtr();
+    TreePtr<Node> x = base.GetChildTreePtr();
     ASSERTS(x)("This probably means we're walking an incomplete tree");
     vector< Itemiser::Element * > x_items = x->Itemise();
 
@@ -393,20 +393,29 @@ XLink XTreeDatabase::GetLastDescendant(XLink xlink)
         if( auto x_con = dynamic_cast<ContainerInterface *>(xe) )
         {
             if( !x_con->empty() )
-                return GetLastDescendant( XLink( x, &x_con->back() ) );
+                return GetLastDescendantXLink( XLink( x, &x_con->back() ) );
         }
         else if( auto p_x_singular = dynamic_cast<TreePtrInterface *>(xe) )
         {
             if( *p_x_singular ) // tolerate NULL singlar child pointers
-                return GetLastDescendant( XLink( x, &*p_x_singular ) );
+                return GetLastDescendantXLink( XLink( x, &*p_x_singular ) );
         }
         else
             ASSERTFAILS("got something strange from itemise");
     }
 
     // No children so we are our our own last descendant
-    return xlink;    
+    return base;    
 }
+
+
+shared_ptr<Mutator> XTreeDatabase::GetLastDescendantMutator(shared_ptr<Mutator> base)
+{
+	XLink base_xlink = base->GetXLink();
+	XLink ld_xlink = GetLastDescendantXLink(base_xlink);
+	return MakeTreeMutator(ld_xlink);
+}
+
 
 
 const Orderings &XTreeDatabase::GetOrderings() const
@@ -427,9 +436,16 @@ XLink XTreeDatabase::GetMainRootXLink() const
 }
 
 
+shared_ptr<Mutator> XTreeDatabase::GetMainRootMutator() const
+{
+    return MakeTreeMutator(GetMainRootXLink());
+}
+
+
 shared_ptr<Mutator> XTreeDatabase::MakeTreeMutator(XLink xlink) const
 {
     const LinkTable::Row &row = link_table->GetRow(xlink);
+    shared_ptr<Mutator> locally_generated_mutator;
     
     switch( row.context_type )
     {
@@ -440,7 +456,8 @@ shared_ptr<Mutator> XTreeDatabase::MakeTreeMutator(XLink xlink) const
             // correctly from the XTreeDatabase object, which is why this method cannot be const.
             ASSERT( (int)(row.tree_ordinal) >= 0 ); // Should be valid whenever context is ROOT
             shared_ptr<TreePtr<Node>> sp_tp_root_node = trees_by_ordinal.at(row.tree_ordinal).sp_tp_root_node;
-            return Mutator::MakeRootMutator( sp_tp_root_node );
+            locally_generated_mutator = Mutator::MakeRootMutator( sp_tp_root_node );
+            break;
         }    
         case DBCommon::SINGULAR:
         {
@@ -448,20 +465,31 @@ shared_ptr<Mutator> XTreeDatabase::MakeTreeMutator(XLink xlink) const
             Itemiser::Element *xe = x_items.at(row.item_ordinal);        
             auto p_x_singular = dynamic_cast<TreePtrInterface *>(xe);
             ASSERT( p_x_singular );
-            return Mutator::MakeSingularMutator( row.parent_node, p_x_singular );
+            locally_generated_mutator = Mutator::MakeSingularMutator( row.parent_node, p_x_singular );
+            break;
         }
         case DBCommon::IN_SEQUENCE:
         case DBCommon::IN_COLLECTION: 
         {
             // COLLECTION is the motivating case: its elements are const, so we neet Mutate() to change them
-            return Mutator::MakeContainerMutator( row.parent_node, row.p_container, row.container_it );            
+            locally_generated_mutator = Mutator::MakeContainerMutator( row.parent_node, row.p_container, row.container_it );  
+            break;          
         }
         case DBCommon::FREE_BASE:
         {
             ASSERTFAIL(); // Base of free zone is just a node, so there's no unique mutator for it
         }
     }    
-    ASSERTFAIL();
+
+	// Attempt to insert into the cache, but cache is not a multiset so this will
+	// fail if already there (by value of the XLink extracted from the Mutator).
+	auto p = mutator_cache.insert(locally_generated_mutator);
+
+	//FTRACE(p.second);
+
+	// Either way, the returned iterator is what we want: if succeded then this is new 
+	// and it points to it in the cache; if failed, it points to the already extant element.
+	return *(p.first);
 }
 
 
@@ -474,6 +502,12 @@ unique_ptr<MutableTreeZone> XTreeDatabase::MakeMutableTreeZone(XLink base,
 		terminii_mutators.push_back( MakeTreeMutator(t) );
 	return make_unique<MutableTreeZone>( move(base_mutator), move(terminii_mutators) );
 }                                                
+
+
+void XTreeDatabase::ClearMutatorCache()
+{
+	mutator_cache.clear();
+}
 
 
 void XTreeDatabase::Dump() const

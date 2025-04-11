@@ -223,7 +223,7 @@ void MutableTreeZone::Exchange( FreeZone *free_zone )
 {    
 	ASSERT( !free_zone->IsEmpty() ); // Could add support but apparently don't need it rn
 	        
-    if( terminii.size()==1 && OnlyElementOf(terminii)->GetXLink() == base->GetXLink() )
+    if( IsEmpty() )
     {
         *free_zone = *FreeZone::CreateEmpty(); // Dodgy but it is reached
         return;
@@ -232,28 +232,20 @@ void MutableTreeZone::Exchange( FreeZone *free_zone )
     // Do a co-walk and exchange one at a time. We want to modify the parent
     // sides of the terminii in-place, leaving valid mutators behind. 
     FreeZone::TerminusIterator free_mut_it = free_zone->GetTerminiiBegin();    
-    //vector<XLink>::iterator tree_xlink_it = terminii.begin();
     for( shared_ptr<Mutator> tree_terminus : terminii )
     {
         ASSERT( free_mut_it != free_zone->GetTerminiiEnd() ); // length mismatch    
-        //ASSERT( tree_xlink_it != terminii.end() ); // length mismatch    
                                 	
 		tree_terminus->ExchangeParent(**free_mut_it); // deep
-
-        //*tree_xlink_it = tree_terminus->GetXLink();   
                 
         free_mut_it++;
-        //tree_xlink_it++;
     } 
     ASSERT( free_mut_it == free_zone->GetTerminiiEnd() ); // length mismatch  
-    //ASSERT( tree_xlink_it == terminii.end() ); // length mismatch    
 
     // Exchange the base. We want to modify the child side of the base
     // in-place, leaving valid mutators behind. 
     TreePtr<Node> free_base = free_zone->GetBaseNode();
-    TreePtr<Node> old_base = base->ExchangeChild( free_base );	// deep
-    //if( !base_mutator->IsAtRoot() )
-	//	base = base_mutator->GetXLink();   
+    TreePtr<Node> old_base = base->ExchangeChild( free_base );	// deep 
     
 	free_zone->SetBase( old_base );	
 }
