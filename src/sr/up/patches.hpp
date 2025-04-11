@@ -131,22 +131,6 @@ private:
     unique_ptr<FreeZone> zone;
 };
 
-// ------------------------- TargettedPatch --------------------------
-
-class TargettedPatch : public Patch
-{
-public:    
-    TargettedPatch( unique_ptr<TreeZone> target_tree_zone, 
-                    unique_ptr<FreeZone> source_zone_,
-                    list<shared_ptr<Patch>> &&child_patches );
-    TreeZone *GetTargetTreeZone() const;
-    FreeZone *GetSourceZone() const;
-
-private:
-    unique_ptr<TreeZone> target_tree_zone;
-    unique_ptr<FreeZone> source_zone;
-};
-
 }
 
 #endif

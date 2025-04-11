@@ -21,15 +21,6 @@ void TreeZoneInverter::Run(shared_ptr<Mutator> origin_mutator, shared_ptr<Patch>
 {
     LocatedPatch base_lze( origin_mutator, source_layout_ptr );
     WalkLocatedPatches( base_lze );
-    
-    // For each targetted patch in the layout, perform replace operation on the DB
-    Patch::ForDepthFirstWalk( *source_layout_ptr, nullptr, [&](shared_ptr<Patch> &patch)
-    {
-        if( auto replace_patch = dynamic_pointer_cast<TargettedPatch>(patch) )
-        {
-            db->MainTreeExchange( replace_patch->GetTargetTreeZone(), replace_patch->GetSourceZone() );
-        }
-    } );    
 }
 
 
@@ -104,10 +95,7 @@ void TreeZoneInverter::Invert( LocatedPatch lze )
     } );
          
     // Make the inverted TZ    
-    unique_ptr<TreeZone> inverted_tree_zone = make_unique<MutableTreeZone>( base_mutator, move(terminii_mutators) );    
+    auto inverted_tree_zone = make_unique<MutableTreeZone>( base_mutator, move(terminii_mutators) );    
     
-    // Modify the expression to include inverted TZ as target
-    *lze.second = make_shared<TargettedPatch>( move(inverted_tree_zone),
-                                               make_unique<FreeZone>( *free_patch->GetZone() ),
-                                               free_patch->MoveChildExpressions() );           
+    db->MainTreeExchange( inverted_tree_zone.get(), free_patch->GetZone() );          
 }

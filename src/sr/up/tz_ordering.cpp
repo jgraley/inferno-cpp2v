@@ -40,7 +40,8 @@ void TreeZoneOrderingHandler::Run( shared_ptr<Patch> &layout )
         // Get the tree zone
         auto to_patch = dynamic_pointer_cast<TreeZonePatch>(*patch);
         ASSERT( to_patch );
-        TreeZone *from_tz = to_patch->GetZone();
+        MutableTreeZone *from_tz = dynamic_cast<MutableTreeZone *>(to_patch->GetZone());
+        ASSERT( from_tz );
         
         // Create the scaffold in a free zone
         auto scaffold_fz = FreeZone::CreateScaffold( from_tz->GetBaseXLink().GetTreePtrInterface(), 
