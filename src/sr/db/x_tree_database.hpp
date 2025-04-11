@@ -79,11 +79,11 @@ public:
     
     TreePtr<Node> GetMainRootNode() const;
     XLink GetMainRootXLink() const;
-	shared_ptr<Mutator> GetMainRootMutator() const;
+	shared_ptr<Mutator> GetMainRootMutator();
 
-    shared_ptr<Mutator> GetTreeMutator(XLink xlink) const;
+    shared_ptr<Mutator> GetTreeMutator(XLink xlink);
     unique_ptr<MutableTreeZone> MakeMutableTreeZone(XLink xlink,
-                                                    vector<XLink> terminii) const;
+                                                    vector<XLink> terminii);
 
 	void ClearMutatorCache();
 
@@ -115,7 +115,7 @@ private:
     typedef DereferencingHash<shared_ptr<Mutator>, Mutator> SPMHasher;
     typedef DereferencingEqual<shared_ptr<Mutator>> SPMEqualPred;
     
-   	mutable unordered_set<shared_ptr<Mutator>, SPMHasher, SPMEqualPred> mutator_cache;
+   	unordered_set<shared_ptr<Mutator>, SPMHasher, SPMEqualPred> mutator_cache;
 };    
     
 };

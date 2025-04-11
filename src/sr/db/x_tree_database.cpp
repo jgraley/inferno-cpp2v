@@ -436,13 +436,13 @@ XLink XTreeDatabase::GetMainRootXLink() const
 }
 
 
-shared_ptr<Mutator> XTreeDatabase::GetMainRootMutator() const
+shared_ptr<Mutator> XTreeDatabase::GetMainRootMutator() 
 {
     return GetTreeMutator(GetMainRootXLink());
 }
 
 
-shared_ptr<Mutator> XTreeDatabase::GetTreeMutator(XLink xlink) const
+shared_ptr<Mutator> XTreeDatabase::GetTreeMutator(XLink xlink) 
 {
     const LinkTable::Row &row = link_table->GetRow(xlink);
     shared_ptr<Mutator> locally_generated_mutator;
@@ -494,7 +494,7 @@ shared_ptr<Mutator> XTreeDatabase::GetTreeMutator(XLink xlink) const
 
 
 unique_ptr<MutableTreeZone> XTreeDatabase::MakeMutableTreeZone(XLink base,
-                                                               vector<XLink> terminii) const
+                                                               vector<XLink> terminii)
 {
 	shared_ptr<Mutator> base_mutator = GetTreeMutator(base);
 	vector<shared_ptr<Mutator>> terminii_mutators;

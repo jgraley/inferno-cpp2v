@@ -44,7 +44,7 @@ void TreeZoneOrderingHandler::Run( shared_ptr<Patch> &layout )
         ASSERT( target_tree_zone );
         
         // Create the scaffold in a free zone
-        auto free_zone = FreeZone::CreateScaffold( target_tree_zone->GetBaseXLink().GetTreePtrInterface(), 
+        auto free_zone = FreeZone::CreateScaffold( target_tree_zone->GetBaseMutator()->GetTreePtrInterface(), 
                                                    target_tree_zone->GetNumTerminii() );
         //FTRACE("Scaffold free zone: ")(scaffold_fz)("\n");
         
@@ -64,7 +64,8 @@ void TreeZoneOrderingHandler::Run( shared_ptr<Patch> &layout )
         // How does the scaffold not end up in the updated tree?
         // The best argument is that, after this pass, none of the
         // scaffold nodes are inside any of the patches in our layout.
-        // So, if subsequent passes and the DB act correctly, they 
+        // The layout is intended contents of the update tree. So, if 
+        // subsequent passes and the DB act correctly, the scaffolds 
         // will be deleted from the tree.                
     }
 }
@@ -155,7 +156,7 @@ void TreeZoneOrderingHandler::ConstrainTreePatchesToRange( PatchRecords &patch_r
                             
 			// Use these to constrain the range for our descendants. 
 			// Since the OOO patches will become free zones, we don't 
-			// have a structural constraint but sill have the DF ordering
+			// have a structural constraint but still have the DF ordering
 			// to satisfy so we can check the run together (weaker) 
 			ConstrainTreePatchesToRange( next_descendant_tree_patches, 
 										 before_first_ooo, 
@@ -185,7 +186,7 @@ void TreeZoneOrderingHandler::ConstrainChildrenToTerminii( shared_ptr<TreeZonePa
     size_t i=0;
     tree_patch->ForChildren( [&](shared_ptr<Patch> &child_patch)    
     {
-        shared_ptr<Mutator> range_front = mutable_tree_zone->GetTerminusMutator(i++); // inclusive (terminus XLink equals base XLink of attached tree zone)
+        shared_ptr<Mutator> range_front = mutable_tree_zone->GetTerminusMutator(i++); // inclusive (terminus equals base of attached tree zone)
         shared_ptr<Mutator> range_back = db->GetLastDescendantMutator(range_front); // inclusive (is same or child of range_front)
         ConstrainAnyPatchToRange( child_patch, range_front, range_back, just_check );
     } );
