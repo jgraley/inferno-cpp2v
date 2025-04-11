@@ -413,7 +413,7 @@ shared_ptr<Mutator> XTreeDatabase::GetLastDescendantMutator(shared_ptr<Mutator> 
 {
 	XLink base_xlink = base->GetXLink();
 	XLink ld_xlink = GetLastDescendantXLink(base_xlink);
-	return MakeTreeMutator(ld_xlink);
+	return GetTreeMutator(ld_xlink);
 }
 
 
@@ -438,11 +438,11 @@ XLink XTreeDatabase::GetMainRootXLink() const
 
 shared_ptr<Mutator> XTreeDatabase::GetMainRootMutator() const
 {
-    return MakeTreeMutator(GetMainRootXLink());
+    return GetTreeMutator(GetMainRootXLink());
 }
 
 
-shared_ptr<Mutator> XTreeDatabase::MakeTreeMutator(XLink xlink) const
+shared_ptr<Mutator> XTreeDatabase::GetTreeMutator(XLink xlink) const
 {
     const LinkTable::Row &row = link_table->GetRow(xlink);
     shared_ptr<Mutator> locally_generated_mutator;
@@ -496,10 +496,10 @@ shared_ptr<Mutator> XTreeDatabase::MakeTreeMutator(XLink xlink) const
 unique_ptr<MutableTreeZone> XTreeDatabase::MakeMutableTreeZone(XLink base,
                                                                vector<XLink> terminii) const
 {
-	shared_ptr<Mutator> base_mutator = MakeTreeMutator(base);
+	shared_ptr<Mutator> base_mutator = GetTreeMutator(base);
 	vector<shared_ptr<Mutator>> terminii_mutators;
 	for( XLink t : terminii )
-		terminii_mutators.push_back( MakeTreeMutator(t) );
+		terminii_mutators.push_back( GetTreeMutator(t) );
 	return make_unique<MutableTreeZone>( move(base_mutator), move(terminii_mutators) );
 }                                                
 

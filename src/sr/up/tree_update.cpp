@@ -51,7 +51,7 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink origin_xlink, shared_p
                 
 	TreeZonesToMutable tree_zones_to_mutable( db );
 	tree_zones_to_mutable.Run(source_layout);
-	shared_ptr<Mutator> origin_mutator = db->MakeTreeMutator(origin_xlink);
+	shared_ptr<Mutator> origin_mutator = db->GetTreeMutator(origin_xlink);
 
     // Free Zones with collection bases (aka poor man's wide zones) lack flexibility
     // and eg can only be merged into another free zone, so we merge them here. The
