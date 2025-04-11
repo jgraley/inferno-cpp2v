@@ -19,7 +19,7 @@ TreeZoneInverter::TreeZoneInverter( XTreeDatabase *db_ ) :
 
 void TreeZoneInverter::Run(shared_ptr<Mutator> origin_mutator, shared_ptr<Patch> *source_layout_ptr)
 {
-    LocatedPatch base_lze( origin_mutator->GetXLink(), source_layout_ptr );
+    LocatedPatch base_lze( origin_mutator, source_layout_ptr );
     WalkLocatedPatches( base_lze );
     
     // For each targetted patch in the layout, perform replace operation on the DB
@@ -47,7 +47,7 @@ void TreeZoneInverter::WalkLocatedPatches( LocatedPatch lze )
             // We don't know the base if we're coming from a free zone
             ASSERT( dynamic_pointer_cast<TreeZonePatch>(child_patch) )
                   ("FZ under another FZ (probably), cannot determine target XLink");
-            LocatedPatch child_lze( XLink(), &child_patch );
+            LocatedPatch child_lze( nullptr, &child_patch );
             WalkLocatedPatches( child_lze );
         } );
     
@@ -56,14 +56,16 @@ void TreeZoneInverter::WalkLocatedPatches( LocatedPatch lze )
     }
     else if( auto tree_patch = dynamic_pointer_cast<TreeZonePatch>(*lze.second) )
     {
+		auto mutable_tree_zone = dynamic_cast<MutableTreeZone *>(tree_patch->GetZone());
+		ASSERT( mutable_tree_zone );
         // Recurse, co-looping over the children/terminii so we can fill in target bases
-        vector<XLink> terminii = tree_patch->GetZone()->GetTerminusXLinks();
+        vector<shared_ptr<Mutator>> terminii = mutable_tree_zone->GetTerminusMutators();
         FreeZonePatch::ChildExpressionIterator it_child = tree_patch->GetChildrenBegin();        
-        for( XLink terminus_xlink : terminii )
+        for( shared_ptr<Mutator> terminus : terminii )
         {
             ASSERT( it_child != tree_patch->GetChildrenEnd() ); // length mismatch
             
-            LocatedPatch child_lze( terminus_xlink, &*it_child );
+            LocatedPatch child_lze( terminus, &*it_child );
             WalkLocatedPatches( child_lze );
                         
             ++it_child;
@@ -79,26 +81,30 @@ void TreeZoneInverter::Invert( LocatedPatch lze )
 {
     // Checks
     ASSERT( lze.first && lze.second && *lze.second);
-    XLink base_xlink = lze.first;
-    ASSERT( base_xlink )("Got no base in our lze, perhaps parent was free zone?"); // FZ merging should prevent
+    shared_ptr<Mutator> base_mutator = lze.first;
+    ASSERT( base_mutator )("Got no base in our lze, perhaps parent was free zone?"); // FZ merging should prevent
     auto free_patch = dynamic_pointer_cast<FreeZonePatch>( *lze.second );
     ASSERT( free_patch )("Got LZE not a free zone: ")(lze); // WalkLocatedPatches() gave us wrong kind of patch
             
     // Collect base xlinks for child zones (which must be tree zones)
-    vector<XLink> terminii_xlinks;
+    vector<shared_ptr<Mutator>> terminii_mutators;
     free_patch->ForChildren([&](shared_ptr<Patch> &child_patch)    
     {
-        auto child_tree_patch = dynamic_pointer_cast<TreeZonePatch>( child_patch );        
+        auto child_tree_patch = dynamic_pointer_cast<TreeZonePatch>( child_patch );    
+        ASSERT(child_tree_patch);
+        auto child_mutable_tree_zone = dynamic_cast<MutableTreeZone *>(child_tree_patch->GetZone());
+        ASSERT(child_mutable_tree_zone);
+        
         // Inversion strategy: we're based on a free zone and FZ merging should 
         // have ensured we'll see only tree zones as children. Each base is a terminus 
         // for the new tree zone.
         ASSERT( child_tree_patch ); 
         
-        terminii_xlinks.push_back( child_tree_patch->GetZone()->GetBaseXLink() );
+        terminii_mutators.push_back( child_mutable_tree_zone->GetBaseMutator() );
     } );
          
     // Make the inverted TZ    
-    unique_ptr<TreeZone> inverted_tree_zone = db->MakeMutableTreeZone( base_xlink, terminii_xlinks );    
+    unique_ptr<TreeZone> inverted_tree_zone = make_unique<MutableTreeZone>( base_mutator, move(terminii_mutators) );    
     
     // Modify the expression to include inverted TZ as target
     *lze.second = make_shared<TargettedPatch>( move(inverted_tree_zone),

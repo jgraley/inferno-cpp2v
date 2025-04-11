@@ -23,7 +23,7 @@ public:
     
 private:
     // .first is NULL: base not known
-    typedef pair<XLink, shared_ptr<Patch> *> LocatedPatch;
+    typedef pair<shared_ptr<Mutator>, shared_ptr<Patch> *> LocatedPatch;
 
     void WalkLocatedPatches(LocatedPatch lze_root);
     void Invert(LocatedPatch lzfe);

@@ -201,6 +201,24 @@ XLink MutableTreeZone::GetTerminusXLink(size_t index) const
 }
 
 
+shared_ptr<Mutator> MutableTreeZone::GetBaseMutator() const
+{
+    return base;
+}
+
+
+vector<shared_ptr<Mutator>> MutableTreeZone::GetTerminusMutators() const
+{
+	return terminii;
+}
+
+
+shared_ptr<Mutator> MutableTreeZone::GetTerminusMutator(size_t index) const
+{
+	return terminii[index];
+}
+
+
 void MutableTreeZone::Exchange( FreeZone *free_zone )
 {    
 	ASSERT( !free_zone->IsEmpty() ); // Could add support but apparently don't need it rn
