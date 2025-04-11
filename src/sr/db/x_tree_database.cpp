@@ -131,7 +131,7 @@ void XTreeDatabase::InitialBuild()
 }
 
 
-void XTreeDatabase::MainTreeExchange( TreeZone *target_tree_zone, FreeZone *free_zone )
+void XTreeDatabase::MainTreeExchange( MutableTreeZone *target_tree_zone, FreeZone *free_zone )
 {
     TRACE("Whole main tree walk for your convenience:\n");
     if( Tracer::IsEnabled() )
@@ -143,23 +143,21 @@ void XTreeDatabase::MainTreeExchange( TreeZone *target_tree_zone, FreeZone *free
     TRACE("Replacing target TreeZone:\n")(*target_tree_zone)("\nwith source FreeZone:\n")(*free_zone)("\n");
     ASSERT( target_tree_zone->GetNumTerminii() == free_zone->GetNumTerminii() )
           ("Target TZ:%lu, source FZ:%lu", target_tree_zone->GetNumTerminii(), free_zone->GetNumTerminii());    
-    MutableTreeZone *mutable_target_tree_zone = dynamic_cast<MutableTreeZone *>(target_tree_zone);
-    ASSERT( mutable_target_tree_zone );
 
-	mutable_target_tree_zone->DBCheck(this); 
+	target_tree_zone->DBCheck(this); 
 
     // Store the core info for the base locally since the link table will change
     // as this function executes.
-    const DBCommon::CoreInfo base_info = link_table->GetCoreInfo( mutable_target_tree_zone->GetBaseXLink() );
+    const DBCommon::CoreInfo base_info = link_table->GetCoreInfo( target_tree_zone->GetBaseXLink() );
 
     // Remove geometric info that will be invalidated by the exchange 
-    MainTreeDeleteGeometric( mutable_target_tree_zone, &base_info );   
+    MainTreeDeleteGeometric( target_tree_zone, &base_info );   
     
     // Update the tree. mutable_target_tree_zone becomes the valid new tree zone.
-    mutable_target_tree_zone->Exchange( free_zone ); 
+    target_tree_zone->Exchange( free_zone ); 
     
     // Re-insert geometric info based on new tree zone
-    MainTreeInsertGeometric( mutable_target_tree_zone, &base_info );       
+    MainTreeInsertGeometric( target_tree_zone, &base_info );       
     
     // Update domain extension extra trees
     PerformQueuedExtraTreeActions();

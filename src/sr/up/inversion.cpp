@@ -95,7 +95,12 @@ void TreeZoneInverter::Invert( LocatedPatch lze )
     } );
          
     // Make the inverted TZ    
-    auto inverted_tree_zone = make_unique<MutableTreeZone>( base_mutator, move(terminii_mutators) );    
+    MutableTreeZone target_tree_zone( base_mutator, move(terminii_mutators) );    
+    FreeZone free_zone = *free_patch->GetZone();
     
-    db->MainTreeExchange( inverted_tree_zone.get(), free_patch->GetZone() );          
+    // Write it into the tree
+    db->MainTreeExchange( &target_tree_zone, &free_zone );          
+    
+    // target_tree_zone is now a TZ for the newly inserted zone, and free_zone is the 
+    // content that was removed. We're currently not using either of these.
 }

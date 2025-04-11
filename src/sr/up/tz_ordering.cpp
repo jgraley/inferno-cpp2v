@@ -34,28 +34,32 @@ void TreeZoneOrderingHandler::Run( shared_ptr<Patch> &layout )
     }
     //FTRACE(layout)("\n");
     
-    for( shared_ptr<Patch> *patch : out_of_order_patch_ptrs )
+    for( shared_ptr<Patch> *target_patch : out_of_order_patch_ptrs )
     {
-        TRACE("patch: ")(*patch)("\n");
+        TRACE("patch: ")(*target_patch)("\n");
         // Get the tree zone
-        auto to_patch = dynamic_pointer_cast<TreeZonePatch>(*patch);
-        ASSERT( to_patch );
-        MutableTreeZone *from_tz = dynamic_cast<MutableTreeZone *>(to_patch->GetZone());
-        ASSERT( from_tz );
+        auto target_tree_patch = dynamic_pointer_cast<TreeZonePatch>(*target_patch);
+        ASSERT( target_tree_patch );
+        MutableTreeZone *target_tree_zone = dynamic_cast<MutableTreeZone *>(target_tree_patch->GetZone());
+        ASSERT( target_tree_zone );
         
         // Create the scaffold in a free zone
-        auto scaffold_fz = FreeZone::CreateScaffold( from_tz->GetBaseXLink().GetTreePtrInterface(), 
-                                                     from_tz->GetNumTerminii() );
+        auto free_zone = FreeZone::CreateScaffold( target_tree_zone->GetBaseXLink().GetTreePtrInterface(), 
+                                                   target_tree_zone->GetNumTerminii() );
         //FTRACE("Scaffold free zone: ")(scaffold_fz)("\n");
         
-        TRACE("from_tz: ")(*from_tz)("\nscaffold_fz: ")(*scaffold_fz)("\n");
-        // Put the scaffold into the "from" part of the tree, and get back the original contents, which we shall move
-        db->MainTreeExchange( from_tz, scaffold_fz.get() );
+        TRACE("target_tree_zone: ")(*target_tree_zone)("\nfree_zone: ")(*free_zone)("\n");
+        // Put the scaffold into the "from" part of the tree, displacing 
+        // the original contents, which we shall move
+        db->MainTreeExchange( target_tree_zone, free_zone.get() );
         
-        // Make a new patch based on this moving free zone
-        auto free_patch = make_shared<FreeZonePatch>( move(scaffold_fz), to_patch->GetChildren() );
-        free_patch->AddEmbeddedMarkers( to_patch->GetEmbeddedMarkers() );
-        *patch = free_patch;
+        // free_zone is the part of the tree that we just displaced. Make 
+        // a new patch based on it.
+        auto free_patch = make_shared<FreeZonePatch>( move(free_zone), target_tree_patch->GetChildren() );
+        
+        // Install the new patch into the layout
+        free_patch->AddEmbeddedMarkers( target_tree_patch->GetEmbeddedMarkers() );               
+        *target_patch = free_patch;
         
         // How does the scaffold not end up in the updated tree?
         // The best argument is that, after this pass, none of the
