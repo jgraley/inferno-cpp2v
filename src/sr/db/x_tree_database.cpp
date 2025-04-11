@@ -144,13 +144,6 @@ void XTreeDatabase::MainTreeExchange( TreeZone *target_tree_zone, FreeZone *free
     ASSERT( target_tree_zone->GetNumTerminii() == free_zone->GetNumTerminii() )
           ("Target TZ:%lu, source FZ:%lu", target_tree_zone->GetNumTerminii(), free_zone->GetNumTerminii());    
     MutableTreeZone *mutable_target_tree_zone = dynamic_cast<MutableTreeZone *>(target_tree_zone);
-    unique_ptr<MutableTreeZone> local_tz;
-    if( !mutable_target_tree_zone )
-    {
-		local_tz = MakeMutableTreeZone( target_tree_zone->GetBaseXLink(),
-		                                target_tree_zone->GetTerminusXLinks() );
-		mutable_target_tree_zone = local_tz.get();                                
-	}
     ASSERT( mutable_target_tree_zone );
 
 	mutable_target_tree_zone->DBCheck(this); 
