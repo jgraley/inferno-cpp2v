@@ -26,7 +26,7 @@ void TreeZoneOrderingHandler::Run( shared_ptr<Patch> &layout )
     out_of_order_patch_ptrs.clear();
     shared_ptr<Mutator> root = db->GetMainRootMutator();
     shared_ptr<Mutator> last = db->GetLastDescendantMutator(root);
-    ConstrainAnyPatchToRange( layout, root->GetXLink(), last->GetXLink(), false );
+    ConstrainAnyPatchToRange( layout, root, last, false );
     
     if( !out_of_order_patch_ptrs.empty() )
     {
@@ -72,15 +72,15 @@ void TreeZoneOrderingHandler::Run( shared_ptr<Patch> &layout )
 
 void TreeZoneOrderingHandler::Check( shared_ptr<Patch> &layout )
 {
-    XLink root = db->GetMainRootXLink();
-    XLink last = XTreeDatabase::GetLastDescendantXLink(root);
+    shared_ptr<Mutator> root = db->GetMainRootMutator();
+    shared_ptr<Mutator> last = db->GetLastDescendantMutator(root);
     ConstrainAnyPatchToRange( layout, root, last, true );
 }
 
 
 void TreeZoneOrderingHandler::ConstrainAnyPatchToRange( shared_ptr<Patch> &start_patch, 
-													    XLink range_front,
-													    XLink range_back,
+													    shared_ptr<Mutator> range_front,
+													    shared_ptr<Mutator> range_back,
 													    bool just_check )
 {
     INDENT(just_check?"c":"C");
@@ -94,15 +94,15 @@ void TreeZoneOrderingHandler::ConstrainAnyPatchToRange( shared_ptr<Patch> &start
 
 
 void TreeZoneOrderingHandler::ConstrainTreePatchesToRange( PatchRecords &patch_records, 
-                                                           XLink range_front,
-                                                           XLink range_back,
+                                                           shared_ptr<Mutator> range_front,
+                                                           shared_ptr<Mutator> range_back,
                                                            bool just_check )
 {                                                
     if( patch_records.empty() )
         return;
         
     // patch_records is updated in-place with correct out_of_range values
-    FindOutOfOrderTreePatches( patch_records, range_front, range_back, just_check );    
+    FindOutOfOrderTreePatches( patch_records, range_front->GetXLink(), range_back->GetXLink(), just_check );    
     
     // Loop over patches, with their associated out-of-order flags
     PatchRecords next_descendant_tree_patches;
@@ -150,8 +150,8 @@ void TreeZoneOrderingHandler::ConstrainTreePatchesToRange( PatchRecords &patch_r
             // Book-end the descendants by the intersection of the supplied 
             // range and the range implied by the bases of the nearest in-order tree patches. 
             // We want to use the in-order ones because they will remain as tree zones.
-            XLink before_first_ooo = seen_in_order ? GetBaseXLink( *prev_in_order_it ) : range_front;                       
-            XLink after_last_ooo = last ? range_back : GetBaseXLink( *it );                 
+            shared_ptr<Mutator> before_first_ooo = seen_in_order ? GetBaseMutator( *prev_in_order_it ) : range_front;                       
+            shared_ptr<Mutator> after_last_ooo = last ? range_back : GetBaseMutator( *it );                 
                             
 			// Use these to constrain the range for our descendants. 
 			// Since the OOO patches will become free zones, we don't 
@@ -180,12 +180,13 @@ void TreeZoneOrderingHandler::ConstrainChildrenToTerminii( shared_ptr<TreeZonePa
 {
     // We have a tree zone. For each of its terminii, find the acceptable
     // range of descendent tree zones and recurse.
-    TreeZone *tree_zone = tree_patch->GetZone();
+	auto mutable_tree_zone = dynamic_cast<MutableTreeZone *>(tree_patch->GetZone());
+	ASSERT( mutable_tree_zone );
     size_t i=0;
     tree_patch->ForChildren( [&](shared_ptr<Patch> &child_patch)    
     {
-        XLink range_front = tree_zone->GetTerminusXLink(i++); // inclusive (terminus XLink equals base XLink of attached tree zone)
-        XLink range_back = XTreeDatabase::GetLastDescendantXLink(range_front); // inclusive (is same or child of range_front)
+        shared_ptr<Mutator> range_front = mutable_tree_zone->GetTerminusMutator(i++); // inclusive (terminus XLink equals base XLink of attached tree zone)
+        shared_ptr<Mutator> range_back = db->GetLastDescendantMutator(range_front); // inclusive (is same or child of range_front)
         ConstrainAnyPatchToRange( child_patch, range_front, range_back, just_check );
     } );
 }
@@ -420,6 +421,15 @@ XLink TreeZoneOrderingHandler::GetBaseXLink(const PatchRecord &patch_record) con
 {
     shared_ptr<TreeZonePatch> tree_patch = GetTreePatch(patch_record);
     return tree_patch->GetZone()->GetBaseXLink();
+}
+
+
+shared_ptr<Mutator> TreeZoneOrderingHandler::GetBaseMutator(const PatchRecord &patch_record) const
+{
+    shared_ptr<TreeZonePatch> tree_patch = GetTreePatch(patch_record);
+	auto mutable_tree_zone = dynamic_cast<MutableTreeZone *>(tree_patch->GetZone());
+	ASSERT( mutable_tree_zone );
+    return mutable_tree_zone->GetBaseMutator();
 }
 
 // ------------------------- AltTreeZoneOrderingChecker --------------------------
