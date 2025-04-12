@@ -24,14 +24,20 @@ protected:
 	};
 	
 public:	
-	static shared_ptr<Mutator> MakeRootMutator( shared_ptr<TreePtr<Node>> sp_tp_root_node );
-	static shared_ptr<Mutator> MakeSingularMutator( TreePtr<Node> parent_node, 
-	                                                TreePtrInterface *parent_singular );
-	static shared_ptr<Mutator> MakeContainerMutator( TreePtr<Node> parent_node, 
-                                                     ContainerInterface *parent_container,
-                                                     ContainerInterface::iterator container_iterator );
+	static shared_ptr<Mutator> MakeFreeSingularMutator( TreePtr<Node> parent_node, 
+	                                                    TreePtrInterface *parent_singular );
+	static shared_ptr<Mutator> MakeFreeContainerMutator( TreePtr<Node> parent_node, 
+                                                         ContainerInterface *parent_container,
+                                                         ContainerInterface::iterator container_iterator );
 	
-private:           
+private: friend class XTreeDatabase;
+	static shared_ptr<Mutator> MakeTreeRootMutator( shared_ptr<TreePtr<Node>> sp_tp_root_node );
+	static shared_ptr<Mutator> MakeTreeSingularMutator( TreePtr<Node> parent_node, 
+	                                                    TreePtrInterface *parent_singular );
+	static shared_ptr<Mutator> MakeTreeContainerMutator( TreePtr<Node> parent_node, 
+                                                         ContainerInterface *parent_container,
+                                                         ContainerInterface::iterator container_iterator );
+
     explicit Mutator( Mode mode_,
                       TreePtr<Node> parent_node, 
 					  TreePtrInterface *parent_singular_,
@@ -42,7 +48,7 @@ private:
 public:  
     bool operator<(const Mutator &right) const;
 	bool operator==( const Mutator &right ) const;
-	bool operator!=( const Mutator &right ) const;
+	bool operator!=( const Mutator &right ) const;      
   
     TreePtr<Node> ExchangeChild( TreePtr<Node> new_child );
     TreePtr<Node> ExchangeContainer( ContainerInterface *child_container,                               

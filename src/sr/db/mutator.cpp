@@ -6,24 +6,49 @@ using namespace SR;
 
 // ------------------------- Mutator --------------------------    
 
-shared_ptr<Mutator> Mutator::MakeRootMutator( shared_ptr<TreePtr<Node>> sp_tp_root_node )
+shared_ptr<Mutator> Mutator::MakeFreeSingularMutator( TreePtr<Node> parent_node, 
+										  	    	  TreePtrInterface *parent_singular )
 {
-	return shared_ptr<Mutator>(new Mutator(Mode::Root, nullptr, nullptr, nullptr, ContainerInterface::iterator(), sp_tp_root_node));
+	auto pm = new Mutator(Mode::Singular, parent_node, parent_singular, nullptr, ContainerInterface::iterator(), nullptr);
+	ASSERTS( !pm->GetChildTreePtr() )("For free zone terminus, child must be placeholder");
+	return shared_ptr<Mutator>(pm);
 }
 
 										  		  
-shared_ptr<Mutator> Mutator::MakeSingularMutator( TreePtr<Node> parent_node, 
-										  		  TreePtrInterface *parent_singular )
+shared_ptr<Mutator> Mutator::MakeFreeContainerMutator( TreePtr<Node> parent_node, 
+												       ContainerInterface *parent_container,
+												       ContainerInterface::iterator container_iterator )
 {
-	return shared_ptr<Mutator>(new Mutator(Mode::Singular, parent_node, parent_singular, nullptr, ContainerInterface::iterator(), nullptr));
+	auto pm = new Mutator(Mode::Container, parent_node, nullptr, parent_container, container_iterator, nullptr);
+	ASSERTS( !pm->GetChildTreePtr() )("For free zone terminus, child must be placeholder");
+	return shared_ptr<Mutator>(pm);
+}
+
+
+shared_ptr<Mutator> Mutator::MakeTreeRootMutator( shared_ptr<TreePtr<Node>> sp_tp_root_node )
+{
+	auto pm = new Mutator(Mode::Root, nullptr, nullptr, nullptr, ContainerInterface::iterator(), sp_tp_root_node);
+	ASSERTS( pm->GetChildTreePtr() )("For tree zone mutator, child must be a valid node");
+	return shared_ptr<Mutator>(pm);
+}
+
+
+shared_ptr<Mutator> Mutator::MakeTreeSingularMutator( TreePtr<Node> parent_node, 
+										  		      TreePtrInterface *parent_singular )
+{
+	auto pm = new Mutator(Mode::Singular, parent_node, parent_singular, nullptr, ContainerInterface::iterator(), nullptr);
+	ASSERTS( pm->GetChildTreePtr() )("For tree zone mutator, child must be a valid node");
+	return shared_ptr<Mutator>(pm);
 }
 
 										  		  
-shared_ptr<Mutator> Mutator::MakeContainerMutator( TreePtr<Node> parent_node, 
-												   ContainerInterface *parent_container,
-												   ContainerInterface::iterator container_iterator )
+shared_ptr<Mutator> Mutator::MakeTreeContainerMutator( TreePtr<Node> parent_node, 
+												       ContainerInterface *parent_container,
+												       ContainerInterface::iterator container_iterator )
 {
-	return shared_ptr<Mutator>(new Mutator(Mode::Container, parent_node, nullptr, parent_container, container_iterator, nullptr));
+	auto pm = new Mutator(Mode::Container, parent_node, nullptr, parent_container, container_iterator, nullptr);
+	ASSERTS( pm->GetChildTreePtr() )("For tree zone mutator, child must be a valid node");
+	return shared_ptr<Mutator>(pm);
 }
 
 
@@ -117,16 +142,19 @@ TreePtr<Node> Mutator::ExchangeContainer( ContainerInterface *child_container,
 		TreePtr<Node> child_element = (TreePtr<Node>)*it_child; 
 		ContainerInterface::iterator it_new = parent_container->insert( it_after, child_element ); // inserts before it_after
 
-		if( child_element == MakePlaceholder() ) 
+		if( !child_element ) // Child element is a place-holder 
 		{
-			// If child_element is a placeholder, some zone terminates immediately at this element.
-			// So child_element *IS* the placeholder of one of that zone's Mutators and child_container IS
-			// the zone's base container. We need to build a new terminus for the zone that uses our parent 
-			// container because that's what will be kept.
+			// If child_element is a placeholder, some zone terminates immediately at this element
+			// (the zone is "shallow"). So child_element *IS* the placeholder of one of that zone's 
+			// Mutators and child_container IS the zone's base container. We need to in-place modify 
+			// the supplied zone terminus using our parent container because that's what will be kept.
 			// Note: Kept: parent container, other child terminii
 			// Discarded: child terminus, child base, child container
 			shared_ptr<Mutator> child_terminus = FindMatchingTerminus( child_container, it_child, zone_terminii );                                                
-			*child_terminus = *MakeContainerMutator(parent_node, parent_container, it_new);                            
+			child_terminus->mode = Mode::Container;
+			child_terminus->parent_node = parent_node;
+			child_terminus->parent_container = parent_container;
+			child_terminus->container_iterator = it_new;
 		}
 	}                   
 	                     
