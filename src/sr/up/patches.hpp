@@ -38,7 +38,8 @@ public:
     
     string GetChildExpressionsTrace() const;
 
-    void ForChildren(function<void(shared_ptr<Patch> &patch)> func);
+    static void ForChildren(shared_ptr<Patch> base,
+                            function<void(shared_ptr<Patch> &patch)> func);
 
     static void ForDepthFirstWalk( shared_ptr<Patch> &base,
                                    function<void(shared_ptr<Patch> &patch)> func_in,
@@ -98,6 +99,8 @@ public:
     
     shared_ptr<FreeZonePatch> DuplicateToFree() const;
     
+    static void ForChildren(shared_ptr<Patch> base,
+                            function<void(shared_ptr<TreeZonePatch> &patch)> func);
     static void ForDepthFirstWalk( shared_ptr<Patch> &base,
                                    function<void(shared_ptr<TreeZonePatch> &patch)> func_in,
                                    function<void(shared_ptr<TreeZonePatch> &patch)> func_out );
@@ -132,6 +135,8 @@ public:
     FreeZone *GetZone() final;
     const FreeZone *GetZone() const final;
     
+    static void ForChildren(shared_ptr<Patch> base,
+                            function<void(shared_ptr<FreeZonePatch> &patch)> func);
     static void ForDepthFirstWalk( shared_ptr<Patch> &base,
                                    function<void(shared_ptr<FreeZonePatch> &patch)> func_in,
                                    function<void(shared_ptr<FreeZonePatch> &patch)> func_out );

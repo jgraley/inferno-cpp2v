@@ -81,7 +81,7 @@ void OrderingPass::ConstrainTreePatchesToRange( PatchRecords &patch_records,
 			// The tree-zone descendants of this patch still need to be checked for OOO.
 			// Accumulate a list of patch records for them. 
             auto tree_patch = GetTreePatch(*it);
-            tree_patch->ForChildren( [&](shared_ptr<Patch> &child_patch)
+            Patch::ForChildren( tree_patch, [&](shared_ptr<Patch> &child_patch)
             {
                 AppendNextDescendantTreePatches( child_patch, next_descendant_tree_patches );
             } );        
@@ -139,7 +139,7 @@ void OrderingPass::ConstrainChildrenToTerminii( shared_ptr<TreeZonePatch> &tree_
 	auto mutable_tree_zone = dynamic_cast<MutableTreeZone *>(tree_patch->GetZone());
 	ASSERT( mutable_tree_zone );
     size_t i=0;
-    tree_patch->ForChildren( [&](shared_ptr<Patch> &child_patch)    
+    Patch::ForChildren( tree_patch, [&](shared_ptr<Patch> &child_patch)    
     {
         shared_ptr<Mutator> terminus = mutable_tree_zone->GetTerminusMutator(i++); 
         ConstrainAnyPatchToDescendants( child_patch, terminus, just_check );
@@ -192,7 +192,7 @@ void OrderingPass::AppendNextDescendantTreePatches( shared_ptr<Patch> &start_pat
     }
     else if( auto free_patch = dynamic_pointer_cast<FreeZonePatch>(start_patch) )
     {
-        free_patch->ForChildren( [&](shared_ptr<Patch> &child_patch)
+        Patch::ForChildren( free_patch, [&](shared_ptr<Patch> &child_patch)
         {
             AppendNextDescendantTreePatches( child_patch, patch_records );
         } );
@@ -480,7 +480,7 @@ void AltOrderingChecker::Worker( shared_ptr<Patch> patch, bool base_equal_ok )
     else if( auto free_patch = dynamic_pointer_cast<FreeZonePatch>(patch) )
     {
         INDENT("F");
-        free_patch->ForChildren( [&](shared_ptr<Patch> &child_patch)
+        Patch::ForChildren( free_patch, [&](shared_ptr<Patch> &child_patch)
         {
             // Got a FreeZone - recurse looking for tree zones to check. But this FZ
             // provides "padding" so do not expect to see terminus again.

@@ -65,9 +65,10 @@ string Patch::GetChildExpressionsTrace() const
 }
 
 
-void Patch::ForChildren(function<void(shared_ptr<Patch> &patch)> func) try
+void Patch::ForChildren( shared_ptr<Patch> base,
+                         function<void(shared_ptr<Patch> &patch)> func ) try
 {
-    for( shared_ptr<Patch> &child_patch : child_patches )
+    for( shared_ptr<Patch> &child_patch : base->child_patches )
         func(child_patch);
 }
 catch( const BreakException & )
@@ -193,6 +194,21 @@ shared_ptr<FreeZonePatch> TreeZonePatch::DuplicateToFree() const
 }    
 
 
+void TreeZonePatch::ForChildren( shared_ptr<Patch> base,
+                                 function<void(shared_ptr<TreeZonePatch> &patch)> func )
+{
+    Patch::ForChildren( base, 
+	[&](shared_ptr<Patch> &patch)
+	{
+		if( auto p = dynamic_pointer_cast<TreeZonePatch>(patch) )
+		{ 
+			func(p);
+			patch = p; // in case p changed
+		}
+	} );
+}
+	
+
 void TreeZonePatch::ForDepthFirstWalk( shared_ptr<Patch> &base,
                                        function<void(shared_ptr<TreeZonePatch> &patch)> func_in,
                                        function<void(shared_ptr<TreeZonePatch> &patch)> func_out )
@@ -290,6 +306,21 @@ FreeZone *FreeZonePatch::GetZone()
 const FreeZone *FreeZonePatch::GetZone() const
 {
     return zone.get();
+}
+
+
+void FreeZonePatch::ForChildren( shared_ptr<Patch> base,
+                                 function<void(shared_ptr<FreeZonePatch> &patch)> func )
+{
+    Patch::ForChildren( base, 
+	[&](shared_ptr<Patch> &patch)
+	{
+		if( auto p = dynamic_pointer_cast<FreeZonePatch>(patch) )
+		{ 
+			func(p);
+			patch = p; // in case p changed
+		}
+	} );
 }
 
 

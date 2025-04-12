@@ -29,7 +29,7 @@ void GapFindingPass::CheckPatch(shared_ptr<TreeZonePatch> patch)
 {
 	TreeZone *tz = patch->GetZone();
 	size_t index = 0;
-	patch->ForChildren( [&](shared_ptr<Patch> &child_patch)	
+	Patch::ForChildren( patch, [&](shared_ptr<Patch> &child_patch)	
 	{
 		XLink terminus_xlink = tz->GetTerminusXLink(index++); // inclusive (terminus XLink equals base XLink of attached tree zone)
 		if( auto child_tz_patch = dynamic_pointer_cast<TreeZonePatch>(child_patch) ) // Child IS a tree zone...

@@ -33,7 +33,7 @@ void InversionPass::WalkLocatedPatches( LocatedPatch lze )
     if( auto free_patch = dynamic_pointer_cast<FreeZonePatch>(*lze.second) )
     {
         // Free zone: recurse and then invert locally
-        free_patch->ForChildren( [&](shared_ptr<Patch> &child_patch)    
+        Patch::ForChildren( free_patch, [&](shared_ptr<Patch> &child_patch)    
         {
             // We don't know the base if we're coming from a free zone
             ASSERT( dynamic_pointer_cast<TreeZonePatch>(child_patch) )
@@ -79,7 +79,7 @@ void InversionPass::Invert( LocatedPatch lze )
             
     // Collect base xlinks for child zones (which must be tree zones)
     vector<shared_ptr<Mutator>> terminii_mutators;
-    free_patch->ForChildren([&](shared_ptr<Patch> &child_patch)    
+    Patch::ForChildren(free_patch, [&](shared_ptr<Patch> &child_patch)    
     {
         auto child_tree_patch = dynamic_pointer_cast<TreeZonePatch>( child_patch );    
         ASSERT(child_tree_patch);
