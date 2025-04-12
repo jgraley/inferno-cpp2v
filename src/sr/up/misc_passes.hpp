@@ -10,6 +10,29 @@
 
 namespace SR 
 {
+
+// ------------------------- ToMutablePass --------------------------
+
+/**
+ * All tree zones are converted to mutable tree zones whose boundaries
+ * are made of Mutators (as opposed to XLinks). Mutators have handy
+ * properties:
+ * - Can mutate the tree, including deep mutation
+ * - Can remain valid across exchanges 
+ * - Are managed via shared_ptr to always alias, so all remain valid
+ */ 
+class ToMutablePass
+{
+public:    
+    ToMutablePass(XTreeDatabase *db_);
+    
+    // Can change the supplied shared ptr
+    void Run( shared_ptr<Patch> &layout );
+
+private:
+    XTreeDatabase * const db;
+};
+
 // ------------------------- ProtectDEPass --------------------------
 
 /**
@@ -30,22 +53,15 @@ private:
 };
 
 
-// ------------------------- ToMutablePass --------------------------
+// ------------------------- InsertIntrinsicPass --------------------------
 
 /**
- * All tree zones are converted to mutable tree zones whose boundaries
- * are made of Mutators (as opposed to XLinks). Mutators have handy
- * properties:
- * - Can mutate the tree, including deep mutation
- * - Can remain valid across exchanges 
- * - Are managed via shared_ptr to always alias, so all remain valid
- */ 
-class ToMutablePass
+ * All the free zones are added to the intrinsic tables in the DB.
+ */
+class InsertIntrinsicPass 
 {
-public:    
-    ToMutablePass(XTreeDatabase *db_);
-    
-    // Can change the supplied shared ptr
+public:
+    InsertIntrinsicPass( XTreeDatabase *db );
     void Run( shared_ptr<Patch> &layout );
 
 private:

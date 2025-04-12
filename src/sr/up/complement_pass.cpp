@@ -31,14 +31,6 @@ void ComplementPass::Run(shared_ptr<Mutator> origin_mutator, shared_ptr<Patch> s
         if( !tz->IsEmpty() )
             source_tzs_df_by_base.emplace( tz->GetBaseXLink(), tz );        
 	} );
-	
-    FreeZonePatch::ForFreeDepthFirstWalk( source_layout, nullptr, [&](shared_ptr<FreeZonePatch> &free_patch)
-    {
-        // Delete intrinsic tables/orderings for this free zone in the layout
-        // Doing this here on the theory that by doing intrinsic inserts and deletes
-        // in the same pass will make them consistent with one another.
-        db->MainTreeInsertIntrinsic( free_patch->GetZone() );        
-    } );
     
     WalkTreeZones(origin_mutator->GetXLink());
 }

@@ -67,6 +67,9 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink origin_xlink, shared_p
     ComplementPass complement_pass( db );
     complement_pass.Run(origin_mutator, source_layout);
 
+    InsertIntrinsicPass insert_intrinsic_pass( db );
+    insert_intrinsic_pass.Run(source_layout);
+
     OrderingPass ordering_pass( db );
     ordering_pass.Run(source_layout);
     ordering_pass.Check(source_layout);

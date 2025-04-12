@@ -35,7 +35,6 @@ void ToMutablePass::Run( shared_ptr<Patch> &layout )
 
 // ------------------------- ProtectDEPass --------------------------
 
-
 ProtectDEPass::ProtectDEPass(const XTreeDatabase *db_) :
     db(db_)
 {
@@ -66,6 +65,24 @@ void ProtectDEPass::Run( shared_ptr<Patch> &layout )
     }    
 }
 
+// ------------------------- InsertIntrinsicPass --------------------------
+
+InsertIntrinsicPass::InsertIntrinsicPass(XTreeDatabase *db_) :
+    db(db_)
+{
+}
+ 
+ 
+void InsertIntrinsicPass::Run( shared_ptr<Patch> &layout )
+{
+    FreeZonePatch::ForFreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<FreeZonePatch> &free_patch)
+    {
+        // Delete intrinsic tables/orderings for this free zone in the layout
+        // Doing this here on the theory that by doing intrinsic inserts and deletes
+        // in the same pass will make them consistent with one another.
+        db->MainTreeInsertIntrinsic( free_patch->GetZone() );        
+    } );
+}
 
 // ------------------------- MarkersPass --------------------------
 
