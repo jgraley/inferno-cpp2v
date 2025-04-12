@@ -178,37 +178,68 @@ shared_ptr<FreeZonePatch> TreeZonePatch::DuplicateToFree() const
 
 
 void TreeZonePatch::ForTreeChildren( shared_ptr<Patch> base,
-                                     function<void(shared_ptr<TreeZonePatch> &patch)> func )
+                                     function<void(shared_ptr<Patch> &patch)> func )
 {
-    Patch::ForChildren( base, 
+    ForChildren( base, 
 	[&](shared_ptr<Patch> &patch)
 	{
-		if( auto p = dynamic_pointer_cast<TreeZonePatch>(patch) )
-		{ 
-			func(p);
-			patch = p; // in case p changed
-		}
+		if( dynamic_pointer_cast<TreeZonePatch>(patch) )		
+			func(patch);
+	} );
+}
+	
+
+void TreeZonePatch::ForTreeChildren( shared_ptr<Patch> base,
+                                     function<void(shared_ptr<TreeZonePatch> &patch)> func )
+
+{
+	ForTreeChildren( base, 
+	[&](shared_ptr<Patch> &patch)
+	{
+		auto p = dynamic_pointer_cast<TreeZonePatch>(patch);
+		func(p);
+		patch = p; // in case p changed
 	} );
 }
 	
 
 void TreeZonePatch::ForTreeDepthFirstWalk( shared_ptr<Patch> &base,
+                                           function<void(shared_ptr<Patch> &patch)> func_in,
+                                           function<void(shared_ptr<Patch> &patch)> func_out )
+{
+    ForDepthFirstWalk( base, 
+	[&](shared_ptr<Patch> &patch)
+	{
+		if( func_in && dynamic_pointer_cast<TreeZonePatch>(patch) )
+			func_in(patch);
+	},
+	[&](shared_ptr<Patch> &patch)
+	{
+		if( func_out && dynamic_pointer_cast<TreeZonePatch>(patch) )
+			func_out(patch);
+	} );
+}
+
+
+void TreeZonePatch::ForTreeDepthFirstWalk( shared_ptr<Patch> &base,
                                            function<void(shared_ptr<TreeZonePatch> &patch)> func_in,
                                            function<void(shared_ptr<TreeZonePatch> &patch)> func_out )
 {
-    Patch::ForDepthFirstWalk( base, 
+    ForTreeDepthFirstWalk( base, 
 	[&](shared_ptr<Patch> &patch)
 	{
-		if( func_in ) if( auto p = dynamic_pointer_cast<TreeZonePatch>(patch) )
+		if( func_in ) 
 		{ 
+			auto p = dynamic_pointer_cast<TreeZonePatch>(patch);
 			func_in(p);
 			patch = p; // in case p changed
 		}
 	},
 	[&](shared_ptr<Patch> &patch)
 	{
-		if( func_out ) if( auto p = dynamic_pointer_cast<TreeZonePatch>(patch) )
+		if( func_out ) 
 		{ 
+			auto p = dynamic_pointer_cast<TreeZonePatch>(patch); 
 			func_out(p);
 			patch = p; // in case p changed
 		}
@@ -293,16 +324,44 @@ const FreeZone *FreeZonePatch::GetZone() const
 
 
 void FreeZonePatch::ForFreeChildren( shared_ptr<Patch> base,
-                                     function<void(shared_ptr<FreeZonePatch> &patch)> func )
+                                     function<void(shared_ptr<Patch> &patch)> func )
 {
-    Patch::ForChildren( base, 
+    ForChildren( base, 
 	[&](shared_ptr<Patch> &patch)
 	{
-		if( auto p = dynamic_pointer_cast<FreeZonePatch>(patch) )
-		{ 
-			func(p);
-			patch = p; // in case p changed
-		}
+		if( dynamic_pointer_cast<FreeZonePatch>(patch) )
+			func(patch);
+	} );
+}
+
+
+void FreeZonePatch::ForFreeChildren( shared_ptr<Patch> base,
+                                     function<void(shared_ptr<FreeZonePatch> &patch)> func )
+{
+    ForFreeChildren( base, 
+	[&](shared_ptr<Patch> &patch)
+	{
+		auto p = dynamic_pointer_cast<FreeZonePatch>(patch);
+		func(p);
+		patch = p; // in case p changed
+	} );
+}
+
+
+void FreeZonePatch::ForFreeDepthFirstWalk( shared_ptr<Patch> &base,
+                                           function<void(shared_ptr<Patch> &patch)> func_in,
+                                           function<void(shared_ptr<Patch> &patch)> func_out )
+{
+    ForDepthFirstWalk( base, 
+	[&](shared_ptr<Patch> &patch)
+	{
+		if( func_in && dynamic_pointer_cast<FreeZonePatch>(patch) )
+			func_in(patch);
+	},
+	[&](shared_ptr<Patch> &patch)
+	{
+		if( func_out && dynamic_pointer_cast<FreeZonePatch>(patch) )
+			func_out(patch);
 	} );
 }
 
@@ -311,19 +370,21 @@ void FreeZonePatch::ForFreeDepthFirstWalk( shared_ptr<Patch> &base,
                                            function<void(shared_ptr<FreeZonePatch> &patch)> func_in,
                                            function<void(shared_ptr<FreeZonePatch> &patch)> func_out )
 {
-    Patch::ForDepthFirstWalk( base, 
+    ForFreeDepthFirstWalk( base, 
 	[&](shared_ptr<Patch> &patch)
 	{
-		if( func_in ) if( auto p = dynamic_pointer_cast<FreeZonePatch>(patch) )
+		if( func_in ) 
 		{ 
+			auto p = dynamic_pointer_cast<FreeZonePatch>(patch);
 			func_in(p);
 			patch = p; // in case p changed
 		}
 	},
 	[&](shared_ptr<Patch> &patch)
 	{
-		if( func_out ) if( auto p = dynamic_pointer_cast<FreeZonePatch>(patch) )
+		if( func_out ) 
 		{ 
+			auto p = dynamic_pointer_cast<FreeZonePatch>(patch);
 			func_out(p);
 			patch = p; // in case p changed
 		}

@@ -86,7 +86,12 @@ public:
     shared_ptr<FreeZonePatch> DuplicateToFree() const;
     
     static void ForTreeChildren( shared_ptr<Patch> base,
+                                 function<void(shared_ptr<Patch> &patch)> func );
+    static void ForTreeChildren( shared_ptr<Patch> base,
                                  function<void(shared_ptr<TreeZonePatch> &patch)> func );
+    static void ForTreeDepthFirstWalk( shared_ptr<Patch> &base,
+                                       function<void(shared_ptr<Patch> &patch)> func_in,
+                                       function<void(shared_ptr<Patch> &patch)> func_out );
     static void ForTreeDepthFirstWalk( shared_ptr<Patch> &base,
                                        function<void(shared_ptr<TreeZonePatch> &patch)> func_in,
                                        function<void(shared_ptr<TreeZonePatch> &patch)> func_out );
@@ -122,7 +127,12 @@ public:
     const FreeZone *GetZone() const final;
     
     static void ForFreeChildren(shared_ptr<Patch> base,
+                                function<void(shared_ptr<Patch> &patch)> func);
+    static void ForFreeChildren(shared_ptr<Patch> base,
                                 function<void(shared_ptr<FreeZonePatch> &patch)> func);
+    static void ForFreeDepthFirstWalk( shared_ptr<Patch> &base,
+                                       function<void(shared_ptr<Patch> &patch)> func_in,
+                                       function<void(shared_ptr<Patch> &patch)> func_out );
     static void ForFreeDepthFirstWalk( shared_ptr<Patch> &base,
                                        function<void(shared_ptr<FreeZonePatch> &patch)> func_in,
                                        function<void(shared_ptr<FreeZonePatch> &patch)> func_out );
