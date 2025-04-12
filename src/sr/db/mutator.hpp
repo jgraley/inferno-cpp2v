@@ -37,7 +37,7 @@ private: friend class XTreeDatabase;
 	static shared_ptr<Mutator> MakeTreeContainerMutator( TreePtr<Node> parent_node, 
                                                          ContainerInterface *parent_container,
                                                          ContainerInterface::iterator container_iterator );
-
+private:
     explicit Mutator( Mode mode_,
                       TreePtr<Node> parent_node, 
 					  TreePtrInterface *parent_singular_,

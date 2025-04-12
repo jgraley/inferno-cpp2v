@@ -21,17 +21,14 @@ ToMutablePass::ToMutablePass(XTreeDatabase *db_) :
 
 void ToMutablePass::Run( shared_ptr<Patch> &layout )
 {
-    Patch::ForDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
+    TreeZonePatch::ForDepthFirstWalk( layout, nullptr, [&](shared_ptr<TreeZonePatch> &tree_patch)
     {
-        if( auto zone_patch = dynamic_pointer_cast<TreeZonePatch>(patch) )
-        {
-			TreeZone *zone = zone_patch->GetZone();
-            if( !dynamic_cast<MutableTreeZone *>(zone) )
-			{			
-				auto mutable_zone = db->MakeMutableTreeZone( zone->GetBaseXLink(),
-															 zone->GetTerminusXLinks() );
-				zone_patch->SetZone(move(mutable_zone));                                
-			}
+		TreeZone *zone = tree_patch->GetZone();
+        if( !dynamic_cast<MutableTreeZone *>(zone) )
+		{			
+			auto mutable_zone = db->MakeMutableTreeZone( zone->GetBaseXLink(),
+														 zone->GetTerminusXLinks() );
+			tree_patch->SetZone(move(mutable_zone));                                			
         }
     } );    
 }
@@ -55,6 +52,7 @@ void ProtectDEPass::Run( shared_ptr<Patch> &layout )
         auto extra_tree = XTreeZone::CreateSubtree(xlink);
         Patch::ForDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &r_patch)
         {
+			// Filter manually because we'll change the type
             if( auto right_tree_patch = dynamic_pointer_cast<TreeZonePatch>(r_patch) )
             {            
                 auto p = tz_relation.CompareHierarchical( *extra_tree, *right_tree_patch->GetZone() );
@@ -120,6 +118,7 @@ void DuplicateAllPass::Run( shared_ptr<Patch> &layout )
 {
     Patch::ForDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
     {
+		// Filter manually because we'll change the type
         if( auto tree_patch = dynamic_pointer_cast<TreeZonePatch>(patch) )
         {
             patch = tree_patch->DuplicateToFree();
@@ -147,6 +146,7 @@ void EmptyZonePass::Run( shared_ptr<Patch> &layout )
 {
     Patch::ForDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
     {
+		// Filter manually because may change patch type
         if( auto zone_patch = dynamic_pointer_cast<TreeZonePatch>(patch) )
         {
             if( zone_patch->GetZone()->IsEmpty() )

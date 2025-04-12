@@ -18,12 +18,9 @@ GapFindingPass::GapFindingPass()
 
 void GapFindingPass::Run(shared_ptr<Patch> layout)
 {	
-	Patch::ForDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
+	TreeZonePatch::ForDepthFirstWalk( layout, nullptr, [&](shared_ptr<TreeZonePatch> &tree_patch)
 	{
-		if( auto tz_patch = dynamic_pointer_cast<TreeZonePatch>(patch) )
-		{				
-			CheckPatch(tz_patch);
-		}
+		CheckPatch(tree_patch);
 	} );
 }
 

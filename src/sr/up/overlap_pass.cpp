@@ -27,12 +27,14 @@ void OverlapPass::Run( shared_ptr<Patch> &layout )
     // Inner and outer loops only look at TreeZonePatch patches
     Patch::ForDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &l_patch)
     {
+		// Filter manually because may change patch type
         if( auto left_tree_patch = dynamic_pointer_cast<TreeZonePatch>(l_patch) )
         {            
             // We will establish an increasing region of known non-overlapping tree zones. Detect
             // when the new l has an overlap in that zone.
             Patch::ForDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &r_patch)
             {
+				// Filter manually because may change patch type
                 if( auto right_tree_patch = dynamic_pointer_cast<TreeZonePatch>(r_patch) )
                 {            
                     if( l_patch == r_patch ) // inner "r" loop stops before catching up with outer "l" loop

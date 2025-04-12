@@ -14,6 +14,9 @@ namespace SR
 {
 class XTreeDatabase;
 
+class FreeZonePatch;
+
+
 // ------------------------- Patch --------------------------
 
 class Patch : public Traceable
@@ -93,7 +96,11 @@ public:
     const TreeZone *GetZone() const override;
     void SetZone( unique_ptr<TreeZone> &&new_zone );
     
-    shared_ptr<Patch> DuplicateToFree() const;
+    shared_ptr<FreeZonePatch> DuplicateToFree() const;
+    
+    static void ForDepthFirstWalk( shared_ptr<Patch> &base,
+                                   function<void(shared_ptr<TreeZonePatch> &patch)> func_in,
+                                   function<void(shared_ptr<TreeZonePatch> &patch)> func_out );
     
     string GetTrace() const final;
     
@@ -125,6 +132,10 @@ public:
     FreeZone *GetZone() final;
     const FreeZone *GetZone() const final;
     
+    static void ForDepthFirstWalk( shared_ptr<Patch> &base,
+                                   function<void(shared_ptr<FreeZonePatch> &patch)> func_in,
+                                   function<void(shared_ptr<FreeZonePatch> &patch)> func_out );
+
     string GetTrace() const final;
 
 private:

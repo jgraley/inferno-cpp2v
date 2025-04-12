@@ -15,57 +15,51 @@ using namespace SR;
 
 void FreeZoneMergeImpl::Run( shared_ptr<Patch> &layout, PolicyFunction policy )
 {
-    Patch::ForDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
+    FreeZonePatch::ForDepthFirstWalk( layout, nullptr, [&](shared_ptr<FreeZonePatch> &free_patch)
     {
-        if( auto free_patch = dynamic_pointer_cast<FreeZonePatch>(patch) )
-        {
-            TRACE("Parent FreeZonePatch ")(*free_patch)("\n");
-            FreeZone *free_zone = free_patch->GetZone();
+		TRACE("Parent FreeZonePatch ")(*free_patch)("\n");
+		FreeZone *free_zone = free_patch->GetZone();
 
-            FreeZone::TerminusIterator it_t = free_zone->GetTerminiiBegin();
-            FreeZonePatch::ChildExpressionIterator it_child = free_patch->GetChildrenBegin();
-            
-            while( it_child != free_patch->GetChildrenEnd() )
-            {
-                ASSERT( it_t != free_zone->GetTerminiiEnd() ); // length mismatch        
-                if( auto child_free_patch = dynamic_pointer_cast<FreeZonePatch>(*it_child) )
-                {    
-                    TRACE("Child FreeZonePatch ")(*child_free_patch)(" and terminus ")(*it_t)("\n");
-                    FreeZone *child_free_zone = child_free_patch->GetZone();                    
-                    if( policy(free_zone, child_free_zone) )
-					{
-                        it_t = free_zone->MergeTerminus( it_t, make_unique<FreeZone>(*child_free_zone) );  // TODO why make_unique here?      
-						TRACE("Mutator OK\n");
-						it_child = free_patch->SpliceOver( it_child, child_free_patch->MoveChildExpressions() );
-						TRACE("Splice OK\n");
-						continue;
-					}
+		FreeZone::TerminusIterator it_t = free_zone->GetTerminiiBegin();
+		FreeZonePatch::ChildExpressionIterator it_child = free_patch->GetChildrenBegin();
+		
+		while( it_child != free_patch->GetChildrenEnd() )
+		{
+			ASSERT( it_t != free_zone->GetTerminiiEnd() ); // length mismatch        
+			if( auto child_free_patch = dynamic_pointer_cast<FreeZonePatch>(*it_child) )
+			{    
+				TRACE("Child FreeZonePatch ")(*child_free_patch)(" and terminus ")(*it_t)("\n");
+				FreeZone *child_free_zone = child_free_patch->GetZone();                    
+				if( policy(free_zone, child_free_zone) )
+				{
+					it_t = free_zone->MergeTerminus( it_t, make_unique<FreeZone>(*child_free_zone) );  // TODO why make_unique here?      
+					TRACE("Mutator OK\n");
+					it_child = free_patch->SpliceOver( it_child, child_free_patch->MoveChildExpressions() );
+					TRACE("Splice OK\n");
+					continue;
 				}
-				
-                TRACE("Child TreeZonePatch: SKIPPING and terminus ")(*it_t)("\n");
-                it_t++;
-                it_child++;                                       
-            } 
-            ASSERT( it_t == free_zone->GetTerminiiEnd() ); // length mismatch    
-            TRACE("Loop OK\n");
-        }
+			}
+			
+			TRACE("Child TreeZonePatch: SKIPPING and terminus ")(*it_t)("\n");
+			it_t++;
+			it_child++;                                       
+		} 
+		ASSERT( it_t == free_zone->GetTerminiiEnd() ); // length mismatch    
+		TRACE("Loop OK\n");
     } );            
 }
 
 
 void FreeZoneMergeImpl::Check( shared_ptr<Patch> &layout, PolicyFunction policy )
 {
-    Patch::ForDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
+    FreeZonePatch::ForDepthFirstWalk( layout, nullptr, [&](shared_ptr<FreeZonePatch> &free_patch)
     {
-        if( auto free_patch = dynamic_pointer_cast<FreeZonePatch>(patch) )
+        free_patch->ForChildren([&](shared_ptr<Patch> &child_patch)
         {
-            free_patch->ForChildren([&](shared_ptr<Patch> &child_patch)
-            {
-                if( auto child_free_patch = dynamic_pointer_cast<FreeZonePatch>(child_patch) )
-                    ASSERT(!policy(child_free_patch->GetZone(), free_patch->GetZone()))
-                          ("Free patch:")(*patch)(" touching another free patch ")(*child_patch);
-            } );
-        }
+            if( auto child_free_patch = dynamic_pointer_cast<FreeZonePatch>(child_patch) )
+                ASSERT(!policy(child_free_patch->GetZone(), free_patch->GetZone()))
+                      ("Free patch:")(*free_patch)(" touching another free patch ")(*child_patch);
+        } );
     } );        
 }
 
@@ -100,10 +94,9 @@ void MergeWidesPass::Run( shared_ptr<Patch> &layout )
 void MergeWidesPass::Check( shared_ptr<Patch> &layout )
 {
 	// Check is stricter: no container bases anywhere, regardless of parent type
-	Patch::ForDepthFirstWalk( layout, [&](shared_ptr<Patch> &patch)
+	FreeZonePatch::ForDepthFirstWalk( layout, [&](shared_ptr<FreeZonePatch> &free_patch)
 	{
-		if( auto free_patch = dynamic_pointer_cast<FreeZonePatch>(patch) )
-			ASSERT( !free_patch->GetZone()->TryGetContainerBase() )(free_patch);
+		ASSERT( !free_patch->GetZone()->TryGetContainerBase() )(free_patch);
 	}, nullptr );
 }
 
