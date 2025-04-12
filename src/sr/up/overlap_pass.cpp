@@ -1,4 +1,4 @@
-#include "tz_overlap.hpp"
+#include "overlap_pass.hpp"
 
 #include "patches.hpp"
 #include "db/x_tree_database.hpp"
@@ -11,42 +11,17 @@
 
 using namespace SR;
 
-// ------------------------- TreeZoneOverlapHandler --------------------------
+// ------------------------- OverlapPass --------------------------
 
-TreeZoneOverlapHandler::TreeZoneOverlapHandler( const XTreeDatabase *db_ ) :
+OverlapPass::OverlapPass( const XTreeDatabase *db_ ) :
     db( db_ )
 {
 }
 
 
-void TreeZoneOverlapHandler::Run( shared_ptr<Patch> &layout )
+void OverlapPass::Run( shared_ptr<Patch> &layout )
 {
     TreeZoneRelation tz_relation( db );
-
-    // First we must duplicate any tree zones that are in domain extensions
-    // because we want them to stick around. If we added these to the layout 
-    // they'd be detected anyway, but this is simpler, and ensures we duplicate
-    // into the main tree and leave the extra tree alone (less confusing if
-    // DomainExtension is the only thing that changes them).
-    // TODO pop out into another pass.
-    auto extra_root_xlinks = db->GetExtraRootXLinks();
-    for( XLink xlink : extra_root_xlinks )
-    {
-        auto extra_tree = XTreeZone::CreateSubtree(xlink);
-        Patch::ForDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &r_patch)
-        {
-            if( auto right_tree_patch = dynamic_pointer_cast<TreeZonePatch>(r_patch) )
-            {            
-                auto p = tz_relation.CompareHierarchical( *extra_tree, *right_tree_patch->GetZone() );
-                if( p.second == ZoneRelation::OVERLAP_GENERAL || 
-                    p.second == ZoneRelation::OVERLAP_TERMINII ||
-                    p.second == ZoneRelation::EQUAL )
-                {
-                    r_patch = right_tree_patch->DuplicateToFree();
-                }
-            }
-        });
-    }    
     
     // The main algorithm for finding overlaps, now operates only on main tree.
     // Inner and outer loops only look at TreeZonePatch patches
@@ -98,7 +73,7 @@ void TreeZoneOverlapHandler::Run( shared_ptr<Patch> &layout )
 }
 
 
-void TreeZoneOverlapHandler::Check( shared_ptr<Patch> &layout )
+void OverlapPass::Check( shared_ptr<Patch> &layout )
 {
     TreeZoneRelation tz_relation( db );
 

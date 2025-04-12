@@ -1,5 +1,5 @@
-#ifndef FZ_MERGE_HPP
-#define FZ_MERGE_HPP
+#ifndef MERGE_PASSES_HPP
+#define MERGE_PASSES_HPP
 
 #include "common/common.hpp"
 #include "node/tree_ptr.hpp"
@@ -24,9 +24,14 @@ public:
     void Check( shared_ptr<Patch> &layout, PolicyFunction decider );
 };
 
-// ------------------------- FreeZoneMerger --------------------------
+// ------------------------- MergeFreesPass --------------------------
 
-class FreeZoneMerger
+/**
+ * Merging of free zones permits Inversion to unambiguously determine the boundaries
+ * for exchanges. It creates the invariant that every free zone is bounded by something
+ * other than a free zone, which must be a tree zone or the origin of the update.
+ */ 
+class MergeFreesPass
 {
 public:       
     // Can change the supplied shared ptr
@@ -39,9 +44,15 @@ private:
     FreeZoneMergeImpl impl;
 };
 
-// ------------------------- FreeZoneMergeCollectionBases --------------------------
+// ------------------------- MergeWidesPass --------------------------
 
-class FreeZoneMergeCollectionBases
+/** 
+ * Free Zones with collection bases (aka poor man's wide zones) lack flexibility
+ * and eg can only be merged into another free zone, so we merge them here. The
+ * Check() is stronger and will fail on any collection base, which constrains what
+ * we can accept from GenReplaceLayout() etc.
+ */ 
+class MergeWidesPass
 {
 public:       
     // Can change the supplied shared ptr

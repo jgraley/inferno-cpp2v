@@ -1,5 +1,5 @@
-#ifndef INVERSION_HPP
-#define INVERSION_HPP
+#ifndef INVERSION_PASS_HPP
+#define INVERSION_PASS_HPP
 
 #include "common/common.hpp"
 #include "node/tree_ptr.hpp"
@@ -11,13 +11,16 @@
 namespace SR 
 {
 
-// Convert free patches into targetted patches by matching them up against 
-// surrounding tree patches and the supplied overall tree zone. TODO 
-// in fact we only need the base XLink.
-class TreeZoneInverter 
+/** 
+ * Installs all the free zones into the tree. 
+ * Determines target tree zones for free patches by examining surrounding tree 
+ * patches and the origin of the update. Exchanges the free patches' zones over
+ * these target tree zones. 
+ */ 
+class InversionPass 
 {
 public:
-    TreeZoneInverter( XTreeDatabase *db );
+    InversionPass( XTreeDatabase *db );
     
     void Run(shared_ptr<Mutator> origin_mutator, shared_ptr<Patch> *source_layout_ptr);
     

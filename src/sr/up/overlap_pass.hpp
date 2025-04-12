@@ -1,5 +1,5 @@
-#ifndef TZ_OVERLAP_HPP
-#define TZ_OVERLAP_HPP
+#ifndef OVERLAP_PASS_HPP
+#define OVERLAP_PASS_HPP
 
 #include "common/common.hpp"
 #include "node/tree_ptr.hpp"
@@ -11,7 +11,17 @@
 namespace SR 
 {
 
-// ------------------------- TreeZoneOverlapHandler --------------------------
+
+class OverlapPass 
+{
+public:
+    OverlapPass( const XTreeDatabase *db );
+    void Run( shared_ptr<Patch> &layout );
+    void Check( shared_ptr<Patch> &layout );
+
+private:
+    const XTreeDatabase * const db;
+};
 
 // To optimise:
 // - Make a std::set/multiset of TZs ordered using TreeZoneRelation (idea 
@@ -23,16 +33,7 @@ namespace SR
 // - Identical TZs are equal in TreeZoneRelation so if regular std::set 
 //   is used, they will be dropped and if std::multiset they will be kept.
 
-class TreeZoneOverlapHandler 
-{
-public:
-    TreeZoneOverlapHandler( const XTreeDatabase *db );
-    void Run( shared_ptr<Patch> &layout );
-    void Check( shared_ptr<Patch> &layout );
 
-private:
-    const XTreeDatabase * const db;
-};
 
 }
 

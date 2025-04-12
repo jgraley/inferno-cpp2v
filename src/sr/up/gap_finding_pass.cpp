@@ -1,4 +1,4 @@
-#include "gap_handler.hpp"
+#include "gap_finding_pass.hpp"
 
 #include "patches.hpp"
 #include "db/x_tree_database.hpp"
@@ -11,12 +11,12 @@
 
 using namespace SR;
 
-TreeZoneGapHandler::TreeZoneGapHandler()
+GapFindingPass::GapFindingPass()
 {
 }
 
 
-void TreeZoneGapHandler::Run(shared_ptr<Patch> layout)
+void GapFindingPass::Run(shared_ptr<Patch> layout)
 {	
 	Patch::ForDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
 	{
@@ -28,7 +28,7 @@ void TreeZoneGapHandler::Run(shared_ptr<Patch> layout)
 }
 
 
-void TreeZoneGapHandler::CheckPatch(shared_ptr<TreeZonePatch> patch)
+void GapFindingPass::CheckPatch(shared_ptr<TreeZonePatch> patch)
 {
 	TreeZone *tz = patch->GetZone();
 	size_t index = 0;

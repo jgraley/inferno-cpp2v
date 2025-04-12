@@ -1,4 +1,4 @@
-#include "complement.hpp"
+#include "complement_pass.hpp"
 
 #include "patches.hpp"
 #include "db/x_tree_database.hpp"
@@ -11,7 +11,7 @@
 
 using namespace SR;
 
-TreeZoneComplementer::TreeZoneComplementer( XTreeDatabase *db_ ) :
+ComplementPass::ComplementPass( XTreeDatabase *db_ ) :
     db( db_ ),
     df_rel( db ),
     source_tzs_df_by_base( df_rel )    
@@ -19,7 +19,7 @@ TreeZoneComplementer::TreeZoneComplementer( XTreeDatabase *db_ ) :
 }
 
 
-void TreeZoneComplementer::Run(shared_ptr<Mutator> origin_mutator, shared_ptr<Patch> source_layout)
+void ComplementPass::Run(shared_ptr<Mutator> origin_mutator, shared_ptr<Patch> source_layout)
 {    
     source_tzs_df_by_base.clear();
     // Gather all the tree zones from the patches in the source layout, and
@@ -46,7 +46,7 @@ void TreeZoneComplementer::Run(shared_ptr<Mutator> origin_mutator, shared_ptr<Pa
 }
 
 
-void TreeZoneComplementer::WalkTreeZones(XLink target_base)
+void ComplementPass::WalkTreeZones(XLink target_base)
 {
     if( source_tzs_df_by_base.count(target_base) > 0 )
     {
@@ -64,7 +64,7 @@ void TreeZoneComplementer::WalkTreeZones(XLink target_base)
 }
 
 
-void TreeZoneComplementer::CreateComplementTZ(XLink target_base)
+void ComplementPass::CreateComplementTZ(XLink target_base)
 {
     ASSERT( source_tzs_df_by_base.count(target_base) == 0 );
     

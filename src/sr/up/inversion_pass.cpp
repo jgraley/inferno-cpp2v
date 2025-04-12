@@ -1,4 +1,4 @@
-#include "inversion.hpp"
+#include "inversion_pass.hpp"
 
 #include "patches.hpp"
 #include "db/x_tree_database.hpp"
@@ -11,20 +11,20 @@
 
 using namespace SR;
 
-TreeZoneInverter::TreeZoneInverter( XTreeDatabase *db_ ) :
+InversionPass::InversionPass( XTreeDatabase *db_ ) :
     db( db_ )
 {
 }
 
 
-void TreeZoneInverter::Run(shared_ptr<Mutator> origin_mutator, shared_ptr<Patch> *source_layout_ptr)
+void InversionPass::Run(shared_ptr<Mutator> origin_mutator, shared_ptr<Patch> *source_layout_ptr)
 {
     LocatedPatch base_lze( origin_mutator, source_layout_ptr );
     WalkLocatedPatches( base_lze );
 }
 
 
-void TreeZoneInverter::WalkLocatedPatches( LocatedPatch lze )
+void InversionPass::WalkLocatedPatches( LocatedPatch lze )
 {
     // Really just a search for FreeZonePatch that fills in the target base mutator from the 
     // enclosing thing (if it's root or a tree zone). 
@@ -68,7 +68,7 @@ void TreeZoneInverter::WalkLocatedPatches( LocatedPatch lze )
 }
 
 
-void TreeZoneInverter::Invert( LocatedPatch lze )
+void InversionPass::Invert( LocatedPatch lze )
 {
     // Checks
     ASSERT( lze.first && lze.second && *lze.second);

@@ -1,5 +1,5 @@
-#ifndef GAP_FINDER_HPP
-#define GAP_FINDER_HPP
+#ifndef GAP_FINDING_PASS_HPP
+#define GAP_FINDING_PASS_HPP
 
 #include "common/common.hpp"
 #include "node/tree_ptr.hpp"
@@ -11,11 +11,15 @@
 namespace SR 
 {
 
-// Find non-contiguous gaps between tree zones. Insert empty free zones into these gaps.
-class TreeZoneGapHandler
+/**
+ * Find non-contiguous gaps between tree zones. Insert empty free zones into 
+ * these gaps. This permits Inversion to clear away unused parts of the tree.
+ * See #754 
+ **/ 
+class GapFindingPass
 {
 public:
-	TreeZoneGapHandler();
+	GapFindingPass();
 	
 	void Run(shared_ptr<Patch> source_layout);
 		

@@ -5,13 +5,13 @@
 #include "tree/validate.hpp"
 #include "common/lambda_loops.hpp"
 #include "tz_relation.hpp"
-#include "up_utils.hpp"
-#include "tz_overlap.hpp"
-#include "tz_ordering.hpp"
-#include "fz_merge.hpp"
-#include "inversion.hpp"
-#include "complement.hpp"
-#include "gap_handler.hpp"
+#include "misc_passes.hpp"
+#include "overlap_pass.hpp"
+#include "ordering_pass.hpp"
+#include "merge_passes.hpp"
+#include "inversion_pass.hpp"
+#include "complement_pass.hpp"
+#include "gap_finding_pass.hpp"
 
 #include <iostream>
 
@@ -28,13 +28,13 @@ TreeUpdater::TreeUpdater(XTreeDatabase *x_tree_db) :
 
 unique_ptr<FreeZone> TreeUpdater::TransformToSingleFreeZone( shared_ptr<Patch> source_layout )
 {
-    DuplicateAllToFree all_to_free;
-    all_to_free.Run(source_layout);  
-    all_to_free.Check(source_layout);
+    DuplicateAllPass duplicate_all_pass;
+    duplicate_all_pass.Run(source_layout);  
+    duplicate_all_pass.Check(source_layout);
     
-    FreeZoneMerger free_zone_merger;
-    free_zone_merger.Run(source_layout);  
-    free_zone_merger.Check(source_layout);
+    MergeFreesPass merge_frees_pass;
+    merge_frees_pass.Run(source_layout);  
+    merge_frees_pass.Check(source_layout);
 
     auto free_patch = dynamic_pointer_cast<FreeZonePatch>(source_layout);
     ASSERT( free_patch );
@@ -49,46 +49,43 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink origin_xlink, shared_p
 {
     ASSERT( db );
                 
-	TreeZonesToMutable tree_zones_to_mutable( db );
-	tree_zones_to_mutable.Run(source_layout);
+	ToMutablePass to_mutable_pass( db );
+	to_mutable_pass.Run(source_layout);
 	shared_ptr<Mutator> origin_mutator = db->GetTreeMutator(origin_xlink);
 
-    // Free Zones with collection bases (aka poor man's wide zones) lack flexibility
-    // and eg can only be merged into another free zone, so we merge them here. The
-    // check is stronger and will fail on any collection base, which constrains what
-    // we can accept from GenReplaceLayout() etc.
-    FreeZoneMergeCollectionBases free_zone_merge_cb;
-    free_zone_merge_cb.Run(source_layout);
-    free_zone_merge_cb.Check(source_layout);
+    MergeWidesPass merge_wides_pass;
+    merge_wides_pass.Run(source_layout);
+    merge_wides_pass.Check(source_layout);
+                           
+	ProtectDEPass protect_de_pass( db );
+	protect_de_pass.Run(source_layout);
                                     
-    TreeZoneOverlapHandler tree_zone_overlap_handler( db );
-    tree_zone_overlap_handler.Run(source_layout);
-    tree_zone_overlap_handler.Check(source_layout);
+    OverlapPass overlap_pass( db );
+    overlap_pass.Run(source_layout);
+    overlap_pass.Check(source_layout);
     
-    TreeZoneComplementer tree_zone_complementor( db );
-    tree_zone_complementor.Run(origin_mutator, source_layout);
+    ComplementPass complement_pass( db );
+    complement_pass.Run(origin_mutator, source_layout);
 
-    TreeZoneOrderingHandler tree_zone_ordering_handler( db );
-    tree_zone_ordering_handler.Run(source_layout);
-    tree_zone_ordering_handler.Check(source_layout);
+    OrderingPass ordering_pass( db );
+    ordering_pass.Run(source_layout);
+    ordering_pass.Check(source_layout);
     
-    TreeZoneGapHandler tree_zone_gap_handler;
-    tree_zone_gap_handler.Run(source_layout);    
+    GapFindingPass gap_finding_pass;
+    gap_finding_pass.Run(source_layout);    
 
-    FreeZoneMerger free_zone_merger;
-    free_zone_merger.Run(source_layout);  
-    free_zone_merger.Check(source_layout);
+    MergeFreesPass merge_frees_pass;
+    merge_frees_pass.Run(source_layout);  
+    merge_frees_pass.Check(source_layout);
     
-    AltTreeZoneOrderingChecker alt_tree_zone_ordering_checker( db );
-    alt_tree_zone_ordering_checker.Check(source_layout);
+    AltOrderingChecker alt_ordering_checker( db );
+    alt_ordering_checker.Check(source_layout);
 
-    // Enact the tree zones that will stick around
-    BaseForEmbeddedMarkPropagation bfe_mark_propagation( db );
-    bfe_mark_propagation.Run(source_layout);
+    MarkersPass markers_pass( db );
+    markers_pass.Run(source_layout);
 
-    // Inversion generates sequence of separate "small" update commands 
-    TreeZoneInverter tree_zone_inverter( db ); 
-    tree_zone_inverter.Run(origin_mutator, &source_layout);     
+    InversionPass inversion_pass( db ); 
+    inversion_pass.Run(origin_mutator, &source_layout);     
     
     // Avoid ginormous memory leak
     db->ClearMutatorCache();           

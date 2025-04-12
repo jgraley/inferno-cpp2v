@@ -1,4 +1,4 @@
-#include "fz_merge.hpp"
+#include "merge_passes.hpp"
 
 #include "patches.hpp"
 #include "db/x_tree_database.hpp"
@@ -69,35 +69,35 @@ void FreeZoneMergeImpl::Check( shared_ptr<Patch> &layout, PolicyFunction policy 
     } );        
 }
 
-// ------------------------- FreeZoneMerger --------------------------
+// ------------------------- MergeFreesPass --------------------------
 
-void FreeZoneMerger::Run( shared_ptr<Patch> &layout )
+void MergeFreesPass::Run( shared_ptr<Patch> &layout )
 {
-	impl.Run(layout, bind(&FreeZoneMerger::Policy, this, placeholders::_1, placeholders::_2));
+	impl.Run(layout, bind(&MergeFreesPass::Policy, this, placeholders::_1, placeholders::_2));
 }
     
     
-void FreeZoneMerger::Check( shared_ptr<Patch> &layout )
+void MergeFreesPass::Check( shared_ptr<Patch> &layout )
 {
-	impl.Check(layout, bind(&FreeZoneMerger::Policy, this, placeholders::_1, placeholders::_2));
+	impl.Check(layout, bind(&MergeFreesPass::Policy, this, placeholders::_1, placeholders::_2));
 }
 
 
-bool FreeZoneMerger::Policy(const FreeZone *, const FreeZone *) const
+bool MergeFreesPass::Policy(const FreeZone *, const FreeZone *) const
 {
 	return true;
 }
 
-// ------------------------- FreeZoneMergeCollectionBases --------------------------
+// ------------------------- MergeWidesPass --------------------------
 
-void FreeZoneMergeCollectionBases::Run( shared_ptr<Patch> &layout )
+void MergeWidesPass::Run( shared_ptr<Patch> &layout )
 {
 	//FTRACE(layout);
-	impl.Run(layout, bind(&FreeZoneMergeCollectionBases::Policy, this, placeholders::_1, placeholders::_2));
+	impl.Run(layout, bind(&MergeWidesPass::Policy, this, placeholders::_1, placeholders::_2));
 }
     
     
-void FreeZoneMergeCollectionBases::Check( shared_ptr<Patch> &layout )
+void MergeWidesPass::Check( shared_ptr<Patch> &layout )
 {
 	// Check is stricter: no container bases anywhere, regardless of parent type
 	Patch::ForDepthFirstWalk( layout, [&](shared_ptr<Patch> &patch)
@@ -108,7 +108,7 @@ void FreeZoneMergeCollectionBases::Check( shared_ptr<Patch> &layout )
 }
 
 
-bool FreeZoneMergeCollectionBases::Policy(const FreeZone *zone, const FreeZone *child_zone) const
+bool MergeWidesPass::Policy(const FreeZone *zone, const FreeZone *child_zone) const
 {	
 	//FTRACE("Zone: ")(*zone)("\nhas child: ")(*child_zone)("\n");
 	return !!child_zone->TryGetContainerBase();

@@ -1,5 +1,5 @@
-#ifndef COMPLEMENT_HPP
-#define COMPLEMENT_HPP
+#ifndef COMPLEMENT_PASS_HPP
+#define COMPLEMENT_PASS_HPP
 
 #include "common/common.hpp"
 #include "node/tree_ptr.hpp"
@@ -11,13 +11,19 @@
 namespace SR 
 {
 
-// Find Tree Zones that complement the Tree Zones in the layout.
-class TreeZoneComplementer
+/**
+ * Find Tree Zones that make up the set-complement of the Tree Zones in 
+ * the layout. We wont' necessarily get this right by taking cues from the
+ * layout as with gap-finding and inversion. For example, an apparent gap 
+ * could fully and strictly contain a TZ that's moved somewhere else in the
+ * layout. Here, we analyse the tree zones without reference to the layout.
+ */
+class ComplementPass
 {
 public:
     typedef map<XLink, TreeZone *, DepthFirstRelation> DepthFirstOrderingZones;
 
-    TreeZoneComplementer( XTreeDatabase *db );
+    ComplementPass( XTreeDatabase *db );
     
     void Run(shared_ptr<Mutator> origin_mutator, shared_ptr<Patch> source_layout);
         
