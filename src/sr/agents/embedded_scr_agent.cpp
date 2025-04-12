@@ -37,13 +37,10 @@ Agent::ReplacePatchPtr EmbeddedSCRAgent::GenReplaceLayoutImpl( const ReplaceKit 
 {   
     // Use auto algorithm but add marker
     Agent::ReplacePatchPtr child_command = AutolocatingAgent::GenReplaceLayoutImpl(kit, me_plink, key_xlink);
-    
-    auto child_patch = dynamic_cast<ZonePatch *>(child_command.get());
-    ASSERT( child_patch );
-    
+
     // Inform the update mechanism that, once it's done duplicating 
     // nodes etc, it should mark this position for this embedded agent.
-    child_patch->AddEmbeddedMarker( this );
+    child_command->AddEmbeddedMarker( this );
 
     return child_command;
 }                                         

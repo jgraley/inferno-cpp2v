@@ -36,6 +36,14 @@ public:
     const list<shared_ptr<Patch>> &GetChildExpressions() const;
     list<shared_ptr<Patch>> &&MoveChildExpressions();
     
+    void AddEmbeddedMarker( RequiresSubordinateSCREngine *new_marker );
+    virtual void AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&new_markers ) = 0;
+    virtual list<RequiresSubordinateSCREngine *> GetEmbeddedMarkers() const = 0;
+    virtual void ClearEmbeddedMarkers() = 0;
+
+    virtual Zone *GetZone() = 0;
+    virtual const Zone *GetZone() const = 0;
+            
     string GetChildExpressionsTrace() const;
 
     static void ForChildren(shared_ptr<Patch> base,
@@ -55,26 +63,6 @@ private:
 
 };
 
-// ------------------------- ZonePatch --------------------------
-
-// Construct with any zone and optional marker M. On evaluate: populate the
-// zone, apply marker and return the resulting FreeZone. 
-class ZonePatch : public Patch
-{
-protected:
-    ZonePatch( list<shared_ptr<Patch>> &&child_patches_ );
-    ZonePatch();
-
-public:
-    void AddEmbeddedMarker( RequiresSubordinateSCREngine *new_marker );
-    virtual void AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&new_markers ) = 0;
-    virtual list<RequiresSubordinateSCREngine *> GetEmbeddedMarkers() const = 0;
-    virtual void ClearEmbeddedMarkers() = 0;
-    
-    virtual Zone *GetZone() = 0;
-    virtual const Zone *GetZone() const = 0;
-};
-
 
 // ------------------------- TreeZonePatch --------------------------
 
@@ -83,7 +71,7 @@ public:
 // populate it immediately (rule #726), and return the resulting FreeZone. 
 // Due to rule #726, we cannot provide a merge method (or we could add support 
 // for markers in interior possibly not at base).
-class TreeZonePatch : public ZonePatch
+class TreeZonePatch : public Patch
 {
 public:
     TreeZonePatch( unique_ptr<TreeZone> zone_, list<shared_ptr<Patch>> &&child_patches );
@@ -119,7 +107,7 @@ private:
 // FreeZone. Rule #726 means there can never be duplicate, clone, move etc, 
 // because we mark for embedded immediately (but this means we can merge 
 // without needing to represent markers in interior possibly not at base).
-class FreeZonePatch : public ZonePatch
+class FreeZonePatch : public Patch
 {
 public:
     FreeZonePatch( unique_ptr<FreeZone> zone_, list<shared_ptr<Patch>> &&child_patches );

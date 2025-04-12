@@ -59,6 +59,12 @@ list<shared_ptr<Patch>> &&Patch::MoveChildExpressions()
 }
 
 
+void Patch::AddEmbeddedMarker( RequiresSubordinateSCREngine *new_marker )
+{
+    AddEmbeddedMarkers( { new_marker } );
+}
+
+
 string Patch::GetChildExpressionsTrace() const
 {
     return Trace(child_patches);
@@ -111,29 +117,11 @@ list<shared_ptr<Patch>> Patch::GetChildren() const
     return child_patches;
 }
 
-// ------------------------- ZonePatch --------------------------
-
-ZonePatch::ZonePatch( list<shared_ptr<Patch>> &&child_patches_ ) :
-    Patch(move(child_patches_))
-{
-}    
-
-
-ZonePatch::ZonePatch() 
-{
-}    
-
-
-void ZonePatch::AddEmbeddedMarker( RequiresSubordinateSCREngine *new_marker )
-{
-    AddEmbeddedMarkers( { new_marker } );
-}
-
 // ------------------------- TreeZonePatch --------------------------
 
 TreeZonePatch::TreeZonePatch( unique_ptr<TreeZone> zone_, 
                               list<shared_ptr<Patch>> &&child_patches ) :
-    ZonePatch( move(child_patches) ),
+    Patch( move(child_patches) ),
     zone(move(zone_))
 {
     ASSERT( zone->GetNumTerminii() == GetNumChildExpressions() );    
@@ -141,7 +129,7 @@ TreeZonePatch::TreeZonePatch( unique_ptr<TreeZone> zone_,
         
 
 TreeZonePatch::TreeZonePatch( unique_ptr<TreeZone> zone_ ) :
-    ZonePatch(),
+    Patch(),
     zone(move(zone_))
 {
     // If zone has terminii, they will be "exposed".
@@ -246,7 +234,7 @@ string TreeZonePatch::GetTrace() const
 
 FreeZonePatch::FreeZonePatch( unique_ptr<FreeZone> zone_, 
                               list<shared_ptr<Patch>> &&child_patches ) :
-    ZonePatch( move(child_patches) ),
+    Patch( move(child_patches) ),
     zone(move(zone_))
 {
     ASSERT( zone->GetNumTerminii() == GetNumChildExpressions() );    
@@ -254,7 +242,7 @@ FreeZonePatch::FreeZonePatch( unique_ptr<FreeZone> zone_,
 
         
 FreeZonePatch::FreeZonePatch( unique_ptr<FreeZone> zone_ ) :
-       ZonePatch(),
+       Patch(),
        zone(move(zone_))
 {
     // If zone has terminii, they will be "exposed" and will remain 
@@ -282,8 +270,8 @@ void FreeZonePatch::ClearEmbeddedMarkers()
 }
 
 
-ZonePatch::ChildExpressionIterator FreeZonePatch::SpliceOver( ChildExpressionIterator it_child, 
-                                                              list<shared_ptr<Patch>> &&child_patches )
+Patch::ChildExpressionIterator FreeZonePatch::SpliceOver( ChildExpressionIterator it_child, 
+                                                          list<shared_ptr<Patch>> &&child_patches )
 {
     // it_child updated to the next child after the one we erased, or end()
     it_child = GetChildExpressions().erase( it_child );        
