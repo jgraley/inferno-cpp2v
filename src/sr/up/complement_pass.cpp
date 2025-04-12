@@ -24,22 +24,20 @@ void ComplementPass::Run(shared_ptr<Mutator> origin_mutator, shared_ptr<Patch> s
     source_tzs_df_by_base.clear();
     // Gather all the tree zones from the patches in the source layout, and
     // put them in a depth-first ordering on base (i.e. ordered relative to CURRENT tree)
-    Patch::ForDepthFirstWalk( source_layout, nullptr, [&](shared_ptr<Patch> &patch)
+    TreeZonePatch::ForTreeDepthFirstWalk( source_layout, nullptr, [&](shared_ptr<TreeZonePatch> &tree_patch)
     {
-        if( auto tz_patch = dynamic_pointer_cast<TreeZonePatch>(patch) )
-        {    
-            TreeZone *tz = tz_patch->GetZone();
+        TreeZone *tz = tree_patch->GetZone();
             
-            if( !tz->IsEmpty() )
-                source_tzs_df_by_base.emplace( tz->GetBaseXLink(), tz );
-        }
-        else if( auto fz_patch = dynamic_pointer_cast<FreeZonePatch>(patch) )
-        {
-            // Delete intrinsic tables/orderings for this free zone in the layout
-            // Doing this here on the theory that by doing intrinsic inserts and deletes
-            // in the same pass will make them consistent with one another.
-            db->MainTreeInsertIntrinsic( fz_patch->GetZone() );
-        }
+        if( !tz->IsEmpty() )
+            source_tzs_df_by_base.emplace( tz->GetBaseXLink(), tz );        
+	} );
+	
+    FreeZonePatch::ForFreeDepthFirstWalk( source_layout, nullptr, [&](shared_ptr<FreeZonePatch> &free_patch)
+    {
+        // Delete intrinsic tables/orderings for this free zone in the layout
+        // Doing this here on the theory that by doing intrinsic inserts and deletes
+        // in the same pass will make them consistent with one another.
+        db->MainTreeInsertIntrinsic( free_patch->GetZone() );        
     } );
     
     WalkTreeZones(origin_mutator->GetXLink());
@@ -54,7 +52,6 @@ void ComplementPass::WalkTreeZones(XLink target_base)
         const TreeZone *found_tz = source_tzs_df_by_base.at(target_base);
         for( XLink terminus : found_tz->GetTerminusXLinks() )
             WalkTreeZones( terminus );
-
     }
     else
     {
