@@ -53,6 +53,7 @@ public:
     bool IsAtRoot() const;        
     XLink GetXLink() const; 
     const TreePtrInterface *GetTreePtrInterface() const;
+    TreePtr<Node> GetChildTreePtr() const;
     static TreePtr<Node> MakePlaceholder();    
 
     static shared_ptr<Mutator> FindMatchingTerminus( ContainerInterface *container,

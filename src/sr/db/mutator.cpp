@@ -44,40 +44,21 @@ Mutator::Mutator( Mode mode_,
 }
 
 
-bool Mutator::operator<(const Mutator &r) const
+bool Mutator::operator<(const Mutator &right) const
 {
-	return GetXLink() < r.GetXLink();
+	return GetTreePtrInterface() < right.GetTreePtrInterface();
 }
 
 
 bool Mutator::operator==( const Mutator &right ) const
 {
-	if( mode != right.mode )
-		return false;
-		
-	switch( mode )
-	{
-		case Mode::Root:
-		return sp_tp_root_node == right.sp_tp_root_node;
-
-		case Mode::Singular:
-		return parent_node == right.parent_node &&
-			   parent_singular == right.parent_singular;
-			
-		case Mode::Container:
-		return parent_node == right.parent_node &&
-			   parent_container == right.parent_container &&
-			   container_iterator == right.container_iterator;
-		
-		default: 
-			ASSERTFAIL();
-	}	   
+	return GetTreePtrInterface() == right.GetTreePtrInterface();
 }
 
 
 bool Mutator::operator!=( const Mutator &right ) const
 {
-	return !operator==(right);
+	return GetTreePtrInterface() != right.GetTreePtrInterface();
 }
 
 
@@ -155,7 +136,7 @@ TreePtr<Node> Mutator::ExchangeContainer( ContainerInterface *child_container,
     
 void Mutator::ExchangeParent( Mutator &other_mut )
 {
-    TreePtr<Node> other_child_node = other_mut.GetXLink().GetChildTreePtr(); // outside the zone        
+    TreePtr<Node> other_child_node = other_mut.GetChildTreePtr(); // outside the zone        
     TreePtr<Node> my_child_node =  ExchangeChild( other_child_node );    
     other_mut.ExchangeChild( my_child_node );    
         
@@ -216,6 +197,12 @@ const TreePtrInterface *Mutator::GetTreePtrInterface() const
 			ASSERTFAIL();
 	}			
 }  
+
+
+TreePtr<Node> Mutator::GetChildTreePtr() const
+{
+	return (TreePtr<Node>)*(GetTreePtrInterface());
+}
 
 
 TreePtr<Node> Mutator::MakePlaceholder()

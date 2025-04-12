@@ -176,7 +176,7 @@ size_t MutableTreeZone::GetNumTerminii() const
 
 TreePtr<Node> MutableTreeZone::GetBaseNode() const
 {
-    return base->GetXLink().GetChildTreePtr(); // TODO Mutator::GetChildTreePtr() 
+    return base->GetChildTreePtr();
 }
 
 
