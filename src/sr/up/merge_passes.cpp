@@ -54,11 +54,10 @@ void FreeZoneMergeImpl::Check( shared_ptr<Patch> &layout, PolicyFunction policy 
 {
     FreeZonePatch::ForDepthFirstWalk( layout, nullptr, [&](shared_ptr<FreeZonePatch> &free_patch)
     {
-        Patch::ForChildren( free_patch, [&](shared_ptr<Patch> &child_patch)
+        FreeZonePatch::ForChildren( free_patch, [&](shared_ptr<FreeZonePatch> &child_free_patch)
         {
-            if( auto child_free_patch = dynamic_pointer_cast<FreeZonePatch>(child_patch) )
-                ASSERT(!policy(child_free_patch->GetZone(), free_patch->GetZone()))
-                      ("Free patch:")(*free_patch)(" touching another free patch ")(*child_patch);
+            ASSERT(!policy(child_free_patch->GetZone(), free_patch->GetZone()))
+                  ("Free patch:")(*free_patch)(" touching another free patch ")(*child_free_patch);
         } );
     } );        
 }
