@@ -70,7 +70,7 @@ public:
     virtual set<SR::PatternLink> GetRequiredVariables() const;
     virtual VariablesRequiringRows GetVariablesRequiringRows() const;
 
-    void ForDepthFirstWalk( function<void(const Expression *)> f ) const;
+    void ForTreeDepthFirstWalk( function<void(const Expression *)> f ) const;
     
     bool IsIndependentOf( shared_ptr<Expression> target ) const;
     using Orderable::OrderCompare3Way;     

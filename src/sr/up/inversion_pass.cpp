@@ -79,7 +79,7 @@ void InversionPass::Invert( LocatedPatch lze )
             
     // Collect base xlinks for child zones (which must be tree zones)
     vector<shared_ptr<Mutator>> terminii_mutators;
-    TreeZonePatch::ForChildren(free_patch, [&](shared_ptr<TreeZonePatch> &child_tree_patch)    
+    TreeZonePatch::ForTreeChildren(free_patch, [&](shared_ptr<TreeZonePatch> &child_tree_patch)    
     {
         auto child_mutable_tree_zone = dynamic_cast<MutableTreeZone *>(child_tree_patch->GetZone());
         ASSERT(child_mutable_tree_zone);

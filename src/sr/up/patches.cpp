@@ -177,8 +177,8 @@ shared_ptr<FreeZonePatch> TreeZonePatch::DuplicateToFree() const
 }    
 
 
-void TreeZonePatch::ForChildren( shared_ptr<Patch> base,
-                                 function<void(shared_ptr<TreeZonePatch> &patch)> func )
+void TreeZonePatch::ForTreeChildren( shared_ptr<Patch> base,
+                                     function<void(shared_ptr<TreeZonePatch> &patch)> func )
 {
     Patch::ForChildren( base, 
 	[&](shared_ptr<Patch> &patch)
@@ -192,9 +192,9 @@ void TreeZonePatch::ForChildren( shared_ptr<Patch> base,
 }
 	
 
-void TreeZonePatch::ForDepthFirstWalk( shared_ptr<Patch> &base,
-                                       function<void(shared_ptr<TreeZonePatch> &patch)> func_in,
-                                       function<void(shared_ptr<TreeZonePatch> &patch)> func_out )
+void TreeZonePatch::ForTreeDepthFirstWalk( shared_ptr<Patch> &base,
+                                           function<void(shared_ptr<TreeZonePatch> &patch)> func_in,
+                                           function<void(shared_ptr<TreeZonePatch> &patch)> func_out )
 {
     Patch::ForDepthFirstWalk( base, 
 	[&](shared_ptr<Patch> &patch)
@@ -292,8 +292,8 @@ const FreeZone *FreeZonePatch::GetZone() const
 }
 
 
-void FreeZonePatch::ForChildren( shared_ptr<Patch> base,
-                                 function<void(shared_ptr<FreeZonePatch> &patch)> func )
+void FreeZonePatch::ForFreeChildren( shared_ptr<Patch> base,
+                                     function<void(shared_ptr<FreeZonePatch> &patch)> func )
 {
     Patch::ForChildren( base, 
 	[&](shared_ptr<Patch> &patch)
@@ -307,9 +307,9 @@ void FreeZonePatch::ForChildren( shared_ptr<Patch> base,
 }
 
 
-void FreeZonePatch::ForDepthFirstWalk( shared_ptr<Patch> &base,
-                                       function<void(shared_ptr<FreeZonePatch> &patch)> func_in,
-                                       function<void(shared_ptr<FreeZonePatch> &patch)> func_out )
+void FreeZonePatch::ForFreeDepthFirstWalk( shared_ptr<Patch> &base,
+                                           function<void(shared_ptr<FreeZonePatch> &patch)> func_in,
+                                           function<void(shared_ptr<FreeZonePatch> &patch)> func_out )
 {
     Patch::ForDepthFirstWalk( base, 
 	[&](shared_ptr<Patch> &patch)

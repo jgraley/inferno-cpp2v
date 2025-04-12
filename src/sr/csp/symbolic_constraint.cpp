@@ -80,7 +80,7 @@ void SymbolicConstraint::Plan::DetermineXTreeDbRequirement()
 {
     required_x_tree_db_level.clear();
     
-    consistency_expression->ForDepthFirstWalk( [&](const SYM::Expression *expr)
+    consistency_expression->ForTreeDepthFirstWalk( [&](const SYM::Expression *expr)
     {
         required_x_tree_db_level = UnionOf( required_x_tree_db_level, 
                                             expr->GetVariablesRequiringRows() );
@@ -90,7 +90,7 @@ void SymbolicConstraint::Plan::DetermineXTreeDbRequirement()
     {
         for( auto suggestion : target_suggestions.second )
         {
-            suggestion.second->ForDepthFirstWalk( [&](const SYM::Expression *expr)
+            suggestion.second->ForTreeDepthFirstWalk( [&](const SYM::Expression *expr)
             {
                 required_x_tree_db_level = UnionOf( required_x_tree_db_level, 
                                                     expr->GetVariablesRequiringRows() );            

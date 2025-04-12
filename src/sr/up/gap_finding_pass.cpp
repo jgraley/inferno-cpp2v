@@ -18,7 +18,7 @@ GapFindingPass::GapFindingPass()
 
 void GapFindingPass::Run(shared_ptr<Patch> layout)
 {	
-	TreeZonePatch::ForDepthFirstWalk( layout, nullptr, [&](shared_ptr<TreeZonePatch> &tree_patch)
+	TreeZonePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<TreeZonePatch> &tree_patch)
 	{
 		CheckPatch(tree_patch);
 	} );

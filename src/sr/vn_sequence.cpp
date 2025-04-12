@@ -58,7 +58,7 @@ void VNSequence::PlanningStageFour()
     set<const SYM::Expression *> sub_exprs;
     for( shared_ptr<SYM::BooleanExpression> clause : clauses )
     {
-        clause->ForDepthFirstWalk([&](const SYM::Expression *sub_expr)
+        clause->ForTreeDepthFirstWalk([&](const SYM::Expression *sub_expr)
         {
             sub_exprs.insert(sub_expr);
         } );

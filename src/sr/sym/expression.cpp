@@ -31,11 +31,11 @@ Expression::VariablesRequiringRows Expression::GetVariablesRequiringRows() const
 }
 
 
-void Expression::ForDepthFirstWalk( function<void(const Expression *)> f ) const
+void Expression::ForTreeDepthFirstWalk( function<void(const Expression *)> f ) const
 {
     f( this );
     for( const shared_ptr<Expression> a : GetOperands() )
-        a->ForDepthFirstWalk( f );
+        a->ForTreeDepthFirstWalk( f );
 }
 
 

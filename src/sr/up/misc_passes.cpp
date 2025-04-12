@@ -21,7 +21,7 @@ ToMutablePass::ToMutablePass(XTreeDatabase *db_) :
 
 void ToMutablePass::Run( shared_ptr<Patch> &layout )
 {
-    TreeZonePatch::ForDepthFirstWalk( layout, nullptr, [&](shared_ptr<TreeZonePatch> &tree_patch)
+    TreeZonePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<TreeZonePatch> &tree_patch)
     {
 		TreeZone *zone = tree_patch->GetZone();
         if( !dynamic_cast<MutableTreeZone *>(zone) )
