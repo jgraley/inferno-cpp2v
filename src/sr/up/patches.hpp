@@ -22,19 +22,19 @@ class FreeZonePatch;
 class Patch : public Traceable
 {
 public:
-    typedef list<shared_ptr<Patch>>::iterator ChildExpressionIterator;
+    typedef list<shared_ptr<Patch>>::iterator ChildPatchIterator;
 
 protected:
     Patch( list<shared_ptr<Patch>> &&child_patches_ );
     Patch();
     
 public:
-    size_t GetNumChildExpressions() const;
-    ChildExpressionIterator GetChildrenBegin();
-    ChildExpressionIterator GetChildrenEnd();
-    list<shared_ptr<Patch>> &GetChildExpressions();
-    const list<shared_ptr<Patch>> &GetChildExpressions() const;
-    list<shared_ptr<Patch>> &&MoveChildExpressions();
+    size_t GetNumChildren() const;
+    ChildPatchIterator GetChildrenBegin();
+    ChildPatchIterator GetChildrenEnd();
+    list<shared_ptr<Patch>> &GetChildren();
+    const list<shared_ptr<Patch>> &GetChildren() const;
+    list<shared_ptr<Patch>> &&MoveChildren();
     
     void AddEmbeddedMarker( RequiresSubordinateSCREngine *new_marker );
     virtual void AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&new_markers ) = 0;
@@ -44,7 +44,7 @@ public:
     virtual Zone *GetZone() = 0;
     virtual const Zone *GetZone() const = 0;
             
-    string GetChildExpressionsTrace() const;
+    string GetChildrenTrace() const;
 
     static void ForChildren(shared_ptr<Patch> base,
                             function<void(shared_ptr<Patch> &patch)> func);
@@ -55,8 +55,6 @@ public:
 
     void DepthFirstWalkImpl(function<void(shared_ptr<Patch> &patch)> func_in,
                             function<void(shared_ptr<Patch> &patch)> func_out);
-
-    list<shared_ptr<Patch>> GetChildren() const;
 
 private:
     list<shared_ptr<Patch>> child_patches;
@@ -117,8 +115,8 @@ public:
     list<RequiresSubordinateSCREngine *> GetEmbeddedMarkers() const final;
     void ClearEmbeddedMarkers() final;
 
-    ChildExpressionIterator SpliceOver( ChildExpressionIterator it_child, 
-                                        list<shared_ptr<Patch>> &&child_patches );
+    ChildPatchIterator SpliceOver( ChildPatchIterator it_child, 
+                                   list<shared_ptr<Patch>> &&child_patches );
 
     FreeZone *GetZone() final;
     const FreeZone *GetZone() const final;

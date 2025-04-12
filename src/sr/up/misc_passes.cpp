@@ -149,7 +149,7 @@ void EmptyZonePass::Run( shared_ptr<Patch> &layout )
         {
             if( zone_patch->GetZone()->IsEmpty() )
             {            
-                shared_ptr<Patch> child_patch = OnlyElementOf( zone_patch->GetChildExpressions() );
+                shared_ptr<Patch> child_patch = OnlyElementOf( zone_patch->GetChildren() );
                 child_patch->AddEmbeddedMarkers( zone_patch->GetEmbeddedMarkers() );
                 patch = child_patch;
             }

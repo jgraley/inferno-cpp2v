@@ -21,7 +21,7 @@ void FreeZoneMergeImpl::Run( shared_ptr<Patch> &layout, PolicyFunction policy )
 		FreeZone *free_zone = free_patch->GetZone();
 
 		FreeZone::TerminusIterator it_t = free_zone->GetTerminiiBegin();
-		FreeZonePatch::ChildExpressionIterator it_child = free_patch->GetChildrenBegin();
+		FreeZonePatch::ChildPatchIterator it_child = free_patch->GetChildrenBegin();
 		
 		while( it_child != free_patch->GetChildrenEnd() )
 		{
@@ -34,7 +34,7 @@ void FreeZoneMergeImpl::Run( shared_ptr<Patch> &layout, PolicyFunction policy )
 				{
 					it_t = free_zone->MergeTerminus( it_t, make_unique<FreeZone>(*child_free_zone) );  // TODO why make_unique here?      
 					TRACE("Mutator OK\n");
-					it_child = free_patch->SpliceOver( it_child, child_free_patch->MoveChildExpressions() );
+					it_child = free_patch->SpliceOver( it_child, child_free_patch->MoveChildren() );
 					TRACE("Splice OK\n");
 					continue;
 				}

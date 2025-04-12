@@ -51,7 +51,7 @@ void InversionPass::WalkLocatedPatches( LocatedPatch lze )
 		ASSERT( mutable_tree_zone );
         // Recurse, co-looping over the children/terminii so we can fill in target bases
         vector<shared_ptr<Mutator>> terminii = mutable_tree_zone->GetTerminusMutators();
-        FreeZonePatch::ChildExpressionIterator it_child = tree_patch->GetChildrenBegin();        
+        FreeZonePatch::ChildPatchIterator it_child = tree_patch->GetChildrenBegin();        
         for( shared_ptr<Mutator> terminus : terminii )
         {
             ASSERT( it_child != tree_patch->GetChildrenEnd() ); // length mismatch

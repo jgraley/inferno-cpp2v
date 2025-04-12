@@ -166,7 +166,7 @@ void OrderingPass::MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch)
 	db->MainTreeExchange( target_tree_zone, free_zone.get() );
 	// free_zone is the part of the tree that we just displaced. Make 
 	// a new patch based on it.
-	auto free_patch = make_shared<FreeZonePatch>( move(free_zone), target_tree_patch->GetChildren() );
+	auto free_patch = make_shared<FreeZonePatch>( move(free_zone), target_tree_patch->MoveChildren() );
 	
 	// Install the new patch into the layout
 	free_patch->AddEmbeddedMarkers( target_tree_patch->GetEmbeddedMarkers() );               
@@ -458,7 +458,7 @@ void AltOrderingChecker::Worker( shared_ptr<Patch> patch, bool base_equal_ok )
         
         // Co-loop over the chidren/terminii
         vector<XLink> terminii = tree_zone->GetTerminusXLinks();
-        FreeZonePatch::ChildExpressionIterator it_child = tree_patch->GetChildrenBegin();        
+        FreeZonePatch::ChildPatchIterator it_child = tree_patch->GetChildrenBegin();        
         for( XLink terminus_xlink : terminii )
         {
             ASSERT( it_child != tree_patch->GetChildrenEnd() ); // length mismatch

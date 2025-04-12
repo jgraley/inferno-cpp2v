@@ -23,37 +23,37 @@ Patch::Patch()
 }    
 
 
-size_t Patch::GetNumChildExpressions() const
+size_t Patch::GetNumChildren() const
 {
     return child_patches.size();
 }
 
 
-Patch::ChildExpressionIterator Patch::GetChildrenBegin()
+Patch::ChildPatchIterator Patch::GetChildrenBegin()
 {
     return child_patches.begin();
 }
 
 
-Patch::ChildExpressionIterator Patch::GetChildrenEnd()
+Patch::ChildPatchIterator Patch::GetChildrenEnd()
 {
     return child_patches.end();
 }
 
 
-list<shared_ptr<Patch>> &Patch::GetChildExpressions() 
+list<shared_ptr<Patch>> &Patch::GetChildren() 
 {
     return child_patches;
 }
 
 
-const list<shared_ptr<Patch>> &Patch::GetChildExpressions() const
+const list<shared_ptr<Patch>> &Patch::GetChildren() const
 {
     return child_patches;
 }
 
 
-list<shared_ptr<Patch>> &&Patch::MoveChildExpressions()
+list<shared_ptr<Patch>> &&Patch::MoveChildren()
 {
     return move(child_patches);
 }
@@ -65,7 +65,7 @@ void Patch::AddEmbeddedMarker( RequiresSubordinateSCREngine *new_marker )
 }
 
 
-string Patch::GetChildExpressionsTrace() const
+string Patch::GetChildrenTrace() const
 {
     return Trace(child_patches);
 }
@@ -112,11 +112,6 @@ void Patch::DepthFirstWalkImpl( function<void(shared_ptr<Patch> &patch)> func_in
 }
 
 
-list<shared_ptr<Patch>> Patch::GetChildren() const
-{
-    return child_patches;
-}
-
 // ------------------------- TreeZonePatch --------------------------
 
 TreeZonePatch::TreeZonePatch( unique_ptr<TreeZone> zone_, 
@@ -124,7 +119,7 @@ TreeZonePatch::TreeZonePatch( unique_ptr<TreeZone> zone_,
     Patch( move(child_patches) ),
     zone(move(zone_))
 {
-    ASSERT( zone->GetNumTerminii() == GetNumChildExpressions() );    
+    ASSERT( zone->GetNumTerminii() == GetNumChildren() );    
 }    
         
 
@@ -175,7 +170,7 @@ void TreeZonePatch::SetZone( unique_ptr<TreeZone> &&new_zone )
 shared_ptr<FreeZonePatch> TreeZonePatch::DuplicateToFree() const
 {
     unique_ptr<FreeZone> free_zone = zone->Duplicate();
-    list<shared_ptr<Patch>> c = GetChildExpressions();
+    list<shared_ptr<Patch>> c = GetChildren();
     auto pop_free_patch = make_shared<FreeZonePatch>( move(free_zone), move(c) );
     pop_free_patch->AddEmbeddedMarkers( GetEmbeddedMarkers() );
     return pop_free_patch;
@@ -224,9 +219,9 @@ void TreeZonePatch::ForDepthFirstWalk( shared_ptr<Patch> &base,
 string TreeZonePatch::GetTrace() const
 {
 #ifdef RECURSIVE_TRACE_OPERATOR
-    return "TreeZonePatch( \nzone: "+Trace(*zone)+",\nchildren: "+GetChildExpressionsTrace()+" )";
+    return "TreeZonePatch( \nzone: "+Trace(*zone)+",\nchildren: "+GetChildrenTrace()+" )";
 #else
-    return "TreeZonePatch( zone: "+Trace(*zone)+", "+Trace(GetNumChildExpressions())+" children )";
+    return "TreeZonePatch( zone: "+Trace(*zone)+", "+Trace(GetNumChildren())+" children )";
 #endif
 }
 
@@ -237,7 +232,7 @@ FreeZonePatch::FreeZonePatch( unique_ptr<FreeZone> zone_,
     Patch( move(child_patches) ),
     zone(move(zone_))
 {
-    ASSERT( zone->GetNumTerminii() == GetNumChildExpressions() );    
+    ASSERT( zone->GetNumTerminii() == GetNumChildren() );    
 }
 
         
@@ -270,16 +265,16 @@ void FreeZonePatch::ClearEmbeddedMarkers()
 }
 
 
-Patch::ChildExpressionIterator FreeZonePatch::SpliceOver( ChildExpressionIterator it_child, 
-                                                          list<shared_ptr<Patch>> &&child_patches )
+Patch::ChildPatchIterator FreeZonePatch::SpliceOver( ChildPatchIterator it_child, 
+                                                     list<shared_ptr<Patch>> &&child_patches )
 {
     // it_child updated to the next child after the one we erased, or end()
-    it_child = GetChildExpressions().erase( it_child );        
+    it_child = GetChildren().erase( it_child );        
     
     // Insert the child before it_child, i.e. where we just
     // erase()d from. I assume it_child now points after the inserted 
     // child, i.e. at the same element it did after the erase()
-    GetChildExpressions().splice( it_child, move(child_patches) );    
+    GetChildren().splice( it_child, move(child_patches) );    
     
     return it_child;
 }                                               
@@ -339,8 +334,8 @@ void FreeZonePatch::ForDepthFirstWalk( shared_ptr<Patch> &base,
 string FreeZonePatch::GetTrace() const
 {
 #ifdef RECURSIVE_TRACE_OPERATOR
-    return "FreeZonePatch( \nzone: "+Trace(*zone)+",\nchildren: "+GetChildExpressionsTrace()+" )";
+    return "FreeZonePatch( \nzone: "+Trace(*zone)+",\nchildren: "+GetChildrenTrace()+" )";
 #else
-    return "FreeZonePatch( zone: "+Trace(*zone)+", "+Trace(GetNumChildExpressions())+" children )";
+    return "FreeZonePatch( zone: "+Trace(*zone)+", "+Trace(GetNumChildren())+" children )";
 #endif    
 }
