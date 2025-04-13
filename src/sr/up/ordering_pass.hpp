@@ -69,7 +69,8 @@ private:
     shared_ptr<Mutator> GetBaseMutator(const PatchRecord &patch_record) const;
                           
     XTreeDatabase * const db;
-    SR::DepthFirstRelation dfr;        
+    SR::DepthFirstRelation dfr;      
+    vector<shared_ptr<Patch> *> out_of_order_patches;  
 };
 
 // ------------------------- AltOrderingChecker --------------------------

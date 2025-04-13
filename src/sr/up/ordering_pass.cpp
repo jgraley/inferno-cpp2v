@@ -23,8 +23,13 @@ OrderingPass::OrderingPass(XTreeDatabase *db_) :
 
 void OrderingPass::Run( shared_ptr<Patch> &layout )
 {    
+	out_of_order_patches.clear();
+	
     shared_ptr<Mutator> root = db->GetMainRootMutator();
     ConstrainAnyPatchToDescendants( layout, root, false );	
+    
+    for( shared_ptr<Patch> *patch_ptr : out_of_order_patches )
+		MoveTreeZoneToFreePatch(patch_ptr);
 }
 
 
@@ -89,7 +94,7 @@ void OrderingPass::ConstrainTreePatchesToRange( PatchRecords &patch_records,
             // Mark as out of order so that the patch itself will be 
             // switched to a free zone patch.
             TRACE("Out of sequence: moving ")(it->patch_ptr)("\n");
-            MoveTreeZoneToFreePatch(it->patch_ptr);
+            out_of_order_patches.push_back(it->patch_ptr);
         }
         else // in-order patch
         {
