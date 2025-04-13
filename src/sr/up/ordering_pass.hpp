@@ -57,13 +57,16 @@ private:
                                       bool just_check );
     void ConstrainChildrenToTerminii( shared_ptr<TreeZonePatch> &tree_patch, 
                                       bool just_check );
-	void MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch );
     void AppendNextDescendantTreePatches( shared_ptr<Patch> &patch, 
                                       PatchRecords &patch_records );
     void FindOutOfOrderTreePatches( PatchRecords &patch_records, 
 									XLink front_ancestor,
 									XLink back_ancestor,
 									bool just_check );
+
+	void ProcessOutOfOrder();
+	void MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch );
+
     shared_ptr<TreeZonePatch> GetTreePatch(const PatchRecord &patch_record) const;
     XLink GetBaseXLink(const PatchRecord &patch_record) const;
     shared_ptr<Mutator> GetBaseMutator(const PatchRecord &patch_record) const;
@@ -71,6 +74,7 @@ private:
     XTreeDatabase * const db;
     SR::DepthFirstRelation dfr;      
     vector<shared_ptr<Patch> *> out_of_order_patches;  
+    set<XLink> in_order_bases;
 };
 
 // ------------------------- AltOrderingChecker --------------------------

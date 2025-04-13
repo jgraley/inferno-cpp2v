@@ -24,18 +24,20 @@ OrderingPass::OrderingPass(XTreeDatabase *db_) :
 void OrderingPass::Run( shared_ptr<Patch> &layout )
 {    
 	out_of_order_patches.clear();
+	in_order_bases.clear();
 	
     shared_ptr<Mutator> root = db->GetMainRootMutator();
     ConstrainAnyPatchToDescendants( layout, root, false );	
-    
-    for( shared_ptr<Patch> *patch_ptr : out_of_order_patches )
-		MoveTreeZoneToFreePatch(patch_ptr);
+    ProcessOutOfOrder();
 }
 
 
 void OrderingPass::Check( shared_ptr<Patch> &layout )
 {
-    shared_ptr<Mutator> root = db->GetMainRootMutator();
+	out_of_order_patches.clear();
+	in_order_bases.clear();
+	
+	shared_ptr<Mutator> root = db->GetMainRootMutator();
     ConstrainAnyPatchToDescendants( layout, root, true );
 }
 
@@ -103,6 +105,10 @@ void OrderingPass::ConstrainTreePatchesToRange( PatchRecords &patch_records,
             auto tree_patch = GetTreePatch(*it);
             TRACE("Recursing on ")(tree_patch)("...\n");
             ConstrainChildrenToTerminii( tree_patch, just_check );
+            
+            // InsertSolo is used here because we should only find each TZ as being in order once
+            //FTRACE(tree_patch)("\nSet is:\n")(in_order_bases)("\n");
+            InsertSolo(in_order_bases, tree_patch->GetZone()->GetBaseXLink());
         }
 
         // Are we just past the end of an out-of-order run?
@@ -149,40 +155,6 @@ void OrderingPass::ConstrainChildrenToTerminii( shared_ptr<TreeZonePatch> &tree_
         shared_ptr<Mutator> terminus = mutable_tree_zone->GetTerminusMutator(i++); 
         ConstrainAnyPatchToDescendants( child_patch, terminus, just_check );
     } );
-}
-
-
-void OrderingPass::MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch)
-{
-	//FTRACE("Patch: ")(*target_patch)("\n");
-	// Get the tree zone
-	auto target_tree_patch = dynamic_pointer_cast<TreeZonePatch>(*target_patch);
-	ASSERT( target_tree_patch );
-	MutableTreeZone *target_tree_zone = dynamic_cast<MutableTreeZone *>(target_tree_patch->GetZone());
-	ASSERT( target_tree_zone );
-	
-	// Create the scaffold in a free zone
-	auto free_zone = FreeZone::CreateScaffold( target_tree_zone->GetBaseMutator()->GetTreePtrInterface(), 
-											   target_tree_zone->GetNumTerminii() );
-	
-	//FTRACE("target_tree_zone: ")(*target_tree_zone)("\nfree_zone: ")(*free_zone)("\n");
-	// Put the scaffold into the "from" part of the tree, displacing 
-	// the original contents, which we shall move
-	db->MainTreeExchange( target_tree_zone, free_zone.get() );
-	// free_zone is the part of the tree that we just displaced. Make 
-	// a new patch based on it.
-	auto free_patch = make_shared<FreeZonePatch>( move(free_zone), target_tree_patch->MoveChildren() );
-	
-	// Install the new patch into the layout
-	free_patch->AddEmbeddedMarkers( target_tree_patch->GetEmbeddedMarkers() );               
-	*target_patch = free_patch;
-	
-	// How does the scaffold not end up in the updated tree?
-	// The best argument is that, after this pass, none of the
-	// scaffold nodes are inside any of the patches in our layout.
-	// The layout is intended contents of the update tree. So, if 
-	// subsequent passes and the DB act correctly, the scaffolds 
-	// will be deleted from the tree.                
 }
 
 
@@ -412,6 +384,73 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
             first = false;
         }        
     }
+}
+
+
+void OrderingPass::ProcessOutOfOrder()
+{
+    for( shared_ptr<Patch> *ooo_patch_ptr : out_of_order_patches )
+    {
+		auto ooo_tree_patch = dynamic_pointer_cast<TreeZonePatch>(*ooo_patch_ptr);
+		ASSERT( ooo_tree_patch );
+		XLink base_xlink = ooo_tree_patch->GetZone()->GetBaseXLink();
+		ASSERT( base_xlink );
+		switch( in_order_bases.count(base_xlink) )
+		{
+			case 0: // This tree patch does not appear in the "correct place" in the layout
+
+			// We can move it to the new place, avoiding the need for duplication
+			MoveTreeZoneToFreePatch(ooo_patch_ptr);
+
+			// But any further appearances must be duplicated
+			InsertSolo(in_order_bases, base_xlink); 
+			break;
+			
+			case 1: // This patch appears in the "correct place" as well as here
+			
+			// We'll have to duplicate. Best to duplicate the OOO one so we don't have to do a move
+			*ooo_patch_ptr = ooo_tree_patch->DuplicateToFree();
+			break;
+			
+			default:
+			ASSERTFAIL();
+			break;
+		}
+	}
+}
+
+
+void OrderingPass::MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch)
+{
+	//FTRACE("Patch: ")(*target_patch)("\n");
+	// Get the tree zone
+	auto target_tree_patch = dynamic_pointer_cast<TreeZonePatch>(*target_patch);
+	ASSERT( target_tree_patch );
+	MutableTreeZone *target_tree_zone = dynamic_cast<MutableTreeZone *>(target_tree_patch->GetZone());
+	ASSERT( target_tree_zone );
+	
+	// Create the scaffold in a free zone
+	auto free_zone = FreeZone::CreateScaffold( target_tree_zone->GetBaseMutator()->GetTreePtrInterface(), 
+											   target_tree_zone->GetNumTerminii() );
+	
+	//FTRACE("target_tree_zone: ")(*target_tree_zone)("\nfree_zone: ")(*free_zone)("\n");
+	// Put the scaffold into the "from" part of the tree, displacing 
+	// the original contents, which we shall move
+	db->MainTreeExchange( target_tree_zone, free_zone.get() );
+	// free_zone is the part of the tree that we just displaced. Make 
+	// a new patch based on it.
+	auto free_patch = make_shared<FreeZonePatch>( move(free_zone), target_tree_patch->MoveChildren() );
+	
+	// Install the new patch into the layout
+	free_patch->AddEmbeddedMarkers( target_tree_patch->GetEmbeddedMarkers() );               
+	*target_patch = free_patch;
+	
+	// How does the scaffold not end up in the updated tree?
+	// The best argument is that, after this pass, none of the
+	// scaffold nodes are inside any of the patches in our layout.
+	// The layout is intended contents of the update tree. So, if 
+	// subsequent passes and the DB act correctly, the scaffolds 
+	// will be deleted from the tree.                
 }
 
 
