@@ -43,8 +43,8 @@ void DBWalk::WalkTreeZone( const Actions *actions,
     WalkKit kit { actions, zone, tree_ordinal, wind, 0U };
     VisitBase( kit, zone->GetBaseXLink(), base_info );  
     ASSERT( kit.next_terminus_index == zone->GetNumTerminii() )
-          ("Zone has %d terminii", zone->GetNumTerminii())
-          (kit.next_terminus_index==0?" (no terminii visited)":""); // should have visited all the terminii
+          ("Zone has %u terminii", zone->GetNumTerminii())
+          (" but only visited %u", kit.next_terminus_index); // should have visited all the terminii
 }
 
 

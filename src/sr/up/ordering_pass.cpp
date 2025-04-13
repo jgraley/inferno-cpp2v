@@ -539,8 +539,8 @@ void AltOrderingChecker::Worker( shared_ptr<Patch> patch, bool base_equal_ok )
         Patch::ForChildren( free_patch, [&](shared_ptr<Patch> &child_patch)
         {
             // Got a FreeZone - recurse looking for tree zones to check. But this FZ
-            // provides "padding" so do not expect to see terminus again.
-            Worker( child_patch, free_patch->GetZone()->IsEmpty() );
+            // provides "padding" so do not expect to see terminus again.            
+            Worker( child_patch, true );
         } );
     }
     else

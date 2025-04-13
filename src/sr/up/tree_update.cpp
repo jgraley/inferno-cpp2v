@@ -12,9 +12,9 @@
 #include "inversion_pass.hpp"
 #include "complement_pass.hpp"
 #include "gap_finding_pass.hpp"
+#include "boundary_pass.hpp"
 
 #include <iostream>
-
 
 using namespace SR;
 
@@ -64,10 +64,13 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink origin_xlink, shared_p
     empty_zone_pass.Run(source_layout);
     empty_zone_pass.Check(source_layout);
     
+    //BoundaryPass boundary_pass( db );
+    //boundary_pass.Run(source_layout);
+
     OverlapPass overlap_pass( db );
     overlap_pass.Run(source_layout);
     overlap_pass.Check(source_layout);
-    
+
     ComplementPass complement_pass( db );
     complement_pass.Run(origin_mutator, source_layout);
 
