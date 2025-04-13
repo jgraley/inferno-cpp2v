@@ -398,23 +398,28 @@ void OrderingPass::ProcessOutOfOrder()
 		switch( in_order_bases.count(base_xlink) )
 		{
 			case 0: // This tree patch does not appear in the "correct place" in the layout
+			{
+				// We can move it to the new place, avoiding the need for duplication
+				MoveTreeZoneToFreePatch(ooo_patch_ptr);
 
-			// We can move it to the new place, avoiding the need for duplication
-			MoveTreeZoneToFreePatch(ooo_patch_ptr);
-
-			// But any further appearances must be duplicated
-			InsertSolo(in_order_bases, base_xlink); 
-			break;
+				// But any further appearances must be duplicated
+				InsertSolo(in_order_bases, base_xlink); 
+				break;
+			}
 			
 			case 1: // This patch appears in the "correct place" as well as here
-			
-			// We'll have to duplicate. Best to duplicate the OOO one so we don't have to do a move
-			*ooo_patch_ptr = ooo_tree_patch->DuplicateToFree();
-			break;
+			{
+				// We'll have to duplicate. Best to duplicate the OOO one so we don't have to do a move
+				shared_ptr<FreeZonePatch> new_free_patch = ooo_tree_patch->DuplicateToFree();
+				*ooo_patch_ptr = new_free_patch;
+
+				// Add to intrinsic tables in DB because we missed InsertIntrinsicPass
+				db->MainTreeInsertIntrinsic( new_free_patch->GetZone() );     
+				break;
+			}
 			
 			default:
-			ASSERTFAIL();
-			break;
+				ASSERTFAIL();
 		}
 	}
 }
