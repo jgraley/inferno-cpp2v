@@ -52,6 +52,23 @@ private:
     const XTreeDatabase * const db;
 };
 
+// ------------------------- EmptyZonePass --------------------------
+
+/**
+ * Drop empty tree zones, because they break correspondance betweek 
+ * base XLink and zone.
+ */ 
+class EmptyZonePass
+{
+public:    
+    EmptyZonePass();
+    
+    // Can change the supplied shared ptr
+    void Run( shared_ptr<Patch> &layout );
+    
+    // Just ASSERT no empty zones
+    void Check( shared_ptr<Patch> &layout );
+};
 
 // ------------------------- InsertIntrinsicPass --------------------------
 
@@ -104,25 +121,6 @@ public:
     void Run( shared_ptr<Patch> &layout );
     
     // Just ASSERT all free zones
-    void Check( shared_ptr<Patch> &layout );
-};
-
-// ------------------------- EmptyZonePass --------------------------
-
-/**
- * Currently unused, this drops patches containing empty zones from the layout. 
- * It's unclear whether this should be tree, free or both. At present we try
- * to support empty zones pretty much everywhere, hence unused.
- */ 
-class EmptyZonePass
-{
-public:    
-    EmptyZonePass();
-    
-    // Can change the supplied shared ptr
-    void Run( shared_ptr<Patch> &layout );
-    
-    // Just ASSERT no empty zones
     void Check( shared_ptr<Patch> &layout );
 };
 

@@ -60,6 +60,10 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink origin_xlink, shared_p
 	ProtectDEPass protect_de_pass( db );
 	protect_de_pass.Run(source_layout);
                                     
+    EmptyZonePass empty_zone_pass;
+    empty_zone_pass.Run(source_layout);
+    empty_zone_pass.Check(source_layout);
+    
     OverlapPass overlap_pass( db );
     overlap_pass.Run(source_layout);
     overlap_pass.Check(source_layout);

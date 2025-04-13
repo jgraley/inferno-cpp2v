@@ -65,6 +65,37 @@ void ProtectDEPass::Run( shared_ptr<Patch> &layout )
     }    
 }
 
+// ------------------------- EmptyZonePass --------------------------
+
+EmptyZonePass::EmptyZonePass()
+{
+}
+    
+
+void EmptyZonePass::Run( shared_ptr<Patch> &layout )
+{
+    TreeZonePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
+    {
+        auto tree_patch = dynamic_pointer_cast<TreeZonePatch>(patch);
+        if( tree_patch->GetZone()->IsEmpty() )
+        {            
+			// Child could be tree or free
+			shared_ptr<Patch> child_patch = OnlyElementOf( tree_patch->GetChildren() );
+			child_patch->AddEmbeddedMarkers( tree_patch->GetEmbeddedMarkers() );
+			patch = child_patch; 
+		}
+    } );    
+}
+
+
+void EmptyZonePass::Check( shared_ptr<Patch> &layout )
+{
+    TreeZonePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<TreeZonePatch> &tree_patch)
+    {
+        ASSERT( !tree_patch->GetZone()->IsEmpty() )("Found empty tree zone: ")(tree_patch->GetZone());
+    } );    
+}
+
 // ------------------------- InsertIntrinsicPass --------------------------
 
 InsertIntrinsicPass::InsertIntrinsicPass(XTreeDatabase *db_) :
@@ -140,36 +171,6 @@ void DuplicateAllPass::Check( shared_ptr<Patch> &layout )
     Patch::ForDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
     {
         ASSERT( dynamic_pointer_cast<FreeZonePatch>(patch) );
-    } );    
-}
-
-// ------------------------- EmptyZonePass --------------------------
-
-EmptyZonePass::EmptyZonePass()
-{
-}
-    
-
-void EmptyZonePass::Run( shared_ptr<Patch> &layout )
-{
-    TreeZonePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
-    {
-        auto zone_patch = dynamic_pointer_cast<TreeZonePatch>(patch);
-        if( zone_patch->GetZone()->IsEmpty() )
-        {            
-			shared_ptr<Patch> child_patch = OnlyElementOf( zone_patch->GetChildren() );
-			child_patch->AddEmbeddedMarkers( zone_patch->GetEmbeddedMarkers() );
-			patch = child_patch;
-		}
-    } );    
-}
-
-
-void EmptyZonePass::Check( shared_ptr<Patch> &layout )
-{
-    Patch::ForDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
-    {
-        ASSERT( !patch->GetZone()->IsEmpty() )("Found empty zone in populate op: ")(patch->GetZone());
     } );    
 }
 

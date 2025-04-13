@@ -260,6 +260,9 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
     set<XLink, DepthFirstRelation>::iterator prev_tz_base_dfo_it;
     for( PatchRecord &patch_record : patch_records )
     {
+		if( patch_record.out_of_order )
+			continue;
+			
         XLink tz_base = GetBaseXLink( patch_record );
         set<XLink, DepthFirstRelation>::iterator tz_base_dfo_it = xlinks_dfo.find(tz_base);
 
