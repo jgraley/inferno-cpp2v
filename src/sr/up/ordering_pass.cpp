@@ -55,9 +55,9 @@ void OrderingPass::ConstrainAnyPatchToDescendants( shared_ptr<Patch> &start_patc
 
 
 void OrderingPass::ConstrainTreePatchesToRange( PatchRecords &patch_records, 
-                                                           shared_ptr<Mutator> front_ancestor,
-                                                           shared_ptr<Mutator> back_ancestor,
-                                                           bool just_check )
+                                                shared_ptr<Mutator> front_ancestor,
+                                                shared_ptr<Mutator> back_ancestor,
+                                                bool just_check )
 {                                                
     if( patch_records.empty() )
         return;
@@ -210,9 +210,9 @@ void OrderingPass::AppendNextDescendantTreePatches( shared_ptr<Patch> &start_pat
 
 
 void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records, 
-														 XLink front_ancestor,
-														 XLink back_ancestor,
-														 bool just_check )
+											  XLink front_ancestor,
+											  XLink back_ancestor,
+											  bool just_check )
 {                                                
 	ASSERT( !patch_records.empty() );
 	// We want bounds on an inclusive range that includes the subtrees under
@@ -242,8 +242,12 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
     vector<XLink> v;
     for( PatchRecord &patch_record : patch_records )
     {
-        xlinks_dfo.insert( GetBaseXLink( patch_record ) );
-        v.push_back( GetBaseXLink( patch_record ) );
+        auto p = xlinks_dfo.insert( GetBaseXLink( patch_record ) );
+        if( !p.second )
+		{
+			// Fail, already there
+			patch_record.out_of_order = true;
+		}
     }
     
     //FTRACE("Depth-first order: ")(xlinks_dfo)("\n");
@@ -280,7 +284,7 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
             
             if( just_check && !consecutive )
             {
-                FTRACE("AS SUPPLIED\n")(v)("\nORDERED DEPTH FIRST\n")(xlinks_dfo)("\nWERE AT: ")(tz_base)("\n");
+                FTRACE("\nORDERED DEPTH FIRST\n")(xlinks_dfo)("\nWERE AT: ")(tz_base)("\n");
                 ASSERT(diff_front >= 0)("Tree zone base ")(tz_base)(" appears before limit ")(range_front)(" in X tree");
                 ASSERT(diff_back <= 0)("Tree zone base ")(tz_base)(" appears after limit ")(range_back)(" in X tree");
                 ASSERTFAIL(); // we aint goin nowhere
