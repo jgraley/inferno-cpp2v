@@ -124,6 +124,14 @@ public:
     void Check( shared_ptr<Patch> &layout );
 };
 
+// ------------------------- ScaffoldChecker --------------------------
+
+class ScaffoldChecker 
+{
+public:
+    void Run( shared_ptr<Patch> layout );
+    static void Check(shared_ptr<Patch> patch);
+};
 }
 
 #endif

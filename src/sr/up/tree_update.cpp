@@ -67,10 +67,6 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink origin_xlink, shared_p
     BoundaryPass boundary_pass( db );
     boundary_pass.Run(source_layout);
 
-    OverlapPass overlap_pass( db );
-    overlap_pass.Run(source_layout);
-    overlap_pass.Check(source_layout);
-
     ComplementPass complement_pass( db );
     complement_pass.Run(origin_mutator, source_layout);
 
@@ -80,6 +76,8 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink origin_xlink, shared_p
     OrderingPass ordering_pass( db );
     ordering_pass.Run(source_layout);
     ordering_pass.Check(source_layout);
+    
+    ScaffoldChecker().Run(source_layout);
     
     GapFindingPass gap_finding_pass;
     gap_finding_pass.Run(source_layout);    

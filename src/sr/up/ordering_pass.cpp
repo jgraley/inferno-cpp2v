@@ -428,41 +428,60 @@ bool OrderingPass::AreLinksConsecutive(XLink left, XLink right, set<XLink, Depth
 void OrderingPass::ProcessOutOfOrder()
 {
 	INDENT("P");
+
+	multiset<XLink> out_of_order_bases;
     for( shared_ptr<Patch> *ooo_patch_ptr : out_of_order_patches )
     {
 		auto ooo_tree_patch = dynamic_pointer_cast<TreeZonePatch>(*ooo_patch_ptr);
 		ASSERT( ooo_tree_patch );
 		XLink base_xlink = ooo_tree_patch->GetZone()->GetBaseXLink();
 		ASSERT( base_xlink );
-		switch( in_order_bases.count(base_xlink) )
+		// Unlike with in-order, there can be multiple OOO.
+		out_of_order_bases.insert( base_xlink );
+	}
+
+	// Process duplications first, because we wouldn't want to duplicate
+	// a TZ that aliasses a TZ that has had scffolding put in.
+    for( shared_ptr<Patch> *ooo_patch_ptr : out_of_order_patches )
+    {
+		auto ooo_tree_patch = dynamic_pointer_cast<TreeZonePatch>(*ooo_patch_ptr);
+		ASSERT( ooo_tree_patch );
+		XLink base_xlink = ooo_tree_patch->GetZone()->GetBaseXLink();
+		ASSERT( base_xlink );
+		ASSERT( out_of_order_bases.count(base_xlink) >= 1 ); // this one!
+		if( out_of_order_bases.count(base_xlink) >= 2 || // Other out-of-orders, we should dup all but one
+		    in_order_bases.count(base_xlink) >= 1 ) // An in-order, we should dup so it can be left alone
 		{
-			case 0: // This tree patch does not appear in the "correct place" in the layout
-			{
-				TRACE("Moving ")(ooo_patch_ptr)("\n");
-				
-				// We can move it to the new place, avoiding the need for duplication
-				MoveTreeZoneToFreePatch(ooo_patch_ptr);
+			// This TZ is aliassed by other TZs
+			TRACE("Duplicating ")(ooo_patch_ptr)("\n");
 
-				// But any further appearances must be duplicated
-				InsertSolo(in_order_bases, base_xlink); 
-				break;
-			}
+			// We'll have to duplicate. Best to duplicate the OOO one so we don't have to do a move
+			shared_ptr<FreeZonePatch> new_free_patch = ooo_tree_patch->DuplicateToFree();
+			*ooo_patch_ptr = new_free_patch;
+
+			// Add to intrinsic tables in DB because we missed InsertIntrinsicPass
+			db->MainTreeInsertIntrinsic( new_free_patch->GetZone() );     
+
+			out_of_order_bases.erase(out_of_order_bases.lower_bound(base_xlink));
+		}
+	}
+	
+	// Now we can do the moves and insert scaffolding		
+    for( shared_ptr<Patch> *ooo_patch_ptr : out_of_order_patches )
+    {
+		auto ooo_tree_patch = dynamic_pointer_cast<TreeZonePatch>(*ooo_patch_ptr);
+		if( ooo_tree_patch )
+		{
+			XLink base_xlink = ooo_tree_patch->GetZone()->GetBaseXLink();
+			ASSERT( base_xlink );
+		
+			TRACE("Moving ")(ooo_patch_ptr)("\n");
 			
-			case 1: // This patch appears in the "correct place" as well as here
-			{
-				TRACE("Duplicating ")(ooo_patch_ptr)("\n");
+			// We can move it to the new place, avoiding the need for duplication
+			MoveTreeZoneToFreePatch(ooo_patch_ptr);
 
-				// We'll have to duplicate. Best to duplicate the OOO one so we don't have to do a move
-				shared_ptr<FreeZonePatch> new_free_patch = ooo_tree_patch->DuplicateToFree();
-				*ooo_patch_ptr = new_free_patch;
-
-				// Add to intrinsic tables in DB because we missed InsertIntrinsicPass
-				db->MainTreeInsertIntrinsic( new_free_patch->GetZone() );     
-				break;
-			}
-			
-			default:
-				ASSERTFAIL();
+			// But any further appearances must be duplicated
+			InsertSolo(in_order_bases, base_xlink); 
 		}
 	}
 }

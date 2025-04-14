@@ -171,3 +171,19 @@ void DuplicateAllPass::Check( shared_ptr<Patch> &layout )
     } );    
 }
 
+// ------------------------- ScaffoldChecker --------------------------
+
+void ScaffoldChecker::Run( shared_ptr<Patch> layout )
+{
+    Patch::ForDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
+    {
+		Check(patch); 
+    } );    
+}
+
+void ScaffoldChecker::Check(shared_ptr<Patch> patch)
+{
+	Zone *zone = patch->GetZone();
+	string tn = zone->GetBaseNode()->GetTypeName();
+	ASSERT( tn.find("Scaffold") == string::npos )(tn);
+}
