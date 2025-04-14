@@ -23,7 +23,7 @@ class BoundaryPass
 public:
 	BoundaryPass( XTreeDatabase *db );
 	
-	void Run(shared_ptr<Patch> source_layout);
+	void Run(shared_ptr<Patch> &layout);
 		
 private:
     void GatherBoundaries(TreeZone *tree_zone);

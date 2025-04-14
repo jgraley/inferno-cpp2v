@@ -60,7 +60,7 @@ void OrderingPass::ConstrainTreePatchesToRange( PatchRecords &patch_records,
                                                 shared_ptr<Mutator> front_ancestor,
                                                 shared_ptr<Mutator> back_ancestor,
                                                 bool just_check )
-{                                                
+{                                	                
     if( patch_records.empty() )
         return;
         
@@ -107,7 +107,7 @@ void OrderingPass::ConstrainTreePatchesToRange( PatchRecords &patch_records,
             ConstrainChildrenToTerminii( tree_patch, just_check );
             
             // InsertSolo is used here because we should only find each TZ as being in order once
-            //FTRACE(tree_patch)("\nSet is:\n")(in_order_bases)("\n");
+            FTRACE(tree_patch)("\nSet is:\n")(in_order_bases)("\n");
             InsertSolo(in_order_bases, tree_patch->GetZone()->GetBaseXLink());
         }
 
@@ -242,10 +242,18 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
             continue;
         }    
 
-        auto p = xlinks_dfo.insert( GetBaseXLink( patch_record ) );
+		if( in_order_bases.count(tz_base) > 0 )
+		{
+			// Known to have been accepted already
+			patch_record.out_of_order = true;
+			continue;
+		}
+
+        auto p = xlinks_dfo.insert(tz_base);
         if( !p.second )
  	    {
-			// Fail, already there
+			// Fail, already there. The DFO element that's already there
+			// might get kicked out later, so possibly do this filtering later TODO
 			patch_record.out_of_order = true;
  		}
     }
@@ -369,6 +377,7 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
  
                     // Insert concatenated run and pretend the concatenated one is the current one (becomes "prev" on next iteration)
                     runs_by_length.insert( make_pair(concatenated_i_back - concatenated_i_front + 1, concatenated_i_front) );
+                    FTRACE("xyz\n");
                     it = InsertSolo( runs_by_front_index, make_pair(concatenated_i_front, concatenated_i_back - concatenated_i_front + 1) );        
                     i_front = concatenated_i_front;
                     i_back = concatenated_i_back;
@@ -427,6 +436,7 @@ void OrderingPass::ProcessOutOfOrder()
 				MoveTreeZoneToFreePatch(ooo_patch_ptr);
 
 				// But any further appearances must be duplicated
+                FTRACE("abc\n");
 				InsertSolo(in_order_bases, base_xlink); 
 				break;
 			}

@@ -75,6 +75,11 @@ void OverlapPass::Check( shared_ptr<Patch> &layout )
 {
     TreeZoneRelation tz_relation( db );
 
+	TreeZonePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &l_patch)
+	{
+		TRACE("Patch: ")(&l_patch)("\n");
+	} );
+
     TreeZonePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<TreeZonePatch> &l_patch)
     {           
 		TreeZonePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<TreeZonePatch> &r_patch)
@@ -83,7 +88,7 @@ void OverlapPass::Check( shared_ptr<Patch> &layout )
 			if( p.second == ZoneRelation::OVERLAP_GENERAL || 
 				p.second == ZoneRelation::OVERLAP_TERMINII )
 			{
-				ASSERT(false)("Tree zone overlap:\n")(l_patch->GetZone())("\nvs:\n")(r_patch->GetZone());
+				ASSERT(false)("Tree zone overlap:\n")(l_patch)("\nvs:\n")(r_patch);
 			}
 		} );
     } );    

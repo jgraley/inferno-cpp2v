@@ -19,7 +19,7 @@ BoundaryPass::BoundaryPass( XTreeDatabase *db_ ) :
 }
 
 
-void BoundaryPass::Run(shared_ptr<Patch> layout)
+void BoundaryPass::Run(shared_ptr<Patch> &layout)
 {	
 	boundaries.clear();
     TreeZonePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
@@ -30,6 +30,7 @@ void BoundaryPass::Run(shared_ptr<Patch> layout)
 	} );
 
 	TRACE("Boundaries:")(boundaries)("\n");
+	TRACE("Check queue:")(check_queue)("\n");
 
     while( !check_queue.empty() ) 
     {
@@ -85,7 +86,7 @@ XLink BoundaryPass::TryGetBoundaryInRange( XLink lower, bool lower_incl, XLink u
 	Orderings::DepthFirstOrdering::iterator it_candidate = boundaries.lower_bound(lower);
 	if( it_candidate == boundaries.end() )
 	{
-		TRACE(*it_candidate)(" failed, no boundaries at or after lower\n");
+		TRACE("failed, no boundaries at or after lower\n");
 		return XLink(); // lower bound rules out
 	}
 	TRACE("lower_bound(")(lower)(") is ")(*it_candidate)("\n");
@@ -95,7 +96,7 @@ XLink BoundaryPass::TryGetBoundaryInRange( XLink lower, bool lower_incl, XLink u
 	}
 	if( it_candidate == boundaries.end() )
 	{
-		TRACE(*it_candidate)(" failed, no boundaries strictly after lower\n");
+		TRACE("failed, no boundaries strictly after lower\n");
 		return XLink(); // exclusive lower bound rules out
 	}
 		
@@ -203,8 +204,11 @@ void BoundaryPass::SplitTreeZoneAtXLink( shared_ptr<Patch> *patch_ptr, XLink spl
 	
 	// Create new parent zone and terminii
 	parent_zone = db->MakeMutableTreeZone(initial_zone->GetBaseXLink(), parent_terminii);
-	*patch_ptr = make_shared<TreeZonePatch>( move(parent_zone), move(parent_children) );	
-
+	auto t = make_shared<TreeZonePatch>( move(parent_zone), move(parent_children) );	
+	
+	TRACE("Splitting: ")(patch_ptr)("\ninto: ")(t)("\nand: ")(new_patch_ptr)("\n");
+	
+	*patch_ptr = t;
 	check_queue.push(patch_ptr);
 	check_queue.push(new_patch_ptr);
 }

@@ -67,7 +67,19 @@ void Patch::AddEmbeddedMarker( RequiresSubordinateSCREngine *new_marker )
 
 string Patch::GetChildrenTrace() const
 {
-    return Trace(child_patches);
+    list<string> ls;
+    for( const shared_ptr<Patch> &child_patch : child_patches )
+    {
+		string s = SSPrintf("%p->", child_patch.get());
+		if( dynamic_cast<TreeZonePatch *>(child_patch.get()) )
+			s += "TreeZonePatch";
+		else if( dynamic_cast<FreeZonePatch *>(child_patch.get()) )
+			s += "FreeZonePatch";
+		else
+			s += "?";
+		ls.push_back(s);
+	}
+	return Trace(ls);
 }
 
 
@@ -100,7 +112,6 @@ catch( const BreakException & )
 void Patch::DepthFirstWalkImpl( function<void(shared_ptr<Patch> &patch)> func_in,
                                 function<void(shared_ptr<Patch> &patch)> func_out )
 {
-	INDENT(".");
     for( shared_ptr<Patch> &patch : child_patches )
     {
         if( func_in )
