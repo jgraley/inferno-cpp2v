@@ -389,13 +389,20 @@ bool OrderingPass::AreLinksConsecutive(XLink left, XLink right, set<XLink, Depth
     set<XLink, DepthFirstRelation>::iterator left_it = xlinks_dfo.find(left);
     set<XLink, DepthFirstRelation>::iterator right_it = xlinks_dfo.find(right);
           
+    // If we're up against either end of the DFO, they can't be consecutive
+	if( left_it == xlinks_dfo.end() || right_it == xlinks_dfo.begin() )
+		return false;
+          
+    // They have to be consecutive in the DFO
     if( next(left_it) != right_it )
 	    return false;
           
+    // A ancestor-descendent pair cannot be contguous because during inversion
+    // the resulting tree zone terminii would break zone rules
 	auto p = dfr.CompareHierarchical( left, right );
 	ASSERT( p.first < 0 ); // should be given by the DFO check
 	if( p.second == DepthFirstRelation::LEFT_IS_ANCESTOR )
-		return false; // Ancestor cannot be contiguous, would break zone terminus rules
+		return false; 
      
     return true;
 }
