@@ -46,7 +46,7 @@ void OrderingPass::ConstrainAnyPatchToDescendants( shared_ptr<Patch> &start_patc
 													          shared_ptr<Mutator> ancestor,
 													          bool just_check )
 {
-    INDENT(just_check?"c":"C");
+    INDENT(just_check?"a":"A");
     TRACE("Starting ")(just_check ? "cross-check" : "transfomation")(" at ")(start_patch)(" with ancestor ")(ancestor)("\n");
     // Actions to take when we have a range. Use at root and for
     // terminii of tree zones.
@@ -60,7 +60,9 @@ void OrderingPass::ConstrainTreePatchesToRange( PatchRecords &patch_records,
                                                 shared_ptr<Mutator> front_ancestor,
                                                 shared_ptr<Mutator> back_ancestor,
                                                 bool just_check )
-{                                	                
+{                               
+	INDENT(just_check?"r":"R");
+
     if( patch_records.empty() )
         return;
         
@@ -107,7 +109,7 @@ void OrderingPass::ConstrainTreePatchesToRange( PatchRecords &patch_records,
             ConstrainChildrenToTerminii( tree_patch, just_check );
             
             // InsertSolo is used here because we should only find each TZ as being in order once
-            FTRACE(tree_patch)("\nSet is:\n")(in_order_bases)("\n");
+            //FTRACE(tree_patch)("\nSet is:\n")(in_order_bases)("\n");
             InsertSolo(in_order_bases, tree_patch->GetZone()->GetBaseXLink());
         }
 
@@ -145,6 +147,8 @@ void OrderingPass::ConstrainTreePatchesToRange( PatchRecords &patch_records,
 void OrderingPass::ConstrainChildrenToTerminii( shared_ptr<TreeZonePatch> &tree_patch, 
                                                            bool just_check )
 {
+	INDENT(just_check?"t":"T");
+	
     // We have a tree zone. For each of its terminii, find the acceptable
     // range of descendent tree zones and recurse.
 	auto mutable_tree_zone = dynamic_cast<MutableTreeZone *>(tree_patch->GetZone());
@@ -185,7 +189,8 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
  											  XLink front_ancestor,
  											  XLink back_ancestor,
  											  bool just_check )
-{                                                
+{          
+	INDENT(just_check?"f":"F");                                      
  	ASSERT( !patch_records.empty() );
  	// We want bounds on an inclusive range that includes the subtrees under
  	// both ancestors (and everything in between wrt DF ordering). So:
@@ -258,7 +263,7 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
  		}
     }
  
-    //FTRACE("Depth-first order: ")(xlinks_dfo)("\n");
+    TRACE("Depth-first order: ")(xlinks_dfo)("\n");
  
     // Find runs of patch records that are consecutive both in the layout and
     // the DF ordering, breaking on patch records outside the supplied overall range.
@@ -267,39 +272,40 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
     bool first = true;            
     for( PatchRecord &patch_record : patch_records )
     {
- 		if( patch_record.out_of_order )
- 		    continue;
- 
-        XLink tz_base = GetBaseXLink( patch_record );
-  
-		// First patch record gets it for free, then we have to check the DF ordering
-		bool consecutive = first || AreLinksConsecutive(prev_tz_base, tz_base, xlinks_dfo);
-
-		if( just_check && !consecutive )
+ 		if( !patch_record.out_of_order )
 		{
-			FTRACE("\nORDERED DEPTH FIRST\n")(xlinks_dfo)("\nWERE AT: ")(tz_base)("\n");
-			ASSERTFAIL(); // we aint goin nowhere
-		}                        
+			XLink tz_base = GetBaseXLink( patch_record );
+	  
+			// First patch record gets it for free, then we have to check the DF ordering
+			bool consecutive = first || AreLinksConsecutive(prev_tz_base, tz_base, xlinks_dfo);
+			TRACE(tz_base)(consecutive?"":" NOT")(" consecutive\n");
 
-		// Completed run if:
-		// - seen at least one patch record since start, and
-		// - not consecutive wrt DF ordering
-		if( !first && !consecutive )
-		{
-			int length = i - run_start_i;
-			runs_by_length.insert( make_pair(length, run_start_i) );
-			runs_by_front_index.insert( make_pair(run_start_i, length) );
+			if( just_check && !consecutive )
+			{
+				FTRACE("DFO: \n")(xlinks_dfo)("\nprev: ")(prev_tz_base)(" current: ")(tz_base)("\n");
+				ASSERTFAIL(); // we aint goin nowhere
+			}                        
+
+			// Completed run if:
+			// - seen at least one patch record since start, and
+			// - not consecutive wrt DF ordering
+			if( !first && !consecutive )
+			{
+				int length = i - run_start_i;
+				runs_by_length.insert( make_pair(length, run_start_i) );
+				runs_by_front_index.insert( make_pair(run_start_i, length) );
+			}
+
+			// Need new run if:
+			// - starting up, or
+			// - not consecutive wrt DF ordering
+			if( first || !consecutive )
+				run_start_i = i; // start new run here
+
+			prev_tz_base = tz_base;
+			first = false;
 		}
-
-		// Need new run if:
-		// - starting up, or
-		// - not consecutive wrt DF ordering
-		if( first || !consecutive )
-			run_start_i = i; // start new run here
-
-		prev_tz_base = tz_base;
-		first = false;
-        i++;        
+		i++;        
     }
  
     // Complete the final run.
@@ -326,7 +332,7 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
         // Mark patch records in this run as out of order and remove from:
         // - local DF ordering
         // - runs data structures
-        //FTRACE("Removing run of %d OOO:\n", l_ooo);
+        TRACE("Removing run of %d OOO:\n", l_ooo);
         for( int i=i_ooo_front; i<i_ooo_front+l_ooo; i++ )
         {
             XLink i_tz_base = GetBaseXLink( patch_records[i] );
@@ -336,7 +342,7 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
                 EraseSolo( xlinks_dfo, i_tz_base ); // remove it exactly once
  
             patch_records[i].out_of_order = true;
-            //FTRACE(i)(": ")(patch_records[i].patch_ptr)("\n");
+            TRACE(i)(": ")(patch_records[i].patch_ptr)("\n");
         }
         EraseSolo( runs_by_length, make_pair(l_ooo, i_ooo_front) ); 
         EraseSolo( runs_by_front_index, i_ooo_front );
@@ -377,7 +383,6 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
  
                     // Insert concatenated run and pretend the concatenated one is the current one (becomes "prev" on next iteration)
                     runs_by_length.insert( make_pair(concatenated_i_back - concatenated_i_front + 1, concatenated_i_front) );
-                    FTRACE("xyz\n");
                     it = InsertSolo( runs_by_front_index, make_pair(concatenated_i_front, concatenated_i_back - concatenated_i_front + 1) );        
                     i_front = concatenated_i_front;
                     i_back = concatenated_i_back;
@@ -422,6 +427,7 @@ bool OrderingPass::AreLinksConsecutive(XLink left, XLink right, set<XLink, Depth
  
 void OrderingPass::ProcessOutOfOrder()
 {
+	INDENT("P");
     for( shared_ptr<Patch> *ooo_patch_ptr : out_of_order_patches )
     {
 		auto ooo_tree_patch = dynamic_pointer_cast<TreeZonePatch>(*ooo_patch_ptr);
@@ -432,17 +438,20 @@ void OrderingPass::ProcessOutOfOrder()
 		{
 			case 0: // This tree patch does not appear in the "correct place" in the layout
 			{
+				TRACE("Moving ")(ooo_patch_ptr)("\n");
+				
 				// We can move it to the new place, avoiding the need for duplication
 				MoveTreeZoneToFreePatch(ooo_patch_ptr);
 
 				// But any further appearances must be duplicated
-                FTRACE("abc\n");
 				InsertSolo(in_order_bases, base_xlink); 
 				break;
 			}
 			
 			case 1: // This patch appears in the "correct place" as well as here
 			{
+				TRACE("Duplicating ")(ooo_patch_ptr)("\n");
+
 				// We'll have to duplicate. Best to duplicate the OOO one so we don't have to do a move
 				shared_ptr<FreeZonePatch> new_free_patch = ooo_tree_patch->DuplicateToFree();
 				*ooo_patch_ptr = new_free_patch;
@@ -461,7 +470,8 @@ void OrderingPass::ProcessOutOfOrder()
 
 void OrderingPass::MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch)
 {
-	//FTRACE("Patch: ")(*target_patch)("\n");
+	INDENT("M");
+
 	// Get the tree zone
 	auto target_tree_patch = dynamic_pointer_cast<TreeZonePatch>(*target_patch);
 	ASSERT( target_tree_patch );

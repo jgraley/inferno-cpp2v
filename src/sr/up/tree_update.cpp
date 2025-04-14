@@ -64,8 +64,8 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink origin_xlink, shared_p
     empty_zone_pass.Run(source_layout);
     empty_zone_pass.Check(source_layout);
     
-    //BoundaryPass boundary_pass( db );
-    //boundary_pass.Run(source_layout);
+    BoundaryPass boundary_pass( db );
+    boundary_pass.Run(source_layout);
 
     OverlapPass overlap_pass( db );
     overlap_pass.Run(source_layout);
