@@ -197,15 +197,41 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
 	ASSERT( db->HasRow(range_back) );
 	//FTRACE("Range: ")(range_front)(" to ")(range_back)(" inclusive\n");
     
-    // Get the patch records in depth-first order
+    // Get the patch records that are in-range and unique, in depth-first order
     set<XLink, DepthFirstRelation> xlinks_dfo(dfr);
     vector<XLink> v;
     for( PatchRecord &patch_record : patch_records )
     {
+        XLink tz_base = GetBaseXLink( patch_record );
+		
+        // Check the tree zone base is in overall range supplied to us for root or parent TZ terminus
+        //FTRACE("Checking ")(tz_base)("...\n");
+        Orderable::Diff diff_front = dfr.Compare3Way(tz_base, range_front);
+        Orderable::Diff diff_back = dfr.Compare3Way(tz_base, range_back);
+        bool ok = diff_front >= 0 && diff_back <= 0; // both inclusive        
+
+        if( !ok )
+        {
+			if( just_check )
+			{
+				//FTRACE(db->GetOrderings().depth_first_ordering)("\n");
+				ASSERT(diff_front >= 0)("Tree zone base ")(tz_base)(" appears before limit ")(range_front)(" in X tree");
+				ASSERT(diff_back <= 0)("Tree zone base ")(tz_base)(" appears after limit ")(range_back)(" in X tree");
+				ASSERTFAIL(); // we aint goin nowhere
+			}
+			
+            // Outside overall range. But we don't need to break up the 
+            // any runs: it's enough to omit from local DF ordering 
+            // and set out_of_order flag.
+            patch_record.out_of_order = true;	
+            continue;		
+        }            
+        
         auto p = xlinks_dfo.insert( GetBaseXLink( patch_record ) );
         if( !p.second )
 		{
-			// Fail, already there
+			// Duplicate is OOO because this is strict ordering and XLink is already 
+			// there (a copy-to-FZ should be inferred for this)
 			patch_record.out_of_order = true;
 		}
     }
@@ -213,14 +239,14 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
     //FTRACE("Depth-first order: ")(xlinks_dfo)("\n");
 
 
-	// Map from x to next(x) where x and next(x) are consecutive
+	// Make a map from x to next(x) where x and next(x) are consecutive
 	map<XLink, XLink> consecutive_pairs;
 	ForOverlappingAdjacentPairs(xlinks_dfo, [&](XLink x, XLink next_x)
 	{
+
 		//auto p = dfr.CompareHierarchical( x, next_x );		
 		consecutive_pairs[x] = next_x;
 	} );
-    XLink df_back = *prev(xlinks_dfo.end());
     
     // Data structures for runs of things that are consecutive wrt DF ordering
     
@@ -247,64 +273,38 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
 			
         XLink tz_base = GetBaseXLink( patch_record );
         set<XLink, DepthFirstRelation>::iterator tz_base_dfo_it = xlinks_dfo.find(tz_base);
-
-        // Check the tree zone base is in overall range supplied to us for root or parent TZ terminus
-        //FTRACE("Checking ")(tz_base)("...\n");
-        Orderable::Diff diff_front = dfr.Compare3Way(tz_base, range_front);
-        Orderable::Diff diff_back = dfr.Compare3Way(tz_base, range_back);
-        bool ok = diff_front >= 0 && diff_back <= 0; // both inclusive        
-
-        if( just_check && !ok )
-        {
-            //FTRACE(db->GetOrderings().depth_first_ordering)("\n");
-            ASSERT(diff_front >= 0)("Tree zone base ")(tz_base)(" appears before limit ")(range_front)(" in X tree");
-            ASSERT(diff_back <= 0)("Tree zone base ")(tz_base)(" appears after limit ")(range_back)(" in X tree");
-            ASSERTFAIL(); // we aint goin nowhere
-        }            
-        
-        if( ok )
-        {			
-            // First patch record gets it for free, then we have to check the DF ordering. If 
-            // prev was at the back of the ordering, we cannot be consecutive.
-            bool consecutive = first || (prev_tz_base!=df_back && consecutive_pairs.at(prev_tz_base)==tz_base);
-            //next(prev_tz_base_dfo_it) == tz_base_dfo_it;
-            
-            if( just_check && !consecutive )
-            {
-                FTRACE("\nORDERED DEPTH FIRST\n")(xlinks_dfo)("\nWERE AT: ")(tz_base)("\n");
-                ASSERT(diff_front >= 0)("Tree zone base ")(tz_base)(" appears before limit ")(range_front)(" in X tree");
-                ASSERT(diff_back <= 0)("Tree zone base ")(tz_base)(" appears after limit ")(range_back)(" in X tree");
-                ASSERTFAIL(); // we aint goin nowhere
-            }                        
-            
-            // Completed run if:
-            // - seen at least one patch record since start, and
-            // - not consecutive wrt DF ordering
-            if( !first && !consecutive )
-            {
-                int length = i - run_start_i;
-                runs_by_length.insert( make_pair(length, run_start_i) );
-                runs_by_front_index.insert( make_pair(run_start_i, length) );
-            }
-            
-            // Need new run if:
-            // - starting up, or
-            // - not consecutive wrt DF ordering
-            if( first || !consecutive )
-                run_start_i = i; // start new run here
-                        
-            prev_tz_base = tz_base;
-            prev_tz_base_dfo_it = tz_base_dfo_it;
-            first = false;
-        }
-        else
-        {
-            // Outside overall range. But we don't need to break up the 
-            // current run: it's enough to remove from local DF ordering 
-            // and set out_of_order flag.
-            EraseSolo( xlinks_dfo, *tz_base_dfo_it );
-            patch_record.out_of_order = true;
-        }    
+			
+		// First patch record gets it for free, then we have to check the DF ordering. If 
+		// prev was at the back of the ordering, we cannot be consecutive.
+		bool consecutive = first || (!xlinks_dfo.empty() && prev_tz_base!=*prev(xlinks_dfo.end()) && consecutive_pairs.at(prev_tz_base)==tz_base);
+		//next(prev_tz_base_dfo_it) == tz_base_dfo_it;
+		
+		if( just_check && !consecutive )
+		{
+			FTRACE("\nORDERED DEPTH FIRST\n")(xlinks_dfo)("\nWERE AT: ")(tz_base)("\n");
+			ASSERTFAIL(); // we aint goin nowhere
+		}                        
+		
+		// Completed run if:
+		// - seen at least one patch record since start, and
+		// - not consecutive wrt DF ordering
+		if( !first && !consecutive )
+		{
+			int length = i - run_start_i;
+			runs_by_length.insert( make_pair(length, run_start_i) );
+			runs_by_front_index.insert( make_pair(run_start_i, length) );
+		}
+		
+		// Need new run if:
+		// - starting up, or
+		// - not consecutive wrt DF ordering
+		if( first || !consecutive )
+			run_start_i = i; // start new run here
+					
+		prev_tz_base = tz_base;
+		prev_tz_base_dfo_it = tz_base_dfo_it;
+		first = false;
+   
         i++;        
     }
     
@@ -370,7 +370,7 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
                 XLink tz_base_front = GetBaseXLink( patch_records[i_front] );
                 //set<XLink, DepthFirstRelation>::iterator tz_base_front_dfo_it = xlinks_dfo.find(tz_base_front);
                         
-                if( prev_tz_base_back != df_back && consecutive_pairs.at(prev_tz_base_back) == tz_base_front ) // Does local DF ordering say we can concatenate?
+                if( !xlinks_dfo.empty() && prev_tz_base_back!=*prev(xlinks_dfo.end()) && consecutive_pairs.at(prev_tz_base_back) == tz_base_front ) // Does local DF ordering say we can concatenate?
                 {
                     //FTRACE("concatenating\n");
                     // Deduce stuff about the new concatenated run
