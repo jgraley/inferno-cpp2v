@@ -79,15 +79,11 @@ void OverlapPass::Check( shared_ptr<Patch> &layout )
     {           
 		TreeZonePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<TreeZonePatch> &r_patch)
 		{						
-			if( l_patch == r_patch ) 
-				LLBreak();
-			
 			auto p = tz_relation.CompareHierarchical( *l_patch->GetZone(), *r_patch->GetZone() );                    
 			if( p.second == ZoneRelation::OVERLAP_GENERAL || 
-				p.second == ZoneRelation::OVERLAP_TERMINII ||
-				p.second == ZoneRelation::EQUAL )
+				p.second == ZoneRelation::OVERLAP_TERMINII )
 			{
-				ASSERT(false)("Tree zone overlap: ")(l_patch->GetZone())(" and ")(r_patch->GetZone());
+				ASSERT(false)("Tree zone overlap:\n")(l_patch->GetZone())("\nvs:\n")(r_patch->GetZone());
 			}
 		} );
     } );    

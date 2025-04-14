@@ -29,6 +29,8 @@ void BoundaryPass::Run(shared_ptr<Patch> layout)
 		check_queue.push(&patch);
 	} );
 
+	TRACE("Boundaries:")(boundaries)("\n");
+
     while( !check_queue.empty() ) 
     {
 		CheckTreeZoneAtBoundaries(check_queue.front());
@@ -49,6 +51,7 @@ void BoundaryPass::GatherBoundaries(TreeZone *tree_zone)
 
 void BoundaryPass::CheckTreeZoneAtBoundaries( shared_ptr<Patch> *patch_ptr )
 {
+	TRACE("Checking ")(*patch_ptr)("\n");
 	auto tree_patch = dynamic_pointer_cast<TreeZonePatch>(*patch_ptr);
 	TreeZone *tree_zone = tree_patch->GetZone();
 	XLink lower_excl = tree_zone->GetBaseXLink();	
@@ -77,23 +80,36 @@ void BoundaryPass::CheckTreeZoneAtBoundaries( shared_ptr<Patch> *patch_ptr )
 
 XLink BoundaryPass::TryGetBoundaryInRange( XLink lower, bool lower_incl, XLink upper, bool upper_incl )
 {
-	// Should find successfully because all the boundaries are already in there
-	Orderings::DepthFirstOrdering::iterator it_lower = boundaries.find(lower);
-	if( it_lower == boundaries.end() )
-		return XLink(); // lower bound rules out
-	if( !lower_incl )
-		++it_lower;
-	if( it_lower == boundaries.end() )
-		return XLink(); // exclusive lower bound rules out
-		
-	XLink candidate = *it_lower;
+	TRACE("Looking for boundary ")(lower_incl?">=":">")(lower)("; ")(upper_incl?"<=":"<")(upper)("\n");
 	
-	Orderable::Diff diff_upper = dfr.Compare3Way(candidate, upper);
-	bool ok = upper_incl ? diff_upper<=0 : diff_upper<0;
+	Orderings::DepthFirstOrdering::iterator it_candidate = boundaries.lower_bound(lower);
+	if( it_candidate == boundaries.end() )
+	{
+		TRACE(*it_candidate)(" failed, no boundaries at or after lower\n");
+		return XLink(); // lower bound rules out
+	}
+	TRACE("lower_bound(")(lower)(") is ")(*it_candidate)("\n");
+	if( *it_candidate==lower && !lower_incl )
+	{
+		++it_candidate;
+	}
+	if( it_candidate == boundaries.end() )
+	{
+		TRACE(*it_candidate)(" failed, no boundaries strictly after lower\n");
+		return XLink(); // exclusive lower bound rules out
+	}
+		
+	XLink candidate = *it_candidate;
+	
+	auto p = dfr.CompareHierarchical(candidate, upper);
+	bool ok = upper_incl ? p.first<=0 : p.first<0;
 
 	if( !ok ) 
+	{
+		TRACE(candidate)(" failed, against upper\n");
 		return XLink();
-	//FTRACE("Got ")(candidate)("\n");
+	}
+	TRACE("got ")(candidate)(" with ")(p)("\n");
 	return candidate;
 }
 
@@ -108,7 +124,7 @@ void BoundaryPass::SplitTreeZoneAtXLink( shared_ptr<Patch> *patch_ptr, XLink spl
 	shared_ptr<Patch> *new_patch_ptr = nullptr;
 
 	auto p = dfr.CompareHierarchical(initial_zone->GetBaseXLink(), split_point);
-	ASSERT( p.second==DepthFirstRelation::LEFT_IS_ANCESTOR ); // split point should be in our zone
+	ASSERT( p.second==DepthFirstRelation::LEFT_IS_ANCESTOR )(initial_zone->GetBaseXLink())(" vs ")(split_point)(" got ")(p); // split point should be in our zone
 	
 	// Co-walk zone and patch
 	size_t terminus_index = 0;

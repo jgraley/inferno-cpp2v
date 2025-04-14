@@ -41,7 +41,7 @@ Orderable::Diff TreeZoneRelation::Compare3Way( const TreeZone &l, const TreeZone
 
 pair<Orderable::Diff, ZoneRelation::RelType> TreeZoneRelation::CompareHierarchical( const TreeZone &l, const TreeZone &r ) const 
 {
-    TRACES("l=")(l)(" r=")(r);    
+    //TRACES("l=")(l)(" r=")(r);    
     DepthFirstRelation df_rel(db);
     
     const TreeZone *d;
@@ -72,20 +72,20 @@ pair<Orderable::Diff, ZoneRelation::RelType> TreeZoneRelation::CompareHierarchic
         case DepthFirstRelation::CONTAINER_SIBLINGS:
         case DepthFirstRelation::ITEM_SIBLINGS:
         case DepthFirstRelation::ROOT_SIBLINGS:
-            TRACES(" different branches: no overlap\n");
+            //TRACES(" different branches: no overlap\n");
             return make_pair(p_base.first, DISTINCT_SIBLINGS); // weakly removed sibling bases cannot overlap
             
         default:
             ASSERTFAILS();
     }
     
-    TRACES(" same branch a=")(a)(" d=")(d);
+    //TRACES(" same branch a=")(a)(" d=")(d);
 
     // If a has a terminus that is an ancestor (weakly)
     // to d's base, then they do not overlap. Otherwise, they do.
     for( XLink terminus : a->GetTerminusXLinks() )
     {
-        TRACES(" terminus: ")(terminus);
+        //TRACES(" terminus: ")(terminus);
         auto p_term = df_rel.CompareHierarchical(terminus, d->GetBaseXLink());
         TRACES(" ")(p_term);
         switch( p_term.second )
@@ -112,6 +112,6 @@ pair<Orderable::Diff, ZoneRelation::RelType> TreeZoneRelation::CompareHierarchic
         }                
     }
     
-    TRACES(" add: overlap\n");
+    //TRACES(" add: overlap\n");
     return make_pair(p_base.first, OVERLAP_GENERAL); // None of a's terminii in path from a's base to zone d, so a goes to leaf through d
 }
