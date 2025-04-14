@@ -144,7 +144,7 @@ void XTreeDatabase::MainTreeExchange( MutableTreeZone *target_tree_zone, FreeZon
     ASSERT( target_tree_zone->GetNumTerminii() == free_zone->GetNumTerminii() )
           ("Target TZ:%lu, source FZ:%lu", target_tree_zone->GetNumTerminii(), free_zone->GetNumTerminii());    
 
-	target_tree_zone->DBCheck(this); 
+	target_tree_zone->Validate(this); 
 
     // Store the core info for the base locally since the link table will change
     // as this function executes.

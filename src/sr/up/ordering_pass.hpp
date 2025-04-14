@@ -87,12 +87,12 @@ public:
     void Check( shared_ptr<Patch> layout );
 
 private:
-    void Worker( shared_ptr<Patch> patch, bool base_equal_ok );
-    void CheckXlink( XLink x, bool equal_ok );
+    void Worker( shared_ptr<Patch> patch, XLink sub_base, bool should_touch );
+    void AppendNextDescendantTreePatches( shared_ptr<Patch> start_patch, 
+                                          vector<shared_ptr<TreeZonePatch>> *ndt_patches );
         
     const XTreeDatabase * const db;
     SR::DepthFirstRelation dfr;                          
-    XLink prev_xlink;
 };
 
 }

@@ -79,15 +79,15 @@ void InversionPass::Invert( LocatedPatch lze )
             
     // Collect base xlinks for child zones (which must be tree zones)
     vector<shared_ptr<Mutator>> terminii_mutators;
-    TreeZonePatch::ForTreeChildren(free_patch, [&](shared_ptr<TreeZonePatch> &child_tree_patch)    
+    Patch::ForChildren(free_patch, [&](shared_ptr<Patch> &child_patch)    
     {
-        auto child_mutable_tree_zone = dynamic_cast<MutableTreeZone *>(child_tree_patch->GetZone());
-        ASSERT(child_mutable_tree_zone);
-        
         // Inversion strategy: we're based on a free zone and FZ merging should 
         // have ensured we'll see only tree zones as children. Each base is a terminus 
         // for the new tree zone.
+		auto child_tree_patch = dynamic_pointer_cast<TreeZonePatch>(child_patch);
         ASSERT( child_tree_patch ); 
+        auto child_mutable_tree_zone = dynamic_cast<MutableTreeZone *>(child_tree_patch->GetZone());
+        ASSERT(child_mutable_tree_zone);        
         
         terminii_mutators.push_back( child_mutable_tree_zone->GetBaseMutator() );
     } );

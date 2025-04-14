@@ -26,7 +26,7 @@ public:
     virtual XLink GetTerminusXLink(size_t index) const = 0;
 
     unique_ptr<FreeZone> Duplicate() const;
-    void DBCheck(const XTreeDatabase *db) const;
+    void Validate(const XTreeDatabase *db) const;
 };
 
 // ------------------------- XTreeZone --------------------------

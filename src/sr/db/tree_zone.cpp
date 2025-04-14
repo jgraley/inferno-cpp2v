@@ -34,7 +34,7 @@ unique_ptr<FreeZone> TreeZone::Duplicate() const
 }
 
 
-void TreeZone::DBCheck(const XTreeDatabase *db) const // TODO maybe move to database?
+void TreeZone::Validate(const XTreeDatabase *db) const // TODO maybe move to database?
 {
     ASSERT( db->HasRow( GetBaseXLink() ) )(GetBaseXLink());
     
@@ -43,17 +43,25 @@ void TreeZone::DBCheck(const XTreeDatabase *db) const // TODO maybe move to data
     // Now we've excluded legit empty zones, checks can be strict
     
     DepthFirstRelation dfr( db );
-    XLink prev_xlink = GetBaseXLink();
+    XLink prev = XLink();
+    XLink base = GetBaseXLink();
     //FTRACE(prev_xlink)("\n");
-    for( XLink terminus_xlink : GetTerminusXLinks() )
+    for( XLink terminus : GetTerminusXLinks() )
     {
-        ASSERT( db->HasRow( terminus_xlink ) )(terminus_xlink);
-        
-        ASSERT( prev_xlink != terminus_xlink )(prev_xlink)(" vs ")(terminus_xlink); // already checked we're not empty
-        
-        ASSERT( dfr.Compare3Way( prev_xlink, terminus_xlink ) < 0 ); // strict: no repeated XLinks
+        ASSERT( db->HasRow( terminus ) )(terminus);        
+                        
+        if( prev )
+        {
+			auto p = dfr.CompareHierarchical( prev, terminus );
+            ASSERT( p.first < 0 ); // strict: no repeated XLinks
+            // Terminii should not be in parent/child relationships
+			ASSERT( p.second != DepthFirstRelation::LEFT_IS_ANCESTOR )(prev)(" vs ")(terminus)(" got ")(p); 
+		}
+
+        auto p2 = dfr.CompareHierarchical( base, terminus );
+		ASSERT( p2.second == DepthFirstRelation::LEFT_IS_ANCESTOR )(base)(" vs ")(terminus)(" got ")(p2); 
             
-        prev_xlink = terminus_xlink;        
+        prev = terminus;        
     }    
 }
 

@@ -197,18 +197,6 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
 	ASSERT( db->HasRow(range_back) );
 	//FTRACE("Range: ")(range_front)(" to ")(range_back)(" inclusive\n");
     
-    // Data structures for runs of things that are consecutive wrt DF ordering
-    
-    // set of pairs: run length to front index. Will be ordered:
-    // - primarily by run length
-    // - secondarily by index into vector (via preserved insertion order)
-    // Note: multimap makes it hard to remove a single element if you don't
-    // already have the required iterator.
-    set<pair<int, int>> runs_by_length; 
-    
-    // Map from the fronts of runs to the run lengths
-    map<int, int> runs_by_front_index; // TODO first->front etc
-    
     // Get the patch records in depth-first order
     set<XLink, DepthFirstRelation> xlinks_dfo(dfr);
     vector<XLink> v;
@@ -224,6 +212,28 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
     
     //FTRACE("Depth-first order: ")(xlinks_dfo)("\n");
 
+
+	// Map from x to next(x) where x and next(x) are consecutive
+	map<XLink, XLink> consecutive_pairs;
+	ForOverlappingAdjacentPairs(xlinks_dfo, [&](XLink x, XLink next_x)
+	{
+		//auto p = dfr.CompareHierarchical( x, next_x );		
+		consecutive_pairs[x] = next_x;
+	} );
+    XLink df_back = *prev(xlinks_dfo.end());
+    
+    // Data structures for runs of things that are consecutive wrt DF ordering
+    
+    // set of pairs: run length to front index. Will be ordered:
+    // - primarily by run length
+    // - secondarily by index into vector (via preserved insertion order)
+    // Note: multimap makes it hard to remove a single element if you don't
+    // already have the required iterator.
+    set<pair<int, int>> runs_by_length; 
+    
+    // Map from the fronts of runs to the run lengths
+    map<int, int> runs_by_front_index; // TODO first->front etc
+        
     // Find runs of patch records that are consecutive both in the layout and
     // the DF ordering, breaking on patch records outside the supplied overall range.
     XLink prev_tz_base;      
@@ -253,9 +263,11 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
         }            
         
         if( ok )
-        {
-            // First patch record gets it for free, then we have to check the DF ordering
-            bool consecutive = first || next(prev_tz_base_dfo_it) == tz_base_dfo_it;
+        {			
+            // First patch record gets it for free, then we have to check the DF ordering. If 
+            // prev was at the back of the ordering, we cannot be consecutive.
+            bool consecutive = first || (prev_tz_base!=df_back && consecutive_pairs.at(prev_tz_base)==tz_base);
+            //next(prev_tz_base_dfo_it) == tz_base_dfo_it;
             
             if( just_check && !consecutive )
             {
@@ -353,12 +365,12 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
             {
                 //FTRACE("prev back: %d of %d, ", prev_i_back, patch_records.size());
                 XLink prev_tz_base_back = GetBaseXLink( patch_records[prev_i_back] );
-                set<XLink, DepthFirstRelation>::iterator prev_tz_base_back_dfo_it = xlinks_dfo.find(prev_tz_base_back);
+                //set<XLink, DepthFirstRelation>::iterator prev_tz_base_back_dfo_it = xlinks_dfo.find(prev_tz_base_back);
                 //FTRACE("front: %d of %d\n", i_front, patch_records.size());
                 XLink tz_base_front = GetBaseXLink( patch_records[i_front] );
-                set<XLink, DepthFirstRelation>::iterator tz_base_front_dfo_it = xlinks_dfo.find(tz_base_front);
+                //set<XLink, DepthFirstRelation>::iterator tz_base_front_dfo_it = xlinks_dfo.find(tz_base_front);
                         
-                if( next(prev_tz_base_back_dfo_it) == tz_base_front_dfo_it ) // Does local DF ordering say we can concatenate?
+                if( prev_tz_base_back != df_back && consecutive_pairs.at(prev_tz_base_back) == tz_base_front ) // Does local DF ordering say we can concatenate?
                 {
                     //FTRACE("concatenating\n");
                     // Deduce stuff about the new concatenated run
@@ -498,36 +510,61 @@ AltOrderingChecker::AltOrderingChecker(const XTreeDatabase *db_) :
 
 void AltOrderingChecker::Check( shared_ptr<Patch> layout )
 {
-    prev_xlink = XLink();
-    Worker(layout, true);
+    Worker(layout, db->GetMainRootXLink(), false);
 }
 
 
-void AltOrderingChecker::Worker( shared_ptr<Patch> patch, bool base_equal_ok )
-{
+void AltOrderingChecker::Worker( shared_ptr<Patch> patch, XLink sub_base, bool should_touch )
+{	
     if( auto tree_patch = dynamic_pointer_cast<TreeZonePatch>(patch) )
     {
         INDENT("T");
         // Got a TreeZone - check ordering of its base, strictness depending on who called us
         const TreeZone *tree_zone = tree_patch->GetZone();
-        CheckXlink( tree_zone->GetBaseXLink(), base_equal_ok );
+        XLink base = tree_zone->GetBaseXLink();
+        auto p = dfr.CompareHierarchical( sub_base, base );
+        if( should_touch )
+			ASSERT( p.second==DepthFirstRelation::EQUAL )(sub_base)(" vs ")(base)(" got ")(p);
+		else
+			ASSERT( p.second==DepthFirstRelation::EQUAL ||
+			        p.second==DepthFirstRelation::LEFT_IS_ANCESTOR )(sub_base)(" vs ")(base)(" got ")(p);
         
-        // Co-loop over the chidren/terminii
+        if( tree_zone->IsEmpty() )
+		{
+			ASSERT( base==OnlyElementOf(tree_zone->GetTerminusXLinks())); // Definition of empty tree zone
+			Worker(OnlyElementOf(patch->GetChildren()), OnlyElementOf(tree_zone->GetTerminusXLinks()), true);
+			return;
+		}
+        
+        // TODO this loop is similar to the one in the FZ case. Pop them both out into 
+        // a new method. First call tree_patch->GetChildren() to get a list<shared_ptr<Patch>>
+        // and co-loop with that. Then pop out into new function. Then have 
+        // AppendNextDescendantTreePatches() also use a list. Then the FZ case 
+        // populates vector<XLink> with the ndt_bases and use the new method.
+        // Prefactor: combine the two loops in FZ case.
+        // Co-loop over the children/terminii
+		XLink prev = XLink();
         vector<XLink> terminii = tree_zone->GetTerminusXLinks();
         FreeZonePatch::ChildPatchIterator it_child = tree_patch->GetChildrenBegin();        
-        for( XLink terminus_xlink : terminii )
+        for( XLink terminus : terminii )
         {
             ASSERT( it_child != tree_patch->GetChildrenEnd() ); // length mismatch
-            
-            // Check this terminus start point is in order. Should not have seen the terminus before.
-            CheckXlink( terminus_xlink, tree_zone->IsEmpty() );
-            
-            // Check everything under the corresponding child is in order. Could see terminus again.
-            Worker( *it_child, true );
-            
-            // Check last xlink under terminus is in order. Could have seen last xlink
-            // during recurse. 
-            CheckXlink( XTreeDatabase::GetLastDescendantXLink(terminus_xlink), true );
+
+			if( prev )
+			{
+				auto p = dfr.CompareHierarchical( prev, terminus );
+				ASSERT( p.first < 0 ); // strict: no repeated XLinks
+				// Terminii should not be in parent/child relationships
+				ASSERT( p.second != DepthFirstRelation::LEFT_IS_ANCESTOR )(prev)(" vs ")(terminus)(" got ")(p);
+			}
+
+			auto p2 = dfr.CompareHierarchical( base, terminus );
+			ASSERT( p2.second == DepthFirstRelation::LEFT_IS_ANCESTOR )(base)(" vs ")(terminus)(" got ")(p2); 
+				
+			prev = terminus;        
+
+            // Check everything under the corresponding child is in order. Should see terminus again.
+            Worker( *it_child, terminus, true );
             
             ++it_child;
         }
@@ -536,12 +573,41 @@ void AltOrderingChecker::Worker( shared_ptr<Patch> patch, bool base_equal_ok )
     else if( auto free_patch = dynamic_pointer_cast<FreeZonePatch>(patch) )
     {
         INDENT("F");
-        Patch::ForChildren( free_patch, [&](shared_ptr<Patch> &child_patch)
+		vector<shared_ptr<TreeZonePatch>> ndt_patches;
+		AppendNextDescendantTreePatches( patch, &ndt_patches );
+		// We're finding tree patches, so they will all have XLinks as bases.
+		
+		TRACE("Checking sub_base: ")(sub_base)(" against %u patches\n", ndt_patches.size());
+		
+		XLink prev = XLink();
+        for( shared_ptr<TreeZonePatch> ndt_patch : ndt_patches )
         {
-            // Got a FreeZone - recurse looking for tree zones to check. But this FZ
-            // provides "padding" so do not expect to see terminus again.            
-            Worker( child_patch, true );
-        } );
+			// ndt_base would become a terminus during inversion, so must
+			// obey the same rules as TZ terminii, relative to sub_base
+			XLink ndt_base = ndt_patch->GetZone()->GetBaseXLink();
+			TRACE("Checking ndt_base: ")(ndt_base)("\n");
+			
+			if( prev )
+			{
+				auto p = dfr.CompareHierarchical( prev, ndt_base );
+				ASSERT( p.first < 0 ); // strict: no repeated XLinks
+				// Terminii should not be in parent/child relationships
+				ASSERT( p.second != DepthFirstRelation::LEFT_IS_ANCESTOR )(prev)(" vs ")(ndt_base)(" got ")(p); 
+			}
+
+			auto p2 = dfr.CompareHierarchical( sub_base, ndt_base );
+			ASSERT( p2.second == DepthFirstRelation::LEFT_IS_ANCESTOR )(sub_base)(" vs ")(ndt_base)(" got ")(p2);  
+				
+			prev = ndt_base;        
+		}				
+
+        for( shared_ptr<TreeZonePatch> ndt_patch : ndt_patches )
+        {
+			XLink ndt_base = ndt_patch->GetZone()->GetBaseXLink();
+
+			// TODO determine should_touch based on the FZs we encountered in AppendNextDescendantTreePatches()  
+            Worker( ndt_patch, ndt_base, false );
+        }
     }
     else
     {
@@ -550,17 +616,26 @@ void AltOrderingChecker::Worker( shared_ptr<Patch> patch, bool base_equal_ok )
 }
 
 
-void AltOrderingChecker::CheckXlink( XLink x, bool equal_ok )
-{    
-    if( prev_xlink )
+void AltOrderingChecker::AppendNextDescendantTreePatches( shared_ptr<Patch> start_patch, 
+                                                          vector<shared_ptr<TreeZonePatch>> *ndt_patches )
+{
+    // Insert descendent tree zones, skipping over free zones, into a list for
+    // convenience.
+    if( auto tree_patch = dynamic_pointer_cast<TreeZonePatch>(start_patch) )
     {
-        TRACE("Check ")(x)(equal_ok?" non-strict":" strict")("\n");
-        if( equal_ok )
-            ASSERT( dfr.Compare3Way( prev_xlink, x ) <= 0 )("prev_xlink=")(prev_xlink)(" x=")(x);
-        else
-            ASSERT( dfr.Compare3Way( prev_xlink, x ) < 0 )("prev_xlink=")(prev_xlink)(" x=")(x);
+        ndt_patches->push_back( tree_patch );
     }
-    
-    prev_xlink = x;
-}
+    else if( auto free_patch = dynamic_pointer_cast<FreeZonePatch>(start_patch) )
+    {
+        Patch::ForChildren( free_patch, [&](shared_ptr<Patch> &child_patch)
+        {
+            AppendNextDescendantTreePatches( child_patch, ndt_patches );
+        } );
+    }
+    else
+    {
+        ASSERTFAIL();
+    }	
+}                                                          
+
 

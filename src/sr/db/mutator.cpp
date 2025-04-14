@@ -295,15 +295,18 @@ void Mutator::Validate() const // TODO call this more
 
 string Mutator::GetTrace() const
 {
+	string s;
  	switch( mode )
 	{
 		case Mode::Root:
-			ASSERT( sp_tp_root_node );
-			return "⌻";
+			s = "⌻";
+			break;
 		
 		case Mode::Singular:
-			ASSERT( parent_singular );
-			return "⌾"+parent_singular->GetTypeName();
+			s = "⌾";
+			if( parent_singular )
+				s += parent_singular->GetTypeName();
+			break;
 		
 		case Mode::Container:
 		{
@@ -319,12 +322,18 @@ string Mutator::GetTrace() const
 				si = "ERROR!";
 			else
 				si = to_string(i);
-			return "⍟"+parent_container->GetTypeName()+"["+si+" of "+to_string(parent_container->size())+"]";			//...?
+			s = "⍟"+parent_container->GetTypeName()+"["+si+" of "+to_string(parent_container->size())+"]";			//...?
+			break;
 		}
 		
 		default:
-			ASSERTFAIL();
+			break;
 	}	
+	
+	const TreePtrInterface *tpi = GetTreePtrInterface();
+	s += "=" + tpi->GetName();
+		
+	return s;
 }
 
 
