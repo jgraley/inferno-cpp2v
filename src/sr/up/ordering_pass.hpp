@@ -63,6 +63,7 @@ private:
 									XLink front_ancestor,
 									XLink back_ancestor,
 									bool just_check );
+	bool AreLinksConsecutive(XLink left, XLink right, set<XLink, DepthFirstRelation> &xlinks_dfo) const;
 
 	void ProcessOutOfOrder();
 	void MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch );

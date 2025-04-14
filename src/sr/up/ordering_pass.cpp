@@ -229,7 +229,6 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
     XLink prev_tz_base;      
     int i=0, run_start_i=0;
     bool first = true;            
-    set<XLink, DepthFirstRelation>::iterator prev_tz_base_dfo_it;
     for( PatchRecord &patch_record : patch_records )
     {
  		if( patch_record.out_of_order )
@@ -256,7 +255,7 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
         if( ok )
         {
             // First patch record gets it for free, then we have to check the DF ordering
-            bool consecutive = first || next(prev_tz_base_dfo_it) == tz_base_dfo_it;
+            bool consecutive = first || AreLinksConsecutive(prev_tz_base, tz_base, xlinks_dfo);
  
             if( just_check && !consecutive )
             {
@@ -283,7 +282,6 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
                 run_start_i = i; // start new run here
  
             prev_tz_base = tz_base;
-            prev_tz_base_dfo_it = tz_base_dfo_it;
             first = false;
         }
         else
@@ -354,12 +352,10 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
             {
                 //FTRACE("prev back: %d of %d, ", prev_i_back, patch_records.size());
                 XLink prev_tz_base_back = GetBaseXLink( patch_records[prev_i_back] );
-                set<XLink, DepthFirstRelation>::iterator prev_tz_base_back_dfo_it = xlinks_dfo.find(prev_tz_base_back);
                 //FTRACE("front: %d of %d\n", i_front, patch_records.size());
                 XLink tz_base_front = GetBaseXLink( patch_records[i_front] );
-                set<XLink, DepthFirstRelation>::iterator tz_base_front_dfo_it = xlinks_dfo.find(tz_base_front);
  
-                if( next(prev_tz_base_back_dfo_it) == tz_base_front_dfo_it ) // Does local DF ordering say we can concatenate?
+                if( AreLinksConsecutive(prev_tz_base_back, tz_base_front, xlinks_dfo) ) // Can we concatenate?
                 {
                     //FTRACE("concatenating\n");
                     // Deduce stuff about the new concatenated run
@@ -385,6 +381,23 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
             first = false;
         }        
     }
+}
+ 
+ 
+bool OrderingPass::AreLinksConsecutive(XLink left, XLink right, set<XLink, DepthFirstRelation> &xlinks_dfo) const
+{
+    set<XLink, DepthFirstRelation>::iterator left_it = xlinks_dfo.find(left);
+    set<XLink, DepthFirstRelation>::iterator right_it = xlinks_dfo.find(right);
+          
+    if( next(left_it) != right_it )
+	    return false;
+          
+	auto p = dfr.CompareHierarchical( left, right );
+	ASSERT( p.first < 0 ); // should be given by the DFO check
+	if( p.second == DepthFirstRelation::LEFT_IS_ANCESTOR )
+		return false; // Ancestor cannot be contiguous, would break zone terminus rules
+     
+    return true;
 }
  
  
