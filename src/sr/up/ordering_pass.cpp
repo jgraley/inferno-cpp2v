@@ -281,10 +281,8 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
     // Get the patch records in depth-first order. Omit:
     // - outside the supplied range
     // - duplicated
-    set<XLink, DepthFirstRelation> xlinks_dfo(dfr);
     set<size_t, DFPatchIndexRelation> indices_dfo(dfpir);
     vector<XLink> v;
-    XLink prev_tz_base;          
     for( PatchRecord &patch_record : patch_records )
     {
         XLink tz_base = GetBaseXLink( patch_record );
@@ -320,9 +318,7 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
 			continue;
 		}
 
-        auto p = xlinks_dfo.insert(tz_base);
-        auto p2 = indices_dfo.insert((size_t)((&patch_record) - (patch_records.data())));
-        ASSERT( p.second == p2.second );
+        auto p = indices_dfo.insert((size_t)((&patch_record) - (patch_records.data())));
         if( !p.second )
  	    {
 			// Fail, already there. The DFO element that's already there
@@ -330,29 +326,25 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
 			patch_record.out_of_order = true;
 			continue;
  		}
-		prev_tz_base = tz_base; 		
     }
  
-    TRACE("Depth-first order: ")(xlinks_dfo)("\n");
+    //FTRACE("Depth-first order: ")(indices_dfo)("\n");
  
     // Find runs of patch records that are consecutive both in the layout and
     // the DF ordering, breaking on patch records outside the supplied overall range.
     int i=0, run_start_i=0, prev_i=0;
     bool first = true;     
-    prev_tz_base = XLink();       
     for( PatchRecord &patch_record : patch_records )
     {
  		if( !patch_record.out_of_order )
-		{
-			XLink tz_base = GetBaseXLink( patch_record );
-	  
+		{  
 			// First patch record gets it for free, then we have to check the DF ordering
 			bool consecutive = first || AreLinksConsecutive(prev_i, i, indices_dfo, dfpir);
-			TRACE(tz_base)(consecutive?"":" NOT")(" consecutive\n");
+			TRACE(i)(consecutive?"":" NOT")(" consecutive\n");
 
 			if( just_check && !consecutive )
 			{
-				FTRACE("DFO: \n")(xlinks_dfo)("\nprev: ")(prev_tz_base)(" current: ")(tz_base)("\n");
+				FTRACE("DFO: \n")(indices_dfo)("\nprev: ")(prev_i)(" current: ")(i)("\n");
 				ASSERTFAIL(); // we aint goin nowhere
 			}                        
 
@@ -372,7 +364,6 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
 			if( first || !consecutive )
 				run_start_i = i; // start new run here
 
-			prev_tz_base = tz_base;
 			prev_i = i;
 			first = false;
 		}
@@ -406,17 +397,10 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
         TRACE("Removing run of %d OOO:\n", l_ooo);
         for( int i=i_ooo_front; i<i_ooo_front+l_ooo; i++ )
         {
-            XLink i_tz_base = GetBaseXLink( patch_records[i] );
             if( patch_records[i].out_of_order )
-            {
-                ASSERT( xlinks_dfo.count( i_tz_base ) == 0 ); 
                 ASSERT( indices_dfo.count( i ) == 0 ); // should already be gone
-			}
             else
-            {
-				EraseSolo( xlinks_dfo, i_tz_base ); 
                 EraseSolo( indices_dfo, i ); 
-			}
  
             patch_records[i].out_of_order = true;
             TRACE(i)(": ")(patch_records[i].patch_ptr)("\n");
