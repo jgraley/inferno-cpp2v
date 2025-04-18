@@ -283,9 +283,9 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
     // - duplicated
     set<size_t, DFPatchIndexRelation> indices_dfo(dfpir);
     vector<XLink> v;
-    for( PatchRecord &patch_record : patch_records )
+    for( size_t i=0; i<patch_records.size(); i++ )
     {
-        XLink tz_base = GetBaseXLink( patch_record );
+        XLink tz_base = GetBaseXLink( patch_records[i] );
 
         // Check the tree zone base is in overall range supplied to us for root or parent TZ terminus
         //FTRACE("Checking ")(tz_base)("...\n");
@@ -307,23 +307,23 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
             // Outside overall range. But we don't need to break up any
             // run: it's enough to omit from local DF ordering 
             // and set out_of_order flag.
-            patch_record.out_of_order = true;
+            patch_records[i].out_of_order = true;
             continue;
         }    
 
 		if( in_order_bases.count(tz_base) > 0 )
 		{
 			// This TZ is known to have been accepted as in-order somewhere else in the layout
-			patch_record.out_of_order = true;
+			patch_records[i].out_of_order = true;
 			continue;
 		}
 
-        auto p = indices_dfo.insert((size_t)((&patch_record) - (patch_records.data())));
+        auto p = indices_dfo.insert(i);
         if( !p.second )
  	    {
 			// Fail, already there. The DFO element that's already there
 			// might get kicked out later, so possibly do this filtering later TODO
-			patch_record.out_of_order = true;
+			patch_records[i].out_of_order = true;
 			continue;
  		}
     }
