@@ -10,14 +10,15 @@
 
 //#define DEBUG
 
-using namespace SR;                   
 
-class DFPatchIndexRelation
+namespace SR 
+{
+	class DFPatchIndexRelation
 {
 public: 
 	typedef size_t KeyType;
 
-    DFPatchIndexRelation(const XTreeDatabase *db, const vector<OrderingPass::PatchRecord> &patch_records);
+    explicit DFPatchIndexRelation(const XTreeDatabase *db, const vector<OrderingPass::PatchRecord> &patch_records);
 
     /// Less operator: for use with set, map etc
     bool operator()( KeyType l_key, KeyType r_key ) const;
@@ -28,6 +29,9 @@ private:
     DepthFirstRelation df;
     const vector<OrderingPass::PatchRecord> &patch_records;
 }; 
+}
+
+using namespace SR;                   
 
 
 DFPatchIndexRelation::DFPatchIndexRelation(const XTreeDatabase *db, const vector<OrderingPass::PatchRecord> &patch_records_) :
@@ -317,9 +321,6 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
 		}
 
         auto p = xlinks_dfo.insert(tz_base);
-        
-        
-        
         auto p2 = indices_dfo.insert((size_t)((&patch_record) - (patch_records.data())));
         ASSERT( p.second == p2.second );
         if( !p.second )
@@ -336,8 +337,9 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
  
     // Find runs of patch records that are consecutive both in the layout and
     // the DF ordering, breaking on patch records outside the supplied overall range.
-    int i=0, run_start_i=0;
-    bool first = true;            
+    int i=0, run_start_i=0, prev_i=0;
+    bool first = true;     
+    prev_tz_base = XLink();       
     for( PatchRecord &patch_record : patch_records )
     {
  		if( !patch_record.out_of_order )
@@ -345,7 +347,7 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
 			XLink tz_base = GetBaseXLink( patch_record );
 	  
 			// First patch record gets it for free, then we have to check the DF ordering
-			bool consecutive = first || AreLinksConsecutive(prev_tz_base, tz_base, xlinks_dfo);
+			bool consecutive = first || AreLinksConsecutive(prev_i, i, indices_dfo, dfpir);
 			TRACE(tz_base)(consecutive?"":" NOT")(" consecutive\n");
 
 			if( just_check && !consecutive )
@@ -371,6 +373,7 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
 				run_start_i = i; // start new run here
 
 			prev_tz_base = tz_base;
+			prev_i = i;
 			first = false;
 		}
 		i++;        
@@ -405,9 +408,15 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
         {
             XLink i_tz_base = GetBaseXLink( patch_records[i] );
             if( patch_records[i].out_of_order )
-                ASSERT( xlinks_dfo.count( i_tz_base ) == 0 ); // should already be gone
+            {
+                ASSERT( xlinks_dfo.count( i_tz_base ) == 0 ); 
+                ASSERT( indices_dfo.count( i ) == 0 ); // should already be gone
+			}
             else
-                EraseSolo( xlinks_dfo, i_tz_base ); // remove it exactly once
+            {
+				EraseSolo( xlinks_dfo, i_tz_base ); 
+                EraseSolo( indices_dfo, i ); 
+			}
  
             patch_records[i].out_of_order = true;
             TRACE(i)(": ")(patch_records[i].patch_ptr)("\n");
@@ -436,7 +445,7 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
                 //FTRACE("front: %d of %d\n", i_front, patch_records.size());
                 XLink tz_base_front = GetBaseXLink( patch_records[i_front] );
  
-                if( AreLinksConsecutive(prev_tz_base_back, tz_base_front, xlinks_dfo) ) // Can we concatenate?
+                if( AreLinksConsecutive(prev_i_back, i_front, indices_dfo, dfpir) ) // Can we concatenate?
                 {
                     //FTRACE("concatenating\n");
                     // Deduce stuff about the new concatenated run
@@ -465,17 +474,17 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
 }
  
  
-bool OrderingPass::AreLinksConsecutive(XLink left, XLink right, set<XLink, DepthFirstRelation> &xlinks_dfo) const
+bool OrderingPass::AreLinksConsecutive(size_t left, size_t right, set<size_t, DFPatchIndexRelation> &indices_dfo, DFPatchIndexRelation &dfpir) const
 {
-    set<XLink, DepthFirstRelation>::iterator left_it = xlinks_dfo.find(left);
-    set<XLink, DepthFirstRelation>::iterator right_it = xlinks_dfo.find(right);
+    set<size_t, DFPatchIndexRelation>::iterator left_it = indices_dfo.find(left);
+    set<size_t, DFPatchIndexRelation>::iterator right_it = indices_dfo.find(right);
           
     // If either is missing from DFO, we mustn't assume consecutivity
-	if( left_it == xlinks_dfo.end() || right_it == xlinks_dfo.end() )
+	if( left_it == indices_dfo.end() || right_it == indices_dfo.end() )
 		return false;
           
     // If we're up against either end of the DFO, they can't be consecutive
-	if( next(left_it) == xlinks_dfo.end() || right_it == xlinks_dfo.begin() )
+	if( next(left_it) == indices_dfo.end() || right_it == indices_dfo.begin() )
 		return false;
           
     // They have to be consecutive in the DFO
@@ -484,7 +493,7 @@ bool OrderingPass::AreLinksConsecutive(XLink left, XLink right, set<XLink, Depth
           
     // A ancestor-descendent pair cannot be contguous because during inversion
     // the resulting tree zone terminii would break zone rules
-	auto p = dfr.CompareHierarchical( left, right );
+	auto p = dfpir.CompareHierarchical( left, right );
 	ASSERT( p.first < 0 ); // should be given by the DFO check
 	if( p.second == DepthFirstRelation::LEFT_IS_ANCESTOR )
 		return false; 

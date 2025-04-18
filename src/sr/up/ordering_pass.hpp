@@ -11,6 +11,8 @@
 
 namespace SR 
 {
+	
+class DFPatchIndexRelation;	
 
 /**
  * Detect where the ordering of tree zones impled by the layout differs from that 
@@ -63,7 +65,7 @@ private:
 									XLink front_ancestor,
 									XLink back_ancestor,
 									bool just_check );
-	bool AreLinksConsecutive(XLink left, XLink right, set<XLink, DepthFirstRelation> &xlinks_dfo) const;
+	bool AreLinksConsecutive(size_t left, size_t right, set<size_t, DFPatchIndexRelation> &indices_dfo, DFPatchIndexRelation &dfpir) const;
 
 	void ProcessOutOfOrder();
 	void MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch );
