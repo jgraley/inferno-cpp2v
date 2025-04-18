@@ -332,46 +332,45 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
  
     // Find runs of patch records that are consecutive both in the layout and
     // the DF ordering, breaking on patch records outside the supplied overall range.
-    int i=0, run_start_i=0, prev_i=0;
+    int run_start_i=0, prev_i=0;
     bool first = true;     
-    for( PatchRecord &patch_record : patch_records )
+    for( size_t i=0; i<patch_records.size(); i++ )
     {
- 		if( !patch_record.out_of_order )
-		{  
-			// First patch record gets it for free, then we have to check the DF ordering
-			bool consecutive = first || AreLinksConsecutive(prev_i, i, indices_dfo, dfpir);
-			TRACE(i)(consecutive?"":" NOT")(" consecutive\n");
+ 		if( patch_records[i].out_of_order )
+			continue;
 
-			if( just_check && !consecutive )
-			{
-				FTRACE("DFO: \n")(indices_dfo)("\nprev: ")(prev_i)(" current: ")(i)("\n");
-				ASSERTFAIL(); // we aint goin nowhere
-			}                        
+		// First patch record gets it for free, then we have to check the DF ordering
+		bool consecutive = first || AreLinksConsecutive(prev_i, i, indices_dfo, dfpir);
+		TRACE(i)(consecutive?"":" NOT")(" consecutive\n");
 
-			// Completed run if:
-			// - seen at least one patch record since start, and
-			// - not consecutive wrt DF ordering
-			if( !first && !consecutive )
-			{
-				int length = i - run_start_i;
-				runs_by_length.insert( make_pair(length, run_start_i) );
-				runs_by_front_index.insert( make_pair(run_start_i, length) );
-			}
+		if( just_check && !consecutive )
+		{
+			FTRACE("DFO: \n")(indices_dfo)("\nprev: ")(prev_i)(" current: ")(i)("\n");
+			ASSERTFAIL(); // we aint goin nowhere
+		}                        
 
-			// Need new run if:
-			// - starting up, or
-			// - not consecutive wrt DF ordering
-			if( first || !consecutive )
-				run_start_i = i; // start new run here
-
-			prev_i = i;
-			first = false;
+		// Completed run if:
+		// - seen at least one patch record since start, and
+		// - not consecutive wrt DF ordering
+		if( !first && !consecutive )
+		{
+			int length = i - run_start_i;
+			runs_by_length.insert( make_pair(length, run_start_i) );
+			runs_by_front_index.insert( make_pair(run_start_i, length) );
 		}
-		i++;        
+
+		// Need new run if:
+		// - starting up, or
+		// - not consecutive wrt DF ordering
+		if( first || !consecutive )
+			run_start_i = i; // start new run here
+
+		prev_i = i;
+		first = false;
     }
- 
+     
     // Complete the final run.
-    int length = i - run_start_i;
+    int length = patch_records.size() - run_start_i;
     runs_by_length.insert( make_pair(length, run_start_i) );
     runs_by_front_index.insert( make_pair(run_start_i, length) );
  
