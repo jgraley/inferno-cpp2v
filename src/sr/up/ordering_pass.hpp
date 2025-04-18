@@ -34,12 +34,12 @@ public:
     // Just ASSERT no empty zones
     void Check( shared_ptr<Patch> &layout );
 
-private:    
     struct PatchRecord
     {
         shared_ptr<Patch> *patch_ptr; // Double pointer to patch node so we can mutate
         bool out_of_order; 
     };
+private:    
     typedef vector<PatchRecord> PatchRecords;
 
 	// On use of ancestor, front_ancestor, back_ancestor: when doing the 
@@ -93,7 +93,7 @@ private:
                                           vector<shared_ptr<TreeZonePatch>> *ndt_patches );
         
     const XTreeDatabase * const db;
-    SR::DepthFirstRelation dfr;                          
+    SR::DepthFirstRelation dfr;   
 };
 
 }

@@ -527,7 +527,7 @@ typename _Unique_if<T>::_Known_bound make_unique(Args&&...) = delete;
 // done by providing the pointer type (not the pointed-to type).
 template<typename POINTER_TYPE>
 bool DereferencingIsLess( const POINTER_TYPE &a, 
-                        const POINTER_TYPE &b )
+                          const POINTER_TYPE &b )
 {
     return *a < *b;
 }                 

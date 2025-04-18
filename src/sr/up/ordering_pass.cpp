@@ -12,6 +12,63 @@
 
 using namespace SR;                   
 
+class DFPatchIndexRelation
+{
+public: 
+	typedef size_t KeyType;
+
+    DFPatchIndexRelation(const XTreeDatabase *db, const vector<OrderingPass::PatchRecord> &patch_records);
+
+    /// Less operator: for use with set, map etc
+    bool operator()( KeyType l_key, KeyType r_key ) const;
+    Orderable::Diff Compare3Way( KeyType l_key, KeyType r_key ) const;
+    pair<Orderable::Diff, DepthFirstRelation::RelType> CompareHierarchical( KeyType l_key, KeyType r_key ) const;
+    
+private:
+    DepthFirstRelation df;
+    const vector<OrderingPass::PatchRecord> &patch_records;
+}; 
+
+
+DFPatchIndexRelation::DFPatchIndexRelation(const XTreeDatabase *db, const vector<OrderingPass::PatchRecord> &patch_records_) :
+    df( db ),
+    patch_records( patch_records_ )
+{
+}    
+
+/// Less operator: for use with set, map etc
+bool DFPatchIndexRelation::operator()( KeyType l_key, KeyType r_key ) const
+{
+    return Compare3Way(l_key, r_key) < 0;
+}
+
+Orderable::Diff DFPatchIndexRelation::Compare3Way( KeyType l_key, KeyType r_key ) const
+{
+    return CompareHierarchical( l_key, r_key ).first;	
+}
+
+
+pair<Orderable::Diff, DepthFirstRelation::RelType> DFPatchIndexRelation::CompareHierarchical( KeyType l_key, KeyType r_key ) const
+{
+	shared_ptr<Patch> *l_pp = patch_records[l_key].patch_ptr;
+    ASSERT( l_pp );
+    ASSERT( *l_pp );
+    auto l_tp = dynamic_pointer_cast<TreeZonePatch>(*l_pp);
+    ASSERT( l_tp );
+	XLink l_xlink = l_tp->GetZone()->GetBaseXLink();
+	
+	shared_ptr<Patch> *r_pp = patch_records[r_key].patch_ptr;
+    ASSERT( r_pp );
+    ASSERT( *r_pp );
+    auto r_tp = dynamic_pointer_cast<TreeZonePatch>(*r_pp);
+    ASSERT( r_tp );
+	XLink r_xlink = r_tp->GetZone()->GetBaseXLink();
+
+	return df.CompareHierarchical( l_xlink, r_xlink );
+	ASSERTFAIL();
+}
+
+
 // ------------------------- OrderingPass --------------------------
 
 OrderingPass::OrderingPass(XTreeDatabase *db_) :
@@ -192,6 +249,8 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
 {          
 	INDENT(just_check?"f":"F");                                      
  	ASSERT( !patch_records.empty() );
+    DFPatchIndexRelation dfpir( db, patch_records );   
+                        
  	// We want bounds on an inclusive range that includes the subtrees under
  	// both ancestors (and everything in between wrt DF ordering). So:
  	// - The ancestor itself is the front of such a range
@@ -200,6 +259,7 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
  	XLink range_front = front_ancestor;
  	XLink range_back = db->GetLastDescendantXLink(back_ancestor);
  	ASSERT( db->HasRow(range_back) );
+ 	
  	//FTRACE("Range: ")(range_front)(" to ")(range_back)(" inclusive\n");
  
     // Data structures for runs of things that are consecutive wrt DF ordering
@@ -218,7 +278,9 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
     // - outside the supplied range
     // - duplicated
     set<XLink, DepthFirstRelation> xlinks_dfo(dfr);
+    set<size_t, DFPatchIndexRelation> indices_dfo(dfpir);
     vector<XLink> v;
+    XLink prev_tz_base;          
     for( PatchRecord &patch_record : patch_records )
     {
         XLink tz_base = GetBaseXLink( patch_record );
@@ -249,25 +311,31 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
 
 		if( in_order_bases.count(tz_base) > 0 )
 		{
-			// Known to have been accepted already
+			// This TZ is known to have been accepted as in-order somewhere else in the layout
 			patch_record.out_of_order = true;
 			continue;
 		}
 
         auto p = xlinks_dfo.insert(tz_base);
+        
+        
+        
+        auto p2 = indices_dfo.insert((size_t)((&patch_record) - (patch_records.data())));
+        ASSERT( p.second == p2.second );
         if( !p.second )
  	    {
 			// Fail, already there. The DFO element that's already there
 			// might get kicked out later, so possibly do this filtering later TODO
 			patch_record.out_of_order = true;
+			continue;
  		}
+		prev_tz_base = tz_base; 		
     }
  
     TRACE("Depth-first order: ")(xlinks_dfo)("\n");
  
     // Find runs of patch records that are consecutive both in the layout and
     // the DF ordering, breaking on patch records outside the supplied overall range.
-    XLink prev_tz_base;      
     int i=0, run_start_i=0;
     bool first = true;            
     for( PatchRecord &patch_record : patch_records )
