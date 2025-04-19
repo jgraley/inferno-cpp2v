@@ -69,6 +69,13 @@ Mutator::Mutator( Mode mode_,
 }
 
 
+shared_ptr<Mutator> Mutator::Clone() const // For #784
+{
+	auto pm = new Mutator(mode, parent_node, parent_singular, parent_container, container_iterator, sp_tp_root_node);
+	return shared_ptr<Mutator>(pm);
+}
+
+
 bool Mutator::operator<(const Mutator &right) const
 {
 	return GetTreePtrInterface() < right.GetTreePtrInterface();
@@ -91,36 +98,35 @@ TreePtr<Node> Mutator::ExchangeChild( TreePtr<Node> new_child )
 {	
 	// Free zone merging should get rid of these, and things will change with general wide zone support
 	ASSERT( !dynamic_cast<ContainerInterface *>(new_child.get()) )("Cannot accept wide here");
-
+	TreePtr<Node> old_child = GetChildTreePtr();
 	switch( mode )
 	{
 		case Mode::Root:
 		{
-			TreePtr<Node> old_child = *sp_tp_root_node;
 			*sp_tp_root_node = new_child;
-			TRACE("Singular mutated ")(new_child)("\n");   
-			return old_child;
+			TRACE("Singular mutated ")(old_child)(" into ")(new_child)("\n");   
+			break;
 		}
 
 		case Mode::Singular:
 		{
-			TreePtr<Node> old_child = (TreePtr<Node>)*parent_singular;
 			*parent_singular = new_child;
-			TRACE("Singular mutated ")(new_child)("\n");   
-			return old_child;
+			TRACE("Singular mutated ")(old_child)(" into ")(new_child)("\n");   
+			break;
 		}
 			
 		case Mode::Container:
 		{
-			TreePtr<Node> old_child = (TreePtr<Node>)*container_iterator;
 			container_iterator.Mutate(&new_child); 
-			TRACE("Container mutated ")(new_child)("\n");   
-			return old_child;
+			TRACE("Container mutated ")(old_child)(" into ")(new_child)("\n");   
+			break;
 		}
 		
 		default: 
 			ASSERTFAIL();
-	}	    
+	}	  
+	
+	return old_child;
 }
     
     
@@ -162,13 +168,18 @@ TreePtr<Node> Mutator::ExchangeContainer( ContainerInterface *child_container,
 }
     
     
-void Mutator::ExchangeParent( Mutator &other_mut )
+void Mutator::ExchangeParent( Mutator &other_mut, Mutator& watch_mut )
 {
+	ASSERT( watch_mut.GetChildTreePtr() );
     TreePtr<Node> other_child_node = other_mut.GetChildTreePtr(); // outside the zone        
+	ASSERT( watch_mut.GetChildTreePtr() );
     TreePtr<Node> my_child_node =  ExchangeChild( other_child_node );    
+	ASSERT( watch_mut.GetChildTreePtr() );
     other_mut.ExchangeChild( my_child_node );    
+	ASSERT( watch_mut.GetChildTreePtr() );
         
     swap(*this, other_mut);
+	ASSERT( watch_mut.GetChildTreePtr() );
 }
     
     

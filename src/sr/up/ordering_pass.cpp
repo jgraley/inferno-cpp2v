@@ -10,6 +10,7 @@
 
 //#define DEBUG
 
+//#define NEW_STUFF
 
 namespace SR 
 {
@@ -585,6 +586,7 @@ void OrderingPass::MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch)
 	ASSERT( target_tree_patch );
 	MutableTreeZone *target_tree_zone = dynamic_cast<MutableTreeZone *>(target_tree_patch->GetZone());
 	ASSERT( target_tree_zone );
+	ASSERT( !target_tree_zone->IsEmpty() ); // See #784
 	
 	// Create the scaffold in a free zone
 	auto free_zone = FreeZone::CreateScaffold( target_tree_zone->GetBaseMutator()->GetTreePtrInterface(), 

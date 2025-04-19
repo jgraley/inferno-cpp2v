@@ -130,14 +130,13 @@ XLink XTreeZone::GetTerminusXLink(size_t index) const
 string XTreeZone::GetTrace() const
 {
     string s;
+	s = Trace(base);
     if( IsEmpty() )
     {
-        s = " ↯ "; // Indicates zone is empty due to a terminus at base
-                   // (we still give the base, for info)
+        s += " ↯ "; // Indicates zone is empty due to a terminus at base
     }
     else
-    {
-        s = Trace(base);
+    {        
         if( terminii.empty() )
             s += " → "; // Indicates the zone goes all the way to leaves i.e. subtree
         else
@@ -229,32 +228,51 @@ shared_ptr<Mutator> MutableTreeZone::GetTerminusMutator(size_t index) const
 
 void MutableTreeZone::Exchange( FreeZone *free_zone )
 {    
-	ASSERT( !free_zone->IsEmpty() ); // Could add support but apparently don't need it rn
-	        
-    if( IsEmpty() )
-    {
-        *free_zone = *FreeZone::CreateEmpty(); // Dodgy but it is reached
-        return;
-	}
+	// Should be true regardless of empty zones
+	ASSERT( GetNumTerminii() == free_zone->GetNumTerminii() );
+
+	ASSERT( !free_zone->IsEmpty() ); // Could add support but apparently don't need it rn	       	        
             
+     ASSERT( base->GetChildTreePtr() )(IsEmpty());
+
     // Do a co-walk and exchange one at a time. We want to modify the parent
     // sides of the terminii in-place, leaving valid mutators behind. 
     FreeZone::TerminusIterator free_mut_it = free_zone->GetTerminiiBegin();    
-    for( shared_ptr<Mutator> tree_terminus : terminii )
+    for( shared_ptr<Mutator> &tree_terminus : terminii )
     {
         ASSERT( free_mut_it != free_zone->GetTerminiiEnd() ); // length mismatch    
-                                	
-		tree_terminus->ExchangeParent(**free_mut_it); // deep
+                         
+	    if( IsEmpty() )
+	    {
+			// #784 workaround, will NOT alias to other mutators eg in other
+			// tree zones, eg ones at these terminii, so you must not use them egain. 
+			tree_terminus = tree_terminus->Clone(); 
+		}	
+		else
+		{
+			ASSERT( tree_terminus != base );
+		}
+		ASSERT( base->GetChildTreePtr() )(IsEmpty()); // <--- passes
+		ASSERT( *free_mut_it != base ); // <--- passes
+		ASSERT( (*free_mut_it)->GetChildTreePtr() != base->GetChildTreePtr() );		
+		tree_terminus->ExchangeParent(**free_mut_it, *base); // deep
+		ASSERT( tree_terminus->GetChildTreePtr() )(IsEmpty()); // <--- passes
+		ASSERT( base->GetChildTreePtr() )(IsEmpty()); // <--- fails
                 
+        ASSERT( tree_terminus->GetChildTreePtr() );
         free_mut_it++;
     } 
     ASSERT( free_mut_it == free_zone->GetTerminiiEnd() ); // length mismatch  
+
+    ASSERT( base->GetChildTreePtr() )(IsEmpty());
 
     // Exchange the base. We want to modify the child side of the base
     // in-place, leaving valid mutators behind. 
     TreePtr<Node> free_base = free_zone->GetBaseNode();
     TreePtr<Node> old_base = base->ExchangeChild( free_base );	// deep 
     
+    ASSERT( base->GetChildTreePtr() )(IsEmpty());
+    ASSERT( old_base );
 	free_zone->SetBase( old_base );	
 }
 
@@ -262,14 +280,13 @@ void MutableTreeZone::Exchange( FreeZone *free_zone )
 string MutableTreeZone::GetTrace() const
 {
     string s;
+	s = Trace(base);
     if( IsEmpty() )
     {
-        s = " ↯ "; // Indicates zone is empty due to a terminus at base
-                   // (we still give the base, for info)
+        s += " ↯ "; // Indicates zone is empty due to a terminus at base
     }
     else
-    {
-        s = Trace(base);
+    {       
         if( terminii.empty() )
             s += " → "; // Indicates the zone goes all the way to leaves i.e. subtree
         else

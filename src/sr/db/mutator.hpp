@@ -29,7 +29,6 @@ public:
 	static shared_ptr<Mutator> MakeFreeContainerMutator( TreePtr<Node> parent_node, 
                                                          ContainerInterface *parent_container,
                                                          ContainerInterface::iterator container_iterator );
-	
 private: friend class XTreeDatabase;
 	static shared_ptr<Mutator> MakeTreeRootMutator( shared_ptr<TreePtr<Node>> sp_tp_root_node );
 	static shared_ptr<Mutator> MakeTreeSingularMutator( TreePtr<Node> parent_node, 
@@ -46,6 +45,8 @@ private:
                       shared_ptr<TreePtr<Node>> sp_tp_root_node_ );             
 
 public:  
+	shared_ptr<Mutator> Clone() const; // For #784
+	
     bool operator<(const Mutator &right) const;
 	bool operator==( const Mutator &right ) const;
 	bool operator!=( const Mutator &right ) const;      
@@ -53,7 +54,7 @@ public:
     TreePtr<Node> ExchangeChild( TreePtr<Node> new_child );
     TreePtr<Node> ExchangeContainer( ContainerInterface *child_container,                               
                                      list<shared_ptr<Mutator>> child_terminii = {} );
-    void ExchangeParent( Mutator& other_mut );
+    void ExchangeParent( Mutator& other_mut, Mutator& watch_mut );
     
     TreePtr<Node> GetParentNode() const;
     bool IsAtRoot() const;        
