@@ -94,6 +94,7 @@ void InversionPass::Invert( LocatedPatch lze )
          
     // Make the inverted TZ    
     MutableTreeZone target_tree_zone( base_mutator, move(terminii_mutators) );    
+    ASSERT( !target_tree_zone.IsEmpty() )(target_tree_zone); // hypothesis: I don't think we can handle this
     FreeZone free_zone = *free_patch->GetZone();
     
     // Write it into the tree

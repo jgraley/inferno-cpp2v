@@ -43,6 +43,7 @@ public:
     };
 private:    
     typedef vector<PatchRecord> PatchRecords;
+    typedef set<size_t, DFPatchIndexRelation> IndicesDFO;
 
 	// On use of ancestor, front_ancestor, back_ancestor: when doing the 
 	// exchanges on the fly, we may actually move the back end of the
@@ -90,7 +91,7 @@ public:
     void Check( shared_ptr<Patch> layout );
 
 private:
-    void Worker( shared_ptr<Patch> patch, XLink sub_base, bool should_touch );
+    void Worker( shared_ptr<Patch> patch, XLink x_sub_base, bool should_touch );
     void AppendNextDescendantTreePatches( shared_ptr<Patch> start_patch, 
                                           vector<shared_ptr<TreeZonePatch>> *ndt_patches );
         
