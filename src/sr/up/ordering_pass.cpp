@@ -132,7 +132,7 @@ void OrderingPass::ConstrainTreePatchesToRange( PatchRecords patch_records,
 			return;
         
 		// patch_records is updated in-place with correct out_of_range values
-		FindOutOfOrderTreePatches( patch_records, lower->GetXLink(), true, upper->GetXLink(), true, just_check );    
+		FindOutOfOrderTreePatches( patch_records, lower->GetXLink(), upper->GetXLink(), just_check );    
 		
 		bool more_to_check = false;
 		
@@ -234,9 +234,7 @@ void OrderingPass::AppendNextDescendantTreePatches( shared_ptr<Patch> &start_pat
 
 void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records, 
  											  XLink lower,
- 											  bool lower_incl,
  											  XLink upper,
- 											  bool upper_incl,
  											  bool just_check )
 {          
 	INDENT(just_check?"f":"F");                                      
@@ -274,24 +272,17 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
 		TRACE("Patch #%u base: ", i)(tz_base)("\n");
         bool in_range = true;
         auto p_lower = dfr.CompareHierarchical(lower, tz_base);
-        if( lower_incl )
-			in_range = in_range && (p_lower.first <= 0);
-		else
-			in_range = in_range && (p_lower.first < 0 && p_lower.second != DepthFirstRelation::LEFT_IS_ANCESTOR);
-		        
+		in_range = in_range && (p_lower.first <= 0);		        
         auto p_upper = dfr.CompareHierarchical(tz_base, upper);
-        if( upper_incl )
-			in_range = in_range && (p_upper.first <= 0);
-		else
-			in_range = in_range && (p_upper.first < 0 && p_upper.second != DepthFirstRelation::LEFT_IS_ANCESTOR);
+		in_range = in_range && (p_upper.first <= 0);
  
         if( !in_range )
         {
 			if( just_check )
 			{				
 				FTRACE(db->GetOrderings().depth_first_ordering)("\n");
-				FTRACE("LOWER: ")(lower)(" incl=")(lower_incl)(" compare result: ")(p_lower)("\n");
-				FTRACE("UPPER: ")(upper)(" incl=")(upper_incl)(" compare result: ")(p_upper)("\n");
+				FTRACE("LOWER: ")(lower)(" compare result: ")(p_lower)("\n");
+				FTRACE("UPPER: ")(upper)(" compare result: ")(p_upper)("\n");
 				ASSERTFAIL(); // we aint goin nowhere
 			}            
 

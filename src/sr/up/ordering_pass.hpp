@@ -64,9 +64,7 @@ private:
                                       PatchRecords &patch_records );
     void FindOutOfOrderTreePatches( PatchRecords &patch_records, 
 									XLink lower,
-									bool lower_incl,
 									XLink upper,
-									bool upper_incl,
 									bool just_check );
 	bool AreLinksConsecutive(size_t left, size_t right, set<size_t, DFPatchIndexRelation> &indices_dfo, DFPatchIndexRelation &dfpir) const;
 
