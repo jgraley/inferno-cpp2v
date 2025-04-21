@@ -21,7 +21,7 @@ list<shared_ptr<SymbolExpression>> ComplementOperator::GetSymbolOperands() const
 unique_ptr<SymbolicResult> ComplementOperator::Evaluate( const EvalKit &kit,
                                                                 list<unique_ptr<SymbolicResult>> &&op_results ) const                                                                    
 {
-    unique_ptr<SymbolicResult> ar = OnlyElementOf(move(op_results));       
+    unique_ptr<SymbolicResult> ar = SoloElementOf(move(op_results));       
     unique_ptr<SubsetResult> asr = make_unique<SubsetResult>( move(ar) );
     return asr->GetComplement();
 }
@@ -143,7 +143,7 @@ list<shared_ptr<SymbolExpression>> AllGreaterOperator::GetSymbolOperands() const
 unique_ptr<SymbolicResult> AllGreaterOperator::Evaluate( const EvalKit &kit,
                                                                 list<unique_ptr<SymbolicResult>> &&op_results ) const                                                                    
 {
-    unique_ptr<SymbolicResult> ar = OnlyElementOf(move(op_results));       
+    unique_ptr<SymbolicResult> ar = SoloElementOf(move(op_results));       
     return make_unique<DepthFirstRangeResult>( kit.x_tree_db, ar->GetOnlyXLink(), false, SR::XLink(), false ); // TODO ar could be a range
 }
 
@@ -182,7 +182,7 @@ list<shared_ptr<SymbolExpression>> AllLessOperator::GetSymbolOperands() const
 unique_ptr<SymbolicResult> AllLessOperator::Evaluate( const EvalKit &kit,
                                                              list<unique_ptr<SymbolicResult>> &&op_results ) const                                                                    
 {
-    unique_ptr<SymbolicResult> ar = OnlyElementOf(move(op_results));       
+    unique_ptr<SymbolicResult> ar = SoloElementOf(move(op_results));       
     return make_unique<DepthFirstRangeResult>( kit.x_tree_db, SR::XLink(), false, ar->GetOnlyXLink(), false );
 }
 
@@ -221,7 +221,7 @@ list<shared_ptr<SymbolExpression>> AllGreaterOrEqualOperator::GetSymbolOperands(
 unique_ptr<SymbolicResult> AllGreaterOrEqualOperator::Evaluate( const EvalKit &kit,
                                                                        list<unique_ptr<SymbolicResult>> &&op_results ) const                                                                    
 {
-    unique_ptr<SymbolicResult> ar = OnlyElementOf(move(op_results));       
+    unique_ptr<SymbolicResult> ar = SoloElementOf(move(op_results));       
     return make_unique<DepthFirstRangeResult>( kit.x_tree_db, ar->GetOnlyXLink(), true, SR::XLink(), false );
 }
 
@@ -260,7 +260,7 @@ list<shared_ptr<SymbolExpression>> AllLessOrEqualOperator::GetSymbolOperands() c
 unique_ptr<SymbolicResult> AllLessOrEqualOperator::Evaluate( const EvalKit &kit,
                                                                     list<unique_ptr<SymbolicResult>> &&op_results ) const                                                                    
 {
-    unique_ptr<SymbolicResult> ar = OnlyElementOf(move(op_results));       
+    unique_ptr<SymbolicResult> ar = SoloElementOf(move(op_results));       
     return make_unique<DepthFirstRangeResult>( kit.x_tree_db, SR::XLink(), false, ar->GetOnlyXLink(), true );
 }
 

@@ -177,7 +177,7 @@ bool SubsetResult::IsDefinedAndUnique() const
 SR::XLink SubsetResult::GetOnlyXLink() const
 {
     ASSERT( !complement_flag )("Is complement so not unique");
-    return OnlyElementOf(xlinks);
+    return SoloElementOf(xlinks);
 }
 
 

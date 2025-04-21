@@ -35,7 +35,7 @@ AugTreePtr<Node> DeclarationOf::TryApplyTransformation( const TransKit &kit, Aug
     }
     
     // function decl/def are folded, so we expect only one declarer
-    return OnlyElementOf( declarers ); 
+    return SoloElementOf( declarers ); 
 }
 catch( TransUtilsInterface::UnknownNode &) 
 {

@@ -149,7 +149,7 @@ unique_ptr<SYM::BooleanResult> IdentifierByNameAgent::IsIdentifierNamedOperator:
                                                                                            list<unique_ptr<SYM::SymbolicResult>> &&op_results ) const 
 {
     ASSERT( op_results.size()==1 );        
-    unique_ptr<SYM::SymbolicResult> ra = OnlyElementOf(move(op_results));
+    unique_ptr<SYM::SymbolicResult> ra = SoloElementOf(move(op_results));
     if( !ra->IsDefinedAndUnique() )
         return make_unique<SYM::BooleanResult>( false );
     
@@ -334,7 +334,7 @@ unique_ptr<SYM::SymbolicResult> NestedAgent::NestingOperator::Evaluate( const Ev
                                                                           list<unique_ptr<SYM::SymbolicResult>> &&op_results ) const 
 {
     ASSERT( op_results.size()==1 );        
-    unique_ptr<SYM::SymbolicResult> keyer_result = OnlyElementOf(move(op_results));
+    unique_ptr<SYM::SymbolicResult> keyer_result = SoloElementOf(move(op_results));
     if( !keyer_result->IsDefinedAndUnique() )
         return make_unique<SYM::EmptyResult>();
     XLink keyer_xlink = keyer_result->GetOnlyXLink();

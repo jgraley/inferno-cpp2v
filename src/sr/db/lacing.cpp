@@ -292,7 +292,7 @@ shared_ptr<Lacing::DecisionNode> Lacing::MakeDecisionSubtree( const set<int> &po
     if( possible_lacing_ordinals.size()==1 )
     {
         // Get that ordinal
-        int ordinal = OnlyElementOf( possible_lacing_ordinals );
+        int ordinal = SoloElementOf( possible_lacing_ordinals );
         
         // Generate leaf node during unwind
         return make_shared<DecisionNodeLeaf>( ordinal );

@@ -139,7 +139,7 @@ unique_ptr<BooleanResult> StarAgent::IsSubcontainerInCategoryOperator::Evaluate(
                                                                                  list<unique_ptr<SymbolicResult>> &&op_results ) const
 {
     ASSERT( op_results.size()==1 );        
-    unique_ptr<SymbolicResult> ra = OnlyElementOf(move(op_results));
+    unique_ptr<SymbolicResult> ra = SoloElementOf(move(op_results));
 
     if( !ra->IsDefinedAndUnique() )
         return make_unique<BooleanResult>( false );

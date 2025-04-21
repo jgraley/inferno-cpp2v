@@ -92,7 +92,7 @@ XTreeZone::XTreeZone( XLink base_, vector<XLink> terminii_ ) :
 bool XTreeZone::IsEmpty() const
 {
     // There must be a base, so the only way to be empty is to terminate at the base
-    return terminii.size()==1 && OnlyElementOf(terminii)==base;    
+    return terminii.size()==1 && SoloElementOf(terminii)==base;    
 }
 
 
@@ -171,7 +171,7 @@ MutableTreeZone::MutableTreeZone( shared_ptr<Mutator> base_,
 bool MutableTreeZone::IsEmpty() const
 {
     // There must be a base, so the only way to be empty is to terminate at the base
-    return terminii.size()==1 && *OnlyElementOf(terminii) == *base;
+    return terminii.size()==1 && *SoloElementOf(terminii) == *base;
 }
 
 
@@ -237,9 +237,9 @@ void MutableTreeZone::Exchange( FreeZone *free_zone )
 
     if( IsEmpty() )
     {		
-		shared_ptr<Mutator> &tree_terminus = terminii.front(); //OnlyElementOf(terminii);
+		shared_ptr<Mutator> &tree_terminus = SoloElementOf(terminii);
 		TreePtr<Node> free_base = free_zone->GetBaseNode();
-		shared_ptr<Mutator> free_terminus = *(free_zone->GetTerminiiBegin()); //OnlyElementOf(free_zone->GetTerminii());
+		shared_ptr<Mutator> free_terminus = *(free_zone->GetTerminiiBegin()); 
 			
 		ASSERT( tree_terminus==base );
 		auto p = tree_terminus->SplitExchange(free_base, *free_terminus);		

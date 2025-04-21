@@ -125,7 +125,7 @@ XLink RelocatingAgent::RelocatingQueryResult::GetBaseXLink() const
 SYM::Lazy<SYM::BooleanExpression> RelocatingAgent::SymbolicNormalLinkedQueryPRed() const                                      
 {             
     shared_ptr<PatternQuery> my_pq = GetPatternQuery();         
-    PatternLink child_plink = OnlyElementOf( my_pq->GetNormalLinks() );
+    PatternLink child_plink = SoloElementOf( my_pq->GetNormalLinks() );
     
     SYM::Lazy<SYM::SymbolExpression> keyer_expr = MakeLazy<SymbolVariable>(keyer_plink);
     SYM::Lazy<SYM::SymbolExpression> child_expr = MakeLazy<SymbolVariable>(child_plink);
@@ -187,7 +187,7 @@ unique_ptr<SymbolicResult> RelocatingAgent::RelocateOperator::Evaluate( const Ev
 {
     // Extract xlink from symbolic result
     ASSERT( op_results.size()==1 );            
-    unique_ptr<SymbolicResult> stimulus_linkset = OnlyElementOf(move(op_results));
+    unique_ptr<SymbolicResult> stimulus_linkset = SoloElementOf(move(op_results));
     if( !stimulus_linkset->IsDefinedAndUnique() )
         return make_unique<EmptyResult>();
     XLink stimulus_xlink = stimulus_linkset->GetOnlyXLink();

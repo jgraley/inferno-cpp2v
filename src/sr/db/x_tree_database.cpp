@@ -349,7 +349,7 @@ XLink XTreeDatabase::TryGetParentXLink(XLink xlink) const
     switch( ps.size() )
     {
         case 0: return XLink(); 
-        case 1: return OnlyElementOf(ps);
+        case 1: return SoloElementOf(ps);
         default: ASSERTFAIL("Rule #217 violation: node with child TreePtr has multiple parents");
     }        
 }

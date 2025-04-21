@@ -126,7 +126,7 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveForGiven( shared_ptr<Symb
             auto negated = dynamic_pointer_cast<NotOperator>( clause_in );
             shared_ptr<PredicateOperator> pred;    
             if( negated )
-                pred = dynamic_pointer_cast<PredicateOperator>(OnlyElementOf(negated->GetBooleanOperands()));
+                pred = dynamic_pointer_cast<PredicateOperator>(SoloElementOf(negated->GetBooleanOperands()));
             else
                 pred = dynamic_pointer_cast<PredicateOperator>(clause_in);
             ASSERT( pred );
@@ -435,11 +435,11 @@ Relationship TruthTableSolver::TryDeriveRelationship( shared_ptr<PredicateOperat
             // Supposed to be the same operand
             
             // Check using OrderCompareEqual()
-            ASSERT( Expression::OrderCompare3Way( *OnlyElementOf(ops_i), *OnlyElementOf(ops_j) ) == 0 );
+            ASSERT( Expression::OrderCompare3Way( *SoloElementOf(ops_i), *SoloElementOf(ops_j) ) == 0 );
             
             // Check by looking directly
-            if( auto svi = dynamic_pointer_cast<SymbolVariable>(OnlyElementOf(ops_i)) )
-                if( auto svj = dynamic_pointer_cast<SymbolVariable>(OnlyElementOf(ops_j)) )
+            if( auto svi = dynamic_pointer_cast<SymbolVariable>(SoloElementOf(ops_i)) )
+                if( auto svj = dynamic_pointer_cast<SymbolVariable>(SoloElementOf(ops_j)) )
                     ASSERT( svi->GetPatternLink() == svj->GetPatternLink() );
         }
 

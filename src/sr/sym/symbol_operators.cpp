@@ -167,7 +167,7 @@ unique_ptr<SymbolicResult> ChildToSymbolOperator::Evaluate( const EvalKit &kit,
     ASSERT( op_results.size()==1 );
 
     // XLink must match our referee (i.e. be non-strict subtype)
-    unique_ptr<SymbolicResult> ar = OnlyElementOf(move(op_results));
+    unique_ptr<SymbolicResult> ar = SoloElementOf(move(op_results));
     if( !ar->IsDefinedAndUnique() )
         return ar;
 
@@ -349,7 +349,7 @@ unique_ptr<SymbolicResult> XTreeDbToSymbolOperator::Evaluate( const EvalKit &kit
                                                                        list<unique_ptr<SymbolicResult>> &&op_results ) const
 {
     // Evaluate operand and ensure we got an XLink
-    unique_ptr<SymbolicResult> ar = OnlyElementOf(move(op_results));       
+    unique_ptr<SymbolicResult> ar = SoloElementOf(move(op_results));       
 
     if( !ar->IsDefinedAndUnique() )
         return ar; // TODO what if non-unique?
@@ -518,7 +518,7 @@ unique_ptr<SymbolicResult> AllChildrenOperator::Evaluate( const EvalKit &kit,
     ASSERT( op_results.size()==1 );
 
     // XLink must match our referee (i.e. be non-strict subtype)
-    unique_ptr<SymbolicResult> ar = OnlyElementOf(move(op_results));
+    unique_ptr<SymbolicResult> ar = SoloElementOf(move(op_results));
     if( !ar->IsDefinedAndUnique() )
         return ar;
 

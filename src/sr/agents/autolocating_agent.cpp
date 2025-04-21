@@ -46,7 +46,7 @@ Agent::ReplacePatchPtr AutolocatingAgent::GenReplaceLayoutImpl( const ReplaceKit
     if( plinks.size() == 1 )
     {
         // Unambiguous path through replace pattern so we can continue to overlay
-        PatternLink replace_plink = OnlyElementOf(plinks);
+        PatternLink replace_plink = SoloElementOf(plinks);
         ASSERT( replace_plink );          
         return replace_plink.GetChildAgent()->GenReplaceLayout(kit, replace_plink);    
     }

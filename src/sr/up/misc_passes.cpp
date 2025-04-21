@@ -80,7 +80,7 @@ void EmptyZonePass::Run( shared_ptr<Patch> &layout )
         if( tree_patch->GetZone()->IsEmpty() )
         {            
 			// Child could be tree or free
-			shared_ptr<Patch> child_patch = OnlyElementOf( tree_patch->GetChildren() );
+			shared_ptr<Patch> child_patch = SoloElementOf( tree_patch->GetChildren() );
 			child_patch->AddEmbeddedMarkers( tree_patch->GetEmbeddedMarkers() );
 			patch = child_patch; 
 		}

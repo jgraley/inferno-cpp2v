@@ -99,7 +99,7 @@ shared_ptr<BooleanExpression> CreateTidiedOperator<OP>::operator()( list< shared
     if( out.empty() )
         return MakeLazy<BooleanConstant>(identity);
     else if( out.size()==1 )
-        return OnlyElementOf(out);
+        return SoloElementOf(out);
     else
         return make_shared<OP>( out );
 }

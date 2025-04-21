@@ -28,7 +28,7 @@ RelocatingAgent::RelocatingQueryResult PointerIsAgent::RunRelocatingQuery( const
         set<XLink> parent_xlinks = db->GetNodeRow(parent_node).incoming_xlinks;
         ASSERT( parent_xlinks.size() == 1 ); // parent_node has children so it should only have one parent (rule #217)
         
-        deps.AddDep( OnlyElementOf(parent_xlinks) );            
+        deps.AddDep( SoloElementOf(parent_xlinks) );            
     }
     
     // Get the pointer that points to us - now from the keyer x link

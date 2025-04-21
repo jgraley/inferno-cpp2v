@@ -657,8 +657,8 @@ void AltOrderingChecker::Worker( shared_ptr<Patch> patch, XLink x_sub_base, bool
         if( tree_zone->IsEmpty() )
 		{
 			TRACE("TZ is empty\n");
-			ASSERT( base==OnlyElementOf(tree_zone->GetTerminusXLinks())); // Definition of empty tree zone
-			Worker(OnlyElementOf(patch->GetChildren()), OnlyElementOf(tree_zone->GetTerminusXLinks()), true);
+			ASSERT( base==SoloElementOf(tree_zone->GetTerminusXLinks())); // Definition of empty tree zone
+			Worker(SoloElementOf(patch->GetChildren()), SoloElementOf(tree_zone->GetTerminusXLinks()), true);
 			return;
 		}
         

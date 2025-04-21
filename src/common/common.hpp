@@ -421,7 +421,7 @@ pair<typename T::value_type, typename T::value_type> ToPair( const T&c )
 
 
 template<typename T>
-const typename T::value_type &OnlyElementOf( const T&c )
+const typename T::value_type &SoloElementOf( const T &c )
 {
     ASSERT( c.size()==1 )("Size is %d:\n", c.size())(c)("\n");
     return *(c.begin());
@@ -429,7 +429,15 @@ const typename T::value_type &OnlyElementOf( const T&c )
 
 
 template<typename T>
-decltype(T::begin()) &OnlyElementOf( T&c )
+typename T::value_type &SoloElementOf( T &c )
+{
+    ASSERT( c.size()==1 )("Size is %d:\n", c.size())(c)("\n");
+    return *(c.begin());
+}
+
+
+template<typename E>
+const typename set<E>::value_type &SoloElementOf( set<E> &c )
 {
     ASSERT( c.size()==1 )("Size is %d:\n", c.size())(c)("\n");
     return *(c.begin());
@@ -437,7 +445,7 @@ decltype(T::begin()) &OnlyElementOf( T&c )
 
 
 template<typename T>
-typename T::value_type &&OnlyElementOf( T&&c )
+typename T::value_type &&SoloElementOf( T&&c )
 {
     ASSERT( c.size()==1 );
     return move(*(c.begin()));

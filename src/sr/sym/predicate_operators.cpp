@@ -626,7 +626,7 @@ unique_ptr<BooleanResult> IsInCategoryOperator::Evaluate( const EvalKit &kit,
     ASSERT( op_results.size()==1 );        
     // IEEE 754 Kind-of can be said to be C(a) ∈ C(arch) where C propogates 
     // NaS. Possibly like a < ?
-    unique_ptr<SymbolicResult> ra = OnlyElementOf(move(op_results));
+    unique_ptr<SymbolicResult> ra = SoloElementOf(move(op_results));
     if( !ra->IsDefinedAndUnique() )
         return make_unique<BooleanResult>( false );
     
@@ -735,7 +735,7 @@ unique_ptr<BooleanResult> IsChildCollectionSizedOperator::Evaluate( const EvalKi
     ASSERT( op_results.size()==1 );        
 
     // Evaluate operand and ensure we got an XLink
-    unique_ptr<SymbolicResult> ra = OnlyElementOf(move(op_results));
+    unique_ptr<SymbolicResult> ra = SoloElementOf(move(op_results));
 
     // IEEE 754 Kind-of can be said to be S(a) == S0 where S propogates 
     // NaS. So like ==
@@ -917,7 +917,7 @@ unique_ptr<BooleanResult> IsLocalMatchOperator::Evaluate( const EvalKit &kit,
     ASSERT( op_results.size()==1 );        
 
     // Evaluate operand and ensure we got an XLink
-    unique_ptr<SymbolicResult> ra = OnlyElementOf(move(op_results));
+    unique_ptr<SymbolicResult> ra = SoloElementOf(move(op_results));
 
     // IEEE 754 Kind-of can be said to be S(a) == S0 where S propogates 
     // NaS. So like ==
