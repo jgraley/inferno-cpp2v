@@ -76,12 +76,7 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink origin_xlink, shared_p
     OrderingPass ordering_pass( db );
     ordering_pass.Run(source_layout);
     ordering_pass.Check(source_layout);
-    
-    Patch::ForDepthFirstWalk(source_layout, [&](shared_ptr<Patch> &patch)
-    {
-		TRACE(patch)("\n"); 
-    }, nullptr );    
-    
+       
     ScaffoldChecker().Run(source_layout);
     
     GapFindingPass gap_finding_pass;

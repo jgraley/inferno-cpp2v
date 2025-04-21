@@ -10,7 +10,7 @@
 
 //#define DEBUG
 
-//#define NEW_STUFF
+#define NEW_STUFF
 
 namespace SR 
 {

@@ -235,19 +235,23 @@ void MutableTreeZone::Exchange( FreeZone *free_zone )
             
 	TreePtr<Node> original_tree_zone_base = base->GetChildTreePtr();
 
-  /*  if( IsEmpty() )
+    if( IsEmpty() )
     {		
-		TreePtr<Node> tree_terminus_node = base->ExchangeChild( TreePtr<Node>() );	// swap in NULL
-		shared_ptr<Mutator> free_terminus = OnlyElementOf(free_zone->GetTerminii());
-		shared_ptr<Mutator> tree_terminus = free_terminus->Clone();
-		tree_terminus->ExchangeChild(tree_terminus_node);
+		TreePtr<Node> original_tree_zone_base = base->GetChildTreePtr();
 		
+		shared_ptr<Mutator> &tree_terminus = terminii.front(); //OnlyElementOf(terminii);
+		tree_terminus = tree_terminus->Clone(); 
+		shared_ptr<Mutator> free_terminus = *(free_zone->GetTerminiiBegin()); //OnlyElementOf(free_zone->GetTerminii());
+		tree_terminus->ExchangeParent(*free_terminus); // deep
 		
-		ASSERT( base->GetChildTreePtr() )(IsEmpty());
-		ASSERT( old_base );
-		free_zone->SetBase( old_base );	
+		TreePtr<Node> free_base = free_zone->GetBaseNode();
+		(void)base->ExchangeChild( free_base );	// deep 
+    
+		ASSERT( original_tree_zone_base );
+		free_zone->SetBase( original_tree_zone_base );	
+		return;
 	}
-*/
+
     // Do a co-walk and exchange one at a time. We want to modify the parent
     // sides of the terminii in-place, leaving valid mutators behind. 
     FreeZone::TerminusIterator free_mut_it = free_zone->GetTerminiiBegin();    
@@ -262,7 +266,7 @@ void MutableTreeZone::Exchange( FreeZone *free_zone )
 			tree_terminus = tree_terminus->Clone(); 
 		}	
 
-		tree_terminus->ExchangeParent(**free_mut_it, *base); // deep
+		tree_terminus->ExchangeParent(**free_mut_it); // deep
                 
         ASSERT( tree_terminus->GetChildTreePtr() );
         free_mut_it++;
