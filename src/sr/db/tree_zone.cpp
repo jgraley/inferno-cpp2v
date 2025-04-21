@@ -237,14 +237,16 @@ void MutableTreeZone::Exchange( FreeZone *free_zone )
 
     if( IsEmpty() )
     {		
-		TreePtr<Node> original_tree_zone_base = base->GetChildTreePtr();
-		
 		shared_ptr<Mutator> &tree_terminus = terminii.front(); //OnlyElementOf(terminii);
-		tree_terminus = tree_terminus->Clone(); 
+		TreePtr<Node> free_base = free_zone->GetBaseNode();
 		shared_ptr<Mutator> free_terminus = *(free_zone->GetTerminiiBegin()); //OnlyElementOf(free_zone->GetTerminii());
+		
+		
+		TreePtr<Node> original_tree_zone_base = tree_terminus->GetChildTreePtr();
+		
+		tree_terminus = tree_terminus->Clone(); 
 		tree_terminus->ExchangeParent(*free_terminus); // deep
 		
-		TreePtr<Node> free_base = free_zone->GetBaseNode();
 		(void)base->ExchangeChild( free_base );	// deep 
     
 		ASSERT( original_tree_zone_base );

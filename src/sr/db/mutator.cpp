@@ -177,7 +177,13 @@ void Mutator::ExchangeParent( Mutator &other_mut )
     swap(*this, other_mut);
 }
     
-    
+    /*
+TreePtr<Node> Mutator::Split( shared_ptr<Mutator> free_terminus, TreePtr<Node> free_base )
+{
+
+}
+*/
+        
 
 TreePtr<Node> Mutator::GetParentNode() const
 {
