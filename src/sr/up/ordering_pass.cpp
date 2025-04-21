@@ -10,9 +10,13 @@
 
 //#define DEBUG
 
-// I think ancestor is better for OOO since there are fewer of them. 
-// DESCENDANT_IS_OOO may be necessary to reproduce issues like #874
-//#define DESCENDANT_IS_OOO
+// I think preferring to move the ancestor is better for OOO since there 
+// are fewer of them (typically) and we're more likely to avoid moving 
+// the leaf zones which could be big. It's also more symmetrical, because 
+// we begin at next descendants of start patch, and on OOO detection, we move 
+// to the next descendants of the OOO patches.
+// PREFER_TO_MOVE_DESCENDANT may be necessary to reproduce issues like #874
+//#define PREFER_TO_MOVE_DESCENDANT
 
 namespace SR 
 {
@@ -112,16 +116,21 @@ void OrderingPass::ConstrainAnyPatchToDescendants( shared_ptr<Patch> &start_patc
 {
     INDENT(just_check?"a":"A");
     TRACE("Starting ")(just_check ? "cross-check" : "transfomation")(" at ")(start_patch)(" with ancestor ")(base)("\n");
-    // Actions to take when we have a range. Use at root and for
-    // terminii of tree zones.
+    
+    // Determine tree zone patches descending from starting patch.
     PatchRecords patch_records;
     shared_ptr<Mutator> last_descendant = db->GetLastDescendantMutator(base);
     AppendNextDescendantTreePatches( start_patch, patch_records );
-                               
+                 
+    // Keep trying to find the in-order subset of patches until we settle.
+    // Settling means for every OOO patch, we've tried going to the 
+    // descendant patches (bypassing FZ) and either there aren't any
+    // or they are in-order.
 	while(true)
 	{
+		// No patches, or all are OOO
 		if( patch_records.empty() )
-			return;
+			break;
         
 		// patch_records is updated in-place with correct out_of_range values
 		FindOutOfOrderTreePatches( patch_records, base->GetXLink(), just_check );    
@@ -129,7 +138,7 @@ void OrderingPass::ConstrainAnyPatchToDescendants( shared_ptr<Patch> &start_patc
 		bool more_to_check = false;
 		
 		// Loop over patches, with their associated out-of-order flags
-		PatchRecords next_descendant_tree_patches;
+		PatchRecords next_patch_records;
 		for( const PatchRecord &patch_record : patch_records )
 		{
 			if( patch_record.out_of_order ) // out-of-order patch
@@ -138,12 +147,12 @@ void OrderingPass::ConstrainAnyPatchToDescendants( shared_ptr<Patch> &start_patc
 				// Accumulate a list of patch records for them. 
 				auto tree_patch = GetTreePatch(patch_record);
 				TRACE("Out-of-order patch: ")(tree_patch)("\nso gathering first descendants...\n");
-				size_t size_before = next_descendant_tree_patches.size();
+				size_t size_before = next_patch_records.size();
 				Patch::ForChildren( tree_patch, [&](shared_ptr<Patch> &child_patch)
 				{
-					AppendNextDescendantTreePatches( child_patch, next_descendant_tree_patches );
+					AppendNextDescendantTreePatches( child_patch, next_patch_records );
 				} );        
-				size_t size_after = next_descendant_tree_patches.size();
+				size_t size_after = next_patch_records.size();
 				more_to_check = more_to_check || (size_after > size_before);
 
 				// Mark as out of order so that the patch itself will be 
@@ -152,14 +161,15 @@ void OrderingPass::ConstrainAnyPatchToDescendants( shared_ptr<Patch> &start_patc
 			}
 			else // in-order patch
 			{          
-				next_descendant_tree_patches.push_back(patch_record);
+				next_patch_records.push_back(patch_record);
 			}
 		}
 		
+		// We've settled
 		if( !more_to_check )
 			break;
 		
-		patch_records = next_descendant_tree_patches;
+		patch_records = next_patch_records;
 	}
     
     // Recurse to check our successes
@@ -310,7 +320,7 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
 		prev_da = da;
 	}
   
-#ifdef DESCENDANT_IS_OOO
+#ifdef PREFER_TO_MOVE_DESCENDANT
 	// discard the descendents
 	for( auto p : run_d_map )
 	{
