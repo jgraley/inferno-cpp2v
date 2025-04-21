@@ -115,24 +115,14 @@ void OrderingPass::ConstrainAnyPatchToDescendants( shared_ptr<Patch> &start_patc
     PatchRecords patch_records;
     shared_ptr<Mutator> last_descendant = db->GetLastDescendantMutator(base);
     AppendNextDescendantTreePatches( start_patch, patch_records );
-    ConstrainTreePatchesToRange(patch_records, base, last_descendant, just_check);
-}
-
-
-void OrderingPass::ConstrainTreePatchesToRange( PatchRecords patch_records, 
-                                                shared_ptr<Mutator> lower,
-                                                shared_ptr<Mutator> upper,
-                                                bool just_check )
-{                               
-	INDENT(just_check?"r":"R");
-
+                               
 	while(true)
 	{
 		if( patch_records.empty() )
 			return;
         
 		// patch_records is updated in-place with correct out_of_range values
-		FindOutOfOrderTreePatches( patch_records, lower->GetXLink(), upper->GetXLink(), just_check );    
+		FindOutOfOrderTreePatches( patch_records, base->GetXLink(), just_check );    
 		
 		bool more_to_check = false;
 		
@@ -191,7 +181,7 @@ void OrderingPass::ConstrainTreePatchesToRange( PatchRecords patch_records,
                                        
 
 void OrderingPass::ConstrainChildrenToTerminii( shared_ptr<TreeZonePatch> &tree_patch, 
-                                                           bool just_check )
+                                                bool just_check )
 {
 	INDENT(just_check?"t":"T");
 	
@@ -209,7 +199,7 @@ void OrderingPass::ConstrainChildrenToTerminii( shared_ptr<TreeZonePatch> &tree_
 
 
 void OrderingPass::AppendNextDescendantTreePatches( shared_ptr<Patch> &start_patch, 
-                                                           PatchRecords &patch_records )
+                                                    PatchRecords &patch_records )
 {
     // Insert descendent tree zones, skipping over free zones, into a list for
     // convenience.
@@ -233,18 +223,13 @@ void OrderingPass::AppendNextDescendantTreePatches( shared_ptr<Patch> &start_pat
 
 
 void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records, 
- 											  XLink lower,
- 											  XLink upper,
+ 											  XLink base,
  											  bool just_check )
 {          
 	INDENT(just_check?"f":"F");                                      
  	ASSERT( !patch_records.empty() );
     DFPatchIndexRelation dfpir( db, patch_records );   
-                        
- 	ASSERT( db->HasRow(upper) );
- 	
- 	TRACE("Range: ")(lower)(" to ")(upper)(" inclusive\n");
- 
+                         	 
     // Data structures for runs of things that are consecutive wrt DF ordering
  
     // set of pairs: run length to front index. Will be ordered:
@@ -271,9 +256,9 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
         // Exclusive: excludes equality AND ancestor/descendant relationship
 		TRACE("Patch #%u base: ", i)(tz_base)("\n");
         bool in_range = true;
-        auto p_lower = dfr.CompareHierarchical(lower, tz_base);
+        auto p_lower = dfr.CompareHierarchical(base, tz_base);
 		in_range = in_range && (p_lower.first <= 0);		        
-        auto p_upper = dfr.CompareHierarchical(tz_base, upper);
+        auto p_upper = dfr.CompareHierarchical(tz_base, db->GetLastDescendantXLink(base));
 		in_range = in_range && (p_upper.first <= 0);
  
         if( !in_range )
@@ -281,8 +266,6 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
 			if( just_check )
 			{				
 				FTRACE(db->GetOrderings().depth_first_ordering)("\n");
-				FTRACE("LOWER: ")(lower)(" compare result: ")(p_lower)("\n");
-				FTRACE("UPPER: ")(upper)(" compare result: ")(p_upper)("\n");
 				ASSERTFAIL(); // we aint goin nowhere
 			}            
 
