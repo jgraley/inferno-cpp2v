@@ -10,7 +10,9 @@
 
 //#define DEBUG
 
-#define NEW_THING
+// I think ancestor is better for OOO since there are fewer of them. 
+// DESCENDANT_IS_OOO may be necessary to reproduce issues like #874
+//#define DESCENDANT_IS_OOO
 
 namespace SR 
 {
@@ -229,23 +231,11 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
 	INDENT(just_check?"f":"F");                                      
  	ASSERT( !patch_records.empty() );
     DFPatchIndexRelation dfpir( db, patch_records );   
-                         	 
-    // Data structures for runs of things that are consecutive wrt DF ordering
- 
-    // set of pairs: run length to front index. Will be ordered:
-    // - primarily by run length
-    // - secondarily by index into vector (via preserved insertion order)
-    // Note: multimap makes it hard to remove a single element if you don't
-    // already have the required iterator.
-    set<pair<int, int>> runs_by_length; 
- 
-    // Map from the fronts of runs to the run lengths
-    map<int, int> runs_by_front_index; // TODO first->front etc
- 
+                         	  
     // Get the patch records in depth-first order. Omit:
     // - outside the supplied range
     // - duplicated
-    IndicesDFO indices_dfo_pre(dfpir);
+    IndicesDFO indices_dfo(dfpir);
     vector<XLink> v;
     for( size_t i=0; i<patch_records.size(); i++ )
     {
@@ -269,77 +259,123 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
 
             // Outside overall range. But we don't need to break up any
             // run: it's enough to omit from local DF ordering 
-            // and set out_of_order flag.
-            patch_records[i].out_of_order = true;
             continue;
         }    
 
 		if( in_order_bases.count(tz_base) > 0 )
 		{
 			// This TZ is known to have been accepted as in-order somewhere else in the layout
-			patch_records[i].out_of_order = true;
 			continue;
 		}
 
-        auto p2 = indices_dfo_pre.insert(i);
+        auto p2 = indices_dfo.insert(i);
         if( !p2.second )
  	    {
-			// Fail, already there. The DFO element that's already there
-			// might get kicked out later, so possibly do this filtering later TODO
-			patch_records[i].out_of_order = true;
+			// Fail, already there. TODO what if both inserted due eg multiset and 
+			// always the "wrong" way around so one will be kicked out...
 			continue;
  		}
     }
  
-    TRACE("Provisional depth-first order: ")(indices_dfo_pre)("\n");
+    TRACE("Provisional depth-first order: ")(indices_dfo)("\n");
 
- 
-	IndicesDFO indices_dfo(dfpir);
+    // Discover runs of ancestor-descendant related nodes
+	map<size_t, set<size_t>> run_d_map, run_a_map; 
+	size_t run_i=0;
 	size_t prev_i=0;
+	bool da = false;
+	bool prev_da = false;
 	bool first = true;
-	for( size_t i : indices_dfo_pre )
+	for( size_t i : indices_dfo )
 	{
 		if( !first )
 		{
 			auto p = dfpir.CompareHierarchical( prev_i, i );
-			TRACE("Compare #%u vs #%u: ", prev_i, i)(p)("\n");
+			TRACE("Compare #%u vs #%u: ", run_i, i)(p)("\n");
 			ASSERT( p.first < 0 ); // should be given by the DFO ordering
 			// so LEFT_IS_ANCESTOR is what we'd get
-			if( p.second == DepthFirstRelation::LEFT_IS_ANCESTOR )
-			{ 
-				TRACE("Removing #%u\n", i);
-				patch_records[i].out_of_order = true;
-				continue; 
+			da = (p.second == DepthFirstRelation::LEFT_IS_ANCESTOR);
+			if( da && !prev_da )
+				run_i = prev_i;
+			
+			if( da )
+			{
+				run_d_map[run_i].insert(i);
+				run_a_map[run_i].insert(prev_i);
 			}
 		}
 		
-		indices_dfo.insert( i );
-		
 		first = false;
 		prev_i = i;
+		prev_da = da;
 	}
- 
+  
+#ifdef DESCENDANT_IS_OOO
+	// discard the descendents
+	for( auto p : run_d_map )
+	{
+		set<size_t> &descendents_i = p.second;
+		for( size_t i : descendents_i )
+		{
+			TRACE("Removing descendant #%u\n", i);
+			indices_dfo.erase( i );
+		}
+	}
+#else
+	// discard the parents
+	for( auto p : run_a_map )
+	{
+		set<size_t> &ancestors_i = p.second;
+		for( size_t i : ancestors_i )
+		{
+			TRACE("Removing ancestor #%u\n", i);
+			indices_dfo.erase( i );
+		}
+	}
+#endif	
+		
     TRACE("Final depth-first order: ")(indices_dfo)("\n");
+         
+    EliminateShortestRuns( indices_dfo, patch_records.size() );
+         
+    // Patches are out of order if their index is missing from the ordering
+    for( size_t i=0; i<patch_records.size(); i++ )   
+		patch_records[i].out_of_order = (indices_dfo.count( i ) == 0);
+}
  
+ 
+void OrderingPass::EliminateShortestRuns( IndicesDFO &indices_dfo, size_t max_val )
+{
+    // Data structures for runs of things that are consecutive wrt DF ordering
+ 
+    // set of pairs: run length to front index. Will be ordered:
+    // - primarily by run length
+    // - secondarily by index into vector (via preserved insertion order)
+    // Note: multimap makes it hard to remove a single element if you don't
+    // already have the required iterator.
+    set<pair<int, int>> runs_by_length; 
+ 
+    // Map from the fronts of runs to the run lengths
+    map<int, int> runs_by_front_index; // TODO first->front etc
     // Find runs of patch records that are consecutive both in the layout and
     // the DF ordering, breaking on patch records outside the supplied overall range.
-    int run_start_i=0;
-    prev_i=0;
-    first = true;     
-    for( size_t i=0; i<patch_records.size(); i++ )
+    size_t run_start_i=0;
+    size_t prev_i=0;
+    bool first = true;     
+    for( size_t i=0; i<max_val; i++ )
     {
- 		if( patch_records[i].out_of_order )
+ 		if( indices_dfo.count(i)==0 ) // only elements in the ordering
 			continue;
 
 		// First patch record gets it for free, then we have to check the DF ordering
-		bool consecutive = first || AreLinksConsecutive(prev_i, i, indices_dfo, dfpir);
+		bool consecutive = first || AreLinksConsecutive(prev_i, i, indices_dfo);
 		TRACE(i)(consecutive?"":" NOT")(" consecutive\n");
 
-		if( just_check && !consecutive )
+		/*if( just_check && !consecutive )
 		{
 			FTRACE("DFO: \n")(indices_dfo)("\nprev: ")(prev_i)(" current: ")(i)("\n");
 			ASSERTFAIL(); // we aint goin nowhere
-		}                        
+		} */                       
 
 		// Completed run if:
 		// - seen at least one patch record since start, and
@@ -362,7 +398,7 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
     }
      
     // Complete the final run.
-    int length = patch_records.size() - run_start_i;
+    int length = max_val - run_start_i;
     runs_by_length.insert( make_pair(length, run_start_i) );
     runs_by_front_index.insert( make_pair(run_start_i, length) );
  
@@ -388,13 +424,8 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
         TRACE("Removing run of %d OOO:\n", l_ooo);
         for( int i=i_ooo_front; i<i_ooo_front+l_ooo; i++ )
         {
-            if( patch_records[i].out_of_order )
-                ASSERT( indices_dfo.count( i ) == 0 ); // should already be gone
-            else
-                EraseSolo( indices_dfo, i ); 
- 
-            patch_records[i].out_of_order = true;
-            TRACE(i)(": ")(patch_records[i].patch_ptr)("\n");
+            if( indices_dfo.count( i ) == 1 )
+                EraseSolo( indices_dfo, i );  
         }
         EraseSolo( runs_by_length, make_pair(l_ooo, i_ooo_front) ); 
         EraseSolo( runs_by_front_index, i_ooo_front );
@@ -414,13 +445,8 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
             int i_back = it->first + it->second - 1;
  
             if( !first )
-            {
-                //FTRACE("prev back: %d of %d, ", prev_i_back, patch_records.size());
-                XLink prev_tz_base_back = GetBaseXLink( patch_records[prev_i_back] );
-                //FTRACE("front: %d of %d\n", i_front, patch_records.size());
-                XLink tz_base_front = GetBaseXLink( patch_records[i_front] );
- 
-                if( AreLinksConsecutive(prev_i_back, i_front, indices_dfo, dfpir) ) // Can we concatenate?
+            { 
+                if( AreLinksConsecutive(prev_i_back, i_front, indices_dfo) ) // Can we concatenate?
                 {
                     //FTRACE("concatenating\n");
                     // Deduce stuff about the new concatenated run
@@ -449,7 +475,7 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
 }
  
  
-bool OrderingPass::AreLinksConsecutive(size_t left, size_t right, set<size_t, DFPatchIndexRelation> &indices_dfo, DFPatchIndexRelation &dfpir) const
+bool OrderingPass::AreLinksConsecutive(size_t left, size_t right, set<size_t, DFPatchIndexRelation> &indices_dfo) const
 {
     set<size_t, DFPatchIndexRelation>::iterator left_it = indices_dfo.find(left);
     set<size_t, DFPatchIndexRelation>::iterator right_it = indices_dfo.find(right);
@@ -465,13 +491,7 @@ bool OrderingPass::AreLinksConsecutive(size_t left, size_t right, set<size_t, DF
     // They have to be consecutive in the DFO
     if( next(left_it) != right_it )
 	    return false;
-          
-    // A ancestor-descendent pair cannot be contguous because during inversion
-    // the resulting tree zone terminii would break zone rules
-	auto p = dfpir.CompareHierarchical( left, right );
-	ASSERT( p.first < 0 ); // should be given by the DFO check
-	ASSERT( p.second != DepthFirstRelation::LEFT_IS_ANCESTOR );
-     
+
     return true;
 }
  

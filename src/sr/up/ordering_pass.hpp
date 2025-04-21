@@ -65,7 +65,9 @@ private:
     void FindOutOfOrderTreePatches( PatchRecords &patch_records, 
 									XLink base,
 									bool just_check );
-	bool AreLinksConsecutive(size_t left, size_t right, set<size_t, DFPatchIndexRelation> &indices_dfo, DFPatchIndexRelation &dfpir) const;
+	void EliminateShortestRuns( IndicesDFO &indices_dfo, size_t max_val );
+	bool AreLinksConsecutive(size_t left, size_t right, 
+	                         set<size_t, DFPatchIndexRelation> &indices_dfo) const;
 
 	void ProcessOutOfOrder();
 	void MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch );
