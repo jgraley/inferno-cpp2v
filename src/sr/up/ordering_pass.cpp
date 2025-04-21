@@ -10,7 +10,7 @@
 
 //#define DEBUG
 
-#define NEW_STUFF
+#define NEW_THING
 
 namespace SR 
 {
@@ -134,6 +134,8 @@ void OrderingPass::ConstrainTreePatchesToRange( PatchRecords &patch_records,
     // patch_records is updated in-place with correct out_of_range values
     FindOutOfOrderTreePatches( patch_records, lower->GetXLink(), lower_incl, upper->GetXLink(), upper_incl, just_check );    
     
+    bool more_to_check = false;
+    
     // Loop over patches, with their associated out-of-order flags
     PatchRecords next_descendant_tree_patches;
     PatchRecords::iterator prev_in_order_it = patch_records.end(); 
@@ -156,52 +158,24 @@ void OrderingPass::ConstrainTreePatchesToRange( PatchRecords &patch_records,
 			// Accumulate a list of patch records for them. 
             auto tree_patch = GetTreePatch(*it);
             TRACE("Out-of-order patch: ")(tree_patch)("\nso gathering first descendants...\n");
+            size_t size_before = next_descendant_tree_patches.size();
             Patch::ForChildren( tree_patch, [&](shared_ptr<Patch> &child_patch)
             {
                 AppendNextDescendantTreePatches( child_patch, next_descendant_tree_patches );
             } );        
+            size_t size_after = next_descendant_tree_patches.size();
+            more_to_check = more_to_check || (size_after > size_before);
 
             // Mark as out of order so that the patch itself will be 
             // switched to a free zone patch.
             out_of_order_patches.push_back(it->patch_ptr);
         }
         else // in-order patch
-        {
-			// In-order patch will remain a tree patch, so use the terminii to establish 
-			// new ranges and recurse.
-            auto tree_patch = GetTreePatch(*it);
-            TRACE("In-order patch, so big recursion on ")(tree_patch)("...\n");
-            ConstrainChildrenToTerminii( tree_patch, just_check );
-            
-            // InsertSolo is used here because we should only find each TZ as being in order once
-            //FTRACE(tree_patch)("\nSet is:\n")(in_order_bases)("\n");
-            InsertSolo(in_order_bases, tree_patch->GetZone()->GetBaseXLink());
+        {          
+			next_descendant_tree_patches.push_back(*it);
         }
 
-        // Are we just past the end of an out-of-order run?
-        if( !first && prev_it->out_of_order && (last || !it->out_of_order) )
-        {
-			TRACE("Small recursion for OOO patches...\n");
-            // Book-end the descendants by the intersection of the supplied 
-            // range and the range implied by the bases of the nearest in-order tree patches. 
-            // We want to use the in-order ones because they will remain as tree zones.
-            shared_ptr<Mutator> next_lower = seen_in_order ? GetBaseMutator( *prev_in_order_it ) : lower;    
-            bool next_lower_incl = seen_in_order ? false : lower_incl;                
-            shared_ptr<Mutator> next_upper = last ? upper : GetBaseMutator( *it );                                             
-            bool next_upper_incl = last ? upper_incl : false;                
-
-			// Use these to constrain the range for our descendants. 
-			// Since the OOO patches will become free zones, we don't 
-			// have a structural constraint but still have the DF ordering
-			// to satisfy so we can check the run together (weaker) 
-			ConstrainTreePatchesToRange( next_descendant_tree_patches, 
-										 next_lower, 
-										 next_lower_incl,
-										 next_upper, 
-										 next_upper_incl,
-										 just_check );
-            next_descendant_tree_patches.clear();
-        }
+		(void)seen_in_order;
 
 		if( !last && !it->out_of_order )
 		{
@@ -211,6 +185,37 @@ void OrderingPass::ConstrainTreePatchesToRange( PatchRecords &patch_records,
         prev_it = it;
         first = false;
     }
+    
+	if( more_to_check )
+	{
+		ConstrainTreePatchesToRange( next_descendant_tree_patches, 
+									 lower, 
+									 lower_incl,
+									 upper, 
+									 upper_incl,
+									 just_check );
+        next_descendant_tree_patches.clear();
+
+		return;
+	}
+    
+    // Recurse to check our successes
+    for( const PatchRecord &patch_record : patch_records )
+    {
+		if( !patch_record.out_of_order )
+		{
+            auto tree_patch = GetTreePatch(patch_record);
+
+            // InsertSolo is used here because we should only find each TZ as being in order once
+            //FTRACE(tree_patch)("\nSet is:\n")(in_order_bases)("\n");
+            InsertSolo(in_order_bases, tree_patch->GetZone()->GetBaseXLink());
+
+			// In-order patch will remain a tree patch, so use the terminii to establish 
+			// new ranges and recurse.
+            TRACE("In-order patch, so big recursion on ")(tree_patch)("...\n");
+            ConstrainChildrenToTerminii( tree_patch, just_check );
+   		}
+	}
 }
                                        
 
@@ -351,7 +356,6 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
 	bool first = true;
 	for( size_t i : indices_dfo_pre )
 	{
-#ifdef NEW_STUFF
 		if( !first )
 		{
 			auto p = dfpir.CompareHierarchical( prev_i, i );
@@ -365,7 +369,6 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
 				continue; 
 			}
 		}
-#endif
 		
 		indices_dfo.insert( i );
 		
@@ -524,11 +527,7 @@ bool OrderingPass::AreLinksConsecutive(size_t left, size_t right, set<size_t, DF
     // the resulting tree zone terminii would break zone rules
 	auto p = dfpir.CompareHierarchical( left, right );
 	ASSERT( p.first < 0 ); // should be given by the DFO check
-#ifdef NEW_STUFF
 	ASSERT( p.second != DepthFirstRelation::LEFT_IS_ANCESTOR );
-#endif
-	if( p.second == DepthFirstRelation::LEFT_IS_ANCESTOR )
-		return false; 
      
     return true;
 }
@@ -763,12 +762,9 @@ void AltOrderingChecker::Worker( shared_ptr<Patch> patch, XLink x_sub_base, bool
 			}
 
 			auto p2 = dfr.CompareHierarchical( x_sub_base, ndt_base );
-#ifdef NEW_STUFF
 			ASSERT( p2.second == DepthFirstRelation::LEFT_IS_ANCESTOR ||
 			        p2.second == DepthFirstRelation::EQUAL )(x_sub_base)(" vs ")(ndt_base)(" got ")(p2);  
-#else			        
-			ASSERT( p2.second == DepthFirstRelation::LEFT_IS_ANCESTOR )(x_sub_base)(" vs ")(ndt_base)(" got ")(p2);  
-#endif
+
 			prev = ndt_base;        
 		}				
 
