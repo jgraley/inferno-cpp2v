@@ -255,11 +255,9 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
         // Inclusive: straightforward depth-first inclusive check
         // Exclusive: excludes equality AND ancestor/descendant relationship
 		TRACE("Patch #%u base: ", i)(tz_base)("\n");
-        bool in_range = true;
-        auto p_lower = dfr.CompareHierarchical(base, tz_base);
-		in_range = in_range && (p_lower.first <= 0);		        
-        auto p_upper = dfr.CompareHierarchical(tz_base, db->GetLastDescendantXLink(base));
-		in_range = in_range && (p_upper.first <= 0);
+        auto p = dfr.CompareHierarchical(base, tz_base);
+		bool in_range = (p.second == DepthFirstRelation::EQUAL || 
+		                 p.second==DepthFirstRelation::LEFT_IS_ANCESTOR);		        
  
         if( !in_range )
         {
@@ -283,8 +281,8 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
 			continue;
 		}
 
-        auto p = indices_dfo_pre.insert(i);
-        if( !p.second )
+        auto p2 = indices_dfo_pre.insert(i);
+        if( !p2.second )
  	    {
 			// Fail, already there. The DFO element that's already there
 			// might get kicked out later, so possibly do this filtering later TODO
