@@ -365,6 +365,7 @@ private:
 
 // Plain tracing...
 #define INDENT(P) Tracer::Descend indent_(P); HITP(Tracer::GetPrefix());
+#define INDENTS(P) Tracer::Descend indent_(P);
 #define TRACE (!Tracer::IsEnabled()) ? NewtonsCradle() : Tracer( __FILE__, __LINE__, GetTrace(), __func__ )
 #define FTRACE Tracer( __FILE__, __LINE__, GetTrace(), __func__, Tracer::FORCE )
 #define TRACES (!Tracer::IsEnabled()) ? NewtonsCradle() : Tracer( __FILE__, __LINE__, "", __func__ )

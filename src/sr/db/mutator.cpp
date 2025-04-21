@@ -170,16 +170,11 @@ TreePtr<Node> Mutator::ExchangeContainer( ContainerInterface *child_container,
     
 void Mutator::ExchangeParent( Mutator &other_mut, Mutator& watch_mut )
 {
-	ASSERT( watch_mut.GetChildTreePtr() );
     TreePtr<Node> other_child_node = other_mut.GetChildTreePtr(); // outside the zone        
-	ASSERT( watch_mut.GetChildTreePtr() );
     TreePtr<Node> my_child_node =  ExchangeChild( other_child_node );    
-	ASSERT( watch_mut.GetChildTreePtr() );
     other_mut.ExchangeChild( my_child_node );    
-	ASSERT( watch_mut.GetChildTreePtr() );
         
     swap(*this, other_mut);
-	ASSERT( watch_mut.GetChildTreePtr() );
 }
     
     

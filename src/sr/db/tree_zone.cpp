@@ -233,8 +233,21 @@ void MutableTreeZone::Exchange( FreeZone *free_zone )
 
 	ASSERT( !free_zone->IsEmpty() ); // Could add support but apparently don't need it rn	       	        
             
-     ASSERT( base->GetChildTreePtr() )(IsEmpty());
+	TreePtr<Node> original_tree_zone_base = base->GetChildTreePtr();
 
+  /*  if( IsEmpty() )
+    {		
+		TreePtr<Node> tree_terminus_node = base->ExchangeChild( TreePtr<Node>() );	// swap in NULL
+		shared_ptr<Mutator> free_terminus = OnlyElementOf(free_zone->GetTerminii());
+		shared_ptr<Mutator> tree_terminus = free_terminus->Clone();
+		tree_terminus->ExchangeChild(tree_terminus_node);
+		
+		
+		ASSERT( base->GetChildTreePtr() )(IsEmpty());
+		ASSERT( old_base );
+		free_zone->SetBase( old_base );	
+	}
+*/
     // Do a co-walk and exchange one at a time. We want to modify the parent
     // sides of the terminii in-place, leaving valid mutators behind. 
     FreeZone::TerminusIterator free_mut_it = free_zone->GetTerminiiBegin();    
@@ -248,32 +261,21 @@ void MutableTreeZone::Exchange( FreeZone *free_zone )
 			// tree zones, eg ones at these terminii, so you must not use them egain. 
 			tree_terminus = tree_terminus->Clone(); 
 		}	
-		else
-		{
-			ASSERT( tree_terminus != base );
-		}
-		ASSERT( base->GetChildTreePtr() )(IsEmpty()); // <--- passes
-		ASSERT( *free_mut_it != base ); // <--- passes
-		ASSERT( (*free_mut_it)->GetChildTreePtr() != base->GetChildTreePtr() );		
+
 		tree_terminus->ExchangeParent(**free_mut_it, *base); // deep
-		ASSERT( tree_terminus->GetChildTreePtr() )(IsEmpty()); // <--- passes
-		ASSERT( base->GetChildTreePtr() )(IsEmpty()); // <--- fails
                 
         ASSERT( tree_terminus->GetChildTreePtr() );
         free_mut_it++;
     } 
     ASSERT( free_mut_it == free_zone->GetTerminiiEnd() ); // length mismatch  
 
-    ASSERT( base->GetChildTreePtr() )(IsEmpty());
-
     // Exchange the base. We want to modify the child side of the base
     // in-place, leaving valid mutators behind. 
     TreePtr<Node> free_base = free_zone->GetBaseNode();
-    TreePtr<Node> old_base = base->ExchangeChild( free_base );	// deep 
+    (void)base->ExchangeChild( free_base );	// deep 
     
-    ASSERT( base->GetChildTreePtr() )(IsEmpty());
-    ASSERT( old_base );
-	free_zone->SetBase( old_base );	
+    ASSERT( original_tree_zone_base );
+	free_zone->SetBase( original_tree_zone_base );	
 }
 
 

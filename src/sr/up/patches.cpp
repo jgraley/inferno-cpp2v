@@ -98,6 +98,7 @@ void Patch::ForDepthFirstWalk( shared_ptr<Patch> &base,
                                function<void(shared_ptr<Patch> &patch)> func_in,
                                function<void(shared_ptr<Patch> &patch)> func_out ) try
 {
+	INDENTS(".");
     if( func_in )
         func_in(base);
     base->DepthFirstWalkImpl(func_in, func_out);
@@ -112,6 +113,7 @@ catch( const BreakException & )
 void Patch::DepthFirstWalkImpl( function<void(shared_ptr<Patch> &patch)> func_in,
                                 function<void(shared_ptr<Patch> &patch)> func_out )
 {
+	INDENTS(".");
     for( shared_ptr<Patch> &patch : child_patches )
     {
         if( func_in )
@@ -218,6 +220,7 @@ void TreeZonePatch::ForTreeDepthFirstWalk( shared_ptr<Patch> &base,
                                            function<void(shared_ptr<Patch> &patch)> func_in,
                                            function<void(shared_ptr<Patch> &patch)> func_out )
 {
+	INDENTS(".");
     ForDepthFirstWalk( base, 
 	[&](shared_ptr<Patch> &patch)
 	{
@@ -236,6 +239,7 @@ void TreeZonePatch::ForTreeDepthFirstWalk( shared_ptr<Patch> &base,
                                            function<void(shared_ptr<TreeZonePatch> &patch)> func_in,
                                            function<void(shared_ptr<TreeZonePatch> &patch)> func_out )
 {
+	INDENTS(".");
     ForTreeDepthFirstWalk( base, 
 	[&](shared_ptr<Patch> &patch)
 	{
@@ -363,6 +367,7 @@ void FreeZonePatch::ForFreeDepthFirstWalk( shared_ptr<Patch> &base,
                                            function<void(shared_ptr<Patch> &patch)> func_in,
                                            function<void(shared_ptr<Patch> &patch)> func_out )
 {
+	INDENTS(".");
     ForDepthFirstWalk( base, 
 	[&](shared_ptr<Patch> &patch)
 	{
@@ -381,6 +386,7 @@ void FreeZonePatch::ForFreeDepthFirstWalk( shared_ptr<Patch> &base,
                                            function<void(shared_ptr<FreeZonePatch> &patch)> func_in,
                                            function<void(shared_ptr<FreeZonePatch> &patch)> func_out )
 {
+	INDENTS(".");
     ForFreeDepthFirstWalk( base, 
 	[&](shared_ptr<Patch> &patch)
 	{
