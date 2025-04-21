@@ -115,15 +115,13 @@ void OrderingPass::ConstrainAnyPatchToDescendants( shared_ptr<Patch> &start_patc
     PatchRecords patch_records;
     shared_ptr<Mutator> last_descendant = db->GetLastDescendantMutator(base);
     AppendNextDescendantTreePatches( start_patch, patch_records );
-    ConstrainTreePatchesToRange(patch_records, base, true, last_descendant, true, just_check);
+    ConstrainTreePatchesToRange(patch_records, base, last_descendant, just_check);
 }
 
 
 void OrderingPass::ConstrainTreePatchesToRange( PatchRecords patch_records, 
                                                 shared_ptr<Mutator> lower,
-                                                bool lower_incl,
                                                 shared_ptr<Mutator> upper,
-                                                bool upper_incl,
                                                 bool just_check )
 {                               
 	INDENT(just_check?"r":"R");
@@ -134,7 +132,7 @@ void OrderingPass::ConstrainTreePatchesToRange( PatchRecords patch_records,
 			return;
         
 		// patch_records is updated in-place with correct out_of_range values
-		FindOutOfOrderTreePatches( patch_records, lower->GetXLink(), lower_incl, upper->GetXLink(), upper_incl, just_check );    
+		FindOutOfOrderTreePatches( patch_records, lower->GetXLink(), true, upper->GetXLink(), true, just_check );    
 		
 		bool more_to_check = false;
 		

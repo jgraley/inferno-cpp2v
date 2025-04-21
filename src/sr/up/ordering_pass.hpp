@@ -56,9 +56,7 @@ private:
 								         bool just_check );
     void ConstrainTreePatchesToRange( PatchRecords patch_records, 
                                       shared_ptr<Mutator> lower,                                      
-									  bool lower_incl,
                                       shared_ptr<Mutator> upper,
-  									  bool upper_incl,
                                       bool just_check );
     void ConstrainChildrenToTerminii( shared_ptr<TreeZonePatch> &tree_patch, 
                                       bool just_check );
