@@ -138,25 +138,13 @@ void OrderingPass::ConstrainTreePatchesToRange( PatchRecords &patch_records,
     
     // Loop over patches, with their associated out-of-order flags
     PatchRecords next_descendant_tree_patches;
-    PatchRecords::iterator prev_in_order_it = patch_records.end(); 
-    PatchRecords::iterator prev_it = patch_records.begin(); 
-    bool seen_in_order = false;
-    bool first = true;
-    for( PatchRecords::iterator it = patch_records.begin();
-         first || prev_it != patch_records.end(); // gets us an extra iteration i.e. end-inclusive
-         ++it )
+    for( const PatchRecord &patch_record : patch_records )
     {
-		bool last = (it == patch_records.end());
-		
-        if( last )
-        {
-			// Nothing
-		}
-        else if( it->out_of_order ) // out-of-order patch
+		if( patch_record.out_of_order ) // out-of-order patch
         {
 			// The tree-zone descendants of this patch still need to be checked for OOO.
 			// Accumulate a list of patch records for them. 
-            auto tree_patch = GetTreePatch(*it);
+            auto tree_patch = GetTreePatch(patch_record);
             TRACE("Out-of-order patch: ")(tree_patch)("\nso gathering first descendants...\n");
             size_t size_before = next_descendant_tree_patches.size();
             Patch::ForChildren( tree_patch, [&](shared_ptr<Patch> &child_patch)
@@ -168,22 +156,12 @@ void OrderingPass::ConstrainTreePatchesToRange( PatchRecords &patch_records,
 
             // Mark as out of order so that the patch itself will be 
             // switched to a free zone patch.
-            out_of_order_patches.push_back(it->patch_ptr);
+            out_of_order_patches.push_back(patch_record.patch_ptr);
         }
         else // in-order patch
         {          
-			next_descendant_tree_patches.push_back(*it);
+			next_descendant_tree_patches.push_back(patch_record);
         }
-
-		(void)seen_in_order;
-
-		if( !last && !it->out_of_order )
-		{
-            prev_in_order_it = it;
-            seen_in_order = true;
-		}
-        prev_it = it;
-        first = false;
     }
     
 	if( more_to_check )
