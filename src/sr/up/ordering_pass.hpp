@@ -55,16 +55,20 @@ private:
 								         shared_ptr<Mutator> base,
 								         bool just_check );
     void ConstrainTreePatchesToRange( PatchRecords &patch_records, 
-                                      shared_ptr<Mutator> range_front,
-                                      shared_ptr<Mutator> range_back,
+                                      shared_ptr<Mutator> lower,                                      
+									  bool lower_incl,
+                                      shared_ptr<Mutator> upper,
+  									  bool upper_incl,
                                       bool just_check );
     void ConstrainChildrenToTerminii( shared_ptr<TreeZonePatch> &tree_patch, 
                                       bool just_check );
     void AppendNextDescendantTreePatches( shared_ptr<Patch> &patch, 
                                       PatchRecords &patch_records );
     void FindOutOfOrderTreePatches( PatchRecords &patch_records, 
-									XLink range_front,
-									XLink range_back,
+									XLink lower,
+									bool lower_incl,
+									XLink upper,
+									bool upper_incl,
 									bool just_check );
 	bool AreLinksConsecutive(size_t left, size_t right, set<size_t, DFPatchIndexRelation> &indices_dfo, DFPatchIndexRelation &dfpir) const;
 

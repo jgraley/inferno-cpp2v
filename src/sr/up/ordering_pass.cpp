@@ -115,13 +115,15 @@ void OrderingPass::ConstrainAnyPatchToDescendants( shared_ptr<Patch> &start_patc
     PatchRecords patch_records;
     shared_ptr<Mutator> last_descendant = db->GetLastDescendantMutator(base);
     AppendNextDescendantTreePatches( start_patch, patch_records );
-    ConstrainTreePatchesToRange(patch_records, base, last_descendant, just_check);
+    ConstrainTreePatchesToRange(patch_records, base, true, last_descendant, true, just_check);
 }
 
 
 void OrderingPass::ConstrainTreePatchesToRange( PatchRecords &patch_records, 
-                                                shared_ptr<Mutator> range_front,
-                                                shared_ptr<Mutator> range_back,
+                                                shared_ptr<Mutator> lower,
+                                                bool lower_incl,
+                                                shared_ptr<Mutator> upper,
+                                                bool upper_incl,
                                                 bool just_check )
 {                               
 	INDENT(just_check?"r":"R");
@@ -130,7 +132,7 @@ void OrderingPass::ConstrainTreePatchesToRange( PatchRecords &patch_records,
         return;
         
     // patch_records is updated in-place with correct out_of_range values
-    FindOutOfOrderTreePatches( patch_records, range_front->GetXLink(), range_back->GetXLink(), just_check );    
+    FindOutOfOrderTreePatches( patch_records, lower->GetXLink(), lower_incl, upper->GetXLink(), upper_incl, just_check );    
     
     // Loop over patches, with their associated out-of-order flags
     PatchRecords next_descendant_tree_patches;
@@ -183,16 +185,20 @@ void OrderingPass::ConstrainTreePatchesToRange( PatchRecords &patch_records,
             // Book-end the descendants by the intersection of the supplied 
             // range and the range implied by the bases of the nearest in-order tree patches. 
             // We want to use the in-order ones because they will remain as tree zones.
-            shared_ptr<Mutator> before_first_ooo = seen_in_order ? GetBaseMutator( *prev_in_order_it ) : range_front;                       
-            shared_ptr<Mutator> after_last_ooo = last ? range_back : GetBaseMutator( *it );                                             
+            shared_ptr<Mutator> next_lower = seen_in_order ? GetBaseMutator( *prev_in_order_it ) : lower;    
+            bool next_lower_incl = seen_in_order ? false : lower_incl;                
+            shared_ptr<Mutator> next_upper = last ? upper : GetBaseMutator( *it );                                             
+            bool next_upper_incl = last ? upper_incl : false;                
 
 			// Use these to constrain the range for our descendants. 
 			// Since the OOO patches will become free zones, we don't 
 			// have a structural constraint but still have the DF ordering
 			// to satisfy so we can check the run together (weaker) 
 			ConstrainTreePatchesToRange( next_descendant_tree_patches, 
-										 before_first_ooo, 
-										 after_last_ooo, 
+										 next_lower, 
+										 next_lower_incl,
+										 next_upper, 
+										 next_upper_incl,
 										 just_check );
             next_descendant_tree_patches.clear();
         }
@@ -251,22 +257,19 @@ void OrderingPass::AppendNextDescendantTreePatches( shared_ptr<Patch> &start_pat
 
 
 void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records, 
- 											  XLink range_front,
- 											  XLink range_back,
+ 											  XLink lower,
+ 											  bool lower_incl,
+ 											  XLink upper,
+ 											  bool upper_incl,
  											  bool just_check )
 {          
 	INDENT(just_check?"f":"F");                                      
  	ASSERT( !patch_records.empty() );
     DFPatchIndexRelation dfpir( db, patch_records );   
                         
- 	// We want bounds on an inclusive range that includes the subtrees under
- 	// both ancestors (and everything in between wrt DF ordering). So:
- 	// - The ancestor itself is the front of such a range
- 	// - For the back, we use GetLastDescendant to ensure all back_ancestor's
- 	//   descendants are included.
- 	ASSERT( db->HasRow(range_back) );
+ 	ASSERT( db->HasRow(upper) );
  	
- 	TRACE("Range: ")(range_front)(" to ")(range_back)(" inclusive\n");
+ 	TRACE("Range: ")(lower)(" to ")(upper)(" inclusive\n");
  
     // Data structures for runs of things that are consecutive wrt DF ordering
  
@@ -289,20 +292,30 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
     {
         XLink tz_base = GetBaseXLink( patch_records[i] );
 
-        // Check the tree zone base is in overall range supplied to us for root or parent TZ terminus
+        // Check the tree zone base is in overall range supplied to us for root or parent TZ terminus.
+        // Inclusive: straightforward depth-first inclusive check
+        // Exclusive: excludes equality AND ancestor/descendant relationship
 		TRACE("Patch #%u base: ", i)(tz_base)("\n");
-        Orderable::Diff diff_front = dfr.Compare3Way(tz_base, range_front);
-        Orderable::Diff diff_back = dfr.Compare3Way(tz_base, range_back);
-        
-        bool in_range = diff_front >= 0 && diff_back <= 0; // both inclusive        
+        bool in_range = true;
+        auto p_lower = dfr.CompareHierarchical(lower, tz_base);
+        if( lower_incl )
+			in_range = in_range && (p_lower.first <= 0);
+		else
+			in_range = in_range && (p_lower.first < 0 && p_lower.second != DepthFirstRelation::LEFT_IS_ANCESTOR);
+		        
+        auto p_upper = dfr.CompareHierarchical(tz_base, upper);
+        if( upper_incl )
+			in_range = in_range && (p_upper.first <= 0);
+		else
+			in_range = in_range && (p_upper.first < 0 && p_upper.second != DepthFirstRelation::LEFT_IS_ANCESTOR);
  
         if( !in_range )
         {
 			if( just_check )
-			{
-				//FTRACE(db->GetOrderings().depth_first_ordering)("\n");
-				ASSERT(diff_front >= 0)("Tree zone base ")(tz_base)(" appears before limit ")(range_front)(" in X tree");
-				ASSERT(diff_back <= 0)("Tree zone base ")(tz_base)(" appears after limit ")(range_back)(" in X tree");
+			{				
+				FTRACE(db->GetOrderings().depth_first_ordering)("\n");
+				FTRACE("LOWER: ")(lower)(" incl=")(lower_incl)(" compare result: ")(p_lower)("\n");
+				FTRACE("UPPER: ")(upper)(" incl=")(upper_incl)(" compare result: ")(p_upper)("\n");
 				ASSERTFAIL(); // we aint goin nowhere
 			}            
 
