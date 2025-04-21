@@ -54,7 +54,7 @@ private:
     void ConstrainAnyPatchToDescendants( shared_ptr<Patch> &start_patch, 
 								         shared_ptr<Mutator> base,
 								         bool just_check );
-    void ConstrainTreePatchesToRange( PatchRecords &patch_records, 
+    void ConstrainTreePatchesToRange( PatchRecords patch_records, 
                                       shared_ptr<Mutator> lower,                                      
 									  bool lower_incl,
                                       shared_ptr<Mutator> upper,

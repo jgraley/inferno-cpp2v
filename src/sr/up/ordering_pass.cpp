@@ -119,7 +119,7 @@ void OrderingPass::ConstrainAnyPatchToDescendants( shared_ptr<Patch> &start_patc
 }
 
 
-void OrderingPass::ConstrainTreePatchesToRange( PatchRecords &patch_records, 
+void OrderingPass::ConstrainTreePatchesToRange( PatchRecords patch_records, 
                                                 shared_ptr<Mutator> lower,
                                                 bool lower_incl,
                                                 shared_ptr<Mutator> upper,
@@ -128,53 +128,48 @@ void OrderingPass::ConstrainTreePatchesToRange( PatchRecords &patch_records,
 {                               
 	INDENT(just_check?"r":"R");
 
-    if( patch_records.empty() )
-        return;
-        
-    // patch_records is updated in-place with correct out_of_range values
-    FindOutOfOrderTreePatches( patch_records, lower->GetXLink(), lower_incl, upper->GetXLink(), upper_incl, just_check );    
-    
-    bool more_to_check = false;
-    
-    // Loop over patches, with their associated out-of-order flags
-    PatchRecords next_descendant_tree_patches;
-    for( const PatchRecord &patch_record : patch_records )
-    {
-		if( patch_record.out_of_order ) // out-of-order patch
-        {
-			// The tree-zone descendants of this patch still need to be checked for OOO.
-			// Accumulate a list of patch records for them. 
-            auto tree_patch = GetTreePatch(patch_record);
-            TRACE("Out-of-order patch: ")(tree_patch)("\nso gathering first descendants...\n");
-            size_t size_before = next_descendant_tree_patches.size();
-            Patch::ForChildren( tree_patch, [&](shared_ptr<Patch> &child_patch)
-            {
-                AppendNextDescendantTreePatches( child_patch, next_descendant_tree_patches );
-            } );        
-            size_t size_after = next_descendant_tree_patches.size();
-            more_to_check = more_to_check || (size_after > size_before);
-
-            // Mark as out of order so that the patch itself will be 
-            // switched to a free zone patch.
-            out_of_order_patches.push_back(patch_record.patch_ptr);
-        }
-        else // in-order patch
-        {          
-			next_descendant_tree_patches.push_back(patch_record);
-        }
-    }
-    
-	if( more_to_check )
+	while(true)
 	{
-		ConstrainTreePatchesToRange( next_descendant_tree_patches, 
-									 lower, 
-									 lower_incl,
-									 upper, 
-									 upper_incl,
-									 just_check );
-        next_descendant_tree_patches.clear();
+		if( patch_records.empty() )
+			return;
+        
+		// patch_records is updated in-place with correct out_of_range values
+		FindOutOfOrderTreePatches( patch_records, lower->GetXLink(), lower_incl, upper->GetXLink(), upper_incl, just_check );    
+		
+		bool more_to_check = false;
+		
+		// Loop over patches, with their associated out-of-order flags
+		PatchRecords next_descendant_tree_patches;
+		for( const PatchRecord &patch_record : patch_records )
+		{
+			if( patch_record.out_of_order ) // out-of-order patch
+			{
+				// The tree-zone descendants of this patch still need to be checked for OOO.
+				// Accumulate a list of patch records for them. 
+				auto tree_patch = GetTreePatch(patch_record);
+				TRACE("Out-of-order patch: ")(tree_patch)("\nso gathering first descendants...\n");
+				size_t size_before = next_descendant_tree_patches.size();
+				Patch::ForChildren( tree_patch, [&](shared_ptr<Patch> &child_patch)
+				{
+					AppendNextDescendantTreePatches( child_patch, next_descendant_tree_patches );
+				} );        
+				size_t size_after = next_descendant_tree_patches.size();
+				more_to_check = more_to_check || (size_after > size_before);
 
-		return;
+				// Mark as out of order so that the patch itself will be 
+				// switched to a free zone patch.
+				out_of_order_patches.push_back(patch_record.patch_ptr);
+			}
+			else // in-order patch
+			{          
+				next_descendant_tree_patches.push_back(patch_record);
+			}
+		}
+		
+		if( !more_to_check )
+			break;
+		
+		patch_records = next_descendant_tree_patches;
 	}
     
     // Recurse to check our successes
