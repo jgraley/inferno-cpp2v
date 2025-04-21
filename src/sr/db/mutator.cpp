@@ -94,31 +94,31 @@ bool Mutator::operator!=( const Mutator &right ) const
 }
 
 
-TreePtr<Node> Mutator::ExchangeChild( TreePtr<Node> new_child )
+TreePtr<Node> Mutator::ExchangeChild( TreePtr<Node> free_child )
 {	
 	// Free zone merging should get rid of these, and things will change with general wide zone support
-	ASSERT( !dynamic_cast<ContainerInterface *>(new_child.get()) )("Cannot accept wide here");
+	ASSERT( !dynamic_cast<ContainerInterface *>(free_child.get()) )("Cannot accept wide here");
 	TreePtr<Node> old_child = GetChildTreePtr();
 	switch( mode )
 	{
 		case Mode::Root:
 		{
-			*sp_tp_root_node = new_child;
-			TRACE("Singular mutated ")(old_child)(" into ")(new_child)("\n");   
+			*sp_tp_root_node = free_child;
+			TRACE("Singular mutated ")(old_child)(" into ")(free_child)("\n");   
 			break;
 		}
 
 		case Mode::Singular:
 		{
-			*parent_singular = new_child;
-			TRACE("Singular mutated ")(old_child)(" into ")(new_child)("\n");   
+			*parent_singular = free_child;
+			TRACE("Singular mutated ")(old_child)(" into ")(free_child)("\n");   
 			break;
 		}
 			
 		case Mode::Container:
 		{
-			container_iterator.Mutate(&new_child); 
-			TRACE("Container mutated ")(old_child)(" into ")(new_child)("\n");   
+			container_iterator.Mutate(&free_child); 
+			TRACE("Container mutated ")(old_child)(" into ")(free_child)("\n");   
 			break;
 		}
 		
@@ -168,30 +168,41 @@ TreePtr<Node> Mutator::ExchangeContainer( ContainerInterface *child_container,
 }
     
     
-void Mutator::ExchangeParent( Mutator &other_mut )
+void Mutator::ExchangeParent( Mutator &free_mut )
 {
-    TreePtr<Node> other_child_node = other_mut.GetChildTreePtr(); // outside the zone        
-    TreePtr<Node> my_child_node =  ExchangeChild( other_child_node );    
-    other_mut.ExchangeChild( my_child_node );    
+    TreePtr<Node> free_child = free_mut.GetChildTreePtr(); // outside the zone        
+    TreePtr<Node> my_child = ExchangeChild( free_child );    
+    free_mut.ExchangeChild( my_child );    
         
-    swap(*this, other_mut);
+    swap(*this, free_mut);
 }
     
-    
-pair<TreePtr<Node>, shared_ptr<Mutator>> Mutator::Split( Mutator &other_mut, TreePtr<Node> new_base )
+
+/* We have to exchange a FZ into an empty TZ for which base==terminus. We will:
+ * - Create a new mutator for tree terminus, and turn ourself into base
+ * - Exchange free_terminus as normal, as well as free_base_child
+ * Care: other mutators in other tree zones will still alise the base,
+ * when they should alias the new terminus after this operation, see #784
+ */ 
+pair<TreePtr<Node>, shared_ptr<Mutator>> Mutator::SplitExchange( TreePtr<Node> free_base_child, Mutator &free_terminus )
 {
+	// Grab my child before it gets mutated at the TreePtrInterface * level
+	// by the exchange on split_terminus (which still has the same TreePtrInterface *)
 	TreePtr<Node> my_original_child = GetChildTreePtr();
 	ASSERT( my_original_child );
 		
-	shared_ptr<Mutator> new_mut = Clone(); 
+	// Get a mutator we can use as terminus. *this is now just for base.
+	shared_ptr<Mutator> split_terminus = Clone(); 
 	
-	new_mut->ExchangeParent( other_mut );
+	// Exchange at the terminus as usual
+	split_terminus->ExchangeParent( free_terminus );
 
-	ExchangeChild( new_base );	
+	// Excahnge at the base as usual
+	ExchangeChild( free_base_child );	
 
-	return make_pair(my_original_child, new_mut);
+	// Return base for extracted FZ and the newly generated terminus for the tree
+	return make_pair(my_original_child, split_terminus);
 }
-
         
 
 TreePtr<Node> Mutator::GetParentNode() const

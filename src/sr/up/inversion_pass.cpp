@@ -42,7 +42,8 @@ void InversionPass::WalkLocatedPatches( LocatedPatch lze )
             WalkLocatedPatches( child_lze );
         } );
     
-        // Invert the free zone while unwinding
+        // Invert the free zone while unwinding. We must make these changes in the 
+        // unwind due #784
         Invert(lze); 
     }
     else if( auto tree_patch = dynamic_pointer_cast<TreeZonePatch>(*lze.second) )

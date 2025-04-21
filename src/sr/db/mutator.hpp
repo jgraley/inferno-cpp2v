@@ -51,11 +51,11 @@ public:
 	bool operator==( const Mutator &right ) const;
 	bool operator!=( const Mutator &right ) const;      
   
-    TreePtr<Node> ExchangeChild( TreePtr<Node> new_child );
+    TreePtr<Node> ExchangeChild( TreePtr<Node> free_child );
     TreePtr<Node> ExchangeContainer( ContainerInterface *child_container,                               
                                      list<shared_ptr<Mutator>> child_terminii = {} );
-    void ExchangeParent( Mutator& other_mut );
-	pair<TreePtr<Node>, shared_ptr<Mutator>> Split( Mutator &other_mut, TreePtr<Node> free_base );
+    void ExchangeParent( Mutator& free_mut );
+	pair<TreePtr<Node>, shared_ptr<Mutator>> SplitExchange( TreePtr<Node> free_base_child, Mutator &free_terminus );
 
     TreePtr<Node> GetParentNode() const;
     bool IsAtRoot() const;        
