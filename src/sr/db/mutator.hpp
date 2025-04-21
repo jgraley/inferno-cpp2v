@@ -55,7 +55,7 @@ public:
     TreePtr<Node> ExchangeContainer( ContainerInterface *child_container,                               
                                      list<shared_ptr<Mutator>> child_terminii = {} );
     void ExchangeParent( Mutator& other_mut );
-	TreePtr<Node> Split( shared_ptr<Mutator> free_terminus, TreePtr<Node> free_base );
+	pair<TreePtr<Node>, shared_ptr<Mutator>> Split( shared_ptr<Mutator> free_terminus, TreePtr<Node> free_base );
 
     TreePtr<Node> GetParentNode() const;
     bool IsAtRoot() const;        

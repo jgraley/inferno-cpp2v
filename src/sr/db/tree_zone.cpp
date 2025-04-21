@@ -242,14 +242,9 @@ void MutableTreeZone::Exchange( FreeZone *free_zone )
 		shared_ptr<Mutator> free_terminus = *(free_zone->GetTerminiiBegin()); //OnlyElementOf(free_zone->GetTerminii());
 			
 		ASSERT( tree_terminus==base );
-		TreePtr<Node> original_tree_zone_base = tree_terminus->GetChildTreePtr();
-		
-		shared_ptr<Mutator> cloned_tree_terminus = tree_terminus->Clone(); 
-		cloned_tree_terminus->ExchangeParent(*free_terminus); // deep
-				
-		(void)base->ExchangeChild( free_base );	// deep 
-    
-		tree_terminus = cloned_tree_terminus;
+		auto p = tree_terminus->Split(free_terminus, free_base );		
+		TreePtr<Node> original_tree_zone_base = p.first;
+		tree_terminus = p.second;
     
 		ASSERT( original_tree_zone_base );
 		free_zone->SetBase( original_tree_zone_base );	

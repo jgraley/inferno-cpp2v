@@ -178,17 +178,17 @@ void Mutator::ExchangeParent( Mutator &other_mut )
 }
     
     
-TreePtr<Node> Mutator::Split( shared_ptr<Mutator> free_terminus, TreePtr<Node> free_base )
+pair<TreePtr<Node>, shared_ptr<Mutator>> Mutator::Split( shared_ptr<Mutator> free_terminus, TreePtr<Node> free_base )
 {
 	TreePtr<Node> original_tree_zone_base = GetChildTreePtr();
 	
-	shared_ptr<Mutator> other = Clone(); 
-	other->ExchangeParent(*free_terminus); // deep
-	
-	(void)ExchangeChild( free_base );	// deep 
+	shared_ptr<Mutator> cloned = Clone(); 
+	cloned->ExchangeParent(*free_terminus); // deep
+			
+	ExchangeChild( free_base );	// deep 
 
 	ASSERT( original_tree_zone_base );
-	return original_tree_zone_base;
+	return make_pair(original_tree_zone_base, cloned);
 }
 
         
