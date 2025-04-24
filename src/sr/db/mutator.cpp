@@ -94,7 +94,7 @@ bool Mutator::operator!=( const Mutator &right ) const
 }
 
 
-TreePtr<Node> Mutator::ExchangeChild( TreePtr<Node> free_child )
+TreePtr<Node> Mutator::ExchangeChild( TreePtr<Node> free_child ) const
 {	
 	// Free zone merging should get rid of these, and things will change with general wide zone support
 	ASSERT( !dynamic_cast<ContainerInterface *>(free_child.get()) )("Cannot accept wide here");
@@ -130,8 +130,8 @@ TreePtr<Node> Mutator::ExchangeChild( TreePtr<Node> free_child )
 }
     
     
-TreePtr<Node> Mutator::ExchangeContainer( ContainerInterface *child_container, 
-                                          list<shared_ptr<Mutator>> zone_terminii )
+TreePtr<Node> Mutator::ExchangeContainer( ContainerInterface *free_child_container, 
+                                          list<shared_ptr<Mutator>> free_zone_terminii )
 {
 	ASSERT( mode==Mode::Container );
 	TreePtr<Node> old_child = (TreePtr<Node>)*container_iterator;
@@ -141,8 +141,8 @@ TreePtr<Node> Mutator::ExchangeContainer( ContainerInterface *child_container,
 	
 	// Child zone base has ContainerInterface, so it's a SubContainer. We get here due to         
 	// FreeZones created by StarAgent. Expand it and populate into the parent, which is also a SubContainer.         
-	for( ContainerInterface::iterator it_child = child_container->begin();
-		 it_child != child_container->end();
+	for( ContainerInterface::iterator it_child = free_child_container->begin();
+		 it_child != free_child_container->end();
 		 ++it_child    )
 	{
 		TreePtr<Node> child_element = (TreePtr<Node>)*it_child; 
@@ -152,11 +152,11 @@ TreePtr<Node> Mutator::ExchangeContainer( ContainerInterface *child_container,
 		{
 			// If child_element is a placeholder, some zone terminates immediately at this element
 			// (the zone is "shallow"). So child_element *IS* the placeholder of one of that zone's 
-			// Mutators and child_container IS the zone's base container. We need to in-place modify 
+			// Mutators and free_child_container IS the zone's base container. We need to in-place modify 
 			// the supplied zone terminus using our parent container because that's what will be kept.
 			// Note: Kept: parent container, other child terminii
 			// Discarded: child terminus, child base, child container
-			shared_ptr<Mutator> child_terminus = FindMatchingTerminus( child_container, it_child, zone_terminii );                                                
+			shared_ptr<Mutator> child_terminus = FindMatchingTerminus( free_child_container, it_child, free_zone_terminii );                                                
 			child_terminus->mode = Mode::Container;
 			child_terminus->parent_node = parent_node;
 			child_terminus->parent_container = parent_container;
@@ -171,38 +171,24 @@ TreePtr<Node> Mutator::ExchangeContainer( ContainerInterface *child_container,
 void Mutator::ExchangeParent( Mutator &free_mut )
 {
     TreePtr<Node> free_child = free_mut.GetChildTreePtr(); // outside the zone        
-    TreePtr<Node> my_child = ExchangeChild( free_child );    
-    free_mut.ExchangeChild( my_child );    
-        
-    swap(*this, free_mut);
-}
+	TreePtr<Node> old_child = GetChildTreePtr();
     
+    ExchangeChild( free_child );            
+    swap(*this, free_mut);
+    ExchangeChild( old_child );        
+}   
+        
 
-/* We have to exchange a FZ into an empty TZ for which base==terminus. We will:
- * - Create a new mutator for tree terminus, and turn ourself into base
- * - Exchange free_terminus as normal, as well as free_base_child
- * Care: other mutators in other tree zones will still alise the base,
- * when they should alias the new terminus after this operation, see #784
- */ 
-pair<TreePtr<Node>, shared_ptr<Mutator>> Mutator::SplitExchange( TreePtr<Node> free_base_child, Mutator &free_terminus )
+// This one will not change the original child, so it's safe if that
+// aliases as in the case of exchanging on an empty TZ. However, it does
+// not update free_mut (in the case of exchanging on an empty TZ, just
+// return an empty FZ).
+void Mutator::SetParent( const Mutator &free_mut )
 {
-	// Grab my child before it gets mutated at the TreePtrInterface * level
-	// by the exchange on split_terminus (which still has the same TreePtrInterface *)
-	TreePtr<Node> my_original_child = GetChildTreePtr();
-	ASSERT( my_original_child );
-		
-	// Get a mutator we can use as terminus. *this is now just for base.
-	shared_ptr<Mutator> split_terminus = Clone(); 
-	
-	// Exchange at the terminus as usual
-	split_terminus->ExchangeParent( free_terminus );
-
-	// Excahnge at the base as usual
-	ExchangeChild( free_base_child );	
-
-	// Return base for extracted FZ and the newly generated terminus for the tree
-	return make_pair(my_original_child, split_terminus);
-}
+	TreePtr<Node> old_child = GetChildTreePtr();
+    *this = free_mut;    
+    ExchangeChild( old_child );           
+}   
         
 
 TreePtr<Node> Mutator::GetParentNode() const

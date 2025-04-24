@@ -35,19 +35,24 @@ unique_ptr<FreeZone> TreeZone::Duplicate() const
 
 
 void TreeZone::Validate(const XTreeDatabase *db) const // TODO maybe move to database?
-{
-    ASSERT( db->HasRow( GetBaseXLink() ) )(GetBaseXLink());
-    
+{       
+    XLink base = GetBaseXLink();
+    ASSERT( base )(base);
+    ASSERT( base.GetChildTreePtr() )(base);
+    ASSERT( db->HasRow( base ) )(base);      
+
     if( IsEmpty() )
         return; // We've checked enough for empty zones
     // Now we've excluded legit empty zones, checks can be strict
     
     DepthFirstRelation dfr( db );
     XLink prev = XLink();
-    XLink base = GetBaseXLink();
+    
     //FTRACE(prev_xlink)("\n");
     for( XLink terminus : GetTerminusXLinks() )
     {
+		ASSERT( terminus )(terminus);
+		ASSERT( terminus.GetChildTreePtr() )(terminus);
         ASSERT( db->HasRow( terminus ) )(terminus);        
                         
         if( prev )
@@ -165,6 +170,9 @@ MutableTreeZone::MutableTreeZone( shared_ptr<Mutator> base_,
     base(base_),
     terminii(move(terminii_))
 {
+	ASSERT( base->GetChildTreePtr() );
+    for( shared_ptr<Mutator> terminus : terminii )
+		ASSERT( terminus->GetChildTreePtr() );
 }
 
 
@@ -189,6 +197,7 @@ TreePtr<Node> MutableTreeZone::GetBaseNode() const
 
 XLink MutableTreeZone::GetBaseXLink() const
 {
+	ASSERT( base->GetChildTreePtr() )(base);
     return base->GetXLink();
 }
 
@@ -214,6 +223,13 @@ shared_ptr<Mutator> MutableTreeZone::GetBaseMutator() const
 }
 
 
+void MutableTreeZone::SetBaseMutator( shared_ptr<Mutator> new_base )
+{
+	ASSERT( new_base->GetChildTreePtr() );
+	base = new_base;
+}
+
+
 vector<shared_ptr<Mutator>> MutableTreeZone::GetTerminusMutators() const
 {
 	return terminii;
@@ -226,58 +242,62 @@ shared_ptr<Mutator> MutableTreeZone::GetTerminusMutator(size_t index) const
 }
 
 
-void MutableTreeZone::Exchange( FreeZone *free_zone )
-{    
+void MutableTreeZone::Exchange( FreeZone *free_zone, vector<MutableTreeZone *> fixups )
+{    		
 	// Should be true regardless of empty zones
 	ASSERT( GetNumTerminii() == free_zone->GetNumTerminii() );
 
 	ASSERT( !free_zone->IsEmpty() ); // Could add support but apparently don't need it rn	       	        
-            
-	TreePtr<Node> original_tree_zone_base = base->GetChildTreePtr();
-
-    if( IsEmpty() )
-    {		
-		shared_ptr<Mutator> &tree_terminus = SoloElementOf(terminii);
-		TreePtr<Node> free_base = free_zone->GetBaseNode();
-		shared_ptr<Mutator> free_terminus = *(free_zone->GetTerminiiBegin()); 
-			
-		ASSERT( tree_terminus==base );
-		auto p = tree_terminus->SplitExchange(free_base, *free_terminus);		
-		TreePtr<Node> original_tree_zone_base = p.first;
-		tree_terminus = p.second;
-    
-		free_zone->SetBase( original_tree_zone_base );	
-		return;
-	}
-
+     
     // Do a co-walk and exchange one at a time. We want to modify the parent
     // sides of the terminii in-place, leaving valid mutators behind. 
-    FreeZone::TerminusIterator free_mut_it = free_zone->GetTerminiiBegin();    
+    vector<MutableTreeZone *>::iterator fixups_it = fixups.begin();
+    FreeZone::TerminusIterator free_terminus_it = free_zone->GetTerminiiBegin();    
     for( shared_ptr<Mutator> &tree_terminus : terminii )
     {
-        ASSERT( free_mut_it != free_zone->GetTerminiiEnd() ); // length mismatch    
+        ASSERT( free_terminus_it != free_zone->GetTerminiiEnd() ); // length mismatch    
+                         
+		if( !fixups.empty() && *fixups_it )
+			ASSERT( *((*fixups_it)->GetBaseMutator()) == *tree_terminus );
                          
 	    if( IsEmpty() )
 	    {
-			// #784 workaround, will NOT alias to other mutators eg in other
-			// tree zones, eg ones at these terminii, so you must not use them egain. 
-			tree_terminus = tree_terminus->Clone(); 
-		}	
+			ASSERT( *tree_terminus==*base );
 
-		tree_terminus->ExchangeParent(**free_mut_it); // deep
+			// #784 workaround, will NOT alias to other mutators eg in other
+			// tree zones, eg ones at these terminii, so you must not use them again. 
+			tree_terminus = make_shared<Mutator>(*base); 
+			
+			// Avoid side-effects on base, at the cost of not getting updated free terminus
+			tree_terminus->SetParent(**free_terminus_it);
+		}	
+		else
+		{
+			tree_terminus->ExchangeParent(**free_terminus_it); // deep
+		}
                 
         ASSERT( tree_terminus->GetChildTreePtr() );
-        free_mut_it++;
+        
+   		if( !fixups.empty() && *fixups_it )
+			(*fixups_it)->SetBaseMutator(tree_terminus);
+        
+        free_terminus_it++;
+        if( !fixups.empty() )
+			fixups_it++;
     } 
-    ASSERT( free_mut_it == free_zone->GetTerminiiEnd() ); // length mismatch  
+    ASSERT( free_terminus_it == free_zone->GetTerminiiEnd() ); // length mismatch  
 
     // Exchange the base. We want to modify the child side of the base
     // in-place, leaving valid mutators behind. 
+	TreePtr<Node> original_tree_zone_base = base->GetChildTreePtr();
+
     TreePtr<Node> free_base = free_zone->GetBaseNode();
     (void)base->ExchangeChild( free_base );	// deep 
     
-    ASSERT( original_tree_zone_base );
-	free_zone->SetBase( original_tree_zone_base );	
+    if( original_tree_zone_base )
+		free_zone->SetBase( original_tree_zone_base );	
+	else
+		*free_zone = *FreeZone::CreateEmpty();		
 }
 
 

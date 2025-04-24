@@ -187,3 +187,18 @@ void ScaffoldChecker::Check(shared_ptr<Patch> patch)
 	string tn = zone->GetBaseNode()->GetTypeName();
 	ASSERT( tn.find("Scaffold") == string::npos )(tn);
 }
+
+// ------------------------- ValidateTreeZones --------------------------
+
+ValidateTreeZones::ValidateTreeZones(const XTreeDatabase *db_) :
+    db(db_)
+{
+}
+ 
+void ValidateTreeZones::Run( shared_ptr<Patch> layout )
+{
+    TreeZonePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<TreeZonePatch> &patch)
+    {
+		patch->GetZone()->Validate(db);
+    } );    
+}

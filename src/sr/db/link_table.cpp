@@ -13,6 +13,7 @@ LinkTable::LinkTable()
 const LinkTable::Row &LinkTable::GetRow(XLink xlink) const
 {
     ASSERT( xlink );
+    ASSERT( xlink.GetChildTreePtr() );
     ASSERT( HasRow(xlink) )
           ("X tree database: no row for ")(xlink)("\n")
           ("Rows: ")(rows);

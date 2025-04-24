@@ -5,6 +5,7 @@
 #include "tree/validate.hpp"
 #include "common/lambda_loops.hpp"
 #include "tz_relation.hpp"
+#include "misc_passes.hpp"
 
 #include <iostream>
 
@@ -16,7 +17,7 @@
 // we begin at next descendants of start patch, and on OOO detection, we move 
 // to the next descendants of the OOO patches.
 // PREFER_TO_MOVE_DESCENDANT may be necessary to reproduce issues like #874
-//#define PREFER_TO_MOVE_DESCENDANT
+#define PREFER_TO_MOVE_DESCENDANT
 
 namespace SR 
 {
@@ -67,6 +68,8 @@ pair<Orderable::Diff, DepthFirstRelation::RelType> DFPatchIndexRelation::Compare
     auto l_tp = dynamic_pointer_cast<TreeZonePatch>(*l_pp);
     ASSERT( l_tp );
 	XLink l_xlink = l_tp->GetZone()->GetBaseXLink();
+	ASSERT( l_xlink );
+	ASSERT( l_xlink.GetChildTreePtr() );
 	
 	shared_ptr<Patch> *r_pp = patch_records[r_key].patch_ptr;
     ASSERT( r_pp );
@@ -74,6 +77,8 @@ pair<Orderable::Diff, DepthFirstRelation::RelType> DFPatchIndexRelation::Compare
     auto r_tp = dynamic_pointer_cast<TreeZonePatch>(*r_pp);
     ASSERT( r_tp );
 	XLink r_xlink = r_tp->GetZone()->GetBaseXLink();
+	ASSERT( r_xlink );
+	ASSERT( r_xlink.GetChildTreePtr() );
 
 	return df.CompareHierarchical( l_xlink, r_xlink );
 	ASSERTFAIL();
@@ -96,7 +101,7 @@ void OrderingPass::Run( shared_ptr<Patch> &layout )
 	
     shared_ptr<Mutator> root = db->GetMainRootMutator();
     ConstrainAnyPatchToDescendants( layout, root, false );	
-    ProcessOutOfOrder();
+    ProcessOutOfOrder(layout);
 }
 
 
@@ -240,6 +245,9 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
 {          
 	INDENT(just_check?"f":"F");                                      
  	ASSERT( !patch_records.empty() );
+    ASSERT( base );
+    ASSERT( base.GetChildTreePtr() );        
+
     DFPatchIndexRelation dfpir( db, patch_records );   
                          	  
     // Get the patch records in depth-first order. Omit:
@@ -250,6 +258,8 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
     for( size_t i=0; i<patch_records.size(); i++ )
     {
         XLink tz_base = GetBaseXLink( patch_records[i] );
+        ASSERT( tz_base );
+        ASSERT( tz_base.GetChildTreePtr() );        
 
         // Check the tree zone base is in overall range supplied to us for root or parent TZ terminus.
         // Inclusive: straightforward depth-first inclusive check
@@ -506,7 +516,7 @@ bool OrderingPass::AreLinksConsecutive(size_t left, size_t right, set<size_t, DF
 }
  
  
-void OrderingPass::ProcessOutOfOrder()
+void OrderingPass::ProcessOutOfOrder(shared_ptr<Patch> &layout)
 {
 	INDENT("P");
 
@@ -522,7 +532,7 @@ void OrderingPass::ProcessOutOfOrder()
 	}
 
 	// Process duplications first, because we wouldn't want to duplicate
-	// a TZ that aliasses a TZ that has had scffolding put in.
+	// a TZ that aliasses a TZ that has had scaffolding put in.
     for( shared_ptr<Patch> *ooo_patch_ptr : out_of_order_patches )
     {
 		auto ooo_tree_patch = dynamic_pointer_cast<TreeZonePatch>(*ooo_patch_ptr);
@@ -559,16 +569,16 @@ void OrderingPass::ProcessOutOfOrder()
 			TRACE("Moving ")(ooo_patch_ptr)("\n");
 			
 			// We can move it to the new place, avoiding the need for duplication
-			MoveTreeZoneToFreePatch(ooo_patch_ptr);
+			MoveTreeZoneToFreePatch(ooo_patch_ptr, layout);
 
-			// But any further appearances must be duplicated
+			// But any further appearances must be duplicated TODO remove this? we're done duplicating!
 			InsertSolo(in_order_bases, base_xlink); 
 		}
 	}
 }
 
 
-void OrderingPass::MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch)
+void OrderingPass::MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch, shared_ptr<Patch> &layout)
 {
 	INDENT("M");
 
@@ -582,11 +592,38 @@ void OrderingPass::MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch)
 	// Create the scaffold in a free zone
 	auto free_zone = FreeZone::CreateScaffold( target_tree_zone->GetBaseMutator()->GetTreePtrInterface(), 
 											   target_tree_zone->GetNumTerminii() );
+    
+    vector<MutableTreeZone *> fixups;	
+	for( shared_ptr<Mutator> terminus : target_tree_zone->GetTerminusMutators() )
+	{
+		MutableTreeZone *found = nullptr;
+		TreeZonePatch::ForTreeDepthFirstWalk(layout, [&](shared_ptr<TreeZonePatch> &patch)
+		{
+			MutableTreeZone *candidate = dynamic_cast<MutableTreeZone *>(patch->GetZone());
+			if( *(candidate->GetBaseMutator()) == *terminus )
+			{
+				ASSERT( !found );
+				found = candidate;
+			}
+		}, nullptr );
+		
+		fixups.push_back( found ); // does not have to be found; TZs can be disconnected
+	}
 	
 	//FTRACE("target_tree_zone: ")(*target_tree_zone)("\nfree_zone: ")(*free_zone)("\n");
 	// Put the scaffold into the "from" part of the tree, displacing 
 	// the original contents, which we shall move
-	db->MainTreeExchange( target_tree_zone, free_zone.get() );
+	target_tree_zone->Validate(db);
+		
+	TRACE("I will exchange tree zone:\n")(target_tree_zone)("\nwith free zone:\n")(free_zone)("\nand fix up these tree zones:\n")(fixups)("\n");
+	db->MainTreeExchange( target_tree_zone, free_zone.get(), fixups );
+	TRACE("After exchanging I have tree zone:\n")(target_tree_zone)("\nand free zone:\n")(free_zone)("\n");
+
+	target_tree_zone->Validate(db);
+	for( MutableTreeZone *fu : fixups )
+	    if( fu )
+		    fu->Validate(db);		
+	
 	// free_zone is the part of the tree that we just displaced. Make 
 	// a new patch based on it.
 	auto free_patch = make_shared<FreeZonePatch>( move(free_zone), target_tree_patch->MoveChildren() );
@@ -594,6 +631,8 @@ void OrderingPass::MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch)
 	// Install the new patch into the layout
 	free_patch->AddEmbeddedMarkers( target_tree_patch->GetEmbeddedMarkers() );               
 	*target_patch = free_patch;
+	
+	ValidateTreeZones(db).Run(layout);
 	
 	// How does the scaffold not end up in the updated tree?
 	// The best argument is that, after this pass, none of the

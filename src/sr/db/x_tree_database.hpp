@@ -42,7 +42,7 @@ public:
     void InitialBuild();
     
     // Incremental strategy: perform updates on zones
-    void MainTreeExchange( MutableTreeZone *target_tree_zone, FreeZone *free_zone );
+    void MainTreeExchange( MutableTreeZone *target_tree_zone, FreeZone *free_zone, vector<MutableTreeZone *> fixups );
         
     void MainTreeDeleteGeometric(TreeZone *zone, const DBCommon::CoreInfo *base_info);
     void MainTreeInsertGeometric(TreeZone *zone, const DBCommon::CoreInfo *base_info);

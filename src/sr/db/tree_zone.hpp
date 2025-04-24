@@ -78,10 +78,11 @@ public:
     XLink GetTerminusXLink(size_t index) const override;
 
     shared_ptr<Mutator> GetBaseMutator() const;
+    void SetBaseMutator( shared_ptr<Mutator> new_base );
 	vector<shared_ptr<Mutator>> GetTerminusMutators() const;
     shared_ptr<Mutator> GetTerminusMutator(size_t index) const;	
 
-    void Exchange( FreeZone *free_zone );
+    void Exchange( FreeZone *free_zone, vector<MutableTreeZone *> fixups );
        
     string GetTrace() const override;
     

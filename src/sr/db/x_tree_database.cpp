@@ -6,6 +6,8 @@
 #include "tree_zone.hpp"
 #include "free_zone.hpp"
 
+#define NO_TOTAL_ALIAS
+
 using namespace SR;    
 
 // We won't normally expect matches as postconditions to our
@@ -131,14 +133,14 @@ void XTreeDatabase::InitialBuild()
 }
 
 
-void XTreeDatabase::MainTreeExchange( MutableTreeZone *target_tree_zone, FreeZone *free_zone )
+void XTreeDatabase::MainTreeExchange( MutableTreeZone *target_tree_zone, FreeZone *free_zone, vector<MutableTreeZone *> fixups )
 {
-    TRACE("Whole main tree walk for your convenience:\n");
+    /*TRACE("Whole main tree walk for your convenience:\n");
     if( Tracer::IsEnabled() )
     {
         DBWalk::Actions actions;
         db_walker.WalkTree( &actions, GetRootXLink(DBCommon::TreeOrdinal::MAIN), DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_IN );
-    }
+    }*/
 
     TRACE("Replacing target TreeZone:\n")(*target_tree_zone)("\nwith source FreeZone:\n")(*free_zone)("\n");
     ASSERT( target_tree_zone->GetNumTerminii() == free_zone->GetNumTerminii() )
@@ -154,7 +156,7 @@ void XTreeDatabase::MainTreeExchange( MutableTreeZone *target_tree_zone, FreeZon
     MainTreeDeleteGeometric( target_tree_zone, &base_info );   
     
     // Update the tree. mutable_target_tree_zone becomes the valid new tree zone.
-    target_tree_zone->Exchange( free_zone ); 
+    target_tree_zone->Exchange( free_zone, fixups ); 
     
     // Re-insert geometric info based on new tree zone
     MainTreeInsertGeometric( target_tree_zone, &base_info );       
@@ -480,7 +482,9 @@ shared_ptr<Mutator> XTreeDatabase::GetTreeMutator(XLink xlink)
             ASSERTFAIL(); // Base of free zone is just a node, so there's no unique mutator for it
         }
     }    
-
+#ifdef NO_TOTAL_ALIAS
+	return locally_generated_mutator;
+#else	
 	// Attempt to insert into the cache, but cache is not a multiset so this will
 	// fail if already there (by value of the XLink extracted from the Mutator).
 	auto p = mutator_cache.insert(locally_generated_mutator);
@@ -490,6 +494,7 @@ shared_ptr<Mutator> XTreeDatabase::GetTreeMutator(XLink xlink)
 	// Either way, the returned iterator is what we want: if succeded then this is new 
 	// and it points to it in the cache; if failed, it points to the already extant element.
 	return *(p.first);
+#endif	
 }
 
 

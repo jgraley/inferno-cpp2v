@@ -9,6 +9,8 @@
 
 #include <iostream>
 
+#define INVERT_ON_WIND_IN
+
 using namespace SR;
 
 InversionPass::InversionPass( XTreeDatabase *db_ ) :
@@ -32,7 +34,10 @@ void InversionPass::WalkLocatedPatches( LocatedPatch lze )
     // merging (if parent was a free zone, we'd have no such mutator)
     if( auto free_patch = dynamic_pointer_cast<FreeZonePatch>(*lze.second) )
     {
-        // Free zone: recurse and then invert locally
+#ifdef INVERT_ON_WIND_IN
+        Invert(lze); 
+#endif
+        // Free zone: recurse 
         Patch::ForChildren( free_patch, [&](shared_ptr<Patch> &child_patch)    
         {
             // We don't know the base if we're coming from a free zone
@@ -42,9 +47,11 @@ void InversionPass::WalkLocatedPatches( LocatedPatch lze )
             WalkLocatedPatches( child_lze );
         } );
     
+#ifndef INVERT_ON_WIND_IN
         // Invert the free zone while unwinding. We must make these changes in the 
         // unwind due #784
         Invert(lze); 
+#endif
     }
     else if( auto tree_patch = dynamic_pointer_cast<TreeZonePatch>(*lze.second) )
     {
@@ -80,6 +87,7 @@ void InversionPass::Invert( LocatedPatch lze )
             
     // Collect base xlinks for child zones (which must be tree zones)
     vector<shared_ptr<Mutator>> terminii_mutators;
+    vector<MutableTreeZone *> fixups;
     Patch::ForChildren(free_patch, [&](shared_ptr<Patch> &child_patch)    
     {
         // Inversion strategy: we're based on a free zone and FZ merging should 
@@ -91,6 +99,7 @@ void InversionPass::Invert( LocatedPatch lze )
         ASSERT(child_mutable_tree_zone);        
         
         terminii_mutators.push_back( child_mutable_tree_zone->GetBaseMutator() );
+        fixups.push_back( child_mutable_tree_zone );
     } );
          
     // Make the inverted TZ    
@@ -99,8 +108,7 @@ void InversionPass::Invert( LocatedPatch lze )
     FreeZone free_zone = *free_patch->GetZone();
     
     // Write it into the tree
-    db->MainTreeExchange( &target_tree_zone, &free_zone );          
+    db->MainTreeExchange( &target_tree_zone, &free_zone, fixups );          
     
-    // target_tree_zone is now a TZ for the newly inserted zone, and free_zone is the 
-    // content that was removed. We're currently not using either of these.
+
 }

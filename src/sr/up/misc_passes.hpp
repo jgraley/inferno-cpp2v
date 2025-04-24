@@ -132,6 +132,20 @@ public:
     void Run( shared_ptr<Patch> layout );
     static void Check(shared_ptr<Patch> patch);
 };
+
+// ------------------------- ValidateTreeZones --------------------------
+
+class ValidateTreeZones 
+{
+public:
+    ValidateTreeZones( const XTreeDatabase *db );
+    void Run( shared_ptr<Patch> layout );
+
+private:
+    const XTreeDatabase * const db;
+};
+
 }
+
 
 #endif

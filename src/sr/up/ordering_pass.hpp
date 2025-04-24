@@ -69,8 +69,8 @@ private:
 	bool AreLinksConsecutive(size_t left, size_t right, 
 	                         set<size_t, DFPatchIndexRelation> &indices_dfo) const;
 
-	void ProcessOutOfOrder();
-	void MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch );
+	void ProcessOutOfOrder(shared_ptr<Patch> &layout);
+	void MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch, shared_ptr<Patch> &layout );
 
     shared_ptr<TreeZonePatch> GetTreePatch(const PatchRecord &patch_record) const;
     XLink GetBaseXLink(const PatchRecord &patch_record) const;
