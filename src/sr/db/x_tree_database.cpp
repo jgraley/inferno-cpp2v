@@ -6,8 +6,6 @@
 #include "tree_zone.hpp"
 #include "free_zone.hpp"
 
-#define NO_TOTAL_ALIAS
-
 using namespace SR;    
 
 // We won't normally expect matches as postconditions to our
@@ -482,19 +480,8 @@ shared_ptr<Mutator> XTreeDatabase::GetTreeMutator(XLink xlink)
             ASSERTFAIL(); // Base of free zone is just a node, so there's no unique mutator for it
         }
     }    
-#ifdef NO_TOTAL_ALIAS
+
 	return locally_generated_mutator;
-#else	
-	// Attempt to insert into the cache, but cache is not a multiset so this will
-	// fail if already there (by value of the XLink extracted from the Mutator).
-	auto p = mutator_cache.insert(locally_generated_mutator);
-
-	//FTRACE(p.second);
-
-	// Either way, the returned iterator is what we want: if succeded then this is new 
-	// and it points to it in the cache; if failed, it points to the already extant element.
-	return *(p.first);
-#endif	
 }
 
 
@@ -507,12 +494,6 @@ unique_ptr<MutableTreeZone> XTreeDatabase::MakeMutableTreeZone(XLink base,
 		terminii_mutators.push_back( GetTreeMutator(t) );
 	return make_unique<MutableTreeZone>( move(base_mutator), move(terminii_mutators) );
 }                                                
-
-
-void XTreeDatabase::ClearMutatorCache()
-{
-	mutator_cache.clear();
-}
 
 
 void XTreeDatabase::Dump() const

@@ -111,8 +111,5 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink origin_xlink, shared_p
     markers_pass.Run(source_layout);
 
     InversionPass inversion_pass( db ); 
-    inversion_pass.Run(origin_mutator, &source_layout);     
-    
-    // Avoid ginormous memory leak
-    db->ClearMutatorCache();           
+    inversion_pass.Run(origin_mutator, &source_layout);             
 }

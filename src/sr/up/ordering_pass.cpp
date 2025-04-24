@@ -17,7 +17,7 @@
 // we begin at next descendants of start patch, and on OOO detection, we move 
 // to the next descendants of the OOO patches.
 // PREFER_TO_MOVE_DESCENDANT may be necessary to reproduce issues like #874
-#define PREFER_TO_MOVE_DESCENDANT
+//#define PREFER_TO_MOVE_DESCENDANT
 
 namespace SR 
 {

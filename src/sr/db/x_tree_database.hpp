@@ -85,8 +85,6 @@ public:
     unique_ptr<MutableTreeZone> MakeMutableTreeZone(XLink xlink,
                                                     vector<XLink> terminii);
 
-	void ClearMutatorCache();
-
     void Dump() const;
     
 private:    
@@ -113,9 +111,7 @@ private:
     // Mutators, i.e. no two equal mutators allowed even though they
     // are separate objects and so the shared_ptrs differ.
     typedef DereferencingHash<shared_ptr<Mutator>, Mutator> SPMHasher;
-    typedef DereferencingEqual<shared_ptr<Mutator>> SPMEqualPred;
-    
-   	unordered_set<shared_ptr<Mutator>, SPMHasher, SPMEqualPred> mutator_cache;
+    typedef DereferencingEqual<shared_ptr<Mutator>> SPMEqualPred;    
 };    
     
 };
