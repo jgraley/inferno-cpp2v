@@ -52,12 +52,8 @@ private:
 	// least across exchanges, we keep ancestors of the bounds that
 	// are at a safe level. FindOutOfOrderTreePatches() converts these.
     void ConstrainAnyPatchToDescendants( shared_ptr<Patch> &start_patch, 
-								         shared_ptr<Mutator> base,
+								         XLink base,
 								         bool just_check );
-    void ConstrainTreePatchesToRange( PatchRecords patch_records, 
-                                      shared_ptr<Mutator> lower,                                      
-                                      shared_ptr<Mutator> upper,
-                                      bool just_check );
     void ConstrainChildrenToTerminii( shared_ptr<TreeZonePatch> &tree_patch, 
                                       bool just_check );
     void AppendNextDescendantTreePatches( shared_ptr<Patch> &patch, 
@@ -74,7 +70,6 @@ private:
 
     shared_ptr<TreeZonePatch> GetTreePatch(const PatchRecord &patch_record) const;
     XLink GetBaseXLink(const PatchRecord &patch_record) const;
-    shared_ptr<Mutator> GetBaseMutator(const PatchRecord &patch_record) const;
                           
     XTreeDatabase * const db;
     SR::DepthFirstRelation dfr;      

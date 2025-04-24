@@ -99,7 +99,7 @@ void OrderingPass::Run( shared_ptr<Patch> &layout )
 	out_of_order_patches.clear();
 	in_order_bases.clear();
 	
-    shared_ptr<Mutator> root = db->GetMainRootMutator();
+    XLink root = db->GetMainRootXLink();
     ConstrainAnyPatchToDescendants( layout, root, false );	
     ProcessOutOfOrder(layout);
 }
@@ -110,13 +110,13 @@ void OrderingPass::Check( shared_ptr<Patch> &layout )
 	out_of_order_patches.clear();
 	in_order_bases.clear();
 	
-	shared_ptr<Mutator> root = db->GetMainRootMutator();
+	XLink root = db->GetMainRootXLink();
     ConstrainAnyPatchToDescendants( layout, root, true );
 }
 
 
 void OrderingPass::ConstrainAnyPatchToDescendants( shared_ptr<Patch> &start_patch, 
-												   shared_ptr<Mutator> base,
+												   XLink base,
 												   bool just_check )
 {
     INDENT(just_check?"a":"A");
@@ -124,7 +124,6 @@ void OrderingPass::ConstrainAnyPatchToDescendants( shared_ptr<Patch> &start_patc
     
     // Determine tree zone patches descending from starting patch.
     PatchRecords patch_records;
-    shared_ptr<Mutator> last_descendant = db->GetLastDescendantMutator(base);
     AppendNextDescendantTreePatches( start_patch, patch_records );
                  
     // Keep trying to find the in-order subset of patches until we settle.
@@ -138,7 +137,7 @@ void OrderingPass::ConstrainAnyPatchToDescendants( shared_ptr<Patch> &start_patc
 			break;
         
 		// patch_records is updated in-place with correct out_of_range values
-		FindOutOfOrderTreePatches( patch_records, base->GetXLink(), just_check );    
+		FindOutOfOrderTreePatches( patch_records, base, just_check );    
 		
 		bool more_to_check = false;
 		
@@ -209,7 +208,7 @@ void OrderingPass::ConstrainChildrenToTerminii( shared_ptr<TreeZonePatch> &tree_
     size_t i=0;
     Patch::ForChildren( tree_patch, [&](shared_ptr<Patch> &child_patch)    
     {
-        shared_ptr<Mutator> terminus = mutable_tree_zone->GetTerminusMutator(i++); 
+        XLink terminus = mutable_tree_zone->GetTerminusXLink(i++); 
         ConstrainAnyPatchToDescendants( child_patch, terminus, just_check );
     } );
 }
@@ -590,17 +589,17 @@ void OrderingPass::MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch, sha
 	ASSERT( !target_tree_zone->IsEmpty() ); // See #784
 	
 	// Create the scaffold in a free zone
-	auto free_zone = FreeZone::CreateScaffold( target_tree_zone->GetBaseMutator()->GetTreePtrInterface(), 
+	auto free_zone = FreeZone::CreateScaffold( target_tree_zone->GetBaseMutator().GetTreePtrInterface(), 
 											   target_tree_zone->GetNumTerminii() );
     
     vector<MutableTreeZone *> fixups;	
-	for( shared_ptr<Mutator> terminus : target_tree_zone->GetTerminusMutators() )
+    for( size_t i=0; i<target_tree_zone->GetNumTerminii(); i++ )
 	{
 		MutableTreeZone *found = nullptr;
 		TreeZonePatch::ForTreeDepthFirstWalk(layout, [&](shared_ptr<TreeZonePatch> &patch)
 		{
 			MutableTreeZone *candidate = dynamic_cast<MutableTreeZone *>(patch->GetZone());
-			if( *(candidate->GetBaseMutator()) == *terminus )
+			if( candidate->GetBaseMutator() == target_tree_zone->GetTerminusMutator(i) )
 			{
 				ASSERT( !found );
 				found = candidate;
@@ -658,15 +657,6 @@ XLink OrderingPass::GetBaseXLink(const PatchRecord &patch_record) const
 {
     shared_ptr<TreeZonePatch> tree_patch = GetTreePatch(patch_record);
     return tree_patch->GetZone()->GetBaseXLink();
-}
-
-
-shared_ptr<Mutator> OrderingPass::GetBaseMutator(const PatchRecord &patch_record) const
-{
-    shared_ptr<TreeZonePatch> tree_patch = GetTreePatch(patch_record);
-	auto mutable_tree_zone = dynamic_cast<MutableTreeZone *>(tree_patch->GetZone());
-	ASSERT( mutable_tree_zone );
-    return mutable_tree_zone->GetBaseMutator();
 }
 
 // ------------------------- AltOrderingChecker --------------------------

@@ -63,11 +63,8 @@ protected:
 class MutableTreeZone : public TreeZone
 {
 public:
-    static unique_ptr<MutableTreeZone> CreateSubtree( shared_ptr<Mutator> base );
-    static unique_ptr<MutableTreeZone> CreateEmpty( shared_ptr<Mutator> base );
-
-    explicit MutableTreeZone( shared_ptr<Mutator> base_, 
-                              vector<shared_ptr<Mutator>> &&terminii_ );
+    explicit MutableTreeZone( Mutator &&base_, 
+                              vector<Mutator> &&terminii_ );
 
     bool IsEmpty() const override;
     size_t GetNumTerminii() const override;
@@ -77,18 +74,17 @@ public:
     vector<XLink> GetTerminusXLinks() const override;
     XLink GetTerminusXLink(size_t index) const override;
 
-    shared_ptr<Mutator> GetBaseMutator() const;
-    void SetBaseMutator( shared_ptr<Mutator> new_base );
-	vector<shared_ptr<Mutator>> GetTerminusMutators() const;
-    shared_ptr<Mutator> GetTerminusMutator(size_t index) const;	
+    const Mutator &GetBaseMutator() const;
+    void SetBaseMutator( const Mutator &new_base );
+    const Mutator &GetTerminusMutator(size_t index) const;	
 
     void Exchange( FreeZone *free_zone, vector<MutableTreeZone *> fixups );
        
     string GetTrace() const override;
     
 private:
-    shared_ptr<Mutator> base;
-    vector<shared_ptr<Mutator>> terminii;
+    Mutator base;
+    vector<Mutator> terminii;
 };
  
 }

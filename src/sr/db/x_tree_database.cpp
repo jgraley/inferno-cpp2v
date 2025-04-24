@@ -489,10 +489,10 @@ unique_ptr<MutableTreeZone> XTreeDatabase::MakeMutableTreeZone(XLink base,
                                                                vector<XLink> terminii)
 {
 	shared_ptr<Mutator> base_mutator = GetTreeMutator(base);
-	vector<shared_ptr<Mutator>> terminii_mutators;
+	vector<Mutator> terminii_mutators;
 	for( XLink t : terminii )
-		terminii_mutators.push_back( GetTreeMutator(t) );
-	return make_unique<MutableTreeZone>( move(base_mutator), move(terminii_mutators) );
+		terminii_mutators.push_back( move(*GetTreeMutator(t)) ); 
+	return make_unique<MutableTreeZone>( move(*base_mutator), move(terminii_mutators) );
 }                                                
 
 

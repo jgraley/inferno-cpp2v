@@ -58,13 +58,12 @@ void InversionPass::WalkLocatedPatches( LocatedPatch lze )
 		auto mutable_tree_zone = dynamic_cast<MutableTreeZone *>(tree_patch->GetZone());
 		ASSERT( mutable_tree_zone );
         // Recurse, co-looping over the children/terminii so we can fill in target bases
-        vector<shared_ptr<Mutator>> terminii = mutable_tree_zone->GetTerminusMutators();
         FreeZonePatch::ChildPatchIterator it_child = tree_patch->GetChildrenBegin();        
-        for( shared_ptr<Mutator> terminus : terminii )
-        {
+        for( size_t i=0; i<mutable_tree_zone->GetNumTerminii(); i++ )
+        {        
             ASSERT( it_child != tree_patch->GetChildrenEnd() ); // length mismatch
             
-            LocatedPatch child_lze( terminus, &*it_child );
+            LocatedPatch child_lze( make_shared<Mutator>(mutable_tree_zone->GetTerminusMutator(i)), &*it_child );
             WalkLocatedPatches( child_lze );
                         
             ++it_child;
@@ -86,7 +85,7 @@ void InversionPass::Invert( LocatedPatch lze )
     ASSERT( free_patch )("Got LZE not a free zone: ")(lze); // WalkLocatedPatches() gave us wrong kind of patch
             
     // Collect base xlinks for child zones (which must be tree zones)
-    vector<shared_ptr<Mutator>> terminii_mutators;
+    vector<Mutator> terminii_mutators;
     vector<MutableTreeZone *> fixups;
     Patch::ForChildren(free_patch, [&](shared_ptr<Patch> &child_patch)    
     {
@@ -103,12 +102,10 @@ void InversionPass::Invert( LocatedPatch lze )
     } );
          
     // Make the inverted TZ    
-    MutableTreeZone target_tree_zone( base_mutator, move(terminii_mutators) );    
+    MutableTreeZone target_tree_zone( move(*base_mutator), move(terminii_mutators) );    
 //    ASSERT( !target_tree_zone.IsEmpty() )(target_tree_zone); // hypothesis: I don't think we can handle this #784
     FreeZone free_zone = *free_patch->GetZone();
     
     // Write it into the tree
-    db->MainTreeExchange( &target_tree_zone, &free_zone, fixups );          
-    
-
+    db->MainTreeExchange( &target_tree_zone, &free_zone, fixups );              
 }
