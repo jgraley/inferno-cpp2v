@@ -22,11 +22,11 @@ unique_ptr<FreeZone> TreeZone::Duplicate() const
     TreePtr<Node> new_base_x = Duplicate::DuplicateSubtree( GetBaseXLink(), 
                                                             duplicator_terminus_map );   
     
-    list<shared_ptr<Mutator>> free_zone_terminii;
+    list<Mutator> free_zone_terminii;
     for( XLink terminus_upd : GetTerminusXLinks() )
     {
         ASSERTS( duplicator_terminus_map[terminus_upd].mutator );
-        free_zone_terminii.push_back( duplicator_terminus_map[terminus_upd].mutator );
+        free_zone_terminii.push_back( *duplicator_terminus_map[terminus_upd].mutator );
     }
 
     // Create a new zone for the result.

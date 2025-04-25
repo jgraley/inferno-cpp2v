@@ -18,6 +18,7 @@ protected:
 	// It is a "mode" because it can change
 	enum class Mode
 	{
+		Null,
 		Root,
 		Singular,
 		Container		
@@ -45,6 +46,7 @@ private:
                       shared_ptr<TreePtr<Node>> sp_tp_root_node_ );             
 
 public:  
+    explicit Mutator();
 	shared_ptr<Mutator> Clone() const; // For #784
 	
     bool operator<(const Mutator &right) const;

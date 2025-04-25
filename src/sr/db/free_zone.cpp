@@ -11,14 +11,14 @@ using namespace SR;
 
 unique_ptr<FreeZone> FreeZone::CreateSubtree( TreePtr<Node> base )
 {
-    return make_unique<FreeZone>( base, list<shared_ptr<Mutator>>{} );
+    return make_unique<FreeZone>( base, list<Mutator>{} );
 }
 
 
 unique_ptr<FreeZone> FreeZone::CreateEmpty()
 {
     return make_unique<FreeZone>( TreePtr<Node>(), // NULL
-                                  list<shared_ptr<Mutator>>{ shared_ptr<Mutator>() } ); // One element, NULL
+                                  list<Mutator>{} ); // Empty
 }
 
 
@@ -28,14 +28,14 @@ unique_ptr<FreeZone> FreeZone::CreateScaffold(const TreePtrInterface *tpi_base, 
     auto pair = tpi_base->MakeScaffold();        
     
     // Set the base as the scaffolding node
-    auto zone = make_unique<FreeZone>( pair.first, list<shared_ptr<Mutator>>{} );
+    auto zone = make_unique<FreeZone>( pair.first, list<Mutator>{} );
     
     // Set the terminii as the scaffolding node's scaffold child pointers (the
     // underlying node type's children will be left empty/NULL)
     for( int i=0; i<num_terminii; i++ )
     {
         ContainerInterface::iterator it = pair.second->insert( Mutator::MakePlaceholder() );
-        zone->AddTerminus( Mutator::MakeFreeContainerMutator(pair.first, pair.second, it) );     
+        zone->AddTerminus( move(*Mutator::MakeFreeContainerMutator(pair.first, pair.second, it)) );     
     }
     
     //FTRACES("Created scaffold with %d terminii\n", num_terminii)("\n");
@@ -49,17 +49,21 @@ FreeZone::FreeZone()
 }
 
 
-FreeZone::FreeZone( TreePtr<Node> base_, list<shared_ptr<Mutator>> &&terminii_ ) : 
-    base( base_ ),
-    terminii( move(terminii_) )
+FreeZone::FreeZone( TreePtr<Node> base_, list<Mutator> &&terminii_ ) : 
+    base( base_ )
 {
     // An empty free zone is indicated by a NULL base and exactly one
     // terminus, which should also be NULL.
     if( !base )
     {
-        ASSERT( terminii.size() == 1 );
-        ASSERT( !terminii.front() );
+        ASSERT( terminii.empty() );
     }
+
+    for( Mutator &terminus : terminii_ )
+    {
+		ASSERT( !terminus.GetChildTreePtr() );
+		terminii.push_back(make_shared<Mutator>(move(terminus)));
+	}	
 
     // Checks all terminii are distinct
     (void)ToSetSolo(terminii);
@@ -79,7 +83,7 @@ bool FreeZone::IsEmpty() const
     // No base indicates an empty zone
     if( !base )
     {
-        ASSERT( terminii.size() == 1 );
+        ASSERT( terminii.size() == 0 );
         ASSERT( !terminii.front() );
         return true;
     }
@@ -96,17 +100,16 @@ ContainerInterface *FreeZone::TryGetContainerBase() const
 
 size_t FreeZone::GetNumTerminii() const
 {
-    return terminii.size();
+    return base ? terminii.size() : 1;
 }
 
 
-void FreeZone::AddTerminus(shared_ptr<Mutator> terminus)
+void FreeZone::AddTerminus(Mutator &&terminus)
 {
     // Can't use this to make an empty zone
     ASSERT( base );
-    ASSERT( terminus );
     
-    terminii.push_back(terminus);
+    terminii.push_back(make_shared<Mutator>(terminus));
 }
 
 
@@ -125,15 +128,15 @@ void FreeZone::SetBase( TreePtr<Node> base_ )
 
 
 void FreeZone::MergeAll( list<unique_ptr<FreeZone>> &&child_zones ) 
-{
-    ASSERT( terminii.size() == child_zones.size() );
-    
+{    
     if( IsEmpty() )
     {        
         // child zone overwrites us
-        operator=(*(child_zones.front()));
+        operator=(*(SoloElementOf(child_zones)));
         return;
     }    
+    
+    ASSERT( terminii.size() == child_zones.size() );
     
     TerminusIterator it_t = GetTerminiiBegin();
     for( unique_ptr<FreeZone> &child_zone : child_zones )

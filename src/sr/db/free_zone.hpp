@@ -28,7 +28,7 @@ public:
     static unique_ptr<FreeZone> CreateScaffold(const TreePtrInterface *tpi_base, int num_terminii);
 
     FreeZone();
-    explicit FreeZone( TreePtr<Node> base, list<shared_ptr<Mutator>> &&terminii );
+    explicit FreeZone( TreePtr<Node> base, list<Mutator> &&terminii );
 
     FreeZone &operator=( const FreeZone &other );
 
@@ -41,7 +41,7 @@ public:
     void MergeAll( list<unique_ptr<FreeZone>> &&child_zones );     
     TerminusIterator MergeTerminus( TerminusIterator it_t, 
                                     unique_ptr<FreeZone> &&child_zone );
-    void AddTerminus(shared_ptr<Mutator> terminus);      
+    void AddTerminus(Mutator &&terminus);      
     TerminusIterator GetTerminiiBegin();
     TerminusIterator GetTerminiiEnd();
 

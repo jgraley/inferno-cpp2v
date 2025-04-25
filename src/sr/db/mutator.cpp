@@ -69,6 +69,12 @@ Mutator::Mutator( Mode mode_,
 }
 
 
+Mutator::Mutator() :
+	mode( Mode::Null )
+{
+}
+
+
 shared_ptr<Mutator> Mutator::Clone() const // For #784
 {
 	auto pm = new Mutator(mode, parent_node, parent_singular, parent_container, container_iterator, sp_tp_root_node);
@@ -122,6 +128,7 @@ TreePtr<Node> Mutator::ExchangeChild( TreePtr<Node> free_child ) const
 			break;
 		}
 		
+		case Mode::Null:
 		default: 
 			ASSERTFAIL();
 	}	  
@@ -239,6 +246,7 @@ const TreePtrInterface *Mutator::GetTreePtrInterface() const
 			return parent_singular;
 		}
 		
+		case Mode::Null:
 		default: 
 			ASSERTFAIL();
 	}			
@@ -307,6 +315,10 @@ void Mutator::Validate() const // TODO call this more
 			ASSERT( found );
 			break;
 		}
+		
+		case Mode::Null:
+		default:
+			ASSERTFAIL();
 	}
 }
 
@@ -344,6 +356,9 @@ string Mutator::GetTrace() const
 			break;
 		}
 		
+		case Mode::Null:
+			return "NULL";
+			
 		default:
 			break;
 	}	
