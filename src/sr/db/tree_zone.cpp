@@ -16,7 +16,7 @@ unique_ptr<FreeZone> TreeZone::Duplicate() const
     // DuplicateSubtree() to use.
     Duplicate::TerminiiMap duplicator_terminus_map;
     for( XLink terminus_upd : GetTerminusXLinks() ) 
-        duplicator_terminus_map[terminus_upd] = { TreePtr<Node>(), shared_ptr<Mutator>() };
+        duplicator_terminus_map[terminus_upd] = { TreePtr<Node>(), Mutator() };
 
     // Duplicate the subtree, populating from the map.
     TreePtr<Node> new_base_x = Duplicate::DuplicateSubtree( GetBaseXLink(), 
@@ -24,10 +24,7 @@ unique_ptr<FreeZone> TreeZone::Duplicate() const
     
     list<Mutator> free_zone_terminii;
     for( XLink terminus_upd : GetTerminusXLinks() )
-    {
-        ASSERTS( duplicator_terminus_map[terminus_upd].mutator );
-        free_zone_terminii.push_back( *duplicator_terminus_map[terminus_upd].mutator );
-    }
+        free_zone_terminii.push_back( duplicator_terminus_map[terminus_upd].mutator );   
 
     // Create a new zone for the result.
     return make_unique<FreeZone>( new_base_x, move(free_zone_terminii) );

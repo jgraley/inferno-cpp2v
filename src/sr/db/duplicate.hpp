@@ -18,7 +18,7 @@ public:
         // 2. dest is set to NULL so you can check we got them all.
         // 3. If dest was NULL (=placeholder value), mutator is created on it.
         TreePtr<Node> dest;
-        shared_ptr<Mutator> mutator;
+        Mutator mutator;
     };
     
     typedef map<XLink, TerminusInfo> TerminiiMap;
