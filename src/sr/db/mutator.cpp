@@ -6,22 +6,23 @@ using namespace SR;
 
 // ------------------------- Mutator --------------------------    
 
-shared_ptr<Mutator> Mutator::MakeFreeSingularMutator( TreePtr<Node> parent_node, 
-										  	    	  TreePtrInterface *parent_singular )
+Mutator Mutator::MakeFreeSingularMutator( TreePtr<Node> parent_node, 
+							  	    	  TreePtrInterface *parent_singular )
 {
-	auto pm = new Mutator(Mode::Singular, parent_node, parent_singular, nullptr, ContainerInterface::iterator(), nullptr);
-	ASSERTS( !pm->GetChildTreePtr() )("For free zone terminus, child must be placeholder");
-	return shared_ptr<Mutator>(pm);
+	ASSERTS( parent_node )("For tree zone mutator, parent must be a valid node");
+	ASSERTS( !(TreePtr<Node>)*parent_singular )("For tree zone mutator, child must be placeholder");
+	return Mutator(Mode::Singular, parent_node, parent_singular, nullptr, ContainerInterface::iterator(), nullptr);
 }
 
 										  		  
-shared_ptr<Mutator> Mutator::MakeFreeContainerMutator( TreePtr<Node> parent_node, 
-												       ContainerInterface *parent_container,
-												       ContainerInterface::iterator container_iterator )
+Mutator Mutator::MakeFreeContainerMutator( TreePtr<Node> parent_node, 
+									       ContainerInterface *parent_container,
+									       ContainerInterface::iterator container_iterator )
 {
-	auto pm = new Mutator(Mode::Container, parent_node, nullptr, parent_container, container_iterator, nullptr);
-	ASSERTS( !pm->GetChildTreePtr() )("For free zone terminus, child must be placeholder");
-	return shared_ptr<Mutator>(pm);
+	ASSERTS( parent_node )("For tree zone mutator, parent must be a valid node");
+	ASSERTS( parent_container )("For tree zone mutator, parent must be a valid node");
+	ASSERTS( !(TreePtr<Node>)*container_iterator )("For tree zone mutator, child must be a placeholder");
+	return Mutator(Mode::Container, parent_node, nullptr, parent_container, container_iterator, nullptr);
 }
 
 

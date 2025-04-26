@@ -97,7 +97,7 @@ TreePtr<Node> Duplicate::DuplicateSubtreeWorker( TreePtr<Node> source,
                     ContainerInterface::iterator dest_it = dest_container->insert( dest_terminus );
                     // NULL value was provided, so consider it a placeholder for a mutator
                     if( !dest_terminus )
-                        terminus_info.mutator = Mutator::MakeFreeContainerMutator( dest, dest_container, dest_it );
+                        terminus_info.mutator = make_shared<Mutator>(Mutator::MakeFreeContainerMutator( dest, dest_container, dest_it ));
                 }
                 else
                 {
@@ -126,7 +126,7 @@ TreePtr<Node> Duplicate::DuplicateSubtreeWorker( TreePtr<Node> source,
                 *dest_singular = dest_terminus;
                 // NULL value was provided, so consider it a placeholder for a mutator
                 if( !dest_terminus )
-                    terminus_info.mutator = Mutator::MakeFreeSingularMutator( dest, dest_singular );
+                    terminus_info.mutator = make_shared<Mutator>(Mutator::MakeFreeSingularMutator( dest, dest_singular ));
             }
             else
             {

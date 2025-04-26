@@ -25,11 +25,12 @@ protected:
 	};
 	
 public:	
-	static shared_ptr<Mutator> MakeFreeSingularMutator( TreePtr<Node> parent_node, 
-	                                                    TreePtrInterface *parent_singular );
-	static shared_ptr<Mutator> MakeFreeContainerMutator( TreePtr<Node> parent_node, 
-                                                         ContainerInterface *parent_container,
-                                                         ContainerInterface::iterator container_iterator );
+	static Mutator MakeFreeSingularMutator( TreePtr<Node> parent_node, 
+	                                        TreePtrInterface *parent_singular );
+	static Mutator MakeFreeContainerMutator( TreePtr<Node> parent_node, 
+                                             ContainerInterface *parent_container,
+                                             ContainerInterface::iterator container_iterator );
+                                             
 private: friend class XTreeDatabase;
 	static Mutator MakeTreeRootMutator( shared_ptr<TreePtr<Node>> sp_tp_root_node );
 	static Mutator MakeTreeSingularMutator( TreePtr<Node> parent_node, 
@@ -37,6 +38,7 @@ private: friend class XTreeDatabase;
 	static Mutator MakeTreeContainerMutator( TreePtr<Node> parent_node, 
                                              ContainerInterface *parent_container,
                                              ContainerInterface::iterator container_iterator );
+                                             
 private:
     explicit Mutator( Mode mode_,
                       TreePtr<Node> parent_node, 
