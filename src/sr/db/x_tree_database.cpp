@@ -445,7 +445,6 @@ shared_ptr<Mutator> XTreeDatabase::GetMainRootMutator()
 shared_ptr<Mutator> XTreeDatabase::GetTreeMutator(XLink xlink) 
 {
     const LinkTable::Row &row = link_table->GetRow(xlink);
-    shared_ptr<Mutator> locally_generated_mutator;
     
     switch( row.context_type )
     {
@@ -456,7 +455,7 @@ shared_ptr<Mutator> XTreeDatabase::GetTreeMutator(XLink xlink)
             // correctly from the XTreeDatabase object, which is why this method cannot be const.
             ASSERT( (int)(row.tree_ordinal) >= 0 ); // Should be valid whenever context is ROOT
             shared_ptr<TreePtr<Node>> sp_tp_root_node = trees_by_ordinal.at(row.tree_ordinal).sp_tp_root_node;
-            locally_generated_mutator = Mutator::MakeTreeRootMutator( sp_tp_root_node );
+            return Mutator::MakeTreeRootMutator( sp_tp_root_node );
             break;
         }    
         case DBCommon::SINGULAR:
@@ -465,23 +464,25 @@ shared_ptr<Mutator> XTreeDatabase::GetTreeMutator(XLink xlink)
             Itemiser::Element *xe = x_items.at(row.item_ordinal);        
             auto p_x_singular = dynamic_cast<TreePtrInterface *>(xe);
             ASSERT( p_x_singular );
-            locally_generated_mutator = Mutator::MakeTreeSingularMutator( row.parent_node, p_x_singular );
+            return Mutator::MakeTreeSingularMutator( row.parent_node, p_x_singular );
             break;
         }
         case DBCommon::IN_SEQUENCE:
         case DBCommon::IN_COLLECTION: 
         {
             // COLLECTION is the motivating case: its elements are const, so we neet Mutate() to change them
-            locally_generated_mutator = Mutator::MakeTreeContainerMutator( row.parent_node, row.p_container, row.container_it );  
+            return Mutator::MakeTreeContainerMutator( row.parent_node, row.p_container, row.container_it );  
             break;          
         }
         case DBCommon::FREE_BASE:
         {
             ASSERTFAIL(); // Base of free zone is just a node, so there's no unique mutator for it
         }
+        default:
+        {
+            ASSERTFAIL(); // Base of free zone is just a node, so there's no unique mutator for it
+        }
     }    
-
-	return locally_generated_mutator;
 }
 
 
