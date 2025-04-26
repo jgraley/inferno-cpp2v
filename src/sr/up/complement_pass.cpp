@@ -19,7 +19,7 @@ ComplementPass::ComplementPass( XTreeDatabase *db_ ) :
 }
 
 
-void ComplementPass::Run(shared_ptr<Mutator> origin_mutator, shared_ptr<Patch> source_layout)
+void ComplementPass::Run(const Mutator &origin_mutator, shared_ptr<Patch> source_layout)
 {    
     source_tzs_df_by_base.clear();
     // Gather all the tree zones from the patches in the source layout, and
@@ -32,7 +32,7 @@ void ComplementPass::Run(shared_ptr<Mutator> origin_mutator, shared_ptr<Patch> s
             source_tzs_df_by_base.emplace( tz->GetBaseXLink(), tz );        
 	} );
     
-    WalkTreeZones(origin_mutator->GetXLink());
+    WalkTreeZones(origin_mutator.GetXLink());
 }
 
 

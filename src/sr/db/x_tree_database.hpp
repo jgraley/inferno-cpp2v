@@ -73,15 +73,13 @@ public:
     // Last of the descendents in depth first order. If no 
     // descendents, it will be the supplied node. 
     static XLink GetLastDescendantXLink(XLink base);
-    shared_ptr<Mutator> GetLastDescendantMutator(shared_ptr<Mutator> base);
 
     const Orderings &GetOrderings() const;
     
     TreePtr<Node> GetMainRootNode() const;
     XLink GetMainRootXLink() const;
-	shared_ptr<Mutator> GetMainRootMutator();
 
-    shared_ptr<Mutator> GetTreeMutator(XLink xlink);
+    Mutator GetTreeMutator(XLink xlink);
     unique_ptr<MutableTreeZone> MakeMutableTreeZone(XLink xlink,
                                                     vector<XLink> terminii);
 

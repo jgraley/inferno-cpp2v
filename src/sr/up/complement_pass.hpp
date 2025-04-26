@@ -25,7 +25,7 @@ public:
 
     ComplementPass( XTreeDatabase *db );
     
-    void Run(shared_ptr<Mutator> origin_mutator, shared_ptr<Patch> source_layout);
+    void Run(const Mutator &origin_mutator, shared_ptr<Patch> source_layout);
         
 private:
     void WalkTreeZones(XLink target_base);

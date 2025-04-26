@@ -19,9 +19,9 @@ InversionPass::InversionPass( XTreeDatabase *db_ ) :
 }
 
 
-void InversionPass::Run(shared_ptr<Mutator> origin_mutator, shared_ptr<Patch> *source_layout_ptr)
+void InversionPass::Run(const Mutator &origin_mutator, shared_ptr<Patch> *source_layout_ptr)
 {
-    LocatedPatch base_lze( origin_mutator, source_layout_ptr );
+    LocatedPatch base_lze( make_shared<Mutator>(origin_mutator), source_layout_ptr );
     WalkLocatedPatches( base_lze );
 }
 

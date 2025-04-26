@@ -22,7 +22,7 @@ class InversionPass
 public:
     InversionPass( XTreeDatabase *db );
     
-    void Run(shared_ptr<Mutator> origin_mutator, shared_ptr<Patch> *source_layout_ptr);
+    void Run(const Mutator &origin_mutator, shared_ptr<Patch> *source_layout_ptr);
     
 private:
     // .first is NULL: base not known

@@ -51,7 +51,7 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink origin_xlink, shared_p
                 
 	ToMutablePass to_mutable_pass( db );
 	to_mutable_pass.Run(source_layout);
-	shared_ptr<Mutator> origin_mutator = db->GetTreeMutator(origin_xlink);
+	Mutator origin_mutator = db->GetTreeMutator(origin_xlink);
 
 	ValidateTreeZones validate_zones(db);
 	validate_zones.Run(source_layout);

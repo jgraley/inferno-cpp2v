@@ -25,30 +25,30 @@ shared_ptr<Mutator> Mutator::MakeFreeContainerMutator( TreePtr<Node> parent_node
 }
 
 
-shared_ptr<Mutator> Mutator::MakeTreeRootMutator( shared_ptr<TreePtr<Node>> sp_tp_root_node )
+Mutator Mutator::MakeTreeRootMutator( shared_ptr<TreePtr<Node>> sp_tp_root_node )
 {
-	auto pm = new Mutator(Mode::Root, nullptr, nullptr, nullptr, ContainerInterface::iterator(), sp_tp_root_node);
-	ASSERTS( pm->GetChildTreePtr() )("For tree zone mutator, child must be a valid node");
-	return shared_ptr<Mutator>(pm);
+	ASSERTS( (TreePtr<Node>)*sp_tp_root_node )("For tree zone mutator, child must be a valid node");
+	return Mutator(Mode::Root, nullptr, nullptr, nullptr, ContainerInterface::iterator(), sp_tp_root_node);
 }
 
 
-shared_ptr<Mutator> Mutator::MakeTreeSingularMutator( TreePtr<Node> parent_node, 
-										  		      TreePtrInterface *parent_singular )
+Mutator Mutator::MakeTreeSingularMutator( TreePtr<Node> parent_node, 
+									      TreePtrInterface *parent_singular )
 {
-	auto pm = new Mutator(Mode::Singular, parent_node, parent_singular, nullptr, ContainerInterface::iterator(), nullptr);
-	ASSERTS( pm->GetChildTreePtr() )("For tree zone mutator, child must be a valid node");
-	return shared_ptr<Mutator>(pm);
+	ASSERTS( parent_node )("For tree zone mutator, parent must be a valid node");
+	ASSERTS( (TreePtr<Node>)*parent_singular )("For tree zone mutator, child must be a valid node");
+	return Mutator(Mode::Singular, parent_node, parent_singular, nullptr, ContainerInterface::iterator(), nullptr);
 }
 
 										  		  
-shared_ptr<Mutator> Mutator::MakeTreeContainerMutator( TreePtr<Node> parent_node, 
-												       ContainerInterface *parent_container,
-												       ContainerInterface::iterator container_iterator )
+Mutator Mutator::MakeTreeContainerMutator( TreePtr<Node> parent_node, 
+									       ContainerInterface *parent_container,
+									       ContainerInterface::iterator container_iterator )
 {
-	auto pm = new Mutator(Mode::Container, parent_node, nullptr, parent_container, container_iterator, nullptr);
-	ASSERTS( pm->GetChildTreePtr() )("For tree zone mutator, child must be a valid node");
-	return shared_ptr<Mutator>(pm);
+	ASSERTS( parent_node )("For tree zone mutator, parent must be a valid node");
+	ASSERTS( parent_container )("For tree zone mutator, parent must be a valid node");
+	ASSERTS( (TreePtr<Node>)*container_iterator )("For tree zone mutator, child must be a valid node");
+	return Mutator(Mode::Container, parent_node, nullptr, parent_container, container_iterator, nullptr);
 }
 
 
