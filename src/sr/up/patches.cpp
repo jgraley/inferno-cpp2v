@@ -295,7 +295,7 @@ void FreeZonePatch::AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&n
 {
     // Rule #726 requires us to mark free zones immediately
     for( RequiresSubordinateSCREngine *ea : new_markers )
-        zone->MarkBaseForEmbedded(ea);    
+        zone->MarkOriginForEmbedded(ea);    
 }
 
 

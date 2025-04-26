@@ -32,14 +32,14 @@ void EmbeddedSCRAgent::MaybeChildrenPlanOverlay( PatternLink me_plink,
 
 
 Agent::ReplacePatchPtr EmbeddedSCRAgent::GenReplaceLayoutImpl( const ReplaceKit &kit, 
-                                                         PatternLink me_plink, 
-                                                         XLink key_xlink )
+                                                               PatternLink me_plink, 
+                                                               XLink key_xlink )
 {   
     // Use auto algorithm but add marker
     Agent::ReplacePatchPtr child_command = AutolocatingAgent::GenReplaceLayoutImpl(kit, me_plink, key_xlink);
 
     // Inform the update mechanism that, once it's done duplicating 
-    // nodes etc, it should mark this position for this embedded agent.
+    // nodes etc, it should mark this position for this embedded agent's origin.
     child_command->AddEmbeddedMarker( this );
 
     return child_command;
@@ -61,9 +61,9 @@ bool EmbeddedSCRAgent::IsSearch() const
 }
 
 
-void EmbeddedSCRAgent::MarkBaseForEmbedded( TreePtr<Node> embedded_through_subtree ) const
+void EmbeddedSCRAgent::MarkOriginForEmbedded( TreePtr<Node> embedded_origin ) const
 {
-    my_scr_engine->MarkBaseForEmbedded( this, embedded_through_subtree );
+    my_scr_engine->MarkOriginForEmbedded( this, embedded_origin );
 }
 
 

@@ -31,7 +31,9 @@ public:
     OrderingPass(XTreeDatabase *db_);
     
     // Can change the supplied shared ptr
-    void Run( shared_ptr<Patch> &layout );
+    void RunAnalysis( shared_ptr<Patch> &layout );
+    void RunDuplicates( shared_ptr<Patch> &layout );
+    void RunMoves( shared_ptr<Patch> &layout );
     
     // Just ASSERT no empty zones
     void Check( shared_ptr<Patch> &layout );
@@ -75,24 +77,6 @@ private:
     SR::DepthFirstRelation dfr;      
     vector<shared_ptr<Patch> *> out_of_order_patches;  
     set<XLink> in_order_bases;
-};
-
-// ------------------------- AltOrderingChecker --------------------------
-
-class AltOrderingChecker
-{
-public:
-    AltOrderingChecker(const XTreeDatabase *db_);
-    
-    void Check( shared_ptr<Patch> layout );
-
-private:
-    void Worker( shared_ptr<Patch> patch, XLink x_sub_base, bool should_touch );
-    void AppendNextDescendantTreePatches( shared_ptr<Patch> start_patch, 
-                                          vector<shared_ptr<TreeZonePatch>> *ndt_patches );
-        
-    const XTreeDatabase * const db;
-    SR::DepthFirstRelation dfr;   
 };
 
 }

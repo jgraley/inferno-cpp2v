@@ -11,9 +11,9 @@ bool Zone::IsSubtree() const
 }
 
 
-void Zone::MarkBaseForEmbedded(RequiresSubordinateSCREngine *embedded_agent)
+void Zone::MarkOriginForEmbedded(RequiresSubordinateSCREngine *embedded_agent)
 {
     ASSERT( !IsEmpty() );
-    embedded_agent->MarkBaseForEmbedded( GetBaseNode() );   
+    embedded_agent->MarkOriginForEmbedded( GetBaseNode() );   
     // Note: SCREngine will tell us to take a hike if we execute this more than once}
 }

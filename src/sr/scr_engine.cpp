@@ -58,10 +58,10 @@ SCREngine::Plan::Plan( SCREngine *algo_,
     
     ASSERT( cp )("Compare pattern must always be provided\n");
     ASSERT( cp==rp ); // Should have managed to reduce to a single pattern by now
-    base_pattern = cp; 
-    base_agent = Agent::AsAgent(base_pattern);
+    pattern_origin = cp; 
+    origin_agent = Agent::AsAgent(pattern_origin);
     // For closure under full arrowhead model, we need a link to root
-    base_plink = PatternLink::CreateDistinct( base_pattern );   
+    origin_plink = PatternLink::CreateDistinct( pattern_origin );   
             
     CategoriseAgents( enclosing_plinks, in_progress_agent_phases );    
 
@@ -78,8 +78,8 @@ void SCREngine::Plan::CategoriseAgents( const set<PatternLink> &enclosing_plinks
     // compare and replace sets separately.
     set<PatternLink> visible_compare_plinks, visible_replace_plinks;
     list<PatternLink> visible_replace_plinks_postorder;
-    WalkVisible( visible_compare_plinks, nullptr, base_plink, Agent::COMPARE_PATH );
-    WalkVisible( visible_replace_plinks, &visible_replace_plinks_postorder, base_plink, Agent::REPLACE_PATH );
+    WalkVisible( visible_compare_plinks, nullptr, origin_plink, Agent::COMPARE_PATH );
+    WalkVisible( visible_replace_plinks, &visible_replace_plinks_postorder, origin_plink, Agent::REPLACE_PATH );
     
     // Determine all the agents we can see (can only see though embedded "through", 
     // not into the embeddeds's pattern)
@@ -221,7 +221,7 @@ void SCREngine::Plan::PlanningStageThree(set<PatternLink> enclosing_keyers)
 void SCREngine::Plan::PlanCompare()
 {
     // All agents this AndRuleEngine see must have been configured 
-    and_rule_engine = make_shared<AndRuleEngine>(base_plink, enclosing_plinks, all_keyer_plinks);
+    and_rule_engine = make_shared<AndRuleEngine>(origin_plink, enclosing_plinks, all_keyer_plinks);
     
     all_keyer_plinks = UnionOfSolo( all_keyer_plinks, 
                                     and_rule_engine->GetKeyerPatternLinks() );
@@ -265,12 +265,12 @@ void SCREngine::Plan::Dump()
     {
         { "root_engine", 
           Trace(root_engine) },
-        { "base_pattern", 
-          Trace(base_pattern) },
-        { "base_plink", 
-          Trace(base_plink) },
-        { "base_agent", 
-          Trace(base_agent) },
+        { "pattern_origin", 
+          Trace(pattern_origin) },
+        { "origin_plink", 
+          Trace(origin_plink) },
+        { "origin_agent", 
+          Trace(origin_agent) },
         { "enclosing_engine", 
           Trace(enclosing_engine) },
         { "enclosing_plinks", 
@@ -313,7 +313,7 @@ void SCREngine::UpdateEmbeddedActionRequests( TreePtr<Node> through_subtree, Tre
     
     // We need to fix up any remaining action requests at the same level as the one
     // that just ran if they have the same through node as the one we just changed.
-    for( auto &p : bases_for_embedded ) // ref important - we're modifying!
+    for( auto &p : origins_for_embedded ) // ref important - we're modifying!
     {
         if( p.second == through_subtree )
         {
@@ -328,7 +328,7 @@ void SCREngine::UpdateEmbeddedActionRequests( TreePtr<Node> through_subtree, Tre
 }
 
 
-void SCREngine::RunEmbedded( PatternLink plink_to_embedded, XLink base_xlink )
+void SCREngine::RunEmbedded( PatternLink plink_to_embedded, XLink origin_xlink )
 {         
     INDENT("E");
     auto embedded_agent = dynamic_cast<RequiresSubordinateSCREngine *>(plink_to_embedded.GetChildAgent());
@@ -338,25 +338,25 @@ void SCREngine::RunEmbedded( PatternLink plink_to_embedded, XLink base_xlink )
    
     TRACE("Going to run embedded on ")(*embedded_engine)
          (" agent ")(embedded_agent)
-         (" and bases_for_embedded are\n")(bases_for_embedded)("\n");
+         (" and origins_for_embedded are\n")(origins_for_embedded)("\n");
    
-    // Recall the base node of the subtree under through (after replace)
-    ASSERT(bases_for_embedded.count(embedded_agent) == 1)
-          ("No call to SCREngine::MarkBaseForEmbedded() for ")(embedded_agent);
-    TreePtr<Node> through_subtree = bases_for_embedded.at(embedded_agent);
-    EraseSolo( bases_for_embedded, embedded_agent); // not needed any more
-    ASSERT( through_subtree );
+    // Recall the origin of the subtree under through (after replace)
+    ASSERT(origins_for_embedded.count(embedded_agent) == 1)
+          ("No call to SCREngine::MarkOriginForEmbedded() for ")(embedded_agent);
+    TreePtr<Node> embedded_origin = origins_for_embedded.at(embedded_agent);
+    EraseSolo( origins_for_embedded, embedded_agent); // not needed any more
+    ASSERT( embedded_origin );
     
-    // Obtain a pointer to the though link that will be updated by the 
-    // embedded. 
-    NodeTable::Row nn = x_tree_db->GetNodeRow(through_subtree);
-    XLink target_xlink = SoloElementOf(nn.incoming_xlinks);
+    // Obtain a pointer to the though link that will be origin for the 
+    // embedded engine. 
+    NodeTable::Row nn = x_tree_db->GetNodeRow(embedded_origin);
+    XLink embedded_origin_xlink = SoloElementOf(nn.incoming_xlinks);
 
     // Run the embedded's engine on this subtree and overwrite through ptr via p_through_x
-    int hits = embedded_engine->RepeatingCompareReplace( target_xlink, &replace_solution );
+    int hits = embedded_engine->RepeatingCompareReplace( embedded_origin_xlink, &replace_solution );
     (void)hits;
     
-    UpdateEmbeddedActionRequests( through_subtree, target_xlink.GetChildTreePtr() );
+    UpdateEmbeddedActionRequests( embedded_origin, embedded_origin_xlink.GetChildTreePtr() );
 }
 
 
@@ -366,7 +366,7 @@ void SCREngine::Replace( XLink origin_xlink )
 
     // Get an expression that evaluates to the new X tree
     Agent::ReplaceKit replace_kit { x_tree_db.get() };
-    Agent::ReplacePatchPtr source_expr = plan.base_agent->GenReplaceLayout(replace_kit, plan.base_plink);
+    Agent::ReplacePatchPtr source_expr = plan.origin_agent->GenReplaceLayout(replace_kit, plan.origin_plink);
         
     // Request to update the tree
     plan.vn_sequence->UpdateUsingLayout( origin_xlink, move(source_expr) );  
@@ -375,32 +375,32 @@ void SCREngine::Replace( XLink origin_xlink )
 }
 
 
-void SCREngine::SingleCompareReplace( XLink base_xlink,
+void SCREngine::SingleCompareReplace( XLink origin_xlink,
                                       const SolutionMap *enclosing_solution ) 
 {
     INDENT(">");
 
     TRACE("Begin search\n");
     // Note: comparing doesn't require double pointer any more, but
-    // replace does so it can change the base node. Throws on mismatch.
-    const SolutionMap &cs = plan.and_rule_engine->Compare( base_xlink, 
+    // replace does so it can change the origin node. Throws on mismatch.
+    const SolutionMap &cs = plan.and_rule_engine->Compare( origin_xlink, 
                                                            enclosing_solution );
     TRACE("Search got a match (otherwise throws)\n");
            
     // Replace will need the compare keys unioned with the enclosing keys
     SolutionMap rs = UnionOfSolo( *enclosing_solution, cs );    
-    bases_for_embedded.clear();
+    origins_for_embedded.clear();
     replace_solution = move(rs);
     replace_solution_available = true;
 
     // Now replace according to the couplings
-    Replace(base_xlink);
+    Replace(origin_xlink);
 
     // Now run the embedded SCR engines (LATER model)
     for( PatternLink plink_to_embedded : plan.my_subordinate_plinks_postorder )
     {
-        TRACE("Running embedded ")(plink_to_embedded)(" base xlink=")(base_xlink)("\n");
-        RunEmbedded(plink_to_embedded, base_xlink);       
+        TRACE("Running embedded ")(plink_to_embedded)(" base xlink=")(origin_xlink)("\n");
+        RunEmbedded(plink_to_embedded, origin_xlink);       
     }
     TRACE("Embedded SCRs done\n");
     
@@ -418,13 +418,13 @@ void SCREngine::SingleCompareReplace( XLink base_xlink,
 // on supplied patterns and couplings. Does search and replace
 // operations repeatedly until there are no more matches. Returns how
 // many hits we got.
-int SCREngine::RepeatingCompareReplace( XLink base_xlink,
+int SCREngine::RepeatingCompareReplace( XLink origin_xlink,
                                         const SolutionMap *enclosing_solution )
 {
     INDENT("}");
     TRACE("Begin RCR\n");
         
-    ASSERT( plan.base_pattern )("SCREngine object was not configured before invocation.\n"
+    ASSERT( plan.pattern_origin )("SCREngine object was not configured before invocation.\n"
                                 "Either call Configure() or supply pattern arguments to constructor.\n"
                                 "Thank you for taking the time to read this message.\n");
     
@@ -443,8 +443,8 @@ int SCREngine::RepeatingCompareReplace( XLink base_xlink,
                 p.second->SetStopAfter(stop_after, depth+1); // and propagate the remaining ones
         try
         {
-            // Cannonicalise could change base
-            SingleCompareReplace( base_xlink, enclosing_solution );
+            // Cannonicalise could change origin
+            SingleCompareReplace( origin_xlink, enclosing_solution );
         }
         catch( const ::Mismatch &e )
         {
@@ -537,13 +537,11 @@ void SCREngine::GenerateGraphRegions( Graph &graph ) const
 }
 
 
-void SCREngine::MarkBaseForEmbedded( const RequiresSubordinateSCREngine *embedded_agent,
-                                     TreePtr<Node> embedded_through_subtree ) const
+void SCREngine::MarkOriginForEmbedded( const RequiresSubordinateSCREngine *embedded_agent,
+                                       TreePtr<Node> embedded_origin ) const
 {
-    // permit multiple insertions while working on command sequence (so we can call
-    // GenReplaceLayout() more than once on the same subtree)
-    //InsertSolo( bases_for_embedded, make_pair( embedded_agent, embedded_through_subtree ) );
-    bases_for_embedded.insert( make_pair( embedded_agent, embedded_through_subtree ) );
+
+    InsertSolo( origins_for_embedded, make_pair( embedded_agent, embedded_origin ) );
 }
 
 

@@ -13,6 +13,7 @@
 #include "complement_pass.hpp"
 #include "gap_finding_pass.hpp"
 #include "boundary_pass.hpp"
+#include "alt_ordering_checker.hpp"
 
 #include <iostream>
 
@@ -89,7 +90,9 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink origin_xlink, shared_p
 	validate_zones.Run(source_layout);
 
     OrderingPass ordering_pass( db );
-    ordering_pass.Run(source_layout);
+    ordering_pass.RunAnalysis(source_layout);
+    ordering_pass.RunDuplicates(source_layout);
+    ordering_pass.RunMoves(source_layout);
 
 	validate_zones.Run(source_layout);
 

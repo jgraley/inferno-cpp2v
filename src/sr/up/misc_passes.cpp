@@ -135,7 +135,7 @@ void MarkersPass::Run( shared_ptr<Patch> &layout )
 		if( !patch->GetZone()->IsEmpty() )
 		{
 			for( RequiresSubordinateSCREngine *agent : markers )
-				patch->GetZone()->MarkBaseForEmbedded(agent);
+				patch->GetZone()->MarkOriginForEmbedded(agent);
 			markers.clear();
 		}
 		// If zone is empty, it has one child, which we will meet at the next iteration
