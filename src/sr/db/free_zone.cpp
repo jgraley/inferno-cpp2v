@@ -35,7 +35,7 @@ unique_ptr<FreeZone> FreeZone::CreateScaffold(const TreePtrInterface *tpi_base, 
     for( int i=0; i<num_terminii; i++ )
     {
         ContainerInterface::iterator it = pair.second->insert( Mutator::MakePlaceholder() );
-        zone->AddTerminus( Mutator::MakeFreeContainerMutator(pair.first, pair.second, it) );     
+        zone->AddTerminus( Mutator::CreateFreeContainer(pair.first, pair.second, it) );     
     }
     
     //FTRACES("Created scaffold with %d terminii\n", num_terminii)("\n");
@@ -84,6 +84,7 @@ bool FreeZone::IsEmpty() const
     if( !base )
     {
         ASSERT( terminii.size() == 1 );
+        ASSERT( !terminii.front() );
         return true;
     }
     return false;

@@ -25,19 +25,19 @@ protected:
 	};
 	
 public:	
-	static Mutator MakeFreeSingularMutator( TreePtr<Node> parent_node, 
-	                                        TreePtrInterface *parent_singular );
-	static Mutator MakeFreeContainerMutator( TreePtr<Node> parent_node, 
-                                             ContainerInterface *parent_container,
-                                             ContainerInterface::iterator container_iterator );
+	static Mutator CreateFreeSingular( TreePtr<Node> parent_node, 
+	                                   TreePtrInterface *parent_singular );
+	static Mutator CreateFreeContainer( TreePtr<Node> parent_node, 
+                                        ContainerInterface *parent_container,
+                                        ContainerInterface::iterator container_iterator );
                                              
 private: friend class XTreeDatabase;
-	static Mutator MakeTreeRootMutator( shared_ptr<TreePtr<Node>> sp_tp_root_node );
-	static Mutator MakeTreeSingularMutator( TreePtr<Node> parent_node, 
-	                                        TreePtrInterface *parent_singular );
-	static Mutator MakeTreeContainerMutator( TreePtr<Node> parent_node, 
-                                             ContainerInterface *parent_container,
-                                             ContainerInterface::iterator container_iterator );
+	static Mutator CreateTreeRoot( shared_ptr<TreePtr<Node>> sp_tp_root_node );
+	static Mutator CreateTreeSingular( TreePtr<Node> parent_node, 
+	                                   TreePtrInterface *parent_singular );
+	static Mutator CreateTreeContainer( TreePtr<Node> parent_node, 
+                                        ContainerInterface *parent_container,
+                                        ContainerInterface::iterator container_iterator );
                                              
 private:
     explicit Mutator( Mode mode_,
@@ -49,11 +49,11 @@ private:
 
 public:  
     explicit Mutator();
-	shared_ptr<Mutator> Clone() const; // For #784
-	
+    	
     bool operator<(const Mutator &right) const;
 	bool operator==( const Mutator &right ) const;
 	bool operator!=( const Mutator &right ) const;      
+	operator bool() const;      
   
     TreePtr<Node> ExchangeChild( TreePtr<Node> free_child ) const;
     TreePtr<Node> ExchangeContainer( ContainerInterface *child_container,                               

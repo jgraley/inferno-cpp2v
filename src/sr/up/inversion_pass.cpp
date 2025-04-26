@@ -21,7 +21,7 @@ InversionPass::InversionPass( XTreeDatabase *db_ ) :
 
 void InversionPass::Run(const Mutator &origin_mutator, shared_ptr<Patch> *source_layout_ptr)
 {
-    LocatedPatch base_lze( make_shared<Mutator>(origin_mutator), source_layout_ptr );
+    LocatedPatch base_lze( origin_mutator, source_layout_ptr );
     WalkLocatedPatches( base_lze );
 }
 
@@ -43,7 +43,7 @@ void InversionPass::WalkLocatedPatches( LocatedPatch lze )
             // We don't know the base if we're coming from a free zone
             ASSERT( dynamic_pointer_cast<TreeZonePatch>(child_patch) )
                   ("FZ under another FZ (probably), cannot determine target");
-            LocatedPatch child_lze( nullptr, &child_patch );
+            LocatedPatch child_lze( Mutator(), &child_patch );
             WalkLocatedPatches( child_lze );
         } );
     
@@ -63,7 +63,7 @@ void InversionPass::WalkLocatedPatches( LocatedPatch lze )
         {        
             ASSERT( it_child != tree_patch->GetChildrenEnd() ); // length mismatch
             
-            LocatedPatch child_lze( make_shared<Mutator>(mutable_tree_zone->GetTerminusMutator(i)), &*it_child );
+            LocatedPatch child_lze( mutable_tree_zone->GetTerminusMutator(i), &*it_child );
             WalkLocatedPatches( child_lze );
                         
             ++it_child;
@@ -79,7 +79,7 @@ void InversionPass::Invert( LocatedPatch lze )
 {
     // Checks
     ASSERT( lze.first && lze.second && *lze.second);
-    shared_ptr<Mutator> base_mutator = lze.first;
+    Mutator base_mutator = lze.first;
     ASSERT( base_mutator )("Got no base in our lze, perhaps parent was free zone?"); // FZ merging should prevent
     auto free_patch = dynamic_pointer_cast<FreeZonePatch>( *lze.second );
     ASSERT( free_patch )("Got LZE not a free zone: ")(lze); // WalkLocatedPatches() gave us wrong kind of patch
@@ -102,8 +102,7 @@ void InversionPass::Invert( LocatedPatch lze )
     } );
          
     // Make the inverted TZ    
-    MutableTreeZone target_tree_zone( move(*base_mutator), move(terminii_mutators) );    
-//    ASSERT( !target_tree_zone.IsEmpty() )(target_tree_zone); // hypothesis: I don't think we can handle this #784
+    MutableTreeZone target_tree_zone( move(base_mutator), move(terminii_mutators) );    
     FreeZone free_zone = *free_patch->GetZone();
     
     // Write it into the tree

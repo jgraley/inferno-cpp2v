@@ -6,8 +6,8 @@ using namespace SR;
 
 // ------------------------- Mutator --------------------------    
 
-Mutator Mutator::MakeFreeSingularMutator( TreePtr<Node> parent_node, 
-							  	    	  TreePtrInterface *parent_singular )
+Mutator Mutator::CreateFreeSingular( TreePtr<Node> parent_node, 
+							   	     TreePtrInterface *parent_singular )
 {
 	ASSERTS( parent_node )("For tree zone mutator, parent must be a valid node");
 	ASSERTS( !(TreePtr<Node>)*parent_singular )("For tree zone mutator, child must be placeholder");
@@ -15,9 +15,9 @@ Mutator Mutator::MakeFreeSingularMutator( TreePtr<Node> parent_node,
 }
 
 										  		  
-Mutator Mutator::MakeFreeContainerMutator( TreePtr<Node> parent_node, 
-									       ContainerInterface *parent_container,
-									       ContainerInterface::iterator container_iterator )
+Mutator Mutator::CreateFreeContainer( TreePtr<Node> parent_node, 
+									  ContainerInterface *parent_container,
+									  ContainerInterface::iterator container_iterator )
 {
 	ASSERTS( parent_node )("For tree zone mutator, parent must be a valid node");
 	ASSERTS( parent_container )("For tree zone mutator, parent must be a valid node");
@@ -26,15 +26,15 @@ Mutator Mutator::MakeFreeContainerMutator( TreePtr<Node> parent_node,
 }
 
 
-Mutator Mutator::MakeTreeRootMutator( shared_ptr<TreePtr<Node>> sp_tp_root_node )
+Mutator Mutator::CreateTreeRoot( shared_ptr<TreePtr<Node>> sp_tp_root_node )
 {
 	ASSERTS( (TreePtr<Node>)*sp_tp_root_node )("For tree zone mutator, child must be a valid node");
 	return Mutator(Mode::Root, nullptr, nullptr, nullptr, ContainerInterface::iterator(), sp_tp_root_node);
 }
 
 
-Mutator Mutator::MakeTreeSingularMutator( TreePtr<Node> parent_node, 
-									      TreePtrInterface *parent_singular )
+Mutator Mutator::CreateTreeSingular( TreePtr<Node> parent_node, 
+									 TreePtrInterface *parent_singular )
 {
 	ASSERTS( parent_node )("For tree zone mutator, parent must be a valid node");
 	ASSERTS( (TreePtr<Node>)*parent_singular )("For tree zone mutator, child must be a valid node");
@@ -42,9 +42,9 @@ Mutator Mutator::MakeTreeSingularMutator( TreePtr<Node> parent_node,
 }
 
 										  		  
-Mutator Mutator::MakeTreeContainerMutator( TreePtr<Node> parent_node, 
-									       ContainerInterface *parent_container,
-									       ContainerInterface::iterator container_iterator )
+Mutator Mutator::CreateTreeContainer( TreePtr<Node> parent_node, 
+									  ContainerInterface *parent_container,
+									  ContainerInterface::iterator container_iterator )
 {
 	ASSERTS( parent_node )("For tree zone mutator, parent must be a valid node");
 	ASSERTS( parent_container )("For tree zone mutator, parent must be a valid node");
@@ -76,13 +76,6 @@ Mutator::Mutator() :
 }
 
 
-shared_ptr<Mutator> Mutator::Clone() const // For #784
-{
-	auto pm = new Mutator(mode, parent_node, parent_singular, parent_container, container_iterator, sp_tp_root_node);
-	return shared_ptr<Mutator>(pm);
-}
-
-
 bool Mutator::operator<(const Mutator &right) const
 {
 	return GetTreePtrInterface() < right.GetTreePtrInterface();
@@ -98,6 +91,12 @@ bool Mutator::operator==( const Mutator &right ) const
 bool Mutator::operator!=( const Mutator &right ) const
 {
 	return GetTreePtrInterface() != right.GetTreePtrInterface();
+}
+
+
+Mutator::operator bool() const
+{
+	return mode != Mode::Null;
 }
 
 

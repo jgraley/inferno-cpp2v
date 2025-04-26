@@ -79,8 +79,8 @@ public:
     TreePtr<Node> GetMainRootNode() const;
     XLink GetMainRootXLink() const;
 
-    Mutator GetTreeMutator(XLink xlink);
-    unique_ptr<MutableTreeZone> MakeMutableTreeZone(XLink xlink,
+    Mutator CreateTreeMutator(XLink xlink);
+    unique_ptr<MutableTreeZone> CreateMutableTreeZone(XLink xlink,
                                                     vector<XLink> terminii);
 
     void Dump() const;
@@ -103,13 +103,7 @@ private:
     DBCommon::TreeOrdinal next_tree_ordinal;
         
     queue<DBCommon::TreeOrdinal> de_extra_insert_queue;
-    queue<DBCommon::TreeOrdinal> extra_tree_destroy_queue;
-    
-    // Mutator cache holds shared pointers but is really a set of
-    // Mutators, i.e. no two equal mutators allowed even though they
-    // are separate objects and so the shared_ptrs differ.
-    typedef DereferencingHash<shared_ptr<Mutator>, Mutator> SPMHasher;
-    typedef DereferencingEqual<shared_ptr<Mutator>> SPMEqualPred;    
+    queue<DBCommon::TreeOrdinal> extra_tree_destroy_queue;   
 };    
     
 };

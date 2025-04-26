@@ -427,7 +427,7 @@ XLink XTreeDatabase::GetMainRootXLink() const
 }
 
 
-Mutator XTreeDatabase::GetTreeMutator(XLink xlink) 
+Mutator XTreeDatabase::CreateTreeMutator(XLink xlink) 
 {
     const LinkTable::Row &row = link_table->GetRow(xlink);
     
@@ -440,7 +440,7 @@ Mutator XTreeDatabase::GetTreeMutator(XLink xlink)
             // correctly from the XTreeDatabase object, which is why this method cannot be const.
             ASSERT( (int)(row.tree_ordinal) >= 0 ); // Should be valid whenever context is ROOT
             shared_ptr<TreePtr<Node>> sp_tp_root_node = trees_by_ordinal.at(row.tree_ordinal).sp_tp_root_node;
-            return Mutator::MakeTreeRootMutator( sp_tp_root_node );
+            return Mutator::CreateTreeRoot( sp_tp_root_node );
             break;
         }    
         case DBCommon::SINGULAR:
@@ -449,14 +449,14 @@ Mutator XTreeDatabase::GetTreeMutator(XLink xlink)
             Itemiser::Element *xe = x_items.at(row.item_ordinal);        
             auto p_x_singular = dynamic_cast<TreePtrInterface *>(xe);
             ASSERT( p_x_singular );
-            return Mutator::MakeTreeSingularMutator( row.parent_node, p_x_singular );
+            return Mutator::CreateTreeSingular( row.parent_node, p_x_singular );
             break;
         }
         case DBCommon::IN_SEQUENCE:
         case DBCommon::IN_COLLECTION: 
         {
             // COLLECTION is the motivating case: its elements are const, so we neet Mutate() to change them
-            return Mutator::MakeTreeContainerMutator( row.parent_node, row.p_container, row.container_it );  
+            return Mutator::CreateTreeContainer( row.parent_node, row.p_container, row.container_it );  
             break;          
         }
         case DBCommon::FREE_BASE:
@@ -471,13 +471,13 @@ Mutator XTreeDatabase::GetTreeMutator(XLink xlink)
 }
 
 
-unique_ptr<MutableTreeZone> XTreeDatabase::MakeMutableTreeZone(XLink base,
+unique_ptr<MutableTreeZone> XTreeDatabase::CreateMutableTreeZone(XLink base,
                                                                vector<XLink> terminii)
 {
-	Mutator base_mutator = GetTreeMutator(base);
+	Mutator base_mutator = CreateTreeMutator(base);
 	vector<Mutator> terminii_mutators;
 	for( XLink t : terminii )
-		terminii_mutators.push_back( GetTreeMutator(t) ); 
+		terminii_mutators.push_back( CreateTreeMutator(t) ); 
 	return make_unique<MutableTreeZone>( move(base_mutator), move(terminii_mutators) );
 }                                                
 
