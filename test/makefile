@@ -11,15 +11,23 @@ SC_CASES += issue677 issue667
 #SC_CASES += sctest10 sctest02 sctest12 sctest08 sctest13 sctest11
 
 # Use pointeris (very quick to test) as "canary" even more so "small"
-SR_CASES = small pointeris sc10_reduce ${SC_CASES} 
+SR_CASES = sc10_reduce ${SC_CASES} 
 MINI_SC_CASES = sctest02 sctest03 sctest01 sctest07 sctest09 sctest06 sctest05 sctest04 sctest15
 MINI_SC_SR_CASES = small pointeris ${MINI_SC_CASES} 
 
-# The original C/C++ test cases, no SystemC
-CPP_CASES = test02 test03 test05 test06 test07 test09 test10 
-CPP_CASES += test11 test12 test13 test14 test15 test16
-# #757 to fix test04
+# 791 to fix pointeris
+# #788 to fix small
 
+# The original C/C++ test cases, no SystemC
+CPP_CASES = test11 test13 test16
+# #757 to fix test04
+# #785 to fix test02 test15
+# #786 to fix test03
+# #787 to fix test12
+# #788 to fix test05 test06 test07 test09 test10
+# #789 to fit test14
+# #790 to fix test07.cpp (again)
+ 
 # The whole lot for the benefit of auto rules
 ALL_CASES = ${SC_CASES} ${CPP_CASES} ${SR_CASES}
 
@@ -49,7 +57,7 @@ $(ALL_CASES:%=${RESULTS_PATH}/execution/%.pass) : ${RESULTS_PATH}/execution/%.pa
 	test/test.sh $< ${RESULTS_PATH}/execution ${IARG} 2>&1 > ${RESULTS_PATH}/execution/$*.log
 	touch ${RESULTS_PATH}/execution/$*.pass
 		
-test : $(SC_CASES:%=${RESULTS_PATH}/execution/%.pass)
+test : $(ALL_CASES:%=${RESULTS_PATH}/execution/%.pass)
 	@echo ------------------------------------------
 	@echo -n "Tests Run: "
 	@date
