@@ -62,7 +62,7 @@ FreeZone::FreeZone( TreePtr<Node> base_, list<Mutator> &&terminii_ ) :
     for( Mutator &terminus : terminii_ )
     {
 		ASSERT( !terminus.GetChildTreePtr() );
-		terminii.push_back(make_shared<Mutator>(move(terminus)));
+		terminii.push_back(move(terminus));
 	}	
 
     // Checks all terminii are distinct
@@ -84,7 +84,6 @@ bool FreeZone::IsEmpty() const
     if( !base )
     {
         ASSERT( terminii.size() == 0 );
-        ASSERT( !terminii.front() );
         return true;
     }
     return false;
@@ -109,7 +108,7 @@ void FreeZone::AddTerminus(Mutator &&terminus)
     // Can't use this to make an empty zone
     ASSERT( base );
     
-    terminii.push_back(make_shared<Mutator>(terminus));
+    terminii.push_back(move(terminus));
 }
 
 
@@ -169,9 +168,9 @@ FreeZone::TerminusIterator FreeZone::MergeTerminus( TerminusIterator it_t,
     else     
     {
 		if( auto child_base_container = child_zone->TryGetContainerBase() )
-		    (*it_t)->ExchangeContainer( child_base_container, child_zone->terminii );
+		    it_t->ExchangeContainer( child_base_container, child_zone->terminii );
 		else
-			(*it_t)->ExchangeChild( child_zone->base );
+			it_t->ExchangeChild( child_zone->base );
         // Populate terminus. This will expand SubContainers. Remember that
         // terminii are reference-like and so it's fine that we erase it.        
     }

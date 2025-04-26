@@ -21,7 +21,7 @@ namespace SR
 class FreeZone : public Zone
 { 
 public:
-    typedef list<shared_ptr<Mutator>>::iterator TerminusIterator;
+    typedef list<Mutator>::iterator TerminusIterator;
 
     static unique_ptr<FreeZone> CreateSubtree( TreePtr<Node> base );
     static unique_ptr<FreeZone> CreateEmpty();
@@ -49,7 +49,7 @@ public:
     
 private:
     TreePtr<Node> base;
-    list<shared_ptr<Mutator>> terminii;
+    list<Mutator> terminii;
 };
  
 }

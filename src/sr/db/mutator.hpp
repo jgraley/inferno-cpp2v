@@ -55,7 +55,7 @@ public:
   
     TreePtr<Node> ExchangeChild( TreePtr<Node> free_child ) const;
     TreePtr<Node> ExchangeContainer( ContainerInterface *child_container,                               
-                                     list<shared_ptr<Mutator>> child_terminii = {} );
+                                     list<Mutator> &child_terminii );
     void ExchangeParent( Mutator& free_mut );
     void SetParent( const Mutator &free_mut );
 
@@ -66,9 +66,9 @@ public:
     TreePtr<Node> GetChildTreePtr() const;
     static TreePtr<Node> MakePlaceholder();    
 
-    static shared_ptr<Mutator> FindMatchingTerminus( ContainerInterface *container,
-                                                     ContainerInterface::iterator it_placeholder,
-                                                     list<shared_ptr<Mutator>> &candidate_terminii );
+    static Mutator *FindMatchingTerminus( ContainerInterface *container,
+                                          ContainerInterface::iterator it_placeholder,
+                                          list<Mutator> &candidate_terminii );
         
     void Validate() const;
     string GetTrace() const;

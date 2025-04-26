@@ -138,7 +138,7 @@ TreePtr<Node> Mutator::ExchangeChild( TreePtr<Node> free_child ) const
     
     
 TreePtr<Node> Mutator::ExchangeContainer( ContainerInterface *free_child_container, 
-                                          list<shared_ptr<Mutator>> free_zone_terminii )
+                                          list<Mutator> &free_zone_terminii )
 {
 	ASSERT( mode==Mode::Container );
 	TreePtr<Node> old_child = (TreePtr<Node>)*container_iterator;
@@ -163,7 +163,7 @@ TreePtr<Node> Mutator::ExchangeContainer( ContainerInterface *free_child_contain
 			// the supplied zone terminus using our parent container because that's what will be kept.
 			// Note: Kept: parent container, other child terminii
 			// Discarded: child terminus, child base, child container
-			shared_ptr<Mutator> child_terminus = FindMatchingTerminus( free_child_container, it_child, free_zone_terminii );                                                
+			Mutator *child_terminus = FindMatchingTerminus( free_child_container, it_child, free_zone_terminii );                                                
 			child_terminus->mode = Mode::Container;
 			child_terminus->parent_node = parent_node;
 			child_terminus->parent_container = parent_container;
@@ -266,20 +266,20 @@ TreePtr<Node> Mutator::MakePlaceholder()
 }
     
     
-shared_ptr<Mutator> Mutator::FindMatchingTerminus( ContainerInterface *container,
-                                                   ContainerInterface::iterator it_placeholder,
-                                                   list<shared_ptr<Mutator>> &candidate_terminii )
+Mutator *Mutator::FindMatchingTerminus( ContainerInterface *container,
+                                        ContainerInterface::iterator it_placeholder,
+                                        list<Mutator> &candidate_terminii )
 {
-    shared_ptr<Mutator> found_terminus;
+    Mutator *found_terminus = nullptr;
 
-    for( shared_ptr<Mutator> candidate_terminus : candidate_terminii )
+    for( Mutator &candidate_terminus : candidate_terminii )
     {
-        if( candidate_terminus->mode == Mode::Container && 
-            candidate_terminus->parent_container == container && 
-            candidate_terminus->container_iterator == it_placeholder )
+        if( candidate_terminus.mode == Mode::Container && 
+            candidate_terminus.parent_container == container && 
+            candidate_terminus.container_iterator == it_placeholder )
         {
-            ASSERTS( !found_terminus )("Found multiple matching terminii including ")(*found_terminus)(" and now ")(*candidate_terminus);
-            found_terminus = candidate_terminus;
+            ASSERTS( !found_terminus )("Found multiple matching terminii including ")(*found_terminus)(" and now ")(candidate_terminus);
+            found_terminus = &candidate_terminus;
         }
     }
     

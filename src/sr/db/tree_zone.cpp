@@ -249,11 +249,11 @@ void MutableTreeZone::Exchange( FreeZone *free_zone, vector<MutableTreeZone *> f
 			ASSERT( tree_terminus==base );
 			
 			// Avoid side-effects on base, at the cost of not getting updated free terminus
-			tree_terminus.SetParent(**free_terminus_it);
+			tree_terminus.SetParent(*free_terminus_it);
 		}	
 		else
 		{
-			tree_terminus.ExchangeParent(**free_terminus_it); // deep
+			tree_terminus.ExchangeParent(*free_terminus_it); // deep
 		}
                 
         ASSERT( tree_terminus.GetChildTreePtr() );
