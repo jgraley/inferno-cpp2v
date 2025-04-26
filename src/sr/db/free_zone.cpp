@@ -18,7 +18,7 @@ unique_ptr<FreeZone> FreeZone::CreateSubtree( TreePtr<Node> base )
 unique_ptr<FreeZone> FreeZone::CreateEmpty()
 {
     return make_unique<FreeZone>( TreePtr<Node>(), // NULL
-                                  list<Mutator>{} ); // Empty
+                                  list<Mutator>{ Mutator() } ); // One element, NULL
 }
 
 
@@ -83,7 +83,7 @@ bool FreeZone::IsEmpty() const
     // No base indicates an empty zone
     if( !base )
     {
-        ASSERT( terminii.size() == 0 );
+        ASSERT( terminii.size() == 1 );
         return true;
     }
     return false;
@@ -99,7 +99,7 @@ ContainerInterface *FreeZone::TryGetContainerBase() const
 
 size_t FreeZone::GetNumTerminii() const
 {
-    return base ? terminii.size() : 1;
+    return terminii.size();
 }
 
 
