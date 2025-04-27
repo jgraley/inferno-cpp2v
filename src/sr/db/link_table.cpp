@@ -34,22 +34,15 @@ const DBCommon::CoreInfo &LinkTable::GetCoreInfo(XLink xlink) const
 }
  
  
-DBWalk::Action LinkTable::GetInsertGeometricAction()
+void LinkTable::InsertGeometric(const DBWalk::WalkInfo &walk_info)
 {
-    return [=](const DBWalk::WalkInfo &walk_info)
-    {
-           GenerateRow(walk_info);
-    };
+    GenerateRow(walk_info);
 }
 
 
-DBWalk::Action LinkTable::GetDeleteGeometricAction()
+void LinkTable::DeleteGeometric(const DBWalk::WalkInfo &walk_info)
 {
-    return [=](const DBWalk::WalkInfo &walk_info)
-    {
-           EraseSolo( rows, walk_info.xlink );
-    };
-
+    EraseSolo( rows, walk_info.xlink );
     // Good practice to poison rows at terminii. Assuming walker tells us we're at a 
     // terminus, we can put in bad stuff (NULL, -1, end() etc) or maybe just a flag
     // for "parent valid". Do this in a new PoisonRow() like GenerateRow().

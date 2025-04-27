@@ -72,24 +72,18 @@ void DomainExtension::PostUpdateActions()
 }
 
 
-DBWalk::Action DomainExtension::GetInsertGeometricAction()
-{
-    return [=](const DBWalk::WalkInfo &walk_info)
-    {        
-        for( auto &p : channels )
-             p.second->Insert( walk_info );             
-    };
+void DomainExtension::InsertGeometric(const DBWalk::WalkInfo &walk_info)
+{        
+    for( auto &p : channels )
+         p.second->Insert( walk_info );             
 }
 
 
-DBWalk::Action DomainExtension::GetDeleteGeometricAction()
-{    
-    return [=](const DBWalk::WalkInfo &walk_info)
-    {        
-        for( auto &p : channels )
-             p.second->Delete( walk_info );
-    };
-}
+void DomainExtension::DeleteGeometric(const DBWalk::WalkInfo &walk_info)
+{        
+    for( auto &p : channels )
+         p.second->Delete( walk_info );
+};
 
 
 void DomainExtension::Validate() const

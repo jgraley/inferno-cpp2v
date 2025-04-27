@@ -47,34 +47,28 @@ bool NodeTable::IsDeclarer(const DBWalk::WalkInfo &walk_info) const
 }
 
 
-DBWalk::Action NodeTable::GetInsertGeometricAction()
+void NodeTable::InsertGeometric(const DBWalk::WalkInfo &walk_info)
 {
-    return [=](const DBWalk::WalkInfo &walk_info)
-    {
-        // Create if not already there
-        Row &row = rows[walk_info.node];
-        
-        InsertSolo( row.incoming_xlinks, walk_info.xlink );            
-        if( IsDeclarer(walk_info) )
-            InsertSolo( row.declaring_xlinks, walk_info.xlink );
-    };
+	// Create if not already there
+	Row &row = rows[walk_info.node];
+	
+	InsertSolo( row.incoming_xlinks, walk_info.xlink );            
+	if( IsDeclarer(walk_info) )
+		InsertSolo( row.declaring_xlinks, walk_info.xlink );
 }
 
 
-DBWalk::Action NodeTable::GetDeleteGeometricAction()
+void NodeTable::DeleteGeometric(const DBWalk::WalkInfo &walk_info)
 {
-    return [=](const DBWalk::WalkInfo &walk_info)
-    {
-        // Should already be there
-        Row &row = rows.at(walk_info.node);
-        
-        EraseSolo( row.incoming_xlinks, walk_info.xlink );            
-        if( IsDeclarer(walk_info) )
-            EraseSolo( row.declaring_xlinks, walk_info.xlink );
-            
-        if( row.incoming_xlinks.empty() )
-            EraseSolo( rows, walk_info.node );
-    };
+	// Should already be there
+	Row &row = rows.at(walk_info.node);
+	
+	EraseSolo( row.incoming_xlinks, walk_info.xlink );            
+	if( IsDeclarer(walk_info) )
+		EraseSolo( row.declaring_xlinks, walk_info.xlink );
+		
+	if( row.incoming_xlinks.empty() )
+		EraseSolo( rows, walk_info.node );
 }
 
 

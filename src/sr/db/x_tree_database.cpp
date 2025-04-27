@@ -109,10 +109,10 @@ void XTreeDatabase::InitialBuild()
     INDENT("p");
     
     DBWalk::Actions actions;
-    actions.push_back( domain->GetInsertGeometricAction() );
-    actions.push_back( link_table->GetInsertGeometricAction() );
-    actions.push_back( node_table->GetInsertGeometricAction() );
-    actions.push_back( orderings->GetInsertGeometricAction() );
+    actions.push_back( bind(&Domain::InsertGeometric, domain.get(), placeholders::_1) );
+    actions.push_back( bind(&LinkTable::InsertGeometric, link_table.get(), placeholders::_1) );
+    actions.push_back( bind(&NodeTable::InsertGeometric, node_table.get(), placeholders::_1) );
+    actions.push_back( bind(&Orderings::InsertGeometric, orderings.get(), placeholders::_1) );
         
     WalkAllTrees( &actions, DBWalk::WIND_IN );
 
@@ -173,14 +173,14 @@ void XTreeDatabase::MainTreeDeleteGeometric(TreeZone *zone, const DBCommon::Core
     ASSERT( extra_tree_destroy_queue.empty() );
     
     DBWalk::Actions actions;
-    actions.push_back( domain_extension->GetDeleteGeometricAction() );
-    actions.push_back( orderings->GetDeleteGeometricAction() );
+    actions.push_back( bind(&DomainExtension::DeleteGeometric, domain_extension.get(), placeholders::_1) );
+    actions.push_back( bind(&Orderings::DeleteGeometric, orderings.get(), placeholders::_1) ); 
     db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_OUT, base_info );   
 
     DBWalk::Actions actions2;
-    actions2.push_back( node_table->GetDeleteGeometricAction() );
-    actions2.push_back( link_table->GetDeleteGeometricAction() );
-    actions2.push_back( domain->GetDeleteGeometricAction() );
+    actions2.push_back( bind(&NodeTable::DeleteGeometric, node_table.get(), placeholders::_1) );
+    actions2.push_back( bind(&LinkTable::DeleteGeometric, link_table.get(), placeholders::_1) );
+    actions2.push_back( bind(&Domain::DeleteGeometric, domain.get(), placeholders::_1) );
     db_walker.WalkTreeZone( &actions2, zone, DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_OUT, base_info );   
 }
 
@@ -191,19 +191,19 @@ void XTreeDatabase::MainTreeInsertGeometric(TreeZone *zone, const DBCommon::Core
     ASSERT( de_extra_insert_queue.empty() );
 
     DBWalk::Actions actions;
-    actions.push_back( domain->GetInsertGeometricAction() );
-    actions.push_back( link_table->GetInsertGeometricAction() );
-    actions.push_back( node_table->GetInsertGeometricAction() );
+    actions.push_back( bind(&Domain::InsertGeometric, domain.get(), placeholders::_1) );
+    actions.push_back( bind(&LinkTable::InsertGeometric, link_table.get(), placeholders::_1) );
+    actions.push_back( bind(&NodeTable::InsertGeometric, node_table.get(), placeholders::_1) );
     db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_IN, base_info );
 
     DBWalk::Actions actions3;
-    actions3.push_back( orderings->GetInsertGeometricAction() );
+    actions3.push_back( bind(&Orderings::InsertGeometric, orderings.get(), placeholders::_1) );
     db_walker.WalkTreeZone( &actions3, zone, DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_IN, base_info );
     
     // Domain extension wants to roam around the XTree, consulting
     // parents, children, anything really. So we need a separate pass.
     DBWalk::Actions actions2;
-    actions2.push_back( domain_extension->GetInsertGeometricAction());
+    actions2.push_back( bind(&DomainExtension::InsertGeometric, domain_extension.get(), placeholders::_1) );
     db_walker.WalkTreeZone( &actions2, zone, DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_IN, base_info );
 }
 
@@ -259,14 +259,14 @@ void XTreeDatabase::ExtraTreeDelete(DBCommon::TreeOrdinal tree_ordinal)
     // zones and on each call we delete just that
     // xlink.
     DBWalk::Actions actions;
-    actions.push_back( domain_extension->GetDeleteGeometricAction() );
-    actions.push_back( orderings->GetDeleteGeometricAction() );
+    actions.push_back( bind(&DomainExtension::DeleteGeometric, domain_extension.get(), placeholders::_1) );
+    actions.push_back( bind(&Orderings::DeleteGeometric, orderings.get(), placeholders::_1) );
     db_walker.WalkTree( &actions, xlink, tree_ordinal, DBWalk::WIND_OUT );       
 
     DBWalk::Actions actions2;
-    actions2.push_back( node_table->GetDeleteGeometricAction() );
-    actions2.push_back( link_table->GetDeleteGeometricAction() );
-    actions2.push_back( domain->GetDeleteGeometricAction() );
+    actions2.push_back( bind(&NodeTable::DeleteGeometric, node_table.get(), placeholders::_1) );
+    actions2.push_back( bind(&LinkTable::DeleteGeometric, link_table.get(), placeholders::_1) );
+    actions2.push_back( bind(&Domain::DeleteGeometric, domain.get(), placeholders::_1) );
     db_walker.WalkTree( &actions2, xlink, tree_ordinal, DBWalk::WIND_OUT );       
 }
 
@@ -277,17 +277,17 @@ void XTreeDatabase::ExtraTreeInsert(DBCommon::TreeOrdinal tree_ordinal)
     XLink xlink = GetRootXLink(tree_ordinal);
     
     DBWalk::Actions actions;
-    actions.push_back( domain->GetInsertGeometricAction() );
-    actions.push_back( link_table->GetInsertGeometricAction() );
-    actions.push_back( node_table->GetInsertGeometricAction() );
+    actions.push_back( bind(&Domain::InsertGeometric, domain.get(), placeholders::_1) );
+    actions.push_back( bind(&LinkTable::InsertGeometric, link_table.get(), placeholders::_1) );
+    actions.push_back( bind(&NodeTable::InsertGeometric, node_table.get(), placeholders::_1) );
     db_walker.WalkTree( &actions, xlink, tree_ordinal, DBWalk::WIND_IN );
 
     DBWalk::Actions actions3;
-    actions3.push_back( orderings->GetInsertGeometricAction() );
+    actions3.push_back( bind(&Orderings::InsertGeometric, orderings.get(), placeholders::_1) );
     db_walker.WalkTree( &actions3, xlink, tree_ordinal, DBWalk::WIND_IN );
 
     DBWalk::Actions actions2;
-    actions2.push_back( domain_extension->GetInsertGeometricAction());
+    actions2.push_back( bind(&DomainExtension::InsertGeometric, domain_extension.get(), placeholders::_1) );
     db_walker.WalkTree( &actions2, xlink, tree_ordinal, DBWalk::WIND_IN );
 }
 
@@ -496,7 +496,7 @@ void XTreeDatabase::Checks()
     // No deps on other parts of DB so check first
     TRACE("Making reference domain for checks\n");
     auto ref_domain = make_shared<Domain>();
-    DBWalk::Actions actions1 { ref_domain->GetInsertGeometricAction() };
+    DBWalk::Actions actions1 { bind(&Domain::InsertGeometric, ref_domain.get(), placeholders::_1) };
     WalkAllTrees( &actions1, DBWalk::WIND_IN );
     TRACE("Checking\n");
     Domain::CheckEqual(ref_domain, domain);
@@ -504,7 +504,7 @@ void XTreeDatabase::Checks()
     // Orderings have deps on LinkTablke for finding parent
     TRACE("Making reference orderings for checks\n");
     auto ref_orderings = make_shared<Orderings>(lacing, this);
-    DBWalk::Actions actions2 { ref_orderings->GetInsertGeometricAction() };
+    DBWalk::Actions actions2 { bind(&Orderings::InsertGeometric, ref_orderings.get(), placeholders::_1) };
     WalkAllTrees( &actions2, DBWalk::WIND_IN );
     TRACE("Checking\n");
     Orderings::CheckEqual(ref_orderings, orderings);

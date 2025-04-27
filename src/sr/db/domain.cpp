@@ -14,23 +14,17 @@ Domain::Domain()
 }
 
 
-DBWalk::Action Domain::GetDeleteGeometricAction()
-{
-    return [=](const DBWalk::WalkInfo &walk_info)
-    {        
-        EraseSolo( unordered_domain, walk_info.xlink );
-        TRACE("DELETE ")(walk_info.xlink)(" term=")(walk_info.at_terminus)("\n");
-    };
+void Domain::DeleteGeometric(const DBWalk::WalkInfo &walk_info)
+{        
+    EraseSolo( unordered_domain, walk_info.xlink );
+    TRACE("DELETE ")(walk_info.xlink)(" term=")(walk_info.at_terminus)("\n");
 }
 
 
-DBWalk::Action Domain::GetInsertGeometricAction()
+void Domain::InsertGeometric(const DBWalk::WalkInfo &walk_info)
 {
-    return [=](const DBWalk::WalkInfo &walk_info)
-    {        
-        InsertSolo( unordered_domain, walk_info.xlink );   
-        TRACE("INSERT ")(walk_info.xlink)(" term=")(walk_info.at_terminus)("\n");
-    };
+    InsertSolo( unordered_domain, walk_info.xlink );   
+    TRACE("INSERT ")(walk_info.xlink)(" term=")(walk_info.at_terminus)("\n");
 }
 
 
