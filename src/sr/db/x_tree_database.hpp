@@ -44,15 +44,15 @@ public:
     // Incremental strategy: perform updates on zones
     void MainTreeExchange( MutableTreeZone *target_tree_zone, FreeZone *free_zone, vector<MutableTreeZone *> fixups );
         
-    void MainTreeDeleteGeometric(TreeZone *zone, const DBCommon::CoreInfo *base_info);
     void MainTreeInsertGeometric(TreeZone *zone, const DBCommon::CoreInfo *base_info);
+    void MainTreeDeleteGeometric(TreeZone *zone, const DBCommon::CoreInfo *base_info);
 
-    void MainTreeDeleteIntrinsic(TreeZone *zone);
     void MainTreeInsertIntrinsic(FreeZone *zone);
+    void MainTreeDeleteIntrinsic(TreeZone *zone);
 
     void PerformQueuedExtraTreeActions();
-    void ExtraTreeDelete(DBCommon::TreeOrdinal tree_ordinal);
     void ExtraTreeInsert(DBCommon::TreeOrdinal tree_ordinal);
+    void ExtraTreeDelete(DBCommon::TreeOrdinal tree_ordinal);
 
     const DomainExtensionChannel *GetDEChannel( const DomainExtension::Extender *extender ) const;
        const Domain &GetDomain() const;
