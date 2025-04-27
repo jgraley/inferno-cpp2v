@@ -208,12 +208,14 @@ void XTreeDatabase::MainTreeDeleteGeometric(TreeZone *zone, const DBCommon::Core
 }
 
 
-void XTreeDatabase::MainTreeInsertIntrinsic(FreeZone *zone)
+void XTreeDatabase::InsertIntrinsic(FreeZone *zone)
 {
     INDENT("i");
     ASSERT( de_extra_insert_queue.empty() );
 
-
+    DBWalk::Actions actions;
+    actions.push_back( bind(&Orderings::InsertIntrinsic, orderings.get(), placeholders::_1) );
+    //db_walker.WalkFreeZone( &actions, zone, DBWalk::WIND_IN );
 }
 
 
@@ -221,10 +223,11 @@ void XTreeDatabase::MainTreeDeleteIntrinsic( TreeZone *zone )
 {
     INDENT("d");
     ASSERT( extra_tree_destroy_queue.empty() );
-    
     const DBCommon::CoreInfo base_info = link_table->GetCoreInfo( zone->GetBaseXLink() );
     
-
+    DBWalk::Actions actions;
+    actions.push_back( bind(&Orderings::DeleteIntrinsic, orderings.get(), placeholders::_1) ); 
+    //db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_OUT, &base_info );   
 }
 
 

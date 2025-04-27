@@ -37,8 +37,10 @@ private:
 public:
     const Lacing *GetLacing() const;
 
-    void DeleteGeometric(const DBWalk::WalkInfo &walk_info);
 	void InsertGeometric(const DBWalk::WalkInfo &walk_info);
+    void DeleteGeometric(const DBWalk::WalkInfo &walk_info);
+	void InsertIntrinsic(const DBWalk::WalkInfo &walk_info);
+	void DeleteIntrinsic(const DBWalk::WalkInfo &walk_info);
         
     void Dump() const;
     void CheckRelations( const vector<XLink> &xlink_domain,  

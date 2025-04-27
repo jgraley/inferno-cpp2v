@@ -16,7 +16,7 @@ void DBWalk::WalkTree( const Actions *actions,
                                            ContainerInterface::iterator() };
                                            
     WalkKit kit { actions, nullptr, tree_ordinal, wind, 0U };
-    VisitBase( kit, root_xlink, &root_info );  
+    VisitBase( kit, root_xlink, root_xlink.GetChildTreePtr(), &root_info );  
 }
 
 
@@ -28,31 +28,34 @@ void DBWalk::WalkSubtree( const Actions *actions,
 {
     ASSERT( base_info );
 	WalkKit kit { actions, nullptr, tree_ordinal, wind, 0U };
-    VisitBase( kit, base_xlink, base_info );
+    VisitBase( kit, base_xlink, base_xlink.GetChildTreePtr(), base_info );
 }
 
 
 void DBWalk::WalkTreeZone( const Actions *actions,
-                           const TreeZone *zone,
+                           const TreeZone *tree_zone,
                            const DBCommon::TreeOrdinal tree_ordinal, 
                            Wind wind,
                            const DBCommon::CoreInfo *base_info )
 {
     //FTRACE("Walking zone: ")(*zone)("\n");
     ASSERT( base_info );
-    WalkKit kit { actions, zone, tree_ordinal, wind, 0U };
-    VisitBase( kit, zone->GetBaseXLink(), base_info );  
-    ASSERT( kit.next_terminus_index == zone->GetNumTerminii() )
-          ("Zone has %u terminii", zone->GetNumTerminii())
+    WalkKit kit { actions, tree_zone, tree_ordinal, wind, 0U };
+    VisitBase( kit, tree_zone->GetBaseXLink(), tree_zone->GetBaseNode(), base_info );  
+    ASSERT( kit.next_terminus_index == tree_zone->GetNumTerminii() )
+          ("Zone has %u terminii", tree_zone->GetNumTerminii())
           (" but only visited %u", kit.next_terminus_index); // should have visited all the terminii
 }
 
 
 void DBWalk::WalkFreeZone( const Actions *actions,
-                           const FreeZone *zone,
+                           const FreeZone *free_zone,
                            Wind wind )
 {
-    //FTRACE("Walking zone: ")(*zone)("\n");
+    //FTRACE("Walking zone: ")(*free_zone)("\n");
+    if( free_zone->IsEmpty() )
+		return;
+				
     const DBCommon::CoreInfo base_info = { TreePtr<Node>(),                       
                                            -1,
                                            DBCommon::FREE_BASE,                  
@@ -60,30 +63,31 @@ void DBWalk::WalkFreeZone( const Actions *actions,
                                            -1,                                                       
                                            ContainerInterface::iterator() };
     WalkKit kit { actions, nullptr, (SR::DBCommon::TreeOrdinal)(-1), wind, 0U };
-    VisitBase( kit, XLink(), &base_info );  
+    VisitBase( kit, XLink(), free_zone->GetBaseNode(), &base_info );  
 }
 
 
 void DBWalk::VisitBase( const WalkKit &kit,   
 						XLink base_xlink,
+						TreePtr<Node> base_node,
                         const DBCommon::CoreInfo *base_info )
 {
     ASSERT( base_info );
     WalkInfo walk_info = { *base_info,                       
                            base_xlink.GetTreePtrInterface(), 
                            base_xlink, 
-                           base_xlink.GetChildTreePtr(),
+                           base_node,
                            kit.tree_ordinal,
                            false, // at_terminus
                            true }; // at_base
 
-    VisitLink( kit, move(walk_info) );
+    VisitNode( kit, move(walk_info) );
 }
 
 
 void DBWalk::VisitSingular( const WalkKit &kit, 
                             const TreePtrInterface *p_x_singular, // should  be inside xlink's child
-                            XLink xlink,
+                            TreePtr<Node> node,
                             int item_ordinal )
 {
     ASSERT( p_x_singular );
@@ -95,11 +99,10 @@ void DBWalk::VisitSingular( const WalkKit &kit,
     if( !*p_x_singular )
         return;
                 
-    TreePtr<Node> x = xlink.GetChildTreePtr();
-    XLink child_xlink( x, p_x_singular ); // p_x_singular should be inside x
+    XLink child_xlink( node, p_x_singular ); // p_x_singular should be inside x
     
-    VisitLink( kit, 
-             { { x,
+    VisitNode( kit, 
+             { { node,
                  item_ordinal,
                  DBCommon::SINGULAR,
                  nullptr,
@@ -116,10 +119,9 @@ void DBWalk::VisitSingular( const WalkKit &kit,
 
 void DBWalk::VisitSequence( const WalkKit &kit, 
                             SequenceInterface *x_seq, // should  be inside xlink's child 
-                            XLink xlink,
+                            TreePtr<Node> node,
                             int item_ordinal )
 {
-    TreePtr<Node> x = xlink.GetChildTreePtr();
     int i=0;
     for( SequenceInterface::iterator xit = x_seq->begin();
          xit != x_seq->end();
@@ -128,9 +130,9 @@ void DBWalk::VisitSequence( const WalkKit &kit,
 		if( !(TreePtr<Node>)*xit )
 			continue; // Placeholder = free zone terminus
 			
-        XLink child_xlink( x, &*xit ); // &*xit should be inside x
-        VisitLink( kit, 
-                 { { x,
+        XLink child_xlink( node, &*xit ); // &*xit should be inside x
+        VisitNode( kit, 
+                 { { node,
                      item_ordinal,
                      DBCommon::IN_SEQUENCE,
                      x_seq,
@@ -149,10 +151,9 @@ void DBWalk::VisitSequence( const WalkKit &kit,
 
 void DBWalk::VisitCollection( const WalkKit &kit, 
                               CollectionInterface *x_col, 
-                              XLink xlink,
+                              TreePtr<Node> node,
                               int item_ordinal )
 {
-    TreePtr<Node> x = xlink.GetChildTreePtr();    
     int i=0;
     for( CollectionInterface::iterator xit = x_col->begin();
          xit != x_col->end();
@@ -161,9 +162,9 @@ void DBWalk::VisitCollection( const WalkKit &kit,
 		if( !(TreePtr<Node>)*xit )
 			continue; // Placeholder = free zone terminus
 			
-        XLink child_xlink( x, &*xit );
-        VisitLink( kit, 
-                 { { x,
+        XLink child_xlink( node, &*xit );
+        VisitNode( kit, 
+                 { { node,
                      item_ordinal,
                      DBCommon::IN_COLLECTION,
                      x_col,                    
@@ -180,7 +181,7 @@ void DBWalk::VisitCollection( const WalkKit &kit,
 }
 
 
-void DBWalk::VisitLink( const WalkKit &kit, 
+void DBWalk::VisitNode( const WalkKit &kit, 
                         WalkInfo &&walk_info ) // .x should be .xlink's child
 {
     INDENT(".");            
@@ -199,7 +200,7 @@ void DBWalk::VisitLink( const WalkKit &kit,
             
     // Recurse into our child nodes but stop at terminii
     if( !walk_info.at_terminus )
-        VisitItemise( kit, walk_info.xlink ); 
+        VisitItemise( kit, walk_info.node ); 
 
     if( kit.wind == WIND_OUT )
     {
@@ -211,19 +212,19 @@ void DBWalk::VisitLink( const WalkKit &kit,
 
 
 void DBWalk::VisitItemise( const WalkKit &kit, 
-                           XLink xlink ) // should be xlink's child
+                           TreePtr<Node> node ) 
 {
-    ASSERT(xlink)("This probably means we're walking an incomplete tree");
-    vector< Itemiser::Element * > x_items = xlink.GetChildTreePtr()->Itemise();
+    ASSERT(node);
+    vector< Itemiser::Element * > x_items = node->Itemise();
     for( vector< Itemiser::Element * >::size_type item_ordinal=0; item_ordinal<x_items.size(); item_ordinal++ )
     {
         Itemiser::Element *xe = x_items[item_ordinal];
         if( auto x_seq = dynamic_cast<SequenceInterface *>(xe) )
-            VisitSequence( kit, x_seq, xlink, item_ordinal );
+            VisitSequence( kit, x_seq, node, item_ordinal );
         else if( auto x_col = dynamic_cast<CollectionInterface *>(xe) )
-            VisitCollection( kit, x_col, xlink, item_ordinal );
+            VisitCollection( kit, x_col, node, item_ordinal );
         else if( auto p_x_singular = dynamic_cast<TreePtrInterface *>(xe) )
-            VisitSingular( kit, p_x_singular, xlink, item_ordinal );
+            VisitSingular( kit, p_x_singular, node, item_ordinal );
         else
             ASSERTFAIL("got something from itemise that isnt a Sequence, Collection or a singular TreePtr");
     }

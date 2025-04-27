@@ -108,7 +108,7 @@ void InsertIntrinsicPass::Run( shared_ptr<Patch> &layout )
 {
     FreeZonePatch::ForFreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<FreeZonePatch> &free_patch)
     {
-        db->MainTreeInsertIntrinsic( free_patch->GetZone() );        
+        db->InsertIntrinsic( free_patch->GetZone() );        
     } );
 }
 

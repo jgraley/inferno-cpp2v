@@ -34,7 +34,7 @@ public:
     typedef list< Action > Actions;
     
     void WalkTree( const Actions *actions,
-                   XLink root_xlink,
+                   XLink base_xlink,
                    const DBCommon::TreeOrdinal tree_ordinal, 
                    Wind wind );
     void WalkSubtree( const Actions *actions,
@@ -63,23 +63,24 @@ private:
 
     void VisitBase( const WalkKit &kit, 
 					XLink base_xlink,
+                    TreePtr<Node> base_node,
                     const DBCommon::CoreInfo *base_info );
     void VisitSingular( const WalkKit &kit, 
                         const TreePtrInterface *p_x_singular, 
-                        XLink xlink,
+                        TreePtr<Node> node,
                         int item_ordinal );
     void VisitSequence( const WalkKit &kit, 
                         SequenceInterface *x_seq, 
-                        XLink xlink,
+                        TreePtr<Node> node,
                         int item_ordinal );
     void VisitCollection( const WalkKit &kit, 
                           CollectionInterface *x_col, 
-                          XLink xlink,
+                          TreePtr<Node> node,
                           int item_ordinal );
-    void VisitLink( const WalkKit &kit, 
+    void VisitNode( const WalkKit &kit, 
                     WalkInfo &&walk_info );
     void VisitItemise( const WalkKit &kit, 
-                       XLink xlink );
+                       TreePtr<Node> node );
 };    
     
 }
