@@ -45,7 +45,7 @@ public:
     };
 private:    
     typedef vector<PatchRecord> PatchRecords;
-    typedef set<size_t, DFPatchIndexRelation> IndicesDFO;
+    typedef set<size_t, DFPatchIndexRelation> PatchIndicesDFO;
 
 	// On use of ancestor, front_ancestor, back_ancestor: when doing the 
 	// exchanges on the fly, we may actually move the back end of the
@@ -63,8 +63,10 @@ private:
     void FindOutOfOrderTreePatches( PatchRecords &patch_records, 
 									XLink base,
 									bool just_check );
-	void EliminateShortestRuns( IndicesDFO &indices_dfo, size_t max_val );
-	bool AreLinksConsecutive(size_t left, size_t right, 
+
+	void MaximalIncreasingSubsequence( PatchIndicesDFO &indices_dfo, size_t max_val );
+	void EliminateShortestRuns( PatchIndicesDFO &indices_dfo, size_t max_val );
+    bool AreLinksConsecutive(size_t left, size_t right, 
 	                         set<size_t, DFPatchIndexRelation> &indices_dfo) const;
 
 	void ProcessOutOfOrder(shared_ptr<Patch> &layout);

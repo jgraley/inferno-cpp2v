@@ -183,12 +183,12 @@ void OrderingPass::ConstrainAnyPatchToDescendants( shared_ptr<Patch> &start_patc
             auto tree_patch = GetTreePatch(patch_record);
 
             // InsertSolo is used here because we should only find each TZ as being in order once
-            //FTRACE(tree_patch)("\nSet is:\n")(in_order_bases)("\n");
+            //TRACE("In-order: index=%d, patch=", i++)(tree_patch)("\nset is:\n")(in_order_bases)("\n");
             InsertSolo(in_order_bases, tree_patch->GetZone()->GetBaseXLink());
 
 			// In-order patch will remain a tree patch, so use the terminii to establish 
 			// new ranges and recurse.
-            TRACE("In-order patch, so big recursion on ")(tree_patch)("...\n");
+            //TRACE("In-order patch, so big recursion on ")(tree_patch)("...\n");
             ConstrainChildrenToTerminii( tree_patch, just_check );
    		}
 	}
@@ -251,7 +251,7 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
     // Get the patch records in depth-first order. Omit:
     // - outside the supplied range
     // - duplicated
-    IndicesDFO indices_dfo(dfpir);
+    PatchIndicesDFO indices_dfo(dfpir);
     vector<XLink> v;
     for( size_t i=0; i<patch_records.size(); i++ )
     {
@@ -283,6 +283,7 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
 		if( in_order_bases.count(tz_base) > 0 )
 		{
 			// This TZ is known to have been accepted as in-order somewhere else in the layout
+			TRACE("Global duplicate rejected: index=%d patch=", i)(patch_records[i].patch_ptr)("\n");
 			continue;
 		}
 
@@ -291,6 +292,7 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
  	    {
 			// Fail, already there. TODO what if both inserted due eg multiset and 
 			// always the "wrong" way around so one will be kicked out...
+			TRACE("Local duplicate rejected: index=%d patch=", i)(patch_records[i].patch_ptr)("\n");
 			continue;
  		}
     }
@@ -354,15 +356,83 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
 		
     TRACE("Final depth-first order: ")(indices_dfo)("\n");
          
-    EliminateShortestRuns( indices_dfo, patch_records.size() );
-         
+    //EliminateShortestRuns( indices_dfo, patch_records.size() );
+    MaximalIncreasingSubsequence( indices_dfo, patch_records.size() );
+    
+    // We cannot use indices_dfo.count() generally, because depth-first isn't a
+    // total ordering in the case where the same TZ appears more than once
+    // in patch_records. This is OK since we refused to even insert the 
+    // duplicates, but we must switch to a different ordering here.
+    set<size_t> indices_simple;
+    for( size_t i : indices_dfo )
+		indices_simple.insert( i );
+		
     // Patches are out of order if their index is missing from the ordering
     for( size_t i=0; i<patch_records.size(); i++ )   
-		patch_records[i].out_of_order = (indices_dfo.count( i ) == 0);
+		patch_records[i].out_of_order = (indices_simple.count( i ) == 0);
 }
  
  
-void OrderingPass::EliminateShortestRuns( IndicesDFO &indices_dfo, size_t max_val )
+// TODO drop max_val
+void OrderingPass::MaximalIncreasingSubsequence( PatchIndicesDFO &indices_dfo, size_t max_val )
+{
+	size_t N = indices_dfo.size();
+	vector<size_t> X;
+	X.reserve( N ); // so we can use push_back() efficiently
+	for( size_t x : indices_dfo )
+		X.push_back( x );		
+		
+	vector<size_t> P(N);
+	vector<size_t> M(N+1);
+	M[0] = -1;
+
+	size_t L = 0;
+	for( size_t i=0; i<N; i++ )
+	{
+		// Binary search for the smallest positive l ≤ L
+		// such that X[M[l]] >= X[i]
+		size_t lo = 1;
+		size_t hi = L + 1;
+		while( lo < hi )
+		{
+			size_t mid = lo + (hi-lo)/2; // lo <= mid < hi
+			if( X[M[mid]] >= X[i] )
+				hi = mid;
+			else // if X[M[mid]] < X[i]
+				lo = mid + 1;
+		}
+		
+		// After searching, lo == hi is 1 greater than the
+		// length of the longest prefix of X[i]
+		size_t newL = lo;
+
+		// The predecessor of X[i] is the last index of 
+		// the subsequence of length newL-1
+		P[i] = M[newL-1];
+		M[newL] = i;
+		
+		if( newL > L )
+		{
+			// If we found a subsequence longer than any we've
+			// found yet, update L
+			L = newL;
+		}
+	}
+
+	// Reconstruct the longest increasing subsequence
+	// It consists of the values of X at the L indices:
+	// ...,  P[P[M[L]]], P[M[L]], M[L]
+	indices_dfo.clear();
+	size_t k = M[L];
+	for( int j=L-1; j>=0; j-- ) //0 included
+	{
+		indices_dfo.insert(X[k]); // we don't mind that we're going backwards because indices_dfo is ordered
+		k = P[k];
+	}
+}
+
+
+void OrderingPass::EliminateShortestRuns( PatchIndicesDFO &indices_dfo, size_t max_val )
 {
     // Data structures for runs of things that are consecutive wrt DF ordering
  
@@ -387,13 +457,7 @@ void OrderingPass::EliminateShortestRuns( IndicesDFO &indices_dfo, size_t max_va
 
 		// First patch record gets it for free, then we have to check the DF ordering
 		bool consecutive = first || AreLinksConsecutive(prev_i, i, indices_dfo);
-		TRACE(i)(consecutive?"":" NOT")(" consecutive\n");
-
-		/*if( just_check && !consecutive )
-		{
-			FTRACE("DFO: \n")(indices_dfo)("\nprev: ")(prev_i)(" current: ")(i)("\n");
-			ASSERTFAIL(); // we aint goin nowhere
-		} */                       
+		TRACE(i)(consecutive?"":" NOT")(" consecutive\n");                    
 
 		// Completed run if:
 		// - seen at least one patch record since start, and

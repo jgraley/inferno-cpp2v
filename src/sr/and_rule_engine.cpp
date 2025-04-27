@@ -813,11 +813,11 @@ SolutionMap AndRuleEngine::Compare( XLink base_xlink,
         ASSERT( x_tree_db->domain.count(base_xlink) > 0 )(base_xlink)(" not found in ")(x_tree_db->GetOrderings()->domain)(" (see issue #202)\n");
 #endif
     
-    // Determine my fixes (just root pattern link to base x link)
-    SolutionMap my_fixes = {{plan.base_plink, base_xlink}};
+    // Determine my fixed (just root pattern link to base x link)
+    SolutionMap my_fixed_assignments = {{plan.base_plink, base_xlink}};
     
     // Start the CSP solver
-    StartCSPSolver( my_fixes, surrounding_solution );
+    StartCSPSolver( my_fixed_assignments, surrounding_solution );
            
     // These are partial solutions, and are mapped against the links
     // into the agents (half-link model). Note: solutions can specify
@@ -834,7 +834,7 @@ SolutionMap AndRuleEngine::Compare( XLink base_xlink,
 
         // Merge my fixes into the solution (but we're not expected to merge
         // in surrounding solution: caller can do that, if required).
-        basic_solution = UnionOfSolo( basic_solution, my_fixes );
+        basic_solution = UnionOfSolo( basic_solution, my_fixed_assignments );
 
         try
         {
