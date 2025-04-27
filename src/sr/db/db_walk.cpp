@@ -52,12 +52,6 @@ void DBWalk::WalkFreeZone( const Actions *actions,
                            const FreeZone *zone,
                            Wind wind )
 {
-	ASSERTFAIL(); // Broken!
-	
-    // Behaviour for free zones:
-    // - Context is FREE_BASE for base of zone, walk_info similar to ROOT
-    // - We do not visit terminii, so at_terminus is always false 
- 
     //FTRACE("Walking zone: ")(*zone)("\n");
     const DBCommon::CoreInfo base_info = { TreePtr<Node>(),                       
                                            -1,
@@ -96,7 +90,8 @@ void DBWalk::VisitSingular( const WalkKit &kit,
     
     // MakeValueArchetype() can generate nodes with NULL pointers (eg in PointerIs)
     // and these get into the domain even though they are not allowed in input trees.
-    // In this case, stop recursing since there's no child to build a row for.    
+    // In this case, stop recursing since there's no child to build a row for. 
+    // Or it could be placeholder = free zone terminus.
     if( !*p_x_singular )
         return;
                 
@@ -130,6 +125,9 @@ void DBWalk::VisitSequence( const WalkKit &kit,
          xit != x_seq->end();
          ++xit )
     {
+		if( !(TreePtr<Node>)*xit )
+			continue; // Placeholder = free zone terminus
+			
         XLink child_xlink( x, &*xit ); // &*xit should be inside x
         VisitLink( kit, 
                  { { x,
@@ -160,6 +158,9 @@ void DBWalk::VisitCollection( const WalkKit &kit,
          xit != x_col->end();
          ++xit )
     {
+		if( !(TreePtr<Node>)*xit )
+			continue; // Placeholder = free zone terminus
+			
         XLink child_xlink( x, &*xit );
         VisitLink( kit, 
                  { { x,
@@ -183,9 +184,9 @@ void DBWalk::VisitLink( const WalkKit &kit,
                         WalkInfo &&walk_info ) // .x should be .xlink's child
 {
     INDENT(".");            
-    walk_info.at_terminus = (kit.zone &&
-                             kit.next_terminus_index < kit.zone->GetNumTerminii() && // TODO store end iterator directly in kit
-                             walk_info.xlink == kit.zone->GetTerminusXLink(kit.next_terminus_index));
+    walk_info.at_terminus = (kit.tree_zone &&
+                             kit.next_terminus_index < kit.tree_zone->GetNumTerminii() && // TODO store end iterator directly in kit
+                             walk_info.xlink == kit.tree_zone->GetTerminusXLink(kit.next_terminus_index));
     if( walk_info.at_terminus )
         ++(kit.next_terminus_index);
       

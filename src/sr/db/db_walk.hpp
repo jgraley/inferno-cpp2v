@@ -55,7 +55,7 @@ private:
     struct WalkKit
     {
         const Actions *actions;
-        const TreeZone *zone;
+        const TreeZone *tree_zone;
         const DBCommon::TreeOrdinal tree_ordinal;        
         Wind wind;
         mutable size_t next_terminus_index;
