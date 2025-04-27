@@ -32,11 +32,9 @@ const Lacing *Orderings::GetLacing() const
 
 
 DBWalk::Action Orderings::GetDeleteGeometricAction()
-{    
-    xlinks_reached_for_node.clear();
-    
+{            
     return [=](const DBWalk::WalkInfo &walk_info)
-    {
+    {		
         EraseSolo( depth_first_ordering, walk_info.xlink );
 
         // Intrinsic orderings are keyed on nodes, and we don't need to update on the boundary layer
@@ -73,6 +71,9 @@ DBWalk::Action Orderings::GetDeleteGeometricAction()
                 EraseSolo( simple_compare_ordering, ancestor_node );                              
             }
         }
+        
+        if( walk_info.at_base )
+			xlinks_reached_for_node.clear(); // clear at end of wind-out walk
     };
 }
 
