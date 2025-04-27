@@ -464,9 +464,6 @@ void OrderingPass::RunDuplicates(shared_ptr<Patch> &layout)
 			shared_ptr<FreeZonePatch> new_free_patch = ooo_tree_patch->DuplicateToFree();
 			*ooo_patch_ptr = new_free_patch;
 
-			// Add to intrinsic tables in DB because we missed InsertIntrinsicPass
-			db->MainTreeInsertIntrinsic( new_free_patch->GetZone() );     
-
 			out_of_order_bases.erase(out_of_order_bases.lower_bound(base_xlink));
 		}
 	}

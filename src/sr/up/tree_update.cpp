@@ -79,11 +79,6 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink origin_xlink, shared_p
 
 	validate_zones.Run(source_layout);
 
-    ComplementPass complement_pass( db );
-    complement_pass.Run(origin_mutator, source_layout);
-
-	validate_zones.Run(source_layout);
-
     InsertIntrinsicPass insert_intrinsic_pass( db );
     insert_intrinsic_pass.Run(source_layout);
 
@@ -92,6 +87,12 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink origin_xlink, shared_p
     OrderingPass ordering_pass( db );
     ordering_pass.RunAnalysis(source_layout);
     ordering_pass.RunDuplicates(source_layout);
+
+	validate_zones.Run(source_layout);
+    ComplementPass complement_pass( db );
+    complement_pass.Run(origin_mutator, source_layout);
+	validate_zones.Run(source_layout);
+
     ordering_pass.RunMoves(source_layout);
 
 	validate_zones.Run(source_layout);
