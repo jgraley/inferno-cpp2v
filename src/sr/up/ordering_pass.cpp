@@ -354,10 +354,8 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
 	}
 #endif	
 		
-    TRACE("Final depth-first order: ")(indices_dfo)("\n");
-         
-    //EliminateShortestRuns( indices_dfo, patch_records.size() );
-    MaximalIncreasingSubsequence( indices_dfo, patch_records.size() );
+    TRACE("Final depth-first order: ")(indices_dfo)("\n");         
+    MaximalIncreasingSubsequence( indices_dfo );
     
     // We cannot use indices_dfo.count() generally, because depth-first isn't a
     // total ordering in the case where the same TZ appears more than once
@@ -374,7 +372,7 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
  
  
 // TODO drop max_val
-void OrderingPass::MaximalIncreasingSubsequence( PatchIndicesDFO &indices_dfo, size_t max_val )
+void OrderingPass::MaximalIncreasingSubsequence( PatchIndicesDFO &indices_dfo )
 {
 	size_t N = indices_dfo.size();
 	vector<size_t> X;
@@ -431,152 +429,6 @@ void OrderingPass::MaximalIncreasingSubsequence( PatchIndicesDFO &indices_dfo, s
 	}
 }
 
-
-void OrderingPass::EliminateShortestRuns( PatchIndicesDFO &indices_dfo, size_t max_val )
-{
-    // Data structures for runs of things that are consecutive wrt DF ordering
- 
-    // set of pairs: run length to front index. Will be ordered:
-    // - primarily by run length
-    // - secondarily by index into vector (via preserved insertion order)
-    // Note: multimap makes it hard to remove a single element if you don't
-    // already have the required iterator.
-    set<pair<int, int>> runs_by_length; 
- 
-    // Map from the fronts of runs to the run lengths
-    map<int, int> runs_by_front_index; // TODO first->front etc
-    // Find runs of patch records that are consecutive both in the layout and
-    // the DF ordering, breaking on patch records outside the supplied overall range.
-    size_t run_start_i=0;
-    size_t prev_i=0;
-    bool first = true;     
-    for( size_t i=0; i<max_val; i++ )
-    {
- 		if( indices_dfo.count(i)==0 ) // only elements in the ordering
-			continue;
-
-		// First patch record gets it for free, then we have to check the DF ordering
-		bool consecutive = first || AreLinksConsecutive(prev_i, i, indices_dfo);
-		TRACE(i)(consecutive?"":" NOT")(" consecutive\n");                    
-
-		// Completed run if:
-		// - seen at least one patch record since start, and
-		// - not consecutive wrt DF ordering
-		if( !first && !consecutive )
-		{
-			int length = i - run_start_i;
-			runs_by_length.insert( make_pair(length, run_start_i) );
-			runs_by_front_index.insert( make_pair(run_start_i, length) );
-		}
-
-		// Need new run if:
-		// - starting up, or
-		// - not consecutive wrt DF ordering
-		if( first || !consecutive )
-			run_start_i = i; // start new run here
-
-		prev_i = i;
-		first = false;
-    }
-     
-    // Complete the final run.
-    int length = max_val - run_start_i;
-    runs_by_length.insert( make_pair(length, run_start_i) );
-    runs_by_front_index.insert( make_pair(run_start_i, length) );
- 
-    // Solve ordering problem reductively
-    while(runs_by_length.size() > 1)
-    {
-        //FTRACE("Runs by length ")(runs_by_length)("\n");
-        // We have more than one run, which means the things are disordered.
-        // Policy is to define the shortest run as out-of-order.
-        // We will try to remove it and maybe concatenate the neighbouring runs,
-        // as well as any consecutive runs that are now consecutive in the DF ordering.
-        // This reduces the number of runs, so should terminate.
-        auto it_rbl_shortest = runs_by_length.begin(); // (joint) smallest run
-        auto it_rbl_ooo = it_rbl_shortest; // policy        
- 
-        // Find out some stuff about the run, and the next one in index order
-        int l_ooo, i_ooo_front; 
-        tie(l_ooo, i_ooo_front) = *it_rbl_ooo; 
- 
-        // Mark patch records in this run as out of order and remove from:
-        // - local DF ordering
-        // - runs data structures
-        TRACE("Removing run of %d OOO:\n", l_ooo);
-        for( int i=i_ooo_front; i<i_ooo_front+l_ooo; i++ )
-        {
-            if( indices_dfo.count( i ) == 1 )
-                EraseSolo( indices_dfo, i );  
-        }
-        EraseSolo( runs_by_length, make_pair(l_ooo, i_ooo_front) ); 
-        EraseSolo( runs_by_front_index, i_ooo_front );
- 
-        // Look for concatenation opportunties
-        // We could do two concatenations after a removal:
-        // - where it was removed from (OOO location), and
-        // - where it would have been according to DF ordering (now consecutive)
-        //FTRACE("Looking for concatenations:\n", l_ooo);
-        bool first = true;
-        int prev_i_front=0, prev_i_back=0;
-        for( map<const int, int>::iterator it = runs_by_front_index.begin();
-             it != runs_by_front_index.end();
-             ++it )
-        {
-            int i_front = it->first;
-            int i_back = it->first + it->second - 1;
- 
-            if( !first )
-            { 
-                if( AreLinksConsecutive(prev_i_back, i_front, indices_dfo) ) // Can we concatenate?
-                {
-                    //FTRACE("concatenating\n");
-                    // Deduce stuff about the new concatenated run
-                    int concatenated_i_front = prev_i_front;
-                    int concatenated_i_back  = i_back; 
- 
-                    // Drop the original neighbouring runs
-                    runs_by_length.erase(make_pair(prev_i_back - prev_i_front + 1, prev_i_front)); 
-                    runs_by_front_index.erase(prev_i_front);
-                    runs_by_length.erase(make_pair(i_back - i_front + 1, i_front)); 
-                    runs_by_front_index.erase(i_front);
- 
-                    // Insert concatenated run and pretend the concatenated one is the current one (becomes "prev" on next iteration)
-                    runs_by_length.insert( make_pair(concatenated_i_back - concatenated_i_front + 1, concatenated_i_front) );
-                    it = InsertSolo( runs_by_front_index, make_pair(concatenated_i_front, concatenated_i_back - concatenated_i_front + 1) );        
-                    i_front = concatenated_i_front;
-                    i_back = concatenated_i_back;
-                }
-            }
- 
-            prev_i_front = i_front;
-            prev_i_back = i_back;
-            first = false;
-        }        
-    }
-}
- 
- 
-bool OrderingPass::AreLinksConsecutive(size_t left, size_t right, set<size_t, DFPatchIndexRelation> &indices_dfo) const
-{
-    set<size_t, DFPatchIndexRelation>::iterator left_it = indices_dfo.find(left);
-    set<size_t, DFPatchIndexRelation>::iterator right_it = indices_dfo.find(right);
-          
-    // If either is missing from DFO, we mustn't assume consecutivity
-	if( left_it == indices_dfo.end() || right_it == indices_dfo.end() )
-		return false;
-          
-    // If we're up against either end of the DFO, they can't be consecutive
-	if( next(left_it) == indices_dfo.end() || right_it == indices_dfo.begin() )
-		return false;
-          
-    // They have to be consecutive in the DFO
-    if( next(left_it) != right_it )
-	    return false;
-
-    return true;
-}
- 
  
 void OrderingPass::RunDuplicates(shared_ptr<Patch> &layout)
 {

@@ -64,10 +64,7 @@ private:
 									XLink base,
 									bool just_check );
 
-	void MaximalIncreasingSubsequence( PatchIndicesDFO &indices_dfo, size_t max_val );
-	void EliminateShortestRuns( PatchIndicesDFO &indices_dfo, size_t max_val );
-    bool AreLinksConsecutive(size_t left, size_t right, 
-	                         set<size_t, DFPatchIndexRelation> &indices_dfo) const;
+	void MaximalIncreasingSubsequence( PatchIndicesDFO &indices_dfo );
 
 	void ProcessOutOfOrder(shared_ptr<Patch> &layout);
 	void MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch, shared_ptr<Patch> &layout );
