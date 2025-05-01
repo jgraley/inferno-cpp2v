@@ -17,6 +17,12 @@ namespace SR
  * layout as with gap-finding and inversion. For example, an apparent gap 
  * could fully and strictly contain a TZ that's moved somewhere else in the
  * layout. Here, we analyse the tree zones without reference to the layout.
+ * 
+ * We will go right ahead and remove all intrinsic DB content on the 
+ * complement zones. Because we only check tree zones, this can include 
+ * nodes that are present in free zones in the layout. So we need to do this
+ * before adding the free zones to the intrinsic DB otherwise they could be
+ * added and then deleted again.
  */
 class ComplementPass
 {

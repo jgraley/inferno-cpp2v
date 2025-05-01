@@ -85,8 +85,8 @@ public:
 
     void Dump() const;
     
-private:    
-    void Checks();
+    void CheckGeometric();
+    void CheckIntrinsic();
     
 private: 
     const shared_ptr<Lacing> lacing;

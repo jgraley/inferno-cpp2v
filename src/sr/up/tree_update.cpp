@@ -53,52 +53,43 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink origin_xlink, shared_p
 	ToMutablePass to_mutable_pass( db );
 	to_mutable_pass.Run(source_layout);
 	Mutator origin_mutator = db->CreateTreeMutator(origin_xlink);
-
 	ValidateTreeZones validate_zones(db);
 	validate_zones.Run(source_layout);
 
     MergeWidesPass merge_wides_pass;
     merge_wides_pass.Run(source_layout);
-    merge_wides_pass.Check(source_layout);
-                           
+    merge_wides_pass.Check(source_layout);                           
 	validate_zones.Run(source_layout);
 
 	ProtectDEPass protect_de_pass( db );
-	protect_de_pass.Run(source_layout);
-                                    
+	protect_de_pass.Run(source_layout);                                  
 	validate_zones.Run(source_layout);
 
     EmptyZonePass empty_zone_pass;
     empty_zone_pass.Run(source_layout);
     empty_zone_pass.Check(source_layout);
-    
 	validate_zones.Run(source_layout);
 
     BoundaryPass boundary_pass( db );
     boundary_pass.Run(source_layout);
-
-	validate_zones.Run(source_layout);
-
-    InsertIntrinsicPass insert_intrinsic_pass( db );
-    insert_intrinsic_pass.Run(source_layout);
-
 	validate_zones.Run(source_layout);
 
     OrderingPass ordering_pass( db );
     ordering_pass.RunAnalysis(source_layout);
     ordering_pass.RunDuplicates(source_layout);
-
 	validate_zones.Run(source_layout);
+	
     ComplementPass complement_pass( db );
     complement_pass.Run(origin_mutator, source_layout);
 	validate_zones.Run(source_layout);
 
-    ordering_pass.RunMoves(source_layout);
-
+    InsertIntrinsicPass insert_intrinsic_pass( db );
+    insert_intrinsic_pass.Run(source_layout);
 	validate_zones.Run(source_layout);
 
+    ordering_pass.RunMoves(source_layout);
     ordering_pass.Check(source_layout);
-       
+	validate_zones.Run(source_layout);       
     ScaffoldChecker().Run(source_layout);
     
     GapFindingPass gap_finding_pass;
@@ -115,5 +106,8 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink origin_xlink, shared_p
     markers_pass.Run(source_layout);
 
     InversionPass inversion_pass( db ); 
-    inversion_pass.Run(origin_mutator, &source_layout);             
+    inversion_pass.Run(origin_mutator, &source_layout);      
+    
+    if( ReadArgs::test_db )
+        db->CheckIntrinsic();
 }

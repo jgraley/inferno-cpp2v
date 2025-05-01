@@ -21,6 +21,8 @@ ComplementPass::ComplementPass( XTreeDatabase *db_ ) :
 
 void ComplementPass::Run(const Mutator &origin_mutator, shared_ptr<Patch> source_layout)
 {    
+	INDENT("C");
+	
     source_tzs_df_by_base.clear();
     // Gather all the tree zones from the patches in the source layout, and
     // put them in a depth-first ordering on base (i.e. ordered relative to CURRENT tree)

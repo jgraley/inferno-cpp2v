@@ -74,6 +74,9 @@ public:
 
 /**
  * All the free zones are added to the intrinsic tables in the DB.
+ * We must do this after Complemementing, otherwise we can add an
+ * intrinsic entry only for it to be deleted again on the grounds that
+ * it has no tree zone patch.
  */
 class InsertIntrinsicPass 
 {

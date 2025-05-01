@@ -21,6 +21,7 @@ BoundaryPass::BoundaryPass( XTreeDatabase *db_ ) :
 
 void BoundaryPass::Run(shared_ptr<Patch> &layout)
 {	
+	INDENT("B");
 	boundaries.clear();
     TreeZonePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
     {

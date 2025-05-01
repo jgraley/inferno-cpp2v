@@ -10,8 +10,6 @@ using namespace SR;
 
 //#define TRACE_CATEGORY_RELATION
 
-#define CAT_IS_GEOMETRIC
-
 Orderings::Orderings( shared_ptr<Lacing> lacing, const XTreeDatabase *db_ ) :
     plan( lacing ),
     depth_first_ordering( db_ ),
@@ -40,12 +38,6 @@ void Orderings::InsertGeometric(const DBWalk::WalkInfo &walk_info)
 	// Intrinsic orderings are keyed on nodes, and we don't need to update on the boundary layer
 	if( !walk_info.at_terminus )
 	{        
-#ifdef CAT_IS_GEOMETRIC
-		// Only if not already
-		if( category_ordering.count(walk_info.node)==0 )
-			InsertSolo( category_ordering, walk_info.node );                             
-#endif
-
 		// Only if not already
 		if( simple_compare_ordering.count(walk_info.node)==0 )
 			InsertSolo( simple_compare_ordering, walk_info.node );               
@@ -82,12 +74,6 @@ void Orderings::DeleteGeometric(const DBWalk::WalkInfo &walk_info)
 		// Track the xlinks we've reached for each node
 		xlinks_reached_for_node[walk_info.node].insert(walk_info.xlink);        
 
-#ifdef CAT_IS_GEOMETRIC
-		// Only remove if this was the last incoming XLink to the node
-		if( xlinks_reached_for_node.at(walk_info.node) == row.incoming_xlinks )
-			EraseSolo( category_ordering, walk_info.node );                            
-#endif
-
 		// Only remove if this was the last incoming XLink to the node
 		if( xlinks_reached_for_node.at(walk_info.node) == row.incoming_xlinks ) // TODO merge these ifs
 			EraseSolo( simple_compare_ordering, walk_info.node );               
@@ -116,13 +102,14 @@ void Orderings::DeleteGeometric(const DBWalk::WalkInfo &walk_info)
 void Orderings::InsertIntrinsic(const DBWalk::WalkInfo &walk_info)
 { 	
 	// Intrinsic orderings are keyed on nodes, and we don't need to update on the boundary layer
+	// We don't get an XLink for root because it's a free zone walk
+	// We also don't get called on terminii so at_terminus is always false, but
+	// keeping the if for clarity
 	if( !walk_info.at_terminus )
 	{        
-#ifdef CAT_IS_INTRINSIC
 		// Only if not already
 		if( category_ordering.count(walk_info.node)==0 )
 			InsertSolo( category_ordering, walk_info.node );            
-#endif			                 
 	}
 }
 
@@ -130,6 +117,7 @@ void Orderings::InsertIntrinsic(const DBWalk::WalkInfo &walk_info)
 void Orderings::DeleteIntrinsic(const DBWalk::WalkInfo &walk_info)
 {		
 	// Intrinsic orderings are keyed on nodes, and we don't need to update on the boundary layer
+	// We do get an XLink for all invocations because it's a tree zone walk
 	if( !walk_info.at_terminus )
 	{
 		// Node table hasn't been updated yet, so node should be in there.
@@ -139,11 +127,9 @@ void Orderings::DeleteIntrinsic(const DBWalk::WalkInfo &walk_info)
 		// Track the xlinks we've reached for each node
 		xlinks_reached_for_node[walk_info.node].insert(walk_info.xlink);        
 
-#ifdef CAT_IS_INTRINSIC
 		// Only remove if this was the last incoming XLink to the node
 		if( xlinks_reached_for_node.at(walk_info.node) == row.incoming_xlinks )
 			EraseSolo( category_ordering, walk_info.node );                   
-#endif			         
 	} 
 	
 	if( walk_info.at_base )
@@ -184,7 +170,7 @@ void Orderings::CheckRelations( const vector<XLink> &xlink_domain,
 
 
 template<typename ORDERING>
-void CheckEqualOrdering( string name, const ORDERING &l, const ORDERING &r )
+void CheckEqualOrdering( string name, const ORDERING &l, const ORDERING &r  )
 {
     auto lk = KeysToSet(l);
     auto rk = KeysToSet(r);
@@ -192,9 +178,15 @@ void CheckEqualOrdering( string name, const ORDERING &l, const ORDERING &r )
 }
 
 
-void Orderings::CheckEqual( shared_ptr<Orderings> l, shared_ptr<Orderings> r )
+void Orderings::CheckEqual( shared_ptr<Orderings> l, shared_ptr<Orderings> r, bool intrinsic )
 {
-    CheckEqualOrdering( "DF", l->depth_first_ordering, r->depth_first_ordering );
-    CheckEqualOrdering( "CAT", l->category_ordering, r->category_ordering );
-    CheckEqualOrdering( "SC", l->simple_compare_ordering, r->simple_compare_ordering );
+	if( intrinsic )
+	{
+		CheckEqualOrdering( "CAT", l->category_ordering, r->category_ordering );
+	}
+	else
+	{
+		CheckEqualOrdering( "DF", l->depth_first_ordering, r->depth_first_ordering );
+		CheckEqualOrdering( "SC", l->simple_compare_ordering, r->simple_compare_ordering );
+	}
 }

@@ -96,6 +96,7 @@ OrderingPass::OrderingPass(XTreeDatabase *db_) :
 
 void OrderingPass::RunAnalysis( shared_ptr<Patch> &layout )
 {    
+	INDENT("A");
 	out_of_order_patches.clear();
 	in_order_bases.clear();
 	

@@ -15,6 +15,7 @@ using namespace SR;
 
 void FreeZoneMergeImpl::Run( shared_ptr<Patch> &layout, PolicyFunction policy )
 {
+	INDENT("F");
     FreeZonePatch::ForFreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<FreeZonePatch> &free_patch)
     {
 		TRACE("Parent FreeZonePatch ")(*free_patch)("\n");

@@ -106,6 +106,7 @@ InsertIntrinsicPass::InsertIntrinsicPass(XTreeDatabase *db_) :
  
 void InsertIntrinsicPass::Run( shared_ptr<Patch> &layout )
 {
+	INDENT("N");
     FreeZonePatch::ForFreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<FreeZonePatch> &free_patch)
     {
         db->InsertIntrinsic( free_patch->GetZone() );        

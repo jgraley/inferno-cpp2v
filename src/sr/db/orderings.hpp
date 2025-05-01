@@ -45,7 +45,7 @@ public:
     void Dump() const;
     void CheckRelations( const vector<XLink> &xlink_domain,  
                          const vector<TreePtr<Node>> &node_domain );
-    static void CheckEqual( shared_ptr<Orderings> l, shared_ptr<Orderings> r );
+    static void CheckEqual( shared_ptr<Orderings> l, shared_ptr<Orderings> r, bool intrinsic );
 
     // Category ordering TODO merge with SimpleCompare ordering
     typedef set<CategoryRelation::KeyType, 
