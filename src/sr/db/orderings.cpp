@@ -33,6 +33,38 @@ const Lacing *Orderings::GetLacing() const
 }
 
 	
+void Orderings::MainTreeInsertGeometric(TreeZone *zone, const DBCommon::CoreInfo *base_info)
+{     
+    DBWalk::Actions actions;
+    actions.push_back( bind(&Orderings::InsertGeometricAction, this, placeholders::_1) );
+    db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_IN, base_info );
+}
+
+
+void Orderings::MainTreeDeleteGeometric(TreeZone *zone, const DBCommon::CoreInfo *base_info)
+{
+    DBWalk::Actions actions;
+    actions.push_back( bind(&Orderings::DeleteGeometricAction, this, placeholders::_1) );
+    db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_OUT, base_info );
+}
+
+
+void Orderings::InsertIntrinsic(FreeZone *zone)
+{
+    DBWalk::Actions actions;
+    actions.push_back( bind(&Orderings::InsertIntrinsicAction, this, placeholders::_1) );
+    db_walker.WalkFreeZone( &actions, zone, DBWalk::WIND_IN );
+}
+
+
+void Orderings::DeleteIntrinsic(FreeZone *zone)
+{
+    DBWalk::Actions actions;
+    actions.push_back( bind(&Orderings::DeleteIntrinsicAction, this, placeholders::_1) );
+    db_walker.WalkFreeZone( &actions, zone, DBWalk::WIND_OUT );
+}
+
+
 void Orderings::InsertGeometricAction(const DBWalk::WalkInfo &walk_info)
 { 
 	InsertSolo( depth_first_ordering, walk_info.xlink );

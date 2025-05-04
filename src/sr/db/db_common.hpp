@@ -57,6 +57,13 @@ public:
         // or IN_COLLECTION. Note: only used in regeneration queries.
         ContainerInterface::iterator container_it;
     };
+
+	// CoreInfo value for root of any tree is always well-defined, so
+	// we provide it here.
+    static const CoreInfo *GetRootCoreInfo();
+
+private:    
+    static const CoreInfo root_core_info;
 };    
 
 }

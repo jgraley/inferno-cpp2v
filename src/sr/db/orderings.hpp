@@ -37,6 +37,11 @@ private:
 public:
     const Lacing *GetLacing() const;
 
+    void MainTreeInsertGeometric(TreeZone *zone, const DBCommon::CoreInfo *base_info);
+    void MainTreeDeleteGeometric(TreeZone *zone, const DBCommon::CoreInfo *base_info);
+    void InsertIntrinsic(FreeZone *zone);
+    void DeleteIntrinsic(FreeZone *zone);
+
 	void InsertGeometricAction(const DBWalk::WalkInfo &walk_info);
     void DeleteGeometricAction(const DBWalk::WalkInfo &walk_info);
 	void InsertIntrinsicAction(const DBWalk::WalkInfo &walk_info);
@@ -75,6 +80,7 @@ public:
 
 private:
     const XTreeDatabase *db;
+    DBWalk db_walker;
     
     // Note: live across deleting walks
     map<TreePtr<Node>, size_t> node_reached_count;    

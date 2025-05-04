@@ -84,6 +84,7 @@ void ComplementPass::CreateComplementTZ(XLink target_base)
     
     // Delete intrinsic tables/orderings for this unreferenced tree zone
     auto target_zone = make_unique<XTreeZone>( target_base, complement_terminii );
-    db->MainTreeDeleteIntrinsic( target_zone.get() );
+    (void)target_zone;
+//    db->MainTreeDeleteIntrinsic( target_zone.get() );
 }
 

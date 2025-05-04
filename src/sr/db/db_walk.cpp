@@ -2,37 +2,6 @@
 
 using namespace SR;    
 
-void DBWalk::WalkTree( const Actions *actions,
-                       XLink root_xlink,
-                       const DBCommon::TreeOrdinal tree_ordinal, 
-                       Wind wind )
-{
-    TRACE("Walking tree rooted at: ")(root_xlink)("\n");
-    ASSERT(root_xlink);
-    const DBCommon::CoreInfo root_info = { TreePtr<Node>(),                       
-                                           -1,
-                                           DBCommon::ROOT,                  
-                                           nullptr,
-                                           -1,                                                       
-                                           ContainerInterface::iterator() };
-                                           
-    WalkKit kit { actions, nullptr, tree_ordinal, wind, 0U };
-    VisitBase( kit, root_xlink, root_xlink.GetChildTreePtr(), &root_info );  
-    TRACE("Done walking tree\n");
-}
-
-
-void DBWalk::WalkSubtree( const Actions *actions,
-                          XLink base_xlink,
-                          const DBCommon::TreeOrdinal tree_ordinal, 
-                          Wind wind,
-                          const DBCommon::CoreInfo *base_info )
-{
-    ASSERT( base_info );
-	WalkKit kit { actions, nullptr, tree_ordinal, wind, 0U };
-    VisitBase( kit, base_xlink, base_xlink.GetChildTreePtr(), base_info );
-}
-
 
 void DBWalk::WalkTreeZone( const Actions *actions,
                            const TreeZone *tree_zone,

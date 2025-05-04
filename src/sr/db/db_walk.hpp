@@ -32,16 +32,7 @@ public:
 
     typedef function<void (const WalkInfo &)> Action;
     typedef list< Action > Actions;
-    
-    void WalkTree( const Actions *actions,
-                   XLink base_xlink,
-                   const DBCommon::TreeOrdinal tree_ordinal, 
-                   Wind wind );
-    void WalkSubtree( const Actions *actions,
-                      XLink base_xlink,
-                      const DBCommon::TreeOrdinal tree_ordinal,
-                      Wind wind,
-                      const DBCommon::CoreInfo *base_info );
+   
     void WalkTreeZone( const Actions *actions,
                        const TreeZone *zone,
                        const DBCommon::TreeOrdinal tree_ordinal,
