@@ -536,7 +536,7 @@ void XTreeDatabase::CheckGeometric()
 	{
 	    XLink root_xlink = GetRootXLink(p.first);
 		auto tree_as_zone = XTreeZone::CreateSubtree(root_xlink);
-		orderings->MainTreeInsertGeometric(tree_as_zone.get(), DBCommon::GetRootCoreInfo());
+		ref_orderings->MainTreeInsertGeometric(tree_as_zone.get(), DBCommon::GetRootCoreInfo());
 	}   
     
     TRACE("Checking\n");
@@ -564,7 +564,7 @@ void XTreeDatabase::CheckIntrinsic()
 	    XLink root_xlink = GetRootXLink(p.first);
 		auto tree_as_zone = XTreeZone::CreateSubtree(root_xlink);
 		auto free_zone = FreeZone::CreateSubtree(tree_as_zone->GetBaseNode());
-		orderings->InsertIntrinsic(free_zone.get());
+		ref_orderings->InsertIntrinsic(free_zone.get());
 	}   
  
     TRACE("Checking\n");
