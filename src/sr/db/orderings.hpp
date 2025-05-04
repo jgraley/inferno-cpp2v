@@ -42,8 +42,11 @@ public:
     void InsertIntrinsic(FreeZone *zone);
     void DeleteIntrinsic(FreeZone *zone);
 
+private:
 	void InsertGeometricAction(const DBWalk::WalkInfo &walk_info);
     void DeleteGeometricAction(const DBWalk::WalkInfo &walk_info);
+
+public:
 	void InsertIntrinsicAction(const DBWalk::WalkInfo &walk_info);
 	void DeleteIntrinsicAction(const DBWalk::WalkInfo &walk_info);
         

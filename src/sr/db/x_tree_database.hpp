@@ -25,7 +25,7 @@ class XTreeZone;
 class XTreeDatabase : public Traceable
 {
 public:
-    XTreeDatabase( TreePtr<Node> main_root, shared_ptr<Lacing> lacing_, DomainExtension::ExtenderSet domain_extenders );
+    XTreeDatabase(shared_ptr<Lacing> lacing_, DomainExtension::ExtenderSet domain_extenders );
     
     // Update and access our trees. Some are created by the DB, others (the extra ones) are
     // allocated and freed here.
@@ -39,7 +39,7 @@ public:
                                      
     // Use both monolithic and incremental updates in order 
     // to build full db during analysis stage
-    void InitialBuild();
+    void InitialBuild(TreePtr<Node> main_root);
     
     // Incremental strategy: perform updates on zones
     void MainTreeExchange( MutableTreeZone *target_tree_zone, FreeZone *free_zone, vector<MutableTreeZone *> fixups );

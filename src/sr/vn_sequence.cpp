@@ -7,10 +7,6 @@
 
 using namespace SR;
 
-
-// Make trace easier to follow
-//#define X_TREE_DB_EACH_STEP
-
 VNSequence::VNSequence( const vector< shared_ptr<VNStep> > &sequence ) :
     steps( sequence )
 {
@@ -62,10 +58,10 @@ void VNSequence::PlanningStageFour()
         {
             sub_exprs.insert(sub_expr);
         } );
-       }
+    }
        
-       // Use thes eto establish the lacing
-       lacing = make_shared<Lacing>();
+    // Use thes eto establish the lacing
+    lacing = make_shared<Lacing>();
     lacing->Build( sub_exprs );   
     
     // ...and to set up the domain extension channels (actioned in analysis stage)
@@ -93,20 +89,14 @@ void VNSequence::SetStopAfter( int step_index, vector<int> ssa, int d )
 
 void VNSequence::AnalysisStage( TreePtr<Node> root )
 {        
-    x_tree_db = make_shared<XTreeDatabase>(root, lacing, domain_extenders);
-    ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");    
-    
-#ifndef X_TREE_DB_EACH_STEP
-    x_tree_db->InitialBuild();
-#endif            
+    x_tree_db = make_shared<XTreeDatabase>(lacing, domain_extenders);
+    x_tree_db->InitialBuild(root);
 }
 
 
 TreePtr<Node> VNSequence::TransformStep( int step_index )
 {           
-#ifdef X_TREE_DB_EACH_STEP
-    x_tree_db->InitialBuild();
-#endif        
+    ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");         
 
     steps[step_index]->SetXTreeDb( x_tree_db );
     steps[step_index]->Transform();

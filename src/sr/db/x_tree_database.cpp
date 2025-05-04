@@ -16,7 +16,7 @@ using namespace SR;
 //   when testing the test
 //#define DB_TEST_THE_TEST
 
-XTreeDatabase::XTreeDatabase( TreePtr<Node> main_root, shared_ptr<Lacing> lacing_, DomainExtension::ExtenderSet domain_extenders ) :
+XTreeDatabase::XTreeDatabase( shared_ptr<Lacing> lacing_, DomainExtension::ExtenderSet domain_extenders ) :
     lacing( lacing_ ),
     domain( make_shared<Domain>() ),
     link_table( make_shared<LinkTable>() ),
@@ -24,13 +24,6 @@ XTreeDatabase::XTreeDatabase( TreePtr<Node> main_root, shared_ptr<Lacing> lacing
     orderings( make_shared<Orderings>(lacing, this) ),
     domain_extension( make_shared<DomainExtension>(this, domain_extenders) )
 {
-    auto sp_main_root = make_shared<TreePtr<Node>>(main_root);
-    XLink main_root_xlink = XLink::CreateFrom(sp_main_root);    
-
-    ASSERT( main_root_xlink );
-    trees_by_ordinal[DBCommon::TreeOrdinal::MAIN] = {sp_main_root};
-    next_tree_ordinal = DBCommon::TreeOrdinal::EXTRAS;
-
     auto create_extra_tree = [=](TreePtr<Node> root_node) -> DBCommon::TreeOrdinal
     {   
         DBCommon::TreeOrdinal tree_ordinal = AllocateExtraTree(root_node);
@@ -108,24 +101,31 @@ void XTreeDatabase::WalkAllTrees(const DBWalk::Actions *actions,
 }
                                  
 
-void XTreeDatabase::InitialBuild()
+void XTreeDatabase::InitialBuild(TreePtr<Node> main_root)
 {      
     INDENT("=i");
-    
-    TRACE("Walk for domain, tables, orderings\n");
+
+	auto main_free_zone = FreeZone::CreateSubtree(main_root);
+	orderings->InsertIntrinsic(main_free_zone.get());   
+
+
+	// Make main tree using FZ, and provide a TZ TODO pop out into eg MainTreeInstallAtrRoot(), asserting no terminii
+    auto sp_main_root = make_shared<TreePtr<Node>>(main_free_zone->GetBaseNode());
+    trees_by_ordinal[DBCommon::TreeOrdinal::MAIN] = {sp_main_root};
+    next_tree_ordinal = DBCommon::TreeOrdinal::EXTRAS;
+    XLink main_root_xlink = GetRootXLink(DBCommon::TreeOrdinal::MAIN);
+    ASSERT( main_root_xlink );
+	auto main_tree_zone = XTreeZone::CreateSubtree(main_root_xlink);
+
+    TRACE("Walks for domain, tables, intrinsic orderings\n");
     DBWalk::Actions actions;
     actions.push_back( bind(&Domain::InsertGeometricAction, domain.get(), placeholders::_1) );
     actions.push_back( bind(&LinkTable::InsertGeometricAction, link_table.get(), placeholders::_1) );
     actions.push_back( bind(&NodeTable::InsertGeometricAction, node_table.get(), placeholders::_1) );
-    actions.push_back( bind(&Orderings::InsertGeometricAction, orderings.get(), placeholders::_1) );
-    actions.push_back( bind(&Orderings::InsertIntrinsicAction, orderings.get(), placeholders::_1) );    
+	db_walker.WalkTreeZone( &actions, main_tree_zone.get(), DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_IN, DBCommon::GetRootCoreInfo() );    	
 
-    for( auto p : trees_by_ordinal )
-    {
-	    XLink root_xlink = GetRootXLink(p.first);
-		auto tree_as_zone = XTreeZone::CreateSubtree(root_xlink);
-		db_walker.WalkTreeZone( &actions, tree_as_zone.get(), p.first, DBWalk::WIND_IN, DBCommon::GetRootCoreInfo() );    
-	}
+    TRACE("Walks for geometric: orderings\n");
+	orderings->MainTreeInsertGeometric(main_tree_zone.get(), DBCommon::GetRootCoreInfo());   
 
     TRACE("Domain extension init\n");
     domain_extension->InitialBuild();    
@@ -534,8 +534,14 @@ void XTreeDatabase::CheckGeometric()
     // Orderings have deps on LinkTable for finding parent
     TRACE("Making reference orderings for checks\n");
     auto ref_orderings = make_shared<Orderings>(lacing, this);
-    DBWalk::Actions actions2 { bind(&Orderings::InsertGeometricAction, ref_orderings.get(), placeholders::_1) };
-    WalkAllTrees( &actions2, DBWalk::WIND_IN );
+    
+    for( auto p : trees_by_ordinal )
+	{
+	    XLink root_xlink = GetRootXLink(p.first);
+		auto tree_as_zone = XTreeZone::CreateSubtree(root_xlink);
+		orderings->MainTreeInsertGeometric(tree_as_zone.get(), DBCommon::GetRootCoreInfo());
+	}   
+    
     TRACE("Checking\n");
     Orderings::CheckEqual(ref_orderings, orderings, false);
 
