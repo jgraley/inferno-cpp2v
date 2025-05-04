@@ -23,6 +23,8 @@ namespace SR
  * nodes that are present in free zones in the layout. So we need to do this
  * before adding the free zones to the intrinsic DB otherwise they could be
  * added and then deleted again.
+ * 
+ * OBSOLETE - we now delete intrisic DB info as a post-pass after inversion
  */
 class ComplementPass
 {

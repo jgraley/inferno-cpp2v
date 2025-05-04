@@ -226,19 +226,6 @@ void XTreeDatabase::InsertIntrinsic(FreeZone *zone)
 }
 
 
-void XTreeDatabase::MainTreeDeleteIntrinsic( TreeZone *zone )
-{
-    INDENT("-i");
-    ASSERT( extra_tree_destroy_queue.empty() );
-    const DBCommon::CoreInfo base_info = link_table->GetCoreInfo( zone->GetBaseXLink() );
-    
-    TRACE("Walk for intrinsic orderings\n");
-    DBWalk::Actions actions;
-    actions.push_back( bind(&Orderings::DeleteIntrinsicAction, orderings.get(), placeholders::_1) ); 
-    db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_OUT, &base_info );   
-}
-
-
 void XTreeDatabase::DeleteIntrinsic( FreeZone *zone )
 {
     INDENT("-i");

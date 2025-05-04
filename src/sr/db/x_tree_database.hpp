@@ -48,7 +48,6 @@ public:
     void MainTreeDeleteGeometric(TreeZone *zone, const DBCommon::CoreInfo *base_info);
 
     void InsertIntrinsic(FreeZone *zone);
-    void MainTreeDeleteIntrinsic(TreeZone *zone);
     void DeleteIntrinsic(FreeZone *zone);
 
     void PerformQueuedExtraTreeActions();
