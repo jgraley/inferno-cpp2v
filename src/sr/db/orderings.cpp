@@ -71,11 +71,11 @@ void Orderings::DeleteGeometric(const DBWalk::WalkInfo &walk_info)
 		NodeTable::Row row = db->GetNodeRow(walk_info.node); 
 		ASSERT( row.incoming_xlinks.count(walk_info.xlink)==1 );
 		
-		// Track the xlinks we've reached for each node
-		xlinks_reached_for_node[walk_info.node].insert(walk_info.xlink);        
+		// Track the number of times we've reached each node in current zone
+		node_reached_count[walk_info.node]++;     
 
 		// Only remove if this was the last incoming XLink to the node
-		if( xlinks_reached_for_node.at(walk_info.node) == row.incoming_xlinks ) // TODO merge these ifs
+		if( node_reached_count.at(walk_info.node) == row.incoming_xlinks.size() ) 
 			EraseSolo( simple_compare_ordering, walk_info.node );               
 	} 
 	
@@ -95,7 +95,9 @@ void Orderings::DeleteGeometric(const DBWalk::WalkInfo &walk_info)
 	}
 	
 	if( walk_info.at_base )
-		xlinks_reached_for_node.clear(); // clear at end of wind-out walk
+	{
+		node_reached_count.clear();
+	}
 }
 
         
@@ -108,7 +110,7 @@ void Orderings::InsertIntrinsic(const DBWalk::WalkInfo &walk_info)
 	if( !walk_info.at_terminus )
 	{        
 		// Only if not already
-		if( category_ordering.count(walk_info.node)==0 )
+		if( category_ordering.count(walk_info.node)==0 )		
 			InsertSolo( category_ordering, walk_info.node );            
 	}
 }
@@ -124,16 +126,18 @@ void Orderings::DeleteIntrinsic(const DBWalk::WalkInfo &walk_info)
 		NodeTable::Row row = db->GetNodeRow(walk_info.node); 
 		ASSERT( row.incoming_xlinks.count(walk_info.xlink)==1 );
 		
-		// Track the xlinks we've reached for each node
-		xlinks_reached_for_node[walk_info.node].insert(walk_info.xlink);        
+		// Track the number of times we've reached each node in current zone
+		node_reached_count[walk_info.node]++;     
 
 		// Only remove if this was the last incoming XLink to the node
-		if( xlinks_reached_for_node.at(walk_info.node) == row.incoming_xlinks )
+		if( node_reached_count.at(walk_info.node) == row.incoming_xlinks.size() ) 
 			EraseSolo( category_ordering, walk_info.node );                   
 	} 
 	
 	if( walk_info.at_base )
-		xlinks_reached_for_node.clear(); // clear at end of wind-out walk
+	{
+		node_reached_count.clear();
+	}
 }
 
         

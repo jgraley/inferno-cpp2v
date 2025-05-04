@@ -75,7 +75,9 @@ public:
 
 private:
     const XTreeDatabase *db;
-    map<TreePtr<Node>, set<XLink>> xlinks_reached_for_node;
+    
+    // Note: live across deleting walks
+    map<TreePtr<Node>, size_t> node_reached_count;    
 };    
     
 }

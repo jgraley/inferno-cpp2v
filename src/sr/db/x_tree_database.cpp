@@ -301,8 +301,10 @@ void XTreeDatabase::ExtraTreeDelete(DBCommon::TreeOrdinal tree_ordinal)
     DBWalk::Actions actions;
     actions.push_back( bind(&DomainExtension::DeleteGeometric, domain_extension.get(), placeholders::_1) );
     actions.push_back( bind(&Orderings::DeleteGeometric, orderings.get(), placeholders::_1) );
-    actions.push_back( bind(&Orderings::DeleteIntrinsic, orderings.get(), placeholders::_1) );
     db_walker.WalkTree( &actions, xlink, tree_ordinal, DBWalk::WIND_OUT );       
+    DBWalk::Actions actions3;
+    actions3.push_back( bind(&Orderings::DeleteIntrinsic, orderings.get(), placeholders::_1) );
+    db_walker.WalkTree( &actions3, xlink, tree_ordinal, DBWalk::WIND_OUT );       
 
     TRACE("Walk for domain, tables\n");
     DBWalk::Actions actions2;
