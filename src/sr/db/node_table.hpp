@@ -37,8 +37,8 @@ public:
     
     bool IsDeclarer(const DBWalk::WalkInfo &walk_info) const;
     
-	void InsertGeometric(const DBWalk::WalkInfo &walk_info);
-    void DeleteGeometric(const DBWalk::WalkInfo &walk_info);
+	void InsertGeometricAction(const DBWalk::WalkInfo &walk_info);
+    void DeleteGeometricAction(const DBWalk::WalkInfo &walk_info);
 
     vector<TreePtr<Node>> GetNodeDomainAsVector() const;
     

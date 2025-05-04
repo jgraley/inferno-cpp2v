@@ -71,8 +71,8 @@ public:
     void InitialBuild();
     void PostUpdateActions();
 
-	void InsertGeometric(const DBWalk::WalkInfo &walk_info);
-	void DeleteGeometric(const DBWalk::WalkInfo &walk_info);
+	void InsertGeometricAction(const DBWalk::WalkInfo &walk_info);
+	void DeleteGeometricAction(const DBWalk::WalkInfo &walk_info);
     
     void Validate() const;
     

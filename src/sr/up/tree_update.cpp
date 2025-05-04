@@ -17,8 +17,6 @@
 
 #include <iostream>
 
-#define IDELAFTERINV
-
 using namespace SR;
 
 
@@ -80,13 +78,7 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink origin_xlink, shared_p
     OrderingPass ordering_pass( db );
     ordering_pass.RunAnalysis(source_layout);
     ordering_pass.RunDuplicates(source_layout);
-	validate_zones.Run(source_layout);
-	
-#ifndef IDELAFTERINV
-    ComplementPass complement_pass( db );
-    complement_pass.Run(origin_mutator, source_layout);
-	validate_zones.Run(source_layout);
-#endif
+	validate_zones.Run(source_layout);	
 
     InsertIntrinsicPass insert_intrinsic_pass( db );
     insert_intrinsic_pass.Run(source_layout);
@@ -112,9 +104,7 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink origin_xlink, shared_p
 
     InversionPass inversion_pass( db ); 
     inversion_pass.RunInversion(origin_mutator, &source_layout);      
-#ifdef IDELAFTERINV
     inversion_pass.RunDeleteIntrinsic();
-#endif
    
     if( ReadArgs::test_db )
         db->CheckIntrinsic();

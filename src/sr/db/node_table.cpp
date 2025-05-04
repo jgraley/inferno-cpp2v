@@ -47,7 +47,7 @@ bool NodeTable::IsDeclarer(const DBWalk::WalkInfo &walk_info) const
 }
 
 
-void NodeTable::InsertGeometric(const DBWalk::WalkInfo &walk_info)
+void NodeTable::InsertGeometricAction(const DBWalk::WalkInfo &walk_info)
 {
 	// Create if not already there
 	Row &row = rows[walk_info.node];
@@ -58,7 +58,7 @@ void NodeTable::InsertGeometric(const DBWalk::WalkInfo &walk_info)
 }
 
 
-void NodeTable::DeleteGeometric(const DBWalk::WalkInfo &walk_info)
+void NodeTable::DeleteGeometricAction(const DBWalk::WalkInfo &walk_info)
 {
 	// Should already be there
 	Row &row = rows.at(walk_info.node);

@@ -20,8 +20,8 @@ class Domain
 public:
     Domain();
 
-	void DeleteGeometric(const DBWalk::WalkInfo &walk_info);
-	void InsertGeometric(const DBWalk::WalkInfo &walk_info);
+	void DeleteGeometricAction(const DBWalk::WalkInfo &walk_info);
+	void InsertGeometricAction(const DBWalk::WalkInfo &walk_info);
     
     static void CheckEqual( shared_ptr<Domain> l, shared_ptr<Domain> r );    
     

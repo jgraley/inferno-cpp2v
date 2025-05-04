@@ -10,6 +10,8 @@ using namespace SR;
 
 //#define TRACE_CATEGORY_RELATION
 
+#define SC_INTRINSIC
+
 Orderings::Orderings( shared_ptr<Lacing> lacing, const XTreeDatabase *db_ ) :
     plan( lacing ),
     depth_first_ordering( db_ ),
@@ -31,7 +33,7 @@ const Lacing *Orderings::GetLacing() const
 }
 
 	
-void Orderings::InsertGeometric(const DBWalk::WalkInfo &walk_info)
+void Orderings::InsertGeometricAction(const DBWalk::WalkInfo &walk_info)
 { 
 	InsertSolo( depth_first_ordering, walk_info.xlink );
 	
@@ -60,7 +62,7 @@ void Orderings::InsertGeometric(const DBWalk::WalkInfo &walk_info)
 }
 
 
-void Orderings::DeleteGeometric(const DBWalk::WalkInfo &walk_info)
+void Orderings::DeleteGeometricAction(const DBWalk::WalkInfo &walk_info)
 {		
 	EraseSolo( depth_first_ordering, walk_info.xlink );
 
@@ -101,7 +103,7 @@ void Orderings::DeleteGeometric(const DBWalk::WalkInfo &walk_info)
 }
 
         
-void Orderings::InsertIntrinsic(const DBWalk::WalkInfo &walk_info)
+void Orderings::InsertIntrinsicAction(const DBWalk::WalkInfo &walk_info)
 { 	
 	// Intrinsic orderings are keyed on nodes, and we don't need to update on the boundary layer
 	// We don't get an XLink for root because it's a free zone walk
@@ -116,7 +118,7 @@ void Orderings::InsertIntrinsic(const DBWalk::WalkInfo &walk_info)
 }
 
 
-void Orderings::DeleteIntrinsic(const DBWalk::WalkInfo &walk_info)
+void Orderings::DeleteIntrinsicAction(const DBWalk::WalkInfo &walk_info)
 {		
 	// Intrinsic orderings are keyed on nodes, and we don't need to update on the boundary layer
 	// We do get an XLink for all invocations because it's a tree zone walk

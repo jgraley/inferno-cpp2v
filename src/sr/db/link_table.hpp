@@ -44,8 +44,8 @@ public:
     
     const DBCommon::CoreInfo &GetCoreInfo(XLink xlink) const;
     
-	void InsertGeometric(const DBWalk::WalkInfo &walk_info);
-	void DeleteGeometric(const DBWalk::WalkInfo &walk_info);
+	void InsertGeometricAction(const DBWalk::WalkInfo &walk_info);
+	void DeleteGeometricAction(const DBWalk::WalkInfo &walk_info);
     
     void GenerateRow(const DBWalk::WalkInfo &walk_info);
     

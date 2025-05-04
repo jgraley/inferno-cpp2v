@@ -34,13 +34,13 @@ const DBCommon::CoreInfo &LinkTable::GetCoreInfo(XLink xlink) const
 }
  
  
-void LinkTable::InsertGeometric(const DBWalk::WalkInfo &walk_info)
+void LinkTable::InsertGeometricAction(const DBWalk::WalkInfo &walk_info)
 {
     GenerateRow(walk_info);
 }
 
 
-void LinkTable::DeleteGeometric(const DBWalk::WalkInfo &walk_info)
+void LinkTable::DeleteGeometricAction(const DBWalk::WalkInfo &walk_info)
 {
     EraseSolo( rows, walk_info.xlink );
     // Good practice to poison rows at terminii. Assuming walker tells us we're at a 
