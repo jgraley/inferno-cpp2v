@@ -90,7 +90,7 @@ void VNSequence::SetStopAfter( int step_index, vector<int> ssa, int d )
 void VNSequence::AnalysisStage( TreePtr<Node> root )
 {        
     x_tree_db = make_shared<XTreeDatabase>(lacing, domain_extenders);
-    x_tree_db->InitialBuild(root);
+    x_tree_db->MainTreeBuild(root);
 }
 
 

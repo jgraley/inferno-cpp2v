@@ -68,7 +68,7 @@ public:
     const DomainExtensionChannel *GetChannel( const Extender *extender ) const;
 
     // To be called after modifying the tree, and before any search/compare operation
-    void InitialBuild();
+    void MainTreeBuild();
     void PostUpdateActions();
 
 	void InsertGeometricAction(const DBWalk::WalkInfo &walk_info);
@@ -98,7 +98,7 @@ public:
     void CheckStimulusXLink( XLink stimulus_xlink );
     void DropStimulusXLink( XLink stimulus_xlink );
     void Validate() const;
-    void InitialBuild();
+    void MainTreeBuild();
     void PostUpdateActions();
 
     void Insert(const DBWalk::WalkInfo &walk_info);

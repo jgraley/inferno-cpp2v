@@ -45,11 +45,10 @@ public:
 private:
 	void InsertGeometricAction(const DBWalk::WalkInfo &walk_info);
     void DeleteGeometricAction(const DBWalk::WalkInfo &walk_info);
-
-public:
 	void InsertIntrinsicAction(const DBWalk::WalkInfo &walk_info);
 	void DeleteIntrinsicAction(const DBWalk::WalkInfo &walk_info);
-        
+
+public:        
     void Dump() const;
     void CheckRelations( const vector<XLink> &xlink_domain,  
                          const vector<TreePtr<Node>> &node_domain );

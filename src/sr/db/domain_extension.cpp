@@ -58,10 +58,10 @@ const DomainExtensionChannel *DomainExtension::GetChannel( const Extender *exten
 }
 
 
-void DomainExtension::InitialBuild()
+void DomainExtension::MainTreeBuild()
 {
     for( auto &p : channels )
-        p.second->InitialBuild();
+        p.second->MainTreeBuild();
 }
 
 
@@ -247,7 +247,7 @@ void DomainExtensionChannel::Validate() const
 
 
 
-void DomainExtensionChannel::InitialBuild()
+void DomainExtensionChannel::MainTreeBuild()
 {
     TRACE("Initial DE build for extender ")(*extender)("\n");
 

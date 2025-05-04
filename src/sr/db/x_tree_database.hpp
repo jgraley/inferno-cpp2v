@@ -29,7 +29,7 @@ public:
     
     // Update and access our trees. Some are created by the DB, others (the extra ones) are
     // allocated and freed here.
-    DBCommon::TreeOrdinal AllocateExtraTree(TreePtr<Node> root_node);
+    DBCommon::TreeOrdinal AllocateExtraTree();
     void FreeExtraTree(DBCommon::TreeOrdinal tree_ordinal);
     XLink GetRootXLink(DBCommon::TreeOrdinal tree_ordinal) const;
     vector<XLink> GetExtraRootXLinks() const;
@@ -39,7 +39,7 @@ public:
                                      
     // Use both monolithic and incremental updates in order 
     // to build full db during analysis stage
-    void InitialBuild(TreePtr<Node> main_root);
+    void MainTreeBuild(TreePtr<Node> main_root);
     
     // Incremental strategy: perform updates on zones
     void MainTreeExchange( MutableTreeZone *target_tree_zone, FreeZone *free_zone, vector<MutableTreeZone *> fixups );
@@ -51,11 +51,11 @@ public:
     void DeleteIntrinsic(FreeZone *zone);
 
     void PerformQueuedExtraTreeActions();
-    void ExtraTreeInsert(DBCommon::TreeOrdinal tree_ordinal);
-    void ExtraTreeDelete(DBCommon::TreeOrdinal tree_ordinal);
+    void ExtraTreeBuild(DBCommon::TreeOrdinal tree_ordinal, TreePtr<Node> root_node);
+    void ExtraTreeTeardown(DBCommon::TreeOrdinal tree_ordinal);
 
     const DomainExtensionChannel *GetDEChannel( const DomainExtension::Extender *extender ) const;
-       const Domain &GetDomain() const;
+    const Domain &GetDomain() const;
 
     const LinkTable &GetLinkTable() const;
     const LinkTable::Row &GetRow(XLink xlink) const;
@@ -102,7 +102,7 @@ private:
     DBWalk db_walker;
     DBCommon::TreeOrdinal next_tree_ordinal;
         
-    queue<DBCommon::TreeOrdinal> de_extra_insert_queue;
+    queue<DBCommon::NewTreeInfo> de_extra_insert_queue;
     queue<DBCommon::TreeOrdinal> extra_tree_destroy_queue;   
 };    
     

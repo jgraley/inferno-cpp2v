@@ -26,9 +26,10 @@ XTreeDatabase::XTreeDatabase( shared_ptr<Lacing> lacing_, DomainExtension::Exten
 {
     auto create_extra_tree = [=](TreePtr<Node> root_node) -> DBCommon::TreeOrdinal
     {   
-        DBCommon::TreeOrdinal tree_ordinal = AllocateExtraTree(root_node);
-        de_extra_insert_queue.push( tree_ordinal );       
-        return tree_ordinal;
+		// Allocate now so we can return the tree ordinal, but enqueue the rest
+        DBCommon::NewTreeInfo info = { AllocateExtraTree(), root_node };
+        de_extra_insert_queue.push( info );       
+        return info.ordinal;
     };
 
     auto destroy_extra_tree = [=](DBCommon::TreeOrdinal tree_ordinal)
@@ -41,10 +42,8 @@ XTreeDatabase::XTreeDatabase( shared_ptr<Lacing> lacing_, DomainExtension::Exten
 }
 
     
-DBCommon::TreeOrdinal XTreeDatabase::AllocateExtraTree(TreePtr<Node> root_node)
+DBCommon::TreeOrdinal XTreeDatabase::AllocateExtraTree()
 {
-    auto sp_root = make_shared<TreePtr<Node>>(root_node);
-    XLink root_xlink = XLink::CreateFrom(sp_root);    
     DBCommon::TreeOrdinal assigned_ordinal;
     if( free_tree_ordinals.empty() )
     {
@@ -56,7 +55,7 @@ DBCommon::TreeOrdinal XTreeDatabase::AllocateExtraTree(TreePtr<Node> root_node)
         assigned_ordinal = free_tree_ordinals.front();
         free_tree_ordinals.pop();
     }
-    trees_by_ordinal[assigned_ordinal] = {sp_root};
+
     return assigned_ordinal;
 }
 
@@ -101,13 +100,13 @@ void XTreeDatabase::WalkAllTrees(const DBWalk::Actions *actions,
 }
                                  
 
-void XTreeDatabase::InitialBuild(TreePtr<Node> main_root)
+void XTreeDatabase::MainTreeBuild(TreePtr<Node> main_root)
 {      
     INDENT("=i");
 
+    TRACE("Walk for intrinsic: orderings\n");
 	auto main_free_zone = FreeZone::CreateSubtree(main_root);
 	orderings->InsertIntrinsic(main_free_zone.get());   
-
 
 	// Make main tree using FZ, and provide a TZ TODO pop out into eg MainTreeInstallAtrRoot(), asserting no terminii
     auto sp_main_root = make_shared<TreePtr<Node>>(main_free_zone->GetBaseNode());
@@ -117,25 +116,20 @@ void XTreeDatabase::InitialBuild(TreePtr<Node> main_root)
     ASSERT( main_root_xlink );
 	auto main_tree_zone = XTreeZone::CreateSubtree(main_root_xlink);
 
-    TRACE("Walks for domain, tables, intrinsic orderings\n");
+    TRACE("Walk for geometric: domain, tables\n");
     DBWalk::Actions actions;
     actions.push_back( bind(&Domain::InsertGeometricAction, domain.get(), placeholders::_1) );
     actions.push_back( bind(&LinkTable::InsertGeometricAction, link_table.get(), placeholders::_1) );
     actions.push_back( bind(&NodeTable::InsertGeometricAction, node_table.get(), placeholders::_1) );
 	db_walker.WalkTreeZone( &actions, main_tree_zone.get(), DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_IN, DBCommon::GetRootCoreInfo() );    	
 
-    TRACE("Walks for geometric: orderings\n");
+    TRACE("Walk for geometric: orderings\n");
 	orderings->MainTreeInsertGeometric(main_tree_zone.get(), DBCommon::GetRootCoreInfo());   
 
     TRACE("Domain extension init\n");
-    domain_extension->InitialBuild();    
-    while(!de_extra_insert_queue.empty())
-    {
-        ExtraTreeInsert( de_extra_insert_queue.front() );
-        de_extra_insert_queue.pop();
-    }    
-    
-
+    domain_extension->MainTreeBuild();    
+    PerformQueuedExtraTreeActions();
+        
     // ---------- Relation checks ------------
     orderings->CheckRelations( link_table->GetXLinkDomainAsVector(),
                                node_table->GetNodeDomainAsVector() );
@@ -243,23 +237,30 @@ void XTreeDatabase::PerformQueuedExtraTreeActions()
 
     while(!extra_tree_destroy_queue.empty())
     {
-        ExtraTreeDelete( extra_tree_destroy_queue.front() );
-        FreeExtraTree( extra_tree_destroy_queue.front() );
+        ExtraTreeTeardown( extra_tree_destroy_queue.front() );        
         
         extra_tree_destroy_queue.pop();
     }
     while(!de_extra_insert_queue.empty())
     {
-        ExtraTreeInsert( de_extra_insert_queue.front() );
+        ExtraTreeBuild( de_extra_insert_queue.front().ordinal, 
+						 de_extra_insert_queue.front().root_node );
         
         de_extra_insert_queue.pop();
     }
 }
 
 
-void XTreeDatabase::ExtraTreeInsert(DBCommon::TreeOrdinal tree_ordinal)
+void XTreeDatabase::ExtraTreeBuild(DBCommon::TreeOrdinal tree_ordinal, TreePtr<Node> root_node)
 {        
 	INDENT("+e");
+	
+	TRACE("Walk for intrinsic: orderings\n");
+	auto free_zone = FreeZone::CreateSubtree(root_node);
+	orderings->InsertIntrinsic(free_zone.get());   
+	
+    auto sp_root = make_shared<TreePtr<Node>>(root_node);
+    trees_by_ordinal[tree_ordinal] = {sp_root};	
     ASSERT( tree_ordinal >= DBCommon::TreeOrdinal::EXTRAS );
     XLink root_xlink = GetRootXLink(tree_ordinal);
     auto tree_as_zone = XTreeZone::CreateSubtree(root_xlink);
@@ -272,14 +273,9 @@ void XTreeDatabase::ExtraTreeInsert(DBCommon::TreeOrdinal tree_ordinal)
     actions.push_back( bind(&NodeTable::InsertGeometricAction, node_table.get(), placeholders::_1) );
     db_walker.WalkTreeZone( &actions, tree_as_zone.get(), tree_ordinal, DBWalk::WIND_IN, DBCommon::GetRootCoreInfo() );
 
-    TRACE("Walk for intrisic: orderings\n");
+    TRACE("Walk for geometric: orderings\n");
     orderings->MainTreeInsertGeometric(tree_as_zone.get(), DBCommon::GetRootCoreInfo());
-
-    TRACE("Walk for geometric and intrisic: orderings\n");
-    DBWalk::Actions actions3;
-    actions3.push_back( bind(&Orderings::InsertIntrinsicAction, orderings.get(), placeholders::_1) );
-    db_walker.WalkTreeZone( &actions3, tree_as_zone.get(), tree_ordinal, DBWalk::WIND_IN, DBCommon::GetRootCoreInfo() );
-
+    
     TRACE("Walk for geometric: domain extension\n");
     DBWalk::Actions actions2;
     actions2.push_back( bind(&DomainExtension::InsertGeometricAction, domain_extension.get(), placeholders::_1) );
@@ -287,7 +283,7 @@ void XTreeDatabase::ExtraTreeInsert(DBCommon::TreeOrdinal tree_ordinal)
 }
 
 
-void XTreeDatabase::ExtraTreeDelete(DBCommon::TreeOrdinal tree_ordinal)
+void XTreeDatabase::ExtraTreeTeardown(DBCommon::TreeOrdinal tree_ordinal)
 {        
 	INDENT("-e");
     ASSERT( tree_ordinal >= DBCommon::TreeOrdinal::EXTRAS );
@@ -314,11 +310,12 @@ void XTreeDatabase::ExtraTreeDelete(DBCommon::TreeOrdinal tree_ordinal)
     actions2.push_back( bind(&Domain::DeleteGeometricAction, domain.get(), placeholders::_1) );
     db_walker.WalkTreeZone( &actions2, tree_as_zone.get(), tree_ordinal, DBWalk::WIND_OUT, DBCommon::GetRootCoreInfo() );       
 
+	auto free_zone = FreeZone::CreateSubtree(tree_as_zone->GetBaseNode());
+	FreeExtraTree( tree_ordinal );
+	
 	// Pulled out to end because intrinsic delete are now done after all geoms
     TRACE("Walk for intrinsic: orderings\n");
-    DBWalk::Actions actions3;
-    actions3.push_back( bind(&Orderings::DeleteIntrinsicAction, orderings.get(), placeholders::_1) );
-    db_walker.WalkTreeZone( &actions3, tree_as_zone.get(), tree_ordinal, DBWalk::WIND_OUT, DBCommon::GetRootCoreInfo() );       
+	orderings->DeleteIntrinsic(free_zone.get());   
 }
 
 
@@ -561,8 +558,15 @@ void XTreeDatabase::CheckIntrinsic()
     // Orderings have deps on LinkTable for finding parent
     TRACE("Making reference orderings for checks\n");
     auto ref_orderings = make_shared<Orderings>(lacing, this);
-    DBWalk::Actions actions2 { bind(&Orderings::InsertIntrinsicAction, ref_orderings.get(), placeholders::_1) };
-    WalkAllTrees( &actions2, DBWalk::WIND_IN );
+ 
+    for( auto p : trees_by_ordinal )
+	{
+	    XLink root_xlink = GetRootXLink(p.first);
+		auto tree_as_zone = XTreeZone::CreateSubtree(root_xlink);
+		auto free_zone = FreeZone::CreateSubtree(tree_as_zone->GetBaseNode());
+		orderings->InsertIntrinsic(free_zone.get());
+	}   
+ 
     TRACE("Checking\n");
     Orderings::CheckEqual(ref_orderings, orderings, true);
 

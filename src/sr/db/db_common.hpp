@@ -32,7 +32,13 @@ public:
         FREE_BASE
     };
     
-       // This structure is embedded inside our DBWalk::WalkInfo, and in LinkTable::Row.
+    struct NewTreeInfo
+    {
+		TreeOrdinal ordinal; // says which tree
+		TreePtr<Node> root_node; // root of the new tree
+	};
+    
+    // This structure is embedded inside our DBWalk::WalkInfo, and in LinkTable::Row.
     // We can fill it in successfully for all nodes only if walking from 
     // the true root of a tree. If we need to walk a subtree, we need to
     // be "booted" by receiving a copy if this info. We get that from the 
