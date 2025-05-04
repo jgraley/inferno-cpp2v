@@ -510,6 +510,10 @@ void OrderingPass::MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch, sha
 	auto free_zone = FreeZone::CreateScaffold( target_tree_zone->GetBaseMutator().GetTreePtrInterface(), 
 											   target_tree_zone->GetNumTerminii() );
     
+    // Add the scaffold to intrinsic db info to maintain invariant rule
+    db->InsertIntrinsic( free_zone.get() );
+    
+    // Determine the fix-ups we'll need to do for tree zones in neighbouring patches
     vector<MutableTreeZone *> fixups;	
     for( size_t i=0; i<target_tree_zone->GetNumTerminii(); i++ )
 	{

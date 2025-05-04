@@ -22,7 +22,8 @@ class InversionPass
 public:
     InversionPass( XTreeDatabase *db );
     
-    void Run(const Mutator &origin_mutator, shared_ptr<Patch> *source_layout_ptr);
+    void RunInversion(const Mutator &origin_mutator, shared_ptr<Patch> *source_layout_ptr);
+    void RunDeleteIntrinsic();
     
 private:
     // .first is NULL: base not known
@@ -32,6 +33,8 @@ private:
     void Invert(LocatedPatch lzfe);
 
     XTreeDatabase * const db;
+    
+    vector<FreeZone> extracted_free_zones;
 };
 
 }

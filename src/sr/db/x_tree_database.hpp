@@ -49,6 +49,7 @@ public:
 
     void InsertIntrinsic(FreeZone *zone);
     void MainTreeDeleteIntrinsic(TreeZone *zone);
+    void DeleteIntrinsic(FreeZone *zone);
 
     void PerformQueuedExtraTreeActions();
     void ExtraTreeInsert(DBCommon::TreeOrdinal tree_ordinal);

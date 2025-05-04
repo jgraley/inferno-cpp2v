@@ -50,7 +50,7 @@ template< typename S >
 inline void EraseSolo( S &s, const typename S::key_type &p )
 {
     size_t n = s.erase( p );
-    ASSERT( n==1 )("Unexpectedly erased %u elements", n);
+    ASSERT( n==1 )("Unexpectedly erased %u elements matching ", n)(p)(" from ")(s);
 }
 
 

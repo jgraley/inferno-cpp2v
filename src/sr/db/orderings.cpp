@@ -123,15 +123,12 @@ void Orderings::DeleteIntrinsic(const DBWalk::WalkInfo &walk_info)
 	if( !walk_info.at_terminus )
 	{
 		// Node table hasn't been updated yet, so node should be in there.
-		NodeTable::Row row = db->GetNodeRow(walk_info.node); 
-		ASSERT( row.incoming_xlinks.count(walk_info.xlink)==1 );
-		
-		// Track the number of times we've reached each node in current zone
-		node_reached_count[walk_info.node]++;     
-
-		// Only remove if this was the last incoming XLink to the node
-		if( node_reached_count.at(walk_info.node) == row.incoming_xlinks.size() ) 
-			EraseSolo( category_ordering, walk_info.node );                   
+		NodeTable::Row row;
+		if( !db->HasNodeRow(walk_info.node) &&  // Node must have been removed from node table
+		    node_reached_count[walk_info.node]++ == 0) // Must only delete once so do it on first reaching
+		{
+			EraseSolo( category_ordering, walk_info.node );   
+		}
 	} 
 	
 	if( walk_info.at_base )

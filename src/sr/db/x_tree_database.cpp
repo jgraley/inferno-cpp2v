@@ -173,21 +173,21 @@ void XTreeDatabase::MainTreeInsertGeometric(TreeZone *zone, const DBCommon::Core
     INDENT("+g");
     ASSERT( de_extra_insert_queue.empty() );
 
-    TRACE("Walk for domain, tables\n");
+    TRACE("Walk for geometric: domain, tables\n");
     DBWalk::Actions actions;
     actions.push_back( bind(&Domain::InsertGeometric, domain.get(), placeholders::_1) );
     actions.push_back( bind(&LinkTable::InsertGeometric, link_table.get(), placeholders::_1) );
     actions.push_back( bind(&NodeTable::InsertGeometric, node_table.get(), placeholders::_1) );
     db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_IN, base_info );
 
-    TRACE("Walk for orderings\n");
+    TRACE("Walk for geometric: orderings\n");
     DBWalk::Actions actions3;
     actions3.push_back( bind(&Orderings::InsertGeometric, orderings.get(), placeholders::_1) );
     db_walker.WalkTreeZone( &actions3, zone, DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_IN, base_info );
     
     // Domain extension wants to roam around the XTree, consulting
     // parents, children, anything really. So we need a separate pass.
-    TRACE("Walk for domain extension\n");
+    TRACE("Walk for geometric: domain extension\n");
     DBWalk::Actions actions2;
     actions2.push_back( bind(&DomainExtension::InsertGeometric, domain_extension.get(), placeholders::_1) );
     db_walker.WalkTreeZone( &actions2, zone, DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_IN, base_info );
@@ -199,13 +199,13 @@ void XTreeDatabase::MainTreeDeleteGeometric(TreeZone *zone, const DBCommon::Core
     INDENT("-g");
     ASSERT( extra_tree_destroy_queue.empty() );
     
-    TRACE("Walk for orderings, domain extension\n");
+    TRACE("Walk for geometric: orderings, domain extension\n");
     DBWalk::Actions actions;
     actions.push_back( bind(&DomainExtension::DeleteGeometric, domain_extension.get(), placeholders::_1) );
     actions.push_back( bind(&Orderings::DeleteGeometric, orderings.get(), placeholders::_1) ); 
     db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_OUT, base_info );   
 
-    TRACE("Walk for domain, tables\n");
+    TRACE("Walk for geometric: domain, tables\n");
     DBWalk::Actions actions2;
     actions2.push_back( bind(&NodeTable::DeleteGeometric, node_table.get(), placeholders::_1) );
     actions2.push_back( bind(&LinkTable::DeleteGeometric, link_table.get(), placeholders::_1) );
@@ -219,7 +219,7 @@ void XTreeDatabase::InsertIntrinsic(FreeZone *zone)
     INDENT("+i");
     ASSERT( de_extra_insert_queue.empty() );
 
-    TRACE("Walk for orderings\n");
+    TRACE("Walk for intrinsic: orderings\n");
     DBWalk::Actions actions;
     actions.push_back( bind(&Orderings::InsertIntrinsic, orderings.get(), placeholders::_1) );
     db_walker.WalkFreeZone( &actions, zone, DBWalk::WIND_IN );
@@ -232,10 +232,22 @@ void XTreeDatabase::MainTreeDeleteIntrinsic( TreeZone *zone )
     ASSERT( extra_tree_destroy_queue.empty() );
     const DBCommon::CoreInfo base_info = link_table->GetCoreInfo( zone->GetBaseXLink() );
     
-    TRACE("Walk for orderings\n");
+    TRACE("Walk for intrinsic orderings\n");
     DBWalk::Actions actions;
     actions.push_back( bind(&Orderings::DeleteIntrinsic, orderings.get(), placeholders::_1) ); 
     db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_OUT, &base_info );   
+}
+
+
+void XTreeDatabase::DeleteIntrinsic( FreeZone *zone )
+{
+    INDENT("-i");
+    ASSERT( extra_tree_destroy_queue.empty() );
+    
+    TRACE("Walk for intrinsic: orderings\n");
+    DBWalk::Actions actions;
+    actions.push_back( bind(&Orderings::DeleteIntrinsic, orderings.get(), placeholders::_1) ); 
+    db_walker.WalkFreeZone( &actions, zone, DBWalk::WIND_OUT );   
 }
 
 
@@ -266,20 +278,20 @@ void XTreeDatabase::ExtraTreeInsert(DBCommon::TreeOrdinal tree_ordinal)
     XLink xlink = GetRootXLink(tree_ordinal);
 	TRACE("Tree ordinal: %d root: ", tree_ordinal)(xlink)("\n");
     
-    TRACE("Walk for domain, tables\n");
+    TRACE("Walk for geometric: domain, tables\n");
     DBWalk::Actions actions;
     actions.push_back( bind(&Domain::InsertGeometric, domain.get(), placeholders::_1) );
     actions.push_back( bind(&LinkTable::InsertGeometric, link_table.get(), placeholders::_1) );
     actions.push_back( bind(&NodeTable::InsertGeometric, node_table.get(), placeholders::_1) );
     db_walker.WalkTree( &actions, xlink, tree_ordinal, DBWalk::WIND_IN );
 
-    TRACE("Walk for orderings\n");
+    TRACE("Walk for geometric and intrisic: orderings\n");
     DBWalk::Actions actions3;
     actions3.push_back( bind(&Orderings::InsertGeometric, orderings.get(), placeholders::_1) );
     actions3.push_back( bind(&Orderings::InsertIntrinsic, orderings.get(), placeholders::_1) );
     db_walker.WalkTree( &actions3, xlink, tree_ordinal, DBWalk::WIND_IN );
 
-    TRACE("Walk for domain extension\n");
+    TRACE("Walk for geometric: domain extension\n");
     DBWalk::Actions actions2;
     actions2.push_back( bind(&DomainExtension::InsertGeometric, domain_extension.get(), placeholders::_1) );
     db_walker.WalkTree( &actions2, xlink, tree_ordinal, DBWalk::WIND_IN );
@@ -297,21 +309,24 @@ void XTreeDatabase::ExtraTreeDelete(DBCommon::TreeOrdinal tree_ordinal)
     // will be invoked with every xlink in the extra
     // zones and on each call we delete just that
     // xlink.
-    TRACE("Walk for orderings, domain extension\n");
+    TRACE("Walk for geometric: orderings, domain extension\n");
     DBWalk::Actions actions;
     actions.push_back( bind(&DomainExtension::DeleteGeometric, domain_extension.get(), placeholders::_1) );
     actions.push_back( bind(&Orderings::DeleteGeometric, orderings.get(), placeholders::_1) );
     db_walker.WalkTree( &actions, xlink, tree_ordinal, DBWalk::WIND_OUT );       
-    DBWalk::Actions actions3;
-    actions3.push_back( bind(&Orderings::DeleteIntrinsic, orderings.get(), placeholders::_1) );
-    db_walker.WalkTree( &actions3, xlink, tree_ordinal, DBWalk::WIND_OUT );       
 
-    TRACE("Walk for domain, tables\n");
+    TRACE("Walk for geometric: domain, tables\n");
     DBWalk::Actions actions2;
     actions2.push_back( bind(&NodeTable::DeleteGeometric, node_table.get(), placeholders::_1) );
     actions2.push_back( bind(&LinkTable::DeleteGeometric, link_table.get(), placeholders::_1) );
     actions2.push_back( bind(&Domain::DeleteGeometric, domain.get(), placeholders::_1) );
     db_walker.WalkTree( &actions2, xlink, tree_ordinal, DBWalk::WIND_OUT );       
+
+	// Pulled out to end because intrinsic delete are now done after all geoms
+    TRACE("Walk for intrinsic: orderings\n");
+    DBWalk::Actions actions3;
+    actions3.push_back( bind(&Orderings::DeleteIntrinsic, orderings.get(), placeholders::_1) );
+    db_walker.WalkTree( &actions3, xlink, tree_ordinal, DBWalk::WIND_OUT );       
 }
 
 

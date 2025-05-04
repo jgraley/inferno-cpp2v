@@ -19,7 +19,7 @@ InversionPass::InversionPass( XTreeDatabase *db_ ) :
 }
 
 
-void InversionPass::Run(const Mutator &origin_mutator, shared_ptr<Patch> *source_layout_ptr)
+void InversionPass::RunInversion(const Mutator &origin_mutator, shared_ptr<Patch> *source_layout_ptr)
 {
 	INDENT("I");
     LocatedPatch base_lze( origin_mutator, source_layout_ptr );
@@ -107,5 +107,18 @@ void InversionPass::Invert( LocatedPatch lze )
     FreeZone free_zone = *free_patch->GetZone();
     
     // Write it into the tree
-    db->MainTreeExchange( &target_tree_zone, &free_zone, fixups );              
+    db->MainTreeExchange( &target_tree_zone, &free_zone, fixups );   
+    
+    // Remember the extracted free zone (material that was in the inverted tree zones) for intrinsic deletes
+    extracted_free_zones.push_back( move(free_zone) );        
+}
+
+
+void InversionPass::RunDeleteIntrinsic()
+{
+	INDENT("V");
+	for( FreeZone &free_zone : extracted_free_zones )
+	{
+		db->DeleteIntrinsic( &free_zone );
+	}
 }
