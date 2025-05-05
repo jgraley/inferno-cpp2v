@@ -35,6 +35,7 @@ public:
     bool IsEmpty() const override;
     ContainerInterface *TryGetContainerBase() const;
     size_t GetNumTerminii() const override;
+    const Mutator &GetTerminusMutator(size_t index) const;	
     TreePtr<Node> GetBaseNode() const override;
     void SetBase( TreePtr<Node> base );
     

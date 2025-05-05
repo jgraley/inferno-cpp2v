@@ -35,6 +35,8 @@ const Lacing *Orderings::GetLacing() const
 	
 void Orderings::MainTreeInsertGeometric(TreeZone *zone, const DBCommon::CoreInfo *base_info)
 {     
+	node_reached_count.clear();
+
     DBWalk::Actions actions;
     actions.push_back( bind(&Orderings::InsertGeometricAction, this, placeholders::_1) );
     db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_IN, base_info );
@@ -44,13 +46,18 @@ void Orderings::MainTreeInsertGeometric(TreeZone *zone, const DBCommon::CoreInfo
 	// sufficient: what is ancestor of base is ancestor of every node in
 	// the zone. If we act at root, there won't be any.
 #ifdef SC_INTRINSIC
-	set<XLink> invalidated_xlinks = GetTerminusAndBaseAncestors(zone);
+	set<XLink> invalidated_xlinks = GetTerminusAndBaseAncestors(*zone);
 	for( XLink x : invalidated_xlinks )
 #else
 	XLink x = zone->GetBaseXLink();
 	while( x = db->TryGetParentXLink(x) )
 #endif	
 	{
+#ifdef SC_INTRINSIC
+		// If it's in at this point it came from instrinsic and will be wrong due to placeholders
+		if( simple_compare_ordering.count(x.GetChildTreePtr())!=0 )
+			EraseSolo( simple_compare_ordering, x.GetChildTreePtr() );                            
+#endif
 		// Assume there is only one incoming XLink to the node because not a leaf
 		InsertSolo( simple_compare_ordering, x.GetChildTreePtr() );                              
 	}
@@ -70,7 +77,7 @@ void Orderings::MainTreeDeleteGeometric(TreeZone *zone, const DBCommon::CoreInfo
 	// sufficient: what is ancestor of base is ancestor of every node in
 	// the zone. If we act at root, there won't be any.
 #ifdef SC_INTRINSIC
-	set<XLink> invalidated_xlinks = GetTerminusAndBaseAncestors(zone);
+	set<XLink> invalidated_xlinks = GetTerminusAndBaseAncestors(*zone);
 	for( XLink x : invalidated_xlinks )
 #else
 	XLink x = zone->GetBaseXLink();
@@ -85,9 +92,11 @@ void Orderings::MainTreeDeleteGeometric(TreeZone *zone, const DBCommon::CoreInfo
 
 void Orderings::InsertIntrinsic(FreeZone *zone)
 {
+	node_reached_count.clear();
+
     DBWalk::Actions actions;
     actions.push_back( bind(&Orderings::InsertIntrinsicAction, this, placeholders::_1) );
-    db_walker.WalkFreeZone( &actions, zone, DBWalk::WIND_IN );
+    db_walker.WalkFreeZone( &actions, zone, DBWalk::WIND_OUT );
 }
 
 
@@ -144,17 +153,29 @@ void Orderings::InsertIntrinsicAction(const DBWalk::WalkInfo &walk_info)
 { 	
 	// Intrinsic orderings are keyed on nodes, and we don't need to update on the boundary layer
 	// We don't get an XLink for root because it's a free zone walk
-	// We also don't get called on terminii so at_terminus is always false, but
-	// keeping the if for clarity
+	// We also don't get called on terminii so at_terminus is always false
 
+	// Restrict to one reaching for the zone TODO could walk do this?
+	if( node_reached_count[walk_info.node]++ > 0 )
+		return;
+
+    // Identifiers duplicate to themselves and therefore old ones can end up in the "new" FZs.
+    // Detect this by looking at current DB
+	if( db->HasNodeRow(walk_info.node) ) // TODO use domain for clarity
+		return; 
+
+	// Moreover, the same identifier can appear more than once in the layout's new FZs. 
+	// Deal with this by checking our own ordering.
+	if( category_ordering.count(walk_info.node) > 0 )
+		return; 
+		
 	// Only if not already
-	if( category_ordering.count(walk_info.node)==0 )		
-		InsertSolo( category_ordering, walk_info.node );            	
+	InsertSolo( category_ordering, walk_info.node );            	
 
 #ifdef SC_INTRINSIC
 	// Intrinsic orderings are keyed on nodes, and we don't need to update on the boundary layer
 	// Only if not already
-	if( simple_compare_ordering.count(walk_info.node)==0 )
+    if( !walk_info.ancestor_of_terminus )
 		InsertSolo( simple_compare_ordering, walk_info.node );               
 #endif		
 }
@@ -163,25 +184,23 @@ void Orderings::InsertIntrinsicAction(const DBWalk::WalkInfo &walk_info)
 void Orderings::DeleteIntrinsicAction(const DBWalk::WalkInfo &walk_info)
 {		
 	// Intrinsic orderings are keyed on nodes, and we don't need to update on the boundary layer
-	// We do get an XLink for all invocations because it's a tree zone walk
+	// We don't get an XLink for root because it's a free zone walk
+	// We also don't get called on terminii so at_terminus is always false
 
-	NodeTable::Row row;
-	if( !db->HasNodeRow(walk_info.node) &&  // Node must have been removed from node table
-	    node_reached_count[walk_info.node] == 0) // Must only delete once so do it on first reaching
-	{
-		EraseSolo( category_ordering, walk_info.node );   
-	}
+	// Restrict to one reaching for the zone TODO could walk do this?
+	if( node_reached_count[walk_info.node]++ > 0 )
+		return;
+
+    // Node must have been removed from the current db
+	if( db->HasNodeRow(walk_info.node) ) // TODO use domain for clarity
+		return; 
+		
+	EraseSolo( category_ordering, walk_info.node );   
 	
 #ifdef SC_INTRINSIC
-	if( !db->HasNodeRow(walk_info.node) &&  // Node must have been removed from node table
-	    node_reached_count[walk_info.node] == 0) // Must only delete once so do it on first reaching
-	{
-		if( simple_compare_ordering.count(walk_info.node)!=0 ) // Some were removed during geometric
-			EraseSolo( simple_compare_ordering, walk_info.node );               
-	}	 
+	if( !walk_info.ancestor_of_terminus ) 
+		EraseSolo( simple_compare_ordering, walk_info.node );               	 
 #endif		
-
-	node_reached_count[walk_info.node]++;
 }
 
 
@@ -259,10 +278,10 @@ void Orderings::CheckEqual( shared_ptr<Orderings> l, shared_ptr<Orderings> r, bo
 	if( intrinsic )
 	{
 		CheckEqualOrdering( "CAT", l->category_ordering, r->category_ordering );
+		CheckEqualOrdering( "SC", l->simple_compare_ordering, r->simple_compare_ordering );
 	}
 	else
 	{
 		CheckEqualOrdering( "DF", l->depth_first_ordering, r->depth_first_ordering );
-		CheckEqualOrdering( "SC", l->simple_compare_ordering, r->simple_compare_ordering );
 	}
 }

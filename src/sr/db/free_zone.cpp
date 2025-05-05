@@ -104,6 +104,15 @@ size_t FreeZone::GetNumTerminii() const
 }
 
 
+const Mutator &FreeZone::GetTerminusMutator(size_t index) const
+{
+	list<Mutator>::const_iterator it = terminii.begin();
+	for( size_t i=0; i<index; i++ )
+		it++;
+	return *it;
+}
+
+
 void FreeZone::AddTerminus(Mutator &&terminus)
 {
     // Can't use this to make an empty zone

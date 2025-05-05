@@ -28,6 +28,7 @@ public:
         const DBCommon::TreeOrdinal tree_ordinal;   // TODO surely in the core info as const across walk?
         bool at_terminus;     
         bool at_base;
+        bool ancestor_of_terminus;
     };
 
     typedef function<void (const WalkInfo &)> Action;
@@ -47,6 +48,7 @@ private:
     {
         const Actions *actions;
         const TreeZone *tree_zone;
+        const FreeZone *free_zone;
         const DBCommon::TreeOrdinal tree_ordinal;        
         Wind wind;
         mutable size_t next_terminus_index;
@@ -56,21 +58,21 @@ private:
 					XLink base_xlink,
                     TreePtr<Node> base_node,
                     const DBCommon::CoreInfo *base_info );
-    void VisitSingular( const WalkKit &kit, 
+    bool VisitSingular( const WalkKit &kit, 
                         const TreePtrInterface *p_x_singular, 
                         TreePtr<Node> node,
                         int item_ordinal );
-    void VisitSequence( const WalkKit &kit, 
+    bool VisitSequence( const WalkKit &kit, 
                         SequenceInterface *x_seq, 
                         TreePtr<Node> node,
                         int item_ordinal );
-    void VisitCollection( const WalkKit &kit, 
+    bool VisitCollection( const WalkKit &kit, 
                           CollectionInterface *x_col, 
                           TreePtr<Node> node,
                           int item_ordinal );
-    void VisitNode( const WalkKit &kit, 
+    bool VisitNode( const WalkKit &kit, 
                     WalkInfo &&walk_info );
-    void VisitItemise( const WalkKit &kit, 
+    bool VisitItemise( const WalkKit &kit, 
                        TreePtr<Node> node );
 };    
     
