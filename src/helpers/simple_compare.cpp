@@ -25,8 +25,9 @@ bool SimpleCompare::operator()( TreePtr<Node> l, TreePtr<Node> r ) const
 
 Orderable::Diff SimpleCompare::Compare3Way( TreePtr<Node> l, TreePtr<Node> r ) const
 {   
-    ASSERT( l );
-    ASSERT( r );
+    if( !l || !r )
+		return (int)(!!l) - (int)(!!r);
+			
     return Compare3Way( *l, *r );
 }
     
@@ -131,8 +132,8 @@ Orderable::Diff SimpleCompare::Compare3Way( CollectionInterface &l, CollectionIn
         return sd;
         
     // Use this object so our ordering is used.
-    NodeOrdering l_ordering = GetNodeOrdering(l);
-    NodeOrdering r_ordering = GetNodeOrdering(r);
+    TreePtrOrdering l_ordering = GetTreePtrOrdering(l);
+    TreePtrOrdering r_ordering = GetTreePtrOrdering(r);
     
     return LexicographicalCompare(l_ordering, r_ordering, *this);
 }

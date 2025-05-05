@@ -46,21 +46,20 @@ void Orderings::MainTreeInsertGeometric(TreeZone *zone, const DBCommon::CoreInfo
 	// sufficient: what is ancestor of base is ancestor of every node in
 	// the zone. If we act at root, there won't be any.
 #ifdef SC_INTRINSIC
-	set<XLink> invalidated_xlinks = GetTerminusAndBaseAncestors(*zone);
-	for( XLink x : invalidated_xlinks )
+	set<TreePtr<Node>> invalidated_xlinks = GetTerminusAndBaseAncestors(*zone);
+	for( TreePtr<Node> x : invalidated_xlinks )                        
+	{
+		// If it's in at this point it came from instrinsic and will be wrong due to placeholders
+		if( simple_compare_ordering.count(x)!=0 )
+			EraseSolo( simple_compare_ordering, x );                            
+		InsertSolo( simple_compare_ordering, x );                           	
+	}
 #else
+	// Assume there is only one incoming XLink to the node because not a leaf
 	XLink x = zone->GetBaseXLink();
 	while( x = db->TryGetParentXLink(x) )
+		InsertSolo( simple_compare_ordering, x.GetChildTreePtr() );           
 #endif	
-	{
-#ifdef SC_INTRINSIC
-		// If it's in at this point it came from instrinsic and will be wrong due to placeholders
-		if( simple_compare_ordering.count(x.GetChildTreePtr())!=0 )
-			EraseSolo( simple_compare_ordering, x.GetChildTreePtr() );                            
-#endif
-		// Assume there is only one incoming XLink to the node because not a leaf
-		InsertSolo( simple_compare_ordering, x.GetChildTreePtr() );                              
-	}
 }
 
 
@@ -77,16 +76,15 @@ void Orderings::MainTreeDeleteGeometric(TreeZone *zone, const DBCommon::CoreInfo
 	// sufficient: what is ancestor of base is ancestor of every node in
 	// the zone. If we act at root, there won't be any.
 #ifdef SC_INTRINSIC
-	set<XLink> invalidated_xlinks = GetTerminusAndBaseAncestors(*zone);
-	for( XLink x : invalidated_xlinks )
+	set<TreePtr<Node>> invalidated_xlinks = GetTerminusAndBaseAncestors(*zone);
+	for( TreePtr<Node> x : invalidated_xlinks )
+		EraseSolo( simple_compare_ordering, x );                              
 #else
+		// Assume there was only one incoming XLink to the node because not a leaf
 	XLink x = zone->GetBaseXLink();
 	while( x = db->TryGetParentXLink(x) )
-#endif
-	{
-		// Assume there was only one incoming XLink to the node because not a leaf
 		EraseSolo( simple_compare_ordering, x.GetChildTreePtr() );                              
-	}
+#endif
 }
 
 
@@ -175,8 +173,7 @@ void Orderings::InsertIntrinsicAction(const DBWalk::WalkInfo &walk_info)
 #ifdef SC_INTRINSIC
 	// Intrinsic orderings are keyed on nodes, and we don't need to update on the boundary layer
 	// Only if not already
-    if( !walk_info.ancestor_of_terminus )
-		InsertSolo( simple_compare_ordering, walk_info.node );               
+	InsertSolo( simple_compare_ordering, walk_info.node );               
 #endif		
 }
 
@@ -198,21 +195,22 @@ void Orderings::DeleteIntrinsicAction(const DBWalk::WalkInfo &walk_info)
 	EraseSolo( category_ordering, walk_info.node );   
 	
 #ifdef SC_INTRINSIC
-	if( !walk_info.ancestor_of_terminus ) 
-		EraseSolo( simple_compare_ordering, walk_info.node );               	 
+	simple_compare_ordering.erase( walk_info.node );               	 
 #endif		
 }
 
 
-set<XLink> Orderings::GetTerminusAndBaseAncestors( const TreeZone &tz ) const
+set<TreePtr<Node>> Orderings::GetTerminusAndBaseAncestors( const TreeZone &tz ) const
 {
-	set<XLink> s;
+	set<TreePtr<Node>> sn;
+	set<XLink> sx;
 		
 	// Include parent of base all the way back to root
 	XLink x = tz.GetBaseXLink();
 	while(x = db->TryGetParentXLink(x))
 	{
-		InsertSolo(s, x);			
+		InsertSolo(sx, x);			
+		sn.insert(x.GetChildTreePtr());			
 	}
 
 	// Now for each terminus, include parent of terminus back to anything we 
@@ -222,13 +220,14 @@ set<XLink> Orderings::GetTerminusAndBaseAncestors( const TreeZone &tz ) const
 		x = tz.GetTerminusXLink(i);
 		while(x = db->TryGetParentXLink(x))
 		{
-			if( s.count(x)!=0 )
-				break;
-			InsertSolo(s, x);			
+			if( sx.count(x)!=0 )
+				break; // There will already be a path to root from here
+			InsertSolo(sx, x);				
+			sn.insert(x.GetChildTreePtr());			
 		}
 	}
 	
-	return s;
+	return sn;
 }
 
         

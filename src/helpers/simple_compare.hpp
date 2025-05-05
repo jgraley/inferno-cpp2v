@@ -34,7 +34,6 @@ public:
     /// Make a SimpleCompare-ordered set using the current SC, filled with the elements from the supplied container
     NodeOrdering GetNodeOrdering( ContainerInterface &c ) const;
 
-    // ---------------- Legacy interface used by renderer only --------------------
     typedef multiset<TreePtr<Node>, const SimpleCompare &> TreePtrOrdering;
 
     /// Less operator: for use with set, map etc (legacy)
