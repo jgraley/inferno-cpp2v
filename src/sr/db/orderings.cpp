@@ -165,13 +165,23 @@ void Orderings::DeleteIntrinsicAction(const DBWalk::WalkInfo &walk_info)
 	// Intrinsic orderings are keyed on nodes, and we don't need to update on the boundary layer
 	// We do get an XLink for all invocations because it's a tree zone walk
 
-	// Node table hasn't been updated yet, so node should be in there.
 	NodeTable::Row row;
 	if( !db->HasNodeRow(walk_info.node) &&  // Node must have been removed from node table
-	    node_reached_count[walk_info.node]++ == 0) // Must only delete once so do it on first reaching
+	    node_reached_count[walk_info.node] == 0) // Must only delete once so do it on first reaching
 	{
 		EraseSolo( category_ordering, walk_info.node );   
 	}
+	
+#ifdef SC_INTRINSIC
+	if( !db->HasNodeRow(walk_info.node) &&  // Node must have been removed from node table
+	    node_reached_count[walk_info.node] == 0) // Must only delete once so do it on first reaching
+	{
+		if( simple_compare_ordering.count(walk_info.node)!=0 ) // Some were removed during geometric
+			EraseSolo( simple_compare_ordering, walk_info.node );               
+	}	 
+#endif		
+
+	node_reached_count[walk_info.node]++;
 }
 
 
