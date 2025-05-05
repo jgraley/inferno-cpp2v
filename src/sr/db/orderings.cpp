@@ -10,7 +10,7 @@ using namespace SR;
 
 //#define TRACE_CATEGORY_RELATION
 
-//#define SC_INTRINSIC
+#define SC_INTRINSIC
 
 Orderings::Orderings( shared_ptr<Lacing> lacing, const XTreeDatabase *db_ ) :
     plan( lacing ),
@@ -47,6 +47,8 @@ void Orderings::MainTreeInsertGeometric(TreeZone *zone, const DBCommon::CoreInfo
 	// the zone. If we act at root, there won't be any.
 #ifdef SC_INTRINSIC
 	set<TreePtr<Node>> invalidated = GetTerminusAndBaseAncestors(*zone);
+	invalidated = UnionOf(invalidated, debt);
+	debt.clear();
 #else
 	// Assume there is only one incoming XLink to the node because not a leaf
 	auto subtree = XTreeZone::CreateSubtree(zone->GetBaseXLink());
@@ -163,8 +165,10 @@ void Orderings::InsertIntrinsicAction(const DBWalk::WalkInfo &walk_info)
 #ifdef SC_INTRINSIC
 	// Intrinsic orderings are keyed on nodes, and we don't need to update on the boundary layer
 	// Only if not already
-	if( !walk_info.ancestor_of_terminus )
-		InsertSolo( simple_compare_ordering, walk_info.node );               
+	if( walk_info.ancestor_of_terminus )
+		debt.insert( walk_info.node );
+	else
+		InsertSolo( simple_compare_ordering, walk_info.node ); 	
 #endif		
 }
 
