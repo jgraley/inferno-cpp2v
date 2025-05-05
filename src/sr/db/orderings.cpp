@@ -10,7 +10,7 @@ using namespace SR;
 
 //#define TRACE_CATEGORY_RELATION
 
-#define SC_INTRINSIC
+//#define SC_INTRINSIC
 
 Orderings::Orderings( shared_ptr<Lacing> lacing, const XTreeDatabase *db_ ) :
     plan( lacing ),
@@ -43,12 +43,16 @@ void Orderings::MainTreeInsertGeometric(TreeZone *zone, const DBCommon::CoreInfo
 	// of the base node so that the SC ordering is intact. Base is
 	// sufficient: what is ancestor of base is ancestor of every node in
 	// the zone. If we act at root, there won't be any.
-	XLink ancestor_xlink = zone->GetBaseXLink();
-	while( ancestor_xlink = db->TryGetParentXLink(ancestor_xlink) )
+#ifdef SC_INTRINSIC
+	set<XLink> invalidated_xlinks = GetTerminusAndBaseAncestors(zone);
+	for( XLink x : invalidated_xlinks )
+#else
+	XLink x = zone->GetBaseXLink();
+	while( x = db->TryGetParentXLink(x) )
+#endif	
 	{
 		// Assume there is only one incoming XLink to the node because not a leaf
-		TreePtr<Node> ancestor_node = ancestor_xlink.GetChildTreePtr();
-		InsertSolo( simple_compare_ordering, ancestor_node );                              
+		InsertSolo( simple_compare_ordering, x.GetChildTreePtr() );                              
 	}
 }
 
@@ -65,12 +69,16 @@ void Orderings::MainTreeDeleteGeometric(TreeZone *zone, const DBCommon::CoreInfo
 	// node, since removing it will invalidate the SC ordering. Base is
 	// sufficient: what is ancestor of base is ancestor of every node in
 	// the zone. If we act at root, there won't be any.
-	XLink ancestor_xlink = zone->GetBaseXLink();
-	while( ancestor_xlink = db->TryGetParentXLink(ancestor_xlink) )
+#ifdef SC_INTRINSIC
+	set<XLink> invalidated_xlinks = GetTerminusAndBaseAncestors(zone);
+	for( XLink x : invalidated_xlinks )
+#else
+	XLink x = zone->GetBaseXLink();
+	while( x = db->TryGetParentXLink(x) )
+#endif
 	{
 		// Assume there was only one incoming XLink to the node because not a leaf
-		TreePtr<Node> ancestor_node = ancestor_xlink.GetChildTreePtr();
-		EraseSolo( simple_compare_ordering, ancestor_node );                              
+		EraseSolo( simple_compare_ordering, x.GetChildTreePtr() );                              
 	}
 }
 
@@ -97,6 +105,7 @@ void Orderings::InsertGeometricAction(const DBWalk::WalkInfo &walk_info)
 { 
 	InsertSolo( depth_first_ordering, walk_info.xlink );
 	
+#ifndef SC_INTRINSIC
 	// Intrinsic orderings are keyed on nodes, and we don't need to update on the boundary layer
 	if( !walk_info.at_terminus )
 	{        
@@ -104,6 +113,7 @@ void Orderings::InsertGeometricAction(const DBWalk::WalkInfo &walk_info)
 		if( simple_compare_ordering.count(walk_info.node)==0 )
 			InsertSolo( simple_compare_ordering, walk_info.node );               
 	}
+#endif	
 }
 
 
@@ -111,6 +121,7 @@ void Orderings::DeleteGeometricAction(const DBWalk::WalkInfo &walk_info)
 {		
 	EraseSolo( depth_first_ordering, walk_info.xlink );
 
+#ifndef SC_INTRINSIC
 	// Intrinsic orderings are keyed on nodes, and we don't need to update on the boundary layer
 	if( !walk_info.at_terminus )
 	{
@@ -125,6 +136,7 @@ void Orderings::DeleteGeometricAction(const DBWalk::WalkInfo &walk_info)
 		if( node_reached_count.at(walk_info.node) == row.incoming_xlinks.size() ) 
 			EraseSolo( simple_compare_ordering, walk_info.node );               
 	} 
+#endif	
 }
 
         
@@ -138,6 +150,13 @@ void Orderings::InsertIntrinsicAction(const DBWalk::WalkInfo &walk_info)
 	// Only if not already
 	if( category_ordering.count(walk_info.node)==0 )		
 		InsertSolo( category_ordering, walk_info.node );            	
+
+#ifdef SC_INTRINSIC
+	// Intrinsic orderings are keyed on nodes, and we don't need to update on the boundary layer
+	// Only if not already
+	if( simple_compare_ordering.count(walk_info.node)==0 )
+		InsertSolo( simple_compare_ordering, walk_info.node );               
+#endif		
 }
 
 
@@ -156,25 +175,28 @@ void Orderings::DeleteIntrinsicAction(const DBWalk::WalkInfo &walk_info)
 }
 
 
-set<XLink> Orderings::GetTerminusDescendants( const TreeZone &tz ) const
+set<XLink> Orderings::GetTerminusAndBaseAncestors( const TreeZone &tz ) const
 {
-	XLink base = tz.GetBaseXLink();
-	if( tz.IsEmpty() )	
-		return { base };
-	else if( tz.IsSubtree() )
-		return {};
-	
-	set<XLink> s = {base};	
-	
+	set<XLink> s;
+		
+	// Include parent of base all the way back to root
+	XLink x = tz.GetBaseXLink();
+	while(x = db->TryGetParentXLink(x))
+	{
+		InsertSolo(s, x);			
+	}
+
+	// Now for each terminus, include parent of terminus back to anything we 
+	// already included.
 	for( size_t i=0; i<tz.GetNumTerminii(); i++ )
 	{
-		XLink x = tz.GetTerminusXLink(i);
-		do
+		x = tz.GetTerminusXLink(i);
+		while(x = db->TryGetParentXLink(x))
 		{
-			InsertSolo(s, x);
-			x = db->TryGetParentXLink(x);			
+			if( s.count(x)!=0 )
+				break;
+			InsertSolo(s, x);			
 		}
-		while( x && s.count(x)==0 );
 	}
 	
 	return s;
