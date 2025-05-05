@@ -43,11 +43,11 @@ void TestOrderingIntact( const ORDERING &ordering,
         // Test the STL interface to the relation, which is what ORDERING will actually use
         ASSERT( comp_func(GetKey(succ), GetKey(pred))==false )
               (ordering_name)(" failed broken ordering:\n")
-              (pred)(" < ")(succ);
+              ("Successive elts ")(pred)(" and ")(succ)(" compared \"greater\"");
         if( expect_totality )
             ASSERT( comp_func(GetKey(pred), GetKey(succ))==true ) // antisymmetry and totality
                   (ordering_name)(" failed broken ordering:\n")
-                  (succ)(" < ")(pred);
+                  ("Successive elts ")(pred)(" and ")(succ)(" did not compare \"less\"");
                     
         // To test using Compare3Way we'd have to construct our own instance
         // of the relation class.

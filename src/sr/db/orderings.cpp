@@ -46,20 +46,15 @@ void Orderings::MainTreeInsertGeometric(TreeZone *zone, const DBCommon::CoreInfo
 	// sufficient: what is ancestor of base is ancestor of every node in
 	// the zone. If we act at root, there won't be any.
 #ifdef SC_INTRINSIC
-	set<TreePtr<Node>> invalidated_xlinks = GetTerminusAndBaseAncestors(*zone);
-	for( TreePtr<Node> x : invalidated_xlinks )                        
-	{
-		// If it's in at this point it came from instrinsic and will be wrong due to placeholders
-		if( simple_compare_ordering.count(x)!=0 )
-			EraseSolo( simple_compare_ordering, x );                            
-		InsertSolo( simple_compare_ordering, x );                           	
-	}
+	set<TreePtr<Node>> invalidated = GetTerminusAndBaseAncestors(*zone);
 #else
 	// Assume there is only one incoming XLink to the node because not a leaf
-	XLink x = zone->GetBaseXLink();
-	while( x = db->TryGetParentXLink(x) )
-		InsertSolo( simple_compare_ordering, x.GetChildTreePtr() );           
+	auto subtree = XTreeZone::CreateSubtree(zone->GetBaseXLink());
+	set<TreePtr<Node>> invalidated = GetTerminusAndBaseAncestors(*subtree);
 #endif	
+
+	for( TreePtr<Node> x : invalidated )                        
+		InsertSolo( simple_compare_ordering, x );           
 }
 
 
@@ -76,15 +71,15 @@ void Orderings::MainTreeDeleteGeometric(TreeZone *zone, const DBCommon::CoreInfo
 	// sufficient: what is ancestor of base is ancestor of every node in
 	// the zone. If we act at root, there won't be any.
 #ifdef SC_INTRINSIC
-	set<TreePtr<Node>> invalidated_xlinks = GetTerminusAndBaseAncestors(*zone);
-	for( TreePtr<Node> x : invalidated_xlinks )
-		EraseSolo( simple_compare_ordering, x );                              
+	set<TreePtr<Node>> invalidated = GetTerminusAndBaseAncestors(*zone);
 #else
-		// Assume there was only one incoming XLink to the node because not a leaf
-	XLink x = zone->GetBaseXLink();
-	while( x = db->TryGetParentXLink(x) )
-		EraseSolo( simple_compare_ordering, x.GetChildTreePtr() );                              
+	// Assume there was only one incoming XLink to the node because not a leaf
+	auto subtree = XTreeZone::CreateSubtree(zone->GetBaseXLink());
+	set<TreePtr<Node>> invalidated = GetTerminusAndBaseAncestors(*subtree);
 #endif
+
+	for( TreePtr<Node> x : invalidated )                        
+		EraseSolo( simple_compare_ordering, x );                              
 }
 
 
@@ -157,11 +152,6 @@ void Orderings::InsertIntrinsicAction(const DBWalk::WalkInfo &walk_info)
 	if( node_reached_count[walk_info.node]++ > 0 )
 		return;
 
-    // Identifiers duplicate to themselves and therefore old ones can end up in the "new" FZs.
-    // Detect this by looking at current DB
-	if( db->HasNodeRow(walk_info.node) ) // TODO use domain for clarity
-		return; 
-
 	// Moreover, the same identifier can appear more than once in the layout's new FZs. 
 	// Deal with this by checking our own ordering.
 	if( category_ordering.count(walk_info.node) > 0 )
@@ -173,7 +163,8 @@ void Orderings::InsertIntrinsicAction(const DBWalk::WalkInfo &walk_info)
 #ifdef SC_INTRINSIC
 	// Intrinsic orderings are keyed on nodes, and we don't need to update on the boundary layer
 	// Only if not already
-	InsertSolo( simple_compare_ordering, walk_info.node );               
+	if( !walk_info.ancestor_of_terminus )
+		InsertSolo( simple_compare_ordering, walk_info.node );               
 #endif		
 }
 
@@ -195,7 +186,8 @@ void Orderings::DeleteIntrinsicAction(const DBWalk::WalkInfo &walk_info)
 	EraseSolo( category_ordering, walk_info.node );   
 	
 #ifdef SC_INTRINSIC
-	simple_compare_ordering.erase( walk_info.node );               	 
+	if( !walk_info.ancestor_of_terminus )
+		simple_compare_ordering.erase( walk_info.node );               	 
 #endif		
 }
 
@@ -277,10 +269,15 @@ void Orderings::CheckEqual( shared_ptr<Orderings> l, shared_ptr<Orderings> r, bo
 	if( intrinsic )
 	{
 		CheckEqualOrdering( "CAT", l->category_ordering, r->category_ordering );
+#ifdef SC_INTRINSIC
 		CheckEqualOrdering( "SC", l->simple_compare_ordering, r->simple_compare_ordering );
+#endif		
 	}
 	else
 	{
+#ifndef SC_INTRINSIC
+		CheckEqualOrdering( "SC", l->simple_compare_ordering, r->simple_compare_ordering );
+#endif			
 		CheckEqualOrdering( "DF", l->depth_first_ordering, r->depth_first_ordering );
 	}
 }
