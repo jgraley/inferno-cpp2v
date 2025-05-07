@@ -10,7 +10,7 @@ using namespace SR;
 
 //#define TRACE_CATEGORY_RELATION
 
-#define SC_INTRINSIC
+//#define SC_INTRINSIC
 
 Orderings::Orderings( shared_ptr<Lacing> lacing, const XTreeDatabase *db_ ) :
     plan( lacing ),
@@ -60,12 +60,12 @@ void Orderings::MainTreeInsertGeometric(TreeZone *zone, const DBCommon::CoreInfo
 }
 
 
-void Orderings::MainTreeDeleteGeometric(TreeZone *zone, const DBCommon::CoreInfo *base_info)
+void Orderings::MainTreeDeleteGeometric(TreeZone *zone, const DBCommon::CoreInfo *base_info, bool delete_intrinsics)
 {
 	node_reached_count.clear();
 	
 	DBWalk::Actions actions;
-    actions.push_back( bind(&Orderings::DeleteGeometricAction, this, placeholders::_1) );
+    actions.push_back( bind(&Orderings::DeleteGeometricAction, this, placeholders::_1, delete_intrinsics) );
     db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_OUT, base_info );
 
 	// We must delete SimpleCompare index entries for ancestors of the base
@@ -73,6 +73,8 @@ void Orderings::MainTreeDeleteGeometric(TreeZone *zone, const DBCommon::CoreInfo
 	// sufficient: what is ancestor of base is ancestor of every node in
 	// the zone. If we act at root, there won't be any.
 #ifdef SC_INTRINSIC
+	if( delete_intrinsics )
+		return; // We deleted everything, so we're done
 	set<TreePtr<Node>> invalidated = GetTerminusAndBaseAncestors(*zone);
 #else
 	// Assume there was only one incoming XLink to the node because not a leaf
@@ -121,12 +123,14 @@ void Orderings::InsertGeometricAction(const DBWalk::WalkInfo &walk_info)
 }
 
 
-void Orderings::DeleteGeometricAction(const DBWalk::WalkInfo &walk_info)
+void Orderings::DeleteGeometricAction(const DBWalk::WalkInfo &walk_info, bool delete_intrinsics)
 {		
 	EraseSolo( depth_first_ordering, walk_info.xlink );
 
-#ifndef SC_INTRINSIC
 	// Intrinsic orderings are keyed on nodes, and we don't need to update on the boundary layer
+#ifdef SC_INTRINSIC
+	if( delete_intrinsics )
+#endif	
 	if( !walk_info.at_terminus )
 	{
 		// Node table hasn't been updated yet, so node should be in there.
@@ -140,7 +144,6 @@ void Orderings::DeleteGeometricAction(const DBWalk::WalkInfo &walk_info)
 		if( node_reached_count.at(walk_info.node) == row.incoming_xlinks.size() ) 
 			EraseSolo( simple_compare_ordering, walk_info.node );               
 	} 
-#endif	
 }
 
         
@@ -165,10 +168,7 @@ void Orderings::InsertIntrinsicAction(const DBWalk::WalkInfo &walk_info)
 #ifdef SC_INTRINSIC
 	// Intrinsic orderings are keyed on nodes, and we don't need to update on the boundary layer
 	// Only if not already
-	if( walk_info.ancestor_of_terminus )
-		debt.insert( walk_info.node );
-	else
-		InsertSolo( simple_compare_ordering, walk_info.node ); 	
+	debt.insert( walk_info.node );	
 #endif		
 }
 

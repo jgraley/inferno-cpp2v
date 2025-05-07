@@ -42,10 +42,10 @@ public:
     void MainTreeBuild(TreePtr<Node> main_root);
     
     // Incremental strategy: perform updates on zones
-    void MainTreeExchange( MutableTreeZone *target_tree_zone, FreeZone *free_zone, vector<MutableTreeZone *> fixups );
+    void MainTreeExchange( MutableTreeZone *target_tree_zone, FreeZone *free_zone, vector<MutableTreeZone *> fixups, bool delete_intrinsics );
         
     void MainTreeInsertGeometric(TreeZone *zone, const DBCommon::CoreInfo *base_info);
-    void MainTreeDeleteGeometric(TreeZone *zone, const DBCommon::CoreInfo *base_info);
+    void MainTreeDeleteGeometric(TreeZone *zone, const DBCommon::CoreInfo *base_info, bool delete_intrinsics);
 
     void InsertIntrinsic(FreeZone *zone);
     void DeleteIntrinsic(FreeZone *zone);

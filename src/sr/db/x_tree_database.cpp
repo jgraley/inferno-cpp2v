@@ -136,7 +136,7 @@ void XTreeDatabase::MainTreeBuild(TreePtr<Node> main_root)
 }
 
 
-void XTreeDatabase::MainTreeExchange( MutableTreeZone *target_tree_zone, FreeZone *free_zone, vector<MutableTreeZone *> fixups )
+void XTreeDatabase::MainTreeExchange( MutableTreeZone *target_tree_zone, FreeZone *free_zone, vector<MutableTreeZone *> fixups, bool delete_intrinsics )
 {
     TRACE("Replacing target TreeZone:\n")(*target_tree_zone)("\nwith source FreeZone:\n")(*free_zone)("\n");
     ASSERT( target_tree_zone->GetNumTerminii() == free_zone->GetNumTerminii() )
@@ -149,7 +149,7 @@ void XTreeDatabase::MainTreeExchange( MutableTreeZone *target_tree_zone, FreeZon
     const DBCommon::CoreInfo base_info = link_table->GetCoreInfo( target_tree_zone->GetBaseXLink() );
 
     // Remove geometric info that will be invalidated by the exchange 
-    MainTreeDeleteGeometric( target_tree_zone, &base_info );   
+    MainTreeDeleteGeometric( target_tree_zone, &base_info, delete_intrinsics );   
     
     // Update the tree. mutable_target_tree_zone becomes the valid new tree zone.
     target_tree_zone->Exchange( free_zone, fixups ); 
@@ -189,7 +189,7 @@ void XTreeDatabase::MainTreeInsertGeometric(TreeZone *zone, const DBCommon::Core
 }
 
 
-void XTreeDatabase::MainTreeDeleteGeometric(TreeZone *zone, const DBCommon::CoreInfo *base_info)
+void XTreeDatabase::MainTreeDeleteGeometric(TreeZone *zone, const DBCommon::CoreInfo *base_info, bool delete_intrinsics)
 {
     INDENT("-g");
     ASSERT( extra_tree_destroy_queue.empty() );
@@ -200,7 +200,7 @@ void XTreeDatabase::MainTreeDeleteGeometric(TreeZone *zone, const DBCommon::Core
     db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_OUT, base_info );   
 
     TRACE("Walk for geometric: orderings\n");
-    orderings->MainTreeDeleteGeometric(zone, base_info);
+    orderings->MainTreeDeleteGeometric(zone, base_info, delete_intrinsics);
 
     TRACE("Walk for geometric: domain, tables\n");
     DBWalk::Actions actions2;
@@ -301,7 +301,7 @@ void XTreeDatabase::ExtraTreeTeardown(DBCommon::TreeOrdinal tree_ordinal)
     db_walker.WalkTreeZone( &actions, tree_as_zone.get(), tree_ordinal, DBWalk::WIND_OUT, DBCommon::GetRootCoreInfo() );       
 
     TRACE("Walk for geometric: orderings\n");
-    orderings->MainTreeDeleteGeometric(tree_as_zone.get(), DBCommon::GetRootCoreInfo());
+    orderings->MainTreeDeleteGeometric(tree_as_zone.get(), DBCommon::GetRootCoreInfo(), true);
 
     TRACE("Walk for geometric: domain, tables\n");
     DBWalk::Actions actions2;

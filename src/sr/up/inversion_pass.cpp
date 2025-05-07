@@ -107,7 +107,7 @@ void InversionPass::Invert( LocatedPatch lze )
     FreeZone free_zone = *free_patch->GetZone();
     
     // Write it into the tree
-    db->MainTreeExchange( &target_tree_zone, &free_zone, fixups );   
+    db->MainTreeExchange( &target_tree_zone, &free_zone, fixups, true );   
     
     // Remember the extracted free zone (material that was in the inverted tree zones) for intrinsic deletes
     extracted_free_zones.push_back( move(free_zone) );        
