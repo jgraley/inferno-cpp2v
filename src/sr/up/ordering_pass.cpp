@@ -471,7 +471,7 @@ void OrderingPass::RunDuplicates(shared_ptr<Patch> &layout)
 }
 
 
-void OrderingPass::RunMoves(shared_ptr<Patch> &layout)
+void OrderingPass::RunMoves(shared_ptr<Patch> &layout, MovesMap &moves_map)
 {
 	INDENT("M");
 	// Now we can do the moves and insert scaffolding		
@@ -486,7 +486,7 @@ void OrderingPass::RunMoves(shared_ptr<Patch> &layout)
 			TRACE("Moving ")(ooo_patch_ptr)("\n");
 			
 			// We can move it to the new place, avoiding the need for duplication
-			MoveTreeZoneToFreePatch(ooo_patch_ptr, layout);
+			MoveTreeZoneToFreePatch(ooo_patch_ptr, layout, moves_map);
 
 			// But any further appearances must be duplicated TODO remove this? we're done duplicating!
 			InsertSolo(in_order_bases, base_xlink); 
@@ -495,7 +495,7 @@ void OrderingPass::RunMoves(shared_ptr<Patch> &layout)
 }
 
 
-void OrderingPass::MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch, shared_ptr<Patch> &layout)
+void OrderingPass::MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch, shared_ptr<Patch> &layout, MovesMap &moves_map)
 {
 	INDENT("M");
 
@@ -543,19 +543,25 @@ void OrderingPass::MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch, sha
 	for( MutableTreeZone *fu : fixups )
 	    if( fu )
 		    fu->Validate(db);		
-	
+		
+#ifdef NEW_STUFF
 	// Make a scaffold that fits in place of the moved-from zone
 	unique_ptr<FreeZone> scaffold_zone = free_zone->MakeScaffold();
-	
+	TreePtr<Node> scaffold_node = scaffold_zone.GetBaseNode();
+
+	// Store the scaffold in the layout so it goes into inversion in the right place
+	auto free_patch = make_shared<FreeZonePatch>( move(scaffold_zone), target_tree_patch->MoveChildren() );
+
+	// Rememeber the association between the scaffold node and the true moved zone
+	mm[scaffold_zone] = move(free_zone);
+#else	
+
 	// free_zone is the part of the tree that we just displaced. Make 
 	// a new patch based on it.
 	auto free_patch = make_shared<FreeZonePatch>( move(free_zone), target_tree_patch->MoveChildren() );
+#endif
 
-	// Store a scaffold that fits in place of the moved-from zone
-	//free_patch->scaffold_zone = move(scaffold_zone);
-	
 	// Install the new patch into the layout
-	free_patch->AddEmbeddedMarkers( target_tree_patch->GetEmbeddedMarkers() );               
 	*target_patch = free_patch;
 	
 	ValidateTreeZones(db).Run(layout);

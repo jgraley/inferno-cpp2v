@@ -144,10 +144,10 @@ private:
 
 // ------------------------- MovesMap --------------------------
 
-struct MoveMap
+struct MovesMap
 {
 	public:
-	map<TreePtr<Node>, unique_ptr<FreeZone>> moves_map;
+	map<TreePtr<Node>, unique_ptr<FreeZone>> mm;
 };
 
 

@@ -89,7 +89,9 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink origin_xlink, shared_p
 	validate_zones.Run(source_layout);
 #endif
 
-    ordering_pass.RunMoves(source_layout);
+	MovesMap moves_map;
+
+    ordering_pass.RunMoves(source_layout, moves_map);
     ordering_pass.Check(source_layout);
 	validate_zones.Run(source_layout);       
     ScaffoldChecker().Run(source_layout);

@@ -33,7 +33,7 @@ public:
     // Can change the supplied shared ptr
     void RunAnalysis( shared_ptr<Patch> &layout );
     void RunDuplicates( shared_ptr<Patch> &layout );
-    void RunMoves( shared_ptr<Patch> &layout );
+    void RunMoves( shared_ptr<Patch> &layout, MovesMap &moves_map);
     
     // Just ASSERT no empty zones
     void Check( shared_ptr<Patch> &layout );
@@ -67,7 +67,7 @@ private:
 	void MaximalIncreasingSubsequence( PatchIndicesDFO &indices_dfo );
 
 	void ProcessOutOfOrder(shared_ptr<Patch> &layout);
-	void MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch, shared_ptr<Patch> &layout );
+	void MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch, shared_ptr<Patch> &layout, MovesMap &moves_map );
 
     shared_ptr<TreeZonePatch> GetTreePatch(const PatchRecord &patch_record) const;
     XLink GetBaseXLink(const PatchRecord &patch_record) const;
