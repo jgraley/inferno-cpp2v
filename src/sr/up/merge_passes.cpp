@@ -86,6 +86,7 @@ bool MergeFreesPass::Policy(const FreeZone *, const FreeZone *) const
 
 void MergeWidesPass::Run( shared_ptr<Patch> &layout )
 {
+	INDENT("W");
 	//FTRACE(layout);
 	impl.Run(layout, bind(&MergeWidesPass::Policy, this, placeholders::_1, placeholders::_2));
 }
@@ -103,7 +104,7 @@ void MergeWidesPass::Check( shared_ptr<Patch> &layout )
 
 bool MergeWidesPass::Policy(const FreeZone *zone, const FreeZone *child_zone) const
 {	
-	//FTRACE("Zone: ")(*zone)("\nhas child: ")(*child_zone)("\n");
+	TRACE("Zone: ")(*zone)("\nhas child: ")(*child_zone)("\n");
 	return !!child_zone->TryGetContainerBase();
 }
 

@@ -86,6 +86,8 @@ private:
     const XTreeDatabase *db;
     DBWalk db_walker;
     
+    map<TreePtr<Node>, size_t> node_ref_counts;
+    
     // Note: live across deleting walks
     map<TreePtr<Node>, size_t> node_reached_count;    
     set<TreePtr<Node>> debt;

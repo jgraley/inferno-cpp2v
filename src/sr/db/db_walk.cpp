@@ -2,6 +2,7 @@
 
 using namespace SR;    
 
+//#define TRACE_WALK
 
 void DBWalk::WalkTreeZone( const Actions *actions,
                            const TreeZone *tree_zone,
@@ -177,7 +178,9 @@ bool DBWalk::VisitCollection( const WalkKit &kit,
 bool DBWalk::VisitNode( const WalkKit &kit, 
                         WalkInfo &&walk_info ) // .x should be .xlink's child
 {
+#ifdef TRACE_WALK
     INDENT(".");     
+#endif
     if( !walk_info.node )
     {
 		walk_info.at_terminus = (kit.free_zone &&

@@ -109,6 +109,7 @@ void InsertIntrinsicPass::Run( shared_ptr<Patch> &layout )
 	INDENT("N");
     FreeZonePatch::ForFreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<FreeZonePatch> &free_patch)
     {
+		TRACE("Inserting for intrinsic: ")(free_patch->GetZone())("\n");
         db->InsertIntrinsic( free_patch->GetZone() );        
     } );
 }

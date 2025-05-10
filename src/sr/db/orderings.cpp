@@ -12,6 +12,8 @@ using namespace SR;
 
 //#define SC_INTRINSIC
 
+#define NRF
+
 Orderings::Orderings( shared_ptr<Lacing> lacing, const XTreeDatabase *db_ ) :
     plan( lacing ),
     depth_first_ordering( db_ ),
@@ -153,17 +155,32 @@ void Orderings::InsertIntrinsicAction(const DBWalk::WalkInfo &walk_info)
 	// We don't get an XLink for root because it's a free zone walk
 	// We also don't get called on terminii so at_terminus is always false
 
+#ifdef NRF
+	if( node_ref_counts[walk_info.node]++ != 0 )
+	{
+		TRACE("CAT does not insert due existing refs: ")(walk_info.node)("\n");
+		return;
+	}		 
+#else
 	// Restrict to one reaching for the zone TODO could walk do this?
 	if( node_reached_count[walk_info.node]++ > 0 )
+	{
+		TRACE("CAT does not insert due reached already: ")(walk_info.node)("\n");
 		return;
+	}
 
 	// Moreover, the same identifier can appear more than once in the layout's new FZs. 
 	// Deal with this by checking our own ordering.
 	if( category_ordering.count(walk_info.node) > 0 )
-		return; 
-		
-	// Only if not already
+	{
+		TRACE("CAT does not insert due already in ordering: ")(walk_info.node)("\n");
+		return;
+	}		
+#endif
+	
+	TRACE("CAT inserts: ")(walk_info.node)("\n");
 	InsertSolo( category_ordering, walk_info.node );            	
+	TRACE("CAT at %p size=%u\n", this, category_ordering.size());
 
 #ifdef SC_INTRINSIC
 	// Intrinsic orderings are keyed on nodes, and we don't need to update on the boundary layer
@@ -179,16 +196,32 @@ void Orderings::DeleteIntrinsicAction(const DBWalk::WalkInfo &walk_info)
 	// We don't get an XLink for root because it's a free zone walk
 	// We also don't get called on terminii so at_terminus is always false
 
+#ifdef NRF
+	if( --node_ref_counts[walk_info.node] != 0 )
+	{
+		TRACE("CAT does not delete due existing refs: ")(walk_info.node)("\n");
+		return;
+	}	
+#else	
 	// Restrict to one reaching for the zone TODO could walk do this?
 	if( node_reached_count[walk_info.node]++ > 0 )
+	{
+		TRACE("CAT does not delete due reached already: ")(walk_info.node)("\n");
 		return;
-
+	}
+	
     // Node must have been removed from the current db
 	if( db->HasNodeRow(walk_info.node) ) // TODO use domain for clarity
-		return; 
+	{
+		TRACE("CAT does not delete due has node row: ")(walk_info.node)("\n");
+		return;
+	}		
+#endif
 		
+	TRACE("CAT deletes: ")(walk_info.node)("\n");
 	EraseSolo( category_ordering, walk_info.node );   
-	
+	TRACE("CAT at %p size=%u\n", this, category_ordering.size());
+
 #ifdef SC_INTRINSIC
 	if( !walk_info.ancestor_of_terminus )
 		simple_compare_ordering.erase( walk_info.node );               	 

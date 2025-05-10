@@ -242,7 +242,7 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
  											  XLink base,
  											  bool just_check )
 {          
-	INDENT(just_check?"f":"F");                                      
+	INDENT(just_check?"q":"Q");                                      
  	ASSERT( !patch_records.empty() );
     ASSERT( base );
     ASSERT( base.GetChildTreePtr() );        

@@ -50,6 +50,7 @@ bool NodeTable::IsDeclarer(const DBWalk::WalkInfo &walk_info) const
 void NodeTable::InsertGeometricAction(const DBWalk::WalkInfo &walk_info)
 {
 	// Create if not already there
+	TRACE("NODE TABLE weakly inserts row for: ")(walk_info.node)("\n");
 	Row &row = rows[walk_info.node];
 	
 	InsertSolo( row.incoming_xlinks, walk_info.xlink );            
@@ -67,8 +68,14 @@ void NodeTable::DeleteGeometricAction(const DBWalk::WalkInfo &walk_info)
 	if( IsDeclarer(walk_info) )
 		EraseSolo( row.declaring_xlinks, walk_info.xlink );
 		
-	if( row.incoming_xlinks.empty() )
-		EraseSolo( rows, walk_info.node );
+	if( !row.incoming_xlinks.empty() )
+	{
+		TRACE("NODE TABLE does not delete row due %u>0 remaining incoming: ", row.incoming_xlinks.size())(walk_info.node)("\n");
+		return;
+	}
+	
+	TRACE("NODE TABLE deletes row for: ")(walk_info.node)("\n");
+	EraseSolo( rows, walk_info.node );
 }
 
 
