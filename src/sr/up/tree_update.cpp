@@ -14,6 +14,7 @@
 #include "gap_finding_pass.hpp"
 #include "boundary_pass.hpp"
 #include "alt_ordering_checker.hpp"
+#include "move_in_pass.hpp"
 
 #include <iostream>
 
@@ -77,7 +78,7 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink origin_xlink, shared_p
 
     OrderingPass ordering_pass( db );
     ordering_pass.RunAnalysis(source_layout);
-    ordering_pass.RunDuplicates(source_layout);
+    ordering_pass.RunDuplicate(source_layout);
 	validate_zones.Run(source_layout);	
 
     MarkersPass markers_pass( db );
@@ -91,7 +92,7 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink origin_xlink, shared_p
 
 	MovesMap moves_map;
 
-    ordering_pass.RunMoves(source_layout, moves_map);
+    ordering_pass.RunMoveOut(source_layout, moves_map);
     ordering_pass.Check(source_layout);
 	validate_zones.Run(source_layout);       
     ScaffoldChecker().Run(source_layout);
@@ -111,6 +112,10 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink origin_xlink, shared_p
 #ifndef NEW_THING
     inversion_pass.RunDeleteIntrinsic();
 #endif   
+	
+	MoveInPass move_in_pass( db );
+	move_in_pass(source_layout, moves_map)
+	
 	db->PerformDeferredActions();
    
     if( ReadArgs::test_db )

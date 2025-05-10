@@ -32,8 +32,8 @@ public:
     
     // Can change the supplied shared ptr
     void RunAnalysis( shared_ptr<Patch> &layout );
-    void RunDuplicates( shared_ptr<Patch> &layout );
-    void RunMoves( shared_ptr<Patch> &layout, MovesMap &moves_map);
+    void RunDuplicate( shared_ptr<Patch> &layout );
+    void RunMoveOut( shared_ptr<Patch> &layout, MovesMap &moves_map);
     
     // Just ASSERT no empty zones
     void Check( shared_ptr<Patch> &layout );

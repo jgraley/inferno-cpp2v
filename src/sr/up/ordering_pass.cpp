@@ -431,7 +431,7 @@ void OrderingPass::MaximalIncreasingSubsequence( PatchIndicesDFO &indices_dfo )
 }
 
  
-void OrderingPass::RunDuplicates(shared_ptr<Patch> &layout)
+void OrderingPass::RunDuplicate(shared_ptr<Patch> &layout)
 {
 	INDENT("D");
 
@@ -471,7 +471,7 @@ void OrderingPass::RunDuplicates(shared_ptr<Patch> &layout)
 }
 
 
-void OrderingPass::RunMoves(shared_ptr<Patch> &layout, MovesMap &moves_map)
+void OrderingPass::RunMoveOut(shared_ptr<Patch> &layout, MovesMap &moves_map)
 {
 	INDENT("M");
 	// Now we can do the moves and insert scaffolding		
