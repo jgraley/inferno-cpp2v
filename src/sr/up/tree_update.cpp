@@ -80,6 +80,9 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink origin_xlink, shared_p
     ordering_pass.RunDuplicates(source_layout);
 	validate_zones.Run(source_layout);	
 
+    MarkersPass markers_pass( db );
+    markers_pass.Run(source_layout);
+
     InsertIntrinsicPass insert_intrinsic_pass( db );
     insert_intrinsic_pass.Run(source_layout);
 	validate_zones.Run(source_layout);
@@ -98,9 +101,6 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink origin_xlink, shared_p
     
     AltOrderingChecker alt_ordering_checker( db );
     alt_ordering_checker.Check(source_layout);
-
-    MarkersPass markers_pass( db );
-    markers_pass.Run(source_layout);
 
     InversionPass inversion_pass( db ); 
     inversion_pass.RunInversion(origin_mutator, &source_layout);      
