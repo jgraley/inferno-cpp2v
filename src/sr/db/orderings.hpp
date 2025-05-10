@@ -39,8 +39,6 @@ public:
 
     void MainTreeInsertGeometric(TreeZone *zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
     void MainTreeDeleteGeometric(TreeZone *zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
-    void InsertIntrinsic(FreeZone *zone);
-    void DeleteIntrinsic(FreeZone *zone);
 
 private:
 	void InsertGeometricAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsics);

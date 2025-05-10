@@ -5,9 +5,6 @@
 #include "lacing.hpp"
 #include "relation_test.hpp"
 
-//#define NEWS
-
-
 using namespace SR;    
 
 Orderings::Orderings( shared_ptr<Lacing> lacing, const XTreeDatabase *db_ ) :
@@ -75,30 +72,6 @@ void Orderings::MainTreeDeleteGeometric(TreeZone *zone, const DBCommon::CoreInfo
 }
 
 
-void Orderings::InsertIntrinsic(FreeZone *zone)
-{
-#ifndef NEWS
-	node_reached_count.clear();
-
-    DBWalk::Actions actions;
-    actions.push_back( bind(&Orderings::InsertIntrinsicAction, this, placeholders::_1) );
-    db_walker.WalkFreeZone( &actions, zone, DBWalk::WIND_OUT );
-#endif
-}
-
-
-void Orderings::DeleteIntrinsic(FreeZone *zone)
-{
-#ifndef NEWS
-	node_reached_count.clear();
-
-    DBWalk::Actions actions;
-    actions.push_back( bind(&Orderings::DeleteIntrinsicAction, this, placeholders::_1) );
-    db_walker.WalkFreeZone( &actions, zone, DBWalk::WIND_OUT );
-#endif
-}
-
-
 void Orderings::InsertGeometricAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsics)
 { 
 	InsertSolo( depth_first_ordering, walk_info.xlink );
@@ -111,10 +84,8 @@ void Orderings::InsertGeometricAction(const DBWalk::WalkInfo &walk_info, bool do
 			InsertSolo( simple_compare_ordering, walk_info.node );               
 	}	
 
-#ifdef NEWS
 	if( do_intrinsics )
 		InsertIntrinsicAction(walk_info);
-#endif	
 }
 
 
@@ -137,10 +108,8 @@ void Orderings::DeleteGeometricAction(const DBWalk::WalkInfo &walk_info, bool do
 			EraseSolo( simple_compare_ordering, walk_info.node );               
 	} 
 
-#ifdef NEWS
 	if( do_intrinsics )
 		DeleteIntrinsicAction(walk_info);
-#endif	
 }
 
         

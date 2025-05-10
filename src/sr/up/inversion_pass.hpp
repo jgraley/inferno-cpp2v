@@ -29,7 +29,6 @@ public:
     InversionPass( XTreeDatabase *db );
     
     void RunInversion(const Mutator &origin_mutator, shared_ptr<Patch> *source_layout_ptr);
-    void RunDeleteIntrinsic();
     
 private:
     // .first is NULL: base not known

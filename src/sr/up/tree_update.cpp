@@ -83,9 +83,6 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink origin_xlink, shared_p
 
     MarkersPass markers_pass( db );
     markers_pass.Run(source_layout);
-
-    InsertIntrinsicPass insert_intrinsic_pass( db );
-    insert_intrinsic_pass.Run(source_layout);
 	validate_zones.Run(source_layout);
 
 	MovesMap moves_map;
@@ -106,7 +103,6 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink origin_xlink, shared_p
 
     InversionPass inversion_pass( db ); 
     inversion_pass.RunInversion(origin_mutator, &source_layout);      
-    inversion_pass.RunDeleteIntrinsic();  
 	
 	MoveInPass move_in_pass( db );
 	move_in_pass.Run(moves_map);

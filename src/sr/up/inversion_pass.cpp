@@ -112,13 +112,3 @@ void InversionPass::Invert( LocatedPatch lze )
     // Remember the extracted free zone (material that was in the inverted tree zones) for intrinsic deletes
     extracted_free_zones.push_back( move(free_zone) );        
 }
-
-
-void InversionPass::RunDeleteIntrinsic()
-{
-	INDENT("V");
-	for( FreeZone &free_zone : extracted_free_zones )
-	{
-		db->DeleteIntrinsic( &free_zone );
-	}
-}

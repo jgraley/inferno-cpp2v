@@ -91,7 +91,6 @@ void XTreeDatabase::MainTreeBuild(TreePtr<Node> main_root)
 
     TRACE("Walk for intrinsic: orderings\n");
 	auto main_free_zone = FreeZone::CreateSubtree(main_root);
-	orderings->InsertIntrinsic(main_free_zone.get());   
 
 	// Make main tree using FZ, and provide a TZ TODO pop out into eg MainTreeInstallAtrRoot(), asserting no terminii
     auto sp_main_root = make_shared<TreePtr<Node>>(main_free_zone->GetBaseNode());
@@ -191,24 +190,6 @@ void XTreeDatabase::MainTreeDeleteGeometric(TreeZone *zone, const DBCommon::Core
 }
 
 
-void XTreeDatabase::InsertIntrinsic(FreeZone *zone)
-{
-    INDENT("+i");
-
-    TRACE("Walk for intrinsic: orderings\n");
-    orderings->InsertIntrinsic(zone);
-}
-
-
-void XTreeDatabase::DeleteIntrinsic( FreeZone *zone )
-{
-    INDENT("-i");
-    
-    TRACE("Walk for intrinsic: orderings\n");
-    orderings->DeleteIntrinsic(zone);
-}
-
-
 void XTreeDatabase::PerformDeferredActions()
 {
     domain_extension->PerformDeferredActions();
@@ -221,7 +202,6 @@ void XTreeDatabase::ExtraTreeBuild(DBCommon::TreeOrdinal tree_ordinal, TreePtr<N
 	
 	TRACE("Walk for intrinsic: orderings\n");
 	auto free_zone = FreeZone::CreateSubtree(root_node);
-	orderings->InsertIntrinsic(free_zone.get());   
 	
     auto sp_root = make_shared<TreePtr<Node>>(root_node);
     trees_by_ordinal[tree_ordinal] = {sp_root};	
@@ -275,11 +255,7 @@ void XTreeDatabase::ExtraTreeTeardown(DBCommon::TreeOrdinal tree_ordinal)
     db_walker.WalkTreeZone( &actions2, tree_as_zone.get(), tree_ordinal, DBWalk::WIND_OUT, DBCommon::GetRootCoreInfo() );       
 
 	auto free_zone = FreeZone::CreateSubtree(tree_as_zone->GetBaseNode());
-	FreeExtraTree( tree_ordinal );
-	
-	// Pulled out to end because intrinsic delete are now done after all geoms
-    TRACE("Walk for intrinsic: orderings\n");
-	orderings->DeleteIntrinsic(free_zone.get());   
+	FreeExtraTree( tree_ordinal );  
 }
 
 
@@ -529,7 +505,6 @@ void XTreeDatabase::CheckIntrinsic()
 		auto tree_as_zone = XTreeZone::CreateSubtree(root_xlink);
 		auto free_zone = FreeZone::CreateSubtree(tree_as_zone->GetBaseNode());
 		ref_orderings->MainTreeInsertGeometric(tree_as_zone.get(), DBCommon::GetRootCoreInfo(), true);
-		ref_orderings->InsertIntrinsic(free_zone.get());
 	}   
  
     TRACE("Checking\n");
