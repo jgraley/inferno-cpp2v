@@ -497,8 +497,6 @@ void OrderingPass::RunMoveOut(shared_ptr<Patch> &layout, MovesMap &moves_map)
 
 void OrderingPass::MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch, shared_ptr<Patch> &layout, MovesMap &moves_map)
 {
-	INDENT("M");
-
 	// Get the tree zone
 	auto target_tree_patch = dynamic_pointer_cast<TreeZonePatch>(*target_patch);
 	ASSERT( target_tree_patch );
@@ -553,6 +551,7 @@ void OrderingPass::MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch, sha
 	auto free_patch = make_shared<FreeZonePatch>( move(scaffold_zone), target_tree_patch->MoveChildren() );
 
 	// Rememeber the association between the scaffold node and the true moved zone
+	TRACE("Making map entry, scaffold node: ")(*scaffold_node)("\n free zone: \n")(*free_zone)("\n");
 	moves_map.mm[scaffold_node] = move(free_zone);
 #else	
 

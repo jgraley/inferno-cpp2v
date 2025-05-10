@@ -17,14 +17,14 @@ Domain::Domain()
 void Domain::DeleteGeometricAction(const DBWalk::WalkInfo &walk_info)
 {        
     EraseSolo( unordered_domain, walk_info.xlink );
-    TRACE("DELETE ")(walk_info.xlink)(" term=")(walk_info.at_terminus)("\n");
+    //TRACE("DELETE ")(walk_info.xlink)(" is_terminus=")(walk_info.at_terminus)("\n");
 }
 
 
 void Domain::InsertGeometricAction(const DBWalk::WalkInfo &walk_info)
 {
     InsertSolo( unordered_domain, walk_info.xlink );   
-    TRACE("INSERT ")(walk_info.xlink)(" term=")(walk_info.at_terminus)("\n");
+    //TRACE("INSERT ")(walk_info.xlink)(" is_terminus=")(walk_info.at_terminus)("\n");
 }
 
 

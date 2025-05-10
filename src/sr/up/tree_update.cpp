@@ -93,7 +93,6 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink origin_xlink, shared_p
     ordering_pass.RunMoveOut(source_layout, moves_map);
     ordering_pass.Check(source_layout);
 	validate_zones.Run(source_layout);       
-    ScaffoldChecker().Run(source_layout);
     
     GapFindingPass gap_finding_pass;
     gap_finding_pass.Run(source_layout);    
@@ -111,6 +110,7 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink origin_xlink, shared_p
 	
 	MoveInPass move_in_pass( db );
 	move_in_pass.Run(moves_map);
+    ScaffoldChecker().Run(source_layout);
 	
 	db->PerformDeferredActions();
    

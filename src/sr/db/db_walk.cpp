@@ -200,11 +200,13 @@ bool DBWalk::VisitNode( const WalkKit &kit,
 		if( kit.wind == WIND_IN )
 		{
 			walk_info.ancestor_of_terminus = false; // actually only defined in wind-out
+#ifdef TRACE_WALK
 			TRACE("Visiting ")
 				 (walk_info.at_base?"base ":"")
 				 (walk_info.at_terminus?"terminus ":"")
 				 (walk_info.xlink)(" ")    
 				 (walk_info.node)(" (Wind-in)\n");    
+#endif
 			for( Action action : *(kit.actions) )
 				action(walk_info);
 		}
@@ -216,11 +218,13 @@ bool DBWalk::VisitNode( const WalkKit &kit,
 		if( kit.wind == WIND_OUT )
 		{
 			walk_info.ancestor_of_terminus = aot; 
+#ifdef TRACE_WALK
 			TRACE("Visiting ")
 				 (walk_info.at_base?"base ":"")
 				 (walk_info.at_terminus?"terminus ":"")
 				 (walk_info.xlink)(" ")
 				 (walk_info.node)(" (Wind-out)\n");    
+#endif
 			for( Action action : *(kit.actions) )
 				action(walk_info);         
 		}

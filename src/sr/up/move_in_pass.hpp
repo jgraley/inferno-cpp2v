@@ -12,7 +12,10 @@ namespace SR
 {
 
 /**
- * TODO
+ * Make tree zones for all the scaffoleds in the supplied moves_map,
+ * and exchange in the corresponding free zones. This completes the
+ * journey of move-patches. We only need the moves map for this, 
+ * the layout was effectively consumed by the inversion pass.
  **/ 
 class MoveInPass
 {
