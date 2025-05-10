@@ -5,11 +5,10 @@
 #include "lacing.hpp"
 #include "relation_test.hpp"
 
+//#define NEWS
+
 
 using namespace SR;    
-
-//#define TRACE_CATEGORY_RELATION
-
 
 Orderings::Orderings( shared_ptr<Lacing> lacing, const XTreeDatabase *db_ ) :
     plan( lacing ),
@@ -50,7 +49,7 @@ void Orderings::MainTreeInsertGeometric(TreeZone *zone, const DBCommon::CoreInfo
 	set<TreePtr<Node>> invalidated = GetTerminusAndBaseAncestors(*subtree);
 
 	for( TreePtr<Node> x : invalidated )                        
-		InsertSolo( simple_compare_ordering, x );           
+		InsertSolo( simple_compare_ordering, x );   			
 }
 
 
@@ -78,21 +77,25 @@ void Orderings::MainTreeDeleteGeometric(TreeZone *zone, const DBCommon::CoreInfo
 
 void Orderings::InsertIntrinsic(FreeZone *zone)
 {
+#ifndef NEWS
 	node_reached_count.clear();
 
     DBWalk::Actions actions;
     actions.push_back( bind(&Orderings::InsertIntrinsicAction, this, placeholders::_1) );
     db_walker.WalkFreeZone( &actions, zone, DBWalk::WIND_OUT );
+#endif
 }
 
 
 void Orderings::DeleteIntrinsic(FreeZone *zone)
 {
+#ifndef NEWS
 	node_reached_count.clear();
 
     DBWalk::Actions actions;
     actions.push_back( bind(&Orderings::DeleteIntrinsicAction, this, placeholders::_1) );
     db_walker.WalkFreeZone( &actions, zone, DBWalk::WIND_OUT );
+#endif
 }
 
 
@@ -107,6 +110,11 @@ void Orderings::InsertGeometricAction(const DBWalk::WalkInfo &walk_info, bool do
 		if( simple_compare_ordering.count(walk_info.node)==0 )
 			InsertSolo( simple_compare_ordering, walk_info.node );               
 	}	
+
+#ifdef NEWS
+	if( do_intrinsics )
+		InsertIntrinsicAction(walk_info);
+#endif	
 }
 
 
@@ -128,11 +136,19 @@ void Orderings::DeleteGeometricAction(const DBWalk::WalkInfo &walk_info, bool do
 		if( node_reached_count.at(walk_info.node) == row.incoming_xlinks.size() ) 
 			EraseSolo( simple_compare_ordering, walk_info.node );               
 	} 
+
+#ifdef NEWS
+	if( do_intrinsics )
+		DeleteIntrinsicAction(walk_info);
+#endif	
 }
 
         
 void Orderings::InsertIntrinsicAction(const DBWalk::WalkInfo &walk_info)
 { 	
+	if( dynamic_cast<ScaffoldBase *>(walk_info.node.get()) ) // TODO pass a flag to the walker
+		return;
+
 	// Intrinsic orderings are keyed on nodes, and we don't need to update on the boundary layer
 	// We don't get an XLink for root because it's a free zone walk
 	// We also don't get called on terminii so at_terminus is always false
@@ -151,6 +167,9 @@ void Orderings::InsertIntrinsicAction(const DBWalk::WalkInfo &walk_info)
 
 void Orderings::DeleteIntrinsicAction(const DBWalk::WalkInfo &walk_info)
 {		
+	if( dynamic_cast<ScaffoldBase *>(walk_info.node.get()) ) // TODO pass a flag to the walker
+		return;
+
 	// Intrinsic orderings are keyed on nodes, and we don't need to update on the boundary layer
 	// We don't get an XLink for root because it's a free zone walk
 	// We also don't get called on terminii so at_terminus is always false
