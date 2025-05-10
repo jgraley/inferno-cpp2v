@@ -542,7 +542,6 @@ void OrderingPass::MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch, sha
 	    if( fu )
 		    fu->Validate(db);		
 		
-#ifdef NEW_THING
 	// Make a scaffold that fits in place of the moved-from zone
 	unique_ptr<FreeZone> scaffold_zone = free_zone->MakeScaffold();
 	TreePtr<Node> scaffold_node = scaffold_zone->GetBaseNode();
@@ -553,12 +552,6 @@ void OrderingPass::MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch, sha
 	// Rememeber the association between the scaffold node and the true moved zone
 	TRACE("Making map entry, scaffold node: ")(*scaffold_node)("\n free zone: \n")(*free_zone)("\n");
 	moves_map.mm[scaffold_node] = move(free_zone);
-#else	
-
-	// free_zone is the part of the tree that we just displaced. Make 
-	// a new patch based on it.
-	auto free_patch = make_shared<FreeZonePatch>( move(free_zone), target_tree_patch->MoveChildren() );
-#endif
 
 	// Install the new patch into the layout
 	*target_patch = free_patch;

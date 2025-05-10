@@ -16,7 +16,6 @@ void MoveInPass::Run(MovesMap &moves_map)
 	INDENT("Z");
 	TRACE("Got %u map entries\n", moves_map.mm.size());
 	
-#ifdef NEW_THING
 	for( auto &p : moves_map.mm )
 	{
 		TreePtr<Node> scaffold_node = p.first;
@@ -32,6 +31,5 @@ void MoveInPass::Run(MovesMap &moves_map)
 		TRACE("Exchanging: ")(*scaffold_mutable_tree_zone)("\n free zone: \n")(*move_zone)("\n");
 		db->MainTreeExchange( scaffold_mutable_tree_zone.get(), move_zone.get(), vector<MutableTreeZone *>(), false );											                                     	
 	}
-#endif
 }
 

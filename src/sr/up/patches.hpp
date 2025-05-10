@@ -16,9 +16,6 @@ class XTreeDatabase;
 
 class FreeZonePatch;
 
-#define NEW_THING
-
-
 // ------------------------- Patch --------------------------
 
 class Patch : public Traceable

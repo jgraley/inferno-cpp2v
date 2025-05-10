@@ -10,8 +10,6 @@ using namespace SR;
 
 //#define TRACE_CATEGORY_RELATION
 
-//#define SC_INTRINSIC
-
 
 Orderings::Orderings( shared_ptr<Lacing> lacing, const XTreeDatabase *db_ ) :
     plan( lacing ),
@@ -46,15 +44,10 @@ void Orderings::MainTreeInsertGeometric(TreeZone *zone, const DBCommon::CoreInfo
 	// of the base node so that the SC ordering is intact. Base is
 	// sufficient: what is ancestor of base is ancestor of every node in
 	// the zone. If we act at root, there won't be any.
-#ifdef SC_INTRINSIC
-	set<TreePtr<Node>> invalidated = GetTerminusAndBaseAncestors(*zone);
-	invalidated = UnionOf(invalidated, debt);
-	debt.clear();
-#else
+
 	// Assume there is only one incoming XLink to the node because not a leaf
 	auto subtree = XTreeZone::CreateSubtree(zone->GetBaseXLink());
 	set<TreePtr<Node>> invalidated = GetTerminusAndBaseAncestors(*subtree);
-#endif	
 
 	for( TreePtr<Node> x : invalidated )                        
 		InsertSolo( simple_compare_ordering, x );           
@@ -73,15 +66,10 @@ void Orderings::MainTreeDeleteGeometric(TreeZone *zone, const DBCommon::CoreInfo
 	// node, since removing it will invalidate the SC ordering. Base is
 	// sufficient: what is ancestor of base is ancestor of every node in
 	// the zone. If we act at root, there won't be any.
-#ifdef SC_INTRINSIC
-	if( delete_intrinsics )
-		return; // We deleted everything, so we're done
-	set<TreePtr<Node>> invalidated = GetTerminusAndBaseAncestors(*zone);
-#else
+
 	// Assume there was only one incoming XLink to the node because not a leaf
 	auto subtree = XTreeZone::CreateSubtree(zone->GetBaseXLink());
 	set<TreePtr<Node>> invalidated = GetTerminusAndBaseAncestors(*subtree);
-#endif
 
 	for( TreePtr<Node> x : invalidated )                        
 		EraseSolo( simple_compare_ordering, x );                              
@@ -112,15 +100,13 @@ void Orderings::InsertGeometricAction(const DBWalk::WalkInfo &walk_info)
 { 
 	InsertSolo( depth_first_ordering, walk_info.xlink );
 	
-#ifndef SC_INTRINSIC
 	// Intrinsic orderings are keyed on nodes, and we don't need to update on the boundary layer
 	if( !walk_info.at_terminus )
 	{        
 		// Only if not already
 		if( simple_compare_ordering.count(walk_info.node)==0 )
 			InsertSolo( simple_compare_ordering, walk_info.node );               
-	}
-#endif	
+	}	
 }
 
 
@@ -129,9 +115,6 @@ void Orderings::DeleteGeometricAction(const DBWalk::WalkInfo &walk_info, bool de
 	EraseSolo( depth_first_ordering, walk_info.xlink );
 
 	// Intrinsic orderings are keyed on nodes, and we don't need to update on the boundary layer
-#ifdef SC_INTRINSIC
-	if( delete_intrinsics )
-#endif	
 	if( !walk_info.at_terminus )
 	{
 		// Node table hasn't been updated yet, so node should be in there.
@@ -162,13 +145,7 @@ void Orderings::InsertIntrinsicAction(const DBWalk::WalkInfo &walk_info)
 	
 	TRACE("CAT inserts: ")(walk_info.node)("\n");
 	InsertSolo( category_ordering, walk_info.node );            	
-	TRACE("CAT at %p size=%u\n", this, category_ordering.size());
-
-#ifdef SC_INTRINSIC
-	// Intrinsic orderings are keyed on nodes, and we don't need to update on the boundary layer
-	// Only if not already
-	debt.insert( walk_info.node );	
-#endif		
+	TRACE("CAT at %p size=%u\n", this, category_ordering.size());		
 }
 
 
@@ -186,12 +163,7 @@ void Orderings::DeleteIntrinsicAction(const DBWalk::WalkInfo &walk_info)
 		
 	TRACE("CAT deletes: ")(walk_info.node)("\n");
 	EraseSolo( category_ordering, walk_info.node );   
-	TRACE("CAT at %p size=%u\n", this, category_ordering.size());
-
-#ifdef SC_INTRINSIC
-	if( !walk_info.ancestor_of_terminus )
-		simple_compare_ordering.erase( walk_info.node );               	 
-#endif		
+	TRACE("CAT at %p size=%u\n", this, category_ordering.size());	
 }
 
 
@@ -272,15 +244,10 @@ void Orderings::CheckEqual( shared_ptr<Orderings> l, shared_ptr<Orderings> r, bo
 	if( intrinsic )
 	{
 		CheckEqualOrdering( "CAT", l->category_ordering, r->category_ordering );
-#ifdef SC_INTRINSIC
-		CheckEqualOrdering( "SC", l->simple_compare_ordering, r->simple_compare_ordering );
-#endif		
 	}
 	else
 	{
-#ifndef SC_INTRINSIC
 		CheckEqualOrdering( "SC", l->simple_compare_ordering, r->simple_compare_ordering );
-#endif			
 		CheckEqualOrdering( "DF", l->depth_first_ordering, r->depth_first_ordering );
 	}
 }
