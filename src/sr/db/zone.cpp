@@ -1,4 +1,5 @@
 #include "zone.hpp"
+#include "free_zone.hpp"
 
 #include "scr_engine.hpp"
 
@@ -16,4 +17,10 @@ void Zone::MarkOriginForEmbedded(RequiresSubordinateSCREngine *embedded_agent)
     ASSERT( !IsEmpty() );
     embedded_agent->MarkOriginForEmbedded( GetBaseNode() );   
     // Note: SCREngine will tell us to take a hike if we execute this more than once}
+}
+
+
+unique_ptr<FreeZone> Zone::MakeScaffold() const
+{
+	return FreeZone::CreateScaffoldToSpec(GetBaseNode(), GetNumTerminii());
 }

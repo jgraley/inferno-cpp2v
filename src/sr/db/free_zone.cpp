@@ -22,7 +22,7 @@ unique_ptr<FreeZone> FreeZone::CreateEmpty()
 }
 
 
-unique_ptr<FreeZone> FreeZone::CreateScaffold(TreePtr<Node> base, int num_terminii)
+unique_ptr<FreeZone> FreeZone::CreateScaffoldToSpec(TreePtr<Node> base, int num_terminii)
 {
 	//auto base = (TreePtr<Node>)(*tpi_base);
 	ASSERTS(base);

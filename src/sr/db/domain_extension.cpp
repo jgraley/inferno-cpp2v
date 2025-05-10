@@ -212,6 +212,9 @@ void DomainExtensionChannel::DropStimulusXLink( XLink stimulus_xlink )
     {
         DBCommon::TreeOrdinal tree_ordinal = induced_root_to_tree_ordinal_and_ref_count.at(induced_root).tree_ordinal;
         EraseSolo( induced_root_to_tree_ordinal_and_ref_count, induced_root );
+        
+        // Note: most robust is to delete immediately but defer the 
+        // check/create to the very end of tree update.
         db->ExtraTreeTeardown(tree_ordinal);
     }
     
