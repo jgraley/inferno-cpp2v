@@ -37,14 +37,14 @@ private:
 public:
     const Lacing *GetLacing() const;
 
-    void MainTreeInsertGeometric(TreeZone *zone, const DBCommon::CoreInfo *base_info);
-    void MainTreeDeleteGeometric(TreeZone *zone, const DBCommon::CoreInfo *base_info, bool delete_intrinsics);
+    void MainTreeInsertGeometric(TreeZone *zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
+    void MainTreeDeleteGeometric(TreeZone *zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
     void InsertIntrinsic(FreeZone *zone);
     void DeleteIntrinsic(FreeZone *zone);
 
 private:
-	void InsertGeometricAction(const DBWalk::WalkInfo &walk_info);
-    void DeleteGeometricAction(const DBWalk::WalkInfo &walk_info, bool delete_intrinsics);
+	void InsertGeometricAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsics);
+    void DeleteGeometricAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsics);
 	void InsertIntrinsicAction(const DBWalk::WalkInfo &walk_info);
 	void DeleteIntrinsicAction(const DBWalk::WalkInfo &walk_info);
 

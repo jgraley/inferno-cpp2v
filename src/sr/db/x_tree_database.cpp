@@ -109,7 +109,7 @@ void XTreeDatabase::MainTreeBuild(TreePtr<Node> main_root)
 	db_walker.WalkTreeZone( &actions, main_tree_zone.get(), DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_IN, DBCommon::GetRootCoreInfo() );    	
 
     TRACE("Walk for geometric: orderings\n");
-	orderings->MainTreeInsertGeometric(main_tree_zone.get(), DBCommon::GetRootCoreInfo());   
+	orderings->MainTreeInsertGeometric(main_tree_zone.get(), DBCommon::GetRootCoreInfo(), true);   
 
     TRACE("Domain extension init\n");
     domain_extension->MainTreeBuild();    
@@ -121,7 +121,7 @@ void XTreeDatabase::MainTreeBuild(TreePtr<Node> main_root)
 }
 
 
-void XTreeDatabase::MainTreeExchange( MutableTreeZone *target_tree_zone, FreeZone *free_zone, vector<MutableTreeZone *> fixups, bool delete_intrinsics )
+void XTreeDatabase::MainTreeExchange( MutableTreeZone *target_tree_zone, FreeZone *free_zone, vector<MutableTreeZone *> fixups, bool do_intrinsics )
 {
     TRACE("Replacing target TreeZone:\n")(*target_tree_zone)("\nwith source FreeZone:\n")(*free_zone)("\n");
     ASSERT( target_tree_zone->GetNumTerminii() == free_zone->GetNumTerminii() )
@@ -134,20 +134,20 @@ void XTreeDatabase::MainTreeExchange( MutableTreeZone *target_tree_zone, FreeZon
     const DBCommon::CoreInfo base_info = link_table->GetCoreInfo( target_tree_zone->GetBaseXLink() );
 
     // Remove geometric info that will be invalidated by the exchange 
-    MainTreeDeleteGeometric( target_tree_zone, &base_info, delete_intrinsics );   
+    MainTreeDeleteGeometric( target_tree_zone, &base_info, do_intrinsics );   
     
     // Update the tree. mutable_target_tree_zone becomes the valid new tree zone.
     target_tree_zone->Exchange( free_zone, fixups ); 
     
     // Re-insert geometric info based on new tree zone
-    MainTreeInsertGeometric( target_tree_zone, &base_info );       
+    MainTreeInsertGeometric( target_tree_zone, &base_info, do_intrinsics );       
         
     if( ReadArgs::test_db )
         CheckGeometric();
 }
 
 
-void XTreeDatabase::MainTreeInsertGeometric(TreeZone *zone, const DBCommon::CoreInfo *base_info)
+void XTreeDatabase::MainTreeInsertGeometric(TreeZone *zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
 {
     INDENT("+g");
 
@@ -159,7 +159,7 @@ void XTreeDatabase::MainTreeInsertGeometric(TreeZone *zone, const DBCommon::Core
     db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_IN, base_info );
 
     TRACE("Walk for geometric: orderings\n");
-    orderings->MainTreeInsertGeometric(zone, base_info);
+    orderings->MainTreeInsertGeometric(zone, base_info, do_intrinsics);
     
     // Domain extension wants to roam around the XTree, consulting
     // parents, children, anything really. So we need a separate pass.
@@ -170,7 +170,7 @@ void XTreeDatabase::MainTreeInsertGeometric(TreeZone *zone, const DBCommon::Core
 }
 
 
-void XTreeDatabase::MainTreeDeleteGeometric(TreeZone *zone, const DBCommon::CoreInfo *base_info, bool delete_intrinsics)
+void XTreeDatabase::MainTreeDeleteGeometric(TreeZone *zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
 {
     INDENT("-g");
     
@@ -180,7 +180,7 @@ void XTreeDatabase::MainTreeDeleteGeometric(TreeZone *zone, const DBCommon::Core
     db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_OUT, base_info );   
 
     TRACE("Walk for geometric: orderings\n");
-    orderings->MainTreeDeleteGeometric(zone, base_info, delete_intrinsics);
+    orderings->MainTreeDeleteGeometric(zone, base_info, do_intrinsics);
 
     TRACE("Walk for geometric: domain, tables\n");
     DBWalk::Actions actions2;
@@ -238,7 +238,7 @@ void XTreeDatabase::ExtraTreeBuild(DBCommon::TreeOrdinal tree_ordinal, TreePtr<N
     db_walker.WalkTreeZone( &actions, tree_as_zone.get(), tree_ordinal, DBWalk::WIND_IN, DBCommon::GetRootCoreInfo() );
 
     TRACE("Walk for geometric: orderings\n");
-    orderings->MainTreeInsertGeometric(tree_as_zone.get(), DBCommon::GetRootCoreInfo());
+    orderings->MainTreeInsertGeometric(tree_as_zone.get(), DBCommon::GetRootCoreInfo(), true);
     
     TRACE("Walk for geometric: domain extension\n");
     DBWalk::Actions actions2;
@@ -500,7 +500,7 @@ void XTreeDatabase::CheckGeometric()
 	{
 	    XLink root_xlink = GetRootXLink(p.first);
 		auto tree_as_zone = XTreeZone::CreateSubtree(root_xlink);
-		ref_orderings->MainTreeInsertGeometric(tree_as_zone.get(), DBCommon::GetRootCoreInfo());
+		ref_orderings->MainTreeInsertGeometric(tree_as_zone.get(), DBCommon::GetRootCoreInfo(), false);
 	}   
     
     TRACE("Checking\n");
@@ -528,6 +528,7 @@ void XTreeDatabase::CheckIntrinsic()
 	    XLink root_xlink = GetRootXLink(p.first);
 		auto tree_as_zone = XTreeZone::CreateSubtree(root_xlink);
 		auto free_zone = FreeZone::CreateSubtree(tree_as_zone->GetBaseNode());
+		ref_orderings->MainTreeInsertGeometric(tree_as_zone.get(), DBCommon::GetRootCoreInfo(), true);
 		ref_orderings->InsertIntrinsic(free_zone.get());
 	}   
  

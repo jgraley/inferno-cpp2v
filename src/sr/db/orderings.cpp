@@ -32,12 +32,12 @@ const Lacing *Orderings::GetLacing() const
 }
 
 	
-void Orderings::MainTreeInsertGeometric(TreeZone *zone, const DBCommon::CoreInfo *base_info)
+void Orderings::MainTreeInsertGeometric(TreeZone *zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
 {     
 	node_reached_count.clear();
 
     DBWalk::Actions actions;
-    actions.push_back( bind(&Orderings::InsertGeometricAction, this, placeholders::_1) );
+    actions.push_back( bind(&Orderings::InsertGeometricAction, this, placeholders::_1, do_intrinsics) );
     db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_IN, base_info );
 
 	// We may now re-instate SimpleCompare index entries for parents 
@@ -54,12 +54,12 @@ void Orderings::MainTreeInsertGeometric(TreeZone *zone, const DBCommon::CoreInfo
 }
 
 
-void Orderings::MainTreeDeleteGeometric(TreeZone *zone, const DBCommon::CoreInfo *base_info, bool delete_intrinsics)
+void Orderings::MainTreeDeleteGeometric(TreeZone *zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
 {
 	node_reached_count.clear();
 	
 	DBWalk::Actions actions;
-    actions.push_back( bind(&Orderings::DeleteGeometricAction, this, placeholders::_1, delete_intrinsics) );
+    actions.push_back( bind(&Orderings::DeleteGeometricAction, this, placeholders::_1, do_intrinsics) );
     db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_OUT, base_info );
 
 	// We must delete SimpleCompare index entries for ancestors of the base
@@ -96,7 +96,7 @@ void Orderings::DeleteIntrinsic(FreeZone *zone)
 }
 
 
-void Orderings::InsertGeometricAction(const DBWalk::WalkInfo &walk_info)
+void Orderings::InsertGeometricAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsics)
 { 
 	InsertSolo( depth_first_ordering, walk_info.xlink );
 	
@@ -110,7 +110,7 @@ void Orderings::InsertGeometricAction(const DBWalk::WalkInfo &walk_info)
 }
 
 
-void Orderings::DeleteGeometricAction(const DBWalk::WalkInfo &walk_info, bool delete_intrinsics)
+void Orderings::DeleteGeometricAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsics)
 {		
 	EraseSolo( depth_first_ordering, walk_info.xlink );
 
