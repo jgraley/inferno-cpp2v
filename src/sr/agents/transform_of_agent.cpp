@@ -92,6 +92,11 @@ XLink TransformOfAgent::AugBERoaming::GetXLink() const
 TransformOfAgent::AugBERoaming *TransformOfAgent::AugBERoaming::OnGetChild( const TreePtrInterface *other_tree_ptr )
 {
     ASSERT( !ON_STACK(other_tree_ptr) );
+#ifdef THROW_ON_NULL
+    if( !(TreePtr<Node>)*other_tree_ptr )
+		throw ReachedNullChiled();
+#endif
+		
     // We're roaming the x tree so construct+return Tree style
     // Policy: my_deps will be copied into with the new node, which will add itself
     return new TransformOfAgent::AugBERoaming(*this, GetUtils()->db->GetXLink(other_tree_ptr)); // tree
@@ -143,6 +148,10 @@ TreePtr<Node> TransformOfAgent::AugBEMeandering::GetGenericTreePtr() const
 
 AugBEInterface *TransformOfAgent::AugBEMeandering::OnGetChild( const TreePtrInterface *other_tree_ptr )
 {
+#ifdef THROW_ON_NULL
+    if( !(TreePtr<Node>)*other_tree_ptr )
+		throw ReachedNullChiled();
+#endif		
     // We're moving through our free tree - not illegal. We get here if a free section of tree was
     // already created (eg using AugBEMeandering::OnSetChild()) and we're re-analysiing it, for 
     // example if a transformation has invoked a different transformation and must now pick a 

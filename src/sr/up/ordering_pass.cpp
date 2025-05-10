@@ -507,8 +507,13 @@ void OrderingPass::MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch, sha
 	ASSERT( !target_tree_zone->IsEmpty() ); // See #784
 	
 	// Create the scaffold in a free zone
-	auto free_zone = FreeZone::CreateScaffold( target_tree_zone->GetBaseMutator().GetTreePtrInterface(), 
+#if NEW_SCAFFOLD
+	auto free_zone = FreeZone::CreateScaffold( target_tree_zone->GetBaseNode(), 
 											   target_tree_zone->GetNumTerminii() );
+#else
+	auto free_zone = FreeZone::CreateScaffold( target_tree_zone->GetBaseXLink().GetTreePtrInterface(), 
+											   target_tree_zone->GetNumTerminii() );
+#endif
     
     // Add the scaffold to intrinsic db info to maintain invariant rule
     db->InsertIntrinsic( free_zone.get() );

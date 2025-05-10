@@ -74,6 +74,11 @@ void DomainExtension::PostUpdateActions()
 
 void DomainExtension::InsertGeometricAction(const DBWalk::WalkInfo &walk_info)
 {        
+#ifdef NO_ACTION_ON_SCAFFOLD	
+	if( dynamic_cast<ScaffoldBase *>(walk_info.node.get()) ) // TODO pass a flag to the walker
+		return;
+#endif
+		
     for( auto &p : channels )
          p.second->Insert( walk_info );             
 }
@@ -81,6 +86,11 @@ void DomainExtension::InsertGeometricAction(const DBWalk::WalkInfo &walk_info)
 
 void DomainExtension::DeleteGeometricAction(const DBWalk::WalkInfo &walk_info)
 {        
+#ifdef NO_ACTION_ON_SCAFFOLD	
+	if( dynamic_cast<ScaffoldBase *>(walk_info.node.get()) )
+		return;
+#endif
+
     for( auto &p : channels )
          p.second->Delete( walk_info );
 };

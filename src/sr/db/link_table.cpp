@@ -169,5 +169,5 @@ vector<XLink> LinkTable::GetXLinkDomainAsVector() const
 
 string LinkTable::GetTrace() const
 {
-    return SSPrintf("Link Table with %d rows", rows.size());
+    return SSPrintf("(link table with %d rows)", rows.size());
 }

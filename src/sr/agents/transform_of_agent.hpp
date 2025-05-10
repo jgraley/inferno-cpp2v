@@ -24,6 +24,7 @@ class TransformOfAgent : public virtual RelocatingAgent
 public:    
     class TransUtils;
     class AugBEMeandering;
+    class ReachedNullChiled : public Mismatch {}; // Eg children of scaffold nodes
 
     // ---------------------- AugBECommon ---------------------------    
     class AugBECommon : public AugBEInterface, 

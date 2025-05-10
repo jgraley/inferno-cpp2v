@@ -118,7 +118,7 @@ void XTreeDatabase::MainTreeBuild(TreePtr<Node> main_root)
 
     TRACE("Walk for geometric: domain, tables\n");
     DBWalk::Actions actions;
-    actions.push_back( bind(&Domain::InsertGeometricAction, domain.get(), placeholders::_1) );
+    actions.push_back( bind(&Domain::InsertGeometricAction, domain.get(), placeholders::_1) ); // TODO all these into the correpsonding classes
     actions.push_back( bind(&LinkTable::InsertGeometricAction, link_table.get(), placeholders::_1) );
     actions.push_back( bind(&NodeTable::InsertGeometricAction, node_table.get(), placeholders::_1) );
 	db_walker.WalkTreeZone( &actions, main_tree_zone.get(), DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_IN, DBCommon::GetRootCoreInfo() );    	

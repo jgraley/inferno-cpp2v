@@ -95,5 +95,5 @@ vector<TreePtr<Node>> NodeTable::GetNodeDomainAsVector() const
 
 string NodeTable::GetTrace() const
 {
-    return Trace(rows);
+    return SSPrintf("(node table with %d rows)", rows.size());
 }

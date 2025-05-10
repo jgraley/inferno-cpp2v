@@ -3,6 +3,9 @@
 
 #include "common/common.hpp"
 
+class TreeUtilsInterface;
+template< class TYPE >
+class Scaffold;
 
 // NOTE: Duplicate uses shared_ptr so that it can be overloaded to return
 // the supplied pointer (as done by SpecificIdentifier). Clone is guaranteed
@@ -22,9 +25,23 @@ public:
     }    
 };
 
+// Outside of class to allow partial specialisation; PS prevents
+// compiler spinning trying to make eg Scaffold<Scaffold<Scaffold<Scaffold<...
+// by absorbing the Scaffold and returting utils for the templated type.
+// TODO into own source file etc
+template< class TYPE >
+static const TreeUtilsInterface *MakeTPStatic( const TYPE *source );
+template< class TYPE >
+static const TreeUtilsInterface *MakeTPStatic( const Scaffold<TYPE> *source );
+
+
 #define CLONE_FUNCTION \
     virtual shared_ptr<Cloner> Clone() const  \
     { \
         return Cloner::CloneStatic(this); \
+    } \
+    virtual const TreeUtilsInterface *MakeTP() const  \
+    { \
+        return ::MakeTPStatic(this); \
     }
 #endif
