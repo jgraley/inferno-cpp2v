@@ -11,7 +11,7 @@
 
 //#define DEBUG
 
-//#define NEW_SCAFFOLD
+#define NEW_SCAFFOLD
 
 // I think preferring to move the ancestor is better for OOO since there 
 // are fewer of them (typically) and we're more likely to avoid moving 
