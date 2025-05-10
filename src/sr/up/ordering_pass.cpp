@@ -544,9 +544,14 @@ void OrderingPass::MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch, sha
 	    if( fu )
 		    fu->Validate(db);		
 	
+	unique_ptr<FreeZone> scaffold_zone = free_zone->MakeScaffold();
+	
 	// free_zone is the part of the tree that we just displaced. Make 
 	// a new patch based on it.
 	auto free_patch = make_shared<FreeZonePatch>( move(free_zone), target_tree_patch->MoveChildren() );
+
+	// Store a scaffold that fits in place of the moved-from zone
+	free_patch->scaffold_zone = move(scaffold_zone);
 	
 	// Install the new patch into the layout
 	free_patch->AddEmbeddedMarkers( target_tree_patch->GetEmbeddedMarkers() );               

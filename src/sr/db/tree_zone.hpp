@@ -40,6 +40,7 @@ class XTreeZone : public TreeZone
 public:
     static unique_ptr<XTreeZone> CreateSubtree( XLink base );
     static unique_ptr<XTreeZone> CreateEmpty( XLink base );
+    static unique_ptr<XTreeZone> CreateFromScaffold( XLink scaffold_xlink );
 
     explicit XTreeZone( XLink base, vector<XLink> terminii );
       

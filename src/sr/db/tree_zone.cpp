@@ -82,6 +82,19 @@ unique_ptr<XTreeZone> XTreeZone::CreateEmpty( XLink base )
 }
 
 
+unique_ptr<XTreeZone> XTreeZone::CreateFromScaffold( XLink scaffold_xlink )
+{
+	TreePtr<Node> scaffold = scaffold_xlink.GetChildTreePtr();
+	ScaffoldBase *sbp = dynamic_cast<ScaffoldBase *>(scaffold.get());
+
+	vector<XLink> terminii;
+	for( TreePtr<Node> &tpp : sbp->child_ptrs )
+		terminii.push_back( XLink( scaffold, &tpp ) );
+	
+	return make_unique<XTreeZone>( scaffold_xlink, terminii );
+}
+
+
 XTreeZone::XTreeZone( XLink base_, vector<XLink> terminii_ ) :
     base( base_ ),
     terminii( terminii_ )

@@ -655,6 +655,7 @@ struct Collection : virtual COLLECTION_BASE< VALUE_TYPE >,
 
 struct ScaffoldBase
 {
+    Sequence<Node> child_ptrs;    
 };
 
 
@@ -665,28 +666,27 @@ template<typename VALUE_TYPE>
 struct Scaffold : VALUE_TYPE, ScaffoldBase
 {
     NODE_FUNCTIONS_FINAL
-    Sequence<Node> child_ptrs;    
 };
 
 
 class TreeUtilsInterface
 {
 public:
-    virtual pair<TreePtr<Node>, Sequence<Node> *> MakeScaffold() const = 0;	
+    virtual TreePtr<Node> MakeScaffold() const = 0;	
 };
 
 
 template<typename VALUE_TYPE>
 class TreeUtils : public TreeUtilsInterface
 {
-    pair<TreePtr<Node>, Sequence<Node> *> MakeScaffold() const final
+    TreePtr<Node> MakeScaffold() const final
 	{
 		// Don't instance TreePtr<Scaffold<X>> because very bad things happen
 		// including gcc 10.5 spinning forever chewing up memory (presumably
 		// it's contemplating TreePtr<Scaffold<Scaffold<X>>> etc). 
 		auto scaffold_sp = make_shared<Scaffold<VALUE_TYPE>>(); 
 		TreePtr<Node> scaffold( scaffold_sp );
-		return make_pair( scaffold, &(scaffold_sp->child_ptrs) );
+		return scaffold;
 	}
 };
 

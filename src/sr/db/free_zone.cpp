@@ -28,17 +28,21 @@ unique_ptr<FreeZone> FreeZone::CreateScaffoldToSpec(TreePtr<Node> base, int num_
 	ASSERTS(base);
 	const TreeUtilsInterface *upi = base->MakeTP();
 	ASSERTS(upi);
-	auto pair = upi->MakeScaffold();
+	auto scaffold = upi->MakeScaffold();
 
+	ScaffoldBase *sbp = dynamic_cast<ScaffoldBase *>(scaffold.get());
+	ASSERTS( sbp );
+	Sequence<Node> *ssp = &(sbp->child_ptrs);
+ 
     // Set the base as the scaffolding node
-    auto zone = make_unique<FreeZone>( pair.first, list<Mutator>{} );
+    auto zone = make_unique<FreeZone>( scaffold, list<Mutator>{} );
     
     // Set the terminii as the scaffolding node's scaffold child pointers (the
     // underlying node type's children will be left empty/NULL)
     for( int i=0; i<num_terminii; i++ )
     {
-        ContainerInterface::iterator it = pair.second->insert( Mutator::MakePlaceholder() );
-        zone->AddTerminus( Mutator::CreateFreeContainer(pair.first, pair.second, it) );     
+        ContainerInterface::iterator it = ssp->insert( Mutator::MakePlaceholder() );
+        zone->AddTerminus( Mutator::CreateFreeContainer(scaffold, ssp, it) );     
     }
     
     //FTRACES("Created scaffold with %d terminii\n", num_terminii)("\n");

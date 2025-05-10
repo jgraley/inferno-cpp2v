@@ -136,11 +136,12 @@ public:
     static void ForFreeDepthFirstWalk( shared_ptr<Patch> &base,
                                        function<void(shared_ptr<FreeZonePatch> &patch)> func_in,
                                        function<void(shared_ptr<FreeZonePatch> &patch)> func_out );
-
     string GetTrace() const final;
 
 private:
     unique_ptr<FreeZone> zone;
+public:    
+    unique_ptr<FreeZone> scaffold_zone;    
 };
 
 }
