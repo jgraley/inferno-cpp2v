@@ -50,7 +50,7 @@ public:
     void InsertIntrinsic(FreeZone *zone);
     void DeleteIntrinsic(FreeZone *zone);
 
-    void PerformQueuedExtraTreeActions();
+    void PerformDeferredDomainExcetionActions();
     void ExtraTreeBuild(DBCommon::TreeOrdinal tree_ordinal, TreePtr<Node> root_node);
     void ExtraTreeTeardown(DBCommon::TreeOrdinal tree_ordinal);
 
@@ -100,10 +100,7 @@ private:
     queue<DBCommon::TreeOrdinal> free_tree_ordinals;
 
     DBWalk db_walker;
-    DBCommon::TreeOrdinal next_tree_ordinal;
-        
-    queue<DBCommon::NewTreeInfo> de_extra_insert_queue;
-    queue<DBCommon::TreeOrdinal> extra_tree_destroy_queue;   
+    DBCommon::TreeOrdinal next_tree_ordinal;  
 };    
     
 };

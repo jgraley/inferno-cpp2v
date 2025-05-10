@@ -106,6 +106,10 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink origin_xlink, shared_p
     inversion_pass.RunInversion(origin_mutator, &source_layout);      
     inversion_pass.RunDeleteIntrinsic();
    
+#ifdef DEFERRED_AT_VERY_END
+	db->PerformDeferredDomainExcetionActions();
+#endif
+   
     if( ReadArgs::test_db )
         db->CheckIntrinsic();
 }

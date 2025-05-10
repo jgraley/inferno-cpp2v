@@ -24,21 +24,6 @@ XTreeDatabase::XTreeDatabase( shared_ptr<Lacing> lacing_, DomainExtension::Exten
     orderings( make_shared<Orderings>(lacing, this) ),
     domain_extension( make_shared<DomainExtension>(this, domain_extenders) )
 {
-    auto create_extra_tree = [=](TreePtr<Node> root_node) -> DBCommon::TreeOrdinal
-    {   
-		// Allocate now so we can return the tree ordinal, but enqueue the rest
-        DBCommon::NewTreeInfo info = { AllocateExtraTree(), root_node };
-        de_extra_insert_queue.push( info );       
-        return info.ordinal;
-    };
-
-    auto destroy_extra_tree = [=](DBCommon::TreeOrdinal tree_ordinal)
-    {
-        extra_tree_destroy_queue.push(tree_ordinal);
-    };
-    
-    domain_extension->SetOnExtraTreeFunctions( create_extra_tree, 
-                                               destroy_extra_tree );
 }
 
     
@@ -128,7 +113,7 @@ void XTreeDatabase::MainTreeBuild(TreePtr<Node> main_root)
 
     TRACE("Domain extension init\n");
     domain_extension->MainTreeBuild();    
-    PerformQueuedExtraTreeActions();
+    PerformDeferredDomainExcetionActions(); // More consistent if calls came via tree update layer
         
     // ---------- Relation checks ------------
     orderings->CheckRelations( link_table->GetXLinkDomainAsVector(),
@@ -157,8 +142,10 @@ void XTreeDatabase::MainTreeExchange( MutableTreeZone *target_tree_zone, FreeZon
     // Re-insert geometric info based on new tree zone
     MainTreeInsertGeometric( target_tree_zone, &base_info );       
     
+#ifndef DEFERRED_AT_VERY_END
     // Update domain extension extra trees
-    PerformQueuedExtraTreeActions();
+    PerformDeferredDomainExcetionActions();
+#endif
         
     if( ReadArgs::test_db )
         CheckGeometric();
@@ -168,7 +155,6 @@ void XTreeDatabase::MainTreeExchange( MutableTreeZone *target_tree_zone, FreeZon
 void XTreeDatabase::MainTreeInsertGeometric(TreeZone *zone, const DBCommon::CoreInfo *base_info)
 {
     INDENT("+g");
-    ASSERT( de_extra_insert_queue.empty() );
 
     TRACE("Walk for geometric: domain, tables\n");
     DBWalk::Actions actions;
@@ -192,7 +178,6 @@ void XTreeDatabase::MainTreeInsertGeometric(TreeZone *zone, const DBCommon::Core
 void XTreeDatabase::MainTreeDeleteGeometric(TreeZone *zone, const DBCommon::CoreInfo *base_info, bool delete_intrinsics)
 {
     INDENT("-g");
-    ASSERT( extra_tree_destroy_queue.empty() );
     
     TRACE("Walk for geometric: domain extension\n");
     DBWalk::Actions actions;
@@ -214,7 +199,6 @@ void XTreeDatabase::MainTreeDeleteGeometric(TreeZone *zone, const DBCommon::Core
 void XTreeDatabase::InsertIntrinsic(FreeZone *zone)
 {
     INDENT("+i");
-    ASSERT( de_extra_insert_queue.empty() );
 
     TRACE("Walk for intrinsic: orderings\n");
     orderings->InsertIntrinsic(zone);
@@ -224,30 +208,15 @@ void XTreeDatabase::InsertIntrinsic(FreeZone *zone)
 void XTreeDatabase::DeleteIntrinsic( FreeZone *zone )
 {
     INDENT("-i");
-    ASSERT( extra_tree_destroy_queue.empty() );
     
     TRACE("Walk for intrinsic: orderings\n");
     orderings->DeleteIntrinsic(zone);
 }
 
 
-void XTreeDatabase::PerformQueuedExtraTreeActions()
+void XTreeDatabase::PerformDeferredDomainExcetionActions()
 {
-    domain_extension->PostUpdateActions();
-
-    while(!extra_tree_destroy_queue.empty())
-    {
-        ExtraTreeTeardown( extra_tree_destroy_queue.front() );        
-        
-        extra_tree_destroy_queue.pop();
-    }
-    while(!de_extra_insert_queue.empty())
-    {
-        ExtraTreeBuild( de_extra_insert_queue.front().ordinal, 
-						 de_extra_insert_queue.front().root_node );
-        
-        de_extra_insert_queue.pop();
-    }
+    domain_extension->PerformDeferredActions();
 }
 
 

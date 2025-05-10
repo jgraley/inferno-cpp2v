@@ -56,20 +56,17 @@ public:
 
     static ExtenderSet DetermineExtenders( const set<const SYM::Expression *> &sub_exprs );
 
-    DomainExtension( const XTreeDatabase *db, ExtenderSet extenders );
+    DomainExtension( XTreeDatabase *db, ExtenderSet extenders );
         
-    typedef function<DBCommon::TreeOrdinal(TreePtr<Node>)> CreateExtraTreeFunction;
+    typedef function<DBCommon::TreeOrdinal(TreePtr<Node>, DBCommon::TreeOrdinal)> CreateExtraTreeFunction;
     typedef function<void(DBCommon::TreeOrdinal)> DestroyExtraTreeFunction;
-
-    void SetOnExtraTreeFunctions( CreateExtraTreeFunction create_extra_tree,
-                                  DestroyExtraTreeFunction destroy_extra_tree );
 
     // Gain access to a channel
     const DomainExtensionChannel *GetChannel( const Extender *extender ) const;
 
     // To be called after modifying the tree, and before any search/compare operation
     void MainTreeBuild();
-    void PostUpdateActions();
+    void PerformDeferredActions();
 
 	void InsertGeometricAction(const DBWalk::WalkInfo &walk_info);
 	void DeleteGeometricAction(const DBWalk::WalkInfo &walk_info);
@@ -89,28 +86,23 @@ private:
 class DomainExtensionChannel
 {
 public:    
-       DomainExtensionChannel( const XTreeDatabase *db, const DomainExtension::Extender *extender );
+    DomainExtensionChannel( XTreeDatabase *db, const DomainExtension::Extender *extender );
 
-    void SetOnExtraTreeFunctions( DomainExtension::CreateExtraTreeFunction create_extra_tree,
-                                  DomainExtension::DestroyExtraTreeFunction destroy_extra_tree );
     XLink GetUniqueDomainExtension( XLink stimulus_xlink, TreePtr<Node> node ) const;
     void CreateExtraTree( TreePtr<Node> extra_root_node );
     void CheckStimulusXLink( XLink stimulus_xlink );
     void DropStimulusXLink( XLink stimulus_xlink );
     void Validate() const;
     void MainTreeBuild();
-    void PostUpdateActions();
+    void PerformDeferredActions();
 
     void Insert(const DBWalk::WalkInfo &walk_info);
     void Delete(const DBWalk::WalkInfo &walk_info);
 
 private:
-    const XTreeDatabase *db;
+    XTreeDatabase *db;
     const DomainExtension::Extender *extender;
-
-    DomainExtension::CreateExtraTreeFunction create_extra_tree;
-    DomainExtension::DestroyExtraTreeFunction destroy_extra_tree;
-
+    
     struct InducedAndDeps : Traceable
     {
         InducedAndDeps( TreePtr<Node> induced_root_, set<XLink> deps_ );
@@ -136,7 +128,7 @@ private:
     map<XLink, set<XLink>> dep_to_all_stimulii;
 
     // Here we collect domain extension stimulus XLinks that we will re-create 
-    // during PostUpdateActions() and then clear.
+    // during PerformDeferredActions() and then clear.
     set<XLink> stimulii_to_recheck;
     
     // SimpleCompare equivalence classes over the domain, with refcount = size of the class.

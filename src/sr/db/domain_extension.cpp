@@ -36,18 +36,10 @@ DomainExtension::ExtenderSet DomainExtension::DetermineExtenders( const set<cons
 }
 
 
-DomainExtension::DomainExtension( const XTreeDatabase *db, ExtenderSet extenders )
+DomainExtension::DomainExtension( XTreeDatabase *db, ExtenderSet extenders )
 {
     for( const Extender *extender : extenders )
          channels[extender] = make_unique<DomainExtensionChannel>(db, extender);
-}
-    
-
-void DomainExtension::SetOnExtraTreeFunctions( CreateExtraTreeFunction on_create_extra_tree_,
-                                               DestroyExtraTreeFunction on_destroy_extra_tree_ )
-{
-    for( auto &p : channels )
-        p.second->SetOnExtraTreeFunctions( on_create_extra_tree_, on_destroy_extra_tree_ );
 }
 
 
@@ -65,10 +57,10 @@ void DomainExtension::MainTreeBuild()
 }
 
 
-void DomainExtension::PostUpdateActions()
+void DomainExtension::PerformDeferredActions()
 {
     for( auto &p : channels )
-        p.second->PostUpdateActions();
+        p.second->PerformDeferredActions();
 }
 
 
@@ -104,18 +96,10 @@ void DomainExtension::Validate() const
 
 // ------------------------- DomainExtensionChannel --------------------------
 
-DomainExtensionChannel::DomainExtensionChannel( const XTreeDatabase *db_, const DomainExtension::Extender *extender_ ) :
+DomainExtensionChannel::DomainExtensionChannel( XTreeDatabase *db_, const DomainExtension::Extender *extender_ ) :
     db( db_ ),
     extender( extender_ )
 {
-}
-
-
-void DomainExtensionChannel::SetOnExtraTreeFunctions( DomainExtension::CreateExtraTreeFunction on_create_extra_tree_,
-                                                      DomainExtension::DestroyExtraTreeFunction on_destroy_extra_tree_ )
-{
-    create_extra_tree = on_create_extra_tree_;
-    destroy_extra_tree = on_destroy_extra_tree_;
 }
 
 
@@ -149,13 +133,16 @@ void DomainExtensionChannel::CreateExtraTree( TreePtr<Node> induced_root )
     // TODO maybe only do this if subtree actually would go wrong.
     TreePtr<Node> extra_root_node = SimpleDuplicate::DuplicateSubtree( induced_root );
 
-    // Add the whole subtree to the rest of the database as a new tree
-    DBCommon::TreeOrdinal tree_ordinal = create_extra_tree( extra_root_node );        
- 
+    // Obtain a tree ordinal 
+    DBCommon::TreeOrdinal tree_ordinal = db->AllocateExtraTree();        
+
     // Add this xlink and ordinal to the extension classes as stimulus. 
     // Count begins at 1 since there's one ref (this one)
     (void)induced_root_to_tree_ordinal_and_ref_count.insert( make_pair( extra_root_node, ExtensionClass(tree_ordinal, 1) ) );  
     
+    // Add the whole subtree to the rest of the database as a new tree
+    db->ExtraTreeBuild( tree_ordinal, extra_root_node );
+ 
     Validate();  
 }
 
@@ -224,7 +211,7 @@ void DomainExtensionChannel::DropStimulusXLink( XLink stimulus_xlink )
     {
         DBCommon::TreeOrdinal tree_ordinal = induced_root_to_tree_ordinal_and_ref_count.at(induced_root).tree_ordinal;
         EraseSolo( induced_root_to_tree_ordinal_and_ref_count, induced_root );
-        destroy_extra_tree(tree_ordinal);
+        db->ExtraTreeTeardown(tree_ordinal);
     }
     
     // Remove tracking row for this stimulus xlink
@@ -268,7 +255,7 @@ void DomainExtensionChannel::MainTreeBuild()
 }
 
 
-void DomainExtensionChannel::PostUpdateActions()
+void DomainExtensionChannel::PerformDeferredActions()
 {
     // TODO only do what's left over as invalid from previous deletes 
     // and not restored by inserts
