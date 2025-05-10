@@ -139,10 +139,17 @@ public:
     string GetTrace() const final;
 
 private:
-    unique_ptr<FreeZone> zone;
-public:    
-    unique_ptr<FreeZone> scaffold_zone;    
+    unique_ptr<FreeZone> zone;   
 };
+
+// ------------------------- MovesMap --------------------------
+
+struct MoveMap
+{
+	public:
+	map<TreePtr<Node>, unique_ptr<FreeZone>> moves_map;
+};
+
 
 }
 
