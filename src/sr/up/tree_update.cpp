@@ -110,7 +110,6 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink origin_xlink, shared_p
 	
 	MoveInPass move_in_pass( db );
 	move_in_pass.Run(moves_map);
-    ScaffoldChecker().Run(source_layout);
 	
 	db->PerformDeferredActions();
    

@@ -16,7 +16,7 @@ class XTreeDatabase;
 
 class FreeZonePatch;
 
-//#define NEW_THING
+#define NEW_THING
 
 
 // ------------------------- Patch --------------------------
