@@ -5,9 +5,7 @@
 using namespace SR;
 
 MoveInPass::MoveInPass( XTreeDatabase *db_ ) :
-    db( db_ ),
-    dfr( db ),
-    boundaries( dfr )
+    db( db_ )
 {
 }
 

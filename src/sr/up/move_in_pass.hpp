@@ -20,6 +20,9 @@ public:
 	MoveInPass( XTreeDatabase *db );
 	
 	void Run(shared_ptr<Patch> &layout, MovesMap &moves_map);
+
+private:
+	XTreeDatabase * const db;
 };
 
 }

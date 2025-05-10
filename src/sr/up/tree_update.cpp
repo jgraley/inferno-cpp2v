@@ -114,7 +114,7 @@ void TreeUpdater::TransformToIncrementalAndExecute( XLink origin_xlink, shared_p
 #endif   
 	
 	MoveInPass move_in_pass( db );
-	move_in_pass(source_layout, moves_map)
+	move_in_pass.Run(source_layout, moves_map);
 	
 	db->PerformDeferredActions();
    
