@@ -544,16 +544,16 @@ void OrderingPass::MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch, sha
 	    if( fu )
 		    fu->Validate(db);		
 		
-#ifdef NEW_STUFF
+#ifdef NEW_THING
 	// Make a scaffold that fits in place of the moved-from zone
 	unique_ptr<FreeZone> scaffold_zone = free_zone->MakeScaffold();
-	TreePtr<Node> scaffold_node = scaffold_zone.GetBaseNode();
+	TreePtr<Node> scaffold_node = scaffold_zone->GetBaseNode();
 
 	// Store the scaffold in the layout so it goes into inversion in the right place
 	auto free_patch = make_shared<FreeZonePatch>( move(scaffold_zone), target_tree_patch->MoveChildren() );
 
 	// Rememeber the association between the scaffold node and the true moved zone
-	mm[scaffold_zone] = move(free_zone);
+	moves_map.mm[scaffold_node] = move(free_zone);
 #else	
 
 	// free_zone is the part of the tree that we just displaced. Make 
