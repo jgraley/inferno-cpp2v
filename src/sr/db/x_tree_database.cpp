@@ -113,7 +113,7 @@ void XTreeDatabase::MainTreeBuild(TreePtr<Node> main_root)
 
     TRACE("Domain extension init\n");
     domain_extension->MainTreeBuild();    
-    PerformDeferredDomainExcetionActions(); // More consistent if calls came via tree update layer
+    PerformDeferredActions(); // More consistent if calls came via tree update layer
         
     // ---------- Relation checks ------------
     orderings->CheckRelations( link_table->GetXLinkDomainAsVector(),
@@ -141,11 +141,6 @@ void XTreeDatabase::MainTreeExchange( MutableTreeZone *target_tree_zone, FreeZon
     
     // Re-insert geometric info based on new tree zone
     MainTreeInsertGeometric( target_tree_zone, &base_info );       
-    
-#ifndef DEFERRED_AT_VERY_END
-    // Update domain extension extra trees
-    PerformDeferredDomainExcetionActions();
-#endif
         
     if( ReadArgs::test_db )
         CheckGeometric();
@@ -214,7 +209,7 @@ void XTreeDatabase::DeleteIntrinsic( FreeZone *zone )
 }
 
 
-void XTreeDatabase::PerformDeferredDomainExcetionActions()
+void XTreeDatabase::PerformDeferredActions()
 {
     domain_extension->PerformDeferredActions();
 }

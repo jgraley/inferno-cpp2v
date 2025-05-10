@@ -14,8 +14,6 @@
 #include "db_walk.hpp"
 #include <queue>
 
-// Drop -ui arg
-
 namespace SR 
 {    
       
@@ -50,7 +48,7 @@ public:
     void InsertIntrinsic(FreeZone *zone);
     void DeleteIntrinsic(FreeZone *zone);
 
-    void PerformDeferredDomainExcetionActions();
+    void PerformDeferredActions();
     void ExtraTreeBuild(DBCommon::TreeOrdinal tree_ordinal, TreePtr<Node> root_node);
     void ExtraTreeTeardown(DBCommon::TreeOrdinal tree_ordinal);
 

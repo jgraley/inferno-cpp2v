@@ -11,6 +11,8 @@
 
 //#define DEBUG
 
+//#define NEW_SCAFFOLD
+
 // I think preferring to move the ancestor is better for OOO since there 
 // are fewer of them (typically) and we're more likely to avoid moving 
 // the leaf zones which could be big. It's also more symmetrical, because 
@@ -507,7 +509,7 @@ void OrderingPass::MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch, sha
 	ASSERT( !target_tree_zone->IsEmpty() ); // See #784
 	
 	// Create the scaffold in a free zone
-#if NEW_SCAFFOLD
+#ifdef NEW_SCAFFOLD
 	auto free_zone = FreeZone::CreateScaffold( target_tree_zone->GetBaseNode(), 
 											   target_tree_zone->GetNumTerminii() );
 #else

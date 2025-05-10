@@ -8,6 +8,7 @@
 #include "helpers/simple_duplicate.hpp"
 
 //#define TRACE_DOMAIN_EXTEND
+#define NO_ACTION_ON_SCAFFOLD
 
 #define TRUE_DE
 

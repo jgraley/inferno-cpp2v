@@ -4,6 +4,8 @@
 #include "db/x_tree_database.hpp"
 #include "../../tree/cpptree.hpp"
 
+#define THROW_ON_NULL
+
 using namespace SR;
 
 // ---------------------- TransformOfAgent::AugBECommon ---------------------------    
