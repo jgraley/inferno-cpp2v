@@ -54,7 +54,6 @@ struct TreePtrInterface : virtual Itemiser::Element
     static Orderable::Diff Compare3Way(const TreePtrInterface &l, const TreePtrInterface &r);
     static Orderable::Diff Compare3WayIdentity(const TreePtrInterface &l, const TreePtrInterface &r);
     virtual TreePtr<Node> MakeValueArchetype() const = 0; // construct an object of the VALUE_TYPE type (NOT a clone)
-    virtual pair<TreePtr<Node>, Sequence<Node> *> MakeScaffold() const = 0;
 
 #ifdef TREE_POINTER_REF_COUNTS
 	virtual void AddRef(const Traceable *ref) const = 0;
@@ -267,8 +266,6 @@ struct TreePtr : virtual TreePtrCommon,
     {
         return TreePtr<Node>(new VALUE_TYPE); // means VALUE_TYPE must be constructable
     }
-    
-    pair<TreePtr<Node>, Sequence<Node> *> MakeScaffold() const final;
 };
 
 // -------------------------- Extra bits ----------------------------    

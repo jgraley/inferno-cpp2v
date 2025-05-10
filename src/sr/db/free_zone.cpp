@@ -22,28 +22,6 @@ unique_ptr<FreeZone> FreeZone::CreateEmpty()
 }
 
 
-unique_ptr<FreeZone> FreeZone::CreateScaffold(const TreePtrInterface *tpi_base, int num_terminii)
-{
-    // Create the scaffolding, of type that matches the supplied TreePtr<>
-    auto pair = tpi_base->MakeScaffold();        
-    
-    // Set the base as the scaffolding node
-    auto zone = make_unique<FreeZone>( pair.first, list<Mutator>{} );
-    
-    // Set the terminii as the scaffolding node's scaffold child pointers (the
-    // underlying node type's children will be left empty/NULL)
-    for( int i=0; i<num_terminii; i++ )
-    {
-        ContainerInterface::iterator it = pair.second->insert( Mutator::MakePlaceholder() );
-        zone->AddTerminus( Mutator::CreateFreeContainer(pair.first, pair.second, it) );     
-    }
-    
-    //FTRACES("Created scaffold with %d terminii\n", num_terminii)("\n");
-
-    return zone;
-}
-
-
 unique_ptr<FreeZone> FreeZone::CreateScaffold(TreePtr<Node> base, int num_terminii)
 {
 	//auto base = (TreePtr<Node>)(*tpi_base);

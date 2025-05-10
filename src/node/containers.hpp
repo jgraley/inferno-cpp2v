@@ -669,22 +669,6 @@ struct Scaffold : VALUE_TYPE, ScaffoldBase
 };
 
 
-
-
-
-template<typename VALUE_TYPE>
-pair<TreePtr<Node>, Sequence<Node> *> TreePtr<VALUE_TYPE>::MakeScaffold() const
-{
-    // Don't instance TreePtr<Scaffold<X>> because very bad things happen
-    // including gcc 10.5 spinning forever chewing up memory (presumably
-    // it's contemplating TreePtr<Scaffold<Scaffold<X>>> etc). 
-    auto scaffold_sp = make_shared<Scaffold<VALUE_TYPE>>(); 
-    TreePtr<Node> scaffold( scaffold_sp );
-    return make_pair( scaffold, &(scaffold_sp->child_ptrs) );
-}
-
-
-
 class TreeUtilsInterface
 {
 public:
