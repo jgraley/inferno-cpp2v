@@ -37,14 +37,12 @@ private:
 public:
     const Lacing *GetLacing() const;
 
-    void MainTreeInsertGeometric(TreeZone *zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
-    void MainTreeDeleteGeometric(TreeZone *zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
+    void MainTreeInsert(TreeZone *zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
+    void MainTreeDelete(TreeZone *zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
 
 private:
-	void InsertGeometricAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsics);
-    void DeleteGeometricAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsics);
-	void InsertIntrinsicAction(const DBWalk::WalkInfo &walk_info);
-	void DeleteIntrinsicAction(const DBWalk::WalkInfo &walk_info);
+	void InsertAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsics);
+    void DeleteAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsics);
 
 	set<TreePtr<Node>> GetTerminusAndBaseAncestors( const TreeZone &tz ) const; 
 

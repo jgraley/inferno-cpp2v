@@ -28,12 +28,12 @@ const Lacing *Orderings::GetLacing() const
 }
 
 	
-void Orderings::MainTreeInsertGeometric(TreeZone *zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
+void Orderings::MainTreeInsert(TreeZone *zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
 {     
 	node_reached_count.clear();
 
     DBWalk::Actions actions;
-    actions.push_back( bind(&Orderings::InsertGeometricAction, this, placeholders::_1, do_intrinsics) );
+    actions.push_back( bind(&Orderings::InsertAction, this, placeholders::_1, do_intrinsics) );
     db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_IN, base_info );
 
 	// We may now re-instate SimpleCompare index entries for parents 
@@ -50,12 +50,12 @@ void Orderings::MainTreeInsertGeometric(TreeZone *zone, const DBCommon::CoreInfo
 }
 
 
-void Orderings::MainTreeDeleteGeometric(TreeZone *zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
+void Orderings::MainTreeDelete(TreeZone *zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
 {
 	node_reached_count.clear();
 	
 	DBWalk::Actions actions;
-    actions.push_back( bind(&Orderings::DeleteGeometricAction, this, placeholders::_1, do_intrinsics) );
+    actions.push_back( bind(&Orderings::DeleteAction, this, placeholders::_1, do_intrinsics) );
     db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_OUT, base_info );
 
 	// We must delete SimpleCompare index entries for ancestors of the base
@@ -72,7 +72,7 @@ void Orderings::MainTreeDeleteGeometric(TreeZone *zone, const DBCommon::CoreInfo
 }
 
 
-void Orderings::InsertGeometricAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsics)
+void Orderings::InsertAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsics)
 { 
 	InsertSolo( depth_first_ordering, walk_info.xlink );
 	
@@ -84,12 +84,25 @@ void Orderings::InsertGeometricAction(const DBWalk::WalkInfo &walk_info, bool do
 			InsertSolo( simple_compare_ordering, walk_info.node );               
 	}	
 
-	if( do_intrinsics )
-		InsertIntrinsicAction(walk_info);
+	if( !do_intrinsics )
+		return;
+				
+	if( dynamic_cast<ScaffoldBase *>(walk_info.node.get()) )
+		return;
+
+	if( node_ref_counts[walk_info.node]++ != 0 )
+	{
+		TRACE("CAT does not insert due existing refs: ")(walk_info.node)("\n");
+		return;
+	}		 
+	
+	TRACE("CAT inserts: ")(walk_info.node)("\n");
+	InsertSolo( category_ordering, walk_info.node );            	
+	TRACE("CAT at %p size=%u\n", this, category_ordering.size());		
 }
 
 
-void Orderings::DeleteGeometricAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsics)
+void Orderings::DeleteAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsics)
 {		
 	EraseSolo( depth_first_ordering, walk_info.xlink );
 
@@ -108,35 +121,10 @@ void Orderings::DeleteGeometricAction(const DBWalk::WalkInfo &walk_info, bool do
 			EraseSolo( simple_compare_ordering, walk_info.node );               
 	} 
 
-	if( do_intrinsics )
-		DeleteIntrinsicAction(walk_info);
-}
-
-        
-void Orderings::InsertIntrinsicAction(const DBWalk::WalkInfo &walk_info)
-{ 	
-	if( dynamic_cast<ScaffoldBase *>(walk_info.node.get()) ) // TODO pass a flag to the walker
+	if( !do_intrinsics )
 		return;
-
-	// Intrinsic orderings are keyed on nodes, and we don't need to update on the boundary layer
-	// We don't get an XLink for root because it's a free zone walk
-	// We also don't get called on terminii so at_terminus is always false
-
-	if( node_ref_counts[walk_info.node]++ != 0 )
-	{
-		TRACE("CAT does not insert due existing refs: ")(walk_info.node)("\n");
-		return;
-	}		 
-	
-	TRACE("CAT inserts: ")(walk_info.node)("\n");
-	InsertSolo( category_ordering, walk_info.node );            	
-	TRACE("CAT at %p size=%u\n", this, category_ordering.size());		
-}
-
-
-void Orderings::DeleteIntrinsicAction(const DBWalk::WalkInfo &walk_info)
-{		
-	if( dynamic_cast<ScaffoldBase *>(walk_info.node.get()) ) // TODO pass a flag to the walker
+		
+	if( dynamic_cast<ScaffoldBase *>(walk_info.node.get()) ) 
 		return;
 
 	// Intrinsic orderings are keyed on nodes, and we don't need to update on the boundary layer
@@ -153,7 +141,7 @@ void Orderings::DeleteIntrinsicAction(const DBWalk::WalkInfo &walk_info)
 	EraseSolo( category_ordering, walk_info.node );   
 	TRACE("CAT at %p size=%u\n", this, category_ordering.size());	
 }
-
+       
 
 set<TreePtr<Node>> Orderings::GetTerminusAndBaseAncestors( const TreeZone &tz ) const
 {

@@ -47,7 +47,7 @@ bool NodeTable::IsDeclarer(const DBWalk::WalkInfo &walk_info) const
 }
 
 
-void NodeTable::InsertGeometricAction(const DBWalk::WalkInfo &walk_info)
+void NodeTable::InsertAction(const DBWalk::WalkInfo &walk_info)
 {
 	// Create if not already there
 	TRACE("NODE TABLE weakly inserts row for: ")(walk_info.node)("\n");
@@ -59,7 +59,7 @@ void NodeTable::InsertGeometricAction(const DBWalk::WalkInfo &walk_info)
 }
 
 
-void NodeTable::DeleteGeometricAction(const DBWalk::WalkInfo &walk_info)
+void NodeTable::DeleteAction(const DBWalk::WalkInfo &walk_info)
 {
 	// Should already be there
 	Row &row = rows.at(walk_info.node);

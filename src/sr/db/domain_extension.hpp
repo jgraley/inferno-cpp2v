@@ -68,8 +68,8 @@ public:
     void MainTreeBuild();
     void PerformDeferredActions();
 
-	void InsertGeometricAction(const DBWalk::WalkInfo &walk_info);
-	void DeleteGeometricAction(const DBWalk::WalkInfo &walk_info);
+	void InsertAction(const DBWalk::WalkInfo &walk_info);
+	void DeleteAction(const DBWalk::WalkInfo &walk_info);
     
     void Validate() const;
     

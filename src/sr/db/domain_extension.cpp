@@ -65,10 +65,10 @@ void DomainExtension::PerformDeferredActions()
 }
 
 
-void DomainExtension::InsertGeometricAction(const DBWalk::WalkInfo &walk_info)
+void DomainExtension::InsertAction(const DBWalk::WalkInfo &walk_info)
 {        
 #ifdef NO_ACTION_ON_SCAFFOLD	
-	if( dynamic_cast<ScaffoldBase *>(walk_info.node.get()) ) // TODO pass a flag to the walker
+	if( dynamic_cast<ScaffoldBase *>(walk_info.node.get()) )
 		return;
 #endif
 		
@@ -77,7 +77,7 @@ void DomainExtension::InsertGeometricAction(const DBWalk::WalkInfo &walk_info)
 }
 
 
-void DomainExtension::DeleteGeometricAction(const DBWalk::WalkInfo &walk_info)
+void DomainExtension::DeleteAction(const DBWalk::WalkInfo &walk_info)
 {        
 #ifdef NO_ACTION_ON_SCAFFOLD	
 	if( dynamic_cast<ScaffoldBase *>(walk_info.node.get()) )
