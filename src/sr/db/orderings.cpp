@@ -89,18 +89,21 @@ void Orderings::InsertAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsi
 	if( simple_compare_ordering.count(walk_info.node)==0 )
 		InsertSolo( simple_compare_ordering, walk_info.node );               
 
-	if( !do_intrinsics )
-		return;
-			
-	if( node_ref_counts[walk_info.node]++ != 0 )
-	{
-		TRACE("CAT does not insert due existing refs: ")(walk_info.node)("\n");
-		return;
-	}		 
-	
-	TRACE("CAT inserts: ")(walk_info.node)("\n");
-	InsertSolo( category_ordering, walk_info.node );            	
-	TRACE("CAT at %p size=%u\n", this, category_ordering.size());		
+	if( do_intrinsics )
+	{		
+		ASSERT( (node_ref_counts[walk_info.node] == 0) ==
+		        (category_ordering.count(walk_info.node)==0) );
+		
+		if( node_ref_counts[walk_info.node]++ != 0 )
+		{
+			TRACE("CAT does not insert due existing refs: ")(walk_info.node)("\n");
+			return;
+		}		 
+		
+		TRACE("CAT inserts: ")(walk_info.node)("\n");
+		InsertSolo( category_ordering, walk_info.node );            	
+		TRACE("CAT at %p size=%u\n", this, category_ordering.size());		
+	}
 }
 
 
@@ -126,21 +129,21 @@ void Orderings::DeleteAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsi
 	if( node_reached_count.at(walk_info.node) == row.incoming_xlinks.size() ) 
 		EraseSolo( simple_compare_ordering, walk_info.node );               
 	
-	if( !do_intrinsics )
-		return;		
-
-	if( walk_info.at_terminus )
-		return;
-
-	if( --node_ref_counts[walk_info.node] != 0 )
-	{
-		TRACE("CAT does not delete due existing refs: ")(walk_info.node)("\n");
-		return;
-	}	
+	if( do_intrinsics )
+	{		
+		ASSERT( (node_reached_count.at(walk_info.node) == row.incoming_xlinks.size()) ==
+		        (node_ref_counts[walk_info.node] == 1) );
 		
-	TRACE("CAT deletes: ")(walk_info.node)("\n");
-	EraseSolo( category_ordering, walk_info.node );   
-	TRACE("CAT at %p size=%u\n", this, category_ordering.size());	
+		if( --node_ref_counts[walk_info.node] != 0 )
+		{
+			TRACE("CAT does not delete due existing refs: ")(walk_info.node)("\n");
+			return;
+		}	
+			
+		TRACE("CAT deletes: ")(walk_info.node)("\n");
+		EraseSolo( category_ordering, walk_info.node );   
+		TRACE("CAT at %p size=%u\n", this, category_ordering.size());	
+	}
 }
        
 
