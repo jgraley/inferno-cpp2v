@@ -78,20 +78,20 @@ void Orderings::InsertAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsi
 { 
 	InsertSolo( depth_first_ordering, walk_info.xlink );
 
+	// Remaining orderings are keyed on nodes, and we don't need to update on the boundary layer
+	if( walk_info.at_terminus )
+		return;
+
 	if( dynamic_cast<ScaffoldBase *>(walk_info.node.get()) )
 		return;
 
-	// Intrinsic orderings are keyed on nodes, and we don't need to update on the boundary layer
-	if( !walk_info.at_terminus )
-	{        
-		// Only if not already
-		if( simple_compare_ordering.count(walk_info.node)==0 )
-			InsertSolo( simple_compare_ordering, walk_info.node );               
-	}	
+	// Only if not already
+	if( simple_compare_ordering.count(walk_info.node)==0 )
+		InsertSolo( simple_compare_ordering, walk_info.node );               
 
 	if( !do_intrinsics )
 		return;
-				
+			
 	if( node_ref_counts[walk_info.node]++ != 0 )
 	{
 		TRACE("CAT does not insert due existing refs: ")(walk_info.node)("\n");
@@ -108,26 +108,29 @@ void Orderings::DeleteAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsi
 {		
 	EraseSolo( depth_first_ordering, walk_info.xlink );
 
+	// Remaining orderings are keyed on nodes, and we don't need to update on the boundary layer
+	if( walk_info.at_terminus )
+		return;
+
 	if( dynamic_cast<ScaffoldBase *>(walk_info.node.get()) )
 		return;
 
-	// Intrinsic orderings are keyed on nodes, and we don't need to update on the boundary layer
-	if( !walk_info.at_terminus )
-	{
-		// Node table hasn't been updated yet, so node should be in there.
-		NodeTable::Row row = db->GetNodeRow(walk_info.node); 
-		ASSERT( row.incoming_xlinks.count(walk_info.xlink)==1 );
+	// Node table hasn't been updated yet, so node should be in there.
+	NodeTable::Row row = db->GetNodeRow(walk_info.node); 
+	ASSERT( row.incoming_xlinks.count(walk_info.xlink)==1 );
 		
-		// Track the number of times we've reached each node in current zone
-		node_reached_count[walk_info.node]++;     
+	// Track the number of times we've reached each node in current zone
+	node_reached_count[walk_info.node]++;     
 
-		// Only remove if this was the last incoming XLink to the node
-		if( node_reached_count.at(walk_info.node) == row.incoming_xlinks.size() ) 
-			EraseSolo( simple_compare_ordering, walk_info.node );               
-	} 
+	// Only remove if this was the last incoming XLink to the node
+	if( node_reached_count.at(walk_info.node) == row.incoming_xlinks.size() ) 
+		EraseSolo( simple_compare_ordering, walk_info.node );               
 	
 	if( !do_intrinsics )
 		return;		
+
+	if( walk_info.at_terminus )
+		return;
 
 	if( --node_ref_counts[walk_info.node] != 0 )
 	{
