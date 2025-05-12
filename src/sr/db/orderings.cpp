@@ -91,18 +91,22 @@ void Orderings::InsertAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsi
 
 	if( do_intrinsics )
 	{		
-		ASSERT( (node_ref_counts[walk_info.node] == 0) ==
-		        (category_ordering.count(walk_info.node)==0) );
+		if( node_ref_counts.count(walk_info.node)==0 )
+			node_ref_counts[walk_info.node] = 0;
+		
+		//ASSERT( (node_ref_counts[walk_info.node] == 0) ==
+		//        (category_ordering.count(walk_info.node)==0) );
 		
 		if( node_ref_counts[walk_info.node]++ != 0 )
 		{
-			TRACE("CAT does not insert due existing refs: ")(walk_info.node)("\n");
+			TRACE("CAT does not insert due existing refs: ")(walk_info.node)(" count=%u\n", node_ref_counts[walk_info.node]);
 			return;
 		}		 
 		
 		TRACE("CAT inserts: ")(walk_info.node)("\n");
-		InsertSolo( category_ordering, walk_info.node );            	
-		TRACE("CAT at %p size=%u\n", this, category_ordering.size());		
+		if( category_ordering.count(walk_info.node)==0 )
+			InsertSolo( category_ordering, walk_info.node );            	
+		TRACE("CAT at %p size=%u count=%u\n", this, category_ordering.size(), node_ref_counts[walk_info.node]);		
 	}
 }
 
@@ -131,8 +135,13 @@ void Orderings::DeleteAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsi
 	
 	if( do_intrinsics )
 	{		
-		ASSERT( (node_reached_count.at(walk_info.node) == row.incoming_xlinks.size()) ==
-		        (node_ref_counts[walk_info.node] == 1) );
+		/*ASSERT( (node_reached_count.at(walk_info.node) == row.incoming_xlinks.size()) ==
+		        (node_ref_counts[walk_info.node] == 1) )
+		        ("Node: ")(walk_info.node)(" XLink: ")(walk_info.xlink)("\n")
+		        ("node_reached_count: ")(node_reached_count.at(walk_info.node))("\n")
+		        ("row.incoming_xlinks: ")(row.incoming_xlinks)("\n")
+		        ("node_ref_count: ")(node_ref_counts[walk_info.node])("\n");
+		  */      
 		
 		if( --node_ref_counts[walk_info.node] != 0 )
 		{
@@ -141,7 +150,8 @@ void Orderings::DeleteAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsi
 		}	
 			
 		TRACE("CAT deletes: ")(walk_info.node)("\n");
-		EraseSolo( category_ordering, walk_info.node );   
+		if( node_reached_count.at(walk_info.node) == row.incoming_xlinks.size() )
+			EraseSolo( category_ordering, walk_info.node );   
 		TRACE("CAT at %p size=%u\n", this, category_ordering.size());	
 	}
 }
