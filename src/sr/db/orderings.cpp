@@ -5,8 +5,6 @@
 #include "lacing.hpp"
 #include "relation_test.hpp"
 
-#define NEWS
-
 using namespace SR;    
 
 Orderings::Orderings( shared_ptr<Lacing> lacing, const XTreeDatabase *db_ ) :
@@ -48,9 +46,7 @@ void Orderings::MainTreeInsert(TreeZone *zone, const DBCommon::CoreInfo *base_in
 	set<TreePtr<Node>> invalidated = GetTerminusAndBaseAncestors(*subtree);
 
 	for( TreePtr<Node> x : invalidated )                        
-#ifdef NEWS
 		if( !dynamic_cast<ScaffoldBase *>(x.get()) )
-#endif
 			InsertSolo( simple_compare_ordering, x );   			
 }
 
@@ -73,9 +69,7 @@ void Orderings::MainTreeDelete(TreeZone *zone, const DBCommon::CoreInfo *base_in
 	set<TreePtr<Node>> invalidated = GetTerminusAndBaseAncestors(*subtree);
 
 	for( TreePtr<Node> x : invalidated )                        
-#ifdef NEWS
 		if( !dynamic_cast<ScaffoldBase *>(x.get()) )
-#endif		
 			EraseSolo( simple_compare_ordering, x );                              
 }
 
@@ -84,10 +78,8 @@ void Orderings::InsertAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsi
 { 
 	InsertSolo( depth_first_ordering, walk_info.xlink );
 
-#ifdef NEWS
 	if( dynamic_cast<ScaffoldBase *>(walk_info.node.get()) )
 		return;
-#endif	
 
 	// Intrinsic orderings are keyed on nodes, and we don't need to update on the boundary layer
 	if( !walk_info.at_terminus )
@@ -96,11 +88,6 @@ void Orderings::InsertAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsi
 		if( simple_compare_ordering.count(walk_info.node)==0 )
 			InsertSolo( simple_compare_ordering, walk_info.node );               
 	}	
-
-#ifndef NEWS
-	if( dynamic_cast<ScaffoldBase *>(walk_info.node.get()) )
-		return;
-#endif	
 
 	if( !do_intrinsics )
 		return;
@@ -121,10 +108,8 @@ void Orderings::DeleteAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsi
 {		
 	EraseSolo( depth_first_ordering, walk_info.xlink );
 
-#ifdef NEWS
 	if( dynamic_cast<ScaffoldBase *>(walk_info.node.get()) )
 		return;
-#endif	
 
 	// Intrinsic orderings are keyed on nodes, and we don't need to update on the boundary layer
 	if( !walk_info.at_terminus )
@@ -140,18 +125,9 @@ void Orderings::DeleteAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsi
 		if( node_reached_count.at(walk_info.node) == row.incoming_xlinks.size() ) 
 			EraseSolo( simple_compare_ordering, walk_info.node );               
 	} 
-
-#ifndef NEWS
-	if( dynamic_cast<ScaffoldBase *>(walk_info.node.get()) )
-		return;
-#endif
 	
 	if( !do_intrinsics )
-		return;
-		
-	// Intrinsic orderings are keyed on nodes, and we don't need to update on the boundary layer
-	// We don't get an XLink for root because it's a free zone walk
-	// We also don't get called on terminii so at_terminus is always false
+		return;		
 
 	if( --node_ref_counts[walk_info.node] != 0 )
 	{
