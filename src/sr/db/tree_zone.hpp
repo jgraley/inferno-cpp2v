@@ -79,6 +79,7 @@ public:
     void SetBaseMutator( const Mutator &new_base );
     const Mutator &GetTerminusMutator(size_t index) const;	
 
+	FreeZone ExchangeFreeToFree( const FreeZone &new_free_zone, vector<MutableTreeZone *> fixups );
     void Exchange( FreeZone *free_zone, vector<MutableTreeZone *> fixups );
        
     string GetTrace() const override;

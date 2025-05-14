@@ -28,7 +28,7 @@ const Lacing *Orderings::GetLacing() const
 }
 
 	
-void Orderings::MainTreeInsert(TreeZone *zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
+void Orderings::MainTreeInsert(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
 {     
 	node_reached_count.clear();
 
@@ -42,7 +42,7 @@ void Orderings::MainTreeInsert(TreeZone *zone, const DBCommon::CoreInfo *base_in
 	// the zone. If we act at root, there won't be any.
 
 	// Assume there is only one incoming XLink to the node because not a leaf
-	auto subtree = XTreeZone::CreateSubtree(zone->GetBaseXLink());
+	auto subtree = XTreeZone::CreateSubtree(zone.GetBaseXLink());
 	set<TreePtr<Node>> invalidated = GetTerminusAndBaseAncestors(*subtree);
 
 	for( TreePtr<Node> x : invalidated )                        
@@ -51,7 +51,7 @@ void Orderings::MainTreeInsert(TreeZone *zone, const DBCommon::CoreInfo *base_in
 }
 
 
-void Orderings::MainTreeDelete(TreeZone *zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
+void Orderings::MainTreeDelete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
 {
 	node_reached_count.clear();
 	
@@ -65,7 +65,7 @@ void Orderings::MainTreeDelete(TreeZone *zone, const DBCommon::CoreInfo *base_in
 	// the zone. If we act at root, there won't be any.
 
 	// Assume there was only one incoming XLink to the node because not a leaf
-	auto subtree = XTreeZone::CreateSubtree(zone->GetBaseXLink());
+	auto subtree = XTreeZone::CreateSubtree(zone.GetBaseXLink());
 	set<TreePtr<Node>> invalidated = GetTerminusAndBaseAncestors(*subtree);
 
 	for( TreePtr<Node> x : invalidated )                        

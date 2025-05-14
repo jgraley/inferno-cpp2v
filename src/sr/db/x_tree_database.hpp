@@ -40,11 +40,10 @@ public:
     void MainTreeBuild(TreePtr<Node> main_root);
     
     // Incremental strategy: perform updates on zones
-	FreeZone ExchangeFreeToFree( MutableTreeZone *target_tree_zone, const FreeZone &free_zone, vector<MutableTreeZone *> fixups, bool do_intrinsics );
-    void MainTreeExchange( MutableTreeZone *target_tree_zone, FreeZone *free_zone, vector<MutableTreeZone *> fixups, bool do_intrinsics );
+	FreeZone ExchangeFreeToFree( MutableTreeZone &target_tree_zone, const FreeZone &new_free_zone, vector<MutableTreeZone *> fixups, bool do_intrinsics );
         
-    void MainTreeInsert(TreeZone *zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
-    void MainTreeDelete(TreeZone *zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
+    void MainTreeInsert(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
+    void MainTreeDelete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
 
     void PerformDeferredActions();
     void ExtraTreeBuild(DBCommon::TreeOrdinal tree_ordinal, TreePtr<Node> root_node);

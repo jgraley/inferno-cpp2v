@@ -37,8 +37,8 @@ private:
 public:
     const Lacing *GetLacing() const;
 
-    void MainTreeInsert(TreeZone *zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
-    void MainTreeDelete(TreeZone *zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
+    void MainTreeInsert(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
+    void MainTreeDelete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
 
 private:
 	void InsertAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsics);

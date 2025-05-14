@@ -505,7 +505,7 @@ void OrderingPass::MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch, sha
 	ASSERT( !target_tree_zone->IsEmpty() ); // See #784
 	
 	// Create the scaffold in a free zone
-	auto free_zone = target_tree_zone->MakeScaffold();
+	auto scaffold_zone_from = target_tree_zone->MakeScaffold();
     
     // Determine the fix-ups we'll need to do for tree zones in neighbouring patches
     vector<MutableTreeZone *> fixups;	
@@ -530,9 +530,9 @@ void OrderingPass::MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch, sha
 	// the original contents, which we shall move
 	target_tree_zone->Validate(db);
 		
-	TRACE("I will exchange tree zone:\n")(target_tree_zone)("\nwith free zone:\n")(free_zone)("\nand fix up these tree zones:\n")(fixups)("\n");
-	*free_zone = db->ExchangeFreeToFree( target_tree_zone, *free_zone, fixups, false );
-	TRACE("After exchanging I have tree zone:\n")(target_tree_zone)("\nand free zone:\n")(free_zone)("\n");
+	TRACE("I will exchange tree zone:\n")(target_tree_zone)("\nwith free zone:\n")(scaffold_zone_from)("\nand fix up these tree zones:\n")(fixups)("\n");
+	auto moving_free_zone = make_unique<FreeZone>(db->ExchangeFreeToFree( *target_tree_zone, *scaffold_zone_from, fixups, false ));
+	TRACE("After exchanging I have tree zone:\n")(target_tree_zone)("\nand free zone:\n")(moving_free_zone)("\n");
 
 	target_tree_zone->Validate(db);
 	for( MutableTreeZone *fu : fixups )
@@ -540,15 +540,15 @@ void OrderingPass::MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch, sha
 		    fu->Validate(db);		
 		
 	// Make a scaffold that fits in place of the moved-from zone
-	unique_ptr<FreeZone> scaffold_zone = free_zone->MakeScaffold();
-	TreePtr<Node> scaffold_node = scaffold_zone->GetBaseNode();
+	unique_ptr<FreeZone> scaffold_zone_to = moving_free_zone->MakeScaffold();
+	TreePtr<Node> scaffold_base_to = scaffold_zone_to->GetBaseNode();
 
 	// Store the scaffold in the layout so it goes into inversion in the right place
-	auto free_patch = make_shared<FreeZonePatch>( move(scaffold_zone), target_tree_patch->MoveChildren() );
+	auto free_patch = make_shared<FreeZonePatch>( move(scaffold_zone_to), target_tree_patch->MoveChildren() );
 
 	// Rememeber the association between the scaffold node and the true moved zone
-	TRACE("Making map entry, scaffold node: ")(*scaffold_node)("\n free zone: \n")(*free_zone)("\n");
-	moves_map.mm[scaffold_node] = move(free_zone);
+	TRACE("Making map entry, scaffold node: ")(*scaffold_base_to)("\n free zone: \n")(*moving_free_zone)("\n");
+	moves_map.mm[scaffold_base_to] = move(moving_free_zone);
 
 	// Install the new patch into the layout
 	*target_patch = free_patch;

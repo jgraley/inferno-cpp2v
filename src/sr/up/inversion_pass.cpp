@@ -107,5 +107,5 @@ void InversionPass::Invert( LocatedPatch lze )
     FreeZone new_free_zone = *free_patch->GetZone();
     
     // Write it into the tree
-    db->ExchangeFreeToFree( &target_tree_zone, new_free_zone, fixups, true );        
+    db->ExchangeFreeToFree( target_tree_zone, new_free_zone, fixups, true );        
 }

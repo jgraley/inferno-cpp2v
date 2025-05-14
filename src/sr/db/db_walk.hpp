@@ -35,12 +35,12 @@ public:
     typedef list< Action > Actions;
    
     void WalkTreeZone( const Actions *actions,
-                       const TreeZone *zone,
+                       const TreeZone &zone,
                        const DBCommon::TreeOrdinal tree_ordinal,
                        Wind wind,
                        const DBCommon::CoreInfo *base_info );
     void WalkFreeZone( const Actions *actions,
-                       const FreeZone *zone,
+                       const FreeZone &zone,
                        Wind wind );
 
 private:

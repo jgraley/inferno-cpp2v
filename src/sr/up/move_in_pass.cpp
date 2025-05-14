@@ -29,7 +29,7 @@ void MoveInPass::Run(MovesMap &moves_map)
 		unique_ptr<MutableTreeZone> scaffold_mutable_tree_zone = db->CreateMutableTreeZone( scaffold_tree_zone->GetBaseXLink(),
 													                                     	scaffold_tree_zone->GetTerminusXLinks() );
 		TRACE("Exchanging: ")(*scaffold_mutable_tree_zone)("\n free zone: \n")(*move_zone)("\n");
-		db->ExchangeFreeToFree( scaffold_mutable_tree_zone.get(), *move_zone, vector<MutableTreeZone *>(), false );											                                     	
+		db->ExchangeFreeToFree( *scaffold_mutable_tree_zone, *move_zone, vector<MutableTreeZone *>(), false );											                                     	
 	}
 }
 

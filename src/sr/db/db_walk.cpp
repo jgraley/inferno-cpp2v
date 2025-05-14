@@ -5,28 +5,28 @@ using namespace SR;
 //#define TRACE_WALK
 
 void DBWalk::WalkTreeZone( const Actions *actions,
-                           const TreeZone *tree_zone,
+                           const TreeZone &tree_zone,
                            const DBCommon::TreeOrdinal tree_ordinal, 
                            Wind wind,
                            const DBCommon::CoreInfo *base_info )
 {
-    TRACE("Walking tree zone: ")(*tree_zone)("\n");
+    TRACE("Walking tree zone: ")(tree_zone)("\n");
     ASSERT( base_info );
-    WalkKit kit { actions, tree_zone, nullptr, tree_ordinal, wind, 0U };
-    VisitBase( kit, tree_zone->GetBaseXLink(), tree_zone->GetBaseNode(), base_info );  
-    ASSERT( kit.next_terminus_index == tree_zone->GetNumTerminii() )
-          ("Zone has %u terminii", tree_zone->GetNumTerminii())
+    WalkKit kit { actions, &tree_zone, nullptr, tree_ordinal, wind, 0U };
+    VisitBase( kit, tree_zone.GetBaseXLink(), tree_zone.GetBaseNode(), base_info );  
+    ASSERT( kit.next_terminus_index == tree_zone.GetNumTerminii() )
+          ("Zone has %u terminii", tree_zone.GetNumTerminii())
           (" but only visited %u", kit.next_terminus_index); // should have visited all the terminii
     TRACE("Done walking tree zone\n");
 }
 
 
 void DBWalk::WalkFreeZone( const Actions *actions,
-                           const FreeZone *free_zone,
+                           const FreeZone &free_zone,
                            Wind wind )
 {
-    TRACE("Walking free zone: ")(*free_zone)("\n");
-    if( free_zone->IsEmpty() )
+    TRACE("Walking free zone: ")(free_zone)("\n");
+    if( free_zone.IsEmpty() )
 		return;
 				
     const DBCommon::CoreInfo base_info = { TreePtr<Node>(),                       
@@ -35,10 +35,10 @@ void DBWalk::WalkFreeZone( const Actions *actions,
                                            nullptr,
                                            -1,                                                       
                                            ContainerInterface::iterator() };
-    WalkKit kit { actions, nullptr, free_zone, (SR::DBCommon::TreeOrdinal)(-1), wind, 0U };
-    VisitBase( kit, XLink(), free_zone->GetBaseNode(), &base_info );  
-    ASSERT( kit.next_terminus_index == free_zone->GetNumTerminii() )
-          ("Zone has %u terminii", free_zone->GetNumTerminii())
+    WalkKit kit { actions, nullptr, &free_zone, (SR::DBCommon::TreeOrdinal)(-1), wind, 0U };
+    VisitBase( kit, XLink(), free_zone.GetBaseNode(), &base_info );  
+    ASSERT( kit.next_terminus_index == free_zone.GetNumTerminii() )
+          ("Zone has %u terminii", free_zone.GetNumTerminii())
           (" but only visited %u", kit.next_terminus_index); // should have visited all the terminii
     TRACE("Done walking free zone\n");
 }

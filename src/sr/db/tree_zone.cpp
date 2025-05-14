@@ -236,20 +236,23 @@ const Mutator &MutableTreeZone::GetTerminusMutator(size_t index) const
 }
 
 
-void MutableTreeZone::Exchange( FreeZone *free_zone, vector<MutableTreeZone *> fixups )
-{    		
+FreeZone MutableTreeZone::ExchangeFreeToFree( const FreeZone &new_free_zone, vector<MutableTreeZone *> fixups )
+{	
 	// Should be true regardless of empty zones
-	ASSERT( GetNumTerminii() == free_zone->GetNumTerminii() );
+	ASSERT( GetNumTerminii() == new_free_zone.GetNumTerminii() );
 
-	ASSERT( !free_zone->IsEmpty() ); // Could add support but apparently don't need it rn	       	        
+	ASSERT( !new_free_zone.IsEmpty() ); // Could add support but apparently don't need it rn	       	        
      
+	// Get a non-const version so we can start changing the terminii etc
+	FreeZone free_zone = new_free_zone;
+	
     // Do a co-walk and exchange one at a time. We want to modify the parent
     // sides of the terminii in-place, leaving valid mutators behind. 
     vector<MutableTreeZone *>::iterator fixups_it = fixups.begin();
-    FreeZone::TerminusIterator free_terminus_it = free_zone->GetTerminiiBegin();    
+    FreeZone::TerminusIterator free_terminus_it = free_zone.GetTerminiiBegin();    
     for( Mutator &tree_terminus : terminii )
     {
-        ASSERT( free_terminus_it != free_zone->GetTerminiiEnd() ); // length mismatch    
+        ASSERT( free_terminus_it != free_zone.GetTerminiiEnd() ); // length mismatch    
                          
 		if( !fixups.empty() && *fixups_it )
 			ASSERT( (*fixups_it)->GetBaseMutator() == tree_terminus );
@@ -275,19 +278,21 @@ void MutableTreeZone::Exchange( FreeZone *free_zone, vector<MutableTreeZone *> f
         if( !fixups.empty() )
 			fixups_it++;
     } 
-    ASSERT( free_terminus_it == free_zone->GetTerminiiEnd() ); // length mismatch  
+    ASSERT( free_terminus_it == free_zone.GetTerminiiEnd() ); // length mismatch  
 
     // Exchange the base. We want to modify the child side of the base
     // in-place, leaving valid mutators behind. 
 	TreePtr<Node> original_tree_zone_base = base.GetChildTreePtr();
 
-    TreePtr<Node> free_base = free_zone->GetBaseNode();
+    TreePtr<Node> free_base = free_zone.GetBaseNode();
     (void)base.ExchangeChild( free_base );	// deep 
     
     if( original_tree_zone_base )
-		free_zone->SetBase( original_tree_zone_base );	
+		free_zone.SetBase( original_tree_zone_base );	
 	else
-		*free_zone = *FreeZone::CreateEmpty();		
+		free_zone = *FreeZone::CreateEmpty();		
+		
+	return free_zone;
 }
 
 
