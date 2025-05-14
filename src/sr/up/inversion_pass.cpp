@@ -104,11 +104,8 @@ void InversionPass::Invert( LocatedPatch lze )
          
     // Make the inverted TZ    
     MutableTreeZone target_tree_zone( move(base_mutator), move(terminii_mutators) );    
-    FreeZone free_zone = *free_patch->GetZone();
+    FreeZone new_free_zone = *free_patch->GetZone();
     
     // Write it into the tree
-    db->MainTreeExchange( &target_tree_zone, &free_zone, fixups, true );   
-    
-    // Remember the extracted free zone (material that was in the inverted tree zones) for intrinsic deletes
-    extracted_free_zones.push_back( move(free_zone) );        
+    db->ExchangeFreeToFree( &target_tree_zone, new_free_zone, fixups, true );        
 }

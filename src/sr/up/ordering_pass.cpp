@@ -531,7 +531,7 @@ void OrderingPass::MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch, sha
 	target_tree_zone->Validate(db);
 		
 	TRACE("I will exchange tree zone:\n")(target_tree_zone)("\nwith free zone:\n")(free_zone)("\nand fix up these tree zones:\n")(fixups)("\n");
-	db->MainTreeExchange( target_tree_zone, free_zone.get(), fixups, false );
+	*free_zone = db->ExchangeFreeToFree( target_tree_zone, *free_zone, fixups, false );
 	TRACE("After exchanging I have tree zone:\n")(target_tree_zone)("\nand free zone:\n")(free_zone)("\n");
 
 	target_tree_zone->Validate(db);

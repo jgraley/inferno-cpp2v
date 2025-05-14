@@ -38,8 +38,6 @@ private:
     void Invert(LocatedPatch lzfe);
 
     XTreeDatabase * const db;
-    
-    vector<FreeZone> extracted_free_zones;
 };
 
 }

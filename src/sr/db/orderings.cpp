@@ -91,9 +91,6 @@ void Orderings::InsertAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsi
 
 	if( do_intrinsics )
 	{		
-		if( node_ref_counts.count(walk_info.node)==0 )
-			node_ref_counts[walk_info.node] = 0;
-		
 		//ASSERT( (node_ref_counts[walk_info.node] == 0) ==
 		//        (category_ordering.count(walk_info.node)==0) );
 		
