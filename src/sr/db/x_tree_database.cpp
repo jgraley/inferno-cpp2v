@@ -120,6 +120,14 @@ void XTreeDatabase::MainTreeBuild(TreePtr<Node> main_root)
 }
 
 
+FreeZone XTreeDatabase::ExchangeFreeToFree( MutableTreeZone *target_tree_zone, const FreeZone &free_zone, vector<MutableTreeZone *> fixups, bool do_intrinsics )
+{
+	FreeZone my_fz = free_zone;
+	MainTreeExchange( target_tree_zone, &my_fz, fixups, do_intrinsics );
+	return my_fz;
+}
+
+
 void XTreeDatabase::MainTreeExchange( MutableTreeZone *target_tree_zone, FreeZone *free_zone, vector<MutableTreeZone *> fixups, bool do_intrinsics )
 {
     TRACE("Replacing target TreeZone:\n")(*target_tree_zone)("\nwith source FreeZone:\n")(*free_zone)("\n");

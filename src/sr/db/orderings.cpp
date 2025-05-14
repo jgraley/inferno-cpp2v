@@ -104,8 +104,7 @@ void Orderings::InsertAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsi
 		}		 
 		
 		TRACE("CAT inserts: ")(walk_info.node)("\n");
-		if( category_ordering.count(walk_info.node)==0 )
-			InsertSolo( category_ordering, walk_info.node );            	
+		InsertSolo( category_ordering, walk_info.node );            	
 		TRACE("CAT at %p size=%u count=%u\n", this, category_ordering.size(), node_ref_counts[walk_info.node]);		
 	}
 }
@@ -150,8 +149,7 @@ void Orderings::DeleteAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsi
 		}	
 			
 		TRACE("CAT deletes: ")(walk_info.node)("\n");
-		if( node_reached_count.at(walk_info.node) == row.incoming_xlinks.size() )
-			EraseSolo( category_ordering, walk_info.node );   
+		EraseSolo( category_ordering, walk_info.node );   
 		TRACE("CAT at %p size=%u\n", this, category_ordering.size());	
 	}
 }
