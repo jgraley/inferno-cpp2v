@@ -16,7 +16,7 @@ const NodeTable::Row &NodeTable::GetRow(TreePtr<Node> node) const
     ASSERT( node );
     ASSERT( HasRow(node) )("\n")
           ("X tree database: no node row for ")(node)("\n")
-          ("Node xlink_table: ")(rows);
+          ("Node table: ")(rows);
     return rows.at(node);
 }
 

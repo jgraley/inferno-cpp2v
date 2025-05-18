@@ -48,7 +48,11 @@ public:
 
 private:
     void AssetsInsert(DBCommon::TreeOrdinal tree_ordinal, TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
+    void AssetsInsertDeux(DBCommon::TreeOrdinal tree_ordinal1, TreeZone &zone1, const DBCommon::CoreInfo *base_info1,
+                          DBCommon::TreeOrdinal tree_ordinal2, TreeZone &zone2, const DBCommon::CoreInfo *base_info2 ); 
     void AssetsDelete(DBCommon::TreeOrdinal tree_ordinal, TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
+    void AssetsDeleteDeux(DBCommon::TreeOrdinal tree_ordinal1, TreeZone &zone1, const DBCommon::CoreInfo *base_info1,
+                          DBCommon::TreeOrdinal tree_ordinal2, TreeZone &zone2, const DBCommon::CoreInfo *base_info2 ); 
 
 public:
     void PerformDeferredActions();

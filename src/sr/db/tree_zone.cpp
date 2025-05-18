@@ -303,7 +303,7 @@ void MutableTreeZone::Swap( TreeZone &tree_zone_r, vector<MutableTreeZone *> fix
 	ASSERT( !IsEmpty() ); // TODO overcautious?      
 	ASSERT( !tree_zone_r.IsEmpty() ); // TODO overcautious?      
 
-	auto mutable_tree_zone_r = dynamic_cast<MutableTreeZone &>(tree_zone_r);
+	auto &mutable_tree_zone_r = dynamic_cast<MutableTreeZone &>(tree_zone_r);
 
     // Do a co-walk and exchange one at a time. We want to modify the parent
     // sides of the terminii in-place, leaving valid mutators behind. 

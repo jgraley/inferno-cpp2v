@@ -202,21 +202,19 @@ void XTreeDatabase::SwapTreeToTree( DBCommon::TreeOrdinal tree_ordinal_l, Mutabl
     const DBCommon::CoreInfo base_info_r = link_table->GetCoreInfo( tree_zone_r.GetBaseXLink() );
 
     // Remove geometric info that will be invalidated by the exchange 
-    AssetsDelete( tree_ordinal_l, tree_zone_l, &base_info_l, false );   
-    AssetsDelete( tree_ordinal_r, tree_zone_r, &base_info_r, false );   
+    AssetsDeleteDeux( tree_ordinal_l, tree_zone_l, &base_info_l, tree_ordinal_r, tree_zone_r, &base_info_r );   
     
     // Update the tree. mutable_target_tree_zone becomes the valid new tree zone.
     // Invariant wrt intrinisc asset state.
     tree_zone_l.Swap( tree_zone_r, fixups_l, fixups_r ); 
     
-    DumpTables();
+    //DumpTables();
     
     TRACE("After swapping target TreeZones:\n")(tree_zone_l)
          ("\nand: ")(tree_zone_r)("\n");    
          
     // Re-insert geometric info based on new tree zone. 
-    AssetsInsert( tree_ordinal_l, tree_zone_l, &base_info_l, false );       
-    AssetsInsert( tree_ordinal_r, tree_zone_r, &base_info_r, false );       
+    AssetsInsertDeux( tree_ordinal_l, tree_zone_l, &base_info_l, tree_ordinal_r, tree_zone_r, &base_info_r );       
         
     if( ReadArgs::test_db )
         CheckGeometric();
@@ -245,6 +243,34 @@ void XTreeDatabase::AssetsInsert(DBCommon::TreeOrdinal tree_ordinal, TreeZone &z
     db_walker.WalkTreeZone( &actions2, zone, tree_ordinal, DBWalk::WIND_IN, base_info );
 }
 
+    
+void XTreeDatabase::AssetsInsertDeux(DBCommon::TreeOrdinal tree_ordinal1, TreeZone &zone1, const DBCommon::CoreInfo *base_info1,
+									 DBCommon::TreeOrdinal tree_ordinal2, TreeZone &zone2, const DBCommon::CoreInfo *base_info2 )
+{
+    INDENT("+d");
+
+	// Geom only!!!
+    TRACE("Walk for geometric: domain, tables\n");
+    DBWalk::Actions actions;
+    actions.push_back( bind(&Domain::InsertAction, domain.get(), placeholders::_1) );
+    actions.push_back( bind(&LinkTable::InsertAction, link_table.get(), placeholders::_1) );
+    actions.push_back( bind(&NodeTable::InsertAction, node_table.get(), placeholders::_1) );
+    db_walker.WalkTreeZone( &actions, zone1, tree_ordinal1, DBWalk::WIND_IN, base_info1 );
+    db_walker.WalkTreeZone( &actions, zone2, tree_ordinal2, DBWalk::WIND_IN, base_info2 );
+
+    TRACE("Walk for geometric: orderings\n");
+    orderings->Insert(zone1, base_info1, false); // doesn't use tree_ordinal
+    orderings->Insert(zone2, base_info2, false); // doesn't use tree_ordinal
+    
+    // Domain extension wants to roam around the XTree, consulting
+    // parents, children, anything really. So we need a separate pass.
+    TRACE("Walk for geometric: domain extension\n");
+    DBWalk::Actions actions2;
+    actions2.push_back( bind(&DomainExtension::InsertAction, domain_extension.get(), placeholders::_1) );
+    db_walker.WalkTreeZone( &actions2, zone1, tree_ordinal1, DBWalk::WIND_IN, base_info1 );
+    db_walker.WalkTreeZone( &actions2, zone2, tree_ordinal2, DBWalk::WIND_IN, base_info2 );
+}
+
 
 void XTreeDatabase::AssetsDelete(DBCommon::TreeOrdinal tree_ordinal, TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
 {
@@ -264,6 +290,32 @@ void XTreeDatabase::AssetsDelete(DBCommon::TreeOrdinal tree_ordinal, TreeZone &z
     actions2.push_back( bind(&LinkTable::DeleteAction, link_table.get(), placeholders::_1) );
     actions2.push_back( bind(&Domain::DeleteAction, domain.get(), placeholders::_1) );
     db_walker.WalkTreeZone( &actions2, zone, tree_ordinal, DBWalk::WIND_OUT, base_info );   
+}
+
+
+void XTreeDatabase::AssetsDeleteDeux(DBCommon::TreeOrdinal tree_ordinal1, TreeZone &zone1, const DBCommon::CoreInfo *base_info1,
+									 DBCommon::TreeOrdinal tree_ordinal2, TreeZone &zone2, const DBCommon::CoreInfo *base_info2 )
+{
+    INDENT("-d");
+    
+	// Geom only!!!
+    TRACE("Walk for geometric: domain extension\n");
+    DBWalk::Actions actions;
+    actions.push_back( bind(&DomainExtension::DeleteAction, domain_extension.get(), placeholders::_1) );
+    db_walker.WalkTreeZone( &actions, zone1, tree_ordinal1, DBWalk::WIND_OUT, base_info1 );   
+    db_walker.WalkTreeZone( &actions, zone2, tree_ordinal2, DBWalk::WIND_OUT, base_info2 );   
+
+    TRACE("Walk for geometric: orderings\n");
+    orderings->Delete(zone1, base_info1, false); // doesn't use tree_ordinal
+    orderings->Delete(zone2, base_info2, false); // doesn't use tree_ordinal
+
+    TRACE("Walk for geometric: domain, tables\n");
+    DBWalk::Actions actions2;
+    actions2.push_back( bind(&NodeTable::DeleteAction, node_table.get(), placeholders::_1) );
+    actions2.push_back( bind(&LinkTable::DeleteAction, link_table.get(), placeholders::_1) );
+    actions2.push_back( bind(&Domain::DeleteAction, domain.get(), placeholders::_1) );
+    db_walker.WalkTreeZone( &actions2, zone1, tree_ordinal1, DBWalk::WIND_OUT, base_info1 );   
+    db_walker.WalkTreeZone( &actions2, zone2, tree_ordinal2, DBWalk::WIND_OUT, base_info2 );   
 }
 
 

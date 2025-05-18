@@ -11,7 +11,7 @@
 #include "../db/db_common.hpp"
 #include <functional>
 
-//#define USE_SWAPS
+#define USE_SWAPS
 
 namespace SR 
 {
