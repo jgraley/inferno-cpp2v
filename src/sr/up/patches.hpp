@@ -149,11 +149,7 @@ private:
 struct MovesMap
 {
 	public:
-#ifdef USE_SWAPS
 	typedef pair<DBCommon::TreeOrdinal, MutableTreeZone> MovePayload;
-#else
-	typedef unique_ptr<FreeZone> MovePayload;
-#endif	
 	map<TreePtr<Node>, MovePayload> mm;
 };
 
