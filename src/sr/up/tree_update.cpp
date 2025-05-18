@@ -32,7 +32,12 @@ TreeUpdater::TreeUpdater(XTreeDatabase *x_tree_db) :
 void TreeUpdater::BuildMainTree( TreePtr<Node> main_tree_root )
 {
 	unique_ptr<FreeZone> main_tree_zone = FreeZone::CreateSubtree(main_tree_root);
-	db->MainTreeBuild(*main_tree_zone);
+	db->BuildTree(DBCommon::TreeOrdinal::MAIN, *main_tree_zone);
+	
+	db->PerformDeferredActions();
+	
+    if( ReadArgs::test_db )
+        db->CheckIntrinsic();	
 }
 
 

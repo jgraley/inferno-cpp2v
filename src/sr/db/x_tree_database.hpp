@@ -35,9 +35,9 @@ public:
     void WalkAllTrees(const DBWalk::Actions *actions,
                        DBWalk::Wind wind);
                                      
-    // Use both monolithic and incremental updates in order 
-    // to build full db during analysis stage
-    void MainTreeBuild(const FreeZone &main_tree_free_zone);
+    // Zone goes into tree. Geom and intrinsic assets inserted. No deletes.
+    void BuildTree(DBCommon::TreeOrdinal tree_ordinal, const FreeZone &free_zone);
+    void TeardownTree(DBCommon::TreeOrdinal tree_ordinal);
     
     // Incremental strategy: perform updates on zones
 	FreeZone ExchangeFreeToFree( MutableTreeZone &target_tree_zone, const FreeZone &new_free_zone, vector<MutableTreeZone *> fixups, bool do_intrinsics );
@@ -46,8 +46,6 @@ public:
     void MainTreeDelete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
 
     void PerformDeferredActions();
-    void ExtraTreeBuild(DBCommon::TreeOrdinal tree_ordinal, const FreeZone &free_zone);
-    void ExtraTreeTeardown(DBCommon::TreeOrdinal tree_ordinal);
 
     const DomainExtensionChannel *GetDEChannel( const DomainExtension::Extender *extender ) const;
     const Domain &GetDomain() const;

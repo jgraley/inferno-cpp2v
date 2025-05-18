@@ -51,13 +51,6 @@ const DomainExtensionChannel *DomainExtension::GetChannel( const Extender *exten
 }
 
 
-void DomainExtension::MainTreeBuild()
-{
-    for( auto &p : channels )
-        p.second->MainTreeBuild();
-}
-
-
 void DomainExtension::PerformDeferredActions()
 {
     for( auto &p : channels )
@@ -73,7 +66,7 @@ void DomainExtension::InsertAction(const DBWalk::WalkInfo &walk_info)
 #endif
 		
     for( auto &p : channels )
-         p.second->Insert( walk_info );             
+         p.second->InsertAction( walk_info );             
 }
 
 
@@ -85,7 +78,7 @@ void DomainExtension::DeleteAction(const DBWalk::WalkInfo &walk_info)
 #endif
 
     for( auto &p : channels )
-         p.second->Delete( walk_info );
+         p.second->DeleteAction( walk_info );
 };
 
 
@@ -145,7 +138,7 @@ void DomainExtensionChannel::CreateExtraTree( TreePtr<Node> induced_root )
 	auto extra_free_zone = FreeZone::CreateSubtree(extra_root_node);
 
     // Add the whole subtree to the rest of the database as a new tree
-    db->ExtraTreeBuild( tree_ordinal, *extra_free_zone );
+    db->BuildTree( tree_ordinal, *extra_free_zone );
  
     Validate();  
 }
@@ -217,8 +210,8 @@ void DomainExtensionChannel::DropStimulusXLink( XLink stimulus_xlink )
         EraseSolo( induced_root_to_tree_ordinal_and_ref_count, induced_root );
         
         // Note: most robust is to delete immediately but defer the 
-        // check/create to the very end of tree update.
-        db->ExtraTreeTeardown(tree_ordinal);
+        // check/create to the very end of tree update. Asymmetry approved!
+        db->TeardownTree(tree_ordinal);
     }
     
     // Remove tracking row for this stimulus xlink
@@ -250,18 +243,6 @@ void DomainExtensionChannel::Validate() const
 }
 
 
-
-void DomainExtensionChannel::MainTreeBuild()
-{
-    TRACE("Initial DE build for extender ")(*extender)("\n");
-
-    for( XLink xlink : db->GetDomain().unordered_domain )
-        CheckStimulusXLink( xlink );
-    
-    Validate();
-}
-
-
 void DomainExtensionChannel::PerformDeferredActions()
 {
     // TODO only do what's left over as invalid from previous deletes 
@@ -275,14 +256,14 @@ void DomainExtensionChannel::PerformDeferredActions()
 }
 
 
-void DomainExtensionChannel::Insert(const DBWalk::WalkInfo &walk_info)
+void DomainExtensionChannel::InsertAction(const DBWalk::WalkInfo &walk_info)
 {
     XLink stimulus_xlink = walk_info.xlink;
     CheckStimulusXLink( stimulus_xlink );
 }
 
 
-void DomainExtensionChannel::Delete(const DBWalk::WalkInfo &walk_info)
+void DomainExtensionChannel::DeleteAction(const DBWalk::WalkInfo &walk_info)
 {
     INDENT("D");
     XLink xlink = walk_info.xlink;

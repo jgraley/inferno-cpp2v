@@ -65,7 +65,6 @@ public:
     const DomainExtensionChannel *GetChannel( const Extender *extender ) const;
 
     // To be called after modifying the tree, and before any search/compare operation
-    void MainTreeBuild();
     void PerformDeferredActions();
 
 	void InsertAction(const DBWalk::WalkInfo &walk_info);
@@ -93,11 +92,10 @@ public:
     void CheckStimulusXLink( XLink stimulus_xlink );
     void DropStimulusXLink( XLink stimulus_xlink );
     void Validate() const;
-    void MainTreeBuild();
     void PerformDeferredActions();
 
-    void Insert(const DBWalk::WalkInfo &walk_info);
-    void Delete(const DBWalk::WalkInfo &walk_info);
+    void InsertAction(const DBWalk::WalkInfo &walk_info);
+    void DeleteAction(const DBWalk::WalkInfo &walk_info);
 
 private:
     XTreeDatabase *db;

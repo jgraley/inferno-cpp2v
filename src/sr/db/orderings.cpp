@@ -28,13 +28,13 @@ const Lacing *Orderings::GetLacing() const
 }
 
 	
-void Orderings::MainTreeInsert(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
+void Orderings::Insert(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
 {     
 	node_reached_count.clear();
 
     DBWalk::Actions actions;
     actions.push_back( bind(&Orderings::InsertAction, this, placeholders::_1, do_intrinsics) );
-    db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_IN, base_info );
+    db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_IN, base_info );
 
 	// We may now re-instate SimpleCompare index entries for parents 
 	// of the base node so that the SC ordering is intact. Base is
@@ -51,13 +51,13 @@ void Orderings::MainTreeInsert(TreeZone &zone, const DBCommon::CoreInfo *base_in
 }
 
 
-void Orderings::MainTreeDelete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
+void Orderings::Delete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
 {
 	node_reached_count.clear();
 	
 	DBWalk::Actions actions;
     actions.push_back( bind(&Orderings::DeleteAction, this, placeholders::_1, do_intrinsics) );
-    db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_OUT, base_info );
+    db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_OUT, base_info );
 
 	// We must delete SimpleCompare index entries for ancestors of the base
 	// node, since removing it will invalidate the SC ordering. Base is
