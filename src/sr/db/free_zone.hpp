@@ -22,6 +22,7 @@ class FreeZone : public Zone
 { 
 public:
     typedef list<Mutator>::iterator TerminusIterator;
+    typedef list<Mutator>::const_iterator TerminusConstIterator;
 
     static unique_ptr<FreeZone> CreateSubtree( TreePtr<Node> base );
     static unique_ptr<FreeZone> CreateEmpty();
@@ -45,6 +46,8 @@ public:
     void AddTerminus(Mutator &&terminus);      
     TerminusIterator GetTerminiiBegin();
     TerminusIterator GetTerminiiEnd();
+    TerminusConstIterator GetTerminiiBegin() const;
+    TerminusConstIterator GetTerminiiEnd() const;
 
     string GetTrace() const;
     

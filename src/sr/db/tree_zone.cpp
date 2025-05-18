@@ -296,6 +296,54 @@ FreeZone MutableTreeZone::Exchange( const FreeZone &new_free_zone, vector<Mutabl
 }
 
 
+void MutableTreeZone::Swap( TreeZone &tree_zone_r, vector<MutableTreeZone *> fixups_l, vector<MutableTreeZone *> fixups_r )
+{
+	// Should be true regardless of empty zones
+	ASSERT( GetNumTerminii() == tree_zone_r.GetNumTerminii() );
+	ASSERT( !IsEmpty() ); // TODO overcautious?      
+	ASSERT( !tree_zone_r.IsEmpty() ); // TODO overcautious?      
+
+	auto mutable_tree_zone_r = dynamic_cast<MutableTreeZone &>(tree_zone_r);
+
+    // Do a co-walk and exchange one at a time. We want to modify the parent
+    // sides of the terminii in-place, leaving valid mutators behind. 
+    vector<MutableTreeZone *>::iterator fixups_l_it = fixups_l.begin();
+    vector<MutableTreeZone *>::iterator fixups_r_it = fixups_r.begin();
+    vector<Mutator>::iterator terminus_it_r = mutable_tree_zone_r.terminii.begin();    
+    for( Mutator &terminus_l : terminii )
+    {
+        ASSERT( terminus_it_r != mutable_tree_zone_r.terminii.end() ); // length mismatch    
+        Mutator &terminus_r = *terminus_it_r;
+         
+		if( !fixups_l.empty() && *fixups_l_it )
+			ASSERT( (*fixups_l_it)->GetBaseMutator() == terminus_l );
+		if( !fixups_r.empty() && *fixups_r_it )
+			ASSERT( (*fixups_r_it)->GetBaseMutator() == terminus_r );
+                         
+	    terminus_l.ExchangeParent(terminus_r); // deep
+		               
+        ASSERT( terminus_l.GetChildTreePtr() );
+        ASSERT( terminus_r.GetChildTreePtr() );
+        
+   		if( !fixups_l.empty() && *fixups_l_it )
+			(*fixups_l_it)->SetBaseMutator(terminus_l);
+   		if( !fixups_r.empty() && *fixups_r_it )
+			(*fixups_r_it)->SetBaseMutator(terminus_r);
+        
+        terminus_it_r++;
+        if( !fixups_l.empty() )
+			fixups_l_it++;
+        if( !fixups_r.empty() )
+			fixups_r_it++;
+    } 
+    ASSERT( terminus_it_r == mutable_tree_zone_r.terminii.end() ); // length mismatch    
+	
+    TreePtr<Node> base_node_r = mutable_tree_zone_r.GetBaseNode();
+    TreePtr<Node> original_base_node_l = base.ExchangeChild( base_node_r );	// deep 
+	(void)mutable_tree_zone_r.base.ExchangeChild( original_base_node_l );		
+}
+
+
 string MutableTreeZone::GetTrace() const
 {
     string s;

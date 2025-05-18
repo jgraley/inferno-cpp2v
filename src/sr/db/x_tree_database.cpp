@@ -86,7 +86,7 @@ void XTreeDatabase::WalkAllTrees(const DBWalk::Actions *actions,
 }
                                  
 
-void XTreeDatabase::BuildTree(DBCommon::TreeOrdinal tree_ordinal, const FreeZone &free_zone)
+MutableTreeZone XTreeDatabase::BuildTree(DBCommon::TreeOrdinal tree_ordinal, const FreeZone &free_zone)
 {      
     INDENT("+t");
     ASSERT( tree_ordinal >= DBCommon::TreeOrdinal(0) );
@@ -96,23 +96,31 @@ void XTreeDatabase::BuildTree(DBCommon::TreeOrdinal tree_ordinal, const FreeZone
     trees_by_ordinal[tree_ordinal] = {sp_root};
     XLink root_xlink = GetRootXLink(tree_ordinal);
     ASSERT( root_xlink );
-	auto tree_zone = XTreeZone::CreateSubtree(root_xlink);
-	TRACE("Tree ordinal: %d zone: ", tree_ordinal)(tree_zone)("\n");
+	auto subtree_zone = XTreeZone::CreateSubtree(root_xlink);
+    TRACE("Tree ordinal: %d subtree zone: ", tree_ordinal)(subtree_zone)("\n");
 
     TRACE("Walk for geometric: domain, tables\n");
     DBWalk::Actions actions;
     actions.push_back( bind(&Domain::InsertAction, domain.get(), placeholders::_1) ); 
     actions.push_back( bind(&LinkTable::InsertAction, link_table.get(), placeholders::_1) );
     actions.push_back( bind(&NodeTable::InsertAction, node_table.get(), placeholders::_1) );
-	db_walker.WalkTreeZone( &actions, *tree_zone, tree_ordinal, DBWalk::WIND_IN, DBCommon::GetRootCoreInfo() );    	
+	db_walker.WalkTreeZone( &actions, *subtree_zone, tree_ordinal, DBWalk::WIND_IN, DBCommon::GetRootCoreInfo() );    	
 
     TRACE("Walk for geometric: orderings\n");
-	orderings->Insert(*tree_zone, DBCommon::GetRootCoreInfo(), true);   
+	orderings->Insert(*subtree_zone, DBCommon::GetRootCoreInfo(), true);   
 
     TRACE("Walk for geometric: domain extension\n");
     DBWalk::Actions actions2;
     actions2.push_back( bind(&DomainExtension::InsertAction, domain_extension.get(), placeholders::_1) );
-    db_walker.WalkTreeZone( &actions2, *tree_zone, tree_ordinal, DBWalk::WIND_IN, DBCommon::GetRootCoreInfo() );
+    db_walker.WalkTreeZone( &actions2, *subtree_zone, tree_ordinal, DBWalk::WIND_IN, DBCommon::GetRootCoreInfo() );
+    
+	vector<Mutator> terminii;
+	for( FreeZone::TerminusConstIterator it=free_zone.GetTerminiiBegin(); 
+		 it != free_zone.GetTerminiiEnd(); 
+		 it++ )
+		terminii.push_back( *it ); 
+	MutableTreeZone tree_zone(CreateTreeMutator(root_xlink), move(terminii));
+    return tree_zone;
 }
 
 
@@ -161,13 +169,13 @@ FreeZone XTreeDatabase::ExchangeFreeToFree( MutableTreeZone &target_tree_zone, c
     const DBCommon::CoreInfo base_info = link_table->GetCoreInfo( target_tree_zone.GetBaseXLink() );
 
     // Remove geometric info that will be invalidated by the exchange 
-    MainTreeDelete( target_tree_zone, &base_info, do_intrinsics );   
+    AssetsDelete( DBCommon::TreeOrdinal::MAIN, target_tree_zone, &base_info, do_intrinsics );   
     
     // Update the tree. mutable_target_tree_zone becomes the valid new tree zone.
     FreeZone extracted_free_zone = target_tree_zone.Exchange( new_free_zone, fixups ); 
     
     // Re-insert geometric info based on new tree zone
-    MainTreeInsert( target_tree_zone, &base_info, do_intrinsics );       
+    AssetsInsert( DBCommon::TreeOrdinal::MAIN, target_tree_zone, &base_info, do_intrinsics );       
         
     if( ReadArgs::test_db )
         CheckGeometric();
@@ -176,7 +184,40 @@ FreeZone XTreeDatabase::ExchangeFreeToFree( MutableTreeZone &target_tree_zone, c
 }
 
 
-void XTreeDatabase::MainTreeInsert(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
+void XTreeDatabase::SwapTreeToTree( DBCommon::TreeOrdinal tree_ordinal_l, MutableTreeZone &tree_zone_l, vector<MutableTreeZone *> fixups_l,
+                                    DBCommon::TreeOrdinal tree_ordinal_r, MutableTreeZone &tree_zone_r, vector<MutableTreeZone *> fixups_r )
+{
+    TRACE("Swapping target TreeZones:\n")(tree_zone_l)("\nand: ")(tree_zone_r)("\n");
+    ASSERT( tree_zone_l.GetNumTerminii() == tree_zone_r.GetNumTerminii() )
+          ("left TZ:%lu, right TZ:%lu", tree_zone_l.GetNumTerminii(), tree_zone_r.GetNumTerminii());    
+	ASSERT( tree_ordinal_l != tree_ordinal_r ); // TZs must be in different trees to avoid interference
+
+	tree_zone_l.Validate(this); 
+	tree_zone_r.Validate(this); 
+
+    // Store the core info for the base locally since the link table will change
+    // as this function executes.
+    const DBCommon::CoreInfo base_info_l = link_table->GetCoreInfo( tree_zone_l.GetBaseXLink() );
+    const DBCommon::CoreInfo base_info_r = link_table->GetCoreInfo( tree_zone_r.GetBaseXLink() );
+
+    // Remove geometric info that will be invalidated by the exchange 
+    AssetsDelete( tree_ordinal_l, tree_zone_l, &base_info_l, false );   
+    AssetsDelete( tree_ordinal_r, tree_zone_r, &base_info_r, false );   
+    
+    // Update the tree. mutable_target_tree_zone becomes the valid new tree zone.
+    // Invariant wrt intrinisc asset state.
+    tree_zone_l.Swap( tree_zone_r, fixups_l, fixups_r ); 
+    
+    // Re-insert geometric info based on new tree zone
+    AssetsInsert( tree_ordinal_l, tree_zone_l, &base_info_l, false );       
+    AssetsInsert( tree_ordinal_r, tree_zone_r, &base_info_r, false );       
+        
+    if( ReadArgs::test_db )
+        CheckGeometric();
+}
+
+
+void XTreeDatabase::AssetsInsert(DBCommon::TreeOrdinal tree_ordinal, TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
 {
     INDENT("+g");
 
@@ -199,7 +240,7 @@ void XTreeDatabase::MainTreeInsert(TreeZone &zone, const DBCommon::CoreInfo *bas
 }
 
 
-void XTreeDatabase::MainTreeDelete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
+void XTreeDatabase::AssetsDelete(DBCommon::TreeOrdinal tree_ordinal, TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
 {
     INDENT("-g");
     

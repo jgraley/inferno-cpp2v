@@ -19,17 +19,27 @@ void MoveInPass::Run(MovesMap &moves_map)
 	for( auto &p : moves_map.mm )
 	{
 		TreePtr<Node> scaffold_node = p.first;
-		unique_ptr<FreeZone> move_zone = move(p.second);
-			
-		TRACE("Got map entry, scaffold node: ")(*scaffold_node)("\n free zone: \n")(*move_zone)("\n");
 		const NodeTable::Row &scaffold_row = db->GetNodeRow(scaffold_node);
 		ASSERT( scaffold_row.incoming_xlinks.size() == 1 );
 		XLink scaffold_base_xlink = SoloElementOf(scaffold_row.incoming_xlinks);
-		unique_ptr<XTreeZone> scaffold_tree_zone = XTreeZone::CreateFromScaffold( scaffold_base_xlink );
+		unique_ptr<XTreeZone> scaffold_tree_zone = XTreeZone::CreateFromScaffold( scaffold_base_xlink ); 
 		unique_ptr<MutableTreeZone> scaffold_mutable_tree_zone = db->CreateMutableTreeZone( scaffold_tree_zone->GetBaseXLink(),
-													                                     	scaffold_tree_zone->GetTerminusXLinks() );
-		TRACE("Exchanging: ")(*scaffold_mutable_tree_zone)("\n free zone: \n")(*move_zone)("\n");
-		db->ExchangeFreeToFree( *scaffold_mutable_tree_zone, *move_zone, vector<MutableTreeZone *>(), false );											                                     	
+													                                     	scaffold_tree_zone->GetTerminusXLinks() );		
+        // TODO Down to here in a helper fn
+        
+        MovesMap::MovePayload &mp = p.second;        										                                     	
+#ifdef USE_SWAPS
+		DBCommon::TreeOrdinal moving_tree_ordinal = mp.first;
+		TreeZone &moving_zone = mp.second
+		TRACE("Exchanging: ")(*scaffold_mutable_tree_zone)("\n moving tree ordinal: \n")(moving_zone)(" in tree %u\n", moving_tree_ordinal);
+		db->SwapTreeToTree( moving_tree_ordinal, moving_zone, vector<MutableTreeZone *>(),
+							DBCommon::TreeOrdinal::MAIN, scaffold_mutable_tree_zone, vector<MutableTreeZone *>() );
+		db->TeardownTree(moving_tree_ordinal); // Don't leak it
+#else		 				 
+		unique_ptr<FreeZone> moving_zone = move(mp);
+		TRACE("Exchanging: ")(*scaffold_mutable_tree_zone)("\n free zone: \n")(*moving_zone)("\n");
+		db->ExchangeFreeToFree( *scaffold_mutable_tree_zone, *moving_zone, vector<MutableTreeZone *>(), false );	
+#endif												                                     	
 	}
 }
 

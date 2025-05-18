@@ -504,10 +504,11 @@ void OrderingPass::MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch, sha
 	ASSERT( target_tree_zone );
 	ASSERT( !target_tree_zone->IsEmpty() ); // See #784
 	
-	// Create the scaffold in a free zone
-	auto scaffold_zone_from = target_tree_zone->MakeScaffold();
-    
-    // Determine the fix-ups we'll need to do for tree zones in neighbouring patches
+	//FTRACE("target_tree_zone: ")(*target_tree_zone)("\nfree_zone: ")(*free_zone)("\n");
+	// Put the scaffold into the "from" part of the tree, displacing 
+	// the original contents, which we shall move
+	target_tree_zone->Validate(db);
+	    // Determine the fix-ups we'll need to do for tree zones in neighbouring patches
     vector<MutableTreeZone *> fixups;	
     for( size_t i=0; i<target_tree_zone->GetNumTerminii(); i++ )
 	{
@@ -523,13 +524,26 @@ void OrderingPass::MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch, sha
 		}, nullptr );
 		
 		fixups.push_back( found ); // does not have to be found; TZs can be disconnected
-	}
-	
-	//FTRACE("target_tree_zone: ")(*target_tree_zone)("\nfree_zone: ")(*free_zone)("\n");
-	// Put the scaffold into the "from" part of the tree, displacing 
-	// the original contents, which we shall move
-	target_tree_zone->Validate(db);
+	}	
 		
+	// Make scaffold free zones that fit in place of the moving zone
+	auto scaffold_zone_from = target_tree_zone->MakeScaffold();
+	unique_ptr<FreeZone> scaffold_zone_to = target_tree_zone->MakeScaffold();
+	TreePtr<Node> scaffold_base_to = scaffold_zone_to->GetBaseNode();
+
+#ifdef USE_SWAPS
+    // Make a new tree for the moving zone, scaffold to begin with
+    DBCommon::TreeOrdinal moving_tree_ordinal = db->AllocateExtraTree();        
+    MutableTreeZone moving_zone = db->BuildTree( moving_tree_ordinal, *scaffold_zone_from );
+
+	// Swap in the true moving zone
+	void XTreeDatabase::SwapTreeToTree( DBCommon::TreeOrdinal::MAIN, target_tree_zone, fixups,
+										moving_tree_ordinal, moving_zone, vector<MutableTreeZone *>() );
+
+	// Rememeber the association between the scaffold node and the true moved zone
+	TRACE("Making map entry, scaffold node: ")(*scaffold_base_to)("\n tree zone: \n")(*moving_zone)("\n");
+	moves_map.mm[scaffold_base_to] = make_pair(moving_tree_ordinal, moving_zone);
+#else
 	TRACE("I will exchange tree zone:\n")(target_tree_zone)("\nwith free zone:\n")(scaffold_zone_from)("\nand fix up these tree zones:\n")(fixups)("\n");
 	auto moving_free_zone = make_unique<FreeZone>(db->ExchangeFreeToFree( *target_tree_zone, *scaffold_zone_from, fixups, false ));
 	TRACE("After exchanging I have tree zone:\n")(target_tree_zone)("\nand free zone:\n")(moving_free_zone)("\n");
@@ -537,18 +551,14 @@ void OrderingPass::MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch, sha
 	target_tree_zone->Validate(db);
 	for( MutableTreeZone *fu : fixups )
 	    if( fu )
-		    fu->Validate(db);		
-		
-	// Make a scaffold that fits in place of the moved-from zone
-	unique_ptr<FreeZone> scaffold_zone_to = moving_free_zone->MakeScaffold();
-	TreePtr<Node> scaffold_base_to = scaffold_zone_to->GetBaseNode();
-
-	// Store the scaffold in the layout so it goes into inversion in the right place
-	auto free_patch = make_shared<FreeZonePatch>( move(scaffold_zone_to), target_tree_patch->MoveChildren() );
+		    fu->Validate(db);				
 
 	// Rememeber the association between the scaffold node and the true moved zone
 	TRACE("Making map entry, scaffold node: ")(*scaffold_base_to)("\n free zone: \n")(*moving_free_zone)("\n");
 	moves_map.mm[scaffold_base_to] = move(moving_free_zone);
+#endif
+	// Store the scaffold in the layout so it goes into inversion in the right place
+	auto free_patch = make_shared<FreeZonePatch>( move(scaffold_zone_to), target_tree_patch->MoveChildren() );
 
 	// Install the new patch into the layout
 	*target_patch = free_patch;
@@ -556,11 +566,12 @@ void OrderingPass::MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch, sha
 	ValidateTreeZones(db).Run(layout);
 	
 	// How does the scaffold not end up in the updated tree?
-	// The best argument is that, after this pass, none of the
-	// scaffold nodes are inside any of the patches in our layout.
-	// The layout is intended contents of the update tree. So, if 
-	// subsequent passes and the DB act correctly, the scaffolds 
-	// will be deleted from the tree.                
+	// The best argument is that, after this pass, scaffold_zone_from is not
+	// in any of the patches in our layout. The layout is intended contents of the update tree. So, if 
+	// inversion acts correctly, scaffold_zone_from 
+	// will be deleted from the tree. OTOH scaffold_zone_to will make it into
+	// inversion as a free zone and enter the tree, but we're tracking it in moves_map
+	// and will swap it out and delete it during MoveInPass.
 }
 
 

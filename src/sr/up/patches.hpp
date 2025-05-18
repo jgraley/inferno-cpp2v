@@ -10,6 +10,8 @@
 #include "../scr_engine.hpp"
 #include <functional>
 
+//#define USE_SWAPS
+
 namespace SR 
 {
 class XTreeDatabase;
@@ -146,7 +148,12 @@ private:
 struct MovesMap
 {
 	public:
-	map<TreePtr<Node>, unique_ptr<FreeZone>> mm;
+#ifdef USE_SWAPS
+	typedef pair<DBCommon::TreeOrdinal, TreeZone> MovePayload;
+#else
+	typedef unique_ptr<FreeZone> MovePayload;
+#endif	
+	map<TreePtr<Node>, MovePayload> mm;
 };
 
 

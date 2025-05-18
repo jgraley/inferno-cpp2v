@@ -216,6 +216,18 @@ FreeZone::TerminusIterator FreeZone::GetTerminiiEnd()
 }
 
 
+FreeZone::TerminusConstIterator FreeZone::GetTerminiiBegin() const
+{
+    return terminii.begin();
+}
+
+
+FreeZone::TerminusConstIterator FreeZone::GetTerminiiEnd() const
+{
+    return terminii.end();
+}
+
+
 string FreeZone::GetTrace() const
 {
     string arrow, s;
