@@ -104,3 +104,10 @@ string NodeTable::GetTrace() const
 {
     return SSPrintf("(node table with %d rows)", rows.size());
 }
+
+
+
+void NodeTable::Dump() const
+{
+	FTRACE("---------------- NodeTable -----------------\n")(rows)("\n");
+}	

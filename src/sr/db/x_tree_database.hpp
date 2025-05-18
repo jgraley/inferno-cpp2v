@@ -83,7 +83,8 @@ public:
                                                     vector<XLink> terminii);
 
     void Dump() const;
-    
+	void DumpTables() const;
+
     void CheckGeometric();
     void CheckIntrinsic();
     

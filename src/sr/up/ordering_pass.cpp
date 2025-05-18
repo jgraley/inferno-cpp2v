@@ -530,19 +530,24 @@ void OrderingPass::MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch, sha
 	auto scaffold_zone_from = target_tree_zone->MakeScaffold();
 	unique_ptr<FreeZone> scaffold_zone_to = target_tree_zone->MakeScaffold();
 	TreePtr<Node> scaffold_base_to = scaffold_zone_to->GetBaseNode();
+	TRACE("Scaffold: to: ")(scaffold_zone_to)(" from: ")(scaffold_zone_from)("\n");
 
 #ifdef USE_SWAPS
     // Make a new tree for the moving zone, scaffold to begin with
     DBCommon::TreeOrdinal moving_tree_ordinal = db->AllocateExtraTree();        
+	TRACE("Allocated extra tree %u\n", moving_tree_ordinal);
     MutableTreeZone moving_zone = db->BuildTree( moving_tree_ordinal, *scaffold_zone_from );
+	TRACE("Zone in extra tree: ")(moving_zone)("\n");
+
+	db->DumpTables();
 
 	// Swap in the true moving zone
-	void XTreeDatabase::SwapTreeToTree( DBCommon::TreeOrdinal::MAIN, target_tree_zone, fixups,
-										moving_tree_ordinal, moving_zone, vector<MutableTreeZone *>() );
+	db->XTreeDatabase::SwapTreeToTree( DBCommon::TreeOrdinal::MAIN, *target_tree_zone, fixups,
+		    						   moving_tree_ordinal, moving_zone, vector<MutableTreeZone *>() );
 
 	// Rememeber the association between the scaffold node and the true moved zone
-	TRACE("Making map entry, scaffold node: ")(*scaffold_base_to)("\n tree zone: \n")(*moving_zone)("\n");
-	moves_map.mm[scaffold_base_to] = make_pair(moving_tree_ordinal, moving_zone);
+	TRACE("Making map entry, scaffold node: ")(scaffold_base_to)("\n tree zone: \n")(moving_zone)("\n");
+	InsertSolo( moves_map.mm, make_pair(scaffold_base_to, make_pair(moving_tree_ordinal, moving_zone)) );
 #else
 	TRACE("I will exchange tree zone:\n")(target_tree_zone)("\nwith free zone:\n")(scaffold_zone_from)("\nand fix up these tree zones:\n")(fixups)("\n");
 	auto moving_free_zone = make_unique<FreeZone>(db->ExchangeFreeToFree( *target_tree_zone, *scaffold_zone_from, fixups, false ));
@@ -557,6 +562,7 @@ void OrderingPass::MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch, sha
 	TRACE("Making map entry, scaffold node: ")(*scaffold_base_to)("\n free zone: \n")(*moving_free_zone)("\n");
 	moves_map.mm[scaffold_base_to] = move(moving_free_zone);
 #endif
+
 	// Store the scaffold in the layout so it goes into inversion in the right place
 	auto free_patch = make_shared<FreeZonePatch>( move(scaffold_zone_to), target_tree_patch->MoveChildren() );
 

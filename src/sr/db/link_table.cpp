@@ -171,3 +171,10 @@ string LinkTable::GetTrace() const
 {
     return SSPrintf("(link table with %d rows)", rows.size());
 }
+
+
+void LinkTable::Dump() const
+{
+	FTRACE("---------------- LinkTable -----------------\n")(rows)("\n");
+}	
+	

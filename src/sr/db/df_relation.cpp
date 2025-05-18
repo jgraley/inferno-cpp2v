@@ -36,7 +36,7 @@ pair<Orderable::Diff, DepthFirstRelation::RelType> DepthFirstRelation::CompareHi
     // filled both child xlinks in for the same parent, we're done.
     map<XLink, pair<XLink, XLink>> candidate_mutuals;
 
-    //FTRACE("\nComparing ")(l_xlink)(" with ")(r_xlink)("\n");
+    //FTRACE("\nComparing ")(l_key)(" with ")(r_key)("\n");
     
     if( l_key == r_key )
     {
@@ -62,7 +62,13 @@ pair<Orderable::Diff, DepthFirstRelation::RelType> DepthFirstRelation::CompareHi
             //FTRACE("Both at root, comparing root ordinals\n");
             const LinkTable::Row &l_row = db->GetRow(l_cur_xlink);       
             const LinkTable::Row &r_row = db->GetRow(r_cur_xlink);
-            ASSERT( l_row.tree_ordinal != r_row.tree_ordinal );
+            if( l_row.tree_ordinal == r_row.tree_ordinal )
+				db->DumpTables();
+            ASSERT( l_row.tree_ordinal != r_row.tree_ordinal )
+                  ("At ")(l_cur_xlink)(" and ")(r_cur_xlink)("\n")
+                  ("Parents ")(l_parent_xlink)(" and ")(r_parent_xlink)("\n")
+                  ("Ordinals %u and %u\n", l_row.tree_ordinal, r_row.tree_ordinal)
+                  ("Candidate mutuals ")(candidate_mutuals)("\n");
             return make_pair(static_cast<int>(l_row.tree_ordinal) - static_cast<int>(r_row.tree_ordinal), ROOT_SIBLINGS);
         }
 
@@ -104,6 +110,8 @@ pair<Orderable::Diff, DepthFirstRelation::RelType> DepthFirstRelation::CompareHi
             candidate_mutuals[r_parent_xlink].second = r_cur_xlink;
             r_cur_xlink = r_parent_xlink; // advance r toward ancestor
         }
+        
+        ASSERT( l_cur_xlink != r_cur_xlink );
     }
     
     // Dropping out of loop means l0 and r0 are weakly removed siblings

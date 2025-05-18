@@ -43,6 +43,8 @@ public:
     vector<TreePtr<Node>> GetNodeDomainAsVector() const;
     
     string GetTrace() const;
+    void Dump() const;
+    
 private:
     // Node-to-row-of-x_tree_db map
     unordered_map<TreePtr<Node>, Row> rows;

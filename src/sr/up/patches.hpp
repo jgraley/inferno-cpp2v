@@ -8,6 +8,7 @@
 #include "../link.hpp"
 #include "../db/duplicate.hpp"
 #include "../scr_engine.hpp"
+#include "../db/db_common.hpp"
 #include <functional>
 
 //#define USE_SWAPS
@@ -149,7 +150,7 @@ struct MovesMap
 {
 	public:
 #ifdef USE_SWAPS
-	typedef pair<DBCommon::TreeOrdinal, TreeZone> MovePayload;
+	typedef pair<DBCommon::TreeOrdinal, MutableTreeZone> MovePayload;
 #else
 	typedef unique_ptr<FreeZone> MovePayload;
 #endif	

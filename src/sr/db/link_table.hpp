@@ -52,6 +52,7 @@ public:
     vector<XLink> GetXLinkDomainAsVector() const;
     
     string GetTrace() const;
+    void Dump() const;
     
 //private:
     typedef XLink Key;

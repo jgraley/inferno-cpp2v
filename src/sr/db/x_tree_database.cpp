@@ -187,7 +187,8 @@ FreeZone XTreeDatabase::ExchangeFreeToFree( MutableTreeZone &target_tree_zone, c
 void XTreeDatabase::SwapTreeToTree( DBCommon::TreeOrdinal tree_ordinal_l, MutableTreeZone &tree_zone_l, vector<MutableTreeZone *> fixups_l,
                                     DBCommon::TreeOrdinal tree_ordinal_r, MutableTreeZone &tree_zone_r, vector<MutableTreeZone *> fixups_r )
 {
-    TRACE("Swapping target TreeZones:\n")(tree_zone_l)("\nand: ")(tree_zone_r)("\n");
+    TRACE("Swapping target TreeZones:\n")(tree_zone_l)(" in #%u ", tree_ordinal_l)
+         ("\nand: ")(tree_zone_r)(" in #%u\n", tree_ordinal_r);
     ASSERT( tree_zone_l.GetNumTerminii() == tree_zone_r.GetNumTerminii() )
           ("left TZ:%lu, right TZ:%lu", tree_zone_l.GetNumTerminii(), tree_zone_r.GetNumTerminii());    
 	ASSERT( tree_ordinal_l != tree_ordinal_r ); // TZs must be in different trees to avoid interference
@@ -208,7 +209,12 @@ void XTreeDatabase::SwapTreeToTree( DBCommon::TreeOrdinal tree_ordinal_l, Mutabl
     // Invariant wrt intrinisc asset state.
     tree_zone_l.Swap( tree_zone_r, fixups_l, fixups_r ); 
     
-    // Re-insert geometric info based on new tree zone
+    DumpTables();
+    
+    TRACE("After swapping target TreeZones:\n")(tree_zone_l)
+         ("\nand: ")(tree_zone_r)("\n");    
+         
+    // Re-insert geometric info based on new tree zone. 
     AssetsInsert( tree_ordinal_l, tree_zone_l, &base_info_l, false );       
     AssetsInsert( tree_ordinal_r, tree_zone_r, &base_info_r, false );       
         
@@ -226,17 +232,17 @@ void XTreeDatabase::AssetsInsert(DBCommon::TreeOrdinal tree_ordinal, TreeZone &z
     actions.push_back( bind(&Domain::InsertAction, domain.get(), placeholders::_1) );
     actions.push_back( bind(&LinkTable::InsertAction, link_table.get(), placeholders::_1) );
     actions.push_back( bind(&NodeTable::InsertAction, node_table.get(), placeholders::_1) );
-    db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_IN, base_info );
+    db_walker.WalkTreeZone( &actions, zone, tree_ordinal, DBWalk::WIND_IN, base_info );
 
     TRACE("Walk for geometric: orderings\n");
-    orderings->Insert(zone, base_info, do_intrinsics);
+    orderings->Insert(zone, base_info, do_intrinsics); // doesn't use tree_ordinal
     
     // Domain extension wants to roam around the XTree, consulting
     // parents, children, anything really. So we need a separate pass.
     TRACE("Walk for geometric: domain extension\n");
     DBWalk::Actions actions2;
     actions2.push_back( bind(&DomainExtension::InsertAction, domain_extension.get(), placeholders::_1) );
-    db_walker.WalkTreeZone( &actions2, zone, DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_IN, base_info );
+    db_walker.WalkTreeZone( &actions2, zone, tree_ordinal, DBWalk::WIND_IN, base_info );
 }
 
 
@@ -247,17 +253,17 @@ void XTreeDatabase::AssetsDelete(DBCommon::TreeOrdinal tree_ordinal, TreeZone &z
     TRACE("Walk for geometric: domain extension\n");
     DBWalk::Actions actions;
     actions.push_back( bind(&DomainExtension::DeleteAction, domain_extension.get(), placeholders::_1) );
-    db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_OUT, base_info );   
+    db_walker.WalkTreeZone( &actions, zone, tree_ordinal, DBWalk::WIND_OUT, base_info );   
 
     TRACE("Walk for geometric: orderings\n");
-    orderings->Delete(zone, base_info, do_intrinsics);
+    orderings->Delete(zone, base_info, do_intrinsics); // doesn't use tree_ordinal
 
     TRACE("Walk for geometric: domain, tables\n");
     DBWalk::Actions actions2;
     actions2.push_back( bind(&NodeTable::DeleteAction, node_table.get(), placeholders::_1) );
     actions2.push_back( bind(&LinkTable::DeleteAction, link_table.get(), placeholders::_1) );
     actions2.push_back( bind(&Domain::DeleteAction, domain.get(), placeholders::_1) );
-    db_walker.WalkTreeZone( &actions2, zone, DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_OUT, base_info );   
+    db_walker.WalkTreeZone( &actions2, zone, tree_ordinal, DBWalk::WIND_OUT, base_info );   
 }
 
 
@@ -460,6 +466,13 @@ unique_ptr<MutableTreeZone> XTreeDatabase::CreateMutableTreeZone(XLink base,
 void XTreeDatabase::Dump() const
 {
     orderings->Dump();
+}
+
+
+void XTreeDatabase::DumpTables() const
+{
+    link_table->Dump();
+    node_table->Dump();
 }
 
 
