@@ -236,7 +236,7 @@ const Mutator &MutableTreeZone::GetTerminusMutator(size_t index) const
 }
 
 
-FreeZone MutableTreeZone::ExchangeFreeToFree( const FreeZone &new_free_zone, vector<MutableTreeZone *> fixups )
+FreeZone MutableTreeZone::Exchange( const FreeZone &new_free_zone, vector<MutableTreeZone *> fixups )
 {	
 	// Should be true regardless of empty zones
 	ASSERT( GetNumTerminii() == new_free_zone.GetNumTerminii() );

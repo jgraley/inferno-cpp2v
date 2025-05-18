@@ -141,8 +141,11 @@ void DomainExtensionChannel::CreateExtraTree( TreePtr<Node> induced_root )
     // Count begins at 1 since there's one ref (this one)
     (void)induced_root_to_tree_ordinal_and_ref_count.insert( make_pair( extra_root_node, ExtensionClass(tree_ordinal, 1) ) );  
     
+	// TODO move up and wrap "Duplicate" in FreeZone class
+	auto extra_free_zone = FreeZone::CreateSubtree(extra_root_node);
+
     // Add the whole subtree to the rest of the database as a new tree
-    db->ExtraTreeBuild( tree_ordinal, extra_root_node );
+    db->ExtraTreeBuild( tree_ordinal, *extra_free_zone );
  
     Validate();  
 }

@@ -85,30 +85,29 @@ void XTreeDatabase::WalkAllTrees(const DBWalk::Actions *actions,
 }
                                  
 
-void XTreeDatabase::MainTreeBuild(TreePtr<Node> main_root)
+void XTreeDatabase::MainTreeBuild(const FreeZone &free_zone)
 {      
     INDENT("=i");
 
     TRACE("Walk for intrinsic: orderings\n");
-	auto main_free_zone = FreeZone::CreateSubtree(main_root);
 
 	// Make main tree using FZ, and provide a TZ TODO pop out into eg MainTreeInstallAtrRoot(), asserting no terminii
-    auto sp_main_root = make_shared<TreePtr<Node>>(main_free_zone->GetBaseNode());
+    auto sp_main_root = make_shared<TreePtr<Node>>(free_zone.GetBaseNode());
     trees_by_ordinal[DBCommon::TreeOrdinal::MAIN] = {sp_main_root};
     next_tree_ordinal = DBCommon::TreeOrdinal::EXTRAS;
     XLink main_root_xlink = GetRootXLink(DBCommon::TreeOrdinal::MAIN);
     ASSERT( main_root_xlink );
-	auto main_tree_zone = XTreeZone::CreateSubtree(main_root_xlink);
+	auto tree_zone = XTreeZone::CreateSubtree(main_root_xlink);
 
     TRACE("Walk for geometric: domain, tables\n");
     DBWalk::Actions actions;
     actions.push_back( bind(&Domain::InsertAction, domain.get(), placeholders::_1) ); // TODO all these into the correpsonding classes
     actions.push_back( bind(&LinkTable::InsertAction, link_table.get(), placeholders::_1) );
     actions.push_back( bind(&NodeTable::InsertAction, node_table.get(), placeholders::_1) );
-	db_walker.WalkTreeZone( &actions, *main_tree_zone, DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_IN, DBCommon::GetRootCoreInfo() );    	
+	db_walker.WalkTreeZone( &actions, *tree_zone, DBCommon::TreeOrdinal::MAIN, DBWalk::WIND_IN, DBCommon::GetRootCoreInfo() );    	
 
     TRACE("Walk for geometric: orderings\n");
-	orderings->MainTreeInsert(*main_tree_zone, DBCommon::GetRootCoreInfo(), true);   
+	orderings->MainTreeInsert(*tree_zone, DBCommon::GetRootCoreInfo(), true);   
 
     TRACE("Domain extension init\n");
     domain_extension->MainTreeBuild();    
@@ -136,7 +135,7 @@ FreeZone XTreeDatabase::ExchangeFreeToFree( MutableTreeZone &target_tree_zone, c
     MainTreeDelete( target_tree_zone, &base_info, do_intrinsics );   
     
     // Update the tree. mutable_target_tree_zone becomes the valid new tree zone.
-    FreeZone extracted_free_zone = target_tree_zone.ExchangeFreeToFree( new_free_zone, fixups ); 
+    FreeZone extracted_free_zone = target_tree_zone.Exchange( new_free_zone, fixups ); 
     
     // Re-insert geometric info based on new tree zone
     MainTreeInsert( target_tree_zone, &base_info, do_intrinsics );       
@@ -198,14 +197,12 @@ void XTreeDatabase::PerformDeferredActions()
 }
 
 
-void XTreeDatabase::ExtraTreeBuild(DBCommon::TreeOrdinal tree_ordinal, TreePtr<Node> root_node)
+void XTreeDatabase::ExtraTreeBuild(DBCommon::TreeOrdinal tree_ordinal, const FreeZone &free_zone)
 {        
 	INDENT("+e");
 	
-	TRACE("Walk for intrinsic: orderings\n");
-	auto free_zone = FreeZone::CreateSubtree(root_node);
-	
-    auto sp_root = make_shared<TreePtr<Node>>(root_node);
+	TRACE("Walk for intrinsic: orderings\n");	
+    auto sp_root = make_shared<TreePtr<Node>>(free_zone.GetBaseNode());
     trees_by_ordinal[tree_ordinal] = {sp_root};	
     ASSERT( tree_ordinal >= DBCommon::TreeOrdinal::EXTRAS );
     XLink root_xlink = GetRootXLink(tree_ordinal);

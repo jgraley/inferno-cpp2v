@@ -29,6 +29,13 @@ TreeUpdater::TreeUpdater(XTreeDatabase *x_tree_db) :
 }
 
 
+void TreeUpdater::BuildMainTree( TreePtr<Node> main_tree_root )
+{
+	unique_ptr<FreeZone> main_tree_zone = FreeZone::CreateSubtree(main_tree_root);
+	db->MainTreeBuild(*main_tree_zone);
+}
+
+
 unique_ptr<FreeZone> TreeUpdater::TransformToSingleFreeZone( shared_ptr<Patch> source_layout )
 {
     DuplicateAllPass duplicate_all_pass;
@@ -48,7 +55,7 @@ unique_ptr<FreeZone> TreeUpdater::TransformToSingleFreeZone( shared_ptr<Patch> s
 }
 
 
-void TreeUpdater::TransformToIncrementalAndExecute( XLink origin_xlink, shared_ptr<Patch> source_layout )
+void TreeUpdater::UpdateMainTree( XLink origin_xlink, shared_ptr<Patch> source_layout )
 {
     ASSERT( db );
                 

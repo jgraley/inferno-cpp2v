@@ -13,6 +13,11 @@ VNSequence::VNSequence( const vector< shared_ptr<VNStep> > &sequence ) :
 }                                  
 
 
+VNSequence::~VNSequence()
+{
+}
+
+
 void VNSequence::PatternTransformations( int step_index )
 {
     steps[step_index]->PatternTransformations();
@@ -87,10 +92,15 @@ void VNSequence::SetStopAfter( int step_index, vector<int> ssa, int d )
 }  
 
 
-void VNSequence::AnalysisStage( TreePtr<Node> root )
+void VNSequence::AnalysisStage( TreePtr<Node> main_tree_root )
 {        
     x_tree_db = make_shared<XTreeDatabase>(lacing, domain_extenders);
-    x_tree_db->MainTreeBuild(root);
+    tree_updater = make_unique<TreeUpdater>(x_tree_db.get()); 
+    
+    // This will initialise all the DB assets including orderings
+    // and domain extension, and so counts as an "analysis" of the
+    // input tree.
+    tree_updater->BuildMainTree(main_tree_root);
 }
 
 
@@ -134,7 +144,7 @@ void VNSequence::UpdateUsingLayout( XLink origin_xlink, shared_ptr<Patch> source
 {
     ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");    
     
-    TreeUpdater( x_tree_db.get() ).TransformToIncrementalAndExecute( origin_xlink, source_layout );   
+    tree_updater->UpdateMainTree( origin_xlink, source_layout );   
 }
 
 

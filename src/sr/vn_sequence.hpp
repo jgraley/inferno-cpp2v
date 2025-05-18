@@ -16,14 +16,15 @@ namespace SR
 
 class VNStep;
 class XTreeDatabase;
-
+class TreeUpdater;
 /**
  * Vida Nova Sequence
  */
 class VNSequence
 {
 public:    
-    VNSequence( const vector< shared_ptr<VNStep> > &sequence );
+    explicit VNSequence( const vector< shared_ptr<VNStep> > &sequence );
+    ~VNSequence();
     
     void PatternTransformations( int step_index );
 
@@ -36,7 +37,7 @@ public:
     static void SetMaxReps( int step_index, int n, bool e );
     void SetStopAfter( int step_index, vector<int> ssa, int d=0 );    
         
-    void AnalysisStage( TreePtr<Node> root );
+    void AnalysisStage( TreePtr<Node> main_tree_root );
     TreePtr<Node> TransformStep( int step_index );
     
     void ForSteps( function<void(int)> body );
@@ -54,7 +55,8 @@ private:
     vector< shared_ptr<VNStep> > steps;
     shared_ptr<Lacing> lacing;
     DomainExtension::ExtenderSet domain_extenders;
-    shared_ptr<XTreeDatabase> x_tree_db;    
+    shared_ptr<XTreeDatabase> x_tree_db;  
+    unique_ptr<TreeUpdater> tree_updater;
 };    
     
 }
