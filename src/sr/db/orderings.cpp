@@ -5,7 +5,7 @@
 #include "lacing.hpp"
 #include "relation_test.hpp"
 
-//#define SC_INTRINSIC
+#define SC_INTRINSIC 1
 
 using namespace SR;   
 
@@ -32,8 +32,6 @@ const Lacing *Orderings::GetLacing() const
 	
 void Orderings::Insert(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
 {     
-	node_reached_count.clear();
-
     DBWalk::Actions actions;
     actions.push_back( bind(&Orderings::InsertAction, this, placeholders::_1, do_intrinsics) );
     db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_IN, base_info );
@@ -44,19 +42,17 @@ void Orderings::Insert(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool
 	// the zone. If we act at root, there won't be any.
 
 	set<TreePtr<Node>> invalidated;
-#ifdef SC_INTRINSIC
-	if( !do_intrinsics )		
+	if( SC_INTRINSIC && !do_intrinsics )		
 	{
 		invalidated = GetTerminusAndBaseAncestors(zone);
 	}
 	else
-#else
 	// Assume there is only one incoming XLink to the node because not a leaf
 	{
+		(void)GetTerminusAndBaseAncestors(zone);
 		auto subtree = XTreeZone::CreateSubtree(zone.GetBaseXLink());
 		invalidated = GetTerminusAndBaseAncestors(subtree);
 	}
-#endif
 
 	for( TreePtr<Node> x : invalidated )                        
 		if( simple_compare_ordering.count(x)==0 )
@@ -80,21 +76,19 @@ void Orderings::Delete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool
 	set<TreePtr<Node>> invalidated;
 	
 	// Assume there was only one incoming XLink to the node because not a leaf
-#ifdef SC_INTRINSIC
-	if( !do_intrinsics )		
+	if( SC_INTRINSIC && !do_intrinsics )		
 	{
 		invalidated = GetTerminusAndBaseAncestors(zone);
 	}
 	else
-#else
 	{
+		(void)GetTerminusAndBaseAncestors(zone);
 		auto subtree = XTreeZone::CreateSubtree(zone.GetBaseXLink());
 		invalidated = GetTerminusAndBaseAncestors(subtree);
 	}
-#endif
 
 	for( TreePtr<Node> x : invalidated )    
-		if( 1 == db->GetNodeRow(x).incoming_xlinks.size() )          // Take reached count as 1          
+		if( db->GetNodeRow(x).incoming_xlinks.size() == 1 ) // Take reached count as 0
 			EraseSolo( simple_compare_ordering, x );                              
 }
 
@@ -108,11 +102,9 @@ void Orderings::InsertAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsi
 		return;
 
 	// Only if not already
-#ifdef SC_INTRINSIC
-	if( do_intrinsics )		
-#endif	
-	if( simple_compare_ordering.count(walk_info.node)==0 )
-		InsertSolo( simple_compare_ordering, walk_info.node );               
+	if( !SC_INTRINSIC || do_intrinsics )			
+		if( simple_compare_ordering.count(walk_info.node)==0 )
+			InsertSolo( simple_compare_ordering, walk_info.node );               
 
 	if( do_intrinsics )
 	{				
@@ -137,39 +129,36 @@ void Orderings::DeleteAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsi
 	NodeTable::Row row = db->GetNodeRow(walk_info.node); 
 	ASSERT( row.incoming_xlinks.count(walk_info.xlink)==1 );
 		
-	// Track the number of times we've reached each node in current zone
-	node_reached_count[walk_info.node]++;     
-
 	// Only remove if this was the last incoming XLink to the node
-#ifdef SC_INTRINSIC
-	if( do_intrinsics )		
-#endif	
-	if( node_reached_count.at(walk_info.node) == row.incoming_xlinks.size() ) 
-		EraseSolo( simple_compare_ordering, walk_info.node );               
+	if( !SC_INTRINSIC || do_intrinsics )		
+		if( row.incoming_xlinks.size() == node_reached_count[walk_info.node]+1 ) 
+			EraseSolo( simple_compare_ordering, walk_info.node );               
 	
 	if( do_intrinsics )
 	{				       	
-		if( node_reached_count.at(walk_info.node) == row.incoming_xlinks.size() ) // we reached all the incomers so there are none outside the zone		
+		// If we reached all the incomers so there are none outside the zone, skip		
+		if( row.incoming_xlinks.size() == node_reached_count[walk_info.node]+1 ) 
 		{		
 			TRACE("CAT deletes: ")(walk_info.node)("\n");
 			EraseSolo( category_ordering, walk_info.node );   
 			TRACE("CAT at %p size=%u\n", this, category_ordering.size());	
 		}
 	}
+
+	// Track the number of times we've reached each node in current zone
+	node_reached_count[walk_info.node]++;     
 }
        
 
 set<TreePtr<Node>> Orderings::GetTerminusAndBaseAncestors( const TreeZone &tz ) const
 {
 	set<TreePtr<Node>> sn;
-	set<XLink> sx;
 		
 	// Include parent of base all the way back to root
 	XLink x = tz.GetBaseXLink();
 	while(x = db->TryGetParentXLink(x))
 	{
-		InsertSolo(sx, x);			
-		sn.insert(x.GetChildTreePtr());			
+		InsertSolo(sn, x.GetChildTreePtr());			
 	}
 
 	// Now for each terminus, include parent of terminus back to anything we 
@@ -179,10 +168,9 @@ set<TreePtr<Node>> Orderings::GetTerminusAndBaseAncestors( const TreeZone &tz ) 
 		x = tz.GetTerminusXLink(i);
 		while(x = db->TryGetParentXLink(x))
 		{
-			if( sx.count(x)!=0 )
+			if( sn.count(x.GetChildTreePtr())!=0 )
 				break; // There will already be a path to root from here
-			InsertSolo(sx, x);				
-			sn.insert(x.GetChildTreePtr());			
+			InsertSolo(sn, x.GetChildTreePtr());			
 		}
 	}
 	
