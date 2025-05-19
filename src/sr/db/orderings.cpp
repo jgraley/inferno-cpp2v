@@ -5,6 +5,8 @@
 #include "lacing.hpp"
 #include "relation_test.hpp"
 
+//#define SC_INTRINSIC
+
 using namespace SR;   
 
 Orderings::Orderings( shared_ptr<Lacing> lacing, const XTreeDatabase *db_ ) :
@@ -45,7 +47,7 @@ void Orderings::Insert(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool
 #ifdef SC_INTRINSIC
 	if( !do_intrinsics )		
 	{
-		invalidated = GetTerminusAndBaseAncestors(*zone);
+		invalidated = GetTerminusAndBaseAncestors(zone);
 	}
 	else
 #else
@@ -57,7 +59,8 @@ void Orderings::Insert(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool
 #endif
 
 	for( TreePtr<Node> x : invalidated )                        
-		InsertSolo( simple_compare_ordering, x );   			
+		if( simple_compare_ordering.count(x)==0 )
+			InsertSolo( simple_compare_ordering, x );   			
 }
 
 
@@ -80,7 +83,7 @@ void Orderings::Delete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool
 #ifdef SC_INTRINSIC
 	if( !do_intrinsics )		
 	{
-		invalidated = GetTerminusAndBaseAncestors(*zone);
+		invalidated = GetTerminusAndBaseAncestors(zone);
 	}
 	else
 #else
@@ -90,8 +93,9 @@ void Orderings::Delete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool
 	}
 #endif
 
-	for( TreePtr<Node> x : invalidated )                        
-		EraseSolo( simple_compare_ordering, x );                              
+	for( TreePtr<Node> x : invalidated )    
+		if( 1 == db->GetNodeRow(x).incoming_xlinks.size() )          // Take reached count as 1          
+			EraseSolo( simple_compare_ordering, x );                              
 }
 
 
