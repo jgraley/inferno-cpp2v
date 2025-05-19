@@ -63,7 +63,6 @@ private:
 
 };
 
-
 // ------------------------- TreeZonePatch --------------------------
 
 // Construct with tree zone and child patches for terminii. Markers can 
