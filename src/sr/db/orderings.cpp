@@ -30,9 +30,17 @@ const Lacing *Orderings::GetLacing() const
 	
 void Orderings::Insert(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
 {     
+	// Take care of the DFO, which is an XLink-keyed ordering and must be updated fully in geom case
     DBWalk::Actions actions;
-    actions.push_back( bind(&Orderings::InsertAction, this, placeholders::_1, do_intrinsics) );
+    actions.push_back( [&](const DBWalk::WalkInfo &walk_info)
+    {
+	 	InsertSolo( depth_first_ordering, walk_info.xlink );
+	} );
     db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_IN, base_info );
+
+    DBWalk::Actions actions2;
+    actions2.push_back( bind(&Orderings::InsertAction, this, placeholders::_1, do_intrinsics) );
+    db_walker.WalkTreeZone( &actions2, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_IN, base_info );
 
 	// We may now re-instate SimpleCompare index entries for parents 
 	// of the base node so that the SC ordering is intact. Base is
@@ -59,11 +67,19 @@ void Orderings::Insert(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool
 
 void Orderings::Delete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
 {
-	node_reached_count.clear();
-	
-	DBWalk::Actions actions;
-    actions.push_back( bind(&Orderings::DeleteAction, this, placeholders::_1, do_intrinsics) );
-    db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_OUT, base_info );
+	// Take care of the DFO, which is an XLink-keyed ordering and must be updated fully in geom case
+    DBWalk::Actions actions;
+    actions.push_back( [&](const DBWalk::WalkInfo &walk_info)
+    {
+	 	EraseSolo( depth_first_ordering, walk_info.xlink );
+	} );
+    db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_IN, base_info );
+
+
+	node_reached_count.clear();	
+	DBWalk::Actions actions2;
+    actions2.push_back( bind(&Orderings::DeleteAction, this, placeholders::_1, do_intrinsics) );
+    db_walker.WalkTreeZone( &actions2, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_OUT, base_info );
 
 	// We must delete SimpleCompare index entries for ancestors of the base
 	// node, since removing it will invalidate the SC ordering. Base is
@@ -92,7 +108,6 @@ void Orderings::Delete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool
 
 void Orderings::InsertAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsics)
 { 
-	InsertSolo( depth_first_ordering, walk_info.xlink );
 
 	// Remaining orderings are keyed on nodes, and we don't need to update on the boundary layer
 	if( walk_info.at_terminus )
@@ -114,9 +129,7 @@ void Orderings::InsertAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsi
 
 
 void Orderings::DeleteAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsics)
-{		
-	EraseSolo( depth_first_ordering, walk_info.xlink );
-
+{			
 	// Remaining orderings are keyed on nodes, and we don't need to update on the boundary layer
 	if( walk_info.at_terminus )
 		return;
