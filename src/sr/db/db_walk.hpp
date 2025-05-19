@@ -39,16 +39,12 @@ public:
                        const DBCommon::TreeOrdinal tree_ordinal,
                        Wind wind,
                        const DBCommon::CoreInfo *base_info );
-    void WalkFreeZone( const Actions *actions,
-                       const FreeZone &zone,
-                       Wind wind );
 
 private:
     struct WalkKit
     {
         const Actions *actions;
         const TreeZone *tree_zone;
-        const FreeZone *free_zone;
         const DBCommon::TreeOrdinal tree_ordinal;        
         Wind wind;
         mutable size_t next_terminus_index;

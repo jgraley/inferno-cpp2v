@@ -12,35 +12,12 @@ void DBWalk::WalkTreeZone( const Actions *actions,
 {
     TRACE("Walking tree zone: ")(tree_zone)(" in #%u\n", tree_ordinal);
     ASSERT( base_info );
-    WalkKit kit { actions, &tree_zone, nullptr, tree_ordinal, wind, 0U };
+    WalkKit kit { actions, &tree_zone, tree_ordinal, wind, 0U };
     VisitBase( kit, tree_zone.GetBaseXLink(), tree_zone.GetBaseNode(), base_info );  
     ASSERT( kit.next_terminus_index == tree_zone.GetNumTerminii() )
           ("Zone has %u terminii", tree_zone.GetNumTerminii())
           (" but only visited %u", kit.next_terminus_index); // should have visited all the terminii
     TRACE("Done walking tree zone\n");
-}
-
-
-void DBWalk::WalkFreeZone( const Actions *actions,
-                           const FreeZone &free_zone,
-                           Wind wind )
-{
-    TRACE("Walking free zone: ")(free_zone)("\n");
-    if( free_zone.IsEmpty() )
-		return;
-				
-    const DBCommon::CoreInfo base_info = { TreePtr<Node>(),                       
-                                           -1,
-                                           DBCommon::FREE_BASE,                  
-                                           nullptr,
-                                           -1,                                                       
-                                           ContainerInterface::iterator() };
-    WalkKit kit { actions, nullptr, &free_zone, (SR::DBCommon::TreeOrdinal)(-1), wind, 0U };
-    VisitBase( kit, XLink(), free_zone.GetBaseNode(), &base_info );  
-    ASSERT( kit.next_terminus_index == free_zone.GetNumTerminii() )
-          ("Zone has %u terminii", free_zone.GetNumTerminii())
-          (" but only visited %u", kit.next_terminus_index); // should have visited all the terminii
-    TRACE("Done walking free zone\n");
 }
 
 
@@ -181,18 +158,10 @@ bool DBWalk::VisitNode( const WalkKit &kit,
 #ifdef TRACE_WALK
     INDENT(".");     
 #endif
-    if( !walk_info.node )
-    {
-		walk_info.at_terminus = (kit.free_zone &&
-		                         kit.next_terminus_index < kit.free_zone->GetNumTerminii() && 
-		                         walk_info.p_tree_ptr_interface == kit.free_zone->GetTerminusMutator(kit.next_terminus_index).GetTreePtrInterface());
-	}
-	else
-	{		
-		walk_info.at_terminus = (kit.tree_zone &&
-								 kit.next_terminus_index < kit.tree_zone->GetNumTerminii() && // TODO store end iterator directly in kit
-								 walk_info.xlink == kit.tree_zone->GetTerminusXLink(kit.next_terminus_index));
-	}
+    walk_info.at_terminus = (walk_info.node &&
+	                         kit.tree_zone &&
+							 kit.next_terminus_index < kit.tree_zone->GetNumTerminii() && // TODO store end iterator directly in kit
+							 walk_info.xlink == kit.tree_zone->GetTerminusXLink(kit.next_terminus_index));
 	
     if( walk_info.at_terminus )
         ++(kit.next_terminus_index);
