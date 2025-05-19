@@ -10,7 +10,7 @@ using namespace SR;
 unique_ptr<FreeZone> TreeZone::Duplicate() const
 {
     if( IsEmpty() )
-        return FreeZone::CreateEmpty();
+        return make_unique<FreeZone>( FreeZone::CreateEmpty() );
         
     // Iterate over terminii and operand zones together, filling the map for
     // DuplicateSubtree() to use.
@@ -69,20 +69,20 @@ void TreeZone::Validate(const XTreeDatabase *db) const // TODO maybe move to dat
 
 // ------------------------- XTreeZone --------------------------
 
-unique_ptr<XTreeZone> XTreeZone::CreateSubtree( XLink base )
+XTreeZone XTreeZone::CreateSubtree( XLink base )
 {
-    return make_unique<XTreeZone>( base, vector<XLink>() );
+    return XTreeZone( base, vector<XLink>() );
 }
 
 
-unique_ptr<XTreeZone> XTreeZone::CreateEmpty( XLink base )
+XTreeZone XTreeZone::CreateEmpty( XLink base )
 {
     ASSERTS( base );
-    return make_unique<XTreeZone>( base, vector<XLink>{ base } ); // One element, same as base
+    return XTreeZone( base, vector<XLink>{ base } ); // One element, same as base
 }
 
 
-unique_ptr<XTreeZone> XTreeZone::CreateFromScaffold( XLink scaffold_xlink )
+XTreeZone XTreeZone::CreateFromScaffold( XLink scaffold_xlink )
 {
 	TreePtr<Node> scaffold = scaffold_xlink.GetChildTreePtr();
 	ScaffoldBase *sbp = dynamic_cast<ScaffoldBase *>(scaffold.get());
@@ -91,7 +91,7 @@ unique_ptr<XTreeZone> XTreeZone::CreateFromScaffold( XLink scaffold_xlink )
 	for( TreePtr<Node> &tpp : sbp->child_ptrs )
 		terminii.push_back( XLink( scaffold, &tpp ) );
 	
-	return make_unique<XTreeZone>( scaffold_xlink, terminii );
+	return XTreeZone( scaffold_xlink, terminii );
 }
 
 
@@ -290,7 +290,7 @@ FreeZone MutableTreeZone::Exchange( const FreeZone &new_free_zone, vector<Mutabl
     if( original_tree_zone_base )
 		free_zone.SetBase( original_tree_zone_base );	
 	else
-		free_zone = *FreeZone::CreateEmpty();		
+		free_zone = FreeZone::CreateEmpty();		
 		
 	return free_zone;
 }

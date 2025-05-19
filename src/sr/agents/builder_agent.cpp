@@ -60,5 +60,5 @@ Agent::ReplacePatchPtr BuilderAgent::GenReplaceLayoutImpl( const ReplaceKit &kit
     }
 
     // Make free zone without duplicating since this is first one
-    return make_shared<FreeZonePatch>( FreeZone::CreateSubtree( new_node ) );
+    return make_shared<FreeZonePatch>( make_unique<FreeZone>( FreeZone::CreateSubtree(new_node) ) );
 }

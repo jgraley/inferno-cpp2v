@@ -9,40 +9,40 @@ using namespace SR;
 
 // ------------------------- FreeZone --------------------------
 
-unique_ptr<FreeZone> FreeZone::CreateSubtree( TreePtr<Node> base )
+FreeZone FreeZone::CreateSubtree( TreePtr<Node> base )
 {
-    return make_unique<FreeZone>( base, list<Mutator>{} );
+    return FreeZone( base, list<Mutator>{} );
 }
 
 
-unique_ptr<FreeZone> FreeZone::CreateEmpty()
+FreeZone FreeZone::CreateEmpty()
 {
-    return make_unique<FreeZone>( TreePtr<Node>(), // NULL
-                                  list<Mutator>{ Mutator() } ); // One element, NULL
+    return FreeZone( TreePtr<Node>(), // NULL
+                     list<Mutator>{ Mutator() } ); // One element, NULL
 }
 
 
-unique_ptr<FreeZone> FreeZone::CreateScaffoldToSpec(TreePtr<Node> base, int num_terminii)
+FreeZone FreeZone::CreateScaffoldToSpec(TreePtr<Node> base, int num_terminii)
 {
 	//auto base = (TreePtr<Node>)(*tpi_base);
 	ASSERTS(base);
 	const TreeUtilsInterface *upi = base->MakeTP();
 	ASSERTS(upi);
-	auto scaffold = upi->MakeScaffold();
+	TreePtr<Node> scaffold = upi->MakeScaffold();
 
 	ScaffoldBase *sbp = dynamic_cast<ScaffoldBase *>(scaffold.get());
 	ASSERTS( sbp );
 	Sequence<Node> *ssp = &(sbp->child_ptrs);
  
     // Set the base as the scaffolding node
-    auto zone = make_unique<FreeZone>( scaffold, list<Mutator>{} );
+    auto zone = FreeZone( scaffold, list<Mutator>{} );
     
     // Set the terminii as the scaffolding node's scaffold child pointers (the
     // underlying node type's children will be left empty/NULL)
     for( int i=0; i<num_terminii; i++ )
     {
         ContainerInterface::iterator it = ssp->insert( Mutator::MakePlaceholder() );
-        zone->AddTerminus( Mutator::CreateFreeContainer(scaffold, ssp, it) );     
+        zone.AddTerminus( Mutator::CreateFreeContainer(scaffold, ssp, it) );     
     }
     
     //FTRACES("Created scaffold with %d terminii\n", num_terminii)("\n");

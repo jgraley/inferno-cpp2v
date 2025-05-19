@@ -27,8 +27,8 @@ void ToMutablePass::Run( shared_ptr<Patch> &layout )
         if( !dynamic_cast<MutableTreeZone *>(zone) )
 		{			
 			auto mutable_zone = db->CreateMutableTreeZone( zone->GetBaseXLink(),
-														 zone->GetTerminusXLinks() );
-			tree_patch->SetZone(move(mutable_zone));                                			
+														   zone->GetTerminusXLinks() );
+			tree_patch->SetZone(make_unique<MutableTreeZone>(mutable_zone));                                			
         }
     } );    
 }
@@ -54,7 +54,7 @@ void ProtectDEPass::Run( shared_ptr<Patch> &layout )
         {
 			// Filter manually because we'll change the type
             auto right_tree_patch = dynamic_pointer_cast<TreeZonePatch>(r_patch);
-			auto p = tz_relation.CompareHierarchical( *extra_tree, *right_tree_patch->GetZone() );
+			auto p = tz_relation.CompareHierarchical( extra_tree, *right_tree_patch->GetZone() );
 			if( p.second == ZoneRelation::OVERLAP_GENERAL || 
 				p.second == ZoneRelation::OVERLAP_TERMINII ||
 				p.second == ZoneRelation::EQUAL )

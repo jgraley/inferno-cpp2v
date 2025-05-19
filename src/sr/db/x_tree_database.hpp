@@ -83,8 +83,8 @@ public:
     XLink GetMainRootXLink() const;
 
     Mutator CreateTreeMutator(XLink xlink);
-    unique_ptr<MutableTreeZone> CreateMutableTreeZone(XLink xlink,
-                                                    vector<XLink> terminii);
+    MutableTreeZone CreateMutableTreeZone(XLink xlink,
+                                          vector<XLink> terminii);
 
     void Dump() const;
 	void DumpTables() const;

@@ -98,13 +98,13 @@ Agent::ReplacePatchPtr StarAgent::GenReplaceLayoutImpl( const ReplaceKit &kit,
     for( const TreePtrInterface &key_elt : *key_container )
     {
         ContainerInterface::iterator dest_it = dest_container->insert( Mutator::MakePlaceholder() );
-        dest_zone->AddTerminus( Mutator::CreateFreeContainer(dest, dest_container, dest_it) );    
+        dest_zone.AddTerminus( Mutator::CreateFreeContainer(dest, dest_container, dest_it) );    
 
         auto child_zone = XTreeZone::CreateSubtree(XLink(key_node, &key_elt) );
-        child_commands.push_back( make_shared<TreeZonePatch>(move(child_zone)) );
+        child_commands.push_back( make_shared<TreeZonePatch>(make_unique<XTreeZone>(child_zone)) );
     }
 
-    return make_shared<FreeZonePatch>( move(dest_zone), move(child_commands) );    
+    return make_shared<FreeZonePatch>( make_unique<FreeZone>(dest_zone), move(child_commands) );    
 }
 
 

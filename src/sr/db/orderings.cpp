@@ -43,7 +43,7 @@ void Orderings::Insert(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool
 
 	// Assume there is only one incoming XLink to the node because not a leaf
 	auto subtree = XTreeZone::CreateSubtree(zone.GetBaseXLink());
-	set<TreePtr<Node>> invalidated = GetTerminusAndBaseAncestors(*subtree);
+	set<TreePtr<Node>> invalidated = GetTerminusAndBaseAncestors(subtree);
 
 	for( TreePtr<Node> x : invalidated )                        
 		if( !dynamic_cast<ScaffoldBase *>(x.get()) )
@@ -66,7 +66,7 @@ void Orderings::Delete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool
 
 	// Assume there was only one incoming XLink to the node because not a leaf
 	auto subtree = XTreeZone::CreateSubtree(zone.GetBaseXLink());
-	set<TreePtr<Node>> invalidated = GetTerminusAndBaseAncestors(*subtree);
+	set<TreePtr<Node>> invalidated = GetTerminusAndBaseAncestors(subtree);
 
 	for( TreePtr<Node> x : invalidated )                        
 		if( !dynamic_cast<ScaffoldBase *>(x.get()) )

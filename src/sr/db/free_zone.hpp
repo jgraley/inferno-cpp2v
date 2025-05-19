@@ -24,9 +24,9 @@ public:
     typedef list<Mutator>::iterator TerminusIterator;
     typedef list<Mutator>::const_iterator TerminusConstIterator;
 
-    static unique_ptr<FreeZone> CreateSubtree( TreePtr<Node> base );
-    static unique_ptr<FreeZone> CreateEmpty();
-    static unique_ptr<FreeZone> CreateScaffoldToSpec(TreePtr<Node> base, int num_terminii);
+    static FreeZone CreateSubtree( TreePtr<Node> base );
+    static FreeZone CreateEmpty();
+    static FreeZone CreateScaffoldToSpec(TreePtr<Node> base, int num_terminii);
 
     FreeZone();
     explicit FreeZone( TreePtr<Node> base, list<Mutator> &&terminii );

@@ -122,7 +122,6 @@ void BoundaryPass::SplitTreeZoneAtXLink( shared_ptr<Patch> *patch_ptr, XLink spl
 	TreeZone *initial_zone = tree_patch->GetZone();
     vector<XLink> parent_terminii, new_terminii;
 	list<shared_ptr<Patch>> parent_children, new_children;
-	unique_ptr<MutableTreeZone> parent_zone;
 	shared_ptr<Patch> *new_patch_ptr = nullptr;
 
 	auto p = dfr.CompareHierarchical(initial_zone->GetBaseXLink(), split_point);
@@ -150,8 +149,8 @@ void BoundaryPass::SplitTreeZoneAtXLink( shared_ptr<Patch> *patch_ptr, XLink spl
 			// We are past the split point and should insert the new patch/zone before terminus
 			ASSERT( !prev_terminus || dfr.Compare3Way(prev_terminus, split_point) < 0 );
 			parent_terminii.push_back(split_point); 
-			unique_ptr<MutableTreeZone> new_child_zone = db->CreateMutableTreeZone(split_point, new_terminii);
-			auto new_child_patch = make_shared<TreeZonePatch>( move(new_child_zone), move(new_children) );
+			MutableTreeZone new_child_zone = db->CreateMutableTreeZone(split_point, new_terminii);
+			auto new_child_patch = make_shared<TreeZonePatch>( make_unique<MutableTreeZone>(new_child_zone), move(new_children) );
 			parent_children.push_back(new_child_patch);
 			new_patch_ptr = &(parent_children.back());
 			done_insert = true;
@@ -188,8 +187,8 @@ void BoundaryPass::SplitTreeZoneAtXLink( shared_ptr<Patch> *patch_ptr, XLink spl
 	{
 		ASSERT( !prev_terminus || dfr.Compare3Way(prev_terminus, split_point) < 0 );
 		parent_terminii.push_back(split_point); 
-		unique_ptr<MutableTreeZone> new_child_zone = db->CreateMutableTreeZone(split_point, new_terminii);
-		auto new_child_patch = make_shared<TreeZonePatch>( move(new_child_zone), move(new_children) );
+		MutableTreeZone new_child_zone = db->CreateMutableTreeZone(split_point, new_terminii);
+		auto new_child_patch = make_shared<TreeZonePatch>( make_unique<MutableTreeZone>(new_child_zone), move(new_children) );
 		parent_children.push_back(new_child_patch);
 		new_patch_ptr = &(parent_children.back());
 	}
@@ -204,8 +203,8 @@ void BoundaryPass::SplitTreeZoneAtXLink( shared_ptr<Patch> *patch_ptr, XLink spl
 	}
 	
 	// Create new parent zone and terminii
-	parent_zone = db->CreateMutableTreeZone(initial_zone->GetBaseXLink(), parent_terminii);
-	auto t = make_shared<TreeZonePatch>( move(parent_zone), move(parent_children) );	
+	MutableTreeZone parent_zone = db->CreateMutableTreeZone(initial_zone->GetBaseXLink(), parent_terminii);
+	auto t = make_shared<TreeZonePatch>( make_unique<MutableTreeZone>(parent_zone), move(parent_children) );	
 	
 	TRACE("Splitting: ")(patch_ptr)("\ninto: ")(t)("\nand: ")(new_patch_ptr)("\n");
 	

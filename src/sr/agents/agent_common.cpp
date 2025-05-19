@@ -552,8 +552,8 @@ Agent::ReplacePatchPtr AgentCommon::GenReplaceLayoutImpl( const ReplaceKit &kit,
 {
     // Default replace behaviour to just use the X subtree we keyed to, so we need to be keyed
     ASSERT(key_xlink)("Agent ")(*this)(" in replace context is not keyed but needs to be");
-    auto new_zone = XTreeZone::CreateSubtree(key_xlink );
-    return make_shared<TreeZonePatch>( move(new_zone) );        
+    auto new_zone = XTreeZone::CreateSubtree(key_xlink);
+    return make_shared<TreeZonePatch>( make_unique<XTreeZone>(new_zone) );        
 } 
 
 

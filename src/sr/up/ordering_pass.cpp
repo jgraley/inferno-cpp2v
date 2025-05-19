@@ -505,7 +505,7 @@ void OrderingPass::MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch, sha
 	ASSERT( !target_tree_zone->IsEmpty() ); // See #784
 	
 	// Make scaffold free zones that fit in place of the moving zone
-	auto scaffold_zone_from = target_tree_zone->MakeScaffold();
+	auto scaffold_zone_from = target_tree_zone->CreateSimilarScaffoldZone();
 	TRACE("\"From\" scaffold: ")(scaffold_zone_from)("\n");
 
 	// ------------------------- Swap "from" zone into its own extra tree ---------------------------
@@ -515,7 +515,7 @@ void OrderingPass::MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch, sha
 	target_tree_zone->Validate(db);
 	    // Determine the fix-ups we'll need to do for tree zones in neighbouring patches
     vector<MutableTreeZone *> fixups;	
-    FreeZone::TerminusIterator terminus_it_scaffold_from = scaffold_zone_from->GetTerminiiBegin();
+    FreeZone::TerminusIterator terminus_it_scaffold_from = scaffold_zone_from.GetTerminiiBegin();
     for( size_t i=0; i<target_tree_zone->GetNumTerminii(); i++ )
 	{
 		MutableTreeZone *found = nullptr;
@@ -536,15 +536,15 @@ void OrderingPass::MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch, sha
 		// we could allow NULL TreePtrs/placeholders to exist in tree and define semantics for them.
 		TreePtr<Node> term_child_node = target_tree_zone->GetTerminusMutator(i).GetChildTreePtr();
 		ASSERT(term_child_node);
-		unique_ptr<FreeZone> plug_node = FreeZone::CreateScaffoldToSpec(term_child_node, 0); // finally no terminii!!!
-        terminus_it_scaffold_from = scaffold_zone_from->MergeTerminus( terminus_it_scaffold_from, move(plug_node) );        
+		FreeZone plug = FreeZone::CreateScaffoldToSpec(term_child_node, 0); // finally no terminii!!!
+        terminus_it_scaffold_from = scaffold_zone_from.MergeTerminus( terminus_it_scaffold_from, make_unique<FreeZone>(plug) );        
 	}	
 	TRACE("\"From\" scaffold after populating terminii: ")(scaffold_zone_from)("\n");
 		
     // Add a new extra tree containing the plugged "from" scaffold
     DBCommon::TreeOrdinal extra_tree_ordinal = db->AllocateExtraTree();        
 	TRACE("Allocated extra tree %u\n", extra_tree_ordinal);
-    MutableTreeZone zone_in_extra_tree = db->BuildTree( extra_tree_ordinal, *scaffold_zone_from );
+    MutableTreeZone zone_in_extra_tree = db->BuildTree( extra_tree_ordinal, scaffold_zone_from );
 	TRACE("Zone in extra tree: ")(zone_in_extra_tree)("\n");
 
 	//db->DumpTables();
@@ -555,29 +555,29 @@ void OrderingPass::MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch, sha
 	// TZ::CreateFromScaffold() which itself takes advantage of the simplicty of scaffold nodes.
 	XLink scaffold_root_xlink = db->GetRootXLink(extra_tree_ordinal);
 	TRACE("Extra tree root: ")(scaffold_root_xlink)("\n");
-	unique_ptr<XTreeZone> from_scaffold_xtz = XTreeZone::CreateFromScaffold( scaffold_root_xlink ); 
-	unique_ptr<MutableTreeZone> from_scaffold_tree_zone = db->CreateMutableTreeZone( from_scaffold_xtz->GetBaseXLink(),
-												                                     from_scaffold_xtz->GetTerminusXLinks() );	
+	XTreeZone from_scaffold_xtz = XTreeZone::CreateFromScaffold( scaffold_root_xlink ); 
+	MutableTreeZone from_scaffold_tree_zone = db->CreateMutableTreeZone( from_scaffold_xtz.GetBaseXLink(),
+												                                     from_scaffold_xtz.GetTerminusXLinks() );	
 	TRACE("Original \"from\" scaffold in TZ with its terminii: ")(from_scaffold_tree_zone)("\n");
 
 	// Swap in the true moving zone. Names become misleading because contents swap:
-	// *from_scaffold_tree_zone <- the actual moving zone now in extra tree
+	// from_scaffold_tree_zone <- the actual moving zone now in extra tree
 	// *target_tree_zone <- the "from" scaffold now in main tree, to be killed by inversion
 	db->XTreeDatabase::SwapTreeToTree( DBCommon::TreeOrdinal::MAIN, *target_tree_zone, fixups,
-		    						   extra_tree_ordinal, *from_scaffold_tree_zone, vector<MutableTreeZone *>() );
+		    						   extra_tree_ordinal, from_scaffold_tree_zone, vector<MutableTreeZone *>() );
 
 	// ------------------------- Add "To" patch to tree for inversion ---------------------------
-	unique_ptr<FreeZone> scaffold_zone_to = from_scaffold_tree_zone->MakeScaffold(); 
-	TreePtr<Node> scaffold_base_to = scaffold_zone_to->GetBaseNode();
+	FreeZone scaffold_zone_to = from_scaffold_tree_zone.CreateSimilarScaffoldZone(); 
+	TreePtr<Node> scaffold_base_to = scaffold_zone_to.GetBaseNode();
 	TRACE("\"To\" scaffold: ")(scaffold_zone_to)("\n");
 
 	// Rememeber the association between the "to" scaffold node and the moving zone
 	TRACE("Making map entry, \"to\" scaffold node: ")(scaffold_base_to)("\n moving zone: \n")(from_scaffold_tree_zone)("\n");
-	InsertSolo( moves_map.mm, make_pair(scaffold_base_to, make_pair(extra_tree_ordinal, *from_scaffold_tree_zone)) );
+	InsertSolo( moves_map.mm, make_pair(scaffold_base_to, make_pair(extra_tree_ordinal, from_scaffold_tree_zone)) );
 
 	// Store the scaffold in the layout so it goes into inversion as a free zone, so it survives, 
 	// and ands up in the tree at the "to" location.
-	auto free_patch = make_shared<FreeZonePatch>( move(scaffold_zone_to), target_tree_patch->MoveChildren() );
+	auto free_patch = make_shared<FreeZonePatch>( make_unique<FreeZone>(scaffold_zone_to), target_tree_patch->MoveChildren() );
 	*target_patch = free_patch;
 	
 	ValidateTreeZones(db).Run(layout);

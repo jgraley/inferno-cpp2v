@@ -27,7 +27,7 @@ public:
         
     bool IsSubtree() const;
     void MarkOriginForEmbedded(RequiresSubordinateSCREngine *embedded_agent);
-    unique_ptr<FreeZone> MakeScaffold() const;
+    FreeZone CreateSimilarScaffoldZone() const;
 };    
  
 }

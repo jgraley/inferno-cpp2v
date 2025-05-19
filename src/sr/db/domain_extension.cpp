@@ -138,7 +138,7 @@ void DomainExtensionChannel::CreateExtraTree( TreePtr<Node> induced_root )
 	auto extra_free_zone = FreeZone::CreateSubtree(extra_root_node);
 
     // Add the whole subtree to the rest of the database as a new tree
-    (void)db->BuildTree( tree_ordinal, *extra_free_zone );
+    (void)db->BuildTree( tree_ordinal, extra_free_zone );
  
     Validate();  
 }

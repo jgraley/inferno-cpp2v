@@ -20,7 +20,7 @@ void Zone::MarkOriginForEmbedded(RequiresSubordinateSCREngine *embedded_agent)
 }
 
 
-unique_ptr<FreeZone> Zone::MakeScaffold() const
+FreeZone Zone::CreateSimilarScaffoldZone() const
 {
 	return FreeZone::CreateScaffoldToSpec(GetBaseNode(), GetNumTerminii());
 }
