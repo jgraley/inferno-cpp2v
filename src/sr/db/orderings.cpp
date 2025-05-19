@@ -41,9 +41,20 @@ void Orderings::Insert(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool
 	// sufficient: what is ancestor of base is ancestor of every node in
 	// the zone. If we act at root, there won't be any.
 
+	set<TreePtr<Node>> invalidated;
+#ifdef SC_INTRINSIC
+	if( !do_intrinsics )		
+	{
+		invalidated = GetTerminusAndBaseAncestors(*zone);
+	}
+	else
+#else
 	// Assume there is only one incoming XLink to the node because not a leaf
-	auto subtree = XTreeZone::CreateSubtree(zone.GetBaseXLink());
-	set<TreePtr<Node>> invalidated = GetTerminusAndBaseAncestors(subtree);
+	{
+		auto subtree = XTreeZone::CreateSubtree(zone.GetBaseXLink());
+		invalidated = GetTerminusAndBaseAncestors(subtree);
+	}
+#endif
 
 	for( TreePtr<Node> x : invalidated )                        
 		if( !dynamic_cast<ScaffoldBase *>(x.get()) )
@@ -64,9 +75,21 @@ void Orderings::Delete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool
 	// sufficient: what is ancestor of base is ancestor of every node in
 	// the zone. If we act at root, there won't be any.
 
+	set<TreePtr<Node>> invalidated;
+	
 	// Assume there was only one incoming XLink to the node because not a leaf
-	auto subtree = XTreeZone::CreateSubtree(zone.GetBaseXLink());
-	set<TreePtr<Node>> invalidated = GetTerminusAndBaseAncestors(subtree);
+#ifdef SC_INTRINSIC
+	if( !do_intrinsics )		
+	{
+		invalidated = GetTerminusAndBaseAncestors(*zone);
+	}
+	else
+#else
+	{
+		auto subtree = XTreeZone::CreateSubtree(zone.GetBaseXLink());
+		invalidated = GetTerminusAndBaseAncestors(subtree);
+	}
+#endif
 
 	for( TreePtr<Node> x : invalidated )                        
 		if( !dynamic_cast<ScaffoldBase *>(x.get()) )
@@ -86,6 +109,9 @@ void Orderings::InsertAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsi
 		return;
 
 	// Only if not already
+#ifdef SC_INTRINSIC
+	if( do_intrinsics )		
+#endif	
 	if( simple_compare_ordering.count(walk_info.node)==0 )
 		InsertSolo( simple_compare_ordering, walk_info.node );               
 
@@ -119,6 +145,9 @@ void Orderings::DeleteAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsi
 	node_reached_count[walk_info.node]++;     
 
 	// Only remove if this was the last incoming XLink to the node
+#ifdef SC_INTRINSIC
+	if( do_intrinsics )		
+#endif	
 	if( node_reached_count.at(walk_info.node) == row.incoming_xlinks.size() ) 
 		EraseSolo( simple_compare_ordering, walk_info.node );               
 	
