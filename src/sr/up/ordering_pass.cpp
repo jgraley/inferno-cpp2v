@@ -577,7 +577,7 @@ void OrderingPass::MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch, sha
 
 	// Store the scaffold in the layout so it goes into inversion as a free zone, so it survives, 
 	// and ands up in the tree at the "to" location.
-	auto free_patch = make_shared<FreeZonePatch>( make_unique<FreeZone>(scaffold_zone_to), target_tree_patch->MoveChildren() );
+	auto free_patch = make_shared<FreeZonePatch>( scaffold_zone_to, target_tree_patch->MoveChildren() );
 	*target_patch = free_patch;
 	
 	ValidateTreeZones(db).Run(layout);

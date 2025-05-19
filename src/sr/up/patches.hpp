@@ -74,8 +74,10 @@ private:
 class TreeZonePatch : public Patch
 {
 public:
-    TreeZonePatch( unique_ptr<TreeZone> zone_, list<shared_ptr<Patch>> &&child_patches );
-    TreeZonePatch( unique_ptr<TreeZone> zone_ );
+    TreeZonePatch( const XTreeZone &zone_, list<shared_ptr<Patch>> &&child_patches );
+    TreeZonePatch( const MutableTreeZone &zone_, list<shared_ptr<Patch>> &&child_patches );
+    TreeZonePatch( const XTreeZone &zone_ );
+    TreeZonePatch( const MutableTreeZone &zone_ );
     
     void AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&new_markers ) final;
     list<RequiresSubordinateSCREngine *> GetEmbeddedMarkers() const final;
@@ -115,8 +117,8 @@ private:
 class FreeZonePatch : public Patch
 {
 public:
-    FreeZonePatch( unique_ptr<FreeZone> zone_, list<shared_ptr<Patch>> &&child_patches );
-    FreeZonePatch( unique_ptr<FreeZone> zone_ );
+    FreeZonePatch( const FreeZone &zone_, list<shared_ptr<Patch>> &&child_patches );
+    FreeZonePatch( const FreeZone &zone_ );
 
     void AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&new_markers ) final;
     list<RequiresSubordinateSCREngine *> GetEmbeddedMarkers() const final;

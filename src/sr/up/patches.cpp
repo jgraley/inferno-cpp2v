@@ -125,18 +125,34 @@ void Patch::DepthFirstWalkImpl( function<void(shared_ptr<Patch> &patch)> func_in
 
 // ------------------------- TreeZonePatch --------------------------
 
-TreeZonePatch::TreeZonePatch( unique_ptr<TreeZone> zone_, 
+TreeZonePatch::TreeZonePatch( const XTreeZone &zone_, 
                               list<shared_ptr<Patch>> &&child_patches ) :
     Patch( move(child_patches) ),
-    zone(move(zone_))
+    zone(make_unique<XTreeZone>(zone_))
 {
     ASSERT( zone->GetNumTerminii() == GetNumChildren() );    
 }    
         
 
-TreeZonePatch::TreeZonePatch( unique_ptr<TreeZone> zone_ ) :
+TreeZonePatch::TreeZonePatch( const MutableTreeZone &zone_, 
+                              list<shared_ptr<Patch>> &&child_patches ) :
+    Patch( move(child_patches) ),
+    zone(make_unique<MutableTreeZone>(zone_))
+{
+    ASSERT( zone->GetNumTerminii() == GetNumChildren() );    
+}    
+        
+
+TreeZonePatch::TreeZonePatch( const XTreeZone &zone_ ) :
     Patch(),
-    zone(move(zone_))
+    zone(make_unique<XTreeZone>(zone_))
+{
+    // If zone has terminii, they will be "exposed".
+}        
+
+TreeZonePatch::TreeZonePatch( const MutableTreeZone &zone_ ) :
+    Patch(),
+    zone(make_unique<MutableTreeZone>(zone_))
 {
     // If zone has terminii, they will be "exposed".
 }
@@ -182,7 +198,7 @@ shared_ptr<FreeZonePatch> TreeZonePatch::DuplicateToFree() const
 {
     unique_ptr<FreeZone> free_zone = zone->Duplicate();
     list<shared_ptr<Patch>> c = GetChildren();
-    auto pop_free_patch = make_shared<FreeZonePatch>( move(free_zone), move(c) );
+    auto pop_free_patch = make_shared<FreeZonePatch>( *free_zone, move(c) );
     pop_free_patch->AddEmbeddedMarkers( GetEmbeddedMarkers() );
     return pop_free_patch;
 }    
@@ -269,18 +285,18 @@ string TreeZonePatch::GetTrace() const
 
 // ------------------------- FreeZonePatch --------------------------
 
-FreeZonePatch::FreeZonePatch( unique_ptr<FreeZone> zone_, 
+FreeZonePatch::FreeZonePatch( const FreeZone &zone_, 
                               list<shared_ptr<Patch>> &&child_patches ) :
     Patch( move(child_patches) ),
-    zone(move(zone_))
+    zone(make_unique<FreeZone>(zone_))
 {
     ASSERT( zone->GetNumTerminii() == GetNumChildren() );    
 }
 
         
-FreeZonePatch::FreeZonePatch( unique_ptr<FreeZone> zone_ ) :
+FreeZonePatch::FreeZonePatch( const FreeZone &zone_ ) :
        Patch(),
-       zone(move(zone_))
+       zone(make_unique<FreeZone>(zone_))
 {
     // If zone has terminii, they will be "exposed" and will remain 
     // in the zone returned by Evaluate.

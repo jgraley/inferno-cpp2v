@@ -39,7 +39,7 @@ void GapFindingPass::CheckPatch(shared_ptr<TreeZonePatch> patch)
 			if( child_base_xlink != terminus_xlink )    // ...but not directly attached in current tree
 			{				
 				// Action: insert an empty free zone
-				auto new_patch = make_shared<FreeZonePatch>( make_unique<FreeZone>(FreeZone::CreateEmpty()), 
+				auto new_patch = make_shared<FreeZonePatch>( FreeZone::CreateEmpty(), 
 				                                             list<shared_ptr<Patch>>{ child_patch } );
 				child_patch = new_patch;
 			}
