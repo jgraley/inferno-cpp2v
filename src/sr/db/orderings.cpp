@@ -5,7 +5,7 @@
 #include "lacing.hpp"
 #include "relation_test.hpp"
 
-using namespace SR;    
+using namespace SR;   
 
 Orderings::Orderings( shared_ptr<Lacing> lacing, const XTreeDatabase *db_ ) :
     plan( lacing ),
@@ -90,19 +90,12 @@ void Orderings::InsertAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsi
 		InsertSolo( simple_compare_ordering, walk_info.node );               
 
 	if( do_intrinsics )
-	{		
-		//ASSERT( (node_ref_counts[walk_info.node] == 0) ==
-		//        (category_ordering.count(walk_info.node)==0) );
-		
-		if( node_ref_counts[walk_info.node]++ != 0 )
+	{				
+		if( category_ordering.count(walk_info.node) == 0 ) // already in		
 		{
-			TRACE("CAT does not insert due existing refs: ")(walk_info.node)(" count=%u\n", node_ref_counts[walk_info.node]);
-			return;
-		}		 
-		
-		TRACE("CAT inserts: ")(walk_info.node)("\n");
-		InsertSolo( category_ordering, walk_info.node );            	
-		TRACE("CAT at %p size=%u count=%u\n", this, category_ordering.size(), node_ref_counts[walk_info.node]);		
+			TRACE("CAT inserts: ")(walk_info.node)("\n");
+			InsertSolo( category_ordering, walk_info.node );            	
+		}
 	}
 }
 
@@ -130,24 +123,13 @@ void Orderings::DeleteAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsi
 		EraseSolo( simple_compare_ordering, walk_info.node );               
 	
 	if( do_intrinsics )
-	{		
-		/*ASSERT( (node_reached_count.at(walk_info.node) == row.incoming_xlinks.size()) ==
-		        (node_ref_counts[walk_info.node] == 1) )
-		        ("Node: ")(walk_info.node)(" XLink: ")(walk_info.xlink)("\n")
-		        ("node_reached_count: ")(node_reached_count.at(walk_info.node))("\n")
-		        ("row.incoming_xlinks: ")(row.incoming_xlinks)("\n")
-		        ("node_ref_count: ")(node_ref_counts[walk_info.node])("\n");
-		  */      
-		
-		if( --node_ref_counts[walk_info.node] != 0 )
-		{
-			TRACE("CAT does not delete due existing refs: ")(walk_info.node)("\n");
-			return;
-		}	
-			
-		TRACE("CAT deletes: ")(walk_info.node)("\n");
-		EraseSolo( category_ordering, walk_info.node );   
-		TRACE("CAT at %p size=%u\n", this, category_ordering.size());	
+	{				       	
+		if( node_reached_count.at(walk_info.node) == row.incoming_xlinks.size() ) // we reached all the incomers so there are none outside the zone		
+		{		
+			TRACE("CAT deletes: ")(walk_info.node)("\n");
+			EraseSolo( category_ordering, walk_info.node );   
+			TRACE("CAT at %p size=%u\n", this, category_ordering.size());	
+		}
 	}
 }
        
