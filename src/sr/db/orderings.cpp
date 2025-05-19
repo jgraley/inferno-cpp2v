@@ -57,8 +57,7 @@ void Orderings::Insert(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool
 #endif
 
 	for( TreePtr<Node> x : invalidated )                        
-		if( !dynamic_cast<ScaffoldBase *>(x.get()) )
-			InsertSolo( simple_compare_ordering, x );   			
+		InsertSolo( simple_compare_ordering, x );   			
 }
 
 
@@ -92,8 +91,7 @@ void Orderings::Delete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool
 #endif
 
 	for( TreePtr<Node> x : invalidated )                        
-		if( !dynamic_cast<ScaffoldBase *>(x.get()) )
-			EraseSolo( simple_compare_ordering, x );                              
+		EraseSolo( simple_compare_ordering, x );                              
 }
 
 
@@ -103,9 +101,6 @@ void Orderings::InsertAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsi
 
 	// Remaining orderings are keyed on nodes, and we don't need to update on the boundary layer
 	if( walk_info.at_terminus )
-		return;
-
-	if( dynamic_cast<ScaffoldBase *>(walk_info.node.get()) )
 		return;
 
 	// Only if not already
@@ -132,9 +127,6 @@ void Orderings::DeleteAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsi
 
 	// Remaining orderings are keyed on nodes, and we don't need to update on the boundary layer
 	if( walk_info.at_terminus )
-		return;
-
-	if( dynamic_cast<ScaffoldBase *>(walk_info.node.get()) )
 		return;
 
 	// Node table hasn't been updated yet, so node should be in there.
