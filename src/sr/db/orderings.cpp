@@ -30,6 +30,7 @@ const Lacing *Orderings::GetLacing() const
 	
 void Orderings::Insert(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
 {     
+	// -------------------- depth-first -----------------------
 	// Take care of the DFO, which is an XLink-keyed ordering and must be updated fully in geom case
     DBWalk::Actions actions;
     actions.push_back( [&](const DBWalk::WalkInfo &walk_info)
@@ -38,28 +39,26 @@ void Orderings::Insert(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool
 	} );
     db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_IN, base_info );
 
-    DBWalk::Actions actions2;
-    actions2.push_back( bind(&Orderings::InsertAction, this, placeholders::_1, do_intrinsics) );
-    db_walker.WalkTreeZone( &actions2, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_IN, base_info );
-
-	// We may now re-instate SimpleCompare index entries for parents 
-	// of the base node so that the SC ordering is intact. Base is
-	// sufficient: what is ancestor of base is ancestor of every node in
-	// the zone. If we act at root, there won't be any.
-
-	set<TreePtr<Node>> invalidated;
+	// -------------------- simple compare and category -----------------------
+	set<TreePtr<Node>> additional_sc_nodes_to_update;
 	if( do_intrinsics )		
 	{
-		(void)GetTerminusAndBaseAncestors(zone);
+		// Use a walk to insert all the SC and CAT when intrinsic
+		DBWalk::Actions actions2;
+		actions2.push_back( bind(&Orderings::InsertAction, this, placeholders::_1, do_intrinsics) );
+		db_walker.WalkTreeZone( &actions2, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_IN, base_info );
+
+		// SC still needs ancestors of root
 		auto subtree = XTreeZone::CreateSubtree(zone.GetBaseXLink());
-		invalidated = GetTerminusAndBaseAncestors(subtree);
+		additional_sc_nodes_to_update = GetTerminusAndBaseAncestors(subtree);
 	}
 	else
 	{
-		invalidated = GetTerminusAndBaseAncestors(zone);
+		// SC needs ancestors of root and terminii
+		additional_sc_nodes_to_update = GetTerminusAndBaseAncestors(zone);
 	}
 
-	for( TreePtr<Node> x : invalidated )                        
+	for( TreePtr<Node> x : additional_sc_nodes_to_update )                        
 		if( simple_compare_ordering.count(x)==0 )
 			InsertSolo( simple_compare_ordering, x );   			
 }
@@ -67,6 +66,7 @@ void Orderings::Insert(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool
 
 void Orderings::Delete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
 {
+	// -------------------- depth-first -----------------------
 	// Take care of the DFO, which is an XLink-keyed ordering and must be updated fully in geom case
     DBWalk::Actions actions;
     actions.push_back( [&](const DBWalk::WalkInfo &walk_info)
@@ -75,32 +75,30 @@ void Orderings::Delete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool
 	} );
     db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_IN, base_info );
 
-
-	node_reached_count.clear();	
-	DBWalk::Actions actions2;
-    actions2.push_back( bind(&Orderings::DeleteAction, this, placeholders::_1, do_intrinsics) );
-    db_walker.WalkTreeZone( &actions2, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_OUT, base_info );
-
-	// We must delete SimpleCompare index entries for ancestors of the base
-	// node, since removing it will invalidate the SC ordering. Base is
-	// sufficient: what is ancestor of base is ancestor of every node in
-	// the zone. If we act at root, there won't be any.
-
-	set<TreePtr<Node>> invalidated;
+	// -------------------- simple compare and category -----------------------
+	set<TreePtr<Node>> additional_sc_nodes_to_update;
 	
 	// Assume there was only one incoming XLink to the node because not a leaf
 	if( do_intrinsics )		
 	{
+		// Use a walk to insert all the SC and CAT when intrinsic
+		node_reached_count.clear();	
+		DBWalk::Actions actions2;
+		actions2.push_back( bind(&Orderings::DeleteAction, this, placeholders::_1, do_intrinsics) );
+		db_walker.WalkTreeZone( &actions2, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_OUT, base_info );
+
+		// SC still needs ancestors of root
 		(void)GetTerminusAndBaseAncestors(zone);
 		auto subtree = XTreeZone::CreateSubtree(zone.GetBaseXLink());
-		invalidated = GetTerminusAndBaseAncestors(subtree);
+		additional_sc_nodes_to_update = GetTerminusAndBaseAncestors(subtree);
 	}
 	else
 	{
-		invalidated = GetTerminusAndBaseAncestors(zone);
+		// SC needs ancestors of root and terminii
+		additional_sc_nodes_to_update = GetTerminusAndBaseAncestors(zone);
 	}
 
-	for( TreePtr<Node> x : invalidated )    
+	for( TreePtr<Node> x : additional_sc_nodes_to_update )    
 		if( db->GetNodeRow(x).incoming_xlinks.size() == 1 ) // Take reached count as 0
 			EraseSolo( simple_compare_ordering, x );                              
 }
@@ -108,22 +106,19 @@ void Orderings::Delete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool
 
 void Orderings::InsertAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsics)
 { 
-
 	// Remaining orderings are keyed on nodes, and we don't need to update on the boundary layer
 	if( walk_info.at_terminus )
 		return;
 
 	// Only if not already
-	if( do_intrinsics )
-	{				
-		if( simple_compare_ordering.count(walk_info.node)==0 )
-			InsertSolo( simple_compare_ordering, walk_info.node );               
+	if( simple_compare_ordering.count(walk_info.node)==0 )
+		InsertSolo( simple_compare_ordering, walk_info.node );               
 
-		if( category_ordering.count(walk_info.node) == 0 ) // already in		
-		{
-			TRACE("CAT inserts: ")(walk_info.node)("\n");
-			InsertSolo( category_ordering, walk_info.node );            	
-		}
+	// Only if not already
+	if( category_ordering.count(walk_info.node) == 0 )
+	{
+		TRACE("CAT inserts: ")(walk_info.node)("\n");
+		InsertSolo( category_ordering, walk_info.node );            	
 	}
 }
 
@@ -134,24 +129,16 @@ void Orderings::DeleteAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsi
 	if( walk_info.at_terminus )
 		return;
 
-	// Node table hasn't been updated yet, so node should be in there.
-	NodeTable::Row row = db->GetNodeRow(walk_info.node); 
-	ASSERT( row.incoming_xlinks.count(walk_info.xlink)==1 );
-		
 	// Only remove if this was the last incoming XLink to the node
-	if( do_intrinsics )
-	{				
-		if( row.incoming_xlinks.size() == node_reached_count[walk_info.node]+1 ) 
-			EraseSolo( simple_compare_ordering, walk_info.node );               
+	// If we reached all the incomers so there are none outside the zone, skip		
+	if( db->GetNodeRow(walk_info.node).incoming_xlinks.size() == node_reached_count[walk_info.node]+1 ) 
+	{		
+		EraseSolo( simple_compare_ordering, walk_info.node );               
 	
-		// If we reached all the incomers so there are none outside the zone, skip		
-		if( row.incoming_xlinks.size() == node_reached_count[walk_info.node]+1 ) 
-		{		
-			TRACE("CAT deletes: ")(walk_info.node)("\n");
-			EraseSolo( category_ordering, walk_info.node );   
-			TRACE("CAT at %p size=%u\n", this, category_ordering.size());	
-		}
-	}
+		TRACE("CAT deletes: ")(walk_info.node)("\n");
+		EraseSolo( category_ordering, walk_info.node );   
+		TRACE("CAT at %p size=%u\n", this, category_ordering.size());	
+    }
 
 	// Track the number of times we've reached each node in current zone
 	node_reached_count[walk_info.node]++;     
