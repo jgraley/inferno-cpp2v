@@ -5,8 +5,6 @@
 #include "lacing.hpp"
 #include "relation_test.hpp"
 
-#define SC_INTRINSIC 1
-
 using namespace SR;   
 
 Orderings::Orderings( shared_ptr<Lacing> lacing, const XTreeDatabase *db_ ) :
@@ -42,16 +40,15 @@ void Orderings::Insert(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool
 	// the zone. If we act at root, there won't be any.
 
 	set<TreePtr<Node>> invalidated;
-	if( SC_INTRINSIC && !do_intrinsics )		
-	{
-		invalidated = GetTerminusAndBaseAncestors(zone);
-	}
-	else
-	// Assume there is only one incoming XLink to the node because not a leaf
+	if( do_intrinsics )		
 	{
 		(void)GetTerminusAndBaseAncestors(zone);
 		auto subtree = XTreeZone::CreateSubtree(zone.GetBaseXLink());
 		invalidated = GetTerminusAndBaseAncestors(subtree);
+	}
+	else
+	{
+		invalidated = GetTerminusAndBaseAncestors(zone);
 	}
 
 	for( TreePtr<Node> x : invalidated )                        
@@ -76,15 +73,15 @@ void Orderings::Delete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool
 	set<TreePtr<Node>> invalidated;
 	
 	// Assume there was only one incoming XLink to the node because not a leaf
-	if( SC_INTRINSIC && !do_intrinsics )		
-	{
-		invalidated = GetTerminusAndBaseAncestors(zone);
-	}
-	else
+	if( do_intrinsics )		
 	{
 		(void)GetTerminusAndBaseAncestors(zone);
 		auto subtree = XTreeZone::CreateSubtree(zone.GetBaseXLink());
 		invalidated = GetTerminusAndBaseAncestors(subtree);
+	}
+	else
+	{
+		invalidated = GetTerminusAndBaseAncestors(zone);
 	}
 
 	for( TreePtr<Node> x : invalidated )    
@@ -102,12 +99,11 @@ void Orderings::InsertAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsi
 		return;
 
 	// Only if not already
-	if( !SC_INTRINSIC || do_intrinsics )			
+	if( do_intrinsics )
+	{				
 		if( simple_compare_ordering.count(walk_info.node)==0 )
 			InsertSolo( simple_compare_ordering, walk_info.node );               
 
-	if( do_intrinsics )
-	{				
 		if( category_ordering.count(walk_info.node) == 0 ) // already in		
 		{
 			TRACE("CAT inserts: ")(walk_info.node)("\n");
@@ -130,12 +126,11 @@ void Orderings::DeleteAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsi
 	ASSERT( row.incoming_xlinks.count(walk_info.xlink)==1 );
 		
 	// Only remove if this was the last incoming XLink to the node
-	if( !SC_INTRINSIC || do_intrinsics )		
+	if( do_intrinsics )
+	{				
 		if( row.incoming_xlinks.size() == node_reached_count[walk_info.node]+1 ) 
 			EraseSolo( simple_compare_ordering, walk_info.node );               
 	
-	if( do_intrinsics )
-	{				       	
 		// If we reached all the incomers so there are none outside the zone, skip		
 		if( row.incoming_xlinks.size() == node_reached_count[walk_info.node]+1 ) 
 		{		
