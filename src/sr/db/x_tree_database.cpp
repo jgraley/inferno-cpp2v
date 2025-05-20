@@ -99,20 +99,22 @@ MutableTreeZone XTreeDatabase::BuildTree(DBCommon::TreeOrdinal tree_ordinal, con
 	auto subtree_zone = XTreeZone::CreateSubtree(root_xlink);
     TRACE("Tree ordinal: %d subtree zone: ", tree_ordinal)(subtree_zone)("\n");
 
+	const DBCommon::CoreInfo *base_info = DBCommon::GetRootCoreInfo();
+
     TRACE("Walk for geometric: domain, tables\n");
+	domain->Insert(subtree_zone, base_info, true);   
     DBWalk::Actions actions;
-    actions.push_back( bind(&Domain::InsertAction, domain.get(), placeholders::_1) ); 
     actions.push_back( bind(&LinkTable::InsertAction, link_table.get(), placeholders::_1) );
     actions.push_back( bind(&NodeTable::InsertAction, node_table.get(), placeholders::_1) );
-	db_walker.WalkTreeZone( &actions, subtree_zone, tree_ordinal, DBWalk::WIND_IN, DBCommon::GetRootCoreInfo() );    	
+	db_walker.WalkTreeZone( &actions, subtree_zone, tree_ordinal, DBWalk::WIND_IN, base_info );    	
 
     TRACE("Walk for geometric: orderings\n");
-	orderings->Insert(subtree_zone, DBCommon::GetRootCoreInfo(), true);   
+	orderings->Insert(subtree_zone, base_info, true);   
 
     TRACE("Walk for geometric: domain extension\n");
     DBWalk::Actions actions2;
     actions2.push_back( bind(&DomainExtension::InsertAction, domain_extension.get(), placeholders::_1) );
-    db_walker.WalkTreeZone( &actions2, subtree_zone, tree_ordinal, DBWalk::WIND_IN, DBCommon::GetRootCoreInfo() );
+    db_walker.WalkTreeZone( &actions2, subtree_zone, tree_ordinal, DBWalk::WIND_IN, base_info );
     
 	vector<Mutator> terminii;
 	for( FreeZone::TerminusConstIterator it=free_zone.GetTerminiiBegin(); 
@@ -132,24 +134,22 @@ void XTreeDatabase::TeardownTree(DBCommon::TreeOrdinal tree_ordinal)
     auto subtree_zone = XTreeZone::CreateSubtree(root_xlink);
 	TRACE("Tree ordinal: %d root: ", tree_ordinal)(subtree_zone)("\n");
 
-    // Note not symmetrical with InsertExtra(): we
-    // will be invoked with every xlink in the extra
-    // zones and on each call we delete just that
-    // xlink.
+	const DBCommon::CoreInfo *base_info = DBCommon::GetRootCoreInfo();
+
     TRACE("Walk for geometric: domain extension\n");
     DBWalk::Actions actions;
     actions.push_back( bind(&DomainExtension::DeleteAction, domain_extension.get(), placeholders::_1) );
-    db_walker.WalkTreeZone( &actions, subtree_zone, tree_ordinal, DBWalk::WIND_OUT, DBCommon::GetRootCoreInfo() );       
+    db_walker.WalkTreeZone( &actions, subtree_zone, tree_ordinal, DBWalk::WIND_OUT, base_info );       
 
     TRACE("Walk for geometric: orderings\n");
-    orderings->Delete(subtree_zone, DBCommon::GetRootCoreInfo(), true);
+    orderings->Delete(subtree_zone, base_info, true);
 
     TRACE("Walk for geometric: domain, tables\n");
     DBWalk::Actions actions2;
     actions2.push_back( bind(&NodeTable::DeleteAction, node_table.get(), placeholders::_1) );
     actions2.push_back( bind(&LinkTable::DeleteAction, link_table.get(), placeholders::_1) );
-    actions2.push_back( bind(&Domain::DeleteAction, domain.get(), placeholders::_1) );
-    db_walker.WalkTreeZone( &actions2, subtree_zone, tree_ordinal, DBWalk::WIND_OUT, DBCommon::GetRootCoreInfo() );       
+    db_walker.WalkTreeZone( &actions2, subtree_zone, tree_ordinal, DBWalk::WIND_OUT, base_info );       
+	domain->Delete(subtree_zone, base_info, true);   
 
 	FreeExtraTree( tree_ordinal );  
 }

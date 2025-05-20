@@ -20,13 +20,18 @@ class Domain
 public:
     Domain();
 
+	void Insert(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
+	void Delete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
+
 	void DeleteAction(const DBWalk::WalkInfo &walk_info);
 	void InsertAction(const DBWalk::WalkInfo &walk_info);
     
     static void CheckEqual( shared_ptr<Domain> l, shared_ptr<Domain> r );    
     
+    DBWalk db_walker;  
+
     // Global domain of possible xlink values
-    unordered_set<XLink> unordered_domain;            
+    unordered_set<XLink> unordered_domain;          
 };    
     
 }
