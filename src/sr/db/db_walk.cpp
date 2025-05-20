@@ -39,7 +39,7 @@ void DBWalk::VisitBase( const WalkKit &kit,
 }
 
 
-bool DBWalk::VisitSingular( const WalkKit &kit, 
+void DBWalk::VisitSingular( const WalkKit &kit, 
                             const TreePtrInterface *p_x_singular, // should  be inside xlink's child
                             TreePtr<Node> node,
                             int item_ordinal )
@@ -74,12 +74,11 @@ bool DBWalk::VisitSingular( const WalkKit &kit,
 }
 
 
-bool DBWalk::VisitSequence( const WalkKit &kit, 
+void DBWalk::VisitSequence( const WalkKit &kit, 
                             SequenceInterface *x_seq, // should  be inside xlink's child 
                             TreePtr<Node> node,
                             int item_ordinal )
 {    
-    bool aot = false;
     int i=0;
     for( SequenceInterface::iterator xit = x_seq->begin();
          xit != x_seq->end();
@@ -94,31 +93,29 @@ bool DBWalk::VisitSequence( const WalkKit &kit,
 			child_node = child_xlink.GetChildTreePtr();
 		}
 			
-        aot |= VisitNode( kit, 
-						  { { node,
-						 	  item_ordinal,
-							  DBCommon::IN_SEQUENCE,
-							  x_seq,
-							  i,
-							  xit },
-						    &*xit, 
-						    child_xlink, 
-						    child_node,
-						    kit.tree_ordinal,
-						    false,
-						    false } );
+        VisitNode(kit, 
+				  { { node,
+					  item_ordinal,
+					  DBCommon::IN_SEQUENCE,
+					  x_seq,
+					  i,
+					  xit },
+					&*xit, 
+					child_xlink, 
+					child_node,
+					kit.tree_ordinal,
+					false,
+					false } );
         i++;
     }
-    return aot;
 }
 
 
-bool DBWalk::VisitCollection( const WalkKit &kit, 
+void DBWalk::VisitCollection( const WalkKit &kit, 
                               CollectionInterface *x_col, 
                               TreePtr<Node> node,
                               int item_ordinal )
 {
-    bool aot = false;
     int i=0;
     for( CollectionInterface::iterator xit = x_col->begin();
          xit != x_col->end();
@@ -133,26 +130,25 @@ bool DBWalk::VisitCollection( const WalkKit &kit,
 			child_node = child_xlink.GetChildTreePtr();
 		}
 		
-        aot |= VisitNode( kit, 
-						  { { node,
-							  item_ordinal,
-							  DBCommon::IN_COLLECTION,
-							  x_col,                    
-							  i,
-							  xit },
-						    &*xit, 
-						    child_xlink, 
-						    child_node,
-						    kit.tree_ordinal,
-						    false,
-						    false } ); // should be child_xlink's child
+        VisitNode(kit, 
+				  { { node,
+					  item_ordinal,
+					  DBCommon::IN_COLLECTION,
+					  x_col,                    
+					  i,
+					  xit },
+					&*xit, 
+					child_xlink, 
+					child_node,
+					kit.tree_ordinal,
+					false,
+					false } ); // should be child_xlink's child
         i++;
     }
-    return aot;
 }
 
 
-bool DBWalk::VisitNode( const WalkKit &kit, 
+void DBWalk::VisitNode( const WalkKit &kit, 
                         WalkInfo &&walk_info ) // .x should be .xlink's child
 {
 #ifdef TRACE_WALK
@@ -166,12 +162,10 @@ bool DBWalk::VisitNode( const WalkKit &kit,
     if( walk_info.at_terminus )
         ++(kit.next_terminus_index);
       
-    bool aot = false;
     if( walk_info.node )
 	{
 		if( kit.wind == WIND_IN )
 		{
-			walk_info.ancestor_of_terminus = false; // actually only defined in wind-out
 #ifdef TRACE_WALK
 			TRACE("Visiting ")
 				 (walk_info.at_base?"base ":"")
@@ -185,11 +179,10 @@ bool DBWalk::VisitNode( const WalkKit &kit,
 				
 		// Recurse into our child nodes but stop at terminii
 		if( !walk_info.at_terminus )
-			aot = VisitItemise( kit, walk_info.node ); 
+			VisitItemise( kit, walk_info.node ); 
 
 		if( kit.wind == WIND_OUT )
 		{
-			walk_info.ancestor_of_terminus = aot; 
 #ifdef TRACE_WALK
 			TRACE("Visiting ")
 				 (walk_info.at_base?"base ":"")
@@ -201,29 +194,25 @@ bool DBWalk::VisitNode( const WalkKit &kit,
 				action(walk_info);         
 		}
 	}
-	
-	return aot || walk_info.at_terminus;
 }
 
 
-bool DBWalk::VisitItemise( const WalkKit &kit, 
+void DBWalk::VisitItemise( const WalkKit &kit, 
                            TreePtr<Node> node ) 
 {
     ASSERT(node);
-    bool aot = false;
     vector< Itemiser::Element * > x_items = node->Itemise();
     for( vector< Itemiser::Element * >::size_type item_ordinal=0; item_ordinal<x_items.size(); item_ordinal++ )
     {
         Itemiser::Element *xe = x_items[item_ordinal];
         if( auto x_seq = dynamic_cast<SequenceInterface *>(xe) )
-            aot |= VisitSequence( kit, x_seq, node, item_ordinal );
+            VisitSequence( kit, x_seq, node, item_ordinal );
         else if( auto x_col = dynamic_cast<CollectionInterface *>(xe) )
-            aot |= VisitCollection( kit, x_col, node, item_ordinal );
+            VisitCollection( kit, x_col, node, item_ordinal );
         else if( auto p_x_singular = dynamic_cast<TreePtrInterface *>(xe) )
-            aot |= VisitSingular( kit, p_x_singular, node, item_ordinal );
+            VisitSingular( kit, p_x_singular, node, item_ordinal );
         else
             ASSERTFAIL("got something from itemise that isnt a Sequence, Collection or a singular TreePtr");
     }
-    return aot;
 }
 

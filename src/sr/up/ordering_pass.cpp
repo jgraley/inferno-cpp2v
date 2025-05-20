@@ -495,12 +495,12 @@ void OrderingPass::RunMoveOut(shared_ptr<Patch> &layout, MovesMap &moves_map)
 }
 
 
-void OrderingPass::MoveTreeZoneOut( shared_ptr<Patch> *patch_from, shared_ptr<Patch> &layout, MovesMap &moves_map)
+void OrderingPass::MoveTreeZoneOut( shared_ptr<Patch> *ooo_patch_ptr, shared_ptr<Patch> &layout, MovesMap &moves_map)
 {
-	// Get the tree zone
-	auto tree_patch_from = dynamic_pointer_cast<TreeZonePatch>(*patch_from);
-	ASSERT( tree_patch_from );
-	MutableTreeZone &main_tree_zone_from = dynamic_cast<MutableTreeZone &>(*tree_patch_from->GetZone());
+	// Out-of-order patch is located at the "to" location, but contains the "from" tree zone.
+	auto ooo_tree_patch = dynamic_pointer_cast<TreeZonePatch>(*ooo_patch_ptr);
+	ASSERT( ooo_tree_patch );
+	MutableTreeZone &main_tree_zone_from = dynamic_cast<MutableTreeZone &>(*ooo_tree_patch->GetZone());
 	ASSERT( !main_tree_zone_from.IsEmpty() ); // See #784
 	
 	// ------------------------- Create extra tree with plugged scaffold ---------------------------
@@ -583,8 +583,8 @@ void OrderingPass::MoveTreeZoneOut( shared_ptr<Patch> *patch_from, shared_ptr<Pa
 
 	// Store the scaffold in the layout so it goes into inversion as a free zone, so it survives, 
 	// and ands up in the tree at the "to" location.
-	auto free_patch = make_shared<FreeZonePatch>( scaffold_zone_to, target_tree_patch->MoveChildren() );
-	*target_patch = free_patch;
+	auto free_patch_to = make_shared<FreeZonePatch>( scaffold_zone_to, ooo_tree_patch->MoveChildren() );
+	*ooo_patch_ptr = free_patch_to;
 	
 	ValidateTreeZones(db).Run(layout);
 	
