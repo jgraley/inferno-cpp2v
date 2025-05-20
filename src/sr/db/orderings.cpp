@@ -40,12 +40,13 @@ void Orderings::Insert(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool
     db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_IN, base_info );
 
 	// -------------------- simple compare and category -----------------------
+	// SC and CAT are node-keyed. CAT is pure intrinsic, but SC has additionals
 	set<TreePtr<Node>> additional_sc_nodes_to_update;
 	if( do_intrinsics )		
 	{
 		// Use a walk to insert all the SC and CAT when intrinsic
 		DBWalk::Actions actions2;
-		actions2.push_back( bind(&Orderings::InsertAction, this, placeholders::_1, do_intrinsics) );
+		actions2.push_back( bind(&Orderings::InsertActionSCAndCAT, this, placeholders::_1) );
 		db_walker.WalkTreeZone( &actions2, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_IN, base_info );
 
 		// SC still needs ancestors of root
@@ -58,9 +59,9 @@ void Orderings::Insert(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool
 		additional_sc_nodes_to_update = GetTerminusAndBaseAncestors(zone);
 	}
 
+	// GetTerminusAndBaseAncestors() never gives us a leaf node, so no need to check for other parents
 	for( TreePtr<Node> x : additional_sc_nodes_to_update )                        
-		if( simple_compare_ordering.count(x)==0 )
-			InsertSolo( simple_compare_ordering, x );   			
+		InsertSolo( simple_compare_ordering, x );   			
 }
 
 
@@ -76,6 +77,7 @@ void Orderings::Delete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool
     db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_IN, base_info );
 
 	// -------------------- simple compare and category -----------------------
+	// SC and CAT are node-keyed. CAT is pure intrinsic, but SC has additionals.
 	set<TreePtr<Node>> additional_sc_nodes_to_update;
 	
 	// Assume there was only one incoming XLink to the node because not a leaf
@@ -84,7 +86,7 @@ void Orderings::Delete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool
 		// Use a walk to insert all the SC and CAT when intrinsic
 		node_reached_count.clear();	
 		DBWalk::Actions actions2;
-		actions2.push_back( bind(&Orderings::DeleteAction, this, placeholders::_1, do_intrinsics) );
+		actions2.push_back( bind(&Orderings::DeleteActionSCAndCAT, this, placeholders::_1) );
 		db_walker.WalkTreeZone( &actions2, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_OUT, base_info );
 
 		// SC still needs ancestors of root
@@ -98,23 +100,23 @@ void Orderings::Delete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool
 		additional_sc_nodes_to_update = GetTerminusAndBaseAncestors(zone);
 	}
 
+	// GetTerminusAndBaseAncestors() never gives us a leaf node, so no need to check for other parents
 	for( TreePtr<Node> x : additional_sc_nodes_to_update )    
-		if( db->GetNodeRow(x).incoming_xlinks.size() == 1 ) // Take reached count as 0
-			EraseSolo( simple_compare_ordering, x );                              
+		EraseSolo( simple_compare_ordering, x );                              
 }
 
 
-void Orderings::InsertAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsics)
+void Orderings::InsertActionSCAndCAT(const DBWalk::WalkInfo &walk_info)
 { 
 	// Remaining orderings are keyed on nodes, and we don't need to update on the boundary layer
 	if( walk_info.at_terminus )
 		return;
 
-	// Only if not already
+	// Multiple parents: only if not already
 	if( simple_compare_ordering.count(walk_info.node)==0 )
 		InsertSolo( simple_compare_ordering, walk_info.node );               
 
-	// Only if not already
+	// Multiple parents: only if not already
 	if( category_ordering.count(walk_info.node) == 0 )
 	{
 		TRACE("CAT inserts: ")(walk_info.node)("\n");
@@ -123,13 +125,13 @@ void Orderings::InsertAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsi
 }
 
 
-void Orderings::DeleteAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsics)
+void Orderings::DeleteActionSCAndCAT(const DBWalk::WalkInfo &walk_info)
 {			
 	// Remaining orderings are keyed on nodes, and we don't need to update on the boundary layer
 	if( walk_info.at_terminus )
 		return;
 
-	// Only remove if this was the last incoming XLink to the node
+	// Multiple parents: only remove if this was the last incoming XLink to the node
 	// If we reached all the incomers so there are none outside the zone, skip		
 	if( db->GetNodeRow(walk_info.node).incoming_xlinks.size() == node_reached_count[walk_info.node]+1 ) 
 	{		
@@ -157,7 +159,8 @@ set<TreePtr<Node>> Orderings::GetTerminusAndBaseAncestors( const TreeZone &tz ) 
 	}
 
 	// Now for each terminus, include parent of terminus back to anything we 
-	// already included.
+	// already included. As a result, we'll never produce a leaf node, so no need to 
+	// deal with multiple parents.
 	for( size_t i=0; i<tz.GetNumTerminii(); i++ )
 	{
 		x = tz.GetTerminusXLink(i);

@@ -503,53 +503,30 @@ void OrderingPass::MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch, sha
 	MutableTreeZone &target_tree_zone = dynamic_cast<MutableTreeZone &>(*target_tree_patch->GetZone());
 	ASSERT( !target_tree_zone.IsEmpty() ); // See #784
 	
+	// ------------------------- Create extra tree with plugged scaffold ---------------------------
+
 	// Make scaffold free zones that fit in place of the moving zone
 	auto scaffold_zone_from = target_tree_zone.CreateSimilarScaffoldZone();
 	TRACE("\"From\" scaffold: ")(scaffold_zone_from)("\n");
 
-	// ------------------------- Swap "from" zone into its own extra tree ---------------------------
-	//FTRACE("target_tree_zone: ")(target_tree_zone)("\nfree_zone: ")(*free_zone)("\n");
-	// Put the scaffold into the "from" part of the tree, displacing 
-	// the original contents, which we shall move
-	target_tree_zone.Validate(db);
-	
-	// Determine the fix-ups we'll need to do for tree zones in neighbouring patches
-    vector<MutableTreeZone *> fixups;	
     FreeZone::TerminusIterator terminus_it_scaffold_from = scaffold_zone_from.GetTerminiiBegin();
     for( size_t i=0; i<target_tree_zone.GetNumTerminii(); i++ )
 	{
-		const Mutator &target_terminus = target_tree_zone.GetTerminusMutator(i);
-				
-		MutableTreeZone *found = nullptr;
-		TreeZonePatch::ForTreeDepthFirstWalk(layout, [&](shared_ptr<TreeZonePatch> &patch)
-		{
-			MutableTreeZone *candidate = dynamic_cast<MutableTreeZone *>(patch->GetZone());
-			if( candidate->GetBaseMutator() == target_terminus )
-			{
-				ASSERT( !found );
-				found = candidate;
-			}
-		}, nullptr );
-		
-		fixups.push_back( found ); // does not have to be found; TZs can be disconnected
-		
 		// Plug the terminii of the "from" scaffold with yet more scaffolding so we get a subtree for the extra tree.
 		// This is a requirement for placing a zone (generally including terminii) into its own extra tree. Alternatively
 		// we could allow NULL TreePtrs/placeholders to exist in tree and define semantics for them.
-		TreePtr<Node> term_child_node = target_terminus.GetChildTreePtr();
+		TreePtr<Node> term_child_node = target_tree_zone.GetTerminusMutator(i).GetChildTreePtr();
 		ASSERT(term_child_node);
 		FreeZone plug = FreeZone::CreateScaffoldToSpec(term_child_node, 0); // finally no terminii!!!
         terminus_it_scaffold_from = scaffold_zone_from.MergeTerminus( terminus_it_scaffold_from, make_unique<FreeZone>(plug) );        
 	}	
 	TRACE("\"From\" scaffold after populating terminii: ")(scaffold_zone_from)("\n");
-		
+
     // Add a new extra tree containing the plugged "from" scaffold
     DBCommon::TreeOrdinal extra_tree_ordinal = db->AllocateExtraTree();        
 	TRACE("Allocated extra tree %u\n", extra_tree_ordinal);
     MutableTreeZone zone_in_extra_tree = db->BuildTree( extra_tree_ordinal, scaffold_zone_from );
 	TRACE("Zone in extra tree: ")(zone_in_extra_tree)("\n");
-
-	//db->DumpTables();
 
 	// We require a TZ based on the "from" scaffold that resembles target_tree_zone, with real
 	// TZ terminii, even though we plugged the FZ terminii making it a subtree.
@@ -561,6 +538,32 @@ void OrderingPass::MoveTreeZoneToFreePatch( shared_ptr<Patch> *target_patch, sha
 	MutableTreeZone from_scaffold_tree_zone = db->CreateMutableTreeZone( from_scaffold_xtz.GetBaseXLink(),
 												                                     from_scaffold_xtz.GetTerminusXLinks() );	
 	TRACE("Original \"from\" scaffold in TZ with its terminii: ")(from_scaffold_tree_zone)("\n");
+
+	// ------------------------- Swap "from" zone into our extra tree ---------------------------
+	//FTRACE("target_tree_zone: ")(target_tree_zone)("\nfree_zone: ")(*free_zone)("\n");
+	// Put the scaffold into the "from" part of the tree, displacing 
+	// the original contents, which we shall move
+	target_tree_zone.Validate(db);
+	
+	// Determine the fix-ups we'll need to do for tree zones in neighbouring patches
+    vector<MutableTreeZone *> fixups;	
+    for( size_t i=0; i<target_tree_zone.GetNumTerminii(); i++ )
+	{				
+		MutableTreeZone *found = nullptr;
+		TreeZonePatch::ForTreeDepthFirstWalk(layout, [&](shared_ptr<TreeZonePatch> &patch)
+		{
+			MutableTreeZone *candidate = dynamic_cast<MutableTreeZone *>(patch->GetZone());
+			if( candidate->GetBaseMutator() == target_tree_zone.GetTerminusMutator(i) )
+			{
+				ASSERT( !found );
+				found = candidate;
+			}
+		}, nullptr );
+		
+		fixups.push_back( found ); // does not have to be found; TZs can be disconnected
+	}
+			
+	//db->DumpTables();
 
 	// Swap in the true moving zone. Names become misleading because contents swap:
 	// from_scaffold_tree_zone <- the actual moving zone now in extra tree

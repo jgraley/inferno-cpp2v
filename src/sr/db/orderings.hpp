@@ -41,8 +41,8 @@ public:
     void Delete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
 
 private:
-	void InsertAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsics);
-    void DeleteAction(const DBWalk::WalkInfo &walk_info, bool do_intrinsics);
+	void InsertActionSCAndCAT(const DBWalk::WalkInfo &walk_info);
+    void DeleteActionSCAndCAT(const DBWalk::WalkInfo &walk_info);
 
 	set<TreePtr<Node>> GetTerminusAndBaseAncestors( const TreeZone &tz ) const; 
 
