@@ -47,6 +47,22 @@ bool NodeTable::IsDeclarer(const DBWalk::WalkInfo &walk_info) const
 }
 
 
+void NodeTable::Insert(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
+{     
+	DBWalk::Actions actions;
+	actions.push_back( bind(&NodeTable::InsertAction, this, placeholders::_1) );
+	db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_IN, base_info );
+}
+
+
+void NodeTable::Delete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
+{
+	DBWalk::Actions actions;
+	actions.push_back( bind(&NodeTable::DeleteAction, this, placeholders::_1) );
+	db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_OUT, base_info );
+}
+
+
 void NodeTable::InsertAction(const DBWalk::WalkInfo &walk_info)
 {
 	// Create if not already there

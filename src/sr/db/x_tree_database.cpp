@@ -103,11 +103,9 @@ MutableTreeZone XTreeDatabase::BuildTree(DBCommon::TreeOrdinal tree_ordinal, con
 
     TRACE("Walk for geometric: domain, tables\n");
 	domain->Insert(subtree_zone, base_info, true);   
-    DBWalk::Actions actions;
-    actions.push_back( bind(&LinkTable::InsertAction, link_table.get(), placeholders::_1) );
-    actions.push_back( bind(&NodeTable::InsertAction, node_table.get(), placeholders::_1) );
-	db_walker.WalkTreeZone( &actions, subtree_zone, tree_ordinal, DBWalk::WIND_IN, base_info );    	
-
+	node_table->Insert(subtree_zone, base_info, true);   
+	link_table->Insert(tree_ordinal, subtree_zone, base_info, true);   
+	
     TRACE("Walk for geometric: orderings\n");
 	orderings->Insert(subtree_zone, base_info, true);   
 
@@ -145,10 +143,8 @@ void XTreeDatabase::TeardownTree(DBCommon::TreeOrdinal tree_ordinal)
     orderings->Delete(subtree_zone, base_info, true);
 
     TRACE("Walk for geometric: domain, tables\n");
-    DBWalk::Actions actions2;
-    actions2.push_back( bind(&NodeTable::DeleteAction, node_table.get(), placeholders::_1) );
-    actions2.push_back( bind(&LinkTable::DeleteAction, link_table.get(), placeholders::_1) );
-    db_walker.WalkTreeZone( &actions2, subtree_zone, tree_ordinal, DBWalk::WIND_OUT, base_info );       
+	link_table->Delete(tree_ordinal, subtree_zone, base_info, true);   
+	node_table->Delete(subtree_zone, base_info, true);   
 	domain->Delete(subtree_zone, base_info, true);   
 
 	FreeExtraTree( tree_ordinal );  

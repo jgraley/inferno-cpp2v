@@ -44,6 +44,9 @@ public:
     
     const DBCommon::CoreInfo &GetCoreInfo(XLink xlink) const;
     
+	void Insert(DBCommon::TreeOrdinal tree_ordinal, TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
+	void Delete(DBCommon::TreeOrdinal tree_ordinal, TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
+
 	void InsertAction(const DBWalk::WalkInfo &walk_info);
 	void DeleteAction(const DBWalk::WalkInfo &walk_info);
     
@@ -56,6 +59,7 @@ public:
     
 //private:
     typedef XLink Key;
+    DBWalk db_walker;     
 
     // XLink-to-row-of-x_tree_db map
     unordered_map<Key, Row> rows; 

@@ -29,9 +29,9 @@ void Domain::Delete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do
 {
 	if( do_intrinsics )		
 	{
-		DBWalk::Actions actions2;
-		actions2.push_back( bind(&Domain::DeleteAction, this, placeholders::_1) );
-		db_walker.WalkTreeZone( &actions2, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_OUT, base_info );
+		DBWalk::Actions actions;
+		actions.push_back( bind(&Domain::DeleteAction, this, placeholders::_1) );
+		db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_OUT, base_info );
 	}
 }
 

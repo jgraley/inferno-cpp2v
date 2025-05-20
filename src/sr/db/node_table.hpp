@@ -37,6 +37,9 @@ public:
     
     bool IsDeclarer(const DBWalk::WalkInfo &walk_info) const;
     
+	void Insert(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
+	void Delete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
+
 	void InsertAction(const DBWalk::WalkInfo &walk_info);
     void DeleteAction(const DBWalk::WalkInfo &walk_info);
 
@@ -46,6 +49,8 @@ public:
     void Dump() const;
     
 private:
+    DBWalk db_walker;  
+
     // Node-to-row-of-x_tree_db map
     unordered_map<TreePtr<Node>, Row> rows;
 };    

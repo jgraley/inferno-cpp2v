@@ -34,6 +34,22 @@ const DBCommon::CoreInfo &LinkTable::GetCoreInfo(XLink xlink) const
 }
  
  
+void LinkTable::Insert(DBCommon::TreeOrdinal tree_ordinal, TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
+{     
+	DBWalk::Actions actions;
+	actions.push_back( bind(&LinkTable::InsertAction, this, placeholders::_1) );
+	db_walker.WalkTreeZone( &actions, zone, tree_ordinal, DBWalk::WIND_IN, base_info );
+}
+
+
+void LinkTable::Delete(DBCommon::TreeOrdinal tree_ordinal, TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
+{
+	DBWalk::Actions actions;
+	actions.push_back( bind(&LinkTable::DeleteAction, this, placeholders::_1) );
+	db_walker.WalkTreeZone( &actions, zone, tree_ordinal, DBWalk::WIND_OUT, base_info );
+}
+ 
+ 
 void LinkTable::InsertAction(const DBWalk::WalkInfo &walk_info)
 {
     GenerateRow(walk_info);
