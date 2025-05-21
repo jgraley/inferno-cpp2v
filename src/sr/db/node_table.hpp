@@ -10,12 +10,14 @@
 namespace SR 
 {    
     
+class LinkTable;
+
 // Node table depends on link table so it can find parent node in order to 
 // call GetDeclared() on it     
 class NodeTable : public Traceable
 {
 public:
-    NodeTable();
+    NodeTable(const LinkTable *link_table_);
 
     class Row : public Traceable
     {
@@ -37,13 +39,13 @@ public:
     const Row &GetRow(TreePtr<Node> node) const;
     bool HasRow(TreePtr<Node> node) const;
     
-    bool IsDeclarer(const DBWalk::WalkInfo &walk_info) const;
+    bool IsDeclarer(XLink xlink) const;
     
 	void Insert(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
 	void Delete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
 
-	void InsertAction(const DBWalk::WalkInfo &walk_info);
-    void DeleteAction(const DBWalk::WalkInfo &walk_info);
+	void InsertAction(XLink xlink);
+    void DeleteAction(XLink xlink);
 
     vector<TreePtr<Node>> GetNodeDomainAsVector() const;
     
@@ -52,6 +54,8 @@ public:
     
 private:
     DBWalk db_walker;  
+    
+    const LinkTable *link_table;
 
     // Node-to-row-of-x_tree_db map
     unordered_map<TreePtr<Node>, Row> rows;

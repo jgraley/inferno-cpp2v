@@ -1,12 +1,14 @@
 #include "node_table.hpp"
 #include "sc_relation.hpp"
+#include "link_table.hpp"
 
 #include "common/read_args.hpp"
 
 using namespace SR;    
 
 
-NodeTable::NodeTable()
+NodeTable::NodeTable(const LinkTable *link_table_) :
+	link_table( link_table_ )
 {
 }
 
@@ -28,16 +30,17 @@ bool NodeTable::HasRow(TreePtr<Node> node) const
 }
 
 
-bool NodeTable::IsDeclarer(const DBWalk::WalkInfo &walk_info) const
+bool NodeTable::IsDeclarer(XLink xlink) const
 {
-    switch( walk_info.core.context_type )
+	LinkTable::Row link_row = link_table->GetRow(xlink);
+    switch( link_row.context_type )
     {
         case DBCommon::SINGULAR:
         case DBCommon::IN_SEQUENCE:
         case DBCommon::IN_COLLECTION:
         {
-            set<const TreePtrInterface *> declared = walk_info.core.parent_node->GetDeclared();
-            return declared.count( walk_info.p_tree_ptr_interface ) > 0;
+            set<const TreePtrInterface *> declared = link_row.parent_node->GetDeclared();
+            return declared.count( xlink.GetTreePtrInterface() ) > 0;
         }
         default:
         {
@@ -50,7 +53,10 @@ bool NodeTable::IsDeclarer(const DBWalk::WalkInfo &walk_info) const
 void NodeTable::Insert(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
 {     
 	DBWalk::Actions actions;
-	actions.push_back( bind(&NodeTable::InsertAction, this, placeholders::_1) );
+	actions.push_back( [&](const DBWalk::WalkInfo &walk_info)
+	{
+		 InsertAction(walk_info.xlink);
+	} );
 	db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_IN, base_info );
 }
 
@@ -58,40 +64,47 @@ void NodeTable::Insert(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool
 void NodeTable::Delete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
 {
 	DBWalk::Actions actions;
-	actions.push_back( bind(&NodeTable::DeleteAction, this, placeholders::_1) );
+	actions.push_back( [&](const DBWalk::WalkInfo &walk_info)
+	{
+		 DeleteAction(walk_info.xlink);
+	}  );
 	db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_OUT, base_info );
 }
 
 
-void NodeTable::InsertAction(const DBWalk::WalkInfo &walk_info)
+void NodeTable::InsertAction(XLink xlink)
 {
+	TreePtr<Node> node = xlink.GetChildTreePtr();
+
 	// Create if not already there
-	TRACE("NODE TABLE weakly inserts row for: ")(walk_info.node)("\n");
-	Row &row = rows[walk_info.node];
+	TRACE("NODE TABLE weakly inserts row for: ")(node)("\n");
+	Row &row = rows[node];
 	
-	InsertSolo( row.incoming_xlinks, walk_info.xlink );            
-	if( IsDeclarer(walk_info) )
-		InsertSolo( row.declaring_xlinks, walk_info.xlink );
+	InsertSolo( row.incoming_xlinks, xlink );            
+	if( IsDeclarer(xlink) )
+		InsertSolo( row.declaring_xlinks, xlink );
 }
 
 
-void NodeTable::DeleteAction(const DBWalk::WalkInfo &walk_info)
+void NodeTable::DeleteAction(XLink xlink)
 {
+	TreePtr<Node> node = xlink.GetChildTreePtr();
+
 	// Should already be there
-	Row &row = rows.at(walk_info.node);
+	Row &row = rows.at(node);
 	
-	EraseSolo( row.incoming_xlinks, walk_info.xlink );            
-	if( IsDeclarer(walk_info) )
-		EraseSolo( row.declaring_xlinks, walk_info.xlink );
+	EraseSolo( row.incoming_xlinks, xlink );            
+	if( IsDeclarer(xlink) )
+		EraseSolo( row.declaring_xlinks, xlink );
 		
 	if( !row.incoming_xlinks.empty() )
 	{
-		TRACE("NODE TABLE does not delete row due %u>0 remaining incoming: ", row.incoming_xlinks.size())(walk_info.node)("\n");
+		TRACE("NODE TABLE does not delete row due %u>0 remaining incoming: ", row.incoming_xlinks.size())(node)("\n");
 		return;
 	}
 	
-	TRACE("NODE TABLE deletes row for: ")(walk_info.node)("\n");
-	EraseSolo( rows, walk_info.node );
+	TRACE("NODE TABLE deletes row for: ")(xlink)("\n");
+	EraseSolo( rows, node );
 }
 
 

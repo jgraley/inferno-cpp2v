@@ -20,7 +20,7 @@ XTreeDatabase::XTreeDatabase( shared_ptr<Lacing> lacing_, DomainExtension::Exten
     lacing( lacing_ ),
     domain( make_shared<Domain>() ),
     link_table( make_shared<LinkTable>() ),
-    node_table( make_shared<NodeTable>() ),
+    node_table( make_shared<NodeTable>(link_table.get()) ),
     orderings( make_shared<Orderings>(lacing, this) ),
     domain_extension( make_shared<DomainExtension>(this, domain_extenders) ),
     next_tree_ordinal( DBCommon::TreeOrdinal::EXTRAS ) // because main is always allocated
