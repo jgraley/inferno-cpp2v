@@ -173,7 +173,7 @@ FreeZone XTreeDatabase::ExchangeFreeToFree( MutableTreeZone &target_tree_zone, c
     AssetsInsert( DBCommon::TreeOrdinal::MAIN, target_tree_zone, &base_info, do_intrinsics );       
         
     if( ReadArgs::test_db )
-        CheckGeometric();
+        CheckDomainAndOrderings();
         
     return extracted_free_zone;
 }
@@ -212,7 +212,7 @@ void XTreeDatabase::SwapTreeToTree( DBCommon::TreeOrdinal tree_ordinal_l, Mutabl
     AssetsInsertDeux( tree_ordinal_l, tree_zone_l, &base_info_l, tree_ordinal_r, tree_zone_r, &base_info_r );       
         
     if( ReadArgs::test_db )
-        CheckGeometric();
+        CheckDomainAndOrderings();
 }
 
 
@@ -519,7 +519,7 @@ void XTreeDatabase::DumpTables() const
 }
 
 
-void XTreeDatabase::CheckGeometric()
+void XTreeDatabase::CheckDomainAndOrderings()
 {
     INDENT("?");
 
@@ -527,9 +527,14 @@ void XTreeDatabase::CheckGeometric()
     // No deps on other parts of DB so check first
     TRACE("Making reference domain for checks\n");
     auto ref_domain = make_shared<Domain>();
-    DBWalk::Actions actions1 { bind(&Domain::InsertAction, ref_domain.get(), placeholders::_1) };
-    WalkAllTrees( &actions1, DBWalk::WIND_IN );
-    TRACE("Checking\n");
+    for( auto p : trees_by_ordinal )
+	{
+	    XLink root_xlink = GetRootXLink(p.first);
+		auto tree_zone = XTreeZone::CreateSubtree(root_xlink);
+		ref_domain->Insert(tree_zone, DBCommon::GetRootCoreInfo(), true);
+	}   
+
+    TRACE("Checking domain\n");
     Domain::CheckEqual(ref_domain, domain);
     
     // Orderings have deps on LinkTable for finding parent
@@ -540,38 +545,11 @@ void XTreeDatabase::CheckGeometric()
 	{
 	    XLink root_xlink = GetRootXLink(p.first);
 		auto tree_zone = XTreeZone::CreateSubtree(root_xlink);
-		ref_orderings->Insert(tree_zone, DBCommon::GetRootCoreInfo(), false);
-	}   
-    
-    TRACE("Checking\n");
-    Orderings::CheckEqual(ref_orderings, orderings, false);
-
-    // ---------- Relation checks ------------
-    // Do these last as they have more deps on other DB stuff
-    orderings->CheckRelations( link_table->GetXLinkDomainAsVector(),
-                               node_table->GetNodeDomainAsVector() );
-}
-
-
-void XTreeDatabase::CheckIntrinsic()
-{
-    INDENT("?");
-
-    // ---------- Checks against a fresh "reference" build ------------
-
-    // Orderings have deps on LinkTable for finding parent
-    TRACE("Making reference orderings for checks\n");
-    auto ref_orderings = make_shared<Orderings>(lacing, this);
- 
-    for( auto p : trees_by_ordinal )
-	{
-	    XLink root_xlink = GetRootXLink(p.first);
-		auto tree_zone = XTreeZone::CreateSubtree(root_xlink);
 		ref_orderings->Insert(tree_zone, DBCommon::GetRootCoreInfo(), true);
 	}   
- 
-    TRACE("Checking\n");
-    Orderings::CheckEqual(ref_orderings, orderings, true);
+    
+    TRACE("Checking orderings\n");
+    Orderings::CheckEqual(ref_orderings, orderings, false);
 
     // ---------- Relation checks ------------
     // Do these last as they have more deps on other DB stuff

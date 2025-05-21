@@ -52,23 +52,45 @@ bool NodeTable::IsDeclarer(XLink xlink) const
 
 void NodeTable::Insert(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
 {     
-	DBWalk::Actions actions;
-	actions.push_back( [&](const DBWalk::WalkInfo &walk_info)
+	if( do_intrinsics )
 	{
-		 InsertAction(walk_info.xlink);
-	} );
-	db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_IN, base_info );
+		// For building, we must add every node in the zone
+		DBWalk::Actions actions;
+		actions.push_back( [&](const DBWalk::WalkInfo &walk_info)
+		{
+			 InsertAction(walk_info.xlink);
+		} );
+		db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_IN, base_info );
+	}
+	else
+	{
+		// For swaps, we only need to act at the boundary of the zone
+		InsertAction(zone.GetBaseXLink());
+		for( XLink terminus : zone.GetTerminusXLinks() )
+			InsertAction(terminus);
+	}
 }
 
 
 void NodeTable::Delete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
 {
-	DBWalk::Actions actions;
-	actions.push_back( [&](const DBWalk::WalkInfo &walk_info)
+	if( do_intrinsics )
 	{
-		 DeleteAction(walk_info.xlink);
-	}  );
-	db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_OUT, base_info );
+		// For tear-down, we must remove every node in the zone
+		DBWalk::Actions actions;
+		actions.push_back( [&](const DBWalk::WalkInfo &walk_info)
+		{
+			 DeleteAction(walk_info.xlink);
+		} );
+		db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_OUT, base_info );
+	}
+	else
+	{
+		// For swaps, we only need to act at the boundary of the zone
+		DeleteAction(zone.GetBaseXLink());
+		for( XLink terminus : zone.GetTerminusXLinks() )
+			DeleteAction(terminus);	
+	}
 }
 
 

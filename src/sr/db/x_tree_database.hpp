@@ -89,8 +89,7 @@ public:
     void Dump() const;
 	void DumpTables() const;
 
-    void CheckGeometric();
-    void CheckIntrinsic();
+    void CheckDomainAndOrderings();
     
 private: 
     const shared_ptr<Lacing> lacing;
