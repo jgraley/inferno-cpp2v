@@ -10,6 +10,8 @@
 namespace SR 
 {    
     
+// Node table depends on link table so it can find parent node in order to 
+// call GetDeclared() on it     
 class NodeTable : public Traceable
 {
 public:

@@ -103,8 +103,8 @@ MutableTreeZone XTreeDatabase::BuildTree(DBCommon::TreeOrdinal tree_ordinal, con
 
     TRACE("Walk for geometric: domain, tables\n");
 	domain->Insert(zone, base_info, true);   
-	node_table->Insert(zone, base_info, true);   
 	link_table->Insert(tree_ordinal, zone, base_info, true);   
+	node_table->Insert(zone, base_info, true);   
 	
     TRACE("Walk for geometric: orderings\n");
 	orderings->Insert(zone, base_info, true);   
@@ -143,8 +143,8 @@ void XTreeDatabase::TeardownTree(DBCommon::TreeOrdinal tree_ordinal)
     orderings->Delete(zone, base_info, true);
 
     TRACE("Walk for geometric: domain, tables\n");
-	link_table->Delete(tree_ordinal, zone, base_info, true);   
 	node_table->Delete(zone, base_info, true);   
+	link_table->Delete(tree_ordinal, zone, base_info, true);   
 	domain->Delete(zone, base_info, true);   
 
 	FreeExtraTree( tree_ordinal );  
@@ -222,8 +222,8 @@ void XTreeDatabase::AssetsInsert(DBCommon::TreeOrdinal tree_ordinal, TreeZone &z
 
     TRACE("Walk for geometric: domain, tables\n");
 	domain->Insert(zone, base_info, true);   
-	node_table->Insert(zone, base_info, true);   
 	link_table->Insert(tree_ordinal, zone, base_info, true);   
+	node_table->Insert(zone, base_info, true);   
 
     TRACE("Walk for geometric: orderings\n");
     orderings->Insert(zone, base_info, do_intrinsics); // doesn't use tree_ordinal
@@ -246,10 +246,10 @@ void XTreeDatabase::AssetsInsertDeux(DBCommon::TreeOrdinal tree_ordinal1, TreeZo
     TRACE("Walk for geometric: domain, tables\n");
 	domain->Insert(zone1, base_info1, true);   
 	domain->Insert(zone2, base_info2, true);   
-	node_table->Insert(zone1, base_info1, true);   
-	node_table->Insert(zone2, base_info2, true);   
 	link_table->Insert(tree_ordinal1, zone1, base_info1, true);   
 	link_table->Insert(tree_ordinal2, zone2, base_info2, true);   
+	node_table->Insert(zone1, base_info1, true);   
+	node_table->Insert(zone2, base_info2, true);   
 
     TRACE("Walk for geometric: orderings\n");
     orderings->Insert(zone1, base_info1, false); // doesn't use tree_ordinal
@@ -278,8 +278,8 @@ void XTreeDatabase::AssetsDelete(DBCommon::TreeOrdinal tree_ordinal, TreeZone &z
     orderings->Delete(zone, base_info, do_intrinsics); // doesn't use tree_ordinal
 
     TRACE("Walk for geometric: domain, tables\n");
-	link_table->Delete(tree_ordinal, zone, base_info, true);   
 	node_table->Delete(zone, base_info, true);   
+	link_table->Delete(tree_ordinal, zone, base_info, true);   
 	domain->Delete(zone, base_info, true);   
 }
 
@@ -301,10 +301,10 @@ void XTreeDatabase::AssetsDeleteDeux(DBCommon::TreeOrdinal tree_ordinal1, TreeZo
     orderings->Delete(zone2, base_info2, false); // doesn't use tree_ordinal
 
     TRACE("Walk for geometric: domain, tables\n");
-	link_table->Delete(tree_ordinal1, zone1, base_info1, true);   
-	link_table->Delete(tree_ordinal2, zone2, base_info2, true);   
 	node_table->Delete(zone1, base_info1, true);   
 	node_table->Delete(zone2, base_info2, true);   
+	link_table->Delete(tree_ordinal1, zone1, base_info1, true);   
+	link_table->Delete(tree_ordinal2, zone2, base_info2, true);   
 	domain->Delete(zone1, base_info1, true);   
 	domain->Delete(zone2, base_info2, true);   
 }

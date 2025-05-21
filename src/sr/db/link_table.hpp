@@ -9,7 +9,6 @@ namespace SR
 {
 class NodeTable;    
     
-
 class LinkTable : public Traceable
 {
 public:
