@@ -37,20 +37,17 @@ public:
                                      
     // Zone goes into tree. Geom and intrinsic assets inserted. No deletes.
     MutableTreeZone BuildTree(DBCommon::TreeOrdinal tree_ordinal, const FreeZone &free_zone);
-    void TeardownTree(DBCommon::TreeOrdinal tree_ordinal);
     
-    // Incremental strategy: perform updates on zones
-	FreeZone ExchangeFreeToFree( MutableTreeZone &target_tree_zone, const FreeZone &new_free_zone, vector<MutableTreeZone *> fixups, bool do_intrinsics );        
-
-	// Moves strategy: use swaps to/from extra trees
-	void SwapTreeToTree( DBCommon::TreeOrdinal tree_ordinal_l, MutableTreeZone &tree_zone_l, vector<MutableTreeZone *> fixups_l,
+    // Zone removed all assets deleted
+    void TeardownTree(DBCommon::TreeOrdinal tree_ordinal);
+   
+	// Swap content between two different trees, performed on geom assets only
+   	void SwapTreeToTree( DBCommon::TreeOrdinal tree_ordinal_l, MutableTreeZone &tree_zone_l, vector<MutableTreeZone *> fixups_l,
 		 				 DBCommon::TreeOrdinal tree_ordinal_r, MutableTreeZone &tree_zone_r, vector<MutableTreeZone *> fixups_r );
 
 private:
-    void AssetsInsert(DBCommon::TreeOrdinal tree_ordinal, TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
     void AssetsInsertDeux(DBCommon::TreeOrdinal tree_ordinal1, TreeZone &zone1, const DBCommon::CoreInfo *base_info1,
                           DBCommon::TreeOrdinal tree_ordinal2, TreeZone &zone2, const DBCommon::CoreInfo *base_info2 ); 
-    void AssetsDelete(DBCommon::TreeOrdinal tree_ordinal, TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
     void AssetsDeleteDeux(DBCommon::TreeOrdinal tree_ordinal1, TreeZone &zone1, const DBCommon::CoreInfo *base_info1,
                           DBCommon::TreeOrdinal tree_ordinal2, TreeZone &zone2, const DBCommon::CoreInfo *base_info2 ); 
 

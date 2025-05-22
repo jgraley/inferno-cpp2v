@@ -25,7 +25,7 @@ void MoveInPass::Run(MovesMap &moves_map)
 		XTreeZone scaffold_tree_zone = XTreeZone::CreateFromScaffold( scaffold_base_xlink ); 
 		MutableTreeZone scaffold_mutable_tree_zone = db->CreateMutableTreeZone( scaffold_tree_zone.GetBaseXLink(),
 													                                     	scaffold_tree_zone.GetTerminusXLinks() );		
-        // TODO Down to here in a helper fn, but some of it is also elsewhere search for CreateFromScaffold
+        // TODO Down to here in a helper fn
         
         MovesMap::MovePayload &mp = p.second;        										                                     	
 		DBCommon::TreeOrdinal moving_tree_ordinal = mp.first;

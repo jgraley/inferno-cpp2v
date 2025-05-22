@@ -151,34 +151,6 @@ void XTreeDatabase::TeardownTree(DBCommon::TreeOrdinal tree_ordinal)
 }
 
 
-FreeZone XTreeDatabase::ExchangeFreeToFree( MutableTreeZone &target_tree_zone, const FreeZone &new_free_zone, vector<MutableTreeZone *> fixups, bool do_intrinsics )
-{
-    TRACE("Replacing target TreeZone:\n")(target_tree_zone)("\nwith source FreeZone:\n")(new_free_zone)("\n");
-    ASSERT( target_tree_zone.GetNumTerminii() == new_free_zone.GetNumTerminii() )
-          ("Target TZ:%lu, source FZ:%lu", target_tree_zone.GetNumTerminii(), new_free_zone.GetNumTerminii());    
-
-	target_tree_zone.Validate(this); 
-
-    // Store the core info for the base locally since the link table will change
-    // as this function executes.
-    const DBCommon::CoreInfo base_info = link_table->GetCoreInfo( target_tree_zone.GetBaseXLink() );
-
-    // Remove geometric info that will be invalidated by the exchange 
-    AssetsDelete( DBCommon::TreeOrdinal::MAIN, target_tree_zone, &base_info, do_intrinsics );   
-    
-    // Update the tree. mutable_target_tree_zone becomes the valid new tree zone.
-    FreeZone extracted_free_zone = target_tree_zone.Exchange( new_free_zone, fixups ); 
-    
-    // Re-insert geometric info based on new tree zone
-    AssetsInsert( DBCommon::TreeOrdinal::MAIN, target_tree_zone, &base_info, do_intrinsics );       
-        
-    if( ReadArgs::test_db )
-        CheckAssets();
-        
-    return extracted_free_zone;
-}
-
-
 void XTreeDatabase::SwapTreeToTree( DBCommon::TreeOrdinal tree_ordinal_l, MutableTreeZone &tree_zone_l, vector<MutableTreeZone *> fixups_l,
                                     DBCommon::TreeOrdinal tree_ordinal_r, MutableTreeZone &tree_zone_r, vector<MutableTreeZone *> fixups_r )
 {
@@ -186,7 +158,10 @@ void XTreeDatabase::SwapTreeToTree( DBCommon::TreeOrdinal tree_ordinal_l, Mutabl
          ("\nand: ")(tree_zone_r)(" in #%u\n", tree_ordinal_r);
     ASSERT( tree_zone_l.GetNumTerminii() == tree_zone_r.GetNumTerminii() )
           ("left TZ:%lu, right TZ:%lu", tree_zone_l.GetNumTerminii(), tree_zone_r.GetNumTerminii());    
-	ASSERT( tree_ordinal_l != tree_ordinal_r ); // TZs must be in different trees to avoid interference
+	// TZs must be in different trees to avoid interference. This could result from a 
+	// shared boundary, or more remote action like the SC ordering deleting all ancestors
+	// of the base of a zone.
+	ASSERT( tree_ordinal_l != tree_ordinal_r );
 
 	tree_zone_l.Validate(this); 
 	tree_zone_r.Validate(this); 
@@ -215,27 +190,6 @@ void XTreeDatabase::SwapTreeToTree( DBCommon::TreeOrdinal tree_ordinal_l, Mutabl
         CheckAssets();
 }
 
-
-void XTreeDatabase::AssetsInsert(DBCommon::TreeOrdinal tree_ordinal, TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
-{
-    INDENT("+g");
-
-    TRACE("Walk for geometric: domain, tables\n");
-	domain->Insert(zone, base_info, true);   
-	link_table->Insert(tree_ordinal, zone, base_info, true);   
-	node_table->Insert(zone, base_info, true);   
-
-    TRACE("Walk for geometric: orderings\n");
-    orderings->Insert(zone, base_info, do_intrinsics); // doesn't use tree_ordinal
-    
-    // Domain extension wants to roam around the XTree, consulting
-    // parents, children, anything really. So we need a separate pass.
-    TRACE("Walk for geometric: domain extension\n");
-    DBWalk::Actions actions2;
-    actions2.push_back( bind(&DomainExtension::InsertAction, domain_extension.get(), placeholders::_1) );
-    db_walker.WalkTreeZone( &actions2, zone, tree_ordinal, DBWalk::WIND_IN, base_info );
-}
-
     
 void XTreeDatabase::AssetsInsertDeux(DBCommon::TreeOrdinal tree_ordinal1, TreeZone &zone1, const DBCommon::CoreInfo *base_info1,
 									 DBCommon::TreeOrdinal tree_ordinal2, TreeZone &zone2, const DBCommon::CoreInfo *base_info2 )
@@ -244,12 +198,12 @@ void XTreeDatabase::AssetsInsertDeux(DBCommon::TreeOrdinal tree_ordinal1, TreeZo
 
 	// Geom only!!!
     TRACE("Walk for geometric: domain, tables\n");
-	domain->Insert(zone1, base_info1, true);   
-	domain->Insert(zone2, base_info2, true);   
-	link_table->Insert(tree_ordinal1, zone1, base_info1, true);   
-	link_table->Insert(tree_ordinal2, zone2, base_info2, true);   
-	node_table->Insert(zone1, base_info1, true);   
-	node_table->Insert(zone2, base_info2, true);   
+	domain->Insert(zone1, base_info1, false);   
+	domain->Insert(zone2, base_info2, false);   
+	link_table->Insert(tree_ordinal1, zone1, base_info1, false);   
+	link_table->Insert(tree_ordinal2, zone2, base_info2, false);   
+	node_table->Insert(zone1, base_info1, false);   
+	node_table->Insert(zone2, base_info2, false);   
 
     TRACE("Walk for geometric: orderings\n");
     orderings->Insert(zone1, base_info1, false); // doesn't use tree_ordinal
@@ -262,25 +216,6 @@ void XTreeDatabase::AssetsInsertDeux(DBCommon::TreeOrdinal tree_ordinal1, TreeZo
     actions2.push_back( bind(&DomainExtension::InsertAction, domain_extension.get(), placeholders::_1) );
     db_walker.WalkTreeZone( &actions2, zone1, tree_ordinal1, DBWalk::WIND_IN, base_info1 );
     db_walker.WalkTreeZone( &actions2, zone2, tree_ordinal2, DBWalk::WIND_IN, base_info2 );
-}
-
-
-void XTreeDatabase::AssetsDelete(DBCommon::TreeOrdinal tree_ordinal, TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
-{
-    INDENT("-g");
-    
-    TRACE("Walk for geometric: domain extension\n");
-    DBWalk::Actions actions;
-    actions.push_back( bind(&DomainExtension::DeleteAction, domain_extension.get(), placeholders::_1) );
-    db_walker.WalkTreeZone( &actions, zone, tree_ordinal, DBWalk::WIND_OUT, base_info );   
-
-    TRACE("Walk for geometric: orderings\n");
-    orderings->Delete(zone, base_info, do_intrinsics); // doesn't use tree_ordinal
-
-    TRACE("Walk for geometric: domain, tables\n");
-	node_table->Delete(zone, base_info, true);   
-	link_table->Delete(tree_ordinal, zone, base_info, true);   
-	domain->Delete(zone, base_info, true);   
 }
 
 
@@ -301,12 +236,12 @@ void XTreeDatabase::AssetsDeleteDeux(DBCommon::TreeOrdinal tree_ordinal1, TreeZo
     orderings->Delete(zone2, base_info2, false); // doesn't use tree_ordinal
 
     TRACE("Walk for geometric: domain, tables\n");
-	node_table->Delete(zone1, base_info1, true);   
-	node_table->Delete(zone2, base_info2, true);   
-	link_table->Delete(tree_ordinal1, zone1, base_info1, true);   
-	link_table->Delete(tree_ordinal2, zone2, base_info2, true);   
-	domain->Delete(zone1, base_info1, true);   
-	domain->Delete(zone2, base_info2, true);   
+	node_table->Delete(zone1, base_info1, false);   
+	node_table->Delete(zone2, base_info2, false);   
+	link_table->Delete(tree_ordinal1, zone1, base_info1, false);   
+	link_table->Delete(tree_ordinal2, zone2, base_info2, false);   
+	domain->Delete(zone1, base_info1, false);   
+	domain->Delete(zone2, base_info2, false);   
 }
 
 
