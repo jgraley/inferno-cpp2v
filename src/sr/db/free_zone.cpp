@@ -167,13 +167,16 @@ void FreeZone::MergeAll( list<unique_ptr<FreeZone>> &&child_zones )
 
 
 FreeZone::TerminusIterator FreeZone::MergeTerminus( TerminusIterator it_t, 
-                                                    unique_ptr<FreeZone> &&child_zone ) 
+                                                    unique_ptr<FreeZone> &&child_zone,
+                                                    Mutator *resulting_mutator ) 
 {
     ASSERT( child_zone.get() != this ); 
 
     if( child_zone->IsEmpty() )
     {
         // Nothing happens to this terminus. If we're empty, we'll stay empty.
+        if( resulting_mutator )
+			*resulting_mutator = *it_t;
         return ++it_t; 
     }    
     
@@ -192,6 +195,9 @@ FreeZone::TerminusIterator FreeZone::MergeTerminus( TerminusIterator it_t,
         // terminii are reference-like and so it's fine that we erase it.        
     }
     
+    if( resulting_mutator )
+		*resulting_mutator = *it_t;
+
     // it_t updated to the next terminus after the one we erased, or end()
     it_t = terminii.erase( it_t );        
     

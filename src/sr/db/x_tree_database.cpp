@@ -173,7 +173,7 @@ FreeZone XTreeDatabase::ExchangeFreeToFree( MutableTreeZone &target_tree_zone, c
     AssetsInsert( DBCommon::TreeOrdinal::MAIN, target_tree_zone, &base_info, do_intrinsics );       
         
     if( ReadArgs::test_db )
-        CheckDomainAndOrderings();
+        CheckAssets();
         
     return extracted_free_zone;
 }
@@ -212,7 +212,7 @@ void XTreeDatabase::SwapTreeToTree( DBCommon::TreeOrdinal tree_ordinal_l, Mutabl
     AssetsInsertDeux( tree_ordinal_l, tree_zone_l, &base_info_l, tree_ordinal_r, tree_zone_r, &base_info_r );       
         
     if( ReadArgs::test_db )
-        CheckDomainAndOrderings();
+        CheckAssets();
 }
 
 
@@ -519,7 +519,7 @@ void XTreeDatabase::DumpTables() const
 }
 
 
-void XTreeDatabase::CheckDomainAndOrderings()
+void XTreeDatabase::CheckAssets()
 {
     INDENT("?");
 

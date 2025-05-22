@@ -154,6 +154,11 @@ struct MovesMap
 	map<TreePtr<Node>, MovePayload> mm;
 };
 
+// ------------------------- Utils ---------------------------
+
+pair<DBCommon::TreeOrdinal, MutableTreeZone> FreeZoneIntoExtraTree( XTreeDatabase *db, FreeZone free_zone, const MutableTreeZone &reference_tree_zone );
+
+
 
 }
 

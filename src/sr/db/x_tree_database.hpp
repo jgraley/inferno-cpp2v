@@ -89,7 +89,7 @@ public:
     void Dump() const;
 	void DumpTables() const;
 
-    void CheckDomainAndOrderings();
+    void CheckAssets();
     
 private: 
     const shared_ptr<Lacing> lacing;

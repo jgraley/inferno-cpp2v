@@ -58,16 +58,16 @@ void NodeTable::Insert(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool
 		DBWalk::Actions actions;
 		actions.push_back( [&](const DBWalk::WalkInfo &walk_info)
 		{
-			 InsertAction(walk_info.xlink);
+			 InsertLink(walk_info.xlink);
 		} );
 		db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_IN, base_info );
 	}
 	else
 	{
 		// For swaps, we only need to act at the boundary of the zone
-		InsertAction(zone.GetBaseXLink());
+		InsertLink(zone.GetBaseXLink());
 		for( XLink terminus : zone.GetTerminusXLinks() )
-			InsertAction(terminus);
+			InsertLink(terminus);
 	}
 }
 
@@ -80,21 +80,21 @@ void NodeTable::Delete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool
 		DBWalk::Actions actions;
 		actions.push_back( [&](const DBWalk::WalkInfo &walk_info)
 		{
-			 DeleteAction(walk_info.xlink);
+			 DeleteLink(walk_info.xlink);
 		} );
 		db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_OUT, base_info );
 	}
 	else
 	{
 		// For swaps, we only need to act at the boundary of the zone
-		DeleteAction(zone.GetBaseXLink());
+		DeleteLink(zone.GetBaseXLink());
 		for( XLink terminus : zone.GetTerminusXLinks() )
-			DeleteAction(terminus);	
+			DeleteLink(terminus);	
 	}
 }
 
 
-void NodeTable::InsertAction(XLink xlink)
+void NodeTable::InsertLink(XLink xlink)
 {
 	TreePtr<Node> node = xlink.GetChildTreePtr();
 
@@ -104,11 +104,14 @@ void NodeTable::InsertAction(XLink xlink)
 	
 	InsertSolo( row.incoming_xlinks, xlink );            
 	if( IsDeclarer(xlink) )
+	{
 		InsertSolo( row.declaring_xlinks, xlink );
+		//ASSERT( row.declaring_xlinks.size()==1 ); // can be removed, only here to help smoke out bugs
+	}
 }
 
 
-void NodeTable::DeleteAction(XLink xlink)
+void NodeTable::DeleteLink(XLink xlink)
 {
 	TreePtr<Node> node = xlink.GetChildTreePtr();
 

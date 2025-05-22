@@ -259,7 +259,11 @@ void DomainExtensionChannel::PerformDeferredActions()
 void DomainExtensionChannel::InsertAction(const DBWalk::WalkInfo &walk_info)
 {
     XLink stimulus_xlink = walk_info.xlink;
-    CheckStimulusXLink( stimulus_xlink );
+    
+    // We're now deferring all new stimulus checks because tree update can
+    // confuse transformations by eg having two declarers in two separate trees.
+    // Wait until we're done with all that stuff then do the checks.
+    InsertSolo(stimulii_to_recheck, stimulus_xlink);
 }
 
 

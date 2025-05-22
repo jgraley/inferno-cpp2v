@@ -44,8 +44,8 @@ public:
 	void Insert(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
 	void Delete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
 
-	void InsertAction(XLink xlink);
-    void DeleteAction(XLink xlink);
+	void InsertLink(XLink xlink);
+    void DeleteLink(XLink xlink);
 
     vector<TreePtr<Node>> GetNodeDomainAsVector() const;
     

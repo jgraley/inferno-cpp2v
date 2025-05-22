@@ -507,38 +507,10 @@ void OrderingPass::MoveTreeZoneOut( shared_ptr<Patch> *ooo_patch_ptr, shared_ptr
 	// Make scaffold free zones that fit in place of the moving zone
 	auto scaffold_zone_from = main_tree_zone_from.CreateSimilarScaffoldZone();
 	TRACE("\"From\" scaffold: ")(scaffold_zone_from)("\n");
-
-    FreeZone::TerminusIterator terminus_it_scaffold_from = scaffold_zone_from.GetTerminiiBegin();
-    for( size_t i=0; i<main_tree_zone_from.GetNumTerminii(); i++ )
-	{
-		// Plug the terminii of the "from" scaffold with yet more scaffolding so we get a subtree for the extra tree.
-		// This is a requirement for placing a zone (generally including terminii) into its own extra tree. Alternatively
-		// we could allow NULL TreePtrs/placeholders to exist in tree and define semantics for them.
-		TreePtr<Node> term_child_node = main_tree_zone_from.GetTerminusMutator(i).GetChildTreePtr();
-		ASSERT(term_child_node);
-		FreeZone plug = FreeZone::CreateScaffoldToSpec(term_child_node, 0); // finally no terminii!!!
-        terminus_it_scaffold_from = scaffold_zone_from.MergeTerminus( terminus_it_scaffold_from, make_unique<FreeZone>(plug) );        
-	}	
-	TRACE("\"From\" scaffold after populating terminii: ")(scaffold_zone_from)("\n");
-
-    // Add a new extra tree containing the plugged "from" scaffold
-    DBCommon::TreeOrdinal extra_tree_ordinal = db->AllocateExtraTree();        
-	TRACE("Allocated extra tree %u\n", extra_tree_ordinal);
-    MutableTreeZone zone_in_extra_tree = db->BuildTree( extra_tree_ordinal, scaffold_zone_from );
-	TRACE("Zone in extra tree: ")(zone_in_extra_tree)("\n");
-
-	// ------------------------- Get unplugged zone for our scaffold ---------------------------
-	// We require a TZ based on the "from" scaffold that resembles main_tree_zone_from, with real
-	// TZ terminii, even though we plugged the FZ terminii making it a subtree.
-	// Since we want TZ, we wait until after the BuildTree() call and take advantage of 
-	// TZ::CreateFromScaffold() which itself takes advantage of the simplicty of scaffold nodes.
-	XLink scaffold_root_xlink = db->GetRootXLink(extra_tree_ordinal);
-	TRACE("Extra tree root: ")(scaffold_root_xlink)("\n");
-	XTreeZone xtz = XTreeZone::CreateFromScaffold( scaffold_root_xlink ); 
-	MutableTreeZone tree_zone_in_extra = db->CreateMutableTreeZone( xtz.GetBaseXLink(),
-												                    xtz.GetTerminusXLinks() );	
-	TRACE("Original \"from\" scaffold in TZ with its terminii: ")(tree_zone_in_extra)("\n");
-
+	auto p = FreeZoneIntoExtraTree( db, scaffold_zone_from, main_tree_zone_from );
+	DBCommon::TreeOrdinal extra_tree_ordinal = p.first;
+	MutableTreeZone tree_zone_in_extra = p.second;
+		
 	// ------------------------- Swap "from" zone into our extra tree ---------------------------
 	//FTRACE("main_tree_zone_from: ")(main_tree_zone_from)("\nfree_zone: ")(*free_zone)("\n");
 	// Put the scaffold into the "from" part of the tree, displacing 

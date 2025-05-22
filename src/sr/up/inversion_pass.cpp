@@ -9,8 +9,6 @@
 
 #include <iostream>
 
-#define INVERT_ON_WIND_IN
-
 using namespace SR;
 
 InversionPass::InversionPass( XTreeDatabase *db_ ) :
@@ -35,9 +33,7 @@ void InversionPass::WalkLocatedPatches( LocatedPatch lze )
     // merging (if parent was a free zone, we'd have no such mutator)
     if( auto free_patch = dynamic_pointer_cast<FreeZonePatch>(*lze.second) )
     {
-#ifdef INVERT_ON_WIND_IN
         Invert(lze); 
-#endif
         // Free zone: recurse 
         Patch::ForChildren( free_patch, [&](shared_ptr<Patch> &child_patch)    
         {
@@ -47,12 +43,6 @@ void InversionPass::WalkLocatedPatches( LocatedPatch lze )
             LocatedPatch child_lze( Mutator(), &child_patch );
             WalkLocatedPatches( child_lze );
         } );
-    
-#ifndef INVERT_ON_WIND_IN
-        // Invert the free zone while unwinding. We must make these changes in the 
-        // unwind due #784
-        Invert(lze); 
-#endif
     }
     else if( auto tree_patch = dynamic_pointer_cast<TreeZonePatch>(*lze.second) )
     {
@@ -103,9 +93,19 @@ void InversionPass::Invert( LocatedPatch lze )
     } );
          
     // Make the inverted TZ    
-    MutableTreeZone target_tree_zone( move(base_mutator), move(terminii_mutators) );    
+    MutableTreeZone main_tree_zone( move(base_mutator), move(terminii_mutators) );    
     FreeZone new_free_zone = *free_patch->GetZone();
-    
+
     // Write it into the tree
-    db->ExchangeFreeToFree( target_tree_zone, new_free_zone, fixups, true );        
+	auto p = FreeZoneIntoExtraTree( db, new_free_zone, main_tree_zone );
+	DBCommon::TreeOrdinal extra_tree_ordinal = p.first;
+	MutableTreeZone tree_zone_in_extra = p.second;
+	
+	// Swap in the true moving zone. Names become misleading because contents swap:
+	// tree_zone_in_extra <- the actual moving zone now in extra tree
+	// main_tree_zone_from <- the "from" scaffold now in main tree, to be killed by inversion
+	db->XTreeDatabase::SwapTreeToTree( DBCommon::TreeOrdinal::MAIN, main_tree_zone, fixups,
+		    						   extra_tree_ordinal, tree_zone_in_extra, vector<MutableTreeZone *>() );
+
+	db->TeardownTree( extra_tree_ordinal );   
 }

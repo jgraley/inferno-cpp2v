@@ -37,7 +37,7 @@ void TreeUpdater::BuildMainTree( TreePtr<Node> main_tree_root )
 	db->PerformDeferredActions();
 	
     if( ReadArgs::test_db )
-        db->CheckDomainAndOrderings();	
+        db->CheckAssets();	
 }
 
 
@@ -122,5 +122,5 @@ void TreeUpdater::UpdateMainTree( XLink origin_xlink, shared_ptr<Patch> source_l
 	db->PerformDeferredActions();
    
     if( ReadArgs::test_db )
-        db->CheckDomainAndOrderings();
+        db->CheckAssets();
 }

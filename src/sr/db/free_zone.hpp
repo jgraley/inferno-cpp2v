@@ -42,7 +42,8 @@ public:
     
     void MergeAll( list<unique_ptr<FreeZone>> &&child_zones );     
     TerminusIterator MergeTerminus( TerminusIterator it_t, 
-                                    unique_ptr<FreeZone> &&child_zone );
+                                    unique_ptr<FreeZone> &&child_zone,
+                                    Mutator *resulting_mutator = nullptr );
     void AddTerminus(Mutator &&terminus);      
     TerminusIterator GetTerminiiBegin();
     TerminusIterator GetTerminiiEnd();
