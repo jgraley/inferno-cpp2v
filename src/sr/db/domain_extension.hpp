@@ -67,15 +67,19 @@ public:
     // To be called after modifying the tree, and before any search/compare operation
     void PerformDeferredActions();
 
+	void Insert(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
+	void Delete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
 	void InsertAction(const DBWalk::WalkInfo &walk_info);
 	void DeleteAction(const DBWalk::WalkInfo &walk_info);
     
     void Validate() const;
     
 private:
+    DBWalk db_walker;         
+
     // Map equivalence classes of extender agents onto our channel objects
     // so that we have one for each equaivalence class.
-      map<const Extender *, unique_ptr<DomainExtensionChannel>, ExtenderChannelRelation> channels;
+    map<const Extender *, unique_ptr<DomainExtensionChannel>, ExtenderChannelRelation> channels;
 };    
     
 // ------------------------- DomainExtensionChannel --------------------------

@@ -35,6 +35,7 @@ void Domain::Delete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do
 	}
 }
 
+
 void Domain::InsertAction(const DBWalk::WalkInfo &walk_info)
 {
     InsertSolo( unordered_domain, walk_info.xlink );   
