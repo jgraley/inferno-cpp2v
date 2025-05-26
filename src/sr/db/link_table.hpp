@@ -48,7 +48,7 @@ public:
 	void InsertAction(const DBWalk::WalkInfo &walk_info);
 	void DeleteAction(const DBWalk::WalkInfo &walk_info);
     
-    void GenerateRow(const DBWalk::WalkInfo &walk_info);
+    void GenerateRow(XLink xlink, DBCommon::TreeOrdinal tree_ordinal, const DBCommon::CoreInfo *core_info);
     
     vector<XLink> GetXLinkDomainAsVector() const;
     
@@ -61,7 +61,10 @@ public:
 		~RAIISuspendForSwap();
 	private:
 		DBWalk db_walker;     
-		LinkTable * const link_table;
+		LinkTable &link_table;
+		unordered_map<XLink, Row> &rows; 
+		queue<DBCommon::CoreInfo> terminus_info1;
+		queue<DBCommon::CoreInfo> terminus_info2;
 	};
 
 
@@ -69,11 +72,10 @@ public:
     void Dump() const;
     
 //private:
-    typedef XLink Key;
     DBWalk db_walker;     
 
     // XLink-to-row-of-x_tree_db map
-    unordered_map<Key, Row> rows; 
+    unordered_map<XLink, Row> rows; 
 };    
     
 };

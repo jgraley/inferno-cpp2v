@@ -4,7 +4,6 @@
 
 using namespace SR;    
 
-
 LinkTable::LinkTable()
 {
 }
@@ -52,7 +51,7 @@ void LinkTable::Delete(DBCommon::TreeOrdinal tree_ordinal, TreeZone &zone, const
  
 void LinkTable::InsertAction(const DBWalk::WalkInfo &walk_info)
 {
-    GenerateRow(walk_info);
+    GenerateRow(walk_info.xlink, walk_info.tree_ordinal, &walk_info.core);
 }
 
 
@@ -65,60 +64,60 @@ void LinkTable::DeleteAction(const DBWalk::WalkInfo &walk_info)
 }
 
 
-void LinkTable::GenerateRow(const DBWalk::WalkInfo &walk_info)
+void LinkTable::GenerateRow(XLink xlink, DBCommon::TreeOrdinal tree_ordinal, const DBCommon::CoreInfo *core_info)
 {
     Row row;        
-    *(DBCommon::CoreInfo *)(&row) = walk_info.core;
+    *(DBCommon::CoreInfo *)(&row) = *core_info;
     switch( row.context_type )
     {
         case DBCommon::ROOT:
         {
             // Root ordinal filled on only for root xlinks, so that we retain
             // locality.
-            row.tree_ordinal = walk_info.tree_ordinal; 
+            row.tree_ordinal = tree_ordinal; 
             
             // TODO wouldn't NULL ie XLink() be clearer? (and below) - no 'cause 
             // then undefineds would get into bool eval in the syms. Instead we
             // allow junk values - analysis of expressions could detect if these 
             // make it anywhere they can do harm. But we could add a new 
             // one-off link like MMAX and OffEndX? What about EmptyResult?
-            row.container_front = walk_info.xlink; 
-            row.container_back = walk_info.xlink;
+            row.container_front = xlink; 
+            row.container_back = xlink;
             break;
         }    
         case DBCommon::SINGULAR:
         {
-            row.container_front = walk_info.xlink;
-            row.container_back = walk_info.xlink;
+            row.container_front = xlink;
+            row.container_back = xlink;
             break;
         }
         case DBCommon::IN_SEQUENCE:
         {  
-            row.container_front = XLink( walk_info.core.parent_node, &walk_info.core.p_container->front() );
-            row.container_back = XLink( walk_info.core.parent_node, &walk_info.core.p_container->back() );
+            row.container_front = XLink( core_info->parent_node, &core_info->p_container->front() );
+            row.container_back = XLink( core_info->parent_node, &core_info->p_container->back() );
             
-            SequenceInterface::iterator xit_predecessor = walk_info.core.container_it;
-            if( xit_predecessor != walk_info.core.p_container->begin() )
+            SequenceInterface::iterator xit_predecessor = core_info->container_it;
+            if( xit_predecessor != row.p_container->begin() )
             {
                 --xit_predecessor;
-                row.sequence_predecessor = XLink( walk_info.core.parent_node, &*xit_predecessor );
+                row.sequence_predecessor = XLink( core_info->parent_node, &*xit_predecessor );
             }
             else
                 row.sequence_predecessor = XLink::OffEndXLink;        
 
-            SequenceInterface::iterator xit_successor = walk_info.core.container_it;
+            SequenceInterface::iterator xit_successor = core_info->container_it;
             ++xit_successor;
-            if( xit_successor != walk_info.core.p_container->end() )
-                row.sequence_successor = XLink( walk_info.core.parent_node, &*xit_successor );
+            if( xit_successor != row.p_container->end() )
+                row.sequence_successor = XLink( core_info->parent_node, &*xit_successor );
             else
                 row.sequence_successor = XLink::OffEndXLink;        
             break;
         }
         case DBCommon::IN_COLLECTION:
         {
-            row.container_front = XLink( walk_info.core.parent_node, &*(walk_info.core.p_container->begin()) );
+            row.container_front = XLink( core_info->parent_node, &*(core_info->p_container->begin()) );
             // Note: in real STL containers, one would use *(x_col->rbegin())
-            row.container_back = XLink( walk_info.core.parent_node, &(walk_info.core.p_container->back()) );
+            row.container_back = XLink( core_info->parent_node, &(core_info->p_container->back()) );
             break;
         }
         case DBCommon::FREE_BASE:
@@ -129,7 +128,7 @@ void LinkTable::GenerateRow(const DBWalk::WalkInfo &walk_info)
     }
 
     // Add a row of x_tree_db
-    InsertSolo( rows, make_pair(walk_info.xlink, row) );
+    InsertSolo( rows, make_pair(xlink, row) );
 }
 
 
@@ -137,23 +136,49 @@ LinkTable::RAIISuspendForSwap::RAIISuspendForSwap(LinkTable *link_table_,
                                                   DBCommon::TreeOrdinal tree_ordinal1_, TreeZone &zone1_, const DBCommon::CoreInfo *base_info1_,
 												  DBCommon::TreeOrdinal tree_ordinal2_, TreeZone &zone2_, const DBCommon::CoreInfo *base_info2_ ) :
 	DBCommon::RAIISuspendForSwap( tree_ordinal1_, zone1_, base_info1_, tree_ordinal2_, zone2_, base_info2_ ),
-	link_table(link_table_)
+	link_table( *link_table_ ),
+	rows( link_table.rows )
 {	
-	DBWalk::Actions actions;
-	actions.push_back( bind(&LinkTable::DeleteAction, link_table, placeholders::_1) );
-	db_walker.WalkTreeZone( &actions, zone1, tree_ordinal1, DBWalk::WIND_OUT, base_info1 );
-	db_walker.WalkTreeZone( &actions, zone2, tree_ordinal2, DBWalk::WIND_OUT, base_info2 );
+	// Erase zone bases
+	EraseSolo( rows, zone1.GetBaseXLink() );
+	EraseSolo( rows, zone2.GetBaseXLink() );
+	
+	// Erase terminii, storing core info for all of them
+	for( XLink terminus : zone1.GetTerminusXLinks() )
+	{
+		terminus_info1.push( rows.at(terminus) );
+		EraseSolo( rows, terminus );	
+	}	
+	for( XLink terminus : zone2.GetTerminusXLinks() )
+	{
+		terminus_info2.push( rows.at(terminus) );
+		EraseSolo( rows, terminus );	
+	}
 }
 
 
 LinkTable::RAIISuspendForSwap::~RAIISuspendForSwap()
 {
-	DBWalk::Actions actions;
-	actions.push_back( bind(&LinkTable::InsertAction, link_table, placeholders::_1) );
-	db_walker.WalkTreeZone( &actions, zone1, tree_ordinal1, DBWalk::WIND_IN, base_info1 );
-	db_walker.WalkTreeZone( &actions, zone2, tree_ordinal2, DBWalk::WIND_IN, base_info2 );
-}
+	// Regenerate base rows using info supplied to us TODO do that here?
+	link_table.GenerateRow(zone1.GetBaseXLink(), tree_ordinal1, base_info1);
+	link_table.GenerateRow(zone2.GetBaseXLink(), tree_ordinal2, base_info2);
 
+	// Stored core info relates to interipr of the zones, and should be
+	// swapped alongside the zones themselves
+	swap( terminus_info1, terminus_info2 );
+
+	// Regenerate terminus rows using a mixture of supplied and stored info
+	for( XLink terminus : zone1.GetTerminusXLinks() )
+	{
+		link_table.GenerateRow(terminus, tree_ordinal1, &terminus_info1.front());
+		terminus_info1.pop();
+	}
+	for( XLink terminus : zone2.GetTerminusXLinks() )
+	{
+		link_table.GenerateRow(terminus, tree_ordinal2, &terminus_info2.front());
+		terminus_info2.pop();
+	}
+}
 
 
 string LinkTable::Row::GetTrace() const
