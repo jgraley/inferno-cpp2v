@@ -32,9 +32,6 @@ public:
     XLink GetRootXLink(DBCommon::TreeOrdinal tree_ordinal) const;
     vector<XLink> GetExtraRootXLinks() const;
     
-    void WalkAllTrees(const DBWalk::Actions *actions,
-                       DBWalk::Wind wind);
-                                     
     // Zone goes into tree. Geom and intrinsic assets inserted. No deletes.
     MutableTreeZone BuildTree(DBCommon::TreeOrdinal tree_ordinal, const FreeZone &free_zone);
     

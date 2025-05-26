@@ -29,7 +29,8 @@ public:
         ROOT,
         SINGULAR,
         IN_SEQUENCE,
-        IN_COLLECTION
+        IN_COLLECTION,
+        UNKNOWN
     };
     
     struct NewTreeInfo
@@ -67,6 +68,7 @@ public:
 	// CoreInfo value for root of any tree is always well-defined, so
 	// we provide it here.
     static const CoreInfo *GetRootCoreInfo();
+    static const CoreInfo *GetUnknownCoreInfo();
 
 	class RAIISuspendForSwap
 	{
@@ -84,6 +86,7 @@ public:
 
 private:    
     static const CoreInfo root_core_info;
+    static const CoreInfo unknown_core_info;
 };    
 
 

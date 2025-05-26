@@ -42,15 +42,8 @@ public:
     
     const DBCommon::CoreInfo &GetCoreInfo(XLink xlink) const;
     
-	void Insert(DBCommon::TreeOrdinal tree_ordinal, TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
-	void Delete(DBCommon::TreeOrdinal tree_ordinal, TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
-
-	void InsertAction(const DBWalk::WalkInfo &walk_info);
-	void DeleteAction(const DBWalk::WalkInfo &walk_info);
-    
-    void GenerateRow(XLink xlink, DBCommon::TreeOrdinal tree_ordinal, const DBCommon::CoreInfo *core_info);
-    
-    vector<XLink> GetXLinkDomainAsVector() const;
+	void Insert(DBCommon::TreeOrdinal tree_ordinal, TreeZone &zone, const DBCommon::CoreInfo *base_info);
+	void Delete(DBCommon::TreeOrdinal tree_ordinal, TreeZone &zone, const DBCommon::CoreInfo *base_info);
     
 	class RAIISuspendForSwap : DBCommon::RAIISuspendForSwap
 	{
@@ -69,6 +62,13 @@ public:
 		DBCommon::CoreInfo mybase_info2;
 	};
 
+	void InsertAction(const DBWalk::WalkInfo &walk_info);
+	void DeleteAction(const DBWalk::WalkInfo &walk_info);
+    
+    void GenerateRow(XLink xlink, DBCommon::TreeOrdinal tree_ordinal, const DBCommon::CoreInfo *core_info);
+    
+    vector<XLink> GetXLinkDomainAsVector() const;
+    
     string GetTrace() const;
     void Dump() const;
     

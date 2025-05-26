@@ -20,8 +20,8 @@ class Domain
 public:
     Domain();
 
-	void Insert(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
-	void Delete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
+	void Insert(TreeZone &zone);
+	void Delete(TreeZone &zone);
 
 	void DeleteAction(const DBWalk::WalkInfo &walk_info);
 	void InsertAction(const DBWalk::WalkInfo &walk_info);

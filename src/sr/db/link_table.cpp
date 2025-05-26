@@ -33,22 +33,73 @@ const DBCommon::CoreInfo &LinkTable::GetCoreInfo(XLink xlink) const
 }
  
  
-void LinkTable::Insert(DBCommon::TreeOrdinal tree_ordinal, TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
+void LinkTable::Insert(DBCommon::TreeOrdinal tree_ordinal, TreeZone &zone, const DBCommon::CoreInfo *base_info)
 {     
-	DBWalk::Actions actions;
-	actions.push_back( bind(&LinkTable::InsertAction, this, placeholders::_1) );
-	db_walker.WalkTreeZone( &actions, zone, tree_ordinal, DBWalk::WIND_IN, base_info );
+	db_walker.WalkTreeZone( bind(&LinkTable::InsertAction, this, placeholders::_1), 
+	                        zone, tree_ordinal, DBWalk::WIND_IN, base_info );
 }
 
 
-void LinkTable::Delete(DBCommon::TreeOrdinal tree_ordinal, TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
+void LinkTable::Delete(DBCommon::TreeOrdinal tree_ordinal, TreeZone &zone, const DBCommon::CoreInfo *base_info)
 {
-	DBWalk::Actions actions;
-	actions.push_back( bind(&LinkTable::DeleteAction, this, placeholders::_1) );
-	db_walker.WalkTreeZone( &actions, zone, tree_ordinal, DBWalk::WIND_OUT, base_info );
+	db_walker.WalkTreeZone( bind(&LinkTable::DeleteAction, this, placeholders::_1), 
+					        zone, tree_ordinal, DBWalk::WIND_OUT, base_info );
 }
  
  
+LinkTable::RAIISuspendForSwap::RAIISuspendForSwap(LinkTable *link_table_,
+                                                  DBCommon::TreeOrdinal tree_ordinal1_, TreeZone &zone1_, 
+												  DBCommon::TreeOrdinal tree_ordinal2_, TreeZone &zone2_ ) :
+	DBCommon::RAIISuspendForSwap( tree_ordinal1_, zone1_, tree_ordinal2_, zone2_ ),
+	link_table( *link_table_ ),
+	rows( link_table.rows )
+{	
+	// Erase zone bases
+	mybase_info1 = rows.at( zone1.GetBaseXLink() );
+	EraseSolo( rows, zone1.GetBaseXLink() );
+	
+	mybase_info2 = rows.at( zone2.GetBaseXLink() );
+	EraseSolo( rows, zone2.GetBaseXLink() );
+	
+	// Erase terminii, storing core info for all of them
+	for( XLink terminus : zone1.GetTerminusXLinks() )
+	{
+		terminus_info1.push( rows.at(terminus) );
+		EraseSolo( rows, terminus );	
+	}	
+	for( XLink terminus : zone2.GetTerminusXLinks() )
+	{
+		terminus_info2.push( rows.at(terminus) );
+		EraseSolo( rows, terminus );	
+	}
+}
+
+
+LinkTable::RAIISuspendForSwap::~RAIISuspendForSwap()
+{
+	// Core info for terminii relates to interior of the zones, and should be
+	// swapped alongside the zones themselves. Interestingly, core info for 
+	// base is outside, so we do not swap them.
+	swap( terminus_info1, terminus_info2 );
+
+	// Regenerate base rows using info supplied to us TODO do that here?
+	link_table.GenerateRow(zone1.GetBaseXLink(), tree_ordinal1, &mybase_info1);
+	link_table.GenerateRow(zone2.GetBaseXLink(), tree_ordinal2, &mybase_info2);
+
+	// Regenerate terminus rows using a mixture of supplied and stored info
+	for( XLink terminus : zone1.GetTerminusXLinks() )
+	{
+		link_table.GenerateRow(terminus, tree_ordinal1, &terminus_info1.front());
+		terminus_info1.pop();
+	}
+	for( XLink terminus : zone2.GetTerminusXLinks() )
+	{
+		link_table.GenerateRow(terminus, tree_ordinal2, &terminus_info2.front());
+		terminus_info2.pop();
+	}
+}
+
+
 void LinkTable::InsertAction(const DBWalk::WalkInfo &walk_info)
 {
     GenerateRow(walk_info.xlink, walk_info.tree_ordinal, &walk_info.core);
@@ -120,6 +171,9 @@ void LinkTable::GenerateRow(XLink xlink, DBCommon::TreeOrdinal tree_ordinal, con
             row.container_back = XLink( core_info->parent_node, &(core_info->p_container->back()) );
             break;
         }
+        default:
+			// includes UNKNOWN
+			ASSERTFAIL();
     }
 
     // Add a row of x_tree_db
@@ -127,55 +181,12 @@ void LinkTable::GenerateRow(XLink xlink, DBCommon::TreeOrdinal tree_ordinal, con
 }
 
 
-LinkTable::RAIISuspendForSwap::RAIISuspendForSwap(LinkTable *link_table_,
-                                                  DBCommon::TreeOrdinal tree_ordinal1_, TreeZone &zone1_, 
-												  DBCommon::TreeOrdinal tree_ordinal2_, TreeZone &zone2_ ) :
-	DBCommon::RAIISuspendForSwap( tree_ordinal1_, zone1_, tree_ordinal2_, zone2_ ),
-	link_table( *link_table_ ),
-	rows( link_table.rows )
-{	
-	// Erase zone bases
-	mybase_info1 = rows.at( zone1.GetBaseXLink() );
-	EraseSolo( rows, zone1.GetBaseXLink() );
-	
-	mybase_info2 = rows.at( zone2.GetBaseXLink() );
-	EraseSolo( rows, zone2.GetBaseXLink() );
-	
-	// Erase terminii, storing core info for all of them
-	for( XLink terminus : zone1.GetTerminusXLinks() )
-	{
-		terminus_info1.push( rows.at(terminus) );
-		EraseSolo( rows, terminus );	
-	}	
-	for( XLink terminus : zone2.GetTerminusXLinks() )
-	{
-		terminus_info2.push( rows.at(terminus) );
-		EraseSolo( rows, terminus );	
-	}
-}
-
-
-LinkTable::RAIISuspendForSwap::~RAIISuspendForSwap()
+vector<XLink> LinkTable::GetXLinkDomainAsVector() const
 {
-	// Regenerate base rows using info supplied to us TODO do that here?
-	link_table.GenerateRow(zone1.GetBaseXLink(), tree_ordinal1, &mybase_info1);
-	link_table.GenerateRow(zone2.GetBaseXLink(), tree_ordinal2, &mybase_info2);
-
-	// Stored core info relates to interipr of the zones, and should be
-	// swapped alongside the zones themselves
-	swap( terminus_info1, terminus_info2 );
-
-	// Regenerate terminus rows using a mixture of supplied and stored info
-	for( XLink terminus : zone1.GetTerminusXLinks() )
-	{
-		link_table.GenerateRow(terminus, tree_ordinal1, &terminus_info1.front());
-		terminus_info1.pop();
-	}
-	for( XLink terminus : zone2.GetTerminusXLinks() )
-	{
-		link_table.GenerateRow(terminus, tree_ordinal2, &terminus_info2.front());
-		terminus_info2.pop();
-	}
+    vector<XLink> v;
+    for( auto p : rows )
+        v.push_back(p.first);
+    return v;
 }
 
 
@@ -202,6 +213,9 @@ string LinkTable::Row::GetTrace() const
             s += "IN_COLLECTION";
             par = cont = true;
             break;
+        case DBCommon::UNKNOWN:
+            s += "UNKNOWN";
+            break;
     }    
     if( par )
         s += ", parent_node=" + Trace(parent_node);
@@ -214,15 +228,6 @@ string LinkTable::Row::GetTrace() const
     s += SSPrintf(", to=%d", tree_ordinal);
     s += ")";
     return s;
-}
-
-
-vector<XLink> LinkTable::GetXLinkDomainAsVector() const
-{
-    vector<XLink> v;
-    for( auto p : rows )
-        v.push_back(p.first);
-    return v;
 }
 
 

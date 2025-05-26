@@ -37,18 +37,9 @@ private:
 public:
     const Lacing *GetLacing() const;
 
-    void Insert(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
-    void Delete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
-    void InsertDF(const TreeZone &zone, const DBCommon::CoreInfo *base_info);
-    void DeleteDF(const TreeZone &zone, const DBCommon::CoreInfo *base_info);
+    void Insert(TreeZone &zone);
+    void Delete(TreeZone &zone);
 
-private:
-	void InsertActionSCAndCAT(const DBWalk::WalkInfo &walk_info);
-    void DeleteActionSCAndCAT(const DBWalk::WalkInfo &walk_info);
-
-	set<TreePtr<Node>> GetTerminusAndBaseAncestors( const TreeZone &tz ) const; 
-
-public:        
 	class RAIISuspendForSwap : DBCommon::RAIISuspendForSwap
 	{
 	public:
@@ -61,6 +52,16 @@ public:
 		Orderings &orderings;
 	};
 
+    void InsertGeometric(const TreeZone &zone);
+    void DeleteGeometric(const TreeZone &zone);
+
+private:
+	void InsertActionSCAndCAT(const DBWalk::WalkInfo &walk_info);
+    void DeleteActionSCAndCAT(const DBWalk::WalkInfo &walk_info);
+
+	set<TreePtr<Node>> GetTerminusAndBaseAncestors( const TreeZone &tz ) const; 
+    
+public:
     void Dump() const;
     void CheckRelations( const vector<XLink> &xlink_domain,  
                          const vector<TreePtr<Node>> &node_domain );

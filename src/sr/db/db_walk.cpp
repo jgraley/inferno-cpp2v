@@ -4,15 +4,15 @@ using namespace SR;
 
 //#define TRACE_WALK
 
-void DBWalk::WalkTreeZone( const Actions *actions,
+void DBWalk::WalkTreeZone( const Action action,
                            const TreeZone &tree_zone,
                            const DBCommon::TreeOrdinal tree_ordinal, 
                            Wind wind,
                            const DBCommon::CoreInfo *base_info )
 {
     TRACE("Walking tree zone: ")(tree_zone)(" in #%u\n", tree_ordinal);
-    ASSERT( base_info );
-    WalkKit kit { actions, &tree_zone, tree_ordinal, wind, 0U };
+    WalkKit kit { action, &tree_zone, tree_ordinal, wind, 0U };
+    
     VisitBase( kit, tree_zone.GetBaseXLink(), tree_zone.GetBaseNode(), base_info );  
     ASSERT( kit.next_terminus_index == tree_zone.GetNumTerminii() )
           ("Zone has %u terminii", tree_zone.GetNumTerminii())
@@ -173,8 +173,7 @@ void DBWalk::VisitNode( const WalkKit &kit,
 				 (walk_info.xlink)(" ")    
 				 (walk_info.node)(" (Wind-in)\n");    
 #endif
-			for( Action action : *(kit.actions) )
-				action(walk_info);
+			kit.action(walk_info);
 		}
 				
 		// Recurse into our child nodes but stop at terminii
@@ -190,8 +189,7 @@ void DBWalk::VisitNode( const WalkKit &kit,
 				 (walk_info.xlink)(" ")
 				 (walk_info.node)(" (Wind-out)\n");    
 #endif
-			for( Action action : *(kit.actions) )
-				action(walk_info);         
+			kit.action(walk_info);         
 		}
 	}
 }

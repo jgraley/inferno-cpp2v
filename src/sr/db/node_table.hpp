@@ -41,14 +41,9 @@ public:
     
     bool IsDeclarer(XLink xlink) const;
     
-	void Insert(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
-	void Delete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
+	void Insert(TreeZone &zone);
+	void Delete(TreeZone &zone);
 
-	void InsertLink(XLink xlink);
-    void DeleteLink(XLink xlink);
-
-    vector<TreePtr<Node>> GetNodeDomainAsVector() const;
-    
 	class RAIISuspendForSwap : DBCommon::RAIISuspendForSwap
 	{
 	public:
@@ -61,6 +56,11 @@ public:
 		NodeTable &node_table;
 	};
 		
+	void InsertLink(XLink xlink);
+    void DeleteLink(XLink xlink);
+
+    vector<TreePtr<Node>> GetNodeDomainAsVector() const;
+    
     string GetTrace() const;
     void Dump() const;
     

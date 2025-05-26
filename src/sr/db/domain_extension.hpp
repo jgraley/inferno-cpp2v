@@ -67,11 +67,24 @@ public:
     // To be called after modifying the tree, and before any search/compare operation
     void PerformDeferredActions();
 
-	void Insert(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
-	void Delete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
-	void InsertAction(const DBWalk::WalkInfo &walk_info);
-	void DeleteAction(const DBWalk::WalkInfo &walk_info);
+	void Insert(const TreeZone &zone);
+	void Delete(const TreeZone &zone);
     
+	class RAIISuspendForSwap : DBCommon::RAIISuspendForSwap
+	{
+	public:
+		RAIISuspendForSwap(DomainExtension *domain_extension_,
+						   DBCommon::TreeOrdinal tree_ordinal1_, TreeZone &zone1_,
+						   DBCommon::TreeOrdinal tree_ordinal2_, TreeZone &zone2_ );
+		~RAIISuspendForSwap();
+	private:
+		DBWalk db_walker;     
+		DomainExtension &domain_extension;
+	};
+	    
+	void InsertAction(XLink xlink);
+	void DeleteAction(XLink xlink);
+
     void Validate() const;
     
 private:
@@ -98,8 +111,8 @@ public:
     void Validate() const;
     void PerformDeferredActions();
 
-    void InsertAction(const DBWalk::WalkInfo &walk_info);
-    void DeleteAction(const DBWalk::WalkInfo &walk_info);
+    void InsertAction(XLink xlink);
+    void DeleteAction(XLink xlink);
 
 private:
     XTreeDatabase *db;

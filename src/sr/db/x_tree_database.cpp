@@ -72,19 +72,7 @@ vector<XLink> XTreeDatabase::GetExtraRootXLinks() const
     
     return xlinks;
 }
-
-
-void XTreeDatabase::WalkAllTrees(const DBWalk::Actions *actions,
-                                 DBWalk::Wind wind)
-{
-    for( auto p : trees_by_ordinal )
-    {
-	    XLink root_xlink = GetRootXLink(p.first);
-		auto tree_zone = XTreeZone::CreateSubtree(root_xlink);
-        db_walker.WalkTreeZone( actions, tree_zone, p.first, wind, DBCommon::GetRootCoreInfo() );
-	}
-}
-                                 
+          
 
 MutableTreeZone XTreeDatabase::BuildTree(DBCommon::TreeOrdinal tree_ordinal, const FreeZone &free_zone)
 {      
@@ -99,13 +87,11 @@ MutableTreeZone XTreeDatabase::BuildTree(DBCommon::TreeOrdinal tree_ordinal, con
 	auto zone = XTreeZone::CreateSubtree(root_xlink);
     TRACE("Tree ordinal: %d subtree zone: ", tree_ordinal)(zone)("\n");
 
-	const DBCommon::CoreInfo *base_info = DBCommon::GetRootCoreInfo();
-
-	domain->Insert(zone, base_info, true);   
-	link_table->Insert(tree_ordinal, zone, base_info, true);   
-	node_table->Insert(zone, base_info, true);   
-	orderings->Insert(zone, base_info, true);   
-    domain_extension->Insert(zone, base_info, true);   
+	domain->Insert(zone);   
+	link_table->Insert(tree_ordinal, zone, DBCommon::GetRootCoreInfo());   
+	node_table->Insert(zone);   
+	orderings->Insert(zone);   
+    domain_extension->Insert(zone);   
     
 	vector<Mutator> terminii;
 	for( FreeZone::TerminusConstIterator it=free_zone.GetTerminiiBegin(); 
@@ -125,13 +111,11 @@ void XTreeDatabase::TeardownTree(DBCommon::TreeOrdinal tree_ordinal)
     auto zone = XTreeZone::CreateSubtree(root_xlink);
 	TRACE("Tree ordinal: %d root: ", tree_ordinal)(zone)("\n");
 
-	const DBCommon::CoreInfo *base_info = DBCommon::GetRootCoreInfo();
-
-    domain_extension->Delete(zone, base_info, true);   
-    orderings->Delete(zone, base_info, true);
-	node_table->Delete(zone, base_info, true);   
-	link_table->Delete(tree_ordinal, zone, base_info, true);   
-	domain->Delete(zone, base_info, true);   
+    domain_extension->Delete(zone);   
+    orderings->Delete(zone);
+	node_table->Delete(zone);   
+	link_table->Delete(tree_ordinal, zone, DBCommon::GetRootCoreInfo());   
+	domain->Delete(zone);   
 
 	FreeExtraTree( tree_ordinal );  
 }
@@ -151,34 +135,21 @@ void XTreeDatabase::SwapTreeToTree( DBCommon::TreeOrdinal tree_ordinal1, Mutable
 
 	zone1.Validate(this); 
 	zone2.Validate(this); 
-
-    // Store the core info for the base locally since the link table will change
-    // as this function executes.
-    DBCommon::CoreInfo base_info1;// = link_table->GetCoreInfo( zone1.GetBaseXLink() );
-    DBCommon::CoreInfo base_info2;// = link_table->GetCoreInfo( zone2.GetBaseXLink() );
-
-    // Remove geometric info that will be invalidated by the exchange 
-    domain_extension->Delete(zone1, &base_info1, false);   
-    domain_extension->Delete(zone2, &base_info2, false);     
-    orderings->Delete(zone1, &base_info1, false); // doesn't use tree_ordinal
-    orderings->Delete(zone2, &base_info2, false); // doesn't use tree_ordinal  
+    
 	{
+		// Scope contains suspension objects on stack
+		DomainExtension::RAIISuspendForSwap de_sus(domain_extension.get(), tree_ordinal1, zone1, tree_ordinal2, zone2);  
+		Orderings::RAIISuspendForSwap orderings_sus(orderings.get(), tree_ordinal1, zone1, tree_ordinal2, zone2);  
 		NodeTable::RAIISuspendForSwap node_table_sus(node_table.get(), tree_ordinal1, zone1, tree_ordinal2, zone2);  
 		LinkTable::RAIISuspendForSwap link_table_sus(link_table.get(), tree_ordinal1, zone1, tree_ordinal2, zone2);  
 		
-		// Update the tree. mutable_target_tree_zone becomes the valid new tree zone.
-		// Invariant wrt intrinisc asset state.
 		zone1.Swap( zone2, fixups1, fixups2 );  // TODO be static and symmetrical
 			
 		TRACE("After swapping zones: ")(zone1)
 			 ("\nand: ")(zone2)("\n");    
 			 
-		// Re-insert geometric info based on new tree zone.     
+		// Suspensions expire in reverse order.     
 	} 
-    orderings->Insert(zone1, &base_info1, false); // doesn't use tree_ordinal
-    orderings->Insert(zone2, &base_info2, false); // doesn't use tree_ordinal
-    domain_extension->Insert(zone1, &base_info1, false);   
-    domain_extension->Insert(zone2, &base_info2, false); 
         
     if( ReadArgs::test_db )
         CheckAssets();
@@ -402,7 +373,7 @@ void XTreeDatabase::CheckAssets()
 	{
 	    XLink root_xlink = GetRootXLink(p.first);
 		auto tree_zone = XTreeZone::CreateSubtree(root_xlink);
-		ref_domain->Insert(tree_zone, DBCommon::GetRootCoreInfo(), true);
+		ref_domain->Insert(tree_zone);
 	}   
 
     TRACE("Checking domain\n");
@@ -416,7 +387,7 @@ void XTreeDatabase::CheckAssets()
 	{
 	    XLink root_xlink = GetRootXLink(p.first);
 		auto tree_zone = XTreeZone::CreateSubtree(root_xlink);
-		ref_orderings->Insert(tree_zone, DBCommon::GetRootCoreInfo(), true);
+		ref_orderings->Insert(tree_zone);
 	}   
     
     TRACE("Checking orderings\n");

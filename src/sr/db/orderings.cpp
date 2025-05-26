@@ -28,97 +28,102 @@ const Lacing *Orderings::GetLacing() const
 }
 
 	
-void Orderings::Insert(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
+void Orderings::Insert(TreeZone &zone)
 {     
 	// -------------------- depth-first -----------------------
-    InsertDF(zone, base_info);
+    InsertGeometric(zone);
 	
 	// -------------------- simple compare and category -----------------------
 	// SC and CAT are node-keyed. CAT is pure intrinsic, but SC has additionals
-	set<TreePtr<Node>> additional_sc_nodes_to_update;
-	if( do_intrinsics )		
-	{
-		// Use a walk to insert all the SC and CAT when intrinsic
-		DBWalk::Actions actions2;
-		actions2.push_back( bind(&Orderings::InsertActionSCAndCAT, this, placeholders::_1) );
-		db_walker.WalkTreeZone( &actions2, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_IN, base_info );
 
-		// SC still needs ancestors of root
-		auto subtree = XTreeZone::CreateSubtree(zone.GetBaseXLink());
-		additional_sc_nodes_to_update = GetTerminusAndBaseAncestors(subtree);
-	}
-	else
-	{
-		// SC needs ancestors of root and terminii
-		additional_sc_nodes_to_update = GetTerminusAndBaseAncestors(zone);
-	}
+	// Use a walk to insert all the SC and CAT when intrinsic
+	db_walker.WalkTreeZone( bind(&Orderings::InsertActionSCAndCAT, this, placeholders::_1), 
+	                        zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_IN );
+
+	// SC still needs ancestors of root
+	auto subtree = XTreeZone::CreateSubtree(zone.GetBaseXLink());
 
 	// GetTerminusAndBaseAncestors() never gives us a leaf node, so no need to check for other parents
-	for( TreePtr<Node> x : additional_sc_nodes_to_update )                        
+	for( TreePtr<Node> x : GetTerminusAndBaseAncestors(subtree) )                        
 		InsertSolo( simple_compare_ordering, x );   			
 }
 
 
-void Orderings::Delete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
+void Orderings::Delete(TreeZone &zone)
 {
 	// -------------------- depth-first -----------------------
-    DeleteDF(zone, base_info);
+    DeleteGeometric(zone);
 
 	// -------------------- simple compare and category -----------------------
 	// SC and CAT are node-keyed. CAT is pure intrinsic, but SC has additionals.
-	set<TreePtr<Node>> additional_sc_nodes_to_update;
 	
-	// Assume there was only one incoming XLink to the node because not a leaf
-	if( do_intrinsics )		
-	{
-		// Use a walk to insert all the SC and CAT when intrinsic
-		node_reached_count.clear();	
-		DBWalk::Actions actions2;
-		actions2.push_back( bind(&Orderings::DeleteActionSCAndCAT, this, placeholders::_1) );
-		db_walker.WalkTreeZone( &actions2, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_OUT, base_info );
+	// Use a walk to insert all the SC and CAT when intrinsic
+	node_reached_count.clear();
+	db_walker.WalkTreeZone( bind(&Orderings::DeleteActionSCAndCAT, this, placeholders::_1),
+	                        zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_OUT );
 
-		// SC still needs ancestors of root
-		(void)GetTerminusAndBaseAncestors(zone);
-		auto subtree = XTreeZone::CreateSubtree(zone.GetBaseXLink());
-		additional_sc_nodes_to_update = GetTerminusAndBaseAncestors(subtree);
-	}
-	else
-	{
-		// SC needs ancestors of root and terminii
-		additional_sc_nodes_to_update = GetTerminusAndBaseAncestors(zone);
-	}
-
+	// SC still needs ancestors of root
+	auto subtree = XTreeZone::CreateSubtree(zone.GetBaseXLink());
+	
 	// GetTerminusAndBaseAncestors() never gives us a leaf node, so no need to check for other parents
-	for( TreePtr<Node> x : additional_sc_nodes_to_update )    
+	for( TreePtr<Node> x : GetTerminusAndBaseAncestors(subtree) )    
 		EraseSolo( simple_compare_ordering, x );                              
 }
 
 
-void Orderings::InsertDF(const TreeZone &zone, const DBCommon::CoreInfo *base_info)
-{     
-	// Take care of the DFO, which is an XLink-keyed ordering and must be updated fully in geom case
-    DBWalk::Actions actions;
-    actions.push_back( [&](const DBWalk::WalkInfo &walk_info)
-    {
-	 	InsertSolo( depth_first_ordering, walk_info.xlink );
-	} );
-	
-	DBCommon::CoreInfo bin;
-    db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_IN, &bin );
+Orderings::RAIISuspendForSwap::RAIISuspendForSwap(Orderings *orderings_,
+                                                  DBCommon::TreeOrdinal tree_ordinal1_, TreeZone &zone1_, 
+												  DBCommon::TreeOrdinal tree_ordinal2_, TreeZone &zone2_ ) :
+	DBCommon::RAIISuspendForSwap( tree_ordinal1_, zone1_, tree_ordinal2_, zone2_ ),
+	orderings( *orderings_ )
+{	
+	// -------------------- depth-first -----------------------
+    orderings.DeleteGeometric(zone1);
+    orderings.DeleteGeometric(zone2);
+
+	// -------------------- simple compare -----------------------
+	for( TreePtr<Node> x : orderings.GetTerminusAndBaseAncestors(zone1) )    
+		EraseSolo( orderings.simple_compare_ordering, x );                              
+	for( TreePtr<Node> x : orderings.GetTerminusAndBaseAncestors(zone2) )    
+		EraseSolo( orderings.simple_compare_ordering, x );                              
 }
 
 
-void Orderings::DeleteDF(const TreeZone &zone, const DBCommon::CoreInfo *base_info)
+Orderings::RAIISuspendForSwap::~RAIISuspendForSwap()
+{
+	// -------------------- depth-first -----------------------
+    orderings.InsertGeometric(zone1);
+    orderings.InsertGeometric(zone2);
+
+	// -------------------- simple compare -----------------------
+	for( TreePtr<Node> x : orderings.GetTerminusAndBaseAncestors(zone1) )                        
+		InsertSolo( orderings.simple_compare_ordering, x );   			
+	for( TreePtr<Node> x : orderings.GetTerminusAndBaseAncestors(zone2) )                        
+		InsertSolo( orderings.simple_compare_ordering, x );   			
+}
+
+        
+void Orderings::InsertGeometric(const TreeZone &zone)
+{     
+	// Take care of the DFO, which is an XLink-keyed ordering and must be updated fully in geom case
+    auto action = [&](const DBWalk::WalkInfo &walk_info)
+    {
+	 	InsertSolo( depth_first_ordering, walk_info.xlink );
+	};
+	
+    db_walker.WalkTreeZone( action, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_IN );
+}
+
+
+void Orderings::DeleteGeometric(const TreeZone &zone)
 {
 	// Take care of the DFO, which is an XLink-keyed ordering and must be updated fully in geom case
-    DBWalk::Actions actions;
-    actions.push_back( [&](const DBWalk::WalkInfo &walk_info)
+    auto action = [&](const DBWalk::WalkInfo &walk_info)
     {
 	 	EraseSolo( depth_first_ordering, walk_info.xlink );
-	} );
+	};
 	
-	DBCommon::CoreInfo bin;
-    db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_IN, &bin );
+    db_walker.WalkTreeZone( action, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_IN );
 }
 
 
@@ -192,40 +197,6 @@ set<TreePtr<Node>> Orderings::GetTerminusAndBaseAncestors( const TreeZone &tz ) 
 }
 
 
-Orderings::RAIISuspendForSwap::RAIISuspendForSwap(Orderings *orderings_,
-                                                  DBCommon::TreeOrdinal tree_ordinal1_, TreeZone &zone1_, 
-												  DBCommon::TreeOrdinal tree_ordinal2_, TreeZone &zone2_ ) :
-	DBCommon::RAIISuspendForSwap( tree_ordinal1_, zone1_, tree_ordinal2_, zone2_ ),
-	orderings( *orderings_ )
-{	
-	DBCommon::CoreInfo bin;
-	// -------------------- depth-first -----------------------
-    orderings.DeleteDF(zone1, &bin);
-    orderings.DeleteDF(zone2, &bin);
-
-	// -------------------- simple compare -----------------------
-	for( TreePtr<Node> x : orderings.GetTerminusAndBaseAncestors(zone1) )    
-		EraseSolo( orderings.simple_compare_ordering, x );                              
-	for( TreePtr<Node> x : orderings.GetTerminusAndBaseAncestors(zone2) )    
-		EraseSolo( orderings.simple_compare_ordering, x );                              
-}
-
-
-Orderings::RAIISuspendForSwap::~RAIISuspendForSwap()
-{
-	DBCommon::CoreInfo bin;
-	// -------------------- depth-first -----------------------
-    orderings.InsertDF(zone1, &bin);
-    orderings.InsertDF(zone2, &bin);
-
-	// -------------------- simple compare -----------------------
-	for( TreePtr<Node> x : orderings.GetTerminusAndBaseAncestors(zone1) )                        
-		InsertSolo( orderings.simple_compare_ordering, x );   			
-	for( TreePtr<Node> x : orderings.GetTerminusAndBaseAncestors(zone2) )                        
-		InsertSolo( orderings.simple_compare_ordering, x );   			
-}
-
-        
 void Orderings::Dump() const
 {
     TRACE("category_ordering:\n")(category_ordering)("\n");

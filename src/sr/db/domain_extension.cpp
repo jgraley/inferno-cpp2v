@@ -58,45 +58,65 @@ void DomainExtension::PerformDeferredActions()
 }
 
 
-void DomainExtension::Insert(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
+void DomainExtension::Insert(const TreeZone &zone)
 {     
-	DBCommon::CoreInfo bin;
-	DBWalk::Actions actions;
-	actions.push_back( bind(&DomainExtension::InsertAction, this, placeholders::_1) );
-	db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_IN, &bin );
+    auto action = [&](const DBWalk::WalkInfo &walk_info)
+    {
+	 	InsertAction( walk_info.xlink );
+	};	
+	db_walker.WalkTreeZone( action, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_IN );
 }
 
 
-void DomainExtension::Delete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
+void DomainExtension::Delete(const TreeZone &zone)
 {
-	DBCommon::CoreInfo bin;
-	DBWalk::Actions actions;
-	actions.push_back( bind(&DomainExtension::DeleteAction, this, placeholders::_1) );
-	db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_OUT, &bin );
+    auto action = [&](const DBWalk::WalkInfo &walk_info)
+    {
+	 	DeleteAction( walk_info.xlink );
+	};
+	db_walker.WalkTreeZone( action, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_OUT );
 }
 
 
-void DomainExtension::InsertAction(const DBWalk::WalkInfo &walk_info)
+DomainExtension::RAIISuspendForSwap::RAIISuspendForSwap(DomainExtension *domain_extension_,
+                                                  DBCommon::TreeOrdinal tree_ordinal1_, TreeZone &zone1_, 
+												  DBCommon::TreeOrdinal tree_ordinal2_, TreeZone &zone2_ ) :
+	DBCommon::RAIISuspendForSwap( tree_ordinal1_, zone1_, tree_ordinal2_, zone2_ ),
+	domain_extension( *domain_extension_ )
+{	
+	domain_extension.Delete(zone1);
+	domain_extension.Delete(zone2);
+}
+
+
+DomainExtension::RAIISuspendForSwap::~RAIISuspendForSwap()
+{
+	domain_extension.Insert(zone1);
+	domain_extension.Insert(zone2);
+}
+
+
+void DomainExtension::InsertAction(XLink xlink)
 {        
 #ifdef NO_ACTION_ON_SCAFFOLD	
-	if( dynamic_cast<ScaffoldBase *>(walk_info.node.get()) )
+	if( dynamic_cast<ScaffoldBase *>(xlink.GetChildTreePtr().get()) )
 		return;
 #endif
 		
     for( auto &p : channels )
-         p.second->InsertAction( walk_info );             
+         p.second->InsertAction( xlink );             
 }
 
 
-void DomainExtension::DeleteAction(const DBWalk::WalkInfo &walk_info)
+void DomainExtension::DeleteAction(XLink xlink)
 {        
 #ifdef NO_ACTION_ON_SCAFFOLD	
-	if( dynamic_cast<ScaffoldBase *>(walk_info.node.get()) )
+	if( dynamic_cast<ScaffoldBase *>(xlink.GetChildTreePtr().get()) )
 		return;
 #endif
 
     for( auto &p : channels )
-         p.second->DeleteAction( walk_info );
+         p.second->DeleteAction( xlink );
 };
 
 
@@ -274,21 +294,18 @@ void DomainExtensionChannel::PerformDeferredActions()
 }
 
 
-void DomainExtensionChannel::InsertAction(const DBWalk::WalkInfo &walk_info)
-{
-    XLink stimulus_xlink = walk_info.xlink;
-    
+void DomainExtensionChannel::InsertAction(XLink xlink)
+{    
     // We're now deferring all new stimulus checks because tree update can
     // confuse transformations by eg having two declarers in two separate trees.
     // Wait until we're done with all that stuff then do the checks.
-    InsertSolo(stimulii_to_recheck, stimulus_xlink);
+    InsertSolo(stimulii_to_recheck, xlink);
 }
 
 
-void DomainExtensionChannel::DeleteAction(const DBWalk::WalkInfo &walk_info)
+void DomainExtensionChannel::DeleteAction(XLink xlink)
 {
     INDENT("D");
-    XLink xlink = walk_info.xlink;
 
     // First deal with the case where the deleted xlink is the stimulus for a domain 
     // extension: in this case, we want to remove every trace of this extension.

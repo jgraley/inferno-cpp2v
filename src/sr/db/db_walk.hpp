@@ -33,16 +33,17 @@ public:
     typedef function<void (const WalkInfo &)> Action;
     typedef list< Action > Actions;
    
-    void WalkTreeZone( const Actions *actions,
+    void WalkTreeZone( const Action action,
                        const TreeZone &zone,
                        const DBCommon::TreeOrdinal tree_ordinal,
                        Wind wind,
-                       const DBCommon::CoreInfo *base_info );
+                       const DBCommon::CoreInfo *base_info = DBCommon::GetUnknownCoreInfo() );
+
 
 private:
     struct WalkKit
     {
-        const Actions *actions;
+        const Action action;
         const TreeZone *tree_zone;
         const DBCommon::TreeOrdinal tree_ordinal;        
         Wind wind;
