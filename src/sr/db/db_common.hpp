@@ -29,8 +29,7 @@ public:
         ROOT,
         SINGULAR,
         IN_SEQUENCE,
-        IN_COLLECTION,
-        FREE_BASE
+        IN_COLLECTION
     };
     
     struct NewTreeInfo
@@ -73,16 +72,14 @@ public:
 	{
 	protected:
 		RAIISuspendForSwap() = delete;
-		RAIISuspendForSwap( DBCommon::TreeOrdinal tree_ordinal1_, TreeZone &zone1_, const DBCommon::CoreInfo *base_info1_,
-						    DBCommon::TreeOrdinal tree_ordinal2_, TreeZone &zone2_, const DBCommon::CoreInfo *base_info2_ );
+		RAIISuspendForSwap( DBCommon::TreeOrdinal tree_ordinal1_, TreeZone &zone1_, 
+						    DBCommon::TreeOrdinal tree_ordinal2_, TreeZone &zone2_ );
 		~RAIISuspendForSwap();
 		
 		const DBCommon::TreeOrdinal tree_ordinal1;
 		const TreeZone &zone1;
-		const DBCommon::CoreInfo * const base_info1;
 		const DBCommon::TreeOrdinal tree_ordinal2;
 		const TreeZone &zone2;
-		const DBCommon::CoreInfo * const base_info2;
 	};
 
 private:    

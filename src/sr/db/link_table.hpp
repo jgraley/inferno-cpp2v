@@ -56,8 +56,8 @@ public:
 	{
 	public:
 		RAIISuspendForSwap(LinkTable *link_table_,
-						   DBCommon::TreeOrdinal tree_ordinal1_, TreeZone &zone1_, const DBCommon::CoreInfo *base_info1_,
-						   DBCommon::TreeOrdinal tree_ordinal2_, TreeZone &zone2_, const DBCommon::CoreInfo *base_info2_ );
+						   DBCommon::TreeOrdinal tree_ordinal1_, TreeZone &zone1_,
+						   DBCommon::TreeOrdinal tree_ordinal2_, TreeZone &zone2_ );
 		~RAIISuspendForSwap();
 	private:
 		DBWalk db_walker;     
@@ -65,8 +65,9 @@ public:
 		unordered_map<XLink, Row> &rows; 
 		queue<DBCommon::CoreInfo> terminus_info1;
 		queue<DBCommon::CoreInfo> terminus_info2;
+		DBCommon::CoreInfo mybase_info1;
+		DBCommon::CoreInfo mybase_info2;
 	};
-
 
     string GetTrace() const;
     void Dump() const;

@@ -39,6 +39,8 @@ public:
 
     void Insert(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
     void Delete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics);
+    void InsertDF(const TreeZone &zone, const DBCommon::CoreInfo *base_info);
+    void DeleteDF(const TreeZone &zone, const DBCommon::CoreInfo *base_info);
 
 private:
 	void InsertActionSCAndCAT(const DBWalk::WalkInfo &walk_info);
@@ -47,6 +49,18 @@ private:
 	set<TreePtr<Node>> GetTerminusAndBaseAncestors( const TreeZone &tz ) const; 
 
 public:        
+	class RAIISuspendForSwap : DBCommon::RAIISuspendForSwap
+	{
+	public:
+		RAIISuspendForSwap(Orderings *orderings_,
+						   DBCommon::TreeOrdinal tree_ordinal1_, TreeZone &zone1_,
+						   DBCommon::TreeOrdinal tree_ordinal2_, TreeZone &zone2_ );
+		~RAIISuspendForSwap();
+	private:
+		DBWalk db_walker;     
+		Orderings &orderings;
+	};
+
     void Dump() const;
     void CheckRelations( const vector<XLink> &xlink_domain,  
                          const vector<TreePtr<Node>> &node_domain );

@@ -16,23 +16,17 @@ Domain::Domain()
 
 void Domain::Insert(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
 {     
-	if( do_intrinsics )		
-	{
-		DBWalk::Actions actions;
-		actions.push_back( bind(&Domain::InsertAction, this, placeholders::_1) );
-		db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_IN, base_info );
-	}
+	DBWalk::Actions actions;
+	actions.push_back( bind(&Domain::InsertAction, this, placeholders::_1) );
+	db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_IN, base_info );
 }
 
 
 void Domain::Delete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
 {
-	if( do_intrinsics )		
-	{
-		DBWalk::Actions actions;
-		actions.push_back( bind(&Domain::DeleteAction, this, placeholders::_1) );
-		db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_OUT, base_info );
-	}
+	DBWalk::Actions actions;
+	actions.push_back( bind(&Domain::DeleteAction, this, placeholders::_1) );
+	db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_OUT, base_info );
 }
 
 

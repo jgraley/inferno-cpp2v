@@ -120,11 +120,6 @@ void LinkTable::GenerateRow(XLink xlink, DBCommon::TreeOrdinal tree_ordinal, con
             row.container_back = XLink( core_info->parent_node, &(core_info->p_container->back()) );
             break;
         }
-        case DBCommon::FREE_BASE:
-        {
-            // No way to reach parent so do nothing
-            return;
-        }
     }
 
     // Add a row of x_tree_db
@@ -133,14 +128,17 @@ void LinkTable::GenerateRow(XLink xlink, DBCommon::TreeOrdinal tree_ordinal, con
 
 
 LinkTable::RAIISuspendForSwap::RAIISuspendForSwap(LinkTable *link_table_,
-                                                  DBCommon::TreeOrdinal tree_ordinal1_, TreeZone &zone1_, const DBCommon::CoreInfo *base_info1_,
-												  DBCommon::TreeOrdinal tree_ordinal2_, TreeZone &zone2_, const DBCommon::CoreInfo *base_info2_ ) :
-	DBCommon::RAIISuspendForSwap( tree_ordinal1_, zone1_, base_info1_, tree_ordinal2_, zone2_, base_info2_ ),
+                                                  DBCommon::TreeOrdinal tree_ordinal1_, TreeZone &zone1_, 
+												  DBCommon::TreeOrdinal tree_ordinal2_, TreeZone &zone2_ ) :
+	DBCommon::RAIISuspendForSwap( tree_ordinal1_, zone1_, tree_ordinal2_, zone2_ ),
 	link_table( *link_table_ ),
 	rows( link_table.rows )
 {	
 	// Erase zone bases
+	mybase_info1 = rows.at( zone1.GetBaseXLink() );
 	EraseSolo( rows, zone1.GetBaseXLink() );
+	
+	mybase_info2 = rows.at( zone2.GetBaseXLink() );
 	EraseSolo( rows, zone2.GetBaseXLink() );
 	
 	// Erase terminii, storing core info for all of them
@@ -160,8 +158,8 @@ LinkTable::RAIISuspendForSwap::RAIISuspendForSwap(LinkTable *link_table_,
 LinkTable::RAIISuspendForSwap::~RAIISuspendForSwap()
 {
 	// Regenerate base rows using info supplied to us TODO do that here?
-	link_table.GenerateRow(zone1.GetBaseXLink(), tree_ordinal1, base_info1);
-	link_table.GenerateRow(zone2.GetBaseXLink(), tree_ordinal2, base_info2);
+	link_table.GenerateRow(zone1.GetBaseXLink(), tree_ordinal1, &mybase_info1);
+	link_table.GenerateRow(zone2.GetBaseXLink(), tree_ordinal2, &mybase_info2);
 
 	// Stored core info relates to interipr of the zones, and should be
 	// swapped alongside the zones themselves
@@ -204,9 +202,6 @@ string LinkTable::Row::GetTrace() const
             s += "IN_COLLECTION";
             par = cont = true;
             break;
-        case DBCommon::FREE_BASE:
-			s += "FREE_BASE";
-			break;
     }    
     if( par )
         s += ", parent_node=" + Trace(parent_node);

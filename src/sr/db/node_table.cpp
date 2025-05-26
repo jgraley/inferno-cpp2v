@@ -52,45 +52,25 @@ bool NodeTable::IsDeclarer(XLink xlink) const
 
 void NodeTable::Insert(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
 {     
-	if( do_intrinsics )
+	// For building, we must add every node in the zone
+	DBWalk::Actions actions;
+	actions.push_back( [&](const DBWalk::WalkInfo &walk_info)
 	{
-		// For building, we must add every node in the zone
-		DBWalk::Actions actions;
-		actions.push_back( [&](const DBWalk::WalkInfo &walk_info)
-		{
-			 InsertLink(walk_info.xlink);
-		} );
-		db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_IN, base_info );
-	}
-	else
-	{
-		// For swaps, we only need to act at the boundary of the zone
-		InsertLink(zone.GetBaseXLink());
-		for( XLink terminus : zone.GetTerminusXLinks() )
-			InsertLink(terminus);
-	}
+		 InsertLink(walk_info.xlink);
+	} );
+	db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_IN, base_info );
 }
 
 
 void NodeTable::Delete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
 {
-	if( do_intrinsics )
+	// For tear-down, we must remove every node in the zone
+	DBWalk::Actions actions;
+	actions.push_back( [&](const DBWalk::WalkInfo &walk_info)
 	{
-		// For tear-down, we must remove every node in the zone
-		DBWalk::Actions actions;
-		actions.push_back( [&](const DBWalk::WalkInfo &walk_info)
-		{
-			 DeleteLink(walk_info.xlink);
-		} );
-		db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_OUT, base_info );
-	}
-	else
-	{
-		// For swaps, we only need to act at the boundary of the zone
-		DeleteLink(zone.GetBaseXLink());
-		for( XLink terminus : zone.GetTerminusXLinks() )
-			DeleteLink(terminus);	
-	}
+		 DeleteLink(walk_info.xlink);
+	} );
+	db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_OUT, base_info );
 }
 
 
@@ -131,6 +111,35 @@ void NodeTable::DeleteLink(XLink xlink)
 	TRACE("NODE TABLE deletes row for: ")(xlink)("\n");
 	EraseSolo( rows, node );
 }
+
+
+NodeTable::RAIISuspendForSwap::RAIISuspendForSwap(NodeTable *node_table_,
+                                                  DBCommon::TreeOrdinal tree_ordinal1_, TreeZone &zone1_, 
+												  DBCommon::TreeOrdinal tree_ordinal2_, TreeZone &zone2_ ) :
+	DBCommon::RAIISuspendForSwap( tree_ordinal1_, zone1_, tree_ordinal2_, zone2_ ),
+	node_table( *node_table_ )
+{	
+	// For swaps, we only need to act at the boundary of the zone
+	node_table.DeleteLink(zone1.GetBaseXLink());
+	for( XLink terminus : zone1.GetTerminusXLinks() )
+		node_table.DeleteLink(terminus);	
+	node_table.DeleteLink(zone2.GetBaseXLink());
+	for( XLink terminus : zone2.GetTerminusXLinks() )
+		node_table.DeleteLink(terminus);	
+}
+
+
+NodeTable::RAIISuspendForSwap::~RAIISuspendForSwap()
+{
+	// For swaps, we only need to act at the boundary of the zone
+	node_table.InsertLink(zone1.GetBaseXLink());
+	for( XLink terminus : zone1.GetTerminusXLinks() )
+		node_table.InsertLink(terminus);
+	node_table.InsertLink(zone2.GetBaseXLink());
+	for( XLink terminus : zone2.GetTerminusXLinks() )
+		node_table.InsertLink(terminus);
+}
+
 
 
 string NodeTable::Row::GetTrace() const

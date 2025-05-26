@@ -49,6 +49,18 @@ public:
 
     vector<TreePtr<Node>> GetNodeDomainAsVector() const;
     
+	class RAIISuspendForSwap : DBCommon::RAIISuspendForSwap
+	{
+	public:
+		RAIISuspendForSwap(NodeTable *node_table_,
+						   DBCommon::TreeOrdinal tree_ordinal1_, TreeZone &zone1_,
+						   DBCommon::TreeOrdinal tree_ordinal2_, TreeZone &zone2_ );
+		~RAIISuspendForSwap();
+	private:
+		DBWalk db_walker;     
+		NodeTable &node_table;
+	};
+		
     string GetTrace() const;
     void Dump() const;
     

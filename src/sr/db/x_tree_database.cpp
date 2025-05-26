@@ -154,21 +154,18 @@ void XTreeDatabase::SwapTreeToTree( DBCommon::TreeOrdinal tree_ordinal1, Mutable
 
     // Store the core info for the base locally since the link table will change
     // as this function executes.
-    const DBCommon::CoreInfo base_info1 = link_table->GetCoreInfo( zone1.GetBaseXLink() );
-    const DBCommon::CoreInfo base_info2 = link_table->GetCoreInfo( zone2.GetBaseXLink() );
+    DBCommon::CoreInfo base_info1;// = link_table->GetCoreInfo( zone1.GetBaseXLink() );
+    DBCommon::CoreInfo base_info2;// = link_table->GetCoreInfo( zone2.GetBaseXLink() );
 
     // Remove geometric info that will be invalidated by the exchange 
     domain_extension->Delete(zone1, &base_info1, false);   
     domain_extension->Delete(zone2, &base_info2, false);     
     orderings->Delete(zone1, &base_info1, false); // doesn't use tree_ordinal
-    orderings->Delete(zone2, &base_info2, false); // doesn't use tree_ordinal
-	node_table->Delete(zone1, &base_info1, false);   
-	node_table->Delete(zone2, &base_info2, false);   
+    orderings->Delete(zone2, &base_info2, false); // doesn't use tree_ordinal  
 	{
-		LinkTable::RAIISuspendForSwap link_table_sus(link_table.get(), tree_ordinal1, zone1, &base_info1, tree_ordinal2, zone2, &base_info2);  
-		domain->Delete(zone1, &base_info1, false);   
-		domain->Delete(zone2, &base_info2, false);  
-			
+		NodeTable::RAIISuspendForSwap node_table_sus(node_table.get(), tree_ordinal1, zone1, tree_ordinal2, zone2);  
+		LinkTable::RAIISuspendForSwap link_table_sus(link_table.get(), tree_ordinal1, zone1, tree_ordinal2, zone2);  
+		
 		// Update the tree. mutable_target_tree_zone becomes the valid new tree zone.
 		// Invariant wrt intrinisc asset state.
 		zone1.Swap( zone2, fixups1, fixups2 );  // TODO be static and symmetrical
@@ -176,12 +173,8 @@ void XTreeDatabase::SwapTreeToTree( DBCommon::TreeOrdinal tree_ordinal1, Mutable
 		TRACE("After swapping zones: ")(zone1)
 			 ("\nand: ")(zone2)("\n");    
 			 
-		// Re-insert geometric info based on new tree zone. 
-		domain->Insert(zone1, &base_info1, false);   
-		domain->Insert(zone2, &base_info2, false);     
-	}
-	node_table->Insert(zone1, &base_info1, false);   
-	node_table->Insert(zone2, &base_info2, false);   
+		// Re-insert geometric info based on new tree zone.     
+	} 
     orderings->Insert(zone1, &base_info1, false); // doesn't use tree_ordinal
     orderings->Insert(zone2, &base_info2, false); // doesn't use tree_ordinal
     domain_extension->Insert(zone1, &base_info1, false);   
@@ -364,10 +357,6 @@ Mutator XTreeDatabase::CreateTreeMutator(XLink xlink)
             // COLLECTION is the motivating case: its elements are const, so we neet Mutate() to change them
             return Mutator::CreateTreeContainer( row.parent_node, row.p_container, row.container_it );  
             break;          
-        }
-        case DBCommon::FREE_BASE:
-        {
-            ASSERTFAIL(); // Base of free zone is just a node, so there's no unique mutator for it
         }
         default:
         {

@@ -60,17 +60,19 @@ void DomainExtension::PerformDeferredActions()
 
 void DomainExtension::Insert(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
 {     
+	DBCommon::CoreInfo bin;
 	DBWalk::Actions actions;
 	actions.push_back( bind(&DomainExtension::InsertAction, this, placeholders::_1) );
-	db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_IN, base_info );
+	db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_IN, &bin );
 }
 
 
 void DomainExtension::Delete(TreeZone &zone, const DBCommon::CoreInfo *base_info, bool do_intrinsics)
 {
+	DBCommon::CoreInfo bin;
 	DBWalk::Actions actions;
 	actions.push_back( bind(&DomainExtension::DeleteAction, this, placeholders::_1) );
-	db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_OUT, base_info );
+	db_walker.WalkTreeZone( &actions, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_OUT, &bin );
 }
 
 
