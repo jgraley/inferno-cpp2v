@@ -35,7 +35,6 @@ public:
         string GetTrace() const;
     };
 
-
     LinkTable();
     
     const Row &GetRow(XLink xlink) const;
@@ -53,6 +52,19 @@ public:
     
     vector<XLink> GetXLinkDomainAsVector() const;
     
+	class RAIISuspendForSwap : DBCommon::RAIISuspendForSwap
+	{
+	public:
+		RAIISuspendForSwap(LinkTable *link_table_,
+						   DBCommon::TreeOrdinal tree_ordinal1_, TreeZone &zone1_, const DBCommon::CoreInfo *base_info1_,
+						   DBCommon::TreeOrdinal tree_ordinal2_, TreeZone &zone2_, const DBCommon::CoreInfo *base_info2_ );
+		~RAIISuspendForSwap();
+	private:
+		DBWalk db_walker;     
+		LinkTable * const link_table;
+	};
+
+
     string GetTrace() const;
     void Dump() const;
     

@@ -137,81 +137,58 @@ void XTreeDatabase::TeardownTree(DBCommon::TreeOrdinal tree_ordinal)
 }
 
 
-void XTreeDatabase::SwapTreeToTree( DBCommon::TreeOrdinal tree_ordinal_l, MutableTreeZone &tree_zone_l, vector<MutableTreeZone *> fixups_l,
-                                    DBCommon::TreeOrdinal tree_ordinal_r, MutableTreeZone &tree_zone_r, vector<MutableTreeZone *> fixups_r )
+void XTreeDatabase::SwapTreeToTree( DBCommon::TreeOrdinal tree_ordinal1, MutableTreeZone &zone1, vector<MutableTreeZone *> fixups1,
+                                    DBCommon::TreeOrdinal tree_ordinal2, MutableTreeZone &zone2, vector<MutableTreeZone *> fixups2 )
 {
-    TRACE("Swapping target TreeZones:\n")(tree_zone_l)(" in #%u ", tree_ordinal_l)
-         ("\nand: ")(tree_zone_r)(" in #%u\n", tree_ordinal_r);
-    ASSERT( tree_zone_l.GetNumTerminii() == tree_zone_r.GetNumTerminii() )
-          ("left TZ:%lu, right TZ:%lu", tree_zone_l.GetNumTerminii(), tree_zone_r.GetNumTerminii());    
+    TRACE("Swapping target TreeZones:\n")(zone1)(" in #%u ", tree_ordinal1)
+         ("\nand: ")(zone2)(" in #%u\n", tree_ordinal2);
+    ASSERT( zone1.GetNumTerminii() == zone2.GetNumTerminii() )
+          ("left TZ:%lu, right TZ:%lu", zone1.GetNumTerminii(), zone2.GetNumTerminii());    
 	// TZs must be in different trees to avoid interference. This could result from a 
 	// shared boundary, or more remote action like the SC ordering deleting all ancestors
 	// of the base of a zone.
-	ASSERT( tree_ordinal_l != tree_ordinal_r );
+	ASSERT( tree_ordinal1 != tree_ordinal2 );
 
-	tree_zone_l.Validate(this); 
-	tree_zone_r.Validate(this); 
+	zone1.Validate(this); 
+	zone2.Validate(this); 
 
     // Store the core info for the base locally since the link table will change
     // as this function executes.
-    const DBCommon::CoreInfo base_info_l = link_table->GetCoreInfo( tree_zone_l.GetBaseXLink() );
-    const DBCommon::CoreInfo base_info_r = link_table->GetCoreInfo( tree_zone_r.GetBaseXLink() );
+    const DBCommon::CoreInfo base_info1 = link_table->GetCoreInfo( zone1.GetBaseXLink() );
+    const DBCommon::CoreInfo base_info2 = link_table->GetCoreInfo( zone2.GetBaseXLink() );
 
     // Remove geometric info that will be invalidated by the exchange 
-    AssetsDeleteDeux( tree_ordinal_l, tree_zone_l, &base_info_l, tree_ordinal_r, tree_zone_r, &base_info_r );   
-    
-    // Update the tree. mutable_target_tree_zone becomes the valid new tree zone.
-    // Invariant wrt intrinisc asset state.
-    tree_zone_l.Swap( tree_zone_r, fixups_l, fixups_r ); 
-    
-    //DumpTables();
-    
-    TRACE("After swapping target TreeZones:\n")(tree_zone_l)
-         ("\nand: ")(tree_zone_r)("\n");    
-         
-    // Re-insert geometric info based on new tree zone. 
-    AssetsInsertDeux( tree_ordinal_l, tree_zone_l, &base_info_l, tree_ordinal_r, tree_zone_r, &base_info_r );       
+    domain_extension->Delete(zone1, &base_info1, false);   
+    domain_extension->Delete(zone2, &base_info2, false);     
+    orderings->Delete(zone1, &base_info1, false); // doesn't use tree_ordinal
+    orderings->Delete(zone2, &base_info2, false); // doesn't use tree_ordinal
+	node_table->Delete(zone1, &base_info1, false);   
+	node_table->Delete(zone2, &base_info2, false);   
+	{
+		LinkTable::RAIISuspendForSwap link_table_sus(link_table.get(), tree_ordinal1, zone1, &base_info1, tree_ordinal2, zone2, &base_info2);  
+		domain->Delete(zone1, &base_info1, false);   
+		domain->Delete(zone2, &base_info2, false);  
+			
+		// Update the tree. mutable_target_tree_zone becomes the valid new tree zone.
+		// Invariant wrt intrinisc asset state.
+		zone1.Swap( zone2, fixups1, fixups2 );  // TODO be static and symmetrical
+			
+		TRACE("After swapping zones: ")(zone1)
+			 ("\nand: ")(zone2)("\n");    
+			 
+		// Re-insert geometric info based on new tree zone. 
+		domain->Insert(zone1, &base_info1, false);   
+		domain->Insert(zone2, &base_info2, false);     
+	}
+	node_table->Insert(zone1, &base_info1, false);   
+	node_table->Insert(zone2, &base_info2, false);   
+    orderings->Insert(zone1, &base_info1, false); // doesn't use tree_ordinal
+    orderings->Insert(zone2, &base_info2, false); // doesn't use tree_ordinal
+    domain_extension->Insert(zone1, &base_info1, false);   
+    domain_extension->Insert(zone2, &base_info2, false); 
         
     if( ReadArgs::test_db )
         CheckAssets();
-}
-
-    
-void XTreeDatabase::AssetsInsertDeux(DBCommon::TreeOrdinal tree_ordinal1, TreeZone &zone1, const DBCommon::CoreInfo *base_info1,
-									 DBCommon::TreeOrdinal tree_ordinal2, TreeZone &zone2, const DBCommon::CoreInfo *base_info2 )
-{
-    INDENT("+d");
-
-	// Geom only!!!
-	domain->Insert(zone1, base_info1, false);   
-	domain->Insert(zone2, base_info2, false);   
-	link_table->Insert(tree_ordinal1, zone1, base_info1, false);   
-	link_table->Insert(tree_ordinal2, zone2, base_info2, false);   
-	node_table->Insert(zone1, base_info1, false);   
-	node_table->Insert(zone2, base_info2, false);   
-    orderings->Insert(zone1, base_info1, false); // doesn't use tree_ordinal
-    orderings->Insert(zone2, base_info2, false); // doesn't use tree_ordinal
-    domain_extension->Insert(zone1, base_info1, false);   
-    domain_extension->Insert(zone2, base_info2, false); 
-}
-
-
-void XTreeDatabase::AssetsDeleteDeux(DBCommon::TreeOrdinal tree_ordinal1, TreeZone &zone1, const DBCommon::CoreInfo *base_info1,
-									 DBCommon::TreeOrdinal tree_ordinal2, TreeZone &zone2, const DBCommon::CoreInfo *base_info2 )
-{
-    INDENT("-d");
-    
-	// Geom only!!!
-    domain_extension->Delete(zone1, base_info1, false);   
-    domain_extension->Delete(zone2, base_info2, false);     
-    orderings->Delete(zone1, base_info1, false); // doesn't use tree_ordinal
-    orderings->Delete(zone2, base_info2, false); // doesn't use tree_ordinal
-	node_table->Delete(zone1, base_info1, false);   
-	node_table->Delete(zone2, base_info2, false);   
-	link_table->Delete(tree_ordinal1, zone1, base_info1, false);   
-	link_table->Delete(tree_ordinal2, zone2, base_info2, false);   
-	domain->Delete(zone1, base_info1, false);   
-	domain->Delete(zone2, base_info2, false);   
 }
 
 

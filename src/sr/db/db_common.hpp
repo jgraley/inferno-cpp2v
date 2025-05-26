@@ -3,6 +3,7 @@
 
 #include "../link.hpp"
 #include "common/standard.hpp"
+#include "tree_zone.hpp"
 
 namespace SR 
 {
@@ -68,9 +69,27 @@ public:
 	// we provide it here.
     static const CoreInfo *GetRootCoreInfo();
 
+	class RAIISuspendForSwap
+	{
+	protected:
+		RAIISuspendForSwap() = delete;
+		RAIISuspendForSwap( DBCommon::TreeOrdinal tree_ordinal1_, TreeZone &zone1_, const DBCommon::CoreInfo *base_info1_,
+						    DBCommon::TreeOrdinal tree_ordinal2_, TreeZone &zone2_, const DBCommon::CoreInfo *base_info2_ );
+		~RAIISuspendForSwap();
+		
+		const DBCommon::TreeOrdinal tree_ordinal1;
+		const TreeZone &zone1;
+		const DBCommon::CoreInfo * const base_info1;
+		const DBCommon::TreeOrdinal tree_ordinal2;
+		const TreeZone &zone2;
+		const DBCommon::CoreInfo * const base_info2;
+	};
+
 private:    
     static const CoreInfo root_core_info;
 };    
+
+
 
 }
 

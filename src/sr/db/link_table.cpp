@@ -133,6 +133,29 @@ void LinkTable::GenerateRow(const DBWalk::WalkInfo &walk_info)
 }
 
 
+LinkTable::RAIISuspendForSwap::RAIISuspendForSwap(LinkTable *link_table_,
+                                                  DBCommon::TreeOrdinal tree_ordinal1_, TreeZone &zone1_, const DBCommon::CoreInfo *base_info1_,
+												  DBCommon::TreeOrdinal tree_ordinal2_, TreeZone &zone2_, const DBCommon::CoreInfo *base_info2_ ) :
+	DBCommon::RAIISuspendForSwap( tree_ordinal1_, zone1_, base_info1_, tree_ordinal2_, zone2_, base_info2_ ),
+	link_table(link_table_)
+{	
+	DBWalk::Actions actions;
+	actions.push_back( bind(&LinkTable::DeleteAction, link_table, placeholders::_1) );
+	db_walker.WalkTreeZone( &actions, zone1, tree_ordinal1, DBWalk::WIND_OUT, base_info1 );
+	db_walker.WalkTreeZone( &actions, zone2, tree_ordinal2, DBWalk::WIND_OUT, base_info2 );
+}
+
+
+LinkTable::RAIISuspendForSwap::~RAIISuspendForSwap()
+{
+	DBWalk::Actions actions;
+	actions.push_back( bind(&LinkTable::InsertAction, link_table, placeholders::_1) );
+	db_walker.WalkTreeZone( &actions, zone1, tree_ordinal1, DBWalk::WIND_IN, base_info1 );
+	db_walker.WalkTreeZone( &actions, zone2, tree_ordinal2, DBWalk::WIND_IN, base_info2 );
+}
+
+
+
 string LinkTable::Row::GetTrace() const
 {
     string s = "(cc=";

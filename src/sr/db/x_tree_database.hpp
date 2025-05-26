@@ -45,13 +45,6 @@ public:
    	void SwapTreeToTree( DBCommon::TreeOrdinal tree_ordinal_l, MutableTreeZone &tree_zone_l, vector<MutableTreeZone *> fixups_l,
 		 				 DBCommon::TreeOrdinal tree_ordinal_r, MutableTreeZone &tree_zone_r, vector<MutableTreeZone *> fixups_r );
 
-private:
-    void AssetsInsertDeux(DBCommon::TreeOrdinal tree_ordinal1, TreeZone &zone1, const DBCommon::CoreInfo *base_info1,
-                          DBCommon::TreeOrdinal tree_ordinal2, TreeZone &zone2, const DBCommon::CoreInfo *base_info2 ); 
-    void AssetsDeleteDeux(DBCommon::TreeOrdinal tree_ordinal1, TreeZone &zone1, const DBCommon::CoreInfo *base_info1,
-                          DBCommon::TreeOrdinal tree_ordinal2, TreeZone &zone2, const DBCommon::CoreInfo *base_info2 ); 
-
-public:
     void PerformDeferredActions();
 
     const DomainExtensionChannel *GetDEChannel( const DomainExtension::Extender *extender ) const;
