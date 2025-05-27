@@ -461,7 +461,7 @@ pair<DBCommon::TreeOrdinal, MutableTreeZone> SR::FreeZoneIntoExtraTree( XTreeDat
 	// TZ terminii, even though we plugged the FZ terminii making it a subtree.
 	XLink root_xlink = db->GetRootXLink(extra_tree_ordinal);
 	TRACE("Extra tree root: ")(root_xlink)("\n");
-	MutableTreeZone tree_zone_in_extra = db->CreateMutableTreeZone( root_xlink, terminii );	
+	MutableTreeZone tree_zone_in_extra = db->CreateMutableTreeZone( root_xlink, terminii, extra_tree_ordinal );	
 	TRACE("Original zone in TZ with its terminii: ")(tree_zone_in_extra)("\n");
 	
 	return make_pair(extra_tree_ordinal, tree_zone_in_extra);

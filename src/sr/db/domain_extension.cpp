@@ -81,7 +81,7 @@ void DomainExtension::Delete(const TreeZone &zone)
 DomainExtension::RAIISuspendForSwap::RAIISuspendForSwap(DomainExtension *domain_extension_,
                                                   DBCommon::TreeOrdinal tree_ordinal1_, TreeZone &zone1_, 
 												  DBCommon::TreeOrdinal tree_ordinal2_, TreeZone &zone2_ ) :
-	DBCommon::RAIISuspendForSwap( tree_ordinal1_, zone1_, tree_ordinal2_, zone2_ ),
+	RAIISuspendForSwapBase( tree_ordinal1_, zone1_, tree_ordinal2_, zone2_ ),
 	domain_extension( *domain_extension_ )
 {	
 	domain_extension.Delete(zone1);

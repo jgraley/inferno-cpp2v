@@ -25,7 +25,7 @@ public:
         const TreePtrInterface *p_tree_ptr_interface;
         XLink xlink;
         TreePtr<Node> node;        
-        const DBCommon::TreeOrdinal tree_ordinal;   // TODO surely in the core info as const across walk?
+        const DBCommon::TreeOrdinal tree_ordinal;  
         bool at_terminus;     
         bool at_base;
     };

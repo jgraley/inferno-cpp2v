@@ -93,7 +93,7 @@ void InversionPass::Invert( LocatedPatch lze )
     } );
          
     // Make the inverted TZ    
-    MutableTreeZone main_tree_zone( move(base_mutator), move(terminii_mutators) );    
+    MutableTreeZone main_tree_zone( move(base_mutator), move(terminii_mutators), DBCommon::TreeOrdinal::MAIN );    
     FreeZone new_free_zone = *free_patch->GetZone();
 
     // Write it into the tree

@@ -71,7 +71,8 @@ public:
 
     Mutator CreateTreeMutator(XLink xlink);
     MutableTreeZone CreateMutableTreeZone(XLink xlink,
-                                          vector<XLink> terminii);
+                                          vector<XLink> terminii,
+                                          DBCommon::TreeOrdinal ordinal);
 
     void Dump() const;
 	void DumpTables() const;

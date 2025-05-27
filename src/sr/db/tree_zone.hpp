@@ -8,6 +8,7 @@
 #include "mutator.hpp"
 #include "df_relation.hpp"
 #include "duplicate.hpp"
+#include "db_common.hpp"
 
 #include <unordered_set>
 
@@ -21,12 +22,20 @@ class FreeZone;
 class TreeZone : public Zone
 {
 public:
+	static const DBCommon::TreeOrdinal default_ordinal = DBCommon::TreeOrdinal::MAIN;
+	explicit TreeZone(DBCommon::TreeOrdinal ordinal_ = default_ordinal);
+
     virtual XLink GetBaseXLink() const = 0;
     virtual vector<XLink> GetTerminusXLinks() const = 0;
     virtual XLink GetTerminusXLink(size_t index) const = 0;
 
+    DBCommon::TreeOrdinal GetTreeOrdinal() const;
+
     unique_ptr<FreeZone> Duplicate() const;
     void Validate(const XTreeDatabase *db) const;
+
+private:
+	DBCommon::TreeOrdinal ordinal;
 };
 
 // ------------------------- XTreeZone --------------------------
@@ -38,11 +47,15 @@ public:
 class XTreeZone : public TreeZone
 { 
 public:
-    static XTreeZone CreateSubtree( XLink base );
+    static XTreeZone CreateSubtree( XLink base, 
+								    DBCommon::TreeOrdinal ordinal_ = default_ordinal );
     static XTreeZone CreateEmpty( XLink base );
-    static XTreeZone CreateFromScaffold( XLink scaffold_xlink );
+    static XTreeZone CreateFromScaffold( XLink scaffold_xlink, 
+										 DBCommon::TreeOrdinal ordinal_ = default_ordinal );
 
-    explicit XTreeZone( XLink base, vector<XLink> terminii );
+    explicit XTreeZone( XLink base, 
+                        vector<XLink> terminii, 
+                        DBCommon::TreeOrdinal ordinal_ = default_ordinal );
       
     bool IsEmpty() const override;
     size_t GetNumTerminii() const override;
@@ -65,7 +78,8 @@ class MutableTreeZone : public TreeZone
 {
 public:
     explicit MutableTreeZone( Mutator &&base_, 
-                              vector<Mutator> &&terminii_ );
+                              vector<Mutator> &&terminii_,
+                              DBCommon::TreeOrdinal ordinal_ = default_ordinal );
 
     bool IsEmpty() const override;
     size_t GetNumTerminii() const override;
@@ -87,6 +101,22 @@ private:
     Mutator base;
     vector<Mutator> terminii;
 };
+ 
+ 
+class RAIISuspendForSwapBase
+{
+protected:
+	RAIISuspendForSwapBase() = delete;
+	RAIISuspendForSwapBase( DBCommon::TreeOrdinal tree_ordinal1_, TreeZone &zone1_, 
+				    		DBCommon::TreeOrdinal tree_ordinal2_, TreeZone &zone2_ );
+	~RAIISuspendForSwapBase();
+	
+	const DBCommon::TreeOrdinal tree_ordinal1;
+	const TreeZone &zone1;
+	const DBCommon::TreeOrdinal tree_ordinal2;
+	const TreeZone &zone2;
+};
+ 
  
 }
 

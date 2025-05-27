@@ -8,6 +8,7 @@
 #include "df_relation.hpp"
 #include "db_walk.hpp"
 #include "node_table.hpp"
+#include "tree_zone.hpp"
 
 namespace SYM
 {
@@ -40,7 +41,7 @@ public:
     void Insert(TreeZone &zone);
     void Delete(TreeZone &zone);
 
-	class RAIISuspendForSwap : DBCommon::RAIISuspendForSwap
+	class RAIISuspendForSwap : RAIISuspendForSwapBase
 	{
 	public:
 		RAIISuspendForSwap(Orderings *orderings_,

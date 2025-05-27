@@ -5,8 +5,10 @@
 #include "helpers/simple_compare.hpp"
 #include "common/standard.hpp"
 #include "db_walk.hpp"
+#include "tree_zone.hpp"
 #include "node/specialise_oostd.hpp"
 #include "../agents/agent.hpp"
+#include "tree_zone.hpp"
 
 #include <unordered_set>
 #include <functional>
@@ -70,7 +72,7 @@ public:
 	void Insert(const TreeZone &zone);
 	void Delete(const TreeZone &zone);
     
-	class RAIISuspendForSwap : DBCommon::RAIISuspendForSwap
+	class RAIISuspendForSwap : RAIISuspendForSwapBase
 	{
 	public:
 		RAIISuspendForSwap(DomainExtension *domain_extension_,

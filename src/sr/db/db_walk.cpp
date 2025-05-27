@@ -10,8 +10,8 @@ void DBWalk::WalkTreeZone( const Action action,
                            Wind wind,
                            const DBCommon::CoreInfo *base_info )
 {
-    TRACE("Walking tree zone: ")(tree_zone)(" in #%u\n", tree_ordinal);
-    WalkKit kit { action, &tree_zone, tree_ordinal, wind, 0U };
+    TRACE("Walking tree zone: ")(tree_zone)(" in #%u\n", tree_zone.GetTreeOrdinal());
+    WalkKit kit { action, &tree_zone, tree_zone.GetTreeOrdinal(), wind, 0U };
     
     VisitBase( kit, tree_zone.GetBaseXLink(), tree_zone.GetBaseNode(), base_info );  
     ASSERT( kit.next_terminus_index == tree_zone.GetNumTerminii() )

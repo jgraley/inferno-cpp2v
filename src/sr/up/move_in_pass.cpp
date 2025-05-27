@@ -22,9 +22,12 @@ void MoveInPass::Run(MovesMap &moves_map)
 		const NodeTable::Row &scaffold_row = db->GetNodeRow(scaffold_node);
 		ASSERT( scaffold_row.incoming_xlinks.size() == 1 );
 		XLink scaffold_base_xlink = SoloElementOf(scaffold_row.incoming_xlinks);
-		XTreeZone scaffold_tree_zone = XTreeZone::CreateFromScaffold( scaffold_base_xlink ); 
+		// Stored scaffold node is taken to be in main tree
+		XTreeZone scaffold_tree_zone = XTreeZone::CreateFromScaffold( scaffold_base_xlink, 
+		                                                              DBCommon::TreeOrdinal::MAIN ); 
 		MutableTreeZone scaffold_mutable_tree_zone = db->CreateMutableTreeZone( scaffold_tree_zone.GetBaseXLink(),
-													                                     	scaffold_tree_zone.GetTerminusXLinks() );		
+													                           	scaffold_tree_zone.GetTerminusXLinks(),
+													                           	DBCommon::TreeOrdinal::MAIN );		
         // TODO Down to here in a helper fn
         
         MovesMap::MovePayload &mp = p.second;        										                                     	

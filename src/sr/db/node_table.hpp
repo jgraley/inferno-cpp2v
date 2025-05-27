@@ -4,6 +4,7 @@
 #include "../link.hpp"
 #include "common/standard.hpp"
 #include "db_walk.hpp"
+#include "tree_zone.hpp"
 
 #include <unordered_map>
 
@@ -44,7 +45,7 @@ public:
 	void Insert(TreeZone &zone);
 	void Delete(TreeZone &zone);
 
-	class RAIISuspendForSwap : DBCommon::RAIISuspendForSwap
+	class RAIISuspendForSwap : RAIISuspendForSwapBase
 	{
 	public:
 		RAIISuspendForSwap(NodeTable *node_table_,

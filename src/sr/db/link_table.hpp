@@ -4,6 +4,7 @@
 #include "../link.hpp"
 #include "common/standard.hpp"
 #include "db_walk.hpp"
+#include "tree_zone.hpp"
 
 namespace SR 
 {
@@ -45,7 +46,7 @@ public:
 	void Insert(DBCommon::TreeOrdinal tree_ordinal, TreeZone &zone, const DBCommon::CoreInfo *base_info);
 	void Delete(DBCommon::TreeOrdinal tree_ordinal, TreeZone &zone, const DBCommon::CoreInfo *base_info);
     
-	class RAIISuspendForSwap : DBCommon::RAIISuspendForSwap
+	class RAIISuspendForSwap : RAIISuspendForSwapBase
 	{
 	public:
 		RAIISuspendForSwap(LinkTable *link_table_,

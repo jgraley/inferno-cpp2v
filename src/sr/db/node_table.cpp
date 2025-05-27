@@ -75,7 +75,7 @@ void NodeTable::Delete(TreeZone &zone)
 NodeTable::RAIISuspendForSwap::RAIISuspendForSwap(NodeTable *node_table_,
                                                   DBCommon::TreeOrdinal tree_ordinal1_, TreeZone &zone1_, 
 												  DBCommon::TreeOrdinal tree_ordinal2_, TreeZone &zone2_ ) :
-	DBCommon::RAIISuspendForSwap( tree_ordinal1_, zone1_, tree_ordinal2_, zone2_ ),
+	RAIISuspendForSwapBase( tree_ordinal1_, zone1_, tree_ordinal2_, zone2_ ),
 	node_table( *node_table_ )
 {	
 	// For swaps, we only need to act at the boundary of the zone

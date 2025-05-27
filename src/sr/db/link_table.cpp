@@ -50,7 +50,7 @@ void LinkTable::Delete(DBCommon::TreeOrdinal tree_ordinal, TreeZone &zone, const
 LinkTable::RAIISuspendForSwap::RAIISuspendForSwap(LinkTable *link_table_,
                                                   DBCommon::TreeOrdinal tree_ordinal1_, TreeZone &zone1_, 
 												  DBCommon::TreeOrdinal tree_ordinal2_, TreeZone &zone2_ ) :
-	DBCommon::RAIISuspendForSwap( tree_ordinal1_, zone1_, tree_ordinal2_, zone2_ ),
+	RAIISuspendForSwapBase( tree_ordinal1_, zone1_, tree_ordinal2_, zone2_ ),
 	link_table( *link_table_ ),
 	rows( link_table.rows )
 {	

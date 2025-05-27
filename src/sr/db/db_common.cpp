@@ -38,17 +38,3 @@ const DBCommon::CoreInfo DBCommon::unknown_core_info =
 	ContainerInterface::iterator() 
 };
 
-
-DBCommon::RAIISuspendForSwap::RAIISuspendForSwap( DBCommon::TreeOrdinal tree_ordinal1_, TreeZone &zone1_, 
-						                          DBCommon::TreeOrdinal tree_ordinal2_, TreeZone &zone2_ ) :
-	tree_ordinal1(tree_ordinal1_),
-	zone1(zone1_),
-	tree_ordinal2(tree_ordinal2_),
-	zone2(zone2_)
-{
-}
-
-				                
-DBCommon::RAIISuspendForSwap::~RAIISuspendForSwap()
-{
-}

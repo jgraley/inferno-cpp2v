@@ -7,6 +7,7 @@
 #include "db_walk.hpp"
 #include "node/specialise_oostd.hpp"
 #include "../agents/agent.hpp"
+#include "tree_zone.hpp"
 
 #include <unordered_set>
 #include <functional>

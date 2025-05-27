@@ -27,7 +27,8 @@ void ToMutablePass::Run( shared_ptr<Patch> &layout )
         if( !dynamic_cast<MutableTreeZone *>(zone) )
 		{			
 			auto mutable_zone = db->CreateMutableTreeZone( zone->GetBaseXLink(),
-														   zone->GetTerminusXLinks() );
+														   zone->GetTerminusXLinks(),
+														   zone->GetTreeOrdinal() );
 			tree_patch->SetZone(make_unique<MutableTreeZone>(mutable_zone));                                			
         }
     } );    

@@ -84,7 +84,7 @@ MutableTreeZone XTreeDatabase::BuildTree(DBCommon::TreeOrdinal tree_ordinal, con
     trees_by_ordinal[tree_ordinal] = {sp_root};
     XLink root_xlink = GetRootXLink(tree_ordinal);
     ASSERT( root_xlink );
-	auto zone = XTreeZone::CreateSubtree(root_xlink);
+	auto zone = XTreeZone::CreateSubtree(root_xlink, tree_ordinal);
     TRACE("Tree ordinal: %d subtree zone: ", tree_ordinal)(zone)("\n");
 
 	domain->Insert(zone);   
@@ -108,7 +108,7 @@ void XTreeDatabase::TeardownTree(DBCommon::TreeOrdinal tree_ordinal)
 	INDENT("-t");
     ASSERT( tree_ordinal >= DBCommon::TreeOrdinal::EXTRAS );
     XLink root_xlink = GetRootXLink(tree_ordinal);
-    auto zone = XTreeZone::CreateSubtree(root_xlink);
+    auto zone = XTreeZone::CreateSubtree(root_xlink, tree_ordinal);
 	TRACE("Tree ordinal: %d root: ", tree_ordinal)(zone)("\n");
 
     domain_extension->Delete(zone);   
@@ -338,13 +338,14 @@ Mutator XTreeDatabase::CreateTreeMutator(XLink xlink)
 
 
 MutableTreeZone XTreeDatabase::CreateMutableTreeZone(XLink base,
-                                                     vector<XLink> terminii)
+                                                     vector<XLink> terminii,
+													 DBCommon::TreeOrdinal ordinal)
 {
 	Mutator base_mutator = CreateTreeMutator(base);
 	vector<Mutator> terminii_mutators;
 	for( XLink t : terminii )
 		terminii_mutators.push_back( CreateTreeMutator(t) ); 
-	return MutableTreeZone( move(base_mutator), move(terminii_mutators) );
+	return MutableTreeZone( move(base_mutator), move(terminii_mutators), ordinal );
 }                                                
 
 

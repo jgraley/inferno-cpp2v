@@ -7,6 +7,18 @@
 
 using namespace SR;
 
+TreeZone::TreeZone(DBCommon::TreeOrdinal ordinal_) :
+	ordinal(ordinal_)
+{
+}
+
+
+DBCommon::TreeOrdinal TreeZone::GetTreeOrdinal() const
+{
+	return ordinal;
+}
+
+
 unique_ptr<FreeZone> TreeZone::Duplicate() const
 {
     if( IsEmpty() )
@@ -69,20 +81,23 @@ void TreeZone::Validate(const XTreeDatabase *db) const // TODO maybe move to dat
 
 // ------------------------- XTreeZone --------------------------
 
-XTreeZone XTreeZone::CreateSubtree( XLink base )
+XTreeZone XTreeZone::CreateSubtree( XLink base, 
+                                    DBCommon::TreeOrdinal ordinal_ )
 {
-    return XTreeZone( base, vector<XLink>() );
+    return XTreeZone( base, vector<XLink>(), ordinal_ );
 }
 
 
 XTreeZone XTreeZone::CreateEmpty( XLink base )
 {
     ASSERTS( base );
-    return XTreeZone( base, vector<XLink>{ base } ); // One element, same as base
+    // One element, same as base. Ordinal shall be invalid.
+    return XTreeZone( base, vector<XLink>{ base }, DBCommon::TreeOrdinal(-1) ); 
 }
 
 
-XTreeZone XTreeZone::CreateFromScaffold( XLink scaffold_xlink )
+XTreeZone XTreeZone::CreateFromScaffold( XLink scaffold_xlink,
+										 DBCommon::TreeOrdinal ordinal_ )
 {
 	TreePtr<Node> scaffold = scaffold_xlink.GetChildTreePtr();
 	ScaffoldBase *sbp = dynamic_cast<ScaffoldBase *>(scaffold.get());
@@ -91,11 +106,14 @@ XTreeZone XTreeZone::CreateFromScaffold( XLink scaffold_xlink )
 	for( TreePtr<Node> &tpp : sbp->child_ptrs )
 		terminii.push_back( XLink( scaffold, &tpp ) );
 	
-	return XTreeZone( scaffold_xlink, terminii );
+	return XTreeZone( scaffold_xlink, terminii, ordinal_ );
 }
 
 
-XTreeZone::XTreeZone( XLink base_, vector<XLink> terminii_ ) :
+XTreeZone::XTreeZone( XLink base_, 
+					  vector<XLink> terminii_,
+					  DBCommon::TreeOrdinal ordinal_ ) :
+	TreeZone( ordinal_ ),
     base( base_ ),
     terminii( terminii_ )
 {
@@ -164,7 +182,9 @@ string XTreeZone::GetTrace() const
 // ------------------------- MutableTreeZone --------------------------
 
 MutableTreeZone::MutableTreeZone( Mutator &&base_, 
-                                  vector<Mutator> &&terminii_ ) :
+                                  vector<Mutator> &&terminii_,
+                                  DBCommon::TreeOrdinal ordinal_ ) :
+	TreeZone( ordinal_ ),
     base(move(base_))
 {
 	ASSERT( base.GetChildTreePtr() );
@@ -301,4 +321,21 @@ string MutableTreeZone::GetTrace() const
     }
     
     return "MutableTreeZone(" + s +")";
+}
+
+
+
+
+RAIISuspendForSwapBase::RAIISuspendForSwapBase( DBCommon::TreeOrdinal tree_ordinal1_, TreeZone &zone1_, 
+												DBCommon::TreeOrdinal tree_ordinal2_, TreeZone &zone2_ ) :
+	tree_ordinal1(tree_ordinal1_),
+	zone1(zone1_),
+	tree_ordinal2(tree_ordinal2_),
+	zone2(zone2_)
+{
+}
+
+				                
+RAIISuspendForSwapBase::~RAIISuspendForSwapBase()
+{
 }
