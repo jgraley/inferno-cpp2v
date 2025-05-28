@@ -28,7 +28,7 @@ const Lacing *Orderings::GetLacing() const
 }
 
 	
-void Orderings::Insert(TreeZone &zone)
+void Orderings::InsertTree(TreeZone &zone)
 {     
 	// -------------------- depth-first -----------------------
     InsertGeometric(zone);
@@ -38,7 +38,7 @@ void Orderings::Insert(TreeZone &zone)
 
 	// Use a walk to insert all the SC and CAT when intrinsic
 	db_walker.WalkTreeZone( bind(&Orderings::InsertActionSCAndCAT, this, placeholders::_1), 
-	                        zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_IN );
+	                        zone, DBWalk::WIND_IN );
 
 	// SC still needs ancestors of root
 	auto subtree = XTreeZone::CreateSubtree(zone.GetBaseXLink());
@@ -49,7 +49,7 @@ void Orderings::Insert(TreeZone &zone)
 }
 
 
-void Orderings::Delete(TreeZone &zone)
+void Orderings::DeleteTree(TreeZone &zone)
 {
 	// -------------------- depth-first -----------------------
     DeleteGeometric(zone);
@@ -60,7 +60,7 @@ void Orderings::Delete(TreeZone &zone)
 	// Use a walk to insert all the SC and CAT when intrinsic
 	node_reached_count.clear();
 	db_walker.WalkTreeZone( bind(&Orderings::DeleteActionSCAndCAT, this, placeholders::_1),
-	                        zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_OUT );
+	                        zone, DBWalk::WIND_OUT );
 
 	// SC still needs ancestors of root
 	auto subtree = XTreeZone::CreateSubtree(zone.GetBaseXLink());
@@ -71,10 +71,8 @@ void Orderings::Delete(TreeZone &zone)
 }
 
 
-Orderings::RAIISuspendForSwap::RAIISuspendForSwap(Orderings *orderings_,
-                                                  DBCommon::TreeOrdinal tree_ordinal1_, TreeZone &zone1_, 
-												  DBCommon::TreeOrdinal tree_ordinal2_, TreeZone &zone2_ ) :
-	RAIISuspendForSwapBase( tree_ordinal1_, zone1_, tree_ordinal2_, zone2_ ),
+Orderings::RAIISuspendForSwap::RAIISuspendForSwap(Orderings *orderings_, TreeZone &zone1_, TreeZone &zone2_ ) :
+	RAIISuspendForSwapBase( zone1_, zone2_ ),
 	orderings( *orderings_ )
 {	
 	// -------------------- depth-first -----------------------
@@ -111,7 +109,7 @@ void Orderings::InsertGeometric(const TreeZone &zone)
 	 	InsertSolo( depth_first_ordering, walk_info.xlink );
 	};
 	
-    db_walker.WalkTreeZone( action, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_IN );
+    db_walker.WalkTreeZone( action, zone, DBWalk::WIND_IN );
 }
 
 
@@ -123,7 +121,7 @@ void Orderings::DeleteGeometric(const TreeZone &zone)
 	 	EraseSolo( depth_first_ordering, walk_info.xlink );
 	};
 	
-    db_walker.WalkTreeZone( action, zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_IN );
+    db_walker.WalkTreeZone( action, zone, DBWalk::WIND_IN );
 }
 
 

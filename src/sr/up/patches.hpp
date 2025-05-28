@@ -150,15 +150,8 @@ private:
 struct MovesMap
 {
 	public:
-	typedef pair<DBCommon::TreeOrdinal, MutableTreeZone> MovePayload;
-	map<TreePtr<Node>, MovePayload> mm;
+	map<TreePtr<Node>, MutableTreeZone> mm;
 };
-
-// ------------------------- Utils ---------------------------
-
-pair<DBCommon::TreeOrdinal, MutableTreeZone> FreeZoneIntoExtraTree( XTreeDatabase *db, FreeZone free_zone, const MutableTreeZone &reference_tree_zone );
-
-
 
 }
 

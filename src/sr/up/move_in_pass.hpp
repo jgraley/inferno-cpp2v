@@ -20,12 +20,13 @@ namespace SR
 class MoveInPass
 {
 public:
-	MoveInPass( XTreeDatabase *db );
+	MoveInPass( XTreeDatabase *db, class UpdateOps *ups_ );
 	
 	void Run(MovesMap &moves_map);
 
 private:
 	XTreeDatabase * const db;
+    UpdateOps * const ups;
 };
 
 }

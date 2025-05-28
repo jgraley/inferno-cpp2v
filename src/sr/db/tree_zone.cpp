@@ -163,13 +163,15 @@ XLink XTreeZone::GetTerminusXLink(size_t index) const
 string XTreeZone::GetTrace() const
 {
     string s;
-	s = Trace(base);
     if( IsEmpty() )
     {
+		s += Trace(base);
         s += " ↯ "; // Indicates zone is empty due to a terminus at base
     }
     else
     {        
+		s += SSPrintf("T%d ", GetTreeOrdinal());
+		s += Trace(base);
         if( terminii.empty() )
             s += " → "; // Indicates the zone goes all the way to leaves i.e. subtree
         else
@@ -306,14 +308,16 @@ void MutableTreeZone::Swap( TreeZone &tree_zone_r, vector<MutableTreeZone *> fix
 
 string MutableTreeZone::GetTrace() const
 {
-    string s;
-	s = Trace(base);
+    string s;	
     if( IsEmpty() )
     {
+		s += Trace(base);
         s += " ↯ "; // Indicates zone is empty due to a terminus at base
     }
     else
     {       
+		s += SSPrintf("T%d ", GetTreeOrdinal());
+		s += Trace(base);
         if( terminii.empty() )
             s += " → "; // Indicates the zone goes all the way to leaves i.e. subtree
         else
@@ -326,11 +330,8 @@ string MutableTreeZone::GetTrace() const
 
 
 
-RAIISuspendForSwapBase::RAIISuspendForSwapBase( DBCommon::TreeOrdinal tree_ordinal1_, TreeZone &zone1_, 
-												DBCommon::TreeOrdinal tree_ordinal2_, TreeZone &zone2_ ) :
-	tree_ordinal1(tree_ordinal1_),
+RAIISuspendForSwapBase::RAIISuspendForSwapBase( TreeZone &zone1_, TreeZone &zone2_ ) :
 	zone1(zone1_),
-	tree_ordinal2(tree_ordinal2_),
 	zone2(zone2_)
 {
 }

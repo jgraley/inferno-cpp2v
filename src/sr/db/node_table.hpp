@@ -42,15 +42,13 @@ public:
     
     bool IsDeclarer(XLink xlink) const;
     
-	void Insert(TreeZone &zone);
-	void Delete(TreeZone &zone);
+	void InsertTree(TreeZone &zone);
+	void DeleteTree(TreeZone &zone);
 
 	class RAIISuspendForSwap : RAIISuspendForSwapBase
 	{
 	public:
-		RAIISuspendForSwap(NodeTable *node_table_,
-						   DBCommon::TreeOrdinal tree_ordinal1_, TreeZone &zone1_,
-						   DBCommon::TreeOrdinal tree_ordinal2_, TreeZone &zone2_ );
+		RAIISuspendForSwap(NodeTable *node_table_, TreeZone &zone1_, TreeZone &zone2_ );
 		~RAIISuspendForSwap();
 	private:
 		DBWalk db_walker;     

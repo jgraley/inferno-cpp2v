@@ -6,7 +6,6 @@ using namespace SR;
 
 void DBWalk::WalkTreeZone( const Action action,
                            const TreeZone &tree_zone,
-                           const DBCommon::TreeOrdinal tree_ordinal, 
                            Wind wind,
                            const DBCommon::CoreInfo *base_info )
 {

@@ -6,6 +6,7 @@
 #include "common/lambda_loops.hpp"
 #include "tz_relation.hpp"
 #include "misc_passes.hpp"
+#include "update_ops.hpp"
 
 #include <iostream>
 
@@ -87,8 +88,9 @@ pair<Orderable::Diff, DepthFirstRelation::RelType> DFPatchIndexRelation::Compare
 
 // ------------------------- OrderingPass --------------------------
 
-OrderingPass::OrderingPass(XTreeDatabase *db_) :
+OrderingPass::OrderingPass(XTreeDatabase *db_, UpdateOps *ups_) :
     db( db_ ),
+    ups( ups_ ),
     dfr( db )
 {
 }
@@ -507,9 +509,7 @@ void OrderingPass::MoveTreeZoneOut( shared_ptr<Patch> *ooo_patch_ptr, shared_ptr
 	// Make scaffold free zones that fit in place of the moving zone
 	auto scaffold_zone_from = main_tree_zone_from.CreateSimilarScaffoldZone();
 	TRACE("\"From\" scaffold: ")(scaffold_zone_from)("\n");
-	auto p = FreeZoneIntoExtraTree( db, scaffold_zone_from, main_tree_zone_from );
-	DBCommon::TreeOrdinal extra_tree_ordinal = p.first;
-	MutableTreeZone tree_zone_in_extra = p.second;
+	MutableTreeZone tree_zone_in_extra = ups->FreeZoneIntoExtraTree( scaffold_zone_from, main_tree_zone_from );
 		
 	// ------------------------- Swap "from" zone into our extra tree ---------------------------
 	//FTRACE("main_tree_zone_from: ")(main_tree_zone_from)("\nfree_zone: ")(*free_zone)("\n");
@@ -540,8 +540,8 @@ void OrderingPass::MoveTreeZoneOut( shared_ptr<Patch> *ooo_patch_ptr, shared_ptr
 	// Swap in the true moving zone. Names become misleading because contents swap:
 	// tree_zone_in_extra <- the actual moving zone now in extra tree
 	// main_tree_zone_from <- the "from" scaffold now in main tree, to be killed by inversion
-	db->XTreeDatabase::SwapTreeToTree( DBCommon::TreeOrdinal::MAIN, main_tree_zone_from, fixups,
-		    						   extra_tree_ordinal, tree_zone_in_extra, vector<MutableTreeZone *>() );
+	db->XTreeDatabase::SwapTreeToTree( main_tree_zone_from, fixups,
+		    						   tree_zone_in_extra, vector<MutableTreeZone *>() );
 
 	// ------------------------- Add "To" scaffolding patch to tree for inversion ---------------------------
 	// tree_zone_in_extra now contains the moving zone	
@@ -551,7 +551,7 @@ void OrderingPass::MoveTreeZoneOut( shared_ptr<Patch> *ooo_patch_ptr, shared_ptr
 
 	// Rememeber the association between the "to" scaffold node and the moving zone
 	TRACE("Making map entry, \"to\" scaffold node: ")(scaffold_base_to)("\n moving zone: \n")(tree_zone_in_extra)("\n");
-	InsertSolo( moves_map.mm, make_pair(scaffold_base_to, make_pair(extra_tree_ordinal, tree_zone_in_extra)) );
+	InsertSolo( moves_map.mm, make_pair(scaffold_base_to, tree_zone_in_extra) );
 
 	// Store the scaffold in the layout so it goes into inversion as a free zone, so it survives, 
 	// and ands up in the tree at the "to" location.

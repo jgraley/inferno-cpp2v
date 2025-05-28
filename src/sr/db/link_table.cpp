@@ -33,24 +33,22 @@ const DBCommon::CoreInfo &LinkTable::GetCoreInfo(XLink xlink) const
 }
  
  
-void LinkTable::Insert(DBCommon::TreeOrdinal tree_ordinal, TreeZone &zone, const DBCommon::CoreInfo *base_info)
+void LinkTable::InsertTree(TreeZone &zone)
 {     
 	db_walker.WalkTreeZone( bind(&LinkTable::InsertAction, this, placeholders::_1), 
-	                        zone, tree_ordinal, DBWalk::WIND_IN, base_info );
+	                        zone, DBWalk::WIND_IN, DBCommon::GetRootCoreInfo() );
 }
 
 
-void LinkTable::Delete(DBCommon::TreeOrdinal tree_ordinal, TreeZone &zone, const DBCommon::CoreInfo *base_info)
+void LinkTable::DeleteTree(TreeZone &zone)
 {
 	db_walker.WalkTreeZone( bind(&LinkTable::DeleteAction, this, placeholders::_1), 
-					        zone, tree_ordinal, DBWalk::WIND_OUT, base_info );
+					        zone, DBWalk::WIND_OUT, DBCommon::GetRootCoreInfo() );
 }
  
  
-LinkTable::RAIISuspendForSwap::RAIISuspendForSwap(LinkTable *link_table_,
-                                                  DBCommon::TreeOrdinal tree_ordinal1_, TreeZone &zone1_, 
-												  DBCommon::TreeOrdinal tree_ordinal2_, TreeZone &zone2_ ) :
-	RAIISuspendForSwapBase( tree_ordinal1_, zone1_, tree_ordinal2_, zone2_ ),
+LinkTable::RAIISuspendForSwap::RAIISuspendForSwap(LinkTable *link_table_, TreeZone &zone1_, TreeZone &zone2_ ) :
+	RAIISuspendForSwapBase( zone1_, zone2_ ),
 	link_table( *link_table_ ),
 	rows( link_table.rows )
 {	
@@ -83,18 +81,18 @@ LinkTable::RAIISuspendForSwap::~RAIISuspendForSwap()
 	swap( terminus_info1, terminus_info2 );
 
 	// Regenerate base rows using info supplied to us TODO do that here?
-	link_table.GenerateRow(zone1.GetBaseXLink(), tree_ordinal1, &mybase_info1);
-	link_table.GenerateRow(zone2.GetBaseXLink(), tree_ordinal2, &mybase_info2);
+	link_table.GenerateRow(zone1.GetBaseXLink(), zone1.GetTreeOrdinal(), &mybase_info1);
+	link_table.GenerateRow(zone2.GetBaseXLink(), zone2.GetTreeOrdinal(), &mybase_info2);
 
 	// Regenerate terminus rows using a mixture of supplied and stored info
 	for( XLink terminus : zone1.GetTerminusXLinks() )
 	{
-		link_table.GenerateRow(terminus, tree_ordinal1, &terminus_info1.front());
+		link_table.GenerateRow(terminus, zone1.GetTreeOrdinal(), &terminus_info1.front());
 		terminus_info1.pop();
 	}
 	for( XLink terminus : zone2.GetTerminusXLinks() )
 	{
-		link_table.GenerateRow(terminus, tree_ordinal2, &terminus_info2.front());
+		link_table.GenerateRow(terminus, zone2.GetTreeOrdinal(), &terminus_info2.front());
 		terminus_info2.pop();
 	}
 }

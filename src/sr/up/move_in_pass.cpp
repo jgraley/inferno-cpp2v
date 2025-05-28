@@ -1,12 +1,14 @@
 #include "move_in_pass.hpp"
 #include "db/x_tree_database.hpp"
+#include "update_ops.hpp"
 
 #include <iostream>
 
 using namespace SR;
 
-MoveInPass::MoveInPass( XTreeDatabase *db_ ) :
-    db( db_ )
+MoveInPass::MoveInPass( XTreeDatabase *db_, UpdateOps *ups_ ) :
+    db( db_ ),
+    ups( ups_ )
 {
 }
 
@@ -30,13 +32,10 @@ void MoveInPass::Run(MovesMap &moves_map)
 													                           	DBCommon::TreeOrdinal::MAIN );		
         // TODO Down to here in a helper fn
         
-        MovesMap::MovePayload &mp = p.second;        										                                     	
-		DBCommon::TreeOrdinal moving_tree_ordinal = mp.first;
-		MutableTreeZone &moving_zone = mp.second;
-		TRACE("Exchanging: ")(scaffold_mutable_tree_zone)("\n moving tree ordinal: \n")(moving_zone)(" in tree #%u\n", moving_tree_ordinal);
-		db->SwapTreeToTree( moving_tree_ordinal, moving_zone, vector<MutableTreeZone *>(),
-							DBCommon::TreeOrdinal::MAIN, scaffold_mutable_tree_zone, vector<MutableTreeZone *>() );
-		db->TeardownTree(moving_tree_ordinal); // Don't leak it									                                     	
+		MutableTreeZone &moving_zone = p.second;
+		db->SwapTreeToTree( moving_zone, vector<MutableTreeZone *>(),
+							scaffold_mutable_tree_zone, vector<MutableTreeZone *>() );
+		db->TeardownTree(moving_zone.GetTreeOrdinal()); // Don't leak it									                                     	
 	}
 }
 

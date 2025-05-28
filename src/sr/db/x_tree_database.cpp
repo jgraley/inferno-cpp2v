@@ -46,10 +46,91 @@ DBCommon::TreeOrdinal XTreeDatabase::AllocateExtraTree()
 }
 
     
-void XTreeDatabase::FreeExtraTree(DBCommon::TreeOrdinal tree_ordinal)
+MutableTreeZone XTreeDatabase::BuildTree(DBCommon::TreeOrdinal tree_ordinal, const FreeZone &free_zone)
+{      
+    INDENT("+t");
+    ASSERT( tree_ordinal >= DBCommon::TreeOrdinal(0) );
+    
+    TRACE("Walk for intrinsic: orderings\n");
+    auto sp_root = make_shared<TreePtr<Node>>(free_zone.GetBaseNode());
+    trees_by_ordinal[tree_ordinal] = {sp_root};
+    XLink root_xlink = GetRootXLink(tree_ordinal);
+    ASSERT( root_xlink );
+	auto zone = XTreeZone::CreateSubtree(root_xlink, tree_ordinal);
+    TRACE("Tree ordinal: %d subtree zone: ", tree_ordinal)(zone)("\n");
+
+	domain->InsertTree(zone);   
+	link_table->InsertTree(zone);   
+	node_table->InsertTree(zone);   
+	orderings->InsertTree(zone);   
+    domain_extension->InsertTree(zone);   
+    
+	vector<Mutator> terminii;
+	for( FreeZone::TerminusConstIterator it=free_zone.GetTerminiiBegin(); 
+		 it != free_zone.GetTerminiiEnd(); 
+		 it++ )
+		terminii.push_back( *it ); 
+	MutableTreeZone tree_zone(CreateTreeMutator(root_xlink), move(terminii));
+    return tree_zone;
+}
+
+
+void XTreeDatabase::TeardownTree(DBCommon::TreeOrdinal tree_ordinal)
+{        
+	INDENT("-t");
+    ASSERT( tree_ordinal >= DBCommon::TreeOrdinal::EXTRAS );
+    XLink root_xlink = GetRootXLink(tree_ordinal);
+    auto zone = XTreeZone::CreateSubtree(root_xlink, tree_ordinal);
+	TRACE("Tree ordinal: %d root: ", tree_ordinal)(zone)("\n");
+
+    domain_extension->DeleteTree(zone);   
+    orderings->DeleteTree(zone);
+	node_table->DeleteTree(zone);   
+	link_table->DeleteTree(zone);   
+	domain->DeleteTree(zone);   
+
+	FreeExtraTree( tree_ordinal );  
+}
+
+
+void XTreeDatabase::SwapTreeToTree( MutableTreeZone &zone1, vector<MutableTreeZone *> fixups1,
+                                    MutableTreeZone &zone2, vector<MutableTreeZone *> fixups2 )
 {
-    trees_by_ordinal.erase(tree_ordinal);
-    free_tree_ordinals.push(tree_ordinal);
+    TRACE("Swapping target TreeZones:\n")(zone1)
+         ("\nand: ")(zone2);
+    ASSERT( zone1.GetNumTerminii() == zone2.GetNumTerminii() )
+          ("left TZ:%lu, right TZ:%lu", zone1.GetNumTerminii(), zone2.GetNumTerminii());    
+	// TZs must be in different trees to avoid interference. This could result from a 
+	// shared boundary, or more remote action like the SC ordering deleting all ancestors
+	// of the base of a zone.
+	ASSERT( zone1.GetTreeOrdinal() != zone2.GetTreeOrdinal() );
+
+	zone1.Validate(this); 
+	zone2.Validate(this); 
+    
+	{
+		// Scope contains suspension objects on stack
+		DomainExtension::RAIISuspendForSwap de_sus(domain_extension.get(), zone1, zone2);  
+		Orderings::RAIISuspendForSwap orderings_sus(orderings.get(), zone1, zone2);  
+		NodeTable::RAIISuspendForSwap node_table_sus(node_table.get(), zone1, zone2);  
+		LinkTable::RAIISuspendForSwap link_table_sus(link_table.get(), zone1, zone2);  
+		
+		zone1.Swap( zone2, fixups1, fixups2 );  // TODO be static and symmetrical
+			
+		TRACE("After swapping zones: ")(zone1)
+			 ("\nand: ")(zone2)("\n");    
+			 
+		// Suspensions expire in reverse order.     
+	} 
+        
+    if( ReadArgs::test_db )
+        CheckAssets();
+}
+
+
+void XTreeDatabase::PerformDeferredActions()
+{
+    domain_extension->PerformDeferredActions();
 }
 
 
@@ -73,94 +154,6 @@ vector<XLink> XTreeDatabase::GetExtraRootXLinks() const
     return xlinks;
 }
           
-
-MutableTreeZone XTreeDatabase::BuildTree(DBCommon::TreeOrdinal tree_ordinal, const FreeZone &free_zone)
-{      
-    INDENT("+t");
-    ASSERT( tree_ordinal >= DBCommon::TreeOrdinal(0) );
-    
-    TRACE("Walk for intrinsic: orderings\n");
-    auto sp_root = make_shared<TreePtr<Node>>(free_zone.GetBaseNode());
-    trees_by_ordinal[tree_ordinal] = {sp_root};
-    XLink root_xlink = GetRootXLink(tree_ordinal);
-    ASSERT( root_xlink );
-	auto zone = XTreeZone::CreateSubtree(root_xlink, tree_ordinal);
-    TRACE("Tree ordinal: %d subtree zone: ", tree_ordinal)(zone)("\n");
-
-	domain->Insert(zone);   
-	link_table->Insert(tree_ordinal, zone, DBCommon::GetRootCoreInfo());   
-	node_table->Insert(zone);   
-	orderings->Insert(zone);   
-    domain_extension->Insert(zone);   
-    
-	vector<Mutator> terminii;
-	for( FreeZone::TerminusConstIterator it=free_zone.GetTerminiiBegin(); 
-		 it != free_zone.GetTerminiiEnd(); 
-		 it++ )
-		terminii.push_back( *it ); 
-	MutableTreeZone tree_zone(CreateTreeMutator(root_xlink), move(terminii));
-    return tree_zone;
-}
-
-
-void XTreeDatabase::TeardownTree(DBCommon::TreeOrdinal tree_ordinal)
-{        
-	INDENT("-t");
-    ASSERT( tree_ordinal >= DBCommon::TreeOrdinal::EXTRAS );
-    XLink root_xlink = GetRootXLink(tree_ordinal);
-    auto zone = XTreeZone::CreateSubtree(root_xlink, tree_ordinal);
-	TRACE("Tree ordinal: %d root: ", tree_ordinal)(zone)("\n");
-
-    domain_extension->Delete(zone);   
-    orderings->Delete(zone);
-	node_table->Delete(zone);   
-	link_table->Delete(tree_ordinal, zone, DBCommon::GetRootCoreInfo());   
-	domain->Delete(zone);   
-
-	FreeExtraTree( tree_ordinal );  
-}
-
-
-void XTreeDatabase::SwapTreeToTree( DBCommon::TreeOrdinal tree_ordinal1, MutableTreeZone &zone1, vector<MutableTreeZone *> fixups1,
-                                    DBCommon::TreeOrdinal tree_ordinal2, MutableTreeZone &zone2, vector<MutableTreeZone *> fixups2 )
-{
-    TRACE("Swapping target TreeZones:\n")(zone1)(" in #%u ", tree_ordinal1)
-         ("\nand: ")(zone2)(" in #%u\n", tree_ordinal2);
-    ASSERT( zone1.GetNumTerminii() == zone2.GetNumTerminii() )
-          ("left TZ:%lu, right TZ:%lu", zone1.GetNumTerminii(), zone2.GetNumTerminii());    
-	// TZs must be in different trees to avoid interference. This could result from a 
-	// shared boundary, or more remote action like the SC ordering deleting all ancestors
-	// of the base of a zone.
-	ASSERT( tree_ordinal1 != tree_ordinal2 );
-
-	zone1.Validate(this); 
-	zone2.Validate(this); 
-    
-	{
-		// Scope contains suspension objects on stack
-		DomainExtension::RAIISuspendForSwap de_sus(domain_extension.get(), tree_ordinal1, zone1, tree_ordinal2, zone2);  
-		Orderings::RAIISuspendForSwap orderings_sus(orderings.get(), tree_ordinal1, zone1, tree_ordinal2, zone2);  
-		NodeTable::RAIISuspendForSwap node_table_sus(node_table.get(), tree_ordinal1, zone1, tree_ordinal2, zone2);  
-		LinkTable::RAIISuspendForSwap link_table_sus(link_table.get(), tree_ordinal1, zone1, tree_ordinal2, zone2);  
-		
-		zone1.Swap( zone2, fixups1, fixups2 );  // TODO be static and symmetrical
-			
-		TRACE("After swapping zones: ")(zone1)
-			 ("\nand: ")(zone2)("\n");    
-			 
-		// Suspensions expire in reverse order.     
-	} 
-        
-    if( ReadArgs::test_db )
-        CheckAssets();
-}
-
-
-void XTreeDatabase::PerformDeferredActions()
-{
-    domain_extension->PerformDeferredActions();
-}
-
 
 const DomainExtensionChannel *XTreeDatabase::GetDEChannel( const DomainExtension::Extender *extender ) const
 {
@@ -297,7 +290,7 @@ XLink XTreeDatabase::GetMainRootXLink() const
 }
 
 
-Mutator XTreeDatabase::CreateTreeMutator(XLink xlink) 
+Mutator XTreeDatabase::CreateTreeMutator(XLink xlink)  const
 {
     const LinkTable::Row &row = link_table->GetRow(xlink);
     
@@ -339,7 +332,7 @@ Mutator XTreeDatabase::CreateTreeMutator(XLink xlink)
 
 MutableTreeZone XTreeDatabase::CreateMutableTreeZone(XLink base,
                                                      vector<XLink> terminii,
-													 DBCommon::TreeOrdinal ordinal)
+													 DBCommon::TreeOrdinal ordinal) const
 {
 	Mutator base_mutator = CreateTreeMutator(base);
 	vector<Mutator> terminii_mutators;
@@ -374,7 +367,7 @@ void XTreeDatabase::CheckAssets()
 	{
 	    XLink root_xlink = GetRootXLink(p.first);
 		auto tree_zone = XTreeZone::CreateSubtree(root_xlink);
-		ref_domain->Insert(tree_zone);
+		ref_domain->InsertTree(tree_zone);
 	}   
 
     TRACE("Checking domain\n");
@@ -388,7 +381,7 @@ void XTreeDatabase::CheckAssets()
 	{
 	    XLink root_xlink = GetRootXLink(p.first);
 		auto tree_zone = XTreeZone::CreateSubtree(root_xlink);
-		ref_orderings->Insert(tree_zone);
+		ref_orderings->InsertTree(tree_zone);
 	}   
     
     TRACE("Checking orderings\n");
@@ -398,4 +391,11 @@ void XTreeDatabase::CheckAssets()
     // Do these last as they have more deps on other DB stuff
     orderings->CheckRelations( link_table->GetXLinkDomainAsVector(),
                                node_table->GetNodeDomainAsVector() );
+}
+
+
+void XTreeDatabase::FreeExtraTree(DBCommon::TreeOrdinal tree_ordinal)
+{
+    trees_by_ordinal.erase(tree_ordinal);
+    free_tree_ordinals.push(tree_ordinal);
 }

@@ -28,7 +28,7 @@ class OrderingPass
 public:    
     typedef list<shared_ptr<Patch> *> PatchPtrList;
 
-    OrderingPass(XTreeDatabase *db_);
+    OrderingPass(XTreeDatabase *db_, class UpdateOps *ups_);
     
     // Can change the supplied shared ptr
     void RunAnalysis( shared_ptr<Patch> &layout );
@@ -73,6 +73,7 @@ private:
     XLink GetBaseXLink(const PatchRecord &patch_record) const;
                           
     XTreeDatabase * const db;
+    UpdateOps * const ups;
     SR::DepthFirstRelation dfr;      
     vector<shared_ptr<Patch> *> out_of_order_patches;  
     set<XLink> in_order_bases;

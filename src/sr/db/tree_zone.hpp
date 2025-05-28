@@ -107,13 +107,10 @@ class RAIISuspendForSwapBase
 {
 protected:
 	RAIISuspendForSwapBase() = delete;
-	RAIISuspendForSwapBase( DBCommon::TreeOrdinal tree_ordinal1_, TreeZone &zone1_, 
-				    		DBCommon::TreeOrdinal tree_ordinal2_, TreeZone &zone2_ );
+	RAIISuspendForSwapBase( TreeZone &zone1_, TreeZone &zone2_ );
 	~RAIISuspendForSwapBase();
 	
-	const DBCommon::TreeOrdinal tree_ordinal1;
 	const TreeZone &zone1;
-	const DBCommon::TreeOrdinal tree_ordinal2;
 	const TreeZone &zone2;
 };
  

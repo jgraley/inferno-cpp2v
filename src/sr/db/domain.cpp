@@ -14,17 +14,17 @@ Domain::Domain()
 }
 
 
-void Domain::Insert(TreeZone &zone)
+void Domain::InsertTree(TreeZone &zone)
 {     
 	db_walker.WalkTreeZone( bind(&Domain::InsertAction, this, placeholders::_1), 
-	                        zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_IN );
+	                        zone, DBWalk::WIND_IN );
 }
 
 
-void Domain::Delete(TreeZone &zone)
+void Domain::DeleteTree(TreeZone &zone)
 {
 	db_walker.WalkTreeZone( bind(&Domain::DeleteAction, this, placeholders::_1), 
-	                        zone, DBCommon::TreeOrdinal(-1), DBWalk::WIND_OUT );
+	                        zone, DBWalk::WIND_OUT );
 }
 
 

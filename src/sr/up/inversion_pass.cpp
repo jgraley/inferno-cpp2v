@@ -6,13 +6,15 @@
 #include "tree/validate.hpp"
 #include "common/lambda_loops.hpp"
 #include "tz_relation.hpp"
+#include "update_ops.hpp"
 
 #include <iostream>
 
 using namespace SR;
 
-InversionPass::InversionPass( XTreeDatabase *db_ ) :
-    db( db_ )
+InversionPass::InversionPass( XTreeDatabase *db_, UpdateOps *ups_ ) :
+    db( db_ ),
+    ups( ups_ )
 {
 }
 
@@ -97,15 +99,13 @@ void InversionPass::Invert( LocatedPatch lze )
     FreeZone new_free_zone = *free_patch->GetZone();
 
     // Write it into the tree
-	auto p = FreeZoneIntoExtraTree( db, new_free_zone, main_tree_zone );
-	DBCommon::TreeOrdinal extra_tree_ordinal = p.first;
-	MutableTreeZone tree_zone_in_extra = p.second;
+	MutableTreeZone tree_zone_in_extra = ups->FreeZoneIntoExtraTree( new_free_zone, main_tree_zone );
 	
 	// Swap in the true moving zone. Names become misleading because contents swap:
 	// tree_zone_in_extra <- the actual moving zone now in extra tree
 	// main_tree_zone_from <- the "from" scaffold now in main tree, to be killed by inversion
-	db->XTreeDatabase::SwapTreeToTree( DBCommon::TreeOrdinal::MAIN, main_tree_zone, fixups,
-		    						   extra_tree_ordinal, tree_zone_in_extra, vector<MutableTreeZone *>() );
+	db->XTreeDatabase::SwapTreeToTree( main_tree_zone, fixups,
+		    						   tree_zone_in_extra, vector<MutableTreeZone *>() );
 
-	db->TeardownTree( extra_tree_ordinal );   
+	db->TeardownTree( tree_zone_in_extra.GetTreeOrdinal() );   
 }

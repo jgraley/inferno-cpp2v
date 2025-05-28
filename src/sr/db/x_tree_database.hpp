@@ -25,12 +25,11 @@ class XTreeDatabase : public Traceable
 public:
     XTreeDatabase(shared_ptr<Lacing> lacing_, DomainExtension::ExtenderSet domain_extenders );
     
+	// ---------------- the principal mutators ------------------
+    
     // Update and access our trees. Some are created by the DB, others (the extra ones) are
     // allocated and freed here.
     DBCommon::TreeOrdinal AllocateExtraTree();
-    void FreeExtraTree(DBCommon::TreeOrdinal tree_ordinal);
-    XLink GetRootXLink(DBCommon::TreeOrdinal tree_ordinal) const;
-    vector<XLink> GetExtraRootXLinks() const;
     
     // Zone goes into tree. Geom and intrinsic assets inserted. No deletes.
     MutableTreeZone BuildTree(DBCommon::TreeOrdinal tree_ordinal, const FreeZone &free_zone);
@@ -39,10 +38,15 @@ public:
     void TeardownTree(DBCommon::TreeOrdinal tree_ordinal);
    
 	// Swap content between two different trees, performed on geom assets only
-   	void SwapTreeToTree( DBCommon::TreeOrdinal tree_ordinal_l, MutableTreeZone &tree_zone_l, vector<MutableTreeZone *> fixups_l,
-		 				 DBCommon::TreeOrdinal tree_ordinal_r, MutableTreeZone &tree_zone_r, vector<MutableTreeZone *> fixups_r );
+   	void SwapTreeToTree( MutableTreeZone &tree_zone_l, vector<MutableTreeZone *> fixups_l,
+		 				 MutableTreeZone &tree_zone_r, vector<MutableTreeZone *> fixups_r );
 
+	// Actions to take at the end of an update cycle
     void PerformDeferredActions();
+
+	// ---------------- const and static methods ------------------
+    XLink GetRootXLink(DBCommon::TreeOrdinal tree_ordinal) const;
+    vector<XLink> GetExtraRootXLinks() const;
 
     const DomainExtensionChannel *GetDEChannel( const DomainExtension::Extender *extender ) const;
     const Domain &GetDomain() const;
@@ -69,10 +73,10 @@ public:
     TreePtr<Node> GetMainRootNode() const;
     XLink GetMainRootXLink() const;
 
-    Mutator CreateTreeMutator(XLink xlink);
+    Mutator CreateTreeMutator(XLink xlink) const;
     MutableTreeZone CreateMutableTreeZone(XLink xlink,
                                           vector<XLink> terminii,
-                                          DBCommon::TreeOrdinal ordinal);
+                                          DBCommon::TreeOrdinal ordinal) const;
 
     void Dump() const;
 	void DumpTables() const;
@@ -80,6 +84,8 @@ public:
     void CheckAssets();
     
 private: 
+    void FreeExtraTree(DBCommon::TreeOrdinal tree_ordinal);
+
     const shared_ptr<Lacing> lacing;
     const shared_ptr<Domain> domain;
     const shared_ptr<LinkTable> link_table;

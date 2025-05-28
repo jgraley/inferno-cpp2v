@@ -35,7 +35,6 @@ public:
    
     void WalkTreeZone( const Action action,
                        const TreeZone &zone,
-                       const DBCommon::TreeOrdinal tree_ordinal,
                        Wind wind,
                        const DBCommon::CoreInfo *base_info = DBCommon::GetUnknownCoreInfo() );
 

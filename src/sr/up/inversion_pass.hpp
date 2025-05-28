@@ -26,7 +26,7 @@ namespace SR
 class InversionPass 
 {
 public:
-    InversionPass( XTreeDatabase *db );
+    InversionPass( XTreeDatabase *db, class UpdateOps *ups_ );
     
     void RunInversion(const Mutator &origin_mutator, shared_ptr<Patch> *source_layout_ptr);
     
@@ -38,6 +38,7 @@ private:
     void Invert(LocatedPatch lzfe);
 
     XTreeDatabase * const db;
+    UpdateOps * const ups;
 };
 
 }
