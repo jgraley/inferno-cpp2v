@@ -502,14 +502,15 @@ void OrderingPass::MoveTreeZoneOut( shared_ptr<Patch> *ooo_patch_ptr, shared_ptr
 	// Out-of-order patch is located at the "to" location, but contains the "from" tree zone.
 	auto ooo_tree_patch = dynamic_pointer_cast<TreeZonePatch>(*ooo_patch_ptr);
 	ASSERT( ooo_tree_patch );
-	MutableTreeZone &main_tree_zone_from = dynamic_cast<MutableTreeZone &>(*ooo_tree_patch->GetZone());
-	ASSERT( !main_tree_zone_from.IsEmpty() ); // See #784
+	MutableTreeZone &main_tree_zone_from_m = dynamic_cast<MutableTreeZone &>(*ooo_tree_patch->GetZone());
+	ASSERT( !main_tree_zone_from_m.IsEmpty() ); // See #784
+	XTreeZone main_tree_zone_from = main_tree_zone_from_m.GetXTreeZone();
 	
 	// ------------------------- Create extra tree with plugged scaffold ---------------------------
 	// Make scaffold free zones that fit in place of the moving zone
 	auto scaffold_zone_from = sops->CreateSimilarScaffoldZone(main_tree_zone_from);
 	TRACE("\"From\" scaffold: ")(scaffold_zone_from)("\n");
-	MutableTreeZone tree_zone_in_extra = sops->FreeZoneIntoExtraTree( scaffold_zone_from, main_tree_zone_from );
+	XTreeZone tree_zone_in_extra = sops->FreeZoneIntoExtraTree( scaffold_zone_from, main_tree_zone_from_m ).GetXTreeZone();
 		
 	// ------------------------- Swap "from" zone into our extra tree ---------------------------
 	//FTRACE("main_tree_zone_from: ")(main_tree_zone_from)("\nfree_zone: ")(*free_zone)("\n");
@@ -518,14 +519,14 @@ void OrderingPass::MoveTreeZoneOut( shared_ptr<Patch> *ooo_patch_ptr, shared_ptr
 	main_tree_zone_from.Validate(db);
 	
 	// Determine the fix-sops we'll need to do for tree zones in neighbouring patches
-    vector<MutableTreeZone *> fixups;	
+    vector<TreeZone *> fixups;	
     for( size_t i=0; i<main_tree_zone_from.GetNumTerminii(); i++ )
 	{				
 		MutableTreeZone *found = nullptr;
 		TreeZonePatch::ForTreeDepthFirstWalk(layout, [&](shared_ptr<TreeZonePatch> &patch)
 		{
 			MutableTreeZone *candidate = dynamic_cast<MutableTreeZone *>(patch->GetZone());
-			if( candidate->GetBaseMutator() == main_tree_zone_from.GetTerminusMutator(i) )
+			if( candidate->GetBaseMutator() == main_tree_zone_from_m.GetTerminusMutator(i) )
 			{
 				ASSERT( !found );
 				found = candidate;
@@ -541,7 +542,7 @@ void OrderingPass::MoveTreeZoneOut( shared_ptr<Patch> *ooo_patch_ptr, shared_ptr
 	// tree_zone_in_extra <- the actual moving zone now in extra tree
 	// main_tree_zone_from <- the "from" scaffold now in main tree, to be killed by inversion
 	db->XTreeDatabase::SwapTreeToTree( main_tree_zone_from, fixups,
-		    						   tree_zone_in_extra, vector<MutableTreeZone *>() );
+		    						   tree_zone_in_extra, vector<TreeZone *>() );
 
 	// ------------------------- Add "To" scaffolding patch to tree for inversion ---------------------------
 	// tree_zone_in_extra now contains the moving zone	

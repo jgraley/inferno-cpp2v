@@ -68,9 +68,7 @@ MutableTreeZone ScaffoldOps::TreeZoneAroundScaffoldNode( TreePtr<Node> scaffold_
 	
 	XTreeZone scaffold_tree_zone( base_xlink, terminii, tree_ordinal );
 	
-	return db->CreateMutableTreeZone( scaffold_tree_zone.GetBaseXLink(),
-									  scaffold_tree_zone.GetTerminusXLinks(),
-									  tree_ordinal );
+	return db->CreateMutableTreeZone( scaffold_tree_zone );
 }
 
 

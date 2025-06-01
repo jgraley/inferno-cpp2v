@@ -93,8 +93,27 @@ void XTreeDatabase::TeardownTree(DBCommon::TreeOrdinal tree_ordinal)
 }
 
 
-void XTreeDatabase::SwapTreeToTree( MutableTreeZone &zone1, vector<MutableTreeZone *> fixups1,
-                                    MutableTreeZone &zone2, vector<MutableTreeZone *> fixups2 )
+void XTreeDatabase::SwapTreeToTree( TreeZone &zone1, vector<TreeZone *> fixups1,
+                                    TreeZone &zone2, vector<TreeZone *> fixups2 )
+{
+	unique_ptr<MutableTreeZone> lmzone1, lmzone2;
+	lmzone1 = make_unique<MutableTreeZone>(CreateMutableTreeZone(zone1));
+	lmzone2 = make_unique<MutableTreeZone>(CreateMutableTreeZone(zone2));
+	
+	SwapTreeToTree( *lmzone1, fixups1,
+	                *lmzone2, fixups2 );
+	
+	dynamic_cast<XTreeZone &>(zone1) = XTreeZone( lmzone1->GetBaseXLink(), 
+	                                              lmzone1->GetTerminusXLinks(), 
+	                                              lmzone1->GetTreeOrdinal() );
+	dynamic_cast<XTreeZone &>(zone2) = XTreeZone( lmzone2->GetBaseXLink(), 
+	                                              lmzone2->GetTerminusXLinks(), 
+	                                              lmzone2->GetTreeOrdinal() );		
+}
+
+
+void XTreeDatabase::SwapTreeToTree( MutableTreeZone &zone1, vector<TreeZone *> fixups1,
+                                    MutableTreeZone &zone2, vector<TreeZone *> fixups2 )
 {
     TRACE("Swapping target TreeZones:\n")(zone1)
          ("\nand: ")(zone2);
@@ -339,6 +358,16 @@ MutableTreeZone XTreeDatabase::CreateMutableTreeZone(XLink base,
 	for( XLink t : terminii )
 		terminii_mutators.push_back( CreateTreeMutator(t) ); 
 	return MutableTreeZone( move(base_mutator), move(terminii_mutators), ordinal );
+}                                                
+
+
+MutableTreeZone XTreeDatabase::CreateMutableTreeZone(TreeZone &zone) const
+{
+	Mutator base_mutator = CreateTreeMutator(zone.GetBaseXLink());
+	vector<Mutator> terminii_mutators;
+	for( XLink t : zone.GetTerminusXLinks() )
+		terminii_mutators.push_back( CreateTreeMutator(t) ); 
+	return MutableTreeZone( move(base_mutator), move(terminii_mutators), zone.GetTreeOrdinal() );
 }                                                
 
 

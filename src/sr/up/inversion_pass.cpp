@@ -80,7 +80,7 @@ void InversionPass::Invert( LocatedPatch lze )
             
     // Collect base xlinks for child zones (which must be tree zones)
     vector<Mutator> terminii_mutators;
-    vector<MutableTreeZone *> fixups;
+    vector<TreeZone *> fixups;
     Patch::ForChildren(free_patch, [&](shared_ptr<Patch> &child_patch)    
     {
         // Inversion strategy: we're based on a free zone and FZ merging should 
@@ -92,20 +92,21 @@ void InversionPass::Invert( LocatedPatch lze )
         ASSERT(child_mutable_tree_zone);        
         
         terminii_mutators.push_back( child_mutable_tree_zone->GetBaseMutator() );
-        fixups.push_back( child_mutable_tree_zone );
-    } );
+        fixups.push_back( child_tree_patch->GetZone() );
+    } );             
          
     // Make the inverted TZ    
-    MutableTreeZone main_tree_zone( move(base_mutator), move(terminii_mutators), DBCommon::TreeOrdinal::MAIN );    
-
+    MutableTreeZone main_tree_zone_m( move(base_mutator), move(terminii_mutators), DBCommon::TreeOrdinal::MAIN );    
+	XTreeZone main_tree_zone = main_tree_zone_m.GetXTreeZone();
+	
     // Write it into the tree
-	MutableTreeZone tree_zone_in_extra = sops->FreeZoneIntoExtraTree( new_free_zone, main_tree_zone );
+	XTreeZone tree_zone_in_extra = sops->FreeZoneIntoExtraTree( new_free_zone, main_tree_zone_m ).GetXTreeZone();
 	
 	// Swap in the true moving zone. Names become misleading because contents swap:
 	// tree_zone_in_extra <- the actual moving zone now in extra tree
 	// main_tree_zone_from <- the "from" scaffold now in main tree, to be killed by inversion
 	db->XTreeDatabase::SwapTreeToTree( main_tree_zone, fixups,
-		    						   tree_zone_in_extra, vector<MutableTreeZone *>() );
+		    						   tree_zone_in_extra, vector<TreeZone *>() );
 
 	db->TeardownTree( tree_zone_in_extra.GetTreeOrdinal() );   
 }

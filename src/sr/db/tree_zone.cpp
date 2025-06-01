@@ -145,6 +145,11 @@ XLink XTreeZone::GetTerminusXLink(size_t index) const
 }
 
 
+void XTreeZone::SetBaseXLink(XLink new_base)
+{
+	base = new_base;
+}
+
 
 string XTreeZone::GetTrace() const
 {
@@ -244,7 +249,16 @@ const Mutator &MutableTreeZone::GetTerminusMutator(size_t index) const
 }
 
 
-void MutableTreeZone::Swap( TreeZone &tree_zone_r, vector<MutableTreeZone *> fixups_l, vector<MutableTreeZone *> fixups_r )
+XTreeZone MutableTreeZone::GetXTreeZone() const
+{
+    vector<XLink> v;
+    for( const Mutator &m : terminii )
+		v.push_back( m.GetXLink() );
+    return XTreeZone( base.GetXLink(), v, GetTreeOrdinal() );    
+}
+
+
+void MutableTreeZone::Swap( TreeZone &tree_zone_r, vector<TreeZone *> fixups_l, vector<TreeZone *> fixups_r )
 {
 	// Should be true regardless of empty zones
 	ASSERT( GetNumTerminii() == tree_zone_r.GetNumTerminii() );
@@ -255,8 +269,8 @@ void MutableTreeZone::Swap( TreeZone &tree_zone_r, vector<MutableTreeZone *> fix
 
     // Do a co-walk and exchange one at a time. We want to modify the parent
     // sides of the terminii in-place, leaving valid mutators behind. 
-    vector<MutableTreeZone *>::iterator fixups_l_it = fixups_l.begin();
-    vector<MutableTreeZone *>::iterator fixups_r_it = fixups_r.begin();
+    vector<TreeZone *>::iterator fixups_l_it = fixups_l.begin();
+    vector<TreeZone *>::iterator fixups_r_it = fixups_r.begin();
     vector<Mutator>::iterator terminus_it_r = mutable_tree_zone_r.terminii.begin();    
     for( Mutator &terminus_l : terminii )
     {
@@ -264,9 +278,9 @@ void MutableTreeZone::Swap( TreeZone &tree_zone_r, vector<MutableTreeZone *> fix
         Mutator &terminus_r = *terminus_it_r;
          
 		if( !fixups_l.empty() && *fixups_l_it )
-			ASSERT( (*fixups_l_it)->GetBaseMutator() == terminus_l );
+			ASSERT( (*fixups_l_it)->GetBaseXLink() == terminus_l.GetXLink() );
 		if( !fixups_r.empty() && *fixups_r_it )
-			ASSERT( (*fixups_r_it)->GetBaseMutator() == terminus_r );
+			ASSERT( (*fixups_r_it)->GetBaseXLink() == terminus_r.GetXLink() );
                          
 	    terminus_l.ExchangeParent(terminus_r); // deep
 		               
@@ -274,9 +288,23 @@ void MutableTreeZone::Swap( TreeZone &tree_zone_r, vector<MutableTreeZone *> fix
         ASSERT( terminus_r.GetChildTreePtr() );
         
    		if( !fixups_l.empty() && *fixups_l_it )
-			(*fixups_l_it)->SetBaseMutator(terminus_l);
+   		{
+			if( auto flm = dynamic_cast<MutableTreeZone *>(*fixups_l_it) )
+				flm->SetBaseMutator(terminus_l);
+			else if( auto flx = dynamic_cast<XTreeZone *>(*fixups_l_it) )
+				flx->SetBaseXLink(terminus_l.GetXLink());
+			else
+				ASSERTFAIL();
+		}
    		if( !fixups_r.empty() && *fixups_r_it )
-			(*fixups_r_it)->SetBaseMutator(terminus_r);
+   		{
+			if( auto frm = dynamic_cast<MutableTreeZone *>(*fixups_r_it) )
+				frm->SetBaseMutator(terminus_r);
+			else if( auto frx = dynamic_cast<XTreeZone *>(*fixups_r_it) )
+				frx->SetBaseXLink(terminus_r.GetXLink());
+			else
+				ASSERTFAIL();
+		}
         
         terminus_it_r++;
         if( !fixups_l.empty() )

@@ -63,6 +63,8 @@ public:
     vector<XLink> GetTerminusXLinks() const override;
     XLink GetTerminusXLink(size_t index) const override;
     
+    void SetBaseXLink(XLink new_base);
+
     string GetTrace() const override;
 
 protected:
@@ -90,8 +92,9 @@ public:
     const Mutator &GetBaseMutator() const;
     void SetBaseMutator( const Mutator &new_base );
     const Mutator &GetTerminusMutator(size_t index) const;	
+	XTreeZone GetXTreeZone() const;
 
-	void Swap( TreeZone &tree_zone_r, vector<MutableTreeZone *> fixups_l, vector<MutableTreeZone *> fixups_r );
+	void Swap( TreeZone &tree_zone_r, vector<TreeZone *> fixups_l, vector<TreeZone *> fixups_r );
        
     string GetTrace() const override;
     

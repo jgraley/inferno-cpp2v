@@ -150,7 +150,7 @@ private:
 struct MovesMap
 {
 	public:
-	map<TreePtr<Node>, MutableTreeZone> mm;
+	map<TreePtr<Node>, XTreeZone> mm;
 };
 
 }
