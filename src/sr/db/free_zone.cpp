@@ -22,35 +22,6 @@ FreeZone FreeZone::CreateEmpty()
 }
 
 
-FreeZone FreeZone::CreateScaffoldToSpec(TreePtr<Node> base, int num_terminii)
-{
-	//auto base = (TreePtr<Node>)(*tpi_base);
-	ASSERTS(base);
-	const TreeUtilsInterface *upi = base->MakeTP();
-	ASSERTS(upi);
-	TreePtr<Node> scaffold = upi->MakeScaffold();
-
-	ScaffoldBase *sbp = dynamic_cast<ScaffoldBase *>(scaffold.get());
-	ASSERTS( sbp );
-	Sequence<Node> *ssp = &(sbp->child_ptrs);
- 
-    // Set the base as the scaffolding node
-    auto zone = FreeZone( scaffold, list<Mutator>{} );
-    
-    // Set the terminii as the scaffolding node's scaffold child pointers (the
-    // underlying node type's children will be left empty/NULL)
-    for( int i=0; i<num_terminii; i++ )
-    {
-        ContainerInterface::iterator it = ssp->insert( Mutator::MakePlaceholder() );
-        zone.AddTerminus( Mutator::CreateFreeContainer(scaffold, ssp, it) );     
-    }
-    
-    //FTRACES("Created scaffold with %d terminii\n", num_terminii)("\n");
-
-    return zone;
-}
-
-
 FreeZone::FreeZone()
 {
 }

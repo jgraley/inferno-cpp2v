@@ -6,15 +6,15 @@
 #include "tree/validate.hpp"
 #include "common/lambda_loops.hpp"
 #include "tz_relation.hpp"
-#include "update_ops.hpp"
+#include "scaffold_ops.hpp"
 
 #include <iostream>
 
 using namespace SR;
 
-InversionPass::InversionPass( XTreeDatabase *db_, UpdateOps *ups_ ) :
+InversionPass::InversionPass( XTreeDatabase *db_, ScaffoldOps *sops_ ) :
     db( db_ ),
-    ups( ups_ )
+    sops( sops_ )
 {
 }
 
@@ -76,6 +76,7 @@ void InversionPass::Invert( LocatedPatch lze )
     ASSERT( base_mutator )("Got no base in our lze, perhaps parent was free zone?"); // FZ merging should prevent
     auto free_patch = dynamic_pointer_cast<FreeZonePatch>( *lze.second );
     ASSERT( free_patch )("Got LZE not a free zone: ")(lze); // WalkLocatedPatches() gave us wrong kind of patch
+    FreeZone new_free_zone = *free_patch->GetZone();
             
     // Collect base xlinks for child zones (which must be tree zones)
     vector<Mutator> terminii_mutators;
@@ -96,10 +97,9 @@ void InversionPass::Invert( LocatedPatch lze )
          
     // Make the inverted TZ    
     MutableTreeZone main_tree_zone( move(base_mutator), move(terminii_mutators), DBCommon::TreeOrdinal::MAIN );    
-    FreeZone new_free_zone = *free_patch->GetZone();
 
     // Write it into the tree
-	MutableTreeZone tree_zone_in_extra = ups->FreeZoneIntoExtraTree( new_free_zone, main_tree_zone );
+	MutableTreeZone tree_zone_in_extra = sops->FreeZoneIntoExtraTree( new_free_zone, main_tree_zone );
 	
 	// Swap in the true moving zone. Names become misleading because contents swap:
 	// tree_zone_in_extra <- the actual moving zone now in extra tree

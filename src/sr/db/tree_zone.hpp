@@ -50,8 +50,6 @@ public:
     static XTreeZone CreateSubtree( XLink base, 
 								    DBCommon::TreeOrdinal ordinal_ = default_ordinal );
     static XTreeZone CreateEmpty( XLink base );
-    static XTreeZone CreateFromScaffold( XLink scaffold_xlink, 
-										 DBCommon::TreeOrdinal ordinal_ = default_ordinal );
 
     explicit XTreeZone( XLink base, 
                         vector<XLink> terminii, 

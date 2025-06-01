@@ -18,9 +18,3 @@ void Zone::MarkOriginForEmbedded(RequiresSubordinateSCREngine *embedded_agent)
     embedded_agent->MarkOriginForEmbedded( GetBaseNode() );   
     // Note: SCREngine will tell us to take a hike if we execute this more than once}
 }
-
-
-FreeZone Zone::CreateSimilarScaffoldZone() const
-{
-	return FreeZone::CreateScaffoldToSpec(GetBaseNode(), GetNumTerminii());
-}

@@ -1,0 +1,112 @@
+#include "scaffold_ops.hpp"
+
+#include "patches.hpp"
+#include "db/x_tree_database.hpp"
+#include "tree/validate.hpp"
+#include "common/lambda_loops.hpp"
+
+using namespace SR;
+
+
+ScaffoldOps::ScaffoldOps( XTreeDatabase *db_ ) :
+    db( db_ )
+{
+}
+
+
+MutableTreeZone ScaffoldOps::FreeZoneIntoExtraTree( FreeZone free_zone, const MutableTreeZone &reference_tree_zone )
+{
+	// ------------------------- Plug the zone to make a subtree ---------------------------
+	// Reference tree zone is used to determine the types of the plugs
+	vector<XLink> terminii;
+    FreeZone::TerminusIterator terminus_it = free_zone.GetTerminiiBegin();
+    for( size_t i=0; i<reference_tree_zone.GetNumTerminii(); i++ )
+	{
+		// Plug the terminii of the "from" scaffold with yet more scaffolding so we get a subtree for the extra tree.
+		// This is a requirement for placing a zone (generally including terminii) into its own extra tree. Alternatively
+		// we could allow NULL TreePtrs/placeholders to exist in tree and define semantics for them.
+		TreePtr<Node> term_child_node = reference_tree_zone.GetTerminusMutator(i).GetChildTreePtr();
+		ASSERT(term_child_node);
+		FreeZone plug = CreateScaffoldToSpec(term_child_node, 0); // finally no terminii!!!
+		Mutator resultant_mutator;
+        terminus_it = free_zone.MergeTerminus( terminus_it, make_unique<FreeZone>(plug), &resultant_mutator );
+        terminii.push_back(resultant_mutator.GetXLink());
+	}	
+	TRACE("Free zone after populating terminii: ")(free_zone)("\n");
+
+	// ------------------------- Build into a new extra tree ---------------------------
+    // Add a new extra tree containing the plugged "from" scaffold
+    DBCommon::TreeOrdinal extra_tree_ordinal = db->AllocateExtraTree();        
+	TRACE("Allocated extra tree %u\n", extra_tree_ordinal);
+    MutableTreeZone zone_in_extra_tree = db->BuildTree( extra_tree_ordinal, free_zone );
+	TRACE("Zone in extra tree: ")(zone_in_extra_tree)("\n");
+
+	// ------------------------- Get unplugged zone for our scaffold ---------------------------
+	// We require a TZ based on the "from" scaffold that resembles main_tree_zone_from, with real
+	// TZ terminii, even though we plugged the FZ terminii making it a subtree.
+	XLink root_xlink = db->GetRootXLink(extra_tree_ordinal);
+	TRACE("Extra tree root: ")(root_xlink)("\n");
+	MutableTreeZone tree_zone_in_extra = db->CreateMutableTreeZone( root_xlink, terminii, extra_tree_ordinal );	
+	TRACE("Original zone in TZ with its terminii: ")(tree_zone_in_extra)("\n");
+	
+	return tree_zone_in_extra;
+}
+
+
+MutableTreeZone ScaffoldOps::TreeZoneAroundScaffoldNode( TreePtr<Node> scaffold_node, DBCommon::TreeOrdinal tree_ordinal )
+{
+	const NodeTable::Row &scaffold_row = db->GetNodeRow(scaffold_node);
+	ASSERT( scaffold_row.incoming_xlinks.size() == 1 );		
+	XLink base_xlink = SoloElementOf(scaffold_row.incoming_xlinks);
+	
+	// Stored scaffold node is taken to be in main tree
+	ScaffoldBase *scaffold_ptr = dynamic_cast<ScaffoldBase *>(scaffold_node.get());
+
+	vector<XLink> terminii;
+	for( TreePtr<Node> &terminus_tpi : scaffold_ptr->child_ptrs )
+		terminii.push_back( XLink( scaffold_node, &terminus_tpi ) );
+	
+	XTreeZone scaffold_tree_zone( base_xlink, terminii, tree_ordinal );
+	
+	return db->CreateMutableTreeZone( scaffold_tree_zone.GetBaseXLink(),
+									  scaffold_tree_zone.GetTerminusXLinks(),
+									  tree_ordinal );
+}
+
+
+FreeZone ScaffoldOps::CreateSimilarScaffoldZone(const Zone &zone) const
+{
+	return CreateScaffoldToSpec(zone.GetBaseNode(), zone.GetNumTerminii());
+}
+
+
+FreeZone ScaffoldOps::CreateScaffoldToSpec(TreePtr<Node> base, int num_terminii) const
+{
+	//auto base = (TreePtr<Node>)(*tpi_base);
+	ASSERTS(base);
+	const TreeUtilsInterface *upi = base->MakeTP();
+	ASSERTS(upi);
+	TreePtr<Node> scaffold = upi->MakeScaffold();
+
+	ScaffoldBase *sbp = dynamic_cast<ScaffoldBase *>(scaffold.get());
+	ASSERTS( sbp );
+	Sequence<Node> *ssp = &(sbp->child_ptrs);
+ 
+    // Set the base as the scaffolding node
+    auto zone = FreeZone( scaffold, list<Mutator>{} );
+    
+    // Set the terminii as the scaffolding node's scaffold child pointers (the
+    // underlying node type's children will be left empty/NULL)
+    for( int i=0; i<num_terminii; i++ )
+    {
+        ContainerInterface::iterator it = ssp->insert( Mutator::MakePlaceholder() );
+        zone.AddTerminus( Mutator::CreateFreeContainer(scaffold, ssp, it) );     
+    }
+    
+    //FTRACES("Created scaffold with %d terminii\n", num_terminii)("\n");
+
+    return zone;
+}
+
+
+

@@ -96,20 +96,6 @@ XTreeZone XTreeZone::CreateEmpty( XLink base )
 }
 
 
-XTreeZone XTreeZone::CreateFromScaffold( XLink scaffold_xlink,
-										 DBCommon::TreeOrdinal ordinal_ )
-{
-	TreePtr<Node> scaffold = scaffold_xlink.GetChildTreePtr();
-	ScaffoldBase *sbp = dynamic_cast<ScaffoldBase *>(scaffold.get());
-
-	vector<XLink> terminii;
-	for( TreePtr<Node> &tpp : sbp->child_ptrs )
-		terminii.push_back( XLink( scaffold, &tpp ) );
-	
-	return XTreeZone( scaffold_xlink, terminii, ordinal_ );
-}
-
-
 XTreeZone::XTreeZone( XLink base_, 
 					  vector<XLink> terminii_,
 					  DBCommon::TreeOrdinal ordinal_ ) :

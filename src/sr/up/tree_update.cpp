@@ -14,7 +14,7 @@
 #include "boundary_pass.hpp"
 #include "alt_ordering_checker.hpp"
 #include "move_in_pass.hpp"
-#include "update_ops.hpp"
+#include "scaffold_ops.hpp"
 
 #include <iostream>
 
@@ -64,11 +64,7 @@ void TreeUpdater::UpdateMainTree( XLink origin_xlink, shared_ptr<Patch> source_l
 {
     ASSERT( db );
                 
-	ToMutablePass to_mutable_pass( db );
-	to_mutable_pass.Run(source_layout);
-	Mutator origin_mutator = db->CreateTreeMutator(origin_xlink);
 	ValidateTreeZones validate_zones(db);
-	validate_zones.Run(source_layout);
 
     MergeWidesPass merge_wides_pass;
     merge_wides_pass.Run(source_layout);
@@ -88,9 +84,14 @@ void TreeUpdater::UpdateMainTree( XLink origin_xlink, shared_ptr<Patch> source_l
     boundary_pass.Run(source_layout);
 	validate_zones.Run(source_layout);
 
-	UpdateOps ups( db );
+	ToMutablePass to_mutable_pass( db );
+	to_mutable_pass.Run(source_layout);
+	Mutator origin_mutator = db->CreateTreeMutator(origin_xlink);
+	validate_zones.Run(source_layout);
 
-    OrderingPass ordering_pass( db, &ups );
+	ScaffoldOps sops( db );
+
+    OrderingPass ordering_pass( db, &sops );
     ordering_pass.RunAnalysis(source_layout);
     ordering_pass.RunDuplicate(source_layout);
 	validate_zones.Run(source_layout);	
@@ -115,10 +116,10 @@ void TreeUpdater::UpdateMainTree( XLink origin_xlink, shared_ptr<Patch> source_l
     AltOrderingChecker alt_ordering_checker( db );
     alt_ordering_checker.Check(source_layout);
 
-    InversionPass inversion_pass( db, &ups ); 
+    InversionPass inversion_pass( db, &sops ); 
     inversion_pass.RunInversion(origin_mutator, &source_layout);      
 	
-	MoveInPass move_in_pass( db, &ups );
+	MoveInPass move_in_pass( db, &sops );
 	move_in_pass.Run(moves_map);
 	
 	db->PerformDeferredActions();

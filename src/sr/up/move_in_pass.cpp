@@ -1,14 +1,14 @@
 #include "move_in_pass.hpp"
 #include "db/x_tree_database.hpp"
-#include "update_ops.hpp"
+#include "scaffold_ops.hpp"
 
 #include <iostream>
 
 using namespace SR;
 
-MoveInPass::MoveInPass( XTreeDatabase *db_, UpdateOps *ups_ ) :
+MoveInPass::MoveInPass( XTreeDatabase *db_, ScaffoldOps *sops_ ) :
     db( db_ ),
-    ups( ups_ )
+    sops( sops_ )
 {
 }
 
@@ -20,22 +20,17 @@ void MoveInPass::Run(MovesMap &moves_map)
 	
 	for( auto &p : moves_map.mm )
 	{
-		TreePtr<Node> scaffold_node = p.first;
-		const NodeTable::Row &scaffold_row = db->GetNodeRow(scaffold_node);
-		ASSERT( scaffold_row.incoming_xlinks.size() == 1 );
-		XLink scaffold_base_xlink = SoloElementOf(scaffold_row.incoming_xlinks);
-		// Stored scaffold node is taken to be in main tree
-		XTreeZone scaffold_tree_zone = XTreeZone::CreateFromScaffold( scaffold_base_xlink, 
-		                                                              DBCommon::TreeOrdinal::MAIN ); 
-		MutableTreeZone scaffold_mutable_tree_zone = db->CreateMutableTreeZone( scaffold_tree_zone.GetBaseXLink(),
-													                           	scaffold_tree_zone.GetTerminusXLinks(),
-													                           	DBCommon::TreeOrdinal::MAIN );		
-        // TODO Down to here in a helper fn
-        
-		MutableTreeZone &moving_zone = p.second;
-		db->SwapTreeToTree( moving_zone, vector<MutableTreeZone *>(),
-							scaffold_mutable_tree_zone, vector<MutableTreeZone *>() );
-		db->TeardownTree(moving_zone.GetTreeOrdinal()); // Don't leak it									                                     	
+		// Hopefully our "to" scaffold node made it through inversion and is now in the main tree. 
+		// Build a TZ around it. Also get the actual moving content which is in an extra tree.
+		MutableTreeZone inverted_main_tree_zone = sops->TreeZoneAroundScaffoldNode( p.first, DBCommon::TreeOrdinal::MAIN );	        
+		MutableTreeZone &extra_tree_zone = p.second;
+		
+		// Swap the moving content in and the scaffold out
+		db->SwapTreeToTree( extra_tree_zone, vector<MutableTreeZone *>(),
+							inverted_main_tree_zone, vector<MutableTreeZone *>() );
+							
+		// We're done with the extra tree zone which now contains scaffold
+		db->TeardownTree(extra_tree_zone.GetTreeOrdinal()); 				                                     	
 	}
 }
 

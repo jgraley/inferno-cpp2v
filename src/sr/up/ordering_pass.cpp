@@ -6,7 +6,7 @@
 #include "common/lambda_loops.hpp"
 #include "tz_relation.hpp"
 #include "misc_passes.hpp"
-#include "update_ops.hpp"
+#include "scaffold_ops.hpp"
 
 #include <iostream>
 
@@ -88,9 +88,9 @@ pair<Orderable::Diff, DepthFirstRelation::RelType> DFPatchIndexRelation::Compare
 
 // ------------------------- OrderingPass --------------------------
 
-OrderingPass::OrderingPass(XTreeDatabase *db_, UpdateOps *ups_) :
+OrderingPass::OrderingPass(XTreeDatabase *db_, ScaffoldOps *sops_) :
     db( db_ ),
-    ups( ups_ ),
+    sops( sops_ ),
     dfr( db )
 {
 }
@@ -507,9 +507,9 @@ void OrderingPass::MoveTreeZoneOut( shared_ptr<Patch> *ooo_patch_ptr, shared_ptr
 	
 	// ------------------------- Create extra tree with plugged scaffold ---------------------------
 	// Make scaffold free zones that fit in place of the moving zone
-	auto scaffold_zone_from = main_tree_zone_from.CreateSimilarScaffoldZone();
+	auto scaffold_zone_from = sops->CreateSimilarScaffoldZone(main_tree_zone_from);
 	TRACE("\"From\" scaffold: ")(scaffold_zone_from)("\n");
-	MutableTreeZone tree_zone_in_extra = ups->FreeZoneIntoExtraTree( scaffold_zone_from, main_tree_zone_from );
+	MutableTreeZone tree_zone_in_extra = sops->FreeZoneIntoExtraTree( scaffold_zone_from, main_tree_zone_from );
 		
 	// ------------------------- Swap "from" zone into our extra tree ---------------------------
 	//FTRACE("main_tree_zone_from: ")(main_tree_zone_from)("\nfree_zone: ")(*free_zone)("\n");
@@ -517,7 +517,7 @@ void OrderingPass::MoveTreeZoneOut( shared_ptr<Patch> *ooo_patch_ptr, shared_ptr
 	// the original contents, which we shall move
 	main_tree_zone_from.Validate(db);
 	
-	// Determine the fix-ups we'll need to do for tree zones in neighbouring patches
+	// Determine the fix-sops we'll need to do for tree zones in neighbouring patches
     vector<MutableTreeZone *> fixups;	
     for( size_t i=0; i<main_tree_zone_from.GetNumTerminii(); i++ )
 	{				
@@ -545,7 +545,7 @@ void OrderingPass::MoveTreeZoneOut( shared_ptr<Patch> *ooo_patch_ptr, shared_ptr
 
 	// ------------------------- Add "To" scaffolding patch to tree for inversion ---------------------------
 	// tree_zone_in_extra now contains the moving zone	
-	FreeZone scaffold_zone_to = tree_zone_in_extra.CreateSimilarScaffoldZone(); 
+	FreeZone scaffold_zone_to = sops->CreateSimilarScaffoldZone(tree_zone_in_extra); 
 	TreePtr<Node> scaffold_base_to = scaffold_zone_to.GetBaseNode();
 	TRACE("\"To\" scaffold base: ")(scaffold_zone_to)("\n");
 

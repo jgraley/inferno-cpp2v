@@ -26,7 +26,6 @@ public:
 
     static FreeZone CreateSubtree( TreePtr<Node> base );
     static FreeZone CreateEmpty();
-    static FreeZone CreateScaffoldToSpec(TreePtr<Node> base, int num_terminii);
 
     FreeZone();
     explicit FreeZone( TreePtr<Node> base, list<Mutator> &&terminii );
