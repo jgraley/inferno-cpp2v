@@ -28,11 +28,11 @@ class InversionPass
 public:
     InversionPass( XTreeDatabase *db, class ScaffoldOps *sops_ );
     
-    void RunInversion(const Mutator &origin_mutator, shared_ptr<Patch> *source_layout_ptr);
+    void RunInversion(XLink origin, shared_ptr<Patch> *source_layout_ptr);
     
 private:
     // .first is NULL: base not known
-    typedef pair<Mutator, shared_ptr<Patch> *> LocatedPatch;
+    typedef pair<XLink, shared_ptr<Patch> *> LocatedPatch;
 
     void WalkLocatedPatches(LocatedPatch lze_root);
     void Invert(LocatedPatch lzfe);

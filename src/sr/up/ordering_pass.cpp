@@ -205,12 +205,11 @@ void OrderingPass::ConstrainChildrenToTerminii( shared_ptr<TreeZonePatch> &tree_
 	
     // We have a tree zone. For each of its terminii, find the acceptable
     // range of descendent tree zones and recurse.
-	auto mutable_tree_zone = dynamic_cast<MutableTreeZone *>(tree_patch->GetZone());
-	ASSERT( mutable_tree_zone );
+	XTreeZone tree_zone = tree_patch->GetXTreeZone();
     size_t i=0;
     Patch::ForChildren( tree_patch, [&](shared_ptr<Patch> &child_patch)    
     {
-        XLink terminus = mutable_tree_zone->GetTerminusXLink(i++); 
+        XLink terminus = tree_zone.GetTerminusXLink(i++); 
         ConstrainAnyPatchToDescendants( child_patch, terminus, just_check );
     } );
 }
@@ -502,15 +501,14 @@ void OrderingPass::MoveTreeZoneOut( shared_ptr<Patch> *ooo_patch_ptr, shared_ptr
 	// Out-of-order patch is located at the "to" location, but contains the "from" tree zone.
 	auto ooo_tree_patch = dynamic_pointer_cast<TreeZonePatch>(*ooo_patch_ptr);
 	ASSERT( ooo_tree_patch );
-	MutableTreeZone &main_tree_zone_from_m = dynamic_cast<MutableTreeZone &>(*ooo_tree_patch->GetZone());
-	ASSERT( !main_tree_zone_from_m.IsEmpty() ); // See #784
-	XTreeZone main_tree_zone_from = main_tree_zone_from_m.GetXTreeZone();
+	XTreeZone main_tree_zone_from = ooo_tree_patch->GetXTreeZone();
+	ASSERT( !main_tree_zone_from.IsEmpty() ); // See #784
 	
 	// ------------------------- Create extra tree with plugged scaffold ---------------------------
 	// Make scaffold free zones that fit in place of the moving zone
 	auto scaffold_zone_from = sops->CreateSimilarScaffoldZone(main_tree_zone_from);
 	TRACE("\"From\" scaffold: ")(scaffold_zone_from)("\n");
-	XTreeZone tree_zone_in_extra = sops->FreeZoneIntoExtraTree( scaffold_zone_from, main_tree_zone_from_m ).GetXTreeZone();
+	XTreeZone tree_zone_in_extra = sops->FreeZoneIntoExtraTree( scaffold_zone_from, main_tree_zone_from );
 		
 	// ------------------------- Swap "from" zone into our extra tree ---------------------------
 	//FTRACE("main_tree_zone_from: ")(main_tree_zone_from)("\nfree_zone: ")(*free_zone)("\n");
@@ -522,11 +520,11 @@ void OrderingPass::MoveTreeZoneOut( shared_ptr<Patch> *ooo_patch_ptr, shared_ptr
     vector<TreeZone *> fixups;	
     for( size_t i=0; i<main_tree_zone_from.GetNumTerminii(); i++ )
 	{				
-		MutableTreeZone *found = nullptr;
+		TreeZone *found = nullptr;
 		TreeZonePatch::ForTreeDepthFirstWalk(layout, [&](shared_ptr<TreeZonePatch> &patch)
 		{
-			MutableTreeZone *candidate = dynamic_cast<MutableTreeZone *>(patch->GetZone());
-			if( candidate->GetBaseMutator() == main_tree_zone_from_m.GetTerminusMutator(i) )
+			TreeZone *candidate = patch->GetZone();
+			if( candidate->GetBaseXLink() == main_tree_zone_from.GetTerminusXLink(i) )
 			{
 				ASSERT( !found );
 				found = candidate;

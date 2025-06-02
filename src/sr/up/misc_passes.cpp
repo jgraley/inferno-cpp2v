@@ -11,29 +11,6 @@
 
 using namespace SR;
 
-// ------------------------- ToMutablePass --------------------------
-
-ToMutablePass::ToMutablePass(XTreeDatabase *db_) :
-    db(db_)
-{
-}
-    
-
-void ToMutablePass::Run( shared_ptr<Patch> &layout )
-{
-    TreeZonePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<TreeZonePatch> &tree_patch)
-    {
-		TreeZone *zone = tree_patch->GetZone();
-        if( !dynamic_cast<MutableTreeZone *>(zone) )
-		{			
-			auto mutable_zone = db->CreateMutableTreeZone( zone->GetBaseXLink(),
-														   zone->GetTerminusXLinks(),
-														   zone->GetTreeOrdinal() );
-			tree_patch->SetZone(make_unique<MutableTreeZone>(mutable_zone));                                			
-        }
-    } );    
-}
-
 // ------------------------- ProtectDEPass --------------------------
 
 ProtectDEPass::ProtectDEPass(const XTreeDatabase *db_) :

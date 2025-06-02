@@ -74,9 +74,7 @@ class TreeZonePatch : public Patch
 {
 public:
     TreeZonePatch( const XTreeZone &zone_, list<shared_ptr<Patch>> &&child_patches );
-    TreeZonePatch( const MutableTreeZone &zone_, list<shared_ptr<Patch>> &&child_patches );
     TreeZonePatch( const XTreeZone &zone_ );
-    TreeZonePatch( const MutableTreeZone &zone_ );
     
     void AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&new_markers ) final;
     list<RequiresSubordinateSCREngine *> GetEmbeddedMarkers() const final;
@@ -86,6 +84,7 @@ public:
     const TreeZone *GetZone() const override;
     void SetZone( unique_ptr<TreeZone> &&new_zone );
     
+    XTreeZone GetXTreeZone() const;
     shared_ptr<FreeZonePatch> DuplicateToFree() const;
     
     static void ForTreeChildren( shared_ptr<Patch> base,

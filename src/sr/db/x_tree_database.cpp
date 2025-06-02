@@ -46,7 +46,7 @@ DBCommon::TreeOrdinal XTreeDatabase::AllocateExtraTree()
 }
 
     
-MutableTreeZone XTreeDatabase::BuildTree(DBCommon::TreeOrdinal tree_ordinal, const FreeZone &free_zone)
+void XTreeDatabase::BuildTree(DBCommon::TreeOrdinal tree_ordinal, const FreeZone &free_zone)
 {      
     INDENT("+t");
     ASSERT( tree_ordinal >= DBCommon::TreeOrdinal(0) );
@@ -64,14 +64,6 @@ MutableTreeZone XTreeDatabase::BuildTree(DBCommon::TreeOrdinal tree_ordinal, con
 	node_table->InsertTree(zone);   
 	orderings->InsertTree(zone);   
     domain_extension->InsertTree(zone);   
-    
-	vector<Mutator> terminii;
-	for( FreeZone::TerminusConstIterator it=free_zone.GetTerminiiBegin(); 
-		 it != free_zone.GetTerminiiEnd(); 
-		 it++ )
-		terminii.push_back( *it ); 
-	MutableTreeZone tree_zone(CreateTreeMutator(root_xlink), move(terminii));
-    return tree_zone;
 }
 
 
@@ -95,26 +87,7 @@ void XTreeDatabase::TeardownTree(DBCommon::TreeOrdinal tree_ordinal)
 
 void XTreeDatabase::SwapTreeToTree( TreeZone &zone1, vector<TreeZone *> fixups1,
                                     TreeZone &zone2, vector<TreeZone *> fixups2 )
-{
-	unique_ptr<MutableTreeZone> lmzone1, lmzone2;
-	lmzone1 = make_unique<MutableTreeZone>(CreateMutableTreeZone(zone1));
-	lmzone2 = make_unique<MutableTreeZone>(CreateMutableTreeZone(zone2));
-	
-	SwapTreeToTree( *lmzone1, fixups1,
-	                *lmzone2, fixups2 );
-	
-	dynamic_cast<XTreeZone &>(zone1) = XTreeZone( lmzone1->GetBaseXLink(), 
-	                                              lmzone1->GetTerminusXLinks(), 
-	                                              lmzone1->GetTreeOrdinal() );
-	dynamic_cast<XTreeZone &>(zone2) = XTreeZone( lmzone2->GetBaseXLink(), 
-	                                              lmzone2->GetTerminusXLinks(), 
-	                                              lmzone2->GetTreeOrdinal() );		
-}
-
-
-void XTreeDatabase::SwapTreeToTree( MutableTreeZone &zone1, vector<TreeZone *> fixups1,
-                                    MutableTreeZone &zone2, vector<TreeZone *> fixups2 )
-{
+{	
     TRACE("Swapping target TreeZones:\n")(zone1)
          ("\nand: ")(zone2);
     ASSERT( zone1.GetNumTerminii() == zone2.GetNumTerminii() )
@@ -127,23 +100,36 @@ void XTreeDatabase::SwapTreeToTree( MutableTreeZone &zone1, vector<TreeZone *> f
 	zone1.Validate(this); 
 	zone2.Validate(this); 
     
+	// Move to local mutable zone BEFORE the suspensions, because DB will lose the 
+	// ability to create the mutators afterwards.
+	MutableTreeZone lmzone1 = CreateMutableTreeZone(zone1);
+	MutableTreeZone lmzone2 = CreateMutableTreeZone(zone2);
+
 	{
 		// Scope contains suspension objects on stack
-		DomainExtension::RAIISuspendForSwap de_sus(domain_extension.get(), zone1, zone2);  
-		Orderings::RAIISuspendForSwap orderings_sus(orderings.get(), zone1, zone2);  
-		NodeTable::RAIISuspendForSwap node_table_sus(node_table.get(), zone1, zone2);  
-		LinkTable::RAIISuspendForSwap link_table_sus(link_table.get(), zone1, zone2);  
+		DomainExtension::RAIISuspendForSwap de_sus(domain_extension.get(), lmzone1, lmzone2);  
+		Orderings::RAIISuspendForSwap orderings_sus(orderings.get(), lmzone1, lmzone2);  
+		NodeTable::RAIISuspendForSwap node_table_sus(node_table.get(), lmzone1, lmzone2);  
+		LinkTable::RAIISuspendForSwap link_table_sus(link_table.get(), lmzone1, lmzone2);  
 		
-		zone1.Swap( zone2, fixups1, fixups2 );  // TODO be static and symmetrical
-			
-		TRACE("After swapping zones: ")(zone1)
-			 ("\nand: ")(zone2)("\n");    
+		lmzone1.Swap( lmzone2, fixups1, fixups2 );  // TODO be static and symmetrical
+
+		TRACE("After swapping zones: ")(lmzone1)
+			 ("\nand: ")(lmzone2)("\n");    
 			 
 		// Suspensions expire in reverse order.     
 	} 
         
     if( ReadArgs::test_db )
         CheckAssets();
+       
+    // Fix up the supplied zones
+    dynamic_cast<XTreeZone &>(zone1) = XTreeZone( lmzone1.GetBaseXLink(), 
+	                                              lmzone1.GetTerminusXLinks(), 
+	                                              lmzone1.GetTreeOrdinal() );
+	dynamic_cast<XTreeZone &>(zone2) = XTreeZone( lmzone2.GetBaseXLink(), 
+	                                              lmzone2.GetTerminusXLinks(), 
+	                                              lmzone2.GetTreeOrdinal() );		        
 }
 
 

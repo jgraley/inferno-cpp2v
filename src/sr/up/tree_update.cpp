@@ -32,7 +32,7 @@ TreeUpdater::TreeUpdater(XTreeDatabase *x_tree_db) :
 void TreeUpdater::BuildMainTree( TreePtr<Node> main_tree_root )
 {
 	FreeZone main_zone = FreeZone::CreateSubtree(main_tree_root);
-	(void)db->BuildTree(DBCommon::TreeOrdinal::MAIN, main_zone);
+	db->BuildTree(DBCommon::TreeOrdinal::MAIN, main_zone);
 	
 	db->PerformDeferredActions();
 	
@@ -84,11 +84,6 @@ void TreeUpdater::UpdateMainTree( XLink origin_xlink, shared_ptr<Patch> source_l
     boundary_pass.Run(source_layout);
 	validate_zones.Run(source_layout);
 
-	ToMutablePass to_mutable_pass( db );
-	to_mutable_pass.Run(source_layout);
-	Mutator origin_mutator = db->CreateTreeMutator(origin_xlink);
-	validate_zones.Run(source_layout);
-
 	ScaffoldOps sops( db );
 
     OrderingPass ordering_pass( db, &sops );
@@ -117,7 +112,7 @@ void TreeUpdater::UpdateMainTree( XLink origin_xlink, shared_ptr<Patch> source_l
     alt_ordering_checker.Check(source_layout);
 
     InversionPass inversion_pass( db, &sops ); 
-    inversion_pass.RunInversion(origin_mutator, &source_layout);      
+    inversion_pass.RunInversion(origin_xlink, &source_layout);      
 	
 	MoveInPass move_in_pass( db, &sops );
 	move_in_pass.Run(moves_map);

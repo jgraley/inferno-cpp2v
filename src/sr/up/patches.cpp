@@ -132,16 +132,7 @@ TreeZonePatch::TreeZonePatch( const XTreeZone &zone_,
 {
     ASSERT( zone->GetNumTerminii() == GetNumChildren() );    
 }    
-        
 
-TreeZonePatch::TreeZonePatch( const MutableTreeZone &zone_, 
-                              list<shared_ptr<Patch>> &&child_patches ) :
-    Patch( move(child_patches) ),
-    zone(make_unique<MutableTreeZone>(zone_))
-{
-    ASSERT( zone->GetNumTerminii() == GetNumChildren() );    
-}    
-        
 
 TreeZonePatch::TreeZonePatch( const XTreeZone &zone_ ) :
     Patch(),
@@ -149,13 +140,6 @@ TreeZonePatch::TreeZonePatch( const XTreeZone &zone_ ) :
 {
     // If zone has terminii, they will be "exposed".
 }        
-
-TreeZonePatch::TreeZonePatch( const MutableTreeZone &zone_ ) :
-    Patch(),
-    zone(make_unique<MutableTreeZone>(zone_))
-{
-    // If zone has terminii, they will be "exposed".
-}
 
 
 void TreeZonePatch::AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&new_markers )
@@ -193,6 +177,15 @@ void TreeZonePatch::SetZone( unique_ptr<TreeZone> &&new_zone )
 	zone = move(new_zone);
 }
 
+
+XTreeZone TreeZonePatch::GetXTreeZone() const
+{
+	if( auto *xtz = dynamic_cast<XTreeZone *>(zone.get()) )
+		return *xtz;
+	else
+		ASSERTFAIL();
+}
+    
 
 shared_ptr<FreeZonePatch> TreeZonePatch::DuplicateToFree() const
 {
