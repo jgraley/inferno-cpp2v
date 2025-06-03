@@ -177,8 +177,8 @@ string XTreeZone::GetTrace() const
 MutableTreeZone::MutableTreeZone( Mutator &&base_, 
                                   vector<Mutator> &&terminii_,
                                   DBCommon::TreeOrdinal ordinal_ ) :
-	TreeZone( ordinal_ ),
-    base(move(base_))
+    base(move(base_)),
+    ordinal( ordinal_ )
 {
 	ASSERT( base.GetChildTreePtr() );
     for( Mutator &terminus : terminii_ )
@@ -230,6 +230,12 @@ XLink MutableTreeZone::GetTerminusXLink(size_t index) const
 }
 
 
+DBCommon::TreeOrdinal MutableTreeZone::GetTreeOrdinal() const
+{
+	return ordinal;
+}
+
+
 const Mutator &MutableTreeZone::GetBaseMutator() const
 {
     return base;
@@ -254,27 +260,25 @@ XTreeZone MutableTreeZone::GetXTreeZone() const
     vector<XLink> v;
     for( const Mutator &m : terminii )
 		v.push_back( m.GetXLink() );
-    return XTreeZone( base.GetXLink(), v, GetTreeOrdinal() );    
+    return XTreeZone( base.GetXLink(), v, ordinal );    
 }
 
 
-void MutableTreeZone::Swap( TreeZone &tree_zone_r, vector<TreeZone *> fixups_l, vector<TreeZone *> fixups_r )
+void MutableTreeZone::Swap( MutableTreeZone &tree_zone_r, vector<TreeZone *> fixups_l, vector<TreeZone *> fixups_r )
 {
 	// Should be true regardless of empty zones
 	ASSERT( GetNumTerminii() == tree_zone_r.GetNumTerminii() );
 	ASSERT( !IsEmpty() ); // TODO overcautious?      
 	ASSERT( !tree_zone_r.IsEmpty() ); // TODO overcautious?      
 
-	auto &mutable_tree_zone_r = dynamic_cast<MutableTreeZone &>(tree_zone_r);
-
     // Do a co-walk and exchange one at a time. We want to modify the parent
     // sides of the terminii in-place, leaving valid mutators behind. 
     vector<TreeZone *>::iterator fixups_l_it = fixups_l.begin();
     vector<TreeZone *>::iterator fixups_r_it = fixups_r.begin();
-    vector<Mutator>::iterator terminus_it_r = mutable_tree_zone_r.terminii.begin();    
+    vector<Mutator>::iterator terminus_it_r = tree_zone_r.terminii.begin();    
     for( Mutator &terminus_l : terminii )
     {
-        ASSERT( terminus_it_r != mutable_tree_zone_r.terminii.end() ); // length mismatch    
+        ASSERT( terminus_it_r != tree_zone_r.terminii.end() ); // length mismatch    
         Mutator &terminus_r = *terminus_it_r;
          
 		if( !fixups_l.empty() && *fixups_l_it )
@@ -312,11 +316,11 @@ void MutableTreeZone::Swap( TreeZone &tree_zone_r, vector<TreeZone *> fixups_l, 
         if( !fixups_r.empty() )
 			fixups_r_it++;
     } 
-    ASSERT( terminus_it_r == mutable_tree_zone_r.terminii.end() ); // length mismatch    
+    ASSERT( terminus_it_r == tree_zone_r.terminii.end() ); // length mismatch    
 	
-    TreePtr<Node> base_node_r = mutable_tree_zone_r.GetBaseNode();
+    TreePtr<Node> base_node_r = tree_zone_r.GetBaseNode();
     TreePtr<Node> original_base_node_l = base.ExchangeChild( base_node_r );	// deep 
-	(void)mutable_tree_zone_r.base.ExchangeChild( original_base_node_l );		
+	(void)tree_zone_r.base.ExchangeChild( original_base_node_l );		
 }
 
 
@@ -330,7 +334,7 @@ string MutableTreeZone::GetTrace() const
     }
     else
     {       
-		s += SSPrintf("T%d ", GetTreeOrdinal());
+		s += SSPrintf("T%d ", ordinal);
 		s += Trace(base);
         if( terminii.empty() )
             s += " → "; // Indicates the zone goes all the way to leaves i.e. subtree

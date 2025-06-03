@@ -107,12 +107,20 @@ void XTreeDatabase::SwapTreeToTree( TreeZone &zone1, vector<TreeZone *> fixups1,
 
 	{
 		// Scope contains suspension objects on stack
-		DomainExtension::RAIISuspendForSwap de_sus(domain_extension.get(), lmzone1, lmzone2);  
-		Orderings::RAIISuspendForSwap orderings_sus(orderings.get(), lmzone1, lmzone2);  
-		NodeTable::RAIISuspendForSwap node_table_sus(node_table.get(), lmzone1, lmzone2);  
-		LinkTable::RAIISuspendForSwap link_table_sus(link_table.get(), lmzone1, lmzone2);  
+		DomainExtension::RAIISuspendForSwap de_sus(domain_extension.get(), zone1, zone2);  
+		Orderings::RAIISuspendForSwap orderings_sus(orderings.get(), zone1, zone2);  
+		NodeTable::RAIISuspendForSwap node_table_sus(node_table.get(), zone1, zone2);  
+		LinkTable::RAIISuspendForSwap link_table_sus(link_table.get(), zone1, zone2);  
 		
 		lmzone1.Swap( lmzone2, fixups1, fixups2 );  // TODO be static and symmetrical
+
+		// Fix up the supplied zones
+		dynamic_cast<XTreeZone &>(zone1) = XTreeZone( lmzone1.GetBaseXLink(), 
+													  lmzone1.GetTerminusXLinks(), 
+													  lmzone1.GetTreeOrdinal() );
+		dynamic_cast<XTreeZone &>(zone2) = XTreeZone( lmzone2.GetBaseXLink(), 
+													  lmzone2.GetTerminusXLinks(), 
+													  lmzone2.GetTreeOrdinal() );		        
 
 		TRACE("After swapping zones: ")(lmzone1)
 			 ("\nand: ")(lmzone2)("\n");    
@@ -123,13 +131,6 @@ void XTreeDatabase::SwapTreeToTree( TreeZone &zone1, vector<TreeZone *> fixups1,
     if( ReadArgs::test_db )
         CheckAssets();
        
-    // Fix up the supplied zones
-    dynamic_cast<XTreeZone &>(zone1) = XTreeZone( lmzone1.GetBaseXLink(), 
-	                                              lmzone1.GetTerminusXLinks(), 
-	                                              lmzone1.GetTreeOrdinal() );
-	dynamic_cast<XTreeZone &>(zone2) = XTreeZone( lmzone2.GetBaseXLink(), 
-	                                              lmzone2.GetTerminusXLinks(), 
-	                                              lmzone2.GetTreeOrdinal() );		        
 }
 
 
