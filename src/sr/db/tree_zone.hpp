@@ -110,11 +110,11 @@ class RAIISuspendForSwapBase
 {
 protected:
 	RAIISuspendForSwapBase() = delete;
-	RAIISuspendForSwapBase( TreeZone &zone1_, TreeZone &zone2_ );
+	RAIISuspendForSwapBase( XTreeZone &zone1_, XTreeZone &zone2_ );
 	~RAIISuspendForSwapBase();
 	
-	const TreeZone &zone1;
-	const TreeZone &zone2;
+	const XTreeZone &zone1;
+	const XTreeZone &zone2;
 };
  
  

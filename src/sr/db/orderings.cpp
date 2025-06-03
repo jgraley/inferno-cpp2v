@@ -71,7 +71,7 @@ void Orderings::DeleteTree(TreeZone &zone)
 }
 
 
-Orderings::RAIISuspendForSwap::RAIISuspendForSwap(Orderings *orderings_, TreeZone &zone1_, TreeZone &zone2_ ) :
+Orderings::RAIISuspendForSwap::RAIISuspendForSwap(Orderings *orderings_, XTreeZone &zone1_, XTreeZone &zone2_ ) :
 	RAIISuspendForSwapBase( zone1_, zone2_ ),
 	orderings( *orderings_ )
 {	

@@ -72,7 +72,7 @@ void NodeTable::DeleteTree(TreeZone &zone)
 }
 
 
-NodeTable::RAIISuspendForSwap::RAIISuspendForSwap(NodeTable *node_table_, TreeZone &zone1_, TreeZone &zone2_ ) :
+NodeTable::RAIISuspendForSwap::RAIISuspendForSwap(NodeTable *node_table_, XTreeZone &zone1_, XTreeZone &zone2_ ) :
 	RAIISuspendForSwapBase( zone1_, zone2_ ),
 	node_table( *node_table_ )
 {	

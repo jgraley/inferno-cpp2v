@@ -48,7 +48,7 @@ public:
 	class RAIISuspendForSwap : RAIISuspendForSwapBase
 	{
 	public:
-		RAIISuspendForSwap(NodeTable *node_table_, TreeZone &zone1_, TreeZone &zone2_ );
+		RAIISuspendForSwap(NodeTable *node_table_, XTreeZone &zone1_, XTreeZone &zone2_ );
 		~RAIISuspendForSwap();
 	private:
 		DBWalk db_walker;     

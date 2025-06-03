@@ -348,7 +348,7 @@ string MutableZone::GetTrace() const
 
 
 
-RAIISuspendForSwapBase::RAIISuspendForSwapBase( TreeZone &zone1_, TreeZone &zone2_ ) :
+RAIISuspendForSwapBase::RAIISuspendForSwapBase( XTreeZone &zone1_, XTreeZone &zone2_ ) :
 	zone1(zone1_),
 	zone2(zone2_)
 {

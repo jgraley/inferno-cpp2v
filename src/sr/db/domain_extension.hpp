@@ -75,7 +75,7 @@ public:
 	class RAIISuspendForSwap : RAIISuspendForSwapBase
 	{
 	public:
-		RAIISuspendForSwap(DomainExtension *domain_extension_, TreeZone &zone1_, TreeZone &zone2_ );
+		RAIISuspendForSwap(DomainExtension *domain_extension_, XTreeZone &zone1_, XTreeZone &zone2_ );
 		~RAIISuspendForSwap();
 	private:
 		DBWalk db_walker;     

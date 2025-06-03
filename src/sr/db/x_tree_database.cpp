@@ -85,8 +85,8 @@ void XTreeDatabase::TeardownTree(DBCommon::TreeOrdinal tree_ordinal)
 }
 
 
-void XTreeDatabase::SwapTreeToTree( TreeZone &zone1, vector<TreeZone *> fixups1,
-                                    TreeZone &zone2, vector<TreeZone *> fixups2 )
+void XTreeDatabase::SwapTreeToTree( XTreeZone &zone1, vector<TreeZone *> fixups1,
+                                    XTreeZone &zone2, vector<TreeZone *> fixups2 )
 {	
     TRACE("Swapping target TreeZones:\n")(zone1)
          ("\nand: ")(zone2);

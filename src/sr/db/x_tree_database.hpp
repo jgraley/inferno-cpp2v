@@ -38,8 +38,8 @@ public:
     void TeardownTree(DBCommon::TreeOrdinal tree_ordinal);
    
 	// Swap content between two different trees, performed on geom assets only
-   	void SwapTreeToTree( TreeZone &tree_zone_l, vector<TreeZone *> fixups_l,
-		 				 TreeZone &tree_zone_r, vector<TreeZone *> fixups_r );
+   	void SwapTreeToTree( XTreeZone &tree_zone_l, vector<TreeZone *> fixups_l,
+		 				 XTreeZone &tree_zone_r, vector<TreeZone *> fixups_r );
 
 	// Actions to take at the end of an update cycle
     void PerformDeferredActions();
