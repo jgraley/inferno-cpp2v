@@ -26,8 +26,8 @@ void MoveInPass::Run(MovesMap &moves_map)
 		XTreeZone extra_tree_zone = p.second;
 		
 		// Swap the moving content in and the scaffold out
-		db->SwapTreeToTree( extra_tree_zone, vector<TreeZone *>(),
-							inverted_main_tree_zone, vector<TreeZone *>() );
+		db->SwapTreeToTree( extra_tree_zone, vector<XTreeZone *>(),
+							inverted_main_tree_zone, vector<XTreeZone *>() );
 							
 		// We're done with the extra tree zone which now contains scaffold
 		db->TeardownTree(extra_tree_zone.GetTreeOrdinal()); 				                                     	

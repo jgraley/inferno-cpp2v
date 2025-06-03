@@ -28,7 +28,7 @@ const Lacing *Orderings::GetLacing() const
 }
 
 	
-void Orderings::InsertTree(TreeZone &zone)
+void Orderings::InsertTree(XTreeZone &zone)
 {     
 	// -------------------- depth-first -----------------------
     InsertGeometric(zone);
@@ -49,7 +49,7 @@ void Orderings::InsertTree(TreeZone &zone)
 }
 
 
-void Orderings::DeleteTree(TreeZone &zone)
+void Orderings::DeleteTree(XTreeZone &zone)
 {
 	// -------------------- depth-first -----------------------
     DeleteGeometric(zone);

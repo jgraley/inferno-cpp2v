@@ -58,7 +58,7 @@ void DomainExtension::PerformDeferredActions()
 }
 
 
-void DomainExtension::InsertTree(const TreeZone &zone)
+void DomainExtension::InsertTree(const XTreeZone &zone)
 {     
     auto action = [&](const DBWalk::WalkInfo &walk_info)
     {
@@ -68,7 +68,7 @@ void DomainExtension::InsertTree(const TreeZone &zone)
 }
 
 
-void DomainExtension::DeleteTree(const TreeZone &zone)
+void DomainExtension::DeleteTree(const XTreeZone &zone)
 {
     auto action = [&](const DBWalk::WalkInfo &walk_info)
     {

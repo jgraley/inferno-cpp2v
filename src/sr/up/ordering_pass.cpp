@@ -517,13 +517,14 @@ void OrderingPass::MoveTreeZoneOut( shared_ptr<Patch> *ooo_patch_ptr, shared_ptr
 	main_tree_zone_from.Validate(db);
 	
 	// Determine the fix-sops we'll need to do for tree zones in neighbouring patches
-    vector<TreeZone *> fixups;	
+    vector<XTreeZone *> fixups;	
     for( size_t i=0; i<main_tree_zone_from.GetNumTerminii(); i++ )
 	{				
-		TreeZone *found = nullptr;
+		XTreeZone *found = nullptr;
 		TreeZonePatch::ForTreeDepthFirstWalk(layout, [&](shared_ptr<TreeZonePatch> &patch)
 		{
-			TreeZone *candidate = patch->GetZone();
+			XTreeZone *candidate = dynamic_cast<XTreeZone *>(patch->GetZone());
+			ASSERT( candidate );
 			if( candidate->GetBaseXLink() == main_tree_zone_from.GetTerminusXLink(i) )
 			{
 				ASSERT( !found );
@@ -540,7 +541,7 @@ void OrderingPass::MoveTreeZoneOut( shared_ptr<Patch> *ooo_patch_ptr, shared_ptr
 	// tree_zone_in_extra <- the actual moving zone now in extra tree
 	// main_tree_zone_from <- the "from" scaffold now in main tree, to be killed by inversion
 	db->XTreeDatabase::SwapTreeToTree( main_tree_zone_from, fixups,
-		    						   tree_zone_in_extra, vector<TreeZone *>() );
+		    						   tree_zone_in_extra, vector<XTreeZone *>() );
 
 	// ------------------------- Add "To" scaffolding patch to tree for inversion ---------------------------
 	// tree_zone_in_extra now contains the moving zone	

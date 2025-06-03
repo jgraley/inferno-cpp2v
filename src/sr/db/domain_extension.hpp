@@ -69,8 +69,8 @@ public:
     // To be called after modifying the tree, and before any search/compare operation
     void PerformDeferredActions();
 
-	void InsertTree(const TreeZone &zone);
-	void DeleteTree(const TreeZone &zone);
+	void InsertTree(const XTreeZone &zone);
+	void DeleteTree(const XTreeZone &zone);
     
 	class RAIISuspendForSwap : RAIISuspendForSwapBase
 	{

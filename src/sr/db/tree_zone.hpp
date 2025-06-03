@@ -95,7 +95,7 @@ public:
     const Mutator &GetTerminusMutator(size_t index) const;	
 	XTreeZone GetXTreeZone() const;
 
-	void Swap( MutableZone &tree_zone_r, vector<TreeZone *> fixups_l, vector<TreeZone *> fixups_r );
+	void Swap( MutableZone &tree_zone_r, vector<XTreeZone *> fixups_l, vector<XTreeZone *> fixups_r );
        
     string GetTrace() const override;
     

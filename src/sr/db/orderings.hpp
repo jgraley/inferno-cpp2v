@@ -38,8 +38,8 @@ private:
 public:
     const Lacing *GetLacing() const;
 
-    void InsertTree(TreeZone &zone);
-    void DeleteTree(TreeZone &zone);
+    void InsertTree(XTreeZone &zone);
+    void DeleteTree(XTreeZone &zone);
 
 	class RAIISuspendForSwap : RAIISuspendForSwapBase
 	{

@@ -38,8 +38,8 @@ public:
     void TeardownTree(DBCommon::TreeOrdinal tree_ordinal);
    
 	// Swap content between two different trees, performed on geom assets only
-   	void SwapTreeToTree( XTreeZone &tree_zone_l, vector<TreeZone *> fixups_l,
-		 				 XTreeZone &tree_zone_r, vector<TreeZone *> fixups_r );
+   	void SwapTreeToTree( XTreeZone &tree_zone_l, vector<XTreeZone *> fixups_l,
+		 				 XTreeZone &tree_zone_r, vector<XTreeZone *> fixups_r );
 
 	// Actions to take at the end of an update cycle
     void PerformDeferredActions();
@@ -75,8 +75,8 @@ public:
 
     Mutator CreateTreeMutator(XLink xlink) const;
     MutableZone CreateMutableZone(XLink xlink,
-                                          vector<XLink> terminii,
-                                          DBCommon::TreeOrdinal ordinal) const;
+                                  vector<XLink> terminii,
+                                  DBCommon::TreeOrdinal ordinal) const;
     MutableZone CreateMutableZone(TreeZone &zone) const;
 
     void Dump() const;

@@ -33,14 +33,14 @@ const DBCommon::CoreInfo &LinkTable::GetCoreInfo(XLink xlink) const
 }
  
  
-void LinkTable::InsertTree(TreeZone &zone)
+void LinkTable::InsertTree(XTreeZone &zone)
 {     
 	db_walker.WalkTreeZone( bind(&LinkTable::InsertAction, this, placeholders::_1), 
 	                        zone, DBWalk::WIND_IN, DBCommon::GetRootCoreInfo() );
 }
 
 
-void LinkTable::DeleteTree(TreeZone &zone)
+void LinkTable::DeleteTree(XTreeZone &zone)
 {
 	db_walker.WalkTreeZone( bind(&LinkTable::DeleteAction, this, placeholders::_1), 
 					        zone, DBWalk::WIND_OUT, DBCommon::GetRootCoreInfo() );

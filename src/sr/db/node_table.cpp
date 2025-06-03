@@ -50,7 +50,7 @@ bool NodeTable::IsDeclarer(XLink xlink) const
 }
 
 
-void NodeTable::InsertTree(TreeZone &zone)
+void NodeTable::InsertTree(XTreeZone &zone)
 {     
 	// For building, we must add every node in the zone
 	auto action = [&](const DBWalk::WalkInfo &walk_info)
@@ -61,7 +61,7 @@ void NodeTable::InsertTree(TreeZone &zone)
 }
 
 
-void NodeTable::DeleteTree(TreeZone &zone)
+void NodeTable::DeleteTree(XTreeZone &zone)
 {
 	// For tear-down, we must remove every node in the zone
 	auto action = [&](const DBWalk::WalkInfo &walk_info)
