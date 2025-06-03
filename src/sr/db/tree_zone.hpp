@@ -72,12 +72,12 @@ protected:
     vector<XLink> terminii;    
 };
 
-// ------------------------- MutableTreeZone --------------------------
+// ------------------------- MutableZone --------------------------
  
-class MutableTreeZone : public Zone
+class MutableZone : public Zone
 {
 public:
-    explicit MutableTreeZone( Mutator &&base_, 
+    explicit MutableZone( Mutator &&base_, 
                               vector<Mutator> &&terminii_,
                               DBCommon::TreeOrdinal ordinal_ );
 
@@ -95,7 +95,7 @@ public:
     const Mutator &GetTerminusMutator(size_t index) const;	
 	XTreeZone GetXTreeZone() const;
 
-	void Swap( MutableTreeZone &tree_zone_r, vector<TreeZone *> fixups_l, vector<TreeZone *> fixups_r );
+	void Swap( MutableZone &tree_zone_r, vector<TreeZone *> fixups_l, vector<TreeZone *> fixups_r );
        
     string GetTrace() const override;
     

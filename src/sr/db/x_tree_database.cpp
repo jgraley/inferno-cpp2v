@@ -102,8 +102,8 @@ void XTreeDatabase::SwapTreeToTree( TreeZone &zone1, vector<TreeZone *> fixups1,
     
 	// Move to local mutable zone BEFORE the suspensions, because DB will lose the 
 	// ability to create the mutators afterwards.
-	MutableTreeZone lmzone1 = CreateMutableTreeZone(zone1);
-	MutableTreeZone lmzone2 = CreateMutableTreeZone(zone2);
+	MutableZone lmzone1 = CreateMutableZone(zone1);
+	MutableZone lmzone2 = CreateMutableZone(zone2);
 
 	{
 		// Scope contains suspension objects on stack
@@ -336,7 +336,7 @@ Mutator XTreeDatabase::CreateTreeMutator(XLink xlink)  const
 }
 
 
-MutableTreeZone XTreeDatabase::CreateMutableTreeZone(XLink base,
+MutableZone XTreeDatabase::CreateMutableZone(XLink base,
                                                      vector<XLink> terminii,
 													 DBCommon::TreeOrdinal ordinal) const
 {
@@ -344,17 +344,17 @@ MutableTreeZone XTreeDatabase::CreateMutableTreeZone(XLink base,
 	vector<Mutator> terminii_mutators;
 	for( XLink t : terminii )
 		terminii_mutators.push_back( CreateTreeMutator(t) ); 
-	return MutableTreeZone( move(base_mutator), move(terminii_mutators), ordinal );
+	return MutableZone( move(base_mutator), move(terminii_mutators), ordinal );
 }                                                
 
 
-MutableTreeZone XTreeDatabase::CreateMutableTreeZone(TreeZone &zone) const
+MutableZone XTreeDatabase::CreateMutableZone(TreeZone &zone) const
 {
 	Mutator base_mutator = CreateTreeMutator(zone.GetBaseXLink());
 	vector<Mutator> terminii_mutators;
 	for( XLink t : zone.GetTerminusXLinks() )
 		terminii_mutators.push_back( CreateTreeMutator(t) ); 
-	return MutableTreeZone( move(base_mutator), move(terminii_mutators), zone.GetTreeOrdinal() );
+	return MutableZone( move(base_mutator), move(terminii_mutators), zone.GetTreeOrdinal() );
 }                                                
 
 

@@ -172,9 +172,9 @@ string XTreeZone::GetTrace() const
     return "XTreeZone(" + s +")";
 }
 
-// ------------------------- MutableTreeZone --------------------------
+// ------------------------- MutableZone --------------------------
 
-MutableTreeZone::MutableTreeZone( Mutator &&base_, 
+MutableZone::MutableZone( Mutator &&base_, 
                                   vector<Mutator> &&terminii_,
                                   DBCommon::TreeOrdinal ordinal_ ) :
     base(move(base_)),
@@ -189,33 +189,33 @@ MutableTreeZone::MutableTreeZone( Mutator &&base_,
 }
 
 
-bool MutableTreeZone::IsEmpty() const
+bool MutableZone::IsEmpty() const
 {
     // There must be a base, so the only way to be empty is to terminate at the base
     return terminii.size()==1 && SoloElementOf(terminii) == base;
 }
 
 
-size_t MutableTreeZone::GetNumTerminii() const
+size_t MutableZone::GetNumTerminii() const
 {
     return terminii.size();
 }
 
 
-TreePtr<Node> MutableTreeZone::GetBaseNode() const
+TreePtr<Node> MutableZone::GetBaseNode() const
 {
     return base.GetChildTreePtr();
 }
 
 
-XLink MutableTreeZone::GetBaseXLink() const
+XLink MutableZone::GetBaseXLink() const
 {
 	ASSERT( base.GetChildTreePtr() )(base);
     return base.GetXLink();
 }
 
 
-vector<XLink> MutableTreeZone::GetTerminusXLinks() const
+vector<XLink> MutableZone::GetTerminusXLinks() const
 {
 	vector<XLink> xlinks;
     for( const Mutator &terminus : terminii )
@@ -224,38 +224,38 @@ vector<XLink> MutableTreeZone::GetTerminusXLinks() const
 }
 
 
-XLink MutableTreeZone::GetTerminusXLink(size_t index) const
+XLink MutableZone::GetTerminusXLink(size_t index) const
 {
 	return terminii[index].GetXLink();
 }
 
 
-DBCommon::TreeOrdinal MutableTreeZone::GetTreeOrdinal() const
+DBCommon::TreeOrdinal MutableZone::GetTreeOrdinal() const
 {
 	return ordinal;
 }
 
 
-const Mutator &MutableTreeZone::GetBaseMutator() const
+const Mutator &MutableZone::GetBaseMutator() const
 {
     return base;
 }
 
 
-void MutableTreeZone::SetBaseMutator( const Mutator &new_base )
+void MutableZone::SetBaseMutator( const Mutator &new_base )
 {
 	ASSERT( new_base.GetChildTreePtr() );
 	base = new_base;
 }
 
 
-const Mutator &MutableTreeZone::GetTerminusMutator(size_t index) const
+const Mutator &MutableZone::GetTerminusMutator(size_t index) const
 {
 	return terminii[index];
 }
 
 
-XTreeZone MutableTreeZone::GetXTreeZone() const
+XTreeZone MutableZone::GetXTreeZone() const
 {
     vector<XLink> v;
     for( const Mutator &m : terminii )
@@ -264,7 +264,7 @@ XTreeZone MutableTreeZone::GetXTreeZone() const
 }
 
 
-void MutableTreeZone::Swap( MutableTreeZone &tree_zone_r, vector<TreeZone *> fixups_l, vector<TreeZone *> fixups_r )
+void MutableZone::Swap( MutableZone &tree_zone_r, vector<TreeZone *> fixups_l, vector<TreeZone *> fixups_r )
 {
 	// Should be true regardless of empty zones
 	ASSERT( GetNumTerminii() == tree_zone_r.GetNumTerminii() );
@@ -293,7 +293,7 @@ void MutableTreeZone::Swap( MutableTreeZone &tree_zone_r, vector<TreeZone *> fix
         
    		if( !fixups_l.empty() && *fixups_l_it )
    		{
-			if( auto flm = dynamic_cast<MutableTreeZone *>(*fixups_l_it) )
+			if( auto flm = dynamic_cast<MutableZone *>(*fixups_l_it) )
 				flm->SetBaseMutator(terminus_l);
 			else if( auto flx = dynamic_cast<XTreeZone *>(*fixups_l_it) )
 				flx->SetBaseXLink(terminus_l.GetXLink());
@@ -302,7 +302,7 @@ void MutableTreeZone::Swap( MutableTreeZone &tree_zone_r, vector<TreeZone *> fix
 		}
    		if( !fixups_r.empty() && *fixups_r_it )
    		{
-			if( auto frm = dynamic_cast<MutableTreeZone *>(*fixups_r_it) )
+			if( auto frm = dynamic_cast<MutableZone *>(*fixups_r_it) )
 				frm->SetBaseMutator(terminus_r);
 			else if( auto frx = dynamic_cast<XTreeZone *>(*fixups_r_it) )
 				frx->SetBaseXLink(terminus_r.GetXLink());
@@ -324,7 +324,7 @@ void MutableTreeZone::Swap( MutableTreeZone &tree_zone_r, vector<TreeZone *> fix
 }
 
 
-string MutableTreeZone::GetTrace() const
+string MutableZone::GetTrace() const
 {
     string s;	
     if( IsEmpty() )
@@ -342,7 +342,7 @@ string MutableTreeZone::GetTrace() const
             s += " ⇥ " + Trace(terminii); // Indicates the zone terminates            
     }
     
-    return "MutableTreeZone(" + s +")";
+    return "MutableZone(" + s +")";
 }
 
 
