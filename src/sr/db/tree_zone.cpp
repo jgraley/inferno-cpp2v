@@ -292,19 +292,9 @@ void MutableZone::Swap( MutableZone &tree_zone_r, vector<XTreeZone *> fixups_l, 
         ASSERT( terminus_r.GetChildTreePtr() );
         
    		if( !fixups_l.empty() && *fixups_l_it )
-   		{
-			if( auto flx = dynamic_cast<XTreeZone *>(*fixups_l_it) )
-				flx->SetBaseXLink(terminus_l.GetXLink());
-			else
-				ASSERTFAIL();
-		}
+			(*fixups_l_it)->SetBaseXLink(terminus_l.GetXLink());
    		if( !fixups_r.empty() && *fixups_r_it )
-   		{
-			if( auto frx = dynamic_cast<XTreeZone *>(*fixups_r_it) )
-				frx->SetBaseXLink(terminus_r.GetXLink());
-			else
-				ASSERTFAIL();
-		}
+			(*fixups_r_it)->SetBaseXLink(terminus_r.GetXLink());
         
         terminus_it_r++;
         if( !fixups_l.empty() )

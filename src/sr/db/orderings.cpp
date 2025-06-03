@@ -101,7 +101,7 @@ Orderings::RAIISuspendForSwap::~RAIISuspendForSwap()
 }
 
         
-void Orderings::InsertGeometric(const TreeZone &zone)
+void Orderings::InsertGeometric(const XTreeZone &zone)
 {     
 	// Take care of the DFO, which is an XLink-keyed ordering and must be updated fully in geom case
     auto action = [&](const DBWalk::WalkInfo &walk_info)
@@ -113,7 +113,7 @@ void Orderings::InsertGeometric(const TreeZone &zone)
 }
 
 
-void Orderings::DeleteGeometric(const TreeZone &zone)
+void Orderings::DeleteGeometric(const XTreeZone &zone)
 {
 	// Take care of the DFO, which is an XLink-keyed ordering and must be updated fully in geom case
     auto action = [&](const DBWalk::WalkInfo &walk_info)
@@ -166,7 +166,7 @@ void Orderings::DeleteActionSCAndCAT(const DBWalk::WalkInfo &walk_info)
 }
        
 
-set<TreePtr<Node>> Orderings::GetTerminusAndBaseAncestors( const TreeZone &tz ) const
+set<TreePtr<Node>> Orderings::GetTerminusAndBaseAncestors( const XTreeZone &tz ) const
 {
 	set<TreePtr<Node>> sn;
 		

@@ -51,14 +51,14 @@ public:
 		Orderings &orderings;
 	};
 
-    void InsertGeometric(const TreeZone &zone);
-    void DeleteGeometric(const TreeZone &zone);
+    void InsertGeometric(const XTreeZone &zone);
+    void DeleteGeometric(const XTreeZone &zone);
 
 private:
 	void InsertActionSCAndCAT(const DBWalk::WalkInfo &walk_info);
     void DeleteActionSCAndCAT(const DBWalk::WalkInfo &walk_info);
 
-	set<TreePtr<Node>> GetTerminusAndBaseAncestors( const TreeZone &tz ) const; 
+	set<TreePtr<Node>> GetTerminusAndBaseAncestors( const XTreeZone &tz ) const; 
     
 public:
     void Dump() const;

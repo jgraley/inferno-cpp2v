@@ -73,12 +73,14 @@ public:
     TreePtr<Node> GetMainRootNode() const;
     XLink GetMainRootXLink() const;
 
+private: 
     Mutator CreateTreeMutator(XLink xlink) const;
     MutableZone CreateMutableZone(XLink xlink,
                                   vector<XLink> terminii,
                                   DBCommon::TreeOrdinal ordinal) const;
-    MutableZone CreateMutableZone(TreeZone &zone) const;
+    MutableZone CreateMutableZone(XTreeZone &zone) const;
 
+public:
     void Dump() const;
 	void DumpTables() const;
 

@@ -337,8 +337,8 @@ Mutator XTreeDatabase::CreateTreeMutator(XLink xlink)  const
 
 
 MutableZone XTreeDatabase::CreateMutableZone(XLink base,
-                                                     vector<XLink> terminii,
-													 DBCommon::TreeOrdinal ordinal) const
+                                             vector<XLink> terminii,
+											 DBCommon::TreeOrdinal ordinal) const
 {
 	Mutator base_mutator = CreateTreeMutator(base);
 	vector<Mutator> terminii_mutators;
@@ -348,7 +348,7 @@ MutableZone XTreeDatabase::CreateMutableZone(XLink base,
 }                                                
 
 
-MutableZone XTreeDatabase::CreateMutableZone(TreeZone &zone) const
+MutableZone XTreeDatabase::CreateMutableZone(XTreeZone &zone) const
 {
 	Mutator base_mutator = CreateTreeMutator(zone.GetBaseXLink());
 	vector<Mutator> terminii_mutators;
