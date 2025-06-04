@@ -75,9 +75,6 @@ public:
 
 private: 
     Mutator CreateTreeMutator(XLink xlink) const;
-    MutableZone CreateMutableZone(XLink xlink,
-                                  vector<XLink> terminii,
-                                  DBCommon::TreeOrdinal ordinal) const;
     MutableZone CreateMutableZone(XTreeZone &zone) const;
 
 public:

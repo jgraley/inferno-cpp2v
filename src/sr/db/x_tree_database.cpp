@@ -100,8 +100,8 @@ void XTreeDatabase::SwapTreeToTree( XTreeZone &zone1, vector<XTreeZone *> fixups
 	zone1.Validate(this); 
 	zone2.Validate(this); 
     
-	// Move to local mutable zone BEFORE the suspensions, because DB will lose the 
-	// ability to create the mutators afterwards.
+	// Move to local mutable zone here because a suspended LinkTable will not 
+	// be able to provide the info to create them.
 	MutableZone lmzone1 = CreateMutableZone(zone1);
 	MutableZone lmzone2 = CreateMutableZone(zone2);
 
@@ -112,15 +112,12 @@ void XTreeDatabase::SwapTreeToTree( XTreeZone &zone1, vector<XTreeZone *> fixups
 		NodeTable::RAIISuspendForSwap node_table_sus(node_table.get(), zone1, zone2);  
 		LinkTable::RAIISuspendForSwap link_table_sus(link_table.get(), zone1, zone2);  
 		
-		lmzone1.Swap( lmzone2, fixups1, fixups2 );  // TODO be static and symmetrical
+		MutableZone::Swap( lmzone1, fixups1, 
+		                   lmzone2, fixups2 );  
 
 		// Fix up the supplied zones
-		dynamic_cast<XTreeZone &>(zone1) = XTreeZone( lmzone1.GetBaseXLink(), 
-													  lmzone1.GetTerminusXLinks(), 
-													  lmzone1.GetTreeOrdinal() );
-		dynamic_cast<XTreeZone &>(zone2) = XTreeZone( lmzone2.GetBaseXLink(), 
-													  lmzone2.GetTerminusXLinks(), 
-													  lmzone2.GetTreeOrdinal() );		        
+		zone1 = lmzone1.GetXTreeZone();
+		zone2 = lmzone2.GetXTreeZone();		        
 
 		TRACE("After swapping zones: ")(lmzone1)
 			 ("\nand: ")(lmzone2)("\n");    
@@ -129,8 +126,7 @@ void XTreeDatabase::SwapTreeToTree( XTreeZone &zone1, vector<XTreeZone *> fixups
 	} 
         
     if( ReadArgs::test_db )
-        CheckAssets();
-       
+        CheckAssets();       
 }
 
 
@@ -334,18 +330,6 @@ Mutator XTreeDatabase::CreateTreeMutator(XLink xlink)  const
         }
     }    
 }
-
-
-MutableZone XTreeDatabase::CreateMutableZone(XLink base,
-                                             vector<XLink> terminii,
-											 DBCommon::TreeOrdinal ordinal) const
-{
-	Mutator base_mutator = CreateTreeMutator(base);
-	vector<Mutator> terminii_mutators;
-	for( XLink t : terminii )
-		terminii_mutators.push_back( CreateTreeMutator(t) ); 
-	return MutableZone( move(base_mutator), move(terminii_mutators), ordinal );
-}                                                
 
 
 MutableZone XTreeDatabase::CreateMutableZone(XTreeZone &zone) const

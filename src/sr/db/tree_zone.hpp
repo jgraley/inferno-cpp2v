@@ -74,28 +74,19 @@ protected:
 
 // ------------------------- MutableZone --------------------------
  
-class MutableZone : public Zone
+class MutableZone : public Traceable
 {
 public:
     explicit MutableZone( Mutator &&base_, 
                               vector<Mutator> &&terminii_,
                               DBCommon::TreeOrdinal ordinal_ );
 
-    bool IsEmpty() const override;
-    size_t GetNumTerminii() const override;
-    TreePtr<Node> GetBaseNode() const override;
+    bool IsEmpty() const;
 
-    XLink GetBaseXLink() const;
-    vector<XLink> GetTerminusXLinks() const;
-    XLink GetTerminusXLink(size_t index) const;
-    DBCommon::TreeOrdinal GetTreeOrdinal() const;
-
-    const Mutator &GetBaseMutator() const;
-    void SetBaseMutator( const Mutator &new_base );
-    const Mutator &GetTerminusMutator(size_t index) const;	
 	XTreeZone GetXTreeZone() const;
 
-	void Swap( MutableZone &tree_zone_r, vector<XTreeZone *> fixups_l, vector<XTreeZone *> fixups_r );
+	static void Swap( MutableZone &tree_zone_l, vector<XTreeZone *> fixups_l, 
+	                  MutableZone &tree_zone_r, vector<XTreeZone *> fixups_r );
        
     string GetTrace() const override;
     

@@ -178,14 +178,12 @@ MutableZone::MutableZone( Mutator &&base_,
                                   vector<Mutator> &&terminii_,
                                   DBCommon::TreeOrdinal ordinal_ ) :
     base(move(base_)),
+    terminii(move(terminii_)),
     ordinal( ordinal_ )
 {
 	ASSERT( base.GetChildTreePtr() );
-    for( Mutator &terminus : terminii_ )
-    {
+    for( Mutator &terminus : terminii )
 		ASSERT( terminus.GetChildTreePtr() );
-		terminii.push_back(move(terminus));
-	}
 }
 
 
@@ -193,65 +191,6 @@ bool MutableZone::IsEmpty() const
 {
     // There must be a base, so the only way to be empty is to terminate at the base
     return terminii.size()==1 && SoloElementOf(terminii) == base;
-}
-
-
-size_t MutableZone::GetNumTerminii() const
-{
-    return terminii.size();
-}
-
-
-TreePtr<Node> MutableZone::GetBaseNode() const
-{
-    return base.GetChildTreePtr();
-}
-
-
-XLink MutableZone::GetBaseXLink() const
-{
-	ASSERT( base.GetChildTreePtr() )(base);
-    return base.GetXLink();
-}
-
-
-vector<XLink> MutableZone::GetTerminusXLinks() const
-{
-	vector<XLink> xlinks;
-    for( const Mutator &terminus : terminii )
-		xlinks.push_back( terminus.GetXLink() );
-	return xlinks;
-}
-
-
-XLink MutableZone::GetTerminusXLink(size_t index) const
-{
-	return terminii[index].GetXLink();
-}
-
-
-DBCommon::TreeOrdinal MutableZone::GetTreeOrdinal() const
-{
-	return ordinal;
-}
-
-
-const Mutator &MutableZone::GetBaseMutator() const
-{
-    return base;
-}
-
-
-void MutableZone::SetBaseMutator( const Mutator &new_base )
-{
-	ASSERT( new_base.GetChildTreePtr() );
-	base = new_base;
-}
-
-
-const Mutator &MutableZone::GetTerminusMutator(size_t index) const
-{
-	return terminii[index];
 }
 
 
@@ -264,32 +203,33 @@ XTreeZone MutableZone::GetXTreeZone() const
 }
 
 
-void MutableZone::Swap( MutableZone &tree_zone_r, vector<XTreeZone *> fixups_l, vector<XTreeZone *> fixups_r )
+void MutableZone::Swap( MutableZone &tree_zone_l, vector<XTreeZone *> fixups_l, 
+                        MutableZone &tree_zone_r, vector<XTreeZone *> fixups_r )
 {
 	// Should be true regardless of empty zones
-	ASSERT( GetNumTerminii() == tree_zone_r.GetNumTerminii() );
-	ASSERT( !IsEmpty() ); // TODO overcautious?      
-	ASSERT( !tree_zone_r.IsEmpty() ); // TODO overcautious?      
+	ASSERTS( tree_zone_l.terminii.size() == tree_zone_r.terminii.size() );
+	ASSERTS( !tree_zone_l.IsEmpty() ); 
+	ASSERTS( !tree_zone_r.IsEmpty() );       
 
     // Do a co-walk and exchange one at a time. We want to modify the parent
     // sides of the terminii in-place, leaving valid mutators behind. 
     vector<XTreeZone *>::iterator fixups_l_it = fixups_l.begin();
     vector<XTreeZone *>::iterator fixups_r_it = fixups_r.begin();
     vector<Mutator>::iterator terminus_it_r = tree_zone_r.terminii.begin();    
-    for( Mutator &terminus_l : terminii )
+    for( Mutator &terminus_l : tree_zone_l.terminii )
     {
-        ASSERT( terminus_it_r != tree_zone_r.terminii.end() ); // length mismatch    
+        ASSERTS( terminus_it_r != tree_zone_r.terminii.end() ); // length mismatch    
         Mutator &terminus_r = *terminus_it_r;
          
 		if( !fixups_l.empty() && *fixups_l_it )
-			ASSERT( (*fixups_l_it)->GetBaseXLink() == terminus_l.GetXLink() );
+			ASSERTS( (*fixups_l_it)->GetBaseXLink() == terminus_l.GetXLink() );
 		if( !fixups_r.empty() && *fixups_r_it )
-			ASSERT( (*fixups_r_it)->GetBaseXLink() == terminus_r.GetXLink() );
+			ASSERTS( (*fixups_r_it)->GetBaseXLink() == terminus_r.GetXLink() );
                          
 	    terminus_l.ExchangeParent(terminus_r); // deep
 		               
-        ASSERT( terminus_l.GetChildTreePtr() );
-        ASSERT( terminus_r.GetChildTreePtr() );
+        ASSERTS( terminus_l.GetChildTreePtr() );
+        ASSERTS( terminus_r.GetChildTreePtr() );
         
    		if( !fixups_l.empty() && *fixups_l_it )
 			(*fixups_l_it)->SetBaseXLink(terminus_l.GetXLink());
@@ -302,10 +242,10 @@ void MutableZone::Swap( MutableZone &tree_zone_r, vector<XTreeZone *> fixups_l, 
         if( !fixups_r.empty() )
 			fixups_r_it++;
     } 
-    ASSERT( terminus_it_r == tree_zone_r.terminii.end() ); // length mismatch    
+    ASSERTS( terminus_it_r == tree_zone_r.terminii.end() ); // length mismatch    
 	
-    TreePtr<Node> base_node_r = tree_zone_r.GetBaseNode();
-    TreePtr<Node> original_base_node_l = base.ExchangeChild( base_node_r );	// deep 
+    TreePtr<Node> base_node_r = tree_zone_r.base.GetChildTreePtr();
+    TreePtr<Node> original_base_node_l = tree_zone_l.base.ExchangeChild( base_node_r );	// deep 
 	(void)tree_zone_r.base.ExchangeChild( original_base_node_l );		
 }
 
