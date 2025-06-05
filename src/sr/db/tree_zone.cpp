@@ -7,78 +7,6 @@
 
 using namespace SR;
 
-TreeZone::TreeZone(DBCommon::TreeOrdinal ordinal_) :
-	ordinal(ordinal_)
-{
-}
-
-
-DBCommon::TreeOrdinal TreeZone::GetTreeOrdinal() const
-{
-	return ordinal;
-}
-
-
-unique_ptr<FreeZone> TreeZone::Duplicate() const
-{
-    if( IsEmpty() )
-        return make_unique<FreeZone>( FreeZone::CreateEmpty() );
-        
-    // Iterate over terminii and operand zones together, filling the map for
-    // DuplicateSubtree() to use.
-    Duplicate::TerminiiMap duplicator_terminus_map;
-    for( XLink terminus_upd : GetTerminusXLinks() ) 
-        duplicator_terminus_map[terminus_upd] = { TreePtr<Node>(), Mutator() };
-
-    // Duplicate the subtree, populating from the map.
-    TreePtr<Node> new_base_x = Duplicate::DuplicateSubtree( GetBaseXLink(), 
-                                                            duplicator_terminus_map );   
-    
-    list<Mutator> free_zone_terminii;
-    for( XLink terminus_upd : GetTerminusXLinks() )
-        free_zone_terminii.push_back( duplicator_terminus_map[terminus_upd].mutator );   
-
-    // Create a new zone for the result.
-    return make_unique<FreeZone>( new_base_x, move(free_zone_terminii) );
-}
-
-
-void TreeZone::Validate(const XTreeDatabase *db) const // TODO maybe move to database?
-{       
-    XLink base = GetBaseXLink();
-    ASSERT( base )(base);
-    ASSERT( base.GetChildTreePtr() )(base);
-    ASSERT( db->HasRow( base ) )(base);      
-
-    if( IsEmpty() )
-        return; // We've checked enough for empty zones
-    // Now we've excluded legit empty zones, checks can be strict
-    
-    DepthFirstRelation dfr( db );
-    XLink prev = XLink();
-    
-    //FTRACE(prev_xlink)("\n");
-    for( XLink terminus : GetTerminusXLinks() )
-    {
-		ASSERT( terminus )(terminus);
-		ASSERT( terminus.GetChildTreePtr() )(terminus);
-        ASSERT( db->HasRow( terminus ) )(terminus);        
-                        
-        if( prev )
-        {
-			auto p = dfr.CompareHierarchical( prev, terminus );
-            ASSERT( p.first < 0 ); // strict: no repeated XLinks
-            // Terminii should not be in parent/child relationships
-			ASSERT( p.second != DepthFirstRelation::LEFT_IS_ANCESTOR )(prev)(" vs ")(terminus)(" got ")(p); 
-		}
-
-        auto p2 = dfr.CompareHierarchical( base, terminus );
-		ASSERT( p2.second == DepthFirstRelation::LEFT_IS_ANCESTOR )(base)(" vs ")(terminus)(" got ")(p2); 
-            
-        prev = terminus;        
-    }    
-}
-
 // ------------------------- XTreeZone --------------------------
 
 XTreeZone XTreeZone::CreateSubtree( XLink base, 
@@ -99,9 +27,9 @@ XTreeZone XTreeZone::CreateEmpty( XLink base )
 XTreeZone::XTreeZone( XLink base_, 
 					  vector<XLink> terminii_,
 					  DBCommon::TreeOrdinal ordinal_ ) :
-	TreeZone( ordinal_ ),
     base( base_ ),
-    terminii( terminii_ )
+    terminii( terminii_ ),
+	ordinal( ordinal_ )
 {
     ASSERT( base ); // XTreeZone is not nullable
     ASSERT( base.GetChildTreePtr() ); // Cannot be empty
@@ -145,9 +73,77 @@ XLink XTreeZone::GetTerminusXLink(size_t index) const
 }
 
 
+
+DBCommon::TreeOrdinal XTreeZone::GetTreeOrdinal() const
+{
+	return ordinal;
+}
+
+
 void XTreeZone::SetBaseXLink(XLink new_base)
 {
 	base = new_base;
+}
+
+
+unique_ptr<FreeZone> XTreeZone::Duplicate() const
+{
+    if( IsEmpty() )
+        return make_unique<FreeZone>( FreeZone::CreateEmpty() );
+        
+    // Iterate over terminii and operand zones together, filling the map for
+    // DuplicateSubtree() to use.
+    Duplicate::TerminiiMap duplicator_terminus_map;
+    for( XLink terminus_upd : GetTerminusXLinks() ) 
+        duplicator_terminus_map[terminus_upd] = { TreePtr<Node>(), Mutator() };
+
+    // Duplicate the subtree, populating from the map.
+    TreePtr<Node> new_base_x = Duplicate::DuplicateSubtree( GetBaseXLink(), 
+                                                            duplicator_terminus_map );   
+    
+    list<Mutator> free_zone_terminii;
+    for( XLink terminus_upd : GetTerminusXLinks() )
+        free_zone_terminii.push_back( duplicator_terminus_map[terminus_upd].mutator );   
+
+    // Create a new zone for the result.
+    return make_unique<FreeZone>( new_base_x, move(free_zone_terminii) );
+}
+
+
+void XTreeZone::Validate(const XTreeDatabase *db) const // TODO maybe move to database?
+{       
+    XLink base = GetBaseXLink();
+    ASSERT( base )(base);
+    ASSERT( base.GetChildTreePtr() )(base);
+    ASSERT( db->HasRow( base ) )(base);      
+
+    if( IsEmpty() )
+        return; // We've checked enough for empty zones
+    // Now we've excluded legit empty zones, checks can be strict
+    
+    DepthFirstRelation dfr( db );
+    XLink prev = XLink();
+    
+    //FTRACE(prev_xlink)("\n");
+    for( XLink terminus : GetTerminusXLinks() )
+    {
+		ASSERT( terminus )(terminus);
+		ASSERT( terminus.GetChildTreePtr() )(terminus);
+        ASSERT( db->HasRow( terminus ) )(terminus);        
+                        
+        if( prev )
+        {
+			auto p = dfr.CompareHierarchical( prev, terminus );
+            ASSERT( p.first < 0 ); // strict: no repeated XLinks
+            // Terminii should not be in parent/child relationships
+			ASSERT( p.second != DepthFirstRelation::LEFT_IS_ANCESTOR )(prev)(" vs ")(terminus)(" got ")(p); 
+		}
+
+        auto p2 = dfr.CompareHierarchical( base, terminus );
+		ASSERT( p2.second == DepthFirstRelation::LEFT_IS_ANCESTOR )(base)(" vs ")(terminus)(" got ")(p2); 
+            
+        prev = terminus;        
+    }    
 }
 
 

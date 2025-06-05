@@ -17,36 +17,17 @@ namespace SR
 class XTreeDatabase;    
 class FreeZone;
 
-// ------------------------- TreeZone --------------------------
-
-class TreeZone : public Zone
-{
-public:
-	static const DBCommon::TreeOrdinal default_ordinal = DBCommon::TreeOrdinal::MAIN;
-	explicit TreeZone(DBCommon::TreeOrdinal ordinal_ = default_ordinal);
-
-    virtual XLink GetBaseXLink() const = 0;
-    virtual vector<XLink> GetTerminusXLinks() const = 0;
-    virtual XLink GetTerminusXLink(size_t index) const = 0;
-
-    DBCommon::TreeOrdinal GetTreeOrdinal() const;
-
-    unique_ptr<FreeZone> Duplicate() const;
-    void Validate(const XTreeDatabase *db) const;
-
-private:
-   	DBCommon::TreeOrdinal ordinal;
-};
-
 // ------------------------- XTreeZone --------------------------
 
 // XTreeZone is for zones that are within the current x tree. All
 // nodes in the tree have an XLink, including at the root, and we
 // prefer to keep track of the XLink to the base node for precision
 // and convenience. See #623.
-class XTreeZone : public TreeZone
+class XTreeZone : public Zone
 { 
 public:
+	static const DBCommon::TreeOrdinal default_ordinal = DBCommon::TreeOrdinal::MAIN;
+
     static XTreeZone CreateSubtree( XLink base, 
 								    DBCommon::TreeOrdinal ordinal_ = default_ordinal );
     static XTreeZone CreateEmpty( XLink base );
@@ -59,17 +40,23 @@ public:
     size_t GetNumTerminii() const override;
     TreePtr<Node> GetBaseNode() const override;
 
-    XLink GetBaseXLink() const override;
-    vector<XLink> GetTerminusXLinks() const override;
-    XLink GetTerminusXLink(size_t index) const override;
+    XLink GetBaseXLink() const;
+    vector<XLink> GetTerminusXLinks() const;
+    XLink GetTerminusXLink(size_t index) const;
+
+    DBCommon::TreeOrdinal GetTreeOrdinal() const;
     
     void SetBaseXLink(XLink new_base);
 
+    unique_ptr<FreeZone> Duplicate() const;
+    void Validate(const XTreeDatabase *db) const;
+    
     string GetTrace() const override;
 
 protected:
     XLink base;    
     vector<XLink> terminii;    
+   	DBCommon::TreeOrdinal ordinal;    
 };
 
 // ------------------------- MutableZone --------------------------
