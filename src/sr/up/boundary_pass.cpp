@@ -41,7 +41,7 @@ void BoundaryPass::Run(shared_ptr<Patch> &layout)
 }
 
 
-void BoundaryPass::GatherBoundaries(TreeZone *tree_zone)
+void BoundaryPass::GatherBoundaries(XTreeZone *tree_zone)
 {
 	boundaries.insert( tree_zone->GetBaseXLink() );
 	for( XLink terminus : tree_zone->GetTerminusXLinks() )
@@ -55,7 +55,7 @@ void BoundaryPass::CheckTreeZoneAtBoundaries( shared_ptr<Patch> *patch_ptr )
 {
 	TRACE("Checking ")(*patch_ptr)("\n");
 	auto tree_patch = dynamic_pointer_cast<TreeZonePatch>(*patch_ptr);
-	TreeZone *tree_zone = tree_patch->GetZone();
+	XTreeZone *tree_zone = tree_patch->GetZone();
 	XLink lower_excl = tree_zone->GetBaseXLink();	
 	
 	for( XLink terminus: tree_zone->GetTerminusXLinks() )
@@ -119,7 +119,7 @@ XLink BoundaryPass::TryGetBoundaryInRange( XLink lower, bool lower_incl, XLink u
 void BoundaryPass::SplitTreeZoneAtXLink( shared_ptr<Patch> *patch_ptr, XLink split_point )
 {
 	auto tree_patch = dynamic_pointer_cast<TreeZonePatch>(*patch_ptr);
-	TreeZone *initial_zone = tree_patch->GetZone();
+	XTreeZone *initial_zone = tree_patch->GetZone();
     vector<XLink> parent_terminii, new_terminii;
 	list<shared_ptr<Patch>> parent_children, new_children;
 	shared_ptr<Patch> *new_patch_ptr = nullptr;

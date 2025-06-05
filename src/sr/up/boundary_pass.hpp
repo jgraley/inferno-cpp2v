@@ -26,7 +26,7 @@ public:
 	void Run(shared_ptr<Patch> &layout);
 		
 private:
-    void GatherBoundaries(TreeZone *tree_zone);
+    void GatherBoundaries(XTreeZone *tree_zone);
 	void CheckTreeZoneAtBoundaries( shared_ptr<Patch> *patch_ptr );
 	XLink TryGetBoundaryInRange( XLink lower, bool lower_incl, XLink upper, bool upper_incl );
 	void SplitTreeZoneAtXLink( shared_ptr<Patch> *patch_ptr, XLink split_point );

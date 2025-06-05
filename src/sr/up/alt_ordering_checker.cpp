@@ -31,8 +31,8 @@ void AltOrderingChecker::Worker( shared_ptr<Patch> patch, XLink x_sub_base, bool
         INDENT("t");
 		TRACE("Checking x_sub_base: ")(x_sub_base)(" against patch:\n")(patch)("\nshould_touch: ")(should_touch)("\n");
 
-        // Got a TreeZone - check ordering of its base, strictness depending on who called us
-        const TreeZone *tree_zone = tree_patch->GetZone();
+        // Got a Tree Zone - check ordering of its base, strictness depending on who called us
+        const XTreeZone *tree_zone = tree_patch->GetZone();
         XLink base = tree_zone->GetBaseXLink();
         auto p = dfr.CompareHierarchical( x_sub_base, base );
         if( should_touch )

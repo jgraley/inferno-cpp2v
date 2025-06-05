@@ -10,7 +10,7 @@
 namespace SR 
 {
 class XTreeDatabase;
-class TreeZone;
+class XTreeZone;
 
 // ------------------------- PointeeRelation --------------------------
 
@@ -32,7 +32,7 @@ public:
 class TreeZoneRelation : public ZoneRelation
 {
 public:
-    typedef TreeZone Domain;
+    typedef XTreeZone Domain;
     
     TreeZoneRelation(const XTreeDatabase *db);
 
@@ -40,10 +40,10 @@ public:
     // function rules (less confusion about what exactly is being compared)
 
     /// Less operator: for use with set, map etc
-    bool operator()( const TreeZone &l, const TreeZone &r ) const;
-    Orderable::Diff Compare3Way( const TreeZone &l, const TreeZone &r ) const;
-    bool CompareEqual( const TreeZone &l, const TreeZone &r ) const;    
-    pair<Orderable::Diff, RelType> CompareHierarchical( const TreeZone &l, const TreeZone &r ) const;
+    bool operator()( const XTreeZone &l, const XTreeZone &r ) const;
+    Orderable::Diff Compare3Way( const XTreeZone &l, const XTreeZone &r ) const;
+    bool CompareEqual( const XTreeZone &l, const XTreeZone &r ) const;    
+    pair<Orderable::Diff, RelType> CompareHierarchical( const XTreeZone &l, const XTreeZone &r ) const;
     
 private:
     const XTreeDatabase * const db;

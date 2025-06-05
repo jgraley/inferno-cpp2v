@@ -14,7 +14,7 @@ ScaffoldOps::ScaffoldOps( XTreeDatabase *db_ ) :
 }
 
 
-XTreeZone ScaffoldOps::FreeZoneIntoExtraTree( FreeZone free_zone, const TreeZone &reference_tree_zone )
+XTreeZone ScaffoldOps::FreeZoneIntoExtraTree( FreeZone free_zone, const XTreeZone &reference_tree_zone )
 {
 	// ------------------------- Plug the zone to make a subtree ---------------------------
 	// Reference tree zone is used to determine the types of the plugs

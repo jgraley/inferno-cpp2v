@@ -160,21 +160,15 @@ void TreeZonePatch::ClearEmbeddedMarkers()
 }
 
 
-TreeZone *TreeZonePatch::GetZone() 
+XTreeZone *TreeZonePatch::GetZone() 
 {
     return zone.get();
 }
 
 
-const TreeZone *TreeZonePatch::GetZone() const
+const XTreeZone *TreeZonePatch::GetZone() const
 {
     return zone.get();
-}
-
-
-void TreeZonePatch::SetZone( unique_ptr<TreeZone> &&new_zone )
-{
-	zone = move(new_zone);
 }
 
 

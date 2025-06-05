@@ -28,7 +28,7 @@ void GapFindingPass::Run(shared_ptr<Patch> layout)
 
 void GapFindingPass::CheckPatch(shared_ptr<TreeZonePatch> patch)
 {
-	TreeZone *tz = patch->GetZone();
+	XTreeZone *tz = patch->GetZone();
 	size_t index = 0;
 	Patch::ForChildren( patch, [&](shared_ptr<Patch> &child_patch)	
 	{

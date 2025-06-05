@@ -80,9 +80,8 @@ public:
     list<RequiresSubordinateSCREngine *> GetEmbeddedMarkers() const final;
     void ClearEmbeddedMarkers() final;
 
-    TreeZone *GetZone() override;
-    const TreeZone *GetZone() const override;
-    void SetZone( unique_ptr<TreeZone> &&new_zone );
+    XTreeZone *GetZone() override;
+    const XTreeZone *GetZone() const override;
     
     XTreeZone GetXTreeZone() const;
     shared_ptr<FreeZonePatch> DuplicateToFree() const;
@@ -101,7 +100,7 @@ public:
     string GetTrace() const final;
     
 private:
-    unique_ptr<TreeZone> zone;
+    unique_ptr<XTreeZone> zone;
     list<RequiresSubordinateSCREngine *> embedded_markers;
 };
 
