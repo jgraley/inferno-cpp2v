@@ -128,15 +128,15 @@ void Patch::DepthFirstWalkImpl( function<void(shared_ptr<Patch> &patch)> func_in
 TreeZonePatch::TreeZonePatch( const TreeZone &zone_, 
                               list<shared_ptr<Patch>> &&child_patches ) :
     Patch( move(child_patches) ),
-    zone(make_unique<TreeZone>(zone_))
+    zone(zone_)
 {
-    ASSERT( zone->GetNumTerminii() == GetNumChildren() );    
+    ASSERT( zone.GetNumTerminii() == GetNumChildren() );    
 }    
 
 
 TreeZonePatch::TreeZonePatch( const TreeZone &zone_ ) :
     Patch(),
-    zone(make_unique<TreeZone>(zone_))
+    zone(zone_)
 {
     // If zone has terminii, they will be "exposed".
 }        
@@ -162,28 +162,25 @@ void TreeZonePatch::ClearEmbeddedMarkers()
 
 TreeZone *TreeZonePatch::GetZone() 
 {
-    return zone.get();
+    return &zone;
 }
 
 
 const TreeZone *TreeZonePatch::GetZone() const
 {
-    return zone.get();
+    return &zone;
 }
 
 
 TreeZone TreeZonePatch::GetXTreeZone() const
 {
-	if( auto *xtz = dynamic_cast<TreeZone *>(zone.get()) )
-		return *xtz;
-	else
-		ASSERTFAIL();
+	return zone;
 }
     
 
 shared_ptr<FreeZonePatch> TreeZonePatch::DuplicateToFree() const
 {
-    unique_ptr<FreeZone> free_zone = zone->Duplicate();
+    unique_ptr<FreeZone> free_zone = zone.Duplicate();
     list<shared_ptr<Patch>> c = GetChildren();
     auto pop_free_patch = make_shared<FreeZonePatch>( *free_zone, move(c) );
     pop_free_patch->AddEmbeddedMarkers( GetEmbeddedMarkers() );
@@ -208,12 +205,12 @@ void TreeZonePatch::ForTreeChildren( shared_ptr<Patch> base,
 
 {
 	ForTreeChildren( base, 
-	[&](shared_ptr<Patch> &patch)
-	{
-		auto p = dynamic_pointer_cast<TreeZonePatch>(patch);
-		func(p);
-		patch = p; // in case p changed
-	} );
+		[&](shared_ptr<Patch> &patch)
+		{
+			auto p = dynamic_pointer_cast<TreeZonePatch>(patch);
+			func(p);
+			patch = p; // in case p changed
+		} );
 }
 	
 
@@ -222,16 +219,16 @@ void TreeZonePatch::ForTreeDepthFirstWalk( shared_ptr<Patch> &base,
                                            function<void(shared_ptr<Patch> &patch)> func_out )
 {
     ForDepthFirstWalk( base, 
-	[&](shared_ptr<Patch> &patch)
-	{
-		if( func_in && dynamic_pointer_cast<TreeZonePatch>(patch) )
-			func_in(patch);
-	},
-	[&](shared_ptr<Patch> &patch)
-	{
-		if( func_out && dynamic_pointer_cast<TreeZonePatch>(patch) )
-			func_out(patch);
-	} );
+		[&](shared_ptr<Patch> &patch)
+		{
+			if( func_in && dynamic_pointer_cast<TreeZonePatch>(patch) )
+				func_in(patch);
+		},
+		[&](shared_ptr<Patch> &patch)
+		{
+			if( func_out && dynamic_pointer_cast<TreeZonePatch>(patch) )
+				func_out(patch);
+		} );
 }
 
 
@@ -240,33 +237,33 @@ void TreeZonePatch::ForTreeDepthFirstWalk( shared_ptr<Patch> &base,
                                            function<void(shared_ptr<TreeZonePatch> &patch)> func_out )
 {
     ForTreeDepthFirstWalk( base, 
-	[&](shared_ptr<Patch> &patch)
-	{
-		if( func_in ) 
-		{ 
-			auto p = dynamic_pointer_cast<TreeZonePatch>(patch);
-			func_in(p);
-			patch = p; // in case p changed
-		}
-	},
-	[&](shared_ptr<Patch> &patch)
-	{
-		if( func_out ) 
-		{ 
-			auto p = dynamic_pointer_cast<TreeZonePatch>(patch); 
-			func_out(p);
-			patch = p; // in case p changed
-		}
-	} );
+		[&](shared_ptr<Patch> &patch)
+		{
+			if( func_in ) 
+			{ 
+				auto p = dynamic_pointer_cast<TreeZonePatch>(patch);
+				func_in(p);
+				patch = p; // in case p changed
+			}
+		},
+		[&](shared_ptr<Patch> &patch)
+		{
+			if( func_out ) 
+			{ 
+				auto p = dynamic_pointer_cast<TreeZonePatch>(patch); 
+				func_out(p);
+				patch = p; // in case p changed
+			}
+		} );
 }
 
 
 string TreeZonePatch::GetTrace() const
 {
 #ifdef RECURSIVE_TRACE_OPERATOR
-    return "TreeZonePatch( \nzone: "+Trace(*zone)+",\nchildren: "+GetChildrenTrace()+" )";
+    return "TreeZonePatch( \nzone: "+Trace(zone)+",\nchildren: "+GetChildrenTrace()+" )";
 #else
-    return "TreeZonePatch( zone: "+Trace(*zone)+", "+Trace(GetNumChildren())+" children )";
+    return "TreeZonePatch( zone: "+Trace(zone)+", "+Trace(GetNumChildren())+" children )";
 #endif
 }
 
@@ -275,15 +272,15 @@ string TreeZonePatch::GetTrace() const
 FreeZonePatch::FreeZonePatch( const FreeZone &zone_, 
                               list<shared_ptr<Patch>> &&child_patches ) :
     Patch( move(child_patches) ),
-    zone(make_unique<FreeZone>(zone_))
+    zone(zone_)
 {
-    ASSERT( zone->GetNumTerminii() == GetNumChildren() );    
+    ASSERT( zone.GetNumTerminii() == GetNumChildren() );    
 }
 
         
 FreeZonePatch::FreeZonePatch( const FreeZone &zone_ ) :
        Patch(),
-       zone(make_unique<FreeZone>(zone_))
+       zone(zone_)
 {
     // If zone has terminii, they will be "exposed" and will remain 
     // in the zone returned by Evaluate.
@@ -294,7 +291,7 @@ void FreeZonePatch::AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&n
 {
     // Rule #726 requires us to mark free zones immediately
     for( RequiresSubordinateSCREngine *ea : new_markers )
-        zone->MarkOriginForEmbedded(ea);    
+        ea->MarkOriginForEmbedded( zone.GetBaseNode() );    
 }
 
 
@@ -327,13 +324,13 @@ Patch::ChildPatchIterator FreeZonePatch::SpliceOver( ChildPatchIterator it_child
 
 FreeZone *FreeZonePatch::GetZone()
 {
-    return zone.get();
+    return &zone;
 }
 
 
 const FreeZone *FreeZonePatch::GetZone() const
 {
-    return zone.get();
+    return &zone;
 }
 
 
@@ -341,11 +338,11 @@ void FreeZonePatch::ForFreeChildren( shared_ptr<Patch> base,
                                      function<void(shared_ptr<Patch> &patch)> func )
 {
     ForChildren( base, 
-	[&](shared_ptr<Patch> &patch)
-	{
-		if( dynamic_pointer_cast<FreeZonePatch>(patch) )
-			func(patch);
-	} );
+		[&](shared_ptr<Patch> &patch)
+		{
+			if( dynamic_pointer_cast<FreeZonePatch>(patch) )
+				func(patch);
+		} );
 }
 
 
@@ -353,12 +350,12 @@ void FreeZonePatch::ForFreeChildren( shared_ptr<Patch> base,
                                      function<void(shared_ptr<FreeZonePatch> &patch)> func )
 {
     ForFreeChildren( base, 
-	[&](shared_ptr<Patch> &patch)
-	{
-		auto p = dynamic_pointer_cast<FreeZonePatch>(patch);
-		func(p);
-		patch = p; // in case p changed
-	} );
+		[&](shared_ptr<Patch> &patch)
+		{
+			auto p = dynamic_pointer_cast<FreeZonePatch>(patch);
+			func(p);
+			patch = p; // in case p changed
+		} );
 }
 
 
@@ -367,16 +364,16 @@ void FreeZonePatch::ForFreeDepthFirstWalk( shared_ptr<Patch> &base,
                                            function<void(shared_ptr<Patch> &patch)> func_out )
 {
     ForDepthFirstWalk( base, 
-	[&](shared_ptr<Patch> &patch)
-	{
-		if( func_in && dynamic_pointer_cast<FreeZonePatch>(patch) )
-			func_in(patch);
-	},
-	[&](shared_ptr<Patch> &patch)
-	{
-		if( func_out && dynamic_pointer_cast<FreeZonePatch>(patch) )
-			func_out(patch);
-	} );
+		[&](shared_ptr<Patch> &patch)
+		{
+			if( func_in && dynamic_pointer_cast<FreeZonePatch>(patch) )
+				func_in(patch);
+		},
+		[&](shared_ptr<Patch> &patch)
+		{
+			if( func_out && dynamic_pointer_cast<FreeZonePatch>(patch) )
+				func_out(patch);
+		} );
 }
 
 
@@ -385,33 +382,33 @@ void FreeZonePatch::ForFreeDepthFirstWalk( shared_ptr<Patch> &base,
                                            function<void(shared_ptr<FreeZonePatch> &patch)> func_out )
 {
     ForFreeDepthFirstWalk( base, 
-	[&](shared_ptr<Patch> &patch)
-	{
-		if( func_in ) 
-		{ 
-			auto p = dynamic_pointer_cast<FreeZonePatch>(patch);
-			func_in(p);
-			patch = p; // in case p changed
-		}
-	},
-	[&](shared_ptr<Patch> &patch)
-	{
-		if( func_out ) 
-		{ 
-			auto p = dynamic_pointer_cast<FreeZonePatch>(patch);
-			func_out(p);
-			patch = p; // in case p changed
-		}
-	} );
+		[&](shared_ptr<Patch> &patch)
+		{
+			if( func_in ) 
+			{ 
+				auto p = dynamic_pointer_cast<FreeZonePatch>(patch);
+				func_in(p);
+				patch = p; // in case p changed
+			}
+		},
+		[&](shared_ptr<Patch> &patch)
+		{
+			if( func_out ) 
+			{ 
+				auto p = dynamic_pointer_cast<FreeZonePatch>(patch);
+				func_out(p);
+				patch = p; // in case p changed
+			}
+		} );
 }
 
 
 string FreeZonePatch::GetTrace() const
 {
 #ifdef RECURSIVE_TRACE_OPERATOR
-    return "FreeZonePatch( \nzone: "+Trace(*zone)+",\nchildren: "+GetChildrenTrace()+" )";
+    return "FreeZonePatch( \nzone: "+Trace(zone)+",\nchildren: "+GetChildrenTrace()+" )";
 #else
-    return "FreeZonePatch( zone: "+Trace(*zone)+", "+Trace(GetNumChildren())+" children )";
+    return "FreeZonePatch( zone: "+Trace(zone)+", "+Trace(GetNumChildren())+" children )";
 #endif    
 }
 

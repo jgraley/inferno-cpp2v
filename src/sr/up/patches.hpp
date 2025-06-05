@@ -100,7 +100,7 @@ public:
     string GetTrace() const final;
     
 private:
-    unique_ptr<TreeZone> zone;
+    TreeZone zone;
     list<RequiresSubordinateSCREngine *> embedded_markers;
 };
 
@@ -140,7 +140,7 @@ public:
     string GetTrace() const final;
 
 private:
-    unique_ptr<FreeZone> zone;   
+    FreeZone zone;   
 };
 
 // ------------------------- MovesMap --------------------------
