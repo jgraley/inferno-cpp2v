@@ -7,86 +7,86 @@
 
 using namespace SR;
 
-// ------------------------- XTreeZone --------------------------
+// ------------------------- TreeZone --------------------------
 
-XTreeZone XTreeZone::CreateSubtree( XLink base, 
+TreeZone TreeZone::CreateSubtree( XLink base, 
                                     DBCommon::TreeOrdinal ordinal_ )
 {
-    return XTreeZone( base, vector<XLink>(), ordinal_ );
+    return TreeZone( base, vector<XLink>(), ordinal_ );
 }
 
 
-XTreeZone XTreeZone::CreateEmpty( XLink base )
+TreeZone TreeZone::CreateEmpty( XLink base )
 {
     ASSERTS( base );
     // One element, same as base. Ordinal shall be invalid.
-    return XTreeZone( base, vector<XLink>{ base }, DBCommon::TreeOrdinal(-1) ); 
+    return TreeZone( base, vector<XLink>{ base }, DBCommon::TreeOrdinal(-1) ); 
 }
 
 
-XTreeZone::XTreeZone( XLink base_, 
+TreeZone::TreeZone( XLink base_, 
 					  vector<XLink> terminii_,
 					  DBCommon::TreeOrdinal ordinal_ ) :
     base( base_ ),
     terminii( terminii_ ),
 	ordinal( ordinal_ )
 {
-    ASSERT( base ); // XTreeZone is not nullable
+    ASSERT( base ); // TreeZone is not nullable
     ASSERT( base.GetChildTreePtr() ); // Cannot be empty
 }
 
 
-bool XTreeZone::IsEmpty() const
+bool TreeZone::IsEmpty() const
 {
     // There must be a base, so the only way to be empty is to terminate at the base
     return terminii.size()==1 && SoloElementOf(terminii)==base;    
 }
 
 
-size_t XTreeZone::GetNumTerminii() const
+size_t TreeZone::GetNumTerminii() const
 {
     return terminii.size();
 }
 
 
-TreePtr<Node> XTreeZone::GetBaseNode() const
+TreePtr<Node> TreeZone::GetBaseNode() const
 {
     return base.GetChildTreePtr();
 }
 
 
-XLink XTreeZone::GetBaseXLink() const
+XLink TreeZone::GetBaseXLink() const
 {
     return base;
 }
 
 
-vector<XLink> XTreeZone::GetTerminusXLinks() const
+vector<XLink> TreeZone::GetTerminusXLinks() const
 {
     return terminii;
 }
 
 
-XLink XTreeZone::GetTerminusXLink(size_t index) const
+XLink TreeZone::GetTerminusXLink(size_t index) const
 {
 	return terminii[index];
 }
 
 
 
-DBCommon::TreeOrdinal XTreeZone::GetTreeOrdinal() const
+DBCommon::TreeOrdinal TreeZone::GetTreeOrdinal() const
 {
 	return ordinal;
 }
 
 
-void XTreeZone::SetBaseXLink(XLink new_base)
+void TreeZone::SetBaseXLink(XLink new_base)
 {
 	base = new_base;
 }
 
 
-unique_ptr<FreeZone> XTreeZone::Duplicate() const
+unique_ptr<FreeZone> TreeZone::Duplicate() const
 {
     if( IsEmpty() )
         return make_unique<FreeZone>( FreeZone::CreateEmpty() );
@@ -110,7 +110,7 @@ unique_ptr<FreeZone> XTreeZone::Duplicate() const
 }
 
 
-void XTreeZone::Validate(const XTreeDatabase *db) const // TODO maybe move to database?
+void TreeZone::Validate(const XTreeDatabase *db) const // TODO maybe move to database?
 {       
     XLink base = GetBaseXLink();
     ASSERT( base )(base);
@@ -147,7 +147,7 @@ void XTreeZone::Validate(const XTreeDatabase *db) const // TODO maybe move to da
 }
 
 
-string XTreeZone::GetTrace() const
+string TreeZone::GetTrace() const
 {
     string s;
     if( IsEmpty() )
@@ -165,7 +165,7 @@ string XTreeZone::GetTrace() const
             s += " ⇥ " + Trace(terminii); // Indicates the zone terminates            
     }
     
-    return "XTreeZone(" + s +")";
+    return "TreeZone(" + s +")";
 }
 
 // ------------------------- MutableZone --------------------------
@@ -190,17 +190,17 @@ bool MutableZone::IsEmpty() const
 }
 
 
-XTreeZone MutableZone::GetXTreeZone() const
+TreeZone MutableZone::GetXTreeZone() const
 {
     vector<XLink> v;
     for( const Mutator &m : terminii )
 		v.push_back( m.GetXLink() );
-    return XTreeZone( base.GetXLink(), v, ordinal );    
+    return TreeZone( base.GetXLink(), v, ordinal );    
 }
 
 
-void MutableZone::Swap( MutableZone &tree_zone_l, vector<XTreeZone *> fixups_l, 
-                        MutableZone &tree_zone_r, vector<XTreeZone *> fixups_r )
+void MutableZone::Swap( MutableZone &tree_zone_l, vector<TreeZone *> fixups_l, 
+                        MutableZone &tree_zone_r, vector<TreeZone *> fixups_r )
 {
 	// Should be true regardless of empty zones
 	ASSERTS( tree_zone_l.terminii.size() == tree_zone_r.terminii.size() );
@@ -209,8 +209,8 @@ void MutableZone::Swap( MutableZone &tree_zone_l, vector<XTreeZone *> fixups_l,
 
     // Do a co-walk and exchange one at a time. We want to modify the parent
     // sides of the terminii in-place, leaving valid mutators behind. 
-    vector<XTreeZone *>::iterator fixups_l_it = fixups_l.begin();
-    vector<XTreeZone *>::iterator fixups_r_it = fixups_r.begin();
+    vector<TreeZone *>::iterator fixups_l_it = fixups_l.begin();
+    vector<TreeZone *>::iterator fixups_r_it = fixups_r.begin();
     vector<Mutator>::iterator terminus_it_r = tree_zone_r.terminii.begin();    
     for( Mutator &terminus_l : tree_zone_l.terminii )
     {
@@ -270,7 +270,7 @@ string MutableZone::GetTrace() const
 
 
 
-RAIISuspendForSwapBase::RAIISuspendForSwapBase( XTreeZone &zone1_, XTreeZone &zone2_ ) :
+RAIISuspendForSwapBase::RAIISuspendForSwapBase( TreeZone &zone1_, TreeZone &zone2_ ) :
 	zone1(zone1_),
 	zone2(zone2_)
 {

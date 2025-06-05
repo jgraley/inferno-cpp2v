@@ -38,27 +38,27 @@ private:
 public:
     const Lacing *GetLacing() const;
 
-    void InsertTree(XTreeZone &zone);
-    void DeleteTree(XTreeZone &zone);
+    void InsertTree(TreeZone &zone);
+    void DeleteTree(TreeZone &zone);
 
 	class RAIISuspendForSwap : RAIISuspendForSwapBase
 	{
 	public:
-		RAIISuspendForSwap(Orderings *orderings_, XTreeZone &zone1_, XTreeZone &zone2_ );
+		RAIISuspendForSwap(Orderings *orderings_, TreeZone &zone1_, TreeZone &zone2_ );
 		~RAIISuspendForSwap();
 	private:
 		DBWalk db_walker;     
 		Orderings &orderings;
 	};
 
-    void InsertGeometric(const XTreeZone &zone);
-    void DeleteGeometric(const XTreeZone &zone);
+    void InsertGeometric(const TreeZone &zone);
+    void DeleteGeometric(const TreeZone &zone);
 
 private:
 	void InsertActionSCAndCAT(const DBWalk::WalkInfo &walk_info);
     void DeleteActionSCAndCAT(const DBWalk::WalkInfo &walk_info);
 
-	set<TreePtr<Node>> GetTerminusAndBaseAncestors( const XTreeZone &tz ) const; 
+	set<TreePtr<Node>> GetTerminusAndBaseAncestors( const TreeZone &tz ) const; 
     
 public:
     void Dump() const;

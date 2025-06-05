@@ -681,7 +681,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingPattern( const
                     zone.AddTerminus( Mutator::CreateFreeContainer(dest, dest_con, dest_it) );     
 
                     ASSERT( under_elt ); // present simplified scheme disallows nullptr
-                    auto under_zone = XTreeZone::CreateSubtree(XLink(under_node, &under_elt) );
+                    auto under_zone = TreeZone::CreateSubtree(XLink(under_node, &under_elt) );
                     child_patches.push_back( make_shared<TreeZonePatch>(under_zone) );        
                 }
             }
@@ -704,7 +704,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingPattern( const
             else
             {
                 ASSERT( *under_singular );            
-                auto under_zone = XTreeZone::CreateSubtree(XLink(under_node, under_singular) );
+                auto under_zone = TreeZone::CreateSubtree(XLink(under_node, under_singular) );
                 child_patches.push_back( make_shared<TreeZonePatch>(under_zone) );            
             }
         }
@@ -812,7 +812,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingX( const Repla
                     zone.AddTerminus( Mutator::CreateFreeContainer(dest, dest_con, dest_it) );     
 
                     ASSERT( under_elt ); // present simplified scheme disallows nullptr
-                    auto under_zone = XTreeZone::CreateSubtree(XLink(under_node, &under_elt) );
+                    auto under_zone = TreeZone::CreateSubtree(XLink(under_node, &under_elt) );
                     child_patches.push_back( make_shared<TreeZonePatch>(under_zone) );        
                 }
             }
@@ -835,7 +835,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingX( const Repla
             else
             {
                 ASSERT( *under_singular );            
-                auto under_zone = XTreeZone::CreateSubtree(XLink(under_node, under_singular) );
+                auto under_zone = TreeZone::CreateSubtree(XLink(under_node, under_singular) );
                 child_patches.push_back( make_shared<TreeZonePatch>(under_zone) );            
             }
         }

@@ -125,18 +125,18 @@ void Patch::DepthFirstWalkImpl( function<void(shared_ptr<Patch> &patch)> func_in
 
 // ------------------------- TreeZonePatch --------------------------
 
-TreeZonePatch::TreeZonePatch( const XTreeZone &zone_, 
+TreeZonePatch::TreeZonePatch( const TreeZone &zone_, 
                               list<shared_ptr<Patch>> &&child_patches ) :
     Patch( move(child_patches) ),
-    zone(make_unique<XTreeZone>(zone_))
+    zone(make_unique<TreeZone>(zone_))
 {
     ASSERT( zone->GetNumTerminii() == GetNumChildren() );    
 }    
 
 
-TreeZonePatch::TreeZonePatch( const XTreeZone &zone_ ) :
+TreeZonePatch::TreeZonePatch( const TreeZone &zone_ ) :
     Patch(),
-    zone(make_unique<XTreeZone>(zone_))
+    zone(make_unique<TreeZone>(zone_))
 {
     // If zone has terminii, they will be "exposed".
 }        
@@ -160,21 +160,21 @@ void TreeZonePatch::ClearEmbeddedMarkers()
 }
 
 
-XTreeZone *TreeZonePatch::GetZone() 
+TreeZone *TreeZonePatch::GetZone() 
 {
     return zone.get();
 }
 
 
-const XTreeZone *TreeZonePatch::GetZone() const
+const TreeZone *TreeZonePatch::GetZone() const
 {
     return zone.get();
 }
 
 
-XTreeZone TreeZonePatch::GetXTreeZone() const
+TreeZone TreeZonePatch::GetXTreeZone() const
 {
-	if( auto *xtz = dynamic_cast<XTreeZone *>(zone.get()) )
+	if( auto *xtz = dynamic_cast<TreeZone *>(zone.get()) )
 		return *xtz;
 	else
 		ASSERTFAIL();

@@ -21,8 +21,8 @@ class Domain
 public:
     Domain();
 
-	void InsertTree(XTreeZone &zone);
-	void DeleteTree(XTreeZone &zone);
+	void InsertTree(TreeZone &zone);
+	void DeleteTree(TreeZone &zone);
 
 	void DeleteAction(const DBWalk::WalkInfo &walk_info);
 	void InsertAction(const DBWalk::WalkInfo &walk_info);

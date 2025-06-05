@@ -33,21 +33,21 @@ const DBCommon::CoreInfo &LinkTable::GetCoreInfo(XLink xlink) const
 }
  
  
-void LinkTable::InsertTree(XTreeZone &zone)
+void LinkTable::InsertTree(TreeZone &zone)
 {     
 	db_walker.WalkTreeZone( bind(&LinkTable::InsertAction, this, placeholders::_1), 
 	                        zone, DBWalk::WIND_IN, DBCommon::GetRootCoreInfo() );
 }
 
 
-void LinkTable::DeleteTree(XTreeZone &zone)
+void LinkTable::DeleteTree(TreeZone &zone)
 {
 	db_walker.WalkTreeZone( bind(&LinkTable::DeleteAction, this, placeholders::_1), 
 					        zone, DBWalk::WIND_OUT, DBCommon::GetRootCoreInfo() );
 }
  
  
-LinkTable::RAIISuspendForSwap::RAIISuspendForSwap(LinkTable *link_table_, XTreeZone &zone1_, XTreeZone &zone2_ ) :
+LinkTable::RAIISuspendForSwap::RAIISuspendForSwap(LinkTable *link_table_, TreeZone &zone1_, TreeZone &zone2_ ) :
 	RAIISuspendForSwapBase( zone1_, zone2_ ),
 	link_table( *link_table_ ),
 	rows( link_table.rows )

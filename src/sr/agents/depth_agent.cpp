@@ -42,7 +42,7 @@ Agent::ReplacePatchPtr DepthAgent::GenReplaceLayoutImpl( const ReplaceKit &kit,
     // Make a tree zone for the nodes we covered
     XLink terminus_key_xlink = my_scr_engine->GetReplaceKey( terminus_plink );
     ASSERT(terminus_key_xlink);// this could mean replace is being attempted on a DepthAgent in an abnormal context
-    auto new_zone = XTreeZone( key_xlink, vector<XLink>{terminus_key_xlink} );   
+    auto new_zone = TreeZone( key_xlink, vector<XLink>{terminus_key_xlink} );   
 
     return make_shared<TreeZonePatch>( new_zone, move(child_commands) );
 }

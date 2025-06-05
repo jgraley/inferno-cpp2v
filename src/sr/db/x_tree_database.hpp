@@ -18,7 +18,7 @@ namespace SR
 {    
       
 class FreeZone;
-class XTreeZone;     
+class TreeZone;     
       
 class XTreeDatabase : public Traceable
 {
@@ -38,8 +38,8 @@ public:
     void TeardownTree(DBCommon::TreeOrdinal tree_ordinal);
    
 	// Swap content between two different trees, performed on geom assets only
-   	void SwapTreeToTree( XTreeZone &tree_zone_l, vector<XTreeZone *> fixups_l,
-		 				 XTreeZone &tree_zone_r, vector<XTreeZone *> fixups_r );
+   	void SwapTreeToTree( TreeZone &tree_zone_l, vector<TreeZone *> fixups_l,
+		 				 TreeZone &tree_zone_r, vector<TreeZone *> fixups_r );
 
 	// Actions to take at the end of an update cycle
     void PerformDeferredActions();
@@ -75,7 +75,7 @@ public:
 
 private: 
     Mutator CreateTreeMutator(XLink xlink) const;
-    MutableZone CreateMutableZone(XTreeZone &zone) const;
+    MutableZone CreateMutableZone(TreeZone &zone) const;
 
 public:
     void Dump() const;

@@ -73,17 +73,17 @@ private:
 class TreeZonePatch : public Patch
 {
 public:
-    TreeZonePatch( const XTreeZone &zone_, list<shared_ptr<Patch>> &&child_patches );
-    TreeZonePatch( const XTreeZone &zone_ );
+    TreeZonePatch( const TreeZone &zone_, list<shared_ptr<Patch>> &&child_patches );
+    TreeZonePatch( const TreeZone &zone_ );
     
     void AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&new_markers ) final;
     list<RequiresSubordinateSCREngine *> GetEmbeddedMarkers() const final;
     void ClearEmbeddedMarkers() final;
 
-    XTreeZone *GetZone() override;
-    const XTreeZone *GetZone() const override;
+    TreeZone *GetZone() override;
+    const TreeZone *GetZone() const override;
     
-    XTreeZone GetXTreeZone() const;
+    TreeZone GetXTreeZone() const;
     shared_ptr<FreeZonePatch> DuplicateToFree() const;
     
     static void ForTreeChildren( shared_ptr<Patch> base,
@@ -100,7 +100,7 @@ public:
     string GetTrace() const final;
     
 private:
-    unique_ptr<XTreeZone> zone;
+    unique_ptr<TreeZone> zone;
     list<RequiresSubordinateSCREngine *> embedded_markers;
 };
 
@@ -148,7 +148,7 @@ private:
 struct MovesMap
 {
 	public:
-	map<TreePtr<Node>, XTreeZone> mm;
+	map<TreePtr<Node>, TreeZone> mm;
 };
 
 }

@@ -28,7 +28,7 @@ void ComplementPass::Run(const Mutator &origin_mutator, shared_ptr<Patch> source
     // put them in a depth-first ordering on base (i.e. ordered relative to CURRENT tree)
     TreeZonePatch::ForTreeDepthFirstWalk( source_layout, nullptr, [&](shared_ptr<TreeZonePatch> &tree_patch)
     {
-        XTreeZone *tz = tree_patch->GetZone();
+        TreeZone *tz = tree_patch->GetZone();
             
         if( !tz->IsEmpty() )
             source_tzs_df_by_base.emplace( tz->GetBaseXLink(), tz );        
@@ -43,7 +43,7 @@ void ComplementPass::WalkTreeZones(XLink target_base)
     if( source_tzs_df_by_base.count(target_base) > 0 )
     {
         // There's a TZ in the layout, so recurse.
-        const XTreeZone *found_tz = source_tzs_df_by_base.at(target_base);
+        const TreeZone *found_tz = source_tzs_df_by_base.at(target_base);
         for( XLink terminus : found_tz->GetTerminusXLinks() )
             WalkTreeZones( terminus );
     }
@@ -83,7 +83,7 @@ void ComplementPass::CreateComplementTZ(XLink target_base)
     }
     
     // Delete intrinsic tables/orderings for this unreferenced tree zone
-    auto target_zone = make_unique<XTreeZone>( target_base, complement_terminii );
+    auto target_zone = make_unique<TreeZone>( target_base, complement_terminii );
     (void)target_zone;
 //    db->MainTreeDeleteIntrinsic( target_zone.get() );
 }

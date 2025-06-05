@@ -205,7 +205,7 @@ void OrderingPass::ConstrainChildrenToTerminii( shared_ptr<TreeZonePatch> &tree_
 	
     // We have a tree zone. For each of its terminii, find the acceptable
     // range of descendent tree zones and recurse.
-	XTreeZone tree_zone = tree_patch->GetXTreeZone();
+	TreeZone tree_zone = tree_patch->GetXTreeZone();
     size_t i=0;
     Patch::ForChildren( tree_patch, [&](shared_ptr<Patch> &child_patch)    
     {
@@ -501,14 +501,14 @@ void OrderingPass::MoveTreeZoneOut( shared_ptr<Patch> *ooo_patch_ptr, shared_ptr
 	// Out-of-order patch is located at the "to" location, but contains the "from" tree zone.
 	auto ooo_tree_patch = dynamic_pointer_cast<TreeZonePatch>(*ooo_patch_ptr);
 	ASSERT( ooo_tree_patch );
-	XTreeZone main_tree_zone_from = ooo_tree_patch->GetXTreeZone();
+	TreeZone main_tree_zone_from = ooo_tree_patch->GetXTreeZone();
 	ASSERT( !main_tree_zone_from.IsEmpty() ); // See #784
 	
 	// ------------------------- Create extra tree with plugged scaffold ---------------------------
 	// Make scaffold free zones that fit in place of the moving zone
 	auto scaffold_zone_from = sops->CreateSimilarScaffoldZone(main_tree_zone_from);
 	TRACE("\"From\" scaffold: ")(scaffold_zone_from)("\n");
-	XTreeZone tree_zone_in_extra = sops->FreeZoneIntoExtraTree( scaffold_zone_from, main_tree_zone_from );
+	TreeZone tree_zone_in_extra = sops->FreeZoneIntoExtraTree( scaffold_zone_from, main_tree_zone_from );
 		
 	// ------------------------- Swap "from" zone into our extra tree ---------------------------
 	//FTRACE("main_tree_zone_from: ")(main_tree_zone_from)("\nfree_zone: ")(*free_zone)("\n");
@@ -517,13 +517,13 @@ void OrderingPass::MoveTreeZoneOut( shared_ptr<Patch> *ooo_patch_ptr, shared_ptr
 	main_tree_zone_from.Validate(db);
 	
 	// Determine the fix-sops we'll need to do for tree zones in neighbouring patches
-    vector<XTreeZone *> fixups;	
+    vector<TreeZone *> fixups;	
     for( size_t i=0; i<main_tree_zone_from.GetNumTerminii(); i++ )
 	{				
-		XTreeZone *found = nullptr;
+		TreeZone *found = nullptr;
 		TreeZonePatch::ForTreeDepthFirstWalk(layout, [&](shared_ptr<TreeZonePatch> &patch)
 		{
-			XTreeZone *candidate = dynamic_cast<XTreeZone *>(patch->GetZone());
+			TreeZone *candidate = dynamic_cast<TreeZone *>(patch->GetZone());
 			ASSERT( candidate );
 			if( candidate->GetBaseXLink() == main_tree_zone_from.GetTerminusXLink(i) )
 			{
@@ -541,7 +541,7 @@ void OrderingPass::MoveTreeZoneOut( shared_ptr<Patch> *ooo_patch_ptr, shared_ptr
 	// tree_zone_in_extra <- the actual moving zone now in extra tree
 	// main_tree_zone_from <- the "from" scaffold now in main tree, to be killed by inversion
 	db->XTreeDatabase::SwapTreeToTree( main_tree_zone_from, fixups,
-		    						   tree_zone_in_extra, vector<XTreeZone *>() );
+		    						   tree_zone_in_extra, vector<TreeZone *>() );
 
 	// ------------------------- Add "To" scaffolding patch to tree for inversion ---------------------------
 	// tree_zone_in_extra now contains the moving zone	

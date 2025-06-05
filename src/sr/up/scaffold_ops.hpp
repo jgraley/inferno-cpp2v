@@ -21,10 +21,10 @@ public:
 
 	// Take a free zone and place it inside a new extra tree, plugging its terminii so the tree is legal.
 	// Generate and return a tree zone in that new extra tree, with therminii present (not plugged).
-	XTreeZone FreeZoneIntoExtraTree( FreeZone free_zone, const XTreeZone &reference_tree_zone );
+	TreeZone FreeZoneIntoExtraTree( FreeZone free_zone, const TreeZone &reference_tree_zone );
 	
 	// Fit a tree zone around a scaffold node, matching base and terminii
-	XTreeZone TreeZoneAroundScaffoldNode( TreePtr<Node> scaffold_node, DBCommon::TreeOrdinal tree_ordinal );
+	TreeZone TreeZoneAroundScaffoldNode( TreePtr<Node> scaffold_node, DBCommon::TreeOrdinal tree_ordinal );
 
 	// Create a scaffold node siliar to supplied zone, matching base and terminii
 	FreeZone CreateSimilarScaffoldZone( const Zone &zone ) const;

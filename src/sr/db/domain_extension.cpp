@@ -58,7 +58,7 @@ void DomainExtension::PerformDeferredActions()
 }
 
 
-void DomainExtension::InsertTree(const XTreeZone &zone)
+void DomainExtension::InsertTree(const TreeZone &zone)
 {     
     auto action = [&](const DBWalk::WalkInfo &walk_info)
     {
@@ -68,7 +68,7 @@ void DomainExtension::InsertTree(const XTreeZone &zone)
 }
 
 
-void DomainExtension::DeleteTree(const XTreeZone &zone)
+void DomainExtension::DeleteTree(const TreeZone &zone)
 {
     auto action = [&](const DBWalk::WalkInfo &walk_info)
     {
@@ -78,7 +78,7 @@ void DomainExtension::DeleteTree(const XTreeZone &zone)
 }
 
 
-DomainExtension::RAIISuspendForSwap::RAIISuspendForSwap(DomainExtension *domain_extension_, XTreeZone &zone1_, XTreeZone &zone2_ ) :
+DomainExtension::RAIISuspendForSwap::RAIISuspendForSwap(DomainExtension *domain_extension_, TreeZone &zone1_, TreeZone &zone2_ ) :
 	RAIISuspendForSwapBase( zone1_, zone2_ ),
 	domain_extension( *domain_extension_ )
 {	

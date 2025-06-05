@@ -26,7 +26,7 @@ void ProtectDEPass::Run( shared_ptr<Patch> &layout )
     auto extra_root_xlinks = db->GetExtraRootXLinks();
     for( XLink xlink : extra_root_xlinks )
     {
-        auto extra_tree = XTreeZone::CreateSubtree(xlink);
+        auto extra_tree = TreeZone::CreateSubtree(xlink);
         
         TreeZonePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &r_patch)
         {

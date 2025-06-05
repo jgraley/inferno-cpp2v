@@ -69,13 +69,13 @@ public:
     // To be called after modifying the tree, and before any search/compare operation
     void PerformDeferredActions();
 
-	void InsertTree(const XTreeZone &zone);
-	void DeleteTree(const XTreeZone &zone);
+	void InsertTree(const TreeZone &zone);
+	void DeleteTree(const TreeZone &zone);
     
 	class RAIISuspendForSwap : RAIISuspendForSwapBase
 	{
 	public:
-		RAIISuspendForSwap(DomainExtension *domain_extension_, XTreeZone &zone1_, XTreeZone &zone2_ );
+		RAIISuspendForSwap(DomainExtension *domain_extension_, TreeZone &zone1_, TreeZone &zone2_ );
 		~RAIISuspendForSwap();
 	private:
 		DBWalk db_walker;     

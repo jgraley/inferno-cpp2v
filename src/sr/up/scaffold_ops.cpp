@@ -14,7 +14,7 @@ ScaffoldOps::ScaffoldOps( XTreeDatabase *db_ ) :
 }
 
 
-XTreeZone ScaffoldOps::FreeZoneIntoExtraTree( FreeZone free_zone, const XTreeZone &reference_tree_zone )
+TreeZone ScaffoldOps::FreeZoneIntoExtraTree( FreeZone free_zone, const TreeZone &reference_tree_zone )
 {
 	// ------------------------- Plug the zone to make a subtree ---------------------------
 	// Reference tree zone is used to determine the types of the plugs
@@ -45,14 +45,14 @@ XTreeZone ScaffoldOps::FreeZoneIntoExtraTree( FreeZone free_zone, const XTreeZon
 	// TZ terminii, even though we plugged the FZ terminii making it a subtree.
 	XLink root_xlink = db->GetRootXLink(extra_tree_ordinal);
 	TRACE("Extra tree root: ")(root_xlink)("\n");
-	XTreeZone tree_zone_in_extra( root_xlink, terminii, extra_tree_ordinal );	
+	TreeZone tree_zone_in_extra( root_xlink, terminii, extra_tree_ordinal );	
 	TRACE("Original zone in TZ with its terminii: ")(tree_zone_in_extra)("\n");
 	
 	return tree_zone_in_extra;
 }
 
 
-XTreeZone ScaffoldOps::TreeZoneAroundScaffoldNode( TreePtr<Node> scaffold_node, DBCommon::TreeOrdinal tree_ordinal )
+TreeZone ScaffoldOps::TreeZoneAroundScaffoldNode( TreePtr<Node> scaffold_node, DBCommon::TreeOrdinal tree_ordinal )
 {
 	const NodeTable::Row &scaffold_row = db->GetNodeRow(scaffold_node);
 	ASSERT( scaffold_row.incoming_xlinks.size() == 1 );		
@@ -65,7 +65,7 @@ XTreeZone ScaffoldOps::TreeZoneAroundScaffoldNode( TreePtr<Node> scaffold_node, 
 	for( TreePtr<Node> &terminus_tpi : scaffold_ptr->child_ptrs )
 		terminii.push_back( XLink( scaffold_node, &terminus_tpi ) );
 	
-	return XTreeZone( base_xlink, terminii, tree_ordinal );
+	return TreeZone( base_xlink, terminii, tree_ordinal );
 }
 
 

@@ -17,22 +17,22 @@ namespace SR
 class XTreeDatabase;    
 class FreeZone;
 
-// ------------------------- XTreeZone --------------------------
+// ------------------------- TreeZone --------------------------
 
-// XTreeZone is for zones that are within the current x tree. All
+// TreeZone is for zones that are within the current x tree. All
 // nodes in the tree have an XLink, including at the root, and we
 // prefer to keep track of the XLink to the base node for precision
 // and convenience. See #623.
-class XTreeZone : public Zone
+class TreeZone : public Zone
 { 
 public:
 	static const DBCommon::TreeOrdinal default_ordinal = DBCommon::TreeOrdinal::MAIN;
 
-    static XTreeZone CreateSubtree( XLink base, 
+    static TreeZone CreateSubtree( XLink base, 
 								    DBCommon::TreeOrdinal ordinal_ = default_ordinal );
-    static XTreeZone CreateEmpty( XLink base );
+    static TreeZone CreateEmpty( XLink base );
 
-    explicit XTreeZone( XLink base, 
+    explicit TreeZone( XLink base, 
                         vector<XLink> terminii, 
                         DBCommon::TreeOrdinal ordinal_ = default_ordinal );
       
@@ -70,10 +70,10 @@ public:
 
     bool IsEmpty() const;
 
-	XTreeZone GetXTreeZone() const;
+	TreeZone GetXTreeZone() const;
 
-	static void Swap( MutableZone &tree_zone_l, vector<XTreeZone *> fixups_l, 
-	                  MutableZone &tree_zone_r, vector<XTreeZone *> fixups_r );
+	static void Swap( MutableZone &tree_zone_l, vector<TreeZone *> fixups_l, 
+	                  MutableZone &tree_zone_r, vector<TreeZone *> fixups_r );
        
     string GetTrace() const override;
     
@@ -88,11 +88,11 @@ class RAIISuspendForSwapBase
 {
 protected:
 	RAIISuspendForSwapBase() = delete;
-	RAIISuspendForSwapBase( XTreeZone &zone1_, XTreeZone &zone2_ );
+	RAIISuspendForSwapBase( TreeZone &zone1_, TreeZone &zone2_ );
 	~RAIISuspendForSwapBase();
 	
-	const XTreeZone &zone1;
-	const XTreeZone &zone2;
+	const TreeZone &zone1;
+	const TreeZone &zone2;
 };
  
  

@@ -50,7 +50,7 @@ bool NodeTable::IsDeclarer(XLink xlink) const
 }
 
 
-void NodeTable::InsertTree(XTreeZone &zone)
+void NodeTable::InsertTree(TreeZone &zone)
 {     
 	// For building, we must add every node in the zone
 	auto action = [&](const DBWalk::WalkInfo &walk_info)
@@ -61,7 +61,7 @@ void NodeTable::InsertTree(XTreeZone &zone)
 }
 
 
-void NodeTable::DeleteTree(XTreeZone &zone)
+void NodeTable::DeleteTree(TreeZone &zone)
 {
 	// For tear-down, we must remove every node in the zone
 	auto action = [&](const DBWalk::WalkInfo &walk_info)
@@ -72,7 +72,7 @@ void NodeTable::DeleteTree(XTreeZone &zone)
 }
 
 
-NodeTable::RAIISuspendForSwap::RAIISuspendForSwap(NodeTable *node_table_, XTreeZone &zone1_, XTreeZone &zone2_ ) :
+NodeTable::RAIISuspendForSwap::RAIISuspendForSwap(NodeTable *node_table_, TreeZone &zone1_, TreeZone &zone2_ ) :
 	RAIISuspendForSwapBase( zone1_, zone2_ ),
 	node_table( *node_table_ )
 {	

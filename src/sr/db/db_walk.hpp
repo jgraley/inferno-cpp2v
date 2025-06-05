@@ -34,7 +34,7 @@ public:
     typedef list< Action > Actions;
    
     void WalkTreeZone( const Action action,
-                       const XTreeZone &zone,
+                       const TreeZone &zone,
                        Wind wind,
                        const DBCommon::CoreInfo *base_info = DBCommon::GetUnknownCoreInfo() );
 
@@ -43,7 +43,7 @@ private:
     struct WalkKit
     {
         const Action action;
-        const XTreeZone *tree_zone;
+        const TreeZone *tree_zone;
         const DBCommon::TreeOrdinal tree_ordinal;        
         Wind wind;
         mutable size_t next_terminus_index;

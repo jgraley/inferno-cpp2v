@@ -5,7 +5,7 @@ using namespace SR;
 //#define TRACE_WALK
 
 void DBWalk::WalkTreeZone( const Action action,
-                           const XTreeZone &tree_zone,
+                           const TreeZone &tree_zone,
                            Wind wind,
                            const DBCommon::CoreInfo *base_info )
 {

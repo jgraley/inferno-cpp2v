@@ -28,7 +28,7 @@ const Lacing *Orderings::GetLacing() const
 }
 
 	
-void Orderings::InsertTree(XTreeZone &zone)
+void Orderings::InsertTree(TreeZone &zone)
 {     
 	// -------------------- depth-first -----------------------
     InsertGeometric(zone);
@@ -41,7 +41,7 @@ void Orderings::InsertTree(XTreeZone &zone)
 	                        zone, DBWalk::WIND_IN );
 
 	// SC still needs ancestors of root
-	auto subtree = XTreeZone::CreateSubtree(zone.GetBaseXLink());
+	auto subtree = TreeZone::CreateSubtree(zone.GetBaseXLink());
 
 	// GetTerminusAndBaseAncestors() never gives us a leaf node, so no need to check for other parents
 	for( TreePtr<Node> x : GetTerminusAndBaseAncestors(subtree) )                        
@@ -49,7 +49,7 @@ void Orderings::InsertTree(XTreeZone &zone)
 }
 
 
-void Orderings::DeleteTree(XTreeZone &zone)
+void Orderings::DeleteTree(TreeZone &zone)
 {
 	// -------------------- depth-first -----------------------
     DeleteGeometric(zone);
@@ -63,7 +63,7 @@ void Orderings::DeleteTree(XTreeZone &zone)
 	                        zone, DBWalk::WIND_OUT );
 
 	// SC still needs ancestors of root
-	auto subtree = XTreeZone::CreateSubtree(zone.GetBaseXLink());
+	auto subtree = TreeZone::CreateSubtree(zone.GetBaseXLink());
 	
 	// GetTerminusAndBaseAncestors() never gives us a leaf node, so no need to check for other parents
 	for( TreePtr<Node> x : GetTerminusAndBaseAncestors(subtree) )    
@@ -71,7 +71,7 @@ void Orderings::DeleteTree(XTreeZone &zone)
 }
 
 
-Orderings::RAIISuspendForSwap::RAIISuspendForSwap(Orderings *orderings_, XTreeZone &zone1_, XTreeZone &zone2_ ) :
+Orderings::RAIISuspendForSwap::RAIISuspendForSwap(Orderings *orderings_, TreeZone &zone1_, TreeZone &zone2_ ) :
 	RAIISuspendForSwapBase( zone1_, zone2_ ),
 	orderings( *orderings_ )
 {	
@@ -101,7 +101,7 @@ Orderings::RAIISuspendForSwap::~RAIISuspendForSwap()
 }
 
         
-void Orderings::InsertGeometric(const XTreeZone &zone)
+void Orderings::InsertGeometric(const TreeZone &zone)
 {     
 	// Take care of the DFO, which is an XLink-keyed ordering and must be updated fully in geom case
     auto action = [&](const DBWalk::WalkInfo &walk_info)
@@ -113,7 +113,7 @@ void Orderings::InsertGeometric(const XTreeZone &zone)
 }
 
 
-void Orderings::DeleteGeometric(const XTreeZone &zone)
+void Orderings::DeleteGeometric(const TreeZone &zone)
 {
 	// Take care of the DFO, which is an XLink-keyed ordering and must be updated fully in geom case
     auto action = [&](const DBWalk::WalkInfo &walk_info)
@@ -166,7 +166,7 @@ void Orderings::DeleteActionSCAndCAT(const DBWalk::WalkInfo &walk_info)
 }
        
 
-set<TreePtr<Node>> Orderings::GetTerminusAndBaseAncestors( const XTreeZone &tz ) const
+set<TreePtr<Node>> Orderings::GetTerminusAndBaseAncestors( const TreeZone &tz ) const
 {
 	set<TreePtr<Node>> sn;
 		

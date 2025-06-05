@@ -29,7 +29,7 @@ namespace SR
 class ComplementPass
 {
 public:
-    typedef map<XLink, XTreeZone *, DepthFirstRelation> DepthFirstOrderingZones;
+    typedef map<XLink, TreeZone *, DepthFirstRelation> DepthFirstOrderingZones;
 
     ComplementPass( XTreeDatabase *db );
     

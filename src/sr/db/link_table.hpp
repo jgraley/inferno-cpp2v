@@ -43,13 +43,13 @@ public:
     
     const DBCommon::CoreInfo &GetCoreInfo(XLink xlink) const;
     
-	void InsertTree(XTreeZone &zone);
-	void DeleteTree(XTreeZone &zone);
+	void InsertTree(TreeZone &zone);
+	void DeleteTree(TreeZone &zone);
     
 	class RAIISuspendForSwap : RAIISuspendForSwapBase
 	{
 	public:
-		RAIISuspendForSwap(LinkTable *link_table_, XTreeZone &zone1_, XTreeZone &zone2_ );
+		RAIISuspendForSwap(LinkTable *link_table_, TreeZone &zone1_, TreeZone &zone2_ );
 		~RAIISuspendForSwap();
 	private:
 		DBWalk db_walker;     

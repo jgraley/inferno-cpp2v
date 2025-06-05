@@ -56,7 +56,7 @@ void XTreeDatabase::BuildTree(DBCommon::TreeOrdinal tree_ordinal, const FreeZone
     trees_by_ordinal[tree_ordinal] = {sp_root};
     XLink root_xlink = GetRootXLink(tree_ordinal);
     ASSERT( root_xlink );
-	auto zone = XTreeZone::CreateSubtree(root_xlink, tree_ordinal);
+	auto zone = TreeZone::CreateSubtree(root_xlink, tree_ordinal);
     TRACE("Tree ordinal: %d subtree zone: ", tree_ordinal)(zone)("\n");
 
 	domain->InsertTree(zone);   
@@ -72,7 +72,7 @@ void XTreeDatabase::TeardownTree(DBCommon::TreeOrdinal tree_ordinal)
 	INDENT("-t");
     ASSERT( tree_ordinal >= DBCommon::TreeOrdinal::EXTRAS );
     XLink root_xlink = GetRootXLink(tree_ordinal);
-    auto zone = XTreeZone::CreateSubtree(root_xlink, tree_ordinal);
+    auto zone = TreeZone::CreateSubtree(root_xlink, tree_ordinal);
 	TRACE("Tree ordinal: %d root: ", tree_ordinal)(zone)("\n");
 
     domain_extension->DeleteTree(zone);   
@@ -85,8 +85,8 @@ void XTreeDatabase::TeardownTree(DBCommon::TreeOrdinal tree_ordinal)
 }
 
 
-void XTreeDatabase::SwapTreeToTree( XTreeZone &zone1, vector<XTreeZone *> fixups1,
-                                    XTreeZone &zone2, vector<XTreeZone *> fixups2 )
+void XTreeDatabase::SwapTreeToTree( TreeZone &zone1, vector<TreeZone *> fixups1,
+                                    TreeZone &zone2, vector<TreeZone *> fixups2 )
 {	
     TRACE("Swapping target TreeZones:\n")(zone1)
          ("\nand: ")(zone2);
@@ -332,7 +332,7 @@ Mutator XTreeDatabase::CreateTreeMutator(XLink xlink)  const
 }
 
 
-MutableZone XTreeDatabase::CreateMutableZone(XTreeZone &zone) const
+MutableZone XTreeDatabase::CreateMutableZone(TreeZone &zone) const
 {
 	Mutator base_mutator = CreateTreeMutator(zone.GetBaseXLink());
 	vector<Mutator> terminii_mutators;
@@ -366,7 +366,7 @@ void XTreeDatabase::CheckAssets()
     for( auto p : trees_by_ordinal )
 	{
 	    XLink root_xlink = GetRootXLink(p.first);
-		auto tree_zone = XTreeZone::CreateSubtree(root_xlink);
+		auto tree_zone = TreeZone::CreateSubtree(root_xlink);
 		ref_domain->InsertTree(tree_zone);
 	}   
 
@@ -380,7 +380,7 @@ void XTreeDatabase::CheckAssets()
     for( auto p : trees_by_ordinal )
 	{
 	    XLink root_xlink = GetRootXLink(p.first);
-		auto tree_zone = XTreeZone::CreateSubtree(root_xlink);
+		auto tree_zone = TreeZone::CreateSubtree(root_xlink);
 		ref_orderings->InsertTree(tree_zone);
 	}   
     
