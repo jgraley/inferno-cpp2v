@@ -434,11 +434,24 @@ void OrderingPass::MaximalIncreasingSubsequence( PatchIndicesDFO &indices_dfo )
 void OrderingPass::FindDuplications(shared_ptr<Patch> &layout)
 {
 	vector<shared_ptr<Patch> *> out_of_order_patches;  
+	in_order_bases.clear();
     TreeZonePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
     {
         auto tree_patch = dynamic_pointer_cast<TreeZonePatch>(patch);
-        if( tree_patch->GetIntent() == TreeZonePatch::Intent::MOVEABLE )
+        switch( tree_patch->GetIntent() )
+        {
+			case TreeZonePatch::Intent::DEFAULT:
+			InsertSolo(in_order_bases, tree_patch->GetZone()->GetBaseXLink() );
+			break;
+			
+			case TreeZonePatch::Intent::MOVEABLE:
 			out_of_order_patches.push_back( &patch );
+			break;
+			
+			case TreeZonePatch::Intent::COPYABLE:
+			// Ignore
+			break;
+		}		
     } );    
 
 	multiset<XLink> out_of_order_bases;
@@ -490,7 +503,14 @@ void OrderingPass::RunDuplicate(shared_ptr<Patch> &layout)
 }
 
 
-void OrderingPass::RunMoveOut(shared_ptr<Patch> &layout, MovesMap &moves_map)
+MoveOutPass::MoveOutPass(XTreeDatabase *db_, ScaffoldOps *sops_) :
+    db( db_ ),
+    sops( sops_ )
+{
+}
+   
+   
+void MoveOutPass::Run(shared_ptr<Patch> &layout, MovesMap &moves_map)
 {
 	INDENT("M");
 
@@ -512,7 +532,7 @@ void OrderingPass::RunMoveOut(shared_ptr<Patch> &layout, MovesMap &moves_map)
 }
 
 
-void OrderingPass::MoveTreeZoneOut( shared_ptr<Patch> *ooo_patch_ptr, shared_ptr<Patch> &layout, MovesMap &moves_map)
+void MoveOutPass::MoveTreeZoneOut( shared_ptr<Patch> *ooo_patch_ptr, shared_ptr<Patch> &layout, MovesMap &moves_map)
 {
 	// Out-of-order patch is located at the "to" location, but contains the "from" tree zone.
 	auto ooo_tree_patch = dynamic_pointer_cast<TreeZonePatch>(*ooo_patch_ptr);

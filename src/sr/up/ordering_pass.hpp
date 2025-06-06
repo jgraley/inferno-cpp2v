@@ -81,6 +81,22 @@ private:
     set<XLink> in_order_bases;
 };
 
+
+class MoveOutPass
+{
+public:    
+    MoveOutPass(XTreeDatabase *db_, class ScaffoldOps *sops_);
+    
+    // Can change the supplied shared ptr
+    void Run( shared_ptr<Patch> &layout, MovesMap &moves_map);
+    
+private:    
+	void MoveTreeZoneOut( shared_ptr<Patch> *ooo_patch_ptr, shared_ptr<Patch> &layout, MovesMap &moves_map );
+
+    XTreeDatabase * const db;
+    ScaffoldOps * const sops;
+};
+
 }
 
 #endif

@@ -97,8 +97,11 @@ void TreeUpdater::UpdateMainTree( XLink origin_xlink, shared_ptr<Patch> source_l
 
 	MovesMap moves_map;
 
-    ordering_pass.RunMoveOut(source_layout, moves_map);
-    ordering_pass.Check(source_layout);
+	MoveOutPass move_out_pass( db, &sops );
+	move_out_pass.Run(source_layout, moves_map);
+
+    //ordering_pass.RunMoveOut(source_layout, moves_map);
+    //ordering_pass.Check(source_layout);
 	validate_zones.Run(source_layout);       
     
     GapFindingPass gap_finding_pass;
