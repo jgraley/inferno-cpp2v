@@ -19,21 +19,18 @@ class DFPatchIndexRelation;
  * found in the current tree. A tree zone is OOO (out of order) when:
  *  - A patch descends from another patch, but its TZ does not descend from the other patch's TZ
  *  - A patch's TZ is not in depth-first order wrt siblings
- * Such cases are treated as moves: the TZ is extracted from the tree and the patch becomes
- * a FZ patch.
- * TODO infer copies here too
+ * The ordering check is strict, so where we see neigbouring duplicates, all but one are
+ * found to be out of order. We set the intent of the out-of-order tree patches to MOVABLE.
  */ 
 class OrderingPass
 {
 public:    
     typedef list<shared_ptr<Patch> *> PatchPtrList;
 
-    OrderingPass(XTreeDatabase *db_, class ScaffoldOps *sops_);
+    OrderingPass(XTreeDatabase *db_);
     
     // Can change the supplied shared ptr
-    void RunAnalysis( shared_ptr<Patch> &layout );
-    void RunDuplicate( shared_ptr<Patch> &layout );
-    void RunMoveOut( shared_ptr<Patch> &layout, MovesMap &moves_map);
+    void Run( shared_ptr<Patch> &layout );
     
     // Just ASSERT no empty zones
     void Check( shared_ptr<Patch> &layout );
@@ -76,12 +73,45 @@ private:
     XLink GetBaseXLink(const PatchRecord &patch_record) const;
                           
     XTreeDatabase * const db;
-    ScaffoldOps * const sops;
     SR::DepthFirstRelation dfr;          
     set<XLink> in_order_bases;
 };
 
+/** 
+ * Determine by examining tree patches with intent DEFAULT and MOVABLE
+ * how to copy N-1 of any set of N duplicates such that as much as possible
+ * the ones we choose were already MOVABLE. Set their intent to COPYABLE.
+ */
+class ChooseCopiesPass
+{
+public:        
+    // Can change the supplied shared ptr
+    void Run(shared_ptr<Patch> &layout);
+};
 
+
+/**
+ * Duplicate the zones in the COPYABLE tree zone patches and thereby turn 
+ * them into free zone patches.
+ */
+class CopyingPass
+{
+public:        
+    // Can change the supplied shared ptr
+    void Run(shared_ptr<Patch> &layout);
+};
+
+
+/**
+ * For tree zone patches with intent MOVABLE, perform the first of two passes 
+ * required for moves (other in MoveInPass). This involves 
+ * - moving the tree zone content somewhere safe
+ * - replacing it with scaffold A
+ * - turning the patch into a free zone patch with scaffold B
+ * We hope that scaffold A will be eaten by inversion, while B will make 
+ * it into the main tree. Then MoveInPass will find it and put
+ * the content there.
+ */
 class MoveOutPass
 {
 public:    

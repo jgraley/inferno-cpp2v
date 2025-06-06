@@ -88,22 +88,20 @@ pair<Orderable::Diff, DepthFirstRelation::RelType> DFPatchIndexRelation::Compare
 
 // ------------------------- OrderingPass --------------------------
 
-OrderingPass::OrderingPass(XTreeDatabase *db_, ScaffoldOps *sops_) :
+OrderingPass::OrderingPass(XTreeDatabase *db_) :
     db( db_ ),
-    sops( sops_ ),
     dfr( db )
 {
 }
     
 
-void OrderingPass::RunAnalysis( shared_ptr<Patch> &layout )
+void OrderingPass::Run( shared_ptr<Patch> &layout )
 {    
 	INDENT("A");
 	in_order_bases.clear();
 	
     XLink root = db->GetMainRootXLink();
     ConstrainAnyPatchToDescendants( layout, root, false );	
-    FindDuplications(layout);
 }
 
 
@@ -431,10 +429,10 @@ void OrderingPass::MaximalIncreasingSubsequence( PatchIndicesDFO &indices_dfo )
 }
 
  
-void OrderingPass::FindDuplications(shared_ptr<Patch> &layout)
+void ChooseCopiesPass::Run(shared_ptr<Patch> &layout)
 {
 	vector<shared_ptr<Patch> *> out_of_order_patches;  
-	in_order_bases.clear();
+	set<XLink> in_order_bases;
     TreeZonePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
     {
         auto tree_patch = dynamic_pointer_cast<TreeZonePatch>(patch);
@@ -483,8 +481,8 @@ void OrderingPass::FindDuplications(shared_ptr<Patch> &layout)
 	}
 }
 
-	
-void OrderingPass::RunDuplicate(shared_ptr<Patch> &layout)
+
+void CopyingPass::Run(shared_ptr<Patch> &layout)
 {
 	INDENT("D");
     TreeZonePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)

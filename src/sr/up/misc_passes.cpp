@@ -76,16 +76,8 @@ void EmptyZonePass::Check( shared_ptr<Patch> &layout )
 
 // ------------------------- MarkersPass --------------------------
 
-MarkersPass::MarkersPass( const XTreeDatabase *db_ ) :
-    db( db_ )
-{
-}
-
-
 void MarkersPass::Run( shared_ptr<Patch> &layout )
-{
-    TreeZoneRelation tz_relation( db );
-    
+{   
     list<RequiresSubordinateSCREngine *> markers;
 
     Patch::ForDepthFirstWalk( layout, [&](shared_ptr<Patch> &patch) // Act on wind-in
@@ -109,11 +101,6 @@ void MarkersPass::Run( shared_ptr<Patch> &layout )
 }
 
 // ------------------------- DuplicateAllPass --------------------------
-
-DuplicateAllPass::DuplicateAllPass()
-{
-}
-    
 
 void DuplicateAllPass::Run( shared_ptr<Patch> &layout )
 {

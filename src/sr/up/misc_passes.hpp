@@ -59,12 +59,8 @@ public:
 class MarkersPass 
 {
 public:
-    MarkersPass( const XTreeDatabase *db );
     void Run( shared_ptr<Patch> &layout );
     void Check( shared_ptr<Patch> &layout );
-
-private:
-    const XTreeDatabase * const db;
 };
 
 // ------------------------- DuplicateAllPass --------------------------
@@ -77,9 +73,7 @@ private:
  */ 
 class DuplicateAllPass
 {
-public:    
-    DuplicateAllPass();
-    
+public:        
     // Can change the supplied shared ptr
     void Run( shared_ptr<Patch> &layout );
     

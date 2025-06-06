@@ -84,14 +84,22 @@ void TreeUpdater::UpdateMainTree( XLink origin_xlink, shared_ptr<Patch> source_l
     boundary_pass.Run(source_layout);
 	validate_zones.Run(source_layout);
 
+    OrderingPass ordering_pass( db );
+    ordering_pass.Run(source_layout);
+    
+    ChooseCopiesPass copies_pass;
+    copies_pass.Run(source_layout);    
+	
+	
+	
 	ScaffoldOps sops( db );
-
-    OrderingPass ordering_pass( db, &sops );
-    ordering_pass.RunAnalysis(source_layout);
-    ordering_pass.RunDuplicate(source_layout);
+	
+	CopyingPass copying_pass;
+	copying_pass.Run(source_layout);
+	
 	validate_zones.Run(source_layout);	
 
-    MarkersPass markers_pass( db );
+    MarkersPass markers_pass;
     markers_pass.Run(source_layout);
 	validate_zones.Run(source_layout);
 
@@ -99,9 +107,6 @@ void TreeUpdater::UpdateMainTree( XLink origin_xlink, shared_ptr<Patch> source_l
 
 	MoveOutPass move_out_pass( db, &sops );
 	move_out_pass.Run(source_layout, moves_map);
-
-    //ordering_pass.RunMoveOut(source_layout, moves_map);
-    //ordering_pass.Check(source_layout);
 	validate_zones.Run(source_layout);       
     
     GapFindingPass gap_finding_pass;
