@@ -103,6 +103,7 @@ void OrderingPass::RunAnalysis( shared_ptr<Patch> &layout )
 	
     XLink root = db->GetMainRootXLink();
     ConstrainAnyPatchToDescendants( layout, root, false );	
+    FindDuplications(layout);
 }
 
 
@@ -430,10 +431,8 @@ void OrderingPass::MaximalIncreasingSubsequence( PatchIndicesDFO &indices_dfo )
 }
 
  
-void OrderingPass::RunDuplicate(shared_ptr<Patch> &layout)
+void OrderingPass::FindDuplications(shared_ptr<Patch> &layout)
 {
-	INDENT("D");
-
 	vector<shared_ptr<Patch> *> out_of_order_patches;  
     TreeZonePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
     {
@@ -469,7 +468,12 @@ void OrderingPass::RunDuplicate(shared_ptr<Patch> &layout)
 			out_of_order_bases.erase(out_of_order_bases.lower_bound(base_xlink));
 		}
 	}
+}
+
 	
+void OrderingPass::RunDuplicate(shared_ptr<Patch> &layout)
+{
+	INDENT("D");
     TreeZonePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
     {
         auto tree_patch = dynamic_pointer_cast<TreeZonePatch>(patch);
@@ -495,27 +499,16 @@ void OrderingPass::RunMoveOut(shared_ptr<Patch> &layout, MovesMap &moves_map)
     {
         auto tree_patch = dynamic_pointer_cast<TreeZonePatch>(patch);
         if( tree_patch->GetIntent() == TreeZonePatch::Intent::MOVEABLE )
-			out_of_order_patches.push_back( &patch );
-    } );    
-
-	// Now we can do the moves and insert scaffolding		
-    for( shared_ptr<Patch> *ooo_patch_ptr : out_of_order_patches )
-    {
-		auto ooo_tree_patch = dynamic_pointer_cast<TreeZonePatch>(*ooo_patch_ptr);
-		if( ooo_tree_patch )
 		{
-			XLink base_xlink = ooo_tree_patch->GetZone()->GetBaseXLink();
+			XLink base_xlink = tree_patch->GetZone()->GetBaseXLink();
 			ASSERT( base_xlink );
 		
-			TRACE("Moving ")(ooo_patch_ptr)("\n");
+			TRACE("Moving ")(patch)("\n");
 			
 			// We can move it to the new place, avoiding the need for duplication
-			MoveTreeZoneOut(ooo_patch_ptr, layout, moves_map);
-
-			// But any further appearances must be duplicated TODO remove this? we're done duplicating!
-			InsertSolo(in_order_bases, base_xlink); 
+			MoveTreeZoneOut(&patch, layout, moves_map);
 		}
-	}
+	} );
 }
 
 
@@ -539,7 +532,7 @@ void OrderingPass::MoveTreeZoneOut( shared_ptr<Patch> *ooo_patch_ptr, shared_ptr
 	// the original contents, which we shall move
 	main_tree_zone_from.Validate(db);
 	
-	// Determine the fix-sops we'll need to do for tree zones in neighbouring patches
+	// Determine the fix-ups we'll need to do for tree zones in neighbouring patches
     vector<TreeZone *> fixups;	
     for( size_t i=0; i<main_tree_zone_from.GetNumTerminii(); i++ )
 	{				

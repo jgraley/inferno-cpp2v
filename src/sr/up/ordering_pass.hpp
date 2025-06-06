@@ -68,6 +68,8 @@ private:
 	void MaximalIncreasingSubsequence( PatchIndicesDFO &indices_dfo );
 
 	void ProcessOutOfOrder(shared_ptr<Patch> &layout);
+    void FindDuplications( shared_ptr<Patch> &layout );
+    
 	void MoveTreeZoneOut( shared_ptr<Patch> *ooo_patch_ptr, shared_ptr<Patch> &layout, MovesMap &moves_map );
 
     shared_ptr<TreeZonePatch> GetTreePatch(const PatchRecord &patch_record) const;
