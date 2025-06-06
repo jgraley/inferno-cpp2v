@@ -73,6 +73,13 @@ private:
 class TreeZonePatch : public Patch
 {
 public:
+	enum class Intent
+	{
+		DEFAULT,
+		MOVEABLE,
+		COPYABLE
+	};
+
     TreeZonePatch( const TreeZone &zone_, list<shared_ptr<Patch>> &&child_patches );
     TreeZonePatch( const TreeZone &zone_ );
     
@@ -97,11 +104,15 @@ public:
                                        function<void(shared_ptr<TreeZonePatch> &patch)> func_in,
                                        function<void(shared_ptr<TreeZonePatch> &patch)> func_out );
     
+    void SetIntent(Intent in);
+    Intent GetIntent() const;
+    
     string GetTrace() const final;
     
 private:
     TreeZone zone;
     list<RequiresSubordinateSCREngine *> embedded_markers;
+    Intent intent = Intent::DEFAULT;
 };
 
 // ------------------------- FreeZonePatch --------------------------

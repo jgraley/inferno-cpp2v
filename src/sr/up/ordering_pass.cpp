@@ -99,7 +99,6 @@ OrderingPass::OrderingPass(XTreeDatabase *db_, ScaffoldOps *sops_) :
 void OrderingPass::RunAnalysis( shared_ptr<Patch> &layout )
 {    
 	INDENT("A");
-	out_of_order_patches.clear();
 	in_order_bases.clear();
 	
     XLink root = db->GetMainRootXLink();
@@ -109,7 +108,6 @@ void OrderingPass::RunAnalysis( shared_ptr<Patch> &layout )
 
 void OrderingPass::Check( shared_ptr<Patch> &layout )
 {
-	out_of_order_patches.clear();
 	in_order_bases.clear();
 	
 	XLink root = db->GetMainRootXLink();
@@ -163,7 +161,7 @@ void OrderingPass::ConstrainAnyPatchToDescendants( shared_ptr<Patch> &start_patc
 
 				// Mark as out of order so that the patch itself will be 
 				// switched to a free zone patch.
-				out_of_order_patches.push_back(patch_record.patch_ptr);
+				dynamic_cast<TreeZonePatch &>(**patch_record.patch_ptr).SetIntent( TreeZonePatch::Intent::MOVEABLE );				
 			}
 			else // in-order patch
 			{          
@@ -436,6 +434,14 @@ void OrderingPass::RunDuplicate(shared_ptr<Patch> &layout)
 {
 	INDENT("D");
 
+	vector<shared_ptr<Patch> *> out_of_order_patches;  
+    TreeZonePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
+    {
+        auto tree_patch = dynamic_pointer_cast<TreeZonePatch>(patch);
+        if( tree_patch->GetIntent() == TreeZonePatch::Intent::MOVEABLE )
+			out_of_order_patches.push_back( &patch );
+    } );    
+
 	multiset<XLink> out_of_order_bases;
     for( shared_ptr<Patch> *ooo_patch_ptr : out_of_order_patches )
     {
@@ -459,22 +465,39 @@ void OrderingPass::RunDuplicate(shared_ptr<Patch> &layout)
 		if( out_of_order_bases.count(base_xlink) >= 2 || // Other out-of-orders, we should dup all but one
 		    in_order_bases.count(base_xlink) >= 1 ) // An in-order, we should dup so it can be left alone
 		{
-			// This TZ is aliassed by other TZs
-			TRACE("Duplicating ")(ooo_patch_ptr)("\n");
-
-			// We'll have to duplicate. Best to duplicate the OOO one so we don't have to do a move
-			shared_ptr<FreeZonePatch> new_free_patch = ooo_tree_patch->DuplicateToFree();
-			*ooo_patch_ptr = new_free_patch;
-
+			ooo_tree_patch->SetIntent( TreeZonePatch::Intent::COPYABLE );
 			out_of_order_bases.erase(out_of_order_bases.lower_bound(base_xlink));
 		}
 	}
+	
+    TreeZonePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
+    {
+        auto tree_patch = dynamic_pointer_cast<TreeZonePatch>(patch);
+        if( tree_patch->GetIntent() == TreeZonePatch::Intent::COPYABLE )
+        {		
+			// This TZ is aliassed by other TZs
+			TRACE("Duplicating ")(patch)("\n");
+
+			// We'll have to duplicate. Best to duplicate the OOO one so we don't have to do a move
+			shared_ptr<FreeZonePatch> new_free_patch = tree_patch->DuplicateToFree();
+			patch = new_free_patch;
+		} 
+	} );
 }
 
 
 void OrderingPass::RunMoveOut(shared_ptr<Patch> &layout, MovesMap &moves_map)
 {
 	INDENT("M");
+
+	vector<shared_ptr<Patch> *> out_of_order_patches;  
+    TreeZonePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
+    {
+        auto tree_patch = dynamic_pointer_cast<TreeZonePatch>(patch);
+        if( tree_patch->GetIntent() == TreeZonePatch::Intent::MOVEABLE )
+			out_of_order_patches.push_back( &patch );
+    } );    
+
 	// Now we can do the moves and insert scaffolding		
     for( shared_ptr<Patch> *ooo_patch_ptr : out_of_order_patches )
     {

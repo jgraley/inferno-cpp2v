@@ -258,6 +258,18 @@ void TreeZonePatch::ForTreeDepthFirstWalk( shared_ptr<Patch> &base,
 }
 
 
+void TreeZonePatch::SetIntent(Intent in)
+{
+	intent = in;
+}
+
+
+TreeZonePatch::Intent TreeZonePatch::GetIntent() const
+{
+	return intent;
+}
+
+
 string TreeZonePatch::GetTrace() const
 {
 #ifdef RECURSIVE_TRACE_OPERATOR

@@ -43,6 +43,7 @@ public:
         shared_ptr<Patch> *patch_ptr; // Double pointer to patch node so we can mutate
         bool out_of_order; 
     };
+    
 private:    
     typedef vector<PatchRecord> PatchRecords;
     typedef set<size_t, DFPatchIndexRelation> PatchIndicesDFO;
@@ -74,8 +75,7 @@ private:
                           
     XTreeDatabase * const db;
     ScaffoldOps * const sops;
-    SR::DepthFirstRelation dfr;      
-    vector<shared_ptr<Patch> *> out_of_order_patches;  
+    SR::DepthFirstRelation dfr;          
     set<XLink> in_order_bases;
 };
 
