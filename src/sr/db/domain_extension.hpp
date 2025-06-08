@@ -72,7 +72,7 @@ public:
 	void InsertTree(const TreeZone &zone);
 	void DeleteTree(const TreeZone &zone);
     
-	class RAIISuspendForSwap : RAIISuspendForSwapBase
+	class RAIISuspendForSwap : DBCommon::RAIISuspendForSwap
 	{
 	public:
 		RAIISuspendForSwap(DomainExtension *domain_extension_, TreeZone &zone1_, TreeZone &zone2_ );

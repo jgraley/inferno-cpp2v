@@ -72,7 +72,7 @@ void Orderings::DeleteTree(TreeZone &zone)
 
 
 Orderings::RAIISuspendForSwap::RAIISuspendForSwap(Orderings *orderings_, TreeZone &zone1_, TreeZone &zone2_ ) :
-	RAIISuspendForSwapBase( zone1_, zone2_ ),
+	DBCommon::RAIISuspendForSwap( zone1_, zone2_ ),
 	orderings( *orderings_ )
 {	
 	// -------------------- depth-first -----------------------

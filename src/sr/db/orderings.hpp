@@ -41,7 +41,7 @@ public:
     void InsertTree(TreeZone &zone);
     void DeleteTree(TreeZone &zone);
 
-	class RAIISuspendForSwap : RAIISuspendForSwapBase
+	class RAIISuspendForSwap : DBCommon::RAIISuspendForSwap
 	{
 	public:
 		RAIISuspendForSwap(Orderings *orderings_, TreeZone &zone1_, TreeZone &zone2_ );

@@ -63,6 +63,17 @@ public:
         // or IN_COLLECTION. Note: only used in regeneration queries.
         ContainerInterface::iterator container_it;
     };
+    
+	class RAIISuspendForSwap
+	{
+	protected:
+		RAIISuspendForSwap() = delete;
+		RAIISuspendForSwap( class TreeZone &zone1_, TreeZone &zone2_ );
+		~RAIISuspendForSwap();
+		
+		const TreeZone &zone1;
+		const TreeZone &zone2;
+	};    
 
 	// CoreInfo value for root of any tree is always well-defined, so
 	// we provide it here.

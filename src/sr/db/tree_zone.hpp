@@ -17,8 +17,6 @@ namespace SR
 class XTreeDatabase;    
 class FreeZone;
 
-// ------------------------- TreeZone --------------------------
-
 // TreeZone is for zones that are within the current x tree. All
 // nodes in the tree have an XLink, including at the root, and we
 // prefer to keep track of the XLink to the base node for precision
@@ -60,43 +58,6 @@ protected:
    	DBCommon::TreeOrdinal ordinal;    
 };
 
-// ------------------------- MutableZone --------------------------
- 
-class MutableZone : public Traceable
-{
-public:
-    explicit MutableZone( Mutator &&base_, 
-                              vector<Mutator> &&terminii_,
-                              DBCommon::TreeOrdinal ordinal_ );
-
-    bool IsEmpty() const;
-
-	TreeZone GetXTreeZone() const;
-
-	static void Swap( MutableZone &tree_zone_l, vector<TreeZone *> fixups_l, 
-	                  MutableZone &tree_zone_r, vector<TreeZone *> fixups_r );
-       
-    string GetTrace() const override;
-    
-private:
-    Mutator base;
-    vector<Mutator> terminii;
-   	DBCommon::TreeOrdinal ordinal;
-};
- 
- 
-class RAIISuspendForSwapBase
-{
-protected:
-	RAIISuspendForSwapBase() = delete;
-	RAIISuspendForSwapBase( TreeZone &zone1_, TreeZone &zone2_ );
-	~RAIISuspendForSwapBase();
-	
-	const TreeZone &zone1;
-	const TreeZone &zone2;
-};
- 
- 
 }
 
 #endif

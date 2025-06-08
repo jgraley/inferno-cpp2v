@@ -5,6 +5,7 @@
 #include "zone.hpp"
 #include "../link.hpp"
 #include "duplicate.hpp"
+#include "mutable_zone.hpp"
 
 #include "link_table.hpp"
 #include "node_table.hpp"

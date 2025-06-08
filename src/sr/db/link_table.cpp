@@ -48,7 +48,7 @@ void LinkTable::DeleteTree(TreeZone &zone)
  
  
 LinkTable::RAIISuspendForSwap::RAIISuspendForSwap(LinkTable *link_table_, TreeZone &zone1_, TreeZone &zone2_ ) :
-	RAIISuspendForSwapBase( zone1_, zone2_ ),
+	DBCommon::RAIISuspendForSwap( zone1_, zone2_ ),
 	link_table( *link_table_ ),
 	rows( link_table.rows )
 {	

@@ -64,67 +64,12 @@ private:
 
 	void MaximalIncreasingSubsequence( PatchIndicesDFO &indices_dfo );
 
-	void ProcessOutOfOrder(shared_ptr<Patch> &layout);
-    void FindDuplications( shared_ptr<Patch> &layout );
-    
-	void MoveTreeZoneOut( shared_ptr<Patch> *ooo_patch_ptr, shared_ptr<Patch> &layout, MovesMap &moves_map );
-
     shared_ptr<TreeZonePatch> GetTreePatch(const PatchRecord &patch_record) const;
     XLink GetBaseXLink(const PatchRecord &patch_record) const;
                           
     XTreeDatabase * const db;
     SR::DepthFirstRelation dfr;          
     set<XLink> in_order_bases;
-};
-
-/** 
- * Determine by examining tree patches with intent DEFAULT and MOVABLE
- * how to copy N-1 of any set of N duplicates such that as much as possible
- * the ones we choose were already MOVABLE. Set their intent to COPYABLE.
- */
-class ChooseCopiesPass
-{
-public:        
-    // Can change the supplied shared ptr
-    void Run(shared_ptr<Patch> &layout);
-};
-
-
-/**
- * Duplicate the zones in the COPYABLE tree zone patches and thereby turn 
- * them into free zone patches.
- */
-class CopyingPass
-{
-public:        
-    // Can change the supplied shared ptr
-    void Run(shared_ptr<Patch> &layout);
-};
-
-
-/**
- * For tree zone patches with intent MOVABLE, perform the first of two passes 
- * required for moves (other in MoveInPass). This involves 
- * - moving the tree zone content somewhere safe
- * - replacing it with scaffold A
- * - turning the patch into a free zone patch with scaffold B
- * We hope that scaffold A will be eaten by inversion, while B will make 
- * it into the main tree. Then MoveInPass will find it and put
- * the content there.
- */
-class MoveOutPass
-{
-public:    
-    MoveOutPass(XTreeDatabase *db_, class ScaffoldOps *sops_);
-    
-    // Can change the supplied shared ptr
-    void Run( shared_ptr<Patch> &layout, MovesMap &moves_map);
-    
-private:    
-	void MoveTreeZoneOut( shared_ptr<Patch> *ooo_patch_ptr, shared_ptr<Patch> &layout, MovesMap &moves_map );
-
-    XTreeDatabase * const db;
-    ScaffoldOps * const sops;
 };
 
 }

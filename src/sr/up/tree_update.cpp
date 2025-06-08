@@ -14,6 +14,8 @@
 #include "boundary_pass.hpp"
 #include "alt_ordering_checker.hpp"
 #include "move_in_pass.hpp"
+#include "move_out_pass.hpp"
+#include "copy_passes.hpp"
 #include "scaffold_ops.hpp"
 
 #include <iostream>

@@ -1,9 +1,25 @@
 #include "db_common.hpp"
 #include "common/standard.hpp"
+#include "tree_zone.hpp"
 
 #include <memory>
 
 using namespace SR;
+
+
+
+
+DBCommon::RAIISuspendForSwap::RAIISuspendForSwap( TreeZone &zone1_, TreeZone &zone2_ ) :
+	zone1(zone1_),
+	zone2(zone2_)
+{
+}
+
+				                
+DBCommon::RAIISuspendForSwap::~RAIISuspendForSwap()
+{
+}
+
 
 const DBCommon::CoreInfo *DBCommon::GetRootCoreInfo()
 {

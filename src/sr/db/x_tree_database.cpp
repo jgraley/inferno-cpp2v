@@ -5,6 +5,7 @@
 #include "common/read_args.hpp"
 #include "tree_zone.hpp"
 #include "free_zone.hpp"
+#include "mutable_zone.hpp"
 
 using namespace SR;    
 
