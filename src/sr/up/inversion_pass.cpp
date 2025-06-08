@@ -90,9 +90,7 @@ void InversionPass::Invert( LocatedPatch lze )
         ASSERT( child_tree_patch ); 
         
         terminii.push_back( child_tree_patch->GetZone()->GetBaseXLink() );
-        auto xtz = dynamic_cast<TreeZone *>(child_tree_patch->GetZone());
-        ASSERT( xtz );
-        fixups.push_back( xtz );
+        fixups.push_back( child_tree_patch->GetZone() );
     } );             
          
     // Make the inverted TZ       

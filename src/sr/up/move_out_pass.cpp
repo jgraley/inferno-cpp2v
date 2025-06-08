@@ -68,8 +68,7 @@ void MoveOutPass::MoveTreeZoneOut( shared_ptr<Patch> *ooo_patch_ptr, shared_ptr<
 		TreeZone *found = nullptr;
 		TreePatch::ForTreeDepthFirstWalk(layout, [&](shared_ptr<TreePatch> &patch)
 		{
-			TreeZone *candidate = dynamic_cast<TreeZone *>(patch->GetZone());
-			ASSERT( candidate );
+			TreeZone *candidate = patch->GetZone();
 			if( candidate->GetBaseXLink() == main_tree_zone_from.GetTerminusXLink(i) )
 			{
 				ASSERT( !found );
