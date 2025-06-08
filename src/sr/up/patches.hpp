@@ -17,7 +17,7 @@ namespace SR
 {
 class XTreeDatabase;
 
-class FreeZonePatch;
+class FreePatch;
 
 // ------------------------- Patch --------------------------
 
@@ -63,14 +63,14 @@ private:
 
 };
 
-// ------------------------- TreeZonePatch --------------------------
+// ------------------------- TreePatch --------------------------
 
 // Construct with tree zone and child patches for terminii. Markers can 
 // then be added. On evaluate: duplicate into a free zone, apply markers,
 // populate it immediately (rule #726), and return the resulting FreeZone. 
 // Due to rule #726, we cannot provide a merge method (or we could add support 
 // for markers in interior possibly not at base).
-class TreeZonePatch : public Patch
+class TreePatch : public Patch
 {
 public:
 	enum class Intent
@@ -80,8 +80,8 @@ public:
 		COPYABLE
 	};
 
-    TreeZonePatch( const TreeZone &zone_, list<shared_ptr<Patch>> &&child_patches );
-    TreeZonePatch( const TreeZone &zone_ );
+    TreePatch( const TreeZone &zone_, list<shared_ptr<Patch>> &&child_patches );
+    TreePatch( const TreeZone &zone_ );
     
     void AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&new_markers ) final;
     list<RequiresSubordinateSCREngine *> GetEmbeddedMarkers() const final;
@@ -91,18 +91,18 @@ public:
     const TreeZone *GetZone() const override;
     
     TreeZone GetXTreeZone() const;
-    shared_ptr<FreeZonePatch> DuplicateToFree() const;
+    shared_ptr<FreePatch> DuplicateToFree() const;
     
     static void ForTreeChildren( shared_ptr<Patch> base,
                                  function<void(shared_ptr<Patch> &patch)> func );
     static void ForTreeChildren( shared_ptr<Patch> base,
-                                 function<void(shared_ptr<TreeZonePatch> &patch)> func );
+                                 function<void(shared_ptr<TreePatch> &patch)> func );
     static void ForTreeDepthFirstWalk( shared_ptr<Patch> &base,
                                        function<void(shared_ptr<Patch> &patch)> func_in,
                                        function<void(shared_ptr<Patch> &patch)> func_out );
     static void ForTreeDepthFirstWalk( shared_ptr<Patch> &base,
-                                       function<void(shared_ptr<TreeZonePatch> &patch)> func_in,
-                                       function<void(shared_ptr<TreeZonePatch> &patch)> func_out );
+                                       function<void(shared_ptr<TreePatch> &patch)> func_in,
+                                       function<void(shared_ptr<TreePatch> &patch)> func_out );
     
     void SetIntent(Intent in);
     Intent GetIntent() const;
@@ -115,18 +115,18 @@ private:
     Intent intent = Intent::DEFAULT;
 };
 
-// ------------------------- FreeZonePatch --------------------------
+// ------------------------- FreePatch --------------------------
 
 // Construct with free zone and child patches for terminii. Markers can 
 // then be added. On evaluate: populate the zone, and return the resulting 
 // FreeZone. Rule #726 means there can never be duplicate, clone, move etc, 
 // because we mark for embedded immediately (but this means we can merge 
 // without needing to represent markers in interior possibly not at base).
-class FreeZonePatch : public Patch
+class FreePatch : public Patch
 {
 public:
-    FreeZonePatch( const FreeZone &zone_, list<shared_ptr<Patch>> &&child_patches );
-    FreeZonePatch( const FreeZone &zone_ );
+    FreePatch( const FreeZone &zone_, list<shared_ptr<Patch>> &&child_patches );
+    FreePatch( const FreeZone &zone_ );
 
     void AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&new_markers ) final;
     list<RequiresSubordinateSCREngine *> GetEmbeddedMarkers() const final;
@@ -141,13 +141,13 @@ public:
     static void ForFreeChildren(shared_ptr<Patch> base,
                                 function<void(shared_ptr<Patch> &patch)> func);
     static void ForFreeChildren(shared_ptr<Patch> base,
-                                function<void(shared_ptr<FreeZonePatch> &patch)> func);
+                                function<void(shared_ptr<FreePatch> &patch)> func);
     static void ForFreeDepthFirstWalk( shared_ptr<Patch> &base,
                                        function<void(shared_ptr<Patch> &patch)> func_in,
                                        function<void(shared_ptr<Patch> &patch)> func_out );
     static void ForFreeDepthFirstWalk( shared_ptr<Patch> &base,
-                                       function<void(shared_ptr<FreeZonePatch> &patch)> func_in,
-                                       function<void(shared_ptr<FreeZonePatch> &patch)> func_out );
+                                       function<void(shared_ptr<FreePatch> &patch)> func_in,
+                                       function<void(shared_ptr<FreePatch> &patch)> func_out );
     string GetTrace() const final;
 
 private:

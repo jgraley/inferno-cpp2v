@@ -53,7 +53,7 @@ unique_ptr<FreeZone> TreeUpdater::TransformToSingleFreeZone( shared_ptr<Patch> s
     merge_frees_pass.Run(source_layout);  
     merge_frees_pass.Check(source_layout);
 
-    auto free_patch = dynamic_pointer_cast<FreeZonePatch>(source_layout);
+    auto free_patch = dynamic_pointer_cast<FreePatch>(source_layout);
     ASSERT( free_patch );
     ASSERT( free_patch->GetNumChildren() == 0 );
     FreeZone *free_zone = free_patch->GetZone();

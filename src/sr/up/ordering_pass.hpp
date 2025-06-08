@@ -54,7 +54,7 @@ private:
     void ConstrainAnyPatchToDescendants( shared_ptr<Patch> &start_patch, 
 								         XLink base,
 								         bool just_check );
-    void ConstrainChildrenToTerminii( shared_ptr<TreeZonePatch> &tree_patch, 
+    void ConstrainChildrenToTerminii( shared_ptr<TreePatch> &tree_patch, 
                                       bool just_check );
     void AppendNextDescendantTreePatches( shared_ptr<Patch> &patch, 
                                       PatchRecords &patch_records );
@@ -64,7 +64,7 @@ private:
 
 	void MaximalIncreasingSubsequence( PatchIndicesDFO &indices_dfo );
 
-    shared_ptr<TreeZonePatch> GetTreePatch(const PatchRecord &patch_record) const;
+    shared_ptr<TreePatch> GetTreePatch(const PatchRecord &patch_record) const;
     XLink GetBaseXLink(const PatchRecord &patch_record) const;
                           
     XTreeDatabase * const db;

@@ -44,7 +44,7 @@ Agent::ReplacePatchPtr DepthAgent::GenReplaceLayoutImpl( const ReplaceKit &kit,
     ASSERT(terminus_key_xlink);// this could mean replace is being attempted on a DepthAgent in an abnormal context
     auto new_zone = TreeZone( key_xlink, vector<XLink>{terminus_key_xlink} );   
 
-    return make_shared<TreeZonePatch>( new_zone, move(child_commands) );
+    return make_shared<TreePatch>( new_zone, move(child_commands) );
 }
 
 

@@ -28,10 +28,10 @@ void ProtectDEPass::Run( shared_ptr<Patch> &layout )
     {
         auto extra_tree = TreeZone::CreateSubtree(db->GetRootXLink(ordinal));
         
-        TreeZonePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &r_patch)
+        TreePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &r_patch)
         {
 			// Filter manually because we'll change the type
-            auto right_tree_patch = dynamic_pointer_cast<TreeZonePatch>(r_patch);
+            auto right_tree_patch = dynamic_pointer_cast<TreePatch>(r_patch);
 			auto p = tz_relation.CompareHierarchical( extra_tree, *right_tree_patch->GetZone() );
 			if( p.second == ZoneRelation::OVERLAP_GENERAL || 
 				p.second == ZoneRelation::OVERLAP_TERMINII ||
@@ -41,7 +41,7 @@ void ProtectDEPass::Run( shared_ptr<Patch> &layout )
 				right_tree_patch->GetZone()->SetTreeOrdinal( ordinal );
 				
 				// Then indicate we won't be moving it
-				right_tree_patch->SetIntent( TreeZonePatch::Intent::COPYABLE );				
+				right_tree_patch->SetIntent( TreePatch::Intent::COPYABLE );				
             }
         });
     }    
@@ -56,9 +56,9 @@ EmptyZonePass::EmptyZonePass()
 
 void EmptyZonePass::Run( shared_ptr<Patch> &layout )
 {
-    TreeZonePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
+    TreePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
     {
-        auto tree_patch = dynamic_pointer_cast<TreeZonePatch>(patch);
+        auto tree_patch = dynamic_pointer_cast<TreePatch>(patch);
         if( tree_patch->GetZone()->IsEmpty() )
         {            
 			// Child could be tree or free
@@ -72,7 +72,7 @@ void EmptyZonePass::Run( shared_ptr<Patch> &layout )
 
 void EmptyZonePass::Check( shared_ptr<Patch> &layout )
 {
-    TreeZonePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<TreeZonePatch> &tree_patch)
+    TreePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<TreePatch> &tree_patch)
     {
         ASSERT( !tree_patch->GetZone()->IsEmpty() )("Found empty tree zone: ")(tree_patch->GetZone());
     } );    
@@ -108,9 +108,9 @@ void MarkersPass::Run( shared_ptr<Patch> &layout )
 
 void DuplicateAllPass::Run( shared_ptr<Patch> &layout )
 {
-    TreeZonePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
+    TreePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
     {
-        auto tree_patch = dynamic_pointer_cast<TreeZonePatch>(patch);
+        auto tree_patch = dynamic_pointer_cast<TreePatch>(patch);
         patch = tree_patch->DuplicateToFree();
     } );    
 }
@@ -120,7 +120,7 @@ void DuplicateAllPass::Check( shared_ptr<Patch> &layout )
 {
     Patch::ForDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
     {
-        ASSERT( dynamic_pointer_cast<FreeZonePatch>(patch) );
+        ASSERT( dynamic_pointer_cast<FreePatch>(patch) );
     } );    
 }
 
@@ -150,7 +150,7 @@ ValidateTreeZones::ValidateTreeZones(const XTreeDatabase *db_) :
  
 void ValidateTreeZones::Run( shared_ptr<Patch> layout )
 {
-    TreeZonePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<TreeZonePatch> &patch)
+    TreePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<TreePatch> &patch)
     {
 		patch->GetZone()->Validate(db);
     } );    

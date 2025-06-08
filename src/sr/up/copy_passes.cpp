@@ -16,20 +16,20 @@ void ChooseCopiesPass::Run(shared_ptr<Patch> &layout)
 {
 	vector<shared_ptr<Patch> *> out_of_order_patches;  
 	set<XLink> in_order_bases;
-    TreeZonePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
+    TreePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
     {
-        auto tree_patch = dynamic_pointer_cast<TreeZonePatch>(patch);
+        auto tree_patch = dynamic_pointer_cast<TreePatch>(patch);
         switch( tree_patch->GetIntent() )
         {
-			case TreeZonePatch::Intent::DEFAULT:
+			case TreePatch::Intent::DEFAULT:
 			InsertSolo(in_order_bases, tree_patch->GetZone()->GetBaseXLink() );
 			break;
 			
-			case TreeZonePatch::Intent::MOVEABLE:
+			case TreePatch::Intent::MOVEABLE:
 			out_of_order_patches.push_back( &patch );
 			break;
 			
-			case TreeZonePatch::Intent::COPYABLE:
+			case TreePatch::Intent::COPYABLE:
 			// Ignore
 			break;
 		}		
@@ -38,7 +38,7 @@ void ChooseCopiesPass::Run(shared_ptr<Patch> &layout)
 	multiset<XLink> out_of_order_bases;
     for( shared_ptr<Patch> *ooo_patch_ptr : out_of_order_patches )
     {
-		auto ooo_tree_patch = dynamic_pointer_cast<TreeZonePatch>(*ooo_patch_ptr);
+		auto ooo_tree_patch = dynamic_pointer_cast<TreePatch>(*ooo_patch_ptr);
 		ASSERT( ooo_tree_patch );
 		XLink base_xlink = ooo_tree_patch->GetZone()->GetBaseXLink();
 		ASSERT( base_xlink );
@@ -50,7 +50,7 @@ void ChooseCopiesPass::Run(shared_ptr<Patch> &layout)
 	// a TZ that aliasses a TZ that has had scaffolding put in.
     for( shared_ptr<Patch> *ooo_patch_ptr : out_of_order_patches )
     {
-		auto ooo_tree_patch = dynamic_pointer_cast<TreeZonePatch>(*ooo_patch_ptr);
+		auto ooo_tree_patch = dynamic_pointer_cast<TreePatch>(*ooo_patch_ptr);
 		ASSERT( ooo_tree_patch );
 		XLink base_xlink = ooo_tree_patch->GetZone()->GetBaseXLink();
 		ASSERT( base_xlink );
@@ -58,7 +58,7 @@ void ChooseCopiesPass::Run(shared_ptr<Patch> &layout)
 		if( out_of_order_bases.count(base_xlink) >= 2 || // Other out-of-orders, we should dup all but one
 		    in_order_bases.count(base_xlink) >= 1 ) // An in-order, we should dup so it can be left alone
 		{
-			ooo_tree_patch->SetIntent( TreeZonePatch::Intent::COPYABLE );
+			ooo_tree_patch->SetIntent( TreePatch::Intent::COPYABLE );
 			out_of_order_bases.erase(out_of_order_bases.lower_bound(base_xlink));
 		}
 	}
@@ -68,16 +68,16 @@ void ChooseCopiesPass::Run(shared_ptr<Patch> &layout)
 void CopyingPass::Run(shared_ptr<Patch> &layout)
 {
 	INDENT("D");
-    TreeZonePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
+    TreePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
     {
-        auto tree_patch = dynamic_pointer_cast<TreeZonePatch>(patch);
-        if( tree_patch->GetIntent() == TreeZonePatch::Intent::COPYABLE )
+        auto tree_patch = dynamic_pointer_cast<TreePatch>(patch);
+        if( tree_patch->GetIntent() == TreePatch::Intent::COPYABLE )
         {		
 			// This TZ is aliassed by other TZs
 			TRACE("Duplicating ")(patch)("\n");
 
 			// We'll have to duplicate. Best to duplicate the OOO one so we don't have to do a move
-			shared_ptr<FreeZonePatch> new_free_patch = tree_patch->DuplicateToFree();
+			shared_ptr<FreePatch> new_free_patch = tree_patch->DuplicateToFree();
 			patch = new_free_patch;
 		} 
 	} );

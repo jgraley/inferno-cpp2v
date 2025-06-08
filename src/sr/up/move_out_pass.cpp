@@ -24,10 +24,10 @@ void MoveOutPass::Run(shared_ptr<Patch> &layout, MovesMap &moves_map)
 	INDENT("M");
 
 	vector<shared_ptr<Patch> *> out_of_order_patches;  
-    TreeZonePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
+    TreePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
     {
-        auto tree_patch = dynamic_pointer_cast<TreeZonePatch>(patch);
-        if( tree_patch->GetIntent() == TreeZonePatch::Intent::MOVEABLE )
+        auto tree_patch = dynamic_pointer_cast<TreePatch>(patch);
+        if( tree_patch->GetIntent() == TreePatch::Intent::MOVEABLE )
 		{
 			XLink base_xlink = tree_patch->GetZone()->GetBaseXLink();
 			ASSERT( base_xlink );
@@ -44,7 +44,7 @@ void MoveOutPass::Run(shared_ptr<Patch> &layout, MovesMap &moves_map)
 void MoveOutPass::MoveTreeZoneOut( shared_ptr<Patch> *ooo_patch_ptr, shared_ptr<Patch> &layout, MovesMap &moves_map)
 {
 	// Out-of-order patch is located at the "to" location, but contains the "from" tree zone.
-	auto ooo_tree_patch = dynamic_pointer_cast<TreeZonePatch>(*ooo_patch_ptr);
+	auto ooo_tree_patch = dynamic_pointer_cast<TreePatch>(*ooo_patch_ptr);
 	ASSERT( ooo_tree_patch );
 	TreeZone main_tree_zone_from = ooo_tree_patch->GetXTreeZone();
 	ASSERT( !main_tree_zone_from.IsEmpty() ); // See #784
@@ -66,7 +66,7 @@ void MoveOutPass::MoveTreeZoneOut( shared_ptr<Patch> *ooo_patch_ptr, shared_ptr<
     for( size_t i=0; i<main_tree_zone_from.GetNumTerminii(); i++ )
 	{				
 		TreeZone *found = nullptr;
-		TreeZonePatch::ForTreeDepthFirstWalk(layout, [&](shared_ptr<TreeZonePatch> &patch)
+		TreePatch::ForTreeDepthFirstWalk(layout, [&](shared_ptr<TreePatch> &patch)
 		{
 			TreeZone *candidate = dynamic_cast<TreeZone *>(patch->GetZone());
 			ASSERT( candidate );
@@ -100,7 +100,7 @@ void MoveOutPass::MoveTreeZoneOut( shared_ptr<Patch> *ooo_patch_ptr, shared_ptr<
 
 	// Store the scaffold in the layout so it goes into inversion as a free zone, so it survives, 
 	// and ands up in the tree at the "to" location.
-	auto free_patch_to = make_shared<FreeZonePatch>( scaffold_zone_to, ooo_tree_patch->MoveChildren() );
+	auto free_patch_to = make_shared<FreePatch>( scaffold_zone_to, ooo_tree_patch->MoveChildren() );
 	*ooo_patch_ptr = free_patch_to;
 	
 	ValidateTreeZones(db).Run(layout);

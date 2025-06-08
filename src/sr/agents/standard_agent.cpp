@@ -682,7 +682,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingPattern( const
 
                     ASSERT( under_elt ); // present simplified scheme disallows nullptr
                     auto under_zone = TreeZone::CreateSubtree(XLink(under_node, &under_elt) );
-                    child_patches.push_back( make_shared<TreeZonePatch>(under_zone) );        
+                    child_patches.push_back( make_shared<TreePatch>(under_zone) );        
                 }
             }
         }            
@@ -705,7 +705,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingPattern( const
             {
                 ASSERT( *under_singular );            
                 auto under_zone = TreeZone::CreateSubtree(XLink(under_node, under_singular) );
-                child_patches.push_back( make_shared<TreeZonePatch>(under_zone) );            
+                child_patches.push_back( make_shared<TreePatch>(under_zone) );            
             }
         }
         else
@@ -714,7 +714,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingPattern( const
         }
     }
     
-    return make_shared<FreeZonePatch>( zone, move(child_patches) );         
+    return make_shared<FreePatch>( zone, move(child_patches) );         
 }
 
 
@@ -813,7 +813,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingX( const Repla
 
                     ASSERT( under_elt ); // present simplified scheme disallows nullptr
                     auto under_zone = TreeZone::CreateSubtree(XLink(under_node, &under_elt) );
-                    child_patches.push_back( make_shared<TreeZonePatch>(under_zone) );        
+                    child_patches.push_back( make_shared<TreePatch>(under_zone) );        
                 }
             }
         }            
@@ -836,7 +836,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingX( const Repla
             {
                 ASSERT( *under_singular );            
                 auto under_zone = TreeZone::CreateSubtree(XLink(under_node, under_singular) );
-                child_patches.push_back( make_shared<TreeZonePatch>(under_zone) );            
+                child_patches.push_back( make_shared<TreePatch>(under_zone) );            
             }
         }
         else
@@ -845,7 +845,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingX( const Repla
         }
     }
     
-    return make_shared<FreeZonePatch>( zone, move(child_patches) );         
+    return make_shared<FreePatch>( zone, move(child_patches) );         
 }
 
 
@@ -922,7 +922,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutNormal( const ReplaceKit &
         }       
     }
     
-    return make_shared<FreeZonePatch>( zone, move(child_patches) );     
+    return make_shared<FreePatch>( zone, move(child_patches) );     
 }
 
 

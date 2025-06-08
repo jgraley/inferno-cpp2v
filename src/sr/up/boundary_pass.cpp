@@ -23,9 +23,9 @@ void BoundaryPass::Run(shared_ptr<Patch> &layout)
 {	
 	INDENT("B");
 	boundaries.clear();
-    TreeZonePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
+    TreePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
     {
-		auto tree_patch = dynamic_pointer_cast<TreeZonePatch>(patch);
+		auto tree_patch = dynamic_pointer_cast<TreePatch>(patch);
 		GatherBoundaries(tree_patch->GetZone());
 		check_queue.push(&patch);
 	} );
@@ -54,7 +54,7 @@ void BoundaryPass::GatherBoundaries(TreeZone *tree_zone)
 void BoundaryPass::CheckTreeZoneAtBoundaries( shared_ptr<Patch> *patch_ptr )
 {
 	TRACE("Checking ")(*patch_ptr)("\n");
-	auto tree_patch = dynamic_pointer_cast<TreeZonePatch>(*patch_ptr);
+	auto tree_patch = dynamic_pointer_cast<TreePatch>(*patch_ptr);
 	TreeZone *tree_zone = tree_patch->GetZone();
 	XLink lower_excl = tree_zone->GetBaseXLink();	
 	
@@ -118,7 +118,7 @@ XLink BoundaryPass::TryGetBoundaryInRange( XLink lower, bool lower_incl, XLink u
 
 void BoundaryPass::SplitTreeZoneAtXLink( shared_ptr<Patch> *patch_ptr, XLink split_point )
 {
-	auto tree_patch = dynamic_pointer_cast<TreeZonePatch>(*patch_ptr);
+	auto tree_patch = dynamic_pointer_cast<TreePatch>(*patch_ptr);
 	TreeZone *initial_zone = tree_patch->GetZone();
     vector<XLink> parent_terminii, new_terminii;
 	list<shared_ptr<Patch>> parent_children, new_children;
@@ -133,7 +133,7 @@ void BoundaryPass::SplitTreeZoneAtXLink( shared_ptr<Patch> *patch_ptr, XLink spl
 	bool saw_under_split = false;
 	bool done_insert = false;
 	XLink prev_terminus;
-	TreeZonePatch::ForChildren( *patch_ptr, [&](shared_ptr<Patch> &child_patch)    
+	TreePatch::ForChildren( *patch_ptr, [&](shared_ptr<Patch> &child_patch)    
 	{
 		ASSERT( terminus_index<initial_zone->GetNumTerminii() ); // length mismatch
 		XLink terminus = initial_zone->GetTerminusXLink(terminus_index);
@@ -152,7 +152,7 @@ void BoundaryPass::SplitTreeZoneAtXLink( shared_ptr<Patch> *patch_ptr, XLink spl
 			ASSERT( !prev_terminus || dfr.Compare3Way(prev_terminus, split_point) < 0 );
 			parent_terminii.push_back(split_point); 
 			TreeZone new_child_zone(split_point, new_terminii, initial_tree_ordinal);
-			auto new_child_patch = make_shared<TreeZonePatch>( new_child_zone, move(new_children) );
+			auto new_child_patch = make_shared<TreePatch>( new_child_zone, move(new_children) );
 			parent_children.push_back(new_child_patch);
 			new_patch_ptr = &(parent_children.back());
 			done_insert = true;
@@ -190,7 +190,7 @@ void BoundaryPass::SplitTreeZoneAtXLink( shared_ptr<Patch> *patch_ptr, XLink spl
 		ASSERT( !prev_terminus || dfr.Compare3Way(prev_terminus, split_point) < 0 );
 		parent_terminii.push_back(split_point); 
 		TreeZone new_child_zone(split_point, new_terminii, initial_tree_ordinal);
-		auto new_child_patch = make_shared<TreeZonePatch>( new_child_zone, move(new_children) );
+		auto new_child_patch = make_shared<TreePatch>( new_child_zone, move(new_children) );
 		parent_children.push_back(new_child_patch);
 		new_patch_ptr = &(parent_children.back());
 	}
@@ -206,7 +206,7 @@ void BoundaryPass::SplitTreeZoneAtXLink( shared_ptr<Patch> *patch_ptr, XLink spl
 	
 	// Create new parent zone and terminii
 	TreeZone parent_zone(initial_zone->GetBaseXLink(), parent_terminii, initial_tree_ordinal);
-	auto t = make_shared<TreeZonePatch>( parent_zone, move(parent_children) );	
+	auto t = make_shared<TreePatch>( parent_zone, move(parent_children) );	
 	
 	TRACE("Splitting: ")(patch_ptr)("\ninto: ")(t)("\nand: ")(new_patch_ptr)("\n");
 	

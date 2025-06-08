@@ -24,7 +24,7 @@ public:
 	void Run(shared_ptr<Patch> source_layout);
 		
 private:
-	void CheckPatch(shared_ptr<TreeZonePatch> patch);
+	void CheckPatch(shared_ptr<TreePatch> patch);
 };
 
 }

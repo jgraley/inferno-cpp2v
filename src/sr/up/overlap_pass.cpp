@@ -24,16 +24,16 @@ void OverlapPass::Run( shared_ptr<Patch> &layout )
     TreeZoneRelation tz_relation( db );
     
     // The main algorithm for finding overlaps, now operates only on main tree.
-    // Inner and outer loops only look at TreeZonePatch patches
-    TreeZonePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &l_patch)
+    // Inner and outer loops only look at TreePatch patches
+    TreePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &l_patch)
     {
-        auto left_tree_patch = dynamic_pointer_cast<TreeZonePatch>(l_patch);
+        auto left_tree_patch = dynamic_pointer_cast<TreePatch>(l_patch);
 
 		// We will establish an increasing region of known non-overlapping tree zones. Detect
 		// when the new l has an overlap in that zone.
-		TreeZonePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &r_patch)
+		TreePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &r_patch)
 		{
-			auto right_tree_patch = dynamic_pointer_cast<TreeZonePatch>(r_patch);
+			auto right_tree_patch = dynamic_pointer_cast<TreePatch>(r_patch);
 					
 			if( l_patch == r_patch ) // inner "r" loop stops before catching up with outer "l" loop
 				LLBreak();
@@ -59,7 +59,7 @@ void OverlapPass::Run( shared_ptr<Patch> &layout )
 					TRACE("Duplicate right ")(right_tree_patch)("\n");
 					r_patch = right_tree_patch->DuplicateToFree();
 					// later iterations of r loop will skip over this because it's now a 
-					// FreeZonePatch, not a TreeZonePatch
+					// FreePatch, not a TreePatch
 				}
 										
 				// TODO duplicate r here rather than l later: we'd prefer to duplicate r
@@ -75,14 +75,14 @@ void OverlapPass::Check( shared_ptr<Patch> &layout )
 {
     TreeZoneRelation tz_relation( db );
 
-	TreeZonePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &l_patch)
+	TreePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &l_patch)
 	{
 		TRACE("Patch: ")(&l_patch)("\n");
 	} );
 
-    TreeZonePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<TreeZonePatch> &l_patch)
+    TreePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<TreePatch> &l_patch)
     {           
-		TreeZonePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<TreeZonePatch> &r_patch)
+		TreePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<TreePatch> &r_patch)
 		{						
 			auto p = tz_relation.CompareHierarchical( *l_patch->GetZone(), *r_patch->GetZone() );                    
 			if( p.second == ZoneRelation::OVERLAP_GENERAL || 

@@ -101,10 +101,10 @@ Agent::ReplacePatchPtr StarAgent::GenReplaceLayoutImpl( const ReplaceKit &kit,
         dest_zone.AddTerminus( Mutator::CreateFreeContainer(dest, dest_container, dest_it) );    
 
         auto child_zone = TreeZone::CreateSubtree(XLink(key_node, &key_elt) );
-        child_commands.push_back( make_shared<TreeZonePatch>(child_zone) );
+        child_commands.push_back( make_shared<TreePatch>(child_zone) );
     }
 
-    return make_shared<FreeZonePatch>( dest_zone, move(child_commands) );    
+    return make_shared<FreePatch>( dest_zone, move(child_commands) );    
 }
 
 

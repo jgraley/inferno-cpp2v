@@ -16,20 +16,20 @@ using namespace SR;
 void FreeZoneMergeImpl::Run( shared_ptr<Patch> &layout, PolicyFunction policy )
 {
 	INDENT("F");
-    FreeZonePatch::ForFreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<FreeZonePatch> &free_patch)
+    FreePatch::ForFreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<FreePatch> &free_patch)
     {
-		TRACE("Parent FreeZonePatch ")(*free_patch)("\n");
+		TRACE("Parent FreePatch ")(*free_patch)("\n");
 		FreeZone *free_zone = free_patch->GetZone();
 
 		FreeZone::TerminusIterator it_t = free_zone->GetTerminiiBegin();
-		FreeZonePatch::ChildPatchIterator it_child = free_patch->GetChildrenBegin();
+		FreePatch::ChildPatchIterator it_child = free_patch->GetChildrenBegin();
 		
 		while( it_child != free_patch->GetChildrenEnd() )
 		{
 			ASSERT( it_t != free_zone->GetTerminiiEnd() ); // length mismatch        
-			if( auto child_free_patch = dynamic_pointer_cast<FreeZonePatch>(*it_child) )
+			if( auto child_free_patch = dynamic_pointer_cast<FreePatch>(*it_child) )
 			{    
-				TRACE("Child FreeZonePatch ")(*child_free_patch)(" and terminus ")(*it_t)("\n");
+				TRACE("Child FreePatch ")(*child_free_patch)(" and terminus ")(*it_t)("\n");
 				FreeZone *child_free_zone = child_free_patch->GetZone();                    
 				if( policy(free_zone, child_free_zone) )
 				{
@@ -41,7 +41,7 @@ void FreeZoneMergeImpl::Run( shared_ptr<Patch> &layout, PolicyFunction policy )
 				}
 			}
 			
-			TRACE("Child TreeZonePatch: SKIPPING and terminus ")(*it_t)("\n");
+			TRACE("Child TreePatch: SKIPPING and terminus ")(*it_t)("\n");
 			it_t++;
 			it_child++;                                       
 		} 
@@ -53,9 +53,9 @@ void FreeZoneMergeImpl::Run( shared_ptr<Patch> &layout, PolicyFunction policy )
 
 void FreeZoneMergeImpl::Check( shared_ptr<Patch> &layout, PolicyFunction policy )
 {
-    FreeZonePatch::ForFreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<FreeZonePatch> &free_patch)
+    FreePatch::ForFreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<FreePatch> &free_patch)
     {
-        FreeZonePatch::ForFreeChildren( free_patch, [&](shared_ptr<FreeZonePatch> &child_free_patch)
+        FreePatch::ForFreeChildren( free_patch, [&](shared_ptr<FreePatch> &child_free_patch)
         {
             ASSERT(!policy(child_free_patch->GetZone(), free_patch->GetZone()))
                   ("Free patch:")(*free_patch)(" touching another free patch ")(*child_free_patch);
@@ -95,7 +95,7 @@ void MergeWidesPass::Run( shared_ptr<Patch> &layout )
 void MergeWidesPass::Check( shared_ptr<Patch> &layout )
 {
 	// Check is stricter: no container bases anywhere, regardless of parent type
-	FreeZonePatch::ForFreeDepthFirstWalk( layout, [&](shared_ptr<FreeZonePatch> &free_patch)
+	FreePatch::ForFreeDepthFirstWalk( layout, [&](shared_ptr<FreePatch> &free_patch)
 	{
 		ASSERT( !free_patch->GetZone()->TryGetContainerBase() )(free_patch);
 	}, nullptr );

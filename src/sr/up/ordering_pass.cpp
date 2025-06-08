@@ -66,7 +66,7 @@ pair<Orderable::Diff, DepthFirstRelation::RelType> DFPatchIndexRelation::Compare
 	shared_ptr<Patch> *l_pp = patch_records[l_key].patch_ptr;
     ASSERT( l_pp );
     ASSERT( *l_pp );
-    auto l_tp = dynamic_pointer_cast<TreeZonePatch>(*l_pp);
+    auto l_tp = dynamic_pointer_cast<TreePatch>(*l_pp);
     ASSERT( l_tp );
 	XLink l_xlink = l_tp->GetZone()->GetBaseXLink();
 	ASSERT( l_xlink );
@@ -75,7 +75,7 @@ pair<Orderable::Diff, DepthFirstRelation::RelType> DFPatchIndexRelation::Compare
 	shared_ptr<Patch> *r_pp = patch_records[r_key].patch_ptr;
     ASSERT( r_pp );
     ASSERT( *r_pp );
-    auto r_tp = dynamic_pointer_cast<TreeZonePatch>(*r_pp);
+    auto r_tp = dynamic_pointer_cast<TreePatch>(*r_pp);
     ASSERT( r_tp );
 	XLink r_xlink = r_tp->GetZone()->GetBaseXLink();
 	ASSERT( r_xlink );
@@ -160,7 +160,7 @@ void OrderingPass::ConstrainAnyPatchToDescendants( shared_ptr<Patch> &start_patc
 
 				// Mark as out of order so that the patch itself will be 
 				// switched to a free zone patch.
-				dynamic_cast<TreeZonePatch &>(**patch_record.patch_ptr).SetIntent( TreeZonePatch::Intent::MOVEABLE );				
+				dynamic_cast<TreePatch &>(**patch_record.patch_ptr).SetIntent( TreePatch::Intent::MOVEABLE );				
 			}
 			else // in-order patch
 			{          
@@ -195,7 +195,7 @@ void OrderingPass::ConstrainAnyPatchToDescendants( shared_ptr<Patch> &start_patc
 }
                                        
 
-void OrderingPass::ConstrainChildrenToTerminii( shared_ptr<TreeZonePatch> &tree_patch, 
+void OrderingPass::ConstrainChildrenToTerminii( shared_ptr<TreePatch> &tree_patch, 
                                                 bool just_check )
 {
 	INDENT(just_check?"t":"T");
@@ -216,9 +216,9 @@ void OrderingPass::AppendNextDescendantTreePatches( shared_ptr<Patch> &start_pat
                                                     PatchRecords &patch_records )
 {
     // Insert descendent DEFAULT tree zones into a list for convenience.
-    if( auto tree_patch = dynamic_pointer_cast<TreeZonePatch>(start_patch) )
+    if( auto tree_patch = dynamic_pointer_cast<TreePatch>(start_patch) )
     {
-		if( tree_patch->GetIntent() == TreeZonePatch::Intent::DEFAULT )
+		if( tree_patch->GetIntent() == TreePatch::Intent::DEFAULT )
 		{
 			TRACE("Saw ")(tree_patch->GetZone()->GetBaseXLink())("\n");
 			patch_records.push_back( { &start_patch, false } );
@@ -427,12 +427,12 @@ void OrderingPass::MaximalIncreasingSubsequence( PatchIndicesDFO &indices_dfo )
 }
 
 
-shared_ptr<TreeZonePatch> OrderingPass::GetTreePatch(const PatchRecord &patch_record) const
+shared_ptr<TreePatch> OrderingPass::GetTreePatch(const PatchRecord &patch_record) const
 {
     shared_ptr<Patch> *patch = patch_record.patch_ptr;
     ASSERT( patch );
     ASSERT( *patch );
-    auto tree_patch = dynamic_pointer_cast<TreeZonePatch>(*patch);
+    auto tree_patch = dynamic_pointer_cast<TreePatch>(*patch);
     ASSERT( tree_patch ); // Things should only be tree pointer ops
     return tree_patch;
 }
@@ -440,6 +440,6 @@ shared_ptr<TreeZonePatch> OrderingPass::GetTreePatch(const PatchRecord &patch_re
 
 XLink OrderingPass::GetBaseXLink(const PatchRecord &patch_record) const
 {
-    shared_ptr<TreeZonePatch> tree_patch = GetTreePatch(patch_record);
+    shared_ptr<TreePatch> tree_patch = GetTreePatch(patch_record);
     return tree_patch->GetZone()->GetBaseXLink();
 }

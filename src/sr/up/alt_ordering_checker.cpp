@@ -26,7 +26,7 @@ void AltOrderingChecker::Check( shared_ptr<Patch> layout )
 
 void AltOrderingChecker::Worker( shared_ptr<Patch> patch, XLink x_sub_base, bool should_touch )
 {	
-    if( auto tree_patch = dynamic_pointer_cast<TreeZonePatch>(patch) )
+    if( auto tree_patch = dynamic_pointer_cast<TreePatch>(patch) )
     {
         INDENT("t");
 		TRACE("Checking x_sub_base: ")(x_sub_base)(" against patch:\n")(patch)("\nshould_touch: ")(should_touch)("\n");
@@ -58,7 +58,7 @@ void AltOrderingChecker::Worker( shared_ptr<Patch> patch, XLink x_sub_base, bool
         // Co-loop over the children/terminii
 		XLink prev = XLink();
         vector<XLink> terminii = tree_zone->GetTerminusXLinks();
-        FreeZonePatch::ChildPatchIterator it_child = tree_patch->GetChildrenBegin();        
+        FreePatch::ChildPatchIterator it_child = tree_patch->GetChildrenBegin();        
         for( XLink terminus : terminii )
         {
             ASSERT( it_child != tree_patch->GetChildrenEnd() ); // length mismatch
@@ -83,20 +83,20 @@ void AltOrderingChecker::Worker( shared_ptr<Patch> patch, XLink x_sub_base, bool
         }
         ASSERT( it_child == tree_patch->GetChildrenEnd() ); // length mismatch
     }
-    else if( auto free_patch = dynamic_pointer_cast<FreeZonePatch>(patch) )
+    else if( auto free_patch = dynamic_pointer_cast<FreePatch>(patch) )
     {
         INDENT("f");
 		TRACE("Checking x_sub_base: ")(x_sub_base)(" against patch:\n")(patch)("\nshould_touch: ")(should_touch)("\n");
         ASSERT( !free_patch->GetZone()->IsEmpty() ); // TODO handle this case as with TZs, above
         
-		vector<shared_ptr<TreeZonePatch>> ndt_patches;
+		vector<shared_ptr<TreePatch>> ndt_patches;
 		AppendNextDescendantTreePatches( patch, &ndt_patches );
 		// We're finding tree patches, so they will all have XLinks as bases.
 		
 		TRACE("TZ patches found by AppendNextDescendantTreePatches():\n", ndt_patches.size())(ndt_patches)("\n");
 		
 		XLink prev = XLink();
-        for( shared_ptr<TreeZonePatch> ndt_patch : ndt_patches )
+        for( shared_ptr<TreePatch> ndt_patch : ndt_patches )
         {
 			// ndt_base would become a terminus during inversion, so must
 			// obey the same rules as TZ terminii, relative to sub_base
@@ -118,7 +118,7 @@ void AltOrderingChecker::Worker( shared_ptr<Patch> patch, XLink x_sub_base, bool
 			prev = ndt_base;        
 		}				
 
-        for( shared_ptr<TreeZonePatch> ndt_patch : ndt_patches )
+        for( shared_ptr<TreePatch> ndt_patch : ndt_patches )
         {
 			XLink ndt_base = ndt_patch->GetZone()->GetBaseXLink();
             Worker( ndt_patch, ndt_base, false );
@@ -132,15 +132,15 @@ void AltOrderingChecker::Worker( shared_ptr<Patch> patch, XLink x_sub_base, bool
 
 
 void AltOrderingChecker::AppendNextDescendantTreePatches( shared_ptr<Patch> start_patch, 
-                                                          vector<shared_ptr<TreeZonePatch>> *ndt_patches )
+                                                          vector<shared_ptr<TreePatch>> *ndt_patches )
 {
     // Insert descendent tree zones, skipping over free zones, into a list for
     // convenience.
-    if( auto tree_patch = dynamic_pointer_cast<TreeZonePatch>(start_patch) )
+    if( auto tree_patch = dynamic_pointer_cast<TreePatch>(start_patch) )
     {
         ndt_patches->push_back( tree_patch );
     }
-    else if( auto free_patch = dynamic_pointer_cast<FreeZonePatch>(start_patch) )
+    else if( auto free_patch = dynamic_pointer_cast<FreePatch>(start_patch) )
     {
         Patch::ForChildren( free_patch, [&](shared_ptr<Patch> &child_patch)
         {
