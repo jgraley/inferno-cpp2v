@@ -37,7 +37,10 @@ void ProtectDEPass::Run( shared_ptr<Patch> &layout )
 				p.second == ZoneRelation::OVERLAP_TERMINII ||
 				p.second == ZoneRelation::EQUAL )
 			{
+				// First set the correct ordinal on the tree zone
 				right_tree_patch->GetZone()->SetTreeOrdinal( ordinal );
+				
+				// Then indicate we won't be moving it
 				right_tree_patch->SetIntent( TreeZonePatch::Intent::COPYABLE );				
             }
         });
