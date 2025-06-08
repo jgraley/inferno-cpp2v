@@ -80,6 +80,12 @@ DBCommon::TreeOrdinal TreeZone::GetTreeOrdinal() const
 }
 
 
+void TreeZone::SetTreeOrdinal(DBCommon::TreeOrdinal ordinal_)
+{
+	ordinal = ordinal_;
+}
+
+
 void TreeZone::SetBaseXLink(XLink new_base)
 {
 	base = new_base;

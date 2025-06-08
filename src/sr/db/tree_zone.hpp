@@ -45,6 +45,7 @@ public:
     XLink GetTerminusXLink(size_t index) const;
 
     DBCommon::TreeOrdinal GetTreeOrdinal() const;
+    void SetTreeOrdinal(DBCommon::TreeOrdinal ordinal_);
     
     void SetBaseXLink(XLink new_base);
 

@@ -215,24 +215,22 @@ void OrderingPass::ConstrainChildrenToTerminii( shared_ptr<TreeZonePatch> &tree_
 void OrderingPass::AppendNextDescendantTreePatches( shared_ptr<Patch> &start_patch, 
                                                     PatchRecords &patch_records )
 {
-    // Insert descendent tree zones, skipping over free zones, into a list for
-    // convenience.
+    // Insert descendent DEFAULT tree zones into a list for convenience.
     if( auto tree_patch = dynamic_pointer_cast<TreeZonePatch>(start_patch) )
     {
-		TRACE("Saw ")(tree_patch->GetZone()->GetBaseXLink())("\n");
-        patch_records.push_back( { &start_patch, false } );
+		if( tree_patch->GetIntent() == TreeZonePatch::Intent::DEFAULT )
+		{
+			TRACE("Saw ")(tree_patch->GetZone()->GetBaseXLink())("\n");
+			patch_records.push_back( { &start_patch, false } );
+			return;
+		}
     }
-    else if( auto free_patch = dynamic_pointer_cast<FreeZonePatch>(start_patch) )
+
+	// Recurse through anything else
+    Patch::ForChildren( start_patch, [&](shared_ptr<Patch> &child_patch)
     {
-        Patch::ForChildren( free_patch, [&](shared_ptr<Patch> &child_patch)
-        {
-            AppendNextDescendantTreePatches( child_patch, patch_records );
-        } );
-    }
-    else
-    {
-        ASSERTFAIL();
-    }
+        AppendNextDescendantTreePatches( child_patch, patch_records );
+    } );
 }                                                                     
 
 

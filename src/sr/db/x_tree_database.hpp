@@ -46,7 +46,7 @@ public:
 
 	// ---------------- const and static methods ------------------
     XLink GetRootXLink(DBCommon::TreeOrdinal tree_ordinal) const;
-    vector<XLink> GetExtraRootXLinks() const;
+    vector<DBCommon::TreeOrdinal> GetExtraRootOrdinals() const;
 
     const DomainExtensionChannel *GetDEChannel( const DomainExtension::Extender *extender ) const;
     const Domain &GetDomain() const;

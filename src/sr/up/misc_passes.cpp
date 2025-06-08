@@ -23,10 +23,10 @@ void ProtectDEPass::Run( shared_ptr<Patch> &layout )
 {
     TreeZoneRelation tz_relation( db );
 
-    auto extra_root_xlinks = db->GetExtraRootXLinks();
-    for( XLink xlink : extra_root_xlinks )
+    auto extra_root_ordinals = db->GetExtraRootOrdinals();
+    for( DBCommon::TreeOrdinal ordinal : extra_root_ordinals )
     {
-        auto extra_tree = TreeZone::CreateSubtree(xlink);
+        auto extra_tree = TreeZone::CreateSubtree(db->GetRootXLink(ordinal));
         
         TreeZonePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &r_patch)
         {
@@ -37,7 +37,8 @@ void ProtectDEPass::Run( shared_ptr<Patch> &layout )
 				p.second == ZoneRelation::OVERLAP_TERMINII ||
 				p.second == ZoneRelation::EQUAL )
 			{
-				r_patch = right_tree_patch->DuplicateToFree();
+				right_tree_patch->GetZone()->SetTreeOrdinal( ordinal );
+				right_tree_patch->SetIntent( TreeZonePatch::Intent::COPYABLE );				
             }
         });
     }    

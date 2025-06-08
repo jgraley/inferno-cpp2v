@@ -142,18 +142,18 @@ XLink XTreeDatabase::GetRootXLink(DBCommon::TreeOrdinal tree_ordinal) const
 }
 
 
-vector<XLink> XTreeDatabase::GetExtraRootXLinks() const
+vector<DBCommon::TreeOrdinal> XTreeDatabase::GetExtraRootOrdinals() const
 {
-    vector<XLink> xlinks;
+    vector<DBCommon::TreeOrdinal> ordinals;
     for( auto p : trees_by_ordinal )
     {
         if( p.first != DBCommon::TreeOrdinal::MAIN )
         {
-            xlinks.push_back( XLink::CreateFrom( p.second.sp_tp_root_node ) );
+            ordinals.push_back( p.first );
         }
     }
     
-    return xlinks;
+    return ordinals;
 }
           
 
