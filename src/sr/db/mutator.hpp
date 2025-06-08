@@ -58,7 +58,7 @@ public:
     TreePtr<Node> ExchangeChild( TreePtr<Node> free_child ) const;
     TreePtr<Node> ExchangeContainer( ContainerInterface *child_container,                               
                                      list<Mutator> &child_terminii );
-    void ExchangeParent( Mutator& free_mut );
+    static void SwapParents( Mutator& mut_l, Mutator& mut_r );
     void SetParent( const Mutator &free_mut );
 
     TreePtr<Node> GetParentNode() const;

@@ -19,6 +19,7 @@ public:
     TreeUpdater(XTreeDatabase *x_tree_db = nullptr); // db optional
     
 	void BuildMainTree( TreePtr<Node> main_tree_root );
+	void TeardownMainTree();
 
     // Duplicates all the tree zones and merges everything into one
     unique_ptr<FreeZone> TransformToSingleFreeZone( shared_ptr<Patch> source_layout );

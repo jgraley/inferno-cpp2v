@@ -20,7 +20,6 @@ namespace SR
 class ChooseCopiesPass
 {
 public:        
-    // Can change the supplied shared ptr
     void Run(shared_ptr<Patch> &layout);
 };
 

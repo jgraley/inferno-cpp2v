@@ -59,7 +59,7 @@ void MutableZone::Swap( MutableZone &tree_zone_l, vector<TreeZone *> fixups_l,
 		if( !fixups_r.empty() && *fixups_r_it )
 			ASSERTS( (*fixups_r_it)->GetBaseXLink() == terminus_r.GetXLink() );
                          
-	    terminus_l.ExchangeParent(terminus_r); // deep
+	    Mutator::SwapParents( terminus_l, terminus_r ); // deep
 		               
         ASSERTS( terminus_l.GetChildTreePtr() );
         ASSERTS( terminus_r.GetChildTreePtr() );

@@ -29,11 +29,7 @@ public:
 
     OrderingPass(XTreeDatabase *db_);
     
-    // Can change the supplied shared ptr
     void Run( shared_ptr<Patch> &layout );
-    
-    // Just ASSERT no empty zones
-    void Check( shared_ptr<Patch> &layout );
 
     struct PatchRecord
     {
@@ -52,15 +48,12 @@ private:
 	// least across exchanges, we keep ancestors of the bounds that
 	// are at a safe level. FindOutOfOrderTreePatches() converts these.
     void ConstrainAnyPatchToDescendants( shared_ptr<Patch> &start_patch, 
-								         XLink base,
-								         bool just_check );
-    void ConstrainChildrenToTerminii( shared_ptr<TreePatch> &tree_patch, 
-                                      bool just_check );
+								         XLink base );
+    void ConstrainChildrenToTerminii( shared_ptr<TreePatch> &tree_patch );
     void AppendNextDescendantTreePatches( shared_ptr<Patch> &patch, 
                                       PatchRecords &patch_records );
     void FindOutOfOrderTreePatches( PatchRecords &patch_records, 
-									XLink base,
-									bool just_check );
+									XLink base );
 
 	void MaximalIncreasingSubsequence( PatchIndicesDFO &indices_dfo );
 
@@ -71,6 +64,24 @@ private:
     SR::DepthFirstRelation dfr;          
     set<XLink> in_order_bases;
 };
+
+
+class DFPatchIndexRelation
+{
+public: 
+	typedef size_t KeyType;
+
+    explicit DFPatchIndexRelation(const XTreeDatabase *db, const vector<OrderingPass::PatchRecord> &patch_records);
+
+    /// Less operator: for use with set, map etc
+    bool operator()( KeyType l_key, KeyType r_key ) const;
+    Orderable::Diff Compare3Way( KeyType l_key, KeyType r_key ) const;
+    pair<Orderable::Diff, DepthFirstRelation::RelType> CompareHierarchical( KeyType l_key, KeyType r_key ) const;
+    
+private:
+    DepthFirstRelation df;
+    const vector<OrderingPass::PatchRecord> &patch_records;
+}; 
 
 }
 

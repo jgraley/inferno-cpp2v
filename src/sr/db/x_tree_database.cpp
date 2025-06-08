@@ -71,7 +71,6 @@ void XTreeDatabase::BuildTree(DBCommon::TreeOrdinal tree_ordinal, const FreeZone
 void XTreeDatabase::TeardownTree(DBCommon::TreeOrdinal tree_ordinal)
 {        
 	INDENT("-t");
-    ASSERT( tree_ordinal >= DBCommon::TreeOrdinal::EXTRAS );
     XLink root_xlink = GetRootXLink(tree_ordinal);
     auto zone = TreeZone::CreateSubtree(root_xlink, tree_ordinal);
 	TRACE("Tree ordinal: %d root: ", tree_ordinal)(zone)("\n");

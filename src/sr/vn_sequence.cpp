@@ -15,6 +15,10 @@ VNSequence::VNSequence( const vector< shared_ptr<VNStep> > &sequence ) :
 
 VNSequence::~VNSequence()
 {
+	if( tree_updater ) // got past analysis
+	{
+		tree_updater->TeardownMainTree();
+	}
 }
 
 

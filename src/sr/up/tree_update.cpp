@@ -43,6 +43,12 @@ void TreeUpdater::BuildMainTree( TreePtr<Node> main_tree_root )
 }
 
 
+void TreeUpdater::TeardownMainTree()
+{
+	db->TeardownTree(DBCommon::TreeOrdinal::MAIN);
+}
+
+
 unique_ptr<FreeZone> TreeUpdater::TransformToSingleFreeZone( shared_ptr<Patch> source_layout )
 {
     DuplicateAllPass duplicate_all_pass;

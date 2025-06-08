@@ -174,15 +174,15 @@ TreePtr<Node> Mutator::ExchangeContainer( ContainerInterface *free_child_contain
 	return old_child;	
 }
     
-    
-void Mutator::ExchangeParent( Mutator &free_mut )
+
+void Mutator::SwapParents( Mutator& mut_l, Mutator& mut_r )
 {
-    TreePtr<Node> free_child = free_mut.GetChildTreePtr(); // outside the zone        
-	TreePtr<Node> old_child = GetChildTreePtr();
+    TreePtr<Node> child_r = mut_r.GetChildTreePtr(); // outside the zone        
+	TreePtr<Node> child_l = mut_l.GetChildTreePtr();
     
-    ExchangeChild( free_child );            
-    swap(*this, free_mut);
-    ExchangeChild( old_child );        
+    mut_l.ExchangeChild( child_r );            
+    swap(mut_l, mut_r);
+    mut_l.ExchangeChild( child_l );        
 }   
         
 
