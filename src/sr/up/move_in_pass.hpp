@@ -12,7 +12,7 @@ namespace SR
 {
 
 /**
- * Make tree zones for all the scaffoleds in the supplied moves_map,
+ * Make tree zones for all the scaffolds in the supplied moves_map,
  * and exchange in the corresponding free zones. This completes the
  * journey of move-patches. We only need the moves map for this, 
  * the layout was effectively consumed by the inversion pass.
@@ -22,7 +22,7 @@ class MoveInPass
 public:
 	MoveInPass( XTreeDatabase *db, class ScaffoldOps *sops_ );
 	
-	void Run(MovesMap &moves_map);
+	void Run(class MovesMap &moves_map);
 
 private:
 	XTreeDatabase * const db;

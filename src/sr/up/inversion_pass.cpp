@@ -95,8 +95,8 @@ void InversionPass::Invert( LocatedPatch lze )
          
     // Make the inverted TZ       
 	TreeZone main_tree_zone = TreeZone( base_xlink, 
-	                                      move(terminii), 
-	                                      DBCommon::TreeOrdinal::MAIN );
+	                                    move(terminii), 
+	                                    db->GetMainTreeOrdinal() );
 	
     // Write it into the tree
 	TreeZone tree_zone_in_extra = sops->FreeZoneIntoExtraTree( new_free_zone, main_tree_zone );
@@ -108,4 +108,8 @@ void InversionPass::Invert( LocatedPatch lze )
 		    						   tree_zone_in_extra, vector<TreeZone *>() );
 
 	db->TeardownTree( tree_zone_in_extra.GetTreeOrdinal() );   
+	
+	// Note: to keep the layout valid, we'd put the main_tree_zone in a tree 
+	// patch and copy its child pointers from the free patch. But we don't use
+	// the layout after this pass.
 }

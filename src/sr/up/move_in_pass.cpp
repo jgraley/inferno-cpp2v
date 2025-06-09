@@ -22,7 +22,7 @@ void MoveInPass::Run(MovesMap &moves_map)
 	{
 		// Hopefully our "to" scaffold node made it through inversion and is now in the main tree. 
 		// Build a TZ around it. Also get the actual moving content which is in an extra tree.
-		TreeZone inverted_main_tree_zone = sops->TreeZoneAroundScaffoldNode( p.first, DBCommon::TreeOrdinal::MAIN );	        
+		TreeZone inverted_main_tree_zone = sops->TreeZoneAroundScaffoldNode( p.first, db->GetMainTreeOrdinal() );	        
 		TreeZone extra_tree_zone = p.second;
 		
 		// Swap the moving content in and the scaffold out

@@ -154,14 +154,6 @@ private:
     FreeZone zone;   
 };
 
-// ------------------------- MovesMap --------------------------
-
-struct MovesMap
-{
-	public:
-	map<TreePtr<Node>, TreeZone> mm;
-};
-
 }
 
 #endif

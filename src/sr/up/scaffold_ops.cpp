@@ -36,9 +36,8 @@ TreeZone ScaffoldOps::FreeZoneIntoExtraTree( FreeZone free_zone, const TreeZone 
 
 	// ------------------------- Build into a new extra tree ---------------------------
     // Add a new extra tree containing the plugged "from" scaffold
-    DBCommon::TreeOrdinal extra_tree_ordinal = db->AllocateExtraTree();        
-	TRACE("Allocated extra tree %u\n", extra_tree_ordinal);
-    db->BuildTree( extra_tree_ordinal, free_zone );
+    DBCommon::TreeOrdinal extra_tree_ordinal = db->BuildTree( DBCommon::TreeType::UPDATE, free_zone );
+	TRACE("Built extra tree %u\n", extra_tree_ordinal);    
 
 	// ------------------------- Get unplugged zone for our scaffold ---------------------------
 	// We require a TZ based on the "from" scaffold that resembles main_tree_zone_from, with real

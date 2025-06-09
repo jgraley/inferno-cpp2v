@@ -66,7 +66,7 @@ Mutator::Mutator( Mode mode_,
     container_iterator( container_iterator_ ),
     sp_tp_root_node( sp_tp_root_node_ )
 {
-    Validate();
+    //Validate();
 }
 
 

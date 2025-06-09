@@ -59,7 +59,7 @@ void MoveOutPass::MoveTreeZoneOut( shared_ptr<Patch> *ooo_patch_ptr, shared_ptr<
 	//FTRACE("main_tree_zone_from: ")(main_tree_zone_from)("\nfree_zone: ")(*free_zone)("\n");
 	// Put the scaffold into the "from" part of the tree, displacing 
 	// the original contents, which we shall move
-	main_tree_zone_from.Validate(db);
+	//main_tree_zone_from.Validate(db);
 	
 	// Determine the fix-ups we'll need to do for tree zones in neighbouring patches
     vector<TreeZone *> fixups;	

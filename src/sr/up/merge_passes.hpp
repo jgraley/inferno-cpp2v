@@ -30,6 +30,7 @@ public:
  * Merging of free zones permits Inversion to unambiguously determine the boundaries
  * for exchanges. It creates the invariant that every free zone is bounded by something
  * other than a free zone, which must be a tree zone or the origin of the update.
+ * This resolves the "free zone ambiguity"
  */ 
 class MergeFreesPass
 {

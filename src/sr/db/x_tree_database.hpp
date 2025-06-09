@@ -28,12 +28,8 @@ public:
     
 	// ---------------- the principal mutators ------------------
     
-    // Update and access our trees. Some are created by the DB, others (the extra ones) are
-    // allocated and freed here.
-    DBCommon::TreeOrdinal AllocateExtraTree();
-    
     // Zone goes into tree. Geom and intrinsic assets inserted. No deletes.
-    void BuildTree(DBCommon::TreeOrdinal tree_ordinal, const FreeZone &free_zone);
+    DBCommon::TreeOrdinal BuildTree(DBCommon::TreeType tree_type, const FreeZone &free_zone);
     
     // Zone removed all assets deleted
     void TeardownTree(DBCommon::TreeOrdinal tree_ordinal);
@@ -47,7 +43,7 @@ public:
 
 	// ---------------- const and static methods ------------------
     XLink GetRootXLink(DBCommon::TreeOrdinal tree_ordinal) const;
-    vector<DBCommon::TreeOrdinal> GetExtraRootOrdinals() const;
+    DBCommon::TreeType GetTreeType(DBCommon::TreeOrdinal tree_ordinal) const;
 
     const DomainExtensionChannel *GetDEChannel( const DomainExtension::Extender *extender ) const;
     const Domain &GetDomain() const;
@@ -73,6 +69,8 @@ public:
     
     TreePtr<Node> GetMainRootNode() const;
     XLink GetMainRootXLink() const;
+	DBCommon::TreeOrdinal GetMainTreeOrdinal() const;
+	DBCommon::TreeOrdinal GetTreeOrdinalFor(XLink xlink) const;
 
 private: 
     Mutator CreateTreeMutator(XLink xlink) const;
@@ -85,7 +83,9 @@ public:
     void CheckAssets();
     
 private: 
-    void FreeExtraTree(DBCommon::TreeOrdinal tree_ordinal);
+    DBCommon::TreeOrdinal AllocateTree();
+    
+    void FreeTree(DBCommon::TreeOrdinal tree_ordinal);
 
     const shared_ptr<Lacing> lacing;
     const shared_ptr<Domain> domain;
@@ -99,6 +99,7 @@ private:
 
     DBWalk db_walker;
     DBCommon::TreeOrdinal next_tree_ordinal;  
+    DBCommon::TreeOrdinal main_tree_ordinal;  
 };    
     
 };

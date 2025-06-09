@@ -15,7 +15,7 @@ namespace SR
 class DFPatchIndexRelation;	
 
 /**
- * Detect where the ordering of tree zones impled by the layout differs from that 
+ * Detect where the ordering of tree zones implied by the layout differs from that 
  * found in the current tree. A tree zone is OOO (out of order) when:
  *  - A patch descends from another patch, but its TZ does not descend from the other patch's TZ
  *  - A patch's TZ is not in depth-first order wrt siblings

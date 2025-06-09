@@ -21,30 +21,23 @@ ProtectDEPass::ProtectDEPass(const XTreeDatabase *db_) :
  
 void ProtectDEPass::Run( shared_ptr<Patch> &layout )
 {
-    TreeZoneRelation tz_relation( db );
-
-    auto extra_root_ordinals = db->GetExtraRootOrdinals();
-    for( DBCommon::TreeOrdinal ordinal : extra_root_ordinals )
-    {
-        auto extra_tree = TreeZone::CreateSubtree(db->GetRootXLink(ordinal));
-        
-        TreePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &r_patch)
-        {
-			// Filter manually because we'll change the type
-            auto right_tree_patch = dynamic_pointer_cast<TreePatch>(r_patch);
-			auto p = tz_relation.CompareHierarchical( extra_tree, *right_tree_patch->GetZone() );
-			if( p.second == ZoneRelation::OVERLAP_GENERAL || 
-				p.second == ZoneRelation::OVERLAP_TERMINII ||
-				p.second == ZoneRelation::EQUAL )
-			{
-				// First set the correct ordinal on the tree zone
-				right_tree_patch->GetZone()->SetTreeOrdinal( ordinal );
+    TreePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<TreePatch> &tree_patch)
+	{
+		DBCommon::TreeOrdinal ordinal = tree_patch->GetZone()->GetTreeOrdinal();
+		switch( db->GetTreeType( ordinal ) )
+		{
+			case DBCommon::TreeType::DOMAIN_EXTENSION:
+				// Indicate we won't be moving it
+				tree_patch->SetIntent( TreePatch::Intent::COPYABLE );
+				break;
 				
-				// Then indicate we won't be moving it
-				right_tree_patch->SetIntent( TreePatch::Intent::COPYABLE );				
-            }
-        });
-    }    
+			case DBCommon::TreeType::MAIN:
+				break;
+				
+			case DBCommon::TreeType::UPDATE:
+				ASSERTFAIL();
+		}
+	});
 }
 
 // ------------------------- EmptyZonePass --------------------------
@@ -134,6 +127,7 @@ void ScaffoldChecker::Run( shared_ptr<Patch> layout )
     } );    
 }
 
+
 void ScaffoldChecker::Check(shared_ptr<Patch> patch)
 {
 	Zone *zone = patch->GetZone();
@@ -147,11 +141,28 @@ ValidateTreeZones::ValidateTreeZones(const XTreeDatabase *db_) :
     db(db_)
 {
 }
+
  
 void ValidateTreeZones::Run( shared_ptr<Patch> layout )
 {
     TreePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<TreePatch> &patch)
     {
 		patch->GetZone()->Validate(db);
+    } );    
+}
+// ------------------------- SetTreeOrdinals --------------------------
+
+SetTreeOrdinals::SetTreeOrdinals(const XTreeDatabase *db_) :
+    db(db_)
+{
+}
+
+ 
+void SetTreeOrdinals::Run( shared_ptr<Patch> layout )
+{
+    TreePatch::ForTreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<TreePatch> &patch)
+    {
+		TreeZone *zone = patch->GetZone();
+		zone->SetTreeOrdinal( db->GetTreeOrdinalFor( zone->GetBaseXLink() ) );
     } );    
 }

@@ -14,11 +14,11 @@ namespace SR
 // ------------------------- ProtectDEPass --------------------------
 
 /**
- * We must duplicate any tree zones that are in domain extension extra trees
- * because we want these to stick around. If we added them to the layout 
- * they'd be detected anyway, but this is simpler, and ensures we duplicate
- * into the main tree and leave the extra tree alone (less confusing if
- * DomainExtension is the only thing that changes them).
+ * Any tree zones that are in domain extension extra trees must be
+ * protected from move operations because they are "managed" by domain
+ * extension. Thus, we mark them as COPYABLE so that in due course
+ * they will be duplicated into free zones, which can go into the main
+ * tree safely.
  */
 class ProtectDEPass 
 {
@@ -33,8 +33,9 @@ private:
 // ------------------------- EmptyZonePass --------------------------
 
 /**
- * Drop empty tree zones, because they break correspondance betweek 
- * base XLink and zone.
+ * Drop empty tree zones, because they break correspondance between
+ * base XLink and zone - the same XLink becomes the base of more than 
+ * one zone.
  */ 
 class EmptyZonePass
 {
@@ -53,8 +54,9 @@ public:
 /**
  * Call into agents/engines informing them where certain important
  * nodes are in the new tree. We have to have completed any duplication
- * before doing this, since we will refer to the actual nodes. And 
- * we should still posess all the zones for the updated tree.
+ * before doing this, since we must refer to the actual X-Tree node that
+ * the engine will see. And we should still posess all the zones for 
+ * the updated tree i.e. before inversion.
  */ 
 class MarkersPass 
 {
@@ -96,6 +98,23 @@ class ValidateTreeZones
 {
 public:
     ValidateTreeZones( const XTreeDatabase *db );
+    void Run( shared_ptr<Patch> layout );
+
+private:
+    const XTreeDatabase * const db;
+};
+
+// ------------------------- SetTreeOrdinals --------------------------
+
+/**
+ * Tree Zones arrive from the engine/agents with an invalid tree ordinal.
+ * They could be in main tree or DE extra trees. Determine and set 
+ * correctly using the database.
+ */ 
+class SetTreeOrdinals 
+{
+public:
+    SetTreeOrdinals( const XTreeDatabase *db );
     void Run( shared_ptr<Patch> layout );
 
 private:

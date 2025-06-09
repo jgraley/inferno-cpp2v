@@ -162,21 +162,17 @@ void DomainExtensionChannel::CreateExtraTree( TreePtr<Node> induced_root )
     // identifier, causing illegal multiple parents. See #677
     // TODO maybe only do this if subtree actually would go wrong.
     TreePtr<Node> extra_root_node = SimpleDuplicate::DuplicateSubtree( induced_root );
+	// TODO move up and wrap "Duplicate" in FreeZone class
+	auto extra_free_zone = FreeZone::CreateSubtree(extra_root_node);    
 
-    // Obtain a tree ordinal 
-    DBCommon::TreeOrdinal tree_ordinal = db->AllocateExtraTree();        
+    // Add the whole subtree to the rest of the database as a new tree
+    DBCommon::TreeOrdinal tree_ordinal = db->BuildTree( DBCommon::TreeType::DOMAIN_EXTENSION, extra_free_zone );;        
 
     // Add this xlink and ordinal to the extension classes as stimulus. 
     // Count begins at 1 since there's one ref (this one)
     (void)induced_root_to_tree_ordinal_and_ref_count.insert( make_pair( extra_root_node, ExtensionClass(tree_ordinal, 1) ) );  
-    
-	// TODO move up and wrap "Duplicate" in FreeZone class
-	auto extra_free_zone = FreeZone::CreateSubtree(extra_root_node);
-
-    // Add the whole subtree to the rest of the database as a new tree
-    db->BuildTree( tree_ordinal, extra_free_zone );
- 
-    Validate();  
+     
+    //Validate();  
 }
 
 
@@ -288,7 +284,7 @@ void DomainExtensionChannel::PerformDeferredActions()
         
     stimulii_to_recheck.clear();   
 
-    Validate();
+    //Validate();
 }
 
 

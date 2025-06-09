@@ -12,16 +12,12 @@ namespace SR
 {
 
 /** 
- * Installs all the free zones into the tree. 
- * Determines target tree zones for free patches by examining surrounding tree 
- * patches and the origin of the update. Exchanges the free patches' zones over
- * these target tree zones. 
- * 
- * As a post-pass (RunDeleteIntrinsic()) we delete all the intrisic DB info,
- * by using the free zones released by our Exchange calls, which correspond
- * to the target tree zones identified by inversion. The key insight is that
- * this will not delete info corresponding to moves, because at this point
- * all we see of them is the scaffold nodes.
+ * Installs all the free zones into the main tree. 
+ * Determines inverted tree zones for free patches by examining surrounding tree 
+ * patches and the origin of the update. We build an extra tree with the free 
+ * zone contents (adding it to all geometric and intrinsic db assets) and 
+ * swap it with the inverted tree zone. The extra tree now contains that which 
+ * we wish to discard, so we tear it down and this also removes from all assets.
  */ 
 class InversionPass 
 {

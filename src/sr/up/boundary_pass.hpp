@@ -12,11 +12,14 @@ namespace SR
 {
 
 /**
- * Make boundaries of tree zone globally consistent by ensuring that
+ * Make boundaries of tree zones globally consistent by ensuring that
  * no boundary of any tree zone is in the interior of another. This ensures
  * that if two tree zones are not equal, then they don't overlap. Among
  * other things, this makes their base XLinks good for ordering checks.
- * It also makes move and duplicate safe.
+ * It also makes move and duplicate safe. After this pass we can say that
+ * a tree zone appears a natural number N of times in the layout without
+ * ambiguity. Wwe must duplicate N-1 appearances, and the remaining one 
+ * will be move or leave-alone.
  **/ 
 class BoundaryPass
 {

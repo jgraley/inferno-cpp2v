@@ -24,7 +24,7 @@ class FreeZone;
 class TreeZone : public Zone
 { 
 public:
-	static const DBCommon::TreeOrdinal default_ordinal = DBCommon::TreeOrdinal::MAIN;
+	static const DBCommon::TreeOrdinal default_ordinal = (DBCommon::TreeOrdinal)(-1); // UNKNOWN
 
     static TreeZone CreateSubtree( XLink base, 
 								    DBCommon::TreeOrdinal ordinal_ = default_ordinal );

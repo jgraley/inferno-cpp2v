@@ -17,7 +17,7 @@ namespace SR
  * required for moves (other in MoveInPass). This involves 
  * - moving the tree zone content somewhere safe
  * - replacing it with scaffold A
- * - turning the patch into a free zone patch with scaffold B
+ * - turning the patch into a free patch with scaffold B
  * We hope that scaffold A will be eaten by inversion, while B will make 
  * it into the main tree. Then MoveInPass will find it and put
  * the content there.
@@ -28,10 +28,10 @@ public:
     MoveOutPass(XTreeDatabase *db_, class ScaffoldOps *sops_);
     
     // Can change the supplied shared ptr
-    void Run( shared_ptr<Patch> &layout, MovesMap &moves_map);
+    void Run( shared_ptr<Patch> &layout, class MovesMap &moves_map);
     
 private:    
-	void MoveTreeZoneOut( shared_ptr<Patch> *ooo_patch_ptr, shared_ptr<Patch> &layout, MovesMap &moves_map );
+	void MoveTreeZoneOut( shared_ptr<Patch> *ooo_patch_ptr, shared_ptr<Patch> &layout, class MovesMap &moves_map );
 
     XTreeDatabase * const db;
     ScaffoldOps * const sops;

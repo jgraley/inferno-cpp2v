@@ -11,16 +11,19 @@ class DBCommon
 public:  
     typedef int OrdinalType; // other ordinals...
 
-    enum class TreeOrdinal
+    typedef int TreeOrdinal;
+    
+    enum class TreeType
     {
-        MAIN,
-        EXTRAS
-        // ...continues, EXTRAS+i
-    };
+		MAIN,
+		DOMAIN_EXTENSION,
+		UPDATE
+	};
     
     struct TreeRecord
     {
         shared_ptr<TreePtr<Node>> sp_tp_root_node;
+        TreeType type;
     };
     
     enum Context

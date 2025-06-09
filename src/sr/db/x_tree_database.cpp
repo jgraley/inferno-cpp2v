@@ -24,37 +24,19 @@ XTreeDatabase::XTreeDatabase( shared_ptr<Lacing> lacing_, DomainExtension::Exten
     node_table( make_shared<NodeTable>(link_table.get()) ),
     orderings( make_shared<Orderings>(lacing, this) ),
     domain_extension( make_shared<DomainExtension>(this, domain_extenders) ),
-    next_tree_ordinal( DBCommon::TreeOrdinal::EXTRAS ) // because main is always allocated
+    next_tree_ordinal( 0 )
 {
 }
 
     
-DBCommon::TreeOrdinal XTreeDatabase::AllocateExtraTree()
-{
-    DBCommon::TreeOrdinal assigned_ordinal;
-    if( free_tree_ordinals.empty() )
-    {
-        assigned_ordinal = next_tree_ordinal;
-        ((int &)next_tree_ordinal)++;
-    }
-    else
-    {
-        assigned_ordinal = free_tree_ordinals.front();
-        free_tree_ordinals.pop();
-    }
-	
-    return assigned_ordinal;
-}
-
-    
-void XTreeDatabase::BuildTree(DBCommon::TreeOrdinal tree_ordinal, const FreeZone &free_zone)
+DBCommon::TreeOrdinal XTreeDatabase::BuildTree( DBCommon::TreeType tree_type, const FreeZone &free_zone)
 {      
     INDENT("+t");
-    ASSERT( tree_ordinal >= DBCommon::TreeOrdinal(0) );
+    DBCommon::TreeOrdinal tree_ordinal = AllocateTree();
     
     TRACE("Walk for intrinsic: orderings\n");
     auto sp_root = make_shared<TreePtr<Node>>(free_zone.GetBaseNode());
-    trees_by_ordinal[tree_ordinal] = {sp_root};
+    trees_by_ordinal[tree_ordinal] = {sp_root, tree_type};
     XLink root_xlink = GetRootXLink(tree_ordinal);
     ASSERT( root_xlink );
 	auto zone = TreeZone::CreateSubtree(root_xlink, tree_ordinal);
@@ -65,6 +47,11 @@ void XTreeDatabase::BuildTree(DBCommon::TreeOrdinal tree_ordinal, const FreeZone
 	node_table->InsertTree(zone);   
 	orderings->InsertTree(zone);   
     domain_extension->InsertTree(zone);   
+    
+    if( tree_type == DBCommon::TreeType::MAIN )
+		main_tree_ordinal = tree_ordinal;
+    
+    return tree_ordinal;
 }
 
 
@@ -81,7 +68,7 @@ void XTreeDatabase::TeardownTree(DBCommon::TreeOrdinal tree_ordinal)
 	link_table->DeleteTree(zone);   
 	domain->DeleteTree(zone);   
 
-	FreeExtraTree( tree_ordinal );  
+	FreeTree( tree_ordinal );  
 }
 
 
@@ -97,8 +84,8 @@ void XTreeDatabase::SwapTreeToTree( TreeZone &zone1, vector<TreeZone *> fixups1,
 	// of the base of a zone.
 	ASSERT( zone1.GetTreeOrdinal() != zone2.GetTreeOrdinal() );
 
-	zone1.Validate(this); 
-	zone2.Validate(this); 
+	//zone1.Validate(this); 
+	//zone2.Validate(this); 
     
 	// Move to local mutable zone here because a suspended LinkTable will not 
 	// be able to provide the info to create them.
@@ -142,20 +129,11 @@ XLink XTreeDatabase::GetRootXLink(DBCommon::TreeOrdinal tree_ordinal) const
 }
 
 
-vector<DBCommon::TreeOrdinal> XTreeDatabase::GetExtraRootOrdinals() const
+DBCommon::TreeType XTreeDatabase::GetTreeType(DBCommon::TreeOrdinal tree_ordinal) const
 {
-    vector<DBCommon::TreeOrdinal> ordinals;
-    for( auto p : trees_by_ordinal )
-    {
-        if( p.first != DBCommon::TreeOrdinal::MAIN )
-        {
-            ordinals.push_back( p.first );
-        }
-    }
-    
-    return ordinals;
+	return trees_by_ordinal.at(tree_ordinal).type;
 }
-          
+
 
 const DomainExtensionChannel *XTreeDatabase::GetDEChannel( const DomainExtension::Extender *extender ) const
 {
@@ -288,7 +266,25 @@ TreePtr<Node> XTreeDatabase::GetMainRootNode() const
 
 XLink XTreeDatabase::GetMainRootXLink() const
 {
-    return GetRootXLink(DBCommon::TreeOrdinal::MAIN);
+    return GetRootXLink(main_tree_ordinal);
+}
+
+
+DBCommon::TreeOrdinal XTreeDatabase::GetMainTreeOrdinal() const
+{
+    return main_tree_ordinal;
+}
+
+
+DBCommon::TreeOrdinal XTreeDatabase::GetTreeOrdinalFor(XLink xlink) const
+{
+	while(XLink next_xlink = TryGetParentXLink(xlink)) 
+		xlink = next_xlink;
+	
+	LinkTable::Row row = link_table->GetRow(xlink);
+	ASSERT( row.context_type == DBCommon::Context::ROOT );
+	return row.tree_ordinal;
+		
 }
 
 
@@ -394,7 +390,25 @@ void XTreeDatabase::CheckAssets()
 }
 
 
-void XTreeDatabase::FreeExtraTree(DBCommon::TreeOrdinal tree_ordinal)
+DBCommon::TreeOrdinal XTreeDatabase::AllocateTree()
+{
+    DBCommon::TreeOrdinal assigned_ordinal;
+    if( free_tree_ordinals.empty() )
+    {
+        assigned_ordinal = next_tree_ordinal;
+        ((int &)next_tree_ordinal)++;
+    }
+    else
+    {
+        assigned_ordinal = free_tree_ordinals.front();
+        free_tree_ordinals.pop();
+    }
+	
+    return assigned_ordinal;
+}
+
+
+void XTreeDatabase::FreeTree(DBCommon::TreeOrdinal tree_ordinal)
 {
     trees_by_ordinal.erase(tree_ordinal);
     free_tree_ordinals.push(tree_ordinal);

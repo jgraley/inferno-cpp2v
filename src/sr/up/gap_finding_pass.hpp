@@ -12,8 +12,10 @@ namespace SR
 {
 
 /**
- * Find non-contiguous gaps between tree zones. Insert empty free zones into 
- * these gaps. This permits Inversion to clear away unused parts of the tree.
+ * Find gaps between tree zones with intent DEFAULT. This is with respect
+ * to the layout i.e. neighbouring in pattern but not in current tree.
+ * Insert empty free zones into these gaps. This permits Inversion to clear 
+ * away unused parts of the tree.
  * See #754 
  **/ 
 class GapFindingPass

@@ -13,6 +13,7 @@
 namespace SR 
 {
 
+// ------------------------- ScaffoldOps --------------------------
 
 class ScaffoldOps
 {
@@ -33,6 +34,15 @@ public:
     
 private:
 	XTreeDatabase * const db;
+};
+
+
+// ------------------------- MovesMap --------------------------
+
+struct MovesMap
+{
+	public:
+	map<TreePtr<Node>, TreeZone> mm;
 };
 
 }
