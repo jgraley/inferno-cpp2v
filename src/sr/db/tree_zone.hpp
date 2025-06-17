@@ -24,15 +24,13 @@ class FreeZone;
 class TreeZone : public Zone
 { 
 public:
-	static const DBCommon::TreeOrdinal default_ordinal = (DBCommon::TreeOrdinal)(-1); // UNKNOWN
-
     static TreeZone CreateSubtree( XLink base, 
-								    DBCommon::TreeOrdinal ordinal_ = default_ordinal );
+								    DBCommon::TreeOrdinal ordinal_ = DBCommon::UnknownTree );
     static TreeZone CreateEmpty( XLink base );
 
     explicit TreeZone( XLink base, 
                         vector<XLink> terminii, 
-                        DBCommon::TreeOrdinal ordinal_ = default_ordinal );
+                        DBCommon::TreeOrdinal ordinal_ = DBCommon::UnknownTree );
       
     bool IsEmpty() const override;
     size_t GetNumTerminii() const override;

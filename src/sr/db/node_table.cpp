@@ -147,6 +147,12 @@ vector<TreePtr<Node>> NodeTable::GetNodeDomainAsVector() const
 }
 
 
+size_t NodeTable::GetTotNumNodes() const
+{
+	return rows.size();
+}
+
+
 string NodeTable::Row::GetTrace() const
 {
     string s = "(";

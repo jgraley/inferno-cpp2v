@@ -61,6 +61,8 @@ private:
 	set<TreePtr<Node>> GetTerminusAndBaseAncestors( const TreeZone &tz ) const; 
     
 public:
+   	void CheckSizeIs( size_t tot_num_xlinks, size_t tot_num_nodes ) const;
+
     void Dump() const;
     void CheckRelations( const vector<XLink> &xlink_domain,  
                          const vector<TreePtr<Node>> &node_domain );

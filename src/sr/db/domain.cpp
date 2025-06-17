@@ -46,3 +46,9 @@ void Domain::CheckEqual( shared_ptr<Domain> l, shared_ptr<Domain> r )
 {
     ASSERT( l->unordered_domain == r->unordered_domain )(" domain mismatch:\n")(DiffTrace(l->unordered_domain, r->unordered_domain));
 }
+
+
+size_t Domain::GetTotNumXLinks() const
+{
+	return unordered_domain.size();
+}

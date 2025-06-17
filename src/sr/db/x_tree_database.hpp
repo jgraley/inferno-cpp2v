@@ -48,7 +48,6 @@ public:
     const DomainExtensionChannel *GetDEChannel( const DomainExtension::Extender *extender ) const;
     const Domain &GetDomain() const;
 
-    const LinkTable &GetLinkTable() const;
     const LinkTable::Row &GetRow(XLink xlink) const;
     bool HasRow(XLink xlink) const;    
     const NodeTable::Row &GetNodeRow(TreePtr<Node> node) const;
@@ -72,17 +71,15 @@ public:
 	DBCommon::TreeOrdinal GetMainTreeOrdinal() const;
 	DBCommon::TreeOrdinal GetTreeOrdinalFor(XLink xlink) const;
 
-private: 
-    Mutator CreateTreeMutator(XLink xlink) const;
-    MutableZone CreateMutableZone(TreeZone &zone) const;
-
-public:
     void Dump() const;
 	void DumpTables() const;
 
     void CheckAssets();
     
 private: 
+    Mutator CreateTreeMutator(XLink xlink) const;
+    MutableZone CreateMutableZone(TreeZone &zone) const;
+
     DBCommon::TreeOrdinal AllocateTree();
     
     void FreeTree(DBCommon::TreeOrdinal tree_ordinal);

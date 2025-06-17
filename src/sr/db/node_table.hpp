@@ -59,7 +59,9 @@ public:
     void DeleteLink(XLink xlink);
 
     vector<TreePtr<Node>> GetNodeDomainAsVector() const;
-    
+
+   	size_t GetTotNumNodes() const;
+
     string GetTrace() const;
     void Dump() const;
     

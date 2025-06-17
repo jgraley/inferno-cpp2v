@@ -29,6 +29,8 @@ public:
     
     static void CheckEqual( shared_ptr<Domain> l, shared_ptr<Domain> r );    
     
+    size_t GetTotNumXLinks() const;
+    
     DBWalk db_walker;  
 
     // Global domain of possible xlink values

@@ -195,6 +195,14 @@ set<TreePtr<Node>> Orderings::GetTerminusAndBaseAncestors( const TreeZone &tz ) 
 }
 
 
+void Orderings::CheckSizeIs( size_t tot_num_xlinks, size_t tot_num_nodes ) const
+{
+	ASSERT( depth_first_ordering.size() == tot_num_xlinks );
+	ASSERT( category_ordering.size() == tot_num_nodes );
+	ASSERT( simple_compare_ordering.size() == tot_num_nodes );
+}
+
+
 void Orderings::Dump() const
 {
     TRACE("category_ordering:\n")(category_ordering)("\n");

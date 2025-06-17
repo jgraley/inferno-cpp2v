@@ -19,7 +19,7 @@ TreeZone TreeZone::CreateEmpty( XLink base )
 {
     ASSERTS( base );
     // One element, same as base. Ordinal shall be invalid.
-    return TreeZone( base, vector<XLink>{ base }, DBCommon::TreeOrdinal(-1) ); 
+    return TreeZone( base, vector<XLink>{ base }, DBCommon::UnknownTree ); 
 }
 
 

@@ -35,10 +35,7 @@ void TreeUpdater::BuildMainTree( TreePtr<Node> main_tree_root )
 	FreeZone main_zone = FreeZone::CreateSubtree(main_tree_root);
 	db->BuildTree(DBCommon::TreeType::MAIN, main_zone);
 	
-	db->PerformDeferredActions();
-	
-    if( ReadArgs::test_db )
-        db->CheckAssets();	
+	db->PerformDeferredActions();	
 }
 
 
@@ -143,8 +140,5 @@ void TreeUpdater::ApplyUpdate(XLink origin_xlink, shared_ptr<Patch> &layout)
 	MoveInPass move_in_pass( db, &sops );
 	move_in_pass.Run(moves_map);
 	
-	db->PerformDeferredActions();
-   
-    if( ReadArgs::test_db )
-        db->CheckAssets();
+	db->PerformDeferredActions();  
 }

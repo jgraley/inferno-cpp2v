@@ -12,6 +12,7 @@ public:
     typedef int OrdinalType; // other ordinals...
 
     typedef int TreeOrdinal;
+    static const TreeOrdinal UnknownTree = -1;
     
     enum class TreeType
     {

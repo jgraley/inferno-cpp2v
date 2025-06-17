@@ -155,6 +155,7 @@ void BoundaryPass::SplitTreeZoneAtXLink( shared_ptr<Patch> *patch_ptr, XLink spl
 			auto new_child_patch = make_shared<TreePatch>( new_child_zone, move(new_children) );
 			parent_children.push_back(new_child_patch);
 			new_patch_ptr = &(parent_children.back());
+			
 			done_insert = true;
 		}
 

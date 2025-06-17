@@ -229,6 +229,12 @@ string LinkTable::Row::GetTrace() const
 }
 
 
+void LinkTable::CheckSizeIs( size_t s ) const
+{
+	ASSERT( rows.size() == s );
+}
+
+
 string LinkTable::GetTrace() const
 {
     return SSPrintf("(link table with %d rows)", rows.size());
