@@ -45,11 +45,11 @@ public:
 	void InsertTree(TreeZone &zone);
 	void DeleteTree(TreeZone &zone);
 
-	class RAIISuspendForSwap : DBCommon::RAIISuspendForSwap
+	class SwapTransaction : DBCommon::SwapTransaction
 	{
 	public:
-		RAIISuspendForSwap(NodeTable *node_table_, TreeZone &zone1_, TreeZone &zone2_ );
-		~RAIISuspendForSwap();
+		SwapTransaction(NodeTable *node_table_, TreeZone &zone1_, TreeZone &zone2_ );
+		~SwapTransaction();
 	private:
 		DBWalk db_walker;     
 		NodeTable &node_table;

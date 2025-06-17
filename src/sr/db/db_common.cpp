@@ -9,14 +9,14 @@ using namespace SR;
 
 
 
-DBCommon::RAIISuspendForSwap::RAIISuspendForSwap( TreeZone &zone1_, TreeZone &zone2_ ) :
+DBCommon::SwapTransaction::SwapTransaction( TreeZone &zone1_, TreeZone &zone2_ ) :
 	zone1(zone1_),
 	zone2(zone2_)
 {
 }
 
 				                
-DBCommon::RAIISuspendForSwap::~RAIISuspendForSwap()
+DBCommon::SwapTransaction::~SwapTransaction()
 {
 }
 

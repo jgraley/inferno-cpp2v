@@ -98,10 +98,10 @@ void XTreeDatabase::SwapTreeToTree( TreeZone &zone1, vector<TreeZone *> fixups1,
 
 	{
 		// Scope contains suspension objects on stack
-		DomainExtension::RAIISuspendForSwap de_sus(domain_extension.get(), zone1, zone2);  
-		Orderings::RAIISuspendForSwap orderings_sus(orderings.get(), zone1, zone2);  
-		NodeTable::RAIISuspendForSwap node_table_sus(node_table.get(), zone1, zone2);  
-		LinkTable::RAIISuspendForSwap link_table_sus(link_table.get(), zone1, zone2);  
+		DomainExtension::SwapTransaction de_sus(domain_extension.get(), zone1, zone2);  
+		Orderings::SwapTransaction orderings_sus(orderings.get(), zone1, zone2);  
+		NodeTable::SwapTransaction node_table_sus(node_table.get(), zone1, zone2);  
+		LinkTable::SwapTransaction link_table_sus(link_table.get(), zone1, zone2);  
 		
 		MutableZone::Swap( lmzone1, fixups1, 
 		                   lmzone2, fixups2 );  

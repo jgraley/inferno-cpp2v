@@ -78,8 +78,8 @@ void DomainExtension::DeleteTree(const TreeZone &zone)
 }
 
 
-DomainExtension::RAIISuspendForSwap::RAIISuspendForSwap(DomainExtension *domain_extension_, TreeZone &zone1_, TreeZone &zone2_ ) :
-	DBCommon::RAIISuspendForSwap( zone1_, zone2_ ),
+DomainExtension::SwapTransaction::SwapTransaction(DomainExtension *domain_extension_, TreeZone &zone1_, TreeZone &zone2_ ) :
+	DBCommon::SwapTransaction( zone1_, zone2_ ),
 	domain_extension( *domain_extension_ )
 {	
 	domain_extension.DeleteTree(zone1);
@@ -87,7 +87,7 @@ DomainExtension::RAIISuspendForSwap::RAIISuspendForSwap(DomainExtension *domain_
 }
 
 
-DomainExtension::RAIISuspendForSwap::~RAIISuspendForSwap()
+DomainExtension::SwapTransaction::~SwapTransaction()
 {
 	domain_extension.InsertTree(zone1);
 	domain_extension.InsertTree(zone2);

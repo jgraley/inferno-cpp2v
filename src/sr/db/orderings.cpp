@@ -71,8 +71,8 @@ void Orderings::DeleteTree(TreeZone &zone)
 }
 
 
-Orderings::RAIISuspendForSwap::RAIISuspendForSwap(Orderings *orderings_, TreeZone &zone1_, TreeZone &zone2_ ) :
-	DBCommon::RAIISuspendForSwap( zone1_, zone2_ ),
+Orderings::SwapTransaction::SwapTransaction(Orderings *orderings_, TreeZone &zone1_, TreeZone &zone2_ ) :
+	DBCommon::SwapTransaction( zone1_, zone2_ ),
 	orderings( *orderings_ )
 {	
 	// -------------------- depth-first -----------------------
@@ -87,7 +87,7 @@ Orderings::RAIISuspendForSwap::RAIISuspendForSwap(Orderings *orderings_, TreeZon
 }
 
 
-Orderings::RAIISuspendForSwap::~RAIISuspendForSwap()
+Orderings::SwapTransaction::~SwapTransaction()
 {
 	// -------------------- depth-first -----------------------
     orderings.InsertGeometric(zone1);

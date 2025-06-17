@@ -68,12 +68,12 @@ public:
         ContainerInterface::iterator container_it;
     };
     
-	class RAIISuspendForSwap
+	class SwapTransaction
 	{
 	protected:
-		RAIISuspendForSwap() = delete;
-		RAIISuspendForSwap( class TreeZone &zone1_, TreeZone &zone2_ );
-		~RAIISuspendForSwap();
+		SwapTransaction() = delete;
+		SwapTransaction( class TreeZone &zone1_, TreeZone &zone2_ );
+		~SwapTransaction();
 		
 		const TreeZone &zone1;
 		const TreeZone &zone2;

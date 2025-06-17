@@ -72,8 +72,8 @@ void NodeTable::DeleteTree(TreeZone &zone)
 }
 
 
-NodeTable::RAIISuspendForSwap::RAIISuspendForSwap(NodeTable *node_table_, TreeZone &zone1_, TreeZone &zone2_ ) :
-	DBCommon::RAIISuspendForSwap( zone1_, zone2_ ),
+NodeTable::SwapTransaction::SwapTransaction(NodeTable *node_table_, TreeZone &zone1_, TreeZone &zone2_ ) :
+	DBCommon::SwapTransaction( zone1_, zone2_ ),
 	node_table( *node_table_ )
 {	
 	// For swaps, we only need to act at the boundary of the zone
@@ -86,7 +86,7 @@ NodeTable::RAIISuspendForSwap::RAIISuspendForSwap(NodeTable *node_table_, TreeZo
 }
 
 
-NodeTable::RAIISuspendForSwap::~RAIISuspendForSwap()
+NodeTable::SwapTransaction::~SwapTransaction()
 {
 	// For swaps, we only need to act at the boundary of the zone
 	node_table.InsertLink(zone1.GetBaseXLink());

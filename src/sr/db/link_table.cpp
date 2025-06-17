@@ -47,8 +47,8 @@ void LinkTable::DeleteTree(TreeZone &zone)
 }
  
  
-LinkTable::RAIISuspendForSwap::RAIISuspendForSwap(LinkTable *link_table_, TreeZone &zone1_, TreeZone &zone2_ ) :
-	DBCommon::RAIISuspendForSwap( zone1_, zone2_ ),
+LinkTable::SwapTransaction::SwapTransaction(LinkTable *link_table_, TreeZone &zone1_, TreeZone &zone2_ ) :
+	DBCommon::SwapTransaction( zone1_, zone2_ ),
 	link_table( *link_table_ ),
 	rows( link_table.rows )
 {	
@@ -73,7 +73,7 @@ LinkTable::RAIISuspendForSwap::RAIISuspendForSwap(LinkTable *link_table_, TreeZo
 }
 
 
-LinkTable::RAIISuspendForSwap::~RAIISuspendForSwap()
+LinkTable::SwapTransaction::~SwapTransaction()
 {
 	// Core info for terminii relates to interior of the zones, and should be
 	// swapped alongside the zones themselves. Interestingly, core info for 
