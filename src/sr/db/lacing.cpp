@@ -495,7 +495,7 @@ int Lacing::GetOrdinalForNode( TreePtr<Node> target_node ) const
 }
 
 
-Orderable::Diff Lacing::OrdinalCompare( TreePtr<Node> lnode, TreePtr<Node> rnode ) const // Broken, see #642
+Orderable::Diff Lacing::OrdinalCompare( TreePtr<Node> lnode, TreePtr<Node> rnode ) const 
 {
     const Lacing::DecisionNode *decision_node_l = decision_tree_root.get();
     const Lacing::DecisionNode *decision_node_r = decision_tree_root.get();
