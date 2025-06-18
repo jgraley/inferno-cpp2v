@@ -478,14 +478,14 @@ int Lacing::GetOrdinalForNode( TreePtr<Node> target_node ) const
     const Lacing::DecisionNode *decision_node = decision_tree_root.get();
     while(true) 
     {
-        if( auto dn_leaf = dynamic_cast<const DecisionNodeLeaf *>(decision_node) )
-        {
-            return dn_leaf->GetLacingOrdinal();
-        }
-        else if( auto dn_local_match = dynamic_cast<const DecisionNodeLocalMatch *>(decision_node) )
+        if( auto dn_local_match = dynamic_cast<const DecisionNodeLocalMatch *>(decision_node) )
         {
             //dn_local_match->GetLacingRange();
             decision_node = dn_local_match->GetNextDecisionNode( target_node );
+        }
+        else if( auto dn_leaf = dynamic_cast<const DecisionNodeLeaf *>(decision_node) )
+        {
+            return dn_leaf->GetLacingOrdinal();
         }
         else
         {
@@ -519,11 +519,11 @@ Orderable::Diff Lacing::OrdinalCompare( TreePtr<Node> lnode, TreePtr<Node> rnode
             ASSERTFAIL();            
         }
         
-        ASSERT( lmax >= GetOrdinalForNode(lnode) );
+       /* ASSERT( lmax >= GetOrdinalForNode(lnode) );
         ASSERT( lmin <= GetOrdinalForNode(lnode) );
         ASSERT( rmax >= GetOrdinalForNode(rnode) );
         ASSERT( rmin <= GetOrdinalForNode(rnode) );
-
+*/
         // Do we have a result yet?
         if( lmax < rmin )
             return lmax-rmin;
@@ -548,10 +548,10 @@ Orderable::Diff Lacing::OrdinalCompare( TreePtr<Node> lnode, TreePtr<Node> rnode
             ASSERTFAIL();            
         }
         
-        ASSERT( lmax >= GetOrdinalForNode(lnode) );
+        /*ASSERT( lmax >= GetOrdinalForNode(lnode) );
         ASSERT( lmin <= GetOrdinalForNode(lnode) );
         ASSERT( rmax >= GetOrdinalForNode(rnode) );
-        ASSERT( rmin <= GetOrdinalForNode(rnode) );
+        ASSERT( rmin <= GetOrdinalForNode(rnode) );*/
 
         // Do we have a result yet?
         if( lmax < rmin )

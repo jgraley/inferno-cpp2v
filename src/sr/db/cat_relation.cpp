@@ -6,7 +6,7 @@
 using namespace SR;    
 
 //#define TRACE_CATEGORY_RELATION
-
+#define USE_OC
 
 CategoryRelation::CategoryRelation( shared_ptr<Lacing> lacing_ ) :
     lacing( lacing_ )
@@ -42,11 +42,14 @@ Orderable::Diff CategoryRelation::Compare3Way(KeyType l_key, KeyType r_key) cons
     int li=-1, ri=-1;
     if( !l_minimus && !r_minimus )
     {
+#ifdef USE_OC
+        Orderable::Diff d = lacing->OrdinalCompare( l_node, r_node );    
+#else        
         li = lacing->GetOrdinalForNode( l_node );
         ri = lacing->GetOrdinalForNode( r_node );
         Orderable::Diff d = li - ri;
-        // Fast path out - now super slow TODO resolve, see #642
-        //Orderable::Diff d1 = lacing->OrdinalCompare( x, y );    
+#endif
+
 #ifdef TRACE_CATEGORY_RELATION
         TRACEC("both normal: %d - %d = %d\n", li, ri, d);
 #endif        
