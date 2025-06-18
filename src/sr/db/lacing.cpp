@@ -504,61 +504,63 @@ Orderable::Diff Lacing::OrdinalCompare( TreePtr<Node> lnode, TreePtr<Node> rnode
     while(true) 
     {
         // Advance left
-        if( auto dn_local_match_l = dynamic_cast<const DecisionNodeLocalMatch *>(decision_node_l) )
+        if( !decision_node_l )
+        {
+			// min and max are equal, nothing more to do on the left
+		}
+        else if( auto dn_local_match_l = dynamic_cast<const DecisionNodeLocalMatch *>(decision_node_l) )
         {
             decision_node_l = dn_local_match_l->GetNextDecisionNode( lnode );
             tie(lmin, lmax) = dn_local_match_l->GetLacingRange();
         }
         else if( auto dn_leaf_l = dynamic_cast<const DecisionNodeLeaf *>(decision_node_l) )
         {
-            if( lmin != lmax )
-                lmin = lmax = dn_leaf_l->GetLacingOrdinal();      
+            lmin = lmax = dn_leaf_l->GetLacingOrdinal();               
         }
         else 
         {
             ASSERTFAIL();            
         }
         
-       /* ASSERT( lmax >= GetOrdinalForNode(lnode) );
-        ASSERT( lmin <= GetOrdinalForNode(lnode) );
-        ASSERT( rmax >= GetOrdinalForNode(rnode) );
-        ASSERT( rmin <= GetOrdinalForNode(rnode) );
-*/
+        if( lmin == lmax )
+			decision_node_l = nullptr;   
+       
         // Do we have a result yet?
         if( lmax < rmin )
             return lmax-rmin;
         if( lmin > rmax )
             return lmin-rmax;
-        if( lmin==lmax && rmin==rmax && lmin==rmin )
+        if( lmin == lmax && rmin == rmax && lmin==rmin )
             return 0;
 
         // Advance right
-        if( auto dn_local_match_r = dynamic_cast<const DecisionNodeLocalMatch *>(decision_node_r) )
+        if( !decision_node_r )
+        {
+			// min and max are equal, nothing more to do on the right
+		}
+        else if( auto dn_local_match_r = dynamic_cast<const DecisionNodeLocalMatch *>(decision_node_r) )
         {
             decision_node_r = dn_local_match_r->GetNextDecisionNode( rnode );
             tie(rmin, rmax) = dn_local_match_r->GetLacingRange();
         }
         else if( auto dn_leaf_r = dynamic_cast<const DecisionNodeLeaf *>(decision_node_r) )
         {
-            if( rmin != rmax )
-                rmin = rmax = dn_leaf_r->GetLacingOrdinal();
+            rmin = rmax = dn_leaf_r->GetLacingOrdinal();
         }
         else 
         {
             ASSERTFAIL();            
-        }
-        
-        /*ASSERT( lmax >= GetOrdinalForNode(lnode) );
-        ASSERT( lmin <= GetOrdinalForNode(lnode) );
-        ASSERT( rmax >= GetOrdinalForNode(rnode) );
-        ASSERT( rmin <= GetOrdinalForNode(rnode) );*/
+        }       
 
-        // Do we have a result yet?
+        if( rmin == rmax )
+			decision_node_r = nullptr;   
+			
+		// Do we have a result yet?
         if( lmax < rmin )
             return lmax-rmin;
         if( lmin > rmax )
             return lmin-rmax;
-        if( lmin==lmax && rmin==rmax && lmin==rmin )
+        if( lmin == lmax && rmin == rmax && lmin==rmin )
             return 0;
     }
 }
