@@ -27,6 +27,7 @@ using namespace SR;
 TreeUpdater::TreeUpdater(XTreeDatabase *x_tree_db) :
     db( x_tree_db )
 {
+	ASSERT( x_tree_db );
 }
 
 
@@ -47,6 +48,9 @@ void TreeUpdater::TeardownMainTree()
 
 unique_ptr<FreeZone> TreeUpdater::TransformToSingleFreeZone( shared_ptr<Patch> layout )
 {
+	// We just want to make one big free zone from the layout. We don't touch the 
+	// database, so method is static.
+	 	
     DuplicateAllPass duplicate_all_pass;
     duplicate_all_pass.Run(layout);  
     duplicate_all_pass.Check(layout);
@@ -65,9 +69,9 @@ unique_ptr<FreeZone> TreeUpdater::TransformToSingleFreeZone( shared_ptr<Patch> l
 
 
 void TreeUpdater::UpdateMainTree( XLink origin_xlink, shared_ptr<Patch> layout )
-{
-    ASSERT( db );
-                
+{               
+    // Figure out what we should do, then do it. See comments in these 
+    // functions and the pass class headers.
 	Analysis(origin_xlink, layout);
 	ApplyUpdate(origin_xlink, layout);
 }
@@ -75,6 +79,15 @@ void TreeUpdater::UpdateMainTree( XLink origin_xlink, shared_ptr<Patch> layout )
 
 void TreeUpdater::Analysis(XLink origin_xlink, shared_ptr<Patch> &layout)
 {	
+	// Roughtly an analysis phase. We can modify the layout but no
+	// changes to the db or zone duplications. The input layout is a
+	// mixture of free and DEFAULT tree zones. After this returns:
+	// - Free zones should be duplicated and added to the db
+	// - Tree zones with COPYABLE should be duplicated and added to the db
+	// - Tree zones with MOVABLE should be moved within the db
+	//   (from TZ position to position implied by patch)
+	// - Tree zones with DEFAULT can be left alone
+	
 	ValidateTreeZones validate_zones(db);
 
 	SetTreeOrdinals set_ordinals( db );
@@ -98,12 +111,18 @@ void TreeUpdater::Analysis(XLink origin_xlink, shared_ptr<Patch> &layout)
     boundary_pass.Run(layout);
 	//validate_zones.Run(layout);
 
+	// INVARIANT: our boundaries are unambiguous: zones either overflap
+	// fully or not at all.
+
     OrderingPass ordering_pass( db );
     ordering_pass.Run(layout);
+    
+    // Choice of copies takes into accout the choice of moves we just made.
     
     ChooseCopiesPass copies_pass;
     copies_pass.Run(layout);    
     
+    // Fix issue with gaps missing inversion.    
     GapFindingPass gap_finding_pass;
     gap_finding_pass.Run(layout);      
 }
@@ -111,31 +130,46 @@ void TreeUpdater::Analysis(XLink origin_xlink, shared_ptr<Patch> &layout)
 	
 void TreeUpdater::ApplyUpdate(XLink origin_xlink, shared_ptr<Patch> &layout)
 {	
+	// To implement the changes: we will duplicate COPYABLEs into free, move
+	// MOVABLES out of main tree, insert all new stuff into main tree, and
+	// then move MOVABLES into new tree at new location. We only need 
+	// DEFAULT tree zones for inversion.
+	
 	ValidateTreeZones validate_zones(db);
 	ScaffoldOps sops( db );
-	MovesMap moves_map;
 	
 	CopyingPass copying_pass;
 	copying_pass.Run(layout);	
 	//validate_zones.Run(layout);	
 
+	// INVARIANT: by now, all true NEW content is in free patches; no COPYABLE TZs
+
     MarkersPass markers_pass;
     markers_pass.Run(layout);
 	//validate_zones.Run(layout);
 
+	MovesMap moves_map;
 	MoveOutPass move_out_pass( db, &sops );
-	move_out_pass.Run(layout, moves_map);
+	move_out_pass.Run(layout, moves_map); // This pass will populate the moves map
 	//validate_zones.Run(layout);         
+
+	// INVARIANT: by now, everything we need to invert is in a free patch;
+	// all tree patches are DEFAULT and this means we can leave them alone.
 
     MergeFreesPass merge_frees_pass;
     merge_frees_pass.Run(layout);  
-    //merge_frees_pass.Check(layout);
-    
+    //merge_frees_pass.Check(layout);   
     //AltOrderingChecker alt_ordering_checker( db );
-    //alt_ordering_checker.Check(layout);
+    //alt_ordering_checker.Check(layout);    
+    
+	// INVARIANT: free patches touch root and/or tree patches (which are all 
+	// leave-alone); inversion now possible
 
     InversionPass inversion_pass( db, &sops ); 
     inversion_pass.RunInversion(origin_xlink, &layout);      
+	
+	// After inversion, we're done with the layout (and it might be invalid, see
+	// comment in code). We will work from the moves map.
 	
 	MoveInPass move_in_pass( db, &sops );
 	move_in_pass.Run(moves_map);

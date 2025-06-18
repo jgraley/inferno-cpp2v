@@ -90,7 +90,7 @@ void OrderingPass::ConstrainAnyPatchToDescendants( shared_ptr<Patch> &start_patc
     INDENT("A");
     TRACE("Starting at ")(start_patch)(" with ancestor ")(base)("\n");
     
-    // Determine tree zone patches descending from starting patch.
+    // Determine tree patches descending from starting patch.
     PatchRecords patch_records;
     AppendNextDescendantTreePatches( start_patch, patch_records );
                  

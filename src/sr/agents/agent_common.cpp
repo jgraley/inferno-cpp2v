@@ -520,7 +520,7 @@ TreePtr<Node> AgentCommon::BuildForBuildersAnalysis( PatternLink me_plink )
 {
     Agent::ReplaceKit kit { nullptr };
     shared_ptr<Patch> layout = GenReplaceLayout(kit, me_plink);
-    unique_ptr<FreeZone> zone = TreeUpdater().TransformToSingleFreeZone( layout );     
+    unique_ptr<FreeZone> zone = TreeUpdater::TransformToSingleFreeZone( layout );     
     return zone->GetBaseNode();
 }
 

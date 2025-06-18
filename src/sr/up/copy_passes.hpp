@@ -25,7 +25,7 @@ public:
 
 
 /**
- * Duplicate the zones in the COPYABLE tree zone patches and thereby turn 
+ * Duplicate the zones in the COPYABLE tree patches and thereby turn 
  * them into free zone patches.
  */
 class CopyingPass
