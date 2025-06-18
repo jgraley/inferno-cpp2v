@@ -20,7 +20,7 @@ Lazy<BooleanExpression> AutolocatingAgent::SymbolicNormalLinkedQuery() const
     
     my_expr &= SymbolicAutolocatingQuery();
     my_expr &= SymbolicPreRestriction() |
-                 (MakeLazy<SymbolVariable>(keyer_plink) == MakeLazy<SymbolConstant>(XLink::MMAX_Link));
+                 (MakeLazy<SymbolVariable>(keyer_plink) == MakeLazy<SymbolConstant>(XLink::MMAX));
 
     return my_expr;
 }

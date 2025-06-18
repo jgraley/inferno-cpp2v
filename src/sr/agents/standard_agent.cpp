@@ -295,7 +295,7 @@ Lazy<BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySequence(const P
         auto candidate_a_successor_expr = MakeLazy<MySequenceSuccessorOperator>(candidate_a_expr);
         expr &= ( candidate_b_expr == candidate_a_successor_expr );
         // Avoid being pushed off the end since candidate b is not a shim
-        expr &= ( candidate_b_expr != MakeLazy<SymbolConstant>(XLink::OffEndXLink) ); 
+        expr &= ( candidate_b_expr != MakeLazy<SymbolConstant>(XLink::OffEnd) ); 
     }
         
     // Gapped pairs of non-stars in the pattern (i.e. stars in between) should 
@@ -367,7 +367,7 @@ void StandardAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
 
     // Get the members of x corresponding to pattern's class
     XLink keyer_xlink = hypothesis_links->at(keyer_plink);
-    ASSERT( keyer_xlink != XLink::MMAX_Link );
+    ASSERT( keyer_xlink != XLink::MMAX );
     vector< Itemiser::Element * > x_items = Itemise( keyer_xlink.GetChildTreePtr().get() );   
 
     for( const Plan::Collection &plan_col : plan.collections )

@@ -10,14 +10,14 @@ using namespace SYM;
 
 // ------------------------- SymbolConstant --------------------------
 
-SymbolConstant::SymbolConstant( SR::XLink xlink_ ) :
+SymbolConstant::SymbolConstant( XValue xlink_ ) :
     xlink( xlink_ )
 {
 }
 
 
 SymbolConstant::SymbolConstant( TreePtr<Node> node ) :
-    SymbolConstant( SR::XLink::CreateDistinct(node) )
+    SymbolConstant( XValue::CreateDistinct(node) )
 {
 }
 
@@ -34,7 +34,7 @@ unique_ptr<SymbolicResult> SymbolConstant::GetValue() const
 }
 
 
-SR::XLink SymbolConstant::GetOnlyXLink() const
+XValue SymbolConstant::GetOnlyXLink() const
 {
     return xlink;
 }
@@ -231,20 +231,20 @@ shared_ptr<SymbolExpression> ChildOperator::TrySolveForToEqual( const SolveKit &
 
 // ------------------------- ChildSequenceFrontOperator --------------------------
 
-unique_ptr<SymbolicResult> ChildSequenceFrontOperator::EvalFromItem( SR::XLink parent_xlink, 
+unique_ptr<SymbolicResult> ChildSequenceFrontOperator::EvalFromItem( XValue parent_xlink, 
                                                                    Itemiser::Element *item ) const
 {
     // Cast based on assumption that we'll be looking at a sequence
     auto p_x_seq = dynamic_cast<SequenceInterface *>(item);    
     ASSERT( p_x_seq )("item_index didn't lead to a sequence");
     
-    SR::XLink result_xlink;
+    XValue result_xlink;
     // Create the correct XLink (i.e. not just pointing to the correct child Node,
     // but also coming from the correct TreePtr<Node>) or OffEnd if container empty.
     if( p_x_seq->empty() )
-        result_xlink = SR::XLink::OffEndXLink; // OffEnd IS allowed in this case
+        result_xlink = XValue::OffEnd; // OffEnd IS allowed in this case
     else
-        result_xlink = SR::XLink(parent_xlink.GetChildTreePtr(), &(p_x_seq->front()));        
+        result_xlink = XValue(parent_xlink.GetChildTreePtr(), &(p_x_seq->front()));        
         
     return make_unique<UniqueResult>( result_xlink );
 }
@@ -257,7 +257,7 @@ string ChildSequenceFrontOperator::GetItemTypeName() const
 
 // ------------------------- ChildSequenceBackOperator --------------------------
 
-unique_ptr<SymbolicResult> ChildSequenceBackOperator::EvalFromItem( SR::XLink parent_xlink, 
+unique_ptr<SymbolicResult> ChildSequenceBackOperator::EvalFromItem( XValue parent_xlink, 
                                                                   Itemiser::Element *item ) const
 {
     // Cast based on assumption that we'll be looking at a sequence
@@ -269,7 +269,7 @@ unique_ptr<SymbolicResult> ChildSequenceBackOperator::EvalFromItem( SR::XLink pa
     if( p_x_seq->empty() )
         return make_unique<EmptyResult>();
     
-    auto result_xlink = SR::XLink(parent_xlink.GetChildTreePtr(), &(p_x_seq->back()));        
+    auto result_xlink = XValue(parent_xlink.GetChildTreePtr(), &(p_x_seq->back()));        
     return make_unique<UniqueResult>( result_xlink );
 }
 
@@ -281,7 +281,7 @@ string ChildSequenceBackOperator::GetItemTypeName() const
 
 // ------------------------- ChildCollectionFrontOperator --------------------------
 
-unique_ptr<SymbolicResult> ChildCollectionFrontOperator::EvalFromItem( SR::XLink parent_xlink, 
+unique_ptr<SymbolicResult> ChildCollectionFrontOperator::EvalFromItem( XValue parent_xlink, 
                                                                      Itemiser::Element *item ) const
 {
     // Cast based on assumption that we'll be looking at a collection
@@ -293,7 +293,7 @@ unique_ptr<SymbolicResult> ChildCollectionFrontOperator::EvalFromItem( SR::XLink
     if( p_x_col->empty() )
         return make_unique<EmptyResult>();
     
-    auto result_xlink = SR::XLink(parent_xlink.GetChildTreePtr(), &*(p_x_col->begin()));        
+    auto result_xlink = XValue(parent_xlink.GetChildTreePtr(), &*(p_x_col->begin()));        
     return make_unique<UniqueResult>( result_xlink );
 }
 
@@ -305,7 +305,7 @@ string ChildCollectionFrontOperator::GetItemTypeName() const
 
 // ------------------------- SingularChildOperator --------------------------
 
-unique_ptr<SymbolicResult> SingularChildOperator::EvalFromItem( SR::XLink parent_xlink, 
+unique_ptr<SymbolicResult> SingularChildOperator::EvalFromItem( XValue parent_xlink, 
                                                               Itemiser::Element *item ) const
 {
     // Cast based on assumption that we'll be looking at a singular item
@@ -314,7 +314,7 @@ unique_ptr<SymbolicResult> SingularChildOperator::EvalFromItem( SR::XLink parent
     
     // Create the correct XLink (i.e. not just pointing to the correct child Node,
     // but also coming from the correct TreePtr<Node>)
-    auto result_xlink = SR::XLink(parent_xlink.GetChildTreePtr(), p_x_singular);        
+    auto result_xlink = XValue(parent_xlink.GetChildTreePtr(), p_x_singular);        
     return make_unique<UniqueResult>( result_xlink );
 }
 
@@ -359,7 +359,7 @@ unique_ptr<SymbolicResult> XTreeDbToSymbolOperator::Evaluate( const EvalKit &kit
         return make_unique<EmptyResult>();
         
     const SR::LinkTable::Row &row( kit.x_tree_db->GetRow(ar->GetOnlyXLink()) );   
-    SR::XLink result_xlink = EvalXLinkFromRow( kit, ar->GetOnlyXLink(), row );
+    XValue result_xlink = EvalXLinkFromRow( kit, ar->GetOnlyXLink(), row );
     if( result_xlink ) 
         return make_unique<UniqueResult>( result_xlink );
     else
@@ -380,8 +380,8 @@ Expression::Precedence XTreeDbToSymbolOperator::GetPrecedence() const
 
 // ------------------------- ParentOperator --------------------------
     
-SR::XLink ParentOperator::EvalXLinkFromRow( const EvalKit &kit,
-                                            SR::XLink xlink, 
+XValue ParentOperator::EvalXLinkFromRow( const EvalKit &kit,
+                                            XValue xlink, 
                                             const SR::LinkTable::Row &row ) const
 {
   
@@ -405,8 +405,8 @@ string ParentOperator::GetRenderPrefix() const
 
 // ------------------------- LastDescendantOperator --------------------------
     
-SR::XLink LastDescendantOperator::EvalXLinkFromRow( const EvalKit &kit,
-                                                    SR::XLink xlink, 
+XValue LastDescendantOperator::EvalXLinkFromRow( const EvalKit &kit,
+                                                    XValue xlink, 
                                                     const SR::LinkTable::Row &row ) const
 {
   
@@ -421,8 +421,8 @@ string LastDescendantOperator::GetRenderPrefix() const
 
 // ------------------------- MyContainerFrontOperator --------------------------
     
-SR::XLink MyContainerFrontOperator::EvalXLinkFromRow( const EvalKit &kit,
-                                                      SR::XLink xlink, 
+XValue MyContainerFrontOperator::EvalXLinkFromRow( const EvalKit &kit,
+                                                      XValue xlink, 
                                                       const SR::LinkTable::Row &row ) const
 {
   
@@ -437,8 +437,8 @@ string MyContainerFrontOperator::GetRenderPrefix() const
 
 // ------------------------- MyContainerBackOperator --------------------------
 
-SR::XLink MyContainerBackOperator::EvalXLinkFromRow( const EvalKit &kit,
-                                                     SR::XLink xlink, 
+XValue MyContainerBackOperator::EvalXLinkFromRow( const EvalKit &kit,
+                                                     XValue xlink, 
                                                      const SR::LinkTable::Row &row ) const
 {
     return row.container_back;
@@ -452,8 +452,8 @@ string MyContainerBackOperator::GetRenderPrefix() const
 
 // ------------------------- MySequenceSuccessorOperator --------------------------
 
-SR::XLink MySequenceSuccessorOperator::EvalXLinkFromRow( const EvalKit &kit,
-                                                         SR::XLink xlink, 
+XValue MySequenceSuccessorOperator::EvalXLinkFromRow( const EvalKit &kit,
+                                                         XValue xlink, 
                                                          const SR::LinkTable::Row &row ) const
 {  
     return row.sequence_successor;
@@ -476,8 +476,8 @@ string MySequenceSuccessorOperator::GetRenderPrefix() const
 
 // ------------------------- MySequencePredecessorOperator --------------------------
 
-SR::XLink MySequencePredecessorOperator::EvalXLinkFromRow( const EvalKit &kit,
-                                                           SR::XLink xlink, 
+XValue MySequencePredecessorOperator::EvalXLinkFromRow( const EvalKit &kit,
+                                                           XValue xlink, 
                                                            const SR::LinkTable::Row &row ) const
 {  
     return row.sequence_predecessor;
@@ -525,10 +525,10 @@ unique_ptr<SymbolicResult> AllChildrenOperator::Evaluate( const EvalKit &kit,
     TreePtr<Node> parent_node = ar->GetOnlyXLink().GetChildTreePtr();
     FlattenNode flat( parent_node );
 
-    set<SR::XLink> child_xlinks;
+    set<XValue> child_xlinks;
     for(const TreePtrInterface &child_node : flat )
     {
-        SR::XLink child_xlink( parent_node, &child_node);
+        XValue child_xlink( parent_node, &child_node);
         child_xlinks.insert( child_xlink );
     }
     

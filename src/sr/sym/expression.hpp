@@ -3,7 +3,7 @@
 
 #include "common/common.hpp"
 #include "common/orderable.hpp"
-#include "../link.hpp"
+#include "value.hpp"
 
 #include <exception>
 

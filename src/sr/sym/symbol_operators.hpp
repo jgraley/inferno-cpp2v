@@ -17,11 +17,11 @@ class SymbolConstant : public SymbolExpression
 {
 public:    
     typedef SymbolExpression NominalType;
-    explicit SymbolConstant( SR::XLink xlink );
+    explicit SymbolConstant( XValue xlink );
     explicit SymbolConstant( TreePtr<Node> node );
     virtual unique_ptr<SymbolicResult> Evaluate( const EvalKit &kit ) const override;    
     unique_ptr<SymbolicResult> GetValue() const;
-    SR::XLink GetOnlyXLink() const;
+    XValue GetOnlyXLink() const;
 
     Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                            OrderProperty order_property ) const override;
@@ -30,7 +30,7 @@ public:
     virtual Precedence GetPrecedence() const override;
     
 private:
-    const SR::XLink xlink;
+    const XValue xlink;
 };
 
 // ------------------------- SymbolVariable --------------------------
@@ -69,7 +69,7 @@ public:
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     virtual unique_ptr<SymbolicResult> Evaluate( const EvalKit &kit,
                                                list<unique_ptr<SymbolicResult>> &&op_results ) const override final;
-    virtual unique_ptr<SymbolicResult> EvalFromItem( SR::XLink parent_xlink, 
+    virtual unique_ptr<SymbolicResult> EvalFromItem( XValue parent_xlink, 
                                                    Itemiser::Element *item ) const = 0;
 
     Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
@@ -100,7 +100,7 @@ class ChildSequenceFrontOperator : public ChildOperator
 {
 public:    
     using ChildOperator::ChildOperator;
-    virtual unique_ptr<SymbolicResult> EvalFromItem( SR::XLink parent_xlink, 
+    virtual unique_ptr<SymbolicResult> EvalFromItem( XValue parent_xlink, 
                                                    Itemiser::Element *item ) const override;
     virtual string GetItemTypeName() const override;    
 };
@@ -111,7 +111,7 @@ class ChildSequenceBackOperator : public ChildOperator
 {
 public:    
     using ChildOperator::ChildOperator;
-    virtual unique_ptr<SymbolicResult> EvalFromItem( SR::XLink parent_xlink, 
+    virtual unique_ptr<SymbolicResult> EvalFromItem( XValue parent_xlink, 
                                                    Itemiser::Element *item ) const override;
     virtual string GetItemTypeName() const override;    
 };
@@ -122,7 +122,7 @@ class ChildCollectionFrontOperator : public ChildOperator
 {
 public:    
     using ChildOperator::ChildOperator;
-    virtual unique_ptr<SymbolicResult> EvalFromItem( SR::XLink parent_xlink, 
+    virtual unique_ptr<SymbolicResult> EvalFromItem( XValue parent_xlink, 
                                                    Itemiser::Element *item ) const override;
     virtual string GetItemTypeName() const override;    
 };
@@ -133,7 +133,7 @@ class SingularChildOperator : public ChildOperator
 {
 public:    
     using ChildOperator::ChildOperator;
-    virtual unique_ptr<SymbolicResult> EvalFromItem( SR::XLink parent_xlink, 
+    virtual unique_ptr<SymbolicResult> EvalFromItem( XValue parent_xlink, 
                                                    Itemiser::Element *item ) const override;
     virtual string GetItemTypeName() const override;    
 };
@@ -149,8 +149,8 @@ public:
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     virtual unique_ptr<SymbolicResult> Evaluate( const EvalKit &kit,
                                                list<unique_ptr<SymbolicResult>> &&op_results ) const override final;
-    virtual SR::XLink EvalXLinkFromRow( const EvalKit &kit,
-                                        SR::XLink xlink, 
+    virtual XValue EvalXLinkFromRow( const EvalKit &kit,
+                                        XValue xlink, 
                                         const SR::LinkTable::Row &row ) const = 0;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
@@ -166,8 +166,8 @@ class ParentOperator : public XTreeDbToSymbolOperator
 {
 public:    
     using XTreeDbToSymbolOperator::XTreeDbToSymbolOperator;
-    SR::XLink EvalXLinkFromRow( const EvalKit &kit,
-                                SR::XLink xlink, 
+    XValue EvalXLinkFromRow( const EvalKit &kit,
+                                XValue xlink, 
                                 const SR::LinkTable::Row &row ) const override;
 
     shared_ptr<SymbolExpression> TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
@@ -182,8 +182,8 @@ class LastDescendantOperator : public XTreeDbToSymbolOperator
 {
 public:    
     using XTreeDbToSymbolOperator::XTreeDbToSymbolOperator;
-    SR::XLink EvalXLinkFromRow( const EvalKit &kit,
-                                SR::XLink xlink, 
+    XValue EvalXLinkFromRow( const EvalKit &kit,
+                                XValue xlink, 
                                 const SR::LinkTable::Row &row ) const override;
     string GetRenderPrefix() const override;
 };
@@ -194,8 +194,8 @@ class MyContainerFrontOperator : public XTreeDbToSymbolOperator
 {
 public:    
     using XTreeDbToSymbolOperator::XTreeDbToSymbolOperator;
-    SR::XLink EvalXLinkFromRow( const EvalKit &kit,
-                                SR::XLink xlink, 
+    XValue EvalXLinkFromRow( const EvalKit &kit,
+                                XValue xlink, 
                                 const SR::LinkTable::Row &row ) const override;
     string GetRenderPrefix() const override;
 };
@@ -206,8 +206,8 @@ class MyContainerBackOperator : public XTreeDbToSymbolOperator
 {
 public:    
     using XTreeDbToSymbolOperator::XTreeDbToSymbolOperator;
-    SR::XLink EvalXLinkFromRow( const EvalKit &kit,
-                                SR::XLink xlink, 
+    XValue EvalXLinkFromRow( const EvalKit &kit,
+                                XValue xlink, 
                                 const SR::LinkTable::Row &row ) const override;
     string GetRenderPrefix() const override;
 };
@@ -218,8 +218,8 @@ class MySequenceSuccessorOperator : public XTreeDbToSymbolOperator
 {
 public:    
     using XTreeDbToSymbolOperator::XTreeDbToSymbolOperator;
-    SR::XLink EvalXLinkFromRow( const EvalKit &kit,
-                                SR::XLink xlink, 
+    XValue EvalXLinkFromRow( const EvalKit &kit,
+                                XValue xlink, 
                                 const SR::LinkTable::Row &row ) const override;
 
     shared_ptr<SymbolExpression> TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
@@ -234,8 +234,8 @@ class MySequencePredecessorOperator : public XTreeDbToSymbolOperator
 {
 public:    
     using XTreeDbToSymbolOperator::XTreeDbToSymbolOperator;
-    SR::XLink EvalXLinkFromRow( const EvalKit &kit,
-                                SR::XLink xlink, 
+    XValue EvalXLinkFromRow( const EvalKit &kit,
+                                XValue xlink, 
                                 const SR::LinkTable::Row &row ) const override;
 
     shared_ptr<SymbolExpression> TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 

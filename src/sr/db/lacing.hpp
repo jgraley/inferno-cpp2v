@@ -32,6 +32,7 @@ class Lacing
 {
 public:    
     typedef set<TreePtr<Node>> CategorySet;
+    typedef map<pair<type_index, type_index>, bool> SubCategoryCache;
 
     Lacing();
 
@@ -53,19 +54,23 @@ private:
     void BuildDecisionTree();
     void TestDecisionTree();
     shared_ptr<DecisionNode> MakeDecisionSubtree( const set<int> &possible_lacing_ordinals );
-    static bool LocalMatchWithNULL( TreePtr<Node> l, TreePtr<Node> r );
+    bool LocalMatchWithNULL( TreePtr<Node> l, TreePtr<Node> r );
 
     class DecisionNode
     {        
     public:
+		DecisionNode(Lacing *lacing_);
         virtual ~DecisionNode();
         virtual string Render(string pre="") = 0;
+    protected:
+        Lacing * const lacing;
     };
     
     class DecisionNodeLocalMatch : public DecisionNode
     {
     public:
-        DecisionNodeLocalMatch( TreePtr<Node> category, 
+        DecisionNodeLocalMatch( Lacing *lacing_,
+                                TreePtr<Node> category, 
                                 shared_ptr<DecisionNode> if_yes,         
                                 shared_ptr<DecisionNode> if_no,
                                 int min_lacing_ordinal,
@@ -85,7 +90,8 @@ private:
     class DecisionNodeLeaf : public DecisionNode
     {
     public:
-        DecisionNodeLeaf( int lacing_ordinal );
+        DecisionNodeLeaf( Lacing *lacing_,
+                          int lacing_ordinal );
         int GetLacingOrdinal() const;
         string Render(string pre) override;
         
@@ -122,6 +128,7 @@ private:
     // Decision tree stuff
     map<TreePtr<Node>, set<int>> cats_to_lacing_sets;
     shared_ptr<DecisionNode> decision_tree_root;
+    SubCategoryCache subcategory_cache;
 };
     
 };

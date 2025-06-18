@@ -2,7 +2,7 @@
 #define RESULT_HPP
 
 #include "common/common.hpp"
-#include "../link.hpp"
+#include "value.hpp"
 #include "../db/sc_relation.hpp"
 #include "../db/cat_relation.hpp"
 #include "../db/df_relation.hpp"
@@ -54,8 +54,8 @@ class SymbolicResult : public Traceable
 {
 public:
     virtual bool IsDefinedAndUnique() const = 0;
-    virtual SR::XLink GetOnlyXLink() const = 0;   
-    virtual bool TryExtensionalise( set<SR::XLink> &links ) const = 0;     
+    virtual XValue GetOnlyXLink() const = 0;   
+    virtual bool TryExtensionalise( set<XValue> &links ) const = 0;     
     virtual bool operator==( const SymbolicResult &other ) const = 0;    
 
     virtual string Render() const = 0;
@@ -67,17 +67,17 @@ public:
 class UniqueResult : public SymbolicResult
 {
 public:
-    explicit UniqueResult( SR::XLink xlink );
+    explicit UniqueResult( XValue xlink );
     
     bool IsDefinedAndUnique() const override;    
-    SR::XLink GetOnlyXLink() const override;    
-    bool TryExtensionalise( set<SR::XLink> &links ) const override;
+    XValue GetOnlyXLink() const override;    
+    bool TryExtensionalise( set<XValue> &links ) const override;
     bool operator==( const SymbolicResult &other ) const override;    
     
     string Render() const override;
 
 private:    
-    SR::XLink xlink;
+    XValue xlink;
 };
 
 // ------------------------- EmptyResult --------------------------
@@ -86,8 +86,8 @@ class EmptyResult : public SymbolicResult
 {
 public:
     bool IsDefinedAndUnique() const override;    
-    SR::XLink GetOnlyXLink() const override;    
-    bool TryExtensionalise( set<SR::XLink> &links ) const override;
+    XValue GetOnlyXLink() const override;    
+    bool TryExtensionalise( set<XValue> &links ) const override;
     bool operator==( const SymbolicResult &other ) const override;    
     
     string Render() const override;
@@ -98,14 +98,14 @@ public:
 class SubsetResult : public SymbolicResult
 {
 public:
-    explicit SubsetResult( set<SR::XLink> xlinks = set<SR::XLink>(), bool complement_flag = false );
+    explicit SubsetResult( set<XValue> xlinks = set<XValue>(), bool complement_flag = false );
     
     // Use this to force other or unknown symbol results to extensionalise
     explicit SubsetResult( unique_ptr<SymbolicResult> other );
     
     bool IsDefinedAndUnique() const override;    
-    SR::XLink GetOnlyXLink() const override;    
-    bool TryExtensionalise( set<SR::XLink> &links ) const override;
+    XValue GetOnlyXLink() const override;    
+    bool TryExtensionalise( set<XValue> &links ) const override;
     bool operator==( const SymbolicResult &other ) const override;
 
     unique_ptr<SubsetResult> GetComplement() const;
@@ -120,7 +120,7 @@ private:
     static unique_ptr<SubsetResult> UnionCore( list<unique_ptr<SubsetResult>> ops );
     static unique_ptr<SubsetResult> IntersectionCore( list<unique_ptr<SubsetResult>> ops );
 
-    set<SR::XLink> xlinks;
+    set<XValue> xlinks;
     bool complement_flag;
 };
 
@@ -134,8 +134,8 @@ public:
     DepthFirstRangeResult( const SR::XTreeDatabase *x_tree_db, KeyType lower, bool lower_incl, KeyType upper, bool upper_incl );
     
     bool IsDefinedAndUnique() const override;    
-    SR::XLink GetOnlyXLink() const override;    
-    bool TryExtensionalise( set<SR::XLink> &links ) const override;
+    XValue GetOnlyXLink() const override;    
+    bool TryExtensionalise( set<XValue> &links ) const override;
     bool operator==( const SymbolicResult &other ) const override;
 
     //unique_ptr<SubsetResult> GetComplement() const;
@@ -146,7 +146,7 @@ public:
 
 private:    
     const SR::XTreeDatabase *x_tree_db;
-    const SR::XLink lower, upper;
+    const XValue lower, upper;
     const bool lower_incl, upper_incl;
 };
 
@@ -159,8 +159,8 @@ public:
     typedef SR::SimpleCompareRelation::KeyType KeyType;
     SimpleCompareRangeResult( const SR::XTreeDatabase *x_tree_db, KeyType lower, bool lower_incl, KeyType upper, bool upper_incl );  
     bool IsDefinedAndUnique() const override;    
-    SR::XLink GetOnlyXLink() const override;    
-    bool TryExtensionalise( set<SR::XLink> &links ) const override;
+    XValue GetOnlyXLink() const override;    
+    bool TryExtensionalise( set<XValue> &links ) const override;
     bool operator==( const SymbolicResult &other ) const override;
 
     //unique_ptr<SubsetResult> GetComplement() const;
@@ -190,8 +190,8 @@ public:
     CategoryRangeResult( const SR::XTreeDatabase *x_tree_db, CatBoundsList &&bounds_list, bool lower_incl, bool upper_incl );
     
     bool IsDefinedAndUnique() const override;    
-    SR::XLink GetOnlyXLink() const override;    
-    bool TryExtensionalise( set<SR::XLink> &links ) const override;
+    XValue GetOnlyXLink() const override;    
+    bool TryExtensionalise( set<XValue> &links ) const override;
     bool operator==( const SymbolicResult &other ) const override;
 
     //unique_ptr<SubsetResult> GetComplement() const;

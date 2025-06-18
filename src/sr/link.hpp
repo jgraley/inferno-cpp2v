@@ -110,15 +110,15 @@ private: friend class LocatedLink;
     void *whodat; 
 #endif
 
-    struct MMAX : virtual Node { NODE_FUNCTIONS_FINAL }; 
-    struct OffEnd : virtual Node { NODE_FUNCTIONS_FINAL }; 
+    struct MMAXNodeType : virtual Node { NODE_FUNCTIONS_FINAL }; 
+    struct OffEndNodeType : virtual Node { NODE_FUNCTIONS_FINAL }; 
     
 public:
     // Magic Match Anything X link: 
-    static const XLink MMAX_Link;
+    static const XLink MMAX;
 
     // Gone off the end
-    static const XLink OffEndXLink;
+    static const XLink OffEnd;
 };
 
 

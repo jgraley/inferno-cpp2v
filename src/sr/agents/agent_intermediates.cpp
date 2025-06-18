@@ -25,7 +25,7 @@ using namespace SYM;
 
 SYM::Lazy<SYM::BooleanExpression> DefaultMMAXAgent::SymbolicNormalLinkedQuery() const
 {    
-    auto mmax_expr = MakeLazy<SymbolConstant>(SR::XLink::MMAX_Link);
+    auto mmax_expr = MakeLazy<SymbolConstant>(XLink::MMAX);
     ClutchRewriter mmax_rewriter( mmax_expr );
     shared_ptr<BooleanExpression> original_expr = SymbolicNormalLinkedQueryMMed();
     return mmax_rewriter.ApplyDistributed( original_expr );

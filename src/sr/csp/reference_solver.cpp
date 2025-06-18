@@ -375,7 +375,7 @@ void ReferenceSolver::ShowBestAssignment()
         {
             TRACE(" assigned ")(assignments_to_show.at(var));
             if( var.GetChildAgent()->IsLocalMatch(*(assignments_to_show.at(var).GetChildTreePtr())) || 
-                assignments_to_show.at(var) == SR::XLink::MMAX_Link )
+                assignments_to_show.at(var) == SYM::XValue::MMAX )
             {
                 TRACEC(" is a local match\n");
             }

@@ -5,7 +5,7 @@
 
 #include "node/specialise_oostd.hpp"
 #include "common/common.hpp"
-#include "../link.hpp"
+#include "../sym/value.hpp"
 #include "../sym/expression.hpp"
 
 #include <memory>
@@ -25,7 +25,7 @@ class SubsetResult;
 
 namespace CSP
 { 
-typedef SR::XLink Value;
+typedef SYM::XValue Value;
 typedef SR::PatternLink VariableId;
 typedef SR::LocatedLink Assignment;
 typedef map<VariableId, Value> Assignments;

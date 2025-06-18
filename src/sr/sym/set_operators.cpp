@@ -144,7 +144,7 @@ unique_ptr<SymbolicResult> AllGreaterOperator::Evaluate( const EvalKit &kit,
                                                                 list<unique_ptr<SymbolicResult>> &&op_results ) const                                                                    
 {
     unique_ptr<SymbolicResult> ar = SoloElementOf(move(op_results));       
-    return make_unique<DepthFirstRangeResult>( kit.x_tree_db, ar->GetOnlyXLink(), false, SR::XLink(), false ); // TODO ar could be a range
+    return make_unique<DepthFirstRangeResult>( kit.x_tree_db, ar->GetOnlyXLink(), false, XValue(), false ); // TODO ar could be a range
 }
 
 
@@ -183,7 +183,7 @@ unique_ptr<SymbolicResult> AllLessOperator::Evaluate( const EvalKit &kit,
                                                              list<unique_ptr<SymbolicResult>> &&op_results ) const                                                                    
 {
     unique_ptr<SymbolicResult> ar = SoloElementOf(move(op_results));       
-    return make_unique<DepthFirstRangeResult>( kit.x_tree_db, SR::XLink(), false, ar->GetOnlyXLink(), false );
+    return make_unique<DepthFirstRangeResult>( kit.x_tree_db, XValue(), false, ar->GetOnlyXLink(), false );
 }
 
 
@@ -222,7 +222,7 @@ unique_ptr<SymbolicResult> AllGreaterOrEqualOperator::Evaluate( const EvalKit &k
                                                                        list<unique_ptr<SymbolicResult>> &&op_results ) const                                                                    
 {
     unique_ptr<SymbolicResult> ar = SoloElementOf(move(op_results));       
-    return make_unique<DepthFirstRangeResult>( kit.x_tree_db, ar->GetOnlyXLink(), true, SR::XLink(), false );
+    return make_unique<DepthFirstRangeResult>( kit.x_tree_db, ar->GetOnlyXLink(), true, XValue(), false );
 }
 
 
@@ -261,7 +261,7 @@ unique_ptr<SymbolicResult> AllLessOrEqualOperator::Evaluate( const EvalKit &kit,
                                                                     list<unique_ptr<SymbolicResult>> &&op_results ) const                                                                    
 {
     unique_ptr<SymbolicResult> ar = SoloElementOf(move(op_results));       
-    return make_unique<DepthFirstRangeResult>( kit.x_tree_db, SR::XLink(), false, ar->GetOnlyXLink(), true );
+    return make_unique<DepthFirstRangeResult>( kit.x_tree_db, XValue(), false, ar->GetOnlyXLink(), true );
 }
 
 
@@ -302,23 +302,23 @@ list<shared_ptr<SymbolExpression>> AllInSimpleCompareRangeOperator::GetSymbolOpe
 
 unique_ptr<SymbolicResult> AllInSimpleCompareRangeOperator::Evaluate( const EvalKit &kit ) const                                                                    
 {
-    SR::XLink lower_xlink = lower->Evaluate(kit)->GetOnlyXLink();
+    XValue lower_xlink = lower->Evaluate(kit)->GetOnlyXLink();
 
     // Optimise case when operands are equal by only evaluating once
-    SR::XLink upper_xlink = (upper==lower) ? 
+    XValue upper_xlink = (upper==lower) ? 
                             lower_xlink : 
                             upper->Evaluate(kit)->GetOnlyXLink();
 
     if( lower_role != BoundingRole::NONE )
     {
         auto node = MakeTreeNode<SR::SimpleCompareRelation::MinimaxNode>( lower_xlink.GetChildTreePtr(), lower_role );
-        lower_xlink = SR::XLink::CreateDistinct( node );
+        lower_xlink = XValue::CreateDistinct( node );
     }
 
     if( upper_role != BoundingRole::NONE )
     {
         auto node = MakeTreeNode<SR::SimpleCompareRelation::MinimaxNode>( upper_xlink.GetChildTreePtr(), upper_role );
-        upper_xlink = SR::XLink::CreateDistinct( node );
+        upper_xlink = XValue::CreateDistinct( node );
     }
 
     return make_unique<SimpleCompareRangeResult>( kit.x_tree_db, 
@@ -373,10 +373,10 @@ unique_ptr<SymbolicResult> AllInCategoryRangeOperator::Evaluate( const EvalKit &
     CategoryRangeResult::CatBoundsList bounds_list;
     for( const ExprBounds &bound_exprs : bounds_exprs_list )
     {
-        SR::XLink lower_xlink = bound_exprs.first->Evaluate(kit)->GetOnlyXLink();
+        XValue lower_xlink = bound_exprs.first->Evaluate(kit)->GetOnlyXLink();
 
         // Optimise case when operands are equal by only evaluating once
-        SR::XLink upper_xlink = (bound_exprs.second==bound_exprs.first) ? 
+        XValue upper_xlink = (bound_exprs.second==bound_exprs.first) ? 
                                 lower_xlink : 
                                 bound_exprs.second->Evaluate(kit)->GetOnlyXLink();
                               

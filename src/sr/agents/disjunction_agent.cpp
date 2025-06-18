@@ -37,7 +37,7 @@ SYM::Lazy<SYM::BooleanExpression> DisjunctionAgent::SymbolicNormalLinkedQuery() 
     ASSERT( GetDisjuncts().size() == 2 )
           ("Got %d choices; to support more than 2 disjuncts, enable SplitDisjunctions; fewer than 2 not allowed", GetDisjuncts().size());
 
-    auto mmax_expr = MakeLazy<SymbolConstant>(XLink::MMAX_Link);
+    auto mmax_expr = MakeLazy<SymbolConstant>(XLink::MMAX);
     auto keyer_expr = MakeLazy<SymbolVariable>(keyer_plink);
     
     list< shared_ptr<BooleanExpression> > is_mmax_exprs, is_keyer_exprs;

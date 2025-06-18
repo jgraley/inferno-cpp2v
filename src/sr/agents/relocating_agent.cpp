@@ -137,7 +137,7 @@ SYM::Lazy<SYM::BooleanExpression> RelocatingAgent::SymbolicNormalLinkedQueryPRed
 DomainExtension::Extender::Info RelocatingAgent::GetDomainExtension( const XTreeDatabase *db, XLink stimulus_xlink ) const
 {
     
-    if( stimulus_xlink == XLink::MMAX_Link )
+    if( stimulus_xlink == XLink::MMAX )
         return DomainExtension::Extender::Info(); // MMAX at base never expands domain because then, all child patterns are also MMAX
     if( !IsPreRestrictionMatch(stimulus_xlink) )
         return DomainExtension::Extender::Info(); // Failed pre-restriction so can't expand domain

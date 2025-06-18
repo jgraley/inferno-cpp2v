@@ -98,16 +98,5 @@ private:
  * element that will be there when we apply the update.
  */  
 }
-	  
-namespace std
-{
-    template<> struct hash<SR::Mutator>
-    {
-        size_t operator()(const SR::Mutator &mutator) const noexcept
-        {
-            return hash<SR::XLink>()(mutator.GetXLink());
-        }
-    };
-}
     
 #endif

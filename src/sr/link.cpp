@@ -441,8 +441,8 @@ string XLink::GetShortName() const
     return "&"+asp_x->GetShortName();
 }
 
-const XLink XLink::MMAX_Link = XLink::CreateDistinct( MakeTreeNode<XLink::MMAX>() );
-const XLink XLink::OffEndXLink = XLink::CreateDistinct( MakeTreeNode<XLink::OffEnd>() );
+const XLink XLink::MMAX = XLink::CreateDistinct( MakeTreeNode<XLink::MMAXNodeType>() );
+const XLink XLink::OffEnd = XLink::CreateDistinct( MakeTreeNode<XLink::OffEndNodeType>() );
               
 //////////////////////////// LocatedLink ///////////////////////////////
 

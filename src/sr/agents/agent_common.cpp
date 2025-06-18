@@ -166,7 +166,7 @@ Lazy<BooleanExpression> AgentCommon::SymbolicCouplingQuery() const
     // And it always will be: see #121; para starting at "No!!"
 
     auto keyer_expr = MakeLazy<SymbolVariable>(keyer_plink);
-    auto mmax_expr = MakeLazy<SymbolConstant>(SR::XLink::MMAX_Link);
+    auto mmax_expr = MakeLazy<SymbolConstant>(XLink::MMAX);
     
     // Policy must apply for every residual
     auto expr = MakeLazy<BooleanConstant>(true);
@@ -261,7 +261,7 @@ void AgentCommon::RunRegenerationQuery( DecidedQueryAgentInterface &query,
     query.Reset(); 
 
     XLink keyer_xlink = hypothesis_links->at(keyer_plink);
-    if( keyer_xlink != XLink::MMAX_Link )
+    if( keyer_xlink != XLink::MMAX )
         this->RunRegenerationQueryImpl( query, hypothesis_links, x_tree_db );
 }                             
                       

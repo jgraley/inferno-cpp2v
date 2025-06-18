@@ -71,7 +71,7 @@ string SymbolicResult::GetTrace() const
 
 // ------------------------- UniqueResult --------------------------
 
-UniqueResult::UniqueResult( SR::XLink xlink_ ) :
+UniqueResult::UniqueResult( XValue xlink_ ) :
     xlink( xlink_ )
 {
     ASSERT( xlink_ )("Not allowed to construct with NULL; use EmptyResult instead");
@@ -84,16 +84,16 @@ bool UniqueResult::IsDefinedAndUnique() const
 }
 
 
-SR::XLink UniqueResult::GetOnlyXLink() const
+XValue UniqueResult::GetOnlyXLink() const
 {
     ASSERT( xlink );
     return xlink;
 }
 
 
-bool UniqueResult::TryExtensionalise( set<SR::XLink> &links ) const
+bool UniqueResult::TryExtensionalise( set<XValue> &links ) const
 {
-    links = set<SR::XLink>{ xlink };
+    links = set<XValue>{ xlink };
     return true;
 }
 
@@ -118,15 +118,15 @@ bool EmptyResult::IsDefinedAndUnique() const
 }
 
 
-SR::XLink EmptyResult::GetOnlyXLink() const
+XValue EmptyResult::GetOnlyXLink() const
 {
     ASSERTFAIL();
 }
 
 
-bool EmptyResult::TryExtensionalise( set<SR::XLink> &links ) const
+bool EmptyResult::TryExtensionalise( set<XValue> &links ) const
 {
-    links = set<SR::XLink>{};
+    links = set<XValue>{};
     return true;
 }
 
@@ -144,7 +144,7 @@ string EmptyResult::Render() const
 
 // ------------------------- SubsetResult --------------------------
 
-SubsetResult::SubsetResult( set<SR::XLink> xlinks_, bool complement_flag_ ) :
+SubsetResult::SubsetResult( set<XValue> xlinks_, bool complement_flag_ ) :
     xlinks( xlinks_ ),
     complement_flag( complement_flag_ )
 {
@@ -160,7 +160,7 @@ SubsetResult::SubsetResult( unique_ptr<SymbolicResult> other )
     }
     else // SymbolicResult
     {
-        set<SR::XLink> links;
+        set<XValue> links;
         bool ok = other->TryExtensionalise( xlinks );
         ASSERTS(ok);
         complement_flag = false;
@@ -174,14 +174,14 @@ bool SubsetResult::IsDefinedAndUnique() const
 }
 
 
-SR::XLink SubsetResult::GetOnlyXLink() const
+XValue SubsetResult::GetOnlyXLink() const
 {
     ASSERT( !complement_flag )("Is complement so not unique");
     return SoloElementOf(xlinks);
 }
 
 
-bool SubsetResult::TryExtensionalise( set<SR::XLink> &links ) const
+bool SubsetResult::TryExtensionalise( set<XValue> &links ) const
 {
     if( complement_flag ) // Refusing to extensionalise a complement set
         return false;
@@ -245,7 +245,7 @@ unique_ptr<SubsetResult> SubsetResult::DeMorgan( function<unique_ptr<SubsetResul
 
 unique_ptr<SubsetResult> SubsetResult::UnionCore( list<unique_ptr<SubsetResult>> ops )
 {
-    set<SR::XLink> result_xlinks;
+    set<XValue> result_xlinks;
     for( const unique_ptr<SubsetResult> &op : ops )
     {
         ASSERTS( !op->complement_flag )("UnionCore requires no complements");
@@ -264,7 +264,7 @@ unique_ptr<SubsetResult> SubsetResult::IntersectionCore( list<unique_ptr<SubsetR
     ASSERTS( non_comp_op )("IntersectionCore requires at least one non-complement");
 
     // DifferenceOf() is the key to combining complemented with non-complimented
-    set<SR::XLink> result_xlinks = (*non_comp_op)->xlinks;
+    set<XValue> result_xlinks = (*non_comp_op)->xlinks;
     for( const unique_ptr<SubsetResult> &op : ops )
     {
         if( &op == non_comp_op )
@@ -290,7 +290,7 @@ string SubsetResult::Render() const
 
 // ------------------------- DepthFirstRangeResult --------------------------
 
-DepthFirstRangeResult::DepthFirstRangeResult( const SR::XTreeDatabase *x_tree_db_, SR::XLink lower_, bool lower_incl_, SR::XLink upper_, bool upper_incl_ ) :
+DepthFirstRangeResult::DepthFirstRangeResult( const SR::XTreeDatabase *x_tree_db_, XValue lower_, bool lower_incl_, XValue upper_, bool upper_incl_ ) :
     x_tree_db( x_tree_db_ ),
     lower( lower_ ),
     upper( upper_ ),
@@ -306,13 +306,13 @@ bool DepthFirstRangeResult::IsDefinedAndUnique() const
 }
 
 
-SR::XLink DepthFirstRangeResult::GetOnlyXLink() const
+XValue DepthFirstRangeResult::GetOnlyXLink() const
 {
     ASSERTFAIL("TODO");
 }
 
 
-bool DepthFirstRangeResult::TryExtensionalise( set<SR::XLink> &links ) const
+bool DepthFirstRangeResult::TryExtensionalise( set<XValue> &links ) const
 { 
     const SR::Orderings::DepthFirstOrdering &ordering = x_tree_db->GetOrderings().depth_first_ordering;
     SR::Orderings::DepthFirstOrdering::iterator it_lower, it_upper;
@@ -343,7 +343,7 @@ bool DepthFirstRangeResult::TryExtensionalise( set<SR::XLink> &links ) const
         it_upper = ordering.end();
     }
     
-    links = set<SR::XLink>( it_lower, it_upper );
+    links = set<XValue>( it_lower, it_upper );
     return true;
 }
 
@@ -384,13 +384,13 @@ bool SimpleCompareRangeResult::IsDefinedAndUnique() const
 }
 
 
-SR::XLink SimpleCompareRangeResult::GetOnlyXLink() const
+XValue SimpleCompareRangeResult::GetOnlyXLink() const
 {
     ASSERTFAIL("TODO");
 }
 
 
-bool SimpleCompareRangeResult::TryExtensionalise( set<SR::XLink> &links ) const
+bool SimpleCompareRangeResult::TryExtensionalise( set<XValue> &links ) const
 {        
     links.clear();
     SR::Orderings::SimpleCompareOrdering::const_iterator it_lower, it_upper;
@@ -422,8 +422,12 @@ bool SimpleCompareRangeResult::TryExtensionalise( set<SR::XLink> &links ) const
     for( SR::Orderings::SimpleCompareOrdering::const_iterator it = it_lower;
          it != it_upper;
          ++it )
-        links = UnionOf( links, x_tree_db->GetNodeRow(*it).incoming_xlinks );  
-    return true;
+	{
+		const set<XValue> &new_links = x_tree_db->GetNodeRow(*it).incoming_xlinks;
+		for( XValue l : new_links )
+			links.insert(l);
+	}	    
+	return true;
 }
 
 
@@ -463,13 +467,13 @@ bool CategoryRangeResult::IsDefinedAndUnique() const
 }
 
 
-SR::XLink CategoryRangeResult::GetOnlyXLink() const
+XValue CategoryRangeResult::GetOnlyXLink() const
 {
     ASSERTFAIL("TODO");
 }
 
 
-bool CategoryRangeResult::TryExtensionalise( set<SR::XLink> &links ) const
+bool CategoryRangeResult::TryExtensionalise( set<XValue> &links ) const
 {        
     links.clear();
     for( const CatBounds &bounds : bounds_list )
@@ -492,7 +496,11 @@ bool CategoryRangeResult::TryExtensionalise( set<SR::XLink> &links ) const
         for( SR::Orderings::CategoryOrdering::const_iterator it = it_lower;
              it != it_upper;
              ++it )
-            links = UnionOf( links, x_tree_db->GetNodeRow(*it).incoming_xlinks );
+        {
+            const set<XValue> &new_links = x_tree_db->GetNodeRow(*it).incoming_xlinks;
+            for( XValue l : new_links )
+				links.insert(l);
+		}		
     }
     return true;
 }

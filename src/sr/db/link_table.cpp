@@ -152,14 +152,14 @@ void LinkTable::GenerateRow(XLink xlink, DBCommon::TreeOrdinal tree_ordinal, con
                 row.sequence_predecessor = XLink( core_info->parent_node, &*xit_predecessor );
             }
             else
-                row.sequence_predecessor = XLink::OffEndXLink;        
+                row.sequence_predecessor = XLink::OffEnd;        
 
             SequenceInterface::iterator xit_successor = core_info->container_it;
             ++xit_successor;
             if( xit_successor != row.p_container->end() )
                 row.sequence_successor = XLink( core_info->parent_node, &*xit_successor );
             else
-                row.sequence_successor = XLink::OffEndXLink;        
+                row.sequence_successor = XLink::OffEnd;        
             break;
         }
         case DBCommon::IN_COLLECTION:

@@ -261,7 +261,7 @@ RelocatingAgent::RelocatingQueryResult TransformOfAgent::RunRelocatingQuery( con
     // precision is lost.
     
     // Policy: Don't convert MMAX link to a node (will evaluate to EmptyResult)
-    if( stimulus_xlink == XLink::MMAX_Link )
+    if( stimulus_xlink == XLink::MMAX )
          return RelocatingQueryResult(); 
     
     Dependencies deps;

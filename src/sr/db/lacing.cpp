@@ -295,7 +295,7 @@ shared_ptr<Lacing::DecisionNode> Lacing::MakeDecisionSubtree( const set<int> &po
         int ordinal = SoloElementOf( possible_lacing_ordinals );
         
         // Generate leaf node during unwind
-        return make_shared<DecisionNodeLeaf>( ordinal );
+        return make_shared<DecisionNodeLeaf>( this, ordinal );
     }
     
     // Find the category whose lacing set best halves the set of possible lacing indices
@@ -350,19 +350,37 @@ shared_ptr<Lacing::DecisionNode> Lacing::MakeDecisionSubtree( const set<int> &po
  
     // Generate a decision node that should decide based on IsSubcategory
     // during the unwind.
-   return make_shared<DecisionNodeLocalMatch>( best_cat, yes, no, min_lacing_ordinal, max_lacing_ordinal );    
+   return make_shared<DecisionNodeLocalMatch>( this, best_cat, yes, no, min_lacing_ordinal, max_lacing_ordinal );    
 }
 
 
 bool Lacing::LocalMatchWithNULL( TreePtr<Node> l, TreePtr<Node> r )
 {
     // Model TreePtr<Node>==NULL as a disjoint category
-    if( !r && !l )
-        return true; // NULL matches NULL
-    else if( !l || !r )
+    if( !l || !r )
         return false; // Null and non-NULL never match 
-    else 
-        return l->IsSubcategory( *r );
+
+    if( !r && !l )
+		return true; // NULL matches NULL
+               	
+	auto p = make_pair(type_index(typeid(*l)), type_index(typeid(*r)));
+	SubCategoryCache::iterator it = subcategory_cache.find( p );
+	if( it != subcategory_cache.end() ) // Found
+	{
+		return it->second;
+	}
+	else // Not found
+	{
+        bool subcat = l->IsSubcategory( *r );
+        InsertSolo( subcategory_cache, make_pair(p, subcat) );
+        return subcat;
+	}
+}
+
+
+Lacing::DecisionNode::DecisionNode(Lacing *lacing_) :
+	lacing( lacing_ )
+{
 }
 
 
@@ -371,11 +389,13 @@ Lacing::DecisionNode::~DecisionNode()
 }
 
 
-Lacing::DecisionNodeLocalMatch::DecisionNodeLocalMatch( TreePtr<Node> category_, 
+Lacing::DecisionNodeLocalMatch::DecisionNodeLocalMatch( Lacing *lacing_,
+                                                        TreePtr<Node> category_, 
                                                         shared_ptr<DecisionNode> if_yes_,         
                                                         shared_ptr<DecisionNode> if_no_,
                                                         int min_lacing_ordinal_,
                                                         int max_lacing_ordinal_ ) :
+    DecisionNode( lacing_ ),                                                   
     category( category_ ),
     if_yes( if_yes_ ),
     if_no( if_no_ ),
@@ -387,7 +407,7 @@ Lacing::DecisionNodeLocalMatch::DecisionNodeLocalMatch( TreePtr<Node> category_,
 
 const Lacing::DecisionNode *Lacing::DecisionNodeLocalMatch::GetNextDecisionNode( TreePtr<Node> node ) const
 {
-    return LocalMatchWithNULL( category, node ) ? if_yes.get() : if_no.get();
+    return lacing->LocalMatchWithNULL( category, node ) ? if_yes.get() : if_no.get();
 }
 
 
@@ -406,7 +426,9 @@ string Lacing::DecisionNodeLocalMatch::Render(string pre)
 }
         
 
-Lacing::DecisionNodeLeaf::DecisionNodeLeaf( int lacing_ordinal_ ) :
+Lacing::DecisionNodeLeaf::DecisionNodeLeaf( Lacing *lacing_,
+                                            int lacing_ordinal_ ) :
+    DecisionNode( lacing_ ),                                                   
     lacing_ordinal( lacing_ordinal_ )
 {
 }
