@@ -637,13 +637,14 @@ unique_ptr<BooleanResult> IsInCategoryOperator::Evaluate( const EvalKit &kit,
 
 shared_ptr<SYM::SymbolExpression> IsInCategoryOperator::TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const
 {
-    // Get lacing index range
+    // Get half-open lacing index ranges
     const list<pair<int, int>> &int_range_list = kit.lacing->GetRangeListForCategory(archetype_node);
     
     // Get specially hacked XLinks that can be used with the category ordering
     AllInCategoryRangeOperator::ExprBoundsList expr_range_list;
     for( pair<int, int> int_range : int_range_list )
     {
+		// Half-open range means use minimus for both (minimus compares less than the node it was created from)
         AllInCategoryRangeOperator::ExprBounds expr_range;
         expr_range.first = make_shared<SYM::SymbolConstant>( MakeTreeNode<SR::CategoryRelation::MinimusNode>(int_range.first) );
         expr_range.second = make_shared<SYM::SymbolConstant>( MakeTreeNode<SR::CategoryRelation::MinimusNode>(int_range.second) );        

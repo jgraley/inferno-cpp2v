@@ -226,18 +226,18 @@ int Lacing::GetMetric(int p, int q)
 void Lacing::BuildRanges()
 {
     // Determine a list of ranges for each category within the lacing:
-    // pairs of (begin, end) indices on cats_in_lacing_order. 
+    // pairs of (begin, end) indices on cats_in_lacing_order, i.e. half-open. 
     CategorySet prev_supercats; 
     for( int i=0; i<=ncats; i++ ) // Note extra iteration! Lets us use ncats as overall "end".
     {
         TreePtr<Node> cat_i = (i<ncats ? cats_in_lacing_order.at(i) : nullptr);
         CategorySet current_supercats = (cat_i ? cats_to_nonstrict_supercats.at(cat_i) : CategorySet());                
             
-        CategorySet begin_supercats = DifferenceOf( current_supercats, prev_supercats );
+        CategorySet begin_supercats = DifferenceOf( current_supercats, prev_supercats ); // inclusive
         for( TreePtr<Node> supercat : begin_supercats )
             cats_to_lacing_range_lists[supercat].push_back( make_pair(i, -1) );
 
-        CategorySet end_supercats = DifferenceOf( prev_supercats, current_supercats );
+        CategorySet end_supercats = DifferenceOf( prev_supercats, current_supercats ); // exclusive
         for( TreePtr<Node> supercat : end_supercats )
             cats_to_lacing_range_lists[supercat].back().second = i;  
                  

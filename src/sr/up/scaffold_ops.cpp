@@ -14,18 +14,18 @@ ScaffoldOps::ScaffoldOps( XTreeDatabase *db_ ) :
 }
 
 
-TreeZone ScaffoldOps::FreeZoneIntoExtraTree( FreeZone free_zone, const TreeZone &reference_tree_zone )
+TreeZone ScaffoldOps::FreeZoneIntoExtraTree( FreeZone free_zone, const TreeZone &tree_zone_for_plug_types )
 {
 	// ------------------------- Plug the zone to make a subtree ---------------------------
 	// Reference tree zone is used to determine the types of the plugs
 	vector<XLink> terminii;
     FreeZone::TerminusIterator terminus_it = free_zone.GetTerminiiBegin();
-    for( size_t i=0; i<reference_tree_zone.GetNumTerminii(); i++ )
+    for( size_t i=0; i<tree_zone_for_plug_types.GetNumTerminii(); i++ )
 	{
 		// Plug the terminii of the "from" scaffold with yet more scaffolding so we get a subtree for the extra tree.
 		// This is a requirement for placing a zone (generally including terminii) into its own extra tree. Alternatively
 		// we could allow NULL TreePtrs/placeholders to exist in tree and define semantics for them.
-		TreePtr<Node> term_child_node = reference_tree_zone.GetTerminusXLink(i).GetChildTreePtr();
+		TreePtr<Node> term_child_node = tree_zone_for_plug_types.GetTerminusXLink(i).GetChildTreePtr();
 		ASSERT(term_child_node);
 		FreeZone plug = CreateScaffoldToSpec(term_child_node, 0); // finally no terminii!!!
 		XLink resulting_xlink;

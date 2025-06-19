@@ -33,7 +33,7 @@ public:
 
     // Create a node here so that a regular XLink can be used and passed
     // through the sym stuff by value. Is minimus because intervals on this
-    // index are half-open.
+    // ordering are half-open.
     class MinimusNode : public Node
     {
     public:
@@ -41,6 +41,7 @@ public:
         MinimusNode( int lacing_ordinal );
         MinimusNode(); ///< default constructor, for making archetypes 
         int GetMinimusOrdinal() const;
+        BoundingRole GetRole() const { return BoundingRole::MINIMUS; }
         string GetName() const final;
     private:
         int lacing_ordinal;

@@ -29,7 +29,7 @@ public:
 
     // Create a node here so that a regular XLink can be used and passed
     // through the sym stuff by value. Is minimus because intervals on this
-    // index are half-open.
+    // ordering are half-open.
     class MinimaxNode : public Node
     {
     public:

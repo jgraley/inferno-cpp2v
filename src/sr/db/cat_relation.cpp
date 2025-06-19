@@ -35,11 +35,11 @@ Orderable::Diff CategoryRelation::Compare3Way(KeyType l_key, KeyType r_key) cons
     INDENT("@");
     TRACE("l_xlink=")(l_xlink)(" r_xlink=")(r_xlink)("\n");
 #endif
-    auto l_minimus = TreePtr<MinimusNode>::DynamicCast( l_node );
-    auto r_minimus = TreePtr<MinimusNode>::DynamicCast( r_node );
+    auto l_minimax = TreePtr<MinimusNode>::DynamicCast( l_node );
+    auto r_minimax = TreePtr<MinimusNode>::DynamicCast( r_node );
 
     int li=-1, ri=-1;
-    if( !l_minimus && !r_minimus )
+    if( !l_minimax && !r_minimax )
     {
         Orderable::Diff d = lacing->OrdinalCompare( l_node, r_node );    
 
@@ -50,35 +50,32 @@ Orderable::Diff CategoryRelation::Compare3Way(KeyType l_key, KeyType r_key) cons
         ASSERT( (d>0) == (d1>0) );
         ASSERT( (d<0) == (d1<0) );
         ASSERT( (d==0) == (d1==0) );
-#endif
-           if( d )
-            return d;    
-            
-        return TreePtr<Node>::Compare3Way( l_key, r_key );       
+#endif           
+        return d ? d : TreePtr<Node>::Compare3Way( l_key, r_key );       
     }
-    else if( l_minimus && r_minimus )
+    else if( l_minimax && r_minimax )
     {
         // This case only expected during test. Fall back to XLink to
         // keep the ordering total for the benefit of the test.
-        li = l_minimus->GetMinimusOrdinal();
-        ri = r_minimus->GetMinimusOrdinal();
+        li = l_minimax->GetMinimusOrdinal();
+        ri = r_minimax->GetMinimusOrdinal();
         Orderable::Diff d = li - ri;
-           if( d )
-            return d;    
-            
-        return TreePtr<Node>::Compare3Way( l_key, r_key );
+        d = d ? d : (int)l_minimax->GetRole() - (int)r_minimax->GetRole();
+        return d ? d : TreePtr<Node>::Compare3Way( l_key, r_key );
     }
-    else if( l_minimus && !r_minimus )
+    else if( l_minimax && !r_minimax )
     {
-        li = l_minimus->GetMinimusOrdinal();
+        li = l_minimax->GetMinimusOrdinal();
         ri = lacing->GetOrdinalForNode( r_node );
-        return (li*2-1) - (ri*2); // minimus is on the left
+        Orderable::Diff d = li - ri;
+        return d ? d : (int)l_minimax->GetRole(); // minimus is on the left
     }
-    else if( !l_minimus && r_minimus )
+    else if( !l_minimax && r_minimax )
     {
         li = lacing->GetOrdinalForNode( l_node );
-        ri = r_minimus->GetMinimusOrdinal();      
-        return (li*2) - (ri*2-1); // minimus is on the right
+        ri = r_minimax->GetMinimusOrdinal();      
+        Orderable::Diff d = li - ri;
+        return d ? d : - (int)r_minimax->GetRole(); // minimus is on the right
     }
     else
     {
