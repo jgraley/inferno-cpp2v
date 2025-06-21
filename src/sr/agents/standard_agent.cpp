@@ -552,7 +552,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutImpl( const ReplaceKit &ki
     else
     {
         // Free replace pattern, just duplicate it.
-        ASSERT( me_plink.GetPattern()->IsFinal() ); 
+        ASSERT( me_plink.GetPattern()->IsFinal() )(me_plink); 
         return GenReplaceLayoutNormal( kit, me_plink ); 
     }
 }
@@ -908,7 +908,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutNormal( const ReplaceKit &
         else if( TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[i]) )
         {
             TRACE("Copying single element\n");
-            ASSERT( *my_singular )("Member %d (", i)(*my_singular)(") of ")(*this)(" was nullptr when not overlaying\n");            
+            ASSERT( *my_singular )("Singular item %d (", i)(*my_singular)(") of ")(*this)(" was nullptr (not overlaying)\n");            
             TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
             *dest_singular = Mutator::MakePlaceholder();
             zone.AddTerminus( Mutator::CreateFreeSingular(dest, dest_singular) );            

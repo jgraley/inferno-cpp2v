@@ -44,7 +44,7 @@ SR_UP_MODULES += $(SR_UP)/gap_finding_pass $(SR_UP)/boundary_pass $(SR_UP)/alt_o
 PARSE_MODULES = $(PARSE)/identifier_tracker $(PARSE)/rc_hold
 RENDER_MODULES = $(RENDER)/sort_decls $(RENDER)/graph $(RENDER)/render $(RENDER)/uniquify_identifiers $(RENDER)/doc_graphs
 STEPS_MODULES = $(STEPS)/inferno_agents $(STEPS)/split_instance_declarations $(STEPS)/generate_implicit_casts $(STEPS)/generate_stacks $(STEPS)/lower_control_flow 
-STEPS_MODULES += $(STEPS)/clean_up $(STEPS)/state_out $(STEPS)/systemc_detection $(STEPS)/to_sc_method $(STEPS)/uncombable $(STEPS)/fall_out $(STEPS)/test_steps
+STEPS_MODULES += $(STEPS)/clean_up $(STEPS)/state_out $(STEPS)/systemc_detection $(STEPS)/systemc_generation $(STEPS)/to_sc_method $(STEPS)/uncombable $(STEPS)/fall_out $(STEPS)/test_steps
 MAIN_MODULES = $(MAIN)/inferno $(MAIN)/unit_test 
 
 ALL_SR_MODULES = $(SR_MODULES) $(SR_AGENTS_MODULES) $(SR_CSP_MODULES) $(SR_DB_MODULES) $(SR_PTRANS_MODULES) $(SR_SYM_MODULES) $(SR_UP_MODULES) 

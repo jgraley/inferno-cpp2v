@@ -1,5 +1,5 @@
 
-// subordinate funciton with multiple parameters and return value
+// subordinate function with multiple parameters and return value
 
 #include <isystemc.h>
 

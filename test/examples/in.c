@@ -83,18 +83,4 @@ unsigned df()
     x.a;
     return 0;
 }
-/*
-class ccc
-{
-    ms asasas;
-    typedef short ti;
-public:
-    int ggh;
-    struct nested
-    {    
-        ccc *p;
-    };
-protected:
-    int a;
-};
-*/
+

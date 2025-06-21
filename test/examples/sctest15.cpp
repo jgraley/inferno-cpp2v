@@ -1,5 +1,5 @@
 
-// 2 threads with subordinate functions
+// 1 thread with subordinate functions
 
 #include <isystemc.h>
 

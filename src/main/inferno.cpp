@@ -17,6 +17,7 @@
 #include "steps/state_out.hpp"
 #include "steps/fall_out.hpp"
 #include "steps/systemc_detection.hpp"
+#include "steps/systemc_generation.hpp"
 #include "steps/to_sc_method.hpp"
 #include "render/doc_graphs.hpp"
 #include "unit_test.hpp"
@@ -51,6 +52,8 @@ void BuildDefaultSequence( vector< shared_ptr<VNStep> > *sequence )
     // SystemC detection, converts implicit SystemC to explicit. Always at the top
     // because we cannot render+compile implicit SystemC.
     DetectAllSCTypes::Build(sequence);
+    
+    GenerateSC::Build(sequence);
 
     { // establish what is locally uncombable
         sequence->push_back( make_shared<DetectUncombableSwitch>() );
