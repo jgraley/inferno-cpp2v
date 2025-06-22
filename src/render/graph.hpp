@@ -79,7 +79,7 @@ public:
     void GenerateGraph( const Figure &figure ); // graph just the specified ojects
     TreePtr<Node> GenerateGraph( TreePtr<Node> root ); // graph the subtree under root node
 
-    struct MyBlock : Graphable::NodeBlock
+    struct MyNodeBlock : Graphable::NodeBlock
     {
         string GetTrace() const override;
 		
@@ -122,47 +122,47 @@ private:
     void PopulateFrom( list<const Graphable *> &graphables, const Graphable *g );
     void PopulateFromSubBlocks( list<const Graphable *> &graphables, const Graphable::NodeBlock &block );
 
-    shared_ptr<MyLink> FindLink( list<MyBlock> &blocks_to_act_on, 
+    shared_ptr<MyLink> FindLink( list<MyNodeBlock> &blocks_to_act_on, 
                                  const Graphable *target_child_g,
                                  Figure::Link target );
-    void CheckLinks( list<MyBlock> blocks );
-    list<MyBlock> GetBlocks( list<const Graphable *> graphables,
+    void CheckLinks( list<MyNodeBlock> blocks );
+    list<MyNodeBlock> GetBlocks( list<const Graphable *> graphables,
                              const Region *region );
-    MyBlock GetBlock( const Graphable *g,
+    MyNodeBlock GetBlock( const Graphable *g,
                       const Region *region );
-    void TrimLinksByChild( list<MyBlock> &blocks,
+    void TrimLinksByChild( list<MyNodeBlock> &blocks,
                            list<const Graphable *> to_keep );
-    void TrimLinksByChild( list<MyBlock> &blocks,
+    void TrimLinksByChild( list<MyNodeBlock> &blocks,
                            set<const Graphable *> to_keep );
-    void TrimLinksByPhase( list<MyBlock> &blocks,
+    void TrimLinksByPhase( list<MyNodeBlock> &blocks,
                            set<Graphable::Phase> to_keep );
-    MyBlock CreateInvisibleBlock( string base_id, 
+    MyNodeBlock CreateInvisibleBlock( string base_id, 
                                  list< tuple<const Graphable *, string, Graphable::Phase> > links_info,
                                  const Region *region );
-    MyBlock PreProcessBlock( const Graphable::NodeBlock &block, 
+    MyNodeBlock PreProcessBlock( const Graphable::NodeBlock &block, 
                              const Graphable *g,
                              const Region *region );
     
-    void PostProcessBlocks( list<MyBlock> &blocks );
-    void PostProcessBlock( MyBlock &block );
+    void PostProcessBlocks( list<MyNodeBlock> &blocks );
+    void PostProcessBlock( MyNodeBlock &block );
 
-    string DoBlocks( const list<MyBlock> &blocks,
+    string DoBlocks( const list<MyNodeBlock> &blocks,
                      const RegionAppearance &region );
-    string DoBlock( const MyBlock &block,
+    string DoBlock( const MyNodeBlock &block,
                     const RegionAppearance &region );
-    string DoNodeBlockLabel( const MyBlock &block, 
+    string DoNodeBlockLabel( const MyNodeBlock &block, 
                              Atts title_font_atts, 
                              string title );
-    string DoExpandedBlockLabel( const MyBlock &block, 
+    string DoExpandedBlockLabel( const MyNodeBlock &block, 
                                  Atts title_font_atts, 
                                  Atts subblock_font_atts, 
                                  Atts table_atts, 
                                  string title, 
                                  bool extra_column );
-    string DoLinks( const list<MyBlock> &blocks );
-    string DoLinks( const MyBlock &block );
+    string DoLinks( const list<MyNodeBlock> &blocks );
+    string DoLinks( const MyNodeBlock &block );
     string DoLink( int port_index, 
-                   const MyBlock &block, 
+                   const MyNodeBlock &block, 
                    shared_ptr<const Graphable::Link> link );
     string DoHeader( string title );
     string DoFooter();

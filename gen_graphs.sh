@@ -60,7 +60,11 @@ fi
 # #757 to fix test04.cpp
 SKIPS=("test04.cpp") 
     
-PROGRESS="I" # I means "in", i.e. input has been parsed
+STEP_NUMBERS=($(seq 1 104)) # TODO obtain this from inferno.exe
+
+# I means "in", i.e. input has been parsed; T means transfoirmation
+PROGRESSES="I ${STEP_NUMBERS[@]/#/T}"
+echo ${PROGRESSES}
 for FILE in $FILES
 do
     CASE=`basename ${FILE}`
@@ -70,10 +74,14 @@ do
 	
     mkdir -p ${BASE_DIR}/intermediate/
 	rm -rf ${BASE_DIR}/intermediate/*
-    ./inferno.exe -i ${FILE} -q${PROGRESS} -g${COLOUR}i > ${BASE_DIR}/intermediate/${CASE}.${PROGRESS}.dot
+    for PROGRESS in ${PROGRESSES}; do
+		./inferno.exe -i ${FILE} -q${PROGRESS} -g${COLOUR}i > ${BASE_DIR}/intermediate/${CASE}.${PROGRESS}.dot
+	done
     mkdir -p ${BASE_DIR}/intermediate-trace/
 	rm -rf ${BASE_DIR}/intermediate-trace/*
-    ./inferno.exe -i ${FILE} -q${PROGRESS} -gt${COLOUR}i > ${BASE_DIR}/intermediate-trace/${CASE}.${PROGRESS}.dot
+    for PROGRESS in ${PROGRESSES}; do
+		./inferno.exe -i ${FILE} -q${PROGRESS} -gt${COLOUR}i > ${BASE_DIR}/intermediate-trace/${CASE}.${PROGRESS}.dot
+	done
 done
 
 ./convert_all_dot.sh -d ${BASE_DIR}

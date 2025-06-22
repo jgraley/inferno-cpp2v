@@ -908,7 +908,7 @@ string AndRuleEngine::GetTrace() const
 
 string AndRuleEngine::GetGraphId() const
 {
-    return "And"+GetSerialString();
+    return "ARE"+GetSerialString();
 }
 
 

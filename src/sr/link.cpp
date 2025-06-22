@@ -172,7 +172,7 @@ string PatternLink::GetName() const
 {
     if(asp_pattern==nullptr)
         return "NULL";
-    return asp_pattern->GetName();
+    return "↳"+asp_pattern->GetName();
 }
 
 
@@ -180,7 +180,7 @@ string PatternLink::GetShortName() const
 {
     if(asp_pattern==nullptr)
         return "NULL";
-    return asp_pattern->GetShortName();
+    return "↳"+asp_pattern->GetShortName();
 }
 
 
@@ -430,7 +430,7 @@ string XLink::GetName() const
 {
     if(asp_x==nullptr)
         return "NULL";
-    return "&"+asp_x->GetName();
+    return "⤷"+asp_x->GetName();
 }
 
 
@@ -438,7 +438,7 @@ string XLink::GetShortName() const
 {
     if(asp_x==nullptr)
         return "NULL";
-    return "&"+asp_x->GetShortName();
+    return "⤷"+asp_x->GetShortName();
 }
 
 const XLink XLink::MMAX = XLink::CreateDistinct( MakeTreeNode<XLink::MMAXNodeType>() );

@@ -74,7 +74,7 @@ void Graph::GenerateGraph( SR::VNStep *root )
     string s;
     s += "// -------------------- transformation figure --------------------\n";
     list<const Graphable *> my_graphables;
-    list<MyBlock> my_blocks;
+    list<MyNodeBlock> my_blocks;
 
     reached.clear();
     PopulateFromTransformation(my_graphables, root);
@@ -103,7 +103,7 @@ void Graph::GenerateGraph( const Figure &figure )
     
     // Exterior agents (shown outside of region): get blocks for them and 
     // remove links to graphables not in this figure
-    list<MyBlock> exterior_blocks;
+    list<MyNodeBlock> exterior_blocks;
     {
         list<const Graphable *> exterior_gs;
         for( const Figure::Agent &agent : figure.exterior_agents )
@@ -114,7 +114,7 @@ void Graph::GenerateGraph( const Figure &figure )
     
     // Interior agents (shown inside region): get blocks for them and 
     // remove links to graphables not in this figure
-    list<MyBlock> interior_blocks;
+    list<MyNodeBlock> interior_blocks;
     {
         list<const Graphable *> interior_gs;
         for( const Figure::Agent &agent : figure.interior_agents )
@@ -127,7 +127,7 @@ void Graph::GenerateGraph( const Figure &figure )
     // Subordinate engines (shown as shaded sub-regions) and their 
     // agents (invisible): get blocks for them, remove links to graphables 
     // not in this SUB-REGION, make them invisible.    
-    map< const GraphIdable *, list<MyBlock> > subordinate_blocks;
+    map< const GraphIdable *, list<MyNodeBlock> > subordinate_blocks;
     for( auto engine_agent : figure.subordinate_engines_and_base_agents )
     {
         list<const Graphable *> sub_gs = { engine_agent.second.g };
@@ -137,14 +137,14 @@ void Graph::GenerateGraph( const Figure &figure )
         FTRACE("sub_region.id: ")(sub_region.id)("\n");
         // Note: the same root agent can be used in multiple engines, but because we've got the
         // current subordinate's id in the sub_region.id, the new node will be unique enough
-        list<MyBlock> sub_blocks = GetBlocks( sub_gs, &sub_region );
+        list<MyNodeBlock> sub_blocks = GetBlocks( sub_gs, &sub_region );
         FTRACE("item_blocks: ")(sub_blocks)("\n");
         
         // Snip off all links that leave this subordinate region
         TrimLinksByChild( sub_blocks, sub_gs );
         
         // Make them all invisible
-        for( MyBlock &sub_block : sub_blocks )
+        for( MyNodeBlock &sub_block : sub_blocks )
             sub_block.block_type = Graphable::INVISIBLE;
                             
         // Set the child id correctly on all the links from all the interior nodes to subordinate nodes. 
@@ -218,7 +218,7 @@ void Graph::GenerateGraph( const Figure &figure )
     // Check for broken links (no block with matching child id)
     FTRACE("interior_blocks: ")(interior_blocks)("\n");
     FTRACE("exterior_blocks: ")(exterior_blocks)("\n");
-    list<MyBlock> all_blocks = interior_blocks + exterior_blocks;
+    list<MyNodeBlock> all_blocks = interior_blocks + exterior_blocks;
     for( auto p : figure.subordinate_engines_and_base_agents )
     {
 		FTRACE("subordinate_blocks.at ")(p.first)(": ")(subordinate_blocks.at(p.first))("\n");
@@ -244,7 +244,7 @@ void Graph::GenerateGraph( const Figure &figure )
         subordinate_region.id = GetRegionGraphId(&figure, p.first);
         subordinate_region.background_colour = ReadArgs::graph_dark ? "gray25" : "antiquewhite3";
 
-        list<MyBlock> item_blocks = subordinate_blocks.at(p.first);        
+        list<MyNodeBlock> item_blocks = subordinate_blocks.at(p.first);        
         string s_subordinate = DoBlocks(item_blocks, subordinate_region); 
         s_interior += DoRegion(s_subordinate, subordinate_region);
     }
@@ -266,7 +266,7 @@ TreePtr<Node> Graph::GenerateGraph( TreePtr<Node> root )
     string s;
     s += "// -------------------- node figure --------------------\n";
     list<const Graphable *> my_graphables;
-    list<MyBlock> my_blocks;
+    list<MyNodeBlock> my_blocks;
 
     reached.clear();
     Graphable *g = dynamic_cast<Graphable *>(root.get());
@@ -318,14 +318,14 @@ void Graph::PopulateFromSubBlocks( list<const Graphable *> &graphables, const Gr
 }
 
   
-shared_ptr<Graph::MyLink> Graph::FindLink( list<MyBlock> &blocks_to_act_on, 
+shared_ptr<Graph::MyLink> Graph::FindLink( list<MyNodeBlock> &blocks_to_act_on, 
                                            const Graphable *target_child_g,
                                            Figure::Link target )
 {
     FTRACE("FindLink( target_child_g=")(target_child_g)(" target=")(target)(" )\n");         
     // Loop over all the links in all the blocks that we might need to 
     // redirect (ones in the interior of the figure)
-    for( MyBlock &block_to_act_on : blocks_to_act_on )
+    for( MyNodeBlock &block_to_act_on : blocks_to_act_on )
     {
         FTRACEC("    NodeBlock: ")(block_to_act_on.base_id)("\n");
         for( Graphable::ItemBlock &sub_block_to_act_on : block_to_act_on.item_blocks )
@@ -356,14 +356,14 @@ shared_ptr<Graph::MyLink> Graph::FindLink( list<MyBlock> &blocks_to_act_on,
 }                           
 
 
-void Graph::CheckLinks( list<MyBlock> blocks )
+void Graph::CheckLinks( list<MyNodeBlock> blocks )
 {
     set<string> base_ids;
 
-    for( MyBlock &block : blocks )
+    for( MyNodeBlock &block : blocks )
         base_ids.insert( block.base_id );
     
-    for( MyBlock &block : blocks )
+    for( MyNodeBlock &block : blocks )
     {
         for( Graphable::ItemBlock &sub_block : block.item_blocks )
         {
@@ -381,10 +381,10 @@ void Graph::CheckLinks( list<MyBlock> blocks )
 }
 
 
-list<Graph::MyBlock> Graph::GetBlocks( list<const Graphable *> graphables,
+list<Graph::MyNodeBlock> Graph::GetBlocks( list<const Graphable *> graphables,
                                        const Region *region )
 {
-    list<MyBlock> blocks;
+    list<MyNodeBlock> blocks;
 
     for( const Graphable *g : graphables )    
         blocks.push_back( GetBlock( g, region ) );    
@@ -393,16 +393,16 @@ list<Graph::MyBlock> Graph::GetBlocks( list<const Graphable *> graphables,
 }
 
 
-Graph::MyBlock Graph::GetBlock( const Graphable *g,
+Graph::MyNodeBlock Graph::GetBlock( const Graphable *g,
                                 const Region *region )
 {
     Graphable::NodeBlock gblock = g->GetGraphBlockInfo();       
-    MyBlock block = PreProcessBlock( gblock, g, region );
+    MyNodeBlock block = PreProcessBlock( gblock, g, region );
     return block;
 }
                   
 
-void Graph::TrimLinksByChild( list<MyBlock> &blocks,
+void Graph::TrimLinksByChild( list<MyNodeBlock> &blocks,
                               list<const Graphable *> to_keep )
 {
     set<const Graphable *> to_keep_set;
@@ -413,10 +413,10 @@ void Graph::TrimLinksByChild( list<MyBlock> &blocks,
 }                              
 
                               
-void Graph::TrimLinksByChild( list<MyBlock> &blocks,
+void Graph::TrimLinksByChild( list<MyNodeBlock> &blocks,
                               set<const Graphable *> to_keep )
 {
-    for( MyBlock &block : blocks )
+    for( MyNodeBlock &block : blocks )
     {       
         for( Graphable::ItemBlock &sub_block : block.item_blocks )
         {            
@@ -435,10 +435,10 @@ void Graph::TrimLinksByChild( list<MyBlock> &blocks,
 }
 
 
-void Graph::TrimLinksByPhase( list<MyBlock> &blocks,
+void Graph::TrimLinksByPhase( list<MyNodeBlock> &blocks,
                               set<Graphable::Phase> to_keep )
 {
-    for( MyBlock &block : blocks )
+    for( MyNodeBlock &block : blocks )
     {       
         for( Graphable::ItemBlock &sub_block : block.item_blocks )
         {            
@@ -454,11 +454,11 @@ void Graph::TrimLinksByPhase( list<MyBlock> &blocks,
 }
 
 
-Graph::MyBlock Graph::CreateInvisibleBlock( string id, 
+Graph::MyNodeBlock Graph::CreateInvisibleBlock( string id, 
                                            list< tuple<const Graphable *, string, Graphable::Phase> > links_info,  
                                            const Region *region )
 {
-    MyBlock block;
+    MyNodeBlock block;
     block.title = "";     
     block.bold = false;
     block.block_type = Graphable::INVISIBLE;
@@ -491,7 +491,7 @@ Graph::MyBlock Graph::CreateInvisibleBlock( string id,
 }
 
 
-Graph::MyBlock Graph::PreProcessBlock( const Graphable::NodeBlock &block, 
+Graph::MyNodeBlock Graph::PreProcessBlock( const Graphable::NodeBlock &block, 
                                        const Graphable *g,
                                        const Region *region )
 {
@@ -500,7 +500,7 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::NodeBlock &block,
     const SpecialBase *pspecial = pnode ? dynamic_cast<const SpecialBase *>(pnode) : nullptr;
 
     // Fill in everything in my block 
-    MyBlock my_block;
+    MyNodeBlock my_block;
     (Graphable::NodeBlock &)my_block = block;
     
     // Fill in the GraphViz ID that the block will use
@@ -585,16 +585,16 @@ Graph::MyBlock Graph::PreProcessBlock( const Graphable::NodeBlock &block,
 }
 
 
-void Graph::PostProcessBlocks( list<MyBlock> &blocks )
+void Graph::PostProcessBlocks( list<MyNodeBlock> &blocks )
 {
-    for( MyBlock &block : blocks )
+    for( MyNodeBlock &block : blocks )
     {
         PostProcessBlock(block);
     }
 }
 
 
-void Graph::PostProcessBlock( MyBlock &block )
+void Graph::PostProcessBlock( MyNodeBlock &block )
 {
     if( block_ids_show_prerestriction.count( block.base_id ) > 0 )
     {          
@@ -620,19 +620,19 @@ void Graph::PostProcessBlock( MyBlock &block )
 }
 
 
-string Graph::DoBlocks( const list<MyBlock> &blocks, 
+string Graph::DoBlocks( const list<MyNodeBlock> &blocks, 
                         const RegionAppearance &region )
 {
     string s;
     
-    for( const MyBlock &block : blocks )
+    for( const MyNodeBlock &block : blocks )
         s += DoBlock(block, region);
     
     return s;
 }
 
 
-string Graph::DoBlock( const MyBlock &block, 
+string Graph::DoBlock( const MyNodeBlock &block, 
                        const RegionAppearance &region )
 {
     Atts title_font_atts, subblock_font_atts, table_atts;
@@ -737,7 +737,7 @@ string Graph::DoBlock( const MyBlock &block,
 }
 
 
-string Graph::DoNodeBlockLabel( const MyBlock &block, 
+string Graph::DoNodeBlockLabel( const MyNodeBlock &block, 
                                 Atts title_font_atts, 
                                 string title )
 {
@@ -746,7 +746,7 @@ string Graph::DoNodeBlockLabel( const MyBlock &block,
 }
 
 
-string Graph::DoExpandedBlockLabel( const MyBlock &block, 
+string Graph::DoExpandedBlockLabel( const MyNodeBlock &block, 
                                     Atts title_font_atts, 
                                     Atts subblock_font_atts, 
                                     Atts table_atts, 
@@ -785,18 +785,18 @@ string Graph::DoExpandedBlockLabel( const MyBlock &block,
 }
 
 
-string Graph::DoLinks( const list<MyBlock> &blocks )
+string Graph::DoLinks( const list<MyNodeBlock> &blocks )
 {
     string s;
     
-    for( const MyBlock &block : blocks )
+    for( const MyNodeBlock &block : blocks )
         s += DoLinks(block);
 
     return s;
 }
 
 
-string Graph::DoLinks( const MyBlock &block )
+string Graph::DoLinks( const MyNodeBlock &block )
 {
     string s;
     
@@ -815,7 +815,7 @@ string Graph::DoLinks( const MyBlock &block )
 
 
 string Graph::DoLink( int port_index, 
-                      const MyBlock &block, 
+                      const MyNodeBlock &block, 
                       shared_ptr<const Graphable::Link> link )
 {          
     auto my_link = dynamic_pointer_cast<const MyLink>(link);
@@ -1071,7 +1071,7 @@ string Graph::MakeHTMLForGraphViz(string html)
 }
 
 
-string Graph::MyBlock::GetTrace() const
+string Graph::MyNodeBlock::GetTrace() const
 {
 	return string("(") +
 		   Graphable::NodeBlock::GetTrace() + ", " +
