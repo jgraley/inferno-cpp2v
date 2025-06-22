@@ -1,13 +1,17 @@
 
 void bfunc();
 
+// References are circular but no actual calls made
+
 void afunc()
 {
-    bfunc; // not a call, just a reference that doesn't go anywhere
+    if( false )
+		bfunc(); 
 }    
    
 void bfunc()
 {
-    afunc;
+    if( false )
+		afunc(); 
 }    
 

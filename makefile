@@ -79,16 +79,27 @@ doc_hitcounts : makefile inferno.exe docs/generated/gen_hitcounts.sh
 	cd docs/generated && ./gen_hitcounts.sh
 
 #
-# Build the step graphs and stats
+# Build the pattern graphs and stats HTML (slow)
 #
-doc_graphs : makefile inferno.exe docs/generated/gen_doc_graphs.sh
+doc_stats_html : makefile inferno.exe docs/generated/gen_doc_graphs.sh
 	cd docs/generated && ./gen_doc_graphs.sh
 
 #
-# Build the development graphs (patterns and inputs with tracing)
+# Build the pattern graphs
 #
-dev_graphs : makefile inferno.exe gen_graphs.sh
-	./gen_graphs.sh --pattern --intermediate
+pattern_graphs : makefile inferno.exe gen_graphs.sh
+	./gen_graphs.sh --pattern
+
+#
+# Build the internmediate graphs (slow)
+#
+intermediate_graphs : makefile inferno.exe gen_graphs.sh
+	./gen_graphs.sh --intermediate
+
+#
+# Build all the graphs (slow)
+#
+all_graphs : pattern_graphs intermediate_graphs
 
 #
 # Build all of the generatable documentation

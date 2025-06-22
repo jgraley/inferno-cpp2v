@@ -121,7 +121,6 @@ void Graph::GenerateGraph( const Figure &figure )
             interior_gs.push_back(agent.g );
         interior_blocks = GetBlocks( interior_gs, &figure );
         TrimLinksByChild( interior_blocks, all_gs );
-        FTRACE("interior_blocks: ")(interior_blocks)("\ninterior_gs: ")(interior_gs)("\nall_gs: ")(all_gs)("\n\n");
     }
     
     // Subordinate engines (shown as shaded sub-regions) and their 
@@ -134,11 +133,9 @@ void Graph::GenerateGraph( const Figure &figure )
 
         Region sub_region;
         sub_region.id = GetRegionGraphId(&figure, engine_agent.first); 
-        FTRACE("sub_region.id: ")(sub_region.id)("\n");
         // Note: the same root agent can be used in multiple engines, but because we've got the
         // current subordinate's id in the sub_region.id, the new node will be unique enough
         list<MyNodeBlock> sub_blocks = GetBlocks( sub_gs, &sub_region );
-        FTRACE("item_blocks: ")(sub_blocks)("\n");
         
         // Snip off all links that leave this subordinate region
         TrimLinksByChild( sub_blocks, sub_gs );
@@ -152,23 +149,17 @@ void Graph::GenerateGraph( const Figure &figure )
         // these are the only ones with outgoing links that we care about.
         for( auto p : Zip( sub_gs, sub_blocks ) )     
         {   
-			FTRACE("sub_g/sub_block: ")(p)("\n");
             for( const Figure::Link &figure_link : engine_agent.second.incoming_links )
             {
-                FTRACE("FindLink figure_link: ")(figure_link)("\n");
                 shared_ptr<MyLink> link = FindLink( interior_blocks, 
                                                     p.first, 
                                                     figure_link );
                 if( link )
-                {
-					FTRACE("Setting child ID on link: ")(link)("\n");
                     link->child_id = p.second.base_id;       
-				}
             }
         }
                             
         subordinate_blocks[engine_agent.first] = sub_blocks;    
-        FTRACE("subordinate_blocks at ")(engine_agent.first)(": ")(sub_blocks)("\n");
     }
     
     // Special case for trivial engines (aka no normal agents): a new invisible 
@@ -216,14 +207,9 @@ void Graph::GenerateGraph( const Figure &figure )
         PostProcessBlocks( subordinate_blocks[p.first] );
     
     // Check for broken links (no block with matching child id)
-    FTRACE("interior_blocks: ")(interior_blocks)("\n");
-    FTRACE("exterior_blocks: ")(exterior_blocks)("\n");
     list<MyNodeBlock> all_blocks = interior_blocks + exterior_blocks;
     for( auto p : figure.subordinate_engines_and_base_agents )
-    {
-		FTRACE("subordinate_blocks.at ")(p.first)(": ")(subordinate_blocks.at(p.first))("\n");
 		all_blocks = all_blocks + subordinate_blocks.at(p.first);
-	}	
     // Links must be checked for a whole figure because figures dont link to each other
     CheckLinks(all_blocks);    
     
@@ -322,32 +308,29 @@ shared_ptr<Graph::MyLink> Graph::FindLink( list<MyNodeBlock> &blocks_to_act_on,
                                            const Graphable *target_child_g,
                                            Figure::Link target )
 {
-    FTRACE("FindLink( target_child_g=")(target_child_g)(" target=")(target)(" )\n");         
+    TRACE("FindLink( target_child_g=")(target_child_g)(" target=")(target)(" )\n");         
     // Loop over all the links in all the blocks that we might need to 
     // redirect (ones in the interior of the figure)
     for( MyNodeBlock &block_to_act_on : blocks_to_act_on )
     {
-        FTRACEC("    NodeBlock: ")(block_to_act_on.base_id)("\n");
+        TRACEC("    NodeBlock: ")(block_to_act_on.base_id)("\n");
         for( Graphable::ItemBlock &sub_block_to_act_on : block_to_act_on.item_blocks )
         {
             for( shared_ptr<Graphable::Link> link_to_act_on : sub_block_to_act_on.links )
             {
                 auto my_link_to_act_on = dynamic_pointer_cast<MyLink>(link_to_act_on);
                 ASSERT( my_link_to_act_on );
-                FTRACEC("        To act on: child_id=")(my_link_to_act_on->child_id)
+                TRACEC("        To act on: child_id=")(my_link_to_act_on->child_id)
                       (" child=")(link_to_act_on->child)
                       (" labels=")(link_to_act_on->labels)(link_to_act_on->trace_labels)("\n");
                 // Two things must be true for us to update this link's planned_as field:
                 // - Link must point to the right agent - that being the root agent of the sub-engine
                 // - The link label (satellite serial number of the PatternLink) must match the one supplied to us for the sub-engine
                 // AndRuleEngine knows link labels for sub-engines. These two criteria ensure we have got the right link. 
-                if( link_to_act_on->child == target_child_g )
+                if( link_to_act_on->child == target_child_g &&
+			        link_to_act_on->pptr == target.pptr )                   
                 {
-                    ASSERT( link_to_act_on->trace_labels.size()>=1 ); // very brittle TODO use pptr? #375
-					if( link_to_act_on->pptr == target.pptr )                   
-                    {
-                        return my_link_to_act_on;
-                    }
+                    return my_link_to_act_on;
                 }
             }
         }
