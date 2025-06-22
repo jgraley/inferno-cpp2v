@@ -74,15 +74,15 @@ struct Node : NodeBases,
         return GetRender();
     }
     
-    virtual Graphable::Block GetGraphBlockInfo() const override;
+    virtual Graphable::NodeBlock GetGraphBlockInfo() const override;
     
     // It's nice to share. So we try to make these available to other 
     // graphables, such as agents
-    static list<Graphable::SubBlock> GetSubblocks( SequenceInterface *seq, 
+    static list<Graphable::ItemBlock> GetSubblocks( SequenceInterface *seq, 
                                                    Phase phase=Graphable::UNDEFINED );
-    static list<Graphable::SubBlock> GetSubblocks( CollectionInterface *col, 
+    static list<Graphable::ItemBlock> GetSubblocks( CollectionInterface *col, 
                                                    Phase phase=Graphable::UNDEFINED );
-    static list<Graphable::SubBlock> GetSubblocks( const TreePtrInterface *singular, 
+    static list<Graphable::ItemBlock> GetSubblocks( const TreePtrInterface *singular, 
                                                    Phase phase=Graphable::UNDEFINED );
                                                    
     virtual string GetGraphId() const override;    

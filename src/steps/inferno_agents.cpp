@@ -18,18 +18,18 @@ using namespace CPPTree;
 
 //---------------------------------- BuildIdentifierAgent ------------------------------------    
 
-Graphable::Block BuildIdentifierAgent::GetGraphBlockInfo() const
+Graphable::NodeBlock BuildIdentifierAgent::GetGraphBlockInfo() const
 {
     // The BuildIdentifier node appears as a parallelogram (rectangle pushed to the side) with
     // the printf format string that controls the name of the generated identifier inside it.
     // TODO indicate whether it's building instance, label or type identifier
-    Block block;
+    NodeBlock block;
     block.bold = true;
     block.title = "'"+format+"'!"; // text from program code, so use single quotes
     block.shape = "parallelogram";
     block.block_type = Graphable::NODE_SHAPED;
     block.node = GetPatternPtr();
-    block.sub_blocks = Node::GetSubblocks(const_cast<Sequence<CPPTree::Identifier> *>(&sources), phase);
+    block.item_blocks = Node::GetSubblocks(const_cast<Sequence<CPPTree::Identifier> *>(&sources), phase);
     return block;
 }
 
@@ -100,13 +100,13 @@ TreePtr<Node> BuildLabelIdentifierAgent::BuildNewSubtree()
 
 //---------------------------------- IdentifierByNameAgent ------------------------------------    
 
-Graphable::Block IdentifierByNameAgent::GetGraphBlockInfo() const
+Graphable::NodeBlock IdentifierByNameAgent::GetGraphBlockInfo() const
 {
     // The IdentifierByNameBase node appears as a trapezium (rectangle narrower at the top) with
     // the string that must be matched inside it.
     // TODO indicate whether it's matching instance, label or type identifier
     // Update: PreRestriction indicator seems to be doing that now
-    Block block;
+    NodeBlock block;
     block.bold = true;
     block.title = "'" + name + "'?";    
     block.shape = "trapezium";
@@ -280,9 +280,9 @@ int NestedAgent::GetExtenderChannelOrdinal() const
 }
 
 
-Graphable::Block NestedAgent::GetGraphBlockInfo() const
+Graphable::NodeBlock NestedAgent::GetGraphBlockInfo() const
 {
-    Block block;
+    NodeBlock block;
     block.bold = false;
     block.title = GetName();
     block.shape = "plaintext";
@@ -295,7 +295,7 @@ Graphable::Block NestedAgent::GetGraphBlockInfo() const
                   list<string>{},
                   phase,
                   &terminus );
-        block.sub_blocks.push_back( { "terminus", 
+        block.item_blocks.push_back( { "terminus", 
                                       "", 
                                       false,
                                       { link } } );
@@ -307,7 +307,7 @@ Graphable::Block NestedAgent::GetGraphBlockInfo() const
                   list<string>{},
                   phase,
                   &depth );
-        block.sub_blocks.push_back( { "depth", 
+        block.item_blocks.push_back( { "depth", 
                                       "", 
                                       false,
                                       { link } } );
@@ -416,10 +416,10 @@ TreePtr<Node> BuildContainerSizeAgent::BuildNewSubtree()
 }                                                   
 
 
-Graphable::Block BuildContainerSizeAgent::GetGraphBlockInfo() const
+Graphable::NodeBlock BuildContainerSizeAgent::GetGraphBlockInfo() const
 {
 
-    Block block;
+    NodeBlock block;
     block.bold = false;
     block.title = GetName();
     block.shape = "egg";
@@ -432,7 +432,7 @@ Graphable::Block BuildContainerSizeAgent::GetGraphBlockInfo() const
                   list<string>{},
                   phase,
                   &container );
-        block.sub_blocks.push_back( { "container", 
+        block.item_blocks.push_back( { "container", 
                                       "", 
                                       false,
                                       { link } } );

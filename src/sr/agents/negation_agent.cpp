@@ -45,7 +45,7 @@ void NegationAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
 }
 
 
-Graphable::Block NegationAgent::GetGraphBlockInfo() const
+Graphable::NodeBlock NegationAgent::GetGraphBlockInfo() const
 {
     // The Negation node appears as a diamond with a ¬ character inside it. The affected subtree is 
     // on the right.
@@ -53,7 +53,7 @@ Graphable::Block NegationAgent::GetGraphBlockInfo() const
     // a node that represents a boolean operation in the program being processed. Those nodes would 
     // appear as rounded rectangles with the name at the top. Their names may be found in
     // src/tree/operator_db.txt  
-    Block block;
+    NodeBlock block;
     block.bold = true;
     block.title = "Negation";
     block.symbol = string("¬");
@@ -65,7 +65,7 @@ Graphable::Block NegationAgent::GetGraphBlockInfo() const
               list<string>{},
               phase,
               GetNegand() );
-    block.sub_blocks = { { "pattern", 
+    block.item_blocks = { { "pattern", 
                            "", 
                            true,
                            { link } } };

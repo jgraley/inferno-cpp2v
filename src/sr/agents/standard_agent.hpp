@@ -153,7 +153,7 @@ private:
                                             PatternLink me_plink );
     
 public:
-    virtual Block GetGraphBlockInfo() const;
+    virtual NodeBlock GetGraphBlockInfo() const;
 
 private:
     Plan plan; // can't be const because children added after construct

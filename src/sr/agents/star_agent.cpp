@@ -108,11 +108,11 @@ Agent::ReplacePatchPtr StarAgent::GenReplaceLayoutImpl( const ReplaceKit &kit,
 }
 
 
-Graphable::Block StarAgent::GetGraphBlockInfo() const
+Graphable::NodeBlock StarAgent::GetGraphBlockInfo() const
 {
     // The Star node appears as a small circle with a * character inside it. * is chosen for its role in 
     // filename wildcarding, which is semantically equiviant only when used in a Sequence.
-    Block block;
+    NodeBlock block;
     block.bold = true;
     block.title = "Star";
     block.symbol = "*";
@@ -126,7 +126,7 @@ Graphable::Block StarAgent::GetGraphBlockInfo() const
                                                   list<string>{},
                                                   phase,
                                                   GetRestriction() );
-        block.sub_blocks.push_back( { "restriction", 
+        block.item_blocks.push_back( { "restriction", 
                                       "", 
                                       false,
                                       { link } } );

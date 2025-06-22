@@ -119,14 +119,14 @@ public:
     
 private:    
     typedef vector<void *> Origin;
-    struct Block
+    struct NodeBlock
     {
         int count;
         set<Origin> destructs;
     };
     static Origin GetOrigin();
     const Origin origin;
-    static map<Origin, Block> instance_counts;
+    static map<Origin, NodeBlock> instance_counts;
 };
 
 

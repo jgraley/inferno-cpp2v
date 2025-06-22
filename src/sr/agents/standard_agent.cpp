@@ -926,13 +926,13 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutNormal( const ReplaceKit &
 }
 
 
-Graphable::Block StandardAgent::GetGraphBlockInfo() const
+Graphable::NodeBlock StandardAgent::GetGraphBlockInfo() const
 {
     // Inject a non-trivial pre-restriction detector
-    Block block = Node::GetGraphBlockInfo();
+    NodeBlock block = Node::GetGraphBlockInfo();
 
     // Over-write link phase depending on the phase we're in
-    for( Graphable::SubBlock &sub_block : block.sub_blocks ) 
+    for( Graphable::ItemBlock &sub_block : block.item_blocks ) 
         for( shared_ptr<Graphable::Link> link : sub_block.links )
             link->phase = phase;
 

@@ -60,7 +60,7 @@ SYM::Lazy<SYM::BooleanExpression> DisjunctionAgent::SymbolicNormalLinkedQuery() 
 }
 
 
-Graphable::Block DisjunctionAgent::GetGraphBlockInfo() const
+Graphable::NodeBlock DisjunctionAgent::GetGraphBlockInfo() const
 {
     // The Disjunction node appears as a diamond with a ∨ character inside it. The affected subtrees are 
     // on the right.
@@ -68,14 +68,14 @@ Graphable::Block DisjunctionAgent::GetGraphBlockInfo() const
     // a node that represents a boolean operation in the program being processed. Those nodes would 
     // appear as rounded rectangles with the name at the top. Their names may be found in
     // src/tree/operator_db.txt  
-    Block block;
+    NodeBlock block;
     block.bold = true;
     block.title = "Disjunction";
     block.symbol = string("∨");
     block.shape = "diamond";
     block.block_type = Graphable::NODE_SHAPED;
     block.node = GetPatternPtr();
-    block.sub_blocks = { { "patterns", 
+    block.item_blocks = { { "patterns", 
                            "", 
                            true,
                            {} } };
@@ -86,7 +86,7 @@ Graphable::Block DisjunctionAgent::GetGraphBlockInfo() const
                   list<string>{},
                   phase,
                   &p );
-        block.sub_blocks.front().links.push_back( link );
+        block.item_blocks.front().links.push_back( link );
     }
 
     return block;

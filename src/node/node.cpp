@@ -27,9 +27,9 @@ void GenericsTest()
 }
 
 
-Graphable::Block Node::GetGraphBlockInfo() const
+Graphable::NodeBlock Node::GetGraphBlockInfo() const
 {    
-    Graphable::Block block;
+    Graphable::NodeBlock block;
     block.title = GetGraphName();     
     block.bold = false;
     block.shape = "plaintext";
@@ -41,11 +41,11 @@ Graphable::Block Node::GetGraphBlockInfo() const
     for( vector< Itemiser::Element * >::size_type i=0; i<members.size(); i++ )
     {
         if( SequenceInterface *seq = dynamic_cast<SequenceInterface *>(members[i]) )
-            block.sub_blocks = block.sub_blocks + GetSubblocks(seq);
+            block.item_blocks = block.item_blocks + GetSubblocks(seq);
         else if( CollectionInterface *col = dynamic_cast<CollectionInterface *>(members[i]) )
-            block.sub_blocks = block.sub_blocks + GetSubblocks(col);
+            block.item_blocks = block.item_blocks + GetSubblocks(col);
         else if( TreePtrInterface *singular = dynamic_cast<TreePtrInterface *>(members[i]) )
-            block.sub_blocks = block.sub_blocks + GetSubblocks(singular);
+            block.item_blocks = block.item_blocks + GetSubblocks(singular);
         else
             ASSERT(0);
     }
@@ -54,14 +54,14 @@ Graphable::Block Node::GetGraphBlockInfo() const
 }
 
 
-list<Graphable::SubBlock> Node::GetSubblocks( SequenceInterface *seq, 
+list<Graphable::ItemBlock> Node::GetSubblocks( SequenceInterface *seq, 
                                               Phase phase )
 {
-    list<SubBlock> sub_blocks;
+    list<ItemBlock> item_blocks;
     int j=0;
     for( const TreePtrInterface &p : *seq )
     {
-        Graphable::SubBlock sub_block = { GetInnermostTemplateParam(seq->GetName()), 
+        Graphable::ItemBlock sub_block = { GetInnermostTemplateParam(seq->GetName()), 
                                           SSPrintf("[%d]", j++),
                                           false,
                                           {} };                                                  
@@ -71,21 +71,21 @@ list<Graphable::SubBlock> Node::GetSubblocks( SequenceInterface *seq,
                                                   phase,
                                                   &p );
         sub_block.links.push_back( link );
-        sub_blocks.push_back( sub_block );
+        item_blocks.push_back( sub_block );
     }   
-    return sub_blocks; 
+    return item_blocks; 
 }
 
 
-list<Graphable::SubBlock> Node::GetSubblocks( CollectionInterface *col, 
+list<Graphable::ItemBlock> Node::GetSubblocks( CollectionInterface *col, 
                                               Phase phase )
 {
-    list<SubBlock> sub_blocks;
+    list<ItemBlock> item_blocks;
     string dots;
     for( int j=0; j<col->size(); j++ )
         dots += ".";
     
-    Graphable::SubBlock sub_block = { GetInnermostTemplateParam(col->GetName()), 
+    Graphable::ItemBlock sub_block = { GetInnermostTemplateParam(col->GetName()), 
                                       "{" + dots + "}",
                                       false,
                                       {} };
@@ -98,18 +98,18 @@ list<Graphable::SubBlock> Node::GetSubblocks( CollectionInterface *col,
                                                   &p );
         sub_block.links.push_back( link );
     }
-    sub_blocks.push_back( sub_block );
-    return sub_blocks; 
+    item_blocks.push_back( sub_block );
+    return item_blocks; 
 }
 
 
-list<Graphable::SubBlock> Node::GetSubblocks( const TreePtrInterface *singular, 
+list<Graphable::ItemBlock> Node::GetSubblocks( const TreePtrInterface *singular, 
                                               Phase phase )
 {
-    list<SubBlock> sub_blocks;
+    list<ItemBlock> item_blocks;
     if( *singular )
     {
-        Graphable::SubBlock sub_block = { GetInnermostTemplateParam(singular->GetName()), 
+        Graphable::ItemBlock sub_block = { GetInnermostTemplateParam(singular->GetName()), 
                                           "",
                                           false,
                                           {} };
@@ -119,17 +119,17 @@ list<Graphable::SubBlock> Node::GetSubblocks( const TreePtrInterface *singular,
                                                   phase,
                                                   singular );
         sub_block.links.push_back( link );
-        sub_blocks.push_back( sub_block );
+        item_blocks.push_back( sub_block );
     }
     else if( ReadArgs::graph_trace )
     {
-        Graphable::SubBlock sub_block = { GetInnermostTemplateParam(singular->GetName()), 
+        Graphable::ItemBlock sub_block = { GetInnermostTemplateParam(singular->GetName()), 
                                           "NULL",
                                           false, 
                                           {} };
-        sub_blocks.push_back( sub_block );
+        item_blocks.push_back( sub_block );
     }
-    return sub_blocks; 
+    return item_blocks; 
 }
 
 

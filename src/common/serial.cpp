@@ -228,7 +228,7 @@ LeakCheck::Origin LeakCheck::GetOrigin()
 }
 
 
-map<LeakCheck::Origin, LeakCheck::Block> LeakCheck::instance_counts;
+map<LeakCheck::Origin, LeakCheck::NodeBlock> LeakCheck::instance_counts;
 
 
 void DumpCounts( int min = 0 ) // for GCC

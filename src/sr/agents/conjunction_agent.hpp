@@ -16,7 +16,7 @@ class ConjunctionAgent : public virtual AutolocatingAgent
 public:               
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
 
-    virtual Block GetGraphBlockInfo() const;
+    virtual NodeBlock GetGraphBlockInfo() const;
 private:
     virtual CollectionInterface &GetConjuncts() const = 0;
 };

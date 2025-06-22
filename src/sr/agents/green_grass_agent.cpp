@@ -23,12 +23,12 @@ Lazy<BooleanExpression> GreenGrassAgent::SymbolicAutolocatingQuery() const
 }
 
 
-Graphable::Block GreenGrassAgent::GetGraphBlockInfo() const
+Graphable::NodeBlock GreenGrassAgent::GetGraphBlockInfo() const
 {
     // The GreenGrass node appears as a cylinder containing four vertical line characters,
     // like this: ||||. These are meant to represent the blades of grass. It was late and I was
     // tired.
-    Block block;
+    NodeBlock block;
     block.bold = true;
     block.title = "GreenGrass";
     block.symbol = "||||";
@@ -40,7 +40,7 @@ Graphable::Block GreenGrassAgent::GetGraphBlockInfo() const
               list<string>{},
               phase,
               GetThrough() );
-    block.sub_blocks = { { "through", 
+    block.item_blocks = { { "through", 
                            "", 
                            true,
                            { link } } };

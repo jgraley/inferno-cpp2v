@@ -79,7 +79,7 @@ public:
     void GenerateGraph( const Figure &figure ); // graph just the specified ojects
     TreePtr<Node> GenerateGraph( TreePtr<Node> root ); // graph the subtree under root node
 
-    struct MyBlock : Graphable::Block
+    struct MyBlock : Graphable::NodeBlock
     {
         string GetTrace() const override;
 		
@@ -120,7 +120,7 @@ private:
 
     void PopulateFromTransformation( list<const Graphable *> &graphables, SR::VNStep *root );
     void PopulateFrom( list<const Graphable *> &graphables, const Graphable *g );
-    void PopulateFromSubBlocks( list<const Graphable *> &graphables, const Graphable::Block &block );
+    void PopulateFromSubBlocks( list<const Graphable *> &graphables, const Graphable::NodeBlock &block );
 
     shared_ptr<MyLink> FindLink( list<MyBlock> &blocks_to_act_on, 
                                  const Graphable *target_child_g,
@@ -139,7 +139,7 @@ private:
     MyBlock CreateInvisibleBlock( string base_id, 
                                  list< tuple<const Graphable *, string, Graphable::Phase> > links_info,
                                  const Region *region );
-    MyBlock PreProcessBlock( const Graphable::Block &block, 
+    MyBlock PreProcessBlock( const Graphable::NodeBlock &block, 
                              const Graphable *g,
                              const Region *region );
     

@@ -41,7 +41,7 @@ public:
     TreePtr<Node> GetSearchPattern() const override;
     TreePtr<Node> GetReplacePattern() const override;
     
-    Block GetGraphBlockInfo() const override;
+    NodeBlock GetGraphBlockInfo() const override;
     
     virtual TreePtr<Node> EvolveIntoEmbeddedCompareReplace() = 0;
 

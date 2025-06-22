@@ -79,16 +79,16 @@ TreePtr<Node> EmbeddedSCRAgent::GetReplacePattern() const
 }
 
 
-Graphable::Block EmbeddedSCRAgent::GetGraphBlockInfo() const
+Graphable::NodeBlock EmbeddedSCRAgent::GetGraphBlockInfo() const
 {
-    list<SubBlock> sub_blocks;
+    list<ItemBlock> item_blocks;
     // Actually much simpler in graph trace mode - just show the base node and plink
     auto compare_link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(search_pattern.get()),
                                                       list<string>{},
                                                       list<string>{""},
                                                       IN_COMPARE_AND_REPLACE,
                                                       &search_pattern );                                  
-    sub_blocks.push_back( { "search/compare", 
+    item_blocks.push_back( { "search/compare", 
                             "",
                             true,
                             { compare_link } } );
@@ -101,7 +101,7 @@ Graphable::Block EmbeddedSCRAgent::GetGraphBlockInfo() const
                                                      IN_REPLACE_ONLY,
                                                      &replace_pattern );                                  
     
-        sub_blocks.push_back( { "replace",
+        item_blocks.push_back( { "replace",
                                 "",
                                 true,
                                 { replace_link } } );
@@ -112,11 +112,11 @@ Graphable::Block EmbeddedSCRAgent::GetGraphBlockInfo() const
               list<string>{},
               phase,
               GetThrough() );
-    sub_blocks.push_front( { "through", 
+    item_blocks.push_front( { "through", 
                              "",
                              true,
                              { link } } );
-    Block block = { false, GetName(), "", "", CONTROL, GetPatternPtr(), sub_blocks };
+    NodeBlock block = { false, GetName(), "", "", CONTROL, GetPatternPtr(), item_blocks };
     return block;
 }
 

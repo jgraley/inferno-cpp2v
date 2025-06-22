@@ -29,7 +29,7 @@ public:
                                                                
     SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuery() const override;                                       
 
-    virtual Block GetGraphBlockInfo() const;
+    virtual NodeBlock GetGraphBlockInfo() const;
     
     // Interface for pattern trasformation
     virtual void SetDisjuncts( CollectionInterface &ci ) = 0;

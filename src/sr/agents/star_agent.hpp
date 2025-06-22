@@ -41,7 +41,7 @@ public:
                                        PatternLink me_plink, 
                                        XLink key_xlink ) final;
 
-    virtual Block GetGraphBlockInfo() const;
+    virtual NodeBlock GetGraphBlockInfo() const;
     
 private:
     virtual const TreePtrInterface *GetRestriction() const = 0;

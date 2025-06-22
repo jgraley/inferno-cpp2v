@@ -115,7 +115,7 @@ void VNStep::Transform()
 }                                   
 
 
-Graphable::Block VNStep::GetGraphBlockInfo() const
+Graphable::NodeBlock VNStep::GetGraphBlockInfo() const
 {
     ASSERTTHIS();
     ASSERT( top_level_engine )("VNStep needs to be configured before use");

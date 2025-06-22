@@ -20,7 +20,7 @@ string Graphable::Link::GetTrace() const
 }
 
 
-string Graphable::SubBlock::GetTrace() const
+string Graphable::ItemBlock::GetTrace() const
 {
 	return string("(") +
 		   "item_name:" + Trace(item_name) + ", " + 
@@ -31,7 +31,7 @@ string Graphable::SubBlock::GetTrace() const
 }
 
 
-string Graphable::Block::GetTrace() const 
+string Graphable::NodeBlock::GetTrace() const 
 {
 	return string("(") +
 		   "bold:" + Trace(bold) + ", " + 
@@ -40,7 +40,7 @@ string Graphable::Block::GetTrace() const
 		   "shape:" + Trace(shape) +  ", " + 
            "block_type:" + Trace(block_type) +  ", " + 
 		   "node:" + Trace(node) + ", " +
-		   "sub_blocks:" + Trace(sub_blocks) +
+		   "item_blocks:" + Trace(item_blocks) +
 		   ")";    
 }  
 

@@ -137,15 +137,15 @@ void CompareReplace::Transform()
 }
 
 
-Graphable::Block CompareReplace::GetGraphBlockInfo() const
+Graphable::NodeBlock CompareReplace::GetGraphBlockInfo() const
 { 
-    list<SubBlock> sub_blocks;
+    list<ItemBlock> item_blocks;
     auto compare_link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(plan.compare_pattern.get()),
                                                       list<string>{},
                                                       list<string>{""},
                                                       IN_COMPARE_AND_REPLACE,
                                                       &plan.compare_pattern );                                  
-    sub_blocks.push_back( { "search/compare", 
+    item_blocks.push_back( { "search/compare", 
                             "",
                             true,
                             { compare_link } } );
@@ -158,12 +158,12 @@ Graphable::Block CompareReplace::GetGraphBlockInfo() const
                                                      IN_REPLACE_ONLY,
                                                      &plan.replace_pattern );                                  
     
-        sub_blocks.push_back( { "replace", 
+        item_blocks.push_back( { "replace", 
                                 "",
                                 true,
                                 { replace_link } } );
     }
-    return { false, GetName(), "", "", CONTROL, nullptr, sub_blocks };
+    return { false, GetName(), "", "", CONTROL, nullptr, item_blocks };
 }
 
 

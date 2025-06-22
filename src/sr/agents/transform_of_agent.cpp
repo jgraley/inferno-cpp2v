@@ -304,9 +304,9 @@ RelocatingAgent::RelocatingQueryResult TransformOfAgent::RunRelocatingQuery( con
 }
 
 
-Graphable::Block TransformOfAgent::GetGraphBlockInfo() const
+Graphable::NodeBlock TransformOfAgent::GetGraphBlockInfo() const
 {
-    Block block;
+    NodeBlock block;
     // The TransformOf node appears as a slightly flattened octagon, with the name of the specified 
     // kind of Transformation class inside it.
     block.bold = true;
@@ -319,7 +319,7 @@ Graphable::Block TransformOfAgent::GetGraphBlockInfo() const
               list<string>{},
               phase,
               &pattern );
-    block.sub_blocks = { { "pattern", 
+    block.item_blocks = { { "pattern", 
                            "", 
                            true,
                            { link } } };

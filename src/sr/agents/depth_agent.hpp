@@ -27,7 +27,7 @@ public:
                                     XLink key_xlink ) final;
 
     virtual void PatternQueryRestrictions( shared_ptr<PatternQuery> pq ) const {};
-    virtual Block GetGraphBlockInfo() const;
+    virtual NodeBlock GetGraphBlockInfo() const;
 
     TreePtr<Node> terminus; // A node somewhere under Stuff, that matches normally, truncating the subtree
     virtual const TreePtrInterface *GetTerminus() const
@@ -46,7 +46,7 @@ class ChildAgent : public DepthAgent
 {
     class NoParentMismatch : public Mismatch {};
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
-    virtual Block GetGraphBlockInfo() const;
+    virtual NodeBlock GetGraphBlockInfo() const;
 };
 
 
@@ -84,7 +84,7 @@ public:
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            const SolutionMap *hypothesis_links,
                                            const XTreeDatabase *x_tree_db ) const;                                              
-    virtual Block GetGraphBlockInfo() const;
+    virtual NodeBlock GetGraphBlockInfo() const;
 
     TreePtr<Node> recurse_restriction; // Restricts the intermediate nodes in the truncated subtree
 };

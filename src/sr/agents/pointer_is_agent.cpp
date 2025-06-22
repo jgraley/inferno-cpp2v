@@ -43,10 +43,10 @@ RelocatingAgent::RelocatingQueryResult PointerIsAgent::RunRelocatingQuery( const
 }
 
 
-Graphable::Block PointerIsAgent::GetGraphBlockInfo() const
+Graphable::NodeBlock PointerIsAgent::GetGraphBlockInfo() const
 {
     // The PointerIs node appears as a slightly flattened pentagon.
-    Block block;
+    NodeBlock block;
     block.bold = true;
     block.title = "PointerIs"; 
     block.shape = "house";
@@ -57,7 +57,7 @@ Graphable::Block PointerIsAgent::GetGraphBlockInfo() const
               list<string>{},
               phase,
               GetPointer() );
-    block.sub_blocks = { { "pointer", 
+    block.item_blocks = { { "pointer", 
                            "", 
                            true,
                            { link } } };

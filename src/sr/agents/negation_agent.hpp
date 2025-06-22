@@ -26,7 +26,7 @@ public:
                                            const SolutionMap *hypothesis_links,
                                            const XTreeDatabase *x_tree_db ) const;                                              
 
-    virtual Block GetGraphBlockInfo() const;
+    virtual NodeBlock GetGraphBlockInfo() const;
     
 private:
     virtual const TreePtrInterface *GetNegand() const = 0;

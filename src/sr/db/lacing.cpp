@@ -123,7 +123,7 @@ void Lacing::Sort()
     do
     {
         swapped = false;
-        for( int bs=ncats/2; bs>=1; bs-- ) // Block sizes
+        for( int bs=ncats/2; bs>=1; bs-- ) // NodeBlock sizes
         {
             for( int i=0; i+bs<=ncats; i++ )
             {

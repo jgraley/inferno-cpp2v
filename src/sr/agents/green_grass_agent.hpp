@@ -19,7 +19,7 @@ class GreenGrassAgent : public virtual AutolocatingAgent
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicAutolocatingQuery() const; 
 
-    virtual Block GetGraphBlockInfo() const;
+    virtual NodeBlock GetGraphBlockInfo() const;
     virtual const TreePtrInterface *GetThrough() const = 0;
 
     class IsGreenGrassOperator : public SYM::PredicateOperator

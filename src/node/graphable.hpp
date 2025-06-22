@@ -72,9 +72,9 @@ public:
         Phase phase;
         const TreePtrInterface *pptr;
     };
-    struct SubBlock : Traceable
+    struct ItemBlock : Traceable
     {
-		SubBlock( string item_name_,
+		ItemBlock( string item_name_,
 				  string item_extra_,
 				  bool hideable_,
 				  list< shared_ptr<Link> > links_ ) :
@@ -91,23 +91,23 @@ public:
         bool hideable;
         list< shared_ptr<Link> > links;
     };
-    struct Block : Traceable
+    struct NodeBlock : Traceable
     {
-		Block() {} // TODO pernsion this off
-		Block( bool bold_, // TODO reorder and add defaults
+		NodeBlock() {} // TODO pernsion this off
+		NodeBlock( bool bold_, // TODO reorder and add defaults
 			   string title_,
 			   string symbol_,
 			   string shape_,
 			   BlockType block_type_,
 			   shared_ptr<const Node> node_,
-			   list<SubBlock> sub_blocks_ ) :
+			   list<ItemBlock> sub_blocks_ ) :
 			bold( bold_ ),
 			title( title_ ),
 			symbol( symbol_ ),
 			shape( shape_ ),
 			block_type( block_type_ ),
 			node( node_ ),
-			sub_blocks( sub_blocks_ )
+			item_blocks( sub_blocks_ )
 		{
 		}
 			   
@@ -119,12 +119,12 @@ public:
         string shape;
         BlockType block_type;
         shared_ptr<const Node> node;
-        list<SubBlock> sub_blocks;
+        list<ItemBlock> item_blocks;
     };
                                       
-    virtual Block GetGraphBlockInfo() const     
+    virtual NodeBlock GetGraphBlockInfo() const     
     { 
-        Block g{false, "", "", "", NODE_SHAPED, nullptr, {}}; 
+        NodeBlock g{false, "", "", "", NODE_SHAPED, nullptr, {}}; 
         return g;
     };
     

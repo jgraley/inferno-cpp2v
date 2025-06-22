@@ -33,7 +33,7 @@ struct BuildIdentifierAgent : public virtual BuilderAgent
 {
     // TODO do this via a transformation as with TransformOf/TransformOf
     BuildIdentifierAgent( string s, int f=0 ) : format(s), flags(f) {}
-    virtual Block GetGraphBlockInfo() const;
+    virtual NodeBlock GetGraphBlockInfo() const;
     Sequence<CPPTree::Identifier> sources;
     string GetNewName();
     string format;
@@ -106,7 +106,7 @@ private:
 struct IdentifierByNameAgent : public virtual NonlocatingAgent 
 {
     IdentifierByNameAgent( string n ) : name(n) {}
-    virtual Block GetGraphBlockInfo() const;
+    virtual NodeBlock GetGraphBlockInfo() const;
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
 
     virtual pair<TreePtr<Node>, TreePtr<Node>> GetBounds( string name ) const { ASSERTFAIL(); } // TODO implemnt all and put back = 0
@@ -214,7 +214,7 @@ struct NestedAgent : public virtual RelocatingAgent
 
     int GetExtenderChannelOrdinal() const override;
 
-    virtual Block GetGraphBlockInfo() const;
+    virtual NodeBlock GetGraphBlockInfo() const;
     
     TreePtr<Node> terminus; 
     TreePtr<CPPTree::String> depth;      
@@ -297,7 +297,7 @@ struct BuildContainerSizeAgent : public virtual BuilderAgent,
     TreePtr<Node> container;
 private:
     virtual TreePtr<Node> BuildNewSubtree() override;
-    virtual Block GetGraphBlockInfo() const;
+    virtual NodeBlock GetGraphBlockInfo() const;
 }; 
 
 #endif
