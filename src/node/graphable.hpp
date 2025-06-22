@@ -20,7 +20,6 @@ class GraphIdable : public virtual Traceable
 public:    
     enum Phase
     {
-        // Really a bitfield
         UNDEFINED = 0,
         IN_COMPARE_ONLY = 1,
         IN_COMPARE_AND_REPLACE = 3,
@@ -40,7 +39,7 @@ public:
         NODE_EXPANDED,
         INVISIBLE    
     };
-    struct Link
+    struct Link : Traceable
     {
         Link( const Graphable *child_,
               list<string> labels_,
@@ -65,6 +64,7 @@ public:
         }
                
         virtual ~Link() = default;
+        string GetTrace() const override;
 
         const Graphable *child;
         list<string> labels;
@@ -72,15 +72,47 @@ public:
         Phase phase;
         const TreePtrInterface *pptr;
     };
-    struct SubBlock
+    struct SubBlock : Traceable
     {
+		SubBlock( string item_name_,
+				  string item_extra_,
+				  bool hideable_,
+				  list< shared_ptr<Link> > links_ ) :
+			item_name( item_name_ ),
+			item_extra( item_extra_ ),
+			hideable( hideable_ ),
+			links( links_ )
+		{
+		}
+		string GetTrace() const override;
+        
         string item_name;
         string item_extra;
         bool hideable;
         list< shared_ptr<Link> > links;
     };
-    struct Block
+    struct Block : Traceable
     {
+		Block() {} // TODO pernsion this off
+		Block( bool bold_, // TODO reorder and add defaults
+			   string title_,
+			   string symbol_,
+			   string shape_,
+			   BlockType block_type_,
+			   shared_ptr<const Node> node_,
+			   list<SubBlock> sub_blocks_ ) :
+			bold( bold_ ),
+			title( title_ ),
+			symbol( symbol_ ),
+			shape( shape_ ),
+			block_type( block_type_ ),
+			node( node_ ),
+			sub_blocks( sub_blocks_ )
+		{
+		}
+			   
+        string GetTrace() const override;
+
         bool bold;
         string title;
         string symbol;
@@ -99,5 +131,8 @@ public:
     // If you don't know about pre-restrictions, you don't have one.
     virtual bool IsNonTrivialPreRestrictionNP(const TreePtrInterface *) const { return false; }
 };
+
+string Trace(const GraphIdable::Phase &phase);
+string Trace(const Graphable::BlockType &type);
 
 #endif

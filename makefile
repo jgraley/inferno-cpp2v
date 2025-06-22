@@ -75,8 +75,8 @@ doxygen :
 #
 # Build the step graphs and stats
 #
-pattern_graphs : makefile inferno.exe docs/generated/gen_pattern_graphs.sh
-	cd docs/generated && ./gen_pattern_graphs.sh
+doc_hitcounts : makefile inferno.exe docs/generated/gen_hitcounts.sh
+	cd docs/generated && ./gen_hitcounts.sh
 
 #
 # Build the step graphs and stats
@@ -87,13 +87,13 @@ doc_graphs : makefile inferno.exe docs/generated/gen_doc_graphs.sh
 #
 # Build the development graphs (patterns and inputs with tracing)
 #
-dev_graphs : makefile inferno.exe gen_dev_graphs.sh
-	./gen_dev_graphs.sh
+dev_graphs : makefile inferno.exe gen_graphs.sh
+	./gen_graphs.sh --pattern --intermediate
 
 #
 # Build all of the generatable documentation
 #
-docs : doxygen pattern_graphs doc_graphs
+docs : doxygen doc_hitcounts doc_graphs
 
 #
 # Push web site to sourceforge

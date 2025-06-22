@@ -946,6 +946,7 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
             {
                 Graph::Figure::Link link;
                 link.short_name = plink.GetShortName();
+                link.pptr = plink.GetPatternTreePtr();
                 if( residuals.count(plink) > 0 )
                     link.details.planned_as = Graph::LINK_RESIDUAL;
                 else if( keyers.count(plink) > 0 )
@@ -982,6 +983,7 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
             Graph::Figure::Link incoming_link;
             incoming_link.details.planned_as = incoming_link_planned_as;
             incoming_link.short_name = p.first.GetShortName();
+            incoming_link.pptr = p.first.GetPatternTreePtr();  
             base_agent.incoming_links.push_back( incoming_link );
             TRACEC(p.second.get())(" : ( ")(incoming_link.short_name)("->")(base_agent.g->GetGraphId())(" )\n");
             figure.subordinate_engines_and_base_agents.push_back( make_pair(p.second.get(), base_agent) );

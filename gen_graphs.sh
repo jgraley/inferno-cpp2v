@@ -54,20 +54,26 @@ if [ "$PATTERN" = "1" ]; then
 fi
 
 if [ "$INTERMEDIATE" = "1" ]; then
-    FILES=test/examples/*.cpp
+    FILES="test/examples/*.cpp test/examples/*.c"
 fi
+   
+# #757 to fix test04.cpp
+SKIPS=("test04.cpp") 
     
 PROGRESS="I" # I means "in", i.e. input has been parsed
 for FILE in $FILES
 do
-    CASE=`basename ${FILE} .cpp`
-
+    CASE=`basename ${FILE}`
+	if [[ $(echo ${SKIPS[@]} | fgrep -w ${CASE}) ]]; then
+		continue
+	fi
+	
     mkdir -p ${BASE_DIR}/intermediate/
 	rm -rf ${BASE_DIR}/intermediate/*
-    ./inferno.exe -i test/examples/${CASE}.cpp -q${PROGRESS} -g${COLOUR}i > ${BASE_DIR}/intermediate/${CASE}_${PROGRESS}.dot
+    ./inferno.exe -i ${FILE} -q${PROGRESS} -g${COLOUR}i > ${BASE_DIR}/intermediate/${CASE}.${PROGRESS}.dot
     mkdir -p ${BASE_DIR}/intermediate-trace/
 	rm -rf ${BASE_DIR}/intermediate-trace/*
-    ./inferno.exe -i test/examples/${CASE}.cpp -q${PROGRESS} -gt${COLOUR}i > ${BASE_DIR}/intermediate-trace/${CASE}_${PROGRESS}.dot
+    ./inferno.exe -i ${FILE} -q${PROGRESS} -gt${COLOUR}i > ${BASE_DIR}/intermediate-trace/${CASE}.${PROGRESS}.dot
 done
 
 ./convert_all_dot.sh -d ${BASE_DIR}

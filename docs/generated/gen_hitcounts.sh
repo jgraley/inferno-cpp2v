@@ -14,7 +14,7 @@ echo \<body dir="ltr" bgcolor="#ffffff" lang="en-US"\> >> $destdir/$idxname
 echo \<h1\>Inferno search and replace patterns\</h1\> >> $destdir/$idxname
 
 cd ../..
-./inferno.exe $extraiopt -i$testcase -thSNMFL > docs/generated/hits.txt 2> docs/generated/steps.txt
+./inferno.exe $extraiopt -i$testcase -thSMFL > docs/generated/hits.txt 2> docs/generated/steps.txt
 cd docs/generated
 
 i=0

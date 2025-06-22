@@ -59,6 +59,7 @@ public:
         };
         struct Link
         {
+			const TreePtrInterface *pptr;
             string short_name;
             LinkDetails details;
         };
@@ -78,9 +79,10 @@ public:
     void GenerateGraph( const Figure &figure ); // graph just the specified ojects
     TreePtr<Node> GenerateGraph( TreePtr<Node> root ); // graph the subtree under root node
 
-private:
     struct MyBlock : Graphable::Block
     {
+        string GetTrace() const override;
+		
         string prerestriction_name;
         string colour;
         bool specify_ports;
@@ -101,6 +103,7 @@ private:
         }
 
         virtual ~MyLink() = default;
+        string GetTrace() const override;
         
         string child_id;
         LinkPlannedAs planned_as;
@@ -112,6 +115,7 @@ private:
         string background_colour;
     };
 
+private:
     typedef map<string, string> Atts;
 
     void PopulateFromTransformation( list<const Graphable *> &graphables, SR::VNStep *root );
@@ -120,7 +124,7 @@ private:
 
     shared_ptr<MyLink> FindLink( list<MyBlock> &blocks_to_act_on, 
                                  const Graphable *target_child_g,
-                                 string target_trace_label );
+                                 Figure::Link target );
     void CheckLinks( list<MyBlock> blocks );
     list<MyBlock> GetBlocks( list<const Graphable *> graphables,
                              const Region *region );
@@ -188,5 +192,10 @@ private:
     const string backgrounded_font_colour;
     string all_dot;
 };
+
+string Trace(const Graph::LinkPlannedAs &lpa);
+string Trace(const Graph::Figure::LinkDetails &gfld);
+string Trace(const Graph::Figure::Link &gflink);
+string Trace(const Graph::Figure::Agent &gfagent);
 
 #endif
