@@ -514,9 +514,10 @@ void StandardAgent::MaybeChildrenPlanOverlay( PatternLink me_plink,
         if( TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[i]) )
         {
             TreePtrInterface *under_singular = dynamic_cast<TreePtrInterface *>(under_items[i]);
-            if( *my_singular )
+            if( *my_singular && *under_singular )
             {
-                ASSERT(*under_singular)("Cannot key ")(*my_singular)(" because correpsonding child of ")(*under_plink.GetChildAgent())(" is nullptr");
+				// Trying out just skipping the PlanOverlay() if no under_singular
+                //ASSERT(*under_singular)("Cannot key singular ")(*my_singular)(" of ")(me_plink)(" because corresponding \"under\" item of ")(under_plink)(" is nullptr (item #%u)", i);
                 PatternLink my_singular_plink(this, my_singular);
                 PatternLink under_singular_plink(this, under_singular);
                 

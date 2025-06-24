@@ -53,6 +53,9 @@ void BuildDefaultSequence( vector< shared_ptr<VNStep> > *sequence )
     // because we cannot render+compile implicit SystemC.
     DetectAllSCTypes::Build(sequence);
     
+    // SystemC generation tries to convert C and/or C++ into SystemC. This
+    // is a simplification of what would happen in ealy phases of the original
+    // Inferno design. Explicit SC nodes are generated.
     GenerateSC::Build(sequence);
 
     { // establish what is locally uncombable

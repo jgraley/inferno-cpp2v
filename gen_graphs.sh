@@ -74,13 +74,13 @@ do
 		continue
 	fi
 	
-    mkdir -p ${BASE_DIR}/intermediate/
-	rm -rf ${BASE_DIR}/intermediate/*
-    mkdir -p ${BASE_DIR}/intermediate-trace/
-	rm -rf ${BASE_DIR}/intermediate-trace/*
+    mkdir -p ${BASE_DIR}/intermediate/${CASE}/
+	rm -rf ${BASE_DIR}/intermediate/${CASE}/*
+    mkdir -p ${BASE_DIR}/intermediate-trace/${CASE}/
+	rm -rf ${BASE_DIR}/intermediate-trace/${CASE}/*
     for PROGRESS in ${PROGRESSES}; do
-		./inferno.exe -i ${FILE} -q${PROGRESS} -gt${COLOUR}i > ${BASE_DIR}/intermediate-trace/${CASE}.${PROGRESS}.dot &
-		./inferno.exe -i ${FILE} -q${PROGRESS} -g${COLOUR}i > ${BASE_DIR}/intermediate/${CASE}.${PROGRESS}.dot &
+		./inferno.exe -i ${FILE} -q${PROGRESS} -gt${COLOUR}i > ${BASE_DIR}/intermediate-trace/${CASE}/${PROGRESS}.dot &
+		./inferno.exe -i ${FILE} -q${PROGRESS} -g${COLOUR}i > ${BASE_DIR}/intermediate/${CASE}/${PROGRESS}.dot &
 		wait
 	done
 done

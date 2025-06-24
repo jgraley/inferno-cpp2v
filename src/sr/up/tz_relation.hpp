@@ -36,7 +36,7 @@ public:
     
     TreeZoneRelation(const XTreeDatabase *db);
 
-    // These methods ARE polymorphic, we;re just taking refs as part of compare 
+    // These methods ARE polymorphic, we're just taking refs as part of compare 
     // function rules (less confusion about what exactly is being compared)
 
     /// Less operator: for use with set, map etc

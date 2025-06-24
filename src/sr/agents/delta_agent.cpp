@@ -39,6 +39,9 @@ Graphable::NodeBlock DeltaAgent::GetGraphBlockInfo() const
 
 list<PatternLink> DeltaAgent::GetVisibleChildren( Path v ) const
 {    
+    ASSERT( *GetOverlay() );          
+    ASSERT( *GetThrough() );          
+    
     list<PatternLink> plinks;
     switch(v)
     {

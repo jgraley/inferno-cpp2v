@@ -20,17 +20,17 @@ MINI_SC_SR_CASES = small.c pointeris.c ${MINI_SC_CASES}
 
 # The original C/C++ test cases, no SystemC
 CPP_CASES = 
-C_CASES = test11.c test13.c test16.c 
+C_CASES = test10.c test11.c test13.c test16.c
 # #757 to fix test04.cpp
 # #785 to fix test02.c test15.c
 # #786 to fix test03.c
 # #787 to fix test12.cpp
-# #788 to fix test05.c test06.c test07.cpp test09.c test10.c
 # #789 to fit test14.cpp
-# #790 to fix test07.cpp (again)
+# #790 to fix test07.cpp
+# #796 to fix test05.c test06.c test09.c
  
 # The whole lot for the benefit of auto rules
-EXEC_CASES = ${SC_CASES} ${CPP_CASES} ${C_CASES}
+EXEC_CASES = ${SC_CASES} ${C_CASES} ${CPP_CASES}
 
 # Arguments to inferno executable:
 # Args supplied via eg I=-uc will be squished together and appended to the

@@ -181,7 +181,7 @@ private:
 
         // Turn a clang::CXXScopeSpec into a pointer to the corresponding scope node.
         // We have to deal with all the ways of it baing invalid, then just use hold_scope.
-        TreePtr<Node> FromCXXScope(const clang::CXXScopeSpec *SS)
+        TreePtr<Node> TryGetCXXScopeSpecifier(const clang::CXXScopeSpec *SS)
         {
             if (!SS)
                 return TreePtr<Node> ();
@@ -198,7 +198,7 @@ private:
         clang::Action::TypeTy *isTypeName(clang::IdentifierInfo &II,
                 clang::Scope *S, const clang::CXXScopeSpec *SS)
         {
-            TreePtr<Node> n( ident_track.TryGet(&II, FromCXXScope(SS)) );
+            TreePtr<Node> n( ident_track.TryGet(&II, TryGetCXXScopeSpecifier(SS)) );
             if (n)
             {
                 TreePtr<UserType> t = DynamicTreePtrCast<UserType> (n);
@@ -225,14 +225,14 @@ private:
             if (!DynamicTreePtrCast<Record> (cur))
                 return false; // not even in a record
 
-            TreePtr<Node> cxxs = FromCXXScope(SS);
+            TreePtr<Node> cxxs = TryGetCXXScopeSpecifier(SS);
             TreePtr<Node> n( ident_track.TryGet(&II, cxxs) );
             return n == cur;
         }
 
         virtual void ActOnPopScope(clang::SourceLocation Loc, clang::Scope *S)
         {
-            TRACE();
+            INDENT("C");
             ident_track.PopScope(S);
         }
 
@@ -593,17 +593,17 @@ private:
                 const clang::CXXScopeSpec &SS, clang::IdentifierInfo *ID,
                 bool recurse)
         {
+			INDENT("F");
             if (!ID)
                 return TreePtr<Declaration> (); // No name specified => doesn't match anything
 
-            // See if we already have this record in the current scope, or specified scope
-            // if Declarator has one
-            TreePtr<Node> cxxs = FromCXXScope(&SS);
+            TreePtr<Node> cxxs = TryGetCXXScopeSpecifier(&SS);
 
-            // Use C++ scope if non-nullptr; do not recurse (=precise match only)
+            // See if we already have this record in the current scope, or specified scope
+            // if Declarator has one. Use C++ scope if present; do not recurse (=precise match only)
+            TRACE("Looking for %s with cxx scope=%p\n", ID->getName(), cxxs.get());
             TreePtr<Node> found_n( ident_track.TryGet(ID, cxxs, recurse) );
-            //TRACE("Looked for %s, result %p (%p)\n", ID->getName(),
-            //        found_n.get(), cxxs.get());
+            TRACE("Got %p\n", found_n.get());
             if (!found_n)
             {
                 // Nothing was found with the supplied name
@@ -673,6 +673,7 @@ private:
         virtual DeclTy *ActOnDeclarator(clang::Scope *S, clang::Declarator &D,
                 DeclTy *LastInGroup)
         {
+			INDENT("D");
             //TRACE("Scope S%p\n", S);
             ident_track.SeenScope(S);
             // TODO the spurious char __builtin_va_list; line comes from the target info.
@@ -787,14 +788,22 @@ private:
     // body to ActOnDeclarator, since the function decl itself is not inside its own body.
     virtual DeclTy *ActOnStartOfFunctionDef(clang::Scope *FnBodyScope, clang::Declarator &D)
     {
+		INDENT("S");
         TRACE();
         // Declarator is outside function sope, otherwise it would be in its own scope and unfindable
         DeclTy *DT = ActOnDeclarator(FnBodyScope->getParent(), D, 0);
         // Now enter function's scope. Use node from existing declaration so we get any enclosing classes
         TreePtr<Node> n = FindExistingDeclaration(D, false);
+
+		// #795 swapped the ActOnStartOfFunctionDef with ident_track.PushScope because two scopes
+		// were interleaving i.e. pushX, pushY, popX, popY where X was the explicit ones here and 
+		// in ActOnFinishFunctionBody(), and Y was coming through some Clang route.
+		        
+        DeclTy *d = ActOnStartOfFunctionDef(FnBodyScope, DT); // Default to ActOnDeclarator.
+
         ident_track.PushScope( FnBodyScope->getParent(), n );
-        // Default to ActOnDeclarator.
-        return ActOnStartOfFunctionDef(FnBodyScope, DT);
+        
+		return d;
     }
 
     virtual DeclTy *ActOnStartOfFunctionDef(clang::Scope *FnBodyScope, DeclTy *D)
@@ -824,7 +833,7 @@ private:
 
     virtual DeclTy *ActOnFinishFunctionBody(DeclTy *Decl, StmtArg Body)
     {
-        TRACE();
+        INDENT("B");
         TreePtr<Instance> o( DynamicTreePtrCast<Instance>( hold_decl.FromRaw(Decl) ) );
         ASSERT(o);
         TreePtr<Compound> cb( DynamicTreePtrCast<Compound>( FromClang( Body ) ) );
@@ -840,7 +849,8 @@ private:
         TRACE("finish fn %d statements %d total\n", cb->statements.size(), (DynamicTreePtrCast<Compound>(o->initialiser))->statements.size() );
 
         inferno_scope_stack.pop(); // we dont use these - we use the clang-managed compound statement instead (passed in via Body)
-        ident_track.PopScope(nullptr);
+
+		ident_track.PopScope(nullptr);
         return Decl;
     }
 
@@ -879,7 +889,7 @@ private:
             const clang::CXXScopeSpec *SS = 0 )
     {
         //TRACE("S%p\n", S);
-        TreePtr<Node> n( ident_track.Get( &II, FromCXXScope( SS ) ) );
+        TreePtr<Node> n( ident_track.Get( &II, TryGetCXXScopeSpecifier( SS ) ) );
         TRACE("aoie %s %s\n", II.getName(), typeid(*n).name() );
         TreePtr<Instance> o = DynamicTreePtrCast<Instance>( n );
         ASSERT( o );
@@ -1059,6 +1069,7 @@ private:
     // Not sure if this one has been tested!!
     virtual TypeResult ActOnTypeName(clang::Scope *S, clang::Declarator &D)
     {
+		ASSERT(false);
         TreePtr<Type> t = CreateTypeNode( D );
         return hold_type.ToRaw( t );
     }
@@ -1385,7 +1396,7 @@ private:
             clang::AttributeList *Attr,
             MultiTemplateParamsArg TemplateParameterLists)
     {
-        //ASSERT( !FromCXXScope(&SS) && "We're not doing anything with the C++ scope"); // TODO do something with the C++ scope
+        //ASSERT( !TryGetCXXScopeSpecifier(&SS) && "We're not doing anything with the C++ scope"); // TODO do something with the C++ scope
         // Now we're using it to link up with forward decls eg class foo { struct s; }; struct foo::s { blah } TODO is this even legal C++?
         
         TRACE("Tag type %d, kind %d\n", TagType, (int)TK);
@@ -1851,7 +1862,7 @@ private:
             clang::SourceLocation CCLoc,
             clang::IdentifierInfo &II)
     {
-        TreePtr<Node> n( ident_track.Get( &II, FromCXXScope( &SS ) ) );
+        TreePtr<Node> n( ident_track.Get( &II, TryGetCXXScopeSpecifier( &SS ) ) );
 
         return hold_scope.ToRaw( n );
     }
@@ -1872,8 +1883,8 @@ private:
     /// The 'SS' should be a non-empty valid CXXScopeSpec.
     virtual void ActOnCXXEnterDeclaratorScope(clang::Scope *S, const clang::CXXScopeSpec &SS)
     {
-        TRACE();
-        TreePtr<Node> n = FromCXXScope( &SS );
+        INDENT("X");
+        TreePtr<Node> n = TryGetCXXScopeSpecifier( &SS );
         ASSERT(n);
         ident_track.PushScope( nullptr, n );
     }
@@ -1885,7 +1896,7 @@ private:
     /// defining scope.
     virtual void ActOnCXXExitDeclaratorScope(clang::Scope *S, const clang::CXXScopeSpec &SS)
     {
-        TRACE();
+        INDENT("Y");
         ident_track.PopScope( nullptr );
     }
 
