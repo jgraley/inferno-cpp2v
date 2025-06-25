@@ -3,7 +3,6 @@
 #include "include_clang_llvm.hpp"
 #include "identifier_tracker.hpp"
 
-
 IdentifierTracker::IdentifierTracker( shared_ptr<Node> g )
 {
 	global = g;
@@ -13,8 +12,7 @@ IdentifierTracker::IdentifierTracker( shared_ptr<Node> g )
     ts->II = nullptr;
     ts->node = g;
     tnodes.push_back( ts );
-    //TRACE("Global tnode ")(ts)("\n");
-    scope_stack.push( ts );
+    //TRACE("Global tnode ")(ts)("\n");  
 }
 
 shared_ptr<IdentifierTracker::TNode> IdentifierTracker::Find( shared_ptr<Node> node )
@@ -59,6 +57,8 @@ void IdentifierTracker::PushScope( clang::Scope *S, shared_ptr<TNode> ts )
     // so we set a non-nullptr rubbish value in there whenever we push, in order
     // to be sure of getting a corresponding pop
     TRACE("stack=")(scope_stack)("\npush new=")(ts)(" clang=S%p\n", S);
+    ASSERT( ts ); 
+    ASSERT( S ); 
     
     if( S )
     {
@@ -71,7 +71,7 @@ void IdentifierTracker::PushScope( clang::Scope *S, shared_ptr<TNode> ts )
         ASSERT( ts->cs ); 
     }
     
-    //ASSERT( ts->parent == scope_stack.top() );     
+    //ASSERT( ts->parent == scope_stack.top() );    
     scope_stack.push( ts );    
 }
 
@@ -81,21 +81,21 @@ void IdentifierTracker::PopScope(clang::Scope *S)
 {
 	INDENT("o");
     TRACE("stack=")(scope_stack)("\npop top, clang=S%p\n", S);
+    ASSERT( S );
     
     // Now stricter after #802
     ASSERT( !scope_stack.empty() );
-    ASSERT( scope_stack.top() );
-    ASSERT( !S || scope_stack.top()->cs == S ); 
+    ASSERT( scope_stack.top()->cs == S ); 
 	
 	TRACE("popping\n");
     scope_stack.pop();
-    ASSERT( !scope_stack.empty() );
     TRACE("after pop stack=")(scope_stack)("\n");
 }
 
 
 void IdentifierTracker::NewScope( clang::Scope *S )
 {
+    ASSERT( S );
 	INDENT("n");
     // See if we already know about the "next_record" specified during parse.
     // If so, make this tnode be the parent. 
@@ -126,7 +126,7 @@ void IdentifierTracker::SeenScope( clang::Scope *S )
     TRACE("stack=")(scope_stack)("\nseen clang=S%p clang-parent=S%p\n", S, S->getParent());
     ASSERT(S);
 
-    if( scope_stack.empty() || !scope_stack.top() || scope_stack.top()->cs != S )
+    if( scope_stack.empty() || scope_stack.top()->cs != S )
     {
         TRACE("Pushing S%p\n", S);
         NewScope( S );

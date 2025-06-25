@@ -167,7 +167,7 @@ string Trace(stack<T, A> s)
         elts.push_front( Trace(s.top()) );
         s.pop();
 	}
-    return Join( elts, CONTAINER_SEP, "[", " (top)]" );
+    return Join( elts, CONTAINER_SEP, "[", elts.empty()?"]":" (top)]" );
 }
 
 
