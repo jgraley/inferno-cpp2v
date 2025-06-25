@@ -18,6 +18,7 @@ class Token;
 
 class IdentifierTracker
 {
+public:
     // The scope tree is made up of these. Each one represents an object, user type
     // or compound statement. II is null if no name; parent is null if in global (root)
     // scope. A TNode t should only have other TNodes pointing to it if it is a scope.
@@ -36,7 +37,8 @@ class IdentifierTracker
                           // Eg given struct A { int B; }; then A->cs is the struct scope and B->cs is nullptr
         clang::IdentifierInfo *II;
     };
-    
+
+private:    
     // Our best effort to determine the current scope
     stack< shared_ptr<TNode> > scope_stack;
     
@@ -52,13 +54,12 @@ class IdentifierTracker
     shared_ptr<TNode> Find( shared_ptr<Node> node );
     void PushScope( clang::Scope *S, shared_ptr<TNode> ts );
     void NewScope( clang::Scope *S );
-    string ToString( shared_ptr<TNode> ts );
     bool IsIdentical( shared_ptr<TNode> current, shared_ptr<TNode> ident );
     int IsIdentifierMatch( const clang::IdentifierInfo *II, shared_ptr<TNode> current, shared_ptr<TNode> ident, bool recurse );
 
-    shared_ptr<Node> global;
-
 public:
+    static shared_ptr<Node> global;
+
     IdentifierTracker( shared_ptr<Node> g );
     
     /// Associate supplied node with supplied identifier and scope. Will remain 
@@ -106,5 +107,7 @@ public:
         return scope_stack.top()->node;
     }
 };
+
+string Trace( const IdentifierTracker::TNode &tnode );
 
 #endif

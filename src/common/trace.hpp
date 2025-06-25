@@ -158,6 +158,19 @@ string Trace(const list<T, A> &l)
 }
 
 
+template<typename T, class A>
+string Trace(stack<T, A> s) 
+{
+    list<string> elts;
+    while( !s.empty() )
+    {
+        elts.push_front( Trace(s.top()) );
+        s.pop();
+	}
+    return Join( elts, CONTAINER_SEP, "[", " (top)]" );
+}
+
+
 template<typename T, class C, class A>
 string Trace(const set<T, C, A> &s) 
 {

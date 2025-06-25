@@ -4,16 +4,16 @@
 #include "identifier_tracker.hpp"
 
 
-IdentifierTracker::IdentifierTracker( shared_ptr<Node> g ) :
-    global( g )
+IdentifierTracker::IdentifierTracker( shared_ptr<Node> g )
 {
+	global = g;
     auto ts = make_shared<TNode>();    
     ts->cs = nullptr;
     ts->parent = shared_ptr<TNode>(); 
     ts->II = nullptr;
     ts->node = g;
     tnodes.push_back( ts );
-    //TRACE("Global tnode %s\n", ToString(ts).c_str() );
+    //TRACE("Global tnode ")(ts)("\n");
     scope_stack.push( ts );
 }
 
@@ -58,7 +58,7 @@ void IdentifierTracker::PushScope( clang::Scope *S, shared_ptr<TNode> ts )
     // If scope has no decls, clang will not invoke ActOnPopScope()
     // so we set a non-nullptr rubbish value in there whenever we push, in order
     // to be sure of getting a corresponding pop
-    TRACE("push new=%s clang=S%p top=%s\n", ToString( ts ).c_str(), S, ToString( scope_stack.top() ).c_str() );
+    TRACE("stack=")(scope_stack)("\npush new=")(ts)(" clang=S%p\n", S);
     
     if( S )
     {
@@ -80,23 +80,23 @@ void IdentifierTracker::PushScope( clang::Scope *S, shared_ptr<TNode> ts )
 void IdentifierTracker::PopScope(clang::Scope *S) 
 {
 	INDENT("o");
-    TRACE("pop top=%s clang=S%p\n", scope_stack.empty()?"<empty>":ToString(scope_stack.top()).c_str(), S );
-    // TODO assert these conditions!
+    TRACE("stack=")(scope_stack)("\npop top, clang=S%p\n", S);
+    
+    // Now stricter after #802
     ASSERT( !scope_stack.empty() );
     ASSERT( scope_stack.top() );
-    //ASSERT( !S || scope_stack.top()->cs == S ); 
-    if( (!S || scope_stack.top()->cs == S) ) // do not pop if we never pushed because didnt get an Add() for this scope
-    {
-		TRACE("popping\n");
-        scope_stack.pop();
-        ASSERT( !scope_stack.empty() );
-    }
-    TRACE("done pop %s S%p\n", ToString(scope_stack.top()).c_str(), S );
+    ASSERT( !S || scope_stack.top()->cs == S ); 
+	
+	TRACE("popping\n");
+    scope_stack.pop();
+    ASSERT( !scope_stack.empty() );
+    TRACE("after pop stack=")(scope_stack)("\n");
 }
 
 
 void IdentifierTracker::NewScope( clang::Scope *S )
 {
+	INDENT("n");
     // See if we already know about the "next_record" specified during parse.
     // If so, make this tnode be the parent. 
     if( !next_record.empty() && (S->getFlags() & clang::Scope::CXXClassScope) ) // Only use next_record if scope is actually a Record
@@ -120,15 +120,17 @@ void IdentifierTracker::NewScope( clang::Scope *S )
 
 void IdentifierTracker::SeenScope( clang::Scope *S )
 {
+	INDENT("s");
     // Detect a change of scope and create a new scope if required. Do not do anything for
     // global scope (=no parent) - in that case, we leave the current scope as nullptr
+    TRACE("stack=")(scope_stack)("\nseen clang=S%p\n", S);
     ASSERT(S);
     if( S->getParent() && (scope_stack.empty() || !scope_stack.top() || scope_stack.top()->cs != S) )
     {
         //TRACE("Seen new clang=S%p", S);
         //if( !scope_stack.empty() && scope_stack.top() )
         //    TRACE(" top=")(ToString(scope_stack.top()));
-        TRACE("\n");
+        //TRACE("\n");
         NewScope( S );
     }
 }
@@ -146,49 +148,9 @@ void IdentifierTracker::Add( clang::IdentifierInfo *II, shared_ptr<Node> node, c
     i->cs = nullptr; // Remember cs is the clang scope *owned* by i
     tnodes.push_back( i );
       
-    TRACE("added %s new=%p top=%s clang=S%p\n", ToString( i ).c_str(), node.get(), ToString( scope_stack.top() ).c_str(), S );    
+    //TRACE("stack=")(scope_stack)("\nadded %s new=%p clang=S%p\n", ToString( i ).c_str(), node.get(), S );    
 }
 
-// Just for debug; make a pretty string of the scope
-string IdentifierTracker::ToString( shared_ptr<TNode> tss )
-{
-    if( !tss )
-        return string("T<nil>");
-
-    string s;
-    deque< shared_ptr<TNode> >::size_type i=0;
-    shared_ptr<TNode> ts = tss;
-    while( ts )
-    {        
-        if( ts->node == global )
-            break;
-        string ss;    
-        if( ts->II )
-        {
-            ss = string(ts->II->getName()) + s;
-        }
-        else
-        {
-            char c[100];
-            sprintf( c, "T%p", ts.get() );
-            ss = string(c) + s;
-        }
-        s = "::" + ss;
-        ts = ts->parent;        
-        i++;
-        ASSERT( i<=tnodes.size() )( "TNode loop detected!!!!!!!!! OH NO!!!!!1\n" );
-    }
-    
-    if( s.empty() )
-        s = "::"; // global scope
-    
-    s += SSPrintf("-T%p:S%p", tss.get(), tss->cs);
-
-    if( tss->parent )
-        s += SSPrintf("->T%p", tss->parent.get() );
-    
-    return s;
-}
 
 #define NOMATCH 1000000
 
@@ -204,9 +166,7 @@ bool IdentifierTracker::IsIdentical( shared_ptr<TNode> current, shared_ptr<TNode
 int IdentifierTracker::IsIdentifierMatch( const clang::IdentifierInfo *II, shared_ptr<TNode> start, shared_ptr<TNode> ident, bool recurse )
 {
     //string cs, ips;
-    //cs = ToString( start );
     ASSERT( ident );
-    //ips = ToString( ident->parent );
     ASSERT( II ); // identifier being searched must have name
      
     if( !(ident->II) )
@@ -221,7 +181,7 @@ int IdentifierTracker::IsIdentifierMatch( const clang::IdentifierInfo *II, share
     shared_ptr<TNode> id_it = ident->parent;
     int d = 0;
     
-    TRACE("Compare ")(ToString(cur_it))(" with ")(ToString(id_it))("\n");
+    //TRACE("Compare ")(cur_it)(" with ")(id_it)("\n");
     
     // Try stepping out of the starting scope, one scope at a time,
     // until we match the identifier's scope.
@@ -255,7 +215,7 @@ shared_ptr<Node> IdentifierTracker::Get( const clang::IdentifierInfo *II, shared
         {
             for( shared_ptr<TNode> x : tnodes )
             {
-                TRACE(ToString(x))("\n");
+                TRACE(x)("\n");
             }
         }
     }*/
@@ -285,13 +245,13 @@ shared_ptr<Node> IdentifierTracker::TryGet( const clang::IdentifierInfo *II, sha
         ASSERT(start);
     }
 
-    //TRACE("TryGet ")(II->getName())(" in scope ")(ToString(start))(" only, ")(iscope?"C++ ":"")(recurse?"":"not ")("recursive\n"); 
+    //TRACE("TryGet ")(II->getName())(" in scope ")(start)(" only, ")(iscope?"C++ ":"")(recurse?"":"not ")("recursive\n"); 
         
     int best_distance=NOMATCH;
     shared_ptr<TNode> best_tnode;
     for( deque< shared_ptr<TNode> >::size_type i=0; i<tnodes.size(); i++ )
     {
-        //TRACE("TNode %u: ", i)(ToString(tnodes[i]))("\n");
+        //TRACE("TNode %u: ", i)(tnodes[i])("\n");
         int distance = IsIdentifierMatch( II, start, tnodes[i], recurse );
         if( distance < best_distance )
         {
@@ -327,3 +287,23 @@ shared_ptr<Node> IdentifierTracker::FindMemberNode( const clang::IdentifierInfo 
     return shared_ptr<Node>();
 }
 */
+
+shared_ptr<Node> IdentifierTracker::global;
+
+
+string Trace( const IdentifierTracker::TNode &tnode )
+{
+    string s;
+	if( tnode.node == IdentifierTracker::global )
+	{
+		s += "global:";
+	}
+	else if( tnode.II )
+	{
+		s += "\"" + string(tnode.II->getName()) + "\":";
+	}
+    
+    s += SSPrintf("S%p", tnode.cs);
+
+    return s;
+}

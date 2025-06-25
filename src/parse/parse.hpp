@@ -218,7 +218,7 @@ private:
         virtual bool isCurrentClassName(const clang::IdentifierInfo& II,
                 clang::Scope *S, const clang::CXXScopeSpec *SS)
         {
-            TRACE();
+            INDENT("N");
             ident_track.SeenScope(S);
 
             TreePtr<Node> cur( ident_track.GetCurrent() );
@@ -798,24 +798,21 @@ private:
 		// #795 swapped the ActOnStartOfFunctionDef with ident_track.PushScope because two scopes
 		// were interleaving i.e. pushX, pushY, popX, popY where X was the explicit ones here and 
 		// in ActOnFinishFunctionBody(), and Y was coming through some Clang route.
+
+        ident_track.SeenScope( FnBodyScope->getParent() );
+        ident_track.PushScope( FnBodyScope, n );
 		        
         DeclTy *d = ActOnStartOfFunctionDef(FnBodyScope, DT); // Default to ActOnDeclarator.
 
-        ident_track.PushScope( FnBodyScope->getParent(), n );
-        
 		return d;
     }
 
     virtual DeclTy *ActOnStartOfFunctionDef(clang::Scope *FnBodyScope, DeclTy *D)
     {
+		INDENT("A");
         //TRACE("FnBodyScope S%p\n", FnBodyScope);
         TreePtr<Instance> o = DynamicTreePtrCast<Instance>(hold_decl.FromRaw(D));
-        ASSERT(o);        
-        
-        // Note: this line was commented out as of mid August, but I'm sure I put it 
-        // in recently, to fix a bug. Can't remember why it was commented out. Uncommented
-        // to fix scopes being popped without being pushed.
-        ident_track.SeenScope( FnBodyScope );
+        ASSERT(o);               
 
         if( TreePtr<CallableParams> pp = DynamicTreePtrCast<CallableParams>( o->type ) )
         AddParamsToScope( pp, FnBodyScope );
@@ -849,8 +846,7 @@ private:
         TRACE("finish fn %d statements %d total\n", cb->statements.size(), (DynamicTreePtrCast<Compound>(o->initialiser))->statements.size() );
 
         inferno_scope_stack.pop(); // we dont use these - we use the clang-managed compound statement instead (passed in via Body)
-
-		ident_track.PopScope(nullptr);
+	
         return Decl;
     }
 
