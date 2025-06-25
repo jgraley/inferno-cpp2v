@@ -58,18 +58,10 @@ void IdentifierTracker::PushScope( clang::Scope *S, shared_ptr<TNode> ts )
     // to be sure of getting a corresponding pop
     TRACE("stack=")(scope_stack)("\npush new=")(ts)(" clang=S%p\n", S);
     ASSERT( ts ); 
-    ASSERT( S ); 
-    
-    if( S )
-    {
-        clang::IdentifierInfo *fake_id = (clang::IdentifierInfo *)0xbad1dbad;    
-        S->AddDecl(fake_id); 
-        ts->cs = S;
-    }
-    else
-    {
-        ASSERT( ts->cs ); 
-    }
+    ASSERT( S );    
+    clang::IdentifierInfo *fake_id = (clang::IdentifierInfo *)0xbad1dbad;    
+    S->AddDecl(fake_id); 
+    ts->cs = S;
     
     //ASSERT( ts->parent == scope_stack.top() );    
     scope_stack.push( ts );    
