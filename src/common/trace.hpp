@@ -171,6 +171,16 @@ string Trace(stack<T, A> s)
 }
 
 
+template<typename T, class A>
+string Trace(deque<T, A> d) 
+{
+    list<string> elts;
+    for( const auto &x : d )
+        elts.push_back( Trace(x) );
+    return Join( elts, CONTAINER_SEP, "[", "]" );
+}
+
+
 template<typename T, class C, class A>
 string Trace(const set<T, C, A> &s) 
 {

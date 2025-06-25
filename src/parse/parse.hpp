@@ -884,9 +884,10 @@ private:
             bool HasTrailingLParen,
             const clang::CXXScopeSpec *SS = 0 )
     {
+		INDENT("I");
         //TRACE("S%p\n", S);
         TreePtr<Node> n( ident_track.Get( &II, TryGetCXXScopeSpecifier( SS ) ) );
-        TRACE("aoie %s %s\n", II.getName(), typeid(*n).name() );
+        TRACE("II=\"%s\" n=\"", II.getName())( n->GetTypeName() )("\"\n");
         TreePtr<Instance> o = DynamicTreePtrCast<Instance>( n );
         ASSERT( o );
         return hold_expr.ToRaw( o->identifier );
