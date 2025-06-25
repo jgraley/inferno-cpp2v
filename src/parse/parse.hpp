@@ -1882,7 +1882,7 @@ private:
         INDENT("X");
         TreePtr<Node> n = TryGetCXXScopeSpecifier( &SS );
         ASSERT(n);
-        ident_track.PushScope( nullptr, n );
+        ident_track.PushScope( S, n );       
     }
 
     /// ActOnCXXExitDeclaratorScope - Called when a declarator that previously
@@ -1893,7 +1893,7 @@ private:
     virtual void ActOnCXXExitDeclaratorScope(clang::Scope *S, const clang::CXXScopeSpec &SS)
     {
         INDENT("Y");
-        ident_track.PopScope( nullptr );
+        ident_track.PopScope( S );       
     }
 
     TreePtr<Instance> GetConstructor( TreePtr<Type> t )

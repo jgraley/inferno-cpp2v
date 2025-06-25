@@ -123,14 +123,12 @@ void IdentifierTracker::SeenScope( clang::Scope *S )
 	INDENT("s");
     // Detect a change of scope and create a new scope if required. Do not do anything for
     // global scope (=no parent) - in that case, we leave the current scope as nullptr
-    TRACE("stack=")(scope_stack)("\nseen clang=S%p\n", S);
+    TRACE("stack=")(scope_stack)("\nseen clang=S%p clang-parent=S%p\n", S, S->getParent());
     ASSERT(S);
-    if( S->getParent() && (scope_stack.empty() || !scope_stack.top() || scope_stack.top()->cs != S) )
+
+    if( scope_stack.empty() || !scope_stack.top() || scope_stack.top()->cs != S )
     {
-        //TRACE("Seen new clang=S%p", S);
-        //if( !scope_stack.empty() && scope_stack.top() )
-        //    TRACE(" top=")(ToString(scope_stack.top()));
-        //TRACE("\n");
+        TRACE("Pushing S%p\n", S);
         NewScope( S );
     }
 }
