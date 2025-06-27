@@ -25,4 +25,4 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-find $DIR/ -depth -name "*.dot" -exec sh -c 'dot -T ${FORMAT} < "$1" > "${1%.dot}.${FORMAT}"' _ {} \;
+find $DIR/ -depth -name "*.dot" -exec sh -c 'echo "$1" && dot -T ${FORMAT} < "$1" > "${1%.dot}.${FORMAT}" && rm "$1"' _ {} \;

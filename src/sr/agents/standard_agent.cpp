@@ -533,6 +533,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutImpl( const ReplaceKit &ki
                                                             XLink key_xlink ) 
 {
     INDENT("B");
+    //FTRACE("For plink=")(me_plink)(" overlay_under_plink=")(overlay_under_plink)(" key_xlink=")(key_xlink)("\n");
 
     if( overlay_under_plink )
     {
@@ -593,9 +594,14 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingPattern( const
 {    
     TreePtr<Node> under_node = under_xlink.GetChildTreePtr();
 
-    // clone me (and dest's local data members will come from me)
-    // Pattern nodes must be cloned because they don't want to share their identifiers
-    TreePtr<Node> dest = AgentCommon::CloneNode(); 
+
+    // Make a new node, force dirty because from pattern
+    // Clone once, because we never want to place an Agent object in the output program tree.
+    // Then use duplicate to produce our output, to get the right identifier semantics.
+    // Note: at present we're caching the self-key node indefinitely. 
+    if( !self_key_node )
+		self_key_node = AgentCommon::CloneNode();
+    TreePtr<Node> dest = Duplicate::DuplicateNode(self_key_node);
     
     // We "invent" dest, because of information coming from this pattern node.
     dest->SetInventedHere();
@@ -858,10 +864,12 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutNormal( const ReplaceKit &
     ASSERT( IsFinal() )("Trying to build non-final ")(*this); 
 
     // Make a new node, force dirty because from pattern
-    // Use clone here because we never want to place an Agent object in the output program tree.
-    // Identifiers that have multiple references in the pattern will be coupled, and  
-    // after the first hit, GenerateCommandOverlay() will handle the rest and it uses Duplicate()
-    TreePtr<Node> dest = AgentCommon::CloneNode();
+    // Clone once, because we never want to place an Agent object in the output program tree.
+    // Then use duplicate to produce our output, to get the right identifier semantics.
+    // Note: at present we're caching the self-key node indefinitely. 
+    if( !self_key_node )
+		self_key_node = AgentCommon::CloneNode();
+    TreePtr<Node> dest = Duplicate::DuplicateNode(self_key_node);
     ASSERT( dest->IsFinal() )(*this)(" trying to build non-final ")(*dest)("\n"); 
 
     // We "invent" dest, because of information coming from this pattern node.

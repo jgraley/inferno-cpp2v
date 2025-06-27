@@ -98,11 +98,11 @@ NodeTable::SwapTransaction::~SwapTransaction()
 }
 
 
-
+#include "../../tree/cpptree.hpp"
 void NodeTable::InsertLink(XLink xlink)
 {
 	TreePtr<Node> node = xlink.GetChildTreePtr();
-
+	
 	// Create if not already there
 	TRACE("NODE TABLE weakly inserts row for: ")(node)("\n");
 	Row &row = rows[node];

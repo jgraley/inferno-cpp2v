@@ -9,11 +9,12 @@ IdentifierTracker::IdentifierTracker( shared_ptr<Node> g )
 {
 	global = g;
     auto ts = make_shared<TNode>();    
-    ts->cs = nullptr;
+    ts->cs = nullptr; // Will fix in SeenScope
     ts->parent = shared_ptr<TNode>(); 
     ts->II = nullptr;
     ts->node = g;
     tnodes.push_back( ts );
+    scope_stack.push( ts );
     //TRACE("Global tnode ")(ts)("\n");  
 }
 
@@ -107,9 +108,7 @@ void IdentifierTracker::NewScope( clang::Scope *S )
         TRACE("no next_record; \n");
         auto ts = make_shared<TNode>();    
         ts->II = nullptr;
-#ifdef NEWS
 		ts->cs = S;
-#endif		
         ts->parent = scope_stack.empty()?shared_ptr<TNode>():scope_stack.top();
         PushScope( S, ts );
     }
@@ -122,8 +121,14 @@ void IdentifierTracker::SeenScope( clang::Scope *S )
     // global scope (=no parent) - in that case, we leave the current scope as nullptr
     TRACE("stack=")(scope_stack)("\nseen clang=S%p clang-parent=S%p\n", S, S->getParent());
     ASSERT(S);
+    
+    if( S->getParent() == nullptr && scope_stack.size() == 1 ) 
+    {
+		ASSERT( scope_stack.top()->node == global )(scope_stack)(" S%p", S);
+		scope_stack.top()->cs = S;
+	}
 
-    if( scope_stack.empty() || scope_stack.top()->cs != S )
+    if( scope_stack.top()->cs != S )
     {
         TRACE("Pushing S%p\n", S);
         NewScope( S );
@@ -158,33 +163,31 @@ bool IdentifierTracker::IsIdentical( shared_ptr<TNode> current, shared_ptr<TNode
 
 // Does identifier "II" found in scope "current" match rooted "ident"? if not return NOMATCH otherwise
 // return the number of scopes we went down through from current to get a match (effectively a distance)
-int IdentifierTracker::IsIdentifierMatch( const clang::IdentifierInfo *to_find_II, shared_ptr<TNode> start_scope, shared_ptr<TNode> candidate, bool recurse, bool nopar )
+int IdentifierTracker::IsIdentifierMatch( const clang::IdentifierInfo *to_find_II, shared_ptr<TNode> start_scope, shared_ptr<TNode> candidate, bool recurse )
 {
     //string cs, ips;
     ASSERT( candidate );
     ASSERT( to_find_II ); // identifier being searched must have name
+
+	TRACE("Candidate ")(candidate);		
      
     if( !(candidate->II) )
     {
-		TRACE("Candidate can't be found by name: candidate->II is null\n");		
+		TRACE(" has no name\n");		
         return NOMATCH; // not all tnodes have a name eg global, which will never match here
     }
         
     if( to_find_II != candidate->II )
     {
-		TRACE("Names mismatch: to find:")(to_find_II->getName())(" != candidate:")(candidate->II->getName())("\n");
+		TRACE(" name mismatches: to find:")(to_find_II->getName())("\n");
         return NOMATCH; // different strings
     }
     
     shared_ptr<TNode> current_scope = start_scope; 
-#ifdef NEWS
-    shared_ptr<TNode> candidate_scope = nopar ? candidate : candidate->parent;
-#else
-    shared_ptr<TNode> candidate_scope = candidate->parent;
-#endif    
+    shared_ptr<TNode> candidate_scope = candidate->parent;    
     int d = 0;
     
-    TRACE("Names match, so check scopes: start_scope=")(start_scope)(" and candidate_scope=")(candidate_scope)("\n");
+    TRACE(" name matches\nso check scopes: start_scope=")(start_scope)(" and candidate_scope=")(candidate_scope)("\n");
     
     // Try stepping out of the starting scope, one scope at a time,
     // until we match the identifier's scope.
@@ -202,11 +205,11 @@ int IdentifierTracker::IsIdentifierMatch( const clang::IdentifierInfo *to_find_I
 }
 
 
-shared_ptr<Node> IdentifierTracker::Get( const clang::IdentifierInfo *to_find_II, shared_ptr<Node> cpp_scope_node, bool nopar )
+shared_ptr<Node> IdentifierTracker::Get( const clang::IdentifierInfo *to_find_II, shared_ptr<Node> cpp_scope_node )
 {
     ASSERT(to_find_II);
     TRACE();
-    shared_ptr<Node> n = TryGet( to_find_II, cpp_scope_node, true, nopar );
+    shared_ptr<Node> n = TryGet( to_find_II, cpp_scope_node, true );
 /*    if( !n ) // All just tracing to see what went wrong
     {
         TRACE("recurse=%s\n", recurse?"true":"false");
@@ -227,7 +230,7 @@ shared_ptr<Node> IdentifierTracker::Get( const clang::IdentifierInfo *to_find_II
 }
 
 
-shared_ptr<Node> IdentifierTracker::TryGet( const clang::IdentifierInfo *to_find_II, shared_ptr<Node> cpp_scope_node, bool recurse, bool nopar )
+shared_ptr<Node> IdentifierTracker::TryGet( const clang::IdentifierInfo *to_find_II, shared_ptr<Node> cpp_scope_node, bool recurse )
 {
 	INDENT("t");
     ASSERT(to_find_II);
@@ -239,7 +242,7 @@ shared_ptr<Node> IdentifierTracker::TryGet( const clang::IdentifierInfo *to_find
         // A C++ style scope was supplied (iscope::II) - search in here and don't recurse
         start_scope = Find( cpp_scope_node );
         ASSERT(start_scope);
-        recurse = false; // Never recurse with a C++ scope - they are exact specifications
+        recurse = false; // Never recurse with a C++ scope - they are exact specifications       
     }    
     else
     {
@@ -255,7 +258,7 @@ shared_ptr<Node> IdentifierTracker::TryGet( const clang::IdentifierInfo *to_find
     shared_ptr<TNode> best_tnode;
     for( deque< shared_ptr<TNode> >::size_type i=0; i<tnodes.size(); i++ )
     {
-        int distance = IsIdentifierMatch( to_find_II, start_scope, tnodes[i], recurse, nopar );
+        int distance = IsIdentifierMatch( to_find_II, start_scope, tnodes[i], recurse );
         if( distance != NOMATCH )
 			TRACE(tnodes[i])(" matches with distance %d\n", distance);
         if( distance < best_distance )

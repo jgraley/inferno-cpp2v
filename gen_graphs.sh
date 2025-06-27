@@ -64,7 +64,7 @@ SKIPS=("test04.cpp")
     
 STEP_NUMBERS=($(seq 1 104)) # TODO obtain this from inferno.exe
 
-# I means "in", i.e. input has been parsed; T means transfoirmation
+# I means "in", i.e. input has been parsed; T means transformation
 PROGRESSES="I ${STEP_NUMBERS[@]/#/T}"
 echo ${PROGRESSES}
 for FILE in $FILES

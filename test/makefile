@@ -19,14 +19,13 @@ MINI_SC_SR_CASES = small.c pointeris.c ${MINI_SC_CASES}
 # #788 to fix small.c 
 
 # The original C/C++ test cases, no SystemC
-CPP_CASES = 
+CPP_CASES = test07.cpp globscope.cpp
 C_CASES = test10.c test11.c test13.c test16.c
 # #757 to fix test04.cpp
 # #785 to fix test02.c test15.c
 # #786 to fix test03.c
 # #787 to fix test12.cpp
 # #789 to fit test14.cpp
-# #790 to fix test07.cpp
 # #796 to fix test05.c test06.c test09.c
  
 # The whole lot for the benefit of auto rules

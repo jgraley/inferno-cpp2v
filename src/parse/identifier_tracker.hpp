@@ -55,7 +55,7 @@ private:
     void PushScope( clang::Scope *S, shared_ptr<TNode> ts );
     void NewScope( clang::Scope *S );
     bool IsIdentical( shared_ptr<TNode> current, shared_ptr<TNode> ident );
-    int IsIdentifierMatch( const clang::IdentifierInfo *to_find_II, shared_ptr<TNode> start_scope, shared_ptr<TNode> candidate, bool recurse, bool nopar = false );
+    int IsIdentifierMatch( const clang::IdentifierInfo *to_find_II, shared_ptr<TNode> start_scope, shared_ptr<TNode> candidate, bool recurse = false );
 
 public:
     static shared_ptr<Node> global;
@@ -81,10 +81,10 @@ public:
     // in nested scopes, we get the one that applies currently (which is the innermost one)  
     // Optionally: Can specify a C++ scope, which must match exactly (nullptr, falls back to current scope)
     //             Can turn off recursion so only a direct match allowed
-    shared_ptr<Node> Get( const clang::IdentifierInfo *to_find_II, shared_ptr<Node> cpp_scope_node = shared_ptr<Node>(), bool nopar = false );                                         
+    shared_ptr<Node> Get( const clang::IdentifierInfo *to_find_II, shared_ptr<Node> cpp_scope_node = shared_ptr<Node>() );                                         
   
     // Version that just results nullptr if identifier has not been added yet
-    shared_ptr<Node> TryGet( const clang::IdentifierInfo *to_find_II, shared_ptr<Node> cpp_scope_node = shared_ptr<Node>(), bool recurse = true, bool nopar = false );      
+    shared_ptr<Node> TryGet( const clang::IdentifierInfo *to_find_II, shared_ptr<Node> cpp_scope_node = shared_ptr<Node>(), bool recurse = true );      
     
     // Indicate that the next Add() call will have the supplied node as parent.
     // Omit to clear (eg after the struct)

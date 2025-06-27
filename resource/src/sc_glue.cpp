@@ -17,6 +17,7 @@ sc_trace_file *GetSCTraceFP()
 int sc_main(int argc, char* argv[])
 {
     sc_start();
+    printf("dropped out of sc_start()\n");
     return 0;
 }
 
