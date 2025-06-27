@@ -38,8 +38,8 @@ ExplicitiseReturn::ExplicitiseReturn()
         
     fi->type = s_any;
     s_any->disjuncts = (s_func, s_proc, MakePatternNode<Subroutine>() );
-    s_proc->members = MakePatternNode< Star<Declaration> >();
-    s_func->members = MakePatternNode< Star<Declaration> >();
+    s_proc->params = MakePatternNode< Star<Parameter> >();
+    s_func->params = MakePatternNode< Star<Parameter> >();
     s_func->return_type = MakePatternNode< Void >();
     fi->initialiser = over;
     s_comp->members = decls;
@@ -115,7 +115,7 @@ ReturnViaTemp::ReturnViaTemp()
     auto locals = MakePatternNode< Star<Declaration> >();
     auto func_id = MakePatternNode<InstanceIdentifier>();
     auto module_id = MakePatternNode<TypeIdentifier>();
-    auto params = MakePatternNode< Star<Instance> >();
+    auto params = MakePatternNode< Star<Parameter> >();
     auto m_call = MakePatternNode<Call>();
     auto m_operands = MakePatternNode< Star<MapOperand> >();
     auto r_temp = MakePatternNode<Temporary>();
@@ -150,7 +150,7 @@ ReturnViaTemp::ReturnViaTemp()
     func->identifier = func_id;
     s_body->members = (locals);
     s_body->statements = (statements);
-    cp->members = (params);  
+    cp->params = (params);  
     cp->return_type = overcp;
     overcp->through = return_type;
     return_type->negand = sx_void;
@@ -181,7 +181,7 @@ AddLinkAddress::AddLinkAddress()
     auto bases = MakePatternNode< Star<Base> >();
     auto r_retaddr = MakePatternNode<Temporary>();
     auto r_retaddr_id = MakePatternNode<BuildInstanceIdentifierAgent>("%s_link");
-    auto lr_retaddr = MakePatternNode<Automatic>();
+    auto lr_retaddr = MakePatternNode<Parameter>();
     auto lr_retaddr_id = MakePatternNode<BuildInstanceIdentifierAgent>("link");
     auto lr_temp_retaddr = MakePatternNode<TempReturnAddress>();
     auto lr_temp_retaddr_id = MakePatternNode<BuildInstanceIdentifierAgent>("temp_link");
@@ -248,9 +248,9 @@ AddLinkAddress::AddLinkAddress()
     l_func_over->through = ls_func;
     l_func_over->overlay = lr_func;    
     ls_func->return_type = MakePatternNode<Void>();
-    ls_func->members = MakePatternNode< Star<Instance> >(); // Params OK here, just not in MergeFunctions
+    ls_func->params = MakePatternNode< Star<Parameter> >(); // Params OK here, just not in MergeFunctions
     lr_func->return_type = ls_func->return_type;
-    lr_func->members = (ls_func->members, lr_retaddr);
+    lr_func->params = (ls_func->params, lr_retaddr);
     l_inst->initialiser = l_over;
     l_inst->identifier = l_inst_id;
     l_over->through = ls_comp;
@@ -299,8 +299,8 @@ ParamsViaTemps::ParamsViaTemps()
     auto func_id = MakePatternNode<InstanceIdentifier>();
     auto param_id = MakePatternNode<InstanceIdentifier>();
     auto module_id = MakePatternNode<TypeIdentifier>();
-    auto s_param = MakePatternNode<Instance>();
-    auto params = MakePatternNode< Star<Instance> >();
+    auto s_param = MakePatternNode<Parameter>();
+    auto params = MakePatternNode< Star<Parameter> >();
     auto ms_call = MakePatternNode<Call>();
     auto mr_call = MakePatternNode<Call>();
     auto ms_operand = MakePatternNode<MapOperand>();
@@ -337,14 +337,14 @@ ParamsViaTemps::ParamsViaTemps()
     r_body->members = (locals);
     s_body->statements = (statements);
     r_body->statements = (r_param, statements);
-    s_cp->members = (params, s_param);  
+    s_cp->params = (params, s_param);  
     s_cp->return_type = return_type;
     s_param->identifier = param_id;
     s_param->type = param_type;
     r_param->type = param_type;
     r_param->initialiser = r_temp_id;
     r_param->identifier = param_id;
-    r_cp->members = (params);
+    r_cp->params = (params);
     r_cp->return_type = return_type;
     r_temp->type = param_type;
     r_temp->initialiser = MakePatternNode<Uninitialised>();

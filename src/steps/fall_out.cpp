@@ -236,7 +236,7 @@ LabelTypeToEnum::LabelTypeToEnum()
     l_apall->conjuncts = (l_apany, l_apnot);
     l_apnot->negand = lmap;
     l_apany->terminus = l_over;
-    l_over->through = MakePatternNode<Labeley>();
+    l_over->through = MakePatternNode<Labeley>(); 
     l_over->overlay = l_enum; 
     l_enum->width = MakePatternNode<SpecificInteger>(32);
             

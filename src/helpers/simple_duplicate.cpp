@@ -16,6 +16,7 @@ TreePtr<Node> SimpleDuplicate::DuplicateNode( TreePtr<Node> source )
 
 TreePtr<Node> SimpleDuplicate::DuplicateSubtree( TreePtr<Node> source ) 
 {    
+	INDENT("D");
     ASSERT( source );
    
     // Make a new node, since we're substituting, preserve dirtyness        
@@ -55,7 +56,7 @@ TreePtr<Node> SimpleDuplicate::DuplicateSubtree( TreePtr<Node> source )
         }            
         else if( TreePtrInterface *keynode_singular = dynamic_cast<TreePtrInterface *>(keynode_items[i]) )
         {
-            //TRACE("Duplicating node ")(*keynode_singular)("\n");
+            TRACE("Duplicating node ")(*keynode_singular)("\n");
             TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
             ASSERT( *keynode_singular )("source should be non-nullptr");
             *dest_singular = DuplicateSubtree( (TreePtr<Node>)*keynode_singular );

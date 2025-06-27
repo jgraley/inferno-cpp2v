@@ -107,7 +107,7 @@ private:
     private:
         // Parameters are parsed outside function scope, so we defer entering them
         // into the ident_track until we're in the function. This stores the clang identifiers.
-        map<TreePtr<Declaration> , clang::IdentifierInfo *> backing_params;
+        map<TreePtr<Declaration> , clang::IdentifierInfo *> backing_params; // #803, would prefer Parameter
 
         // The statement after a label is parsed as a sub-construct under the label which
         // is not how the inferno tree does it. Remember that relationship here and
@@ -120,7 +120,7 @@ private:
         // Members of records go in an unordered collection, but when parsing
         // we might need the order, eg for C-style initialisers or auto-generated
         // constructor calls.
-        map<TreePtr<Scope> , Sequence<Declaration> > backing_ordering;
+        map<TreePtr<Node> , Sequence<Declaration> > backing_ordering;
 
         // In ActOnTag, when we see a record decl, we store it here and generate it
         // at the next IssueDeclaration, called from ActOnDeclaration. This allows
@@ -280,12 +280,11 @@ private:
             backing_ordering[p].clear(); // ensure at least an empty sequence is in the map
             for (unsigned i = 0; i < fchunk.NumArgs; i++)
             {
-                TreePtr<Declaration> d = hold_decl.FromRaw(
-                        fchunk.ArgInfo[i].Param);
-                TreePtr<Instance> inst = DynamicTreePtrCast<Instance> (d);
-                ASSERT( inst );
-                backing_ordering[p].push_back(inst);
-                p->members.insert(inst);
+                TreePtr<Declaration> d = hold_decl.FromRaw(fchunk.ArgInfo[i].Param);
+                auto param = DynamicTreePtrCast<Parameter> (d);
+                ASSERT( param );
+                backing_ordering[p].push_back(param);
+                p->params.insert(param);
             }
         }
 
@@ -562,6 +561,36 @@ private:
             return o;
         }
 
+        TreePtr<Parameter> CreateParameterNode(clang::Scope *S, clang::Declarator &D)
+        {
+            TRACE();
+            const clang::DeclSpec &DS = D.getDeclSpec();
+            TreePtr<Constancy> constancy;
+            if (DS.getTypeQualifiers() & clang::DeclSpec::TQ_const)
+                constancy = MakeTreeNode<Const>();
+            else
+                constancy = MakeTreeNode<NonConst>();
+
+            auto param = MakeTreeNode<Parameter>();
+
+            all_decls->members.insert(param);
+
+            clang::IdentifierInfo *ID = D.getIdentifier();
+            if (ID)
+            {
+                param->identifier = CreateInstanceIdentifier(ID);
+                ident_track.Add(ID, param, S);
+            }
+            else
+            {
+                param->identifier = CreateInstanceIdentifier();
+            }
+            param->type = CreateTypeNode(D);
+            param->initialiser = MakeTreeNode<Uninitialised> ();
+
+            return param;
+        }
+        
         TreePtr<Typedef> CreateTypedefNode(clang::Scope *S,
                 clang::Declarator &D)
         {
@@ -713,10 +742,10 @@ private:
         virtual DeclTy *ActOnParamDeclarator(clang::Scope *S,
                 clang::Declarator &D)
         {
-
-            TreePtr<Instance> p = CreateInstanceNode(S, D, MakeTreeNode<Public>(), true);
-            backing_params[p] = D.getIdentifier(); // allow us to register the object with ident_track once we're in the function body scope
-            return hold_decl.ToRaw(p);
+            TreePtr<Parameter> param = CreateParameterNode(S, D);
+            ASSERT(param); // we set the automatic flag to true
+            backing_params[param] = D.getIdentifier(); // allow us to register the object with ident_track once we're in the function body scope
+            return hold_decl.ToRaw(param);
         }
 
         virtual void AddInitializerToDecl(DeclTy *Dcl, ExprArg Init)
@@ -773,7 +802,7 @@ private:
         {
             ASSERT(pp);
 
-            for(TreePtr<Declaration> param : pp->members )
+            for(auto param : pp->params )
             {        
                 TRACE();
                 clang::IdentifierInfo *paramII = backing_params[param];
@@ -1651,17 +1680,16 @@ private:
     // Populate a map operator using elements from a sequence of expressions
     void PopulateMapOperator( TreePtr<MapOperator> mapop, // MapOperands corresponding to the elements of ai go in here
             Sequence<Expression> &seq, // Operands to insert, ordered as per the input program
-            TreePtr<Scope> scope ) // Original Scope that established ordering, must be in backing_ordering
+            TreePtr<Node> key ) // Original Scope that established ordering, must be in backing_ordering
 
     {
         // Get a reference to the ordered list of members for this scope from a backing list
-        ASSERT( backing_ordering.count(scope) > 0 )("Supplied scope did not make it into the backing ordering list");
-        Sequence<Declaration> &scope_ordered = backing_ordering[scope];
+        Sequence<Declaration> &ordered = backing_ordering.at(key);
         //TRACE("%p %p\n", &scope->members, scope.get());
 
         // Go over the entire scope, keeping track of where we are in the Sequence
         Sequence<Expression>::iterator seq_it = seq.begin();
-        for( TreePtr<Declaration> d : scope_ordered )
+        for( TreePtr<Declaration> d : ordered )
         {
             if( seq_it == seq.end() )
             {
@@ -1687,7 +1715,7 @@ private:
         }        
         ASSERT( seq_it == seq.end() )
               ("Too many arguments to function/struct init (we allow too few for poor mans overlading, but not too many)\n")
-              ("Scope was ")(*scope)(" for map operator ")(mapop)("\n");
+              ("Key was ")(*key)(" for map operator ")(mapop)("\n");
     }
 
     TreePtr<String> CreateString( const char *s )

@@ -178,7 +178,7 @@ DetectSCProcess::DetectSCProcess( TreePtr< Process > lr_scprocess )
     ls_comp->statements = (l_pre, ls_pcall, l_post);
     ls_cons->type = l_ctype;
     ls_cons->identifier = l_ident;
-    l_ctype->members = (MakePatternNode<Automatic>()); // one parameter
+    l_ctype->params = (MakePatternNode<Parameter>()); // one parameter
     ls_pcall->callee = s_token;
     ls_pcall->operands = (ls_arg);
     ls_arg->identifier = s_arg_id;
@@ -266,7 +266,7 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     auto ls_lookup = MakePatternNode< Lookup >();
     auto s_cons = MakePatternNode< Instance >();
     auto s_id = MakePatternNode< InstanceIdentifier >();
-    auto s_params = MakePatternNode< Star<Automatic> >();
+    auto s_params = MakePatternNode< Star<Parameter> >();
     auto s_ctype = MakePatternNode<Constructor>();
     auto bases = MakePatternNode< Star<Base> >();
     auto module_typeid = MakePatternNode< TypeIdentifier >();
@@ -284,7 +284,7 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     // s_comp's members and statements left empty to signify empty constructor
     s_cons->identifier = s_id;
     s_cons->type = s_ctype;
-    s_ctype->members = (s_params); // any parameters
+    s_ctype->params = (s_params); // any parameters
     r_module->members = (decls);
     r_module->bases = (bases);
     r_module->identifier = module_typeid;
@@ -310,14 +310,14 @@ RemoveVoidInstances::RemoveVoidInstances()
     auto s_instance = MakePatternNode<Static>();
     auto s_any = MakePatternNode< Disjunction<Type> >();
     auto s_callable = MakePatternNode<CallableParams>();
-    auto s_params = MakePatternNode< Star<Instance> >();
-    auto s_void_param = MakePatternNode<Instance>();
+    auto s_params = MakePatternNode< Star<Parameter> >();
+    auto s_void_param = MakePatternNode<Parameter>();
     
     // Eliminate the declaration that came from isystemc.h
     s_scope->members = (decls, s_instance);
     s_instance->type = s_any;
     s_any->disjuncts = (s_callable, MakePatternNode<Void>() ); // match void instances (pointless) or functions as below...
-    s_callable->members = (s_params, s_void_param); // one void param is enough, but don't match no params
+    s_callable->params = (s_params, s_void_param); // one void param is enough, but don't match no params
     s_void_param->type = MakePatternNode<Void>();
     
     r_scope->members = (decls);   

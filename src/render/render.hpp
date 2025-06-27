@@ -20,7 +20,7 @@ private:
     UniquifyIdentifiers unique;
     // Remember the orders of collections when we sort them. Mirrors the same
     // map in the parser.
-    map< TreePtr<CPPTree::Scope>, Sequence<CPPTree::Declaration> > backing_ordering;
+    map< TreePtr<Node>, Sequence<CPPTree::Declaration> > backing_ordering;
 
     bool IsSystemC( const TransKit &kit, TreePtr<Node> root );
     string RenderLiteral( const TransKit &kit, TreePtr<CPPTree::Literal> sp );
@@ -37,7 +37,7 @@ private:
     string RenderMakeRecord( const TransKit &kit, TreePtr<CPPTree::MakeRecord> ro );
     string RenderMapInOrder( const TransKit &kit, 
                              TreePtr<CPPTree::MapOperator> ro,
-                             TreePtr<CPPTree::Scope> r,
+                             TreePtr<Node> key,
                              string separator,
                              bool separate_last );
     string RenderAccess( const TransKit &kit, TreePtr<CPPTree::AccessSpec> current_access );
@@ -69,13 +69,17 @@ private:
     string RenderModuleCtor( const TransKit &kit, 
                              TreePtr<SCTree::Module> m,
                              TreePtr<CPPTree::AccessSpec> *access );    
-    string RenderDeclarationCollection( const TransKit &kit, 
-                                        TreePtr<CPPTree::Scope> sd,
-                                        string separator, 
-                                        bool separate_last,
-                                        TreePtr<CPPTree::AccessSpec> init_access = TreePtr<CPPTree::AccessSpec>(),
-                                        bool showtype=true );
-    string RenderMismatchException( string fname, const Mismatch &me );
+    string RenderScope( const TransKit &kit, 
+						TreePtr<CPPTree::Scope> key,
+						string separator, 
+						bool separate_last,
+						TreePtr<CPPTree::AccessSpec> init_access = TreePtr<CPPTree::AccessSpec>(),
+						bool showtype=true );
+	string RenderParams( const TransKit &kit, 
+						 TreePtr<CPPTree::CallableParams> key,
+						 string separator, 
+                         bool separate_last );
+	string RenderMismatchException( string fname, const Mismatch &me );
     const string outfile;                                     
     SimpleCompare sc;
 };

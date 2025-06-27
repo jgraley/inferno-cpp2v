@@ -393,6 +393,14 @@ struct Automatic : LocalVariable
     NODE_FUNCTIONS_FINAL
 };
 
+/// A function parameter
+/** Function parameters. Allocation is probably the same as automatic, unless 
+ *  elided by function call optimsiations. */
+struct Parameter : LocalVariable
+{
+    NODE_FUNCTIONS_FINAL
+};
+
 /// A local temp variable not preserved across function calls
 /** A local variable with unspecified storage which may be used within a function but is not preserved
  across recursion or between calls (such a variable could safely be implemented as any of
@@ -462,10 +470,10 @@ struct Callable : Type
 /// Anything that can be called and has parameters
 /** Parameters are generated as a sequence of automatic variable/object 
  declarations (ie Instances) inside the Scope we derive from. */
-struct CallableParams : Callable,
-                        Scope // For the parameters
+struct CallableParams : Callable
 {
     NODE_FUNCTIONS
+    Collection<Declaration> params; // TODO be Parameter #803
     virtual string GetColour() const { return Callable::GetColour(); } // Callable wins
 };
 

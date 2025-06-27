@@ -30,13 +30,13 @@ GenerateImplicitCasts::GenerateImplicitCasts()
     s_call->callee = callee;
     auto s_proc = MakePatternNode<CallableParams>();
     callee->pattern = s_proc;
-    auto s_param = MakePatternNode< Instance >();
+    auto s_param = MakePatternNode< Parameter >();
     auto param_id = MakePatternNode< InstanceIdentifier >();
     s_param->identifier = param_id;
     auto type = MakePatternNode< Type >();
     s_param->type = type;
-    auto s_other_params = MakePatternNode< Star<Instance> >();
-    s_proc->members = (s_param, s_other_params);
+    auto s_other_params = MakePatternNode< Star<Parameter> >();
+    s_proc->params = (s_param, s_other_params);
     auto s_arg = MakePatternNode< MapOperand >();
     s_arg->identifier = param_id;
     auto s_arg_value = MakePatternNode< TransformOf<Expression> >( &TypeOf::instance );
