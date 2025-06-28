@@ -273,7 +273,7 @@ What makes embedded pattern useful (as opposed to eg sequencing multiple root tr
 
 2. The embdeded node is placed within the enclosing replace pattern. Now the embedded node will only match at (`EmbeddedCompareReplace`) or under (`EmbeddedSearchReplace`) the position where it is found in the enclosing replace pattern. In the example, the embedded pattern could be placed inside the scope containing the variable's declaration, to restrict matches to that scope.
 
-### 10.1 Nested
+### 10.1 Nested embedded pattern
 
 It is possible to use more than one embedded pattern. They always appear nested in a graph of the pattern (that is as direct or indirect children of each other) and can nest in two distinct ways:
 

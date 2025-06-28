@@ -117,6 +117,8 @@ ReturnViaTemp::ReturnViaTemp()
     auto module_id = MakePatternNode<TypeIdentifier>();
     auto params = MakePatternNode< Star<Parameter> >();
     auto m_call = MakePatternNode<Call>();
+    auto m_any = MakePatternNode<Disjunction<Expression>>();
+    auto m_lookup = MakePatternNode<Lookup>();
     auto m_operands = MakePatternNode< Star<MapOperand> >();
     auto r_temp = MakePatternNode<Temporary>();
     auto mr_assign = MakePatternNode<Assign>();
@@ -137,7 +139,9 @@ ReturnViaTemp::ReturnViaTemp()
     lr_return->return_value = MakePatternNode<Uninitialised>(); // means no return value given
 
     ms_gg->through = m_call;
-    m_call->callee = func_id;
+    m_call->callee = m_any;
+    m_any->disjuncts = ( func_id, m_lookup );
+    m_lookup->member = func_id;
     m_call->operands = (m_operands);
     mr_comp->statements = (m_call, r_temp_id);
     auto embedded_m = MakePatternNode< EmbeddedSearchReplace<Scope> >( r_module, ms_gg, mr_comp );

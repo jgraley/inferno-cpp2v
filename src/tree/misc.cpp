@@ -93,8 +93,11 @@ AugTreePtr<Instance> FindMemberByName( const TransKit &kit, AugTreePtr<Record> r
             AugTreePtr<Node> ut = DeclarationOf().TryApplyTransformation( kit, GET_CHILD(b_atp, record) );
             auto ir = AugTreePtr<InheritanceRecord>::DynamicCast(ut);
             ASSERT(ir);
-            if( AugTreePtr<Instance> i = FindMemberByName( kit, ir, name ) )
+            if( AugTreePtr<Instance> i_in_base = FindMemberByName( kit, ir, name ) )
+            {
+				i = i_in_base;
                 LLBreak();
+			}
         } );
     }
     if( i )
