@@ -16,7 +16,7 @@ public:
 private:
     TreePtr<CPPTree::Program> program, temp_old_program;
     string deferred_decls;
-    stack< TreePtr<CPPTree::Scope> > scope_stack;
+    stack< TreePtr<Node> > scope_stack;
     UniquifyIdentifiers unique;
     // Remember the orders of collections when we sort them. Mirrors the same
     // map in the parser.

@@ -75,7 +75,7 @@ TreePtr<Node> Render::GenerateRender( TreePtr<Node> context, TreePtr<Node> root 
 #endif
     
     // Track scopes for name resolution
-    AutoPush< TreePtr<Scope> > cs( scope_stack, program );
+    AutoPush< TreePtr<Node> > cs( scope_stack, program );
     
 	// pre-pass to fill in backing_ordering. It would be better to tell 
 	// it that it's doing a pre-pass so it can adapt it's behaviour.
@@ -160,7 +160,7 @@ DEFAULT_CATCH_CLAUSE
 
 string Render::RenderScopePrefix( const TransKit &kit, TreePtr<Identifier> id ) try
 {
-    TreePtr<Scope> scope = GetScope( program, id );
+    TreePtr<Node> scope = GetScope( program, id );
         
     //TRACE("%p %p %p\n", program.get(), scope.get(), scope_stack.top().get() );
     if( scope == scope_stack.top() )
@@ -423,7 +423,7 @@ string Render::RenderExpression( const TransKit &kit, TreePtr<Initialiser> expre
         return string();
     else if( TreePtr<StatementExpression> ce = DynamicTreePtrCast< StatementExpression >(expression) )
     {
-        AutoPush< TreePtr<Scope> > cs( scope_stack, ce );
+        AutoPush< TreePtr<Node> > cs( scope_stack, ce );
         string s = "({ ";
         s += RenderScope( kit, ce, "; ", true ); // Must do this first to populate backing list
         s += RenderSequence( kit, ce->statements, "; ", true );
@@ -699,7 +699,7 @@ string Render::RenderInstance( const TransKit &kit, TreePtr<Instance> o, string 
     else if( callable )
     {
         // Establish the scope of the function
-        AutoPush< TreePtr<Scope> > cs( scope_stack, GetScope( program, o->identifier ) );
+        AutoPush< TreePtr<Node> > cs( scope_stack, GetScope( program, o->identifier ) );
 
         // Put the contents of the body into a Compound-like form even if there's only one
         // Statement there - this is because we will wrangle with them later
@@ -738,7 +738,7 @@ string Render::RenderInstance( const TransKit &kit, TreePtr<Instance> o, string 
         if( TreePtr<Expression> ei = DynamicTreePtrCast<Expression>( o->initialiser ) )
         {
             // Render expression with an assignment
-            AutoPush< TreePtr<Scope> > cs( scope_stack, GetScope( program, o->identifier ) );
+            AutoPush< TreePtr<Node> > cs( scope_stack, GetScope( program, o->identifier ) );
             s += " = " + RenderExpression(kit, ei) + sep;
         }
         else
@@ -805,7 +805,7 @@ string Render::RenderDeclaration( const TransKit &kit, TreePtr<Declaration> decl
         {
             s += RenderInstance( kit, o, sep, showtype, showtype, false, false );
             {
-                AutoPush< TreePtr<Scope> > cs( scope_stack, program );
+                AutoPush< TreePtr<Node> > cs( scope_stack, program );
                 deferred_decls += string("\n") + RenderInstance( kit, o, sep, showtype, false, true, true );
             }
         }
@@ -880,7 +880,7 @@ string Render::RenderDeclaration( const TransKit &kit, TreePtr<Declaration> decl
             }
 
             // Contents
-            AutoPush< TreePtr<Scope> > cs( scope_stack, r );
+            AutoPush< TreePtr<Node> > cs( scope_stack, r );
             s += "\n{\n" +
                  RenderScope( kit, r, sep2, true, a, showtype ) +
                  "}";
@@ -909,7 +909,7 @@ string Render::RenderStatement( const TransKit &kit, TreePtr<Statement> statemen
         return RenderDeclaration( kit, d, sep );
     else if( TreePtr<Compound> c = DynamicTreePtrCast< Compound >(statement) )
     {
-        AutoPush< TreePtr<Scope> > cs( scope_stack, c );
+        AutoPush< TreePtr<Node> > cs( scope_stack, c );
         string s = "{\n";
         s += RenderScope( kit, c, ";\n", true ); // Must do this first to populate backing list
         s += RenderSequence( kit, c->statements, ";\n", true );

@@ -1092,10 +1092,8 @@ private:
         return hold_expr.ToRaw( c );
     }
 
-    // Not sure if this one has been tested!!
     virtual TypeResult ActOnTypeName(clang::Scope *S, clang::Declarator &D)
     {
-		ASSERT(false);
         TreePtr<Type> t = CreateTypeNode( D );
         return hold_type.ToRaw( t );
     }

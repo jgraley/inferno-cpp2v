@@ -10,7 +10,7 @@ using namespace CPPTree;
 // back-pointers.
 //
 // TODO take id as SpecificIdentifier, not Identifier, so do not need to ASSERT check this
-TreePtr<Scope> GetScope( TreePtr<Program> program, TreePtr<Identifier> id )
+TreePtr<Node> GetScope( TreePtr<Program> program, TreePtr<Identifier> id )
 {
     TRACE("Trying program (global)\n" );
 
@@ -18,7 +18,7 @@ TreePtr<Scope> GetScope( TreePtr<Program> program, TreePtr<Identifier> id )
     Walk walkr(program, nullptr, nullptr);
     for( const TreePtrInterface &n : walkr )
     {
-        if( TreePtr<Scope> s = DynamicTreePtrCast<Scope>((TreePtr<Node>)n) )
+        if( auto s = DynamicTreePtrCast<Scope>((TreePtr<Node>)n) )
         {
             for( TreePtr<Declaration> d : s->members )
             {
@@ -26,16 +26,24 @@ TreePtr<Scope> GetScope( TreePtr<Program> program, TreePtr<Identifier> id )
                     return s;
             }
         }
+        else if( auto c = DynamicTreePtrCast<CallableParams>((TreePtr<Node>)n) )
+        {		
+            for( TreePtr<Declaration> p : c->params )
+            {
+                if( id == GetIdentifierOfDeclaration( p ).GetTreePtr() ) 
+                    return c;
+            }
+   		} 
     }
     
     // Special additional processing for Compounds - look for statements that are really Instance Declarations
     Walk walkc(program, nullptr, nullptr);
     for( const TreePtrInterface &n : walkc )
     {
-        if( TreePtr<Compound> c = DynamicTreePtrCast<Compound>((TreePtr<Node>)n) )
+        if( auto c = DynamicTreePtrCast<Compound>((TreePtr<Node>)n) )
             for( TreePtr<Statement> s : c->statements )
             {
-                if( TreePtr<Instance> d = DynamicTreePtrCast<Instance>(s) )
+                if( auto d = DynamicTreePtrCast<Instance>(s) )
                     if( id == GetIdentifierOfDeclaration( d ).GetTreePtr() )
                         return c;
             }
@@ -46,5 +54,5 @@ TreePtr<Scope> GetScope( TreePtr<Program> program, TreePtr<Identifier> id )
     else
         throw ScopeOnNonSpecificMismatch();
     // Every identifier should have a scope - if this fails, we've missed out a kind of scope
-    return TreePtr<Scope>();
+    return nullptr;
 }
