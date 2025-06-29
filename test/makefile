@@ -19,7 +19,7 @@ MINI_SC_SR_CASES = small.c pointeris.c ${MINI_SC_CASES}
 CPP_CASES = test04.cpp test07.cpp test12.cpp test14.cpp methodcall.cpp
 C_CASES = test05.c test06.c test09.c test10.c test11.c test13.c test16.c pointeris.c small.c
 # #785 to fix test02.c test15.c
-# #786 to fix test03.c
+# #786 to fix test03.c compound.c
 # #757 / #787 to fix 
 # #805 to fix ut_in_func.cpp
  
