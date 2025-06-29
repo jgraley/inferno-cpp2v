@@ -181,9 +181,12 @@ string Render::RenderScopePrefix( const TransKit &kit, TreePtr<Identifier> id ) 
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderScopedIdentifier( const TransKit &kit, TreePtr<Identifier> id ) try
+string Render::RenderScopedIdentifier( const TransKit &kit, TreePtr<Identifier> id, bool bracketize_cpp_scope ) try
 {
-    string s = RenderScopePrefix( kit, id ) + RenderIdentifier( kit, id );
+    string s_scope = RenderScopePrefix( kit, id );
+    string s = s_scope + RenderIdentifier( kit, id );
+    if( bracketize_cpp_scope && !s_scope.empty() )
+		s = "(" + s + ")"; // Bracketise if there's anything in the C++ scope specifier
     TRACE("Render scoped identifier %s\n", s.c_str() );
     return s;
 }
@@ -369,7 +372,8 @@ string Render::RenderOperator( const TransKit &kit, TreePtr<Operator> op, Sequen
     else if( DynamicTreePtrCast<NODE_SHAPED>(op) ) \
     { \
         s = TEXT; \
-        s += RenderExpression( kit, *operands_it, true ); \
+        s += RenderExpression( kit, *operands_it, true, \
+                               !!TreePtr<AddressOf>::DynamicCast(op) ); /* Prevent interpretation as a member function pointer literal */ \
     }
 #define POSTFIX(TOK, TEXT, NODE_SHAPED, BASE, CAT) \
     else if( DynamicTreePtrCast<NODE_SHAPED>(op) ) \
@@ -412,12 +416,11 @@ string Render::RenderCall( const TransKit &kit, TreePtr<Call> call ) try
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderExpression( const TransKit &kit, TreePtr<Initialiser> expression, bool bracketize_operator ) try
+string Render::RenderExpression( const TransKit &kit, TreePtr<Initialiser> expression, bool bracketize, bool bracketize_cpp_scope ) try
 {
     //TRACE("%p\n", expression.get());
-
-    string before = bracketize_operator ? "(" : "";
-    string after = bracketize_operator ? ")" : "";
+    string before = bracketize ? "(" : "";
+    string after = bracketize ? ")" : "";
 
     if( DynamicTreePtrCast< Uninitialised >(expression) )
         return string();
@@ -434,7 +437,7 @@ string Render::RenderExpression( const TransKit &kit, TreePtr<Initialiser> expre
                "&&" + RenderIdentifier( kit, li ) + // label-as-variable (GCC extension)
                after;
     else if( TreePtr<InstanceIdentifier> ii = DynamicTreePtrCast< InstanceIdentifier >(expression) )
-        return RenderScopedIdentifier( kit, ii );
+        return RenderScopedIdentifier( kit, ii, bracketize_cpp_scope );
     else if( TreePtr<SizeOf> pot = DynamicTreePtrCast< SizeOf >(expression) )
         return before +
                "sizeof(" + RenderType( kit, pot->operand, "" ) + ")" +

@@ -4,9 +4,13 @@ Sweep for TODOs in code, but quite high theshold
 Get web page to reference all the docs 
    - including this one
 
-figure out how to keep using the non-SC tests
+figure out how to keep using the non-SC tests. Done:
+ - C is elevated to a GlobalScope module
+ - C++ classes are left alone pending the phases that can do this properly
 
 more reduction of reliance on Module - SC detection should be changed to not only work in Modules.
+ - NO!! sequential phase should be restricted to Modules. If anything isn't in a module by
+   now, assume it's test harness code or something the back-end can deal with.
 
 sc_signal support
    - maybe just replace all fundy types
@@ -27,7 +31,7 @@ tidy-up step to move module member temps back down into a function temp where po
 deal with returning from a thread module correctly (for elegance mostly)
    - SC terminates when no pending events
    - need to be able to exit the superloop in a SC_THREAD
-   - and fail to next_trigger() in SC_MEHTOD
+   - and fail to next_trigger() in SC_METHOD
    - I think we already generate explicit return statements, so act on these during ThreadToMethod
    
 get rid of Callable, CallableParams, Procedure etc. It's all guff. Just have Function
@@ -36,7 +40,7 @@ add ability to lower wait(X) into yielding wait loop
    - not really critical at this stage, but makes the intention clearer for SC users
    - moved out of 0.2, not actually sure if belongs in sequential phase
 
-new Transformation interface, allows returning a bool for "hit or missed" result (ie xformations used for emasurement)
+new Transformation interface, allows returning a bool for "hit or missed" result (ie xformations used for measurement)
    - Make a "keep going until miss" meta-transformation, maybe use in S&R, definitely for cleanups
 
 make node-specific graphing be based on virtual functions in nodes, so that graph plotter does not need so many deps

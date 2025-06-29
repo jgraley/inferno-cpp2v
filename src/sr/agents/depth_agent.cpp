@@ -16,6 +16,7 @@ using namespace SYM;
 
 shared_ptr<PatternQuery> DepthAgent::GetPatternQuery() const
 {
+	ASSERT( terminus )("Terminus has not been specified for ")(*this);
     auto pq = make_shared<PatternQuery>();
     
     pq->RegisterDecision( false ); // Exclusive, please.

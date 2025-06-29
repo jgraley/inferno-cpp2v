@@ -628,6 +628,14 @@ ConditionalOperatorToIf::ConditionalOperatorToIf()
 
 ExtractCallParams::ExtractCallParams()
 {
+    auto module = MakePatternNode<Module>();
+    auto other_decls = MakePatternNode<Star<Declaration>>();
+    auto stuff = MakePatternNode<Stuff<Declaration>>();
+    auto delta = MakePatternNode<Delta<Node>>();
+    auto field = MakePatternNode<Field>();
+    auto func = MakePatternNode<Function>();
+    auto func_id = MakePatternNode<InstanceIdentifier>();
+    
     auto s_call = MakePatternNode<Call>();
     auto r_call = MakePatternNode<Call>();
     auto r_temp_id = MakePatternNode<BuildInstanceIdentifierAgent>("temp_%s");
@@ -639,18 +647,25 @@ ExtractCallParams::ExtractCallParams()
     auto r_param = MakePatternNode<MapOperand>();
     auto value = MakePatternNode< TransformOf<Expression> >( &TypeOf::instance );
     auto type = MakePatternNode<Type>();
-    auto callee = MakePatternNode<Expression>();
     auto id = MakePatternNode<InstanceIdentifier>();
     auto all = MakePatternNode< Conjunction<Expression> >();
     auto x_not = MakePatternNode< Negation<Expression> >();
     auto x_id = MakePatternNode<InstanceIdentifier>();
+    
+    module->members = (stuff, field, other_decls);
+    stuff->terminus = delta;
+    delta->through =    MakeCheckUncombable(s_call);
+    delta->overlay =    r_ce;
+    field->type = func; 
+    func->params = MakePatternNode<Star<Parameter>>();
+    field->identifier = func_id;
     
     s_call->operands = (params, s_param);
     s_param->value = all;
     all->conjuncts = (value, x_not);
     s_param->identifier = id;
     value->pattern = type;
-    s_call->callee = callee;
+    s_call->callee = func_id;
     x_not->negand = x_id; // this restriction to become light-touch restriction
     
     r_ce->members = (r_temp);
@@ -663,7 +678,7 @@ ExtractCallParams::ExtractCallParams()
     r_call->operands = (params, r_param);
     r_param->value = r_temp_id;    
     r_param->identifier = id;
-    r_call->callee = callee;
+    r_call->callee = func_id;
     
-    Configure( SEARCH_REPLACE, MakeCheckUncombable(s_call), r_ce );
+    Configure( SEARCH_REPLACE, module );
 }

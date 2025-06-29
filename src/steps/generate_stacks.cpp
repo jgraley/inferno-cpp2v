@@ -19,6 +19,9 @@ using namespace SCTree;
 /// Place return at end of void functions, if not already there
 ExplicitiseReturn::ExplicitiseReturn()
 {
+    auto module = MakePatternNode<Module>();
+    auto other_decls = MakePatternNode<Star<Declaration>>();
+    
     auto fi = MakePatternNode< Instance >();
     auto s_comp = MakePatternNode<Compound>();
     auto sx_comp = MakePatternNode<Compound>();
@@ -36,6 +39,8 @@ ExplicitiseReturn::ExplicitiseReturn()
     auto s_all = MakePatternNode< Conjunction<Compound> >();
     auto s_not = MakePatternNode< Negation<Compound> >();
         
+    module->members = (fi, other_decls);
+    
     fi->type = s_any;
     s_any->disjuncts = (s_func, s_proc, MakePatternNode<Subroutine>() );
     s_proc->params = MakePatternNode< Star<Parameter> >();
@@ -55,7 +60,7 @@ ExplicitiseReturn::ExplicitiseReturn()
     r_comp->statements = (pre, r_return);
     r_return->return_value = MakePatternNode<Uninitialised>();
     
-    Configure( SEARCH_REPLACE, fi );
+    Configure( SEARCH_REPLACE, module );
 }    
 
 
@@ -100,8 +105,8 @@ UseTempForReturnValue::UseTempForReturnValue()
 
 ReturnViaTemp::ReturnViaTemp()
 {
-    auto s_module = MakePatternNode<Scope>();
-    auto r_module = MakePatternNode<Scope>();
+    auto s_module = MakePatternNode<Module>();
+    auto r_module = MakePatternNode<Module>();
     auto func = MakePatternNode<Instance>();
     auto decls = MakePatternNode< Star<Declaration> >();
     auto bases = MakePatternNode< Star<Base> >();
@@ -179,8 +184,8 @@ struct TempReturnAddress : Temporary
 
 AddLinkAddress::AddLinkAddress()
 {
-    auto s_module = MakePatternNode<Scope>();
-    auto r_module = MakePatternNode<Scope>();
+    auto s_module = MakePatternNode<Module>();
+    auto r_module = MakePatternNode<Module>();
     auto decls = MakePatternNode< Star<Declaration> >();
     auto bases = MakePatternNode< Star<Base> >();
     auto r_retaddr = MakePatternNode<Temporary>();
@@ -286,8 +291,8 @@ AddLinkAddress::AddLinkAddress()
 
 ParamsViaTemps::ParamsViaTemps()
 {
-    auto s_module = MakePatternNode<Scope>();
-    auto r_module = MakePatternNode<Scope>();
+    auto s_module = MakePatternNode<Module>();
+    auto r_module = MakePatternNode<Module>();
     auto s_func = MakePatternNode<Instance>();
     auto r_func = MakePatternNode<Instance>();
     auto decls = MakePatternNode< Star<Declaration> >();

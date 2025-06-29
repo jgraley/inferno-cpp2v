@@ -26,6 +26,7 @@ class Sub : public Test, virtual private Other
 
 void Test::g()
 {
+	(void)f(23);
 }
 
 enum GGFF
@@ -37,10 +38,11 @@ enum GGFF
 };
 
 static struct { int c; } d;
+struct BStruct { int a; };
 
 int main()
 {
-    struct { int a; } b;
+	BStruct b;
     Sub t;
     t.d.i = 22;
     Test *pt = &t;
