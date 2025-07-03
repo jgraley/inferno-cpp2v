@@ -40,7 +40,7 @@ Agent::ReplacePatchPtr EmbeddedSCRAgent::GenReplaceLayoutImpl( const ReplaceKit 
 
     // Inform the update mechanism that, once it's done duplicating 
     // nodes etc, it should mark this position for this embedded agent's origin.
-    child_command->AddEmbeddedMarker( this );
+    child_command->AddEmbeddedMarker( me_plink );
 
     return child_command;
 }                                         

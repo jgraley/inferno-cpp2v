@@ -75,7 +75,7 @@ void EmptyZonePass::Check( shared_ptr<Patch> &layout )
 
 void MarkersPass::Run( shared_ptr<Patch> &layout )
 {   
-    list<RequiresSubordinateSCREngine *> markers;
+    list<PatternLink> markers;
 
     Patch::ForDepthFirstWalk( layout, [&](shared_ptr<Patch> &patch) // Act on wind-in
     {
@@ -85,8 +85,8 @@ void MarkersPass::Run( shared_ptr<Patch> &layout )
 		
 		if( !patch->GetZone()->IsEmpty() )
 		{
-			for( RequiresSubordinateSCREngine *agent : markers )
-				agent->MarkOriginForEmbedded( patch->GetZone()->GetBaseNode() );    
+			for( PatternLink marker : markers )
+				marker.GetChildAgent()->MarkOriginForEmbedded( patch->GetZone()->GetBaseNode() );    
 			markers.clear();
 		}
 		// If zone is empty, it has one child, which we will meet at the next iteration

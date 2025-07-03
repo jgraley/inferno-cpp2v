@@ -546,6 +546,11 @@ Agent::ReplacePatchPtr AgentCommon::GenReplaceLayout( const ReplaceKit &kit,
 }
 
 
+void AgentCommon::MarkOriginForEmbedded( TreePtr<Node> embedded_through_subtree ) const
+{
+}
+
+
 Agent::ReplacePatchPtr AgentCommon::GenReplaceLayoutImpl( const ReplaceKit &kit, 
                                                           PatternLink me_plink, 
                                                           XLink key_xlink )

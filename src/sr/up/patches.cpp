@@ -59,7 +59,7 @@ list<shared_ptr<Patch>> &&Patch::MoveChildren()
 }
 
 
-void Patch::AddEmbeddedMarker( RequiresSubordinateSCREngine *new_marker )
+void Patch::AddEmbeddedMarker( PatternLink new_marker )
 {
     AddEmbeddedMarkers( { new_marker } );
 }
@@ -142,13 +142,13 @@ TreePatch::TreePatch( const TreeZone &zone_ ) :
 }        
 
 
-void TreePatch::AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&new_markers )
+void TreePatch::AddEmbeddedMarkers( list<PatternLink> &&new_markers )
 {
     embedded_markers.splice( embedded_markers.end(), move(new_markers) );
 }
 
 
-list<RequiresSubordinateSCREngine *> TreePatch::GetEmbeddedMarkers() const
+list<PatternLink> TreePatch::GetEmbeddedMarkers() const
 {
     return embedded_markers;
 }
@@ -299,15 +299,15 @@ FreePatch::FreePatch( const FreeZone &zone_ ) :
 }
 
 
-void FreePatch::AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&new_markers )
+void FreePatch::AddEmbeddedMarkers( list<PatternLink> &&new_markers )
 {
     // Rule #726 requires us to mark free zones immediately
-    for( RequiresSubordinateSCREngine *ea : new_markers )
-        ea->MarkOriginForEmbedded( zone.GetBaseNode() );    
+    for( PatternLink marker : new_markers )
+        marker.GetChildAgent()->MarkOriginForEmbedded( zone.GetBaseNode() );    
 }
 
 
-list<RequiresSubordinateSCREngine *> FreePatch::GetEmbeddedMarkers() const
+list<PatternLink> FreePatch::GetEmbeddedMarkers() const
 {
     return {}; // Rule #726 means there aren't any
 }

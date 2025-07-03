@@ -32,7 +32,6 @@ class VNSequence;
 class RequiresSubordinateSCREngine : public virtual Graphable
 {
 public:
-    virtual void MarkOriginForEmbedded( TreePtr<Node> embedded_through_subtree ) const = 0;
     virtual TreePtr<Node> GetSearchPattern() const = 0;
     virtual TreePtr<Node> GetReplacePattern() const = 0;
 };

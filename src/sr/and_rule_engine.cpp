@@ -222,8 +222,8 @@ void AndRuleEngine::Plan::PopulateBoundaryAgents( PatternLink link,
     if( reached_agents.count(agent) > 0 )    
         return; 
     reached_agents.insert(agent);
+    
     // ------------ Now unique by agent (stronger) -------------
-
     if( surrounding_agents.count( agent ) > 0 )
     {
         // At boundary so don't recurse
@@ -377,16 +377,22 @@ void AndRuleEngine::Plan::CreateMyFullSymbolics()
 void AndRuleEngine::Plan::CreateBoundarySymbolics()
 {
 #ifdef CHECK_FOR_SURROUNDING_KEYERS
-    // First do some checking
-    for( PatternLink residual_plink : my_boundary_links )
+    bool generate_pattern_graphs = !ReadArgs::pattern_graph_name.empty() || 
+                                   ReadArgs::pattern_graph_index != -1;
+                                   
+    if( !(generate_pattern_graphs && ReadArgs::graph_trace) )
     {
-        Agent *agent = residual_plink.GetChildAgent();
-        bool found_keyer = false;
-        for( PatternLink keyer_plink : boundary_keyer_links )
-            if( keyer_plink.GetChildAgent()==agent )
-                found_keyer = true;
-        ASSERT( found_keyer )("Boundary residual plink ")(residual_plink)(" has no keyer\n");
-    }
+		// First do some checking (unless we're generating a pattern trace graph)
+		for( PatternLink residual_plink : my_boundary_links )
+		{
+			Agent *agent = residual_plink.GetChildAgent();
+			bool found_keyer = false;
+			for( PatternLink keyer_plink : boundary_keyer_links )
+				if( keyer_plink.GetChildAgent()==agent )
+					found_keyer = true;
+			ASSERT( found_keyer )("Boundary residual plink ")(residual_plink)(" has no keyer\n");
+		}
+	}
 #endif
     
     for( PatternLink keyer_plink : boundary_keyer_links )
@@ -990,7 +996,7 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
         }
     };
     TRACE("   Subordinates (my free abnormals):\n");    
-    subordinates_lambda( plan.my_free_abnormal_engines, Graph::LINK_ABDEFAULT );
+    subordinates_lambda( plan.my_free_abnormal_engines, Graph::LINK_ABNORMAL_DEFAULT );
     TRACE("   Subordinates (my evaluator abnormals):\n");    
     subordinates_lambda( plan.my_evaluator_abnormal_engines, Graph::LINK_EVALUATOR );
     TRACE("   Subordinates (my multiplicity engines):\n");    

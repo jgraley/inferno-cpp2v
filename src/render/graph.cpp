@@ -969,7 +969,7 @@ string Graph::LinkStyleAtt(LinkPlannedAs incoming_link_planned_as, Graphable::Ph
     case LINK_RESIDUAL:
         atts += "arrowhead=\"normalnonetee\"\n";
         break;
-    case LINK_ABDEFAULT:
+    case LINK_ABNORMAL_DEFAULT:
         atts += "arrowhead=\"normalnoneodot\"\n";
         break;
     case LINK_EVALUATOR:
@@ -1091,8 +1091,8 @@ string Trace(const Graph::LinkPlannedAs &lpa)
 		case Graph::LINK_RESIDUAL:
 			return "LINK_RESIDUAL";
 		
-		case Graph::LINK_ABDEFAULT:
-			return "LINK_ABDEFAULT";
+		case Graph::LINK_ABNORMAL_DEFAULT:
+			return "LINK_ABNORMAL_DEFAULT";
 		
 		case Graph::LINK_EVALUATOR:
 			return "LINK_EVALUATOR";

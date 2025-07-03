@@ -38,9 +38,9 @@ public:
     const list<shared_ptr<Patch>> &GetChildren() const;
     list<shared_ptr<Patch>> &&MoveChildren();
     
-    void AddEmbeddedMarker( RequiresSubordinateSCREngine *new_marker );
-    virtual void AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&new_markers ) = 0;
-    virtual list<RequiresSubordinateSCREngine *> GetEmbeddedMarkers() const = 0;
+    void AddEmbeddedMarker( PatternLink new_marker );
+    virtual void AddEmbeddedMarkers( list<PatternLink> &&new_markers ) = 0;
+    virtual list<PatternLink> GetEmbeddedMarkers() const = 0;
     virtual void ClearEmbeddedMarkers() = 0;
 
     virtual Zone *GetZone() = 0;
@@ -83,8 +83,8 @@ public:
     TreePatch( const TreeZone &zone_, list<shared_ptr<Patch>> &&child_patches );
     TreePatch( const TreeZone &zone_ );
     
-    void AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&new_markers ) final;
-    list<RequiresSubordinateSCREngine *> GetEmbeddedMarkers() const final;
+    void AddEmbeddedMarkers( list<PatternLink> &&new_markers ) final;
+    list<PatternLink> GetEmbeddedMarkers() const final;
     void ClearEmbeddedMarkers() final;
 
     TreeZone *GetZone() override;
@@ -111,7 +111,7 @@ public:
     
 private:
     TreeZone zone;
-    list<RequiresSubordinateSCREngine *> embedded_markers;
+    list<PatternLink> embedded_markers;
     Intent intent = Intent::DEFAULT;
 };
 
@@ -128,8 +128,8 @@ public:
     FreePatch( const FreeZone &zone_, list<shared_ptr<Patch>> &&child_patches );
     FreePatch( const FreeZone &zone_ );
 
-    void AddEmbeddedMarkers( list<RequiresSubordinateSCREngine *> &&new_markers ) final;
-    list<RequiresSubordinateSCREngine *> GetEmbeddedMarkers() const final;
+    void AddEmbeddedMarkers( list<PatternLink> &&new_markers ) final;
+    list<PatternLink> GetEmbeddedMarkers() const final;
     void ClearEmbeddedMarkers() final;
 
     ChildPatchIterator SpliceOver( ChildPatchIterator it_child, 

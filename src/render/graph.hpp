@@ -40,7 +40,7 @@ public:
         LINK_DEFAULT,
         LINK_KEYER,
         LINK_RESIDUAL,
-        LINK_ABDEFAULT,
+        LINK_ABNORMAL_DEFAULT,
         LINK_EVALUATOR,
         LINK_MULTIPLICITY        
     };

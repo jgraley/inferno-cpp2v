@@ -37,7 +37,9 @@ done
 
 if [ "$DOCS" == "1" ]; then
     mkdir -p ${BASE_DIR}/docs/
+	rm -rf ${BASE_DIR}/docs/*
     mkdir -p ${BASE_DIR}/docs-trace/
+	rm -rf ${BASE_DIR}/docs-trace/*
     ./inferno.exe -g${COLOUR}d ${BASE_DIR}/docs/ &
     ./inferno.exe -gt${COLOUR}d ${BASE_DIR}/docs-trace/ &
     wait
@@ -45,7 +47,9 @@ fi
 
 if [ "$PATTERN" == "1" ]; then
     mkdir -p ${BASE_DIR}/pattern/
+	rm -rf ${BASE_DIR}/pattern/*
     mkdir -p ${BASE_DIR}/pattern-trace/
+	rm -rf ${BASE_DIR}/pattern-trace/*
     ./inferno.exe -g${COLOUR}p ${BASE_DIR}/pattern/ &
     ./inferno.exe -gt${COLOUR}p ${BASE_DIR}/pattern-trace/ &
     wait
@@ -70,7 +74,9 @@ if [ "$INTERMEDIATE" == "1" ]; then
 		fi
 		
 		mkdir -p ${BASE_DIR}/intermediate/${CASE}/
+		rm -rf ${BASE_DIR}/intermediate/${CASE}/*
 		mkdir -p ${BASE_DIR}/intermediate-trace/${CASE}/
+		rm -rf ${BASE_DIR}/intermediate-trace/${CASE}/*
 		for PROGRESS in ${PROGRESSES}; do
 			./inferno.exe -i ${FILE} -q${PROGRESS} -gt${COLOUR}i > ${BASE_DIR}/intermediate-trace/${CASE}/${PROGRESS}.dot &
 			./inferno.exe -i ${FILE} -q${PROGRESS} -g${COLOUR}i > ${BASE_DIR}/intermediate/${CASE}/${PROGRESS}.dot &

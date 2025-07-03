@@ -37,7 +37,8 @@ public:
     virtual bool IsSearch() const;
     
     // Implement RequiresSubordinateSCREngine
-    void MarkOriginForEmbedded( TreePtr<Node> embedded_through_subtree ) const override;
+    void MarkOriginForEmbedded( TreePtr<Node> embedded_through_subtree ) const final;
+    
     TreePtr<Node> GetSearchPattern() const override;
     TreePtr<Node> GetReplacePattern() const override;
     
