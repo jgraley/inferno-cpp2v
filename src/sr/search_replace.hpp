@@ -70,7 +70,7 @@ public:
     virtual void SetStopAfter( vector<int> ssa, int d=0 );
     SCREngine *GetRootEngine();
     TreePtr<Node> GetSearchComparePattern();
-    TreePtr<Node> GetReplacePattern();
+    TreePtr<Node> GetEmbeddedReplacePattern();
     string GetTrace() const;
 
 private:

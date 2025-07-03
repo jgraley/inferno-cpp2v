@@ -29,13 +29,6 @@ class SpecialBase;
 class AndRuleEngine;
 class VNSequence;
 
-class RequiresSubordinateSCREngine : public virtual Graphable
-{
-public:
-    virtual TreePtr<Node> GetSearchPattern() const = 0;
-    virtual TreePtr<Node> GetReplacePattern() const = 0;
-};
-
 class StartsOverlay : public virtual Graphable
 {
 public:
@@ -107,11 +100,11 @@ private:
         set<Agent *> my_agents;   
         set<PatternLink> all_keyer_plinks;   
         set<StartsOverlay *> my_overlay_starter_engines;   
-        map< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > my_engines;   
+        map< Agent *, shared_ptr<SCREngine> > my_engines;   
         shared_ptr<AndRuleEngine> and_rule_engine;
         CompareReplace::AgentPhases final_agent_phases;   
         list<PatternLink> my_replace_plinks_postorder;
-        list<PatternLink> my_subordinate_plinks_postorder;
+        list<PatternLink> my_embedded_plinks_postorder;
     } plan;
 
     void UpdateEmbeddedActionRequests( TreePtr<Node> through_subtree, TreePtr<Node> new_subtree ) const;
@@ -135,7 +128,7 @@ public: // For agents
     // Note: this is const but RepeatingCompareReplace() isn't. Why?
     // Because we're not calling OUR RepeatingCompareReplace but
     // the embedded_engine's one - and that pointer is not const.
-    void MarkOriginForEmbedded( const RequiresSubordinateSCREngine *embedded_agent, 
+    void MarkOriginForEmbedded( const Agent *embedded_agent, 
                                 TreePtr<Node> embedded_through_subtree ) const;    
     void SetReplaceKey( LocatedLink keyer_link ) const;
     XLink GetReplaceKey( PatternLink plink ) const;
@@ -160,7 +153,7 @@ private:
     shared_ptr<XTreeDatabase> x_tree_db;
     mutable SolutionMap replace_solution;
     bool replace_solution_available = false;    
-    mutable map<const RequiresSubordinateSCREngine *, TreePtr<Node> > origins_for_embedded;
+    mutable map<const Agent *, TreePtr<Node> > origins_for_embedded;
 };
 
 };

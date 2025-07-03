@@ -551,6 +551,18 @@ void AgentCommon::MarkOriginForEmbedded( TreePtr<Node> embedded_through_subtree 
 }
 
 
+TreePtr<Node> AgentCommon::GetEmbeddedSearchPattern() const
+{
+	return nullptr;
+}
+
+
+TreePtr<Node> AgentCommon::GetEmbeddedReplacePattern() const
+{
+	return nullptr;
+}
+
+
 Agent::ReplacePatchPtr AgentCommon::GenReplaceLayoutImpl( const ReplaceKit &kit, 
                                                           PatternLink me_plink, 
                                                           XLink key_xlink )

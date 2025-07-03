@@ -111,13 +111,18 @@ void SCREngine::Plan::CategoriseAgents( const set<PatternLink> &enclosing_plinks
 
     // Need the replace plinks in the same order that GenReplaceLayout() walks the tree
     for( PatternLink plink : visible_replace_plinks_postorder )
-        if( enclosing_plinks.count(plink) == 0 ) // exclude by plink
+    {		
+        if( enclosing_plinks.count(plink) == 0 )
         {
             my_replace_plinks_postorder.push_back( plink );
-            if( dynamic_cast<RequiresSubordinateSCREngine *>(plink.GetChildAgent()) )
-                my_subordinate_plinks_postorder.push_back(plink);
-        }
-
+            
+            Agent *agent = plink.GetChildAgent();
+            if( agent->GetEmbeddedSearchPattern() ||
+                agent->GetEmbeddedReplacePattern() )
+                my_embedded_plinks_postorder.push_back(plink);        
+		}
+	}
+	
     my_agents.clear();
     for( PatternLink plink : my_plinks )
         my_agents.insert( plink.GetChildAgent() );
@@ -155,17 +160,16 @@ void SCREngine::Plan::CreateMyEngines( CompareReplace::AgentPhases &in_progress_
     // Determine which agents our embeddeds should not configure
     set<PatternLink> surrounding_plinks = UnionOf( enclosing_plinks, my_plinks ); 
             
-    for( PatternLink plink : my_subordinate_plinks_postorder )
+    for( PatternLink plink : my_embedded_plinks_postorder )
     {
-        auto ae = dynamic_cast<RequiresSubordinateSCREngine *>(plink.GetChildAgent());
-        ASSERT( ae );    
-        my_engines[ae] = make_shared<SCREngine>( vn_sequence,
-                                                 root_engine, 
-                                                 in_progress_agent_phases,
-                                                 ae->GetSearchPattern(),
-                                                 ae->GetReplacePattern(),
-                                                 surrounding_plinks, 
-                                                 algo );       
+		Agent *agent = plink.GetChildAgent();   
+        my_engines[agent] = make_shared<SCREngine>( vn_sequence,
+                                                    root_engine, 
+                                                    in_progress_agent_phases,
+                                                    agent->GetEmbeddedSearchPattern(),
+                                                    agent->GetEmbeddedReplacePattern(),
+                                                    surrounding_plinks, 
+                                                    algo );       
     }        
 }
 
@@ -177,7 +181,7 @@ void SCREngine::Plan::PlanningStageTwo(const CompareReplace::AgentPhases &final_
     final_agent_phases = final_agent_phases_;
     
     // Recurse into subordinate SCREngines
-    for( pair< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > p : my_engines )
+    for( pair< Agent *, shared_ptr<SCREngine> > p : my_engines )
         p.second->PlanningStageTwo(final_agent_phases);                                      
 
     // Configure agents on the way out
@@ -213,7 +217,7 @@ void SCREngine::Plan::PlanningStageThree(set<PatternLink> enclosing_keyers)
     
     // RECURSE RECURSE
     // Recurse into subordinate SCREngines
-    for( pair< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > p : my_engines )
+    for( pair< Agent *, shared_ptr<SCREngine> > p : my_engines )
         p.second->PlanningStageThree(all_keyer_plinks);    
 } 
 
@@ -252,7 +256,7 @@ void SCREngine::Plan::PlanningStageFive( shared_ptr<const Lacing> lacing )
 
     and_rule_engine->PlanningStageFive(lacing);
     
-    for( pair< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > p : my_engines )
+    for( pair< Agent *, shared_ptr<SCREngine> > p : my_engines )
         p.second->PlanningStageFive(lacing);    
             
     Dump();
@@ -293,8 +297,8 @@ void SCREngine::Plan::Dump()
           Trace(final_agent_phases) },
         { "my_replace_plinks_postorder", 
           Trace(my_replace_plinks_postorder) },
-        { "my_subordinate_plinks_postorder", 
-          Trace(my_subordinate_plinks_postorder) }
+        { "my_embedded_plinks_postorder", 
+          Trace(my_embedded_plinks_postorder) }
     };
     TRACE("=============================================== ")
          (*this)(":\n")(plan_as_strings)("\n");
@@ -331,8 +335,7 @@ void SCREngine::UpdateEmbeddedActionRequests( TreePtr<Node> through_subtree, Tre
 void SCREngine::RunEmbedded( PatternLink plink_to_embedded, XLink origin_xlink )
 {         
     INDENT("E");
-    auto embedded_agent = dynamic_cast<RequiresSubordinateSCREngine *>(plink_to_embedded.GetChildAgent());
-    ASSERT( embedded_agent );    
+    auto embedded_agent = plink_to_embedded.GetChildAgent();
     shared_ptr<SCREngine> embedded_engine = plan.my_engines.at(embedded_agent);
     ASSERT( embedded_engine );
    
@@ -397,7 +400,7 @@ void SCREngine::SingleCompareReplace( XLink origin_xlink,
     Replace(origin_xlink);
 
     // Now run the embedded SCR engines (LATER model)
-    for( PatternLink plink_to_embedded : plan.my_subordinate_plinks_postorder )
+    for( PatternLink plink_to_embedded : plan.my_embedded_plinks_postorder )
     {
         TRACE("Running embedded ")(plink_to_embedded)(" base xlink=")(origin_xlink)("\n");
         RunEmbedded(plink_to_embedded, origin_xlink);       
@@ -439,7 +442,7 @@ int SCREngine::RepeatingCompareReplace( XLink origin_xlink,
     {
         bool stop = depth < stop_after.size() && stop_after[depth]==i+1;
         if( stop )
-            for( const pair< RequiresSubordinateSCREngine * const, shared_ptr<SCREngine> > &p : plan.my_engines )
+            for( const pair< Agent * const, shared_ptr<SCREngine> > &p : plan.my_engines )
                 p.second->SetStopAfter(stop_after, depth+1); // and propagate the remaining ones
         try
         {
@@ -490,7 +493,7 @@ void SCREngine::SetXTreeDb( shared_ptr<XTreeDatabase> x_tree_db_ )
 
     plan.and_rule_engine->SetXTreeDb(x_tree_db);
     
-    for( pair< RequiresSubordinateSCREngine *, shared_ptr<SCREngine> > p : plan.my_engines )
+    for( pair< Agent *, shared_ptr<SCREngine> > p : plan.my_engines )
         p.second->SetXTreeDb(x_tree_db);            
 }
 
@@ -537,7 +540,7 @@ void SCREngine::GenerateGraphRegions( Graph &graph ) const
 }
 
 
-void SCREngine::MarkOriginForEmbedded( const RequiresSubordinateSCREngine *embedded_agent,
+void SCREngine::MarkOriginForEmbedded( const Agent *embedded_agent,
                                        TreePtr<Node> embedded_origin ) const
 {
 

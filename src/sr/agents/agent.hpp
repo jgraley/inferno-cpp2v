@@ -88,7 +88,9 @@ public:
     virtual ReplacePatchPtr GenReplaceLayout( const ReplaceKit &kit, 
                                               PatternLink me_plink ) = 0;
     virtual void MarkOriginForEmbedded( TreePtr<Node> embedded_through_subtree ) const = 0;
-
+    virtual TreePtr<Node> GetEmbeddedSearchPattern() const = 0;
+    virtual TreePtr<Node> GetEmbeddedReplacePattern() const = 0;
+    
     virtual list<PatternLink> GetChildren() const = 0;
     virtual list<PatternLink> GetVisibleChildren( Path v ) const = 0;                        
     virtual bool ShouldGenerateCategoryClause() const = 0;                                

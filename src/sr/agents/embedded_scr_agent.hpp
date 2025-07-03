@@ -19,8 +19,7 @@ class SearchReplace;
 /// the embedded SCR engines operate on the tree at the position of the EmbeddedSCR
 /// agent, performing search and replace operations via the `search_pattern` and 
 /// `replace_pattern` pointers until no more matches are found (the usual reductive style).  
-class EmbeddedSCRAgent : public virtual AutolocatingAgent, 
-                         public RequiresSubordinateSCREngine 
+class EmbeddedSCRAgent : public virtual AutolocatingAgent
 {
 public:
     EmbeddedSCRAgent( TreePtr<Node> sp, TreePtr<Node> rp, bool is_search );
@@ -36,11 +35,10 @@ public:
     list<PatternLink> GetVisibleChildren( Path v ) const override;
     virtual bool IsSearch() const;
     
-    // Implement RequiresSubordinateSCREngine
     void MarkOriginForEmbedded( TreePtr<Node> embedded_through_subtree ) const final;
     
-    TreePtr<Node> GetSearchPattern() const override;
-    TreePtr<Node> GetReplacePattern() const override;
+    TreePtr<Node> GetEmbeddedSearchPattern() const override;
+    TreePtr<Node> GetEmbeddedReplacePattern() const override;
     
     NodeBlock GetGraphBlockInfo() const override;
     

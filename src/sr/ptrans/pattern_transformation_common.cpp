@@ -17,7 +17,7 @@ PatternTransformationCommon::PatternKnowledge::PatternKnowledge( VNStep &vnt )
         search_compare_root_plink = PatternLink::CreateDistinct( search_compare_root_pattern );
         WalkPattern( all_plinks, search_compare_root_plink );
     }    
-    replace_root_pattern = top_level_engine->GetReplacePattern();
+    replace_root_pattern = top_level_engine->GetEmbeddedReplacePattern();
     if( replace_root_pattern )
     {
         replace_root_agent = Agent::AsAgent(replace_root_pattern);

@@ -67,13 +67,13 @@ void EmbeddedSCRAgent::MarkOriginForEmbedded( TreePtr<Node> embedded_origin ) co
 }
 
 
-TreePtr<Node> EmbeddedSCRAgent::GetSearchPattern() const 
+TreePtr<Node> EmbeddedSCRAgent::GetEmbeddedSearchPattern() const 
 { 
     return search_pattern; 
 }
 
 
-TreePtr<Node> EmbeddedSCRAgent::GetReplacePattern() const 
+TreePtr<Node> EmbeddedSCRAgent::GetEmbeddedReplacePattern() const 
 { 
     return replace_pattern; 
 }
