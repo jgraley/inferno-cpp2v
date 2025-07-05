@@ -36,13 +36,13 @@ Agent::ReplacePatchPtr EmbeddedSCRAgent::GenReplaceLayoutImpl( const ReplaceKit 
                                                                XLink key_xlink )
 {   
     // Use auto algorithm but add marker
-    Agent::ReplacePatchPtr child_command = AutolocatingAgent::GenReplaceLayoutImpl(kit, me_plink, key_xlink);
+    Agent::ReplacePatchPtr patch = AutolocatingAgent::GenReplaceLayoutImpl(kit, me_plink, key_xlink);
 
     // Inform the update mechanism that, once it's done duplicating 
     // nodes etc, it should mark this position for this embedded agent's origin.
-    child_command->AddEmbeddedMarker( me_plink );
+    patch->AddOriginators( { me_plink } );
 
-    return child_command;
+    return patch;
 }                                         
 
 
@@ -61,7 +61,7 @@ bool EmbeddedSCRAgent::IsSearch() const
 }
 
 
-void EmbeddedSCRAgent::MarkOriginForEmbedded( TreePtr<Node> embedded_origin ) const
+void EmbeddedSCRAgent::MarkReplaceKey( TreePtr<Node> embedded_origin ) const
 {
     my_scr_engine->MarkOriginForEmbedded( this, embedded_origin );
 }

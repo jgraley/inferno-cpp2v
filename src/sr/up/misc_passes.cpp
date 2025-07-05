@@ -56,7 +56,7 @@ void EmptyZonePass::Run( shared_ptr<Patch> &layout )
         {            
 			// Child could be tree or free
 			shared_ptr<Patch> child_patch = SoloElementOf( tree_patch->GetChildren() );
-			child_patch->AddEmbeddedMarkers( tree_patch->GetEmbeddedMarkers() );
+			child_patch->AddOriginators( tree_patch->GetOriginators() );
 			patch = child_patch; 
 		}
     } );    
@@ -75,26 +75,26 @@ void EmptyZonePass::Check( shared_ptr<Patch> &layout )
 
 void MarkersPass::Run( shared_ptr<Patch> &layout )
 {   
-    list<PatternLink> markers;
+    list<PatternLink> originators;
 
     Patch::ForDepthFirstWalk( layout, [&](shared_ptr<Patch> &patch) // Act on wind-in
     {
 		// Append to our list
-		markers.splice( markers.end(), patch->GetEmbeddedMarkers() );
-		patch->ClearEmbeddedMarkers();
+		originators.splice( originators.end(), patch->GetOriginators() );
+		patch->ClearOriginators();
 		
 		if( !patch->GetZone()->IsEmpty() )
 		{
-			for( PatternLink marker : markers )
-				marker.GetChildAgent()->MarkOriginForEmbedded( patch->GetZone()->GetBaseNode() );    
-			markers.clear();
+			for( PatternLink plink : originators )
+				plink.GetChildAgent()->MarkReplaceKey( patch->GetZone()->GetBaseNode() );    
+			originators.clear();
 		}
 		// If zone is empty, it has one child, which we will meet at the next iteration
 		// of the depth-first walk. That's the one where we should enact the marker. 
 		// Unless it's empty too, in which case repeat - we must find non-empty eventually!
     }, nullptr );
     
-    ASSERT( markers.empty() ); // could not place marker because we saw only empty zones.
+    ASSERT( originators.empty() ); // could not place marker because we saw only empty zones.
 }
 
 // ------------------------- DuplicateAllPass --------------------------

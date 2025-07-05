@@ -546,7 +546,7 @@ Agent::ReplacePatchPtr AgentCommon::GenReplaceLayout( const ReplaceKit &kit,
 }
 
 
-void AgentCommon::MarkOriginForEmbedded( TreePtr<Node> embedded_through_subtree ) const
+void AgentCommon::MarkReplaceKey( TreePtr<Node> embedded_through_subtree ) const
 {
 }
 

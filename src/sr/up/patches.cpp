@@ -59,12 +59,6 @@ list<shared_ptr<Patch>> &&Patch::MoveChildren()
 }
 
 
-void Patch::AddEmbeddedMarker( PatternLink new_marker )
-{
-    AddEmbeddedMarkers( { new_marker } );
-}
-
-
 string Patch::GetChildrenTrace() const
 {
     list<string> ls;
@@ -142,21 +136,21 @@ TreePatch::TreePatch( const TreeZone &zone_ ) :
 }        
 
 
-void TreePatch::AddEmbeddedMarkers( list<PatternLink> &&new_markers )
+void TreePatch::AddOriginators( list<PatternLink> &&new_markers )
 {
-    embedded_markers.splice( embedded_markers.end(), move(new_markers) );
+    originators.splice( originators.end(), move(new_markers) );
 }
 
 
-list<PatternLink> TreePatch::GetEmbeddedMarkers() const
+list<PatternLink> TreePatch::GetOriginators() const
 {
-    return embedded_markers;
+    return originators;
 }
 
 
-void TreePatch::ClearEmbeddedMarkers()
+void TreePatch::ClearOriginators()
 {
-    embedded_markers.clear();
+    originators.clear();
 }
 
 
@@ -183,7 +177,7 @@ shared_ptr<FreePatch> TreePatch::DuplicateToFree() const
     unique_ptr<FreeZone> free_zone = zone.Duplicate();
     list<shared_ptr<Patch>> c = GetChildren();
     auto pop_free_patch = make_shared<FreePatch>( *free_zone, move(c) );
-    pop_free_patch->AddEmbeddedMarkers( GetEmbeddedMarkers() );
+    pop_free_patch->AddOriginators( GetOriginators() );
     return pop_free_patch;
 }    
 
@@ -299,28 +293,28 @@ FreePatch::FreePatch( const FreeZone &zone_ ) :
 }
 
 
-void FreePatch::AddEmbeddedMarkers( list<PatternLink> &&new_markers )
+void FreePatch::AddOriginators( list<PatternLink> &&new_markers )
 {
     // Rule #726 requires us to mark free zones immediately
     for( PatternLink marker : new_markers )
-        marker.GetChildAgent()->MarkOriginForEmbedded( zone.GetBaseNode() );    
+        marker.GetChildAgent()->MarkReplaceKey( zone.GetBaseNode() );    
 }
 
 
-list<PatternLink> FreePatch::GetEmbeddedMarkers() const
+list<PatternLink> FreePatch::GetOriginators() const
 {
     return {}; // Rule #726 means there aren't any
 }
 
 
-void FreePatch::ClearEmbeddedMarkers()
+void FreePatch::ClearOriginators()
 {
     // Rule #726 means there aren't any
 }
 
 
 Patch::ChildPatchIterator FreePatch::SpliceOver( ChildPatchIterator it_child, 
-                                                     list<shared_ptr<Patch>> &&child_patches )
+                                                 list<shared_ptr<Patch>> &&child_patches )
 {
     // it_child updated to the next child after the one we erased, or end()
     it_child = GetChildren().erase( it_child );        
