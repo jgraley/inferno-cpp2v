@@ -35,7 +35,7 @@ public:
     list<PatternLink> GetVisibleChildren( Path v ) const override;
     virtual bool IsSearch() const;
     
-    void MarkReplaceKey( TreePtr<Node> embedded_through_subtree ) const final;
+    void SetAssign( TreePtr<Node> embedded_through_subtree ) const final;
     
     TreePtr<Node> GetEmbeddedSearchPattern() const override;
     TreePtr<Node> GetEmbeddedReplacePattern() const override;

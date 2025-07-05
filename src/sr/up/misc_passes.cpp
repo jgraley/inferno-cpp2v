@@ -71,10 +71,11 @@ void EmptyZonePass::Check( shared_ptr<Patch> &layout )
     } );    
 }
 
-// ------------------------- MarkersPass --------------------------
+// ------------------------- GetAssignmentsPass --------------------------
 
-void MarkersPass::Run( shared_ptr<Patch> &layout )
+Patch::Assignments GetAssignmentsPass::Run( shared_ptr<Patch> &layout )
 {   
+	Patch::Assignments assignments;
     list<PatternLink> originators;
 
     Patch::ForDepthFirstWalk( layout, [&](shared_ptr<Patch> &patch) // Act on wind-in
@@ -85,8 +86,9 @@ void MarkersPass::Run( shared_ptr<Patch> &layout )
 		
 		if( !patch->GetZone()->IsEmpty() )
 		{
+			TreePtr<Node> x = patch->GetZone()->GetBaseNode();
 			for( PatternLink plink : originators )
-				plink.GetChildAgent()->MarkReplaceKey( patch->GetZone()->GetBaseNode() );    
+				assignments.insert( make_pair(plink, make_pair(x, XLink())) );
 			originators.clear();
 		}
 		// If zone is empty, it has one child, which we will meet at the next iteration
@@ -95,6 +97,7 @@ void MarkersPass::Run( shared_ptr<Patch> &layout )
     }, nullptr );
     
     ASSERT( originators.empty() ); // could not place marker because we saw only empty zones.
+    return assignments;
 }
 
 // ------------------------- DuplicateAllPass --------------------------

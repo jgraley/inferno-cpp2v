@@ -25,6 +25,7 @@ class Patch : public Traceable
 {
 public:
     typedef list<shared_ptr<Patch>>::iterator ChildPatchIterator;
+    typedef map<PatternLink, pair<TreePtr<Node>, XLink>> Assignments;
 
 protected:
     Patch( list<shared_ptr<Patch>> &&child_patches_ );
@@ -59,7 +60,6 @@ public:
 
 private:
     list<shared_ptr<Patch>> child_patches;
-
 };
 
 // ------------------------- TreePatch --------------------------

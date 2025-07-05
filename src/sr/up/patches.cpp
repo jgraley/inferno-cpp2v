@@ -297,7 +297,7 @@ void FreePatch::AddOriginators( list<PatternLink> &&new_markers )
 {
     // Rule #726 requires us to mark free zones immediately
     for( PatternLink marker : new_markers )
-        marker.GetChildAgent()->MarkReplaceKey( zone.GetBaseNode() );    
+        marker.GetChildAgent()->SetAssign( zone.GetBaseNode() );    
 }
 
 

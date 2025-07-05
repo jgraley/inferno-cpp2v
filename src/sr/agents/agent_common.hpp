@@ -63,7 +63,7 @@ public:
     TreePtr<Node> BuildForBuildersAnalysis( PatternLink me_plink ) override;
     ReplacePatchPtr GenReplaceLayout( const ReplaceKit &kit, 
                                 PatternLink me_plink ) override;
-    void MarkReplaceKey( TreePtr<Node> embedded_through_subtree ) const override;
+    void SetAssign( TreePtr<Node> embedded_through_subtree ) const override;
     TreePtr<Node> GetEmbeddedSearchPattern() const override;
     TreePtr<Node> GetEmbeddedReplacePattern() const override;
     

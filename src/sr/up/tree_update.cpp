@@ -144,11 +144,12 @@ void TreeUpdater::ApplyUpdate(XLink origin_xlink, shared_ptr<Patch> &layout)
 
 	// INVARIANT: by now, all true NEW content is in free patches; no COPYABLE TZs
 
-    MarkersPass markers_pass;
-    markers_pass.Run(layout);
-	//validate_zones.Run(layout);
+    GetAssignmentsPass get_assigns_pass;
+    Patch::Assignments as = get_assigns_pass.Run(layout);
+    for( auto a : as )
+        a.first.GetChildAgent()->SetAssign( a.second.first );    
 
-	MovesMap moves_map;
+    MovesMap moves_map;
 	MoveOutPass move_out_pass( db, &sops );
 	move_out_pass.Run(layout, moves_map); // This pass will populate the moves map
 	//validate_zones.Run(layout);         

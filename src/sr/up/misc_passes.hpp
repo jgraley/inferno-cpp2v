@@ -7,6 +7,7 @@
 #include "../db/tree_zone.hpp"
 #include "../link.hpp"
 #include "../scr_engine.hpp"
+#include "patches.hpp"
 
 namespace SR 
 {
@@ -49,20 +50,16 @@ public:
     void Check( shared_ptr<Patch> &layout );
 };
 
-// ------------------------- MarkersPass --------------------------
+// ------------------------- GetAssignmentsPass --------------------------
 
 /**
- * Call into agents/engines informing them where certain important
- * nodes are in the new tree. We have to have completed any duplication
- * before doing this, since we must refer to the actual X-Tree node that
- * the engine will see. And we should still posess all the zones for 
- * the updated tree i.e. before inversion.
+ * Extract assignments for tree patches. Combines the originator info 
+ * with the exentual locations in the new X tree.
  */ 
-class MarkersPass 
+class GetAssignmentsPass 
 {
 public:
-    void Run( shared_ptr<Patch> &layout );
-    void Check( shared_ptr<Patch> &layout );
+    Patch::Assignments Run( shared_ptr<Patch> &layout );
 };
 
 // ------------------------- DuplicateAllPass --------------------------
