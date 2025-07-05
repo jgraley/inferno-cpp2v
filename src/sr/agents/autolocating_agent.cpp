@@ -39,8 +39,8 @@ SYM::Lazy<SYM::BooleanExpression> AutolocatingAgent::SymbolicAutolocatingQuery()
 
 
 Agent::ReplacePatchPtr AutolocatingAgent::GenReplaceLayoutImpl( const ReplaceKit &kit, 
-                                                            PatternLink me_plink, 
-                                                            XLink key_xlink )
+                                                                PatternLink me_plink, 
+                                                                XLink key_xlink )
 {
     auto plinks = pattern_query->GetNormalLinks();
     if( plinks.size() == 1 )

@@ -50,13 +50,13 @@ public:
     void Check( shared_ptr<Patch> &layout );
 };
 
-// ------------------------- GetAssignmentsPass --------------------------
+// ------------------------- GetTreePatchAssignmentsPass --------------------------
 
 /**
  * Extract assignments for tree patches. Combines the originator info 
  * with the exentual locations in the new X tree.
  */ 
-class GetAssignmentsPass 
+class GetTreePatchAssignmentsPass 
 {
 public:
     Patch::Assignments Run( shared_ptr<Patch> &layout );

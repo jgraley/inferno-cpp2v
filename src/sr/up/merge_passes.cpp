@@ -13,8 +13,9 @@ using namespace SR;
 
 // ------------------------- FreeZoneMergeImpl --------------------------  
 
-void FreeZoneMergeImpl::Run( shared_ptr<Patch> &layout, PolicyFunction policy )
+Patch::Assignments FreeZoneMergeImpl::Run( shared_ptr<Patch> &layout, PolicyFunction policy )
 {
+	Patch::Assignments assignments;
 	INDENT("F");
     FreePatch::ForFreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<FreePatch> &free_patch)
     {
@@ -33,11 +34,18 @@ void FreeZoneMergeImpl::Run( shared_ptr<Patch> &layout, PolicyFunction policy )
 				FreeZone *child_free_zone = child_free_patch->GetZone();                    
 				if( policy(free_zone, child_free_zone) )
 				{
-					it_t = free_zone->MergeTerminus( it_t, make_unique<FreeZone>(*child_free_zone) );  // TODO why make_unique here?      
+					it_t = free_zone->MergeTerminus( it_t, make_unique<FreeZone>(*child_free_zone) );  // TODO why make_unique here and not move()?
 					TRACE("Mutator OK\n");
 					it_child = free_patch->SpliceOver( it_child, child_free_patch->MoveChildren() );
 					TRACE("Splice OK\n");
-					continue;
+					
+					// Extract assignments between FZs that have been merged
+					TreePtr<Node> x = child_free_zone->GetBaseNode();
+					for( PatternLink plink : child_free_patch->GetOriginators() )
+						assignments.insert( make_pair(plink, make_pair(x, XLink())) );
+					child_free_patch->ClearOriginators();
+					
+					continue; // TODO not sure about this
 				}
 			}
 			
@@ -48,6 +56,8 @@ void FreeZoneMergeImpl::Run( shared_ptr<Patch> &layout, PolicyFunction policy )
 		ASSERT( it_t == free_zone->GetTerminiiEnd() ); // length mismatch    
 		TRACE("Loop OK\n");
     } );            
+    
+    return assignments;
 }
 
 
@@ -65,9 +75,9 @@ void FreeZoneMergeImpl::Check( shared_ptr<Patch> &layout, PolicyFunction policy 
 
 // ------------------------- MergeFreesPass --------------------------
 
-void MergeFreesPass::Run( shared_ptr<Patch> &layout )
+Patch::Assignments MergeFreesPass::Run( shared_ptr<Patch> &layout )
 {
-	impl.Run(layout, bind(&MergeFreesPass::Policy, this, placeholders::_1, placeholders::_2));
+	return impl.Run(layout, bind(&MergeFreesPass::Policy, this, placeholders::_1, placeholders::_2));
 }
     
     
@@ -84,11 +94,11 @@ bool MergeFreesPass::Policy(const FreeZone *, const FreeZone *) const
 
 // ------------------------- MergeWidesPass --------------------------
 
-void MergeWidesPass::Run( shared_ptr<Patch> &layout )
+Patch::Assignments MergeWidesPass::Run( shared_ptr<Patch> &layout )
 {
 	INDENT("W");
 	//FTRACE(layout);
-	impl.Run(layout, bind(&MergeWidesPass::Policy, this, placeholders::_1, placeholders::_2));
+	return impl.Run(layout, bind(&MergeWidesPass::Policy, this, placeholders::_1, placeholders::_2));
 }
     
     

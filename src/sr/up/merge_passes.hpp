@@ -7,6 +7,7 @@
 #include "../db/tree_zone.hpp"
 #include "../link.hpp"
 #include "../scr_engine.hpp"
+#include "patches.hpp"
 
 namespace SR 
 {
@@ -19,7 +20,7 @@ public:
 	typedef function<bool (const FreeZone *zone, const FreeZone *child_zone)> PolicyFunction;
    
     // Can change the supplied shared ptr
-    void Run( shared_ptr<Patch> &layout, PolicyFunction decider );
+    Patch::Assignments Run( shared_ptr<Patch> &layout, PolicyFunction decider );
     
     void Check( shared_ptr<Patch> &layout, PolicyFunction decider );
 };
@@ -36,7 +37,7 @@ class MergeFreesPass
 {
 public:       
     // Can change the supplied shared ptr
-    void Run( shared_ptr<Patch> &layout );
+    Patch::Assignments Run( shared_ptr<Patch> &layout );
     
     void Check( shared_ptr<Patch> &layout );
     
@@ -57,7 +58,7 @@ class MergeWidesPass
 {
 public:       
     // Can change the supplied shared ptr
-    void Run( shared_ptr<Patch> &layout );
+    Patch::Assignments Run( shared_ptr<Patch> &layout );
     
     void Check( shared_ptr<Patch> &layout );
 

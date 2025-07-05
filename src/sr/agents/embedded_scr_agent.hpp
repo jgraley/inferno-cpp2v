@@ -28,14 +28,10 @@ public:
     virtual void MaybeChildrenPlanOverlay( PatternLink me_plink, 
                                   PatternLink under_plink );
 
-    ReplacePatchPtr GenReplaceLayoutImpl( const ReplaceKit &kit, 
-                                    PatternLink me_plink, 
-                                    XLink key_xlink ) final;
-
     list<PatternLink> GetVisibleChildren( Path v ) const override;
     virtual bool IsSearch() const;
     
-    void SetAssign( TreePtr<Node> embedded_through_subtree ) const final;
+    void SetReplaceAssignment( TreePtr<Node> embedded_through_subtree ) const final;
     
     TreePtr<Node> GetEmbeddedSearchPattern() const override;
     TreePtr<Node> GetEmbeddedReplacePattern() const override;

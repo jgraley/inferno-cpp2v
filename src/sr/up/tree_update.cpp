@@ -70,10 +70,27 @@ unique_ptr<FreeZone> TreeUpdater::TransformToSingleFreeZone( shared_ptr<Patch> l
 
 void TreeUpdater::UpdateMainTree( XLink origin_xlink, shared_ptr<Patch> layout )
 {               
+	assignments.clear();
+	
     // Figure out what we should do, then do it. See comments in these 
     // functions and the pass class headers.
 	Analysis(origin_xlink, layout);
 	ApplyUpdate(origin_xlink, layout);
+
+	// Act on replace assignements info
+	// TODO
+	// - Do we really need to do MergeWidesPass?
+	// - make inversion return the in-tree TZs
+	// - ensure they get through move-out
+	// - move GetTreePatchAssignmentsPass to the very end
+	// - go to XLinks and drop the inner std::pair
+	// - checks: did we get an assignmant for every originator? Any extra?
+	// - checks: are all the assignment XLinks valid and in main tree?
+	// - route the assignemtns out though to SCR engine and don't call 
+	//   the originators directly
+	FTRACE("After update, assignments are\n")(assignments)("\n");
+    for( auto a : assignments )
+        a.first.GetChildAgent()->SetReplaceAssignment( a.second.first );
 }
 
 
@@ -94,8 +111,8 @@ void TreeUpdater::Analysis(XLink origin_xlink, shared_ptr<Patch> &layout)
 	set_ordinals.Run(layout);
 
     MergeWidesPass merge_wides_pass;
-    merge_wides_pass.Run(layout);
-    //merge_wides_pass.Check(layout);                           
+    Patch::Assignments as = merge_wides_pass.Run(layout);
+    assignments.insert( as.begin(), as.end() );
 	//validate_zones.Run(layout);
 
 	ProtectDEPass protect_de_pass( db );
@@ -129,7 +146,7 @@ void TreeUpdater::Analysis(XLink origin_xlink, shared_ptr<Patch> &layout)
 	
 	
 void TreeUpdater::ApplyUpdate(XLink origin_xlink, shared_ptr<Patch> &layout)
-{	
+{		
 	// To implement the changes: we will duplicate COPYABLEs into free, move
 	// MOVABLES out of main tree, insert all new stuff into main tree, and
 	// then move MOVABLES into new tree at new location. We only need 
@@ -144,10 +161,9 @@ void TreeUpdater::ApplyUpdate(XLink origin_xlink, shared_ptr<Patch> &layout)
 
 	// INVARIANT: by now, all true NEW content is in free patches; no COPYABLE TZs
 
-    GetAssignmentsPass get_assigns_pass;
+    GetTreePatchAssignmentsPass get_assigns_pass;
     Patch::Assignments as = get_assigns_pass.Run(layout);
-    for( auto a : as )
-        a.first.GetChildAgent()->SetAssign( a.second.first );    
+    assignments.insert( as.begin(), as.end() );
 
     MovesMap moves_map;
 	MoveOutPass move_out_pass( db, &sops );
@@ -158,7 +174,8 @@ void TreeUpdater::ApplyUpdate(XLink origin_xlink, shared_ptr<Patch> &layout)
 	// all tree patches are DEFAULT and this means we can leave them alone.
 
     MergeFreesPass merge_frees_pass;
-    merge_frees_pass.Run(layout);  
+    as = merge_frees_pass.Run(layout);  
+    assignments.insert( as.begin(), as.end() );
     //merge_frees_pass.Check(layout);   
     //AltOrderingChecker alt_ordering_checker( db );
     //alt_ordering_checker.Check(layout);    
@@ -175,5 +192,7 @@ void TreeUpdater::ApplyUpdate(XLink origin_xlink, shared_ptr<Patch> &layout)
 	MoveInPass move_in_pass( db, &sops );
 	move_in_pass.Run(moves_map);
 	
-	db->PerformDeferredActions();  
+	// Delayed actions in DB i.e. new/invalidated stimulus checks for
+	// domain extenstion.
+	db->PerformDeferredActions();      	
 }

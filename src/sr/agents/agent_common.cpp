@@ -526,7 +526,7 @@ TreePtr<Node> AgentCommon::BuildForBuildersAnalysis( PatternLink me_plink )
 
 
 Agent::ReplacePatchPtr AgentCommon::GenReplaceLayout( const ReplaceKit &kit, 
-                                                   PatternLink me_plink )
+                                                      PatternLink me_plink )
 {
     INDENT("C");
     ASSERT( me_plink.GetChildAgent() == this );
@@ -542,11 +542,17 @@ Agent::ReplacePatchPtr AgentCommon::GenReplaceLayout( const ReplaceKit &kit,
               (*this)(" keyed with non-final node ")(key_xlink)("\n"); 
     }
 
-    return GenReplaceLayoutImpl( kit, me_plink, key_xlink );
+    ReplacePatchPtr patch = GenReplaceLayoutImpl( kit, me_plink, key_xlink );
+      
+    // Inform the update mechanism that, once it's done duplicating 
+    // nodes etc, it should mark this position for this embedded agent's origin.
+    patch->AddOriginators( { me_plink } );
+    
+    return patch;
 }
 
 
-void AgentCommon::SetAssign( TreePtr<Node> embedded_through_subtree ) const
+void AgentCommon::SetReplaceAssignment( TreePtr<Node> embedded_through_subtree ) const
 {
 }
 

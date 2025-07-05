@@ -87,7 +87,7 @@ public:
     virtual TreePtr<Node> BuildForBuildersAnalysis( PatternLink me_plink ) = 0;
     virtual ReplacePatchPtr GenReplaceLayout( const ReplaceKit &kit, 
                                               PatternLink me_plink ) = 0;
-    virtual void SetAssign( TreePtr<Node> embedded_through_subtree ) const = 0;
+    virtual void SetReplaceAssignment( TreePtr<Node> embedded_through_subtree ) const = 0;
     virtual TreePtr<Node> GetEmbeddedSearchPattern() const = 0;
     virtual TreePtr<Node> GetEmbeddedReplacePattern() const = 0;
     

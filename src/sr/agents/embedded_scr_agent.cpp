@@ -28,22 +28,7 @@ void EmbeddedSCRAgent::MaybeChildrenPlanOverlay( PatternLink me_plink,
     // Make embedded engines "invisible" to Delta key propagation (i.e. Autolocated see #342)
     PatternLink through_plink(this, GetThrough());
     through_plink.GetChildAgent()->PlanOverlay(through_plink, under_plink);   
-}
-
-
-Agent::ReplacePatchPtr EmbeddedSCRAgent::GenReplaceLayoutImpl( const ReplaceKit &kit, 
-                                                               PatternLink me_plink, 
-                                                               XLink key_xlink )
-{   
-    // Use auto algorithm but add marker
-    Agent::ReplacePatchPtr patch = AutolocatingAgent::GenReplaceLayoutImpl(kit, me_plink, key_xlink);
-
-    // Inform the update mechanism that, once it's done duplicating 
-    // nodes etc, it should mark this position for this embedded agent's origin.
-    patch->AddOriginators( { me_plink } );
-
-    return patch;
-}                                         
+}                                      
 
 
 list<PatternLink> EmbeddedSCRAgent::GetVisibleChildren( Path v ) const
@@ -61,7 +46,7 @@ bool EmbeddedSCRAgent::IsSearch() const
 }
 
 
-void EmbeddedSCRAgent::SetAssign( TreePtr<Node> embedded_origin ) const
+void EmbeddedSCRAgent::SetReplaceAssignment( TreePtr<Node> embedded_origin ) const
 {
     my_scr_engine->MarkOriginForEmbedded( this, embedded_origin );
 }

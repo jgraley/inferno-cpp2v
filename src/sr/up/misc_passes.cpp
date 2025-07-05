@@ -71,9 +71,9 @@ void EmptyZonePass::Check( shared_ptr<Patch> &layout )
     } );    
 }
 
-// ------------------------- GetAssignmentsPass --------------------------
+// ------------------------- GetTreePatchAssignmentsPass --------------------------
 
-Patch::Assignments GetAssignmentsPass::Run( shared_ptr<Patch> &layout )
+Patch::Assignments GetTreePatchAssignmentsPass::Run( shared_ptr<Patch> &layout )
 {   
 	Patch::Assignments assignments;
     list<PatternLink> originators;
