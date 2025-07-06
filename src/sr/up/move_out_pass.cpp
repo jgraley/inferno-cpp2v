@@ -87,14 +87,14 @@ void MoveOutPass::MoveTreeZoneOut( shared_ptr<Patch> *ooo_patch_ptr, shared_ptr<
 	db->XTreeDatabase::SwapTreeToTree( main_tree_zone_from, fixups,
 		    						   tree_zone_in_extra, vector<TreeZone *>() );
 
-	// ------------------------- Add "To" scaffolding patch to tree for inversion ---------------------------
+	// ------------------------- Add "To" scaffolding patch to layout for inversion ---------------------------
 	// tree_zone_in_extra now contains the moving zone	
 	FreeZone scaffold_zone_to = sops->CreateSimilarScaffoldZone(tree_zone_in_extra); 
 	TreePtr<Node> scaffold_base_to = scaffold_zone_to.GetBaseNode();
 	TRACE("\"To\" scaffold base: ")(scaffold_zone_to)("\n");
 
 	// Rememeber the association between the "to" scaffold node and the moving zone
-	TRACE("Making map entry, \"to\" scaffold node: ")(scaffold_base_to)("\n moving zone: \n")(tree_zone_in_extra)("\n");
+	FTRACE("Making map entry, \"to\" scaffold node: ")(scaffold_base_to)("\n moving zone: \n")(tree_zone_in_extra)("\n");
 	InsertSolo( moves_map.mm, make_pair(scaffold_base_to, tree_zone_in_extra) );
 
 	// Store the scaffold in the layout so it goes into inversion as a free zone, so it survives, 

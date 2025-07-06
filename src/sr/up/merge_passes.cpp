@@ -40,7 +40,10 @@ Patch::Assignments FreeZoneMergeImpl::Run( shared_ptr<Patch> &layout, PolicyFunc
 					TRACE("Splice OK\n");
 					
 					// Extract assignments between FZs that have been merged
+
 					TreePtr<Node> x = child_free_zone->GetBaseNode();
+					if( dynamic_cast<ScaffoldBase *>(x.get()) )
+						ASSERT(child_free_patch->GetOriginators().empty());
 					for( PatternLink plink : child_free_patch->GetOriginators() )
 						assignments.insert( make_pair(plink, make_pair(x, XLink())) );
 					child_free_patch->ClearOriginators();
@@ -92,17 +95,17 @@ bool MergeFreesPass::Policy(const FreeZone *, const FreeZone *) const
 	return true;
 }
 
-// ------------------------- MergeWidesPass --------------------------
+// ------------------------- MergeSubcontainerBasePass --------------------------
 
-Patch::Assignments MergeWidesPass::Run( shared_ptr<Patch> &layout )
+Patch::Assignments MergeSubcontainerBasePass::Run( shared_ptr<Patch> &layout )
 {
 	INDENT("W");
 	//FTRACE(layout);
-	return impl.Run(layout, bind(&MergeWidesPass::Policy, this, placeholders::_1, placeholders::_2));
+	return impl.Run(layout, bind(&MergeSubcontainerBasePass::Policy, this, placeholders::_1, placeholders::_2));
 }
     
     
-void MergeWidesPass::Check( shared_ptr<Patch> &layout )
+void MergeSubcontainerBasePass::Check( shared_ptr<Patch> &layout )
 {
 	// Check is stricter: no container bases anywhere, regardless of parent type
 	FreePatch::ForFreeDepthFirstWalk( layout, [&](shared_ptr<FreePatch> &free_patch)
@@ -112,7 +115,7 @@ void MergeWidesPass::Check( shared_ptr<Patch> &layout )
 }
 
 
-bool MergeWidesPass::Policy(const FreeZone *zone, const FreeZone *child_zone) const
+bool MergeSubcontainerBasePass::Policy(const FreeZone *zone, const FreeZone *child_zone) const
 {	
 	TRACE("Zone: ")(*zone)("\nhas child: ")(*child_zone)("\n");
 	return !!child_zone->TryGetContainerBase();

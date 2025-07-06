@@ -136,7 +136,8 @@ public:
 
     FreeZone *GetZone() final;
     const FreeZone *GetZone() const final;
-    
+   	shared_ptr<TreePatch> ConvertToTree(const TreeZone &tree_zone) const;
+
     static void ForFreeChildren(shared_ptr<Patch> base,
                                 function<void(shared_ptr<Patch> &patch)> func);
     static void ForFreeChildren(shared_ptr<Patch> base,

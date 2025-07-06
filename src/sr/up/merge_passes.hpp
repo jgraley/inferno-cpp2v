@@ -46,7 +46,7 @@ private:
     FreeZoneMergeImpl impl;
 };
 
-// ------------------------- MergeWidesPass --------------------------
+// ------------------------- MergeSubcontainerBasePass --------------------------
 
 /** 
  * Free Zones with collection bases (aka poor man's wide zones) lack flexibility
@@ -54,7 +54,7 @@ private:
  * Check() is stronger and will fail on any collection base, which constrains what
  * we can accept from GenReplaceLayout() etc.
  */ 
-class MergeWidesPass
+class MergeSubcontainerBasePass
 {
 public:       
     // Can change the supplied shared ptr

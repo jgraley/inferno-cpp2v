@@ -93,23 +93,24 @@ void InversionPass::Invert( LocatedPatch lze )
         fixups.push_back( child_tree_patch->GetZone() );
     } );             
          
-    // Make the inverted TZ       
+    // Make the inverted TZ - this contains the old content identified by inversion
 	TreeZone main_tree_zone = TreeZone( base_xlink, 
 	                                    move(terminii), 
 	                                    db->GetMainTreeOrdinal() );
 	
-    // Write it into the tree
+    // Write free zone with new content into an extra tree. main_tree_zone is 
+    // used here only for the plug types.
 	TreeZone tree_zone_in_extra = sops->FreeZoneIntoExtraTree( new_free_zone, main_tree_zone );
 	
-	// Swap in the true moving zone. Names become misleading because contents swap:
-	// tree_zone_in_extra <- the actual moving zone now in extra tree
-	// main_tree_zone_from <- the "from" scaffold now in main tree, to be killed by inversion
+	// Swap in the true moving zone. After this swap:
+	// tree_zone_in_extra <- the old content
+	// main_tree_zone <- the new content
 	db->XTreeDatabase::SwapTreeToTree( main_tree_zone, fixups,
 		    						   tree_zone_in_extra, vector<TreeZone *>() );
 
+	// Delete old content from DB
 	db->TeardownTree( tree_zone_in_extra.GetTreeOrdinal() );   
 	
-	// Note: to keep the layout valid, we'd put the main_tree_zone in a tree 
-	// patch and copy its child pointers from the free patch. But we don't use
-	// the layout after this pass.
+	// Update the patch to be a tree zone patch with the new content in situ.
+	*(lze.second) = free_patch->ConvertToTree( main_tree_zone );
 }

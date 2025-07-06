@@ -79,7 +79,7 @@ void TreeUpdater::UpdateMainTree( XLink origin_xlink, shared_ptr<Patch> layout )
 
 	// Act on replace assignements info
 	// TODO
-	// - Do we really need to do MergeWidesPass?
+	// - Do we really need to do MergeSubcontainerBasePass? - no but no harm so leaving
 	// - make inversion return the in-tree TZs
 	// - ensure they get through move-out
 	// - move GetTreePatchAssignmentsPass to the very end
@@ -87,8 +87,9 @@ void TreeUpdater::UpdateMainTree( XLink origin_xlink, shared_ptr<Patch> layout )
 	// - checks: did we get an assignmant for every originator? Any extra?
 	// - checks: are all the assignment XLinks valid and in main tree?
 	// - route the assignemtns out though to SCR engine and don't call 
-	//   the originators directly
-	FTRACE("After update, assignments are\n")(assignments)("\n");
+	//   the originators directly incl. drop call from FreePatch to agent
+	// - TODOs in FreeZoneMergeImpl::Run()
+	//FTRACE("After update, assignments are\n")(assignments)("\n");
     for( auto a : assignments )
         a.first.GetChildAgent()->SetReplaceAssignment( a.second.first );
 }
@@ -110,7 +111,7 @@ void TreeUpdater::Analysis(XLink origin_xlink, shared_ptr<Patch> &layout)
 	SetTreeOrdinals set_ordinals( db );
 	set_ordinals.Run(layout);
 
-    MergeWidesPass merge_wides_pass;
+    MergeSubcontainerBasePass merge_wides_pass;
     Patch::Assignments as = merge_wides_pass.Run(layout);
     assignments.insert( as.begin(), as.end() );
 	//validate_zones.Run(layout);

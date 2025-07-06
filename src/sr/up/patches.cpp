@@ -340,6 +340,15 @@ const FreeZone *FreePatch::GetZone() const
 }
 
 
+shared_ptr<TreePatch> FreePatch::ConvertToTree(const TreeZone &tree_zone) const
+{
+    list<shared_ptr<Patch>> c = GetChildren();
+    auto pop_tree_patch = make_shared<TreePatch>( tree_zone, move(c) );
+    pop_tree_patch->AddOriginators( GetOriginators() );
+    return pop_tree_patch;
+}  
+
+
 void FreePatch::ForFreeChildren( shared_ptr<Patch> base,
                                      function<void(shared_ptr<Patch> &patch)> func )
 {
