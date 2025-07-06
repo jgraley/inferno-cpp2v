@@ -7,6 +7,7 @@
 #include "link.hpp"
 #include "sr/db/lacing.hpp"
 #include "sr/db/domain_extension.hpp"
+#include "up/up_common.hpp"
 
 class Graph;
 
@@ -46,7 +47,7 @@ public:
     void GenerateGraphRegions( int step_index, Graph &graph ) const;
     string GetStepName( int step_index ) const;
 
-    void UpdateUsingLayout( XLink origin_xlink, shared_ptr<Patch> source_layout );
+    ReplaceAssignments UpdateUsingLayout( XLink origin_xlink, shared_ptr<Patch> source_layout );
     
     void XTreeDbDump() const;
     void XTreeDbExpectMatches() const;

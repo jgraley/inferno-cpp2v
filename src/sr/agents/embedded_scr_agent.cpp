@@ -46,12 +46,6 @@ bool EmbeddedSCRAgent::IsSearch() const
 }
 
 
-void EmbeddedSCRAgent::SetReplaceAssignment( TreePtr<Node> embedded_origin ) const
-{
-    my_scr_engine->MarkOriginForEmbedded( this, embedded_origin );
-}
-
-
 TreePtr<Node> EmbeddedSCRAgent::GetEmbeddedSearchPattern() const 
 { 
     return search_pattern; 

@@ -310,60 +310,27 @@ string SCREngine::Plan::GetTrace() const
     return algo->GetName() + ".plan" + algo->GetSerialString();
 }
 
-    
-void SCREngine::UpdateEmbeddedActionRequests( TreePtr<Node> through_subtree, TreePtr<Node> new_subtree ) const 
-{
-    INDENT("F");
-    
-    // We need to fix up any remaining action requests at the same level as the one
-    // that just ran if they have the same through node as the one we just changed.
-    for( auto &p : origins_for_embedded ) // ref important - we're modifying!
-    {
-        if( p.second == through_subtree )
-        {
-            TRACE("Fixup for ")(*(Agent *)p.first)(": ")(through_subtree)(" becomes ")(new_subtree)("\n");
-            p.second = new_subtree;
-        }
-    }
-    
-    // Master SCREngines may also have pending action requests with matching through node
-    if( plan.enclosing_engine ) 
-        plan.enclosing_engine->UpdateEmbeddedActionRequests( through_subtree, new_subtree );
-}
 
-
-void SCREngine::RunEmbedded( PatternLink plink_to_embedded, XLink origin_xlink )
+void SCREngine::RunEmbedded( PatternLink plink_to_embedded, const ReplaceAssignments &replace_assignments )
 {         
     INDENT("E");
     auto embedded_agent = plink_to_embedded.GetChildAgent();
     shared_ptr<SCREngine> embedded_engine = plan.my_engines.at(embedded_agent);
     ASSERT( embedded_engine );
-   
     TRACE("Going to run embedded on ")(*embedded_engine)
-         (" agent ")(embedded_agent)
-         (" and origins_for_embedded are\n")(origins_for_embedded)("\n");
+         (" agent ")(embedded_agent)("\n");
+              
+	// Discover new origin for embedded by consulting the replace assignments
+	XLink embedded_origin_xlink = replace_assignments.at(plink_to_embedded);
+    TRACE("Running embedded ")(plink_to_embedded)(" with origin=")(embedded_origin_xlink)("\n");
    
-    // Recall the origin of the subtree under through (after replace)
-    ASSERT(origins_for_embedded.count(embedded_agent) == 1)
-          ("No call to SCREngine::MarkOriginForEmbedded() for ")(embedded_agent);
-    TreePtr<Node> embedded_origin = origins_for_embedded.at(embedded_agent);
-    EraseSolo( origins_for_embedded, embedded_agent); // not needed any more
-    ASSERT( embedded_origin );
-    
-    // Obtain a pointer to the though link that will be origin for the 
-    // embedded engine. 
-    NodeTable::Row nn = x_tree_db->GetNodeRow(embedded_origin);
-    XLink embedded_origin_xlink = SoloElementOf(nn.incoming_xlinks);
-
     // Run the embedded's engine on this subtree and overwrite through ptr via p_through_x
     int hits = embedded_engine->RepeatingCompareReplace( embedded_origin_xlink, &replace_solution );
-    (void)hits;
-    
-    UpdateEmbeddedActionRequests( embedded_origin, embedded_origin_xlink.GetChildTreePtr() );
+    (void)hits;    
 }
 
 
-void SCREngine::Replace( XLink origin_xlink )
+ReplaceAssignments SCREngine::Replace( XLink origin_xlink )
 {
     INDENT("R");
 
@@ -372,9 +339,11 @@ void SCREngine::Replace( XLink origin_xlink )
     Agent::ReplacePatchPtr source_expr = plan.origin_agent->GenReplaceLayout(replace_kit, plan.origin_plink);
         
     // Request to update the tree
-    plan.vn_sequence->UpdateUsingLayout( origin_xlink, move(source_expr) );  
+    ReplaceAssignments assignments = plan.vn_sequence->UpdateUsingLayout( origin_xlink, move(source_expr) );  
     
     TRACE("Replace done\n");
+    
+    return assignments;
 }
 
 
@@ -392,19 +361,23 @@ void SCREngine::SingleCompareReplace( XLink origin_xlink,
            
     // Replace will need the compare keys unioned with the enclosing keys
     SolutionMap rs = UnionOfSolo( *enclosing_solution, cs );    
-    origins_for_embedded.clear();
     replace_solution = move(rs);
     replace_solution_available = true;
 
     // Now replace according to the couplings
-    Replace(origin_xlink);
+    ReplaceAssignments replace_assignments = Replace(origin_xlink);
+
+    // replace_assignments overrides
+	replace_solution = UnionOf( replace_solution, replace_assignments );    
 
     // Now run the embedded SCR engines (LATER model)
     for( PatternLink plink_to_embedded : plan.my_embedded_plinks_postorder )
-    {
-        TRACE("Running embedded ")(plink_to_embedded)(" base xlink=")(origin_xlink)("\n");
-        RunEmbedded(plink_to_embedded, origin_xlink);       
-    }
+#ifdef NEWS
+        RunEmbedded(plink_to_embedded, replace_solution);       
+#else
+        RunEmbedded(plink_to_embedded, replace_assignments);       
+#endif
+		
     TRACE("Embedded SCRs done\n");
     
     replace_solution_available = false;
@@ -537,14 +510,6 @@ void SCREngine::GenerateGraphRegions( Graph &graph ) const
     plan.and_rule_engine->GenerateGraphRegions(graph, GetGraphId());
     for( auto p : plan.my_engines )
         p.second->GenerateGraphRegions(graph);    
-}
-
-
-void SCREngine::MarkOriginForEmbedded( const Agent *embedded_agent,
-                                       TreePtr<Node> embedded_origin ) const
-{
-
-    InsertSolo( origins_for_embedded, make_pair( embedded_agent, embedded_origin ) );
 }
 
 

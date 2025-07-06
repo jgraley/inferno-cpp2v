@@ -13,7 +13,7 @@ using namespace SR;
 
 // ------------------------- FreeZoneMergeImpl --------------------------  
 
-void FreeZoneMergeImpl::Run( shared_ptr<Patch> &layout, PolicyFunction policy, Assignments *assignments )
+void FreeZoneMergeImpl::Run( shared_ptr<Patch> &layout, PolicyFunction policy, ReplaceAssignments *assignments )
 {
 	INDENT("F");
     FreePatch::ForFreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<FreePatch> &free_patch)
@@ -77,7 +77,7 @@ void FreeZoneMergeImpl::Check( shared_ptr<Patch> &layout, PolicyFunction policy 
 
 // ------------------------- MergeFreesPass --------------------------
 
-void MergeFreesPass::Run( shared_ptr<Patch> &layout, Assignments *assignments )
+void MergeFreesPass::Run( shared_ptr<Patch> &layout, ReplaceAssignments *assignments )
 {
 	impl.Run(layout, bind(&MergeFreesPass::Policy, this, placeholders::_1, placeholders::_2), assignments);
 }

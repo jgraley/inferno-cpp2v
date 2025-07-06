@@ -69,7 +69,7 @@ unique_ptr<FreeZone> TreeUpdater::TransformToSingleFreeZone( shared_ptr<Patch> l
 }
 
 
-void TreeUpdater::UpdateMainTree( XLink origin_xlink, shared_ptr<Patch> layout )
+ReplaceAssignments TreeUpdater::UpdateMainTree( XLink origin_xlink, shared_ptr<Patch> layout )
 {               
 	assignments.clear();
 	
@@ -80,18 +80,14 @@ void TreeUpdater::UpdateMainTree( XLink origin_xlink, shared_ptr<Patch> layout )
 
 	// Act on replace assignements info
 	// TODO
-	// - go to XLinks and drop the inner std::pair
+	// - fix NEWS in SCREngine
 	// - checks: did we get an assignmant for every originator? Any extra?
 	// - checks: are all the assignment XLinks valid and in main tree?
 	// - route the assignemtns out though to SCR engine and don't call 
-	//   the originators directly incl. drop call from FreePatch to agent
+	//   the originators directly incl. 
 	// - TODOs in FreeZoneMergeImpl::Run()
 	// - Drop rule #726
-	//FTRACE("After update, assignments are\n")(assignments)("\n");
-    for( auto a : assignments )
-    {
-         a.first.GetChildAgent()->SetReplaceAssignment( a.second.GetChildTreePtr() );
-	}
+	return assignments;
 }
 
 

@@ -13,7 +13,7 @@
 namespace SR 
 {
 typedef set<PatternLink> Originators;
-typedef map<PatternLink, XLink> Assignments;
+typedef map<PatternLink, XLink> ReplaceAssignments;
     
     
 // ------------------------- MovesMap --------------------------

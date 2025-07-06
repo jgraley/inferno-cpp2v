@@ -4,6 +4,7 @@
 #include "render/graph.hpp"
 #include "db/x_tree_database.hpp"
 #include "up/tree_update.hpp"
+#include "up/up_common.hpp"
 
 using namespace SR;
 
@@ -144,11 +145,11 @@ string VNSequence::GetStepName( int step_index ) const
 }
 
 
-void VNSequence::UpdateUsingLayout( XLink origin_xlink, shared_ptr<Patch> source_layout )
+ReplaceAssignments VNSequence::UpdateUsingLayout( XLink origin_xlink, shared_ptr<Patch> source_layout )
 {
     ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");    
     
-    tree_updater->UpdateMainTree( origin_xlink, source_layout );   
+    return tree_updater->UpdateMainTree( origin_xlink, source_layout );   
 }
 
 

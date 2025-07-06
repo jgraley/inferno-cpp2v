@@ -552,11 +552,6 @@ Agent::ReplacePatchPtr AgentCommon::GenReplaceLayout( const ReplaceKit &kit,
 }
 
 
-void AgentCommon::SetReplaceAssignment( TreePtr<Node> embedded_through_subtree ) const
-{
-}
-
-
 TreePtr<Node> AgentCommon::GetEmbeddedSearchPattern() const
 {
 	return nullptr;

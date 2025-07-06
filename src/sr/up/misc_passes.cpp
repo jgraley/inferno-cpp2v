@@ -73,7 +73,7 @@ void EmptyZonePass::Check( shared_ptr<Patch> &layout )
 
 // ------------------------- GetTreePatchAssignmentsPass --------------------------
 
-void GetTreePatchAssignmentsPass::Run( shared_ptr<Patch> &layout, Assignments *assignments )
+void GetTreePatchAssignmentsPass::Run( shared_ptr<Patch> &layout, ReplaceAssignments *assignments )
 {   
     Originators originators;
 

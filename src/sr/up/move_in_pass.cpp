@@ -14,7 +14,7 @@ MoveInPass::MoveInPass( XTreeDatabase *db_, ScaffoldOps *sops_ ) :
 }
 
 
-void MoveInPass::Run(MovesMap &moves_map, Assignments *assignments)
+void MoveInPass::Run(MovesMap &moves_map, ReplaceAssignments *assignments)
 {	
 	INDENT("Z");
 	TRACE("Got %u map entries\n", moves_map.mm.size());

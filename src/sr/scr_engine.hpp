@@ -12,6 +12,7 @@
 #include "node/graphable.hpp"
 #include "search_replace.hpp"
 #include "db/duplicate.hpp"
+#include "up/up_common.hpp"
 
 #include <set>
 
@@ -107,9 +108,8 @@ private:
         list<PatternLink> my_embedded_plinks_postorder;
     } plan;
 
-    void UpdateEmbeddedActionRequests( TreePtr<Node> through_subtree, TreePtr<Node> new_subtree ) const;
-    void RunEmbedded( PatternLink plink_to_embedded, XLink origin_xlink );
-    void Replace( XLink origin_xlink );
+    void RunEmbedded( PatternLink plink_to_embedded, const ReplaceAssignments &replace_assignments );
+    ReplaceAssignments Replace( XLink origin_xlink );
     void SingleCompareReplace( XLink origin_xlink,
                                const SolutionMap *enclosing_solution );                                                                                              
 
@@ -127,9 +127,7 @@ public: // For top level engine/VN trans
 public: // For agents
     // Note: this is const but RepeatingCompareReplace() isn't. Why?
     // Because we're not calling OUR RepeatingCompareReplace but
-    // the embedded_engine's one - and that pointer is not const.
-    void MarkOriginForEmbedded( const Agent *embedded_agent, 
-                                TreePtr<Node> embedded_through_subtree ) const;    
+    // the embedded_engine's one - and that pointer is not const. 
     void SetReplaceKey( LocatedLink keyer_link ) const;
     XLink GetReplaceKey( PatternLink plink ) const;
     bool IsKeyedByAndRuleEngine( Agent *agent ) const; 
@@ -153,7 +151,6 @@ private:
     shared_ptr<XTreeDatabase> x_tree_db;
     mutable SolutionMap replace_solution;
     bool replace_solution_available = false;    
-    mutable map<const Agent *, TreePtr<Node> > origins_for_embedded;
 };
 
 };
