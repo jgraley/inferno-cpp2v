@@ -97,7 +97,7 @@ void MoveOutPass::MoveTreeZoneOut( shared_ptr<Patch> *ooo_patch_ptr, shared_ptr<
 	// Rememeber the association between the "to" scaffold node and the moving zone
 	FTRACE("Making map entry, \"to\" scaffold node: ")(scaffold_base_to)("\n moving zone: \n")(tree_zone_in_extra)("\n");
 
-	MoveInfo mi{ tree_zone_in_extra };
+	MoveInfo mi{ tree_zone_in_extra, ooo_tree_patch->GetOriginators() };
 	InsertSolo( moves_map.mm, make_pair(scaffold_base_to, mi) );
 
 	// Store the scaffold in the layout so it goes into inversion as a free zone, so it survives, 

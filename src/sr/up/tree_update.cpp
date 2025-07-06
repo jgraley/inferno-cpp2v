@@ -164,10 +164,6 @@ void TreeUpdater::ApplyUpdate(XLink origin_xlink, shared_ptr<Patch> &layout)
 
 	// INVARIANT: by now, all true NEW content is in free patches; no COPYABLE TZs
 
-    GetTreePatchAssignmentsPass get_assigns_pass;
-    Assignments as = get_assigns_pass.Run(layout);
-    assignments.insert( as.begin(), as.end() );
-
     MovesMap moves_map;
 	MoveOutPass move_out_pass( db, &sops );
 	move_out_pass.Run(layout, moves_map); // This pass will populate the moves map
@@ -177,7 +173,7 @@ void TreeUpdater::ApplyUpdate(XLink origin_xlink, shared_ptr<Patch> &layout)
 	// all tree patches are DEFAULT and this means we can leave them alone.
 
     MergeFreesPass merge_frees_pass;
-    as = merge_frees_pass.Run(layout);  
+    Assignments as = merge_frees_pass.Run(layout);  
     assignments.insert( as.begin(), as.end() );
     //merge_frees_pass.Check(layout);   
     //AltOrderingChecker alt_ordering_checker( db );
@@ -189,12 +185,17 @@ void TreeUpdater::ApplyUpdate(XLink origin_xlink, shared_ptr<Patch> &layout)
     InversionPass inversion_pass( db, &sops ); 
     inversion_pass.RunInversion(origin_xlink, &layout);      
 	
+    GetTreePatchAssignmentsPass get_assigns_pass;
+    as = get_assigns_pass.Run(layout);
+    assignments.insert( as.begin(), as.end() );
+
 	// After inversion, we're done with the layout (and it might be invalid, see
 	// comment in code). We will work from the moves map.
 	
 	MoveInPass move_in_pass( db, &sops );
-	move_in_pass.Run(moves_map);
-	
+	as = move_in_pass.Run(moves_map);
+    assignments.insert( as.begin(), as.end() );
+
 	// Delayed actions in DB i.e. new/invalidated stimulus checks for
 	// domain extenstion.
 	db->PerformDeferredActions();      	

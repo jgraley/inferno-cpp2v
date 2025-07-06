@@ -21,7 +21,7 @@ typedef map<PatternLink, pair<TreePtr<Node>, XLink>> Assignments;
 struct MoveInfo
 {
 	TreeZone zone;
-	//Originators
+	Originators originators;
 };
 
 struct MovesMap

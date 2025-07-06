@@ -78,16 +78,16 @@ Assignments GetTreePatchAssignmentsPass::Run( shared_ptr<Patch> &layout )
 	Assignments assignments;
     Originators originators;
 
-    Patch::ForDepthFirstWalk( layout, [&](shared_ptr<Patch> &patch) // Act on wind-in
+    TreePatch::ForTreeDepthFirstWalk( layout, [&](shared_ptr<TreePatch> &tree_patch) // Act on wind-in
     {
 		// Append to our list
-		Originators patch_originators = patch->GetOriginators();
+		Originators patch_originators = tree_patch->GetOriginators();
 		originators.insert( patch_originators.begin(), patch_originators.end() );
-		patch->ClearOriginators();
+		tree_patch->ClearOriginators();
 		
-		if( !patch->GetZone()->IsEmpty() )
+		if( !tree_patch->GetZone()->IsEmpty() )
 		{
-			TreePtr<Node> x = patch->GetZone()->GetBaseNode();
+			TreePtr<Node> x = tree_patch->GetZone()->GetBaseNode();
 			for( PatternLink plink : originators )
 				assignments.insert( make_pair(plink, make_pair(x, XLink())) );
 			originators.clear();
