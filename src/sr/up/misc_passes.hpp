@@ -59,7 +59,7 @@ public:
 class GetTreePatchAssignmentsPass 
 {
 public:
-    Assignments Run( shared_ptr<Patch> &layout );
+    void Run( shared_ptr<Patch> &layout, Assignments *assignments );
 };
 
 // ------------------------- DuplicateAllPass --------------------------

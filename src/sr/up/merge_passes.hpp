@@ -20,7 +20,7 @@ public:
 	typedef function<bool (const FreeZone *zone, const FreeZone *child_zone)> PolicyFunction;
    
     // Can change the supplied shared ptr
-    Assignments Run( shared_ptr<Patch> &layout, PolicyFunction decider );
+    void Run( shared_ptr<Patch> &layout, PolicyFunction decider, Assignments *assignments = nullptr);
     
     void Check( shared_ptr<Patch> &layout, PolicyFunction decider );
 };
@@ -37,7 +37,7 @@ class MergeFreesPass
 {
 public:       
     // Can change the supplied shared ptr
-    Assignments Run( shared_ptr<Patch> &layout );
+    void Run( shared_ptr<Patch> &layout, Assignments *assignments );
     
     void Check( shared_ptr<Patch> &layout );
     
@@ -58,7 +58,7 @@ class MergeSubcontainerBasePass
 {
 public:       
     // Can change the supplied shared ptr
-    Assignments Run( shared_ptr<Patch> &layout );
+    void Run( shared_ptr<Patch> &layout );
     
     void Check( shared_ptr<Patch> &layout );
 

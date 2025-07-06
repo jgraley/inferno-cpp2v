@@ -171,6 +171,10 @@ TreePtr<Node> Mutator::ExchangeContainer( ContainerInterface *free_child_contain
 		}
 	}                   
 	                     
+	// One placeholder became zero, one or many elements from the child container. Thus
+	// to continue to behavce as a mutator would be ambiguous.
+	mode = Mode::Null;
+	                     
 	return old_child;	
 }
     
@@ -248,7 +252,7 @@ const TreePtrInterface *Mutator::GetTreePtrInterface() const
 		
 		case Mode::Null:
 		default: 
-			ASSERTFAIL();
+			ASSERTFAIL("trying to query a NULL mutator (may be null because a container-merge ambiguated it)");
 	}			
 }  
 

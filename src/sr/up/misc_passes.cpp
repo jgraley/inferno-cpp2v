@@ -73,9 +73,8 @@ void EmptyZonePass::Check( shared_ptr<Patch> &layout )
 
 // ------------------------- GetTreePatchAssignmentsPass --------------------------
 
-Assignments GetTreePatchAssignmentsPass::Run( shared_ptr<Patch> &layout )
+void GetTreePatchAssignmentsPass::Run( shared_ptr<Patch> &layout, Assignments *assignments )
 {   
-	Assignments assignments;
     Originators originators;
 
     TreePatch::ForTreeDepthFirstWalk( layout, [&](shared_ptr<TreePatch> &tree_patch) // Act on wind-in
@@ -87,9 +86,9 @@ Assignments GetTreePatchAssignmentsPass::Run( shared_ptr<Patch> &layout )
 		
 		if( !tree_patch->GetZone()->IsEmpty() )
 		{
-			TreePtr<Node> x = tree_patch->GetZone()->GetBaseNode();
+			TreeZone *tree_zone = tree_patch->GetZone();
 			for( PatternLink plink : originators )
-				assignments.insert( make_pair(plink, make_pair(x, XLink())) );
+				assignments->insert( make_pair(plink, make_pair(tree_zone->GetBaseNode(), tree_zone->GetBaseXLink())) );
 			originators.clear();
 		}
 		// If zone is empty, it has one child, which we will meet at the next iteration
@@ -98,7 +97,6 @@ Assignments GetTreePatchAssignmentsPass::Run( shared_ptr<Patch> &layout )
     }, nullptr );
     
     ASSERT( originators.empty() ); // could not place marker because we saw only empty zones.
-    return assignments;
 }
 
 // ------------------------- DuplicateAllPass --------------------------

@@ -75,7 +75,6 @@ ContainerInterface *FreeZone::TryGetContainerBase() const
 }
 
 
-
 size_t FreeZone::GetNumTerminii() const
 {
     return terminii.size();
@@ -142,6 +141,8 @@ FreeZone::TerminusIterator FreeZone::MergeTerminus( TerminusIterator it_t,
                                                     XLink *resulting_xlink ) 
 {
     ASSERT( child_zone.get() != this ); 
+	if( resulting_xlink )
+		*resulting_xlink = XLink();
 
     if( child_zone->IsEmpty() )
     {
@@ -156,19 +157,22 @@ FreeZone::TerminusIterator FreeZone::MergeTerminus( TerminusIterator it_t,
         // Child zone overwrites us
         base = child_zone->base;        
     }    
-    else     
-    {
-		if( auto child_base_container = child_zone->TryGetContainerBase() )
-		    it_t->ExchangeContainer( child_base_container, child_zone->terminii );
-		else
-			it_t->ExchangeChild( child_zone->base );
-        // Populate terminus. This will expand SubContainers. Remember that
-        // terminii are reference-like and so it's fine that we erase it.        
+    else if( auto child_base_container = child_zone->TryGetContainerBase() )
+	{
+		// Child is a subcontainer-rooted free zone. Populate, but don't provide 
+		// an XLink because it would be ambiguous.
+		// TODO separate function for this case.
+		it_t->ExchangeContainer( child_base_container, child_zone->terminii );
+	}
+	else
+	{
+		// Child is a regular free zone with an unambiguous root.
+		it_t->ExchangeChild( child_zone->base );
+        
+		if( resulting_xlink )
+			*resulting_xlink = it_t->GetXLink();
     }
     
-    if( resulting_xlink )
-		*resulting_xlink = it_t->GetXLink();
-
     // it_t updated to the next terminus after the one we erased, or end()
     it_t = terminii.erase( it_t );        
     

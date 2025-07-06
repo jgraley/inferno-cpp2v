@@ -13,9 +13,8 @@ using namespace SR;
 
 // ------------------------- FreeZoneMergeImpl --------------------------  
 
-Assignments FreeZoneMergeImpl::Run( shared_ptr<Patch> &layout, PolicyFunction policy )
+void FreeZoneMergeImpl::Run( shared_ptr<Patch> &layout, PolicyFunction policy, Assignments *assignments )
 {
-	Assignments assignments;
 	INDENT("F");
     FreePatch::ForFreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<FreePatch> &free_patch)
     {
@@ -34,19 +33,30 @@ Assignments FreeZoneMergeImpl::Run( shared_ptr<Patch> &layout, PolicyFunction po
 				FreeZone *child_free_zone = child_free_patch->GetZone();                    
 				if( policy(free_zone, child_free_zone) )
 				{
-					it_t = free_zone->MergeTerminus( it_t, make_unique<FreeZone>(*child_free_zone) );  // TODO why make_unique here and not move()?
+					XLink resulting_xlink;
+					it_t = free_zone->MergeTerminus( it_t, make_unique<FreeZone>(*child_free_zone), &resulting_xlink );  // TODO why make_unique here and not move()?
 					TRACE("Mutator OK\n");
 					it_child = free_patch->SpliceOver( it_child, child_free_patch->MoveChildren() );
 					TRACE("Splice OK\n");
 					
 					// Extract assignments between FZs that have been merged
 
-					TreePtr<Node> x = child_free_zone->GetBaseNode();
-					if( dynamic_cast<ScaffoldBase *>(x.get()) )
-						ASSERT(child_free_patch->GetOriginators().empty());
-					for( PatternLink plink : child_free_patch->GetOriginators() )
-						assignments.insert( make_pair(plink, make_pair(x, XLink())) );
-					child_free_patch->ClearOriginators();
+					if( assignments ) // we won't get one if child was a subcontainer-base (ambiguous)
+					{
+						ASSERT( resulting_xlink );
+						TreePtr<Node> x = child_free_zone->GetBaseNode();
+						if( dynamic_cast<ScaffoldBase *>(x.get()) )
+							ASSERT(child_free_patch->GetOriginators().empty());
+						for( PatternLink plink : child_free_patch->GetOriginators() )
+						{
+							FTRACE(x)(" ")(resulting_xlink)(" asp=%p\n", resulting_xlink.GetTreePtrInterface());
+							ASSERT( x == resulting_xlink.GetChildTreePtr() )
+									("Node: ")(x)("\n")
+									("XLink: ")(resulting_xlink)(" asp=%p\n", resulting_xlink.GetTreePtrInterface());
+							assignments->insert( make_pair(plink, make_pair(x, resulting_xlink)) );
+						}
+						child_free_patch->ClearOriginators();
+					}
 					
 					continue; // TODO not sure about this
 				}
@@ -58,9 +68,7 @@ Assignments FreeZoneMergeImpl::Run( shared_ptr<Patch> &layout, PolicyFunction po
 		} 
 		ASSERT( it_t == free_zone->GetTerminiiEnd() ); // length mismatch    
 		TRACE("Loop OK\n");
-    } );            
-    
-    return assignments;
+    } );                
 }
 
 
@@ -78,9 +86,9 @@ void FreeZoneMergeImpl::Check( shared_ptr<Patch> &layout, PolicyFunction policy 
 
 // ------------------------- MergeFreesPass --------------------------
 
-Assignments MergeFreesPass::Run( shared_ptr<Patch> &layout )
+void MergeFreesPass::Run( shared_ptr<Patch> &layout, Assignments *assignments )
 {
-	return impl.Run(layout, bind(&MergeFreesPass::Policy, this, placeholders::_1, placeholders::_2));
+	impl.Run(layout, bind(&MergeFreesPass::Policy, this, placeholders::_1, placeholders::_2), assignments);
 }
     
     
@@ -97,11 +105,11 @@ bool MergeFreesPass::Policy(const FreeZone *, const FreeZone *) const
 
 // ------------------------- MergeSubcontainerBasePass --------------------------
 
-Assignments MergeSubcontainerBasePass::Run( shared_ptr<Patch> &layout )
+void MergeSubcontainerBasePass::Run( shared_ptr<Patch> &layout )
 {
 	INDENT("W");
 	//FTRACE(layout);
-	return impl.Run(layout, bind(&MergeSubcontainerBasePass::Policy, this, placeholders::_1, placeholders::_2));
+	impl.Run(layout, bind(&MergeSubcontainerBasePass::Policy, this, placeholders::_1, placeholders::_2));
 }
     
     

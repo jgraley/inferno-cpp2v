@@ -22,7 +22,7 @@ class MoveInPass
 public:
 	MoveInPass( XTreeDatabase *db, class ScaffoldOps *sops_ );
 	
-	Assignments Run(class MovesMap &moves_map);
+	void Run(class MovesMap &moves_map, Assignments *assignments);
 
 private:
 	XTreeDatabase * const db;

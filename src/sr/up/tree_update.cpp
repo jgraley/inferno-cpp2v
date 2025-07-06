@@ -57,7 +57,7 @@ unique_ptr<FreeZone> TreeUpdater::TransformToSingleFreeZone( shared_ptr<Patch> l
     duplicate_all_pass.Check(layout);
     
     MergeFreesPass merge_frees_pass;
-    merge_frees_pass.Run(layout);  
+    merge_frees_pass.Run(layout, nullptr);  
     merge_frees_pass.Check(layout);
 
     auto free_patch = dynamic_pointer_cast<FreePatch>(layout);
@@ -80,9 +80,6 @@ void TreeUpdater::UpdateMainTree( XLink origin_xlink, shared_ptr<Patch> layout )
 
 	// Act on replace assignements info
 	// TODO
-	// - Do we really need to do MergeSubcontainerBasePass? - no but no harm so leaving
-	// - make inversion return the in-tree TZs
-	// - ensure they get through move-out
 	// - move GetTreePatchAssignmentsPass to the very end
 	// - go to XLinks and drop the inner std::pair
 	// - checks: did we get an assignmant for every originator? Any extra?
@@ -93,7 +90,9 @@ void TreeUpdater::UpdateMainTree( XLink origin_xlink, shared_ptr<Patch> layout )
 	// - Drop rule #726
 	//FTRACE("After update, assignments are\n")(assignments)("\n");
     for( auto a : assignments )
-        a.first.GetChildAgent()->SetReplaceAssignment( a.second.first );
+    {
+        a.first.GetChildAgent()->SetReplaceAssignment( a.second.first /*second.GetChildTreePtr()*/ );
+	}
 }
 
 
@@ -114,8 +113,7 @@ void TreeUpdater::Analysis(XLink origin_xlink, shared_ptr<Patch> &layout)
 	set_ordinals.Run(layout);
 
     MergeSubcontainerBasePass merge_wides_pass;
-    Assignments as = merge_wides_pass.Run(layout);
-    assignments.insert( as.begin(), as.end() );
+    merge_wides_pass.Run(layout);
 	//validate_zones.Run(layout);
 
 	ProtectDEPass protect_de_pass( db );
@@ -173,28 +171,25 @@ void TreeUpdater::ApplyUpdate(XLink origin_xlink, shared_ptr<Patch> &layout)
 	// all tree patches are DEFAULT and this means we can leave them alone.
 
     MergeFreesPass merge_frees_pass;
-    Assignments as = merge_frees_pass.Run(layout);  
-    assignments.insert( as.begin(), as.end() );
+    merge_frees_pass.Run(layout, &assignments);  
     //merge_frees_pass.Check(layout);   
     //AltOrderingChecker alt_ordering_checker( db );
     //alt_ordering_checker.Check(layout);    
-    
+ 
 	// INVARIANT: free patches touch root and/or tree patches (which are all 
 	// leave-alone); inversion now possible
 
     InversionPass inversion_pass( db, &sops ); 
     inversion_pass.RunInversion(origin_xlink, &layout);      
-	
-    GetTreePatchAssignmentsPass get_assigns_pass;
-    as = get_assigns_pass.Run(layout);
-    assignments.insert( as.begin(), as.end() );
 
 	// After inversion, we're done with the layout (and it might be invalid, see
 	// comment in code). We will work from the moves map.
 	
 	MoveInPass move_in_pass( db, &sops );
-	as = move_in_pass.Run(moves_map);
-    assignments.insert( as.begin(), as.end() );
+	move_in_pass.Run(moves_map, &assignments);
+
+    GetTreePatchAssignmentsPass get_assigns_pass;
+    get_assigns_pass.Run(layout, &assignments);
 
 	// Delayed actions in DB i.e. new/invalidated stimulus checks for
 	// domain extenstion.

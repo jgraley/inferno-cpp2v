@@ -26,7 +26,6 @@ struct MoveInfo
 
 struct MovesMap
 {
-	public:
 	map<TreePtr<Node>, MoveInfo> mm;
 };
 

@@ -95,7 +95,7 @@ void MoveOutPass::MoveTreeZoneOut( shared_ptr<Patch> *ooo_patch_ptr, shared_ptr<
 	TRACE("\"To\" scaffold base: ")(scaffold_zone_to)("\n");
 
 	// Rememeber the association between the "to" scaffold node and the moving zone
-	FTRACE("Making map entry, \"to\" scaffold node: ")(scaffold_base_to)("\n moving zone: \n")(tree_zone_in_extra)("\n");
+	TRACE("Making map entry, \"to\" scaffold node: ")(scaffold_base_to)("\n moving zone: \n")(tree_zone_in_extra)("\n");
 
 	MoveInfo mi{ tree_zone_in_extra, ooo_tree_patch->GetOriginators() };
 	InsertSolo( moves_map.mm, make_pair(scaffold_base_to, mi) );
