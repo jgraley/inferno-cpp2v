@@ -73,15 +73,16 @@ void EmptyZonePass::Check( shared_ptr<Patch> &layout )
 
 // ------------------------- GetTreePatchAssignmentsPass --------------------------
 
-Patch::Assignments GetTreePatchAssignmentsPass::Run( shared_ptr<Patch> &layout )
+Assignments GetTreePatchAssignmentsPass::Run( shared_ptr<Patch> &layout )
 {   
-	Patch::Assignments assignments;
-    list<PatternLink> originators;
+	Assignments assignments;
+    Originators originators;
 
     Patch::ForDepthFirstWalk( layout, [&](shared_ptr<Patch> &patch) // Act on wind-in
     {
 		// Append to our list
-		originators.splice( originators.end(), patch->GetOriginators() );
+		Originators patch_originators = patch->GetOriginators();
+		originators.insert( patch_originators.begin(), patch_originators.end() );
 		patch->ClearOriginators();
 		
 		if( !patch->GetZone()->IsEmpty() )
@@ -122,8 +123,7 @@ void DuplicateAllPass::Check( shared_ptr<Patch> &layout )
 
 // ------------------------- ScaffoldChecker --------------------------
 
-void ScaffoldChecker::Run( shared_ptr<Patch> layout )
-{
+void ScaffoldChecker::Run( shared_ptr<Patch> layout ){
     Patch::ForDepthFirstWalk( layout, nullptr, [&](shared_ptr<Patch> &patch)
     {
 		Check(patch); 

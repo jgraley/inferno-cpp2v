@@ -6,6 +6,7 @@
 #include "tz_relation.hpp"
 #include "misc_passes.hpp"
 #include "scaffold_ops.hpp"
+#include "up_common.hpp"
 
 #include <iostream>
 
@@ -95,7 +96,9 @@ void MoveOutPass::MoveTreeZoneOut( shared_ptr<Patch> *ooo_patch_ptr, shared_ptr<
 
 	// Rememeber the association between the "to" scaffold node and the moving zone
 	FTRACE("Making map entry, \"to\" scaffold node: ")(scaffold_base_to)("\n moving zone: \n")(tree_zone_in_extra)("\n");
-	InsertSolo( moves_map.mm, make_pair(scaffold_base_to, tree_zone_in_extra) );
+
+	MoveInfo mi{ tree_zone_in_extra };
+	InsertSolo( moves_map.mm, make_pair(scaffold_base_to, mi) );
 
 	// Store the scaffold in the layout so it goes into inversion as a free zone, so it survives, 
 	// and ands up in the tree at the "to" location.

@@ -4,6 +4,7 @@
 #include "db/x_tree_database.hpp"
 #include "tree/validate.hpp"
 #include "common/lambda_loops.hpp"
+#include "up_common.hpp"
 
 using namespace SR;
 

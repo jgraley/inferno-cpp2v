@@ -13,9 +13,9 @@ using namespace SR;
 
 // ------------------------- FreeZoneMergeImpl --------------------------  
 
-Patch::Assignments FreeZoneMergeImpl::Run( shared_ptr<Patch> &layout, PolicyFunction policy )
+Assignments FreeZoneMergeImpl::Run( shared_ptr<Patch> &layout, PolicyFunction policy )
 {
-	Patch::Assignments assignments;
+	Assignments assignments;
 	INDENT("F");
     FreePatch::ForFreeDepthFirstWalk( layout, nullptr, [&](shared_ptr<FreePatch> &free_patch)
     {
@@ -78,7 +78,7 @@ void FreeZoneMergeImpl::Check( shared_ptr<Patch> &layout, PolicyFunction policy 
 
 // ------------------------- MergeFreesPass --------------------------
 
-Patch::Assignments MergeFreesPass::Run( shared_ptr<Patch> &layout )
+Assignments MergeFreesPass::Run( shared_ptr<Patch> &layout )
 {
 	return impl.Run(layout, bind(&MergeFreesPass::Policy, this, placeholders::_1, placeholders::_2));
 }
@@ -97,7 +97,7 @@ bool MergeFreesPass::Policy(const FreeZone *, const FreeZone *) const
 
 // ------------------------- MergeSubcontainerBasePass --------------------------
 
-Patch::Assignments MergeSubcontainerBasePass::Run( shared_ptr<Patch> &layout )
+Assignments MergeSubcontainerBasePass::Run( shared_ptr<Patch> &layout )
 {
 	INDENT("W");
 	//FTRACE(layout);

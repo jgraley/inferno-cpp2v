@@ -59,7 +59,7 @@ public:
 class GetTreePatchAssignmentsPass 
 {
 public:
-    Patch::Assignments Run( shared_ptr<Patch> &layout );
+    Assignments Run( shared_ptr<Patch> &layout );
 };
 
 // ------------------------- DuplicateAllPass --------------------------

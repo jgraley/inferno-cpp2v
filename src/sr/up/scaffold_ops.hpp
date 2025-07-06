@@ -44,14 +44,6 @@ private:
 	XTreeDatabase * const db;
 };
 
-// ------------------------- MovesMap --------------------------
-
-struct MovesMap
-{
-	public:
-	map<TreePtr<Node>, TreeZone> mm;
-};
-
 }
 
 #endif

@@ -16,6 +16,7 @@
 #include "move_out_pass.hpp"
 #include "copy_passes.hpp"
 #include "scaffold_ops.hpp"
+#include "up_common.hpp"
 
 #include <iostream>
 
@@ -89,6 +90,7 @@ void TreeUpdater::UpdateMainTree( XLink origin_xlink, shared_ptr<Patch> layout )
 	// - route the assignemtns out though to SCR engine and don't call 
 	//   the originators directly incl. drop call from FreePatch to agent
 	// - TODOs in FreeZoneMergeImpl::Run()
+	// - Drop rule #726
 	//FTRACE("After update, assignments are\n")(assignments)("\n");
     for( auto a : assignments )
         a.first.GetChildAgent()->SetReplaceAssignment( a.second.first );
@@ -112,7 +114,7 @@ void TreeUpdater::Analysis(XLink origin_xlink, shared_ptr<Patch> &layout)
 	set_ordinals.Run(layout);
 
     MergeSubcontainerBasePass merge_wides_pass;
-    Patch::Assignments as = merge_wides_pass.Run(layout);
+    Assignments as = merge_wides_pass.Run(layout);
     assignments.insert( as.begin(), as.end() );
 	//validate_zones.Run(layout);
 
@@ -163,7 +165,7 @@ void TreeUpdater::ApplyUpdate(XLink origin_xlink, shared_ptr<Patch> &layout)
 	// INVARIANT: by now, all true NEW content is in free patches; no COPYABLE TZs
 
     GetTreePatchAssignmentsPass get_assigns_pass;
-    Patch::Assignments as = get_assigns_pass.Run(layout);
+    Assignments as = get_assigns_pass.Run(layout);
     assignments.insert( as.begin(), as.end() );
 
     MovesMap moves_map;

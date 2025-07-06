@@ -7,6 +7,7 @@
 #include "common/lambda_loops.hpp"
 #include "tz_relation.hpp"
 #include "scaffold_ops.hpp"
+#include "up_common.hpp"
 
 #include <iostream>
 

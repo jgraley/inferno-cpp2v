@@ -9,6 +9,8 @@
 #include "../db/duplicate.hpp"
 #include "../scr_engine.hpp"
 #include "../db/db_common.hpp"
+#include "up_common.hpp"
+
 #include <functional>
 
 #define USE_SWAPS
@@ -25,7 +27,6 @@ class Patch : public Traceable
 {
 public:
     typedef list<shared_ptr<Patch>>::iterator ChildPatchIterator;
-    typedef map<PatternLink, pair<TreePtr<Node>, XLink>> Assignments;
 
 protected:
     Patch( list<shared_ptr<Patch>> &&child_patches_ );
@@ -39,9 +40,9 @@ public:
     const list<shared_ptr<Patch>> &GetChildren() const;
     list<shared_ptr<Patch>> &&MoveChildren();
     
-    virtual void AddOriginators( list<PatternLink> &&new_markers ) = 0;
-    virtual list<PatternLink> GetOriginators() const = 0;
-    virtual void ClearOriginators() = 0;
+    void AddOriginators( const Originators &new_originators );
+    const Originators &GetOriginators() const;
+    void ClearOriginators();
 
     virtual Zone *GetZone() = 0;
     virtual const Zone *GetZone() const = 0;
@@ -60,6 +61,7 @@ public:
 
 private:
     list<shared_ptr<Patch>> child_patches;
+    Originators originators;    
 };
 
 // ------------------------- TreePatch --------------------------
@@ -81,10 +83,6 @@ public:
 
     TreePatch( const TreeZone &zone_, list<shared_ptr<Patch>> &&child_patches );
     TreePatch( const TreeZone &zone_ );
-    
-    void AddOriginators( list<PatternLink> &&new_markers ) final;
-    list<PatternLink> GetOriginators() const final;
-    void ClearOriginators() final;
 
     TreeZone *GetZone() override;
     const TreeZone *GetZone() const override;
@@ -110,7 +108,6 @@ public:
     
 private:
     TreeZone zone;
-    list<PatternLink> originators;
     Intent intent = Intent::DEFAULT;
 };
 
@@ -126,10 +123,6 @@ class FreePatch : public Patch
 public:
     FreePatch( const FreeZone &zone_, list<shared_ptr<Patch>> &&child_patches );
     FreePatch( const FreeZone &zone_ );
-
-    void AddOriginators( list<PatternLink> &&new_markers ) final;
-    list<PatternLink> GetOriginators() const final;
-    void ClearOriginators() final;
 
     ChildPatchIterator SpliceOver( ChildPatchIterator it_child, 
                                    list<shared_ptr<Patch>> &&child_patches );

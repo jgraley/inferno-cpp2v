@@ -59,6 +59,24 @@ list<shared_ptr<Patch>> &&Patch::MoveChildren()
 }
 
 
+void Patch::AddOriginators( const Originators &new_originators )
+{
+    originators.insert( new_originators.begin(), new_originators.end() );   
+}
+
+
+const Originators &Patch::GetOriginators() const
+{
+    return originators;
+}
+
+
+void Patch::ClearOriginators()
+{
+    originators.clear();
+}
+
+
 string Patch::GetChildrenTrace() const
 {
     list<string> ls;
@@ -134,24 +152,6 @@ TreePatch::TreePatch( const TreeZone &zone_ ) :
 {
     // If zone has terminii, they will be "exposed".
 }        
-
-
-void TreePatch::AddOriginators( list<PatternLink> &&new_markers )
-{
-    originators.splice( originators.end(), move(new_markers) );
-}
-
-
-list<PatternLink> TreePatch::GetOriginators() const
-{
-    return originators;
-}
-
-
-void TreePatch::ClearOriginators()
-{
-    originators.clear();
-}
 
 
 TreeZone *TreePatch::GetZone() 
@@ -290,26 +290,6 @@ FreePatch::FreePatch( const FreeZone &zone_ ) :
 {
     // If zone has terminii, they will be "exposed" and will remain 
     // in the zone returned by Evaluate.
-}
-
-
-void FreePatch::AddOriginators( list<PatternLink> &&new_markers )
-{
-    // Rule #726 requires us to mark free zones immediately
-    for( PatternLink marker : new_markers )
-        marker.GetChildAgent()->SetReplaceAssignment( zone.GetBaseNode() );    
-}
-
-
-list<PatternLink> FreePatch::GetOriginators() const
-{
-    return {}; // Rule #726 means there aren't any
-}
-
-
-void FreePatch::ClearOriginators()
-{
-    // Rule #726 means there aren't any
 }
 
 
