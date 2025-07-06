@@ -28,13 +28,12 @@ void MoveInPass::Run(MovesMap &moves_map, Assignments *assignments)
 		
 		// Notice if some of the assignments go to XLinks that will get
 		// damaged by the swap
-		list<Originators> v; // one per terminus
-		for( XLink xlink : main_tree_zone.GetTerminusXLinks() )
+		vector<Originators> fixups( main_tree_zone.GetNumTerminii() ); // one per terminus
+		for( size_t i=0; i<fixups.size(); i++ )
 		{
-			v.push_back({});
 			for( auto p : *assignments )
-				if( p.second.second == xlink )
-					v.back().insert( p.first );
+				if( p.second == main_tree_zone.GetTerminusXLink(i) )
+					fixups[i].insert( p.first );
 		}
 				
 		// Swap the moving content in and the scaffold out
@@ -42,13 +41,10 @@ void MoveInPass::Run(MovesMap &moves_map, Assignments *assignments)
 							main_tree_zone, vector<TreeZone *>() );
 				
 		// Fix up XLinks damaged by the swap.
-		for( XLink xlink : main_tree_zone.GetTerminusXLinks() )
+		for( size_t i=0; i<fixups.size(); i++ )
 		{
-			// v.front() has set of originator plinks
-			// x is noew correct xlink
-			for( PatternLink plink : v.front() )
-				assignments->at(plink).second = xlink;
-			v.pop_front();
+			for( PatternLink plink : fixups[i] )
+				assignments->at(plink) = main_tree_zone.GetTerminusXLink(i);
 		}
 
 		// We're done with the extra tree zone which now contains scaffold
@@ -56,7 +52,7 @@ void MoveInPass::Run(MovesMap &moves_map, Assignments *assignments)
 		
 		// Capture the replace assignments
 		for( PatternLink plink : p.second.originators )
-			assignments->insert( make_pair(plink, make_pair(main_tree_zone.GetBaseNode(), main_tree_zone.GetBaseXLink())) );		                                     	
+			assignments->insert( make_pair(plink, main_tree_zone.GetBaseXLink()) );  	
 	}
 }
 

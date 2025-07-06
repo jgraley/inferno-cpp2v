@@ -44,17 +44,8 @@ void FreeZoneMergeImpl::Run( shared_ptr<Patch> &layout, PolicyFunction policy, A
 					if( assignments ) // we won't get one if child was a subcontainer-base (ambiguous)
 					{
 						ASSERT( resulting_xlink );
-						TreePtr<Node> x = child_free_zone->GetBaseNode();
-						if( dynamic_cast<ScaffoldBase *>(x.get()) )
-							ASSERT(child_free_patch->GetOriginators().empty());
 						for( PatternLink plink : child_free_patch->GetOriginators() )
-						{
-							FTRACE(x)(" ")(resulting_xlink)(" asp=%p\n", resulting_xlink.GetTreePtrInterface());
-							ASSERT( x == resulting_xlink.GetChildTreePtr() )
-									("Node: ")(x)("\n")
-									("XLink: ")(resulting_xlink)(" asp=%p\n", resulting_xlink.GetTreePtrInterface());
-							assignments->insert( make_pair(plink, make_pair(x, resulting_xlink)) );
-						}
+							assignments->insert( make_pair(plink, resulting_xlink) );
 						child_free_patch->ClearOriginators();
 					}
 					

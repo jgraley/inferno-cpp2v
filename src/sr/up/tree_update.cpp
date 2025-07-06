@@ -80,7 +80,6 @@ void TreeUpdater::UpdateMainTree( XLink origin_xlink, shared_ptr<Patch> layout )
 
 	// Act on replace assignements info
 	// TODO
-	// - move GetTreePatchAssignmentsPass to the very end
 	// - go to XLinks and drop the inner std::pair
 	// - checks: did we get an assignmant for every originator? Any extra?
 	// - checks: are all the assignment XLinks valid and in main tree?
@@ -91,7 +90,7 @@ void TreeUpdater::UpdateMainTree( XLink origin_xlink, shared_ptr<Patch> layout )
 	//FTRACE("After update, assignments are\n")(assignments)("\n");
     for( auto a : assignments )
     {
-        a.first.GetChildAgent()->SetReplaceAssignment( a.second.first /*second.GetChildTreePtr()*/ );
+         a.first.GetChildAgent()->SetReplaceAssignment( a.second.GetChildTreePtr() );
 	}
 }
 
