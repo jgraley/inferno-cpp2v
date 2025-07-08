@@ -117,13 +117,14 @@ void SCREngine::Plan::CategoriseAgents( const set<PatternLink> &enclosing_plinks
     for( PatternLink plink : visible_replace_plinks_postorder )
     {		
         if( enclosing_plinks.count(plink) == 0 )
-        {
-            my_replace_plinks_postorder.push_back( plink );
-            
+        {          
             Agent *agent = plink.GetChildAgent();
             if( agent->GetEmbeddedSearchPattern() ||
                 agent->GetEmbeddedReplacePattern() )
                 my_embedded_plinks_postorder.push_back(plink);        
+                
+            if( visible_compare_plinks.count(plink) == 0 )
+				my_replace_plinks_postorder.push_back( plink ); // be exclusive of shared contexts      
 		}
 	}
 	

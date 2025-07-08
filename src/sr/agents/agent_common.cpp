@@ -515,11 +515,12 @@ bool AgentCommon::ReplaceKeyerQuery( PatternLink me_plink,
                                      set<PatternLink> keyer_plinks )
 {
 #ifdef NEWS
+	// TODO #807 drop the vcall and do this in SCR engine
+	
     ASSERT( me_plink.GetChildAgent() == this );
     
-    // TODO could we be stricter? Replace-only region should not be keyed.
-    if( !my_scr_engine->IsKeyed(me_plink) ) // keyed on current plink
-		return false; // was probably keyed by AndRuleEngine planning for compare,
+    // Only want to be called when not already keyed, i.e. exclusively replace context.
+    ASSERT( !my_scr_engine->IsKeyed(me_plink) ) 
 		
     bool should_key = !my_scr_engine->IsKeyed(this); // (not) keyed by any incoming plink
     
