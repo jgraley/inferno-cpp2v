@@ -33,31 +33,28 @@ bool BuilderAgent::ReplaceKeyerQuery( PatternLink me_plink,
  
  
 Agent::ReplacePatchPtr BuilderAgent::GenReplaceLayoutImpl( const ReplaceKit &kit, 
-                                                          PatternLink me_plink, 
-                                                          XLink key_xlink )
+                                                           PatternLink me_plink, 
+                                                           XLink key_xlink )
 {
     INDENT("%");
 
     TreePtr<Node> new_node;
     if( me_plink == keyer_plink )
     {
-        ASSERT( !key_xlink ); // we're on keyer plink
         // Call the soft pattern impl 
-        new_node = BuildNewSubtree();
-          
-        // Key it
-        XLink new_xlink = XLink::CreateDistinct( new_node );
-        my_scr_engine->SetReplaceKey( LocatedLink( me_plink, new_xlink ) );   
+        built_node = new_node = BuildNewSubtree();
         
         // Don't duplicate since this is first one     
     }
-    else
-    {
-        ASSERT( key_xlink ); // we're on residual plink
-        
+    else if( key_xlink ) // residual but keyed during search or externally
+    {        
         // Duplicate to keep free zones distinct since not first one
         new_node = SimpleDuplicate::DuplicateSubtree(key_xlink.GetChildTreePtr());
     }
+    else // residual but seen earlier during this get-layout pass 
+    {
+        new_node = SimpleDuplicate::DuplicateSubtree(built_node);
+	}
 
     // Make free zone without duplicating since this is first one
     return make_shared<FreePatch>( FreeZone::CreateSubtree(new_node) );

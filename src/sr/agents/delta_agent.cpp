@@ -12,6 +12,7 @@ shared_ptr<PatternQuery> DeltaAgent::GetPatternQuery() const
     return pq;
 }
 
+
 Graphable::NodeBlock DeltaAgent::GetGraphBlockInfo() const
 {
     list<ItemBlock> item_blocks;

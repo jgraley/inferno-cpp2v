@@ -78,15 +78,6 @@ ReplaceAssignments TreeUpdater::UpdateMainTree( XLink origin_xlink, shared_ptr<P
 	Analysis(origin_xlink, layout);
 	ApplyUpdate(origin_xlink, layout);
 
-	// Act on replace assignements info
-	// TODO
-	// - fix NEWS in SCREngine
-	// - checks: did we get an assignmant for every originator? Any extra?
-	// - checks: are all the assignment XLinks valid and in main tree?
-	// - route the assignemtns out though to SCR engine and don't call 
-	//   the originators directly incl. 
-	// - TODOs in FreeZoneMergeImpl::Run()
-	// - Drop rule #726
 	return assignments;
 }
 

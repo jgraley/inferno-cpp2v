@@ -78,7 +78,11 @@ void SCREngine::Plan::CategoriseAgents( const set<PatternLink> &enclosing_plinks
     // compare and replace sets separately.
     set<PatternLink> visible_compare_plinks, visible_replace_plinks;
     list<PatternLink> visible_replace_plinks_postorder;
+    
+    // Common stem and compare path of deltas
     WalkVisible( visible_compare_plinks, nullptr, origin_plink, Agent::COMPARE_PATH );
+
+    // Common stem and replace path of deltas
     WalkVisible( visible_replace_plinks, &visible_replace_plinks_postorder, origin_plink, Agent::REPLACE_PATH );
     
     // Determine all the agents we can see (can only see though embedded "through", 
@@ -145,13 +149,15 @@ void SCREngine::Plan::WalkVisible( set<PatternLink> &visible,
     visible.insert( plink );    
     
     // Gee, I sure hope recovers children in the same order as GenReplaceLayoutImpl()    
+    // We will not recurse into the "wrong" branch of a Delta (wrt path) or
+    // the compare or replace branches of an embedded engine.
     list<PatternLink> visible_child_plinks = plink.GetChildAgent()->GetVisibleChildren(path); 
     
     for( PatternLink visible_child_plink : visible_child_plinks )
-        WalkVisible( visible, visible_postorder, visible_child_plink, path );    
+        WalkVisible( visible, visible_postorder, visible_child_plink, path ); // recurse here
 
     if( visible_postorder )
-        visible_postorder->push_back( plink );
+        visible_postorder->push_back( plink ); // Push to list here, hence post-order
 }
 
 
@@ -238,11 +244,12 @@ void SCREngine::Plan::PlanReplace()
     for( StartsOverlay *ao : my_overlay_starter_engines )
         ao->StartPlanOverlay();        
 
-    for( PatternLink plink : my_replace_plinks_postorder )
+    for( PatternLink plink : my_replace_plinks_postorder ) // common stem and Delta->replace
     {
         Agent *agent = plink.GetChildAgent();
         if( agent->ReplaceKeyerQuery(plink, all_keyer_plinks) )
         {
+			ASSERT( all_keyer_plinks.count(plink)==0 )(plink);
             InsertSolo( all_keyer_plinks, plink );
             agent->ConfigureCoupling( algo, plink, {} );
         }
@@ -311,7 +318,7 @@ string SCREngine::Plan::GetTrace() const
 }
 
 
-void SCREngine::RunEmbedded( PatternLink plink_to_embedded, const ReplaceAssignments &replace_assignments )
+void SCREngine::RunEmbedded( PatternLink plink_to_embedded )
 {         
     INDENT("E");
     auto embedded_agent = plink_to_embedded.GetChildAgent();
@@ -321,7 +328,7 @@ void SCREngine::RunEmbedded( PatternLink plink_to_embedded, const ReplaceAssignm
          (" agent ")(embedded_agent)("\n");
               
 	// Discover new origin for embedded by consulting the replace assignments
-	XLink embedded_origin_xlink = replace_assignments.at(plink_to_embedded);
+	XLink embedded_origin_xlink = replace_solution.at(plink_to_embedded);
     TRACE("Running embedded ")(plink_to_embedded)(" with origin=")(embedded_origin_xlink)("\n");
    
     // Run the embedded's engine on this subtree and overwrite through ptr via p_through_x
@@ -368,15 +375,13 @@ void SCREngine::SingleCompareReplace( XLink origin_xlink,
     ReplaceAssignments replace_assignments = Replace(origin_xlink);
 
     // replace_assignments overrides
-	replace_solution = UnionOf( replace_solution, replace_assignments );    
+	//replace_solution = UnionOf( replace_solution, replace_assignments );    	
+	for( auto p : replace_assignments )
+		replace_solution[p.first] = p.second;
 
     // Now run the embedded SCR engines (LATER model)
-    for( PatternLink plink_to_embedded : plan.my_embedded_plinks_postorder )
-#ifdef NEWS
-        RunEmbedded(plink_to_embedded, replace_solution);       
-#else
-        RunEmbedded(plink_to_embedded, replace_assignments);       
-#endif
+    for( PatternLink plink_to_embedded : plan.my_embedded_plinks_postorder )	    
+        RunEmbedded(plink_to_embedded);       
 		
     TRACE("Embedded SCRs done\n");
     
@@ -510,13 +515,6 @@ void SCREngine::GenerateGraphRegions( Graph &graph ) const
     plan.and_rule_engine->GenerateGraphRegions(graph, GetGraphId());
     for( auto p : plan.my_engines )
         p.second->GenerateGraphRegions(graph);    
-}
-
-
-void SCREngine::SetReplaceKey( LocatedLink keyer_link ) const
-{
-    ASSERT( replace_solution_available );
-    InsertSolo( replace_solution, keyer_link );
 }
 
 

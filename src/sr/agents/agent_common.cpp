@@ -20,6 +20,8 @@
 
 #include <stdexcept>
 
+#define NEWS
+
 using namespace SR;
 using namespace SYM;
 
@@ -512,7 +514,25 @@ void AgentCommon::MaybeChildrenPlanOverlay( PatternLink me_plink,
 bool AgentCommon::ReplaceKeyerQuery( PatternLink me_plink, 
                                      set<PatternLink> keyer_plinks )
 {
+#ifdef NEWS
+    ASSERT( me_plink.GetChildAgent() == this );
+    
+    // TODO could we be stricter? Replace-only region should not be keyed.
+    if( !my_scr_engine->IsKeyed(me_plink) ) // keyed on current plink
+		return false; // was probably keyed by AndRuleEngine planning for compare,
+		
+    bool should_key = !my_scr_engine->IsKeyed(this); // (not) keyed by any incoming plink
+    
+    if( should_key )
+    {
+        ASSERT( !keyer_plink );
+        keyer_plink = me_plink;
+    }
+    
+    return should_key; 
+#else
     return false;
+#endif
 }
                                   
                                   

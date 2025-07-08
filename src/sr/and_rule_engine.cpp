@@ -102,7 +102,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     for( PatternLink plink : surrounding_keyer_plinks )
         if( boundary_agents.count(plink.GetChildAgent()) == 1 )
             boundary_keyer_links.insert( plink );
-        
+               
     my_fixed_keyer_links = { base_plink };
     
     // ------------------ Log the plan ---------------------

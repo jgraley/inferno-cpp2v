@@ -34,7 +34,7 @@ void FreeZoneMergeImpl::Run( shared_ptr<Patch> &layout, PolicyFunction policy, R
 				if( policy(free_zone, child_free_zone) )
 				{
 					XLink resulting_xlink;
-					it_t = free_zone->MergeTerminus( it_t, make_unique<FreeZone>(*child_free_zone), &resulting_xlink );  // TODO why make_unique here and not move()?
+					it_t = free_zone->MergeTerminus( it_t, make_unique<FreeZone>(*child_free_zone), &resulting_xlink );  
 					TRACE("Mutator OK\n");
 					it_child = free_patch->SpliceOver( it_child, child_free_patch->MoveChildren() );
 					TRACE("Splice OK\n");
@@ -49,7 +49,7 @@ void FreeZoneMergeImpl::Run( shared_ptr<Patch> &layout, PolicyFunction policy, R
 						child_free_patch->ClearOriginators();
 					}
 					
-					continue; // TODO not sure about this
+					continue;
 				}
 			}
 			

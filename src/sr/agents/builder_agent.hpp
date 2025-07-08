@@ -26,6 +26,9 @@ public:
                                     XLink key_xlink ) final;
                                             
     virtual TreePtr<Node> BuildNewSubtree() = 0;
+    
+private:
+    TreePtr<Node> built_node = nullptr;    
 };
 
 };
