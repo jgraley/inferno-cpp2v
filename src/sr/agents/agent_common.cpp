@@ -520,7 +520,7 @@ bool AgentCommon::ReplaceKeyerQuery( PatternLink me_plink,
     ASSERT( me_plink.GetChildAgent() == this );
     
     // Only want to be called when not already keyed, i.e. exclusively replace context.
-    ASSERT( !my_scr_engine->IsKeyed(me_plink) ) 
+    ASSERT( !my_scr_engine->IsKeyed(me_plink) );
 		
     bool should_key = !my_scr_engine->IsKeyed(this); // (not) keyed by any incoming plink
     

@@ -45,6 +45,9 @@ Agent::ReplacePatchPtr BuilderAgent::GenReplaceLayoutImpl( const ReplaceKit &kit
         built_node = new_node = BuildNewSubtree();
         
         // Don't duplicate since this is first one     
+        // Note: from #807 we don't now set a key with the SCR engine 
+        // since tree update does so for all agents that submit patches.
+        // This has allowed the removal of a CreateDistinct() call.
     }
     else if( key_xlink ) // residual but keyed during search or externally
     {        
@@ -53,6 +56,7 @@ Agent::ReplacePatchPtr BuilderAgent::GenReplaceLayoutImpl( const ReplaceKit &kit
     }
     else // residual but seen earlier during this get-layout pass 
     {
+        // Duplicate to keep free zones distinct since not first one
         new_node = SimpleDuplicate::DuplicateSubtree(built_node);
 	}
 
