@@ -758,16 +758,25 @@ private:
 
             o->initialiser = FromClang(Init);
 
-            // At this point, when we have the instance (and hence the type) and the initialiser
-            // we can detect when an array initialiser has been inserted for a record instance and
-            // change it.
             DefaultTransUtils utils(all_decls);
             TransKit kit { &utils };
-            if ( TreePtr<MakeArray> ai = DynamicTreePtrCast<MakeArray>(o->initialiser) )
-                if ( TreePtr<TypeIdentifier> ti = DynamicTreePtrCast<TypeIdentifier>(o->type) )
-                    if ( TreePtr<Record> r = GetRecordDeclaration(kit, ti).GetTreePtr() )
+            // Actions if we have an intiialiser
+            if( auto ai = DynamicTreePtrCast<MakeArray>(o->initialiser) )
+            {
+				// If an array does not give its size (eg myarr[]), fill the size
+				// in from the initialiser
+                if( auto a = DynamicTreePtrCast<Array>(o->type) )                
+					if( DynamicTreePtrCast<Uninitialised>(a->size) )
+						a->size = MakeTreeNode<SpecificInteger>( ai->operands.size() );				
+                
+                // At this point, when we have the instance (and hence the type) and the initialiser
+				// we can detect when an array initialiser has been inserted for a record instance and
+				// change it.
+                if( auto ti = DynamicTreePtrCast<TypeIdentifier>(o->type) )
+                    if( TreePtr<Record> r = GetRecordDeclaration(kit, ti).GetTreePtr() )
                         o->initialiser = CreateRecordLiteralFromArrayLiteral(
                                 ai, r);
+			}
         }
 
         /// AddCXXDirectInitializerToDecl - This action is called immediately after 

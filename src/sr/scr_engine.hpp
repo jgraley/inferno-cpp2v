@@ -82,9 +82,10 @@ private:
         void PlanningStageTwo(const CompareReplace::AgentPhases &in_progress_agent_phases); // Stage one is the constructor
         void ConfigureAgents();
         void PlanningStageThree(set<PatternLink> enclosing_keyers);
-        void PlanningStageFive( shared_ptr<const Lacing> lacing );
         void PlanCompare();
         void PlanReplace();
+        bool IsAgentKeyed( Agent *agent ) const;        
+        void PlanningStageFive( shared_ptr<const Lacing> lacing );
         void Dump();
         string GetTrace() const; // used for debug
         
@@ -104,7 +105,7 @@ private:
         map< Agent *, shared_ptr<SCREngine> > my_engines;   
         shared_ptr<AndRuleEngine> and_rule_engine;
         CompareReplace::AgentPhases final_agent_phases;   
-        list<PatternLink> my_replace_plinks_postorder;
+        list<PatternLink> my_replace_only_plinks_postorder;
         list<PatternLink> my_embedded_plinks_postorder;
     } plan;
 
@@ -130,8 +131,6 @@ public: // For agents
     // the embedded_engine's one - and that pointer is not const. 
     XLink GetReplaceKey( PatternLink plink ) const;
     bool IsKeyedByAndRuleEngine( Agent *agent ) const; 
-    bool IsKeyed( PatternLink plink ) const; 
-    bool IsKeyed( Agent *agent ) const; 
     const CompareReplace * GetOverallMaster() const;
     
     friend class Conjecture; 

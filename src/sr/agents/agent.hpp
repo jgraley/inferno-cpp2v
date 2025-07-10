@@ -81,8 +81,6 @@ public:
     virtual void Reset() = 0;     
     virtual void PlanOverlay( PatternLink me_plink, 
                               PatternLink under_plink ) = 0;
-    virtual bool ReplaceKeyerQuery( PatternLink me_plink, 
-                                    set<PatternLink> keyer_plinks ) = 0;
 
     virtual TreePtr<Node> BuildForBuildersAnalysis( PatternLink me_plink ) = 0;
     virtual ReplacePatchPtr GenReplaceLayout( const ReplaceKit &kit, 

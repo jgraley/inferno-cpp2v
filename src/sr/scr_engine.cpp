@@ -124,7 +124,7 @@ void SCREngine::Plan::CategoriseAgents( const set<PatternLink> &enclosing_plinks
                 my_embedded_plinks_postorder.push_back(plink);        
                 
             if( visible_compare_plinks.count(plink) == 0 )
-				my_replace_plinks_postorder.push_back( plink ); // be exclusive of shared contexts      
+				my_replace_only_plinks_postorder.push_back( plink ); // be exclusive of shared contexts      
 		}
 	}
 	
@@ -245,16 +245,33 @@ void SCREngine::Plan::PlanReplace()
     for( StartsOverlay *ao : my_overlay_starter_engines )
         ao->StartPlanOverlay();        
 
-    for( PatternLink plink : my_replace_plinks_postorder ) // common stem and Delta->replace
+    for( PatternLink plink : my_replace_only_plinks_postorder ) // common stem and Delta->replace
     {
         Agent *agent = plink.GetChildAgent();
-        if( agent->ReplaceKeyerQuery(plink, all_keyer_plinks) )
-        {
-			ASSERT( all_keyer_plinks.count(plink)==0 )(plink);
+		
+		// Only want to be here when not already keyed, i.e. exclusively replace context.
+		ASSERT( all_keyer_plinks.count(plink)==0 )(plink);
+			
+		bool need_replace_key = !IsAgentKeyed(agent); // (not) keyed by any incoming plink
+		
+		if( need_replace_key )
+		{
             InsertSolo( all_keyer_plinks, plink );
             agent->ConfigureCoupling( algo, plink, {} );
         }
     }
+}
+
+
+bool SCREngine::Plan::IsAgentKeyed( Agent *agent ) const
+{
+    for( PatternLink keyer_plink : all_keyer_plinks )
+    {
+        Agent *keyer_agent = keyer_plink.GetChildAgent();
+        if( keyer_agent == agent )
+            return true; 
+    }
+    return false;
 }
 
 
@@ -303,8 +320,8 @@ void SCREngine::Plan::Dump()
           Trace(and_rule_engine) },
         { "final_agent_phases", 
           Trace(final_agent_phases) },
-        { "my_replace_plinks_postorder", 
-          Trace(my_replace_plinks_postorder) },
+        { "my_replace_only_plinks_postorder", 
+          Trace(my_replace_only_plinks_postorder) },
         { "my_embedded_plinks_postorder", 
           Trace(my_embedded_plinks_postorder) }
     };
@@ -534,24 +551,6 @@ bool SCREngine::IsKeyedByAndRuleEngine( Agent *agent ) const
 {
     ASSERT( plan.and_rule_engine );
     return plan.and_rule_engine->GetKeyedAgents().count( agent );
-}
-
-
-bool SCREngine::IsKeyed( PatternLink plink ) const
-{
-    return plan.all_keyer_plinks.count(plink)==1;
-}
-
-
-bool SCREngine::IsKeyed( Agent *agent ) const
-{
-    for( PatternLink keyer_plink : plan.all_keyer_plinks )
-    {
-        Agent *keyer_agent = keyer_plink.GetChildAgent();
-        if( keyer_agent == agent )
-            return true; 
-    }
-    return false;
 }
 
 

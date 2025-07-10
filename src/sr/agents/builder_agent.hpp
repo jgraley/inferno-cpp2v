@@ -16,10 +16,7 @@ public:
     // TODO do this via a transformation as with TransformOf/TransformOf
     BuilderAgent() {}
 
-    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const final;                                       
-
-    bool ReplaceKeyerQuery( PatternLink me_plink, 
-                            set<PatternLink> keyer_plinks ) final;                                  
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const final;                                                                       
 
     ReplacePatchPtr GenReplaceLayoutImpl( const ReplaceKit &kit, 
                                     PatternLink me_plink, 

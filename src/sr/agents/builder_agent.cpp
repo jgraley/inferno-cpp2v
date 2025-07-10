@@ -14,23 +14,6 @@ SYM::Lazy<SYM::BooleanExpression> BuilderAgent::SymbolicNormalLinkedQueryPRed() 
     return SYM::MakeLazy<SYM::BooleanConstant>(true);
 }                                      
 
-
-bool BuilderAgent::ReplaceKeyerQuery( PatternLink me_plink, 
-                                      set<PatternLink> keyer_plinks )
-{
-    ASSERT( me_plink.GetChildAgent() == this );
-    ASSERT( !my_scr_engine->IsKeyed(me_plink) ); // should only be reached once for each plink
-    bool should_key = !my_scr_engine->IsKeyed(this);
-    
-    if( should_key )
-    {
-        ASSERT( !keyer_plink );
-        keyer_plink = me_plink;
-    }
-    
-    return should_key; 
-}
- 
  
 Agent::ReplacePatchPtr BuilderAgent::GenReplaceLayoutImpl( const ReplaceKit &kit, 
                                                            PatternLink me_plink, 

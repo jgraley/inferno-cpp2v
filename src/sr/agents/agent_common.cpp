@@ -20,8 +20,6 @@
 
 #include <stdexcept>
 
-#define NEWS
-
 using namespace SR;
 using namespace SYM;
 
@@ -508,32 +506,6 @@ void AgentCommon::MaybeChildrenPlanOverlay( PatternLink me_plink,
                                    PatternLink under_plink )
 {
     // An empty function here implies leaf-termination of the overlay process
-}
-
-
-bool AgentCommon::ReplaceKeyerQuery( PatternLink me_plink, 
-                                     set<PatternLink> keyer_plinks )
-{
-#ifdef NEWS
-	// TODO #807 drop the vcall and do this in SCR engine
-	
-    ASSERT( me_plink.GetChildAgent() == this );
-    
-    // Only want to be called when not already keyed, i.e. exclusively replace context.
-    ASSERT( !my_scr_engine->IsKeyed(me_plink) );
-		
-    bool should_key = !my_scr_engine->IsKeyed(this); // (not) keyed by any incoming plink
-    
-    if( should_key )
-    {
-        ASSERT( !keyer_plink );
-        keyer_plink = me_plink;
-    }
-    
-    return should_key; 
-#else
-    return false;
-#endif
 }
                                   
                                   

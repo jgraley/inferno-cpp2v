@@ -57,9 +57,7 @@ public:
     virtual void PlanOverlay( PatternLink me_plink, 
                               PatternLink under_plink );
     virtual void MaybeChildrenPlanOverlay( PatternLink me_plink, 
-                                  PatternLink under_plink );
-    virtual bool ReplaceKeyerQuery( PatternLink me_plink, 
-                                    set<PatternLink> keyer_plinks );                                  
+                                  PatternLink under_plink );                                 
     TreePtr<Node> BuildForBuildersAnalysis( PatternLink me_plink ) override;
     ReplacePatchPtr GenReplaceLayout( const ReplaceKit &kit, 
                                 PatternLink me_plink ) override;
