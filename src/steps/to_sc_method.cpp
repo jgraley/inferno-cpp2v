@@ -211,7 +211,7 @@ ExplicitiseReturns::ExplicitiseReturns()
     auto m_post = MakePatternNode< Star<Statement> >();
     auto r_flag = MakePatternNode<Temporary>();
     auto r_boolean = MakePatternNode<Boolean>();
-    auto r_flag_id = MakePatternNode<BuildInstanceIdentifierAgent>("enabled");
+    auto r_flag_id = MakePatternNode<SpecificInstanceIdentifier>("enabled");
     auto lr_false = MakePatternNode<False>();
     auto r_true = MakePatternNode<True>();
     auto s_uninit = MakePatternNode<Uninitialised>();

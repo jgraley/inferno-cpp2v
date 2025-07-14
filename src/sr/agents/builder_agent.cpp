@@ -22,26 +22,27 @@ Agent::ReplacePatchPtr BuilderAgent::GenReplaceLayoutImpl( const ReplaceKit &kit
     INDENT("%");
 
     TreePtr<Node> new_node;
-    if( me_plink == keyer_plink )
-    {
+    if( me_plink == keyer_plink ) // keyer
+	{
         // Call the soft pattern impl 
-        built_node = new_node = BuildNewSubtree();
+        built_node = new_node = BuildNewSubtree(); // acts like Clone()
         
         // Don't duplicate since this is first one     
         // Note: from #807 we don't now set a key with the SCR engine 
         // since tree update does so for all agents that submit patches.
         // This has allowed the removal of a CreateDistinct() call.
     }
-    else if( key_xlink ) // residual but keyed during search or externally
-    {        
-        // Duplicate to keep free zones distinct since not first one
-        new_node = SimpleDuplicate::DuplicateSubtree(key_xlink.GetChildTreePtr());
-    }
-    else // residual but seen earlier during this get-layout pass 
+    else // residual
     {
-        // Duplicate to keep free zones distinct since not first one
-        new_node = SimpleDuplicate::DuplicateSubtree(built_node);
-	}
+		TreePtr<Node> key;
+		if( key_xlink ) // residual but keyed during search or externally	
+			key = key_xlink.GetChildTreePtr(); 
+		else // residual but seen earlier during this get-layout pass 
+			key = built_node;
+		
+		// Duplicate to keep free zones distinct since not first one
+		new_node = SimpleDuplicate::DuplicateSubtree(key);
+	}   
 
     // Make free zone without duplicating since this is first one
     return make_shared<FreePatch>( FreeZone::CreateSubtree(new_node) );

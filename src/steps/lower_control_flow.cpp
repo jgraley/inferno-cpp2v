@@ -346,7 +346,7 @@ SwitchToIfGoto::SwitchToIfGoto()
     auto body = MakePatternNode<Statement>();
     auto cond_type = MakePatternNode<Type>();
     auto r_decl = MakePatternNode<Automatic>();
-    auto id = MakePatternNode<BuildInstanceIdentifierAgent>("switch_value");
+    auto id = MakePatternNode<SpecificInstanceIdentifier>("switch_value");
     auto s_cond = MakePatternNode< TransformOf<Expression> >( &TypeOf::instance );
     
     // EmbeddedSearchReplace for default
@@ -540,7 +540,7 @@ LogicalAndToIf::LogicalAndToIf()
     auto op1 = MakePatternNode<Expression>();
     auto op2 = MakePatternNode<Expression>();
     auto r_comp = MakePatternNode<StatementExpression>();
-    auto r_temp_id = MakePatternNode<BuildInstanceIdentifierAgent>("andtemp");
+    auto r_temp_id = MakePatternNode<SpecificInstanceIdentifier>("andtemp");
     auto r_temp = MakePatternNode<Temporary>();
     auto r_boolean = MakePatternNode<Boolean>();
     auto r_if = MakePatternNode<If>();
@@ -570,7 +570,7 @@ LogicalOrToIf::LogicalOrToIf()
     auto op1 = MakePatternNode<Expression>();
     auto op2 = MakePatternNode<Expression>();
     auto r_comp = MakePatternNode<StatementExpression>();
-    auto r_temp_id = MakePatternNode<BuildInstanceIdentifierAgent>("ortemp");
+    auto r_temp_id = MakePatternNode<SpecificInstanceIdentifier>("ortemp");
     auto r_temp = MakePatternNode<Temporary>();
     auto r_boolean = MakePatternNode<Boolean>();
     auto r_if = MakePatternNode<If>();
@@ -600,7 +600,7 @@ ConditionalOperatorToIf::ConditionalOperatorToIf()
     auto op1 = MakePatternNode<Expression>();
     auto op3 = MakePatternNode<Expression>();
     auto r_comp = MakePatternNode<StatementExpression>();
-    auto r_temp_id = MakePatternNode<BuildInstanceIdentifierAgent>("muxtemp");
+    auto r_temp_id = MakePatternNode<SpecificInstanceIdentifier>("muxtemp");
     auto r_temp = MakePatternNode<Temporary>();
     auto op2 = MakePatternNode< TransformOf<Expression> >( &TypeOf::instance );
     auto type = MakePatternNode<Type>();

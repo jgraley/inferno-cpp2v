@@ -252,7 +252,7 @@ void SCREngine::Plan::PlanReplace()
 		// Only want to be here when not already keyed, i.e. exclusively replace context.
 		ASSERT( all_keyer_plinks.count(plink)==0 )(plink);
 			
-		bool need_replace_key = !IsAgentKeyed(agent); // (not) keyed by any incoming plink
+		bool need_replace_key = !IsAgentKeyed(agent); // not keyed by any incoming plink
 		
 		if( need_replace_key )
 		{
@@ -533,6 +533,14 @@ void SCREngine::GenerateGraphRegions( Graph &graph ) const
     plan.and_rule_engine->GenerateGraphRegions(graph, GetGraphId());
     for( auto p : plan.my_engines )
         p.second->GenerateGraphRegions(graph);    
+}
+
+
+
+void SCREngine::SetReplaceKey( LocatedLink keyer_link ) const
+{
+    ASSERT( replace_solution_available );
+    InsertSolo( replace_solution, keyer_link );
 }
 
 

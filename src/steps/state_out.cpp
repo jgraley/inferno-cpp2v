@@ -264,7 +264,7 @@ AddStateLabelVar::AddStateLabelVar()
     auto state_var = MakePatternNode<Automatic>();
     auto sx_not = MakePatternNode< Negation<Expression> >();
     auto lsx_not = MakePatternNode< Negation<Expression> >();
-    auto state_var_id = MakePatternNode< BuildInstanceIdentifierAgent >("state");
+    auto state_var_id = MakePatternNode< SpecificInstanceIdentifier >("state");
     
     ls_goto->destination = lsx_not;
     lsx_not->negand = state_var_id; //  MakePatternNode<InstanceIdentifier>();
@@ -498,7 +498,7 @@ AddYieldFlag::AddYieldFlag()
     auto r_flag_init = MakePatternNode<Assign>();
     auto mr_assign = MakePatternNode<Assign>();
     auto msx_assign = MakePatternNode<Assign>();
-    auto r_flag_id = MakePatternNode<BuildInstanceIdentifierAgent>("yield_flag");
+    auto r_flag_id = MakePatternNode<SpecificInstanceIdentifier>("yield_flag");
     auto ms_all = MakePatternNode< Conjunction<Compound> >();
     auto ms_not = MakePatternNode< Negation<Compound> >();
     

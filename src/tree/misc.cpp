@@ -36,6 +36,12 @@ AugTreePtr<Node> DeclarationOf::TryApplyTransformation( const TransKit &kit, Aug
         throw DeclarationNotFound();
     }
     
+    if( declarers.size() > 1 )
+    {
+        FTRACE("Warning: declaration of ")(node)(" is ambiguous (has %u declarer links)\n", declarers.size());
+        throw DeclarationNotFound();
+    }
+    
     // function decl/def are folded, so we expect only one declarer
     return SoloElementOf( declarers ); 
 }

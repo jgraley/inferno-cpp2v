@@ -957,11 +957,7 @@ void Graph::Remember( string s )
 
 
 string Graph::LinkStyleAtt(LinkPlannedAs incoming_link_planned_as, Graphable::Phase phase)
-{
-	// As of #807, all replace-only links are keyers TODO move this back out into the engine
-	if( phase==Graphable::IN_REPLACE_ONLY )
-		incoming_link_planned_as = LINK_KEYER;
-	
+{	
     string atts;
     switch(incoming_link_planned_as)
     {

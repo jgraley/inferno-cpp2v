@@ -533,7 +533,8 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutImpl( const ReplaceKit &ki
                                                             XLink key_xlink ) 
 {
     INDENT("B");
-    //FTRACE("For plink=")(me_plink)(" overlay_under_plink=")(overlay_under_plink)(" key_xlink=")(key_xlink)("\n");
+    //if( TreePtr<CPPTree::SpecificInstanceIdentifier>::DynamicCast(me_plink.GetPattern()) )
+    //    FTRACE("For me_plink=")(me_plink)(" keyer_plink=")(keyer_plink)(" overlay_under_plink=")(overlay_under_plink)(" key_xlink=")(key_xlink)("\n");
 
     if( overlay_under_plink )
     {
@@ -549,7 +550,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutImpl( const ReplaceKit &ki
         // The under and over pattern nodes are both this. AndRuleEngine 
         // has keyed this, and due wildcarding, key will be a final node
         // i.e. possibly a subclass of this node.
-        return GenReplaceLayoutOverlay( kit, me_plink, key_xlink );
+        return GenReplaceLayoutOverlayUsingX( kit, me_plink, key_xlink );
     }
     else
     {
@@ -599,9 +600,9 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingPattern( const
     // Clone once, because we never want to place an Agent object in the output program tree.
     // Then use duplicate to produce our output, to get the right identifier semantics.
     // Note: at present we're caching the self-key node indefinitely. 
-    if( !self_key_node )
-		self_key_node = AgentCommon::CloneNode();
-    TreePtr<Node> dest = Duplicate::DuplicateNode(self_key_node);
+    if( keyer_plink==me_plink ) 
+		built_node = AgentCommon::CloneNode();
+    TreePtr<Node> dest = Duplicate::DuplicateNode(built_node);
     
     // We "invent" dest, because of information coming from this pattern node.
     dest->SetInventedHere();
@@ -861,15 +862,18 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutNormal( const ReplaceKit &
 {
     INDENT("N");
  
+    //if( TreePtr<CPPTree::SpecificInstanceIdentifier>::DynamicCast(me_plink.GetPattern()) )
+    //    FTRACE("For me_plink=")(me_plink)("\n");
+
     ASSERT( IsFinal() )("Trying to build non-final ")(*this); 
 
     // Make a new node, force dirty because from pattern
     // Clone once, because we never want to place an Agent object in the output program tree.
     // Then use duplicate to produce our output, to get the right identifier semantics.
     // Note: at present we're caching the self-key node indefinitely. 
-    if( !self_key_node )
-		self_key_node = AgentCommon::CloneNode();
-    TreePtr<Node> dest = Duplicate::DuplicateNode(self_key_node);
+    if( keyer_plink==me_plink ) 
+		built_node = AgentCommon::CloneNode();
+    TreePtr<Node> dest = Duplicate::DuplicateNode(built_node);
     ASSERT( dest->IsFinal() )(*this)(" trying to build non-final ")(*dest)("\n"); 
 
     // We "invent" dest, because of information coming from this pattern node.

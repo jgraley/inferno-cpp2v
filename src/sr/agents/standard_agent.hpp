@@ -158,7 +158,7 @@ public:
 private:
     Plan plan; // can't be const because children added after construct
     bool planned = false;
-    TreePtr<Node> self_key_node;
+    TreePtr<Node> built_node = nullptr;
 };
 
 

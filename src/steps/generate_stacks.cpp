@@ -87,7 +87,7 @@ UseTempForReturnValue::UseTempForReturnValue()
     auto r_sub_comp= MakeTreeNode<Compound>();
     auto r_newvar = MakeTreeNode< Temporary >();
     r_newvar->type = type;
-    auto id = MakePatternNode<BuildInstanceIdentifierAgent>("temp_retval");
+    auto id = MakePatternNode<SpecificInstanceIdentifier>("temp_retval");
     r_newvar->identifier = id;
     r_newvar->initialiser = MakePatternNode<Uninitialised>();
     r_sub_comp->members = ( r_newvar );
@@ -191,9 +191,9 @@ AddLinkAddress::AddLinkAddress()
     auto r_retaddr = MakePatternNode<Temporary>();
     auto r_retaddr_id = MakePatternNode<BuildInstanceIdentifierAgent>("%s_link");
     auto lr_retaddr = MakePatternNode<Parameter>();
-    auto lr_retaddr_id = MakePatternNode<BuildInstanceIdentifierAgent>("link");
+    auto lr_retaddr_id = MakePatternNode<SpecificInstanceIdentifier>("link");
     auto lr_temp_retaddr = MakePatternNode<TempReturnAddress>();
-    auto lr_temp_retaddr_id = MakePatternNode<BuildInstanceIdentifierAgent>("temp_link");
+    auto lr_temp_retaddr_id = MakePatternNode<SpecificInstanceIdentifier>("temp_link");
     auto s_nm = MakePatternNode< Negation<Declaration> >();
     auto ls_nm = MakePatternNode< Negation<Declaration> >();
     auto gg = MakePatternNode< GreenGrass<Declaration> >();
