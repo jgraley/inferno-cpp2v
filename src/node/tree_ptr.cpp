@@ -6,7 +6,7 @@
 #include "tree_ptr.hpp"
 
 // To reduce clutter in log diffs when satellite serial numbers are not in synch
-//#define SUPPRESS_SATELLITE_NUMBERS
+#define SUPPRESS_SATELLITE_NUMBERS
 
 // Ordering on node is not a requirement for repeatability. I think it's only there to
 // keep logs nice by grouping similar nodes. But it slows down set<TreePtr<>> and
@@ -168,7 +168,7 @@ string TreePtrCommon::GetName() const
         return string("NULL");
 
 #ifdef SUPPRESS_SATELLITE_NUMBERS
-    string s = "#?->";
+    string s;
 #else
     // Use the serial string of the TreePtr itself #625
     string s = SatelliteSerial::GetSerialString() + "->";
@@ -185,7 +185,7 @@ string TreePtrCommon::GetShortName() const
         return string("NULL");
 
 #ifdef SUPPRESS_SATELLITE_NUMBERS
-    string s = "#?->";
+    string s;
 #else
     // Use the serial string of the TreePtr itself #625
     string s = SatelliteSerial::GetSerialString() + "->";

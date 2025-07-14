@@ -15,7 +15,7 @@
 #
 
 inferno=./inferno.exe
-resfile=test/summary.csv
+resfile=test/summary.csv 
 
 if test $# -eq 0
 then

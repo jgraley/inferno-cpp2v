@@ -99,20 +99,22 @@ private:
 
 // An instance for each equaivalence class of domain-extender agents, 
 // covers whole domain for that extender algorithm.
-class DomainExtensionChannel
+class DomainExtensionChannel : public Traceable
 {
 public:    
     DomainExtensionChannel( XTreeDatabase *db, const DomainExtension::Extender *extender );
 
+    void InsertAction(XLink xlink);
+    void DeleteAction(XLink xlink);
+    
     XLink GetUniqueDomainExtension( XLink stimulus_xlink, TreePtr<Node> node ) const;
     void CreateExtraTree( TreePtr<Node> extra_root_node );
     void CheckStimulusXLink( XLink stimulus_xlink );
     void DropStimulusXLink( XLink stimulus_xlink );
-    void Validate() const;
     void PerformDeferredActions();
 
-    void InsertAction(XLink xlink);
-    void DeleteAction(XLink xlink);
+    void Validate() const;
+    string GetTrace() const final;
 
 private:
     XTreeDatabase *db;
@@ -129,7 +131,7 @@ private:
     
     struct ExtensionClass : Traceable
     {
-        ExtensionClass( DBCommon::TreeOrdinal tree_ordinal_, int ref_count_ );
+        ExtensionClass();
         string GetTrace() const override;
         
         DBCommon::TreeOrdinal tree_ordinal;

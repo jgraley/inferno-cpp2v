@@ -31,7 +31,7 @@ XTreeDatabase::XTreeDatabase( shared_ptr<Lacing> lacing_, DomainExtension::Exten
     
 DBCommon::TreeOrdinal XTreeDatabase::BuildTree( DBCommon::TreeType tree_type, const FreeZone &free_zone)
 {      
-    INDENT("+t");
+    INDENT("B");
     DBCommon::TreeOrdinal tree_ordinal = AllocateTree();
     
     TRACE("Walk for intrinsic: orderings\n");
@@ -59,7 +59,7 @@ DBCommon::TreeOrdinal XTreeDatabase::BuildTree( DBCommon::TreeType tree_type, co
 
 void XTreeDatabase::TeardownTree(DBCommon::TreeOrdinal tree_ordinal)
 {        
-	INDENT("-t");
+	INDENT("T");
     XLink root_xlink = GetRootXLink(tree_ordinal);
     auto zone = TreeZone::CreateSubtree(root_xlink, tree_ordinal);
 	TRACE("Tree ordinal: %d root: ", tree_ordinal)(zone)("\n");
@@ -79,6 +79,7 @@ void XTreeDatabase::TeardownTree(DBCommon::TreeOrdinal tree_ordinal)
 void XTreeDatabase::SwapTreeToTree( TreeZone &zone1, vector<TreeZone *> fixups1,
                                     TreeZone &zone2, vector<TreeZone *> fixups2 )
 {	
+	INDENT("S");
     TRACE("Swapping target TreeZones:\n")(zone1)
          ("\nand: ")(zone2);
     ASSERT( zone1.GetNumTerminii() == zone2.GetNumTerminii() )

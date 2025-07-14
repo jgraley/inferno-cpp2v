@@ -14,7 +14,7 @@ int main()
 {
     unsigned x = 6;
     char xx[4];
-    xx[2] = 7;
+    xx[2] = 7; 
     xx[1] = 0;
     xx[3] = 0;
     unsigned *px = &x;
