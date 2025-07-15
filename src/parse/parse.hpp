@@ -407,6 +407,7 @@ private:
                     // TODO attributes
                     TRACE("reference to...\n");
                     //const clang::DeclaratorChunk::ReferenceTypeInfo &rchunk = chunk.Ref;
+                    FTRACE("Warning: references not supported by transformations");
                     auto r = MakeTreeNode<Reference>();
                     ASSERT(r);
                     r->destination = CreateTypeNode(D, depth + 1);

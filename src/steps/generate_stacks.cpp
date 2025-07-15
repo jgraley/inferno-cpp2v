@@ -692,3 +692,11 @@ MergeFunctions::MergeFunctions()
 }
 
 
+FunctionMergingDisallowed::FunctionMergingDisallowed()
+{
+	auto s_reference = MakePatternNode<Reference>();
+	s_reference->destination = MakePatternNode<Type>();
+	
+    Configure( SEARCH_REPLACE, s_reference );
+};
+

@@ -9,8 +9,8 @@
 using namespace SR;
 
 void VNStep::Configure( StepType type,
-                                  TreePtr<Node> scp,
-                                  TreePtr<Node> rp )
+                        TreePtr<Node> scp,
+                        TreePtr<Node> rp )
 {
     switch( type )
     {

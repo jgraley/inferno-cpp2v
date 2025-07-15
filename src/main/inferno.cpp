@@ -68,6 +68,7 @@ void BuildDefaultSequence( vector< shared_ptr<VNStep> > *sequence )
     }    
     { // Construct lowerings
         { // function call lowering (and function merging)
+			sequence->push_back( make_shared<FunctionMergingDisallowed>() );
             sequence->push_back( make_shared<ExtractCallParams>() );
             sequence->push_back( make_shared<ExplicitiseReturn>() );
             sequence->push_back( make_shared<ReturnViaTemp>() );

@@ -17,10 +17,9 @@ MINI_SC_SR_CASES = small.c pointeris.c ${MINI_SC_CASES}
 
 # The original C/C++ test cases, no SystemC
 CPP_CASES = test04.cpp test07.cpp test12.cpp test14.cpp methodcall.cpp
-C_CASES = test05.c test06.c test09.c test10.c test11.c test13.c test15.c test16.c pointeris.c small.c
+C_CASES = test02.c test05.c test06.c test09.c test10.c test11.c test13.c test15.c test16.c pointeris.c small.c
 # #786 to fix test03.c compound.c
 # #805 to fix ut_in_func.cpp
-# #813 to fix test02.cpp 
  
 # The whole lot for the benefit of auto rules
 EXEC_CASES = ${SC_CASES} ${C_CASES} ${CPP_CASES}

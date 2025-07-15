@@ -69,6 +69,12 @@ public:
     MergeFunctions();
 };
 
+class FunctionMergingDisallowed : public VNStep
+{
+public:
+    FunctionMergingDisallowed();
+};
+
 }; // end namespace
 
 #endif /* GENERATE_STACKS_HPP_ */
