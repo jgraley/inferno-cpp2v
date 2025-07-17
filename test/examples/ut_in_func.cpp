@@ -1,6 +1,6 @@
 int main()
 {
-    struct {} b;
+    struct A {} a;
     return 1;
 }
 
