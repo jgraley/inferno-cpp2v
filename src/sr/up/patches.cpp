@@ -8,8 +8,6 @@
 
 using namespace SR;
 
-#define RECURSIVE_TRACE_OPERATOR
-
 // ------------------------- Patch --------------------------
 
 Patch::Patch( list<shared_ptr<Patch>> &&child_patches_ ) :
@@ -82,13 +80,14 @@ string Patch::GetChildrenTrace() const
     list<string> ls;
     for( const shared_ptr<Patch> &child_patch : child_patches )
     {
-		string s = SSPrintf("%p->", child_patch.get());
+		string s;
 		if( dynamic_cast<TreePatch *>(child_patch.get()) )
 			s += "TreePatch";
 		else if( dynamic_cast<FreePatch *>(child_patch.get()) )
 			s += "FreePatch";
 		else
 			s += "?";
+		s += SSPrintf("@%p", child_patch.get());
 		ls.push_back(s);
 	}
 	return Trace(ls);
@@ -124,6 +123,7 @@ catch( const BreakException & )
 void Patch::DepthFirstWalkImpl( function<void(shared_ptr<Patch> &patch)> func_in,
                                 function<void(shared_ptr<Patch> &patch)> func_out )
 {
+	INDENT(".");
     for( shared_ptr<Patch> &patch : child_patches )
     {
         if( func_in )
@@ -133,6 +133,15 @@ void Patch::DepthFirstWalkImpl( function<void(shared_ptr<Patch> &patch)> func_in
             func_out(patch);
     }
 }
+
+
+
+string Patch::GetTrace() const
+{
+    return "children: " + GetChildrenTrace() + ",\n"
+           "originators: " + Trace(originators);  
+}
+
 
 
 // ------------------------- TreePatch --------------------------
@@ -266,11 +275,8 @@ TreePatch::Intent TreePatch::GetIntent() const
 
 string TreePatch::GetTrace() const
 {
-#ifdef RECURSIVE_TRACE_OPERATOR
-    return "TreePatch( \nzone: "+Trace(zone)+",\nchildren: "+GetChildrenTrace()+" )";
-#else
-    return "TreePatch( zone: "+Trace(zone)+", "+Trace(GetNumChildren())+" children )";
-#endif
+	return "TreePatch( \nzone: " + Trace(zone) + ",\n" + 
+	       Patch::GetTrace() + ")";
 }
 
 // ------------------------- FreePatch --------------------------
@@ -400,11 +406,8 @@ void FreePatch::ForFreeDepthFirstWalk( shared_ptr<Patch> &base,
 
 string FreePatch::GetTrace() const
 {
-#ifdef RECURSIVE_TRACE_OPERATOR
-    return "FreePatch( \nzone: "+Trace(zone)+",\nchildren: "+GetChildrenTrace()+" )";
-#else
-    return "FreePatch( zone: "+Trace(zone)+", "+Trace(GetNumChildren())+" children )";
-#endif    
+	return "FreePatch( \nzone: " + Trace(zone) + ",\n" + 
+	       Patch::GetTrace() + ")";
 }
 
 

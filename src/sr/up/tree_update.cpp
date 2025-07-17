@@ -73,6 +73,13 @@ ReplaceAssignments TreeUpdater::UpdateMainTree( XLink origin_xlink, shared_ptr<P
 {               
 	assignments.clear();
 	
+	// Dump all patches in wind-in order
+	TRACE("Tree update layout:\n");
+	Patch::ForDepthFirstWalk(layout, [](shared_ptr<Patch> patch)
+	{
+		TRACE(patch)("\n");
+	}, nullptr);
+	
     // Figure out what we should do, then do it. See comments in these 
     // functions and the pass class headers.
 	Analysis(origin_xlink, layout);

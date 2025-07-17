@@ -45,3 +45,20 @@ Graphable::NodeBlock ConjunctionAgent::GetGraphBlockInfo() const
     }
     return block;
 }
+
+
+Agent::ReplacePatchPtr ConjunctionAgent::GenReplaceLayoutImpl( const ReplaceKit &kit, 
+                                                               PatternLink me_plink, 
+                                                               XLink key_xlink )
+{
+    auto plinks = pattern_query->GetNormalLinks();
+    ASSERT( plinks.size() >= 1 );
+
+	if( plinks.size() >= 2 )
+		FTRACE("Warning, replace is choosing first of:\n")(plinks)("\n");
+
+    // Pick the first normal plink
+    PatternLink replace_plink = plinks.front();
+    ASSERT( replace_plink );          
+    return replace_plink.GetChildAgent()->GenReplaceLayout(kit, replace_plink);    
+} 

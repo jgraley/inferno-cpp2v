@@ -931,15 +931,16 @@ string Render::RenderStatement( const TransKit &kit, TreePtr<Statement> statemen
     }
     else if( TreePtr<If> i = DynamicTreePtrCast<If>(statement) )
     {
+		bool else_clause = !DynamicTreePtrCast<Nop>(i->else_body); // Nop means no else clause
         string s;
         s += "if( " + RenderExpression(kit, i->condition) + " )\n";
         bool sub_if = !!DynamicTreePtrCast<If>(i->body);
-        if( sub_if )
+        if( sub_if && else_clause )
              s += "{\n"; // Note: braces there to clarify else binding eg if(a) if(b) foo; else how_do_i_bind;
         s += RenderStatement(kit, i->body, ";\n");
-        if( sub_if )
+        if( sub_if && else_clause )
              s += "}\n";
-        if( !DynamicTreePtrCast<Nop>(i->else_body) )  // Nop means no else clause
+        if( else_clause )  
             s += "else\n" +
                  RenderStatement(kit, i->else_body, ";\n");
         return s;

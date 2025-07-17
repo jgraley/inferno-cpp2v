@@ -503,7 +503,7 @@ void AgentCommon::PlanOverlay( PatternLink me_plink,
 
 
 void AgentCommon::MaybeChildrenPlanOverlay( PatternLink me_plink, 
-                                   PatternLink under_plink )
+                                            PatternLink under_plink )
 {
     // An empty function here implies leaf-termination of the overlay process
 }

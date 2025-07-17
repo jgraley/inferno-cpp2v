@@ -694,6 +694,8 @@ MergeFunctions::MergeFunctions()
 
 FunctionMergingDisallowed::FunctionMergingDisallowed()
 {
+	// We can't deal with references in function merging subsequence
+	// yet. If we see one, spin. TODO improve on spinning #814
 	auto s_reference = MakePatternNode<Reference>();
 	s_reference->destination = MakePatternNode<Type>();
 	

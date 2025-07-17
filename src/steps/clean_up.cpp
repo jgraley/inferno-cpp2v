@@ -121,6 +121,9 @@ CleanupCompoundMulti::CleanupCompoundMulti() // LIMITAION: decls in body not all
     Configure( SEARCH_REPLACE, s_outer, r_comp );
 }
 
+// Act on all Compound with single Statement. Won't work because
+// Compound is an Initialiser while Statement is not.
+//#define CLEANUP_COMP_SINGLE_STRONG
 
 CleanupCompoundSingle::CleanupCompoundSingle() 
 {
@@ -130,11 +133,11 @@ CleanupCompoundSingle::CleanupCompoundSingle()
     //{a} -> a TODO need to restrict parent node to Statement: For, If etc OK; Instance is NOT OK
     //         TODO OR maybe just fix renderer for that case
     // Note: this hits eg If(x){a;} which the "Multi" version misses 
-    auto all = MakePatternNode< Conjunction<Statement> >();
-    auto sx_not = MakePatternNode< Negation<Statement> >();
+    auto all = MakePatternNode< Conjunction<Node> >();
+    auto sx_not = MakePatternNode< Negation<Node> >();
     auto sx_instance = MakePatternNode<Instance>();
-    auto node = MakePatternNode< Child<Statement> >();
-    auto over = MakePatternNode< Delta<Statement> >();
+    auto node = MakePatternNode< Child<Node> >();
+    auto over = MakePatternNode< Delta<Node> >();
     auto s_comp = MakePatternNode<Compound>();
     auto body = MakePatternNode< Statement >();
 
@@ -148,7 +151,11 @@ CleanupCompoundSingle::CleanupCompoundSingle()
     s_comp->statements = body;
     // Note: leaving s_comp empty meaning no decls allowed
 
+#ifdef CLEANUP_COMP_SINGLE_STRONG
+    Configure( SEARCH_REPLACE, s_comp, body );
+#else    
     Configure( SEARCH_REPLACE, all );
+#endif    
 }
 
 CleanupNop::CleanupNop() 

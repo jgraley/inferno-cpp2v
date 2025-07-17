@@ -59,6 +59,8 @@ public:
     void DepthFirstWalkImpl(function<void(shared_ptr<Patch> &patch)> func_in,
                             function<void(shared_ptr<Patch> &patch)> func_out);
 
+    string GetTrace() const override;
+
 private:
     list<shared_ptr<Patch>> child_patches;
     Originators originators;    

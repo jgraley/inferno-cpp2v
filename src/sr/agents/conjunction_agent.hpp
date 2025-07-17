@@ -17,6 +17,10 @@ public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
 
     virtual NodeBlock GetGraphBlockInfo() const;
+
+    ReplacePatchPtr GenReplaceLayoutImpl( const ReplaceKit &kit, 
+                                         PatternLink me_plink, 
+                                         XLink key_xlink ) final;
 private:
     virtual CollectionInterface &GetConjuncts() const = 0;
 };
