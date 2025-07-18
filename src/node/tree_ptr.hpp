@@ -62,7 +62,6 @@ struct TreePtrInterface : virtual Itemiser::Element
 	
     virtual string GetName() const = 0;
     virtual string GetShortName() const = 0;
-    string GetTrace() const override;
 };
 
 // -------------------------- TreePtrCommon ----------------------------    
@@ -99,6 +98,7 @@ struct TreePtrCommon : virtual TreePtrInterface, public SatelliteSerial
     const SatelliteSerial &GetSS() const override;
     string GetName() const final;
     string GetShortName() const;    
+    string GetTrace() const override;
     
 #ifdef TREE_POINTER_REF_COUNTS
 	mutable unsigned ref_count = 0;

@@ -382,7 +382,8 @@ void AndRuleEngine::Plan::CreateBoundarySymbolics()
                                    
     if( !(generate_pattern_graphs && ReadArgs::graph_trace) )
     {
-		// First do some checking (unless we're generating a pattern trace graph)
+		// First do some checking (unless we're generating a pattern trace graph
+		// because we want to find the problem by looking at the graph)
 		for( PatternLink residual_plink : my_boundary_links )
 		{
 			Agent *agent = residual_plink.GetChildAgent();

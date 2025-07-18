@@ -39,7 +39,7 @@ GotoAfterWait::GotoAfterWait()
     auto sx_goto = MakePatternNode<Goto>();
     auto r_goto = MakePatternNode<Goto>();
     auto r_label = MakePatternNode<Label>();
-    auto r_labelid = MakePatternNode<BuildLabelIdentifierAgent>("YIELD");
+    auto r_labelid = MakePatternNode<SpecificLabelIdentifier>("YIELD");
           
     all_over->through = all;
     all_over->overlay = anynode;
@@ -72,7 +72,7 @@ GotoAfterWait::GotoAfterWait()
     auto sx_goto = MakePatternNode<Goto>();
     auto r_goto = MakePatternNode<Goto>();
     auto r_label = MakePatternNode<Label>();
-    auto r_labelid = MakePatternNode<BuildLabelIdentifierAgent>("YIELD");
+    auto r_labelid = MakePatternNode<SpecificLabelIdentifier>("YIELD");
         
     s_comp->members = (decls);
     s_comp->statements = (pre, wait, notmatch, post);
@@ -105,7 +105,7 @@ NormaliseConditionalGotos::NormaliseConditionalGotos()
     auto sx_post = MakePatternNode< Star<Statement> >();
     auto mult = MakePatternNode< ConditionalOperator >();
     auto label = MakePatternNode< Label >();
-    auto label_id = MakePatternNode< BuildLabelIdentifierAgent >("PROCEED");
+    auto label_id = MakePatternNode< SpecificLabelIdentifier >("PROCEED");
     auto s_all = MakePatternNode< Conjunction<Statement> >();
     auto sx_not = MakePatternNode< Negation<Statement> >();
     
@@ -220,7 +220,7 @@ EnsureBootstrap::EnsureBootstrap()
     auto post = MakePatternNode< Star<Statement> >();
     auto r_goto = MakePatternNode<Goto>();
     auto r_label = MakePatternNode<Label>();
-    auto r_labelid = MakePatternNode<BuildLabelIdentifierAgent>("BOOTSTRAP");
+    auto r_labelid = MakePatternNode<SpecificLabelIdentifier>("BOOTSTRAP");
     auto stop = MakePatternNode< Negation<Statement> >();
     auto sx_goto = MakePatternNode<Goto>();
         
@@ -343,7 +343,7 @@ ShareGotos::ShareGotos()
     auto first_goto = MakePatternNode< Goto >();
     auto r_goto = MakePatternNode< Goto >();
     auto r_label = MakePatternNode<Label>();
-    auto r_labelid = MakePatternNode<BuildLabelIdentifierAgent>("ITERATE");
+    auto r_labelid = MakePatternNode<SpecificLabelIdentifier>("ITERATE");
                     
     loop->body = over;
     loop->condition = MakePatternNode<SpecificInteger>(1);

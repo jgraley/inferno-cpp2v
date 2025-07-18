@@ -210,7 +210,7 @@ AddLinkAddress::AddLinkAddress()
     auto mr_comp = MakePatternNode<Compound>();
     auto msx_comp = MakePatternNode<Compound>();
     auto mr_label = MakePatternNode<Label>();
-    auto mr_labelid = MakePatternNode<BuildLabelIdentifierAgent>("LINK");
+    auto mr_labelid = MakePatternNode<SpecificLabelIdentifier>("LINK");
     auto m_all = MakePatternNode< Conjunction<Statement> >();
     auto m_any = MakePatternNode< Child<Statement> >(); // TODO rename Child -> Blob
     auto ms_not = MakePatternNode< Negation<Statement> >();

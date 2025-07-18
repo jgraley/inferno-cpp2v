@@ -78,12 +78,6 @@ Orderable::Diff TreePtrInterface::Compare3WayIdentity(const TreePtrInterface &l,
     return SatelliteSerial::Compare3WayIdentity( l.GetSS(), r.GetSS() );
 }
 
-
-string TreePtrInterface::GetTrace() const
-{
-    return GetName();
-}    
-
 // -------------------------- TreePtrCommon ----------------------------    
 
 TreePtrCommon::TreePtrCommon()
@@ -164,17 +158,14 @@ const SatelliteSerial &TreePtrCommon::GetSS() const
 
 string TreePtrCommon::GetName() const
 {
-    if( !operator bool() )           
-        return string("NULL");
+	// This is used by graph plotting, and must describe the tree pointer itself, 
+	// not the pointed-to node!
+    string s = Traceable::GetName();
 
-#ifdef SUPPRESS_SATELLITE_NUMBERS
-    string s;
-#else
+#ifndef SUPPRESS_SATELLITE_NUMBERS
     // Use the serial string of the TreePtr itself #625
-    string s = SatelliteSerial::GetSerialString() + "->";
+    s += SatelliteSerial::GetSerialString();
 #endif  
-    
-    s += get()->GetTrace();
     return s;
 }  
 
@@ -185,7 +176,7 @@ string TreePtrCommon::GetShortName() const
         return string("NULL");
 
 #ifdef SUPPRESS_SATELLITE_NUMBERS
-    string s;
+    string s = "&";
 #else
     // Use the serial string of the TreePtr itself #625
     string s = SatelliteSerial::GetSerialString() + "->";
@@ -194,3 +185,20 @@ string TreePtrCommon::GetShortName() const
     s += get()->GetSerialString(); 
     return s;
 }  
+
+
+string TreePtrCommon::GetTrace() const
+{
+    if( !operator bool() )           
+        return string("NULL");
+
+#ifdef SUPPRESS_SATELLITE_NUMBERS
+    string s = "&";
+#else
+    // Use the serial string of the TreePtr itself #625
+    string s = SatelliteSerial::GetSerialString() + "->";
+#endif  
+    
+    s += get()->GetTrace();
+    return s;
+}    

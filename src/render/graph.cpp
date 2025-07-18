@@ -983,9 +983,13 @@ string Graph::LinkStyleAtt(LinkPlannedAs incoming_link_planned_as, Graphable::Ph
     switch( phase )
     {
     case Graphable::UNDEFINED:
+		FTRACE("Warning, undefined phase\n");
+		// fall through
     case Graphable::IN_COMPARE_ONLY:
+        atts += "style=\"solid\"\n";
+        break;
     case Graphable::IN_COMPARE_AND_REPLACE:
-        //atts += "style=\"solid\"\n";
+        atts += "style=\"bold\"\n";
         break;
     case Graphable::IN_REPLACE_ONLY:
         atts += "style=\"dashed\"\n";
