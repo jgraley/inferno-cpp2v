@@ -317,6 +317,7 @@ public:
         static string pre;
         static string last_traced_pre, leftmost_pre;
         const int os;
+        const int num_exceptions;
         friend class Tracer;
     };
 

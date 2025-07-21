@@ -17,8 +17,8 @@ DEPS = makefile.common src/makefile
 # ------------------- Common options --------------------
 OPTIONS =
  
-# Use the C++11 standard 
-OPTIONS += -std=c++14
+# Use the C++17 standard 
+OPTIONS += -std=c++17
 
 # No path needed when include file is in same directory
 OPTIONS += -I.

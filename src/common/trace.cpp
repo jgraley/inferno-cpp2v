@@ -261,7 +261,8 @@ void Tracer::MaybePrintEndl()
 
 
 Tracer::Descend::Descend( string s ) : 
-    os(pre.size()) 
+    os(pre.size()),
+    num_exceptions( uncaught_exceptions() )
 { 
     ASSERT( s.length()>=1 );
     pre += s; 
@@ -273,7 +274,8 @@ Tracer::Descend::~Descend()
 { 
     if(Tracer::IsEnabled())
     {
-        if( uncaught_exception() )
+		int nne = uncaught_exceptions();
+        if( nne>num_exceptions ) // is there at least one new exception?
             Tracer()("Ouch!\n");
         else                    
             Tracer()("OK\n");
