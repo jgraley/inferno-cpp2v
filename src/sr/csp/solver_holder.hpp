@@ -7,20 +7,6 @@
 #include "node/specialise_oostd.hpp"
 #include "common/common.hpp"
 
-#define COROUTINE_HOLDER
-
-
-#ifdef COROUTINE_HOLDER
-
-// Needs boost to be rebuilt with valgrind=on on b2 command line according to https://stackoverflow.com/questions/29180589/is-it-safe-to-use-spawn-directly-in-an-asio-stackful-coroutine
-#define BOOST_USE_VALGRIND
-
-// Needs boost to be rebuilt with context-impl=ucontext according to https://github.com/boostorg/coroutine/issues/30#issuecomment-325583085
-#define BOOST_USE_ASAN
-
-#include <boost/coroutine2/coroutine.hpp>
-#endif
-
 namespace SR
 {
 class Agent;
@@ -80,21 +66,10 @@ public:
     
 private:
     void ReportSolution( const Solution &solution );    
-#ifdef COROUTINE_HOLDER
-    void ReapSource();
-    void MaybeRethrow();
-#endif
     const shared_ptr<Solver> solver;
 
     bool enable_coroutine;
-#ifdef COROUTINE_HOLDER
-    typedef boost::coroutines2::coroutine<Solution> Coroutine;
-    Coroutine::push_type *sink = nullptr;
-    Coroutine::pull_type *source = nullptr;
-    exception_ptr solver_exception;
-#else
     list<Solution> solutions_queue;    
-#endif    
 };
 
 };
