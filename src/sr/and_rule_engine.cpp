@@ -597,7 +597,9 @@ void AndRuleEngine::PlanningStageFive( shared_ptr<const Lacing> lacing )
 }
 
 
-void AndRuleEngine::StartCSPSolver(const SolutionMap &fixes, const SolutionMap *surrounding_solution)
+void AndRuleEngine::StartCSPSolver(const SolutionMap &fixes, 
+                                   const SolutionMap *surrounding_solution, 
+                                   CSP::SolutionHandler on_solution_function)
 {    
     // Determine the full set of forces 
     // TODO presumably doesn't need to be the ordered one
@@ -609,7 +611,9 @@ void AndRuleEngine::StartCSPSolver(const SolutionMap &fixes, const SolutionMap *
     
     TRACE("Starting solver\n");
     ASSERT( plan.solver_holder );
-    plan.solver_holder->Start( surrounding_and_base_links, x_tree_db.get() );
+    plan.solver_holder->Start( surrounding_and_base_links, 
+                               x_tree_db.get(), 
+                               on_solution_function );
 }
 
 
@@ -849,13 +853,20 @@ SolutionMap AndRuleEngine::Compare( XLink base_xlink,
     // Determine my fixed (just root pattern link to base x link)
     SolutionMap my_fixed_assignments = {{plan.base_plink, base_xlink}};
     
-    // Start the CSP solver
-    StartCSPSolver( my_fixed_assignments, surrounding_solution );
-           	
-    std::function<void(SolutionMap)> on_solution_function = std::bind(&AndRuleEngine::OnSolution, this, placeholders::_1, my_fixed_assignments, surrounding_solution);      	
-           	
+    CSP::SolutionHandler on_solution_function = std::bind(&AndRuleEngine::OnSolution, 
+                                                          this, 
+                                                          placeholders::_1, 
+                                                          my_fixed_assignments, 
+                                                          surrounding_solution);      	
+    
 	try
 	{    
+#ifdef STACKED_CSP
+		StartCSPSolver( my_fixed_assignments, surrounding_solution, on_solution_function );
+#else
+		// Start the CSP solver
+		StartCSPSolver( my_fixed_assignments, surrounding_solution, nullptr );
+           	           	
 		// Create the conjecture object we will use for this compare, and keep iterating
 		// though different conjectures trying to find one that allows a match.
 		//int i=0;
@@ -873,6 +884,7 @@ SolutionMap AndRuleEngine::Compare( XLink base_xlink,
 			on_solution_function( basic_solution );
 			// Otherwise get another solution from the solver
 		}
+#endif		
 	}
 	catch( const SuccessfulMatch &sm )
 	{ 

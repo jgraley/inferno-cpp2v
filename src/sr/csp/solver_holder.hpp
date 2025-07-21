@@ -7,6 +7,10 @@
 #include "node/specialise_oostd.hpp"
 #include "common/common.hpp"
 
+#include <functional>
+
+#define STACKED_CSP
+
 namespace SR
 {
 class Agent;
@@ -16,6 +20,8 @@ class XTreeDatabase;
 namespace CSP
 { 
 class Solver;
+
+typedef function<void(Solution)> SolutionHandler;
 
 /** A simple back-tracking solver
  */
@@ -40,7 +46,8 @@ public:
      * @param initial_domain [in] the domain for all the variables, could get expanded depending on the solver algorithm.
      */
     void Start( const Assignments &forces,
-                const SR::XTreeDatabase *x_tree_db );
+                const SR::XTreeDatabase *x_tree_db,
+                SolutionHandler solution_handler );
 
     /**
      * Try to extract a single solution from the solver. 

@@ -5,6 +5,8 @@
 
 #include <algorithm>
 
+
+
 using namespace CSP;
 
 SolverHolder::SolverHolder( shared_ptr<Solver> solver_ ) :
@@ -18,18 +20,25 @@ SolverHolder::~SolverHolder()
 }
 
 
-void SolverHolder::Start( const Assignments &forces,
-                          const SR::XTreeDatabase *x_tree_db )
+    void SolverHolder::Start( const Assignments &forces,
+                              const SR::XTreeDatabase *x_tree_db,
+                              SolutionHandler solution_handler )                            
 {
     solver->Start( forces, x_tree_db );    
 
-	auto solution_report_lambda = [&](const Solution &solution)
+    solutions_queue.clear();
+
+#ifdef STACKED_CSP
+    solver->Run( solution_handler, Solver::RejectionReportFunction() );
+#else    
+    (void)solution_handler;
+	SolutionHandler solution_report_lambda = [&](Solution solution)
 	{ 
 		ReportSolution(solution); 
 	};
 
-    solutions_queue.clear();
     solver->Run( solution_report_lambda, Solver::RejectionReportFunction() );
+#endif    
 }
 
 
