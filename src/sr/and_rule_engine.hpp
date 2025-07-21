@@ -144,9 +144,6 @@ public:
     void PlanningStageFive( shared_ptr<const Lacing> lacing );      
     
 private:        
-    void StartCSPSolver( const SolutionMap &fixes,
-                         const SolutionMap *surrounding_solution,
-                         CSP::SolutionHandler on_solution_function );
     void CompareLinks( Agent *agent,
                        shared_ptr<const DecidedQuery> query );
     void DecidedCompare( LocatedLink link );

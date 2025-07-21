@@ -597,26 +597,6 @@ void AndRuleEngine::PlanningStageFive( shared_ptr<const Lacing> lacing )
 }
 
 
-void AndRuleEngine::StartCSPSolver(const SolutionMap &fixes, 
-                                   const SolutionMap *surrounding_solution, 
-                                   CSP::SolutionHandler on_solution_function)
-{    
-    // Determine the full set of forces 
-    // TODO presumably doesn't need to be the ordered one
-    SolutionMap surrounding_and_base_links;
-    for( PatternLink link : plan.boundary_keyer_links )
-        surrounding_and_base_links[link] = surrounding_solution->at(link);
-    for( PatternLink link : plan.my_fixed_keyer_links )
-        surrounding_and_base_links[link] = fixes.at(link);
-    
-    TRACE("Starting solver\n");
-    ASSERT( plan.solver_holder );
-    plan.solver_holder->Start( surrounding_and_base_links, 
-                               x_tree_db.get(), 
-                               on_solution_function );
-}
-
-
 void AndRuleEngine::CompareEvaluatorLinks( Agent *agent, 
                                            const SolutionMap *solution_for_subordinates, 
                                            const SolutionMap *solution_for_evaluators ) 
@@ -843,6 +823,7 @@ SolutionMap AndRuleEngine::Compare( XLink base_xlink,
 {
     INDENT("C");
     ASSERT( base_xlink );            
+	ASSERT( plan.solver_holder );
     TRACE("Compare base ")(base_xlink)("\n");
 
 #ifdef CHECK_EVERYTHING_IS_IN_DOMAIN
@@ -853,6 +834,15 @@ SolutionMap AndRuleEngine::Compare( XLink base_xlink,
     // Determine my fixed (just root pattern link to base x link)
     SolutionMap my_fixed_assignments = {{plan.base_plink, base_xlink}};
     
+    // Determine the full set of forces 
+    // TODO presumably doesn't need to be the ordered one
+    SolutionMap surrounding_and_base_links;
+    for( PatternLink link : plan.boundary_keyer_links )
+        surrounding_and_base_links[link] = surrounding_solution->at(link);
+    for( PatternLink link : plan.my_fixed_keyer_links )
+        surrounding_and_base_links[link] = my_fixed_assignments.at(link);
+    
+	// Bind our OnSolution function as the solution handler for the solver
     CSP::SolutionHandler on_solution_function = std::bind(&AndRuleEngine::OnSolution, 
                                                           this, 
                                                           placeholders::_1, 
@@ -861,30 +851,10 @@ SolutionMap AndRuleEngine::Compare( XLink base_xlink,
     
 	try
 	{    
-#ifdef STACKED_CSP
-		StartCSPSolver( my_fixed_assignments, surrounding_solution, on_solution_function );
-#else
-		// Start the CSP solver
-		StartCSPSolver( my_fixed_assignments, surrounding_solution, nullptr );
-           	           	
-		// Create the conjecture object we will use for this compare, and keep iterating
-		// though different conjectures trying to find one that allows a match.
-		//int i=0;
-		while(1)
-		{
-			// Get a solution from the solver
-			// These are partial solutions, and are mapped against the links
-			// into the agents (half-link model). Note: solutions can specify
-			// the MMAX node.
-			SolutionMap basic_solution;
-			bool match = plan.solver_holder->GetNextSolution( &basic_solution );        
-			if( !match )
-				break;
-				
-			on_solution_function( basic_solution );
-			// Otherwise get another solution from the solver
-		}
-#endif		
+		TRACE("Starting solver\n");
+		plan.solver_holder->RunSolver( surrounding_and_base_links, 
+								       x_tree_db.get(), 
+							     	   on_solution_function );	
 	}
 	catch( const SuccessfulMatch &sm )
 	{ 

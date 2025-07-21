@@ -9,8 +9,6 @@
 
 #include <functional>
 
-#define STACKED_CSP
-
 namespace SR
 {
 class Agent;
@@ -45,19 +43,9 @@ public:
      * 
      * @param initial_domain [in] the domain for all the variables, could get expanded depending on the solver algorithm.
      */
-    void Start( const Assignments &forces,
-                const SR::XTreeDatabase *x_tree_db,
-                SolutionHandler solution_handler );
-
-    /**
-     * Try to extract a single solution from the solver. 
-     * 
-     * @param solution [out] if non-null and solution exists: A fullly populated assignments map
-     *
-     * @retval true A solution was found, and non-null arguments are filled in
-     * @retval false No solutions are left, and the pointer arguments are unused
-     */
-    bool GetNextSolution( Solution *solution = nullptr );
+    void RunSolver( const Assignments &forces,
+                    const SR::XTreeDatabase *x_tree_db,
+                    SolutionHandler solution_handler );
  
     string GetTrace() const;
 
@@ -72,11 +60,7 @@ public:
     void CheckPlan() const;
     
 private:
-    void ReportSolution( const Solution &solution );    
     const shared_ptr<Solver> solver;
-
-    bool enable_coroutine;
-    list<Solution> solutions_queue;    
 };
 
 };
