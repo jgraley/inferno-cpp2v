@@ -36,6 +36,18 @@
 
 using namespace SR;
 
+AndRuleEngine::SuccessfulMatch::SuccessfulMatch( SolutionMap solution_ ) :
+	solution(solution_)
+{
+}
+
+
+const SolutionMap &AndRuleEngine::SuccessfulMatch::GetSolution() const
+{
+	return solution;
+}
+
+
 AndRuleEngine::AndRuleEngine( PatternLink base_plink, 
                               const set<PatternLink> &surrounding_plinks,
                               const set<PatternLink> &surrounding_keyer_plinks ) :
@@ -601,18 +613,6 @@ void AndRuleEngine::StartCSPSolver(const SolutionMap &fixes, const SolutionMap *
 }
 
 
-SolutionMap AndRuleEngine::GetNextCSPSolution()
-{
-    TRACE("GetNextCSPSolution()\n");
-    SolutionMap csp_solution;
-    bool match = plan.solver_holder->GetNextSolution( &csp_solution );        
-    if( !match )
-        throw NoSolution();
-
-    return csp_solution;
-}
-
-
 void AndRuleEngine::CompareEvaluatorLinks( Agent *agent, 
                                            const SolutionMap *solution_for_subordinates, 
                                            const SolutionMap *solution_for_evaluators ) 
@@ -794,6 +794,32 @@ void AndRuleEngine::RegenerationPass( SolutionMap &basic_solution, const Solutio
 }
 
 
+void AndRuleEngine::OnSolution(SolutionMap basic_solution, const SolutionMap &my_fixed_assignments, const SolutionMap *surrounding_solution)
+{
+    // Merge my fixes into the solution (but we're not expected to merge
+    // in surrounding solution: caller can do that, if required).
+    basic_solution = UnionOfSolo( basic_solution, my_fixed_assignments );
+
+	// Is the solution now complete? 
+	for( auto plink : plan.my_normal_links )
+		ASSERT( basic_solution.count(plink) > 0 )("Cannot find normal link ")(plink)("\nIn ")(basic_solution)("\n");
+	
+	try
+	{
+		RegenerationPass( basic_solution, surrounding_solution );
+	}
+	catch( const ::Mismatch &e )
+	{                
+		TRACE("Caught ")(e)(" after recursion, trying next solution\n");
+		return; 
+	}
+	
+	// We succeeded and basic_solution is the right set of keys
+	TRACE("AndRuleEngine hit\n");
+	throw SuccessfulMatch(basic_solution);
+}
+
+
 void AndRuleEngine::SetXTreeDb( shared_ptr<const XTreeDatabase> x_tree_db_ )
 {
     x_tree_db = x_tree_db_;
@@ -825,45 +851,34 @@ SolutionMap AndRuleEngine::Compare( XLink base_xlink,
     
     // Start the CSP solver
     StartCSPSolver( my_fixed_assignments, surrounding_solution );
-           
-    // These are partial solutions, and are mapped against the links
-    // into the agents (half-link model). Note: solutions can specify
-    // the MMAX node.
-    SolutionMap basic_solution; 
-
-    // Create the conjecture object we will use for this compare, and keep iterating
-    // though different conjectures trying to find one that allows a match.
-    //int i=0;
-    while(1)
-    {
-        // Get a solution from the solver
-        basic_solution = GetNextCSPSolution();        
-
-        // Merge my fixes into the solution (but we're not expected to merge
-        // in surrounding solution: caller can do that, if required).
-        basic_solution = UnionOfSolo( basic_solution, my_fixed_assignments );
-
-        try
-        {
-            // Is the solution complete? 
-            for( auto plink : plan.my_normal_links )
-            {            
-                ASSERT( basic_solution.count(plink) > 0 )("Cannot find normal link ")(plink)("\nIn ")(basic_solution)("\n");
-            }
-            RegenerationPass( basic_solution, surrounding_solution );
-        }
-        catch( const ::Mismatch &e )
-        {                
-            TRACE("Caught ")(e)(" after recursion, trying next solution\n");
-            continue; // Get another solution from the solver
-        }
-        // We got a match so we're done. 
-        TRACE("AndRuleEngine hit\n");
-        break; // Success
-    }
-    
-    // By now, we succeeded and basic_solution is the right set of keys
-    return basic_solution;
+           	
+    std::function<void(SolutionMap)> on_solution_function = std::bind(&AndRuleEngine::OnSolution, this, placeholders::_1, my_fixed_assignments, surrounding_solution);      	
+           	
+	try
+	{    
+		// Create the conjecture object we will use for this compare, and keep iterating
+		// though different conjectures trying to find one that allows a match.
+		//int i=0;
+		while(1)
+		{
+			// Get a solution from the solver
+			// These are partial solutions, and are mapped against the links
+			// into the agents (half-link model). Note: solutions can specify
+			// the MMAX node.
+			SolutionMap basic_solution;
+			bool match = plan.solver_holder->GetNextSolution( &basic_solution );        
+			if( !match )
+				break;
+				
+			on_solution_function( basic_solution );
+			// Otherwise get another solution from the solver
+		}
+	}
+	catch( const SuccessfulMatch &sm )
+	{ 
+		return sm.GetSolution();   // We got a match so we're done. 
+	}	
+	throw NoSolution();
 }
 
 

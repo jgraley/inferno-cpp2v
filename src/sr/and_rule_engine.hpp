@@ -54,6 +54,16 @@ public:
     {
     };
     
+    // A solution was discovered to be a match
+    class SuccessfulMatch : public Exception
+    {
+	public:
+		SuccessfulMatch( SolutionMap solution_ );
+		const SolutionMap &GetSolution() const;
+	private:
+		SolutionMap solution;
+    };
+
     AndRuleEngine( PatternLink base_plink, 
                    const set<PatternLink> &surrounding_plinks,
                    const set<PatternLink> &surrounding_keyer_plinks );
@@ -142,7 +152,6 @@ public:
 private:        
     void StartCSPSolver( const SolutionMap &fixes,
                          const SolutionMap *surrounding_solution );
-    SolutionMap GetNextCSPSolution();
     void CompareLinks( Agent *agent,
                        shared_ptr<const DecidedQuery> query );
     void DecidedCompare( LocatedLink link );
@@ -156,6 +165,7 @@ private:
                                 const SolutionMap &solution_for_subordinates );
     void RegenerationPass( SolutionMap &basic_solution,
                            const SolutionMap *surrounding_solution );
+    void OnSolution(SolutionMap basic_solution, const SolutionMap &my_fixed_assignments, const SolutionMap *surrounding_solution);
     
 public:
     void SetXTreeDb( shared_ptr<const XTreeDatabase> x_tree_db );
