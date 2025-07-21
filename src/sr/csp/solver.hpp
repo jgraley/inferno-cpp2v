@@ -68,14 +68,15 @@ public:
                       
     /**
      * Run the solver to exhaustion (i.e. it will discover all the
-     * solutions). Solutions will be reported using the supplied function.
+     * solutions). Solutions will be reported using the supplied function. If that
+     * function wants to abort the solve, it should throw an exception.    
      * 
      * @param solution_report_function [inout] solutions reported by calling this (required).
      * 
      * @param rejection_report_function [inout] rejections reported by calling this (optional).
      */
     virtual void Run( const SolutionReportFunction &solution_report_function,
-                      const RejectionReportFunction &rejection_report_function ) = 0;
+                      const RejectionReportFunction &rejection_report_function = nullptr ) = 0;
 
     string GetTrace() const;
 

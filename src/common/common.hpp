@@ -473,7 +473,8 @@ const typename T::value_type &BackOf( const T&c )
 }
 
 // ----------------------- make_unique<>() -----------------------
-
+// Built in at C++14 onward
+#if __cplusplus < 201402L
 template<class T> 
 struct _Unique_if 
 {
@@ -511,7 +512,7 @@ typename _Unique_if<T>::_Unknown_bound make_unique(size_t n)
 
 template<class T, class... Args>
 typename _Unique_if<T>::_Known_bound make_unique(Args&&...) = delete;
-
+#endif
 
 // Get a "that" pointer, which is a pointer of the same type as "this"
 // for multi-methods. NULL not allowed, wrong type not allowed.

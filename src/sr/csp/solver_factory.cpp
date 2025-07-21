@@ -10,10 +10,10 @@ using namespace CSP;
 
 //#define USE_REF_SOLVER_ONLY
 
-shared_ptr<CSP::SolverHolder> CSP::CreateSolverAndHolder( const list< shared_ptr<Constraint> > &constraints, 
-                                                          const vector<VariableId> &free_variables, 
-                                                          const set<VariableId> &domain_forced_variables, 
-                                                          const set<VariableId> &arbitrary_forced_variables )
+shared_ptr<CSP::Solver> CSP::CreateSolverAndHolder( const list< shared_ptr<Constraint> > &constraints, 
+                                                    const vector<VariableId> &free_variables, 
+                                                    const set<VariableId> &domain_forced_variables, 
+                                                    const set<VariableId> &arbitrary_forced_variables )
 {
 #ifdef USE_REF_SOLVER_ONLY
     auto salg = make_shared<CSP::ReferenceSolver>( constraints, 
@@ -36,10 +36,10 @@ shared_ptr<CSP::SolverHolder> CSP::CreateSolverAndHolder( const list< shared_ptr
 
         auto testalg = make_shared<CSP::SolverTest>( refalg, salg );
 
-        return make_shared<CSP::SolverHolder>( testalg );
+        return testalg;
     }
     else
     {
-        return make_shared<CSP::SolverHolder>( salg );
+        return salg;
     }
 }                                                       

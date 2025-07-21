@@ -1,5 +1,4 @@
 #include "solver.hpp"
-#include "solver_holder.hpp"
 
 using namespace CSP;
 

@@ -12,7 +12,7 @@
 #include "query.hpp"
 #include "link.hpp"
 #include "db/x_tree_database.hpp"
-#include "csp/solver_holder.hpp"
+#include "csp/solver.hpp"
 
 #include <set>
 #include <map>
@@ -38,8 +38,8 @@ public:
     {
     };
     
-    // Conjecture ran out of choices
-    class NoSolution : public Mismatch
+    // And-rule engine was unsucessful
+    class AndRuleMismatch : public Mismatch
     {
     };
     
@@ -133,7 +133,7 @@ public:
         set< shared_ptr<SYM::BooleanExpression> > expressions_for_current_solve;
         map< set<PatternLink>, set<shared_ptr<SYM::BooleanExpression>> > expressions_condensed;
 
-        shared_ptr<CSP::SolverHolder> solver_holder;
+        shared_ptr<CSP::Solver> csp_solver;
         list<PatternLink> normal_and_boundary_links_preorder;
         
     private: // working variables in plan construction
@@ -152,11 +152,9 @@ private:
                                 const SolutionMap *solution_for_evaluators );
     void CompareMultiplicityLinks( LocatedLink link, 
                                    const SolutionMap *solution_for_subordinates ); 
-    void RegenerationPassAgent( Agent *agent,
+    void AgentRegeneration( Agent *agent,
                                 SolutionMap &basic_solution,
                                 const SolutionMap &solution_for_subordinates );
-    void RegenerationPass( SolutionMap &basic_solution,
-                           const SolutionMap *surrounding_solution );
     void OnSolution(SolutionMap basic_solution, 
                     const SolutionMap &my_fixed_assignments, 
                     const SolutionMap *surrounding_solution);

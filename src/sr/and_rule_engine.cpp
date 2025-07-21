@@ -3,7 +3,6 @@
 #include "csp/symbolic_constraint.hpp"
 #include "csp/reference_solver.hpp"
 #include "csp/backjumping_solver.hpp"
-#include "csp/solver_holder.hpp"
 #include "csp/solver_factory.hpp"
 #include "scr_engine.hpp"
 #include "search_replace.hpp"
@@ -166,15 +165,15 @@ void AndRuleEngine::Plan::PlanningStageFive( shared_ptr<const Lacing> lacing )
     // Boundary links may not be in our domain if eg they got 
     // deleted by the enclosing replace. So base_plink is the only one that
     // we can guarantee will be in the domain.
-    solver_holder = CreateSolverAndHolder( constraints_list, 
-                                           ToVector(free_normal_links_ordered), 
-                                           my_fixed_keyer_links,
-                                           boundary_keyer_links );    
+    csp_solver = CreateSolverAndHolder( constraints_list, 
+                                        ToVector(free_normal_links_ordered), 
+                                        my_fixed_keyer_links,
+                                        boundary_keyer_links );    
                                     
     // Note: constraints_list drops out of scope and discards its 
     // references; only constraints held onto by solver will remain.
-    solver_holder->Dump();    
-    solver_holder->CheckPlan();   
+    csp_solver->Dump();    
+    csp_solver->CheckPlan();   
     
     // ------------------ Stage five on subordinates ---------------------
     for( auto p : my_free_abnormal_engines )
@@ -678,10 +677,11 @@ void AndRuleEngine::CompareMultiplicityLinks( LocatedLink link,
 }
 
 
-void AndRuleEngine::RegenerationPassAgent( Agent *agent,
+void AndRuleEngine::AgentRegeneration( Agent *agent,
                                            SolutionMap &basic_solution,
                                            const SolutionMap &solution_for_subordinates )
 {
+    INDENT("R");
     // Get a list of the links we must supply to the agent for regeneration
     auto pq = agent->GetPatternQuery();
     TRACE("Trying to regenerate ")(*agent)("\n");    
@@ -759,27 +759,9 @@ void AndRuleEngine::RegenerationPassAgent( Agent *agent,
 }      
 
 
-void AndRuleEngine::RegenerationPass( SolutionMap &basic_solution, const SolutionMap *surrounding_solution )
-{
-    INDENT("R");
-    const SolutionMap solution_for_subordinates = UnionOfSolo( *surrounding_solution, basic_solution );   
-    TRACE("---------------- Regeneration ----------------\n");      
-    //TRACEC("Subordinate keys ")(keys_for_subordinates)("\n");       
-    TRACEC("Basic solution ")(basic_solution)("\n");    
-
-    for( Agent *agent : plan.my_normal_agents )
-    {
-        RegenerationPassAgent( agent, 
-                               basic_solution,
-                               solution_for_subordinates );
-    }
-
-    TRACE("Regeneration complete\n");
-}
-
-
 void AndRuleEngine::OnSolution(SolutionMap basic_solution, const SolutionMap &my_fixed_assignments, const SolutionMap *surrounding_solution)
 {
+    INDENT("S");
     // Merge my fixes into the solution (but we're not expected to merge
     // in surrounding solution: caller can do that, if required).
     basic_solution = UnionOfSolo( basic_solution, my_fixed_assignments );
@@ -790,7 +772,18 @@ void AndRuleEngine::OnSolution(SolutionMap basic_solution, const SolutionMap &my
 	
 	try
 	{
-		RegenerationPass( basic_solution, surrounding_solution );
+		const SolutionMap solution_for_subordinates = UnionOfSolo( *surrounding_solution, basic_solution );   
+		TRACE("---------------- Regeneration ----------------\n");      
+		TRACEC("Basic solution ")(basic_solution)("\n");    
+
+		for( Agent *agent : plan.my_normal_agents )
+		{
+			AgentRegeneration( agent, 
+								   basic_solution,
+								   solution_for_subordinates );
+		}
+
+		TRACE("Regeneration successful, we have a match\n");
 	}
 	catch( const ::Mismatch &e )
 	{                
@@ -798,7 +791,8 @@ void AndRuleEngine::OnSolution(SolutionMap basic_solution, const SolutionMap &my
 		return; 
 	}
 	
-	// We succeeded and basic_solution is the right set of keys
+	// We succeeded and basic_solution is the right set of keys. Throw the solution
+	// in an exception though the CSP algo, in order to abort the solve process.
 	TRACE("AndRuleEngine hit\n");
 	throw SuccessfulMatch(basic_solution);
 }
@@ -823,7 +817,7 @@ SolutionMap AndRuleEngine::Compare( XLink base_xlink,
 {
     INDENT("C");
     ASSERT( base_xlink );            
-	ASSERT( plan.solver_holder );
+	ASSERT( plan.csp_solver );
     TRACE("Compare base ")(base_xlink)("\n");
 
 #ifdef CHECK_EVERYTHING_IS_IN_DOMAIN
@@ -841,26 +835,25 @@ SolutionMap AndRuleEngine::Compare( XLink base_xlink,
         surrounding_and_base_links[link] = surrounding_solution->at(link);
     for( PatternLink link : plan.my_fixed_keyer_links )
         surrounding_and_base_links[link] = my_fixed_assignments.at(link);
+    plan.csp_solver->Start( surrounding_and_base_links, x_tree_db.get() );    
     
 	// Bind our OnSolution function as the solution handler for the solver
-    CSP::SolutionHandler on_solution_function = std::bind(&AndRuleEngine::OnSolution, 
-                                                          this, 
-                                                          placeholders::_1, 
-                                                          my_fixed_assignments, 
-                                                          surrounding_solution);      	
+    CSP::Solver::SolutionReportFunction on_solution_function = std::bind( &AndRuleEngine::OnSolution, 
+																		  this, 
+																		  placeholders::_1, 
+																		  my_fixed_assignments, 
+																		  surrounding_solution );      	
     
 	try
 	{    
-		TRACE("Starting solver\n");
-		plan.solver_holder->RunSolver( surrounding_and_base_links, 
-								       x_tree_db.get(), 
-							     	   on_solution_function );	
+		plan.csp_solver->Run( on_solution_function );  	
+		// CSP solver returns when there are no further solutions.
+		throw AndRuleMismatch();
 	}
 	catch( const SuccessfulMatch &sm )
 	{ 
 		return sm.GetSolution();   // We got a match so we're done. 
 	}	
-	throw NoSolution();
 }
 
 
