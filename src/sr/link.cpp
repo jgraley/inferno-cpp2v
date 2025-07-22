@@ -198,7 +198,8 @@ PatternLink::PatternLink(shared_ptr<const TreePtrInterface> ppattern,
 //////////////////////////// XLink ///////////////////////////////
 
 XLink::XLink() :
-    asp_x( nullptr )
+    asp_x( nullptr ),
+    p_tpi( nullptr )
 {
 #ifdef KEEP_WHODAT_INFO
     whodat = WHODAT();
@@ -222,7 +223,8 @@ XLink::~XLink()
 
 
 XLink::XLink(const XLink &other) :
-    asp_x( other.asp_x )
+    asp_x( other.asp_x ),
+    p_tpi( other.p_tpi )
 {
 #ifdef KEEP_WHODAT_INFO
     whodat = WHODAT();
@@ -253,6 +255,7 @@ XLink &XLink::operator=(const XLink &other)
 #endif
 		
 	asp_x = other.asp_x;
+	p_tpi = other.p_tpi;
 	
 #ifdef XLINK_TREE_POINTER_REF_COUNTS
 	if( asp_x )
@@ -263,7 +266,8 @@ XLink &XLink::operator=(const XLink &other)
 
 
 XLink::XLink(XLink &&other) :
-    asp_x( other.asp_x )
+    asp_x( other.asp_x ),
+    p_tpi( other.p_tpi )
 {
 #ifdef KEEP_WHODAT_INFO
     whodat = WHODAT();
@@ -276,6 +280,7 @@ XLink::XLink(XLink &&other) :
 	{
 		other.asp_x->RemoveRef(&other);
 		other.asp_x = nullptr;
+		other.p_tpi = nullptr;
 	}
 	if( asp_x ) 
 		asp_x->AddRef(this);
@@ -298,12 +303,14 @@ XLink &XLink::operator=(XLink &&other)
 #endif
 
 	asp_x = other.asp_x;
+	p_tpi = other.p_tpi;
 
 #ifdef XLINK_TREE_POINTER_REF_COUNTS
 	if( other.asp_x ) 
 	{
 		other.asp_x->RemoveRef(&other);
 		other.asp_x = nullptr;
+		other.p_tpi = nullptr;
 	}
 	if( asp_x ) 
 		asp_x->AddRef(this);
@@ -314,29 +321,30 @@ XLink &XLink::operator=(XLink &&other)
 
 
 
-XLink::XLink( shared_ptr<const Node> parent_x,
-              const TreePtrInterface *px,
+XLink::XLink( shared_ptr<const Node> p_parent,
+              const TreePtrInterface *p_tpi_,
               void *whodat_ ) :
-    asp_x( parent_x, px ) 
+    asp_x( p_parent, p_tpi_ ),    
     // From Cppreference: 
     //         template<class Y> 
     //         shared_ptr( const shared_ptr<Y>& r, element_type* ptr ) noexcept
     //  Y is function template = const Node
     //  element_type = T is class template = const TreePtrInterface
-    //  r is parent_x
-    //  ptr is px
+    //  r is p_parent
+    //  ptr is p_tpi
     // So, the shareD_ptr mechanism will keep parent_x alive as with TreePtr
-    // but .get() will return px, whichh points to one of parent_x's pointers.
+    // but .get() will return p_tpi, which points to one of p_parent's pointers.
+    p_tpi( p_tpi_ )
 {
 #ifdef KEEP_WHODAT_INFO
     whodat = whodat_ ? whodat_ : WHODAT();
 #else
 	(void)whodat_;
 #endif  
-    ASSERT( parent_x );
-    ASSERT( px );
-    ASSERT( parent_x != GetChildTreePtr() );
-    ASSERT_NOT_ON_STACK( px )( *this );
+    ASSERT( p_parent );
+    ASSERT( p_tpi );
+    ASSERT( p_parent != GetChildTreePtr() );
+    ASSERT_NOT_ON_STACK( p_tpi_ )( *this );
 #ifdef XLINK_LIFECYCLE_TRACE
 	FTRACE(this)("\n");
 #endif
@@ -352,9 +360,10 @@ XLink::XLink( const LocatedLink &l ) :
 }
 
 
-XLink::XLink( shared_ptr<const TreePtrInterface> px,
+XLink::XLink( shared_ptr<const TreePtrInterface> asp_x_,
               void *whodat_ ) :
-    asp_x( px )
+    asp_x( asp_x_ ),
+    p_tpi( asp_x.get() )
 {
 #ifdef KEEP_WHODAT_INFO
     whodat = whodat_ ? whodat_ : WHODAT();
@@ -362,7 +371,7 @@ XLink::XLink( shared_ptr<const TreePtrInterface> px,
 	(void)whodat_;
 #endif  
 
-    ASSERT(px);
+    ASSERT(p_tpi);
 
 #ifdef XLINK_LIFECYCLE_TRACE
 	FTRACE(this)("\n");

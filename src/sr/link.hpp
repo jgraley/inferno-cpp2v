@@ -104,6 +104,7 @@ public:
 private: friend class LocatedLink;
 
     shared_ptr<const TreePtrInterface> asp_x;
+    const TreePtrInterface *p_tpi;
     // So .get() will return const TreePtrInterface*
     
 #ifdef KEEP_WHODAT_INFO
