@@ -74,6 +74,8 @@ string SymbolicResult::GetTrace() const
 UniqueResult::UniqueResult( XValue xlink_ ) :
     xlink( xlink_ )
 {
+	//FTRACE(xlink)("\n"); // crashes when xlink copy constructor nulls the sp_tp_
+
     ASSERT( xlink_ )("Not allowed to construct with NULL; use EmptyResult instead");
 }
 
