@@ -73,7 +73,9 @@ struct TreePtrCommon : virtual TreePtrInterface, public SatelliteSerial
     ~TreePtrCommon();
 #endif
     TreePtrCommon(const TreePtrCommon &other);
-    //TreePtrCommon &operator=(const TreePtrCommon &other);
+    TreePtrCommon &operator=(const TreePtrCommon &other);
+    TreePtrCommon(TreePtrCommon &&other) = delete;
+    TreePtrCommon &operator=(TreePtrCommon &&other) = delete;
     
     explicit TreePtrCommon( Node *o );
     TreePtrCommon( nullptr_t o );

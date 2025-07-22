@@ -44,6 +44,7 @@ void DBWalk::VisitSingular( const WalkKit &kit,
                             int item_ordinal )
 {
     ASSERT( p_x_singular );
+    ASSERT(node);
     XLink child_xlink;
     TreePtr<Node> child_node = nullptr;
     
@@ -53,6 +54,7 @@ void DBWalk::VisitSingular( const WalkKit &kit,
     // Or it could be placeholder = free zone terminus.
     if( *p_x_singular )
     {
+		ASSERT( node );
 		child_xlink = XLink( node, p_x_singular ); // p_x_singular should be inside x
 		child_node = child_xlink.GetChildTreePtr();
 	}

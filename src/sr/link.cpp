@@ -6,8 +6,14 @@ using namespace SR;
 // For debugging
 #ifdef KEEP_WHODAT_INFO
 #define WHODAT() RETURN_ADDR()
+#define PUSH_WHODAT(W) ((W).push_back(WHODAT()))
+#define PUSH_WHODAT_ARG(W, W_) do { if(W_) (W).push_back((W_)); (W).push_back(WHODAT()); } while(false)
+#define PUSH_WHODAT_CMA(W, O) do { W=O.W; (W).push_back(WHODAT()); } while(false)
 #else
 #define WHODAT() nullptr
+#define PUSH_WHODAT(W) ((W).push_back(WHODAT()))
+#define PUSH_WHODAT_ARG(W, W_) ((void)(W_))
+#define PUSH_WHODAT_CMA(W, O) ((void)(O))
 #endif
  
 // Tests the not-on-stack tests themseleves
@@ -17,15 +23,16 @@ using namespace SR;
 #define XLINK_TREE_POINTER_REF_COUNTS
 #endif
 
+// >1 because we require an external reference aside from asp_x itself
+#define ASP_REF_CHECK(ASP_X) ASSERT( !(ASP_X) || (ASP_X).use_count() > 1 )
+
 //#define XLINK_LIFECYCLE_TRACE
 
 //////////////////////////// PatternLink ///////////////////////////////
 
 PatternLink::PatternLink()
 {
-#ifdef KEEP_WHODAT_INFO
-    whodat = WHODAT();
-#endif
+    PUSH_WHODAT(whodat);
 }
 
 
@@ -37,11 +44,7 @@ PatternLink::PatternLink(shared_ptr<const Node> parent_pattern,
     ASSERT( parent_pattern );
     ASSERT( ppattern );
     ASSERT( *ppattern );
-#ifdef KEEP_WHODAT_INFO
-    whodat = whodat_ ? whodat_ : WHODAT();
-#else
-	(void)whodat_;
-#endif    
+	PUSH_WHODAT_ARG( whodat, whodat_ );
     ASSERT_NOT_ON_STACK( ppattern )( *this );
 }
 
@@ -160,9 +163,11 @@ Mutate() on the container.
 
 string PatternLink::GetTrace() const
 {
-    string s = GetName();
+    if(asp_pattern==nullptr)
+        return "NULL";
+    string s = "↳"+asp_pattern->GetTrace();
 #ifdef KEEP_WHODAT_INFO    
-    s += SSPrintf("@%lX", (unsigned long)whodat);
+    s += Trace(whodat);
 #endif
     return s;
 }
@@ -188,11 +193,7 @@ PatternLink::PatternLink(shared_ptr<const TreePtrInterface> ppattern,
                          void *whodat_) :
     asp_pattern( ppattern )
 {
-#ifdef KEEP_WHODAT_INFO
-    whodat = whodat_ ? whodat_ : WHODAT();
-#else
-	(void)whodat_;
-#endif    
+	PUSH_WHODAT_ARG( whodat, whodat_ );    
 }
 
 //////////////////////////// XLink ///////////////////////////////
@@ -201,9 +202,7 @@ XLink::XLink() :
     asp_x( nullptr ),
     p_tpi( nullptr )
 {
-#ifdef KEEP_WHODAT_INFO
-    whodat = WHODAT();
-#endif
+    PUSH_WHODAT(whodat);
 #ifdef XLINK_LIFECYCLE_TRACE
 	FTRACE(this)("\n");
 #endif	
@@ -226,9 +225,9 @@ XLink::XLink(const XLink &other) :
     asp_x( other.asp_x ),
     p_tpi( other.p_tpi )
 {
-#ifdef KEEP_WHODAT_INFO
-    whodat = WHODAT();
-#endif
+    PUSH_WHODAT_CMA(whodat, other);
+	ASP_REF_CHECK(asp_x);
+
 #ifdef XLINK_LIFECYCLE_TRACE
 	FTRACE(this)("\n");
 #endif
@@ -243,9 +242,9 @@ XLink &XLink::operator=(const XLink &other)
 {
 	ASSERT( &other != this );
 	
-#ifdef KEEP_WHODAT_INFO
-    whodat = WHODAT();
-#endif
+    PUSH_WHODAT_CMA(whodat, other);
+	ASP_REF_CHECK(asp_x);
+
 #ifdef XLINK_LIFECYCLE_TRACE
 	FTRACE(this)("\n");
 #endif
@@ -269,9 +268,9 @@ XLink::XLink(XLink &&other) :
     asp_x( other.asp_x ),
     p_tpi( other.p_tpi )
 {
-#ifdef KEEP_WHODAT_INFO
-    whodat = WHODAT();
-#endif
+    PUSH_WHODAT_CMA(whodat, other);
+	ASP_REF_CHECK(asp_x);
+
 #ifdef XLINK_LIFECYCLE_TRACE
 	FTRACE(this)(" move from ")(&other)("\n");
 #endif
@@ -291,9 +290,9 @@ XLink::XLink(XLink &&other) :
 XLink &XLink::operator=(XLink &&other)
 {
 	ASSERT( &other != this );
-#ifdef KEEP_WHODAT_INFO
-    whodat = WHODAT();
-#endif
+	ASP_REF_CHECK(asp_x);
+
+    PUSH_WHODAT_CMA(whodat, other);
 #ifdef XLINK_LIFECYCLE_TRACE
 	FTRACE(this)(" move from ")(&other)("\n");
 #endif
@@ -319,8 +318,6 @@ XLink &XLink::operator=(XLink &&other)
 }
 
 
-
-
 XLink::XLink( shared_ptr<const Node> p_parent,
               const TreePtrInterface *p_tpi_,
               void *whodat_ ) :
@@ -336,11 +333,8 @@ XLink::XLink( shared_ptr<const Node> p_parent,
     // but .get() will return p_tpi, which points to one of p_parent's pointers.
     p_tpi( p_tpi_ )
 {
-#ifdef KEEP_WHODAT_INFO
-    whodat = whodat_ ? whodat_ : WHODAT();
-#else
-	(void)whodat_;
-#endif  
+	PUSH_WHODAT_ARG( whodat, whodat_ );
+	ASP_REF_CHECK(asp_x);
     ASSERT( p_parent );
     ASSERT( p_tpi );
     ASSERT( p_parent != GetChildTreePtr() );
@@ -366,11 +360,8 @@ XLink::XLink( shared_ptr<const TreePtrInterface> asp_x_,
     asp_x( asp_x_ ),
     p_tpi( p_tpi_ )
 {
-#ifdef KEEP_WHODAT_INFO
-    whodat = whodat_ ? whodat_ : WHODAT();
-#else
-	(void)whodat_;
-#endif  
+	PUSH_WHODAT_ARG( whodat, whodat_ );
+	ASP_REF_CHECK(asp_x);
 
     ASSERT(p_tpi);
 
@@ -434,7 +425,7 @@ string XLink::GetTrace() const
         return "NULL";
     string s = "⤷"+p_tpi->GetTrace();
 #ifdef KEEP_WHODAT_INFO    
-    s += SSPrintf("@%" PRIxPTR, (uintptr_t)whodat);
+    s += Trace(whodat);
 #endif
     return s;
 }

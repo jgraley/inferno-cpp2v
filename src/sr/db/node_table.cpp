@@ -1,6 +1,7 @@
 #include "node_table.hpp"
 #include "sc_relation.hpp"
 #include "link_table.hpp"
+#include "x_tree_database.hpp"
 
 #include "common/read_args.hpp"
 
@@ -150,6 +151,30 @@ vector<TreePtr<Node>> NodeTable::GetNodeDomainAsVector() const
 size_t NodeTable::GetTotNumNodes() const
 {
 	return rows.size();
+}
+
+
+void NodeTable::ConsistencyCheck(const XTreeDatabase *db) const
+{
+    for( auto p : rows )
+	{
+		TreePtr<Node> node = p.first;
+		const Row &row = p.second;
+		for( XLink xlink : row.incoming_xlinks )
+		{
+			ASSERT( db->HasRow(xlink) );			
+			const LinkTable::Row &link_row = db->GetRow(xlink);
+			if( !link_row.parent_node )
+			{
+				DBCommon::TreeOrdinal ord = db->GetTreeOrdinalFor(xlink);
+				ASSERT( xlink == db->GetRootXLink(ord) );
+			}
+			else
+			{
+			    ASSERT( HasRow( link_row.parent_node ) );
+			}
+		}
+	}
 }
 
 

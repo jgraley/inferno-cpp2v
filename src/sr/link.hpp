@@ -5,7 +5,7 @@
 #include "node/specialise_oostd.hpp"
 #include "helpers/walk.hpp"
 
-//#define KEEP_WHODAT_INFO
+#define KEEP_WHODAT_INFO
 // Note: you may wish to try subtracting 1 or 8 or something 
 // from the address to get a better indication of where the 
 // call itself came from.
@@ -50,7 +50,7 @@ private: friend class LocatedLink;
 
     shared_ptr<const TreePtrInterface> asp_pattern;
 #ifdef KEEP_WHODAT_INFO
-    void *whodat; 
+    vector<void *> whodat; 
 #endif
 }; 
 
@@ -109,7 +109,7 @@ private:
     // So .get() will return const TreePtrInterface*
     
 #ifdef KEEP_WHODAT_INFO
-    void *whodat; 
+    vector<void *> whodat; 
 #endif
 
     struct MMAXNodeType : virtual Node { NODE_FUNCTIONS_FINAL }; 

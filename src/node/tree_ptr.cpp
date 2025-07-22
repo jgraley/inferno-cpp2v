@@ -112,16 +112,20 @@ TreePtrCommon::TreePtrCommon( nullptr_t ) :
 
 
 TreePtrCommon::TreePtrCommon(const TreePtrCommon &other) :
+	Itemiser::Element( other ), // Itemiser requires that itemisable's operator= calls though to Element.
     SatelliteSerial( other )
 {
+	// but not the refs since this is a new instance
 }
 
 
-/*TreePtrCommon &TreePtrCommon::operator=(const TreePtrCommon &other)
-{
+TreePtrCommon &TreePtrCommon::operator=(const TreePtrCommon &other)
+{	
 	SatelliteSerial::operator=(other);
+	Itemiser::Element::operator=(other);
+	// but not the refs since this is a different instance
 	return *this;
-}*/
+}
 
 
 #ifdef TREE_POINTER_REF_COUNTS
@@ -130,8 +134,8 @@ void TreePtrCommon::AddRef(const Traceable *ref) const
 	//FTRACE("Add ref ")(ref)("\n");
 	ref_count++; 
 #ifdef TREE_POINTER_REF_TRACKING
-	if( references.count(ref) )
-		FTRACE(references)("\n");
+	//if( references.count(ref) )
+	//	FTRACE(references)("\n");
 	InsertSolo( references, ref );
 #endif	
 }

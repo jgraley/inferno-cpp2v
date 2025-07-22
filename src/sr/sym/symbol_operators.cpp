@@ -13,29 +13,34 @@ using namespace SYM;
 SymbolConstant::SymbolConstant( XValue xlink_ ) :
     xlink( xlink_ )
 {
+	//FTRACE(xlink)("\n");
 }
 
 
 SymbolConstant::SymbolConstant( TreePtr<Node> node ) :
     SymbolConstant( XValue::CreateDistinct(node) )
 {
+	//FTRACE(xlink)("\n");
 }
 
 
 unique_ptr<SymbolicResult> SymbolConstant::Evaluate( const EvalKit &kit ) const
 {
+	//FTRACE(xlink)("\n");
     return make_unique<UniqueResult>( xlink );
 }
 
 
 unique_ptr<SymbolicResult> SymbolConstant::GetValue() const
 {
+	//FTRACE(xlink)("\n");
     return make_unique<UniqueResult>( xlink );
 }
 
 
 XValue SymbolConstant::GetOnlyXLink() const
 {
+	//FTRACE(xlink)("\n");
     return xlink;
 }
 
@@ -44,6 +49,7 @@ Orderable::Diff SymbolConstant::OrderCompare3WayCovariant( const Orderable &righ
                                                            OrderProperty order_property ) const 
 {
     auto &r = GET_THAT_REFERENCE(right);
+	//FTRACE(xlink)("\n");
 
     if( xlink == r.xlink )
         return 0;

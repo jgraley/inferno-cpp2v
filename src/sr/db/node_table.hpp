@@ -61,6 +61,8 @@ public:
     vector<TreePtr<Node>> GetNodeDomainAsVector() const;
 
    	size_t GetTotNumNodes() const;
+   	
+   	void ConsistencyCheck(const XTreeDatabase *db) const;
 
     string GetTrace() const;
     void Dump() const;

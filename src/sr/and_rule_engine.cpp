@@ -344,6 +344,7 @@ void AndRuleEngine::Plan::ConfigureAgents()
             if( residual_plink.GetChildAgent() == agent )
                 residual_plinks.insert( residual_plink );
 
+        TRACE("Call ConfigureCoupling() on agent %p: ", agent)(agent)(" plink: ")(keyer_plink)("\n");  
         agent->ConfigureCoupling( algo, keyer_plink, residual_plinks );
     }
 

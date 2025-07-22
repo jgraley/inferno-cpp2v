@@ -311,9 +311,12 @@ void XTreeDatabase::CheckAssets()
 	link_table->CheckSizeIs(tot_num_xlinks);
 	orderings->CheckSizeIs(tot_num_xlinks, tot_num_nodes);
 
+	// ---------- Check node table incomings -------------		
+	node_table->ConsistencyCheck(this);
+
 	if( !ReadArgs::test_db )
 		return;
-
+		
     // ---------- Checks against a fresh "reference" build ------------
     // No deps on other parts of DB so check first
     TRACE("Making reference domain for checks\n");

@@ -111,7 +111,7 @@ void SCREngine::Plan::CategoriseAgents( const set<PatternLink> &enclosing_plinks
     //my_plinks = DifferenceOf( visible_plinks, enclosing_plinks );
     for( PatternLink plink : visible_plinks )
         if( enclosing_agents.count( plink.GetChildAgent() ) == 0 ) // exclude by agent
-            my_plinks.insert( plink );
+            InsertSolo( my_plinks, plink );
 
     // Need the replace plinks in the same order that GenReplaceLayout() walks the tree
     for( PatternLink plink : visible_replace_plinks_postorder )
@@ -147,6 +147,8 @@ void SCREngine::Plan::WalkVisible( set<PatternLink> &visible,
                                    PatternLink plink, 
                                    Agent::Path path ) const
 {
+	// Can insert more than once TODO better to terminate the walk on repeat visits 
+	// and use InsertSlol()
     visible.insert( plink );    
     
     // Gee, I sure hope recovers children in the same order as GenReplaceLayoutImpl()    
@@ -200,7 +202,8 @@ void SCREngine::Plan::ConfigureAgents()
 {
     // Give agents pointers to here and our coupling keys
     for( Agent *agent : my_agents )
-    {        
+    {  
+		TRACE("Call SCRConfigure() on agent %p: ", agent)(agent)("\n");  
         agent->SCRConfigure( algo,
                              final_agent_phases.at(agent) );                                                 
     }
@@ -257,6 +260,7 @@ void SCREngine::Plan::PlanReplace()
 		if( need_replace_key )
 		{
             InsertSolo( all_keyer_plinks, plink );
+            TRACE("Call ConfigureCoupling() on agent %p: ", agent)(agent)(" plink: ")(plink)("\n");  
             agent->ConfigureCoupling( algo, plink, {} );
         }
     }

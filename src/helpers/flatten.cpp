@@ -45,8 +45,8 @@ FlattenNode_iterator::FlattenNode_iterator( TreePtr<Node> r ) :
 
     mit = 0;
     m_end = root->ItemiseSize();
-    //TRACE("Flattening node ")(*root)(" size %d\n", m_end);
     NormaliseNewMember();
+    //FTRACE("Flattening node ")(*root)(" size %d\n", m_end);
 }
 
 
@@ -58,8 +58,8 @@ FlattenNode_iterator::FlattenNode_iterator( const Node *r ) :
 
     mit = 0;
     m_end = root->ItemiseSize();
-    //TRACE("Flattening node ")(*root)(" size %d\n", m_end);
     NormaliseNewMember();
+    //FTRACE("Flattening node ")(*root)(" size %d\n", m_end);
 }
 
 
@@ -84,7 +84,7 @@ string FlattenNode_iterator::GetName() const
 {
     string s = root->GetTrace();
     if (IsAtEnd())
-        s += string("end()");
+        s += string(".end()");
     else if( dynamic_cast<CollectionInterface *>(GetCurrentMember()) )
         s += string("{}.") + cit->GetTrace();
     else if( dynamic_cast<SequenceInterface *>(GetCurrentMember()) )

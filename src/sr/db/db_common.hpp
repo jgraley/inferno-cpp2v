@@ -50,6 +50,7 @@ public:
     // LinkTable. They originate in DBWalk::Walk() from a tree root.
     struct CoreInfo
     {
+		// NULL for the root xlink of any tree
         TreePtr<Node> parent_node;
         
         // Index into itemisation of the parent node

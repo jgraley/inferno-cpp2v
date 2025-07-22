@@ -14,6 +14,7 @@
 #include <iostream>
 #include <sstream>
 #include <algorithm>
+#include <cinttypes>
 
 using namespace std;
 
@@ -83,7 +84,7 @@ string Trace(const void *p)
 #ifdef SUPPRESS_ADDRESSES
         return "void-ptr";
 #else    
-        return SSPrintf("%p", p);
+        return SSPrintf("%" PRIxPTR, (uintptr_t)p);
 #endif        
     else
         return "NULL";

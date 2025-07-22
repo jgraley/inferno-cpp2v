@@ -122,10 +122,11 @@ list<PatternLink> AgentCommon::GetChildren() const
     // Note: a pattern query should be just as good...
     // Incorrect! This gets the replace-side stuff as well; GetPatternQuery()
     // is only for search.
-    
+    //FTRACE("\n");
     list<PatternLink> plinks;
     for( const TreePtrInterface &tpi : *con )
     {        
+		//FTRACE("TPI=%p\n", &tpi);
         if( tpi )
             plinks.push_back( PatternLink(this, &tpi) );
     }
