@@ -65,17 +65,19 @@ public:
     XLink(XLink &&other);
     XLink &operator=(XLink &&other);
     XLink( shared_ptr<const Node> parent_x,
-           const TreePtrInterface *px,
+           const TreePtrInterface *p_tpi,
            void *whodat=nullptr );
     XLink( const LocatedLink &l );
 private: friend class LocatedLink;
     XLink( shared_ptr<const TreePtrInterface> px,
+           const TreePtrInterface *p_tpi,
            void *whodat=nullptr );
 public:   
    
     // Make a copy of tp_x which acts as a new, distinct value 
     static XLink CreateDistinct( const TreePtr<Node> &tp_x ); 
-    static XLink CreateFrom( shared_ptr<TreePtr<Node>> sp_tp_x );
+    static XLink CreateFrom( shared_ptr<TreePtr<Node>> sp_tp_x,
+                             const TreePtrInterface *p_tpi );
     size_t GetHash() const noexcept;    
     explicit operator bool() const;
     bool HasChildX() const;
@@ -88,21 +90,20 @@ public:
 
     inline bool operator<(const XLink &r) const
     {
-        return asp_x < r.asp_x;  
+        return p_tpi < r.p_tpi;  
     }
         
     inline bool operator!=(const XLink &r) const
     {
-        return asp_x != r.asp_x;    
+        return p_tpi != r.p_tpi;    
     }
 
     inline bool operator==(const XLink &r) const
     {
-        return asp_x == r.asp_x;    
+        return p_tpi == r.p_tpi;    
     }
 
-private: friend class LocatedLink;
-
+private:
     shared_ptr<const TreePtrInterface> asp_x;
     const TreePtrInterface *p_tpi;
     // So .get() will return const TreePtrInterface*

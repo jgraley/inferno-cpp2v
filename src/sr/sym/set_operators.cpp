@@ -374,11 +374,13 @@ unique_ptr<SymbolicResult> AllInCategoryRangeOperator::Evaluate( const EvalKit &
     for( const ExprBounds &bound_exprs : bounds_exprs_list )
     {
         XValue lower_xlink = bound_exprs.first->Evaluate(kit)->GetOnlyXLink();
+        //FTRACE("lower_xlink: ")(lower_xlink)("\n");
 
         // Optimise case when operands are equal by only evaluating once
         XValue upper_xlink = (bound_exprs.second==bound_exprs.first) ? 
                                 lower_xlink : 
                                 bound_exprs.second->Evaluate(kit)->GetOnlyXLink();
+        //FTRACE("upper_xlink: ")(upper_xlink)("\n");
                               
         bounds_list.push_back( make_pair( make_unique<TreePtr<Node>>(lower_xlink.GetChildTreePtr()),
                                           make_unique<TreePtr<Node>>(upper_xlink.GetChildTreePtr()) ) );

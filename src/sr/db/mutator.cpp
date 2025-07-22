@@ -11,7 +11,7 @@ Mutator Mutator::CreateFreeSingular( TreePtr<Node> parent_node,
 {
 	ASSERTS( parent_node )("For tree zone mutator, parent must be a valid node");
 	ASSERTS( !(TreePtr<Node>)*parent_singular )("For tree zone mutator, child must be placeholder");
-	return Mutator(Mode::Singular, parent_node, parent_singular, nullptr, ContainerInterface::iterator(), nullptr);
+	return Mutator(Mode::Singular, parent_node, parent_singular, nullptr, ContainerInterface::iterator(), nullptr, nullptr);
 }
 
 										  		  
@@ -22,14 +22,15 @@ Mutator Mutator::CreateFreeContainer( TreePtr<Node> parent_node,
 	ASSERTS( parent_node )("For tree zone mutator, parent must be a valid node");
 	ASSERTS( parent_container )("For tree zone mutator, parent must be a valid node");
 	ASSERTS( !(TreePtr<Node>)*container_iterator )("For tree zone mutator, child must be a placeholder");
-	return Mutator(Mode::Container, parent_node, nullptr, parent_container, container_iterator, nullptr);
+	return Mutator(Mode::Container, parent_node, nullptr, parent_container, container_iterator, nullptr, nullptr);
 }
 
 
-Mutator Mutator::CreateTreeRoot( shared_ptr<TreePtr<Node>> sp_tp_root_node )
+Mutator Mutator::CreateTreeRoot( shared_ptr<TreePtr<Node>> sp_tp_root_node,
+                                 TreePtrInterface *tpi_root_node  )
 {
-	ASSERTS( (TreePtr<Node>)*sp_tp_root_node )("For tree zone mutator, child must be a valid node");
-	return Mutator(Mode::Root, nullptr, nullptr, nullptr, ContainerInterface::iterator(), sp_tp_root_node);
+	ASSERTS( (TreePtr<Node>)*tpi_root_node )("For tree zone mutator, child must be a valid node");
+	return Mutator(Mode::Root, nullptr, nullptr, nullptr, ContainerInterface::iterator(), sp_tp_root_node, tpi_root_node);
 }
 
 
@@ -38,7 +39,7 @@ Mutator Mutator::CreateTreeSingular( TreePtr<Node> parent_node,
 {
 	ASSERTS( parent_node )("For tree zone mutator, parent must be a valid node");
 	ASSERTS( (TreePtr<Node>)*parent_singular )("For tree zone mutator, child must be a valid node");
-	return Mutator(Mode::Singular, parent_node, parent_singular, nullptr, ContainerInterface::iterator(), nullptr);
+	return Mutator(Mode::Singular, parent_node, parent_singular, nullptr, ContainerInterface::iterator(), nullptr, nullptr);
 }
 
 										  		  
@@ -49,7 +50,7 @@ Mutator Mutator::CreateTreeContainer( TreePtr<Node> parent_node,
 	ASSERTS( parent_node )("For tree zone mutator, parent must be a valid node");
 	ASSERTS( parent_container )("For tree zone mutator, parent must be a valid node");
 	ASSERTS( (TreePtr<Node>)*container_iterator )("For tree zone mutator, child must be a valid node");
-	return Mutator(Mode::Container, parent_node, nullptr, parent_container, container_iterator, nullptr);
+	return Mutator(Mode::Container, parent_node, nullptr, parent_container, container_iterator, nullptr, nullptr);
 }
 
 
@@ -58,13 +59,15 @@ Mutator::Mutator( Mode mode_,
                   TreePtrInterface *parent_singular_, 
                   ContainerInterface *parent_container_,
                   ContainerInterface::iterator container_iterator_,
-                  shared_ptr<TreePtr<Node>> sp_tp_root_node_ ) :
+                  shared_ptr<TreePtr<Node>> sp_tp_root_node_,
+                  TreePtrInterface *tpi_root_node_ ) :
 	mode( mode_ ),
     parent_node( parent_node_ ),
     parent_singular( parent_singular_ ),
     parent_container( parent_container_ ),
     container_iterator( container_iterator_ ),
-    sp_tp_root_node( sp_tp_root_node_ )
+    sp_tp_root_node( sp_tp_root_node_ ),
+    tpi_root_node( tpi_root_node_ )
 {
     //Validate();
 }
@@ -109,7 +112,7 @@ TreePtr<Node> Mutator::ExchangeChild( TreePtr<Node> free_child ) const
 	{
 		case Mode::Root:
 		{
-			*sp_tp_root_node = free_child;
+			*tpi_root_node = free_child;
 			TRACE("Singular mutated ")(old_child)(" into ")(free_child)("\n");   
 			break;
 		}
@@ -219,7 +222,7 @@ XLink Mutator::GetXLink() const
 {
 	XLink xlink;
 	if( mode == Mode::Root )
-		xlink = XLink::CreateFrom(sp_tp_root_node);
+		xlink = XLink::CreateFrom(sp_tp_root_node, tpi_root_node);
 	else
 	    xlink = XLink(parent_node, GetTreePtrInterface() );
     ASSERT( xlink );
@@ -232,8 +235,8 @@ const TreePtrInterface *Mutator::GetTreePtrInterface() const
 	switch( mode )
 	{
 		case Mode::Root:
-			ASSERT( sp_tp_root_node );
-			return sp_tp_root_node.get();
+			ASSERT( tpi_root_node );
+			return tpi_root_node;
 		
 		case Mode::Singular:
 			ASSERT( parent_singular );
@@ -297,7 +300,7 @@ void Mutator::Validate() const // TODO call this more
  	switch( mode )
 	{
 		case Mode::Root:
-			ASSERT( sp_tp_root_node );
+			ASSERT( tpi_root_node );
 			break;
 			
 		case Mode::Singular:

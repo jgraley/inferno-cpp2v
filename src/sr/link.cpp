@@ -361,9 +361,10 @@ XLink::XLink( const LocatedLink &l ) :
 
 
 XLink::XLink( shared_ptr<const TreePtrInterface> asp_x_,
+              const TreePtrInterface *p_tpi_,
               void *whodat_ ) :
     asp_x( asp_x_ ),
-    p_tpi( asp_x_.get() )
+    p_tpi( p_tpi_ )
 {
 #ifdef KEEP_WHODAT_INFO
     whodat = whodat_ ? whodat_ : WHODAT();
@@ -385,13 +386,14 @@ XLink::XLink( shared_ptr<const TreePtrInterface> asp_x_,
 XLink XLink::CreateDistinct( const TreePtr<Node> &tp_x )
 {
     auto sp_tp_x = make_shared< TreePtr<Node> >( tp_x ); 
-    return CreateFrom(sp_tp_x);
+    return XLink(sp_tp_x, sp_tp_x.get(), WHODAT());
 }
               
               
-XLink XLink::CreateFrom( shared_ptr<TreePtr<Node>> sp_tp_x )
+XLink XLink::CreateFrom( shared_ptr<TreePtr<Node>> sp_tp_x,
+                         const TreePtrInterface *p_tpi )
 {
-    return XLink(sp_tp_x, WHODAT());
+    return XLink((shared_ptr<TreePtr<Node>>)nullptr, p_tpi, WHODAT());
 }
 
 
@@ -415,6 +417,7 @@ bool XLink::HasChildX() const
 
 TreePtr<Node> XLink::GetChildTreePtr() const
 {
+	//FTRACE(p_tpi)("\n");
     return (TreePtr<Node>)*p_tpi;
 }
 
@@ -427,7 +430,9 @@ const TreePtrInterface *XLink::GetTreePtrInterface() const
 
 string XLink::GetTrace() const
 {
-    string s = GetName();
+    if(p_tpi==nullptr)
+        return "NULL";
+    string s = "⤷"+p_tpi->GetTrace();
 #ifdef KEEP_WHODAT_INFO    
     s += SSPrintf("@%" PRIxPTR, (uintptr_t)whodat);
 #endif

@@ -32,7 +32,8 @@ public:
                                         ContainerInterface::iterator container_iterator );
                                              
 private: friend class XTreeDatabase;
-	static Mutator CreateTreeRoot( shared_ptr<TreePtr<Node>> sp_tp_root_node );
+	static Mutator CreateTreeRoot( shared_ptr<TreePtr<Node>> sp_tp_root_node,
+                                   TreePtrInterface *tpi_root_node );
 	static Mutator CreateTreeSingular( TreePtr<Node> parent_node, 
 	                                   TreePtrInterface *parent_singular );
 	static Mutator CreateTreeContainer( TreePtr<Node> parent_node, 
@@ -45,7 +46,8 @@ private:
 					  TreePtrInterface *parent_singular_,
                       ContainerInterface *parent_container_,
                       ContainerInterface::iterator container_iterator_,
-                      shared_ptr<TreePtr<Node>> sp_tp_root_node_ );             
+                      shared_ptr<TreePtr<Node>> sp_tp_root_node_,
+                      TreePtrInterface *tpi_root_node_ );             
 
 public:  
     explicit Mutator();
@@ -82,6 +84,7 @@ private:
     ContainerInterface *parent_container;
     ContainerInterface::iterator container_iterator;
     shared_ptr<TreePtr<Node>> sp_tp_root_node;
+    TreePtrInterface *tpi_root_node;
 };        
     
 

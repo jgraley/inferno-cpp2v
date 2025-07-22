@@ -24,6 +24,7 @@ public:
     struct TreeRecord
     {
         shared_ptr<TreePtr<Node>> sp_tp_root_node;
+        TreePtrInterface *tpi_root_node;
         TreeType type;
     };
     

@@ -30,15 +30,15 @@ void Domain::DeleteTree(TreeZone &zone)
 
 void Domain::InsertAction(const DBWalk::WalkInfo &walk_info)
 {
-    InsertSolo( unordered_domain, walk_info.xlink );   
     //TRACE("INSERT ")(walk_info.xlink)(" is_terminus=")(walk_info.at_terminus)("\n");
+    InsertSolo( unordered_domain, walk_info.xlink );   
 }
 
 
 void Domain::DeleteAction(const DBWalk::WalkInfo &walk_info)
 {        
-    EraseSolo( unordered_domain, walk_info.xlink );
     //TRACE("DELETE ")(walk_info.xlink)(" is_terminus=")(walk_info.at_terminus)("\n");
+    EraseSolo( unordered_domain, walk_info.xlink );
 }
 
 
