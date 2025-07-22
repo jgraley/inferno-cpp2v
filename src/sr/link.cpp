@@ -216,8 +216,8 @@ XLink::~XLink()
 	FTRACE(this)("\n");
 #endif
 #ifdef XLINK_TREE_POINTER_REF_COUNTS
-	if( asp_x ) 
-		asp_x->RemoveRef(this);
+	if( p_tpi ) 
+		p_tpi->RemoveRef(this);
 #endif
 }
 
@@ -233,8 +233,8 @@ XLink::XLink(const XLink &other) :
 	FTRACE(this)("\n");
 #endif
 #ifdef XLINK_TREE_POINTER_REF_COUNTS
-	if( asp_x ) 
-		asp_x->AddRef(this);
+	if( p_tpi ) 
+		p_tpi->AddRef(this);
 #endif
 }
 
@@ -250,16 +250,16 @@ XLink &XLink::operator=(const XLink &other)
 	FTRACE(this)("\n");
 #endif
 #ifdef XLINK_TREE_POINTER_REF_COUNTS
-	if( asp_x ) 
-		asp_x->RemoveRef(this);
+	if( p_tpi ) 
+		p_tpi->RemoveRef(this);
 #endif
 		
 	asp_x = other.asp_x;
 	p_tpi = other.p_tpi;
 	
 #ifdef XLINK_TREE_POINTER_REF_COUNTS
-	if( asp_x )
-		asp_x->AddRef(this);	
+	if( p_tpi )
+		p_tpi->AddRef(this);	
 #endif
 	return *this;
 }
@@ -276,14 +276,14 @@ XLink::XLink(XLink &&other) :
 	FTRACE(this)(" move from ")(&other)("\n");
 #endif
 #ifdef XLINK_TREE_POINTER_REF_COUNTS
-	if( other.asp_x ) 
+	if( other.p_tpi ) 
 	{
-		other.asp_x->RemoveRef(&other);
+		other.p_tpi->RemoveRef(&other);
 		other.asp_x = nullptr;
 		other.p_tpi = nullptr;
 	}
-	if( asp_x ) 
-		asp_x->AddRef(this);
+	if( p_tpi ) 
+		p_tpi->AddRef(this);
 #endif
 }
 
@@ -298,22 +298,22 @@ XLink &XLink::operator=(XLink &&other)
 	FTRACE(this)(" move from ")(&other)("\n");
 #endif
 #ifdef XLINK_TREE_POINTER_REF_COUNTS
-	if( asp_x ) 
-		asp_x->RemoveRef(this);
+	if( p_tpi ) 
+		p_tpi->RemoveRef(this);
 #endif
 
 	asp_x = other.asp_x;
 	p_tpi = other.p_tpi;
 
 #ifdef XLINK_TREE_POINTER_REF_COUNTS
-	if( other.asp_x ) 
+	if( other.p_tpi ) 
 	{
-		other.asp_x->RemoveRef(&other);
+		other.p_tpi->RemoveRef(&other);
 		other.asp_x = nullptr;
 		other.p_tpi = nullptr;
 	}
-	if( asp_x ) 
-		asp_x->AddRef(this);
+	if( p_tpi ) 
+		p_tpi->AddRef(this);
 #endif
 	return *this;
 }
@@ -349,7 +349,7 @@ XLink::XLink( shared_ptr<const Node> p_parent,
 	FTRACE(this)("\n");
 #endif
 #ifdef XLINK_TREE_POINTER_REF_COUNTS
-	asp_x->AddRef(this);
+	p_tpi->AddRef(this);
 #endif	
 }
 
@@ -363,7 +363,7 @@ XLink::XLink( const LocatedLink &l ) :
 XLink::XLink( shared_ptr<const TreePtrInterface> asp_x_,
               void *whodat_ ) :
     asp_x( asp_x_ ),
-    p_tpi( asp_x.get() )
+    p_tpi( asp_x_.get() )
 {
 #ifdef KEEP_WHODAT_INFO
     whodat = whodat_ ? whodat_ : WHODAT();
@@ -377,7 +377,7 @@ XLink::XLink( shared_ptr<const TreePtrInterface> asp_x_,
 	FTRACE(this)("\n");
 #endif
 #ifdef XLINK_TREE_POINTER_REF_COUNTS
-	asp_x->AddRef(this);
+	p_tpi->AddRef(this);
 #endif	
 }              
 
@@ -397,31 +397,31 @@ XLink XLink::CreateFrom( shared_ptr<TreePtr<Node>> sp_tp_x )
 
 size_t XLink::GetHash() const noexcept
 {
-    return std::hash<decltype(asp_x)>()(asp_x) >> HASHING_POINTERS_ALIGNMENT_BITS; 
+    return std::hash<decltype(p_tpi)>()(p_tpi) >> HASHING_POINTERS_ALIGNMENT_BITS; 
 }
 
 
 XLink::operator bool() const
 {
-    return asp_x != nullptr;
+    return p_tpi != nullptr;
 }
 
 
 bool XLink::HasChildX() const
 {
-    return !!*asp_x;
+    return !!*p_tpi;
 }
 
 
 TreePtr<Node> XLink::GetChildTreePtr() const
 {
-    return (TreePtr<Node>)*asp_x;
+    return (TreePtr<Node>)*p_tpi;
 }
 
 
 const TreePtrInterface *XLink::GetTreePtrInterface() const
 {
-    return asp_x.get();
+    return p_tpi;
 }
 
 
@@ -437,17 +437,17 @@ string XLink::GetTrace() const
 
 string XLink::GetName() const 
 {
-    if(asp_x==nullptr)
+    if(p_tpi==nullptr)
         return "NULL";
-    return "⤷"+asp_x->GetName();
+    return "⤷"+p_tpi->GetName();
 }
 
 
 string XLink::GetShortName() const 
 {
-    if(asp_x==nullptr)
+    if(p_tpi==nullptr)
         return "NULL";
-    return "⤷"+asp_x->GetShortName();
+    return "⤷"+p_tpi->GetShortName();
 }
 
 const XLink XLink::MMAX = XLink::CreateDistinct( MakeTreeNode<XLink::MMAXNodeType>() );
