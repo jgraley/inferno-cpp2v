@@ -68,6 +68,7 @@ public:
 
     // To be called after modifying the tree, and before any search/compare operation
     void PerformDeferredActions();
+    void PerformDeeplyDeferredActions();
 
 	void InsertTree(const TreeZone &zone);
 	void DeleteTree(const TreeZone &zone);
@@ -112,6 +113,7 @@ public:
     void CheckStimulusXLink( XLink stimulus_xlink );
     void DropStimulusXLink( XLink stimulus_xlink );
     void PerformDeferredActions();
+    void PerformDeeplyDeferredActions();
 
     void Validate() const;
     string GetTrace() const final;
@@ -150,6 +152,8 @@ private:
     
     // SimpleCompare equivalence classes over the domain, with refcount = size of the class.
     map<TreePtr<Node>, ExtensionClass, SimpleCompare> induced_root_to_tree_ordinal_and_ref_count;
+    
+    set<DBCommon::TreeOrdinal> ordinals_to_tear_down;
 };
         
 }

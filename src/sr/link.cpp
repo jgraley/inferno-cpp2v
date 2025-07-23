@@ -12,10 +12,10 @@ using namespace SR;
 #define PUSH_WHODAT_CMA_ARG(W, O, W_) do { W=O.W; (W).push_back((W_)?(W_):WHODAT()); } while(false)
 #else
 #define WHODAT() nullptr
-#define PUSH_WHODAT(W) ((W).push_back(WHODAT()))
+#define PUSH_WHODAT(W) {}
 #define PUSH_WHODAT_ARG(W, W_) ((void)(W_))
 #define PUSH_WHODAT_CMA(W, O) ((void)(O))
-#define PUSH_WHODAT_CMA_ARG(W, O, W_) ((void)(O, W_))
+#define PUSH_WHODAT_CMA_ARG(W, O, W_) ((void)(O), (void)(W_))
 #endif
  
 // Tests the not-on-stack tests themseleves

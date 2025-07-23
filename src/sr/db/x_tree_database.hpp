@@ -40,6 +40,7 @@ public:
 
 	// Actions to take at the end of an update cycle
     void PerformDeferredActions();
+    void PerformDeeplyDeferredActions();
 
 	// ---------------- const and static methods ------------------
     XLink GetRootXLink(DBCommon::TreeOrdinal tree_ordinal) const;

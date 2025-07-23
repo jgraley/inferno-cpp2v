@@ -5,6 +5,7 @@
 #include "ptrans/search_to_compare.hpp"
 #include "ptrans/split_disjunctions.hpp"
 #include "vn_sequence.hpp"
+#include "db/x_tree_database.hpp"
 
 using namespace SR;
 
@@ -101,9 +102,10 @@ void VNStep::SetStopAfter( vector<int> ssa, int d )
 }  
 
 
-void VNStep::SetXTreeDb( shared_ptr<XTreeDatabase> x_tree_db )
+void VNStep::SetXTreeDb( shared_ptr<XTreeDatabase> x_tree_db_ )
 {
-    top_level_engine->SetXTreeDb( x_tree_db );
+	x_tree_db = x_tree_db_;
+    top_level_engine->SetXTreeDb( x_tree_db );    
 }
 
 
@@ -112,6 +114,7 @@ void VNStep::Transform()
     ASSERTTHIS();
     ASSERT( top_level_engine )("VNStep needs to be configured before use");
     top_level_engine->Transform();
+    x_tree_db->PerformDeeplyDeferredActions();
 }                                   
 
 

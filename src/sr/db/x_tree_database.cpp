@@ -133,6 +133,13 @@ void XTreeDatabase::PerformDeferredActions()
 }
 
 
+void XTreeDatabase::PerformDeeplyDeferredActions()
+{
+    domain_extension->PerformDeeplyDeferredActions();
+    CheckAssets();           
+}
+
+
 XLink XTreeDatabase::GetRootXLink(DBCommon::TreeOrdinal tree_ordinal) const
 {
     const DBCommon::TreeRecord &tree_rec = trees_by_ordinal.at(tree_ordinal);

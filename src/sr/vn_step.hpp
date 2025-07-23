@@ -59,6 +59,7 @@ public:
 private:
     shared_ptr<CompareReplace> top_level_engine;
     VNSequence *vn_sequence = nullptr;
+    shared_ptr<XTreeDatabase> x_tree_db;
 };    
     
 }
