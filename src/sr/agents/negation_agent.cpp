@@ -41,7 +41,7 @@ void NegationAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
     query.Reset();
     
     // Context is abnormal because patterns must not match
-    query.RegisterAbnormalLink( PatternLink(this, GetNegand()), keyer_xlink ); // Link into X, abnormal
+    query.RegisterAbnormalNode( PatternLink(this, GetNegand()), nullptr, keyer_xlink ); // Link into X, abnormal
 }
 
 

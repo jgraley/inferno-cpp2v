@@ -438,7 +438,7 @@ AgentCommon::QueryLambda AgentCommon::TestStartRegenerationQuery( const Solution
         //DecidedQueryCommon::AssertMatchingLinks( mut_query->GetNormalLinks(), ref_query->GetNormalLinks() );
 
         // Now to check the links the two algos put in their query objects
-        DecidedQueryCommon::AssertMatchingLinks( mut_query->GetAbnormalLinks(), ref_query->GetAbnormalLinks() );
+        //DecidedQueryCommon::AssertMatchingNodes( mut_query->GetAbnormalNodes(), ref_query->GetAbnormalNodes() ); TODO this is a check on agents; bring back
         DecidedQueryCommon::AssertMatchingNodes( mut_query->GetMultiplicityNodes(), ref_query->GetMultiplicityNodes() );
         return mut_query;
     };

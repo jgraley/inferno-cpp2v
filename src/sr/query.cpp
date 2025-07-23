@@ -130,7 +130,7 @@ string DecidedQuery::GetTrace() const
 {
     string s;
     s += "Normal: " + TraceLinks(GetNormalLinks()) + "\n";
-    s += "Abnormal: " + TraceLinks(GetAbnormalLinks()) + "\n";
+    s += "Abnormal: " + Trace(GetAbnormalNodes()) + "\n";
     s += "Multiplicity: " + Trace(GetMultiplicityNodes()) + "\n";
 
     ASSERT( choices.size() == decisions.size() );
@@ -177,10 +177,9 @@ void DecidedQuery::RegisterNormalLink( PatternLink plink, XLink xlink )
 }
 
 
-void DecidedQuery::RegisterAbnormalLink( PatternLink plink, XLink xlink )
+void DecidedQuery::RegisterAbnormalNode( PatternLink plink, TreePtr<Node> node, XLink xlink )
 {
-    LocatedLink link( plink, xlink );
-    abnormal_links.insert( link );
+    abnormal_nodes[plink] = make_pair(node, xlink);
 }
 
 
@@ -308,7 +307,7 @@ void DecidedQuery::CompleteDecisionsWithEmpty()
 void DecidedQuery::Reset()
 {
     normal_links.clear();
-    abnormal_links.clear();
+    abnormal_nodes.clear();
     multiplicity_nodes.clear();
     next_decision = decisions.begin();  
     next_choice = choices.begin();  

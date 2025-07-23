@@ -679,8 +679,8 @@ void AndRuleEngine::CompareMultiplicityNode( PatternLink plink, TreePtr<Node> no
 
 
 void AndRuleEngine::AgentRegeneration( Agent *agent,
-                                           SolutionMap &basic_solution,
-                                           const SolutionMap &solution_for_subordinates )
+                                       SolutionMap &basic_solution,
+                                       const SolutionMap &solution_for_subordinates )
 {
     INDENT("R");
     // Get a list of the links we must supply to the agent for regeneration
@@ -713,18 +713,20 @@ void AndRuleEngine::AgentRegeneration( Agent *agent,
             SolutionMap solution_for_evaluators;
             
             // Try matching the abnormal links (free and evaluator).
-            for( const LocatedLink &link : query->GetAbnormalLinks() )
-            {
-                ASSERT( link );
+            for( const auto &p : query->GetAbnormalNodes() )
+            {                
+                XLink xlink = p.second.first ? XLink::CreateFrom(&p.second.first) : p.second.second;
+                ASSERT( xlink );
+                
                 // Actions if evaluator link
-                if( plan.my_evaluator_abnormal_engines.count( (PatternLink)link ) )                
-                    InsertSolo( solution_for_evaluators, link );                
+                if( plan.my_evaluator_abnormal_engines.count( p.first ) )                
+                    InsertSolo( solution_for_evaluators, make_pair(p.first, xlink) );                
                 
                 // Actions if free link
-                if( plan.my_free_abnormal_engines.count( (PatternLink)link ) )
+                if( plan.my_free_abnormal_engines.count( p.first ) )
                 {
-                    shared_ptr<AndRuleEngine> e = plan.my_free_abnormal_engines.at( (PatternLink)link );
-                    (void)e->Compare( link, &solution_for_subordinates );
+                    shared_ptr<AndRuleEngine> e = plan.my_free_abnormal_engines.at( p.first );
+                    (void)e->Compare( xlink, &solution_for_subordinates );
                 }
             }                    
             
@@ -750,9 +752,14 @@ void AndRuleEngine::AgentRegeneration( Agent *agent,
         }     
                                         
         // Replace needs these keys 
-        for( const LocatedLink &link : query->GetAbnormalLinks() )
-            InsertSolo( basic_solution, link );                
-                
+        for( const auto &p : query->GetAbnormalNodes() )
+        {
+            XLink xlink = p.second.first ? XLink::CreateDistinct(p.second.first) : p.second.second;
+            ASSERT( xlink );
+			
+            InsertSolo( basic_solution, make_pair(p.first, xlink) );                
+		}
+		
         // If we got here, we're done!
         TRACE("Success after %d tries\n", i);  
         break;

@@ -458,7 +458,7 @@ void StandardAgent::RegenerationQuerySequence( DecidedQueryAgentInterface &query
 
             // Apply couplings to this Star and matched range
             // Restrict to pre-restriction or pattern_seq restriction
-            query.RegisterAbnormalLink( plink, XLink::CreateDistinct(xss) ); // Only used in after-pass AND REPLACE!!
+            query.RegisterAbnormalNode( plink, xss ); // Only used in after-pass AND REPLACE!!
         }
     } 
 }
@@ -483,7 +483,7 @@ void StandardAgent::RegenerationQueryCollection( DecidedQueryAgentInterface &que
         XLink keyer_xlink = hypothesis_links->at(keyer_plink);
         auto x_subcollection = MakeTreeNode<SubCollectionRange>( keyer_xlink.GetChildTreePtr(), p_x_col->begin(), p_x_col->end() );
         x_subcollection->SetExclusions( excluded_x );                                                             
-        query.RegisterAbnormalLink( plan_col.star_plink, XLink::CreateDistinct(x_subcollection) ); // Only used in after-pass AND REPLACE!!       
+        query.RegisterAbnormalNode( plan_col.star_plink, x_subcollection ); // Only used in after-pass AND REPLACE!!       
     }    
 }
 

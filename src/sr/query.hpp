@@ -93,6 +93,7 @@ public:
     typedef vector<Choice> Choices; 
     typedef SolutionMap Links;
     typedef map<PatternLink, TreePtr<Node>> Nodes;
+    typedef map<PatternLink, pair<TreePtr<Node>, XLink>> Pairs;
     
     virtual const Choices &GetChoices() const = 0;
     virtual const Ranges &GetDecisions() const = 0;
@@ -127,7 +128,7 @@ public:
     virtual void CompleteDecisionsWithEmpty() = 0;
 
     virtual void RegisterNormalLink( PatternLink plink, XLink xlink ) = 0; 
-    virtual void RegisterAbnormalLink( PatternLink plink, XLink xlink ) = 0; 
+    virtual void RegisterAbnormalNode( PatternLink plink, TreePtr<Node> node, XLink xlink=XLink() ) = 0; 
     virtual void RegisterMultiplicityNode( PatternLink plink, TreePtr<Node> node ) = 0;
     
     class RAIIDecisionsCleanup
@@ -150,7 +151,7 @@ public:
     virtual void Start() = 0;
 
     virtual const Links &GetNormalLinks() const = 0; 
-    virtual const Links &GetAbnormalLinks() const = 0; 
+    virtual const Pairs &GetAbnormalNodes() const = 0; 
     virtual const Nodes &GetMultiplicityNodes() const = 0; 
     
     virtual void Invalidate( Choices::size_type bc ) = 0;
@@ -179,11 +180,11 @@ public:
     void CompleteDecisionsWithEmpty() final;
 
     void RegisterNormalLink( PatternLink plink, XLink xlink ) final; 
-    void RegisterAbnormalLink( PatternLink plink, XLink xlink ) final; 
+    void RegisterAbnormalNode( PatternLink plink, TreePtr<Node> node, XLink xlink=XLink() ) final; 
     void RegisterMultiplicityNode( PatternLink plink, TreePtr<Node> node ) final; 
                                                   
     const Links &GetNormalLinks() const final { return normal_links; } 
-    const Links &GetAbnormalLinks() const final { return abnormal_links; }
+    const Pairs &GetAbnormalNodes() const final { return abnormal_nodes; }
     const Nodes &GetMultiplicityNodes() const final { return multiplicity_nodes; }
      
     const Choices &GetChoices() const final { return choices; }
@@ -195,7 +196,7 @@ public:
     
 private: friend class Conjecture;
     Links normal_links; 
-    Links abnormal_links; 
+    Pairs abnormal_nodes; 
     Nodes multiplicity_nodes; 
     Ranges decisions;
     Ranges::iterator next_decision;
