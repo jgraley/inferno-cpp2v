@@ -18,6 +18,7 @@ void MoveInPass::Run(MovesMap &moves_map, ReplaceAssignments *assignments)
 {	
 	INDENT("Z");
 	TRACE("Got %u map entries\n", moves_map.mm.size());
+	set<DBCommon::TreeOrdinal> ordinals_to_tear_down;
 	
 	for( auto &p : moves_map.mm )
 	{
@@ -39,7 +40,8 @@ void MoveInPass::Run(MovesMap &moves_map, ReplaceAssignments *assignments)
 		// Swap the moving content in and the scaffold out
 		db->SwapTreeToTree( extra_tree_zone, vector<TreeZone *>(),
 							main_tree_zone, vector<TreeZone *>() );
-				
+		ordinals_to_tear_down.insert( extra_tree_zone.GetTreeOrdinal() );
+		
 		// Fix up XLinks damaged by the swap.
 		for( size_t i=0; i<fixups.size(); i++ )
 		{
@@ -47,12 +49,17 @@ void MoveInPass::Run(MovesMap &moves_map, ReplaceAssignments *assignments)
 				assignments->at(plink) = main_tree_zone.GetTerminusXLink(i);
 		}
 
-		// We're done with the extra tree zone which now contains scaffold
-		db->TeardownTree(extra_tree_zone.GetTreeOrdinal()); 	
-		
 		// Capture the replace assignments
 		for( PatternLink plink : p.second.originators )
-			assignments->insert( make_pair(plink, main_tree_zone.GetBaseXLink()) );  	
+			assignments->insert( make_pair(plink, main_tree_zone.GetBaseXLink()) );  				
 	}
+
+	// XLink memory safety: discard tree zones in the moves map before 
+	// tearing down tree, which will delete the underlying TreePtr<>		
+	moves_map.mm.clear();
+
+	// We're done with the extra trees which now contains scaffold
+	for( DBCommon::TreeOrdinal ord : ordinals_to_tear_down )		
+		db->TeardownTree(ord); 
 }
 

@@ -71,7 +71,9 @@ unique_ptr<FreeZone> TreeUpdater::TransformToSingleFreeZone( shared_ptr<Patch> l
 
 ReplaceAssignments TreeUpdater::UpdateMainTree( XLink origin_xlink, shared_ptr<Patch> layout )
 {               
-	assignments.clear();
+	// XLink memory safety: don't store the assignments in a member because
+	// they may outlast the database and become invalid.	
+	ReplaceAssignments assignments;
 	
 	// Dump all patches in wind-in order
 	TRACE("Tree update layout:\n");
@@ -82,14 +84,14 @@ ReplaceAssignments TreeUpdater::UpdateMainTree( XLink origin_xlink, shared_ptr<P
 	
     // Figure out what we should do, then do it. See comments in these 
     // functions and the pass class headers.
-	Analysis(origin_xlink, layout);
-	ApplyUpdate(origin_xlink, layout);
+	Analysis(origin_xlink, layout, assignments);
+	ApplyUpdate(origin_xlink, layout, assignments);
 
 	return assignments;
 }
 
 
-void TreeUpdater::Analysis(XLink origin_xlink, shared_ptr<Patch> &layout)
+void TreeUpdater::Analysis(XLink origin_xlink, shared_ptr<Patch> &layout, ReplaceAssignments &assignments)
 {	
 	// Roughtly an analysis phase. We can modify the layout but no
 	// changes to the db or zone duplications. The input layout is a
@@ -139,7 +141,7 @@ void TreeUpdater::Analysis(XLink origin_xlink, shared_ptr<Patch> &layout)
 }
 	
 	
-void TreeUpdater::ApplyUpdate(XLink origin_xlink, shared_ptr<Patch> &layout)
+void TreeUpdater::ApplyUpdate(XLink origin_xlink, shared_ptr<Patch> &layout, ReplaceAssignments &assignments)
 {		
 	// To implement the changes: we will duplicate COPYABLEs into free, move
 	// MOVABLES out of main tree, insert all new stuff into main tree, and

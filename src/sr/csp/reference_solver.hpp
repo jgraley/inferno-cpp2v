@@ -46,10 +46,13 @@ public:
                      const set<VariableId> &arbitrary_forced_variables );
     ~ReferenceSolver();
 
-    virtual void Start( const Assignments &forces,
-                        const SR::XTreeDatabase *x_tree_db );
-    virtual void Run( const SolutionReportFunction &solution_report_function,
-                      const RejectionReportFunction &rejection_report_function );
+    void Start( const Assignments &forces,
+                const SR::XTreeDatabase *x_tree_db ) override;
+                
+    void Stop() override;
+				
+    void Run( const SolutionReportFunction &solution_report_function,
+              const RejectionReportFunction &rejection_report_function ) override;
 
 protected:
     const struct Plan : public virtual Traceable

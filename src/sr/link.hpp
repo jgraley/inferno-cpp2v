@@ -23,7 +23,7 @@ public:
     PatternLink();
     PatternLink( shared_ptr<const Node> parent_pattern,
                  const TreePtrInterface *ppattern, 
-                 void *whodat=nullptr );
+                 void *whodat_=nullptr );
     PatternLink( const Agent *parent_agent,
                  const TreePtrInterface *ppattern );
     // Make a copy of tp_pattern which acts as a new, distinct value 
@@ -60,18 +60,19 @@ class XLink : public Traceable
 public:
     XLink();
     virtual ~XLink();
-    XLink(const XLink &other);
+    XLink(const XLink &other,
+          void *whodat_=nullptr);
     XLink &operator=(const XLink &other);
     XLink(XLink &&other);
     XLink &operator=(XLink &&other);
     XLink( shared_ptr<const Node> parent_x,
            const TreePtrInterface *p_tpi,
-           void *whodat=nullptr );
+           void *whodat_=nullptr );
     XLink( const LocatedLink &l );
 private: friend class LocatedLink;
     XLink( shared_ptr<const TreePtrInterface> px,
            const TreePtrInterface *p_tpi,
-           void *whodat=nullptr );
+           void *whodat_=nullptr );
 public:   
    
     // Make a copy of tp_x which acts as a new, distinct value 

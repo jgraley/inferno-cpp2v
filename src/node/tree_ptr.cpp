@@ -131,7 +131,7 @@ TreePtrCommon &TreePtrCommon::operator=(const TreePtrCommon &other)
 #ifdef TREE_POINTER_REF_COUNTS
 void TreePtrCommon::AddRef(const Traceable *ref) const
 { 
-	FTRACE("Add ref ")(ref)("\n");
+	//TRACE("Add ref ")(ref)("\n");
 	
 	ref_count++; 
 	
@@ -148,7 +148,7 @@ void TreePtrCommon::AddRef(const Traceable *ref) const
 
 void TreePtrCommon::RemoveRef(const Traceable *ref) const 
 { 
-	FTRACE("Remove ref ")(ref)("\n");
+	//TRACE("Remove ref ")(ref)("\n");
 	ASSERT( ref_count>0 )
 	      ("Ref count decrement past zero\n")
 #ifdef TREE_POINTER_REF_TRACKING

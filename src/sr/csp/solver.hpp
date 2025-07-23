@@ -51,7 +51,7 @@ public:
     Solver();
     
     /**
-     * Desroy an instance of a solver on the basis that it has outlived
+     * Destroy an instance of a solver on the basis that it has outlived
      * it's usefulness and is now less valuable than the memory it consumes.
      */
     virtual ~Solver();
@@ -66,6 +66,17 @@ public:
     virtual void Start( const Assignments &forces,
                         const SR::XTreeDatabase *x_tree_db ) = 0;
                       
+	/**
+	 * Clear down member data structures after solving is done
+	 * 
+	 * XLink memory safety: use this to remove XLinks from member
+	 * data structures so that when DB is torn down at the end of the
+	 * VN sequence, which will delete the underlying TreePtr<>s,
+	 * we don't get orphaned XLinks.	
+	 */ 
+    virtual void Stop() = 0;
+
+
     /**
      * Run the solver to exhaustion (i.e. it will discover all the
      * solutions). Solutions will be reported using the supplied function. If that

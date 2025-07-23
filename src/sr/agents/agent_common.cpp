@@ -286,7 +286,10 @@ AgentCommon::QueryLambda AgentCommon::StartRegenerationQuery( const SolutionMap 
         {
             TRACE("Trying conjecture increment\n");
             if( !nlq_conjecture->Increment() )
+            {
+				nlq_conjecture->Reset();
                 throw NLQConjOutAfterHitMismatch(); // Conjecture has run out of choices to try.            
+			}
         }
 
         while(1)
@@ -294,8 +297,14 @@ AgentCommon::QueryLambda AgentCommon::StartRegenerationQuery( const SolutionMap 
             try
             {
                 // Query the agent: our conj will be used for the iteration and
-                // therefore our query will hold the result 
+                // therefore our query will hold the result.
                 query = nlq_conjecture->GetQuery(this);
+
+                // XLink memory safety: this will put XLinks into the query
+                // which is held by nlq_conjecture. It is imperitive to call
+                // nlq_conjecture->Reset() to destruct them before competing
+                // the search so that final teardown doesn't orphan them. Note
+                // this lambda is called repeatedley, see the `first` flag.
                 RunRegenerationQuery( *query, hypothesis_links, x_tree_db );       
                     
                 TRACE("Got query from DNLQ ")(query->GetDecisions())("\n");

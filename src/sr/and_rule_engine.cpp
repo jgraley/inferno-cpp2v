@@ -832,10 +832,17 @@ SolutionMap AndRuleEngine::Compare( XLink base_xlink,
     // Determine the full set of forces 
     // TODO presumably doesn't need to be the ordered one
     SolutionMap surrounding_and_base_links;
-    for( PatternLink link : plan.boundary_keyer_links )
-        surrounding_and_base_links[link] = surrounding_solution->at(link);
-    for( PatternLink link : plan.my_fixed_keyer_links )
-        surrounding_and_base_links[link] = my_fixed_assignments.at(link);
+    for( PatternLink plink : plan.boundary_keyer_links )
+    {
+		XLink xlink = surrounding_solution->at(plink);
+        surrounding_and_base_links[plink] = xlink;
+	}
+    for( PatternLink plink : plan.my_fixed_keyer_links )
+    {	
+		XLink xlink = my_fixed_assignments.at(plink);
+		surrounding_and_base_links[plink] = xlink;
+	}
+        
     plan.csp_solver->Start( surrounding_and_base_links, x_tree_db.get() );    
     
 	// Bind our OnSolution function as the solution handler for the solver
@@ -849,10 +856,12 @@ SolutionMap AndRuleEngine::Compare( XLink base_xlink,
 	{    
 		plan.csp_solver->Run( on_solution_function );  	
 		// CSP solver returns when there are no further solutions.
+		plan.csp_solver->Stop();
 		throw AndRuleMismatch();
 	}
 	catch( const SuccessfulMatch &sm )
 	{ 
+		plan.csp_solver->Stop();
 		return sm.GetSolution();   // We got a match so we're done. 
 	}	
 }

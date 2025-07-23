@@ -8,6 +8,7 @@
 #include "helpers/simple_duplicate.hpp"
 
 #define NO_ACTION_ON_SCAFFOLD
+#define LEAK_EXTRA_TREES
 
 using namespace SR;    
 
@@ -316,7 +317,11 @@ void DomainExtensionChannel::DropStimulusXLink( XLink stimulus_xlink )
         // Note: most robust is to delete immediately but defer the 
         // check/create to the very end of tree update. Asymmetry approved!
         // Warning can causae re-entry: at the very least, ensure Validate() passes before calling
-        db->TeardownTree(tree_ordinal);
+#ifdef LEAK_EXTRA_TREES
+        (void)tree_ordinal;
+#else
+        db->TeardownTree(tree_ordinal);		
+#endif        
     }
     
 	//Validate();    

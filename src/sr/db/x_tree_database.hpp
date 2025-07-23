@@ -79,10 +79,13 @@ public:
 private: 
     Mutator CreateTreeMutator(XLink xlink) const;
     MutableZone CreateMutableZone(TreeZone &zone) const;
-
     DBCommon::TreeOrdinal AllocateTree();
-    
     void FreeTree(DBCommon::TreeOrdinal tree_ordinal);
+
+	// XLink memory safety: declare this before the assets so it
+	// will be destructed after them. This is because assets hold
+	// XLinks onto TreePtr<>s kept alive by this data structure.
+    map<DBCommon::TreeOrdinal, DBCommon::TreeRecord> trees_by_ordinal;
 
     const shared_ptr<Lacing> lacing;
     const shared_ptr<Domain> domain;
@@ -91,7 +94,6 @@ private:
     const shared_ptr<Orderings> orderings;
     const shared_ptr<DomainExtension> domain_extension;
 
-    map<DBCommon::TreeOrdinal, DBCommon::TreeRecord> trees_by_ordinal;
     queue<DBCommon::TreeOrdinal> free_tree_ordinals;
 
     DBWalk db_walker;

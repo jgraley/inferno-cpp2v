@@ -17,6 +17,13 @@ void SolverTest::Start( const Assignments &forces,
 }
 
 
+void SolverTest::Stop()
+{
+	reference_solver->Stop();
+	solver_under_test->Stop();
+}
+
+
 void SolverTest::Run( const SolutionReportFunction &solution_report_function,
                       const RejectionReportFunction &rejection_report_function )
 {

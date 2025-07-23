@@ -25,7 +25,7 @@ public:
     {
         shared_ptr<PatternQuery> pq;
         shared_ptr<DecidedQuery> query;
-         AgentRecords::const_iterator previous_agent;
+        AgentRecords::const_iterator previous_agent;
     };
 
 public:

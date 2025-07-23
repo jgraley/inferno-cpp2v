@@ -99,10 +99,10 @@ void ValueSelector::SetupSuggestionGenerator( shared_ptr<set<Value>> suggested )
 #ifdef CHECK_NONEMPTY_RESIDUAL
     ASSERT( !suggested->empty() );
 #endif
-     // Use of shared_ptr here allows the lambda to keep suggested
-     // alive without copying it. Even if we could deal with the slowness of a copy, 
-     // we'd still get a crash because the initial suggestion_iterator would be
-     // invalid for the copy. Could be unique_ptr in C++14 when we can move-capture
+    // Use of shared_ptr here allows the lambda to keep suggested
+    // alive without copying it. Even if we could deal with the slowness of a copy, 
+    // we'd still get a crash because the initial suggestion_iterator would be
+    // invalid for the copy. Could be unique_ptr in C++14 when we can move-capture
     // Taking hint means new generator that only reveals the hint
     set<Value>::iterator suggestion_iterator = suggested->begin();
     values_generator = [=]() mutable -> Value

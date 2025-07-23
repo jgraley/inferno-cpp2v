@@ -7,13 +7,15 @@ using namespace SR;
 #ifdef KEEP_WHODAT_INFO
 #define WHODAT() RETURN_ADDR()
 #define PUSH_WHODAT(W) ((W).push_back(WHODAT()))
-#define PUSH_WHODAT_ARG(W, W_) do { if(W_) (W).push_back((W_)); (W).push_back(WHODAT()); } while(false)
+#define PUSH_WHODAT_ARG(W, W_) do { (W).push_back((W_)?(W_):WHODAT()); } while(false)
 #define PUSH_WHODAT_CMA(W, O) do { W=O.W; (W).push_back(WHODAT()); } while(false)
+#define PUSH_WHODAT_CMA_ARG(W, O, W_) do { W=O.W; (W).push_back((W_)?(W_):WHODAT()); } while(false)
 #else
 #define WHODAT() nullptr
 #define PUSH_WHODAT(W) ((W).push_back(WHODAT()))
 #define PUSH_WHODAT_ARG(W, W_) ((void)(W_))
 #define PUSH_WHODAT_CMA(W, O) ((void)(O))
+#define PUSH_WHODAT_CMA_ARG(W, O, W_) ((void)(O, W_))
 #endif
  
 // Tests the not-on-stack tests themseleves
@@ -221,11 +223,12 @@ XLink::~XLink()
 }
 
 
-XLink::XLink(const XLink &other) :
+XLink::XLink(const XLink &other,
+             void *whodat_) :
     asp_x( other.asp_x ),
     p_tpi( other.p_tpi )
 {
-    PUSH_WHODAT_CMA(whodat, other);
+    PUSH_WHODAT_CMA_ARG(whodat, other, whodat_);
 	ASP_REF_CHECK(asp_x);
 
 #ifdef XLINK_LIFECYCLE_TRACE
@@ -459,7 +462,7 @@ LocatedLink::LocatedLink()
 LocatedLink::LocatedLink( const PatternLink &plink_, 
                           const XLink &xlink_) :
     plink( plink_ ),
-    xlink( xlink_ )                                                  
+    xlink( xlink_, WHODAT() )                                                  
 {
     ASSERT( (bool)plink == (bool)xlink );
     

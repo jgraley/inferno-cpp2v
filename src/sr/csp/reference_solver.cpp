@@ -166,6 +166,15 @@ void ReferenceSolver::Start( const Assignments &forces,
     assignments = forced_assignments;    
 }
 
+
+void ReferenceSolver::Stop()
+{
+	forced_assignments.clear();
+	assignments.clear();
+	value_selectors.clear();
+	success_count.clear();
+}
+
     
 void ReferenceSolver::Run( const SolutionReportFunction &solution_report_function_,
                            const RejectionReportFunction &rejection_report_function_ )
