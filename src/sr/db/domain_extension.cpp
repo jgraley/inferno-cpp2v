@@ -282,47 +282,51 @@ void DomainExtensionChannel::DropStimulusXLink( XLink stimulus_xlink )
     TRACE("Stimulus: ")(stimulus_xlink)("\n");
     // Be strict here: all these data structures need to remain in synch
     ASSERT( stimulus_to_induced_root_and_deps.count(stimulus_xlink)>0 );
+	DBCommon::TreeOrdinal ordinal_to_tear_down;
     
 	//Validate();    
-    TreePtr<Node> induced_root = stimulus_to_induced_root_and_deps.at(stimulus_xlink).induced_root;
-    set<XLink> &deps = stimulus_to_induced_root_and_deps.at(stimulus_xlink).deps;
+ 
+	{
+		TreePtr<Node> induced_root = stimulus_to_induced_root_and_deps.at(stimulus_xlink).induced_root;
+		set<XLink> &deps = stimulus_to_induced_root_and_deps.at(stimulus_xlink).deps;
 
-    // Remove this stimulus xlink from deps structures, possibly dropping the
-    // dep completely
-    for( XLink dep : deps )
-    {
-        ASSERT( dep_to_all_stimulii.count(dep)>0 );
-        ASSERT( !dep_to_all_stimulii.at(dep).empty() );
-        EraseSolo(dep_to_all_stimulii.at(dep), stimulus_xlink);
-        if( dep_to_all_stimulii.at(dep).empty() )
-            EraseSolo(dep_to_all_stimulii, dep);
-    }       
-    
-    // Remove tracking row for this stimulus xlink
-    EraseSolo(stimulus_to_induced_root_and_deps, stimulus_xlink);
+		// Remove this stimulus xlink from deps structures, possibly dropping the
+		// dep completely
+		for( XLink dep : deps )
+		{
+			ASSERT( dep_to_all_stimulii.count(dep)>0 );
+			ASSERT( !dep_to_all_stimulii.at(dep).empty() );
+			EraseSolo(dep_to_all_stimulii.at(dep), stimulus_xlink);
+			if( dep_to_all_stimulii.at(dep).empty() )
+				EraseSolo(dep_to_all_stimulii, dep);
+		}       
+		
+		// Remove tracking row for this stimulus xlink
+		EraseSolo(stimulus_to_induced_root_and_deps, stimulus_xlink);
 
-	//Validate();    
+		//Validate();    
 
-    // Remove a reference to this induced root from domain extension classes, possibly
-    // dropping the extension class completely.
-    ASSERT( induced_root_to_tree_ordinal_and_ref_count.count(induced_root) > 0 )
-          ("Induced root ")(induced_root)(" was expected to be in ")(induced_root_to_tree_ordinal_and_ref_count);
-    int new_rc = --induced_root_to_tree_ordinal_and_ref_count.at(induced_root).ref_count;
-    if( new_rc==0 )
-    {
+		// Remove a reference to this induced root from domain extension classes, possibly
+		// dropping the extension class completely.
+		ASSERT( induced_root_to_tree_ordinal_and_ref_count.count(induced_root) > 0 )
+			  ("Induced root ")(induced_root)(" was expected to be in ")(induced_root_to_tree_ordinal_and_ref_count);
+		int new_rc = --induced_root_to_tree_ordinal_and_ref_count.at(induced_root).ref_count;    
+		if( new_rc > 0 )
+			return;
+		
 		//FTRACE("Dropping induced ")(induced_root)("\n");
-        DBCommon::TreeOrdinal tree_ordinal = induced_root_to_tree_ordinal_and_ref_count.at(induced_root).tree_ordinal;
-        EraseSolo( induced_root_to_tree_ordinal_and_ref_count, induced_root );
-        
-        // Note: most robust is to delete immediately but defer the 
-        // check/create to the very end of tree update. Asymmetry approved!
-        // Warning can causae re-entry: at the very least, ensure Validate() passes before calling
+		ordinal_to_tear_down = induced_root_to_tree_ordinal_and_ref_count.at(induced_root).tree_ordinal;
+		EraseSolo( induced_root_to_tree_ordinal_and_ref_count, induced_root );
+	}
+	
+	// Note: most robust is to delete immediately but defer the 
+	// check/create to the very end of tree update. Asymmetry approved!
+	// Warning can causae re-entry: at the very least, ensure Validate() passes before calling
 #ifdef LEAK_EXTRA_TREES
-        (void)tree_ordinal;
+	(void)ordinal_to_tear_down;
 #else
-        db->TeardownTree(tree_ordinal);		
+	db->TeardownTree(ordinal_to_tear_down);		
 #endif        
-    }
     
 	//Validate();    
 }
