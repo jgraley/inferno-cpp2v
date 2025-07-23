@@ -17,8 +17,8 @@ class SymbolConstant : public SymbolExpression
 {
 public:    
     typedef SymbolExpression NominalType;
-    explicit SymbolConstant( XValue xlink );
-    explicit SymbolConstant( TreePtr<Node> node );
+    explicit SymbolConstant( XValue xlink_ );
+    explicit SymbolConstant( TreePtr<Node> node_ );
     virtual unique_ptr<SymbolicResult> Evaluate( const EvalKit &kit ) const override;    
     unique_ptr<SymbolicResult> GetValue() const;
     XValue GetOnlyXLink() const;
@@ -30,6 +30,10 @@ public:
     virtual Precedence GetPrecedence() const override;
     
 private:
+	// XLink memory safety: xlink depends on node, so declare node first.
+	// Since this is a constant expression and evaluations (which can
+	// contin the xlink) are temporary, this should be ok.
+    const TreePtr<Node> node; // TODO make a subclass for this?
     const XValue xlink;
 };
 

@@ -92,6 +92,7 @@ public:
     typedef vector<Range> Ranges;
     typedef vector<Choice> Choices; 
     typedef SolutionMap Links;
+    typedef map<PatternLink, TreePtr<Node>> Nodes;
     
     virtual const Choices &GetChoices() const = 0;
     virtual const Ranges &GetDecisions() const = 0;
@@ -104,7 +105,9 @@ public:
     } last_activity = NEW;
     
     static void AssertMatchingLinks( const DecidedQueryCommon::Links &mut_links, 
-                                    const DecidedQueryCommon::Links &ref_links );
+                                     const DecidedQueryCommon::Links &ref_links );
+    static void AssertMatchingNodes( const DecidedQueryCommon::Nodes &mut_nodes, 
+                                     const DecidedQueryCommon::Nodes &ref_nodes );
     static string TraceLinks( const DecidedQueryCommon::Links &links );    
 };
 
@@ -125,7 +128,7 @@ public:
 
     virtual void RegisterNormalLink( PatternLink plink, XLink xlink ) = 0; 
     virtual void RegisterAbnormalLink( PatternLink plink, XLink xlink ) = 0; 
-    virtual void RegisterMultiplicityLink( PatternLink plink, XLink xlink ) = 0; 
+    virtual void RegisterMultiplicityNode( PatternLink plink, TreePtr<Node> node ) = 0;
     
     class RAIIDecisionsCleanup
     {
@@ -148,8 +151,7 @@ public:
 
     virtual const Links &GetNormalLinks() const = 0; 
     virtual const Links &GetAbnormalLinks() const = 0; 
-    virtual const Links &GetMultiplicityLinks() const = 0; 
-    virtual Links GetAllLinks() const = 0; 
+    virtual const Nodes &GetMultiplicityNodes() const = 0; 
     
     virtual void Invalidate( Choices::size_type bc ) = 0;
     virtual void SetChoice( Choices::size_type bc, Choice newc ) = 0;
@@ -178,12 +180,11 @@ public:
 
     void RegisterNormalLink( PatternLink plink, XLink xlink ) final; 
     void RegisterAbnormalLink( PatternLink plink, XLink xlink ) final; 
-    void RegisterMultiplicityLink( PatternLink plink, XLink xlink ) final; 
+    void RegisterMultiplicityNode( PatternLink plink, TreePtr<Node> node ) final; 
                                                   
     const Links &GetNormalLinks() const final { return normal_links; } 
     const Links &GetAbnormalLinks() const final { return abnormal_links; }
-    const Links &GetMultiplicityLinks() const final { return multiplicity_links; }
-    Links GetAllLinks() const final; 
+    const Nodes &GetMultiplicityNodes() const final { return multiplicity_nodes; }
      
     const Choices &GetChoices() const final { return choices; }
     const Ranges &GetDecisions() const final { return decisions; }
@@ -195,7 +196,7 @@ public:
 private: friend class Conjecture;
     Links normal_links; 
     Links abnormal_links; 
-    Links multiplicity_links; 
+    Nodes multiplicity_nodes; 
     Ranges decisions;
     Ranges::iterator next_decision;
     Choices choices;

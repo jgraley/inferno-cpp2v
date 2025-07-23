@@ -5,7 +5,7 @@
 #include "node/specialise_oostd.hpp"
 #include "helpers/walk.hpp"
 
-//#define KEEP_WHODAT_INFO
+#define KEEP_WHODAT_INFO
 // Note: you may wish to try subtracting 1 or 8 or something 
 // from the address to get a better indication of where the 
 // call itself came from.
@@ -77,8 +77,7 @@ public:
    
     // Make a copy of tp_x which acts as a new, distinct value 
     static XLink CreateDistinct( const TreePtr<Node> &tp_x ); 
-    static XLink CreateFrom( shared_ptr<TreePtr<Node>> sp_tp_x,
-                             const TreePtrInterface *p_tpi );
+    static XLink CreateFrom( const TreePtrInterface *p_tpi );
     size_t GetHash() const noexcept;    
     explicit operator bool() const;
     bool HasChildX() const;
@@ -117,10 +116,12 @@ private:
     struct OffEndNodeType : virtual Node { NODE_FUNCTIONS_FINAL }; 
     
 public:
-    // Magic Match Anything X link: 
+    // Magic Match Anything Xlink: 
+    static const TreePtr<MMAXNodeType> MMAXNode;
     static const XLink MMAX;
 
     // Gone off the end
+    static const TreePtr<OffEndNodeType> OffEndNode;
     static const XLink OffEnd;
 };
 

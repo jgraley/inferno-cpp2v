@@ -85,6 +85,27 @@ void DecidedQueryCommon::AssertMatchingLinks( const DecidedQueryCommon::Links &m
 }
 
 
+void DecidedQueryCommon::AssertMatchingNodes( const DecidedQueryCommon::Nodes &mut_nodes, 
+                                              const DecidedQueryCommon::Nodes &ref_nodes )
+{    
+    TRACE("Checking ")(mut_nodes)(" against ")(ref_nodes)("\n");
+    
+    // Multiplicity X links are not uniquified but their contents should match 
+    ASSERT( mut_nodes.size() == ref_nodes.size() );
+    for( pair<const PatternLink, TreePtr<Node>> rp : ref_nodes )
+    {
+        PatternLink plink = rp.first;
+        TreePtr<Node> ref_node = rp.second;
+        ASSERT( mut_nodes.count(plink) == 1 );
+        TreePtr<Node> mut_node = mut_nodes.at(plink);        
+        if( auto mxssr = dynamic_cast<SubContainer *>(mut_node.get()) )        
+            mxssr->AssertMatchingContents( ref_node ); // only the contents will actually match        
+        else // some other node: should match by link        
+            ASSERT( mut_node == ref_node );        
+    }
+}
+
+
 string DecidedQueryCommon::TraceLinks( const DecidedQueryCommon::Links &links )
 {      
     bool first = true;
@@ -110,7 +131,7 @@ string DecidedQuery::GetTrace() const
     string s;
     s += "Normal: " + TraceLinks(GetNormalLinks()) + "\n";
     s += "Abnormal: " + TraceLinks(GetAbnormalLinks()) + "\n";
-    s += "Multiplicity: " + TraceLinks(GetMultiplicityLinks()) + "\n";
+    s += "Multiplicity: " + Trace(GetMultiplicityNodes()) + "\n";
 
     ASSERT( choices.size() == decisions.size() );
 
@@ -163,10 +184,9 @@ void DecidedQuery::RegisterAbnormalLink( PatternLink plink, XLink xlink )
 }
 
 
-void DecidedQuery::RegisterMultiplicityLink( PatternLink plink, XLink xlink )
+void DecidedQuery::RegisterMultiplicityNode( PatternLink plink, TreePtr<Node> node )
 {
-    LocatedLink link( plink, xlink );
-    multiplicity_links.insert( link );
+    multiplicity_nodes[plink] = node;
 }
 
 
@@ -289,18 +309,9 @@ void DecidedQuery::Reset()
 {
     normal_links.clear();
     abnormal_links.clear();
-    multiplicity_links.clear();
+    multiplicity_nodes.clear();
     next_decision = decisions.begin();  
     next_choice = choices.begin();  
-}
-
-
-DecidedQuery::Links DecidedQuery::GetAllLinks() const
-{
-    Links links = GetNormalLinks();
-    links = UnionOfSolo( links, GetAbnormalLinks() );
-    links = UnionOfSolo( links, GetMultiplicityLinks() );
-    return links;
 }
 
 

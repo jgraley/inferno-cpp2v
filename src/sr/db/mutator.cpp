@@ -222,7 +222,7 @@ XLink Mutator::GetXLink() const
 {
 	XLink xlink;
 	if( mode == Mode::Root )
-		xlink = XLink::CreateFrom(sp_tp_root_node, tpi_root_node);
+		xlink = XLink::CreateFrom(tpi_root_node);
 	else
 	    xlink = XLink(parent_node, GetTreePtrInterface() );
     ASSERT( xlink );

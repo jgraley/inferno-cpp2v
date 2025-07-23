@@ -143,7 +143,7 @@ void XTreeDatabase::PerformDeeplyDeferredActions()
 XLink XTreeDatabase::GetRootXLink(DBCommon::TreeOrdinal tree_ordinal) const
 {
     const DBCommon::TreeRecord &tree_rec = trees_by_ordinal.at(tree_ordinal);
-    return XLink::CreateFrom( tree_rec.sp_tp_root_node, tree_rec.tpi_root_node );
+    return XLink::CreateFrom( tree_rec.tpi_root_node );
 }
 
 

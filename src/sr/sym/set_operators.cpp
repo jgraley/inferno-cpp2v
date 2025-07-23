@@ -302,28 +302,22 @@ list<shared_ptr<SymbolExpression>> AllInSimpleCompareRangeOperator::GetSymbolOpe
 
 unique_ptr<SymbolicResult> AllInSimpleCompareRangeOperator::Evaluate( const EvalKit &kit ) const                                                                    
 {
-    XValue lower_xlink = lower->Evaluate(kit)->GetOnlyXLink();
+    TreePtr<Node> lower_node = lower->Evaluate(kit)->GetOnlyXLink().GetChildTreePtr();
 
     // Optimise case when operands are equal by only evaluating once
-    XValue upper_xlink = (upper==lower) ? 
-                            lower_xlink : 
-                            upper->Evaluate(kit)->GetOnlyXLink();
+    TreePtr<Node> upper_node = (upper==lower) ? 
+                               lower_node : 
+                               upper->Evaluate(kit)->GetOnlyXLink().GetChildTreePtr();
 
     if( lower_role != BoundingRole::NONE )
-    {
-        auto node = MakeTreeNode<SR::SimpleCompareRelation::MinimaxNode>( lower_xlink.GetChildTreePtr(), lower_role );
-        lower_xlink = XValue::CreateDistinct( node );
-    }
+        lower_node = MakeTreeNode<SR::SimpleCompareRelation::MinimaxNode>( lower_node, lower_role );
 
     if( upper_role != BoundingRole::NONE )
-    {
-        auto node = MakeTreeNode<SR::SimpleCompareRelation::MinimaxNode>( upper_xlink.GetChildTreePtr(), upper_role );
-        upper_xlink = XValue::CreateDistinct( node );
-    }
+        upper_node = MakeTreeNode<SR::SimpleCompareRelation::MinimaxNode>( upper_node, upper_role );
 
     return make_unique<SimpleCompareRangeResult>( kit.x_tree_db, 
-                                                  lower_xlink.GetChildTreePtr(), lower_incl, 
-                                                  upper_xlink.GetChildTreePtr(), upper_incl );   
+                                                  lower_node, lower_incl, 
+                                                  upper_node, upper_incl );   
 }
 
 
@@ -373,17 +367,17 @@ unique_ptr<SymbolicResult> AllInCategoryRangeOperator::Evaluate( const EvalKit &
     CategoryRangeResult::CatBoundsList bounds_list;
     for( const ExprBounds &bound_exprs : bounds_exprs_list )
     {
-        XValue lower_xlink = bound_exprs.first->Evaluate(kit)->GetOnlyXLink();
-        //FTRACE("lower_xlink: ")(lower_xlink)("\n");
+        TreePtr<Node> lower_node = bound_exprs.first->Evaluate(kit)->GetOnlyXLink().GetChildTreePtr();
+        //FTRACE("lower_node: ")(lower_node)("\n");
 
         // Optimise case when operands are equal by only evaluating once
-        XValue upper_xlink = (bound_exprs.second==bound_exprs.first) ? 
-                                lower_xlink : 
-                                bound_exprs.second->Evaluate(kit)->GetOnlyXLink();
-        //FTRACE("upper_xlink: ")(upper_xlink)("\n");
+        TreePtr<Node> upper_node = (bound_exprs.second==bound_exprs.first) ? 
+                                   lower_node : 
+                                   bound_exprs.second->Evaluate(kit)->GetOnlyXLink().GetChildTreePtr();
+        //FTRACE("upper_node: ")(upper_node)("\n");
                               
-        bounds_list.push_back( make_pair( make_unique<TreePtr<Node>>(lower_xlink.GetChildTreePtr()),
-                                          make_unique<TreePtr<Node>>(upper_xlink.GetChildTreePtr()) ) );
+        bounds_list.push_back( make_pair( make_unique<TreePtr<Node>>(lower_node),
+                                          make_unique<TreePtr<Node>>(upper_node) ) );
     }
     return make_unique<CategoryRangeResult>( kit.x_tree_db, move(bounds_list), lower_incl, upper_incl );    
 }

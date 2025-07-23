@@ -150,8 +150,8 @@ private:
     void CompareEvaluatorLinks( Agent *agent, 
                                 const SolutionMap *solution_for_subordinates, 
                                 const SolutionMap *solution_for_evaluators );
-    void CompareMultiplicityLinks( LocatedLink link, 
-                                   const SolutionMap *solution_for_subordinates ); 
+    void CompareMultiplicityNode( PatternLink plink, TreePtr<Node> node, 
+                                  const SolutionMap *solution_for_subordinates ); 
     void AgentRegeneration( Agent *agent,
                                 SolutionMap &basic_solution,
                                 const SolutionMap &solution_for_subordinates );

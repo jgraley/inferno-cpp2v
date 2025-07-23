@@ -30,7 +30,6 @@ Agent::ReplacePatchPtr BuilderAgent::GenReplaceLayoutImpl( const ReplaceKit &kit
         // Don't duplicate since this is first one     
         // Note: from #807 we don't now set a key with the SCR engine 
         // since tree update does so for all agents that submit patches.
-        // This has allowed the removal of a CreateDistinct() call.
     }
     else // residual
     {

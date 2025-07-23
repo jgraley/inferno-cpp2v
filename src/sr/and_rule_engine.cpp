@@ -640,19 +640,19 @@ void AndRuleEngine::CompareEvaluatorLinks( Agent *agent,
 }
 
 
-void AndRuleEngine::CompareMultiplicityLinks( LocatedLink link, 
-                                              const SolutionMap *solution_for_subordinates ) 
+void AndRuleEngine::CompareMultiplicityNode( PatternLink plink, TreePtr<Node> node, 
+                                             const SolutionMap *solution_for_subordinates ) 
 {
     INDENT("M");
 
-    shared_ptr<AndRuleEngine> e = plan.my_multiplicity_engines.at( (PatternLink)link );
-    TRACE("Checking multiplicity ")(link)("\n");
+    shared_ptr<AndRuleEngine> e = plan.my_multiplicity_engines.at( plink );
+    TRACE("Checking multiplicity ")(plink)(" vs ")(node)("\n");
         
-    auto xsc = dynamic_cast<SubContainer *>( link.GetChildTreePtr().get() );
+    auto xsc = dynamic_cast<SubContainer *>( node.get() );
+    ASSERT(xsc)("unrecognised multiplicity node ")(node);
     
     if( auto xscr = dynamic_cast<SubContainerRange *>(xsc) )
     {
-        ASSERT( link );
         ContainerInterface *xci = dynamic_cast<ContainerInterface *>(xscr);
         ASSERT(xci)("Multiplicity x must implement ContainerInterface");    
         
@@ -673,7 +673,7 @@ void AndRuleEngine::CompareMultiplicityLinks( LocatedLink link,
     }    
     else
     {
-        ASSERTFAIL("unrecognised SubContainer\n");
+        ASSERT(false)("unrecognised SubContainer ")(xsc);
     }
 }
 
@@ -729,13 +729,14 @@ void AndRuleEngine::AgentRegeneration( Agent *agent,
             }                    
             
             // Try matching the multiplicity links.
-            for( const LocatedLink &link : query->GetMultiplicityLinks() )
+            for( const auto &p : query->GetMultiplicityNodes() )
             {
-                if( plan.my_evaluator_abnormal_engines.count( (PatternLink)link ) )
-                    InsertSolo( solution_for_evaluators, link );                
+				ASSERT( p.second );
+                if( plan.my_evaluator_abnormal_engines.count( p.first ) )
+                    InsertSolo( solution_for_evaluators, make_pair(p.first, XLink::CreateFrom(&p.second)) );                
 
-                if( plan.my_multiplicity_engines.count( (PatternLink)link ) )
-                    CompareMultiplicityLinks( link, &solution_for_subordinates );  
+                if( plan.my_multiplicity_engines.count( p.first ) )
+                    CompareMultiplicityNode( p.first, p.second, &solution_for_subordinates );  
             }
 
             // Try matching the evaluator agents.

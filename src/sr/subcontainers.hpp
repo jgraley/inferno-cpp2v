@@ -18,7 +18,7 @@ struct SubContainer : Node // TODO #69
 {
     NODE_FUNCTIONS
     
-    // XLinks to these are often created using CreateDistinct()
+    // XLinks to these are often created using CreateFrom()
     // (putting them in the domain would make the domain too big).
     // These functions operate on links held within the subcontainer,
     // which typically will be in the domain.

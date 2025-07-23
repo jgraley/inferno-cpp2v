@@ -11,14 +11,16 @@ using namespace SYM;
 // ------------------------- SymbolConstant --------------------------
 
 SymbolConstant::SymbolConstant( XValue xlink_ ) :
+	node( nullptr ),
     xlink( xlink_ )
 {
 	//FTRACE(xlink)("\n");
 }
 
 
-SymbolConstant::SymbolConstant( TreePtr<Node> node ) :
-    SymbolConstant( XValue::CreateDistinct(node) )
+SymbolConstant::SymbolConstant( TreePtr<Node> node_ ) :
+	node( node_ ),
+    xlink( XValue::CreateFrom(&node) )
 {
 	//FTRACE(xlink)("\n");
 }

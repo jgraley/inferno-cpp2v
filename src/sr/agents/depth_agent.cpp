@@ -140,8 +140,7 @@ void StuffAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
         xpr_ss->elts.push_front( xlink );      
     }
     
-    XLink xpr_ss_link = XLink::CreateDistinct( xpr_ss ); // Only used in after-pass
-    query.RegisterMultiplicityLink( PatternLink(this, &recurse_restriction), xpr_ss_link ); // Links into X    
+    query.RegisterMultiplicityNode( PatternLink(this, &recurse_restriction), xpr_ss ); // Links into X    
 }
     
     

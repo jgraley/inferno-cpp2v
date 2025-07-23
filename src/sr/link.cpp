@@ -30,6 +30,8 @@ using namespace SR;
 
 //#define XLINK_LIFECYCLE_TRACE
 
+//#define NO_INIT_ASP_X
+
 //////////////////////////// PatternLink ///////////////////////////////
 
 PatternLink::PatternLink()
@@ -225,7 +227,11 @@ XLink::~XLink()
 
 XLink::XLink(const XLink &other,
              void *whodat_) :
+#ifdef NO_INIT_ASP_X
+	asp_x( nullptr ),
+#else
     asp_x( other.asp_x ),
+#endif    
     p_tpi( other.p_tpi )
 {
     PUSH_WHODAT_CMA_ARG(whodat, other, whodat_);
@@ -256,7 +262,11 @@ XLink &XLink::operator=(const XLink &other)
 		p_tpi->RemoveRef(this);
 #endif
 		
+#ifdef NO_INIT_ASP_X
+	asp_x = nullptr;
+#else
 	asp_x = other.asp_x;
+#endif	
 	p_tpi = other.p_tpi;
 	
 #ifdef XLINK_TREE_POINTER_REF_COUNTS
@@ -268,7 +278,11 @@ XLink &XLink::operator=(const XLink &other)
 
 
 XLink::XLink(XLink &&other) :
+#ifdef NO_INIT_ASP_X
+	asp_x( nullptr ),
+#else
     asp_x( other.asp_x ),
+#endif    
     p_tpi( other.p_tpi )
 {
     PUSH_WHODAT_CMA(whodat, other);
@@ -304,7 +318,11 @@ XLink &XLink::operator=(XLink &&other)
 		p_tpi->RemoveRef(this);
 #endif
 
+#ifdef NO_INIT_ASP_X
+	asp_x = nullptr;
+#else
 	asp_x = other.asp_x;
+#endif	
 	p_tpi = other.p_tpi;
 
 #ifdef XLINK_TREE_POINTER_REF_COUNTS
@@ -324,7 +342,11 @@ XLink &XLink::operator=(XLink &&other)
 XLink::XLink( shared_ptr<const Node> p_parent,
               const TreePtrInterface *p_tpi_,
               void *whodat_ ) :
+#ifdef NO_INIT_ASP_X
+	asp_x( nullptr ),
+#else
     asp_x( p_parent, p_tpi_ ),    
+#endif    
     // From Cppreference: 
     //         template<class Y> 
     //         shared_ptr( const shared_ptr<Y>& r, element_type* ptr ) noexcept
@@ -360,7 +382,11 @@ XLink::XLink( const LocatedLink &l ) :
 XLink::XLink( shared_ptr<const TreePtrInterface> asp_x_,
               const TreePtrInterface *p_tpi_,
               void *whodat_ ) :
+#ifdef NO_INIT_ASP_X
+	asp_x( nullptr ),
+#else
     asp_x( asp_x_ ),
+#endif    
     p_tpi( p_tpi_ )
 {
 	PUSH_WHODAT_ARG( whodat, whodat_ );
@@ -384,8 +410,7 @@ XLink XLink::CreateDistinct( const TreePtr<Node> &tp_x )
 }
               
               
-XLink XLink::CreateFrom( shared_ptr<TreePtr<Node>> sp_tp_x,
-                         const TreePtrInterface *p_tpi )
+XLink XLink::CreateFrom( const TreePtrInterface *p_tpi )
 {
     return XLink((shared_ptr<TreePtr<Node>>)nullptr, p_tpi, WHODAT());
 }
@@ -449,8 +474,11 @@ string XLink::GetShortName() const
     return "⤷"+p_tpi->GetShortName();
 }
 
-const XLink XLink::MMAX = XLink::CreateDistinct( MakeTreeNode<XLink::MMAXNodeType>() );
-const XLink XLink::OffEnd = XLink::CreateDistinct( MakeTreeNode<XLink::OffEndNodeType>() );
+const TreePtr<XLink::MMAXNodeType> XLink::MMAXNode = MakeTreeNode<XLink::MMAXNodeType>();
+const XLink XLink::MMAX = XLink::CreateFrom( &XLink::MMAXNode );
+
+const TreePtr<XLink::OffEndNodeType> XLink::OffEndNode = MakeTreeNode<XLink::OffEndNodeType>();
+const XLink XLink::OffEnd = XLink::CreateFrom( &XLink::OffEndNode );
               
 //////////////////////////// LocatedLink ///////////////////////////////
 
