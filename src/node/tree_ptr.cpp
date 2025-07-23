@@ -121,8 +121,8 @@ TreePtrCommon::TreePtrCommon(const TreePtrCommon &other) :
 
 TreePtrCommon &TreePtrCommon::operator=(const TreePtrCommon &other)
 {	
-	SatelliteSerial::operator=(other);
 	Itemiser::Element::operator=(other);
+	SatelliteSerial::operator=(other);
 	// but not the refs since this is a different instance
 	return *this;
 }
@@ -131,11 +131,16 @@ TreePtrCommon &TreePtrCommon::operator=(const TreePtrCommon &other)
 #ifdef TREE_POINTER_REF_COUNTS
 void TreePtrCommon::AddRef(const Traceable *ref) const
 { 
-	//FTRACE("Add ref ")(ref)("\n");
+	FTRACE("Add ref ")(ref)("\n");
+	
 	ref_count++; 
+	
 #ifdef TREE_POINTER_REF_TRACKING
-	//if( references.count(ref) )
-	//	FTRACE(references)("\n");
+	ASSERT( references.count(ref)==0 )
+	      ("Ref: ")
+	      (ref)
+	      (" added more than once\n")
+	      (references);
 	InsertSolo( references, ref );
 #endif	
 }
@@ -143,9 +148,16 @@ void TreePtrCommon::AddRef(const Traceable *ref) const
 
 void TreePtrCommon::RemoveRef(const Traceable *ref) const 
 { 
-	//FTRACE("Remove ref ")(ref)("\n");
-	ASSERT( ref_count>0 )("Ref count decrement past zero");
+	FTRACE("Remove ref ")(ref)("\n");
+	ASSERT( ref_count>0 )
+	      ("Ref count decrement past zero\n")
+#ifdef TREE_POINTER_REF_TRACKING
+	       (references)
+#endif
+           ;
+           
 	ref_count--; 
+	
 #ifdef TREE_POINTER_REF_TRACKING
 	EraseSolo( references, ref );
 #endif	
@@ -193,16 +205,12 @@ string TreePtrCommon::GetShortName() const
 
 string TreePtrCommon::GetTrace() const
 {
-    if( !operator bool() )           
-        return string("NULL");
-
 #ifdef SUPPRESS_SATELLITE_NUMBERS
-    string s = "&";
+	string s = "&";
 #else
-    // Use the serial string of the TreePtr itself #625
-    string s = SatelliteSerial::GetSerialString() + "->";
+	// Use the serial string of the TreePtr itself #625
+	string s = SatelliteSerial::GetSerialString() + "->";
 #endif  
-    
-    s += get()->GetTrace();
-    return s;
+	// Don't use vcalls because could be invoked in destructor
+    return "TreePtrCommon";
 }    

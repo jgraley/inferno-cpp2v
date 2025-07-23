@@ -53,6 +53,7 @@ private:
 class SymbolicResult : public Traceable
 {
 public:
+	virtual ~SymbolicResult();
     virtual bool IsDefinedAndUnique() const = 0;
     virtual XValue GetOnlyXLink() const = 0;   
     virtual bool TryExtensionalise( set<XValue> &links ) const = 0;     
@@ -68,6 +69,7 @@ class UniqueResult : public SymbolicResult
 {
 public:
     explicit UniqueResult( XValue xlink );
+    ~UniqueResult() final;
     
     bool IsDefinedAndUnique() const override;    
     XValue GetOnlyXLink() const override;    

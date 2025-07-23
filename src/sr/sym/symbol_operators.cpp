@@ -26,7 +26,7 @@ SymbolConstant::SymbolConstant( TreePtr<Node> node ) :
 
 unique_ptr<SymbolicResult> SymbolConstant::Evaluate( const EvalKit &kit ) const
 {
-	//FTRACE(xlink)("\n");
+	INDENT("S");
     return make_unique<UniqueResult>( xlink );
 }
 
@@ -87,10 +87,10 @@ set<SR::PatternLink> SymbolVariable::GetRequiredVariables() const
 
 unique_ptr<SymbolicResult> SymbolVariable::Evaluate( const EvalKit &kit ) const
 {
+	INDENT("s");
     // This is an ERROR. You could perfectly easily have called GetRequiredVariables(),
     // done a quick set difference and KNOWN that it would come to this.
     ASSERT( kit.hypothesis_links->count(plink) > 0 );
-    
     return make_unique<UniqueResult>( kit.hypothesis_links->at(plink) );
 }
 

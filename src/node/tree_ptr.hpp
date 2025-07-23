@@ -268,6 +268,22 @@ struct TreePtr : virtual TreePtrCommon,
     {
         return TreePtr<Node>(new VALUE_TYPE); // means VALUE_TYPE must be constructable
     }
+
+	string GetTrace() const
+	{
+		if( !operator bool() )           
+			return string("NULL");
+
+#ifdef SUPPRESS_SATELLITE_NUMBERS
+		string s = "&";
+#else
+		// Use the serial string of the TreePtr itself #625
+		string s = SatelliteSerial::GetSerialString() + "->";
+#endif  
+		
+		s += get()->GetTrace();
+		return s;
+	} 
 };
 
 // -------------------------- Extra bits ----------------------------    

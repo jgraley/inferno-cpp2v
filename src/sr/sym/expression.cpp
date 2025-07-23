@@ -200,9 +200,13 @@ list<shared_ptr<Expression>> SymbolToSymbolExpression::GetOperands() const
 
 unique_ptr<SymbolicResult> SymbolToSymbolExpression::Evaluate( const EvalKit &kit ) const
 { 
+	INDENT("E");
     list<unique_ptr<SymbolicResult>> op_results;
     for( shared_ptr<SymbolExpression> a : GetSymbolOperands() )
+    {
+		//FTRACE("SE expr:")(a)("\n");
         op_results.push_back( a->Evaluate(kit) );
+	}
     return Evaluate( kit, move(op_results) );
 }
 
@@ -225,9 +229,13 @@ list<shared_ptr<Expression>> SymbolToBooleanExpression::GetOperands() const
 
 unique_ptr<BooleanResult> SymbolToBooleanExpression::Evaluate( const EvalKit &kit ) const
 { 
+	INDENT("e");
     list<unique_ptr<SymbolicResult>> op_results;
     for( shared_ptr<SymbolExpression> a : GetSymbolOperands() )
+    {
+		//FTRACE("se expr:")(a)("\n");
         op_results.push_back( a->Evaluate(kit) );
+   	}
     return Evaluate( kit, move(op_results) );
 }
 

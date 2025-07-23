@@ -73,45 +73,53 @@ void InversionPass::Invert( LocatedPatch lze )
 {
     // Checks
     ASSERT( lze.first && lze.second && *lze.second);
-    XLink base_xlink = lze.first;
-    ASSERT( base_xlink )("Got no base in our lze, perhaps parent was free zone?"); // FZ merging should prevent
     auto free_patch = dynamic_pointer_cast<FreePatch>( *lze.second );
+	DBCommon::TreeOrdinal ordinal_to_tear_down;
     ASSERT( free_patch )("Got LZE not a free zone: ")(lze); // WalkLocatedPatches() gave us wrong kind of patch
-    FreeZone new_free_zone = *free_patch->GetZone();
-            
-    // Collect base xlinks for child zones (which must be tree zones)
-    vector<XLink> terminii;
-    vector<TreeZone *> fixups;
-    Patch::ForChildren(free_patch, [&](shared_ptr<Patch> &child_patch)    
-    {
-        // Inversion strategy: we're based on a free zone and FZ merging should 
-        // have ensured we'll see only tree zones as children. Each base is a terminus 
-        // for the new tree zone.
-		auto child_tree_patch = dynamic_pointer_cast<TreePatch>(child_patch);
-        ASSERT( child_tree_patch ); 
-        
-        terminii.push_back( child_tree_patch->GetZone()->GetBaseXLink() );
-        fixups.push_back( child_tree_patch->GetZone() );
-    } );             
-         
-    // Make the inverted TZ - this contains the old content identified by inversion
-	TreeZone main_tree_zone = TreeZone( base_xlink, 
-	                                    move(terminii), 
-	                                    db->GetMainTreeOrdinal() );
+	{
+		XLink base_xlink = lze.first;
+		ASSERT( base_xlink )("Got no base in our lze, perhaps parent was free zone?"); // FZ merging should prevent
+		FreeZone new_free_zone = *free_patch->GetZone();
+				
+		// Collect base xlinks for child zones (which must be tree zones)
+		vector<XLink> terminii;
+		vector<TreeZone *> fixups;
+		Patch::ForChildren(free_patch, [&](shared_ptr<Patch> &child_patch)    
+		{
+			// Inversion strategy: we're based on a free zone and FZ merging should 
+			// have ensured we'll see only tree zones as children. Each base is a terminus 
+			// for the new tree zone.
+			auto child_tree_patch = dynamic_pointer_cast<TreePatch>(child_patch);
+			ASSERT( child_tree_patch ); 
+			
+			terminii.push_back( child_tree_patch->GetZone()->GetBaseXLink() );
+			fixups.push_back( child_tree_patch->GetZone() );
+		} );             
+			 
+		// Make the inverted TZ - this contains the old content identified by inversion
+		TreeZone main_tree_zone = TreeZone( base_xlink, 
+											move(terminii), 
+											db->GetMainTreeOrdinal() );
+		
+		// Write free zone with new content into an extra tree. main_tree_zone is 
+		// used here only for the plug types.
+		TreeZone tree_zone_in_extra = sops->FreeZoneIntoExtraTree( new_free_zone, main_tree_zone );
+		ordinal_to_tear_down = tree_zone_in_extra.GetTreeOrdinal();
+		
+		// Swap in the true moving zone. After this swap:
+		// tree_zone_in_extra <- the old content
+		// main_tree_zone <- the new content
+		db->XTreeDatabase::SwapTreeToTree( main_tree_zone, fixups,
+										   tree_zone_in_extra, vector<TreeZone *>() );
 	
-    // Write free zone with new content into an extra tree. main_tree_zone is 
-    // used here only for the plug types.
-	TreeZone tree_zone_in_extra = sops->FreeZoneIntoExtraTree( new_free_zone, main_tree_zone );
-	
-	// Swap in the true moving zone. After this swap:
-	// tree_zone_in_extra <- the old content
-	// main_tree_zone <- the new content
-	db->XTreeDatabase::SwapTreeToTree( main_tree_zone, fixups,
-		    						   tree_zone_in_extra, vector<TreeZone *>() );
+		// Update the patch to be a tree zone patch with the new content in situ.
+		*(lze.second) = free_patch->ConvertToTree( main_tree_zone );
+		
+		// XLink memory safety: let zone and root_xlink drop out of scope 
+		// before freeing tree, which will delete the underlying TreePtr<>	
+	}
 
 	// Delete old content from DB
-	db->TeardownTree( tree_zone_in_extra.GetTreeOrdinal() );   
-	
-	// Update the patch to be a tree zone patch with the new content in situ.
-	*(lze.second) = free_patch->ConvertToTree( main_tree_zone );
+	db->TeardownTree( ordinal_to_tear_down );   
+
 }

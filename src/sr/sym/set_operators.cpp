@@ -105,7 +105,7 @@ unique_ptr<SymbolicResult> IntersectionOperator::Evaluate( const EvalKit &kit,
 
 string IntersectionOperator::Render() const
 {
-    // ç{} is universal set aka whole domain
+    // ç{} aka "complement of empty" is universal set aka whole domain
     if( sa.empty() )
         return "ç{}";
     list<string> ls;

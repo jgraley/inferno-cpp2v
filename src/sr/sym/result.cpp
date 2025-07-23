@@ -64,19 +64,31 @@ string BooleanResult::GetTrace() const
 
 // ------------------------- SymbolicResult --------------------------
 
+SymbolicResult::~SymbolicResult()
+{
+}
+
+
 string SymbolicResult::GetTrace() const
 {
-    return Render();
+    return SSPrintf("@%p ", this) + Render();
 }
 
 // ------------------------- UniqueResult --------------------------
 
-UniqueResult::UniqueResult( XValue xlink_ ) :
-    xlink( xlink_ )
+UniqueResult::UniqueResult( XValue xlink_ )    
 {
-	//FTRACE(xlink)("\n"); // crashes when xlink copy constructor nulls the sp_tp_
-
+	INDENT("U");
     ASSERT( xlink_ )("Not allowed to construct with NULL; use EmptyResult instead");
+	//FTRACE("Result at %p sets xlink to: ", this)(xlink_)("\n"); // crashes when xlink copy constructor nulls the sp_tp_
+	xlink = xlink_;
+	//FTRACE("Done\n"); 
+}
+
+
+UniqueResult::~UniqueResult()
+{
+	//FTRACE("Destructo at %p\n", this); 	
 }
 
 

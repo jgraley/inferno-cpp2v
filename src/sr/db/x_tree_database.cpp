@@ -60,15 +60,20 @@ DBCommon::TreeOrdinal XTreeDatabase::BuildTree( DBCommon::TreeType tree_type, co
 void XTreeDatabase::TeardownTree(DBCommon::TreeOrdinal tree_ordinal)
 {        
 	INDENT("T");
-    XLink root_xlink = GetRootXLink(tree_ordinal);
-    auto zone = TreeZone::CreateSubtree(root_xlink, tree_ordinal);
-	TRACE("Tree ordinal: %d root: ", tree_ordinal)(zone)("\n");
+    {
+		XLink root_xlink = GetRootXLink(tree_ordinal);
+		auto zone = TreeZone::CreateSubtree(root_xlink, tree_ordinal);
+		TRACE("Tree ordinal: %d root: ", tree_ordinal)(zone)("\n");
 
-    domain_extension->DeleteTree(zone);   
-    orderings->DeleteTree(zone);
-	node_table->DeleteTree(zone);   
-	link_table->DeleteTree(zone);   
-	domain->DeleteTree(zone);   
+		domain_extension->DeleteTree(zone);   
+		orderings->DeleteTree(zone);
+		node_table->DeleteTree(zone);   
+		link_table->DeleteTree(zone);   
+		domain->DeleteTree(zone);   
+		
+		// XLink memory safety: let zone and root_xlink drop out of scope 
+		// before freeing tree, which will delete the underlying TreePtr<>	
+	} 
 
 	FreeTree( tree_ordinal );  
     
