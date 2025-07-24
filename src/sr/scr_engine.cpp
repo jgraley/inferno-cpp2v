@@ -380,12 +380,19 @@ void SCREngine::SingleCompareReplace( XLink origin_xlink,
                                       const SolutionMap *enclosing_solution ) 
 {
     INDENT(">");
+    
+	// XLink memory safety: we need to keep some nodes alive - for example
+	// nodes from regeneration which are not in any tree but are created
+	// during search/matching. They are needed by replace and embeddeds
+	// and have the same lifetime as the replace solution.
+    set<TreePtr<Node>> keep_alive_nodes; 
 
     TRACE("Begin search\n");
     // Note: comparing doesn't require double pointer any more, but
     // replace does so it can change the origin node. Throws on mismatch.
     const SolutionMap &cs = plan.and_rule_engine->Compare( origin_xlink, 
-                                                           enclosing_solution );
+                                                           enclosing_solution,
+                                                           &keep_alive_nodes );
     TRACE("Search got a match (otherwise throws)\n");
            
     // Replace will need the compare keys unioned with the enclosing keys

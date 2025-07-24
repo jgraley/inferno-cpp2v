@@ -599,7 +599,8 @@ void AndRuleEngine::PlanningStageFive( shared_ptr<const Lacing> lacing )
 
 void AndRuleEngine::CompareEvaluatorLinks( Agent *agent, 
                                            const SolutionMap *solution_for_subordinates, 
-                                           const SolutionMap *solution_for_evaluators ) 
+                                           const SolutionMap *solution_for_evaluators,
+                                           set<TreePtr<Node>> *keep_alive_nodes ) 
 {
     INDENT("E");
     auto pq = agent->GetPatternQuery();
@@ -619,7 +620,7 @@ void AndRuleEngine::CompareEvaluatorLinks( Agent *agent,
         try 
         {
             shared_ptr<AndRuleEngine> e = plan.my_evaluator_abnormal_engines.at(link);
-            (void)e->Compare( xlink, solution_for_subordinates );
+            (void)e->Compare( xlink, solution_for_subordinates, keep_alive_nodes );
             compare_results.push_back( true );
         }
         catch( const ::Mismatch &e )
@@ -641,7 +642,8 @@ void AndRuleEngine::CompareEvaluatorLinks( Agent *agent,
 
 
 void AndRuleEngine::CompareMultiplicityNode( PatternLink plink, TreePtr<Node> node, 
-                                             const SolutionMap *solution_for_subordinates ) 
+                                             const SolutionMap *solution_for_subordinates,
+                                             set<TreePtr<Node>> *keep_alive_nodes ) 
 {
     INDENT("M");
 
@@ -660,7 +662,7 @@ void AndRuleEngine::CompareMultiplicityNode( PatternLink plink, TreePtr<Node> no
         {
             TRACE("Comparing ")(xe_node)("\n");
             XLink xe_link = XLink(xscr->GetParentX(), &xe_node);
-            (void)e->Compare( xe_link, solution_for_subordinates );
+            (void)e->Compare( xe_link, solution_for_subordinates, keep_alive_nodes );
         }
     }
     else if( auto xssl = dynamic_cast<SubSequence *>(xsc) )
@@ -668,7 +670,7 @@ void AndRuleEngine::CompareMultiplicityNode( PatternLink plink, TreePtr<Node> no
         for( XLink xe_link : xssl->elts )
         {
             TRACE("Comparing ")(xe_link)("\n");
-            (void)e->Compare( xe_link, solution_for_subordinates );
+            (void)e->Compare( xe_link, solution_for_subordinates, keep_alive_nodes );
         }
     }    
     else
@@ -680,7 +682,8 @@ void AndRuleEngine::CompareMultiplicityNode( PatternLink plink, TreePtr<Node> no
 
 void AndRuleEngine::AgentRegeneration( Agent *agent,
                                        SolutionMap &basic_solution,
-                                       const SolutionMap &solution_for_subordinates )
+                                       const SolutionMap &solution_for_subordinates,
+                                       set<TreePtr<Node>> *keep_alive_nodes )
 {
     INDENT("R");
     // Get a list of the links we must supply to the agent for regeneration
@@ -726,7 +729,7 @@ void AndRuleEngine::AgentRegeneration( Agent *agent,
                 if( plan.my_free_abnormal_engines.count( p.first ) )
                 {
                     shared_ptr<AndRuleEngine> e = plan.my_free_abnormal_engines.at( p.first );
-                    (void)e->Compare( xlink, &solution_for_subordinates );
+                    (void)e->Compare( xlink, &solution_for_subordinates, keep_alive_nodes );
                 }
             }                    
             
@@ -738,12 +741,12 @@ void AndRuleEngine::AgentRegeneration( Agent *agent,
                     InsertSolo( solution_for_evaluators, make_pair(p.first, XLink::CreateFrom(&p.second)) );                
 
                 if( plan.my_multiplicity_engines.count( p.first ) )
-                    CompareMultiplicityNode( p.first, p.second, &solution_for_subordinates );  
+                    CompareMultiplicityNode( p.first, p.second, &solution_for_subordinates, keep_alive_nodes );  
             }
 
             // Try matching the evaluator agents.
             if( plan.my_evaluators.count( agent ) )
-                CompareEvaluatorLinks( agent, &solution_for_subordinates, &solution_for_evaluators );                    
+                CompareEvaluatorLinks( agent, &solution_for_subordinates, &solution_for_evaluators, keep_alive_nodes );                    
         }
         catch( const ::Mismatch &e )
         {
@@ -754,10 +757,19 @@ void AndRuleEngine::AgentRegeneration( Agent *agent,
         // Replace needs these keys 
         for( const auto &p : query->GetAbnormalNodes() )
         {
-            XLink xlink = p.second.first ? XLink::CreateDistinct(p.second.first) : p.second.second;
-            ASSERT( xlink );
-			
-            InsertSolo( basic_solution, make_pair(p.first, xlink) );                
+			XLink xlink;
+            if( p.second.first ) // node was provided
+			{
+				// XLink memory safety: Add the node to a keep-alive set and
+				// make the XLink from the actual node in the set.					
+				set<TreePtr<Node>>::iterator it = InsertSolo( *keep_alive_nodes, p.second.first );				
+				xlink = XLink::CreateFrom(&*it);			
+			}
+			else // xlink was provided
+            {
+				xlink = p.second.second;
+			}
+			InsertSolo( basic_solution, make_pair(p.first, xlink) );
 		}
 		
         // If we got here, we're done!
@@ -768,7 +780,10 @@ void AndRuleEngine::AgentRegeneration( Agent *agent,
 }      
 
 
-void AndRuleEngine::OnSolution(SolutionMap basic_solution, const SolutionMap &my_fixed_assignments, const SolutionMap *surrounding_solution)
+void AndRuleEngine::OnSolution(SolutionMap basic_solution, 
+                               const SolutionMap &my_fixed_assignments, 
+                               const SolutionMap *surrounding_solution,
+                               set<TreePtr<Node>> *keep_alive_nodes)
 {
     INDENT("S");
     // Merge my fixes into the solution (but we're not expected to merge
@@ -788,8 +803,9 @@ void AndRuleEngine::OnSolution(SolutionMap basic_solution, const SolutionMap &my
 		for( Agent *agent : plan.my_normal_agents )
 		{
 			AgentRegeneration( agent, 
-								   basic_solution,
-								   solution_for_subordinates );
+							   basic_solution,
+							   solution_for_subordinates,
+							   keep_alive_nodes );
 		}
 
 		TRACE("Regeneration successful, we have a match\n");
@@ -822,7 +838,8 @@ void AndRuleEngine::SetXTreeDb( shared_ptr<const XTreeDatabase> x_tree_db_ )
 
 
 SolutionMap AndRuleEngine::Compare( XLink base_xlink,
-                                    const SolutionMap *surrounding_solution )
+                                    const SolutionMap *surrounding_solution,
+                                    set<TreePtr<Node>> *keep_alive_nodes )
 {
     INDENT("C");
     ASSERT( base_xlink );            
@@ -858,7 +875,8 @@ SolutionMap AndRuleEngine::Compare( XLink base_xlink,
 																		  this, 
 																		  placeholders::_1, 
 																		  my_fixed_assignments, 
-																		  surrounding_solution );      	
+																		  surrounding_solution,
+																		  keep_alive_nodes );      	
     
 	try
 	{    
