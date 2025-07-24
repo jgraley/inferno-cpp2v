@@ -1,17 +1,15 @@
 #include "link.hpp"
 #include "agents/agent.hpp"
 
-using namespace SR;
+//#define NO_INIT_ASP_X
 
 // For debugging
 #ifdef KEEP_WHODAT_INFO
-#define WHODAT() RETURN_ADDR()
 #define PUSH_WHODAT(W) ((W).push_back(WHODAT()))
-#define PUSH_WHODAT_ARG(W, W_) do { (W).push_back((W_)?(W_):WHODAT()); } while(false)
-#define PUSH_WHODAT_CMA(W, O) do { W=O.W; (W).push_back(WHODAT()); } while(false)
+#define PUSH_WHODAT_ARG(W, W_) do { (W)=(W_); (W).push_back(WHODAT()); } while(false)
+#define PUSH_WHODAT_CMA(W, O) do { (W)=(O).W; (W).push_back(WHODAT()); } while(false)
 #define PUSH_WHODAT_CMA_ARG(W, O, W_) do { W=O.W; (W).push_back((W_)?(W_):WHODAT()); } while(false)
 #else
-#define WHODAT() nullptr
 #define PUSH_WHODAT(W) {}
 #define PUSH_WHODAT_ARG(W, W_) ((void)(W_))
 #define PUSH_WHODAT_CMA(W, O) ((void)(O))
@@ -30,7 +28,7 @@ using namespace SR;
 
 //#define XLINK_LIFECYCLE_TRACE
 
-//#define NO_INIT_ASP_X
+using namespace SR;
 
 //////////////////////////// PatternLink ///////////////////////////////
 
@@ -42,7 +40,7 @@ PatternLink::PatternLink()
 
 PatternLink::PatternLink(shared_ptr<const Node> parent_pattern,
                          const TreePtrInterface *ppattern, 
-                         void *whodat_) :
+                         Whodat whodat_) :
     asp_pattern( parent_pattern, ppattern )
 {
     ASSERT( parent_pattern );
@@ -55,7 +53,7 @@ PatternLink::PatternLink(shared_ptr<const Node> parent_pattern,
 
 PatternLink::PatternLink(const Agent *parent_agent,
                          const TreePtrInterface *ppattern) :
-    PatternLink( parent_agent->GetPatternPtr(), ppattern, WHODAT() )
+    PatternLink( parent_agent->GetPatternPtr(), ppattern, {WHODAT()} )
 {
 }
 
@@ -63,7 +61,7 @@ PatternLink::PatternLink(const Agent *parent_agent,
 PatternLink PatternLink::CreateDistinct( const TreePtr<Node> &tp_pattern )
 {
     shared_ptr< TreePtr<Node> > sp_tp_pattern = make_shared< TreePtr<Node> >( tp_pattern ); 
-    return PatternLink(sp_tp_pattern, WHODAT());
+    return PatternLink(sp_tp_pattern, {WHODAT()});
 }
               
               
@@ -194,7 +192,7 @@ string PatternLink::GetShortName() const
 
 
 PatternLink::PatternLink(shared_ptr<const TreePtrInterface> ppattern, 
-                         void *whodat_) :
+                         Whodat whodat_) :
     asp_pattern( ppattern )
 {
 	PUSH_WHODAT_ARG( whodat, whodat_ );    
@@ -203,6 +201,9 @@ PatternLink::PatternLink(shared_ptr<const TreePtrInterface> ppattern,
 //////////////////////////// XLink ///////////////////////////////
 
 XLink::XLink() :
+#ifdef HOLD_DEBUG_NAME
+	debug_name("NULL->NULL"),
+#endif
     asp_x( nullptr ),
     p_tpi( nullptr )
 {
@@ -225,8 +226,10 @@ XLink::~XLink()
 }
 
 
-XLink::XLink(const XLink &other,
-             void *whodat_) :
+XLink::XLink(const XLink &other) :
+#ifdef HOLD_DEBUG_NAME
+	debug_name(other.debug_name),
+#endif
 #ifdef NO_INIT_ASP_X
 	asp_x( nullptr ),
 #else
@@ -234,7 +237,7 @@ XLink::XLink(const XLink &other,
 #endif    
     p_tpi( other.p_tpi )
 {
-    PUSH_WHODAT_CMA_ARG(whodat, other, whodat_);
+    PUSH_WHODAT_CMA(whodat, other);
 	ASP_REF_CHECK(asp_x);
 
 #ifdef XLINK_LIFECYCLE_TRACE
@@ -262,6 +265,9 @@ XLink &XLink::operator=(const XLink &other)
 		p_tpi->RemoveRef(this);
 #endif
 		
+#ifdef HOLD_DEBUG_NAME
+	debug_name = other.debug_name;
+#endif
 #ifdef NO_INIT_ASP_X
 	asp_x = nullptr;
 #else
@@ -278,6 +284,9 @@ XLink &XLink::operator=(const XLink &other)
 
 
 XLink::XLink(XLink &&other) :
+#ifdef HOLD_DEBUG_NAME
+	debug_name(other.debug_name),
+#endif
 #ifdef NO_INIT_ASP_X
 	asp_x( nullptr ),
 #else
@@ -318,6 +327,9 @@ XLink &XLink::operator=(XLink &&other)
 		p_tpi->RemoveRef(this);
 #endif
 
+#ifdef HOLD_DEBUG_NAME
+	debug_name = other.debug_name;
+#endif
 #ifdef NO_INIT_ASP_X
 	asp_x = nullptr;
 #else
@@ -341,7 +353,10 @@ XLink &XLink::operator=(XLink &&other)
 
 XLink::XLink( shared_ptr<const Node> p_parent,
               const TreePtrInterface *p_tpi_,
-              void *whodat_ ) :
+              Whodat whodat_ ) :
+#ifdef HOLD_DEBUG_NAME
+	debug_name(Trace(p_parent)+"->"+Trace(p_tpi_)),
+#endif
 #ifdef NO_INIT_ASP_X
 	asp_x( nullptr ),
 #else
@@ -381,7 +396,10 @@ XLink::XLink( const LocatedLink &l ) :
 
 XLink::XLink( shared_ptr<const TreePtrInterface> asp_x_,
               const TreePtrInterface *p_tpi_,
-              void *whodat_ ) :
+              Whodat whodat_ ) :
+#ifdef HOLD_DEBUG_NAME
+	debug_name("?->"+Trace(p_tpi_)),
+#endif
 #ifdef NO_INIT_ASP_X
 	asp_x( nullptr ),
 #else
@@ -406,13 +424,14 @@ XLink::XLink( shared_ptr<const TreePtrInterface> asp_x_,
 XLink XLink::CreateDistinct( const TreePtr<Node> &tp_x )
 {
     auto sp_tp_x = make_shared< TreePtr<Node> >( tp_x ); 
-    return XLink(sp_tp_x, sp_tp_x.get(), WHODAT());
+    return XLink(sp_tp_x, sp_tp_x.get(), {WHODAT()});
 }
               
               
-XLink XLink::CreateFrom( const TreePtrInterface *p_tpi )
+XLink XLink::CreateFrom( const TreePtrInterface *p_tpi,
+                         Whodat whodat_ )
 {
-    return XLink((shared_ptr<TreePtr<Node>>)nullptr, p_tpi, WHODAT());
+    return XLink((shared_ptr<TreePtr<Node>>)nullptr, p_tpi, whodat_);
 }
 
 
@@ -447,11 +466,22 @@ const TreePtrInterface *XLink::GetTreePtrInterface() const
 }
 
 
+#ifdef KEEP_WHODAT_INFO
+XLink::Whodat XLink::GetWhodat() const
+{
+	return whodat;
+}
+#endif	
+
 string XLink::GetTrace() const
 {
     if(p_tpi==nullptr)
         return "NULL";
+#ifdef HOLD_DEBUG_NAME
+	string s = "⤷"+debug_name;
+#else
     string s = "⤷"+p_tpi->GetTrace();
+#endif    
 #ifdef KEEP_WHODAT_INFO    
     s += Trace(whodat);
 #endif
@@ -490,7 +520,7 @@ LocatedLink::LocatedLink()
 LocatedLink::LocatedLink( const PatternLink &plink_, 
                           const XLink &xlink_) :
     plink( plink_ ),
-    xlink( xlink_, WHODAT() )                                                  
+    xlink( xlink_ )                                                  
 {
     ASSERT( (bool)plink == (bool)xlink );
     

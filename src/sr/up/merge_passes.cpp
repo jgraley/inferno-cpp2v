@@ -39,8 +39,9 @@ void FreeZoneMergeImpl::Run( shared_ptr<Patch> &layout, PolicyFunction policy, R
 					it_child = free_patch->SpliceOver( it_child, child_free_patch->MoveChildren() );
 					TRACE("Splice OK\n");
 					
+					//FTRACE(!!assignments)(" resulting xlink:")(resulting_xlink)("\nchild zone")(child_free_zone)("\n");
+					
 					// Extract assignments between FZs that have been merged
-
 					if( assignments ) // we won't get one if child was a subcontainer-base (ambiguous)
 					{
 						ASSERT( resulting_xlink );

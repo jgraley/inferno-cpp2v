@@ -366,7 +366,8 @@ void XTreeDatabase::CheckAssets()
 
 Mutator XTreeDatabase::CreateTreeMutator(XLink xlink)  const
 {
-    const LinkTable::Row &row = link_table->GetRow(xlink);
+    const LinkTable::Row &row = link_table->GetRow(xlink);   
+    Mutator m;
     
     switch( row.context_type )
     {
@@ -377,7 +378,7 @@ Mutator XTreeDatabase::CreateTreeMutator(XLink xlink)  const
             // correctly from the XTreeDatabase object, which is why this method cannot be const.
             ASSERT( (int)(row.tree_ordinal) >= 0 ); // Should be valid whenever context is ROOT
             const DBCommon::TreeRecord &tree_rec = trees_by_ordinal.at(row.tree_ordinal);
-            return Mutator::CreateTreeRoot( tree_rec.sp_tp_root_node, tree_rec.tpi_root_node );
+            m = Mutator::CreateTreeRoot( tree_rec.sp_tp_root_node, tree_rec.tpi_root_node );
             break;
         }    
         case DBCommon::SINGULAR:
@@ -386,14 +387,14 @@ Mutator XTreeDatabase::CreateTreeMutator(XLink xlink)  const
             Itemiser::Element *xe = x_items.at(row.item_ordinal);        
             auto p_x_singular = dynamic_cast<TreePtrInterface *>(xe);
             ASSERT( p_x_singular );
-            return Mutator::CreateTreeSingular( row.parent_node, p_x_singular );
+            m = Mutator::CreateTreeSingular( row.parent_node, p_x_singular );
             break;
         }
         case DBCommon::IN_SEQUENCE:
         case DBCommon::IN_COLLECTION: 
         {
             // COLLECTION is the motivating case: its elements are const, so we neet Mutate() to change them
-            return Mutator::CreateTreeContainer( row.parent_node, row.p_container, row.container_it );  
+            m = Mutator::CreateTreeContainer( row.parent_node, row.p_container, row.container_it );  
             break;          
         }
         default:
@@ -401,6 +402,10 @@ Mutator XTreeDatabase::CreateTreeMutator(XLink xlink)  const
             ASSERTFAIL(); // Base of free zone is just a node, so there's no unique mutator for it
         }
     }    
+#ifdef KEEP_WHODAT_INFO
+	m.SetWhodat( xlink.GetWhodat() );
+#endif
+	return m;
 }
 
 

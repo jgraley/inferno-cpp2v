@@ -148,7 +148,9 @@ FreeZone::TerminusIterator FreeZone::MergeTerminus( TerminusIterator it_t,
     {
         // Nothing happens to this terminus. If we're empty, we'll stay empty.
         if( resulting_xlink )
+        {
 			*resulting_xlink = it_t->GetXLink();
+		}
         return ++it_t; 
     }    
     
@@ -170,7 +172,9 @@ FreeZone::TerminusIterator FreeZone::MergeTerminus( TerminusIterator it_t,
 		it_t->ExchangeChild( child_zone->base );
         
 		if( resulting_xlink )
+		{
 			*resulting_xlink = it_t->GetXLink();
+ 		}
     }
     
     // it_t updated to the next terminus after the one we erased, or end()
@@ -180,7 +184,7 @@ FreeZone::TerminusIterator FreeZone::MergeTerminus( TerminusIterator it_t,
     // erase()d from. I assume it_t now points after the inserted 
     // terminii, i.e. at the same element it did after the erase()
     terminii.splice( it_t, move(child_zone->terminii) );
-    
+    	
     return it_t;
 }
 

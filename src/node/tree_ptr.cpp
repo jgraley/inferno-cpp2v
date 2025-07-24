@@ -84,17 +84,19 @@ TreePtrCommon::TreePtrCommon()
 {
 }
 
-
 #ifdef TREE_POINTER_REF_COUNTS
+list<string> deletions;
 TreePtrCommon::~TreePtrCommon()
 {
-	// Use ASSERT for static since we're in a destructor and our concrete class has gone away
-	ASSERTS( ref_count==0 )
-	       ("Ref count at delete: %u\n", ref_count)
+       // Use ASSERT for static since we're in a destructor and our concrete class has gone away
+       ASSERTS( ref_count==0 )
+              ("Live XLinks when deleting ")(Join(deletions, " due to "))("\n")
+              ("XLink ref count: %u\n", ref_count)
 #ifdef TREE_POINTER_REF_TRACKING
-	       (references)
+              (references)
 #endif
            ;
+       deletions.clear();
 }
 #endif
 
@@ -163,7 +165,6 @@ void TreePtrCommon::RemoveRef(const Traceable *ref) const
 #endif	
 }    
 #endif
-
 
 
 const SatelliteSerial &TreePtrCommon::GetSS() const

@@ -763,7 +763,8 @@ void AndRuleEngine::AgentRegeneration( Agent *agent,
 				// XLink memory safety: Add the node to a keep-alive set and
 				// make the XLink from the actual node in the set.					
 				set<TreePtr<Node>>::iterator it = InsertSolo( *keep_alive_nodes, p.second.first );				
-				xlink = XLink::CreateFrom(&*it);			
+				xlink = XLink::CreateFrom(&*it);	
+				TRACE("Made solution XLink: ")(xlink)(" from keep-alive ")(*it)("\n");		
 			}
 			else // xlink was provided
             {

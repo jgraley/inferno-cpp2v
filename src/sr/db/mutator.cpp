@@ -11,7 +11,11 @@ Mutator Mutator::CreateFreeSingular( TreePtr<Node> parent_node,
 {
 	ASSERTS( parent_node )("For tree zone mutator, parent must be a valid node");
 	ASSERTS( !(TreePtr<Node>)*parent_singular )("For tree zone mutator, child must be placeholder");
-	return Mutator(Mode::Singular, parent_node, parent_singular, nullptr, ContainerInterface::iterator(), nullptr, nullptr);
+	Mutator m(Mode::Singular, parent_node, parent_singular, nullptr, ContainerInterface::iterator(), nullptr, nullptr);
+#ifdef KEEP_WHODAT_INFO
+	m.SetWhodat({WHODAT()});
+#endif
+	return m;
 }
 
 										  		  
@@ -22,7 +26,11 @@ Mutator Mutator::CreateFreeContainer( TreePtr<Node> parent_node,
 	ASSERTS( parent_node )("For tree zone mutator, parent must be a valid node");
 	ASSERTS( parent_container )("For tree zone mutator, parent must be a valid node");
 	ASSERTS( !(TreePtr<Node>)*container_iterator )("For tree zone mutator, child must be a placeholder");
-	return Mutator(Mode::Container, parent_node, nullptr, parent_container, container_iterator, nullptr, nullptr);
+	Mutator m(Mode::Container, parent_node, nullptr, parent_container, container_iterator, nullptr, nullptr);
+#ifdef KEEP_WHODAT_INFO
+	m.SetWhodat({WHODAT()});
+#endif
+	return m;
 }
 
 
@@ -220,11 +228,24 @@ bool Mutator::IsAtRoot() const
 
 XLink Mutator::GetXLink() const
 {
-	XLink xlink;
+	XLink xlink;	
 	if( mode == Mode::Root )
-		xlink = XLink::CreateFrom(tpi_root_node);
+	{
+		xlink = XLink::CreateFrom(tpi_root_node
+#ifdef KEEP_WHODAT_INFO
+                                        	   , whodat
+#endif
+                                         		        );
+	}
 	else
-	    xlink = XLink(parent_node, GetTreePtrInterface() );
+	{
+	    xlink = XLink(parent_node, GetTreePtrInterface()
+#ifdef KEEP_WHODAT_INFO
+                                        	            , whodat
+#endif
+                                         		                 );
+	}
+	//FTRACE("got xlink ")(xlink)("\n");
     ASSERT( xlink );
     return xlink;
 }

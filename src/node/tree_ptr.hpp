@@ -14,8 +14,8 @@
 #include "node.hpp"
 
 
-#define TREE_POINTER_REF_COUNTS
-#define TREE_POINTER_REF_TRACKING
+//#define TREE_POINTER_REF_COUNTS
+//#define TREE_POINTER_REF_TRACKING
 
 template<typename VALUE_TYPE>
 struct Sequence;
@@ -70,7 +70,7 @@ struct TreePtrCommon : virtual TreePtrInterface, public SatelliteSerial
 {
     TreePtrCommon();
 #ifdef TREE_POINTER_REF_COUNTS
-    ~TreePtrCommon();
+    virtual ~TreePtrCommon();
 #endif
     TreePtrCommon(const TreePtrCommon &other);
     TreePtrCommon &operator=(const TreePtrCommon &other);
@@ -111,6 +111,9 @@ struct TreePtrCommon : virtual TreePtrInterface, public SatelliteSerial
 };
 
 // -------------------------- TreePtr template ----------------------------    
+#ifdef TREE_POINTER_REF_COUNTS
+extern list<string> deletions;
+#endif
 
 template<typename VALUE_TYPE>
 struct TreePtr : virtual TreePtrCommon, 
@@ -119,6 +122,13 @@ struct TreePtr : virtual TreePtrCommon,
     typedef VALUE_TYPE value_type;
     
     TreePtr() {}
+
+#ifdef TREE_POINTER_REF_COUNTS
+	~TreePtr() final
+	{
+		deletions.push_front( Trace(*this) );
+	}
+#endif
 
     explicit TreePtr( VALUE_TYPE *o ) : 
         TreePtrCommon( o ),

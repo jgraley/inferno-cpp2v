@@ -52,6 +52,10 @@ private:
 public:  
     explicit Mutator();
     	
+#ifdef KEEP_WHODAT_INFO
+	void SetWhodat( XLink::Whodat whodat_ ) { whodat = whodat_; }
+#endif
+
     bool operator<(const Mutator &right) const;
 	bool operator==( const Mutator &right ) const;
 	bool operator!=( const Mutator &right ) const;      
@@ -72,8 +76,7 @@ public:
 
     static Mutator *FindMatchingTerminus( ContainerInterface *container,
                                           ContainerInterface::iterator it_placeholder,
-                                          list<Mutator> &candidate_terminii );
-        
+                                          list<Mutator> &candidate_terminii );       
     void Validate() const;
     string GetTrace() const;
 
@@ -85,6 +88,9 @@ private:
     ContainerInterface::iterator container_iterator;
     shared_ptr<TreePtr<Node>> sp_tp_root_node;
     TreePtrInterface *tpi_root_node;
+#ifdef KEEP_WHODAT_INFO
+	XLink::Whodat whodat = {NULL};
+#endif	
 };        
     
 

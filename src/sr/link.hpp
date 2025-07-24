@@ -5,11 +5,20 @@
 #include "node/specialise_oostd.hpp"
 #include "helpers/walk.hpp"
 
-#define KEEP_WHODAT_INFO
+//#define KEEP_WHODAT_INFO
 // Note: you may wish to try subtracting 1 or 8 or something 
 // from the address to get a better indication of where the 
 // call itself came from.
 // The gdb magic you require is eg "info line *b.whodat"
+
+#ifdef KEEP_WHODAT_INFO
+#define WHODAT() RETURN_ADDR()
+#else
+#define WHODAT() nullptr
+#endif
+
+//#define HOLD_DEBUG_NAME
+
 
 namespace SR
 { 
@@ -20,10 +29,12 @@ class XLink;
 class PatternLink : public Traceable
 {
 public:
+	typedef vector<void *> Whodat;
+
     PatternLink();
     PatternLink( shared_ptr<const Node> parent_pattern,
                  const TreePtrInterface *ppattern, 
-                 void *whodat_=nullptr );
+                 Whodat whodat_ = Whodat() );
     PatternLink( const Agent *parent_agent,
                  const TreePtrInterface *ppattern );
     // Make a copy of tp_pattern which acts as a new, distinct value 
@@ -39,14 +50,14 @@ public:
     TreePtr<Node> GetPattern() const;
     const TreePtrInterface *GetPatternTreePtr() const;
     void Redirect( const TreePtrInterface &new_parent_pattern );
-    
+	
     string GetTrace() const; // used for debug
     string GetName() const;
     string GetShortName() const;
     
 private: friend class LocatedLink;
     PatternLink( shared_ptr<const TreePtrInterface> ppattern, 
-                 void *whodat=nullptr );
+                 Whodat whodat_ = Whodat() );
 
     shared_ptr<const TreePtrInterface> asp_pattern;
 #ifdef KEEP_WHODAT_INFO
@@ -58,32 +69,38 @@ private: friend class LocatedLink;
 class XLink : public Traceable
 {
 public:
+	typedef vector<void *> Whodat;
+
     XLink();
     virtual ~XLink();
-    XLink(const XLink &other,
-          void *whodat_=nullptr);
+    XLink(const XLink &other);
     XLink &operator=(const XLink &other);
     XLink(XLink &&other);
     XLink &operator=(XLink &&other);
     XLink( shared_ptr<const Node> parent_x,
            const TreePtrInterface *p_tpi,
-           void *whodat_=nullptr );
+           Whodat whodat_ = Whodat() );
     XLink( const LocatedLink &l );
 private: friend class LocatedLink;
     XLink( shared_ptr<const TreePtrInterface> px,
            const TreePtrInterface *p_tpi,
-           void *whodat_=nullptr );
+           Whodat whodat_ = Whodat() );
 public:   
    
     // Make a copy of tp_x which acts as a new, distinct value 
     static XLink CreateDistinct( const TreePtr<Node> &tp_x ); 
-    static XLink CreateFrom( const TreePtrInterface *p_tpi );
+    static XLink CreateFrom( const TreePtrInterface *p_tpi,
+                             Whodat whodat_ = Whodat() );
     size_t GetHash() const noexcept;    
     explicit operator bool() const;
     bool HasChildX() const;
     TreePtr<Node> GetChildTreePtr() const;
     const TreePtrInterface *GetTreePtrInterface() const;
     
+#ifdef KEEP_WHODAT_INFO
+	Whodat GetWhodat() const;
+#endif	
+
     string GetTrace() const; // used for debug
     string GetName() const;
     string GetShortName() const;
@@ -104,12 +121,16 @@ public:
     }
 
 private:
+#ifdef HOLD_DEBUG_NAME
+	string debug_name;
+#endif
     shared_ptr<const TreePtrInterface> asp_x;
     const TreePtrInterface *p_tpi;
+	
     // So .get() will return const TreePtrInterface*
     
 #ifdef KEEP_WHODAT_INFO
-    vector<void *> whodat; 
+    Whodat whodat; 
 #endif
 
     struct MMAXNodeType : virtual Node { NODE_FUNCTIONS_FINAL }; 

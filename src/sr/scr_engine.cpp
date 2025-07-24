@@ -13,6 +13,8 @@
 
 #include <list>
 
+//#define TRACE_KEEP_ALIVES
+
 using namespace SR;
 using namespace std;
 
@@ -353,7 +355,7 @@ void SCREngine::RunEmbedded( PatternLink plink_to_embedded )
 	XLink embedded_origin_xlink = replace_solution.at(plink_to_embedded);
     TRACE("Running embedded ")(plink_to_embedded)(" with origin=")(embedded_origin_xlink)("\n");
    
-    // Run the embedded's engine on this subtree and overwrite through ptr via p_through_x
+    // Run the embedded's engine on this subtree and overwrite through ptr via p_through_x    
     int hits = embedded_engine->RepeatingCompareReplace( embedded_origin_xlink, &replace_solution );
     (void)hits;    
 }
@@ -385,19 +387,18 @@ void SCREngine::SingleCompareReplace( XLink origin_xlink,
 	// nodes from regeneration which are not in any tree but are created
 	// during search/matching. They are needed by replace and embeddeds
 	// and have the same lifetime as the replace solution.
-    set<TreePtr<Node>> keep_alive_nodes; 
+    set<TreePtr<Node>> *keep_alive_nodes = new set<TreePtr<Node>>(); // TODO won't need new once XLinks sorted
 
     TRACE("Begin search\n");
     // Note: comparing doesn't require double pointer any more, but
     // replace does so it can change the origin node. Throws on mismatch.
-    const SolutionMap &cs = plan.and_rule_engine->Compare( origin_xlink, 
-                                                           enclosing_solution,
-                                                           &keep_alive_nodes );
+    SolutionMap cs = plan.and_rule_engine->Compare( origin_xlink, 
+                                                    enclosing_solution,
+                                                    keep_alive_nodes );
     TRACE("Search got a match (otherwise throws)\n");
            
     // Replace will need the compare keys unioned with the enclosing keys
-    SolutionMap rs = UnionOfSolo( *enclosing_solution, cs );    
-    replace_solution = move(rs);
+    replace_solution = UnionOfSolo( *enclosing_solution, cs );    
     replace_solution_available = true;
 
     // Now replace according to the couplings
@@ -408,6 +409,9 @@ void SCREngine::SingleCompareReplace( XLink origin_xlink,
 	for( auto p : replace_assignments )
 		replace_solution[p.first] = p.second;
 
+	//FTRACE("replace_assignments: ")(replace_assignments)("\n");
+	//FTRACE("enclosing_solution: ")(*enclosing_solution)("\n");
+
     // Now run the embedded SCR engines (LATER model)
     for( PatternLink plink_to_embedded : plan.my_embedded_plinks_postorder )	    
         RunEmbedded(plink_to_embedded);       
@@ -416,11 +420,38 @@ void SCREngine::SingleCompareReplace( XLink origin_xlink,
     
     replace_solution_available = false;
     replace_solution.clear();
+    replace_assignments.clear();
+    cs.clear();
           
     // Clear out anything cached in agents and update the x_tree_db 
     // now that replace is done
     for( Agent *a : plan.my_agents )
         a->Reset();
+        
+#ifdef TRACE_KEEP_ALIVES
+    set<pair<string, string>> ss;
+    for( TreePtr<Node> x : *keep_alive_nodes )
+    {
+		pair<string, string> s;
+		s.first = Trace(x);
+		if( auto xscr = dynamic_cast<SubContainerRange *>(x.get()) )
+		{
+			ContainerInterface *xci = dynamic_cast<ContainerInterface *>(xscr);
+			ASSERT(xci)("Multiplicity x must implement ContainerInterface");    
+			
+			for( const TreePtrInterface &xe_node : *xci )
+			{
+				s.second += ":" + Trace(xe_node);
+			}
+		}
+		ss.insert(s);
+	}
+	FTRACE("delete keep_alive_nodes: ")(ss)("\n");
+#endif
+    delete keep_alive_nodes;
+#ifdef TRACE_KEEP_ALIVES
+	FTRACE("done deleting keep_alive_nodes\n");
+#endif
 }
 
 
@@ -560,7 +591,11 @@ XLink SCREngine::GetReplaceKey( PatternLink plink ) const
     ASSERT( plink );
     ASSERT( replace_solution_available );
     if( replace_solution.count(plink) == 1 )
-        return replace_solution.at(plink);
+    {
+		XLink xlink = replace_solution.at(plink);
+		//FTRACE("Extracted xlink: ")(xlink)("\n");
+        return xlink;
+	}
     else
         return XLink();
 }
