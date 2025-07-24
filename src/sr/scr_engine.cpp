@@ -379,7 +379,7 @@ ReplaceAssignments SCREngine::Replace( XLink origin_xlink )
 
 
 void SCREngine::SingleCompareReplace( XLink origin_xlink,
-                                      const SolutionMap *enclosing_solution ) 
+                                      SolutionMap *enclosing_solution ) 
 {
     INDENT(">");
     
@@ -399,7 +399,7 @@ void SCREngine::SingleCompareReplace( XLink origin_xlink,
            
     // Replace will need the compare keys unioned with the enclosing keys
     replace_solution = UnionOfSolo( *enclosing_solution, cs );    
-    replace_solution_available = true;
+    replace_solution_pointer = &replace_solution;
 
     // Now replace according to the couplings
     ReplaceAssignments replace_assignments = Replace(origin_xlink);
@@ -418,7 +418,7 @@ void SCREngine::SingleCompareReplace( XLink origin_xlink,
 		
     TRACE("Embedded SCRs done\n");
     
-    replace_solution_available = false;
+    replace_solution_pointer = nullptr;
     replace_solution.clear();
     replace_assignments.clear();
     cs.clear();
@@ -460,7 +460,7 @@ void SCREngine::SingleCompareReplace( XLink origin_xlink,
 // operations repeatedly until there are no more matches. Returns how
 // many hits we got.
 int SCREngine::RepeatingCompareReplace( XLink origin_xlink,
-                                        const SolutionMap *enclosing_solution )
+                                        SolutionMap *enclosing_solution )
 {
     INDENT("}");
     TRACE("Begin RCR\n");
@@ -581,18 +581,18 @@ void SCREngine::GenerateGraphRegions( Graph &graph ) const
 
 void SCREngine::SetReplaceKey( LocatedLink keyer_link ) const
 {
-    ASSERT( replace_solution_available );
-    InsertSolo( replace_solution, keyer_link );
+    ASSERT( replace_solution_pointer );
+    InsertSolo( *replace_solution_pointer, keyer_link );
 }
 
 
 XLink SCREngine::GetReplaceKey( PatternLink plink ) const
 {
     ASSERT( plink );
-    ASSERT( replace_solution_available );
+    ASSERT( replace_solution_pointer );
     if( replace_solution.count(plink) == 1 )
     {
-		XLink xlink = replace_solution.at(plink);
+		XLink xlink = replace_solution_pointer->at(plink);
 		//FTRACE("Extracted xlink: ")(xlink)("\n");
         return xlink;
 	}

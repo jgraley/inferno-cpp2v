@@ -112,11 +112,11 @@ private:
     void RunEmbedded( PatternLink plink_to_embedded );
     ReplaceAssignments Replace( XLink origin_xlink );
     void SingleCompareReplace( XLink origin_xlink,
-                               const SolutionMap *enclosing_solution );                                                                                              
+                               SolutionMap *enclosing_solution );                                                                                              
 
 public: // For top level engine/VN trans
     int RepeatingCompareReplace( XLink origin_xlink,
-                                 const SolutionMap *enclosing_solution );                                                                                               
+                                 SolutionMap *enclosing_solution );                                                                                               
     virtual void SetStopAfter( vector<int> ssa, int d=0 );
     static void SetMaxReps( int n, bool e );
     void SetXTreeDb( shared_ptr<XTreeDatabase> x_tree_db );
@@ -149,7 +149,7 @@ private:
     
     shared_ptr<XTreeDatabase> x_tree_db;
     mutable SolutionMap replace_solution;
-    bool replace_solution_available = false;    
+    SolutionMap *replace_solution_pointer = nullptr;    
 };
 
 };
