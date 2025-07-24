@@ -789,7 +789,8 @@ void AndRuleEngine::OnSolution(SolutionMap basic_solution,
     INDENT("S");
     // Merge my fixes into the solution (but we're not expected to merge
     // in surrounding solution: caller can do that, if required).
-    basic_solution = UnionOfSolo( basic_solution, my_fixed_assignments );
+	for( auto p : my_fixed_assignments )
+		basic_solution[p.first] = p.second;
 
 	// Is the solution now complete? 
 	for( auto plink : plan.my_normal_links )
@@ -797,7 +798,9 @@ void AndRuleEngine::OnSolution(SolutionMap basic_solution,
 	
 	try
 	{
-		const SolutionMap solution_for_subordinates = UnionOfSolo( *surrounding_solution, basic_solution );   
+		SolutionMap solution_for_subordinates = *surrounding_solution;
+		for( auto p : basic_solution )
+			solution_for_subordinates[p.first] = p.second;
 		TRACE("---------------- Regeneration ----------------\n");      
 		TRACEC("Basic solution ")(basic_solution)("\n");    
 

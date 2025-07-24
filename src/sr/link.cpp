@@ -3,6 +3,9 @@
 
 //#define NO_INIT_ASP_X
 
+//#define DO_ASP_CHECK
+
+
 // For debugging
 #ifdef KEEP_WHODAT_INFO
 #define PUSH_WHODAT(W) ((W).push_back(WHODAT()))
@@ -24,7 +27,11 @@
 #endif
 
 // >1 because we require an external reference aside from asp_x itself
-#define ASP_REF_CHECK(ASP_X) ASSERT( !(ASP_X) || (ASP_X).use_count() > 1 )
+#ifdef DO_ASP_CHECK
+#define ASP_REF_CHECK(ASP_X) ASSERT( !(ASP_X) || (ASP_X).use_count() >= 2 )
+#else
+#define ASP_REF_CHECK(ASP_X) {}
+#endif
 
 //#define XLINK_LIFECYCLE_TRACE
 

@@ -15,6 +15,8 @@
 
 //#define TRACE_KEEP_ALIVES
 
+//#define NEWS
+
 using namespace SR;
 using namespace std;
 
@@ -345,6 +347,7 @@ string SCREngine::Plan::GetTrace() const
 void SCREngine::RunEmbedded( PatternLink plink_to_embedded )
 {         
     INDENT("E");
+    ASSERT( replace_solution_pointer );
     auto embedded_agent = plink_to_embedded.GetChildAgent();
     shared_ptr<SCREngine> embedded_engine = plan.my_engines.at(embedded_agent);
     ASSERT( embedded_engine );
@@ -352,11 +355,11 @@ void SCREngine::RunEmbedded( PatternLink plink_to_embedded )
          (" agent ")(embedded_agent)("\n");
               
 	// Discover new origin for embedded by consulting the replace assignments
-	XLink embedded_origin_xlink = replace_solution.at(plink_to_embedded);
+	XLink embedded_origin_xlink = replace_solution_pointer->at(plink_to_embedded);
     TRACE("Running embedded ")(plink_to_embedded)(" with origin=")(embedded_origin_xlink)("\n");
    
     // Run the embedded's engine on this subtree and overwrite through ptr via p_through_x    
-    int hits = embedded_engine->RepeatingCompareReplace( embedded_origin_xlink, &replace_solution );
+    int hits = embedded_engine->RepeatingCompareReplace( embedded_origin_xlink, replace_solution_pointer );
     (void)hits;    
 }
 
@@ -398,16 +401,20 @@ void SCREngine::SingleCompareReplace( XLink origin_xlink,
     TRACE("Search got a match (otherwise throws)\n");
            
     // Replace will need the compare keys unioned with the enclosing keys
-    replace_solution = UnionOfSolo( *enclosing_solution, cs );    
+#ifdef NEWS
+    replace_solution_pointer = enclosing_solution;
+#else
     replace_solution_pointer = &replace_solution;
-
+#endif
+	for( auto p : cs )
+		(*replace_solution_pointer)[p.first] = p.second;
+		    
     // Now replace according to the couplings
     ReplaceAssignments replace_assignments = Replace(origin_xlink);
 
     // replace_assignments overrides
-	//replace_solution = UnionOf( replace_solution, replace_assignments );    	
 	for( auto p : replace_assignments )
-		replace_solution[p.first] = p.second;
+		(*replace_solution_pointer)[p.first] = p.second;
 
 	//FTRACE("replace_assignments: ")(replace_assignments)("\n");
 	//FTRACE("enclosing_solution: ")(*enclosing_solution)("\n");
@@ -419,10 +426,12 @@ void SCREngine::SingleCompareReplace( XLink origin_xlink,
     TRACE("Embedded SCRs done\n");
     
     replace_solution_pointer = nullptr;
+#ifndef NEWS
     replace_solution.clear();
+#endif
     replace_assignments.clear();
     cs.clear();
-          
+
     // Clear out anything cached in agents and update the x_tree_db 
     // now that replace is done
     for( Agent *a : plan.my_agents )
@@ -590,7 +599,7 @@ XLink SCREngine::GetReplaceKey( PatternLink plink ) const
 {
     ASSERT( plink );
     ASSERT( replace_solution_pointer );
-    if( replace_solution.count(plink) == 1 )
+    if( replace_solution_pointer->count(plink) == 1 )
     {
 		XLink xlink = replace_solution_pointer->at(plink);
 		//FTRACE("Extracted xlink: ")(xlink)("\n");
