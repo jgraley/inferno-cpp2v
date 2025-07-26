@@ -109,14 +109,18 @@ private:
         list<PatternLink> my_embedded_plinks_postorder;
     } plan;
 
-    void RunEmbedded( PatternLink plink_to_embedded );
-    ReplaceAssignments Replace( XLink origin_xlink );
+    void RunEmbedded( PatternLink plink_to_embedded,
+                      SolutionMap *universal_assignments );
+    ReplaceAssignments Replace( XLink origin_xlink,
+                                SolutionMap *universal_assignments );
     void SingleCompareReplace( XLink origin_xlink,
-                               SolutionMap *enclosing_solution );                                                                                              
+                               SolutionMap *enclosing_solution,
+                               SolutionMap *universal_assignments );                                                                                              
 
 public: // For top level engine/VN trans
     int RepeatingCompareReplace( XLink origin_xlink,
-                                 SolutionMap *enclosing_solution );                                                                                               
+                                 SolutionMap *enclosing_solution,
+                                 SolutionMap *universal_assignments );                                                                                               
     virtual void SetStopAfter( vector<int> ssa, int d=0 );
     static void SetMaxReps( int n, bool e );
     void SetXTreeDb( shared_ptr<XTreeDatabase> x_tree_db );

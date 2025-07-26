@@ -150,24 +150,29 @@ private:
     void CompareEvaluatorLinks( Agent *agent, 
                                 const SolutionMap *solution_for_subordinates, 
                                 const SolutionMap *solution_for_evaluators,
-                                set<TreePtr<Node>> *keep_alive_nodes );
+                                set<TreePtr<Node>> *keep_alive_nodes,
+                                SolutionMap *universal_assignments );
     void CompareMultiplicityNode( PatternLink plink, TreePtr<Node> node, 
                                   const SolutionMap *solution_for_subordinates,
-                                  set<TreePtr<Node>> *keep_alive_nodes ); 
+                                  set<TreePtr<Node>> *keep_alive_nodes,
+                                  SolutionMap *universal_assignments ); 
     void AgentRegeneration( Agent *agent,
-                                SolutionMap &basic_solution,
-                                const SolutionMap &solution_for_subordinates,
-                                set<TreePtr<Node>> *keep_alive_nodes );
+                            SolutionMap &basic_solution,
+                            const SolutionMap &solution_for_subordinates,
+                            set<TreePtr<Node>> *keep_alive_nodes,
+                            SolutionMap *universal_assignments );
     void OnSolution(SolutionMap basic_solution, 
                     const SolutionMap &my_fixed_assignments, 
                     const SolutionMap *surrounding_solution,
-                    set<TreePtr<Node>> *keep_alive_nodes);
+                    set<TreePtr<Node>> *keep_alive_nodes,
+                    SolutionMap *universal_assignments);
     
 public:
     void SetXTreeDb( shared_ptr<const XTreeDatabase> x_tree_db );
     SolutionMap Compare( XLink base_xlink,
-                         const SolutionMap *surrounding_solution,
-                         set<TreePtr<Node>> *keep_alive_nodes );
+                         const SolutionMap *surrounding_solution,                         
+                         set<TreePtr<Node>> *keep_alive_nodes,
+                         SolutionMap *universal_assignments );
 
     const set<Agent *> &GetKeyedAgents() const;
     const set<PatternLink> GetKeyerPatternLinks() const;

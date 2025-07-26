@@ -344,7 +344,8 @@ string SCREngine::Plan::GetTrace() const
 }
 
 
-void SCREngine::RunEmbedded( PatternLink plink_to_embedded )
+void SCREngine::RunEmbedded( PatternLink plink_to_embedded,
+                             SolutionMap *universal_assignments )
 {         
     INDENT("E");
     ASSERT( replace_solution_pointer );
@@ -359,12 +360,15 @@ void SCREngine::RunEmbedded( PatternLink plink_to_embedded )
     TRACE("Running embedded ")(plink_to_embedded)(" with origin=")(embedded_origin_xlink)("\n");
    
     // Run the embedded's engine on this subtree and overwrite through ptr via p_through_x    
-    int hits = embedded_engine->RepeatingCompareReplace( embedded_origin_xlink, replace_solution_pointer );
+    int hits = embedded_engine->RepeatingCompareReplace( embedded_origin_xlink, 
+                                                         replace_solution_pointer,
+                                                         universal_assignments );
     (void)hits;    
 }
 
 
-ReplaceAssignments SCREngine::Replace( XLink origin_xlink )
+ReplaceAssignments SCREngine::Replace( XLink origin_xlink, 
+                                       SolutionMap *universal_assignments )
 {
     INDENT("R");
 
@@ -382,7 +386,8 @@ ReplaceAssignments SCREngine::Replace( XLink origin_xlink )
 
 
 void SCREngine::SingleCompareReplace( XLink origin_xlink,
-                                      SolutionMap *enclosing_solution ) 
+                                      SolutionMap *enclosing_solution,
+									  SolutionMap *universal_assignments ) 
 {
     INDENT(">");
     
@@ -397,7 +402,8 @@ void SCREngine::SingleCompareReplace( XLink origin_xlink,
     // replace does so it can change the origin node. Throws on mismatch.
     SolutionMap cs = plan.and_rule_engine->Compare( origin_xlink, 
                                                     enclosing_solution,
-                                                    keep_alive_nodes );
+                                                    keep_alive_nodes,
+                                                    universal_assignments );
     TRACE("Search got a match (otherwise throws)\n");
            
     // Replace will need the compare keys unioned with the enclosing keys
@@ -407,28 +413,32 @@ void SCREngine::SingleCompareReplace( XLink origin_xlink,
     replace_solution_pointer = &replace_solution;
 #endif
 	for( auto p : cs )
-		(*replace_solution_pointer)[p.first] = p.second;
+	{
+		replace_solution[p.first] = p.second;
+		(*universal_assignments)[p.first] = p.second;
+	}
 		    
     // Now replace according to the couplings
-    ReplaceAssignments replace_assignments = Replace(origin_xlink);
+    ReplaceAssignments replace_assignments = Replace(origin_xlink, universal_assignments);
 
     // replace_assignments overrides
 	for( auto p : replace_assignments )
-		(*replace_solution_pointer)[p.first] = p.second;
+	{
+		replace_solution[p.first] = p.second;
+		(*universal_assignments)[p.first] = p.second;
+	}
 
 	//FTRACE("replace_assignments: ")(replace_assignments)("\n");
 	//FTRACE("enclosing_solution: ")(*enclosing_solution)("\n");
 
     // Now run the embedded SCR engines (LATER model)
     for( PatternLink plink_to_embedded : plan.my_embedded_plinks_postorder )	    
-        RunEmbedded(plink_to_embedded);       
+        RunEmbedded(plink_to_embedded, universal_assignments);       
 		
     TRACE("Embedded SCRs done\n");
     
     replace_solution_pointer = nullptr;
-#ifndef NEWS
     replace_solution.clear();
-#endif
     replace_assignments.clear();
     cs.clear();
 
@@ -469,7 +479,8 @@ void SCREngine::SingleCompareReplace( XLink origin_xlink,
 // operations repeatedly until there are no more matches. Returns how
 // many hits we got.
 int SCREngine::RepeatingCompareReplace( XLink origin_xlink,
-                                        SolutionMap *enclosing_solution )
+                                        SolutionMap *enclosing_solution,
+                                        SolutionMap *universal_assignments )
 {
     INDENT("}");
     TRACE("Begin RCR\n");
@@ -494,7 +505,9 @@ int SCREngine::RepeatingCompareReplace( XLink origin_xlink,
         try
         {
             // Cannonicalise could change origin
-            SingleCompareReplace( origin_xlink, enclosing_solution );
+            SingleCompareReplace( origin_xlink, 
+                                  enclosing_solution,
+                                  universal_assignments );
         }
         catch( const ::Mismatch &e )
         {
