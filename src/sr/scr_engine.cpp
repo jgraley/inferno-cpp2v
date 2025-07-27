@@ -402,8 +402,7 @@ void SCREngine::SingleCompareReplace( XLink origin_xlink,
     // replace does so it can change the origin node. Throws on mismatch.
     SolutionMap cs = plan.and_rule_engine->Compare( origin_xlink, 
                                                     enclosing_solution,
-                                                    keep_alive_nodes,
-                                                    universal_assignments );
+                                                    keep_alive_nodes );
     TRACE("Search got a match (otherwise throws)\n");
            
     // Replace will need the compare keys unioned with the enclosing keys
