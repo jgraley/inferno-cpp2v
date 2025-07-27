@@ -519,17 +519,18 @@ void AgentCommon::MaybeChildrenPlanOverlay( PatternLink me_plink,
 }
                                   
                                   
-TreePtr<Node> AgentCommon::BuildForBuildersAnalysis( PatternLink me_plink )
+TreePtr<Node> AgentCommon::BuildForBuildersAnalysis( PatternLink me_plink, const SCREngine *acting_engine )
 {
     Agent::ReplaceKit kit { nullptr };
-    shared_ptr<Patch> layout = GenReplaceLayout(kit, me_plink);
+    shared_ptr<Patch> layout = GenReplaceLayout(kit, me_plink, acting_engine);
     unique_ptr<FreeZone> zone = TreeUpdater::TransformToSingleFreeZone( layout );     
     return zone->GetBaseNode();
 }
 
 
 Agent::ReplacePatchPtr AgentCommon::GenReplaceLayout( const ReplaceKit &kit, 
-                                                      PatternLink me_plink )
+                                                      PatternLink me_plink,
+                                                      const SCREngine *acting_engine)
 {
     INDENT("C");
     ASSERT( me_plink.GetChildAgent() == this );
@@ -538,14 +539,16 @@ Agent::ReplacePatchPtr AgentCommon::GenReplaceLayout( const ReplaceKit &kit,
     ASSERT( phase != IN_COMPARE_ONLY )(*this)(" is configured for compare only");
     
     XLink key_xlink;
-    if( keyer_plink && my_scr_engine->IsReplaceKey( keyer_plink ) )
+    //FTRACE(my_scr_engine)("\n");
+    ASSERT( acting_engine );
+    if( keyer_plink && phase != IN_REPLACE_ONLY && my_scr_engine->IsReplaceKey( keyer_plink, acting_engine ) )
     {
         key_xlink = my_scr_engine->GetReplaceKey( keyer_plink );
         ASSERT( key_xlink.GetChildTreePtr()->IsFinal() )
               (*this)(" keyed with non-final node ")(key_xlink)("\n"); 
     }
 
-    ReplacePatchPtr patch = GenReplaceLayoutImpl( kit, me_plink, key_xlink );
+    ReplacePatchPtr patch = GenReplaceLayoutImpl( kit, me_plink, key_xlink, acting_engine );
       
     // Inform the update mechanism that, once it's done duplicating 
     // nodes etc, it should mark this position for this embedded agent's origin.
@@ -569,7 +572,8 @@ TreePtr<Node> AgentCommon::GetEmbeddedReplacePattern() const
 
 Agent::ReplacePatchPtr AgentCommon::GenReplaceLayoutImpl( const ReplaceKit &kit, 
                                                           PatternLink me_plink, 
-                                                          XLink key_xlink )
+                                                          XLink key_xlink,
+                                                          const SCREngine *acting_engine )
 {
     // Default replace behaviour to just use the X subtree we keyed to, so we need to be keyed
     ASSERT(key_xlink)("Agent ")(*this)(" in replace context is not keyed but needs to be");

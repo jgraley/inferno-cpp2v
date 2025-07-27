@@ -20,7 +20,8 @@ public:
 
     ReplacePatchPtr GenReplaceLayoutImpl( const ReplaceKit &kit, 
                                          PatternLink me_plink, 
-                                         XLink key_xlink ) final;
+                                         XLink key_xlink,
+                                                  const SCREngine *acting_engine ) final;
 private:
     virtual CollectionInterface &GetConjuncts() const = 0;
 };

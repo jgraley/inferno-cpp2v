@@ -34,7 +34,7 @@ Graphable::NodeBlock BuildIdentifierAgent::GetGraphBlockInfo() const
 }
 
 
-string BuildIdentifierAgent::GetNewName()
+string BuildIdentifierAgent::GetNewName(const SCREngine *acting_engine)
 {
     INDENT("B");
     TRACE("Begin SoftMakeIdentifier recurse for \"")(format)("\"\n");
@@ -46,7 +46,7 @@ string BuildIdentifierAgent::GetNewName()
         // We have a child identifier - let replace algorithm run in the expectation it will
         // get subsitituted with a SpecificIdentifier from the original program tree
         PatternLink source_plink(this, &source);
-        TreePtr<Node> new_identifier = source_plink.GetChildAgent()->BuildForBuildersAnalysis(source_plink);
+        TreePtr<Node> new_identifier = source_plink.GetChildAgent()->BuildForBuildersAnalysis(source_plink, acting_engine);
         TRACE("End SoftMakeIdentifier recurse\n");
         ASSERT( new_identifier );
         TreePtr<SpecificIdentifier> si = DynamicTreePtrCast<SpecificIdentifier>( new_identifier );
@@ -79,23 +79,23 @@ string BuildIdentifierAgent::GetNewName()
 
 //---------------------------------- BuildInstanceIdentifierAgent ------------------------------------    
 
-TreePtr<Node> BuildInstanceIdentifierAgent::BuildNewSubtree()
+TreePtr<Node> BuildInstanceIdentifierAgent::BuildNewSubtree(const SCREngine *acting_engine)
 {
-    return MakeTreeNode<CPPTree::SpecificInstanceIdentifier>( GetNewName() ); 
+    return MakeTreeNode<CPPTree::SpecificInstanceIdentifier>( GetNewName(acting_engine) ); 
 }
 
 //---------------------------------- BuildTypeIdentifierAgent ------------------------------------    
 
-TreePtr<Node> BuildTypeIdentifierAgent::BuildNewSubtree()
+TreePtr<Node> BuildTypeIdentifierAgent::BuildNewSubtree(const SCREngine *acting_engine)
 {
-    return MakeTreeNode<CPPTree::SpecificTypeIdentifier>( GetNewName() ); 
+    return MakeTreeNode<CPPTree::SpecificTypeIdentifier>( GetNewName(acting_engine) ); 
 }                                                   
 
 //---------------------------------- BuildLabelIdentifierAgent ------------------------------------    
 
-TreePtr<Node> BuildLabelIdentifierAgent::BuildNewSubtree()
+TreePtr<Node> BuildLabelIdentifierAgent::BuildNewSubtree(const SCREngine *acting_engine)
 {
-    return MakeTreeNode<CPPTree::SpecificLabelIdentifier>( GetNewName() ); 
+    return MakeTreeNode<CPPTree::SpecificLabelIdentifier>( GetNewName(acting_engine) ); 
 }                                                   
 
 //---------------------------------- IdentifierByNameAgent ------------------------------------    
@@ -403,11 +403,11 @@ XLink NestedSubscriptLookupAgent::Advance( XLink xlink,
 
 //---------------------------------- BuildContainerSizeAgent ------------------------------------    
 
-TreePtr<Node> BuildContainerSizeAgent::BuildNewSubtree()
+TreePtr<Node> BuildContainerSizeAgent::BuildNewSubtree(const SCREngine *acting_engine)
 {
     ASSERT( container );
     PatternLink container_plink(this, &container);
-    TreePtr<Node> new_node = container_plink.GetChildAgent()->BuildForBuildersAnalysis(container_plink);
+    TreePtr<Node> new_node = container_plink.GetChildAgent()->BuildForBuildersAnalysis(container_plink, acting_engine);
     ASSERT( new_node );
     ContainerInterface *new_container = dynamic_cast<ContainerInterface *>(new_node.get());
     ASSERT( new_container );

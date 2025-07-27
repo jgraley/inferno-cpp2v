@@ -137,20 +137,25 @@ public:
                                     PatternLink under_plink );
     ReplacePatchPtr GenReplaceLayoutImpl( const ReplaceKit &kit, 
                                     PatternLink me_plink, 
-                                    XLink key_xlink ) final;
+                                    XLink key_xlink,
+                                                  const SCREngine *acting_engine ) final;
 
 private:    
     ReplacePatchPtr GenReplaceLayoutOverlay( const ReplaceKit &kit, 
                                              PatternLink me_plink, 
-                                             XLink under_xlink ); // under substitution if not nullptr
+                                             XLink under_xlink,
+                                                  const SCREngine *acting_engine ); // under substitution if not nullptr
     ReplacePatchPtr GenReplaceLayoutOverlayUsingPattern( const ReplaceKit &kit, 
                                                          PatternLink me_plink, 
-                                                         XLink under_xlink );
+                                                         XLink under_xlink,
+                                                  const SCREngine *acting_engine );
     ReplacePatchPtr GenReplaceLayoutOverlayUsingX( const ReplaceKit &kit, 
                                                    PatternLink me_plink, 
-                                                   XLink under_xlink ); 
+                                                   XLink under_xlink,
+                                                  const SCREngine *acting_engine ); 
     ReplacePatchPtr GenReplaceLayoutNormal( const ReplaceKit &kit, 
-                                            PatternLink me_plink );
+                                            PatternLink me_plink,
+                                                  const SCREngine *acting_engine );
     
 public:
     virtual NodeBlock GetGraphBlockInfo() const;

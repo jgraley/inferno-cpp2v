@@ -30,7 +30,8 @@ public:
 
     ReplacePatchPtr GenReplaceLayoutImpl( const ReplaceKit &kit, 
                                          PatternLink me_plink, 
-                                         XLink key_xlink ) override;
+                                         XLink key_xlink,
+                                                  const SCREngine *acting_engine ) override;
 };
 
 };

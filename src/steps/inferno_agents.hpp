@@ -35,7 +35,7 @@ struct BuildIdentifierAgent : public virtual BuilderAgent
     BuildIdentifierAgent( string s, int f=0 ) : format(s), flags(f) {}
     virtual NodeBlock GetGraphBlockInfo() const;
     Sequence<CPPTree::Identifier> sources;
-    string GetNewName();
+    string GetNewName(const SCREngine *acting_engine);
     string format;
     int flags;
 };
@@ -55,7 +55,7 @@ struct BuildInstanceIdentifierAgent : Special<CPPTree::InstanceIdentifier>,
     BuildInstanceIdentifierAgent() : BuildIdentifierAgent("unnamed") {}
 
 private:    
-    virtual TreePtr<Node> BuildNewSubtree() override;
+    virtual TreePtr<Node> BuildNewSubtree(const SCREngine *acting_engine) override;
 };
 
 
@@ -72,7 +72,7 @@ struct BuildTypeIdentifierAgent : Special<CPPTree::TypeIdentifier>,
     BuildTypeIdentifierAgent( string s="Unnamed", int f=0 ) : BuildIdentifierAgent(s,f) {}
 
 private:
-    virtual TreePtr<Node> BuildNewSubtree() override;
+    virtual TreePtr<Node> BuildNewSubtree(const SCREngine *acting_engine) override;
 };
 
 
@@ -90,7 +90,7 @@ struct BuildLabelIdentifierAgent : Special<CPPTree::LabelIdentifier>,
     BuildLabelIdentifierAgent( string s, int f=0 ) : BuildIdentifierAgent(s,f) {}
 
 private:
-    virtual TreePtr<Node> BuildNewSubtree() override;
+    virtual TreePtr<Node> BuildNewSubtree(const SCREngine *acting_engine) override;
 };
 
 //---------------------------------- IdentifierByNameAgent ------------------------------------    
@@ -296,7 +296,7 @@ struct BuildContainerSizeAgent : public virtual BuilderAgent,
     
     TreePtr<Node> container;
 private:
-    virtual TreePtr<Node> BuildNewSubtree() override;
+    virtual TreePtr<Node> BuildNewSubtree(const SCREngine *acting_engine) override;
     virtual NodeBlock GetGraphBlockInfo() const;
 }; 
 

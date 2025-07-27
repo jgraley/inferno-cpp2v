@@ -49,7 +49,8 @@ Graphable::NodeBlock ConjunctionAgent::GetGraphBlockInfo() const
 
 Agent::ReplacePatchPtr ConjunctionAgent::GenReplaceLayoutImpl( const ReplaceKit &kit, 
                                                                PatternLink me_plink, 
-                                                               XLink key_xlink )
+                                                               XLink key_xlink,
+                                                  const SCREngine *acting_engine )
 {
     auto plinks = pattern_query->GetNormalLinks();
     ASSERT( plinks.size() >= 1 );
@@ -60,5 +61,5 @@ Agent::ReplacePatchPtr ConjunctionAgent::GenReplaceLayoutImpl( const ReplaceKit 
     // Pick the first normal plink
     PatternLink replace_plink = plinks.front();
     ASSERT( replace_plink );          
-    return replace_plink.GetChildAgent()->GenReplaceLayout(kit, replace_plink);    
+    return replace_plink.GetChildAgent()->GenReplaceLayout(kit, replace_plink, acting_engine);    
 } 

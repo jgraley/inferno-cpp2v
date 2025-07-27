@@ -17,7 +17,8 @@ SYM::Lazy<SYM::BooleanExpression> BuilderAgent::SymbolicNormalLinkedQueryPRed() 
  
 Agent::ReplacePatchPtr BuilderAgent::GenReplaceLayoutImpl( const ReplaceKit &kit, 
                                                            PatternLink me_plink, 
-                                                           XLink key_xlink )
+                                                           XLink key_xlink,
+                                                  const SCREngine *acting_engine )
 {
     INDENT("%");
 
@@ -25,7 +26,7 @@ Agent::ReplacePatchPtr BuilderAgent::GenReplaceLayoutImpl( const ReplaceKit &kit
     if( me_plink == keyer_plink ) // keyer
 	{
         // Call the soft pattern impl 
-        built_node = new_node = BuildNewSubtree(); // acts like Clone()
+        built_node = new_node = BuildNewSubtree(acting_engine); // acts like Clone()
         
         // Don't duplicate since this is first one     
         // Note: from #807 we don't now set a key with the SCR engine 

@@ -59,7 +59,7 @@ struct TreePtrInterface : virtual Itemiser::Element
 	virtual void AddRef(const Traceable *ref) const = 0;
 	virtual void RemoveRef(const Traceable *ref) const = 0;
 #endif
-	
+    virtual string GetSerialString() const = 0;
     virtual string GetName() const = 0;
     virtual string GetShortName() const = 0;
 };
@@ -98,6 +98,7 @@ struct TreePtrCommon : virtual TreePtrInterface, public SatelliteSerial
 #endif
 
     const SatelliteSerial &GetSS() const override;
+    string GetSerialString() const final;
     string GetName() const final;
     string GetShortName() const;    
     string GetTrace() const override;

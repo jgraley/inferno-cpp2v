@@ -71,7 +71,8 @@ void StarAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
 
 Agent::ReplacePatchPtr StarAgent::GenReplaceLayoutImpl( const ReplaceKit &kit, 
                                                   PatternLink me_plink, 
-                                                  XLink key_xlink ) 
+                                                  XLink key_xlink,
+                                                  const SCREngine *acting_engine ) 
 {
     INDENT("*");
     ASSERT( key_xlink );

@@ -58,15 +58,18 @@ public:
                               PatternLink under_plink );
     virtual void MaybeChildrenPlanOverlay( PatternLink me_plink, 
                                   PatternLink under_plink );                                 
-    TreePtr<Node> BuildForBuildersAnalysis( PatternLink me_plink ) override;
+    TreePtr<Node> BuildForBuildersAnalysis( PatternLink me_plink,
+                                            const SCREngine *acting_engine ) override;
     ReplacePatchPtr GenReplaceLayout( const ReplaceKit &kit, 
-                                PatternLink me_plink ) override;
+                                PatternLink me_plink,
+                                const SCREngine *acting_engine ) override;
     TreePtr<Node> GetEmbeddedSearchPattern() const override;
     TreePtr<Node> GetEmbeddedReplacePattern() const override;
     
     virtual ReplacePatchPtr GenReplaceLayoutImpl( const ReplaceKit &kit, 
                                          PatternLink me_plink, 
-                                         XLink key_xlink );
+                                         XLink key_xlink,
+                                                  const SCREngine *acting_engine );
     TreePtr<Node> CloneNode() const;
     virtual string GetTrace() const;
 

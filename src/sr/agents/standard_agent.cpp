@@ -530,7 +530,8 @@ void StandardAgent::MaybeChildrenPlanOverlay( PatternLink me_plink,
 
 Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutImpl( const ReplaceKit &kit, 
                                                             PatternLink me_plink, 
-                                                            XLink key_xlink ) 
+                                                            XLink key_xlink,
+                                                  const SCREngine *acting_engine ) 
 {
     INDENT("B");
     //if( TreePtr<CPPTree::SpecificInstanceIdentifier>::DynamicCast(me_plink.GetPattern()) )
@@ -542,7 +543,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutImpl( const ReplaceKit &ki
         // The under pattern node is in a different location from over (=this), 
         // but overlay planning has set up overlay_under_plink for us.
         XLink under_xlink = my_scr_engine->GetReplaceKey( overlay_under_plink );
-        return GenReplaceLayoutOverlay( kit, me_plink, under_xlink );
+        return GenReplaceLayoutOverlay( kit, me_plink, under_xlink, acting_engine );
     }
     else if( key_xlink ) 
     {
@@ -550,20 +551,21 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutImpl( const ReplaceKit &ki
         // The under and over pattern nodes are both this. AndRuleEngine 
         // has keyed this, and due wildcarding, key will be a final node
         // i.e. possibly a subclass of this node.
-        return GenReplaceLayoutOverlayUsingX( kit, me_plink, key_xlink );
+        return GenReplaceLayoutOverlayUsingX( kit, me_plink, key_xlink, acting_engine );
     }
     else
     {
         // Free replace pattern, just duplicate it.
         ASSERT( me_plink.GetPattern()->IsFinal() )(me_plink); 
-        return GenReplaceLayoutNormal( kit, me_plink ); 
+        return GenReplaceLayoutNormal( kit, me_plink, acting_engine ); 
     }
 }
 
 
 Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlay( const ReplaceKit &kit, 
                                                                PatternLink me_plink, 
-                                                               XLink under_xlink )  // overlaying
+                                                               XLink under_xlink,
+                                                  const SCREngine *acting_engine )  // overlaying
 {
     INDENT("O");
     ASSERT( under_xlink );
@@ -583,15 +585,16 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlay( const ReplaceKit 
     // and the new node will get its locals. Otherwise use keyed X (=under) as
     // the template. #593 will improve on this.
     if( same_type ) 
-        return GenReplaceLayoutOverlayUsingPattern( kit, me_plink, under_xlink );
+        return GenReplaceLayoutOverlayUsingPattern( kit, me_plink, under_xlink, acting_engine );
     else 
-        return GenReplaceLayoutOverlayUsingX( kit, me_plink, under_xlink );
+        return GenReplaceLayoutOverlayUsingX( kit, me_plink, under_xlink, acting_engine );
 }
 
 
 Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingPattern( const ReplaceKit &kit, 
                                                                            PatternLink me_plink, 
-                                                                           XLink under_xlink ) 
+                                                                           XLink under_xlink,
+                                                  const SCREngine *acting_engine ) 
 {    
     TreePtr<Node> under_node = under_xlink.GetChildTreePtr();
 
@@ -676,7 +679,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingPattern( const
                     ASSERT( my_elt )("Some element of member %d (", j)(*my_con)(") of ")(*this)(" was nullptr\n");
                     TRACE("Got ")(*my_elt)("\n");
                     PatternLink my_elt_plink( this, &my_elt );
-                    child_patches.push_back( my_elt_plink.GetChildAgent()->GenReplaceLayout(kit, my_elt_plink) );                
+                    child_patches.push_back( my_elt_plink.GetChildAgent()->GenReplaceLayout(kit, my_elt_plink, acting_engine) );                
                 }
             }    
             else
@@ -707,7 +710,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingPattern( const
                 ASSERT(    my_singular );
                 ASSERT( *my_singular ); // Should not have marked this one for overlay if NULL
                 PatternLink my_singular_plink( this, my_singular );                    
-                child_patches.push_back( my_singular_plink.GetChildAgent()->GenReplaceLayout(kit, my_singular_plink) );           
+                child_patches.push_back( my_singular_plink.GetChildAgent()->GenReplaceLayout(kit, my_singular_plink, acting_engine) );           
             }        
             else
             {
@@ -728,7 +731,8 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingPattern( const
 
 Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingX( const ReplaceKit &kit, 
                                                                      PatternLink me_plink, 
-                                                                     XLink under_xlink )  
+                                                                     XLink under_xlink,
+                                                  const SCREngine *acting_engine )  
 {
     TreePtr<Node> under_node = under_xlink.GetChildTreePtr();
 
@@ -807,7 +811,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingX( const Repla
                     ASSERT( my_elt )("Some element of member %d (", j)(*my_con)(") of ")(*this)(" was nullptr\n");
                     TRACE("Got ")(*my_elt)("\n");
                     PatternLink my_elt_plink( this, &my_elt );
-                    child_patches.push_back( my_elt_plink.GetChildAgent()->GenReplaceLayout(kit, my_elt_plink) );                
+                    child_patches.push_back( my_elt_plink.GetChildAgent()->GenReplaceLayout(kit, my_elt_plink, acting_engine) );                
                 }
             }    
             else
@@ -838,7 +842,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingX( const Repla
                 ASSERT(    my_singular );
                 ASSERT( *my_singular ); // Should not have marked this one for overlay if NULL
                 PatternLink my_singular_plink( this, my_singular );                    
-                child_patches.push_back( my_singular_plink.GetChildAgent()->GenReplaceLayout(kit, my_singular_plink) );           
+                child_patches.push_back( my_singular_plink.GetChildAgent()->GenReplaceLayout(kit, my_singular_plink, acting_engine) );           
             }        
             else
             {
@@ -858,7 +862,8 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingX( const Repla
 
 
 Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutNormal( const ReplaceKit &kit, 
-                                                              PatternLink me_plink ) 
+                                                              PatternLink me_plink,
+                                                  const SCREngine *acting_engine ) 
 {
     INDENT("N");
  
@@ -915,7 +920,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutNormal( const ReplaceKit &
                 zone.AddTerminus( Mutator::CreateFreeContainer(dest, dest_con, dest_it) );    
 
                 PatternLink my_elt_plink( this, &my_elt );
-                child_patches.push_back( my_elt_plink.GetChildAgent()->GenReplaceLayout(kit, my_elt_plink) );               
+                child_patches.push_back( my_elt_plink.GetChildAgent()->GenReplaceLayout(kit, my_elt_plink, acting_engine) );               
             }
         }            
         else if( TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[i]) )
@@ -927,7 +932,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutNormal( const ReplaceKit &
             zone.AddTerminus( Mutator::CreateFreeSingular(dest, dest_singular) );            
 
             PatternLink my_singular_plink( this, my_singular );                    
-            child_patches.push_back( my_singular_plink.GetChildAgent()->GenReplaceLayout(kit, my_singular_plink) );           
+            child_patches.push_back( my_singular_plink.GetChildAgent()->GenReplaceLayout(kit, my_singular_plink, acting_engine) );           
         }
         else
         {

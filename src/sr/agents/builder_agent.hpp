@@ -20,9 +20,10 @@ public:
 
     ReplacePatchPtr GenReplaceLayoutImpl( const ReplaceKit &kit, 
                                     PatternLink me_plink, 
-                                    XLink key_xlink ) final;
+                                    XLink key_xlink,
+                                                  const SCREngine *acting_engine ) final;
                                             
-    virtual TreePtr<Node> BuildNewSubtree() = 0;
+    virtual TreePtr<Node> BuildNewSubtree(const SCREngine *acting_engine) = 0;
     
 private:
     TreePtr<Node> built_node = nullptr;    

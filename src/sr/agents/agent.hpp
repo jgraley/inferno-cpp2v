@@ -82,9 +82,11 @@ public:
     virtual void PlanOverlay( PatternLink me_plink, 
                               PatternLink under_plink ) = 0;
 
-    virtual TreePtr<Node> BuildForBuildersAnalysis( PatternLink me_plink ) = 0;
+    virtual TreePtr<Node> BuildForBuildersAnalysis( PatternLink me_plink,
+                                                    const SCREngine *acting_engine ) = 0;
     virtual ReplacePatchPtr GenReplaceLayout( const ReplaceKit &kit, 
-                                              PatternLink me_plink ) = 0;
+                                              PatternLink me_plink,
+                                              const SCREngine *acting_engine ) = 0;
     virtual TreePtr<Node> GetEmbeddedSearchPattern() const = 0;
     virtual TreePtr<Node> GetEmbeddedReplacePattern() const = 0;
     

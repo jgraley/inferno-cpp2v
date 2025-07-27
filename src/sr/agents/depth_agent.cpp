@@ -31,14 +31,15 @@ shared_ptr<PatternQuery> DepthAgent::GetPatternQuery() const
 
 Agent::ReplacePatchPtr DepthAgent::GenReplaceLayoutImpl( const ReplaceKit &kit, 
                                                    PatternLink me_plink, 
-                                                   XLink key_xlink ) 
+                                                   XLink key_xlink,
+                                                  const SCREngine *acting_engine ) 
 {
     INDENT("#");
     
     // Recurse at the terminus
     PatternLink terminus_plink(this, &terminus);
     list<Agent::ReplacePatchPtr> child_commands;
-    child_commands.push_back( terminus_plink.GetChildAgent()->GenReplaceLayout(kit, terminus_plink) );
+    child_commands.push_back( terminus_plink.GetChildAgent()->GenReplaceLayout(kit, terminus_plink, acting_engine) );
 
     // Make a tree zone for the nodes we covered
     XLink terminus_key_xlink = my_scr_engine->GetReplaceKey( terminus_plink );

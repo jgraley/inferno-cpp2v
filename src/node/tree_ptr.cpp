@@ -173,6 +173,12 @@ const SatelliteSerial &TreePtrCommon::GetSS() const
 }
 
 
+string TreePtrCommon::GetSerialString() const
+{
+	return SatelliteSerial::GetSerialString();
+}
+	
+
 string TreePtrCommon::GetName() const
 {
 	// This is used by graph plotting, and must describe the tree pointer itself, 

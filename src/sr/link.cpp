@@ -194,7 +194,12 @@ string PatternLink::GetShortName() const
 {
     if(asp_pattern==nullptr)
         return "NULL";
-    return "↳"+asp_pattern->GetShortName();
+	// Serial string included because needed in graphs to disambiguate links
+    string s = "↳" + asp_pattern->GetSerialString() + "->" + asp_pattern->GetShortName();
+    // I think we should be calling eg GetSerialString() from *outside* obejcts, i.e.
+    // from pointer-liuke objects, since the awrial number is not a part of the
+    // object's value.
+    return s;
 }
 
 
@@ -508,7 +513,13 @@ string XLink::GetShortName() const
 {
     if(p_tpi==nullptr)
         return "NULL";
-    return "⤷"+p_tpi->GetShortName();
+	
+	// Serial string included because needed in graphs to disambiguate links
+    string s = "⤷" + p_tpi->GetSerialString() + "->" + p_tpi->GetShortName();
+    // I think we should be calling eg GetSerialString() from *outside* obejcts, i.e.
+    // from pointer-like objects, since the awrial number is not a part of the
+    // object's value.
+    return s;    
 }
 
 const TreePtr<XLink::MMAXNodeType> XLink::MMAXNode = MakeTreeNode<XLink::MMAXNodeType>();

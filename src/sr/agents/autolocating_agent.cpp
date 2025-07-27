@@ -40,7 +40,8 @@ SYM::Lazy<SYM::BooleanExpression> AutolocatingAgent::SymbolicAutolocatingQuery()
 
 Agent::ReplacePatchPtr AutolocatingAgent::GenReplaceLayoutImpl( const ReplaceKit &kit, 
                                                                 PatternLink me_plink, 
-                                                                XLink key_xlink )
+                                                                XLink key_xlink,
+                                                  const SCREngine *acting_engine )
 {
     auto plinks = pattern_query->GetNormalLinks();
     if( plinks.size() == 1 )
@@ -48,10 +49,10 @@ Agent::ReplacePatchPtr AutolocatingAgent::GenReplaceLayoutImpl( const ReplaceKit
         // Unambiguous path through replace pattern so we can continue to overlay
         PatternLink replace_plink = SoloElementOf(plinks);
         ASSERT( replace_plink );          
-        return replace_plink.GetChildAgent()->GenReplaceLayout(kit, replace_plink);    
+        return replace_plink.GetChildAgent()->GenReplaceLayout(kit, replace_plink, acting_engine);    
     }
     else
     {
-        return AgentCommon::GenReplaceLayoutImpl(kit, me_plink, key_xlink);
+        return AgentCommon::GenReplaceLayoutImpl(kit, me_plink, key_xlink, acting_engine);
     }
 }                                         

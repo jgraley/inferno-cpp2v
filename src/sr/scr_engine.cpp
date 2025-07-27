@@ -239,8 +239,9 @@ void SCREngine::Plan::PlanCompare()
     // All agents this AndRuleEngine see must have been configured 
     and_rule_engine = make_shared<AndRuleEngine>(origin_plink, enclosing_plinks, all_keyer_plinks);
     
-    all_keyer_plinks = UnionOfSolo( all_keyer_plinks, 
-                                    and_rule_engine->GetKeyerPatternLinks() );
+    and_rule_engine_keyer_plinks = and_rule_engine->GetKeyerPatternLinks();
+    
+    all_keyer_plinks = UnionOfSolo( all_keyer_plinks, and_rule_engine_keyer_plinks );
 }
 
 
@@ -257,7 +258,7 @@ void SCREngine::Plan::PlanReplace()
 		// Only want to be here when not already keyed, i.e. exclusively replace context.
 		ASSERT( all_keyer_plinks.count(plink)==0 )(plink);
 			
-		bool need_replace_key = !IsAgentKeyed(agent); // not keyed by any incoming plink
+		bool need_replace_key = !IsAgentKeyer(agent); // not keyed by any incoming plink
 		
 		if( need_replace_key )
 		{
@@ -269,7 +270,7 @@ void SCREngine::Plan::PlanReplace()
 }
 
 
-bool SCREngine::Plan::IsAgentKeyed( Agent *agent ) const
+bool SCREngine::Plan::IsAgentKeyer( Agent *agent ) const
 {
     for( PatternLink keyer_plink : all_keyer_plinks )
     {
@@ -278,6 +279,12 @@ bool SCREngine::Plan::IsAgentKeyed( Agent *agent ) const
             return true; 
     }
     return false;
+}
+
+
+bool SCREngine::Plan::IsKeyerViaARE( PatternLink plink ) const
+{
+    return and_rule_engine_keyer_plinks.count( plink ) > 0;
 }
 
 
@@ -371,7 +378,7 @@ ReplaceAssignments SCREngine::Replace( XLink origin_xlink,
 
     // Get an expression that evaluates to the new X tree
     Agent::ReplaceKit replace_kit { x_tree_db.get() };
-    Agent::ReplacePatchPtr source_expr = plan.origin_agent->GenReplaceLayout(replace_kit, plan.origin_plink);
+    Agent::ReplacePatchPtr source_expr = plan.origin_agent->GenReplaceLayout(replace_kit, plan.origin_plink, this);
         
     // Request to update the tree
     ReplaceAssignments assignments = plan.vn_sequence->UpdateUsingLayout( origin_xlink, move(source_expr) );  
@@ -405,6 +412,7 @@ void SCREngine::SingleCompareReplace( XLink origin_xlink,
     replace_solution_pointer = &replace_solution;
 	universal_assignments_pointer = universal_assignments;
     replace_solution.clear();
+	//FTRACE("Compare solution to replace_solution:\n")(cs)("\n");
 
 	for( auto p : cs )
 	{
@@ -414,6 +422,7 @@ void SCREngine::SingleCompareReplace( XLink origin_xlink,
 		    
     // Now replace according to the couplings
     ReplaceAssignments replace_assignments = Replace(origin_xlink, universal_assignments);
+	//FTRACE("Reaplce assignments to replace_solution:\n")(replace_assignments)("\n");
 
     // replace_assignments overrides
 	for( auto p : replace_assignments )
@@ -593,21 +602,45 @@ void SCREngine::GenerateGraphRegions( Graph &graph ) const
 }
 
 
-
 void SCREngine::SetReplaceKey( LocatedLink keyer_link ) const
 {
     ASSERT( replace_solution_pointer );
     ASSERT( universal_assignments_pointer );
     InsertSolo( *replace_solution_pointer, keyer_link );
     InsertSolo( *universal_assignments_pointer, keyer_link );
+   	//FTRACE("Set replace key: ")(keyer_link)("\n");
 }
 
 
-bool SCREngine::IsReplaceKey( PatternLink plink ) const
+bool SCREngine::IsReplaceKey( PatternLink plink, const SCREngine *acting_engine ) const
 {
     ASSERT( plink );
     ASSERT( replace_solution_pointer );
-    return (replace_solution_pointer->count(plink) == 1);
+    
+    //FTRACE("querying: ")(plink)(" acting engine: ")(acting_engine)("\n");
+    
+    // We are called on the agent's configured engine and from here, checking
+    // membership of replace_solution seems to work. 
+    // The idea is to combine a universal assignments map with some stuff
+    // from planning to achieve the same boolean result.
+    
+    bool in_replace_solution = (replace_solution_pointer->count(plink) == 1);
+   /* bool in_universal_assignments_and_via_are = (universal_assignments_pointer->count(plink) == 1) && 
+                                                 acting_engine->plan.IsKeyerViaARE(plink);
+    
+    ASSERT( !(in_universal_assignments_and_via_are && !in_replace_solution) )
+          (plink)(" is in universal*ARE but not replace\n")
+          ("replace:\n")(*replace_solution_pointer)("\n")
+          ("universal:\n")(*universal_assignments_pointer)
+          ("ARE:\n")(plan.and_rule_engine_keyer_plinks)("\n");
+        
+    ASSERT( !(in_replace_solution && !in_universal_assignments_and_via_are) )
+          (plink)(" is in replace but not universal*ARE\n")
+          ("replace:\n")(*replace_solution_pointer)("\n")
+          ("universal:\n")(*universal_assignments_pointer)("\n")
+          ("ARE:\n")(plan.and_rule_engine_keyer_plinks)("\n");
+     */     
+    return in_replace_solution;
 }
 
 
