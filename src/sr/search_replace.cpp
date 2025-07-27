@@ -131,10 +131,8 @@ void CompareReplace::Transform()
     INDENT(")");
     TRACE("Enter S&R instance ")(*this);
 
-    SolutionMap empty_solution;    
     SolutionMap universal_assignments;    
     (void)plan.scr_engine->RepeatingCompareReplace( x_tree_db->GetMainRootXLink(), 
-                                                    &empty_solution,
                                                     &universal_assignments );       
 }
 

@@ -15,8 +15,6 @@
 
 //#define TRACE_KEEP_ALIVES
 
-//#define NEWS
-
 using namespace SR;
 using namespace std;
 
@@ -356,12 +354,11 @@ void SCREngine::RunEmbedded( PatternLink plink_to_embedded,
          (" agent ")(embedded_agent)("\n");
               
 	// Discover new origin for embedded by consulting the replace assignments
-	XLink embedded_origin_xlink = replace_solution_pointer->at(plink_to_embedded);
+	XLink embedded_origin_xlink = universal_assignments->at(plink_to_embedded);
     TRACE("Running embedded ")(plink_to_embedded)(" with origin=")(embedded_origin_xlink)("\n");
    
     // Run the embedded's engine on this subtree and overwrite through ptr via p_through_x    
     int hits = embedded_engine->RepeatingCompareReplace( embedded_origin_xlink, 
-                                                         replace_solution_pointer,
                                                          universal_assignments );
     (void)hits;    
 }
@@ -386,7 +383,6 @@ ReplaceAssignments SCREngine::Replace( XLink origin_xlink,
 
 
 void SCREngine::SingleCompareReplace( XLink origin_xlink,
-                                      SolutionMap *enclosing_solution,
 									  SolutionMap *universal_assignments ) 
 {
     INDENT(">");
@@ -401,16 +397,15 @@ void SCREngine::SingleCompareReplace( XLink origin_xlink,
     // Note: comparing doesn't require double pointer any more, but
     // replace does so it can change the origin node. Throws on mismatch.
     SolutionMap cs = plan.and_rule_engine->Compare( origin_xlink, 
-                                                    enclosing_solution,
+                                                    universal_assignments,
                                                     keep_alive_nodes );
     TRACE("Search got a match (otherwise throws)\n");
            
     // Replace will need the compare keys unioned with the enclosing keys
-#ifdef NEWS
-    replace_solution_pointer = enclosing_solution;
-#else
     replace_solution_pointer = &replace_solution;
-#endif
+	universal_assignments_pointer = universal_assignments;
+    replace_solution.clear();
+
 	for( auto p : cs )
 	{
 		replace_solution[p.first] = p.second;
@@ -437,6 +432,7 @@ void SCREngine::SingleCompareReplace( XLink origin_xlink,
     TRACE("Embedded SCRs done\n");
     
     replace_solution_pointer = nullptr;
+    universal_assignments_pointer = nullptr;
     replace_solution.clear();
     replace_assignments.clear();
     cs.clear();
@@ -478,7 +474,6 @@ void SCREngine::SingleCompareReplace( XLink origin_xlink,
 // operations repeatedly until there are no more matches. Returns how
 // many hits we got.
 int SCREngine::RepeatingCompareReplace( XLink origin_xlink,
-                                        SolutionMap *enclosing_solution,
                                         SolutionMap *universal_assignments )
 {
     INDENT("}");
@@ -505,7 +500,6 @@ int SCREngine::RepeatingCompareReplace( XLink origin_xlink,
         {
             // Cannonicalise could change origin
             SingleCompareReplace( origin_xlink, 
-                                  enclosing_solution,
                                   universal_assignments );
         }
         catch( const ::Mismatch &e )
@@ -603,22 +597,25 @@ void SCREngine::GenerateGraphRegions( Graph &graph ) const
 void SCREngine::SetReplaceKey( LocatedLink keyer_link ) const
 {
     ASSERT( replace_solution_pointer );
+    ASSERT( universal_assignments_pointer );
     InsertSolo( *replace_solution_pointer, keyer_link );
+    InsertSolo( *universal_assignments_pointer, keyer_link );
+}
+
+
+bool SCREngine::IsReplaceKey( PatternLink plink ) const
+{
+    ASSERT( plink );
+    ASSERT( replace_solution_pointer );
+    return (replace_solution_pointer->count(plink) == 1);
 }
 
 
 XLink SCREngine::GetReplaceKey( PatternLink plink ) const
 {
     ASSERT( plink );
-    ASSERT( replace_solution_pointer );
-    if( replace_solution_pointer->count(plink) == 1 )
-    {
-		XLink xlink = replace_solution_pointer->at(plink);
-		//FTRACE("Extracted xlink: ")(xlink)("\n");
-        return xlink;
-	}
-    else
-        return XLink();
+    ASSERT( universal_assignments_pointer );
+    return universal_assignments_pointer->at(plink);
 }
 
 

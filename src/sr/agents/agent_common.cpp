@@ -538,10 +538,10 @@ Agent::ReplacePatchPtr AgentCommon::GenReplaceLayout( const ReplaceKit &kit,
     ASSERT( phase != IN_COMPARE_ONLY )(*this)(" is configured for compare only");
     
     XLink key_xlink;
-    if( keyer_plink )
+    if( keyer_plink && my_scr_engine->IsReplaceKey( keyer_plink ) )
     {
         key_xlink = my_scr_engine->GetReplaceKey( keyer_plink );
-        ASSERT( !key_xlink || key_xlink.GetChildTreePtr()->IsFinal() )
+        ASSERT( key_xlink.GetChildTreePtr()->IsFinal() )
               (*this)(" keyed with non-final node ")(key_xlink)("\n"); 
     }
 

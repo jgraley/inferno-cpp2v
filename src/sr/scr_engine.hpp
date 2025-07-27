@@ -114,12 +114,10 @@ private:
     ReplaceAssignments Replace( XLink origin_xlink,
                                 SolutionMap *universal_assignments );
     void SingleCompareReplace( XLink origin_xlink,
-                               SolutionMap *enclosing_solution,
                                SolutionMap *universal_assignments );                                                                                              
 
 public: // For top level engine/VN trans
     int RepeatingCompareReplace( XLink origin_xlink,
-                                 SolutionMap *enclosing_solution,
                                  SolutionMap *universal_assignments );                                                                                               
     virtual void SetStopAfter( vector<int> ssa, int d=0 );
     static void SetMaxReps( int n, bool e );
@@ -134,6 +132,7 @@ public: // For agents
     // Because we're not calling OUR RepeatingCompareReplace but
     // the embedded_engine's one - and that pointer is not const. 
 	void SetReplaceKey( LocatedLink keyer_link ) const;
+    bool IsReplaceKey( PatternLink plink ) const;
     XLink GetReplaceKey( PatternLink plink ) const;
     bool IsKeyedByAndRuleEngine( Agent *agent ) const; 
     const CompareReplace * GetOverallMaster() const;
@@ -154,6 +153,7 @@ private:
     shared_ptr<XTreeDatabase> x_tree_db;
     mutable SolutionMap replace_solution;
     SolutionMap *replace_solution_pointer = nullptr;    
+    SolutionMap *universal_assignments_pointer = nullptr;    
 };
 
 };
