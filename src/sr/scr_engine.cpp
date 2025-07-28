@@ -13,6 +13,7 @@
 
 #include <list>
 
+#define NEWS
 //#define TRACE_KEEP_ALIVES
 
 using namespace SR;
@@ -412,7 +413,7 @@ void SCREngine::SingleCompareReplace( XLink origin_xlink,
     replace_solution_pointer = &replace_solution;
 	universal_assignments_pointer = universal_assignments;
     replace_solution.clear();
-	//FTRACE("Compare solution to replace_solution:\n")(cs)("\n");
+	TRACE("Compare solution copied to replace_solution:\n")(cs)("\n");
 
 	for( auto p : cs )
 	{
@@ -431,8 +432,8 @@ void SCREngine::SingleCompareReplace( XLink origin_xlink,
 		(*universal_assignments)[p.first] = p.second;
 	}
 
-	//FTRACE("replace_assignments: ")(replace_assignments)("\n");
-	//FTRACE("enclosing_solution: ")(*enclosing_solution)("\n");
+	TRACE("Replace_assignments copied to replace solution:\n")(replace_assignments)("\n");
+	//TRACE("universal_assignments: ")(*universal_assignments)("\n");
 
     // Now run the embedded SCR engines (LATER model)
     for( PatternLink plink_to_embedded : plan.my_embedded_plinks_postorder )	    
@@ -608,16 +609,16 @@ void SCREngine::SetReplaceKey( LocatedLink keyer_link ) const
     ASSERT( universal_assignments_pointer );
     InsertSolo( *replace_solution_pointer, keyer_link );
     InsertSolo( *universal_assignments_pointer, keyer_link );
-   	//FTRACE("Set replace key: ")(keyer_link)("\n");
+   	TRACE("Setting: ")(keyer_link)("\n");
 }
 
 
-bool SCREngine::IsReplaceKey( PatternLink plink, const SCREngine *acting_engine ) const
+bool SCREngine::IsKeyed( PatternLink plink, const SCREngine *acting_engine ) const
 {
     ASSERT( plink );
     ASSERT( replace_solution_pointer );
     
-    //FTRACE("querying: ")(plink)(" acting engine: ")(acting_engine)("\n");
+    TRACE("Querying: ")(plink)(" acting engine: ")(acting_engine)("\n");
     
     // We are called on the agent's configured engine and from here, checking
     // membership of replace_solution seems to work. 
@@ -625,21 +626,25 @@ bool SCREngine::IsReplaceKey( PatternLink plink, const SCREngine *acting_engine 
     // from planning to achieve the same boolean result.
     
     bool in_replace_solution = (replace_solution_pointer->count(plink) == 1);
-   /* bool in_universal_assignments_and_via_are = (universal_assignments_pointer->count(plink) == 1) && 
-                                                 acting_engine->plan.IsKeyerViaARE(plink);
+#ifdef NEWS
+    bool in_universal_assignments_and_via_are = (universal_assignments_pointer->count(plink) == 1) && 
+                                                (acting_engine->plan.and_rule_engine_keyer_plinks.count(plink) == 1 || 
+                                                 acting_engine->plan.enclosing_plinks.count(plink) == 1);
     
     ASSERT( !(in_universal_assignments_and_via_are && !in_replace_solution) )
           (plink)(" is in universal*ARE but not replace\n")
           ("replace:\n")(*replace_solution_pointer)("\n")
           ("universal:\n")(*universal_assignments_pointer)
-          ("ARE:\n")(plan.and_rule_engine_keyer_plinks)("\n");
+          ("acting ARE:\n")(acting_engine->plan.and_rule_engine_keyer_plinks)("\n")
+          ("acting enclosing:\n")(acting_engine->plan.enclosing_plinks)("\n");
         
     ASSERT( !(in_replace_solution && !in_universal_assignments_and_via_are) )
           (plink)(" is in replace but not universal*ARE\n")
           ("replace:\n")(*replace_solution_pointer)("\n")
           ("universal:\n")(*universal_assignments_pointer)("\n")
-          ("ARE:\n")(plan.and_rule_engine_keyer_plinks)("\n");
-     */     
+          ("acting ARE:\n")(acting_engine->plan.and_rule_engine_keyer_plinks)("\n")
+          ("acting enclosing:\n")(acting_engine->plan.enclosing_plinks)("\n");
+#endif
     return in_replace_solution;
 }
 

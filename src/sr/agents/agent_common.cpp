@@ -541,7 +541,7 @@ Agent::ReplacePatchPtr AgentCommon::GenReplaceLayout( const ReplaceKit &kit,
     XLink key_xlink;
     //FTRACE(my_scr_engine)("\n");
     ASSERT( acting_engine );
-    if( keyer_plink && phase != IN_REPLACE_ONLY && my_scr_engine->IsReplaceKey( keyer_plink, acting_engine ) )
+    if( keyer_plink && phase != IN_REPLACE_ONLY && my_scr_engine->IsKeyed( keyer_plink, acting_engine ) )
     {
         key_xlink = my_scr_engine->GetReplaceKey( keyer_plink );
         ASSERT( key_xlink.GetChildTreePtr()->IsFinal() )
