@@ -583,7 +583,7 @@ void SCREngine::GenerateGraphRegions( Graph &graph ) const
 }
 
 
-void SCREngine::SetReplaceKey( LocatedLink keyer_link ) const
+void SCREngine::SetKey( LocatedLink keyer_link ) const
 {
     ASSERT( universal_assignments );
     InsertSolo( *universal_assignments, keyer_link );
@@ -591,18 +591,17 @@ void SCREngine::SetReplaceKey( LocatedLink keyer_link ) const
 }
 
 
-bool SCREngine::IsKeyed( PatternLink plink ) const
+bool SCREngine::IsKeyedBeforeReplace( PatternLink plink ) const
 {
     ASSERT( plink );
     
     // This can be determined entirely from the plan. Node is keyed if 
     // our AndRuleEngine did it or enclosing SCREngine did it.
-    return (plan.and_rule_engine_keyer_plinks.count(plink) == 1 || 
-            plan.enclosing_plinks.count(plink) == 1);
+    return plan.keyed_before_replace_plinks.count(plink) == 1;
 }
 
 
-XLink SCREngine::GetReplaceKey( PatternLink plink ) const
+XLink SCREngine::GetKey( PatternLink plink ) const
 {
     ASSERT( plink );
     ASSERT( universal_assignments );
