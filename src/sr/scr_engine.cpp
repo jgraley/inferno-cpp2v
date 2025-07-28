@@ -283,12 +283,6 @@ bool SCREngine::Plan::IsAgentKeyer( Agent *agent ) const
 }
 
 
-bool SCREngine::Plan::IsKeyerViaARE( PatternLink plink ) const
-{
-    return and_rule_engine_keyer_plinks.count( plink ) > 0;
-}
-
-
 void SCREngine::Plan::PlanningStageFive( shared_ptr<const Lacing> lacing )
 {    
     TRACE("Planning stage five\n");
@@ -613,39 +607,14 @@ void SCREngine::SetReplaceKey( LocatedLink keyer_link ) const
 }
 
 
-bool SCREngine::IsKeyed( PatternLink plink, const SCREngine *acting_engine ) const
+bool SCREngine::IsKeyed( PatternLink plink ) const
 {
     ASSERT( plink );
-    ASSERT( replace_solution_pointer );
     
-    TRACE("Querying: ")(plink)(" acting engine: ")(acting_engine)("\n");
-    
-    // We are called on the agent's configured engine and from here, checking
-    // membership of replace_solution seems to work. 
-    // The idea is to combine a universal assignments map with some stuff
-    // from planning to achieve the same boolean result.
-    
-    bool in_replace_solution = (replace_solution_pointer->count(plink) == 1);
-#ifdef NEWS
-    bool in_universal_assignments_and_via_are = (universal_assignments_pointer->count(plink) == 1) && 
-                                                (acting_engine->plan.and_rule_engine_keyer_plinks.count(plink) == 1 || 
-                                                 acting_engine->plan.enclosing_plinks.count(plink) == 1);
-    
-    ASSERT( !(in_universal_assignments_and_via_are && !in_replace_solution) )
-          (plink)(" is in universal*ARE but not replace\n")
-          ("replace:\n")(*replace_solution_pointer)("\n")
-          ("universal:\n")(*universal_assignments_pointer)
-          ("acting ARE:\n")(acting_engine->plan.and_rule_engine_keyer_plinks)("\n")
-          ("acting enclosing:\n")(acting_engine->plan.enclosing_plinks)("\n");
-        
-    ASSERT( !(in_replace_solution && !in_universal_assignments_and_via_are) )
-          (plink)(" is in replace but not universal*ARE\n")
-          ("replace:\n")(*replace_solution_pointer)("\n")
-          ("universal:\n")(*universal_assignments_pointer)("\n")
-          ("acting ARE:\n")(acting_engine->plan.and_rule_engine_keyer_plinks)("\n")
-          ("acting enclosing:\n")(acting_engine->plan.enclosing_plinks)("\n");
-#endif
-    return in_replace_solution;
+    // This can be determined entirely from the plan. Node is keyed if 
+    // our AndRuleEngine did it or enclosing SCREngine did it.
+    return (plan.and_rule_engine_keyer_plinks.count(plink) == 1 || 
+            plan.enclosing_plinks.count(plink) == 1);
 }
 
 

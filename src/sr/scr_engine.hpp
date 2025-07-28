@@ -85,7 +85,6 @@ private:
         void PlanCompare();
         void PlanReplace();
         bool IsAgentKeyer( Agent *agent ) const;   
-        bool IsKeyerViaARE( PatternLink plink ) const;
         void PlanningStageFive( shared_ptr<const Lacing> lacing );
         void Dump();
         string GetTrace() const; // used for debug
@@ -134,7 +133,7 @@ public: // For agents
     // Because we're not calling OUR RepeatingCompareReplace but
     // the embedded_engine's one - and that pointer is not const. 
 	void SetReplaceKey( LocatedLink keyer_link ) const;
-    bool IsKeyed( PatternLink plink, const SCREngine *acting_engine ) const;
+    bool IsKeyed( PatternLink plink ) const;
     XLink GetReplaceKey( PatternLink plink ) const;
     bool IsKeyedByAndRuleEngine( Agent *agent ) const; 
     const CompareReplace * GetOverallMaster() const;
