@@ -151,9 +151,7 @@ private:
     vector<int> stop_after;
     vector<int>::size_type depth;    
     
-    shared_ptr<XTreeDatabase> x_tree_db;
-    mutable SolutionMap replace_solution;
-    SolutionMap *replace_solution_pointer = nullptr;    
+    shared_ptr<XTreeDatabase> x_tree_db;   
     SolutionMap *universal_assignments_pointer = nullptr;    
 };
 

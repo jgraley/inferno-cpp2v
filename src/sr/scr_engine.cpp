@@ -348,7 +348,7 @@ void SCREngine::RunEmbedded( PatternLink plink_to_embedded,
                              SolutionMap *universal_assignments )
 {         
     INDENT("E");
-    ASSERT( replace_solution_pointer );
+    ASSERT( universal_assignments );
     auto embedded_agent = plink_to_embedded.GetChildAgent();
     shared_ptr<SCREngine> embedded_engine = plan.my_engines.at(embedded_agent);
     ASSERT( embedded_engine );
@@ -404,29 +404,20 @@ void SCREngine::SingleCompareReplace( XLink origin_xlink,
     TRACE("Search got a match (otherwise throws)\n");
            
     // Replace will need the compare keys unioned with the enclosing keys
-    replace_solution_pointer = &replace_solution;
 	universal_assignments_pointer = universal_assignments;
-    replace_solution.clear();
-	TRACE("Compare solution copied to replace_solution:\n")(cs)("\n");
 
 	for( auto p : cs )
-	{
-		replace_solution[p.first] = p.second;
 		(*universal_assignments)[p.first] = p.second;
-	}
+	TRACE("Compare solution copied to universal_assignments:\n")(cs)("\n");
 		    
     // Now replace according to the couplings
     ReplaceAssignments replace_assignments = Replace(origin_xlink, universal_assignments);
-	//FTRACE("Reaplce assignments to replace_solution:\n")(replace_assignments)("\n");
 
     // replace_assignments overrides
 	for( auto p : replace_assignments )
-	{
-		replace_solution[p.first] = p.second;
 		(*universal_assignments)[p.first] = p.second;
-	}
 
-	TRACE("Replace_assignments copied to replace solution:\n")(replace_assignments)("\n");
+	TRACE("Replace_assignments copied to universal_assignments solution:\n")(replace_assignments)("\n");
 	//TRACE("universal_assignments: ")(*universal_assignments)("\n");
 
     // Now run the embedded SCR engines (LATER model)
@@ -435,9 +426,7 @@ void SCREngine::SingleCompareReplace( XLink origin_xlink,
 		
     TRACE("Embedded SCRs done\n");
     
-    replace_solution_pointer = nullptr;
     universal_assignments_pointer = nullptr;
-    replace_solution.clear();
     replace_assignments.clear();
     cs.clear();
 
@@ -599,9 +588,7 @@ void SCREngine::GenerateGraphRegions( Graph &graph ) const
 
 void SCREngine::SetReplaceKey( LocatedLink keyer_link ) const
 {
-    ASSERT( replace_solution_pointer );
     ASSERT( universal_assignments_pointer );
-    InsertSolo( *replace_solution_pointer, keyer_link );
     InsertSolo( *universal_assignments_pointer, keyer_link );
    	TRACE("Setting: ")(keyer_link)("\n");
 }
