@@ -240,14 +240,14 @@ void SCREngine::Plan::PlanCompare()
     // All agents this AndRuleEngine see must have been configured 
     and_rule_engine = make_shared<AndRuleEngine>(origin_plink, enclosing_plinks, all_keyer_plinks);
     
-    and_rule_engine_keyer_plinks = and_rule_engine->GetKeyerPatternLinks();
-    
-    all_keyer_plinks = UnionOfSolo( all_keyer_plinks, and_rule_engine_keyer_plinks );
+    and_rule_engine_keyer_plinks = and_rule_engine->GetKeyerPatternLinks();   
 }
 
 
 void SCREngine::Plan::PlanReplace()
 {
+    all_keyer_plinks = UnionOfSolo( all_keyer_plinks, and_rule_engine_keyer_plinks );
+
     // Plan the keyers for couplings 
     for( StartsOverlay *ao : my_overlay_starter_engines )
         ao->StartPlanOverlay();        
@@ -268,6 +268,10 @@ void SCREngine::Plan::PlanReplace()
             agent->ConfigureCoupling( algo, plink, {} );
         }
     }
+
+    // Replace will need the compare keyers unioned with the enclosing keyers    
+    keyed_before_replace_plinks = UnionOfSolo( and_rule_engine_keyer_plinks,
+										       enclosing_plinks );
 }
 
 
@@ -344,8 +348,7 @@ string SCREngine::Plan::GetTrace() const
 }
 
 
-void SCREngine::RunEmbedded( PatternLink plink_to_embedded,
-                             SolutionMap *universal_assignments )
+void SCREngine::RunEmbedded( PatternLink plink_to_embedded )
 {         
     INDENT("E");
     ASSERT( universal_assignments );
@@ -366,8 +369,7 @@ void SCREngine::RunEmbedded( PatternLink plink_to_embedded,
 }
 
 
-ReplaceAssignments SCREngine::Replace( XLink origin_xlink, 
-                                       SolutionMap *universal_assignments )
+ReplaceAssignments SCREngine::Replace( XLink origin_xlink )
 {
     INDENT("R");
 
@@ -384,8 +386,7 @@ ReplaceAssignments SCREngine::Replace( XLink origin_xlink,
 }
 
 
-void SCREngine::SingleCompareReplace( XLink origin_xlink,
-									  SolutionMap *universal_assignments ) 
+void SCREngine::SingleCompareReplace( XLink origin_xlink ) 
 {
     INDENT(">");
     
@@ -398,20 +399,17 @@ void SCREngine::SingleCompareReplace( XLink origin_xlink,
     TRACE("Begin search\n");
     // Note: comparing doesn't require double pointer any more, but
     // replace does so it can change the origin node. Throws on mismatch.
-    SolutionMap cs = plan.and_rule_engine->Compare( origin_xlink, 
-                                                    universal_assignments,
-                                                    keep_alive_nodes );
+    SolutionMap compare_solution = plan.and_rule_engine->Compare( origin_xlink, 
+                                                                  universal_assignments,
+                                                                  keep_alive_nodes );
     TRACE("Search got a match (otherwise throws)\n");
            
-    // Replace will need the compare keys unioned with the enclosing keys
-	universal_assignments_pointer = universal_assignments;
-
-	for( auto p : cs )
+	for( auto p : compare_solution )
 		(*universal_assignments)[p.first] = p.second;
-	TRACE("Compare solution copied to universal_assignments:\n")(cs)("\n");
+	TRACE("Compare solution copied to universal_assignments:\n")(compare_solution)("\n");
 		    
     // Now replace according to the couplings
-    ReplaceAssignments replace_assignments = Replace(origin_xlink, universal_assignments);
+    ReplaceAssignments replace_assignments = Replace(origin_xlink);
 
     // replace_assignments overrides
 	for( auto p : replace_assignments )
@@ -422,14 +420,10 @@ void SCREngine::SingleCompareReplace( XLink origin_xlink,
 
     // Now run the embedded SCR engines (LATER model)
     for( PatternLink plink_to_embedded : plan.my_embedded_plinks_postorder )	    
-        RunEmbedded(plink_to_embedded, universal_assignments);       
+        RunEmbedded(plink_to_embedded);       
 		
     TRACE("Embedded SCRs done\n");
     
-    universal_assignments_pointer = nullptr;
-    replace_assignments.clear();
-    cs.clear();
-
     // Clear out anything cached in agents and update the x_tree_db 
     // now that replace is done
     for( Agent *a : plan.my_agents )
@@ -467,10 +461,12 @@ void SCREngine::SingleCompareReplace( XLink origin_xlink,
 // operations repeatedly until there are no more matches. Returns how
 // many hits we got.
 int SCREngine::RepeatingCompareReplace( XLink origin_xlink,
-                                        SolutionMap *universal_assignments )
+                                        SolutionMap *universal_assignments_ )
 {
     INDENT("}");
     TRACE("Begin RCR\n");
+    
+    universal_assignments = universal_assignments_;
         
     ASSERT( plan.pattern_origin )("SCREngine object was not configured before invocation.\n"
                                 "Either call Configure() or supply pattern arguments to constructor.\n"
@@ -492,8 +488,7 @@ int SCREngine::RepeatingCompareReplace( XLink origin_xlink,
         try
         {
             // Cannonicalise could change origin
-            SingleCompareReplace( origin_xlink, 
-                                  universal_assignments );
+            SingleCompareReplace( origin_xlink );
         }
         catch( const ::Mismatch &e )
         {
@@ -514,6 +509,8 @@ int SCREngine::RepeatingCompareReplace( XLink origin_xlink,
     ASSERT(!rep_error)
           ("Still getting matches after %d repetitions, may be repeating forever.\n"
            "Try using -rn%d to suppress this error\n", repetitions, repetitions);
+    
+    universal_assignments = nullptr; 
     
     return repetitions;
 }                                
@@ -588,8 +585,8 @@ void SCREngine::GenerateGraphRegions( Graph &graph ) const
 
 void SCREngine::SetReplaceKey( LocatedLink keyer_link ) const
 {
-    ASSERT( universal_assignments_pointer );
-    InsertSolo( *universal_assignments_pointer, keyer_link );
+    ASSERT( universal_assignments );
+    InsertSolo( *universal_assignments, keyer_link );
    	TRACE("Setting: ")(keyer_link)("\n");
 }
 
@@ -608,8 +605,8 @@ bool SCREngine::IsKeyed( PatternLink plink ) const
 XLink SCREngine::GetReplaceKey( PatternLink plink ) const
 {
     ASSERT( plink );
-    ASSERT( universal_assignments_pointer );
-    return universal_assignments_pointer->at(plink);
+    ASSERT( universal_assignments );
+    return universal_assignments->at(plink);
 }
 
 

@@ -102,6 +102,7 @@ private:
         set<Agent *> my_agents;   
         set<PatternLink> and_rule_engine_keyer_plinks;   
         set<PatternLink> all_keyer_plinks;   
+        set<PatternLink> keyed_before_replace_plinks;
         set<StartsOverlay *> my_overlay_starter_engines;   
         map< Agent *, shared_ptr<SCREngine> > my_engines;   
         shared_ptr<AndRuleEngine> and_rule_engine;
@@ -110,16 +111,13 @@ private:
         list<PatternLink> my_embedded_plinks_postorder;
     } plan;
 
-    void RunEmbedded( PatternLink plink_to_embedded,
-                      SolutionMap *universal_assignments );
-    ReplaceAssignments Replace( XLink origin_xlink,
-                                SolutionMap *universal_assignments );
-    void SingleCompareReplace( XLink origin_xlink,
-                               SolutionMap *universal_assignments );                                                                                              
+    void RunEmbedded( PatternLink plink_to_embedded );
+    ReplaceAssignments Replace( XLink origin_xlink );
+    void SingleCompareReplace( XLink origin_xlink );                                                                                              
 
 public: // For top level engine/VN trans
     int RepeatingCompareReplace( XLink origin_xlink,
-                                 SolutionMap *universal_assignments );                                                                                               
+                                 SolutionMap *universal_assignments_ );                                                                                               
     virtual void SetStopAfter( vector<int> ssa, int d=0 );
     static void SetMaxReps( int n, bool e );
     void SetXTreeDb( shared_ptr<XTreeDatabase> x_tree_db );
@@ -152,7 +150,7 @@ private:
     vector<int>::size_type depth;    
     
     shared_ptr<XTreeDatabase> x_tree_db;   
-    SolutionMap *universal_assignments_pointer = nullptr;    
+    SolutionMap *universal_assignments = nullptr;    
 };
 
 };
