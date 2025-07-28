@@ -130,7 +130,6 @@ public: // For agents
     // Note: this is const but RepeatingCompareReplace() isn't. Why?
     // Because we're not calling OUR RepeatingCompareReplace but
     // the embedded_engine's one - and that pointer is not const. 
-	void SetKey( LocatedLink keyer_link ) const;
     bool IsKeyedBeforeReplace( PatternLink plink ) const;
     XLink GetKey( PatternLink plink ) const;
     bool IsKeyedByAndRuleEngine( Agent *agent ) const; 

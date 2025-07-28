@@ -583,14 +583,6 @@ void SCREngine::GenerateGraphRegions( Graph &graph ) const
 }
 
 
-void SCREngine::SetKey( LocatedLink keyer_link ) const
-{
-    ASSERT( universal_assignments );
-    InsertSolo( *universal_assignments, keyer_link );
-   	TRACE("Setting: ")(keyer_link)("\n");
-}
-
-
 bool SCREngine::IsKeyedBeforeReplace( PatternLink plink ) const
 {
     ASSERT( plink );

@@ -542,7 +542,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutImpl( const ReplaceKit &ki
         // Explicit request for overlay, resulting from use of the Delta agent.
         // The under pattern node is in a different location from over (=this), 
         // but overlay planning has set up overlay_under_plink for us.
-        XLink under_xlink = my_scr_engine->GetKey( overlay_under_plink );
+        XLink under_xlink = acting_engine->GetKey( overlay_under_plink );
         return GenReplaceLayoutOverlay( kit, me_plink, under_xlink, acting_engine );
     }
     else if( key_xlink ) 

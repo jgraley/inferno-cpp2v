@@ -541,9 +541,9 @@ Agent::ReplacePatchPtr AgentCommon::GenReplaceLayout( const ReplaceKit &kit,
     XLink key_xlink;
     //FTRACE(my_scr_engine)("\n");
     ASSERT( acting_engine );
-    if( keyer_plink && acting_engine->IsKeyedBeforeReplace( keyer_plink ) )
+    if( acting_engine->IsKeyedBeforeReplace( keyer_plink ) )
     {
-        key_xlink = my_scr_engine->GetKey( keyer_plink );
+        key_xlink = acting_engine->GetKey( keyer_plink );
         ASSERT( key_xlink.GetChildTreePtr()->IsFinal() )
               (*this)(" keyed with non-final node ")(key_xlink)("\n"); 
     }
