@@ -160,13 +160,13 @@ private:
                             set<TreePtr<Node>> *keep_alive_nodes );
     void OnSolution(SolutionMap basic_solution, 
                     const SolutionMap &my_fixed_assignments, 
-                    const SolutionMap *surrounding_solution,
+                    const SolutionMap *universal_assignments,
                     set<TreePtr<Node>> *keep_alive_nodes);
     
 public:
     void SetXTreeDb( shared_ptr<const XTreeDatabase> x_tree_db );
     SolutionMap Compare( XLink base_xlink,
-                         const SolutionMap *surrounding_solution,
+                         const SolutionMap *universal_assignments,
                          set<TreePtr<Node>> *keep_alive_nodes );
 
     const set<Agent *> &GetKeyedAgents() const;

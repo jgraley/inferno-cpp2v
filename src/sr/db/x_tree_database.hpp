@@ -39,8 +39,9 @@ public:
 		 				 TreeZone &tree_zone_r, vector<TreeZone *> fixups_r );
 
 	// Actions to take at the end of an update cycle
-    void PerformDeferredActions();
-    void PerformDeeplyDeferredActions();
+    void DeferredActionsEndOfUpdate();
+    void DeferredActionsEndOfSCR();
+    void DeferredActionsEndOfStep();
 
 	// ---------------- const and static methods ------------------
     XLink GetRootXLink(DBCommon::TreeOrdinal tree_ordinal) const;

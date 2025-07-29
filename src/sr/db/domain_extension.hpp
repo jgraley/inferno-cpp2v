@@ -67,8 +67,8 @@ public:
     const DomainExtensionChannel *GetChannel( const Extender *extender ) const;
 
     // To be called after modifying the tree, and before any search/compare operation
-    void PerformDeferredActions();
-    void PerformDeeplyDeferredActions();
+    void DeferredActionsEndOfUpdate();
+    void DeferredActionsEndOfStep();
 
 	void InsertTree(const TreeZone &zone);
 	void DeleteTree(const TreeZone &zone);
@@ -112,8 +112,8 @@ public:
     void CreateExtraTree( TreePtr<Node> extra_root_node );
     void CheckStimulusXLink( XLink stimulus_xlink );
     void DropStimulusXLink( XLink stimulus_xlink );
-    void PerformDeferredActions();
-    void PerformDeeplyDeferredActions();
+    void DeferredActionsEndOfUpdate();
+    void DeferredActionsEndOfStep();
 
     void Validate() const;
     string GetTrace() const final;
@@ -147,7 +147,7 @@ private:
     map<XLink, set<XLink>> dep_to_all_stimulii;
 
     // Here we collect domain extension stimulus XLinks that we will re-create 
-    // during PerformDeferredActions() and then clear.
+    // during DeferredActionsEndOfUpdate() and then clear.
     set<XLink> stimulii_to_recheck;
     
     // SimpleCompare equivalence classes over the domain, with refcount = size of the class.

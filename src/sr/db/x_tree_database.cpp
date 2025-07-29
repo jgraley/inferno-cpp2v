@@ -126,16 +126,22 @@ void XTreeDatabase::SwapTreeToTree( TreeZone &zone1, vector<TreeZone *> fixups1,
 }
 
 
-void XTreeDatabase::PerformDeferredActions()
+void XTreeDatabase::DeferredActionsEndOfUpdate()
 {
-    domain_extension->PerformDeferredActions();
+    domain_extension->DeferredActionsEndOfUpdate();
     CheckAssets();           
 }
 
 
-void XTreeDatabase::PerformDeeplyDeferredActions()
+void XTreeDatabase::DeferredActionsEndOfSCR()
 {
-    domain_extension->PerformDeeplyDeferredActions();
+    CheckAssets();           
+}
+
+
+void XTreeDatabase::DeferredActionsEndOfStep()
+{
+    domain_extension->DeferredActionsEndOfStep();
     CheckAssets();           
 }
 

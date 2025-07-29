@@ -783,7 +783,7 @@ void AndRuleEngine::AgentRegeneration( Agent *agent,
 
 void AndRuleEngine::OnSolution(SolutionMap basic_solution, 
                                const SolutionMap &my_fixed_assignments, 
-                               const SolutionMap *surrounding_solution,
+                               const SolutionMap *universal_assignments,
                                set<TreePtr<Node>> *keep_alive_nodes)
 {
     INDENT("S");
@@ -798,9 +798,10 @@ void AndRuleEngine::OnSolution(SolutionMap basic_solution,
 	
 	try
 	{
-		SolutionMap solution_for_subordinates = *surrounding_solution;
+		SolutionMap solution_for_subordinates = *universal_assignments;
 		for( auto p : basic_solution )
 			solution_for_subordinates[p.first] = p.second;
+			
 		TRACE("---------------- Regeneration ----------------\n");      
 		TRACEC("Basic solution ")(basic_solution)("\n");    
 
@@ -842,7 +843,7 @@ void AndRuleEngine::SetXTreeDb( shared_ptr<const XTreeDatabase> x_tree_db_ )
 
 
 SolutionMap AndRuleEngine::Compare( XLink base_xlink,
-                                    const SolutionMap *surrounding_solution,
+                                    const SolutionMap *universal_assignments,
                                     set<TreePtr<Node>> *keep_alive_nodes )
 {
     INDENT("C");
@@ -857,13 +858,15 @@ SolutionMap AndRuleEngine::Compare( XLink base_xlink,
     
     // Determine my fixed (just root pattern link to base x link)
     SolutionMap my_fixed_assignments = {{plan.base_plink, base_xlink}};
-    
+	//(*universal_assignments)[plan.base_plink] = base_xlink;
+	
     // Determine the full set of forces 
     // TODO presumably doesn't need to be the ordered one
+    // TODO union these sets during planning
     SolutionMap surrounding_and_base_links;
     for( PatternLink plink : plan.boundary_keyer_links )
     {
-		XLink xlink = surrounding_solution->at(plink);
+		XLink xlink = universal_assignments->at(plink);
         surrounding_and_base_links[plink] = xlink;
 	}
     for( PatternLink plink : plan.my_fixed_keyer_links )
@@ -879,7 +882,7 @@ SolutionMap AndRuleEngine::Compare( XLink base_xlink,
 																		  this, 
 																		  placeholders::_1, 
 																		  my_fixed_assignments, 
-																		  surrounding_solution,
+																		  universal_assignments,
 																		  keep_alive_nodes );      	
     
 	try

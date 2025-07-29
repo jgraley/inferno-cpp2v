@@ -114,7 +114,7 @@ void VNStep::Transform()
     ASSERTTHIS();
     ASSERT( top_level_engine )("VNStep needs to be configured before use");
     top_level_engine->Transform();
-    x_tree_db->PerformDeeplyDeferredActions();
+    x_tree_db->DeferredActionsEndOfStep();
 }                                   
 
 

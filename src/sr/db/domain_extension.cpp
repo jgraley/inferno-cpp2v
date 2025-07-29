@@ -49,17 +49,17 @@ const DomainExtensionChannel *DomainExtension::GetChannel( const Extender *exten
 }
 
 
-void DomainExtension::PerformDeferredActions()
+void DomainExtension::DeferredActionsEndOfUpdate()
 {
     for( auto &p : channels )
-        p.second->PerformDeferredActions();
+        p.second->DeferredActionsEndOfUpdate();
 }
 
 
-void DomainExtension::PerformDeeplyDeferredActions()
+void DomainExtension::DeferredActionsEndOfStep()
 {
     for( auto &p : channels )
-        p.second->PerformDeeplyDeferredActions();
+        p.second->DeferredActionsEndOfStep();
 }
 
 
@@ -333,7 +333,7 @@ void DomainExtensionChannel::DropStimulusXLink( XLink stimulus_xlink )
 }
 
 
-void DomainExtensionChannel::PerformDeferredActions()
+void DomainExtensionChannel::DeferredActionsEndOfUpdate()
 {
     // TODO only do what's left over as invalid from previous deletes 
     // and not restored by inserts
@@ -347,7 +347,7 @@ void DomainExtensionChannel::PerformDeferredActions()
 }
 
 
-void DomainExtensionChannel::PerformDeeplyDeferredActions()
+void DomainExtensionChannel::DeferredActionsEndOfStep()
 {
 	// Wait until all embedded engines are complete (i.e. end of step)
 	// because couplings may reference into domain extension trees which

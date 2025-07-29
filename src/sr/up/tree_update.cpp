@@ -37,7 +37,7 @@ void TreeUpdater::BuildMainTree( TreePtr<Node> main_tree_root )
 	FreeZone main_zone = FreeZone::CreateSubtree(main_tree_root);
 	db->BuildTree(DBCommon::TreeType::MAIN, main_zone);
 	
-	db->PerformDeferredActions();	
+	db->DeferredActionsEndOfUpdate();	
 }
 
 
@@ -86,6 +86,10 @@ ReplaceAssignments TreeUpdater::UpdateMainTree( XLink origin_xlink, shared_ptr<P
     // functions and the pass class headers.
 	Analysis(origin_xlink, layout, assignments);
 	ApplyUpdate(origin_xlink, layout, assignments);
+
+	// Delayed actions in DB i.e. new/invalidated stimulus checks for
+	// domain extenstion.
+	db->DeferredActionsEndOfUpdate();      	
 
 	return assignments;
 }
@@ -185,8 +189,4 @@ void TreeUpdater::ApplyUpdate(XLink origin_xlink, shared_ptr<Patch> &layout, Rep
 
     GetTreePatchAssignmentsPass get_assigns_pass;
     get_assigns_pass.Run(layout, &assignments);
-
-	// Delayed actions in DB i.e. new/invalidated stimulus checks for
-	// domain extenstion.
-	db->PerformDeferredActions();      	
 }

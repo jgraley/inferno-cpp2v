@@ -449,7 +449,10 @@ void SCREngine::SingleCompareReplace( XLink origin_xlink )
 	}
 	FTRACE("delete keep_alive_nodes: ")(ss)("\n");
 #endif
+
     delete keep_alive_nodes;
+	x_tree_db->DeferredActionsEndOfSCR();    
+
 #ifdef TRACE_KEEP_ALIVES
 	FTRACE("done deleting keep_alive_nodes\n");
 #endif
