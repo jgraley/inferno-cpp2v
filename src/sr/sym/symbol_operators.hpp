@@ -32,7 +32,7 @@ public:
 private:
 	// XLink memory safety: xlink depends on node, so declare node first.
 	// Since this is a constant expression and evaluations (which can
-	// contin the xlink) are temporary, this should be ok.
+	// contain the xlink) are temporary, this should be ok.
     const TreePtr<Node> node; // TODO make a subclass for this?
     const XValue xlink;
 };

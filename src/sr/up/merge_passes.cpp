@@ -46,7 +46,11 @@ void FreeZoneMergeImpl::Run( shared_ptr<Patch> &layout, PolicyFunction policy, R
 					{
 						ASSERT( resulting_xlink );
 						for( PatternLink plink : child_free_patch->GetOriginators() )
+						{
+							string tn = resulting_xlink.GetChildTreePtr()->GetTypeName();
+							ASSERT( tn.find("Scaffold") == string::npos )(tn);
 							assignments->insert( make_pair(plink, resulting_xlink) );
+						}
 						child_free_patch->ClearOriginators();
 					}
 					

@@ -99,9 +99,11 @@ private:
         const set<PatternLink> enclosing_plinks;
         set<Agent *> enclosing_agents;
         set<PatternLink> my_plinks;   
+        set<PatternLink> my_agent_plinks;   
         set<Agent *> my_agents;   
         set<PatternLink> and_rule_engine_keyer_plinks;   
         set<PatternLink> all_keyer_plinks;   
+        set<PatternLink> my_keyer_plinks;   
         set<PatternLink> keyed_before_replace_plinks;
         set<StartsOverlay *> my_overlay_starter_engines;   
         map< Agent *, shared_ptr<SCREngine> > my_engines;   

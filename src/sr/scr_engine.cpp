@@ -111,10 +111,16 @@ void SCREngine::Plan::CategoriseAgents( const set<PatternLink> &enclosing_plinks
     // Determine which ones really belong to us (some might be visible in 
     // an enclosing pattern, in which case it should be in enclosing_plinks.)      
     my_plinks.clear();
-    //my_plinks = DifferenceOf( visible_plinks, enclosing_plinks );
+    //my_agent_plinks = DifferenceOf( visible_plinks, enclosing_plinks );
+    for( PatternLink plink : visible_plinks )
+        if( enclosing_plinks.count( plink ) == 0 ) // exclude by agent
+            InsertSolo( my_plinks, plink );
+    
+    my_agent_plinks.clear();
+    //my_agent_plinks = DifferenceOf( visible_plinks, enclosing_plinks );
     for( PatternLink plink : visible_plinks )
         if( enclosing_agents.count( plink.GetChildAgent() ) == 0 ) // exclude by agent
-            InsertSolo( my_plinks, plink );
+            InsertSolo( my_agent_plinks, plink );
 
     // Need the replace plinks in the same order that GenReplaceLayout() walks the tree
     for( PatternLink plink : visible_replace_plinks_postorder )
@@ -132,7 +138,7 @@ void SCREngine::Plan::CategoriseAgents( const set<PatternLink> &enclosing_plinks
 	}
 	
     my_agents.clear();
-    for( PatternLink plink : my_plinks )
+    for( PatternLink plink : my_agent_plinks )
         my_agents.insert( plink.GetChildAgent() );
 
     // Determine who our embeddeds are
@@ -170,7 +176,7 @@ void SCREngine::Plan::WalkVisible( set<PatternLink> &visible,
 void SCREngine::Plan::CreateMyEngines( CompareReplace::AgentPhases &in_progress_agent_phases )
 {
     // Determine which agents our embeddeds should not configure
-    set<PatternLink> surrounding_plinks = UnionOf( enclosing_plinks, my_plinks ); 
+    set<PatternLink> surrounding_plinks = UnionOf( enclosing_plinks, my_agent_plinks ); 
             
     for( PatternLink plink : my_embedded_plinks_postorder )
     {
@@ -247,7 +253,8 @@ void SCREngine::Plan::PlanCompare()
 void SCREngine::Plan::PlanReplace()
 {
     all_keyer_plinks = UnionOfSolo( all_keyer_plinks, and_rule_engine_keyer_plinks );
-
+	my_keyer_plinks = and_rule_engine_keyer_plinks;
+	
     // Plan the keyers for couplings 
     for( StartsOverlay *ao : my_overlay_starter_engines )
         ao->StartPlanOverlay();        
@@ -267,6 +274,8 @@ void SCREngine::Plan::PlanReplace()
             TRACE("Call ConfigureCoupling() on agent %p: ", agent)(agent)(" plink: ")(plink)("\n");  
             agent->ConfigureCoupling( algo, plink, {} );
         }
+        
+        my_keyer_plinks.insert( plink ); // See #822
     }
 
     // Replace will need the compare keyers unioned with the enclosing keyers    
@@ -318,8 +327,8 @@ void SCREngine::Plan::Dump()
           Trace(enclosing_plinks) },
         { "enclosing_agents", 
           Trace(enclosing_agents) },
-        { "my_plinks", 
-          Trace(my_plinks) },
+        { "my_agent_plinks", 
+          Trace(my_agent_plinks) },
         { "my_agents", 
           Trace(my_agents) },
         { "all_keyer_plinks", 
@@ -390,10 +399,12 @@ void SCREngine::SingleCompareReplace( XLink origin_xlink )
 {
     INDENT(">");
     
+    size_t initial_num_assignments = universal_assignments->size();
+    
 	// XLink memory safety: we need to keep some nodes alive - for example
 	// nodes from regeneration which are not in any tree but are created
 	// during search/matching. They are needed by replace and embeddeds
-	// and have the same lifetime as the replace solution.
+	// and have the same lifetime as the the scope of this function.
     set<TreePtr<Node>> *keep_alive_nodes = new set<TreePtr<Node>>(); // TODO won't need new once XLinks sorted
 
     TRACE("Begin search\n");
@@ -410,7 +421,7 @@ void SCREngine::SingleCompareReplace( XLink origin_xlink )
 		    
     // Now replace according to the couplings
     ReplaceAssignments replace_assignments = Replace(origin_xlink);
-
+	
     // replace_assignments overrides
 	for( auto p : replace_assignments )
 		(*universal_assignments)[p.first] = p.second;
@@ -449,6 +460,18 @@ void SCREngine::SingleCompareReplace( XLink origin_xlink )
 	}
 	FTRACE("delete keep_alive_nodes: ")(ss)("\n");
 #endif
+
+    // XLink memory safety: remove xlinks we're done with before 
+    // discarding corresponding TreePtrs
+	for( PatternLink plink : plan.my_plinks ) 
+	{
+		// Not EraseSolo because ARE doesn't add all the assignments 
+		// eg due to abnormal links which can't be coupled. 
+		universal_assignments->erase( plink );
+	}
+	ASSERT( universal_assignments->size() == initial_num_assignments )
+	      ("universal_assignments: ")(*universal_assignments)("\n")
+	      ("initial_num_assignments: ")(initial_num_assignments)("\n");
 
     delete keep_alive_nodes;
 	x_tree_db->DeferredActionsEndOfSCR();    

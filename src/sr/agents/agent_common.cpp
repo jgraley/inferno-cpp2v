@@ -281,7 +281,7 @@ AgentCommon::QueryLambda AgentCommon::StartRegenerationQuery( const SolutionMap 
         
         // The trouble with using a lambda is that you have to return a potential
         // hit to caller and then iterate _if_ you get called again. A coroutine
-        // would make it possible to do this more cleanly.
+        // would make it possible to do this more cleanly. Related: #815
         if( !first )
         {
             TRACE("Trying conjecture increment\n");
@@ -300,11 +300,11 @@ AgentCommon::QueryLambda AgentCommon::StartRegenerationQuery( const SolutionMap 
                 // therefore our query will hold the result.
                 query = nlq_conjecture->GetQuery(this);
 
-                // XLink memory safety: this will put XLinks into the query
                 // which is held by nlq_conjecture. It is imperitive to call
-                // nlq_conjecture->Reset() to destruct them before competing
+                // nlq_conjecture->Reset() to destruct them before completing
                 // the search so that final teardown doesn't orphan them. Note
                 // this lambda is called repeatedley, see the `first` flag.
+                // Related: #815
                 RunRegenerationQuery( *query, hypothesis_links, x_tree_db );       
                     
                 TRACE("Got query from DNLQ ")(query->GetDecisions())("\n");

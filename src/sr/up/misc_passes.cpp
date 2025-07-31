@@ -88,7 +88,11 @@ void GetTreePatchAssignmentsPass::Run( shared_ptr<Patch> &layout, ReplaceAssignm
 		{
 			TreeZone *tree_zone = tree_patch->GetZone();
 			for( PatternLink plink : originators )
+			{
+				string tn = tree_zone->GetBaseNode()->GetTypeName();
+				ASSERT( tn.find("Scaffold") == string::npos )(tn);
 				assignments->insert( make_pair(plink, tree_zone->GetBaseXLink()) );
+			}
 			originators.clear();
 		}
 		// If zone is empty, it has one child, which we will meet at the next iteration

@@ -51,7 +51,11 @@ void MoveInPass::Run(MovesMap &moves_map, ReplaceAssignments *assignments)
 
 		// Capture the replace assignments
 		for( PatternLink plink : p.second.originators )
+		{
+			string tn = main_tree_zone.GetBaseNode()->GetTypeName();
+			ASSERT( tn.find("Scaffold") == string::npos )(tn);
 			assignments->insert( make_pair(plink, main_tree_zone.GetBaseXLink()) );  				
+		}
 	}
 
 	// XLink memory safety: discard tree zones in the moves map before 
