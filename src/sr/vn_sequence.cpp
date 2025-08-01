@@ -145,11 +145,9 @@ string VNSequence::GetStepName( int step_index ) const
 }
 
 
-ReplaceAssignments VNSequence::UpdateUsingLayout( XLink origin_xlink, shared_ptr<Patch> source_layout )
+TreeUpdater *VNSequence::GetTreeUpdater() const
 {
-    ASSERT( x_tree_db )("Analysis stage should have created x_tree_db object");    
-    
-    return tree_updater->UpdateMainTree( origin_xlink, source_layout );   
+	return tree_updater.get();
 }
 
 

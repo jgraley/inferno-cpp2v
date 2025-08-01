@@ -95,6 +95,11 @@ ReplaceAssignments TreeUpdater::UpdateMainTree( XLink origin_xlink, shared_ptr<P
 }
 
 
+void TreeUpdater::DeferredDeleteUnusedNodes()
+{
+}
+
+
 void TreeUpdater::Analysis(XLink origin_xlink, shared_ptr<Patch> &layout, ReplaceAssignments &assignments)
 {	
 	// Roughtly an analysis phase. We can modify the layout but no

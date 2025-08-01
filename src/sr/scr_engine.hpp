@@ -114,7 +114,7 @@ private:
     } plan;
 
     void RunEmbedded( PatternLink plink_to_embedded );
-    ReplaceAssignments Replace( XLink origin_xlink );
+	Agent::ReplacePatchPtr CreateReplaceLayout();
     void SingleCompareReplace( XLink origin_xlink );                                                                                              
 
 public: // For top level engine/VN trans

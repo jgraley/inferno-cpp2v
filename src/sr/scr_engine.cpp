@@ -10,6 +10,7 @@
 #include "and_rule_engine.hpp"
 #include "link.hpp"
 #include "vn_sequence.hpp"
+#include "up/tree_update.hpp"
 
 #include <list>
 
@@ -378,20 +379,13 @@ void SCREngine::RunEmbedded( PatternLink plink_to_embedded )
 }
 
 
-ReplaceAssignments SCREngine::Replace( XLink origin_xlink )
+Agent::ReplacePatchPtr SCREngine::CreateReplaceLayout()
 {
     INDENT("R");
 
     // Get an expression that evaluates to the new X tree
     Agent::ReplaceKit replace_kit { x_tree_db.get() };
-    Agent::ReplacePatchPtr source_expr = plan.origin_agent->GenReplaceLayout(replace_kit, plan.origin_plink, this);
-        
-    // Request to update the tree
-    ReplaceAssignments assignments = plan.vn_sequence->UpdateUsingLayout( origin_xlink, move(source_expr) );  
-    
-    TRACE("Replace done\n");
-    
-    return assignments;
+    return plan.origin_agent->GenReplaceLayout(replace_kit, plan.origin_plink, this);
 }
 
 
@@ -420,8 +414,11 @@ void SCREngine::SingleCompareReplace( XLink origin_xlink )
 	TRACE("Compare solution copied to universal_assignments:\n")(compare_solution)("\n");
 		    
     // Now replace according to the couplings
-    ReplaceAssignments replace_assignments = Replace(origin_xlink);
-	
+	Agent::ReplacePatchPtr layout = CreateReplaceLayout();	
+	TreeUpdater *updater = plan.vn_sequence->GetTreeUpdater();
+    ReplaceAssignments replace_assignments = updater->UpdateMainTree( origin_xlink, move(layout) );  
+    delete keep_alive_nodes; // XLink memory safety: tree update should discard these XLinks
+
     // replace_assignments overrides
 	for( auto p : replace_assignments )
 		(*universal_assignments)[p.first] = p.second;
@@ -472,8 +469,9 @@ void SCREngine::SingleCompareReplace( XLink origin_xlink )
 	ASSERT( universal_assignments->size() == initial_num_assignments )
 	      ("universal_assignments: ")(*universal_assignments)("\n")
 	      ("initial_num_assignments: ")(initial_num_assignments)("\n");
-
-    delete keep_alive_nodes;
+	          
+	// It's now safe to discard the TreePtrs from the DB
+    updater->DeferredDeleteUnusedNodes();
 	x_tree_db->DeferredActionsEndOfSCR();    
 
 #ifdef TRACE_KEEP_ALIVES
