@@ -6,6 +6,7 @@
 #include "tree_zone.hpp"
 #include "free_zone.hpp"
 #include "mutable_zone.hpp"
+#include "db_common.hpp"
 
 using namespace SR;    
 
@@ -28,6 +29,24 @@ XTreeDatabase::XTreeDatabase( shared_ptr<Lacing> lacing_, DomainExtension::Exten
 {
 }
 
+XTreeDatabase::~XTreeDatabase()
+{	
+	DeferredActionsEndOfUpdate();
+	DeferredActionsEndOfStep();
+	
+	list<DBCommon::TreeOrdinal> remaining_ordinals;
+	for( auto p : trees_by_ordinal )
+		remaining_ordinals.push_back( p.first );
+	for( DBCommon::TreeOrdinal ord : remaining_ordinals )
+		TeardownTree(ord);
+	
+	list<pair<string, string>> ss;
+	for( auto p : trees_by_ordinal )
+		ss.push_back( make_pair(Trace(p.first), Trace(p.second) ) );
+	ASSERT( trees_by_ordinal.empty() )("Leaking trees:\n")(ss);
+}
+
+
     
 DBCommon::TreeOrdinal XTreeDatabase::BuildTree( DBCommon::TreeType tree_type, const FreeZone &free_zone)
 {      
@@ -35,8 +54,13 @@ DBCommon::TreeOrdinal XTreeDatabase::BuildTree( DBCommon::TreeType tree_type, co
     DBCommon::TreeOrdinal tree_ordinal = AllocateTree();
     
     TRACE("Walk for intrinsic: orderings\n");
+#ifdef NEWS
+    trees_by_ordinal[tree_ordinal] = {free_zone.GetBaseNode(), nullptr, tree_type};
+    trees_by_ordinal.at(tree_ordinal).tpi_root_node = &(trees_by_ordinal.at(tree_ordinal).sp_tp_root_node);
+#else    
     auto sp_root = make_shared<TreePtr<Node>>(free_zone.GetBaseNode());
     trees_by_ordinal[tree_ordinal] = {sp_root, sp_root.get(), tree_type};
+#endif
     XLink root_xlink = GetRootXLink(tree_ordinal);
     ASSERT( root_xlink );
 	auto zone = TreeZone::CreateSubtree(root_xlink, tree_ordinal);
@@ -57,7 +81,7 @@ DBCommon::TreeOrdinal XTreeDatabase::BuildTree( DBCommon::TreeType tree_type, co
 }
 
 
-void XTreeDatabase::TeardownTree(DBCommon::TreeOrdinal tree_ordinal)
+void XTreeDatabase::TeardownTree(DBCommon::TreeOrdinal tree_ordinal, bool defer_freeing_nodes)
 {        
 	INDENT("T");
     {
@@ -75,7 +99,10 @@ void XTreeDatabase::TeardownTree(DBCommon::TreeOrdinal tree_ordinal)
 		// before freeing tree, which will delete the underlying TreePtr<>	
 	} 
 
-	deferred_tree_ordinals.push( tree_ordinal );
+	if( defer_freeing_nodes )
+		deferred_tree_ordinals.push( tree_ordinal );
+	else
+		FreeTree( tree_ordinal );
     
     CheckAssets();       	
 }
@@ -387,7 +414,7 @@ Mutator XTreeDatabase::CreateTreeMutator(XLink xlink)  const
             // correctly from the XTreeDatabase object, which is why this method cannot be const.
             ASSERT( (int)(row.tree_ordinal) >= 0 ); // Should be valid whenever context is ROOT
             const DBCommon::TreeRecord &tree_rec = trees_by_ordinal.at(row.tree_ordinal);
-            m = Mutator::CreateTreeRoot( tree_rec.sp_tp_root_node, tree_rec.tpi_root_node );
+            m = Mutator::CreateTreeRoot( tree_rec.tpi_root_node );
             break;
         }    
         case DBCommon::SINGULAR:

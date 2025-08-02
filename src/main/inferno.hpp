@@ -17,6 +17,7 @@ class Inferno
 {
 public:    
     Inferno( shared_ptr<SR::VNSequence> vn_sequence );
+    ~Inferno();
     
     struct Step
     {

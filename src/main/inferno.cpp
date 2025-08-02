@@ -189,6 +189,11 @@ Inferno::Inferno( shared_ptr<VNSequence> vn_sequence_ ) :
 }
 
 
+Inferno::~Inferno()
+{
+	//FTRACE("hi\n");
+}
+
 Inferno::Plan::Plan(Inferno *algo_) :
     algo( algo_ )
 {
@@ -587,6 +592,7 @@ int main( int argc, char *argv[] )
     // Inferno is just a harness that supports various execution 
     // scenarios based on command line args.
     auto vn_sequence = make_shared<SR::VNSequence>( sequence );
+    {Inferno inferno( vn_sequence );}
     Inferno inferno( vn_sequence );
     inferno.Run();
     //CSP::ReferenceSolver::DumpGSV();

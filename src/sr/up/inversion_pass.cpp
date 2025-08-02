@@ -119,7 +119,7 @@ void InversionPass::Invert( LocatedPatch lze )
 		// before freeing tree, which will delete the underlying TreePtr<>	
 	}
 
-	// Delete old content from DB
-	db->TeardownTree( ordinal_to_tear_down );   
+	// Delete old content from DB, but DO defer freeing of nodes (XLink memory safety)
+	db->TeardownTree( ordinal_to_tear_down, true );   
 
 }

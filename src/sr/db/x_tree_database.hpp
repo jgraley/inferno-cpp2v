@@ -25,6 +25,7 @@ class XTreeDatabase : public Traceable
 {
 public:
     XTreeDatabase(shared_ptr<Lacing> lacing_, DomainExtension::ExtenderSet domain_extenders );
+    ~XTreeDatabase();
     
 	// ---------------- the principal mutators ------------------
     
@@ -32,7 +33,7 @@ public:
     DBCommon::TreeOrdinal BuildTree(DBCommon::TreeType tree_type, const FreeZone &free_zone);
     
     // Zone removed all assets deleted
-    void TeardownTree(DBCommon::TreeOrdinal tree_ordinal);
+    void TeardownTree(DBCommon::TreeOrdinal tree_ordinal, bool defer_freeing_nodes = false);
    
 	// Swap content between two different trees, performed on geom assets only
    	void SwapTreeToTree( TreeZone &tree_zone_l, vector<TreeZone *> fixups_l,

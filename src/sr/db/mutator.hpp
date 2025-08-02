@@ -4,6 +4,7 @@
 #include "../link.hpp"
 #include "common/standard.hpp"
 #include "node/specialise_oostd.hpp"
+#include "db_common.hpp"
 
 #include <unordered_set>
 
@@ -32,8 +33,7 @@ public:
                                         ContainerInterface::iterator container_iterator );
                                              
 private: friend class XTreeDatabase;
-	static Mutator CreateTreeRoot( shared_ptr<TreePtr<Node>> sp_tp_root_node,
-                                   TreePtrInterface *tpi_root_node );
+	static Mutator CreateTreeRoot( TreePtrInterface *tpi_root_node );
 	static Mutator CreateTreeSingular( TreePtr<Node> parent_node, 
 	                                   TreePtrInterface *parent_singular );
 	static Mutator CreateTreeContainer( TreePtr<Node> parent_node, 
@@ -46,7 +46,6 @@ private:
 					  TreePtrInterface *parent_singular_,
                       ContainerInterface *parent_container_,
                       ContainerInterface::iterator container_iterator_,
-                      shared_ptr<TreePtr<Node>> sp_tp_root_node_,
                       TreePtrInterface *tpi_root_node_ );             
 
 public:  
@@ -86,7 +85,6 @@ private:
     TreePtrInterface *parent_singular;    // TODO could combine into an Itemiser::Element *
     ContainerInterface *parent_container;
     ContainerInterface::iterator container_iterator;
-    shared_ptr<TreePtr<Node>> sp_tp_root_node;
     TreePtrInterface *tpi_root_node;
 #ifdef KEEP_WHODAT_INFO
 	XLink::Whodat whodat = {NULL};

@@ -7,6 +7,29 @@
 using namespace SR;
 
 
+string Trace(SR::DBCommon::TreeType tt)
+{
+	switch(tt)
+	{
+		case SR::DBCommon::TreeType::MAIN:
+		return "MAIN";
+		
+		case SR::DBCommon::TreeType::DOMAIN_EXTENSION:
+		return "DOMAIN_EXTENSION";
+		
+		case SR::DBCommon::TreeType::UPDATE:
+		return "UPDATE";
+	}
+	ASSERTFAIL();
+}
+
+
+string Trace(const SR::DBCommon::TreeRecord &tr) 
+{ 
+	return "("+Trace(tr.sp_tp_root_node)+", "+
+	           Trace(tr.tpi_root_node)+", "+
+	           Trace(tr.type)+")"; 
+}
 
 
 DBCommon::SwapTransaction::SwapTransaction( TreeZone &zone1_, TreeZone &zone2_ ) :
