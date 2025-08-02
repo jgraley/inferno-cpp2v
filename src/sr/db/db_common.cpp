@@ -26,8 +26,7 @@ string Trace(SR::DBCommon::TreeType tt)
 
 string Trace(const SR::DBCommon::TreeRecord &tr) 
 { 
-	return "("+Trace(tr.sp_tp_root_node)+", "+
-	           Trace(tr.tpi_root_node)+", "+
+	return "("+Trace(tr.tp_root_node)+", "+
 	           Trace(tr.type)+")"; 
 }
 

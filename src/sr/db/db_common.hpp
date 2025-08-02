@@ -6,7 +6,6 @@
 
 namespace SR 
 {
-    typedef TreePtr<Node> TreeRootType;
 
 class DBCommon
 {
@@ -25,8 +24,7 @@ public:
     
     struct TreeRecord
     {
-        mutable TreePtr<Node> sp_tp_root_node;
-        TreePtrInterface *tpi_root_node;
+        TreePtr<Node> tp_root_node;
         TreeType type;
     };
     

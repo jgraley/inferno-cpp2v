@@ -54,8 +54,10 @@ DBCommon::TreeOrdinal XTreeDatabase::BuildTree( DBCommon::TreeType tree_type, co
     DBCommon::TreeOrdinal tree_ordinal = AllocateTree();
     
     TRACE("Walk for intrinsic: orderings\n");
-    trees_by_ordinal[tree_ordinal] = {free_zone.GetBaseNode(), nullptr, tree_type};
-    trees_by_ordinal.at(tree_ordinal).tpi_root_node = &(trees_by_ordinal.at(tree_ordinal).sp_tp_root_node);
+    // We copy the TreePtr<> into trees_by_ordinal, and the instance in 
+    // trees_by_ordinal is then autoritative for the purposes of 
+    // making XLinks, Mutators etc.
+    trees_by_ordinal[tree_ordinal] = {free_zone.GetBaseNode(), tree_type};
     XLink root_xlink = GetRootXLink(tree_ordinal);
     ASSERT( root_xlink );
 	auto zone = TreeZone::CreateSubtree(root_xlink, tree_ordinal);
@@ -175,7 +177,7 @@ void XTreeDatabase::DeferredActionsEndOfStep()
 XLink XTreeDatabase::GetRootXLink(DBCommon::TreeOrdinal tree_ordinal) const
 {
     const DBCommon::TreeRecord &tree_rec = trees_by_ordinal.at(tree_ordinal);
-    return XLink::CreateFrom( &(tree_rec.sp_tp_root_node) );
+    return XLink::CreateFrom( &(tree_rec.tp_root_node) );
 }
 
 
@@ -395,7 +397,7 @@ void XTreeDatabase::CheckAssets()
 }
 
 
-Mutator XTreeDatabase::CreateTreeMutator(XLink xlink)  const
+Mutator XTreeDatabase::CreateTreeMutator(XLink xlink) 
 {
     const LinkTable::Row &row = link_table->GetRow(xlink);   
     Mutator m;
@@ -408,8 +410,8 @@ Mutator XTreeDatabase::CreateTreeMutator(XLink xlink)  const
             // By holding it separately, we can avoid a const cast, and in fact constness propagates
             // correctly from the XTreeDatabase object, which is why this method cannot be const.
             ASSERT( (int)(row.tree_ordinal) >= 0 ); // Should be valid whenever context is ROOT
-            const DBCommon::TreeRecord &tree_rec = trees_by_ordinal.at(row.tree_ordinal);
-            m = Mutator::CreateTreeRoot( &(tree_rec.sp_tp_root_node) );
+            DBCommon::TreeRecord &tree_rec = trees_by_ordinal.at(row.tree_ordinal);
+            m = Mutator::CreateTreeRoot( &(tree_rec.tp_root_node) );
             break;
         }    
         case DBCommon::SINGULAR:
@@ -440,7 +442,7 @@ Mutator XTreeDatabase::CreateTreeMutator(XLink xlink)  const
 }
 
 
-MutableZone XTreeDatabase::CreateMutableZone(TreeZone &zone) const
+MutableZone XTreeDatabase::CreateMutableZone(TreeZone &zone)
 {
 	Mutator base_mutator = CreateTreeMutator(zone.GetBaseXLink());
 	vector<Mutator> terminii_mutators;

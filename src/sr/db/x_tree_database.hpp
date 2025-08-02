@@ -79,8 +79,8 @@ public:
     void CheckAssets();
     
 private: 
-    Mutator CreateTreeMutator(XLink xlink) const;
-    MutableZone CreateMutableZone(TreeZone &zone) const;
+    Mutator CreateTreeMutator(XLink xlink);
+    MutableZone CreateMutableZone(TreeZone &zone);
     DBCommon::TreeOrdinal AllocateTree();
     void FreeTree(DBCommon::TreeOrdinal tree_ordinal);
 
