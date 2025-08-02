@@ -36,7 +36,7 @@ OPTIONS += -Werror
 OPTIONS += -Wfatal-errors
 
 # Optimisation level.
-OPTIONS += -O0
+OPTIONS += -Og
 
 # We supply an ASSERT handler in common/trace.cpp
 OPTIONS += -DBOOST_ENABLE_ASSERT_HANDLER

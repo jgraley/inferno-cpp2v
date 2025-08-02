@@ -5,7 +5,7 @@
 #include "node/specialise_oostd.hpp"
 #include "helpers/walk.hpp"
 
-#define KEEP_WHODAT_INFO
+//#define KEEP_WHODAT_INFO
 // Note: you may wish to try subtracting 1 or 8 or something 
 // from the address to get a better indication of where the 
 // call itself came from.

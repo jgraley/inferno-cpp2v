@@ -14,8 +14,8 @@
 #include "node.hpp"
 
 
-#define TREE_POINTER_REF_COUNTS
-#define TREE_POINTER_REF_TRACKING
+//#define TREE_POINTER_REF_COUNTS
+//#define TREE_POINTER_REF_TRACKING
 
 template<typename VALUE_TYPE>
 struct Sequence;
