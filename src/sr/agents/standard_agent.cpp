@@ -6,6 +6,7 @@
 #include "star_agent.hpp"
 #include "scr_engine.hpp"
 #include "link.hpp"
+#include "../tree/cpptree.hpp"
 #include "sym/boolean_operators.hpp"
 #include "sym/predicate_operators.hpp"
 #include "sym/symbol_operators.hpp"
@@ -598,14 +599,10 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingPattern( const
 {    
     TreePtr<Node> under_node = under_xlink.GetChildTreePtr();
 
-
-    // Make a new node, force dirty because from pattern
-    // Clone once, because we never want to place an Agent object in the output program tree.
-    // Then use duplicate to produce our output, to get the right identifier semantics.
-    // Note: at present we're caching the self-key node indefinitely. 
-    if( keyer_plink==me_plink ) 
-		built_node = AgentCommon::CloneNode();
-    TreePtr<Node> dest = Duplicate::DuplicateNode(built_node);
+	// With identifiers, Duplicate() would return *this as a replace node which 
+	// we don't support. Use BuildxxxIdentifierAgent for most cases. For exotic cases see #819.
+	ASSERT( !dynamic_cast<CPPTree::SpecificIdentifier *>(this) );		
+    TreePtr<Node> dest = Duplicate::DuplicateNode(me_plink.GetPattern());
     
     // We "invent" dest, because of information coming from this pattern node.
     dest->SetInventedHere();
@@ -871,14 +868,12 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutNormal( const ReplaceKit &
     //    FTRACE("For me_plink=")(me_plink)("\n");
 
     ASSERT( IsFinal() )("Trying to build non-final ")(*this); 
-
-    // Make a new node, force dirty because from pattern
-    // Clone once, because we never want to place an Agent object in the output program tree.
-    // Then use duplicate to produce our output, to get the right identifier semantics.
-    // Note: at present we're caching the self-key node indefinitely. 
-    if( keyer_plink==me_plink ) 
-		built_node = AgentCommon::CloneNode();
-    TreePtr<Node> dest = Duplicate::DuplicateNode(built_node);
+		
+	// With identifiers, Duplicate() would return *this as a replace node which 
+	// we don't support. Use BuildxxxIdentifierAgent for most cases. For exotic cases see #819.
+	ASSERT( !dynamic_cast<CPPTree::SpecificIdentifier *>(this) );		
+    TreePtr<Node> dest = Duplicate::DuplicateNode(me_plink.GetPattern());
+    
     ASSERT( dest->IsFinal() )(*this)(" trying to build non-final ")(*dest)("\n"); 
 
     // We "invent" dest, because of information coming from this pattern node.

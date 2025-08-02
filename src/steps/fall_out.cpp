@@ -83,7 +83,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     auto l_func = MakePatternNode<Field>();
     auto r_lmap = MakePatternNode<Static>();
     auto l_lmap = MakePatternNode<Static>();
-    auto r_lmap_id = MakePatternNode<SpecificInstanceIdentifier>("lmap");
+    auto r_lmap_id = MakePatternNode<BuildInstanceIdentifierAgent>("lmap");
     auto r_array = MakePatternNode<Array>();
     auto r_make = MakePatternNode<MakeArray>();
     auto ls_make = MakePatternNode<MakeArray>();
@@ -502,7 +502,7 @@ AddStateEnumVar::AddStateEnumVar()
     auto lr_assign = MakePatternNode<Assign>();
     auto state_var = MakePatternNode<Automatic>();
     auto lx_not = MakePatternNode< Negation<Expression> >();
-    auto state_var_id = MakePatternNode< SpecificInstanceIdentifier >("state");
+    auto state_var_id = MakePatternNode< BuildInstanceIdentifierAgent >("state");
     auto s_gg = MakePatternNode< GreenGrass<Compound> >();
     auto s_sub = MakePatternNode<Subscript>();
     auto ls_sub = MakePatternNode<Subscript>();

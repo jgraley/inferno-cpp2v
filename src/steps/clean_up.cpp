@@ -57,7 +57,7 @@ CleanupStatementExpression::CleanupStatementExpression() // LIMITAION: decls in 
     auto decls = MakePatternNode< Star<Declaration> >();
     auto r_temp = MakePatternNode<Temporary>();
     auto last = MakePatternNode< TransformOf<Expression> >( &TypeOf::instance );
-    auto r_temp_id = MakePatternNode<SpecificInstanceIdentifier>("result");
+    auto r_temp_id = MakePatternNode<BuildInstanceIdentifierAgent>("result");
     auto r_assign = MakePatternNode<Assign>();
     auto overlay = MakePatternNode< Delta<Expression> >();
     auto r_type = MakePatternNode<Type>();
