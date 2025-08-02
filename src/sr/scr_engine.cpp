@@ -394,6 +394,7 @@ void SCREngine::SingleCompareReplace( XLink origin_xlink )
     INDENT(">");
     
     size_t initial_num_assignments = universal_assignments->size();
+    SolutionMap initial_assignments = *universal_assignments;
     
 	// XLink memory safety: we need to keep some nodes alive - for example
 	// nodes from regeneration which are not in any tree but are created
@@ -404,20 +405,21 @@ void SCREngine::SingleCompareReplace( XLink origin_xlink )
     TRACE("Begin search\n");
     // Note: comparing doesn't require double pointer any more, but
     // replace does so it can change the origin node. Throws on mismatch.
-    SolutionMap compare_solution = plan.and_rule_engine->Compare( origin_xlink, 
+    {
+		SolutionMap compare_solution = plan.and_rule_engine->Compare( origin_xlink, 
                                                                   universal_assignments,
                                                                   keep_alive_nodes );
-    TRACE("Search got a match (otherwise throws)\n");
-           
-	for( auto p : compare_solution )
-		(*universal_assignments)[p.first] = p.second;
-	TRACE("Compare solution copied to universal_assignments:\n")(compare_solution)("\n");
+		TRACE("Search got a match (otherwise throws)\n");
+			   
+		for( auto p : compare_solution )
+			(*universal_assignments)[p.first] = p.second;
+		TRACE("Compare solution copied to universal_assignments:\n")(compare_solution)("\n");
+	}
 		    
     // Now replace according to the couplings
 	Agent::ReplacePatchPtr layout = CreateReplaceLayout();	
 	TreeUpdater *updater = plan.vn_sequence->GetTreeUpdater();
     ReplaceAssignments replace_assignments = updater->UpdateMainTree( origin_xlink, move(layout) );  
-    delete keep_alive_nodes; // XLink memory safety: tree update should discard these XLinks
 
     // replace_assignments overrides
 	for( auto p : replace_assignments )
@@ -469,9 +471,15 @@ void SCREngine::SingleCompareReplace( XLink origin_xlink )
 	ASSERT( universal_assignments->size() == initial_num_assignments )
 	      ("universal_assignments: ")(*universal_assignments)("\n")
 	      ("initial_num_assignments: ")(initial_num_assignments)("\n");
+	ASSERT( *universal_assignments == initial_assignments )
+	      ("universal_assignments: ")(*universal_assignments)("\n")
+	      ("initial_assignments: ")(initial_assignments)("\n");
+	initial_assignments.clear();
+	//FTRACE("universal_assignments: ")(*universal_assignments)("\n");
 	          
 	// It's now safe to discard the TreePtrs from the DB
 	x_tree_db->DeferredActionsEndOfSCR();    
+    delete keep_alive_nodes; // tree update discards these XLinks but still in universal assignment
 
 #ifdef TRACE_KEEP_ALIVES
 	FTRACE("done deleting keep_alive_nodes\n");

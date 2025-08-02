@@ -1,7 +1,7 @@
 #include "link.hpp"
 #include "agents/agent.hpp"
 
-//#define NO_INIT_ASP_X
+#define NO_INIT_ASP_X
 
 //#define DO_ASP_CHECK
 
