@@ -471,7 +471,6 @@ void SCREngine::SingleCompareReplace( XLink origin_xlink )
 	      ("initial_num_assignments: ")(initial_num_assignments)("\n");
 	          
 	// It's now safe to discard the TreePtrs from the DB
-    updater->DeferredDeleteUnusedNodes();
 	x_tree_db->DeferredActionsEndOfSCR();    
 
 #ifdef TRACE_KEEP_ALIVES

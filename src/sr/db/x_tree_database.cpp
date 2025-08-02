@@ -75,7 +75,7 @@ void XTreeDatabase::TeardownTree(DBCommon::TreeOrdinal tree_ordinal)
 		// before freeing tree, which will delete the underlying TreePtr<>	
 	} 
 
-	FreeTree( tree_ordinal );  
+	deferred_tree_ordinals.push( tree_ordinal );
     
     CheckAssets();       	
 }
@@ -135,6 +135,12 @@ void XTreeDatabase::DeferredActionsEndOfUpdate()
 
 void XTreeDatabase::DeferredActionsEndOfSCR()
 {
+	while( !deferred_tree_ordinals.empty() )
+	{		
+		FreeTree( deferred_tree_ordinals.front() );  
+		deferred_tree_ordinals.pop();
+	}
+
     CheckAssets();           
 }
 

@@ -27,7 +27,6 @@ public:
     
     // Much as the name suggests. Db required and acts directly on it.
     ReplaceAssignments UpdateMainTree( XLink origin_xlink, shared_ptr<Patch> source_layout );
-    void DeferredDeleteUnusedNodes();
     
 private:
 	void Analysis(XLink origin_xlink, shared_ptr<Patch> &source_layout, ReplaceAssignments &assignments);

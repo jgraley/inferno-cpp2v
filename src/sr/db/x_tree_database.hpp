@@ -96,6 +96,7 @@ private:
     const shared_ptr<Orderings> orderings;
     const shared_ptr<DomainExtension> domain_extension;
 
+    queue<DBCommon::TreeOrdinal> deferred_tree_ordinals;
     queue<DBCommon::TreeOrdinal> free_tree_ordinals;
 
     DBWalk db_walker;
