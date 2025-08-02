@@ -54,13 +54,8 @@ DBCommon::TreeOrdinal XTreeDatabase::BuildTree( DBCommon::TreeType tree_type, co
     DBCommon::TreeOrdinal tree_ordinal = AllocateTree();
     
     TRACE("Walk for intrinsic: orderings\n");
-#ifdef NEWS
     trees_by_ordinal[tree_ordinal] = {free_zone.GetBaseNode(), nullptr, tree_type};
     trees_by_ordinal.at(tree_ordinal).tpi_root_node = &(trees_by_ordinal.at(tree_ordinal).sp_tp_root_node);
-#else    
-    auto sp_root = make_shared<TreePtr<Node>>(free_zone.GetBaseNode());
-    trees_by_ordinal[tree_ordinal] = {sp_root, sp_root.get(), tree_type};
-#endif
     XLink root_xlink = GetRootXLink(tree_ordinal);
     ASSERT( root_xlink );
 	auto zone = TreeZone::CreateSubtree(root_xlink, tree_ordinal);
@@ -180,7 +175,7 @@ void XTreeDatabase::DeferredActionsEndOfStep()
 XLink XTreeDatabase::GetRootXLink(DBCommon::TreeOrdinal tree_ordinal) const
 {
     const DBCommon::TreeRecord &tree_rec = trees_by_ordinal.at(tree_ordinal);
-    return XLink::CreateFrom( tree_rec.tpi_root_node );
+    return XLink::CreateFrom( &(tree_rec.sp_tp_root_node) );
 }
 
 
@@ -414,7 +409,7 @@ Mutator XTreeDatabase::CreateTreeMutator(XLink xlink)  const
             // correctly from the XTreeDatabase object, which is why this method cannot be const.
             ASSERT( (int)(row.tree_ordinal) >= 0 ); // Should be valid whenever context is ROOT
             const DBCommon::TreeRecord &tree_rec = trees_by_ordinal.at(row.tree_ordinal);
-            m = Mutator::CreateTreeRoot( tree_rec.tpi_root_node );
+            m = Mutator::CreateTreeRoot( &(tree_rec.sp_tp_root_node) );
             break;
         }    
         case DBCommon::SINGULAR:

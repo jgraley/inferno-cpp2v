@@ -3,7 +3,6 @@
 #include "include_clang_llvm.hpp"
 #include "identifier_tracker.hpp"
 
-#define NEWS
 
 IdentifierTracker::IdentifierTracker( shared_ptr<Node> g )
 {

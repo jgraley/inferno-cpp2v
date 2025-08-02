@@ -14,7 +14,6 @@
 
 #include <list>
 
-#define NEWS
 //#define TRACE_KEEP_ALIVES
 
 using namespace SR;

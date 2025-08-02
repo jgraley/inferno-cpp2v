@@ -4,15 +4,9 @@
 #include "../link.hpp"
 #include "common/standard.hpp"
 
-#define NEWS
-
 namespace SR 
 {
-#ifdef NEWS
     typedef TreePtr<Node> TreeRootType;
-#else    
-    typedef shared_ptr<TreePtr<Node>> TreeRootType;
-#endif
 
 class DBCommon
 {
@@ -31,7 +25,7 @@ public:
     
     struct TreeRecord
     {
-        TreeRootType sp_tp_root_node;
+        mutable TreePtr<Node> sp_tp_root_node;
         TreePtrInterface *tpi_root_node;
         TreeType type;
     };
