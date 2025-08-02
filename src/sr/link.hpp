@@ -17,9 +17,6 @@
 #define WHODAT() nullptr
 #endif
 
-//#define HOLD_DEBUG_NAME
-
-
 namespace SR
 { 
 class Agent;
@@ -121,10 +118,6 @@ public:
     }
 
 private:
-#ifdef HOLD_DEBUG_NAME
-	string debug_name;
-#endif
-    shared_ptr<const TreePtrInterface> asp_x;
     const TreePtrInterface *p_tpi;
 	
     // So .get() will return const TreePtrInterface*

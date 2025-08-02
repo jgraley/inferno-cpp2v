@@ -1,11 +1,6 @@
 #include "link.hpp"
 #include "agents/agent.hpp"
 
-#define NO_INIT_ASP_X
-
-//#define DO_ASP_CHECK
-
-
 // For debugging
 #ifdef KEEP_WHODAT_INFO
 #define PUSH_WHODAT(W) ((W).push_back(WHODAT()))
@@ -24,13 +19,6 @@
 
 #ifdef TREE_POINTER_REF_COUNTS
 #define XLINK_TREE_POINTER_REF_COUNTS
-#endif
-
-// >1 because we require an external reference aside from asp_x itself
-#ifdef DO_ASP_CHECK
-#define ASP_REF_CHECK(ASP_X) ASSERT( !(ASP_X) || (ASP_X).use_count() >= 2 )
-#else
-#define ASP_REF_CHECK(ASP_X) {}
 #endif
 
 //#define XLINK_LIFECYCLE_TRACE
@@ -213,10 +201,6 @@ PatternLink::PatternLink(shared_ptr<const TreePtrInterface> ppattern,
 //////////////////////////// XLink ///////////////////////////////
 
 XLink::XLink() :
-#ifdef HOLD_DEBUG_NAME
-	debug_name("NULL->NULL"),
-#endif
-    asp_x( nullptr ),
     p_tpi( nullptr )
 {
     PUSH_WHODAT(whodat);
@@ -239,18 +223,9 @@ XLink::~XLink()
 
 
 XLink::XLink(const XLink &other) :
-#ifdef HOLD_DEBUG_NAME
-	debug_name(other.debug_name),
-#endif
-#ifdef NO_INIT_ASP_X
-	asp_x( nullptr ),
-#else
-    asp_x( other.asp_x ),
-#endif    
     p_tpi( other.p_tpi )
 {
     PUSH_WHODAT_CMA(whodat, other);
-	ASP_REF_CHECK(asp_x);
 
 #ifdef XLINK_LIFECYCLE_TRACE
 	FTRACE(this)("\n");
@@ -267,7 +242,6 @@ XLink &XLink::operator=(const XLink &other)
 	ASSERT( &other != this );
 	
     PUSH_WHODAT_CMA(whodat, other);
-	ASP_REF_CHECK(asp_x);
 
 #ifdef XLINK_LIFECYCLE_TRACE
 	FTRACE(this)("\n");
@@ -276,15 +250,6 @@ XLink &XLink::operator=(const XLink &other)
 	if( p_tpi ) 
 		p_tpi->RemoveRef(this);
 #endif
-		
-#ifdef HOLD_DEBUG_NAME
-	debug_name = other.debug_name;
-#endif
-#ifdef NO_INIT_ASP_X
-	asp_x = nullptr;
-#else
-	asp_x = other.asp_x;
-#endif	
 	p_tpi = other.p_tpi;
 	
 #ifdef XLINK_TREE_POINTER_REF_COUNTS
@@ -296,18 +261,9 @@ XLink &XLink::operator=(const XLink &other)
 
 
 XLink::XLink(XLink &&other) :
-#ifdef HOLD_DEBUG_NAME
-	debug_name(other.debug_name),
-#endif
-#ifdef NO_INIT_ASP_X
-	asp_x( nullptr ),
-#else
-    asp_x( other.asp_x ),
-#endif    
     p_tpi( other.p_tpi )
 {
     PUSH_WHODAT_CMA(whodat, other);
-	ASP_REF_CHECK(asp_x);
 
 #ifdef XLINK_LIFECYCLE_TRACE
 	FTRACE(this)(" move from ")(&other)("\n");
@@ -316,7 +272,6 @@ XLink::XLink(XLink &&other) :
 	if( other.p_tpi ) 
 	{
 		other.p_tpi->RemoveRef(&other);
-		other.asp_x = nullptr;
 		other.p_tpi = nullptr;
 	}
 	if( p_tpi ) 
@@ -328,7 +283,6 @@ XLink::XLink(XLink &&other) :
 XLink &XLink::operator=(XLink &&other)
 {
 	ASSERT( &other != this );
-	ASP_REF_CHECK(asp_x);
 
     PUSH_WHODAT_CMA(whodat, other);
 #ifdef XLINK_LIFECYCLE_TRACE
@@ -338,22 +292,12 @@ XLink &XLink::operator=(XLink &&other)
 	if( p_tpi ) 
 		p_tpi->RemoveRef(this);
 #endif
-
-#ifdef HOLD_DEBUG_NAME
-	debug_name = other.debug_name;
-#endif
-#ifdef NO_INIT_ASP_X
-	asp_x = nullptr;
-#else
-	asp_x = other.asp_x;
-#endif	
 	p_tpi = other.p_tpi;
 
 #ifdef XLINK_TREE_POINTER_REF_COUNTS
 	if( other.p_tpi ) 
 	{
 		other.p_tpi->RemoveRef(&other);
-		other.asp_x = nullptr;
 		other.p_tpi = nullptr;
 	}
 	if( p_tpi ) 
@@ -366,14 +310,6 @@ XLink &XLink::operator=(XLink &&other)
 XLink::XLink( shared_ptr<const Node> p_parent,
               const TreePtrInterface *p_tpi_,
               Whodat whodat_ ) :
-#ifdef HOLD_DEBUG_NAME
-	debug_name(Trace(p_parent)+"->"+Trace(p_tpi_)),
-#endif
-#ifdef NO_INIT_ASP_X
-	asp_x( nullptr ),
-#else
-    asp_x( p_parent, p_tpi_ ),    
-#endif    
     // From Cppreference: 
     //         template<class Y> 
     //         shared_ptr( const shared_ptr<Y>& r, element_type* ptr ) noexcept
@@ -386,7 +322,6 @@ XLink::XLink( shared_ptr<const Node> p_parent,
     p_tpi( p_tpi_ )
 {
 	PUSH_WHODAT_ARG( whodat, whodat_ );
-	ASP_REF_CHECK(asp_x);
     ASSERT( p_parent );
     ASSERT( p_tpi );
     ASSERT( p_parent != GetChildTreePtr() );
@@ -409,18 +344,9 @@ XLink::XLink( const LocatedLink &l ) :
 XLink::XLink( shared_ptr<const TreePtrInterface> asp_x_,
               const TreePtrInterface *p_tpi_,
               Whodat whodat_ ) :
-#ifdef HOLD_DEBUG_NAME
-	debug_name("?->"+Trace(p_tpi_)),
-#endif
-#ifdef NO_INIT_ASP_X
-	asp_x( nullptr ),
-#else
-    asp_x( asp_x_ ),
-#endif    
     p_tpi( p_tpi_ )
 {
 	PUSH_WHODAT_ARG( whodat, whodat_ );
-	ASP_REF_CHECK(asp_x);
 
     ASSERT(p_tpi);
 
@@ -489,11 +415,7 @@ string XLink::GetTrace() const
 {
     if(p_tpi==nullptr)
         return "NULL";
-#ifdef HOLD_DEBUG_NAME
-	string s = "⤷"+debug_name;
-#else
     string s = "⤷"+p_tpi->GetTrace();
-#endif    
 #ifdef KEEP_WHODAT_INFO    
     s += Trace(whodat);
 #endif
