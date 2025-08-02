@@ -133,18 +133,12 @@ void XTreeDatabase::DeferredActionsEndOfUpdate()
 }
 
 
-void XTreeDatabase::DeferredActionsEndOfSCR()
-{
-    CheckAssets();           
-}
-
-
 void XTreeDatabase::DeferredActionsEndOfStep()
 {
 	// This part would be better done by returning the deferred ordinals
 	// to the SCR engine and letting it hold them in local scope, so that
 	// the right trees are deleted at the right time (i.e. on the unwind
-	// of its recursion into embeddeds) TODO
+	// of its recursion into embeddeds) TODO #823
 	while( !deferred_tree_ordinals.empty() )
 	{		
 		FreeTree( deferred_tree_ordinals.front() );  
@@ -311,8 +305,7 @@ DBCommon::TreeOrdinal XTreeDatabase::GetTreeOrdinalFor(XLink xlink) const
 	
 	LinkTable::Row row = link_table->GetRow(xlink);
 	ASSERT( row.context_type == DBCommon::Context::ROOT );
-	return row.tree_ordinal;
-		
+	return row.tree_ordinal;		
 }
 
 

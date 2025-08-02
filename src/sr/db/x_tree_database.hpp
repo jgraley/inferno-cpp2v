@@ -40,7 +40,6 @@ public:
 
 	// Actions to take at the end of an update cycle
     void DeferredActionsEndOfUpdate();
-    void DeferredActionsEndOfSCR();
     void DeferredActionsEndOfStep();
 
 	// ---------------- const and static methods ------------------
