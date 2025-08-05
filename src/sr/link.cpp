@@ -21,8 +21,6 @@
 #define XLINK_TREE_POINTER_REF_COUNTS
 #endif
 
-//#define XLINK_LIFECYCLE_TRACE
-
 using namespace SR;
 
 //////////////////////////// PatternLink ///////////////////////////////
@@ -204,17 +202,11 @@ XLink::XLink() :
     p_tpi( nullptr )
 {
     PUSH_WHODAT(whodat);
-#ifdef XLINK_LIFECYCLE_TRACE
-	FTRACE(this)("\n");
-#endif	
 }
 
 
 XLink::~XLink() 
 {
-#ifdef XLINK_LIFECYCLE_TRACE
-	FTRACE(this)("\n");
-#endif
 #ifdef XLINK_TREE_POINTER_REF_COUNTS
 	if( p_tpi ) 
 		p_tpi->RemoveRef(this);
@@ -227,9 +219,6 @@ XLink::XLink(const XLink &other) :
 {
     PUSH_WHODAT_CMA(whodat, other);
 
-#ifdef XLINK_LIFECYCLE_TRACE
-	FTRACE(this)("\n");
-#endif
 #ifdef XLINK_TREE_POINTER_REF_COUNTS
 	if( p_tpi ) 
 		p_tpi->AddRef(this);
@@ -243,9 +232,6 @@ XLink &XLink::operator=(const XLink &other)
 	
     PUSH_WHODAT_CMA(whodat, other);
 
-#ifdef XLINK_LIFECYCLE_TRACE
-	FTRACE(this)("\n");
-#endif
 #ifdef XLINK_TREE_POINTER_REF_COUNTS
 	if( p_tpi ) 
 		p_tpi->RemoveRef(this);
@@ -255,53 +241,6 @@ XLink &XLink::operator=(const XLink &other)
 #ifdef XLINK_TREE_POINTER_REF_COUNTS
 	if( p_tpi )
 		p_tpi->AddRef(this);	
-#endif
-	return *this;
-}
-
-
-XLink::XLink(XLink &&other) :
-    p_tpi( other.p_tpi )
-{
-    PUSH_WHODAT_CMA(whodat, other);
-
-#ifdef XLINK_LIFECYCLE_TRACE
-	FTRACE(this)(" move from ")(&other)("\n");
-#endif
-#ifdef XLINK_TREE_POINTER_REF_COUNTS
-	if( other.p_tpi ) 
-	{
-		other.p_tpi->RemoveRef(&other);
-		other.p_tpi = nullptr;
-	}
-	if( p_tpi ) 
-		p_tpi->AddRef(this);
-#endif
-}
-
-
-XLink &XLink::operator=(XLink &&other)
-{
-	ASSERT( &other != this );
-
-    PUSH_WHODAT_CMA(whodat, other);
-#ifdef XLINK_LIFECYCLE_TRACE
-	FTRACE(this)(" move from ")(&other)("\n");
-#endif
-#ifdef XLINK_TREE_POINTER_REF_COUNTS
-	if( p_tpi ) 
-		p_tpi->RemoveRef(this);
-#endif
-	p_tpi = other.p_tpi;
-
-#ifdef XLINK_TREE_POINTER_REF_COUNTS
-	if( other.p_tpi ) 
-	{
-		other.p_tpi->RemoveRef(&other);
-		other.p_tpi = nullptr;
-	}
-	if( p_tpi ) 
-		p_tpi->AddRef(this);
 #endif
 	return *this;
 }
@@ -326,9 +265,6 @@ XLink::XLink( shared_ptr<const Node> p_parent,
     ASSERT( p_tpi );
     ASSERT( p_parent != GetChildTreePtr() );
     ASSERT_NOT_ON_STACK( p_tpi_ )( *this );
-#ifdef XLINK_LIFECYCLE_TRACE
-	FTRACE(this)("\n");
-#endif
 #ifdef XLINK_TREE_POINTER_REF_COUNTS
 	p_tpi->AddRef(this);
 #endif	
@@ -350,9 +286,6 @@ XLink::XLink( shared_ptr<const TreePtrInterface> asp_x_,
 
     ASSERT(p_tpi);
 
-#ifdef XLINK_LIFECYCLE_TRACE
-	FTRACE(this)("\n");
-#endif
 #ifdef XLINK_TREE_POINTER_REF_COUNTS
 	p_tpi->AddRef(this);
 #endif	

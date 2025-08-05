@@ -398,15 +398,15 @@ void SCREngine::SingleCompareReplace( XLink origin_xlink )
 	// nodes from regeneration which are not in any tree but are created
 	// during search/matching. They are needed by replace and embeddeds
 	// and have the same lifetime as the the scope of this function.
-    set<TreePtr<Node>> *keep_alive_nodes = new set<TreePtr<Node>>(); // TODO won't need new once XLinks sorted
+    set<TreePtr<Node>> keep_alive_nodes;
 
     TRACE("Begin search\n");
     // Note: comparing doesn't require double pointer any more, but
     // replace does so it can change the origin node. Throws on mismatch.
     {
 		SolutionMap compare_solution = plan.and_rule_engine->Compare( origin_xlink, 
-                                                                  universal_assignments,
-                                                                  keep_alive_nodes );
+                                                                      universal_assignments,
+                                                                      &keep_alive_nodes );
 		TRACE("Search got a match (otherwise throws)\n");
 			   
 		for( auto p : compare_solution )
@@ -435,49 +435,21 @@ void SCREngine::SingleCompareReplace( XLink origin_xlink )
     // Clear out anything cached in agents and update the x_tree_db 
     // now that replace is done
     for( Agent *a : plan.my_agents )
-        a->Reset();
-        
-#ifdef TRACE_KEEP_ALIVES
-    set<pair<string, string>> ss;
-    for( TreePtr<Node> x : *keep_alive_nodes )
-    {
-		pair<string, string> s;
-		s.first = Trace(x);
-		if( auto xscr = dynamic_cast<SubContainerRange *>(x.get()) )
-		{
-			ContainerInterface *xci = dynamic_cast<ContainerInterface *>(xscr);
-			ASSERT(xci)("Multiplicity x must implement ContainerInterface");    
-			
-			for( const TreePtrInterface &xe_node : *xci )
-			{
-				s.second += ":" + Trace(xe_node);
-			}
-		}
-		ss.insert(s);
-	}
-	FTRACE("delete keep_alive_nodes: ")(ss)("\n");
-#endif
+        a->Reset();        
 
     // XLink memory safety: remove xlinks we're done with before 
     // discarding corresponding TreePtrs
 	for( PatternLink plink : plan.my_plinks ) 
 	{
 		// Not EraseSolo because ARE doesn't add all the assignments 
-		// eg due to abnormal links which can't be coupled. 
+		// eg due to abnormal links which can't be coupled or 
+		// regions not matched due negation or disjunction. 
 		universal_assignments->erase( plink );
 	}
 	ASSERT( universal_assignments->size() == initial_num_assignments )
 	      ("universal_assignments: ")(*universal_assignments)("\n")
 	      ("initial_num_assignments: ")(initial_num_assignments)("\n");
 	//FTRACE("universal_assignments: ")(*universal_assignments)("\n");
-	          
-	// tree update discards these XLinks but they remain in universal 
-	// assignment until we remove them (just above)
-    delete keep_alive_nodes; 
-
-#ifdef TRACE_KEEP_ALIVES
-	FTRACE("done deleting keep_alive_nodes\n");
-#endif
 }
 
 

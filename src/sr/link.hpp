@@ -72,8 +72,6 @@ public:
     virtual ~XLink();
     XLink(const XLink &other);
     XLink &operator=(const XLink &other);
-    XLink(XLink &&other);
-    XLink &operator=(XLink &&other);
     XLink( shared_ptr<const Node> parent_x,
            const TreePtrInterface *p_tpi,
            Whodat whodat_ = Whodat() );
