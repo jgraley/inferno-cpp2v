@@ -60,7 +60,7 @@ SCREngine::Plan::Plan( SCREngine *algo_,
     enclosing_engine = enclosing_engine_;
     
     ASSERT( cp )("Compare pattern must always be provided\n");
-    ASSERT( cp==rp ); // Should have managed to reduce to a single pattern by now
+    ASSERT( cp==rp ); // Should have managed to reduce to a single pattern by now (CombinePatterns)
     pattern_origin = cp; 
     origin_agent = Agent::AsAgent(pattern_origin);
     // For closure under full arrowhead model, we need a link to root
@@ -180,7 +180,7 @@ void SCREngine::Plan::CreateMyEngines( CompareReplace::AgentPhases &in_progress_
             
     for( PatternLink plink : my_embedded_plinks_postorder )
     {
-		Agent *agent = plink.GetChildAgent();   
+		Agent *agent = plink.GetChildAgent();   		
         my_engines[agent] = make_shared<SCREngine>( vn_sequence,
                                                     root_engine, 
                                                     in_progress_agent_phases,

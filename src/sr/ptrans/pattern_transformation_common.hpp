@@ -19,7 +19,7 @@ protected:
     class PatternKnowledge
     {
     public:
-        PatternKnowledge( VNStep &vnt );
+        PatternKnowledge( VNStep &vnt, const PatternTransformationCommon *trans );
     
     private:
         void WalkPattern( set<PatternLink> &all_plinks, 
@@ -34,9 +34,8 @@ protected:
         TreePtr<Node> replace_root_pattern;
         Agent *replace_root_agent = nullptr;
         PatternLink replace_root_plink;
-        set<PatternLink> all_plinks;
         set<Agent *> all_agents;
-        map< Agent *, set<PatternLink> > plinks_to_agents;                
+        map< Agent *, set<PatternLink> > agents_to_incoming_plinks;                
         set<EmbeddedSCRAgent *> embedded_scr_agents;
     };
 

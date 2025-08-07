@@ -90,8 +90,8 @@ TreePtrCommon::~TreePtrCommon()
 {
        // Use ASSERT for static since we're in a destructor and our concrete class has gone away
        ASSERTS( ref_count==0 )
-              ("Live XLinks when deleting ")(Join(deletions, " due to "))("\n")
-              ("XLink ref count: %u\n", ref_count)
+              ("Live links when deleting ")(Join(deletions, " due to "))("\n")
+              ("Link count: %u\n", ref_count)
 #ifdef TREE_POINTER_REF_TRACKING
               (references)
 #endif
@@ -133,13 +133,13 @@ TreePtrCommon &TreePtrCommon::operator=(const TreePtrCommon &other)
 #ifdef TREE_POINTER_REF_COUNTS
 void TreePtrCommon::AddRef(const Traceable *ref) const
 { 
-	//TRACE("Add ref ")(ref)("\n");
+	//TRACE("Add link ")(ref)("\n");
 	
 	ref_count++; 
 	
 #ifdef TREE_POINTER_REF_TRACKING
 	ASSERT( references.count(ref)==0 )
-	      ("Ref: ")
+	      ("Link: ")
 	      (ref)
 	      (" added more than once\n")
 	      (references);
@@ -150,9 +150,9 @@ void TreePtrCommon::AddRef(const Traceable *ref) const
 
 void TreePtrCommon::RemoveRef(const Traceable *ref) const 
 { 
-	//TRACE("Remove ref ")(ref)("\n");
+	//TRACE("Remove link ")(ref)("\n");
 	ASSERT( ref_count>0 )
-	      ("Ref count decrement past zero\n")
+	      ("Link count decrement past zero\n")
 #ifdef TREE_POINTER_REF_TRACKING
 	       (references)
 #endif

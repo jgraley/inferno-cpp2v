@@ -55,7 +55,7 @@ void DBWalk::VisitSingular( const WalkKit &kit,
     if( *p_x_singular )
     {
 		ASSERT( node );
-		child_xlink = XLink( node, p_x_singular ); // p_x_singular should be inside x
+		child_xlink = XLink( p_x_singular ); // p_x_singular should be inside x
 		child_node = child_xlink.GetChildTreePtr();
 	}
                     
@@ -90,7 +90,7 @@ void DBWalk::VisitSequence( const WalkKit &kit,
 		
 		if( (TreePtr<Node>)*xit ) // could be placeholder for terminus
 		{
-			child_xlink = XLink( node, &*xit ); // &*xit should be inside x
+			child_xlink = XLink( &*xit ); // &*xit should be inside x
 			child_node = child_xlink.GetChildTreePtr();
 		}
 			
@@ -127,7 +127,7 @@ void DBWalk::VisitCollection( const WalkKit &kit,
 		
 		if( (TreePtr<Node>)*xit ) // could be placeholder for terminus
 		{
-			child_xlink = XLink( node, &*xit ); // &*xit should be inside x
+			child_xlink = XLink( &*xit ); // &*xit should be inside x
 			child_node = child_xlink.GetChildTreePtr();
 		}
 		

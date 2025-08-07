@@ -4,12 +4,12 @@
 
 using namespace SR;
 
-PatternTransformationCommon::PatternKnowledge::PatternKnowledge( VNStep &vnt )
+PatternTransformationCommon::PatternKnowledge::PatternKnowledge( VNStep &vnt, const PatternTransformationCommon *trans )
 {
     vn_transformation = &vnt;
     top_level_engine = vnt.GetTopLevelEngine();
     
-    all_plinks.clear();
+    set<PatternLink> all_plinks; // PLink memory safety: local so freed before any changes to the pattern
     search_compare_root_pattern = top_level_engine->GetSearchComparePattern();
     if( search_compare_root_pattern )
     {
@@ -26,13 +26,15 @@ PatternTransformationCommon::PatternKnowledge::PatternKnowledge( VNStep &vnt )
     }
     
     all_agents.clear();
-    plinks_to_agents.clear();
-    for( PatternLink plink : all_plinks )
-    {
-        all_agents.insert( plink.GetChildAgent() ); 
-        plinks_to_agents[plink.GetChildAgent()].insert(plink);
-    }
-    
+    agents_to_incoming_plinks.clear();
+	for( PatternLink plink : all_plinks )
+	{
+		all_agents.insert( plink.GetChildAgent() ); 
+		
+		if( trans->RequireAgentsToIncomingPlinksMap() )
+			agents_to_incoming_plinks[plink.GetChildAgent()].insert(plink);
+	}
+		
     embedded_scr_agents.clear();
     for( Agent *agent : all_agents )        
         if( auto sa = dynamic_cast<EmbeddedSCRAgent *>(agent) )
@@ -52,7 +54,7 @@ void PatternTransformationCommon::PatternKnowledge::WalkPattern( set<PatternLink
    
 void PatternTransformationCommon::operator()( VNStep &vnt )
 {
-    const PatternKnowledge pk( vnt );
+    const PatternKnowledge pk( vnt, this );
     
     DoPatternTransformation( pk );    
 }

@@ -375,7 +375,7 @@ XLink NestedArrayAgent::Advance( XLink xlink,
                                  string *depth ) const
 {
     if( auto a = TreePtr<Array>::DynamicCast(xlink.GetChildTreePtr()) )         
-        return XLink(a, &(a->element)); // TODO support depth string (or integer)
+        return XLink(&(a->element)); // TODO support depth string (or integer)
     else
         return XLink();
 }
@@ -388,12 +388,12 @@ XLink NestedSubscriptLookupAgent::Advance( XLink xlink,
     if( auto s = DynamicTreePtrCast<Subscript>(xlink.GetChildTreePtr()) )            
     {
         *depth += "S";
-        return XLink(s, &(s->operands.front())); // the base, not the index
+        return XLink(&(s->operands.front())); // the base, not the index
     }
     else if( auto l = DynamicTreePtrCast<Lookup>(xlink.GetChildTreePtr()) )            
     {
         *depth += "L";
-        return XLink(l, &(l->member)); 
+        return XLink(&(l->member)); 
     }
     else
     {

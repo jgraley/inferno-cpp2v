@@ -252,7 +252,7 @@ unique_ptr<SymbolicResult> ChildSequenceFrontOperator::EvalFromItem( XValue pare
     if( p_x_seq->empty() )
         result_xlink = XValue::OffEnd; // OffEnd IS allowed in this case
     else
-        result_xlink = XValue(parent_xlink.GetChildTreePtr(), &(p_x_seq->front()));        
+        result_xlink = XValue(&(p_x_seq->front()));        
         
     return make_unique<UniqueResult>( result_xlink );
 }
@@ -277,7 +277,7 @@ unique_ptr<SymbolicResult> ChildSequenceBackOperator::EvalFromItem( XValue paren
     if( p_x_seq->empty() )
         return make_unique<EmptyResult>();
     
-    auto result_xlink = XValue(parent_xlink.GetChildTreePtr(), &(p_x_seq->back()));        
+    auto result_xlink = XValue(&(p_x_seq->back()));        
     return make_unique<UniqueResult>( result_xlink );
 }
 
@@ -301,7 +301,7 @@ unique_ptr<SymbolicResult> ChildCollectionFrontOperator::EvalFromItem( XValue pa
     if( p_x_col->empty() )
         return make_unique<EmptyResult>();
     
-    auto result_xlink = XValue(parent_xlink.GetChildTreePtr(), &*(p_x_col->begin()));        
+    auto result_xlink = XValue(&*(p_x_col->begin()));        
     return make_unique<UniqueResult>( result_xlink );
 }
 
@@ -322,7 +322,7 @@ unique_ptr<SymbolicResult> SingularChildOperator::EvalFromItem( XValue parent_xl
     
     // Create the correct XLink (i.e. not just pointing to the correct child Node,
     // but also coming from the correct TreePtr<Node>)
-    auto result_xlink = XValue(parent_xlink.GetChildTreePtr(), p_x_singular);        
+    auto result_xlink = XValue(p_x_singular);        
     return make_unique<UniqueResult>( result_xlink );
 }
 
@@ -536,7 +536,7 @@ unique_ptr<SymbolicResult> AllChildrenOperator::Evaluate( const EvalKit &kit,
     set<XValue> child_xlinks;
     for(const TreePtrInterface &child_node : flat )
     {
-        XValue child_xlink( parent_node, &child_node);
+        XValue child_xlink( &child_node);
         child_xlinks.insert( child_xlink );
     }
     

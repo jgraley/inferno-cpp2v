@@ -282,12 +282,12 @@ XLink XTreeDatabase::GetLastDescendantXLink(XLink base)
         if( auto x_con = dynamic_cast<ContainerInterface *>(xe) )
         {
             if( !x_con->empty() )
-                return GetLastDescendantXLink( XLink( x, &x_con->back() ) );
+                return GetLastDescendantXLink( XLink( &x_con->back() ) );
         }
         else if( auto p_x_singular = dynamic_cast<TreePtrInterface *>(xe) )
         {
             if( *p_x_singular ) // tolerate NULL singlar child pointers
-                return GetLastDescendantXLink( XLink( x, &*p_x_singular ) );
+                return GetLastDescendantXLink( XLink( &*p_x_singular ) );
         }
         else
             ASSERTFAILS("got something strange from itemise");

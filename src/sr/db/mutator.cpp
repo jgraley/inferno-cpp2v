@@ -236,7 +236,7 @@ XLink Mutator::GetXLink() const
 	}
 	else
 	{
-	    xlink = XLink(parent_node, GetTreePtrInterface()
+	    xlink = XLink(GetTreePtrInterface()
 #ifdef KEEP_WHODAT_INFO
                                         	            , whodat
 #endif

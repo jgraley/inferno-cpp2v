@@ -23,18 +23,23 @@ void SearchToCompare::DoPatternTransformation( const PatternKnowledge &pk )
             FixupPointers( pk, sa->search_pattern, sa->replace_pattern );
 
             TreePtr<Node> nn = sa->EvolveIntoEmbeddedCompareReplace();            
-            for( PatternLink plink : pk.plinks_to_agents.at(sa) )
+            for( PatternLink plink : pk.agents_to_incoming_plinks.at(sa) )
                 plink.Redirect(nn);           
         }
     }
+}
+
+bool SearchToCompare::RequireAgentsToIncomingPlinksMap() const
+{
+	return true; // yes please and we promise to keep them valid or delete them
 }
 
 
 void SearchToCompare::FixupPointers( const PatternKnowledge &pk, TreePtr<Node> &scp, TreePtr<Node> &rp )
 {
     ASSERT( scp );
-    ASSERT( scp==rp );
-
+	ASSERT( scp==rp ); 	// Should have filled in both by now (CombinePatterns)
+	
     // Obtain search and replace semantics from a compare and replace engine
     // by inserting a stuff node at root
     auto stuff = MakePatternNode< Stuff<Node> >();        

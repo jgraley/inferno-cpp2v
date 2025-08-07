@@ -40,7 +40,7 @@ string SubContainerRange::GetContentsTrace()
         if( !first )
             s += ", ";
         first = false;
-        XLink e_link = XLink(GetParentX(), &e_node);
+        XLink e_link(&e_node);
         s += Trace(e_link);
     }
     s += ")";
@@ -262,7 +262,7 @@ string SubContainerRangeExclusions::GetContentsTrace()
         if( !first )
             s += ", ";
         first = false;
-        XLink e_link = XLink(GetParentX(), &e_node);
+        XLink e_link(&e_node);
         s += Trace(e_link);
     }
     s += ")";

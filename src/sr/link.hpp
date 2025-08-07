@@ -29,11 +29,20 @@ public:
 	typedef vector<void *> Whodat;
 
     PatternLink();
+    ~PatternLink();
+    PatternLink(const PatternLink &other);
+    PatternLink &operator=(const PatternLink &other);
     PatternLink( shared_ptr<const Node> parent_pattern,
                  const TreePtrInterface *ppattern, 
                  Whodat whodat_ = Whodat() );
+private: friend class LocatedLink;
+    PatternLink( shared_ptr<const TreePtrInterface> ppattern, 
+                 Whodat whodat_ = Whodat() );
+public:
     PatternLink( const Agent *parent_agent,
                  const TreePtrInterface *ppattern );
+    //static PatternLink CreateFrom( const TreePtrInterface *p_tpi,
+    //                               Whodat whodat_ = Whodat() );
     // Make a copy of tp_pattern which acts as a new, distinct value 
     static PatternLink CreateDistinct( const TreePtr<Node> &tp_pattern );
     bool operator<(const PatternLink &other) const;
@@ -52,10 +61,8 @@ public:
     string GetName() const;
     string GetShortName() const;
     
-private: friend class LocatedLink;
-    PatternLink( shared_ptr<const TreePtrInterface> ppattern, 
-                 Whodat whodat_ = Whodat() );
-
+private:
+    const TreePtrInterface *p_tpi;
     shared_ptr<const TreePtrInterface> asp_pattern;
 #ifdef KEEP_WHODAT_INFO
     vector<void *> whodat; 
@@ -72,18 +79,11 @@ public:
     virtual ~XLink();
     XLink(const XLink &other);
     XLink &operator=(const XLink &other);
-    XLink( shared_ptr<const Node> parent_x,
-           const TreePtrInterface *p_tpi,
+    XLink( const TreePtrInterface *p_tpi,
            Whodat whodat_ = Whodat() );
     XLink( const LocatedLink &l );
-private: friend class LocatedLink;
-    XLink( shared_ptr<const TreePtrInterface> px,
-           const TreePtrInterface *p_tpi,
-           Whodat whodat_ = Whodat() );
-public:   
    
     // Make a copy of tp_x which acts as a new, distinct value 
-    static XLink CreateDistinct( const TreePtr<Node> &tp_x ); 
     static XLink CreateFrom( const TreePtrInterface *p_tpi,
                              Whodat whodat_ = Whodat() );
     size_t GetHash() const noexcept;    

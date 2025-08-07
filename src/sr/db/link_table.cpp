@@ -142,14 +142,14 @@ void LinkTable::GenerateRow(XLink xlink, DBCommon::TreeOrdinal tree_ordinal, con
         }
         case DBCommon::IN_SEQUENCE:
         {  
-            row.container_front = XLink( core_info->parent_node, &core_info->p_container->front() );
-            row.container_back = XLink( core_info->parent_node, &core_info->p_container->back() );
+            row.container_front = XLink( &core_info->p_container->front() );
+            row.container_back = XLink( &core_info->p_container->back() );
             
             SequenceInterface::iterator xit_predecessor = core_info->container_it;
             if( xit_predecessor != row.p_container->begin() )
             {
                 --xit_predecessor;
-                row.sequence_predecessor = XLink( core_info->parent_node, &*xit_predecessor );
+                row.sequence_predecessor = XLink( &*xit_predecessor );
             }
             else
                 row.sequence_predecessor = XLink::OffEnd;        
@@ -157,16 +157,16 @@ void LinkTable::GenerateRow(XLink xlink, DBCommon::TreeOrdinal tree_ordinal, con
             SequenceInterface::iterator xit_successor = core_info->container_it;
             ++xit_successor;
             if( xit_successor != row.p_container->end() )
-                row.sequence_successor = XLink( core_info->parent_node, &*xit_successor );
+                row.sequence_successor = XLink( &*xit_successor );
             else
                 row.sequence_successor = XLink::OffEnd;        
             break;
         }
         case DBCommon::IN_COLLECTION:
         {
-            row.container_front = XLink( core_info->parent_node, &*(core_info->p_container->begin()) );
+            row.container_front = XLink( &*(core_info->p_container->begin()) );
             // Note: in real STL containers, one would use *(x_col->rbegin())
-            row.container_back = XLink( core_info->parent_node, &(core_info->p_container->back()) );
+            row.container_back = XLink( &(core_info->p_container->back()) );
             break;
         }
         default:

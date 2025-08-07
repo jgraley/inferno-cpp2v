@@ -12,7 +12,9 @@ namespace SR
 
 class SearchToCompare : public PatternTransformationCommon
 {
-    virtual void DoPatternTransformation( const PatternKnowledge &pk ) override;
+    void DoPatternTransformation( const PatternKnowledge &pk ) final;
+    bool RequireAgentsToIncomingPlinksMap() const final;
+
     void FixupPointers( const PatternKnowledge &pk, TreePtr<Node> &scp, TreePtr<Node> &rp );
 };    
         

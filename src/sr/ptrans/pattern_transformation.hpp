@@ -16,6 +16,7 @@ class PatternTransformation
 {
 public:
     virtual void operator()( VNStep &vnt ) = 0;   
+    virtual bool RequireAgentsToIncomingPlinksMap() const;
 };
 
 

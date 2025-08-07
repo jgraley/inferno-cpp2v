@@ -85,7 +85,7 @@ TreePtr<Node> Duplicate::DuplicateSubtreeWorker( TreePtr<Node> source,
             for( const TreePtrInterface &source_elt : *source_container )
             {
                 ASSERTS( source_elt ); // present simplified scheme disallows nullptr
-                XLink source_child_xlink = XLink(source, &source_elt);
+                XLink source_child_xlink = XLink(&source_elt);
 
                 if( terminii_map.count(source_child_xlink) == 1 ) 
                 {
@@ -114,7 +114,7 @@ TreePtr<Node> Duplicate::DuplicateSubtreeWorker( TreePtr<Node> source,
             //TRACE("Duplicating node ")(*keynode_singular)("\n");
             TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
             ASSERTS( *source_singular )("source should be non-nullptr");
-            XLink source_child_xlink = XLink(source, source_singular);
+            XLink source_child_xlink = XLink(source_singular);
             
             if( terminii_map.count(source_child_xlink) == 1 ) 
             {

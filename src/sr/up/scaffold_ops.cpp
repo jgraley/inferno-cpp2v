@@ -63,7 +63,7 @@ TreeZone ScaffoldOps::TreeZoneAroundScaffoldNode( TreePtr<Node> scaffold_node, D
 
 	vector<XLink> terminii;
 	for( TreePtr<Node> &terminus_tpi : scaffold_ptr->child_ptrs )
-		terminii.push_back( XLink( scaffold_node, &terminus_tpi ) );
+		terminii.push_back( XLink( &terminus_tpi ) );
 	
 	return TreeZone( base_xlink, terminii, tree_ordinal );
 }

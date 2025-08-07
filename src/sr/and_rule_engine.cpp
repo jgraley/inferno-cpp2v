@@ -661,7 +661,7 @@ void AndRuleEngine::CompareMultiplicityNode( PatternLink plink, TreePtr<Node> no
         for( const TreePtrInterface &xe_node : *xci )
         {
             TRACE("Comparing ")(xe_node)("\n");
-            XLink xe_link = XLink(xscr->GetParentX(), &xe_node);
+            XLink xe_link(&xe_node);
             (void)e->Compare( xe_link, solution_for_subordinates, keep_alive_nodes );
         }
     }
