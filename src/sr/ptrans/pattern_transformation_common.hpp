@@ -28,12 +28,17 @@ protected:
     public:
         VNStep *vn_transformation;
         shared_ptr<CompareReplace> top_level_engine;
-        TreePtr<Node> search_compare_root_pattern;
+        
+		// Pattern link memory safety: declare these before any plinks that hang off them
+        shared_ptr<TreePtr<Node>> sp_tp_search_compare_root_pattern;
+        shared_ptr<TreePtr<Node>> sp_tp_replace_root_pattern;
+
         Agent *search_compare_root_agent = nullptr;
-        PatternLink search_compare_root_plink;
-        TreePtr<Node> replace_root_pattern;
         Agent *replace_root_agent = nullptr;
+
+        PatternLink search_compare_root_plink;
         PatternLink replace_root_plink;
+
         set<Agent *> all_agents;
         map< Agent *, set<PatternLink> > agents_to_incoming_plinks;                
         set<EmbeddedSCRAgent *> embedded_scr_agents;

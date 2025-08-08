@@ -8,8 +8,8 @@ using namespace SR;
 
 void SearchToCompare::DoPatternTransformation( const PatternKnowledge &pk )
 {    
-    TreePtr<Node> scp = pk.search_compare_root_pattern;
-    TreePtr<Node> rp = pk.replace_root_pattern;
+    TreePtr<Node> scp = *(pk.sp_tp_search_compare_root_pattern);
+    TreePtr<Node> rp = *(pk.sp_tp_replace_root_pattern);
     if( dynamic_pointer_cast<SearchReplace>(pk.top_level_engine) )
         FixupPointers( pk, scp, rp );
     auto new_tle = make_shared<CompareReplace>(); 

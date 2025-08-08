@@ -111,13 +111,6 @@ PatternLink::PatternLink(const Agent *parent_agent,
     PatternLink( parent_agent->GetPatternPtr(), ppattern, {WHODAT()} )
 {
 }
-
-
-PatternLink PatternLink::CreateDistinct( const TreePtr<Node> &tp_pattern )
-{
-    shared_ptr< TreePtr<Node> > sp_tp_pattern = make_shared< TreePtr<Node> >( tp_pattern ); 
-    return PatternLink(sp_tp_pattern, {WHODAT()});
-}
               
               
 bool PatternLink::operator<(const PatternLink &other) const

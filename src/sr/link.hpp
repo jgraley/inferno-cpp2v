@@ -42,7 +42,6 @@ public:
     //static PatternLink CreateFrom( const TreePtrInterface *p_tpi,
     //                               Whodat whodat_ = Whodat() );
     // Make a copy of tp_pattern which acts as a new, distinct value 
-    static PatternLink CreateDistinct( const TreePtr<Node> &tp_pattern );
     bool operator<(const PatternLink &other) const;
     bool operator!=(const PatternLink &other) const;
     bool operator==(const PatternLink &other) const;
