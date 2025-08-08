@@ -92,7 +92,7 @@ private:
         SCREngine * const algo;
         VNSequence *vn_sequence;
         const CompareReplace *root_engine;
-        TreePtr<Node> pattern_origin;
+        shared_ptr<TreePtr<Node>> sp_tp_pattern_origin;
         PatternLink origin_plink;
         Agent *origin_agent;
         const SCREngine *enclosing_engine;

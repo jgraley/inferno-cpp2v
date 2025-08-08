@@ -35,10 +35,8 @@ public:
     PatternLink( shared_ptr<const Node> parent_pattern,
                  const TreePtrInterface *ppattern, 
                  Whodat whodat_ = Whodat() );
-private: friend class LocatedLink;
     PatternLink( shared_ptr<const TreePtrInterface> ppattern, 
                  Whodat whodat_ = Whodat() );
-public:
     PatternLink( const Agent *parent_agent,
                  const TreePtrInterface *ppattern );
     //static PatternLink CreateFrom( const TreePtrInterface *p_tpi,
