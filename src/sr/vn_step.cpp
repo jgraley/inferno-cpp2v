@@ -16,18 +16,18 @@ void VNStep::Configure( StepType type,
     switch( type )
     {
         case SEARCH_REPLACE:
-            top_level_engine = make_shared<SearchReplace>();
+            root_engine = make_shared<SearchReplace>();
             break;
             
         case COMPARE_REPLACE:
-            top_level_engine = make_shared<CompareReplace>();
+            root_engine = make_shared<CompareReplace>();
             break;
             
         default:
             ASSERTFAIL("Silly");
     }       
     
-    top_level_engine->Configure( scp, rp );
+    root_engine->Configure( scp, rp );
 }                                  
 
 
@@ -47,7 +47,7 @@ PatternTransformationVector VNStep::GetAllPatternTrans()
 void VNStep::PatternTransformations()
 {
     ASSERTTHIS();
-    ASSERT( top_level_engine )("VNStep needs to be configured before use");
+    ASSERT( root_engine )("VNStep needs to be configured before use");
     PatternTransformationVector ptv = GetAllPatternTrans();
     
     ptv(*this);
@@ -58,33 +58,33 @@ void VNStep::PlanningStageOne( VNSequence *vn_sequence_ )
 {
     ASSERTTHIS();
     ASSERT( vn_sequence_ );
-    ASSERT( top_level_engine )("VNStep needs to be configured before use");
+    ASSERT( root_engine )("VNStep needs to be configured before use");
     vn_sequence = vn_sequence_;
-    top_level_engine->PlanningStageOne(vn_sequence);
+    root_engine->PlanningStageOne(vn_sequence);
 }
 
 
 void VNStep::PlanningStageTwo()
 {
     ASSERTTHIS();
-    ASSERT( top_level_engine )("VNStep needs to be configured before use");
-    top_level_engine->PlanningStageTwo();
+    ASSERT( root_engine )("VNStep needs to be configured before use");
+    root_engine->PlanningStageTwo();
 }
 
 
 void VNStep::PlanningStageThree()
 {
     ASSERTTHIS();
-    ASSERT( top_level_engine )("VNStep needs to be configured before use");
-    top_level_engine->PlanningStageThree();
+    ASSERT( root_engine )("VNStep needs to be configured before use");
+    root_engine->PlanningStageThree();
 }
 
 
 void VNStep::PlanningStageFive( shared_ptr<const Lacing> lacing )
 {
     ASSERTTHIS();
-    ASSERT( top_level_engine )("VNStep needs to be configured before use");
-    top_level_engine->PlanningStageFive(lacing);
+    ASSERT( root_engine )("VNStep needs to be configured before use");
+    root_engine->PlanningStageFive(lacing);
 }
 
 
@@ -97,23 +97,23 @@ void VNStep::SetMaxReps( int n, bool e )
 void VNStep::SetStopAfter( vector<int> ssa, int d )
 {
     ASSERTTHIS();
-    ASSERT( top_level_engine )("VNStep needs to be configured before use");
-    top_level_engine->SetStopAfter( ssa, d );
+    ASSERT( root_engine )("VNStep needs to be configured before use");
+    root_engine->SetStopAfter( ssa, d );
 }  
 
 
 void VNStep::SetXTreeDb( shared_ptr<XTreeDatabase> x_tree_db_ )
 {
 	x_tree_db = x_tree_db_;
-    top_level_engine->SetXTreeDb( x_tree_db );    
+    root_engine->SetXTreeDb( x_tree_db );    
 }
 
 
 void VNStep::Transform()
 {
     ASSERTTHIS();
-    ASSERT( top_level_engine )("VNStep needs to be configured before use");
-    top_level_engine->Transform();
+    ASSERT( root_engine )("VNStep needs to be configured before use");
+    root_engine->Transform();
     x_tree_db->DeferredActionsEndOfStep();
 }                                   
 
@@ -121,32 +121,32 @@ void VNStep::Transform()
 Graphable::NodeBlock VNStep::GetGraphBlockInfo() const
 {
     ASSERTTHIS();
-    ASSERT( top_level_engine )("VNStep needs to be configured before use");
-    return top_level_engine->GetGraphBlockInfo();
+    ASSERT( root_engine )("VNStep needs to be configured before use");
+    return root_engine->GetGraphBlockInfo();
 }  
 
 
 string VNStep::GetGraphId() const
 {
     ASSERTTHIS();
-    ASSERT( top_level_engine )("VNStep needs to be configured before use");
-    return top_level_engine->GetGraphId();
+    ASSERT( root_engine )("VNStep needs to be configured before use");
+    return root_engine->GetGraphId();
 }  
 
 
 void VNStep::GenerateGraphRegions( Graph &graph ) const
 {
     ASSERTTHIS();
-    ASSERT( top_level_engine )("VNStep needs to be configured before use");
-    return top_level_engine->GenerateGraphRegions( graph );
+    ASSERT( root_engine )("VNStep needs to be configured before use");
+    return root_engine->GenerateGraphRegions( graph );
 }  
 
 
 shared_ptr<CompareReplace> VNStep::GetTopLevelEngine() const
 {
     ASSERTTHIS();
-    ASSERT( top_level_engine )("VNStep needs to be configured before use");
-    return top_level_engine;
+    ASSERT( root_engine )("VNStep needs to be configured before use");
+    return root_engine;
 }
 
 
@@ -154,6 +154,6 @@ void VNStep::SetTopLevelEngine( shared_ptr<CompareReplace> tle )
 {
     ASSERTTHIS();
     ASSERT( tle )("Bad tle ptr");
-    top_level_engine = tle;
+    root_engine = tle;
 }
 

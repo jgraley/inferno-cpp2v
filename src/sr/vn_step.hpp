@@ -57,7 +57,7 @@ public:
     void SetTopLevelEngine( shared_ptr<CompareReplace> tle );
 
 private:
-    shared_ptr<CompareReplace> top_level_engine;
+    shared_ptr<CompareReplace> root_engine;
     VNSequence *vn_sequence = nullptr;
     shared_ptr<XTreeDatabase> x_tree_db;
 };    

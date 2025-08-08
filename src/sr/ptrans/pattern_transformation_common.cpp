@@ -7,12 +7,12 @@ using namespace SR;
 PatternTransformationCommon::PatternKnowledge::PatternKnowledge( VNStep &vnt, const PatternTransformationCommon *trans )
 {
     vn_transformation = &vnt;
-    top_level_engine = vnt.GetTopLevelEngine();
+    root_engine = vnt.GetTopLevelEngine();
     
     set<PatternLink> all_plinks; // PLink memory safety: local so freed before any changes to the pattern
 
-    sp_tp_search_compare_root_pattern = make_shared<TreePtr<Node>>( top_level_engine->GetSearchComparePattern() );
-    sp_tp_replace_root_pattern = make_shared<TreePtr<Node>>( top_level_engine->GetEmbeddedReplacePattern() );
+    sp_tp_search_compare_root_pattern = make_shared<TreePtr<Node>>( root_engine->GetSearchComparePattern() );
+    sp_tp_replace_root_pattern = make_shared<TreePtr<Node>>( root_engine->GetEmbeddedReplacePattern() );
 
 
     if( *sp_tp_search_compare_root_pattern )

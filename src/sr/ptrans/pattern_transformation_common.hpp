@@ -27,7 +27,7 @@ protected:
                           
     public:
         VNStep *vn_transformation;
-        shared_ptr<CompareReplace> top_level_engine;
+        shared_ptr<CompareReplace> root_engine;
         
 		// Pattern link memory safety: declare these before any plinks that hang off them
         shared_ptr<TreePtr<Node>> sp_tp_search_compare_root_pattern;
