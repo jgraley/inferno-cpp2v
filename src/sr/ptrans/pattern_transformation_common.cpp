@@ -11,20 +11,19 @@ PatternTransformationCommon::PatternKnowledge::PatternKnowledge( VNStep &vnt, co
     
     set<PatternLink> all_plinks; // PLink memory safety: local so freed before any changes to the pattern
 
-    sp_tp_search_compare_root_pattern = make_shared<TreePtr<Node>>( root_engine->GetSearchComparePattern() );
-    sp_tp_replace_root_pattern = make_shared<TreePtr<Node>>( root_engine->GetEmbeddedReplacePattern() );
+    search_compare_root_pattern = root_engine->GetSearchComparePattern();
+    replace_root_pattern = root_engine->GetEmbeddedReplacePattern();
 
-
-    if( *sp_tp_search_compare_root_pattern )
+    if( search_compare_root_pattern )
     {
-        search_compare_root_agent = Agent::AsAgent(*sp_tp_search_compare_root_pattern);
-        search_compare_root_plink = PatternLink( sp_tp_search_compare_root_pattern );
+        search_compare_root_agent = Agent::AsAgent(search_compare_root_pattern);
+        search_compare_root_plink = PatternLink( &search_compare_root_pattern );
         WalkPattern( all_plinks, search_compare_root_plink );
     }    
-    if( *sp_tp_replace_root_pattern )
+    if( replace_root_pattern )
     {
-        replace_root_agent = Agent::AsAgent(*sp_tp_replace_root_pattern);
-        replace_root_plink = PatternLink( sp_tp_replace_root_pattern );
+        replace_root_agent = Agent::AsAgent(replace_root_pattern);
+        replace_root_plink = PatternLink( &replace_root_pattern );
         WalkPattern( all_plinks, replace_root_plink );
     }
     

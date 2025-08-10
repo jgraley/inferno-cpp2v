@@ -122,7 +122,6 @@ public:
     template<class OTHER_VALUE_TYPE>
     AugTreePtr<OTHER_VALUE_TYPE> GetChild( const TreePtr<OTHER_VALUE_TYPE> *other_tree_ptr ) const
     {
-        ASSERT( !ON_STACK(other_tree_ptr) );        
         auto ogc = OnGetChild(other_tree_ptr);
         auto atp = AugTreePtr<OTHER_VALUE_TYPE>(*other_tree_ptr, ogc);
         return atp; 
@@ -132,7 +131,6 @@ public:
     template<class OTHER_VALUE_TYPE, class NEW_VALUE_TYPE>
     void SetChild( TreePtr<OTHER_VALUE_TYPE> *other_tree_ptr, AugTreePtr<NEW_VALUE_TYPE> new_val )
     {
-        ASSERT( !ON_STACK(other_tree_ptr) );        
         *other_tree_ptr = new_val.GetTreePtr(); // Update the type-safe free tree
         AugTreePtrBase::OnSetChild(other_tree_ptr, new_val); // Let base decide what to do
     }

@@ -61,10 +61,10 @@ SCREngine::Plan::Plan( SCREngine *algo_,
     
     ASSERT( cp )("Compare pattern must always be provided\n");
     ASSERT( cp==rp ); // Should have managed to reduce to a single pattern by now (CombinePatterns)
-    sp_tp_pattern_origin = make_shared<TreePtr<Node>>(cp); 
-    origin_agent = Agent::AsAgent(*sp_tp_pattern_origin);
+    pattern_origin = cp; // plink safety: take a copy
+    origin_agent = Agent::AsAgent(pattern_origin);
     // For closure under full arrowhead model, we need a link to root
-    origin_plink = PatternLink(sp_tp_pattern_origin);   
+    origin_plink = PatternLink(&pattern_origin);   
             
     CategoriseAgents( enclosing_plinks, in_progress_agent_phases );    
 
@@ -315,8 +315,8 @@ void SCREngine::Plan::Dump()
     {
         { "root_engine", 
           Trace(root_engine) },
-        { "sp_tp_pattern_origin", 
-          Trace(sp_tp_pattern_origin) },
+        { "pattern_origin", 
+          Trace(pattern_origin) },
         { "origin_plink", 
           Trace(origin_plink) },
         { "origin_agent", 
@@ -465,7 +465,7 @@ int SCREngine::RepeatingCompareReplace( XLink origin_xlink,
     
     universal_assignments = universal_assignments_;
         
-    ASSERT( *plan.sp_tp_pattern_origin )
+    ASSERT( plan.pattern_origin )
           ("SCREngine object was not configured before invocation.\n"
            "Either call Configure() or supply pattern arguments to constructor.\n"
            "Thank you for taking the time to read this message.\n");

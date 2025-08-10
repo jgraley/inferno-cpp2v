@@ -411,9 +411,6 @@ private:
 #define ASSERTFAIL(MESSAGE) do { Tracer( __FILE__, __LINE__, GetTrace(), __func__, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #MESSAGE ); abort(); } while(0);
 #define ASSERTFAILS(MESSAGE) do { Tracer( __FILE__, __LINE__, "", __func__, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #MESSAGE ); abort(); } while(0);
 
-#define STACK_BASE 0x7f0000000000ULL
-#define ON_STACK(POINTER) (((uint64_t)(POINTER) & STACK_BASE) == STACK_BASE)
-#define ASSERT_NOT_ON_STACK(POINTER) ASSERT( !ON_STACK(POINTER) )("\nObject at %p seems like it's probably on the stack, usually a bad sign\n", POINTER)
 #define RETURN_ADDR() (__builtin_extract_return_addr (__builtin_return_address (0)))
 
 // Tracing onto a string...

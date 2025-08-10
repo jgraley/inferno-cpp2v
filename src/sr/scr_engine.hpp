@@ -93,7 +93,7 @@ private:
         VNSequence *vn_sequence;
         const CompareReplace *root_engine;
         // PatternLink memory safety: declare before any of the plinks that might refer to it
-        shared_ptr<TreePtr<Node>> sp_tp_pattern_origin;
+        TreePtr<Node> pattern_origin;
         PatternLink origin_plink;
         Agent *origin_agent;
         const SCREngine *enclosing_engine;

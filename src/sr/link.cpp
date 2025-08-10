@@ -13,9 +13,6 @@
 #define PUSH_WHODAT_CMA(W, O) ((void)(O))
 #define PUSH_WHODAT_CMA_ARG(W, O, W_) ((void)(O), (void)(W_))
 #endif
- 
-// Tests the not-on-stack tests themseleves
-//#define TEST_ASSERT_NOT_ON_STACK
 
 #ifdef TREE_POINTER_REF_COUNTS
 #define PLINK_TREE_POINTER_REF_COUNTS
@@ -26,8 +23,7 @@ using namespace SR;
 //////////////////////////// PatternLink ///////////////////////////////
 
 PatternLink::PatternLink() :
-	p_tpi(nullptr),
-    asp_pattern(nullptr)
+	p_tpi(nullptr)
 {
     PUSH_WHODAT(whodat);
 }
@@ -43,8 +39,7 @@ PatternLink::~PatternLink()
 
 
 PatternLink::PatternLink(const PatternLink &other) :
-	p_tpi( other.p_tpi ),
-    asp_pattern( other.asp_pattern )
+	p_tpi( other.p_tpi )
 {
     PUSH_WHODAT_CMA(whodat, other);
 
@@ -66,7 +61,6 @@ PatternLink &PatternLink::operator=(const PatternLink &other)
 		p_tpi->RemoveRef(this);
 #endif
 	p_tpi = other.p_tpi;
-	asp_pattern = other.asp_pattern;	
 	
 #ifdef PLINK_TREE_POINTER_REF_COUNTS
 	if( p_tpi )
@@ -76,39 +70,22 @@ PatternLink &PatternLink::operator=(const PatternLink &other)
 }
 
 
-PatternLink::PatternLink(shared_ptr<const Node> parent_pattern,
-                         const TreePtrInterface *p_tpi_, 
+PatternLink::PatternLink(const TreePtrInterface *p_tpi_, 
                          Whodat whodat_) :
-	p_tpi( p_tpi_ ),
-    asp_pattern( parent_pattern, p_tpi_ )
+	p_tpi( p_tpi_ )
 {
-    ASSERT( parent_pattern );
     ASSERT( p_tpi_ );
     ASSERT( *p_tpi_ );
 	PUSH_WHODAT_ARG( whodat, whodat_ );
-    ASSERT_NOT_ON_STACK( p_tpi_ )( *this );
 #ifdef PLINK_TREE_POINTER_REF_COUNTS
 	p_tpi->AddRef(this);
 #endif	    
 }
 
 
-PatternLink::PatternLink(shared_ptr<const TreePtrInterface> ppattern, 
-                         Whodat whodat_) :
-	p_tpi( ppattern.get() ),
-    asp_pattern( ppattern )
-{
-	PUSH_WHODAT_ARG( whodat, whodat_ );    
-#ifdef PLINK_TREE_POINTER_REF_COUNTS
-	if( p_tpi )
-		p_tpi->AddRef(this);	
-#endif
-}
-
-
 PatternLink::PatternLink(const Agent *parent_agent,
                          const TreePtrInterface *ppattern) :
-    PatternLink( parent_agent->GetPatternPtr(), ppattern, {WHODAT()} )
+    PatternLink( ppattern, {WHODAT()} )
 {
 }
               
@@ -200,9 +177,8 @@ void PatternLink::Redirect( const TreePtrInterface &new_parent_pattern )
 #if USE_LIST_FOR_COLLECTION
     // With this setting, collections as well as sequences are really
     // lists, and the const cast is safe. In fact the constness of 
-    // associative keys is the only reason for asp_pattern pointing
+    // associative keys is the only reason for p_tpi pointing
     // to const.
-    *const_pointer_cast<TreePtrInterface>(asp_pattern) = new_parent_pattern;
     *const_cast<TreePtrInterface *>(p_tpi) = new_parent_pattern;
 #else
 #error If associative containers are to be used in nodes, the const \
@@ -301,7 +277,6 @@ XLink::XLink( const TreePtrInterface *p_tpi_,
 	PUSH_WHODAT_ARG( whodat, whodat_ );
     ASSERT( p_tpi );
     ASSERT( *p_tpi );
-    ASSERT_NOT_ON_STACK( p_tpi_ )( *this );
 #ifdef XLINK_TREE_POINTER_REF_COUNTS
 	p_tpi->AddRef(this);
 #endif	
@@ -410,13 +385,7 @@ LocatedLink::LocatedLink( const PatternLink &plink_,
     plink( plink_ ),
     xlink( xlink_ )                                                  
 {
-    ASSERT( (bool)plink == (bool)xlink );
-    
-#ifdef TEST_ASSERT_NOT_ON_STACK
-    // Test the fail case; pass case is being tested all the time anyway
-    int a;
-    ASSERT_NOT_ON_STACK(&a)(*this);
-#endif        
+    ASSERT( (bool)plink == (bool)xlink );         
 }
 
 

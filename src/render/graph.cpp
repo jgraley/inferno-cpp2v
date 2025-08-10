@@ -550,7 +550,7 @@ Graph::MyNodeBlock Graph::PreProcessBlock( const Graphable::NodeBlock &block,
             if( link->pptr && my_block.node )   
             {
                 if( pspecial )         
-                    my_link->trace_labels.push_back( PatternLink( my_block.node, link->pptr ).GetShortName() );        
+                    my_link->trace_labels.push_back( PatternLink( link->pptr ).GetShortName() );        
                 else
                     my_link->trace_labels.push_back( XLink( link->pptr ).GetShortName() ); 
             }

@@ -93,7 +93,6 @@ XLink TransformOfAgent::AugBERoaming::GetXLink() const
 
 TransformOfAgent::AugBERoaming *TransformOfAgent::AugBERoaming::OnGetChild( const TreePtrInterface *other_tree_ptr )
 {
-    ASSERT( !ON_STACK(other_tree_ptr) );
 #ifdef THROW_ON_NULL
     if( !(TreePtr<Node>)*other_tree_ptr )
 		throw ReachedNullChiled();

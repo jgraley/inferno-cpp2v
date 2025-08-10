@@ -32,10 +32,7 @@ public:
     ~PatternLink();
     PatternLink(const PatternLink &other);
     PatternLink &operator=(const PatternLink &other);
-    PatternLink( shared_ptr<const Node> parent_pattern,
-                 const TreePtrInterface *ppattern, 
-                 Whodat whodat_ = Whodat() );
-    PatternLink( shared_ptr<const TreePtrInterface> ppattern, 
+    PatternLink( const TreePtrInterface *ppattern, 
                  Whodat whodat_ = Whodat() );
     PatternLink( const Agent *parent_agent,
                  const TreePtrInterface *ppattern );
@@ -60,7 +57,6 @@ public:
     
 private:
     const TreePtrInterface *p_tpi;
-    shared_ptr<const TreePtrInterface> asp_pattern;
 #ifdef KEEP_WHODAT_INFO
     vector<void *> whodat; 
 #endif

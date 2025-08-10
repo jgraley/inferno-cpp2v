@@ -30,8 +30,8 @@ protected:
         shared_ptr<CompareReplace> root_engine;
         
 		// Pattern link memory safety: declare these before any plinks that hang off them
-        shared_ptr<TreePtr<Node>> sp_tp_search_compare_root_pattern;
-        shared_ptr<TreePtr<Node>> sp_tp_replace_root_pattern;
+        TreePtr<Node> search_compare_root_pattern;
+        TreePtr<Node> replace_root_pattern;
 
         Agent *search_compare_root_agent = nullptr;
         Agent *replace_root_agent = nullptr;
