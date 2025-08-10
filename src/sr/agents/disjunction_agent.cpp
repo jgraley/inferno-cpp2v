@@ -25,7 +25,7 @@ shared_ptr<PatternQuery> DisjunctionAgent::GetPatternQuery() const
     auto pq = make_shared<PatternQuery>();
     pq->RegisterDecision(false); // Exclusive, please
     for( const TreePtrInterface &p : GetDisjuncts() )                 
-        pq->RegisterNormalLink( PatternLink(this, &p) );    
+        pq->RegisterNormalLink( PatternLink(&p) );    
     
     return pq;
 }
@@ -44,7 +44,7 @@ SYM::Lazy<SYM::BooleanExpression> DisjunctionAgent::SymbolicNormalLinkedQuery() 
     list< shared_ptr<SymbolExpression> > disjunct_exprs;
     for( const TreePtrInterface &p : GetDisjuncts() )           
     {
-        PatternLink disjunct_plink(this, &p);
+        PatternLink disjunct_plink(&p);
         auto disjunct_expr = MakeLazy<SymbolVariable>(disjunct_plink);
         disjunct_exprs.push_back( disjunct_expr );
         is_mmax_exprs.push_back( disjunct_expr==mmax_expr );

@@ -34,11 +34,6 @@ public:
     PatternLink &operator=(const PatternLink &other);
     PatternLink( const TreePtrInterface *ppattern, 
                  Whodat whodat_ = Whodat() );
-    PatternLink( const Agent *parent_agent,
-                 const TreePtrInterface *ppattern );
-    //static PatternLink CreateFrom( const TreePtrInterface *p_tpi,
-    //                               Whodat whodat_ = Whodat() );
-    // Make a copy of tp_pattern which acts as a new, distinct value 
     bool operator<(const PatternLink &other) const;
     bool operator!=(const PatternLink &other) const;
     bool operator==(const PatternLink &other) const;

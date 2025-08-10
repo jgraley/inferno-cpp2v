@@ -20,7 +20,7 @@ shared_ptr<PatternQuery> DepthAgent::GetPatternQuery() const
     auto pq = make_shared<PatternQuery>();
     
     pq->RegisterDecision( false ); // Exclusive, please.
-    pq->RegisterNormalLink( PatternLink(this, &terminus) );
+    pq->RegisterNormalLink( PatternLink(&terminus) );
     
     // Allow subclasses to further restrict
     PatternQueryRestrictions( pq );
@@ -37,7 +37,7 @@ Agent::ReplacePatchPtr DepthAgent::GenReplaceLayoutImpl( const ReplaceKit &kit,
     INDENT("#");
     
     // Recurse at the terminus
-    PatternLink terminus_plink(this, &terminus);
+    PatternLink terminus_plink(&terminus);
     list<Agent::ReplacePatchPtr> child_commands;
     child_commands.push_back( terminus_plink.GetChildAgent()->GenReplaceLayout(kit, terminus_plink, acting_engine) );
 
@@ -73,7 +73,7 @@ Graphable::NodeBlock DepthAgent::GetGraphBlockInfo() const
 
 SYM::Lazy<SYM::BooleanExpression> ChildAgent::SymbolicNormalLinkedQueryPRed() const
 {
-    PatternLink terminus_plink(this, &terminus);
+    PatternLink terminus_plink(&terminus);
     return MakeLazy<ParentOperator>( MakeLazy<SymbolVariable>(terminus_plink) ) ==
            MakeLazy<SymbolVariable>(keyer_plink);
 }
@@ -94,13 +94,13 @@ Graphable::NodeBlock ChildAgent::GetGraphBlockInfo() const
 void StuffAgent::PatternQueryRestrictions( shared_ptr<PatternQuery> pq ) const
 {
     if( recurse_restriction )
-        pq->RegisterMultiplicityLink( PatternLink(this, &recurse_restriction) );
+        pq->RegisterMultiplicityLink( PatternLink(&recurse_restriction) );
 }                                                      
 
 
 SYM::Lazy<SYM::BooleanExpression> StuffAgent::SymbolicNormalLinkedQueryPRed() const
 {
-    PatternLink terminus_plink(this, &terminus);
+    PatternLink terminus_plink(&terminus);
     auto expr = MakeLazy<BooleanConstant>(true);
     
     expr &= MakeLazy<SymbolVariable>(terminus_plink) >= 
@@ -127,7 +127,7 @@ void StuffAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
     XLink keyer_xlink = hypothesis_links->at(keyer_plink);
     TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(keyer_xlink)("\n");
     
-    PatternLink terminus_plink(this, &terminus);
+    PatternLink terminus_plink(&terminus);
     XLink req_terminus_xlink = hypothesis_links->at(terminus_plink); 
     
     XLink xlink = req_terminus_xlink;
@@ -141,7 +141,7 @@ void StuffAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
         xpr_ss->elts.push_front( xlink );      
     }
     
-    query.RegisterMultiplicityNode( PatternLink(this, &recurse_restriction), xpr_ss ); // Links into X    
+    query.RegisterMultiplicityNode( PatternLink(&recurse_restriction), xpr_ss ); // Links into X    
 }
     
     

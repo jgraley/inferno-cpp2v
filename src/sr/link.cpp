@@ -81,14 +81,7 @@ PatternLink::PatternLink(const TreePtrInterface *p_tpi_,
 	p_tpi->AddRef(this);
 #endif	    
 }
-
-
-PatternLink::PatternLink(const Agent *parent_agent,
-                         const TreePtrInterface *ppattern) :
-    PatternLink( ppattern, {WHODAT()} )
-{
-}
-              
+            
               
 bool PatternLink::operator<(const PatternLink &other) const
 {

@@ -128,7 +128,7 @@ list<PatternLink> AgentCommon::GetChildren() const
     {        
 		//FTRACE("TPI=%p\n", &tpi);
         if( tpi )
-            plinks.push_back( PatternLink(this, &tpi) );
+            plinks.push_back( PatternLink(&tpi) );
     }
     return plinks;
 }

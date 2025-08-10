@@ -39,6 +39,7 @@ shared_ptr<TransformOfAgent::Dependencies> TransformOfAgent::AugBECommon::GetDep
     return my_deps;
 }
 
+
 void TransformOfAgent::AugBECommon::OnDepLeak()
 {
     // Policy: Leak dumps our deps stright into dest
@@ -247,7 +248,7 @@ RelocatingAgent::Dependencies *TransformOfAgent::TransUtils::GetDeps() const
 shared_ptr<PatternQuery> TransformOfAgent::GetPatternQuery() const
 {
     auto pq = make_shared<PatternQuery>();
-    pq->RegisterNormalLink( PatternLink(this, &pattern) );
+    pq->RegisterNormalLink( PatternLink(&pattern) );
     return pq;
 }
 

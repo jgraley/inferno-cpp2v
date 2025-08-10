@@ -17,7 +17,7 @@ EmbeddedSCRAgent::EmbeddedSCRAgent( TreePtr<Node> sp, TreePtr<Node> rp, bool is_
 shared_ptr<PatternQuery> EmbeddedSCRAgent::GetPatternQuery() const
 {
     auto pq = make_shared<PatternQuery>();
-    pq->RegisterNormalLink( PatternLink(this, GetThrough()) );
+    pq->RegisterNormalLink( PatternLink(GetThrough()) );
     return pq;
 }
 
@@ -26,7 +26,7 @@ void EmbeddedSCRAgent::MaybeChildrenPlanOverlay( PatternLink me_plink,
                                                  PatternLink under_plink )
 {    
     // Make embedded engines "invisible" to Delta key propagation (i.e. Autolocated see #342)
-    PatternLink through_plink(this, GetThrough());
+    PatternLink through_plink(GetThrough());
     through_plink.GetChildAgent()->PlanOverlay(through_plink, under_plink);   
 }                                      
 
@@ -35,7 +35,7 @@ list<PatternLink> EmbeddedSCRAgent::GetVisibleChildren( Path v ) const
 {
     // it's an embedded engines, so set up a container containing only "through", not "compare" or "replace"
     list<PatternLink> plinks;
-    plinks.push_back( PatternLink(this, GetThrough()) );
+    plinks.push_back( PatternLink(GetThrough()) );
     return plinks;
 }
 

@@ -45,7 +45,7 @@ string BuildIdentifierAgent::GetNewName(const SCREngine *acting_engine)
         ASSERT( source );
         // We have a child identifier - let replace algorithm run in the expectation it will
         // get subsitituted with a SpecificIdentifier from the original program tree
-        PatternLink source_plink(this, &source);
+        PatternLink source_plink(&source);
         TreePtr<Node> new_identifier = source_plink.GetChildAgent()->BuildForBuildersAnalysis(source_plink, acting_engine);
         TRACE("End SoftMakeIdentifier recurse\n");
         ASSERT( new_identifier );
@@ -229,9 +229,9 @@ pair<TreePtr<Node>, TreePtr<Node>> LabelIdentifierByNameAgent::GetBounds( string
 shared_ptr<PatternQuery> NestedAgent::GetPatternQuery() const
 {
     auto pq = make_shared<PatternQuery>();
-    pq->RegisterNormalLink( PatternLink(this, &terminus) );
+    pq->RegisterNormalLink( PatternLink(&terminus) );
     if( depth )
-        pq->RegisterNormalLink( PatternLink(this, &depth) ); // local
+        pq->RegisterNormalLink( PatternLink(&depth) ); // local
     return pq;
 }
 
@@ -406,7 +406,7 @@ XLink NestedSubscriptLookupAgent::Advance( XLink xlink,
 TreePtr<Node> BuildContainerSizeAgent::BuildNewSubtree(const SCREngine *acting_engine)
 {
     ASSERT( container );
-    PatternLink container_plink(this, &container);
+    PatternLink container_plink(&container);
     TreePtr<Node> new_node = container_plink.GetChildAgent()->BuildForBuildersAnalysis(container_plink, acting_engine);
     ASSERT( new_node );
     ContainerInterface *new_container = dynamic_cast<ContainerInterface *>(new_node.get());

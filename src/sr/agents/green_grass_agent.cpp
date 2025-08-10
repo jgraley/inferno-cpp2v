@@ -11,7 +11,7 @@ using namespace SYM;
 shared_ptr<PatternQuery> GreenGrassAgent::GetPatternQuery() const
 {
     auto pq = make_shared<PatternQuery>();
-    pq->RegisterNormalLink( PatternLink(this, GetThrough()) );
+    pq->RegisterNormalLink( PatternLink(GetThrough()) );
     return pq;
 }
 

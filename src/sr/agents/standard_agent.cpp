@@ -77,7 +77,7 @@ StandardAgent::Plan::Sequence::Sequence( int ii, Plan *plan, Phase phase, Sequen
          pit != pattern->end(); 
          ++pit ) 
     {
-        PatternLink plink(plan->algo, &*pit);
+        PatternLink plink(&*pit);
         if( dynamic_cast<StarAgent *>(plink.GetChildAgent()) )
         {               
             pit_last_star = pit;
@@ -106,11 +106,11 @@ StandardAgent::Plan::Sequence::Sequence( int ii, Plan *plan, Phase phase, Sequen
     
     if( !pattern->empty() )
     {        
-        plink_front = PatternLink(plan->algo, &pattern->front());
+        plink_front = PatternLink(&pattern->front());
         if( !dynamic_cast<StarAgent *>(plink_front.GetChildAgent()) )
             non_star_at_front = plink_front;
             
-        plink_back = PatternLink(plan->algo, &pattern->back());
+        plink_back = PatternLink(&pattern->back());
         if( !dynamic_cast<StarAgent *>(plink_back.GetChildAgent()) )
             non_star_at_back = plink_back;        
     }
@@ -130,7 +130,7 @@ StandardAgent::Plan::Collection::Collection( int ii, Plan *plan, Phase phase, Co
          ++pit )                 
     {
         const TreePtrInterface *pe = &*pit; 
-        PatternLink plink(plan->algo, &*pit);
+        PatternLink plink(&*pit);
         ASSERTS( pe );
         if( dynamic_cast<StarAgent *>(pe->get()) ) // per the impl, the star in a collection is not linked
         {
@@ -157,7 +157,7 @@ StandardAgent::Plan::Singular::Singular( int ii, Plan *plan, Phase phase, TreePt
     pattern(pattern_)
 {
     ASSERTS( pattern );
-    plink = PatternLink(plan->algo, pattern);
+    plink = PatternLink(pattern);
 }
 
 
@@ -200,11 +200,11 @@ void StandardAgent::IncrPatternQuerySequence( const Plan::Sequence &plan_seq,
         {
             if( pit != plan_seq.pit_last_star )
                 pattern_query->RegisterDecision( true ); // Inclusive, please.
-            pattern_query->RegisterAbnormalLink(PatternLink(this, pe));    
+            pattern_query->RegisterAbnormalLink(PatternLink(pe));    
         }
         else
         {
-            pattern_query->RegisterNormalLink(PatternLink(this, pe));    
+            pattern_query->RegisterNormalLink(PatternLink(pe));    
         }
     }
 }
@@ -219,7 +219,7 @@ void StandardAgent::IncrPatternQueryCollection( const Plan::Collection &plan_col
         if( !dynamic_cast<StarAgent *>(pe->get()) ) // per the impl, the star in a collection is not linked
         {
             pattern_query->RegisterDecision( false ); // Exclusive, please
-            pattern_query->RegisterNormalLink(PatternLink(this, pe));             
+            pattern_query->RegisterNormalLink(PatternLink(pe));             
         }
     }
     if( plan_col.star_plink )
@@ -232,7 +232,7 @@ void StandardAgent::IncrPatternQueryCollection( const Plan::Collection &plan_col
 void StandardAgent::IncrPatternQuerySingular( const Plan::Singular &plan_sing, 
                                               shared_ptr<PatternQuery> &pattern_query ) const
 {
-    pattern_query->RegisterNormalLink(PatternLink(this, plan_sing.pattern));
+    pattern_query->RegisterNormalLink(PatternLink(plan_sing.pattern));
 }                                              
 
 // ---------------------------- Symbolic Queries ----------------------------------                                               
@@ -519,8 +519,8 @@ void StandardAgent::MaybeChildrenPlanOverlay( PatternLink me_plink,
             {
 				// Trying out just skipping the PlanOverlay() if no under_singular
                 //ASSERT(*under_singular)("Cannot key singular ")(*my_singular)(" of ")(me_plink)(" because corresponding \"under\" item of ")(under_plink)(" is nullptr (item #%u)", i);
-                PatternLink my_singular_plink(this, my_singular);
-                PatternLink under_singular_plink(this, under_singular);
+                PatternLink my_singular_plink(my_singular);
+                PatternLink under_singular_plink(under_singular);
                 
                 my_singular_plink.GetChildAgent()->PlanOverlay( my_singular_plink, under_singular_plink );
             }
@@ -675,7 +675,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingPattern( const
                     
                     ASSERT( my_elt )("Some element of member %d (", j)(*my_con)(") of ")(*this)(" was nullptr\n");
                     TRACE("Got ")(*my_elt)("\n");
-                    PatternLink my_elt_plink( this, &my_elt );
+                    PatternLink my_elt_plink( &my_elt );
                     child_patches.push_back( my_elt_plink.GetChildAgent()->GenReplaceLayout(kit, my_elt_plink, acting_engine) );                
                 }
             }    
@@ -706,7 +706,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingPattern( const
                 TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[j]);        
                 ASSERT(    my_singular );
                 ASSERT( *my_singular ); // Should not have marked this one for overlay if NULL
-                PatternLink my_singular_plink( this, my_singular );                    
+                PatternLink my_singular_plink( my_singular );                    
                 child_patches.push_back( my_singular_plink.GetChildAgent()->GenReplaceLayout(kit, my_singular_plink, acting_engine) );           
             }        
             else
@@ -807,7 +807,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingX( const Repla
                     
                     ASSERT( my_elt )("Some element of member %d (", j)(*my_con)(") of ")(*this)(" was nullptr\n");
                     TRACE("Got ")(*my_elt)("\n");
-                    PatternLink my_elt_plink( this, &my_elt );
+                    PatternLink my_elt_plink( &my_elt );
                     child_patches.push_back( my_elt_plink.GetChildAgent()->GenReplaceLayout(kit, my_elt_plink, acting_engine) );                
                 }
             }    
@@ -838,7 +838,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingX( const Repla
                 TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[j]);        
                 ASSERT(    my_singular );
                 ASSERT( *my_singular ); // Should not have marked this one for overlay if NULL
-                PatternLink my_singular_plink( this, my_singular );                    
+                PatternLink my_singular_plink( my_singular );                    
                 child_patches.push_back( my_singular_plink.GetChildAgent()->GenReplaceLayout(kit, my_singular_plink, acting_engine) );           
             }        
             else
@@ -914,7 +914,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutNormal( const ReplaceKit &
                 ContainerInterface::iterator dest_it = dest_con->insert( Mutator::MakePlaceholder() );
                 zone.AddTerminus( Mutator::CreateFreeContainer(dest, dest_con, dest_it) );    
 
-                PatternLink my_elt_plink( this, &my_elt );
+                PatternLink my_elt_plink( &my_elt );
                 child_patches.push_back( my_elt_plink.GetChildAgent()->GenReplaceLayout(kit, my_elt_plink, acting_engine) );               
             }
         }            
@@ -926,7 +926,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutNormal( const ReplaceKit &
             *dest_singular = Mutator::MakePlaceholder();
             zone.AddTerminus( Mutator::CreateFreeSingular(dest, dest_singular) );            
 
-            PatternLink my_singular_plink( this, my_singular );                    
+            PatternLink my_singular_plink( my_singular );                    
             child_patches.push_back( my_singular_plink.GetChildAgent()->GenReplaceLayout(kit, my_singular_plink, acting_engine) );           
         }
         else

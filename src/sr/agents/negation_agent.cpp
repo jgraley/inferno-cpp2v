@@ -12,7 +12,7 @@ using namespace SYM;
 shared_ptr<PatternQuery> NegationAgent::GetPatternQuery() const
 {
     auto pq = make_shared<PatternQuery>();
-    pq->RegisterAbnormalLink( PatternLink(this, GetNegand()) );
+    pq->RegisterAbnormalLink( PatternLink(GetNegand()) );
     
     auto evaluator = make_shared<BooleanEvaluator>( [this](list<bool> inputs) -> bool
     {
@@ -41,7 +41,7 @@ void NegationAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
     query.Reset();
     
     // Context is abnormal because patterns must not match
-    query.RegisterAbnormalNode( PatternLink(this, GetNegand()), nullptr, keyer_xlink ); // Link into X, abnormal
+    query.RegisterAbnormalNode( PatternLink(GetNegand()), nullptr, keyer_xlink ); // Link into X, abnormal
 }
 
 
