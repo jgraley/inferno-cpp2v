@@ -36,8 +36,8 @@ PatternLink::PatternLink() :
 PatternLink::~PatternLink()
 {
 #ifdef PLINK_TREE_POINTER_REF_COUNTS
-	if( asp_pattern ) 
-		asp_pattern->RemoveRef(this);
+	if( p_tpi ) 
+		p_tpi->RemoveRef(this);
 #endif
 }
 
@@ -49,8 +49,8 @@ PatternLink::PatternLink(const PatternLink &other) :
     PUSH_WHODAT_CMA(whodat, other);
 
 #ifdef PLINK_TREE_POINTER_REF_COUNTS
-	if( asp_pattern ) 
-		asp_pattern->AddRef(this);
+	if( p_tpi ) 
+		p_tpi->AddRef(this);
 #endif
 }
 
@@ -62,15 +62,15 @@ PatternLink &PatternLink::operator=(const PatternLink &other)
     PUSH_WHODAT_CMA(whodat, other);
 
 #ifdef PLINK_TREE_POINTER_REF_COUNTS
-	if( asp_pattern ) 
-		asp_pattern->RemoveRef(this);
+	if( p_tpi ) 
+		p_tpi->RemoveRef(this);
 #endif
 	p_tpi = other.p_tpi;
 	asp_pattern = other.asp_pattern;	
 	
 #ifdef PLINK_TREE_POINTER_REF_COUNTS
-	if( asp_pattern )
-		asp_pattern->AddRef(this);	
+	if( p_tpi )
+		p_tpi->AddRef(this);	
 #endif
 	return *this;
 }
@@ -88,7 +88,7 @@ PatternLink::PatternLink(shared_ptr<const Node> parent_pattern,
 	PUSH_WHODAT_ARG( whodat, whodat_ );
     ASSERT_NOT_ON_STACK( p_tpi_ )( *this );
 #ifdef PLINK_TREE_POINTER_REF_COUNTS
-	asp_pattern->AddRef(this);
+	p_tpi->AddRef(this);
 #endif	    
 }
 
@@ -100,8 +100,8 @@ PatternLink::PatternLink(shared_ptr<const TreePtrInterface> ppattern,
 {
 	PUSH_WHODAT_ARG( whodat, whodat_ );    
 #ifdef PLINK_TREE_POINTER_REF_COUNTS
-	if( asp_pattern )
-		asp_pattern->AddRef(this);	
+	if( p_tpi )
+		p_tpi->AddRef(this);	
 #endif
 }
 
@@ -121,13 +121,13 @@ bool PatternLink::operator<(const PatternLink &other) const
 
 bool PatternLink::operator!=(const PatternLink &other) const
 {
-    return asp_pattern != other.asp_pattern;
+    return p_tpi != other.p_tpi;
 }
 
 
 bool PatternLink::operator==(const PatternLink &other) const
 {
-    return asp_pattern == other.asp_pattern;
+    return p_tpi == other.p_tpi;
 }
 
 
@@ -142,21 +142,21 @@ Orderable::Diff PatternLink::Compare3Way(const PatternLink &l, const PatternLink
     // NULLness is primary ordering because we wish to dereference both pointers. 
     // If both are NULL we'll call that equal, and drop out. Also do fast-out on 
     // equal pointers.
-    if( r.asp_pattern==l.asp_pattern )
+    if( r.p_tpi==l.p_tpi )
         return 0; // for == case
-    else if( !r.asp_pattern )
+    else if( !r.p_tpi )
         return 1; // for > case
-    else if( !l.asp_pattern )
+    else if( !l.p_tpi )
         return -1; // for < case
     
     // Secondary ordering is on the value of the TreePtr which will
     // help with orderings of sets of things in the trace logs.
-    if( Orderable::Diff d_node = TreePtrInterface::Compare3Way( *l.asp_pattern, *r.asp_pattern ) )
+    if( Orderable::Diff d_node = TreePtrInterface::Compare3Way( *l.p_tpi, *r.p_tpi ) )
         return d_node;
 
     // Tertiary ordering is on the identities of the TreePtrs, which 
     // corresponds to the values of the PatternLinks.
-    if( Orderable::Diff d_tpi = TreePtrInterface::Compare3WayIdentity( *l.asp_pattern, *r.asp_pattern ) )
+    if( Orderable::Diff d_tpi = TreePtrInterface::Compare3WayIdentity( *l.p_tpi, *r.p_tpi ) )
         return d_tpi;
        
     return 0;
@@ -165,33 +165,33 @@ Orderable::Diff PatternLink::Compare3Way(const PatternLink &l, const PatternLink
 
 size_t PatternLink::GetHash() const noexcept
 {
-    return std::hash<decltype(asp_pattern)>()(asp_pattern) >> HASHING_POINTERS_ALIGNMENT_BITS;
+    return std::hash<decltype(p_tpi)>()(p_tpi) >> HASHING_POINTERS_ALIGNMENT_BITS;
 }
 
 
 PatternLink::operator bool() const
 {
-    return asp_pattern != nullptr;
+    return p_tpi != nullptr;
 }
 
 
 Agent *PatternLink::GetChildAgent() const
 {
-    ASSERT( asp_pattern )
+    ASSERT( p_tpi )
           ("GetChildAgent() called on uninitialised (nullptr) link\n");
-    return Agent::AsAgent((TreePtr<Node>)*asp_pattern);    
+    return Agent::AsAgent((TreePtr<Node>)*p_tpi);    
 }
 
 
 TreePtr<Node> PatternLink::GetPattern() const
 {
-    return (TreePtr<Node>)*asp_pattern;
+    return (TreePtr<Node>)*p_tpi;
 }
 
 
 const TreePtrInterface *PatternLink::GetPatternTreePtr() const
 {
-    return asp_pattern.get();
+    return p_tpi;
 }
 
 
@@ -203,6 +203,7 @@ void PatternLink::Redirect( const TreePtrInterface &new_parent_pattern )
     // associative keys is the only reason for asp_pattern pointing
     // to const.
     *const_pointer_cast<TreePtrInterface>(asp_pattern) = new_parent_pattern;
+    *const_cast<TreePtrInterface *>(p_tpi) = new_parent_pattern;
 #else
 #error If associative containers are to be used in nodes, the const \
 cast wont be safe and this function needs to be able to call \
@@ -213,9 +214,9 @@ Mutate() on the container.
 
 string PatternLink::GetTrace() const
 {
-    if(asp_pattern==nullptr)
+    if(p_tpi==nullptr)
         return "NULL";
-    string s = "↳"+asp_pattern->GetTrace();
+    string s = "↳"+p_tpi->GetTrace();
 #ifdef KEEP_WHODAT_INFO    
     s += Trace(whodat);
 #endif
@@ -225,18 +226,18 @@ string PatternLink::GetTrace() const
 
 string PatternLink::GetName() const
 {
-    if(asp_pattern==nullptr)
+    if(p_tpi==nullptr)
         return "NULL";
-    return "↳"+asp_pattern->GetName();
+    return "↳"+p_tpi->GetName();
 }
 
 
 string PatternLink::GetShortName() const
 {
-    if(asp_pattern==nullptr)
+    if(p_tpi==nullptr)
         return "NULL";
 	// Serial string included because needed in graphs to disambiguate links
-    string s = "↳" + asp_pattern->GetSerialString() + "->" + asp_pattern->GetShortName();
+    string s = "↳" + p_tpi->GetSerialString() + "->" + p_tpi->GetShortName();
     // I think we should be calling eg GetSerialString() from *outside* obejcts, i.e.
     // from pointer-liuke objects, since the awrial number is not a part of the
     // object's value.
