@@ -27,20 +27,20 @@ PatternTransformationCommon::PatternKnowledge::PatternKnowledge( VNStep &vnt, co
         WalkPattern( all_plinks, replace_root_plink );
     }
     
-    all_agents.clear();
+    all_pattern_nodes.clear();
     agents_to_incoming_plinks.clear();
 	for( PatternLink plink : all_plinks )
 	{
-		all_agents.insert( plink.GetChildAgent() ); 
+		all_pattern_nodes.insert( plink.GetPattern() );
 		
 		if( trans->RequireAgentsToIncomingPlinksMap() )
 			agents_to_incoming_plinks[plink.GetChildAgent()].insert(plink);
 	}
 		
-    embedded_scr_agents.clear();
-    for( Agent *agent : all_agents )        
-        if( auto sa = dynamic_cast<EmbeddedSCRAgent *>(agent) )
-            embedded_scr_agents.insert( sa );
+    embedded_scr_nodes.clear();
+    for( TreePtr<Node> node : all_pattern_nodes )        
+        if( dynamic_cast<EmbeddedSCRAgent *>(Agent::AsAgent(node)) )
+            embedded_scr_nodes.insert( node );
 }
 
 

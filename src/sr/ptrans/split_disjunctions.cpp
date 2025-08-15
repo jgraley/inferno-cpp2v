@@ -6,8 +6,8 @@ using namespace SR;
 
 void SplitDisjunctions::DoPatternTransformation( const PatternKnowledge &pk )
 {    
-    for( Agent *agent : pk.all_agents )
-        if( auto da = dynamic_cast<DisjunctionAgent *>(agent) )
+    for( TreePtr<Node> node : pk.all_pattern_nodes )
+        if( auto da = dynamic_cast<DisjunctionAgent *>(Agent::AsAgent(node)) )
             MaybeSplit(da);            
 }
 

@@ -133,7 +133,7 @@ void SCREngine::Plan::CategoriseAgents( const set<PatternLink> &enclosing_plinks
                 my_embedded_plinks_postorder.push_back(plink);        
                 
             if( visible_compare_plinks.count(plink) == 0 )
-				my_replace_only_plinks_postorder.push_back( plink ); // be exclusive of shared contexts      
+				my_replace_only_plinks_postorder.push_back( plink ); // be exclusive of shared contexts. See #822     
 		}
 	}
 	
@@ -244,7 +244,7 @@ void SCREngine::Plan::PlanningStageThree(set<PatternLink> enclosing_keyers)
 void SCREngine::Plan::PlanCompare()
 {
     // All agents this AndRuleEngine see must have been configured 
-    and_rule_engine = make_shared<AndRuleEngine>(origin_plink, enclosing_plinks, all_keyer_plinks);
+    and_rule_engine = shared_ptr<AndRuleEngine>(new AndRuleEngine(origin_plink, enclosing_plinks, all_keyer_plinks, {}, {}));
     
     and_rule_engine_keyer_plinks = and_rule_engine->GetKeyerPatternLinks();   
 }
@@ -253,7 +253,7 @@ void SCREngine::Plan::PlanCompare()
 void SCREngine::Plan::PlanReplace()
 {
     all_keyer_plinks = UnionOfSolo( all_keyer_plinks, and_rule_engine_keyer_plinks );
-	my_keyer_plinks = and_rule_engine_keyer_plinks;
+	my_agents_to_keyers.clear();
 	
     // Plan the keyers for couplings 
     for( StartsOverlay *ao : my_overlay_starter_engines )
@@ -266,16 +266,17 @@ void SCREngine::Plan::PlanReplace()
 		// Only want to be here when not already keyed, i.e. exclusively replace context.
 		ASSERT( all_keyer_plinks.count(plink)==0 )(plink);
 			
-		bool need_replace_key = !IsAgentKeyer(agent); // not keyed by any incoming plink
+		bool need_replace_key = !IsAgentKeyer(agent); // not keyed by any OTHER incoming plink
 		
 		if( need_replace_key )
 		{
             InsertSolo( all_keyer_plinks, plink );
             TRACE("Call ConfigureCoupling() on agent %p: ", agent)(agent)(" plink: ")(plink)("\n");  
+			
+			my_agents_to_keyers[agent] = plink; 
             agent->ConfigureCoupling( algo, plink, {} );
         }
         
-        my_keyer_plinks.insert( plink ); // See #822
     }
 
     // Replace will need the compare keyers unioned with the enclosing keyers    
@@ -383,7 +384,7 @@ Agent::ReplacePatchPtr SCREngine::CreateReplaceLayout()
     INDENT("R");
 
     // Get an expression that evaluates to the new X tree
-    Agent::ReplaceKit replace_kit { x_tree_db.get() };
+    Agent::ReplaceKit replace_kit { x_tree_db.get(), &plan.my_agents_to_keyers };
     return plan.origin_agent->GenReplaceLayout(replace_kit, plan.origin_plink, this);
 }
 

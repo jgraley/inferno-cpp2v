@@ -13,10 +13,11 @@ void CombinePatterns::DoPatternTransformation( const PatternKnowledge &pk )
     TreePtr<Node> rp = pk.replace_root_pattern;
     FixupPointers( pk, scp, rp );
     pk.root_engine->Configure( scp, rp );
-    
-    
-    for( EmbeddedSCRAgent *sa : pk.embedded_scr_agents )    
+        
+    for( TreePtr<Node> node : pk.embedded_scr_nodes )    
     {
+		EmbeddedSCRAgent *sa = dynamic_cast<EmbeddedSCRAgent *>(Agent::AsAgent(node));
+		ASSERT( sa );
         FixupPointers( pk, sa->search_pattern, sa->replace_pattern );
     }
 }

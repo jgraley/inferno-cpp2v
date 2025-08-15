@@ -16,12 +16,14 @@ void SearchToCompare::DoPatternTransformation( const PatternKnowledge &pk )
     new_tle->Configure( scp, rp );
     pk.vn_transformation->SetTopLevelEngine(new_tle); // install the new one
     
-    for( EmbeddedSCRAgent *sa : pk.embedded_scr_agents )    
+    for( TreePtr<Node> node : pk.embedded_scr_nodes )    
     {
+		EmbeddedSCRAgent *sa = dynamic_cast<EmbeddedSCRAgent *>(Agent::AsAgent(node));
+		ASSERT( sa );
         if( sa->IsSearch() )
         {                    
             FixupPointers( pk, sa->search_pattern, sa->replace_pattern );
-
+            			
             TreePtr<Node> nn = sa->EvolveIntoEmbeddedCompareReplace();            
             for( PatternLink plink : pk.agents_to_incoming_plinks.at(sa) )
                 plink.Redirect(nn);           

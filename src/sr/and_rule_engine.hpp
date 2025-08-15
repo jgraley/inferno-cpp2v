@@ -60,7 +60,9 @@ public:
 
     AndRuleEngine( PatternLink base_plink, 
                    const set<PatternLink> &surrounding_plinks,
-                   const set<PatternLink> &surrounding_keyer_plinks );
+                   const set<PatternLink> &surrounding_keyer_plinks,
+                   const map< Agent *, PatternLink > &surrounding_agents_to_keyers,
+                   const map< Agent *, set<PatternLink> > &surrounding_agents_to_residuals );
     
     ~AndRuleEngine();
     
@@ -69,7 +71,9 @@ public:
         Plan( AndRuleEngine *algo,  
               PatternLink base_plink, 
               const set<PatternLink> &surrounding_plinks,
-              const set<PatternLink> &surrounding_keyer_plinks );
+              const set<PatternLink> &surrounding_keyer_plinks,
+              const map< Agent *, PatternLink > &surrounding_agents_to_keyers,
+              const map< Agent *, set<PatternLink> > &surrounding_agents_to_residuals );
         void PlanningStageFive( shared_ptr<const Lacing> lacing );
 
         void PopulateNormalAgents( set<Agent *> *normal_agents, 
@@ -105,8 +109,19 @@ public:
         string GetTrace() const; // used for debug
         
         AndRuleEngine * const algo;
-        const PatternLink base_plink;
+        
         const TreePtr<Node> base_pattern;
+        
+        set< shared_ptr<SYM::BooleanExpression> > expressions_from_agents;
+        set< shared_ptr<SYM::BooleanExpression> > expressions_split;
+        set< shared_ptr<SYM::BooleanExpression> > expressions_for_current_solve;
+        map< set<PatternLink>, set<shared_ptr<SYM::BooleanExpression>> > expressions_condensed;
+        map< PatternLink, shared_ptr<AndRuleEngine> > my_free_abnormal_engines;
+        map< PatternLink, shared_ptr<AndRuleEngine> > my_evaluator_abnormal_engines;
+        map< PatternLink, shared_ptr<AndRuleEngine> > my_multiplicity_engines;
+        shared_ptr<CSP::Solver> csp_solver;
+        
+        const PatternLink base_plink;
         Agent * const base_agent;
         const set<PatternLink> surrounding_plinks;
         const set<PatternLink> surrounding_keyer_plinks;
@@ -115,9 +130,6 @@ public:
         set<PatternLink> my_normal_links;
         set<PatternLink> my_normal_links_unique_by_agent;
         set< Agent *> my_evaluators;   
-        map< PatternLink, shared_ptr<AndRuleEngine> > my_free_abnormal_engines;
-        map< PatternLink, shared_ptr<AndRuleEngine> > my_evaluator_abnormal_engines;
-        map< PatternLink, shared_ptr<AndRuleEngine> > my_multiplicity_engines;
         set<Agent *> boundary_agents;
         set<PatternLink> coupling_residual_links;
         set<PatternLink> coupling_keyer_links_all; // All keyers
@@ -126,14 +138,10 @@ public:
         set<PatternLink> my_fixed_keyer_links; 
         map< Agent *, set<PatternLink> > parent_links_to_my_normal_agents;
         map< Agent *, set<PatternLink> > parent_residual_links_to_boundary_agents;
+        map< Agent *, PatternLink > agents_to_keyers;
+        map< Agent *, set<PatternLink> > agents_to_residuals;
         list<PatternLink> free_normal_links_ordered;
         set<PatternLink> current_solve_plinks;
-        set< shared_ptr<SYM::BooleanExpression> > expressions_from_agents;
-        set< shared_ptr<SYM::BooleanExpression> > expressions_split;
-        set< shared_ptr<SYM::BooleanExpression> > expressions_for_current_solve;
-        map< set<PatternLink>, set<shared_ptr<SYM::BooleanExpression>> > expressions_condensed;
-
-        shared_ptr<CSP::Solver> csp_solver;
         list<PatternLink> normal_and_boundary_links_preorder;
         
     private: // working variables in plan construction

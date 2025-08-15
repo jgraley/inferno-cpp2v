@@ -24,6 +24,7 @@ public:
     struct ReplaceKit
     {
         XTreeDatabase *x_tree_db;
+        const map<Agent *, PatternLink> *agents_to_keyers;
     };
 
     // really just to reduce the amount of typing if I change it
@@ -63,7 +64,7 @@ public:
     typedef function<shared_ptr<DecidedQuery>()> QueryLambda;
 
     /// Obtain a symbolic expression for this node's queries (coupling and maybe NLQ)
-    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicQuery( bool coupling_only ) const = 0; 
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicQuery( PatternLink keyer, const set<PatternLink> &residuals, bool coupling_only ) const = 0; 
 
     /// Get abnormal/multiplicity info from an Agent given partial map of locations of base and normal links. 
     virtual QueryLambda StartRegenerationQuery( const SolutionMap *hypothesis_links,
@@ -76,7 +77,6 @@ public:
 
     virtual const SCREngine *GetMasterSCREngine() const = 0;      // TODO unused
     virtual PatternLink GetKeyerPatternLink() const = 0;
-    virtual set<PatternLink> GetResidualPatternLinks() const = 0;                                  
 
     virtual void Reset() = 0;     
     virtual void PlanOverlay( PatternLink me_plink, 

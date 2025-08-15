@@ -39,9 +39,11 @@ protected:
         PatternLink search_compare_root_plink;
         PatternLink replace_root_plink;
 
-        set<Agent *> all_agents;
+        set<TreePtr<Node>> all_pattern_nodes;
+        set<TreePtr<Node>> embedded_scr_nodes;
+
+		// Pattern link memory safety: declare plinks AFTER TreePtrs that hold things in place
         map< Agent *, set<PatternLink> > agents_to_incoming_plinks;                
-        set<EmbeddedSCRAgent *> embedded_scr_agents;
     };
 
 public:

@@ -20,6 +20,8 @@
 
 #include <stdexcept>
 
+//#define NEWS
+
 using namespace SR;
 using namespace SYM;
 
@@ -148,9 +150,9 @@ shared_ptr<DecidedQuery> AgentCommon::CreateDecidedQuery() const
 }
                                 
 
-Lazy<BooleanExpression> AgentCommon::SymbolicQuery( bool coupling_only ) const 
+Lazy<BooleanExpression> AgentCommon::SymbolicQuery( PatternLink keyer, const set<PatternLink> &residuals, bool coupling_only ) const 
 {
-    auto cq_expr = SymbolicCouplingQuery();
+    auto cq_expr = SymbolicCouplingQuery(keyer, residuals);
     if( coupling_only )
         return cq_expr;
 
@@ -159,19 +161,34 @@ Lazy<BooleanExpression> AgentCommon::SymbolicQuery( bool coupling_only ) const
 }
 
 
-Lazy<BooleanExpression> AgentCommon::SymbolicCouplingQuery() const
+Lazy<BooleanExpression> AgentCommon::SymbolicCouplingQuery(PatternLink keyer, const set<PatternLink> &residuals) const
 {
     ASSERT( my_keyer_engine )(*this)(" has not been configured for couplings");
     
     // This class establishes the policy for couplings in one place.
     // And it always will be: see #121; para starting at "No!!"
 
+	ASSERT( keyer == keyer_plink )
+	      ("keyer: ")(keyer)
+	      ("\nkeyer_plink: ")(keyer_plink);
+	ASSERT( residuals == residual_plinks )
+	      ("residuals: ")(residuals)
+	      ("\residual_plinks: ")(residual_plinks);
+#ifdef NEWS    
+    auto keyer_expr = MakeLazy<SymbolVariable>(keyer);
+#else
     auto keyer_expr = MakeLazy<SymbolVariable>(keyer_plink);
+#endif
+    
     auto mmax_expr = MakeLazy<SymbolConstant>(XLink::MMAX);
     
     // Policy must apply for every residual
     auto expr = MakeLazy<BooleanConstant>(true);
-    for( PatternLink residual_plink : residual_plinks )
+#ifdef NEWS    
+    for( PatternLink residual_plink : residuals )
+#else    
+    for( PatternLink residual_plink : residual_plinks)
+#endif    
     {
         auto residual_expr = MakeLazy<SymbolVariable>(residual_plink);
         
@@ -469,14 +486,6 @@ PatternLink AgentCommon::GetKeyerPatternLink() const
 }
 
 
-set<PatternLink> AgentCommon::GetResidualPatternLinks() const
-{
-    ASSERT( my_keyer_engine )(*this)(" has not been configured for couplings");
-    
-    return residual_plinks;
-}                                  
-
-
 void AgentCommon::Reset()
 {
 }
@@ -521,7 +530,7 @@ void AgentCommon::MaybeChildrenPlanOverlay( PatternLink me_plink,
                                   
 TreePtr<Node> AgentCommon::BuildForBuildersAnalysis( PatternLink me_plink, const SCREngine *acting_engine )
 {
-    Agent::ReplaceKit kit { nullptr };
+    Agent::ReplaceKit kit { nullptr, nullptr };
     shared_ptr<Patch> layout = GenReplaceLayout(kit, me_plink, acting_engine);
     unique_ptr<FreeZone> zone = TreeUpdater::TransformToSingleFreeZone( layout );     
     return zone->GetBaseNode();
@@ -537,6 +546,12 @@ Agent::ReplacePatchPtr AgentCommon::GenReplaceLayout( const ReplaceKit &kit,
     ASSERTTHIS();
     ASSERT(my_scr_engine)("Agent ")(*this)(" appears not to have been configured");
     ASSERT( phase != IN_COMPARE_ONLY )(*this)(" is configured for compare only");
+
+#ifdef NEWS2
+	// TODO get ARE keyers in agents_to_keyers too, for combined "stem" paths
+    ASSERT( kit.agents_to_keyers->count(this)>0 )(*kit.agents_to_keyers);
+    ASSERT( keyer_plink == kit.agents_to_keyers->at(this) );
+#endif    
     
     XLink key_xlink;
     //FTRACE(my_scr_engine)("\n");
@@ -623,11 +638,7 @@ string AgentCommon::GetPlanAsString() const
         { "overlay_under_plink", 
           Trace(overlay_under_plink) },
         { "keyer_and_normal_plinks", 
-          Trace(keyer_and_normal_plinks) },
-        { "SymbolicCouplingQuery()", 
-          my_keyer_engine ? Trace(SymbolicCouplingQuery()) : string("<not configured for couplings>") },
-        { "SymbolicNormalLinkedQuery()", 
-          pattern_query ? Trace(SymbolicNormalLinkedQuery()) : string("<no pattern_query>") }
+          Trace(keyer_and_normal_plinks) }
     };
     return Trace(plan_as_strings);
 }

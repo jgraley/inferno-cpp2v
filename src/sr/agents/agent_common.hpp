@@ -26,9 +26,9 @@ public:
     virtual list<PatternLink> GetVisibleChildren( Path v ) const override;
     virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const;                                    
                                   
-    SYM::Lazy<SYM::BooleanExpression> SymbolicQuery( bool coupling_only ) const override;                                       
+    SYM::Lazy<SYM::BooleanExpression> SymbolicQuery( PatternLink keyer, const set<PatternLink> &residuals, bool coupling_only ) const override;                                       
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuery() const = 0;
-    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicCouplingQuery() const;       
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicCouplingQuery(PatternLink keyer, const set<PatternLink> &residuals) const;       
     bool IsNonTrivialPreRestrictionNP(const TreePtrInterface *pptr) const override;
     bool IsNonTrivialPreRestriction() const;
     bool ShouldGenerateCategoryClause() const override;                                
@@ -52,7 +52,6 @@ public:
      
     virtual const SCREngine *GetMasterSCREngine() const;      
     virtual PatternLink GetKeyerPatternLink() const override;                                  
-    virtual set<PatternLink> GetResidualPatternLinks() const override;                                  
     virtual void Reset();    
     virtual void PlanOverlay( PatternLink me_plink, 
                               PatternLink under_plink );

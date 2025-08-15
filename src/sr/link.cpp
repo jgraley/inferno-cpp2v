@@ -74,11 +74,13 @@ PatternLink::PatternLink(const TreePtrInterface *p_tpi_,
                          Whodat whodat_) :
 	p_tpi( p_tpi_ )
 {
-    ASSERT( p_tpi_ );
-    ASSERT( *p_tpi_ );
+    //ASSERT( p_tpi_ );
+    if( p_tpi_ )
+		ASSERT( *p_tpi_ );
 	PUSH_WHODAT_ARG( whodat, whodat_ );
 #ifdef PLINK_TREE_POINTER_REF_COUNTS
-	p_tpi->AddRef(this);
+	if( p_tpi )
+		p_tpi->AddRef(this);
 #endif	    
 }
             

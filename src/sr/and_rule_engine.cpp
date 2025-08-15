@@ -49,8 +49,15 @@ const SolutionMap &AndRuleEngine::SuccessfulMatch::GetSolution() const
 
 AndRuleEngine::AndRuleEngine( PatternLink base_plink, 
                               const set<PatternLink> &surrounding_plinks,
-                              const set<PatternLink> &surrounding_keyer_plinks ) :
-    plan( this, base_plink, surrounding_plinks, surrounding_keyer_plinks )
+                              const set<PatternLink> &surrounding_keyer_plinks,
+                              const map< Agent *, PatternLink > &surrounding_agents_to_keyers,
+                              const map< Agent *, set<PatternLink> > &surrounding_agents_to_residuals ) :
+    plan( this, 
+          base_plink, 
+          surrounding_plinks, 
+          surrounding_keyer_plinks,
+          surrounding_agents_to_keyers,
+          surrounding_agents_to_residuals )
 {
 }    
 
@@ -63,17 +70,21 @@ AndRuleEngine::~AndRuleEngine()
 AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, 
                            PatternLink base_plink_, 
                            const set<PatternLink> &surrounding_plinks_,
-                           const set<PatternLink> &surrounding_keyer_plinks_ ) :
+                           const set<PatternLink> &surrounding_keyer_plinks_ ,
+                           const map< Agent *, PatternLink > &surrounding_agents_to_keyers,
+                           const map< Agent *, set<PatternLink> > &surrounding_agents_to_residuals) :
     algo( algo_ ),
+    base_pattern( base_plink_.GetPattern() ),
     base_plink( base_plink_ ),
-    base_pattern( base_plink.GetPattern() ),
     base_agent( base_plink.GetChildAgent() ),
     surrounding_plinks( surrounding_plinks_ ),
-    surrounding_keyer_plinks( surrounding_keyer_plinks_ )
+    surrounding_keyer_plinks( surrounding_keyer_plinks_ ),
+    agents_to_keyers( surrounding_agents_to_keyers ),
+    agents_to_residuals( surrounding_agents_to_residuals )    
 {    
     INDENT("P");
     TRACE(algo->GetTrace())(" planning\n");
-    
+    FTRACE("agents_to_keyers: ")(agents_to_keyers)("\n");
     // ------------------ Fill in the plan ---------------------
     surrounding_agents.clear();
     for( PatternLink plink : surrounding_plinks )
@@ -343,8 +354,10 @@ void AndRuleEngine::Plan::ConfigureAgents()
         for( PatternLink residual_plink : coupling_residual_links )
             if( residual_plink.GetChildAgent() == agent )
                 residual_plinks.insert( residual_plink );
-
-        TRACE("Call ConfigureCoupling() on agent %p: ", agent)(agent)(" plink: ")(keyer_plink)("\n");  
+	
+        FTRACE("Call ConfigureCoupling() on agent %p: ", agent)(agent)(" plink: ")(keyer_plink)("\n");  
+        agents_to_keyers[agent] = keyer_plink;
+        agents_to_residuals[agent] = residual_plinks;
         agent->ConfigureCoupling( algo, keyer_plink, residual_plinks );
     }
 
@@ -356,6 +369,8 @@ void AndRuleEngine::Plan::ConfigureAgents()
     {
         ASSERT( boundary_plink );
         Agent *agent = boundary_plink.GetChildAgent();
+        
+		agents_to_residuals[agent].insert( boundary_plink );        
         agent->AddResiduals( {boundary_plink} );
     }
 }
@@ -380,7 +395,8 @@ void AndRuleEngine::Plan::CreateMyFullSymbolics()
     for( PatternLink keyer_plink : my_normal_links_unique_by_agent ) // Only one constraint per agent
     {
         Agent *agent = keyer_plink.GetChildAgent();
-        SYM::Lazy<SYM::BooleanExpression> op = agent->SymbolicQuery(false);
+        ASSERT(agents_to_keyers.at(agent))(agents_to_keyers);
+        SYM::Lazy<SYM::BooleanExpression> op = agent->SymbolicQuery(agents_to_keyers.at(agent), agents_to_residuals.at(agent), false);
         expressions_from_agents.insert( op );
     }
 }
@@ -410,8 +426,24 @@ void AndRuleEngine::Plan::CreateBoundarySymbolics()
     
     for( PatternLink keyer_plink : boundary_keyer_links )
     {                                    
-        Agent *agent = keyer_plink.GetChildAgent();
-        SYM::Lazy<SYM::BooleanExpression> op = agent->SymbolicQuery(true);
+        Agent *agent = keyer_plink.GetChildAgent();             
+        
+        // TODO fix
+        // SCREngine has not configured any couplings yet (but what about SCR recursions?). 
+        // ARE needs to supply these to the AREs of embedded SCRs. So SCR needs to grab them
+        // from newly constructed ARE, use for replace and pass into embedded SCR, which
+        // must then pass into their AREs.
+		
+		ASSERT( agents_to_keyers.count(agent)>0 )("agent: ")(agent)("\nagents_to_keyers: ")(agents_to_keyers);
+		ASSERT( agents_to_residuals.count(agent)>0 )("agent: ")(agent)("\agents_to_residuals: ")(agents_to_residuals);
+#ifdef NEWS
+        PatternLink keyer = agents_to_keyers.at(agent);
+        set<PatternLink> residuals = agents_to_residuals.at(agent);
+        SYM::Lazy<SYM::BooleanExpression> op = agent->SymbolicQuery(keyer, residuals, true);
+#else
+        SYM::Lazy<SYM::BooleanExpression> op = agent->SymbolicQuery(PatternLink(), set<PatternLink>(), true);
+#endif
+        
         expressions_from_agents.insert( op );
     }
 }
@@ -459,13 +491,17 @@ void AndRuleEngine::Plan::CreateSubordniateEngines( const set<Agent *> &normal_a
             {
                 my_evaluator_abnormal_engines[link] = make_shared<AndRuleEngine>( link, 
                                                                                   subordinate_surrounding_plinks, 
-                                                                                  subordinate_surrounding_keyer_plinks );  
+                                                                                  subordinate_surrounding_keyer_plinks,
+                                                                                  agents_to_keyers,
+                                                                                  agents_to_residuals );  
             }
             else
             {
                 my_free_abnormal_engines[link] = make_shared<AndRuleEngine>( link, 
                                                                              subordinate_surrounding_plinks, 
-                                                                             subordinate_surrounding_keyer_plinks );  
+                                                                             subordinate_surrounding_keyer_plinks,
+                                                                             agents_to_keyers,
+                                                                             agents_to_residuals );  
             }
         }
         
@@ -473,7 +509,9 @@ void AndRuleEngine::Plan::CreateSubordniateEngines( const set<Agent *> &normal_a
         {
             my_multiplicity_engines[link] = make_shared<AndRuleEngine>( link, 
                                                                         subordinate_surrounding_plinks, 
-                                                                        subordinate_surrounding_keyer_plinks );  
+                                                                        subordinate_surrounding_keyer_plinks,
+                                                                        agents_to_keyers,
+                                                                        agents_to_residuals );  
         }
     }
 }

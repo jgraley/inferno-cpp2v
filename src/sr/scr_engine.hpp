@@ -94,9 +94,15 @@ private:
         const CompareReplace *root_engine;
         // PatternLink memory safety: declare before any of the plinks that might refer to it
         TreePtr<Node> pattern_origin;
+                
+        const SCREngine *enclosing_engine;
+        map< Agent *, shared_ptr<SCREngine> > my_engines;   
+        shared_ptr<AndRuleEngine> and_rule_engine;
+        CompareReplace::AgentPhases final_agent_phases;   
+        set<StartsOverlay *> my_overlay_starter_engines;   
+
         PatternLink origin_plink;
         Agent *origin_agent;
-        const SCREngine *enclosing_engine;
         const set<PatternLink> enclosing_plinks;
         set<Agent *> enclosing_agents;
         set<PatternLink> my_plinks;   
@@ -104,12 +110,8 @@ private:
         set<Agent *> my_agents;   
         set<PatternLink> and_rule_engine_keyer_plinks;   
         set<PatternLink> all_keyer_plinks;   
-        set<PatternLink> my_keyer_plinks;   
+        map<Agent *, PatternLink> my_agents_to_keyers;   
         set<PatternLink> keyed_before_replace_plinks;
-        set<StartsOverlay *> my_overlay_starter_engines;   
-        map< Agent *, shared_ptr<SCREngine> > my_engines;   
-        shared_ptr<AndRuleEngine> and_rule_engine;
-        CompareReplace::AgentPhases final_agent_phases;   
         list<PatternLink> my_replace_only_plinks_postorder;
         list<PatternLink> my_embedded_plinks_postorder;
     } plan;
