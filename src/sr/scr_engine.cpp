@@ -220,8 +220,8 @@ void SCREngine::Plan::ConfigureAgents()
 
 
 void SCREngine::Plan::PlanningStageThree( set<PatternLink> enclosing_keyers, 
-                                          map<Agent *, PatternLink> enclosing_agents_to_keyers,
-                                          map<Agent *, set<PatternLink>> enclosing_agents_to_residuals )
+                                          map<const Agent *, PatternLink> enclosing_agents_to_keyers,
+                                          map<const Agent *, set<PatternLink>> enclosing_agents_to_residuals )
 {    
     INDENT("}");
     // Stage three mirrors the sequence of events taken at run time i.e.
@@ -598,11 +598,29 @@ bool SCREngine::IsKeyedBeforeReplace( PatternLink plink ) const
 }
 
 
+bool SCREngine::IsKeyedBeforeReplace( const Agent *agent ) const
+{
+    ASSERT( agent );
+    
+    // This can be determined entirely from the plan. Node is keyed if 
+    // our AndRuleEngine did it or enclosing SCREngine did it.
+    return plan.keyed_before_replace_plinks.count(plan.all_agents_to_keyers.at(agent)) == 1;
+}
+
+
 XLink SCREngine::GetKey( PatternLink plink ) const
 {
     ASSERT( plink );
     ASSERT( universal_assignments );
     return universal_assignments->at(plink);
+}
+
+
+XLink SCREngine::GetKey( const Agent *agent ) const
+{
+    ASSERT( agent );
+    ASSERT( universal_assignments );
+    return universal_assignments->at(plan.all_agents_to_keyers.at(agent));
 }
 
 

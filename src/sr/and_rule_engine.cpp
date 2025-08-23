@@ -23,9 +23,7 @@
 #include "sym/expression_analysis.hpp"
 
 #include <list>
- 
-#define NEWS_ARE
- 
+  
 //#define CHECK_EVERYTHING_IS_IN_DOMAIN
 
 //#define NLQ_TEST
@@ -52,8 +50,8 @@ const SolutionMap &AndRuleEngine::SuccessfulMatch::GetSolution() const
 AndRuleEngine::AndRuleEngine( PatternLink base_plink, 
                               const set<PatternLink> &surrounding_plinks,
                               const set<PatternLink> &surrounding_keyer_plinks,
-                              const map< Agent *, PatternLink > &surrounding_agents_to_keyers,
-                              const map< Agent *, set<PatternLink> > &surrounding_agents_to_residuals ) :
+                              const map<const Agent *, PatternLink> &surrounding_agents_to_keyers,
+                              const map<const Agent *, set<PatternLink>> &surrounding_agents_to_residuals ) :
     plan( this, 
           base_plink, 
           surrounding_plinks, 
@@ -73,8 +71,8 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
                            PatternLink base_plink_, 
                            const set<PatternLink> &surrounding_plinks_,
                            const set<PatternLink> &surrounding_keyer_plinks_ ,
-                           const map< Agent *, PatternLink > &surrounding_agents_to_keyers,
-                           const map< Agent *, set<PatternLink> > &surrounding_agents_to_residuals) :
+                           const map<const Agent *, PatternLink> &surrounding_agents_to_keyers,
+                           const map<const Agent *, set<PatternLink>> &surrounding_agents_to_residuals) :
     algo( algo_ ),
     base_pattern( base_plink_.GetPattern() ),
     base_plink( base_plink_ ),
@@ -440,29 +438,18 @@ void AndRuleEngine::Plan::CreateBoundarySymbolics()
     
     for( PatternLink keyer_plink : boundary_keyer_links )
     {                                    
-        Agent *agent = keyer_plink.GetChildAgent();             
-        
-        // TODO fix
-        // SCREngine has not configured any couplings yet (but what about SCR recursions?). 
-        // ARE needs to supply these to the AREs of embedded SCRs. So SCR needs to grab them
-        // from newly constructed ARE, use for replace and pass into embedded SCR, which
-        // must then pass into their AREs.
+        Agent *agent = keyer_plink.GetChildAgent();                    
 		
         //FTRACE("SymbolicQuery: ")(agent)("\n");
 		ASSERT( agents_to_keyers.count(agent)>0 )
 		      ("agent: ")(agent)
-		      ("\nagents_to_keyers: ")(agents_to_keyers)
-		      ("\nAgent's stored keyer: ")(agent->GetKeyerPatternLink());
+		      ("\nagents_to_keyers: ")(agents_to_keyers);
 		ASSERT( agents_to_residuals.count(agent)>0 )
 		      ("agent: ")(agent)
 		      ("\agents_to_residuals: ")(agents_to_residuals);
-#ifdef NEWS_ARE
         PatternLink keyer = agents_to_keyers.at(agent);
         set<PatternLink> residuals = agents_to_residuals.at(agent);
         SYM::Lazy<SYM::BooleanExpression> op = agent->SymbolicQuery(keyer, residuals, true);
-#else
-        SYM::Lazy<SYM::BooleanExpression> op = agent->SymbolicQuery(PatternLink(), set<PatternLink>(), true);
-#endif
         
         expressions_from_agents.insert( op );
     }
@@ -977,9 +964,9 @@ set<PatternLink> AndRuleEngine::GetKeyerPatternLinks() const
 }
 
 
-map<Agent *, PatternLink> AndRuleEngine::GetAgentsToKeyersMap() const
+map<const Agent *, PatternLink> AndRuleEngine::GetAgentsToKeyersMap() const
 {
-    map<Agent *, PatternLink> agents_to_keyers_incl_subs;
+    map<const Agent *, PatternLink> agents_to_keyers_incl_subs;
     
     list<const AndRuleEngine *> subs = GetAndRuleEnginesInclThis();
     for( const AndRuleEngine *e : subs )
@@ -990,9 +977,9 @@ map<Agent *, PatternLink> AndRuleEngine::GetAgentsToKeyersMap() const
 }
 
 
-map<Agent *, set<PatternLink>> AndRuleEngine::GetAgentsToResidualsMap() const
+map<const Agent *, set<PatternLink>> AndRuleEngine::GetAgentsToResidualsMap() const
 {
-    map<Agent *, set<PatternLink>> agents_to_residuals_incl_subs;
+    map<const Agent *, set<PatternLink>> agents_to_residuals_incl_subs;
     
     list<const AndRuleEngine *> subs = GetAndRuleEnginesInclThis();
     for( const AndRuleEngine *e : subs )

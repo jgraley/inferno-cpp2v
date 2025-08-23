@@ -53,8 +53,8 @@ public:
         plan.PlanningStageTwo(in_progress_agent_phases); 
     }
     void PlanningStageThree(set<PatternLink> enclosing_keyers, 
-                            map<Agent *, PatternLink> enclosing_agents_to_keyers,
-                            map<Agent *, set<PatternLink>> enclosing_agents_to_residuals)
+                            map<const Agent *, PatternLink> enclosing_agents_to_keyers,
+                            map<const Agent *, set<PatternLink>> enclosing_agents_to_residuals)
     {
         plan.PlanningStageThree(enclosing_keyers, 
                                 enclosing_agents_to_keyers, 
@@ -86,8 +86,8 @@ private:
         void PlanningStageTwo(const CompareReplace::AgentPhases &in_progress_agent_phases); // Stage one is the constructor
         void ConfigureAgents();
         void PlanningStageThree( set<PatternLink> enclosing_keyers, 
-                                 map<Agent *, PatternLink> enclosing_agents_to_keyers,
-                                 map<Agent *, set<PatternLink>> enclosing_agents_to_residuals );
+                                 map<const Agent *, PatternLink> enclosing_agents_to_keyers,
+                                 map<const Agent *, set<PatternLink>> enclosing_agents_to_residuals );
         void PlanCompare();
         void PlanReplace();
         bool IsAgentKeyer( Agent *agent ) const;   
@@ -116,8 +116,8 @@ private:
         set<Agent *> my_agents;   
         set<PatternLink> and_rule_engine_keyer_plinks;   
         set<PatternLink> all_keyer_plinks;   
-        map<Agent *, PatternLink> all_agents_to_keyers;
-        map<Agent *, set<PatternLink>> all_agents_to_residuals;        
+        map<const Agent *, PatternLink> all_agents_to_keyers;
+        map<const Agent *, set<PatternLink>> all_agents_to_residuals;        
         set<PatternLink> keyed_before_replace_plinks;
         list<PatternLink> my_replace_only_plinks_postorder;
         list<PatternLink> my_embedded_plinks_postorder;
@@ -143,7 +143,9 @@ public: // For agents
     // Because we're not calling OUR RepeatingCompareReplace but
     // the embedded_engine's one - and that pointer is not const. 
     bool IsKeyedBeforeReplace( PatternLink plink ) const;
+    bool IsKeyedBeforeReplace( const Agent *agent ) const;
     XLink GetKey( PatternLink plink ) const;
+    XLink GetKey( const Agent *agent ) const;
     bool IsKeyedByAndRuleEngine( Agent *agent ) const; 
     const CompareReplace * GetOverallMaster() const;
     

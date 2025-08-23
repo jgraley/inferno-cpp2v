@@ -20,8 +20,6 @@
 
 #include <stdexcept>
 
-//#define NEWS
-
 using namespace SR;
 using namespace SYM;
 
@@ -174,21 +172,13 @@ Lazy<BooleanExpression> AgentCommon::SymbolicCouplingQuery(PatternLink keyer, co
 	ASSERT( IsIncludes(residual_plinks, residuals) )
 	      ("\nresiduals (passed in): ")(residuals)
 	      ("\nresidual_plinks (stored): ")(residual_plinks);
-#ifdef NEWS    
-    auto keyer_expr = MakeLazy<SymbolVariable>(keyer);
-#else
-    auto keyer_expr = MakeLazy<SymbolVariable>(keyer_plink);
-#endif
-    
+	      
+    auto keyer_expr = MakeLazy<SymbolVariable>(keyer);    
     auto mmax_expr = MakeLazy<SymbolConstant>(XLink::MMAX);
     
     // Policy must apply for every residual
     auto expr = MakeLazy<BooleanConstant>(true);
-#ifdef NEWS    
-    for( PatternLink residual_plink : residuals )
-#else    
-    for( PatternLink residual_plink : residual_plinks)
-#endif    
+    for( PatternLink residual_plink : residuals )    
     {
         auto residual_expr = MakeLazy<SymbolVariable>(residual_plink);
         
@@ -551,20 +541,14 @@ Agent::ReplacePatchPtr AgentCommon::GenReplaceLayout( const ReplaceKit &kit,
     ASSERT( me_plink.GetChildAgent() == this );
     ASSERTTHIS();
     ASSERT(my_scr_engine)("Agent ")(*this)(" appears not to have been configured");
-    ASSERT( phase != IN_COMPARE_ONLY )(*this)(" is configured for compare only");
-
-#ifdef NEWS2
-	// TODO get ARE keyers in agents_to_keyers too, for combined "stem" paths
-    ASSERT( kit.agents_to_keyers->count(this)>0 )(*kit.agents_to_keyers);
-    ASSERT( keyer_plink == kit.agents_to_keyers->at(this) );
-#endif    
+    ASSERT( phase != IN_COMPARE_ONLY )(*this)(" is configured for compare only");  
     
     XLink key_xlink;
     //FTRACE(my_scr_engine)("\n");
     ASSERT( acting_engine );
-    if( acting_engine->IsKeyedBeforeReplace( keyer_plink ) )
+    if( acting_engine->IsKeyedBeforeReplace( this ) )
     {
-        key_xlink = acting_engine->GetKey( keyer_plink );
+        key_xlink = acting_engine->GetKey( this );
         ASSERT( key_xlink.GetChildTreePtr()->IsFinal() )
               (*this)(" keyed with non-final node ")(key_xlink)("\n"); 
     }
@@ -572,7 +556,7 @@ Agent::ReplacePatchPtr AgentCommon::GenReplaceLayout( const ReplaceKit &kit,
     ReplacePatchPtr patch = GenReplaceLayoutImpl( kit, me_plink, key_xlink, acting_engine );
       
     // Inform the update mechanism that, once it's done duplicating 
-    // nodes etc, it should mark this position for this embedded agent's origin.
+    // nodes etc, it should mark this position for this agent's origin.
     patch->AddOriginators( { me_plink } );
     
     return patch;
@@ -637,10 +621,6 @@ string AgentCommon::GetPlanAsString() const
           Trace(my_keyer_engine) },
         //{ "pattern_query", 
         //  Trace(pattern_query) }, // TODO should be traceable?
-        { "keyer_plink", 
-          Trace(keyer_plink) },
-        { "residual_plinks", 
-          Trace(residual_plinks) },
         { "overlay_under_plink", 
           Trace(overlay_under_plink) },
         { "keyer_and_normal_plinks", 

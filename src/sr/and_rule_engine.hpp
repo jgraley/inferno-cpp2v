@@ -61,8 +61,8 @@ public:
     AndRuleEngine( PatternLink base_plink, 
                    const set<PatternLink> &surrounding_plinks,
                    const set<PatternLink> &surrounding_keyer_plinks,
-                   const map< Agent *, PatternLink > &surrounding_agents_to_keyers,
-                   const map< Agent *, set<PatternLink> > &surrounding_agents_to_residuals );
+                   const map<const Agent *, PatternLink> &surrounding_agents_to_keyers,
+                   const map<const Agent *, set<PatternLink>> &surrounding_agents_to_residuals );
     
     ~AndRuleEngine();
     
@@ -72,8 +72,8 @@ public:
               PatternLink base_plink, 
               const set<PatternLink> &surrounding_plinks,
               const set<PatternLink> &surrounding_keyer_plinks,
-              const map< Agent *, PatternLink > &surrounding_agents_to_keyers,
-              const map< Agent *, set<PatternLink> > &surrounding_agents_to_residuals );
+              const map<const Agent *, PatternLink> &surrounding_agents_to_keyers,
+              const map<const Agent *, set<PatternLink>> &surrounding_agents_to_residuals );
         void PlanningStageFive( shared_ptr<const Lacing> lacing );
 
         void PopulateNormalAgents( set<Agent *> *normal_agents, 
@@ -138,8 +138,8 @@ public:
         set<PatternLink> my_fixed_keyer_links; 
         map< Agent *, set<PatternLink> > parent_links_to_my_normal_agents;
         map< Agent *, set<PatternLink> > parent_residual_links_to_boundary_agents;
-        map< Agent *, PatternLink > agents_to_keyers;
-        map< Agent *, set<PatternLink> > agents_to_residuals;
+        map<const Agent *, PatternLink> agents_to_keyers;
+        map<const Agent *, set<PatternLink>> agents_to_residuals;
         list<PatternLink> free_normal_links_ordered;
         set<PatternLink> current_solve_plinks;
         list<PatternLink> normal_and_boundary_links_preorder;
@@ -180,8 +180,8 @@ public:
     const set<Agent *> &GetKeyedAgents() const;
     set<PatternLink> GetKeyerPatternLinks() const;
     
-    map<Agent *, PatternLink> GetAgentsToKeyersMap() const;
-    map<Agent *, set<PatternLink>> GetAgentsToResidualsMap() const;
+    map<const Agent *, PatternLink> GetAgentsToKeyersMap() const;
+    map<const Agent *, set<PatternLink>> GetAgentsToResidualsMap() const;
     
     set< shared_ptr<SYM::BooleanExpression> > GetExpressions() const;
     list<const AndRuleEngine *> GetAndRuleEnginesInclThis() const;

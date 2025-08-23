@@ -24,7 +24,7 @@ public:
     struct ReplaceKit
     {
         XTreeDatabase *x_tree_db;
-        const map<Agent *, PatternLink> *agents_to_keyers;
+        const map<const Agent *, PatternLink> *agents_to_keyers;
     };
 
     // really just to reduce the amount of typing if I change it
