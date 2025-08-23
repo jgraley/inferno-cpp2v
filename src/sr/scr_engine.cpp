@@ -219,7 +219,9 @@ void SCREngine::Plan::ConfigureAgents()
 }
 
 
-void SCREngine::Plan::PlanningStageThree(set<PatternLink> enclosing_keyers)
+void SCREngine::Plan::PlanningStageThree( set<PatternLink> enclosing_keyers, 
+                                          map<Agent *, PatternLink> enclosing_agents_to_keyers,
+                                          map<Agent *, set<PatternLink>> enclosing_agents_to_residuals )
 {    
     INDENT("}");
     // Stage three mirrors the sequence of events taken at run time i.e.
@@ -227,6 +229,8 @@ void SCREngine::Plan::PlanningStageThree(set<PatternLink> enclosing_keyers)
     TRACE("Planning stage three\n");
  
     all_keyer_plinks = enclosing_keyers;
+    all_agents_to_keyers = enclosing_agents_to_keyers;
+    all_agents_to_residuals = enclosing_agents_to_residuals;
     
     // COMPARE
     PlanCompare();
@@ -237,23 +241,26 @@ void SCREngine::Plan::PlanningStageThree(set<PatternLink> enclosing_keyers)
     // RECURSE RECURSE
     // Recurse into subordinate SCREngines
     for( pair< Agent *, shared_ptr<SCREngine> > p : my_engines )
-        p.second->PlanningStageThree(all_keyer_plinks);    
+        p.second->PlanningStageThree( all_keyer_plinks, 
+                                      all_agents_to_keyers, 
+                                      all_agents_to_residuals );    
 } 
 
 
 void SCREngine::Plan::PlanCompare()
 {
     // All agents this AndRuleEngine see must have been configured 
-    and_rule_engine = shared_ptr<AndRuleEngine>(new AndRuleEngine(origin_plink, enclosing_plinks, all_keyer_plinks, {}, {}));
+    and_rule_engine = shared_ptr<AndRuleEngine>(new AndRuleEngine(origin_plink, enclosing_plinks, all_keyer_plinks, all_agents_to_keyers, all_agents_to_residuals));
     
     and_rule_engine_keyer_plinks = and_rule_engine->GetKeyerPatternLinks();   
+    all_agents_to_keyers = and_rule_engine->GetAgentsToKeyersMap();
+    all_agents_to_residuals = and_rule_engine->GetAgentsToResidualsMap();
 }
 
 
 void SCREngine::Plan::PlanReplace()
 {
     all_keyer_plinks = UnionOfSolo( all_keyer_plinks, and_rule_engine_keyer_plinks );
-	my_agents_to_keyers.clear();
 	
     // Plan the keyers for couplings 
     for( StartsOverlay *ao : my_overlay_starter_engines )
@@ -273,10 +280,9 @@ void SCREngine::Plan::PlanReplace()
             InsertSolo( all_keyer_plinks, plink );
             TRACE("Call ConfigureCoupling() on agent %p: ", agent)(agent)(" plink: ")(plink)("\n");  
 			
-			my_agents_to_keyers[agent] = plink; 
+			all_agents_to_keyers[agent] = plink; 
             agent->ConfigureCoupling( algo, plink, {} );
-        }
-        
+        }        
     }
 
     // Replace will need the compare keyers unioned with the enclosing keyers    
@@ -384,7 +390,7 @@ Agent::ReplacePatchPtr SCREngine::CreateReplaceLayout()
     INDENT("R");
 
     // Get an expression that evaluates to the new X tree
-    Agent::ReplaceKit replace_kit { x_tree_db.get(), &plan.my_agents_to_keyers };
+    Agent::ReplaceKit replace_kit { x_tree_db.get(), &plan.all_agents_to_keyers };
     return plan.origin_agent->GenReplaceLayout(replace_kit, plan.origin_plink, this);
 }
 
@@ -554,7 +560,7 @@ set< shared_ptr<SYM::BooleanExpression> > SCREngine::GetExpressions() const
 list<const AndRuleEngine *> SCREngine::GetAndRuleEngines() const
 {
     list<const AndRuleEngine *> engines;
-    engines = plan.and_rule_engine->GetAndRuleEngines();
+    engines = plan.and_rule_engine->GetAndRuleEnginesInclThis();
     for( auto p : plan.my_engines )
     {
         //engines.push_back(nullptr);

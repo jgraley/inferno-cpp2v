@@ -178,9 +178,13 @@ public:
                          set<TreePtr<Node>> *keep_alive_nodes );
 
     const set<Agent *> &GetKeyedAgents() const;
-    const set<PatternLink> GetKeyerPatternLinks() const;
+    set<PatternLink> GetKeyerPatternLinks() const;
+    
+    map<Agent *, PatternLink> GetAgentsToKeyersMap() const;
+    map<Agent *, set<PatternLink>> GetAgentsToResidualsMap() const;
+    
     set< shared_ptr<SYM::BooleanExpression> > GetExpressions() const;
-    list<const AndRuleEngine *> GetAndRuleEngines() const;
+    list<const AndRuleEngine *> GetAndRuleEnginesInclThis() const;
 
     string GetTrace() const; // used for debug
     virtual string GetGraphId() const;

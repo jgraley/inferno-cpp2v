@@ -24,6 +24,8 @@
 
 #include <list>
  
+#define NEWS_ARE
+ 
 //#define CHECK_EVERYTHING_IS_IN_DOMAIN
 
 //#define NLQ_TEST
@@ -84,7 +86,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
 {    
     INDENT("P");
     TRACE(algo->GetTrace())(" planning\n");
-    FTRACE("agents_to_keyers: ")(agents_to_keyers)("\n");
+    //FTRACE("agents_to_keyers: ")(agents_to_keyers)("\n");
     // ------------------ Fill in the plan ---------------------
     surrounding_agents.clear();
     for( PatternLink plink : surrounding_plinks )
@@ -355,7 +357,9 @@ void AndRuleEngine::Plan::ConfigureAgents()
             if( residual_plink.GetChildAgent() == agent )
                 residual_plinks.insert( residual_plink );
 	
-        FTRACE("Call ConfigureCoupling() on agent %p: ", agent)(agent)(" plink: ")(keyer_plink)("\n");  
+        //FTRACE("Call ConfigureCoupling() on agent %p: ", agent)(agent)("\n")
+        //      ("keyer_plink: ")(keyer_plink)("\n")
+        //      ("residual_plinks: ")(residual_plinks)("\n");  
         agents_to_keyers[agent] = keyer_plink;
         agents_to_residuals[agent] = residual_plinks;
         agent->ConfigureCoupling( algo, keyer_plink, residual_plinks );
@@ -370,7 +374,9 @@ void AndRuleEngine::Plan::ConfigureAgents()
         ASSERT( boundary_plink );
         Agent *agent = boundary_plink.GetChildAgent();
         
-		agents_to_residuals[agent].insert( boundary_plink );        
+        //FTRACE("Call AddResiduals() on agent %p: ", agent)(agent)("\n")
+        //      ("boundary_plink (residual): ")(boundary_plink)("\n");  
+   		agents_to_residuals[agent].insert( boundary_plink );        
         agent->AddResiduals( {boundary_plink} );
     }
 }
@@ -395,6 +401,14 @@ void AndRuleEngine::Plan::CreateMyFullSymbolics()
     for( PatternLink keyer_plink : my_normal_links_unique_by_agent ) // Only one constraint per agent
     {
         Agent *agent = keyer_plink.GetChildAgent();
+        //FTRACE("SymbolicQuery: ")(agent)("\n");
+		ASSERT( agents_to_keyers.count(agent)>0 )
+		      ("agent: ")(agent)
+		      ("\nagents_to_keyers: ")(agents_to_keyers)
+		      ("\nAgent's stored keyer: ")(agent->GetKeyerPatternLink());
+		ASSERT( agents_to_residuals.count(agent)>0 )
+		      ("agent: ")(agent)
+		      ("\agents_to_residuals: ")(agents_to_residuals);
         ASSERT(agents_to_keyers.at(agent))(agents_to_keyers);
         SYM::Lazy<SYM::BooleanExpression> op = agent->SymbolicQuery(agents_to_keyers.at(agent), agents_to_residuals.at(agent), false);
         expressions_from_agents.insert( op );
@@ -434,9 +448,15 @@ void AndRuleEngine::Plan::CreateBoundarySymbolics()
         // from newly constructed ARE, use for replace and pass into embedded SCR, which
         // must then pass into their AREs.
 		
-		ASSERT( agents_to_keyers.count(agent)>0 )("agent: ")(agent)("\nagents_to_keyers: ")(agents_to_keyers);
-		ASSERT( agents_to_residuals.count(agent)>0 )("agent: ")(agent)("\agents_to_residuals: ")(agents_to_residuals);
-#ifdef NEWS
+        //FTRACE("SymbolicQuery: ")(agent)("\n");
+		ASSERT( agents_to_keyers.count(agent)>0 )
+		      ("agent: ")(agent)
+		      ("\nagents_to_keyers: ")(agents_to_keyers)
+		      ("\nAgent's stored keyer: ")(agent->GetKeyerPatternLink());
+		ASSERT( agents_to_residuals.count(agent)>0 )
+		      ("agent: ")(agent)
+		      ("\agents_to_residuals: ")(agents_to_residuals);
+#ifdef NEWS_ARE
         PatternLink keyer = agents_to_keyers.at(agent);
         set<PatternLink> residuals = agents_to_residuals.at(agent);
         SYM::Lazy<SYM::BooleanExpression> op = agent->SymbolicQuery(keyer, residuals, true);
@@ -945,16 +965,41 @@ const set<Agent *> &AndRuleEngine::GetKeyedAgents() const
 }
 
 
-const set<PatternLink> AndRuleEngine::GetKeyerPatternLinks() const
+set<PatternLink> AndRuleEngine::GetKeyerPatternLinks() const
 {
     set<PatternLink> keyer_plinks_incl_subs;
-    //keyer_plinks_incl_subs = plan.coupling_keyer_links_all; 
     
-    list<const AndRuleEngine *> subs = GetAndRuleEngines();
+    list<const AndRuleEngine *> subs = GetAndRuleEnginesInclThis();
     for( const AndRuleEngine *e : subs )
         keyer_plinks_incl_subs = UnionOfSolo( keyer_plinks_incl_subs, e->plan.coupling_keyer_links_all );
         
     return keyer_plinks_incl_subs;
+}
+
+
+map<Agent *, PatternLink> AndRuleEngine::GetAgentsToKeyersMap() const
+{
+    map<Agent *, PatternLink> agents_to_keyers_incl_subs;
+    
+    list<const AndRuleEngine *> subs = GetAndRuleEnginesInclThis();
+    for( const AndRuleEngine *e : subs )
+		for( auto p : e->plan.agents_to_keyers )
+			agents_to_keyers_incl_subs.insert( p ); // TODO use UnionOf after fixing #808
+        
+    return agents_to_keyers_incl_subs;
+}
+
+
+map<Agent *, set<PatternLink>> AndRuleEngine::GetAgentsToResidualsMap() const
+{
+    map<Agent *, set<PatternLink>> agents_to_residuals_incl_subs;
+    
+    list<const AndRuleEngine *> subs = GetAndRuleEnginesInclThis();
+    for( const AndRuleEngine *e : subs )
+		for( auto p : e->plan.agents_to_residuals )
+		    agents_to_residuals_incl_subs[p.first] = UnionOf(agents_to_residuals_incl_subs[p.first], p.second);
+		    
+    return agents_to_residuals_incl_subs;
 }
 
 
@@ -964,16 +1009,16 @@ set< shared_ptr<SYM::BooleanExpression> > AndRuleEngine::GetExpressions() const
 }
 
 
-list<const AndRuleEngine *> AndRuleEngine::GetAndRuleEngines() const
+list<const AndRuleEngine *> AndRuleEngine::GetAndRuleEnginesInclThis() const
 {
     list<const AndRuleEngine *> engines;
     engines.push_back( this );
     for( auto p : plan.my_free_abnormal_engines )
-        engines = engines + p.second->GetAndRuleEngines();
+        engines = engines + p.second->GetAndRuleEnginesInclThis();
     for( auto p : plan.my_evaluator_abnormal_engines )
-        engines = engines + p.second->GetAndRuleEngines();
+        engines = engines + p.second->GetAndRuleEnginesInclThis();
     for( auto p : plan.my_multiplicity_engines )
-        engines = engines + p.second->GetAndRuleEngines();
+        engines = engines + p.second->GetAndRuleEnginesInclThis();
     return engines;
 }
 

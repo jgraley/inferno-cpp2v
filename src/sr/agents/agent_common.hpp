@@ -51,7 +51,10 @@ public:
     virtual void ResetNLQConjecture();
      
     virtual const SCREngine *GetMasterSCREngine() const;      
-    virtual PatternLink GetKeyerPatternLink() const override;                                  
+
+    PatternLink GetKeyerPatternLink() const override;                                  
+    set<PatternLink> GetResidualPatternLink() const override;
+
     virtual void Reset();    
     virtual void PlanOverlay( PatternLink me_plink, 
                               PatternLink under_plink );

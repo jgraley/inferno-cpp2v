@@ -169,11 +169,11 @@ Lazy<BooleanExpression> AgentCommon::SymbolicCouplingQuery(PatternLink keyer, co
     // And it always will be: see #121; para starting at "No!!"
 
 	ASSERT( keyer == keyer_plink )
-	      ("keyer: ")(keyer)
-	      ("\nkeyer_plink: ")(keyer_plink);
-	ASSERT( residuals == residual_plinks )
-	      ("residuals: ")(residuals)
-	      ("\residual_plinks: ")(residual_plinks);
+	      ("\nkeyer (passed in): ")(keyer)
+	      ("\nkeyer_plink (stored): ")(keyer_plink);
+	ASSERT( IsIncludes(residual_plinks, residuals) )
+	      ("\nresiduals (passed in): ")(residuals)
+	      ("\nresidual_plinks (stored): ")(residual_plinks);
 #ifdef NEWS    
     auto keyer_expr = MakeLazy<SymbolVariable>(keyer);
 #else
@@ -483,6 +483,12 @@ PatternLink AgentCommon::GetKeyerPatternLink() const
     ASSERT( keyer_plink )(*this)(" has no keyer_plink, engine=")(my_keyer_engine)("\n");
     
     return keyer_plink;
+}
+
+
+set<PatternLink> AgentCommon::GetResidualPatternLink() const
+{
+    return residual_plinks;
 }
 
 

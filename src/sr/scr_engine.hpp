@@ -52,9 +52,13 @@ public:
     {
         plan.PlanningStageTwo(in_progress_agent_phases); 
     }
-    void PlanningStageThree(set<PatternLink> enclosing_keyers)
+    void PlanningStageThree(set<PatternLink> enclosing_keyers, 
+                            map<Agent *, PatternLink> enclosing_agents_to_keyers,
+                            map<Agent *, set<PatternLink>> enclosing_agents_to_residuals)
     {
-        plan.PlanningStageThree(enclosing_keyers); 
+        plan.PlanningStageThree(enclosing_keyers, 
+                                enclosing_agents_to_keyers, 
+                                enclosing_agents_to_residuals); 
     }
     void PlanningStageFive( shared_ptr<const Lacing> lacing )
     {
@@ -81,7 +85,9 @@ private:
         void CreateMyEngines( CompareReplace::AgentPhases &in_progress_agent_phases );
         void PlanningStageTwo(const CompareReplace::AgentPhases &in_progress_agent_phases); // Stage one is the constructor
         void ConfigureAgents();
-        void PlanningStageThree(set<PatternLink> enclosing_keyers);
+        void PlanningStageThree( set<PatternLink> enclosing_keyers, 
+                                 map<Agent *, PatternLink> enclosing_agents_to_keyers,
+                                 map<Agent *, set<PatternLink>> enclosing_agents_to_residuals );
         void PlanCompare();
         void PlanReplace();
         bool IsAgentKeyer( Agent *agent ) const;   
@@ -110,7 +116,8 @@ private:
         set<Agent *> my_agents;   
         set<PatternLink> and_rule_engine_keyer_plinks;   
         set<PatternLink> all_keyer_plinks;   
-        map<Agent *, PatternLink> my_agents_to_keyers;   
+        map<Agent *, PatternLink> all_agents_to_keyers;
+        map<Agent *, set<PatternLink>> all_agents_to_residuals;        
         set<PatternLink> keyed_before_replace_plinks;
         list<PatternLink> my_replace_only_plinks_postorder;
         list<PatternLink> my_embedded_plinks_postorder;

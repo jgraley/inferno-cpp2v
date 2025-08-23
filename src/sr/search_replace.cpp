@@ -60,7 +60,7 @@ void CompareReplace::Plan::PlanningStageTwo()
 void CompareReplace::Plan::PlanningStageThree()
 {
     // Third, create subordinate AndRuleEngines
-    scr_engine->PlanningStageThree( {} );
+    scr_engine->PlanningStageThree( {}, {}, {} );
         
     map<const Agent *, StringNoQuotes> agent_plans;
     for( auto p : agent_phases )

@@ -259,7 +259,7 @@ inline list< pair<typename T0::value_type, typename T1::value_type> > Zip( const
 }    
 
 
-// Is c1 a subset of c2?
+// Is c2 a subset of c1?
 template< typename C1, typename C2 >
 inline bool IsIncludes( const C1 &c1, const C2 &c2 )
 {
