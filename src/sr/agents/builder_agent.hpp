@@ -19,9 +19,9 @@ public:
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed(PatternLink keyer_plink) const final;                                                                       
 
     ReplacePatchPtr GenReplaceLayoutImpl( const ReplaceKit &kit, 
-                                    PatternLink me_plink, 
-                                    XLink key_xlink,
-                                                  const SCREngine *acting_engine ) final;
+                                          PatternLink me_plink, 
+                                          XLink key_xlink,
+                                          const SCREngine *acting_engine ) final;
                                             
     virtual TreePtr<Node> BuildNewSubtree(const SCREngine *acting_engine) = 0;
     

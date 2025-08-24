@@ -43,18 +43,16 @@ public:
                                const SolutionMap *hypothesis_links,
                                PatternLink keyer_plink,
                                const XTreeDatabase *x_tree_db ) const;
-    virtual QueryLambda StartRegenerationQuery( const SolutionMap *hypothesis_links,
-                                                PatternLink keyer_plink,
-                                                const XTreeDatabase *x_tree_db,
-                                                bool use_DQ = false ) const;
-    virtual QueryLambda TestStartRegenerationQuery( const SolutionMap *hypothesis_links,
-													PatternLink keyer_plink,
-                                                    const XTreeDatabase *x_tree_db ) const;
-    
-    virtual void ResetNLQConjecture();
-     
-    virtual const SCREngine *GetMasterSCREngine() const;      
-
+    QueryLambda StartRegenerationQuery( const AndRuleEngine *acting_engine,
+                                        const SolutionMap *hypothesis_links,
+                                        PatternLink keyer_plink,
+                                        const XTreeDatabase *x_tree_db,
+                                        bool use_DQ = false ) const final;
+    QueryLambda TestStartRegenerationQuery( const AndRuleEngine *acting_engine,
+                                            const SolutionMap *hypothesis_links,
+										    PatternLink keyer_plink,
+                                            const XTreeDatabase *x_tree_db ) const final;
+         
     virtual void Reset();    
     virtual void PlanOverlay( SCREngine *acting_engine,
                               PatternLink me_plink, 
@@ -71,8 +69,8 @@ public:
     TreePtr<Node> GetEmbeddedReplacePattern() const override;
     
     virtual ReplacePatchPtr GenReplaceLayoutImpl( const ReplaceKit &kit, 
-                                         PatternLink me_plink, 
-                                         XLink key_xlink,
+                                                  PatternLink me_plink, 
+                                                  XLink key_xlink,
                                                   const SCREngine *acting_engine );
     TreePtr<Node> CloneNode() const;
     virtual string GetTrace() const;
@@ -81,13 +79,8 @@ public:
     virtual string GetPlanAsString() const override;
     
 protected:                                  
-    const SCREngine *my_scr_engine = nullptr;    
     const Traceable *my_keyer_engine = nullptr;    
-    shared_ptr<PatternQuery> pattern_query;
-    Phase phase = UNDEFINED;
-    
-private:    
-    shared_ptr<Conjecture> nlq_conjecture;
+    Phase phase = UNDEFINED;    
 };
 
 };

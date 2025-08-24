@@ -143,7 +143,8 @@ public:
         list<PatternLink> free_normal_links_ordered;
         set<PatternLink> current_solve_plinks;
         list<PatternLink> normal_and_boundary_links_preorder;
-        
+        map<const Agent *, shared_ptr<Conjecture>> agents_to_nlq_conjectures;
+
     private: // working variables in plan construction
         set<Agent *> reached_agents;
         set<PatternLink> reached_links; 
@@ -185,6 +186,8 @@ public:
     
     set< shared_ptr<SYM::BooleanExpression> > GetExpressions() const;
     list<const AndRuleEngine *> GetAndRuleEnginesInclThis() const;
+
+    shared_ptr<Conjecture> GetNLQConjecture(const Agent *agent) const;
 
     string GetTrace() const; // used for debug
     virtual string GetGraphId() const;

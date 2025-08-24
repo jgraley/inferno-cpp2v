@@ -214,7 +214,7 @@ void SCREngine::Plan::ConfigureAgents()
     {  
 		TRACE("Call SCRConfigure() on agent %p: ", agent)(agent)("\n");  
         agent->SCRConfigure( algo,
-                             final_agent_phases.at(agent) );                                                 
+                             final_agent_phases.at(agent) );              
     }
 }
 

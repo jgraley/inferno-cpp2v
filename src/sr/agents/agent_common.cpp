@@ -25,8 +25,7 @@ using namespace SYM;
 
 //---------------------------------- AgentCommon ------------------------------------    
 
-AgentCommon::AgentCommon() :
-    my_scr_engine(nullptr)
+AgentCommon::AgentCommon()
 {
 }
 
@@ -34,31 +33,8 @@ AgentCommon::AgentCommon() :
 void AgentCommon::SCRConfigure( const SCREngine *e,
                                 Phase phase_ )
 {
-    ASSERT(e);
-    // Repeat configuration regarded as an error because it suggests I maybe don't
-    // have a clue what should actaually be configing the agent. Plus general lifecycle 
-    // rule enforcement.
-    // Why no coupling across sibling embedded engines? Would need an ordering for keying
-    // but ordering not defined on sibling embedded engines.
-    // Stronger reason: siblings each hit multiple times with respect to parent
-    // and not necessarily the same number of times, so there's no single
-    // well defined key.
-    ASSERT(!my_scr_engine)
-          ("Detected repeat configuration of ")
-          (*this)
-          ("\nCould be result of coupling this node across sibling embedded engines - not allowed :(");
-    my_scr_engine = e;
-    
-	pattern_query = GetPatternQuery();    
-        
     phase = phase_;
     ASSERT( (int)phase != 0 );
-    if( phase != IN_REPLACE_ONLY )
-    {
-        // We will need a conjecture, so that we can iterate through multiple 
-        // potentially valid values for the abnormals and multiplicities.
-        nlq_conjecture = make_shared<Conjecture>(this);            
-    }
 }
 
 
@@ -73,7 +49,6 @@ void AgentCommon::ConfigureCoupling( const Traceable *e,
     ASSERT(!my_keyer_engine)("Detected repeat coupling configuration of ")(*this)
                                    ("\nCould be result of coupling abnormal links - not allowed :(\n")
                                    (my_keyer_engine)(" with keyer ")(keyer_plink_)("\n");                
-    ASSERT(my_scr_engine)("Must call SCRConfigure() before ConfigureCoupling()");
     my_keyer_engine = e;
                                            
     if( keyer_plink_ )
@@ -117,10 +92,8 @@ list<PatternLink> AgentCommon::GetVisibleChildren( Path v ) const
 
 
 shared_ptr<DecidedQuery> AgentCommon::CreateDecidedQuery() const
-{
-    ASSERT( my_scr_engine ); // check we have been configured
-    
-    return make_shared<DecidedQuery>( pattern_query );
+{    
+    return make_shared<DecidedQuery>( GetPatternQuery() );
 }
                                 
 
@@ -237,11 +210,13 @@ void AgentCommon::RunRegenerationQuery( DecidedQueryAgentInterface &query,
 }                             
                       
                       
-AgentCommon::QueryLambda AgentCommon::StartRegenerationQuery( const SolutionMap *hypothesis_links,
+AgentCommon::QueryLambda AgentCommon::StartRegenerationQuery( const AndRuleEngine *acting_engine,
+                                                              const SolutionMap *hypothesis_links,
 															  PatternLink keyer_plink,
                                                               const XTreeDatabase *x_tree_db,
                                                               bool use_DQ ) const
 {
+	shared_ptr<Conjecture> nlq_conjecture = acting_engine->GetNLQConjecture(this);
     ASSERT( nlq_conjecture )(phase);
     nlq_conjecture->Start();
     bool first = true;
@@ -303,29 +278,31 @@ AgentCommon::QueryLambda AgentCommon::StartRegenerationQuery( const SolutionMap 
 }   
                                               
                                               
-AgentCommon::QueryLambda AgentCommon::TestStartRegenerationQuery( const SolutionMap *hypothesis_links,
+AgentCommon::QueryLambda AgentCommon::TestStartRegenerationQuery( const AndRuleEngine *acting_engine,
+                                                                  const SolutionMap *hypothesis_links,
                                                                   PatternLink keyer_plink,  
                                                                   const XTreeDatabase *x_tree_db ) const
 {
+	shared_ptr<PatternQuery> pq = GetPatternQuery();
     QueryLambda mut_lambda;
     QueryLambda ref_lambda;
     auto mut_hits = make_shared<int>(0);
     auto ref_hits = make_shared<int>(0);
     try
     {
-        mut_lambda = StartRegenerationQuery( hypothesis_links, keyer_plink, x_tree_db, false );
+        mut_lambda = StartRegenerationQuery( acting_engine, hypothesis_links, keyer_plink, x_tree_db, false );
     }
     catch( ::Mismatch &e ) 
     {
         try
         {
             Tracer::RAIIDisable silencer; // make ref algo be quiet            
-            (void)StartRegenerationQuery( hypothesis_links, keyer_plink, x_tree_db, true );
+            (void)StartRegenerationQuery( acting_engine, hypothesis_links, keyer_plink, x_tree_db, true );
             ASSERT(false)("MUT start threw ")(e)(" but ref didn't\n")
                          (*this)("\n")
-                         ("Normal: ")(MapForPattern(pattern_query->GetNormalLinks(), *hypothesis_links))("\n")
-                         ("Abormal: ")(MapForPattern(pattern_query->GetAbnormalLinks(), *hypothesis_links))("\n")
-                         ("Multiplicity: ")(MapForPattern(pattern_query->GetMultiplicityLinks(), *hypothesis_links))("\n");
+                         ("Normal: ")(MapForPattern(pq->GetNormalLinks(), *hypothesis_links))("\n")
+                         ("Abormal: ")(MapForPattern(pq->GetAbnormalLinks(), *hypothesis_links))("\n")
+                         ("Multiplicity: ")(MapForPattern(pq->GetMultiplicityLinks(), *hypothesis_links))("\n");
         }
         catch( ::Mismatch &e ) 
         {
@@ -337,15 +314,15 @@ AgentCommon::QueryLambda AgentCommon::TestStartRegenerationQuery( const Solution
     try
     {
         Tracer::RAIIDisable silencer; // make ref algo be quiet             
-        ref_lambda = StartRegenerationQuery( hypothesis_links, keyer_plink, x_tree_db, true );        
+        ref_lambda = StartRegenerationQuery( acting_engine, hypothesis_links, keyer_plink, x_tree_db, true );        
     }
     catch( ::Mismatch &e ) 
     {
         ASSERT(false)("Ref start threw ")(e)(" but MUT didn't\n")
                      (*this)("\n")
-                     ("Normal: ")(MapForPattern(pattern_query->GetNormalLinks(), *hypothesis_links))("\n")
-                     ("Abormal: ")(MapForPattern(pattern_query->GetAbnormalLinks(), *hypothesis_links))("\n")
-                     ("Multiplicity: ")(MapForPattern(pattern_query->GetMultiplicityLinks(), *hypothesis_links))("\n");
+                     ("Normal: ")(MapForPattern(pq->GetNormalLinks(), *hypothesis_links))("\n")
+                     ("Abormal: ")(MapForPattern(pq->GetAbnormalLinks(), *hypothesis_links))("\n")
+                     ("Multiplicity: ")(MapForPattern(pq->GetMultiplicityLinks(), *hypothesis_links))("\n");
     }
 
     QueryLambda test_lambda = [=]()mutable->shared_ptr<DecidedQuery>
@@ -374,9 +351,9 @@ AgentCommon::QueryLambda AgentCommon::TestStartRegenerationQuery( const Solution
                 ASSERT(false)("MUT lambda threw ")(e)(" but ref didn't\n")
                              ("MUT hits %d, ref hits %d\n", *mut_hits, *ref_hits)
                              (*this)("\n")
-                             ("Normal: ")(MapForPattern(pattern_query->GetNormalLinks(), *hypothesis_links))("\n")
-                             ("Abormal: ")(MapForPattern(pattern_query->GetAbnormalLinks(), *hypothesis_links))("\n")
-                             ("Multiplicity: ")(MapForPattern(pattern_query->GetMultiplicityLinks(), *hypothesis_links))("\n");
+                             ("Normal: ")(MapForPattern(pq->GetNormalLinks(), *hypothesis_links))("\n")
+                             ("Abormal: ")(MapForPattern(pq->GetAbnormalLinks(), *hypothesis_links))("\n")
+                             ("Multiplicity: ")(MapForPattern(pq->GetMultiplicityLinks(), *hypothesis_links))("\n");
             }
             catch( ::Mismatch &e ) 
             {
@@ -400,9 +377,9 @@ AgentCommon::QueryLambda AgentCommon::TestStartRegenerationQuery( const Solution
             ASSERT(false)("Ref lambda threw ")(e)(" but MUT didn't\n")
                          ("MUT hits %d, ref hits %d\n", *mut_hits, *ref_hits)
                          (*this)("\n")
-                         ("Normal: ")(MapForPattern(pattern_query->GetNormalLinks(), *hypothesis_links))("\n")
-                         ("Abormal: ")(MapForPattern(pattern_query->GetAbnormalLinks(), *hypothesis_links))("\n")
-                         ("Multiplicity: ")(MapForPattern(pattern_query->GetMultiplicityLinks(), *hypothesis_links))("\n");
+                         ("Normal: ")(MapForPattern(pq->GetNormalLinks(), *hypothesis_links))("\n")
+                         ("Abormal: ")(MapForPattern(pq->GetAbnormalLinks(), *hypothesis_links))("\n")
+                         ("Multiplicity: ")(MapForPattern(pq->GetMultiplicityLinks(), *hypothesis_links))("\n");
         }
             
         
@@ -419,18 +396,6 @@ AgentCommon::QueryLambda AgentCommon::TestStartRegenerationQuery( const Solution
 }
 
 
-void AgentCommon::ResetNLQConjecture()
-{
-    // Theoretically this should be done inside the lambda's destructor, but can't put code there
-    nlq_conjecture->Reset();
-}
-
-
-const SCREngine *AgentCommon::GetMasterSCREngine() const
-{
-    return my_scr_engine;
-}      
-
 
 void AgentCommon::Reset()
 {
@@ -445,7 +410,7 @@ void AgentCommon::PlanOverlay( SCREngine *acting_engine,
     // This function is called on nodes in the "overlay" branch of Delta nodes.
     // Some special nodes will not know what to do...
       
-    if( my_scr_engine->IsKeyedByAndRuleEngine(this) ) 
+    if( acting_engine->IsKeyedByAndRuleEngine(this) ) 
         return; // In search pattern and already keyed - we only overlay using replace-only nodes
                 
     // This is why we call on over, passing in under. The test requires
@@ -492,11 +457,9 @@ Agent::ReplacePatchPtr AgentCommon::GenReplaceLayout( const ReplaceKit &kit,
     INDENT("C");
     ASSERT( me_plink.GetChildAgent() == this );
     ASSERTTHIS();
-    ASSERT(my_scr_engine)("Agent ")(*this)(" appears not to have been configured");
     ASSERT( phase != IN_COMPARE_ONLY )(*this)(" is configured for compare only");  
     
     XLink key_xlink;
-    //FTRACE(my_scr_engine)("\n");
     ASSERT( acting_engine );
     if( acting_engine->IsKeyedBeforeReplace( this ) )
     {
@@ -567,8 +530,6 @@ string AgentCommon::GetPlanAsString() const
 {
     list<KeyValuePair> plan_as_strings = 
     {
-        { "my_scr_engine", 
-          Trace(my_scr_engine) },
         { "my_keyer_engine", 
           Trace(my_keyer_engine) }
     };

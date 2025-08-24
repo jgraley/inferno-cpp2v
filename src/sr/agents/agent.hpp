@@ -67,17 +67,15 @@ public:
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicQuery( PatternLink keyer, const set<PatternLink> &residuals, bool coupling_only ) const = 0; 
 
     /// Get abnormal/multiplicity info from an Agent given partial map of locations of base and normal links. 
-    virtual QueryLambda StartRegenerationQuery( const SolutionMap *hypothesis_links,
+    virtual QueryLambda StartRegenerationQuery( const AndRuleEngine *acting_engine,
+												const SolutionMap *hypothesis_links,
                                                 PatternLink keyer_plink, 
                                                 const XTreeDatabase *x_tree_db,
                                                 bool use_DQ = false ) const = 0;
-    virtual QueryLambda TestStartRegenerationQuery( const SolutionMap *hypothesis_links,
+    virtual QueryLambda TestStartRegenerationQuery( const AndRuleEngine *acting_engine,
+                                                    const SolutionMap *hypothesis_links,
 													PatternLink keyer_plink,
                                                     const XTreeDatabase *x_tree_db ) const = 0;
-
-    virtual void ResetNLQConjecture() = 0;    
-
-    virtual const SCREngine *GetMasterSCREngine() const = 0;      // TODO unused
 
     virtual void Reset() = 0;     
     virtual void PlanOverlay( SCREngine *acting_engine,

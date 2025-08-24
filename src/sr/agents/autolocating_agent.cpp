@@ -14,8 +14,9 @@ using namespace SYM;
 Lazy<BooleanExpression> AutolocatingAgent::SymbolicNormalLinkedQuery(PatternLink keyer_plink) const
 {
     Lazy<BooleanExpression> my_expr = SYM::MakeLazy<SYM::BooleanConstant>(true);
+	shared_ptr<PatternQuery> pq = GetPatternQuery();
 
-    for( PatternLink plink : pattern_query->GetNormalLinks() )
+    for( PatternLink plink : pq->GetNormalLinks() )
         my_expr &= MakeLazy<SymbolVariable>(keyer_plink) == MakeLazy<SymbolVariable>(plink);
     
     my_expr &= SymbolicAutolocatingQuery(keyer_plink);
@@ -43,7 +44,8 @@ Agent::ReplacePatchPtr AutolocatingAgent::GenReplaceLayoutImpl( const ReplaceKit
                                                                 XLink key_xlink,
                                                   const SCREngine *acting_engine )
 {
-    auto plinks = pattern_query->GetNormalLinks();
+	shared_ptr<PatternQuery> pq = GetPatternQuery();
+    auto plinks = pq->GetNormalLinks();
     if( plinks.size() == 1 )
     {
         // Unambiguous path through replace pattern so we can continue to overlay

@@ -102,7 +102,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     reached_agents.clear();
     reached_links.clear();    
     PopulateBoundaryAgents( base_plink, 
-                           surrounding_agents );
+                            surrounding_agents );
 
     // Collect together the parent links to agents
     for( PatternLink plink : my_normal_links )
@@ -361,6 +361,7 @@ void AndRuleEngine::Plan::ConfigureAgents()
         agents_to_keyers[agent] = keyer_plink;
         agents_to_residuals[agent] = residual_plinks;
         agent->ConfigureCoupling( algo, keyer_plink, residual_plinks );
+        agents_to_nlq_conjectures[agent] = make_shared<Conjecture>(agent);                                   
     }
 
     // New coupling planning
@@ -742,9 +743,9 @@ void AndRuleEngine::AgentRegeneration( Agent *agent,
 
     PatternLink keyer_plink = plan.agents_to_keyers.at(agent);
 #ifdef NLQ_TEST
-    auto nlq_lambda = agent->TestStartRegenerationQuery( &basic_solution, keyer_plink, x_tree_db.get() );
+    auto nlq_lambda = agent->TestStartRegenerationQuery( this, &basic_solution, keyer_plink, x_tree_db.get() );
 #else    
-    auto nlq_lambda = agent->StartRegenerationQuery( &basic_solution, keyer_plink, x_tree_db.get() );
+    auto nlq_lambda = agent->StartRegenerationQuery( this, &basic_solution, keyer_plink, x_tree_db.get() );
 #endif
     
     int i=0;
@@ -822,7 +823,8 @@ void AndRuleEngine::AgentRegeneration( Agent *agent,
         TRACE("Success after %d tries\n", i);  
         break;
     } 
-    agent->ResetNLQConjecture(); // save memory
+    // Memory safety: clear out the conjecture once done.
+    plan.agents_to_nlq_conjectures.at(agent)->Reset(); 
 }      
 
 
@@ -1008,6 +1010,12 @@ list<const AndRuleEngine *> AndRuleEngine::GetAndRuleEnginesInclThis() const
         engines = engines + p.second->GetAndRuleEnginesInclThis();
     return engines;
 }
+
+
+shared_ptr<Conjecture> AndRuleEngine::GetNLQConjecture(const Agent *agent) const
+{
+	return plan.agents_to_nlq_conjectures.at(agent);
+}	
 
 
 string AndRuleEngine::GetTrace() const

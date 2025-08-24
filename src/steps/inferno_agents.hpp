@@ -55,7 +55,7 @@ struct BuildInstanceIdentifierAgent : Special<CPPTree::InstanceIdentifier>,
     BuildInstanceIdentifierAgent() : BuildIdentifierAgent("unnamed") {}
 
 private:    
-    virtual TreePtr<Node> BuildNewSubtree(const SCREngine *acting_engine) override;
+    TreePtr<Node> BuildNewSubtree(const SCREngine *acting_engine) override;
 };
 
 

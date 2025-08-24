@@ -52,7 +52,8 @@ Agent::ReplacePatchPtr ConjunctionAgent::GenReplaceLayoutImpl( const ReplaceKit 
                                                                XLink key_xlink,
                                                   const SCREngine *acting_engine )
 {
-    auto plinks = pattern_query->GetNormalLinks();
+	shared_ptr<PatternQuery> pq = GetPatternQuery();
+    auto plinks = pq->GetNormalLinks();
     ASSERT( plinks.size() >= 1 );
 
 	if( plinks.size() >= 2 )
