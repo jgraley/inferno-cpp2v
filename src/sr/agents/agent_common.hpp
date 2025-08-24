@@ -41,19 +41,19 @@ public:
                                            const XTreeDatabase *x_tree_db ) const;
     void RunRegenerationQuery( DecidedQueryAgentInterface &query,
                                const SolutionMap *hypothesis_links,
+                               PatternLink keyer_plink,
                                const XTreeDatabase *x_tree_db ) const;
     virtual QueryLambda StartRegenerationQuery( const SolutionMap *hypothesis_links,
+                                                PatternLink keyer_plink,
                                                 const XTreeDatabase *x_tree_db,
                                                 bool use_DQ = false ) const;
     virtual QueryLambda TestStartRegenerationQuery( const SolutionMap *hypothesis_links,
+													PatternLink keyer_plink,
                                                     const XTreeDatabase *x_tree_db ) const;
     
     virtual void ResetNLQConjecture();
      
     virtual const SCREngine *GetMasterSCREngine() const;      
-
-    PatternLink GetKeyerPatternLink() const override;                                  
-    set<PatternLink> GetResidualPatternLink() const override;
 
     virtual void Reset();    
     virtual void PlanOverlay( PatternLink me_plink, 

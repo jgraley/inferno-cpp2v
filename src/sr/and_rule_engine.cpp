@@ -402,8 +402,7 @@ void AndRuleEngine::Plan::CreateMyFullSymbolics()
         //FTRACE("SymbolicQuery: ")(agent)("\n");
 		ASSERT( agents_to_keyers.count(agent)>0 )
 		      ("agent: ")(agent)
-		      ("\nagents_to_keyers: ")(agents_to_keyers)
-		      ("\nAgent's stored keyer: ")(agent->GetKeyerPatternLink());
+		      ("\nagents_to_keyers: ")(agents_to_keyers);
 		ASSERT( agents_to_residuals.count(agent)>0 )
 		      ("agent: ")(agent)
 		      ("\agents_to_residuals: ")(agents_to_residuals);
@@ -740,11 +739,12 @@ void AndRuleEngine::AgentRegeneration( Agent *agent,
     for( XLink xlink : pq->GetNormalLinks() )    
         ASSERT( x_tree_db->domain.count(xlink) > 0 )(xlink)(" not found in ")(x_tree_db->domain)(" (see issue #202)\n"); // #202 expected to cause this to fail
 #endif
-    
+
+    PatternLink keyer_plink = plan.agents_to_keyers.at(agent);
 #ifdef NLQ_TEST
-    auto nlq_lambda = agent->TestStartRegenerationQuery( &basic_solution, x_tree_db.get() );
+    auto nlq_lambda = agent->TestStartRegenerationQuery( &basic_solution, keyer_plink, x_tree_db.get() );
 #else    
-    auto nlq_lambda = agent->StartRegenerationQuery( &basic_solution, x_tree_db.get() );
+    auto nlq_lambda = agent->StartRegenerationQuery( &basic_solution, keyer_plink, x_tree_db.get() );
 #endif
     
     int i=0;

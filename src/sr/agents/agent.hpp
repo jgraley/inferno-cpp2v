@@ -68,16 +68,16 @@ public:
 
     /// Get abnormal/multiplicity info from an Agent given partial map of locations of base and normal links. 
     virtual QueryLambda StartRegenerationQuery( const SolutionMap *hypothesis_links,
+                                                PatternLink keyer_plink, 
                                                 const XTreeDatabase *x_tree_db,
                                                 bool use_DQ = false ) const = 0;
     virtual QueryLambda TestStartRegenerationQuery( const SolutionMap *hypothesis_links,
+													PatternLink keyer_plink,
                                                     const XTreeDatabase *x_tree_db ) const = 0;
 
     virtual void ResetNLQConjecture() = 0;    
 
     virtual const SCREngine *GetMasterSCREngine() const = 0;      // TODO unused
-    virtual PatternLink GetKeyerPatternLink() const = 0;
-    virtual set<PatternLink> GetResidualPatternLink() const = 0;
 
     virtual void Reset() = 0;     
     virtual void PlanOverlay( PatternLink me_plink, 

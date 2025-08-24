@@ -261,6 +261,7 @@ void AgentCommon::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
     
 void AgentCommon::RunRegenerationQuery( DecidedQueryAgentInterface &query,
                                         const SolutionMap *hypothesis_links,
+                                        PatternLink keyer_plink,
                                         const XTreeDatabase *x_tree_db ) const
 {
     // Admin stuff every RQ has to do
@@ -275,6 +276,7 @@ void AgentCommon::RunRegenerationQuery( DecidedQueryAgentInterface &query,
                       
                       
 AgentCommon::QueryLambda AgentCommon::StartRegenerationQuery( const SolutionMap *hypothesis_links,
+															  PatternLink keyer_plink,
                                                               const XTreeDatabase *x_tree_db,
                                                               bool use_DQ ) const
 {
@@ -312,7 +314,7 @@ AgentCommon::QueryLambda AgentCommon::StartRegenerationQuery( const SolutionMap 
                 // the search so that final teardown doesn't orphan them. Note
                 // this lambda is called repeatedley, see the `first` flag.
                 // Related: #815
-                RunRegenerationQuery( *query, hypothesis_links, x_tree_db );       
+                RunRegenerationQuery( *query, hypothesis_links, keyer_plink, x_tree_db );       
                     
                 TRACE("Got query from DNLQ ")(query->GetDecisions())("\n");
                     
@@ -340,6 +342,7 @@ AgentCommon::QueryLambda AgentCommon::StartRegenerationQuery( const SolutionMap 
                                               
                                               
 AgentCommon::QueryLambda AgentCommon::TestStartRegenerationQuery( const SolutionMap *hypothesis_links,
+                                                                  PatternLink keyer_plink,  
                                                                   const XTreeDatabase *x_tree_db ) const
 {
     QueryLambda mut_lambda;
@@ -348,14 +351,14 @@ AgentCommon::QueryLambda AgentCommon::TestStartRegenerationQuery( const Solution
     auto ref_hits = make_shared<int>(0);
     try
     {
-        mut_lambda = StartRegenerationQuery( hypothesis_links, x_tree_db, false );
+        mut_lambda = StartRegenerationQuery( hypothesis_links, keyer_plink, x_tree_db, false );
     }
     catch( ::Mismatch &e ) 
     {
         try
         {
             Tracer::RAIIDisable silencer; // make ref algo be quiet            
-            (void)StartRegenerationQuery( hypothesis_links, x_tree_db, true );
+            (void)StartRegenerationQuery( hypothesis_links, keyer_plink, x_tree_db, true );
             ASSERT(false)("MUT start threw ")(e)(" but ref didn't\n")
                          (*this)("\n")
                          ("Normal: ")(MapForPattern(pattern_query->GetNormalLinks(), *hypothesis_links))("\n")
@@ -372,7 +375,7 @@ AgentCommon::QueryLambda AgentCommon::TestStartRegenerationQuery( const Solution
     try
     {
         Tracer::RAIIDisable silencer; // make ref algo be quiet             
-        ref_lambda = StartRegenerationQuery( hypothesis_links, x_tree_db, true );        
+        ref_lambda = StartRegenerationQuery( hypothesis_links, keyer_plink, x_tree_db, true );        
     }
     catch( ::Mismatch &e ) 
     {
@@ -465,21 +468,6 @@ const SCREngine *AgentCommon::GetMasterSCREngine() const
 {
     return my_scr_engine;
 }      
-
-
-PatternLink AgentCommon::GetKeyerPatternLink() const
-{
-    ASSERT( my_keyer_engine )(*this)(" has not been configured for couplings");
-    ASSERT( keyer_plink )(*this)(" has no keyer_plink, engine=")(my_keyer_engine)("\n");
-    
-    return keyer_plink;
-}
-
-
-set<PatternLink> AgentCommon::GetResidualPatternLink() const
-{
-    return residual_plinks;
-}
 
 
 void AgentCommon::Reset()
