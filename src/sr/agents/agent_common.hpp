@@ -80,9 +80,7 @@ protected:
     const Traceable *my_keyer_engine = nullptr;    
     shared_ptr<PatternQuery> pattern_query;
     PatternLink keyer_plink;
-    set<PatternLink> residual_plinks;
     PatternLink overlay_under_plink;
-    list<PatternLink> keyer_and_normal_plinks;
     Phase phase = UNDEFINED;
     
 private:    

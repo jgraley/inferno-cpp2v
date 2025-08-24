@@ -81,36 +81,13 @@ void AgentCommon::ConfigureCoupling( const Traceable *e,
     {
         ASSERT( keyer_plink_.GetChildAgent() == this )("Parent link supplied for different agent");
         keyer_plink = keyer_plink_;
-    }
-    
-    for( PatternLink plink : residual_plinks_ )
-    {
-        ASSERT( plink );
-        ASSERT( plink.GetChildAgent() == this )("Parent link supplied for different agent");
-        InsertSolo( residual_plinks, plink );
-    }
-
-    // It works with a set, but if we lose this ordering, hints from 
-    // Autolocated agent NLQs become less useful and CSP solver slows right
-    // down.
-    if( phase != IN_REPLACE_ONLY && keyer_plink )
-    {
-        keyer_and_normal_plinks.clear();
-        keyer_and_normal_plinks.push_back( keyer_plink );
-        for( PatternLink plink : pattern_query->GetNormalLinks() )
-            keyer_and_normal_plinks.push_back( plink );
-    }
+    }   
 }
                                 
 
 void AgentCommon::AddResiduals( set<PatternLink> residual_plinks_ )
 {
-    for( PatternLink plink : residual_plinks_ )
-    {
-        ASSERT( plink );
-        ASSERT( plink.GetChildAgent() == this )("Parent link supplied for different agent");
-        InsertSolo( residual_plinks, plink );
-    }
+
 }
 
 
@@ -169,9 +146,6 @@ Lazy<BooleanExpression> AgentCommon::SymbolicCouplingQuery(PatternLink keyer, co
 	ASSERT( keyer == keyer_plink )
 	      ("\nkeyer (passed in): ")(keyer)
 	      ("\nkeyer_plink (stored): ")(keyer_plink);
-	ASSERT( IsIncludes(residual_plinks, residuals) )
-	      ("\nresiduals (passed in): ")(residuals)
-	      ("\nresidual_plinks (stored): ")(residual_plinks);
 	      
     auto keyer_expr = MakeLazy<SymbolVariable>(keyer);    
     auto mmax_expr = MakeLazy<SymbolConstant>(XLink::MMAX);
@@ -610,9 +584,7 @@ string AgentCommon::GetPlanAsString() const
         //{ "pattern_query", 
         //  Trace(pattern_query) }, // TODO should be traceable?
         { "overlay_under_plink", 
-          Trace(overlay_under_plink) },
-        { "keyer_and_normal_plinks", 
-          Trace(keyer_and_normal_plinks) }
+          Trace(overlay_under_plink) }
     };
     return Trace(plan_as_strings);
 }
