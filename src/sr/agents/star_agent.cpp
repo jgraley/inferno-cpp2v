@@ -38,6 +38,7 @@ SYM::Lazy<SYM::BooleanExpression> StarAgent::SymbolicNormalLinkedQuery(PatternLi
 
 void StarAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                           const SolutionMap *hypothesis_links,
+                                          PatternLink keyer_plink,
                                           const XTreeDatabase *x_tree_db ) const
 { 
     // This agent has no normal links, so just do this to populate query

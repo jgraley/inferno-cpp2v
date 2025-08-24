@@ -242,19 +242,19 @@ Lazy<BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryPRed(PatternLink
     auto expr = MakeLazy<IsLocalMatchOperator>(GetPatternPtr().get(), MakeLazy<SymbolVariable>(keyer_plink));
 
     for( const Plan::Singular &plan_sing : plan.singulars )
-        expr &= SymbolicNormalLinkedQuerySingular( plan_sing );
+        expr &= SymbolicNormalLinkedQuerySingular( plan_sing, keyer_plink );
 
     for( const Plan::Collection &plan_col : plan.collections )
-        expr &= SymbolicNormalLinkedQueryCollection( plan_col );
+        expr &= SymbolicNormalLinkedQueryCollection( plan_col, keyer_plink );
 
     for( const Plan::Sequence &plan_seq : plan.sequences )
-        expr &= SymbolicNormalLinkedQuerySequence( plan_seq );
+        expr &= SymbolicNormalLinkedQuerySequence( plan_seq, keyer_plink );
 
     return expr;    
 }                                  
 
                                                
-Lazy<BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySequence(const Plan::Sequence &plan_seq) const
+Lazy<BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySequence(const Plan::Sequence &plan_seq, PatternLink keyer_plink) const
 {
     auto expr = MakeLazy<BooleanConstant>(true);
 
@@ -313,7 +313,7 @@ Lazy<BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySequence(const P
 }                                  
 
 
-SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryCollection(const Plan::Collection &plan_col) const
+SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryCollection(const Plan::Collection &plan_col, PatternLink keyer_plink) const
 {
     auto expr = MakeLazy<BooleanConstant>(true);
 
@@ -350,7 +350,7 @@ SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryCollec
 }                                  
 
 
-SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySingular(const Plan::Singular &plan_sing) const
+SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySingular(const Plan::Singular &plan_sing, PatternLink keyer_plink) const
 {
     auto keyer = MakeLazy<SymbolVariable>(keyer_plink);
     auto keyer_sing_expr = MakeLazy<SingularChildOperator>( GetArchetypeNode(), plan_sing.itemise_index, keyer );
@@ -362,6 +362,7 @@ SYM::Lazy<SYM::BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySingul
                                                
 void StandardAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                               const SolutionMap *hypothesis_links,
+                                              PatternLink keyer_plink,
                                               const XTreeDatabase *x_tree_db ) const
 { 
     INDENT("Q");
@@ -374,12 +375,12 @@ void StandardAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
     for( const Plan::Collection &plan_col : plan.collections )
     {
         auto p_x_col = dynamic_cast<CollectionInterface *>(x_items[plan_col.itemise_index]);
-        RegenerationQueryCollection( query, p_x_col, plan_col, hypothesis_links, x_tree_db );
+        RegenerationQueryCollection( query, p_x_col, plan_col, hypothesis_links, keyer_plink, x_tree_db );
     }
     for( const Plan::Sequence &plan_seq : plan.sequences )
     {
         auto p_x_seq = dynamic_cast<SequenceInterface *>(x_items[plan_seq.itemise_index]);
-        RegenerationQuerySequence( query, p_x_seq, plan_seq, hypothesis_links, x_tree_db );
+        RegenerationQuerySequence( query, p_x_seq, plan_seq, hypothesis_links, keyer_plink, x_tree_db );
     }
 }
 
@@ -388,6 +389,7 @@ void StandardAgent::RegenerationQuerySequence( DecidedQueryAgentInterface &query
                                                SequenceInterface *p_x_seq,
                                                const Plan::Sequence &plan_seq,
                                                const SolutionMap *hypothesis_links,
+                                               PatternLink keyer_plink,
                                                const XTreeDatabase *x_tree_db ) const
 {
     INDENT("S");
@@ -469,6 +471,7 @@ void StandardAgent::RegenerationQueryCollection( DecidedQueryAgentInterface &que
                                                  CollectionInterface *p_x_col,
                                                  const Plan::Collection &plan_col,
                                                  const SolutionMap *hypothesis_links,
+                                                 PatternLink keyer_plink,                                              
                                                  const XTreeDatabase *x_tree_db ) const
 {
     INDENT("C");
@@ -532,11 +535,11 @@ void StandardAgent::MaybeChildrenPlanOverlay( PatternLink me_plink,
 Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutImpl( const ReplaceKit &kit, 
                                                             PatternLink me_plink, 
                                                             XLink key_xlink,
-                                                  const SCREngine *acting_engine ) 
+                                                            const SCREngine *acting_engine ) 
 {
     INDENT("B");
     //if( TreePtr<CPPTree::SpecificInstanceIdentifier>::DynamicCast(me_plink.GetPattern()) )
-    //    FTRACE("For me_plink=")(me_plink)(" keyer_plink=")(keyer_plink)(" overlay_under_plink=")(overlay_under_plink)(" key_xlink=")(key_xlink)("\n");
+    //    FTRACE("For me_plink=")(me_plink)(" overlay_under_plink=")(overlay_under_plink)(" key_xlink=")(key_xlink)("\n");
 
     if( overlay_under_plink )
     {
@@ -566,7 +569,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutImpl( const ReplaceKit &ki
 Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlay( const ReplaceKit &kit, 
                                                                PatternLink me_plink, 
                                                                XLink under_xlink,
-                                                  const SCREngine *acting_engine )  // overlaying
+                                                               const SCREngine *acting_engine )  // overlaying
 {
     INDENT("O");
     ASSERT( under_xlink );

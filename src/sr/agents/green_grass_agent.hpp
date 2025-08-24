@@ -17,7 +17,7 @@ namespace SR
 class GreenGrassAgent : public virtual AutolocatingAgent 
 {               
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicAutolocatingQuery() const; 
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicAutolocatingQuery(PatternLink keyer_plink) const; 
 
     virtual NodeBlock GetGraphBlockInfo() const;
     virtual const TreePtrInterface *GetThrough() const = 0;

@@ -540,7 +540,7 @@ Graph::MyNodeBlock Graph::PreProcessBlock( const Graphable::NodeBlock &block,
             // yet know the keyer. Solver only applies prerestriction to keyer plink.
             if( link->pptr && dynamic_pointer_cast<SpecialBase>((TreePtr<Node>)*(link->pptr)) )
             {
-                if( link->child->IsNonTrivialPreRestrictionNP( link->pptr ) )
+                if( link->child->IsNonTrivialPreRestriction( link->pptr ) )
                 {
                     block_ids_show_prerestriction.insert( my_link->child_id );
                 }

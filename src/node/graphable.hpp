@@ -129,7 +129,7 @@ public:
     };
     
     // If you don't know about pre-restrictions, you don't have one.
-    virtual bool IsNonTrivialPreRestrictionNP(const TreePtrInterface *) const { return false; }
+    virtual bool IsNonTrivialPreRestriction(const TreePtrInterface *) const { return false; }
 };
 
 string Trace(const GraphIdable::Phase &phase);

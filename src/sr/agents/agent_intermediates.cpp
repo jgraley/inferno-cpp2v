@@ -35,7 +35,7 @@ SYM::Lazy<SYM::BooleanExpression> DefaultMMAXAgent::SymbolicNormalLinkedQuery(Pa
 
 SYM::Lazy<SYM::BooleanExpression> PreRestrictedAgent::SymbolicNormalLinkedQueryMMed(PatternLink keyer_plink) const
 {
-    return SymbolicPreRestriction() & SymbolicNormalLinkedQueryPRed(keyer_plink);
+    return SymbolicPreRestriction(keyer_plink) & SymbolicNormalLinkedQueryPRed(keyer_plink);
 }                  
 
 //---------------------------------- NonlocatingAgent ------------------------------------    

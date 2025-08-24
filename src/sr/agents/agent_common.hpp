@@ -29,15 +29,15 @@ public:
     SYM::Lazy<SYM::BooleanExpression> SymbolicQuery( PatternLink keyer, const set<PatternLink> &residuals, bool coupling_only ) const override;                                       
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuery(PatternLink keyer_plink) const = 0;
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicCouplingQuery(PatternLink keyer, const set<PatternLink> &residuals) const;       
-    bool IsNonTrivialPreRestrictionNP(const TreePtrInterface *pptr) const override;
-    bool IsNonTrivialPreRestriction() const;
+    bool IsNonTrivialPreRestriction(const TreePtrInterface *pptr) const override;
     bool ShouldGenerateCategoryClause() const override;                                
-    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicPreRestriction() const;
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicPreRestriction(PatternLink keyer_plink) const;
     bool IsPreRestrictionMatch( TreePtr<Node> x ) const; // return true if matches
     bool IsPreRestrictionMatch( XLink x ) const; // return true if matches
     
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            const SolutionMap *hypothesis_links,
+                                           PatternLink keyer_plink,
                                            const XTreeDatabase *x_tree_db ) const;
     void RunRegenerationQuery( DecidedQueryAgentInterface &query,
                                const SolutionMap *hypothesis_links,
@@ -79,7 +79,7 @@ protected:
     const SCREngine *my_scr_engine = nullptr;    
     const Traceable *my_keyer_engine = nullptr;    
     shared_ptr<PatternQuery> pattern_query;
-    PatternLink keyer_plink;
+    //PatternLink keyer_plink;
     PatternLink overlay_under_plink;
     Phase phase = UNDEFINED;
     

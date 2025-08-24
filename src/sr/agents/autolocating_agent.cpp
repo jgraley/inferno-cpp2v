@@ -18,8 +18,8 @@ Lazy<BooleanExpression> AutolocatingAgent::SymbolicNormalLinkedQuery(PatternLink
     for( PatternLink plink : pattern_query->GetNormalLinks() )
         my_expr &= MakeLazy<SymbolVariable>(keyer_plink) == MakeLazy<SymbolVariable>(plink);
     
-    my_expr &= SymbolicAutolocatingQuery();
-    my_expr &= SymbolicPreRestriction() |
+    my_expr &= SymbolicAutolocatingQuery(keyer_plink);
+    my_expr &= SymbolicPreRestriction(keyer_plink) |
                  (MakeLazy<SymbolVariable>(keyer_plink) == MakeLazy<SymbolConstant>(XLink::MMAX));
 
     return my_expr;
@@ -32,7 +32,7 @@ void AutolocatingAgent::RunAutolocatingQuery( XLink common_xlink ) const
 }
 
 
-SYM::Lazy<SYM::BooleanExpression> AutolocatingAgent::SymbolicAutolocatingQuery() const
+SYM::Lazy<SYM::BooleanExpression> AutolocatingAgent::SymbolicAutolocatingQuery(PatternLink keyer_plink) const
 {
     return SYM::MakeLazy<SYM::BooleanConstant>(true); // TODO don't like this, belongs in ConjuctionAgent
 }

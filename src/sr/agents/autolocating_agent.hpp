@@ -26,7 +26,7 @@ public:
     SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuery(PatternLink keyer_plink) const override; 
     
     virtual void RunAutolocatingQuery(XLink common_xlink) const;
-    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicAutolocatingQuery() const; 
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicAutolocatingQuery(PatternLink keyer_plink) const; 
 
     ReplacePatchPtr GenReplaceLayoutImpl( const ReplaceKit &kit, 
                                          PatternLink me_plink, 

@@ -115,6 +115,7 @@ SYM::Lazy<SYM::BooleanExpression> StuffAgent::SymbolicNormalLinkedQueryPRed(Patt
 
 void StuffAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            const SolutionMap *hypothesis_links,
+                                           PatternLink keyer_plink,
                                            const XTreeDatabase *x_tree_db ) const
 {
     INDENT("#");

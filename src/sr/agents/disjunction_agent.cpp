@@ -55,7 +55,7 @@ SYM::Lazy<SYM::BooleanExpression> DisjunctionAgent::SymbolicNormalLinkedQuery(Pa
                                         (is_mmax_exprs.back() & is_keyer_exprs.front());
 
     // Don't forget the pre-restriction, applies in non-MMAX-keyer case
-    main_expr &= SymbolicPreRestriction() | (keyer_expr==mmax_expr); 
+    main_expr &= SymbolicPreRestriction(keyer_plink) | (keyer_expr==mmax_expr); 
     return main_expr;
 }
 

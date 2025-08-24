@@ -114,22 +114,25 @@ public:
 
 private:        
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed(PatternLink keyer_plink) const;                                       
-    SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuerySequence(const Plan::Sequence &plan_seq) const;                                       
-    SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryCollection(const Plan::Collection &plan_col) const;                                       
-    SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuerySingular(const Plan::Singular &plan_sing) const;                                       
+    SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuerySequence(const Plan::Sequence &plan_seq, PatternLink keyer_plink) const;                                       
+    SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryCollection(const Plan::Collection &plan_col, PatternLink keyer_plink) const;                                       
+    SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuerySingular(const Plan::Singular &plan_sing, PatternLink keyer_plink) const;                                       
                                     
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            const SolutionMap *hypothesis_links,
+                                           PatternLink keyer_plink,
                                            const XTreeDatabase *x_tree_db ) const;                                              
     void RegenerationQuerySequence( DecidedQueryAgentInterface &query,
                                     SequenceInterface *x_seq,
                                     const Plan::Sequence &plan_seq,
                                     const SolutionMap *hypothesis_links,
+                                    PatternLink keyer_plink,
                                     const XTreeDatabase *x_tree_db ) const;
     void RegenerationQueryCollection( DecidedQueryAgentInterface &query,
                                       CollectionInterface *x_col,
                                       const Plan::Collection &plan_col,
                                       const SolutionMap *hypothesis_links,
+                                      PatternLink keyer_plink,
                                       const XTreeDatabase *x_tree_db ) const;
                                            
 public:

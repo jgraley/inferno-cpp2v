@@ -72,15 +72,14 @@ void AgentCommon::ConfigureCoupling( const Traceable *e,
     // Also see #316
     ASSERT(!my_keyer_engine)("Detected repeat coupling configuration of ")(*this)
                                    ("\nCould be result of coupling abnormal links - not allowed :(\n")
-                                   (my_keyer_engine)(" with keyer ")(keyer_plink)("\n")
-                                   (e)(" with keyer ")(keyer_plink_);                                   
+                                   (my_keyer_engine)(" with keyer ")(keyer_plink_)("\n");                
     ASSERT(my_scr_engine)("Must call SCRConfigure() before ConfigureCoupling()");
     my_keyer_engine = e;
                                            
     if( keyer_plink_ )
     {
         ASSERT( keyer_plink_.GetChildAgent() == this )("Parent link supplied for different agent");
-        keyer_plink = keyer_plink_;
+        //keyer_plink = keyer_plink_;
     }   
 }
                                 
@@ -142,10 +141,6 @@ Lazy<BooleanExpression> AgentCommon::SymbolicCouplingQuery(PatternLink keyer, co
     
     // This class establishes the policy for couplings in one place.
     // And it always will be: see #121; para starting at "No!!"
-
-	ASSERT( keyer == keyer_plink )
-	      ("\nkeyer (passed in): ")(keyer)
-	      ("\nkeyer_plink (stored): ")(keyer_plink);
 	      
     auto keyer_expr = MakeLazy<SymbolVariable>(keyer);    
     auto mmax_expr = MakeLazy<SymbolConstant>(XLink::MMAX);
@@ -166,19 +161,11 @@ Lazy<BooleanExpression> AgentCommon::SymbolicCouplingQuery(PatternLink keyer, co
 }
 
 
-bool AgentCommon::IsNonTrivialPreRestrictionNP(const TreePtrInterface *pptr) const
+bool AgentCommon::IsNonTrivialPreRestriction(const TreePtrInterface *pptr) const
 {
-    // No Plan version: does not need planning and so is handy for graphs.
     // Note: we are using typeid on the tree pointer type, not the node type.
     // So we need an archetype tree pointer.
     return typeid( *pptr ) != typeid( *GetArchetypeTreePtr() );
-}                                
-
-
-bool AgentCommon::IsNonTrivialPreRestriction() const
-{
-    // Use our keyer_plink to get pptr - but only after planning!
-    return IsNonTrivialPreRestrictionNP( keyer_plink.GetPatternTreePtr() );
 }                                
 
 
@@ -199,7 +186,7 @@ bool AgentCommon::ShouldGenerateCategoryClause() const
 }                                
 
 
-SYM::Lazy<SYM::BooleanExpression> AgentCommon::SymbolicPreRestriction() const
+SYM::Lazy<SYM::BooleanExpression> AgentCommon::SymbolicPreRestriction(PatternLink keyer_plink) const
 {
     if( ShouldGenerateCategoryClause() )
     {
@@ -228,6 +215,7 @@ bool AgentCommon::IsPreRestrictionMatch( XLink x ) const
 
 void AgentCommon::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                             const SolutionMap *hypothesis_links,
+                                            PatternLink keyer_plink,
                                             const XTreeDatabase *x_tree_db ) const
 {
 }
@@ -245,7 +233,7 @@ void AgentCommon::RunRegenerationQuery( DecidedQueryAgentInterface &query,
 
     XLink keyer_xlink = hypothesis_links->at(keyer_plink);
     if( keyer_xlink != XLink::MMAX )
-        this->RunRegenerationQueryImpl( query, hypothesis_links, x_tree_db );
+        this->RunRegenerationQueryImpl( query, hypothesis_links, keyer_plink, x_tree_db );
 }                             
                       
                       

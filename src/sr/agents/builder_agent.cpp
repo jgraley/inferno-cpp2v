@@ -18,12 +18,12 @@ SYM::Lazy<SYM::BooleanExpression> BuilderAgent::SymbolicNormalLinkedQueryPRed(Pa
 Agent::ReplacePatchPtr BuilderAgent::GenReplaceLayoutImpl( const ReplaceKit &kit, 
                                                            PatternLink me_plink, 
                                                            XLink key_xlink,
-                                                  const SCREngine *acting_engine )
+                                                           const SCREngine *acting_engine )
 {
     INDENT("%");
 
     TreePtr<Node> new_node;
-    if( me_plink == keyer_plink ) // keyer
+    if( me_plink == kit.agents_to_keyers->at(this) ) // keyer
 	{
         // Call the soft pattern impl 
         built_node = new_node = BuildNewSubtree(acting_engine); // acts like Clone()
