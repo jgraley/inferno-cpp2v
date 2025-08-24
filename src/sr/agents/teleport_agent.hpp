@@ -14,7 +14,7 @@ namespace SR
 class RelocatedAgent : public PreRestrictedAgent, public DomainExtension::Extender // names finalised in rule #729
 {
 public:    
-    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed(PatternLink keyer_plink) const;                                       
     
     class Dependencies
     {

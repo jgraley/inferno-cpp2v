@@ -22,7 +22,7 @@ shared_ptr<PatternQuery> StarAgent::GetPatternQuery() const
 }
 
 
-SYM::Lazy<SYM::BooleanExpression> StarAgent::SymbolicNormalLinkedQuery() const
+SYM::Lazy<SYM::BooleanExpression> StarAgent::SymbolicNormalLinkedQuery(PatternLink keyer_plink) const
 {
     if( ShouldGenerateCategoryClause() )
     {

@@ -71,7 +71,7 @@ Graphable::NodeBlock DepthAgent::GetGraphBlockInfo() const
 
 //---------------------------------- ChildAgent ------------------------------------    
 
-SYM::Lazy<SYM::BooleanExpression> ChildAgent::SymbolicNormalLinkedQueryPRed() const
+SYM::Lazy<SYM::BooleanExpression> ChildAgent::SymbolicNormalLinkedQueryPRed(PatternLink keyer_plink) const
 {
     PatternLink terminus_plink(&terminus);
     return MakeLazy<ParentOperator>( MakeLazy<SymbolVariable>(terminus_plink) ) ==
@@ -98,7 +98,7 @@ void StuffAgent::PatternQueryRestrictions( shared_ptr<PatternQuery> pq ) const
 }                                                      
 
 
-SYM::Lazy<SYM::BooleanExpression> StuffAgent::SymbolicNormalLinkedQueryPRed() const
+SYM::Lazy<SYM::BooleanExpression> StuffAgent::SymbolicNormalLinkedQueryPRed(PatternLink keyer_plink) const
 {
     PatternLink terminus_plink(&terminus);
     auto expr = MakeLazy<BooleanConstant>(true);

@@ -27,7 +27,7 @@ public:
 
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;                                
                                                                
-    SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuery() const override;                                       
+    SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuery(PatternLink keyer_plink) const override;                                       
 
     virtual NodeBlock GetGraphBlockInfo() const;
     

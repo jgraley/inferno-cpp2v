@@ -23,7 +23,7 @@ public:
     class PreRestrictionMismatch : public Mismatch {};
     class AutolocationMismatch : public Mismatch {};
                                                  
-    SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuery() const override; 
+    SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuery(PatternLink keyer_plink) const override; 
     
     virtual void RunAutolocatingQuery(XLink common_xlink) const;
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicAutolocatingQuery() const; 

@@ -113,7 +113,7 @@ public:
                                    shared_ptr<PatternQuery> &pattern_query ) const;
 
 private:        
-    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed(PatternLink keyer_plink) const;                                       
     SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuerySequence(const Plan::Sequence &plan_seq) const;                                       
     SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryCollection(const Plan::Collection &plan_col) const;                                       
     SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuerySingular(const Plan::Singular &plan_sing) const;                                       

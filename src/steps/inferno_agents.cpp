@@ -116,7 +116,7 @@ Graphable::NodeBlock IdentifierByNameAgent::GetGraphBlockInfo() const
 }
 
 
-SYM::Lazy<SYM::BooleanExpression> IdentifierByNameAgent::SymbolicNormalLinkedQueryPRed() const
+SYM::Lazy<SYM::BooleanExpression> IdentifierByNameAgent::SymbolicNormalLinkedQueryPRed(PatternLink keyer_plink) const
 {
     auto keyer_expr = SYM::MakeLazy<SYM::SymbolVariable>(keyer_plink);   
     return SYM::MakeLazy<IsIdentifierNamedOperator>(this, name, keyer_expr);
@@ -236,7 +236,7 @@ shared_ptr<PatternQuery> NestedAgent::GetPatternQuery() const
 }
 
     
-SYM::Lazy<SYM::BooleanExpression> NestedAgent::SymbolicNormalLinkedQueryPRed() const                                      
+SYM::Lazy<SYM::BooleanExpression> NestedAgent::SymbolicNormalLinkedQueryPRed(PatternLink keyer_plink) const                                      
 {                 
     shared_ptr<PatternQuery> my_pq = GetPatternQuery();         
     PatternLink child_plink = my_pq->GetNormalLinks().front();
@@ -247,7 +247,7 @@ SYM::Lazy<SYM::BooleanExpression> NestedAgent::SymbolicNormalLinkedQueryPRed() c
     SYM::Lazy<SYM::BooleanExpression> expr = SYM::MakeLazy<NestingOperator>( this, keyer_expr ) == child_expr;
     
     if( depth )
-        expr &= RelocatingAgent::SymbolicNormalLinkedQueryPRed();
+        expr &= RelocatingAgent::SymbolicNormalLinkedQueryPRed(keyer_plink);
         
     return expr;
 }                     

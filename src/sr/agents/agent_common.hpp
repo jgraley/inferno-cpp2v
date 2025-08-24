@@ -27,7 +27,7 @@ public:
     virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const;                                    
                                   
     SYM::Lazy<SYM::BooleanExpression> SymbolicQuery( PatternLink keyer, const set<PatternLink> &residuals, bool coupling_only ) const override;                                       
-    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuery() const = 0;
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuery(PatternLink keyer_plink) const = 0;
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicCouplingQuery(PatternLink keyer, const set<PatternLink> &residuals) const;       
     bool IsNonTrivialPreRestrictionNP(const TreePtrInterface *pptr) const override;
     bool IsNonTrivialPreRestriction() const;

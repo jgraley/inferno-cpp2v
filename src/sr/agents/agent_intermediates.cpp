@@ -23,19 +23,19 @@ using namespace SYM;
 
 //---------------------------------- DefaultMMAXAgent ------------------------------------    
 
-SYM::Lazy<SYM::BooleanExpression> DefaultMMAXAgent::SymbolicNormalLinkedQuery() const
+SYM::Lazy<SYM::BooleanExpression> DefaultMMAXAgent::SymbolicNormalLinkedQuery(PatternLink keyer_plink) const
 {    
     auto mmax_expr = MakeLazy<SymbolConstant>(XLink::MMAX);
     ClutchRewriter mmax_rewriter( mmax_expr );
-    shared_ptr<BooleanExpression> original_expr = SymbolicNormalLinkedQueryMMed();
+    shared_ptr<BooleanExpression> original_expr = SymbolicNormalLinkedQueryMMed(keyer_plink);
     return mmax_rewriter.ApplyDistributed( original_expr );
 }
 
 //---------------------------------- PreRestrictedAgent ------------------------------------    
 
-SYM::Lazy<SYM::BooleanExpression> PreRestrictedAgent::SymbolicNormalLinkedQueryMMed() const
+SYM::Lazy<SYM::BooleanExpression> PreRestrictedAgent::SymbolicNormalLinkedQueryMMed(PatternLink keyer_plink) const
 {
-    return SymbolicPreRestriction() & SymbolicNormalLinkedQueryPRed();
+    return SymbolicPreRestriction() & SymbolicNormalLinkedQueryPRed(keyer_plink);
 }                  
 
 //---------------------------------- NonlocatingAgent ------------------------------------    

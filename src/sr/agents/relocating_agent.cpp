@@ -122,7 +122,7 @@ XLink RelocatingAgent::RelocatingQueryResult::GetBaseXLink() const
 
 //---------------------------------- RelocatingAgent ------------------------------------    
 
-SYM::Lazy<SYM::BooleanExpression> RelocatingAgent::SymbolicNormalLinkedQueryPRed() const                                      
+SYM::Lazy<SYM::BooleanExpression> RelocatingAgent::SymbolicNormalLinkedQueryPRed(PatternLink keyer_plink) const                                      
 {             
     shared_ptr<PatternQuery> my_pq = GetPatternQuery();         
     PatternLink child_plink = SoloElementOf( my_pq->GetNormalLinks() );

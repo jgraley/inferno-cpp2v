@@ -31,7 +31,7 @@ shared_ptr<PatternQuery> DisjunctionAgent::GetPatternQuery() const
 }
 
 
-SYM::Lazy<SYM::BooleanExpression> DisjunctionAgent::SymbolicNormalLinkedQuery() const
+SYM::Lazy<SYM::BooleanExpression> DisjunctionAgent::SymbolicNormalLinkedQuery(PatternLink keyer_plink) const
 {
     // TODO implement SymbolicAutolocatingQuery()?
     ASSERT( GetDisjuncts().size() == 2 )

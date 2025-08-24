@@ -237,7 +237,7 @@ void StandardAgent::IncrPatternQuerySingular( const Plan::Singular &plan_sing,
 
 // ---------------------------- Symbolic Queries ----------------------------------                                               
                                                
-Lazy<BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryPRed() const
+Lazy<BooleanExpression> StandardAgent::SymbolicNormalLinkedQueryPRed(PatternLink keyer_plink) const
 {
     auto expr = MakeLazy<IsLocalMatchOperator>(GetPatternPtr().get(), MakeLazy<SymbolVariable>(keyer_plink));
 

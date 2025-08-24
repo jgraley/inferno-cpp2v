@@ -32,7 +32,7 @@ public:
     class NotASubcontainerMismatch : public Mismatch {};
 
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;                
-    SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuery() const override;                                       
+    SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuery(PatternLink keyer_plink) const override;                                       
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            const SolutionMap *hypothesis_links,
                                            const XTreeDatabase *x_tree_db ) const;                                                                                          

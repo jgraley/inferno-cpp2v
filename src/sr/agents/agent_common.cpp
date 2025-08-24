@@ -131,7 +131,7 @@ Lazy<BooleanExpression> AgentCommon::SymbolicQuery( PatternLink keyer, const set
     if( coupling_only )
         return cq_expr;
 
-    auto nlq_expr = SymbolicNormalLinkedQuery();
+    auto nlq_expr = SymbolicNormalLinkedQuery(keyer);
        return cq_expr & nlq_expr; 
 }
 

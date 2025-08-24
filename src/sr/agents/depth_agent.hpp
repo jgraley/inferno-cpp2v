@@ -46,7 +46,7 @@ public:
 class ChildAgent : public DepthAgent
 {
     class NoParentMismatch : public Mismatch {};
-    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed(PatternLink keyer_plink) const;                                       
     virtual NodeBlock GetGraphBlockInfo() const;
 };
 
@@ -81,7 +81,7 @@ class StuffAgent : public DepthAgent
 {
 public:
     virtual void PatternQueryRestrictions( shared_ptr<PatternQuery> pq ) const;
-    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed(PatternLink keyer_plink) const;                                       
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            const SolutionMap *hypothesis_links,
                                            const XTreeDatabase *x_tree_db ) const;                                              

@@ -8,7 +8,7 @@
 using namespace SR;
 
 
-SYM::Lazy<SYM::BooleanExpression> BuilderAgent::SymbolicNormalLinkedQueryPRed() const
+SYM::Lazy<SYM::BooleanExpression> BuilderAgent::SymbolicNormalLinkedQueryPRed(PatternLink keyer_plink) const
 {
     // Match anything (subject to pre-restriction, MMAX and couplings)
     return SYM::MakeLazy<SYM::BooleanConstant>(true);

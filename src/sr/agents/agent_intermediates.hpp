@@ -15,8 +15,8 @@ namespace SR
 class DefaultMMAXAgent : public AgentCommon
 {
 public:                                        
-    SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuery() const final;                                       
-    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryMMed() const = 0;                                       
+    SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuery(PatternLink keyer_plink) const final;                                       
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryMMed(PatternLink keyer_plink) const = 0;                                       
 };
 
 
@@ -26,8 +26,8 @@ public:
 class PreRestrictedAgent : public DefaultMMAXAgent
 {
 public:    
-    SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryMMed() const final;                                       
-    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const = 0;                                       
+    SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryMMed(PatternLink keyer_plink) const final;                                       
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed(PatternLink keyer_plink) const = 0;                                       
 };
 
 

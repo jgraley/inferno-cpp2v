@@ -11,7 +11,7 @@ using namespace SYM;
 
 //---------------------------------- AutolocatingAgent ------------------------------------    
 
-Lazy<BooleanExpression> AutolocatingAgent::SymbolicNormalLinkedQuery() const
+Lazy<BooleanExpression> AutolocatingAgent::SymbolicNormalLinkedQuery(PatternLink keyer_plink) const
 {
     Lazy<BooleanExpression> my_expr = SYM::MakeLazy<SYM::BooleanConstant>(true);
 

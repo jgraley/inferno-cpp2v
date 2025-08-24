@@ -20,8 +20,6 @@ public:
 
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;              
 
-    //virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const override;                                       
-
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                            const SolutionMap *hypothesis_links,
                                            const XTreeDatabase *x_tree_db ) const;                                              

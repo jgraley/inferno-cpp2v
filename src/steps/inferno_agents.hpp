@@ -107,7 +107,7 @@ struct IdentifierByNameAgent : public virtual NonlocatingAgent
 {
     IdentifierByNameAgent( string n ) : name(n) {}
     virtual NodeBlock GetGraphBlockInfo() const;
-    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed(PatternLink keyer_plink) const;                                       
 
     virtual pair<TreePtr<Node>, TreePtr<Node>> GetBounds( string name ) const { ASSERTFAIL(); } // TODO implemnt all and put back = 0
     string name;
@@ -205,7 +205,7 @@ struct LabelIdentifierByNameAgent : Special<CPPTree::LabelIdentifier>,
 struct NestedAgent : public virtual RelocatingAgent
 {
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;                
-    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed() const;                                       
+    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed(PatternLink keyer_plink) const;                                       
 
     RelocatingQueryResult RunRelocatingQuery( const XTreeDatabase *db, XLink stimulus_xlink ) const override;                
 
