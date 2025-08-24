@@ -136,8 +136,9 @@ private:
                                       const XTreeDatabase *x_tree_db ) const;
                                            
 public:
-    virtual void MaybeChildrenPlanOverlay(      PatternLink me_plink, 
-                                    PatternLink under_plink );
+    virtual void MaybeChildrenPlanOverlay( SCREngine *acting_engine,
+                                           PatternLink me_plink, 
+                                           PatternLink bottom_layer_plink );
     ReplacePatchPtr GenReplaceLayoutImpl( const ReplaceKit &kit, 
                                     PatternLink me_plink, 
                                     XLink key_xlink,

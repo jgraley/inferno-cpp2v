@@ -27,7 +27,7 @@ public:
                                     XLink key_xlink,
                                                   const SCREngine *acting_engine ) final;
 
-    virtual void StartPlanOverlay();
+    virtual void StartPlanOverlay(SCREngine *acting_engine);
     
 private:
     virtual const TreePtrInterface *GetThrough() const = 0;

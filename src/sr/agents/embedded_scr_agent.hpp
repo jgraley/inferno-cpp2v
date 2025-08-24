@@ -25,8 +25,9 @@ public:
     EmbeddedSCRAgent( TreePtr<Node> sp, TreePtr<Node> rp, bool is_search );
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;              
     virtual const TreePtrInterface *GetThrough() const = 0;    
-    virtual void MaybeChildrenPlanOverlay( PatternLink me_plink, 
-                                  PatternLink under_plink );
+    virtual void MaybeChildrenPlanOverlay( SCREngine *acting_engine,
+                                           PatternLink me_plink, 
+                                           PatternLink bottom_layer_plink );
 
     list<PatternLink> GetVisibleChildren( Path v ) const override;
     virtual bool IsSearch() const;

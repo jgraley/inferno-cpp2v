@@ -493,17 +493,18 @@ void StandardAgent::RegenerationQueryCollection( DecidedQueryAgentInterface &que
 
 // ---------------------------- Replace ----------------------------------                                               
 
-void StandardAgent::MaybeChildrenPlanOverlay( PatternLink me_plink, 
-                                              PatternLink under_plink ) 
+void StandardAgent::MaybeChildrenPlanOverlay( SCREngine *acting_engine,
+                                              PatternLink me_plink, 
+                                              PatternLink bottom_layer_plink ) 
 {
     INDENT("T");
-    ASSERT( under_plink.GetChildAgent() );
-    TRACE(".MaybeChildrenPlanOverlay(")(under_plink)(")\n");
+    ASSERT( bottom_layer_plink.GetChildAgent() );
+    TRACE(".MaybeChildrenPlanOverlay(")(bottom_layer_plink)(")\n");
 
     // Loop over all the elements of under and dest that do not appear in pattern or
     // appear in pattern but are nullptr TreePtr<>s. Duplicate from under into dest.
     vector< Itemiser::Element * > my_items = Itemise(); 
-    vector< Itemiser::Element * > under_items = Itemise( under_plink.GetChildAgent() ); 
+    vector< Itemiser::Element * > bottom_layer_items = Itemise( bottom_layer_plink.GetChildAgent() ); 
     
     // Loop over all the members of under (which can be a subset of dest)
     // and for non-nullptr members, duplicate them by recursing and write the
@@ -511,21 +512,21 @@ void StandardAgent::MaybeChildrenPlanOverlay( PatternLink me_plink,
     for( vector< Itemiser::Element * >::size_type i=0; i<my_items.size(); i++ )
     {
         ASSERT( my_items[i] )( "itemise returned null element" );
-        ASSERT( under_items[i] )( "itemise returned null element" );
+        ASSERT( bottom_layer_items[i] )( "itemise returned null element" );
         
         TRACE("Member %d\n", i );
         // Act only on singular members that are non-null in the pattern (i.e. this) 
         if( TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[i]) )
         {
-            TreePtrInterface *under_singular = dynamic_cast<TreePtrInterface *>(under_items[i]);
-            if( *my_singular && *under_singular )
+            TreePtrInterface *bottom_layer_singular = dynamic_cast<TreePtrInterface *>(bottom_layer_items[i]);
+            if( *my_singular && *bottom_layer_singular )
             {
-				// Trying out just skipping the PlanOverlay() if no under_singular
-                //ASSERT(*under_singular)("Cannot key singular ")(*my_singular)(" of ")(me_plink)(" because corresponding \"under\" item of ")(under_plink)(" is nullptr (item #%u)", i);
+				// Trying out just skipping the PlanOverlay() if no bottom_layer_singular
+                //ASSERT(*bottom_layer_singular)("Cannot key singular ")(*my_singular)(" of ")(me_plink)(" because corresponding \"under\" item of ")(bottom_layer_plink)(" is nullptr (item #%u)", i);
                 PatternLink my_singular_plink(my_singular);
-                PatternLink under_singular_plink(under_singular);
+                PatternLink under_singular_plink(bottom_layer_singular);
                 
-                my_singular_plink.GetChildAgent()->PlanOverlay( my_singular_plink, under_singular_plink );
+                my_singular_plink.GetChildAgent()->PlanOverlay( acting_engine, my_singular_plink, under_singular_plink );
             }
         }
     }
@@ -540,14 +541,14 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutImpl( const ReplaceKit &ki
     INDENT("B");
     //if( TreePtr<CPPTree::SpecificInstanceIdentifier>::DynamicCast(me_plink.GetPattern()) )
     //    FTRACE("For me_plink=")(me_plink)(" overlay_under_plink=")(overlay_under_plink)(" key_xlink=")(key_xlink)("\n");
-
-    if( overlay_under_plink )
+	PatternLink bottom_layer_plink = acting_engine->TryGetOverlayBottomLayer(this);
+    if( bottom_layer_plink )
     {
         // Explicit request for overlay, resulting from use of the Delta agent.
         // The under pattern node is in a different location from over (=this), 
         // but overlay planning has set up overlay_under_plink for us.
-        XLink under_xlink = acting_engine->GetKey( overlay_under_plink );
-        return GenReplaceLayoutOverlay( kit, me_plink, under_xlink, acting_engine );
+        XLink bottom_layer_xlink = acting_engine->GetKey( bottom_layer_plink );
+        return GenReplaceLayoutOverlay( kit, me_plink, bottom_layer_xlink, acting_engine );
     }
     else if( key_xlink ) 
     {
@@ -568,39 +569,39 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutImpl( const ReplaceKit &ki
 
 Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlay( const ReplaceKit &kit, 
                                                                PatternLink me_plink, 
-                                                               XLink under_xlink,
+                                                               XLink bottom_layer_xlink,
                                                                const SCREngine *acting_engine )  // overlaying
 {
     INDENT("O");
-    ASSERT( under_xlink );
-    TreePtr<Node> under_node = under_xlink.GetChildTreePtr();
+    ASSERT( bottom_layer_xlink );
+    TreePtr<Node> bottom_layer_node = bottom_layer_xlink.GetChildTreePtr();
     
-    ASSERT( under_node->IsFinal() )
-          (*under_node)
+    ASSERT( bottom_layer_node->IsFinal() )
+          (*bottom_layer_node)
           (" must be a final class.");
-    ASSERT( IsSubcategory(*under_node) ) 
-          (*under_node)
+    ASSERT( IsSubcategory(*bottom_layer_node) ) 
+          (*bottom_layer_node)
           (" must be a non-strict subclass of ")
           (*this)
           (", so that it has a super-set of members");
-    bool same_type = under_node->IsSubcategory(*GetPatternPtr()); // See the above assert
+    bool same_type = bottom_layer_node->IsSubcategory(*GetPatternPtr()); // See the above assert
         
     // Policy: if type is same then use pattern as a template
     // and the new node will get its locals. Otherwise use keyed X (=under) as
     // the template. #593 will improve on this.
     if( same_type ) 
-        return GenReplaceLayoutOverlayUsingPattern( kit, me_plink, under_xlink, acting_engine );
+        return GenReplaceLayoutOverlayUsingPattern( kit, me_plink, bottom_layer_xlink, acting_engine );
     else 
-        return GenReplaceLayoutOverlayUsingX( kit, me_plink, under_xlink, acting_engine );
+        return GenReplaceLayoutOverlayUsingX( kit, me_plink, bottom_layer_xlink, acting_engine );
 }
 
 
 Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingPattern( const ReplaceKit &kit, 
                                                                            PatternLink me_plink, 
-                                                                           XLink under_xlink,
-                                                  const SCREngine *acting_engine ) 
+                                                                           XLink bottom_layer_xlink,
+                                                                           const SCREngine *acting_engine ) 
 {    
-    TreePtr<Node> under_node = under_xlink.GetChildTreePtr();
+    TreePtr<Node> bottom_layer_node = bottom_layer_xlink.GetChildTreePtr();
 
 	// With identifiers, Duplicate() would return *this as a replace node which 
 	// we don't support. Use BuildxxxIdentifierAgent for most cases. For exotic cases see #819.
@@ -614,26 +615,26 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingPattern( const
     list<Agent::ReplacePatchPtr> child_patches;    
     auto zone = FreeZone::CreateSubtree(dest);
 
-    // Loop over all the elements of under_node and dest that do not appear in pattern or
-    // appear in pattern but are nullptr TreePtr<>s. Duplicate from under_node into dest.
-    vector< Itemiser::Element * > under_items = under_node->Itemise();
-    vector< Itemiser::Element * > dest_items = under_node->Itemise( dest.get() ); 
-    ASSERT( under_items.size() == dest_items.size() );
+    // Loop over all the elements of bottom_layer_node and dest that do not appear in pattern or
+    // appear in pattern but are nullptr TreePtr<>s. Duplicate from bottom_layer_node into dest.
+    vector< Itemiser::Element * > bottom_layer_items = bottom_layer_node->Itemise();
+    vector< Itemiser::Element * > dest_items = bottom_layer_node->Itemise( dest.get() ); 
+    ASSERT( bottom_layer_items.size() == dest_items.size() );
 
     // Loop over the child elements of me (=over) and dest, limited to elements
-    // present in me, which is a non-strict superclass of under_node and dest.
+    // present in me, which is a non-strict superclass of bottom_layer_node and dest.
     // Overlay or overwrite pattern over a duplicate of dest. Keep track of 
     // corresponding elements of dest. 
     vector< Itemiser::Element * > my_items = Itemise();
     vector< Itemiser::Element * > dest_items_in_me = Itemise( dest.get() ); // Get the members of dest corresponding to pattern's class
     ASSERT( my_items.size() == dest_items_in_me.size() );        
     
-    TRACE("Copying %d members from under_node=", dest_items.size())(*under_node)(" dest=")(*dest)("\n");
+    TRACE("Copying %d members from bottom_layer_node=", dest_items.size())(*bottom_layer_node)(" dest=")(*dest)("\n");
     // i tracks items in under/dest, j tracks items in me
     bool in_me;
     for( vector< Itemiser::Element * >::size_type i=0, j=0; i<dest_items.size(); i++, in_me && j++ )
     {
-        ASSERT( under_items[i] )( "itemise returned null element" );
+        ASSERT( bottom_layer_items[i] )( "itemise returned null element" );
         ASSERT( dest_items[i] )( "itemise returned null element" );
 
         in_me = j < dest_items_in_me.size() && dest_items[i]==dest_items_in_me[j];
@@ -658,7 +659,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingPattern( const
         }
         
         TRACE("Member %d from key\n", i );
-        if( ContainerInterface *under_container = dynamic_cast<ContainerInterface *>(under_items[i]) )                
+        if( ContainerInterface *bottom_layer_container = dynamic_cast<ContainerInterface *>(bottom_layer_items[i]) )                
         {
             ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_items[i]);
             ASSERT( dest_con )( "itemise for dest didn't match itemise for my_con");
@@ -684,20 +685,20 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingPattern( const
             }    
             else
             {
-                TRACE("Copying container size %d from key\n", under_container->size() );
-                for( const TreePtrInterface &under_elt : *under_container )
+                TRACE("Copying container size %d from key\n", bottom_layer_container->size() );
+                for( const TreePtrInterface &bottom_layer_elt : *bottom_layer_container )
                 {
                     // Make a placeholder in the dest container for the mutator to point to
                     ContainerInterface::iterator dest_it = dest_con->insert( Mutator::MakePlaceholder() );
                     zone.AddTerminus( Mutator::CreateFreeContainer(dest, dest_con, dest_it) );     
 
-                    ASSERT( under_elt ); // present simplified scheme disallows nullptr
-                    auto under_zone = TreeZone::CreateSubtree(XLink(&under_elt) );
+                    ASSERT( bottom_layer_elt ); // present simplified scheme disallows nullptr
+                    auto under_zone = TreeZone::CreateSubtree(XLink(&bottom_layer_elt) );
                     child_patches.push_back( make_shared<TreePatch>(under_zone) );        
                 }
             }
         }            
-        else if( TreePtrInterface *under_singular = dynamic_cast<TreePtrInterface *>(under_items[i]) )
+        else if( TreePtrInterface *bottom_layer_singular = dynamic_cast<TreePtrInterface *>(bottom_layer_items[i]) )
         {
             TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
             ASSERT( dest_singular )( "itemise for target didn't match itemise for pattern");
@@ -714,8 +715,8 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingPattern( const
             }        
             else
             {
-                ASSERT( *under_singular );            
-                auto under_zone = TreeZone::CreateSubtree(XLink(under_singular) );
+                ASSERT( *bottom_layer_singular );            
+                auto under_zone = TreeZone::CreateSubtree(XLink(bottom_layer_singular) );
                 child_patches.push_back( make_shared<TreePatch>(under_zone) );            
             }
         }
@@ -731,13 +732,13 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingPattern( const
 
 Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingX( const ReplaceKit &kit, 
                                                                      PatternLink me_plink, 
-                                                                     XLink under_xlink,
-                                                  const SCREngine *acting_engine )  
+                                                                     XLink bottom_layer_xlink,
+                                                                     const SCREngine *acting_engine )  
 {
-    TreePtr<Node> under_node = under_xlink.GetChildTreePtr();
+    TreePtr<Node> bottom_layer_node = bottom_layer_xlink.GetChildTreePtr();
 
     // Duplicate under (and dest's local variables will appear to come from under)
-    TreePtr<Node> dest = Duplicate::DuplicateNode(under_node); 
+    TreePtr<Node> dest = Duplicate::DuplicateNode(bottom_layer_node); 
 
     // We "invent" dest, because of information coming from this pattern node.
     dest->SetInventedHere();
@@ -746,26 +747,26 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingX( const Repla
     list<Agent::ReplacePatchPtr> child_patches;    
     auto zone = FreeZone::CreateSubtree(dest);
 
-    // Loop over all the elements of under_node and dest that do not appear in pattern or
-    // appear in pattern but are nullptr TreePtr<>s. Duplicate from under_node into dest.
-    vector< Itemiser::Element * > under_items = under_node->Itemise();
-    vector< Itemiser::Element * > dest_items = under_node->Itemise( dest.get() ); 
-    ASSERT( under_items.size() == dest_items.size() );
+    // Loop over all the elements of bottom_layer_node and dest that do not appear in pattern or
+    // appear in pattern but are nullptr TreePtr<>s. Duplicate from bottom_layer_node into dest.
+    vector< Itemiser::Element * > bottom_layer_items = bottom_layer_node->Itemise();
+    vector< Itemiser::Element * > dest_items = bottom_layer_node->Itemise( dest.get() ); 
+    ASSERT( bottom_layer_items.size() == dest_items.size() );
 
     // Loop over the child elements of me (=over) and dest, limited to elements
-    // present in me, which is a non-strict superclass of under_node and dest.
+    // present in me, which is a non-strict superclass of bottom_layer_node and dest.
     // Overlay or overwrite pattern over a duplicate of dest. Keep track of 
     // corresponding elements of dest. 
     vector< Itemiser::Element * > my_items = Itemise();
     vector< Itemiser::Element * > dest_items_in_me = Itemise( dest.get() ); // Get the members of dest corresponding to pattern's class
     ASSERT( my_items.size() == dest_items_in_me.size() );        
     
-    TRACE("Copying %d members from under_node=", dest_items.size())(*under_node)(" dest=")(*dest)("\n");
+    TRACE("Copying %d members from bottom_layer_node=", dest_items.size())(*bottom_layer_node)(" dest=")(*dest)("\n");
     // i tracks items in under/dest, j tracks items in me
     bool in_me;
     for( vector< Itemiser::Element * >::size_type i=0, j=0; i<dest_items.size(); i++, in_me && j++ )
     {
-        ASSERT( under_items[i] )( "itemise returned null element" );
+        ASSERT( bottom_layer_items[i] )( "itemise returned null element" );
         ASSERT( dest_items[i] )( "itemise returned null element" );
 
         in_me = j < dest_items_in_me.size() && dest_items[i]==dest_items_in_me[j];
@@ -790,7 +791,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingX( const Repla
         }
         
         TRACE("Member %d from key\n", i );
-        if( ContainerInterface *under_container = dynamic_cast<ContainerInterface *>(under_items[i]) )                
+        if( ContainerInterface *bottom_layer_container = dynamic_cast<ContainerInterface *>(bottom_layer_items[i]) )                
         {
             ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_items[i]);
             ASSERT( dest_con )( "itemise for dest didn't match itemise for my_con");
@@ -816,20 +817,20 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingX( const Repla
             }    
             else
             {
-                TRACE("Copying container size %d from key\n", under_container->size() );
-                for( const TreePtrInterface &under_elt : *under_container )
+                TRACE("Copying container size %d from key\n", bottom_layer_container->size() );
+                for( const TreePtrInterface &bottom_layer_elt : *bottom_layer_container )
                 {
                     // Make a placeholder in the dest container for the mutator to point to
                     ContainerInterface::iterator dest_it = dest_con->insert( Mutator::MakePlaceholder() );
                     zone.AddTerminus( Mutator::CreateFreeContainer(dest, dest_con, dest_it) );     
 
-                    ASSERT( under_elt ); // present simplified scheme disallows nullptr
-                    auto under_zone = TreeZone::CreateSubtree(XLink(&under_elt) );
+                    ASSERT( bottom_layer_elt ); // present simplified scheme disallows nullptr
+                    auto under_zone = TreeZone::CreateSubtree(XLink(&bottom_layer_elt) );
                     child_patches.push_back( make_shared<TreePatch>(under_zone) );        
                 }
             }
         }            
-        else if( TreePtrInterface *under_singular = dynamic_cast<TreePtrInterface *>(under_items[i]) )
+        else if( TreePtrInterface *bottom_layer_singular = dynamic_cast<TreePtrInterface *>(bottom_layer_items[i]) )
         {
             TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
             ASSERT( dest_singular )( "itemise for target didn't match itemise for pattern");
@@ -846,8 +847,8 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingX( const Repla
             }        
             else
             {
-                ASSERT( *under_singular );            
-                auto under_zone = TreeZone::CreateSubtree(XLink(under_singular) );
+                ASSERT( *bottom_layer_singular );            
+                auto under_zone = TreeZone::CreateSubtree(XLink(bottom_layer_singular) );
                 child_patches.push_back( make_shared<TreePatch>(under_zone) );            
             }
         }
@@ -863,7 +864,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingX( const Repla
 
 Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutNormal( const ReplaceKit &kit, 
                                                               PatternLink me_plink,
-                                                  const SCREngine *acting_engine ) 
+                                                              const SCREngine *acting_engine ) 
 {
     INDENT("N");
  

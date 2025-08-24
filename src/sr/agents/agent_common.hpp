@@ -56,10 +56,12 @@ public:
     virtual const SCREngine *GetMasterSCREngine() const;      
 
     virtual void Reset();    
-    virtual void PlanOverlay( PatternLink me_plink, 
-                              PatternLink under_plink );
-    virtual void MaybeChildrenPlanOverlay( PatternLink me_plink, 
-                                  PatternLink under_plink );                                 
+    virtual void PlanOverlay( SCREngine *acting_engine,
+                              PatternLink me_plink, 
+                              PatternLink bottom_layer_plink );
+    virtual void MaybeChildrenPlanOverlay( SCREngine *acting_engine,
+                                           PatternLink me_plink, 
+                                           PatternLink bottom_layer_plink );                                 
     TreePtr<Node> BuildForBuildersAnalysis( PatternLink me_plink,
                                             const SCREngine *acting_engine ) override;
     ReplacePatchPtr GenReplaceLayout( const ReplaceKit &kit, 
@@ -75,19 +77,17 @@ public:
     TreePtr<Node> CloneNode() const;
     virtual string GetTrace() const;
 
+    virtual string GetGraphId() const;
+    virtual string GetPlanAsString() const override;
+    
 protected:                                  
     const SCREngine *my_scr_engine = nullptr;    
     const Traceable *my_keyer_engine = nullptr;    
     shared_ptr<PatternQuery> pattern_query;
-    //PatternLink keyer_plink;
-    PatternLink overlay_under_plink;
     Phase phase = UNDEFINED;
     
 private:    
     shared_ptr<Conjecture> nlq_conjecture;
-
-    virtual string GetGraphId() const;
-    virtual string GetPlanAsString() const override;
 };
 
 };

@@ -57,15 +57,13 @@ list<PatternLink> DeltaAgent::GetVisibleChildren( Path v ) const
 }
 
 
-void DeltaAgent::StartPlanOverlay()
+void DeltaAgent::StartPlanOverlay(SCREngine *acting_engine)
 {
     ASSERT( *GetOverlay() );          
     PatternLink overlay_plink(GetOverlay());
     PatternLink through_plink(GetThrough());
     
-    // Key as many nodes as possible on the replace side. Note: the "keyer link"
-    // is always the link coming from traversal of the subtree under GetOverlay()
-    overlay_plink.GetChildAgent()->PlanOverlay(overlay_plink, through_plink);
+    overlay_plink.GetChildAgent()->PlanOverlay(acting_engine, overlay_plink, through_plink);
 }
 
 

@@ -80,8 +80,9 @@ public:
     virtual const SCREngine *GetMasterSCREngine() const = 0;      // TODO unused
 
     virtual void Reset() = 0;     
-    virtual void PlanOverlay( PatternLink me_plink, 
-                              PatternLink under_plink ) = 0;
+    virtual void PlanOverlay( SCREngine *acting_engine,
+                              PatternLink me_plink, 
+                              PatternLink bottom_layer_plink ) = 0;
 
     virtual TreePtr<Node> BuildForBuildersAnalysis( PatternLink me_plink,
                                                     const SCREngine *acting_engine ) = 0;

@@ -33,7 +33,7 @@ class VNSequence;
 class StartsOverlay : public virtual Graphable
 {
 public:
-    virtual void StartPlanOverlay() = 0;
+    virtual void StartPlanOverlay(SCREngine *acting_engine) = 0;
 };
 
 /// Common implementation for search+replace, compare+replace and embeddeds
@@ -105,7 +105,7 @@ private:
         map< Agent *, shared_ptr<SCREngine> > my_engines;   
         shared_ptr<AndRuleEngine> and_rule_engine;
         CompareReplace::AgentPhases final_agent_phases;   
-        set<StartsOverlay *> my_overlay_starter_engines;   
+        set<StartsOverlay *> my_overlay_starter_agents;   
 
         PatternLink origin_plink;
         Agent *origin_agent;
@@ -118,6 +118,7 @@ private:
         set<PatternLink> all_keyer_plinks;   
         map<const Agent *, PatternLink> all_agents_to_keyers;
         map<const Agent *, set<PatternLink>> all_agents_to_residuals;        
+        map<const Agent *, PatternLink> all_agents_to_bottom_layer;
         set<PatternLink> keyed_before_replace_plinks;
         list<PatternLink> my_replace_only_plinks_postorder;
         list<PatternLink> my_embedded_plinks_postorder;
@@ -148,6 +149,8 @@ public: // For agents
     XLink GetKey( const Agent *agent ) const;
     bool IsKeyedByAndRuleEngine( Agent *agent ) const; 
     const CompareReplace * GetOverallMaster() const;
+    void SetOverlayBottomLayer(const Agent *agent, PatternLink bottom_layer_plink);
+    PatternLink TryGetOverlayBottomLayer(const Agent *agent) const;
     
     friend class Conjecture; 
 

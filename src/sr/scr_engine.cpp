@@ -141,12 +141,12 @@ void SCREngine::Plan::CategoriseAgents( const set<PatternLink> &enclosing_plinks
     for( PatternLink plink : my_agent_plinks )
         my_agents.insert( plink.GetChildAgent() );
 
-    // Determine who our embeddeds are
-    my_overlay_starter_engines.clear();
+    // Determine who our overlayers are
+    my_overlay_starter_agents.clear();
     for( Agent *a : my_agents )
     {
         if( auto ao = dynamic_cast<StartsOverlay *>(a) )
-            InsertSolo(my_overlay_starter_engines, ao);
+            InsertSolo(my_overlay_starter_agents, ao);
     }
 }
 
@@ -263,8 +263,8 @@ void SCREngine::Plan::PlanReplace()
     all_keyer_plinks = UnionOfSolo( all_keyer_plinks, and_rule_engine_keyer_plinks );
 	
     // Plan the keyers for couplings 
-    for( StartsOverlay *ao : my_overlay_starter_engines )
-        ao->StartPlanOverlay();        
+    for( StartsOverlay *ao : my_overlay_starter_agents )
+        ao->StartPlanOverlay(algo);        
 
     for( PatternLink plink : my_replace_only_plinks_postorder ) // common stem and Delta->replace
     {
@@ -340,8 +340,8 @@ void SCREngine::Plan::Dump()
           Trace(my_agents) },
         { "all_keyer_plinks", 
           Trace(all_keyer_plinks) },
-        { "my_overlay_starter_engines", 
-          Trace(my_overlay_starter_engines) },
+        { "my_overlay_starter_agents", 
+          Trace(my_overlay_starter_agents) },
         { "my_engines", 
           Trace(my_engines) },
         { "and_rule_engine", 
@@ -634,6 +634,21 @@ bool SCREngine::IsKeyedByAndRuleEngine( Agent *agent ) const
 const CompareReplace * SCREngine::GetOverallMaster() const
 {
     return plan.root_engine;
+}
+
+
+void SCREngine::SetOverlayBottomLayer(const Agent *agent, PatternLink bottom_layer_plink)
+{
+	InsertSolo( plan.all_agents_to_bottom_layer, make_pair(agent, bottom_layer_plink) );
+}
+
+
+PatternLink SCREngine::TryGetOverlayBottomLayer(const Agent *agent) const
+{
+	if( plan.all_agents_to_bottom_layer.count(agent)==1 )
+    	return plan.all_agents_to_bottom_layer.at(agent);
+    else
+		return PatternLink();
 }
 
 

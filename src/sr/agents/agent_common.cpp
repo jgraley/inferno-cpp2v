@@ -437,8 +437,9 @@ void AgentCommon::Reset()
 }
 
 
-void AgentCommon::PlanOverlay( PatternLink me_plink, 
-                               PatternLink under_plink )
+void AgentCommon::PlanOverlay( SCREngine *acting_engine,
+                               PatternLink me_plink, 
+                               PatternLink bottom_layer_plink )
 {
     ASSERT( me_plink.GetChildAgent() == this );
     // This function is called on nodes in the "overlay" branch of Delta nodes.
@@ -452,25 +453,26 @@ void AgentCommon::PlanOverlay( PatternLink me_plink,
     // over a subcategory means we simply update the singulars we know about
     // in over. Under is likely to be an X node and hence final, while
     // over can be StandaedAgent<some intermediate>.
-    if( !IsSubcategory(*under_plink.GetChildAgent()) ) 
+    if( !IsSubcategory(*bottom_layer_plink.GetChildAgent()) ) 
         return; // Not compatible with pattern: recursion stops here
         
     // Under must be a standard agent
-    if( !dynamic_cast<StandardAgent *>(under_plink.GetChildAgent()) )
+    if( !dynamic_cast<StandardAgent *>(bottom_layer_plink.GetChildAgent()) )
         return;
         
     // Remember the overlaying action that will be required
-    overlay_under_plink = under_plink;
+    acting_engine->SetOverlayBottomLayer( this, bottom_layer_plink );
 
     // Agent-specific actions
-    MaybeChildrenPlanOverlay( me_plink, under_plink );
+    MaybeChildrenPlanOverlay( acting_engine, me_plink, bottom_layer_plink );
 }
 
 
-void AgentCommon::MaybeChildrenPlanOverlay( PatternLink me_plink, 
-                                            PatternLink under_plink )
+void AgentCommon::MaybeChildrenPlanOverlay( SCREngine *acting_engine,
+                                            PatternLink me_plink, 
+                                            PatternLink bottom_layer_plink )
 {
-    // An empty function here implies leaf-termination of the overlay process
+    // An empty function here implies leaf-termination of the overlay plan
 }
                                   
                                   
@@ -568,11 +570,7 @@ string AgentCommon::GetPlanAsString() const
         { "my_scr_engine", 
           Trace(my_scr_engine) },
         { "my_keyer_engine", 
-          Trace(my_keyer_engine) },
-        //{ "pattern_query", 
-        //  Trace(pattern_query) }, // TODO should be traceable?
-        { "overlay_under_plink", 
-          Trace(overlay_under_plink) }
+          Trace(my_keyer_engine) }
     };
     return Trace(plan_as_strings);
 }
