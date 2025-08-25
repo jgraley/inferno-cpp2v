@@ -66,7 +66,7 @@ EXE_OPTIONS = $(OPTIONS)
 #EXE_OPTIONS += -pg
 
 # Enable address sanitiser
-EXE_OPTIONS += -fsanitize=address 
+#EXE_OPTIONS += -fsanitize=address 
 
 # -------------------- Options applied to Inferno/Vida Nova sources --------------------
 IVN_OPTIONS = $(EXE_OPTIONS)
