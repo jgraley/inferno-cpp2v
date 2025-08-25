@@ -77,6 +77,8 @@ public:
         parser.ParseTranslationUnit();
         ASSERT( !diags.hasErrorOccurred() )("Will not proceed into inferno because clang reported errors\n");
         TRACE("End parse\n");
+        
+        delete ptarget;
         return root;
     }
 

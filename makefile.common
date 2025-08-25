@@ -44,9 +44,6 @@ OPTIONS += -DBOOST_ENABLE_ASSERT_HANDLER
 # Enable gdb debugging
 OPTIONS += -ggdb3
 
-# Enable gprof profiling (slows compile times)
-#OPTIONS += -pg
-
 # Workaround compile error with SystemC
 OPTIONS += -fpermissive
 
@@ -61,8 +58,18 @@ OPTIONS += -DBOOST_CONTEXT_STATIC_LINK
 OPTIONS += -DBOOST_NO_CXX14_STD_EXCHANGE
 OPTIONS += -DBOOST_NO_CXX17_STD_INVOKE
 
-# -------------------- Options applied to Inferno/Vida Nova --------------------
-IVN_OPTIONS = $(OPTIONS)
+# -------------------- Options applied to Inferno/Vida Nova executable--------------------
+
+EXE_OPTIONS = $(OPTIONS)
+
+# Enable gprof profiling (slows compile times)
+#EXE_OPTIONS += -pg
+
+# Enable address sanitiser
+EXE_OPTIONS += -fsanitize=address 
+
+# -------------------- Options applied to Inferno/Vida Nova sources --------------------
+IVN_OPTIONS = $(EXE_OPTIONS)
 
 IVN_OPTIONS += -Wall 
 #IVN_OPTIONS += -Werror=unused-parameter
@@ -85,8 +92,8 @@ CLANG = $(LLVM)/tools/clang
 
 LC_JOBS=4
 
-# -------------------- Options applied to SystemC --------------------
-SC_OPTIONS = $(OPTIONS)
-
 # -------------------- Options applied to linking --------------------
-LINK_OPTIONS = $(OPTIONS) 
+LINK_OPTIONS = $(EXE_OPTIONS) 
+
+# -------------------- Options applied to SystemC test builds --------------------
+SC_OPTIONS = $(OPTIONS)

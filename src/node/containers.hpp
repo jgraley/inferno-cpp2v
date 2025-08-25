@@ -37,6 +37,7 @@ public:
     struct iterator_interface : public Traceable
     {
         // TODO const iterator and const versions of begin(), end()
+        virtual ~iterator_interface() {}
         virtual unique_ptr<iterator_interface> Clone() const = 0; // Make another copy of the present iterator
         virtual iterator_interface &operator++() = 0;
         virtual iterator_interface &operator--();
@@ -81,7 +82,7 @@ public:
         explicit operator bool() const;
     
     protected:
-           virtual unique_ptr<iterator_interface> Clone() const;
+        virtual unique_ptr<iterator_interface> Clone() const;
     
     private:
         unique_ptr<iterator_interface> pib;
@@ -672,6 +673,7 @@ struct Scaffold : VALUE_TYPE, ScaffoldBase
 class TreeUtilsInterface
 {
 public:
+    virtual ~TreeUtilsInterface() {};
     virtual TreePtr<Node> MakeScaffold() const = 0;	
 };
 
