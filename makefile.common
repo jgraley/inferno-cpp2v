@@ -16,30 +16,9 @@ DEPS = makefile.common src/makefile
 
 # ------------------- Common options --------------------
 OPTIONS =
- 
-# Use the C++17 standard 
-OPTIONS += -std=c++17
-
-# No path needed when include file is in same directory
-OPTIONS += -I.
-
-# Warn if return is missing
-OPTIONS += -Wreturn-type
-
-# Warn if variable looks like used before init
-OPTIONS += -Wuninitialized -Wmaybe-uninitialized
-
-# Treat all warnings as errors 
-OPTIONS += -Werror
-
-# Make the build abort after the first error
-OPTIONS += -Wfatal-errors
 
 # Optimisation level.
-OPTIONS += -O0
-
-# We supply an ASSERT handler in common/trace.cpp
-OPTIONS += -DBOOST_ENABLE_ASSERT_HANDLER
+OPTIONS += -Og
 
 # Enable gdb debugging
 OPTIONS += -ggdb3
@@ -53,14 +32,9 @@ OPTIONS += -fPIC
 # Generate include deps
 OPTIONS += -MMD
 
-# For boost
-OPTIONS += -DBOOST_CONTEXT_STATIC_LINK
-OPTIONS += -DBOOST_NO_CXX14_STD_EXCHANGE
-OPTIONS += -DBOOST_NO_CXX17_STD_INVOKE
-
 # -------------------- Options applied to Inferno/Vida Nova executable--------------------
 
-EXE_OPTIONS = $(OPTIONS)
+EXE_OPTIONS =
 
 # Enable gprof profiling (slows compile times)
 #EXE_OPTIONS += -pg
@@ -69,7 +43,23 @@ EXE_OPTIONS = $(OPTIONS)
 #EXE_OPTIONS += -fsanitize=address 
 
 # -------------------- Options applied to Inferno/Vida Nova sources --------------------
-IVN_OPTIONS = $(EXE_OPTIONS)
+
+IVN_OPTIONS = $(OPTIONS) $(EXE_OPTIONS)
+
+# No path needed when include file is in same directory
+IVN_OPTIONS += -I.
+
+# Warn if return is missing
+IVN_OPTIONS += -Wreturn-type
+
+# Warn if variable looks like used before init
+IVN_OPTIONS += -Wuninitialized -Wmaybe-uninitialized
+
+# Treat all warnings as errors 
+IVN_OPTIONS += -Werror
+
+# Make the build abort after the first error
+IVN_OPTIONS += -Wfatal-errors
 
 IVN_OPTIONS += -Wall 
 #IVN_OPTIONS += -Werror=unused-parameter
@@ -78,12 +68,26 @@ IVN_OPTIONS += -Wall
 # #780 to re-instate
 IVN_OPTIONS += -Wno-deprecated-copy 
 
-
 IVN_OPTIONS += -I$(LLVM)/include -I$(CLANG)/include
 IVN_OPTIONS += -D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS
 
-# -------------------- Options applied to LLVM and clang --------------------
-LC_OPTIONS +=
+# Use the C++17 standard 
+IVN_OPTIONS += -std=c++17
+
+# For boost
+IVN_OPTIONS += -DBOOST_CONTEXT_STATIC_LINK
+IVN_OPTIONS += -DBOOST_NO_CXX14_STD_EXCHANGE
+IVN_OPTIONS += -DBOOST_NO_CXX17_STD_INVOKE
+
+# We supply an ASSERT handler in common/trace.cpp
+IVN_OPTIONS += -DBOOST_ENABLE_ASSERT_HANDLER
+
+# -------------------- Options applied to LLVM and clang sources only --------------------
+
+# Strangely, on C++11, we get problems with inferred rvalue refs, and below 11
+# the clang code tries to use alignof. We work around the latter here.
+LC_OPTIONS += -include cstdio -include stdint.h 
+LC_OPTIONS += -std=c++03
 
 # For including llvm/clang header files
 BUILD = Debug
@@ -92,8 +96,20 @@ CLANG = $(LLVM)/tools/clang
 
 LC_JOBS=4
 
-# -------------------- Options applied to linking --------------------
-LINK_OPTIONS = $(EXE_OPTIONS) 
+# -------------------- Options applied to linking only --------------------
+LINK_OPTIONS = 
 
-# -------------------- Options applied to SystemC test builds --------------------
-SC_OPTIONS = $(OPTIONS)
+# Standard libs
+LINK_OPTIONS += -lstdc++
+
+# Boost libs
+LINK_OPTIONS += -lboost_context
+
+# Select the linker to use
+LINK_OPTIONS += -fuse-ld=gold
+
+# Don't produce position-indepednent executable (may be a workaround for an issue with an old gcc)
+LINK_OPTIONS += -no-pie
+
+# -------------------- Options applied to SystemC test builds only --------------------
+SC_OPTIONS =
