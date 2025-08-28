@@ -32,7 +32,7 @@ OPTIONS += -fPIC
 # Generate include deps
 OPTIONS += -MMD
 
-# -------------------- Options applied to Inferno/Vida Nova executable--------------------
+# -------------------- Options applied to Inferno/Vida Nova executable only --------------------
 
 EXE_OPTIONS =
 
@@ -41,6 +41,8 @@ EXE_OPTIONS =
 
 # Enable address sanitiser
 #EXE_OPTIONS += -fsanitize=address 
+#EXE_OPTIONS += -fsanitize=undefined 
+#-fsanitize-trap=all
 
 # -------------------- Options applied to Inferno/Vida Nova sources --------------------
 

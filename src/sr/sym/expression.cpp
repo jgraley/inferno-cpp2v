@@ -16,7 +16,7 @@ set<SR::PatternLink> Expression::GetRequiredVariables() const
 {
     set<SR::PatternLink> required_vars;
     // Non-strict union (i.e. not Solo) because common links are fine
-    for( const shared_ptr<Expression> a : GetOperands() )
+    for( const shared_ptr<Expression> &a : GetOperands() )
         required_vars = UnionOf( required_vars, a->GetRequiredVariables() );
     return required_vars;
 }
@@ -34,7 +34,7 @@ Expression::VariablesRequiringRows Expression::GetVariablesRequiringRows() const
 void Expression::ForTreeDepthFirstWalk( function<void(const Expression *)> f ) const
 {
     f( this );
-    for( const shared_ptr<Expression> a : GetOperands() )
+    for( const shared_ptr<Expression> &a : GetOperands() )
         a->ForTreeDepthFirstWalk( f );
 }
 
@@ -44,7 +44,7 @@ bool Expression::IsIndependentOf( shared_ptr<Expression> target ) const
     if( OrderCompare3Way( *this, *target )==0 )
         return false; // we match the target, so not independent.
         
-    for( shared_ptr<Expression> op : GetOperands() )
+    for( shared_ptr<Expression> &op : GetOperands() )
     {
         if( !op->IsIndependentOf( target ) )
             return false; // an operand may not be, so we may not be.
@@ -66,11 +66,11 @@ Orderable::Diff Expression::OrderCompare3WayChildren( const Orderable &right,
     {
         // Commutative
         set<shared_ptr<Expression>, Relation> lo;
-        for( shared_ptr<Expression> e : ll )     
+        for( shared_ptr<Expression> &e : ll )     
             lo.insert( e );
 
         set<shared_ptr<Expression>, Relation> ro;
-        for( shared_ptr<Expression> e : rl )      
+        for( shared_ptr<Expression> &e : rl )      
             ro.insert( e );
 
         return LexicographicalCompare( lo, ro, Relation() );
@@ -159,7 +159,7 @@ list<shared_ptr<BooleanExpression>> BooleanToBooleanExpression::GetBooleanOperan
 list<shared_ptr<Expression>> BooleanToBooleanExpression::GetOperands() const
 {
     list<shared_ptr<Expression>> ops;
-    for( shared_ptr<BooleanExpression> op : GetBooleanOperands() )
+    for( shared_ptr<BooleanExpression> &op : GetBooleanOperands() )
         ops.push_back( op );
     return ops;
 }
@@ -168,7 +168,7 @@ list<shared_ptr<Expression>> BooleanToBooleanExpression::GetOperands() const
 unique_ptr<BooleanResult> BooleanToBooleanExpression::Evaluate( const EvalKit &kit ) const
 { 
     list<unique_ptr<BooleanResult>> op_results;
-    for( shared_ptr<BooleanExpression> a : GetBooleanOperands() )
+    for( shared_ptr<BooleanExpression> &a : GetBooleanOperands() )
         op_results.push_back( a->Evaluate(kit) );
     return Evaluate( kit, move(op_results) );
 }
@@ -192,7 +192,7 @@ list<shared_ptr<SymbolExpression>> SymbolToSymbolExpression::GetSymbolOperands()
 list<shared_ptr<Expression>> SymbolToSymbolExpression::GetOperands() const
 {
     list<shared_ptr<Expression>> ops;
-    for( shared_ptr<SymbolExpression> op : GetSymbolOperands() )
+    for( shared_ptr<SymbolExpression> &op : GetSymbolOperands() )
         ops.push_back( op );
     return ops;
 }
@@ -202,7 +202,7 @@ unique_ptr<SymbolicResult> SymbolToSymbolExpression::Evaluate( const EvalKit &ki
 { 
 	INDENT("E");
     list<unique_ptr<SymbolicResult>> op_results;
-    for( shared_ptr<SymbolExpression> a : GetSymbolOperands() )
+    for( shared_ptr<SymbolExpression> &a : GetSymbolOperands() )
     {
 		//FTRACE("SE expr:")(a)("\n");
         op_results.push_back( a->Evaluate(kit) );
@@ -221,7 +221,7 @@ unique_ptr<SymbolicResult> SymbolToSymbolExpression::Evaluate( const EvalKit &ki
 list<shared_ptr<Expression>> SymbolToBooleanExpression::GetOperands() const
 {
     list<shared_ptr<Expression>> ops;
-    for( shared_ptr<SymbolExpression> op : GetSymbolOperands() )
+    for( shared_ptr<SymbolExpression> &op : GetSymbolOperands() )
         ops.push_back( op );
     return ops;
 }
@@ -231,7 +231,7 @@ unique_ptr<BooleanResult> SymbolToBooleanExpression::Evaluate( const EvalKit &ki
 { 
 	INDENT("e");
     list<unique_ptr<SymbolicResult>> op_results;
-    for( shared_ptr<SymbolExpression> a : GetSymbolOperands() )
+    for( shared_ptr<SymbolExpression> &a : GetSymbolOperands() )
     {
 		//FTRACE("se expr:")(a)("\n");
         op_results.push_back( a->Evaluate(kit) );
