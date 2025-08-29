@@ -8,7 +8,6 @@
 #include "helpers/walk.hpp"
 #include "helpers/transformation.hpp"
 #include <set>
-#include <boost/type_traits.hpp>
  
 namespace SR
 { 

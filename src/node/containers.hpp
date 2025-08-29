@@ -57,9 +57,15 @@ public:
     // types. And to retain covariant return s from begin() and end(), we have to include this class 
     // in the hierarchy of iterators. So we ensure that those iterators aren't unwittingly delegating 
     // into our methods using CHECK_NOT_REACHED_ON_SUBCLASS.
-    class iterator : public iterator_interface, public std::iterator<forward_iterator_tag, const TreePtrInterface>
+    class iterator : public iterator_interface
     {
     public:
+		using iterator_category = forward_iterator_tag;
+		using value_type = const TreePtrInterface;
+		using difference_type = ptrdiff_t;
+		using pointer = const TreePtrInterface *;
+		using reference = const TreePtrInterface &;
+    
         iterator();
         iterator( const iterator &ib );
         iterator &operator=( const iterator &ib );

@@ -172,7 +172,7 @@ set<TreePtr<Node>> Orderings::GetTerminusAndBaseAncestors( const TreeZone &tz ) 
 		
 	// Include parent of base all the way back to root
 	XLink x = tz.GetBaseXLink();
-	while(x = db->TryGetParentXLink(x))
+	while( (x = db->TryGetParentXLink(x)) )
 	{
 		InsertSolo(sn, x.GetChildTreePtr());			
 	}
@@ -183,7 +183,7 @@ set<TreePtr<Node>> Orderings::GetTerminusAndBaseAncestors( const TreeZone &tz ) 
 	for( size_t i=0; i<tz.GetNumTerminii(); i++ )
 	{
 		x = tz.GetTerminusXLink(i);
-		while(x = db->TryGetParentXLink(x))
+		while( (x = db->TryGetParentXLink(x)) )
 		{
 			if( sn.count(x.GetChildTreePtr())!=0 )
 				break; // There will already be a path to root from here

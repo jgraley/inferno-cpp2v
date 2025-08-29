@@ -11,7 +11,6 @@
 #include "link.hpp" 
 
 #include <vector>
-#include <boost/type_traits.hpp>
 
 namespace SR
 { 

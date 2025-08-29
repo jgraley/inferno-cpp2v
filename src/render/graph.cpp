@@ -13,6 +13,7 @@
 #include "common/read_args.hpp"
 #include "graph.hpp"
 #include "steps/inferno_agents.hpp"
+#include <sstream>
 #include <inttypes.h>
 #include <algorithm>
 #include "node/graphable.hpp"

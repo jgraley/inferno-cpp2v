@@ -83,7 +83,8 @@ AugTreePtr<Instance> FindMemberByName( const TransKit &kit, AugTreePtr<Record> r
     AugTreePtr<Instance> i;
     FOR_AUG_CONTAINER( r, members, [&](AugTreePtr<Declaration> d_atp)
     {
-        if( i = AugTreePtr<Instance>::DynamicCast(d_atp) )
+		i = AugTreePtr<Instance>::DynamicCast(d_atp);
+        if( i )
             if( auto sss = AugTreePtr<SpecificInstanceIdentifier>::DynamicCast(GET_CHILD(i, identifier)) )
                 if( sss->GetRender() == name )
                     LLBreak();
