@@ -82,7 +82,7 @@ ValueSelector::~ValueSelector()
 void ValueSelector::SetupDefaultGenerator()
 {
     auto fwd_it = x_tree_db->GetDomain().unordered_domain.begin();     
-    values_generator = [=]() mutable -> Value
+    values_generator = [=, this]() mutable -> Value
     {
         if( fwd_it==x_tree_db->GetDomain().unordered_domain.end() )        
             return Value();

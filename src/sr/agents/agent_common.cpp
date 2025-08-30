@@ -221,7 +221,7 @@ AgentCommon::QueryLambda AgentCommon::StartRegenerationQuery( const AndRuleEngin
     nlq_conjecture->Start();
     bool first = true;
     
-    QueryLambda lambda = [=]()mutable->shared_ptr<DecidedQuery>
+    QueryLambda lambda = [=, this]()mutable->shared_ptr<DecidedQuery>
     { 
         shared_ptr<DecidedQuery> query;
         
@@ -325,7 +325,7 @@ AgentCommon::QueryLambda AgentCommon::TestStartRegenerationQuery( const AndRuleE
                      ("Multiplicity: ")(MapForPattern(pq->GetMultiplicityLinks(), *hypothesis_links))("\n");
     }
 
-    QueryLambda test_lambda = [=]()mutable->shared_ptr<DecidedQuery>
+    QueryLambda test_lambda = [=, this]()mutable->shared_ptr<DecidedQuery>
     {
         shared_ptr<SR::DecidedQuery> mut_query;
         shared_ptr<SR::DecidedQuery> ref_query;

@@ -409,14 +409,8 @@ void ReferenceSolver::ShowBestAssignment()
 
 void ReferenceSolver::TimedOperations()
 {
-    auto now = chrono::steady_clock::now();
-    auto since = now - last_report;
-    if( since > chrono::seconds(3) )
-    {
-        TRACE("Intermediate CSP snapshot\n");
-        ShowBestAssignment();
-        last_report = now;
-    }
+    //TRACE("Intermediate CSP snapshot\n");
+    //ShowBestAssignment();
 }
 
 

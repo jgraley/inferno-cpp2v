@@ -8,7 +8,6 @@
 #include "common/common.hpp"
 #include "value_selector.hpp"
 
-#include <chrono>
 #include <functional>
 
 namespace SR
@@ -105,9 +104,6 @@ protected:
     Assignments assignments;
     map< int, shared_ptr<ValueSelector> > value_selectors;
     map< int, int > success_count;
-    
-    // Timed reports
-    chrono::time_point<chrono::steady_clock> last_report;
     
 public:
     static void DumpGSV();

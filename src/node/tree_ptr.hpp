@@ -323,7 +323,7 @@ template< typename X, typename Y >
 bool operator!=( const TreePtr<X> &x,
                  const TreePtr<Y> &y)
 {
-    return operator!=( (const shared_ptr<X> &)x, (const shared_ptr<Y> &)y );
+    return !operator==( (const shared_ptr<X> &)x, (const shared_ptr<Y> &)y );
 }
 
 
