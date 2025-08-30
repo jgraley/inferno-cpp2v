@@ -82,7 +82,7 @@ struct SCDynamicNamedFunction : virtual SCNamedFunction
     nodes for each. All waits must be done in local execution contexts
     like threads. Waits allow the SystemC kernel to run other processes. */
 struct Wait : CPPTree::Statement,
-              SCNamedFunction, 
+              virtual SCNamedFunction, 
               CPPTree::Uncombable
 {
     NODE_FUNCTIONS
@@ -118,7 +118,7 @@ struct WaitDelta : Wait
     Next_triggers do NOT allow the SystemC kernel to run other processes until
     the combable block completes. */
 struct NextTrigger : CPPTree::Statement,
-                     SCNamedFunction
+                     virtual SCNamedFunction
 {
     NODE_FUNCTIONS
     virtual string GetToken() { return "next_trigger"; }
@@ -152,7 +152,7 @@ struct NextTriggerDelta : NextTrigger
     type Event I would think. This is an intermediate because there are a few
     distinct flavours. */
 struct Notify : CPPTree::Statement,
-                SCNamedFunction
+                virtual SCNamedFunction
 {
     NODE_FUNCTIONS
     virtual string GetToken() { return "notify"; }
@@ -183,7 +183,7 @@ struct NotifyTimed : Notify
     put code. Different final nodes have different invocation and execution models.
     Processes look like functions that have no params or return value. */
 struct Process : CPPTree::Subroutine,
-                 SCNamedConstruct 
+                 virtual SCNamedConstruct 
 {
     NODE_FUNCTIONS
 };
@@ -228,7 +228,7 @@ struct ClockedThread : Process
 /** Evaluates to the total number of delta cycles thus far. Can be compared with zero 
     to produce an inferred reset signal for initialising state machines */
 struct DeltaCount : CPPTree::Operator,
-                    SCNamedFunction // TODO rename as InferredReset() since that will transform more easily to a real reset system
+                    virtual SCNamedFunction // TODO rename as InferredReset() since that will transform more easily to a real reset system
 {
     NODE_FUNCTIONS_FINAL
     virtual string GetToken() { return "sc_delta_count"; }    
@@ -239,7 +239,7 @@ struct DeltaCount : CPPTree::Operator,
     SystemC does not allow control of the return value from its main 
     function. */
 struct TerminationFunction : CPPTree::Statement,
-                             SCNamedFunction
+                             virtual SCNamedFunction
 {
     NODE_FUNCTIONS
     TreePtr<CPPTree::Expression> code; ///< exit code for program, 0 to 255 

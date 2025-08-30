@@ -66,6 +66,7 @@ SubContainerRangeExclusions::exclusion_iterator::exclusion_iterator() :
 
 
 SubContainerRangeExclusions::exclusion_iterator::exclusion_iterator( const exclusion_iterator &i ) :
+    ContainerInterface::iterator(),
     container(i.container)
 {
     pib = i.pib->Clone(); // Note we are not clone-on-write, so clone here for in case we write later
