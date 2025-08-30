@@ -134,6 +134,9 @@ struct ContainerCommon : virtual ContainerInterface, CONTAINER_IMPL
     typedef CONTAINER_IMPL Impl;
     typedef typename Impl::value_type value_type;
     
+    ContainerCommon() = default;
+    ContainerCommon(const ContainerCommon<Impl>&) = default;    
+    
     // C++11 fix
     ContainerCommon& operator=(const ContainerCommon& other)
     {
@@ -229,6 +232,10 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
 {
     typedef SEQUENCE_IMPL< TreePtr<VALUE_TYPE> > Impl;
     typedef TreePtr<VALUE_TYPE> value_type;
+         
+    using Impl::insert; // due to silly C++ rule where different overloads hide each other
+    inline Sequential<VALUE_TYPE>() {}
+	Sequential(const Sequential<VALUE_TYPE>&) = default;
     
     // C++11 fix
     Sequential& operator=(const Sequential& other)
@@ -237,8 +244,6 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
         return *this;
     }
 
-    using Impl::insert; // due to silly C++ rule where different overloads hide each other
-    inline Sequential<VALUE_TYPE>() {}
     struct iterator : public ContainerCommon<Impl>::iterator
     {
         inline iterator( typename Impl::iterator &i ) : Impl::iterator(i) {}
@@ -673,6 +678,7 @@ template<typename VALUE_TYPE>
 struct Scaffold : VALUE_TYPE, ScaffoldBase
 {
     NODE_FUNCTIONS_FINAL
+    Scaffold() {};
 };
 
 
@@ -692,7 +698,7 @@ class TreeUtils : public TreeUtilsInterface
 		// Don't instance TreePtr<Scaffold<X>> because very bad things happen
 		// including gcc 10.5 spinning forever chewing up memory (presumably
 		// it's contemplating TreePtr<Scaffold<Scaffold<X>>> etc). 
-		auto scaffold_sp = make_shared<Scaffold<VALUE_TYPE>>(); 
+		auto scaffold_sp = shared_ptr<Scaffold<VALUE_TYPE>>( new Scaffold<VALUE_TYPE>() ); 
 		TreePtr<Node> scaffold( scaffold_sp );
 		return scaffold;
 	}

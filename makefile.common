@@ -73,7 +73,7 @@ IVN_OPTIONS += -Wall
 #IVN_OPTIONS += -Wextra
 
 # Disable deprecated-cop warning #780 to re-instate
-IVN_OPTIONS += -Wno-deprecated-copy 
+IVN_OPTIONS += -Wdeprecated-copy 
 
 IVN_OPTIONS += -I$(LLVM)/include -I$(CLANG)/include
 IVN_OPTIONS += -D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS

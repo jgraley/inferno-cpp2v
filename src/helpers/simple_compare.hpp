@@ -17,6 +17,7 @@ public:
     typedef multiset<reference_wrapper<Node>, const SimpleCompare &> NodeOrdering;
 
     SimpleCompare( Orderable::OrderProperty order_property = Orderable::TOTAL );
+    SimpleCompare(const SimpleCompare&) = default;
     SimpleCompare &operator=(const SimpleCompare &other);
 
     /// Less operator: for use with set, map etc

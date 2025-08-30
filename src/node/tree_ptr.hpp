@@ -38,6 +38,9 @@ struct TreePtr;
 // base class of the pointed-to things.
 struct TreePtrInterface : virtual Itemiser::Element
 {
+	TreePtrInterface() = default;
+	TreePtrInterface(const TreePtrInterface&) = default;
+
     // Convert to and from shared_ptr<VALUE_INTERFACE> and TreePtr<VALUE_INTERFACE>
     virtual explicit operator shared_ptr<Node>() const = 0; 
     virtual explicit operator TreePtr<Node>() const = 0; 
@@ -125,7 +128,7 @@ struct TreePtr : virtual TreePtrCommon,
 	
     typedef VALUE_TYPE value_type;
     
-    TreePtr() {}
+    TreePtr() = default;
 
 #ifdef TREE_POINTER_REF_COUNTS
 	~TreePtr() final

@@ -28,6 +28,7 @@ public:
     static FreeZone CreateEmpty();
 
     FreeZone();
+	FreeZone(const SR::FreeZone&) = default;
     explicit FreeZone( TreePtr<Node> base, list<Mutator> &&terminii );
 
     FreeZone &operator=( const FreeZone &other );

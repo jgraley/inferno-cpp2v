@@ -22,7 +22,9 @@ public:
     class Element : public virtual Traceable
     {
     public:
-        virtual ~Element() {}
+		Element() = default;
+        virtual ~Element() {}        
+        Element(const Itemiser::Element&) = default;
         Element &operator=( const Element & )
         {
             if( (uintptr_t)this >= (uintptr_t)dstart &&

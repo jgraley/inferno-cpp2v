@@ -13,6 +13,16 @@ Walk_iterator::Walk_iterator() :
 }        
 
 
+Walk_iterator::Walk_iterator( const Walk_iterator & other ) :
+    root( other.root ),
+    out_filter( other.out_filter ),
+    recurse_filter( other.recurse_filter ), // See note in header about recurse nodes
+    state( other.state ),
+    done( other.done )
+{
+}
+
+
 Walk_iterator::Walk_iterator( TreePtr<Node> &r,
                               Filter *of,
                               Filter *rf ) :
@@ -22,16 +32,6 @@ Walk_iterator::Walk_iterator( TreePtr<Node> &r,
     done( false )
 {
     DoNodeFilter();
-}
-
-
-Walk_iterator::Walk_iterator( const Walk_iterator & other ) :
-    root( other.root ),
-    out_filter( other.out_filter ),
-    recurse_filter( other.recurse_filter ), // See note in header about recurse nodes
-    state( other.state ),
-    done( other.done )
-{
 }
 
 

@@ -55,6 +55,17 @@ class TreePtrInterface;
 struct Node : NodeBases,
               enable_shared_from_this<Node>
 {
+    NODE_FUNCTIONS
+
+	Node() {}
+    virtual ~Node(){}  // be a virtual hierarchy
+    
+    // Avoid "error: implicitly-declared [copy constructor] is deprecated" from -Wdeprecated-copy 
+    Node(const Node&) = default;
+    
+    // Node must be inherited virtually, to allow MI diamonds
+    // without making Node ambiguous
+    
     // C++11 fix
     Node& operator=(Node&)
     {
@@ -63,12 +74,6 @@ struct Node : NodeBases,
         return *this;
     }
 
-    NODE_FUNCTIONS
-
-    virtual ~Node(){}  // be a virtual hierarchy
-    // Node must be inherited virtually, to allow MI diamonds
-    // without making Node ambiguous
-    
     virtual string GetGraphName() const
     {
         return GetRender();

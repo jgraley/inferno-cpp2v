@@ -49,6 +49,8 @@ public:
     
     class CouplingMismatch : public Mismatch {};
         
+	Agent() = default;
+	Agent(const SR::Agent&) = default;
     Agent& operator=(Agent& other);
     virtual void SCRConfigure( const SCREngine *e,
                                Phase phase ) = 0;

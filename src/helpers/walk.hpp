@@ -28,7 +28,12 @@ public:
     typedef const value_type &reference;
 
     // Copy constructor and standard iterator operations
+    Walk_iterator(); // makes "end" iterator
     Walk_iterator( const Walk_iterator & other );
+    Walk_iterator& operator=(const Walk_iterator&) = default;
+    Walk_iterator( TreePtr<Node> &root,
+                   Filter *out_filter = nullptr,
+                   Filter *recurse_filter = nullptr );
     virtual unique_ptr<ContainerInterface::iterator_interface> Clone() const;
     virtual Walk_iterator &operator++();
     virtual reference operator*() const;
@@ -41,10 +46,6 @@ public:
     string GetName() const;
     virtual void AdvanceOver();
     virtual void AdvanceInto();
-    Walk_iterator(); // makes "end" iterator
-    Walk_iterator( TreePtr<Node> &root,
-                   Filter *out_filter = nullptr,
-                   Filter *recurse_filter = nullptr );
     virtual TreePtr<Node> GetParent(int grandness=0) const; // Go back a whole step
     virtual const TreePtrInterface *GetNodePointerInParent(int grandness=0) const;// Go back half a step
     // Get all the true recursions made so far (i.e. excluding root and current position)
