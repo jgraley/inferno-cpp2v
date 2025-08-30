@@ -717,7 +717,6 @@ IsChildCollectionSizedOperator::IsChildCollectionSizedOperator( TreePtr<Node> ar
     a( a_ ),
     size( size_ )
 {
-    ASSERT( item_index >= 0 );
 }    
 
 

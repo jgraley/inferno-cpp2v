@@ -333,7 +333,7 @@ string TruthTable::Render( set<int> column_axes, vector<string> pred_labels, uns
     ASSERT( column_axes.size() <= degree );
     ASSERT( render_cell_size >= 2 );
     for( unsigned i : column_axes )
-        ASSERT( i>=0 && i<degree )("axis out of range\n")(column_axes)("\ndegree=%d\n", degree);
+        ASSERT( i<degree )("axis out of range\n")(column_axes)("\ndegree=%d\n", degree);
     
     // Determine what the row axes must be
     vector<int> row_axes;

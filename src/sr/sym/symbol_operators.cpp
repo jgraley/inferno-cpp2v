@@ -163,7 +163,6 @@ ChildToSymbolOperator::ChildToSymbolOperator( TreePtr<Node> archetype_node_,
     item_index( item_index_ ),
     a( a_ )
 {
-    ASSERT( item_index >= 0 );
 }    
 
 

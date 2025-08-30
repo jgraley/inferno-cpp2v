@@ -292,7 +292,6 @@ private:
 
         TreePtr<Type> CreateTypeNode(clang::Declarator &D, unsigned depth = 0)
         {
-            ASSERT( depth>=0 );
             ASSERT( depth<=D.getNumTypeObjects() );
 
             if (depth == D.getNumTypeObjects())

@@ -116,7 +116,6 @@ public:
     {
         //TRACE("ItemiseIndex() index=%d obj=%p *obj=", i, itemise_object)(*itemise_object)(" size=%d\n", sizeof(*itemise_object));
         const vector< uintptr_t > &v = BasicItemiseStatic( itemise_object );
-        ASSERTS( i>=0 )("i=%d size=%d", i, v.size());
         ASSERTS( i<v.size() )("i=%d size=%d", i, v.size());
         uintptr_t ofs = v[i];
         Element *res = (Element *)((const char *)itemise_object + ofs);
