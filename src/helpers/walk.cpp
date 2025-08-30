@@ -14,6 +14,7 @@ Walk_iterator::Walk_iterator() :
 
 
 Walk_iterator::Walk_iterator( const Walk_iterator & other ) :
+    ContainerInterface::iterator(),
     root( other.root ),
     out_filter( other.out_filter ),
     recurse_filter( other.recurse_filter ), // See note in header about recurse nodes

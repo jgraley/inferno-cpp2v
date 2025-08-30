@@ -70,6 +70,7 @@ FlattenNode_iterator::FlattenNode_iterator() :
 
 
 FlattenNode_iterator::FlattenNode_iterator( const FlattenNode_iterator & other ) :
+    ContainerInterface::iterator(),
     mit( other.mit ),
     m_end( other.m_end ),
     cit( other.cit ),

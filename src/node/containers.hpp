@@ -151,7 +151,8 @@ struct ContainerCommon : virtual ContainerInterface, CONTAINER_IMPL
         iterator() {}
 
         iterator( const iterator &ib ) :
-            Impl::iterator( (typename Impl::iterator &)ib )
+            Impl::iterator( (typename Impl::iterator &)ib ),
+            ContainerInterface::iterator()
         {
             // Avoid delegating to ContainerInterface::iterator
         }
