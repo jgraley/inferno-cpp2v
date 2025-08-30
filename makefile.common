@@ -73,6 +73,7 @@ IVN_OPTIONS += -Wunused-parameter
 IVN_OPTIONS += -Wmissing-field-initializers
 IVN_OPTIONS += -Werror=type-limits
 IVN_OPTIONS += -Werror=inaccessible-base
+IVN_OPTIONS += -Werror=implicit-fallthrough
 #IVN_OPTIONS += -Wextra
 
 # Relates to rule-of-n, see #780 to re-instate

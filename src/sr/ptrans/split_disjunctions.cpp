@@ -61,7 +61,7 @@ TreePtr<Node> SplitDisjunctions::ReduceToNode( Collection<Node> &patterns, Disju
     switch( patterns.size() )
     {
     case 0:
-        ASSERT( false );
+        ASSERTFAIL();        
     case 1:
         return *(patterns.begin()); // return the only element, no new node required
     default: // >=2

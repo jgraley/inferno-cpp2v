@@ -388,9 +388,9 @@ private:
                         return d;
                     }
                     default:
-                        ASSERT("Unknown function kind\n");
-                        break;
+                        ASSERTFAIL();
                     }
+                    ASSERTFAIL();
                 }
 
                 case clang::DeclaratorChunk::Pointer:
