@@ -377,7 +377,7 @@ Inferno::Plan::Plan(Inferno *algo_) :
         stages.push_back( stage_pattern_graphs );    
                 
     stages.push_back( stage_pattern_transformation );         
-    if( ShouldIQuitAfter(stage_pattern_transformation) )
+    if( ShouldIQuitAfter(stage_pattern_transformation.progress_stage) )
         return;
 
     for( Stage &stage : stages_planning )
@@ -386,7 +386,7 @@ Inferno::Plan::Plan(Inferno *algo_) :
         // If a pattern trace graph was requested, generate it immediately after last planning stage.
         if( &stage == &(stages_planning.back()) && generate_pattern_graphs && ReadArgs::graph_trace )
             stages.push_back( stage_pattern_graphs );     
-        if( ShouldIQuitAfter(stage) )
+        if( ShouldIQuitAfter(stage.progress_stage) )
             return;
     }
 
@@ -400,16 +400,16 @@ Inferno::Plan::Plan(Inferno *algo_) :
     }
 
     stages.push_back( stage_parse_X );   
-    if( ShouldIQuitAfter(stage_parse_X) ) 
+    if( ShouldIQuitAfter(stage_parse_X.progress_stage) ) 
         goto FINAL_RENDER;         
     // Now input has been parsed, we always want to render even if quitting early.  
     
     stages.push_back( stage_analyse );   
-    if( ShouldIQuitAfter(stage_analyse) ) 
+    if( ShouldIQuitAfter(stage_analyse.progress_stage) ) 
         goto FINAL_RENDER; 
         
     stages.push_back( stage_transform_X );        
-    if( ShouldIQuitAfter(stage_transform_X) ) 
+    if( ShouldIQuitAfter(stage_transform_X.progress_stage) ) 
         goto FINAL_RENDER;
         
     FINAL_RENDER:
@@ -547,10 +547,10 @@ void Inferno::Run()
 }
 
 
-bool Inferno::ShouldIQuitAfter(Stage stage)
+bool Inferno::ShouldIQuitAfter(Progress::Stage stage)
 {
     return ReadArgs::quitafter && 
-           ReadArgs::quitafter_progress.GetStage()==stage.progress_stage;
+           ReadArgs::quitafter_progress.GetStage()==stage;
 }
 
 
@@ -571,9 +571,6 @@ int main( int argc, char *argv[] )
     }
     
     // Build a sequence of steps 
-    Inferno::Stage stage_build_steps( 
-        { Progress::BUILDING_STEPS }
-    );
     Progress(Progress::BUILDING_STEPS).SetAsCurrent();    
     vector< shared_ptr<SR::VNStep> > sequence;
     if( !ReadArgs::trace_quiet )
@@ -584,7 +581,7 @@ int main( int argc, char *argv[] )
         BuildDefaultSequence( &sequence );    
         
     // Maybe we want to stop after buolding the steps
-    if( Inferno::ShouldIQuitAfter(stage_build_steps) )
+    if( Inferno::ShouldIQuitAfter(Progress::BUILDING_STEPS) )
         return EXIT_SUCCESS;    
 
     // No, so create VNSequence and Inferno instances and run it:

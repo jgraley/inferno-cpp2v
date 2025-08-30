@@ -61,7 +61,7 @@ public:
     void RunTransformationStep(const Step &sp);
     void Run();
     
-    static bool ShouldIQuitAfter(Stage stage);
+    static bool ShouldIQuitAfter(Progress::Stage stage);
     
 private:
     TreePtr<Node> program;
