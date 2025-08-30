@@ -39,6 +39,7 @@ class PredicateOperator : public SymbolToBooleanExpression
 {
 public:    
     typedef SymbolToBooleanExpression Parent;
+    using Parent::Evaluate;
             
     virtual shared_ptr<PredicateOperator> Clone() const = 0;
     

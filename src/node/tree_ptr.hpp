@@ -68,6 +68,7 @@ struct TreePtrInterface : virtual Itemiser::Element
 
 struct TreePtrCommon : virtual TreePtrInterface, public SatelliteSerial
 {
+	using TreePtrInterface::operator=;
     TreePtrCommon();
 #ifdef TREE_POINTER_REF_COUNTS
     virtual ~TreePtrCommon();
@@ -120,6 +121,8 @@ template<typename VALUE_TYPE>
 struct TreePtr : virtual TreePtrCommon, 
                  shared_ptr<VALUE_TYPE>
 {
+	using TreePtrInterface::operator=;
+	
     typedef VALUE_TYPE value_type;
     
     TreePtr() {}
