@@ -35,7 +35,7 @@ public:
     void PlanningStageFour();
     void PlanningStageFive( int step_index );
     
-    static void SetMaxReps( int step_index, int n, bool e );
+    static void SetMaxReps( int n, bool e );
     void SetStopAfter( int step_index, vector<int> ssa, int d=0 );    
         
     void AnalysisStage( TreePtr<Node> main_tree_root );

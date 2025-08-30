@@ -30,9 +30,9 @@ public:
 // by absorbing the Scaffold and returting utils for the templated type.
 // TODO into own source file etc
 template< class TYPE >
-static const TreeUtilsInterface *MakeTPStatic( const TYPE *source );
+static const TreeUtilsInterface *MakeTreeUtilsStatic( const TYPE * );
 template< class TYPE >
-static const TreeUtilsInterface *MakeTPStatic( const Scaffold<TYPE> *source );
+static const TreeUtilsInterface *MakeTreeUtilsStatic( const Scaffold<TYPE> * );
 
 
 #define CLONE_FUNCTION \
@@ -40,8 +40,8 @@ static const TreeUtilsInterface *MakeTPStatic( const Scaffold<TYPE> *source );
     { \
         return Cloner::CloneStatic(this); \
     } \
-    virtual const TreeUtilsInterface *MakeTP() const  \
+    virtual const TreeUtilsInterface *MakeTreeUtils() const  \
     { \
-        return ::MakeTPStatic(this); \
+        return ::MakeTreeUtilsStatic(this); \
     }
 #endif

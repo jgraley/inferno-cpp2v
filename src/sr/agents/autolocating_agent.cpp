@@ -29,12 +29,14 @@ Lazy<BooleanExpression> AutolocatingAgent::SymbolicNormalLinkedQuery(PatternLink
 
 void AutolocatingAgent::RunAutolocatingQuery( XLink common_xlink ) const
 {
+	(void)common_xlink;
     // No restriction by default
 }
 
 
 SYM::Lazy<SYM::BooleanExpression> AutolocatingAgent::SymbolicAutolocatingQuery(PatternLink keyer_plink) const
 {
+	(void)keyer_plink;
     return SYM::MakeLazy<SYM::BooleanConstant>(true); // TODO don't like this, belongs in ConjuctionAgent
 }
 

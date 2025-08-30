@@ -10,6 +10,7 @@ using namespace SR;
 
 SYM::Lazy<SYM::BooleanExpression> BuilderAgent::SymbolicNormalLinkedQueryPRed(PatternLink keyer_plink) const
 {
+	(void)keyer_plink;
     // Match anything (subject to pre-restriction, MMAX and couplings)
     return SYM::MakeLazy<SYM::BooleanConstant>(true);
 }                                      

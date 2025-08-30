@@ -37,8 +37,7 @@ public:
     virtual TreePtr<Node> CloneToEmpty() const = 0;
     
 private:
-    virtual void SCRConfigure( const SCREngine *e,
-                               Phase phase );
+    virtual void SCRConfigure( Phase phase );
     shared_ptr< Collection<Node> > options;
 };
 

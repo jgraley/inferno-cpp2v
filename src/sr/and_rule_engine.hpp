@@ -97,8 +97,7 @@ public:
         void CreateBoundarySymbolics();
         void SymbolicRewrites();
 
-        void CreateSubordniateEngines( const set<Agent *> &normal_agents, 
-                                       const set<PatternLink> &subordinate_surrounding_plinks, 
+        void CreateSubordniateEngines( const set<PatternLink> &subordinate_surrounding_plinks, 
                                        const set<PatternLink> &subordinate_surrounding_keyer_plinks );
 
         // CSP solver stuff

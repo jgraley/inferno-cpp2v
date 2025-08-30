@@ -14,11 +14,10 @@
 using namespace SR;
 using namespace SYM;
 
-void StandardAgent::SCRConfigure( const SCREngine *e,
-                                  Phase phase )
+void StandardAgent::SCRConfigure( Phase phase )
 {
     plan.ConstructPlan( this, phase );    
-    AgentCommon::SCRConfigure(e, phase);
+    AgentCommon::SCRConfigure(phase);
 }
 
 // ---------------------------- Planning ----------------------------------                                               
@@ -54,6 +53,8 @@ StandardAgent::Plan::Sequence::Sequence( int ii, Plan *plan, Phase phase, Sequen
     Item(ii),
     pattern(pattern_)
 {
+	(void)plan;
+	(void)phase;
     //if( phase == IN_REPLACE_ONLY )
     //    return;
     
@@ -124,6 +125,7 @@ StandardAgent::Plan::Collection::Collection( int ii, Plan *plan, Phase phase, Co
     //if( phase == IN_REPLACE_ONLY )
     //    return;
 
+	(void)plan;
     p_star = nullptr;
     for( CollectionInterface::iterator pit = pattern->begin(); 
          pit != pattern->end(); 
@@ -156,7 +158,9 @@ StandardAgent::Plan::Singular::Singular( int ii, Plan *plan, Phase phase, TreePt
     Item(ii),
     pattern(pattern_)
 {
-    ASSERTS( pattern );
+	(void)plan;
+	(void)phase;
+	ASSERTS( pattern );
     plink = PatternLink(pattern);
 }
 
@@ -475,6 +479,7 @@ void StandardAgent::RegenerationQueryCollection( DecidedQueryAgentInterface &que
                                                  const XTreeDatabase *x_tree_db ) const
 {
     INDENT("C");
+    (void)x_tree_db;
 
     if( plan_col.star_plink )
     {
@@ -497,6 +502,7 @@ void StandardAgent::MaybeChildrenPlanOverlay( SCREngine *acting_engine,
                                               PatternLink me_plink, 
                                               PatternLink bottom_layer_plink ) 
 {
+	(void)me_plink;
     INDENT("T");
     ASSERT( bottom_layer_plink.GetChildAgent() );
     TRACE(".MaybeChildrenPlanOverlay(")(bottom_layer_plink)(")\n");
@@ -735,6 +741,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingX( const Repla
                                                                      XLink bottom_layer_xlink,
                                                                      const SCREngine *acting_engine )  
 {
+	(void)me_plink;
     TreePtr<Node> bottom_layer_node = bottom_layer_xlink.GetChildTreePtr();
 
     // Duplicate under (and dest's local variables will appear to come from under)

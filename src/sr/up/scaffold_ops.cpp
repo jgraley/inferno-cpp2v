@@ -79,7 +79,7 @@ FreeZone ScaffoldOps::CreateScaffoldToSpec(TreePtr<Node> base, int num_terminii)
 {
 	//auto base = (TreePtr<Node>)(*tpi_base);
 	ASSERTS(base);
-	const TreeUtilsInterface *upi = base->MakeTP();
+	const TreeUtilsInterface *upi = base->MakeTreeUtils();
 	ASSERTS(upi);
 	TreePtr<Node> scaffold = upi->MakeScaffold();
 	delete upi; // TODO try unique_ptr<>

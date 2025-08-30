@@ -166,8 +166,9 @@ bool SpecificFloat::IsLocalMatchCovariant( const Matcher &candidate ) const
 
 
 Orderable::Diff SpecificFloat::OrderCompare3WayCovariant( const Orderable &right, 
-                                                    OrderProperty order_property ) const
+                                                          OrderProperty order_property ) const
 {
+	(void)order_property;
     auto &r = GET_THAT_REFERENCE(right);
         
     // Primary ordering: the value
@@ -230,8 +231,9 @@ bool SpecificIdentifier::IsLocalMatchCovariant( const Matcher &candidate ) const
 
 
 Orderable::Diff SpecificIdentifier::OrderCompare3WayCovariant( const Orderable &right, 
-                                                           OrderProperty order_property ) const
+                                                               OrderProperty order_property ) const
 {
+	(void)order_property;
     auto &r = GET_THAT_REFERENCE(right);
         
     //FTRACEC("Compare ")(*this)(" with ")(*r)(": ");
@@ -311,7 +313,7 @@ bool SpecificFloatSemantics::IsLocalMatchCovariant( const Matcher &candidate ) c
 
 
 Orderable::Diff SpecificFloatSemantics::OrderCompare3WayCovariant( const Orderable &right, 
-                                                               OrderProperty order_property ) const
+                                                                   OrderProperty order_property ) const
 {
     auto &r = GET_THAT_REFERENCE(right); 
 

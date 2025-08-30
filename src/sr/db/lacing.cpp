@@ -442,7 +442,7 @@ int Lacing::DecisionNodeLeaf::GetLacingOrdinal() const
 
 string Lacing::DecisionNodeLeaf::Render(string pre)
 {
-    return SSPrintf("Your lacing ordinal is %d\n", lacing_ordinal );
+    return pre + SSPrintf(" your lacing ordinal is %d\n", lacing_ordinal );
 }
         
         

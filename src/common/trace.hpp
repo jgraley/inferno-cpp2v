@@ -110,8 +110,8 @@ struct TraceTupleWorker
 template<typename TUPLE>
 struct TraceTupleWorker<TUPLE, 0>
 {
-    // Template specialisation terminates the re4cursion at index==0
-    static void Execute(list<string> &elts, TUPLE const & t) {};
+    // Template specialisation terminates the recursion at index==0
+    static void Execute(list<string> &, TUPLE const &) {};
 };
 
 

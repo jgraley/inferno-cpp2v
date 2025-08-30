@@ -16,12 +16,7 @@ class AgentCommon : public Agent
 {
 public:
     AgentCommon();
-    virtual void SCRConfigure( const SCREngine *e,
-                               Phase phase );
-    virtual void ConfigureCoupling( const Traceable *e,
-                                    PatternLink keyer_plink_, 
-                                    set<PatternLink> residual_plinks_ );
-    virtual void AddResiduals( set<PatternLink> residual_plinks_ );
+    virtual void SCRConfigure( Phase phase );
     virtual list<PatternLink> GetChildren() const override;
     virtual list<PatternLink> GetVisibleChildren( Path v ) const override;
     virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const;                                    
@@ -46,8 +41,7 @@ public:
     QueryLambda StartRegenerationQuery( const AndRuleEngine *acting_engine,
                                         const SolutionMap *hypothesis_links,
                                         PatternLink keyer_plink,
-                                        const XTreeDatabase *x_tree_db,
-                                        bool use_DQ = false ) const final;
+                                        const XTreeDatabase *x_tree_db ) const final;
     QueryLambda TestStartRegenerationQuery( const AndRuleEngine *acting_engine,
                                             const SolutionMap *hypothesis_links,
 										    PatternLink keyer_plink,
@@ -79,7 +73,6 @@ public:
     virtual string GetPlanAsString() const override;
     
 protected:                                  
-    const Traceable *my_keyer_engine = nullptr;    
     Phase phase = UNDEFINED;    
 };
 

@@ -127,6 +127,7 @@ bool Render::IsSystemC( const TransKit &, TreePtr<Node> root )
 
 string Render::RenderLiteral( const TransKit &kit, TreePtr<Literal> sp ) try
 {
+	(void)kit;
     return Sanitise( sp->GetRender() );
 }
 DEFAULT_CATCH_CLAUSE
@@ -134,6 +135,7 @@ DEFAULT_CATCH_CLAUSE
 
 string Render::RenderIdentifier( const TransKit &kit, TreePtr<Identifier> id ) try
 {
+	(void)kit;
     string ids;
     if( id )
     {
@@ -195,6 +197,7 @@ DEFAULT_CATCH_CLAUSE
 
 string Render::RenderIntegralType( const TransKit &kit, TreePtr<Integral> type, string object ) try
 {
+	(void)kit;
     bool ds;
     int64_t width;
     auto ic = DynamicTreePtrCast<SpecificInteger>( type->width );
@@ -251,6 +254,7 @@ DEFAULT_CATCH_CLAUSE
 
 string Render::RenderFloatingType( const TransKit &kit, TreePtr<Floating> type ) try
 {
+	(void)kit;
     string s;
     TreePtr<SpecificFloatSemantics> sem = DynamicTreePtrCast<SpecificFloatSemantics>(type->semantics);
     ASSERT(sem);
@@ -575,6 +579,7 @@ DEFAULT_CATCH_CLAUSE
 
 string Render::RenderAccess( const TransKit &kit, TreePtr<AccessSpec> current_access ) try
 {
+	(void)kit;
     if( DynamicTreePtrCast<Public>( current_access ) )
         return "public";
     else if( DynamicTreePtrCast<Private>( current_access ) )
@@ -589,6 +594,7 @@ DEFAULT_CATCH_CLAUSE
 
 string Render::RenderStorage( const TransKit &kit, TreePtr<Instance> st ) try
 {
+	(void)kit;
     if( DynamicTreePtrCast<Program>( scope_stack.top() ) )
         return ""; // at top-level scope, everything is set to static, but don't actually output the word
     else if( DynamicTreePtrCast<Static>( st ) )

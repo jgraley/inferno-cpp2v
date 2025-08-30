@@ -41,6 +41,8 @@ void StarAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                           PatternLink keyer_plink,
                                           const XTreeDatabase *x_tree_db ) const
 { 
+	(void)x_tree_db;
+	
     // This agent has no normal links, so just do this to populate query
     XLink keyer_xlink = hypothesis_links->at(keyer_plink);
     INDENT("*");
@@ -71,11 +73,14 @@ void StarAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
 
 
 Agent::ReplacePatchPtr StarAgent::GenReplaceLayoutImpl( const ReplaceKit &kit, 
-                                                  PatternLink me_plink, 
-                                                  XLink key_xlink,
-                                                  const SCREngine *acting_engine ) 
+                                                        PatternLink me_plink, 
+                                                        XLink key_xlink,
+                                                        const SCREngine *acting_engine ) 
 {
     INDENT("*");
+    (void)kit;
+    (void)me_plink;
+    (void)acting_engine;
     ASSERT( key_xlink );
     TreePtr<Node> key_node = key_xlink.GetChildTreePtr();
     
@@ -140,6 +145,7 @@ Graphable::NodeBlock StarAgent::GetGraphBlockInfo() const
 unique_ptr<BooleanResult> StarAgent::IsSubcontainerInCategoryOperator::Evaluate( const EvalKit &kit,
                                                                                  list<unique_ptr<SymbolicResult>> &&op_results ) const
 {
+	(void)kit;
     ASSERT( op_results.size()==1 );        
     unique_ptr<SymbolicResult> ra = SoloElementOf(move(op_results));
 

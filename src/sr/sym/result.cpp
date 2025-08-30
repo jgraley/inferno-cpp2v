@@ -362,7 +362,7 @@ bool DepthFirstRangeResult::TryExtensionalise( set<XValue> &links ) const
 }
 
 
-bool DepthFirstRangeResult::operator==( const SymbolicResult &other ) const
+bool DepthFirstRangeResult::operator==( const SymbolicResult & ) const
 {
     ASSERTFAIL("TODO");
 }
@@ -445,7 +445,7 @@ bool SimpleCompareRangeResult::TryExtensionalise( set<XValue> &links ) const
 }
 
 
-bool SimpleCompareRangeResult::operator==( const SymbolicResult &other ) const
+bool SimpleCompareRangeResult::operator==( const SymbolicResult & ) const
 {
     ASSERTFAIL("TODO");
 }
@@ -520,7 +520,7 @@ bool CategoryRangeResult::TryExtensionalise( set<XValue> &links ) const
 }
 
 
-bool CategoryRangeResult::operator==( const SymbolicResult &other ) const
+bool CategoryRangeResult::operator==( const SymbolicResult & ) const
 {
     ASSERTFAIL("TODO");
 }

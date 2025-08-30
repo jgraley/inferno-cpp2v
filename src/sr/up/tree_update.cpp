@@ -84,7 +84,7 @@ ReplaceAssignments TreeUpdater::UpdateMainTree( XLink origin_xlink, shared_ptr<P
 	
     // Figure out what we should do, then do it. See comments in these 
     // functions and the pass class headers.
-	Analysis(origin_xlink, layout, assignments);
+	Analysis(layout);
 	ApplyUpdate(origin_xlink, layout, assignments);
 
 	// Delayed actions in DB i.e. new/invalidated stimulus checks for
@@ -95,7 +95,7 @@ ReplaceAssignments TreeUpdater::UpdateMainTree( XLink origin_xlink, shared_ptr<P
 }
 
 
-void TreeUpdater::Analysis(XLink origin_xlink, shared_ptr<Patch> &layout, ReplaceAssignments &assignments)
+void TreeUpdater::Analysis(shared_ptr<Patch> &layout)
 {	
 	// Roughtly an analysis phase. We can modify the layout but no
 	// changes to the db or zone duplications. The input layout is a

@@ -85,7 +85,7 @@ void VNSequence::PlanningStageFive( int step_index )
 }
 
 
-void VNSequence::SetMaxReps( int step_index, int n, bool e ) 
+void VNSequence::SetMaxReps( int n, bool e ) 
 { 
     VNStep::SetMaxReps(n, e);
 }

@@ -29,7 +29,7 @@ public:
     ReplaceAssignments UpdateMainTree( XLink origin_xlink, shared_ptr<Patch> source_layout );
     
 private:
-	void Analysis(XLink origin_xlink, shared_ptr<Patch> &source_layout, ReplaceAssignments &assignments);
+	void Analysis(shared_ptr<Patch> &source_layout);
 	void ApplyUpdate(XLink origin_xlink, shared_ptr<Patch> &source_layout, ReplaceAssignments &assignments);
 
     XTreeDatabase * const db;

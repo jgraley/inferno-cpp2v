@@ -50,8 +50,10 @@ Graphable::NodeBlock ConjunctionAgent::GetGraphBlockInfo() const
 Agent::ReplacePatchPtr ConjunctionAgent::GenReplaceLayoutImpl( const ReplaceKit &kit, 
                                                                PatternLink me_plink, 
                                                                XLink key_xlink,
-                                                  const SCREngine *acting_engine )
+                                                               const SCREngine *acting_engine )
 {
+	(void)me_plink;
+	(void)key_xlink;
 	shared_ptr<PatternQuery> pq = GetPatternQuery();
     auto plinks = pq->GetNormalLinks();
     ASSERT( plinks.size() >= 1 );

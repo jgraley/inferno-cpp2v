@@ -39,6 +39,7 @@ bool SearchToCompare::RequireAgentsToIncomingPlinksMap() const
 
 void SearchToCompare::FixupPointers( const PatternKnowledge &pk, TreePtr<Node> &scp, TreePtr<Node> &rp )
 {
+	(void)pk;
     ASSERT( scp );
 	ASSERT( scp==rp ); 	// Should have filled in both by now (CombinePatterns)
 	

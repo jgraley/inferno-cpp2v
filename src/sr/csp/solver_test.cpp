@@ -27,6 +27,8 @@ void SolverTest::Stop()
 void SolverTest::Run( const SolutionReportFunction &solution_report_function,
                       const RejectionReportFunction &rejection_report_function )
 {
+	(void)rejection_report_function;
+	
     // Get a set of solutions from the reference solver
     TRACE("############ RUNNING REFERENCE SOLVER #############\n");
     set<Solution> reference_solutions, under_test_solutions;

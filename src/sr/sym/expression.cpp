@@ -55,8 +55,9 @@ bool Expression::IsIndependentOf( shared_ptr<Expression> target ) const
 
 
 Orderable::Diff Expression::OrderCompare3WayChildren( const Orderable &right, 
-                                                      OrderProperty order_property ) const 
+                                                      OrderProperty order_property ) const                                                      
 {
+	(void)order_property;
     auto &r = GET_THAT_REFERENCE(right);    
     
     list<shared_ptr<Expression>> ll = GetOperands();
@@ -135,15 +136,15 @@ string Expression::GetTrace() const
 
 // ------------------------- BooleanExpression --------------------------
 
-shared_ptr<SymbolExpression> BooleanExpression::TrySolveFor( const SolveKit &kit, shared_ptr<SymbolVariable> target ) const
+shared_ptr<SymbolExpression> BooleanExpression::TrySolveFor( const SolveKit &, shared_ptr<SymbolVariable>  ) const
 {
     return nullptr;
 }
 
 // ------------------------- SymbolExpression --------------------------
 
-shared_ptr<SymbolExpression> SymbolExpression::TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
-                                                                   shared_ptr<SymbolExpression> to_equal ) const
+shared_ptr<SymbolExpression> SymbolExpression::TrySolveForToEqual( const SolveKit &, shared_ptr<SymbolVariable> , 
+                                                                   shared_ptr<SymbolExpression>  ) const
 {
     return nullptr;
 }
@@ -174,8 +175,8 @@ unique_ptr<BooleanResult> BooleanToBooleanExpression::Evaluate( const EvalKit &k
 }
 
 
-unique_ptr<BooleanResult> BooleanToBooleanExpression::Evaluate( const EvalKit &kit, 
-                                                                list<unique_ptr<BooleanResult>> &&op_results ) const
+unique_ptr<BooleanResult> BooleanToBooleanExpression::Evaluate( const EvalKit &, 
+                                                                list<unique_ptr<BooleanResult>> && ) const
 {
     ASSERTFAIL("Need to override one of the Evaluate() methods\n");
 }
@@ -210,8 +211,8 @@ unique_ptr<SymbolicResult> SymbolToSymbolExpression::Evaluate( const EvalKit &ki
     return Evaluate( kit, move(op_results) );
 }
 
-unique_ptr<SymbolicResult> SymbolToSymbolExpression::Evaluate( const EvalKit &kit, 
-                                                             list<unique_ptr<SymbolicResult>> &&op_results ) const
+unique_ptr<SymbolicResult> SymbolToSymbolExpression::Evaluate( const EvalKit &, 
+                                                             list<unique_ptr<SymbolicResult>> && ) const
 {
     ASSERTFAIL("Need to override one of the Evaluate() methods\n");
 }
@@ -240,8 +241,8 @@ unique_ptr<BooleanResult> SymbolToBooleanExpression::Evaluate( const EvalKit &ki
 }
 
 
-unique_ptr<BooleanResult> SymbolToBooleanExpression::Evaluate( const EvalKit &kit, 
-                                                               list<unique_ptr<SymbolicResult>> &&op_results ) const
+unique_ptr<BooleanResult> SymbolToBooleanExpression::Evaluate( const EvalKit &, 
+                                                               list<unique_ptr<SymbolicResult>> && ) const
 {
     ASSERTFAIL("Need to override one of the Evaluate() methods\n");
 }

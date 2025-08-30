@@ -109,7 +109,7 @@ struct IdentifierByNameAgent : public virtual NonlocatingAgent
     virtual NodeBlock GetGraphBlockInfo() const;
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed(PatternLink keyer_plink) const;                                       
 
-    virtual pair<TreePtr<Node>, TreePtr<Node>> GetBounds( string name ) const { ASSERTFAIL(); } // TODO implemnt all and put back = 0
+    virtual pair<TreePtr<Node>, TreePtr<Node>> GetBounds( string ) const { ASSERTFAIL(); } // TODO implemnt all and put back = 0
     string name;
 
     // We use the term _similar_ to describe nodes whose internal values and 

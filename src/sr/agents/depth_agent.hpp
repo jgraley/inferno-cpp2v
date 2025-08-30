@@ -27,7 +27,7 @@ public:
                                     XLink key_xlink,
                                                   const SCREngine *acting_engine ) final;
 
-    virtual void PatternQueryRestrictions( shared_ptr<PatternQuery> pq ) const {};
+    virtual void PatternQueryRestrictions( shared_ptr<PatternQuery> ) const {};
     virtual NodeBlock GetGraphBlockInfo() const;
 
     TreePtr<Node> terminus; // A node somewhere under Stuff, that matches normally, truncating the subtree

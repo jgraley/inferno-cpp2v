@@ -220,8 +220,9 @@ unique_ptr<SymbolicResult> RelocatingAgent::RelocateOperator::Evaluate( const Ev
 
 
 Orderable::Diff RelocatingAgent::RelocateOperator::OrderCompare3WayCovariant( const Orderable &right, 
-                                                                      OrderProperty order_property ) const 
+                                                                              OrderProperty order_property ) const 
 {
+	(void)order_property;
     auto &r = GET_THAT_REFERENCE(right);
     // Agents aren't comparable, so value of operator is identiy of agent
     return Node::Compare3WayIdentity( *agent->GetPatternPtr(), *r.agent->GetPatternPtr() );

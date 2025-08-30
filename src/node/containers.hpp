@@ -706,14 +706,14 @@ class TreeUtils : public TreeUtilsInterface
 
 
 template< class TYPE >
-const TreeUtilsInterface *MakeTPStatic( const TYPE *source )  
+const TreeUtilsInterface *MakeTreeUtilsStatic( const TYPE * )  
 { 
 	return new TreeUtils<TYPE>();
 }
 
 
 template< class TYPE >
-const TreeUtilsInterface *MakeTPStatic( const Scaffold<TYPE> *source )  
+const TreeUtilsInterface *MakeTreeUtilsStatic( const Scaffold<TYPE> * )  
 { 
 	return new TreeUtils<TYPE>();
 }

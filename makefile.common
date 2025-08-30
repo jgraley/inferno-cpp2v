@@ -69,10 +69,10 @@ IVN_OPTIONS += -Werror
 IVN_OPTIONS += -Wfatal-errors
 
 IVN_OPTIONS += -Wall 
-#IVN_OPTIONS += -Werror=unused-parameter
+IVN_OPTIONS += -Werror=unused-parameter
 #IVN_OPTIONS += -Wextra
 
-# Disable deprecated-cop warning #780 to re-instate
+# Relates to rule-of-n, see #780 to re-instate
 IVN_OPTIONS += -Wdeprecated-copy 
 
 IVN_OPTIONS += -I$(LLVM)/include -I$(CLANG)/include

@@ -20,6 +20,7 @@ BooleanConstant::BooleanConstant( bool value_ ) :
 
 unique_ptr<BooleanResult> BooleanConstant::Evaluate( const EvalKit &kit ) const
 {
+	(void)kit;
     return make_unique<BooleanResult>( value );
 }
 
@@ -31,8 +32,9 @@ bool BooleanConstant::GetAsBool() const
 
 
 Orderable::Diff BooleanConstant::OrderCompare3WayCovariant( const Orderable &right, 
-                                                      OrderProperty order_property ) const 
+                                                            OrderProperty order_property ) const 
 {
+	(void)order_property;
     auto &r = GET_THAT_REFERENCE(right);
 
     return value - r.value;
@@ -67,6 +69,7 @@ list<shared_ptr<BooleanExpression>> NotOperator::GetBooleanOperands() const
 unique_ptr<BooleanResult> NotOperator::Evaluate( const EvalKit &kit,
                                                  list<unique_ptr<BooleanResult>> &&op_results ) const
 {
+	(void)kit;
     unique_ptr<BooleanResult> ra = move( op_results.front() );
     if( ra->IsDefinedAndUnique() ) // DEFINED
     {
@@ -113,6 +116,7 @@ list<shared_ptr<BooleanExpression>> AndOperator::GetBooleanOperands() const
 unique_ptr<BooleanResult> AndOperator::Evaluate( const EvalKit &kit,
                                                  list<unique_ptr<BooleanResult>> &&op_results ) const
 {
+	(void)kit;
     if( op_results.empty() )
         return make_unique<BooleanResult>( true ); // identity element
         
@@ -172,6 +176,7 @@ list<shared_ptr<BooleanExpression>> OrOperator::GetBooleanOperands() const
 unique_ptr<BooleanResult> OrOperator::Evaluate( const EvalKit &kit,
                                                          list<unique_ptr<BooleanResult>> &&op_results ) const
 {
+	(void)kit;
     if( op_results.empty() )
         return make_unique<BooleanResult>( false ); // identity element
 
@@ -234,6 +239,7 @@ list<shared_ptr<BooleanExpression>> BoolEqualOperator::GetBooleanOperands() cons
 unique_ptr<BooleanResult> BoolEqualOperator::Evaluate( const EvalKit &kit,
                                                        list<unique_ptr<BooleanResult>> &&op_results ) const
 {
+	(void)kit;
     unique_ptr<BooleanResult> ra = move( op_results.front() );
     unique_ptr<BooleanResult> rb = move( op_results.back() );
     
@@ -289,6 +295,7 @@ list<shared_ptr<BooleanExpression>> ImplicationOperator::GetBooleanOperands() co
 unique_ptr<BooleanResult> ImplicationOperator::Evaluate( const EvalKit &kit,
                                                          list<unique_ptr<BooleanResult>> &&op_results ) const
 {
+	(void)kit;
     unique_ptr<BooleanResult> ra = move( op_results.front() );
     unique_ptr<BooleanResult> rb = move( op_results.back() );
     if( ra->IsDefinedAndUnique() )

@@ -725,6 +725,7 @@ string Graph::DoNodeBlockLabel( const MyNodeBlock &block,
                                 Atts title_font_atts, 
                                 string title )
 {
+	(void)block;
     title = ApplyTagPair(title, "FONT", title_font_atts);
     return MakeHTMLForGraphViz(title);
 }

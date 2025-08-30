@@ -30,11 +30,12 @@ shared_ptr<PatternQuery> DepthAgent::GetPatternQuery() const
 
 
 Agent::ReplacePatchPtr DepthAgent::GenReplaceLayoutImpl( const ReplaceKit &kit, 
-                                                   PatternLink me_plink, 
-                                                   XLink key_xlink,
-                                                  const SCREngine *acting_engine ) 
+                                                         PatternLink me_plink, 
+                                                         XLink key_xlink,
+                                                         const SCREngine *acting_engine ) 
 {
     INDENT("#");
+	(void)me_plink;
     
     // Recurse at the terminus
     PatternLink terminus_plink(&terminus);

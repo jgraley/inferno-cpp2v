@@ -9,10 +9,9 @@
 using namespace SR;
 using namespace SYM;
 
-void DisjunctionAgent::SCRConfigure( const SCREngine *e,
-                                     Phase phase )
+void DisjunctionAgent::SCRConfigure( Phase phase )
 {
-    AgentCommon::SCRConfigure(e, phase);
+    AgentCommon::SCRConfigure(phase);
 
     options = make_shared< Collection<Node> >();
     for( const TreePtrInterface &p : GetDisjuncts() )

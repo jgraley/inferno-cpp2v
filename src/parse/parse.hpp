@@ -89,10 +89,10 @@ private:
     {
     public:
         InfernoAction(TreePtr<Node> context, TreePtr<Scope> root_scope,
-                clang::IdentifierTable &IT, clang::Preprocessor &pp,
-                clang::TargetInfo &T) :
+                      clang::IdentifierTable &, clang::Preprocessor &pp,
+                      clang::TargetInfo &T) :
             preprocessor(pp), target_info(T), ident_track(context),
-                    global_scope(context), all_decls(MakeTreeNode<Program>()) // TODO Scope not Program
+            global_scope(context), all_decls(MakeTreeNode<Program>()) // TODO Scope not Program
         {
             ASSERT( context );
             ASSERT( root_scope );
@@ -198,7 +198,7 @@ private:
         }
 
         clang::Action::TypeTy *isTypeName(clang::IdentifierInfo &II,
-                clang::Scope *S, const clang::CXXScopeSpec *SS)
+                clang::Scope *, const clang::CXXScopeSpec *SS)
         {
             TreePtr<Node> n( ident_track.TryGet(&II, TryGetCXXScopeSpecifier(SS)) );
             if (n)
@@ -211,8 +211,8 @@ private:
             return 0;
         }
 
-        virtual DeclTy *isTemplateName(clang::IdentifierInfo &II,
-                clang::Scope *S, const clang::CXXScopeSpec *SS = 0)
+        virtual DeclTy *isTemplateName(clang::IdentifierInfo &,
+                clang::Scope *, const clang::CXXScopeSpec * = 0)
         {
             return 0; // TODO templates
         }
@@ -232,7 +232,7 @@ private:
             return n == cur;
         }
 
-        virtual void ActOnPopScope(clang::SourceLocation Loc, clang::Scope *S)
+        virtual void ActOnPopScope(clang::SourceLocation, clang::Scope *S)
         {
             INDENT("C");
             ident_track.PopScope(S);
@@ -786,10 +786,10 @@ private:
         /// ActOnDeclarator, when a C++ direct initializer is present.
         /// e.g: "int x(1);"
         virtual void AddCXXDirectInitializerToDecl(DeclTy *Dcl,
-                                                   clang::SourceLocation LParenLoc,
-                                                   ExprTy **Exprs, unsigned NumExprs,
-                                                   clang::SourceLocation *CommaLocs,
-                                                   clang::SourceLocation RParenLoc) 
+                                                   clang::SourceLocation,
+                                                   ExprTy **, unsigned,
+                                                   clang::SourceLocation *,
+                                                   clang::SourceLocation) 
         {
             TRACE();
             TreePtr<Declaration> d = hold_decl.FromRaw(Dcl);
@@ -907,7 +907,7 @@ private:
         }
     }
 
-    virtual StmtResult ActOnReturnStmt( clang::SourceLocation ReturnLoc,
+    virtual StmtResult ActOnReturnStmt( clang::SourceLocation,
             ExprTy *RetValExp )
     {
         auto r = MakeTreeNode<Return>();
@@ -919,10 +919,10 @@ private:
         return hold_stmt.ToRaw( r );
     }
 
-    virtual ExprResult ActOnIdentifierExpr( clang::Scope *S,
-            clang::SourceLocation Loc,
+    virtual ExprResult ActOnIdentifierExpr( clang::Scope *,
+            clang::SourceLocation,
             clang::IdentifierInfo &II,
-            bool HasTrailingLParen,
+            bool,
             const clang::CXXScopeSpec *SS = 0 )
     {
 		INDENT("I");
@@ -993,8 +993,8 @@ private:
         return hold_expr.ToRaw( CreateNumericConstant( tok ) );
     }
 
-    virtual ExprResult ActOnBinOp(clang::Scope *S,
-            clang::SourceLocation TokLoc, clang::tok::TokenKind Kind,
+    virtual ExprResult ActOnBinOp(clang::Scope *,
+            clang::SourceLocation , clang::tok::TokenKind Kind,
             ExprTy *LHS, ExprTy *RHS)
     {
         TRACE();
@@ -1026,7 +1026,7 @@ private:
         return hold_expr.ToRaw( o );
     }
 
-    virtual ExprResult ActOnPostfixUnaryOp(clang::Scope *S, clang::SourceLocation OpLoc,
+    virtual ExprResult ActOnPostfixUnaryOp(clang::Scope *, clang::SourceLocation,
             clang::tok::TokenKind Kind, ExprTy *Input)
     {
         TreePtr<NonCommutativeOperator> o = TreePtr<NonCommutativeOperator>();
@@ -1046,7 +1046,7 @@ private:
         return hold_expr.ToRaw( o );
     }
 
-    virtual ExprResult ActOnUnaryOp( clang::Scope *S, clang::SourceLocation OpLoc,
+    virtual ExprResult ActOnUnaryOp( clang::Scope *, clang::SourceLocation,
             clang::tok::TokenKind Kind, ExprTy *Input)
     {
         TreePtr<NonCommutativeOperator> o = TreePtr<NonCommutativeOperator>();
@@ -1066,8 +1066,8 @@ private:
         return hold_expr.ToRaw( o );
     }
 
-    virtual ExprResult ActOnConditionalOp(clang::SourceLocation QuestionLoc,
-            clang::SourceLocation ColonLoc,
+    virtual ExprResult ActOnConditionalOp(clang::SourceLocation,
+            clang::SourceLocation,
             ExprTy *Cond, ExprTy *LHS, ExprTy *RHS)
     {
         auto co = MakeTreeNode<ConditionalOperator>();
@@ -1092,10 +1092,10 @@ private:
         return c;
     }
 
-    virtual ExprResult ActOnCallExpr(clang::Scope *S, ExprTy *Fn, clang::SourceLocation LParenLoc,
+    virtual ExprResult ActOnCallExpr(clang::Scope *, ExprTy *Fn, clang::SourceLocation,
             ExprTy **Args, unsigned NumArgs,
-            clang::SourceLocation *CommaLocs,
-            clang::SourceLocation RParenLoc)
+            clang::SourceLocation *,
+            clang::SourceLocation)
     {
         // Get the args in a Sequence
         Sequence<Expression> args;
@@ -1104,7 +1104,7 @@ private:
         return hold_expr.ToRaw( c );
     }
 
-    virtual TypeResult ActOnTypeName(clang::Scope *S, clang::Declarator &D)
+    virtual TypeResult ActOnTypeName(clang::Scope *, clang::Declarator &D)
     {
         TreePtr<Type> t = CreateTypeNode( D );
         return hold_type.ToRaw( t );
@@ -1166,9 +1166,9 @@ private:
         }
     }
 
-    virtual OwningStmtResult ActOnCompoundStmt(clang::SourceLocation L, clang::SourceLocation R,
+    virtual OwningStmtResult ActOnCompoundStmt(clang::SourceLocation, clang::SourceLocation,
             MultiStmtArg Elts,
-            bool isStmtExpr)
+            bool)
     {
         // TODO helper fn for MultiStmtArg, like FromClang. Maybe.
         auto s = MakeTreeNode<Compound>();
@@ -1179,8 +1179,8 @@ private:
         return ToStmt( s );
     }
 
-    virtual OwningStmtResult ActOnDeclStmt(DeclTy *Decl, clang::SourceLocation StartLoc,
-            clang::SourceLocation EndLoc)
+    virtual OwningStmtResult ActOnDeclStmt(DeclTy *Decl, clang::SourceLocation,
+            clang::SourceLocation)
     {
         TreePtr<Declaration> d( hold_decl.FromRaw(Decl) );
         // Basically we are being asked to turn a Declaration, which has already been parsed,
@@ -1208,8 +1208,8 @@ private:
         return hold_label_identifier.FromRaw( II->getFETokenInfo<void *>() );
     }
 
-    virtual StmtResult ActOnLabelStmt(clang::SourceLocation IdentLoc, clang::IdentifierInfo *II,
-            clang::SourceLocation ColonLoc, StmtTy *SubStmt)
+    virtual StmtResult ActOnLabelStmt(clang::SourceLocation, clang::IdentifierInfo *II,
+            clang::SourceLocation, StmtTy *SubStmt)
     {
         auto l = MakeTreeNode<Label>();
         l->identifier = MaybeCreateLabelIdentifier(II);
@@ -1217,8 +1217,8 @@ private:
         return hold_stmt.ToRaw( l );
     }
 
-    virtual StmtResult ActOnGotoStmt(clang::SourceLocation GotoLoc,
-            clang::SourceLocation LabelLoc,
+    virtual StmtResult ActOnGotoStmt(clang::SourceLocation,
+            clang::SourceLocation,
             clang::IdentifierInfo *LabelII)
     {
         auto g = MakeTreeNode<Goto>();
@@ -1226,8 +1226,8 @@ private:
         return hold_stmt.ToRaw( g );
     }
 
-    virtual StmtResult ActOnIndirectGotoStmt(clang::SourceLocation GotoLoc,
-            clang::SourceLocation StarLoc,
+    virtual StmtResult ActOnIndirectGotoStmt(clang::SourceLocation,
+            clang::SourceLocation,
             ExprTy *DestExp)
     {
         auto g = MakeTreeNode<Goto>();
@@ -1235,7 +1235,7 @@ private:
         return hold_stmt.ToRaw( g );
     }
 
-    virtual ExprResult ActOnAddrLabel(clang::SourceLocation OpLoc, clang::SourceLocation LabLoc,
+    virtual ExprResult ActOnAddrLabel(clang::SourceLocation, clang::SourceLocation,
             clang::IdentifierInfo *LabelII) // "&&foo"
 
     {
@@ -1243,8 +1243,8 @@ private:
         return hold_expr.ToRaw( MaybeCreateLabelIdentifier(LabelII) );
     }
 
-    virtual StmtResult ActOnIfStmt(clang::SourceLocation IfLoc, ExprTy *CondVal,
-            StmtTy *ThenVal, clang::SourceLocation ElseLoc,
+    virtual StmtResult ActOnIfStmt(clang::SourceLocation, ExprTy *CondVal,
+            StmtTy *ThenVal, clang::SourceLocation,
             StmtTy *ElseVal)
     {
         auto i = MakeTreeNode<If>();
@@ -1257,7 +1257,7 @@ private:
         return hold_stmt.ToRaw( i );
     }
 
-    virtual StmtResult ActOnWhileStmt(clang::SourceLocation WhileLoc, ExprTy *Cond,
+    virtual StmtResult ActOnWhileStmt(clang::SourceLocation, ExprTy *Cond,
             StmtTy *Body)
     {
         auto w = MakeTreeNode<While>();
@@ -1266,8 +1266,8 @@ private:
         return hold_stmt.ToRaw( w );
     }
 
-    virtual StmtResult ActOnDoStmt(clang::SourceLocation DoLoc, StmtTy *Body,
-            clang::SourceLocation WhileLoc, ExprTy *Cond)
+    virtual StmtResult ActOnDoStmt(clang::SourceLocation, StmtTy *Body,
+            clang::SourceLocation, ExprTy *Cond)
     {
         auto d = MakeTreeNode<Do>();
         d->body = hold_stmt.FromRaw( Body );
@@ -1275,10 +1275,10 @@ private:
         return hold_stmt.ToRaw( d );
     }
 
-    virtual StmtResult ActOnForStmt(clang::SourceLocation ForLoc,
-            clang::SourceLocation LParenLoc,
+    virtual StmtResult ActOnForStmt(clang::SourceLocation,
+            clang::SourceLocation,
             StmtTy *First, ExprTy *Second, ExprTy *Third,
-            clang::SourceLocation RParenLoc, StmtTy *Body)
+            clang::SourceLocation, StmtTy *Body)
     {
         auto f = MakeTreeNode<For>();
         if( First )
@@ -1308,7 +1308,7 @@ private:
         return hold_stmt.ToRaw( s );
     }
 
-    virtual StmtResult ActOnFinishSwitchStmt(clang::SourceLocation SwitchLoc,
+    virtual StmtResult ActOnFinishSwitchStmt(clang::SourceLocation,
             StmtTy *rsw, ExprTy *Body)
     {
         TreePtr<Statement> s( hold_stmt.FromRaw( rsw ) );
@@ -1322,9 +1322,9 @@ private:
 
     /// ActOnCaseStmt - Note that this handles the GNU 'case 1 ... 4' extension,
     /// which can specify an RHS value.
-    virtual OwningStmtResult ActOnCaseStmt(clang::SourceLocation CaseLoc, ExprArg LHSVal,
-            clang::SourceLocation DotDotDotLoc, ExprArg RHSVal,
-            clang::SourceLocation ColonLoc, StmtArg SubStmt)
+    virtual OwningStmtResult ActOnCaseStmt(clang::SourceLocation, ExprArg LHSVal,
+            clang::SourceLocation, ExprArg RHSVal,
+            clang::SourceLocation, StmtArg SubStmt)
     {
         TRACE();
 
@@ -1345,9 +1345,9 @@ private:
         }
     }
 
-    virtual OwningStmtResult ActOnDefaultStmt(clang::SourceLocation DefaultLoc,
-            clang::SourceLocation ColonLoc, StmtArg SubStmt,
-            clang::Scope *CurScope)
+    virtual OwningStmtResult ActOnDefaultStmt(clang::SourceLocation,
+            clang::SourceLocation, StmtArg SubStmt,
+            clang::Scope *)
     {
         TRACE();
         auto d = MakeTreeNode<Default>();
@@ -1355,13 +1355,12 @@ private:
         return ToStmt( d );
     }
 
-    virtual StmtResult ActOnContinueStmt(clang::SourceLocation ContinueLoc,
-            clang::Scope *CurScope)
+    virtual StmtResult ActOnContinueStmt(clang::SourceLocation, clang::Scope *)
     {
         return hold_stmt.ToRaw( MakeTreeNode<Continue>() );
     }
 
-    virtual StmtResult ActOnBreakStmt(clang::SourceLocation GotoLoc, clang::Scope *CurScope)
+    virtual StmtResult ActOnBreakStmt(clang::SourceLocation, clang::Scope *)
     {
         return hold_stmt.ToRaw( MakeTreeNode<Break>() );
     }
@@ -1396,7 +1395,7 @@ private:
 
     virtual DeclTy *ActOnCXXMemberDeclarator(clang::Scope *S, clang::AccessSpecifier AS,
             clang::Declarator &D, ExprTy *BitfieldWidth,
-            ExprTy *Init, DeclTy *LastInGroup)
+            ExprTy *Init, DeclTy *)
     {
         //const clang::DeclSpec &DS = D.getDeclSpec();
         //TRACE("Element %p\n", Init);
@@ -1427,10 +1426,10 @@ private:
     }
 
     virtual DeclTy *ActOnTag(clang::Scope *S, unsigned TagType, TagKind TK,
-            clang::SourceLocation KWLoc, const clang::CXXScopeSpec &SS,
-            clang::IdentifierInfo *Name, clang::SourceLocation NameLoc,
-            clang::AttributeList *Attr,
-            MultiTemplateParamsArg TemplateParameterLists)
+            clang::SourceLocation, const clang::CXXScopeSpec &SS,
+            clang::IdentifierInfo *Name, clang::SourceLocation,
+            clang::AttributeList *,
+            MultiTemplateParamsArg)
     {
         //ASSERT( !TryGetCXXScopeSpecifier(&SS) && "We're not doing anything with the C++ scope"); // TODO do something with the C++ scope
         // Now we're using it to link up with forward decls eg class foo { struct s; }; struct foo::s { blah } TODO is this even legal C++?
@@ -1512,8 +1511,8 @@ private:
 
     /// ActOnStartCXXClassDef - This is called at the start of a class/struct/union
     /// definition, when on C++.
-    virtual void ActOnStartCXXClassDef(clang::Scope *S, DeclTy *TagDecl,
-            clang::SourceLocation LBrace)
+    virtual void ActOnStartCXXClassDef(clang::Scope *, DeclTy *TagDecl,
+            clang::SourceLocation)
     {
         //TRACE("S%p\n", S);
 
@@ -1547,10 +1546,10 @@ private:
         decl_to_insert = h;
     }
 
-    virtual ExprResult ActOnMemberReferenceExpr(clang::Scope *S, ExprTy *Base,
-            clang::SourceLocation OpLoc,
+    virtual ExprResult ActOnMemberReferenceExpr(clang::Scope *, ExprTy *Base,
+            clang::SourceLocation,
             clang::tok::TokenKind OpKind,
-            clang::SourceLocation MemberLoc,
+            clang::SourceLocation,
             clang::IdentifierInfo &Member)
     {
         TRACE("kind %d\n", OpKind);
@@ -1558,14 +1557,12 @@ private:
 
         // Turn -> into * and .
         if( OpKind == clang::tok::arrow ) // Base->Member
-
         {
             auto ou = MakeTreeNode<Dereference>();
             ou->operands.push_back( hold_expr.FromRaw( Base ) );
             a->base = ou;
         }
         else if( OpKind == clang::tok::period ) // Base.Member
-
         {
             a->base = hold_expr.FromRaw( Base );
         }
@@ -1595,9 +1592,9 @@ private:
         return hold_expr.ToRaw( a );
     }
 
-    virtual ExprResult ActOnArraySubscriptExpr(clang::Scope *S,
-            ExprTy *Base, clang::SourceLocation LLoc,
-            ExprTy *Idx, clang::SourceLocation RLoc)
+    virtual ExprResult ActOnArraySubscriptExpr(clang::Scope *,
+            ExprTy *Base, clang::SourceLocation,
+            ExprTy *Idx, clang::SourceLocation)
     {
         auto su = MakeTreeNode<Subscript>();
         su->operands.push_back( hold_expr.FromRaw( Base ) );
@@ -1606,7 +1603,7 @@ private:
     }
 
     /// ActOnCXXBoolLiteral - Parse {true,false} literals.
-    virtual ExprResult ActOnCXXBoolLiteral(clang::SourceLocation OpLoc,
+    virtual ExprResult ActOnCXXBoolLiteral(clang::SourceLocation,
             clang::tok::TokenKind Kind) //TODO not working - get node has no info
 
     {
@@ -1620,8 +1617,8 @@ private:
         return hold_expr.ToRaw( ic );
     }
 
-    virtual ExprResult ActOnCastExpr(clang::SourceLocation LParenLoc, TypeTy *Ty,
-            clang::SourceLocation RParenLoc, ExprTy *Op)
+    virtual ExprResult ActOnCastExpr(clang::SourceLocation, TypeTy *Ty,
+            clang::SourceLocation, ExprTy *Op)
     {
         auto c = MakeTreeNode<Cast>();
         c->operand = hold_expr.FromRaw( Op );
@@ -1629,7 +1626,7 @@ private:
         return hold_expr.ToRaw( c );
     }
 
-    virtual OwningStmtResult ActOnNullStmt(clang::SourceLocation SemiLoc)
+    virtual OwningStmtResult ActOnNullStmt(clang::SourceLocation)
     {
         TRACE();
         auto n = MakeTreeNode<Nop>();
@@ -1652,10 +1649,10 @@ private:
         return hold_expr.ToRaw( nc );
     }
 
-    virtual ExprResult ActOnInitList(clang::SourceLocation LParenLoc,
+    virtual ExprResult ActOnInitList(clang::SourceLocation,
             ExprTy **InitList, unsigned NumInit,
             clang::InitListDesignations &Designators,
-            clang::SourceLocation RParenLoc)
+            clang::SourceLocation)
     {
         ASSERT( !Designators.hasAnyDesignators() )( "Designators in init lists unsupported" );
         // Assume initialiser is for an Array, and create an ArrayInitialiser node
@@ -1750,15 +1747,15 @@ private:
     }
 
     /// ActOnCXXThis - Parse the C++ 'this' pointer.
-    virtual ExprResult ActOnCXXThis(clang::SourceLocation ThisLoc)
+    virtual ExprResult ActOnCXXThis(clang::SourceLocation)
     {
         return hold_expr.ToRaw( MakeTreeNode<This>() );
     }
 
     virtual DeclTy *ActOnEnumConstant(clang::Scope *S, DeclTy *EnumDecl,
             DeclTy *LastEnumConstant,
-            clang::SourceLocation IdLoc, clang::IdentifierInfo *Id,
-            clang::SourceLocation EqualLoc, ExprTy *Val)
+            clang::SourceLocation, clang::IdentifierInfo *Id,
+            clang::SourceLocation, ExprTy *Val)
     {
         TreePtr<Declaration> d( hold_decl.FromRaw( EnumDecl ) );
         TreePtr<Enum> e( DynamicTreePtrCast<Enum>(d) );
@@ -1790,7 +1787,7 @@ private:
         return hold_decl.ToRaw( o );
     }
 
-    virtual void ActOnEnumBody(clang::SourceLocation EnumLoc, DeclTy *EnumDecl,
+    virtual void ActOnEnumBody(clang::SourceLocation, DeclTy *EnumDecl,
             DeclTy **Elements, unsigned NumElements)
     {
         TreePtr<Declaration> d( hold_decl.FromRaw( EnumDecl ) );
@@ -1802,7 +1799,7 @@ private:
 
     /// ParsedFreeStandingDeclSpec - This method is invoked when a declspec with
     /// no declarator (e.g. "struct foo;") is parsed.
-    virtual DeclTy *ParsedFreeStandingDeclSpec(clang::Scope *S, clang::DeclSpec &DS)
+    virtual DeclTy *ParsedFreeStandingDeclSpec(clang::Scope *, clang::DeclSpec &DS)
     {
         TRACE();
         TreePtr<Declaration> d( hold_decl.FromRaw( DS.getTypeRep() ) );
@@ -1827,8 +1824,8 @@ private:
     }
 
     virtual ExprResult
-    ActOnSizeOfAlignOfExpr( clang::SourceLocation OpLoc, bool isSizeof, bool isType,
-            void *TyOrEx, const clang::SourceRange &ArgRange)
+    ActOnSizeOfAlignOfExpr( clang::SourceLocation, bool isSizeof, bool isType,
+            void *TyOrEx, const clang::SourceRange &)
     {
         TreePtr<TypeOperator> p;
         if( isSizeof )
@@ -1837,7 +1834,7 @@ private:
             p = MakeTreeNode<AlignOf>();
 
         if( isType )
-        p->operand = hold_type.FromRaw(TyOrEx);
+            p->operand = hold_type.FromRaw(TyOrEx);
         else
         {
             ASSERT(0)("typeof() only supported on types at the moment");
@@ -1849,10 +1846,10 @@ private:
     }
 
     virtual BaseResult ActOnBaseSpecifier(DeclTy *classdecl,
-            clang::SourceRange SpecifierRange,
+            clang::SourceRange,
             bool Virt, clang::AccessSpecifier AccessSpec,
             TypeTy *basetype,
-            clang::SourceLocation BaseLoc)
+            clang::SourceLocation)
     {
         TreePtr<Type> t( hold_type.FromRaw( basetype ) );
         TreePtr<SpecificTypeIdentifier> ti = DynamicTreePtrCast<SpecificTypeIdentifier>(t);
@@ -1863,6 +1860,7 @@ private:
 
         auto base = MakeTreeNode<Base>();
         base->record = ti;
+        (void)Virt;
         /*  if( Virt )
          base->storage = MakeTreeNode<Virtual>();
          else
@@ -1891,10 +1889,10 @@ private:
     /// nested-name part ("foo::"), 'IdLoc' is the source location of 'bar',
     /// 'CCLoc' is the location of '::' and 'II' is the identifier for 'bar'.
     /// Returns a CXXScopeTy* object representing the C++ scope.
-    virtual CXXScopeTy *ActOnCXXNestedNameSpecifier(clang::Scope *S,
+    virtual CXXScopeTy *ActOnCXXNestedNameSpecifier(clang::Scope *,
             const clang::CXXScopeSpec &SS,
-            clang::SourceLocation IdLoc,
-            clang::SourceLocation CCLoc,
+            clang::SourceLocation,
+            clang::SourceLocation,
             clang::IdentifierInfo &II)
     {
         TreePtr<Node> n( ident_track.Get( &II, TryGetCXXScopeSpecifier( &SS ) ) );
@@ -1904,8 +1902,8 @@ private:
 
     /// ActOnCXXGlobalScopeSpecifier - Return the object that represents the
     /// global scope ('::').
-    virtual CXXScopeTy *ActOnCXXGlobalScopeSpecifier(clang::Scope *S,
-            clang::SourceLocation CCLoc)
+    virtual CXXScopeTy *ActOnCXXGlobalScopeSpecifier(clang::Scope *,
+            clang::SourceLocation)
     {
         return hold_scope.ToRaw( global_scope );
     }
@@ -1929,7 +1927,7 @@ private:
     /// CXXScopeSpec that was passed to ActOnCXXEnterDeclaratorScope as well.
     /// Used to indicate that names should revert to being looked up in the
     /// defining scope.
-    virtual void ActOnCXXExitDeclaratorScope(clang::Scope *S, const clang::CXXScopeSpec &SS)
+    virtual void ActOnCXXExitDeclaratorScope(clang::Scope *S, const clang::CXXScopeSpec &)
     {
         INDENT("Y");
         ident_track.PopScope( S );       
@@ -1955,13 +1953,13 @@ private:
     }
 
     virtual MemInitResult ActOnMemInitializer( DeclTy *ConstructorDecl,
-            clang::Scope *S,
+            clang::Scope *,
             clang::IdentifierInfo *MemberOrBase,
-            clang::SourceLocation IdLoc,
-            clang::SourceLocation LParenLoc,
+            clang::SourceLocation,
+            clang::SourceLocation,
             ExprTy **Args, unsigned NumArgs,
-            clang::SourceLocation *CommaLocs,
-            clang::SourceLocation RParenLoc )
+            clang::SourceLocation,
+            clang::SourceLocation )
     {
         // Get (or make) the constructor we're invoking
         TreePtr<Node> n( ident_track.Get( MemberOrBase ) );
@@ -2010,14 +2008,14 @@ private:
     /// @code new (p1, p2) type(c1, c2) @endcode
     /// the p1 and p2 expressions will be in PlacementArgs and the c1 and c2
     /// expressions in ConstructorArgs. The type is passed as a declarator.
-    virtual ExprResult ActOnCXXNew( clang::SourceLocation StartLoc, bool UseGlobal,
-            clang::SourceLocation PlacementLParen,
+    virtual ExprResult ActOnCXXNew( clang::SourceLocation, bool UseGlobal,
+            clang::SourceLocation,
             ExprTy **PlacementArgs, unsigned NumPlaceArgs,
-            clang::SourceLocation PlacementRParen,
-            bool ParenTypeId, clang::Declarator &D,
-            clang::SourceLocation ConstructorLParen,
+            clang::SourceLocation,
+            bool, clang::Declarator &D,
+            clang::SourceLocation,
             ExprTy **ConstructorArgs, unsigned NumConsArgs,
-            clang::SourceLocation ConstructorRParen )
+            clang::SourceLocation )
     {
         auto n = MakeTreeNode<New>();
         n->type = CreateTypeNode( D );
@@ -2037,7 +2035,7 @@ private:
     /// ActOnCXXDelete - Parsed a C++ 'delete' expression. UseGlobal is true if
     /// the delete was qualified (::delete). ArrayForm is true if the array form
     /// was used (delete[]).
-    virtual ExprResult ActOnCXXDelete( clang::SourceLocation StartLoc, bool UseGlobal,
+    virtual ExprResult ActOnCXXDelete( clang::SourceLocation, bool UseGlobal,
             bool ArrayForm, ExprTy *Expression )
     {
         auto d = MakeTreeNode<Delete>();
@@ -2056,8 +2054,8 @@ private:
         return hold_expr.ToRaw( d );
     }
 
-    virtual ExprResult ActOnCompoundLiteral(clang::SourceLocation LParen, TypeTy *Ty,
-            clang::SourceLocation RParen, ExprTy *Op)
+    virtual ExprResult ActOnCompoundLiteral(clang::SourceLocation, TypeTy *Ty,
+            clang::SourceLocation, ExprTy *Op)
     {
         TreePtr<Type> t = hold_type.FromRaw( Ty );
         TreePtr<Expression> e = hold_expr.FromRaw( Op );
@@ -2077,8 +2075,8 @@ private:
         return hold_expr.ToRaw( e );
     }
 
-    virtual ExprResult ActOnStmtExpr(clang::SourceLocation LPLoc, StmtTy *SubStmt,
-                                     clang::SourceLocation RPLoc) // "({..})"
+    virtual ExprResult ActOnStmtExpr(clang::SourceLocation, StmtTy *SubStmt,
+                                     clang::SourceLocation) // "({..})"
     {
         TreePtr<Compound> cb( DynamicTreePtrCast<Compound>( hold_stmt.FromRaw( SubStmt ) ) );
         ASSERT(cb); // Let's hope the only statement Clang gives us is a compound
@@ -2092,119 +2090,119 @@ private:
     // Note: only actions that return something (so we don't get nullptr XTy going around the place). No obj-C or GCC
     // extensions. These all assert out immediately.
 
-    virtual DeclTy *ActOnFileScopeAsmDecl(clang::SourceLocation Loc, ExprArg AsmString)
+    virtual DeclTy *ActOnFileScopeAsmDecl(clang::SourceLocation, ExprArg)
     {
         ASSERTFAIL("Unimplemented action");
         return 0;
     }
 
-    virtual DeclTy *ActOnField(clang::Scope *S, DeclTy *TagD, clang::SourceLocation DeclStart,
-            clang::Declarator &D, ExprTy *BitfieldWidth)
+    virtual DeclTy *ActOnField(clang::Scope *, DeclTy *, clang::SourceLocation,
+            clang::Declarator &, ExprTy *)
     {
         ASSERTFAIL("Unimplemented action"); // TODO is this C-not-C++ or ObjC?
         return 0;
     }
 
-    virtual StmtResult ActOnAsmStmt(clang::SourceLocation AsmLoc,
-            bool IsSimple,
-            bool IsVolatile,
-            unsigned NumOutputs,
-            unsigned NumInputs,
-            std::string *Names,
-            ExprTy **Constraints,
-            ExprTy **Exprs,
-            ExprTy *AsmString,
-            unsigned NumClobbers,
-            ExprTy **Clobbers,
-            clang::SourceLocation RParenLoc)
+    virtual StmtResult ActOnAsmStmt(clang::SourceLocation,
+            bool,
+            bool,
+            unsigned,
+            unsigned,
+            std::string *,
+            ExprTy **,
+            ExprTy **,
+            ExprTy *,
+            unsigned,
+            ExprTy **,
+            clang::SourceLocation)
     {
         ASSERTFAIL("Unimplemented action");
         return 0;
     }
 
-    virtual ExprResult ActOnPredefinedExpr(clang::SourceLocation Loc,
-            clang::tok::TokenKind Kind)
+    virtual ExprResult ActOnPredefinedExpr(clang::SourceLocation,
+            clang::tok::TokenKind)
     {
         ASSERTFAIL("Unimplemented action");
         return 0;
     }
 
-    virtual DeclTy *ActOnStartNamespaceDef(clang::Scope *S, clang::SourceLocation IdentLoc,
-            clang::IdentifierInfo *Ident,
-            clang::SourceLocation LBrace)
+    virtual DeclTy *ActOnStartNamespaceDef(clang::Scope *, clang::SourceLocation,
+            clang::IdentifierInfo *,
+            clang::SourceLocation)
     {
         ASSERTFAIL("Unimplemented action");
         return 0;
     }
 
-    virtual ExprResult ActOnCXXNamedCast(clang::SourceLocation OpLoc, clang::tok::TokenKind Kind,
-            clang::SourceLocation LAngleBracketLoc, TypeTy *Ty,
-            clang::SourceLocation RAngleBracketLoc,
-            clang::SourceLocation LParenLoc, ExprTy *Op,
-            clang::SourceLocation RParenLoc)
+    virtual ExprResult ActOnCXXNamedCast(clang::SourceLocation, clang::tok::TokenKind,
+            clang::SourceLocation, TypeTy *,
+            clang::SourceLocation,
+            clang::SourceLocation, ExprTy *,
+            clang::SourceLocation)
     {
         ASSERTFAIL("Unimplemented action");
         return 0;
     }
 
-    virtual ExprResult ActOnCXXThrow(clang::SourceLocation OpLoc,
-            ExprTy *Op = 0)
+    virtual ExprResult ActOnCXXThrow(clang::SourceLocation,
+            ExprTy *)
     {
         ASSERTFAIL("Unimplemented action");
         return 0;
     }
 
-    virtual ExprResult ActOnCXXTypeConstructExpr(clang::SourceRange TypeRange,
-            TypeTy *TypeRep,
-            clang::SourceLocation LParenLoc,
-            ExprTy **Exprs,
-            unsigned NumExprs,
-            clang::SourceLocation *CommaLocs,
-            clang::SourceLocation RParenLoc)
+    virtual ExprResult ActOnCXXTypeConstructExpr(clang::SourceRange,
+            TypeTy *,
+            clang::SourceLocation,
+            ExprTy **,
+            unsigned,
+            clang::SourceLocation *,
+            clang::SourceLocation)
     {
         ASSERTFAIL("Unimplemented action");
         return 0;
     }
 
-    virtual ExprResult ActOnCXXConditionDeclarationExpr(clang::Scope *S,
-            clang::SourceLocation StartLoc,
-            clang::Declarator &D,
-            clang::SourceLocation EqualLoc,
-            ExprTy *AssignExprVal)
+    virtual ExprResult ActOnCXXConditionDeclarationExpr(clang::Scope *,
+            clang::SourceLocation,
+            clang::Declarator &,
+            clang::SourceLocation,
+            ExprTy *)
     {
         ASSERTFAIL("Unimplemented action");
         return 0;
     }
 
-    virtual DeclTy *ActOnExceptionDeclarator(clang::Scope *S, clang::Declarator &D)
+    virtual DeclTy *ActOnExceptionDeclarator(clang::Scope *, clang::Declarator &)
     {
         ASSERTFAIL("Unimplemented action");
         return 0;
     }
 
-    virtual OwningStmtResult ActOnCXXCatchBlock(clang::SourceLocation CatchLoc,
-            DeclTy *ExceptionDecl,
-            StmtArg HandlerBlock)
+    virtual OwningStmtResult ActOnCXXCatchBlock(clang::SourceLocation,
+            DeclTy *,
+            StmtArg)
     {
         ASSERTFAIL("Unimplemented action");
         return StmtEmpty();
     }
 
-    virtual OwningStmtResult ActOnCXXTryBlock(clang::SourceLocation TryLoc,
-            StmtArg TryBlock,
-            MultiStmtArg Handlers)
+    virtual OwningStmtResult ActOnCXXTryBlock(clang::SourceLocation,
+            StmtArg,
+            MultiStmtArg)
     {
         ASSERTFAIL("Unimplemented action");
         return StmtEmpty();
     }
     /// ActOnUsingDirective - This is called when using-directive is parsed.
-    virtual DeclTy *ActOnUsingDirective(clang::Scope *CurScope,
-            clang::SourceLocation UsingLoc,
-            clang::SourceLocation NamespcLoc,
-            const clang::CXXScopeSpec &SS,
-            clang::SourceLocation IdentLoc,
-            clang::IdentifierInfo *NamespcName,
-            clang::AttributeList *AttrList)
+    virtual DeclTy *ActOnUsingDirective(clang::Scope *,
+            clang::SourceLocation,
+            clang::SourceLocation,
+            const clang::CXXScopeSpec &,
+            clang::SourceLocation,
+            clang::IdentifierInfo *,
+            clang::AttributeList *)
     {
         ASSERTFAIL("Unimplemented action");
         return 0;
@@ -2214,20 +2212,20 @@ private:
     /// argument for a function parameter, but we can't parse it yet
     /// because we're inside a class definition. Note that this default
     /// argument will be parsed later.
-    virtual void ActOnParamUnparsedDefaultArgument(DeclTy *param,
-            clang::SourceLocation EqualLoc)
+    virtual void ActOnParamUnparsedDefaultArgument(DeclTy *,
+            clang::SourceLocation)
     {
         ASSERTFAIL("Unimplemented action");
     }
 
     /// ActOnParamDefaultArgumentError - Parsing or semantic analysis of
     /// the default argument for the parameter param failed.
-    virtual void ActOnParamDefaultArgumentError(DeclTy *param)
+    virtual void ActOnParamDefaultArgumentError(DeclTy *)
     {
         ASSERTFAIL("Unimplemented action");
     }
 
-    virtual void ActOnEnumStartDefinition(clang::Scope *S, DeclTy *EnumDecl)
+    virtual void ActOnEnumStartDefinition(clang::Scope *, DeclTy *)
     {
         ASSERTFAIL("Unimplemented action");
     }

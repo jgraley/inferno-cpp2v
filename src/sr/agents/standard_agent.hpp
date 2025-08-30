@@ -38,8 +38,7 @@ public:
     class SurplusXCollectionMismatch : public CollectionMismatch {};
     class InsufficientXCollectionMismatch : public CollectionMismatch {};
     
-    virtual void SCRConfigure( const SCREngine *e,
-                               Phase phase );
+    virtual void SCRConfigure( Phase phase );
 
     struct Plan : public virtual Traceable
     {

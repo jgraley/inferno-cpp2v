@@ -30,6 +30,7 @@ void NegationAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
                                               PatternLink keyer_plink,
                                               const XTreeDatabase *x_tree_db ) const
 { 
+	(void)x_tree_db;
     ASSERT( *GetNegand() );
     // This agent has no normal links, so just do this to populate query
     XLink keyer_xlink = hypothesis_links->at(keyer_plink);

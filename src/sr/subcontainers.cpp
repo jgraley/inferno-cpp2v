@@ -305,7 +305,7 @@ string SubCollection::GetContentsTrace()
 }
 
 
-void SubCollection::AssertMatchingContents( TreePtr<Node> other )
+void SubCollection::AssertMatchingContents( TreePtr<Node> )
 {
     ASSERT(!"DEPRACATED");
 }

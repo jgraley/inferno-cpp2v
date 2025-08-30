@@ -148,6 +148,7 @@ list<shared_ptr<SYM::SymbolExpression> *> IdentifierByNameAgent::IsIdentifierNam
 unique_ptr<SYM::BooleanResult> IdentifierByNameAgent::IsIdentifierNamedOperator::Evaluate( const EvalKit &kit,
                                                                                            list<unique_ptr<SYM::SymbolicResult>> &&op_results ) const 
 {
+	(void)kit;
     ASSERT( op_results.size()==1 );        
     unique_ptr<SYM::SymbolicResult> ra = SoloElementOf(move(op_results));
     if( !ra->IsDefinedAndUnique() )
@@ -179,8 +180,9 @@ shared_ptr<SYM::SymbolExpression> IdentifierByNameAgent::IsIdentifierNamedOperat
                                               
                                               
 Orderable::Diff IdentifierByNameAgent::IsIdentifierNamedOperator::OrderCompare3WayCovariant( const Orderable &right, 
-                                                                                       OrderProperty order_property ) const 
+                                                                                             OrderProperty order_property ) const 
 {
+	(void)order_property;
     auto &r = GET_THAT_REFERENCE(right);
     return name.compare(r.name);
 }  
@@ -255,6 +257,7 @@ SYM::Lazy<SYM::BooleanExpression> NestedAgent::SymbolicNormalLinkedQueryPRed(Pat
 
 RelocatingAgent::RelocatingQueryResult NestedAgent::RunRelocatingQuery( const XTreeDatabase *db, XLink stimulus_xlink ) const
 {   
+	(void)db;
     // Compare the depth with the supplied pattern if present
     if( depth )
     {
@@ -331,8 +334,9 @@ list<shared_ptr<SYM::SymbolExpression>> NestedAgent::NestingOperator::GetSymbolO
 
 
 unique_ptr<SYM::SymbolicResult> NestedAgent::NestingOperator::Evaluate( const EvalKit &kit,
-                                                                          list<unique_ptr<SYM::SymbolicResult>> &&op_results ) const 
+                                                                        list<unique_ptr<SYM::SymbolicResult>> &&op_results ) const 
 {
+	(void)kit;
     ASSERT( op_results.size()==1 );        
     unique_ptr<SYM::SymbolicResult> keyer_result = SoloElementOf(move(op_results));
     if( !keyer_result->IsDefinedAndUnique() )
@@ -350,8 +354,9 @@ unique_ptr<SYM::SymbolicResult> NestedAgent::NestingOperator::Evaluate( const Ev
 
 
 Orderable::Diff NestedAgent::NestingOperator::OrderCompare3WayCovariant( const Orderable &right, 
-                                                                      OrderProperty order_property ) const 
+                                                                         OrderProperty order_property ) const 
 {
+	(void)order_property;
     auto &r = GET_THAT_REFERENCE(right);
     // Agents aren't comparable, so value of operator is identiy of agent
     return Node::Compare3WayIdentity( *agent->GetPatternPtr(), *r.agent->GetPatternPtr() );
@@ -374,6 +379,7 @@ SYM::Expression::Precedence NestedAgent::NestingOperator::GetPrecedence() const
 XLink NestedArrayAgent::Advance( XLink xlink, 
                                  string *depth ) const
 {
+	(void)depth;
     if( auto a = TreePtr<Array>::DynamicCast(xlink.GetChildTreePtr()) )         
         return XLink(&(a->element)); // TODO support depth string (or integer)
     else

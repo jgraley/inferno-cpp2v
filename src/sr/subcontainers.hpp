@@ -182,7 +182,7 @@ struct SubCollection : Collection<Node>,
         return *this;
     }
     virtual string GetContentsTrace(); 
-    virtual void AssertMatchingContents( TreePtr<Node> other );    
+    virtual void AssertMatchingContents( TreePtr<Node> );    
 };       
 
 };

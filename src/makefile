@@ -55,67 +55,67 @@ ALL_MODULES = $(COMMON_MODULES) $(NODE_MODULES) $(HELPERS_MODULES) $(TREE_MODULE
 -include $(ALL_MODULES:%=build/%.d)
 
 build/inferno.a : $(ALL_MODULES:%=build/%.o)
-	mkdir -p build$(NODE)/type_db 
+	@mkdir -p build$(NODE)/type_db 
 	$(AR) -r --thin build/inferno.a $(ALL_MODULES:%=build/%.o)
 
 $(COMMON_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
-	mkdir -p $(dir $@)
+	@mkdir -p $(dir $@)
 	$(ICC) $< -c $(SRC_OPTIONS) -o $@ 
 
 $(NODE_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
-	mkdir -p $(dir $@)
+	@mkdir -p $(dir $@)
 	$(ICC) $< -c $(SRC_OPTIONS) -o $@ 
 
 $(HELPERS_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
-	mkdir -p $(dir $@)
+	@mkdir -p $(dir $@)
 	$(ICC) $< -c $(SRC_OPTIONS) -o $@ 
 
 $(TREE_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
-	mkdir -p $(dir $@)
+	@mkdir -p $(dir $@)
 	$(ICC) $< -c $(SRC_OPTIONS) -o $@
 
 $(SR_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS) 
-	mkdir -p $(dir $@)
+	@mkdir -p $(dir $@)
 	$(ICC) $< -c $(SRC_SR_OPTIONS) -o $@
 
 $(SR_AGENTS_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
-	mkdir -p $(dir $@)
+	@mkdir -p $(dir $@)
 	$(ICC) $< -c $(SRC_SR_OPTIONS) -o $@
 
 $(SR_CSP_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
-	mkdir -p $(dir $@)
+	@mkdir -p $(dir $@)
 	$(ICC) $< -c $(SRC_SR_OPTIONS) -o $@
 
 $(SR_DB_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
-	mkdir -p $(dir $@)
+	@mkdir -p $(dir $@)
 	$(ICC) $< -c $(SRC_SR_OPTIONS) -o $@
 
 $(SR_PTRANS_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS) 
-	mkdir -p $(dir $@)
+	@mkdir -p $(dir $@)
 	$(ICC) $< -c $(SRC_SR_OPTIONS) -o $@
 
 $(SR_SYM_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
-	mkdir -p $(dir $@)
+	@mkdir -p $(dir $@)
 	$(ICC) $< -c $(SRC_SR_OPTIONS) -o $@
 
 $(SR_UP_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
-	mkdir -p $(dir $@)
+	@mkdir -p $(dir $@)
 	$(ICC) $< -c $(SRC_SR_OPTIONS) -o $@
 
 $(PARSE_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
-	mkdir -p $(dir $@)
+	@mkdir -p $(dir $@)
 	$(ICC) $< -c $(SRC_OPTIONS) -o $@
 
 $(RENDER_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
-	mkdir -p $(dir $@)
+	@mkdir -p $(dir $@)
 	$(ICC) $< -c $(SRC_OPTIONS) -o $@ 
 
 $(STEPS_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
-	mkdir -p $(dir $@)
+	@mkdir -p $(dir $@)
 	$(ICC) $< -c $(SRC_OPTIONS) -o $@ 
 
 $(MAIN_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
-	mkdir -p $(dir $@)
+	@mkdir -p $(dir $@)
 	$(ICC) $< -c $(SRC_OPTIONS) -o $@
 
  

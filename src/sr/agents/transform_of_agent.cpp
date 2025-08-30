@@ -105,7 +105,7 @@ TransformOfAgent::AugBERoaming *TransformOfAgent::AugBERoaming::OnGetChild( cons
 }
 
 
-void TransformOfAgent::AugBERoaming::OnSetChild( const TreePtrInterface *other_tree_ptr, AugBEInterface *new_val )
+void TransformOfAgent::AugBERoaming::OnSetChild( const TreePtrInterface *, AugBEInterface * )
 {
     ASSERTFAIL(); // would modify the x-tree, not allowed
 }
@@ -169,6 +169,7 @@ AugBEInterface *TransformOfAgent::AugBEMeandering::OnGetChild( const TreePtrInte
 
 void TransformOfAgent::AugBEMeandering::OnSetChild( const TreePtrInterface *other_tree_ptr, AugBEInterface *new_val )
 {
+	(void)other_tree_ptr;
     ASSERT( new_val );
     AugBECommon *n = dynamic_cast<AugBECommon *>(new_val);
     ASSERT( n );

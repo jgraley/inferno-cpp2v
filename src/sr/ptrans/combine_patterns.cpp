@@ -8,6 +8,7 @@ using namespace SR;
 
 void CombinePatterns::DoPatternTransformation( const PatternKnowledge &pk )
 {    
+	(void)pk;
 	// TODO use refs for scp and tp and in search to compare
     TreePtr<Node> scp = pk.search_compare_root_pattern;
     TreePtr<Node> rp = pk.replace_root_pattern;
@@ -25,6 +26,7 @@ void CombinePatterns::DoPatternTransformation( const PatternKnowledge &pk )
 
 void CombinePatterns::FixupPointers( const PatternKnowledge &pk, TreePtr<Node> &scp, TreePtr<Node> &rp )
 {
+	(void)pk;
     ASSERT( scp );
     if( !rp )
     {

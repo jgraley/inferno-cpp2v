@@ -26,6 +26,7 @@ void EmbeddedSCRAgent::MaybeChildrenPlanOverlay( SCREngine *acting_engine,
 												 PatternLink me_plink, 
                                                  PatternLink bottom_layer_plink )
 {    
+	(void)me_plink;
     // Make embedded engines "invisible" to Delta key propagation (i.e. Autolocated see #342)
     PatternLink through_plink(GetThrough());
     through_plink.GetChildAgent()->PlanOverlay(acting_engine, through_plink, bottom_layer_plink);   
@@ -34,6 +35,7 @@ void EmbeddedSCRAgent::MaybeChildrenPlanOverlay( SCREngine *acting_engine,
 
 list<PatternLink> EmbeddedSCRAgent::GetVisibleChildren( Path v ) const
 {
+	(void)v;
     // it's an embedded engines, so set up a container containing only "through", not "compare" or "replace"
     list<PatternLink> plinks;
     plinks.push_back( PatternLink(GetThrough()) );

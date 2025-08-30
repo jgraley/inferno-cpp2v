@@ -69,8 +69,9 @@ list<shared_ptr<SymbolExpression> *> GreenGrassAgent::IsGreenGrassOperator::GetS
 
 
 unique_ptr<BooleanResult> GreenGrassAgent::IsGreenGrassOperator::Evaluate( const EvalKit &kit,
-                                                                                    list<unique_ptr<SymbolicResult>> &&op_results ) const 
+                                                                           list<unique_ptr<SymbolicResult>> &&op_results ) const 
 {
+	(void)kit;
     ASSERT( op_results.size()==1 );        
     unique_ptr<SymbolicResult> ra = SoloElementOf(move(op_results));
     if( !ra->IsDefinedAndUnique() )
@@ -84,8 +85,9 @@ unique_ptr<BooleanResult> GreenGrassAgent::IsGreenGrassOperator::Evaluate( const
 
 
 Orderable::Diff GreenGrassAgent::IsGreenGrassOperator::OrderCompare3WayCovariant( const Orderable &right, 
-                                                     OrderProperty order_property ) const 
+                                                                                  OrderProperty order_property ) const 
 {
+	(void)order_property;
     auto &r = GET_THAT_REFERENCE(right);
     // Agents aren't comparable, so value of operator is identiy of agent
     return Node::Compare3WayIdentity( *agent->GetPatternPtr(), *r.agent->GetPatternPtr() );

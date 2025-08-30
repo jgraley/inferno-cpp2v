@@ -72,6 +72,9 @@ Agent::ReplacePatchPtr DeltaAgent::GenReplaceLayoutImpl( const ReplaceKit &kit,
                                                          XLink key_xlink,
                                                          const SCREngine *acting_engine )
 {
+	(void)me_plink;
+	(void)key_xlink;
+	
     // Recurse through the Overlay branch
     PatternLink overlay_plink(GetOverlay());
     return overlay_plink.GetChildAgent()->GenReplaceLayout(kit, overlay_plink, acting_engine);    

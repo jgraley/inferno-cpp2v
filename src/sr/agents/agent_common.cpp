@@ -30,38 +30,10 @@ AgentCommon::AgentCommon()
 }
 
 
-void AgentCommon::SCRConfigure( const SCREngine *e,
-                                Phase phase_ )
+void AgentCommon::SCRConfigure( Phase phase_ )
 {
     phase = phase_;
     ASSERT( (int)phase != 0 );
-}
-
-
-void AgentCommon::ConfigureCoupling( const Traceable *e,
-                                     PatternLink keyer_plink_, 
-                                     set<PatternLink> residual_plinks_ )
-{  
-    ASSERT(e);
-    // Enforcing rule #149 - breaking that rule will cause the same base node to appear in
-    // more than one subordinate and-rule engine, so that it will get configured more than once.
-    // Also see #316
-    ASSERT(!my_keyer_engine)("Detected repeat coupling configuration of ")(*this)
-                                   ("\nCould be result of coupling abnormal links - not allowed :(\n")
-                                   (my_keyer_engine)(" with keyer ")(keyer_plink_)("\n");                
-    my_keyer_engine = e;
-                                           
-    if( keyer_plink_ )
-    {
-        ASSERT( keyer_plink_.GetChildAgent() == this )("Parent link supplied for different agent");
-        //keyer_plink = keyer_plink_;
-    }   
-}
-                                
-
-void AgentCommon::AddResiduals( set<PatternLink> residual_plinks_ )
-{
-
 }
 
 
@@ -87,6 +59,7 @@ list<PatternLink> AgentCommon::GetChildren() const
     
 list<PatternLink> AgentCommon::GetVisibleChildren( Path v ) const
 {
+	(void)v;
     return GetChildren();
 }
 
@@ -109,9 +82,7 @@ Lazy<BooleanExpression> AgentCommon::SymbolicQuery( PatternLink keyer, const set
 
 
 Lazy<BooleanExpression> AgentCommon::SymbolicCouplingQuery(PatternLink keyer, const set<PatternLink> &residuals) const
-{
-    ASSERT( my_keyer_engine )(*this)(" has not been configured for couplings");
-    
+{    
     // This class establishes the policy for couplings in one place.
     // And it always will be: see #121; para starting at "No!!"
 	      
@@ -186,10 +157,10 @@ bool AgentCommon::IsPreRestrictionMatch( XLink x ) const
 }
 
 
-void AgentCommon::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
-                                            const SolutionMap *hypothesis_links,
-                                            PatternLink keyer_plink,
-                                            const XTreeDatabase *x_tree_db ) const
+void AgentCommon::RunRegenerationQueryImpl( DecidedQueryAgentInterface &,
+                                            const SolutionMap *,
+                                            PatternLink,
+                                            const XTreeDatabase * ) const
 {
 }
     
@@ -213,8 +184,7 @@ void AgentCommon::RunRegenerationQuery( DecidedQueryAgentInterface &query,
 AgentCommon::QueryLambda AgentCommon::StartRegenerationQuery( const AndRuleEngine *acting_engine,
                                                               const SolutionMap *hypothesis_links,
 															  PatternLink keyer_plink,
-                                                              const XTreeDatabase *x_tree_db,
-                                                              bool use_DQ ) const
+                                                              const XTreeDatabase *x_tree_db ) const
 {
 	shared_ptr<Conjecture> nlq_conjecture = acting_engine->GetNLQConjecture(this);
     ASSERT( nlq_conjecture )(phase);
@@ -290,14 +260,14 @@ AgentCommon::QueryLambda AgentCommon::TestStartRegenerationQuery( const AndRuleE
     auto ref_hits = make_shared<int>(0);
     try
     {
-        mut_lambda = StartRegenerationQuery( acting_engine, hypothesis_links, keyer_plink, x_tree_db, false );
+        mut_lambda = StartRegenerationQuery( acting_engine, hypothesis_links, keyer_plink, x_tree_db );
     }
     catch( ::Mismatch &e ) 
     {
         try
         {
             Tracer::RAIIDisable silencer; // make ref algo be quiet            
-            (void)StartRegenerationQuery( acting_engine, hypothesis_links, keyer_plink, x_tree_db, true );
+            (void)StartRegenerationQuery( acting_engine, hypothesis_links, keyer_plink, x_tree_db );
             ASSERT(false)("MUT start threw ")(e)(" but ref didn't\n")
                          (*this)("\n")
                          ("Normal: ")(MapForPattern(pq->GetNormalLinks(), *hypothesis_links))("\n")
@@ -314,7 +284,7 @@ AgentCommon::QueryLambda AgentCommon::TestStartRegenerationQuery( const AndRuleE
     try
     {
         Tracer::RAIIDisable silencer; // make ref algo be quiet             
-        ref_lambda = StartRegenerationQuery( acting_engine, hypothesis_links, keyer_plink, x_tree_db, true );        
+        ref_lambda = StartRegenerationQuery( acting_engine, hypothesis_links, keyer_plink, x_tree_db );        
     }
     catch( ::Mismatch &e ) 
     {
@@ -433,9 +403,9 @@ void AgentCommon::PlanOverlay( SCREngine *acting_engine,
 }
 
 
-void AgentCommon::MaybeChildrenPlanOverlay( SCREngine *acting_engine,
-                                            PatternLink me_plink, 
-                                            PatternLink bottom_layer_plink )
+void AgentCommon::MaybeChildrenPlanOverlay( SCREngine *,
+                                            PatternLink, 
+                                            PatternLink )
 {
     // An empty function here implies leaf-termination of the overlay plan
 }
@@ -495,6 +465,10 @@ Agent::ReplacePatchPtr AgentCommon::GenReplaceLayoutImpl( const ReplaceKit &kit,
                                                           XLink key_xlink,
                                                           const SCREngine *acting_engine )
 {
+	(void)kit;
+	(void)me_plink;
+	(void)acting_engine;
+	
     // Default replace behaviour to just use the X subtree we keyed to, so we need to be keyed
     ASSERT(key_xlink)("Agent ")(*this)(" in replace context is not keyed but needs to be");
     auto new_zone = TreeZone::CreateSubtree(key_xlink);
@@ -530,8 +504,6 @@ string AgentCommon::GetPlanAsString() const
 {
     list<KeyValuePair> plan_as_strings = 
     {
-        { "my_keyer_engine", 
-          Trace(my_keyer_engine) }
     };
     return Trace(plan_as_strings);
 }

@@ -63,13 +63,13 @@ shared_ptr<PredicateOperator> PredicateOperator::TrySubstitute( shared_ptr<Symbo
 }                                                                
 
 
-Relationship PredicateOperator::GetRelationshipWith( shared_ptr<PredicateOperator> other ) const
+Relationship PredicateOperator::GetRelationshipWith( shared_ptr<PredicateOperator> ) const
 {
     return Relationship::NONE;
 }
 
 
-Transitivity PredicateOperator::GetTransitivityWith( shared_ptr<PredicateOperator> other ) const
+Transitivity PredicateOperator::GetTransitivityWith( shared_ptr<PredicateOperator> ) const
 {
     return Transitivity::NONE;
 }
@@ -126,6 +126,7 @@ list<shared_ptr<SymbolExpression>*> IsEqualOperator::GetSymbolOperandPointers()
 unique_ptr<BooleanResult> IsEqualOperator::Evaluate( const EvalKit &kit,
                                                      list<unique_ptr<SymbolicResult>> &&op_results ) const 
 {
+	(void)kit;
     ASSERT( op_results.size()==2 );
     // IEEE 754 Equals results in false if an operand is NaS. Not-equals has 
     // no operator class of it's own and is implemented as ¬(==) so will 
@@ -524,8 +525,9 @@ list<shared_ptr<SymbolExpression> *> IsAllDiffOperator::GetSymbolOperandPointers
 
 
 unique_ptr<BooleanResult> IsAllDiffOperator::Evaluate( const EvalKit &kit,
-                                                     list<unique_ptr<SymbolicResult>> &&op_results ) const 
+                                                       list<unique_ptr<SymbolicResult>> &&op_results ) const 
 {
+    (void)kit;
     for( const unique_ptr<SymbolicResult> &ra : op_results )
         if( !ra->IsDefinedAndUnique() )
             return make_unique<BooleanResult>( false );
@@ -623,6 +625,7 @@ list<shared_ptr<SymbolExpression> *> IsInCategoryOperator::GetSymbolOperandPoint
 unique_ptr<BooleanResult> IsInCategoryOperator::Evaluate( const EvalKit &kit,
                                                           list<unique_ptr<SymbolicResult>> &&op_results ) const 
 {
+	(void)kit;
     ASSERT( op_results.size()==1 );        
     // IEEE 754 Kind-of can be said to be C(a) ∈ C(arch) where C propogates 
     // NaS. Possibly like a < ?
@@ -676,7 +679,7 @@ Relationship IsInCategoryOperator::GetRelationshipWith( shared_ptr<PredicateOper
 
 
 Orderable::Diff IsInCategoryOperator::OrderCompare3WayCovariant( const Orderable &right, 
-                                                     OrderProperty order_property ) const 
+                                                                 OrderProperty order_property ) const 
 {
     auto &r = GET_THAT_REFERENCE(right);
     //FTRACE(Render())("\n");
@@ -706,9 +709,9 @@ TreePtr<Node> IsInCategoryOperator::GetArchetypeNode() const
 // ------------------------- IsChildCollectionSizedOperator --------------------------
 
 IsChildCollectionSizedOperator::IsChildCollectionSizedOperator( TreePtr<Node> archetype_node_,
-                                                          vector< Itemiser::Element * >::size_type item_index_, 
-                                                          shared_ptr<SymbolExpression> a_,
-                                                          int size_ ) :
+                                                                vector< Itemiser::Element * >::size_type item_index_, 
+                                                                shared_ptr<SymbolExpression> a_,
+                                                                int size_ ) :
     archetype_node( archetype_node_ ),
     item_index( item_index_ ),
     a( a_ ),
@@ -731,8 +734,9 @@ list<shared_ptr<SymbolExpression> *> IsChildCollectionSizedOperator::GetSymbolOp
 
 
 unique_ptr<BooleanResult> IsChildCollectionSizedOperator::Evaluate( const EvalKit &kit,
-                                                                 list<unique_ptr<SymbolicResult>> &&op_results ) const
+                                                                    list<unique_ptr<SymbolicResult>> &&op_results ) const
 {
+	(void)kit;
     ASSERT( op_results.size()==1 );        
 
     // Evaluate operand and ensure we got an XLink
@@ -764,7 +768,7 @@ unique_ptr<BooleanResult> IsChildCollectionSizedOperator::Evaluate( const EvalKi
 
 
 Orderable::Diff IsChildCollectionSizedOperator::OrderCompare3WayCovariant( const Orderable &right, 
-                                                                  OrderProperty order_property ) const 
+                                                                           OrderProperty order_property ) const 
 {
     auto &r = GET_THAT_REFERENCE(right);
     //FTRACE(Render())("\n");
@@ -826,6 +830,8 @@ list<shared_ptr<SymbolExpression> *> IsSimpleCompareEquivalentOperator::GetSymbo
 unique_ptr<BooleanResult> IsSimpleCompareEquivalentOperator::Evaluate( const EvalKit &kit,
                                                                        list<unique_ptr<SymbolicResult>> &&op_results ) const 
 {
+	(void)kit;
+
     // IEEE 754 Kind-of can be said to be E(a) == E(b) where E propagates 
     // NaS. So like ==
     for( const unique_ptr<SymbolicResult> &ra : op_results )
@@ -915,6 +921,7 @@ list<shared_ptr<SymbolExpression> *> IsLocalMatchOperator::GetSymbolOperandPoint
 unique_ptr<BooleanResult> IsLocalMatchOperator::Evaluate( const EvalKit &kit,
                                                           list<unique_ptr<SymbolicResult>> &&op_results ) const
 {
+	(void)kit;
     ASSERT( op_results.size()==1 );        
 
     // Evaluate operand and ensure we got an XLink

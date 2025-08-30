@@ -19,8 +19,9 @@ list<shared_ptr<SymbolExpression>> ComplementOperator::GetSymbolOperands() const
 
 
 unique_ptr<SymbolicResult> ComplementOperator::Evaluate( const EvalKit &kit,
-                                                                list<unique_ptr<SymbolicResult>> &&op_results ) const                                                                    
+                                                         list<unique_ptr<SymbolicResult>> &&op_results ) const                                                                    
 {
+	(void)kit;
     unique_ptr<SymbolicResult> ar = SoloElementOf(move(op_results));       
     unique_ptr<SubsetResult> asr = make_unique<SubsetResult>( move(ar) );
     return asr->GetComplement();
@@ -56,6 +57,7 @@ list<shared_ptr<SymbolExpression>> UnionOperator::GetSymbolOperands() const
 unique_ptr<SymbolicResult> UnionOperator::Evaluate( const EvalKit &kit,
                                                            list<unique_ptr<SymbolicResult>> &&op_results ) const
 {
+	(void)kit;
     list<unique_ptr<SubsetResult>> ssrs;
     for( unique_ptr<SymbolicResult> &ar : op_results )       
         ssrs.push_back( make_unique<SubsetResult>( move(ar) ) );
@@ -96,6 +98,7 @@ list<shared_ptr<SymbolExpression>> IntersectionOperator::GetSymbolOperands() con
 unique_ptr<SymbolicResult> IntersectionOperator::Evaluate( const EvalKit &kit,
                                                                   list<unique_ptr<SymbolicResult>> &&op_results ) const
 {
+	(void)kit;
     list<unique_ptr<SubsetResult>> ssrs;
     for( unique_ptr<SymbolicResult> &ar : op_results )       
         ssrs.push_back( make_unique<SubsetResult>( move(ar) ) );

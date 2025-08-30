@@ -445,9 +445,9 @@ void Inferno::RunStage( Stage stage )
             Tracer::Enable( stage.allow_trace && sp.allow_trace ); 
             HitCount::Enable( stage.allow_hits && sp.allow_hits ); 
             if( stage.allow_reps && sp.allow_reps )
-                VNSequence::SetMaxReps( sp.step_index, ReadArgs::repetitions, ReadArgs::rep_error );
+                VNSequence::SetMaxReps( ReadArgs::repetitions, ReadArgs::rep_error );
             else
-                VNSequence::SetMaxReps( sp.step_index, 100, true );
+                VNSequence::SetMaxReps( 100, true );
             if( stage.allow_stop && sp.allow_stop )
                 vn_sequence->SetStopAfter(sp.step_index, ReadArgs::quitafter_counts, 0);
             stage.step_function(sp);

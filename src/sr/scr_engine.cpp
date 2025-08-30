@@ -213,8 +213,7 @@ void SCREngine::Plan::ConfigureAgents()
     for( Agent *agent : my_agents )
     {  
 		TRACE("Call SCRConfigure() on agent %p: ", agent)(agent)("\n");  
-        agent->SCRConfigure( algo,
-                             final_agent_phases.at(agent) );              
+        agent->SCRConfigure( final_agent_phases.at(agent) );              
     }
 }
 
@@ -277,11 +276,8 @@ void SCREngine::Plan::PlanReplace()
 		
 		if( need_replace_key )
 		{
-            InsertSolo( all_keyer_plinks, plink );
-            TRACE("Call ConfigureCoupling() on agent %p: ", agent)(agent)(" plink: ")(plink)("\n");  
-			
+            InsertSolo( all_keyer_plinks, plink );		
 			all_agents_to_keyers[agent] = plink; 
-            agent->ConfigureCoupling( algo, plink, {} );
         }        
     }
 

@@ -52,12 +52,7 @@ public:
 	Agent() = default;
 	Agent(const SR::Agent&) = default;
     Agent& operator=(Agent& other);
-    virtual void SCRConfigure( const SCREngine *e,
-                               Phase phase ) = 0;
-    virtual void ConfigureCoupling( const Traceable *e,
-                                    PatternLink keyer_plink_, 
-                                    set<PatternLink> residual_plinks_ ) = 0;
-    virtual void AddResiduals( set<PatternLink> residual_plinks_ ) = 0;
+    virtual void SCRConfigure( Phase phase ) = 0;
                                    
     /// List the Agents reached via links during search
     virtual shared_ptr<PatternQuery> GetPatternQuery() const = 0;
@@ -72,8 +67,7 @@ public:
     virtual QueryLambda StartRegenerationQuery( const AndRuleEngine *acting_engine,
 												const SolutionMap *hypothesis_links,
                                                 PatternLink keyer_plink, 
-                                                const XTreeDatabase *x_tree_db,
-                                                bool use_DQ = false ) const = 0;
+                                                const XTreeDatabase *x_tree_db ) const = 0;
     virtual QueryLambda TestStartRegenerationQuery( const AndRuleEngine *acting_engine,
                                                     const SolutionMap *hypothesis_links,
 													PatternLink keyer_plink,

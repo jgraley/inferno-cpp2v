@@ -28,6 +28,7 @@ SymbolConstant::SymbolConstant( TreePtr<Node> node_ ) :
 
 unique_ptr<SymbolicResult> SymbolConstant::Evaluate( const EvalKit &kit ) const
 {
+	(void)kit;
 	INDENT("S");
     return make_unique<UniqueResult>( xlink );
 }
@@ -50,6 +51,7 @@ XValue SymbolConstant::GetOnlyXLink() const
 Orderable::Diff SymbolConstant::OrderCompare3WayCovariant( const Orderable &right, 
                                                            OrderProperty order_property ) const 
 {
+	(void)order_property;
     auto &r = GET_THAT_REFERENCE(right);
 	//FTRACE(xlink)("\n");
 
@@ -107,6 +109,7 @@ shared_ptr<SymbolExpression> SymbolVariable::TrySolveForToEqual( const SolveKit 
                                                                  shared_ptr<SymbolVariable> target, 
                                                                  shared_ptr<SymbolExpression> to_equal ) const
 {
+	(void)kit;
     // Trivial case terminates a recursive solve. This amounts to "what 
     // value should target have, so that this evaluates to to_equal?". 
 
@@ -126,8 +129,9 @@ shared_ptr<SymbolExpression> SymbolVariable::TrySolveForToEqual( const SolveKit 
 
 
 Orderable::Diff SymbolVariable::OrderCompare3WayCovariant( const Orderable &right, 
-                                                     OrderProperty order_property ) const 
+                                                           OrderProperty order_property ) const 
 {
+	(void)order_property;
     auto &r = GET_THAT_REFERENCE(right);
 
     if( plink == r.plink )
@@ -153,8 +157,8 @@ Expression::Precedence SymbolVariable::GetPrecedence() const
 // ------------------------- ChildToSymbolOperator --------------------------
 
 ChildToSymbolOperator::ChildToSymbolOperator( TreePtr<Node> archetype_node_,
-                                                  vector< Itemiser::Element * >::size_type item_index_, 
-                                                  shared_ptr<SymbolExpression> a_ ) :
+                                              vector< Itemiser::Element * >::size_type item_index_, 
+                                              shared_ptr<SymbolExpression> a_ ) :
     archetype_node( archetype_node_ ),
     item_index( item_index_ ),
     a( a_ )
@@ -172,6 +176,7 @@ list<shared_ptr<SymbolExpression>> ChildToSymbolOperator::GetSymbolOperands() co
 unique_ptr<SymbolicResult> ChildToSymbolOperator::Evaluate( const EvalKit &kit,
                                                             list<unique_ptr<SymbolicResult>> &&op_results ) const
 {
+	(void)kit;
     ASSERT( op_results.size()==1 );
 
     // XLink must match our referee (i.e. be non-strict subtype)
@@ -193,7 +198,7 @@ unique_ptr<SymbolicResult> ChildToSymbolOperator::Evaluate( const EvalKit &kit,
 
 
 Orderable::Diff ChildToSymbolOperator::OrderCompare3WayCovariant( const Orderable &right, 
-                                                              OrderProperty order_property ) const 
+                                                                  OrderProperty order_property ) const 
 {
     auto &r = GET_THAT_REFERENCE(right);
     //FTRACE(Render())("\n");
@@ -240,8 +245,10 @@ shared_ptr<SymbolExpression> ChildOperator::TrySolveForToEqual( const SolveKit &
 // ------------------------- ChildSequenceFrontOperator --------------------------
 
 unique_ptr<SymbolicResult> ChildSequenceFrontOperator::EvalFromItem( XValue parent_xlink, 
-                                                                   Itemiser::Element *item ) const
+                                                                     Itemiser::Element *item ) const
 {
+	(void)parent_xlink;
+	
     // Cast based on assumption that we'll be looking at a sequence
     auto p_x_seq = dynamic_cast<SequenceInterface *>(item);    
     ASSERT( p_x_seq )("item_index didn't lead to a sequence");
@@ -266,8 +273,10 @@ string ChildSequenceFrontOperator::GetItemTypeName() const
 // ------------------------- ChildSequenceBackOperator --------------------------
 
 unique_ptr<SymbolicResult> ChildSequenceBackOperator::EvalFromItem( XValue parent_xlink, 
-                                                                  Itemiser::Element *item ) const
+                                                                    Itemiser::Element *item ) const
 {
+    (void)parent_xlink;
+    
     // Cast based on assumption that we'll be looking at a sequence
     auto p_x_seq = dynamic_cast<SequenceInterface *>(item);    
     ASSERT( p_x_seq )("item_index didn't lead to a sequence");
@@ -290,8 +299,10 @@ string ChildSequenceBackOperator::GetItemTypeName() const
 // ------------------------- ChildCollectionFrontOperator --------------------------
 
 unique_ptr<SymbolicResult> ChildCollectionFrontOperator::EvalFromItem( XValue parent_xlink, 
-                                                                     Itemiser::Element *item ) const
+                                                                       Itemiser::Element *item ) const
 {
+	(void)parent_xlink;
+	
     // Cast based on assumption that we'll be looking at a collection
     auto p_x_col = dynamic_cast<CollectionInterface *>(item);    
     ASSERT( p_x_col )("item_index didn't lead to a collection");
@@ -314,8 +325,10 @@ string ChildCollectionFrontOperator::GetItemTypeName() const
 // ------------------------- SingularChildOperator --------------------------
 
 unique_ptr<SymbolicResult> SingularChildOperator::EvalFromItem( XValue parent_xlink, 
-                                                              Itemiser::Element *item ) const
+                                                                Itemiser::Element *item ) const
 {
+	(void)parent_xlink;
+	
     // Cast based on assumption that we'll be looking at a singular item
     TreePtrInterface *p_x_singular = dynamic_cast<TreePtrInterface *>(item);
     ASSERT( p_x_singular )("item_index didn't lead to a singular item");
@@ -354,7 +367,7 @@ list<shared_ptr<SymbolExpression>> XTreeDbToSymbolOperator::GetSymbolOperands() 
 
 
 unique_ptr<SymbolicResult> XTreeDbToSymbolOperator::Evaluate( const EvalKit &kit,
-                                                                       list<unique_ptr<SymbolicResult>> &&op_results ) const
+                                                              list<unique_ptr<SymbolicResult>> &&op_results ) const
 {
     // Evaluate operand and ensure we got an XLink
     unique_ptr<SymbolicResult> ar = SoloElementOf(move(op_results));       
@@ -389,17 +402,20 @@ Expression::Precedence XTreeDbToSymbolOperator::GetPrecedence() const
 // ------------------------- ParentOperator --------------------------
     
 XValue ParentOperator::EvalXLinkFromRow( const EvalKit &kit,
-                                            XValue xlink, 
-                                            const SR::LinkTable::Row &row ) const
+                                         XValue xlink, 
+                                         const SR::LinkTable::Row &row ) const
 {
-  
+    (void)xlink;
+    (void)row;
     return kit.x_tree_db->TryGetParentXLink(xlink);
 }
 
 
 shared_ptr<SymbolExpression> ParentOperator::TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
-                                                             shared_ptr<SymbolExpression> to_equal ) const
+                                                                 shared_ptr<SymbolExpression> to_equal ) const
 {   
+	(void)kit;
+	
     // AllChildren and Parent are inverse of each other
     auto a_to_equal = make_shared<AllChildrenOperator>( to_equal );
     return a->TrySolveForToEqual( kit, target, a_to_equal );
@@ -414,10 +430,12 @@ string ParentOperator::GetRenderPrefix() const
 // ------------------------- LastDescendantOperator --------------------------
     
 XValue LastDescendantOperator::EvalXLinkFromRow( const EvalKit &kit,
-                                                    XValue xlink, 
-                                                    const SR::LinkTable::Row &row ) const
+                                                 XValue xlink, 
+                                                 const SR::LinkTable::Row &row ) const
 {
-  
+    (void)kit;
+    (void)xlink;
+    (void)row;
     return SR::XTreeDatabase::GetLastDescendantXLink(xlink);
 }
 
@@ -430,10 +448,11 @@ string LastDescendantOperator::GetRenderPrefix() const
 // ------------------------- MyContainerFrontOperator --------------------------
     
 XValue MyContainerFrontOperator::EvalXLinkFromRow( const EvalKit &kit,
-                                                      XValue xlink, 
-                                                      const SR::LinkTable::Row &row ) const
+                                                   XValue xlink, 
+                                                   const SR::LinkTable::Row &row ) const
 {
-  
+    (void)kit;
+    (void)xlink;
     return row.container_front;
 }
 
@@ -446,9 +465,11 @@ string MyContainerFrontOperator::GetRenderPrefix() const
 // ------------------------- MyContainerBackOperator --------------------------
 
 XValue MyContainerBackOperator::EvalXLinkFromRow( const EvalKit &kit,
-                                                     XValue xlink, 
-                                                     const SR::LinkTable::Row &row ) const
+                                                  XValue xlink, 
+                                                  const SR::LinkTable::Row &row ) const
 {
+    (void)kit;
+    (void)xlink;
     return row.container_back;
 }
 
@@ -461,9 +482,11 @@ string MyContainerBackOperator::GetRenderPrefix() const
 // ------------------------- MySequenceSuccessorOperator --------------------------
 
 XValue MySequenceSuccessorOperator::EvalXLinkFromRow( const EvalKit &kit,
-                                                         XValue xlink, 
-                                                         const SR::LinkTable::Row &row ) const
+                                                      XValue xlink, 
+                                                      const SR::LinkTable::Row &row ) const
 {  
+    (void)kit;
+    (void)xlink;
     return row.sequence_successor;
 }
 
@@ -485,9 +508,11 @@ string MySequenceSuccessorOperator::GetRenderPrefix() const
 // ------------------------- MySequencePredecessorOperator --------------------------
 
 XValue MySequencePredecessorOperator::EvalXLinkFromRow( const EvalKit &kit,
-                                                           XValue xlink, 
-                                                           const SR::LinkTable::Row &row ) const
+                                                        XValue xlink, 
+                                                        const SR::LinkTable::Row &row ) const
 {  
+    (void)kit;
+    (void)xlink;
     return row.sequence_predecessor;
 }
 
@@ -521,8 +546,9 @@ list<shared_ptr<SymbolExpression>> AllChildrenOperator::GetSymbolOperands() cons
 
 
 unique_ptr<SymbolicResult> AllChildrenOperator::Evaluate( const EvalKit &kit,
-                                                            list<unique_ptr<SymbolicResult>> &&op_results ) const
+                                                          list<unique_ptr<SymbolicResult>> &&op_results ) const
 {
+	(void)kit;
     ASSERT( op_results.size()==1 );
 
     // XLink must match our referee (i.e. be non-strict subtype)

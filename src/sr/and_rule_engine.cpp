@@ -163,7 +163,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     // and post order
     set<PatternLink> subordinate_surrounding_plinks = UnionOf( my_normal_links, surrounding_plinks );         
     set<PatternLink> subordinate_surrounding_keyer_plinks = UnionOf( coupling_keyer_links_all, surrounding_keyer_plinks );         
-    CreateSubordniateEngines( my_normal_agents, subordinate_surrounding_plinks, subordinate_surrounding_keyer_plinks );          
+    CreateSubordniateEngines( subordinate_surrounding_plinks, subordinate_surrounding_keyer_plinks );          
 }
 
 
@@ -354,13 +354,9 @@ void AndRuleEngine::Plan::ConfigureAgents()
         for( PatternLink residual_plink : coupling_residual_links )
             if( residual_plink.GetChildAgent() == agent )
                 residual_plinks.insert( residual_plink );
-	
-        //FTRACE("Call ConfigureCoupling() on agent %p: ", agent)(agent)("\n")
-        //      ("keyer_plink: ")(keyer_plink)("\n")
-        //      ("residual_plinks: ")(residual_plinks)("\n");  
+	 
         agents_to_keyers[agent] = keyer_plink;
         agents_to_residuals[agent] = residual_plinks;
-        agent->ConfigureCoupling( algo, keyer_plink, residual_plinks );
         agents_to_nlq_conjectures[agent] = make_shared<Conjecture>(agent);                                   
     }
 
@@ -371,12 +367,8 @@ void AndRuleEngine::Plan::ConfigureAgents()
     for( PatternLink boundary_plink : my_boundary_links )
     {
         ASSERT( boundary_plink );
-        Agent *agent = boundary_plink.GetChildAgent();
-        
-        //FTRACE("Call AddResiduals() on agent %p: ", agent)(agent)("\n")
-        //      ("boundary_plink (residual): ")(boundary_plink)("\n");  
+        Agent *agent = boundary_plink.GetChildAgent(); 
    		agents_to_residuals[agent].insert( boundary_plink );        
-        agent->AddResiduals( {boundary_plink} );
     }
 }
 
@@ -479,8 +471,7 @@ void AndRuleEngine::Plan::SymbolicRewrites()
 }
 
 
-void AndRuleEngine::Plan::CreateSubordniateEngines( const set<Agent *> &normal_agents, 
-                                                    const set<PatternLink> &subordinate_surrounding_plinks, 
+void AndRuleEngine::Plan::CreateSubordniateEngines( const set<PatternLink> &subordinate_surrounding_plinks, 
                                                     const set<PatternLink> &subordinate_surrounding_keyer_plinks )
 {
     for( PatternLink plink : my_normal_links_unique_by_agent )
