@@ -169,20 +169,6 @@ bool ContainerInterface::iterator::operator==( const iterator &i ) const // cova
 }
 
 
-bool ContainerInterface::iterator::operator!=( const iterator_interface &ib ) const // isovariant param
-{
-    CHECK_NOT_REACHED_ON_SUBCLASS
-    return !operator==( ib );
-}
-
-
-bool ContainerInterface::iterator::operator!=( const iterator &i ) const // covariant param
-{
-    CHECK_NOT_REACHED_ON_SUBCLASS
-    return !operator==( i );
-}
-
-
 void ContainerInterface::iterator::Mutate( const value_type *v ) const
 {
     CHECK_NOT_REACHED_ON_SUBCLASS

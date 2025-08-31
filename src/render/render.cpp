@@ -1100,7 +1100,11 @@ string Render::RenderModuleCtor( const TransKit &kit,
                     s += ",";
                 string ids = RenderIdentifier(kit, i->identifier);                           
                 string inits = RenderExpression(kit, i->initialiser);
-                s += "\n" + ids + "(" + inits + ")";
+                s += "\n" + ids;
+                if( DynamicTreePtrCast< MakeArray >(i->initialiser) )
+					s += inits; // MakeArray as an init should render brace-initialiser syntax
+				else
+					s += "(" + inits + ")";
                 first = false;                 
             }
         }                      

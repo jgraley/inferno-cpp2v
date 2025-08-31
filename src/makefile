@@ -56,7 +56,7 @@ ALL_MODULES = $(COMMON_MODULES) $(NODE_MODULES) $(HELPERS_MODULES) $(TREE_MODULE
 
 build/inferno.a : $(ALL_MODULES:%=build/%.o)
 	@mkdir -p build$(NODE)/type_db 
-	$(AR) -r --thin build/inferno.a $(ALL_MODULES:%=build/%.o)
+	$(AR) -r build/inferno.a $(ALL_MODULES:%=build/%.o)
 
 $(COMMON_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
 	@mkdir -p $(dir $@)

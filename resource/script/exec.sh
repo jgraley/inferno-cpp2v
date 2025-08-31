@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 if test $# -eq 0
 then
@@ -40,7 +40,7 @@ then
   if test $lres -eq 0
   then
     echo Run...
-    $outpath/"$fb$post".exe
+    LD_LIBRARY_PATH=systemc/lib-linux64/ $outpath/"$fb$post".exe
     rres=$?
     return_code=$rres
   fi

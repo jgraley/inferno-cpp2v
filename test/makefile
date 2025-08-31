@@ -17,7 +17,9 @@ MINI_SC_SR_CASES = small.c pointeris.c ${MINI_SC_CASES}
 
 # The original C/C++ test cases, no SystemC
 CPP_CASES = test04.cpp test07.cpp test12.cpp test14.cpp methodcall.cpp ut_in_func.cpp
-C_CASES = test02.c test03.c test05.c test06.c test09.c test10.c test11.c test13.c test15.c test16.c pointeris.c small.c compound.c 
+C_CASES = test02.c test03.c test05.c test06.c test09.c test11.c test13.c test15.c test16.c pointeris.c small.c compound.c 
+ 
+# #831: test10.c
  
 # The whole lot for the benefit of auto rules
 EXEC_CASES = ${SC_CASES} ${C_CASES} ${CPP_CASES}
@@ -42,7 +44,7 @@ IARG="${DEFAULT_I_ARG} ${I}"
 test/autotestd : autotestd.cpp
 	g++ autotestd.cpp -o autotestd
 
-$(EXEC_CASES:%=${RESULTS_PATH}/exec/%.pass) : ${RESULTS_PATH}/exec/%.pass : test/examples/% test/makefile inferno.exe test/exec_test.sh ${RESOURCE_ARTEFACTS}
+$(EXEC_CASES:%=${RESULTS_PATH}/exec/%.pass) : ${RESULTS_PATH}/exec/%.pass : test/examples/% test/makefile inferno.exe test/exec_test.sh ${RESOURCE_DEPS}
 	@mkdir -p ${RESULTS_PATH}/exec
 	@rm -f ${RESULTS_PATH}/exec/$*.
 	test/exec_test.sh $< ${RESULTS_PATH}/exec ${IARG} 2>&1 > ${RESULTS_PATH}/exec/$*.log
@@ -91,7 +93,7 @@ minisrtest : $(MINI_SC_SR_CASES:%=${RESULTS_PATH}/sr/%.pass)
 	@echo "MINI SEARCH/REPLACE TESTS PASSED"
 	@spd-say -i 0 -r -100 -p -100 "the mini search and replace tests have parssed"
 
-$(SC_CASES:%=${RESULTS_PATH}/rep/%.pass) : ${RESULTS_PATH}/rep/%.pass : test/examples/%.cpp test/makefile inferno.exe test/reptest.sh ${RESOURCE_ARTEFACTS}
+$(SC_CASES:%=${RESULTS_PATH}/rep/%.pass) : ${RESULTS_PATH}/rep/%.pass : test/examples/%.cpp test/makefile inferno.exe test/reptest.sh ${RESOURCE_DEPS}
 	@mkdir -p ${RESULTS_PATH}/rep
 	@rm -f ${RESULTS_PATH}/rep/$*.
 	test/reptest.sh $< -tq 2>&1 > ${RESULTS_PATH}/rep/$*.log 

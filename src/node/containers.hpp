@@ -79,8 +79,6 @@ public:
         const value_type *operator->() const;
         bool operator==( const iterator_interface &ib ) const; // isovariant param
         bool operator==( const iterator &i ) const; // covariant param;
-        bool operator!=( const iterator_interface &ib ) const; // isovariant param;
-        bool operator!=( const iterator &i ) const; // covariant param;
         void Mutate( const value_type *v ) const;
         bool IsOrdered() const;
         iterator_interface *GetUnderlyingIterator() const;
@@ -191,11 +189,8 @@ struct ContainerCommon : virtual ContainerInterface, CONTAINER_IMPL
             const typename Impl::iterator *pi = dynamic_cast<const typename Impl::iterator *>(&ib);
             ASSERT(pi)("Comparing iterators of different type");
             return *(const typename Impl::iterator *)this == *pi;
-        }
-        virtual bool operator!=( const typename ContainerInterface::iterator_interface &ib ) const
-        {
-            return !operator==(ib);
-        }
+        } 
+		virtual bool operator==( const iterator &ib ) const { return operator==((typename ContainerInterface::iterator_interface &)ib); } // dismbiguation, see #830
     };
 
     typedef iterator const_iterator;

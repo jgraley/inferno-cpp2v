@@ -24,7 +24,7 @@ public:
     virtual reference operator*() const;
     virtual pointer operator->() const;
     virtual bool operator==( const ContainerInterface::iterator_interface &ciii_o ) const;
-    virtual bool operator!=( const ContainerInterface::iterator_interface &ciii_o ) const { return !operator==(ciii_o); }
+    virtual bool operator==( const FlattenNode_iterator &ib ) const { return operator==((ContainerInterface::iterator_interface &)ib); } // dismbiguation, see #830
     //virtual bool operator<( const FlattenNode_iterator &o ) const;
     virtual void Mutate( pointer v ) const;
     virtual bool IsOrdered() const;

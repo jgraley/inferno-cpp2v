@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 #
 # test.sh
@@ -69,8 +69,10 @@ l1res=$?
 if test $l1res -eq 0
 then
  echo Run input...
- $outpath/"$fb"_in.exe
+ set +e
+ LD_LIBRARY_PATH=systemc/lib-linux64/ $outpath/"$fb"_in.exe
  r1res=$?
+ set -e
 fi
 
 echo Transform... 
@@ -94,8 +96,10 @@ then
    if test $l2res -eq 0
    then
     echo Run output...
-    $outpath/"$fb"_out.exe
+    set +e
+    LD_LIBRARY_PATH=systemc/lib-linux64/ $outpath/"$fb"_out.exe
     r2res=$?
+    set -e
     echo From inferno $r2res
     echo Expected $r1res
     cmpres=1

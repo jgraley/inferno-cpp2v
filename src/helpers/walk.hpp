@@ -39,7 +39,7 @@ public:
     virtual reference operator*() const;
     virtual pointer operator->() const;
     virtual bool operator==( const ContainerInterface::iterator_interface &ib ) const;
-    virtual bool operator!=( const ContainerInterface::iterator_interface &ib ) const { return !operator==(ib); }
+    virtual bool operator==( const Walk_iterator &ib ) const { return operator==((ContainerInterface::iterator_interface &)ib); } // dismbiguation, see #830
     virtual void Mutate( pointer v ) const;
     virtual bool IsOrdered() const;
     // Some additional operations specific to walk iterators
