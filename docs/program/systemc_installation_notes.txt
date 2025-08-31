@@ -1,48 +1,12 @@
-# What I had to do to install systemc-2.2.0.tgz on Ubuntu 10.10 using bash and gcc 4.4.5, 4.7.? and 4.8.5. Best
-# done by hand, and read the INSTALL guide that comes with SystemC
-# Got from http://www.accellera.org/downloads/standards/systemc/files (2007 version of SystemC 2.2)
-#
-# Note: the accelera link given above has stopped working, so now we include the tarball in 
-# our repo, but patches still have to be applied manually.
-#
-tar -zxf systemc-2.2.0.tgz
-cd systemc-2.2.0
 
-mkdir objdir
-cd objdir
+Simply build systemc-3.1.0 per the instructions in the zip file or tar-ball. You don't need to do
+a system install, just do the default `make install` which installs into the unzipped
+systemc-3.1.0 directory. Then, just make a symlink to that dir from the inferno repo root called 
+just `systemc`.
 
-export CXX=g++
-export LIBS=-lpthread # added to get -lpthread on the link line of the examples
-../configure
+Notes:
+ - The test scripts use LD_LIBRARY_PATH to allow test executables to get the SystemC stuff.
+ - SystemC wants C++17 (although inferno/VN is now on C++20)
 
-gedit ../src/sysc/utils/sc_utils_ids.cpp
-# in gedit, insert the following lines at the top of the file:
-#include <string.h>
-#include <cstdlib>
 
-make debug # insns say gmake, but not available on ubuntu
-# observe lots of warnings scrolling by
-------------------
-Additional note: repeating this with GCC4.7 onward, I needed to remove four (presumably 
-incorrect) "mutable" keywords at reference decls, as requested by the compiler.
-------------------
-Further: on going to gcc 9.4, I also needed to fix up default values in args of
-friend declarations: defaults should be moved to the original declaration.
-------------------
-
-make install
-
-make check # you should to do this check whether systemc can link
-# have to press return once
-------------------
-Additional note: you may have to comment out a using std::gets; - the check still 
-completes after doing this.
-------------------
-
-# For inferno to use SystemC, create a symbolic link inferno-cpp2v-code/systemc pointing to the
-# systemc directory, systemc-2.2.0 in this case.
-
-# To compile, use eg
-g++ my_prog.cpp -Iresource/include -Isystemc/include -Lsystemc/lib-linux64/ -lsystemc
-# Note that this makes inferno include files available too
 

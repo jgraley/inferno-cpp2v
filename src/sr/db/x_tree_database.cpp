@@ -31,9 +31,6 @@ XTreeDatabase::XTreeDatabase( shared_ptr<Lacing> lacing_, DomainExtension::Exten
 
 XTreeDatabase::~XTreeDatabase()
 {	
-	DeferredActionsEndOfUpdate();
-	DeferredActionsEndOfStep();
-	
 	list<DBCommon::TreeOrdinal> remaining_ordinals;
 	for( auto p : trees_by_ordinal )
 		remaining_ordinals.push_back( p.first );

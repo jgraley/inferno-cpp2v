@@ -64,7 +64,7 @@ binutils-gold (installing this makes gcc use the gold linker which speeds up bui
 valgrind      (profiling and other handy stuff)
 kcachegrind   (GUI for profiles)
 
-You also need to install SystemC (version 2.2.0) and set up a symlink in this directory pointing to the installation. See docs/program/systemc_installation_notes.txt for more info.
+You also need to install SystemC (version 3.1.0) and set up a symlink in this directory pointing to the installation. See docs/program/systemc_installation_notes.txt for more info.
 
 Now type:
 

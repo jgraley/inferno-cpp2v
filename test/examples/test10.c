@@ -22,6 +22,7 @@ int main()
 // Try and excite the multiple choice bug with collections - somewhat
 // random, you may need to vary the commented-out assigns. Use with
 // SplitInstanceDeclarations -> MergeInstanceDeclarations
+	f(); // respect #832
     int a;
     a = 1;
     int b;
