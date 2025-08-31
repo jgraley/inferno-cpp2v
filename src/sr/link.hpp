@@ -35,7 +35,6 @@ public:
     PatternLink( const TreePtrInterface *ppattern, 
                  Whodat whodat_ = Whodat() );
     bool operator<(const PatternLink &other) const;
-    bool operator!=(const PatternLink &other) const;
     bool operator==(const PatternLink &other) const;
     bool operator==(const LocatedLink &other) const;
     static Orderable::Diff Compare3Way(const PatternLink &l, const PatternLink &r);
@@ -93,11 +92,6 @@ public:
         return p_tpi < r.p_tpi;  
     }
         
-    inline bool operator!=(const XLink &r) const
-    {
-        return p_tpi != r.p_tpi;    
-    }
-
     inline bool operator==(const XLink &r) const
     {
         return p_tpi == r.p_tpi;    
@@ -136,7 +130,6 @@ public:
         LocatedLink(p.first, p.second) {}
     
     bool operator<(const LocatedLink &other) const;
-    bool operator!=(const LocatedLink &other) const;
     bool operator==(const LocatedLink &other) const;
     size_t GetHash() const noexcept;    
     explicit operator bool() const;

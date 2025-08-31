@@ -137,19 +137,6 @@ bool SubContainerRangeExclusions::exclusion_iterator::operator==( const exclusio
 }
 
 
-bool SubContainerRangeExclusions::exclusion_iterator::operator!=( const iterator_interface &ib ) const // isovariant param
-{
-    return !operator==( ib );
-}
-
-
-bool SubContainerRangeExclusions::exclusion_iterator::operator!=( const exclusion_iterator &i ) const // covariant param
-{
-    ASSERT(pib && i.pib)("Attempt to compare uninitialised iterator %s==%s", pib?"i":"U", i.pib?"i":"U");
-    return !operator==( i );
-}
-
-
 void SubContainerRangeExclusions::exclusion_iterator::Mutate( const value_type *v ) const
 {
     ASSERT(pib)("Attempt to Mutate through uninitialised iterator");

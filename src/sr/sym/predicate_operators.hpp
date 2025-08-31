@@ -102,6 +102,7 @@ Lazy<BooleanExpression> operator==( Lazy<SymbolExpression> a, Lazy<SymbolExpress
 
 // ------------------------- (not equal operator) --------------------------
 
+// Even in C++20 we still require operator!= for lazy evaluation (return type is not bool)
 Lazy<BooleanExpression> operator!=( Lazy<SymbolExpression> a, Lazy<SymbolExpression> b );
 
 // ------------------------- DepthFirstComparisonOperator --------------------------

@@ -49,10 +49,6 @@ public:
     {
         return stage == o.stage && step == o.step;
     }
-    inline bool operator!=( const Progress &o ) const 
-    {
-        return stage != o.stage || step != o.step;
-    }
     inline bool operator<( const Progress &other ) const
     {
         return Compare3Way(*this, other) < 0;

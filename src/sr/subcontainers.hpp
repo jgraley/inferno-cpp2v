@@ -84,8 +84,6 @@ struct SubContainerRangeExclusions : SubContainerRange
         const value_type *operator->() const;
         bool operator==( const iterator_interface &ib ) const;
         bool operator==( const exclusion_iterator &i ) const;
-        bool operator!=( const iterator_interface &ib ) const;
-        bool operator!=( const exclusion_iterator &i ) const;
         void Mutate( const value_type *v ) const;
         bool IsOrdered() const;
         iterator_interface *GetUnderlyingIterator() const;

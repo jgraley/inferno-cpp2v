@@ -91,12 +91,6 @@ bool PatternLink::operator<(const PatternLink &other) const
 }
 
 
-bool PatternLink::operator!=(const PatternLink &other) const
-{
-    return p_tpi != other.p_tpi;
-}
-
-
 bool PatternLink::operator==(const PatternLink &other) const
 {
     return p_tpi == other.p_tpi;
@@ -392,12 +386,6 @@ bool LocatedLink::operator<(const LocatedLink &other) const
         return plink < other.plink;
         
     return xlink < other.xlink;    
-}
-
-
-bool LocatedLink::operator!=(const LocatedLink &other) const
-{
-    return plink != other.plink || xlink != other.xlink;
 }
 
 

@@ -35,12 +35,6 @@ bool TreePtrInterface::operator==(const TreePtrInterface &r) const
 }
 
 
-bool TreePtrInterface::operator!=(const TreePtrInterface &r) const
-{
-    return get() != r.get();
-}
-
-
 Orderable::Diff TreePtrInterface::Compare3Way(const TreePtrInterface &l, const TreePtrInterface &r)
 {
     // NULLness is primary ordering because we wish to dereference both pointers. 

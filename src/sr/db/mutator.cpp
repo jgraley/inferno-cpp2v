@@ -96,12 +96,6 @@ bool Mutator::operator==( const Mutator &right ) const
 }
 
 
-bool Mutator::operator!=( const Mutator &right ) const
-{
-	return GetTreePtrInterface() != right.GetTreePtrInterface();
-}
-
-
 Mutator::operator bool() const
 {
 	return mode != Mode::Null;

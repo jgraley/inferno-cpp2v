@@ -53,7 +53,6 @@ struct TreePtrInterface : virtual Itemiser::Element
     virtual TreePtrInterface &operator=( nullptr_t n ) = 0;
     bool operator<(const TreePtrInterface &other) const;
     bool operator==(const TreePtrInterface &other) const;
-    bool operator!=(const TreePtrInterface &other) const;
     static Orderable::Diff Compare3Way(const TreePtrInterface &l, const TreePtrInterface &r);
     static Orderable::Diff Compare3WayIdentity(const TreePtrInterface &l, const TreePtrInterface &r);
     virtual TreePtr<Node> MakeValueArchetype() const = 0; // construct an object of the VALUE_TYPE type (NOT a clone)
@@ -319,14 +318,6 @@ bool operator==( const TreePtr<X> &x,
                  const TreePtr<Y> &y)
 {
     return operator==( (const shared_ptr<X> &)x, (const shared_ptr<Y> &)y );
-}
-
-
-template< typename X, typename Y >
-bool operator!=( const TreePtr<X> &x,
-                 const TreePtr<Y> &y)
-{
-    return !operator==( (const shared_ptr<X> &)x, (const shared_ptr<Y> &)y );
 }
 
 

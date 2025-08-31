@@ -57,7 +57,6 @@ public:
 
     bool operator<(const Mutator &right) const;
 	bool operator==( const Mutator &right ) const;
-	bool operator!=( const Mutator &right ) const;      
 	operator bool() const;      
   
     TreePtr<Node> ExchangeChild( TreePtr<Node> free_child ) const;
