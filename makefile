@@ -1,26 +1,9 @@
 include makefile.common
 
-.PHONY: default all get_libs test docs force_subordinate_makefiles clean iclean dclean resource publish doxygen pattern_graphs doc_graphs
+.PHONY: default all test docs force_subordinate_makefiles clean iclean dclean resource publish doxygen pattern_graphs doc_graphs
 default : inferno.exe
-all : clean get_libs inferno.exe resource docs test
-
-#
-# Establish required revisions of external code
-#
-# previous version 58906, 60777, 61676
-LLVM_REVISION ?= 61726
-
-#
-# unpack the LLVM snapshot that we use
-#
-# Note: we used to download LLVM and clang from SourceForge and then
-# patch it, but LLVM has moved to github, and while svn access is provided, 
-# I seemed to get the wrong version. Now a tarball of the patched LLVM
-# snapshot is included in our repo. We link to it, as with systemc.
-#
-get_libs : makefile
-	tar -zxf llvm-${LLVM_REVISION}-patched.tgz
-							
+all : clean inferno.exe resource docs test
+	
 #
 # Compile llvm and clang sources
 #		

@@ -1,5 +1,5 @@
 
-Welcome to the inferno-synth subversion module.
+Welcome to inferno-cpp2v
 
 Directories are organised thusly:
 
@@ -24,11 +24,9 @@ prototype/
     be compiled into the inferno executable.
 
 llvm/
-    If you've done "make get_libs", a copy of llvm will go here. Clang goes 
-    in llvm/tools/clang/
-
-patches/
-    Patches applied to the llvm/clang checkout by make get_libs.
+    A VERY old Clang/LLVM snapshot, with updates for modern compilers. Clang is 
+    in llvm/tools/clang/. I think the revision is 61726 (Subversion) on 
+    Sourceforge. 
 
 eclipse/
     Inferno also supports the Eclipse IDE (with CDT C++ tools plugin installed). 
@@ -39,15 +37,9 @@ resources/
     Code needed to get SystemC to work for running test vectors etc, both in Inferno 
     and when compiling natively.
 
-How to check out:
-
-Inferno is hosted at Sourceforge in a Subversion repository. You can get a modifiable checkout using:
-
-svn checkout svn+ssh://jgraley@svn.code.sf.net/p/inferno-cpp2v/code/trunk inferno-cpp2v-code 
-
 How to build:
 
-Inferno works with gcc/g++ 4.4.5, 4.7.? and 4.8.5
+Inferno works with gcc/g++ 13.3.0
 
 On a Debian/Ubuntu system, you need approximately the following apt packages:
     
@@ -72,7 +64,6 @@ make all
 
 This will:
  - clean up any old binaries       (make clean)
- - download LLVM and clang         (make get_libs)
  - compile inferno and clang       (make inferno.exe or just make)
  - build the doxygen documentation (make docs)
  - run the tests                   (make test)
@@ -84,6 +75,3 @@ script for usage instructions. If you want to see a graph, try e.g.
 
 ./inferno.exe -itest/examples/add.cpp -gi | dotty -
 
-How to apply a gihub Personal Access Token so you can commit
-
-git remote set-url origin https://<GitHub username>:<Personal Access Token>@github.com/<GitHub username>/inferno-cpp2v.git
