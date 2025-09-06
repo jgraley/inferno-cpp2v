@@ -18,7 +18,7 @@ public:
     GotoAfterWait();
 };
 
-/** conditionasl branch with no else clause gets goto in both 
+/** conditional branch with no else clause gets goto in both 
     clauses - generates new label for this. */
 class NormaliseConditionalGotos : public VNStep
 {

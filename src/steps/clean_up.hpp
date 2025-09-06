@@ -81,10 +81,10 @@ public:
 };
 
 /** turn a compound expression that does not end in an expression into an ordinary compound */
-class ReduceVoidStatementExpression : public VNStep
+class CleanupVoidStatementExpression : public VNStep
 {
 public:
-    ReduceVoidStatementExpression();
+    CleanupVoidStatementExpression();
 };
 
 /** Remove instances not used anywhere - except Callables and instances of InheritanceRecord since

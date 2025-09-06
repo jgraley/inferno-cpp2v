@@ -69,7 +69,7 @@ OK, thought about this some more.
 
 Firstly, need to determine whether syntheisable Verilog can deal with side effects. What does verilog do with eg x++ && y++? Maybe we can 
 leave some side effects in place, allowing a lighter touch. If so, I think we're interested in un-combable subexpressions, since these are the
-one we must move out. This suggests Simple Uncombable Sequence Points, in which we only break down sequence point expressions when they 
+one we must move out. This suggests Simple Uncombable Sequence Points (SUSP), in which we only break down sequence point expressions when they 
 contain uncombable subexpressions. If Verilog is OK with stuff like assigns and assignment operator and pre/post inc, then the only uncombables
 in expressions are function calls (and pre-existing compound expressions) - these must always be assumed side-effecty. So only limited value in actually analyzing for 
 side effects in conjunction. i.e. x SEQ f() is safe to move f(), but we may as well break it down anyway to keep the transformations simpler.
@@ -87,7 +87,7 @@ inferno (if verilog doesn't handle), I think all positions within &&, || and ?: 
 Lets go over the list of sequence points again:
 1. Expanded by new LowerBooleanAnd/Or always in SSP and where side effect is contained on either side. In SUSP expand if there are any uncombables.
 2. As 1 using LowerConditionalOperator
-3. This is the invariant defined by SSP/SUSP, must be respected by all steps. It corresponds to the principal of sequentially executing 
+3. This is the invariant defined by SSP/SUSP, must be respected by all steps. It corresponds to the principle of sequentially executing 
    statements in a Compound block, an existing requirement.
 4. ParamsViaTemps moves param expressions up and when it runs, calls are always at statement level. This satisfied SSP/SUSP
 5. ReturnViaTemp moves return expression up; return is a statement; updating the temp suffices for "copied into the calling context" (a 

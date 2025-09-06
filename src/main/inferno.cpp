@@ -58,7 +58,8 @@ void BuildDefaultSequence( vector< shared_ptr<VNStep> > *sequence )
     // Inferno design. Explicit SC nodes are generated.
     GenerateSC::Build(sequence);
 
-    { // establish what is locally uncombable
+    { 
+		// ---------------------- Establish what is locally uncombable ----------------------
         sequence->push_back( make_shared<DetectUncombableSwitch>() );
         sequence->push_back( make_shared<MakeAllForUncombable>() );
         sequence->push_back( make_shared<DetectCombableFor>() );
@@ -66,8 +67,10 @@ void BuildDefaultSequence( vector< shared_ptr<VNStep> > *sequence )
         sequence->push_back( make_shared<CleanupCompoundMulti>() );
         sequence->push_back( make_shared<DetectCombableBreak>() );
     }    
-    { // Construct lowerings
-        { // function call lowering (and function merging)
+    { 
+		// ---------------------- Construct lowerings ----------------------
+        { 
+			// function call lowering (and function merging)
 			sequence->push_back( make_shared<FunctionMergingDisallowed>() );
             sequence->push_back( make_shared<ExtractCallParams>() );
             sequence->push_back( make_shared<ExplicitiseReturn>() );
@@ -80,62 +83,55 @@ void BuildDefaultSequence( vector< shared_ptr<VNStep> > *sequence )
             sequence->push_back( make_shared<GenerateStacks>() );
             sequence->push_back( make_shared<MergeFunctions>() );
         }
-   
+		
+		// Lower structured programming constructs and &&, ||, ?:
         sequence->push_back( make_shared<BreakToGoto>() );
         sequence->push_back( make_shared<ForToWhile>() );
         sequence->push_back( make_shared<WhileToDo>() );
-        sequence->push_back( make_shared<DoToIfGoto>() );
-        
+        sequence->push_back( make_shared<DoToIfGoto>() );               
         sequence->push_back( make_shared<LogicalOrToIf>() );
         sequence->push_back( make_shared<LogicalAndToIf>() );
         sequence->push_back( make_shared<ConditionalOperatorToIf>() );
         sequence->push_back( make_shared<SwitchToIfGoto>() );
         sequence->push_back( make_shared<SplitInstanceDeclarations>() );
         sequence->push_back( make_shared<IfToIfGoto>() );
-        // All remaining uncombables at the top level and in SUSP style
+        // All remaining uncombables at the top level and in SUSP style (Simple Uncombable Sequence Points)
     }    
-    { // Initial treatment of gotos and labels
-        sequence->push_back( make_shared<NormaliseConditionalGotos>() );
-        sequence->push_back( make_shared<CompactGotos>() );
-    }        
-    { // big round of cleaning up
-        sequence->push_back( make_shared<ReduceVoidStatementExpression>() );
-        //for( int i=0; i<2; i++ )
-        // Ineffectual gotos, unused and duplicate labels result from compound tidy-up after construct lowering, but if not 
-        // removed before AddGotoBeforeLabel, they will generate spurious states. We also remove dead code which can be exposed by
-        // removal of unused labels - we must repeat because dead code removal can generate unused labels.
-        sequence->push_back( make_shared<CleanupStatementExpression>() );
-        for( int i=0; i<2; i++ )
-        {
-            sequence->push_back( make_shared<CleanupCompoundMulti>() );
-            sequence->push_back( make_shared<CleanupCompoundSingle>() );
-            sequence->push_back( make_shared<CleanupNop>() );
-            sequence->push_back( make_shared<CleanupUnusedLabels>() );
-            sequence->push_back( make_shared<CleanupDuplicateLabels>() );
-            sequence->push_back( make_shared<CleanupIneffectualLabels>() );
-            sequence->push_back( make_shared<CleanUpDeadCode>() );
-        }
-    }    
-    { // transition to normalised lmap style
+
+	// ---------------------- big round of cleaning up ----------------------
+	sequence->push_back( make_shared<CleanupVoidStatementExpression>() );
+	sequence->push_back( make_shared<CleanupStatementExpression>() );
+	// Ineffectual gotos, unused and duplicate labels result from compound tidy-up after construct lowering, but if not 
+	// removed before AddGotoBeforeLabel, they will generate spurious states. We also remove dead code which can be exposed by
+	// removal of unused labels - we must repeat because dead code removal can generate unused labels.
+	for( int i=0; i<2; i++ )
+	{
+		sequence->push_back( make_shared<CleanupCompoundMulti>() );
+		sequence->push_back( make_shared<CleanupCompoundSingle>() );
+		sequence->push_back( make_shared<CleanupNop>() );
+		sequence->push_back( make_shared<CleanupUnusedLabels>() );
+		sequence->push_back( make_shared<CleanupDuplicateLabels>() );
+		sequence->push_back( make_shared<CleanupIneffectualLabels>() );
+		sequence->push_back( make_shared<CleanUpDeadCode>() );
+	}
+   
+    { 
+		// ---------------------- Transition to normalised lmap style ----------------------
         sequence->push_back( make_shared<GotoAfterWait>() );
         sequence->push_back( make_shared<AddGotoBeforeLabel>() );
-        //sequence->push_back( make_shared<EnsureBootstrap>() );
+		sequence->push_back( make_shared<NormaliseConditionalGotos>() );
+		sequence->push_back( make_shared<CompactGotos>() );
         sequence->push_back( make_shared<EnsureResetYield>() );
         sequence->push_back( make_shared<CleanupCompoundMulti>() );
         sequence->push_back( make_shared<AddStateLabelVar>() );
         sequence->push_back( make_shared<PlaceLabelsInArray>() );
-#if 1
-        sequence->push_back( make_shared<LabelTypeToEnum>() );
-#else
-        for( int i=0; i<2; i++ )
-        {
-            sequence->push_back( make_shared<LabelVarsToEnum>() );
-            sequence->push_back( make_shared<SwapSubscriptConditionalOperator>() );
-        }
-#endif        
-        sequence->push_back( make_shared<CleanupCompoundMulti>() );
+        sequence->push_back( make_shared<LabelTypeToEnum>() );     
     }    
-    { // creating fallthrough machine
+
+    sequence->push_back( make_shared<CleanupCompoundMulti>() );
+
+    { 
+		// ---------------------- Create fallthrough machine ----------------------
         for( int i=0; i<5; i++ )
         {
             sequence->push_back( make_shared<ApplyCombGotoPolicy>() );
@@ -147,12 +143,17 @@ void BuildDefaultSequence( vector< shared_ptr<VNStep> > *sequence )
         sequence->push_back( make_shared<ApplyTopPolicy>() );
         sequence->push_back( make_shared<DetectSuperLoop>(false) );
         sequence->push_back( make_shared<DetectSuperLoop>(true) );
-        sequence->push_back( make_shared<CleanupUnusedVariables>() );
     }
-    { // optimsing fall though machine
+
+    sequence->push_back( make_shared<CleanupUnusedVariables>() );
+    
+    { 
+		// ---------------------- Optimsing fall though machine ----------------------
         sequence->push_back( make_shared<LoopRotation>() );
     }
-    { // transition to event driven style
+    
+    { 
+		// ---------------------- Transition to event driven style ----------------------
         sequence->push_back( make_shared<InsertInferredYield>() );
         sequence->push_back( make_shared<AutosToModule>() );
         sequence->push_back( make_shared<TempsAndStaticsToModule>() );
@@ -161,15 +162,15 @@ void BuildDefaultSequence( vector< shared_ptr<VNStep> > *sequence )
         sequence->push_back( make_shared<ExplicitiseReturns>() );
         sequence->push_back( make_shared<CleanupNestedIf>() );
     }
-    { // final cleanups
-        for( int i=0; i<2; i++ )
-        {
-            sequence->push_back( make_shared<CleanupUnusedLabels>() );
-            sequence->push_back( make_shared<CleanupDuplicateLabels>() );
-            sequence->push_back( make_shared<CleanupIneffectualLabels>() );
-            sequence->push_back( make_shared<CleanUpDeadCode>() );
-        }
-    }
+    
+	// ---------------------- Final cleanups ----------------------
+    for( int i=0; i<2; i++ )
+	{
+		sequence->push_back( make_shared<CleanupUnusedLabels>() );
+		sequence->push_back( make_shared<CleanupDuplicateLabels>() );
+		sequence->push_back( make_shared<CleanupIneffectualLabels>() );
+		sequence->push_back( make_shared<CleanUpDeadCode>() );
+	}
 }
 
 

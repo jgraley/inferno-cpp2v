@@ -116,6 +116,7 @@ NormaliseConditionalGotos::NormaliseConditionalGotos()
     iif->else_body = MakePatternNode<Nop>(); 
     s_comp->members = ( decls );    
     s_comp->statements = ( pre, iif, post );    
+    sx_comp->members = ( decls );    
     sx_comp->statements = ( sx_pre, iif, sx_goto, sx_post );    
 
     label->identifier = label_id;

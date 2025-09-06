@@ -410,7 +410,7 @@ CleanUpDeadCode::CleanUpDeadCode()
 }
 
 
-ReduceVoidStatementExpression::ReduceVoidStatementExpression()
+CleanupVoidStatementExpression::CleanupVoidStatementExpression()
 {
     auto s_ce = MakePatternNode<StatementExpression>();
     auto decls = MakePatternNode< Star<Declaration> >();
