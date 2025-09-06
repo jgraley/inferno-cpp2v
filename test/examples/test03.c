@@ -8,8 +8,6 @@ int main()
            y = 11;
     } 
     
-
-
     return (unsigned char)y;
 }
 

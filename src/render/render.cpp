@@ -741,6 +741,8 @@ string Render::RenderInstance( const TransKit &kit, TreePtr<Instance> o, string 
         r->members = members;
         r->statements = remainder;
         s += "\n" + RenderStatement(kit, r, "");
+        // Surround functions with blank lines
+        s = '\n' + s + '\n';
     }
     else
     {
@@ -896,6 +898,8 @@ string Render::RenderDeclaration( const TransKit &kit, TreePtr<Declaration> decl
         }
 
         s += ";\n";
+        // Add blank lines before and after
+        s = '\n' + s + '\n';
     }
     else if( TreePtr<Label> l = DynamicTreePtrCast<Label>(declaration) )
         return RenderIdentifier(kit, l->identifier) + ":;\n"; // need ; after a label in case last in compound block

@@ -71,6 +71,13 @@ void BuildDefaultSequence( vector< shared_ptr<VNStep> > *sequence )
 		// ---------------------- Construct lowerings ----------------------
         { 
 			// function call lowering (and function merging)
+			// Note: not the same as inlining: we are building stacks
+			// for recursion, and turning calls and returns into gotos.
+			// There is no duplication from multiple call sites, and
+			// no limit on recursion (aside from stack size). We can do
+			// this before lowering the structured programming constructs
+			// because we make use of statement expressions (gcc extension
+			// to jump in and out of the middle of expressions using goto.
 			sequence->push_back( make_shared<FunctionMergingDisallowed>() );
             sequence->push_back( make_shared<ExtractCallParams>() );
             sequence->push_back( make_shared<ExplicitiseReturn>() );

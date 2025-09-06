@@ -83,6 +83,7 @@ ires=$?
 
 if test $ires -eq 0
 then
+ clang-format -i $outfile
  echo Compile output...
  resource/script/compile.sh -c $outfile -o $outpath/"$fb"_out.o
  c2res=$?
