@@ -68,30 +68,50 @@ void BuildDefaultSequence( vector< shared_ptr<VNStep> > *sequence )
         sequence->push_back( make_shared<DetectCombableBreak>() );
     }    
     { 
-		// ---------------------- Construct lowerings ----------------------
-        { 
-			// function call lowering (and function merging)
-			// Note: not the same as inlining: we are building stacks
-			// for recursion, and turning calls and returns into gotos.
-			// There is no duplication from multiple call sites, and
-			// no limit on recursion (aside from stack size). We can do
-			// this before lowering the structured programming constructs
-			// because we make use of statement expressions (gcc extension
-			// to jump in and out of the middle of expressions using goto.
-			sequence->push_back( make_shared<FunctionMergingDisallowed>() );
-            sequence->push_back( make_shared<ExtractCallParams>() );
-            sequence->push_back( make_shared<ExplicitiseReturn>() );
-            sequence->push_back( make_shared<ReturnViaTemp>() );
-            sequence->push_back( make_shared<AddLinkAddress>() );
-            sequence->push_back( make_shared<ParamsViaTemps>() );
-            sequence->push_back( make_shared<SplitInstanceDeclarations>() );
-            sequence->push_back( make_shared<MoveInstanceDeclarations>() );
-            sequence->push_back( make_shared<AutosToModule>() );
-            sequence->push_back( make_shared<GenerateStacks>() );
-            sequence->push_back( make_shared<MergeFunctions>() );
-        }
-		
+		// ---------------------- Function merging ----------------------
+		// Note: not the same as inlining: we are building stacks
+		// for recursion, and turning calls and returns into gotos.
+		// There is no duplication from multiple call sites, and
+		// no limit on recursion (aside from stack size). We can do
+		// this before lowering the structured programming constructs
+		// because we make use of statement expressions. 
+		sequence->push_back( make_shared<FunctionMergingDisallowed>() );
+		sequence->push_back( make_shared<ExtractCallParams>() );
+		sequence->push_back( make_shared<ExplicitiseReturn>() );
+		sequence->push_back( make_shared<ReturnViaTemp>() );
+		sequence->push_back( make_shared<AddLinkAddress>() );
+		sequence->push_back( make_shared<ParamsViaTemps>() );
+		sequence->push_back( make_shared<SplitInstanceDeclarations>() );
+		sequence->push_back( make_shared<MoveInstanceDeclarations>() );
+		sequence->push_back( make_shared<AutosToModule>() );
+		sequence->push_back( make_shared<GenerateStacks>() );
+		sequence->push_back( make_shared<MergeFunctions>() );
+	}
+	
+#ifdef REPRODUCE_833 // this cleanup is desirable to make function-merge output readable but fix #833 first
+  	// ---------------------- big round of cleaning up ----------------------
+	sequence->push_back( make_shared<CleanupVoidStatementExpression>() );
+	sequence->push_back( make_shared<CleanupStatementExpression>() );
+	// Ineffectual gotos, unused and duplicate labels result from compound tidy-up after construct lowering, but if not 
+	// removed before AddGotoBeforeLabel, they will generate spurious states. We also remove dead code which can be exposed by
+	// removal of unused labels - we must repeat because dead code removal can generate unused labels.
+	for( int i=0; i<2; i++ )
+	{
+		sequence->push_back( make_shared<CleanupCompoundMulti>() );
+		sequence->push_back( make_shared<CleanupCompoundSingle>() );
+		sequence->push_back( make_shared<CleanupNop>() );
+		sequence->push_back( make_shared<CleanupUnusedLabels>() );
+		sequence->push_back( make_shared<CleanupDuplicateLabels>() );
+		sequence->push_back( make_shared<CleanupIneffectualLabels>() );
+		sequence->push_back( make_shared<CleanUpDeadCode>() );
+	}
+#endif
+
+	{
+		// ---------------------- Construct lowerings ----------------------	
 		// Lower structured programming constructs and &&, ||, ?:
+		// NOTE: After this sub-phase, it won't be possible to add usages of 
+		// these constructs, which is why we leave this as late as possible.
         sequence->push_back( make_shared<BreakToGoto>() );
         sequence->push_back( make_shared<ForToWhile>() );
         sequence->push_back( make_shared<WhileToDo>() );
@@ -123,7 +143,7 @@ void BuildDefaultSequence( vector< shared_ptr<VNStep> > *sequence )
 	}
    
     { 
-		// ---------------------- Transition to normalised lmap style ----------------------
+		// ---------------------- Install state enum and lmap ----------------------
         sequence->push_back( make_shared<GotoAfterWait>() );
         sequence->push_back( make_shared<AddGotoBeforeLabel>() );
 		sequence->push_back( make_shared<NormaliseConditionalGotos>() );

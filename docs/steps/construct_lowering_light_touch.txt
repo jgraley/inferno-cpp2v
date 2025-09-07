@@ -2,7 +2,7 @@
 Combability
 -----------
 
-It is desirable to introduce "light-touch" approach to the construct lowering (loops, if, switch etc). Since the fall-through machine can already merge forward iterations, this is only essential for definite for loops which are indeed combable. But it is desirable for all constructs - the fall thru machine will be less bluky, with fewer states and constructs that reasonably could appear in the output verilog untouched should do so (as one of the overall project objectives).
+It is desirable to introduce "light-touch" approach to the construct lowering (loops, if, switch etc). Since the fall-through machine can already merge forward iterations, this is only essential for definite for loops which are indeed combable. But it is desirable for all constructs - the fall thru machine will be less bulky, with fewer states and constructs that reasonably could appear in the output RTL code untouched should do so (as one of the overall project objectives).
 
 We can categorise constructs as follows:
 1. Always intriniscally uncombable (function call, do, while) 
@@ -11,7 +11,7 @@ We can categorise constructs as follows:
 
 In all of these cases, if there is anything uncombable underneath the construct, ie in its condition or body, then the construct must be lowered.  There are other kinds of Statements that are uncombable, but which are not lowere here: Yield, Label, Goto. From the point of view of analysis, these are similar to category 1 constructs.
 
-It might appear that we can order this best by doing category 1 first, and ararnge for the output of the cat 1 lowerings to triger the cat 2 and 3 lowerings. But there is an existing partial ordering to these lowerings, since some lowerings generate output that contains another construct which itself may need lowering - the "inferral ordering".
+It might appear that we can order this best by doing category 1 first, and arrange for the output of the cat 1 lowerings to triger the cat 2 and 3 lowerings. But there is an existing partial ordering to these lowerings, since some lowerings generate output that contains another construct which itself may need lowering - the "inferral ordering".
 
 So instead we seek to apply the lowerings in an order decided based on the existing ordering. And of course we would prefer not to have to repeat steps.
 

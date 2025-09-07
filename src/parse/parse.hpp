@@ -752,11 +752,20 @@ private:
 
         virtual void AddInitializerToDecl(DeclTy *Dcl, ExprArg Init)
         {
+			INDENT("I");
             TRACE();
             TreePtr<Declaration> d = hold_decl.FromRaw(Dcl);
+			TRACE("Decl: ")(d)(" init: ")(FromClang(Init))("\n");
+			if( auto dc = DynamicTreePtrCast<DeclarationChain>(d) )
+				TRACE("DC first: ")(dc->first)("\nsecond: ")(dc->second)("\n");
+				
+			// If we got a chain, use the last element (the others have already
+			// had their inits). Determined by experiment.
+			while( auto dc = DynamicTreePtrCast<DeclarationChain>(d) )
+				d = dc->second;
 
-            TreePtr<Instance> o = DynamicTreePtrCast<Instance> (d);
-            ASSERT( o ); // Only objects can be initialised
+            TreePtr<Instance> o = DynamicTreePtrCast<Instance>(d);
+            ASSERT( o )(d); // Only objects can be initialised
 
             o->initialiser = FromClang(Init);
 

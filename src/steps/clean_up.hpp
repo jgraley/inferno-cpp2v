@@ -15,7 +15,7 @@ namespace Steps {
 
 using namespace SR;
 
-/// Find compound statements inside compund statements and flatten
+/// Find statement expressions inside compound statements and flatten
 class CleanupStatementExpression : public VNStep
 {    
 public:

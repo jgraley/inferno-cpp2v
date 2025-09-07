@@ -14,10 +14,14 @@ SC_CASES += scissue677.cpp scissue667.cpp sc10_reduce.cpp
 SR_CASES = ${SC_CASES} 
 MINI_SC_CASES = sctest02.cpp sctest03.cpp sctest01.cpp sctest07.cpp sctest09.cpp sctest06.cpp sctest05.cpp sctest04.cpp sctest15.cpp 
 MINI_SC_SR_CASES = small.c pointeris.c ${MINI_SC_CASES} 
+MINI_SC_SR_CASES = small.c pointeris.c ${MINI_SC_CASES} 
 
 # The original C/C++ test cases, no SystemC
 CPP_CASES = test04.cpp test07.cpp test12.cpp test14.cpp methodcall.cpp ut_in_func.cpp
-C_CASES = buriedcall.c test02.c test03.c test05.c test06.c test09.c test10.c test11.c test13.c test15.c test16.c pointeris.c small.c compound.c 
+C_CASES = declchain.c buriedcall.c test02.c test03.c test05.c test06.c test09.c test10.c test11.c test13.c test15.c test16.c pointeris.c small.c compound.c
+  
+# Skip due #834: gotovar.c  
+# Skip due #836: duffs_device.c  
   
 # The whole lot for the benefit of auto rules
 EXEC_CASES = ${SC_CASES} ${C_CASES} ${CPP_CASES}

@@ -12,7 +12,7 @@ int fp(int);
 static int f(int &i, char longidentifier)
 {
    static signed char x=9;
-   auto unsigned char y=4;
+   unsigned char y=4;
    x++;
    return x/y;
 }
