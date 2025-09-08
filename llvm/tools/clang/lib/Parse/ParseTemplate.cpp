@@ -319,7 +319,7 @@ Parser::ParseNonTypeTemplateParameter(unsigned Depth, unsigned Position) {
   Declarator ParamDecl(DS, Declarator::TemplateParamContext);
   ParseDeclarator(ParamDecl);
   if (DS.getTypeSpecType() == DeclSpec::TST_unspecified && !DS.getTypeRep()) {
-    // This probably shouldn't happen - and it's more of a Sema thing, but
+    // This probably shouldn't happen - and it's more of a Sema thing, but 
     // basically we didn't parse the type name because we couldn't associate
     // it with an AST node. we should just skip to the comma or greater.
     // TODO: This is currently a placeholder for some kind of Sema Error.
