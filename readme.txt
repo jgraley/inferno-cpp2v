@@ -47,11 +47,8 @@ make
 build-essential
 flex
 bison
-libboost-all-dev
 graphviz      (only if you want to look at pretty pictures)
-indent        (makes reading inferno C output easier)
 doxygen       (automated class documentation)
-imagemagick   (only for web page generation TODO don't need this now using svg)
 binutils-gold (installing this makes gcc use the gold linker which speeds up builds)
 valgrind      (profiling and other handy stuff)
 kcachegrind   (GUI for profiles)
@@ -75,3 +72,6 @@ script for usage instructions. If you want to see a graph, try e.g.
 
 ./inferno.exe -itest/examples/add.cpp -gi | dotty -
 
+To make git work with a GitHub access token:
+
+git remote set-url origin https://<user>:<token>@github.com/jgraley/inferno-cpp2v.git
