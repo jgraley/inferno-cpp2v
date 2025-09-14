@@ -45,8 +45,7 @@ On a Debian/Ubuntu system, you need approximately the following apt packages:
     
 make
 build-essential
-flex
-bison
+bison         (parser generator)
 graphviz      (only if you want to look at pretty pictures)
 doxygen       (automated class documentation)
 binutils-gold (installing this makes gcc use the gold linker which speeds up builds)
@@ -54,6 +53,13 @@ valgrind      (profiling and other handy stuff)
 kcachegrind   (GUI for profiles)
 
 You also need to install SystemC (version 3.1.0) and set up a symlink in this directory pointing to the installation. See docs/program/systemc_installation_notes.txt for more info.
+
+And also RE/flex lexer generator (with unicode support):
+ - go to https://github.com/Genivia/RE-flex/releases/tag/v6.0.0
+ - download the source code .zip and unzip it and go in
+ - ./clean.sh
+ - ./build.sh
+ - symlink `reflex` in inferno top level to the unzipped dir as with SystemC
 
 Now type:
 
