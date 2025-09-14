@@ -30,15 +30,21 @@ $(MODULES:%=build/%.lpp.o): build/%.lpp.o : build/%.lpp.cpp build/%.lpp.hpp buil
 	@mkdir -p $(dir $@)
 	g++ $< -c $(CXXFLAGS) -o $@ 
 
+
 $(MODULES:%=build/%.ypp.o): build/%.ypp.o : build/%.ypp.cpp build/%.ypp.hpp build/%.lpp.hpp build/%.location.hpp $(DEPS)
 	@mkdir -p $(dir $@)
 	g++ $< -c $(CXXFLAGS) -o $@ 
 
 
-$(MODULES:%=build/%_exe): build/%_exe : build/%.lpp.o build/%.ypp.o
-	g++ $^ $(LIBREFLEX) $(CXXFLAGS) -o $@
+build/src/lang.a : $(MODULES:%=build/%.lpp.o) $(MODULES:%=build/%.ypp.o) $(DEPS)
+	@mkdir -p build/src 
+	$(AR) -r $@ $(MODULES:%=build/%.lpp.o) $(MODULES:%=build/%.ypp.o)
+	
+
+$(MODULES:%=build/%_exe): build/%_exe : build/src/lang.a $(DEPS)
+	g++ $< $(LIBREFLEX) $(CXXFLAGS) -o $@
 	
 	
 .PHONY: langtest
-langtest : build/$(LANG)/vn_lang_exe
+langtest : build/$(LANG)/vn_lang_exe $(DEPS) 
 	./$< $(LANG)/langtest.vn

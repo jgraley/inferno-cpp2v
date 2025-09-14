@@ -119,3 +119,4 @@ $(MAIN_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
 	$(ICC) $< -c $(SRC_OPTIONS) -o $@
 
  
+include src/sr/lang/makefile

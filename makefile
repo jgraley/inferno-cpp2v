@@ -19,6 +19,12 @@ LLVM_CLANG_ARGS := ENABLE_OPTIMIZED=$(ENABLE_OPTIMIZED)
 LLVM_CLANG_ARGS += CXXFLAGS="$(OPTIONS) $(EXE_OPTIONS) $(LC_OPTIONS)"
 LLVM_CLANG_ARGS += CFLAGS="$(OPTIONS) $(EXE_OPTIONS) $(LC_OPTIONS)"
 
+# reflex is symlink to RE/flex user-level installation
+LIBREFLEX_PATH = reflex/lib/libreflex.a
+
+LIB_PATHS = $(LLVM_CLANG_LIB_PATHS) $(LIBREFLEX_PATH)
+
+
 $(LLVM_LIB_PATH)/libLLVMBit%.a : force_subordinate_makefiles
 	cd llvm/lib/Bitcode/$(patsubst libLLVMBit%.a,%,$(notdir $@)) && $(MAKE) $(LLVM_CLANG_ARGS)	
 
@@ -40,8 +46,8 @@ clean_libclang%.a :
 #
 # Link inferno executable
 #
-inferno.exe : makefile makefile.common build/inferno.a $(LLVM_CLANG_LIB_PATHS)
-	$(ICC) build/inferno.a $(LLVM_CLANG_LIB_PATHS) $(OPTIONS) $(EXE_OPTIONS) $(LINK_OPTIONS) -o inferno.exe
+inferno.exe : makefile makefile.common build/inferno.a build/src/lang.a $(LIB_PATHS)
+	$(ICC) build/inferno.a $(LIB_PATHS) $(OPTIONS) $(EXE_OPTIONS) $(LINK_OPTIONS) -o inferno.exe
 
 #
 # Build the doxygen docs
