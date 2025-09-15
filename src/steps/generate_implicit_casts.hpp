@@ -12,7 +12,7 @@
 
 namespace Steps {
 
-using namespace SR;
+using namespace VN;
 
 /** Wherever an argument to a function call differs in type from
     the funciton's declaration, insert a cast to the declared

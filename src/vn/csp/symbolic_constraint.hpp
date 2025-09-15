@@ -11,7 +11,7 @@
 #include <memory>
 #include <list>
 
-namespace SR
+namespace VN
 {
 class Conjecture;    
 class XTreeDatabase;
@@ -34,14 +34,14 @@ public:
      * @param op a shared pointer to the boolean operator
      */
     explicit SymbolicConstraint( shared_ptr<SYM::BooleanExpression> op,
-                                 shared_ptr<const SR::Lacing> lacing );
+                                 shared_ptr<const VN::Lacing> lacing );
     
 private:
     const struct Plan : public virtual Traceable
     {
         explicit Plan( SymbolicConstraint *algo,  
                        shared_ptr<SYM::BooleanExpression> expression,
-                       shared_ptr<const SR::Lacing> lacing );
+                       shared_ptr<const VN::Lacing> lacing );
         void DetermineVariables();
         void DetermineHintExpressions();
         void DetermineXTreeDbRequirement();
@@ -54,19 +54,19 @@ private:
         map<VariableId, GivensToExpression> suggestion_expressions;
         shared_ptr<SYM::BooleanExpression> alt_expression_for_testing;       
         SYM::Expression::VariablesRequiringRows required_x_tree_db_level; 
-        shared_ptr<const SR::Lacing> lacing;
+        shared_ptr<const VN::Lacing> lacing;
     } plan;
 
     const set<VariableId> &GetVariables() const override;
     SYM::Expression::VariablesRequiringRows GetVariablesRequiringRows() const override;
-    virtual void Start( const SR::XTreeDatabase *x_tree_db );    
+    virtual void Start( const VN::XTreeDatabase *x_tree_db );    
     bool IsSatisfied( const Assignments &assignments ) const override;
     unique_ptr<SYM::SubsetResult> GetSuggestedValues( const Assignments &assignments,
                                                    const VariableId &var ) const override;               
     string GetTrace() const override;
     void Dump() const;
 
-    const SR::XTreeDatabase *x_tree_db;
+    const VN::XTreeDatabase *x_tree_db;
 };
 
 };

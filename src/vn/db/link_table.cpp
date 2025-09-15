@@ -2,7 +2,7 @@
 
 #include "node_table.hpp"
 
-using namespace SR;    
+using namespace VN;    
 
 LinkTable::LinkTable()
 {

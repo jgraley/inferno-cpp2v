@@ -16,7 +16,7 @@
 
 //#define TRACE_KEEP_ALIVES
 
-using namespace SR;
+using namespace VN;
 using namespace std;
 
 int SCREngine::repetitions;

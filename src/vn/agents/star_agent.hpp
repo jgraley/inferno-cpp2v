@@ -10,7 +10,7 @@
 #include "../sym/predicate_operators.hpp"
 #include "special_agent.hpp"
 
-namespace SR
+namespace VN
 { 
 
 /// Agent used in a container pattern under a standard agent, that matches 

@@ -13,7 +13,7 @@ public:
                 shared_ptr<Solver> solver_under_test );    
 
     void Start( const Assignments &forces,
-                const SR::XTreeDatabase *x_tree_db ) override;
+                const VN::XTreeDatabase *x_tree_db ) override;
     void Stop() override;
     void Run( const SolutionReportFunction &solution_report_function,
               const RejectionReportFunction &rejection_report_function ) override;

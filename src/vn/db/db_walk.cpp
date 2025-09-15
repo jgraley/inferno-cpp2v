@@ -1,6 +1,6 @@
 #include "db_walk.hpp"
 
-using namespace SR;    
+using namespace VN;    
 
 //#define TRACE_WALK
 

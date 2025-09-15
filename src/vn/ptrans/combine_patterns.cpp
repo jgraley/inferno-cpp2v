@@ -4,7 +4,7 @@
 #include "agents/delta_agent.hpp"
 #include "agents/embedded_scr_agent.hpp"
 
-using namespace SR;
+using namespace VN;
 
 void CombinePatterns::DoPatternTransformation( const PatternKnowledge &pk )
 {    

@@ -10,7 +10,7 @@
 #include "../db/db_common.hpp"
 #include <functional>
 
-namespace SR 
+namespace VN 
 {
 typedef set<PatternLink> Originators;
 typedef map<PatternLink, XLink> ReplaceAssignments;

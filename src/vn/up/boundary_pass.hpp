@@ -8,7 +8,7 @@
 #include "../link.hpp"
 #include "../scr_engine.hpp"
 
-namespace SR 
+namespace VN 
 {
 
 /**
@@ -35,7 +35,7 @@ private:
 	void SplitTreeZoneAtXLink( shared_ptr<Patch> *patch_ptr, XLink split_point );
 
 	XTreeDatabase * const db;
-    SR::DepthFirstRelation dfr;                          
+    VN::DepthFirstRelation dfr;                          
 	set<XLink, DepthFirstRelation> boundaries;
 	queue<shared_ptr<Patch> *> check_queue;
 };

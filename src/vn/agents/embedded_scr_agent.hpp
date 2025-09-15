@@ -8,7 +8,7 @@
 #include "standard_agent.hpp"
 #include "special_agent.hpp"
 
-namespace SR
+namespace VN
 { 
 class SearchReplace;
 

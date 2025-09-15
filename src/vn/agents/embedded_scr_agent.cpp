@@ -4,7 +4,7 @@
 #include "../db/duplicate.hpp"
 #include "link.hpp"
 
-using namespace SR;
+using namespace VN;
 
 EmbeddedSCRAgent::EmbeddedSCRAgent( TreePtr<Node> sp, TreePtr<Node> rp, bool is_search_ ) :
     search_pattern( sp ),

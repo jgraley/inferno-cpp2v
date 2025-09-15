@@ -10,7 +10,7 @@
 class Graph;
 
 
-namespace SR 
+namespace VN 
 {
 
 class CompareReplace;

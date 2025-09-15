@@ -7,7 +7,7 @@
 #include <vector>
 #include <functional>
 
-namespace SR
+namespace VN
 {
     class VNStep;
     class VNSequence;
@@ -16,7 +16,7 @@ namespace SR
 class Inferno
 {
 public:    
-    Inferno( shared_ptr<SR::VNSequence> vn_sequence );
+    Inferno( shared_ptr<VN::VNSequence> vn_sequence );
     ~Inferno();
     
     struct Step
@@ -41,7 +41,7 @@ public:
     };
 
 private:
-    shared_ptr<SR::VNSequence> vn_sequence;
+    shared_ptr<VN::VNSequence> vn_sequence;
 
     const class Plan
     {

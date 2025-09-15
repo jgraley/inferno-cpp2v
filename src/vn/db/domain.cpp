@@ -7,7 +7,7 @@
 
 //#define TRACE_DOMAIN_EXTEND
 
-using namespace SR;    
+using namespace VN;    
 
 Domain::Domain()
 {

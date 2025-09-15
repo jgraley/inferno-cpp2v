@@ -8,7 +8,7 @@
 
 #include <unordered_set>
 
-namespace SR 
+namespace VN 
 {
 	class SCREngine;
 	class RequiresSubordinateSCREngine;

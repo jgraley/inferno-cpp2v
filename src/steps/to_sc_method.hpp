@@ -6,7 +6,7 @@
 /// Steps namespace contains all of inferno's transformation steps. 
 namespace Steps {
 
-using namespace SR;
+using namespace VN;
 
 /** Move automatic variables out to class scope as fields, but only
     when the compound block they are declared in does not make outgoing 

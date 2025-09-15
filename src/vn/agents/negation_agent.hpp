@@ -7,7 +7,7 @@
 #include "special_agent.hpp"
 #include "autolocating_agent.hpp"
 
-namespace SR
+namespace VN
 {
 
 /// Boolean node that matches if the sub-pattern at `pattern` does 

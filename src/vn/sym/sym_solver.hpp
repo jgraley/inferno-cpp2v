@@ -16,7 +16,7 @@ class PredicateOperator;
 class TruthTableSolver
 {
 public:
-    typedef set<SR::PatternLink> GivenSymbolSet;
+    typedef set<VN::PatternLink> GivenSymbolSet;
 
     TruthTableSolver( const Expression::SolveKit &kit,
                       shared_ptr<BooleanExpression> initial_expression );

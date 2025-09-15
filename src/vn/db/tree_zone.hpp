@@ -12,7 +12,7 @@
 
 #include <unordered_set>
 
-namespace SR 
+namespace VN 
 {
 class XTreeDatabase;    
 class FreeZone;

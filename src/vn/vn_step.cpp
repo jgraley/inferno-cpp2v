@@ -7,7 +7,7 @@
 #include "vn_sequence.hpp"
 #include "db/x_tree_database.hpp"
 
-using namespace SR;
+using namespace VN;
 
 void VNStep::Configure( StepType type,
                         TreePtr<Node> scp,

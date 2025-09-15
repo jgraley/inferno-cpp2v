@@ -9,7 +9,7 @@
 #include <list>
 #include <set>
 
-namespace SR
+namespace VN
 {
     
 // Internal node classes - NOTE these are not agents, they are local tree nodes

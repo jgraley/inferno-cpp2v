@@ -5,7 +5,7 @@
 
 #include "conjecture.hpp"
 
-namespace SR 
+namespace VN 
 {
 Conjecture::Plan::Plan( set<Agent *> my_agents, const Agent *base_agent )
 {

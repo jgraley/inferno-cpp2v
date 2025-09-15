@@ -10,7 +10,7 @@
 #define NO_ACTION_ON_SCAFFOLD
 #define LEAK_EXTRA_TREES
 
-using namespace SR;    
+using namespace VN;    
 
 // ------------------------- DomainExtension --------------------------
 

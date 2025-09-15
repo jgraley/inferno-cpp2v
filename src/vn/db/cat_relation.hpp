@@ -12,7 +12,7 @@ namespace SYM
 };
     
     
-namespace SR 
+namespace VN 
 {
 class Lacing;
 class XTreeDatabase;

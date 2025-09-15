@@ -5,7 +5,7 @@
 #include "node/graphable.hpp"
 #include <functional>
 
-namespace SR 
+namespace VN 
 {
 
 class VNStep;

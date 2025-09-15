@@ -10,7 +10,7 @@ SolverTest::SolverTest( shared_ptr<Solver> reference_solver_,
 }
 
 void SolverTest::Start( const Assignments &forces,
-                        const SR::XTreeDatabase *x_tree_db )
+                        const VN::XTreeDatabase *x_tree_db )
 {
     reference_solver->Start(forces, x_tree_db);
     solver_under_test->Start(forces, x_tree_db);

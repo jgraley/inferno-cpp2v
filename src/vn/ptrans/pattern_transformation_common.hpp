@@ -6,7 +6,7 @@
 #include "node/graphable.hpp"
 #include "search_replace.hpp"
 
-namespace SR 
+namespace VN 
 {
 
 class VNStep;

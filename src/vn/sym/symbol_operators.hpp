@@ -43,10 +43,10 @@ class SymbolVariable : public SymbolExpression
 {
 public:    
     typedef SymbolExpression NominalType;
-    explicit SymbolVariable( const SR::PatternLink &plink );
-    virtual set<SR::PatternLink> GetRequiredVariables() const override;
+    explicit SymbolVariable( const VN::PatternLink &plink );
+    virtual set<VN::PatternLink> GetRequiredVariables() const override;
     virtual unique_ptr<SymbolicResult> Evaluate( const EvalKit &kit ) const override;
-    SR::PatternLink GetPatternLink() const;
+    VN::PatternLink GetPatternLink() const;
 
     virtual shared_ptr<SymbolExpression> TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
                                                        shared_ptr<SymbolExpression> to_equal ) const override;
@@ -58,7 +58,7 @@ public:
     virtual Precedence GetPrecedence() const override;
 
 private:
-    const SR::PatternLink plink;
+    const VN::PatternLink plink;
 };
 
 // ------------------------- ChildToSymbolOperator --------------------------
@@ -155,7 +155,7 @@ public:
                                                list<unique_ptr<SymbolicResult>> &&op_results ) const override final;
     virtual XValue EvalXLinkFromRow( const EvalKit &kit,
                                         XValue xlink, 
-                                        const SR::LinkTable::Row &row ) const = 0;
+                                        const VN::LinkTable::Row &row ) const = 0;
     virtual string Render() const override;
     virtual Precedence GetPrecedence() const override;
     virtual string GetRenderPrefix() const = 0;
@@ -172,7 +172,7 @@ public:
     using XTreeDbToSymbolOperator::XTreeDbToSymbolOperator;
     XValue EvalXLinkFromRow( const EvalKit &kit,
                                 XValue xlink, 
-                                const SR::LinkTable::Row &row ) const override;
+                                const VN::LinkTable::Row &row ) const override;
 
     shared_ptr<SymbolExpression> TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
                                                      shared_ptr<SymbolExpression> to_equal ) const override;
@@ -188,7 +188,7 @@ public:
     using XTreeDbToSymbolOperator::XTreeDbToSymbolOperator;
     XValue EvalXLinkFromRow( const EvalKit &kit,
                                 XValue xlink, 
-                                const SR::LinkTable::Row &row ) const override;
+                                const VN::LinkTable::Row &row ) const override;
     string GetRenderPrefix() const override;
 };
 
@@ -200,7 +200,7 @@ public:
     using XTreeDbToSymbolOperator::XTreeDbToSymbolOperator;
     XValue EvalXLinkFromRow( const EvalKit &kit,
                                 XValue xlink, 
-                                const SR::LinkTable::Row &row ) const override;
+                                const VN::LinkTable::Row &row ) const override;
     string GetRenderPrefix() const override;
 };
 
@@ -212,7 +212,7 @@ public:
     using XTreeDbToSymbolOperator::XTreeDbToSymbolOperator;
     XValue EvalXLinkFromRow( const EvalKit &kit,
                                 XValue xlink, 
-                                const SR::LinkTable::Row &row ) const override;
+                                const VN::LinkTable::Row &row ) const override;
     string GetRenderPrefix() const override;
 };
 
@@ -224,7 +224,7 @@ public:
     using XTreeDbToSymbolOperator::XTreeDbToSymbolOperator;
     XValue EvalXLinkFromRow( const EvalKit &kit,
                                 XValue xlink, 
-                                const SR::LinkTable::Row &row ) const override;
+                                const VN::LinkTable::Row &row ) const override;
 
     shared_ptr<SymbolExpression> TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
                                                      shared_ptr<SymbolExpression> to_equal ) const override;
@@ -240,7 +240,7 @@ public:
     using XTreeDbToSymbolOperator::XTreeDbToSymbolOperator;
     XValue EvalXLinkFromRow( const EvalKit &kit,
                                 XValue xlink, 
-                                const SR::LinkTable::Row &row ) const override;
+                                const VN::LinkTable::Row &row ) const override;
 
     shared_ptr<SymbolExpression> TrySolveForToEqual( const SolveKit &kit, shared_ptr<SymbolVariable> target, 
                                                      shared_ptr<SymbolExpression> to_equal ) const override;

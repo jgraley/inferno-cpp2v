@@ -9,7 +9,7 @@
 #include "vn/agents/builder_agent.hpp"
 #include "vn/sym/expression.hpp"
 
-using namespace SR;
+using namespace VN;
 // TODO pollutes client namespace
 #define BYPASS_WHEN_IDENTICAL 1
 

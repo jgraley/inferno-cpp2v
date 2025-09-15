@@ -5,7 +5,7 @@
 
 #include <iostream>
 
-using namespace SR;
+using namespace VN;
 
 MoveInPass::MoveInPass( XTreeDatabase *db_, ScaffoldOps *sops_ ) :
     db( db_ ),

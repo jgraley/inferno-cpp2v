@@ -4,7 +4,7 @@
 #include "../link.hpp"
 #include "common/standard.hpp"
 
-namespace SR 
+namespace VN 
 {
 
 class DBCommon
@@ -93,8 +93,8 @@ private:
 
 }
 
-string Trace(SR::DBCommon::TreeType tt);
-string Trace(const SR::DBCommon::TreeRecord &tr);
+string Trace(VN::DBCommon::TreeType tt);
+string Trace(const VN::DBCommon::TreeRecord &tr);
 
 
 #endif

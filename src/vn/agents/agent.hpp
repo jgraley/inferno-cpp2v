@@ -7,7 +7,7 @@
 #include "../sym/lazy_eval.hpp"
 
 
-namespace SR
+namespace VN
 { 
 class SpecialBase;
 class SCREngine;
@@ -50,7 +50,7 @@ public:
     class CouplingMismatch : public Mismatch {};
         
 	Agent() = default;
-	Agent(const SR::Agent&) = default;
+	Agent(const VN::Agent&) = default;
     Agent& operator=(Agent& other);
     virtual void SCRConfigure( Phase phase ) = 0;
                                    

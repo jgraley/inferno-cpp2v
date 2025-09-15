@@ -12,7 +12,7 @@
 
 using namespace CPPTree;
 using namespace Steps;
-using namespace SR;
+using namespace VN;
  
 TreePtr<Node> Steps::MakeCheckUncombable( TreePtr<CPPTree::Statement> construct )
 {

@@ -2,7 +2,7 @@
 #include "vn_step.hpp"
 #include "agents/disjunction_agent.hpp"
    
-using namespace SR;
+using namespace VN;
 
 void SplitDisjunctions::DoPatternTransformation( const PatternKnowledge &pk )
 {    

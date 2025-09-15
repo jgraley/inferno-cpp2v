@@ -601,7 +601,7 @@ int main( int argc, char *argv[] )
     
     // Build a sequence of steps 
     Progress(Progress::BUILDING_STEPS).SetAsCurrent();    
-    vector< shared_ptr<SR::VNStep> > sequence;
+    vector< shared_ptr<VN::VNStep> > sequence;
     if( !ReadArgs::trace_quiet )
         fprintf(stderr, "Building patterns\n"); 
     if( ReadArgs::documentation_graphs )
@@ -617,7 +617,7 @@ int main( int argc, char *argv[] )
     // VNSequence contains the algrithms.
     // Inferno is just a harness that supports various execution 
     // scenarios based on command line args.
-    auto vn_sequence = make_shared<SR::VNSequence>( sequence );
+    auto vn_sequence = make_shared<VN::VNSequence>( sequence );
     Inferno inferno( vn_sequence );
     inferno.Run();
     //CSP::ReferenceSolver::DumpGSV();

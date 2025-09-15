@@ -9,7 +9,7 @@
 #include "../scr_engine.hpp"
 #include "patches.hpp"
 
-namespace SR 
+namespace VN 
 {
 
 // ------------------------- Runners --------------------------

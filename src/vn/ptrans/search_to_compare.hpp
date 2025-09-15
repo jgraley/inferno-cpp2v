@@ -7,7 +7,7 @@
 #include "scr_engine.hpp"
 #include "agents/agent.hpp"
 
-namespace SR 
+namespace VN 
 {
 
 class SearchToCompare : public PatternTransformationCommon

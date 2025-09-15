@@ -6,7 +6,7 @@
 #include "../sym/expression.hpp"
 #include "../sym/predicate_operators.hpp"
 
-namespace SR
+namespace VN
 { 
 
 /// Agent that only matches if the subtree at `through` is part of the original

@@ -6,7 +6,7 @@
 #include "common/lambda_loops.hpp"
 #include "up_common.hpp"
 
-using namespace SR;
+using namespace VN;
 
 
 ScaffoldOps::ScaffoldOps( XTreeDatabase *db_ ) :

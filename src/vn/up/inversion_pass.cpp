@@ -11,7 +11,7 @@
 
 #include <iostream>
 
-using namespace SR;
+using namespace VN;
 
 InversionPass::InversionPass( XTreeDatabase *db_, ScaffoldOps *sops_ ) :
     db( db_ ),

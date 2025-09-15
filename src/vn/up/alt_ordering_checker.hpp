@@ -9,7 +9,7 @@
 #include "../link.hpp"
 #include "../scr_engine.hpp"
 
-namespace SR 
+namespace VN 
 {
 	
 /**
@@ -28,7 +28,7 @@ private:
                                           vector<shared_ptr<TreePatch>> *ndt_patches );
         
     const XTreeDatabase * const db;
-    SR::DepthFirstRelation dfr;   
+    VN::DepthFirstRelation dfr;   
 };
 
 }

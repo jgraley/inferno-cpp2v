@@ -5,7 +5,7 @@
 #include "autolocating_agent.hpp"
 #include "../scr_engine.hpp" 
 
-namespace SR
+namespace VN
 { 
 
 /// Agent that is used in a combined search/replace path to seperate search 

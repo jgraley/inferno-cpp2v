@@ -4,7 +4,7 @@
 #include <list>
 #include <functional>
 
-namespace SR
+namespace VN
 {
     
 // Now just a functor that evaluates down the list

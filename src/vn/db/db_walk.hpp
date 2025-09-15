@@ -7,7 +7,7 @@
 #include "tree_zone.hpp"
 #include "free_zone.hpp"
 
-namespace SR 
+namespace VN 
 {
 class DBWalk
 {   

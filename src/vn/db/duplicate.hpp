@@ -4,7 +4,7 @@
 #include "../link.hpp"
 #include "mutator.hpp"
 
-namespace SR
+namespace VN
 { 
 class SCREngine;
 

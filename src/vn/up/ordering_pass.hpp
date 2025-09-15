@@ -9,7 +9,7 @@
 #include "../link.hpp"
 #include "../scr_engine.hpp"
 
-namespace SR 
+namespace VN 
 {
 	
 class DFPatchIndexRelation;	
@@ -61,7 +61,7 @@ private:
     XLink GetBaseXLink(const PatchRecord &patch_record) const;
                           
     XTreeDatabase * const db;
-    SR::DepthFirstRelation dfr;          
+    VN::DepthFirstRelation dfr;          
     set<XLink> in_order_bases;
 };
 

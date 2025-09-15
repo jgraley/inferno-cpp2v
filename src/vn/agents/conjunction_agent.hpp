@@ -5,7 +5,7 @@
 #include "autolocating_agent.hpp"
 #include "../boolean_evaluator.hpp"
 
-namespace SR
+namespace VN
 {
 
 /// Boolean node that matches if all of the sub-patterns at the pointers in

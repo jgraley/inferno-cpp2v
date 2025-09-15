@@ -14,7 +14,7 @@
 
 namespace Steps {
 
-using namespace SR;
+using namespace VN;
 
 /** Ensure an actual return statement is present in void-returning functions */
 class ExplicitiseReturn : public VNStep

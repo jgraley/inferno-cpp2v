@@ -5,7 +5,7 @@
 
 #include "common/read_args.hpp"
 
-using namespace SR;    
+using namespace VN;    
 
 
 NodeTable::NodeTable(const LinkTable *link_table_) :

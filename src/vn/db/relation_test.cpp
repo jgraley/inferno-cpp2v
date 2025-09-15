@@ -2,13 +2,13 @@
 
 #include <random>
  
-using namespace SR;
+using namespace VN;
 
 #define RANDVAL_RANGE 1000000
 
 
 template<typename KeyType>
-void SR::TestRelationProperties( const vector<KeyType> &keys,
+void VN::TestRelationProperties( const vector<KeyType> &keys,
                                  bool expect_totality,
                                  string relation_name, 
                                  function<Orderable::Diff(KeyType l, KeyType r)> compare,
@@ -240,14 +240,14 @@ void SR::TestRelationProperties( const vector<KeyType> &keys,
 
 // --------------------- Explicit instantiations for the types we use as keys --------------------------
 
-template void SR::TestRelationProperties<XLink>( const vector<XLink> &keys,
+template void VN::TestRelationProperties<XLink>( const vector<XLink> &keys,
                                                  bool expect_totality,
                                                  string relation_name, 
                                                  function<Orderable::Diff(XLink l, XLink r)> compare,
                                                  function<bool(XLink l, XLink r)> is_equal_native, 
                                                  function<XLink(XLink x, int randval)> get_special );
 
-template void SR::TestRelationProperties<TreePtr<Node>>( const vector<TreePtr<Node>> &keys,
+template void VN::TestRelationProperties<TreePtr<Node>>( const vector<TreePtr<Node>> &keys,
                                                          bool expect_totality,
                                                          string relation_name, 
                                                          function<Orderable::Diff(TreePtr<Node> l, TreePtr<Node> r)> compare,

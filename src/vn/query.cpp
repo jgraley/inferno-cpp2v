@@ -6,7 +6,7 @@
 
 #include <inttypes.h>
 
-using namespace SR;
+using namespace VN;
 
 //////////////////////////// PatternQuery ///////////////////////////////
 

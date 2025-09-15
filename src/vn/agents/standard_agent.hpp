@@ -9,7 +9,7 @@
 #include "helpers/transformation.hpp"
 #include <set>
  
-namespace SR
+namespace VN
 { 
 
 /// Agent implementation used for all standard pattern nodes. Normal agents are

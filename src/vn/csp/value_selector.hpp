@@ -9,7 +9,7 @@
 
 #include <functional>
 
-namespace SR
+namespace VN
 {
     class XTreeDatabase;
 };
@@ -25,7 +25,7 @@ class ValueSelector : public Traceable
 {
 public:
     ValueSelector( const ConstraintSet &constraints_to_query,
-                   const SR::XTreeDatabase *x_tree_db_,
+                   const VN::XTreeDatabase *x_tree_db_,
                    Assignments &assignments_,
                    VariableId var );
     ~ValueSelector();
@@ -34,7 +34,7 @@ public:
     Value GetNextValue();
     
 private:
-    const SR::XTreeDatabase * const x_tree_db;
+    const VN::XTreeDatabase * const x_tree_db;
     Assignments &assignments;
     const VariableId my_var;
     const ConstraintSet &constraints_to_query;

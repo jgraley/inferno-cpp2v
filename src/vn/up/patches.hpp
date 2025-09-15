@@ -15,7 +15,7 @@
 
 #define USE_SWAPS
 
-namespace SR 
+namespace VN 
 {
 class XTreeDatabase;
 

@@ -3,7 +3,7 @@
 #include "../search_replace.hpp" 
 #include "link.hpp"
 
-using namespace SR;
+using namespace VN;
 
 shared_ptr<PatternQuery> DeltaAgent::GetPatternQuery() const
 {

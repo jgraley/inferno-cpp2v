@@ -249,7 +249,7 @@ unique_ptr<BooleanResult> DepthFirstComparisonOperator::Evaluate( const EvalKit 
 
     // For greater/less, we need to consult the x_tree_db. We use the 
     // depth-first relation.
-    SR::DepthFirstRelation dfr( kit.x_tree_db ); 
+    VN::DepthFirstRelation dfr( kit.x_tree_db ); 
     Orderable::Diff diff = dfr.Compare3Way(ra->GetOnlyXLink(), rb->GetOnlyXLink() );
     bool res = EvalBoolFromDiff( diff );
     
@@ -649,8 +649,8 @@ shared_ptr<SYM::SymbolExpression> IsInCategoryOperator::TrySolveFor( const Solve
     {
 		// Half-open range means use minimus for both (minimus compares less than the node it was created from)
         AllInCategoryRangeOperator::ExprBounds expr_range;
-        expr_range.first = make_shared<SYM::SymbolConstant>( MakeTreeNode<SR::CategoryRelation::MinimusNode>(int_range.first) );
-        expr_range.second = make_shared<SYM::SymbolConstant>( MakeTreeNode<SR::CategoryRelation::MinimusNode>(int_range.second) );        
+        expr_range.first = make_shared<SYM::SymbolConstant>( MakeTreeNode<VN::CategoryRelation::MinimusNode>(int_range.first) );
+        expr_range.second = make_shared<SYM::SymbolConstant>( MakeTreeNode<VN::CategoryRelation::MinimusNode>(int_range.second) );        
         expr_range_list.push_back( expr_range );
     }
     TRACE(archetype_node)("\n")(int_range_list)("\n")(expr_range_list)("\n");

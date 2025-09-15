@@ -2,7 +2,7 @@
 
 #include "helpers/flatten.hpp"
 
-using namespace SR;
+using namespace VN;
 
 // ------------------------- Mutator --------------------------    
 

@@ -4,7 +4,7 @@
 #include "agents/depth_agent.hpp"
 #include "agents/embedded_scr_agent.hpp"
    
-using namespace SR;
+using namespace VN;
 
 void SearchToCompare::DoPatternTransformation( const PatternKnowledge &pk )
 {    

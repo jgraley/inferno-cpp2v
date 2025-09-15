@@ -19,7 +19,7 @@
 
 class Graph;
     
-namespace SR 
+namespace VN 
 {
 class Agent;
 class EmbeddedSCRAgent;

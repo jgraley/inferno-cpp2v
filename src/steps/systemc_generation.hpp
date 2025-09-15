@@ -9,7 +9,7 @@
 
 namespace Steps {
 
-using namespace SR;
+using namespace VN;
 
 class GlobalScopeToModule : public VNStep 
 {

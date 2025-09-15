@@ -6,7 +6,7 @@
 #include "up/tree_update.hpp"
 #include "up/up_common.hpp"
 
-using namespace SR;
+using namespace VN;
 
 VNSequence::VNSequence( const vector< shared_ptr<VNStep> > &sequence ) :
     steps( sequence )

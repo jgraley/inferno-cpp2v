@@ -10,7 +10,7 @@
 
 #include <memory>
 
-namespace SR
+namespace VN
 {
 
 class XTreeDatabase;

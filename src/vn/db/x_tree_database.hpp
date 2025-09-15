@@ -15,7 +15,7 @@
 #include "db_walk.hpp"
 #include <queue>
 
-namespace SR 
+namespace VN 
 {    
       
 class FreeZone;

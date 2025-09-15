@@ -8,7 +8,7 @@
 
 #include <unordered_map>
 
-namespace SR 
+namespace VN 
 {    
     
 class LinkTable;

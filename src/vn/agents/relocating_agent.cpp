@@ -13,7 +13,7 @@
 
 #include <stdexcept>
 
-using namespace SR;
+using namespace VN;
 using namespace SYM;
 
 //---------------------------------- RelocatingAgent::Dependencies ------------------------------------    

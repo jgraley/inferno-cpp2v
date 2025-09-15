@@ -7,7 +7,7 @@
 #include "node/specialise_oostd.hpp"
 #include "../db/mutator.hpp"
 
-namespace SR 
+namespace VN 
 {
 class XTreeDatabase;
 class TreeZone;

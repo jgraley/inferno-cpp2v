@@ -9,7 +9,7 @@
 #include "../sym/predicate_operators.hpp"
 #include "special_agent.hpp"
 
-namespace SR
+namespace VN
 {
 
 /// Boolean node that matches if any of the sub-patterns at the pointers in

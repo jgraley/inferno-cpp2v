@@ -6,7 +6,7 @@
 
 #define THROW_ON_NULL
 
-using namespace SR;
+using namespace VN;
 
 // ---------------------- TransformOfAgent::AugBECommon ---------------------------    
 

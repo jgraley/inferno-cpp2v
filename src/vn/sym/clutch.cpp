@@ -26,7 +26,7 @@ shared_ptr<BooleanExpression> ClutchRewriter::ApplyUnified(shared_ptr<BooleanExp
     auto all_engaged_expr = MakeLazy<BooleanConstant>(true);
     list< shared_ptr<BooleanExpression> > all_disengaged_list;
     shared_ptr<BooleanExpression> first_engage;
-    for( SR::PatternLink plink : original_expr->GetRequiredVariables() )
+    for( VN::PatternLink plink : original_expr->GetRequiredVariables() )
     {
         auto x = MakeLazy<SymbolVariable>(plink);
         all_disengaged_expr &= ( x == disengager_expr );

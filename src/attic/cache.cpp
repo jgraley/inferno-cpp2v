@@ -2,7 +2,7 @@
     
 #include "node/node.hpp"    
     
-using namespace SR;    
+using namespace VN;    
     
 CacheByLocation::Value CacheByLocation::operator()( Key key, CannonicalOperation op )
 {  

@@ -4,7 +4,7 @@
 #include "agent_common.hpp"
 #include "special_agent.hpp"
 
-namespace SR
+namespace VN
 {
 
 

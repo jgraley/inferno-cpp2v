@@ -4,7 +4,7 @@
 #include "../search_replace.hpp"
 #include "relocating_agent.hpp"
 
-namespace SR
+namespace VN
 {
 /// Match based on the type of a a parent pointer. This agent matches
 /// if the pointer-type of whichever agent points to this one matches the 

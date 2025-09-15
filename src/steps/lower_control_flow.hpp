@@ -6,7 +6,7 @@
 
 namespace Steps {
 
-using namespace SR;
+using namespace VN;
 
 /** Detect an uncombable switch and mark it for lowering. This is 
     any switch with fall throughs.  */

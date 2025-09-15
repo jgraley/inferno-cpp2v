@@ -70,7 +70,7 @@ Graph::~Graph()
 }
 
 
-void Graph::GenerateGraph( SR::VNStep *root )
+void Graph::GenerateGraph( VN::VNStep *root )
 {
     string s;
     s += "// -------------------- transformation figure --------------------\n";
@@ -272,7 +272,7 @@ TreePtr<Node> Graph::GenerateGraph( TreePtr<Node> root )
 }
 
 
-void Graph::PopulateFromTransformation( list<const Graphable *> &graphables, SR::VNStep *root )
+void Graph::PopulateFromTransformation( list<const Graphable *> &graphables, VN::VNStep *root )
 {    
     reached.clear();
     PopulateFrom( graphables, root );

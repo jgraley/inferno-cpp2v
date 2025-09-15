@@ -2,7 +2,7 @@
 #include "conjecture.hpp"
 #include "link.hpp"
 
-using namespace SR;
+using namespace VN;
 
 
 shared_ptr<PatternQuery> ConjunctionAgent::GetPatternQuery() const

@@ -144,7 +144,7 @@ ReferenceSolver::ReferenceSolver( const list< shared_ptr<Constraint> > &constrai
                         
 
 void ReferenceSolver::Start( const Assignments &forces,
-                             const SR::XTreeDatabase *x_tree_db_ )
+                             const VN::XTreeDatabase *x_tree_db_ )
 {
     TRACE("Reference solver begins\n");
     INDENT("S");

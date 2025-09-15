@@ -5,7 +5,7 @@
 #include "common/common.hpp"
 #include <vector>
 
-namespace SR 
+namespace VN 
 {
 
 class CompareReplace;

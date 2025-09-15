@@ -33,7 +33,7 @@
 // Enabling this is making the Karnaugh map finder slow down #586
 //#define EXTRA_CONDENSED_CONSTRAINTS
 
-using namespace SR;
+using namespace VN;
 
 AndRuleEngine::SuccessfulMatch::SuccessfulMatch( SolutionMap solution_ ) :
 	solution(solution_)
@@ -742,7 +742,7 @@ void AndRuleEngine::AgentRegeneration( Agent *agent,
     int i=0;
     while(1)
     {
-        shared_ptr<SR::DecidedQuery> query = nlq_lambda();
+        shared_ptr<VN::DecidedQuery> query = nlq_lambda();
         i++;
                 
         TRACE("Try out query, attempt %d (1-based)\n", i);    

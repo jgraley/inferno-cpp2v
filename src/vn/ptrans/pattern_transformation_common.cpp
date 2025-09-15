@@ -2,7 +2,7 @@
 #include "vn_step.hpp"
 #include "agents/embedded_scr_agent.hpp"
 
-using namespace SR;
+using namespace VN;
 
 PatternTransformationCommon::PatternKnowledge::PatternKnowledge( VNStep &vnt, const PatternTransformationCommon *trans )
 {

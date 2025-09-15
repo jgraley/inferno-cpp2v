@@ -6,7 +6,7 @@
 #include "sym/symbol_operators.hpp"
 #include "sym/lazy_eval.hpp"
 
-using namespace SR;
+using namespace VN;
 using namespace SYM;
 
 shared_ptr<PatternQuery> NegationAgent::GetPatternQuery() const

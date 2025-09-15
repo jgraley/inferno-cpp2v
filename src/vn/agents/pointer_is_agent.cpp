@@ -6,7 +6,7 @@
 #include "standard_agent.hpp"
 #include "db/x_tree_database.hpp"
 
-using namespace SR;
+using namespace VN;
 
 shared_ptr<PatternQuery> PointerIsAgent::GetPatternQuery() const
 {

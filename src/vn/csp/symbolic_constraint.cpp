@@ -17,7 +17,7 @@
 using namespace CSP;
 
 SymbolicConstraint::SymbolicConstraint( shared_ptr<SYM::BooleanExpression> expression,
-                                        shared_ptr<const SR::Lacing> lacing ) :
+                                        shared_ptr<const VN::Lacing> lacing ) :
     plan( this, expression, lacing )
 {
 }
@@ -25,7 +25,7 @@ SymbolicConstraint::SymbolicConstraint( shared_ptr<SYM::BooleanExpression> expre
 
 SymbolicConstraint::Plan::Plan( SymbolicConstraint *algo_,
                                 shared_ptr<SYM::BooleanExpression> expression_,
-                                shared_ptr<const SR::Lacing> lacing_ ) :
+                                shared_ptr<const VN::Lacing> lacing_ ) :
     algo( algo_ ),
     consistency_expression( expression_ ),
     lacing( lacing_ )
@@ -118,7 +118,7 @@ SYM::Expression::VariablesRequiringRows SymbolicConstraint::GetVariablesRequirin
 }
 
 
-void SymbolicConstraint::Start( const SR::XTreeDatabase *x_tree_db_ )
+void SymbolicConstraint::Start( const VN::XTreeDatabase *x_tree_db_ )
 {
     ASSERT( x_tree_db_ );
 	x_tree_db = x_tree_db_;

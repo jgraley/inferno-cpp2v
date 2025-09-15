@@ -8,7 +8,7 @@
 
 #include <functional>
 
-namespace SR
+namespace VN
 {
 
 // K is probably an element of a set so it's its own key.

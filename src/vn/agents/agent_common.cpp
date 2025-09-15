@@ -20,7 +20,7 @@
 
 #include <stdexcept>
 
-using namespace SR;
+using namespace VN;
 using namespace SYM;
 
 //---------------------------------- AgentCommon ------------------------------------    
@@ -297,8 +297,8 @@ AgentCommon::QueryLambda AgentCommon::TestStartRegenerationQuery( const AndRuleE
 
     QueryLambda test_lambda = [=, this]()mutable->shared_ptr<DecidedQuery>
     {
-        shared_ptr<SR::DecidedQuery> mut_query;
-        shared_ptr<SR::DecidedQuery> ref_query;
+        shared_ptr<VN::DecidedQuery> mut_query;
+        shared_ptr<VN::DecidedQuery> ref_query;
         try 
         { 
             mut_query = mut_lambda(); 

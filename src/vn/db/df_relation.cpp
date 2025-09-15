@@ -8,7 +8,7 @@
 
 #include <random>
 
-using namespace SR;
+using namespace VN;
 
 DepthFirstRelation::DepthFirstRelation(const XTreeDatabase *db_) :
     db( db_ )

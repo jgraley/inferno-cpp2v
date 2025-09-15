@@ -14,7 +14,7 @@ namespace SYM
     class Expression;
 };
     
-namespace SR 
+namespace VN 
 {   
 /*
  * Lacing provides the tools and data structures required to create an ordering 

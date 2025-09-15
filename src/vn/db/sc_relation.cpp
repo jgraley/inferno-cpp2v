@@ -7,7 +7,7 @@
 
 #include <random>
 
-using namespace SR;
+using namespace VN;
 
 
 SimpleCompareRelation::SimpleCompareRelation() :

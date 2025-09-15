@@ -17,7 +17,7 @@
 #define WHODAT() nullptr
 #endif
 
-namespace SR
+namespace VN
 { 
 class Agent;
 class LocatedLink;
@@ -164,16 +164,16 @@ void EnsureNotOnStack( const void *p, string trace="" );
 // unordered_set, unordered_map
 namespace std
 {
-    template<> struct hash<SR::PatternLink>
+    template<> struct hash<VN::PatternLink>
     {
-        size_t operator()(const SR::PatternLink &plink) const noexcept
+        size_t operator()(const VN::PatternLink &plink) const noexcept
         {
             return plink.GetHash();
         }
     };
-    template<> struct hash<SR::XLink>
+    template<> struct hash<VN::XLink>
     {
-        size_t operator()(const SR::XLink &xlink) const noexcept
+        size_t operator()(const VN::XLink &xlink) const noexcept
         {
             return xlink.GetHash();
         }

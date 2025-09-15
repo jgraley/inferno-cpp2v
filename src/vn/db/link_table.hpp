@@ -6,7 +6,7 @@
 #include "db_walk.hpp"
 #include "tree_zone.hpp"
 
-namespace SR 
+namespace VN 
 {
 class NodeTable;    
     

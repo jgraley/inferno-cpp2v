@@ -12,7 +12,7 @@
 
 #include <vector>
 
-namespace SR
+namespace VN
 { 
 class Agent;
 

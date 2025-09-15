@@ -8,7 +8,7 @@
 #include "mutable_zone.hpp"
 #include "db_common.hpp"
 
-using namespace SR;    
+using namespace VN;    
 
 // We won't normally expect matches as postconditions to our
 // public methods because changing strategies make some do more

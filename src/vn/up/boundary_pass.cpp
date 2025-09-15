@@ -9,7 +9,7 @@
 
 #include <iostream>
 
-using namespace SR;
+using namespace VN;
 
 BoundaryPass::BoundaryPass( XTreeDatabase *db_ ) :
     db( db_ ),

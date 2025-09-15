@@ -12,7 +12,7 @@
 
 class SimpleCompare;
 
-namespace SR
+namespace VN
 {
 class SimpleCompareRelation
 {

@@ -5,7 +5,7 @@
 #include "lacing.hpp"
 #include "relation_test.hpp"
 
-using namespace SR;   
+using namespace VN;   
 
 Orderings::Orderings( shared_ptr<Lacing> lacing, const XTreeDatabase *db_ ) :
     plan( lacing ),

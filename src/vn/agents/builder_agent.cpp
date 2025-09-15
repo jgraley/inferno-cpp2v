@@ -5,7 +5,7 @@
 #include "sym/boolean_operators.hpp"
 #include "helpers/simple_duplicate.hpp"
 
-using namespace SR;
+using namespace VN;
 
 
 SYM::Lazy<SYM::BooleanExpression> BuilderAgent::SymbolicNormalLinkedQueryPRed(PatternLink keyer_plink) const

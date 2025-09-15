@@ -10,7 +10,7 @@
 
 #include <functional>
 
-namespace SR
+namespace VN
 {
     class XTreeDatabase;
 };
@@ -46,7 +46,7 @@ public:
     ~ReferenceSolver();
 
     void Start( const Assignments &forces,
-                const SR::XTreeDatabase *x_tree_db ) override;
+                const VN::XTreeDatabase *x_tree_db ) override;
                 
     void Stop() override;
 				
@@ -97,7 +97,7 @@ protected:
     RejectionReportFunction rejection_report_function;
     
     // Used during solve - depends on pattern and x
-    const SR::XTreeDatabase *x_tree_db;
+    const VN::XTreeDatabase *x_tree_db;
     Assignments forced_assignments;
         
     vector<VariableId>::size_type current_var_index;

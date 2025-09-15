@@ -8,7 +8,7 @@
 #include "../db/domain_extension.hpp"
 #include "special_agent.hpp"
 
-namespace SR
+namespace VN
 { 
 //---------------------------------- RelocatingAgent ------------------------------------    
 

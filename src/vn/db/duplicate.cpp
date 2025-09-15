@@ -1,7 +1,7 @@
 #include "duplicate.hpp"
 #include "scr_engine.hpp"
 
-using namespace SR;
+using namespace VN;
 
 TreePtr<Node> Duplicate::DuplicateNode( TreePtr<Node> source )
 {

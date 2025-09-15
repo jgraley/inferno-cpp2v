@@ -6,7 +6,7 @@
 #include "../query.hpp"
 #include "../sym/lazy_eval.hpp"
 
-namespace SR
+namespace VN
 { 
 
 /**

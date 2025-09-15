@@ -6,7 +6,7 @@
 #include "../db/free_zone.hpp"
 #include "../db/tree_zone.hpp"
 
-using namespace SR;
+using namespace VN;
 
 TreeZoneRelation::TreeZoneRelation(const XTreeDatabase *db_) :
     db( db_ )

@@ -11,7 +11,7 @@
 
 namespace Steps {
 
-using namespace SR;
+using namespace VN;
 
 /// spot SystemC type by its name and replace with inferno node 
 /** We look for the decl and remeove it since the inferno

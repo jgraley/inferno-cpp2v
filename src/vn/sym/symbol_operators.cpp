@@ -77,13 +77,13 @@ Expression::Precedence SymbolConstant::GetPrecedence() const
 
 // ------------------------- SymbolVariable --------------------------
 
-SymbolVariable::SymbolVariable( const SR::PatternLink &plink_ ) :
+SymbolVariable::SymbolVariable( const VN::PatternLink &plink_ ) :
     plink( plink_ )
 {
 }
 
 
-set<SR::PatternLink> SymbolVariable::GetRequiredVariables() const
+set<VN::PatternLink> SymbolVariable::GetRequiredVariables() const
 {
     return { plink };
 }
@@ -99,7 +99,7 @@ unique_ptr<SymbolicResult> SymbolVariable::Evaluate( const EvalKit &kit ) const
 }
 
 
-SR::PatternLink SymbolVariable::GetPatternLink() const
+VN::PatternLink SymbolVariable::GetPatternLink() const
 {
     return plink;
 }
@@ -378,7 +378,7 @@ unique_ptr<SymbolicResult> XTreeDbToSymbolOperator::Evaluate( const EvalKit &kit
     if( !kit.x_tree_db->HasRow(ar->GetOnlyXLink()) )
         return make_unique<EmptyResult>();
         
-    const SR::LinkTable::Row &row( kit.x_tree_db->GetRow(ar->GetOnlyXLink()) );   
+    const VN::LinkTable::Row &row( kit.x_tree_db->GetRow(ar->GetOnlyXLink()) );   
     XValue result_xlink = EvalXLinkFromRow( kit, ar->GetOnlyXLink(), row );
     if( result_xlink ) 
         return make_unique<UniqueResult>( result_xlink );
@@ -402,7 +402,7 @@ Expression::Precedence XTreeDbToSymbolOperator::GetPrecedence() const
     
 XValue ParentOperator::EvalXLinkFromRow( const EvalKit &kit,
                                          XValue xlink, 
-                                         const SR::LinkTable::Row &row ) const
+                                         const VN::LinkTable::Row &row ) const
 {
     (void)xlink;
     (void)row;
@@ -430,12 +430,12 @@ string ParentOperator::GetRenderPrefix() const
     
 XValue LastDescendantOperator::EvalXLinkFromRow( const EvalKit &kit,
                                                  XValue xlink, 
-                                                 const SR::LinkTable::Row &row ) const
+                                                 const VN::LinkTable::Row &row ) const
 {
     (void)kit;
     (void)xlink;
     (void)row;
-    return SR::XTreeDatabase::GetLastDescendantXLink(xlink);
+    return VN::XTreeDatabase::GetLastDescendantXLink(xlink);
 }
 
 
@@ -448,7 +448,7 @@ string LastDescendantOperator::GetRenderPrefix() const
     
 XValue MyContainerFrontOperator::EvalXLinkFromRow( const EvalKit &kit,
                                                    XValue xlink, 
-                                                   const SR::LinkTable::Row &row ) const
+                                                   const VN::LinkTable::Row &row ) const
 {
     (void)kit;
     (void)xlink;
@@ -465,7 +465,7 @@ string MyContainerFrontOperator::GetRenderPrefix() const
 
 XValue MyContainerBackOperator::EvalXLinkFromRow( const EvalKit &kit,
                                                   XValue xlink, 
-                                                  const SR::LinkTable::Row &row ) const
+                                                  const VN::LinkTable::Row &row ) const
 {
     (void)kit;
     (void)xlink;
@@ -482,7 +482,7 @@ string MyContainerBackOperator::GetRenderPrefix() const
 
 XValue MySequenceSuccessorOperator::EvalXLinkFromRow( const EvalKit &kit,
                                                       XValue xlink, 
-                                                      const SR::LinkTable::Row &row ) const
+                                                      const VN::LinkTable::Row &row ) const
 {  
     (void)kit;
     (void)xlink;
@@ -508,7 +508,7 @@ string MySequenceSuccessorOperator::GetRenderPrefix() const
 
 XValue MySequencePredecessorOperator::EvalXLinkFromRow( const EvalKit &kit,
                                                         XValue xlink, 
-                                                        const SR::LinkTable::Row &row ) const
+                                                        const VN::LinkTable::Row &row ) const
 {  
     (void)kit;
     (void)xlink;

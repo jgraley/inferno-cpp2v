@@ -6,7 +6,7 @@
 #include "sym/symbol_operators.hpp"
 #include "sym/result.hpp"
 
-using namespace SR;
+using namespace VN;
 using namespace SYM;
 
 void DisjunctionAgent::SCRConfigure( Phase phase )

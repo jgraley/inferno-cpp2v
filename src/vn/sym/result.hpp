@@ -15,7 +15,7 @@
 #define make_unique make_shared
 #endif
 
-namespace SR
+namespace VN
 {
     class XTreeDatabase;
 };
@@ -132,8 +132,8 @@ class DepthFirstRangeResult : public SymbolicResult
 {
 public:
     // lower or upper can be null to exclude that limit
-    typedef SR::DepthFirstRelation::KeyType KeyType;
-    DepthFirstRangeResult( const SR::XTreeDatabase *x_tree_db, KeyType lower, bool lower_incl, KeyType upper, bool upper_incl );
+    typedef VN::DepthFirstRelation::KeyType KeyType;
+    DepthFirstRangeResult( const VN::XTreeDatabase *x_tree_db, KeyType lower, bool lower_incl, KeyType upper, bool upper_incl );
     
     bool IsDefinedAndUnique() const override;    
     XValue GetOnlyXLink() const override;    
@@ -147,7 +147,7 @@ public:
     string Render() const override;
 
 private:    
-    const SR::XTreeDatabase *x_tree_db;
+    const VN::XTreeDatabase *x_tree_db;
     const XValue lower, upper;
     const bool lower_incl, upper_incl;
 };
@@ -158,8 +158,8 @@ class SimpleCompareRangeResult : public SymbolicResult
 {
 public:
     // lower or upper can be null to exclude that limit
-    typedef SR::SimpleCompareRelation::KeyType KeyType;
-    SimpleCompareRangeResult( const SR::XTreeDatabase *x_tree_db, KeyType lower, bool lower_incl, KeyType upper, bool upper_incl );  
+    typedef VN::SimpleCompareRelation::KeyType KeyType;
+    SimpleCompareRangeResult( const VN::XTreeDatabase *x_tree_db, KeyType lower, bool lower_incl, KeyType upper, bool upper_incl );  
     bool IsDefinedAndUnique() const override;    
     XValue GetOnlyXLink() const override;    
     bool TryExtensionalise( set<XValue> &links ) const override;
@@ -172,7 +172,7 @@ public:
     string Render() const override;
 
 private:    
-    const SR::XTreeDatabase *x_tree_db;
+    const VN::XTreeDatabase *x_tree_db;
     const KeyType lower, upper;
     const bool lower_incl, upper_incl;
 };
@@ -184,12 +184,12 @@ class CategoryRangeResult : public SymbolicResult
 {
 public:
     // Shared_ptr is OK since we don't mutate at eval time, just dereference
-    typedef SR::CategoryRelation::KeyType KeyType;
+    typedef VN::CategoryRelation::KeyType KeyType;
     typedef pair<shared_ptr<KeyType>, shared_ptr<KeyType>> CatBounds;   
     typedef list<CatBounds> CatBoundsList;
 
     // lower or upper can be null to exclude that limit
-    CategoryRangeResult( const SR::XTreeDatabase *x_tree_db, CatBoundsList &&bounds_list, bool lower_incl, bool upper_incl );
+    CategoryRangeResult( const VN::XTreeDatabase *x_tree_db, CatBoundsList &&bounds_list, bool lower_incl, bool upper_incl );
     
     bool IsDefinedAndUnique() const override;    
     XValue GetOnlyXLink() const override;    
@@ -203,7 +203,7 @@ public:
     string Render() const override;
 
 private:    
-    const SR::XTreeDatabase *x_tree_db;
+    const VN::XTreeDatabase *x_tree_db;
     const CatBoundsList bounds_list;
     const bool lower_incl, upper_incl;
 };

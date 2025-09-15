@@ -10,7 +10,7 @@
 #include "../db/db_common.hpp"
 #include <functional>
 
-namespace SR 
+namespace VN 
 {
 
 // ------------------------- ScaffoldOps --------------------------

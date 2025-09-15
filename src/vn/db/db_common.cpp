@@ -4,27 +4,27 @@
 
 #include <memory>
 
-using namespace SR;
+using namespace VN;
 
 
-string Trace(SR::DBCommon::TreeType tt)
+string Trace(VN::DBCommon::TreeType tt)
 {
 	switch(tt)
 	{
-		case SR::DBCommon::TreeType::MAIN:
+		case VN::DBCommon::TreeType::MAIN:
 		return "MAIN";
 		
-		case SR::DBCommon::TreeType::DOMAIN_EXTENSION:
+		case VN::DBCommon::TreeType::DOMAIN_EXTENSION:
 		return "DOMAIN_EXTENSION";
 		
-		case SR::DBCommon::TreeType::UPDATE:
+		case VN::DBCommon::TreeType::UPDATE:
 		return "UPDATE";
 	}
 	ASSERTFAIL();
 }
 
 
-string Trace(const SR::DBCommon::TreeRecord &tr) 
+string Trace(const VN::DBCommon::TreeRecord &tr) 
 { 
 	return "("+Trace(tr.tp_root_node)+", "+
 	           Trace(tr.type)+")"; 

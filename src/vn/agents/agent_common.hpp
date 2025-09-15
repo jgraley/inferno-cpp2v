@@ -9,7 +9,7 @@
 #include "../sym/lazy_eval.hpp"
 #include "../up/patches.hpp"
 
-namespace SR
+namespace VN
 { 
 /// Implments misc functionality common to all or most agents
 class AgentCommon : public Agent

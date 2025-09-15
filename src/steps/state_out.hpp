@@ -5,7 +5,7 @@
 
 namespace Steps {
 
-using namespace SR;
+using namespace VN;
 
 /// Make sure every SystemC wait is followed by a goto
 /** This is in preparation for state-out/fall-out. We will only reorganise the 

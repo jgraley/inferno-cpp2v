@@ -304,7 +304,7 @@ string SubsetResult::Render() const
 
 // ------------------------- DepthFirstRangeResult --------------------------
 
-DepthFirstRangeResult::DepthFirstRangeResult( const SR::XTreeDatabase *x_tree_db_, XValue lower_, bool lower_incl_, XValue upper_, bool upper_incl_ ) :
+DepthFirstRangeResult::DepthFirstRangeResult( const VN::XTreeDatabase *x_tree_db_, XValue lower_, bool lower_incl_, XValue upper_, bool upper_incl_ ) :
     x_tree_db( x_tree_db_ ),
     lower( lower_ ),
     upper( upper_ ),
@@ -328,8 +328,8 @@ XValue DepthFirstRangeResult::GetOnlyXLink() const
 
 bool DepthFirstRangeResult::TryExtensionalise( set<XValue> &links ) const
 { 
-    const SR::Orderings::DepthFirstOrdering &ordering = x_tree_db->GetOrderings().depth_first_ordering;
-    SR::Orderings::DepthFirstOrdering::iterator it_lower, it_upper;
+    const VN::Orderings::DepthFirstOrdering &ordering = x_tree_db->GetOrderings().depth_first_ordering;
+    VN::Orderings::DepthFirstOrdering::iterator it_lower, it_upper;
     
     if( lower )
     {
@@ -382,7 +382,7 @@ string DepthFirstRangeResult::Render() const
 
 // ------------------------- SimpleCompareRangeResult --------------------------
 
-SimpleCompareRangeResult::SimpleCompareRangeResult( const SR::XTreeDatabase *x_tree_db_, KeyType lower_, bool lower_incl_, KeyType upper_, bool upper_incl_ ) :
+SimpleCompareRangeResult::SimpleCompareRangeResult( const VN::XTreeDatabase *x_tree_db_, KeyType lower_, bool lower_incl_, KeyType upper_, bool upper_incl_ ) :
     x_tree_db( x_tree_db_ ),
     lower( lower_ ),
     upper( upper_ ),
@@ -407,7 +407,7 @@ XValue SimpleCompareRangeResult::GetOnlyXLink() const
 bool SimpleCompareRangeResult::TryExtensionalise( set<XValue> &links ) const
 {        
     links.clear();
-    SR::Orderings::SimpleCompareOrdering::const_iterator it_lower, it_upper;
+    VN::Orderings::SimpleCompareOrdering::const_iterator it_lower, it_upper;
 
     if( lower )
     {
@@ -433,7 +433,7 @@ bool SimpleCompareRangeResult::TryExtensionalise( set<XValue> &links ) const
         it_upper = x_tree_db->GetOrderings().simple_compare_ordering.end();
     }
     
-    for( SR::Orderings::SimpleCompareOrdering::const_iterator it = it_lower;
+    for( VN::Orderings::SimpleCompareOrdering::const_iterator it = it_lower;
          it != it_upper;
          ++it )
 	{
@@ -466,7 +466,7 @@ string SimpleCompareRangeResult::Render() const
 
 // ------------------------- CategoryRangeResult --------------------------
 
-CategoryRangeResult::CategoryRangeResult( const SR::XTreeDatabase *x_tree_db_, CatBoundsList &&bounds_list_, bool lower_incl_, bool upper_incl_ ) :
+CategoryRangeResult::CategoryRangeResult( const VN::XTreeDatabase *x_tree_db_, CatBoundsList &&bounds_list_, bool lower_incl_, bool upper_incl_ ) :
     x_tree_db( x_tree_db_ ),
     bounds_list( move(bounds_list_) ),
     lower_incl( lower_incl_ ),
@@ -492,7 +492,7 @@ bool CategoryRangeResult::TryExtensionalise( set<XValue> &links ) const
     links.clear();
     for( const CatBounds &bounds : bounds_list )
     {
-        SR::Orderings::CategoryOrdering::const_iterator it_lower, it_upper; 
+        VN::Orderings::CategoryOrdering::const_iterator it_lower, it_upper; 
 
         ASSERT( &bounds );
         ASSERT( bounds.first );
@@ -507,7 +507,7 @@ bool CategoryRangeResult::TryExtensionalise( set<XValue> &links ) const
         else
             it_upper = x_tree_db->GetOrderings().category_ordering.lower_bound(*bounds.second);
 
-        for( SR::Orderings::CategoryOrdering::const_iterator it = it_lower;
+        for( VN::Orderings::CategoryOrdering::const_iterator it = it_lower;
              it != it_upper;
              ++it )
         {

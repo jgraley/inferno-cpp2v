@@ -9,7 +9,7 @@
 
 #include <unordered_set>
 
-namespace SR 
+namespace VN 
 {
 
         
@@ -28,7 +28,7 @@ public:
     static FreeZone CreateEmpty();
 
     FreeZone();
-	FreeZone(const SR::FreeZone&) = default;
+	FreeZone(const VN::FreeZone&) = default;
     explicit FreeZone( TreePtr<Node> base, list<Mutator> &&terminii );
 
     FreeZone &operator=( const FreeZone &other );

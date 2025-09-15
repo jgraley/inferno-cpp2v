@@ -6,7 +6,7 @@
 #include "common/lambda_loops.hpp"
 #include "tree_update.hpp"
 
-using namespace SR;
+using namespace VN;
 
 // ------------------------- Patch --------------------------
 

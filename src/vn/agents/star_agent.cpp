@@ -7,7 +7,7 @@
 #include "sym/boolean_operators.hpp"
 #include "sym/result.hpp"
 
-using namespace SR;
+using namespace VN;
 using namespace SYM;
 
 shared_ptr<PatternQuery> StarAgent::GetPatternQuery() const

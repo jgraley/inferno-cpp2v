@@ -8,7 +8,7 @@
 
 #include <functional>
 
-namespace SR
+namespace VN
 {
 class XTreeDatabase;
 }
@@ -64,7 +64,7 @@ public:
      * @param x_tree_db [in] database of information about the current values.
      */
     virtual void Start( const Assignments &forces,
-                        const SR::XTreeDatabase *x_tree_db ) = 0;
+                        const VN::XTreeDatabase *x_tree_db ) = 0;
                       
 	/**
 	 * Clear down member data structures after solving is done

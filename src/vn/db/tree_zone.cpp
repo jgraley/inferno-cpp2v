@@ -5,7 +5,7 @@
 #include "x_tree_database.hpp"
 #include "free_zone.hpp"
 
-using namespace SR;
+using namespace VN;
 
 
 TreeZone TreeZone::CreateSubtree( XLink base, 

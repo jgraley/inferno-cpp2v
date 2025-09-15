@@ -8,7 +8,7 @@
 #include <map>
 #include <functional>
 
-namespace SR
+namespace VN
 { 
 class Agent;
 class LocatedLink;

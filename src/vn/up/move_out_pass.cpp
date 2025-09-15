@@ -10,7 +10,7 @@
 
 #include <iostream>
 
-using namespace SR;
+using namespace VN;
 
 
 MoveOutPass::MoveOutPass(XTreeDatabase *db_, class ScaffoldOps *sops_) :

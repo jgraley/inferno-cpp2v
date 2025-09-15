@@ -5,7 +5,7 @@
 
 namespace Steps {
 
-using namespace SR;
+using namespace VN;
 
 /// Put all the labels in an array indexable by an enum
 class PlaceLabelsInArray : public VNStep

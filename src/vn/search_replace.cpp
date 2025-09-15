@@ -9,7 +9,7 @@
 
 #include <list>
 
-using namespace SR;
+using namespace VN;
 
 CompareReplace::CompareReplace( bool is_search ) :
     plan( this, is_search )

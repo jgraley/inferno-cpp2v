@@ -21,7 +21,7 @@
 // PREFER_TO_MOVE_DESCENDANT may be necessary to reproduce issues like #874
 //#define PREFER_TO_MOVE_DESCENDANT
 
-using namespace SR;                   
+using namespace VN;                   
 
 DFPatchIndexRelation::DFPatchIndexRelation(const XTreeDatabase *db, const vector<OrderingPass::PatchRecord> &patch_records_) :
     df( db ),

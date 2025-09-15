@@ -13,7 +13,7 @@
 #include <memory>
 #include <functional>
 
-namespace SR
+namespace VN
 {
 class Agent;
 };
@@ -26,8 +26,8 @@ class SubsetResult;
 namespace CSP
 { 
 typedef SYM::XValue Value;
-typedef SR::PatternLink VariableId;
-typedef SR::LocatedLink Assignment;
+typedef VN::PatternLink VariableId;
+typedef VN::LocatedLink Assignment;
 typedef map<VariableId, Value> Assignments;
 typedef Assignments Solution;
 typedef pair<VariableId, set<Value>> Hint;
@@ -61,7 +61,7 @@ public:
      * 
      * @param x_tree_db [in] pointer to an uptodate XTreeDatabase object
      */    
-    virtual void Start( const SR::XTreeDatabase *x_tree_db ) = 0;    
+    virtual void Start( const VN::XTreeDatabase *x_tree_db ) = 0;    
     
     /**
      * Determine whether a partila assignment satisfies this constraint. 

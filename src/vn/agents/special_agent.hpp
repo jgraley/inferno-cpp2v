@@ -4,7 +4,7 @@
 #include "agent.hpp"
 #include "common/common.hpp"
 
-namespace SR
+namespace VN
 { 
 
 // --- General note on SPECIAL_NODE_FUNCTIONS and PRE_RESTRICTION ---

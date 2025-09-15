@@ -6,7 +6,7 @@
 
 namespace Steps {
 
-using namespace SR;
+using namespace VN;
 
 class EmbeddedSCRTest : public VNStep
 {

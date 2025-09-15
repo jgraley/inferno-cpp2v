@@ -11,7 +11,7 @@
 
 #include <iostream>
  
-using namespace SR;
+using namespace VN;
 
 void ChooseCopiesPass::Run(shared_ptr<Patch> &layout)
 {

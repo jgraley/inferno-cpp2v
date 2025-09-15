@@ -3,7 +3,7 @@
 #include "lacing.hpp"
 #include "relation_test.hpp"
 
-using namespace SR;    
+using namespace VN;    
 
 //#define TRACE_CATEGORY_RELATION
 
@@ -115,7 +115,7 @@ void CategoryRelation::Test( const vector<KeyType> &keys )
         int i = randval%2 ? r.first : r.second; // begin or end of range, randomly
         
         // Make minimus node (this relation always uses minimus because half-open
-        TreePtr<Node> node = MakeTreeNode<SR::CategoryRelation::MinimusNode>(i);
+        TreePtr<Node> node = MakeTreeNode<VN::CategoryRelation::MinimusNode>(i);
         return node;      
     } );
 }

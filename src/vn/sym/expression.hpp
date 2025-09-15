@@ -7,7 +7,7 @@
 
 #include <exception>
 
-namespace SR
+namespace VN
 {
     class XTreeDatabase;
     class Lacing;
@@ -32,7 +32,7 @@ public:
      */
     struct SolveKit
     {
-        const SR::Lacing *lacing;
+        const VN::Lacing *lacing;
     };
 
     /**
@@ -40,8 +40,8 @@ public:
      */
     struct EvalKit
     {
-        const SR::SolutionMap *hypothesis_links;
-        const SR::XTreeDatabase *x_tree_db;
+        const VN::SolutionMap *hypothesis_links;
+        const VN::XTreeDatabase *x_tree_db;
     };
     
     // Bigger number is LOWER precedence.
@@ -64,10 +64,10 @@ public:
         COMMA 
     };    
                 
-    typedef set<SR::PatternLink> VariablesRequiringRows;
+    typedef set<VN::PatternLink> VariablesRequiringRows;
                 
     virtual list<shared_ptr<Expression>> GetOperands() const;
-    virtual set<SR::PatternLink> GetRequiredVariables() const;
+    virtual set<VN::PatternLink> GetRequiredVariables() const;
     virtual VariablesRequiringRows GetVariablesRequiringRows() const;
 
     void ForTreeDepthFirstWalk( function<void(const Expression *)> f ) const;

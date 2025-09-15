@@ -6,7 +6,7 @@
 namespace SYM
 {         
 
-typedef SR::XLink XValue;
+typedef VN::XLink XValue;
 
 };
 

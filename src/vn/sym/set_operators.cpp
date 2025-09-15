@@ -313,10 +313,10 @@ unique_ptr<SymbolicResult> AllInSimpleCompareRangeOperator::Evaluate( const Eval
                                upper->Evaluate(kit)->GetOnlyXLink().GetChildTreePtr();
 
     if( lower_role != BoundingRole::NONE )
-        lower_node = MakeTreeNode<SR::SimpleCompareRelation::MinimaxNode>( lower_node, lower_role );
+        lower_node = MakeTreeNode<VN::SimpleCompareRelation::MinimaxNode>( lower_node, lower_role );
 
     if( upper_role != BoundingRole::NONE )
-        upper_node = MakeTreeNode<SR::SimpleCompareRelation::MinimaxNode>( upper_node, upper_role );
+        upper_node = MakeTreeNode<VN::SimpleCompareRelation::MinimaxNode>( upper_node, upper_role );
 
     return make_unique<SimpleCompareRangeResult>( kit.x_tree_db, 
                                                   lower_node, lower_incl, 

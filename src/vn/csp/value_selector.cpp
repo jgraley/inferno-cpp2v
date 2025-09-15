@@ -19,7 +19,7 @@
 using namespace CSP;
 
 ValueSelector::ValueSelector( const ConstraintSet &constraints_to_query_, 
-                              const SR::XTreeDatabase *x_tree_db_,
+                              const VN::XTreeDatabase *x_tree_db_,
                               Assignments &assignments_,
                               VariableId var ) :
     x_tree_db( x_tree_db_ ),

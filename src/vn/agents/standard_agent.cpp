@@ -11,7 +11,7 @@
 #include "sym/predicate_operators.hpp"
 #include "sym/symbol_operators.hpp"
 
-using namespace SR;
+using namespace VN;
 using namespace SYM;
 
 void StandardAgent::SCRConfigure( Phase phase )

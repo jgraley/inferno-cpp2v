@@ -13,7 +13,7 @@
 #include <functional>
   
 /// SR namespace contains the search and replace implementation
-namespace SR 
+namespace VN 
 {
     
 class Domain

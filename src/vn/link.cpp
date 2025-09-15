@@ -18,7 +18,7 @@
 #define PLINK_TREE_POINTER_REF_COUNTS
 #endif
 
-using namespace SR;
+using namespace VN;
 
 //////////////////////////// PatternLink ///////////////////////////////
 
@@ -473,7 +473,7 @@ string LocatedLink::GetShortName() const
  * Not too sure about the use of GetChildAgent() in content compare. Also
  * has no callers.
  
-bool SR::operator==( const list<PatternLink> &left, const list<LocatedLink> &right )
+bool VN::operator==( const list<PatternLink> &left, const list<LocatedLink> &right )
 {
     ASSERT(false);
     auto left_it = left.begin();
@@ -491,7 +491,7 @@ bool SR::operator==( const list<PatternLink> &left, const list<LocatedLink> &rig
 }
 */
 
-SolutionMap SR::MapForPattern( const list<PatternLink> &plinks, 
+SolutionMap VN::MapForPattern( const list<PatternLink> &plinks, 
                                const SolutionMap &basic_solution )
 {
     SolutionMap m;

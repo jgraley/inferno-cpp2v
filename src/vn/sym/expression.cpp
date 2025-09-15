@@ -12,9 +12,9 @@ list<shared_ptr<Expression>> Expression::GetOperands() const
 }
 
 
-set<SR::PatternLink> Expression::GetRequiredVariables() const 
+set<VN::PatternLink> Expression::GetRequiredVariables() const 
 {
-    set<SR::PatternLink> required_vars;
+    set<VN::PatternLink> required_vars;
     // Non-strict union (i.e. not Solo) because common links are fine
     for( const shared_ptr<Expression> &a : GetOperands() )
         required_vars = UnionOf( required_vars, a->GetRequiredVariables() );
