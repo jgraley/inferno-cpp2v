@@ -57,21 +57,21 @@ test : $(EXEC_CASES:%=${RESULTS_PATH}/exec/%.pass)
 	@echo -n "Tests Run: "
 	@date
 	@echo "EXECUTION TESTS PASSED"
-	@spd-say -i 0 -r -100 -p -100 "the tests have parssed"
+	@LANG='en_GB.UTF-8' spd-say -i 0 -r -100 -p -100 "the tests have parssed"
 
 minitest : $(MINI_SC_CASES:%=${RESULTS_PATH}/exec/%.pass)
 	@echo ------------------------------------------
 	@echo -n "Tests Run: "
 	@date
 	@echo "MINI EXECUTION TESTS PASSED"
-	@spd-say -i 0 -r -100 -p -100 "the tests have parssed"
+	@LANG='en_GB.UTF-8' spd-say -i 0 -r -100 -p -100 "the tests have parssed"
 
 cpptest : $(CPP_CASES:%=${RESULTS_PATH}/exec/%.pass)
 	@echo ------------------------------------------
 	@echo -n "Tests Run: "
 	@date
 	@echo "CPP EXECUTION TESTS PASSED"
-	@spd-say -i 0 -r -100 -p -100 "the tests have parssed"
+	@LANG='en_GB.UTF-8' spd-say -i 0 -r -100 -p -100 "the tests have parssed"
 
 $(SR_CASES:%=${RESULTS_PATH}/sr/%.pass) : ${RESULTS_PATH}/sr/%.pass : test/examples/%.cpp test/makefile inferno.exe test/srtest.sh
 	@mkdir -p ${RESULTS_PATH}/sr
@@ -85,7 +85,7 @@ srtest : $(SR_CASES:%=${RESULTS_PATH}/sr/%.pass)
 	@echo -n "Tests Run: "
 	@date
 	@echo "SEARCH/REPLACE TESTS PASSED"
-	@spd-say -i 0 -r -100 -p -100 "the tests have parssed"
+	@LANG='en_GB.UTF-8' spd-say -i 0 -r -100 -p -100 "the tests have parssed"
 
 minisrtest : $(MINI_SC_SR_CASES:%=${RESULTS_PATH}/sr/%.pass)
 	@touch $@
@@ -93,7 +93,7 @@ minisrtest : $(MINI_SC_SR_CASES:%=${RESULTS_PATH}/sr/%.pass)
 	@echo -n "Tests Run: "
 	@date
 	@echo "MINI SEARCH/REPLACE TESTS PASSED"
-	@spd-say -i 0 -r -100 -p -100 "the mini search and replace tests have parssed"
+	@LANG='en_GB.UTF-8' spd-say -i 0 -r -100 -p -100 "the mini search and replace tests have parssed"
 
 $(SC_CASES:%=${RESULTS_PATH}/rep/%.pass) : ${RESULTS_PATH}/rep/%.pass : test/examples/%.cpp test/makefile inferno.exe test/reptest.sh ${RESOURCE_DEPS}
 	@mkdir -p ${RESULTS_PATH}/rep
@@ -107,7 +107,7 @@ reptest : $(SC_CASES:%=${RESULTS_PATH}/rep/%.pass)
 	@echo -n "Tests Run: "
 	@date
 	@echo "REP TESTS PASSED"
-	@spd-say -i 0 -r -100 -p -100 "the tests have passed"
+	@LANG='en_GB.UTF-8' spd-say -i 0 -r -100 -p -100 "the tests have passed"
 
 graphtest : test/examples/*.cpp test/makefile inferno.exe gen_dev_graphs.sh
 	./gen_dev_graphs.sh --pattern --docs --intermediate
@@ -117,6 +117,6 @@ graphtest : test/examples/*.cpp test/makefile inferno.exe gen_dev_graphs.sh
 	@echo -n "Tests Run: "
 	@date
 	@echo "GRAPH TESTS PASSED"
-	@spd-say -i 0 -r -100 -p -100 "the tests have passed"
+	@LANG='en_GB.UTF-8' spd-say -i 0 -r -100 -p -100 "the tests have passed"
 
 .PHONY: all test ${RESULTS_PATH}/graph.pass
