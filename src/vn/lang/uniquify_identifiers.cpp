@@ -139,6 +139,7 @@ IdentifierFingerprinter::IdentifierFingerprinter( TreePtr<Node> root_x ) :
 
 void IdentifierFingerprinter::ProcessNode( TreePtr<Node> x, int &index )
 {
+	ASSERT( x );
     // Record the fingerprints and increment index on the way down
     if( auto id_x = TreePtr<SpecificIdentifier>::DynamicCast(x) )
         fingerprints[id_x].insert(index);
@@ -151,6 +152,7 @@ void IdentifierFingerprinter::ProcessNode( TreePtr<Node> x, int &index )
 
 void IdentifierFingerprinter::ProcessChildren( TreePtr<Node> x, int &index )
 {
+	ASSERT( x );
     vector< Itemiser::Element * > x_items = x->Itemise();
     for( Itemiser::Element *xe : x_items )
     {
@@ -168,6 +170,8 @@ void IdentifierFingerprinter::ProcessChildren( TreePtr<Node> x, int &index )
 
 void IdentifierFingerprinter::ProcessSingularNode( const TreePtrInterface *p_x_sing, int &index )
 {
+	//if( !*p_x_sing )
+	//	return; // NULL singular indicates wildcard
     ProcessNode( (TreePtr<Node>)(*p_x_sing), index );
 }
 

@@ -197,7 +197,7 @@ TreePtr<Node> CompareReplace::GetSearchComparePattern()
 }
 
 
-TreePtr<Node> CompareReplace::GetEmbeddedReplacePattern()
+TreePtr<Node> CompareReplace::GetReplacePattern()
 {
     return plan.replace_pattern;
 }

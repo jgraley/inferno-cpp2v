@@ -142,6 +142,12 @@ void VNStep::GenerateGraphRegions( Graph &graph ) const
 }  
 
 
+void VNStep::DoRender( Render &render ) const
+{
+	render.WriteToFile( render.RenderToString( root_engine ) );
+}
+
+
 shared_ptr<CompareReplace> VNStep::GetTopLevelEngine() const
 {
     ASSERTTHIS();

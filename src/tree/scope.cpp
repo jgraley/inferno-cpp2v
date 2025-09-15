@@ -10,12 +10,12 @@ using namespace CPPTree;
 // back-pointers.
 //
 // TODO take id as SpecificIdentifier, not Identifier, so do not need to ASSERT check this
-TreePtr<Node> GetScope( TreePtr<Program> program, TreePtr<Identifier> id )
+TreePtr<Node> GetScope( TreePtr<Scope> context, TreePtr<Identifier> id )
 {
     TRACE("Trying program (global)\n" );
 
     // Look through the members of all scopes (Program, Records, CallableParams, Compounds)
-    Walk walkr(program, nullptr, nullptr);
+    Walk walkr(context, nullptr, nullptr);
     for( const TreePtrInterface &n : walkr )
     {
         if( auto s = DynamicTreePtrCast<Scope>((TreePtr<Node>)n) )
@@ -37,7 +37,7 @@ TreePtr<Node> GetScope( TreePtr<Program> program, TreePtr<Identifier> id )
     }
     
     // Special additional processing for Compounds - look for statements that are really Instance Declarations
-    Walk walkc(program, nullptr, nullptr);
+    Walk walkc(context, nullptr, nullptr);
     for( const TreePtrInterface &n : walkc )
     {
         if( auto c = DynamicTreePtrCast<Compound>((TreePtr<Node>)n) )

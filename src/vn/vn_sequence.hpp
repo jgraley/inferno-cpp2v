@@ -8,6 +8,7 @@
 #include "db/lacing.hpp"
 #include "db/domain_extension.hpp"
 #include "up/up_common.hpp"
+#include "lang/render.hpp"
 
 class Graph;
 
@@ -46,6 +47,7 @@ public:
     void DoGraph( int step_index, Graph &graph ) const;
     void GenerateGraphRegions( int step_index, Graph &graph ) const;
     string GetStepName( int step_index ) const;
+    void DoRender( int step_index, Render &render ) const;
 
     TreeUpdater *GetTreeUpdater() const;
     

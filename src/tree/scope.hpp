@@ -11,6 +11,6 @@
 class ScopeNotFoundMismatch : public Mismatch {};
 class ScopeOnNonSpecificMismatch : public Mismatch {};
 
-TreePtr<Node> GetScope( TreePtr<CPPTree::Program> program, TreePtr<CPPTree::Identifier> id );
+TreePtr<Node> GetScope( TreePtr<CPPTree::Scope> context, TreePtr<CPPTree::Identifier> id );
 
 #endif

@@ -8,7 +8,7 @@
 #include "link.hpp"
 
 class Graph;
-
+class Render;
 
 namespace VN 
 {
@@ -51,6 +51,7 @@ public:
     virtual NodeBlock GetGraphBlockInfo() const;
     virtual string GetGraphId() const; 
     void GenerateGraphRegions( Graph &graph ) const;
+    void DoRender( Render &render ) const;
     
     // For pattern transformations
     shared_ptr<CompareReplace> GetTopLevelEngine() const;

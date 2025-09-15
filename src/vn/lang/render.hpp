@@ -2,19 +2,27 @@
 #define RENDER_HPP
 
 #include "tree/cpptree.hpp"
+#include "tree/sctree.hpp"
 #include "helpers/transformation.hpp"
 #include "uniquify_identifiers.hpp"
 #include "helpers/simple_compare.hpp"
 
+namespace VN 
+{
+    class CompareReplace; // TODO all of Render should be VN::
+};
 
 class Render
 {
 public:
     Render( string of = string() );
-    TreePtr<Node> GenerateRender( TreePtr<Node> context, TreePtr<Node> root );
+    string RenderToString( shared_ptr<VN::CompareReplace> pattern );
+    string RenderToString( TreePtr<Node> root );
+    void WriteToFile(string s);
     
 private:
-    TreePtr<CPPTree::Program> program, temp_old_program;
+    TreePtr<Node> temp_old_root;
+    TreePtr<CPPTree::Scope> root_scope;
     string deferred_decls;
     stack< TreePtr<Node> > scope_stack;
     UniquifyIdentifiers unique;

@@ -145,6 +145,12 @@ string VNSequence::GetStepName( int step_index ) const
 }
 
 
+void VNSequence::DoRender( int step_index, Render &render ) const
+{
+    steps[step_index]->DoRender(render);
+}
+
+
 TreeUpdater *VNSequence::GetTreeUpdater() const
 {
 	return tree_updater.get();

@@ -13,16 +13,14 @@
 #include "render.hpp"
 #include "clang/Parse/DeclSpec.h"
 #include "uniquify_identifiers.hpp"
+#include "search_replace.hpp"
 
 using namespace CPPTree;
 using namespace SCTree;
+using namespace VN;
 
 // Don't like the layout of rendered code?
-// Install "indent" on your UNIX box and pipe the output through iindent.sh
-
-// TODO maybe reduce "()" by using a simplified scheme, ie divide operators into "high" and "low"
-// categories and elide on low(high()). Note that a full scheme makes code unreadable if
-// user does not have them memorised. Maybe just encode those priorities that are well known.
+// There's a .clang-format in repo root.
 
 // TODO indent back to previous level at end of string
 #define ERROR_UNKNOWN(V) \
@@ -50,51 +48,65 @@ Render::Render( string of ) :
 }
 
 
+string Render::RenderToString( shared_ptr<CompareReplace> pattern )
+{
+	return RenderToString( pattern->GetSearchComparePattern() ) +
+	       "\n꩜\n" +
+	       RenderToString( pattern->GetReplacePattern() );
+}
+
 // Note: this does not modify the program tree, and that can be checked by 
 // defining TEST_FOR_UNMODIFIED_TREE and retesting everything.
 //#define TEST_FOR_UNMODIFIED_TREE
-TreePtr<Node> Render::GenerateRender( TreePtr<Node> context, TreePtr<Node> root )
-{
-    // Render can only work on a whole program
-    ASSERT( context == root );
-    
+string Render::RenderToString( TreePtr<Node> root )
+{   
     DefaultTransUtils utils(root);
     TransKit kit { &utils };
     
 #ifdef TEST_FOR_UNMODIFIED_TREE    
-    temp_old_program = dynamic_pointer_cast<Program>(root);
+    temp_old_root = dynamic_pointer_cast<Program>(root);
     root = Duplicate::DuplicateSubtree(root);
 #endif
     
-    // Must be a program
-    program = dynamic_pointer_cast<Program>(root);
-    ASSERT( program );
+    // Top level is expected to be a scope of some kind
+    root_scope = dynamic_pointer_cast<Scope>(root);
+    if( !root_scope )
+		return ERROR_UNKNOWN( Trace(root) );
 
 #ifdef TEST_FOR_UNMODIFIED_TREE   
-    bool before = sc(program, temp_old_program);  
+    bool before = sc(root, temp_old_root);  
 #endif
     
     // Track scopes for name resolution
-    AutoPush< TreePtr<Node> > cs( scope_stack, program );
+    AutoPush< TreePtr<Node> > cs( scope_stack, root_scope );
     
 	// pre-pass to fill in backing_ordering. It would be better to tell 
 	// it that it's doing a pre-pass so it can adapt it's behaviour.
-    RenderScope( kit, program, ";\n", true ); 
+    RenderScope( kit, root_scope, ";\n", true ); 
     deferred_decls.clear();
 
     // Make the identifiers unique
     unique.clear();
-    unique.UniquifyScope( program );
+    unique.UniquifyScope( root_scope );
 
     string s;
 
-    if( IsSystemC( kit, program ) )
+    if( IsSystemC( kit, root_scope ) )
         s += "#include \"isystemc.h\"\n\n";
 
-    s += RenderScope( kit, program, ";\n", true ); // gets the .hpp stuff directly
+    s += RenderScope( kit, root_scope, ";\n", true ); // gets the .hpp stuff directly
 
     s += deferred_decls; // these could go in a .cpp file
 
+#ifdef TEST_FOR_UNMODIFIED_TREE   
+    ASSERT( sc(root, temp_old_root) == before );        
+#endif 
+	return s;
+}
+
+
+void Render::WriteToFile( string s )
+{
     if( outfile.empty() )
     {
         puts( s.c_str() );
@@ -105,13 +117,7 @@ TreePtr<Node> Render::GenerateRender( TreePtr<Node> context, TreePtr<Node> root 
         ASSERT( fp )( "Cannot open output file \"%s\"", outfile.c_str() );
         fputs( s.c_str(), fp );
         fclose( fp );
-    }
-        
-#ifdef TEST_FOR_UNMODIFIED_TREE   
-    ASSERT( sc(program, temp_old_program) == before );        
-#endif
-    
-    return program; // no change
+    }        
 }
 
 
@@ -162,12 +168,12 @@ DEFAULT_CATCH_CLAUSE
 
 string Render::RenderScopePrefix( const TransKit &kit, TreePtr<Identifier> id ) try
 {
-    TreePtr<Node> scope = GetScope( program, id );
+    TreePtr<Node> scope = GetScope( root_scope, id );
         
     //TRACE("%p %p %p\n", program.get(), scope.get(), scope_stack.top().get() );
     if( scope == scope_stack.top() )
         return string(); // local scope
-    else if( scope == program )
+    else if( scope == root_scope )
         return " ::";
     else if( TreePtr<Enum> e = DynamicTreePtrCast<Enum>( scope ) ) // <- for enum
         return RenderScopePrefix( kit, e->identifier );    // omit scope for the enum itself
@@ -409,7 +415,7 @@ string Render::RenderCall( const TransKit &kit, TreePtr<Call> call ) try
     s += "(";
 
     // If CallableParams, generate some arguments, resolving the order using the original function type
-    TreePtr<Node> ctype = TypeOf::instance(call->callee, program).GetTreePtr();
+    TreePtr<Node> ctype = TypeOf::instance(call->callee, root_scope).GetTreePtr();
     ASSERT( ctype );
     if( TreePtr<CallableParams> cp = DynamicTreePtrCast<CallableParams>(ctype) )
         s += RenderMapInOrder( kit, call, cp, ", ", false );
@@ -672,7 +678,7 @@ string Render::RenderInstance( const TransKit &kit, TreePtr<Instance> o, string 
     TreePtr<Destructor> de = DynamicTreePtrCast<Destructor>(o->type);
     if( con || de )
     {
-        TreePtr<Record> rec = DynamicTreePtrCast<Record>( GetScope( program, o->identifier ) );
+        TreePtr<Record> rec = DynamicTreePtrCast<Record>( GetScope( root_scope, o->identifier ) );
         ASSERT( rec );        
         name += (de ? "~" : "");
         name += RenderIdentifier(kit, rec->identifier);
@@ -708,7 +714,7 @@ string Render::RenderInstance( const TransKit &kit, TreePtr<Instance> o, string 
     else if( callable )
     {
         // Establish the scope of the function
-        AutoPush< TreePtr<Node> > cs( scope_stack, GetScope( program, o->identifier ) );
+        AutoPush< TreePtr<Node> > cs( scope_stack, GetScope( root_scope, o->identifier ) );
 
         // Put the contents of the body into a Compound-like form even if there's only one
         // Statement there - this is because we will wrangle with them later
@@ -749,7 +755,7 @@ string Render::RenderInstance( const TransKit &kit, TreePtr<Instance> o, string 
         if( TreePtr<Expression> ei = DynamicTreePtrCast<Expression>( o->initialiser ) )
         {
             // Render expression with an assignment
-            AutoPush< TreePtr<Node> > cs( scope_stack, GetScope( program, o->identifier ) );
+            AutoPush< TreePtr<Node> > cs( scope_stack, GetScope( root_scope, o->identifier ) );
             s += " = " + RenderExpression(kit, ei) + sep;
         }
         else
@@ -816,7 +822,7 @@ string Render::RenderDeclaration( const TransKit &kit, TreePtr<Declaration> decl
         {
             s += RenderInstance( kit, o, sep, showtype, showtype, false, false );
             {
-                AutoPush< TreePtr<Node> > cs( scope_stack, program );
+                AutoPush< TreePtr<Node> > cs( scope_stack, root_scope );
                 deferred_decls += string("\n") + RenderInstance( kit, o, sep, showtype, false, true, true );
             }
         }

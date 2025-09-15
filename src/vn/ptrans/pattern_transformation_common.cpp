@@ -12,7 +12,7 @@ PatternTransformationCommon::PatternKnowledge::PatternKnowledge( VNStep &vnt, co
     set<PatternLink> all_plinks; // PLink memory safety: local so freed before any changes to the pattern
 
     search_compare_root_pattern = root_engine->GetSearchComparePattern();
-    replace_root_pattern = root_engine->GetEmbeddedReplacePattern();
+    replace_root_pattern = root_engine->GetReplacePattern();
 
     if( search_compare_root_pattern )
     {

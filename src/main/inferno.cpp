@@ -276,7 +276,7 @@ Inferno::Plan::Plan(Inferno *algo_) :
           nullptr, [&]()
           { 
               Render r( ReadArgs::outfile );
-              r.GenerateRender( algo->program, algo->program ); 
+              r.WriteToFile( r.RenderToString( algo->program ) ); 
           } }
     );
 
@@ -497,9 +497,12 @@ void Inferno::GeneratePatternGraphs()
             string ss;
             if( !ReadArgs::documentation_graphs )
                 ss = SSPrintf("%03d-", sp.step_index);
-            string filepath = dir + ss + vn_sequence->GetStepName(sp.step_index) + ".dot";                                                       
-            Graph g( filepath, vn_sequence->GetStepName(sp.step_index) );
+            string dotfile_path = dir + ss + vn_sequence->GetStepName(sp.step_index) + ".dot";                                                       
+            Graph g( dotfile_path, vn_sequence->GetStepName(sp.step_index) );
             GenerateGraphRegions( sp, g );
+            string vnfile_path = dir + ss + vn_sequence->GetStepName(sp.step_index) + ".vn";                                                       
+            Render r( vnfile_path );
+            vn_sequence->DoRender( sp.step_index, r );
         }
     }
     else
@@ -561,7 +564,7 @@ void Inferno::RunTransformationStep(const Step &sp)
     if( ReadArgs::output_all )
     {
         Render r( ReadArgs::outfile+SSPrintf("_%03d.cpp", sp.step_index) );
-        r.GenerateRender( program, program );     
+        r.WriteToFile( r.RenderToString( program ) );     
         Graph g( ReadArgs::outfile+SSPrintf("_%03d.dot", sp.step_index), 
                  ReadArgs::outfile+SSPrintf(" after T%03d-%s", sp.step_index, vn_sequence->GetStepName(sp.step_index).c_str()) );
         g.GenerateGraph( program );    
