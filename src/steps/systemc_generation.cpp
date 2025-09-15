@@ -3,7 +3,7 @@
 #include "tree/cpptree.hpp"
 #include "tree/typeof.hpp"
 #include "inferno_agents.hpp"
-#include "sr/agents/all.hpp"
+#include "vn/agents/all.hpp"
 
 // Uncomment to reproduce #807
 #define ALSO_MOVE_VARS

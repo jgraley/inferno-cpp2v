@@ -4,7 +4,7 @@
 #include "tree/cpptree.hpp"
 #include "tree/typeof.hpp"
 #include "inferno_agents.hpp"
-#include "sr/agents/all.hpp"
+#include "vn/agents/all.hpp"
 
 using namespace CPPTree;
 using namespace SCTree;

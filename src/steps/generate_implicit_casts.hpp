@@ -8,7 +8,7 @@
 #ifndef GENERATE_IMPLICIT_CASTS_HPP
 #define GENERATE_IMPLICIT_CASTS_HPP
 
-#include "sr/vn_step.hpp"
+#include "vn/vn_step.hpp"
 
 namespace Steps {
 

@@ -1,4 +1,4 @@
-LANG=src/sr/lang
+LANG=src/vn/lang
 REFLEX_DIR = reflex
 REFLEX = $(REFLEX_DIR)/bin/reflex
 LIBREFLEX = $(REFLEX_DIR)/lib/libreflex.a

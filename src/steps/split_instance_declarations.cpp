@@ -1,6 +1,6 @@
 #include "split_instance_declarations.hpp"
 #include "tree/cpptree.hpp"
-#include "sr/agents/all.hpp"
+#include "vn/agents/all.hpp"
 #include "inferno_agents.hpp"
 
 using namespace CPPTree;

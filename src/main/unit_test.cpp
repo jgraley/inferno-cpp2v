@@ -2,7 +2,7 @@
 
 #include "node/node.hpp"
 #include "common/standard.hpp"
-#include "sr/sym/truth_table.hpp"
+#include "vn/sym/truth_table.hpp"
 
 #include <cstdlib>
 

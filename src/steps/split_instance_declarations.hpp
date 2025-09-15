@@ -1,7 +1,7 @@
 #ifndef SPLIT_INSTANCE_DECLARATIONS_HPP
 #define SPLIT_INSTANCE_DECLARATIONS_HPP
 
-#include "sr/vn_step.hpp"
+#include "vn/vn_step.hpp"
 
 namespace Steps {
 

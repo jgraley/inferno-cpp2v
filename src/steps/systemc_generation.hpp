@@ -5,7 +5,7 @@
 
 #include "tree/cpptree.hpp"
 #include "tree/sctree.hpp"
-#include "sr/vn_step.hpp"
+#include "vn/vn_step.hpp"
 
 namespace Steps {
 

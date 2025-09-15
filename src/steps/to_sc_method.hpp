@@ -1,7 +1,7 @@
 #ifndef TO_SC_METHOD_HPP
 #define TO_SC_METHOD_HPP
 
-#include "sr/vn_step.hpp"
+#include "vn/vn_step.hpp"
 
 /// Steps namespace contains all of inferno's transformation steps. 
 namespace Steps {

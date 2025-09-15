@@ -10,7 +10,7 @@
 
 #include "tree/typeof.hpp"
 #include "tree/misc.hpp"
-#include "sr/vn_step.hpp"
+#include "vn/vn_step.hpp"
 
 namespace Steps {
 

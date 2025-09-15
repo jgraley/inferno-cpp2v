@@ -8,7 +8,7 @@
 #include "generate_implicit_casts.hpp"
 #include "tree/cpptree.hpp"
 #include "common/common.hpp"
-#include "sr/agents/all.hpp"
+#include "vn/agents/all.hpp"
 #include "tree/typeof.hpp"
 
 using namespace CPPTree;

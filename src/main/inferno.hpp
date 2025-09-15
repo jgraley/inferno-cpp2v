@@ -2,7 +2,7 @@
 #define INFERNO_HPP
 
 #include "helpers/transformation.hpp"
-#include "sr/vn_step.hpp"
+#include "vn/vn_step.hpp"
 
 #include <vector>
 #include <functional>

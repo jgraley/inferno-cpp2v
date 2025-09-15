@@ -21,9 +21,9 @@
 #include "steps/to_sc_method.hpp"
 #include "render/doc_graphs.hpp"
 #include "unit_test.hpp"
-#include "sr/search_replace.hpp"
-#include "sr/csp/reference_solver.hpp"
-#include "sr/vn_sequence.hpp"
+#include "vn/search_replace.hpp"
+#include "vn/csp/reference_solver.hpp"
+#include "vn/vn_sequence.hpp"
 
 #include <cstdlib>
 

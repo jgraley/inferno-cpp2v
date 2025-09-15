@@ -8,7 +8,7 @@
 #include "steps/generate_stacks.hpp"
 #include "tree/cpptree.hpp"
 #include "common/common.hpp"
-#include "sr/agents/all.hpp"
+#include "vn/agents/all.hpp"
 #include "tree/sctree.hpp"
 #include "inferno_agents.hpp"
 

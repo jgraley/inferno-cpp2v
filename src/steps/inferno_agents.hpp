@@ -1,13 +1,13 @@
 #ifndef INFERNO_AGENTS_HPP
 #define INFERNO_AGENTS_HPP
 
-#include "sr/agents/relocating_agent.hpp"
+#include "vn/agents/relocating_agent.hpp"
 #include "tree/cpptree.hpp" 
 #include "helpers/transformation.hpp"
 #include "tree/sctree.hpp"
-#include "sr/agents/star_agent.hpp"
-#include "sr/agents/builder_agent.hpp"
-#include "sr/sym/expression.hpp"
+#include "vn/agents/star_agent.hpp"
+#include "vn/agents/builder_agent.hpp"
+#include "vn/sym/expression.hpp"
 
 using namespace SR;
 // TODO pollutes client namespace

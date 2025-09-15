@@ -2,7 +2,7 @@
 #ifndef EMBEDDED_SCR_TEST_HPP
 #define EMBEDDED_SCR_TEST_HPP
 
-#include "sr/vn_step.hpp"
+#include "vn/vn_step.hpp"
 
 namespace Steps {
 

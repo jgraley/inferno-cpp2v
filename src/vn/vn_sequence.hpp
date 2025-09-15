@@ -5,8 +5,8 @@
 #include "common/read_args.hpp"
 #include "node/tree_ptr.hpp"
 #include "link.hpp"
-#include "sr/db/lacing.hpp"
-#include "sr/db/domain_extension.hpp"
+#include "db/lacing.hpp"
+#include "db/domain_extension.hpp"
 #include "up/up_common.hpp"
 
 class Graph;

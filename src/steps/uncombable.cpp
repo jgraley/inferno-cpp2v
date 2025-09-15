@@ -8,7 +8,7 @@
 #include "steps/uncombable.hpp"
 #include "tree/cpptree.hpp"
 #include "common/common.hpp"
-#include "sr/agents/all.hpp"
+#include "vn/agents/all.hpp"
 
 using namespace CPPTree;
 using namespace Steps;

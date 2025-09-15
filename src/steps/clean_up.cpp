@@ -8,7 +8,7 @@
 #include "steps/clean_up.hpp"
 #include "tree/cpptree.hpp"
 #include "common/common.hpp"
-#include "sr/agents/all.hpp"
+#include "vn/agents/all.hpp"
 #include "tree/typeof.hpp"
 #include "tree/misc.hpp"
 #include "inferno_agents.hpp"

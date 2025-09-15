@@ -6,9 +6,9 @@
  */
 
 #include "tree/cpptree.hpp"
-#include "sr/vn_step.hpp"
-#include "sr/search_replace.hpp"
-#include "sr/scr_engine.hpp"
+#include "vn/vn_step.hpp"
+#include "vn/search_replace.hpp"
+#include "vn/scr_engine.hpp"
 #include "common/trace.hpp"
 #include "common/read_args.hpp"
 #include "graph.hpp"
@@ -17,8 +17,8 @@
 #include <inttypes.h>
 #include <algorithm>
 #include "node/graphable.hpp"
-#include "sr/link.hpp"
-#include "sr/agents/standard_agent.hpp" // temporary, I hope
+#include "vn/link.hpp"
+#include "vn/agents/standard_agent.hpp" // temporary, I hope
 
 using namespace CPPTree;
 

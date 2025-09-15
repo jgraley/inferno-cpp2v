@@ -2,7 +2,7 @@
 #define GRAPH_HPP
 
 #include "tree/cpptree.hpp"
-#include "sr/scr_engine.hpp"
+#include "vn/scr_engine.hpp"
 
 /**
  * Generate a GraphViz compatible graph description from a subtree (when used as a

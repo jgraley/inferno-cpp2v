@@ -1,7 +1,7 @@
 #ifndef LACING_HPP
 #define LACING_HPP
 
-#include "sr/link.hpp"
+#include "../link.hpp"
 #include "common/standard.hpp"
 #include "helpers/simple_compare.hpp"
 

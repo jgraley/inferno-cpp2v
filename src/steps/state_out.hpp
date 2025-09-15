@@ -1,7 +1,7 @@
 #ifndef STATE_OUT_HPP
 #define STATE_OUT_HPP
 
-#include "sr/vn_step.hpp"
+#include "vn/vn_step.hpp"
 
 namespace Steps {
 

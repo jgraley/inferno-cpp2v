@@ -1,8 +1,8 @@
 #ifndef LOWER_CONTROL_FLOW_HPP
 #define LOWER_CONTROL_FLOW_HPP
 
-#include "sr/search_replace.hpp"
-#include "sr/vn_step.hpp"
+#include "vn/search_replace.hpp"
+#include "vn/vn_step.hpp"
 
 namespace Steps {
 
