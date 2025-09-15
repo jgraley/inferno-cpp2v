@@ -8,40 +8,40 @@ BISON = bison
 CXXFLAGS = -O0 -std=c++20 -ggdb3
 CXXFLAGS += -Ibuild/$(LANG) -Ireflex/include -I.
 
-MODULES=$(LANG)/vn_lang
+LYPP_MODULES=$(LANG)/vn_lang
 
 DEPS = $(LANG)/makefile
 
 
-$(MODULES:%=build/%.lpp.hpp) : build/%.lpp.hpp : build/%.lpp.cpp
-$(MODULES:%=build/%.lpp.cpp): build/%.lpp.cpp : %.lpp $(DEPS)
+$(LYPP_MODULES:%=build/%.lpp.hpp) : build/%.lpp.hpp : build/%.lpp.cpp
+$(LYPP_MODULES:%=build/%.lpp.cpp): build/%.lpp.cpp : %.lpp $(DEPS)
 	@mkdir -p $(dir $@)
 	$(REFLEX) $(REFLAGS) --bison-complete --bison-locations $< --outfile=$@ --header-file=$(subst .cpp,.hpp,$@)	
 	
 
-$(MODULES:%=build/%.ypp.hpp) : build/%.ypp.hpp : build/%.ypp.cpp
-$(MODULES:%=build/%.location.hpp) : build/%.location.hpp : build/%.ypp.cpp
-$(MODULES:%=build/%.ypp.cpp): build/%.ypp.cpp : %.ypp $(DEPS) 
+$(LYPP_MODULES:%=build/%.ypp.hpp) : build/%.ypp.hpp : build/%.ypp.cpp
+$(LYPP_MODULES:%=build/%.location.hpp) : build/%.location.hpp : build/%.ypp.cpp
+$(LYPP_MODULES:%=build/%.ypp.cpp): build/%.ypp.cpp : %.ypp $(DEPS) 
 	@mkdir -p $(dir $@)
 	$(BISON) -d $< -o $@
 
 
-$(MODULES:%=build/%.lpp.o): build/%.lpp.o : build/%.lpp.cpp build/%.lpp.hpp build/%.location.hpp $(DEPS)
+$(LYPP_MODULES:%=build/%.lpp.o): build/%.lpp.o : build/%.lpp.cpp build/%.lpp.hpp build/%.location.hpp $(DEPS)
 	@mkdir -p $(dir $@)
 	g++ $< -c $(CXXFLAGS) -o $@ 
 
 
-$(MODULES:%=build/%.ypp.o): build/%.ypp.o : build/%.ypp.cpp build/%.ypp.hpp build/%.lpp.hpp build/%.location.hpp $(DEPS)
+$(LYPP_MODULES:%=build/%.ypp.o): build/%.ypp.o : build/%.ypp.cpp build/%.ypp.hpp build/%.lpp.hpp build/%.location.hpp $(DEPS)
 	@mkdir -p $(dir $@)
 	g++ $< -c $(CXXFLAGS) -o $@ 
 
 
-build/src/lang.a : $(MODULES:%=build/%.lpp.o) $(MODULES:%=build/%.ypp.o) $(DEPS)
+build/src/lang.a : $(LYPP_MODULES:%=build/%.lpp.o) $(LYPP_MODULES:%=build/%.ypp.o) $(DEPS)
 	@mkdir -p build/src 
-	$(AR) -r $@ $(MODULES:%=build/%.lpp.o) $(MODULES:%=build/%.ypp.o)
+	$(AR) -r $@ $(LYPP_MODULES:%=build/%.lpp.o) $(LYPP_MODULES:%=build/%.ypp.o)
 	
 
-$(MODULES:%=build/%_exe): build/%_exe : build/src/lang.a $(DEPS)
+$(LYPP_MODULES:%=build/%_exe): build/%_exe : build/src/lang.a $(DEPS)
 	g++ $< $(LIBREFLEX) $(CXXFLAGS) -o $@
 	
 	

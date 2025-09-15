@@ -3,7 +3,7 @@
 #include "tree/cpptree.hpp"
 #include "tree/sctree.hpp"
 #include "cplusplus/parse.hpp"  
-#include "cplusplus/render.hpp"
+#include "vn/lang/render.hpp"
 #include "vn/graph/graph.hpp"
 #include "common/read_args.hpp"
 #include "helpers/walk.hpp"

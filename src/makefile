@@ -11,12 +11,13 @@ VN_PTRANS = $(VN)/ptrans
 VN_SYM = $(VN)/sym
 VN_UP = $(VN)/up
 VN_GRAPH = $(VN)/graph
+VN_LANG = $(VN)/lang
 CPLUSPLUS = $(SRC)/cplusplus
 STEPS = $(SRC)/steps
 MAIN = $(SRC)/main
 
 SRC_OPTIONS = $(OPTIONS) $(EXE_OPTIONS) $(IVN_OPTIONS) -I$(SRC)
-SRC_SR_OPTIONS = $(SRC_OPTIONS) -I$(VN)
+SRC_VN_OPTIONS = $(SRC_OPTIONS) -I$(VN)
 
 COMMON_MODULES = $(COMMON)/standard $(COMMON)/common $(COMMON)/read_args $(COMMON)/trace $(COMMON)/hit_count $(COMMON)/mismatch $(COMMON)/serial $(COMMON)/progress $(COMMON)/orderable
 COMMON_MODULES += $(COMMON)/lambda_loops
@@ -42,12 +43,13 @@ VN_UP_MODULES +=  $(VN_UP)/tz_relation $(VN_UP)/patches $(VN_UP)/scaffold_ops $(
 VN_UP_MODULES +=  $(VN_UP)/misc_passes $(VN_UP)/merge_passes $(VN_UP)/ordering_pass $(VN_UP)/inversion_pass 
 VN_UP_MODULES += $(VN_UP)/gap_finding_pass $(VN_UP)/boundary_pass $(VN_UP)/alt_ordering_checker $(VN_UP)/move_in_pass $(VN_UP)/move_out_pass $(VN_UP)/copy_passes
 VN_GRAPH_MODULES = $(VN_GRAPH)/graph $(VN_GRAPH)/doc_graphs
-CPLUSPLUS_MODULES = $(CPLUSPLUS)/identifier_tracker $(CPLUSPLUS)/rc_hold $(CPLUSPLUS)/sort_decls $(CPLUSPLUS)/render $(CPLUSPLUS)/uniquify_identifiers 
+VN_LANG_MODULES = $(VN_LANG)/sort_decls $(VN_LANG)/render $(VN_LANG)/uniquify_identifiers 
+CPLUSPLUS_MODULES = $(CPLUSPLUS)/identifier_tracker $(CPLUSPLUS)/rc_hold 
 STEPS_MODULES = $(STEPS)/inferno_agents $(STEPS)/split_instance_declarations $(STEPS)/generate_implicit_casts $(STEPS)/generate_stacks $(STEPS)/lower_control_flow 
 STEPS_MODULES += $(STEPS)/clean_up $(STEPS)/state_out $(STEPS)/systemc_detection $(STEPS)/systemc_generation $(STEPS)/to_sc_method $(STEPS)/uncombable $(STEPS)/fall_out $(STEPS)/test_steps
 MAIN_MODULES = $(MAIN)/inferno $(MAIN)/unit_test 
 
-ALL_VN_MODULES = $(VN_MODULES) $(VN_AGENTS_MODULES) $(VN_CSP_MODULES) $(VN_DB_MODULES) $(VN_PTRANS_MODULES) $(VN_SYM_MODULES) $(VN_UP_MODULES) $(VN_GRAPH_MODULES)
+ALL_VN_MODULES = $(VN_MODULES) $(VN_AGENTS_MODULES) $(VN_CSP_MODULES) $(VN_DB_MODULES) $(VN_PTRANS_MODULES) $(VN_SYM_MODULES) $(VN_UP_MODULES) $(VN_GRAPH_MODULES) $(VN_LANG_MODULES)
 ALL_MODULES = $(COMMON_MODULES) $(NODE_MODULES) $(HELPERS_MODULES) $(TREE_MODULES) $(CPLUSPLUS_MODULES) $(STEPS_MODULES) $(ALL_VN_MODULES) $(MAIN_MODULES)
  
 # Include the auto-generated .d files which contain rules for the
@@ -76,35 +78,39 @@ $(TREE_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
 
 $(VN_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS) 
 	@mkdir -p $(dir $@)
-	$(ICC) $< -c $(SRC_SR_OPTIONS) -o $@
+	$(ICC) $< -c $(SRC_VN_OPTIONS) -o $@
 
 $(VN_AGENTS_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
 	@mkdir -p $(dir $@)
-	$(ICC) $< -c $(SRC_SR_OPTIONS) -o $@
+	$(ICC) $< -c $(SRC_VN_OPTIONS) -o $@
 
 $(VN_CSP_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
 	@mkdir -p $(dir $@)
-	$(ICC) $< -c $(SRC_SR_OPTIONS) -o $@
+	$(ICC) $< -c $(SRC_VN_OPTIONS) -o $@
 
 $(VN_DB_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
 	@mkdir -p $(dir $@)
-	$(ICC) $< -c $(SRC_SR_OPTIONS) -o $@
+	$(ICC) $< -c $(SRC_VN_OPTIONS) -o $@
 
 $(VN_PTRANS_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS) 
 	@mkdir -p $(dir $@)
-	$(ICC) $< -c $(SRC_SR_OPTIONS) -o $@
+	$(ICC) $< -c $(SRC_VN_OPTIONS) -o $@
 
 $(VN_SYM_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
 	@mkdir -p $(dir $@)
-	$(ICC) $< -c $(SRC_SR_OPTIONS) -o $@
+	$(ICC) $< -c $(SRC_VN_OPTIONS) -o $@
 
 $(VN_UP_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
 	@mkdir -p $(dir $@)
-	$(ICC) $< -c $(SRC_SR_OPTIONS) -o $@
+	$(ICC) $< -c $(SRC_VN_OPTIONS) -o $@
 
 $(VN_GRAPH_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
 	@mkdir -p $(dir $@)
-	$(ICC) $< -c $(SRC_OPTIONS) -o $@
+	$(ICC) $< -c $(SRC_VN_OPTIONS) -o $@
+
+$(VN_LANG_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
+	@mkdir -p $(dir $@)
+	$(ICC) $< -c $(SRC_VN_OPTIONS) -o $@
 
 $(CPLUSPLUS_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
 	@mkdir -p $(dir $@)
