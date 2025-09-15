@@ -7,7 +7,7 @@
 #include "common/serial.hpp"
 #include "agents/agent.hpp"
 #include "agents/conjunction_agent.hpp"
-#include "render/graph.hpp"
+#include "vn/graph/graph.hpp"
 
 #include "query.hpp"
 #include "link.hpp"

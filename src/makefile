@@ -10,8 +10,8 @@ VN_DB = $(VN)/db
 VN_PTRANS = $(VN)/ptrans
 VN_SYM = $(VN)/sym
 VN_UP = $(VN)/up
-PARSE = $(SRC)/parse
-RENDER = $(SRC)/render
+VN_GRAPH = $(VN)/graph
+CPLUSPLUS = $(SRC)/cplusplus
 STEPS = $(SRC)/steps
 MAIN = $(SRC)/main
 
@@ -41,14 +41,14 @@ VN_SYM_MODULES += $(VN_SYM)/truth_table $(VN_SYM)/truth_table_with_predicates $(
 VN_UP_MODULES +=  $(VN_UP)/tz_relation $(VN_UP)/patches $(VN_UP)/scaffold_ops $(VN_UP)/tree_update
 VN_UP_MODULES +=  $(VN_UP)/misc_passes $(VN_UP)/merge_passes $(VN_UP)/ordering_pass $(VN_UP)/inversion_pass 
 VN_UP_MODULES += $(VN_UP)/gap_finding_pass $(VN_UP)/boundary_pass $(VN_UP)/alt_ordering_checker $(VN_UP)/move_in_pass $(VN_UP)/move_out_pass $(VN_UP)/copy_passes
-PARSE_MODULES = $(PARSE)/identifier_tracker $(PARSE)/rc_hold
-RENDER_MODULES = $(RENDER)/sort_decls $(RENDER)/graph $(RENDER)/render $(RENDER)/uniquify_identifiers $(RENDER)/doc_graphs
+VN_GRAPH_MODULES = $(VN_GRAPH)/graph $(VN_GRAPH)/doc_graphs
+CPLUSPLUS_MODULES = $(CPLUSPLUS)/identifier_tracker $(CPLUSPLUS)/rc_hold $(CPLUSPLUS)/sort_decls $(CPLUSPLUS)/render $(CPLUSPLUS)/uniquify_identifiers 
 STEPS_MODULES = $(STEPS)/inferno_agents $(STEPS)/split_instance_declarations $(STEPS)/generate_implicit_casts $(STEPS)/generate_stacks $(STEPS)/lower_control_flow 
 STEPS_MODULES += $(STEPS)/clean_up $(STEPS)/state_out $(STEPS)/systemc_detection $(STEPS)/systemc_generation $(STEPS)/to_sc_method $(STEPS)/uncombable $(STEPS)/fall_out $(STEPS)/test_steps
 MAIN_MODULES = $(MAIN)/inferno $(MAIN)/unit_test 
 
-ALL_SR_MODULES = $(VN_MODULES) $(VN_AGENTS_MODULES) $(VN_CSP_MODULES) $(VN_DB_MODULES) $(VN_PTRANS_MODULES) $(VN_SYM_MODULES) $(VN_UP_MODULES) 
-ALL_MODULES = $(COMMON_MODULES) $(NODE_MODULES) $(HELPERS_MODULES) $(TREE_MODULES) $(PARSE_MODULES) $(RENDER_MODULES) $(STEPS_MODULES) $(ALL_SR_MODULES) $(MAIN_MODULES)
+ALL_VN_MODULES = $(VN_MODULES) $(VN_AGENTS_MODULES) $(VN_CSP_MODULES) $(VN_DB_MODULES) $(VN_PTRANS_MODULES) $(VN_SYM_MODULES) $(VN_UP_MODULES) $(VN_GRAPH_MODULES)
+ALL_MODULES = $(COMMON_MODULES) $(NODE_MODULES) $(HELPERS_MODULES) $(TREE_MODULES) $(CPLUSPLUS_MODULES) $(STEPS_MODULES) $(ALL_VN_MODULES) $(MAIN_MODULES)
  
 # Include the auto-generated .d files which contain rules for the
 # include dependencies.
@@ -102,13 +102,13 @@ $(VN_UP_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
 	@mkdir -p $(dir $@)
 	$(ICC) $< -c $(SRC_SR_OPTIONS) -o $@
 
-$(PARSE_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
+$(VN_GRAPH_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
 	@mkdir -p $(dir $@)
 	$(ICC) $< -c $(SRC_OPTIONS) -o $@
 
-$(RENDER_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
+$(CPLUSPLUS_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
 	@mkdir -p $(dir $@)
-	$(ICC) $< -c $(SRC_OPTIONS) -o $@ 
+	$(ICC) $< -c $(SRC_OPTIONS) -o $@
 
 $(STEPS_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
 	@mkdir -p $(dir $@)

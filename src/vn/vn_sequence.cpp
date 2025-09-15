@@ -1,7 +1,7 @@
 #include "vn_sequence.hpp"
 
 #include "vn_step.hpp"
-#include "render/graph.hpp"
+#include "graph/graph.hpp"
 #include "db/x_tree_database.hpp"
 #include "up/tree_update.hpp"
 #include "up/up_common.hpp"
