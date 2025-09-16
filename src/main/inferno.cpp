@@ -497,10 +497,13 @@ void Inferno::GeneratePatternGraphs()
             string ss;
             if( !ReadArgs::documentation_graphs )
                 ss = SSPrintf("%03d-", sp.step_index);
-            string dotfile_path = dir + ss + vn_sequence->GetStepName(sp.step_index) + ".dot";                                                       
+            string name = ss + vn_sequence->GetStepName(sp.step_index);
+            fprintf(stderr, "%s\n", name.c_str() );
+            
+            string dotfile_path = dir + name + ".dot";                                                       
             Graph g( dotfile_path, vn_sequence->GetStepName(sp.step_index) );
             GenerateGraphRegions( sp, g );
-            string vnfile_path = dir + ss + vn_sequence->GetStepName(sp.step_index) + ".vn";                                                       
+            string vnfile_path = dir + name + ".vn";                                                       
             Render r( vnfile_path );
             vn_sequence->DoRender( sp.step_index, r );
         }
@@ -531,12 +534,12 @@ void Inferno::GeneratePatternGraphs()
             }
             if( !found ) // not found?
             {
-                fprintf(stderr, "Cannot find specified steps. Steps are:\n" );  
+                fprintf(stderr, "Cannot find step:\n%s\nSteps are:\n", ReadArgs::pattern_graph_name.c_str() );  
                 for( const Step &sp : plan.steps )
                 {
-                    string ss = SSPrintf("%03d-", sp.step_index);
-                    string msg = ss+vn_sequence->GetStepName(sp.step_index);
-                    fprintf( stderr, "%szn", msg.c_str() );
+                    string msg = vn_sequence->GetStepName(sp.step_index);
+                    msg += SSPrintf(" (%03d)", sp.step_index);
+                    fprintf( stderr, "%s\n", msg.c_str() );
                 }
                 ASSERT(false);
             }

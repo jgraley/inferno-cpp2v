@@ -808,7 +808,7 @@ string Graph::DoLink( int port_index,
     
     // Atts
     string atts;
-    atts += LinkStyleAtt(my_link->planned_as, link->phase);
+    atts += LinkStyleAtt(my_link);
 
     // Labels
     list<string> labels;
@@ -958,10 +958,10 @@ void Graph::Remember( string s )
 }
 
 
-string Graph::LinkStyleAtt(LinkPlannedAs incoming_link_planned_as, Graphable::Phase phase)
+string Graph::LinkStyleAtt(shared_ptr<const MyLink> my_link)
 {	
     string atts;
-    switch(incoming_link_planned_as)
+    switch( my_link->planned_as )
     {
     case LINK_DEFAULT:
         break;
@@ -982,10 +982,10 @@ string Graph::LinkStyleAtt(LinkPlannedAs incoming_link_planned_as, Graphable::Ph
         break;
     }
     
-    switch( phase )
+    switch( my_link->phase )
     {
     case Graphable::UNDEFINED:
-		FTRACE("Warning, undefined phase\n");
+		FTRACE("Warning, undefined phase: ")(my_link)("\n");
 		// fall through
     case Graphable::IN_COMPARE_ONLY:
         atts += "style=\"solid\"\n";

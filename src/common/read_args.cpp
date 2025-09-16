@@ -63,7 +63,7 @@ void ReadArgs::Usage(string msg)
                     "-g[t][k]p<n>   Generate dot file for specified transformation step n or by name,\n"
                     "               or generate all into a directory if name ends in /.\n"
                     "-g[t][k]d      Generate dot files for documentation; -o specifies directory.\n"
-                    "            Note: t enables trace details in graph; k enables dark colour-scheme.\n"
+                    "               Note: t enables trace details in graph; k enables dark colour-scheme.\n"
                     "-rn<n>      Stop search and replace after n repetitions and do not generate an error.\n"
                     "-re<n>      Stop search and replace after n repetitions and do generate an error.\n"
                     "-f          Output all intermediates: .cpp and .dot. <outfile> is path/basename.\n"

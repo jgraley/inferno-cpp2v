@@ -172,7 +172,7 @@ private:
     string EscapeForGraphviz( string s );
     void Disburse( string s );
     void Remember( string s );
-    string LinkStyleAtt(LinkPlannedAs incoming_link_planned_as, Graphable::Phase phase);
+    string LinkStyleAtt(shared_ptr<const MyLink> my_link);
     string GetRegionGraphId(const Region *region, const GraphIdable *g);
     string GetRegionGraphId(const Region *region, string id);
     string Indent(string s);
