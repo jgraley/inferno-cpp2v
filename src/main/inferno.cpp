@@ -289,11 +289,10 @@ Inferno::Plan::Plan(Inferno *algo_) :
           [this]()
           { 
 			  using namespace std::placeholders;
-			  auto b = bind(&Inferno::DoPatternGraph, algo, _1, _2, _3, _4);
-			  algo->PatternDispatcher( b, 
-			  					 ReadArgs::pattern_graph_index,
-								 ReadArgs::pattern_graph_name,
-								 !ReadArgs::documentation_graphs );
+			  algo->PatternDispatcher( bind(&Inferno::DoPatternGraph, algo, _1, _2, _3, _4), 
+			  					       ReadArgs::pattern_graph_index,
+								       ReadArgs::pattern_graph_name,
+								       !ReadArgs::documentation_graphs );
           } } 
     );
     
@@ -307,8 +306,8 @@ Inferno::Plan::Plan(Inferno *algo_) :
           { 
 			  using namespace std::placeholders;
 			  algo->PatternDispatcher( bind(&Inferno::DoPatternRender, algo, _1, _2, _3, _4), 
-	                             ReadArgs::pattern_render_index,
-	                             ReadArgs::pattern_render_name );
+	                                   ReadArgs::pattern_render_index,
+	                                   ReadArgs::pattern_render_name );
           } } 
     );
     
