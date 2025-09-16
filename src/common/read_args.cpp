@@ -15,6 +15,8 @@ string ReadArgs::outfile;
 bool ReadArgs::intermediate_graph = false;
 int ReadArgs::pattern_graph_index = -1; // -1 disables
 string ReadArgs::pattern_graph_name = ""; // "" disables
+int ReadArgs::pattern_render_index = -1; // -1 disables
+string ReadArgs::pattern_render_name = ""; // "" disables
 bool ReadArgs::graph_trace = false;
 bool ReadArgs::graph_dark = false;
 bool ReadArgs::trace = false;
@@ -59,11 +61,13 @@ void ReadArgs::Usage(string msg)
                     "               Note: -qT<n> makes -t and -r operate only on step n.\n"                
                     "               Note: if quitting after parse or later, output is attempted.\n"     
                     "-n<n>       Only run step <n>. User must ensure input program meets any restrictions of the step.\n"                    
-                    "-g[t][k]i      Generate Graphviz dot file for output or intermediate if used with -q.\n"
-                    "-g[t][k]p<n>   Generate dot file for specified transformation step n or by name,\n"
-                    "               or generate all into a directory if name ends in /.\n"
-                    "-g[t][k]d      Generate dot files for documentation; -o specifies directory.\n"
-                    "               Note: t enables trace details in graph; k enables dark colour-scheme.\n"
+                    "-g[t][k]i         Generate Graphviz dot file for output or intermediate if used with -q.\n"
+                    "-g[t][k]p<step>   Generate dot file for specified transformation step by name,\n"
+                    "                  or number, or generate all into a directory if name ends in /.\n"
+                    "-g[t][k]d         Generate dot files for documentation; -o specifies directory.\n"
+                    "                  Note: t enables trace details in graph; k enables dark colour-scheme.\n"
+                    "-p<step>    Generate vn file for specified transformation step by name,\n"
+                    "            or number, or generate all into a directory if name ends in /.\n"
                     "-rn<n>      Stop search and replace after n repetitions and do not generate an error.\n"
                     "-re<n>      Stop search and replace after n repetitions and do generate an error.\n"
                     "-f          Output all intermediates: .cpp and .dot. <outfile> is path/basename.\n"
@@ -160,12 +164,12 @@ ReadArgs::ReadArgs( int ac, char *av[] )
             }
             else if( graph_option=='p' )
             {
-                string s = GetArg(ai);
+                string s = GetArg();
                 int v = strtoul( s.c_str(), nullptr, 10 );
                 if( v==0 && s!="0" ) // Did strtoul fail?
-                    pattern_graph_name = s;
+                    pattern_render_name = s;
                 else
-                    pattern_graph_index = v;
+                    pattern_render_index = v;
             }
             else if( graph_option=='d' )
             {
@@ -181,6 +185,15 @@ ReadArgs::ReadArgs( int ac, char *av[] )
             {
                 Usage("Unknown argument after -g");
             }
+        }
+        else if( option=='p' )
+        {
+            string s = GetArg();
+            int v = strtoul( s.c_str(), nullptr, 10 );
+            if( v==0 && s!="0" ) // Did strtoul fail?
+                pattern_render_name = s;
+            else
+                pattern_render_index = v;
         }
         else if( option=='r' )
         {

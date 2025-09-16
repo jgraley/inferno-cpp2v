@@ -288,7 +288,27 @@ Inferno::Plan::Plan(Inferno *algo_) :
           nullptr,  
           [this]()
           { 
-              algo->GeneratePatternGraphs(); 
+			  using namespace std::placeholders;
+			  auto b = bind(&Inferno::DoPatternGraph, algo, _1, _2, _3, _4);
+			  algo->PatternDispatcher( b, 
+			  					 ReadArgs::pattern_graph_index,
+								 ReadArgs::pattern_graph_name,
+								 !ReadArgs::documentation_graphs );
+          } } 
+    );
+    
+    // Output a pattern render
+    Stage stage_pattern_renders( 
+        { Progress::RENDERING, 
+          false, false, false, false,
+          "Rendering pattern to VN lang",
+          nullptr,  
+          [this]()
+          { 
+			  using namespace std::placeholders;
+			  algo->PatternDispatcher( bind(&Inferno::DoPatternRender, algo, _1, _2, _3, _4), 
+	                             ReadArgs::pattern_render_index,
+	                             ReadArgs::pattern_render_name );
           } } 
     );
     
@@ -401,6 +421,8 @@ Inferno::Plan::Plan(Inferno *algo_) :
     stages.clear();
     bool generate_pattern_graphs = !ReadArgs::pattern_graph_name.empty() || 
                                    ReadArgs::pattern_graph_index != -1;
+    bool generate_pattern_renders = !ReadArgs::pattern_render_name.empty() || 
+                                    ReadArgs::pattern_render_index != -1;
                                    
     if( generate_pattern_graphs && !ReadArgs::graph_trace )
         stages.push_back( stage_pattern_graphs );    
@@ -411,10 +433,21 @@ Inferno::Plan::Plan(Inferno *algo_) :
 
     for( Stage &stage : stages_planning )
     {
+        // Actions on all planning stages
         stages.push_back( stage );
-        // If a pattern trace graph was requested, generate it immediately after last planning stage.
-        if( &stage == &(stages_planning.back()) && generate_pattern_graphs && ReadArgs::graph_trace )
-            stages.push_back( stage_pattern_graphs );     
+        
+        // Actions on last planning stage       
+        if( &stage == &(stages_planning.back()) )
+        { 
+			// Pattern graphs genned after pattern transformation in trace mode only
+			if( generate_pattern_graphs && ReadArgs::graph_trace )
+				stages.push_back( stage_pattern_graphs );
+				
+			// VN language always rendered after pattern transformation
+			if( generate_pattern_renders )
+				stages.push_back( stage_pattern_renders );
+        }
+         
         if( ShouldIQuitAfter(stage.progress_stage) )
             return;
     }
@@ -486,46 +519,40 @@ void Inferno::RunStage( Stage stage )
 }
 
     
-void Inferno::GeneratePatternGraphs()
+void Inferno::PatternDispatcher(PatternAction action, int pattern_index, string pattern_name, bool prepend_step_number)
 {
-    if( ReadArgs::pattern_graph_name.back()=='/' )
+    if( pattern_name.back()=='/' )
     {
-        string dir = ReadArgs::pattern_graph_name;
+        string dir = pattern_name;
         for( const Step &sp : plan.steps )
         {
             Progress(Progress::RENDERING, sp.step_index).SetAsCurrent();
             string ss;
-            if( !ReadArgs::documentation_graphs )
+            if( prepend_step_number )
                 ss = SSPrintf("%03d-", sp.step_index);
             string name = ss + vn_sequence->GetStepName(sp.step_index);
-            fprintf(stderr, "%s\n", name.c_str() );
-            
-            string dotfile_path = dir + name + ".dot";                                                       
-            Graph g( dotfile_path, vn_sequence->GetStepName(sp.step_index) );
-            GenerateGraphRegions( sp, g );
-            string vnfile_path = dir + name + ".vn";                                                       
-            Render r( vnfile_path );
-            vn_sequence->DoRender( sp.step_index, r );
+            fprintf(stderr, "%s\n", name.c_str() );            
+            action( sp, dir + name, true, vn_sequence->GetStepName(sp.step_index) );
         }
     }
     else
     {
         Step my_sp;
         bool found = false;
-        if( ReadArgs::pattern_graph_name.empty() )
+        if( pattern_name.empty() )
         {
-            ASSERT( ReadArgs::pattern_graph_index >= 0 )("Negative step number is silly\n");
-            ASSERT( ReadArgs::pattern_graph_index < (int)(plan.steps.size()) )("There are only %d steps at present\n", plan.steps.size() );
-            my_sp = plan.steps[ReadArgs::pattern_graph_index];
+            ASSERT( pattern_index >= 0 )("Negative step number is silly\n");
+            ASSERT( pattern_index < (int)(plan.steps.size()) )("There are only %d steps at present\n", plan.steps.size() );
+            my_sp = plan.steps[pattern_index];
             found = true;
         }
         else
         {
             for( const Step &sp : plan.steps )
             {                    
-                if( ReadArgs::pattern_graph_name.empty() ?
-                    sp.step_index == ReadArgs::pattern_graph_index :
-                    vn_sequence->GetStepName(sp.step_index) == ReadArgs::pattern_graph_name )
+                if( pattern_name.empty() ?
+                    sp.step_index == pattern_index :
+                    vn_sequence->GetStepName(sp.step_index) == pattern_name )
                 {
                     my_sp = sp;
                     found = true;
@@ -534,7 +561,7 @@ void Inferno::GeneratePatternGraphs()
             }
             if( !found ) // not found?
             {
-                fprintf(stderr, "Cannot find step:\n%s\nSteps are:\n", ReadArgs::pattern_graph_name.c_str() );  
+                fprintf(stderr, "Cannot find step:\n%s\nSteps are:\n", pattern_name.c_str() );  
                 for( const Step &sp : plan.steps )
                 {
                     string msg = vn_sequence->GetStepName(sp.step_index);
@@ -544,18 +571,30 @@ void Inferno::GeneratePatternGraphs()
                 ASSERT(false);
             }
         }
-        Progress(Progress::RENDERING, my_sp.step_index).SetAsCurrent();
-        Graph g( ReadArgs::outfile, vn_sequence->GetStepName(my_sp.step_index) );
-        GenerateGraphRegions( my_sp, g );
+        Progress(Progress::RENDERING, my_sp.step_index).SetAsCurrent();        
+		action( my_sp, ReadArgs::outfile, false, vn_sequence->GetStepName(my_sp.step_index) );
     }       
 }
 
 
-void Inferno::GenerateGraphRegions( const Step &sp, Graph &graph )
+void Inferno::DoPatternGraph( const Step &sp, string outfile, bool add_file_extension, string title ) const
 {
+	if( add_file_extension )
+		outfile += ".dot";
+	Graph graph( outfile, title );
     vn_sequence->DoGraph( sp.step_index, graph );
     if( ReadArgs::graph_trace )    
         vn_sequence->GenerateGraphRegions(sp.step_index, graph);
+}
+   
+ 
+void Inferno::DoPatternRender( const Step &sp, string outfile, bool add_file_extension, string title ) const
+{
+	(void)title;
+	if( add_file_extension )
+		outfile += ".vn";
+    Render r( outfile );
+    vn_sequence->DoRender( sp.step_index, r );
 }
    
    

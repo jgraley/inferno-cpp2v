@@ -11,26 +11,31 @@
 // globals here since in a way command line args *are* global. Avoid
 // the word "parse" here. 
 
+using namespace std;
+
+
 class ReadArgs
 {
 public:
     void Usage(string msg);
-    std::string GetArg( size_t al=1 );
+    string GetArg( size_t al=1 );
     ReadArgs( int argc, char *argv[] );
 
-    static std::string exename;
-    static std::string infile;
-    static std::string outfile;
+    static string exename;
+    static string infile;
+    static string outfile;
     static bool intermediate_graph;
     static int pattern_graph_index;
-    static std::string pattern_graph_name;
+    static string pattern_graph_name;
+    static int pattern_render_index;
+    static string pattern_render_name;
     static bool graph_trace;
     static bool graph_dark;
     static bool trace;
     static bool trace_hits;    
     static bool trace_quiet;   
     static bool trace_no_stack; 
-    static std::string hits_format;
+    static string hits_format;
     static bool quitafter;
     static Progress quitafter_progress;
     static vector<int> quitafter_counts;
@@ -45,7 +50,7 @@ public:
     static bool output_all;
     
 private:
-    void ParseQuitAfter(std::string arg);
+    void ParseQuitAfter(string arg);
     int curarg;
     char **argv;
     int argc;

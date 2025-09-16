@@ -53,11 +53,17 @@ private:
         list<Stage> stages;  
     } plan;
     
+    typedef function<void(const Step &sp, string outfile, bool add_file_extension, string title)> PatternAction;
+    
 public:    
     void RunStage( Stage stage );
                          
     void GeneratePatternGraphs();
-    void GenerateGraphRegions( const Step &sp, Graph &graph );
+    void GeneratePatternRenders();
+    void PatternDispatcher( PatternAction action, int pattern_index, string pattern_name, bool prepend_step_number = true );
+    void DoPatternGraph( const Step &sp, string outfile, bool add_file_extension, string title ) const;
+	void DoPatternRender( const Step &sp, string outfile, bool add_file_extension, string title ) const;
+    
     void RunTransformationStep(const Step &sp);
     void Run();
     
