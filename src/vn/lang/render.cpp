@@ -739,7 +739,7 @@ string Render::RenderInstance( const TransKit &kit, TreePtr<Instance> o,
         if( !inits.empty() )
         {
             s += " : ";
-            s += RenderSequence( kit, inits, ", ", false, TreePtr<Public>(), true );
+            s += RenderSequence( kit, inits, ", ", false, TreePtr<Public>() );
         }
 
         // Render the other stuff as a Compound so we always get {} in all cases
@@ -899,7 +899,7 @@ string Render::RenderDeclaration( const TransKit &kit, TreePtr<Declaration> decl
             if( DynamicTreePtrCast< Enum >(r) )
 				s += RenderEnumBody( kit, r->members );
 			else
-				s += RenderScope( kit, r, ";\n", true, a, true );			
+				s += RenderScope( kit, r, ";\n", true, a );			
             s += "}";                                 
         }
 
@@ -1015,8 +1015,7 @@ string Render::RenderSequence( const TransKit &kit,
                                Sequence<ELEMENT> spe,
                                string separator,
                                bool separate_last,
-                               TreePtr<AccessSpec> init_access,
-                               bool show_type ) try
+                               TreePtr<AccessSpec> init_access ) try
 {
     TRACE();
     string s;
@@ -1027,7 +1026,7 @@ string Render::RenderSequence( const TransKit &kit,
         string sep = (separate_last || it!=last_it) ? separator : "";
         TreePtr<ELEMENT> pe = *it;
         if( TreePtr<Declaration> d = DynamicTreePtrCast< Declaration >(pe) )
-            s += RenderDeclaration( kit, d, sep, init_access ? &init_access : nullptr, show_type, false );
+            s += RenderDeclaration( kit, d, sep, init_access ? &init_access : nullptr, true, false );
         else if( TreePtr<Statement> st = DynamicTreePtrCast< Statement >(pe) )
             s += RenderStatement( kit, st, sep );
         else
@@ -1151,8 +1150,7 @@ string Render::RenderScope( const TransKit &kit,
 							TreePtr<Scope> key,
 							string separator,
 							bool separate_last,
-							TreePtr<AccessSpec> init_access,
-							bool show_type ) try
+							TreePtr<AccessSpec> init_access ) try
 {
     TRACE();
 
@@ -1164,7 +1162,7 @@ string Render::RenderScope( const TransKit &kit,
     for( TreePtr<Declaration> pd : sorted ) //for( int i=0; i<sorted.size(); i++ )
         if( TreePtr<Record> r = DynamicTreePtrCast<Record>(pd) ) // is a record
             if( !DynamicTreePtrCast<Enum>(r) ) // but not an enum
-                s += RenderDeclaration( kit, r, separator, init_access ? &init_access : nullptr, show_type, true );
+                s += RenderDeclaration( kit, r, separator, init_access ? &init_access : nullptr, true, true );
 
     // For SystemC modules, we generate a constructor based on the other decls in
     // the module. Nothing goes in the Inferno tree for a module constructor, since
@@ -1177,7 +1175,7 @@ string Render::RenderScope( const TransKit &kit,
     // Note that in SC modules there can be inits on non-funciton members, which we hide.
     // TODO not consistent with C++ classes in general, where the inits have already been
     // moved into constructor inits before rendering begins.
-    s += RenderSequence( kit, sorted, separator, separate_last, init_access, show_type );
+    s += RenderSequence( kit, sorted, separator, separate_last, init_access );
     TRACE();
     return s;
 }

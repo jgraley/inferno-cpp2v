@@ -66,8 +66,7 @@ private:
                            Sequence<ELEMENT> spe, 
                            string separator, 
                            bool separate_last,
-                           TreePtr<CPPTree::AccessSpec> init_access = TreePtr<CPPTree::AccessSpec>(),
-                           bool show_type = true );
+                           TreePtr<CPPTree::AccessSpec> init_access = TreePtr<CPPTree::AccessSpec>() );
     string RenderEnumBody( const TransKit &kit, 
                            Collection<CPPTree::Declaration> spe);
     string RenderOperandSequence( const TransKit &kit, 
@@ -81,8 +80,7 @@ private:
 						TreePtr<CPPTree::Scope> key,
 						string separator, 
 						bool separate_last,
-						TreePtr<CPPTree::AccessSpec> init_access = TreePtr<CPPTree::AccessSpec>(),
-						bool show_type=true );
+						TreePtr<CPPTree::AccessSpec> init_access = TreePtr<CPPTree::AccessSpec>() );
 	string RenderParams( const TransKit &kit, 
 						 TreePtr<CPPTree::CallableParams> key,
 						 string separator, 
