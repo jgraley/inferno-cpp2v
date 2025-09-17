@@ -82,7 +82,7 @@ string Render::RenderToString( TreePtr<Node> root )
     
 	// pre-pass to fill in backing_ordering. It would be better to tell 
 	// it that it's doing a pre-pass so it can adapt it's behaviour.
-    RenderScope( kit, root_scope, ";\n", true ); 
+    RenderScope( kit, root_scope, true ); 
     deferred_decls.clear();
 
     // Make the identifiers unique
@@ -94,7 +94,7 @@ string Render::RenderToString( TreePtr<Node> root )
     if( IsSystemC( kit, root_scope ) )
         s += "#include \"isystemc.h\"\n\n";
 
-    s += RenderScope( kit, root_scope, ";\n", true ); // gets the .hpp stuff directly
+    s += RenderScope( kit, root_scope, true ); // gets the .hpp stuff directly
 
     s += deferred_decls; // these could go in a .cpp file
 
@@ -297,11 +297,11 @@ string Render::RenderType( const TransKit &kit, TreePtr<Type> type, string objec
     else if( DynamicTreePtrCast< Boolean >(type) )
         return const_str + "bool" + sobject;
     else if( TreePtr<Constructor> c = DynamicTreePtrCast< Constructor >(type) )
-        return object + "(" + RenderParams(kit, c, ", ", false) + ")" + const_str;
+        return object + "(" + RenderParams(kit, c) + ")" + const_str;
     else if( TreePtr<Destructor> f = DynamicTreePtrCast< Destructor >(type) )
         return object + "()" + const_str;
     else if( TreePtr<Function> f = DynamicTreePtrCast< Function >(type) )
-        return RenderType( kit, f->return_type, "(" + object + ")(" + RenderParams(kit, f, ", ", false) + ")" + const_str );
+        return RenderType( kit, f->return_type, "(" + object + ")(" + RenderParams(kit, f) + ")" + const_str );
     else if( TreePtr<Process> f = DynamicTreePtrCast< Process >(type) )
         return "void " + object + "()" + const_str;
     else if( TreePtr<Pointer> p = DynamicTreePtrCast< Pointer >(type) )
@@ -438,8 +438,8 @@ string Render::RenderExpression( const TransKit &kit, TreePtr<Initialiser> expre
     {
         AutoPush< TreePtr<Node> > cs( scope_stack, ce );
         string s = "({ ";
-        s += RenderScope( kit, ce, "; ", true ); // Must do this first to populate backing list
-        s += RenderSequence( kit, ce->statements, "; ", true );
+        s += RenderScope( kit, ce, true ); // Must do this first to populate backing list
+        s += RenderSequence( kit, ce->statements, ";\n", true );
         return s + "})";
     }
     else if( TreePtr<SpecificLabelIdentifier> li = DynamicTreePtrCast< SpecificLabelIdentifier >(expression) )
@@ -739,7 +739,7 @@ string Render::RenderInstance( const TransKit &kit, TreePtr<Instance> o,
         if( !inits.empty() )
         {
             s += " : ";
-            s += RenderSequence( kit, inits, ", ", false, TreePtr<Public>() );
+            s += RenderConstructorInitList( kit, inits );
         }
 
         // Render the other stuff as a Compound so we always get {} in all cases
@@ -897,7 +897,7 @@ string Render::RenderDeclaration( const TransKit &kit, TreePtr<Declaration> decl
             if( DynamicTreePtrCast< Enum >(r) )
 				s += RenderEnumBody( kit, r->members );
 			else
-				s += RenderScope( kit, r, ";\n", true, a );			
+				s += RenderScope( kit, r, true, a );			
             s += "}";                                 
         }
 
@@ -928,7 +928,7 @@ string Render::RenderStatement( const TransKit &kit, TreePtr<Statement> statemen
     {
         AutoPush< TreePtr<Node> > cs( scope_stack, c );
         string s = "{\n";
-        s += RenderScope( kit, c, ";\n", true ); // Must do this first to populate backing list
+        s += RenderScope( kit, c, true ); // Must do this first to populate backing list
         s += RenderSequence( kit, c->statements, ";\n", true );
         return s + "}\n";
     }
@@ -1026,6 +1026,27 @@ string Render::RenderSequence( const TransKit &kit,
         if( TreePtr<Declaration> d = DynamicTreePtrCast< Declaration >(pe) )
             s += RenderDeclaration( kit, d, sep, init_access ? &init_access : nullptr, false );
         else if( TreePtr<Statement> st = DynamicTreePtrCast< Statement >(pe) )
+            s += RenderStatement( kit, st, sep );
+        else
+            s += ERROR_UNSUPPORTED(pe);
+    }
+    return s;
+}
+DEFAULT_CATCH_CLAUSE
+
+
+string Render::RenderConstructorInitList( const TransKit &kit, 
+										  Sequence<Statement> spe ) try
+{
+    TRACE();
+    string s;
+    typename Sequence<Statement>::iterator last_it=spe.end();
+    --last_it;    
+    for( typename Sequence<Statement>::iterator it=spe.begin(); it!=spe.end(); ++it )
+    {
+        string sep = (it!=last_it) ? ",\n" : "";
+        TreePtr<Statement> pe = *it;
+		if( TreePtr<Statement> st = DynamicTreePtrCast< Statement >(pe) )
             s += RenderStatement( kit, st, sep );
         else
             s += ERROR_UNSUPPORTED(pe);
@@ -1146,7 +1167,6 @@ DEFAULT_CATCH_CLAUSE
 
 string Render::RenderScope( const TransKit &kit, 
 							TreePtr<Scope> key,
-							string separator,
 							bool separate_last,
 							TreePtr<AccessSpec> init_access ) try
 {
@@ -1160,7 +1180,7 @@ string Render::RenderScope( const TransKit &kit,
     for( TreePtr<Declaration> pd : sorted ) //for( int i=0; i<sorted.size(); i++ )
         if( TreePtr<Record> r = DynamicTreePtrCast<Record>(pd) ) // is a record
             if( !DynamicTreePtrCast<Enum>(r) ) // but not an enum
-                s += RenderDeclaration( kit, r, separator, init_access ? &init_access : nullptr, true );
+                s += RenderDeclaration( kit, r, ";\n", init_access ? &init_access : nullptr, true );
 
     // For SystemC modules, we generate a constructor based on the other decls in
     // the module. Nothing goes in the Inferno tree for a module constructor, since
@@ -1173,7 +1193,7 @@ string Render::RenderScope( const TransKit &kit,
     // Note that in SC modules there can be inits on non-funciton members, which we hide.
     // TODO not consistent with C++ classes in general, where the inits have already been
     // moved into constructor inits before rendering begins.
-    s += RenderSequence( kit, sorted, separator, separate_last, init_access );
+    s += RenderSequence( kit, sorted, ";\n", separate_last, init_access );
     TRACE();
     return s;
 }
@@ -1181,9 +1201,7 @@ DEFAULT_CATCH_CLAUSE
 
 
 string Render::RenderParams( const TransKit &kit, 
-							 TreePtr<CallableParams> key,
-							 string separator, 
-							 bool separate_last ) try
+							 TreePtr<CallableParams> key ) try
 {
     TRACE();
     Sequence<Declaration> sorted;
@@ -1192,11 +1210,19 @@ string Render::RenderParams( const TransKit &kit,
 		
     backing_ordering[key] = sorted;
 		    
-    // Emit the actual declarations, sorted for dependencies
-    // Note that in SC modules there can be inits on non-funciton members, which we hide.
-    // TODO not consistent with C++ classes in general, where the inits have already been
-    // moved into constructor inits before rendering begins.
-    return RenderSequence( kit, sorted, separator, separate_last );    
+    string s;
+    typename Sequence<Declaration>::iterator last_it=sorted.end();
+    --last_it;    
+    for( typename Sequence<Declaration>::iterator it=sorted.begin(); it!=sorted.end(); ++it )
+    {
+        string sep = (it!=last_it) ? ", " : "";
+        TreePtr<Declaration> pe = *it;
+        if( TreePtr<Declaration> d = DynamicTreePtrCast< Declaration >(pe) )
+            s += RenderDeclaration( kit, d, sep, nullptr, false );
+        else
+            s += ERROR_UNSUPPORTED(pe);
+    }
+    return s;
 }
 DEFAULT_CATCH_CLAUSE
 

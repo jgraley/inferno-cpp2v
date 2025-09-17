@@ -66,7 +66,9 @@ private:
                            string separator, 
                            bool separate_last,
                            TreePtr<CPPTree::AccessSpec> init_access = TreePtr<CPPTree::AccessSpec>() );
-    string RenderEnumBody( const TransKit &kit, 
+	string RenderConstructorInitList( const TransKit &kit, 
+									  Sequence<CPPTree::Statement> spe );
+	string RenderEnumBody( const TransKit &kit, 
                            Collection<CPPTree::Declaration> spe);
     string RenderOperandSequence( const TransKit &kit, 
                                   Sequence<CPPTree::Expression> spe, 
@@ -77,13 +79,10 @@ private:
                              TreePtr<CPPTree::AccessSpec> *access );    
     string RenderScope( const TransKit &kit, 
 						TreePtr<CPPTree::Scope> key,
-						string separator, 
 						bool separate_last,
 						TreePtr<CPPTree::AccessSpec> init_access = TreePtr<CPPTree::AccessSpec>() );
 	string RenderParams( const TransKit &kit, 
-						 TreePtr<CPPTree::CallableParams> key,
-						 string separator, 
-                         bool separate_last );
+						 TreePtr<CPPTree::CallableParams> key);
 	string RenderMismatchException( string fname, const Mismatch &me );
     const string outfile;                                     
     SimpleCompare sc;
