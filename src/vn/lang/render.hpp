@@ -58,7 +58,6 @@ private:
                               TreePtr<CPPTree::Declaration> declaration, 
                               string sep, 
                               TreePtr<CPPTree::AccessSpec> *current_access = nullptr,
-                              bool show_type = true, 
                               bool force_incomplete = false );
     string RenderStatement( const TransKit &kit, TreePtr<CPPTree::Statement> statement, string sep );
     template< class ELEMENT >
