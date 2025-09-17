@@ -650,8 +650,8 @@ void Render::ExtractInits( const TransKit &kit, Sequence<Statement> &body, Seque
 }
 
 
-string Render::RenderInstance( const TransKit &kit, TreePtr<Instance> o, string sep, bool showtype,
-                               bool showstorage, bool showinit, bool showscope ) try
+string Render::RenderInstance( const TransKit &kit, TreePtr<Instance> o, 
+                               bool show_storage, bool show_type, bool show_scope_res, bool show_init, string sep ) try
 {
     string s;
     string name;
@@ -666,12 +666,12 @@ string Render::RenderInstance( const TransKit &kit, TreePtr<Instance> o, string 
         if( DynamicTreePtrCast<Const>(f->constancy) )
             constant = true;
 
-    if( showstorage )
+    if( show_storage )
     {
         s += RenderStorage(kit, o);
     }
 
-    if( showscope )
+    if( show_scope_res )
         name += RenderScopePrefix(kit, o->identifier);
 
     TreePtr<Constructor> con = DynamicTreePtrCast<Constructor>(o->type);
@@ -688,7 +688,7 @@ string Render::RenderInstance( const TransKit &kit, TreePtr<Instance> o, string 
         name += RenderIdentifier(kit, o->identifier);
     }
 
-    if( showtype )
+    if( show_type )
         s += RenderType( kit, o->type, name, constant );
     else
         s = name;
@@ -706,7 +706,7 @@ string Render::RenderInstance( const TransKit &kit, TreePtr<Instance> o, string 
                     return s;
                 }
     
-    if( !showinit || DynamicTreePtrCast<Uninitialised>(o->initialiser) )
+    if( !show_init || DynamicTreePtrCast<Uninitialised>(o->initialiser) )
     {
         // Don't render any initialiser
         s += sep;
@@ -795,7 +795,7 @@ bool Render::ShouldSplitInstance( const TransKit &kit, TreePtr<Instance> o )
 
 string Render::RenderDeclaration( const TransKit &kit, TreePtr<Declaration> declaration,
                                   string sep, TreePtr<AccessSpec> *current_access,
-                                  bool showtype, bool force_incomplete, bool shownonfuncinit ) try
+                                  bool show_type, bool force_incomplete ) try
 {
     TRACE();
     string s;
@@ -820,16 +820,17 @@ string Render::RenderDeclaration( const TransKit &kit, TreePtr<Declaration> decl
     {
         if( ShouldSplitInstance(kit, o) )
         {
-            s += RenderInstance( kit, o, sep, showtype, showtype, false, false );
+            s += RenderInstance( kit, o, show_type, show_type, false, false, sep );
             {
                 AutoPush< TreePtr<Node> > cs( scope_stack, root_scope );
-                deferred_decls += string("\n") + RenderInstance( kit, o, sep, showtype, false, true, true );
+                deferred_decls += string("\n") + RenderInstance( kit, o, false, show_type, true, true, sep );
             }
         }
         else
         {
             // Otherwise, render everything directly using the default settings
-            s += RenderInstance( kit, o, sep, showtype, showtype, shownonfuncinit, false );
+            s += RenderInstance( kit, o, show_type, show_type, false, true, sep );
+            //ASSERT( shownonfuncinit || DynamicTreePtrCast<Uninitialised>(o->initialiser) )("Instance: ")(o)("\nInitialiser: ")(o->initialiser)("\nScopes:\n")(scope_stack)("\nlooks like:\n")(s);
         }
     }
     else if( TreePtr<Typedef> t = DynamicTreePtrCast< Typedef >(declaration) )
@@ -839,8 +840,6 @@ string Render::RenderDeclaration( const TransKit &kit, TreePtr<Declaration> decl
     else if( TreePtr<Record> r = DynamicTreePtrCast< Record >(declaration) )
     {
         TreePtr<AccessSpec> a;
-        bool showtype=true;
-        string sep2=";\n";
         shared_ptr<SCNamedRecord> scr = dynamic_pointer_cast< SCNamedRecord >(r);
         if( DynamicTreePtrCast< Class >(r) || scr )
         {
@@ -861,8 +860,6 @@ string Render::RenderDeclaration( const TransKit &kit, TreePtr<Declaration> decl
         {
             s += "enum";
             a = MakeTreeNode<Public>();
-            sep2 = ",\n";
-            showtype = false;
         }
         else
             return ERROR_UNSUPPORTED(declaration);
@@ -898,9 +895,12 @@ string Render::RenderDeclaration( const TransKit &kit, TreePtr<Declaration> decl
 
             // Contents
             AutoPush< TreePtr<Node> > cs( scope_stack, r );
-            s += "\n{\n" +
-                 RenderScope( kit, r, sep2, true, a, showtype ) +
-                 "}";
+            s += "\n{\n";
+            if( DynamicTreePtrCast< Enum >(r) )
+				s += RenderEnumBody( kit, r->members );
+			else
+				s += RenderScope( kit, r, ";\n", true, a, true );			
+            s += "}";                                 
         }
 
         s += ";\n";
@@ -1016,8 +1016,7 @@ string Render::RenderSequence( const TransKit &kit,
                                string separator,
                                bool separate_last,
                                TreePtr<AccessSpec> init_access,
-                               bool showtype,
-                               bool shownonfuncinit ) try
+                               bool show_type ) try
 {
     TRACE();
     string s;
@@ -1028,10 +1027,27 @@ string Render::RenderSequence( const TransKit &kit,
         string sep = (separate_last || it!=last_it) ? separator : "";
         TreePtr<ELEMENT> pe = *it;
         if( TreePtr<Declaration> d = DynamicTreePtrCast< Declaration >(pe) )
-            s += RenderDeclaration( kit, d, sep, init_access ? &init_access : nullptr, showtype, false, shownonfuncinit );
+            s += RenderDeclaration( kit, d, sep, init_access ? &init_access : nullptr, show_type, false );
         else if( TreePtr<Statement> st = DynamicTreePtrCast< Statement >(pe) )
             s += RenderStatement( kit, st, sep );
         else
+            s += ERROR_UNSUPPORTED(pe);
+    }
+    return s;
+}
+DEFAULT_CATCH_CLAUSE
+
+
+string Render::RenderEnumBody( const TransKit &kit, 
+                               Collection<Declaration> spe ) try
+{
+    TRACE();
+    string s;
+    for( TreePtr<Declaration> pe : spe )
+    {
+        if( auto d = TreePtr<Declaration>::DynamicCast(pe) )
+            s += RenderDeclaration( kit, d, ",\n", nullptr, false, false );
+        else 
             s += ERROR_UNSUPPORTED(pe);
     }
     return s;
@@ -1136,7 +1152,7 @@ string Render::RenderScope( const TransKit &kit,
 							string separator,
 							bool separate_last,
 							TreePtr<AccessSpec> init_access,
-							bool showtype ) try
+							bool show_type ) try
 {
     TRACE();
 
@@ -1148,7 +1164,7 @@ string Render::RenderScope( const TransKit &kit,
     for( TreePtr<Declaration> pd : sorted ) //for( int i=0; i<sorted.size(); i++ )
         if( TreePtr<Record> r = DynamicTreePtrCast<Record>(pd) ) // is a record
             if( !DynamicTreePtrCast<Enum>(r) ) // but not an enum
-                s += RenderDeclaration( kit, r, separator, init_access ? &init_access : nullptr, showtype, true );
+                s += RenderDeclaration( kit, r, separator, init_access ? &init_access : nullptr, show_type, true );
 
     // For SystemC modules, we generate a constructor based on the other decls in
     // the module. Nothing goes in the Inferno tree for a module constructor, since
@@ -1161,7 +1177,7 @@ string Render::RenderScope( const TransKit &kit,
     // Note that in SC modules there can be inits on non-funciton members, which we hide.
     // TODO not consistent with C++ classes in general, where the inits have already been
     // moved into constructor inits before rendering begins.
-    s += RenderSequence( kit, sorted, separator, separate_last, init_access, showtype, !sc_module );
+    s += RenderSequence( kit, sorted, separator, separate_last, init_access, show_type );
     TRACE();
     return s;
 }

@@ -51,16 +51,15 @@ private:
     string RenderAccess( const TransKit &kit, TreePtr<CPPTree::AccessSpec> current_access );
     string RenderStorage( const TransKit &kit, TreePtr<CPPTree::Instance> st );
     void ExtractInits( const TransKit &kit, Sequence<CPPTree::Statement> &body, Sequence<CPPTree::Statement> &inits, Sequence<CPPTree::Statement> &remainder );
-    string RenderInstance( const TransKit &kit, TreePtr<CPPTree::Instance> o, string sep, bool showtype = true,
-                           bool showstorage = true, bool showinit = true, bool showscope = false );
+    string RenderInstance( const TransKit &kit, TreePtr<CPPTree::Instance> o,  
+                           bool show_storage, bool show_type, bool show_scope_res, bool show_init, string sep );
     bool ShouldSplitInstance( const TransKit &kit, TreePtr<CPPTree::Instance> o );
     string RenderDeclaration( const TransKit &kit, 
                               TreePtr<CPPTree::Declaration> declaration, 
                               string sep, 
                               TreePtr<CPPTree::AccessSpec> *current_access = nullptr,
-                              bool showtype = true, 
-                              bool force_incomplete = false,
-                              bool shownonfuncinit = true );
+                              bool show_type = true, 
+                              bool force_incomplete = false );
     string RenderStatement( const TransKit &kit, TreePtr<CPPTree::Statement> statement, string sep );
     template< class ELEMENT >
     string RenderSequence( const TransKit &kit, 
@@ -68,8 +67,9 @@ private:
                            string separator, 
                            bool separate_last,
                            TreePtr<CPPTree::AccessSpec> init_access = TreePtr<CPPTree::AccessSpec>(),
-                           bool showtype = true,
-                           bool shownonfuncinit = true );
+                           bool show_type = true );
+    string RenderEnumBody( const TransKit &kit, 
+                           Collection<CPPTree::Declaration> spe);
     string RenderOperandSequence( const TransKit &kit, 
                                   Sequence<CPPTree::Expression> spe, 
                                   string separator, 
@@ -82,7 +82,7 @@ private:
 						string separator, 
 						bool separate_last,
 						TreePtr<CPPTree::AccessSpec> init_access = TreePtr<CPPTree::AccessSpec>(),
-						bool showtype=true );
+						bool show_type=true );
 	string RenderParams( const TransKit &kit, 
 						 TreePtr<CPPTree::CallableParams> key,
 						 string separator, 
