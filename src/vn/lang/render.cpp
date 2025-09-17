@@ -439,7 +439,7 @@ string Render::RenderExpression( const TransKit &kit, TreePtr<Initialiser> expre
         AutoPush< TreePtr<Node> > cs( scope_stack, ce );
         string s = "({ ";
         s += RenderScope( kit, ce, true ); // Must do this first to populate backing list
-        s += RenderSequence( kit, ce->statements, ";\n", true );
+        s += RenderSequence( kit, ce->statements, true );
         return s + "})";
     }
     else if( TreePtr<SpecificLabelIdentifier> li = DynamicTreePtrCast< SpecificLabelIdentifier >(expression) )
@@ -929,7 +929,7 @@ string Render::RenderStatement( const TransKit &kit, TreePtr<Statement> statemen
         AutoPush< TreePtr<Node> > cs( scope_stack, c );
         string s = "{\n";
         s += RenderScope( kit, c, true ); // Must do this first to populate backing list
-        s += RenderSequence( kit, c->statements, ";\n", true );
+        s += RenderSequence( kit, c->statements, true );
         return s + "}\n";
     }
     else if( TreePtr<Expression> e = DynamicTreePtrCast< Expression >(statement) )
@@ -1011,7 +1011,6 @@ DEFAULT_CATCH_CLAUSE
 template< class ELEMENT >
 string Render::RenderSequence( const TransKit &kit, 
                                Sequence<ELEMENT> spe,
-                               string separator,
                                bool separate_last,
                                TreePtr<AccessSpec> init_access ) try
 {
@@ -1021,7 +1020,7 @@ string Render::RenderSequence( const TransKit &kit,
     --last_it;    
     for( typename Sequence<ELEMENT>::iterator it=spe.begin(); it!=spe.end(); ++it )
     {
-        string sep = (separate_last || it!=last_it) ? separator : "";
+        string sep = (separate_last || it!=last_it) ? ";\n" : "";
         TreePtr<ELEMENT> pe = *it;
         if( TreePtr<Declaration> d = DynamicTreePtrCast< Declaration >(pe) )
             s += RenderDeclaration( kit, d, sep, init_access ? &init_access : nullptr, false );
@@ -1193,7 +1192,7 @@ string Render::RenderScope( const TransKit &kit,
     // Note that in SC modules there can be inits on non-funciton members, which we hide.
     // TODO not consistent with C++ classes in general, where the inits have already been
     // moved into constructor inits before rendering begins.
-    s += RenderSequence( kit, sorted, ";\n", separate_last, init_access );
+    s += RenderSequence( kit, sorted, separate_last, init_access );
     TRACE();
     return s;
 }

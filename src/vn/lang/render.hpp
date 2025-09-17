@@ -63,7 +63,6 @@ private:
     template< class ELEMENT >
     string RenderSequence( const TransKit &kit, 
                            Sequence<ELEMENT> spe, 
-                           string separator, 
                            bool separate_last,
                            TreePtr<CPPTree::AccessSpec> init_access = TreePtr<CPPTree::AccessSpec>() );
 	string RenderConstructorInitList( const TransKit &kit, 
