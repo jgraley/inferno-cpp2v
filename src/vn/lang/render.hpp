@@ -71,8 +71,7 @@ private:
                            Collection<CPPTree::Declaration> spe);
     string RenderOperandSequence( const TransKit &kit, 
                                   Sequence<CPPTree::Expression> spe, 
-                                  string separator, 
-                                  bool separate_last );
+                                  string separator );
     string RenderModuleCtor( const TransKit &kit, 
                              TreePtr<SCTree::Module> m,
                              TreePtr<CPPTree::AccessSpec> *access );    

@@ -354,7 +354,7 @@ string Render::RenderOperator( const TransKit &kit, TreePtr<Operator> op, Sequen
     Sequence<Expression>::iterator operands_it = operands.begin();
     if( DynamicTreePtrCast< MakeArray >(op) )
     {
-        s = "{ " + RenderOperandSequence( kit, operands, ", ", false ) + " }";
+        s = "{ " + RenderOperandSequence( kit, operands, ", " ) + " }";
     }
     else if( DynamicTreePtrCast< ConditionalOperator >(op) )
     {
@@ -477,9 +477,9 @@ string Render::RenderExpression( const TransKit &kit, TreePtr<Initialiser> expre
     else if( TreePtr<New> n = DynamicTreePtrCast< New >(expression) )
         return before +
                (DynamicTreePtrCast<Global>(n->global) ? "::" : "") +
-               "new(" + RenderOperandSequence( kit, n->placement_arguments, ", ", false ) + ") " +
+               "new(" + RenderOperandSequence( kit, n->placement_arguments, ", " ) + ") " +
                RenderType( kit, n->type, "" ) +
-               (n->constructor_arguments.empty() ? "" : "(" + RenderOperandSequence( kit, n->constructor_arguments, ", ", false ) + ")" ) +
+               (n->constructor_arguments.empty() ? "" : "(" + RenderOperandSequence( kit, n->constructor_arguments, ", " ) + ")" ) +
                after;
     else if( TreePtr<Delete> d = DynamicTreePtrCast< Delete >(expression) )
         return before +
@@ -1037,14 +1037,17 @@ string Render::RenderConstructorInitList( const TransKit &kit,
 										  Sequence<Statement> spe ) try
 {
     TRACE();
-    string s;
-    typename Sequence<Statement>::iterator last_it=spe.end();
-    --last_it;    
-    for( typename Sequence<Statement>::iterator it=spe.begin(); it!=spe.end(); ++it )
+    string s; 
+    bool first = true;
+    for( TreePtr<Statement> st : spe )
     {
-        string sep = (it!=last_it) ? ",\n" : "";
-        TreePtr<Statement> st = *it;
-        s += RenderStatement( kit, st, sep );
+		if( !first )
+			s += ",\n";
+        if( auto e = TreePtr<Expression>::DynamicCast(st) )
+            s += RenderExpression( kit, e );
+        else 
+            s += ERROR_UNSUPPORTED(st);
+        first = false;
     }
     return s;
 }
@@ -1070,19 +1073,17 @@ DEFAULT_CATCH_CLAUSE
 
 string Render::RenderOperandSequence( const TransKit &kit, 
                                       Sequence<Expression> spe,
-                                      string separator,
-                                      bool separate_last ) try
+                                      string separator ) try
 {
     TRACE();
     string s;
-    Sequence<Expression>::iterator last_it=spe.end();
-    --last_it;
-    for( Sequence<Expression>::iterator it=spe.begin(); it!=spe.end(); ++it )
+    bool first = true;
+    for( TreePtr<Expression> pe : spe )
     {
-        //TRACE("%d %p\n", i, &i);
-        string sep = (separate_last || it!=last_it) ? separator : "";
-        TreePtr<Expression> pe = *it;
-        s += RenderExpression( kit, pe ) + sep;
+		if( !first )
+			s += separator;
+        s += RenderExpression( kit, pe );
+        first = false;
     }
     return s;
 }
@@ -1201,14 +1202,14 @@ string Render::RenderParams( const TransKit &kit,
 		
     backing_ordering[key] = sorted;
 		    
-    string s;
-    typename Sequence<Declaration>::iterator last_it=sorted.end();
-    --last_it;    
-    for( typename Sequence<Declaration>::iterator it=sorted.begin(); it!=sorted.end(); ++it )
+    string s;   
+    bool first = true;
+    for( TreePtr<Declaration> d : sorted )
     {
-        string sep = (it!=last_it) ? ", " : "";
-        TreePtr<Declaration> d = *it;
-        s += RenderDeclaration( kit, d, sep, nullptr, false );
+		if( !first )
+			s += ", ";
+        s += RenderDeclaration( kit, d, "", nullptr, false );
+        first = false;
     }
     return s;
 }
