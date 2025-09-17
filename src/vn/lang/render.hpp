@@ -60,11 +60,11 @@ private:
                               TreePtr<CPPTree::AccessSpec> *current_access = nullptr,
                               bool force_incomplete = false );
     string RenderStatement( const TransKit &kit, TreePtr<CPPTree::Statement> statement, string sep );
-    template< class ELEMENT >
-    string RenderSequence( const TransKit &kit, 
-                           Sequence<ELEMENT> spe, 
-                           bool separate_last,
-                           TreePtr<CPPTree::AccessSpec> init_access = TreePtr<CPPTree::AccessSpec>() );
+    string RenderStatementSequence( const TransKit &kit, 
+                                    Sequence<CPPTree::Statement> spe );
+    string RenderDeclarationSequence( const TransKit &kit, 
+                                      Sequence<CPPTree::Declaration> spe,
+                                      TreePtr<CPPTree::AccessSpec> init_access = TreePtr<CPPTree::AccessSpec>() );
 	string RenderConstructorInitList( const TransKit &kit, 
 									  Sequence<CPPTree::Statement> spe );
 	string RenderEnumBody( const TransKit &kit, 
@@ -78,7 +78,6 @@ private:
                              TreePtr<CPPTree::AccessSpec> *access );    
     string RenderScope( const TransKit &kit, 
 						TreePtr<CPPTree::Scope> key,
-						bool separate_last,
 						TreePtr<CPPTree::AccessSpec> init_access = TreePtr<CPPTree::AccessSpec>() );
 	string RenderParams( const TransKit &kit, 
 						 TreePtr<CPPTree::CallableParams> key);
