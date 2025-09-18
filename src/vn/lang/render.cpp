@@ -354,7 +354,7 @@ string Render::RenderOperator( const TransKit &kit, TreePtr<Operator> op, Sequen
     Sequence<Expression>::iterator operands_it = operands.begin();
     if( DynamicTreePtrCast< MakeArray >(op) )
     {
-        s = "{ " + RenderOperandSequence( kit, operands, ", " ) + " }";
+        s = "{ " + RenderOperandSequence( kit, operands ) + " }";
     }
     else if( DynamicTreePtrCast< ConditionalOperator >(op) )
     {
@@ -418,7 +418,7 @@ string Render::RenderCall( const TransKit &kit, TreePtr<Call> call ) try
     TreePtr<Node> ctype = TypeOf::instance(call->callee, root_scope).GetTreePtr();
     ASSERT( ctype );
     if( TreePtr<CallableParams> cp = DynamicTreePtrCast<CallableParams>(ctype) )
-        s += RenderMapInOrder( kit, call, cp, ", ", false );
+        s += RenderMapInOrder( kit, call, cp );
 
     s += ")";
     return s;
@@ -478,9 +478,9 @@ string Render::RenderExpression( const TransKit &kit, TreePtr<Initialiser> expre
     else if( TreePtr<New> n = DynamicTreePtrCast< New >(expression) )
         return before +
                (DynamicTreePtrCast<Global>(n->global) ? "::" : "") +
-               "new(" + RenderOperandSequence( kit, n->placement_arguments, ", " ) + ") " +
+               "new(" + RenderOperandSequence( kit, n->placement_arguments ) + ") " +
                RenderType( kit, n->type, "" ) +
-               (n->constructor_arguments.empty() ? "" : "(" + RenderOperandSequence( kit, n->constructor_arguments, ", " ) + ")" ) +
+               (n->constructor_arguments.empty() ? "" : "(" + RenderOperandSequence( kit, n->constructor_arguments ) + ")" ) +
                after;
     else if( TreePtr<Delete> d = DynamicTreePtrCast< Delete >(expression) )
         return before +
@@ -534,7 +534,7 @@ string Render::RenderMakeRecord( const TransKit &kit, TreePtr<MakeRecord> ro ) t
     s += "(";
     s += RenderType( kit, ro->type, "" );
     s += "){ ";
-    s += RenderMapInOrder( kit, ro, r, ", ", false );
+    s += RenderMapInOrder( kit, ro, r );
     s += " }";
     return s;
 }
@@ -543,9 +543,7 @@ DEFAULT_CATCH_CLAUSE
 
 string Render::RenderMapInOrder( const TransKit &kit, 
                                  TreePtr<MapOperator> ro,
-                                 TreePtr<Node> key,
-                                 string separator,
-                                 bool separate_last ) try
+                                 TreePtr<Node> key ) try
 {	
 	if( backing_ordering.count(key) == 0 )	
 		return "«unknown ordering for "+Trace(key)+", OK in pre-pass»";        	
@@ -569,15 +567,13 @@ string Render::RenderMapInOrder( const TransKit &kit,
                     if( i->identifier == mi->identifier )
                     {
                         if( !first )
-                            s += separator;
+                            s += ", ";
                         s += RenderExpression( kit, mi->value );
                         first = false;
                     }
                 }
             }
         }
-        if( separate_last )
-            s += separator;
     }
     return s;
 }
@@ -700,7 +696,7 @@ string Render::RenderInstance( const TransKit &kit, TreePtr<Instance> o,
 	
     bool callable = (bool)DynamicTreePtrCast<Callable>(o->type);
 
-    // If object was declared as a module, bodge in a name as a constructor parameter
+    // If object was declared as a module instance, bodge in a name as a constructor parameter
     // But not for fields - they need an init list, done in RenderScope()
     if( !DynamicTreePtrCast<Field>(o) )
         if( TreePtr<TypeIdentifier> tid = DynamicTreePtrCast<TypeIdentifier>(o->type) )
@@ -1066,8 +1062,7 @@ DEFAULT_CATCH_CLAUSE
 
 
 string Render::RenderOperandSequence( const TransKit &kit, 
-                                      Sequence<Expression> spe,
-                                      string separator ) try
+                                      Sequence<Expression> spe ) try
 {
     TRACE();
     string s;
@@ -1075,7 +1070,7 @@ string Render::RenderOperandSequence( const TransKit &kit,
     for( TreePtr<Expression> pe : spe )
     {
 		if( !first )
-			s += separator;
+			s += ", ";
         s += RenderExpression( kit, pe );
         first = false;
     }

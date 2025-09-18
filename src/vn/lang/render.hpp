@@ -45,9 +45,7 @@ private:
     string RenderMakeRecord( const TransKit &kit, TreePtr<CPPTree::MakeRecord> ro );
     string RenderMapInOrder( const TransKit &kit, 
                              TreePtr<CPPTree::MapOperator> ro,
-                             TreePtr<Node> key,
-                             string separator,
-                             bool separate_last );
+                             TreePtr<Node> key );
     string RenderAccess( const TransKit &kit, TreePtr<CPPTree::AccessSpec> current_access );
     string RenderStorage( const TransKit &kit, TreePtr<CPPTree::Instance> st );
     void ExtractInits( const TransKit &kit, Sequence<CPPTree::Statement> &body, Sequence<CPPTree::Statement> &inits, Sequence<CPPTree::Statement> &remainder );
@@ -66,8 +64,7 @@ private:
 	string RenderEnumBody( const TransKit &kit, 
                            Collection<CPPTree::Declaration> spe);
     string RenderOperandSequence( const TransKit &kit, 
-                                  Sequence<CPPTree::Expression> spe, 
-                                  string separator );
+                                  Sequence<CPPTree::Expression> spe );
     string RenderModuleCtor( const TransKit &kit, 
                              TreePtr<SCTree::Module> m,
                              TreePtr<CPPTree::AccessSpec> *access );    
