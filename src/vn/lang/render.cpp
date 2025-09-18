@@ -439,7 +439,8 @@ string Render::RenderExpression( const TransKit &kit, TreePtr<Initialiser> expre
         AutoPush< TreePtr<Node> > cs( scope_stack, ce );
         string s = "({ ";
         s += RenderScope( kit, ce ); // Must do this first to populate backing list
-        s += RenderStatementSequence( kit, ce->statements );
+		for( TreePtr<Statement> st : ce->statements )    
+			s += RenderStatement( kit, st, true );    
         return s + "})";
     }
     else if( TreePtr<SpecificLabelIdentifier> li = DynamicTreePtrCast< SpecificLabelIdentifier >(expression) )
@@ -651,11 +652,12 @@ void Render::ExtractInits( const TransKit &kit, Sequence<Statement> &body, Seque
 
 
 string Render::RenderInstance( const TransKit &kit, TreePtr<Instance> o, 
-                               bool show_storage, bool show_type, bool show_scope_res, bool show_init, string sep ) try
+                               bool show_storage, bool show_type, bool show_scope_res, bool show_init, bool show_separator ) try
 {
     string s;
     string name;
     bool constant=false;
+	string sep = show_separator ? ";\n" : "";
 
     ASSERT(o->type);
 
@@ -750,19 +752,16 @@ string Render::RenderInstance( const TransKit &kit, TreePtr<Instance> o,
         // Surround functions with blank lines
         s = '\n' + s + '\n';
     }
-    else
-    {
-        if( TreePtr<Expression> ei = DynamicTreePtrCast<Expression>( o->initialiser ) )
-        {
-            // Render expression with an assignment
-            AutoPush< TreePtr<Node> > cs( scope_stack, GetScope( root_scope, o->identifier ) );
-            s += " = " + RenderExpression(kit, ei) + sep;
-        }
-        else
-        {
-            s += ERROR_UNSUPPORTED(o->initialiser);
-        }
-    }
+    else if( TreePtr<Expression> ei = DynamicTreePtrCast<Expression>( o->initialiser ) )
+	{
+		// Render expression with an assignment
+		AutoPush< TreePtr<Node> > cs( scope_stack, GetScope( root_scope, o->identifier ) );
+		s += " = " + RenderExpression(kit, ei) + sep;
+	}
+	else
+	{
+		s += ERROR_UNSUPPORTED(o->initialiser);
+	}
 
     return s;
 }
@@ -794,12 +793,12 @@ bool Render::ShouldSplitInstance( const TransKit &kit, TreePtr<Instance> o )
 
 
 string Render::RenderDeclaration( const TransKit &kit, TreePtr<Declaration> declaration,
-                                  bool include_separator, 
+                                  bool show_separator, 
                                   TreePtr<AccessSpec> *current_access,
                                   bool force_incomplete ) try
 {
     TRACE();
-	string sep = include_separator ? ";\n" : "";
+	string sep = show_separator ? ";\n" : "";
     string s;
 
     TreePtr<AccessSpec> this_access = MakeTreeNode<Public>();
@@ -820,17 +819,16 @@ string Render::RenderDeclaration( const TransKit &kit, TreePtr<Declaration> decl
     {
         if( ShouldSplitInstance(kit, o) )
         {
-            s += RenderInstance( kit, o, true, true, false, false, sep );
+            s += RenderInstance( kit, o, true, true, false, false, show_separator );
             {
                 AutoPush< TreePtr<Node> > cs( scope_stack, root_scope );
-                deferred_decls += string("\n") + RenderInstance( kit, o, false, true, true, true, sep );
+                deferred_decls += string("\n") + RenderInstance( kit, o, false, true, true, true, show_separator );
             }
         }
         else
         {
             // Otherwise, render everything directly using the default settings
-            s += RenderInstance( kit, o, true, true, false, true, sep );
-            //ASSERT( shownonfuncinit || DynamicTreePtrCast<Uninitialised>(o->initialiser) )("Instance: ")(o)("\nInitialiser: ")(o->initialiser)("\nScopes:\n")(scope_stack)("\nlooks like:\n")(s);
+            s += RenderInstance( kit, o, true, true, false, true, show_separator );
         }
     }
     else if( TreePtr<Typedef> t = DynamicTreePtrCast< Typedef >(declaration) )
@@ -918,21 +916,22 @@ string Render::RenderDeclaration( const TransKit &kit, TreePtr<Declaration> decl
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderStatement( const TransKit &kit, TreePtr<Statement> statement, bool include_separator ) try
+string Render::RenderStatement( const TransKit &kit, TreePtr<Statement> statement, bool show_separator ) try
 {
     TRACE();
-    string sep = include_separator ? ";\n" : "";
+    string sep = show_separator ? ";\n" : "";
     if( !statement )
         return sep;
     //printf( "%s %d things\n", typeid(*statement).name(), statement->Itemise().size() );
     if( TreePtr<Declaration> d = DynamicTreePtrCast< Declaration >(statement) )
-        return RenderDeclaration( kit, d, include_separator );
+        return RenderDeclaration( kit, d, show_separator );
     else if( TreePtr<Compound> c = DynamicTreePtrCast< Compound >(statement) )
     {
         AutoPush< TreePtr<Node> > cs( scope_stack, c );
         string s = "{\n";
         s += RenderScope( kit, c ); // Must do this first to populate backing list
-        s += RenderStatementSequence( kit, c->statements );
+		for( TreePtr<Statement> st : c->statements )    
+			s += RenderStatement( kit, st, true );    
         return s + "}\n";
     }
     else if( TreePtr<Expression> e = DynamicTreePtrCast< Expression >(statement) )
@@ -1011,31 +1010,6 @@ string Render::RenderStatement( const TransKit &kit, TreePtr<Statement> statemen
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderStatementSequence( const TransKit &kit, 
-                                        Sequence<CPPTree::Statement> spe ) try
-{
-    TRACE();
-    string s;
-    for( TreePtr<Statement> st : spe )    
-        s += RenderStatement( kit, st, true );    
-    return s;
-}
-DEFAULT_CATCH_CLAUSE
-
-
-string Render::RenderDeclarationSequence( const TransKit &kit, 
-                                          Sequence<Declaration> spe,
-                                          TreePtr<AccessSpec> init_access ) try
-{
-    TRACE();
-    string s;    
-    for( TreePtr<Declaration> d : spe )
-        s += RenderDeclaration( kit, d, true, init_access ? &init_access : nullptr, false );
-    return s;
-}
-DEFAULT_CATCH_CLAUSE
-
-
 string Render::RenderConstructorInitList( const TransKit &kit, 
 										  Sequence<Statement> spe ) try
 {
@@ -1062,12 +1036,16 @@ string Render::RenderEnumBody( const TransKit &kit,
 {
     TRACE();
     string s;
+    bool first = true;
     for( TreePtr<Declaration> pe : spe )
     {
-        if( auto o = TreePtr<Instance>::DynamicCast(pe) )
-            s += RenderInstance( kit, o, false, false, false, true, ",\n" );
+		if( !first )
+			s += ",\n";
+	    if( auto o = TreePtr<Instance>::DynamicCast(pe) )
+            s += RenderInstance( kit, o, false, false, false, true, false );
         else 
             s += ERROR_UNSUPPORTED(pe);
+        first = false;    
     }
     return s;
 }
@@ -1188,7 +1166,8 @@ string Render::RenderScope( const TransKit &kit,
         s += RenderModuleCtor( kit, sc_module, &init_access );
 
     // Emit the actual declarations, sorted for dependencies
-    s += RenderDeclarationSequence( kit, sorted, init_access );
+    for( TreePtr<Declaration> d : sorted )
+        s += RenderDeclaration( kit, d, true, init_access ? &init_access : nullptr, false );
     TRACE();
     return s;
 }
@@ -1211,8 +1190,8 @@ string Render::RenderParams( const TransKit &kit,
     {
 		if( !first )
 			s += ", ";
-        s += RenderDeclaration( kit, d, false, nullptr, true );
-        //s += RenderInstance( kit, o, true, true, false, false, "" )
+		if( auto o = TreePtr<Instance>::DynamicCast(d) )
+			s += RenderInstance( kit, o, true, true, false, false, false );
         first = false;
     }
     return s;

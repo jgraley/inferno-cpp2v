@@ -52,19 +52,18 @@ private:
     string RenderStorage( const TransKit &kit, TreePtr<CPPTree::Instance> st );
     void ExtractInits( const TransKit &kit, Sequence<CPPTree::Statement> &body, Sequence<CPPTree::Statement> &inits, Sequence<CPPTree::Statement> &remainder );
     string RenderInstance( const TransKit &kit, TreePtr<CPPTree::Instance> o,  
-                           bool show_storage, bool show_type, bool show_scope_res, bool show_init, string sep );
+                           bool show_storage, 
+                           bool show_type, 
+                           bool show_scope_res, 
+                           bool show_init, 
+                           bool show_separator );
     bool ShouldSplitInstance( const TransKit &kit, TreePtr<CPPTree::Instance> o );
     string RenderDeclaration( const TransKit &kit, TreePtr<CPPTree::Declaration> declaration, 
-                              bool include_separator, 
+                              bool show_separator, 
                               TreePtr<CPPTree::AccessSpec> *current_access = nullptr,
                               bool force_incomplete = false );
-    string RenderStatement( const TransKit &kit, TreePtr<CPPTree::Statement> statement, bool include_separator );
-    string RenderStatementSequence( const TransKit &kit, 
-                                    Sequence<CPPTree::Statement> spe );
-    string RenderDeclarationSequence( const TransKit &kit, 
-                                      Sequence<CPPTree::Declaration> spe,
-                                      TreePtr<CPPTree::AccessSpec> init_access = TreePtr<CPPTree::AccessSpec>() );
-	string RenderConstructorInitList( const TransKit &kit, 
+    string RenderStatement( const TransKit &kit, TreePtr<CPPTree::Statement> statement, bool show_separator );
+ 	string RenderConstructorInitList( const TransKit &kit, 
 									  Sequence<CPPTree::Statement> spe );
 	string RenderEnumBody( const TransKit &kit, 
                            Collection<CPPTree::Declaration> spe);
