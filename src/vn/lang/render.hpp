@@ -50,13 +50,13 @@ private:
     string RenderStorage( const TransKit &kit, TreePtr<CPPTree::Instance> st );
     void ExtractInits( const TransKit &kit, Sequence<CPPTree::Statement> &body, Sequence<CPPTree::Statement> &inits, Sequence<CPPTree::Statement> &remainder );
 
-    string RenderPrototype( const TransKit &kit, TreePtr<CPPTree::Instance> o, 
-                            bool out_of_line );
+    string RenderInstanceProto( const TransKit &kit, TreePtr<CPPTree::Instance> o, 
+                                bool out_of_line );
     string RenderInstance( const TransKit &kit, TreePtr<CPPTree::Instance> o,  
                            bool out_of_line );
     bool ShouldSplitInstance( const TransKit &kit, TreePtr<CPPTree::Instance> o );
+    //string RenderRecordProto( const TransKit &kit, TreePtr<CPPTree::Record> record )
     string RenderDeclaration( const TransKit &kit, TreePtr<CPPTree::Declaration> declaration, 
-                              TreePtr<CPPTree::AccessSpec> *current_access = nullptr,
                               bool force_incomplete = false );
     string RenderStatement( const TransKit &kit, TreePtr<CPPTree::Statement> statement );
  	string RenderConstructorInitList( const TransKit &kit, 

@@ -647,7 +647,7 @@ void Render::ExtractInits( const TransKit &kit, Sequence<Statement> &body, Seque
 }
 
 
-string Render::RenderPrototype( const TransKit &kit, TreePtr<Instance> o, 
+string Render::RenderInstanceProto( const TransKit &kit, TreePtr<Instance> o, 
                                 bool out_of_line ) try
 {
     string s;
@@ -692,7 +692,7 @@ DEFAULT_CATCH_CLAUSE
 string Render::RenderInstance( const TransKit &kit, TreePtr<Instance> o, 
                                bool out_of_line ) try
 {
-    string s = RenderPrototype( kit, o, out_of_line );
+    string s = RenderInstanceProto( kit, o, out_of_line );
 	
     bool callable = (bool)DynamicTreePtrCast<Callable>(o->type);
 
@@ -792,31 +792,16 @@ bool Render::ShouldSplitInstance( const TransKit &kit, TreePtr<Instance> o )
 
 
 string Render::RenderDeclaration( const TransKit &kit, TreePtr<Declaration> declaration,
-                                  TreePtr<AccessSpec> *current_access,
                                   bool force_incomplete ) try
 {
     TRACE();
     string s;
 
-    TreePtr<AccessSpec> this_access = MakeTreeNode<Public>();
-
-    // Decide access spec for this declaration (explicit if instance, otherwise force to Public)
-    if( TreePtr<Field> f = DynamicTreePtrCast<Field>(declaration) )
-        this_access = f->access;
-
-    // Now decide whether we actually need to render an access spec (ie has it changed?)
-    if( current_access && // nullptr means dont ever render access specs
-        typeid(*this_access) != typeid(**current_access) ) // current_access spec must have changed
-    {
-        s += RenderAccess( kit, this_access ) + ":\n";
-        *current_access = this_access;
-    }
-
     if( TreePtr<Instance> o = DynamicTreePtrCast<Instance>(declaration) )
     {
         if( ShouldSplitInstance(kit, o) )
         {
-            s += RenderPrototype( kit, o, false ) + ";\n";
+            s += RenderInstanceProto( kit, o, false ) + ";\n";
             {
                 AutoPush< TreePtr<Node> > cs( scope_stack, root_scope );
                 deferred_decls += string("\n") + RenderInstance( kit, o, true );
@@ -1150,6 +1135,28 @@ string Render::RenderModuleCtor( const TransKit &kit,
 DEFAULT_CATCH_CLAUSE
 
 
+string Render::MaybeRenderAccess( TreePtr<Declaration> key,
+								  TreePtr<CPPTree::AccessSpec> *current_access = nullptr )
+{
+
+    TreePtr<AccessSpec> this_access = MakeTreeNode<Public>();
+
+    // Decide access spec for this declaration (explicit if instance, otherwise force to Public)
+    if( TreePtr<Field> f = DynamicTreePtrCast<Field>(declaration) )
+        this_access = f->access;
+
+    // Now decide whether we actually need to render an access spec (ie has it changed?)
+    if( current_access && // nullptr means dont ever render access specs
+        typeid(*this_access) != typeid(**current_access) ) // current_access spec must have changed
+    {
+        s += RenderAccess( kit, this_access ) + ":\n";
+        *current_access = this_access;
+    }
+    
+    return s;	
+}								  
+
+
 string Render::RenderScope( const TransKit &kit, 
 							TreePtr<Scope> key,
 							TreePtr<AccessSpec> init_access ) try
@@ -1164,7 +1171,11 @@ string Render::RenderScope( const TransKit &kit,
     for( TreePtr<Declaration> pd : sorted ) //for( int i=0; i<sorted.size(); i++ )
         if( TreePtr<Record> r = DynamicTreePtrCast<Record>(pd) ) // is a record
             if( !DynamicTreePtrCast<Enum>(r) ) // but not an enum
-                s += RenderDeclaration( kit, r, init_access ? &init_access : nullptr, true );
+            {
+				if( init_access )
+					s += MaybeRenderAccess( r, &init_access );
+                s += RenderDeclaration( kit, r, true );
+			}
 
     // For SystemC modules, we generate a constructor based on the other decls in
     // the module. Nothing goes in the Inferno tree for a module constructor, since
@@ -1175,7 +1186,11 @@ string Render::RenderScope( const TransKit &kit,
 
     // Emit the actual declarations, sorted for dependencies
     for( TreePtr<Declaration> d : sorted )
-        s += RenderDeclaration( kit, d, init_access ? &init_access : nullptr, false );
+    {
+		if( init_access )
+			s += MaybeRenderAccess( r, &init_access );		
+        s += RenderDeclaration( kit, d, false );
+	}
     TRACE();
     return s;
 }
