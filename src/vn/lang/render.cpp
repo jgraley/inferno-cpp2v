@@ -746,7 +746,7 @@ string Render::RenderInstance( const TransKit &kit, TreePtr<Instance> o,
         auto r = MakeTreeNode<Compound>();
         r->members = members;
         r->statements = remainder;
-        s += "\n" + RenderStatement(kit, r, "");
+        s += "\n" + RenderStatement(kit, r, false);
         // Surround functions with blank lines
         s = '\n' + s + '\n';
     }
@@ -794,10 +794,12 @@ bool Render::ShouldSplitInstance( const TransKit &kit, TreePtr<Instance> o )
 
 
 string Render::RenderDeclaration( const TransKit &kit, TreePtr<Declaration> declaration,
-                                  string sep, TreePtr<AccessSpec> *current_access,
+                                  bool include_separator, 
+                                  TreePtr<AccessSpec> *current_access,
                                   bool force_incomplete ) try
 {
     TRACE();
+	string sep = include_separator ? ";\n" : "";
     string s;
 
     TreePtr<AccessSpec> this_access = MakeTreeNode<Public>();
@@ -916,14 +918,15 @@ string Render::RenderDeclaration( const TransKit &kit, TreePtr<Declaration> decl
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderStatement( const TransKit &kit, TreePtr<Statement> statement, string sep ) try
+string Render::RenderStatement( const TransKit &kit, TreePtr<Statement> statement, bool include_separator ) try
 {
     TRACE();
+    string sep = include_separator ? ";\n" : "";
     if( !statement )
         return sep;
     //printf( "%s %d things\n", typeid(*statement).name(), statement->Itemise().size() );
     if( TreePtr<Declaration> d = DynamicTreePtrCast< Declaration >(statement) )
-        return RenderDeclaration( kit, d, sep );
+        return RenderDeclaration( kit, d, include_separator );
     else if( TreePtr<Compound> c = DynamicTreePtrCast< Compound >(statement) )
     {
         AutoPush< TreePtr<Node> > cs( scope_stack, c );
@@ -951,27 +954,27 @@ string Render::RenderStatement( const TransKit &kit, TreePtr<Statement> statemen
         bool sub_if = !!DynamicTreePtrCast<If>(i->body);
         if( sub_if && else_clause )
              s += "{\n"; // Note: braces there to clarify else binding eg if(a) if(b) foo; else how_do_i_bind;
-        s += RenderStatement(kit, i->body, ";\n");
+        s += RenderStatement(kit, i->body, true);
         if( sub_if && else_clause )
              s += "}\n";
         if( else_clause )  
             s += "else\n" +
-                 RenderStatement(kit, i->else_body, ";\n");
+                 RenderStatement(kit, i->else_body, true);
         return s;
     }
     else if( TreePtr<While> w = DynamicTreePtrCast<While>(statement) )
         return "while( " + RenderExpression(kit, w->condition) + " )\n" +
-               RenderStatement(kit, w->body, ";\n");
+               RenderStatement(kit, w->body, true);
     else if( TreePtr<Do> d = DynamicTreePtrCast<Do>(statement) )
         return "do\n" +
-               RenderStatement(kit, d->body, ";\n") +
+               RenderStatement(kit, d->body, true) +
                "while( " + RenderExpression(kit, d->condition) + " )" + sep;
     else if( TreePtr<For> f = DynamicTreePtrCast<For>(statement) )
-        return "for( " + RenderStatement(kit, f->initialisation, "") + "; " + RenderExpression(kit, f->condition) + "; "+ RenderStatement(kit, f->increment, "") + " )\n" +
-               RenderStatement(kit, f->body, ";\n");
+        return "for( " + RenderStatement(kit, f->initialisation, false) + "; " + RenderExpression(kit, f->condition) + "; "+ RenderStatement(kit, f->increment, false) + " )\n" +
+               RenderStatement(kit, f->body, true);
     else if( TreePtr<Switch> s = DynamicTreePtrCast<Switch>(statement) )
         return "switch( " + RenderExpression(kit, s->condition) + " )\n" +
-               RenderStatement(kit, s->body, ";\n");
+               RenderStatement(kit, s->body, true);
     else if( TreePtr<Case> c = DynamicTreePtrCast<Case>(statement) )
         return "case " + RenderExpression(kit, c->value) + ":;\n";
     else if( TreePtr<RangeCase> rc = DynamicTreePtrCast<RangeCase>(statement) )
@@ -1014,7 +1017,7 @@ string Render::RenderStatementSequence( const TransKit &kit,
     TRACE();
     string s;
     for( TreePtr<Statement> st : spe )    
-        s += RenderStatement( kit, st, ";\n" );    
+        s += RenderStatement( kit, st, true );    
     return s;
 }
 DEFAULT_CATCH_CLAUSE
@@ -1027,7 +1030,7 @@ string Render::RenderDeclarationSequence( const TransKit &kit,
     TRACE();
     string s;    
     for( TreePtr<Declaration> d : spe )
-        s += RenderDeclaration( kit, d, ";\n", init_access ? &init_access : nullptr, false );
+        s += RenderDeclaration( kit, d, true, init_access ? &init_access : nullptr, false );
     return s;
 }
 DEFAULT_CATCH_CLAUSE
@@ -1175,7 +1178,7 @@ string Render::RenderScope( const TransKit &kit,
     for( TreePtr<Declaration> pd : sorted ) //for( int i=0; i<sorted.size(); i++ )
         if( TreePtr<Record> r = DynamicTreePtrCast<Record>(pd) ) // is a record
             if( !DynamicTreePtrCast<Enum>(r) ) // but not an enum
-                s += RenderDeclaration( kit, r, ";\n", init_access ? &init_access : nullptr, true );
+                s += RenderDeclaration( kit, r, true, init_access ? &init_access : nullptr, true );
 
     // For SystemC modules, we generate a constructor based on the other decls in
     // the module. Nothing goes in the Inferno tree for a module constructor, since
@@ -1208,7 +1211,8 @@ string Render::RenderParams( const TransKit &kit,
     {
 		if( !first )
 			s += ", ";
-        s += RenderDeclaration( kit, d, "", nullptr, false );
+        s += RenderDeclaration( kit, d, false, nullptr, true );
+        //s += RenderInstance( kit, o, true, true, false, false, "" )
         first = false;
     }
     return s;

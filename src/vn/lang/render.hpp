@@ -54,12 +54,11 @@ private:
     string RenderInstance( const TransKit &kit, TreePtr<CPPTree::Instance> o,  
                            bool show_storage, bool show_type, bool show_scope_res, bool show_init, string sep );
     bool ShouldSplitInstance( const TransKit &kit, TreePtr<CPPTree::Instance> o );
-    string RenderDeclaration( const TransKit &kit, 
-                              TreePtr<CPPTree::Declaration> declaration, 
-                              string sep, 
+    string RenderDeclaration( const TransKit &kit, TreePtr<CPPTree::Declaration> declaration, 
+                              bool include_separator, 
                               TreePtr<CPPTree::AccessSpec> *current_access = nullptr,
                               bool force_incomplete = false );
-    string RenderStatement( const TransKit &kit, TreePtr<CPPTree::Statement> statement, string sep );
+    string RenderStatement( const TransKit &kit, TreePtr<CPPTree::Statement> statement, bool include_separator );
     string RenderStatementSequence( const TransKit &kit, 
                                     Sequence<CPPTree::Statement> spe );
     string RenderDeclarationSequence( const TransKit &kit, 
