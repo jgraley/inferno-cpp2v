@@ -651,13 +651,12 @@ void Render::ExtractInits( const TransKit &kit, Sequence<Statement> &body, Seque
 }
 
 
-string Render::RenderInstance( const TransKit &kit, TreePtr<Instance> o, 
-                               bool show_storage, bool show_type, bool show_scope_res, bool show_init, bool show_separator ) try
+string Render::RenderPrototype( const TransKit &kit, TreePtr<Instance> o, 
+                                bool out_of_line ) try
 {
     string s;
     string name;
     bool constant=false;
-	string sep = show_separator ? ";\n" : "";
 
     ASSERT(o->type);
 
@@ -668,14 +667,11 @@ string Render::RenderInstance( const TransKit &kit, TreePtr<Instance> o,
         if( DynamicTreePtrCast<Const>(f->constancy) )
             constant = true;
 
-    if( show_storage )
-    {
-        s += RenderStorage(kit, o);
-    }
-
-    if( show_scope_res )
+    if( out_of_line )
         name += RenderScopePrefix(kit, o->identifier);
-
+    else // in-line
+        s += RenderStorage(kit, o);
+ 
     TreePtr<Constructor> con = DynamicTreePtrCast<Constructor>(o->type);
     TreePtr<Destructor> de = DynamicTreePtrCast<Destructor>(o->type);
     if( con || de )
@@ -690,28 +686,35 @@ string Render::RenderInstance( const TransKit &kit, TreePtr<Instance> o,
         name += RenderIdentifier(kit, o->identifier);
     }
 
-    if( show_type )
-        s += RenderType( kit, o->type, name, constant );
-    else
-        s = name;
+    s += RenderType( kit, o->type, name, constant );
 
+	return s;
+} 
+DEFAULT_CATCH_CLAUSE
+
+
+string Render::RenderInstance( const TransKit &kit, TreePtr<Instance> o, 
+                               bool out_of_line ) try
+{
+    string s = RenderPrototype( kit, o, out_of_line );
+	
     bool callable = (bool)DynamicTreePtrCast<Callable>(o->type);
 
-    // If object is really a module, bodge in a name as a constructor parameter
+    // If object was declared as a module, bodge in a name as a constructor parameter
     // But not for fields - they need an init list, done in RenderScope()
     if( !DynamicTreePtrCast<Field>(o) )
         if( TreePtr<TypeIdentifier> tid = DynamicTreePtrCast<TypeIdentifier>(o->type) )
             if( TreePtr<Record> r = GetRecordDeclaration(kit, tid).GetTreePtr() )
                 if( DynamicTreePtrCast<Module>(r) )
                 {
-                    s += "(\"" + RenderIdentifier(kit, o->identifier) + "\")" + sep;
+                    s += "(\"" + RenderIdentifier(kit, o->identifier) + "\")" + ";\n";
                     return s;
                 }
     
-    if( !show_init || DynamicTreePtrCast<Uninitialised>(o->initialiser) )
+    if( DynamicTreePtrCast<Uninitialised>(o->initialiser) )
     {
         // Don't render any initialiser
-        s += sep;
+        s += ";\n";
     }
     else if( callable )
     {
@@ -756,7 +759,7 @@ string Render::RenderInstance( const TransKit &kit, TreePtr<Instance> o,
 	{
 		// Render expression with an assignment
 		AutoPush< TreePtr<Node> > cs( scope_stack, GetScope( root_scope, o->identifier ) );
-		s += " = " + RenderExpression(kit, ei) + sep;
+		s += " = " + RenderExpression(kit, ei) + ";\n";
 	}
 	else
 	{
@@ -817,16 +820,16 @@ string Render::RenderDeclaration( const TransKit &kit, TreePtr<Declaration> decl
     {
         if( ShouldSplitInstance(kit, o) )
         {
-            s += RenderInstance( kit, o, true, true, false, false, true );
+            s += RenderPrototype( kit, o, false ) + ";\n";
             {
                 AutoPush< TreePtr<Node> > cs( scope_stack, root_scope );
-                deferred_decls += string("\n") + RenderInstance( kit, o, false, true, true, true, true );
+                deferred_decls += string("\n") + RenderInstance( kit, o, true );
             }
         }
         else
         {
             // Otherwise, render everything directly using the default settings
-            s += RenderInstance( kit, o, true, true, false, true, true );
+            s += RenderInstance( kit, o, false );
         }
     }
     else if( TreePtr<Typedef> t = DynamicTreePtrCast< Typedef >(declaration) )
@@ -1038,10 +1041,23 @@ string Render::RenderEnumBody( const TransKit &kit,
     {
 		if( !first )
 			s += ",\n";
-	    if( auto o = TreePtr<Instance>::DynamicCast(pe) )
-            s += RenderInstance( kit, o, false, false, false, true, false );
-        else 
-            s += ERROR_UNSUPPORTED(pe);
+			
+	    auto o = TreePtr<Instance>::DynamicCast(pe);
+	    if( !o )
+	    {
+			s += ERROR_UNSUPPORTED(pe);
+			continue;
+		}
+	    s += RenderIdentifier(kit, o->identifier) + " = ";
+	    
+        auto ei = TreePtr<Expression>::DynamicCast( o->initialiser );
+	    if( !ei )
+	    {
+			s += ERROR_UNSUPPORTED(o->initialiser);
+			continue;
+		}		
+		s += RenderExpression(kit, ei);
+
         first = false;    
     }
     return s;
@@ -1187,8 +1203,16 @@ string Render::RenderParams( const TransKit &kit,
     {
 		if( !first )
 			s += ", ";
-		if( auto o = TreePtr<Instance>::DynamicCast(d) )
-			s += RenderInstance( kit, o, true, true, false, false, false );
+		
+		auto o = TreePtr<Instance>::DynamicCast(d);
+		if( !o )
+		{
+			s += ERROR_UNSUPPORTED(d);
+			continue;
+		}
+		string name = RenderIdentifier(kit, o->identifier);
+        s += RenderType( kit, o->type, name, false );
+    		
         first = false;
     }
     return s;

@@ -51,12 +51,11 @@ private:
     string RenderAccess( const TransKit &kit, TreePtr<CPPTree::AccessSpec> current_access );
     string RenderStorage( const TransKit &kit, TreePtr<CPPTree::Instance> st );
     void ExtractInits( const TransKit &kit, Sequence<CPPTree::Statement> &body, Sequence<CPPTree::Statement> &inits, Sequence<CPPTree::Statement> &remainder );
+
+    string RenderPrototype( const TransKit &kit, TreePtr<CPPTree::Instance> o, 
+                            bool out_of_line );
     string RenderInstance( const TransKit &kit, TreePtr<CPPTree::Instance> o,  
-                           bool show_storage, 
-                           bool show_type, 
-                           bool show_scope_res, 
-                           bool show_init, 
-                           bool show_separator );
+                           bool out_of_line );
     bool ShouldSplitInstance( const TransKit &kit, TreePtr<CPPTree::Instance> o );
     string RenderDeclaration( const TransKit &kit, TreePtr<CPPTree::Declaration> declaration, 
                               TreePtr<CPPTree::AccessSpec> *current_access = nullptr,
