@@ -61,7 +61,7 @@ MakeAllForUncombable::MakeAllForUncombable()
     auto s_for = MakePatternNode<For>();
     auto init = MakePatternNode<Statement>();
     auto test = MakePatternNode<Expression>();
-    auto inc = MakePatternNode<Statement>();
+    auto inc = MakePatternNode<Expression>();
     auto body = MakePatternNode<Statement>();
     auto r_ufor = MakePatternNode<UncombableFor>();
     
@@ -213,9 +213,9 @@ ForToWhile::ForToWhile()
     
     auto s_for = MakePatternNode<For>();
     auto forbody = MakePatternNode<Statement>();
-    auto inc = MakePatternNode<Statement>();
     auto init = MakePatternNode<Statement>();
     auto cond = MakePatternNode<Expression>();
+    auto inc = MakePatternNode<Expression>();
     auto r_while = MakePatternNode<While>();
     auto r_outer = MakePatternNode<Compound>();
     auto r_body = MakePatternNode<Compound>();

@@ -59,10 +59,9 @@ private:
                            bool show_separator );
     bool ShouldSplitInstance( const TransKit &kit, TreePtr<CPPTree::Instance> o );
     string RenderDeclaration( const TransKit &kit, TreePtr<CPPTree::Declaration> declaration, 
-                              bool show_separator, 
                               TreePtr<CPPTree::AccessSpec> *current_access = nullptr,
                               bool force_incomplete = false );
-    string RenderStatement( const TransKit &kit, TreePtr<CPPTree::Statement> statement, bool show_separator );
+    string RenderStatement( const TransKit &kit, TreePtr<CPPTree::Statement> statement );
  	string RenderConstructorInitList( const TransKit &kit, 
 									  Sequence<CPPTree::Statement> spe );
 	string RenderEnumBody( const TransKit &kit, 

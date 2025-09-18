@@ -1303,7 +1303,7 @@ private:
         if( third )
             f->increment = hold_stmt.FromRaw( third );
         else
-            f->increment = MakeTreeNode<Nop>();
+            f->increment = MakeTreeNode<False>();
 
         f->body = hold_stmt.FromRaw( Body );
         return hold_stmt.ToRaw( f );

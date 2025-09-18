@@ -919,9 +919,12 @@ struct Do : Loop, Uncombable // a do..while() construct
 struct For : Loop
 {
     NODE_FUNCTIONS_FINAL
-    TreePtr<Statement> initialisation; // Initialiser; use Nop if absent
-    TreePtr<Expression> condition;     // Condition; use True if absent
-    TreePtr<Statement> increment;      // Increment; use Nop if absent
+    TreePtr<Statement>  initialisation; // Initialiser; use Nop if absent
+    TreePtr<Expression> condition;      // Condition; use True if absent
+    TreePtr<Expression> increment;      // Increment; use Nop if absent
+    // Note: K&R has all three as expressions but init needs to be a statement
+    // if we are to declare the loop variable there. OTOH if inc is a statement
+    // then the grammar will want to produce a terminator ie `for(a;b;c;)`
 };
 
 /// Switch statement. 
