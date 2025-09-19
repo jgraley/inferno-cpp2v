@@ -55,19 +55,18 @@ private:
     string RenderInstance( const TransKit &kit, TreePtr<CPPTree::Instance> o,  
                            bool out_of_line );
     bool ShouldSplitInstance( const TransKit &kit, TreePtr<CPPTree::Instance> o );
-    //string RenderRecordProto( const TransKit &kit, TreePtr<CPPTree::Record> record )
-    string RenderDeclaration( const TransKit &kit, TreePtr<CPPTree::Declaration> declaration, 
-                              bool force_incomplete = false );
+    string RenderRecordProto( const TransKit &kit, TreePtr<CPPTree::Record> record );
+    string RenderDeclaration( const TransKit &kit, TreePtr<CPPTree::Declaration> declaration );
     string RenderStatement( const TransKit &kit, TreePtr<CPPTree::Statement> statement );
  	string RenderConstructorInitList( const TransKit &kit, 
 									  Sequence<CPPTree::Statement> spe );
-	string RenderEnumBody( const TransKit &kit, 
-                           Collection<CPPTree::Declaration> spe);
-    string RenderOperandSequence( const TransKit &kit, 
-                                  Sequence<CPPTree::Expression> spe );
-    string RenderModuleCtor( const TransKit &kit, 
-                             TreePtr<SCTree::Module> m,
-                             TreePtr<CPPTree::AccessSpec> *access );    
+	string RenderEnumBody( const TransKit &kit, Collection<CPPTree::Declaration> spe);
+    string RenderOperandSequence( const TransKit &kit, Sequence<CPPTree::Expression> spe );
+    string RenderModuleCtor( const TransKit &kit, TreePtr<SCTree::Module> m );    
+	string MaybeRenderFieldAccess( const TransKit &kit, TreePtr<CPPTree::Declaration> declaration,
+			  			           TreePtr<CPPTree::AccessSpec> *current_access );
+	string MaybeRenderAccessColon( const TransKit &kit, TreePtr<CPPTree::AccessSpec> this_access,
+			  			           TreePtr<CPPTree::AccessSpec> *current_access );
     string RenderScope( const TransKit &kit, 
 						TreePtr<CPPTree::Scope> key,
 						TreePtr<CPPTree::AccessSpec> init_access = TreePtr<CPPTree::AccessSpec>() );

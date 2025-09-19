@@ -791,8 +791,29 @@ bool Render::ShouldSplitInstance( const TransKit &kit, TreePtr<Instance> o )
 }
 
 
-string Render::RenderDeclaration( const TransKit &kit, TreePtr<Declaration> declaration,
-                                  bool force_incomplete ) try
+string Render::RenderRecordProto( const TransKit &kit, TreePtr<Record> record )
+{
+	string s;
+	shared_ptr<SCNamedRecord> scr = dynamic_pointer_cast< SCNamedRecord >(record);
+	if( DynamicTreePtrCast< Class >(record) || scr )
+		s += "class";
+	else if( DynamicTreePtrCast< Struct >(record) )
+		s += "struct";
+	else if( DynamicTreePtrCast< Union >(record) )
+		s += "union";
+	else if( DynamicTreePtrCast< Enum >(record) )
+		s += "enum";
+	else
+		return ERROR_UNSUPPORTED(record);
+
+	// Name of the record
+	s += " " + RenderIdentifier(kit, record->identifier);
+	
+	return s;
+}
+
+
+string Render::RenderDeclaration( const TransKit &kit, TreePtr<Declaration> declaration ) try
 {
     TRACE();
     string s;
@@ -819,71 +840,58 @@ string Render::RenderDeclaration( const TransKit &kit, TreePtr<Declaration> decl
     }
     else if( TreePtr<Record> r = DynamicTreePtrCast< Record >(declaration) )
     {
-        TreePtr<AccessSpec> a;
         shared_ptr<SCNamedRecord> scr = dynamic_pointer_cast< SCNamedRecord >(r);
+
+        // Prototype of the record
+		s += RenderRecordProto( kit, r );
+
+ 	    // Base classes
+		if( TreePtr<InheritanceRecord> ir = DynamicTreePtrCast< InheritanceRecord >(declaration) )
+		{
+			if( !ir->bases.empty() || scr )
+			{
+				s += " : ";
+				bool first=true;
+				if( scr )
+				{
+					first = false;
+					s += RenderAccess(kit, MakeTreeNode<Public>()) + " ";
+					s += scr->GetToken();
+				}
+				for( TreePtr<Node> bn : sc.GetTreePtrOrdering(ir->bases) )
+				{
+					if( !first )
+						s += ", ";
+					first=false;
+					auto b = TreePtr<Base>::DynamicCast(bn);
+					ASSERT( b );
+					s += RenderAccess(kit, b->access) + " ";
+					s += RenderIdentifier(kit, b->record);
+				}
+			}
+		}
+
+		// Members
+		AutoPush< TreePtr<Node> > cs( scope_stack, r );
+		s += "\n{\n";
+        TreePtr<AccessSpec> a;
         if( DynamicTreePtrCast< Class >(r) || scr )
-        {
-            s += "class";
             a = MakeTreeNode<Private>();
-        }
         else if( DynamicTreePtrCast< Struct >(r) )
-        {
-            s += "struct";
             a = MakeTreeNode<Public>();
-        }
         else if( DynamicTreePtrCast< Union >(r) )
-        {
-            s += "union";
             a = MakeTreeNode<Public>();
-        }
         else if( DynamicTreePtrCast< Enum >(r) )
-        {
-            s += "enum";
-            a = MakeTreeNode<Public>();
-        }
+            a = nullptr;
         else
             return ERROR_UNSUPPORTED(declaration);
 
-        // Name of the record
-        s += " " + RenderIdentifier(kit, r->identifier);
-
-        if( !force_incomplete )
-        {
-            // Base classes
-            if( TreePtr<InheritanceRecord> ir = DynamicTreePtrCast< InheritanceRecord >(declaration) )
-            {
-                if( !ir->bases.empty() || scr )
-                {
-                    s += " : ";
-                    bool first=true;
-                    if( scr )
-                    {
-                        first = false;
-                        s += "public " + scr->GetToken();
-                    }
-                    for( TreePtr<Node> bn : sc.GetTreePtrOrdering(ir->bases) )
-                    {
-                        if( !first )
-                            s += ", ";
-                        first=false;
-                        auto b = TreePtr<Base>::DynamicCast(bn);
-                        ASSERT( b );
-                        s += RenderAccess(kit, b->access) + " " + RenderIdentifier(kit, b->record);
-                    }
-                }
-            }
-
-            // Contents
-            AutoPush< TreePtr<Node> > cs( scope_stack, r );
-            s += "\n{\n";
-            if( DynamicTreePtrCast< Enum >(r) )
-				s += RenderEnumBody( kit, r->members );
-			else
-				s += RenderScope( kit, r, a );			
-            s += "}";                                 
-        }
-
-        s += ";\n";
+		if( a )
+			s += RenderScope( kit, r, a );			
+		else
+			s += RenderEnumBody( kit, r->members );
+			
+		s += "};\n";
         // Add blank lines before and after
         s = '\n' + s + '\n';
     }
@@ -1064,18 +1072,10 @@ string Render::RenderOperandSequence( const TransKit &kit,
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderModuleCtor( const TransKit &kit, 
-                                 TreePtr<Module> m,
-                                 TreePtr<AccessSpec> *access ) try
+string Render::RenderModuleCtor( const TransKit &kit, TreePtr<Module> m ) try
 {
     string s;
     
-    // SystemC module, we must produce a constructor in SC style, do this as inline
-    if( !DynamicTreePtrCast<Public>(*access) )
-    {
-        s += "public:\n";
-        *access = MakeTreeNode<Public>();// note that we left the access as public
-    }
     s += "SC_CTOR( " + RenderIdentifier( kit, m->identifier ) + " )";
     int first = true;             
     auto sorted_members = sc.GetTreePtrOrdering(m->members);
@@ -1135,25 +1135,34 @@ string Render::RenderModuleCtor( const TransKit &kit,
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::MaybeRenderAccess( TreePtr<Declaration> key,
-								  TreePtr<CPPTree::AccessSpec> *current_access = nullptr )
+string Render::MaybeRenderFieldAccess( const TransKit &kit, TreePtr<Declaration> declaration,
+								       TreePtr<AccessSpec> *current_access )
 {
-
+	ASSERT( current_access );
+	
     TreePtr<AccessSpec> this_access = MakeTreeNode<Public>();
 
     // Decide access spec for this declaration (explicit if instance, otherwise force to Public)
     if( TreePtr<Field> f = DynamicTreePtrCast<Field>(declaration) )
         this_access = f->access;
 
+    return MaybeRenderAccessColon( kit, this_access, current_access );	
+}								  
+
+
+string Render::MaybeRenderAccessColon( const TransKit &kit, TreePtr<AccessSpec> this_access,
+								       TreePtr<AccessSpec> *current_access )
+{
+	ASSERT( current_access );
+
     // Now decide whether we actually need to render an access spec (ie has it changed?)
-    if( current_access && // nullptr means dont ever render access specs
-        typeid(*this_access) != typeid(**current_access) ) // current_access spec must have changed
+    if( typeid(*this_access) != typeid(**current_access) ) // current_access spec must have changed
     {
-        s += RenderAccess( kit, this_access ) + ":\n";
         *current_access = this_access;
+        return RenderAccess( kit, this_access ) + ":\n";
     }
     
-    return s;	
+    return "";	
 }								  
 
 
@@ -1173,8 +1182,8 @@ string Render::RenderScope( const TransKit &kit,
             if( !DynamicTreePtrCast<Enum>(r) ) // but not an enum
             {
 				if( init_access )
-					s += MaybeRenderAccess( r, &init_access );
-                s += RenderDeclaration( kit, r, true );
+					s += MaybeRenderFieldAccess( kit, r, &init_access );
+                s += RenderRecordProto( kit, r ) + ";\n";
 			}
 
     // For SystemC modules, we generate a constructor based on the other decls in
@@ -1182,14 +1191,18 @@ string Render::RenderScope( const TransKit &kit,
     // it is an elaboration mechanism, not funcitonal.
     TreePtr<Module> sc_module = DynamicTreePtrCast<Module>(key);
     if( sc_module )
-        s += RenderModuleCtor( kit, sc_module, &init_access );
-
+    {
+ 		if( init_access )
+			s += MaybeRenderAccessColon( kit, MakeTreeNode<Public>(), &init_access );		
+        s += RenderModuleCtor( kit, sc_module );
+	}
+	
     // Emit the actual declarations, sorted for dependencies
     for( TreePtr<Declaration> d : sorted )
     {
 		if( init_access )
-			s += MaybeRenderAccess( r, &init_access );		
-        s += RenderDeclaration( kit, d, false );
+			s += MaybeRenderFieldAccess( kit, d, &init_access );		
+        s += RenderDeclaration( kit, d );
 	}
     TRACE();
     return s;
