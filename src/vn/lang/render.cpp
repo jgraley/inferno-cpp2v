@@ -61,10 +61,11 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern )
 string Render::RenderToString( TreePtr<Node> root )
 {   
     DefaultTransUtils utils(root);
-    TransKit kit { &utils };
+    stringstream render_output;
+    Render::Kit kit { &utils, render_output };
     
 #ifdef TEST_FOR_UNMODIFIED_TREE    
-    temp_old_root = dynamic_pointer_cast<Program>(root);
+    temp_old_root = root;
     root = Duplicate::DuplicateSubtree(root);
 #endif
     
@@ -121,7 +122,7 @@ void Render::WriteToFile( string s )
 }
 
 
-bool Render::IsSystemC( const TransKit &, TreePtr<Node> root )
+bool Render::IsSystemC( const Render::Kit &, TreePtr<Node> root )
 { 
     Walk e(root, nullptr, nullptr);
     for( const TreePtrInterface &n : e )
@@ -131,7 +132,7 @@ bool Render::IsSystemC( const TransKit &, TreePtr<Node> root )
 }
 
 
-string Render::RenderLiteral( const TransKit &kit, TreePtr<Literal> sp ) try
+string Render::RenderLiteral( const Render::Kit &kit, TreePtr<Literal> sp ) try
 {
 	(void)kit;
     return Sanitise( sp->GetRender() );
@@ -139,7 +140,7 @@ string Render::RenderLiteral( const TransKit &kit, TreePtr<Literal> sp ) try
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderIdentifier( const TransKit &kit, TreePtr<Identifier> id ) try
+string Render::RenderIdentifier( const Render::Kit &kit, TreePtr<Identifier> id ) try
 {
 	(void)kit;
     string ids;
@@ -166,7 +167,7 @@ string Render::RenderIdentifier( const TransKit &kit, TreePtr<Identifier> id ) t
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderScopePrefix( const TransKit &kit, TreePtr<Identifier> id ) try
+string Render::RenderScopePrefix( const Render::Kit &kit, TreePtr<Identifier> id ) try
 {
     TreePtr<Node> scope = GetScope( root_scope, id );
         
@@ -189,7 +190,7 @@ string Render::RenderScopePrefix( const TransKit &kit, TreePtr<Identifier> id ) 
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderScopedIdentifier( const TransKit &kit, TreePtr<Identifier> id, bool bracketize_cpp_scope ) try
+string Render::RenderScopedIdentifier( const Render::Kit &kit, TreePtr<Identifier> id, bool bracketize_cpp_scope ) try
 {
     string s_scope = RenderScopePrefix( kit, id );
     string s = s_scope + RenderIdentifier( kit, id );
@@ -201,7 +202,7 @@ string Render::RenderScopedIdentifier( const TransKit &kit, TreePtr<Identifier> 
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderIntegralType( const TransKit &kit, TreePtr<Integral> type, string object ) try
+string Render::RenderIntegralType( const Render::Kit &kit, TreePtr<Integral> type, string object ) try
 {
 	(void)kit;
     bool ds;
@@ -258,7 +259,7 @@ string Render::RenderIntegralType( const TransKit &kit, TreePtr<Integral> type, 
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderFloatingType( const TransKit &kit, TreePtr<Floating> type ) try
+string Render::RenderFloatingType( const Render::Kit &kit, TreePtr<Floating> type ) try
 {
 	(void)kit;
     string s;
@@ -279,7 +280,7 @@ string Render::RenderFloatingType( const TransKit &kit, TreePtr<Floating> type )
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderType( const TransKit &kit, TreePtr<Type> type, string object, bool constant ) try
+string Render::RenderType( const Render::Kit &kit, TreePtr<Type> type, string object, bool constant ) try
 {
     string sobject;
     if( !object.empty() )
@@ -347,7 +348,7 @@ string Render::Sanitise( string s ) try
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderOperator( const TransKit &kit, TreePtr<Operator> op, Sequence<Expression> &operands ) try
+string Render::RenderOperator( const Render::Kit &kit, TreePtr<Operator> op, Sequence<Expression> &operands ) try
 {
     ASSERT(op);
     string s;
@@ -401,7 +402,7 @@ string Render::RenderOperator( const TransKit &kit, TreePtr<Operator> op, Sequen
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderCall( const TransKit &kit, TreePtr<Call> call ) try
+string Render::RenderCall( const Render::Kit &kit, TreePtr<Call> call ) try
 {
     string s;
 
@@ -426,7 +427,7 @@ string Render::RenderCall( const TransKit &kit, TreePtr<Call> call ) try
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderExpression( const TransKit &kit, TreePtr<Initialiser> expression, bool bracketize, bool bracketize_cpp_scope ) try
+string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> expression, bool bracketize, bool bracketize_cpp_scope ) try
 {
     //TRACE("%p\n", expression.get());
     string before = bracketize ? "(" : "";
@@ -521,7 +522,7 @@ string Render::RenderExpression( const TransKit &kit, TreePtr<Initialiser> expre
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderMakeRecord( const TransKit &kit, TreePtr<MakeRecord> ro ) try
+string Render::RenderMakeRecord( const Render::Kit &kit, TreePtr<MakeRecord> ro ) try
 {
     string s;
 
@@ -541,7 +542,7 @@ string Render::RenderMakeRecord( const TransKit &kit, TreePtr<MakeRecord> ro ) t
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderMapInOrder( const TransKit &kit, 
+string Render::RenderMapInOrder( const Render::Kit &kit, 
                                  TreePtr<MapOperator> ro,
                                  TreePtr<Node> key ) try
 {	
@@ -580,7 +581,7 @@ string Render::RenderMapInOrder( const TransKit &kit,
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderAccess( const TransKit &kit, TreePtr<AccessSpec> current_access ) try
+string Render::RenderAccess( const Render::Kit &kit, TreePtr<AccessSpec> current_access ) try
 {
 	(void)kit;
     if( DynamicTreePtrCast<Public>( current_access ) )
@@ -595,7 +596,7 @@ string Render::RenderAccess( const TransKit &kit, TreePtr<AccessSpec> current_ac
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderStorage( const TransKit &kit, TreePtr<Instance> st ) try
+string Render::RenderStorage( const Render::Kit &kit, TreePtr<Instance> st ) try
 {
 	(void)kit;
     if( DynamicTreePtrCast<Program>( scope_stack.top() ) )
@@ -622,7 +623,7 @@ string Render::RenderStorage( const TransKit &kit, TreePtr<Instance> st ) try
 DEFAULT_CATCH_CLAUSE
 
 
-void Render::ExtractInits( const TransKit &kit, Sequence<Statement> &body, Sequence<Statement> &inits, Sequence<Statement> &remainder )
+void Render::ExtractInits( const Render::Kit &kit, Sequence<Statement> &body, Sequence<Statement> &inits, Sequence<Statement> &remainder )
 {
     for( TreePtr<Statement> s : body )
     {
@@ -647,7 +648,7 @@ void Render::ExtractInits( const TransKit &kit, Sequence<Statement> &body, Seque
 }
 
 
-string Render::RenderInstanceProto( const TransKit &kit, TreePtr<Instance> o, 
+string Render::RenderInstanceProto( const Render::Kit &kit, TreePtr<Instance> o, 
                                 bool out_of_line ) try
 {
     string s;
@@ -689,7 +690,7 @@ string Render::RenderInstanceProto( const TransKit &kit, TreePtr<Instance> o,
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderInstance( const TransKit &kit, TreePtr<Instance> o, 
+string Render::RenderInstance( const Render::Kit &kit, TreePtr<Instance> o, 
                                bool out_of_line ) try
 {
     string s = RenderInstanceProto( kit, o, out_of_line );
@@ -771,7 +772,7 @@ DEFAULT_CATCH_CLAUSE
 // get split into a part that goes into the record (main line of rendering) and
 // a part that goes separately (deferred_decls gets appended at the very end).
 // Do all functions, since SortDecls() ignores function bodies for dep analysis
-bool Render::ShouldSplitInstance( const TransKit &kit, TreePtr<Instance> o ) 
+bool Render::ShouldSplitInstance( const Render::Kit &kit, TreePtr<Instance> o ) 
 {
     bool isfunc = !!DynamicTreePtrCast<Callable>( o->type );
     bool isnumber = !!DynamicTreePtrCast<Numeric>( o->type );
@@ -791,7 +792,7 @@ bool Render::ShouldSplitInstance( const TransKit &kit, TreePtr<Instance> o )
 }
 
 
-string Render::RenderRecordProto( const TransKit &kit, TreePtr<Record> record )
+string Render::RenderRecordProto( const Render::Kit &kit, TreePtr<Record> record )
 {
 	string s;
 	shared_ptr<SCNamedRecord> scr = dynamic_pointer_cast< SCNamedRecord >(record);
@@ -813,7 +814,7 @@ string Render::RenderRecordProto( const TransKit &kit, TreePtr<Record> record )
 }
 
 
-string Render::RenderDeclaration( const TransKit &kit, TreePtr<Declaration> declaration ) try
+string Render::RenderDeclaration( const Render::Kit &kit, TreePtr<Declaration> declaration ) try
 {
     TRACE();
     string s;
@@ -906,7 +907,7 @@ string Render::RenderDeclaration( const TransKit &kit, TreePtr<Declaration> decl
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderStatement( const TransKit &kit, TreePtr<Statement> statement ) try
+string Render::RenderStatement( const Render::Kit &kit, TreePtr<Statement> statement ) try
 {
     TRACE();
     if( !statement )
@@ -999,7 +1000,7 @@ string Render::RenderStatement( const TransKit &kit, TreePtr<Statement> statemen
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderConstructorInitList( const TransKit &kit, 
+string Render::RenderConstructorInitList( const Render::Kit &kit, 
 										  Sequence<Statement> spe ) try
 {
     TRACE();
@@ -1020,7 +1021,7 @@ string Render::RenderConstructorInitList( const TransKit &kit,
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderEnumBody( const TransKit &kit, 
+string Render::RenderEnumBody( const Render::Kit &kit, 
                                Collection<Declaration> spe ) try
 {
     TRACE();
@@ -1054,7 +1055,7 @@ string Render::RenderEnumBody( const TransKit &kit,
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderOperandSequence( const TransKit &kit, 
+string Render::RenderOperandSequence( const Render::Kit &kit, 
                                       Sequence<Expression> spe ) try
 {
     TRACE();
@@ -1072,7 +1073,7 @@ string Render::RenderOperandSequence( const TransKit &kit,
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderModuleCtor( const TransKit &kit, TreePtr<Module> m ) try
+string Render::RenderModuleCtor( const Render::Kit &kit, TreePtr<Module> m ) try
 {
     string s;
     
@@ -1135,7 +1136,7 @@ string Render::RenderModuleCtor( const TransKit &kit, TreePtr<Module> m ) try
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::MaybeRenderFieldAccess( const TransKit &kit, TreePtr<Declaration> declaration,
+string Render::MaybeRenderFieldAccess( const Render::Kit &kit, TreePtr<Declaration> declaration,
 								       TreePtr<AccessSpec> *current_access )
 {
 	ASSERT( current_access );
@@ -1150,7 +1151,7 @@ string Render::MaybeRenderFieldAccess( const TransKit &kit, TreePtr<Declaration>
 }								  
 
 
-string Render::MaybeRenderAccessColon( const TransKit &kit, TreePtr<AccessSpec> this_access,
+string Render::MaybeRenderAccessColon( const Render::Kit &kit, TreePtr<AccessSpec> this_access,
 								       TreePtr<AccessSpec> *current_access )
 {
 	ASSERT( current_access );
@@ -1166,7 +1167,7 @@ string Render::MaybeRenderAccessColon( const TransKit &kit, TreePtr<AccessSpec> 
 }								  
 
 
-string Render::RenderScope( const TransKit &kit, 
+string Render::RenderScope( const Render::Kit &kit, 
 							TreePtr<Scope> key,
 							TreePtr<AccessSpec> init_access ) try
 {
@@ -1210,7 +1211,7 @@ string Render::RenderScope( const TransKit &kit,
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderParams( const TransKit &kit, 
+string Render::RenderParams( const Render::Kit &kit, 
 							 TreePtr<CallableParams> key ) try
 {
     TRACE();
