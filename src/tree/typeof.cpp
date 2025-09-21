@@ -191,16 +191,16 @@ AugTreePtr<CPPTree::Type> TypeOf::GetOperator( const TransKit &kit, AugTreePtr<O
 #define SPECIAL GetSpecial( kit, op, optypes )
 
     if(false) {}
-#define INFIX(TOK, TEXT, NODE, BASE, CAT) \
+#define INFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) \
     else if( AugTreePtr<NODE>::DynamicCast(op) ) \
         return CAT;
-#define PREFIX(TOK, TEXT, NODE, BASE, CAT) \
+#define PREFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) \
     else if( AugTreePtr<NODE>::DynamicCast(op) ) \
         return CAT;
-#define POSTFIX(TOK, TEXT, NODE, BASE, CAT) \
+#define POSTFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) \
     else if( AugTreePtr<NODE>::DynamicCast(op) ) \
         return CAT;
-#define OTHER(TOK, TEXT, NODE, BASE, CAT) \
+#define OTHER(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) \
     else if( AugTreePtr<NODE>::DynamicCast(op) ) \
         return CAT;
 #include "tree/operator_data.inc"

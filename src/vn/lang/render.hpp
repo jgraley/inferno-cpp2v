@@ -7,8 +7,6 @@
 #include "uniquify_identifiers.hpp"
 #include "helpers/simple_compare.hpp"
 
-#include <sstream>
-
 namespace VN 
 {
     class CompareReplace; // TODO all of Render should be VN::
@@ -19,7 +17,6 @@ class Render
 public:
 	struct Kit : TransKit
 	{	
-		stringstream &ss;
 	};
 
     Render( string of = string() );
@@ -48,7 +45,7 @@ private:
     string Sanitise( string s );
     string RenderOperator( const Render::Kit &kit, TreePtr<CPPTree::Operator> op, Sequence<CPPTree::Expression> &operands );
     string RenderCall( const Render::Kit &kit, TreePtr<CPPTree::Call> call );
-    string RenderExpression( const Render::Kit &kit, TreePtr<CPPTree::Initialiser> expression, bool bracketize=false, bool bracketize_cpp_scope=false );
+    string RenderExpression( const Render::Kit &kit, TreePtr<CPPTree::Initialiser> expression, Syntax::Production prod, bool bracketize=false, bool bracketize_cpp_scope=false );
     string RenderMakeRecord( const Render::Kit &kit, TreePtr<CPPTree::MakeRecord> ro );
     string RenderMapInOrder( const Render::Kit &kit, 
                              TreePtr<CPPTree::MapOperator> ro,

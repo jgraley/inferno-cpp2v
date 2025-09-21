@@ -61,8 +61,7 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern )
 string Render::RenderToString( TreePtr<Node> root )
 {   
     DefaultTransUtils utils(root);
-    stringstream render_output;
-    Render::Kit kit { &utils, render_output };
+    Render::Kit kit { &utils };
     
 #ifdef TEST_FOR_UNMODIFIED_TREE    
     temp_old_root = root;
@@ -313,8 +312,8 @@ string Render::RenderType( const Render::Kit &kit, TreePtr<Type> type, string ob
         return RenderType( kit, 
                            a->element, 
                            object.empty() ? 
-                               "[" + RenderExpression(kit, a->size) + "]" : 
-                               "(" + object + "[" + RenderExpression(kit, a->size) + "])", 
+                               "[" + RenderExpression(kit, a->size, Syntax::Production::BOOT_EXPR) + "]" : 
+                               "(" + object + "[" + RenderExpression(kit, a->size, Syntax::Production::BOOT_EXPR) + "])", 
                            constant );
     else if( TreePtr<Typedef> t = DynamicTreePtrCast< Typedef >(type) )
         return const_str + RenderIdentifier(kit, t->identifier) + sobject;
@@ -359,37 +358,40 @@ string Render::RenderOperator( const Render::Kit &kit, TreePtr<Operator> op, Seq
     }
     else if( DynamicTreePtrCast< ConditionalOperator >(op) )
     {
-        s = RenderExpression( kit, *operands_it, true ) + " ? ";
+        s = RenderExpression( kit, *operands_it, Syntax::Production::CONDITIONAL+1, true ) + " ? ";
         ++operands_it;
-        s += RenderExpression( kit, *operands_it, true ) + " : ";
+        // Middle expression boots parser
+        s += RenderExpression( kit, *operands_it, Syntax::Production::BOOT_EXPR, true ) + " : ";
         ++operands_it;
-        s += RenderExpression( kit, *operands_it, true );           
+        s += RenderExpression( kit, *operands_it, Syntax::Production::CONDITIONAL, true );           
     }
     else if( DynamicTreePtrCast< Subscript >(op) )
     {
-        s = RenderExpression( kit, *operands_it, true ) + "[";
+        s = RenderExpression( kit, *operands_it, Syntax::Production::POSTFIX, true ) + "[";
         ++operands_it;
-        s += RenderExpression( kit, *operands_it, false ) + "]";
+        s += RenderExpression( kit, *operands_it, Syntax::Production::BOOT_EXPR, false ) + "]";
     }
-#define INFIX(TOK, TEXT, NODE_SHAPED, BASE, CAT) \
+#define INFIX(TOK, TEXT, NODE_SHAPED, BASE, CAT, PROD, ASSOC) \
     else if( DynamicTreePtrCast<NODE_SHAPED>(op) ) \
     { \
-        s = RenderExpression( kit, *operands_it, true ); \
+		int left_boost = (Syntax::Association::ASSOC==Syntax::Association::RIGHT)?1:0; \
+		int right_boost = (Syntax::Association::ASSOC==Syntax::Association::LEFT)?1:0; \
+        s = RenderExpression( kit, *operands_it, Syntax::Production::PROD + left_boost, true ); \
         s += TEXT; \
         ++operands_it; \
-        s += RenderExpression( kit, *operands_it, true ); \
+        s += RenderExpression( kit, *operands_it, Syntax::Production::PROD + right_boost, true ); \
     }
-#define PREFIX(TOK, TEXT, NODE_SHAPED, BASE, CAT) \
+#define PREFIX(TOK, TEXT, NODE_SHAPED, BASE, CAT, PROD, ASSOC) \
     else if( DynamicTreePtrCast<NODE_SHAPED>(op) ) \
     { \
         s = TEXT; \
-        s += RenderExpression( kit, *operands_it, true, \
+        s += RenderExpression( kit, *operands_it, Syntax::Production::PROD, true, \
                                !!TreePtr<AddressOf>::DynamicCast(op) ); /* Prevent interpretation as a member function pointer literal */ \
     }
-#define POSTFIX(TOK, TEXT, NODE_SHAPED, BASE, CAT) \
+#define POSTFIX(TOK, TEXT, NODE_SHAPED, BASE, CAT, PROD, ASSOC) \
     else if( DynamicTreePtrCast<NODE_SHAPED>(op) ) \
     { \
-        s = RenderExpression( kit, *operands_it, true ); \
+        s = RenderExpression( kit, *operands_it, Syntax::Production::PROD, true ); \
         s += TEXT; \
     }
 #include "tree/operator_data.inc"
@@ -409,9 +411,9 @@ string Render::RenderCall( const Render::Kit &kit, TreePtr<Call> call ) try
     // Render the expression that resolves to the function name unless this is
     // a constructor call in which case just the name of the thing being constructed.
     if( TreePtr<Expression> base = TypeOf::instance.TryGetConstructedExpression( kit, call ).GetTreePtr() )
-        s += RenderExpression( kit, base, true );
+        s += RenderExpression( kit, base, Syntax::Production::POSTFIX, true );
     else
-        s += RenderExpression( kit, call->callee, true );
+        s += RenderExpression( kit, call->callee, Syntax::Production::POSTFIX, true );
 
     s += "(";
 
@@ -427,8 +429,11 @@ string Render::RenderCall( const Render::Kit &kit, TreePtr<Call> call ) try
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> expression, bool bracketize, bool bracketize_cpp_scope ) try
+string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> expression, Syntax::Production prod, 
+                                 bool bracketize, 
+                                 bool bracketize_cpp_scope ) try
 {
+	(void) prod;
     //TRACE("%p\n", expression.get());
     string before = bracketize ? "(" : "";
     string after = bracketize ? ")" : "";
@@ -488,17 +493,17 @@ string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> ex
                (DynamicTreePtrCast<Global>(d->global) ? "::" : "") +
                "delete" +
                (DynamicTreePtrCast<DeleteArray>(d->array) ? "[]" : "") +
-               " " + RenderExpression( kit, d->pointer, true ) +
+               " " + RenderExpression( kit, d->pointer, Syntax::Production::PREFIX, true ) +
                after;
     else if( TreePtr<Lookup> a = DynamicTreePtrCast< Lookup >(expression) )
         return before +
-               RenderExpression( kit, a->base, true ) + "." +
+               RenderExpression( kit, a->base, Syntax::Production::POSTFIX, true ) + "." +
                RenderScopedIdentifier( kit, a->member ) +
                after;
     else if( TreePtr<Cast> c = DynamicTreePtrCast< Cast >(expression) )
         return before +
                "(" + RenderType( kit, c->type, "" ) + ")" +
-               RenderExpression( kit, c->operand, false ) +
+               RenderExpression( kit, c->operand, Syntax::Production::PREFIX, false ) +
                after;
     else if( TreePtr<MakeRecord> ro = DynamicTreePtrCast< MakeRecord >(expression) )
         return before +
@@ -569,7 +574,7 @@ string Render::RenderMapInOrder( const Render::Kit &kit,
                     {
                         if( !first )
                             s += ", ";
-                        s += RenderExpression( kit, mi->value );
+                        s += RenderExpression( kit, mi->value, Syntax::Production::COMMA_SEP );
                         first = false;
                     }
                 }
@@ -756,7 +761,7 @@ string Render::RenderInstance( const Render::Kit &kit, TreePtr<Instance> o,
 	{
 		// Render expression with an assignment
 		AutoPush< TreePtr<Node> > cs( scope_stack, GetScope( root_scope, o->identifier ) );
-		s += " = " + RenderExpression(kit, ei) + ";\n";
+		s += " = " + RenderExpression(kit, ei, Syntax::Production::ASSIGN) + ";\n";
 	}
 	else
 	{
@@ -925,21 +930,21 @@ string Render::RenderStatement( const Render::Kit &kit, TreePtr<Statement> state
         return s + "}\n";
     }
     else if( TreePtr<Expression> e = DynamicTreePtrCast< Expression >(statement) )
-        return RenderExpression(kit, e) + ";\n";
+        return RenderExpression(kit, e, Syntax::Production::BOOT_EXPR) + ";\n";
     else if( TreePtr<Return> es = DynamicTreePtrCast<Return>(statement) )
-        return "return " + RenderExpression(kit, es->return_value) + ";\n";
+        return "return " + RenderExpression(kit, es->return_value, Syntax::Production::BOOT_EXPR) + ";\n";
     else if( TreePtr<Goto> g = DynamicTreePtrCast<Goto>(statement) )
     {
         if( TreePtr<SpecificLabelIdentifier> li = DynamicTreePtrCast< SpecificLabelIdentifier >(g->destination) )
             return "goto " + RenderIdentifier(kit, li) + ";\n";  // regular goto
         else
-            return "goto *(" + RenderExpression(kit, g->destination) + ");\n"; // goto-a-variable (GCC extension)
+            return "goto *(" + RenderExpression(kit, g->destination, Syntax::Production::PREFIX) + ");\n"; // goto-a-variable (GCC extension) TODO drop the ()
     }
     else if( TreePtr<If> i = DynamicTreePtrCast<If>(statement) )
     {
 		bool else_clause = !DynamicTreePtrCast<Nop>(i->else_body); // Nop means no else clause
         string s;
-        s += "if( " + RenderExpression(kit, i->condition) + " )\n";
+        s += "if( " + RenderExpression(kit, i->condition, Syntax::Production::BOOT_EXPR) + " )\n";
         bool sub_if = !!DynamicTreePtrCast<If>(i->body);
         if( sub_if && else_clause )
              s += "{\n"; // Note: braces there to clarify else binding eg if(a) if(b) foo; else how_do_i_bind;
@@ -952,22 +957,27 @@ string Render::RenderStatement( const Render::Kit &kit, TreePtr<Statement> state
         return s;
     }
     else if( TreePtr<While> w = DynamicTreePtrCast<While>(statement) )
-        return "while( " + RenderExpression(kit, w->condition) + " )\n" +
+        return "while( " + 
+               RenderExpression(kit, w->condition, Syntax::Production::BOOT_EXPR) + " )\n" +
                RenderStatement(kit, w->body);
     else if( TreePtr<Do> d = DynamicTreePtrCast<Do>(statement) )
         return "do\n" +
                RenderStatement(kit, d->body) +
-               "while( " + RenderExpression(kit, d->condition) + " );\n";
+               "while( " + RenderExpression(kit, d->condition, Syntax::Production::BOOT_EXPR) + " );\n";
     else if( TreePtr<For> f = DynamicTreePtrCast<For>(statement) )
-        return "for( " + RenderStatement(kit, f->initialisation) + RenderExpression(kit, f->condition) + "; "+ RenderExpression(kit, f->increment) + " )\n" +
+        return "for( " + 
+               RenderStatement(kit, f->initialisation ) + 
+               RenderExpression(kit, f->condition, Syntax::Production::BOOT_EXPR) + "; "+ 
+               RenderExpression(kit, f->increment, Syntax::Production::BOOT_EXPR) + " )\n" +
                RenderStatement(kit, f->body);
     else if( TreePtr<Switch> s = DynamicTreePtrCast<Switch>(statement) )
-        return "switch( " + RenderExpression(kit, s->condition) + " )\n" +
+        return "switch( " + RenderExpression(kit, s->condition, Syntax::Production::BOOT_EXPR) + " )\n" +
                RenderStatement(kit, s->body);
     else if( TreePtr<Case> c = DynamicTreePtrCast<Case>(statement) )
-        return "case " + RenderExpression(kit, c->value) + ":;\n";
+        return "case " + RenderExpression(kit, c->value, Syntax::Production::BOOT_EXPR) + ":;\n";
     else if( TreePtr<RangeCase> rc = DynamicTreePtrCast<RangeCase>(statement) )
-        return "case " + RenderExpression(kit, rc->value_lo) + " ... " + RenderExpression(kit, rc->value_hi) + ":\n";
+		// GCC extension: assume that ... is part of the case statement, and can boot the expressions.
+        return "case " + RenderExpression(kit, rc->value_lo, Syntax::Production::BOOT_EXPR) + " ... " + RenderExpression(kit, rc->value_hi, Syntax::Production::BOOT_EXPR) + ":\n";
     else if( DynamicTreePtrCast<Default>(statement) )
         return "default:;\n";
     else if( DynamicTreePtrCast<Continue>(statement) )
@@ -977,23 +987,23 @@ string Render::RenderStatement( const Render::Kit &kit, TreePtr<Statement> state
     else if( DynamicTreePtrCast<Nop>(statement) )
         return ";\n";
     else if( TreePtr<WaitDynamic> c = DynamicTreePtrCast<WaitDynamic>(statement) ) 
-        return c->GetToken() + "( " + RenderExpression(kit, c->event) + " );\n";
+        return c->GetToken() + "( " + RenderExpression(kit, c->event, Syntax::Production::COMMA_SEP) + " );\n";
     else if( TreePtr<WaitStatic> c = DynamicTreePtrCast<WaitStatic>(statement) ) 
         return c->GetToken() + "();\n";
     else if( TreePtr<WaitDelta> c = DynamicTreePtrCast<WaitDelta>(statement) )
         return c->GetToken() + "(SC_ZERO_TIME);\n";
     else if( TreePtr<NextTriggerDynamic> c = DynamicTreePtrCast<NextTriggerDynamic>(statement) ) 
-        return c->GetToken() + "( " + RenderExpression(kit, c->event) + " );\n";
+        return c->GetToken() + "( " + RenderExpression(kit, c->event, Syntax::Production::COMMA_SEP) + " );\n";
     else if( TreePtr<NextTriggerStatic> c = DynamicTreePtrCast<NextTriggerStatic>(statement) ) 
         return c->GetToken() + "();\n";
     else if( TreePtr<NextTriggerDelta> c = DynamicTreePtrCast<NextTriggerDelta>(statement) ) 
         return c->GetToken() + "(SC_ZERO_TIME);\n";
     else if( TreePtr<TerminationFunction> tf = DynamicTreePtrCast<TerminationFunction>(statement) )
-        return tf->GetToken() + "( " + RenderExpression(kit, tf->code) + " );\n";
+        return tf->GetToken() + "( " + RenderExpression(kit, tf->code, Syntax::Production::COMMA_SEP) + " );\n";
     else if( TreePtr<NotifyImmediate> n = DynamicTreePtrCast<NotifyImmediate>(statement) )
-        return RenderExpression( kit, n->event, true ) + "." + n->GetToken() + "();\n";
+        return RenderExpression( kit, n->event, Syntax::Production::PREFIX, true ) + "." + n->GetToken() + "();\n";
     else if( TreePtr<NotifyDelta> n = DynamicTreePtrCast<NotifyDelta>(statement) )
-        return RenderExpression( kit, n->event, true ) + "." + n->GetToken() + "(SC_ZERO_TIME);\n";
+        return RenderExpression( kit, n->event, Syntax::Production::PREFIX, true ) + "." + n->GetToken() + "(SC_ZERO_TIME);\n";
     else
         return ERROR_UNSUPPORTED(statement);
 }
@@ -1011,7 +1021,7 @@ string Render::RenderConstructorInitList( const Render::Kit &kit,
 		if( !first )
 			s += ",\n";
         if( auto e = TreePtr<Expression>::DynamicCast(st) )
-            s += RenderExpression( kit, e );
+            s += RenderExpression( kit, e, Syntax::Production::COMMA_SEP );
         else 
             s += ERROR_UNSUPPORTED(st);
         first = false;
@@ -1046,7 +1056,7 @@ string Render::RenderEnumBody( const Render::Kit &kit,
 			s += ERROR_UNSUPPORTED(o->initialiser);
 			continue;
 		}		
-		s += RenderExpression(kit, ei);
+		s += RenderExpression(kit, ei, Syntax::Production::ASSIGN);
 
         first = false;    
     }
@@ -1065,7 +1075,7 @@ string Render::RenderOperandSequence( const Render::Kit &kit,
     {
 		if( !first )
 			s += ", ";
-        s += RenderExpression( kit, pe );
+        s += RenderExpression( kit, pe, Syntax::Production::COMMA_SEP );
         first = false;
     }
     return s;
@@ -1114,7 +1124,7 @@ string Render::RenderModuleCtor( const Render::Kit &kit, TreePtr<Module> m ) try
                 else
                     s += ",";
                 string ids = RenderIdentifier(kit, i->identifier);                           
-                string inits = RenderExpression(kit, i->initialiser);
+                string inits = RenderExpression(kit, i->initialiser, Syntax::Production::COMMA_SEP);
                 s += "\n" + ids;
                 if( DynamicTreePtrCast< MakeArray >(i->initialiser) )
 					s += inits; // MakeArray as an init should render brace-initialiser syntax

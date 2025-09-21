@@ -7,65 +7,65 @@
 
 // save typing by defining any macros not yet defined
 #ifndef PREFIX
-#define PREFIX(TOK, TEXT, NODE, BASE, CAT)
+#define PREFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC)
 #endif
 #ifndef POSTFIX
-#define POSTFIX(TOK, TEXT, NODE, BASE, CAT)
+#define POSTFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC)
 #endif
 #ifndef INFIX
-#define INFIX(TOK, TEXT, NODE, BASE, CAT)
+#define INFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC)
 #endif
 #ifndef OTHER
-#define OTHER(TOK, TEXT, NODE, BASE, CAT)
+#define OTHER(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC)
 #endif
 
 /*
-Syntax  Clang token          Text   Inferno node          Intermediate         Category */
+Syntax  Clang token          Text   Inferno node          Intermediate            Category    Syntax::Production   Association */
 
-PREFIX(amp                 , "&",   AddressOf,            Unop,                   SPECIAL )
-INFIX(amp                  , "&",   BitwiseAnd,           CommutativeBinop,       BITWISE )
-INFIX(ampamp               , "&&",  LogicalAnd,           Binop,                  LOGICAL )
-INFIX(ampequal             , "&=",  AssignmentBitwiseAnd, AssignmentOperator,     BITWISE )
-INFIX(star                 , "*",   Multiply,             CommutativeBinop,       ARITHMETIC )
-PREFIX(star                , "*",   Dereference,          Unop,                   SPECIAL )
-INFIX(starequal            , "*=",  AssignmentMultiply,   AssignmentOperator,     ARITHMETIC )
-INFIX(plus                 , "+",   Add,                  CommutativeBinop,       ARITHMETIC )
-PREFIX(plusplus            , "++",  PreIncrement,         AssignmentOperator,     ARITHMETIC ) // operator++()
-POSTFIX(plusplus           , "++",  PostIncrement,        AssignmentOperator,     ARITHMETIC ) // operator++(int)
-INFIX(plusequal            , "+=",  AssignmentAdd,        AssignmentOperator,     ARITHMETIC )
-PREFIX(minus               , "-",   Negate,               Unop,                   ARITHMETIC )
-INFIX(minus                , "-",   Subtract,             Binop,                  ARITHMETIC )
-PREFIX(minusminus          , "--",  PreDecrement,         AssignmentOperator,     ARITHMETIC ) // operator--()
-POSTFIX(minusminus         , "--",  PostDecrement,        AssignmentOperator,     ARITHMETIC ) // operator--(int)
-INFIX(minusequal           , "-=",  AssignmentSubtract,   AssignmentOperator,     ARITHMETIC )
-PREFIX(tilde               , "~",   BitwiseNot,           Unop,                   BITWISE )
-PREFIX(exclaim             , "!",   LogicalNot,           Unop,                   LOGICAL )
-INFIX(exclaimequal         , "!=",  NotEqual,             CommutativeBinop,       COMPARISON )
-INFIX(slash                , "/",   Divide,               Binop,                  ARITHMETIC )
-INFIX(slashequal           , "/=",  AssignmentDivide,     AssignmentOperator,     ARITHMETIC )
-INFIX(percent              , "%",   Modulo,               Binop,                  ARITHMETIC )
-INFIX(percentequal         , "%=",  AssignmentModulo,     AssignmentOperator,     ARITHMETIC )
-INFIX(less                 , "<",   Less,                 Binop,                  COMPARISON )
-INFIX(lessless             , "<<",  ShiftLeft,            Binop,                  SHIFT )
-INFIX(lessequal            , "<=",  LessOrEqual,          Binop,                  COMPARISON )
-INFIX(lesslessequal        , "<<=", AssignmentShiftLeft,  AssignmentOperator,     SHIFT )
-INFIX(greater              , ">",   Greater,              Binop,                  COMPARISON )
-INFIX(greatergreater       , ">>",  ShiftRight,           Binop,                  SHIFT )
-INFIX(greaterequal         , ">=",  GreaterOrEqual,       Binop,                  COMPARISON )
-INFIX(greatergreaterequal  , ">>=", AssignmentShiftRight, AssignmentOperator,     SHIFT )
-INFIX(caret                , "^",   Eor,                  CommutativeBinop,       BITWISE )
-INFIX(caretequal           , "^=",  AssignmentEor,        AssignmentOperator,     BITWISE )
-INFIX(pipe                 , "|",   BitwiseOr,            CommutativeBinop,       BITWISE )
-INFIX(pipepipe             , "||",  LogicalOr,            Binop,                  LOGICAL )
-INFIX(pipeequal            , "|=",  AssignmentBitwiseOr,  AssignmentOperator,     BITWISE )
-INFIX(equal                , "=",   Assign,               AssignmentOperator,     SPECIAL )
-INFIX(equalequal           , "==",  Equal,                CommutativeBinop,       COMPARISON )
-INFIX(comma                , ",",   Comma,                Binop,                  SPECIAL ) 
+PREFIX(amp                 , "&",   AddressOf,            Unop,                   SPECIAL,    PREFIX,      RIGHT )
+INFIX(amp                  , "&",   BitwiseAnd,           CommutativeBinop,       BITWISE,    BITWISE_AND, LEFT )
+INFIX(ampamp               , "&&",  LogicalAnd,           Binop,                  LOGICAL,    LOGIC_AND,   LEFT )
+INFIX(ampequal             , "&=",  AssignmentBitwiseAnd, AssignmentOperator,     BITWISE,    ASSIGN,      RIGHT )
+INFIX(star                 , "*",   Multiply,             CommutativeBinop,       ARITHMETIC, MUL_DIV,     LEFT )
+PREFIX(star                , "*",   Dereference,          Unop,                   SPECIAL,    PREFIX,      RIGHT )
+INFIX(starequal            , "*=",  AssignmentMultiply,   AssignmentOperator,     ARITHMETIC, ASSIGN,      RIGHT )
+INFIX(plus                 , "+",   Add,                  CommutativeBinop,       ARITHMETIC, ADD_SUB,     LEFT )
+PREFIX(plusplus            , "++",  PreIncrement,         AssignmentOperator,     ARITHMETIC, PREFIX,      RIGHT ) // operator++()
+POSTFIX(plusplus           , "++",  PostIncrement,        AssignmentOperator,     ARITHMETIC, POSTFIX,     LEFT ) // operator++(int)
+INFIX(plusequal            , "+=",  AssignmentAdd,        AssignmentOperator,     ARITHMETIC, ASSIGN,      RIGHT )
+PREFIX(minus               , "-",   Negate,               Unop,                   ARITHMETIC, PREFIX,      RIGHT )
+INFIX(minus                , "-",   Subtract,             Binop,                  ARITHMETIC, ADD_SUB,     LEFT )
+PREFIX(minusminus          , "--",  PreDecrement,         AssignmentOperator,     ARITHMETIC, PREFIX,      RIGHT ) // operator--()
+POSTFIX(minusminus         , "--",  PostDecrement,        AssignmentOperator,     ARITHMETIC, POSTFIX,     LEFT ) // operator--(int)
+INFIX(minusequal           , "-=",  AssignmentSubtract,   AssignmentOperator,     ARITHMETIC, ASSIGN,      RIGHT )
+PREFIX(tilde               , "~",   BitwiseNot,           Unop,                   BITWISE,    PREFIX,      RIGHT )
+PREFIX(exclaim             , "!",   LogicalNot,           Unop,                   LOGICAL,    PREFIX,      RIGHT )
+INFIX(exclaimequal         , "!=",  NotEqual,             CommutativeBinop,       COMPARISON, EQ_COMP,     LEFT )
+INFIX(slash                , "/",   Divide,               Binop,                  ARITHMETIC, MUL_DIV,     LEFT )
+INFIX(slashequal           , "/=",  AssignmentDivide,     AssignmentOperator,     ARITHMETIC, ASSIGN,      RIGHT )
+INFIX(percent              , "%",   Modulo,               Binop,                  ARITHMETIC, MUL_DIV,     LEFT )
+INFIX(percentequal         , "%=",  AssignmentModulo,     AssignmentOperator,     ARITHMETIC, ASSIGN,      RIGHT )
+INFIX(less                 , "<",   Less,                 Binop,                  COMPARISON, MAG_COMP,    LEFT )
+INFIX(lessless             , "<<",  ShiftLeft,            Binop,                  SHIFT,      SHIFT,       LEFT )
+INFIX(lessequal            , "<=",  LessOrEqual,          Binop,                  COMPARISON, MAG_COMP,    LEFT )
+INFIX(lesslessequal        , "<<=", AssignmentShiftLeft,  AssignmentOperator,     SHIFT,      ASSIGN,      LEFT )
+INFIX(greater              , ">",   Greater,              Binop,                  COMPARISON, MAG_COMP,    LEFT )
+INFIX(greatergreater       , ">>",  ShiftRight,           Binop,                  SHIFT,      SHIFT,       LEFT )
+INFIX(greaterequal         , ">=",  GreaterOrEqual,       Binop,                  COMPARISON, MAG_COMP,    LEFT )
+INFIX(greatergreaterequal  , ">>=", AssignmentShiftRight, AssignmentOperator,     SHIFT,      ASSIGN,      RIGHT )
+INFIX(caret                , "^",   Eor,                  CommutativeBinop,       BITWISE,    BITWISE_EOR, LEFT )
+INFIX(caretequal           , "^=",  AssignmentEor,        AssignmentOperator,     BITWISE,    ASSIGN,      RIGHT )
+INFIX(pipe                 , "|",   BitwiseOr,            CommutativeBinop,       BITWISE,    BITWISE_OR,  LEFT )
+INFIX(pipepipe             , "||",  LogicalOr,            Binop,                  LOGICAL,    LOGIC_OR,    LEFT )
+INFIX(pipeequal            , "|=",  AssignmentBitwiseOr,  AssignmentOperator,     BITWISE,    ASSIGN,      RIGHT )
+INFIX(equal                , "=",   Assign,               AssignmentOperator,     SPECIAL,    ASSIGN,      RIGHT )
+INFIX(equalequal           , "==",  Equal,                CommutativeBinop,       COMPARISON, EQ_COMP,     LEFT )
+INFIX(comma                , ",",   Comma,                Binop,                  SPECIAL,    COMMA_OP,    LEFT ) 
 // TODO these four have no clang id, no string and are non-standard - put them back in cpptree.hpp
-OTHER(0                    , "",    ConditionalOperator,  Ternop,                 SPECIAL )  // a?b:c
-OTHER(0                    , "",    Subscript,            Binop,                  SPECIAL )  // a[b]
-OTHER(0                    , "",    MakeArray,            NonCommutativeOperator, SPECIAL ) // {a, b, c}
-OTHER(0                    , "",    This,                 Operator,               SPECIAL ) // this
+OTHER(0                    , "",    ConditionalOperator,  Ternop,                 SPECIAL,    CONDITIONAL, RIGHT )  // a?b:c
+OTHER(0                    , "",    Subscript,            Binop,                  SPECIAL,    POSTFIX,     LEFT )  // a[b]
+OTHER(0                    , "",    MakeArray,            NonCommutativeOperator, SPECIAL,    BRACED,      LEFT ) // {a, b, c}
+OTHER(0                    , "",    This,                 Operator,               SPECIAL,    TOKEN,       LEFT ) // this
 
 // save typing by undefining macros
 #undef PREFIX

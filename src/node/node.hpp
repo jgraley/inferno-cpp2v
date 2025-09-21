@@ -6,7 +6,7 @@
 #include "clone.hpp"
 #include "common/magic.hpp"
 #include "match.hpp"
-#include "renderable.hpp"
+#include "syntax.hpp"
 #include "graphable.hpp"
 #include "coloured.hpp"
 #include "relationship.hpp"
@@ -24,7 +24,7 @@
 #define NODE_FUNCTIONS_FINAL ITEMISE_FUNCTION MATCHER_FUNCTION CLONE_FUNCTION FINAL_FUNCTION(true)
 /// The node support classes all collected together for convenience
 struct NodeBases : Magic,
-                   virtual Renderable,
+                   virtual Syntax,
                    virtual Graphable,
                    Coloured,
                    Matcher,

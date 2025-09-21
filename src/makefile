@@ -21,7 +21,7 @@ SRC_VN_OPTIONS = $(SRC_OPTIONS) -I$(VN)
 
 COMMON_MODULES = $(COMMON)/standard $(COMMON)/common $(COMMON)/read_args $(COMMON)/trace $(COMMON)/hit_count $(COMMON)/mismatch $(COMMON)/serial $(COMMON)/progress $(COMMON)/orderable
 COMMON_MODULES += $(COMMON)/lambda_loops
-NODE_MODULES = $(NODE)/containers $(NODE)/node $(NODE)/itemise $(NODE)/match $(NODE)/clone $(NODE)/relationship $(NODE)/tree_ptr $(NODE)/graphable
+NODE_MODULES = $(NODE)/containers $(NODE)/node $(NODE)/itemise $(NODE)/match $(NODE)/clone $(NODE)/relationship $(NODE)/tree_ptr $(NODE)/graphable $(NODE)/syntax 
 HELPERS_MODULES = $(HELPERS)/flatten $(HELPERS)/walk $(HELPERS)/simple_compare $(HELPERS)/simple_duplicate $(HELPERS)/transformation
 TREE_MODULES = $(TREE)/cpptree $(TREE)/validate $(TREE)/scope $(TREE)/misc $(TREE)/typeof $(TREE)/type_data
 VN_MODULES = $(VN)/link $(VN)/query $(VN)/search_replace $(VN)/scr_engine $(VN)/and_rule_engine $(VN)/conjecture $(VN)/subcontainers 

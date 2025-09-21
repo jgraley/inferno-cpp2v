@@ -1009,7 +1009,7 @@ private:
         TreePtr<Operator> o = TreePtr<Operator>();
         switch( Kind )
         {
-#define INFIX(TOK, TEXT, NODE, BASE, CAT) \
+#define INFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) \
             case clang::tok::TOK: \
                 o=MakeTreeNode<NODE>();\
                 break;
@@ -1041,7 +1041,7 @@ private:
 
         switch( Kind )
         {
-#define POSTFIX(TOK, TEXT, NODE, BASE, CAT) \
+#define POSTFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) \
             case clang::tok::TOK: \
                 o=MakeTreeNode<NODE>(); \
                 break;
@@ -1061,7 +1061,7 @@ private:
 
         switch( Kind )
         {
-#define PREFIX(TOK, TEXT, NODE, BASE, CAT) \
+#define PREFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) \
             case clang::tok::TOK:\
                 o=MakeTreeNode<NODE>(); \
                 break;
