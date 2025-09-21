@@ -3,6 +3,7 @@
 #include "tree/cpptree.hpp"
 #include "tree/sctree.hpp"
 #include "cplusplus/parse.hpp"  
+#include "cplusplus/cpprender.hpp"  
 #include "vn/lang/render.hpp"
 #include "vn/graph/graph.hpp"
 #include "common/read_args.hpp"
@@ -275,7 +276,7 @@ Inferno::Plan::Plan(Inferno *algo_) :
           "Rendering output to code", 
           nullptr, [&]()
           { 
-              Render r( ReadArgs::outfile );
+              CppRender r( ReadArgs::outfile );
               r.WriteToFile( r.RenderToString( algo->program ) ); 
           } }
     );

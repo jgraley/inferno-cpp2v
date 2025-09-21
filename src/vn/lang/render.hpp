@@ -9,8 +9,7 @@
 
 namespace VN 
 {
-    class CompareReplace; // TODO all of Render should be VN::
-};
+class CompareReplace; 
 
 class Render
 {
@@ -85,6 +84,7 @@ private:
 	string RenderMismatchException( string fname, const Mismatch &me );
     const string outfile;                                     
     SimpleCompare sc;
+};
 };
 
 #endif

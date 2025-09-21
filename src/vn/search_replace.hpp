@@ -8,11 +8,9 @@
 #include "agents/agent.hpp"
 #include <set>
 
-class Graph;
-
-
 namespace VN 
 {
+class Graph;
 class Agent;
 class Conjecture;
 class SpecialBase;

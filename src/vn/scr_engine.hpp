@@ -24,6 +24,7 @@ namespace SYM
 
 namespace VN 
 {
+class Graph;
 class Agent;
 class Conjecture;
 class SpecialBase;

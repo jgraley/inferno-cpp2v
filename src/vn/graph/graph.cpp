@@ -1064,12 +1064,12 @@ string Graph::MyNodeBlock::GetTrace() const
 {
 	return string("(") +
 		   Graphable::NodeBlock::GetTrace() + ", " +
-		   "prerestriction_name:" + Trace(prerestriction_name) + ", " + 
-		   "colour:" + Trace(colour) + ", " + 
-		   "specify_ports:" + Trace(specify_ports) + ", " + 
-		   "base_id:" + Trace(base_id) +  ", " + 
-           "italic_title:" + Trace(italic_title) +  ", " + 
-		   "external_text:" + Trace(external_text) +
+		   "prerestriction_name:" + ::Trace(prerestriction_name) + ", " + 
+		   "colour:" + ::Trace(colour) + ", " + 
+		   "specify_ports:" + ::Trace(specify_ports) + ", " + 
+		   "base_id:" + ::Trace(base_id) +  ", " + 
+           "italic_title:" + ::Trace(italic_title) +  ", " + 
+		   "external_text:" + ::Trace(external_text) +
 		   ")";    
 }
 
@@ -1078,13 +1078,13 @@ string Graph::MyLink::GetTrace() const
 {
 	return string("(") +
 		   Graphable::Link::GetTrace() + ", " +
-		   "child_id:" + Trace(child_id) + ", " + 
-		   "planned_as:" + Trace(planned_as) +
+		   "child_id:" + ::Trace(child_id) + ", " + 
+		   "planned_as:" + ::Trace(planned_as) +
 		   ")";    
 }
 
 
-string Trace(const Graph::LinkPlannedAs &lpa)
+string VN::Trace(const Graph::LinkPlannedAs &lpa)
 {
 	switch( lpa )
 	{
@@ -1110,29 +1110,29 @@ string Trace(const Graph::LinkPlannedAs &lpa)
 }
 
 
-string Trace(const Graph::Figure::LinkDetails &gfld)
+string VN::Trace(const Graph::Figure::LinkDetails &gfld)
 {
 	return string("(") +
-		   "planned_as:" + Trace(gfld.planned_as) +
+		   "planned_as:" + ::Trace(gfld.planned_as) +
 		   ")";    
 }
 
 
-string Trace(const Graph::Figure::Link &gflink)
+string VN::Trace(const Graph::Figure::Link &gflink)
 {
 	return string("(") +
-		   "pptr:" + Trace(gflink.pptr) + ", " + 
-		   "short_name:" + Trace(gflink.short_name) + ", " + 
+		   "pptr:" + ::Trace(gflink.pptr) + ", " + 
+		   "short_name:" + ::Trace(gflink.short_name) + ", " + 
 		   "details:" + Trace(gflink.details) +
 		   ")";    
 }
 
 
-string Trace(const Graph::Figure::Agent &gfagent)
+string VN::Trace(const Graph::Figure::Agent &gfagent)
 {
 	return string("(") +
-		   "g:" + Trace(gfagent.g) + ", " + 
-		   "incoming_links:" + Trace(gfagent.incoming_links) +
+		   "g:" + ::Trace(gfagent.g) + ", " + 
+		   "incoming_links:" + ::Trace(gfagent.incoming_links) +
 		   ")";    
 }
 

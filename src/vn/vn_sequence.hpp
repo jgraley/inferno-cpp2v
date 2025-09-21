@@ -10,12 +10,9 @@
 #include "up/up_common.hpp"
 #include "lang/render.hpp"
 
-class Graph;
-
-
 namespace VN 
 {
-
+class Graph;
 class VNStep;
 class XTreeDatabase;
 class TreeUpdater;

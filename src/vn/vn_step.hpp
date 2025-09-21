@@ -7,12 +7,10 @@
 #include "ptrans/pattern_transformation.hpp"
 #include "link.hpp"
 
-class Graph;
-class Render;
-
 namespace VN 
 {
-
+class Graph;
+class Render;
 class CompareReplace;
 class VNSequence;
 class XTreeDatabase;

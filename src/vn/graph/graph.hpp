@@ -30,7 +30,6 @@
 namespace VN
 {
 class VNStep;
-};
 
 class Graph
 {
@@ -197,5 +196,6 @@ string Trace(const Graph::LinkPlannedAs &lpa);
 string Trace(const Graph::Figure::LinkDetails &gfld);
 string Trace(const Graph::Figure::Link &gflink);
 string Trace(const Graph::Figure::Agent &gfagent);
+};
 
 #endif
