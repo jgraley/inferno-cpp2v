@@ -64,7 +64,7 @@ INFIX(comma                , ",",   Comma,                Binop,                
 // TODO these four have no clang id, no string and are non-standard - put them back in cpptree.hpp
 OTHER(0                    , "",    ConditionalOperator,  Ternop,                 SPECIAL,    CONDITIONAL, RIGHT )  // a?b:c
 OTHER(0                    , "",    Subscript,            Binop,                  SPECIAL,    POSTFIX,     LEFT )  // a[b]
-OTHER(0                    , "",    MakeArray,            NonCommutativeOperator, SPECIAL,    BRACED,      LEFT ) // {a, b, c}
+OTHER(0                    , "",    MakeArray,            NonCommutativeOperator, SPECIAL,    PARENTHESISED,      LEFT ) // {a, b, c}
 OTHER(0                    , "",    This,                 Operator,               SPECIAL,    TOKEN,       LEFT ) // this
 
 // save typing by undefining macros

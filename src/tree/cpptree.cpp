@@ -45,6 +45,12 @@ string SpecificString::GetTrace() const
     return GetName() + "(" + GetRender() + ")" + GetSerialString();
 }
 
+
+Syntax::Production SpecificString::GetIdealProduction() const
+{ 
+	return Production::TOKEN; 
+}
+
 //////////////////////////// SpecificInteger ///////////////////////////////
 
 SpecificInteger::SpecificInteger()  : 
@@ -141,6 +147,12 @@ string SpecificInteger::GetTrace() const
     return GetName() + "(" + GetRender() + ")" + GetSerialString();
 }
 
+
+Syntax::Production SpecificInteger::GetIdealProduction() const
+{ 
+	return Production::TOKEN; 
+}
+
 //////////////////////////// SpecificFloat ///////////////////////////////
 
 SpecificFloat::SpecificFloat() :
@@ -200,6 +212,12 @@ string SpecificFloat::GetRender() const
 string SpecificFloat::GetTrace() const
 {
     return GetName() + "(" + GetRender() + ")" + GetSerialString();
+}
+
+
+Syntax::Production SpecificFloat::GetIdealProduction() const
+{ 
+	return Production::TOKEN; 
 }
 
 //////////////////////////// SpecificIdentifier ///////////////////////////////
@@ -292,6 +310,12 @@ string SpecificIdentifier::GetTrace() const
     return GetName() + "(" + GetGraphName() + ")" + GetSerialString();
 }
 
+
+Syntax::Production SpecificIdentifier::GetIdealProduction() const
+{ 
+	return Production::TOKEN; 
+}
+
 //////////////////////////// SpecificFloatSemantics ///////////////////////////////
 
 SpecificFloatSemantics::SpecificFloatSemantics() 
@@ -341,3 +365,72 @@ SpecificFloatSemantics::operator const llvm::fltSemantics &() const
     return *value;
 }
 
+//////////////////////////// True ///////////////////////////////
+
+Syntax::Production True::GetIdealProduction() const
+{ 
+	return Production::TOKEN; 
+}
+
+//////////////////////////// False ///////////////////////////////
+
+Syntax::Production False::GetIdealProduction() const
+{ 
+	return Production::TOKEN; 
+}
+
+//////////////////////////// New ///////////////////////////////
+
+Syntax::Production New::GetIdealProduction() const
+{ 
+	return Production::PREFIX; 
+}
+
+//////////////////////////// Delete ///////////////////////////////
+
+Syntax::Production Delete::GetIdealProduction() const
+{ 
+	return Production::PREFIX; 
+}
+
+//////////////////////////// Lookup ///////////////////////////////
+
+Syntax::Production Lookup::GetIdealProduction() const
+{ 
+	return Production::POSTFIX; 
+}
+
+//////////////////////////// Cast ///////////////////////////////
+
+Syntax::Production Cast::GetIdealProduction() const
+{ 
+	return Production::PREFIX; 
+}
+
+//////////////////////////// Call ///////////////////////////////
+
+Syntax::Production Call::GetIdealProduction() const
+{ 
+	return Production::POSTFIX; 
+}
+
+//////////////////////////// MakeRecord ///////////////////////////////
+
+Syntax::Production MakeRecord::GetIdealProduction() const
+{ 
+	return Production::PARENTHESISED; 
+}
+
+//////////////////////////// SizeOf ///////////////////////////////
+
+Syntax::Production SizeOf::GetIdealProduction() const
+{ 
+	return Production::PREFIX; 
+}
+
+//////////////////////////// AlignOf ///////////////////////////////
+
+Syntax::Production AlignOf::GetIdealProduction() const
+{ 
+	return Production::PREFIX; 
+}

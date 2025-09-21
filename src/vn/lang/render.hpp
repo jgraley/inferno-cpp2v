@@ -37,15 +37,15 @@ private:
     bool IsSystemC( const Render::Kit &kit, TreePtr<Node> root );
     string RenderLiteral( const Render::Kit &kit, TreePtr<CPPTree::Literal> sp );
     string RenderIdentifier( const Render::Kit &kit, TreePtr<CPPTree::Identifier> id );
-    string RenderScopePrefix( const Render::Kit &kit, TreePtr<CPPTree::Identifier> id );
-    string RenderScopedIdentifier( const Render::Kit &kit, TreePtr<CPPTree::Identifier> id, bool bracketize_cpp_scope=false );
+    string RenderScopePrefix( const Render::Kit &kit, TreePtr<CPPTree::Identifier> id, Syntax::Production surround_prod );
+    string RenderScopedIdentifier( const Render::Kit &kit, TreePtr<CPPTree::Identifier> id, Syntax::Production surround_prod );
     string RenderIntegralType( const Render::Kit &kit, TreePtr<CPPTree::Integral> type, string object=string() );
     string RenderFloatingType( const Render::Kit &kit, TreePtr<CPPTree::Floating> type );
     string RenderType( const Render::Kit &kit, TreePtr<CPPTree::Type> type, string object=string(), bool constant=false );
     string Sanitise( string s );
     string RenderOperator( const Render::Kit &kit, TreePtr<CPPTree::Operator> op, Sequence<CPPTree::Expression> &operands );
     string RenderCall( const Render::Kit &kit, TreePtr<CPPTree::Call> call );
-    string RenderExpression( const Render::Kit &kit, TreePtr<CPPTree::Initialiser> expression, Syntax::Production prod, bool bracketize=false, bool bracketize_cpp_scope=false );
+    string RenderExpression( const Render::Kit &kit, TreePtr<CPPTree::Initialiser> expression, Syntax::Production surround_prod );
     string RenderMakeRecord( const Render::Kit &kit, TreePtr<CPPTree::MakeRecord> ro );
     string RenderMapInOrder( const Render::Kit &kit, 
                              TreePtr<CPPTree::MapOperator> ro,

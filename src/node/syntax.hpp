@@ -31,9 +31,9 @@ public:
 		MUL_DIV,
 		PREFIX, // C++: all prefix including keywords where expression
 		POSTFIX, // C++: all prefix including sub clauses
-		BRACED, // enclosed in { }
+		SCOPE_RES, // :: in C++
 		
-		PARENTHESISED, // enclosed in ( )
+		PARENTHESISED, // enclosed in (), {} etc
 		
 		TOKEN // Highest precedence would be that of lexer tokens
 	};
@@ -60,8 +60,9 @@ public:
         // and a debugging aid in C++ renders
         return Production::UNDEFINED; 
     }
+    
+    static Syntax::Production BoostPrecedence( Syntax::Production prec );
+    static int GetPrecedence( Syntax::Production prec );
 };
-
-Syntax::Production operator+(Syntax::Production p, int i);
 
 #endif

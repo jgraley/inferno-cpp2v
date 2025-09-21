@@ -232,6 +232,7 @@ struct DeltaCount : CPPTree::Operator,
 {
     NODE_FUNCTIONS_FINAL
     virtual string GetToken() { return "sc_delta_count"; }    
+	Production GetIdealProduction() const override { return Production::POSTFIX; };	// renders like a function call
 };
 
 /// Termination functions
