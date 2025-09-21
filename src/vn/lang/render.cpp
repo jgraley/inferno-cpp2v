@@ -311,19 +311,17 @@ string Render::RenderType( const Render::Kit &kit, TreePtr<Type> type, string ob
     else if( TreePtr<Destructor> f = DynamicTreePtrCast< Destructor >(type) )
         return object + "()" + const_str;
     else if( TreePtr<Function> f = DynamicTreePtrCast< Function >(type) )
-        return RenderType( kit, f->return_type, "(" + object + ")(" + RenderParams(kit, f) + ")" + const_str, Syntax::Production::POSTFIX );
+        return RenderType( kit, f->return_type, object + "(" + RenderParams(kit, f) + ")" + const_str, Syntax::Production::POSTFIX );
     else if( TreePtr<Process> f = DynamicTreePtrCast< Process >(type) )
         return "void " + object + "()" + const_str;
     else if( TreePtr<Pointer> p = DynamicTreePtrCast< Pointer >(type) )
-        return RenderType( kit, p->destination, const_str + "(*" + object + ")", Syntax::Production::PREFIX, false ); // TODO Pointer node to indicate constancy of pointed-to object - would go into this call to RenderType
+        return RenderType( kit, p->destination, const_str + "*" + object, Syntax::Production::PREFIX, false ); // TODO Pointer node to indicate constancy of pointed-to object - would go into this call to RenderType
     else if( TreePtr<Reference> r = DynamicTreePtrCast< Reference >(type) )
-        return RenderType( kit, r->destination, const_str + "(&" + object + ")", Syntax::Production::PREFIX );
+        return RenderType( kit, r->destination, const_str + "&" + object, Syntax::Production::PREFIX );
     else if( TreePtr<Array> a = DynamicTreePtrCast< Array >(type) )
         return RenderType( kit, 
                            a->element, 
-                           object.empty() ? 
-                               "[" + RenderExpression(kit, a->size, Syntax::Production::BOOT_EXPR) + "]" : 
-                               "(" + object + "[" + RenderExpression(kit, a->size, Syntax::Production::BOOT_EXPR) + "])", 
+                           object + "[" + RenderExpression(kit, a->size, Syntax::Production::BOOT_EXPR) + "]", 
                            Syntax::Production::POSTFIX,
                            constant );
     else if( TreePtr<Typedef> t = DynamicTreePtrCast< Typedef >(type) )
