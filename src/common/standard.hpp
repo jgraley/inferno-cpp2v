@@ -32,7 +32,7 @@ public:
     }
     
     virtual string GetTypeName() const; 
-    virtual string GetName() const; // used by parse, render etc
+    virtual string GetName() const; 
     virtual string GetTrace() const; // used for debug
 };
 

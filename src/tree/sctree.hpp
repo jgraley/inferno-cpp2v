@@ -23,7 +23,10 @@ struct SCConstruct : virtual Node {};
 struct SCNamedConstruct : public SCConstruct
 {
     NODE_FUNCTIONS
-    virtual string GetToken() {ASSERTFAIL("GetToken() called on intermediate node\n")} ///< Produce the source-code-name of the corresponding SystemC construct
+    virtual string GetName() const
+	{
+		return Traceable::GetName() + "(" + GetToken() + ")";
+	}    
 };
 
 /// Anything derived from this renders like an identifier
@@ -45,7 +48,7 @@ struct Event : CPPTree::Type,
                SCNamedIdentifier
 {
     NODE_FUNCTIONS_FINAL
-    virtual string GetToken() { return "sc_event"; }
+    virtual string GetToken() const { return "sc_event"; }
 };
 
 /** SystemC module type. The processes, registers, submodules and everything
@@ -57,7 +60,7 @@ struct Event : CPPTree::Type,
 struct Module : SCNamedRecord
 {
     NODE_FUNCTIONS_FINAL
-    virtual string GetToken() { return "sc_module"; }
+    virtual string GetToken() const { return "sc_module"; }
 };
 
 /** SystemC interface construct. Not exactly sure whether/how I will use 
@@ -65,7 +68,7 @@ struct Module : SCNamedRecord
 struct Interface : SCNamedRecord
 {
     NODE_FUNCTIONS_FINAL
-    virtual string GetToken() { return "sc_interface"; }
+    virtual string GetToken() const { return "sc_interface"; }
 };
 
 /** SystemC interface construct. Not exactly sure whether/how I will use 
@@ -86,7 +89,7 @@ struct Wait : CPPTree::Statement,
               CPPTree::Uncombable
 {
     NODE_FUNCTIONS
-    virtual string GetToken() { return "wait"; }
+    virtual string GetToken() const { return "wait"; }
 };
 
 /** Waiting for a SystemC event - blocks until the event indicated by the expression is 
@@ -121,7 +124,7 @@ struct NextTrigger : CPPTree::Statement,
                      virtual SCNamedFunction
 {
     NODE_FUNCTIONS
-    virtual string GetToken() { return "next_trigger"; }
+    virtual string GetToken() const { return "next_trigger"; }
 };
 
 /** Causes the method to be triggered again when the event indicated by the expression is 
@@ -155,7 +158,7 @@ struct Notify : CPPTree::Statement,
                 virtual SCNamedFunction
 {
     NODE_FUNCTIONS
-    virtual string GetToken() { return "notify"; }
+    virtual string GetToken() const { return "notify"; }
     TreePtr<CPPTree::Expression> event; ///< event to notify 
 };
 
@@ -202,7 +205,7 @@ struct EventProcess : Process
 struct Method : EventProcess
 {
     NODE_FUNCTIONS_FINAL
-    virtual string GetToken() { return "SC_METHOD"; }
+    virtual string GetToken() const { return "SC_METHOD"; }
 };
 
 /** SystemC thread process. Local context, so this can run forever (stopping only to indicate completion
@@ -212,7 +215,7 @@ struct Thread : EventProcess // TODO if SystemC really can't pre-empt, then this
                              // TODO and I should create a real thread support extension because user's threads will run busy sometimes
 {
     NODE_FUNCTIONS_FINAL
-    virtual string GetToken() { return "SC_THREAD"; }
+    virtual string GetToken() const { return "SC_THREAD"; }
 };
 
 /** SystemC clocked thread process. A local context as with Thread, but can only
@@ -221,7 +224,7 @@ struct Thread : EventProcess // TODO if SystemC really can't pre-empt, then this
 struct ClockedThread : Process
 {
     NODE_FUNCTIONS_FINAL
-    virtual string GetToken() { return "SC_CTHREAD"; }
+    virtual string GetToken() const { return "SC_CTHREAD"; }
     //TODO TreePtr<Sensitivity> clock;
 };
 
@@ -231,7 +234,7 @@ struct DeltaCount : CPPTree::Operator,
                     virtual SCNamedFunction // TODO rename as InferredReset() since that will transform more easily to a real reset system
 {
     NODE_FUNCTIONS_FINAL
-    virtual string GetToken() { return "sc_delta_count"; }    
+    virtual string GetToken() const { return "sc_delta_count"; }    
 	Production GetMyProduction() const override { return Production::POSTFIX; };	// renders like a function call
 };
 
@@ -250,7 +253,7 @@ struct TerminationFunction : CPPTree::Statement,
 struct Exit : TerminationFunction
 {
     NODE_FUNCTIONS_FINAL
-    virtual string GetToken() { return "exit"; }
+    virtual string GetToken() const { return "exit"; }
 };
 
 /// Cease function 
@@ -259,7 +262,7 @@ struct Exit : TerminationFunction
 struct Cease : TerminationFunction
 {
     NODE_FUNCTIONS_FINAL
-    virtual string GetToken() { return "cease"; }
+    virtual string GetToken() const { return "cease"; }
 };
 
 };

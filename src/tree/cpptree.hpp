@@ -37,7 +37,12 @@ struct Initialiser : virtual Node
 };
 
 /// an uninitialised Instance.
-struct Uninitialised : Initialiser { NODE_FUNCTIONS_FINAL }; 
+struct Uninitialised : Initialiser 
+{ 
+	NODE_FUNCTIONS_FINAL 
+	
+	Production GetMyProduction() const override;
+}; 
 
 /// Represents a statement as found inside a function body. 
 /** Basically anything 
@@ -105,6 +110,7 @@ struct Literal : Expression,
 {
     NODE_FUNCTIONS
     virtual string GetColour() const { return Expression::GetColour(); } // Expression wins
+    virtual string GetName() const;
 };
 
 /// Intermediate property node that represents a string of any value.
@@ -122,8 +128,7 @@ struct SpecificString : String
     virtual bool IsLocalMatchCovariant( const Matcher &candidate ) const; /// Overloaded comparison for search&replace
     virtual Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
-    virtual string GetRender() const; /// Produce a string for debug
-    virtual string GetTrace() const;
+    virtual string GetToken() const; 
 	Production GetMyProduction() const override;
 private:
     string value; ///< The string itself
@@ -159,8 +164,7 @@ struct SpecificInteger : Integer
     virtual bool IsLocalMatchCovariant( const Matcher &candidate ) const; /// Overloaded comparison for search&replace
     virtual Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
-    virtual string GetRender() const; /// Produce a string for debug
-    virtual string GetTrace() const;
+    virtual string GetToken() const; 
 	Production GetMyProduction() const override;
 	
 private:
@@ -182,8 +186,7 @@ struct SpecificFloat : Float, llvm::APFloat
     virtual bool IsLocalMatchCovariant( const Matcher &candidate ) const; /// Overloaded comparison for search&replace
     virtual Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
-    virtual string GetRender() const; /// Produce a string for graphing
-    virtual string GetTrace() const;	
+    virtual string GetToken() const; 
     Production GetMyProduction() const override;
 };
 
@@ -196,7 +199,7 @@ struct Bool : Literal { NODE_FUNCTIONS };
 struct True : Bool
 {
     NODE_FUNCTIONS_FINAL
-    virtual string GetRender() const { return "true"; } ///< Produce a string for debug
+    virtual string GetToken() const { return "true"; } ///< Produce a string for debug
 	Production GetMyProduction() const override;
 };
 
@@ -204,7 +207,7 @@ struct True : Bool
 struct False : Bool
 {
     NODE_FUNCTIONS_FINAL
-    virtual string GetRender() const { return "false"; } 
+    virtual string GetToken() const { return "false"; } 
 	Production GetMyProduction() const override;
 };
 
@@ -241,10 +244,9 @@ struct SpecificIdentifier : virtual Property
     virtual bool IsLocalMatchCovariant( const Matcher &candidate ) const; /// Overloaded comparison for search&replace
     virtual Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
-    virtual string GetRender() const; /// This is relied upon to just return the identifier name for rendering
+    virtual string GetToken() const; /// This is relied upon to just return the identifier name for rendering
     virtual string GetGraphName() const;
     virtual string GetTrace() const;
-	Production GetMyProduction() const override;
 	
 protected:
     BoundingRole addr_bounding_role;
@@ -267,6 +269,7 @@ struct SpecificInstanceIdentifier : InstanceIdentifier,
     SpecificInstanceIdentifier( string s, BoundingRole addr_bounding_role = BoundingRole::NONE ) : 
         SpecificIdentifier(s, addr_bounding_role) {} ///< make identifier with the given name
     NODE_FUNCTIONS_FINAL
+	Production GetMyProduction() const override;
 };
                             
 
@@ -286,6 +289,7 @@ struct SpecificTypeIdentifier : TypeIdentifier,
     SpecificTypeIdentifier( string s, BoundingRole addr_bounding_role = BoundingRole::NONE ) : 
         SpecificIdentifier(s, addr_bounding_role) {} ///< make identifier with the given name
     NODE_FUNCTIONS_FINAL
+	Production GetMyProduction() const override;
 };
 
 // General note about identifiers: in a valid program tree, there should
@@ -445,6 +449,7 @@ struct SpecificLabelIdentifier : LabelIdentifier,
     SpecificLabelIdentifier( string s, BoundingRole addr_bounding_role = BoundingRole::NONE ) : 
         SpecificIdentifier(s, addr_bounding_role) {} ///< construct with initial name
     NODE_FUNCTIONS_FINAL
+	Production GetMyProduction() const override;    
 };
 
 /// Declaration of a label for switch, goto etc.
@@ -912,6 +917,7 @@ struct StatementExpression : Expression, ///< Evaluates to whatever the last sta
 {
     NODE_FUNCTIONS_FINAL
     virtual string GetColour() const { return Expression::GetColour(); } // Expression wins    
+	Production GetMyProduction() const override;	
 };                   
 
 /// The return statement of a function

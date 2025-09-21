@@ -51,7 +51,7 @@ string BuildIdentifierAgent::GetNewName(const SCREngine *acting_engine)
         ASSERT( new_identifier );
         TreePtr<SpecificIdentifier> si = DynamicTreePtrCast<SpecificIdentifier>( new_identifier );
         ASSERT( si )("BuildIdentifier: ")(*new_identifier)(" should be a kind of SpecificIdentifier (format is %s)", format.c_str());
-        string s = si->GetRender();
+        string s = si->GetToken();
         if( !vs.empty() )
             all_same = all_same && (s == vs.back());
         vs.push_back( s );
@@ -157,8 +157,8 @@ unique_ptr<SYM::BooleanResult> IdentifierByNameAgent::IsIdentifierNamedOperator:
     TreePtr<Node> base_x = ra->GetOnlyXLink().GetChildTreePtr(); // TODO dynamic_pointer_cast support for TreePtrInterface #27
     if( auto si_x = DynamicTreePtrCast<CPPTree::SpecificIdentifier>(base_x) )
     {
-        TRACE("Comparing ")(si_x->GetRender())(" with ")(name);
-        if( si_x->GetRender() == name )
+        TRACE("Comparing ")(si_x->GetToken())(" with ")(name);
+        if( si_x->GetToken() == name )
         {
             TRACE(" : same\n");
             return make_unique<SYM::BooleanResult>( true );

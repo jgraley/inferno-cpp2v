@@ -76,9 +76,9 @@ struct Node : NodeBases,
 
     virtual string GetGraphName() const
     {
-        return GetRender();
+        return GetToken();
     }
-    
+        
     virtual Graphable::NodeBlock GetGraphBlockInfo() const override;
     
     // It's nice to share. So we try to make these available to other 
@@ -91,7 +91,7 @@ struct Node : NodeBases,
                                                    Phase phase=Graphable::UNDEFINED );
                                                    
     virtual string GetGraphId() const override;    
-    virtual string GetTrace() const override;
+    virtual string GetTrace() const override;    
 };
 
 

@@ -15,7 +15,7 @@ public:
 		
 		INITIALISER, // For initialisers
 		
-		BOOT_EXPR, // Lowest precedence is called "BOOT_EXPR"
+		BOOT_EXPR, // Lowest expression precedence: (), {}, [] etc from the inside
 		
 		COMMA_OP,
 		COMMA_SEP, // Use this for comma-separated lists to force parens for COMMA_OP
@@ -35,9 +35,11 @@ public:
 		POSTFIX, // C++: all prefix including sub clauses
 		SCOPE_RES, // :: in C++
 		
-		PARENTHESISED, // enclosed in (), {} etc
+		PARENTHESISED, // Highest expression precedence: (), {} from the outside
 		
-		TOKEN // Highest precedence would be that of lexer tokens
+		IDENTIFIER,
+		TOKEN, // Highest precedence would be that of lexer tokens
+		ANONYMOUS = TOKEN
 	};
 	
 	// We deal with syntactical association only, not mathematical, because:
@@ -49,11 +51,15 @@ public:
 		RIGHT
 	};
 	
+	/// Produce the source-code-name of the corresponding SystemC construct
+    virtual string GetToken() const
+    {
+		ASSERTFAIL("GetToken() called on non-token")
+	} 
+
 	virtual string GetRender() const
     {
-        // If no render supplied just return the name - right for graphs
-        // and a debugging aid in C++ renders
-        return GetName(); 
+        return GetToken(); 
     }
 
 	// What production do I become once rendered

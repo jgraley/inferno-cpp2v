@@ -5,12 +5,27 @@
 
 using namespace CPPTree;
 
+//////////////////////////// Uninitialised ///////////////////////////////
+
+Syntax::Production Uninitialised::GetMyProduction() const
+{
+	// Most types don't use declarators, so provide a safe default
+	return Production::ANONYMOUS; // Renders as an empty string
+}
+
 //////////////////////////// Type ///////////////////////////////
 
 Syntax::Production Type::GetOperandInDeclaratorProduction() const
 {
 	// Most types don't use declarators, so provide a safe default
 	return Production::INSTANCE_PROTO;
+}
+
+//////////////////////////// Literal ///////////////////////////////
+
+string Literal::GetName() const
+{
+    return Traceable::GetName() + "(" + GetToken() + ")";
 }
 
 //////////////////////////// SpecificString ///////////////////////////////
@@ -41,16 +56,10 @@ Orderable::Diff SpecificString::OrderCompare3WayCovariant( const Orderable &righ
 }
  
  
-string SpecificString::GetRender() const
+string SpecificString::GetToken() const
 {
     // Since this is a string literal, output it double quoted
     return "\"" + value + "\"";
-}
-
-
-string SpecificString::GetTrace() const
-{
-    return GetName() + "(" + GetRender() + ")" + GetSerialString();
 }
 
 
@@ -136,7 +145,7 @@ Orderable::Diff SpecificInteger::OrderCompare3WayCovariant( const Orderable &rig
 }
  
  
-string SpecificInteger::GetRender() const /// Produce a string for debug
+string SpecificInteger::GetToken() const 
 {
     return string(value.toString(10)) + // decimal
            (value.isUnsigned() ? "U" : "") +
@@ -147,12 +156,6 @@ string SpecificInteger::GetRender() const /// Produce a string for debug
            (value.getBitWidth()>TypeDb::integral_bits[clang::DeclSpec::TSW_long] ? "L" : "");
 #endif
            // note, assuming longlong bigger than long, so second L appends first to get LL
-}
-
-
-string SpecificInteger::GetTrace() const
-{
-    return GetName() + "(" + GetRender() + ")" + GetSerialString();
 }
 
 
@@ -206,7 +209,7 @@ Orderable::Diff SpecificFloat::OrderCompare3WayCovariant( const Orderable &right
 }
  
 
-string SpecificFloat::GetRender() const
+string SpecificFloat::GetToken() const
 {
     char hs[256];
     // generate hex float since it can be exact
@@ -214,12 +217,6 @@ string SpecificFloat::GetRender() const
     return string(hs) +
            (&getSemantics()==TypeDb::float_semantics ? "F" : "") +
            (&getSemantics()==TypeDb::long_double_semantics ? "L" : "");
-}
-
-
-string SpecificFloat::GetTrace() const
-{
-    return GetName() + "(" + GetRender() + ")" + GetSerialString();
 }
 
 
@@ -288,7 +285,7 @@ Orderable::Diff SpecificIdentifier::OrderCompare3WayCovariant( const Orderable &
 }
 
 
-string SpecificIdentifier::GetRender() const 
+string SpecificIdentifier::GetToken() const 
 {
     return name;
 }
@@ -318,10 +315,25 @@ string SpecificIdentifier::GetTrace() const
     return GetName() + "(" + GetGraphName() + ")" + GetSerialString();
 }
 
+//////////////////////////// SpecificInstanceIdentifier //////////////////////////////
 
-Syntax::Production SpecificIdentifier::GetMyProduction() const
+Syntax::Production SpecificInstanceIdentifier::GetMyProduction() const
 { 
-	return Production::TOKEN; 
+	return Production::IDENTIFIER; 
+}
+
+//////////////////////////// SpecificTypeIdentifier //////////////////////////////
+
+Syntax::Production SpecificTypeIdentifier::GetMyProduction() const
+{ 
+	return Production::IDENTIFIER; 
+}
+
+//////////////////////////// SpecificLabelIdentifier //////////////////////////////
+
+Syntax::Production SpecificLabelIdentifier::GetMyProduction() const
+{ 
+	return Production::PREFIX;  // renders with && prepended
 }
 
 //////////////////////////// Callable //////////////////////////////
@@ -462,4 +474,11 @@ Syntax::Production SizeOf::GetMyProduction() const
 Syntax::Production AlignOf::GetMyProduction() const
 { 
 	return Production::PREFIX; 
+}
+
+//////////////////////////// StatementExpression ///////////////////////////////
+
+Syntax::Production StatementExpression::GetMyProduction() const
+{ 
+	return Production::PARENTHESISED; 
 }
