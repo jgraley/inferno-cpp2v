@@ -9,7 +9,9 @@ class Syntax : virtual Traceable
 public:
 	enum class Production // "Syntax::Production" is a generalisation of precedence
 	{		
-		UNINITIALISED,
+		UNDEFINED,
+		
+		INITIALISER, // For initialisers
 		
 		BOOT_EXPR, // Lowest precedence is called "BOOT_EXPR"
 		
@@ -50,6 +52,13 @@ public:
         // If no render supplied just return the name - right for graphs
         // and a debugging aid in C++ renders
         return GetName(); 
+    }
+
+	virtual Production GetIdealProduction() const
+    {
+        // If no render supplied just return the name - right for graphs
+        // and a debugging aid in C++ renders
+        return Production::UNDEFINED; 
     }
 };
 

@@ -208,7 +208,7 @@ ContainerInterface::iterator::operator string() const
     if( pib )
         return Traceable::TypeIdName( *pib );
     else 
-        return string("UNINITIALISED");
+        return string("INITIALISER");
 }
 
 

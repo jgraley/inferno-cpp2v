@@ -700,10 +700,38 @@ struct AssignmentOperator : NonCommutativeOperator { NODE_FUNCTIONS };
 
 // Use an include file to generate nodes for all the actual operators based on
 // contents of operator_data.inc
-#define PREFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) struct NODE : BASE { NODE_FUNCTIONS_FINAL };
-#define POSTFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) struct NODE : BASE { NODE_FUNCTIONS_FINAL };
-#define INFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) struct NODE : BASE { NODE_FUNCTIONS_FINAL };
-#define OTHER(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) struct NODE : BASE { NODE_FUNCTIONS_FINAL };
+#define PREFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) struct NODE : BASE \
+{ \
+	NODE_FUNCTIONS_FINAL \
+	virtual Production GetIdealProduction() const \
+	{ \
+		return Production::PROD; \
+	} \
+};
+#define POSTFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) struct NODE : BASE \
+{ \
+	NODE_FUNCTIONS_FINAL \
+	virtual Production GetIdealProduction() const \
+	{ \
+		return Production::PROD; \
+	} \
+};
+#define INFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) struct NODE : BASE \
+{ \
+	NODE_FUNCTIONS_FINAL \
+	virtual Production GetIdealProduction() const \
+	{ \
+		return Production::PROD; \
+	} \
+};
+#define OTHER(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) struct NODE : BASE \
+{ \
+	NODE_FUNCTIONS_FINAL \
+	virtual Production GetIdealProduction() const \
+	{ \
+		return Production::PROD; \
+	} \
+};
 #include "operator_data.inc"
 
 /// Property indicating whether a New/Delete is global 
