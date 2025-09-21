@@ -11,6 +11,8 @@ public:
 	{		
 		UNDEFINED,
 		
+		INSTANCE_PROTO, 
+		
 		INITIALISER, // For initialisers
 		
 		BOOT_EXPR, // Lowest precedence is called "BOOT_EXPR"
@@ -54,10 +56,15 @@ public:
         return GetName(); 
     }
 
-	virtual Production GetIdealProduction() const
+	// What production do I become once rendered
+	virtual Production GetMyProduction() const
     {
-        // If no render supplied just return the name - right for graphs
-        // and a debugging aid in C++ renders
+        return Production::UNDEFINED; 
+    }
+    
+    // What production is expected as my operand in a declarator
+	virtual Production GetOperandInDeclaratorProduction() const
+    {
         return Production::UNDEFINED; 
     }
     

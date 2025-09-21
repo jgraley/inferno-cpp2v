@@ -65,6 +65,7 @@ struct Type : virtual Node
 { 
     NODE_FUNCTIONS 
     virtual string GetColour() const { return "/set28/3"; }    
+	Production GetOperandInDeclaratorProduction() const override;   
 };
 
 /// A declaration specifies the creation of a UserType or an Instance. 
@@ -123,7 +124,7 @@ struct SpecificString : String
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
     virtual string GetRender() const; /// Produce a string for debug
     virtual string GetTrace() const;
-	Production GetIdealProduction() const override;
+	Production GetMyProduction() const override;
 private:
     string value; ///< The string itself
 };
@@ -160,7 +161,7 @@ struct SpecificInteger : Integer
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
     virtual string GetRender() const; /// Produce a string for debug
     virtual string GetTrace() const;
-	Production GetIdealProduction() const override;
+	Production GetMyProduction() const override;
 	
 private:
     llvm::APSInt value;    
@@ -183,7 +184,7 @@ struct SpecificFloat : Float, llvm::APFloat
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
     virtual string GetRender() const; /// Produce a string for graphing
     virtual string GetTrace() const;	
-    Production GetIdealProduction() const override;
+    Production GetMyProduction() const override;
 };
 
 /// Intermediate property node that represents either boolean value.
@@ -196,7 +197,7 @@ struct True : Bool
 {
     NODE_FUNCTIONS_FINAL
     virtual string GetRender() const { return "true"; } ///< Produce a string for debug
-	Production GetIdealProduction() const override;
+	Production GetMyProduction() const override;
 };
 
 /// Property node for boolean value false 
@@ -204,7 +205,7 @@ struct False : Bool
 {
     NODE_FUNCTIONS_FINAL
     virtual string GetRender() const { return "false"; } 
-	Production GetIdealProduction() const override;
+	Production GetMyProduction() const override;
 };
 
 //////////////////////////// Declarations //////////////////////////// 
@@ -243,7 +244,7 @@ struct SpecificIdentifier : virtual Property
     virtual string GetRender() const; /// This is relied upon to just return the identifier name for rendering
     virtual string GetGraphName() const;
     virtual string GetTrace() const;
-	Production GetIdealProduction() const override;
+	Production GetMyProduction() const override;
 	
 protected:
     BoundingRole addr_bounding_role;
@@ -470,6 +471,8 @@ struct Label : Declaration, //TODO commonize with Case and Default
 struct Callable : Type
 {
     NODE_FUNCTIONS
+    
+	Production GetOperandInDeclaratorProduction() const override;
 };
 
 /// Anything that can be called and has parameters
@@ -528,6 +531,8 @@ struct Array : Type
     NODE_FUNCTIONS_FINAL
     TreePtr<Type> element; ///< the element type
     TreePtr<Initialiser> size; ///< evaluates to the size or Uninitialised if not given eg []
+   
+	Production GetOperandInDeclaratorProduction() const override;
 };
 
 /// Intermediate for indirect access to some type as specified
@@ -535,6 +540,8 @@ struct Indirection : Type
 {
     NODE_FUNCTIONS
     TreePtr<Type> destination; ///< reaching an object of this type, indirectly
+
+	Production GetOperandInDeclaratorProduction() const override;
 };
 
 /// A C/C++ pointer
@@ -708,7 +715,7 @@ struct AssignmentOperator : NonCommutativeOperator { NODE_FUNCTIONS };
 #define PREFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) struct NODE : BASE \
 { \
 	NODE_FUNCTIONS_FINAL \
-	Production GetIdealProduction() const override \
+	Production GetMyProduction() const override \
 	{ \
 		return Production::PROD; \
 	} \
@@ -716,7 +723,7 @@ struct AssignmentOperator : NonCommutativeOperator { NODE_FUNCTIONS };
 #define POSTFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) struct NODE : BASE \
 { \
 	NODE_FUNCTIONS_FINAL \
-	Production GetIdealProduction() const override \
+	Production GetMyProduction() const override \
 	{ \
 		return Production::PROD; \
 	} \
@@ -724,7 +731,7 @@ struct AssignmentOperator : NonCommutativeOperator { NODE_FUNCTIONS };
 #define INFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) struct NODE : BASE \
 { \
 	NODE_FUNCTIONS_FINAL \
-	Production GetIdealProduction() const override \
+	Production GetMyProduction() const override \
 	{ \
 		return Production::PROD; \
 	} \
@@ -732,7 +739,7 @@ struct AssignmentOperator : NonCommutativeOperator { NODE_FUNCTIONS };
 #define OTHER(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) struct NODE : BASE \
 { \
 	NODE_FUNCTIONS_FINAL \
-	Production GetIdealProduction() const override \
+	Production GetMyProduction() const override \
 	{ \
 		return Production::PROD; \
 	} \
@@ -773,7 +780,7 @@ struct New : Operator
     Sequence<Expression> constructor_arguments; ///< arguments to the constructor
     TreePtr<Globality> global; ///< whether placement is global
 
-	Production GetIdealProduction() const override;
+	Production GetMyProduction() const override;
 };
 
 /// Node for C++ delete operator
@@ -784,7 +791,7 @@ struct Delete : Operator
     TreePtr<DeleteArrayness> array; ///< whether array delete
     TreePtr<Globality> global; ///< whether global placement
 
-	Production GetIdealProduction() const override;
+	Production GetMyProduction() const override;
 };
 
 /// Node for accessing an element in a record as in base.member
@@ -796,7 +803,7 @@ struct Lookup : Operator
     TreePtr<Expression> base; ///< the Record we look in
     TreePtr<InstanceIdentifier> member; ///< the member to find
 	
-	Production GetIdealProduction() const override;
+	Production GetMyProduction() const override;
 };
 
 /// Node for a c-style cast. 
@@ -807,7 +814,7 @@ struct Cast : Operator
     TreePtr<Expression> operand; ///< the expression to cast
     TreePtr<Type> type; ///< the desired new type
 	
-	Production GetIdealProduction() const override;
+	Production GetMyProduction() const override;
 };
 
 /// Associates an Expression with an InstanceIdentifier. 
@@ -839,7 +846,7 @@ struct Call : MapOperator, Uncombable
     NODE_FUNCTIONS_FINAL
     TreePtr<Expression> callee; ///< evaluates to the Callable Instance we must call
 	
-	Production GetIdealProduction() const override;
+	Production GetMyProduction() const override;
 };
 
 /// Initialiser for a record 
@@ -851,7 +858,7 @@ struct MakeRecord : MapOperator
     NODE_FUNCTIONS_FINAL
     TreePtr<TypeIdentifier> type; ///< handle of the type of the record we are making
 	
-	Production GetIdealProduction() const override;
+	Production GetMyProduction() const override;
 };
 
 /// Operator that operates on data types as parameters. 
@@ -866,14 +873,14 @@ struct TypeOperator : Operator
 struct SizeOf : TypeOperator 
 { 
 	NODE_FUNCTIONS_FINAL 
-	Production GetIdealProduction() const override;
+	Production GetMyProduction() const override;
 }; 
 
 /// alignof() a type
 struct AlignOf : TypeOperator 
 { 
 	NODE_FUNCTIONS_FINAL
-	Production GetIdealProduction() const override;	
+	Production GetMyProduction() const override;	
 };
 
 //////////////////////////// Statements ////////////////////////////

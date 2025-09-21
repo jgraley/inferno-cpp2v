@@ -41,7 +41,6 @@ static struct { int c; } d;
 struct BStruct { int a; };
 
 int main()
-
 {
 	BStruct b;
     Sub t;

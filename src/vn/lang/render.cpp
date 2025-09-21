@@ -176,7 +176,7 @@ string Render::RenderScopePrefix( const Render::Kit &kit, TreePtr<Identifier> id
     else if( scope == root_scope )
         return " ::";
     else if( TreePtr<Enum> e = DynamicTreePtrCast<Enum>( scope ) ) // <- for enum
-        return RenderScopePrefix( kit, e->identifier, prod );    // omit scope for the enum itself
+        return RenderScopePrefix( kit, e->identifier, surround_prod );    // omit scope for the enum itself
     else if( TreePtr<Record> r = DynamicTreePtrCast<Record>( scope ) ) // <- for class, struct, union
         return RenderScopedIdentifier( kit, r->identifier, Syntax::Production::SCOPE_RES ) + "::";
     else if( DynamicTreePtrCast<CallableParams>( scope ) ||  // <- this is for params
@@ -191,10 +191,10 @@ DEFAULT_CATCH_CLAUSE
 
 string Render::RenderScopedIdentifier( const Render::Kit &kit, TreePtr<Identifier> id, Syntax::Production surround_prod ) try
 {
-	if( Syntax::GetPrecedence(Syntax::Production::SCOPE_RES) < Syntax::GetPrecedence(prod) )
+	if( Syntax::GetPrecedence(Syntax::Production::SCOPE_RES) < Syntax::GetPrecedence(surround_prod) )
 		return "(" + RenderScopedIdentifier(kit, id, Syntax::Production::BOOT_EXPR) + ")";
 
-    string s = RenderScopePrefix( kit, id, prod );   
+    string s = RenderScopePrefix( kit, id, surround_prod );   
     s += RenderIdentifier( kit, id );
 
     TRACE("Render scoped identifier %s\n", s.c_str() );
@@ -281,12 +281,20 @@ string Render::RenderFloatingType( const Render::Kit &kit, TreePtr<Floating> typ
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderType( const Render::Kit &kit, TreePtr<Type> type, string object, bool constant ) try
+string Render::RenderType( const Render::Kit &kit, TreePtr<Type> type, string object, Syntax::Production object_prod, 
+                           bool constant ) try
 {
+    Syntax::Production surround_prod = type->GetOperandInDeclaratorProduction();
+	ASSERT( surround_prod != Syntax::Production::UNDEFINED )("Rendering type: ")(type)(" in production %d",(int)surround_prod)(" got no surrounding production\n");
+	ASSERT( Syntax::GetPrecedence(surround_prod) <= Syntax::GetPrecedence(Syntax::Production::PARENTHESISED) ); // Can't satisfy this production's precedence demand using parentheses
+	ASSERT( Syntax::GetPrecedence(object_prod) >= Syntax::GetPrecedence(Syntax::Production::BOOT_EXPR) ); // Can't puth this node into parentheses
+	bool bracketize = Syntax::GetPrecedence(object_prod) < Syntax::GetPrecedence(surround_prod);	
+    if( bracketize )
+		object = "(" + object + ")";
     string sobject;
     if( !object.empty() )
         sobject = " " + object;
-    
+                
     string const_str = constant?"const ":"";
 
     TRACE();
@@ -303,19 +311,20 @@ string Render::RenderType( const Render::Kit &kit, TreePtr<Type> type, string ob
     else if( TreePtr<Destructor> f = DynamicTreePtrCast< Destructor >(type) )
         return object + "()" + const_str;
     else if( TreePtr<Function> f = DynamicTreePtrCast< Function >(type) )
-        return RenderType( kit, f->return_type, "(" + object + ")(" + RenderParams(kit, f) + ")" + const_str );
+        return RenderType( kit, f->return_type, "(" + object + ")(" + RenderParams(kit, f) + ")" + const_str, Syntax::Production::POSTFIX );
     else if( TreePtr<Process> f = DynamicTreePtrCast< Process >(type) )
         return "void " + object + "()" + const_str;
     else if( TreePtr<Pointer> p = DynamicTreePtrCast< Pointer >(type) )
-        return RenderType( kit, p->destination, const_str + "(*" + object + ")", false ); // TODO Pointer node to indicate constancy of pointed-to object - would go into this call to RenderType
+        return RenderType( kit, p->destination, const_str + "(*" + object + ")", Syntax::Production::PREFIX, false ); // TODO Pointer node to indicate constancy of pointed-to object - would go into this call to RenderType
     else if( TreePtr<Reference> r = DynamicTreePtrCast< Reference >(type) )
-        return RenderType( kit, r->destination, const_str + "(&" + object + ")" );
+        return RenderType( kit, r->destination, const_str + "(&" + object + ")", Syntax::Production::PREFIX );
     else if( TreePtr<Array> a = DynamicTreePtrCast< Array >(type) )
         return RenderType( kit, 
                            a->element, 
                            object.empty() ? 
                                "[" + RenderExpression(kit, a->size, Syntax::Production::BOOT_EXPR) + "]" : 
                                "(" + object + "[" + RenderExpression(kit, a->size, Syntax::Production::BOOT_EXPR) + "])", 
+                           Syntax::Production::POSTFIX,
                            constant );
     else if( TreePtr<Typedef> t = DynamicTreePtrCast< Typedef >(type) )
         return const_str + RenderIdentifier(kit, t->identifier) + sobject;
@@ -376,8 +385,8 @@ string Render::RenderOperator( const Render::Kit &kit, TreePtr<Operator> op, Seq
 #define INFIX(TOK, TEXT, NODE_SHAPED, BASE, CAT, PROD, ASSOC) \
     else if( DynamicTreePtrCast<NODE_SHAPED>(op) ) \
     { \
-		Syntax::Production surround_prod_left = Syntax::Production::PROD; \
-		Syntax::Production surround_prod_right = Syntax::Production::PROD; \
+		Syntax::Production prod_left = Syntax::Production::PROD; \
+		Syntax::Production prod_right = Syntax::Production::PROD; \
 		switch( Syntax::Association::ASSOC ) \
 		{ \
 			case Syntax::Association::RIGHT: prod_left = Syntax::BoostPrecedence(prod_left); break; \
@@ -442,13 +451,12 @@ DEFAULT_CATCH_CLAUSE
 
 string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> expression, Syntax::Production surround_prod ) try
 {
-	(void) prod;
-	Syntax::Production node_ideal_prod = expression->GetIdealProduction();
-	// If current prouction has too-high precedence, boot back down using parentheses
-	ASSERT( node_ideal_prod != Syntax::Production::UNDEFINED )("Rendering expression: ")(expression)(" in production %d",(int)prod)(" got no ideal production\n");
-	ASSERT( Syntax::GetPrecedence(prod) <= Syntax::GetPrecedence(Syntax::Production::PARENTHESISED) ); // Can't satisfy this production's precedence demand using parentheses
+	Syntax::Production node_ideal_prod = expression->GetMyProduction();
+	// If current production has too-high precedence, boot back down using parentheses
+	ASSERT( node_ideal_prod != Syntax::Production::UNDEFINED )("Rendering expression: ")(expression)(" in production %d",(int)surround_prod)(" got no ideal production\n");
+	ASSERT( Syntax::GetPrecedence(surround_prod) <= Syntax::GetPrecedence(Syntax::Production::PARENTHESISED) ); // Can't satisfy this production's precedence demand using parentheses
 	ASSERT( Syntax::GetPrecedence(node_ideal_prod) >= Syntax::GetPrecedence(Syntax::Production::BOOT_EXPR) ); // Can't puth this node into parentheses
-	bool bracketize = Syntax::GetPrecedence(node_ideal_prod) < Syntax::GetPrecedence(prod);	
+	bool bracketize = Syntax::GetPrecedence(node_ideal_prod) < Syntax::GetPrecedence(surround_prod);	
 	
     //TRACE("%p\n", expression.get());
     string before = bracketize ? "(" : "";
@@ -470,14 +478,14 @@ string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> ex
                "&&" + RenderIdentifier( kit, li ) + // label-as-variable (GCC extension)
                after;
     else if( TreePtr<InstanceIdentifier> ii = DynamicTreePtrCast< InstanceIdentifier >(expression) )
-        return RenderScopedIdentifier( kit, ii, prod );
+        return RenderScopedIdentifier( kit, ii, surround_prod );
     else if( TreePtr<SizeOf> pot = DynamicTreePtrCast< SizeOf >(expression) )
         return before +
-               "sizeof(" + RenderType( kit, pot->operand, "" ) + ")" +
+               "sizeof(" + RenderType( kit, pot->operand, "", Syntax::Production::TOKEN ) + ")" +
                after;
     else if( TreePtr<AlignOf> pot = DynamicTreePtrCast< AlignOf >(expression) )
         return before +
-               "alignof(" + RenderType( kit, pot->operand, "" ) + ")" +
+               "alignof(" + RenderType( kit, pot->operand, "", Syntax::Production::TOKEN ) + ")" +
                after;
     else if( TreePtr<NonCommutativeOperator> nco = DynamicTreePtrCast< NonCommutativeOperator >(expression) )
         return before +
@@ -501,7 +509,7 @@ string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> ex
         return before +
                (DynamicTreePtrCast<Global>(n->global) ? "::" : "") +
                "new(" + RenderOperandSequence( kit, n->placement_arguments ) + ") " +
-               RenderType( kit, n->type, "" ) +
+               RenderType( kit, n->type, "", Syntax::Production::TOKEN ) +
                (n->constructor_arguments.empty() ? "" : "(" + RenderOperandSequence( kit, n->constructor_arguments ) + ")" ) +
                after;
     else if( TreePtr<Delete> d = DynamicTreePtrCast< Delete >(expression) )
@@ -518,7 +526,7 @@ string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> ex
                after;
     else if( TreePtr<Cast> c = DynamicTreePtrCast< Cast >(expression) )
         return before +
-               "(" + RenderType( kit, c->type, "" ) + ")" +
+               "(" + RenderType( kit, c->type, "", Syntax::Production::TOKEN ) + ")" +
                RenderExpression( kit, c->operand, Syntax::Production::PREFIX ) +
                after;
     else if( TreePtr<MakeRecord> ro = DynamicTreePtrCast< MakeRecord >(expression) )
@@ -554,7 +562,7 @@ string Render::RenderMakeRecord( const Render::Kit &kit, TreePtr<MakeRecord> ro 
     TreePtr<Record> r = GetRecordDeclaration(kit, id).GetTreePtr();
 
     s += "(";
-    s += RenderType( kit, ro->type, "" );
+    s += RenderType( kit, ro->type, "", Syntax::Production::TOKEN );
     s += "){ ";
     s += RenderMapInOrder( kit, ro, r );
     s += " }";
@@ -704,7 +712,7 @@ string Render::RenderInstanceProto( const Render::Kit &kit, TreePtr<Instance> o,
         name += RenderIdentifier(kit, o->identifier);
     }
 
-    s += RenderType( kit, o->type, name, constant );
+    s += RenderType( kit, o->type, name, Syntax::Production::SCOPE_RES, constant );
 
 	return s;
 } 
@@ -858,7 +866,7 @@ string Render::RenderDeclaration( const Render::Kit &kit, TreePtr<Declaration> d
     }
     else if( TreePtr<Typedef> t = DynamicTreePtrCast< Typedef >(declaration) )
     {
-        s += "typedef " + RenderType( kit, t->type, RenderIdentifier(kit, t->identifier) ) + ";\n";
+        s += "typedef " + RenderType( kit, t->type, RenderIdentifier(kit, t->identifier), Syntax::Production::TOKEN ) + ";\n";
     }
     else if( TreePtr<Record> r = DynamicTreePtrCast< Record >(declaration) )
     {
@@ -1261,7 +1269,7 @@ string Render::RenderParams( const Render::Kit &kit,
 			continue;
 		}
 		string name = RenderIdentifier(kit, o->identifier);
-        s += RenderType( kit, o->type, name, false );
+        s += RenderType( kit, o->type, name, Syntax::Production::TOKEN, false );
     		
         first = false;
     }

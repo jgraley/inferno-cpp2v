@@ -5,6 +5,14 @@
 
 using namespace CPPTree;
 
+//////////////////////////// Type ///////////////////////////////
+
+Syntax::Production Type::GetOperandInDeclaratorProduction() const
+{
+	// Most types don't use declarators, so provide a safe default
+	return Production::INSTANCE_PROTO;
+}
+
 //////////////////////////// SpecificString ///////////////////////////////
 
 SpecificString::SpecificString() 
@@ -46,7 +54,7 @@ string SpecificString::GetTrace() const
 }
 
 
-Syntax::Production SpecificString::GetIdealProduction() const
+Syntax::Production SpecificString::GetMyProduction() const
 { 
 	return Production::TOKEN; 
 }
@@ -148,7 +156,7 @@ string SpecificInteger::GetTrace() const
 }
 
 
-Syntax::Production SpecificInteger::GetIdealProduction() const
+Syntax::Production SpecificInteger::GetMyProduction() const
 { 
 	return Production::TOKEN; 
 }
@@ -215,7 +223,7 @@ string SpecificFloat::GetTrace() const
 }
 
 
-Syntax::Production SpecificFloat::GetIdealProduction() const
+Syntax::Production SpecificFloat::GetMyProduction() const
 { 
 	return Production::TOKEN; 
 }
@@ -311,9 +319,30 @@ string SpecificIdentifier::GetTrace() const
 }
 
 
-Syntax::Production SpecificIdentifier::GetIdealProduction() const
+Syntax::Production SpecificIdentifier::GetMyProduction() const
 { 
 	return Production::TOKEN; 
+}
+
+//////////////////////////// Callable //////////////////////////////
+
+Syntax::Production Callable::GetOperandInDeclaratorProduction() const
+{
+	return Production::POSTFIX; // eg int a();
+}
+
+//////////////////////////// Array //////////////////////////////
+
+Syntax::Production Array::GetOperandInDeclaratorProduction() const
+{
+	return Production::POSTFIX; // eg int a[];
+}
+
+//////////////////////////// Indirection //////////////////////////////
+
+Syntax::Production Indirection::GetOperandInDeclaratorProduction() const
+{
+	return Production::PREFIX; // eg int *a;
 }
 
 //////////////////////////// SpecificFloatSemantics ///////////////////////////////
@@ -367,70 +396,70 @@ SpecificFloatSemantics::operator const llvm::fltSemantics &() const
 
 //////////////////////////// True ///////////////////////////////
 
-Syntax::Production True::GetIdealProduction() const
+Syntax::Production True::GetMyProduction() const
 { 
 	return Production::TOKEN; 
 }
 
 //////////////////////////// False ///////////////////////////////
 
-Syntax::Production False::GetIdealProduction() const
+Syntax::Production False::GetMyProduction() const
 { 
 	return Production::TOKEN; 
 }
 
 //////////////////////////// New ///////////////////////////////
 
-Syntax::Production New::GetIdealProduction() const
+Syntax::Production New::GetMyProduction() const
 { 
 	return Production::PREFIX; 
 }
 
 //////////////////////////// Delete ///////////////////////////////
 
-Syntax::Production Delete::GetIdealProduction() const
+Syntax::Production Delete::GetMyProduction() const
 { 
 	return Production::PREFIX; 
 }
 
 //////////////////////////// Lookup ///////////////////////////////
 
-Syntax::Production Lookup::GetIdealProduction() const
+Syntax::Production Lookup::GetMyProduction() const
 { 
 	return Production::POSTFIX; 
 }
 
 //////////////////////////// Cast ///////////////////////////////
 
-Syntax::Production Cast::GetIdealProduction() const
+Syntax::Production Cast::GetMyProduction() const
 { 
 	return Production::PREFIX; 
 }
 
 //////////////////////////// Call ///////////////////////////////
 
-Syntax::Production Call::GetIdealProduction() const
+Syntax::Production Call::GetMyProduction() const
 { 
 	return Production::POSTFIX; 
 }
 
 //////////////////////////// MakeRecord ///////////////////////////////
 
-Syntax::Production MakeRecord::GetIdealProduction() const
+Syntax::Production MakeRecord::GetMyProduction() const
 { 
 	return Production::PARENTHESISED; 
 }
 
 //////////////////////////// SizeOf ///////////////////////////////
 
-Syntax::Production SizeOf::GetIdealProduction() const
+Syntax::Production SizeOf::GetMyProduction() const
 { 
 	return Production::PREFIX; 
 }
 
 //////////////////////////// AlignOf ///////////////////////////////
 
-Syntax::Production AlignOf::GetIdealProduction() const
+Syntax::Production AlignOf::GetMyProduction() const
 { 
 	return Production::PREFIX; 
 }
