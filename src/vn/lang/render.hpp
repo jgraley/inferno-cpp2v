@@ -6,6 +6,7 @@
 #include "helpers/transformation.hpp"
 #include "uniquify_identifiers.hpp"
 #include "helpers/simple_compare.hpp"
+#include "tree/misc.hpp"
 
 namespace VN 
 {
@@ -17,6 +18,8 @@ public:
 	struct Kit : TransKit
 	{	
 	};
+	
+	class DeclNotFoundOrInferred : public DeclarationOf::DeclarationNotFound {};
 
     Render( string of = string() );
     string RenderToString( shared_ptr<VN::CompareReplace> pattern );

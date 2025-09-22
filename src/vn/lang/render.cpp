@@ -172,11 +172,20 @@ DEFAULT_CATCH_CLAUSE
 
 string Render::RenderScopePrefix( const Render::Kit &kit, TreePtr<Identifier> id, Syntax::Production surround_prod ) try
 {
-    TreePtr<Node> scope = GetScope( root_scope, id );
-        
+	TreePtr<Node> scope;
+	try
+	{
+		scope = GetScope( root_scope, id );
+	}
+ 	catch( ScopeNotFoundMismatch & )
+ 	{
+		// Assume that specific identifiers added by SC lowering are all in global scope eg from a #include
+		return "";
+	}
+       
     //TRACE("%p %p %p\n", program.get(), scope.get(), scope_stack.top().get() );
     if( scope == scope_stack.top() )
-        return string(); // local scope
+        return ""; // local scope
     else if( scope == root_scope )
         return " ::";
     else if( TreePtr<Enum> e = DynamicTreePtrCast<Enum>( scope ) ) // <- for enum
@@ -186,7 +195,7 @@ string Render::RenderScopePrefix( const Render::Kit &kit, TreePtr<Identifier> id
     else if( DynamicTreePtrCast<CallableParams>( scope ) ||  // <- this is for params
              DynamicTreePtrCast<Compound>( scope ) ||    // <- this is for locals in body
              DynamicTreePtrCast<StatementExpression>( scope ) )    // <- this is for locals in body
-        return string();
+        return "";
     else
         return ERROR_UNSUPPORTED( scope );
 }
@@ -438,10 +447,37 @@ string Render::RenderCall( const Render::Kit &kit, TreePtr<Call> call ) try
     else
         s += RenderExpression( kit, call->callee, Syntax::Production::POSTFIX );
 
-    s += "(";
-
     // If CallableParams, generate some arguments, resolving the order using the original function type
-    TreePtr<Node> ctype = TypeOf::instance(call->callee, root_scope).GetTreePtr();
+    TreePtr<Node> ctype;
+    try
+    {
+		ctype = TypeOf::instance(call->callee, root_scope).GetTreePtr();
+	}		
+	catch( DeclarationOf::DeclarationNotFound & )
+	{
+		// Try to infer decl as just the placeholder symbols _1, _2 etc
+		map<unsigned long, TreePtr<Initialiser>> ops;
+        for( TreePtr<MapOperand> mi : call->operands )
+        {
+			string tok = mi->identifier->GetToken();
+			if( tok[0] != '_' )
+				throw DeclNotFoundOrInferred();			
+			unsigned long i = strtol(tok.c_str()+1, nullptr, 10);
+			if( i==0 )
+				throw DeclNotFoundOrInferred();
+			ops[i] = mi->value;
+		}
+
+		// Inferred OK and values are in ops.
+		list<string> renders;
+        for( auto p : ops )        
+			renders.push_back( RenderExpression(kit, p.second, Syntax::Production::COMMA_SEP) );				
+		s += Join(renders, ", ", "(", ")");
+		return s;
+	}
+
+    s += "(";
+	
     ASSERT( ctype );
     if( TreePtr<CallableParams> cp = DynamicTreePtrCast<CallableParams>(ctype) )
         s += RenderMapInOrder( kit, call, cp );
@@ -777,12 +813,9 @@ DEFAULT_CATCH_CLAUSE
 // Do all functions, since SortDecls() ignores function bodies for dep analysis
 bool Render::ShouldSplitInstance( const Render::Kit &kit, TreePtr<Instance> o ) 
 {
+	(void)kit;
     bool isfunc = !!DynamicTreePtrCast<Callable>( o->type );
-    bool isnumber = !!DynamicTreePtrCast<Numeric>( o->type );
-
-    if( TreePtr<TypeIdentifier> ti = DynamicTreePtrCast<TypeIdentifier>(o->type) )
-        if( DynamicTreePtrCast<Enum>( GetRecordDeclaration(kit, ti).GetTreePtr() ) )
-            isnumber = 1; // enum is like a number        
+    bool isnumber = !!DynamicTreePtrCast<Numeric>( o->type );       
 
     bool split_var = false;
     if( TreePtr<Static> s = DynamicTreePtrCast<Static>(o) )

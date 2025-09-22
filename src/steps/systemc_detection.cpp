@@ -111,6 +111,9 @@ DetectSCDelta::DetectSCDelta( TreePtr<SCNamedFunction> r_delta )
     s_arg->identifier = s_param_id;
     s_arg->value = s_arg_id;
       
+    // TODO This is the last trans to remove calls to r_delta->GetToken(), so   
+    // clear the declaration away.
+      
     Configure( SEARCH_REPLACE, s_call, r_delta );
 }
 
@@ -128,6 +131,8 @@ DetectTerminationFunction::DetectTerminationFunction( TreePtr<TerminationFunctio
     s_arg->identifier = s_param_id;
     s_arg->value = event;
     r_tf->code = event;       
+      
+    // TODO clear the declaration away.      
       
     Configure( SEARCH_REPLACE, s_call, r_tf );
 }
