@@ -27,7 +27,7 @@ public:
 /// spot SystemC base class by its name and replace with inferno node 
 /** We look for the decl and remove it since the inferno
  Node does not require declaration. Then replace all class nodes
- that inherit from the suppleid base with the new inferno node and 
+ that inherit from the supplied base with the new inferno node and 
  remove the base */
 class DetectSCBase : public VNStep 
 {
@@ -120,7 +120,7 @@ public:
 /** Builder for the steps that detect implicit SysetemC constructs in C++ code
     and replace them with Inferno's Explicit nodes for SystemC which are much
     more succinct in tree form */
-class DetectAllSCTypes
+class DetectAllSystemC
 {
 public:
     static void Build( vector< shared_ptr<VNStep> > *sequence );

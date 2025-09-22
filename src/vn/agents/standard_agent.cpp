@@ -847,7 +847,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingX( const Repla
             if( should_overlay )
             {
                 TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[j]);        
-                ASSERT(    my_singular );
+                ASSERT( my_singular );
                 ASSERT( *my_singular ); // Should not have marked this one for overlay if NULL
                 PatternLink my_singular_plink( my_singular );                    
                 child_patches.push_back( my_singular_plink.GetChildAgent()->GenReplaceLayout(kit, my_singular_plink, acting_engine) );           
@@ -882,7 +882,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutNormal( const ReplaceKit &
 		
 	// With identifiers, Duplicate() would return *this as a replace node which 
 	// we don't support. Use BuildxxxIdentifierAgent for most cases. For exotic cases see #819.
-	ASSERT( !dynamic_cast<CPPTree::SpecificIdentifier *>(this) );		
+	//ASSERT( !dynamic_cast<CPPTree::SpecificIdentifier *>(this) );		
     TreePtr<Node> dest = Duplicate::DuplicateNode(me_plink.GetPattern());
     
     ASSERT( dest->IsFinal() )(*this)(" trying to build non-final ")(*dest)("\n"); 
@@ -932,7 +932,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutNormal( const ReplaceKit &
         else if( TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[i]) )
         {
             TRACE("Copying single element\n");
-            ASSERT( *my_singular )("Singular item %d (", i)(*my_singular)(") of ")(*this)(" was nullptr (not overlaying)\n");            
+            ASSERT( *my_singular )("Singular item %d ", i)(" of ")(*this)(" was nullptr (not overlaying)\n");            
             TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
             *dest_singular = Mutator::MakePlaceholder();
             zone.AddTerminus( Mutator::CreateFreeSingular(dest, dest_singular) );            

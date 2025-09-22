@@ -19,6 +19,7 @@
 #include "steps/fall_out.hpp"
 #include "steps/systemc_detection.hpp"
 #include "steps/systemc_generation.hpp"
+#include "steps/systemc_lowering.hpp"
 #include "steps/to_sc_method.hpp"
 #include "vn/graph/doc_graphs.hpp"
 #include "unit_test.hpp"
@@ -53,7 +54,7 @@ void BuildDefaultSequence( vector< shared_ptr<VNStep> > *sequence )
     
     // SystemC detection, converts implicit SystemC to explicit. Always at the top
     // because we cannot render+compile implicit SystemC.
-    DetectAllSCTypes::Build(sequence);
+    DetectAllSystemC::Build(sequence);
     
     // SystemC generation tries to convert C and/or C++ into SystemC. This
     // is a simplification of what would happen in ealy phases of the original
@@ -200,6 +201,8 @@ void BuildDefaultSequence( vector< shared_ptr<VNStep> > *sequence )
 		sequence->push_back( make_shared<CleanupIneffectualLabels>() );
 		sequence->push_back( make_shared<CleanUpDeadCode>() );
 	}
+	
+	//LowerAllSystemC::Build(sequence);
 }
 
 

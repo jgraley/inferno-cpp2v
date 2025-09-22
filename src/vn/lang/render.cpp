@@ -42,6 +42,10 @@ using namespace VN;
     } 
 
 
+#define SYSTEMC_MARKER(V) SSPrintf( " // SystemC %s:%d\n", __FILE__, __LINE__ )
+
+
+
 Render::Render( string of ) :
     outfile( of )
 {
@@ -314,7 +318,7 @@ string Render::RenderType( const Render::Kit &kit, TreePtr<Type> type, string ob
     else if( TreePtr<Function> f = DynamicTreePtrCast< Function >(type) )
         return RenderType( kit, f->return_type, object + "(" + RenderParams(kit, f) + ")" + const_str, Syntax::Production::POSTFIX );
     else if( TreePtr<Process> f = DynamicTreePtrCast< Process >(type) )
-        return "void " + object + "()" + const_str;
+        return "void " + object + "()" + const_str + SYSTEMC_MARKER();
     else if( TreePtr<Pointer> p = DynamicTreePtrCast< Pointer >(type) )
         return RenderType( kit, p->destination, const_str + "*" + object, Syntax::Production::PREFIX, false ); // TODO Pointer node to indicate constancy of pointed-to object - would go into this call to RenderType
     else if( TreePtr<Reference> r = DynamicTreePtrCast< Reference >(type) )
@@ -647,7 +651,7 @@ void Render::ExtractInits( const Render::Kit &kit, Sequence<Statement> &body, Se
 
 
 string Render::RenderInstanceProto( const Render::Kit &kit, TreePtr<Instance> o, 
-                                bool out_of_line ) try
+                                    bool out_of_line ) try
 {
     string s;
     string name;
@@ -695,6 +699,7 @@ string Render::RenderInstance( const Render::Kit &kit, TreePtr<Instance> o,
 	
     bool callable = (bool)DynamicTreePtrCast<Callable>(o->type);
 
+	// SystemC: declaring instance of module at top level.
     // If object was declared as a module instance, bodge in a name as a constructor parameter
     // But not for fields - they need an init list, done in RenderScope()
     if( !DynamicTreePtrCast<Field>(o) )
@@ -702,7 +707,7 @@ string Render::RenderInstance( const Render::Kit &kit, TreePtr<Instance> o,
             if( TreePtr<Record> r = GetRecordDeclaration(kit, tid).GetTreePtr() )
                 if( DynamicTreePtrCast<Module>(r) )
                 {
-                    s += "(\"" + RenderIdentifier(kit, o->identifier) + "\")" + ";\n";
+                    s += "(\"" + RenderIdentifier(kit, o->identifier) + "\")" + ";" + SYSTEMC_MARKER();
                     return s;
                 }
     
@@ -984,23 +989,23 @@ string Render::RenderStatement( const Render::Kit &kit, TreePtr<Statement> state
     else if( DynamicTreePtrCast<Nop>(statement) )
         return ";\n";
     else if( TreePtr<WaitDynamic> c = DynamicTreePtrCast<WaitDynamic>(statement) ) 
-        return c->GetToken() + "( " + RenderExpression(kit, c->event, Syntax::Production::COMMA_SEP) + " );\n";
+        return c->GetToken() + "( " + RenderExpression(kit, c->event, Syntax::Production::COMMA_SEP) + " ); " + SYSTEMC_MARKER();
     else if( TreePtr<WaitStatic> c = DynamicTreePtrCast<WaitStatic>(statement) ) 
-        return c->GetToken() + "();\n";
+        return c->GetToken() + "(); " + SYSTEMC_MARKER();
     else if( TreePtr<WaitDelta> c = DynamicTreePtrCast<WaitDelta>(statement) )
-        return c->GetToken() + "(SC_ZERO_TIME);\n";
+        return c->GetToken() + "(SC_ZERO_TIME); " + SYSTEMC_MARKER();
     else if( TreePtr<NextTriggerDynamic> c = DynamicTreePtrCast<NextTriggerDynamic>(statement) ) 
-        return c->GetToken() + "( " + RenderExpression(kit, c->event, Syntax::Production::COMMA_SEP) + " );\n";
+        return c->GetToken() + "( " + RenderExpression(kit, c->event, Syntax::Production::COMMA_SEP) + " ); " + SYSTEMC_MARKER();
     else if( TreePtr<NextTriggerStatic> c = DynamicTreePtrCast<NextTriggerStatic>(statement) ) 
-        return c->GetToken() + "();\n";
+        return c->GetToken() + "(); " + SYSTEMC_MARKER();
     else if( TreePtr<NextTriggerDelta> c = DynamicTreePtrCast<NextTriggerDelta>(statement) ) 
-        return c->GetToken() + "(SC_ZERO_TIME);\n";
+        return c->GetToken() + "(SC_ZERO_TIME); " + SYSTEMC_MARKER();
     else if( TreePtr<TerminationFunction> tf = DynamicTreePtrCast<TerminationFunction>(statement) )
-        return tf->GetToken() + "( " + RenderExpression(kit, tf->code, Syntax::Production::COMMA_SEP) + " );\n";
+        return tf->GetToken() + "( " + RenderExpression(kit, tf->code, Syntax::Production::COMMA_SEP) + " ); " + SYSTEMC_MARKER();
     else if( TreePtr<NotifyImmediate> n = DynamicTreePtrCast<NotifyImmediate>(statement) )
-        return RenderExpression( kit, n->event, Syntax::Production::PREFIX ) + "." + n->GetToken() + "();\n";
+        return RenderExpression( kit, n->event, Syntax::Production::PREFIX ) + "." + n->GetToken() + "(); " + SYSTEMC_MARKER();
     else if( TreePtr<NotifyDelta> n = DynamicTreePtrCast<NotifyDelta>(statement) )
-        return RenderExpression( kit, n->event, Syntax::Production::PREFIX ) + "." + n->GetToken() + "(SC_ZERO_TIME);\n";
+        return RenderExpression( kit, n->event, Syntax::Production::PREFIX ) + "." + n->GetToken() + "(SC_ZERO_TIME); " + SYSTEMC_MARKER();
     else
         return ERROR_UNSUPPORTED(statement);
 }
@@ -1101,7 +1106,7 @@ string Render::RenderModuleCtor( const Render::Kit &kit, TreePtr<Module> m ) try
                         else
                             s += ",";
                         string ids = RenderIdentifier(kit, f->identifier);                           
-                        s += "\n" + ids + "(\"" + ids + "\")";
+                        s += SYSTEMC_MARKER() + ids + "(\"" + ids + "\")";
                         first = false;
                     }   
                     
@@ -1122,7 +1127,7 @@ string Render::RenderModuleCtor( const Render::Kit &kit, TreePtr<Module> m ) try
                     s += ",";
                 string ids = RenderIdentifier(kit, i->identifier);                           
                 string inits = RenderExpression(kit, i->initialiser, Syntax::Production::COMMA_SEP);
-                s += "\n" + ids;
+                s += SYSTEMC_MARKER() + ids;
                 if( DynamicTreePtrCast< MakeArray >(i->initialiser) )
 					s += inits; // MakeArray as an init should render brace-initialiser syntax
 				else
@@ -1131,12 +1136,12 @@ string Render::RenderModuleCtor( const Render::Kit &kit, TreePtr<Module> m ) try
             }
         }                      
     }    
-    s += "\n{\n";
+    s += SYSTEMC_MARKER() + "{\n";
     for( TreePtr<Node> pd : sorted_members )
         if( TreePtr<Field> f = DynamicTreePtrCast<Field>(pd) )
             if( TreePtr<Process> r = DynamicTreePtrCast<Process>(f->type) )
-                s += r->GetToken() + "(" + RenderIdentifier( kit, f->identifier ) + ");\n";
-    s += "}\n";
+                s += r->GetToken() + "(" + RenderIdentifier( kit, f->identifier ) + ");" + SYSTEMC_MARKER();
+    s += "}" + SYSTEMC_MARKER();
     
     return s;
 }
@@ -1202,7 +1207,7 @@ string Render::RenderScope( const Render::Kit &kit,
     {
  		if( init_access )
 			s += MaybeRenderAccessColon( kit, MakeTreeNode<Public>(), &init_access );		
-        s += RenderModuleCtor( kit, sc_module );
+        s += RenderModuleCtor( kit, sc_module ) + SYSTEMC_MARKER();
 	}
 	
     // Emit the actual declarations, sorted for dependencies

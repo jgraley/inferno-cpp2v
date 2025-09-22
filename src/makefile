@@ -46,7 +46,8 @@ VN_GRAPH_MODULES = $(VN_GRAPH)/graph $(VN_GRAPH)/doc_graphs
 VN_LANG_MODULES = $(VN_LANG)/sort_decls $(VN_LANG)/render $(VN_LANG)/uniquify_identifiers 
 CPLUSPLUS_MODULES = $(CPLUSPLUS)/identifier_tracker $(CPLUSPLUS)/rc_hold $(CPLUSPLUS)/cpprender 
 STEPS_MODULES = $(STEPS)/inferno_agents $(STEPS)/split_instance_declarations $(STEPS)/generate_implicit_casts $(STEPS)/generate_stacks $(STEPS)/lower_control_flow 
-STEPS_MODULES += $(STEPS)/clean_up $(STEPS)/state_out $(STEPS)/systemc_detection $(STEPS)/systemc_generation $(STEPS)/to_sc_method $(STEPS)/uncombable $(STEPS)/fall_out $(STEPS)/test_steps
+STEPS_MODULES += $(STEPS)/clean_up $(STEPS)/state_out $(STEPS)/to_sc_method $(STEPS)/uncombable $(STEPS)/fall_out $(STEPS)/test_steps
+STEPS_MODULES += $(STEPS)/systemc_detection $(STEPS)/systemc_generation $(STEPS)/systemc_lowering
 MAIN_MODULES = $(MAIN)/inferno $(MAIN)/unit_test 
 
 ALL_VN_MODULES = $(VN_MODULES) $(VN_AGENTS_MODULES) $(VN_CSP_MODULES) $(VN_DB_MODULES) $(VN_PTRANS_MODULES) $(VN_SYM_MODULES) $(VN_UP_MODULES) $(VN_GRAPH_MODULES) $(VN_LANG_MODULES)
