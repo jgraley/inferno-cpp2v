@@ -28,7 +28,7 @@ using namespace VN;
     string( V ) + \
     string( " not supported in " ) + \
     string( __func__ ) + \
-    string( "»" );
+    string( "()»" );
 
 #define ERROR_UNSUPPORTED(P) \
     ERROR_UNKNOWN( P ? typeid(*P).name() : "<nullptr>" );
@@ -448,33 +448,7 @@ string Render::RenderCall( const Render::Kit &kit, TreePtr<Call> call ) try
         s += RenderExpression( kit, call->callee, Syntax::Production::POSTFIX );
 
     // If CallableParams, generate some arguments, resolving the order using the original function type
-    TreePtr<Node> ctype;
-    try
-    {
-		ctype = TypeOf::instance(call->callee, root_scope).GetTreePtr();
-	}		
-	catch( DeclarationOf::DeclarationNotFound & )
-	{
-		// Try to infer decl as just the placeholder symbols _1, _2 etc
-		map<unsigned long, TreePtr<Initialiser>> ops;
-        for( TreePtr<MapOperand> mi : call->operands )
-        {
-			string tok = mi->identifier->GetToken();
-			if( tok[0] != '_' )
-				throw DeclNotFoundOrInferred();			
-			unsigned long i = strtol(tok.c_str()+1, nullptr, 10);
-			if( i==0 )
-				throw DeclNotFoundOrInferred();
-			ops[i] = mi->value;
-		}
-
-		// Inferred OK and values are in ops.
-		list<string> renders;
-        for( auto p : ops )        
-			renders.push_back( RenderExpression(kit, p.second, Syntax::Production::COMMA_SEP) );				
-		s += Join(renders, ", ", "(", ")");
-		return s;
-	}
+    TreePtr<Node> ctype = TypeOf::instance(call->callee, root_scope).GetTreePtr();
 
     s += "(";
 	
@@ -483,6 +457,24 @@ string Render::RenderCall( const Render::Kit &kit, TreePtr<Call> call ) try
         s += RenderMapInOrder( kit, call, cp );
 
     s += ")";
+    return s;
+}
+DEFAULT_CATCH_CLAUSE
+
+
+string Render::RenderSysCall( const Render::Kit &kit, TreePtr<SysCall> call ) try
+{
+    string s;
+
+    // Render the expression that resolves to the function name 
+    s += RenderExpression( kit, call->callee, Syntax::Production::POSTFIX );
+
+	// SysCall just has a sequence of arg expressions
+    list<string> renders;
+    for( TreePtr<Expression> e : call->operands )    
+		renders.push_back( RenderExpression(kit, e, Syntax::Production::COMMA_SEP) );				
+	s += Join(renders, ", ", "(", ")");
+
     return s;
 }
 DEFAULT_CATCH_CLAUSE
@@ -501,7 +493,7 @@ string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> ex
 
     if( DynamicTreePtrCast< Uninitialised >(expression) )
         return string();
-    else if( TreePtr<StatementExpression> ce = DynamicTreePtrCast< StatementExpression >(expression) )
+    else if( auto ce = DynamicTreePtrCast< StatementExpression >(expression) )
     {
         AutoPush< TreePtr<Node> > cs( scope_stack, ce );
         string s = "({ ";
@@ -510,17 +502,17 @@ string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> ex
 			s += RenderStatement( kit, st );    
         return s + "})";
     }
-    else if( TreePtr<SpecificLabelIdentifier> li = DynamicTreePtrCast< SpecificLabelIdentifier >(expression) )
+    else if( auto li = DynamicTreePtrCast< SpecificLabelIdentifier >(expression) )
         return "&&" + RenderIdentifier( kit, li ); // label-as-variable (GCC extension)             
-    else if( TreePtr<SpecificInstanceIdentifier> ii = DynamicTreePtrCast< SpecificInstanceIdentifier >(expression) )
+    else if( auto ii = DynamicTreePtrCast< SpecificInstanceIdentifier >(expression) )
         return RenderScopedIdentifier( kit, ii, surround_prod );
-    else if( TreePtr<SizeOf> pot = DynamicTreePtrCast< SizeOf >(expression) )
+    else if( auto pot = DynamicTreePtrCast< SizeOf >(expression) )
         return "sizeof(" + RenderType( kit, pot->operand, "", Syntax::Production::ANONYMOUS ) + ")";               
-    else if( TreePtr<AlignOf> pot = DynamicTreePtrCast< AlignOf >(expression) )
+    else if( auto pot = DynamicTreePtrCast< AlignOf >(expression) )
         return "alignof(" + RenderType( kit, pot->operand, "", Syntax::Production::ANONYMOUS ) + ")";
-    else if( TreePtr<NonCommutativeOperator> nco = DynamicTreePtrCast< NonCommutativeOperator >(expression) )
+    else if( auto nco = DynamicTreePtrCast< NonCommutativeOperator >(expression) )
         return RenderOperator( kit, nco, nco->operands );           
-    else if( TreePtr<CommutativeOperator> co = DynamicTreePtrCast< CommutativeOperator >(expression) )
+    else if( auto co = DynamicTreePtrCast< CommutativeOperator >(expression) )
     {
         Sequence<Expression> seq_operands;
         // Operands are in collection, so sort them and put them in a sequence
@@ -528,31 +520,33 @@ string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> ex
             seq_operands.push_back( TreePtr<Expression>::DynamicCast(o) );
         return RenderOperator( kit, co, seq_operands );               
     }
-    else if( TreePtr<Call> c = DynamicTreePtrCast< Call >(expression) )
+    else if( auto c = DynamicTreePtrCast< Call >(expression) )
         return RenderCall( kit, c );
-    else if( TreePtr<New> n = DynamicTreePtrCast< New >(expression) )
+    else if( auto sc = DynamicTreePtrCast< SysCall >(expression) )
+        return RenderSysCall( kit, sc );
+    else if( auto n = DynamicTreePtrCast< New >(expression) )
         return string (DynamicTreePtrCast<Global>(n->global) ? "::" : "") +
                "new(" + RenderOperandSequence( kit, n->placement_arguments ) + ") " +
                RenderType( kit, n->type, "", Syntax::Production::ANONYMOUS ) +
                (n->constructor_arguments.empty() ? "" : "(" + RenderOperandSequence( kit, n->constructor_arguments ) + ")" );
-    else if( TreePtr<Delete> d = DynamicTreePtrCast< Delete >(expression) )
+    else if( auto d = DynamicTreePtrCast< Delete >(expression) )
         return string(DynamicTreePtrCast<Global>(d->global) ? "::" : "") +
                "delete" +
                (DynamicTreePtrCast<DeleteArray>(d->array) ? "[]" : "") +
                " " + RenderExpression( kit, d->pointer, Syntax::Production::PREFIX );
-    else if( TreePtr<Lookup> a = DynamicTreePtrCast< Lookup >(expression) )
+    else if( auto a = DynamicTreePtrCast< Lookup >(expression) )
         return RenderExpression( kit, a->base, Syntax::Production::POSTFIX ) + "." +
                RenderScopedIdentifier( kit, a->member, Syntax::BoostPrecedence(Syntax::Production::POSTFIX) );
-    else if( TreePtr<Cast> c = DynamicTreePtrCast< Cast >(expression) )
+    else if( auto c = DynamicTreePtrCast< Cast >(expression) )
         return "(" + RenderType( kit, c->type, "", Syntax::Production::ANONYMOUS ) + ")" +
                RenderExpression( kit, c->operand, Syntax::Production::PREFIX );
-    else if( TreePtr<MakeRecord> ro = DynamicTreePtrCast< MakeRecord >(expression) )
+    else if( auto ro = DynamicTreePtrCast< MakeRecord >(expression) )
         return RenderMakeRecord( kit, ro );
-    else if( TreePtr<Literal> l = DynamicTreePtrCast< Literal >(expression) )
+    else if( auto l = DynamicTreePtrCast< Literal >(expression) )
         return RenderLiteral( kit, l );
     else if( DynamicTreePtrCast< This >(expression) )
         return "this";
-    else if( TreePtr<DeltaCount> dc = DynamicTreePtrCast<DeltaCount>(expression) ) 
+    else if( auto dc = DynamicTreePtrCast<DeltaCount>(expression) ) 
         return dc->GetToken() + "()";
     else
         return ERROR_UNSUPPORTED(expression);
@@ -663,9 +657,11 @@ DEFAULT_CATCH_CLAUSE
 
 void Render::ExtractInits( const Render::Kit &kit, Sequence<Statement> &body, Sequence<Statement> &inits, Sequence<Statement> &remainder )
 {
+	// Initialisers are just calls to the constructor embedded in the body. In Inferno,
+	// we call a constructor by 
     for( TreePtr<Statement> s : body )
     {
-        if( TreePtr<Call> o = DynamicTreePtrCast< Call >(s) )
+        if( auto o = DynamicTreePtrCast< Call >(s) )
         {
             try
             {

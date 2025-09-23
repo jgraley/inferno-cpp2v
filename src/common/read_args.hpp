@@ -48,6 +48,7 @@ public:
     static bool test_db;
     static bool documentation_graphs;
     static bool output_all;
+    static char use_feature_option;
     
 private:
     void ParseQuitAfter(string arg);

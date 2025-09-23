@@ -36,7 +36,7 @@ int ReadArgs::repetitions = 100; // default behaviour
 bool ReadArgs::rep_error = true; // default behaviour
 bool ReadArgs::documentation_graphs = false;
 bool ReadArgs::output_all = false;
- 
+char ReadArgs::use_feature_option = '\0';
 
 void ReadArgs::Usage(string msg)
 {
@@ -234,8 +234,7 @@ ReadArgs::ReadArgs( int ac, char *av[] )
         }
         else if( option=='u' )
         {
-            //char use_option = argv[curarg][2];
-            Usage("Unknown argument after -u");
+            use_feature_option = argv[curarg][2];
         }
         else 
         {

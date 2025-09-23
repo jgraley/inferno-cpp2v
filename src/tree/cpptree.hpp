@@ -1036,6 +1036,17 @@ struct Break : Statement { NODE_FUNCTIONS_FINAL };
 /// Do nothing; these get optimised out where possible
 struct Nop : Statement { NODE_FUNCTIONS_FINAL };
   
+//////////////////////////// System nodes ////////////////////////////
+
+struct SysCall : Operator
+{
+    NODE_FUNCTIONS_FINAL
+    TreePtr<InstanceIdentifier> callee; ///< evaluates to the Callable Instance we must call
+    Sequence<Expression> operands; ///< Operands whose relationship is established via identifiers
+	
+	Production GetMyProduction() const override;
+};  
+  
 }; // end namespace  
    
 #endif

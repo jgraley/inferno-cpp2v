@@ -482,3 +482,11 @@ Syntax::Production StatementExpression::GetMyProduction() const
 { 
 	return Production::PARENTHESISED; 
 }
+
+//////////////////////////// SysCall ///////////////////////////////
+
+Syntax::Production SysCall::GetMyProduction() const
+{ 
+	return Production::POSTFIX; 
+}
+
