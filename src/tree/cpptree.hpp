@@ -1037,6 +1037,11 @@ struct Break : Statement { NODE_FUNCTIONS_FINAL };
 struct Nop : Statement { NODE_FUNCTIONS_FINAL };
   
 //////////////////////////// System nodes ////////////////////////////
+// System nodes represent stuff that would come in from "standard" places
+// via #include, including C-library, STL, SystemC etc. We take them to
+// "fixed" and won't attmept to process declarations for them
+// TODO: Identifier uniquing should prevent anything aliassing these,
+// and should not need to rename any of them. Detect via lack of decl.
 
 struct SysCall : Operator
 {
