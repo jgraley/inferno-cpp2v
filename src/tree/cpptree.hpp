@@ -622,7 +622,7 @@ struct Labeley : Type
 /// Intermediate declaration of a user defined type of any kind (struct, typedef etc).
 /* The user type node is a declaration and goes into a declaration scope. It points
  to a TypeIdentifier, and all usages of the type actually point to the
- TypeIdentifier. */
+ TypeIdentifier. TODO rename to TypeDecl or similar */
 struct UserType : Declaration 
 { 
     NODE_FUNCTIONS
@@ -1047,11 +1047,11 @@ struct SysCall : Operator
 {
     NODE_FUNCTIONS_FINAL
     TreePtr<InstanceIdentifier> callee; ///< evaluates to the Callable Instance we must call
-    Sequence<Expression> operands; ///< Operands whose relationship is established via identifiers
+    Sequence<Expression> operands; ///< Arguments taken in order
 	
 	Production GetMyProduction() const override;
 };  
-  
+
 }; // end namespace  
    
 #endif
