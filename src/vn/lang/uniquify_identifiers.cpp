@@ -49,7 +49,7 @@ void VisibleIdentifiers::SplitName( TreePtr<SpecificIdentifier> i, string *b, un
 }
 
 
-string VisibleIdentifiers::AddIdentifierNumber( NameUsage &nu, TreePtr<SpecificIdentifier>, string b, unsigned n )
+unsigned VisibleIdentifiers::AssignNumber( NameUsage &nu, TreePtr<SpecificIdentifier>, unsigned n )
 {
     // Uniqueify the number n, by incrementing it until there are no conflicts
     bool tryagain;
@@ -70,40 +70,57 @@ string VisibleIdentifiers::AddIdentifierNumber( NameUsage &nu, TreePtr<SpecificI
 
     } while(tryagain);
 
-    // Store the number
+    // Store the number got
     nu.insert( n );
 
-    // Return the name that the new identifier should take
-    return MakeUniqueName( b, n );
+	// Return the number got
+	return n;
 }
 
 
 string VisibleIdentifiers::AddIdentifier( TreePtr<SpecificIdentifier> i )
 {
     // Get canonical form of identifier name
-    string b;
-    unsigned n;
-    SplitName( i, &b, &n );
+    string base_name;
+    unsigned n_want;
+    SplitName( i, &base_name, &n_want );
 
     // Do we have the base name already? If so, add this new instance
     for( NameUsagePair &p : name_usages )
-        if( b == p.first )
-               return AddIdentifierNumber( p.second, i, b, n );
+    {
+        if( base_name == p.first )
+        {
+            unsigned n_got = AssignNumber( p.second, i, n_want );
+            return MakeUniqueName( base_name, n_got );
+		}
+	}
 
     // Otherwise start a new record for this base name.
     NameUsage nu;
-    string nn = AddIdentifierNumber( nu, i, b, n );
-    name_usages.insert( NameUsagePair( b, nu ) );
-    return nn;
+    unsigned n_got = AssignNumber( nu, i, n_want );
+    name_usages.insert( NameUsagePair( base_name, nu ) );
+    return MakeUniqueName( base_name, n_got );
 }
 
 //////////////////////////// IdentifierFingerprinter ///////////////////////////////
 
-IdentifierFingerprinter::IdentifierFingerprinter( TreePtr<Node> root_x ) :
+IdentifierFingerprinter::IdentifierFingerprinter() :
     comparer( Orderable::REPEATABLE )
 {
+}
+
+
+IdentifierFingerprinter::IdsByFingerprint IdentifierFingerprinter::GetIdentifiersInTreeByFingerprint( TreePtr<Node> root_x )
+{
     int index=0;
-    ProcessNode( root_x, index );
+    ProcessNode( root_x, index );	
+	
+    map< Fingerprint, set<TreePtr<CPPTree::SpecificIdentifier>> > rfp;
+    for( pair< TreePtr<SpecificIdentifier>, Fingerprint > p : fingerprints )
+    {
+        rfp[p.second].insert( p.first );        
+    }
+    return rfp;
 }
 
 
@@ -184,40 +201,45 @@ void IdentifierFingerprinter::ProcessCollection( CollectionInterface *x_col, int
     }
 }
 
-
-map< IdentifierFingerprinter::Fingerprint, set<TreePtr<CPPTree::SpecificIdentifier>> > IdentifierFingerprinter::GetReverseFingerprints()
-{
-    map< Fingerprint, set<TreePtr<CPPTree::SpecificIdentifier>> > rfp;
-    for( pair< TreePtr<SpecificIdentifier>, Fingerprint > p : fingerprints )
-    {
-        rfp[p.second].insert( p.first );        
-    }
-    return rfp;
-}
-
-
 //////////////////////////// UniquifyIdentifiers ///////////////////////////////
 
 UniquifyIdentifiers::IdentifierNameMap UniquifyIdentifiers::UniquifyAll( TreePtr<Node> root )
 {
-    IdentifierFingerprinter idfp( root );    
-
+	IdentifierFingerprinter::IdsByFingerprint ids_by_fp = IdentifierFingerprinter().GetIdentifiersInTreeByFingerprint(root);    
+	
+	// For repeatability of renders, get a list of identifiers in the tree, ordered:
+	// - mainly depth-first, wind-in
+	// - collections disambiguated using SimpleCompare
     list< TreePtr<SpecificIdentifier> > ids;
-    for( auto p : idfp.GetReverseFingerprints() )
-    {
-        ASSERT(p.second.size() == 1)
-          ("Could not differentiate between these identifiers: ")(p.second)
-          (" fingerprint ")(p.first)
-          (". Need to write some more code to uniquify the renders in this case!! (#225)\n");
-        // If assert is removed, this loop could iterate more than once; the order
-        // of the iterations will not be repeatable, and so id uniquification won't be.
-        for( TreePtr<SpecificIdentifier> si : p.second ) // TODO change me!
-            ids.push_back( si );
-    }
+	for( auto p : ids_by_fp )
+	{
+		//ASSERT(p.second.size() == 1)
+		//  ("Could not differentiate between these identifiers: ")(p.second)
+		//  (" fingerprint ")(p.first)
+		//  (". Need to write some more code to uniquify the renders in this case!! (#225)\n");
+		// If assert is removed, this loop could iterate more than once; the order
+		// of the iterations will not be repeatable, and so id uniquification won't be.
+		for( TreePtr<SpecificIdentifier> si : p.second ) 
+			ids.push_back( si );
+	}
+	
+    list< TreePtr<SpecificIdentifier> > renamable_ids;
+	for( auto id : ids )
+	{
+		try
+		{
+			//DeclarationOf().TryApplyTransformation( kit, id );
+			renamable_ids.push_back( id ); // can only rename if there is a decl
+		}
+		catch(DeclarationOf::DeclarationNotFound &)
+		{
+			
+		}
+	}
 
 	VisibleIdentifiers vi;
 	IdentifierNameMap inm;
-    for( TreePtr<SpecificIdentifier> si : ids )
+    for( TreePtr<SpecificIdentifier> si : renamable_ids )
     {
         string nn = vi.AddIdentifier( si );
         inm.insert( IdentifierNamePair( si, nn ) );

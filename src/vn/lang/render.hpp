@@ -19,8 +19,6 @@ public:
 	{	
 	};
 	
-	class DeclNotFoundOrInferred : public DeclarationOf::DeclarationNotFound {};
-
     Render( string of = string() );
     string RenderToString( shared_ptr<VN::CompareReplace> pattern );
     string RenderToString( TreePtr<Node> root );

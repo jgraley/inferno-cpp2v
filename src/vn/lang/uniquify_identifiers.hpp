@@ -24,7 +24,7 @@ struct VisibleIdentifiers
     typedef pair<const string, NameUsage> NameUsagePair;
     map< string, NameUsage > name_usages;
 
-    string AddIdentifierNumber( NameUsage &nu, TreePtr<CPPTree::SpecificIdentifier> i, string b, unsigned n );
+    unsigned AssignNumber( NameUsage &nu, TreePtr<CPPTree::SpecificIdentifier> i, unsigned n );
     string AddIdentifier( TreePtr<CPPTree::SpecificIdentifier> i );
 
     static string MakeUniqueName( string b, unsigned n );
@@ -50,15 +50,16 @@ class IdentifierFingerprinter
 {
 public:
     typedef set<int> Fingerprint;
+    typedef map< Fingerprint, set<TreePtr<CPPTree::SpecificIdentifier>> > IdsByFingerprint;
 
-    IdentifierFingerprinter( TreePtr<Node> root_x );
+    IdentifierFingerprinter();
     
+    IdsByFingerprint GetIdentifiersInTreeByFingerprint(TreePtr<Node> root_x);
     void ProcessNode( TreePtr<Node> x, int &index );
     void ProcessChildren( TreePtr<Node> x, int &index );
     void ProcessSingularNode( const TreePtrInterface *p_x_sing, int &index );
     void ProcessSequence( SequenceInterface *x_seq, int &index );
     void ProcessCollection( CollectionInterface *x_col, int &index );    
-    map< Fingerprint, set<TreePtr<CPPTree::SpecificIdentifier>> > GetReverseFingerprints();
     
 private:
     SimpleCompare comparer;
