@@ -14,10 +14,10 @@ bool IsDependOn( TreePtr<CPPTree::Declaration> a, TreePtr<CPPTree::Declaration> 
 // Sort some declarations into an order that will compile successfully.
 // Optionally ignore pointers and references to records: they can be cyclic and so cannot be sorted
 // on. set to "true" if incomplete declarations for all records have already been emitted. 
-Sequence<CPPTree::Declaration> SortDecls( ContainerInterface &c, bool ignore_indirection_to_record, const UniquifyIdentifiers *unique );
+Sequence<CPPTree::Declaration> SortDecls( ContainerInterface &c, bool ignore_indirection_to_record, const UniquifyIdentifiers::IdentifierNameMap &unique_ids );
 
 // Sort using SimpleCompare
-Sequence<CPPTree::Declaration> PreSortDecls( Sequence<CPPTree::Declaration> c, const UniquifyIdentifiers *unique );
+Sequence<CPPTree::Declaration> PreSortDecls( Sequence<CPPTree::Declaration> c, const UniquifyIdentifiers::IdentifierNameMap &unique_ids );
 
 // Mix them up randomly!!
 Sequence<CPPTree::Declaration> JumbleDecls( Sequence<CPPTree::Declaration> c );

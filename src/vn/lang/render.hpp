@@ -31,7 +31,7 @@ private:
     TreePtr<CPPTree::Scope> root_scope;
     string deferred_decls;
     stack< TreePtr<Node> > scope_stack;
-    UniquifyIdentifiers unique;
+    UniquifyIdentifiers::IdentifierNameMap unique_ids;
     // Remember the orders of collections when we sort them. Mirrors the same
     // map in the parser.
     map< TreePtr<Node>, Sequence<CPPTree::Declaration> > backing_ordering;

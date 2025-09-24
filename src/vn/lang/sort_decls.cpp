@@ -129,7 +129,7 @@ bool IsDependOn( TreePtr<Declaration> a, TreePtr<Declaration> b, bool ignore_ind
 }
 
 
-Sequence<Declaration> SortDecls( ContainerInterface &c, bool ignore_indirection_to_record, const UniquifyIdentifiers *unique )
+Sequence<Declaration> SortDecls( ContainerInterface &c, bool ignore_indirection_to_record, const UniquifyIdentifiers::IdentifierNameMap &unique_ids )
 {
     Sequence<Declaration> s;
     int ocs = c.size();
@@ -144,7 +144,7 @@ Sequence<Declaration> SortDecls( ContainerInterface &c, bool ignore_indirection_
     //cc = JumbleDecls( cc );
 
     // Sort using SimpleCompare first: this should improve reproducibility
-    cc = PreSortDecls( cc, unique );
+    cc = PreSortDecls( cc, unique_ids );
 
     // Keep searching our local container of decls (cc) for decls that do not depend
     // on anything else in the container. Such a decl may be safely rendered before the
@@ -190,12 +190,12 @@ Sequence<Declaration> SortDecls( ContainerInterface &c, bool ignore_indirection_
 }
 
 
-Sequence<Declaration> PreSortDecls( Sequence<Declaration> c, const UniquifyIdentifiers *unique )
+Sequence<Declaration> PreSortDecls( Sequence<Declaration> c, const UniquifyIdentifiers::IdentifierNameMap &unique_ids )
 {
     //FTRACE("PreSortDecls()\n");
 
     // Make a SimpleCompare-ordered set and fill it with the decls
-    auto comparer = UniquifyCompare(unique);
+    auto comparer = UniquifyCompare(unique_ids);
     SimpleCompare::TreePtrOrdering sco = comparer.GetTreePtrOrdering(c);
     //SimpleCompare(Orderable::REPEATABLE).GetTreePtrOrdering(c);
 

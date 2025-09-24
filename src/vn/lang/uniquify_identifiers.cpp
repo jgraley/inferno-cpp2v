@@ -8,6 +8,37 @@ using namespace CPPTree;
 #define UID_FORMAT_HINT "%s_%u"
 //#define UID_FORMAT_PURE "id_%u"
 
+
+//////////////////////////// UniquifyIdentifiers ///////////////////////////////
+
+UniquifyIdentifiers::IdentifierNameMap UniquifyIdentifiers::UniquifyAll( TreePtr<Node> root )
+{
+    IdentifierFingerprinter idfp( root );    
+
+    list< TreePtr<SpecificIdentifier> > ids;
+    for( auto p : idfp.GetReverseFingerprints() )
+    {
+        /*ASSERT(p.second.size() == 1)
+          ("Could not differentiate between these identifiers: ")(p.second)
+          (" fingerprint ")(p.first)
+          (". Need to write some more code to uniquify the renders in this case!! (#225)\n");*/
+        // If assert is removed, this loop could iterate more than once; the order
+        // of the iterations will not be repeatable, and so id uniquification won't be.
+        for( TreePtr<SpecificIdentifier> si : p.second ) // TODO change me!
+            ids.push_back( si );
+    }
+
+	VisibleIdentifiers vi;
+	IdentifierNameMap inm;
+    for( TreePtr<SpecificIdentifier> si : ids )
+    {
+        string nn = vi.AddIdentifier( si );
+        inm.insert( IdentifierNamePair( si, nn ) );
+    }        
+    
+    return inm;
+}
+
 //////////////////////////// VisibleIdentifiers ///////////////////////////////
 
 string VisibleIdentifiers::MakeUniqueName( string b, unsigned n ) // note static
@@ -98,9 +129,9 @@ string VisibleIdentifiers::AddIdentifier( TreePtr<SpecificIdentifier> i )
 
 //////////////////////////// UniquifyCompare ///////////////////////////////
 
-UniquifyCompare::UniquifyCompare( const UniquifyIdentifiers *unique_ ) :
+UniquifyCompare::UniquifyCompare( const UniquifyIdentifiers::IdentifierNameMap &unique_ids_ ) :
     SimpleCompare(Orderable::REPEATABLE),  // Use REPEATABLE but doesn't really matter since we're overriding identifier compare 
-    unique( unique_ )
+    unique_ids( unique_ids_ )
 {
 }
 
@@ -109,7 +140,7 @@ Orderable::Diff UniquifyCompare::Compare3Way( TreePtr<Node> l, TreePtr<Node> r )
 {
     //FTRACE("UC::Compare ")(a)(" - ")(b)("\n");
     
-    // We're ovreridden the node entrypoint of SimpleCompare. If we're not
+    // We're overriding the node entrypoint of SimpleCompare. If we're not
     // dealing with two SpecificIdentifiers, call back into that function
     // explicitly to get normal compare behaviour.
     auto id_l = TreePtr<SpecificIdentifier>::DynamicCast(l);
@@ -118,8 +149,8 @@ Orderable::Diff UniquifyCompare::Compare3Way( TreePtr<Node> l, TreePtr<Node> r )
         return SimpleCompare::Compare3Way(l, r);
         
     // We have two SpecificIdentifiers, so get their unique names
-    string ustr_l = unique->at(id_l);
-    string ustr_r = unique->at(id_r);
+    string ustr_l = unique_ids.at(id_l);
+    string ustr_r = unique_ids.at(id_r);
     //FTRACE(id_a)(" becomes ")(ustr_a)("\n");
     
     // Compare those. This is like a REPEATABLE SC but using the
@@ -228,31 +259,4 @@ map< IdentifierFingerprinter::Fingerprint, set<TreePtr<CPPTree::SpecificIdentifi
         rfp[p.second].insert( p.first );        
     }
     return rfp;
-}
-
-
-//////////////////////////// UniquifyIdentifiers ///////////////////////////////
-
-void UniquifyIdentifiers::UniquifyScope( TreePtr<Node> root, VisibleIdentifiers v )
-{
-    IdentifierFingerprinter idfp( root );    
-
-    list< TreePtr<SpecificIdentifier> > ids;
-    for( auto p : idfp.GetReverseFingerprints() )
-    {
-        /*ASSERT(p.second.size() == 1)
-          ("Could not differentiate between these identifiers: ")(p.second)
-          (" fingerprint ")(p.first)
-          (". Need to write some more code to uniquify the renders in this case!! (#225)\n");*/
-        // If assert is removed, this loop could iterate more than once; the order
-        // of the iterations will not be repeatable, and so id uniquification won't be.
-        for( TreePtr<SpecificIdentifier> si : p.second ) // TODO change me!
-            ids.push_back( si );
-    }
-
-    for( TreePtr<SpecificIdentifier> si : ids )
-    {
-        string nn = v.AddIdentifier( si );
-        insert( IdentifierNamePair( si, nn ) );
-    }        
 }

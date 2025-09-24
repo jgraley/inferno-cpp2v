@@ -14,6 +14,13 @@
 // the same form into our scheme, as if we created them, then uniqueness is guaranteed (but we will sometimes
 // want to change the number, so what started as foo_2 could become foo_3 by the time we're done with it).
 
+struct UniquifyIdentifiers
+{
+    typedef pair<const TreePtr<CPPTree::SpecificIdentifier>, string> IdentifierNamePair;
+    typedef map< TreePtr<CPPTree::SpecificIdentifier>, string> IdentifierNameMap;
+    static IdentifierNameMap UniquifyAll( TreePtr<Node> root );
+};
+
 typedef set< unsigned > NameUsage;
 
 struct UniquifyIdentifiers;
@@ -35,11 +42,11 @@ struct VisibleIdentifiers
 class UniquifyCompare : public SimpleCompare
 {
 public:
-    UniquifyCompare( const UniquifyIdentifiers *unique );
+    UniquifyCompare( const UniquifyIdentifiers::IdentifierNameMap &unique_ids_ );
     Orderable::Diff Compare3Way( TreePtr<Node> l, TreePtr<Node> r ) const override;
     
 private:
-    const UniquifyIdentifiers * const unique;
+    const UniquifyIdentifiers::IdentifierNameMap &unique_ids;
 };
 
 ///
@@ -75,13 +82,5 @@ private:
     SimpleCompare comparer;
     map< TreePtr<CPPTree::SpecificIdentifier>, Fingerprint > fingerprints;
 };
-
-
-struct UniquifyIdentifiers : public map< TreePtr<CPPTree::SpecificIdentifier>, string >
-{
-    typedef pair<const TreePtr<CPPTree::SpecificIdentifier>, string> IdentifierNamePair;
-    void UniquifyScope( TreePtr<Node> root, VisibleIdentifiers v = VisibleIdentifiers() ); // Not a ref because we want a copy so we can go back TODO optimise
-};
-
 
 #endif

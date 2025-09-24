@@ -85,13 +85,12 @@ string Render::RenderToString( TreePtr<Node> root )
     AutoPush< TreePtr<Node> > cs( scope_stack, root_scope );
     
 	// pre-pass to fill in backing_ordering. It would be better to tell 
-	// it that it's doing a pre-pass so it can adapt it's behaviour.
+	// it that it's doing a pre-pass so it can adapt its behaviour.
     RenderScope( kit, root_scope ); 
     deferred_decls.clear();
 
     // Make the identifiers unique
-    unique.clear();
-    unique.UniquifyScope( root_scope );
+    unique_ids = UniquifyIdentifiers::UniquifyAll( root_scope );
 
     string s;
 
@@ -151,9 +150,9 @@ string Render::RenderIdentifier( const Render::Kit &kit, TreePtr<Identifier> id 
     {
         if( TreePtr<SpecificIdentifier> ii = DynamicTreePtrCast<SpecificIdentifier>( id ) )
         {
-            if( unique.count(ii) == 0 )
-                return ERROR_UNKNOWN( SSPrintf("identifier %s undeclared", ii->GetToken().c_str() ) );
-            ids = unique.at(ii);
+            if( unique_ids.count(ii) == 0 )
+                return ERROR_UNKNOWN( SSPrintf("identifier %s missing from unique_ids", ii->GetToken().c_str() ) );
+            ids = unique_ids.at(ii);
         }
         else
             return ERROR_UNSUPPORTED( (id) );
@@ -1214,7 +1213,7 @@ string Render::RenderScope( const Render::Kit &kit,
 {
     TRACE();
 
-    Sequence<Declaration> sorted = SortDecls( key->members, true, &unique );
+    Sequence<Declaration> sorted = SortDecls( key->members, true, unique_ids );
     backing_ordering[key] = sorted;
 
     // Emit an incomplete for each record
