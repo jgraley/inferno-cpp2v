@@ -14,13 +14,6 @@
 // the same form into our scheme, as if we created them, then uniqueness is guaranteed (but we will sometimes
 // want to change the number, so what started as foo_2 could become foo_3 by the time we're done with it).
 
-struct UniquifyIdentifiers
-{
-    typedef pair<const TreePtr<CPPTree::SpecificIdentifier>, string> IdentifierNamePair;
-    typedef map< TreePtr<CPPTree::SpecificIdentifier>, string> IdentifierNameMap;
-    static IdentifierNameMap UniquifyAll( TreePtr<Node> root );
-};
-
 typedef set< unsigned > NameUsage;
 
 struct UniquifyIdentifiers;
@@ -38,16 +31,6 @@ struct VisibleIdentifiers
     static void SplitName( TreePtr<CPPTree::SpecificIdentifier> i, string *b, unsigned *n ); // note static
 };
 
-
-class UniquifyCompare : public SimpleCompare
-{
-public:
-    UniquifyCompare( const UniquifyIdentifiers::IdentifierNameMap &unique_ids_ );
-    Orderable::Diff Compare3Way( TreePtr<Node> l, TreePtr<Node> r ) const override;
-    
-private:
-    const UniquifyIdentifiers::IdentifierNameMap &unique_ids;
-};
 
 ///
 /// Generate a "fingerprint" for each specific identifier node. This captures the 
@@ -75,7 +58,6 @@ public:
     void ProcessSingularNode( const TreePtrInterface *p_x_sing, int &index );
     void ProcessSequence( SequenceInterface *x_seq, int &index );
     void ProcessCollection( CollectionInterface *x_col, int &index );    
-    map< TreePtr<CPPTree::SpecificIdentifier>, Fingerprint > GetFingerprints();
     map< Fingerprint, set<TreePtr<CPPTree::SpecificIdentifier>> > GetReverseFingerprints();
     
 private:
@@ -83,4 +65,25 @@ private:
     map< TreePtr<CPPTree::SpecificIdentifier>, Fingerprint > fingerprints;
 };
 
+
+// Main API
+struct UniquifyIdentifiers
+{
+    typedef pair<const TreePtr<CPPTree::SpecificIdentifier>, string> IdentifierNamePair;
+    typedef map< TreePtr<CPPTree::SpecificIdentifier>, string> IdentifierNameMap;
+    static IdentifierNameMap UniquifyAll( TreePtr<Node> root );
+};
+
+
+// Utility for external use: version of SimpleCompare that uses the uniquified 
+// names of the identifiers.
+class UniquifyCompare : public SimpleCompare
+{
+public:
+    UniquifyCompare( const UniquifyIdentifiers::IdentifierNameMap &unique_ids_ );
+    Orderable::Diff Compare3Way( TreePtr<Node> l, TreePtr<Node> r ) const override;
+    
+private:
+    const UniquifyIdentifiers::IdentifierNameMap &unique_ids;
+};
 #endif

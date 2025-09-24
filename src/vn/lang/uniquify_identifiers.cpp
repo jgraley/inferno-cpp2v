@@ -9,36 +9,6 @@ using namespace CPPTree;
 //#define UID_FORMAT_PURE "id_%u"
 
 
-//////////////////////////// UniquifyIdentifiers ///////////////////////////////
-
-UniquifyIdentifiers::IdentifierNameMap UniquifyIdentifiers::UniquifyAll( TreePtr<Node> root )
-{
-    IdentifierFingerprinter idfp( root );    
-
-    list< TreePtr<SpecificIdentifier> > ids;
-    for( auto p : idfp.GetReverseFingerprints() )
-    {
-        /*ASSERT(p.second.size() == 1)
-          ("Could not differentiate between these identifiers: ")(p.second)
-          (" fingerprint ")(p.first)
-          (". Need to write some more code to uniquify the renders in this case!! (#225)\n");*/
-        // If assert is removed, this loop could iterate more than once; the order
-        // of the iterations will not be repeatable, and so id uniquification won't be.
-        for( TreePtr<SpecificIdentifier> si : p.second ) // TODO change me!
-            ids.push_back( si );
-    }
-
-	VisibleIdentifiers vi;
-	IdentifierNameMap inm;
-    for( TreePtr<SpecificIdentifier> si : ids )
-    {
-        string nn = vi.AddIdentifier( si );
-        inm.insert( IdentifierNamePair( si, nn ) );
-    }        
-    
-    return inm;
-}
-
 //////////////////////////// VisibleIdentifiers ///////////////////////////////
 
 string VisibleIdentifiers::MakeUniqueName( string b, unsigned n ) // note static
@@ -127,37 +97,6 @@ string VisibleIdentifiers::AddIdentifier( TreePtr<SpecificIdentifier> i )
     return nn;
 }
 
-//////////////////////////// UniquifyCompare ///////////////////////////////
-
-UniquifyCompare::UniquifyCompare( const UniquifyIdentifiers::IdentifierNameMap &unique_ids_ ) :
-    SimpleCompare(Orderable::REPEATABLE),  // Use REPEATABLE but doesn't really matter since we're overriding identifier compare 
-    unique_ids( unique_ids_ )
-{
-}
-
-
-Orderable::Diff UniquifyCompare::Compare3Way( TreePtr<Node> l, TreePtr<Node> r ) const
-{
-    //FTRACE("UC::Compare ")(a)(" - ")(b)("\n");
-    
-    // We're overriding the node entrypoint of SimpleCompare. If we're not
-    // dealing with two SpecificIdentifiers, call back into that function
-    // explicitly to get normal compare behaviour.
-    auto id_l = TreePtr<SpecificIdentifier>::DynamicCast(l);
-    auto id_r = TreePtr<SpecificIdentifier>::DynamicCast(r);
-    if( !(id_l && id_r) )
-        return SimpleCompare::Compare3Way(l, r);
-        
-    // We have two SpecificIdentifiers, so get their unique names
-    string ustr_l = unique_ids.at(id_l);
-    string ustr_r = unique_ids.at(id_r);
-    //FTRACE(id_a)(" becomes ")(ustr_a)("\n");
-    
-    // Compare those. This is like a REPEATABLE SC but using the
-    // uniquified names instead.
-    return ustr_l.compare(ustr_r);
-}
-
 //////////////////////////// IdentifierFingerprinter ///////////////////////////////
 
 IdentifierFingerprinter::IdentifierFingerprinter( TreePtr<Node> root_x ) :
@@ -171,9 +110,10 @@ IdentifierFingerprinter::IdentifierFingerprinter( TreePtr<Node> root_x ) :
 void IdentifierFingerprinter::ProcessNode( TreePtr<Node> x, int &index )
 {
 	ASSERT( x );
-    // Record the fingerprints and increment index on the way down
+    // Record the fingerprints and increment index in depth-first pre-order
     if( auto id_x = TreePtr<SpecificIdentifier>::DynamicCast(x) )
         fingerprints[id_x].insert(index);
+        
     index++;
 
     // Recurse into our child nodes
@@ -245,12 +185,6 @@ void IdentifierFingerprinter::ProcessCollection( CollectionInterface *x_col, int
 }
 
 
-map< TreePtr<SpecificIdentifier>, IdentifierFingerprinter::Fingerprint > IdentifierFingerprinter::GetFingerprints()
-{
-    return fingerprints;
-}
-
-
 map< IdentifierFingerprinter::Fingerprint, set<TreePtr<CPPTree::SpecificIdentifier>> > IdentifierFingerprinter::GetReverseFingerprints()
 {
     map< Fingerprint, set<TreePtr<CPPTree::SpecificIdentifier>> > rfp;
@@ -260,3 +194,67 @@ map< IdentifierFingerprinter::Fingerprint, set<TreePtr<CPPTree::SpecificIdentifi
     }
     return rfp;
 }
+
+
+//////////////////////////// UniquifyIdentifiers ///////////////////////////////
+
+UniquifyIdentifiers::IdentifierNameMap UniquifyIdentifiers::UniquifyAll( TreePtr<Node> root )
+{
+    IdentifierFingerprinter idfp( root );    
+
+    list< TreePtr<SpecificIdentifier> > ids;
+    for( auto p : idfp.GetReverseFingerprints() )
+    {
+        ASSERT(p.second.size() == 1)
+          ("Could not differentiate between these identifiers: ")(p.second)
+          (" fingerprint ")(p.first)
+          (". Need to write some more code to uniquify the renders in this case!! (#225)\n");
+        // If assert is removed, this loop could iterate more than once; the order
+        // of the iterations will not be repeatable, and so id uniquification won't be.
+        for( TreePtr<SpecificIdentifier> si : p.second ) // TODO change me!
+            ids.push_back( si );
+    }
+
+	VisibleIdentifiers vi;
+	IdentifierNameMap inm;
+    for( TreePtr<SpecificIdentifier> si : ids )
+    {
+        string nn = vi.AddIdentifier( si );
+        inm.insert( IdentifierNamePair( si, nn ) );
+    }        
+    
+    return inm;
+}
+
+//////////////////////////// UniquifyCompare ///////////////////////////////
+
+UniquifyCompare::UniquifyCompare( const UniquifyIdentifiers::IdentifierNameMap &unique_ids_ ) :
+    SimpleCompare(Orderable::REPEATABLE),  // Use REPEATABLE but doesn't really matter since we're overriding identifier compare 
+    unique_ids( unique_ids_ )
+{
+}
+
+
+Orderable::Diff UniquifyCompare::Compare3Way( TreePtr<Node> l, TreePtr<Node> r ) const
+{
+    //FTRACE("UC::Compare ")(a)(" - ")(b)("\n");
+    
+    // We're overriding the node entrypoint of SimpleCompare. If we're not
+    // dealing with two SpecificIdentifiers, call back into that function
+    // explicitly to get normal compare behaviour.
+    auto id_l = TreePtr<SpecificIdentifier>::DynamicCast(l);
+    auto id_r = TreePtr<SpecificIdentifier>::DynamicCast(r);
+    if( !(id_l && id_r) )
+        return SimpleCompare::Compare3Way(l, r);
+        
+    // We have two SpecificIdentifiers, so get their unique names
+    string ustr_l = unique_ids.at(id_l);
+    string ustr_r = unique_ids.at(id_r);
+    //FTRACE(id_a)(" becomes ")(ustr_a)("\n");
+    
+    // Compare those. This is like a REPEATABLE SC but using the
+    // uniquified names instead.
+    return ustr_l.compare(ustr_r);
+}
+
+
