@@ -90,7 +90,7 @@ string Render::RenderToString( TreePtr<Node> root )
     deferred_decls.clear();
 
     // Make the identifiers unique
-    unique_ids = UniquifyIdentifiers::UniquifyAll( root_scope );
+    unique_ids = UniquifyIdentifiers::UniquifyAll( kit, root );
 
     string s;
 

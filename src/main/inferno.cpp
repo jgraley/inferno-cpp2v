@@ -202,8 +202,7 @@ void BuildDefaultSequence( vector< shared_ptr<VNStep> > *sequence )
 		sequence->push_back( make_shared<CleanUpDeadCode>() );
 	}
 	
-	if( ReadArgs::use_feature_option == 'l' )
-		LowerAllSystemC::Build(sequence);
+	LowerAllSystemC::Build(sequence);
 }
 
 

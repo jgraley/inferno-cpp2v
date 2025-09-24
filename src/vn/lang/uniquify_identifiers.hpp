@@ -7,6 +7,7 @@
 #include "tree/cpptree.hpp"
 #include "common/standard.hpp"
 #include "helpers/simple_compare.hpp"
+#include "helpers/transformation.hpp"
 
 // Check identifiers for duplication
 // Policy is to dedupe with a simple scheme like <name>_<unique number> or even without the underscore
@@ -14,21 +15,23 @@
 // the same form into our scheme, as if we created them, then uniqueness is guaranteed (but we will sometimes
 // want to change the number, so what started as foo_2 could become foo_3 by the time we're done with it).
 
-typedef set< unsigned > NameUsage;
+typedef map< unsigned, TreePtr<CPPTree::SpecificIdentifier> > NameUsage;
 
 struct UniquifyIdentifiers;
 
-struct VisibleIdentifiers
+class VisibleIdentifiers
 {
     // map of basenames to their offset number tables
     typedef pair<const string, NameUsage> NameUsagePair;
     map< string, NameUsage > name_usages;
 
-    unsigned AssignNumber( NameUsage &nu, TreePtr<CPPTree::SpecificIdentifier> i, unsigned n );
-    string AddIdentifier( TreePtr<CPPTree::SpecificIdentifier> i );
-
     static string MakeUniqueName( string b, unsigned n );
     static void SplitName( TreePtr<CPPTree::SpecificIdentifier> i, string *b, unsigned *n ); // note static
+    unsigned AssignNumber( NameUsage &nu, TreePtr<CPPTree::SpecificIdentifier> i, unsigned n );
+
+public:    
+    string AddIdentifier( TreePtr<CPPTree::SpecificIdentifier> i );
+    void AddUndeclaredIdentifier( TreePtr<CPPTree::SpecificIdentifier> i );
 };
 
 
@@ -67,12 +70,12 @@ private:
 };
 
 
-// Main API
+// Main API.
 struct UniquifyIdentifiers
 {
     typedef pair<const TreePtr<CPPTree::SpecificIdentifier>, string> IdentifierNamePair;
     typedef map< TreePtr<CPPTree::SpecificIdentifier>, string> IdentifierNameMap;
-    static IdentifierNameMap UniquifyAll( TreePtr<Node> root );
+    static IdentifierNameMap UniquifyAll( const TransKit &kit, TreePtr<Node> root );
 };
 
 

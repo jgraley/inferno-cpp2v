@@ -28,7 +28,7 @@ string VisibleIdentifiers::MakeUniqueName( string b, unsigned n ) // note static
 
 void VisibleIdentifiers::SplitName( TreePtr<SpecificIdentifier> i, string *b, unsigned *n ) // note static
 {
-    string original_name = i->GetRender();
+    string original_name = i->GetToken();
 #ifdef UID_FORMAT_HINT 
     char cb[1024]; // hope that's big enough!
     int c = sscanf( original_name.c_str(), UID_FORMAT_HINT, cb, n ); // TODO maybe add %s at the end to catch junk after the number
@@ -49,16 +49,16 @@ void VisibleIdentifiers::SplitName( TreePtr<SpecificIdentifier> i, string *b, un
 }
 
 
-unsigned VisibleIdentifiers::AssignNumber( NameUsage &nu, TreePtr<SpecificIdentifier>, unsigned n )
+unsigned VisibleIdentifiers::AssignNumber( NameUsage &nu, TreePtr<SpecificIdentifier> id, unsigned n )
 {
-    // Uniqueify the number n, by incrementing it until there are no conflicts
+    // Uniquify the number n, by incrementing it until there are no conflicts
     bool tryagain;
     do
     {
         // See if the number n is already used
         tryagain = false;
-        for( unsigned u : nu )
-            if( u == n )
+        for( auto p : nu )
+            if( p.first == n )
             {
                 tryagain = true;
                 break;
@@ -71,35 +71,56 @@ unsigned VisibleIdentifiers::AssignNumber( NameUsage &nu, TreePtr<SpecificIdenti
     } while(tryagain);
 
     // Store the number got
-    nu.insert( n );
+    nu.insert( make_pair(n, id) );
 
 	// Return the number got
 	return n;
 }
 
 
-string VisibleIdentifiers::AddIdentifier( TreePtr<SpecificIdentifier> i )
+string VisibleIdentifiers::AddIdentifier( TreePtr<SpecificIdentifier> id )
+{
+    // Get canonical form of identifier name
+    string base_name;
+    unsigned n_want;
+    SplitName( id, &base_name, &n_want );
+
+    // Do we have the base name already? If so, add this new instance
+    if( name_usages.count(base_name) > 0 )
+    {
+        unsigned n_got = AssignNumber( name_usages.at(base_name), id, n_want );
+        return MakeUniqueName( base_name, n_got );
+	}
+
+    // Otherwise start a new record for this base name.
+    NameUsage nu;
+    unsigned n_got = AssignNumber( nu, id, n_want );
+    name_usages.insert( NameUsagePair( base_name, nu ) );
+    return MakeUniqueName( base_name, n_got );
+}
+
+
+void VisibleIdentifiers::AddUndeclaredIdentifier( TreePtr<SpecificIdentifier> i )
 {
     // Get canonical form of identifier name
     string base_name;
     unsigned n_want;
     SplitName( i, &base_name, &n_want );
 
-    // Do we have the base name already? If so, add this new instance
-    for( NameUsagePair &p : name_usages )
-    {
-        if( base_name == p.first )
-        {
-            unsigned n_got = AssignNumber( p.second, i, n_want );
-            return MakeUniqueName( base_name, n_got );
-		}
-	}
+    // Undeclared identifiers should already be unique. We must assume they are 
+    // declared "somewhere else" and that to rename them would break things. In
+    // fact they're probably system node ids. These have the usual identifier 
+    // semantics; do a #819 when introducing.
+    ASSERT( name_usages.count(base_name) == 0 )
+            ("Name conflict among undeclared identifiers (would force a rename - unsafe)\n")
+            ("identifier: ")(i)(" token: ")(i->GetToken())("\n")
+            ("previous usages: ")(name_usages); 
 
     // Otherwise start a new record for this base name.
     NameUsage nu;
     unsigned n_got = AssignNumber( nu, i, n_want );
+    ASSERT( n_got == n_want )( "Undeclared identifier: ")(i)(" would be renamed - unsafe"); 
     name_usages.insert( NameUsagePair( base_name, nu ) );
-    return MakeUniqueName( base_name, n_got );
 }
 
 //////////////////////////// IdentifierFingerprinter ///////////////////////////////
@@ -203,7 +224,7 @@ void IdentifierFingerprinter::ProcessCollection( CollectionInterface *x_col, int
 
 //////////////////////////// UniquifyIdentifiers ///////////////////////////////
 
-UniquifyIdentifiers::IdentifierNameMap UniquifyIdentifiers::UniquifyAll( TreePtr<Node> root )
+UniquifyIdentifiers::IdentifierNameMap UniquifyIdentifiers::UniquifyAll( const TransKit &kit, TreePtr<Node> root )
 {
 	IdentifierFingerprinter::IdsByFingerprint ids_by_fp = IdentifierFingerprinter().GetIdentifiersInTreeByFingerprint(root);    
 	
@@ -223,26 +244,32 @@ UniquifyIdentifiers::IdentifierNameMap UniquifyIdentifiers::UniquifyAll( TreePtr
 			ids.push_back( si );
 	}
 	
+	VisibleIdentifiers vi;
+	IdentifierNameMap inm;
+
+	// Deal with undeclared (system) identifiers which must be preserved
     list< TreePtr<SpecificIdentifier> > renamable_ids;
 	for( auto id : ids )
 	{
 		try
 		{
-			//DeclarationOf().TryApplyTransformation( kit, id );
+			DeclarationOf().TryApplyTransformation( kit, id );
 			renamable_ids.push_back( id ); // can only rename if there is a decl
 		}
 		catch(DeclarationOf::DeclarationNotFound &)
 		{
-			
+			// Assume undeclared identifier is really a system node identifier.
+			// Ensure it will keep its name and not be conflicted, and add to the
+			// map so normal IDs don't conflict with it.
+			vi.AddUndeclaredIdentifier( id );
+			inm.insert( IdentifierNamePair( id, id->GetToken() ) );
 		}
 	}
 
-	VisibleIdentifiers vi;
-	IdentifierNameMap inm;
-    for( TreePtr<SpecificIdentifier> si : renamable_ids )
+    for( TreePtr<SpecificIdentifier> id : renamable_ids )
     {
-        string nn = vi.AddIdentifier( si );
-        inm.insert( IdentifierNamePair( si, nn ) );
+        string nn = vi.AddIdentifier( id );
+        inm.insert( IdentifierNamePair( id, nn ) );
     }        
     
     return inm;
