@@ -734,13 +734,21 @@ string Render::RenderInstance( const Render::Kit &kit, TreePtr<Instance> o,
     // If object was declared as a module instance, bodge in a name as a constructor parameter
     // But not for fields - they need an init list, done in RenderScope()
     if( !DynamicTreePtrCast<Field>(o) )
-        if( TreePtr<TypeIdentifier> tid = DynamicTreePtrCast<TypeIdentifier>(o->type) )
+        if( TreePtr<TypeIdentifier> tid = DynamicTreePtrCast<TypeIdentifier>(o->type) ) try
+        {
             if( TreePtr<Record> r = GetRecordDeclaration(kit, tid).GetTreePtr() )
-                if( DynamicTreePtrCast<Module>(r) )
+            {
+				if( DynamicTreePtrCast<Module>(r) )
                 {
                     s += "(\"" + RenderIdentifier(kit, o->identifier) + "\")" + ";" + SYSTEMC_MARKER();
                     return s;
                 }
+			}
+		}
+		catch(DeclarationOf::DeclarationNotFound &)
+		{
+			// No decl so probably a system type. 				
+		}			
     
     if( DynamicTreePtrCast<Uninitialised>(o->initialiser) )
     {
@@ -1125,8 +1133,11 @@ string Render::RenderModuleCtor( const Render::Kit &kit, TreePtr<Module> m ) try
         // Bodge an init list that names any fields we have that are modules
         // and initialises any fields with initialisers
         if( TreePtr<Field> f = DynamicTreePtrCast<Field>(pd) )
-            if( TreePtr<TypeIdentifier> tid = DynamicTreePtrCast<TypeIdentifier>(f->type) )
+        {
+            if( TreePtr<TypeIdentifier> tid = DynamicTreePtrCast<TypeIdentifier>(f->type) ) try
+			{
                 if( TreePtr<Record> r = GetRecordDeclaration(kit, tid).GetTreePtr() )
+                {
                     if( DynamicTreePtrCast<Module>(r) )
                     {
                         if( first )
@@ -1137,6 +1148,13 @@ string Render::RenderModuleCtor( const Render::Kit &kit, TreePtr<Module> m ) try
                         s += SYSTEMC_MARKER() + ids + "(\"" + ids + "\")";
                         first = false;
                     }   
+				}
+			}
+			catch(DeclarationOf::DeclarationNotFound &)
+			{
+				// No decl so probably a system type. 
+			}
+        }
                     
         // Where data members are initialised, generate the init into the init list. We will 
         // inhibit rendering of these inits in the module decls. TODO inconsistent 

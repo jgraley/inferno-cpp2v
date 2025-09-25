@@ -795,20 +795,24 @@ private:
         /// e.g: "int x(1);"
         virtual void AddCXXDirectInitializerToDecl(DeclTy *Dcl,
                                                    clang::SourceLocation,
-                                                   ExprTy **, unsigned,
+                                                   ExprTy **Args, unsigned NumArgs,
                                                    clang::SourceLocation *,
                                                    clang::SourceLocation) 
         {
             TRACE();
+            // Free-standing direct initialiser: we initialise with
+            // a call to the InstanceIdentifier of a Field of type 
+            // Constructor. We don't bother with a Lookup since the
+            // obejct is obviously the one we're delclaring.
             TreePtr<Declaration> d = hold_decl.FromRaw(Dcl);
             TreePtr<Instance> o = DynamicTreePtrCast<Instance> (d);
-            TRACE("Ignoring C++ direct initialiser for SC Modules, not supported in general\n"); // TODO try the code below...
-           // TreePtr<Instance> cm = GetConstructor( d->type );
-           // ASSERT( cm );
-           // ASSERT( cm->identifier );
-           // Sequence<Expression> args;
-           // CollectArgs( &args, Exprs, NumExprs );
-           // TreePtr<Call> c = CreateCall( args, cm->identifier );
+            TreePtr<Instance> cm = GetConstructor( o->type );
+            ASSERT( cm );
+            ASSERT( cm->identifier );
+            Sequence<Expression> args;
+            CollectArgs( &args, Args, NumArgs );
+            TreePtr<Call> c = CreateCall( args, cm->identifier );
+            o->initialiser = c;
         }
         
         // Clang tends to parse parameters and function bodies in seperate
@@ -1433,6 +1437,68 @@ private:
         return hold_decl.ToRaw( d );
     }
 
+    virtual MemInitResult ActOnMemInitializer(DeclTy *ConstructorDecl,
+                                              clang::Scope *,
+                                              clang::IdentifierInfo *MemberOrBase,
+                                              clang::SourceLocation,
+                                              clang::SourceLocation,
+                                              ExprTy **Args, unsigned NumArgs,
+                                              clang::SourceLocation *,
+                                              clang::SourceLocation) 
+    {
+		// Free-standing direct initialiser: we initialise with
+		// a call to the InstanceIdentifier of a Field of type 
+		// Constructor. We don't bother with a Lookup since the
+		// obejct is obviously the one we're declaring.
+		TreePtr<Declaration> d = hold_decl.FromRaw(ConstructorDecl);
+		auto memb_id = CreateInstanceIdentifier(MemberOrBase);
+		Sequence<Expression> args;
+		CollectArgs( &args, Args, NumArgs );
+			
+		FTRACE("ActOnMemInitializer() ConstructorDecl: ")(d)(" MemberOrBase:")(memb_id)(" Args: ")(args)("\n");
+		ASSERT( memb_id );
+		// memb_id -> our field -> type -> memb record -> a suitable constructor -> a call to it		
+		TreePtr<Field> our_field;
+		for( TreePtr<Declaration> our_d : inferno_scope_stack.top()->members )
+			if( auto our_f=DynamicTreePtrCast<Field>(our_d) )
+				if( our_f->identifier == memb_id )
+					our_field = our_f;
+		ASSERT( our_field )("Didn't find ")(memb_id)(" in current class ")(inferno_scope_stack.top()->members);
+        auto memb_type = DynamicTreePtrCast<TypeIdentifier>(our_field->type);
+		ASSERT( our_field )("Didn't get type for ")(our_field)(" id: ")(memb_id);
+        DefaultTransUtils utils(all_decls);
+        TransKit kit { &utils };
+        TreePtr<Record> memb_decl = GetRecordDeclaration(kit, memb_type).GetTreePtr();
+		ASSERT( memb_decl )("Didn't get record decl for ")(memb_type)(" field: ")(our_field)(" id: ")(memb_id);
+        TreePtr<InstanceIdentifier> memb_cons_id;
+        for( TreePtr<Declaration> memb_d : memb_decl->members )
+			if( auto memb_f=DynamicTreePtrCast<Field>(memb_d) )
+				if( DynamicTreePtrCast<Constructor>(memb_f->type) ) // TODO add overload filtering here
+					memb_cons_id = memb_f->identifier;
+		TreePtr<Call> c = CreateCall( args, memb_cons_id );
+        return hold_expr.ToRaw( c );
+    }
+
+    /// ActOnMemInitializers - This is invoked when all of the member
+    /// initializers of a constructor have been parsed. ConstructorDecl
+    /// is the function declaration (which will be a C++ constructor in
+    /// a well-formed program), ColonLoc is the location of the ':' that
+    /// starts the constructor initializer, and MemInit/NumMemInits
+    /// contains the individual member (and base) initializers. 
+    virtual void ActOnMemInitializers(DeclTy *ConstructorDecl, 
+                                      clang::SourceLocation,
+                                      MemInitTy **MemInits, unsigned NumMemInits) {
+		TreePtr<Declaration> d = hold_decl.FromRaw(ConstructorDecl);
+		Sequence<Expression> inits;
+		CollectArgs( &inits, MemInits, NumMemInits );
+		FTRACE("ActOnMemInitializers() ConstructorDecl: ")(d)(" MemInits: ")(inits)("\n");
+
+		TreePtr<Instance> o = DynamicTreePtrCast<Instance> (d);
+		auto body = DynamicTreePtrCast<Compound> (o->initialiser);
+		for( auto i : inits )
+			body->statements.push_back( i );
+    }
+  
     virtual DeclTy *ActOnTag(clang::Scope *S, unsigned TagType, TagKind TK,
             clang::SourceLocation, const clang::CXXScopeSpec &SS,
             clang::IdentifierInfo *Name, clang::SourceLocation,
@@ -1672,6 +1738,7 @@ private:
             TreePtr<Expression> e = hold_expr.FromRaw( InitList[i] );
             ao->operands.push_back( e );
         }
+        FTRACE("ActOnInitList: ")(ao)("\n");
         return hold_expr.ToRaw( ao );
     }
 

@@ -76,7 +76,7 @@ struct Node : NodeBases,
 
     virtual string GetGraphName() const
     {
-        return GetToken();
+        return GetName();
     }
         
     virtual Graphable::NodeBlock GetGraphBlockInfo() const override;

@@ -8,7 +8,7 @@
 #include "../db/domain_extension.hpp"
 #include "special_agent.hpp"
 
-namespace VN
+namespace VN 
 { 
 
 class RelocatedAgent : public PreRestrictedAgent, public DomainExtension::Extender // names finalised in rule #729
