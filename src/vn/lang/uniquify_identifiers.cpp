@@ -17,7 +17,11 @@ string VisibleIdentifiers::MakeUniqueName( string b, unsigned n ) // note static
     if( n>0 )
         return SSPrintf( UID_FORMAT_HINT, b.c_str(), n );
     else
+    {
+		ASSERT( !b.empty() );
         return b; // n==0 means no change to identifier name; the "_0" is implied in this case
+    }
+      
 #endif
 #ifdef UID_FORMAT_PURE 
     (void)b;
@@ -35,15 +39,15 @@ void VisibleIdentifiers::SplitName( TreePtr<SpecificIdentifier> i, string *b, un
     if( c == 2 && *n > 0 ) // note that x_0 is *not* in standard form, so it become eg x_0_1 etc
     {
         *b = string(cb);        
-    }    
-    else
+    }        
+	else
     {
-        *n = 0;
+        *n = original_name.empty() ? 1 : 0;
         *b = original_name;
     }
 #endif
 #ifdef UID_FORMAT_PURE 
-    *n = 0;
+    *n = 1;
     *b = ""; // Have to prevent uniquifier from assuming different basenames are already unique
 #endif
 }
@@ -102,6 +106,8 @@ string VisibleIdentifiers::AddIdentifier( TreePtr<SpecificIdentifier> id )
 
 void VisibleIdentifiers::AddUndeclaredIdentifier( TreePtr<SpecificIdentifier> i )
 {
+	ASSERT( !i->GetToken().empty() )("An undeclared indentifier cannot safely be renamed and so must have a non-empty name: ")(i);
+	
     // Get canonical form of identifier name
     string base_name;
     unsigned n_want;
@@ -262,6 +268,7 @@ UniquifyIdentifiers::IdentifierNameMap UniquifyIdentifiers::UniquifyAll( const T
 			// Ensure it will keep its name and not be conflicted, and add to the
 			// map so normal IDs don't conflict with it.
 			vi.AddUndeclaredIdentifier( id );
+			ASSERT( !id->GetToken().empty() );
 			inm.insert( IdentifierNamePair( id, id->GetToken() ) );
 		}
 	}
@@ -269,6 +276,7 @@ UniquifyIdentifiers::IdentifierNameMap UniquifyIdentifiers::UniquifyAll( const T
     for( TreePtr<SpecificIdentifier> id : renamable_ids )
     {
         string nn = vi.AddIdentifier( id );
+        ASSERT( !nn.empty() );
         inm.insert( IdentifierNamePair( id, nn ) );
     }        
     

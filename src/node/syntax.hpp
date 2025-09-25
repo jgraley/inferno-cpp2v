@@ -54,7 +54,7 @@ public:
 	/// Produce the source-code-name of the corresponding SystemC construct
     virtual string GetToken() const
     {
-		ASSERTFAIL("GetToken() called on non-token")
+		return "";
 	} 
 
 	virtual string GetRender() const

@@ -11,7 +11,7 @@ ClassA instance_a("foo");
 class ClassB
 {
 	// Put this before the member init that references it, because
-	// parser is on-pass on class bodies.
+	// parser is one-pass on class bodies.
 	ClassA field_a;	
 
 	ClassB() : 

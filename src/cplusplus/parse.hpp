@@ -695,7 +695,7 @@ private:
                 TRACE("inserted record decl\n");
             }
 
-            TRACE("no insert record decl\n");
+            TRACE("now insert record decl\n");
             inferno_scope_stack.top()->members.insert(d);
             backing_ordering[inferno_scope_stack.top()].push_back(d);
             TRACE("From %d to %d decls\n", os, inferno_scope_stack.top()->members.size() );
@@ -717,6 +717,7 @@ private:
             TreePtr<Declaration> d = FindExistingDeclaration(D, false); // decl exists already?
             if (!d)
             {
+				TRACE("Created decl: ")(d)("\n");
                 d = CreateDelcaration(S, D); // make a new one
                 IssueDeclaration(S, d);
             }
@@ -1437,44 +1438,45 @@ private:
         return hold_decl.ToRaw( d );
     }
 
-    virtual MemInitResult ActOnMemInitializer(DeclTy *ConstructorDecl,
-                                              clang::Scope *,
-                                              clang::IdentifierInfo *MemberOrBase,
-                                              clang::SourceLocation,
-                                              clang::SourceLocation,
-                                              ExprTy **Args, unsigned NumArgs,
-                                              clang::SourceLocation *,
-                                              clang::SourceLocation) 
+    MemInitResult ActOnMemInitializer(DeclTy *ConstructorDecl,
+                                      clang::Scope *,
+                                      clang::IdentifierInfo *MemberOrBase,
+                                      clang::SourceLocation,
+                                      clang::SourceLocation,
+                                      ExprTy **Args, unsigned NumArgs,
+                                      clang::SourceLocation *,
+                                      clang::SourceLocation) final
     {
 		// Free-standing direct initialiser: we initialise with
 		// a call to the InstanceIdentifier of a Field of type 
 		// Constructor. We don't bother with a Lookup since the
 		// obejct is obviously the one we're declaring.
+		// MemberOrBase -> our field -> type -> memb record -> a suitable constructor -> a call to it		
 		TreePtr<Declaration> d = hold_decl.FromRaw(ConstructorDecl);
-		auto memb_id = CreateInstanceIdentifier(MemberOrBase);
+		TreePtr<Node> our_field_node( ident_track.Get( MemberOrBase ) );
+		auto our_field( DynamicTreePtrCast<Field>(our_field_node) );
+		ASSERT( our_field )("Didn't get a Field for the thing being initialised - is it a base? TODO!!");
+
 		Sequence<Expression> args;
 		CollectArgs( &args, Args, NumArgs );
 			
-		FTRACE("ActOnMemInitializer() ConstructorDecl: ")(d)(" MemberOrBase:")(memb_id)(" Args: ")(args)("\n");
-		ASSERT( memb_id );
-		// memb_id -> our field -> type -> memb record -> a suitable constructor -> a call to it		
-		TreePtr<Field> our_field;
-		for( TreePtr<Declaration> our_d : inferno_scope_stack.top()->members )
-			if( auto our_f=DynamicTreePtrCast<Field>(our_d) )
-				if( our_f->identifier == memb_id )
-					our_field = our_f;
-		ASSERT( our_field )("Didn't find ")(memb_id)(" in current class ")(inferno_scope_stack.top()->members);
+		TRACE("ActOnMemInitializer() ConstructorDecl: ")(d)(" MemberOrBase:")(our_field)(" Args: ")(args)("\n");
+
         auto memb_type = DynamicTreePtrCast<TypeIdentifier>(our_field->type);
-		ASSERT( our_field )("Didn't get type for ")(our_field)(" id: ")(memb_id);
+		ASSERT( our_field )("Didn't get type for ")(our_field);
         DefaultTransUtils utils(all_decls);
         TransKit kit { &utils };
         TreePtr<Record> memb_decl = GetRecordDeclaration(kit, memb_type).GetTreePtr();
-		ASSERT( memb_decl )("Didn't get record decl for ")(memb_type)(" field: ")(our_field)(" id: ")(memb_id);
-        TreePtr<InstanceIdentifier> memb_cons_id;
+		ASSERT( memb_decl )("Didn't get record decl for ")(memb_type)(" field: ")(our_field);
+        TreePtr<Instance> memb_cons;
         for( TreePtr<Declaration> memb_d : memb_decl->members )
 			if( auto memb_f=DynamicTreePtrCast<Field>(memb_d) )
 				if( DynamicTreePtrCast<Constructor>(memb_f->type) ) // TODO add signature filtering here for overloads
-					memb_cons_id = memb_f->identifier;
+					memb_cons = memb_f;
+
+        TreePtr<InstanceIdentifier> memb_cons_id = memb_cons->identifier;
+
+
 		TreePtr<Call> c = CreateCall( args, memb_cons_id );
         return hold_expr.ToRaw( c );
     }
@@ -1485,18 +1487,22 @@ private:
     /// a well-formed program), ColonLoc is the location of the ':' that
     /// starts the constructor initializer, and MemInit/NumMemInits
     /// contains the individual member (and base) initializers. 
-    virtual void ActOnMemInitializers(DeclTy *ConstructorDecl, 
-                                      clang::SourceLocation,
-                                      MemInitTy **MemInits, unsigned NumMemInits) {
+    void ActOnMemInitializers(DeclTy *ConstructorDecl, 
+                              clang::SourceLocation,
+                              MemInitTy **MemInits, unsigned NumMemInits) final {
 		TreePtr<Declaration> d = hold_decl.FromRaw(ConstructorDecl);
 		Sequence<Expression> inits;
 		CollectArgs( &inits, MemInits, NumMemInits );
-		FTRACE("ActOnMemInitializers() ConstructorDecl: ")(d)(" MemInits: ")(inits)("\n");
+		TRACE("ActOnMemInitializers() ConstructorDecl: ")(d)(" MemInits: ")(inits)("\n");
 
-		TreePtr<Instance> o = DynamicTreePtrCast<Instance> (d);
-		auto body = DynamicTreePtrCast<Compound> (o->initialiser);
-		for( auto i : inits )
-			body->statements.push_back( i );
+		TreePtr<Instance> o = DynamicTreePtrCast<Instance> (d);		
+		ASSERT( o );
+		ASSERT( DynamicTreePtrCast<Uninitialised>(o->initialiser) );
+        TreePtr<Compound> comp = DynamicTreePtrCast<Compound>(o->initialiser);
+        comp = MakeTreeNode<Compound>();
+        o->initialiser = comp;
+        for( auto i : inits )
+			comp->statements.push_back( i );
     }
   
     virtual DeclTy *ActOnTag(clang::Scope *S, unsigned TagType, TagKind TK,
@@ -1738,7 +1744,7 @@ private:
             TreePtr<Expression> e = hold_expr.FromRaw( InitList[i] );
             ao->operands.push_back( e );
         }
-        FTRACE("ActOnInitList: ")(ao)("\n");
+        TRACE("ActOnInitList: ")(ao)("\n");
         return hold_expr.ToRaw( ao );
     }
 
@@ -2027,14 +2033,15 @@ private:
         ASSERTFAIL("missing constructor");
     }
 
-    virtual MemInitResult ActOnMemInitializer( DeclTy *ConstructorDecl,
+/* lol
+    MemInitResult ActOnMemInitializer( DeclTy *ConstructorDecl,
             clang::Scope *,
             clang::IdentifierInfo *MemberOrBase,
             clang::SourceLocation,
             clang::SourceLocation,
             ExprTy **Args, unsigned NumArgs,
             clang::SourceLocation,
-            clang::SourceLocation )
+            clang::SourceLocation ) final
     {
         // Get (or make) the constructor we're invoking
         TreePtr<Node> n( ident_track.Get( MemberOrBase ) );
@@ -2071,7 +2078,7 @@ private:
         comp->statements.push_back( call );
         return 0;
     }
-
+*/
     void CollectArgs( Sequence<Expression> *ps, ExprTy **Args, unsigned NumArgs )
     {
         for(unsigned i=0; i<NumArgs; i++ )
