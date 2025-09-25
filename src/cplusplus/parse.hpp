@@ -1473,7 +1473,7 @@ private:
         TreePtr<InstanceIdentifier> memb_cons_id;
         for( TreePtr<Declaration> memb_d : memb_decl->members )
 			if( auto memb_f=DynamicTreePtrCast<Field>(memb_d) )
-				if( DynamicTreePtrCast<Constructor>(memb_f->type) ) // TODO add overload filtering here
+				if( DynamicTreePtrCast<Constructor>(memb_f->type) ) // TODO add signature filtering here for overloads
 					memb_cons_id = memb_f->identifier;
 		TreePtr<Call> c = CreateCall( args, memb_cons_id );
         return hold_expr.ToRaw( c );
