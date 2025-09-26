@@ -339,6 +339,17 @@ struct Const : Constancy { NODE_FUNCTIONS_FINAL };
 struct NonConst : Constancy { NODE_FUNCTIONS_FINAL };
 // TODO add mutable when supported by clang
 
+// TODO put this in Instance, Pointer and New
+// Take constancy out of Reference
+// The idea is that we specify const not in the types, but in the nodes
+// that permit an object to be reached for assignment or mutation.
+struct Reacher : virtual Node
+{
+	NODE_FUNCTIONS
+    TreePtr<Type> type; ///< the Type of the instance, can be data or Callable type
+    TreePtr<Constancy> constancy; ///< Is the field constant (ie only written by constructor)
+};
+
 /// Declaration of a variable, object or function
 /** Instance represents a variable/object or a function. In case of function, type is a
  type under Callable and initialiser is a Statement (or Uninitialised for a function

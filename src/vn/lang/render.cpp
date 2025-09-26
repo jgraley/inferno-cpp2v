@@ -471,6 +471,16 @@ string Render::RenderCall( const Render::Kit &kit, TreePtr<Call> call ) try
 DEFAULT_CATCH_CLAUSE
 
 
+string Render::RenderSeqOperands( const Render::Kit &kit, Sequence<Expression> operands ) try
+{
+    list<string> renders;
+    for( TreePtr<Expression> e : operands )    
+		renders.push_back( RenderExpression(kit, e, Syntax::Production::COMMA_SEP) );				
+	return Join(renders, ", ", "(", ")");
+}
+DEFAULT_CATCH_CLAUSE
+
+
 string Render::RenderSysCall( const Render::Kit &kit, TreePtr<SysCall> call ) try
 {
     string s;
@@ -479,11 +489,7 @@ string Render::RenderSysCall( const Render::Kit &kit, TreePtr<SysCall> call ) tr
     s += RenderExpression( kit, call->callee, Syntax::Production::POSTFIX );
 
 	// SysCall just has a sequence of arg expressions
-    list<string> renders;
-    for( TreePtr<Expression> e : call->operands )    
-		renders.push_back( RenderExpression(kit, e, Syntax::Production::COMMA_SEP) );				
-	s += Join(renders, ", ", "(", ")");
-
+	s += RenderSeqOperands(kit, call->operands);
     return s;
 }
 DEFAULT_CATCH_CLAUSE
@@ -737,6 +743,20 @@ string Render::RenderInstanceProto( const Render::Kit &kit,
 DEFAULT_CATCH_CLAUSE
 
 
+bool Render::IsDeclared( const Render::Kit &kit, TreePtr<Identifier> id )
+{
+	try
+	{
+        DeclarationOf().TryApplyTransformation( kit, id );
+        return true;
+	}
+	catch(DeclarationOf::DeclarationNotFound &)
+	{
+		return false; 				
+	}
+}	
+
+
 string Render::RenderInstance( const Render::Kit &kit, TreePtr<Instance> o, 
                                bool out_of_line ) try
 {
@@ -811,10 +831,22 @@ string Render::RenderInstance( const Render::Kit &kit, TreePtr<Instance> o,
     if( TreePtr<Expression> ei = DynamicTreePtrCast<Expression>( o->initialiser ) )
 	{
 		// Attempt direct initialisation
-		if( auto call = DynamicTreePtrCast<Call>( ei ) )		
+		if( auto call = DynamicTreePtrCast<SysCall>( ei ) )
+		{
+			if( auto lu = TreePtr<Lookup>::DynamicCast(call->callee) )
+				if( auto id = TreePtr<InstanceIdentifier>::DynamicCast(lu->member) )
+					if( id->GetToken().empty() ) // syscall to a nameless member function => sys construct
+						return s + RenderSeqOperands(kit, call->operands) + ";\n";
+		}
+		if( auto call = DynamicTreePtrCast<Call>( ei ) ) try
+		{		
 			if( TypeOf::instance.TryGetConstructedExpression( kit, call ).GetTreePtr() )		
 				return s + RenderMapArgs(kit, call) + ";\n";
-					
+		}
+		catch(DeclarationOf::DeclarationNotFound &)
+		{
+		}	
+							
 		// Render expression with an assignment
 		AutoPush< TreePtr<Node> > cs( scope_stack, GetScope( root_scope, o->identifier ) );		
 		return s + " = " + RenderExpression(kit, ei, Syntax::Production::ASSIGN) + ";\n";

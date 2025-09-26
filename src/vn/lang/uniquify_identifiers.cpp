@@ -106,6 +106,8 @@ string VisibleIdentifiers::AddIdentifier( TreePtr<SpecificIdentifier> id )
 
 void VisibleIdentifiers::AddUndeclaredIdentifier( TreePtr<SpecificIdentifier> i )
 {
+	ASSERT( !i->GetToken().empty() );
+		
     // Get canonical form of identifier name
     string base_name;
     unsigned n_want;

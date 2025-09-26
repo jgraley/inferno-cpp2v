@@ -47,6 +47,7 @@ private:
     string RenderOperator( const Render::Kit &kit, TreePtr<CPPTree::Operator> op, Sequence<CPPTree::Expression> &operands );
     string RenderMapArgs( const Render::Kit &kit, TreePtr<CPPTree::Call> call );
     string RenderCall( const Render::Kit &kit, TreePtr<CPPTree::Call> call );
+    string RenderSeqOperands( const Render::Kit &kit, Sequence<CPPTree::Expression> operands );
     string RenderSysCall( const Render::Kit &kit, TreePtr<CPPTree::SysCall> call );
     string RenderExpression( const Render::Kit &kit, TreePtr<CPPTree::Initialiser> expression, Syntax::Production surround_prod );
     string RenderMakeRecord( const Render::Kit &kit, TreePtr<CPPTree::MakeRecord> ro );
@@ -61,6 +62,7 @@ private:
 
     string RenderInstanceProto( const Render::Kit &kit, TreePtr<CPPTree::Instance> o, 
                                 bool out_of_line );
+	bool IsDeclared( const Render::Kit &kit, TreePtr<CPPTree::Identifier> id );
     string RenderInstance( const Render::Kit &kit, TreePtr<CPPTree::Instance> o,  
                            bool out_of_line );
     bool ShouldSplitInstance( const Render::Kit &kit, TreePtr<CPPTree::Instance> o );

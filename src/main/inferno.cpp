@@ -203,12 +203,11 @@ void BuildDefaultSequence( vector< shared_ptr<VNStep> > *sequence )
 		sequence->push_back( make_shared<CleanupDuplicateLabels>() );
 		sequence->push_back( make_shared<CleanupIneffectualLabels>() );
 		sequence->push_back( make_shared<CleanUpDeadCode>() );
-	}
-	
-	END_OF_TRANS:
+	}		
 	
 	if( ReadArgs::use_feature_option == 'l' )
 	{
+		END_OF_TRANS:
 		LowerAllSystemC::Build(sequence);
 	}
 }

@@ -2068,52 +2068,6 @@ private:
         ASSERTFAIL("missing constructor");
     }
 
-/* lol
-    MemInitResult ActOnMemInitializer( DeclTy *ConstructorDecl,
-            clang::Scope *,
-            clang::IdentifierInfo *MemberOrBase,
-            clang::SourceLocation,
-            clang::SourceLocation,
-            ExprTy **Args, unsigned NumArgs,
-            clang::SourceLocation,
-            clang::SourceLocation ) final
-    {
-        // Get (or make) the constructor we're invoking
-        TreePtr<Node> n( ident_track.Get( MemberOrBase ) );
-        TreePtr<Instance> om( DynamicTreePtrCast<Instance>(n) );
-        ASSERT( om );
-        TreePtr<Instance> cm = GetConstructor( om->type );
-        ASSERT( cm );
-        ASSERT( cm->identifier );
-
-        // Build a lookup to the constructor, using the speiciifed subobject and the matching constructor
-        auto lu = MakeTreeNode<Lookup>();
-        lu->base = om->identifier;
-        lu->member = cm->identifier;
-
-        // Build a call to the constructor with supplied args
-        Sequence<Expression> args;
-        CollectArgs( &args, Args, NumArgs );
-        TreePtr<Call> call = CreateCall( args, lu );
-
-        // Get the constructor whose init list we're adding to (may need to start a
-        // new compound statement)
-        TreePtr<Declaration> d( hold_decl.FromRaw( ConstructorDecl ) );
-        TreePtr<Instance> o( DynamicTreePtrCast<Instance>(d) );
-        ASSERT(o);
-        TreePtr<Compound> comp = DynamicTreePtrCast<Compound>(o->initialiser);
-        if( !comp )
-        {
-            comp = MakeTreeNode<Compound>();
-            o->initialiser = comp;
-            TRACE();
-        }
-
-        // Add it
-        comp->statements.push_back( call );
-        return 0;
-    }
-*/
     void CollectArgs( Sequence<Expression> *ps, ExprTy **Args, unsigned NumArgs )
     {
         for(unsigned i=0; i<NumArgs; i++ )
