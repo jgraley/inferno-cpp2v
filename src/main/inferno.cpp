@@ -58,7 +58,9 @@ void BuildDefaultSequence( vector< shared_ptr<VNStep> > *sequence )
     
    	if( ReadArgs::use_feature_option == 's' )
 	    goto END_OF_TRANS;
-    
+   	if( ReadArgs::use_feature_option == 'x' )
+		goto ONLY_LOWER;
+		
     // SystemC generation tries to convert C and/or C++ into SystemC. This
     // is a simplification of what would happen in ealy phases of the original
     // Inferno design. Explicit SC nodes are generated.
@@ -207,9 +209,10 @@ void BuildDefaultSequence( vector< shared_ptr<VNStep> > *sequence )
 	
 	if( ReadArgs::use_feature_option == 'l' )
 	{
-		END_OF_TRANS:
+		ONLY_LOWER:
 		LowerAllSystemC::Build(sequence);
 	}
+	END_OF_TRANS:{}
 }
 
 

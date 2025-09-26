@@ -29,10 +29,10 @@ public:
  Node does not require declaration. Then replace all class nodes
  that inherit from the supplied base with the new inferno node and 
  remove the base */
-class DetectSCBase : public VNStep 
+class DetectSCHierarchicalClass : public VNStep 
 {
 public:
-    DetectSCBase( TreePtr< SCTree::SCNamedRecord > lr_scclass );
+    DetectSCHierarchicalClass( TreePtr< SCTree::SCNamedRecord > lr_scclass );
 };
 
 

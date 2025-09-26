@@ -33,7 +33,7 @@ DetectSCType::DetectSCType( TreePtr< SCNamedConstruct > lr_scnode )
 }
 
 
-DetectSCBase::DetectSCBase( TreePtr< SCNamedRecord > lr_scclass )
+DetectSCHierarchicalClass::DetectSCHierarchicalClass( TreePtr< SCNamedRecord > lr_scclass )
 {
     auto over = MakePatternNode< Delta<Node> >();
     auto s_scope = MakePatternNode< Scope >();
@@ -334,8 +334,8 @@ RemoveVoidInstances::RemoveVoidInstances()
 void DetectAllSystemC::Build( vector< shared_ptr<VNStep> > *sequence )
 {
     sequence->push_back( make_shared<DetectSCType>( MakePatternNode<Event>() ) );
-    sequence->push_back( make_shared<DetectSCBase>( MakePatternNode<Module>() ) );
-    sequence->push_back( make_shared<DetectSCBase>( MakePatternNode<Interface>() ) );
+    sequence->push_back( make_shared<DetectSCHierarchicalClass>( MakePatternNode<Module>() ) );
+    sequence->push_back( make_shared<DetectSCHierarchicalClass>( MakePatternNode<Interface>() ) );
     sequence->push_back( make_shared<DetectSCDynamic>( MakePatternNode<WaitDynamic>() ) );
     sequence->push_back( make_shared<DetectSCStatic>( MakePatternNode<WaitStatic>() ) );
     sequence->push_back( make_shared<DetectSCDelta>( MakePatternNode<WaitDelta>() ) );
