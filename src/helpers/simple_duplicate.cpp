@@ -58,7 +58,7 @@ TreePtr<Node> SimpleDuplicate::DuplicateSubtree( TreePtr<Node> source )
         {
             TRACE("Duplicating node ")(*keynode_singular)("\n");
             TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
-            ASSERT( *keynode_singular )("source should be non-nullptr");
+            ASSERT( *keynode_singular )("source should be non-nullptr, source: ")(source)(" item #%d: ", i)(keynode_singular->MakeValueArchetype());
             *dest_singular = DuplicateSubtree( (TreePtr<Node>)*keynode_singular );
             ASSERT( *dest_singular );
             ASSERT( TreePtr<Node>(*dest_singular)->IsFinal() );            

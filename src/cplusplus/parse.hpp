@@ -290,13 +290,20 @@ private:
             }
         }
 
-        TreePtr<Type> CreateTypeNode(clang::Declarator &D, unsigned depth = 0)
+        TreePtr<Type> CreateTypeNode(clang::Declarator &D, unsigned depth = 0, TreePtr<Constancy> *constancy = nullptr)
         {
             ASSERT( depth<=D.getNumTypeObjects() );
 
             if (depth == D.getNumTypeObjects())
             {
                 const clang::DeclSpec &DS = D.getDeclSpec();
+				if( constancy )
+				{
+					if( DS.getTypeQualifiers() & clang::DeclSpec::TQ_const )
+						*constancy = MakeTreeNode<Const>();
+					else
+						*constancy = MakeTreeNode<NonConst>();
+				}
                 clang::DeclSpec::TST t = DS.getTypeSpecType();
                 ASSERT( DS.getTypeSpecComplex() == clang::DeclSpec::TSC_unspecified )(
                         "complex types not supported");
@@ -347,8 +354,6 @@ private:
                 case clang::DeclSpec::TST_class:
                 case clang::DeclSpec::TST_enum:
                     TRACE("struct/union/class/enum\n");
-                    // Disgustingly, clang casts the DeclTy returned from ActOnTag() to
-                    // a TypeTy.
                     return DynamicTreePtrCast<Record> (hold_decl.FromRaw(
                             DS.getTypeRep()))->identifier;
                     break;
@@ -365,8 +370,9 @@ private:
                 {
                 case clang::DeclaratorChunk::Function:
                 {
-                    const clang::DeclaratorChunk::FunctionTypeInfo &fchunk =
-                            chunk.Fun;
+                    const clang::DeclaratorChunk::FunctionTypeInfo &fchunk = chunk.Fun;
+					if( constancy )				
+						*constancy = MakeTreeNode<NonConst>();					     
                     switch (D.getKind())
                     {
                     case clang::Declarator::DK_Normal:
@@ -397,21 +403,32 @@ private:
                 {
                     // TODO attributes
                     TRACE("pointer to...\n");
-                    //const clang::DeclaratorChunk::PointerTypeInfo &pchunk = chunk.Ptr;
-                    auto p = MakeTreeNode<Pointer>();
-                    p->destination = CreateTypeNode(D, depth + 1);
-                    return p;
+                    const clang::DeclaratorChunk::PointerTypeInfo &pchunk = chunk.Ptr;
+					if( constancy )
+					{						
+						if( pchunk.TypeQuals & clang::DeclSpec::TQ_const )
+							*constancy = MakeTreeNode<Const>();
+						else
+							*constancy = MakeTreeNode<NonConst>();
+					}                    
+                    auto p = MakeTreeNode<Pointer>();                    
+                    p->destination = CreateTypeNode(D, depth + 1, &p->constancy);
+                    ASSERT( p->constancy );
+					return p;
                 }
 
                 case clang::DeclaratorChunk::Reference:
                 {
                     // TODO attributes
                     TRACE("reference to...\n");
-                    //const clang::DeclaratorChunk::ReferenceTypeInfo &rchunk = chunk.Ref;
+					//const clang::DeclaratorChunk::ReferenceTypeInfo &rchunk = chunk.Ref;                    
+ 					if( constancy )
+						*constancy = MakeTreeNode<NonConst>();
                     FTRACE("Warning: references not supported by transformations");
                     auto r = MakeTreeNode<Reference>();
                     ASSERT(r);
-                    r->destination = CreateTypeNode(D, depth + 1);
+                    r->destination = CreateTypeNode(D, depth + 1, &r->constancy);
+                    ASSERT( r->constancy );
                     return r;
                 }
 
@@ -420,6 +437,13 @@ private:
                     // TODO attributes
                     const clang::DeclaratorChunk::ArrayTypeInfo &achunk = chunk.Arr;
                     TRACE("array [%d] of...\n", achunk.NumElts);
+					if( constancy )
+					{						
+						if( achunk.TypeQuals & clang::DeclSpec::TQ_const )
+							*constancy = MakeTreeNode<Const>();
+						else
+							*constancy = MakeTreeNode<NonConst>();
+					}                    
                     auto a = MakeTreeNode<Array>();
                     ASSERT(a);
                     a->element = CreateTypeNode(D, depth + 1);
@@ -475,11 +499,13 @@ private:
                 access = MakeTreeNode<Private>(); // Most scopes are private unless specified otherwise
 
             TreePtr<Constancy> constancy;
-            if (DS.getTypeQualifiers() & clang::DeclSpec::TQ_const)
+/*            if (DS.getTypeQualifiers() & clang::DeclSpec::TQ_const)
                 constancy = MakeTreeNode<Const>();
             else
                 constancy = MakeTreeNode<NonConst>();
-
+*/
+			TreePtr<Type> type = CreateTypeNode(D, 0, &constancy);
+            ASSERT( constancy );
             TreePtr<Instance> o;
 
             if (automatic)
@@ -557,7 +583,7 @@ private:
             {
                 o->identifier = CreateInstanceIdentifier();
             }
-            o->type = CreateTypeNode(D);
+            o->type = type;
             o->initialiser = MakeTreeNode<Uninitialised> ();
 
             return o;
@@ -566,12 +592,14 @@ private:
         TreePtr<Parameter> CreateParameterNode(clang::Scope *S, clang::Declarator &D)
         {
             TRACE();
-            const clang::DeclSpec &DS = D.getDeclSpec();
             TreePtr<Constancy> constancy;
+            /*const clang::DeclSpec &DS = D.getDeclSpec();
             if (DS.getTypeQualifiers() & clang::DeclSpec::TQ_const)
                 constancy = MakeTreeNode<Const>();
             else
-                constancy = MakeTreeNode<NonConst>();
+                constancy = MakeTreeNode<NonConst>();*/
+   			TreePtr<Type> type = CreateTypeNode(D, 0, &constancy);
+            ASSERT( constancy );
 
             auto param = MakeTreeNode<Parameter>();
 
@@ -587,7 +615,7 @@ private:
             {
                 param->identifier = CreateInstanceIdentifier();
             }
-            param->type = CreateTypeNode(D);
+            param->type = type;
             param->initialiser = MakeTreeNode<Uninitialised> ();
 
             return param;
@@ -806,14 +834,20 @@ private:
             // Constructor. We don't bother with a Lookup since the
             // obejct is obviously the one we're delclaring.
             TreePtr<Declaration> d = hold_decl.FromRaw(Dcl);
-            TreePtr<Instance> o = DynamicTreePtrCast<Instance> (d);
-            TreePtr<Instance> cm = GetConstructor( o->type );
-            ASSERT( cm );
-            ASSERT( cm->identifier );
+            auto our_inst = DynamicTreePtrCast<Instance> (d);
+            ASSERT( our_inst )(d);
+            ASSERT( our_inst->identifier );
+            TreePtr<Instance> memb_type = GetConstructor( our_inst->type );
+            ASSERT( memb_type );
+            ASSERT( memb_type->identifier );
+            // Build a lookup to the constructor, using the specified subobject and the matching constructor
+            auto lu = MakeTreeNode<Lookup>();
+            lu->base = our_inst->identifier;
+            lu->member = memb_type->identifier;            
             Sequence<Expression> args;
             CollectArgs( &args, Args, NumArgs );
-            TreePtr<Call> c = CreateCall( args, cm->identifier );
-            o->initialiser = c;
+            TreePtr<Call> c = CreateCall( args, lu );
+            our_inst->initialiser = c;
         }
         
         // Clang tends to parse parameters and function bodies in seperate
@@ -1438,6 +1472,7 @@ private:
         return hold_decl.ToRaw( d );
     }
 
+
     MemInitResult ActOnMemInitializer(DeclTy *ConstructorDecl,
                                       clang::Scope *,
                                       clang::IdentifierInfo *MemberOrBase,
@@ -1446,11 +1481,7 @@ private:
                                       ExprTy **Args, unsigned NumArgs,
                                       clang::SourceLocation *,
                                       clang::SourceLocation) final
-    {
-		// Free-standing direct initialiser: we initialise with
-		// a call to the InstanceIdentifier of a Field of type 
-		// Constructor. We don't bother with a Lookup since the
-		// obejct is obviously the one we're declaring.
+    {		
 		// MemberOrBase -> our field -> type -> memb record -> a suitable constructor -> a call to it		
 		TreePtr<Declaration> d = hold_decl.FromRaw(ConstructorDecl);
 		TreePtr<Node> our_field_node( ident_track.Get( MemberOrBase ) );
@@ -1476,8 +1507,12 @@ private:
 
         TreePtr<InstanceIdentifier> memb_cons_id = memb_cons->identifier;
 
-
-		TreePtr<Call> c = CreateCall( args, memb_cons_id );
+        // Build a lookup to the constructor, using the specified subobject and the matching constructor
+        auto lu = MakeTreeNode<Lookup>();
+        lu->base = our_field->identifier;
+        lu->member = memb_cons_id;
+        
+		TreePtr<Call> c = CreateCall( args, lu );
         return hold_expr.ToRaw( c );
     }
 
@@ -2014,7 +2049,7 @@ private:
         ident_track.PopScope( S );       
     }
 
-    TreePtr<Instance> GetConstructor( TreePtr<Type> t )
+    TreePtr<Instance> GetConstructor( TreePtr<Type> t ) // TODO return a field
     {
         TreePtr<TypeIdentifier> id = DynamicTreePtrCast<TypeIdentifier>(t);
         ASSERT(id);
@@ -2026,9 +2061,9 @@ private:
         {
             TreePtr<Instance> o( DynamicTreePtrCast<Instance>(d) );
             if( !o )
-            continue;
+                continue;
             if( DynamicTreePtrCast<Constructor>(o->type) )
-            return o;
+                return o;
         }
         ASSERTFAIL("missing constructor");
     }

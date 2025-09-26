@@ -545,7 +545,7 @@ struct Indirection : Type
 {
     NODE_FUNCTIONS
     TreePtr<Type> destination; ///< reaching an object of this type, indirectly
-
+	TreePtr<Constancy> constancy;  ///< is the destination const?
 	Production GetOperandInDeclaratorProduction() const override;
 };
 

@@ -1,7 +1,7 @@
 class ClassA 
 {
 public:
-    ClassA( char *str )
+    ClassA( const char *str )
     {
 	}
 };
@@ -18,5 +18,4 @@ class ClassB
 	    field_a("bar")
 	{
 	}
-
 };

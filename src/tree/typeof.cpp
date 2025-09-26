@@ -96,6 +96,7 @@ AugTreePtr<CPPTree::Type> TypeOf::Get( const TransKit &kit, AugTreePtr<Expressio
     {
         auto p = kit.utils->MakeAugTreeNode<Pointer>();
         SET_CHILD(p, destination, GET_CHILD(n, type));
+        SET_CHILD(p, constancy, kit.utils->MakeAugTreeNode<NonConst>()); // TODO New needs a constancy
         return p;
     }
     else if( AugTreePtr<Delete>::DynamicCast(o) )
@@ -135,6 +136,7 @@ AugTreePtr<CPPTree::Type> TypeOf::GetOperator( const TransKit &kit, AugTreePtr<O
         {
             auto p = kit.utils->MakeAugTreeNode<Pointer>();
             SET_CHILD(p, destination, GET_CHILD(a, element));
+            SET_CHILD(p, constancy, kit.utils->MakeAugTreeNode<NonConst>()); // TODO pass in constancy        
             t = AugTreePtr<Type>(p);
         }
         // Check we finished the job
@@ -321,6 +323,7 @@ AugTreePtr<CPPTree::Type> TypeOf::GetSpecial( const TransKit &kit, AugTreePtr<Op
     {
         auto p = kit.utils->MakeAugTreeNode<Pointer>();
         SET_CHILD(p, destination, optypes.front());
+        SET_CHILD(p, constancy, kit.utils->MakeAugTreeNode<NonConst>()); // TODO pass in constancy                
         return AugTreePtr<Type>(p);
     }
     else if( AugTreePtr<Comma>::DynamicCast(op) )
@@ -382,6 +385,7 @@ AugTreePtr<CPPTree::Type> TypeOf::GetLiteral( const TransKit &kit, AugTreePtr<Li
         SET_CHILD(n, width, sz);
         auto p = kit.utils->MakeAugTreeNode<Pointer>();
         SET_CHILD(p, destination, n);
+        SET_CHILD(p, constancy, kit.utils->MakeAugTreeNode<Const>()); 
         return p;
     }
     else

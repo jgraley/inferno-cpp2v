@@ -328,9 +328,9 @@ string Render::RenderType( const Render::Kit &kit, TreePtr<Type> type, string ob
     else if( TreePtr<Process> f = DynamicTreePtrCast< Process >(type) )
         return "void " + object + "()" + const_str + SYSTEMC_MARKER();
     else if( TreePtr<Pointer> p = DynamicTreePtrCast< Pointer >(type) )
-        return RenderType( kit, p->destination, const_str + "*" + object, Syntax::Production::PREFIX, false ); // TODO Pointer node to indicate constancy of pointed-to object - would go into this call to RenderType
+        return RenderType( kit, p->destination, string(DynamicTreePtrCast<Const>(p->constancy)?"const ":"") + "*" + const_str + object, Syntax::Production::PREFIX, false ); // TODO Pointer node to indicate constancy of pointed-to object - would go into this call to RenderType
     else if( TreePtr<Reference> r = DynamicTreePtrCast< Reference >(type) )
-        return RenderType( kit, r->destination, const_str + "&" + object, Syntax::Production::PREFIX );
+        return RenderType( kit, r->destination, string(DynamicTreePtrCast<Const>(p->constancy)?"const ":"") + "&" + const_str + object, Syntax::Production::PREFIX );
     else if( TreePtr<Array> a = DynamicTreePtrCast< Array >(type) )
         return RenderType( kit, 
                            a->element, 
@@ -435,16 +435,9 @@ string Render::RenderOperator( const Render::Kit &kit, TreePtr<Operator> op, Seq
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderCall( const Render::Kit &kit, TreePtr<Call> call ) try
+string Render::RenderMapArgs( const Render::Kit &kit, TreePtr<Call> call ) try
 {
     string s;
-
-    // Render the expression that resolves to the function name unless this is
-    // a constructor call in which case just the name of the thing being constructed.
-    if( TreePtr<Expression> base = TypeOf::instance.TryGetConstructedExpression( kit, call ).GetTreePtr() )
-        s += RenderExpression( kit, base, Syntax::Production::POSTFIX );
-    else
-        s += RenderExpression( kit, call->callee, Syntax::Production::POSTFIX );
 
     // If CallableParams, generate some arguments, resolving the order using the original function type
     TreePtr<Node> ctype = TypeOf::instance(call->callee, root_scope).GetTreePtr();
@@ -456,6 +449,23 @@ string Render::RenderCall( const Render::Kit &kit, TreePtr<Call> call ) try
         s += RenderMapInOrder( kit, call, cp );
 
     s += ")";
+    return s;
+}
+DEFAULT_CATCH_CLAUSE
+
+
+string Render::RenderCall( const Render::Kit &kit, TreePtr<Call> call ) try
+{
+    string s;
+
+    // Render the expression that resolves to the function name unless this is
+    // a constructor call in which case just the name of the thing being constructed.
+    if( TreePtr<Expression> base = TypeOf::instance.TryGetConstructedExpression( kit, call ).GetTreePtr() )
+        s += RenderExpression( kit, base, Syntax::Production::POSTFIX );
+    else
+        s += RenderExpression( kit, call->callee, Syntax::Production::POSTFIX );
+
+    s += RenderMapArgs(kit, call);
     return s;
 }
 DEFAULT_CATCH_CLAUSE
@@ -654,7 +664,10 @@ string Render::RenderStorage( const Render::Kit &kit, TreePtr<Instance> st ) try
 DEFAULT_CATCH_CLAUSE
 
 
-void Render::ExtractInits( const Render::Kit &kit, Sequence<Statement> &body, Sequence<Statement> &inits, Sequence<Statement> &remainder )
+void Render::ExtractInits( const Render::Kit &kit, 
+                           Sequence<Statement> &body, 
+                           Sequence<Statement> &inits, 
+                           Sequence<Statement> &remainder )
 {
 	// Initialisers are just calls to the constructor embedded in the body. In Inferno,
 	// we call a constructor by 
@@ -681,7 +694,8 @@ void Render::ExtractInits( const Render::Kit &kit, Sequence<Statement> &body, Se
 }
 
 
-string Render::RenderInstanceProto( const Render::Kit &kit, TreePtr<Instance> o, 
+string Render::RenderInstanceProto( const Render::Kit &kit, 
+                                    TreePtr<Instance> o, 
                                     bool out_of_line ) try
 {
     string s;
@@ -728,12 +742,11 @@ string Render::RenderInstance( const Render::Kit &kit, TreePtr<Instance> o,
 {
     string s = RenderInstanceProto( kit, o, out_of_line );
 	
-    bool callable = (bool)DynamicTreePtrCast<Callable>(o->type);
-
 	// SystemC: declaring instance of module at top level.
     // If object was declared as a module instance, bodge in a name as a constructor parameter
     // But not for fields - they need an init list, done in RenderScope()
     if( !DynamicTreePtrCast<Field>(o) )
+    {
         if( TreePtr<TypeIdentifier> tid = DynamicTreePtrCast<TypeIdentifier>(o->type) ) try
         {
             if( TreePtr<Record> r = GetRecordDeclaration(kit, tid).GetTreePtr() )
@@ -749,13 +762,12 @@ string Render::RenderInstance( const Render::Kit &kit, TreePtr<Instance> o,
 		{
 			// No decl so probably a system type. 				
 		}			
+    }
     
     if( DynamicTreePtrCast<Uninitialised>(o->initialiser) )
-    {
-        // Don't render any initialiser
-        s += ";\n";
-    }
-    else if( callable )
+        return s + ";\n"; // Don't render any initialiser    
+    
+    if( DynamicTreePtrCast<Callable>(o->type) )
     {
         // Establish the scope of the function
         AutoPush< TreePtr<Node> > cs( scope_stack, GetScope( root_scope, o->identifier ) );
@@ -782,7 +794,7 @@ string Render::RenderInstance( const Render::Kit &kit, TreePtr<Instance> o,
         // Render the constructor initialisers if there are any
         if( !inits.empty() )
         {
-            s += " : ";
+            s += " :\n";
             s += RenderConstructorInitList( kit, inits );
         }
 
@@ -791,21 +803,24 @@ string Render::RenderInstance( const Render::Kit &kit, TreePtr<Instance> o,
         r->members = members;
         r->statements = remainder;
         s += "\n" + RenderStatement(kit, r);
-        // Surround functions with blank lines
-        s = '\n' + s + '\n';
+        
+        // Surround functions with blank lines        
+        return '\n' + s + '\n';
     }
-    else if( TreePtr<Expression> ei = DynamicTreePtrCast<Expression>( o->initialiser ) )
+    
+    if( TreePtr<Expression> ei = DynamicTreePtrCast<Expression>( o->initialiser ) )
 	{
+		// Attempt direct initialisation
+		if( auto call = DynamicTreePtrCast<Call>( ei ) )		
+			if( TypeOf::instance.TryGetConstructedExpression( kit, call ).GetTreePtr() )		
+				return s + RenderMapArgs(kit, call) + ";\n";
+					
 		// Render expression with an assignment
-		AutoPush< TreePtr<Node> > cs( scope_stack, GetScope( root_scope, o->identifier ) );
-		s += " = " + RenderExpression(kit, ei, Syntax::Production::ASSIGN) + ";\n";
-	}
-	else
-	{
-		s += ERROR_UNSUPPORTED(o->initialiser);
+		AutoPush< TreePtr<Node> > cs( scope_stack, GetScope( root_scope, o->identifier ) );		
+		return s + " = " + RenderExpression(kit, ei, Syntax::Production::ASSIGN) + ";\n";
 	}
 
-    return s;
+    return s + ERROR_UNSUPPORTED(o->initialiser);
 }
 DEFAULT_CATCH_CLAUSE
 
@@ -1058,6 +1073,7 @@ string Render::RenderConstructorInitList( const Render::Kit &kit,
     {
 		if( !first )
 			s += ",\n";
+		s += "    "; // indentation
         if( auto e = TreePtr<Expression>::DynamicCast(st) )
             s += RenderExpression( kit, e, Syntax::Production::COMMA_SEP );
         else 

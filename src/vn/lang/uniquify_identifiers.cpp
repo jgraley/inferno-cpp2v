@@ -106,8 +106,6 @@ string VisibleIdentifiers::AddIdentifier( TreePtr<SpecificIdentifier> id )
 
 void VisibleIdentifiers::AddUndeclaredIdentifier( TreePtr<SpecificIdentifier> i )
 {
-	ASSERT( !i->GetToken().empty() )("An undeclared indentifier cannot safely be renamed and so must have a non-empty name: ")(i);
-	
     // Get canonical form of identifier name
     string base_name;
     unsigned n_want;
@@ -264,11 +262,14 @@ UniquifyIdentifiers::IdentifierNameMap UniquifyIdentifiers::UniquifyAll( const T
 		}
 		catch(DeclarationOf::DeclarationNotFound &)
 		{
+			// An undeclared indentifier cannot safely be renamed and so must have a non-empty name
+			if( id->GetToken().empty() )
+				continue;
+	
 			// Assume undeclared identifier is really a system node identifier.
 			// Ensure it will keep its name and not be conflicted, and add to the
 			// map so normal IDs don't conflict with it.
 			vi.AddUndeclaredIdentifier( id );
-			ASSERT( !id->GetToken().empty() );
 			inm.insert( IdentifierNamePair( id, id->GetToken() ) );
 		}
 	}
