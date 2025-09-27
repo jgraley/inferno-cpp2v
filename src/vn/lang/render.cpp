@@ -94,7 +94,7 @@ string Render::RenderToString( TreePtr<Node> root )
 
     string s;
 
-    if( IsSystemC( kit, root_scope ) )
+    //if( IsSystemC( kit, root_scope ) )
         s += "#include \"isystemc.h\"\n\n";
 
     s += RenderScope( kit, root_scope ); // gets the .hpp stuff directly
@@ -145,7 +145,6 @@ DEFAULT_CATCH_CLAUSE
 string Render::RenderIdentifier( const Render::Kit &kit, TreePtr<Identifier> id ) try
 {
 	(void)kit;
-	static int c=0;
     string ids;
     if( id )
     {
@@ -153,10 +152,7 @@ string Render::RenderIdentifier( const Render::Kit &kit, TreePtr<Identifier> id 
         {			
             if( unique_ids.count(ii) == 0 )
             {
-				c++;
-				FTRACE("missing from unique_ids case %d\n", c);
-				ASSERT( c != 46 );
-                return ERROR_UNKNOWN( SSPrintf("identifier %s missing from unique_ids, case %d", ii->GetToken().c_str(), c ) );
+                return ERROR_UNKNOWN( SSPrintf("identifier %s missing from unique_ids", ii->GetToken().c_str() ) );
 			}
             ids = unique_ids.at(ii);
         }
@@ -503,6 +499,26 @@ string Render::RenderSysCall( const Render::Kit &kit, TreePtr<SysCall> call ) tr
 DEFAULT_CATCH_CLAUSE
 
 
+string Render::RenderSysMacroCall( const Render::Kit &kit, TreePtr<SysMacroCall> smc ) try
+{
+	list<string> renders; // TODO duplicated code, factor out into RenderSeqMacroArgs()
+	for( TreePtr<Node> mo : smc->macro_operands )
+	{
+		// TODO before we can render all Node, we'll need to make scope resolution less
+		// agressive, because it puts :: in front of global instance ids which breaks things.				
+		if( auto id = TreePtr<Identifier>::DynamicCast(mo) )
+			renders.push_back( RenderIdentifier(kit, id) );
+	}
+	string args_in_parens = Join(renders, ", ", "(", ")");
+
+	// No constructor case
+
+    // Other funcitons just evaluate
+    return RenderExpression( kit, smc->callee, Syntax::Production::POSTFIX ) + args_in_parens;
+}
+DEFAULT_CATCH_CLAUSE
+
+
 string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> expression, Syntax::Production surround_prod ) try
 {
 	Syntax::Production node_ideal_prod = expression->GetMyProduction();
@@ -718,6 +734,21 @@ string Render::RenderInstanceProto( const Render::Kit &kit,
 
     ASSERT(o->type);
 
+	if( auto smf = TreePtr<SysMacroField>::DynamicCast(o) )
+	{
+		s += "SC_CTOR"; // TODO don't just hard-wire - put it in the SysMacroField, undeclared instance ID for now
+		list<string> renders;
+		for( TreePtr<Node> mo : smf->macro_operands )
+		{
+			// TODO before we can render all Node, we'll need to make scope resolution less
+			// agressive, because it puts :: in front of global instance ids which breaks things.				
+			if( auto id = TreePtr<Identifier>::DynamicCast(mo) )
+				renders.push_back( RenderIdentifier(kit, id) );
+		}
+		s += Join(renders, ", ", "(", ")");
+		return s;
+	}
+
     if( TreePtr<Static> st = DynamicTreePtrCast<Static>(o) )
         if( DynamicTreePtrCast<Const>(st->constancy) )
             constant = true;
@@ -872,17 +903,30 @@ DEFAULT_CATCH_CLAUSE
 bool Render::ShouldSplitInstance( const Render::Kit &kit, TreePtr<Instance> o ) 
 {
 	(void)kit;
-    bool isfunc = !!DynamicTreePtrCast<Callable>( o->type );
-    bool isnumber = !!DynamicTreePtrCast<Numeric>( o->type );       
+    if( DynamicTreePtrCast<Callable>( o->type ) )
+    {
+		// ----- functions -----
+		if( auto smf = TreePtr<SysMacroField>::DynamicCast(o) )
+			return false; // don't split these
+			
+		return true;
+	}
+	else
+	{
+		// ----- objects ------	
+		if( !DynamicTreePtrCast<Record>( scope_stack.top() ) )
+			return false;
+		
+		if( TreePtr<Static> s = DynamicTreePtrCast<Static>(o) )
+		{
+			if( DynamicTreePtrCast<Const>(s->constancy) && DynamicTreePtrCast<Numeric>( o->type ) )
+				return false;
 
-    bool split_var = false;
-    if( TreePtr<Static> s = DynamicTreePtrCast<Static>(o) )
-        if( DynamicTreePtrCast<NonConst>(s->constancy) || !isnumber )
-            split_var = true;
+			return true;				
+		}
 
-    return ( DynamicTreePtrCast<Record>( scope_stack.top() ) &&
-               split_var ) || 
-               isfunc;
+		return false;
+	}
 }
 
 
@@ -1079,6 +1123,8 @@ string Render::RenderStatement( const Render::Kit &kit, TreePtr<Statement> state
         return "break;\n";
     else if( DynamicTreePtrCast<Nop>(statement) )
         return ";\n";
+    else if( auto smc = DynamicTreePtrCast<SysMacroCall>(statement) )
+        return RenderSysMacroCall( kit, smc );
     else if( TreePtr<WaitDynamic> c = DynamicTreePtrCast<WaitDynamic>(statement) ) 
         return c->GetToken() + "( " + RenderExpression(kit, c->event, Syntax::Production::COMMA_SEP) + " ); " + SYSTEMC_MARKER();
     else if( TreePtr<WaitStatic> c = DynamicTreePtrCast<WaitStatic>(statement) ) 
