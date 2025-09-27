@@ -57,7 +57,7 @@ AugTreePtr<CPPTree::Type> TypeOf::Get( const TransKit &kit, AugTreePtr<Expressio
     {
         return GetLiteral( kit, l );
     }
-    else if( auto c = AugTreePtr<Call>::DynamicCast(o) )
+    else if( auto c = AugTreePtr<GoSub>::DynamicCast(o) )
     {
         AugTreePtr<Type> t = Get(kit, GET_CHILD(c, callee)); // get type of the function itself
         ASSERT( AugTreePtr<Callable>::DynamicCast(t) )( "Trying to call something that is not Callable: ")(*t);
@@ -399,15 +399,22 @@ AugTreePtr<CPPTree::Type> TypeOf::GetLiteral( const TransKit &kit, AugTreePtr<Li
 
 // Is this call really a constructor call? If so return the object being
 // constructed. Otherwise, return nullptr
-AugTreePtr<CPPTree::Expression> TypeOf::TryGetConstructedExpression( const TransKit &kit, AugTreePtr<Call> call ) const
+AugTreePtr<CPPTree::Expression> TypeOf::TryGetConstructedExpression( const TransKit &kit, AugTreePtr<GoSub> gs ) const
 {
     AugTreePtr<CPPTree::Expression> e;
 
-    if( auto lf = AugTreePtr<Lookup>::DynamicCast(GET_CHILD(call, callee)) )
+    if( auto lu = AugTreePtr<Lookup>::DynamicCast(GET_CHILD(gs, callee)) )
     {
-        ASSERT(lf->member);
-        if( AugTreePtr<Constructor>::DynamicCast( Get( kit, GET_CHILD(lf, member) ) ) )
-            e = GET_CHILD(lf, base);
+        ASSERT(lu->member);
+        bool is_cons = false;
+
+		if( AugTreePtr<Call>::DynamicCast(gs) )		
+			is_cons = !!AugTreePtr<Constructor>::DynamicCast( Get( kit, GET_CHILD(lu, member) ) );		
+		else if( AugTreePtr<SysCall>::DynamicCast(gs) )		
+			is_cons = lu->member->GetToken().empty();					
+		
+		if( is_cons )
+			e = GET_CHILD(lu, base);
     }
 
     return e;

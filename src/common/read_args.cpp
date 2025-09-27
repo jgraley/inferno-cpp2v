@@ -100,7 +100,7 @@ ReadArgs::ReadArgs( int ac, char *av[] )
     for( curarg=1; curarg<argc; curarg++ )
     {
         if( argv[curarg][0] != '-' )
-            Usage("Expecting \"-\"");
+            Usage(SSPrintf("Expecting \"-\" in argument \"%s\"", argv[curarg]));
             
         if( ((string)(argv[curarg])).size()<2 )
             Usage("Missing option letter");
@@ -164,12 +164,12 @@ ReadArgs::ReadArgs( int ac, char *av[] )
             }
             else if( graph_option=='p' )
             {
-                string s = GetArg();
+                string s = GetArg(ai);
                 int v = strtoul( s.c_str(), nullptr, 10 );
                 if( v==0 && s!="0" ) // Did strtoul fail?
-                    pattern_render_name = s;
+                    pattern_graph_name = s;
                 else
-                    pattern_render_index = v;
+                    pattern_graph_index = v;
             }
             else if( graph_option=='d' )
             {

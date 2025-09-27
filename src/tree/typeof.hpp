@@ -27,7 +27,7 @@ public:
 
     // Is this call really a constructor call? If so return the object being
     // constructed. Otherwise, return nullptr
-    AugTreePtr<CPPTree::Expression> TryGetConstructedExpression( const TransKit &kit, AugTreePtr<CPPTree::Call> call ) const;
+    AugTreePtr<CPPTree::Expression> TryGetConstructedExpression( const TransKit &kit, AugTreePtr<CPPTree::GoSub> gs ) const;
 
 private:    
     // TODO make these private

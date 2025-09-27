@@ -844,6 +844,12 @@ struct MapOperand : virtual Node
     virtual string GetColour() const { return "/set28/8"; }    
 };
 
+struct GoSub : virtual Node
+{
+    TreePtr<Expression> callee; ///< evaluates to the Callable Instance we must call	
+    NODE_FUNCTIONS
+};
+
 /// An operator with operands whose order is established by mapping
 /** Maps a multiplicity of Instances to Expressions via their InstanceIdentifiers.*/
 struct MapOperator : Operator
@@ -857,10 +863,9 @@ struct MapOperator : Operator
  calls have callee -> some InstanceIdentifier for a Callable Instance.
  Arguments passed via MapOperator - mapped to the parameters in the callee
  type (if it's a CallableParams). */
-struct Call : MapOperator, Uncombable
+struct Call : GoSub, MapOperator, Uncombable
 {
     NODE_FUNCTIONS_FINAL
-    TreePtr<Expression> callee; ///< evaluates to the Callable Instance we must call
 	
 	Production GetMyProduction() const override;
 };
@@ -1054,10 +1059,9 @@ struct Nop : Statement { NODE_FUNCTIONS_FINAL };
 // TODO: Identifier uniquing should prevent anything aliassing these,
 // and should not need to rename any of them. Detect via lack of decl.
 
-struct SysCall : Operator
+struct SysCall : GoSub, Operator
 {
     NODE_FUNCTIONS_FINAL
-    TreePtr<Expression> callee; ///< evaluates to the Callable Instance we must call
     Sequence<Expression> operands; ///< Arguments taken in order
 	
 	Production GetMyProduction() const override;

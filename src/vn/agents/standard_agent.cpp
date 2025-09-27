@@ -932,7 +932,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutNormal( const ReplaceKit &
         else if( TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[i]) )
         {
             TRACE("Copying single element\n");
-            ASSERT( *my_singular )("Singular item %d ", i)(" of ")(*this)(" was nullptr (not overlaying)\n");            
+            ASSERT( *my_singular )("Singular item %d of ", i)(*this)(" was nullptr (not overlaying)\n");            
             TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
             *dest_singular = Mutator::MakePlaceholder();
             zone.AddTerminus( Mutator::CreateFreeSingular(dest, dest_singular) );            

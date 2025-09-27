@@ -985,7 +985,7 @@ string Graph::LinkStyleAtt(shared_ptr<const MyLink> my_link)
     switch( my_link->phase )
     {
     case Graphable::UNDEFINED:
-		FTRACE("Warning, undefined phase: ")(my_link)("\n");
+		TRACE("Warning, undefined phase: ")(my_link)("\n");
 		// fall through
     case Graphable::IN_COMPARE_ONLY:
         atts += "style=\"solid\"\n";

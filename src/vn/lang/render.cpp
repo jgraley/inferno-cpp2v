@@ -145,13 +145,19 @@ DEFAULT_CATCH_CLAUSE
 string Render::RenderIdentifier( const Render::Kit &kit, TreePtr<Identifier> id ) try
 {
 	(void)kit;
+	static int c=0;
     string ids;
     if( id )
     {
         if( TreePtr<SpecificIdentifier> ii = DynamicTreePtrCast<SpecificIdentifier>( id ) )
-        {
+        {			
             if( unique_ids.count(ii) == 0 )
-                return ERROR_UNKNOWN( SSPrintf("identifier %s missing from unique_ids", ii->GetToken().c_str() ) );
+            {
+				c++;
+				FTRACE("missing from unique_ids case %d\n", c);
+				ASSERT( c != 46 );
+                return ERROR_UNKNOWN( SSPrintf("identifier %s missing from unique_ids, case %d", ii->GetToken().c_str(), c ) );
+			}
             ids = unique_ids.at(ii);
         }
         else
@@ -483,14 +489,16 @@ DEFAULT_CATCH_CLAUSE
 
 string Render::RenderSysCall( const Render::Kit &kit, TreePtr<SysCall> call ) try
 {
-    string s;
+    string args_in_parens = RenderSeqOperands(kit, call->operands);
 
-    // Render the expression that resolves to the function name 
-    s += RenderExpression( kit, call->callee, Syntax::Production::POSTFIX );
+	// Constructor case: spot by use of Lookup to empty-named method. Elide the "."
+	if( auto lu = DynamicTreePtrCast< Lookup >(call->callee) )
+	    if( auto id = DynamicTreePtrCast< InstanceIdentifier >(lu->member) )
+			if( id->GetToken().empty() )
+				return RenderExpression( kit, lu->base, Syntax::Production::POSTFIX ) + args_in_parens;
 
-	// SysCall just has a sequence of arg expressions
-	s += RenderSeqOperands(kit, call->operands);
-    return s;
+    // Other funcitons just evaluate
+    return RenderExpression( kit, call->callee, Syntax::Production::POSTFIX ) + args_in_parens;
 }
 DEFAULT_CATCH_CLAUSE
 
@@ -549,9 +557,9 @@ string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> ex
                "delete" +
                (DynamicTreePtrCast<DeleteArray>(d->array) ? "[]" : "") +
                " " + RenderExpression( kit, d->pointer, Syntax::Production::PREFIX );
-    else if( auto a = DynamicTreePtrCast< Lookup >(expression) )
-        return RenderExpression( kit, a->base, Syntax::Production::POSTFIX ) + "." +
-               RenderScopedIdentifier( kit, a->member, Syntax::BoostPrecedence(Syntax::Production::POSTFIX) );
+    else if( auto lu = DynamicTreePtrCast< Lookup >(expression) )
+        return RenderExpression( kit, lu->base, Syntax::Production::POSTFIX ) + "." +
+               RenderScopedIdentifier( kit, lu->member, Syntax::BoostPrecedence(Syntax::Production::POSTFIX) );
     else if( auto c = DynamicTreePtrCast< Cast >(expression) )
         return "(" + RenderType( kit, c->type, "", Syntax::Production::ANONYMOUS ) + ")" +
                RenderExpression( kit, c->operand, Syntax::Production::PREFIX );
@@ -679,11 +687,11 @@ void Render::ExtractInits( const Render::Kit &kit,
 	// we call a constructor by 
     for( TreePtr<Statement> s : body )
     {
-        if( auto o = DynamicTreePtrCast< Call >(s) )
+        if( auto call = DynamicTreePtrCast< GoSub >(s) )
         {
             try
             {
-                if( TypeOf::instance.TryGetConstructedExpression( kit, o ) )
+                if( TypeOf::instance.TryGetConstructedExpression( kit, call ) )
                 {
                     inits.push_back(s);
                     continue;

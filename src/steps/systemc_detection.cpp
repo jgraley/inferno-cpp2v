@@ -255,27 +255,34 @@ DetectSCNotifyDelta::DetectSCNotifyDelta()
 
 RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
 {
+    auto module_typeid = MakePatternNode< TypeIdentifier >();
     auto stuff = MakePatternNode< Stuff<Scope> >();
     auto over = MakePatternNode< Delta<Scope> >();
     auto decls = MakePatternNode< Star<Declaration> >();
     auto l_decls = MakePatternNode< Star<Declaration> >();
     auto l_pre = MakePatternNode< Star<Statement> >();
     auto l_post = MakePatternNode< Star<Statement> >();
-    auto ls_args = MakePatternNode< Star<MapOperand> >();
+    auto l1s_args = MakePatternNode< Star<MapOperand> >();
+    auto s_cons = MakePatternNode< Field >();
     auto s_comp = MakePatternNode< Compound >();
+    auto s_id = MakePatternNode< InstanceIdentifier >();
+    auto s_ctype = MakePatternNode<Constructor>();
+    auto s_params = MakePatternNode< Star<Parameter> >();
     auto ls_comp = MakePatternNode< Compound >();
     auto lr_comp = MakePatternNode< Compound >();
     auto s_module = MakePatternNode< Module >();
     auto r_module = MakePatternNode< Module >();
-    auto ls_call = MakePatternNode< Call >();
-    auto ls_lookup = MakePatternNode< Lookup >();
-    auto s_cons = MakePatternNode< Instance >();
-    auto s_id = MakePatternNode< InstanceIdentifier >();
-    auto s_params = MakePatternNode< Star<Parameter> >();
-    auto s_ctype = MakePatternNode<Constructor>();
+    auto l1s_call = MakePatternNode< Call >();
+    auto l1s_lookup = MakePatternNode< Lookup >();
+    auto l_instance = MakePatternNode<Instance>();  
+    auto l_delta = MakePatternNode<Delta<Initialiser>>();  
+    auto l2s_call = MakePatternNode<Call>();
+    auto l2s_lookup = MakePatternNode<Lookup>();
+	auto l2s_args = MakePatternNode< Star<MapOperand> >();
+
     auto bases = MakePatternNode< Star<Base> >();
-    auto module_typeid = MakePatternNode< TypeIdentifier >();
-    auto r_embedded = MakePatternNode< EmbeddedSearchReplace<Node> >( stuff, ls_comp, lr_comp );            
+    auto r_embedded_2 = MakePatternNode< EmbeddedSearchReplace<Node> >( stuff, l_instance, l_instance );            
+    auto r_embedded_1 = MakePatternNode< EmbeddedSearchReplace<Node> >( r_embedded_2, ls_comp, lr_comp );            
                     
     // dispense with an empty constructor                 
     stuff->terminus = over;
@@ -285,8 +292,8 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     s_module->bases = (bases);
     s_module->identifier = module_typeid;
     s_cons->type = MakePatternNode<Constructor>();        
+    s_cons->constancy = MakePatternNode<NonConst>();
     s_cons->initialiser = s_comp;
-    // s_comp's members and statements left empty to signify empty constructor
     s_cons->identifier = s_id;
     s_cons->type = s_ctype;
     s_ctype->params = (s_params); // any parameters
@@ -294,16 +301,28 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     r_module->bases = (bases);
     r_module->identifier = module_typeid;
             
-    // dispense with any calls to it
+    // Embedded 1: dispense with any calls to it from member inits
     ls_comp->members = (l_decls);
-    ls_comp->statements = (l_pre, ls_call, l_post);
-    ls_call->callee = ls_lookup;
-    ls_call->operands = ls_args; // any number of args, it doesn't matter, ctor is still empty so does nothing
-    ls_lookup->member = s_id;        
+    ls_comp->statements = (l_pre, l1s_call, l_post);
+    l1s_call->callee = l1s_lookup;
+    l1s_call->operands = (l1s_args); // any number of args, it doesn't matter, ctor is still empty so does nothing
+    l1s_lookup->base = MakePatternNode< InstanceIdentifier >();
+    l1s_lookup->member = s_id;        
     lr_comp->members = (l_decls);
     lr_comp->statements = (l_pre, l_post);
+
+    // Embedded 2: dispense with any calls to it from instances
+    l_instance->type = module_typeid;
+    l_instance->initialiser = l_delta;
+    l_delta->through = l2s_call;
+    l_delta->overlay = MakePatternNode< Uninitialised >();
+    l2s_call->callee = l2s_lookup;
+    l2s_call->operands = (l2s_args); // any number of args, it doesn't matter, ctor is still empty so does nothing
+    l2s_lookup->base = l_instance->identifier;
+    l2s_lookup->member = s_id;
+
             
-    Configure( COMPARE_REPLACE, stuff, r_embedded );
+    Configure( COMPARE_REPLACE, stuff, r_embedded_1 );
 }
 
 

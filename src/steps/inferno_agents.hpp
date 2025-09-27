@@ -93,6 +93,28 @@ private:
     virtual TreePtr<Node> BuildNewSubtree(const SCREngine *acting_engine) override;
 };
 
+//---------------------------------- StringizeAgent ------------------------------------    
+
+// Make a String node containing the token string of an identifier. No uniquing is attempted.
+struct StringizeAgent : Special<CPPTree::String>,
+                        public virtual BuilderAgent
+{
+    SPECIAL_NODE_FUNCTIONS
+
+    shared_ptr<const Node> GetPatternPtr() const
+    {
+        return shared_from_this();
+    }
+
+    StringizeAgent() {}
+
+    TreePtr<CPPTree::Identifier> source;
+
+private:
+    TreePtr<Node> BuildNewSubtree(const SCREngine *acting_engine) override;    
+    NodeBlock GetGraphBlockInfo() const override;
+};
+
 //---------------------------------- IdentifierByNameAgent ------------------------------------    
 
 /// These can be used in search pattern to match a SpecificIdentifier by name.
