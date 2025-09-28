@@ -154,7 +154,7 @@ CleanupCompoundSingle::CleanupCompoundSingle()
 #ifdef CLEANUP_COMP_SINGLE_STRONG
     Configure( SEARCH_REPLACE, s_comp, body );
 #else    
-    Configure( SEARCH_REPLACE, all );
+    Configure( SEARCH_REPLACE, all, node );
 #endif    
 }
 

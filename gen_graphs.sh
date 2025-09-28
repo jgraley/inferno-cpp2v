@@ -61,7 +61,7 @@ if [ "$INTERMEDIATE" == "1" ]; then
 	# #757 to fix test04.cpp
 	SKIPS=("test04.cpp") 
 		
-	STEP_NUMBERS=($(seq 1 122)) # TODO obtain this from inferno.exe
+	STEP_NUMBERS=($(seq 1 126)) # TODO obtain this from inferno.exe
 
 	# I means "in", i.e. input has been parsed; T means transformation
 	PROGRESSES="I ${STEP_NUMBERS[@]/#/T}"
