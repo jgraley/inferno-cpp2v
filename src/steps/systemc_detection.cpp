@@ -341,11 +341,82 @@ RemoveVoidInstances::RemoveVoidInstances()
     s_scope->members = (decls, s_instance);
     s_instance->type = s_any;
     s_any->disjuncts = (s_callable, MakePatternNode<Void>() ); // match void instances (pointless) or functions as below...
-    s_callable->params = (s_params, s_void_param); // one void param is enough, but don't match no params
+    s_callable->params = (s_params, s_void_param); // one void param is enough, but don't match on zero params
     s_void_param->type = MakePatternNode<Void>();
     
     r_scope->members = (decls);   
        
+    Configure( COMPARE_REPLACE, s_scope, r_scope );
+}
+
+
+RemoveSCPrototypes::RemoveSCPrototypes()
+{
+    auto s_scope = MakePatternNode<Program>();
+    auto r_scope = MakePatternNode<Program>();
+    auto decls = MakePatternNode< Star<Declaration> >();
+    auto s_any = MakePatternNode< Disjunction<Instance> >();
+    
+    auto s_cease_inst = MakePatternNode<Static>();
+    auto s_cease_type = MakePatternNode<Function>();   
+    auto s_cease_param = MakePatternNode<Parameter>();   
+    auto s_exit_inst = MakePatternNode<Static>();
+    auto s_exit_type = MakePatternNode<Function>();   
+    auto s_exit_param = MakePatternNode<Parameter>();   
+    auto s_wait_inst = MakePatternNode<Static>();
+    auto s_wait_type = MakePatternNode<Function>();   
+    auto s_wait_param = MakePatternNode<Parameter>();   
+    auto s_next_trigger_inst = MakePatternNode<Static>();
+    auto s_next_trigger_type = MakePatternNode<Function>();   
+    auto s_next_trigger_param = MakePatternNode<Parameter>();   
+    auto s_unsigned_char = MakePatternNode<Unsigned>();   
+    auto s_int = MakePatternNode<Signed>();   
+    auto s_int2 = MakePatternNode<Signed>();   
+    auto s_int3 = MakePatternNode<Signed>();   
+    
+    
+    s_scope->members = (decls, s_any);
+    s_any->disjuncts = (s_cease_inst, s_exit_inst, s_wait_inst, s_next_trigger_inst);
+    
+    // void cease( unsigned char exit_code );
+    s_cease_inst->identifier = MakePatternNode< InstanceIdentifierByNameAgent >( "cease" ); 
+    s_cease_inst->type = s_cease_type;
+    s_cease_type->return_type = MakePatternNode<Void>();
+    s_cease_type->params = (s_cease_param);
+    s_cease_param->type = s_unsigned_char;
+    s_unsigned_char->width = MakePatternNode<SpecificInteger>(8);
+    s_cease_param->identifier = MakePatternNode<InstanceIdentifierByNameAgent>( "exit_code" );   
+    
+    // void exit( int exit_code );
+    s_exit_inst->identifier = MakePatternNode< InstanceIdentifierByNameAgent >( "exit" ); 
+    s_exit_inst->type = s_exit_type;
+    s_exit_type->return_type = MakePatternNode<Void>();
+    s_exit_type->params = (s_exit_param);
+    s_exit_param->type = s_int;
+    s_int->width = MakePatternNode<SpecificInteger>(32);
+    s_exit_param->identifier = MakePatternNode<InstanceIdentifierByNameAgent>( "exit_code" );   
+    
+    // void wait( int p1 );
+    s_wait_inst->identifier = MakePatternNode< InstanceIdentifierByNameAgent >( "wait" ); 
+    s_wait_inst->type = s_wait_type;
+    s_wait_type->return_type = MakePatternNode<Void>();
+    s_wait_type->params = (s_wait_param);
+    s_wait_param->type = s_int2;
+    s_int2->width = MakePatternNode<SpecificInteger>(32);
+    s_wait_param->identifier = MakePatternNode<InstanceIdentifierByNameAgent>( "p1" );   
+    
+    // void next_trigger( int p1 );
+    s_next_trigger_inst->identifier = MakePatternNode< InstanceIdentifierByNameAgent >( "next_trigger" ); 
+    s_next_trigger_inst->type = s_next_trigger_type;
+    s_next_trigger_type->return_type = MakePatternNode<Void>();
+    s_next_trigger_type->params = (s_next_trigger_param);
+    s_next_trigger_param->type = s_int3;
+    s_int3->width = MakePatternNode<SpecificInteger>(32);
+    s_next_trigger_param->identifier = MakePatternNode<InstanceIdentifierByNameAgent>( "p1" );   
+    
+    r_scope->members = (decls);   
+
+
     Configure( COMPARE_REPLACE, s_scope, r_scope );
 }
 
@@ -370,6 +441,7 @@ void DetectAllSystemC::Build( vector< shared_ptr<VNStep> > *sequence )
     sequence->push_back( make_shared<DetectSCNotifyDelta>() );
     sequence->push_back( make_shared<RemoveEmptyModuleConstructors>() );
     sequence->push_back( make_shared<RemoveVoidInstances>() );
+    sequence->push_back( make_shared<RemoveSCPrototypes>() );
     sequence->push_back( make_shared<CleanupUnusedVariables>() );    // for SC_ZERO_TIME
 }
 

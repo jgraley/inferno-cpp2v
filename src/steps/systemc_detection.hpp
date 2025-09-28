@@ -99,6 +99,7 @@ public:
 
 /// Remove constructors in SC modules that are now empty thanks to earlier steps
 /// Must also remove explicit calls to constructor (which would not do anything)
+/// in both member init form (l1) and direct form (l2).
 class RemoveEmptyModuleConstructors : public VNStep
 {
 public:
@@ -115,6 +116,15 @@ public:
     RemoveVoidInstances();
 };
 
+
+/// Remove SC global functions from isystemc.h
+/** isystemc.h declares global functions to satisfy parser. Hoover them all up
+    efficiently here. */
+class RemoveSCPrototypes : public VNStep
+{
+public:
+    RemoveSCPrototypes();
+};
 
 
 /** Builder for the steps that detect implicit SysetemC constructs in C++ code
