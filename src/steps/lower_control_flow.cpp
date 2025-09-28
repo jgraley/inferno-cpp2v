@@ -663,7 +663,7 @@ ExtractCallParams::ExtractCallParams()
     s_call->operands = (params, s_param);
     s_param->value = all;
     all->conjuncts = (value, x_not);
-    s_param->identifier = id;
+    s_param->key = id;
     value->pattern = type;
     s_call->callee = func_id;
     x_not->negand = x_id; // this restriction to become light-touch restriction
@@ -677,7 +677,7 @@ ExtractCallParams::ExtractCallParams()
     r_assign->operands = (r_temp_id, value);
     r_call->operands = (params, r_param);
     r_param->value = r_temp_id;    
-    r_param->identifier = id;
+    r_param->key = id;
     r_call->callee = func_id;
     
     Configure( SEARCH_REPLACE, module );

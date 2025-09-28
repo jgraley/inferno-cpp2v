@@ -414,7 +414,7 @@ AugTreePtr<CPPTree::Expression> TypeOf::TryGetConstructedExpression( const Trans
 			is_cons = lu->member->GetToken().empty();					
 		
 		if( is_cons )
-			e = GET_CHILD(lu, base);
+			e = GET_CHILD(lu, object);
     }
 
     return e;

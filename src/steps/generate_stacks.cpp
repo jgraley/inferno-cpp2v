@@ -247,7 +247,7 @@ AddLinkAddress::AddLinkAddress()
     mr_comp->statements = (mr_call, mr_label);  
     mr_call->operands = (ms_call->operands, mr_operand);
     mr_call->callee = l_inst_id;
-    mr_operand->identifier = lr_retaddr_id;
+    mr_operand->key = lr_retaddr_id;
     mr_operand->value = mr_labelid;
     mr_label->identifier = mr_labelid;    
     
@@ -324,7 +324,7 @@ ParamsViaTemps::ParamsViaTemps()
     
     ms_call->callee = func_id;
     ms_call->operands = (m_operands, ms_operand);
-    ms_operand->identifier = param_id;
+    ms_operand->key = param_id;
     ms_operand->value = m_expr;
     mr_comp->statements = (mr_assign, mr_call);
     mr_assign->operands = (r_temp_id, m_expr);

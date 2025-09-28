@@ -842,7 +842,7 @@ private:
             ASSERT( memb_type->identifier );
             // Build a lookup to the constructor, using the specified subobject and the matching constructor
             auto lu = MakeTreeNode<Lookup>();
-            lu->base = our_inst->identifier;
+            lu->object = our_inst->identifier;
             lu->member = memb_type->identifier;            
             Sequence<Expression> args;
             CollectArgs( &args, Args, NumArgs );
@@ -1509,7 +1509,7 @@ private:
 
         // Build a lookup to the constructor, using the specified subobject and the matching constructor
         auto lu = MakeTreeNode<Lookup>();
-        lu->base = our_field->identifier;
+        lu->object = our_field->identifier;
         lu->member = memb_cons_id;
         
 		TreePtr<Call> c = CreateCall( args, lu );
@@ -1675,11 +1675,11 @@ private:
         {
             auto ou = MakeTreeNode<Dereference>();
             ou->operands.push_back( hold_expr.FromRaw( Base ) );
-            a->base = ou;
+            a->object = ou;
         }
         else if( OpKind == clang::tok::period ) // Base.Member
         {
-            a->base = hold_expr.FromRaw( Base );
+            a->object = hold_expr.FromRaw( Base );
         }
         else
         {
@@ -1687,7 +1687,7 @@ private:
         }
 
         // Find the specified member in the record implied by the expression on the left of .
-        TreePtr<Node> tbase = TypeOf::instance( a->base, all_decls ).GetTreePtr();
+        TreePtr<Node> tbase = TypeOf::instance( a->object, all_decls ).GetTreePtr();
         TreePtr<TypeIdentifier> tibase = DynamicTreePtrCast<TypeIdentifier>(tbase);
         ASSERT( tibase );
         DefaultTransUtils utils(all_decls);
@@ -1828,7 +1828,7 @@ private:
                     // Get value out of array init and put it in record init together with member instance id
                     TreePtr<Expression> v = *seq_it;
                     auto mi = MakeTreeNode<MapOperand>();
-                    mi->identifier = i->identifier;
+                    mi->key = i->identifier;
                     mi->value = v;
                     mapop->operands.insert( mi );
 

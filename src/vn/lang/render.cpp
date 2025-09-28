@@ -15,7 +15,6 @@
 #include "search_replace.hpp"
 
 using namespace CPPTree;
-using namespace SCTree;
 using namespace VN;
 
 // Don't like the layout of rendered code?
@@ -468,7 +467,7 @@ string Render::RenderSysCall( const Render::Kit &kit, TreePtr<SysCall> call ) tr
 	if( auto lu = DynamicTreePtrCast< Lookup >(call->callee) )
 	    if( auto id = DynamicTreePtrCast< InstanceIdentifier >(lu->member) )
 			if( id->GetToken().empty() )
-				return RenderExpression( kit, lu->base, Syntax::Production::POSTFIX ) + args_in_parens;
+				return RenderExpression( kit, lu->object, Syntax::Production::POSTFIX ) + args_in_parens;
 
     // Other funcitons just evaluate
     return RenderExpression( kit, call->callee, Syntax::Production::POSTFIX ) + args_in_parens;
@@ -551,7 +550,7 @@ string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> ex
                (DynamicTreePtrCast<DeleteArray>(d->array) ? "[]" : "") +
                " " + RenderExpression( kit, d->pointer, Syntax::Production::PREFIX );
     else if( auto lu = DynamicTreePtrCast< Lookup >(expression) )
-        return RenderExpression( kit, lu->base, Syntax::Production::POSTFIX ) + "." +
+        return RenderExpression( kit, lu->object, Syntax::Production::POSTFIX ) + "." +
                RenderScopedIdentifier( kit, lu->member, Syntax::BoostPrecedence(Syntax::Production::POSTFIX) );
     else if( auto c = DynamicTreePtrCast< Cast >(expression) )
         return "(" + RenderType( kit, c->type, "", Syntax::Production::ANONYMOUS ) + ")" +
@@ -611,7 +610,7 @@ string Render::RenderMapInOrder( const Render::Kit &kit,
                 // search init for matching member (TODO could avoid O(n^2) by exploiting the map)
                 for( TreePtr<MapOperand> mi : ro->operands )
                 {
-                    if( i->identifier == mi->identifier )
+                    if( i->identifier == mi->key )
                     {
                         if( !first )
                             s += ", ";
@@ -886,8 +885,7 @@ bool Render::ShouldSplitInstance( const Render::Kit &kit, TreePtr<Instance> o )
 string Render::RenderRecordProto( const Render::Kit &kit, TreePtr<Record> record )
 {
 	string s;
-	shared_ptr<SCRecord> scr = dynamic_pointer_cast< SCRecord >(record);
-	if( DynamicTreePtrCast< Class >(record) || scr )
+	if( DynamicTreePtrCast< Class >(record) )
 		s += "class";
 	else if( DynamicTreePtrCast< Struct >(record) )
 		s += "struct";
@@ -945,24 +943,16 @@ string Render::RenderDeclaration( const Render::Kit &kit, TreePtr<Declaration> d
     }
     else if( TreePtr<Record> r = DynamicTreePtrCast< Record >(declaration) )
     {
-        shared_ptr<SCRecord> scr = dynamic_pointer_cast< SCRecord >(r);
-
         // Prototype of the record
 		s += RenderRecordProto( kit, r );
 
  	    // Base classes
 		if( TreePtr<InheritanceRecord> ir = DynamicTreePtrCast< InheritanceRecord >(declaration) )
 		{
-			if( !ir->bases.empty() || scr )
+			if( !ir->bases.empty() )
 			{
 				s += " : ";
 				bool first=true;
-				if( scr )
-				{
-					first = false;
-					s += RenderAccess(kit, MakeTreeNode<Public>()) + " ";
-					s += scr->GetToken();
-				}
 				for( TreePtr<Node> bn : sc.GetTreePtrOrdering(ir->bases) )
 				{
 					if( !first )
@@ -980,7 +970,7 @@ string Render::RenderDeclaration( const Render::Kit &kit, TreePtr<Declaration> d
 		AutoPush< TreePtr<Node> > cs( scope_stack, r );
 		s += "\n{\n";
         TreePtr<AccessSpec> a;
-        if( DynamicTreePtrCast< Class >(r) || scr )
+        if( DynamicTreePtrCast< Class >(r) )
             a = MakeTreeNode<Private>();
         else if( DynamicTreePtrCast< Struct >(r) )
             a = MakeTreeNode<Public>();

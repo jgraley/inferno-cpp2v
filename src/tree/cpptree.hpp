@@ -821,7 +821,7 @@ struct Delete : Operator
 struct Lookup : Operator
 {
     NODE_FUNCTIONS_FINAL
-    TreePtr<Expression> base; ///< the Record we look in
+    TreePtr<Expression> object; ///< the Record instance we look in
     TreePtr<InstanceIdentifier> member; ///< the member to find
 	
 	Production GetMyProduction() const override;
@@ -843,7 +843,7 @@ struct Cast : Operator
 struct MapOperand : virtual Node
 {
     NODE_FUNCTIONS_FINAL
-    TreePtr<InstanceIdentifier> identifier; ///< the handle for this particualar operand
+    TreePtr<InstanceIdentifier> key; ///< the handle for this particualar operand
     TreePtr<Expression> value; ///< the Expression for this operand
     
     virtual string GetColour() const { return "/set28/8"; }    

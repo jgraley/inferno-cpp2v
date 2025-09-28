@@ -77,7 +77,7 @@ RaiseSCDynamic::RaiseSCDynamic( TreePtr<SCDynamicFunction> r_dynamic )
                     
     s_call->callee = s_token;       
     s_call->operands = (s_arg);
-    s_arg->identifier = s_param_id;
+    s_arg->key = s_param_id;
     s_arg->value = eexpr;
     eexpr->pattern = MakePatternNode<Event>();
     r_dynamic->event = eexpr;       
@@ -108,7 +108,7 @@ RaiseSCDelta::RaiseSCDelta( TreePtr<SCFunction> r_delta )
                     
     s_call->callee = s_token;       
     s_call->operands = (s_arg);
-    s_arg->identifier = s_param_id;
+    s_arg->key = s_param_id;
     s_arg->value = s_arg_id;
       
     // TODO This is the last trans to remove calls to r_delta->GetToken(), so   
@@ -128,7 +128,7 @@ RaiseTerminationFunction::RaiseTerminationFunction( TreePtr<TerminationFunction>
             
     s_call->callee = s_token;       
     s_call->operands = (s_arg);
-    s_arg->identifier = s_param_id;
+    s_arg->key = s_param_id;
     s_arg->value = event;
     r_tf->code = event;       
       
@@ -186,7 +186,7 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     l_ctype->params = (MakePatternNode<Parameter>()); // one parameter
     ls_pcall->callee = s_token;
     ls_pcall->operands = (ls_arg);
-    ls_arg->identifier = s_arg_id;
+    ls_arg->key = s_arg_id;
     ls_arg->value = ls_id;
     l_overcons->overlay = lr_cons;
     lr_cons->initialiser = lr_comp;
@@ -230,7 +230,7 @@ RaiseSCNotifyImmediate::RaiseSCNotifyImmediate()
             
     s_call->callee = s_lookup;
     //s_call->operands = ();
-    s_lookup->base = eexpr;          
+    s_lookup->object = eexpr;          
     eexpr->pattern = s_event;     // ensure base really evaluates to an event 
     s_lookup->member = s_token;        
 
@@ -255,9 +255,9 @@ RaiseSCNotifyDelta::RaiseSCNotifyDelta()
             
     s_call->callee = s_lookup;
     s_call->operands = (s_arg);
-    s_arg->identifier = s_arg_id;
+    s_arg->key = s_arg_id;
     s_arg->value = s_zero_token;        
-    s_lookup->base = eexpr;          
+    s_lookup->object = eexpr;          
     eexpr->pattern = s_event;     // ensure base really evaluates to an event 
     s_lookup->member = s_token;        
 
@@ -320,7 +320,7 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     ls_comp->statements = (l_pre, l1s_call, l_post);
     l1s_call->callee = l1s_lookup;
     l1s_call->operands = (l1s_args); // any number of args, it doesn't matter, ctor is still empty so does nothing
-    l1s_lookup->base = MakePatternNode< InstanceIdentifier >();
+    l1s_lookup->object = MakePatternNode< InstanceIdentifier >();
     l1s_lookup->member = s_id;        
     lr_comp->members = (l_decls);
     lr_comp->statements = (l_pre, l_post);
@@ -332,9 +332,8 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     l_delta->overlay = MakePatternNode< Uninitialised >();
     l2s_call->callee = l2s_lookup;
     l2s_call->operands = (l2s_args); // any number of args, it doesn't matter, ctor is still empty so does nothing
-    l2s_lookup->base = l_instance->identifier;
+    l2s_lookup->object = l_instance->identifier;
     l2s_lookup->member = s_id;
-
             
     Configure( COMPARE_REPLACE, stuff, r_embedded_1 );
 }

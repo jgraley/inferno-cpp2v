@@ -148,13 +148,13 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
 	l1_statements_negation->negand = l1n_call;
 	l1n_call->callee = l1n_lookup;
 	l1n_call->operands = MakePatternNode<Star<Expression>>();
-	l1n_lookup->base = l1_field_id; // this should be enough to prevent spin
+	l1n_lookup->object = l1_field_id; // this should be enough to prevent spin
 	// l1_field_id is instance of a SC class and is not constructed in SC language
 	
     l1r_call->callee = l1r_lookup;
     l1r_call->operands = (l1r_arg);
     l1r_arg->source =  tid;
-    l1r_lookup->base = l1_field_id;
+    l1r_lookup->object = l1_field_id;
     l1r_lookup->member = MakePatternNode< SpecificInstanceIdentifier >(""); // Empty indicates constructor SysCall
                     
     // Static decl of our module: init to SysCall
@@ -169,7 +169,7 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     l2r_call->callee = l2r_lookup;
     l2r_call->operands = (l2r_arg);
     l2r_arg->source =  tid;
-    l2r_lookup->base = l2_instance->identifier;
+    l2r_lookup->object = l2_instance->identifier;
     l2r_lookup->member = MakePatternNode< SpecificInstanceIdentifier >(""); // Empty indicates constructor SysCall
                                                            
     auto embedded_2 = MakePatternNode< EmbeddedSearchReplace<Node> >( stuff, l2_conjunction, l2_instance );                         
@@ -301,7 +301,7 @@ LowerSCNotifyImmediate::LowerSCNotifyImmediate()
             
     r_call->callee = r_lookup;
     //s_call->operands = ();
-    r_lookup->base = eexpr;          
+    r_lookup->object = eexpr;          
     eexpr->pattern = r_event;     // ensure base really evaluates to an event 
     r_lookup->member = r_token;        
        
@@ -325,7 +325,7 @@ LowerSCNotifyDelta::LowerSCNotifyDelta(TreePtr<CPPTree::InstanceIdentifier> zero
 
     r_call->callee = r_lookup;
     r_call->operands = (zero_time_id);
-    r_lookup->base = eexpr;          
+    r_lookup->object = eexpr;          
     r_lookup->member = r_token;        
 
        
@@ -375,11 +375,8 @@ void SystemCLowering::Build( vector< shared_ptr<VNStep> > *sequence )
     sequence->push_back( make_shared<AddIncludeSystemC>() );
 
 	auto zero_time_id = MakePatternNode< SpecificInstanceIdentifier >( "SC_ZERO_TIME" );
-	// TODO do we need a way of calling constructors (for init lists) that is
-	// determinable without needing TypeOf?
 	
 	// The reverse ordering of SystemCRaising::Build()
-	// TODO renaming: sc_det -> sc_raising, sc_gen -> simple_sc_from_c
 	sequence->push_back( make_shared<LowerSCNotifyDelta>(zero_time_id) );
 	sequence->push_back( make_shared<LowerSCNotifyImmediate>() );
 	sequence->push_back( make_shared<LowerSCDeltaCount>() );
@@ -409,10 +406,6 @@ void SystemCLowering::Build( vector< shared_ptr<VNStep> > *sequence )
     sequence->push_back( make_shared<LowerSCHierarchicalClass>( MakePatternNode<Interface>() ) );
     sequence->push_back( make_shared<LowerSCHierarchicalClass>( MakePatternNode<Module>() ) );
     sequence->push_back( make_shared<LowerSCType>( MakePatternNode<Event>() ) );
-    // TODO add a Sys node to cause the #include "isystemc.h"
-    // TODO and why can't it be the real header?
     
-    // TODO renderer don't use try/catch, use IsDeclared()
-    
-    // Lookup dont say base; MapOperand do say key       
+    // TODO renderer don't use try/catch, use IsDeclared()    
 }
