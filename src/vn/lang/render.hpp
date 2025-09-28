@@ -74,8 +74,6 @@ private:
 									  Sequence<CPPTree::Statement> spe );
 	string RenderEnumBody( const Render::Kit &kit, Collection<CPPTree::Declaration> spe);
     string RenderOperandSequence( const Render::Kit &kit, Sequence<CPPTree::Expression> spe );
-    string RenderModuleCtor( const Render::Kit &kit, TreePtr<SCTree::Module> m );    
-
 	string MaybeRenderFieldAccess( const Render::Kit &kit, TreePtr<CPPTree::Declaration> declaration,
 			  			           TreePtr<CPPTree::AccessSpec> *current_access );
 	string MaybeRenderAccessColon( const Render::Kit &kit, TreePtr<CPPTree::AccessSpec> this_access,

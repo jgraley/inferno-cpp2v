@@ -41,11 +41,6 @@ using namespace VN;
         return RenderMismatchException( __func__, e ); \
     } 
 
-
-#define SYSTEMC_MARKER(V) SSPrintf( " // SystemC %s:%d\n", __FILE__, __LINE__ )
-
-
-
 Render::Render( string of ) :
     outfile( of )
 {
@@ -327,8 +322,6 @@ string Render::RenderType( const Render::Kit &kit, TreePtr<Type> type, string ob
         return object + "()" + const_str;
     else if( TreePtr<Function> f = DynamicTreePtrCast< Function >(type) )
         return RenderType( kit, f->return_type, object + "(" + RenderParams(kit, f) + ")" + const_str, Syntax::Production::POSTFIX );
-    else if( TreePtr<Process> f = DynamicTreePtrCast< Process >(type) )
-        return "void " + object + "()" + const_str + SYSTEMC_MARKER();
     else if( TreePtr<Pointer> p = DynamicTreePtrCast< Pointer >(type) )
         return RenderType( kit, p->destination, string(DynamicTreePtrCast<Const>(p->constancy)?"const ":"") + "*" + const_str + object, Syntax::Production::PREFIX, false ); // TODO Pointer node to indicate constancy of pointed-to object - would go into this call to RenderType
     else if( TreePtr<Reference> r = DynamicTreePtrCast< Reference >(type) )
@@ -800,29 +793,7 @@ string Render::RenderInstance( const Render::Kit &kit, TreePtr<Instance> o,
                                bool out_of_line ) try
 {
     string s = RenderInstanceProto( kit, o, out_of_line );
-	
-	// SystemC: declaring instance of module at top level.
-    // If object was declared as a module instance, bodge in a name as a constructor parameter
-    // But not for fields - they need an init list, done in RenderScope()
-    if( !DynamicTreePtrCast<Field>(o) )
-    {
-        if( TreePtr<TypeIdentifier> tid = DynamicTreePtrCast<TypeIdentifier>(o->type) ) try
-        {
-            if( TreePtr<Record> r = GetRecordDeclaration(kit, tid).GetTreePtr() )
-            {
-				if( DynamicTreePtrCast<Module>(r) )
-                {
-                    s += "(\"" + RenderIdentifier(kit, o->identifier) + "\")" + ";" + SYSTEMC_MARKER();
-                    return s;
-                }
-			}
-		}
-		catch(DeclarationOf::DeclarationNotFound &)
-		{
-			// No decl so probably a system type. 				
-		}			
-    }
-    
+	    
     if( DynamicTreePtrCast<Uninitialised>(o->initialiser) )
         return s + ";\n"; // Don't render any initialiser    
     
@@ -1125,24 +1096,6 @@ string Render::RenderStatement( const Render::Kit &kit, TreePtr<Statement> state
         return ";\n";
     else if( auto smc = DynamicTreePtrCast<SysMacroCall>(statement) )
         return RenderSysMacroCall( kit, smc );
-    else if( TreePtr<WaitDynamic> c = DynamicTreePtrCast<WaitDynamic>(statement) ) 
-        return c->GetToken() + "( " + RenderExpression(kit, c->event, Syntax::Production::COMMA_SEP) + " ); " + SYSTEMC_MARKER();
-    else if( TreePtr<WaitStatic> c = DynamicTreePtrCast<WaitStatic>(statement) ) 
-        return c->GetToken() + "(); " + SYSTEMC_MARKER();
-    else if( TreePtr<WaitDelta> c = DynamicTreePtrCast<WaitDelta>(statement) )
-        return c->GetToken() + "(SC_ZERO_TIME); " + SYSTEMC_MARKER();
-    else if( TreePtr<NextTriggerDynamic> c = DynamicTreePtrCast<NextTriggerDynamic>(statement) ) 
-        return c->GetToken() + "( " + RenderExpression(kit, c->event, Syntax::Production::COMMA_SEP) + " ); " + SYSTEMC_MARKER();
-    else if( TreePtr<NextTriggerStatic> c = DynamicTreePtrCast<NextTriggerStatic>(statement) ) 
-        return c->GetToken() + "(); " + SYSTEMC_MARKER();
-    else if( TreePtr<NextTriggerDelta> c = DynamicTreePtrCast<NextTriggerDelta>(statement) ) 
-        return c->GetToken() + "(SC_ZERO_TIME); " + SYSTEMC_MARKER();
-    else if( TreePtr<TerminationFunction> tf = DynamicTreePtrCast<TerminationFunction>(statement) )
-        return tf->GetToken() + "( " + RenderExpression(kit, tf->code, Syntax::Production::COMMA_SEP) + " ); " + SYSTEMC_MARKER();
-    else if( TreePtr<NotifyImmediate> n = DynamicTreePtrCast<NotifyImmediate>(statement) )
-        return RenderExpression( kit, n->event, Syntax::Production::PREFIX ) + "." + n->GetToken() + "(); " + SYSTEMC_MARKER();
-    else if( TreePtr<NotifyDelta> n = DynamicTreePtrCast<NotifyDelta>(statement) )
-        return RenderExpression( kit, n->event, Syntax::Production::PREFIX ) + "." + n->GetToken() + "(SC_ZERO_TIME); " + SYSTEMC_MARKER();
     else
         return ERROR_UNSUPPORTED(statement);
 }
@@ -1223,79 +1176,6 @@ string Render::RenderOperandSequence( const Render::Kit &kit,
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderModuleCtor( const Render::Kit &kit, TreePtr<Module> m ) try
-{
-    string s;
-    
-    s += "SC_CTOR( " + RenderIdentifier( kit, m->identifier ) + " )";
-    int first = true;             
-    auto sorted_members = sc.GetTreePtrOrdering(m->members);
-    for( TreePtr<Node> pd : sorted_members )
-    {
-        // Bodge an init list that names any fields we have that are modules
-        // and initialises any fields with initialisers
-        if( TreePtr<Field> f = DynamicTreePtrCast<Field>(pd) )
-        {
-            if( TreePtr<TypeIdentifier> tid = DynamicTreePtrCast<TypeIdentifier>(f->type) ) try
-			{
-                if( TreePtr<Record> r = GetRecordDeclaration(kit, tid).GetTreePtr() )
-                {
-                    if( DynamicTreePtrCast<Module>(r) )
-                    {
-                        if( first )
-                            s += " :";
-                        else
-                            s += ",";
-                        string ids = RenderIdentifier(kit, f->identifier);                           
-                        s += SYSTEMC_MARKER() + ids + "(\"" + ids + "\")";
-                        first = false;
-                    }   
-				}
-			}
-			catch(DeclarationOf::DeclarationNotFound &)
-			{
-				// No decl so probably a system type. 
-			}
-        }
-                    
-        // Where data members are initialised, generate the init into the init list. We will 
-        // inhibit rendering of these inits in the module decls. TODO inconsistent 
-        // with normal C++ constructors where the inits should already be in the correct place.
-        if( TreePtr<Field> i = DynamicTreePtrCast<Field>(pd) )
-        {
-            TRACE("Got ")(*i)(" init is ")(*(i->initialiser))(" %d %d\n", 
-                    (int)(bool)DynamicTreePtrCast<Callable>(i->type),
-                    (int)(bool)DynamicTreePtrCast<Uninitialised>(i->initialiser) );                   
-        
-            if( !DynamicTreePtrCast<Callable>(i->type) && !DynamicTreePtrCast<Uninitialised>(i->initialiser) )
-            {                   
-                if( first )
-                    s += " :";
-                else
-                    s += ",";
-                string ids = RenderIdentifier(kit, i->identifier);                           
-                string inits = RenderExpression(kit, i->initialiser, Syntax::Production::COMMA_SEP);
-                s += SYSTEMC_MARKER() + ids;
-                if( DynamicTreePtrCast< MakeArray >(i->initialiser) )
-					s += inits; // MakeArray as an init should render brace-initialiser syntax
-				else
-					s += "(" + inits + ")";
-                first = false;                 
-            }
-        }                      
-    }    
-    s += SYSTEMC_MARKER() + "{\n";
-    for( TreePtr<Node> pd : sorted_members )
-        if( TreePtr<Field> f = DynamicTreePtrCast<Field>(pd) )
-            if( TreePtr<Process> r = DynamicTreePtrCast<Process>(f->type) )
-                s += r->GetToken() + "(" + RenderIdentifier( kit, f->identifier ) + ");" + SYSTEMC_MARKER();
-    s += "}" + SYSTEMC_MARKER();
-    
-    return s;
-}
-DEFAULT_CATCH_CLAUSE
-
-
 string Render::MaybeRenderFieldAccess( const Render::Kit &kit, TreePtr<Declaration> declaration,
 								       TreePtr<AccessSpec> *current_access )
 {
@@ -1346,17 +1226,6 @@ string Render::RenderScope( const Render::Kit &kit,
 					s += MaybeRenderFieldAccess( kit, r, &init_access );
                 s += RenderRecordProto( kit, r ) + ";\n";
 			}
-
-    // For SystemC modules, we generate a constructor based on the other decls in
-    // the module. Nothing goes in the Inferno tree for a module constructor, since
-    // it is an elaboration mechanism, not funcitonal.
-    TreePtr<Module> sc_module = DynamicTreePtrCast<Module>(key);
-    if( sc_module )
-    {
- 		if( init_access )
-			s += MaybeRenderAccessColon( kit, MakeTreeNode<Public>(), &init_access );		
-        s += RenderModuleCtor( kit, sc_module ) + SYSTEMC_MARKER();
-	}
 	
     // Emit the actual declarations, sorted for dependencies
     for( TreePtr<Declaration> d : sorted )
