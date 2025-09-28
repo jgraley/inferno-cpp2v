@@ -171,7 +171,7 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCNamedRecord > s_s
     l2r_lookup->base = l2_instance->identifier;
     l2r_lookup->member = MakePatternNode< SpecificInstanceIdentifier >(""); // Empty indicates constructor SysCall
                                                            
-    auto embedded_2 = MakePatternNode< EmbeddedSearchReplace<Node> >( stuff, l2_conjunction, l2_conjunction );                         
+    auto embedded_2 = MakePatternNode< EmbeddedSearchReplace<Node> >( stuff, l2_conjunction, l2_instance );                         
     auto embedded_1 = MakePatternNode< EmbeddedSearchReplace<Node> >( embedded_2, l1_class, l1_class );                         
     Configure( COMPARE_REPLACE, stuff, embedded_1 );
 }
@@ -390,8 +390,7 @@ void LowerAllSystemC::Build( vector< shared_ptr<VNStep> > *sequence )
     
     // TODO renderer don't use try/catch, use IsDeclared()
     
-    // TODO tidy away SC function decls from isystemc.h in raiser
-    // Lookup dont use base; MapOperand do use key
+    // Lookup dont say base; MapOperand do say key
     
     // Get -ul out of gen_graphs
     
