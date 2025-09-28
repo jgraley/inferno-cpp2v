@@ -18,6 +18,7 @@ LowerSCType::LowerSCType( TreePtr< SCNamedConstruct > s_scnode )
     Configure( SEARCH_REPLACE, s_scnode, r_token );
 }
 
+
 EnsureConstructorsInSCRecordUsers::EnsureConstructorsInSCRecordUsers()
 {
 	auto s_scclass = MakePatternNode< SCNamedRecord >();
@@ -348,6 +349,17 @@ LowerSCNotifyDelta::LowerSCNotifyDelta(TreePtr<CPPTree::InstanceIdentifier> zero
        
     Configure( SEARCH_REPLACE, s_notify, r_call );
 }
+
+/*
+AddIncludeSystemC::AddIncludeSystemC()
+{
+    auto s_program = MakePatternNode<Program>();
+
+    auto r_filename = MakePatternNode< SpecificString >( "systemc.h" );                
+
+    Configure( COMPARE_REPLACE, s_scnode, r_token );
+}
+*/
 
 void LowerAllSystemC::Build( vector< shared_ptr<VNStep> > *sequence )
 {

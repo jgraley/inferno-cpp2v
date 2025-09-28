@@ -55,11 +55,6 @@ void BuildDefaultSequence( vector< shared_ptr<VNStep> > *sequence )
     // SystemC detection, converts implicit SystemC to explicit. Always at the top
     // because we cannot render+compile implicit SystemC.
     DetectAllSystemC::Build(sequence);
-    
-   	if( ReadArgs::use_feature_option == 's' )
-	    goto END_OF_TRANS;
-   	if( ReadArgs::use_feature_option == 'x' )
-		goto ONLY_LOWER;
 		
     // SystemC generation tries to convert C and/or C++ into SystemC. This
     // is a simplification of what would happen in ealy phases of the original
@@ -207,12 +202,7 @@ void BuildDefaultSequence( vector< shared_ptr<VNStep> > *sequence )
 		sequence->push_back( make_shared<CleanUpDeadCode>() );
 	}		
 	
-	if( ReadArgs::use_feature_option == 'l' )
-	{
-		ONLY_LOWER:
-		LowerAllSystemC::Build(sequence);
-	}
-	END_OF_TRANS:{}
+	LowerAllSystemC::Build(sequence);
 }
 
 
@@ -447,7 +437,7 @@ Inferno::Plan::Plan(Inferno *algo_) :
     for( Stage &stage : stages_planning )
     {
         // Actions on all planning stages
-    //    stages.push_back( stage );
+        stages.push_back( stage );
         
         // Actions on last planning stage       
         if( &stage == &(stages_planning.back()) )
@@ -461,8 +451,6 @@ Inferno::Plan::Plan(Inferno *algo_) :
 				stages.push_back( stage_pattern_renders );
         }
          
-        stages.push_back( stage ); // TODO put me back at top of the loop body
-
         if( ShouldIQuitAfter(stage.progress_stage) )
             return;
     }

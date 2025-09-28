@@ -1056,9 +1056,11 @@ struct Nop : Statement { NODE_FUNCTIONS_FINAL };
 // System nodes represent stuff that would come in from "standard" places
 // via #include, including C-library, STL, SystemC etc. We take them to
 // be "fixed" and won't attmept to process declarations for them
-// TODO: Identifier uniquing should prevent anything aliassing these,
-// and should not need to rename any of them. Detect via lack of decl.
+// Identifiers in these nodes can be undeclared: uniquing should prevent 
+// anything aliassing these, and should not rename any of them. 
 
+/// A regular function call whose arguments are given in sequence, so that a 
+/// declaration is not needed.
 struct SysCall : GoSub, Operator
 {
     NODE_FUNCTIONS_FINAL
@@ -1067,18 +1069,27 @@ struct SysCall : GoSub, Operator
 	Production GetMyProduction() const override;
 };  
 
+/// A proprocessor macro expansion that may be used as a statement, and takes 
+/// arbitrary operands.
+struct SysMacroCall : GoSub, Statement // TODO insert into node hierarchy more cleanly
+{
+    NODE_FUNCTIONS_FINAL
+    Sequence<Node> macro_operands; ///< Arguments taken in order, macro so can be anything
+};
 
+/// A proprocessor macro expansion that may be used as a field, and takes 
+/// arbitrary operands.
 struct SysMacroField : Field // TODO insert into node hierarchy more cleanly
 {
     NODE_FUNCTIONS_FINAL
     Sequence<Node> macro_operands; ///< Arguments taken in order, macro so can be anything
 };
 
-
-struct SysMacroCall : GoSub, Statement // TODO insert into node hierarchy more cleanly
+/// Instruction to include a system header file in <>
+struct SysInclude : virtual Declaration 
 {
     NODE_FUNCTIONS_FINAL
-    Sequence<Node> macro_operands; ///< Arguments taken in order, macro so can be anything
+    TreePtr<String> filename;
 };
 
 
