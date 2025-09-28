@@ -16,7 +16,7 @@ public:
     }
     void HelperU()
     {         
-    }
+    } 
 };
 
 TopLevel top_level("top_level");
