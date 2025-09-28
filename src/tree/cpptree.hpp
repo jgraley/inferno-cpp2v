@@ -114,7 +114,11 @@ struct Literal : Expression,
 };
 
 /// Intermediate property node that represents a string of any value.
-struct String : Literal { NODE_FUNCTIONS };
+struct String : Literal 
+{ 
+	NODE_FUNCTIONS 
+	virtual string GetString() { ASSERTFAIL(); }
+};
 
 /// A string with a specific value 
 /** Value must be filled in. 
@@ -130,6 +134,7 @@ struct SpecificString : String
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
     virtual string GetToken() const; 
 	Production GetMyProduction() const override;
+	string GetString() final { return value; }
 private:
     string value; ///< The string itself
 };
@@ -1085,11 +1090,29 @@ struct SysMacroField : Field // TODO insert into node hierarchy more cleanly
     Sequence<Node> macro_operands; ///< Arguments taken in order, macro so can be anything
 };
 
+/// Preprocessor decl-like stuff: includes, defines
+struct PreProcDecl : virtual Declaration 
+{
+    NODE_FUNCTIONS
+};
+
+/// Instruction to include a system header file
+struct SysInclude : virtual PreProcDecl 
+{
+    NODE_FUNCTIONS
+    TreePtr<String> filename;
+};
+
 /// Instruction to include a system header file in <>
-struct SysInclude : virtual Declaration 
+struct SysIncludeAngle : virtual SysInclude 
 {
     NODE_FUNCTIONS_FINAL
-    TreePtr<String> filename;
+};
+
+/// Instruction to include a system header file in ""
+struct SysIncludeQuote : virtual SysInclude 
+{
+    NODE_FUNCTIONS_FINAL
 };
 
 

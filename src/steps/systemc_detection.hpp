@@ -20,7 +20,7 @@ using namespace VN;
 class DetectSCType : public VNStep 
 {
 public:
-    DetectSCType( TreePtr< SCTree::SCNamedConstruct > lr_scnode );
+    DetectSCType( TreePtr< CPPTree::Type > lr_scnode );
 };
 
 
@@ -32,28 +32,28 @@ public:
 class DetectSCHierarchicalClass : public VNStep 
 {
 public:
-    DetectSCHierarchicalClass( TreePtr< SCTree::SCNamedRecord > lr_scclass );
+    DetectSCHierarchicalClass( TreePtr< SCTree::SCRecord > lr_scclass );
 };
 
 
 class DetectSCDynamic : public VNStep
 {
 public:
-    DetectSCDynamic( TreePtr<SCTree::SCDynamicNamedFunction> r_dynamic );
+    DetectSCDynamic( TreePtr<SCTree::SCDynamicFunction> r_dynamic );
 };
 
 
 class DetectSCStatic : public VNStep
 {
 public:
-    DetectSCStatic( TreePtr<SCTree::SCNamedFunction> r_static );
+    DetectSCStatic( TreePtr<SCTree::SCFunction> r_static );
 };
 
 
 class DetectSCDelta : public VNStep
 {
 public:
-    DetectSCDelta( TreePtr<SCTree::SCNamedFunction> r_delta );
+    DetectSCDelta( TreePtr<SCTree::SCFunction> r_delta );
 };
 
 

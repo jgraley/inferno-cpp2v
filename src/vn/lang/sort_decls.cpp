@@ -131,36 +131,51 @@ bool IsDependOn( TreePtr<Declaration> a, TreePtr<Declaration> b, bool ignore_ind
 
 Sequence<Declaration> SortDecls( ContainerInterface &c, bool ignore_indirection_to_record, const UniquifyIdentifiers::IdentifierNameMap &unique_ids )
 {
-    Sequence<Declaration> s;
     int ocs = c.size();
     
     // Our algorithm will modify the source container, so make a copy of it
-    Sequence<Declaration> cc;
+    Sequence<Declaration> unsorted;
     for( const TreePtrInterface &a : c )
-        cc.push_back( a );
+        unsorted.push_back( a );
+
+     // Sort using SimpleCompare first: this should improve reproducibility
+    Sequence<Declaration> pre_sorted = PreSortDecls( unsorted, unique_ids );
+
+    Sequence<Declaration> sorted;
+
+	// Move pre-processor declarations into the sorted list first
+	for( ContainerInterface::iterator it = pre_sorted.begin(); it != (ContainerInterface::iterator)pre_sorted.end(); ) 
+	{
+		if( TreePtr<PreProcDecl>::DynamicCast(*it) )
+		{
+			sorted.push_back(*it);
+			it = pre_sorted.erase(it);
+		}
+		else
+		{
+			++it;
+		}
+	}
 
     // Uncomment one of these to stress the sorter
-    //cc = ReverseDecls( cc );
-    //cc = JumbleDecls( cc );
+    //pre_sorted = ReverseDecls( pre_sorted );
+    //pre_sorted = JumbleDecls( pre_sorted );
 
-    // Sort using SimpleCompare first: this should improve reproducibility
-    cc = PreSortDecls( cc, unique_ids );
-
-    // Keep searching our local container of decls (cc) for decls that do not depend
+   // Keep searching our local container of decls (cc) for decls that do not depend
     // on anything else in the container. Such a decl may be safely rendered before the
     // rest of the decls, so place it at the end of the sequence we are building up
     // (s) and remove from the container cc since cc only holds the ones we have still to
     // place in s. Repeat until we've done all the decls at which point cc is empty.
     // If no non-dependent decl may be found in cc then it's irredemably circular and
-    // we fail. This looks like O(N^3). Well, that's just a damn shame.
+    // we fail. This looks like O(N^3).
     TRACE("Adding decls in dep order: ");
-    while( !cc.empty() )
+    while( !pre_sorted.empty() )
     {
         bool found = false; // just for ASSERT check
-        for( const TreePtr<Declaration> &a : cc )
+        for( const TreePtr<Declaration> &a : pre_sorted )
         {
             bool a_has_deps=false;
-            for( const TreePtr<Declaration> &b : cc )
+            for( const TreePtr<Declaration> &b : pre_sorted )
             {
                 TreePtr<Declaration> aid = dynamic_cast< const TreePtr<Declaration> & >(a);
                 a_has_deps |= IsDependOn( aid, b, ignore_indirection_to_record );
@@ -168,8 +183,8 @@ Sequence<Declaration> SortDecls( ContainerInterface &c, bool ignore_indirection_
             if( !a_has_deps )
             {
                 TRACE(*a)(" ");
-                s.push_back(a);
-                cc.erase(a);
+                sorted.push_back(a);
+                pre_sorted.erase(a);
                 found = true;
                 break;
             }
@@ -178,15 +193,15 @@ Sequence<Declaration> SortDecls( ContainerInterface &c, bool ignore_indirection_
         if( !found )
         {   
             TRACE("\nRemaining unsequenceable decls: ");
-            for( const TreePtr<Declaration> &a : cc )
+            for( const TreePtr<Declaration> &a : pre_sorted )
                    TRACE(*a)(" ");
         }
         ASSERT( found )("\nfailed to find a decl to add without dependencies, maybe circular\n");
         //TRACE("%d %d\n", s.size(), c.size() );
     }
     TRACE("\n");
-    ASSERT( s.size() == ocs );
-    return s;
+    ASSERT( sorted.size() == ocs );
+    return sorted;
 }
 
 

@@ -11,17 +11,17 @@ using namespace SCTree;
 using namespace Steps;
 
 
-LowerSCType::LowerSCType( TreePtr< SCNamedConstruct > s_scnode )
+LowerSCType::LowerSCType( TreePtr< Type > s_sctype )
 {
-    auto r_token = MakePatternNode< SpecificTypeIdentifier >( s_scnode->GetToken() );                
+    auto r_token = MakePatternNode< SpecificTypeIdentifier >( s_sctype->GetToken() );                
 
-    Configure( SEARCH_REPLACE, s_scnode, r_token );
+    Configure( SEARCH_REPLACE, s_sctype, r_token );
 }
 
 
 EnsureConstructorsInSCRecordUsers::EnsureConstructorsInSCRecordUsers()
 {
-	auto s_scclass = MakePatternNode< SCNamedRecord >();
+	auto s_scclass = MakePatternNode< SCRecord >();
     auto decls = MakePatternNode< Star<Declaration> >();
     auto bases = MakePatternNode< Star<Base> >();
     auto s_decls_negation = MakePatternNode< Negation<Declaration> >();
@@ -29,7 +29,7 @@ EnsureConstructorsInSCRecordUsers::EnsureConstructorsInSCRecordUsers()
     auto sn_cons_type = MakePatternNode< Constructor >();
     auto sn_params = MakePatternNode< Star<Parameter> >();
     
-	auto r_scclass = MakePatternNode< SCNamedRecord >();
+	auto r_scclass = MakePatternNode< SCRecord >();
     auto r_base = MakePatternNode< Base >();
     auto tid = MakePatternNode< TypeIdentifier >();
     auto r_token = MakePatternNode< SpecificTypeIdentifier >( s_scclass->GetToken() ); 
@@ -69,7 +69,7 @@ EnsureConstructorsInSCRecordUsers::EnsureConstructorsInSCRecordUsers()
     Configure( SEARCH_REPLACE, s_scclass, r_scclass );
 }
 
-LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCNamedRecord > s_scclass )
+LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclass )
 {
 	auto stuff = MakePatternNode<Stuff<Scope>>();
 	auto delta = MakePatternNode<Delta<Scope>>();
@@ -196,7 +196,7 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCNamedRecord > s_s
     r_param_ptr->constancy = MakePatternNode< Const >
 */
 
-LowerSCDynamic::LowerSCDynamic( TreePtr<SCDynamicNamedFunction> s_dynamic,
+LowerSCDynamic::LowerSCDynamic( TreePtr<SCDynamicFunction> s_dynamic,
                                 TreePtr<InstanceIdentifier> r_dest )                              
 {
     auto r_call = MakePatternNode< SysCall >();
@@ -211,7 +211,7 @@ LowerSCDynamic::LowerSCDynamic( TreePtr<SCDynamicNamedFunction> s_dynamic,
 }
 
 
-LowerSCStatic::LowerSCStatic( TreePtr<SCNamedFunction> s_static,
+LowerSCStatic::LowerSCStatic( TreePtr<SCFunction> s_static,
                               TreePtr<InstanceIdentifier> r_dest )
 {
     auto r_call = MakePatternNode< SysCall >();
@@ -222,7 +222,7 @@ LowerSCStatic::LowerSCStatic( TreePtr<SCNamedFunction> s_static,
 }
 
 
-LowerSCDelta::LowerSCDelta( TreePtr<SCNamedFunction> s_delta,
+LowerSCDelta::LowerSCDelta( TreePtr<SCFunction> s_delta,
                             TreePtr<InstanceIdentifier> r_dest,
                             TreePtr<CPPTree::InstanceIdentifier> zero_time_id )
 {
@@ -350,19 +350,33 @@ LowerSCNotifyDelta::LowerSCNotifyDelta(TreePtr<CPPTree::InstanceIdentifier> zero
     Configure( SEARCH_REPLACE, s_notify, r_call );
 }
 
-/*
+
 AddIncludeSystemC::AddIncludeSystemC()
 {
     auto s_program = MakePatternNode<Program>();
+    auto r_program = MakePatternNode<Program>();
+    auto decls = MakePatternNode<Star<Declaration>>();
+    auto declstuff = MakePatternNode<Stuff<Declaration>>();
+    auto r_include = MakePatternNode<SysIncludeQuote>();
+    auto s_negation = MakePatternNode<Negation<Declaration>>();
+    auto sn_include = MakePatternNode<SysIncludeQuote>();
 
-    auto r_filename = MakePatternNode< SpecificString >( "systemc.h" );                
+    s_program->members = (decls, declstuff);
+    decls->restriction = s_negation;
+    declstuff->terminus = MakePatternNode<SCNode>(); 
+    s_negation->negand = sn_include;
+    sn_include->filename = MakePatternNode<SpecificString>("isystemc.h");   
+    r_program->members = (decls, declstuff, r_include);
+    r_include->filename = MakePatternNode<SpecificString>("isystemc.h");   
 
-    Configure( COMPARE_REPLACE, s_scnode, r_token );
+    Configure( COMPARE_REPLACE, s_program, r_program );
 }
-*/
+
 
 void LowerAllSystemC::Build( vector< shared_ptr<VNStep> > *sequence )
 {
+    sequence->push_back( make_shared<AddIncludeSystemC>() );
+
 	auto zero_time_id = MakePatternNode< SpecificInstanceIdentifier >( "SC_ZERO_TIME" );
 	// TODO do we need a way of calling constructors (for init lists) that is
 	// determinable without needing TypeOf?
@@ -402,9 +416,5 @@ void LowerAllSystemC::Build( vector< shared_ptr<VNStep> > *sequence )
     
     // TODO renderer don't use try/catch, use IsDeclared()
     
-    // Lookup dont say base; MapOperand do say key
-    
-    // Get -ul out of gen_graphs
-    
-    // Route replace path around conjuntion to stop warning
+    // Lookup dont say base; MapOperand do say key       
 }

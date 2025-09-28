@@ -15,37 +15,21 @@
 namespace SCTree {
 
 /** Base for all SystemC nodes, permitting detection of SystemC dialect eg for rendering */
-struct SCConstruct : virtual Node {}; 
-
-/** Base for SystemC nodes that helps with detection and rendering by allowing constructs
-    that differ only in source-code-name to be treated as a group. The actual source-code-name
-    is available via a virtual accessor. */
-struct SCNamedConstruct : public SCConstruct
-{
-    NODE_FUNCTIONS
-    virtual string GetName() const
-	{
-		return Traceable::GetName() + "(" + GetToken() + ")";
-	}    
-};
-
-/// Anything derived from this renders like an identifier
-struct SCNamedIdentifier : virtual SCNamedConstruct {};
+struct SCNode : virtual Node {}; 
 
 /// Anything derived from this renders like a record
-struct SCNamedRecord : virtual SCNamedConstruct,
+struct SCRecord : virtual SCNode,
                        CPPTree::InheritanceRecord 
 {
     NODE_FUNCTIONS
 };
 
 /// Anything derived from this renders like a function
-struct SCNamedFunction : virtual SCNamedConstruct {};
+struct SCFunction : virtual SCNode {};
 
 /** SystemC event type, no members need to be set up. Event instances
     are declared to be of this type. They can then be signalled, waited etc. */
-struct Event : CPPTree::Type,
-               SCNamedIdentifier
+struct Event : CPPTree::Type
 {
     NODE_FUNCTIONS_FINAL
     virtual string GetToken() const { return "sc_event"; }
@@ -57,7 +41,7 @@ struct Event : CPPTree::Type,
     based on the module's members. Thus elaboration is structural in the tree
     (as with Verilog) and the renderer generates the run-time elaboration
     fu to satisfy SystemC. */
-struct Module : SCNamedRecord
+struct Module : SCRecord
 {
     NODE_FUNCTIONS_FINAL
     virtual string GetToken() const { return "sc_module"; }
@@ -65,7 +49,7 @@ struct Module : SCNamedRecord
 
 /** SystemC interface construct. Not exactly sure whether/how I will use 
     this. Presumably this is why Module comes from InheritanceRecord not Record. */                                                                      
-struct Interface : SCNamedRecord
+struct Interface : SCRecord
 {
     NODE_FUNCTIONS_FINAL
     virtual string GetToken() const { return "sc_interface"; }
@@ -73,7 +57,7 @@ struct Interface : SCNamedRecord
 
 /** SystemC interface construct. Not exactly sure whether/how I will use 
     this. Presumably this is why Module comes from InheritanceRecord not Record. */   
-struct SCDynamicNamedFunction : virtual SCNamedFunction
+struct SCDynamicFunction : virtual SCFunction
 {
     NODE_FUNCTIONS
     TreePtr<CPPTree::Expression> event; 
@@ -85,7 +69,7 @@ struct SCDynamicNamedFunction : virtual SCNamedFunction
     nodes for each. All waits must be done in local execution contexts
     like threads. Waits allow the SystemC kernel to run other processes. */
 struct Wait : CPPTree::Statement,
-              virtual SCNamedFunction, 
+              virtual SCFunction, 
               CPPTree::Uncombable
 {
     NODE_FUNCTIONS
@@ -96,7 +80,7 @@ struct Wait : CPPTree::Statement,
     triggered, regardless of clocks, deltas etc. Ands and ors etc are probably OK as 
     the correpsonding boolean expressions on the events. */
 struct WaitDynamic : Wait,
-                     SCDynamicNamedFunction
+                     SCDynamicFunction
 {
     NODE_FUNCTIONS_FINAL
 };
@@ -121,7 +105,7 @@ struct WaitDelta : Wait
     Next_triggers do NOT allow the SystemC kernel to run other processes until
     the combable block completes. */
 struct NextTrigger : CPPTree::Statement,
-                     virtual SCNamedFunction
+                     virtual SCFunction
 {
     NODE_FUNCTIONS
     virtual string GetToken() const { return "next_trigger"; }
@@ -131,7 +115,7 @@ struct NextTrigger : CPPTree::Statement,
     triggered, regardless of clocks, deltas etc. Ands and ors etc are probably OK as 
     the correpsonding boolean expressions on the events. */
 struct NextTriggerDynamic : NextTrigger,
-                            SCDynamicNamedFunction
+                            SCDynamicFunction
 {
     NODE_FUNCTIONS_FINAL
 };
@@ -155,7 +139,7 @@ struct NextTriggerDelta : NextTrigger
     type Event I would think. This is an intermediate because there are a few
     distinct flavours. */
 struct Notify : CPPTree::Statement,
-                virtual SCNamedFunction
+                virtual SCFunction
 {
     NODE_FUNCTIONS
     virtual string GetToken() const { return "notify"; }
@@ -186,12 +170,12 @@ struct NotifyTimed : Notify
     put code. Different final nodes have different invocation and execution models.
     Processes look like functions that have no params or return value. */
 struct Process : CPPTree::Subroutine,
-                 virtual SCNamedConstruct 
+                 virtual SCNode 
 {
     NODE_FUNCTIONS
 };
 
-/** Any process that begins or resumes execution in return to events (presumably
+/** Any process that begins or resumes execution in response to events (presumably
     including the virtual events created by deltas). Essentially unclocked */
 struct EventProcess : Process
 {
@@ -231,7 +215,7 @@ struct ClockedThread : Process
 /** Evaluates to the total number of delta cycles thus far. Can be compared with zero 
     to produce an inferred reset signal for initialising state machines */
 struct DeltaCount : CPPTree::Operator,
-                    virtual SCNamedFunction // TODO rename as InferredReset() since that will transform more easily to a real reset system
+                    virtual SCFunction // TODO rename as InferredReset() since that will transform more easily to a real reset system
 {
     NODE_FUNCTIONS_FINAL
     virtual string GetToken() const { return "sc_delta_count"; }    
@@ -243,7 +227,7 @@ struct DeltaCount : CPPTree::Operator,
     SystemC does not allow control of the return value from its main 
     function. */
 struct TerminationFunction : CPPTree::Statement,
-                             virtual SCNamedFunction
+                             virtual SCFunction
 {
     NODE_FUNCTIONS
     TreePtr<CPPTree::Expression> code; ///< exit code for program, 0 to 255 

@@ -11,15 +11,15 @@ using namespace SCTree;
 using namespace Steps;
 
 
-DetectSCType::DetectSCType( TreePtr< SCNamedConstruct > lr_scnode )
+DetectSCType::DetectSCType( TreePtr< Type > lr_sctype )
 {
     auto over = MakePatternNode< Delta<Node> >();
     auto s_scope = MakePatternNode< Scope >();
     auto r_scope = MakePatternNode< Scope >();
     auto decls = MakePatternNode< Star<Declaration> >();
     auto s_usertype = MakePatternNode< UserType >();
-    auto s_token = MakePatternNode< TypeIdentifierByNameAgent >( lr_scnode->GetToken() );                
-    auto r_embedded = MakePatternNode< EmbeddedSearchReplace<Node> >( over, s_token, lr_scnode );    
+    auto s_token = MakePatternNode< TypeIdentifierByNameAgent >( lr_sctype->GetToken() );                
+    auto r_embedded = MakePatternNode< EmbeddedSearchReplace<Node> >( over, s_token, lr_sctype );    
     
     // Eliminate the declaration that came from isystemc.h
     over->through = s_scope;
@@ -33,7 +33,7 @@ DetectSCType::DetectSCType( TreePtr< SCNamedConstruct > lr_scnode )
 }
 
 
-DetectSCHierarchicalClass::DetectSCHierarchicalClass( TreePtr< SCNamedRecord > lr_scclass )
+DetectSCHierarchicalClass::DetectSCHierarchicalClass( TreePtr< SCRecord > lr_scclass )
 {
     auto over = MakePatternNode< Delta<Node> >();
     auto s_scope = MakePatternNode< Scope >();
@@ -67,7 +67,7 @@ DetectSCHierarchicalClass::DetectSCHierarchicalClass( TreePtr< SCNamedRecord > l
 }
 
 
-DetectSCDynamic::DetectSCDynamic( TreePtr<SCDynamicNamedFunction> r_dynamic )
+DetectSCDynamic::DetectSCDynamic( TreePtr<SCDynamicFunction> r_dynamic )
 {
     auto s_call = MakePatternNode< Call >();
     auto s_arg = MakePatternNode< MapOperand >();
@@ -86,7 +86,7 @@ DetectSCDynamic::DetectSCDynamic( TreePtr<SCDynamicNamedFunction> r_dynamic )
 }
 
 
-DetectSCStatic::DetectSCStatic( TreePtr<SCNamedFunction> r_static )
+DetectSCStatic::DetectSCStatic( TreePtr<SCFunction> r_static )
 {
     auto s_call = MakePatternNode< Call >();
     auto s_token = MakePatternNode< InstanceIdentifierByNameAgent >( r_static->GetToken() ); 
@@ -98,7 +98,7 @@ DetectSCStatic::DetectSCStatic( TreePtr<SCNamedFunction> r_static )
 }
 
 
-DetectSCDelta::DetectSCDelta( TreePtr<SCNamedFunction> r_delta )
+DetectSCDelta::DetectSCDelta( TreePtr<SCFunction> r_delta )
 {
     auto s_call = MakePatternNode< Call >();
     auto s_arg = MakePatternNode< MapOperand >();

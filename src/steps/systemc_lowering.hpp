@@ -15,7 +15,7 @@ using namespace VN;
 class LowerSCType : public VNStep 
 {
 public:
-    LowerSCType( TreePtr< SCTree::SCNamedConstruct > s_scnode );
+    LowerSCType( TreePtr< CPPTree::Type > s_scnode );
 };
 
 
@@ -28,14 +28,14 @@ public:
 class LowerSCHierarchicalClass : public VNStep 
 {
 public:
-    LowerSCHierarchicalClass( TreePtr< SCTree::SCNamedRecord > s_scclass );
+    LowerSCHierarchicalClass( TreePtr< SCTree::SCRecord > s_scclass );
 };
 
 
 class LowerSCDynamic : public VNStep
 {
 public:
-    LowerSCDynamic( TreePtr<SCTree::SCDynamicNamedFunction> s_dynamic,
+    LowerSCDynamic( TreePtr<SCTree::SCDynamicFunction> s_dynamic,
                     TreePtr<CPPTree::InstanceIdentifier> r_dest );
 };
 
@@ -43,7 +43,7 @@ public:
 class LowerSCStatic : public VNStep
 {
 public:
-    LowerSCStatic( TreePtr<SCTree::SCNamedFunction> s_dynamic,
+    LowerSCStatic( TreePtr<SCTree::SCFunction> s_dynamic,
                    TreePtr<CPPTree::InstanceIdentifier> r_dest );
 };
 
@@ -51,7 +51,7 @@ public:
 class LowerSCDelta : public VNStep
 {
 public:
-    LowerSCDelta( TreePtr<SCTree::SCNamedFunction> s_delta,
+    LowerSCDelta( TreePtr<SCTree::SCFunction> s_delta,
                   TreePtr<CPPTree::InstanceIdentifier> r_dest,
                   TreePtr<CPPTree::InstanceIdentifier> zero_time_id );
 };
@@ -82,6 +82,13 @@ class LowerSCNotifyDelta : public VNStep
 {
 public:
     LowerSCNotifyDelta( TreePtr<CPPTree::InstanceIdentifier> zero_time_id );
+};
+
+
+class AddIncludeSystemC : public VNStep
+{
+public:
+    AddIncludeSystemC();
 };
 
 

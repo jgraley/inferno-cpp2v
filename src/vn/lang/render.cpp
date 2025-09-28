@@ -24,11 +24,11 @@ using namespace VN;
 
 // TODO indent back to previous level at end of string
 #define ERROR_UNKNOWN(V) \
-    string( "«" ) + \
+    string( "\n«" ) + \
     string( V ) + \
     string( " not supported in " ) + \
     string( __func__ ) + \
-    string( "()»" );
+    string( "()»\n" );
 
 #define ERROR_UNSUPPORTED(P) \
     ERROR_UNKNOWN( P ? typeid(*P).name() : "<nullptr>" );
@@ -89,9 +89,6 @@ string Render::RenderToString( TreePtr<Node> root )
 
     string s;
 
-    //if( IsSystemC( kit, root_scope ) )
-        s += "#include \"isystemc.h\"\n\n";
-
     s += RenderScope( kit, root_scope ); // gets the .hpp stuff directly
 
     s += deferred_decls; // these could go in a .cpp file
@@ -116,16 +113,6 @@ void Render::WriteToFile( string s )
         fputs( s.c_str(), fp );
         fclose( fp );
     }        
-}
-
-
-bool Render::IsSystemC( const Render::Kit &, TreePtr<Node> root )
-{ 
-    Walk e(root, nullptr, nullptr);
-    for( const TreePtrInterface &n : e )
-        if( dynamic_pointer_cast<SCConstruct>((TreePtr<Node>)n) )
-            return true;
-    return false;
 }
 
 
@@ -336,8 +323,6 @@ string Render::RenderType( const Render::Kit &kit, TreePtr<Type> type, string ob
         return const_str + RenderIdentifier(kit, t->identifier) + sobject;
     else if( TreePtr<SpecificTypeIdentifier> ti = DynamicTreePtrCast< SpecificTypeIdentifier >(type) )
         return const_str + RenderScopedIdentifier(kit, ti, Syntax::Production::BOOT_EXPR) + sobject;
-    else if( shared_ptr<SCNamedIdentifier> sct = dynamic_pointer_cast< SCNamedIdentifier >(type) )
-        return const_str + sct->GetToken() + sobject;
     else if( dynamic_pointer_cast<Labeley>(type) )
         return const_str + "void *" + object;
     else
@@ -904,7 +889,7 @@ bool Render::ShouldSplitInstance( const Render::Kit &kit, TreePtr<Instance> o )
 string Render::RenderRecordProto( const Render::Kit &kit, TreePtr<Record> record )
 {
 	string s;
-	shared_ptr<SCNamedRecord> scr = dynamic_pointer_cast< SCNamedRecord >(record);
+	shared_ptr<SCRecord> scr = dynamic_pointer_cast< SCRecord >(record);
 	if( DynamicTreePtrCast< Class >(record) || scr )
 		s += "class";
 	else if( DynamicTreePtrCast< Struct >(record) )
@@ -921,6 +906,19 @@ string Render::RenderRecordProto( const Render::Kit &kit, TreePtr<Record> record
 	
 	return s;
 }
+
+
+string Render::RenderPreProcDecl(const Render::Kit &kit, TreePtr<PreProcDecl> ppd ) try
+{
+	(void)kit;
+	if( auto si = TreePtr<SysIncludeAngle>::DynamicCast(ppd) )
+	    return "#include <" + si->filename->GetString() + ">";
+	else if( auto si = TreePtr<SysIncludeQuote>::DynamicCast(ppd) )
+	    return "#include " + si->filename->GetToken();
+	else
+		return ERROR_UNSUPPORTED(ppd);	   
+}
+DEFAULT_CATCH_CLAUSE
 
 
 string Render::RenderDeclaration( const Render::Kit &kit, TreePtr<Declaration> declaration ) try
@@ -950,7 +948,7 @@ string Render::RenderDeclaration( const Render::Kit &kit, TreePtr<Declaration> d
     }
     else if( TreePtr<Record> r = DynamicTreePtrCast< Record >(declaration) )
     {
-        shared_ptr<SCNamedRecord> scr = dynamic_pointer_cast< SCNamedRecord >(r);
+        shared_ptr<SCRecord> scr = dynamic_pointer_cast< SCRecord >(r);
 
         // Prototype of the record
 		s += RenderRecordProto( kit, r );
@@ -1007,6 +1005,8 @@ string Render::RenderDeclaration( const Render::Kit &kit, TreePtr<Declaration> d
     }
     else if( TreePtr<Label> l = DynamicTreePtrCast<Label>(declaration) )
         return RenderIdentifier(kit, l->identifier) + ":;\n"; // need ; after a label in case last in compound block
+    else if( auto ppd = TreePtr<PreProcDecl>::DynamicCast(declaration) )
+        return RenderPreProcDecl(kit, ppd) + "\n"; 
     else
         s += ERROR_UNSUPPORTED(declaration);
 
@@ -1216,20 +1216,34 @@ string Render::RenderScope( const Render::Kit &kit,
     Sequence<Declaration> sorted = SortDecls( key->members, true, unique_ids );
     backing_ordering[key] = sorted;
 
-    // Emit an incomplete for each record
+    // Emit an incomplete for each record and preproc
     string s;
     for( TreePtr<Declaration> pd : sorted ) //for( int i=0; i<sorted.size(); i++ )
-        if( TreePtr<Record> r = DynamicTreePtrCast<Record>(pd) ) // is a record
-            if( !DynamicTreePtrCast<Enum>(r) ) // but not an enum
-            {
-				if( init_access )
-					s += MaybeRenderFieldAccess( kit, r, &init_access );
-                s += RenderRecordProto( kit, r ) + ";\n";
-			}
+    {		
+		if( auto ppd = DynamicTreePtrCast<PreProcDecl>(pd) )
+		{
+			s += RenderPreProcDecl( kit, ppd ) + "\n";
+			continue;
+		}
+		
+        TreePtr<Record> r = DynamicTreePtrCast<Record>(pd); 
+        if( !r )
+            continue; // only do records and preprocessor decls
+            
+        if( DynamicTreePtrCast<Enum>(r) ) 
+			continue; // but not an enum
 	
-    // Emit the actual declarations, sorted for dependencies
+		if( init_access )
+			s += MaybeRenderFieldAccess( kit, r, &init_access );
+        s += RenderRecordProto( kit, r ) + ";\n";	
+	}
+	
+    // Emit the actual definitions, sorted for dependencies
     for( TreePtr<Declaration> d : sorted )
     {
+		if( DynamicTreePtrCast<PreProcDecl>(d) )
+			continue;
+			
 		if( init_access )
 			s += MaybeRenderFieldAccess( kit, d, &init_access );		
         s += RenderDeclaration( kit, d );
