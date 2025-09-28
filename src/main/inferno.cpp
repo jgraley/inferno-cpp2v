@@ -447,7 +447,7 @@ Inferno::Plan::Plan(Inferno *algo_) :
     for( Stage &stage : stages_planning )
     {
         // Actions on all planning stages
-        stages.push_back( stage );
+    //    stages.push_back( stage );
         
         // Actions on last planning stage       
         if( &stage == &(stages_planning.back()) )
@@ -461,6 +461,8 @@ Inferno::Plan::Plan(Inferno *algo_) :
 				stages.push_back( stage_pattern_renders );
         }
          
+        stages.push_back( stage ); // TODO put me back at top of the loop body
+
         if( ShouldIQuitAfter(stage.progress_stage) )
             return;
     }

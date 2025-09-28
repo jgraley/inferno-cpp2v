@@ -1075,7 +1075,7 @@ struct SysMacroField : Field // TODO insert into node hierarchy more cleanly
 };
 
 
-struct SysMacroCall : GoSub, Operator // TODO insert into node hierarchy more cleanly
+struct SysMacroCall : GoSub, Statement // TODO insert into node hierarchy more cleanly
 {
     NODE_FUNCTIONS_FINAL
     Sequence<Node> macro_operands; ///< Arguments taken in order, macro so can be anything

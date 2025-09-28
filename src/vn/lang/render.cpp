@@ -509,7 +509,7 @@ string Render::RenderSysMacroCall( const Render::Kit &kit, TreePtr<SysMacroCall>
 		if( auto id = TreePtr<Identifier>::DynamicCast(mo) )
 			renders.push_back( RenderIdentifier(kit, id) );
 	}
-	string args_in_parens = Join(renders, ", ", "(", ")");
+	string args_in_parens = Join(renders, ", ", "(", ");\n");
 
 	// No constructor case
 
