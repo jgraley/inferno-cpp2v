@@ -1,5 +1,4 @@
 #include "tree/cpptree.hpp"
-#include "tree/sctree.hpp"
 #include "helpers/transformation.hpp"
 #include "tree/typeof.hpp"
 #include "common/trace.hpp"
@@ -563,8 +562,6 @@ string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> ex
         return RenderLiteral( kit, l );
     else if( DynamicTreePtrCast< This >(expression) )
         return "this";
-    else if( auto dc = DynamicTreePtrCast<DeltaCount>(expression) ) 
-        return dc->GetToken() + "()";
     else
         return ERROR_UNSUPPORTED(expression);
 }

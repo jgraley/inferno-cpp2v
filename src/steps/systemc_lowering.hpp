@@ -85,6 +85,13 @@ public:
 };
 
 
+class LowerSCDeltaCount : public VNStep
+{
+public:
+    LowerSCDeltaCount();
+};
+
+
 class AddIncludeSystemC : public VNStep
 {
 public:
@@ -95,7 +102,7 @@ public:
 /** Builder for the steps that lowers Inferno's Explicit nodes for SystemC 
     into implicit SysetemC constructs in C++ code for rendering using a
     C/C++ renderer. */
-class LowerAllSystemC
+class SystemCLowering
 {
 public:
     static void Build( vector< shared_ptr<VNStep> > *sequence );

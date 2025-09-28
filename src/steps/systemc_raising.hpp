@@ -1,5 +1,5 @@
-#ifndef SYSTEMC_DETECTION
-#define SYSTEMC_DETECTION
+#ifndef SYSTEMC_RAISING
+#define SYSTEMC_RAISING
 
 // These transformations detect SystemC constructs by identifier 
 // name and node pattern within input code, and substitute the 
@@ -17,10 +17,10 @@ using namespace VN;
 /** We look for the decl and remeove it since the inferno
  Node does not require declaration. Then just switch each appearance
  over to the new node, using an embedded pattern */
-class DetectSCType : public VNStep 
+class RaiseSCType : public VNStep 
 {
 public:
-    DetectSCType( TreePtr< CPPTree::Type > lr_scnode );
+    RaiseSCType( TreePtr< CPPTree::Type > lr_scnode );
 };
 
 
@@ -29,31 +29,31 @@ public:
  Node does not require declaration. Then replace all class nodes
  that inherit from the supplied base with the new inferno node and 
  remove the base */
-class DetectSCHierarchicalClass : public VNStep 
+class RaiseSCHierarchicalClass : public VNStep 
 {
 public:
-    DetectSCHierarchicalClass( TreePtr< SCTree::SCRecord > lr_scclass );
+    RaiseSCHierarchicalClass( TreePtr< SCTree::SCRecord > lr_scclass );
 };
 
 
-class DetectSCDynamic : public VNStep
+class RaiseSCDynamic : public VNStep
 {
 public:
-    DetectSCDynamic( TreePtr<SCTree::SCDynamicFunction> r_dynamic );
+    RaiseSCDynamic( TreePtr<SCTree::SCDynamicFunction> r_dynamic );
 };
 
 
-class DetectSCStatic : public VNStep
+class RaiseSCStatic : public VNStep
 {
 public:
-    DetectSCStatic( TreePtr<SCTree::SCFunction> r_static );
+    RaiseSCStatic( TreePtr<SCTree::SCFunction> r_static );
 };
 
 
-class DetectSCDelta : public VNStep
+class RaiseSCDelta : public VNStep
 {
 public:
-    DetectSCDelta( TreePtr<SCTree::SCFunction> r_delta );
+    RaiseSCDelta( TreePtr<SCTree::SCFunction> r_delta );
 };
 
 
@@ -62,38 +62,47 @@ public:
  Node does not require declaration. Then replace all calls to 
  the function with the explicit statement node. Bring arguments
  across by name match as per Inferno's MapOperator style. */
-class DetectTerminationFunction : public VNStep
+class RaiseTerminationFunction : public VNStep
 {
 public:
-    DetectTerminationFunction( TreePtr<SCTree::TerminationFunction> r_tf );    
+    RaiseTerminationFunction( TreePtr<SCTree::TerminationFunction> r_tf );    
 };
 
 
-class DetectSCProcess : public VNStep
+class RaiseSCProcess : public VNStep
 {
 public:
-    DetectSCProcess( TreePtr< SCTree::Process > lr_scprocess );
+    RaiseSCProcess( TreePtr< SCTree::Process > lr_scprocess );
 };
 
+
+
+/// spot SystemC sc_delta_count() method by its name and replace with inferno node 
+/** Look for sc_delta_count() and replace with DeltaCount */
+class RaiseSCDeltaCount : public VNStep  
+{
+public:
+    RaiseSCDeltaCount();
+};
 
 
 /// spot SystemC notify() method by its name and replace with inferno node 
 /** Look for myevent.notify() and replace with Notify->myevent. No need to 
     eliminate the notify decl - that disappeared with the sc_event class */
-class DetectSCNotifyImmediate : public VNStep  
+class RaiseSCNotifyImmediate : public VNStep  
 {
 public:
-    DetectSCNotifyImmediate();
+    RaiseSCNotifyImmediate();
 };
 
 
 /// spot SystemC notify(SC_ZERO_TIME) method by its name and replace with inferno node 
 /** Look for myevent.notify(SC_ZERO_TIME) and replace with Notify->myevent. No need to 
     eliminate the notify decl - that disappeared with the sc_event class */
-class DetectSCNotifyDelta : public VNStep  
+class RaiseSCNotifyDelta : public VNStep  
 {
 public:
-    DetectSCNotifyDelta();
+    RaiseSCNotifyDelta();
 };
 
 
@@ -130,7 +139,7 @@ public:
 /** Builder for the steps that detect implicit SysetemC constructs in C++ code
     and replace them with Inferno's Explicit nodes for SystemC which are much
     more succinct in tree form */
-class DetectAllSystemC
+class SystemCRaising
 {
 public:
     static void Build( vector< shared_ptr<VNStep> > *sequence );

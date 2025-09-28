@@ -1,5 +1,5 @@
 
-#include "systemc_detection.hpp"
+#include "systemc_raising.hpp"
 #include "clean_up.hpp"
 #include "tree/cpptree.hpp"
 #include "tree/typeof.hpp"
@@ -11,7 +11,7 @@ using namespace SCTree;
 using namespace Steps;
 
 
-DetectSCType::DetectSCType( TreePtr< Type > lr_sctype )
+RaiseSCType::RaiseSCType( TreePtr< Type > lr_sctype )
 {
     auto over = MakePatternNode< Delta<Node> >();
     auto s_scope = MakePatternNode< Scope >();
@@ -33,7 +33,7 @@ DetectSCType::DetectSCType( TreePtr< Type > lr_sctype )
 }
 
 
-DetectSCHierarchicalClass::DetectSCHierarchicalClass( TreePtr< SCRecord > lr_scclass )
+RaiseSCHierarchicalClass::RaiseSCHierarchicalClass( TreePtr< SCRecord > lr_scclass )
 {
     auto over = MakePatternNode< Delta<Node> >();
     auto s_scope = MakePatternNode< Scope >();
@@ -67,7 +67,7 @@ DetectSCHierarchicalClass::DetectSCHierarchicalClass( TreePtr< SCRecord > lr_scc
 }
 
 
-DetectSCDynamic::DetectSCDynamic( TreePtr<SCDynamicFunction> r_dynamic )
+RaiseSCDynamic::RaiseSCDynamic( TreePtr<SCDynamicFunction> r_dynamic )
 {
     auto s_call = MakePatternNode< Call >();
     auto s_arg = MakePatternNode< MapOperand >();
@@ -86,7 +86,7 @@ DetectSCDynamic::DetectSCDynamic( TreePtr<SCDynamicFunction> r_dynamic )
 }
 
 
-DetectSCStatic::DetectSCStatic( TreePtr<SCFunction> r_static )
+RaiseSCStatic::RaiseSCStatic( TreePtr<SCFunction> r_static )
 {
     auto s_call = MakePatternNode< Call >();
     auto s_token = MakePatternNode< InstanceIdentifierByNameAgent >( r_static->GetToken() ); 
@@ -98,7 +98,7 @@ DetectSCStatic::DetectSCStatic( TreePtr<SCFunction> r_static )
 }
 
 
-DetectSCDelta::DetectSCDelta( TreePtr<SCFunction> r_delta )
+RaiseSCDelta::RaiseSCDelta( TreePtr<SCFunction> r_delta )
 {
     auto s_call = MakePatternNode< Call >();
     auto s_arg = MakePatternNode< MapOperand >();
@@ -118,7 +118,7 @@ DetectSCDelta::DetectSCDelta( TreePtr<SCFunction> r_delta )
 }
 
 
-DetectTerminationFunction::DetectTerminationFunction( TreePtr<TerminationFunction> r_tf )
+RaiseTerminationFunction::RaiseTerminationFunction( TreePtr<TerminationFunction> r_tf )
 {
     auto event = MakePatternNode< Expression >();
     auto s_call = MakePatternNode< Call >();
@@ -138,7 +138,7 @@ DetectTerminationFunction::DetectTerminationFunction( TreePtr<TerminationFunctio
 }
 
 
-DetectSCProcess::DetectSCProcess( TreePtr< Process > lr_scprocess )
+RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
 {
     auto over = MakePatternNode< Delta<Node> >();
     auto s_scope = MakePatternNode< Scope >();
@@ -204,7 +204,21 @@ DetectSCProcess::DetectSCProcess( TreePtr< Process > lr_scprocess )
 }
 
 
-DetectSCNotifyImmediate::DetectSCNotifyImmediate()
+RaiseSCDeltaCount::RaiseSCDeltaCount()
+{
+    auto r_delta_count = MakePatternNode<DeltaCount>();
+
+    auto s_call = MakePatternNode<SysCall>();
+    auto s_token = MakePatternNode< SpecificInstanceIdentifier >( r_delta_count->GetToken() );                
+                
+    s_call->callee = s_token;
+    //s_call->operands = (); // no operands
+       
+    Configure( SEARCH_REPLACE, s_call, r_delta_count );
+}
+
+
+RaiseSCNotifyImmediate::RaiseSCNotifyImmediate()
 {
     auto s_call = MakePatternNode<Call>();
     auto s_lookup = MakePatternNode<Lookup>();
@@ -226,7 +240,7 @@ DetectSCNotifyImmediate::DetectSCNotifyImmediate()
 }
 
 
-DetectSCNotifyDelta::DetectSCNotifyDelta()
+RaiseSCNotifyDelta::RaiseSCNotifyDelta()
 {
     auto s_call = MakePatternNode<Call>();
     auto s_lookup = MakePatternNode<Lookup>();
@@ -369,14 +383,16 @@ RemoveSCPrototypes::RemoveSCPrototypes()
     auto s_next_trigger_inst = MakePatternNode<Static>();
     auto s_next_trigger_type = MakePatternNode<Function>();   
     auto s_next_trigger_param = MakePatternNode<Parameter>();   
+    auto s_delta_count_inst = MakePatternNode<Static>();
+    auto s_delta_count_type = MakePatternNode<Function>();   
+
     auto s_unsigned_char = MakePatternNode<Unsigned>();   
     auto s_int = MakePatternNode<Signed>();   
     auto s_int2 = MakePatternNode<Signed>();   
     auto s_int3 = MakePatternNode<Signed>();   
     
-    
     s_scope->members = (decls, s_any);
-    s_any->disjuncts = (s_cease_inst, s_exit_inst, s_wait_inst, s_next_trigger_inst);
+    s_any->disjuncts = (s_cease_inst, s_exit_inst, s_wait_inst, s_next_trigger_inst, s_delta_count_inst);
     
     // void cease( unsigned char exit_code );
     s_cease_inst->identifier = MakePatternNode< InstanceIdentifierByNameAgent >( "cease" ); 
@@ -414,6 +430,12 @@ RemoveSCPrototypes::RemoveSCPrototypes()
     s_int3->width = MakePatternNode<SpecificInteger>(32);
     s_next_trigger_param->identifier = MakePatternNode<InstanceIdentifierByNameAgent>( "p1" );   
     
+    // void sc_delta_count();
+    s_delta_count_inst->identifier = MakePatternNode< InstanceIdentifierByNameAgent >( "sc_delta_count" ); 
+    s_delta_count_inst->type = s_delta_count_type;
+    s_delta_count_type->return_type = MakePatternNode<Void>();
+    //s_delta_count_type->params = ();
+    
     r_scope->members = (decls);   
 
 
@@ -421,24 +443,25 @@ RemoveSCPrototypes::RemoveSCPrototypes()
 }
 
 
-void DetectAllSystemC::Build( vector< shared_ptr<VNStep> > *sequence )
+void SystemCRaising::Build( vector< shared_ptr<VNStep> > *sequence )
 {
-    sequence->push_back( make_shared<DetectSCType>( MakePatternNode<Event>() ) );
-    sequence->push_back( make_shared<DetectSCHierarchicalClass>( MakePatternNode<Module>() ) );
-    sequence->push_back( make_shared<DetectSCHierarchicalClass>( MakePatternNode<Interface>() ) );
-    sequence->push_back( make_shared<DetectSCDynamic>( MakePatternNode<WaitDynamic>() ) );
-    sequence->push_back( make_shared<DetectSCStatic>( MakePatternNode<WaitStatic>() ) );
-    sequence->push_back( make_shared<DetectSCDelta>( MakePatternNode<WaitDelta>() ) );
-    sequence->push_back( make_shared<DetectSCDynamic>( MakePatternNode<NextTriggerDynamic>() ) );
-    sequence->push_back( make_shared<DetectSCStatic>( MakePatternNode<NextTriggerStatic>() ) );
-    sequence->push_back( make_shared<DetectSCDelta>( MakePatternNode<NextTriggerDelta>() ) );
-    sequence->push_back( make_shared<DetectTerminationFunction>( MakePatternNode<Exit>() ) );
-    sequence->push_back( make_shared<DetectTerminationFunction>( MakePatternNode<Cease>() ) );
-    sequence->push_back( make_shared<DetectSCProcess>( MakePatternNode<Thread>() ) );
-    sequence->push_back( make_shared<DetectSCProcess>( MakePatternNode<ClockedThread>() ) );
-    sequence->push_back( make_shared<DetectSCProcess>( MakePatternNode<Method>() ) );
-    sequence->push_back( make_shared<DetectSCNotifyImmediate>() );
-    sequence->push_back( make_shared<DetectSCNotifyDelta>() );
+    sequence->push_back( make_shared<RaiseSCType>( MakePatternNode<Event>() ) );
+    sequence->push_back( make_shared<RaiseSCHierarchicalClass>( MakePatternNode<Module>() ) );
+    sequence->push_back( make_shared<RaiseSCHierarchicalClass>( MakePatternNode<Interface>() ) );
+    sequence->push_back( make_shared<RaiseSCDynamic>( MakePatternNode<WaitDynamic>() ) );
+    sequence->push_back( make_shared<RaiseSCStatic>( MakePatternNode<WaitStatic>() ) );
+    sequence->push_back( make_shared<RaiseSCDelta>( MakePatternNode<WaitDelta>() ) );
+    sequence->push_back( make_shared<RaiseSCDynamic>( MakePatternNode<NextTriggerDynamic>() ) );
+    sequence->push_back( make_shared<RaiseSCStatic>( MakePatternNode<NextTriggerStatic>() ) );
+    sequence->push_back( make_shared<RaiseSCDelta>( MakePatternNode<NextTriggerDelta>() ) );
+    sequence->push_back( make_shared<RaiseTerminationFunction>( MakePatternNode<Exit>() ) );
+    sequence->push_back( make_shared<RaiseTerminationFunction>( MakePatternNode<Cease>() ) );
+    sequence->push_back( make_shared<RaiseSCProcess>( MakePatternNode<Thread>() ) );
+    sequence->push_back( make_shared<RaiseSCProcess>( MakePatternNode<ClockedThread>() ) );
+    sequence->push_back( make_shared<RaiseSCProcess>( MakePatternNode<Method>() ) );
+    sequence->push_back( make_shared<RaiseSCDeltaCount>() );
+    sequence->push_back( make_shared<RaiseSCNotifyImmediate>() );
+    sequence->push_back( make_shared<RaiseSCNotifyDelta>() );
     sequence->push_back( make_shared<RemoveEmptyModuleConstructors>() );
     sequence->push_back( make_shared<RemoveVoidInstances>() );
     sequence->push_back( make_shared<RemoveSCPrototypes>() );

@@ -1,5 +1,5 @@
 
-#include "systemc_generation.hpp"
+#include "systemc_from_c_simple.hpp"
 #include "tree/cpptree.hpp"
 #include "tree/typeof.hpp"
 #include "inferno_agents.hpp"
@@ -133,7 +133,7 @@ MainToThread::MainToThread()
 }
 
 
-void GenerateSC::Build( vector< shared_ptr<VNStep> > *sequence )
+void SystemCFromCSimple::Build( vector< shared_ptr<VNStep> > *sequence )
 {
     sequence->push_back( make_shared<GlobalScopeToModule>() );
     sequence->push_back( make_shared<MainToThread>() );

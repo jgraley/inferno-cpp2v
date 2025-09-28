@@ -17,8 +17,8 @@
 #include "steps/clean_up.hpp"
 #include "steps/state_out.hpp"
 #include "steps/fall_out.hpp"
-#include "steps/systemc_detection.hpp"
-#include "steps/systemc_generation.hpp"
+#include "steps/systemc_raising.hpp"
+#include "steps/systemc_from_c_simple.hpp"
 #include "steps/systemc_lowering.hpp"
 #include "steps/to_sc_method.hpp"
 #include "vn/graph/doc_graphs.hpp"
@@ -52,14 +52,16 @@ void BuildDefaultSequence( vector< shared_ptr<VNStep> > *sequence )
         sequence->push_back( make_shared<FixCrazyNumberEmb>() );
     }
     
+	// ---------------------- SystemC raising ----------------------
     // SystemC detection, converts implicit SystemC to explicit. Always at the top
     // because we cannot render+compile implicit SystemC.
-    DetectAllSystemC::Build(sequence);
+    SystemCRaising::Build(sequence);
 		
+	// ---------------------- SystemC simple generation ----------------------
     // SystemC generation tries to convert C and/or C++ into SystemC. This
     // is a simplification of what would happen in ealy phases of the original
     // Inferno design. Explicit SC nodes are generated.
-    GenerateSC::Build(sequence);
+    SystemCFromCSimple::Build(sequence);
 
     { 
 		// ---------------------- Establish what is locally uncombable ----------------------
@@ -202,7 +204,9 @@ void BuildDefaultSequence( vector< shared_ptr<VNStep> > *sequence )
 		sequence->push_back( make_shared<CleanUpDeadCode>() );
 	}		
 	
-	LowerAllSystemC::Build(sequence);
+	// ---------------------- SystemC lowering ----------------------
+	// Lower SystemC nodes to C++ constructs for rendering
+	SystemCLowering::Build(sequence);
 }
 
 

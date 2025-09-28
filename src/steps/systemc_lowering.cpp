@@ -177,24 +177,6 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     Configure( COMPARE_REPLACE, stuff, embedded_1 );
 }
 
- /*  auto r_construct = MakePatternNode<Field>();
-    auto r_construct_type = MakePatternNode<SysCall>();
-    auto r_construct_lu = MakePatternNode<Lookup>();
-    auto r_param = MakePatternNode<Parameter>();
-    auto r_param_ptr = MakePatternNode<Pointer>();
-    
-    r_construct->type = r_construct_type;
-    r_construct->identifier = MakePatternNode< SpecificInstanceIdentifier >( "" );
-    r_construct->initialsier = MakePatternNode< Uninitialised >();
-    r_construct->virtuality = MakePatternNode< NonVirtual >();
-    r_construct->access = MakePatternNode< Public >();
-    r_construct->constancy = MakePatternNode< NonConst >();
-    r_construct_type->callee = r_construct_lu;
-    r_construct_type->operands = (r_param);
-    r_param->type = r_param_ptr;
-    r_param->identifier = MakePatternNode< SpecificInstanceIdentifier >( "" );;
-    r_param_ptr->constancy = MakePatternNode< Const >
-*/
 
 LowerSCDynamic::LowerSCDynamic( TreePtr<SCDynamicFunction> s_dynamic,
                                 TreePtr<InstanceIdentifier> r_dest )                              
@@ -351,6 +333,21 @@ LowerSCNotifyDelta::LowerSCNotifyDelta(TreePtr<CPPTree::InstanceIdentifier> zero
 }
 
 
+LowerSCDeltaCount::LowerSCDeltaCount()
+{
+    auto s_delta_count = MakePatternNode<DeltaCount>();
+ 
+    auto r_call = MakePatternNode<SysCall>();
+    auto r_token = MakePatternNode< SpecificInstanceIdentifier >( s_delta_count->GetToken() );                
+    //MakePatternNode< Expression > eexpr; 
+            
+    r_call->callee = r_token;
+    //r_call->operands = (); // no operands
+       
+    Configure( SEARCH_REPLACE, s_delta_count, r_call );
+}
+
+
 AddIncludeSystemC::AddIncludeSystemC()
 {
     auto s_program = MakePatternNode<Program>();
@@ -373,7 +370,7 @@ AddIncludeSystemC::AddIncludeSystemC()
 }
 
 
-void LowerAllSystemC::Build( vector< shared_ptr<VNStep> > *sequence )
+void SystemCLowering::Build( vector< shared_ptr<VNStep> > *sequence )
 {
     sequence->push_back( make_shared<AddIncludeSystemC>() );
 
@@ -381,10 +378,11 @@ void LowerAllSystemC::Build( vector< shared_ptr<VNStep> > *sequence )
 	// TODO do we need a way of calling constructors (for init lists) that is
 	// determinable without needing TypeOf?
 	
-	// The reverse ordering of DetectAllSystemC::Build()
+	// The reverse ordering of SystemCRaising::Build()
 	// TODO renaming: sc_det -> sc_raising, sc_gen -> simple_sc_from_c
 	sequence->push_back( make_shared<LowerSCNotifyDelta>(zero_time_id) );
 	sequence->push_back( make_shared<LowerSCNotifyImmediate>() );
+	sequence->push_back( make_shared<LowerSCDeltaCount>() );
 	
     sequence->push_back( make_shared<LowerTerminationFunction>( MakePatternNode<Cease>() ) );
     sequence->push_back( make_shared<LowerTerminationFunction>( MakePatternNode<Exit>() ) );

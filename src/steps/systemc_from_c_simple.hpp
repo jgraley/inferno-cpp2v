@@ -1,5 +1,5 @@
-#ifndef SYSTEMC_GENERATION
-#define SYSTEMC_GENERATION
+#ifndef SYSTEMC_FROM_C_SIMPLE
+#define SYSTEMC_FROM_C_SIMPLE
 
 // These transformations convert C code into SystemC.
 
@@ -33,7 +33,7 @@ public:
  * an SC module called GlobalScope and move the free functions
  * (including main()) into it.
  * */
-class GenerateSC
+class SystemCFromCSimple
 {
 public:
     static void Build( vector< shared_ptr<VNStep> > *sequence );
