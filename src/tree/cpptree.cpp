@@ -71,7 +71,7 @@ Syntax::Production SpecificString::GetMyProduction() const
 //////////////////////////// SpecificInteger ///////////////////////////////
 
 SpecificInteger::SpecificInteger()  : 
-    value(INTEGER_DEFAULT_WIDTH, false)
+    value(TypeDb::int_bits, false)
 {
 }
 
@@ -83,21 +83,21 @@ SpecificInteger::SpecificInteger( llvm::APSInt i ) :
 
 
 SpecificInteger::SpecificInteger( int i ) : 
-    value(INTEGER_DEFAULT_WIDTH, false)  // signed
+    value(TypeDb::int_bits, false)  // signed
 { 
     value = i; 
 } 
 
 
 SpecificInteger::SpecificInteger( int64_t i ) : 
-    value(INTEGER_DEFAULT_WIDTH, false)  // 64-bit
+    value(TypeDb::int_bits, false)  // 64-bit
 { 
     value = i; 
 } 
 
 
 SpecificInteger::SpecificInteger( unsigned i ) : 
-    value(INTEGER_DEFAULT_WIDTH, true)  // unsigned
+    value(TypeDb::int_bits, true)  // unsigned
 { 
     value = i; 
 } 
@@ -483,9 +483,9 @@ Syntax::Production StatementExpression::GetMyProduction() const
 	return Production::PARENTHESISED; 
 }
 
-//////////////////////////// SysCall ///////////////////////////////
+//////////////////////////// ExteriorCall ///////////////////////////////
 
-Syntax::Production SysCall::GetMyProduction() const
+Syntax::Production ExteriorCall::GetMyProduction() const
 { 
 	return Production::POSTFIX; 
 }

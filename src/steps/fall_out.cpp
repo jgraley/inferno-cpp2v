@@ -237,7 +237,7 @@ LabelTypeToEnum::LabelTypeToEnum()
     l_apany->terminus = l_over;
     l_over->through = MakePatternNode<Labeley>(); 
     l_over->overlay = l_enum; 
-    l_enum->width = MakePatternNode<SpecificInteger>(32);
+    l_enum->width = MakePatternNode<SpecificInteger>(TypeDb::int_bits);
             
     auto embedded_l = MakePatternNode< EmbeddedSearchReplace<Scope> >( record, l_apall_over );   
 
@@ -337,7 +337,7 @@ LabelInstancesToEnum::LabelInstancesToEnum()
     l_apany->terminus = l_over;
     l_over->through = MakePatternNode<Labeley>();
     l_over->overlay = l_enum; 
-    l_enum->width = MakePatternNode<SpecificInteger>(32);
+    l_enum->width = MakePatternNode<SpecificInteger>(TypeDb::int_bits);
             
     auto embedded_l = MakePatternNode< EmbeddedSearchReplace<Scope> >( record, l_apall );   
 

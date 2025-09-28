@@ -144,8 +144,6 @@ private:
  can do +, - etc on). */
 struct Number : Literal { NODE_FUNCTIONS };
 
-#define INTEGER_DEFAULT_WIDTH 32
-
 /// Intermediate property node that represents an integer of any value and signedness. 
 struct Integer : Number { NODE_FUNCTIONS };
 
@@ -348,7 +346,7 @@ struct NonConst : Constancy { NODE_FUNCTIONS_FINAL };
 // Take constancy out of Reference
 // The idea is that we specify const not in the types, but in the nodes
 // that permit an object to be reached for assignment or mutation.
-struct Reacher : virtual Node
+struct Reaching : virtual Node
 {
 	NODE_FUNCTIONS
     TreePtr<Type> type; ///< the Type of the instance, can be data or Callable type
@@ -1066,7 +1064,7 @@ struct Nop : Statement { NODE_FUNCTIONS_FINAL };
 
 /// A regular function call whose arguments are given in sequence, so that a 
 /// declaration is not needed.
-struct SysCall : GoSub, Operator
+struct ExteriorCall : GoSub, Operator
 {
     NODE_FUNCTIONS_FINAL
     Sequence<Expression> operands; ///< Arguments taken in order
@@ -1074,17 +1072,17 @@ struct SysCall : GoSub, Operator
 	Production GetMyProduction() const override;
 };  
 
-/// A proprocessor macro expansion that may be used as a statement, and takes 
+/// A proprocessor macro usage that may be used as a field, and takes 
 /// arbitrary operands.
-struct SysMacroCall : GoSub, Statement // TODO insert into node hierarchy more cleanly
+struct MacroField : Field 
 {
     NODE_FUNCTIONS_FINAL
     Sequence<Node> macro_operands; ///< Arguments taken in order, macro so can be anything
 };
 
-/// A proprocessor macro expansion that may be used as a field, and takes 
+/// A proprocessor macro usage that may be used as a statement, and takes 
 /// arbitrary operands.
-struct SysMacroField : Field // TODO insert into node hierarchy more cleanly
+struct MacroCall : GoSub, Statement 
 {
     NODE_FUNCTIONS_FINAL
     Sequence<Node> macro_operands; ///< Arguments taken in order, macro so can be anything
@@ -1097,20 +1095,20 @@ struct PreProcDecl : virtual Declaration
 };
 
 /// Instruction to include a system header file
-struct SysInclude : virtual PreProcDecl 
+struct Include : virtual PreProcDecl 
 {
     NODE_FUNCTIONS
     TreePtr<String> filename;
 };
 
 /// Instruction to include a system header file in <>
-struct SysIncludeAngle : virtual SysInclude 
+struct SystemInclude : virtual Include 
 {
     NODE_FUNCTIONS_FINAL
 };
 
 /// Instruction to include a system header file in ""
-struct SysIncludeQuote : virtual SysInclude 
+struct LocalInclude : virtual Include 
 {
     NODE_FUNCTIONS_FINAL
 };

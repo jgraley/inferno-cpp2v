@@ -7,6 +7,7 @@
 struct TypeDb
 {
     static const uint32_t char_bits;
+    static const uint32_t int_bits;
     static const bool char_default_signed;
     static const uint32_t integral_bits[]; // indexed by the LLVM TSW value (type-specifier enum)
     static const uint32_t size_t_bits; // always unsigned

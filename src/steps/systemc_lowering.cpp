@@ -33,7 +33,7 @@ EnsureConstructorsInSCRecordUsers::EnsureConstructorsInSCRecordUsers()
     auto r_base = MakePatternNode< Base >();
     auto tid = MakePatternNode< TypeIdentifier >();
     auto r_token = MakePatternNode< SpecificTypeIdentifier >( s_scclass->GetToken() ); 
-    auto r_cons = MakePatternNode< SysMacroField >(); 
+    auto r_cons = MakePatternNode< MacroField >(); 
     auto r_comp = MakePatternNode< Compound >();
     auto r_id = MakePatternNode<BuildInstanceIdentifierAgent>(""); // constructor id 
     auto r_ctype = MakePatternNode<Constructor>();
@@ -54,7 +54,7 @@ EnsureConstructorsInSCRecordUsers::EnsureConstructorsInSCRecordUsers()
     sn_cons_type->params = sn_params; // any constructor is enough to stop us
     s_scclass->bases = (bases);    
     r_scclass->identifier = tid;       
-    r_scclass->members = (decls, r_cons); // TODO for SC_CTOR(ClassName) add SysMacroField;
+    r_scclass->members = (decls, r_cons); // TODO for SC_CTOR(ClassName) add MacroField;
     r_scclass->bases = (bases);    
     r_cons->type = MakePatternNode<Constructor>();        
     r_cons->constancy = MakePatternNode<NonConst>();
@@ -79,7 +79,7 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     auto r_base = MakePatternNode< Base >();
     auto tid = MakePatternNode< TypeIdentifier >();
     auto r_token = MakePatternNode< SpecificTypeIdentifier >( s_scclass->GetToken() ); 
-    auto r_cons = MakePatternNode< Field >(); // TODO for SC_CTOR(ClassName) add SysMacroField
+    auto r_cons = MakePatternNode< Field >(); // TODO for SC_CTOR(ClassName) add MacroField
     auto r_id = MakePatternNode<BuildInstanceIdentifierAgent>(""); // constructor id 
     auto r_ctype = MakePatternNode<Constructor>();
     auto r_params = MakePatternNode< Star<Parameter> >();
@@ -89,10 +89,10 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     auto l1_bases = MakePatternNode< Star<Base> >();
     auto l1_statements = MakePatternNode< Star<Statement> >();
     auto l1_statements_negation = MakePatternNode< Negation<Statement> >();
-    auto l1n_call = MakePatternNode<SysCall>();
+    auto l1n_call = MakePatternNode<ExteriorCall>();
     auto l1n_lookup = MakePatternNode<Lookup>();
     auto l1_decls = MakePatternNode< Star<Declaration> >();
-    auto l1_cons = MakePatternNode< Field >(); // TODO for SC_CTOR(ClassName) add SysMacroField
+    auto l1_cons = MakePatternNode< Field >(); // TODO for SC_CTOR(ClassName) add MacroField
     auto l1_cons_type = MakePatternNode< Constructor >();
     auto l1_params = MakePatternNode< Star<Parameter> >();
     auto l1s_comp = MakePatternNode< Compound >();
@@ -100,7 +100,7 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     auto l1_field = MakePatternNode< Field >();
     auto l1_field_id = MakePatternNode< InstanceIdentifier >();
     auto l1_delta = MakePatternNode<Delta<Initialiser>>();  
-    auto l1r_call = MakePatternNode<SysCall>();
+    auto l1r_call = MakePatternNode<ExteriorCall>();
     auto l1r_lookup = MakePatternNode<Lookup>();
 	auto l1r_arg = MakePatternNode< StringizeAgent >();
     
@@ -109,7 +109,7 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     auto l2_instance = MakePatternNode<Instance>();  
     auto l2_inst_id = MakePatternNode<InstanceIdentifier>();  
     auto l2_delta = MakePatternNode<Delta<Initialiser>>();  
-    auto l2r_call = MakePatternNode<SysCall>();
+    auto l2r_call = MakePatternNode<ExteriorCall>();
     auto l2r_lookup = MakePatternNode<Lookup>();
 	auto l2r_arg = MakePatternNode< StringizeAgent >();
     
@@ -126,7 +126,7 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     r_base->record = r_token;
     r_base->access = MakePatternNode< Public >();
        
-    // Field decl of our module in some OTHER class: add SysCall to all constructors
+    // Field decl of our module in some OTHER class: add ExteriorCall to all constructors
     l1_class->identifier = MakePatternNode< TypeIdentifier >(); // not tid, the OTHER class
     l1_class->members = (l1_fields, l1_cons, l1_field);
     l1_class->bases = (l1_bases);
@@ -155,9 +155,9 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     l1r_call->operands = (l1r_arg);
     l1r_arg->source =  tid;
     l1r_lookup->object = l1_field_id;
-    l1r_lookup->member = MakePatternNode< SpecificInstanceIdentifier >(""); // Empty indicates constructor SysCall
+    l1r_lookup->member = MakePatternNode< SpecificInstanceIdentifier >(""); // Empty indicates constructor ExteriorCall
                     
-    // Static decl of our module: init to SysCall
+    // Static decl of our module: init to ExteriorCall
     // Not fields: they can't have constructor calls as intiialisers
     l2_conjunction->conjuncts = (l2_instance, l2_negation);
     l2_negation->negand = MakePatternNode<Field>();
@@ -170,7 +170,7 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     l2r_call->operands = (l2r_arg);
     l2r_arg->source =  tid;
     l2r_lookup->object = l2_instance->identifier;
-    l2r_lookup->member = MakePatternNode< SpecificInstanceIdentifier >(""); // Empty indicates constructor SysCall
+    l2r_lookup->member = MakePatternNode< SpecificInstanceIdentifier >(""); // Empty indicates constructor ExteriorCall
                                                            
     auto embedded_2 = MakePatternNode< EmbeddedSearchReplace<Node> >( stuff, l2_conjunction, l2_instance );                         
     auto embedded_1 = MakePatternNode< EmbeddedSearchReplace<Node> >( embedded_2, l1_class, l1_class );                         
@@ -181,7 +181,7 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
 LowerSCDynamic::LowerSCDynamic( TreePtr<SCDynamicFunction> s_dynamic,
                                 TreePtr<InstanceIdentifier> r_dest )                              
 {
-    auto r_call = MakePatternNode< SysCall >();
+    auto r_call = MakePatternNode< ExteriorCall >();
     // TODO MapOperand args can't render without a function decl. Maybe add OperandSequence as an alternative? 
     auto event_expr = MakePatternNode< Expression >(); 
                     
@@ -196,7 +196,7 @@ LowerSCDynamic::LowerSCDynamic( TreePtr<SCDynamicFunction> s_dynamic,
 LowerSCStatic::LowerSCStatic( TreePtr<SCFunction> s_static,
                               TreePtr<InstanceIdentifier> r_dest )
 {
-    auto r_call = MakePatternNode< SysCall >();
+    auto r_call = MakePatternNode< ExteriorCall >();
                         
     r_call->callee = r_dest;       
       
@@ -208,7 +208,7 @@ LowerSCDelta::LowerSCDelta( TreePtr<SCFunction> s_delta,
                             TreePtr<InstanceIdentifier> r_dest,
                             TreePtr<CPPTree::InstanceIdentifier> zero_time_id )
 {
-    auto r_call = MakePatternNode< SysCall >();
+    auto r_call = MakePatternNode< ExteriorCall >();
                     
     r_call->callee = r_dest;       
     r_call->operands = (zero_time_id);
@@ -219,7 +219,7 @@ LowerSCDelta::LowerSCDelta( TreePtr<SCFunction> s_delta,
 
 LowerTerminationFunction::LowerTerminationFunction( TreePtr<SCTree::TerminationFunction> s_tf )
 {
-    auto r_call = MakePatternNode< SysCall >();
+    auto r_call = MakePatternNode< ExteriorCall >();
     auto r_token = MakePatternNode< SpecificInstanceIdentifier >( s_tf->GetToken() ); 
     // TODO MapOperand args can't render without a function decl. Maybe add OperandSequence as an alternative? 
     auto exit_expr = MakePatternNode< Expression >(); 
@@ -239,7 +239,7 @@ LowerSCProcess::LowerSCProcess( TreePtr< SCTree::Process > s_scprocess )
     auto s_comp = MakePatternNode< Compound >();
     auto r_comp = MakePatternNode< Compound >();
     auto module = MakePatternNode< Module >();
-    auto r_pcall = MakePatternNode< SysMacroCall >();
+    auto r_pcall = MakePatternNode< MacroCall >();
     auto overcons = MakePatternNode< Delta<Instance> >();
     auto overtype = MakePatternNode< Delta<Type> >();
     auto s_cons = MakePatternNode< Instance >();
@@ -247,7 +247,7 @@ LowerSCProcess::LowerSCProcess( TreePtr< SCTree::Process > s_scprocess )
     auto process = MakePatternNode< Instance >();
     auto pre = MakePatternNode< Star<Statement> >();
     auto statements_negation = MakePatternNode< Negation<Statement> >();    
-    auto sn_pcall = MakePatternNode< SysMacroCall >();
+    auto sn_pcall = MakePatternNode< MacroCall >();
     auto id = MakePatternNode< InstanceIdentifier >(); 
     auto bases = MakePatternNode< Star<Base> >();
     auto ctype = MakePatternNode<Constructor>();
@@ -290,7 +290,7 @@ LowerSCProcess::LowerSCProcess( TreePtr< SCTree::Process > s_scprocess )
 LowerSCNotifyImmediate::LowerSCNotifyImmediate()
 {
     auto s_notify = MakePatternNode<NotifyImmediate>();
-    auto r_call = MakePatternNode<SysCall>();
+    auto r_call = MakePatternNode<ExteriorCall>();
     auto r_lookup = MakePatternNode<Lookup>();
     auto r_event = MakePatternNode<Event>();
     auto r_token = MakePatternNode< SpecificInstanceIdentifier >( s_notify->GetToken() );                
@@ -315,7 +315,7 @@ LowerSCNotifyDelta::LowerSCNotifyDelta(TreePtr<CPPTree::InstanceIdentifier> zero
     auto eexpr = MakePatternNode< TransformOf<Expression> >( &TypeOf::instance ); 
     auto event = MakePatternNode<Event>();
     
-    auto r_call = MakePatternNode<SysCall>();
+    auto r_call = MakePatternNode<ExteriorCall>();
     auto r_lookup = MakePatternNode<Lookup>();
     auto r_token = MakePatternNode< SpecificInstanceIdentifier >( s_notify->GetToken() );                
     //MakePatternNode< Expression > eexpr; 
@@ -337,7 +337,7 @@ LowerSCDeltaCount::LowerSCDeltaCount()
 {
     auto s_delta_count = MakePatternNode<DeltaCount>();
  
-    auto r_call = MakePatternNode<SysCall>();
+    auto r_call = MakePatternNode<ExteriorCall>();
     auto r_token = MakePatternNode< SpecificInstanceIdentifier >( s_delta_count->GetToken() );                
     //MakePatternNode< Expression > eexpr; 
             
@@ -354,9 +354,9 @@ AddIncludeSystemC::AddIncludeSystemC()
     auto r_program = MakePatternNode<Program>();
     auto decls = MakePatternNode<Star<Declaration>>();
     auto declstuff = MakePatternNode<Stuff<Declaration>>();
-    auto r_include = MakePatternNode<SysIncludeQuote>();
+    auto r_include = MakePatternNode<LocalInclude>();
     auto s_negation = MakePatternNode<Negation<Declaration>>();
-    auto sn_include = MakePatternNode<SysIncludeQuote>();
+    auto sn_include = MakePatternNode<LocalInclude>();
 
     s_program->members = (decls, declstuff);
     decls->restriction = s_negation;

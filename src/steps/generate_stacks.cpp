@@ -496,7 +496,7 @@ GenerateStacks::GenerateStacks()
     // top-level decls
     r_top_comp->members = (top_decls);
     r_index->type = r_index_type;
-    r_index_type->width = MakePatternNode<SpecificInteger>(32);
+    r_index_type->width = MakePatternNode<SpecificInteger>(TypeDb::int_bits);
     r_index_identifier->sources = (fi_id);
     r_index->identifier = r_index_identifier;
     r_index->constancy = MakePatternNode<NonConst>();
@@ -580,7 +580,7 @@ GenerateStacks::GenerateStacks()
     // top-level decls
     r_top_comp->members = ( top_decls, r_index );
     r_index->type = r_index_type;
-    r_index_type->width = MakePatternNode<SpecificInteger>(32);
+    r_index_type->width = MakePatternNode<SpecificInteger>(TypeDb::int_bits);
     r_index_identifier->sources = (fi->identifier);
     r_index->identifier = r_index_identifier;
     r_index->constancy = MakePatternNode<NonConst>();

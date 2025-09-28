@@ -10,6 +10,7 @@
 #define IS_SIGNED( T ) ((T)-1 < (T)0)
 
 const uint32_t TypeDb::char_bits = sizeof( char ) * 8;
+const uint32_t TypeDb::int_bits = sizeof( int ) * 8;
 const bool TypeDb::char_default_signed = IS_SIGNED(char);
 const uint32_t TypeDb::integral_bits[] =
 {

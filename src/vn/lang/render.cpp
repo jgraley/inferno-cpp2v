@@ -459,7 +459,7 @@ string Render::RenderSeqOperands( const Render::Kit &kit, Sequence<Expression> o
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderSysCall( const Render::Kit &kit, TreePtr<SysCall> call ) try
+string Render::RenderSysCall( const Render::Kit &kit, TreePtr<ExteriorCall> call ) try
 {
     string args_in_parens = RenderSeqOperands(kit, call->operands);
 
@@ -475,7 +475,7 @@ string Render::RenderSysCall( const Render::Kit &kit, TreePtr<SysCall> call ) tr
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderSysMacroCall( const Render::Kit &kit, TreePtr<SysMacroCall> smc ) try
+string Render::RenderSysMacroCall( const Render::Kit &kit, TreePtr<MacroCall> smc ) try
 {
 	list<string> renders; // TODO duplicated code, factor out into RenderSeqMacroArgs()
 	for( TreePtr<Node> mo : smc->macro_operands )
@@ -537,7 +537,7 @@ string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> ex
     }
     else if( auto c = DynamicTreePtrCast< Call >(expression) )
         return RenderCall( kit, c );
-    else if( auto sc = DynamicTreePtrCast< SysCall >(expression) )
+    else if( auto sc = DynamicTreePtrCast< ExteriorCall >(expression) )
         return RenderSysCall( kit, sc );
     else if( auto n = DynamicTreePtrCast< New >(expression) )
         return string (DynamicTreePtrCast<Global>(n->global) ? "::" : "") +
@@ -708,9 +708,9 @@ string Render::RenderInstanceProto( const Render::Kit &kit,
 
     ASSERT(o->type);
 
-	if( auto smf = TreePtr<SysMacroField>::DynamicCast(o) )
+	if( auto smf = TreePtr<MacroField>::DynamicCast(o) )
 	{
-		s += "SC_CTOR"; // TODO don't just hard-wire - put it in the SysMacroField, undeclared instance ID for now
+		s += "SC_CTOR"; // TODO don't just hard-wire - put it in the MacroField, undeclared instance ID for now
 		list<string> renders;
 		for( TreePtr<Node> mo : smf->macro_operands )
 		{
@@ -822,7 +822,7 @@ string Render::RenderInstance( const Render::Kit &kit, TreePtr<Instance> o,
     if( TreePtr<Expression> ei = DynamicTreePtrCast<Expression>( o->initialiser ) )
 	{
 		// Attempt direct initialisation
-		if( auto call = DynamicTreePtrCast<SysCall>( ei ) )
+		if( auto call = DynamicTreePtrCast<ExteriorCall>( ei ) )
 		{
 			if( auto lu = TreePtr<Lookup>::DynamicCast(call->callee) )
 				if( auto id = TreePtr<InstanceIdentifier>::DynamicCast(lu->member) )
@@ -858,7 +858,7 @@ bool Render::ShouldSplitInstance( const Render::Kit &kit, TreePtr<Instance> o )
     if( DynamicTreePtrCast<Callable>( o->type ) )
     {
 		// ----- functions -----
-		if( auto smf = TreePtr<SysMacroField>::DynamicCast(o) )
+		if( auto smf = TreePtr<MacroField>::DynamicCast(o) )
 			return false; // don't split these
 			
 		return true;
@@ -906,9 +906,9 @@ string Render::RenderRecordProto( const Render::Kit &kit, TreePtr<Record> record
 string Render::RenderPreProcDecl(const Render::Kit &kit, TreePtr<PreProcDecl> ppd ) try
 {
 	(void)kit;
-	if( auto si = TreePtr<SysIncludeAngle>::DynamicCast(ppd) )
+	if( auto si = TreePtr<SystemInclude>::DynamicCast(ppd) )
 	    return "#include <" + si->filename->GetString() + ">";
-	else if( auto si = TreePtr<SysIncludeQuote>::DynamicCast(ppd) )
+	else if( auto si = TreePtr<LocalInclude>::DynamicCast(ppd) )
 	    return "#include " + si->filename->GetToken();
 	else
 		return ERROR_UNSUPPORTED(ppd);	   
@@ -1081,7 +1081,7 @@ string Render::RenderStatement( const Render::Kit &kit, TreePtr<Statement> state
         return "break;\n";
     else if( DynamicTreePtrCast<Nop>(statement) )
         return ";\n";
-    else if( auto smc = DynamicTreePtrCast<SysMacroCall>(statement) )
+    else if( auto smc = DynamicTreePtrCast<MacroCall>(statement) )
         return RenderSysMacroCall( kit, smc );
     else
         return ERROR_UNSUPPORTED(statement);
