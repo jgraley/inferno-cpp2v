@@ -414,24 +414,17 @@ DEFAULT_CATCH_CLAUSE
 
 
 string Render::RenderMapArgs( const Render::Kit &kit, TreePtr<Call> call ) try
-{
-    string s;
-
+{   
     // If CallableParams, generate some arguments, resolving the order using the original function type
     TreePtr<Node> ctype = TypeOf::instance(call->callee, root_scope).GetTreePtr();
+    ASSERT( ctype );
 
 	Sequence<Declaration> sorted;	
 	if( auto f = TreePtr<CallableParams>::DynamicCast(ctype) )	
 		for( auto param : f->params )
 			sorted.push_back(param); 
 
-    s += "(";
-	
-    ASSERT( ctype );
-    s += RenderMapInOrder( kit, call, sorted );
-
-    s += ")";
-    return s;
+    return "(" + RenderMapInOrder( kit, call, sorted ) + ")";
 }
 DEFAULT_CATCH_CLAUSE
 
@@ -607,7 +600,7 @@ string Render::RenderMapInOrder( const Render::Kit &kit,
             // ...and not function instances
             if( !DynamicTreePtrCast<Callable>( i->type ) )
             {
-                // search init for matching member (TODO could avoid O(n^2) by exploiting the map)
+                // search init for matching member (not a map: this is a Collection of MapOperand nodes)
                 for( TreePtr<MapOperand> mi : ro->operands )
                 {
                     if( i->identifier == mi->key )
