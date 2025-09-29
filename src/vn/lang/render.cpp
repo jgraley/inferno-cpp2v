@@ -735,7 +735,8 @@ string Render::RenderInstanceProto( const Render::Kit &kit,
     TreePtr<Destructor> de = DynamicTreePtrCast<Destructor>(o->type);
     if( con || de )
     {
-        TreePtr<Record> rec = DynamicTreePtrCast<Record>( GetScope( root_scope, o->identifier ) );
+		// TODO use GetRecordDeclaration( Typeof( o->identifier ) ) and leave scopes out of it
+        TreePtr<Record> rec = DynamicTreePtrCast<Record>( TryGetScope( o->identifier ) );
         ASSERT( rec );        
         name += (de ? "~" : "");
         name += RenderIdentifier(kit, rec->identifier);
@@ -777,7 +778,7 @@ string Render::RenderInstance( const Render::Kit &kit, TreePtr<Instance> o,
     if( DynamicTreePtrCast<Callable>(o->type) )
     {
         // Establish the scope of the function
-        AutoPush< TreePtr<Node> > cs( scope_stack, GetScope( root_scope, o->identifier ) );
+        AutoPush< TreePtr<Node> > cs( scope_stack, TryGetScope( o->identifier ) );
 
         // Put the contents of the body into a Compound-like form even if there's only one
         // Statement there - this is because we will wrangle with them later
@@ -835,7 +836,7 @@ string Render::RenderInstance( const Render::Kit &kit, TreePtr<Instance> o,
 		}	
 							
 		// Render expression with an assignment
-		AutoPush< TreePtr<Node> > cs( scope_stack, GetScope( root_scope, o->identifier ) );		
+		AutoPush< TreePtr<Node> > cs( scope_stack, TryGetScope( o->identifier ) );		
 		return s + " = " + RenderExpression(kit, ei, Syntax::Production::ASSIGN) + ";\n";
 	}
 
