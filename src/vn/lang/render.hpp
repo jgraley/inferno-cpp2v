@@ -49,7 +49,7 @@ private:
     string RenderMakeRecord( const Render::Kit &kit, TreePtr<CPPTree::MakeRecord> ro );
     string RenderMapInOrder( const Render::Kit &kit, 
                              TreePtr<CPPTree::MapOperator> ro,
-                             TreePtr<Node> key );
+                             Sequence<CPPTree::Declaration> sorted );
     string RenderAccess( const Render::Kit &kit, TreePtr<CPPTree::AccessSpec> current_access );
     string RenderStorage( const Render::Kit &kit, TreePtr<CPPTree::Instance> st );
     void ExtractInits( const Render::Kit &kit, Sequence<CPPTree::Statement> &body, 

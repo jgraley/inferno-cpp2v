@@ -420,11 +420,15 @@ string Render::RenderMapArgs( const Render::Kit &kit, TreePtr<Call> call ) try
     // If CallableParams, generate some arguments, resolving the order using the original function type
     TreePtr<Node> ctype = TypeOf::instance(call->callee, root_scope).GetTreePtr();
 
+	Sequence<Declaration> sorted;	
+	if( auto f = TreePtr<CallableParams>::DynamicCast(ctype) )	
+		for( auto param : f->params )
+			sorted.push_back(param); 
+
     s += "(";
 	
     ASSERT( ctype );
-    if( TreePtr<CallableParams> cp = DynamicTreePtrCast<CallableParams>(ctype) )
-        s += RenderMapInOrder( kit, call, cp );
+    s += RenderMapInOrder( kit, call, sorted );
 
     s += ")";
     return s;
@@ -576,11 +580,13 @@ string Render::RenderMakeRecord( const Render::Kit &kit, TreePtr<MakeRecord> ro 
     ASSERT(id);
 
     TreePtr<Record> r = GetRecordDeclaration(kit, id).GetTreePtr();
+    // Make sure we have the same ordering as when the record was rendered
+	Sequence<Declaration> sorted = SortDecls( r->members, true, unique_ids );
 
     s += "(";
     s += RenderType( kit, ro->type, "", Syntax::Production::ANONYMOUS );
     s += "){ ";
-    s += RenderMapInOrder( kit, ro, r );
+    s += RenderMapInOrder( kit, ro, sorted );
     s += " }";
     return s;
 }
@@ -589,19 +595,8 @@ DEFAULT_CATCH_CLAUSE
 
 string Render::RenderMapInOrder( const Render::Kit &kit, 
                                  TreePtr<MapOperator> ro,
-                                 TreePtr<Node> key ) try
+                                 Sequence<Declaration> sorted ) try
 {	
-	Sequence<Declaration> sorted;
-	
-	// make record
-	if( auto r = TreePtr<Record>::DynamicCast(key) )	
-		sorted = SortDecls( r->members, true, unique_ids );
-
-	// calls
-	if( auto f = TreePtr<CallableParams>::DynamicCast(key) )	
-		for( auto param : f->params )
-			sorted.push_back(param); // no sorting required		
-
     string s;
     bool first = true;   
     for( TreePtr<Declaration> d : sorted )
