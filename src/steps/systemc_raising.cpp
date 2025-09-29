@@ -14,8 +14,8 @@ using namespace Steps;
 RaiseSCType::RaiseSCType( TreePtr< Type > lr_sctype )
 {
     auto over = MakePatternNode< Delta<Node> >();
-    auto s_scope = MakePatternNode< Scope >();
-    auto r_scope = MakePatternNode< Scope >();
+    auto s_scope = MakePatternNode< DeclScope >();
+    auto r_scope = MakePatternNode< DeclScope >();
     auto decls = MakePatternNode< Star<Declaration> >();
     auto s_usertype = MakePatternNode< UserType >();
     auto s_token = MakePatternNode< TypeIdentifierByNameAgent >( lr_sctype->GetToken() );                
@@ -36,8 +36,8 @@ RaiseSCType::RaiseSCType( TreePtr< Type > lr_sctype )
 RaiseSCHierarchicalClass::RaiseSCHierarchicalClass( TreePtr< SCRecord > lr_scclass )
 {
     auto over = MakePatternNode< Delta<Node> >();
-    auto s_scope = MakePatternNode< Scope >();
-    auto r_scope = MakePatternNode< Scope >();
+    auto s_scope = MakePatternNode< DeclScope >();
+    auto r_scope = MakePatternNode< DeclScope >();
     auto decls = MakePatternNode< Star<Declaration> >();
     auto l_decls = MakePatternNode< Star<Declaration> >();
     auto l_bases = MakePatternNode< Star<Base> >();
@@ -141,8 +141,8 @@ RaiseTerminationFunction::RaiseTerminationFunction( TreePtr<TerminationFunction>
 RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
 {
     auto over = MakePatternNode< Delta<Node> >();
-    auto s_scope = MakePatternNode< Scope >();
-    auto r_scope = MakePatternNode< Scope >();
+    auto s_scope = MakePatternNode< DeclScope >();
+    auto r_scope = MakePatternNode< DeclScope >();
     auto decls = MakePatternNode< Star<Declaration> >();
     auto l_decls = MakePatternNode< Star<Declaration> >();
     auto l_cdecls = MakePatternNode< Star<Declaration> >();

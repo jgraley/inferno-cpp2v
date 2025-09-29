@@ -31,7 +31,7 @@ public:
     TreePtr<Node> DoParse()
     {
         auto root = MakeTreeNode<Program>();
-        TreePtr<Scope> root_scope = DynamicTreePtrCast<Scope>(root);
+        TreePtr<DeclScope> root_scope = DynamicTreePtrCast<DeclScope>(root);
         ASSERT(root_scope)("Can only parse into a scope");
 
         clang::FileManager fm;
@@ -88,7 +88,7 @@ private:
     class InfernoAction: public clang::Action, public Traceable
     {
     public:
-        InfernoAction(TreePtr<Node> context, TreePtr<Scope> root_scope,
+        InfernoAction(TreePtr<Node> context, TreePtr<DeclScope> root_scope,
                       clang::IdentifierTable &, clang::Preprocessor &pp,
                       clang::TargetInfo &T) :
             preprocessor(pp), target_info(T), ident_track(context),
@@ -133,7 +133,7 @@ private:
         clang::Preprocessor &preprocessor;
         clang::TargetInfo &target_info;
 
-        stack<TreePtr<Scope> > inferno_scope_stack;
+        stack<TreePtr<DeclScope> > inferno_scope_stack;
         RCHold<Declaration, DeclTy *> hold_decl;
         RCHold<Base, DeclTy *> hold_base;
         RCHold<Expression, ExprTy *> hold_expr;
@@ -709,13 +709,15 @@ private:
         // 1. Inserts a stored decl if there is one in decl_to_insert
         void IssueDeclaration(clang::Scope *S, TreePtr<Declaration> d)
         {
-            int os = inferno_scope_stack.top()->members.size();
+			auto ds = TreePtr<DeclScope>::DynamicCast( inferno_scope_stack.top() );
+			ASSERT( ds ); // would fail if we pushed a parameters scope
+            int os = ds->members.size();
             // Did we leave a record decl lying around to insert later? If so, pack it together with
             // the current instance decl, for insertion into the code sequence.
             TRACE("Issuing instance decl ")(*d)(" scope flags %x ", S->getFlags());
             if (decl_to_insert)
             {
-                inferno_scope_stack.top()->members.insert(decl_to_insert);
+                ds->members.insert(decl_to_insert);
                 backing_ordering[inferno_scope_stack.top()].push_back(
                         decl_to_insert);
                 backing_paired_decl[d] = decl_to_insert;
@@ -724,9 +726,9 @@ private:
             }
 
             TRACE("now insert record decl\n");
-            inferno_scope_stack.top()->members.insert(d);
+            ds->members.insert(d);
             backing_ordering[inferno_scope_stack.top()].push_back(d);
-            TRACE("From %d to %d decls\n", os, inferno_scope_stack.top()->members.size() );
+            TRACE("From %d to %d decls\n", os, ds->members.size() );
         }
 
         virtual DeclTy *ActOnDeclarator(clang::Scope *S, clang::Declarator &D,
@@ -911,7 +913,7 @@ private:
         // ActOnFinishFunctionBody() as a hierarchy of Compounds.
         // If we tried to do this ourselves we'd lose the nested compound
         // statement hierarchy.
-        inferno_scope_stack.push( MakeTreeNode<Scope>() );
+        inferno_scope_stack.push( MakeTreeNode<DeclScope>() );
  
         return hold_decl.ToRaw( o );
     }
@@ -1808,7 +1810,6 @@ private:
     {
         // Get a reference to the ordered list of members for this scope from a backing list
         Sequence<Declaration> &ordered = backing_ordering.at(key);
-        //TRACE("%p %p\n", &scope->members, scope.get());
 
         // Go over the entire scope, keeping track of where we are in the Sequence
         Sequence<Expression>::iterator seq_it = seq.begin();
@@ -1929,12 +1930,14 @@ private:
 
         // See if the declaration is already there (due to forwarding using
         // incomplete struct). If so, do not add it again
-        Collection<Declaration> &sd = inferno_scope_stack.top()->members;
+		auto ds = TreePtr<DeclScope>::DynamicCast( inferno_scope_stack.top() );
+		ASSERT( ds ); // would fail if we pushed a parameters scope
+        Collection<Declaration> &sd = ds->members;
         for( const TreePtr<Declaration> &p : sd ) // TODO find()?
         if( TreePtr<Declaration>(p) == d )
         return hold_decl.ToRaw( d );
 
-        inferno_scope_stack.top()->members.insert( d );
+        ds->members.insert( d );
         backing_ordering[inferno_scope_stack.top()].push_back( d );
         return hold_decl.ToRaw( d );
     }

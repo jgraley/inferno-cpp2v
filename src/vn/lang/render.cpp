@@ -52,27 +52,16 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern )
 	       RenderToString( pattern->GetReplacePattern() );
 }
 
-// Note: this does not modify the program tree, and that can be checked by 
-// defining TEST_FOR_UNMODIFIED_TREE and retesting everything.
-//#define TEST_FOR_UNMODIFIED_TREE
+
 string Render::RenderToString( TreePtr<Node> root )
 {   
     DefaultTransUtils utils(root);
     Render::Kit kit { &utils };
     
-#ifdef TEST_FOR_UNMODIFIED_TREE    
-    temp_old_root = root;
-    root = Duplicate::DuplicateSubtree(root);
-#endif
-    
     // Top level is expected to be a scope of some kind
     root_scope = dynamic_pointer_cast<Scope>(root);
     if( !root_scope )
 		return ERROR_UNKNOWN( Trace(root) );
-
-#ifdef TEST_FOR_UNMODIFIED_TREE   
-    bool before = sc(root, temp_old_root);  
-#endif
     
     // Track scopes for name resolution
     AutoPush< TreePtr<Node> > cs( scope_stack, root_scope );
@@ -80,16 +69,10 @@ string Render::RenderToString( TreePtr<Node> root )
     // Make the identifiers unique (does its own tree walk)
     unique_ids = UniquifyIdentifiers::UniquifyAll( kit, root );
 
-    string s;
-
-    s += RenderScope( kit, root_scope ); // gets the .hpp stuff directly
-
-    s += deferred_decls; // these could go in a .cpp file
-
-#ifdef TEST_FOR_UNMODIFIED_TREE   
-    ASSERT( sc(root, temp_old_root) == before );        
-#endif 
-	return s;
+	if( auto prog = TreePtr<Program>::DynamicCast(root) )
+		return RenderProgram( kit, prog );
+	else
+		return ERROR_UNKNOWN( Trace(root) );
 }
 
 
@@ -106,6 +89,19 @@ void Render::WriteToFile( string s )
         fputs( s.c_str(), fp );
         fclose( fp );
     }        
+}
+
+
+string Render::RenderProgram( const Render::Kit &kit, TreePtr<Program> program )
+{
+
+    string s;
+
+    s += RenderDeclScope( kit, program ); // gets the .hpp stuff directly
+
+    s += deferred_decls; // these could go in a .cpp file
+    
+    return s;
 }
 
 
@@ -146,28 +142,21 @@ string Render::RenderIdentifier( const Render::Kit &kit, TreePtr<Identifier> id 
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderScopePrefix( const Render::Kit &kit, TreePtr<Identifier> id, Syntax::Production surround_prod ) try
+string Render::RenderDeclScopePrefix( const Render::Kit &kit, TreePtr<Identifier> id, Syntax::Production surround_prod ) try
 {
-	TreePtr<Node> scope;
-	try
-	{
-		scope = GetScope( root_scope, id );
-	}
- 	catch( ScopeNotFoundMismatch & )
- 	{
-		// Assume that specific identifiers added by SC lowering are all in global scope eg from a #include
-		return "";
-	}
+	TreePtr<Node> scope = TryGetScope(id);
        
     //TRACE("%p %p %p\n", program.get(), scope.get(), scope_stack.top().get() );
-    if( scope == scope_stack.top() )
+	if( !scope )
+		return ""; // either we're not in a scope or id is undeclared
+    else if( scope == scope_stack.top() )
         return ""; // local scope
     else if( scope == root_scope )
         return " ::";
     else if( TreePtr<Enum> e = DynamicTreePtrCast<Enum>( scope ) ) // <- for enum
-        return RenderScopePrefix( kit, e->identifier, surround_prod );    // omit scope for the enum itself
+        return RenderDeclScopePrefix( kit, e->identifier, surround_prod );    // omit scope for the enum itself
     else if( TreePtr<Record> r = DynamicTreePtrCast<Record>( scope ) ) // <- for class, struct, union
-        return RenderScopedIdentifier( kit, r->identifier, Syntax::Production::SCOPE_RES ) + "::";
+        return RenderDeclScopedIdentifier( kit, r->identifier, Syntax::Production::SCOPE_RES ) + "::";
     else if( DynamicTreePtrCast<CallableParams>( scope ) ||  // <- this is for params
              DynamicTreePtrCast<Compound>( scope ) ||    // <- this is for locals in body
              DynamicTreePtrCast<StatementExpression>( scope ) )    // <- this is for locals in body
@@ -178,12 +167,12 @@ string Render::RenderScopePrefix( const Render::Kit &kit, TreePtr<Identifier> id
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderScopedIdentifier( const Render::Kit &kit, TreePtr<Identifier> id, Syntax::Production surround_prod ) try
+string Render::RenderDeclScopedIdentifier( const Render::Kit &kit, TreePtr<Identifier> id, Syntax::Production surround_prod ) try
 {
 	if( Syntax::GetPrecedence(Syntax::Production::SCOPE_RES) < Syntax::GetPrecedence(surround_prod) )
-		return "(" + RenderScopedIdentifier(kit, id, Syntax::Production::BOOT_EXPR) + ")";
+		return "(" + RenderDeclScopedIdentifier(kit, id, Syntax::Production::BOOT_EXPR) + ")";
 
-    string s = RenderScopePrefix( kit, id, surround_prod );   
+    string s = RenderDeclScopePrefix( kit, id, surround_prod );   
     s += RenderIdentifier( kit, id );
 
     TRACE("Render scoped identifier %s\n", s.c_str() );
@@ -315,7 +304,7 @@ string Render::RenderType( const Render::Kit &kit, TreePtr<Type> type, string ob
     else if( TreePtr<Typedef> t = DynamicTreePtrCast< Typedef >(type) )
         return const_str + RenderIdentifier(kit, t->identifier) + sobject;
     else if( TreePtr<SpecificTypeIdentifier> ti = DynamicTreePtrCast< SpecificTypeIdentifier >(type) )
-        return const_str + RenderScopedIdentifier(kit, ti, Syntax::Production::BOOT_EXPR) + sobject;
+        return const_str + RenderDeclScopedIdentifier(kit, ti, Syntax::Production::BOOT_EXPR) + sobject;
     else if( dynamic_pointer_cast<Labeley>(type) )
         return const_str + "void *" + object;
     else
@@ -389,7 +378,7 @@ string Render::RenderOperator( const Render::Kit &kit, TreePtr<Operator> op, Seq
         /* Prevent interpretation as a member function pointer literal */ \
         if( auto ao = TreePtr<AddressOf>::DynamicCast(op) ) \
 			if( auto id = TreePtr<Identifier>::DynamicCast(*operands_it) ) \
-			    paren = !RenderScopePrefix( kit, id, Syntax::Production::PROD ).empty(); \
+			    paren = !RenderDeclScopePrefix( kit, id, Syntax::Production::PROD ).empty(); \
         s += (paren?"(":"") + RenderExpression( kit, *operands_it, Syntax::Production::PROD) + (paren?")":""); \
     }
 #define POSTFIX(TOK, TEXT, NODE_SHAPED, BASE, CAT, PROD, ASSOC) \
@@ -514,7 +503,7 @@ string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> ex
     {
         AutoPush< TreePtr<Node> > cs( scope_stack, ce );
         string s = "({ ";
-        s += RenderScope( kit, ce ); // Must do this first to populate backing list
+        s += RenderDeclScope( kit, ce ); // Must do this first to populate backing list
 		for( TreePtr<Statement> st : ce->statements )    
 			s += RenderStatement( kit, st );    
         return s + "})";
@@ -522,7 +511,7 @@ string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> ex
     else if( auto li = DynamicTreePtrCast< SpecificLabelIdentifier >(expression) )
         return "&&" + RenderIdentifier( kit, li ); // label-as-variable (GCC extension)             
     else if( auto ii = DynamicTreePtrCast< SpecificInstanceIdentifier >(expression) )
-        return RenderScopedIdentifier( kit, ii, surround_prod );
+        return RenderDeclScopedIdentifier( kit, ii, surround_prod );
     else if( auto pot = DynamicTreePtrCast< SizeOf >(expression) )
         return "sizeof(" + RenderType( kit, pot->operand, "", Syntax::Production::ANONYMOUS ) + ")";               
     else if( auto pot = DynamicTreePtrCast< AlignOf >(expression) )
@@ -553,7 +542,7 @@ string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> ex
                " " + RenderExpression( kit, d->pointer, Syntax::Production::PREFIX );
     else if( auto lu = DynamicTreePtrCast< Lookup >(expression) )
         return RenderExpression( kit, lu->object, Syntax::Production::POSTFIX ) + "." +
-               RenderScopedIdentifier( kit, lu->member, Syntax::BoostPrecedence(Syntax::Production::POSTFIX) );
+               RenderDeclScopedIdentifier( kit, lu->member, Syntax::BoostPrecedence(Syntax::Production::POSTFIX) );
     else if( auto c = DynamicTreePtrCast< Cast >(expression) )
         return "(" + RenderType( kit, c->type, "", Syntax::Production::ANONYMOUS ) + ")" +
                RenderExpression( kit, c->operand, Syntax::Production::PREFIX );
@@ -738,7 +727,7 @@ string Render::RenderInstanceProto( const Render::Kit &kit,
             constant = true;
 
     if( out_of_line )
-        name += RenderScopePrefix(kit, o->identifier, Syntax::Production::SCOPE_RES);
+        name += RenderDeclScopePrefix(kit, o->identifier, Syntax::Production::SCOPE_RES);
     else // in-line
         s += RenderStorage(kit, o);
  
@@ -989,7 +978,7 @@ string Render::RenderDeclaration( const Render::Kit &kit, TreePtr<Declaration> d
             return ERROR_UNSUPPORTED(declaration);
 
 		if( a )
-			s += RenderScope( kit, r, a );			
+			s += RenderDeclScope( kit, r, a );			
 		else
 			s += RenderEnumBody( kit, r->members );
 			
@@ -1022,7 +1011,7 @@ string Render::RenderStatement( const Render::Kit &kit, TreePtr<Statement> state
     {
         AutoPush< TreePtr<Node> > cs( scope_stack, c );
         string s = "{\n";
-        s += RenderScope( kit, c ); // Must do this first to populate backing list
+        s += RenderDeclScope( kit, c ); // Must do this first to populate backing list
 		for( TreePtr<Statement> st : c->statements )    
 			s += RenderStatement( kit, st );    
         return s + "}\n";
@@ -1201,9 +1190,9 @@ string Render::MaybeRenderAccessColon( const Render::Kit &kit, TreePtr<AccessSpe
 }								  
 
 
-string Render::RenderScope( const Render::Kit &kit, 
-							TreePtr<Scope> key,
-							TreePtr<AccessSpec> init_access ) try
+string Render::RenderDeclScope( const Render::Kit &kit, 
+					    		TreePtr<DeclScope> key,
+						    	TreePtr<AccessSpec> init_access ) try
 {
     TRACE();
 
@@ -1278,8 +1267,24 @@ string Render::RenderParams( const Render::Kit &kit,
 DEFAULT_CATCH_CLAUSE
 
 
+TreePtr<Scope> Render::TryGetScope( TreePtr<Identifier> id )
+{
+	if( !root_scope )
+		return nullptr; // We aren't even in any scopes
+
+	try
+	{
+		return GetScope( root_scope, id );
+	}
+ 	catch( ScopeNotFoundMismatch & )
+ 	{
+		// There is a scope but our id us not in it, maybe it was undeclared?
+		return nullptr;
+	}
+}
+
+
 string Render::RenderMismatchException( string fname, const Mismatch &me )
 {
     return "«"+fname+"() error: "+me.What()+"»";
 }
-

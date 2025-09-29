@@ -83,19 +83,25 @@ struct Declaration : virtual Node
 };
 
 /// A scope is any space in a program where declarations may appear. Declarations
-/** in the collection are associated with the scope node but unordered. Scopes
- are used for name resolution during parse. */
+/** are associated with the scope node but unordered. Scopes are used for name 
+ * resolution during parse. */
 struct Scope : virtual Node
 {
     NODE_FUNCTIONS
-    Collection<Declaration> members; /// The declarations in this scope
     virtual string GetColour() const { return "/set28/4"; }
+};
+
+/// A scope in which we provide a collection of declarations.
+struct DeclScope : virtual Scope
+{
+    NODE_FUNCTIONS
+    Collection<Declaration> members; /// The declarations in this scope
 };
 
 /// The top level of a program
 /** The top level of a program is considered a collection of declarations.
  main() would typically be a function instance somewhere in this collection. */
-struct Program : Scope { NODE_FUNCTIONS_FINAL };
+struct Program : DeclScope { NODE_FUNCTIONS_FINAL };
 
 /// Indicates that the node cannot be combinationalised
 struct Uncombable : virtual Node { NODE_FUNCTIONS };
@@ -496,7 +502,7 @@ struct Callable : Type
 /// Anything that can be called and has parameters
 /** Parameters are generated as a sequence of automatic variable/object 
  declarations (ie Instances) inside the Scope we derive from. */
-struct CallableParams : Callable
+struct CallableParams : Callable, Scope
 {
     NODE_FUNCTIONS
     Collection<Declaration> params; // TODO be Parameter #803
@@ -657,7 +663,7 @@ struct Typedef : UserType
  or Static) is in the Scope. They can be variables/objects in all 
  cases and additionally Callable instances in Struct/Class. */
 struct Record : UserType,
-                Scope // Member declarations go in here
+                DeclScope // Member declarations go in here
 {
     NODE_FUNCTIONS
     virtual string GetColour() const { return UserType::GetColour(); } // UserType wins
@@ -912,7 +918,7 @@ struct AlignOf : TypeOperator
 /** Note that local declarations
  can go in the members of the Scope or in the statements (since Declaration
  derives from Statement). There is a sequence point between each statement. */
-struct SequentialScope : Scope,
+struct SequentialScope : DeclScope,
                          virtual Statement
 {
     NODE_FUNCTIONS

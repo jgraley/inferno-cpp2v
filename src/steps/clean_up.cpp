@@ -436,8 +436,8 @@ CleanupVoidStatementExpression::CleanupVoidStatementExpression()
 CleanupUnusedVariables::CleanupUnusedVariables()
 {
     auto s_all = MakePatternNode< Conjunction<Scope> >();
-    auto s_scope = MakePatternNode<Scope>();
-    auto r_scope = MakePatternNode<Scope>();
+    auto s_scope = MakePatternNode<DeclScope>();
+    auto r_scope = MakePatternNode<DeclScope>();
     auto over_scope = MakePatternNode< Delta<Scope> >();
     auto decls = MakePatternNode< Star<Declaration> >();
     auto inst = MakePatternNode<Instance>();

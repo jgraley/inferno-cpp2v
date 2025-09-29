@@ -10,7 +10,7 @@ using namespace CPPTree;
 // back-pointers.
 //
 // TODO take id as SpecificIdentifier, not Identifier, so do not need to ASSERT check this
-TreePtr<Node> GetScope( TreePtr<Scope> context, TreePtr<Identifier> id )
+TreePtr<Scope> GetScope( TreePtr<Scope> context, TreePtr<Identifier> id )
 {
     TRACE("Trying program (global)\n" );
 
@@ -18,20 +18,20 @@ TreePtr<Node> GetScope( TreePtr<Scope> context, TreePtr<Identifier> id )
     Walk walkr(context, nullptr, nullptr);
     for( const TreePtrInterface &n : walkr )
     {
-        if( auto s = DynamicTreePtrCast<Scope>((TreePtr<Node>)n) )
+        if( auto ds = DynamicTreePtrCast<DeclScope>((TreePtr<Node>)n) )
         {
-            for( TreePtr<Declaration> d : s->members )
+            for( TreePtr<Declaration> d : ds->members )
             {
                 if( id == GetIdentifierOfDeclaration( d ).GetTreePtr() ) 
-                    return s;
+                    return ds;
             }
         }
-        else if( auto c = DynamicTreePtrCast<CallableParams>((TreePtr<Node>)n) )
+        else if( auto cp = DynamicTreePtrCast<CallableParams>((TreePtr<Node>)n) )
         {		
-            for( TreePtr<Declaration> p : c->params )
+            for( TreePtr<Declaration> p : cp->params )
             {
                 if( id == GetIdentifierOfDeclaration( p ).GetTreePtr() ) 
-                    return c;
+                    return cp;
             }
    		} 
     }

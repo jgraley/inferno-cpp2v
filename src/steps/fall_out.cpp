@@ -24,8 +24,8 @@ struct StateLabel : Label
 
 PlaceLabelsInArray::PlaceLabelsInArray()
 {
-    auto s_module = MakePatternNode<Scope>();
-    auto r_module = MakePatternNode<Scope>();
+    auto s_module = MakePatternNode<DeclScope>();
+    auto r_module = MakePatternNode<DeclScope>();
     auto gg = MakePatternNode< GreenGrass<Type> >();
     auto func = MakePatternNode<Field>();
     auto m_func = MakePatternNode<Field>();
@@ -79,7 +79,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     auto l_over = MakePatternNode< Delta<Statement> >();
     auto l_not = MakePatternNode< Negation<Statement> >();
     auto m_stuff_func = MakePatternNode< Stuff<Scope> >();
-    auto l_module = MakePatternNode<Scope>();
+    auto l_module = MakePatternNode<DeclScope>();
     auto l_func = MakePatternNode<Field>();
     auto r_lmap = MakePatternNode<Static>();
     auto l_lmap = MakePatternNode<Static>();

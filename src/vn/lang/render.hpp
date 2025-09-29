@@ -30,10 +30,11 @@ private:
     string deferred_decls;
     stack< TreePtr<Node> > scope_stack;
     UniquifyIdentifiers::IdentifierNameMap unique_ids;
+	string RenderProgram( const Render::Kit &kit, TreePtr<CPPTree::Program> program );
     string RenderLiteral( const Render::Kit &kit, TreePtr<CPPTree::Literal> sp );
     string RenderIdentifier( const Render::Kit &kit, TreePtr<CPPTree::Identifier> id );
-    string RenderScopePrefix( const Render::Kit &kit, TreePtr<CPPTree::Identifier> id, Syntax::Production surround_prod );
-    string RenderScopedIdentifier( const Render::Kit &kit, TreePtr<CPPTree::Identifier> id, Syntax::Production surround_prod );
+    string RenderDeclScopePrefix( const Render::Kit &kit, TreePtr<CPPTree::Identifier> id, Syntax::Production surround_prod );
+    string RenderDeclScopedIdentifier( const Render::Kit &kit, TreePtr<CPPTree::Identifier> id, Syntax::Production surround_prod );
     string RenderIntegralType( const Render::Kit &kit, TreePtr<CPPTree::Integral> type, string object=string() );
     string RenderFloatingType( const Render::Kit &kit, TreePtr<CPPTree::Floating> type );
     string RenderType( const Render::Kit &kit, TreePtr<CPPTree::Type> type, string object, Syntax::Production object_prod, 
@@ -76,13 +77,15 @@ private:
 			  			           TreePtr<CPPTree::AccessSpec> *current_access );
 	string MaybeRenderAccessColon( const Render::Kit &kit, TreePtr<CPPTree::AccessSpec> this_access,
 			  			           TreePtr<CPPTree::AccessSpec> *current_access );
-    string RenderScope( const Render::Kit &kit, 
-						TreePtr<CPPTree::Scope> key,
-						TreePtr<CPPTree::AccessSpec> init_access = TreePtr<CPPTree::AccessSpec>() );
+    string RenderDeclScope( const Render::Kit &kit, 
+							TreePtr<CPPTree::DeclScope> key,
+							TreePtr<CPPTree::AccessSpec> init_access = TreePtr<CPPTree::AccessSpec>() );
 
 	string RenderParams( const Render::Kit &kit, 
 						 TreePtr<CPPTree::CallableParams> key);
 						 
+	TreePtr<CPPTree::Scope> TryGetScope( TreePtr<CPPTree::Identifier> id );
+							 
 	string RenderMismatchException( string fname, const Mismatch &me );
     const string outfile;                                     
     SimpleCompare sc;
