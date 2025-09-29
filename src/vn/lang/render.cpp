@@ -836,7 +836,7 @@ string Render::RenderInstance( const Render::Kit &kit, TreePtr<Instance> o,
 		}	
 							
 		// Render expression with an assignment
-		AutoPush< TreePtr<Node> > cs( scope_stack, TryGetScope( o->identifier ) );		
+		//AutoPush< TreePtr<Node> > cs( scope_stack, TryGetScope( o->identifier ) );		
 		return s + " = " + RenderExpression(kit, ei, Syntax::Production::ASSIGN) + ";\n";
 	}
 
