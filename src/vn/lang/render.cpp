@@ -62,10 +62,7 @@ string Render::RenderToString( TreePtr<Node> root )
     root_scope = dynamic_pointer_cast<Scope>(root);
     if( !root_scope )
 		return ERROR_UNKNOWN( Trace(root) );
-    
-    // Track scopes for name resolution
-    AutoPush< TreePtr<Node> > cs( scope_stack, root_scope );
-    
+        
     // Make the identifiers unique (does its own tree walk)
     unique_ids = UniquifyIdentifiers::UniquifyAll( kit, root );
 
@@ -94,11 +91,12 @@ void Render::WriteToFile( string s )
 
 string Render::RenderProgram( const Render::Kit &kit, TreePtr<Program> program )
 {
-
     string s;
 
-    s += RenderDeclScope( kit, program ); // gets the .hpp stuff directly
+    // Track scopes for name resolution
+    AutoPush< TreePtr<Node> > cs( scope_stack, root_scope );
 
+    s += RenderDeclScope( kit, program ); // gets the .hpp stuff directly
     s += deferred_decls; // these could go in a .cpp file
     
     return s;
@@ -836,7 +834,6 @@ string Render::RenderInstance( const Render::Kit &kit, TreePtr<Instance> o,
 		}	
 							
 		// Render expression with an assignment
-		//AutoPush< TreePtr<Node> > cs( scope_stack, TryGetScope( o->identifier ) );		
 		return s + " = " + RenderExpression(kit, ei, Syntax::Production::ASSIGN) + ";\n";
 	}
 
