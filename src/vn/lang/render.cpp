@@ -98,10 +98,11 @@ string Render::RenderProgram( const Render::Kit &kit, TreePtr<Program> program )
     // Track scopes for name resolution
     s += RenderDeclScope( kit, program ); // gets the .hpp stuff directly
     
-    for( TreePtr<Instance> o : deferred_instances )
-		s += "\n" + RenderInstance( kit, o, true ); // these could go in a .cpp file
-    // Avoid memory leak
-    deferred_instances.clear(); 
+    while( !deferred_instances.empty() )
+	{
+		s += "\n" + RenderInstance( kit, deferred_instances.front(), true ); // these could go in a .cpp file
+		deferred_instances.pop();
+	}
     
     return s;
 }
@@ -925,7 +926,7 @@ string Render::RenderDeclaration( const Render::Kit &kit, TreePtr<Declaration> d
         {
             s += RenderInstanceProto( kit, o, false ) + ";\n";
 			// Split out the definition of the instance for rendering later at to level
-            deferred_instances.push_back(o);
+            deferred_instances.push(o);
         }
         else
         {
