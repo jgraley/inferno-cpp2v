@@ -94,8 +94,6 @@ string Render::RenderProgram( const Render::Kit &kit, TreePtr<Program> program )
     string s;
 
     // Track scopes for name resolution
-    AutoPush< TreePtr<Node> > cs( scope_stack, root_scope );
-
     s += RenderDeclScope( kit, program ); // gets the .hpp stuff directly
     s += deferred_decls; // these could go in a .cpp file
     
@@ -499,7 +497,6 @@ string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> ex
         return string();
     else if( auto ce = DynamicTreePtrCast< StatementExpression >(expression) )
     {
-        AutoPush< TreePtr<Node> > cs( scope_stack, ce );
         string s = "({ ";
         s += RenderDeclScope( kit, ce ); // Must do this first to populate backing list
 		for( TreePtr<Statement> st : ce->statements )    
@@ -961,7 +958,6 @@ string Render::RenderDeclaration( const Render::Kit &kit, TreePtr<Declaration> d
 		}
 
 		// Members
-		AutoPush< TreePtr<Node> > cs( scope_stack, r );
 		s += "\n{\n";
         TreePtr<AccessSpec> a;
         if( DynamicTreePtrCast< Class >(r) )
@@ -978,7 +974,7 @@ string Render::RenderDeclaration( const Render::Kit &kit, TreePtr<Declaration> d
 		if( a )
 			s += RenderDeclScope( kit, r, a );			
 		else
-			s += RenderEnumBody( kit, r->members );
+			s += RenderEnumBodyScope( kit, r ); 
 			
 		s += "};\n";
         // Add blank lines before and after
@@ -1007,7 +1003,6 @@ string Render::RenderStatement( const Render::Kit &kit, TreePtr<Statement> state
         return RenderDeclaration( kit, d );
     else if( TreePtr<Compound> c = DynamicTreePtrCast< Compound >(statement) )
     {
-        AutoPush< TreePtr<Node> > cs( scope_stack, c );
         string s = "{\n";
         s += RenderDeclScope( kit, c ); // Must do this first to populate backing list
 		for( TreePtr<Statement> st : c->statements )    
@@ -1105,13 +1100,15 @@ string Render::RenderConstructorInitList( const Render::Kit &kit,
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderEnumBody( const Render::Kit &kit, 
-                               Collection<Declaration> spe ) try
+string Render::RenderEnumBodyScope( const Render::Kit &kit, 
+                                    TreePtr<CPPTree::Record> record ) try
 {
     TRACE();
+	AutoPush< TreePtr<Node> > cs( scope_stack, record );
+    
     string s;
     bool first = true;
-    for( TreePtr<Declaration> pe : spe )
+    for( TreePtr<Declaration> pe : record->members )
     {
 		if( !first )
 			s += ",\n";
@@ -1189,12 +1186,14 @@ string Render::MaybeRenderAccessColon( const Render::Kit &kit, TreePtr<AccessSpe
 
 
 string Render::RenderDeclScope( const Render::Kit &kit, 
-					    		TreePtr<DeclScope> key,
+					    		TreePtr<DeclScope> decl_scope,
 						    	TreePtr<AccessSpec> init_access ) try
 {
     TRACE();
 
-    Sequence<Declaration> sorted = SortDecls( key->members, true, unique_ids );
+    AutoPush< TreePtr<Node> > cs( scope_stack, decl_scope );
+
+    Sequence<Declaration> sorted = SortDecls( decl_scope->members, true, unique_ids );
 
     // Emit an incomplete for each record and preproc
     string s;

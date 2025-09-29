@@ -71,14 +71,14 @@ private:
     string RenderStatement( const Render::Kit &kit, TreePtr<CPPTree::Statement> statement );
  	string RenderConstructorInitList( const Render::Kit &kit, 
 									  Sequence<CPPTree::Statement> spe );
-	string RenderEnumBody( const Render::Kit &kit, Collection<CPPTree::Declaration> spe);
+	string RenderEnumBodyScope( const Render::Kit &kit, TreePtr<CPPTree::Record> record );
     string RenderOperandSequence( const Render::Kit &kit, Sequence<CPPTree::Expression> spe );
 	string MaybeRenderFieldAccess( const Render::Kit &kit, TreePtr<CPPTree::Declaration> declaration,
 			  			           TreePtr<CPPTree::AccessSpec> *current_access );
 	string MaybeRenderAccessColon( const Render::Kit &kit, TreePtr<CPPTree::AccessSpec> this_access,
 			  			           TreePtr<CPPTree::AccessSpec> *current_access );
     string RenderDeclScope( const Render::Kit &kit, 
-							TreePtr<CPPTree::DeclScope> key,
+							TreePtr<CPPTree::DeclScope> decl_scope,
 							TreePtr<CPPTree::AccessSpec> init_access = TreePtr<CPPTree::AccessSpec>() );
 
 	string RenderParams( const Render::Kit &kit, 
