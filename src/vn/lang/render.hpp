@@ -27,7 +27,8 @@ public:
 private:
     TreePtr<Node> temp_old_root;
     TreePtr<CPPTree::Scope> root_scope;
-    string deferred_decls;
+    Sequence<CPPTree::Instance> deferred_decls;
+    //string deferred_decls;    
     stack< TreePtr<Node> > scope_stack;
     UniquifyIdentifiers::IdentifierNameMap unique_ids;
 	string RenderProgram( const Render::Kit &kit, TreePtr<CPPTree::Program> program );

@@ -93,9 +93,14 @@ string Render::RenderProgram( const Render::Kit &kit, TreePtr<Program> program )
 {
     string s;
 
+    AutoPush< TreePtr<Node> > cs( scope_stack, program );
+
     // Track scopes for name resolution
     s += RenderDeclScope( kit, program ); // gets the .hpp stuff directly
-    s += deferred_decls; // these could go in a .cpp file
+    
+    for( TreePtr<Instance> o : deferred_decls )
+		s += "\n" + RenderInstance( kit, o, true );
+   // s += deferred_decls; // these could go in a .cpp file
     
     return s;
 }
@@ -498,6 +503,7 @@ string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> ex
     else if( auto ce = DynamicTreePtrCast< StatementExpression >(expression) )
     {
         string s = "({ ";
+		AutoPush< TreePtr<Node> > cs( scope_stack, ce );
         s += RenderDeclScope( kit, ce ); // Must do this first to populate backing list
 		for( TreePtr<Statement> st : ce->statements )    
 			s += RenderStatement( kit, st );    
@@ -766,7 +772,7 @@ string Render::RenderInstance( const Render::Kit &kit, TreePtr<Instance> o,
                                bool out_of_line ) try
 {
     string s = RenderInstanceProto( kit, o, out_of_line );
-	    
+
     if( DynamicTreePtrCast<Uninitialised>(o->initialiser) )
         return s + ";\n"; // Don't render any initialiser    
     
@@ -810,7 +816,7 @@ string Render::RenderInstance( const Render::Kit &kit, TreePtr<Instance> o,
         // Surround functions with blank lines        
         return '\n' + s + '\n';
     }
-    
+
     if( TreePtr<Expression> ei = DynamicTreePtrCast<Expression>( o->initialiser ) )
 	{
 		// Attempt direct initialisation
@@ -919,7 +925,8 @@ string Render::RenderDeclaration( const Render::Kit &kit, TreePtr<Declaration> d
             s += RenderInstanceProto( kit, o, false ) + ";\n";
             {
                 AutoPush< TreePtr<Node> > cs( scope_stack, root_scope );
-                deferred_decls += string("\n") + RenderInstance( kit, o, true );
+                deferred_decls.push_back(o);
+                //deferred_decls += string("\n") + RenderInstance( kit, o, true );
             }
         }
         else
@@ -971,6 +978,7 @@ string Render::RenderDeclaration( const Render::Kit &kit, TreePtr<Declaration> d
         else
             return ERROR_UNSUPPORTED(declaration);
 
+		AutoPush< TreePtr<Node> > cs( scope_stack, r );
 		if( a )
 			s += RenderDeclScope( kit, r, a );			
 		else
@@ -1004,6 +1012,7 @@ string Render::RenderStatement( const Render::Kit &kit, TreePtr<Statement> state
     else if( TreePtr<Compound> c = DynamicTreePtrCast< Compound >(statement) )
     {
         string s = "{\n";
+		AutoPush< TreePtr<Node> > cs( scope_stack, c );
         s += RenderDeclScope( kit, c ); // Must do this first to populate backing list
 		for( TreePtr<Statement> st : c->statements )    
 			s += RenderStatement( kit, st );    
@@ -1103,9 +1112,7 @@ DEFAULT_CATCH_CLAUSE
 string Render::RenderEnumBodyScope( const Render::Kit &kit, 
                                     TreePtr<CPPTree::Record> record ) try
 {
-    TRACE();
-	AutoPush< TreePtr<Node> > cs( scope_stack, record );
-    
+    TRACE();   
     string s;
     bool first = true;
     for( TreePtr<Declaration> pe : record->members )
@@ -1190,9 +1197,6 @@ string Render::RenderDeclScope( const Render::Kit &kit,
 						    	TreePtr<AccessSpec> init_access ) try
 {
     TRACE();
-
-    AutoPush< TreePtr<Node> > cs( scope_stack, decl_scope );
-
     Sequence<Declaration> sorted = SortDecls( decl_scope->members, true, unique_ids );
 
     // Emit an incomplete for each record and preproc
@@ -1266,7 +1270,7 @@ DEFAULT_CATCH_CLAUSE
 
 TreePtr<Scope> Render::TryGetScope( TreePtr<Identifier> id )
 {
-	if( !root_scope )
+	if( !root_scope || scope_stack.empty() ) 
 		return nullptr; // We aren't even in any scopes
 
 	try
