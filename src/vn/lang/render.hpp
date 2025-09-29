@@ -46,10 +46,12 @@ private:
     string RenderSysCall( const Render::Kit &kit, TreePtr<CPPTree::ExteriorCall> call );
     string RenderSysMacroCall( const Render::Kit &kit, TreePtr<CPPTree::MacroCall> call );
     string RenderExpression( const Render::Kit &kit, TreePtr<CPPTree::Initialiser> expression, Syntax::Production surround_prod );
-    string RenderMakeRecord( const Render::Kit &kit, TreePtr<CPPTree::MakeRecord> ro );
+    string RenderMakeRecord( const Render::Kit &kit, TreePtr<CPPTree::MakeRecord> make_rec );
     string RenderMapInOrder( const Render::Kit &kit, 
                              TreePtr<CPPTree::MapOperator> ro,
-                             Sequence<CPPTree::Declaration> sorted );
+                             Sequence<CPPTree::Declaration> key_sequence );
+	Sequence<CPPTree::Expression> SortMapOperands( TreePtr<CPPTree::MapOperator> ro,
+                                                   Sequence<CPPTree::Declaration> key_sequence );  
     string RenderAccess( const Render::Kit &kit, TreePtr<CPPTree::AccessSpec> current_access );
     string RenderStorage( const Render::Kit &kit, TreePtr<CPPTree::Instance> st );
     void ExtractInits( const Render::Kit &kit, Sequence<CPPTree::Statement> &body, 

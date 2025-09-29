@@ -161,6 +161,10 @@ void IdentifierFingerprinter::ProcessNode( TreePtr<Node> x, int &index )
     index++;
 
     // Recurse into our child nodes
+    // Notw: not worried about repeat visits of arbitrary nodes due to couplings
+    // because the purpose of this walk is to determine a fingerprint for
+    // repeatable uniquification - if all paths go into the fingerprint, that's
+    // good.
     ProcessChildren( x, index );
 }
 

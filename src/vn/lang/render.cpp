@@ -77,12 +77,7 @@ string Render::RenderToString( TreePtr<Node> root )
     // Track scopes for name resolution
     AutoPush< TreePtr<Node> > cs( scope_stack, root_scope );
     
-	// pre-pass to fill in backing_ordering. It would be better to tell 
-	// it that it's doing a pre-pass so it can adapt its behaviour.
-    RenderScope( kit, root_scope ); 
-    deferred_decls.clear();
-
-    // Make the identifiers unique
+    // Make the identifiers unique (does its own tree walk)
     unique_ids = UniquifyIdentifiers::UniquifyAll( kit, root );
 
     string s;
@@ -419,12 +414,22 @@ string Render::RenderMapArgs( const Render::Kit &kit, TreePtr<Call> call ) try
     TreePtr<Node> ctype = TypeOf::instance(call->callee, root_scope).GetTreePtr();
     ASSERT( ctype );
 
-	Sequence<Declaration> sorted;	
+	// Convert f->params from Parameters to Declarations
+	Sequence<Declaration> param_sequence;	
 	if( auto f = TreePtr<CallableParams>::DynamicCast(ctype) )	
 		for( auto param : f->params )
-			sorted.push_back(param); 
+			param_sequence.push_back(param); 
 
-    return "(" + RenderMapInOrder( kit, call, sorted ) + ")";
+	// Determine args sequence using param sequence
+	Sequence<Expression> arg_sequence  = SortMapOperands( call, param_sequence );
+	
+	// Render to strings
+	list<string> ls;
+    for( TreePtr<Expression> e : arg_sequence )
+		ls.push_back( RenderExpression( kit, e, Syntax::Production::COMMA_SEP ) );
+
+	// Do the syntax
+	return Join( ls, ", ", "(", ")" );
 }
 DEFAULT_CATCH_CLAUSE
 
@@ -564,35 +569,47 @@ string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> ex
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderMakeRecord( const Render::Kit &kit, TreePtr<MakeRecord> ro ) try
+string Render::RenderMakeRecord( const Render::Kit &kit, TreePtr<MakeRecord> make_rec ) try
 {
     string s;
 
     // Get the record
-    TreePtr<TypeIdentifier> id = DynamicTreePtrCast<TypeIdentifier>(ro->type);
+    TreePtr<TypeIdentifier> id = DynamicTreePtrCast<TypeIdentifier>(make_rec->type);
     ASSERT(id);
+    
+    // We have an interesting problem: there are two collections, but an ordering
+    // is implied in the generalised case: the record type has a collection of 
+    // fields, but they need to be sorted based on dependency order when rendering
+    // the records (we also aim for repeatability here). This ordering must then
+    // be applied to the MapOperator in order to get a match-up between sub-expressions
+    // and fields. I think C++ side-steps this by diallowing the MakeRecord syntax
+    // in classes where dependencies might matter.
 
     TreePtr<Record> r = GetRecordDeclaration(kit, id).GetTreePtr();
     // Make sure we have the same ordering as when the record was rendered
-	Sequence<Declaration> sorted = SortDecls( r->members, true, unique_ids );
+	Sequence<Declaration> sorted_members = SortDecls( r->members, true, unique_ids );
 
-    s += "(";
-    s += RenderType( kit, ro->type, "", Syntax::Production::ANONYMOUS );
-    s += "){ ";
-    s += RenderMapInOrder( kit, ro, sorted );
-    s += " }";
+	// Determine args sequence using param sequence
+	Sequence<Expression> sub_expr_sequence  = SortMapOperands( make_rec, sorted_members );
+	
+	// Render to strings
+	list<string> ls;
+    for( TreePtr<Expression> e : sub_expr_sequence )
+		ls.push_back( RenderExpression( kit, e, Syntax::Production::COMMA_SEP ) );
+
+	// Do the syntax
+    s += "(" + RenderType( kit, make_rec->type, "", Syntax::Production::ANONYMOUS ) + ")";
+    s += Join( ls, ", ", "{ ", " }" );    
     return s;
 }
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderMapInOrder( const Render::Kit &kit, 
-                                 TreePtr<MapOperator> ro,
-                                 Sequence<Declaration> sorted ) try
+Sequence<Expression> Render::SortMapOperands( TreePtr<MapOperator> ro,
+                                              Sequence<Declaration> key_sequence )
 {	
-    string s;
-    bool first = true;   
-    for( TreePtr<Declaration> d : sorted )
+    Sequence<Expression> out_sequence;
+    for( TreePtr<Declaration> d : key_sequence )
     {
         // We only care about instances...
         if( TreePtr<Instance> i = DynamicTreePtrCast<Instance>( d ) )
@@ -605,18 +622,16 @@ string Render::RenderMapInOrder( const Render::Kit &kit,
                 {
                     if( i->identifier == mi->key )
                     {
-                        if( !first )
-                            s += ", ";
-                        s += RenderExpression( kit, mi->value, Syntax::Production::COMMA_SEP );
-                        first = false;
+						out_sequence.push_back( mi->value );
+						break;
                     }
                 }
             }
         }
     }
-    return s;
+    return out_sequence;
 }
-DEFAULT_CATCH_CLAUSE
+
 
 string Render::RenderAccess( const Render::Kit &kit, TreePtr<AccessSpec> current_access ) try
 {
