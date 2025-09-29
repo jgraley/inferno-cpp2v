@@ -98,9 +98,10 @@ string Render::RenderProgram( const Render::Kit &kit, TreePtr<Program> program )
     // Track scopes for name resolution
     s += RenderDeclScope( kit, program ); // gets the .hpp stuff directly
     
-    for( TreePtr<Instance> o : deferred_decls )
-		s += "\n" + RenderInstance( kit, o, true );
-   // s += deferred_decls; // these could go in a .cpp file
+    for( TreePtr<Instance> o : deferred_instances )
+		s += "\n" + RenderInstance( kit, o, true ); // these could go in a .cpp file
+    // Avoid memory leak
+    deferred_instances.clear(); 
     
     return s;
 }
@@ -847,7 +848,7 @@ DEFAULT_CATCH_CLAUSE
 
 // Non-const static objects in records and functions 
 // get split into a part that goes into the record (main line of rendering) and
-// a part that goes separately (deferred_decls gets appended at the very end).
+// a part that goes separately (deferred_instances gets appended at the very end).
 // Do all functions, since SortDecls() ignores function bodies for dep analysis
 bool Render::ShouldSplitInstance( const Render::Kit &kit, TreePtr<Instance> o ) 
 {
@@ -923,11 +924,8 @@ string Render::RenderDeclaration( const Render::Kit &kit, TreePtr<Declaration> d
         if( ShouldSplitInstance(kit, o) )
         {
             s += RenderInstanceProto( kit, o, false ) + ";\n";
-            {
-                AutoPush< TreePtr<Node> > cs( scope_stack, root_scope );
-                deferred_decls.push_back(o);
-                //deferred_decls += string("\n") + RenderInstance( kit, o, true );
-            }
+			// Split out the definition of the instance for rendering later at to level
+            deferred_instances.push_back(o);
         }
         else
         {
