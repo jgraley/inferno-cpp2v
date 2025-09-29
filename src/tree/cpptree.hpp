@@ -342,11 +342,10 @@ struct Const : Constancy { NODE_FUNCTIONS_FINAL };
 struct NonConst : Constancy { NODE_FUNCTIONS_FINAL };
 // TODO add mutable when supported by clang
 
-// TODO put this in Instance, Pointer and New
-// Take constancy out of Reference
+// TODO #853 put this in Instance, Indirection and New
 // The idea is that we specify const not in the types, but in the nodes
 // that permit an object to be reached for assignment or mutation.
-struct Reaching : virtual Node
+struct View : virtual Node
 {
 	NODE_FUNCTIONS
     TreePtr<Type> type; ///< the Type of the instance, can be data or Callable type

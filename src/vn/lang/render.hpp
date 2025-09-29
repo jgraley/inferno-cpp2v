@@ -30,10 +30,6 @@ private:
     string deferred_decls;
     stack< TreePtr<Node> > scope_stack;
     UniquifyIdentifiers::IdentifierNameMap unique_ids;
-    // Remember the orders of collections when we sort them. Mirrors the same
-    // map in the parser.
-    map< TreePtr<Node>, Sequence<CPPTree::Declaration> > backing_ordering;
-
     string RenderLiteral( const Render::Kit &kit, TreePtr<CPPTree::Literal> sp );
     string RenderIdentifier( const Render::Kit &kit, TreePtr<CPPTree::Identifier> id );
     string RenderScopePrefix( const Render::Kit &kit, TreePtr<CPPTree::Identifier> id, Syntax::Production surround_prod );

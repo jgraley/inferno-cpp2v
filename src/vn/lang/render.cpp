@@ -591,15 +591,20 @@ string Render::RenderMapInOrder( const Render::Kit &kit,
                                  TreePtr<MapOperator> ro,
                                  TreePtr<Node> key ) try
 {	
-	if( backing_ordering.count(key) == 0 )	
-		return "«unknown ordering for "+Trace(key)+", OK in pre-pass»";        	
+	Sequence<Declaration> sorted;
+	
+	// make record
+	if( auto r = TreePtr<Record>::DynamicCast(key) )	
+		sorted = SortDecls( r->members, true, unique_ids );
+
+	// calls
+	if( auto f = TreePtr<CallableParams>::DynamicCast(key) )	
+		for( auto param : f->params )
+			sorted.push_back(param); // no sorting required		
 
     string s;
-    bool first = true;
-    
-    // Get a reference to the ordered list of members for this record from our backing list
-    Sequence<Declaration> &sd = backing_ordering.at(key);
-    for( TreePtr<Declaration> d : sd )
+    bool first = true;   
+    for( TreePtr<Declaration> d : sorted )
     {
         // We only care about instances...
         if( TreePtr<Instance> i = DynamicTreePtrCast<Instance>( d ) )
@@ -624,7 +629,6 @@ string Render::RenderMapInOrder( const Render::Kit &kit,
     return s;
 }
 DEFAULT_CATCH_CLAUSE
-
 
 string Render::RenderAccess( const Render::Kit &kit, TreePtr<AccessSpec> current_access ) try
 {
@@ -1201,7 +1205,6 @@ string Render::RenderScope( const Render::Kit &kit,
     TRACE();
 
     Sequence<Declaration> sorted = SortDecls( key->members, true, unique_ids );
-    backing_ordering[key] = sorted;
 
     // Emit an incomplete for each record and preproc
     string s;
@@ -1248,9 +1251,7 @@ string Render::RenderParams( const Render::Kit &kit,
     Sequence<Declaration> sorted;
     for( auto param : key->params )
 		sorted.push_back(param); // no sorting required
-		
-    backing_ordering[key] = sorted;
-		    
+			    
     string s;   
     bool first = true;
     for( TreePtr<Declaration> d : sorted )
