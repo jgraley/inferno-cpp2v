@@ -10,7 +10,7 @@ using namespace CPPTree;
 // back-pointers.
 //
 // TODO take id as SpecificIdentifier, not Identifier, so do not need to ASSERT check this
-TreePtr<Scope> GetScope( TreePtr<Scope> context, TreePtr<Identifier> id )
+TreePtr<Scope> GetScope( TreePtr<Node> context, TreePtr<Identifier> id )
 {
     TRACE("Trying program (global)\n" );
 

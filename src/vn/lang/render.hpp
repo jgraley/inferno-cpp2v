@@ -25,10 +25,9 @@ public:
     void WriteToFile(string s);
     
 private:
-    TreePtr<Node> temp_old_root;
-    TreePtr<CPPTree::Scope> root_scope;
-    queue<TreePtr<CPPTree::Instance>> deferred_instances;
+    TreePtr<Node> context;
     stack< TreePtr<Node> > scope_stack;
+    queue<TreePtr<CPPTree::Instance>> deferred_instances;
     UniquifyIdentifiers::IdentifierNameMap unique_ids;
 	string RenderProgram( const Render::Kit &kit, TreePtr<CPPTree::Program> program );
     string RenderLiteral( const Render::Kit &kit, TreePtr<CPPTree::Literal> sp );

@@ -58,13 +58,14 @@ string Render::RenderToString( TreePtr<Node> root )
     DefaultTransUtils utils(root);
     Render::Kit kit { &utils };
     
-    // Top level is expected to be a scope of some kind
-    root_scope = dynamic_pointer_cast<Scope>(root);
-    if( !root_scope )
-		return ERROR_UNKNOWN( Trace(root) );
+    // Rememebr top level for identifier purposes:
+    // - UniquifyIdentifiers
+    // - GetScope()
+    // Neither of these actually require the context to be a Scope.
+    context = root; 
         
     // Make the identifiers unique (does its own tree walk)
-    unique_ids = UniquifyIdentifiers::UniquifyAll( kit, root );
+    unique_ids = UniquifyIdentifiers::UniquifyAll( kit, context );
 
 	if( auto prog = TreePtr<Program>::DynamicCast(root) )
 		return RenderProgram( kit, prog );
@@ -156,11 +157,11 @@ string Render::RenderDeclScopePrefix( const Render::Kit &kit, TreePtr<Identifier
 		return ""; // either we're not in a scope or id is undeclared
     else if( scope == scope_stack.top() )
         return ""; // local scope
-    else if( scope == root_scope )
-        return " ::";
-    else if( TreePtr<Enum> e = DynamicTreePtrCast<Enum>( scope ) ) // <- for enum
+    else if( DynamicTreePtrCast<Program>( scope ) )
+        return "::";
+    else if( auto e = DynamicTreePtrCast<Enum>( scope ) ) // <- for enum
         return RenderDeclScopePrefix( kit, e->identifier, surround_prod );    // omit scope for the enum itself
-    else if( TreePtr<Record> r = DynamicTreePtrCast<Record>( scope ) ) // <- for class, struct, union
+    else if( auto r = DynamicTreePtrCast<Record>( scope ) ) // <- for class, struct, union
         return RenderDeclScopedIdentifier( kit, r->identifier, Syntax::Production::SCOPE_RES ) + "::";
     else if( DynamicTreePtrCast<CallableParams>( scope ) ||  // <- this is for params
              DynamicTreePtrCast<Compound>( scope ) ||    // <- this is for locals in body
@@ -405,7 +406,7 @@ DEFAULT_CATCH_CLAUSE
 string Render::RenderMapArgs( const Render::Kit &kit, TreePtr<Call> call ) try
 {   
     // If CallableParams, generate some arguments, resolving the order using the original function type
-    TreePtr<Node> ctype = TypeOf::instance(call->callee, root_scope).GetTreePtr();
+    TreePtr<Node> ctype = TypeOf::instance.Get(kit, call->callee).GetTreePtr();
     ASSERT( ctype );
 
 	// Convert f->params from Parameters to Declarations
@@ -1271,12 +1272,12 @@ DEFAULT_CATCH_CLAUSE
 
 TreePtr<Scope> Render::TryGetScope( TreePtr<Identifier> id )
 {
-	if( !root_scope || scope_stack.empty() ) 
+	if( scope_stack.empty() ) 
 		return nullptr; // We aren't even in any scopes
 
 	try
 	{
-		return GetScope( root_scope, id );
+		return GetScope( context, id );
 	}
  	catch( ScopeNotFoundMismatch & )
  	{

@@ -23,15 +23,18 @@ public:
     class NumericalOperatorUsageMismatch4 : public NumericalOperatorUsageMismatch {};
     class DereferenceUsageMismatch : public UsageMismatch {};
 
+    // If you don't have a kit, use Transformation::operator().
+    // If you do but you only have a Node, use this
     AugTreePtr<Node> TryApplyTransformation( const TransKit &kit, AugTreePtr<Node> node ) const override;
+    
+    // If you have kit and an Expression, well done! You can call this one
+    AugTreePtr<CPPTree::Type> Get( const TransKit &kit, AugTreePtr<CPPTree::Expression> o ) const;
 
     // Is this call really a constructor call? If so return the object being
     // constructed. Otherwise, return nullptr
     AugTreePtr<CPPTree::Expression> TryGetConstructedExpression( const TransKit &kit, AugTreePtr<CPPTree::GoSub> gs ) const;
 
 private:    
-    // TODO make these private
-    AugTreePtr<CPPTree::Type> Get( const TransKit &kit, AugTreePtr<CPPTree::Expression> o ) const;
     AugTreePtr<CPPTree::Type> GetOperator( const TransKit &kit, AugTreePtr<CPPTree::Operator> op, list<AugTreePtr<CPPTree::Type>> optypes ) const;
     AugTreePtr<CPPTree::Type> GetStandard( const TransKit &kit, list<AugTreePtr<CPPTree::Type>> &optypes ) const;
     AugTreePtr<CPPTree::Type> GetStandardOnNumerics( const TransKit &kit, list<AugTreePtr<CPPTree::Numeric>> &optypes ) const;
