@@ -24,7 +24,7 @@ class sc_module;
 class sc_interface;
 
 void wait( int p1 );
-void next_trigger( int p1 );
+void next_trigger( int p1 ); 
 void SC_THREAD( void (*func)() );
 void SC_CTHREAD( void (*func)(), int clock );
 void SC_METHOD( void (*func)() );
@@ -41,17 +41,9 @@ void cease( unsigned char exit_code );
 int SC_ZERO_TIME;
 
 #else
-// Parsed by native compiler
-// Reduce the macros we define outside of the SC standard to when SC expects.
-// Introdude real SystemC header file
-#include <systemc.h>
-
-#define SC_PORT(X) sc_port<X>
-extern sc_trace_file *GetSCTraceFP();
+// Parsed by native compiler on raw input example files only.
+#include "systemc_extensions.h"
 
 #endif // inferno
-
-void cease( unsigned char exit_code );
-
 #endif // guard
 

@@ -350,6 +350,32 @@ LowerSCDeltaCount::LowerSCDeltaCount()
 
 AddIncludeSystemC::AddIncludeSystemC()
 {
+	string filename = "systemc.h";
+	
+    auto s_program = MakePatternNode<Program>();
+    auto r_program = MakePatternNode<Program>();
+    auto decls = MakePatternNode<Star<Declaration>>();
+    auto declstuff = MakePatternNode<Stuff<Declaration>>();
+    auto r_include = MakePatternNode<SystemInclude>();
+    auto s_negation = MakePatternNode<Negation<Declaration>>();
+    auto sn_include = MakePatternNode<SystemInclude>();
+
+    s_program->members = (decls, declstuff);
+    decls->restriction = s_negation;
+    declstuff->terminus = MakePatternNode<SCNode>(); 
+    s_negation->negand = sn_include;
+    sn_include->filename = MakePatternNode<SpecificString>(filename);   
+    r_program->members = (decls, declstuff, r_include);
+    r_include->filename = MakePatternNode<SpecificString>(filename);   
+
+    Configure( COMPARE_REPLACE, s_program, r_program );
+}
+
+
+AddIncludeSCExtensions::AddIncludeSCExtensions()
+{
+	string filename = "systemc_extensions.h";
+
     auto s_program = MakePatternNode<Program>();
     auto r_program = MakePatternNode<Program>();
     auto decls = MakePatternNode<Star<Declaration>>();
@@ -360,11 +386,11 @@ AddIncludeSystemC::AddIncludeSystemC()
 
     s_program->members = (decls, declstuff);
     decls->restriction = s_negation;
-    declstuff->terminus = MakePatternNode<SCNode>(); 
+    declstuff->terminus = MakePatternNode<SCExtension>(); 
     s_negation->negand = sn_include;
-    sn_include->filename = MakePatternNode<SpecificString>("isystemc.h");   
+    sn_include->filename = MakePatternNode<SpecificString>(filename);   
     r_program->members = (decls, declstuff, r_include);
-    r_include->filename = MakePatternNode<SpecificString>("isystemc.h");   
+    r_include->filename = MakePatternNode<SpecificString>(filename);   
 
     Configure( COMPARE_REPLACE, s_program, r_program );
 }
@@ -373,6 +399,7 @@ AddIncludeSystemC::AddIncludeSystemC()
 void SystemCLowering::Build( vector< shared_ptr<VNStep> > *sequence )
 {
     sequence->push_back( make_shared<AddIncludeSystemC>() );
+    sequence->push_back( make_shared<AddIncludeSCExtensions>() );
 
 	auto zero_time_id = MakePatternNode< SpecificInstanceIdentifier >( "SC_ZERO_TIME" );
 	

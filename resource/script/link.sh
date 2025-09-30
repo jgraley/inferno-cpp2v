@@ -23,4 +23,4 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-g++ $GCC_EXTRA_ARGS resource/lib/sc_glue.o -Lsystemc/lib-linux64/ -lsystemc -no-pie
+g++ $GCC_EXTRA_ARGS resource/lib/systemc_extensions.o -Lsystemc/lib-linux64/ -lsystemc -no-pie

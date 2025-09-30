@@ -1,4 +1,4 @@
-
+#include "systemc_extensions.h"
 #include <systemc.h>
 
 static sc_trace_file *fp;                          // Declare FilePointer fp

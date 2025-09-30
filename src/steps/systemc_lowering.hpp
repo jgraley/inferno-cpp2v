@@ -99,6 +99,13 @@ public:
 };
 
 
+class AddIncludeSCExtensions : public VNStep
+{
+public:
+    AddIncludeSCExtensions();
+};
+
+
 /** Builder for the steps that lowers Inferno's Explicit nodes for SystemC 
     into implicit SysetemC constructs in C++ code for rendering using a
     C/C++ renderer. */

@@ -129,6 +129,24 @@ bool IsDependOn( TreePtr<Declaration> a, TreePtr<Declaration> b, bool ignore_ind
 }
 
 
+template<typename NodeType>
+void ExtractDeclsToBack( Sequence<Declaration> &sorted, Sequence<Declaration> &pre_sorted )
+{
+	for( ContainerInterface::iterator it = pre_sorted.begin(); it != (ContainerInterface::iterator)pre_sorted.end(); ) 
+	{
+		if( TreePtr<NodeType>::DynamicCast(*it) )
+		{
+			sorted.push_back(*it);
+			it = pre_sorted.erase(it);
+		}
+		else
+		{
+			++it;
+		}
+	}	
+}
+
+
 Sequence<Declaration> SortDecls( ContainerInterface &c, bool ignore_indirection_to_record, const UniquifyIdentifiers::IdentifierNameMap &unique_ids )
 {
     int ocs = c.size();
@@ -144,18 +162,9 @@ Sequence<Declaration> SortDecls( ContainerInterface &c, bool ignore_indirection_
     Sequence<Declaration> sorted;
 
 	// Move pre-processor declarations into the sorted list first
-	for( ContainerInterface::iterator it = pre_sorted.begin(); it != (ContainerInterface::iterator)pre_sorted.end(); ) 
-	{
-		if( TreePtr<PreProcDecl>::DynamicCast(*it) )
-		{
-			sorted.push_back(*it);
-			it = pre_sorted.erase(it);
-		}
-		else
-		{
-			++it;
-		}
-	}
+	ExtractDeclsToBack<LocalInclude>(sorted, pre_sorted);
+	ExtractDeclsToBack<SystemInclude>(sorted, pre_sorted);
+	ExtractDeclsToBack<PreProcDecl>(sorted, pre_sorted);
 
     // Uncomment one of these to stress the sorter
     //pre_sorted = ReverseDecls( pre_sorted );

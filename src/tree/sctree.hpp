@@ -240,10 +240,18 @@ struct Exit : TerminationFunction
     virtual string GetToken() const { return "exit"; }
 };
 
+
+/// For SC extension. Not ideal because nodes will still have SCNode but
+/// it will do for determining header file inclusion during lowering.
+struct SCExtension : virtual Node
+{
+	NODE_FUNCTIONS
+};
+
 /// Cease function 
 /** an alternative to exit(), supplied by the inferno runtime glue for SC
     to complete logging activities etc before calling exit(). */
-struct Cease : TerminationFunction
+struct Cease : TerminationFunction, SCExtension
 {
     NODE_FUNCTIONS_FINAL
     virtual string GetToken() const { return "cease"; }

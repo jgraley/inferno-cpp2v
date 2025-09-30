@@ -98,7 +98,7 @@ string Render::RenderProgram( const Render::Kit &kit, TreePtr<Program> program )
     // Track scopes for name resolution
     s += RenderDeclScope( kit, program ); // gets the .hpp stuff directly
     
-    // These are rendered here, inside program scope but outside any scopes
+    // These are rendered here, inside program scope but outside any additional scopes
     // that were on the scope stack when the instance was seen.
     while( !deferred_instances.empty() )
 	{

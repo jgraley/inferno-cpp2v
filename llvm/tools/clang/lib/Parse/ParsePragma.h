@@ -17,7 +17,7 @@
 #include "clang/Lex/Pragma.h"
 
 namespace clang {
-  class Action;
+  class Action; 
 
 class PragmaPackHandler : public PragmaHandler {
   Action &Actions;
