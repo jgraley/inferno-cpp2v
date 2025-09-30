@@ -65,7 +65,7 @@ string Render::RenderToString( TreePtr<Node> root )
     // Make the identifiers unique (does its own tree walk)
     unique_ids = UniquifyIdentifiers::UniquifyAll( kit, context );
 
-	return RenderProduction( kit, root, Syntax::Production::TRANSLATION_UNIT );
+	return RenderIntoProduction( kit, root, Syntax::Production::TRANSLATION_UNIT );
 }
 
 
@@ -85,28 +85,50 @@ void Render::WriteToFile( string s )
 }
 
 
-string Render::RenderProduction( const Render::Kit &kit, TreePtr<Node> node, Syntax::Production surround_prod )
+string Render::RenderIntoProduction( const Render::Kit &kit, TreePtr<Node> node, Syntax::Production prod )
 {
 	// Production surround_prod relates to the surrounding grammar production and can be 
 	// used to change the render of a certain subtree. It sums up all the ancestor nodes of
 	// the one supplied.
 	string s;
+	Syntax::Production node_ideal_prod = node->GetMyProduction();
 	
-	switch(surround_prod)
+	switch(prod)
 	{
 		case Syntax::Production::TRANSLATION_UNIT:
-		s += RenderTranslationUnit( kit, node );
+		s += Dispatch( kit, node, prod );
 		break;
 		
 		case Syntax::Production::BOOT_EXPR...Syntax::Production::PARENTHESISED:
-		s += RenderExpression( kit, node, surround_prod );
+		{
+			// If current production has too-high precedence, boot back down using parentheses
+			ASSERT( node_ideal_prod != Syntax::Production::UNDEFINED )("Rendering expression: ")(node)(" in production %d",(int)prod)(" got no ideal production\n");
+			ASSERT( Syntax::GetPrecedence(prod) <= Syntax::GetPrecedence(Syntax::Production::PARENTHESISED) ); // Can't satisfy this production's precedence demand using parentheses
+			ASSERT( Syntax::GetPrecedence(node_ideal_prod) >= Syntax::GetPrecedence(Syntax::Production::BOOT_EXPR) ); // Can't puth this node into parentheses
+			bool parenthesise = Syntax::GetPrecedence(node_ideal_prod) < Syntax::GetPrecedence(prod);	
+			if( parenthesise )
+				s += "(" + Dispatch( kit, node, Syntax::Production::BOOT_EXPR ) + ")";
+			else
+				s += Dispatch( kit, node, prod );
+		}
 		break;
 		
 		default:
-		return SSPrintf( "\n«production %d not supported in %s()»\n", (int)surround_prod, __func__ );
+		return SSPrintf( "\n«production %d not supported in %s()»\n", (int)prod, __func__ );
 	}
 	
 	return s;
+}
+
+
+string Render::Dispatch( const Render::Kit &kit, TreePtr<Node> node, Syntax::Production surround_prod )
+{
+	if( auto program = TreePtr<Program>::DynamicCast(node) )
+		return RenderTranslationUnit( kit, program );
+	else if( auto expression = TreePtr<Expression>::DynamicCast(node) )
+		return RenderExpression( kit, expression, surround_prod );
+	else
+        return ERROR_UNSUPPORTED( node );      	
 }
 
 

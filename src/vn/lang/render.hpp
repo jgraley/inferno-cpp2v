@@ -29,7 +29,8 @@ private:
     stack< TreePtr<Node> > scope_stack;
     queue<TreePtr<CPPTree::Instance>> deferred_instances;
     UniquifyIdentifiers::IdentifierNameMap unique_ids;
-	string RenderProduction( const Render::Kit &kit, TreePtr<Node> node, Syntax::Production surround_prod );
+	string RenderIntoProduction( const Render::Kit &kit, TreePtr<Node> node, Syntax::Production prod );
+	string Dispatch( const Render::Kit &kit, TreePtr<Node> node, Syntax::Production surround_prod );
 	string RenderTranslationUnit( const Render::Kit &kit, TreePtr<Node> unit ); 
     string RenderLiteral( const Render::Kit &kit, TreePtr<CPPTree::Literal> sp ); 
     string RenderIdentifier( const Render::Kit &kit, TreePtr<CPPTree::Identifier> id );
