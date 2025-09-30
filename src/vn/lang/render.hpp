@@ -29,23 +29,25 @@ private:
     stack< TreePtr<Node> > scope_stack;
     queue<TreePtr<CPPTree::Instance>> deferred_instances;
     UniquifyIdentifiers::IdentifierNameMap unique_ids;
-	string RenderProgram( const Render::Kit &kit, TreePtr<CPPTree::Program> program );
-    string RenderLiteral( const Render::Kit &kit, TreePtr<CPPTree::Literal> sp );
+	string RenderProduction( const Render::Kit &kit, TreePtr<Node> node, Syntax::Production surround_prod );
+	string RenderTranslationUnit( const Render::Kit &kit, TreePtr<Node> unit ); 
+    string RenderLiteral( const Render::Kit &kit, TreePtr<CPPTree::Literal> sp ); 
     string RenderIdentifier( const Render::Kit &kit, TreePtr<CPPTree::Identifier> id );
     string RenderDeclScopePrefix( const Render::Kit &kit, TreePtr<CPPTree::Identifier> id, Syntax::Production surround_prod );
     string RenderDeclScopedIdentifier( const Render::Kit &kit, TreePtr<CPPTree::Identifier> id, Syntax::Production surround_prod );
     string RenderIntegralType( const Render::Kit &kit, TreePtr<CPPTree::Integral> type, string object=string() );
     string RenderFloatingType( const Render::Kit &kit, TreePtr<CPPTree::Floating> type );
-    string RenderType( const Render::Kit &kit, TreePtr<CPPTree::Type> type, string object, Syntax::Production object_prod, 
+    string RenderTypeAndDeclarator( const Render::Kit &kit, TreePtr<CPPTree::Type> type, string declarator, Syntax::Production object_prod, 
                        bool constant=false );
+    string RenderType( const Render::Kit &kit, TreePtr<CPPTree::Type> type );
     string Sanitise( string s );
     string RenderOperator( const Render::Kit &kit, TreePtr<CPPTree::Operator> op, Sequence<CPPTree::Expression> &operands );
     string RenderMapArgs( const Render::Kit &kit, TreePtr<CPPTree::Call> call );
     string RenderCall( const Render::Kit &kit, TreePtr<CPPTree::Call> call );
     string RenderSeqOperands( const Render::Kit &kit, Sequence<CPPTree::Expression> operands );
-    string RenderSysCall( const Render::Kit &kit, TreePtr<CPPTree::ExteriorCall> call );
-    string RenderSysMacroCall( const Render::Kit &kit, TreePtr<CPPTree::MacroCall> call );
-    string RenderExpression( const Render::Kit &kit, TreePtr<CPPTree::Initialiser> expression, Syntax::Production surround_prod );
+    string RenderExteriorCall( const Render::Kit &kit, TreePtr<CPPTree::ExteriorCall> call );
+    string RenderMacroCall( const Render::Kit &kit, TreePtr<CPPTree::MacroCall> call );
+    string RenderExpression( const Render::Kit &kit, TreePtr<Node> expression, Syntax::Production surround_prod );
     string RenderMakeRecord( const Render::Kit &kit, TreePtr<CPPTree::MakeRecord> make_rec );
     string RenderMapInOrder( const Render::Kit &kit, 
                              TreePtr<CPPTree::MapOperator> ro,
