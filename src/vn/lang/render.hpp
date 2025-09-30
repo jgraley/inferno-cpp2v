@@ -31,7 +31,7 @@ private:
     UniquifyIdentifiers::IdentifierNameMap unique_ids;
 	string RenderIntoProduction( const Render::Kit &kit, TreePtr<Node> node, Syntax::Production prod );
 	string Dispatch( const Render::Kit &kit, TreePtr<Node> node, Syntax::Production surround_prod );
-	string RenderTranslationUnit( const Render::Kit &kit, TreePtr<Node> unit ); 
+	string RenderProgram( const Render::Kit &kit, TreePtr<CPPTree::Program> program ); 
     string RenderLiteral( const Render::Kit &kit, TreePtr<CPPTree::Literal> sp ); 
     string RenderIdentifier( const Render::Kit &kit, TreePtr<CPPTree::Identifier> id );
     string RenderDeclScopePrefix( const Render::Kit &kit, TreePtr<CPPTree::Identifier> id, Syntax::Production surround_prod );
@@ -48,7 +48,7 @@ private:
     string RenderSeqOperands( const Render::Kit &kit, Sequence<CPPTree::Expression> operands );
     string RenderExteriorCall( const Render::Kit &kit, TreePtr<CPPTree::ExteriorCall> call );
     string RenderMacroCall( const Render::Kit &kit, TreePtr<CPPTree::MacroCall> call );
-    string RenderExpression( const Render::Kit &kit, TreePtr<Node> expression, Syntax::Production surround_prod );
+    string RenderExpression( const Render::Kit &kit, TreePtr<CPPTree::Initialiser> expression, Syntax::Production surround_prod );
     string RenderMakeRecord( const Render::Kit &kit, TreePtr<CPPTree::MakeRecord> make_rec );
     string RenderMapInOrder( const Render::Kit &kit, 
                              TreePtr<CPPTree::MapOperator> ro,

@@ -96,11 +96,12 @@ string Render::RenderIntoProduction( const Render::Kit &kit, TreePtr<Node> node,
 	switch(prod)
 	{
 		case Syntax::Production::TRANSLATION_UNIT:
-		s += Dispatch( kit, node, prod );
-		break;
+			s += Dispatch( kit, node, prod );
+			break;
 		
 		case Syntax::Production::BOOT_EXPR...Syntax::Production::PARENTHESISED:
 		{
+			// Could factor out into eg RenderIntoExpression()
 			// If current production has too-high precedence, boot back down using parentheses
 			ASSERT( node_ideal_prod != Syntax::Production::UNDEFINED )("Rendering expression: ")(node)(" in production %d",(int)prod)(" got no ideal production\n");
 			ASSERT( Syntax::GetPrecedence(prod) <= Syntax::GetPrecedence(Syntax::Production::PARENTHESISED) ); // Can't satisfy this production's precedence demand using parentheses
@@ -110,11 +111,11 @@ string Render::RenderIntoProduction( const Render::Kit &kit, TreePtr<Node> node,
 				s += "(" + Dispatch( kit, node, Syntax::Production::BOOT_EXPR ) + ")";
 			else
 				s += Dispatch( kit, node, prod );
+			break;
 		}
-		break;
 		
 		default:
-		return SSPrintf( "\n«production %d not supported in %s()»\n", (int)prod, __func__ );
+		    return SSPrintf( "\n«production %d not supported in %s()»\n", (int)prod, __func__ );
 	}
 	
 	return s;
@@ -124,7 +125,7 @@ string Render::RenderIntoProduction( const Render::Kit &kit, TreePtr<Node> node,
 string Render::Dispatch( const Render::Kit &kit, TreePtr<Node> node, Syntax::Production surround_prod )
 {
 	if( auto program = TreePtr<Program>::DynamicCast(node) )
-		return RenderTranslationUnit( kit, program );
+		return RenderProgram( kit, program );
 	else if( auto expression = TreePtr<Expression>::DynamicCast(node) )
 		return RenderExpression( kit, expression, surround_prod );
 	else
@@ -132,28 +133,23 @@ string Render::Dispatch( const Render::Kit &kit, TreePtr<Node> node, Syntax::Pro
 }
 
 
-string Render::RenderTranslationUnit( const Render::Kit &kit, TreePtr<Node> unit )
+string Render::RenderProgram( const Render::Kit &kit, TreePtr<CPPTree::Program> program )
 {
-	if( auto program = TreePtr<Program>::DynamicCast(unit) )
+	string s;
+
+	AutoPush< TreePtr<Node> > cs( scope_stack, program );
+
+	// Track scopes for name resolution
+	s += RenderDeclScope( kit, program ); // gets the .hpp stuff directly
+	
+	// These are rendered here, inside program scope but outside any additional scopes
+	// that were on the scope stack when the instance was seen.
+	while( !deferred_instances.empty() )
 	{
-		string s;
-
-		AutoPush< TreePtr<Node> > cs( scope_stack, program );
-
-		// Track scopes for name resolution
-		s += RenderDeclScope( kit, program ); // gets the .hpp stuff directly
-		
-		// These are rendered here, inside program scope but outside any additional scopes
-		// that were on the scope stack when the instance was seen.
-		while( !deferred_instances.empty() )
-		{
-			s += "\n" + RenderInstance( kit, deferred_instances.front(), true ); // these could go in a .cpp file
-			deferred_instances.pop();
-		}
-		return s;
+		s += "\n" + RenderInstance( kit, deferred_instances.front(), true ); // these could go in a .cpp file
+		deferred_instances.pop();
 	}
-	else
-        return ERROR_UNSUPPORTED( unit );      
+	return s;  
 }
 
 
@@ -545,7 +541,7 @@ string Render::RenderMacroCall( const Render::Kit &kit, TreePtr<MacroCall> smc )
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderExpression( const Render::Kit &kit, TreePtr<Node> expression, Syntax::Production surround_prod ) try
+string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> expression, Syntax::Production surround_prod ) try
 {
 	Syntax::Production node_ideal_prod = expression->GetMyProduction();
 	// If current production has too-high precedence, boot back down using parentheses
