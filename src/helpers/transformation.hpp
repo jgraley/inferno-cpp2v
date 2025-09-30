@@ -247,12 +247,12 @@ protected:
 class DefaultTransUtils : public TransUtilsInterface
 {
 public:    
-    explicit DefaultTransUtils( TreePtr<Node> root_ );                               
+    explicit DefaultTransUtils( TreePtr<Node> context_ );                               
     set<AugTreePtr<Node>> GetDeclarers( AugTreePtr<Node> node ) const override;
             
 private:    
     ValuePtr<AugBEInterface> CreateBE( TreePtr<Node> tp ) const override;            
-    TreePtr<Node> root;
+    TreePtr<Node> context;
 };
 
 // ---------------------- TransKit ---------------------------
@@ -272,7 +272,7 @@ public:
     // Apply this transformation to tree at node, using root for decls etc.
     // This entry point is for non-VN use cases, without dmain extension.
     AugTreePtr<Node> operator()( AugTreePtr<Node> node, 
-                                 TreePtr<Node> root ) const;
+                                 TreePtr<Node> context ) const;
                                                                        
     // Apply this transformation to tree at node, using kit for decls etc.
     // Vida Nova implementation with a TransKit for VN integration: see

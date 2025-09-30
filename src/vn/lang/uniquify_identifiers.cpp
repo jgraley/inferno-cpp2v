@@ -137,10 +137,10 @@ IdentifierFingerprinter::IdentifierFingerprinter() :
 }
 
 
-IdentifierFingerprinter::IdsByFingerprint IdentifierFingerprinter::GetIdentifiersInTreeByFingerprint( TreePtr<Node> root_x )
+IdentifierFingerprinter::IdsByFingerprint IdentifierFingerprinter::GetIdentifiersInTreeByFingerprint( TreePtr<Node> context )
 {
     int index=0;
-    ProcessNode( root_x, index );	
+    ProcessNode( context, index );	
 	
     map< Fingerprint, set<TreePtr<CPPTree::SpecificIdentifier>> > rfp;
     for( pair< TreePtr<SpecificIdentifier>, Fingerprint > p : fingerprints )
@@ -234,9 +234,9 @@ void IdentifierFingerprinter::ProcessCollection( CollectionInterface *x_col, int
 
 //////////////////////////// UniquifyIdentifiers ///////////////////////////////
 
-UniquifyIdentifiers::IdentifierNameMap UniquifyIdentifiers::UniquifyAll( const TransKit &kit, TreePtr<Node> root )
+UniquifyIdentifiers::IdentifierNameMap UniquifyIdentifiers::UniquifyAll( const TransKit &kit, TreePtr<Node> context )
 {
-	IdentifierFingerprinter::IdsByFingerprint ids_by_fp = IdentifierFingerprinter().GetIdentifiersInTreeByFingerprint(root);    
+	IdentifierFingerprinter::IdsByFingerprint ids_by_fp = IdentifierFingerprinter().GetIdentifiersInTreeByFingerprint(context);    
 	
 	// For repeatability of renders, get a list of identifiers in the tree, ordered:
 	// - mainly depth-first, wind-in

@@ -55,8 +55,8 @@ void AugTreePtrBase::OnDepLeak() const
 
 // ---------------------- DefaultTransUtils ---------------------------
 
-DefaultTransUtils::DefaultTransUtils( TreePtr<Node> root_ ) :
-    root( root_ )
+DefaultTransUtils::DefaultTransUtils( TreePtr<Node> context_ ) :
+    context( context_ )
 {
 }    
 
@@ -72,7 +72,7 @@ set<AugTreePtr<Node>> DefaultTransUtils::GetDeclarers( AugTreePtr<Node> atp_node
     TreePtr<Node> node = atp_node.GetTreePtr();
     set<TreePtr<Node>> declarers;
     
-    Walk w(root, nullptr, nullptr);
+    Walk w(context, nullptr, nullptr);
     for( const TreePtrInterface &n : w )
     {
         set<const TreePtrInterface *> declared = ((TreePtr<Node>)n)->GetDeclared();
@@ -120,16 +120,16 @@ set<DefaultTransUtils::LinkInfo> DefaultTransUtils::GetParents( TreePtr<Node> no
 // ---------------------- Transformation ---------------------------
 
 AugTreePtr<Node> Transformation::operator()( AugTreePtr<Node> atp, 
-                                             TreePtr<Node> root    ) const
+                                             TreePtr<Node> context ) const
 {
-    DefaultTransUtils utils(root);
+    DefaultTransUtils utils(context);
     TransKit kit { &utils };
     return TryApplyTransformation( kit, atp );
 }
 
 
 AugTreePtr<Node> Transformation::ApplyTransformation( const TransKit &kit, // Handy functions
-                                                      AugTreePtr<Node> node ) const    // Root of the subtree we want to modify                                      
+                                                      AugTreePtr<Node> node ) const // Base of the subtree we want to transform                                      
 {
     AugTreePtr<Node> n = TryApplyTransformation(kit, node);
     if( !n )

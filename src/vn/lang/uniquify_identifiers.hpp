@@ -57,7 +57,7 @@ public:
 
     IdentifierFingerprinter();
     
-    IdsByFingerprint GetIdentifiersInTreeByFingerprint(TreePtr<Node> root_x);
+    IdsByFingerprint GetIdentifiersInTreeByFingerprint(TreePtr<Node> context);
     void ProcessNode( TreePtr<Node> x, int &index );
     void ProcessChildren( TreePtr<Node> x, int &index );
     void ProcessSingularNode( const TreePtrInterface *p_x_sing, int &index );
@@ -75,7 +75,7 @@ struct UniquifyIdentifiers
 {
     typedef pair<const TreePtr<CPPTree::SpecificIdentifier>, string> IdentifierNamePair;
     typedef map< TreePtr<CPPTree::SpecificIdentifier>, string> IdentifierNameMap;
-    static IdentifierNameMap UniquifyAll( const TransKit &kit, TreePtr<Node> root );
+    static IdentifierNameMap UniquifyAll( const TransKit &kit, TreePtr<Node> context );
 };
 
 

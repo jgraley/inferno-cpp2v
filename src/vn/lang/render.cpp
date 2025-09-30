@@ -54,16 +54,14 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern )
 
 
 string Render::RenderToString( TreePtr<Node> root )
-{   
-    DefaultTransUtils utils(root);
-    Render::Kit kit { &utils };
-    
-    // Rememebr top level for identifier purposes:
-    // - UniquifyIdentifiers
-    // - GetScope()
-    // Neither of these actually require the context to be a Scope.
+{       
+    // Context is used for various lookups but does not need
+    // to be a Scope.
     context = root; 
         
+    DefaultTransUtils utils(context);
+    Render::Kit kit { &utils };
+
     // Make the identifiers unique (does its own tree walk)
     unique_ids = UniquifyIdentifiers::UniquifyAll( kit, context );
 
