@@ -70,7 +70,7 @@ private:
     string RenderRecordProto( const Render::Kit &kit, TreePtr<CPPTree::Record> record );
 	string RenderPreProcDecl(const Render::Kit &kit, TreePtr<CPPTree::PreProcDecl> ppd );
     string RenderDeclaration( const Render::Kit &kit, TreePtr<CPPTree::Declaration> declaration );
-    string RenderStatement( const Render::Kit &kit, TreePtr<CPPTree::Statement> statement );
+    string RenderStatement( const Render::Kit &kit, TreePtr<CPPTree::Statement> statement, Syntax::Production surround_prod );
  	string RenderConstructorInitList( const Render::Kit &kit, 
 									  Sequence<CPPTree::Statement> spe );
 	string RenderEnumBodyScope( const Render::Kit &kit, TreePtr<CPPTree::Record> record );

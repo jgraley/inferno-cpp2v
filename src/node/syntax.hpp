@@ -10,18 +10,21 @@ public:
 	enum class Production // "Syntax::Production" is a generalisation of precedence
 	{		
 		UNDEFINED,
-		TRANSLATION_UNIT,
-		
+		TRANSLATION_UNIT,		
 		INSTANCE_PROTO, 
-		STATEMENT,
-		SPACE_SEP_STATEMENT,
-		SPACE_SEP_DECLARATION,
-		STATEMENT_ARG,
 		
+		BOOT_STATEMENT,
+		
+		SEMICOLON_SEP, // Lowest statement precedence: {} etc from the inside		
+		BODY_STATEMENT, // eg if( ... ) <here>;    is this prefix?
+		SPACE_SEP_STATEMENT, // eg throw <here>;
+		SPACE_SEP_DECLARATION, // the type in <here> <declarator> 
+		STATEMENT_ARG,		// eg if( <here> ) ... which could be a decl etc
 		INITIALISER, // For initialisers
-		
-		BOOT_EXPR, // Lowest expression precedence: (), {}, [] etc from the inside
-		
+		BRACED,		 // {} from the outside	
+		TOP_STATEMENT, // Highest statement precedence
+				
+		BOOT_EXPR, // Lowest expression precedence: (), {}, [] etc from the inside		
 		COMMA_OP,
 		COMMA_SEP, // Use this for comma-separated lists to force parens for COMMA_OP
 		ASSIGN, //C++: assign ops and statement-like keywords eg throw
@@ -38,9 +41,9 @@ public:
 		MUL_DIV,
 		PREFIX, // C++: all prefix including keywords where expression
 		POSTFIX, // C++: all prefix including sub clauses
-		SCOPE_RESOLVE, // :: in C++
-				
-		PARENTHESISED, // Highest expression precedence: (), {} from the outside
+		SCOPE_RESOLVE, // :: in C++				
+		PARENTHESISED, // (), {} from the outside		
+		TOP_EXPR, // Highest expression precedence
 		
 		PURE_IDENTIFIER,
 		TOKEN, // Highest precedence would be that of lexer tokens
