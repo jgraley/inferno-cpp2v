@@ -34,7 +34,8 @@ public:
 		MUL_DIV,
 		PREFIX, // C++: all prefix including keywords where expression
 		POSTFIX, // C++: all prefix including sub clauses
-		SCOPE_RES, // :: in C++
+		SCOPE_RESOLVE, // :: in C++
+		DESTRUCTOR_MARK, // The ~ prefix on destructors
 		
 		PARENTHESISED, // Highest expression precedence: (), {} from the outside
 		

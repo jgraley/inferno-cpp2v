@@ -165,7 +165,7 @@ string Render::RenderIdentifier( const Render::Kit &kit, TreePtr<Identifier> id,
 {	
 	(void)kit;
 	if( Syntax::GetPrecedence(surround_prod) != Syntax::GetPrecedence(Syntax::Production::PURE_IDENTIFIER) )
-		return RenderDeclScopedIdentifier(kit, id, surround_prod);
+		return ScopeResolvedIdentifier(kit, id, surround_prod);
 
     string ids;
     if( id )
@@ -193,7 +193,7 @@ string Render::RenderIdentifier( const Render::Kit &kit, TreePtr<Identifier> id,
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderDeclScopePrefix( const Render::Kit &kit, TreePtr<Identifier> id, Syntax::Production surround_prod ) try
+string Render::ScopeResolvingPrefix( const Render::Kit &kit, TreePtr<Identifier> id, Syntax::Production surround_prod ) try
 {
 	TreePtr<Node> scope = TryGetScope(id);
        
@@ -205,9 +205,9 @@ string Render::RenderDeclScopePrefix( const Render::Kit &kit, TreePtr<Identifier
     else if( DynamicTreePtrCast<Program>( scope ) )
         return "::";
     else if( auto e = DynamicTreePtrCast<Enum>( scope ) ) // <- for enum
-        return RenderDeclScopePrefix( kit, e->identifier, surround_prod );    // omit scope for the enum itself
+        return ScopeResolvingPrefix( kit, e->identifier, surround_prod );    // omit scope for the enum itself
     else if( auto r = DynamicTreePtrCast<Record>( scope ) ) // <- for class, struct, union
-        return RenderDeclScopedIdentifier( kit, r->identifier, Syntax::Production::SCOPE_RES ) + "::";
+        return ScopeResolvedIdentifier( kit, r->identifier, Syntax::Production::SCOPE_RESOLVE ) + "::";
     else if( DynamicTreePtrCast<CallableParams>( scope ) ||  // <- this is for params
              DynamicTreePtrCast<Compound>( scope ) ||    // <- this is for locals in body
              DynamicTreePtrCast<StatementExpression>( scope ) )    // <- this is for locals in body
@@ -218,12 +218,12 @@ string Render::RenderDeclScopePrefix( const Render::Kit &kit, TreePtr<Identifier
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderDeclScopedIdentifier( const Render::Kit &kit, TreePtr<Identifier> id, Syntax::Production surround_prod ) try
+string Render::ScopeResolvedIdentifier( const Render::Kit &kit, TreePtr<Identifier> id, Syntax::Production surround_prod ) try
 {
-	if( Syntax::GetPrecedence(Syntax::Production::SCOPE_RES) < Syntax::GetPrecedence(surround_prod) )
-		return "(" + RenderDeclScopedIdentifier(kit, id, Syntax::Production::BOOT_EXPR) + ")";
+	if( Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::SCOPE_RESOLVE) )
+		return "(" + ScopeResolvedIdentifier(kit, id, Syntax::Production::BOOT_EXPR) + ")";
 
-    string s = RenderDeclScopePrefix( kit, id, surround_prod );   
+    string s = ScopeResolvingPrefix( kit, id, surround_prod );   
     s += RenderIdentifier( kit, id, Syntax::Production::PURE_IDENTIFIER );
 
     TRACE("Render scoped identifier %s\n", s.c_str() );
@@ -356,7 +356,7 @@ string Render::RenderTypeAndDeclarator( const Render::Kit &kit, TreePtr<Type> ty
     else if( TreePtr<Typedef> t = DynamicTreePtrCast< Typedef >(type) )
         return const_str + RenderIdentifier(kit, t->identifier, Syntax::Production::PURE_IDENTIFIER) + sdeclarator;
     else if( TreePtr<SpecificTypeIdentifier> ti = DynamicTreePtrCast< SpecificTypeIdentifier >(type) )
-        return const_str + RenderDeclScopedIdentifier(kit, ti, Syntax::Production::BOOT_EXPR) + sdeclarator;
+        return const_str + ScopeResolvedIdentifier(kit, ti, Syntax::Production::BOOT_EXPR) + sdeclarator;
     else if( dynamic_pointer_cast<Labeley>(type) )
         return const_str + "void *" + declarator;
     else
@@ -436,7 +436,7 @@ string Render::RenderOperator( const Render::Kit &kit, TreePtr<Operator> op, Seq
         /* Prevent interpretation as a member function pointer literal */ \
         if( auto ao = TreePtr<AddressOf>::DynamicCast(op) ) \
 			if( auto id = TreePtr<Identifier>::DynamicCast(*operands_it) ) \
-			    paren = !RenderDeclScopePrefix( kit, id, Syntax::Production::PROD ).empty(); \
+			    paren = !ScopeResolvingPrefix( kit, id, Syntax::Production::PROD ).empty(); \
         s += (paren?"(":"") + RenderIntoProduction( kit, *operands_it, Syntax::Production::PROD) + (paren?")":""); \
     }
 #define POSTFIX(TOK, TEXT, NODE_SHAPED, BASE, CAT, PROD, ASSOC) \
@@ -558,7 +558,7 @@ string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> ex
     else if( auto li = DynamicTreePtrCast< SpecificLabelIdentifier >(expression) )
         return "&&" + RenderIdentifier( kit, li, Syntax::Production::POSTFIX ); // label-as-variable (GCC extension)             
     else if( auto ii = DynamicTreePtrCast< SpecificInstanceIdentifier >(expression) )
-        return RenderDeclScopedIdentifier( kit, ii, surround_prod );
+        return ScopeResolvedIdentifier( kit, ii, surround_prod );
     else if( auto pot = DynamicTreePtrCast< SizeOf >(expression) )
         return "sizeof(" + RenderType( kit, pot->operand ) + ")";               
     else if( auto pot = DynamicTreePtrCast< AlignOf >(expression) )
@@ -589,7 +589,7 @@ string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> ex
                " " + RenderIntoProduction( kit, d->pointer, Syntax::Production::PREFIX );
     else if( auto lu = DynamicTreePtrCast< Lookup >(expression) )
         return RenderIntoProduction( kit, lu->object, Syntax::Production::POSTFIX ) + "." +
-               RenderDeclScopedIdentifier( kit, lu->member, Syntax::BoostPrecedence(Syntax::Production::POSTFIX) );
+               ScopeResolvedIdentifier( kit, lu->member, Syntax::BoostPrecedence(Syntax::Production::POSTFIX) );
     else if( auto c = DynamicTreePtrCast< Cast >(expression) )
         return "(" + RenderType( kit, c->type ) + ")" +
                RenderIntoProduction( kit, c->operand, Syntax::Production::PREFIX );
@@ -772,7 +772,7 @@ string Render::RenderInstanceProto( const Render::Kit &kit,
             constant = true;
 
     if( out_of_line )
-        name += RenderDeclScopePrefix(kit, o->identifier, Syntax::Production::SCOPE_RES);
+        name += ScopeResolvingPrefix(kit, o->identifier, Syntax::Production::SCOPE_RESOLVE);
     else // in-line
         s += RenderStorage(kit, o);
  
@@ -791,7 +791,7 @@ string Render::RenderInstanceProto( const Render::Kit &kit,
         name += RenderIdentifier(kit, o->identifier, Syntax::Production::PURE_IDENTIFIER);
     }
 
-    s += RenderTypeAndDeclarator( kit, o->type, name, Syntax::Production::SCOPE_RES, constant );
+    s += RenderTypeAndDeclarator( kit, o->type, name, Syntax::Production::SCOPE_RESOLVE, constant );
 
 	return s;
 } 
@@ -1001,7 +1001,7 @@ string Render::RenderDeclaration( const Render::Kit &kit, TreePtr<Declaration> d
 					auto b = TreePtr<Base>::DynamicCast(bn);
 					ASSERT( b );
 					s += RenderAccess(kit, b->access) + " ";
-					s += RenderIdentifier(kit, b->record, Syntax::Production::SCOPE_RES);
+					s += RenderIdentifier(kit, b->record, Syntax::Production::SCOPE_RESOLVE);
 				}
 			}
 		}
