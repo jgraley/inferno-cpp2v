@@ -319,14 +319,14 @@ string SpecificIdentifier::GetTrace() const
 
 Syntax::Production SpecificInstanceIdentifier::GetMyProduction() const
 { 
-	return Production::IDENTIFIER; 
+	return Production::PURE_IDENTIFIER; 
 }
 
 //////////////////////////// SpecificTypeIdentifier //////////////////////////////
 
 Syntax::Production SpecificTypeIdentifier::GetMyProduction() const
 { 
-	return Production::IDENTIFIER; 
+	return Production::PURE_IDENTIFIER; 
 }
 
 //////////////////////////// SpecificLabelIdentifier //////////////////////////////

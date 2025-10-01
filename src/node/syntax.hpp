@@ -38,7 +38,7 @@ public:
 		
 		PARENTHESISED, // Highest expression precedence: (), {} from the outside
 		
-		IDENTIFIER,
+		PURE_IDENTIFIER,
 		TOKEN, // Highest precedence would be that of lexer tokens
 		ANONYMOUS = TOKEN
 	};

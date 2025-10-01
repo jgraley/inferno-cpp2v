@@ -33,7 +33,7 @@ private:
 	string Dispatch( const Render::Kit &kit, TreePtr<Node> node, Syntax::Production surround_prod );
 	string RenderProgram( const Render::Kit &kit, TreePtr<CPPTree::Program> program ); 
     string RenderLiteral( const Render::Kit &kit, TreePtr<CPPTree::Literal> sp ); 
-    string RenderIdentifier( const Render::Kit &kit, TreePtr<CPPTree::Identifier> id );
+    string RenderIdentifier( const Render::Kit &kit, TreePtr<CPPTree::Identifier> id, Syntax::Production surround_prod );
     string RenderDeclScopePrefix( const Render::Kit &kit, TreePtr<CPPTree::Identifier> id, Syntax::Production surround_prod );
     string RenderDeclScopedIdentifier( const Render::Kit &kit, TreePtr<CPPTree::Identifier> id, Syntax::Production surround_prod );
     string RenderIntegralType( const Render::Kit &kit, TreePtr<CPPTree::Integral> type, string object=string() );

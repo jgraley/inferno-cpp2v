@@ -30,10 +30,6 @@ public:
 
     TreePtr<Node> DoParse()
     {
-        auto root = MakeTreeNode<Program>();
-        TreePtr<DeclScope> root_scope = DynamicTreePtrCast<DeclScope>(root);
-        ASSERT(root_scope)("Can only parse into a scope");
-
         clang::FileManager fm;
         llvm::raw_stderr_ostream errstream; // goes to stderr
         clang::TextDiagnosticPrinter diag_printer(errstream);
@@ -70,8 +66,10 @@ public:
         }
         pp.EnterMainSourceFile();
 
+        auto root = MakeTreeNode<Program>();
+        auto context = root;
         clang::IdentifierTable it(opts);
-        InfernoAction actions(root, root_scope, it, pp, *ptarget);
+        InfernoAction actions(context, root, it, pp, *ptarget);
         clang::Parser parser(pp, actions);
         TRACE("Start parse\n");
         parser.ParseTranslationUnit();
@@ -88,15 +86,15 @@ private:
     class InfernoAction: public clang::Action, public Traceable
     {
     public:
-        InfernoAction(TreePtr<Node> context, TreePtr<DeclScope> root_scope,
+        InfernoAction(TreePtr<Node> context, TreePtr<Scope> root,
                       clang::IdentifierTable &, clang::Preprocessor &pp,
                       clang::TargetInfo &T) :
             preprocessor(pp), target_info(T), ident_track(context),
             global_scope(context), all_decls(MakeTreeNode<Program>()) // TODO Scope not Program
         {
             ASSERT( context );
-            ASSERT( root_scope );
-            inferno_scope_stack.push(root_scope); // things will be pushed into here
+            ASSERT( root );
+            inferno_scope_stack.push(root); // things will be pushed into here
             backing_ordering[inferno_scope_stack.top()].clear();
         }
 
@@ -133,7 +131,7 @@ private:
         clang::Preprocessor &preprocessor;
         clang::TargetInfo &target_info;
 
-        stack<TreePtr<DeclScope> > inferno_scope_stack;
+        stack<TreePtr<Scope> > inferno_scope_stack;
         RCHold<Declaration, DeclTy *> hold_decl;
         RCHold<Base, DeclTy *> hold_base;
         RCHold<Expression, ExprTy *> hold_expr;
