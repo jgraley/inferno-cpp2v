@@ -13,6 +13,10 @@ public:
 		TRANSLATION_UNIT,
 		
 		INSTANCE_PROTO, 
+		STATEMENT,
+		SPACE_SEP_STATEMENT,
+		SPACE_SEP_DECLARATION,
+		STATEMENT_ARG,
 		
 		INITIALISER, // For initialisers
 		
@@ -35,8 +39,7 @@ public:
 		PREFIX, // C++: all prefix including keywords where expression
 		POSTFIX, // C++: all prefix including sub clauses
 		SCOPE_RESOLVE, // :: in C++
-		DESTRUCTOR_MARK, // The ~ prefix on destructors
-		
+				
 		PARENTHESISED, // Highest expression precedence: (), {} from the outside
 		
 		PURE_IDENTIFIER,
