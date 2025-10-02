@@ -92,6 +92,8 @@ string Render::RenderIntoProduction( const Render::Kit &kit, TreePtr<Node> node,
 	// the one supplied.
 	string s;
 	Syntax::Production node_ideal_prod = node->GetMyProduction();
+	ASSERT( node_ideal_prod != Syntax::Production::UNDEFINED )
+	      ("Rendering expression: ")(node)(" in production %d",(int)prod)(" got no ideal production\n");
 	
 	switch(node_ideal_prod)
 	{
@@ -99,9 +101,10 @@ string Render::RenderIntoProduction( const Render::Kit &kit, TreePtr<Node> node,
 		{
 			// Could factor out into eg RenderIntoExpression()
 			// If current production has too-high precedence, boot back down using parentheses
-			ASSERT( node_ideal_prod != Syntax::Production::UNDEFINED )("Rendering expression: ")(node)(" in production %d",(int)prod)(" got no ideal production\n");
-			ASSERT( Syntax::GetPrecedence(prod) <= Syntax::GetPrecedence(Syntax::Production::TOP_EXPR) ); // Can't satisfy this production's precedence demand using parentheses
-			ASSERT( Syntax::GetPrecedence(node_ideal_prod) >= Syntax::GetPrecedence(Syntax::Production::BOOT_EXPR) ); // Can't puth this node into parentheses
+			ASSERT( Syntax::GetPrecedence(prod) <= Syntax::GetPrecedence(Syntax::Production::TOP_EXPR) )
+			      ("surr prod: %d node prod: %d", (int)prod, (int)node_ideal_prod); // Can't satisfy this production's precedence demand using parentheses
+			ASSERT( Syntax::GetPrecedence(node_ideal_prod) >= Syntax::GetPrecedence(Syntax::Production::BOOT_EXPR) )
+			      ("surr prod: %d node prod: %d", (int)prod, (int)node_ideal_prod); // Can't puth this node into parentheses
 			bool parenthesise = Syntax::GetPrecedence(node_ideal_prod) < Syntax::GetPrecedence(prod);	
 			if( parenthesise )
 				s += "(" + Dispatch( kit, node, Syntax::Production::BOOT_EXPR ) + ")";
@@ -122,6 +125,8 @@ string Render::Dispatch( const Render::Kit &kit, TreePtr<Node> node, Syntax::Pro
 {
 	if( auto program = TreePtr<Program>::DynamicCast(node) )
 		return RenderProgram( kit, program );
+	else if( auto identifier = TreePtr<Identifier>::DynamicCast(node) ) // Expression is a kind of Statement
+		return RenderIdentifier( kit, identifier, surround_prod );
 	else if( auto expression = TreePtr<Expression>::DynamicCast(node) ) // Expression is a kind of Statement
 		return RenderExpression( kit, expression, surround_prod );
 	else if( auto statement = TreePtr<Statement>::DynamicCast(node) )
@@ -219,7 +224,7 @@ DEFAULT_CATCH_CLAUSE
 string Render::ScopeResolvedIdentifier( const Render::Kit &kit, TreePtr<Identifier> id, Syntax::Production surround_prod ) try
 {
     string s = ScopeResolvingPrefix( kit, id, surround_prod );   
-    s += RenderIdentifier( kit, id, Syntax::Production::PURE_IDENTIFIER );
+    s += RenderIntoProduction( kit, id, Syntax::Production::PURE_IDENTIFIER );
 
     TRACE("Render scoped identifier %s\n", s.c_str() );
     return s;
@@ -350,7 +355,7 @@ string Render::RenderTypeAndDeclarator( const Render::Kit &kit, TreePtr<Type> ty
                            Syntax::Production::POSTFIX,
                            constant );
 //    else if( TreePtr<Typedef> t = DynamicTreePtrCast< Typedef >(type) )
-//        return const_str + RenderIdentifier(kit, t->identifier, Syntax::Production::PURE_IDENTIFIER) + sdeclarator;
+//        return const_str + RenderIntoProduction(kit, t->identifier, Syntax::Production::PURE_IDENTIFIER) + sdeclarator;
     else if( TreePtr<SpecificTypeIdentifier> ti = DynamicTreePtrCast< SpecificTypeIdentifier >(type) )
     {
 		Syntax::Production prod = pure_type ? Syntax::Production::SCOPE_RESOLVE  // TODO use the one that was passed in
@@ -530,7 +535,7 @@ string Render::RenderMacroCall( const Render::Kit &kit, TreePtr<MacroCall> smc )
 	for( TreePtr<Node> mo : smc->macro_operands )
 	{		
 		if( auto id = TreePtr<Identifier>::DynamicCast(mo) )
-			renders.push_back( RenderIdentifier(kit, id, Syntax::Production::PURE_IDENTIFIER) );
+			renders.push_back( RenderIntoProduction(kit, id, Syntax::Production::PURE_IDENTIFIER) );
 	}
 	string args_in_parens = Join(renders, ", ", "(", ");\n");
 
@@ -758,7 +763,7 @@ string Render::RenderInstanceProto( const Render::Kit &kit,
 		for( TreePtr<Node> mo : smf->macro_operands )
 		{				
 			if( auto id = TreePtr<Identifier>::DynamicCast(mo) )
-				renders.push_back( RenderIdentifier(kit, id, Syntax::Production::PURE_IDENTIFIER) );
+				renders.push_back( RenderIntoProduction(kit, id, Syntax::Production::PURE_IDENTIFIER) );
 		}
 		s += Join(renders, ", ", "(", ")");
 		return s;
@@ -784,11 +789,11 @@ string Render::RenderInstanceProto( const Render::Kit &kit,
         TreePtr<Record> rec = DynamicTreePtrCast<Record>( TryGetScope( o->identifier ) );
         ASSERT( rec );        
         name += (de ? "~" : ""); 
-        name += RenderIdentifier(kit, rec->identifier, Syntax::Production::PURE_IDENTIFIER);
+        name += RenderIntoProduction(kit, rec->identifier, Syntax::Production::PURE_IDENTIFIER);
     }
     else
     {
-        name += RenderIdentifier(kit, o->identifier, Syntax::Production::PURE_IDENTIFIER);
+        name += RenderIntoProduction(kit, o->identifier, Syntax::Production::PURE_IDENTIFIER);
     }
 
     s += RenderTypeAndDeclarator( kit, o->type, name, Syntax::Production::SCOPE_RESOLVE, constant );
@@ -938,7 +943,7 @@ string Render::RenderRecordProto( const Render::Kit &kit, TreePtr<Record> record
 		return ERROR_UNSUPPORTED(record);
 
 	// Name of the record
-	s += " " + RenderIdentifier(kit, record->identifier, Syntax::Production::PURE_IDENTIFIER);
+	s += " " + RenderIntoProduction(kit, record->identifier, Syntax::Production::PURE_IDENTIFIER);
 	
 	return s;
 }
@@ -978,7 +983,7 @@ string Render::RenderDeclaration( const Render::Kit &kit, TreePtr<Declaration> d
     }
     else if( TreePtr<Typedef> t = DynamicTreePtrCast< Typedef >(declaration) )
     {
-		auto id = RenderIdentifier(kit, t->identifier, Syntax::Production::PURE_IDENTIFIER);
+		auto id = RenderIntoProduction(kit, t->identifier, Syntax::Production::PURE_IDENTIFIER);
         s += "typedef " + RenderTypeAndDeclarator( kit, t->type, id, Syntax::Production::PURE_IDENTIFIER ) + ";\n";
     }
     else if( TreePtr<Record> r = DynamicTreePtrCast< Record >(declaration) )
@@ -1031,7 +1036,7 @@ string Render::RenderDeclaration( const Render::Kit &kit, TreePtr<Declaration> d
         s = '\n' + s + '\n';
     }
     else if( TreePtr<Label> l = DynamicTreePtrCast<Label>(declaration) )
-        return RenderIdentifier(kit, l->identifier, Syntax::Production::PURE_IDENTIFIER) + ":;\n"; // need ; after a label in case last in compound block
+        return RenderIntoProduction(kit, l->identifier, Syntax::Production::PURE_IDENTIFIER) + ":;\n"; // need ; after a label in case last in compound block
     else if( auto ppd = TreePtr<PreProcDecl>::DynamicCast(declaration) )
         return RenderPreProcDecl(kit, ppd) + "\n"; 
     else
@@ -1301,7 +1306,7 @@ string Render::RenderParams( const Render::Kit &kit,
 			s += ERROR_UNSUPPORTED(d);
 			continue;
 		}
-		string name = RenderIdentifier(kit, o->identifier, Syntax::Production::PURE_IDENTIFIER);
+		string name = RenderIntoProduction(kit, o->identifier, Syntax::Production::PURE_IDENTIFIER);
         s += RenderTypeAndDeclarator( kit, o->type, name, Syntax::Production::PURE_IDENTIFIER, false );
     		
         first = false;

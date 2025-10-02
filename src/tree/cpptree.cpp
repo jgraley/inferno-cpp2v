@@ -21,6 +21,13 @@ Syntax::Production Type::GetOperandInDeclaratorProduction() const
 	return Production::INSTANCE_PROTO;
 }
 
+//////////////////////////// Program ///////////////////////////////
+
+Syntax::Production Program::GetMyProduction() const
+{
+	return Production::TRANSLATION_UNIT;
+}
+
 //////////////////////////// Literal ///////////////////////////////
 
 string Literal::GetName() const

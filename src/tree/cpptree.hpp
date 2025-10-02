@@ -101,7 +101,11 @@ struct DeclScope : virtual Scope
 /// The top level of a program
 /** The top level of a program is considered a collection of declarations.
  main() would typically be a function instance somewhere in this collection. */
-struct Program : DeclScope { NODE_FUNCTIONS_FINAL };
+struct Program : DeclScope 
+{ 
+	NODE_FUNCTIONS_FINAL
+	Production GetMyProduction() const override;
+};
 
 /// Indicates that the node cannot be combinationalised
 struct Uncombable : virtual Node { NODE_FUNCTIONS };
