@@ -286,7 +286,6 @@ Sequence<Declaration> ReverseDecls( Sequence<Declaration> c )
 }
 
 // TODO
-// RenderPureIdentifier calls -> RenderIntoProduction
 // RenderStatement calls -> RenderIntoProduction
 // Statements: infer the {} around funciton bodies by specifying INITIALISER?
 // Statements: resolve else ambig by splitting BODY_STATEMENT?

@@ -109,8 +109,11 @@ string Render::RenderIntoProduction( const Render::Kit &kit, TreePtr<Node> node,
                   ("Node: ")(node)("\n")
                   ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); // Can't satisfy this production's precedence demand using parentheses
             bool parenthesise = Syntax::GetPrecedence(node_prod) < Syntax::GetPrecedence(surround_prod);    
+            bool semicolon = Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::CONDITION);    
             if( parenthesise )
                 s += "(" + Dispatch( kit, node, Syntax::Production::BOOT_EXPR ) + ")";
+            else if( semicolon )
+                s += Dispatch( kit, node, Syntax::Production::BOOT_EXPR ) + ";";
             else
                 s += Dispatch( kit, node, surround_prod );
             break;
@@ -576,7 +579,7 @@ string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> ex
         AutoPush< TreePtr<Node> > cs( scope_stack, ce );
         s += RenderDeclScope( kit, ce ); // Must do this first to populate backing list
         for( TreePtr<Statement> st : ce->statements )    
-            s += RenderStatement( kit, st, Syntax::Production::SEMICOLON_SEP );    
+            s += RenderStatement( kit, st, Syntax::Production::STATEMENT_LOW );    
         return s + "})";
     }
     else if( auto pot = DynamicTreePtrCast< SizeOf >(expression) )
@@ -1081,11 +1084,11 @@ string Render::RenderStatement( const Render::Kit &kit, TreePtr<Statement> state
         AutoPush< TreePtr<Node> > cs( scope_stack, c );
         s += RenderDeclScope( kit, c ); // Must do this first to populate backing list
         for( TreePtr<Statement> st : c->statements )    
-            s += RenderStatement( kit, st, Syntax::Production::SEMICOLON_SEP );    
+            s += RenderStatement( kit, st, Syntax::Production::STATEMENT_LOW );    
         return s + "}\n";
     }
     else if( TreePtr<Expression> e = DynamicTreePtrCast< Expression >(statement) )
-        return RenderIntoProduction(kit, e, Syntax::Production::SEMICOLON_SEP) + ";\n";
+        return RenderIntoProduction(kit, e, Syntax::Production::STATEMENT_LOW) + ";\n";
     else if( TreePtr<Return> es = DynamicTreePtrCast<Return>(statement) )
         return "return " + RenderIntoProduction(kit, es->return_value, Syntax::Production::SPACE_SEP_STATEMENT) + ";\n";
     else if( TreePtr<Goto> g = DynamicTreePtrCast<Goto>(statement) )
@@ -1099,7 +1102,7 @@ string Render::RenderStatement( const Render::Kit &kit, TreePtr<Statement> state
     {
         bool else_clause = !DynamicTreePtrCast<Nop>(i->else_body); // Nop means no else clause
         string s;
-        s += "if( " + RenderIntoProduction(kit, i->condition, Syntax::Production::STATEMENT_ARG) + " )\n";
+        s += "if( " + RenderIntoProduction(kit, i->condition, Syntax::Production::CONDITION) + " )\n";
         bool sub_if = !!DynamicTreePtrCast<If>(i->body);
         if( sub_if && else_clause )
              s += "{\n"; // Note: braces there to clarify else binding eg if(a) if(b) foo; else how_do_i_bind;
@@ -1113,21 +1116,21 @@ string Render::RenderStatement( const Render::Kit &kit, TreePtr<Statement> state
     }
     else if( TreePtr<While> w = DynamicTreePtrCast<While>(statement) )
         return "while( " + 
-               RenderIntoProduction(kit, w->condition, Syntax::Production::STATEMENT_ARG) + " )\n" +
+               RenderIntoProduction(kit, w->condition, Syntax::Production::CONDITION) + " )\n" +
                RenderStatement(kit, w->body, Syntax::Production::BODY_STATEMENT);
     else if( TreePtr<Do> d = DynamicTreePtrCast<Do>(statement) )
         return "do\n" +
                RenderStatement(kit, d->body, Syntax::Production::BODY_STATEMENT) +
-               "while( " + RenderIntoProduction(kit, d->condition, Syntax::Production::STATEMENT_ARG) + " );\n";
+               "while( " + RenderIntoProduction(kit, d->condition, Syntax::Production::CONDITION) + " );\n";
     else if( TreePtr<For> f = DynamicTreePtrCast<For>(statement) )
         return "for( " + 
-               RenderStatement(kit, f->initialisation, Syntax::Production::SEMICOLON_SEP) + 
-               RenderIntoProduction(kit, f->condition, Syntax::Production::SEMICOLON_SEP) + "; "+ 
-               RenderIntoProduction(kit, f->increment, Syntax::Production::SEMICOLON_SEP) + " )\n" +
-               RenderStatement(kit, f->body, Syntax::Production::BODY_STATEMENT);
+               RenderIntoProduction(kit, f->initialisation, Syntax::Production::STATEMENT_LOW) + 
+               RenderIntoProduction(kit, f->condition, Syntax::Production::CONDITION) + "; "+ 
+               RenderIntoProduction(kit, f->increment, Syntax::Production::BOOT_EXPR) + " )\n" +
+               RenderIntoProduction(kit, f->body, Syntax::Production::BODY_STATEMENT);
     else if( TreePtr<Switch> s = DynamicTreePtrCast<Switch>(statement) )
-        return "switch( " + RenderIntoProduction(kit, s->condition, Syntax::Production::STATEMENT_ARG) + " )\n" +
-               RenderStatement(kit, s->body, Syntax::Production::BODY_STATEMENT);
+        return "switch( " + RenderIntoProduction(kit, s->condition, Syntax::Production::CONDITION) + " )\n" +
+               RenderIntoProduction(kit, s->body, Syntax::Production::BODY_STATEMENT);
     else if( TreePtr<Case> c = DynamicTreePtrCast<Case>(statement) )
         return "case " + RenderIntoProduction(kit, c->value, Syntax::Production::SPACE_SEP_STATEMENT) + ":;\n";
     else if( TreePtr<RangeCase> rc = DynamicTreePtrCast<RangeCase>(statement) )

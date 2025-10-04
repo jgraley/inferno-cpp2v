@@ -521,7 +521,7 @@ Syntax::Production MakeRecord::GetMyProduction() const
 
 Syntax::Production SizeOf::GetMyProduction() const
 { 
-	return Production::PREFIX; 
+	return Production::PREFIX; 	
 }
 
 //////////////////////////// AlignOf ///////////////////////////////
@@ -531,11 +531,76 @@ Syntax::Production AlignOf::GetMyProduction() const
 	return Production::PREFIX; 
 }
 
+//////////////////////////// Compound ///////////////////////////////
+
+Syntax::Production Compound::GetMyProduction() const
+{ 
+	return Production::BRACED; 
+}
+
 //////////////////////////// StatementExpression ///////////////////////////////
 
 Syntax::Production StatementExpression::GetMyProduction() const
 { 
 	return Production::PARENTHESISED; 
+}
+
+//////////////////////////// Return ///////////////////////////////
+
+Syntax::Production Return::GetMyProduction() const
+{ 
+	return Production::SPACE_SEP_STATEMENT; 
+}
+
+//////////////////////////// Goto ///////////////////////////////
+
+Syntax::Production Goto::GetMyProduction() const
+{ 
+	return Production::SPACE_SEP_STATEMENT; 
+}
+
+//////////////////////////// If ///////////////////////////////
+
+Syntax::Production If::GetMyProduction() const
+{ 
+	// If we don't have an else clause, we might steal the else from a 
+	// surrounding If node, so drop our precedence a little bit.
+	return else_body ? Production::BODY_STATEMENT : Production::STATEMENT_LOW; 
+}
+
+//////////////////////////// Breakable ///////////////////////////////
+
+Syntax::Production Breakable::GetMyProduction() const
+{ 
+	return Production::BODY_STATEMENT; 
+}
+
+//////////////////////////// SwitchTarget ///////////////////////////////
+
+Syntax::Production SwitchTarget::GetMyProduction() const
+{ 
+	return Production::LABEL; 
+}
+
+//////////////////////////// Continue ///////////////////////////////
+
+Syntax::Production Continue::GetMyProduction() const
+{ 
+	return Production::SPACE_SEP_STATEMENT; // It's easy to imagine these getting arguments 
+}
+
+//////////////////////////// Break ///////////////////////////////
+
+Syntax::Production Break::GetMyProduction() const
+{ 
+	return Production::SPACE_SEP_STATEMENT; // It's easy to imagine these getting arguments 
+}
+
+//////////////////////////// Nop ///////////////////////////////
+
+Syntax::Production Nop::GetMyProduction() const
+{ 
+	return Production::BRACED; // Assuming render as {}
 }
 
 //////////////////////////// ExteriorCall ///////////////////////////////

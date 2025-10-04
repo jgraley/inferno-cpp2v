@@ -15,13 +15,14 @@ public:
 		
 		BOOT_STATEMENT,
 		
-		SEMICOLON_SEP, // Lowest statement precedence: {} etc from the inside		
+		STATEMENT_LOW, // Lowest statement precedence: {} etc from the inside		
 		BODY_STATEMENT, // eg if( ... ) <here>;    is this prefix?
 		SPACE_SEP_STATEMENT, // eg throw <here>;
 		SPACE_SEP_DECLARATION, // the type in <here> <declarator> 
-		STATEMENT_ARG,		// eg if( <here> ) ... which could be a decl etc
-		INITIALISER, // For initialisers
+		INITIALISER, // For initialisers eg function body		
+		LABEL,  // Anything with a : after it. Could be a prefix on statements.
 		BRACED,		 // {} from the outside	#10
+		CONDITION,		// eg if( <here> ) ... which could be a decl etc
 		TOP_STATEMENT, // Highest statement precedence
 										
 		BOOT_EXPR, // Lowest expression precedence: (), {}, [] etc from the inside		

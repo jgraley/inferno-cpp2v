@@ -956,6 +956,7 @@ struct Compound : SequentialScope,  ///< Local declarations go in here (preferab
                   Initialiser       ///< Can "initialise" a function (with the body) 
 {
     NODE_FUNCTIONS_FINAL
+	Production GetMyProduction() const override;	
 };                   
 
 /// GCC extension for compound statements that return a value
@@ -965,6 +966,7 @@ struct StatementExpression : Expression, ///< Evaluates to whatever the last sta
                              SequentialScope       ///< Local declarations go in here (preferably)
 {
     NODE_FUNCTIONS_FINAL
+    
     virtual string GetColour() const { return Expression::GetColour(); } // Expression wins    
 	Production GetMyProduction() const override;	
 };                   
@@ -976,6 +978,8 @@ struct Return : Statement
 {
     NODE_FUNCTIONS_FINAL
     TreePtr<Initialiser> return_value; ///< return value or Uninitialised
+
+	Production GetMyProduction() const override;	
 };
 
 /// A goto statement
@@ -989,6 +993,8 @@ struct Goto : Statement, Uncombable
     // Dest is an expression for goto-a-variable support.
     // Ordinary gotos will have Label here.
     TreePtr<Expression> destination; ///< where to go to, expresison allowed
+
+	Production GetMyProduction() const override;	
 };
 
 /// If statement
@@ -998,6 +1004,8 @@ struct If : Statement
     TreePtr<Expression> condition; ///< condition to test
     TreePtr<Statement> body;       ///< executes when true
     TreePtr<Statement> else_body;  ///< executes when false, can be Nop if no else clause
+
+	Production GetMyProduction() const override;	
 };
 
 /// Designate a statement that may be broken out of
@@ -1009,6 +1017,8 @@ struct Breakable : Statement
 {
     NODE_FUNCTIONS
     TreePtr<Statement> body; ///< a break in here jumps to the end of here
+
+	Production GetMyProduction() const override;	
 };
 
 /// Any loop.
@@ -1055,7 +1065,12 @@ struct Switch : Breakable
 };
 
 /// Intermediate for labels in a switch statement.
-struct SwitchTarget : Statement { NODE_FUNCTIONS };
+struct SwitchTarget : Statement 
+{ 
+	NODE_FUNCTIONS 
+
+	Production GetMyProduction() const override;
+};
 
 /// Case label, supporting range extension in case useful for optimisation
 struct RangeCase : SwitchTarget
@@ -1077,13 +1092,28 @@ struct Case : SwitchTarget
 struct Default : SwitchTarget { NODE_FUNCTIONS_FINAL };
 
 /// Continue (to innermost Loop)
-struct Continue : Statement, Uncombable { NODE_FUNCTIONS_FINAL };
+struct Continue : Statement, Uncombable 
+{ 
+	NODE_FUNCTIONS_FINAL 
+
+	Production GetMyProduction() const override;
+};
 
 /// Break (from innermost Breakable)
-struct Break : Statement { NODE_FUNCTIONS_FINAL };
+struct Break : Statement 
+{ 
+	NODE_FUNCTIONS_FINAL 
+
+	Production GetMyProduction() const override;
+};
 
 /// Do nothing; these get optimised out where possible
-struct Nop : Statement { NODE_FUNCTIONS_FINAL };
+struct Nop : Statement 
+{ 
+	NODE_FUNCTIONS_FINAL 
+
+	Production GetMyProduction() const override;
+};
   
 //////////////////////////// System nodes ////////////////////////////
 // System nodes represent stuff that would come in from "standard" places
