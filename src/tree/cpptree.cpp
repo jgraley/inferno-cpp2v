@@ -15,10 +15,18 @@ Syntax::Production Uninitialised::GetMyProduction() const
 
 //////////////////////////// Type ///////////////////////////////
 
+Syntax::Production Type::GetMyProduction() const
+{
+	// GetMyProduction on types is for non-booted anonymous types eg with auto a = new <here>;
+	// Default shall be to boot (i.e. force parentheses).
+	return Production::BOOT_EXPR;
+}
+
+
 Syntax::Production Type::GetOperandInDeclaratorProduction() const
 {
 	// Most types don't use declarators, so provide a safe default
-	return Production::INSTANCE_PROTO;
+	return Production::BOOT_EXPR;
 }
 
 //////////////////////////// Program ///////////////////////////////
@@ -352,16 +360,49 @@ Syntax::Production Callable::GetOperandInDeclaratorProduction() const
 
 //////////////////////////// Array //////////////////////////////
 
+Syntax::Production Array::GetMyProduction() const
+{ 
+	return Production::POSTFIX; // eg auto a = new int[9]; (without booting)
+}
+
+
 Syntax::Production Array::GetOperandInDeclaratorProduction() const
 {
-	return Production::POSTFIX; // eg int a[];
+	return Production::POSTFIX; // eg int a[9];
 }
 
 //////////////////////////// Indirection //////////////////////////////
 
+Syntax::Production Indirection::GetMyProduction() const
+{ 
+	return Production::POSTFIX; // eg auto a = new int *; (without booting)
+}
+
+
 Syntax::Production Indirection::GetOperandInDeclaratorProduction() const
 {
 	return Production::PREFIX; // eg int *a;
+}
+
+//////////////////////////// Void ///////////////////////////////
+
+Syntax::Production Void::GetMyProduction() const
+{ 
+	return Production::TOKEN; // eg auto a = new void;
+}
+
+//////////////////////////// Boolean ///////////////////////////////
+
+Syntax::Production Boolean::GetMyProduction() const
+{ 
+	return Production::TOKEN; // eg auto a = new bool;
+}
+
+//////////////////////////// Numeric ///////////////////////////////
+
+Syntax::Production Numeric::GetMyProduction() const
+{ 
+	return Production::SPACE_SEP_TYPE; // eg auto a = new unsigned long;
 }
 
 //////////////////////////// SpecificFloatSemantics ///////////////////////////////
@@ -411,6 +452,13 @@ Orderable::Diff SpecificFloatSemantics::OrderCompare3WayCovariant( const Orderab
 SpecificFloatSemantics::operator const llvm::fltSemantics &() const 
 {
     return *value;
+}
+
+//////////////////////////// Labeley ///////////////////////////////
+
+Syntax::Production Labeley::GetMyProduction() const
+{
+	return Production::POSTFIX; // renders as void *
 }
 
 //////////////////////////// True ///////////////////////////////

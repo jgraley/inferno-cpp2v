@@ -69,7 +69,9 @@ struct Expression : virtual Statement,
 struct Type : virtual Node 
 { 
     NODE_FUNCTIONS 
+    
     virtual string GetColour() const { return "/set28/3"; }    
+   	Production GetMyProduction() const override;
 	Production GetOperandInDeclaratorProduction() const override;   
 };
 
@@ -560,6 +562,7 @@ struct Array : Type
     TreePtr<Type> element; ///< the element type
     TreePtr<Initialiser> size; ///< evaluates to the size or Uninitialised if not given eg []
    
+	Production GetMyProduction() const override;	
 	Production GetOperandInDeclaratorProduction() const override;
 };
 
@@ -569,6 +572,8 @@ struct Indirection : Type
     NODE_FUNCTIONS
     TreePtr<Type> destination; ///< reaching an object of this type, indirectly
 	TreePtr<Constancy> constancy;  ///< is the destination const?
+
+	Production GetMyProduction() const override;	
 	Production GetOperandInDeclaratorProduction() const override;
 };
 
@@ -579,17 +584,31 @@ struct Pointer : Indirection { NODE_FUNCTIONS_FINAL };
 struct Reference : Indirection { NODE_FUNCTIONS_FINAL };
 
 /// The pseudo-type void, disallowed in some circumstances as per C.
-struct Void : Type { NODE_FUNCTIONS_FINAL };
+struct Void : Type 
+{ 
+	NODE_FUNCTIONS_FINAL 
+
+	Production GetMyProduction() const override;
+};
 
 /// Boolean type. 
 /** We support bool separately from 1-bit ints, at least for now.
  (note that (bool)2==true but (int:1)2==0)
  Note: Boolean here is considered an adjective, and in general Type
  nodes are named using adjectives. C.f. the Property/Literal intermediate Bool */
-struct Boolean : Type { NODE_FUNCTIONS_FINAL };
+struct Boolean : Type 
+{ 
+	NODE_FUNCTIONS_FINAL 
+	
+	Production GetMyProduction() const override;	
+};
 
 /// Intermediate for any type that represents a number that you can eg add and subtract. 
-struct Numeric : Type { NODE_FUNCTIONS };
+struct Numeric : Type 
+{ 
+	NODE_FUNCTIONS 
+	Production GetMyProduction() const override;
+};
 
 /// Type represents an integral (singed or unsigned) type. 
 /** The total number of bits (including sign when signed, and 
@@ -638,6 +657,8 @@ struct Floating : Numeric
 struct Labeley : Type
 {
     NODE_FUNCTIONS_FINAL   
+    
+	Production GetMyProduction() const override;	    
 };
 
 //////////////////////////// User-defined Types ////////////////////////////

@@ -128,8 +128,10 @@ string Render::Dispatch( const Render::Kit &kit, TreePtr<Node> node, Syntax::Pro
 {
     if( auto program = TreePtr<Program>::DynamicCast(node) )
         return RenderProgram( kit, program );
-    else if( auto identifier = TreePtr<Identifier>::DynamicCast(node) ) // Expression is a kind of Statement
+    else if( auto identifier = TreePtr<Identifier>::DynamicCast(node) ) // Identifier can be a kind of type or expression
         return RenderIdentifier( kit, identifier, surround_prod );
+    else if( auto type = TreePtr<Type>::DynamicCast(node) ) 
+        return RenderType( kit, type, surround_prod );
     else if( auto expression = TreePtr<Expression>::DynamicCast(node) ) // Expression is a kind of Statement
         return RenderExpression( kit, expression, surround_prod );
     else if( auto statement = TreePtr<Statement>::DynamicCast(node) )
@@ -578,9 +580,9 @@ string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> ex
         return s + "})";
     }
     else if( auto pot = DynamicTreePtrCast< SizeOf >(expression) )
-        return "sizeof(" + RenderType( kit, pot->operand, Syntax::Production::BOOT_EXPR ) + ")";               
+        return "sizeof(" + RenderIntoProduction( kit, pot->operand, Syntax::Production::BOOT_EXPR ) + ")";               
     else if( auto pot = DynamicTreePtrCast< AlignOf >(expression) )
-        return "alignof(" + RenderType( kit, pot->operand, Syntax::Production::BOOT_EXPR ) + ")";
+        return "alignof(" + RenderIntoProduction( kit, pot->operand, Syntax::Production::BOOT_EXPR ) + ")";
     else if( auto nco = DynamicTreePtrCast< NonCommutativeOperator >(expression) )
         return RenderOperator( kit, nco, nco->operands );           
     else if( auto co = DynamicTreePtrCast< CommutativeOperator >(expression) )
@@ -598,7 +600,7 @@ string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> ex
     else if( auto n = DynamicTreePtrCast< New >(expression) )
         return string (DynamicTreePtrCast<Global>(n->global) ? "::" : "") +
                "new(" + RenderOperandSequence( kit, n->placement_arguments ) + ") " +
-               RenderType( kit, n->type, Syntax::Production::TYPE_IN_NEW ) +
+               RenderIntoProduction( kit, n->type, Syntax::Production::TYPE_IN_NEW ) +
                (n->constructor_arguments.empty() ? "" : "(" + RenderOperandSequence( kit, n->constructor_arguments ) + ")" );
     else if( auto d = DynamicTreePtrCast< Delete >(expression) )
         return string(DynamicTreePtrCast<Global>(d->global) ? "::" : "") +
@@ -609,7 +611,7 @@ string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> ex
         return RenderIntoProduction( kit, lu->object, Syntax::Production::POSTFIX ) + "." +
                RenderIntoProduction( kit, lu->member, Syntax::BoostPrecedence(Syntax::Production::POSTFIX) );
     else if( auto c = DynamicTreePtrCast< Cast >(expression) )
-        return "(" + RenderType( kit, c->type, Syntax::Production::BOOT_EXPR ) + ")" +
+        return "(" + RenderIntoProduction( kit, c->type, Syntax::Production::BOOT_EXPR ) + ")" +
                RenderIntoProduction( kit, c->operand, Syntax::Production::PREFIX );
     else if( auto ro = DynamicTreePtrCast< MakeRecord >(expression) )
         return RenderMakeRecord( kit, ro );
@@ -652,7 +654,7 @@ string Render::RenderMakeRecord( const Render::Kit &kit, TreePtr<MakeRecord> mak
         ls.push_back( RenderIntoProduction( kit, e, Syntax::Production::COMMA_SEP ) );
 
     // Do the syntax
-    s += "(" + RenderType( kit, make_rec->type, Syntax::Production::BOOT_EXPR ) + ")";
+    s += "(" + RenderIntoProduction( kit, make_rec->type, Syntax::Production::BOOT_EXPR ) + ")";
     s += Join( ls, ", ", "{ ", " }" );    
     return s;
 }
