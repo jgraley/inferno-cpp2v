@@ -38,7 +38,7 @@ private:
     string RenderIdentifier( const Render::Kit &kit, TreePtr<CPPTree::Identifier> id, Syntax::Production surround_prod );
     string RenderIntegralType( const Render::Kit &kit, TreePtr<CPPTree::Integral> type, string object=string() );
     string RenderFloatingType( const Render::Kit &kit, TreePtr<CPPTree::Floating> type );
-    string RenderTypeAndDeclarator( const Render::Kit &kit, TreePtr<CPPTree::Type> type, string declarator, Syntax::Production object_prod, 
+    string RenderTypeAndDeclarator( const Render::Kit &kit, TreePtr<CPPTree::Type> type, string declarator, Syntax::Production object_prod, Syntax::Production surround_prod,
                        bool constant=false );
     string RenderType( const Render::Kit &kit, TreePtr<CPPTree::Type> type );
     string Sanitise( string s );
