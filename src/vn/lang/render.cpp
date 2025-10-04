@@ -880,7 +880,7 @@ string Render::RenderInstance( const Render::Kit &kit, TreePtr<Instance> o,
         auto r = MakeTreeNode<Compound>();
         r->members = members;
         r->statements = remainder;
-        s += "\n" + RenderStatement(kit, r, Syntax::Production::BODY_STATEMENT); // TODO force {} by using higher precedence?
+        s += "\n" + RenderStatement(kit, r, Syntax::Production::STATEMENT_HIGH); // TODO force {} by using higher precedence?
         
         // Surround functions with blank lines        
         return '\n' + s + '\n';
@@ -1100,37 +1100,37 @@ string Render::RenderStatement( const Render::Kit &kit, TreePtr<Statement> state
     }
     else if( TreePtr<If> i = DynamicTreePtrCast<If>(statement) )
     {
-        bool else_clause = !DynamicTreePtrCast<Nop>(i->else_body); // Nop means no else clause
+        bool has_else_clause = !DynamicTreePtrCast<Nop>(i->else_body); // Nop means no else clause
         string s;
         s += "if( " + RenderIntoProduction(kit, i->condition, Syntax::Production::CONDITION) + " )\n";
         bool sub_if = !!DynamicTreePtrCast<If>(i->body);
-        if( sub_if && else_clause )
+        if( sub_if && has_else_clause )
              s += "{\n"; // Note: braces there to clarify else binding eg if(a) if(b) foo; else how_do_i_bind;
-        s += RenderStatement(kit, i->body, Syntax::Production::BODY_STATEMENT);
-        if( sub_if && else_clause )
+        s += RenderStatement(kit, i->body, has_else_clause ? Syntax::Production::STATEMENT_HIGH : Syntax::Production::STATEMENT_LOW);
+        if( sub_if && has_else_clause )
              s += "}\n";
-        if( else_clause )  
+        if( has_else_clause )  
             s += "else\n" +
-                 RenderStatement(kit, i->else_body, Syntax::Production::BODY_STATEMENT);
+                 RenderStatement(kit, i->else_body, Syntax::Production::STATEMENT_LOW);
         return s;
     }
     else if( TreePtr<While> w = DynamicTreePtrCast<While>(statement) )
         return "while( " + 
                RenderIntoProduction(kit, w->condition, Syntax::Production::CONDITION) + " )\n" +
-               RenderStatement(kit, w->body, Syntax::Production::BODY_STATEMENT);
+               RenderIntoProduction(kit, w->body, surround_prod);
     else if( TreePtr<Do> d = DynamicTreePtrCast<Do>(statement) )
         return "do\n" +
-               RenderStatement(kit, d->body, Syntax::Production::BODY_STATEMENT) +
+               RenderIntoProduction(kit, d->body, Syntax::Production::STATEMENT_LOW) +
                "while( " + RenderIntoProduction(kit, d->condition, Syntax::Production::CONDITION) + " );\n";
     else if( TreePtr<For> f = DynamicTreePtrCast<For>(statement) )
         return "for( " + 
                RenderIntoProduction(kit, f->initialisation, Syntax::Production::STATEMENT_LOW) + 
                RenderIntoProduction(kit, f->condition, Syntax::Production::CONDITION) + "; "+ 
                RenderIntoProduction(kit, f->increment, Syntax::Production::BOOT_EXPR) + " )\n" +
-               RenderIntoProduction(kit, f->body, Syntax::Production::BODY_STATEMENT);
+               RenderIntoProduction(kit, f->body, Syntax::Production::STATEMENT_HIGH);
     else if( TreePtr<Switch> s = DynamicTreePtrCast<Switch>(statement) )
         return "switch( " + RenderIntoProduction(kit, s->condition, Syntax::Production::CONDITION) + " )\n" +
-               RenderIntoProduction(kit, s->body, Syntax::Production::BODY_STATEMENT);
+               RenderIntoProduction(kit, s->body, surround_prod);
     else if( TreePtr<Case> c = DynamicTreePtrCast<Case>(statement) )
         return "case " + RenderIntoProduction(kit, c->value, Syntax::Production::SPACE_SEP_STATEMENT) + ":;\n";
     else if( TreePtr<RangeCase> rc = DynamicTreePtrCast<RangeCase>(statement) )

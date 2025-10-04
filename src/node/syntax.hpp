@@ -16,7 +16,7 @@ public:
 		BOOT_STATEMENT,
 		
 		STATEMENT_LOW, // Lowest statement precedence: {} etc from the inside		
-		BODY_STATEMENT, // eg if( ... ) <here>;    is this prefix?
+		STATEMENT_HIGH, // eg if( ... ) <here>;    is this prefix?
 		SPACE_SEP_STATEMENT, // eg throw <here>;
 		SPACE_SEP_DECLARATION, // the type in <here> <declarator> 
 		INITIALISER, // For initialisers eg function body		

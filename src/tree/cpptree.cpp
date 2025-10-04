@@ -565,14 +565,15 @@ Syntax::Production If::GetMyProduction() const
 { 
 	// If we don't have an else clause, we might steal the else from a 
 	// surrounding If node, so drop our precedence a little bit.
-	return else_body ? Production::BODY_STATEMENT : Production::STATEMENT_LOW; 
+	bool has_else_clause = !DynamicTreePtrCast<Nop>(else_body);
+	return has_else_clause ? Production::STATEMENT_HIGH : Production::STATEMENT_LOW; 
 }
 
 //////////////////////////// Breakable ///////////////////////////////
 
 Syntax::Production Breakable::GetMyProduction() const
 { 
-	return Production::BODY_STATEMENT; 
+	return Production::STATEMENT_HIGH; 
 }
 
 //////////////////////////// SwitchTarget ///////////////////////////////
