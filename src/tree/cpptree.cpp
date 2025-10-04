@@ -340,7 +340,7 @@ Syntax::Production SpecificTypeIdentifier::GetMyProduction() const
 
 Syntax::Production SpecificLabelIdentifier::GetMyProduction() const
 { 
-	return Production::PREFIX;  // renders with && prepended
+	return Production::PURE_IDENTIFIER; 
 }
 
 //////////////////////////// Callable //////////////////////////////

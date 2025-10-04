@@ -13,6 +13,7 @@ using namespace CPPTree;
 
 AugTreePtr<Identifier> GetIdentifierOfDeclaration( AugTreePtr<Declaration> d )
 {
+	ASSERT(d);
     if( auto i = AugTreePtr<Instance>::DynamicCast( d ) )
         return GET_CHILD(i, identifier);
     else if( auto t = AugTreePtr<UserType>::DynamicCast( d ) )

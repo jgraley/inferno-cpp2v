@@ -21,7 +21,7 @@ public:
 		SPACE_SEP_DECLARATION, // the type in <here> <declarator> 
 		STATEMENT_ARG,		// eg if( <here> ) ... which could be a decl etc
 		INITIALISER, // For initialisers
-		BRACED,		 // {} from the outside	
+		BRACED,		 // {} from the outside	#10
 		TOP_STATEMENT, // Highest statement precedence
 				
 		BOOT_EXPR, // Lowest expression precedence: (), {}, [] etc from the inside		
@@ -41,11 +41,11 @@ public:
 		MUL_DIV,
 		PREFIX, // C++: all prefix including keywords where expression
 		POSTFIX, // C++: all prefix including sub clauses
-		SCOPE_RESOLVE, // :: in C++				
 		PARENTHESISED, // (), {} from the outside		
 		TOP_EXPR, // Highest expression precedence
 		
-		PURE_IDENTIFIER,
+		SCOPE_RESOLVE, // :: in C++				
+		PURE_IDENTIFIER, // Higher than expr because could be a type, label etc
 		TOKEN, // Highest precedence would be that of lexer tokens
 		ANONYMOUS = TOKEN
 	};
