@@ -23,7 +23,7 @@ public:
 		INITIALISER, // For initialisers
 		BRACED,		 // {} from the outside	#10
 		TOP_STATEMENT, // Highest statement precedence
-				
+										
 		BOOT_EXPR, // Lowest expression precedence: (), {}, [] etc from the inside		
 		COMMA_OP,
 		COMMA_SEP, // Use this for comma-separated lists to force parens for COMMA_OP
@@ -39,6 +39,7 @@ public:
 		SHIFT,
 		ADD_SUB,
 		MUL_DIV,
+		TYPE_IN_NEW, // new(args) <here>(args)
 		PREFIX, // C++: all prefix including keywords where expression
 		POSTFIX, // C++: all prefix including sub clauses
 		PARENTHESISED, // (), {} from the outside		

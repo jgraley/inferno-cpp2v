@@ -323,8 +323,8 @@ string Render::RenderFloatingType( const Render::Kit &kit, TreePtr<Floating> typ
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderTypeAndDeclarator( const Render::Kit &kit, TreePtr<Type> type, string declarator, Syntax::Production declarator_prod, Syntax::Production surround_prod,
-                           bool constant ) try
+string Render::RenderTypeAndDeclarator( const Render::Kit &kit, TreePtr<Type> type, string declarator, 
+                                        Syntax::Production declarator_prod, Syntax::Production surround_prod, bool constant ) try
 {
     // Production passed in here comes from the current value of the delcarator string, not surrounding production.
     Syntax::Production prod_surrounding_declarator = type->GetOperandInDeclaratorProduction();
@@ -386,10 +386,10 @@ string Render::RenderTypeAndDeclarator( const Render::Kit &kit, TreePtr<Type> ty
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderType( const Render::Kit &kit, TreePtr<CPPTree::Type> type )
+string Render::RenderType( const Render::Kit &kit, TreePtr<CPPTree::Type> type, Syntax::Production surround_prod )
 {
     // Production ANONYMOUS relates to the fact that we've provided an empty string for the initial declarator.
-    return RenderTypeAndDeclarator( kit, type, "", Syntax::Production::ANONYMOUS, Syntax::Production::SCOPE_RESOLVE, false ); // TODO surrounding
+    return RenderTypeAndDeclarator( kit, type, "", Syntax::Production::ANONYMOUS, surround_prod, false ); 
 }
 
 // Insert escapes into a string so it can be put in source code
@@ -578,9 +578,9 @@ string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> ex
         return s + "})";
     }
     else if( auto pot = DynamicTreePtrCast< SizeOf >(expression) )
-        return "sizeof(" + RenderType( kit, pot->operand ) + ")";               
+        return "sizeof(" + RenderType( kit, pot->operand, Syntax::Production::BOOT_EXPR ) + ")";               
     else if( auto pot = DynamicTreePtrCast< AlignOf >(expression) )
-        return "alignof(" + RenderType( kit, pot->operand ) + ")";
+        return "alignof(" + RenderType( kit, pot->operand, Syntax::Production::BOOT_EXPR ) + ")";
     else if( auto nco = DynamicTreePtrCast< NonCommutativeOperator >(expression) )
         return RenderOperator( kit, nco, nco->operands );           
     else if( auto co = DynamicTreePtrCast< CommutativeOperator >(expression) )
@@ -598,7 +598,7 @@ string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> ex
     else if( auto n = DynamicTreePtrCast< New >(expression) )
         return string (DynamicTreePtrCast<Global>(n->global) ? "::" : "") +
                "new(" + RenderOperandSequence( kit, n->placement_arguments ) + ") " +
-               RenderType( kit, n->type ) +
+               RenderType( kit, n->type, Syntax::Production::TYPE_IN_NEW ) +
                (n->constructor_arguments.empty() ? "" : "(" + RenderOperandSequence( kit, n->constructor_arguments ) + ")" );
     else if( auto d = DynamicTreePtrCast< Delete >(expression) )
         return string(DynamicTreePtrCast<Global>(d->global) ? "::" : "") +
@@ -609,7 +609,7 @@ string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> ex
         return RenderIntoProduction( kit, lu->object, Syntax::Production::POSTFIX ) + "." +
                RenderIntoProduction( kit, lu->member, Syntax::BoostPrecedence(Syntax::Production::POSTFIX) );
     else if( auto c = DynamicTreePtrCast< Cast >(expression) )
-        return "(" + RenderType( kit, c->type ) + ")" +
+        return "(" + RenderType( kit, c->type, Syntax::Production::BOOT_EXPR ) + ")" +
                RenderIntoProduction( kit, c->operand, Syntax::Production::PREFIX );
     else if( auto ro = DynamicTreePtrCast< MakeRecord >(expression) )
         return RenderMakeRecord( kit, ro );
@@ -652,7 +652,7 @@ string Render::RenderMakeRecord( const Render::Kit &kit, TreePtr<MakeRecord> mak
         ls.push_back( RenderIntoProduction( kit, e, Syntax::Production::COMMA_SEP ) );
 
     // Do the syntax
-    s += "(" + RenderType( kit, make_rec->type ) + ")";
+    s += "(" + RenderType( kit, make_rec->type, Syntax::Production::BOOT_EXPR ) + ")";
     s += Join( ls, ", ", "{ ", " }" );    
     return s;
 }
