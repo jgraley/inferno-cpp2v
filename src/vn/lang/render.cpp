@@ -563,6 +563,7 @@ DEFAULT_CATCH_CLAUSE
 
 string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> expression, Syntax::Production surround_prod ) try
 {
+	(void)surround_prod;
     if( DynamicTreePtrCast< Uninitialised >(expression) )
         return string();
     else if( auto ce = DynamicTreePtrCast< StatementExpression >(expression) )
@@ -574,8 +575,6 @@ string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> ex
 			s += RenderStatement( kit, st, Syntax::Production::SEMICOLON_SEP );    
         return s + "})";
     }
-    else if( auto ii = DynamicTreePtrCast< SpecificInstanceIdentifier >(expression) )
-        return RenderPureIdentifier( kit, ii, surround_prod );
     else if( auto pot = DynamicTreePtrCast< SizeOf >(expression) )
         return "sizeof(" + RenderType( kit, pot->operand ) + ")";               
     else if( auto pot = DynamicTreePtrCast< AlignOf >(expression) )
@@ -606,7 +605,7 @@ string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> ex
                " " + RenderIntoProduction( kit, d->pointer, Syntax::Production::PREFIX );
     else if( auto lu = DynamicTreePtrCast< Lookup >(expression) )
         return RenderIntoProduction( kit, lu->object, Syntax::Production::POSTFIX ) + "." +
-               RenderPureIdentifier( kit, lu->member, Syntax::BoostPrecedence(Syntax::Production::POSTFIX) );
+               RenderIntoProduction( kit, lu->member, Syntax::BoostPrecedence(Syntax::Production::POSTFIX) );
     else if( auto c = DynamicTreePtrCast< Cast >(expression) )
         return "(" + RenderType( kit, c->type ) + ")" +
                RenderIntoProduction( kit, c->operand, Syntax::Production::PREFIX );
