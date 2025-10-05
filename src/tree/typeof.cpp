@@ -128,6 +128,17 @@ AugTreePtr<CPPTree::Type> TypeOf::Get( const TransKit &kit, AugTreePtr<Expressio
         else
             throw SubscriptUsageMismatch();
     }
+    else if( auto al = AugTreePtr<MakeArray>::DynamicCast(op) )
+    {
+        auto a = kit.utils->MakeAugTreeNode<Array>();
+        auto sz = kit.utils->MakeAugTreeNode<SpecificInteger>( (int)(al->operands.size()) ); // TODO make it work with size_t and remove the cast
+        SET_CHILD(a, size, sz);
+        if( al->operands.empty() )
+            SET_CHILD(a, element, kit.utils->MakeAugTreeNode<Void>()); // array has no elements so cannot determine type
+        else
+            SET_CHILD(a, element, Get( kit, GET_CHILD_FRONT(al, operands) ));
+        return AugTreePtr<Type>(a);
+    }
     else 
     {
         throw UnsupportedExpressionMismatch();
@@ -158,20 +169,7 @@ AugTreePtr<CPPTree::Type> TypeOf::GetRegularOperator( const TransKit &kit, AugTr
         ASSERT( !AugTreePtr<Reference>::DynamicCast(t) );
         ASSERT( !AugTreePtr<Array>::DynamicCast(t) );
     }
-
-    // Turn an array literal into an array
-    if( auto al = AugTreePtr<MakeArray>::DynamicCast(op) )
-    {
-        auto a = kit.utils->MakeAugTreeNode<Array>();
-        auto sz = kit.utils->MakeAugTreeNode<SpecificInteger>( (int)(optypes.size()) ); // TODO make it work with size_t and remove the cast
-        SET_CHILD(a, size, sz);
-        if( optypes.empty() )
-            SET_CHILD(a, element, kit.utils->MakeAugTreeNode<Void>()); // array has no elements so cannot determine type
-        else
-            SET_CHILD(a, element, optypes.front());
-        return AugTreePtr<Type>(a);
-    }
-
+    
     // Assignment operators return their left-hand operand type in all cases
     if( AugTreePtr<AssignmentOperator>::DynamicCast(op) )
     {

@@ -50,7 +50,6 @@ void Lacing::FixupCategories(const CategorySet &raw_categories_)
 {
     // Uniquify using IsSameCategory() so we definitely get a
     // category-uniquification.
-    FTRACE("-------------------------------------------------------------\n");
     categories.clear();
     for( TreePtr<Node> x : raw_categories_ )    
     {

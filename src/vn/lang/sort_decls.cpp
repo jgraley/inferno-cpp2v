@@ -290,3 +290,4 @@ Sequence<Declaration> ReverseDecls( Sequence<Declaration> c )
 // Statements: infer the {} around funciton bodies by specifying INITIALISER?
 // more passing through surround_prod in RenderStatement() and similar when handing over directly
 // add ifelse.c to the tests
+// Every way of getting to anythign should be via RenderIntoProduction()

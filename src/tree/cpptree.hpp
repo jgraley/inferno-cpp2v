@@ -801,6 +801,7 @@ struct AssignmentOperator : NonCommutativeOperator { NODE_FUNCTIONS };
 };
 #include "operator_data.inc"
 
+/// The termary ?: operator
 struct ConditionalOperator : Operator
 {
 	NODE_FUNCTIONS_FINAL
@@ -811,11 +812,20 @@ struct ConditionalOperator : Operator
 	Production GetMyProduction() const override;
 };
 
+/// Subscripting on objects
 struct Subscript : Operator
 {
 	NODE_FUNCTIONS_FINAL
 	TreePtr<Expression> destination;
 	TreePtr<Expression> index;	
+	
+	Production GetMyProduction() const override;
+};
+
+/// An array formed directly from elements which should all be the same type
+struct MakeArray : NonCommutativeOperator
+{
+	NODE_FUNCTIONS_FINAL	
 	
 	Production GetMyProduction() const override;
 };

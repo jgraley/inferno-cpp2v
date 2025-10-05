@@ -496,6 +496,13 @@ Syntax::Production False::GetMyProduction() const
 	return Production::TOKEN; 
 }
 
+//////////////////////////// ConditionalOperator ///////////////////////////////
+
+Syntax::Production ConditionalOperator::GetMyProduction() const
+{ 
+	return Production::CONDITIONAL; 
+}
+
 //////////////////////////// Subscript ///////////////////////////////
 
 Syntax::Production Subscript::GetMyProduction() const
@@ -503,11 +510,11 @@ Syntax::Production Subscript::GetMyProduction() const
 	return Production::POSTFIX; 
 }
 
-//////////////////////////// ConditionalOperator ///////////////////////////////
+//////////////////////////// MakeArray ///////////////////////////////
 
-Syntax::Production ConditionalOperator::GetMyProduction() const
+Syntax::Production MakeArray::GetMyProduction() const
 { 
-	return Production::CONDITIONAL; 
+	return Production::PARENTHESISED; 
 }
 
 //////////////////////////// New ///////////////////////////////

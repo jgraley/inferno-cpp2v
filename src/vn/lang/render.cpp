@@ -499,7 +499,13 @@ string Render::RenderOperator( const Render::Kit &kit, TreePtr<Operator> op ) tr
 			   RenderIntoProduction( kit, subs->index, Syntax::Production::BOOT_EXPR ) + 
 			   "]";
     }
-	else if( auto nco = DynamicTreePtrCast< NonCommutativeOperator >(op) )
+    else if( auto al = DynamicTreePtrCast< MakeArray >(op) )
+    {
+        return "{ " + 
+               RenderOperandSequence( kit, al->operands ) + 
+               " }";
+    }	
+    else if( auto nco = DynamicTreePtrCast< NonCommutativeOperator >(op) )
         operands = nco->operands;           
     else if( auto co = DynamicTreePtrCast< CommutativeOperator >(op) )
     {
@@ -512,12 +518,11 @@ string Render::RenderOperator( const Render::Kit &kit, TreePtr<Operator> op ) tr
     {
         return ERROR_UNSUPPORTED(op);
 	}
-        
-    // Regular operators: kinds of either NonCommutativeOperator or CommutativeOperator; operands in operands
-    if( DynamicTreePtrCast< MakeArray >(op) )
+
+    // Regular operators: kinds of either NonCommutativeOperator or CommutativeOperator; operands in operands  
+    if( false )
     {
-        s = "{ " + RenderOperandSequence( kit, operands ) + " }";
-    }
+	}        
 #define INFIX(TOK, TEXT, NODE_SHAPED, BASE, CAT, PROD, ASSOC) \
     else if( DynamicTreePtrCast<NODE_SHAPED>(op) ) \
     { \
