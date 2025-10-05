@@ -40,7 +40,7 @@ AugTreePtr<CPPTree::Type> TypeOf::Get( const TransKit &kit, AugTreePtr<Expressio
             AugTreePtr<Type> type = Get(kit, o_atp);
             optypes.push_back( type );
         } );
-        return GetOperator( kit, op, optypes );
+        return GetRegularOperator( kit, op, optypes );
     }
     else if( auto op = AugTreePtr<CommutativeOperator>::DynamicCast(o) ) // operator
     {
@@ -51,7 +51,7 @@ AugTreePtr<CPPTree::Type> TypeOf::Get( const TransKit &kit, AugTreePtr<Expressio
             AugTreePtr<Type> type = Get(kit, o_atp);
             optypes.push_back( type );
         } );
-        return GetOperator( kit, op, optypes );
+        return GetRegularOperator( kit, op, optypes );
     }
     else if( auto l = AugTreePtr<Literal>::DynamicCast(o) )
     {
@@ -113,6 +113,11 @@ AugTreePtr<CPPTree::Type> TypeOf::Get( const TransKit &kit, AugTreePtr<Expressio
         else
             return kit.utils->MakeAugTreeNode<Void>(); 
     }
+    else if( auto condo = AugTreePtr<ConditionalOperator>::DynamicCast(op) )
+    {
+        return Get( kit, GET_CHILD(condo, expr_then) );
+ // middle element TODO do this properly, consider cond ? nullptr : &x
+    }
     else 
     {
         throw UnsupportedExpressionMismatch();
@@ -123,7 +128,7 @@ AugTreePtr<CPPTree::Type> TypeOf::Get( const TransKit &kit, AugTreePtr<Expressio
 
 // Just discover the type of operators, where the types of the operands have already been determined
 // Note we always get a Sequence, even when the operator is commutative
-AugTreePtr<CPPTree::Type> TypeOf::GetOperator( const TransKit &kit, AugTreePtr<Operator> op, list<AugTreePtr<Type>> optypes ) const
+AugTreePtr<CPPTree::Type> TypeOf::GetRegularOperator( const TransKit &kit, AugTreePtr<Operator> op, list<AugTreePtr<Type>> optypes ) const
 {
     // Lower types that masquerade as other types in preparation for operand analysis
     // - References go to the referenced type
@@ -329,12 +334,6 @@ AugTreePtr<CPPTree::Type> TypeOf::GetSpecial( const TransKit &kit, AugTreePtr<Op
     else if( AugTreePtr<Comma>::DynamicCast(op) )
     {
         return optypes.back();
-    }
-    else if( AugTreePtr<ConditionalOperator>::DynamicCast(op) )
-    {
-        list<AugTreePtr<Type>>::iterator optypes_it = optypes.begin();
-        ++optypes_it;
-        return *optypes_it; // middle element TODO do this properly, consider cond ? nullptr : &x
     }
     else if( AugTreePtr<This>::DynamicCast(op) )
     {

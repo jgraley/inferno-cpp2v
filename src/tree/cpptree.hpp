@@ -801,6 +801,16 @@ struct AssignmentOperator : NonCommutativeOperator { NODE_FUNCTIONS };
 };
 #include "operator_data.inc"
 
+struct ConditionalOperator : Operator
+{
+	NODE_FUNCTIONS_FINAL
+	TreePtr<Expression> condition;
+	TreePtr<Expression> expr_then;
+	TreePtr<Expression> expr_else;	
+	
+	Production GetMyProduction() const override;
+};
+
 /// Property indicating whether a New/Delete is global 
 /** New/Delete is global if it has :: in
  front of it. This differentiates when placement args are given as follows:

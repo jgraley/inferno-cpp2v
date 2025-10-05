@@ -496,6 +496,13 @@ Syntax::Production False::GetMyProduction() const
 	return Production::TOKEN; 
 }
 
+//////////////////////////// ConditionalOperator ///////////////////////////////
+
+Syntax::Production ConditionalOperator::GetMyProduction() const
+{ 
+	return Production::CONDITIONAL; 
+}
+
 //////////////////////////// New ///////////////////////////////
 
 Syntax::Production New::GetMyProduction() const

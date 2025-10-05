@@ -103,7 +103,6 @@ NormaliseConditionalGotos::NormaliseConditionalGotos()
     auto sx_pre = MakePatternNode< Star<Statement> >();
     auto post = MakePatternNode< Star<Statement> >();
     auto sx_post = MakePatternNode< Star<Statement> >();
-    auto mult = MakePatternNode< ConditionalOperator >();
     auto label = MakePatternNode< Label >();
     auto label_id = MakePatternNode< BuildLabelIdentifierAgent >("PROCEED");
     auto s_all = MakePatternNode< Conjunction<Statement> >();
@@ -140,7 +139,7 @@ CompactGotos::CompactGotos()
     auto decls = MakePatternNode< Star<Declaration> >();
     auto pre = MakePatternNode< Star<Statement> >();
     auto post = MakePatternNode< Star<Statement> >();
-    auto mult = MakePatternNode< ConditionalOperator >();
+    auto multiplexer = MakePatternNode< ConditionalOperator >();
     
     s_then_goto->destination = MakePatternNode<Expression>();    
     s_else_goto->destination = MakePatternNode<Expression>();
@@ -150,8 +149,10 @@ CompactGotos::CompactGotos()
     s_comp->members = ( decls );    
     s_comp->statements = ( pre, s_if, s_else_goto, post );    
 
-    mult->operands = (cond, s_then_goto->destination, s_else_goto->destination);
-    r_goto->destination = mult;
+    multiplexer->condition = cond;
+    multiplexer->expr_then = s_then_goto->destination;
+    multiplexer->expr_else = s_else_goto->destination;
+    r_goto->destination = multiplexer;
     r_comp->statements = ( pre, r_goto, post );
     r_comp->members = ( decls );    
         
@@ -173,7 +174,6 @@ AddGotoBeforeLabel::AddGotoBeforeLabel() // TODO really slow!!11
     auto post = MakePatternNode< Star<Statement> >();
     auto sx_pre = MakePatternNode< Star<Statement> >();
     auto sx_post = MakePatternNode< Star<Statement> >();
-    auto mult = MakePatternNode< ConditionalOperator >();
     auto label = MakePatternNode< Label >();
     auto label_id = MakePatternNode< LabelIdentifier >();
     auto s_all = MakePatternNode< Conjunction<Compound> >();

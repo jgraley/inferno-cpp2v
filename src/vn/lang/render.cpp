@@ -483,6 +483,15 @@ string Render::RenderOperator( const Render::Kit &kit, TreePtr<Operator> op ) tr
                RenderIntoProduction( kit, c->operand, Syntax::Production::PREFIX );
     else if( auto ro = DynamicTreePtrCast< MakeRecord >(op) )
         return RenderMakeRecord( kit, ro );
+    else if( auto condo = DynamicTreePtrCast< ConditionalOperator >(op) )
+    {
+        return RenderIntoProduction( kit, condo->condition, Syntax::BoostPrecedence(Syntax::Production::CONDITIONAL) ) + 
+               " ? " +
+               // Middle expression boots parser - so you can't split it up using (), [] etc
+               RenderIntoProduction( kit, condo->expr_then, Syntax::Production::BOOT_EXPR ) + 
+               " : " +
+               RenderIntoProduction( kit, condo->expr_else, Syntax::Production::CONDITIONAL );          
+    }
 	else if( auto nco = DynamicTreePtrCast< NonCommutativeOperator >(op) )
         operands = nco->operands;           
     else if( auto co = DynamicTreePtrCast< CommutativeOperator >(op) )
@@ -497,20 +506,10 @@ string Render::RenderOperator( const Render::Kit &kit, TreePtr<Operator> op ) tr
         return ERROR_UNSUPPORTED(op);
 	}
         
-    // Kinds of either NonCommutativeOperator or CommutativeOperator; operands in operands
+    // Regular operators: kinds of either NonCommutativeOperator or CommutativeOperator; operands in operands
     if( DynamicTreePtrCast< MakeArray >(op) )
     {
         s = "{ " + RenderOperandSequence( kit, operands ) + " }";
-    }
-    else if( DynamicTreePtrCast< ConditionalOperator >(op) )
-    {
-	    Sequence<Expression>::iterator operands_it = operands.begin();
-        s = RenderIntoProduction( kit, *operands_it, Syntax::BoostPrecedence(Syntax::Production::CONDITIONAL) ) + " ? ";
-        ++operands_it;
-        // Middle expression boots parser - so you can't split it up using (), [] etc
-        s += RenderIntoProduction( kit, *operands_it, Syntax::Production::BOOT_EXPR ) + " : ";
-        ++operands_it;
-        s += RenderIntoProduction( kit, *operands_it, Syntax::Production::CONDITIONAL );           
     }
     else if( DynamicTreePtrCast< Subscript >(op) )
     {

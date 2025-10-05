@@ -477,12 +477,16 @@ SwapSubscriptConditionalOperator::SwapSubscriptConditionalOperator()
     auto index2 = MakePatternNode<Expression>();
     auto array = MakePatternNode<InstanceIdentifier>(); // Instance used to prevent side effects, which would go out of sequence
     
-    s_mux->operands = (cond, s_sub1, s_sub2);
+    s_mux->condition = cond;
+    s_mux->expr_then = s_sub1;
+    s_mux->expr_else = s_sub2;    
     s_sub1->operands = (array, index1);
     s_sub2->operands = (array, index2);
     
     r_sub->operands = (array, r_mux);
-    r_mux->operands = (cond, index1, index2);
+    r_mux->condition = cond;
+    r_mux->expr_then = index1;
+    r_mux->expr_else = index2;    
     
     Configure( SEARCH_REPLACE, s_mux, r_sub );
 }

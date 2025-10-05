@@ -1117,12 +1117,12 @@ private:
             clang::SourceLocation,
             ExprTy *Cond, ExprTy *LHS, ExprTy *RHS)
     {
-        auto co = MakeTreeNode<ConditionalOperator>();
-        co->operands.push_back( hold_expr.FromRaw(Cond) );
+        auto condo = MakeTreeNode<ConditionalOperator>();
+        condo->condition = hold_expr.FromRaw(Cond);
         ASSERT(LHS )( "gnu extension not supported");
-        co->operands.push_back( hold_expr.FromRaw(LHS) );
-        co->operands.push_back( hold_expr.FromRaw(RHS) );
-        return hold_expr.ToRaw( co );
+        condo->expr_then = hold_expr.FromRaw(LHS);
+        condo->expr_else = hold_expr.FromRaw(RHS);
+        return hold_expr.ToRaw( condo );
     }
 
     TreePtr<Call> CreateCall( Sequence<Expression> &args, TreePtr<Expression> callee )

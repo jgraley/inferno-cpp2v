@@ -35,7 +35,7 @@ public:
     AugTreePtr<CPPTree::Expression> TryGetConstructedExpression( const TransKit &kit, AugTreePtr<CPPTree::GoSub> gs ) const;
 
 private:    
-    AugTreePtr<CPPTree::Type> GetOperator( const TransKit &kit, AugTreePtr<CPPTree::Operator> op, list<AugTreePtr<CPPTree::Type>> optypes ) const;
+    AugTreePtr<CPPTree::Type> GetRegularOperator( const TransKit &kit, AugTreePtr<CPPTree::Operator> op, list<AugTreePtr<CPPTree::Type>> optypes ) const;
     AugTreePtr<CPPTree::Type> GetStandard( const TransKit &kit, list<AugTreePtr<CPPTree::Type>> &optypes ) const;
     AugTreePtr<CPPTree::Type> GetStandardOnNumerics( const TransKit &kit, list<AugTreePtr<CPPTree::Numeric>> &optypes ) const;
     AugTreePtr<CPPTree::Type> GetSpecial( const TransKit &kit, AugTreePtr<CPPTree::Operator> op, list<AugTreePtr<CPPTree::Type>> &optypes ) const;

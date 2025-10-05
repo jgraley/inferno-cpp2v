@@ -608,7 +608,9 @@ ConditionalOperatorToIf::ConditionalOperatorToIf()
     auto r_assignt = MakePatternNode<Assign>();
     auto r_assignf = MakePatternNode<Assign>();
     
-    s_mux->operands = (op1, op2, op3);
+    s_mux->condition = op1;
+    s_mux->expr_then = op2;
+    s_mux->expr_else = op3;
     op2->pattern = type;
     
     r_comp->members = (r_temp);
