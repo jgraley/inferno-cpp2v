@@ -17,12 +17,14 @@ public:
 		
 		STATEMENT_LOW, // Lowest statement precedence: {} etc from the inside		
 		STATEMENT_HIGH, // eg if( ... ) <here>;    is this prefix?
+		STATEMENT_TERM,
+		DECLARATION,
+		CONDITION,		// eg if( <here> ) ... which could be a decl etc BOUNDARY FOR SEMICOLONS
 		SPACE_SEP_STATEMENT, // eg throw <here>;
-		SPACE_SEP_DECLARATION, // the type in <here> <declarator> 
+		SPACE_SEP_DECLARATION, // the type in <here> <declarator>;
 		INITIALISER, // For initialisers eg function body		
 		LABEL,  // Anything with a : after it. Could be a prefix on statements.
 		BRACED,		 // {} from the outside	#10
-		CONDITION,		// eg if( <here> ) ... which could be a decl etc
 		TOP_STATEMENT, // Highest statement precedence
 										
 		BOOT_EXPR, // Lowest expression precedence: (), {}, [] etc from the inside		
@@ -44,12 +46,12 @@ public:
 		PREFIX, // C++: all prefix including keywords where expression
 		POSTFIX, // C++: all prefix including sub clauses
 		SPACE_SEP_TYPE, // eg auto a = new unsigned long *<here>; - interestingly, the spaces take precedence
+		TOKEN, // Highest precedence would be that of lexer tokens
 		PARENTHESISED, // (), {} from the outside		
 		TOP_EXPR, // Highest expression precedence
 		
 		SCOPE_RESOLVE, // :: in C++				
 		PURE_IDENTIFIER, // Higher than expr because could be a type, label etc
-		TOKEN, // Highest precedence would be that of lexer tokens
 		ANONYMOUS = TOKEN
 	};
 	

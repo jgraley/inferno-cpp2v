@@ -549,14 +549,14 @@ Syntax::Production StatementExpression::GetMyProduction() const
 
 Syntax::Production Return::GetMyProduction() const
 { 
-	return Production::SPACE_SEP_STATEMENT; 
+	return Production::STATEMENT_TERM; 
 }
 
 //////////////////////////// Goto ///////////////////////////////
 
 Syntax::Production Goto::GetMyProduction() const
 { 
-	return Production::SPACE_SEP_STATEMENT; 
+	return Production::STATEMENT_TERM; 
 }
 
 //////////////////////////// If ///////////////////////////////
@@ -587,14 +587,14 @@ Syntax::Production SwitchTarget::GetMyProduction() const
 
 Syntax::Production Continue::GetMyProduction() const
 { 
-	return Production::SPACE_SEP_STATEMENT; // It's easy to imagine these getting arguments 
+	return Production::STATEMENT_TERM; 
 }
 
 //////////////////////////// Break ///////////////////////////////
 
 Syntax::Production Break::GetMyProduction() const
 { 
-	return Production::SPACE_SEP_STATEMENT; // It's easy to imagine these getting arguments 
+	return Production::STATEMENT_TERM; 
 }
 
 //////////////////////////// Nop ///////////////////////////////

@@ -89,36 +89,73 @@ string Render::RenderIntoProduction( const Render::Kit &kit, TreePtr<Node> node,
 {
     INDENT("R");
     // Production surround_prod relates to the surrounding grammar production and can be 
-    // used to change the render of a certain subtree. It sums up all the ancestor nodes of
+    // used to change the render of a certain subtree. It represents all the ancestor nodes of
     // the one supplied.
-    string s = SSPrintf("\n// %s Surround %d node %s from %p\n", Tracer::GetPrefix().c_str(), (int)surround_prod, Trace(node).c_str(), RETURN_ADDR() );
-    
-    
+    string s, ss;
     Syntax::Production node_prod = node->GetMyProduction();
+    bool do_boot = Syntax::GetPrecedence(node_prod) < Syntax::GetPrecedence(surround_prod);    
+    bool semicolon = Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::CONDITION) &&
+                     Syntax::GetPrecedence(node_prod) >= Syntax::GetPrecedence(Syntax::Production::CONDITION);    
+    if( ReadArgs::use_feature_option=='c' )
+		s += SSPrintf("\n// %s Surround %d node %d (%s) from %p boot: %s semcolon: %s\n", 
+					 Tracer::GetPrefix().c_str(), 
+					 Syntax::GetPrecedence(surround_prod), 
+					 Syntax::GetPrecedence(node_prod),
+					 Trace(node).c_str(), 
+					 RETURN_ADDR(),
+					 do_boot ? "yes" : "no",
+					 semicolon ? "yes" : "no" );
+        
     ASSERT( node_prod != Syntax::Production::UNDEFINED )
           ("Rendering expression: ")(node)(" surr prod: %d",(int)surround_prod)(" got no ideal production\n");
     
     switch(node_prod)
     {
+        case Syntax::Production::BOOT_STATEMENT...Syntax::Production::TOP_STATEMENT: // Statement productions at different precedences
+        {
+            // If current production has too-high precedence, boot back down using braces
+            ASSERT( Syntax::GetPrecedence(surround_prod) <= Syntax::GetPrecedence(Syntax::Production::BRACED) )
+                  ("Braces won't achieve high enough precedence for surrounding production\n")
+                  ("Node: ")(node)("\n")
+                  ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); // Can't satisfy this production's precedence demand using parentheses
+            if( do_boot || semicolon )
+				surround_prod = Syntax::Production::BOOT_STATEMENT;
+			ss = Dispatch( kit, node, surround_prod );
+            if( semicolon )
+                ss = ss + "; // RIP-stmt\n";
+            if( do_boot )
+                ss = "{ // RIP-stmt\n" + ss + "} // RIP-stmt\n";
+            s += ss;
+            break;
+        }
+
         case Syntax::Production::BOOT_EXPR...Syntax::Production::TOP_EXPR: // Expression productions at different precedences
         {
-            // Could factor out into eg RenderIntoExpression()
             // If current production has too-high precedence, boot back down using parentheses
             ASSERT( Syntax::GetPrecedence(surround_prod) <= Syntax::GetPrecedence(Syntax::Production::PARENTHESISED) )
                   ("Parentheses won't achieve high enough precedence for surrounding production\n")
                   ("Node: ")(node)("\n")
                   ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); // Can't satisfy this production's precedence demand using parentheses
-            bool parenthesise = Syntax::GetPrecedence(node_prod) < Syntax::GetPrecedence(surround_prod);    
-            bool semicolon = Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::CONDITION);    
-            if( parenthesise )
-                s += "(" + Dispatch( kit, node, Syntax::Production::BOOT_EXPR ) + ")";
-            else if( semicolon )
-                s += Dispatch( kit, node, Syntax::Production::BOOT_EXPR ) + ";";
-            else
-                s += Dispatch( kit, node, surround_prod );
+            if( do_boot || semicolon )
+				surround_prod = Syntax::Production::BOOT_EXPR;
+			ss = Dispatch( kit, node, surround_prod );
+            if( semicolon )
+                ss = ss + "; // RIP-expr \n";
+            if( do_boot )
+                ss = "(" + ss + ")";
+            s += ss;
             break;
         }
         
+        case Syntax::Production::PURE_IDENTIFIER: 
+            if( semicolon )
+				surround_prod = Syntax::Production::BOOT_EXPR;
+			ss = Dispatch( kit, node, surround_prod );
+            if( semicolon )
+                ss = ss + "; // RIP-id \n";
+            s += ss;
+			break;
+
         default:
             s += Dispatch( kit, node, surround_prod );
     }
@@ -816,7 +853,7 @@ string Render::RenderInstanceProto( const Render::Kit &kit,
         name += RenderIntoProduction(kit, o->identifier, starting_declarator_prod);
     }
 
-    s += RenderTypeAndDeclarator( kit, o->type, name, starting_declarator_prod, Syntax::Production::SPACE_SEP_DECLARATION, constant );
+    s += RenderTypeAndDeclarator( kit, o->type, name, starting_declarator_prod, Syntax::Production::DECLARATION, constant );
 
     return s;
 } 
@@ -1033,7 +1070,7 @@ string Render::RenderDeclaration( const Render::Kit &kit, TreePtr<Declaration> d
         }
 
         // Members
-        s += "\n{\n";
+        s += "\n{ // memb\n";
         TreePtr<AccessSpec> a;
         if( DynamicTreePtrCast< Class >(r) )
             a = MakeTreeNode<Private>();
@@ -1080,15 +1117,15 @@ string Render::RenderStatement( const Render::Kit &kit, TreePtr<Statement> state
         return RenderDeclaration( kit, d );
     else if( TreePtr<Compound> c = DynamicTreePtrCast< Compound >(statement) )
     {
-        string s = "{\n";
+        string s = "{ // comp\n";
         AutoPush< TreePtr<Node> > cs( scope_stack, c );
         s += RenderDeclScope( kit, c ); // Must do this first to populate backing list
         for( TreePtr<Statement> st : c->statements )    
             s += RenderStatement( kit, st, Syntax::Production::STATEMENT_LOW );    
-        return s + "}\n";
+        return s + "} // comp\n";
     }
     else if( TreePtr<Expression> e = DynamicTreePtrCast< Expression >(statement) )
-        return RenderIntoProduction(kit, e, Syntax::Production::STATEMENT_LOW) + ";\n";
+        return RenderIntoProduction(kit, e, Syntax::Production::STATEMENT_LOW);
     else if( TreePtr<Return> es = DynamicTreePtrCast<Return>(statement) )
         return "return " + RenderIntoProduction(kit, es->return_value, Syntax::Production::SPACE_SEP_STATEMENT) + ";\n";
     else if( TreePtr<Goto> g = DynamicTreePtrCast<Goto>(statement) )
@@ -1103,15 +1140,15 @@ string Render::RenderStatement( const Render::Kit &kit, TreePtr<Statement> state
         bool has_else_clause = !DynamicTreePtrCast<Nop>(i->else_body); // Nop means no else clause
         string s;
         s += "if( " + RenderIntoProduction(kit, i->condition, Syntax::Production::CONDITION) + " )\n";
-        bool sub_if = !!DynamicTreePtrCast<If>(i->body);
-        if( sub_if && has_else_clause )
-             s += "{\n"; // Note: braces there to clarify else binding eg if(a) if(b) foo; else how_do_i_bind;
-        s += RenderStatement(kit, i->body, has_else_clause ? Syntax::Production::STATEMENT_HIGH : Syntax::Production::STATEMENT_LOW);
-        if( sub_if && has_else_clause )
-             s += "}\n";
+        //bool sub_if = !!DynamicTreePtrCast<If>(i->body);
+       // if( sub_if && has_else_clause )
+       //      s += "{\n"; // Note: braces there to clarify else binding eg if(a) if(b) foo; else how_do_i_bind;
+        s += RenderIntoProduction(kit, i->body, has_else_clause ? Syntax::Production::STATEMENT_HIGH : Syntax::Production::STATEMENT_LOW);
+       // if( sub_if && has_else_clause )
+       //      s += "}\n";
         if( has_else_clause )  
             s += "else\n" +
-                 RenderStatement(kit, i->else_body, Syntax::Production::STATEMENT_LOW);
+                 RenderIntoProduction(kit, i->else_body, Syntax::Production::STATEMENT_LOW);
         return s;
     }
     else if( TreePtr<While> w = DynamicTreePtrCast<While>(statement) )
@@ -1147,7 +1184,7 @@ string Render::RenderStatement( const Render::Kit &kit, TreePtr<Statement> state
     else if( DynamicTreePtrCast<Break>(statement) )
         return "break;\n";
     else if( DynamicTreePtrCast<Nop>(statement) )
-        return ";\n";
+        return "; // Nop \n";
     else if( auto smc = DynamicTreePtrCast<MacroCall>(statement) )
         return RenderMacroCall( kit, smc );
     else
@@ -1329,7 +1366,7 @@ string Render::RenderParams( const Render::Kit &kit,
         }
         Syntax::Production starting_declarator_prod = Syntax::Production::PURE_IDENTIFIER;
         string name = RenderIntoProduction(kit, o->identifier, starting_declarator_prod);
-        s += RenderTypeAndDeclarator( kit, o->type, name, starting_declarator_prod, Syntax::Production::SPACE_SEP_DECLARATION, false );
+        s += RenderTypeAndDeclarator( kit, o->type, name, starting_declarator_prod, Syntax::Production::CONDITION, false );
             
         first = false;
     }
