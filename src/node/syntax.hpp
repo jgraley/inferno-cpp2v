@@ -19,6 +19,8 @@ public:
 		STATEMENT_HIGH, // eg if( ... ) <here>;    is this prefix?
 		STATEMENT,
 		DECLARATION,
+		BRACED,		 // {} from the outside	#10
+
 		CONDITION,		// eg if( <here> ) ... which could be a decl etc BOUNDARY FOR SEMICOLONS
 		BARE_STATEMENT, // no trailing ;
 		PROTOTYPE,
@@ -26,7 +28,6 @@ public:
 		SPACE_SEP_DECLARATION, // the type in <here> <declarator>;
 		INITIALISER, // For initialisers eg function body		
 		LABEL,  // Anything with a : after it. Could be (a) like a bare statement needing a ; or (b) a prefix on statements.
-		BRACED,		 // {} from the outside	#10
 		TOP_STATEMENT, // Highest statement precedence
 										
 		BOOT_EXPR, // Lowest expression precedence: (), {}, [] etc from the inside		

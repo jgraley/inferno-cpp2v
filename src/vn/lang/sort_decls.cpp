@@ -290,3 +290,4 @@ Sequence<Declaration> ReverseDecls( Sequence<Declaration> c )
 // Statements: infer the {} around funciton bodies by specifying INITIALISER?
 // more passing through surround_prod in RenderStatement() and similar when handing over directly
 // bring in if..else
+// fix funciton defs have trailing semicolon

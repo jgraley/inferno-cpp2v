@@ -563,14 +563,14 @@ Syntax::Production StatementExpression::GetMyProduction() const
 
 Syntax::Production Return::GetMyProduction() const
 { 
-	return Production::STATEMENT; 
+	return Production::BARE_STATEMENT; 
 }
 
 //////////////////////////// Goto ///////////////////////////////
 
 Syntax::Production Goto::GetMyProduction() const
 { 
-	return Production::STATEMENT; 
+	return Production::BARE_STATEMENT; 
 }
 
 //////////////////////////// If ///////////////////////////////

@@ -1112,8 +1112,7 @@ string Render::RenderStatement( const Render::Kit &kit, TreePtr<Statement> state
 {
     (void)surround_prod;
     TRACE();
-    if( !statement )
-        return ";\n"; // TODO nasty, should assert not NULL in all of these in fact
+    ASSERT( statement );
     //printf( "%s %d things\n", typeid(*statement).name(), statement->Itemise().size() );
     if( TreePtr<Declaration> d = DynamicTreePtrCast< Declaration >(statement) )
         return RenderDeclaration( kit, d, surround_prod );
@@ -1129,13 +1128,13 @@ string Render::RenderStatement( const Render::Kit &kit, TreePtr<Statement> state
     else if( TreePtr<Expression> e = DynamicTreePtrCast< Expression >(statement) )
         return RenderIntoProduction(kit, e, surround_prod);
     else if( TreePtr<Return> es = DynamicTreePtrCast<Return>(statement) )
-        return "return " + RenderIntoProduction(kit, es->return_value, Syntax::Production::SPACE_SEP_STATEMENT) + ";\n";
+        return "return " + RenderIntoProduction(kit, es->return_value, Syntax::Production::SPACE_SEP_STATEMENT);
     else if( TreePtr<Goto> g = DynamicTreePtrCast<Goto>(statement) )
     {
         if( TreePtr<SpecificLabelIdentifier> li = DynamicTreePtrCast< SpecificLabelIdentifier >(g->destination) )
-            return "goto " + RenderIntoProduction(kit, li, Syntax::Production::SPACE_SEP_STATEMENT) + ";\n";  // regular goto
+            return "goto " + RenderIntoProduction(kit, li, Syntax::Production::SPACE_SEP_STATEMENT);  // regular goto
         else
-            return "goto *" + RenderIntoProduction(kit, g->destination, Syntax::Production::PREFIX) + ";\n"; // goto-a-variable (GCC extension)
+            return "goto *" + RenderIntoProduction(kit, g->destination, Syntax::Production::PREFIX); // goto-a-variable (GCC extension)
     }
     else if( TreePtr<If> i = DynamicTreePtrCast<If>(statement) )
     {
@@ -1164,7 +1163,7 @@ string Render::RenderStatement( const Render::Kit &kit, TreePtr<Statement> state
     else if( TreePtr<For> f = DynamicTreePtrCast<For>(statement) )
         return "for( " + 
                RenderIntoProduction(kit, f->initialisation, Syntax::Production::STATEMENT_LOW) + 
-               RenderIntoProduction(kit, f->condition, Syntax::Production::CONDITION) + "; "+ 
+               RenderIntoProduction(kit, f->condition, Syntax::Production::STATEMENT_LOW) + 
                RenderIntoProduction(kit, f->increment, Syntax::Production::BOOT_EXPR) + " )\n" +
                RenderIntoProduction(kit, f->body, surround_prod);
     else if( TreePtr<Switch> s = DynamicTreePtrCast<Switch>(statement) )
