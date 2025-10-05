@@ -172,8 +172,8 @@ string Render::Dispatch( const Render::Kit &kit, TreePtr<Node> node, Syntax::Pro
         return RenderIdentifier( kit, identifier, surround_prod );
     else if( auto type = TreePtr<Type>::DynamicCast(node) )  // Type is a kind of Operator
         return RenderType( kit, type, surround_prod );
-    //else if( auto op = TreePtr<Operator>::DynamicCast(node) ) // Operator is a kind of Expression
-        //return RenderOperator( kit, op );
+    else if( auto op = TreePtr<Operator>::DynamicCast(node) ) // Operator is a kind of Expression
+        return RenderOperator( kit, op );
     else if( auto expression = TreePtr<Expression>::DynamicCast(node) ) // Expression is a kind of Statement
         return RenderExpression( kit, expression, surround_prod );
     else if( auto instance = TreePtr<Instance>::DynamicCast(node) )    // Instance is a kind of Statement and Declaration
@@ -462,8 +462,28 @@ DEFAULT_CATCH_CLAUSE
 string Render::RenderOperator( const Render::Kit &kit, TreePtr<Operator> op ) try
 {
     ASSERT(op);
+    
+    string s;
     Sequence<Expression> operands;
-	if( auto nco = DynamicTreePtrCast< NonCommutativeOperator >(op) )
+    if( auto n = DynamicTreePtrCast< New >(op) )
+        return string (DynamicTreePtrCast<Global>(n->global) ? "::" : "") +
+               "new(" + RenderOperandSequence( kit, n->placement_arguments ) + ") " +
+               RenderIntoProduction( kit, n->type, Syntax::Production::TYPE_IN_NEW ) +
+               (n->constructor_arguments.empty() ? "" : "(" + RenderOperandSequence( kit, n->constructor_arguments ) + ")" );
+    else if( auto d = DynamicTreePtrCast< Delete >(op) )
+        return string(DynamicTreePtrCast<Global>(d->global) ? "::" : "") +
+               "delete" +
+               (DynamicTreePtrCast<DeleteArray>(d->array) ? "[]" : "") +
+               " " + RenderIntoProduction( kit, d->pointer, Syntax::Production::PREFIX );
+    else if( auto lu = DynamicTreePtrCast< Lookup >(op) )
+        return RenderIntoProduction( kit, lu->object, Syntax::Production::POSTFIX ) + "." +
+               RenderIntoProduction( kit, lu->member, Syntax::BoostPrecedence(Syntax::Production::POSTFIX) );
+    else if( auto c = DynamicTreePtrCast< Cast >(op) )
+        return "(" + RenderIntoProduction( kit, c->type, Syntax::Production::BOOT_EXPR ) + ")" +
+               RenderIntoProduction( kit, c->operand, Syntax::Production::PREFIX );
+    else if( auto ro = DynamicTreePtrCast< MakeRecord >(op) )
+        return RenderMakeRecord( kit, ro );
+	else if( auto nco = DynamicTreePtrCast< NonCommutativeOperator >(op) )
         operands = nco->operands;           
     else if( auto co = DynamicTreePtrCast< CommutativeOperator >(op) )
     {
@@ -472,15 +492,19 @@ string Render::RenderOperator( const Render::Kit &kit, TreePtr<Operator> op ) tr
         for( TreePtr<Node> o : sc.GetTreePtrOrdering(co->operands) )
             operands.push_back( TreePtr<Expression>::DynamicCast(o) );
     }
-    
-    string s;
-    Sequence<Expression>::iterator operands_it = operands.begin();
+    else
+    {
+        return ERROR_UNSUPPORTED(op);
+	}
+        
+    // Kinds of either NonCommutativeOperator or CommutativeOperator; operands in operands
     if( DynamicTreePtrCast< MakeArray >(op) )
     {
         s = "{ " + RenderOperandSequence( kit, operands ) + " }";
     }
     else if( DynamicTreePtrCast< ConditionalOperator >(op) )
     {
+	    Sequence<Expression>::iterator operands_it = operands.begin();
         s = RenderIntoProduction( kit, *operands_it, Syntax::BoostPrecedence(Syntax::Production::CONDITIONAL) ) + " ? ";
         ++operands_it;
         // Middle expression boots parser - so you can't split it up using (), [] etc
@@ -490,6 +514,7 @@ string Render::RenderOperator( const Render::Kit &kit, TreePtr<Operator> op ) tr
     }
     else if( DynamicTreePtrCast< Subscript >(op) )
     {
+		Sequence<Expression>::iterator operands_it = operands.begin();
         s = RenderIntoProduction( kit, *operands_it, Syntax::Production::POSTFIX ) + "[";
         ++operands_it;
         s += RenderIntoProduction( kit, *operands_it, Syntax::Production::BOOT_EXPR ) + "]";
@@ -504,6 +529,7 @@ string Render::RenderOperator( const Render::Kit &kit, TreePtr<Operator> op ) tr
             case Syntax::Association::RIGHT: prod_left = Syntax::BoostPrecedence(prod_left); break; \
             case Syntax::Association::LEFT:  prod_right = Syntax::BoostPrecedence(prod_right); break; \
         } \
+		Sequence<Expression>::iterator operands_it = operands.begin(); \
         s = RenderIntoProduction( kit, *operands_it, prod_left ); \
         s += TEXT; \
         ++operands_it; \
@@ -512,6 +538,7 @@ string Render::RenderOperator( const Render::Kit &kit, TreePtr<Operator> op ) tr
 #define PREFIX(TOK, TEXT, NODE_SHAPED, BASE, CAT, PROD, ASSOC) \
     else if( DynamicTreePtrCast<NODE_SHAPED>(op) ) \
     { \
+		Sequence<Expression>::iterator operands_it = operands.begin(); \
         s = TEXT; \
         bool paren = false; \
         /* Prevent interpretation as a member function pointer literal */ \
@@ -523,6 +550,7 @@ string Render::RenderOperator( const Render::Kit &kit, TreePtr<Operator> op ) tr
 #define POSTFIX(TOK, TEXT, NODE_SHAPED, BASE, CAT, PROD, ASSOC) \
     else if( DynamicTreePtrCast<NODE_SHAPED>(op) ) \
     { \
+		Sequence<Expression>::iterator operands_it = operands.begin(); \
         s = RenderIntoProduction( kit, *operands_it, Syntax::Production::PROD ); \
         s += TEXT; \
     }
@@ -645,24 +673,6 @@ string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> ex
         return RenderCall( kit, c );
     else if( auto sc = DynamicTreePtrCast< ExteriorCall >(expression) )
         return RenderExteriorCall( kit, sc );
-    else if( auto n = DynamicTreePtrCast< New >(expression) )
-        return string (DynamicTreePtrCast<Global>(n->global) ? "::" : "") +
-               "new(" + RenderOperandSequence( kit, n->placement_arguments ) + ") " +
-               RenderIntoProduction( kit, n->type, Syntax::Production::TYPE_IN_NEW ) +
-               (n->constructor_arguments.empty() ? "" : "(" + RenderOperandSequence( kit, n->constructor_arguments ) + ")" );
-    else if( auto d = DynamicTreePtrCast< Delete >(expression) )
-        return string(DynamicTreePtrCast<Global>(d->global) ? "::" : "") +
-               "delete" +
-               (DynamicTreePtrCast<DeleteArray>(d->array) ? "[]" : "") +
-               " " + RenderIntoProduction( kit, d->pointer, Syntax::Production::PREFIX );
-    else if( auto lu = DynamicTreePtrCast< Lookup >(expression) )
-        return RenderIntoProduction( kit, lu->object, Syntax::Production::POSTFIX ) + "." +
-               RenderIntoProduction( kit, lu->member, Syntax::BoostPrecedence(Syntax::Production::POSTFIX) );
-    else if( auto c = DynamicTreePtrCast< Cast >(expression) )
-        return "(" + RenderIntoProduction( kit, c->type, Syntax::Production::BOOT_EXPR ) + ")" +
-               RenderIntoProduction( kit, c->operand, Syntax::Production::PREFIX );
-    else if( auto ro = DynamicTreePtrCast< MakeRecord >(expression) )
-        return RenderMakeRecord( kit, ro );
     else if( auto l = DynamicTreePtrCast< Literal >(expression) )
         return RenderLiteral( kit, l );
     else if( DynamicTreePtrCast< This >(expression) )

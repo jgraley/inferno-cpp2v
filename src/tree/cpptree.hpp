@@ -924,7 +924,7 @@ struct MakeRecord : IdValueMap, Expression
 
 /// Operator that operates on data types as parameters. 
 /** Where either is allowed we use the type one, since it's more concise. */
-struct TemplateExpression : Operator
+struct TemplateExpression : Expression
 {
     NODE_FUNCTIONS
     TreePtr<Type> argument; ///< This Type is an input operand 
