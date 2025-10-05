@@ -1712,8 +1712,8 @@ private:
             ExprTy *Idx, clang::SourceLocation)
     {
         auto su = MakeTreeNode<Subscript>();
-        su->operands.push_back( hold_expr.FromRaw( Base ) );
-        su->operands.push_back( hold_expr.FromRaw( Idx ) );
+        su->destination = hold_expr.FromRaw( Base );
+        su->index = hold_expr.FromRaw( Idx );
         return hold_expr.ToRaw( su );
     }
 

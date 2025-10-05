@@ -394,7 +394,7 @@ Inferno::Plan::Plan(Inferno *algo_) :
           true, false, false, false,
           "Planning stage five", 
           [this](const Step &sp)
-          { 
+          {   
               algo->vn_sequence->PlanningStageFive(sp.step_index); 
           }, 
           nullptr }

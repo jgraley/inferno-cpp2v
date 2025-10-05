@@ -429,8 +429,9 @@ GenerateStacks::GenerateStacks()
     auto fi_id = MakePatternNode<InstanceIdentifier>();
 
     // Sub-embedded pattern replace with a subscript into the array
-    l_r_sub->operands = ( r_identifier, r_index_identifier );
-
+    l_r_sub->destination = r_identifier;
+    l_r_sub->index = r_index_identifier;
+    
     auto r_embedded = MakePatternNode< EmbeddedSearchReplace<Statement> >( r_vcomp, s_identifier, l_r_sub );
 
     // EmbeddedSearchReplace search to find automatic variables within the function
@@ -512,120 +513,6 @@ GenerateStacks::GenerateStacks()
 
     Configure( SEARCH_REPLACE, s_module, r_mid );
 }
-
-/*
-OLD VERSION
-GenerateStacks::GenerateStacks()
-{
-    // Search for a function and require it to have at least one automatic
-    // variable using an and rule. Add a stack index variable (static) to the 
-    // function. Increment at the beginning of the function body and decrement 
-    // at the end. 
-    //
-    // Use an embedded pattern to find automatic variables in the function. Replace them
-    // with arrays of the same type. Using another embedded pattern, add a decrement of
-    // the stack pointer before any return statements.
-    //
-    // Using a sub-embedded pattern of the variable-finding pattern, look for usages of 
-    // the variable. Replace with an indexing operation into the array using
-    // the stack index.    
-    auto fi = MakePatternNode<Instance>();
-    auto oinit = MakePatternNode< Delta<Initialiser> >();
-    auto s_func = MakePatternNode<Callable>();
-    auto s_and = MakePatternNode< Conjunction<Initialiser> >();
-    auto s_top_comp = MakePatternNode<Compound>();
-    auto r_top_comp = MakePatternNode<Compound>();
-    auto r_ret_comp = MakePatternNode<Compound>();
-    auto temp = MakePatternNode<Compound>();
-    auto top_decls = MakePatternNode< Star<Declaration> >();
-    auto top_pre = MakePatternNode< Star<Statement> >();
-    auto stuff = MakePatternNode< Stuff<Statement> >();
-    auto cs_stuff = MakePatternNode< Stuff<Compound> >();
-    auto overlay = MakePatternNode< Delta<Statement> >();
-    auto cs_instance = MakePatternNode<Automatic>();
-    auto s_instance = MakePatternNode<Automatic>();
-    auto r_index = MakePatternNode<Static>();
-    auto r_instance = MakePatternNode<Static>();
-    auto r_index_type = MakePatternNode<Unsigned>();
-    auto r_inc = MakePatternNode<PostIncrement>();
-    auto r_ret_dec = MakePatternNode<PostDecrement>();
-    auto s_identifier = MakePatternNode<InstanceIdentifier>();
-    auto r_array = MakePatternNode<Array>();
-    auto ret = MakePatternNode<Return>();
-    auto l_r_sub = MakePatternNode<Subscript>();
-    auto s_and3 = MakePatternNode< Conjunction<Node> >();
-    auto r_index_identifier = MakePatternNode<BuildInstanceIdentifierAgent>("%s_stack_index");
-    auto r_identifier = MakePatternNode<BuildInstanceIdentifierAgent>("%s_stack");
-    auto s_gg = MakePatternNode< GreenGrass<Statement> >();
-
-    // Master search - look for functions satisfying the construct limitation and get
-    fi->identifier = MakePatternNode<InstanceIdentifier>();
-    fi->type = s_func;
-    fi->initialiser = oinit;   
-    oinit->through = s_and;
-    s_top_comp->members = ( top_decls );
-    s_top_comp->statements = ( top_pre );
-
-    // Construct limitation - restrict top-level search to functions that contain an automatic variable
-    cs_stuff->terminus = cs_instance;
-    s_and->conjuncts = ( s_top_comp, cs_stuff );
-
-    // Master replace - insert index variable, inc and dec into function at top level
-    auto r_embedded = MakePatternNode< EmbeddedSearchReplace<Statement> >( stuff, s_identifier, l_r_sub );
-    auto r_mid = MakePatternNode< EmbeddedCompareReplace<Statement> >( r_top_comp, stuff, r_embedded );
-    auto r_embedded_3 = MakePatternNode< EmbeddedSearchReplace<Statement> >( r_mid, s_gg, r_ret_comp );
-    temp->statements = (r_embedded_3);
-    oinit->overlay = temp;//r_embedded_3; 
-
-    // top-level decls
-    r_top_comp->members = ( top_decls, r_index );
-    r_index->type = r_index_type;
-    r_index_type->width = MakePatternNode<SpecificInteger>(TypeDb::int_bits);
-    r_index_identifier->sources = (fi->identifier);
-    r_index->identifier = r_index_identifier;
-    r_index->constancy = MakePatternNode<NonConst>();
-    r_index->initialiser = MakePatternNode<SpecificInteger>(0);
-//    r_index->virt = MakePatternNode<NonVirtual>();
-//    r_index->access = MakePatternNode<Private>();
-
-    // top-level statements
-    r_inc->operands = ( r_index_identifier );
-    r_top_comp->statements = ( r_inc, top_pre );
-
-    // EmbeddedSearchReplace search to find automatic variables within the function
-    stuff->terminus = overlay;
-    overlay->through = s_instance;
-    s_instance->identifier = s_identifier;
-    s_instance->initialiser = MakePatternNode<Uninitialised>(); // can't handle initialisers!
-    s_instance->type = MakePatternNode<Type>();
-
-    // EmbeddedSearchReplace replace to insert as a static array (TODO be a member of enclosing class)
-    r_instance->constancy = MakePatternNode<NonConst>();
-    r_instance->initialiser = MakePatternNode<Uninitialised>();
-    overlay->overlay = r_instance;
-    r_identifier->sources = (s_identifier);
-    r_instance->identifier = r_identifier;
-    r_instance->type = r_array;
-//    r_instance->virt = MakePatternNode<NonVirtual>();
-//    r_instance->access = MakePatternNode<Private>();
-    r_array->element = s_instance->type;
-    r_array->size = MakePatternNode<SpecificInteger>(10);
-
-    // Sub-embedded pattern replace with a subscript into the array
-    l_r_sub->operands = ( r_identifier, r_index_identifier );
-
-    // EmbeddedSearchReplace to find early returns in the function
-    s_gg->through = ret;
-
-    // EmbeddedSearchReplace replace with a decrement of the stack index coming before the return
-    //r_ret_comp->members = ( r_ret_decls );
-    r_ret_dec->operands = ( r_index_identifier );
-    r_ret_comp->statements = ( r_ret_dec, ret );
-
-    Configure( SEARCH_REPLACE, fi );
-}
-
-*/
 
 
 MergeFunctions::MergeFunctions()

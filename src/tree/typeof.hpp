@@ -22,6 +22,7 @@ public:
     class NumericalOperatorUsageMismatch3 : public NumericalOperatorUsageMismatch {};
     class NumericalOperatorUsageMismatch4 : public NumericalOperatorUsageMismatch {};
     class DereferenceUsageMismatch : public UsageMismatch {};
+    class SubscriptUsageMismatch : public UsageMismatch {};
 
     // If you don't have a kit, use Transformation::operator().
     // If you do but you only have a Node, use this

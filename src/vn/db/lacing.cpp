@@ -3,6 +3,8 @@
 #include "../sym/expression.hpp"
 #include "../sym/predicate_operators.hpp"
 
+#include "../tree/cpptree.hpp"
+
 #include <limits>
 
 #define BF
@@ -48,11 +50,13 @@ void Lacing::FixupCategories(const CategorySet &raw_categories_)
 {
     // Uniquify using IsSameCategory() so we definitely get a
     // category-uniquification.
+    FTRACE("-------------------------------------------------------------\n");
     categories.clear();
-    for( TreePtr<Node> x : raw_categories_ )
+    for( TreePtr<Node> x : raw_categories_ )    
     {
         bool unique = true;
         for( TreePtr<Node> y : categories )
+        {
             if( Node::IsEquivalentCategory(*x, *y) )
             {
                 unique = false;
@@ -64,9 +68,12 @@ void Lacing::FixupCategories(const CategorySet &raw_categories_)
                 ASSERT( Node::OrderCompare3Way( *x, *y, Orderable::TOTAL ) );
                 ASSERT( Node::OrderCompare3Way( *x, *y, Orderable::REPEATABLE ) );
             }
-            
+		}
+		
         if( unique )
+        {
             categories.insert(x);
+		}
     }
     
     
@@ -468,7 +475,10 @@ const list<pair<int, int>> &Lacing::GetRangeListForCategory( TreePtr<Node> arche
     auto &lrl = TryGetRangeListForCategory( archetype );
     ASSERT( !lrl.empty() )
           ("Could not find lacing info for ")(archetype)
-          ("\nin:\n")(cats_to_lacing_range_lists)("\n");
+          ("\nin:\n")(cats_to_lacing_range_lists)("\n")
+          ("Did you leave NODE_FUNCTIONS_FINAL or NODE_FUNCTIONS out of a node decl?\n")
+          ("That sould make the node equivalent to its parent node wrt cat ordering\n")
+          ("and so one of them will get dropped from the lacing process.");
     return lrl;
 }
 

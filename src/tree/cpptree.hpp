@@ -811,6 +811,15 @@ struct ConditionalOperator : Operator
 	Production GetMyProduction() const override;
 };
 
+struct Subscript : Operator
+{
+	NODE_FUNCTIONS_FINAL
+	TreePtr<Expression> destination;
+	TreePtr<Expression> index;	
+	
+	Production GetMyProduction() const override;
+};
+
 /// Property indicating whether a New/Delete is global 
 /** New/Delete is global if it has :: in
  front of it. This differentiates when placement args are given as follows:

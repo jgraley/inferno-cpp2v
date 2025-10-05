@@ -116,7 +116,17 @@ AugTreePtr<CPPTree::Type> TypeOf::Get( const TransKit &kit, AugTreePtr<Expressio
     else if( auto condo = AugTreePtr<ConditionalOperator>::DynamicCast(op) )
     {
         return Get( kit, GET_CHILD(condo, expr_then) );
- // middle element TODO do this properly, consider cond ? nullptr : &x
+		// middle element TODO do this properly, consider cond ? nullptr : &x
+    }
+    else if( auto subs = AugTreePtr<Subscript>::DynamicCast(op) )
+    {
+		AugTreePtr<Type> dest_type = Get( kit, GET_CHILD(subs, destination) );
+        if( auto o2 = AugTreePtr<Pointer>::DynamicCast( dest_type ) )
+            return GET_CHILD(o2, destination);
+        else if( auto o2 = AugTreePtr<Array>::DynamicCast( dest_type ) )
+            return GET_CHILD(o2, element);
+        else
+            throw SubscriptUsageMismatch();
     }
     else 
     {
@@ -314,7 +324,7 @@ AugTreePtr<CPPTree::Type> TypeOf::GetStandardOnNumerics( const TransKit &kit, li
 
 AugTreePtr<CPPTree::Type> TypeOf::GetSpecial( const TransKit &kit, AugTreePtr<Operator> op, list<AugTreePtr<Type>> &optypes ) const
 {
-    if( AugTreePtr<Dereference>::DynamicCast(op) || AugTreePtr<Subscript>::DynamicCast(op) )
+    if( AugTreePtr<Dereference>::DynamicCast(op) )
     {
         if( auto o2 = AugTreePtr<Pointer>::DynamicCast( optypes.front() ) )
             return GET_CHILD(o2, destination);

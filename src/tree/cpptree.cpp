@@ -496,6 +496,13 @@ Syntax::Production False::GetMyProduction() const
 	return Production::TOKEN; 
 }
 
+//////////////////////////// Subscript ///////////////////////////////
+
+Syntax::Production Subscript::GetMyProduction() const
+{ 
+	return Production::POSTFIX; 
+}
+
 //////////////////////////// ConditionalOperator ///////////////////////////////
 
 Syntax::Production ConditionalOperator::GetMyProduction() const

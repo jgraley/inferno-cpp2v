@@ -70,7 +70,7 @@ void VNSequence::PlanningStageFour()
         } );
     }
        
-    // Use thes eto establish the lacing
+    // Use these to establish the lacing
     lacing = make_shared<Lacing>();
     lacing->Build( sub_exprs );   
     

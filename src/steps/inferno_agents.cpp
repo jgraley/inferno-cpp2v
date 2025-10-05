@@ -414,10 +414,10 @@ XLink NestedArrayAgent::Advance( XLink xlink,
 XLink NestedSubscriptLookupAgent::Advance( XLink xlink, 
                                            string *depth ) const
 {
-    if( auto s = DynamicTreePtrCast<Subscript>(xlink.GetChildTreePtr()) )            
+    if( auto subs = DynamicTreePtrCast<Subscript>(xlink.GetChildTreePtr()) )            
     {
         *depth += "S";
-        return XLink(&(s->operands.front())); // the base, not the index
+        return XLink(&(subs->destination)); // the base, not the index
     }
     else if( auto l = DynamicTreePtrCast<Lookup>(xlink.GetChildTreePtr()) )            
     {

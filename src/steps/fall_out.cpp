@@ -108,7 +108,8 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     ll_any->terminus = ll_over;
     ll_over->through = ls_label_id;
     ll_over->overlay = ll_sub;
-    ll_sub->operands = (r_lmap_id, lr_state_id);
+    ll_sub->destination = r_lmap_id;
+    ll_sub->index = lr_state_id;
     lls_not1->negand = lls_make;
     lls_make->operands = (MakePatternNode< Star<Expression> >(), 
                           ls_label_id,
@@ -241,16 +242,19 @@ LabelTypeToEnum::LabelTypeToEnum()
             
     auto embedded_l = MakePatternNode< EmbeddedSearchReplace<Scope> >( record, l_apall_over );   
 
-    ms_sub->operands = (lmap_id, m_state_id);
+    ms_sub->destination = lmap_id;
+    ms_sub->index = m_state_id;
     
     auto embedded_m = MakePatternNode< EmbeddedSearchReplace<Scope> >( embedded_l, ms_sub, m_state_id );   
 
     ns_goto->destination = n_dest_expr;
     nr_goto->destination = nr_sub;
-    nr_sub->operands = (lmap_id, n_dest_expr);
+    nr_sub->destination = lmap_id;
+    nr_sub->index = n_dest_expr;
     n_dest_expr->negand = nsx_sub;
-    nsx_sub->operands = (lmap_id, MakePatternNode<Expression>());
-    
+    nsx_sub->destination = lmap_id;
+    nsx_sub->index = MakePatternNode<Expression>();
+
     auto embedded_n = MakePatternNode< EmbeddedSearchReplace<Scope> >( embedded_m, ns_goto, nr_goto );   
     
     all->conjuncts = (record, stuff_labeley, stuff_lmap);
@@ -267,94 +271,6 @@ LabelTypeToEnum::LabelTypeToEnum()
     Configure( SEARCH_REPLACE, all, embedded_n );
 }
 
-/*
-RemoveLabelSubscript::RemoveLabelSubscript()
-{
-    auto stuff_labeley = MakePatternNode< Stuff<Scope> >();
-    auto stuff_lmap = MakePatternNode< Stuff<Scope> >();
-    auto labeley = MakePatternNode<Labeley>();
-    auto lmap = MakePatternNode<Static>();
-    auto lmap_const = MakePatternNode<Const>();
-    auto lmap_type = MakePatternNode<Array>();
-    auto lmap_id = MakePatternNode<InstanceIdentifier>();
-    auto apall = MakePatternNode< Conjunction<Node> >();
-    auto l_apall = MakePatternNode< Conjunction<Node> >();
-    auto apnot = MakePatternNode< Negation<Node> >();
-    auto l_apnot = MakePatternNode< Negation<Node> >();
-    auto apany = MakePatternNode< Child<Node> >();
-    auto l_apany = MakePatternNode< Child<Node> >();
-    auto l_over = MakePatternNode< Delta<Type> >();
-    auto ms_sub = MakePatternNode<Subscript>();
-    auto nr_sub = MakePatternNode<Subscript>();
-    auto nsx_sub = MakePatternNode<Subscript>();
-    auto m_state_id = MakePatternNode<InstanceIdentifier>();
-    auto ns_goto = MakePatternNode<Goto>();
-    auto nr_goto = MakePatternNode<Goto>();
-    auto n_dest_expr = MakePatternNode< Negation<Expression> >();
-    auto l_enum = MakePatternNode<Unsigned>(); // TODO use the real enum!!
-    auto all = MakePatternNode< Conjunction<Scope> >();
-    auto record = MakePatternNode<Record>();
-    auto decls = MakePatternNode< Star<Declaration> >();
-    
-    ms_sub->operands = (lmap_id, m_state_id);    
-    auto embedded_m = MakePatternNode< EmbeddedSearchReplace<Scope> >( embedded_l, ms_sub, m_state_id );       
-    Configure( SEARCH_REPLACE, all, embedded_n );
-}
-
-
-LabelInstancesToEnum::LabelInstancesToEnum()
-{
-    auto stuff_labeley = MakePatternNode< Stuff<Scope> >();
-    auto stuff_lmap = MakePatternNode< Stuff<Scope> >();
-    auto labeley = MakePatternNode<Labeley>();
-    auto lmap = MakePatternNode<Static>();
-    auto lmap_const = MakePatternNode<Const>();
-    auto lmap_type = MakePatternNode<Array>();
-    auto lmap_id = MakePatternNode<InstanceIdentifier>();
-    auto apall = MakePatternNode< Conjunction<Node> >();
-    auto l_apall = MakePatternNode< Conjunction<Node> >();
-    auto apnot = MakePatternNode< Negation<Node> >();
-    auto l_apnot = MakePatternNode< Negation<Node> >();
-    auto apany = MakePatternNode< Child<Node> >();
-    auto l_apany = MakePatternNode< Child<Node> >();
-    auto l_over = MakePatternNode< Delta<Type> >();
-    auto ms_sub = MakePatternNode<Subscript>();
-    auto nr_sub = MakePatternNode<Subscript>();
-    auto nsx_sub = MakePatternNode<Subscript>();
-    auto m_state_id = MakePatternNode<InstanceIdentifier>();
-    auto ns_goto = MakePatternNode<Goto>();
-    auto nr_goto = MakePatternNode<Goto>();
-    auto n_dest_expr = MakePatternNode< Negation<Expression> >();
-    auto l_enum = MakePatternNode<Unsigned>(); // TODO use the real enum!!
-    auto all = MakePatternNode< Conjunction<Scope> >();
-    auto record = MakePatternNode<Record>();
-    auto decls = MakePatternNode< Star<Declaration> >();
-    
-    record->members = ( decls );
-
-    l_apall->conjuncts = (l_apany, l_apnot);
-    l_apnot->negand = lmap;
-    l_apany->terminus = l_over;
-    l_over->through = MakePatternNode<Labeley>();
-    l_over->overlay = l_enum; 
-    l_enum->width = MakePatternNode<SpecificInteger>(TypeDb::int_bits);
-            
-    auto embedded_l = MakePatternNode< EmbeddedSearchReplace<Scope> >( record, l_apall );   
-
-    all->conjuncts = (record, stuff_labeley, stuff_lmap);
-    stuff_lmap->terminus = lmap;
-    lmap->identifier = lmap_id;
-    lmap->type = lmap_type;
-    lmap->constancy = lmap_const;
-    lmap_type->element = MakePatternNode<Labeley>();
-    stuff_labeley->terminus = apall;
-    apall->conjuncts = (apany, apnot);
-    apany->terminus = labeley;
-    apnot->negand = lmap;
-    
-    Configure( SEARCH_REPLACE, all, embedded_l );
-}
-*/
 
 LabelVarsToEnum::LabelVarsToEnum()
 {
@@ -407,7 +323,8 @@ LabelVarsToEnum::LabelVarsToEnum()
     l_nested_subscript->terminus = var_id;    
     l_nested_subscript->depth = depth;
     l_over->through = ls_sub;
-    ls_sub->operands = (lmap_id, l_index);
+    ls_sub->destination = lmap_id;
+    ls_sub->index = l_index;
     l_over->overlay = l_index;    
    
     auto embedded_l = MakePatternNode< EmbeddedSearchReplace<Scope> >( scope, l_assign );   
@@ -425,8 +342,10 @@ LabelVarsToEnum::LabelVarsToEnum()
     m_nested_subscript->depth = depth;
     m_over->overlay = mr_sub;
     msx_not3->negand = msx_sub;
-    msx_sub->operands = (lmap_id, m_nested_subscript);
-    mr_sub->operands = (lmap_id, m_nested_subscript);
+    msx_sub->destination = lmap_id;
+    msx_sub->index = m_nested_subscript;
+    mr_sub->destination = lmap_id;
+    mr_sub->index = m_nested_subscript;
     
     auto embedded_m = MakePatternNode< EmbeddedSearchReplace<Scope> >( embedded_l, ms_all, ms_anynode );   
    
@@ -441,7 +360,8 @@ LabelVarsToEnum::LabelVarsToEnum()
     s_assign->operands = (nested_subscript, s_sub);
     nested_subscript->terminus = var_id;
     nested_subscript->depth = depth;
-    s_sub->operands = (lmap_id, s_index);
+    s_sub->destination = lmap_id;
+    s_sub->index = s_index;
     s_index->pattern = type;
     sx_not1->negand = sx_stuff;
     sx_stuff->terminus = sx_all;
@@ -453,7 +373,8 @@ LabelVarsToEnum::LabelVarsToEnum()
     sx_assign->operands = (nested_subscript2, sx_sub);
     nested_subscript2->terminus = var_id;
     nested_subscript2->depth = depth;
-    sx_sub->operands = (lmap_id, MakePatternNode<Expression>() );
+    sx_sub->destination = lmap_id;
+    sx_sub->index = MakePatternNode<Expression>();
     over->overlay = type;
     lmap_stuff->terminus = lmap;
     lmap->identifier = lmap_id;
@@ -480,10 +401,13 @@ SwapSubscriptConditionalOperator::SwapSubscriptConditionalOperator()
     s_mux->condition = cond;
     s_mux->expr_then = s_sub1;
     s_mux->expr_else = s_sub2;    
-    s_sub1->operands = (array, index1);
-    s_sub2->operands = (array, index2);
+    s_sub1->destination = array;
+    s_sub1->index = index1;
+    s_sub2->destination = array;
+    s_sub2->index = index2;
     
-    r_sub->operands = (array, r_mux);
+    r_sub->destination = array;
+    r_sub->index = r_mux;
     r_mux->condition = cond;
     r_mux->expr_then = index1;
     r_mux->expr_else = index2;    
@@ -516,21 +440,24 @@ AddStateEnumVar::AddStateEnumVar()
     auto type = MakePatternNode<Integral>(); // TODO use the enum type, and ensure properly supported in TypeOf
     
     ls_goto->destination = ls_sub;
-    ls_sub->operands = (array, lx_not);
+    ls_sub->destination = array;
+    ls_sub->index = lx_not;
     lx_not->negand = state_var_id; //  MakePatternNode<InstanceIdentifier>();
     
     lr_compound->statements = (lr_assign, lr_goto);
     lr_assign->operands = (state_var_id, lx_not);
     lr_goto->destination = lr_sub;
-    lr_sub->operands = (array, state_var_id);
-            
+    lr_sub->destination = array;
+    lr_sub->index = state_var_id;
+
     auto r_embedded = MakePatternNode< EmbeddedSearchReplace<Statement> >( r_comp, ls_goto, lr_compound );
      
     s_gg->through = s_comp;
     s_comp->members = (decls);
     s_comp->statements = (pre, s_goto, post); 
     s_goto->destination = s_sub;
-    s_sub->operands = (array, s_index);
+    s_sub->destination = array;
+    s_sub->index = s_index;
     s_index->pattern = type;
         
     r_comp->members = (state_var, decls);
@@ -572,7 +499,8 @@ ApplyCombGotoPolicy::ApplyCombGotoPolicy()
     pre->restriction = sx_pre,
     sx_pre->negand = sx_pre_goto; // ensure we act on the first goto only
     s_goto1->destination = sub;
-    sub->operands = (lmap_id, state_var_id);
+    sub->destination = lmap_id;
+    sub->index = state_var_id;
     label->state = state_id;
     body->restriction = sx_body;
     sx_body->negand = sx_uncombable; 
@@ -622,7 +550,8 @@ ApplyYieldGotoPolicy::ApplyYieldGotoPolicy()
     pre->restriction = sx_pre,
     sx_pre->negand = sx_pre_goto; // ensure we act on the first goto only
     s_goto1->destination = sub;
-    sub->operands = (lmap_id, state_var_id);
+    sub->destination = lmap_id;
+    sub->index = state_var_id;
     label->state = state_id;
     goto2->destination = sub;    
     body1->restriction = sx_body1;
@@ -670,7 +599,8 @@ ApplyBottomPolicy::ApplyBottomPolicy()
     pre->restriction = sx_pre,
     sx_pre->negand = sx_pre_goto; // ensure we act on the first goto only
     goto1->destination = sub;
-    sub->operands = (lmap_id, state_var_id);
+    sub->destination = lmap_id;
+    sub->index = state_var_id;
     label->state = state_id;
     body->restriction = sx_body,
     sx_body->negand = sx_uncombable; 

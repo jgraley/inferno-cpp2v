@@ -492,6 +492,13 @@ string Render::RenderOperator( const Render::Kit &kit, TreePtr<Operator> op ) tr
                " : " +
                RenderIntoProduction( kit, condo->expr_else, Syntax::Production::CONDITIONAL );          
     }
+    else if( auto subs = DynamicTreePtrCast< Subscript >(op) )
+    {
+        return RenderIntoProduction( kit, subs->destination, Syntax::Production::POSTFIX ) + 
+               "[" +
+			   RenderIntoProduction( kit, subs->index, Syntax::Production::BOOT_EXPR ) + 
+			   "]";
+    }
 	else if( auto nco = DynamicTreePtrCast< NonCommutativeOperator >(op) )
         operands = nco->operands;           
     else if( auto co = DynamicTreePtrCast< CommutativeOperator >(op) )
@@ -510,13 +517,6 @@ string Render::RenderOperator( const Render::Kit &kit, TreePtr<Operator> op ) tr
     if( DynamicTreePtrCast< MakeArray >(op) )
     {
         s = "{ " + RenderOperandSequence( kit, operands ) + " }";
-    }
-    else if( DynamicTreePtrCast< Subscript >(op) )
-    {
-		Sequence<Expression>::iterator operands_it = operands.begin();
-        s = RenderIntoProduction( kit, *operands_it, Syntax::Production::POSTFIX ) + "[";
-        ++operands_it;
-        s += RenderIntoProduction( kit, *operands_it, Syntax::Production::BOOT_EXPR ) + "]";
     }
 #define INFIX(TOK, TEXT, NODE_SHAPED, BASE, CAT, PROD, ASSOC) \
     else if( DynamicTreePtrCast<NODE_SHAPED>(op) ) \
