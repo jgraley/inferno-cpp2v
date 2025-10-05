@@ -517,6 +517,13 @@ Syntax::Production MakeArray::GetMyProduction() const
 	return Production::PARENTHESISED; 
 }
 
+//////////////////////////// This ///////////////////////////////
+
+Syntax::Production This::GetMyProduction() const
+{ 
+	return Production::TOKEN; 
+}
+
 //////////////////////////// New ///////////////////////////////
 
 Syntax::Production New::GetMyProduction() const

@@ -505,6 +505,8 @@ string Render::RenderOperator( const Render::Kit &kit, TreePtr<Operator> op ) tr
                RenderOperandSequence( kit, al->operands ) + 
                " }";
     }	
+    else if( DynamicTreePtrCast< This >(op) )
+        return "this";
     else if( auto nco = DynamicTreePtrCast< NonCommutativeOperator >(op) )
         operands = nco->operands;           
     else if( auto co = DynamicTreePtrCast< CommutativeOperator >(op) )
@@ -679,9 +681,7 @@ string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> ex
         return RenderExteriorCall( kit, sc );
     else if( auto l = DynamicTreePtrCast< Literal >(expression) )
         return RenderLiteral( kit, l );
-    else if( DynamicTreePtrCast< This >(expression) )
-        return "this";
-    else if( auto op = TreePtr<Operator>::DynamicCast(expression) ) // Operator is a kind of Expression
+   else if( auto op = TreePtr<Operator>::DynamicCast(expression) ) // Operator is a kind of Expression
         return RenderOperator( kit, op );
     else
         return ERROR_UNSUPPORTED(expression);

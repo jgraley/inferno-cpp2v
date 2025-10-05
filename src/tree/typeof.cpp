@@ -139,6 +139,11 @@ AugTreePtr<CPPTree::Type> TypeOf::Get( const TransKit &kit, AugTreePtr<Expressio
             SET_CHILD(a, element, Get( kit, GET_CHILD_FRONT(al, operands) ));
         return AugTreePtr<Type>(a);
     }
+    else if( AugTreePtr<This>::DynamicCast(op) )
+    {
+        throw UnsupportedThisMismatch(); // TODO add support
+        //ASSERTFAIL(""); 
+    }
     else 
     {
         throw UnsupportedExpressionMismatch();
@@ -342,11 +347,6 @@ AugTreePtr<CPPTree::Type> TypeOf::GetSpecial( const TransKit &kit, AugTreePtr<Op
     else if( AugTreePtr<Comma>::DynamicCast(op) )
     {
         return optypes.back();
-    }
-    else if( AugTreePtr<This>::DynamicCast(op) )
-    {
-        throw UnsupportedThisMismatch(); // TODO add support
-        //ASSERTFAIL(""); 
     }
     else
     {

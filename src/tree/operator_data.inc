@@ -61,11 +61,6 @@ INFIX(pipeequal            , "|=",  AssignmentBitwiseOr,  AssignmentOperator,   
 INFIX(equal                , "=",   Assign,               AssignmentOperator,     SPECIAL,    ASSIGN,      RIGHT )
 INFIX(equalequal           , "==",  Equal,                CommutativeBinop,       COMPARISON, EQ_COMP,     LEFT )
 INFIX(comma                , ",",   Comma,                Binop,                  SPECIAL,    COMMA_OP,    LEFT ) 
-// TODO these four have no clang id, no string and are non-standard - put them back in cpptree.hpp
-//OTHER(0                    , "",    ConditionalOperator,  Ternop,                 SPECIAL,    CONDITIONAL, RIGHT )  // a?b:c
-//OTHER(0                    , "",    Subscript,            Binop,                  SPECIAL,    POSTFIX,     LEFT )  // a[b]
-//OTHER(0                    , "",    MakeArray,            NonCommutativeOperator, SPECIAL,    PARENTHESISED,      LEFT ) // {a, b, c}
-OTHER(0                    , "",    This,                 Operator,               SPECIAL,    TOKEN,       LEFT ) // this
 
 // save typing by undefining macros
 #undef PREFIX

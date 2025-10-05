@@ -756,9 +756,6 @@ struct Unop : NonCommutativeOperator { NODE_FUNCTIONS };
 /// An operator with two operands
 struct Binop : NonCommutativeOperator { NODE_FUNCTIONS };
 
-/// An operator with three operands
-struct Ternop : NonCommutativeOperator { NODE_FUNCTIONS };
-
 /// An operator with two interchangable operands
 struct CommutativeBinop : CommutativeOperator { NODE_FUNCTIONS };
 
@@ -824,6 +821,13 @@ struct Subscript : Operator
 
 /// An array formed directly from elements which should all be the same type
 struct MakeArray : NonCommutativeOperator
+{
+	NODE_FUNCTIONS_FINAL	
+	
+	Production GetMyProduction() const override;
+};
+
+struct This : Operator
 {
 	NODE_FUNCTIONS_FINAL	
 	
