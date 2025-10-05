@@ -1801,7 +1801,7 @@ private:
     }
 
     // Populate a map operator using elements from a sequence of expressions
-    void PopulateMapOperator( TreePtr<MapOperator> mapop, // MapOperands corresponding to the elements of ai go in here
+    void PopulateMapOperator( TreePtr<IdValueMap> mapop, // MapOperands corresponding to the elements of ai go in here
             Sequence<Expression> &seq, // Operands to insert, ordered as per the input program
             TreePtr<Node> key ) // Original Scope that established ordering, must be in backing_ordering
 
@@ -1826,7 +1826,7 @@ private:
                 {
                     // Get value out of array init and put it in record init together with member instance id
                     TreePtr<Expression> v = *seq_it;
-                    auto mi = MakeTreeNode<MapOperand>();
+                    auto mi = MakeTreeNode<IdValuePair>();
                     mi->key = i->identifier;
                     mi->value = v;
                     mapop->operands.insert( mi );

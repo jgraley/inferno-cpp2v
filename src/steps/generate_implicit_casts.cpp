@@ -37,7 +37,7 @@ GenerateImplicitCasts::GenerateImplicitCasts()
     s_param->type = type;
     auto s_other_params = MakePatternNode< Star<Parameter> >();
     s_proc->params = (s_param, s_other_params);
-    auto s_arg = MakePatternNode< MapOperand >();
+    auto s_arg = MakePatternNode< IdValuePair >();
     s_arg->key = param_id;
     auto s_arg_value = MakePatternNode< TransformOf<Expression> >( &TypeOf::instance );
     s_arg->value = s_arg_value;
@@ -45,11 +45,11 @@ GenerateImplicitCasts::GenerateImplicitCasts()
     auto s_arg_type = MakePatternNode< Negation<Type> >();
     s_arg_value->pattern = s_arg_type;
     s_arg_type->negand = type;
-    auto other_args = MakePatternNode< Star<MapOperand> >();
+    auto other_args = MakePatternNode< Star<IdValuePair> >();
     s_call->operands = ( s_arg, other_args );
 
     auto r_call = MakePatternNode<Call>();
-    auto r_arg = MakePatternNode< MapOperand >();
+    auto r_arg = MakePatternNode< IdValuePair >();
     r_arg->key = param_id;
     auto r_cast = MakePatternNode<Cast>();
     r_arg->value = r_cast;

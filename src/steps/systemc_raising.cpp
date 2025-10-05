@@ -70,7 +70,7 @@ RaiseSCHierarchicalClass::RaiseSCHierarchicalClass( TreePtr< SCRecord > lr_sccla
 RaiseSCDynamic::RaiseSCDynamic( TreePtr<SCDynamicFunction> r_dynamic )
 {
     auto s_call = MakePatternNode< Call >();
-    auto s_arg = MakePatternNode< MapOperand >();
+    auto s_arg = MakePatternNode< IdValuePair >();
     auto s_token = MakePatternNode< InstanceIdentifierByNameAgent >( r_dynamic->GetToken() ); 
     auto s_param_id = MakePatternNode< InstanceIdentifierByNameAgent >( "p1" ); 
     auto eexpr = MakePatternNode< TransformOf<Expression> >( &TypeOf::instance ); 
@@ -101,7 +101,7 @@ RaiseSCStatic::RaiseSCStatic( TreePtr<SCFunction> r_static )
 RaiseSCDelta::RaiseSCDelta( TreePtr<SCFunction> r_delta )
 {
     auto s_call = MakePatternNode< Call >();
-    auto s_arg = MakePatternNode< MapOperand >();
+    auto s_arg = MakePatternNode< IdValuePair >();
     auto s_token = MakePatternNode< InstanceIdentifierByNameAgent >( r_delta->GetToken() ); 
     auto s_param_id = MakePatternNode< InstanceIdentifierByNameAgent >( "p1" ); 
     auto s_arg_id = MakePatternNode< InstanceIdentifierByNameAgent >( "SC_ZERO_TIME" ); 
@@ -122,7 +122,7 @@ RaiseTerminationFunction::RaiseTerminationFunction( TreePtr<TerminationFunction>
 {
     auto event = MakePatternNode< Expression >();
     auto s_call = MakePatternNode< Call >();
-    auto s_arg = MakePatternNode< MapOperand >();
+    auto s_arg = MakePatternNode< IdValuePair >();
     auto s_token = MakePatternNode< InstanceIdentifierByNameAgent >( r_tf->GetToken() ); 
     auto s_param_id = MakePatternNode< InstanceIdentifierByNameAgent >( "exit_code" ); 
             
@@ -151,7 +151,7 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     auto lr_comp = MakePatternNode< Compound >();
     auto l_module = MakePatternNode< Module >();
     auto ls_pcall = MakePatternNode< Call >();
-    auto ls_arg = MakePatternNode< MapOperand >();
+    auto ls_arg = MakePatternNode< IdValuePair >();
     auto l_overcons = MakePatternNode< Delta<Instance> >();
     auto l_overtype = MakePatternNode< Delta<Type> >();
     auto ls_cons = MakePatternNode< Instance >();
@@ -246,7 +246,7 @@ RaiseSCNotifyDelta::RaiseSCNotifyDelta()
     auto s_lookup = MakePatternNode<Lookup>();
     auto s_event = MakePatternNode<Event>();
     auto r_notify = MakePatternNode<NotifyDelta>();
-    auto s_arg = MakePatternNode<MapOperand>();
+    auto s_arg = MakePatternNode<IdValuePair>();
     auto s_zero_token = MakePatternNode< InstanceIdentifierByNameAgent >( "SC_ZERO_TIME" );                
     auto s_arg_id = MakePatternNode< InstanceIdentifierByNameAgent >( "p1" ); 
     auto s_token = MakePatternNode< InstanceIdentifierByNameAgent >( r_notify->GetToken() );                
@@ -276,7 +276,7 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     auto l_decls = MakePatternNode< Star<Declaration> >();
     auto l_pre = MakePatternNode< Star<Statement> >();
     auto l_post = MakePatternNode< Star<Statement> >();
-    auto l1s_args = MakePatternNode< Star<MapOperand> >();
+    auto l1s_args = MakePatternNode< Star<IdValuePair> >();
     auto s_cons = MakePatternNode< Field >();
     auto s_comp = MakePatternNode< Compound >();
     auto s_id = MakePatternNode< InstanceIdentifier >();
@@ -292,7 +292,7 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     auto l_delta = MakePatternNode<Delta<Initialiser>>();  
     auto l2s_call = MakePatternNode<Call>();
     auto l2s_lookup = MakePatternNode<Lookup>();
-	auto l2s_args = MakePatternNode< Star<MapOperand> >();
+	auto l2s_args = MakePatternNode< Star<IdValuePair> >();
 
     auto bases = MakePatternNode< Star<Base> >();
     auto r_embedded_2 = MakePatternNode< EmbeddedSearchReplace<Node> >( stuff, l_instance, l_instance );            

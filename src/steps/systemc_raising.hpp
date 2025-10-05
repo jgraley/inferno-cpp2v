@@ -61,7 +61,7 @@ public:
 /** We look for the decl and remove it since the inferno
  Node does not require declaration. Then replace all calls to 
  the function with the explicit statement node. Bring arguments
- across by name match as per Inferno's MapOperator style. */
+ across by name match as per Inferno's IdValueMap style. */
 class RaiseTerminationFunction : public VNStep
 {
 public:

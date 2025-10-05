@@ -591,7 +591,7 @@ DEFAULT_CATCH_CLAUSE
 
 string Render::RenderExteriorCall( const Render::Kit &kit, TreePtr<ExteriorCall> call ) try
 {
-    string args_in_parens = RenderSeqOperands(kit, call->operands);
+    string args_in_parens = RenderSeqOperands(kit, call->arguments);
 
     // Constructor case: spot by use of Lookup to empty-named method. Elide the "."
     if( auto lu = DynamicTreePtrCast< Lookup >(call->callee) )
@@ -687,7 +687,7 @@ string Render::RenderMakeRecord( const Render::Kit &kit, TreePtr<MakeRecord> mak
     // is implied in the generalised case: the record type has a collection of 
     // fields, but they need to be sorted based on dependency order when rendering
     // the records (we also aim for repeatability here). This ordering must then
-    // be applied to the MapOperator in order to get a match-up between sub-expressions
+    // be applied to the IdValueMap in order to get a match-up between sub-expressions
     // and fields. I think C++ side-steps this by diallowing the MakeRecord syntax
     // in classes where dependencies might matter.
 
@@ -711,7 +711,7 @@ string Render::RenderMakeRecord( const Render::Kit &kit, TreePtr<MakeRecord> mak
 DEFAULT_CATCH_CLAUSE
 
 
-Sequence<Expression> Render::SortMapOperands( TreePtr<MapOperator> ro,
+Sequence<Expression> Render::SortMapOperands( TreePtr<IdValueMap> ro,
                                               Sequence<Declaration> key_sequence )
 {   
     Sequence<Expression> out_sequence;
@@ -723,8 +723,8 @@ Sequence<Expression> Render::SortMapOperands( TreePtr<MapOperator> ro,
             // ...and not function instances
             if( !DynamicTreePtrCast<Callable>( i->type ) )
             {
-                // search init for matching member (not a map: this is a Collection of MapOperand nodes)
-                for( TreePtr<MapOperand> mi : ro->operands )
+                // search init for matching member (not a map: this is a Collection of IdValuePair nodes)
+                for( TreePtr<IdValuePair> mi : ro->operands )
                 {
                     if( i->identifier == mi->key )
                     {
@@ -951,7 +951,7 @@ string Render::RenderInstance( const Render::Kit &kit, TreePtr<Instance> o, Synt
             if( auto lu = TreePtr<Lookup>::DynamicCast(call->callee) )
                 if( auto id = TreePtr<InstanceIdentifier>::DynamicCast(lu->member) )
                     if( id->GetToken().empty() ) // syscall to a nameless member function => sys construct
-                        return s + RenderSeqOperands(kit, call->operands) + ";\n";
+                        return s + RenderSeqOperands(kit, call->arguments) + ";\n";
         }
         if( auto call = DynamicTreePtrCast<Call>( ei ) ) try
         {       

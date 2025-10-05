@@ -642,9 +642,9 @@ ExtractCallParams::ExtractCallParams()
     auto r_temp = MakePatternNode<Temporary>();
     auto r_ce = MakePatternNode<StatementExpression>();
     auto r_assign = MakePatternNode<Assign>();
-    auto params = MakePatternNode< Star<MapOperand> >();
-    auto s_param = MakePatternNode<MapOperand>();
-    auto r_param = MakePatternNode<MapOperand>();
+    auto params = MakePatternNode< Star<IdValuePair> >();
+    auto s_param = MakePatternNode<IdValuePair>();
+    auto r_param = MakePatternNode<IdValuePair>();
     auto value = MakePatternNode< TransformOf<Expression> >( &TypeOf::instance );
     auto type = MakePatternNode<Type>();
     auto id = MakePatternNode<InstanceIdentifier>();

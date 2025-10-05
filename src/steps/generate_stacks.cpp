@@ -124,7 +124,7 @@ ReturnViaTemp::ReturnViaTemp()
     auto m_call = MakePatternNode<Call>();
     auto m_any = MakePatternNode<Disjunction<Expression>>();
     auto m_lookup = MakePatternNode<Lookup>();
-    auto m_operands = MakePatternNode< Star<MapOperand> >();
+    auto m_operands = MakePatternNode< Star<IdValuePair> >();
     auto r_temp = MakePatternNode<Temporary>();
     auto mr_assign = MakePatternNode<Assign>();
     auto lr_assign = MakePatternNode<Assign>();
@@ -231,7 +231,7 @@ AddLinkAddress::AddLinkAddress()
     auto ll_over = MakePatternNode< Delta<Statement> >();
     auto m_gg = MakePatternNode< GreenGrass<Statement> >();
     auto ll_gg = MakePatternNode< GreenGrass<Statement> >();
-    auto mr_operand = MakePatternNode<MapOperand>();
+    auto mr_operand = MakePatternNode<IdValuePair>();
 
     ll_gg->through = ll_return;
     ll_over->overlay = llr_comp;        
@@ -242,7 +242,7 @@ AddLinkAddress::AddLinkAddress()
     auto embedded_ll = MakePatternNode< EmbeddedSearchReplace<Compound> >( lr_comp, ll_gg, llr_comp );   
    
     m_gg->through = ms_call;
-    ms_call->operands = (MakePatternNode< Star<MapOperand> >());
+    ms_call->operands = (MakePatternNode< Star<IdValuePair> >());
     ms_call->callee = l_inst_id;
     mr_comp->statements = (mr_call, mr_label);  
     mr_call->operands = (ms_call->operands, mr_operand);
@@ -312,8 +312,8 @@ ParamsViaTemps::ParamsViaTemps()
     auto params = MakePatternNode< Star<Parameter> >();
     auto ms_call = MakePatternNode<Call>();
     auto mr_call = MakePatternNode<Call>();
-    auto ms_operand = MakePatternNode<MapOperand>();
-    auto m_operands = MakePatternNode< Star<MapOperand> >();
+    auto ms_operand = MakePatternNode<IdValuePair>();
+    auto m_operands = MakePatternNode< Star<IdValuePair> >();
     auto r_param = MakePatternNode<Automatic>();
     auto param_type = MakePatternNode<Type>();
     auto r_temp = MakePatternNode<Temporary>();

@@ -874,7 +874,7 @@ struct Cast : Operator
 
 /// Associates an Expression with an InstanceIdentifier. 
 /** Basically a key-value pair of identifier and value. Use in Maps. */
-struct MapOperand : virtual Node
+struct IdValuePair : virtual Node
 {
     NODE_FUNCTIONS_FINAL
     TreePtr<InstanceIdentifier> key; ///< the handle for this particualar operand
@@ -883,26 +883,27 @@ struct MapOperand : virtual Node
     virtual string GetColour() const { return "/set28/8"; }    
 };
 
-struct GoSub : virtual Node
-{
-    TreePtr<Expression> callee; ///< evaluates to the Callable Instance we must call	
-    NODE_FUNCTIONS
-};
-
 /// An operator with operands whose order is established by mapping
 /** Maps a multiplicity of Instances to Expressions via their InstanceIdentifiers.*/
-struct MapOperator : Operator
+struct IdValueMap : virtual Node
 {
     NODE_FUNCTIONS
-    Collection<MapOperand> operands; ///< Operands whose relationship is established via identifiers
+    Collection<IdValuePair> operands; ///< Operands whose relationship is established via identifiers
+};
+
+
+struct GoSub : virtual Node
+{
+    NODE_FUNCTIONS
+    TreePtr<Expression> callee; ///< evaluates to the Callable Instance we must call	
 };
 
 /// A function call to specified function passing in specified arguments
 /* Function is an expression to allow eg function pointer dereference. Normal
  calls have callee -> some InstanceIdentifier for a Callable Instance.
- Arguments passed via MapOperator - mapped to the parameters in the callee
+ Arguments passed via IdValueMap - mapped to the parameters in the callee
  type (if it's a CallableParams). */
-struct Call : GoSub, MapOperator, Uncombable
+struct Call : GoSub, IdValueMap, Expression, Uncombable
 {
     NODE_FUNCTIONS_FINAL
 	
@@ -913,7 +914,7 @@ struct Call : GoSub, MapOperator, Uncombable
 /** Uses a map to associate elements with corresponding record 
  members. We also give the record type explicitly since the map is
  not enough information. */
-struct MakeRecord : MapOperator
+struct MakeRecord : IdValueMap, Expression
 {
     NODE_FUNCTIONS_FINAL
     TreePtr<TypeIdentifier> type; ///< handle of the type of the record we are making
@@ -1132,10 +1133,10 @@ struct Nop : Statement
 
 /// A regular function call whose arguments are given in sequence, so that a 
 /// declaration is not needed.
-struct ExteriorCall : GoSub, Operator
+struct ExteriorCall : GoSub, Expression
 {
     NODE_FUNCTIONS_FINAL
-    Sequence<Expression> operands; ///< Arguments taken in order
+    Sequence<Expression> arguments; ///< Arguments taken in order
 	
 	Production GetMyProduction() const override;
 };  
