@@ -384,9 +384,10 @@ struct Instance : Declaration,
     TreePtr<Type> type; ///< the Type of the instance, can be data or Callable type
     TreePtr<InstanceIdentifier> identifier; ///< acts as a handle for the instance, and holds its name only as a hint
     TreePtr<Initialiser> initialiser; ///< init value for data, body for Callable type
+    
     virtual string GetColour() const { return Declaration::GetColour(); } // Declaration wins
     set<const TreePtrInterface *> GetDeclared() override { return { &identifier }; };
-
+	Production GetMyProduction() const override;    
 };
 
 /// A variable or function with one instance across the entire program. 
@@ -474,6 +475,7 @@ struct SpecificLabelIdentifier : LabelIdentifier,
     SpecificLabelIdentifier( string s, BoundingRole addr_bounding_role = BoundingRole::NONE ) : 
         SpecificIdentifier(s, addr_bounding_role) {} ///< construct with initial name
     NODE_FUNCTIONS_FINAL
+    
 	Production GetMyProduction() const override;    
 };
 
@@ -487,8 +489,10 @@ struct Label : Declaration, //TODO commonize with Case and Default
 {
     NODE_FUNCTIONS_FINAL
     TreePtr<LabelIdentifier> identifier; ///< a handle for the label to be referenced elewhere
+    
     virtual string GetColour() const { return Declaration::GetColour(); } // Declaration wins
     set<const TreePtrInterface *> GetDeclared() override { return { &identifier }; };
+	Production GetMyProduction() const override;	
 };
 
 //////////////////////////// Anonymous Types ////////////////////////////
@@ -1146,6 +1150,8 @@ struct MacroCall : GoSub, Statement
 {
     NODE_FUNCTIONS_FINAL
     Sequence<Node> macro_operands; ///< Arguments taken in order, macro so can be anything
+   	
+   	Production GetMyProduction() const override;
 };
 
 /// Preprocessor decl-like stuff: includes, defines

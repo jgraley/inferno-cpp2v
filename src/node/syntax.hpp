@@ -18,8 +18,8 @@ public:
 		STATEMENT_LOW, // Lowest statement precedence: {} etc from the inside		
 		STATEMENT_HIGH, // eg if( ... ) <here>;    is this prefix?
 		STATEMENT_TERM,
-		DECLARATION,
 		CONDITION,		// eg if( <here> ) ... which could be a decl etc BOUNDARY FOR SEMICOLONS
+		DECLARATION,
 		SPACE_SEP_STATEMENT, // eg throw <here>;
 		SPACE_SEP_DECLARATION, // the type in <here> <declarator>;
 		INITIALISER, // For initialisers eg function body		

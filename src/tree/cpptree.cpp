@@ -344,11 +344,25 @@ Syntax::Production SpecificTypeIdentifier::GetMyProduction() const
 	return Production::PURE_IDENTIFIER; 
 }
 
+//////////////////////////// Instance //////////////////////////////
+
+Syntax::Production Instance::GetMyProduction() const
+{ 
+	return Production::DECLARATION; 
+}
+
 //////////////////////////// SpecificLabelIdentifier //////////////////////////////
 
 Syntax::Production SpecificLabelIdentifier::GetMyProduction() const
 { 
 	return Production::PURE_IDENTIFIER; 
+}
+
+//////////////////////////// Label //////////////////////////////
+
+Syntax::Production Label::GetMyProduction() const
+{ 
+	return Production::LABEL; 
 }
 
 //////////////////////////// Callable //////////////////////////////
@@ -609,5 +623,12 @@ Syntax::Production Nop::GetMyProduction() const
 Syntax::Production ExteriorCall::GetMyProduction() const
 { 
 	return Production::POSTFIX; 
+}
+
+//////////////////////////// MacroCall ///////////////////////////////
+
+Syntax::Production MacroCall::GetMyProduction() const
+{ 
+	return Production::STATEMENT_TERM; 
 }
 

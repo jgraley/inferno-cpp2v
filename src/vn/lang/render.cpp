@@ -616,7 +616,7 @@ string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> ex
         AutoPush< TreePtr<Node> > cs( scope_stack, ce );
         s += RenderDeclScope( kit, ce ); // Must do this first to populate backing list
         for( TreePtr<Statement> st : ce->statements )    
-            s += RenderStatement( kit, st, Syntax::Production::STATEMENT_LOW );    
+            s += RenderIntoProduction( kit, st, Syntax::Production::STATEMENT_LOW );    
         return s + "})";
     }
     else if( auto pot = DynamicTreePtrCast< SizeOf >(expression) )
@@ -917,7 +917,7 @@ string Render::RenderInstance( const Render::Kit &kit, TreePtr<Instance> o,
         auto r = MakeTreeNode<Compound>();
         r->members = members;
         r->statements = remainder;
-        s += "\n" + RenderStatement(kit, r, Syntax::Production::STATEMENT_HIGH); // TODO force {} by using higher precedence?
+        s += "\n" + RenderIntoProduction(kit, r, Syntax::Production::STATEMENT_LOW); // TODO force {} by using higher precedence?
         
         // Surround functions with blank lines        
         return '\n' + s + '\n';
@@ -1121,7 +1121,7 @@ string Render::RenderStatement( const Render::Kit &kit, TreePtr<Statement> state
         AutoPush< TreePtr<Node> > cs( scope_stack, c );
         s += RenderDeclScope( kit, c ); // Must do this first to populate backing list
         for( TreePtr<Statement> st : c->statements )    
-            s += RenderStatement( kit, st, Syntax::Production::STATEMENT_LOW );    
+            s += RenderIntoProduction( kit, st, Syntax::Production::STATEMENT_LOW );    
         return s + "} // comp\n";
     }
     else if( TreePtr<Expression> e = DynamicTreePtrCast< Expression >(statement) )
