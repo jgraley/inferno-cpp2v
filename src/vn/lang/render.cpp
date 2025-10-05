@@ -1127,7 +1127,7 @@ string Render::RenderStatement( const Render::Kit &kit, TreePtr<Statement> state
         return s + "} // comp\n";
     }
     else if( TreePtr<Expression> e = DynamicTreePtrCast< Expression >(statement) )
-        return RenderIntoProduction(kit, e, Syntax::Production::STATEMENT_LOW);
+        return RenderIntoProduction(kit, e, surround_prod);
     else if( TreePtr<Return> es = DynamicTreePtrCast<Return>(statement) )
         return "return " + RenderIntoProduction(kit, es->return_value, Syntax::Production::SPACE_SEP_STATEMENT) + ";\n";
     else if( TreePtr<Goto> g = DynamicTreePtrCast<Goto>(statement) )
@@ -1160,33 +1160,33 @@ string Render::RenderStatement( const Render::Kit &kit, TreePtr<Statement> state
     else if( TreePtr<Do> d = DynamicTreePtrCast<Do>(statement) )
         return "do\n" +
                RenderIntoProduction(kit, d->body, Syntax::Production::STATEMENT_LOW) +
-               "while( " + RenderIntoProduction(kit, d->condition, Syntax::Production::CONDITION) + " );\n";
+               "while( " + RenderIntoProduction(kit, d->condition, Syntax::Production::CONDITION) + " )";
     else if( TreePtr<For> f = DynamicTreePtrCast<For>(statement) )
         return "for( " + 
                RenderIntoProduction(kit, f->initialisation, Syntax::Production::STATEMENT_LOW) + 
                RenderIntoProduction(kit, f->condition, Syntax::Production::CONDITION) + "; "+ 
                RenderIntoProduction(kit, f->increment, Syntax::Production::BOOT_EXPR) + " )\n" +
-               RenderIntoProduction(kit, f->body, Syntax::Production::STATEMENT_HIGH);
+               RenderIntoProduction(kit, f->body, surround_prod);
     else if( TreePtr<Switch> s = DynamicTreePtrCast<Switch>(statement) )
         return "switch( " + RenderIntoProduction(kit, s->condition, Syntax::Production::CONDITION) + " )\n" +
                RenderIntoProduction(kit, s->body, surround_prod);
     else if( TreePtr<Case> c = DynamicTreePtrCast<Case>(statement) )
-        return "case " + RenderIntoProduction(kit, c->value, Syntax::Production::SPACE_SEP_STATEMENT) + ":;\n";
+        return "case " + RenderIntoProduction(kit, c->value, Syntax::Production::SPACE_SEP_STATEMENT) + ":";
     else if( TreePtr<RangeCase> rc = DynamicTreePtrCast<RangeCase>(statement) )
         // GCC extension: assume that ... is part of the case statement, and can boot the expressions.
         return "case " + 
                RenderIntoProduction(kit, rc->value_lo, Syntax::Production::SPACE_SEP_STATEMENT) + 
                " ... " + 
                RenderIntoProduction(kit, rc->value_hi, Syntax::Production::SPACE_SEP_STATEMENT) + 
-               ":\n";
+               ":";
     else if( DynamicTreePtrCast<Default>(statement) )
-        return "default:;\n";
+        return "default:";
     else if( DynamicTreePtrCast<Continue>(statement) )
-        return "continue;\n";
+        return "continue";
     else if( DynamicTreePtrCast<Break>(statement) )
-        return "break;\n";
+        return "break";
     else if( DynamicTreePtrCast<Nop>(statement) )
-        return "; // Nop \n";
+        return "";
     else if( auto smc = DynamicTreePtrCast<MacroCall>(statement) )
         return RenderMacroCall( kit, smc );
     else

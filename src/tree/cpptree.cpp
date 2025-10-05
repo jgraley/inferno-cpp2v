@@ -590,6 +590,13 @@ Syntax::Production Breakable::GetMyProduction() const
 	return Production::STATEMENT_HIGH; 
 }
 
+//////////////////////////// Do ///////////////////////////////
+
+Syntax::Production Do::GetMyProduction() const
+{ 
+	return Production::BARE_STATEMENT; 
+}
+
 //////////////////////////// SwitchTarget ///////////////////////////////
 
 Syntax::Production SwitchTarget::GetMyProduction() const
@@ -601,21 +608,21 @@ Syntax::Production SwitchTarget::GetMyProduction() const
 
 Syntax::Production Continue::GetMyProduction() const
 { 
-	return Production::STATEMENT; 
+	return Production::BARE_STATEMENT; 
 }
 
 //////////////////////////// Break ///////////////////////////////
 
 Syntax::Production Break::GetMyProduction() const
 { 
-	return Production::STATEMENT; 
+	return Production::BARE_STATEMENT; 
 }
 
 //////////////////////////// Nop ///////////////////////////////
 
 Syntax::Production Nop::GetMyProduction() const
 { 
-	return Production::BRACED; // Assuming render as {}
+	return Production::BOOT_STATEMENT; // Force a {}
 }
 
 //////////////////////////// ExteriorCall ///////////////////////////////

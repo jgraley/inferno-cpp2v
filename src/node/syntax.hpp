@@ -20,11 +20,12 @@ public:
 		STATEMENT,
 		DECLARATION,
 		CONDITION,		// eg if( <here> ) ... which could be a decl etc BOUNDARY FOR SEMICOLONS
+		BARE_STATEMENT, // no trailing ;
 		PROTOTYPE,
 		SPACE_SEP_STATEMENT, // eg throw <here>;
 		SPACE_SEP_DECLARATION, // the type in <here> <declarator>;
 		INITIALISER, // For initialisers eg function body		
-		LABEL,  // Anything with a : after it. Could be a prefix on statements.
+		LABEL,  // Anything with a : after it. Could be (a) like a bare statement needing a ; or (b) a prefix on statements.
 		BRACED,		 // {} from the outside	#10
 		TOP_STATEMENT, // Highest statement precedence
 										

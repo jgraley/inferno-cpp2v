@@ -23,6 +23,8 @@ public:
             if(x==0 || x==2)
                 x=false ? 88 : 2;   
             break;
+            default:
+            break;
         }
         switch(0)
         {

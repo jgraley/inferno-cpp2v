@@ -1043,6 +1043,8 @@ struct Do : Loop, Uncombable // a do..while() construct
 {
     NODE_FUNCTIONS_FINAL
     TreePtr<Expression> condition; ///< Tested after each iteration; false terminates immediately
+
+	Production GetMyProduction() const override;	
 };
 
 /// C-style for loop. 
