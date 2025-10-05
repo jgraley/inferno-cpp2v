@@ -29,6 +29,13 @@ Syntax::Production Type::GetOperandInDeclaratorProduction() const
 	return Production::BOOT_EXPR;
 }
 
+//////////////////////////// Declaration ///////////////////////////////
+
+Syntax::Production Declaration::GetMyProduction() const
+{
+	return Production::DECLARATION;
+}
+
 //////////////////////////// Program ///////////////////////////////
 
 Syntax::Production Program::GetMyProduction() const

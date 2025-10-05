@@ -1336,7 +1336,7 @@ string Render::RenderDeclScope( const Render::Kit &kit,
             
         if( init_access )
             s += MaybeRenderFieldAccess( kit, d, &init_access );        
-        s += RenderDeclaration( kit, d, Syntax::Production::DECLARATION );
+        s += RenderIntoProduction( kit, d, Syntax::Production::DECLARATION );
     }
     TRACE();
     return s;

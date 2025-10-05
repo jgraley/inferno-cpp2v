@@ -81,7 +81,9 @@ struct Type : virtual Node
 struct Declaration : virtual Node 
 { 
     NODE_FUNCTIONS 
+    
     virtual string GetColour() const { return "/set28/1"; }
+	Production GetMyProduction() const override;	    
 };
 
 /// A scope is any space in a program where declarations may appear. Declarations
