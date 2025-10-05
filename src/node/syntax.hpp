@@ -10,8 +10,10 @@ public:
 	enum class Production // "Syntax::Production" is a generalisation of precedence
 	{		
 		UNDEFINED,
-		TRANSLATION_UNIT,		
-		INSTANCE_PROTO, 
+		
+		PROGRAM,
+		TRANSLATION_UNIT_CPP,		
+		TRANSLATION_UNIT_HPP, 
 		
 		BOOT_STATEMENT,
 		

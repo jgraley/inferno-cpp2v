@@ -65,7 +65,7 @@ string Render::RenderToString( TreePtr<Node> root )
     // Make the identifiers unique (does its own tree walk)
     unique_ids = UniquifyIdentifiers::UniquifyAll( kit, context );
 
-    return RenderIntoProduction( kit, root, Syntax::Production::TRANSLATION_UNIT );
+    return RenderIntoProduction( kit, root, Syntax::Production::PROGRAM );
 }
 
 
@@ -167,13 +167,17 @@ string Render::RenderIntoProduction( const Render::Kit &kit, TreePtr<Node> node,
 string Render::Dispatch( const Render::Kit &kit, TreePtr<Node> node, Syntax::Production surround_prod )
 {
     if( auto program = TreePtr<Program>::DynamicCast(node) )
-        return RenderProgram( kit, program );
+        return RenderProgram( kit, program, surround_prod );
     else if( auto identifier = TreePtr<Identifier>::DynamicCast(node) ) // Identifier can be a kind of type or expression
         return RenderIdentifier( kit, identifier, surround_prod );
-    else if( auto type = TreePtr<Type>::DynamicCast(node) ) 
+    else if( auto type = TreePtr<Type>::DynamicCast(node) )  // Type is a kind of Operator
         return RenderType( kit, type, surround_prod );
+    //else if( auto op = TreePtr<Operator>::DynamicCast(node) ) // Operator is a kind of Expression
+        //return RenderOperator( kit, op );
     else if( auto expression = TreePtr<Expression>::DynamicCast(node) ) // Expression is a kind of Statement
         return RenderExpression( kit, expression, surround_prod );
+    else if( auto instance = TreePtr<Instance>::DynamicCast(node) )    // Instance is a kind of Statement and Declaration
+        return RenderInstance( kit, instance, surround_prod ); 
     else if( auto declaration = TreePtr<Declaration>::DynamicCast(node) )
         return RenderDeclaration( kit, declaration, surround_prod );
     else if( auto statement = TreePtr<Statement>::DynamicCast(node) )
@@ -183,20 +187,21 @@ string Render::Dispatch( const Render::Kit &kit, TreePtr<Node> node, Syntax::Pro
 }
 
 
-string Render::RenderProgram( const Render::Kit &kit, TreePtr<CPPTree::Program> program )
+string Render::RenderProgram( const Render::Kit &kit, TreePtr<CPPTree::Program> program, Syntax::Production surround_prod )
 {
+	(void)surround_prod;
     string s;
 
     AutoPush< TreePtr<Node> > cs( scope_stack, program );
 
     // Track scopes for name resolution
-    s += RenderDeclScope( kit, program ); // gets the .hpp stuff directly
+    s += RenderDeclScope( kit, program ); // gets the .hpp stuff directly   TRANSLATION_UNIT_HPP
     
     // These are rendered here, inside program scope but outside any additional scopes
     // that were on the scope stack when the instance was seen.
     while( !deferred_instances.empty() )
     {
-        s += "\n" + RenderInstance( kit, deferred_instances.front(), true ); // these could go in a .cpp file
+        s += "\n" + RenderInstance( kit, deferred_instances.front(), Syntax::Production::TRANSLATION_UNIT_CPP ); // these could go in a .cpp file
         deferred_instances.pop();
     }
     return s;  
@@ -454,9 +459,20 @@ string Render::Sanitise( string s ) try
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderOperator( const Render::Kit &kit, TreePtr<Operator> op, Sequence<Expression> &operands ) try
+string Render::RenderOperator( const Render::Kit &kit, TreePtr<Operator> op ) try
 {
     ASSERT(op);
+    Sequence<Expression> operands;
+	if( auto nco = DynamicTreePtrCast< NonCommutativeOperator >(op) )
+        operands = nco->operands;           
+    else if( auto co = DynamicTreePtrCast< CommutativeOperator >(op) )
+    {
+        Sequence<Expression> seq_operands;
+        // Operands are in collection, so sort them and put them in a sequence
+        for( TreePtr<Node> o : sc.GetTreePtrOrdering(co->operands) )
+            operands.push_back( TreePtr<Expression>::DynamicCast(o) );
+    }
+    
     string s;
     Sequence<Expression>::iterator operands_it = operands.begin();
     if( DynamicTreePtrCast< MakeArray >(op) )
@@ -624,17 +640,7 @@ string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> ex
     else if( auto pot = DynamicTreePtrCast< SizeOf >(expression) )
         return "sizeof(" + RenderIntoProduction( kit, pot->operand, Syntax::Production::BOOT_EXPR ) + ")";               
     else if( auto pot = DynamicTreePtrCast< AlignOf >(expression) )
-        return "alignof(" + RenderIntoProduction( kit, pot->operand, Syntax::Production::BOOT_EXPR ) + ")";
-    else if( auto nco = DynamicTreePtrCast< NonCommutativeOperator >(expression) )
-        return RenderOperator( kit, nco, nco->operands );           
-    else if( auto co = DynamicTreePtrCast< CommutativeOperator >(expression) )
-    {
-        Sequence<Expression> seq_operands;
-        // Operands are in collection, so sort them and put them in a sequence
-        for( TreePtr<Node> o : sc.GetTreePtrOrdering(co->operands) )
-            seq_operands.push_back( TreePtr<Expression>::DynamicCast(o) );
-        return RenderOperator( kit, co, seq_operands );               
-    }
+        return "alignof(" + RenderIntoProduction( kit, pot->operand, Syntax::Production::BOOT_EXPR ) + ")";    
     else if( auto c = DynamicTreePtrCast< Call >(expression) )
         return RenderCall( kit, c );
     else if( auto sc = DynamicTreePtrCast< ExteriorCall >(expression) )
@@ -661,6 +667,8 @@ string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> ex
         return RenderLiteral( kit, l );
     else if( DynamicTreePtrCast< This >(expression) )
         return "this";
+    else if( auto op = TreePtr<Operator>::DynamicCast(expression) ) // Operator is a kind of Expression
+        return RenderOperator( kit, op );
     else
         return ERROR_UNSUPPORTED(expression);
 }
@@ -805,7 +813,7 @@ void Render::ExtractInits( const Render::Kit &kit,
 
 string Render::RenderInstanceProto( const Render::Kit &kit, 
                                     TreePtr<Instance> o, 
-                                    bool out_of_line ) try
+                                    Syntax::Production surround_prod ) try
 {
     string s;
     string name;
@@ -833,7 +841,7 @@ string Render::RenderInstanceProto( const Render::Kit &kit,
         if( DynamicTreePtrCast<Const>(f->constancy) )
             constant = true;
 
-    if( out_of_line )
+    if( surround_prod == Syntax::Production::TRANSLATION_UNIT_CPP )
         name += ScopeResolvingPrefix(kit, o->identifier, Syntax::Production::SCOPE_RESOLVE);
     else // in-line
         s += RenderStorage(kit, o);
@@ -876,11 +884,21 @@ bool Render::IsDeclared( const Render::Kit &kit, TreePtr<Identifier> id )
 }   
 
 
-string Render::RenderInstance( const Render::Kit &kit, TreePtr<Instance> o, 
-                               bool out_of_line ) try
+string Render::RenderInstance( const Render::Kit &kit, TreePtr<Instance> o, Syntax::Production surround_prod ) try
 {
-    string s = RenderInstanceProto( kit, o, out_of_line );
+    string s = RenderInstanceProto( kit, o, surround_prod );
 
+	if( surround_prod != Syntax::Production::TRANSLATION_UNIT_CPP )
+	{
+       if( ShouldSplitInstance(kit, o) )
+        {
+            s += ";\n";
+            // Split out the definition of the instance for rendering later at top level scope
+            deferred_instances.push(o);
+            return s;
+        }
+	}
+	
     if( DynamicTreePtrCast<Uninitialised>(o->initialiser) )
         return s + ";\n"; // Don't render any initialiser    
     
@@ -919,7 +937,7 @@ string Render::RenderInstance( const Render::Kit &kit, TreePtr<Instance> o,
         auto r = MakeTreeNode<Compound>();
         r->members = members;
         r->statements = remainder;
-        s += "\n" + RenderIntoProduction(kit, r, Syntax::Production::STATEMENT_LOW); // TODO force {} by using higher precedence?
+        s += "\n" + RenderIntoProduction(kit, r, Syntax::Production::STATEMENT_LOW); 
         
         // Surround functions with blank lines        
         return '\n' + s + '\n';
@@ -1026,21 +1044,8 @@ string Render::RenderDeclaration( const Render::Kit &kit, TreePtr<Declaration> d
     TRACE();
     string s;
 	(void)surround_prod;
-    if( TreePtr<Instance> o = DynamicTreePtrCast<Instance>(declaration) )
-    {
-        if( ShouldSplitInstance(kit, o) )
-        {
-            s += RenderInstanceProto( kit, o, false ) + ";\n";
-            // Split out the definition of the instance for rendering later at to level
-            deferred_instances.push(o);
-        }
-        else
-        {
-            // Otherwise, render everything directly using the default settings
-            s += RenderInstance( kit, o, false );
-        }
-    }
-    else if( TreePtr<Typedef> t = DynamicTreePtrCast< Typedef >(declaration) )
+
+    if( TreePtr<Typedef> t = DynamicTreePtrCast< Typedef >(declaration) )
     {
         Syntax::Production starting_declarator_prod = Syntax::Production::PURE_IDENTIFIER;
         auto id = RenderIntoProduction(kit, t->identifier, starting_declarator_prod);

@@ -40,7 +40,7 @@ Syntax::Production Declaration::GetMyProduction() const
 
 Syntax::Production Program::GetMyProduction() const
 {
-	return Production::TRANSLATION_UNIT;
+	return Production::PROGRAM;
 }
 
 //////////////////////////// Literal ///////////////////////////////

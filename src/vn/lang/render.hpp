@@ -31,7 +31,7 @@ private:
     UniquifyIdentifiers::IdentifierNameMap unique_ids;
 	string RenderIntoProduction( const Render::Kit &kit, TreePtr<Node> node, Syntax::Production prod );
 	string Dispatch( const Render::Kit &kit, TreePtr<Node> node, Syntax::Production surround_prod );
-	string RenderProgram( const Render::Kit &kit, TreePtr<CPPTree::Program> program ); 
+	string RenderProgram( const Render::Kit &kit, TreePtr<CPPTree::Program> program, Syntax::Production surround_prod ); 
     string RenderLiteral( const Render::Kit &kit, TreePtr<CPPTree::Literal> sp ); 
     string RenderPureIdentifier( const Render::Kit &kit, TreePtr<CPPTree::Identifier> id, Syntax::Production surround_prod );
     string ScopeResolvingPrefix( const Render::Kit &kit, TreePtr<CPPTree::Identifier> id, Syntax::Production surround_prod );
@@ -42,7 +42,7 @@ private:
                                     Syntax::Production object_prod, Syntax::Production surround_prod, bool constant=false );
     string RenderType( const Render::Kit &kit, TreePtr<CPPTree::Type> type, Syntax::Production surround_prod );
     string Sanitise( string s );
-    string RenderOperator( const Render::Kit &kit, TreePtr<CPPTree::Operator> op, Sequence<CPPTree::Expression> &operands );
+    string RenderOperator( const Render::Kit &kit, TreePtr<CPPTree::Operator> op );
     string RenderMapArgs( const Render::Kit &kit, TreePtr<CPPTree::Call> call );
     string RenderCall( const Render::Kit &kit, TreePtr<CPPTree::Call> call );
     string RenderSeqOperands( const Render::Kit &kit, Sequence<CPPTree::Expression> operands );
@@ -61,11 +61,9 @@ private:
                        Sequence<CPPTree::Statement> &inits, 
                        Sequence<CPPTree::Statement> &remainder );
 
-    string RenderInstanceProto( const Render::Kit &kit, TreePtr<CPPTree::Instance> o, 
-                                bool out_of_line );
+    string RenderInstanceProto( const Render::Kit &kit, TreePtr<CPPTree::Instance> o, Syntax::Production surround_prod );
 	bool IsDeclared( const Render::Kit &kit, TreePtr<CPPTree::Identifier> id );
-    string RenderInstance( const Render::Kit &kit, TreePtr<CPPTree::Instance> o,  
-                           bool out_of_line );
+    string RenderInstance( const Render::Kit &kit, TreePtr<CPPTree::Instance> o, Syntax::Production surround_prod );
     bool ShouldSplitInstance( const Render::Kit &kit, TreePtr<CPPTree::Instance> o );
     string RenderRecordProto( const Render::Kit &kit, TreePtr<CPPTree::Record> record );
 	string RenderPreProcDecl(const Render::Kit &kit, TreePtr<CPPTree::PreProcDecl> ppd );
