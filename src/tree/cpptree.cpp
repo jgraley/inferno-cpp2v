@@ -348,7 +348,7 @@ Syntax::Production SpecificTypeIdentifier::GetMyProduction() const
 
 Syntax::Production Instance::GetMyProduction() const
 { 
-	return Production::DECLARATION; 
+	return Production::PROTOTYPE; 
 }
 
 //////////////////////////// SpecificLabelIdentifier //////////////////////////////
@@ -563,14 +563,14 @@ Syntax::Production StatementExpression::GetMyProduction() const
 
 Syntax::Production Return::GetMyProduction() const
 { 
-	return Production::STATEMENT_TERM; 
+	return Production::STATEMENT; 
 }
 
 //////////////////////////// Goto ///////////////////////////////
 
 Syntax::Production Goto::GetMyProduction() const
 { 
-	return Production::STATEMENT_TERM; 
+	return Production::STATEMENT; 
 }
 
 //////////////////////////// If ///////////////////////////////
@@ -601,14 +601,14 @@ Syntax::Production SwitchTarget::GetMyProduction() const
 
 Syntax::Production Continue::GetMyProduction() const
 { 
-	return Production::STATEMENT_TERM; 
+	return Production::STATEMENT; 
 }
 
 //////////////////////////// Break ///////////////////////////////
 
 Syntax::Production Break::GetMyProduction() const
 { 
-	return Production::STATEMENT_TERM; 
+	return Production::STATEMENT; 
 }
 
 //////////////////////////// Nop ///////////////////////////////
@@ -629,6 +629,6 @@ Syntax::Production ExteriorCall::GetMyProduction() const
 
 Syntax::Production MacroCall::GetMyProduction() const
 { 
-	return Production::STATEMENT_TERM; 
+	return Production::STATEMENT; 
 }
 

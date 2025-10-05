@@ -174,6 +174,8 @@ string Render::Dispatch( const Render::Kit &kit, TreePtr<Node> node, Syntax::Pro
         return RenderType( kit, type, surround_prod );
     else if( auto expression = TreePtr<Expression>::DynamicCast(node) ) // Expression is a kind of Statement
         return RenderExpression( kit, expression, surround_prod );
+    else if( auto declaration = TreePtr<Declaration>::DynamicCast(node) )
+        return RenderDeclaration( kit, declaration, surround_prod );
     else if( auto statement = TreePtr<Statement>::DynamicCast(node) )
         return RenderStatement( kit, statement, surround_prod );
     else
@@ -853,7 +855,7 @@ string Render::RenderInstanceProto( const Render::Kit &kit,
         name += RenderIntoProduction(kit, o->identifier, starting_declarator_prod);
     }
 
-    s += RenderTypeAndDeclarator( kit, o->type, name, starting_declarator_prod, Syntax::Production::DECLARATION, constant );
+    s += RenderTypeAndDeclarator( kit, o->type, name, starting_declarator_prod, Syntax::Production::PROTOTYPE, constant );
 
     return s;
 } 
@@ -1019,11 +1021,11 @@ string Render::RenderPreProcDecl(const Render::Kit &kit, TreePtr<PreProcDecl> pp
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderDeclaration( const Render::Kit &kit, TreePtr<Declaration> declaration ) try
+string Render::RenderDeclaration( const Render::Kit &kit, TreePtr<Declaration> declaration, Syntax::Production surround_prod ) try
 {
     TRACE();
     string s;
-
+	(void)surround_prod;
     if( TreePtr<Instance> o = DynamicTreePtrCast<Instance>(declaration) )
     {
         if( ShouldSplitInstance(kit, o) )
@@ -1114,7 +1116,7 @@ string Render::RenderStatement( const Render::Kit &kit, TreePtr<Statement> state
         return ";\n"; // TODO nasty, should assert not NULL in all of these in fact
     //printf( "%s %d things\n", typeid(*statement).name(), statement->Itemise().size() );
     if( TreePtr<Declaration> d = DynamicTreePtrCast< Declaration >(statement) )
-        return RenderDeclaration( kit, d );
+        return RenderDeclaration( kit, d, surround_prod );
     else if( TreePtr<Compound> c = DynamicTreePtrCast< Compound >(statement) )
     {
         string s = "{ // comp\n";
@@ -1335,7 +1337,7 @@ string Render::RenderDeclScope( const Render::Kit &kit,
             
         if( init_access )
             s += MaybeRenderFieldAccess( kit, d, &init_access );        
-        s += RenderDeclaration( kit, d );
+        s += RenderDeclaration( kit, d, Syntax::Production::DECLARATION );
     }
     TRACE();
     return s;

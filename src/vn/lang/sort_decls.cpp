@@ -288,4 +288,4 @@ Sequence<Declaration> ReverseDecls( Sequence<Declaration> c )
 // TODO
 // RenderStatement calls -> RenderIntoProduction
 // Statements: infer the {} around funciton bodies by specifying INITIALISER?
- 
+// more passing through surround_prod in RenderStatement() and similar
