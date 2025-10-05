@@ -924,21 +924,21 @@ struct MakeRecord : IdValueMap, Expression
 
 /// Operator that operates on data types as parameters. 
 /** Where either is allowed we use the type one, since it's more concise. */
-struct TypeOperator : Operator
+struct TemplateExpression : Operator
 {
     NODE_FUNCTIONS
-    TreePtr<Type> operand; ///< This Type is an input operand 
+    TreePtr<Type> argument; ///< This Type is an input operand 
 };
 
 /// sizeof() a type
-struct SizeOf : TypeOperator 
+struct SizeOf : TemplateExpression 
 { 
 	NODE_FUNCTIONS_FINAL 
 	Production GetMyProduction() const override;
 }; 
 
 /// alignof() a type
-struct AlignOf : TypeOperator 
+struct AlignOf : TemplateExpression 
 { 
 	NODE_FUNCTIONS_FINAL
 	Production GetMyProduction() const override;	

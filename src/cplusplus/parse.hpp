@@ -1944,20 +1944,20 @@ private:
     ActOnSizeOfAlignOfExpr( clang::SourceLocation, bool isSizeof, bool isType,
             void *TyOrEx, const clang::SourceRange &)
     {
-        TreePtr<TypeOperator> p;
+        TreePtr<TemplateExpression> p;
         if( isSizeof )
             p = MakeTreeNode<SizeOf>();
         else
             p = MakeTreeNode<AlignOf>();
 
         if( isType )
-            p->operand = hold_type.FromRaw(TyOrEx);
+            p->argument = hold_type.FromRaw(TyOrEx);
         else
         {
             ASSERT(0)("typeof() only supported on types at the moment");
             // TODO This is wrong because we'll get 2 refs to the type, need to duplicate,
             // or maybe add an alternative node and convert in a S&R
-            p->operand = TreePtr<Type>::DynamicCast( TypeOf::instance( hold_expr.FromRaw(TyOrEx), all_decls ).GetTreePtr() );
+            p->argument = TreePtr<Type>::DynamicCast( TypeOf::instance( hold_expr.FromRaw(TyOrEx), all_decls ).GetTreePtr() );
         }
         return hold_expr.ToRaw( p );
     }

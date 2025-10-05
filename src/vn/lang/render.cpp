@@ -638,9 +638,9 @@ string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> ex
         return s + "})";
     }
     else if( auto pot = DynamicTreePtrCast< SizeOf >(expression) )
-        return "sizeof(" + RenderIntoProduction( kit, pot->operand, Syntax::Production::BOOT_EXPR ) + ")";               
+        return "sizeof(" + RenderIntoProduction( kit, pot->argument, Syntax::Production::BOOT_EXPR ) + ")";               
     else if( auto pot = DynamicTreePtrCast< AlignOf >(expression) )
-        return "alignof(" + RenderIntoProduction( kit, pot->operand, Syntax::Production::BOOT_EXPR ) + ")";    
+        return "alignof(" + RenderIntoProduction( kit, pot->argument, Syntax::Production::BOOT_EXPR ) + ")";    
     else if( auto c = DynamicTreePtrCast< Call >(expression) )
         return RenderCall( kit, c );
     else if( auto sc = DynamicTreePtrCast< ExteriorCall >(expression) )
