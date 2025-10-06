@@ -348,6 +348,10 @@ DEFAULT_CATCH_CLAUSE
 string Render::RenderIntegralTypeAndDeclarator( const Render::Kit &kit, TreePtr<Integral> type, string declarator ) try
 {
     (void)kit;
+    // This function only exists to provide bitfields in member declarations that use declarators.
+    // RenderIntegral() can provide the pure types directly, without bitfields.
+    ASSERT(!declarator.empty())("I don't think bitfields can be used in anonymous types");
+
     int64_t width;
     auto ic = DynamicTreePtrCast<SpecificInteger>( type->width );
     ASSERT(ic)("width must be integer");
@@ -355,7 +359,9 @@ string Render::RenderIntegralTypeAndDeclarator( const Render::Kit &kit, TreePtr<
 
     TRACE("width %" PRId64 "\n", width);
 
-    string s = RenderIntegral( kit, type, Syntax::Production::SPACE_SEP_DECLARATION );
+    string s = RenderIntoProduction( kit, type, Syntax::Production::SPACE_SEP_DECLARATION );
+
+    s += " " + declarator;
 
     // Fix the width
     bool bitfield = !( width == TypeDb::char_bits ||
@@ -363,8 +369,6 @@ string Render::RenderIntegralTypeAndDeclarator( const Render::Kit &kit, TreePtr<
                        width == TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified] ||
                        width == TypeDb::integral_bits[clang::DeclSpec::TSW_long] ||
                        width == TypeDb::integral_bits[clang::DeclSpec::TSW_longlong] );
-
-    s += " " + declarator;
 
     if( bitfield )
     {
