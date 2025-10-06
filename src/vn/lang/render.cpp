@@ -170,10 +170,16 @@ string Render::Dispatch( const Render::Kit &kit, TreePtr<Node> node, Syntax::Pro
         return RenderProgram( kit, program, surround_prod );
     else if( auto identifier = TreePtr<Identifier>::DynamicCast(node) ) // Identifier can be a kind of type or expression
         return RenderIdentifier( kit, identifier, surround_prod );
+    else if( auto floating = TreePtr<Floating>::DynamicCast(node) )
+        return RenderFloating( kit, floating, surround_prod );
+    else if( auto integral = TreePtr<Integral>::DynamicCast(node) )
+        return RenderIntegral( kit, integral, surround_prod );
     else if( auto type = TreePtr<Type>::DynamicCast(node) )  // Type is a kind of Operator
         return RenderType( kit, type, surround_prod );
+    else if( auto literal = DynamicTreePtrCast< Literal >(node) )
+        return RenderLiteral( kit, literal, surround_prod );
     else if( auto op = TreePtr<Operator>::DynamicCast(node) ) // Operator is a kind of Expression
-        return RenderOperator( kit, op );
+        return RenderOperator( kit, op, surround_prod );
     else if( auto expression = TreePtr<Expression>::DynamicCast(node) ) // Expression is a kind of Statement
         return RenderExpression( kit, expression, surround_prod );
     else if( auto instance = TreePtr<Instance>::DynamicCast(node) )    // Instance is a kind of Statement and Declaration
@@ -208,8 +214,9 @@ string Render::RenderProgram( const Render::Kit &kit, TreePtr<CPPTree::Program> 
 }
 
 
-string Render::RenderLiteral( const Render::Kit &kit, TreePtr<Literal> sp ) try
+string Render::RenderLiteral( const Render::Kit &kit, TreePtr<Literal> sp, Syntax::Production surround_prod ) try
 {
+	(void)surround_prod;
     (void)kit;
     return Sanitise( sp->GetToken() );
 }
@@ -294,8 +301,9 @@ string Render::RenderIdentifier( const Render::Kit &kit, TreePtr<Identifier> id,
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderIntegralType( const Render::Kit &kit, TreePtr<Integral> type, string object ) try
+string Render::RenderIntegral( const Render::Kit &kit, TreePtr<Integral> type, Syntax::Production surround_prod ) try
 {
+	(void)surround_prod;
     (void)kit;
     bool ds;
     int64_t width;
@@ -319,25 +327,44 @@ string Render::RenderIntegralType( const Render::Kit &kit, TreePtr<Integral> typ
         s = "unsigned ";
 
     // Fix the width
-    bool bitfield = false;
-    if( width == TypeDb::char_bits )
+    if( width <= TypeDb::char_bits )
         s += "char";
-    else if( width == TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified] )
-        s += "int";
-    else if( width == TypeDb::integral_bits[clang::DeclSpec::TSW_short] )
+    else if( width <= TypeDb::integral_bits[clang::DeclSpec::TSW_short] )
         s += "short";
-    else if( width == TypeDb::integral_bits[clang::DeclSpec::TSW_long] )
-        s += "long";
-    else if( width == TypeDb::integral_bits[clang::DeclSpec::TSW_longlong] )
-        s += "long long";
-    else   
-    {
-        // unmatched defaults to int for bitfields
+    else if( width <= TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified] )
         s += "int";
-        bitfield = true;
-    }
+    else if( width <= TypeDb::integral_bits[clang::DeclSpec::TSW_long] )
+        s += "long";
+    else if( width <= TypeDb::integral_bits[clang::DeclSpec::TSW_longlong] )
+        s += "long long";
+    else
+		ASSERTFAIL();
 
-    s += " " + object;
+    return s;
+}
+DEFAULT_CATCH_CLAUSE
+
+
+string Render::RenderIntegralTypeAndDeclarator( const Render::Kit &kit, TreePtr<Integral> type, string declarator ) try
+{
+    (void)kit;
+    int64_t width;
+    auto ic = DynamicTreePtrCast<SpecificInteger>( type->width );
+    ASSERT(ic)("width must be integer");
+    width = ic->GetInt64();
+
+    TRACE("width %" PRId64 "\n", width);
+
+    string s = RenderIntegral( kit, type, Syntax::Production::SPACE_SEP_DECLARATION );
+
+    // Fix the width
+    bool bitfield = !( width == TypeDb::char_bits ||
+                       width == TypeDb::integral_bits[clang::DeclSpec::TSW_short] ||
+                       width == TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified] ||
+                       width == TypeDb::integral_bits[clang::DeclSpec::TSW_long] ||
+                       width == TypeDb::integral_bits[clang::DeclSpec::TSW_longlong] );
+
+    s += " " + declarator;
 
     if( bitfield )
     {
@@ -351,8 +378,9 @@ string Render::RenderIntegralType( const Render::Kit &kit, TreePtr<Integral> typ
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderFloatingType( const Render::Kit &kit, TreePtr<Floating> type ) try
+string Render::RenderFloating( const Render::Kit &kit, TreePtr<Floating> type, Syntax::Production surround_prod ) try
 {
+	(void)surround_prod;
     (void)kit;
     string s;
     TreePtr<SpecificFloatSemantics> sem = DynamicTreePtrCast<SpecificFloatSemantics>(type->semantics);
@@ -389,18 +417,14 @@ string Render::RenderTypeAndDeclarator( const Render::Kit &kit, TreePtr<Type> ty
     string sdeclarator;
     if( !pure_type )
         sdeclarator = " " + declarator;
+    Syntax::Production type_prod = pure_type ? surround_prod  
+                                             : Syntax::Production::SPACE_SEP_DECLARATION;
                 
     string const_str = constant?"const ":"";
 
     TRACE();
     if( TreePtr<Integral> i = DynamicTreePtrCast< Integral >(type) )
-        return const_str + RenderIntegralType( kit, i, declarator );
-    if( TreePtr<Floating> f = DynamicTreePtrCast< Floating >(type) )
-        return const_str + RenderFloatingType( kit, f ) + sdeclarator;
-    else if( DynamicTreePtrCast< Void >(type) )
-        return const_str + "void" + sdeclarator;
-    else if( DynamicTreePtrCast< Boolean >(type) )
-        return const_str + "bool" + sdeclarator;
+        return const_str + RenderIntegralTypeAndDeclarator( kit, i, declarator );        
     else if( TreePtr<Constructor> c = DynamicTreePtrCast< Constructor >(type) )
         return declarator + "(" + RenderParams(kit, c) + ")" + const_str;
     else if( TreePtr<Destructor> f = DynamicTreePtrCast< Destructor >(type) )
@@ -422,21 +446,24 @@ string Render::RenderTypeAndDeclarator( const Render::Kit &kit, TreePtr<Type> ty
                            surround_prod,
                            constant );
     else if( TreePtr<SpecificTypeIdentifier> ti = DynamicTreePtrCast< SpecificTypeIdentifier >(type) )
-    {
-        Syntax::Production prod = pure_type ? Syntax::Production::SCOPE_RESOLVE  // TODO take a surrounding_prod and use here
-                                            : Syntax::Production::SPACE_SEP_DECLARATION;
-        return const_str + RenderIntoProduction(kit, ti, prod) + sdeclarator;
-    }
+        return const_str + RenderIntoProduction(kit, ti, type_prod) + sdeclarator;
     else if( dynamic_pointer_cast<Labeley>(type) )
         return const_str + "void *" + declarator;
-    else
-        return ERROR_UNSUPPORTED(type);
+    else // Assume the type renders expressionally
+        return const_str + RenderIntoProduction( kit, type, type_prod ) + sdeclarator;
 }
 DEFAULT_CATCH_CLAUSE
 
 
 string Render::RenderType( const Render::Kit &kit, TreePtr<CPPTree::Type> type, Syntax::Production surround_prod )
 {
+	if( DynamicTreePtrCast< Void >(type) )
+        return "void";
+    else if( DynamicTreePtrCast< Boolean >(type) )
+        return "bool";
+    	
+    // If we got here, we should not be looking at a type that renders expressionally
+	ASSERT( Syntax::GetPrecedence(type->GetMyProduction()) < Syntax::GetPrecedence(Syntax::Production::BOOT_EXPR) )(type);
     // Production ANONYMOUS relates to the fact that we've provided an empty string for the initial declarator.
     return RenderTypeAndDeclarator( kit, type, "", Syntax::Production::ANONYMOUS, surround_prod, false ); 
 }
@@ -459,8 +486,9 @@ string Render::Sanitise( string s ) try
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderOperator( const Render::Kit &kit, TreePtr<Operator> op ) try
+string Render::RenderOperator( const Render::Kit &kit, TreePtr<Operator> op, Syntax::Production surround_prod ) try
 {
+    (void)surround_prod;
     ASSERT(op);
     
     string s;
@@ -679,10 +707,6 @@ string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> ex
         return RenderCall( kit, c );
     else if( auto sc = DynamicTreePtrCast< ExteriorCall >(expression) )
         return RenderExteriorCall( kit, sc );
-    else if( auto l = DynamicTreePtrCast< Literal >(expression) )
-        return RenderLiteral( kit, l );
-   else if( auto op = TreePtr<Operator>::DynamicCast(expression) ) // Operator is a kind of Expression
-        return RenderOperator( kit, op );
     else
         return ERROR_UNSUPPORTED(expression);
 }
