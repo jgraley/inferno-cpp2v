@@ -1384,6 +1384,7 @@ string Render::RenderDeclScope( const Render::Kit &kit,
         if( init_access )
             s += MaybeRenderFieldAccess( kit, r, &init_access );
         s += RenderRecordProto( kit, r ) + ";\n";   
+        //s += RenderIntoProduction( kit, r, Syntax::Production::PROTOTYPE ) + ";\n"; 
     }
     
     // Emit the actual definitions, sorted for dependencies
