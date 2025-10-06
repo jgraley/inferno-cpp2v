@@ -895,21 +895,23 @@ string Render::RenderInstanceProto( const Render::Kit &kit,
     if( surround_prod != Syntax::Production::TRANSLATION_UNIT_CPP )
         s += RenderStorage(kit, o);
 
-    string name = ScopeResolvingPrefix(kit, o->identifier, Syntax::Production::SCOPE_RESOLVE);
-    Syntax::Production starting_declarator_prod = Syntax::Production::PURE_IDENTIFIER; // we already rendered the scope prefix into name
+    string name;     
+    Syntax::Production starting_declarator_prod; 
     TreePtr<Constructor> con = DynamicTreePtrCast<Constructor>(o->type);
     TreePtr<Destructor> de = DynamicTreePtrCast<Destructor>(o->type);
     if( con || de )
     {
+		name = ScopeResolvingPrefix(kit, o->identifier, Syntax::Production::SCOPE_RESOLVE);
         // TODO use GetRecordDeclaration( Typeof( o->identifier ) ) and leave scopes out of it
         TreePtr<Record> rec = DynamicTreePtrCast<Record>( TryGetScope( o->identifier ) );
         ASSERT( rec );        
         name += (de ? "~" : ""); 
-        starting_declarator_prod = Syntax::Production::PURE_IDENTIFIER;
+        starting_declarator_prod = Syntax::Production::PURE_IDENTIFIER; // we already rendered the scope prefix into name
         name += RenderIntoProduction(kit, rec->identifier, starting_declarator_prod);
     }
     else
     {
+        starting_declarator_prod = Syntax::Production::SCOPE_RESOLVE;
         name += RenderIntoProduction(kit, o->identifier, starting_declarator_prod);
     }
 
