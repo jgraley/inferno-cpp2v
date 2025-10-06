@@ -62,7 +62,7 @@ private:
                        Sequence<CPPTree::Statement> &inits, 
                        Sequence<CPPTree::Statement> &remainder );
 
-    string RenderInstanceProto( const Render::Kit &kit, TreePtr<CPPTree::Instance> o, Syntax::Production surround_prod );
+    string RenderInstanceProto( const Render::Kit &kit, TreePtr<CPPTree::Instance> o );
 	bool IsDeclared( const Render::Kit &kit, TreePtr<CPPTree::Identifier> id );
     string RenderInstance( const Render::Kit &kit, TreePtr<CPPTree::Instance> o, Syntax::Production surround_prod );
     bool ShouldSplitInstance( const Render::Kit &kit, TreePtr<CPPTree::Instance> o );

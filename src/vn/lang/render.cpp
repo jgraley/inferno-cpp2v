@@ -864,8 +864,7 @@ void Render::ExtractInits( const Render::Kit &kit,
 
 
 string Render::RenderInstanceProto( const Render::Kit &kit, 
-                                    TreePtr<Instance> o, 
-                                    Syntax::Production surround_prod ) try
+                                    TreePtr<Instance> o ) try
 {
     string s;
     bool constant=false;
@@ -891,10 +890,7 @@ string Render::RenderInstanceProto( const Render::Kit &kit,
     if( TreePtr<Field> f = DynamicTreePtrCast<Field>(o) )
         if( DynamicTreePtrCast<Const>(f->constancy) )
             constant = true;
-        
-    if( surround_prod != Syntax::Production::TRANSLATION_UNIT_CPP )
-        s += RenderStorage(kit, o);
-
+            
     string name;     
     Syntax::Production starting_declarator_prod; 
     TreePtr<Constructor> con = DynamicTreePtrCast<Constructor>(o->type);
@@ -938,7 +934,12 @@ bool Render::IsDeclared( const Render::Kit &kit, TreePtr<Identifier> id )
 
 string Render::RenderInstance( const Render::Kit &kit, TreePtr<Instance> o, Syntax::Production surround_prod ) try
 {
-    string s = RenderInstanceProto( kit, o, surround_prod );
+    string s;
+    
+    if( surround_prod != Syntax::Production::TRANSLATION_UNIT_CPP )
+		s += RenderStorage(kit, o);
+    
+    s += RenderInstanceProto( kit, o );
 
 	if( surround_prod != Syntax::Production::TRANSLATION_UNIT_CPP )
 	{
@@ -1108,6 +1109,9 @@ string Render::RenderDeclaration( const Render::Kit &kit, TreePtr<Declaration> d
     {
         // Prototype of the record
         s += RenderRecordProto( kit, r );
+        
+        if( surround_prod == Syntax::Production::PROTOTYPE )
+			return s;
 
         // Base classes
         if( TreePtr<InheritanceRecord> ir = DynamicTreePtrCast< InheritanceRecord >(declaration) )
