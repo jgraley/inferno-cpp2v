@@ -194,6 +194,8 @@ string Render::Dispatch( const Render::Kit &kit, TreePtr<Node> node, Syntax::Pro
         return RenderExpression( kit, expression, surround_prod );
     else if( auto instance = TreePtr<Instance>::DynamicCast(node) )    // Instance is a kind of Statement and Declaration
         return RenderInstance( kit, instance, surround_prod ); 
+    else if( auto ppd = TreePtr<PreProcDecl>::DynamicCast(node) )
+        return RenderPreProcDecl(kit, ppd, surround_prod); 
     else if( auto declaration = TreePtr<Declaration>::DynamicCast(node) )
         return RenderDeclaration( kit, declaration, surround_prod );
     else if( auto statement = TreePtr<Statement>::DynamicCast(node) )
@@ -272,7 +274,7 @@ string Render::ScopeResolvingPrefix( const Render::Kit &kit, TreePtr<Identifier>
     else if( scope == scope_stack.top() )
         return ""; // local scope
     else if( DynamicTreePtrCast<Program>( scope ) )
-        return "::";
+        return "";
     else if( auto e = DynamicTreePtrCast<Enum>( scope ) ) // <- for enum
         return ScopeResolvingPrefix( kit, e->identifier, surround_prod );    // omit scope for the enum itself
     else if( auto r = DynamicTreePtrCast<Record>( scope ) ) // <- for class, struct, union
@@ -866,7 +868,6 @@ string Render::RenderInstanceProto( const Render::Kit &kit,
                                     Syntax::Production surround_prod ) try
 {
     string s;
-    string name;
     bool constant=false;
 
     ASSERT(o->type);
@@ -890,12 +891,11 @@ string Render::RenderInstanceProto( const Render::Kit &kit,
     if( TreePtr<Field> f = DynamicTreePtrCast<Field>(o) )
         if( DynamicTreePtrCast<Const>(f->constancy) )
             constant = true;
-
-    if( surround_prod == Syntax::Production::TRANSLATION_UNIT_CPP )
-        name += ScopeResolvingPrefix(kit, o->identifier, Syntax::Production::SCOPE_RESOLVE);
-    else // in-line
+        
+    if( surround_prod != Syntax::Production::TRANSLATION_UNIT_CPP )
         s += RenderStorage(kit, o);
 
+    string name = ScopeResolvingPrefix(kit, o->identifier, Syntax::Production::SCOPE_RESOLVE);
     Syntax::Production starting_declarator_prod = Syntax::Production::PURE_IDENTIFIER; // we already rendered the scope prefix into name
     TreePtr<Constructor> con = DynamicTreePtrCast<Constructor>(o->type);
     TreePtr<Destructor> de = DynamicTreePtrCast<Destructor>(o->type);
@@ -1076,8 +1076,9 @@ string Render::RenderRecordProto( const Render::Kit &kit, TreePtr<Record> record
 }
 
 
-string Render::RenderPreProcDecl(const Render::Kit &kit, TreePtr<PreProcDecl> ppd ) try
+string Render::RenderPreProcDecl(const Render::Kit &kit, TreePtr<PreProcDecl> ppd, Syntax::Production surround_prod ) try
 {
+	(void)surround_prod;
     (void)kit;
     if( auto si = TreePtr<SystemInclude>::DynamicCast(ppd) )
         return "#include <" + si->filename->GetString() + ">";
@@ -1152,8 +1153,6 @@ string Render::RenderDeclaration( const Render::Kit &kit, TreePtr<Declaration> d
     }
     else if( TreePtr<Label> l = DynamicTreePtrCast<Label>(declaration) )
         return RenderIntoProduction(kit, l->identifier, Syntax::Production::PURE_IDENTIFIER) + ":;\n"; // need ; after a label in case last in compound block
-    else if( auto ppd = TreePtr<PreProcDecl>::DynamicCast(declaration) )
-        return RenderPreProcDecl(kit, ppd) + "\n"; 
     else
         s += ERROR_UNSUPPORTED(declaration);
 
@@ -1365,7 +1364,7 @@ string Render::RenderDeclScope( const Render::Kit &kit,
     {       
         if( auto ppd = DynamicTreePtrCast<PreProcDecl>(pd) )
         {
-            s += RenderPreProcDecl( kit, ppd ) + "\n";
+            s += RenderIntoProduction( kit, ppd, Syntax::Production::DECLARATION ) + "\n";
             continue;
         }
         
