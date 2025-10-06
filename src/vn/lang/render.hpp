@@ -44,19 +44,19 @@ private:
     string RenderType( const Render::Kit &kit, TreePtr<CPPTree::Type> type, Syntax::Production surround_prod );
     string Sanitise( string s );
     string RenderOperator( const Render::Kit &kit, TreePtr<CPPTree::Operator> op, Syntax::Production surround_prod );
-    string RenderMapArgs( const Render::Kit &kit, TreePtr<CPPTree::Call> call );
-    string RenderCall( const Render::Kit &kit, TreePtr<CPPTree::Call> call );
-    string RenderSeqOperands( const Render::Kit &kit, Sequence<CPPTree::Expression> operands );
-    string RenderExteriorCall( const Render::Kit &kit, TreePtr<CPPTree::ExteriorCall> call );
-    string RenderMacroCall( const Render::Kit &kit, TreePtr<CPPTree::MacroCall> call );
+    string RenderCallArgs( const Render::Kit &kit, TreePtr<CPPTree::Call> call );
+    string RenderCall( const Render::Kit &kit, TreePtr<CPPTree::Call> call, Syntax::Production surround_prod );
+    string RenderExprSeq( const Render::Kit &kit, Sequence<CPPTree::Expression> seq );
+    string RenderExteriorCall( const Render::Kit &kit, TreePtr<CPPTree::ExteriorCall> call, Syntax::Production surround_prod );
+    string RenderMacroStatement( const Render::Kit &kit, TreePtr<CPPTree::MacroStatement> ms, Syntax::Production surround_prod );
     string RenderExpression( const Render::Kit &kit, TreePtr<CPPTree::Initialiser> expression, Syntax::Production surround_prod );
-    string RenderMakeRecord( const Render::Kit &kit, TreePtr<CPPTree::MakeRecord> make_rec );
+    string RenderMakeRecord( const Render::Kit &kit, TreePtr<CPPTree::MakeRecord> make_rec, Syntax::Production surround_prod );
     string RenderMapInOrder( const Render::Kit &kit, 
                              TreePtr<CPPTree::IdValueMap> ro,
                              Sequence<CPPTree::Declaration> key_sequence );
 	Sequence<CPPTree::Expression> SortMapOperands( TreePtr<CPPTree::IdValueMap> ro,
                                                    Sequence<CPPTree::Declaration> key_sequence );  
-    string RenderAccess( const Render::Kit &kit, TreePtr<CPPTree::AccessSpec> current_access );
+    string RenderAccessSpec( const Render::Kit &kit, TreePtr<CPPTree::AccessSpec> access, Syntax::Production surround_prod );
     string RenderStorage( const Render::Kit &kit, TreePtr<CPPTree::Instance> st );
     void ExtractInits( const Render::Kit &kit, Sequence<CPPTree::Statement> &body, 
                        Sequence<CPPTree::Statement> &inits, 

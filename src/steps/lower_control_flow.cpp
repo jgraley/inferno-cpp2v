@@ -268,7 +268,7 @@ WhileToDo::WhileToDo()
 
     r_if->condition = cond;
     r_if->body = r_do;
-    r_if->else_body = r_nop;
+    r_if->body_else = r_nop;
     r_do->condition = cond;
     r_do->body = body;
     
@@ -287,7 +287,7 @@ IfToIfGoto::IfToIfGoto()
     auto l_r_if = MakePatternNode<If>();
     auto r_if = MakePatternNode<If>();
     auto body = MakePatternNode<Statement>();
-    auto else_body = MakePatternNode<Statement>();
+    auto body_else = MakePatternNode<Statement>();
     auto cond = MakePatternNode<Expression>();
     auto l_r_not = MakePatternNode< Negation<Statement> >();
     auto l_r_goto = MakePatternNode<Goto>();
@@ -305,18 +305,18 @@ IfToIfGoto::IfToIfGoto()
     s_and->conjuncts = (s_if, l_r_not);
     s_if->condition = cond;
     s_if->body = body;
-    s_if->else_body = else_body;
+    s_if->body_else = body_else;
     
     // exclude if(x) goto y;
     l_r_not->negand = l_r_if;
     l_r_if->body = l_r_goto;
-    l_r_if->else_body = l_r_nop;
+    l_r_if->body_else = l_r_nop;
     
-    r_comp->statements = (r_if, body, r_goto_else, r_label1, else_body, r_label2);
+    r_comp->statements = (r_if, body, r_goto_else, r_label1, body_else, r_label2);
     r_if->condition = r_not;
     r_not->operands = (cond);
     r_if->body = r_goto;
-    r_if->else_body = r_nop;
+    r_if->body_else = r_nop;
     r_goto->destination = r_labelid1;
     r_goto_else->destination = r_labelid2;
     r_label1->identifier = r_labelid1;
@@ -393,7 +393,7 @@ SwitchToIfGoto::SwitchToIfGoto()
     l2_r_body->statements = (l2_r_if, l2_pre, l2_r_label, l2_post);
     l2_r_if->condition = l2_r_equal;
     l2_r_if->body = l2_r_goto;
-    l2_r_if->else_body = l2_r_nop;
+    l2_r_if->body_else = l2_r_nop;
     l2_r_equal->operands = (id, l2_exp);
     l2_r_goto->destination = l2_r_labelid;
     l2_r_label->identifier = l2_r_labelid;
@@ -427,7 +427,7 @@ SwitchToIfGoto::SwitchToIfGoto()
     l3_r_body->statements = (l3_r_if, l3_pre, l3_r_label, l3_post);
     l3_r_if->condition = l3_r_and;
     l3_r_if->body = l3_r_goto;
-    l3_r_if->else_body = l3_r_nop;
+    l3_r_if->body_else = l3_r_nop;
     l3_r_and->operands = (l3_r_ge, l3_r_le);
     l3_r_ge->operands = (id, l3_exp_lo);
     l3_r_le->operands = (id, l3_exp_hi);
@@ -494,7 +494,7 @@ DoToIfGoto::DoToIfGoto()
     r_cont_label->identifier = l_r_cont_labelid;
     r_if->condition = cond;
     r_if->body = r_goto;
-    r_if->else_body = r_nop;
+    r_if->body_else = r_nop;
     r_goto->destination = r_labelid;
         
     Configure( SEARCH_REPLACE, MakeCheckUncombable(s_do), r_comp );
@@ -557,7 +557,7 @@ LogicalAndToIf::LogicalAndToIf()
     r_assign1->operands = (r_temp_id, op1);
     r_if->condition = r_temp_id;
     r_if->body = r_assign2;
-    r_if->else_body = MakePatternNode<Nop>();
+    r_if->body_else = MakePatternNode<Nop>();
     r_assign2->operands = (r_temp_id, op2);    
     
     Configure( SEARCH_REPLACE, MakeCheckUncombable( s_and ), r_comp );
@@ -587,7 +587,7 @@ LogicalOrToIf::LogicalOrToIf()
     r_assign1->operands = (r_temp_id, op1);
     r_if->condition = r_temp_id;
     r_if->body = MakePatternNode<Nop>();
-    r_if->else_body = r_assign2;
+    r_if->body_else = r_assign2;
     r_assign2->operands = (r_temp_id, op2);    
     
     Configure( SEARCH_REPLACE, MakeCheckUncombable(s_or), r_comp );
@@ -620,7 +620,7 @@ ConditionalOperatorToIf::ConditionalOperatorToIf()
     r_comp->statements = (r_if, r_temp_id);
     r_if->condition = op1;
     r_if->body = r_assignt;
-    r_if->else_body = r_assignf;
+    r_if->body_else = r_assignf;
     r_assignt->operands = (r_temp_id, op2);    
     r_assignf->operands = (r_temp_id, op3);    
     

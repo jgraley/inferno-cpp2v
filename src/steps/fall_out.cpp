@@ -508,7 +508,7 @@ ApplyCombGotoPolicy::ApplyCombGotoPolicy()
     
     r_if->condition = r_equal;
     r_if->body = r_body_comp;
-    r_if->else_body = MakePatternNode<Nop>();
+    r_if->body_else = MakePatternNode<Nop>();
     r_equal->operands = (state_var_id, state_id);
     //r_body_comp->members = ();
     r_body_comp->statements = body;
@@ -561,7 +561,7 @@ ApplyYieldGotoPolicy::ApplyYieldGotoPolicy()
         
     r_if->condition = r_equal;
     r_if->body = r_body_comp;
-    r_if->else_body = MakePatternNode<Nop>();
+    r_if->body_else = MakePatternNode<Nop>();
     r_equal->operands = (state_var_id, state_id);
     //r_body_comp->members = ();
     r_body_comp->statements = (body1, wait, body2, goto2);
@@ -607,14 +607,14 @@ ApplyBottomPolicy::ApplyBottomPolicy()
     
     r_if->condition = r_equal;
     r_if->body = r_body_comp;
-    r_if->else_body = MakePatternNode<Nop>();
+    r_if->body_else = MakePatternNode<Nop>();
     r_equal->operands = (state_var_id, state_id);
     //r_body_comp->members = ();
     r_body_comp->statements = body;
     // TODO: with the condition, superloop is exiting before the last state block has run
     r_if2->condition = r_not_equal;
     r_if2->body = goto1;
-    r_if2->else_body = MakePatternNode<Nop>();
+    r_if2->body_else = MakePatternNode<Nop>();
     r_not_equal->operands = (state_var_id, state_id);    
     
     Configure( SEARCH_REPLACE, s_comp, r_comp );
@@ -692,7 +692,7 @@ ApplyTopPolicy::ApplyTopPolicy()
     r_if->body = r_body_comp;
     //r_body_comp->members = ();
     r_body_comp->statements = (body1, wait, body2, gotoo);
-    r_if->else_body = MakePatternNode<Nop>();
+    r_if->body_else = MakePatternNode<Nop>();
     
     Configure( SEARCH_REPLACE, s_all, r_comp );
 }
@@ -750,7 +750,7 @@ DetectSuperLoop::DetectSuperLoop( bool is_conditional_goto )
     sx_not->negand = MakePatternNode<Label>(); // so s_label is the only one - all gotos must go to it.
     s_ifgoto->condition = cond;
     s_ifgoto->body = s_goto;
-    s_ifgoto->else_body = MakePatternNode<Nop>();
+    s_ifgoto->body_else = MakePatternNode<Nop>();
     
     over->overlay = r_comp;
     r_comp->members = (decls);

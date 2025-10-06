@@ -112,7 +112,7 @@ NormaliseConditionalGotos::NormaliseConditionalGotos()
     sx_not->negand = sx_comp;    
     iif->condition = cond;
     iif->body = then_goto;
-    iif->else_body = MakePatternNode<Nop>(); 
+    iif->body_else = MakePatternNode<Nop>(); 
     s_comp->members = ( decls );    
     s_comp->statements = ( pre, iif, post );    
     sx_comp->members = ( decls );    
@@ -145,7 +145,7 @@ CompactGotos::CompactGotos()
     s_else_goto->destination = MakePatternNode<Expression>();
     s_if->condition = cond;
     s_if->body = s_then_goto;
-    s_if->else_body = MakePatternNode<Nop>(); // standed conditional branch has no else clause - our "else" is the next statement
+    s_if->body_else = MakePatternNode<Nop>(); // standed conditional branch has no else clause - our "else" is the next statement
     s_comp->members = ( decls );    
     s_comp->statements = ( pre, s_if, s_else_goto, post );    
 
@@ -601,7 +601,7 @@ AddInferredYield::AddInferredYield()
     r_if->condition = r_not;
     r_not->operands = (flag_id);
     r_if->body = r_yield;
-    r_if->else_body = MakePatternNode<Nop>();
+    r_if->body_else = MakePatternNode<Nop>();
     
     Configure( SEARCH_REPLACE, fn );            
 }
@@ -649,7 +649,7 @@ MoveInitIntoSuperLoop::MoveInitIntoSuperLoop()
     r_if->body = r_if_comp;
 //    r_if_comp->members = ();
     r_if_comp->statements = (first_init, inits);//, MakePatternNode<WaitDelta>());
-    r_if->else_body = MakePatternNode<Nop>();
+    r_if->body_else = MakePatternNode<Nop>();
     
     Configure( SEARCH_REPLACE, fn );            
 }

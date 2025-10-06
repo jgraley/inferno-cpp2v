@@ -170,6 +170,8 @@ string Render::Dispatch( const Render::Kit &kit, TreePtr<Node> node, Syntax::Pro
         return RenderProgram( kit, program, surround_prod );
     else if( auto identifier = TreePtr<Identifier>::DynamicCast(node) ) // Identifier can be a kind of type or expression
         return RenderIdentifier( kit, identifier, surround_prod );
+    else if( auto access = TreePtr<AccessSpec>::DynamicCast(node) ) // Identifier can be a kind of type or expression
+        return RenderAccessSpec( kit, access, surround_prod );
     else if( auto floating = TreePtr<Floating>::DynamicCast(node) )
         return RenderFloating( kit, floating, surround_prod );
     else if( auto integral = TreePtr<Integral>::DynamicCast(node) )
@@ -178,6 +180,14 @@ string Render::Dispatch( const Render::Kit &kit, TreePtr<Node> node, Syntax::Pro
         return RenderType( kit, type, surround_prod );
     else if( auto literal = DynamicTreePtrCast< Literal >(node) )
         return RenderLiteral( kit, literal, surround_prod );
+    else if( auto make_rec = TreePtr<MakeRecord>::DynamicCast(node) )
+        return RenderMakeRecord( kit, make_rec, surround_prod );
+    else if( auto call = TreePtr<Call>::DynamicCast(node) )
+        return RenderCall( kit, call, surround_prod );
+    else if( auto ext_call = TreePtr<ExteriorCall>::DynamicCast(node) )
+        return RenderExteriorCall( kit, ext_call, surround_prod );
+    else if( auto macro_stmt = TreePtr<MacroStatement>::DynamicCast(node) )
+        return RenderMacroStatement( kit, macro_stmt, surround_prod );
     else if( auto op = TreePtr<Operator>::DynamicCast(node) ) // Operator is a kind of Expression
         return RenderOperator( kit, op, surround_prod );
     else if( auto expression = TreePtr<Expression>::DynamicCast(node) ) // Expression is a kind of Statement
@@ -191,7 +201,6 @@ string Render::Dispatch( const Render::Kit &kit, TreePtr<Node> node, Syntax::Pro
     else
         return ERROR_UNSUPPORTED( node );       
 }
-
 
 string Render::RenderProgram( const Render::Kit &kit, TreePtr<CPPTree::Program> program, Syntax::Production surround_prod )
 {
@@ -513,8 +522,6 @@ string Render::RenderOperator( const Render::Kit &kit, TreePtr<Operator> op, Syn
     else if( auto c = DynamicTreePtrCast< Cast >(op) )
         return "(" + RenderIntoProduction( kit, c->type, Syntax::Production::BOOT_EXPR ) + ")" +
                RenderIntoProduction( kit, c->operand, Syntax::Production::PREFIX );
-    else if( auto ro = DynamicTreePtrCast< MakeRecord >(op) )
-        return RenderMakeRecord( kit, ro );
     else if( auto condo = DynamicTreePtrCast< ConditionalOperator >(op) )
     {
         return RenderIntoProduction( kit, condo->condition, Syntax::BoostPrecedence(Syntax::Production::CONDITIONAL) ) + 
@@ -602,7 +609,7 @@ string Render::RenderOperator( const Render::Kit &kit, TreePtr<Operator> op, Syn
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderMapArgs( const Render::Kit &kit, TreePtr<Call> call ) try
+string Render::RenderCallArgs( const Render::Kit &kit, TreePtr<Call> call ) try
 {   
     // If CallableParams, generate some arguments, resolving the order using the original function type
     TreePtr<Node> ctype = TypeOf::instance.Get(kit, call->callee).GetTreePtr();
@@ -628,8 +635,9 @@ string Render::RenderMapArgs( const Render::Kit &kit, TreePtr<Call> call ) try
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderCall( const Render::Kit &kit, TreePtr<Call> call ) try
+string Render::RenderCall( const Render::Kit &kit, TreePtr<Call> call, Syntax::Production surround_prod ) try
 {
+	(void)surround_prod;
     string s;
 
     // Render the expression that resolves to the function name unless this is
@@ -639,25 +647,26 @@ string Render::RenderCall( const Render::Kit &kit, TreePtr<Call> call ) try
     else
         s += RenderIntoProduction( kit, call->callee, Syntax::Production::POSTFIX );
 
-    s += RenderMapArgs(kit, call);
+    s += RenderCallArgs(kit, call);
     return s;
 }
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderSeqOperands( const Render::Kit &kit, Sequence<Expression> operands ) try
+string Render::RenderExprSeq( const Render::Kit &kit, Sequence<Expression> seq ) try
 {
     list<string> renders;
-    for( TreePtr<Expression> e : operands )    
+    for( TreePtr<Expression> e : seq )    
         renders.push_back( RenderIntoProduction(kit, e, Syntax::Production::COMMA_SEP) );               
     return Join(renders, ", ", "(", ")");
 }
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderExteriorCall( const Render::Kit &kit, TreePtr<ExteriorCall> call ) try
+string Render::RenderExteriorCall( const Render::Kit &kit, TreePtr<ExteriorCall> call, Syntax::Production surround_prod ) try
 {
-    string args_in_parens = RenderSeqOperands(kit, call->arguments);
+	(void)surround_prod;
+    string args_in_parens = RenderExprSeq(kit, call->arguments);
 
     // Constructor case: spot by use of Lookup to empty-named method. Elide the "."
     if( auto lu = DynamicTreePtrCast< Lookup >(call->callee) )
@@ -671,10 +680,11 @@ string Render::RenderExteriorCall( const Render::Kit &kit, TreePtr<ExteriorCall>
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderMacroCall( const Render::Kit &kit, TreePtr<MacroCall> smc ) try
+string Render::RenderMacroStatement( const Render::Kit &kit, TreePtr<MacroStatement> ms, Syntax::Production surround_prod ) try
 {
+	(void)surround_prod;
     list<string> renders; // TODO duplicated code, factor out into RenderSeqMacroArgs()
-    for( TreePtr<Node> mo : smc->macro_operands )
+    for( TreePtr<Node> mo : ms->macro_operands )
     {       
         if( auto id = TreePtr<Identifier>::DynamicCast(mo) )
             renders.push_back( RenderIntoProduction(kit, id, Syntax::Production::PURE_IDENTIFIER) );
@@ -684,7 +694,7 @@ string Render::RenderMacroCall( const Render::Kit &kit, TreePtr<MacroCall> smc )
     // No constructor case
 
     // Other funcitons just evaluate
-    return RenderIntoProduction( kit, smc->callee, Syntax::Production::POSTFIX ) + args_in_parens;
+    return RenderIntoProduction( kit, ms->callee, Syntax::Production::POSTFIX ) + args_in_parens;
 }
 DEFAULT_CATCH_CLAUSE
 
@@ -707,18 +717,15 @@ string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> ex
         return "sizeof(" + RenderIntoProduction( kit, pot->argument, Syntax::Production::BOOT_EXPR ) + ")";               
     else if( auto pot = DynamicTreePtrCast< AlignOf >(expression) )
         return "alignof(" + RenderIntoProduction( kit, pot->argument, Syntax::Production::BOOT_EXPR ) + ")";    
-    else if( auto c = DynamicTreePtrCast< Call >(expression) )
-        return RenderCall( kit, c );
-    else if( auto sc = DynamicTreePtrCast< ExteriorCall >(expression) )
-        return RenderExteriorCall( kit, sc );
     else
         return ERROR_UNSUPPORTED(expression);
 }
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderMakeRecord( const Render::Kit &kit, TreePtr<MakeRecord> make_rec ) try
+string Render::RenderMakeRecord( const Render::Kit &kit, TreePtr<MakeRecord> make_rec, Syntax::Production surround_prod ) try
 {
+	(void)surround_prod;
     string s;
 
     // Get the record
@@ -781,17 +788,18 @@ Sequence<Expression> Render::SortMapOperands( TreePtr<IdValueMap> ro,
 }
 
 
-string Render::RenderAccess( const Render::Kit &kit, TreePtr<AccessSpec> current_access ) try
+string Render::RenderAccessSpec( const Render::Kit &kit, TreePtr<AccessSpec> access, Syntax::Production surround_prod ) try
 {
+	(void)surround_prod;
     (void)kit;
-    if( DynamicTreePtrCast<Public>( current_access ) )
+    if( DynamicTreePtrCast<Public>( access ) )
         return "public";
-    else if( DynamicTreePtrCast<Private>( current_access ) )
+    else if( DynamicTreePtrCast<Private>( access ) )
         return "private";
-    else if( DynamicTreePtrCast<Protected>( current_access ) )
+    else if( DynamicTreePtrCast<Protected>( access ) )
         return "protected";
     else
-        return ERROR_UNKNOWN("current_access spec");
+        return ERROR_UNKNOWN("access spec");
 }
 DEFAULT_CATCH_CLAUSE
 
@@ -987,18 +995,18 @@ string Render::RenderInstance( const Render::Kit &kit, TreePtr<Instance> o, Synt
 
     if( TreePtr<Expression> ei = DynamicTreePtrCast<Expression>( o->initialiser ) )
     {
-        // Attempt direct initialisation
+        // Attempt direct initialisation by providing args for a constructor call
         if( auto call = DynamicTreePtrCast<ExteriorCall>( ei ) )
         {
             if( auto lu = TreePtr<Lookup>::DynamicCast(call->callee) )
                 if( auto id = TreePtr<InstanceIdentifier>::DynamicCast(lu->member) )
                     if( id->GetToken().empty() ) // syscall to a nameless member function => sys construct
-                        return s + RenderSeqOperands(kit, call->arguments) + ";\n";
+                        return s + RenderExprSeq(kit, call->arguments) + ";\n";
         }
         if( auto call = DynamicTreePtrCast<Call>( ei ) ) try
         {       
             if( TypeOf::instance.TryGetConstructedExpression( kit, call ).GetTreePtr() )        
-                return s + RenderMapArgs(kit, call) + ";\n";
+                return s + RenderCallArgs(kit, call) + ";\n";
         }
         catch(DeclarationOf::DeclarationNotFound &)
         {
@@ -1112,7 +1120,7 @@ string Render::RenderDeclaration( const Render::Kit &kit, TreePtr<Declaration> d
                     first=false;
                     auto b = TreePtr<Base>::DynamicCast(bn);
                     ASSERT( b );
-                    s += RenderAccess(kit, b->access) + " ";
+                    s += RenderIntoProduction(kit, b->access, Syntax::Production::TOKEN ) + " ";
                     s += RenderIntoProduction(kit, b->record, Syntax::Production::SCOPE_RESOLVE);
                 }
             }
@@ -1185,7 +1193,7 @@ string Render::RenderStatement( const Render::Kit &kit, TreePtr<Statement> state
     }
     else if( TreePtr<If> i = DynamicTreePtrCast<If>(statement) )
     {
-        bool has_else_clause = !DynamicTreePtrCast<Nop>(i->else_body); // Nop means no else clause
+        bool has_else_clause = !DynamicTreePtrCast<Nop>(i->body_else); // Nop means no else clause
         string s;
         s += "if( " + RenderIntoProduction(kit, i->condition, Syntax::Production::CONDITION) + " )\n";
         //bool sub_if = !!DynamicTreePtrCast<If>(i->body);
@@ -1196,7 +1204,7 @@ string Render::RenderStatement( const Render::Kit &kit, TreePtr<Statement> state
        //      s += "}\n";
         if( has_else_clause )  
             s += "else\n" +
-                 RenderIntoProduction(kit, i->else_body, Syntax::Production::STATEMENT_LOW);
+                 RenderIntoProduction(kit, i->body_else, Syntax::Production::STATEMENT_LOW);
         return s;
     }
     else if( TreePtr<While> w = DynamicTreePtrCast<While>(statement) )
@@ -1233,8 +1241,6 @@ string Render::RenderStatement( const Render::Kit &kit, TreePtr<Statement> state
         return "break";
     else if( DynamicTreePtrCast<Nop>(statement) )
         return "";
-    else if( auto smc = DynamicTreePtrCast<MacroCall>(statement) )
-        return RenderMacroCall( kit, smc );
     else
         return ERROR_UNSUPPORTED(statement);
 }
@@ -1339,7 +1345,7 @@ string Render::MaybeRenderAccessColon( const Render::Kit &kit, TreePtr<AccessSpe
     if( typeid(*this_access) != typeid(**current_access) ) // current_access spec must have changed
     {
         *current_access = this_access;
-        return RenderAccess( kit, this_access ) + ":\n";
+        return RenderIntoProduction( kit, this_access, Syntax::Production::TOKEN ) + ":\n";
     }
     
     return "";  

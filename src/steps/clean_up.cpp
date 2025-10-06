@@ -494,14 +494,14 @@ CleanupNestedIf::CleanupNestedIf()
     
     s_outer_if->condition = outer_cond;
     s_outer_if->body = s_inner_if;
-    s_outer_if->else_body = s_outer_nop;
+    s_outer_if->body_else = s_outer_nop;
     s_inner_if->condition = inner_cond;
     s_inner_if->body = body;
-    s_inner_if->else_body = s_inner_nop;
+    s_inner_if->body_else = s_inner_nop;
     
     r_if->condition = r_and;
     r_if->body = body; 
-    r_if->else_body = r_nop;
+    r_if->body_else = r_nop;
     r_and->operands = (outer_cond, inner_cond); // outer first, to be side-effect correct
     
     Configure( SEARCH_REPLACE, s_outer_if, r_if );

@@ -239,7 +239,7 @@ LowerSCProcess::LowerSCProcess( TreePtr< SCTree::Process > s_scprocess )
     auto s_comp = MakePatternNode< Compound >();
     auto r_comp = MakePatternNode< Compound >();
     auto module = MakePatternNode< Module >();
-    auto r_pcall = MakePatternNode< MacroCall >();
+    auto r_pcall = MakePatternNode< MacroStatement >();
     auto overcons = MakePatternNode< Delta<Instance> >();
     auto overtype = MakePatternNode< Delta<Type> >();
     auto s_cons = MakePatternNode< Instance >();
@@ -247,7 +247,7 @@ LowerSCProcess::LowerSCProcess( TreePtr< SCTree::Process > s_scprocess )
     auto process = MakePatternNode< Instance >();
     auto pre = MakePatternNode< Star<Statement> >();
     auto statements_negation = MakePatternNode< Negation<Statement> >();    
-    auto sn_pcall = MakePatternNode< MacroCall >();
+    auto sn_pcall = MakePatternNode< MacroStatement >();
     auto id = MakePatternNode< InstanceIdentifier >(); 
     auto bases = MakePatternNode< Star<Base> >();
     auto ctype = MakePatternNode<Constructor>();

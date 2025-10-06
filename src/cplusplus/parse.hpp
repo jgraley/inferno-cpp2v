@@ -1298,9 +1298,9 @@ private:
         i->condition = hold_expr.FromRaw( CondVal );
         i->body = hold_stmt.FromRaw( ThenVal );
         if( ElseVal )
-        i->else_body = hold_stmt.FromRaw( ElseVal );
+        i->body_else = hold_stmt.FromRaw( ElseVal );
         else
-        i->else_body = MakeTreeNode<Nop>(); // empty else clause
+        i->body_else = MakeTreeNode<Nop>(); // empty else clause
         return hold_stmt.ToRaw( i );
     }
 

@@ -351,6 +351,13 @@ Syntax::Production SpecificTypeIdentifier::GetMyProduction() const
 	return Production::PURE_IDENTIFIER; 
 }
 
+//////////////////////////// AccessSpec //////////////////////////////
+
+Syntax::Production AccessSpec::GetMyProduction() const
+{ 
+	return Production::TOKEN; 
+}
+
 //////////////////////////// Instance //////////////////////////////
 
 Syntax::Production Instance::GetMyProduction() const
@@ -614,7 +621,7 @@ Syntax::Production If::GetMyProduction() const
 { 
 	// If we don't have an else clause, we might steal the else from a 
 	// surrounding If node, so drop our precedence a little bit.
-	bool has_else_clause = !DynamicTreePtrCast<Nop>(else_body);
+	bool has_else_clause = !DynamicTreePtrCast<Nop>(body_else);
 	return has_else_clause ? Production::STATEMENT_HIGH : Production::STATEMENT_LOW; 
 }
 
@@ -667,9 +674,9 @@ Syntax::Production ExteriorCall::GetMyProduction() const
 	return Production::POSTFIX; 
 }
 
-//////////////////////////// MacroCall ///////////////////////////////
+//////////////////////////// MacroStatement ///////////////////////////////
 
-Syntax::Production MacroCall::GetMyProduction() const
+Syntax::Production MacroStatement::GetMyProduction() const
 { 
 	return Production::STATEMENT; 
 }

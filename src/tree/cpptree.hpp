@@ -335,7 +335,12 @@ struct NonVirtual : Virtuality { NODE_FUNCTIONS_FINAL };
  control generated high-level interfaces. Note that we only specify access
  for physical things like instances. Abstract stuff like TypeDef are always
  considered Public. */
-struct AccessSpec : Property { NODE_FUNCTIONS };
+struct AccessSpec : Property 
+{ 
+	NODE_FUNCTIONS 
+
+	Production GetMyProduction() const override;
+};
 
 /// Property for public access
 struct Public : AccessSpec { NODE_FUNCTIONS_FINAL };
@@ -1043,7 +1048,7 @@ struct If : Statement
     NODE_FUNCTIONS_FINAL
     TreePtr<Expression> condition; ///< condition to test
     TreePtr<Statement> body;       ///< executes when true
-    TreePtr<Statement> else_body;  ///< executes when false, can be Nop if no else clause
+    TreePtr<Statement> body_else;  ///< executes when false, can be Nop if no else clause
 
 	Production GetMyProduction() const override;	
 };
@@ -1184,7 +1189,7 @@ struct MacroField : Field
 
 /// A proprocessor macro usage that may be used as a statement, and takes 
 /// arbitrary operands.
-struct MacroCall : GoSub, Statement 
+struct MacroStatement : GoSub, Statement 
 {
     NODE_FUNCTIONS_FINAL
     Sequence<Node> macro_operands; ///< Arguments taken in order, macro so can be anything

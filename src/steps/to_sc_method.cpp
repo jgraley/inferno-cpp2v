@@ -234,7 +234,7 @@ ExplicitiseReturns::ExplicitiseReturns()
     m_over->overlay = mr_if;
     mr_if->condition = r_flag_id;
     mr_if->body = ms_affected;
-    mr_if->else_body = MakePatternNode<Nop>();
+    mr_if->body_else = MakePatternNode<Nop>();
     
     auto embedded_m = MakePatternNode< EmbeddedSearchReplace<Compound> >( over_comp, m_comp );
     
