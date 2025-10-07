@@ -15,21 +15,22 @@ public:
 		TRANSLATION_UNIT_CPP,		
 		TRANSLATION_UNIT_HPP, 
 		
-		BOOT_STATEMENT,
-		
+		BOOT_STATEMENT,		
 		STATEMENT_LOW, // Lowest statement precedence: {} etc from the inside		
 		STATEMENT_HIGH, // eg if( ... ) <here>;    is this prefix?
 		STATEMENT,
 		DECLARATION,
 		BRACED,		 // {} from the outside	#10
 
-		CONDITION,		// eg if( <here> ) ... which could be a decl etc BOUNDARY FOR SEMICOLONS
+		CONDITION,		// eg if( <here> ) ... which could be a decl etc. Surround lower than this can get ";" added.
+		PROTOTYPE,      // Render prototype only, no init or ";". Nodes higher than this can get ";" added.
 		BARE_STATEMENT, // no trailing ;
-		PROTOTYPE,
+		
 		SPACE_SEP_STATEMENT, // eg throw <here>;
 		SPACE_SEP_DECLARATION, // the type in <here> <declarator>;
 		INITIALISER, // For initialisers eg function body		
 		LABEL,  // Anything with a : after it. Could be (a) like a bare statement needing a ; or (b) a prefix on statements.
+
 		TOP_STATEMENT, // Highest statement precedence
 										
 		BOOT_EXPR, // Lowest expression precedence: (), {}, [] etc from the inside		

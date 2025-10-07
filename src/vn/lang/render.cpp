@@ -95,7 +95,7 @@ string Render::RenderIntoProduction( const Render::Kit &kit, TreePtr<Node> node,
     Syntax::Production node_prod = node->GetMyProduction();
     bool do_boot = Syntax::GetPrecedence(node_prod) < Syntax::GetPrecedence(surround_prod);    
     bool semicolon = Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::CONDITION) &&
-                     Syntax::GetPrecedence(node_prod) >= Syntax::GetPrecedence(Syntax::Production::CONDITION);    
+                     Syntax::GetPrecedence(node_prod) > Syntax::GetPrecedence(Syntax::Production::PROTOTYPE);    
     if( ReadArgs::use_feature_option=='c' )
 		s += SSPrintf("\n// %s Surround %d node %d (%s) from %p boot: %s semcolon: %s\n", 
 					 Tracer::GetPrefix().c_str(), 
@@ -114,10 +114,11 @@ string Render::RenderIntoProduction( const Render::Kit &kit, TreePtr<Node> node,
         case Syntax::Production::BOOT_STATEMENT...Syntax::Production::TOP_STATEMENT: // Statement productions at different precedences
         {
             // If current production has too-high precedence, boot back down using braces
-            ASSERT( Syntax::GetPrecedence(surround_prod) <= Syntax::GetPrecedence(Syntax::Production::BRACED) )
-                  ("Braces won't achieve high enough precedence for surrounding production\n")
-                  ("Node: ")(node)("\n")
-                  ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); // Can't satisfy this production's precedence demand using parentheses
+            if( do_boot )
+				ASSERT( Syntax::GetPrecedence(surround_prod) <= Syntax::GetPrecedence(Syntax::Production::BRACED) )
+					  ("Braces won't achieve high enough precedence for surrounding production\n")
+                      ("Node: ")(node)("\n")
+                      ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); 
             if( do_boot || semicolon )
 				surround_prod = Syntax::Production::BOOT_STATEMENT;
 			ss = Dispatch( kit, node, surround_prod );
@@ -132,10 +133,11 @@ string Render::RenderIntoProduction( const Render::Kit &kit, TreePtr<Node> node,
         case Syntax::Production::BOOT_EXPR...Syntax::Production::TOP_EXPR: // Expression productions at different precedences
         {
             // If current production has too-high precedence, boot back down using parentheses
-            ASSERT( Syntax::GetPrecedence(surround_prod) <= Syntax::GetPrecedence(Syntax::Production::PARENTHESISED) )
-                  ("Parentheses won't achieve high enough precedence for surrounding production\n")
-                  ("Node: ")(node)("\n")
-                  ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); // Can't satisfy this production's precedence demand using parentheses
+            if( do_boot )
+				ASSERT( Syntax::GetPrecedence(surround_prod) <= Syntax::GetPrecedence(Syntax::Production::PARENTHESISED) )
+					  ("Parentheses won't achieve high enough precedence for surrounding production\n")
+					  ("Node: ")(node)("\n")
+					  ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); 
             if( do_boot || semicolon )
 				surround_prod = Syntax::Production::BOOT_EXPR;
 			ss = Dispatch( kit, node, surround_prod );
@@ -213,6 +215,8 @@ string Render::RenderProgram( const Render::Kit &kit, TreePtr<CPPTree::Program> 
 
     // Track scopes for name resolution
     s += RenderDeclScope( kit, program ); // gets the .hpp stuff directly   TRANSLATION_UNIT_HPP
+    
+    s += "// Definitions\n";    
     
     // These are rendered here, inside program scope but outside any additional scopes
     // that were on the scope stack when the instance was seen.
@@ -941,11 +945,14 @@ string Render::RenderInstance( const Render::Kit &kit, TreePtr<Instance> o, Synt
     
     s += RenderInstanceProto( kit, o );
 
+	if( surround_prod == Syntax::Production::PROTOTYPE )
+		return s;
+		
 	if( surround_prod != Syntax::Production::TRANSLATION_UNIT_CPP )
 	{
        if( ShouldSplitInstance(kit, o) )
         {
-            s += ";\n";
+            s += "; // RI-ssi\n";
             // Split out the definition of the instance for rendering later at top level scope
             deferred_instances.push(o);
             return s;
@@ -953,7 +960,7 @@ string Render::RenderInstance( const Render::Kit &kit, TreePtr<Instance> o, Synt
 	}
 	
     if( DynamicTreePtrCast<Uninitialised>(o->initialiser) )
-        return s + ";\n"; // Don't render any initialiser    
+        return s + "; // RI-no-init\n"; // Don't render any initialiser    
     
     if( DynamicTreePtrCast<Callable>(o->type) )
     {
@@ -1303,7 +1310,7 @@ string Render::RenderEnumBodyScope( const Render::Kit &kit,
 
         first = false;    
     }
-    return s;
+    return s + "\n";
 }
 DEFAULT_CATCH_CLAUSE
 
@@ -1383,8 +1390,8 @@ string Render::RenderDeclScope( const Render::Kit &kit,
     
         if( init_access )
             s += MaybeRenderFieldAccess( kit, r, &init_access );
-        s += RenderRecordProto( kit, r ) + ";\n";   
-        //s += RenderIntoProduction( kit, r, Syntax::Production::PROTOTYPE ) + ";\n"; 
+        //s += RenderRecordProto( kit, r ) + "; // RDS-record proto\n";   
+        s += RenderIntoProduction( kit, r, Syntax::Production::PROTOTYPE ) + "; // RDS-record proto (new)\n"; 
     }
     
     // Emit the actual definitions, sorted for dependencies
@@ -1395,7 +1402,7 @@ string Render::RenderDeclScope( const Render::Kit &kit,
             
         if( init_access )
             s += MaybeRenderFieldAccess( kit, d, &init_access );        
-        s += RenderIntoProduction( kit, d, Syntax::Production::DECLARATION );
+        s += RenderIntoProduction( kit, d, Syntax::Production::STATEMENT_LOW );
     }
     TRACE();
     return s;

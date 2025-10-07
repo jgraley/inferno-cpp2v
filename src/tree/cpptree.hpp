@@ -702,7 +702,9 @@ struct Record : UserType,
                 DeclScope // Member declarations go in here
 {
     NODE_FUNCTIONS
+    
     virtual string GetColour() const { return UserType::GetColour(); } // UserType wins
+	Production GetMyProduction() const override;	    
 };
 
 /// A union, as per Record.

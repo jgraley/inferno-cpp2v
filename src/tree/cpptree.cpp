@@ -362,7 +362,7 @@ Syntax::Production AccessSpec::GetMyProduction() const
 
 Syntax::Production Instance::GetMyProduction() const
 { 
-	return Production::PROTOTYPE; 
+	return Production::PROTOTYPE; // prototype render is supported
 }
 
 //////////////////////////// SpecificLabelIdentifier //////////////////////////////
@@ -487,6 +487,13 @@ SpecificFloatSemantics::operator const llvm::fltSemantics &() const
 Syntax::Production Labeley::GetMyProduction() const
 {
 	return Production::POSTFIX; // renders as void *
+}
+
+//////////////////////////// Record ///////////////////////////////
+
+Syntax::Production Record::GetMyProduction() const
+{
+	return Production::PROTOTYPE; // prototype render is supported
 }
 
 //////////////////////////// True ///////////////////////////////
