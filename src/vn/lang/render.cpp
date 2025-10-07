@@ -977,7 +977,7 @@ string Render::RenderInstanceBody( const Render::Kit &kit, TreePtr<Instance> o )
         auto r = MakeTreeNode<Compound>();
         r->members = members;
         r->statements = remainder;
-        s += "\n" + RenderIntoProduction(kit, r, Syntax::Production::STATEMENT_LOW); 
+        s += "\n" + RenderIntoProduction(kit, r, Syntax::Production::BRACED); 
         
         return s;
     }
