@@ -362,7 +362,7 @@ Syntax::Production AccessSpec::GetMyProduction() const
 
 Syntax::Production Instance::GetMyProduction() const
 { 
-	return Production::PROTOTYPE; // prototype render is supported
+	return Production::DECLARATION;
 }
 
 //////////////////////////// SpecificLabelIdentifier //////////////////////////////

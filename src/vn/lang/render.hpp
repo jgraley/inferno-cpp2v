@@ -27,7 +27,7 @@ public:
 private:
     TreePtr<Node> context;
     stack< TreePtr<Node> > scope_stack;
-    queue<TreePtr<CPPTree::Instance>> deferred_instances;
+    queue<TreePtr<CPPTree::Instance>> definitions;
     UniquifyIdentifiers::IdentifierNameMap unique_ids;
 	string RenderIntoProduction( const Render::Kit &kit, TreePtr<Node> node, Syntax::Production prod );
 	string Dispatch( const Render::Kit &kit, TreePtr<Node> node, Syntax::Production surround_prod );
@@ -64,6 +64,7 @@ private:
 
     string RenderInstanceProto( const Render::Kit &kit, TreePtr<CPPTree::Instance> o );
 	bool IsDeclared( const Render::Kit &kit, TreePtr<CPPTree::Identifier> id );
+    string RenderInstanceBody( const Render::Kit &kit, TreePtr<CPPTree::Instance> o );
     string RenderInstance( const Render::Kit &kit, TreePtr<CPPTree::Instance> o, Syntax::Production surround_prod );
     bool ShouldSplitInstance( const Render::Kit &kit, TreePtr<CPPTree::Instance> o );
     string RenderRecordProto( const Render::Kit &kit, TreePtr<CPPTree::Record> record );

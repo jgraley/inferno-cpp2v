@@ -12,8 +12,7 @@ public:
 		UNDEFINED,
 		
 		PROGRAM,
-		TRANSLATION_UNIT_CPP,		
-		TRANSLATION_UNIT_HPP, 
+		DEFINITION,		
 		
 		BOOT_STATEMENT,		
 		STATEMENT_LOW, // Lowest statement precedence: {} etc from the inside		

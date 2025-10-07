@@ -214,16 +214,16 @@ string Render::RenderProgram( const Render::Kit &kit, TreePtr<CPPTree::Program> 
     AutoPush< TreePtr<Node> > cs( scope_stack, program );
 
     // Track scopes for name resolution
-    s += RenderDeclScope( kit, program ); // gets the .hpp stuff directly   TRANSLATION_UNIT_HPP
+    s += RenderDeclScope( kit, program ); // gets the .hpp stuff directly 
     
     s += "// Definitions\n";    
     
     // These are rendered here, inside program scope but outside any additional scopes
     // that were on the scope stack when the instance was seen.
-    while( !deferred_instances.empty() )
+    while( !definitions.empty() )
     {
-        s += "\n" + RenderInstance( kit, deferred_instances.front(), Syntax::Production::TRANSLATION_UNIT_CPP ); // these could go in a .cpp file
-        deferred_instances.pop();
+        s += "\n" + RenderInstance( kit, definitions.front(), Syntax::Production::DEFINITION ); // these could go in a .cpp file
+        definitions.pop();
     }
     return s;  
 }
@@ -936,34 +936,14 @@ bool Render::IsDeclared( const Render::Kit &kit, TreePtr<Identifier> id )
 }   
 
 
-string Render::RenderInstance( const Render::Kit &kit, TreePtr<Instance> o, Syntax::Production surround_prod ) try
+string Render::RenderInstanceBody( const Render::Kit &kit, TreePtr<Instance> o ) try
 {
-    string s;
-    
-    if( surround_prod != Syntax::Production::TRANSLATION_UNIT_CPP )
-		s += RenderStorage(kit, o);
-    
-    s += RenderInstanceProto( kit, o );
-
-	if( surround_prod == Syntax::Production::PROTOTYPE )
-		return s;
-		
-	if( surround_prod != Syntax::Production::TRANSLATION_UNIT_CPP )
-	{
-       if( ShouldSplitInstance(kit, o) )
-        {
-            s += "; // RI-ssi\n";
-            // Split out the definition of the instance for rendering later at top level scope
-            deferred_instances.push(o);
-            return s;
-        }
-	}
-	
-    if( DynamicTreePtrCast<Uninitialised>(o->initialiser) )
-        return s + "; // RI-no-init\n"; // Don't render any initialiser    
+	if( DynamicTreePtrCast<Uninitialised>(o->initialiser) )
+        return "; // RIB-no-init\n"; // Don't render any initialiser    
     
     if( DynamicTreePtrCast<Callable>(o->type) )
     {
+		string s;
         // Establish the scope of the function
         AutoPush< TreePtr<Node> > cs( scope_stack, TryGetScope( o->identifier ) );
 
@@ -999,8 +979,7 @@ string Render::RenderInstance( const Render::Kit &kit, TreePtr<Instance> o, Synt
         r->statements = remainder;
         s += "\n" + RenderIntoProduction(kit, r, Syntax::Production::STATEMENT_LOW); 
         
-        // Surround functions with blank lines        
-        return '\n' + s + '\n';
+        return s;
     }
 
     if( TreePtr<Expression> ei = DynamicTreePtrCast<Expression>( o->initialiser ) )
@@ -1011,29 +990,63 @@ string Render::RenderInstance( const Render::Kit &kit, TreePtr<Instance> o, Synt
             if( auto lu = TreePtr<Lookup>::DynamicCast(call->callee) )
                 if( auto id = TreePtr<InstanceIdentifier>::DynamicCast(lu->member) )
                     if( id->GetToken().empty() ) // syscall to a nameless member function => sys construct
-                        return s + RenderExprSeq(kit, call->arguments) + ";\n";
+                        return RenderExprSeq(kit, call->arguments) + ";\n";
         }
         if( auto call = DynamicTreePtrCast<Call>( ei ) ) try
         {       
             if( TypeOf::instance.TryGetConstructedExpression( kit, call ).GetTreePtr() )        
-                return s + RenderCallArgs(kit, call) + ";\n";
+                return RenderCallArgs(kit, call) + ";\n";
         }
         catch(DeclarationOf::DeclarationNotFound &)
         {
         }   
                             
         // Render expression with an assignment
-        return s + " = " + RenderIntoProduction(kit, ei, Syntax::Production::ASSIGN) + ";\n";
+        return " = " + RenderIntoProduction(kit, ei, Syntax::Production::ASSIGN) + ";\n";
     }
 
-    return s + ERROR_UNSUPPORTED(o->initialiser);
+    return ERROR_UNSUPPORTED(o->initialiser);
 }
 DEFAULT_CATCH_CLAUSE
 
 
+string Render::RenderInstance( const Render::Kit &kit, TreePtr<Instance> o, Syntax::Production surround_prod )
+{
+    string s;
+       
+	switch( surround_prod )
+	{
+		case Syntax::Production::DEFINITION:
+			// Definition is out-of-line so skip the storage
+			s += RenderInstanceProto( kit, o );
+			s += RenderInstanceBody( kit, o );	
+			s += "\n";		
+			break;
+			
+		default: // should be one of the statement-level prods
+			s += RenderStorage(kit, o);
+			s += RenderInstanceProto( kit, o );
+		    if( ShouldSplitInstance(kit, o) )
+			{
+				// Emit just a prototype now and request definition later
+				s += "; // RI-ssi\n";
+				// Split out the definition of the instance for rendering later at Program scope
+				definitions.push(o);
+			}		
+			else
+			{
+				// Emit the whole lot in-line
+				s += RenderInstanceBody( kit, o );							
+				s += "\n";		
+			}
+	}
+	return s;
+}
+
+
 // Non-const static objects in records and functions 
 // get split into a part that goes into the record (main line of rendering) and
-// a part that goes separately (deferred_instances gets appended at the very end).
+// a part that goes separately (definitions gets appended at the very end).
 // Do all functions, since SortDecls() ignores function bodies for dep analysis
 bool Render::ShouldSplitInstance( const Render::Kit &kit, TreePtr<Instance> o ) 
 {
@@ -1371,7 +1384,7 @@ string Render::RenderDeclScope( const Render::Kit &kit,
     TRACE();
     Sequence<Declaration> sorted = SortDecls( decl_scope->members, true, unique_ids );
 
-    // Emit an incomplete for each record and preproc
+    // Emit a prototype for each record and preproc
     string s;
     for( TreePtr<Declaration> pd : sorted ) //for( int i=0; i<sorted.size(); i++ )
     {       
