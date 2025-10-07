@@ -115,10 +115,18 @@ string Render::RenderIntoProduction( const Render::Kit &kit, TreePtr<Node> node,
         {
             // If current production has too-high precedence, boot back down using braces
             if( do_boot )
-				ASSERT( Syntax::GetPrecedence(surround_prod) <= Syntax::GetPrecedence(Syntax::Production::BRACED) )
-					  ("Braces won't achieve high enough precedence for surrounding production\n")
+            {
+				// Braces can actually work in expressions, eg in {}. The nodes are STATEMENT_SEQ and we boot to BOOT_STATEMENT
+				ASSERT( Syntax::GetPrecedence(surround_prod) <= Syntax::GetPrecedence(Syntax::Production::BRACED) ||			
+				        Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::TOP_STATEMENT) )
+					  ("Braces won't achieve high enough precedence for surrounding statement production\n")
                       ("Node: ")(node)("\n")
                       ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); 
+				ASSERT( Syntax::GetPrecedence(surround_prod) <= Syntax::GetPrecedence(Syntax::Production::PARENTHESISED) )
+					  ("Braces won't achieve high enough precedence for surrounding expressional or higher production\n")
+                      ("Node: ")(node)("\n")
+                      ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); 
+			}
             if( do_boot || semicolon )
 				surround_prod = Syntax::Production::BOOT_STATEMENT;
 			ss = Dispatch( kit, node, surround_prod );
@@ -544,12 +552,8 @@ string Render::RenderOperator( const Render::Kit &kit, TreePtr<Operator> op, Syn
 			   RenderIntoProduction( kit, subs->index, Syntax::Production::BOOT_EXPR ) + 
 			   "]";
     }
-    else if( auto al = DynamicTreePtrCast< MakeArray >(op) )
-    {
-        return "{ " + 
-               RenderOperandSequence( kit, al->operands ) + 
-               " }";
-    }	
+    else if( auto al = DynamicTreePtrCast< MakeArray >(op) )    
+        return RenderOperandSequence( kit, al->operands );
     else if( DynamicTreePtrCast< This >(op) )
         return "this";
     else if( auto nco = DynamicTreePtrCast< NonCommutativeOperator >(op) )
@@ -759,8 +763,8 @@ string Render::RenderMakeRecord( const Render::Kit &kit, TreePtr<MakeRecord> mak
         ls.push_back( RenderIntoProduction( kit, e, Syntax::Production::COMMA_SEP ) );
 
     // Do the syntax
-    s += "(" + RenderIntoProduction( kit, make_rec->type, Syntax::Production::BOOT_EXPR ) + ")";
-    s += Join( ls, ", ", "{ ", " }" );    
+    s += "(" + RenderIntoProduction( kit, make_rec->type, Syntax::Production::BOOT_EXPR ) + ")"; 
+    s += Join( ls, ", " );    
     return s;
 }
 DEFAULT_CATCH_CLAUSE

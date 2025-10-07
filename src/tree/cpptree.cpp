@@ -528,7 +528,7 @@ Syntax::Production Subscript::GetMyProduction() const
 
 Syntax::Production MakeArray::GetMyProduction() const
 { 
-	return Production::PARENTHESISED; 
+	return Production::STATEMENT_SEQ; 
 }
 
 //////////////////////////// This ///////////////////////////////
@@ -577,7 +577,7 @@ Syntax::Production Call::GetMyProduction() const
 
 Syntax::Production MakeRecord::GetMyProduction() const
 { 
-	return Production::PARENTHESISED; 
+	return Production::STATEMENT_SEQ; 
 }
 
 //////////////////////////// SizeOf ///////////////////////////////
