@@ -598,7 +598,7 @@ Syntax::Production AlignOf::GetMyProduction() const
 
 Syntax::Production Compound::GetMyProduction() const
 { 
-	return Production::BRACED; 
+	return Production::STATEMENT_SEQ; // Get the central system to generate the {} for us
 }
 
 //////////////////////////// StatementExpression ///////////////////////////////

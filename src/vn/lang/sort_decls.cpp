@@ -286,12 +286,8 @@ Sequence<Declaration> ReverseDecls( Sequence<Declaration> c )
 }
 
 // TODO
-// Statements: infer the {} around funciton bodies by specifying INITIALISER?
-// more passing through surround_prod in RenderStatement() and similar when handing over directly
 // add ifelse.c to the tests
 // Every way of getting to anythign should be via RenderIntoProduction()
-// Make PROTOTYPE cause RenderDeclaration() to render a prototype for Record (for the
-//     call from RenderDeclScope(), unlees there's another suitable prod number.
 // Add a ticket to make Record a true Type not a UserType. Generate TypeDef during parse and just leave them in.
 //     For renderer, Record can just be handled like another type with declarator support, and
 //     PROTOTYPE production triggers prototype declarator. Consider eliding Typedef(Record...).

@@ -14,7 +14,10 @@ public:
 		PROGRAM,
 		DEFINITION,		
 		
+		// Complete self-sufficient statements and declarations. We need a precedence
+		// scheme to disambiguate if/else.
 		BOOT_STATEMENT,		
+		STATEMENT_SEQ, // A number of statements in sequence without {}
 		STATEMENT_LOW, // Lowest statement precedence: {} etc from the inside		
 		STATEMENT_HIGH, // eg if( ... ) <here>;    is this prefix?
 		STATEMENT,
@@ -27,7 +30,6 @@ public:
 		
 		SPACE_SEP_STATEMENT, // eg throw <here>;
 		SPACE_SEP_DECLARATION, // the type in <here> <declarator>;
-		INITIALISER, // For initialisers eg function body		
 		LABEL,  // Anything with a : after it. Could be (a) like a bare statement needing a ; or (b) a prefix on statements.
 
 		TOP_STATEMENT, // Highest statement precedence

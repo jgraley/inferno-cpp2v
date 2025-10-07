@@ -977,6 +977,7 @@ string Render::RenderInstanceBody( const Render::Kit &kit, TreePtr<Instance> o )
         auto r = MakeTreeNode<Compound>();
         r->members = members;
         r->statements = remainder;
+        // In case we don't use Compound in future, BRACED should ensure {}
         s += "\n" + RenderIntoProduction(kit, r, Syntax::Production::BRACED); 
         
         return s;
@@ -1198,12 +1199,12 @@ string Render::RenderStatement( const Render::Kit &kit, TreePtr<Statement> state
         return RenderDeclaration( kit, d, surround_prod );
     else if( TreePtr<Compound> c = DynamicTreePtrCast< Compound >(statement) )
     {
-        string s = "{ // comp\n";
+        string s;
         AutoPush< TreePtr<Node> > cs( scope_stack, c );
         s += RenderDeclScope( kit, c ); // Must do this first to populate backing list
         for( TreePtr<Statement> st : c->statements )    
             s += RenderIntoProduction( kit, st, Syntax::Production::STATEMENT_LOW );    
-        return s + "} // comp\n";
+        return s;
     }
     else if( TreePtr<Expression> e = DynamicTreePtrCast< Expression >(statement) )
         return RenderIntoProduction(kit, e, surround_prod);
@@ -1221,15 +1222,10 @@ string Render::RenderStatement( const Render::Kit &kit, TreePtr<Statement> state
         bool has_else_clause = !DynamicTreePtrCast<Nop>(i->body_else); // Nop means no else clause
         string s;
         s += "if( " + RenderIntoProduction(kit, i->condition, Syntax::Production::CONDITION) + " )\n";
-        //bool sub_if = !!DynamicTreePtrCast<If>(i->body);
-       // if( sub_if && has_else_clause )
-       //      s += "{\n"; // Note: braces there to clarify else binding eg if(a) if(b) foo; else how_do_i_bind;
+        // The choice of production here causes then "else" ambuguity to be resolved.
         s += RenderIntoProduction(kit, i->body, has_else_clause ? Syntax::Production::STATEMENT_HIGH : Syntax::Production::STATEMENT_LOW);
-       // if( sub_if && has_else_clause )
-       //      s += "}\n";
         if( has_else_clause )  
-            s += "else\n" +
-                 RenderIntoProduction(kit, i->body_else, Syntax::Production::STATEMENT_LOW);
+            s += "else\n" + RenderIntoProduction(kit, i->body_else, Syntax::Production::STATEMENT_LOW);
         return s;
     }
     else if( TreePtr<While> w = DynamicTreePtrCast<While>(statement) )
