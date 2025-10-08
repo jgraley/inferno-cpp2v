@@ -694,7 +694,7 @@ string Render::RenderMacroStatement( const Render::Kit &kit, TreePtr<MacroStatem
 {
 	(void)surround_prod;
     list<string> renders; // TODO duplicated code, factor out into RenderSeqMacroArgs()
-    for( TreePtr<Node> mo : ms->macro_operands )
+    for( TreePtr<Node> mo : ms->arguments )
     {       
         if( auto id = TreePtr<Identifier>::DynamicCast(mo) )
             renders.push_back( RenderIntoProduction(kit, id, Syntax::Production::PURE_IDENTIFIER) );
@@ -704,7 +704,7 @@ string Render::RenderMacroStatement( const Render::Kit &kit, TreePtr<MacroStatem
     // No constructor case
 
     // Other funcitons just evaluate
-    return RenderIntoProduction( kit, ms->callee, Syntax::Production::POSTFIX ) + args_in_parens;
+    return RenderIntoProduction( kit, ms->name, Syntax::Production::POSTFIX ) + args_in_parens;
 }
 DEFAULT_CATCH_CLAUSE
 
@@ -716,12 +716,12 @@ string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> ex
         return string();
     else if( auto ce = DynamicTreePtrCast< StatementExpression >(expression) )
     {
-        string s = "({ ";
+        string s = "{ ";
         AutoPush< TreePtr<Node> > cs( scope_stack, ce );
         s += RenderDeclScope( kit, ce ); // Must do this first to populate backing list
         for( TreePtr<Statement> st : ce->statements )    
             s += RenderIntoProduction( kit, st, Syntax::Production::STATEMENT_LOW );    
-        return s + "})";
+        return s + " }";
     }
     else if( auto pot = DynamicTreePtrCast< SizeOf >(expression) )
         return "sizeof(" + RenderIntoProduction( kit, pot->argument, Syntax::Production::BOOT_EXPR ) + ")";               
@@ -881,9 +881,9 @@ string Render::RenderInstanceProto( const Render::Kit &kit,
 
     if( auto smf = TreePtr<MacroField>::DynamicCast(o) )
     {
-        s += "SC_CTOR"; // TODO don't just hard-wire - put it in the MacroField, undeclared instance ID for now
+        s += smf->name->GetToken(); 
         list<string> renders;
-        for( TreePtr<Node> mo : smf->macro_operands )
+        for( TreePtr<Node> mo : smf->arguments )
         {               
             if( auto id = TreePtr<Identifier>::DynamicCast(mo) )
                 renders.push_back( RenderIntoProduction(kit, id, Syntax::Production::PURE_IDENTIFIER) );
@@ -940,7 +940,7 @@ bool Render::IsDeclared( const Render::Kit &kit, TreePtr<Identifier> id )
 }   
 
 
-string Render::RenderInstanceBody( const Render::Kit &kit, TreePtr<Instance> o ) try
+string Render::RenderInstanceInitialisation( const Render::Kit &kit, TreePtr<Instance> o ) try
 {
 	if( DynamicTreePtrCast<Uninitialised>(o->initialiser) )
         return "; // RIB-no-init\n"; // Don't render any initialiser    
@@ -1024,7 +1024,7 @@ string Render::RenderInstance( const Render::Kit &kit, TreePtr<Instance> o, Synt
 		case Syntax::Production::DEFINITION:
 			// Definition is out-of-line so skip the storage
 			s += RenderInstanceProto( kit, o );
-			s += RenderInstanceBody( kit, o );	
+			s += RenderInstanceInitialisation( kit, o );	
 			s += "\n";		
 			break;
 			
@@ -1041,7 +1041,7 @@ string Render::RenderInstance( const Render::Kit &kit, TreePtr<Instance> o, Synt
 			else
 			{
 				// Emit the whole lot in-line
-				s += RenderInstanceBody( kit, o );							
+				s += RenderInstanceInitialisation( kit, o );							
 				s += "\n";		
 			}
 	}
@@ -1128,7 +1128,7 @@ string Render::RenderDeclaration( const Render::Kit &kit, TreePtr<Declaration> d
     {
         Syntax::Production starting_declarator_prod = Syntax::Production::PURE_IDENTIFIER;
         auto id = RenderIntoProduction(kit, t->identifier, starting_declarator_prod);
-        s += "typedef " + RenderTypeAndDeclarator( kit, t->type, id, starting_declarator_prod, Syntax::Production::SPACE_SEP_DECLARATION ) + ";\n";
+        s += "typedef " + RenderTypeAndDeclarator( kit, t->type, id, starting_declarator_prod, Syntax::Production::SPACE_SEP_DECLARATION );
     }
     else if( TreePtr<Record> r = DynamicTreePtrCast< Record >(declaration) )
     {

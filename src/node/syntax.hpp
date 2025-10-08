@@ -27,6 +27,7 @@ public:
 		CONDITION,		// eg if( <here> ) ... which could be a decl etc. Surround lower than this can get ";" added.
 		PROTOTYPE,      // Render prototype only, no init or ";". Nodes higher than this can get ";" added.
 		BARE_STATEMENT, // no trailing ;
+		BARE_DECLARATION, // no trailing ;
 		
 		SPACE_SEP_STATEMENT, // eg throw <here>;
 		SPACE_SEP_DECLARATION, // the type in <here> <declarator>;

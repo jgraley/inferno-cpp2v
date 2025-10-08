@@ -170,7 +170,7 @@ Sequence<Declaration> SortDecls( ContainerInterface &c, bool ignore_indirection_
     //pre_sorted = ReverseDecls( pre_sorted );
     //pre_sorted = JumbleDecls( pre_sorted );
 
-   // Keep searching our local container of decls (cc) for decls that do not depend
+    // Keep searching our local container of decls (cc) for decls that do not depend
     // on anything else in the container. Such a decl may be safely rendered before the
     // rest of the decls, so place it at the end of the sequence we are building up
     // (s) and remove from the container cc since cc only holds the ones we have still to
@@ -286,10 +286,16 @@ Sequence<Declaration> ReverseDecls( Sequence<Declaration> c )
 }
 
 // TODO
-// add ifelse.c to the tests
-// Every way of getting to anythign should be via RenderIntoProduction()
+// Every way of getting to anything should be via RenderIntoProduction()
 // Add a ticket to make Record a true Type not a UserType. Generate TypeDef during parse and just leave them in.
 //     For renderer, Record can just be handled like another type with declarator support, and
 //     PROTOTYPE production triggers prototype declarator. Consider eliding Typedef(Record...).
-// Get the Types down to low expressional (including the TOKEN ones) to that casts and MakeRecord get the 
-// () automatically. All other uses of types to set surround explicitly, eg type-and-decl, operator new etc.
+// Get the Types down to low expressional (including the TOKEN ones) so that casts, MakeRecord, sizeof, alignof get the 
+//     () automatically. All other uses of types to set surround explicitly, eg type-and-decl, operator new etc.
+//     Same for when we add templates and <>
+// Bug: getting two #include <systemc.h> in render after all the steps
+// Bug: still getting top-level prototypes in render after all the steps (may already be a ticket for this)
+// Get Instance::GetMyProduction to vary depending on type: functions are DECLARATION, others are BARE_DECLARATION.
+//     No initiualiser is also BARE_DECLARATION. Drop the semicolons accordingly.
+// MacroStatement can identify itself using an identifier (for the uniquifying/conflict checks), but don't inherit from GoSub
+//    Then do MacroField the same way. In fact, factor out Macro. Get rid of "SC_CTOR" from renderer

@@ -33,11 +33,12 @@ EnsureConstructorsInSCRecordUsers::EnsureConstructorsInSCRecordUsers()
     auto r_base = MakePatternNode< Base >();
     auto tid = MakePatternNode< TypeIdentifier >();
     auto r_token = MakePatternNode< SpecificTypeIdentifier >( s_scclass->GetToken() ); 
-    auto r_cons = MakePatternNode< MacroField >(); 
+    auto r_cons_macro = MakePatternNode< MacroField >(); 
     auto r_comp = MakePatternNode< Compound >();
     auto r_id = MakePatternNode<BuildInstanceIdentifierAgent>(""); // constructor id 
     auto r_ctype = MakePatternNode<Constructor>();
     auto r_params = MakePatternNode< Star<Parameter> >();
+    auto sc_ctor_macro_name = MakePatternNode< SpecificPreprocessorIdentifier >( "SC_CTOR" ); // #819 style
 
 	// TODO not restricting properly: as per our name EnsureConstructorsInSCRecordUsers
 	// we should add constructors to the USERS of SC classes (i.e. those that declare
@@ -54,16 +55,17 @@ EnsureConstructorsInSCRecordUsers::EnsureConstructorsInSCRecordUsers()
     sn_cons_type->params = sn_params; // any constructor is enough to stop us
     s_scclass->bases = (bases);    
     r_scclass->identifier = tid;       
-    r_scclass->members = (decls, r_cons); // TODO for SC_CTOR(ClassName) add MacroField;
+    r_scclass->members = (decls, r_cons_macro); 
     r_scclass->bases = (bases);    
-    r_cons->type = MakePatternNode<Constructor>();        
-    r_cons->constancy = MakePatternNode<NonConst>();
-    r_cons->access = MakePatternNode< Public >();
-    r_cons->virt = MakePatternNode< NonVirtual >();
-    r_cons->initialiser = r_comp;
-    r_cons->identifier = r_id;
-    r_cons->type = r_ctype;
-    r_cons->macro_operands = (tid);
+    r_cons_macro->type = MakePatternNode<Constructor>();        
+    r_cons_macro->constancy = MakePatternNode<NonConst>();
+    r_cons_macro->access = MakePatternNode< Public >();
+    r_cons_macro->virt = MakePatternNode< NonVirtual >();
+    r_cons_macro->initialiser = r_comp;
+    r_cons_macro->identifier = r_id;
+    r_cons_macro->type = r_ctype;
+    r_cons_macro->arguments = (tid);
+    r_cons_macro->name = sc_ctor_macro_name;
     //r_ctype->params = ();
 
     Configure( SEARCH_REPLACE, s_scclass, r_scclass );
@@ -239,7 +241,7 @@ LowerSCProcess::LowerSCProcess( TreePtr< SCTree::Process > s_scprocess )
     auto s_comp = MakePatternNode< Compound >();
     auto r_comp = MakePatternNode< Compound >();
     auto module = MakePatternNode< Module >();
-    auto r_pcall = MakePatternNode< MacroStatement >();
+    auto r_process_macro = MakePatternNode< MacroStatement >();
     auto overcons = MakePatternNode< Delta<Instance> >();
     auto overtype = MakePatternNode< Delta<Type> >();
     auto s_cons = MakePatternNode< Instance >();
@@ -247,12 +249,12 @@ LowerSCProcess::LowerSCProcess( TreePtr< SCTree::Process > s_scprocess )
     auto process = MakePatternNode< Instance >();
     auto pre = MakePatternNode< Star<Statement> >();
     auto statements_negation = MakePatternNode< Negation<Statement> >();    
-    auto sn_pcall = MakePatternNode< MacroStatement >();
+    auto sn_process_macro = MakePatternNode< MacroStatement >();
     auto id = MakePatternNode< InstanceIdentifier >(); 
     auto bases = MakePatternNode< Star<Base> >();
     auto ctype = MakePatternNode<Constructor>();
     auto ident = MakePatternNode<InstanceIdentifier>();
-    auto token = MakePatternNode< SpecificInstanceIdentifier >( s_scprocess->GetToken() ); // #819 style
+    auto token = MakePatternNode< SpecificPreprocessorIdentifier >( s_scprocess->GetToken() ); // #819 style
     auto r_func = MakePatternNode<Function>();
                 
     module->members = (overcons, process, decls);
@@ -264,8 +266,8 @@ LowerSCProcess::LowerSCProcess( TreePtr< SCTree::Process > s_scprocess )
     s_comp->members = cdecls;
     s_comp->statements = (pre);
     pre->restriction = statements_negation;
-    statements_negation->negand = sn_pcall;
-    sn_pcall->macro_operands = (id);
+    statements_negation->negand = sn_process_macro;
+    sn_process_macro->arguments = (id);
     
     // ctype->params = (); // no parameters
     overcons->overlay = r_cons;
@@ -273,9 +275,9 @@ LowerSCProcess::LowerSCProcess( TreePtr< SCTree::Process > s_scprocess )
     r_cons->type = ctype;
     r_cons->initialiser = r_comp;
     r_comp->members = cdecls;
-    r_comp->statements = (pre, r_pcall);
-    r_pcall->callee = token;
-    r_pcall->macro_operands = (id);
+    r_comp->statements = (pre, r_process_macro);
+    r_process_macro->name = token;
+    r_process_macro->arguments = (id);
     
     process->identifier = id;
     process->type = overtype;

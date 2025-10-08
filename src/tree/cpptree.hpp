@@ -692,6 +692,8 @@ struct Typedef : UserType
 {
     NODE_FUNCTIONS_FINAL
     TreePtr<Type> type; ///< emulate this type
+
+	Production GetMyProduction() const override;	    
 }; 
 
 /// Intermediate for declaration of a struct, class, union or enum. 
@@ -1164,12 +1166,30 @@ struct Nop : Statement
 	Production GetMyProduction() const override;
 };
   
-//////////////////////////// System nodes ////////////////////////////
-// System nodes represent stuff that would come in from "standard" places
-// via #include, including C-library, STL, SystemC etc. We take them to
-// be "fixed" and won't attmept to process declarations for them
-// Identifiers in these nodes can be undeclared: uniquing should prevent 
-// anything aliassing these, and should not rename any of them. 
+//////////////////////////// Preprocessor stuff ////////////////////////////
+// Mainly for invoking preprocessor macros defined by SystemC etc.
+
+/// Name of a #defien macro or symbol. Cppreference.com calls these identifiers,
+/// and we do want to uniquify them relative to all the other identifiers
+/// beacuase shadowing here is confusing. As usual, if no declaration is 
+/// found, uniqification is just a uniqueness check, because renaming is deemed unsafe.
+struct PreprocessorIdentifier : Identifier
+{ 
+    NODE_FUNCTIONS 
+};
+
+/// Identifier for a specific label that has been declared somewhere.
+struct SpecificPreprocessorIdentifier : PreprocessorIdentifier,
+                           SpecificIdentifier
+{
+    SpecificPreprocessorIdentifier() {} ///< Default constructor
+    SpecificPreprocessorIdentifier( string s, BoundingRole addr_bounding_role = BoundingRole::NONE ) : 
+        SpecificIdentifier(s, addr_bounding_role) {} ///< construct with initial name
+    NODE_FUNCTIONS_FINAL
+    
+	Production GetMyProduction() const override;    
+};
+
 
 /// A regular function call whose arguments are given in sequence, so that a 
 /// declaration is not needed.
@@ -1185,16 +1205,19 @@ struct ExteriorCall : GoSub, Expression
 /// arbitrary operands.
 struct MacroField : Field 
 {
+	// TODO be MacroDeclaration, inherit from Declaration and add an initialiser for body of declared function
     NODE_FUNCTIONS_FINAL
-    Sequence<Node> macro_operands; ///< Arguments taken in order, macro so can be anything
+    TreePtr<PreprocessorIdentifier> name;
+    Sequence<Node> arguments; ///< Arguments taken in order, macro so can be anything
 };
 
 /// A proprocessor macro usage that may be used as a statement, and takes 
 /// arbitrary operands.
-struct MacroStatement : GoSub, Statement 
+struct MacroStatement : Statement 
 {
     NODE_FUNCTIONS_FINAL
-    Sequence<Node> macro_operands; ///< Arguments taken in order, macro so can be anything
+    TreePtr<PreprocessorIdentifier> name;
+    Sequence<Node> arguments; ///< Arguments taken in order. Can be anything at all!
    	
    	Production GetMyProduction() const override;
 };

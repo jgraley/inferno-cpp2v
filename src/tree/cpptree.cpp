@@ -489,6 +489,13 @@ Syntax::Production Labeley::GetMyProduction() const
 	return Production::POSTFIX; // renders as void *
 }
 
+//////////////////////////// Typedef ///////////////////////////////
+
+Syntax::Production Typedef::GetMyProduction() const
+{
+	return Production::BARE_DECLARATION; 
+}
+
 //////////////////////////// Record ///////////////////////////////
 
 Syntax::Production Record::GetMyProduction() const
@@ -605,7 +612,7 @@ Syntax::Production Compound::GetMyProduction() const
 
 Syntax::Production StatementExpression::GetMyProduction() const
 { 
-	return Production::PARENTHESISED; 
+	return Production::BOOT_EXPR; // Force central to give us () 
 }
 
 //////////////////////////// Return ///////////////////////////////
@@ -672,6 +679,13 @@ Syntax::Production Break::GetMyProduction() const
 Syntax::Production Nop::GetMyProduction() const
 { 
 	return Production::BOOT_STATEMENT; // Force a {}
+}
+
+//////////////////////////// SpecificPreprocessorIdentifier //////////////////////////////
+
+Syntax::Production SpecificPreprocessorIdentifier::GetMyProduction() const
+{ 
+	return Production::PURE_IDENTIFIER; 
 }
 
 //////////////////////////// ExteriorCall ///////////////////////////////

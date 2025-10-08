@@ -22,11 +22,11 @@ int iftest(int p, int q)
 
 int main()
 {
-    int tt;
+    int tt=0;
     tt += iftest(0, 0);
-    tt += iftest(0, 0)*2;
-    tt += iftest(0, 0)*3;
-    tt += iftest(0, 0)*5;
+    tt += iftest(0, 1)*2;
+    tt += iftest(1, 0)*3;
+    tt += iftest(1, 1)*5;
     return tt % 128;
 }
 
