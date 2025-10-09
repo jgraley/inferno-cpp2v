@@ -98,14 +98,15 @@ string Render::RenderIntoProduction( const Render::Kit &kit, TreePtr<Node> node,
                      Syntax::GetPrecedence(node_prod) > Syntax::GetPrecedence(Syntax::Production::PROTOTYPE);  
     bool do_init = surround_prod == Syntax::Production::INITIALISER;
     if( ReadArgs::use_feature_option=='c' )
-		s += SSPrintf("\n// %s Surround %d node %d (%s) from %p boot: %s semcolon: %s\n", 
+		s += SSPrintf("\n// %s Surround %d node %d (%s) from %p boot: %s semcolon: %s init: $s\n", 
 					 Tracer::GetPrefix().c_str(), 
 					 Syntax::GetPrecedence(surround_prod), 
 					 Syntax::GetPrecedence(node_prod),
 					 Trace(node).c_str(), 
 					 RETURN_ADDR(),
 					 do_boot ? "yes" : "no",
-					 semicolon ? "yes" : "no" );
+					 semicolon ? "yes" : "no",
+					 do_init ? "yes" : "no" );
         
     ASSERT( node_prod != Syntax::Production::UNDEFINED )
           ("Rendering expression: ")(node)(" surr prod: %d",(int)surround_prod)(" got no ideal production\n");
@@ -155,7 +156,7 @@ string Render::RenderIntoProduction( const Render::Kit &kit, TreePtr<Node> node,
 					  
 			// Deal with expression in initialiser production by prepending =
 			if( do_init )
-				s += " = ";
+				s += " = // RIP-expr "+Trace(node)+"\n";
             if( do_boot )
                 s += "(";
 
@@ -170,17 +171,16 @@ string Render::RenderIntoProduction( const Render::Kit &kit, TreePtr<Node> node,
             break;
         }
         
-        case Syntax::Production::PURE_IDENTIFIER: 
+        default: 
+        {
             if( semicolon )
 				surround_prod = Syntax::Production::BOOT_EXPR;
 			s += Dispatch( kit, node, surround_prod );
 			
             if( semicolon )
-                s += "; // RIP-id \n";            
+                s += "; // RIP-default \n";            
 			break;
-
-        default:
-            s += Dispatch( kit, node, surround_prod );
+		}
     }
     
     return s;
@@ -189,7 +189,9 @@ string Render::RenderIntoProduction( const Render::Kit &kit, TreePtr<Node> node,
 
 string Render::Dispatch( const Render::Kit &kit, TreePtr<Node> node, Syntax::Production surround_prod )
 {
-    if( auto program = TreePtr<Program>::DynamicCast(node) )
+    if( TreePtr<Uninitialised>::DynamicCast(node) )
+        return string();  
+    else if( auto program = TreePtr<Program>::DynamicCast(node) )
         return RenderProgram( kit, program, surround_prod );
     else if( auto identifier = TreePtr<Identifier>::DynamicCast(node) ) // Identifier can be a kind of type or expression
         return RenderIdentifier( kit, identifier, surround_prod );
@@ -726,9 +728,7 @@ DEFAULT_CATCH_CLAUSE
 string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> expression, Syntax::Production surround_prod ) try
 {
     (void)surround_prod;
-    if( DynamicTreePtrCast< Uninitialised >(expression) )
-        return string();
-        
+      
     if( auto ce = DynamicTreePtrCast< StatementExpression >(expression) )
     {
         string s = "{ ";
@@ -945,9 +945,7 @@ bool Render::IsDeclared( const Render::Kit &kit, TreePtr<Identifier> id )
 string Render::RenderInitialisation( const Render::Kit &kit, TreePtr<Initialiser> init ) try
 {
 	string s;
-	if( DynamicTreePtrCast<Uninitialised>(init) )
-        return "; // RIB-no-init\n"; // Don't render any initialiser        
-    else if( TreePtr<Expression> ei = DynamicTreePtrCast<Expression>( init ) )
+	if( TreePtr<Expression> ei = DynamicTreePtrCast<Expression>( init ) )
     {
         // Attempt direct initialisation by providing args for a constructor call
         if( auto call = DynamicTreePtrCast<ExteriorCall>( ei ) )

@@ -37,7 +37,7 @@ public:
 		TOP_STATEMENT, // Highest statement precedence
 										
 		BOOT_EXPR, // Lowest expression precedence: (), {}, [] etc from the inside		
-		COMMA_OP,
+		COMMA_OP, // #20
 		COMMA_SEP, // Use this for comma-separated lists to force parens for COMMA_OP
 		ASSIGN, //C++: assign ops and statement-like keywords eg throw
 		CONDITIONAL = ASSIGN, 		
@@ -48,20 +48,20 @@ public:
 		BITWISE_AND,
 		EQ_COMP,
 		MAG_COMP,
-		SHIFT,
+		SHIFT, //  #30
 		ADD_SUB,
 		MUL_DIV,
 		TYPE_IN_NEW, // new(args) <here>(args)
 		PREFIX, // C++: all prefix including keywords where expression
 		POSTFIX, // C++: all prefix including sub clauses
 		SPACE_SEP_TYPE, // eg auto a = new unsigned long *<here>; - interestingly, the spaces take precedence
-		TOKEN, // Highest precedence would be that of lexer tokens
+		TOKEN, // Highest precedence would be that of lexer tokens #37
 		PARENTHESISED, // (), {} from the outside		
 		TOP_EXPR, // Highest expression precedence
 		
-		SCOPE_RESOLVE, // :: in C++				
+		SCOPE_RESOLVE, // :: in C++		#40		
 		PURE_IDENTIFIER, // Higher than expr because could be a type, label etc
-		ANONYMOUS = TOKEN
+		ANONYMOUS
 	};
 	
 	// We deal with syntactical association only, not mathematical, because:
