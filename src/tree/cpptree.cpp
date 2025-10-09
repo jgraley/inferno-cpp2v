@@ -87,7 +87,7 @@ string SpecificString::GetToken() const
 
 Syntax::Production SpecificString::GetMyProduction() const
 { 
-	return Production::TOKEN; 
+	return Production::PRIMITIVE; 
 }
 
 //////////////////////////// SpecificInteger ///////////////////////////////
@@ -183,7 +183,7 @@ string SpecificInteger::GetToken() const
 
 Syntax::Production SpecificInteger::GetMyProduction() const
 { 
-	return Production::TOKEN; 
+	return Production::PRIMITIVE; 
 }
 
 //////////////////////////// SpecificFloat ///////////////////////////////
@@ -244,7 +244,7 @@ string SpecificFloat::GetToken() const
 
 Syntax::Production SpecificFloat::GetMyProduction() const
 { 
-	return Production::TOKEN; 
+	return Production::PRIMITIVE; 
 }
 
 //////////////////////////// SpecificIdentifier ///////////////////////////////
@@ -507,14 +507,14 @@ Syntax::Production Record::GetMyProduction() const
 
 Syntax::Production True::GetMyProduction() const
 { 
-	return Production::TOKEN; 
+	return Production::PRIMITIVE; 
 }
 
 //////////////////////////// False ///////////////////////////////
 
 Syntax::Production False::GetMyProduction() const
 { 
-	return Production::TOKEN; 
+	return Production::PRIMITIVE; 
 }
 
 //////////////////////////// ConditionalOperator ///////////////////////////////
@@ -542,7 +542,7 @@ Syntax::Production MakeArray::GetMyProduction() const
 
 Syntax::Production This::GetMyProduction() const
 { 
-	return Production::TOKEN; 
+	return Production::PRIMITIVE; 
 }
 
 //////////////////////////// New ///////////////////////////////

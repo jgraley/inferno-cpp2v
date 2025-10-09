@@ -55,6 +55,7 @@ public:
 		PREFIX, // C++: all prefix including keywords where expression
 		POSTFIX, // C++: all prefix including sub clauses
 		SPACE_SEP_TYPE, // eg auto a = new unsigned long *<here>; - interestingly, the spaces take precedence
+		PRIMITIVE, // one-token literal eg 12, 12.34, "foo"
 		TOKEN, // Highest precedence would be that of lexer tokens #37
 		PARENTHESISED, // (), {} from the outside		
 		TOP_EXPR, // Highest expression precedence
