@@ -22,6 +22,7 @@ public:
 		STATEMENT_HIGH, // eg if( ... ) <here>;    is this prefix?
 		STATEMENT,
 		DECLARATION,
+		INITIALISER, // eg MyType thing <here>; and " = " is inserted if node is expressional
 		BRACED,		 // {} from the outside	#10
 
 		CONDITION,		// eg if( <here> ) ... which could be a decl etc. Surround lower than this can get ";" added.

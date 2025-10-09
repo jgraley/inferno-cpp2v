@@ -535,7 +535,7 @@ Syntax::Production Subscript::GetMyProduction() const
 
 Syntax::Production MakeArray::GetMyProduction() const
 { 
-	return Production::STATEMENT_SEQ; 
+	return Production::PARENTHESISED; 
 }
 
 //////////////////////////// This ///////////////////////////////

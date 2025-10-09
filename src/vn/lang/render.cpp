@@ -127,14 +127,17 @@ string Render::RenderIntoProduction( const Render::Kit &kit, TreePtr<Node> node,
                       ("Node: ")(node)("\n")
                       ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); 
 			}
+            if( do_boot )
+                s += "{ // RIP-stmt\n";
+
             if( do_boot || semicolon )
 				surround_prod = Syntax::Production::BOOT_STATEMENT;
-			ss = Dispatch( kit, node, surround_prod );
+			s += Dispatch( kit, node, surround_prod );
+			
             if( semicolon )
-                ss = ss + "; // RIP-stmt\n";
+                s += "; // RIP-stmt\n";
             if( do_boot )
-                ss = "{ // RIP-stmt\n" + ss + "} // RIP-stmt\n";
-            s += ss;
+                s += "} // RIP-stmt\n";            
             break;
         }
 
@@ -146,24 +149,31 @@ string Render::RenderIntoProduction( const Render::Kit &kit, TreePtr<Node> node,
 					  ("Parentheses won't achieve high enough precedence for surrounding production\n")
 					  ("Node: ")(node)("\n")
 					  ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); 
+					  
+			// Deal with expression in initialiser production by prepending =
+			if( surround_prod == Syntax::Production::INITIALISER )
+				s += " = ";
+            if( do_boot )
+                s += "(";
+
             if( do_boot || semicolon )
 				surround_prod = Syntax::Production::BOOT_EXPR;
-			ss = Dispatch( kit, node, surround_prod );
+			s += Dispatch( kit, node, surround_prod );
+
             if( semicolon )
-                ss = ss + "; // RIP-expr \n";
+                s += "; // RIP-expr \n";
             if( do_boot )
-                ss = "(" + ss + ")";
-            s += ss;
+                s += ")";            
             break;
         }
         
         case Syntax::Production::PURE_IDENTIFIER: 
             if( semicolon )
 				surround_prod = Syntax::Production::BOOT_EXPR;
-			ss = Dispatch( kit, node, surround_prod );
+			s += Dispatch( kit, node, surround_prod );
+			
             if( semicolon )
-                ss = ss + "; // RIP-id \n";
-            s += ss;
+                s += "; // RIP-id \n";            
 			break;
 
         default:
@@ -715,7 +725,8 @@ string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> ex
     (void)surround_prod;
     if( DynamicTreePtrCast< Uninitialised >(expression) )
         return string();
-    else if( auto ce = DynamicTreePtrCast< StatementExpression >(expression) )
+        
+    if( auto ce = DynamicTreePtrCast< StatementExpression >(expression) )
     {
         string s = "{ ";
         AutoPush< TreePtr<Node> > cs( scope_stack, ce );
@@ -952,7 +963,7 @@ string Render::RenderInitialisation( const Render::Kit &kit, TreePtr<Initialiser
         }   
                             
         // Render expression with an assignment
-        return " = " + RenderIntoProduction(kit, ei, Syntax::Production::ASSIGN) + ";\n";
+        return RenderIntoProduction(kit, ei, Syntax::Production::INITIALISER);
     }
     else if( auto stmt = DynamicTreePtrCast<Statement>(init) )
     {
@@ -1334,15 +1345,10 @@ string Render::RenderOperandSequence( const Render::Kit &kit,
 {
     TRACE();
     string s;
-    bool first = true;
+	list<string> renders;    
     for( TreePtr<Expression> pe : spe )
-    {
-        if( !first )
-            s += ", ";
-        s += RenderIntoProduction( kit, pe, Syntax::Production::COMMA_SEP );
-        first = false;
-    }
-    return s;
+		renders.push_back( RenderIntoProduction( kit, pe, Syntax::Production::COMMA_SEP ) );
+    return Join(renders, ", ", "{", "}"); // irregular use of {}
 }
 DEFAULT_CATCH_CLAUSE
 
