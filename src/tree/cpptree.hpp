@@ -1217,7 +1217,7 @@ struct MacroDeclaration : Declaration
 struct MacroStatement : Statement 
 {
     NODE_FUNCTIONS_FINAL
-    TreePtr<PreprocessorIdentifier> name;
+    TreePtr<PreprocessorIdentifier> identifier;
     Sequence<Node> arguments; ///< Arguments taken in order. Can be anything at all!
    	
    	Production GetMyProduction() const override;

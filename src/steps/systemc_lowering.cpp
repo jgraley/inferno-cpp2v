@@ -269,7 +269,7 @@ LowerSCProcess::LowerSCProcess( TreePtr< SCTree::Process > s_scprocess )
     r_cons_macro->initialiser = r_comp;
     r_comp->members = cdecls;
     r_comp->statements = (pre, r_process_macro);
-    r_process_macro->name = token;
+    r_process_macro->identifier = token;
     r_process_macro->arguments = (id);
     
     process->identifier = id;

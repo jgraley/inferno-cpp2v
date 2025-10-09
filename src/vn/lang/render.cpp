@@ -699,18 +699,13 @@ DEFAULT_CATCH_CLAUSE
 string Render::RenderMacroStatement( const Render::Kit &kit, TreePtr<MacroStatement> ms, Syntax::Production surround_prod ) try
 {
 	(void)surround_prod;
+	string s = RenderIntoProduction( kit, ms->identifier, Syntax::Production::POSTFIX );
+	
     list<string> renders; // TODO duplicated code, factor out into RenderSeqMacroArgs()
-    for( TreePtr<Node> mo : ms->arguments )
-    {       
-        if( auto id = TreePtr<Identifier>::DynamicCast(mo) )
-            renders.push_back( RenderIntoProduction(kit, id, Syntax::Production::PURE_IDENTIFIER) );
-    }
-    string args_in_parens = Join(renders, ", ", "(", ");\n");
-
-    // No constructor case
-
-    // Other funcitons just evaluate
-    return RenderIntoProduction( kit, ms->name, Syntax::Production::POSTFIX ) + args_in_parens;
+    for( TreePtr<Node> node : ms->arguments )
+        renders.push_back( RenderIntoProduction(kit, node, Syntax::Production::COMMA_SEP) );
+    s += Join(renders, ", ", "(", ");\n");
+    return s;
 }
 DEFAULT_CATCH_CLAUSE
 
@@ -933,12 +928,33 @@ bool Render::IsDeclared( const Render::Kit &kit, TreePtr<Identifier> id )
 }   
 
 
-string Render::RenderInstanceInitialisation( const Render::Kit &kit, TreePtr<Instance> o ) try
+string Render::RenderInitialisation( const Render::Kit &kit, TreePtr<Initialiser> init ) try
 {
-	if( DynamicTreePtrCast<Uninitialised>(o->initialiser) )
-        return "; // RIB-no-init\n"; // Don't render any initialiser    
-    
-    if( DynamicTreePtrCast<Callable>(o->type) )
+	if( DynamicTreePtrCast<Uninitialised>(init) )
+        return "; // RIB-no-init\n"; // Don't render any initialiser        
+    else if( TreePtr<Expression> ei = DynamicTreePtrCast<Expression>( init ) )
+    {
+        // Attempt direct initialisation by providing args for a constructor call
+        if( auto call = DynamicTreePtrCast<ExteriorCall>( ei ) )
+        {
+            if( auto lu = TreePtr<Lookup>::DynamicCast(call->callee) )
+                if( auto id = TreePtr<InstanceIdentifier>::DynamicCast(lu->member) )
+                    if( id->GetToken().empty() ) // syscall to a nameless member function => sys construct
+                        return RenderExprSeq(kit, call->arguments) + ";\n";
+        }
+        if( auto call = DynamicTreePtrCast<Call>( ei ) ) try
+        {       
+            if( TypeOf::instance.TryGetConstructedExpression( kit, call ).GetTreePtr() )        
+                return RenderCallArgs(kit, call) + ";\n";
+        }
+        catch(DeclarationOf::DeclarationNotFound &)
+        {
+        }   
+                            
+        // Render expression with an assignment
+        return " = " + RenderIntoProduction(kit, ei, Syntax::Production::ASSIGN) + ";\n";
+    }
+    else if( auto stmt = DynamicTreePtrCast<Statement>(init) )
     {
 		string s;
 
@@ -946,15 +962,13 @@ string Render::RenderInstanceInitialisation( const Render::Kit &kit, TreePtr<Ins
         // Statement there - this is because we will wrangle with them later
         Sequence<Statement> code;
         Collection<Declaration> members;
-        if( TreePtr<Compound> comp = DynamicTreePtrCast<Compound>(o->initialiser) )
+        if( TreePtr<Compound> comp = DynamicTreePtrCast<Compound>(stmt) )
         {
             members = comp->members;
             code = comp->statements;
         }
-        else if( TreePtr<Statement> st = DynamicTreePtrCast<Statement>(o->initialiser) )
-            code.push_back( st );
-        else
-            s += ERROR_UNSUPPORTED(o->initialiser);
+        else 
+            code.push_back( stmt );
 
         // Seperate the statements into constructor initialisers and "other stuff"
         Sequence<Statement> inits;
@@ -978,30 +992,7 @@ string Render::RenderInstanceInitialisation( const Render::Kit &kit, TreePtr<Ins
         return s;
     }
 
-    if( TreePtr<Expression> ei = DynamicTreePtrCast<Expression>( o->initialiser ) )
-    {
-        // Attempt direct initialisation by providing args for a constructor call
-        if( auto call = DynamicTreePtrCast<ExteriorCall>( ei ) )
-        {
-            if( auto lu = TreePtr<Lookup>::DynamicCast(call->callee) )
-                if( auto id = TreePtr<InstanceIdentifier>::DynamicCast(lu->member) )
-                    if( id->GetToken().empty() ) // syscall to a nameless member function => sys construct
-                        return RenderExprSeq(kit, call->arguments) + ";\n";
-        }
-        if( auto call = DynamicTreePtrCast<Call>( ei ) ) try
-        {       
-            if( TypeOf::instance.TryGetConstructedExpression( kit, call ).GetTreePtr() )        
-                return RenderCallArgs(kit, call) + ";\n";
-        }
-        catch(DeclarationOf::DeclarationNotFound &)
-        {
-        }   
-                            
-        // Render expression with an assignment
-        return " = " + RenderIntoProduction(kit, ei, Syntax::Production::ASSIGN) + ";\n";
-    }
-
-    return ERROR_UNSUPPORTED(o->initialiser);
+    return ERROR_UNSUPPORTED(init);
 }
 DEFAULT_CATCH_CLAUSE
 
@@ -1017,7 +1008,7 @@ string Render::RenderInstance( const Render::Kit &kit, TreePtr<Instance> o, Synt
 				// Definition is out-of-line so skip the storage
 				s += RenderInstanceProto( kit, o );
 				AutoPush< TreePtr<Node> > cs( scope_stack, TryGetScope( o->identifier ) );
-				s += RenderInstanceInitialisation( kit, o );	
+				s += RenderInitialisation( kit, o->initialiser );	
 				s += "\n";		
 			}
 			break;
@@ -1036,7 +1027,7 @@ string Render::RenderInstance( const Render::Kit &kit, TreePtr<Instance> o, Synt
 			{
 				// Emit the whole lot in-line
 				AutoPush< TreePtr<Node> > cs( scope_stack, TryGetScope( o->identifier ) );
-				s += RenderInstanceInitialisation( kit, o );							
+				s += RenderInitialisation( kit, o->initialiser );							
 				s += "\n";		
 			}
 	}
@@ -1080,58 +1071,16 @@ bool Render::ShouldSplitInstance( const Render::Kit &kit, TreePtr<Instance> o )
 
 string Render::RenderMacroDeclaration( const Render::Kit &kit, TreePtr<MacroDeclaration> md, Syntax::Production surround_prod )
 {
-	(void)surround_prod;
-	string s;
+	(void)surround_prod;	
     // ---- Proto ----
-	s += md->identifier->GetToken(); 
+	string s = RenderIntoProduction( kit, md->identifier, Syntax::Production::POSTFIX );
 	list<string> renders;
-	for( TreePtr<Node> mo : md->arguments )
-	{               
-		if( auto id = TreePtr<Identifier>::DynamicCast(mo) )
-			renders.push_back( RenderIntoProduction(kit, id, Syntax::Production::PURE_IDENTIFIER) );
-		else
-			renders.push_back( ERROR_UNSUPPORTED(mo) );
-	}
+	for( TreePtr<Node> node : md->arguments )
+		renders.push_back( RenderIntoProduction(kit, node, Syntax::Production::COMMA_SEP) );
 	s += Join(renders, ", ", "(", ")");
 	
-	// ---- Initialisation ----
-	if( DynamicTreePtrCast<Uninitialised>(md->initialiser) )
-        return "; // RMD-no-init\n"; // Don't render any initialiser    
-
-	// Put the contents of the body into a Compound-like form even if there's only one
-	// Statement there - this is because we will wrangle with them later
-	Sequence<Statement> code;
-	Collection<Declaration> members;
-	if( TreePtr<Compound> comp = DynamicTreePtrCast<Compound>(md->initialiser) )
-	{
-		members = comp->members;
-		code = comp->statements;
-	}
-	else if( TreePtr<Statement> st = DynamicTreePtrCast<Statement>(md->initialiser) )
-		code.push_back( st );
-	else
-		s += ERROR_UNSUPPORTED(md->initialiser);
-
-	// Seperate the statements into constructor initialisers and "other stuff"
-	Sequence<Statement> inits;
-	Sequence<Statement> remainder;
-	ExtractInits( kit, code, inits, remainder );
-
-	// Render the constructor initialisers if there are any
-	if( !inits.empty() )
-	{
-		s += " :\n";
-		s += RenderConstructorInitList( kit, inits );
-	}
-
-	// Render the other stuff as a Compound so we always get {} in all cases
-	auto r = MakeTreeNode<Compound>();
-	r->members = members;
-	r->statements = remainder;
-	// In case we don't use Compound in future, BRACED should ensure {}
-	s += "\n" + RenderIntoProduction(kit, r, Syntax::Production::BRACED); 
-    
-    return s;
+	// ---- Initialisation ----	    
+    return s + RenderInitialisation( kit, md->initialiser );
 }
 
 

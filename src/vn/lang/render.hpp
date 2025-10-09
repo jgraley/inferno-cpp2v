@@ -64,7 +64,7 @@ private:
 
     string RenderInstanceProto( const Render::Kit &kit, TreePtr<CPPTree::Instance> o );
 	bool IsDeclared( const Render::Kit &kit, TreePtr<CPPTree::Identifier> id );
-    string RenderInstanceInitialisation( const Render::Kit &kit, TreePtr<CPPTree::Instance> o );
+    string RenderInitialisation( const Render::Kit &kit, TreePtr<CPPTree::Initialiser> init );
     string RenderInstance( const Render::Kit &kit, TreePtr<CPPTree::Instance> o, Syntax::Production surround_prod );
     bool ShouldSplitInstance( const Render::Kit &kit, TreePtr<CPPTree::Instance> o );
 	string RenderMacroDeclaration( const Render::Kit &kit, TreePtr<CPPTree::MacroDeclaration> md, Syntax::Production surround_prod );
