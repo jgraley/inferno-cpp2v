@@ -47,10 +47,10 @@ private:
     string RenderCallArgs( const Render::Kit &kit, TreePtr<CPPTree::Call> call );
     string RenderCall( const Render::Kit &kit, TreePtr<CPPTree::Call> call, Syntax::Production surround_prod );
     string RenderExprSeq( const Render::Kit &kit, Sequence<CPPTree::Expression> seq );
-    string RenderExteriorCall( const Render::Kit &kit, TreePtr<CPPTree::ExteriorCall> call, Syntax::Production surround_prod );
+    string RenderExteriorCall( const Render::Kit &kit, TreePtr<CPPTree::SeqArgsCall> call, Syntax::Production surround_prod );
     string RenderMacroStatement( const Render::Kit &kit, TreePtr<CPPTree::MacroStatement> ms, Syntax::Production surround_prod );
     string RenderExpression( const Render::Kit &kit, TreePtr<CPPTree::Initialiser> expression, Syntax::Production surround_prod );
-    string RenderMakeRecord( const Render::Kit &kit, TreePtr<CPPTree::MakeRecord> make_rec, Syntax::Production surround_prod );
+    string RenderMakeRecord( const Render::Kit &kit, TreePtr<CPPTree::RecordLiteral> make_rec, Syntax::Production surround_prod );
     string RenderMapInOrder( const Render::Kit &kit, 
                              TreePtr<CPPTree::IdValueMap> ro,
                              Sequence<CPPTree::Declaration> key_sequence );

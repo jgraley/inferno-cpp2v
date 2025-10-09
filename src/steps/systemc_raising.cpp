@@ -208,7 +208,7 @@ RaiseSCDeltaCount::RaiseSCDeltaCount()
 {
     auto r_delta_count = MakePatternNode<DeltaCount>();
 
-    auto s_call = MakePatternNode<ExteriorCall>();
+    auto s_call = MakePatternNode<SeqArgsCall>();
     auto s_token = MakePatternNode< SpecificInstanceIdentifier >( r_delta_count->GetToken() );                
                 
     s_call->callee = s_token;

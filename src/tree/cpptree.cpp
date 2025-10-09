@@ -531,9 +531,9 @@ Syntax::Production Subscript::GetMyProduction() const
 	return Production::POSTFIX; 
 }
 
-//////////////////////////// MakeArray ///////////////////////////////
+//////////////////////////// ArrayLiteral ///////////////////////////////
 
-Syntax::Production MakeArray::GetMyProduction() const
+Syntax::Production ArrayLiteral::GetMyProduction() const
 { 
 	return Production::PARENTHESISED; 
 }
@@ -580,9 +580,9 @@ Syntax::Production Call::GetMyProduction() const
 	return Production::POSTFIX; 
 }
 
-//////////////////////////// MakeRecord ///////////////////////////////
+//////////////////////////// RecordLiteral ///////////////////////////////
 
-Syntax::Production MakeRecord::GetMyProduction() const
+Syntax::Production RecordLiteral::GetMyProduction() const
 { 
 	return Production::PARENTHESISED; 
 }
@@ -688,9 +688,9 @@ Syntax::Production SpecificPreprocessorIdentifier::GetMyProduction() const
 	return Production::PURE_IDENTIFIER; 
 }
 
-//////////////////////////// ExteriorCall ///////////////////////////////
+//////////////////////////// SeqArgsCall ///////////////////////////////
 
-Syntax::Production ExteriorCall::GetMyProduction() const
+Syntax::Production SeqArgsCall::GetMyProduction() const
 { 
 	return Production::POSTFIX; 
 }

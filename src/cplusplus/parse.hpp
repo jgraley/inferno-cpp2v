@@ -801,7 +801,7 @@ private:
             DefaultTransUtils utils(all_decls);
             TransKit kit { &utils };
             // Actions if we have an intiialiser
-            if( auto ai = DynamicTreePtrCast<MakeArray>(o->initialiser) )
+            if( auto ai = DynamicTreePtrCast<ArrayLiteral>(o->initialiser) )
             {
 				// If an array does not give its size (eg myarr[]), fill the size
 				// in from the initialiser
@@ -1773,7 +1773,7 @@ private:
         // Assume initialiser is for an Array, and create an ArrayInitialiser node
         // even if it's really a struct init. We'll come along later and replace with a
         // RecordInitialiser when we can see what the struct is.
-        auto ao = MakeTreeNode<MakeArray>();
+        auto ao = MakeTreeNode<ArrayLiteral>();
         for(unsigned i=0; i<NumInit; i++)
         {
             TreePtr<Expression> e = hold_expr.FromRaw( InitList[i] );
@@ -1786,11 +1786,11 @@ private:
     // Create a RecordInitialiser using the elements of the supplied ArrayInitialiser and matching
     // them against the members of the supplied record. Records are stored using an unordered
     // collection for the members, so we have to use the ordered backing map. Array inits are ordered.
-    TreePtr<MakeRecord> CreateRecordLiteralFromArrayLiteral( TreePtr<MakeArray> ai,
+    TreePtr<RecordLiteral> CreateRecordLiteralFromArrayLiteral( TreePtr<ArrayLiteral> ai,
             TreePtr<Record> r )
     {
         // Make new record initialiser and fill in the type
-        auto ri = MakeTreeNode<MakeRecord>();
+        auto ri = MakeTreeNode<RecordLiteral>();
         ri->type = r->identifier;
 
         // Fill in the RecordLiteral operands collection with pairs that relate operands to their member ids
@@ -2139,7 +2139,7 @@ private:
         // change it.
         DefaultTransUtils utils(all_decls);
         TransKit kit { &utils };
-        if( TreePtr<MakeArray> ai = DynamicTreePtrCast<MakeArray>(e) )
+        if( TreePtr<ArrayLiteral> ai = DynamicTreePtrCast<ArrayLiteral>(e) )
             if( TreePtr<TypeIdentifier> ti = DynamicTreePtrCast<TypeIdentifier>(t) )
                 if( TreePtr<Record> r = GetRecordDeclaration(kit, ti).GetTreePtr() )
                     e = CreateRecordLiteralFromArrayLiteral( ai, r );

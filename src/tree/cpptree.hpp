@@ -829,7 +829,7 @@ struct Subscript : Operator
 };
 
 /// An array formed directly from elements which should all be the same type
-struct MakeArray : NonCommutativeOperator
+struct ArrayLiteral : NonCommutativeOperator
 {
 	NODE_FUNCTIONS_FINAL	
 	
@@ -956,7 +956,7 @@ struct Call : GoSub, IdValueMap, Expression, Uncombable
 /** Uses a map to associate elements with corresponding record 
  members. We also give the record type explicitly since the map is
  not enough information. */
-struct MakeRecord : IdValueMap, Expression
+struct RecordLiteral : IdValueMap, Expression
 {
     NODE_FUNCTIONS_FINAL
     TreePtr<TypeIdentifier> type; ///< handle of the type of the record we are making
@@ -1192,8 +1192,8 @@ struct SpecificPreprocessorIdentifier : PreprocessorIdentifier,
 
 
 /// A regular function call whose arguments are given in sequence, so that a 
-/// declaration is not needed.
-struct ExteriorCall : GoSub, Expression
+/// declaration is not needed. Good for eg library calls.
+struct SeqArgsCall : GoSub, Expression
 {
     NODE_FUNCTIONS_FINAL
     Sequence<Expression> arguments; ///< Arguments taken in order

@@ -85,10 +85,10 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     auto l_lmap = MakePatternNode<Static>();
     auto r_lmap_id = MakePatternNode<BuildInstanceIdentifierAgent>("lmap");
     auto r_array = MakePatternNode<Array>();
-    auto r_make = MakePatternNode<MakeArray>();
-    auto ls_make = MakePatternNode<MakeArray>();
-    auto lr_make = MakePatternNode<MakeArray>();
-    auto lls_make = MakePatternNode<MakeArray>();
+    auto r_make = MakePatternNode<ArrayLiteral>();
+    auto ls_make = MakePatternNode<ArrayLiteral>();
+    auto lr_make = MakePatternNode<ArrayLiteral>();
+    auto lls_make = MakePatternNode<ArrayLiteral>();
     auto l_mover = MakePatternNode< Delta<Expression> >();
     auto l_stuff = MakePatternNode< Stuff<Statement> >();
     auto l_existing = MakePatternNode< Star<Expression> >();

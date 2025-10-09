@@ -205,11 +205,11 @@ string Render::Dispatch( const Render::Kit &kit, TreePtr<Node> node, Syntax::Pro
         return RenderType( kit, type, surround_prod );
     else if( auto literal = DynamicTreePtrCast< Literal >(node) )
         return RenderLiteral( kit, literal, surround_prod );
-    else if( auto make_rec = TreePtr<MakeRecord>::DynamicCast(node) )
+    else if( auto make_rec = TreePtr<RecordLiteral>::DynamicCast(node) )
         return RenderMakeRecord( kit, make_rec, surround_prod );
     else if( auto call = TreePtr<Call>::DynamicCast(node) )
         return RenderCall( kit, call, surround_prod );
-    else if( auto ext_call = TreePtr<ExteriorCall>::DynamicCast(node) )
+    else if( auto ext_call = TreePtr<SeqArgsCall>::DynamicCast(node) )
         return RenderExteriorCall( kit, ext_call, surround_prod );
     else if( auto macro_decl = TreePtr<MacroDeclaration>::DynamicCast(node) )
         return RenderMacroDeclaration( kit, macro_decl, surround_prod );
@@ -573,7 +573,7 @@ string Render::RenderOperator( const Render::Kit &kit, TreePtr<Operator> op, Syn
 			   RenderIntoProduction( kit, subs->index, Syntax::Production::BOOT_EXPR ) + 
 			   "]";
     }
-    else if( auto al = DynamicTreePtrCast< MakeArray >(op) )    
+    else if( auto al = DynamicTreePtrCast< ArrayLiteral >(op) )    
         return RenderOperandSequence( kit, al->operands );
     else if( DynamicTreePtrCast< This >(op) )
         return "this";
@@ -694,7 +694,7 @@ string Render::RenderExprSeq( const Render::Kit &kit, Sequence<Expression> seq )
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderExteriorCall( const Render::Kit &kit, TreePtr<ExteriorCall> call, Syntax::Production surround_prod ) try
+string Render::RenderExteriorCall( const Render::Kit &kit, TreePtr<SeqArgsCall> call, Syntax::Production surround_prod ) try
 {
 	(void)surround_prod;
     string args_in_parens = RenderExprSeq(kit, call->arguments);
@@ -748,7 +748,7 @@ string Render::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> ex
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderMakeRecord( const Render::Kit &kit, TreePtr<MakeRecord> make_rec, Syntax::Production surround_prod ) try
+string Render::RenderMakeRecord( const Render::Kit &kit, TreePtr<RecordLiteral> make_rec, Syntax::Production surround_prod ) try
 {
 	(void)surround_prod;
     string s;
@@ -762,7 +762,7 @@ string Render::RenderMakeRecord( const Render::Kit &kit, TreePtr<MakeRecord> mak
     // fields, but they need to be sorted based on dependency order when rendering
     // the records (we also aim for repeatability here). This ordering must then
     // be applied to the IdValueMap in order to get a match-up between sub-expressions
-    // and fields. I think C++ side-steps this by diallowing the MakeRecord syntax
+    // and fields. I think C++ side-steps this by diallowing the RecordLiteral syntax
     // in classes where dependencies might matter.
 
     TreePtr<Record> r = GetRecordDeclaration(kit, id).GetTreePtr();
@@ -948,7 +948,7 @@ string Render::RenderInitialisation( const Render::Kit &kit, TreePtr<Initialiser
 	if( TreePtr<Expression> ei = DynamicTreePtrCast<Expression>( init ) )
     {
         // Attempt direct initialisation by providing args for a constructor call
-        if( auto call = DynamicTreePtrCast<ExteriorCall>( ei ) )
+        if( auto call = DynamicTreePtrCast<SeqArgsCall>( ei ) )
         {
             if( auto lu = TreePtr<Lookup>::DynamicCast(call->callee) )
                 if( auto id = TreePtr<InstanceIdentifier>::DynamicCast(lu->member) )
