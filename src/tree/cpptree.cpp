@@ -584,7 +584,7 @@ Syntax::Production Call::GetMyProduction() const
 
 Syntax::Production MakeRecord::GetMyProduction() const
 { 
-	return Production::STATEMENT_SEQ; 
+	return Production::PARENTHESISED; 
 }
 
 //////////////////////////// SizeOf ///////////////////////////////

@@ -776,7 +776,7 @@ string Render::RenderMakeRecord( const Render::Kit &kit, TreePtr<MakeRecord> mak
 
     // Do the syntax
     s += "(" + RenderIntoProduction( kit, make_rec->type, Syntax::Production::BOOT_EXPR ) + ")"; 
-    s += Join( ls, ", " );    
+    s += Join( ls, ", ", "{", "}" );    
     return s;
 }
 DEFAULT_CATCH_CLAUSE
