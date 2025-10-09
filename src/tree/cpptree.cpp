@@ -87,7 +87,7 @@ string SpecificString::GetToken() const
 
 Syntax::Production SpecificString::GetMyProduction() const
 { 
-	return Production::PRIMITIVE; 
+	return Production::PRIMITIVE_EXPR; 
 }
 
 //////////////////////////// SpecificInteger ///////////////////////////////
@@ -183,7 +183,7 @@ string SpecificInteger::GetToken() const
 
 Syntax::Production SpecificInteger::GetMyProduction() const
 { 
-	return Production::PRIMITIVE; 
+	return Production::PRIMITIVE_EXPR; 
 }
 
 //////////////////////////// SpecificFloat ///////////////////////////////
@@ -244,7 +244,7 @@ string SpecificFloat::GetToken() const
 
 Syntax::Production SpecificFloat::GetMyProduction() const
 { 
-	return Production::PRIMITIVE; 
+	return Production::PRIMITIVE_EXPR; 
 }
 
 //////////////////////////// SpecificIdentifier ///////////////////////////////
@@ -416,14 +416,14 @@ Syntax::Production Indirection::GetOperandInDeclaratorProduction() const
 
 Syntax::Production Void::GetMyProduction() const
 { 
-	return Production::TOKEN; // eg auto a = new void;
+	return Production::PRIMITIVE_TYPE; // eg auto a = new void;
 }
 
 //////////////////////////// Boolean ///////////////////////////////
 
 Syntax::Production Boolean::GetMyProduction() const
 { 
-	return Production::TOKEN; // eg auto a = new bool;
+	return Production::PRIMITIVE_TYPE; // eg auto a = new bool;
 }
 
 //////////////////////////// Numeric ///////////////////////////////
@@ -507,14 +507,14 @@ Syntax::Production Record::GetMyProduction() const
 
 Syntax::Production True::GetMyProduction() const
 { 
-	return Production::PRIMITIVE; 
+	return Production::PRIMITIVE_EXPR; 
 }
 
 //////////////////////////// False ///////////////////////////////
 
 Syntax::Production False::GetMyProduction() const
 { 
-	return Production::PRIMITIVE; 
+	return Production::PRIMITIVE_EXPR; 
 }
 
 //////////////////////////// ConditionalOperator ///////////////////////////////
@@ -542,7 +542,7 @@ Syntax::Production MakeArray::GetMyProduction() const
 
 Syntax::Production This::GetMyProduction() const
 { 
-	return Production::PRIMITIVE; 
+	return Production::PRIMITIVE_EXPR; 
 }
 
 //////////////////////////// New ///////////////////////////////

@@ -298,5 +298,3 @@ Sequence<Declaration> ReverseDecls( Sequence<Declaration> c )
 // Bug: still getting top-level prototypes in render after all the steps (may already be a ticket for this)
 // Get Instance::GetMyProduction to vary depending on type: functions are DECLARATION, others are BARE_DECLARATION.
 //     No initiualiser is also BARE_DECLARATION. Drop the semicolons accordingly.
-// MacroStatement can identify itself using an identifier (for the uniquifying/conflict checks), but don't inherit from GoSub
-//    Then do MacroDeclaration the same way. In fact, factor out Macro. Get rid of "SC_CTOR" from renderer
