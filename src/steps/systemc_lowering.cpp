@@ -25,20 +25,18 @@ EnsureConstructorsInSCRecordUsers::EnsureConstructorsInSCRecordUsers()
     auto decls = MakePatternNode< Star<Declaration> >();
     auto bases = MakePatternNode< Star<Base> >();
     auto s_decls_negation = MakePatternNode< Negation<Declaration> >();
-    auto sn_cons = MakePatternNode< Field >();
-    auto sn_cons_type = MakePatternNode< Constructor >();
-    auto sn_params = MakePatternNode< Star<Parameter> >();
+    auto sn_cons_macro = MakePatternNode< MacroDeclaration >(); 
+    auto sn_params = MakePatternNode< Star<Node> >();
     
 	auto r_scclass = MakePatternNode< SCRecord >();
     auto r_base = MakePatternNode< Base >();
     auto tid = MakePatternNode< TypeIdentifier >();
     auto r_token = MakePatternNode< SpecificTypeIdentifier >( s_scclass->GetToken() ); 
-    auto r_cons_macro = MakePatternNode< MacroField >(); 
+    auto r_cons_macro = MakePatternNode< MacroDeclaration >(); 
     auto r_comp = MakePatternNode< Compound >();
-    auto r_id = MakePatternNode<BuildInstanceIdentifierAgent>(""); // constructor id 
-    auto r_ctype = MakePatternNode<Constructor>();
-    auto r_params = MakePatternNode< Star<Parameter> >();
-    auto sc_ctor_macro_name = MakePatternNode< SpecificPreprocessorIdentifier >( "SC_CTOR" ); // #819 style
+    auto ctor_macro_name = MakePatternNode< SpecificPreprocessorIdentifier >( "SC_CTOR" ); // #819 style
+    auto ctor_macro_byname = MakePatternNode< PreprocessorIdentifierByNameAgent >( "SC_CTOR" );                
+    auto ctor_macro_wildname = MakePatternNode< PreprocessorIdentifier >(); // TODO too broad               
 
 	// TODO not restricting properly: as per our name EnsureConstructorsInSCRecordUsers
 	// we should add constructors to the USERS of SC classes (i.e. those that declare
@@ -50,23 +48,24 @@ EnsureConstructorsInSCRecordUsers::EnsureConstructorsInSCRecordUsers()
     s_scclass->identifier = tid;       
     s_scclass->members = (decls);
     decls->restriction = s_decls_negation;
-    s_decls_negation->negand = sn_cons;
-    sn_cons->type = sn_cons_type;
-    sn_cons_type->params = sn_params; // any constructor is enough to stop us
+    s_decls_negation->negand = sn_cons_macro;
+#ifdef RECREATE_856
+    sn_cons_macro->identifier = ctor_macro_name;
+#else
+#ifdef RECREATE_857
+    sn_cons_macro->identifier = ctor_macro_byname;
+#else
+    sn_cons_macro->identifier = ctor_macro_wildname;
+#endif        
+#endif    
+    sn_cons_macro->arguments = sn_params;
     s_scclass->bases = (bases);    
     r_scclass->identifier = tid;       
     r_scclass->members = (decls, r_cons_macro); 
     r_scclass->bases = (bases);    
-    r_cons_macro->type = MakePatternNode<Constructor>();        
-    r_cons_macro->constancy = MakePatternNode<NonConst>();
-    r_cons_macro->access = MakePatternNode< Public >();
-    r_cons_macro->virt = MakePatternNode< NonVirtual >();
     r_cons_macro->initialiser = r_comp;
-    r_cons_macro->identifier = r_id;
-    r_cons_macro->type = r_ctype;
     r_cons_macro->arguments = (tid);
-    r_cons_macro->name = sc_ctor_macro_name;
-    //r_ctype->params = ();
+    r_cons_macro->identifier = ctor_macro_name;
 
     Configure( SEARCH_REPLACE, s_scclass, r_scclass );
 }
@@ -81,10 +80,6 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     auto r_base = MakePatternNode< Base >();
     auto tid = MakePatternNode< TypeIdentifier >();
     auto r_token = MakePatternNode< SpecificTypeIdentifier >( s_scclass->GetToken() ); 
-    auto r_cons = MakePatternNode< Field >(); // TODO for SC_CTOR(ClassName) add MacroField
-    auto r_id = MakePatternNode<BuildInstanceIdentifierAgent>(""); // constructor id 
-    auto r_ctype = MakePatternNode<Constructor>();
-    auto r_params = MakePatternNode< Star<Parameter> >();
     
     auto l1_class = MakePatternNode< InheritanceRecord >();
     auto l1_fields = MakePatternNode< Star<Declaration> >();
@@ -94,9 +89,8 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     auto l1n_call = MakePatternNode<ExteriorCall>();
     auto l1n_lookup = MakePatternNode<Lookup>();
     auto l1_decls = MakePatternNode< Star<Declaration> >();
-    auto l1_cons = MakePatternNode< Field >(); // TODO for SC_CTOR(ClassName) add MacroField
-    auto l1_cons_type = MakePatternNode< Constructor >();
-    auto l1_params = MakePatternNode< Star<Parameter> >();
+    auto l1_cons_macro = MakePatternNode< MacroDeclaration >(); 
+    auto l1_macro_args = MakePatternNode< Star<Node> >();    
     auto l1s_comp = MakePatternNode< Compound >();
     auto l1r_comp = MakePatternNode< Compound >();
     auto l1_field = MakePatternNode< Field >();
@@ -130,12 +124,11 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
        
     // Field decl of our module in some OTHER class: add ExteriorCall to all constructors
     l1_class->identifier = MakePatternNode< TypeIdentifier >(); // not tid, the OTHER class
-    l1_class->members = (l1_fields, l1_cons, l1_field);
+    l1_class->members = (l1_fields, l1_cons_macro, l1_field);
     l1_class->bases = (l1_bases);
-    l1_cons->identifier = MakePatternNode< InstanceIdentifier >();
-    l1_cons->initialiser = l1_delta;
-    l1_cons->type = l1_cons_type;        
-    l1_cons_type->params = l1_params;
+    l1_cons_macro->identifier = MakePatternNode< PreprocessorIdentifier >();
+    l1_cons_macro->arguments = l1_macro_args;
+    l1_cons_macro->initialiser = l1_delta;
     l1_delta->through = l1s_comp;
     l1_delta->overlay = l1r_comp;
     l1s_comp->members = (l1_decls);
@@ -242,27 +235,27 @@ LowerSCProcess::LowerSCProcess( TreePtr< SCTree::Process > s_scprocess )
     auto r_comp = MakePatternNode< Compound >();
     auto module = MakePatternNode< Module >();
     auto r_process_macro = MakePatternNode< MacroStatement >();
-    auto overcons = MakePatternNode< Delta<Instance> >();
+    auto overcons = MakePatternNode< Delta<Declaration> >();
     auto overtype = MakePatternNode< Delta<Type> >();
-    auto s_cons = MakePatternNode< Instance >();
-    auto r_cons = MakePatternNode< Instance >();
+    auto s_cons_macro = MakePatternNode< MacroDeclaration >();
+    auto r_cons_macro = MakePatternNode< MacroDeclaration >();
+    auto macro_args = MakePatternNode< Star<Node> >();
     auto process = MakePatternNode< Instance >();
     auto pre = MakePatternNode< Star<Statement> >();
     auto statements_negation = MakePatternNode< Negation<Statement> >();    
     auto sn_process_macro = MakePatternNode< MacroStatement >();
     auto id = MakePatternNode< InstanceIdentifier >(); 
     auto bases = MakePatternNode< Star<Base> >();
-    auto ctype = MakePatternNode<Constructor>();
-    auto ident = MakePatternNode<InstanceIdentifier>();
+    auto ident = MakePatternNode<PreprocessorIdentifier>();
     auto token = MakePatternNode< SpecificPreprocessorIdentifier >( s_scprocess->GetToken() ); // #819 style
     auto r_func = MakePatternNode<Function>();
                 
     module->members = (overcons, process, decls);
     module->bases = (bases);
-    overcons->through = s_cons;       
-    s_cons->identifier = ident;
-    s_cons->type = ctype;
-    s_cons->initialiser = s_comp;
+    overcons->through = s_cons_macro;       
+    s_cons_macro->identifier = ident;
+    s_cons_macro->arguments = macro_args;
+    s_cons_macro->initialiser = s_comp;
     s_comp->members = cdecls;
     s_comp->statements = (pre);
     pre->restriction = statements_negation;
@@ -270,10 +263,10 @@ LowerSCProcess::LowerSCProcess( TreePtr< SCTree::Process > s_scprocess )
     sn_process_macro->arguments = (id);
     
     // ctype->params = (); // no parameters
-    overcons->overlay = r_cons;
-    r_cons->identifier = ident;
-    r_cons->type = ctype;
-    r_cons->initialiser = r_comp;
+    overcons->overlay = r_cons_macro;
+    r_cons_macro->identifier = ident;
+    r_cons_macro->arguments = macro_args;
+    r_cons_macro->initialiser = r_comp;
     r_comp->members = cdecls;
     r_comp->statements = (pre, r_process_macro);
     r_process_macro->name = token;

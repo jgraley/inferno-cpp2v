@@ -18,7 +18,7 @@ using namespace std;
 
 // Single source of truth for how to get printable name of a type, but
 // if you have an object, please use Traceable::TypeIdName()
-#define TYPE_ID_NAME(TYPE) ( CPPFilt( typeid(TYPE).name() ) )
+#define TYPE_ID_NAME(TYPE) ( ::Traceable::CPPFilt( typeid(TYPE).name() ) )
 
 class Traceable
 {

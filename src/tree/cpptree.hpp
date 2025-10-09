@@ -1180,7 +1180,7 @@ struct PreprocessorIdentifier : Identifier
 
 /// Identifier for a specific label that has been declared somewhere.
 struct SpecificPreprocessorIdentifier : PreprocessorIdentifier,
-                           SpecificIdentifier
+                                        SpecificIdentifier
 {
     SpecificPreprocessorIdentifier() {} ///< Default constructor
     SpecificPreprocessorIdentifier( string s, BoundingRole addr_bounding_role = BoundingRole::NONE ) : 
@@ -1203,12 +1203,13 @@ struct ExteriorCall : GoSub, Expression
 
 /// A proprocessor macro usage that may be used as a field, and takes 
 /// arbitrary operands.
-struct MacroField : Field 
+struct MacroDeclaration : Declaration
 {
 	// TODO be MacroDeclaration, inherit from Declaration and add an initialiser for body of declared function
     NODE_FUNCTIONS_FINAL
-    TreePtr<PreprocessorIdentifier> name;
+    TreePtr<PreprocessorIdentifier> identifier;
     Sequence<Node> arguments; ///< Arguments taken in order, macro so can be anything
+    TreePtr<Initialiser> initialiser;
 };
 
 /// A proprocessor macro usage that may be used as a statement, and takes 

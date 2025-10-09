@@ -608,6 +608,7 @@ XLink SCREngine::GetKey( PatternLink plink ) const
 {
     ASSERT( plink );
     ASSERT( universal_assignments );
+    ASSERT( universal_assignments->count(plink)>0 )("Could not find plink: ")(plink)(" in matching assignments");
     return universal_assignments->at(plink);
 }
 
@@ -616,7 +617,7 @@ XLink SCREngine::GetKey( const Agent *agent ) const
 {
     ASSERT( agent );
     ASSERT( universal_assignments );
-    return universal_assignments->at(plan.all_agents_to_keyers.at(agent));
+    return GetKey(plan.all_agents_to_keyers.at(agent));
 }
 
 

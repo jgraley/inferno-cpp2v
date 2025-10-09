@@ -22,14 +22,14 @@ using namespace VN;
 
 // TODO indent back to previous level at end of string
 #define ERROR_UNKNOWN(V) \
-    string( "\n«" ) + \
-    string( V ) + \
-    string( " not supported in " ) + \
-    string( __func__ ) + \
-    string( "()»\n" );
+    ( string( "\n«" ) + \
+      string( V ) + \
+      string( " not supported in " ) + \
+      string( __func__ ) + \
+      string( "()»\n" ) )
 
 #define ERROR_UNSUPPORTED(P) \
-    ERROR_UNKNOWN( P ? typeid(*P).name() : "<nullptr>" );
+    ERROR_UNKNOWN( P ? TYPE_ID_NAME(*P) : "<nullptr>" )
 
 // For #400 make methods that return strings try-functions
 // and use this for the catch clause.
@@ -196,6 +196,8 @@ string Render::Dispatch( const Render::Kit &kit, TreePtr<Node> node, Syntax::Pro
         return RenderCall( kit, call, surround_prod );
     else if( auto ext_call = TreePtr<ExteriorCall>::DynamicCast(node) )
         return RenderExteriorCall( kit, ext_call, surround_prod );
+    else if( auto macro_decl = TreePtr<MacroDeclaration>::DynamicCast(node) )
+        return RenderMacroDeclaration( kit, macro_decl, surround_prod );
     else if( auto macro_stmt = TreePtr<MacroStatement>::DynamicCast(node) )
         return RenderMacroStatement( kit, macro_stmt, surround_prod );
     else if( auto op = TreePtr<Operator>::DynamicCast(node) ) // Operator is a kind of Expression
@@ -490,9 +492,13 @@ string Render::RenderType( const Render::Kit &kit, TreePtr<CPPTree::Type> type, 
         return "bool";
     	
     // If we got here, we should not be looking at a type that renders expressionally
-	ASSERT( Syntax::GetPrecedence(type->GetMyProduction()) < Syntax::GetPrecedence(Syntax::Production::BOOT_EXPR) )(type);
-    // Production ANONYMOUS relates to the fact that we've provided an empty string for the initial declarator.
-    return RenderTypeAndDeclarator( kit, type, "", Syntax::Production::ANONYMOUS, surround_prod, false ); 
+	if( Syntax::GetPrecedence(type->GetMyProduction()) < Syntax::GetPrecedence(Syntax::Production::BOOT_EXPR) ) 
+	{
+		// Production ANONYMOUS relates to the fact that we've provided an empty string for the initial declarator.
+		return RenderTypeAndDeclarator( kit, type, "", Syntax::Production::ANONYMOUS, surround_prod, false ); 
+	}
+	else
+		return ERROR_UNSUPPORTED(type);
 }
 
 // Insert escapes into a string so it can be put in source code
@@ -879,19 +885,6 @@ string Render::RenderInstanceProto( const Render::Kit &kit,
 
     ASSERT(o->type);
 
-    if( auto smf = TreePtr<MacroField>::DynamicCast(o) )
-    {
-        s += smf->name->GetToken(); 
-        list<string> renders;
-        for( TreePtr<Node> mo : smf->arguments )
-        {               
-            if( auto id = TreePtr<Identifier>::DynamicCast(mo) )
-                renders.push_back( RenderIntoProduction(kit, id, Syntax::Production::PURE_IDENTIFIER) );
-        }
-        s += Join(renders, ", ", "(", ")");
-        return s;
-    }
-
     if( TreePtr<Static> st = DynamicTreePtrCast<Static>(o) )
         if( DynamicTreePtrCast<Const>(st->constancy) )
             constant = true;
@@ -948,8 +941,6 @@ string Render::RenderInstanceInitialisation( const Render::Kit &kit, TreePtr<Ins
     if( DynamicTreePtrCast<Callable>(o->type) )
     {
 		string s;
-        // Establish the scope of the function
-        AutoPush< TreePtr<Node> > cs( scope_stack, TryGetScope( o->identifier ) );
 
         // Put the contents of the body into a Compound-like form even if there's only one
         // Statement there - this is because we will wrangle with them later
@@ -1022,10 +1013,13 @@ string Render::RenderInstance( const Render::Kit &kit, TreePtr<Instance> o, Synt
 	switch( surround_prod )
 	{
 		case Syntax::Production::DEFINITION:
-			// Definition is out-of-line so skip the storage
-			s += RenderInstanceProto( kit, o );
-			s += RenderInstanceInitialisation( kit, o );	
-			s += "\n";		
+			{
+				// Definition is out-of-line so skip the storage
+				s += RenderInstanceProto( kit, o );
+				AutoPush< TreePtr<Node> > cs( scope_stack, TryGetScope( o->identifier ) );
+				s += RenderInstanceInitialisation( kit, o );	
+				s += "\n";		
+			}
 			break;
 			
 		default: // should be one of the statement-level prods
@@ -1041,6 +1035,7 @@ string Render::RenderInstance( const Render::Kit &kit, TreePtr<Instance> o, Synt
 			else
 			{
 				// Emit the whole lot in-line
+				AutoPush< TreePtr<Node> > cs( scope_stack, TryGetScope( o->identifier ) );
 				s += RenderInstanceInitialisation( kit, o );							
 				s += "\n";		
 			}
@@ -1059,7 +1054,7 @@ bool Render::ShouldSplitInstance( const Render::Kit &kit, TreePtr<Instance> o )
     if( DynamicTreePtrCast<Callable>( o->type ) )
     {
         // ----- functions -----
-        if( auto smf = TreePtr<MacroField>::DynamicCast(o) )
+        if( auto smf = TreePtr<MacroDeclaration>::DynamicCast(o) )
             return false; // don't split these
             
         return true;
@@ -1080,6 +1075,63 @@ bool Render::ShouldSplitInstance( const Render::Kit &kit, TreePtr<Instance> o )
 
         return false;
     }
+}
+
+
+string Render::RenderMacroDeclaration( const Render::Kit &kit, TreePtr<MacroDeclaration> md, Syntax::Production surround_prod )
+{
+	(void)surround_prod;
+	string s;
+    // ---- Proto ----
+	s += md->identifier->GetToken(); 
+	list<string> renders;
+	for( TreePtr<Node> mo : md->arguments )
+	{               
+		if( auto id = TreePtr<Identifier>::DynamicCast(mo) )
+			renders.push_back( RenderIntoProduction(kit, id, Syntax::Production::PURE_IDENTIFIER) );
+		else
+			renders.push_back( ERROR_UNSUPPORTED(mo) );
+	}
+	s += Join(renders, ", ", "(", ")");
+	
+	// ---- Initialisation ----
+	if( DynamicTreePtrCast<Uninitialised>(md->initialiser) )
+        return "; // RMD-no-init\n"; // Don't render any initialiser    
+
+	// Put the contents of the body into a Compound-like form even if there's only one
+	// Statement there - this is because we will wrangle with them later
+	Sequence<Statement> code;
+	Collection<Declaration> members;
+	if( TreePtr<Compound> comp = DynamicTreePtrCast<Compound>(md->initialiser) )
+	{
+		members = comp->members;
+		code = comp->statements;
+	}
+	else if( TreePtr<Statement> st = DynamicTreePtrCast<Statement>(md->initialiser) )
+		code.push_back( st );
+	else
+		s += ERROR_UNSUPPORTED(md->initialiser);
+
+	// Seperate the statements into constructor initialisers and "other stuff"
+	Sequence<Statement> inits;
+	Sequence<Statement> remainder;
+	ExtractInits( kit, code, inits, remainder );
+
+	// Render the constructor initialisers if there are any
+	if( !inits.empty() )
+	{
+		s += " :\n";
+		s += RenderConstructorInitList( kit, inits );
+	}
+
+	// Render the other stuff as a Compound so we always get {} in all cases
+	auto r = MakeTreeNode<Compound>();
+	r->members = members;
+	r->statements = remainder;
+	// In case we don't use Compound in future, BRACED should ensure {}
+	s += "\n" + RenderIntoProduction(kit, r, Syntax::Production::BRACED); 
+    
+    return s;
 }
 
 

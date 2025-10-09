@@ -249,6 +249,15 @@ pair<TreePtr<Node>, TreePtr<Node>> LabelIdentifierByNameAgent::GetBounds( string
     return make_pair( minimus, maximus );
 }
 
+//---------------------------------- PreprocessorIdentifierByNameAgent ------------------------------------    
+
+pair<TreePtr<Node>, TreePtr<Node>> PreprocessorIdentifierByNameAgent::GetBounds( string name ) const
+{
+    TreePtr<Node> minimus = MakeTreeNode<SpecificPreprocessorIdentifier>( name, Orderable::BoundingRole::MINIMUS );
+    TreePtr<Node> maximus = MakeTreeNode<SpecificPreprocessorIdentifier>( name, Orderable::BoundingRole::MAXIMUS );
+    return make_pair( minimus, maximus );
+}
+
 //---------------------------------- NestedAgent ------------------------------------    
 
 shared_ptr<PatternQuery> NestedAgent::GetPatternQuery() const

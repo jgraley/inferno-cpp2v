@@ -218,6 +218,23 @@ struct LabelIdentifierByNameAgent : Special<CPPTree::LabelIdentifier>,
     pair<TreePtr<Node>, TreePtr<Node>> GetBounds( string name ) const override;
 };
 
+//---------------------------------- PreprocessorIdentifierByNameAgent ------------------------------------    
+
+struct PreprocessorIdentifierByNameAgent : Special<CPPTree::PreprocessorIdentifier>,                             
+                                           IdentifierByNameAgent  
+{
+    SPECIAL_NODE_FUNCTIONS
+
+    shared_ptr<const Node> GetPatternPtr() const
+    {
+        return shared_from_this();
+    }
+    
+    PreprocessorIdentifierByNameAgent() : IdentifierByNameAgent(string()) {}    
+    PreprocessorIdentifierByNameAgent( string n ) : IdentifierByNameAgent(n) {}                    
+    pair<TreePtr<Node>, TreePtr<Node>> GetBounds( string name ) const override;
+};
+
 //---------------------------------- NestedAgent ------------------------------------    
 
 /// Matching for the nested nature of array and struct nodes, both when declaring and 

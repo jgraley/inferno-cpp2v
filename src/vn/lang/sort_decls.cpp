@@ -82,7 +82,8 @@ bool IsDependOn( TreePtr<Declaration> a, TreePtr<Declaration> b, bool ignore_ind
     // Actually, we really want to see whether declaration a depends on the identifier of b
     // since the rest of b is irrelevent (apart from the above).
     TreePtr<Identifier> ib = GetIdentifierOfDeclaration( b ).GetTreePtr();
-    ASSERT(ib);
+    if(!ib)
+		return false;
           
       //TRACE("Looking for dependencies on ")(*b)(" (identifier ")(*ib)(") under ")(*a)(ignore_indirection?"":" not")(" ignoring indirection\n");      
           
@@ -298,4 +299,4 @@ Sequence<Declaration> ReverseDecls( Sequence<Declaration> c )
 // Get Instance::GetMyProduction to vary depending on type: functions are DECLARATION, others are BARE_DECLARATION.
 //     No initiualiser is also BARE_DECLARATION. Drop the semicolons accordingly.
 // MacroStatement can identify itself using an identifier (for the uniquifying/conflict checks), but don't inherit from GoSub
-//    Then do MacroField the same way. In fact, factor out Macro. Get rid of "SC_CTOR" from renderer
+//    Then do MacroDeclaration the same way. In fact, factor out Macro. Get rid of "SC_CTOR" from renderer
