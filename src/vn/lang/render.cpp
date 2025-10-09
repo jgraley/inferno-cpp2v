@@ -95,7 +95,8 @@ string Render::RenderIntoProduction( const Render::Kit &kit, TreePtr<Node> node,
     Syntax::Production node_prod = node->GetMyProduction();
     bool do_boot = Syntax::GetPrecedence(node_prod) < Syntax::GetPrecedence(surround_prod);    
     bool semicolon = Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::CONDITION) &&
-                     Syntax::GetPrecedence(node_prod) > Syntax::GetPrecedence(Syntax::Production::PROTOTYPE);    
+                     Syntax::GetPrecedence(node_prod) > Syntax::GetPrecedence(Syntax::Production::PROTOTYPE);  
+    bool do_init = surround_prod == Syntax::Production::INITIALISER;
     if( ReadArgs::use_feature_option=='c' )
 		s += SSPrintf("\n// %s Surround %d node %d (%s) from %p boot: %s semcolon: %s\n", 
 					 Tracer::GetPrefix().c_str(), 
@@ -127,6 +128,8 @@ string Render::RenderIntoProduction( const Render::Kit &kit, TreePtr<Node> node,
                       ("Node: ")(node)("\n")
                       ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); 
 			}
+			if( do_init )
+				s += "\n";
             if( do_boot )
                 s += "{ // RIP-stmt\n";
 
@@ -151,7 +154,7 @@ string Render::RenderIntoProduction( const Render::Kit &kit, TreePtr<Node> node,
 					  ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); 
 					  
 			// Deal with expression in initialiser production by prepending =
-			if( surround_prod == Syntax::Production::INITIALISER )
+			if( do_init )
 				s += " = ";
             if( do_boot )
                 s += "(";
@@ -160,10 +163,10 @@ string Render::RenderIntoProduction( const Render::Kit &kit, TreePtr<Node> node,
 				surround_prod = Syntax::Production::BOOT_EXPR;
 			s += Dispatch( kit, node, surround_prod );
 
-            if( semicolon )
-                s += "; // RIP-expr \n";
             if( do_boot )
                 s += ")";            
+            if( semicolon )
+                s += "; // RIP-expr \n";
             break;
         }
         
@@ -776,7 +779,7 @@ string Render::RenderMakeRecord( const Render::Kit &kit, TreePtr<MakeRecord> mak
 
     // Do the syntax
     s += "(" + RenderIntoProduction( kit, make_rec->type, Syntax::Production::BOOT_EXPR ) + ")"; 
-    s += Join( ls, ", ", "{", "}" );    
+    s += Join( ls, ", ", "{", "}" );   // Use of {} in expressions is irregular so handle locally 
     return s;
 }
 DEFAULT_CATCH_CLAUSE
@@ -941,6 +944,7 @@ bool Render::IsDeclared( const Render::Kit &kit, TreePtr<Identifier> id )
 
 string Render::RenderInitialisation( const Render::Kit &kit, TreePtr<Initialiser> init ) try
 {
+	string s;
 	if( DynamicTreePtrCast<Uninitialised>(init) )
         return "; // RIB-no-init\n"; // Don't render any initialiser        
     else if( TreePtr<Expression> ei = DynamicTreePtrCast<Expression>( init ) )
@@ -961,14 +965,9 @@ string Render::RenderInitialisation( const Render::Kit &kit, TreePtr<Initialiser
         catch(DeclarationOf::DeclarationNotFound &)
         {
         }   
-                            
-        // Render expression with an assignment
-        return RenderIntoProduction(kit, ei, Syntax::Production::INITIALISER);
     }
     else if( auto stmt = DynamicTreePtrCast<Statement>(init) )
     {
-		string s;
-
         // Put the contents of the body into a Compound-like form even if there's only one
         // Statement there - this is because we will wrangle with them later
         Sequence<Statement> code;
@@ -991,19 +990,16 @@ string Render::RenderInitialisation( const Render::Kit &kit, TreePtr<Initialiser
         {
             s += " :\n";
             s += RenderConstructorInitList( kit, inits );
-        }
 
-        // Render the other stuff as a Compound so we always get {} in all cases
-        auto r = MakeTreeNode<Compound>();
-        r->members = members;
-        r->statements = remainder;
-        // In case we don't use Compound in future, BRACED should ensure {}
-        s += "\n" + RenderIntoProduction(kit, r, Syntax::Production::BRACED); 
-        
-        return s;
+			// Render the other stuff as a Compound so we always get {} in all cases
+			auto r = MakeTreeNode<Compound>();
+			r->members = members;
+			r->statements = remainder;		
+			init = r;	
+		}	
     }
 
-    return ERROR_UNSUPPORTED(init);
+    return s + RenderIntoProduction(kit, init, Syntax::Production::INITIALISER); 
 }
 DEFAULT_CATCH_CLAUSE
 
@@ -1348,7 +1344,7 @@ string Render::RenderOperandSequence( const Render::Kit &kit,
 	list<string> renders;    
     for( TreePtr<Expression> pe : spe )
 		renders.push_back( RenderIntoProduction( kit, pe, Syntax::Production::COMMA_SEP ) );
-    return Join(renders, ", ", "{", "}"); // irregular use of {}
+    return Join(renders, ", ", "{", "}"); // Use of {} in expressions is irregular so handle locally 
 }
 DEFAULT_CATCH_CLAUSE
 
