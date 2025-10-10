@@ -392,14 +392,13 @@ RemoveSCPrototypes::RemoveSCPrototypes()
     
     s_scope->members = (decls, s_any);
     s_any->disjuncts = (s_cease_inst, s_exit_inst, s_wait_inst, s_next_trigger_inst, s_delta_count_inst);
-    
     // void cease( unsigned char exit_code );
     s_cease_inst->identifier = MakePatternNode< InstanceIdentifierByNameAgent >( "cease" ); 
     s_cease_inst->type = s_cease_type;
     s_cease_type->return_type = MakePatternNode<Void>();
     s_cease_type->params = (s_cease_param);
     s_cease_param->type = s_unsigned_char;
-    s_unsigned_char->width = MakePatternNode<SpecificInteger>(TypeDb::char_bits);
+    s_unsigned_char->width = MakePatternNode<SpecificInteger>((int)TypeDb::char_bits);
     s_cease_param->identifier = MakePatternNode<InstanceIdentifierByNameAgent>( "exit_code" );   
     
     // void exit( int exit_code );
@@ -408,7 +407,7 @@ RemoveSCPrototypes::RemoveSCPrototypes()
     s_exit_type->return_type = MakePatternNode<Void>();
     s_exit_type->params = (s_exit_param);
     s_exit_param->type = s_int;
-    s_int->width = MakePatternNode<SpecificInteger>(TypeDb::int_bits);
+    s_int->width = MakePatternNode<SpecificInteger>((int)TypeDb::int_bits);
     s_exit_param->identifier = MakePatternNode<InstanceIdentifierByNameAgent>( "exit_code" );   
     
     // void wait( int p1 );
@@ -417,7 +416,7 @@ RemoveSCPrototypes::RemoveSCPrototypes()
     s_wait_type->return_type = MakePatternNode<Void>();
     s_wait_type->params = (s_wait_param);
     s_wait_param->type = s_int2;
-    s_int2->width = MakePatternNode<SpecificInteger>(TypeDb::int_bits);
+    s_int2->width = MakePatternNode<SpecificInteger>((int)TypeDb::int_bits);
     s_wait_param->identifier = MakePatternNode<InstanceIdentifierByNameAgent>( "p1" );   
     
     // void next_trigger( int p1 );
@@ -426,7 +425,7 @@ RemoveSCPrototypes::RemoveSCPrototypes()
     s_next_trigger_type->return_type = MakePatternNode<Void>();
     s_next_trigger_type->params = (s_next_trigger_param);
     s_next_trigger_param->type = s_int3;
-    s_int3->width = MakePatternNode<SpecificInteger>(TypeDb::int_bits);
+    s_int3->width = MakePatternNode<SpecificInteger>((int)TypeDb::int_bits);
     s_next_trigger_param->identifier = MakePatternNode<InstanceIdentifierByNameAgent>( "p1" );   
     
     // void sc_delta_count();

@@ -291,10 +291,5 @@ Sequence<Declaration> ReverseDecls( Sequence<Declaration> c )
 // Add a ticket to make Record a true Type not a UserType. Generate TypeDef during parse and just leave them in.
 //     For renderer, Record can just be handled like another type with declarator support, and
 //     PROTOTYPE production triggers prototype declarator. Consider eliding Typedef(Record...).
-// Get the Types down to low expressional (including the TOKEN ones) so that casts, RecordLiteral, sizeof, alignof get the 
-//     () automatically. All other uses of types to set surround explicitly, eg type-and-decl, operator new etc.
-//     Same for when we add templates and <>
-// Bug: getting two #include <systemc.h> in render after all the steps
-// Bug: still getting top-level prototypes in render after all the steps (may already be a ticket for this)
 // Get Instance::GetMyProduction to vary depending on type: functions are DECLARATION, others are BARE_DECLARATION.
 //     No initiualiser is also BARE_DECLARATION. Drop the semicolons accordingly.

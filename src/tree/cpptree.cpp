@@ -521,7 +521,9 @@ Syntax::Production False::GetMyProduction() const
 
 Syntax::Production ConditionalOperator::GetMyProduction() const
 { 
-	return Production::CONDITIONAL; 
+	// This operator borros ASSIGN's precidence and both are right-associative, 
+	// so the two can be mingled freely and will always evaluate right-to-left.
+	return Production::ASSIGN; 
 }
 
 //////////////////////////// Subscript ///////////////////////////////
@@ -678,7 +680,7 @@ Syntax::Production Break::GetMyProduction() const
 
 Syntax::Production Nop::GetMyProduction() const
 { 
-	return Production::BOOT_STATEMENT; // Force a {}
+	return Production::BOOT_STMT_DECL; // Force a {}
 }
 
 //////////////////////////// SpecificPreprocessorIdentifier //////////////////////////////

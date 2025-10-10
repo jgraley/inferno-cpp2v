@@ -25,8 +25,8 @@ EnsureConstructorsInSCRecordUsers::EnsureConstructorsInSCRecordUsers()
     auto decls = MakePatternNode< Star<Declaration> >();
     auto bases = MakePatternNode< Star<Base> >();
     auto s_decls_negation = MakePatternNode< Negation<Declaration> >();
-    auto sn_cons_macro = MakePatternNode< MacroDeclaration >(); 
-    auto sn_params = MakePatternNode< Star<Node> >();
+    auto sx_cons_macro = MakePatternNode< MacroDeclaration >(); 
+    auto sx_params = MakePatternNode< Star<Node> >();
     
 	auto r_scclass = MakePatternNode< SCRecord >();
     auto r_base = MakePatternNode< Base >();
@@ -48,17 +48,17 @@ EnsureConstructorsInSCRecordUsers::EnsureConstructorsInSCRecordUsers()
     s_scclass->identifier = tid;       
     s_scclass->members = (decls);
     decls->restriction = s_decls_negation;
-    s_decls_negation->negand = sn_cons_macro;
+    s_decls_negation->negand = sx_cons_macro;
 #ifdef RECREATE_856
-    sn_cons_macro->identifier = ctor_macro_name;
+    sx_cons_macro->identifier = ctor_macro_name;
 #else
 #ifdef RECREATE_857
-    sn_cons_macro->identifier = ctor_macro_byname;
+    sx_cons_macro->identifier = ctor_macro_byname;
 #else
-    sn_cons_macro->identifier = ctor_macro_wildname;
+    sx_cons_macro->identifier = ctor_macro_wildname;
 #endif        
 #endif    
-    sn_cons_macro->arguments = sn_params;
+    sx_cons_macro->arguments = sx_params;
     s_scclass->bases = (bases);    
     r_scclass->identifier = tid;       
     r_scclass->members = (decls, r_cons_macro); 
@@ -86,8 +86,8 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     auto l1_bases = MakePatternNode< Star<Base> >();
     auto l1_statements = MakePatternNode< Star<Statement> >();
     auto l1_statements_negation = MakePatternNode< Negation<Statement> >();
-    auto l1n_call = MakePatternNode<SeqArgsCall>();
-    auto l1n_lookup = MakePatternNode<Lookup>();
+    auto l1x_call = MakePatternNode<SeqArgsCall>();
+    auto l1x_lookup = MakePatternNode<Lookup>();
     auto l1_decls = MakePatternNode< Star<Declaration> >();
     auto l1_cons_macro = MakePatternNode< MacroDeclaration >(); 
     auto l1_macro_args = MakePatternNode< Star<Node> >();    
@@ -140,10 +140,10 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     l1_field->identifier = l1_field_id;
     
 	l1_statements->restriction = l1_statements_negation;
-	l1_statements_negation->negand = l1n_call;
-	l1n_call->callee = l1n_lookup;
-	l1n_call->arguments = MakePatternNode<Star<Expression>>();
-	l1n_lookup->object = l1_field_id; // this should be enough to prevent spin
+	l1_statements_negation->negand = l1x_call;
+	l1x_call->callee = l1x_lookup;
+	l1x_call->arguments = MakePatternNode<Star<Expression>>();
+	l1x_lookup->object = l1_field_id; // this should be enough to prevent spin
 	// l1_field_id is instance of a SC class and is not constructed in SC language
 	
     l1r_call->callee = l1r_lookup;
@@ -243,7 +243,7 @@ LowerSCProcess::LowerSCProcess( TreePtr< SCTree::Process > s_scprocess )
     auto process = MakePatternNode< Instance >();
     auto pre = MakePatternNode< Star<Statement> >();
     auto statements_negation = MakePatternNode< Negation<Statement> >();    
-    auto sn_process_macro = MakePatternNode< MacroStatement >();
+    auto sx_process_macro = MakePatternNode< MacroStatement >();
     auto id = MakePatternNode< InstanceIdentifier >(); 
     auto bases = MakePatternNode< Star<Base> >();
     auto ident = MakePatternNode<PreprocessorIdentifier>();
@@ -259,8 +259,8 @@ LowerSCProcess::LowerSCProcess( TreePtr< SCTree::Process > s_scprocess )
     s_comp->members = cdecls;
     s_comp->statements = (pre);
     pre->restriction = statements_negation;
-    statements_negation->negand = sn_process_macro;
-    sn_process_macro->arguments = (id);
+    statements_negation->negand = sx_process_macro;
+    sx_process_macro->arguments = (id);
     
     // ctype->params = (); // no parameters
     overcons->overlay = r_cons_macro;
@@ -346,23 +346,25 @@ AddIncludeSystemC::AddIncludeSystemC()
 {
 	string filename = "systemc.h";
 	
+    auto s_conjunction = MakePatternNode<Conjunction<Program>>();
     auto s_program = MakePatternNode<Program>();
     auto r_program = MakePatternNode<Program>();
     auto decls = MakePatternNode<Star<Declaration>>();
-    auto declstuff = MakePatternNode<Stuff<Declaration>>();
+    auto s_stuff = MakePatternNode<Stuff<Program>>();
     auto r_include = MakePatternNode<SystemInclude>();
     auto s_negation = MakePatternNode<Negation<Declaration>>();
-    auto sn_include = MakePatternNode<SystemInclude>();
+    auto sx_include = MakePatternNode<SystemInclude>();
 
-    s_program->members = (decls, declstuff);
+	s_conjunction->conjuncts = (s_program, s_stuff);
+    s_program->members = (decls);
     decls->restriction = s_negation;
-    declstuff->terminus = MakePatternNode<SCNode>(); 
-    s_negation->negand = sn_include;
-    sn_include->filename = MakePatternNode<SpecificString>(filename);   
-    r_program->members = (decls, declstuff, r_include);
+    s_stuff->terminus = MakePatternNode<SCNode>(); 
+    s_negation->negand = sx_include;
+    sx_include->filename = MakePatternNode<SpecificString>(filename);   
+    r_program->members = (decls, r_include);
     r_include->filename = MakePatternNode<SpecificString>(filename);   
 
-    Configure( COMPARE_REPLACE, s_program, r_program );
+    Configure( COMPARE_REPLACE, s_conjunction, r_program );
 }
 
 
@@ -370,20 +372,22 @@ AddIncludeSCExtensions::AddIncludeSCExtensions()
 {
 	string filename = "systemc_extensions.h";
 
+    auto s_conjunction = MakePatternNode<Conjunction<Program>>();
     auto s_program = MakePatternNode<Program>();
     auto r_program = MakePatternNode<Program>();
     auto decls = MakePatternNode<Star<Declaration>>();
-    auto declstuff = MakePatternNode<Stuff<Declaration>>();
+    auto s_stuff = MakePatternNode<Stuff<Program>>();
     auto r_include = MakePatternNode<LocalInclude>();
     auto s_negation = MakePatternNode<Negation<Declaration>>();
-    auto sn_include = MakePatternNode<LocalInclude>();
+    auto sx_include = MakePatternNode<LocalInclude>();
 
-    s_program->members = (decls, declstuff);
+	s_conjunction->conjuncts = (s_program, s_stuff);
+    s_program->members = (decls);
     decls->restriction = s_negation;
-    declstuff->terminus = MakePatternNode<SCExtension>(); 
-    s_negation->negand = sn_include;
-    sn_include->filename = MakePatternNode<SpecificString>(filename);   
-    r_program->members = (decls, declstuff, r_include);
+    s_stuff->terminus = MakePatternNode<SCExtension>(); 
+    s_negation->negand = sx_include;
+    sx_include->filename = MakePatternNode<SpecificString>(filename);   
+    r_program->members = (decls, r_include);
     r_include->filename = MakePatternNode<SpecificString>(filename);   
 
     Configure( COMPARE_REPLACE, s_program, r_program );
