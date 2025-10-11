@@ -288,21 +288,21 @@ Sequence<Declaration> ReverseDecls( Sequence<Declaration> c )
 
 // TODO
 // Every way of getting to anything should be via RenderIntoProduction()
-// Add a ticket to make Record a true Type not a UserType. Generate TypeDef during parse and just leave them in.
+// Add a ticket to make Record a true Type not a TypeDeclaration. Generate TypeDef during parse and just leave them in.
 //     For renderer, Record can just be handled like another type with declarator support, and
 //     PROTOTYPE production triggers prototype declarator. Consider eliding Typedef(Record...).
 // Get Instance::GetMyProduction to vary depending on type: functions are DECLARATION, others are BARE_DECLARATION.
 //     No initiualiser is also BARE_DECLARATION. Drop the semicolons accordingly.
+// Parse::GetConstructor() and Render::RenderConstructionArgs() are heavily duplicated. Refactor into misc.
 
 // Construction : Initialiser 
-// ObjectLiteral : Expression (or Literal : Expression)
 // IdInitPair = <InstanceIdentifier, Initialiser>
 //
-// ClassType obj(args...);         // Instance( ClassType, obj, Construction( args ) ) "direct initialisation"
+// ClassType obj(args...);         // Instance( ClassType (or auto?), obj, Construction( ClassType, args ) ) "direct initialisation"
 //
 // Otherclass(otherargs...) :     
-//     obj(args...)                // IdInitPair( obj, Construction( args ) )
+//     obj(args...)                // IdInitPair( obj, Construction( ClassType, args ) )
 // {
 // }
 //
-// foo = x + ClassType(args...);   // ObjectLiteral( ClassType, Construction( args ) )
+// foo = x + ClassType(args...);   // Construction( ClassType, args )

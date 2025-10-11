@@ -16,7 +16,7 @@ AugTreePtr<Identifier> GetIdentifierOfDeclaration( AugTreePtr<Declaration> d )
 	ASSERT(d);
     if( auto i = AugTreePtr<Instance>::DynamicCast( d ) )
         return GET_CHILD(i, identifier);
-    else if( auto t = AugTreePtr<UserType>::DynamicCast( d ) )
+    else if( auto t = AugTreePtr<TypeDeclaration>::DynamicCast( d ) )
         return GET_CHILD(t, identifier);
     else if( auto l = AugTreePtr<Label>::DynamicCast( d ) )
         return GET_CHILD(l, identifier);
@@ -59,7 +59,7 @@ catch( TransUtilsInterface::UnknownNode &)
 DeclarationOf DeclarationOf::instance; // TODO Use this instead of constructing a temp (could contain lookup tables etc in the future)
 
 // Look for a record, skipping over typedefs. Returns nullptr if not a record.
-AugTreePtr<Record> GetRecordDeclaration( const TransKit &kit, AugTreePtr<TypeIdentifier> id )
+AugTreePtr<Record> TryGetRecordDeclaration( const TransKit &kit, AugTreePtr<TypeIdentifier> id )
 {
     AugTreePtr<Node> ut = DeclarationOf().TryApplyTransformation( kit, id );
     while( auto td = AugTreePtr<Typedef>::DynamicCast(ut) )

@@ -44,8 +44,9 @@ private:
     string RenderType( const Render::Kit &kit, TreePtr<CPPTree::Type> type, Syntax::Production surround_prod );
     string Sanitise( string s );
     string RenderOperator( const Render::Kit &kit, TreePtr<CPPTree::Operator> op, Syntax::Production surround_prod );
-    string RenderCallArgs( const Render::Kit &kit, TreePtr<CPPTree::Call> call );
+    string RenderMapArgs( const Render::Kit &kit, TreePtr<CPPTree::Type> dest_type, Collection<CPPTree::IdValuePair> &args );
     string RenderCall( const Render::Kit &kit, TreePtr<CPPTree::Call> call, Syntax::Production surround_prod );
+    string RenderConstruction( const Render::Kit &kit, TreePtr<CPPTree::Construction> cons, Syntax::Production surround_prod );
     string RenderExprSeq( const Render::Kit &kit, Sequence<CPPTree::Expression> seq );
     string RenderExteriorCall( const Render::Kit &kit, TreePtr<CPPTree::SeqArgsCall> call, Syntax::Production surround_prod );
     string RenderMacroStatement( const Render::Kit &kit, TreePtr<CPPTree::MacroStatement> ms, Syntax::Production surround_prod );

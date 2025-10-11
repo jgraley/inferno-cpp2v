@@ -205,10 +205,10 @@ string Render::Dispatch( const Render::Kit &kit, TreePtr<Node> node, Syntax::Pro
         return RenderType( kit, type, surround_prod );
     else if( auto literal = DynamicTreePtrCast< Literal >(node) )
         return RenderLiteral( kit, literal, surround_prod );
-    else if( auto make_rec = TreePtr<RecordLiteral>::DynamicCast(node) )
-        return RenderMakeRecord( kit, make_rec, surround_prod );
     else if( auto call = TreePtr<Call>::DynamicCast(node) )
         return RenderCall( kit, call, surround_prod );
+    else if( auto make_rec = TreePtr<RecordLiteral>::DynamicCast(node) )
+        return RenderMakeRecord( kit, make_rec, surround_prod );
     else if( auto ext_call = TreePtr<SeqArgsCall>::DynamicCast(node) )
         return RenderExteriorCall( kit, ext_call, surround_prod );
     else if( auto macro_decl = TreePtr<MacroDeclaration>::DynamicCast(node) )
@@ -642,20 +642,16 @@ string Render::RenderOperator( const Render::Kit &kit, TreePtr<Operator> op, Syn
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderCallArgs( const Render::Kit &kit, TreePtr<Call> call ) try
+string Render::RenderMapArgs( const Render::Kit &kit, TreePtr<Type> dest_type, Collection<IdValuePair> &args ) try
 {   
-    // If CallableParams, generate some arguments, resolving the order using the original function type
-    TreePtr<Node> ctype = TypeOf::instance.Get(kit, call->callee).GetTreePtr();
-    ASSERT( ctype );
-
     // Convert f->params from Parameters to Declarations
     Sequence<Declaration> param_sequence;   
-    if( auto f = TreePtr<CallableParams>::DynamicCast(ctype) )  
+    if( auto f = TreePtr<CallableParams>::DynamicCast(dest_type) )  
         for( auto param : f->params )
             param_sequence.push_back(param); 
 
     // Determine args sequence using param sequence
-    Sequence<Expression> arg_sequence  = SortMapById( call->args, param_sequence );
+    Sequence<Expression> arg_sequence  = SortMapById( args, param_sequence );
     
     // Render to strings
     list<string> ls;
@@ -680,7 +676,36 @@ string Render::RenderCall( const Render::Kit &kit, TreePtr<Call> call, Syntax::P
     else
         s += RenderIntoProduction( kit, call->callee, Syntax::Production::POSTFIX );
 
-    s += RenderCallArgs(kit, call);
+    s += RenderMapArgs(kit, TypeOf::instance.Get(kit, call->callee).GetTreePtr(), call->args);
+    return s;
+}
+DEFAULT_CATCH_CLAUSE
+
+
+string Render::RenderConstruction( const Render::Kit &kit, TreePtr<Construction> cons, Syntax::Production surround_prod ) try
+{
+	(void)surround_prod;
+    TreePtr<TypeIdentifier> obj_type_id = DynamicTreePtrCast<TypeIdentifier>(cons->type);
+    ASSERT(obj_type_id); // TODO what if the type is already a record? What if neither Record nor Id?
+    TreePtr<Record> record = TryGetRecordDeclaration(kit, obj_type_id).GetTreePtr();
+    
+    TreePtr<Constructor> found_cons_decl_type;
+    for( TreePtr<Declaration> d : record->members )
+    {
+		auto f = TreePtr<Field>::DynamicCast( d );
+		if( !f )
+			continue;
+			
+		if( auto c = TreePtr<Constructor>::DynamicCast( f->type ) )
+		{
+			// TODO Filter for matching overload here
+			found_cons_decl_type = d;
+			break;
+		}
+	}
+    
+    string s;
+    s += RenderMapArgs(kit, cons->type, cons->args);
     return s;
 }
 DEFAULT_CATCH_CLAUSE
@@ -767,7 +792,7 @@ string Render::RenderMakeRecord( const Render::Kit &kit, TreePtr<RecordLiteral> 
     // and fields. I think C++ side-steps this by diallowing the RecordLiteral syntax
     // in classes where dependencies might matter.
 
-    TreePtr<Record> r = GetRecordDeclaration(kit, id).GetTreePtr();
+    TreePtr<Record> r = TryGetRecordDeclaration(kit, id).GetTreePtr();
     // Make sure we have the same ordering as when the record was rendered
     Sequence<Declaration> sorted_members = SortDecls( r->members, true, unique_ids );
 
@@ -910,7 +935,7 @@ string Render::RenderInstanceProto( const Render::Kit &kit,
     if( con || de )
     {
 		name = ScopeResolvingPrefix(kit, o->identifier, Syntax::Production::SCOPE_RESOLVE);
-        // TODO use GetRecordDeclaration( Typeof( o->identifier ) ) and leave scopes out of it
+        // TODO use TryGetRecordDeclaration( Typeof( o->identifier ) ) and leave scopes out of it
         TreePtr<Record> rec = DynamicTreePtrCast<Record>( TryGetScope( o->identifier ) );
         ASSERT( rec );        
         name += (de ? "~" : ""); 
@@ -960,7 +985,7 @@ string Render::RenderInitialisation( const Render::Kit &kit, TreePtr<Initialiser
         if( auto call = DynamicTreePtrCast<Call>( ei ) ) try
         {       
             if( TypeOf::instance.TryGetConstructedExpression( kit, call ).GetTreePtr() )        
-                return RenderCallArgs(kit, call) + ";\n";
+                return RenderMapArgs(kit, TypeOf::instance.Get(kit, call->callee).GetTreePtr(), call->args) + ";\n";
         }
         catch(DeclarationOf::DeclarationNotFound &)
         {

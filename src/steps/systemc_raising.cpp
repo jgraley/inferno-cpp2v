@@ -17,7 +17,7 @@ RaiseSCType::RaiseSCType( TreePtr< Type > lr_sctype )
     auto s_scope = MakePatternNode< DeclScope >();
     auto r_scope = MakePatternNode< DeclScope >();
     auto decls = MakePatternNode< Star<Declaration> >();
-    auto s_usertype = MakePatternNode< UserType >();
+    auto s_usertype = MakePatternNode< TypeDeclaration >();
     auto s_token = MakePatternNode< TypeIdentifierByNameAgent >( lr_sctype->GetToken() );                
     auto r_embedded = MakePatternNode< EmbeddedSearchReplace<Node> >( over, s_token, lr_sctype );    
     
@@ -41,7 +41,7 @@ RaiseSCHierarchicalClass::RaiseSCHierarchicalClass( TreePtr< SCRecord > lr_sccla
     auto decls = MakePatternNode< Star<Declaration> >();
     auto l_decls = MakePatternNode< Star<Declaration> >();
     auto l_bases = MakePatternNode< Star<Base> >();
-    auto s_usertype = MakePatternNode< UserType >();
+    auto s_usertype = MakePatternNode< TypeDeclaration >();
     auto ls_class = MakePatternNode< InheritanceRecord >();
     auto ls_base = MakePatternNode< Base >();
     auto l_tid = MakePatternNode< TypeIdentifier >();

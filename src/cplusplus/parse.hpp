@@ -15,6 +15,8 @@
 
 #include <unistd.h> // for get_current_dir_name()
 
+//#define NEWS
+
 using namespace CPPTree; // TODO put parse in cpp file so this using does not pollute
 
 #define INFERNO_TRIPLE "arm-linux"
@@ -201,7 +203,7 @@ private:
             TreePtr<Node> n( ident_track.TryGet(&II, TryGetCXXScopeSpecifier(SS)) );
             if (n)
             {
-                TreePtr<UserType> t = DynamicTreePtrCast<UserType> (n);
+                TreePtr<TypeDeclaration> t = DynamicTreePtrCast<TypeDeclaration> (n);
                 if (t)
                     return hold_type.ToRaw(t->identifier);
             }
@@ -813,7 +815,7 @@ private:
 				// we can detect when an array initialiser has been inserted for a record instance and
 				// change it.
                 if( auto ti = DynamicTreePtrCast<TypeIdentifier>(o->type) )
-                    if( TreePtr<Record> r = GetRecordDeclaration(kit, ti).GetTreePtr() )
+                    if( TreePtr<Record> r = TryGetRecordDeclaration(kit, ti).GetTreePtr() )
                         o->initialiser = CreateRecordLiteralFromArrayLiteral(
                                 ai, r);
 			}
@@ -836,23 +838,23 @@ private:
             TreePtr<Declaration> d = hold_decl.FromRaw(Dcl);
             auto our_inst = DynamicTreePtrCast<Instance> (d);
             ASSERT( our_inst )(d);
-            ASSERT( our_inst->identifier );
-            TreePtr<Instance> memb_type = GetConstructor( our_inst->type );
-            ASSERT( memb_type );
-            ASSERT( memb_type->identifier );
-            // Build a lookup to the constructor, using the specified subobject and the matching constructor
-            auto lu = MakeTreeNode<Lookup>();
-            lu->object = our_inst->identifier;
-            lu->member = memb_type->identifier;            
-            Sequence<Expression> args;
-            CollectArgs( &args, Args, NumArgs );
-            
+            ASSERT( our_inst->identifier );            
 #ifdef NEWS            
             auto c = MakeTreeNode<Construction>();
-			TreePtr<Node> t = TypeOf::instance(lu, all_decls).GetTreePtr();
+            c->type = our_inst->type;
+			TreePtr<Node> type = TypeOf::instance(lu, all_decls).GetTreePtr();
 			if( TreePtr<CallableParams> p = DynamicTreePtrCast<CallableParams>(t) )
 				PopulateMapOperator( c->args, args, p );
 #else            
+            TreePtr<Instance> memb_o = GetConstructor( our_inst->type );
+            ASSERT( memb_o );
+            ASSERT( memb_o->identifier );
+            // Build a lookup to the constructor, using the specified subobject and the matching constructor
+            auto lu = MakeTreeNode<Lookup>();
+            lu->object = our_inst->identifier;
+            lu->member = memb_o->identifier;            
+            Sequence<Expression> args;
+            CollectArgs( &args, Args, NumArgs );
             TreePtr<Call> c = CreateCall( args, lu );
 #endif            
             our_inst->initialiser = c;
@@ -1505,7 +1507,7 @@ private:
 		ASSERT( our_field )("Didn't get type for ")(our_field);
         DefaultTransUtils utils(all_decls);
         TransKit kit { &utils };
-        TreePtr<Record> memb_decl = GetRecordDeclaration(kit, memb_type).GetTreePtr();
+        TreePtr<Record> memb_decl = TryGetRecordDeclaration(kit, memb_type).GetTreePtr();
 		ASSERT( memb_decl )("Didn't get record decl for ")(memb_type)(" field: ")(our_field);
         TreePtr<Instance> memb_cons;
         for( TreePtr<Declaration> memb_d : memb_decl->members )
@@ -1700,7 +1702,7 @@ private:
         ASSERT( tibase );
         DefaultTransUtils utils(all_decls);
         TransKit kit { &utils };
-        TreePtr<Record> rbase = GetRecordDeclaration(kit, tibase).GetTreePtr();
+        TreePtr<Record> rbase = TryGetRecordDeclaration(kit, tibase).GetTreePtr();
         ASSERT( rbase )( "thing on left of ./-> is not a record/record ptr" );
         TreePtr<Instance> m = FindMemberByName( kit, rbase, string(Member.getName()) ).GetTreePtr();
         ASSERT(m)("in r.m or (&r)->m, could not find m in r\n"
@@ -2063,7 +2065,7 @@ private:
         ASSERT(id);
         DefaultTransUtils utils(all_decls);
         TransKit kit { &utils };
-        TreePtr<Record> r = GetRecordDeclaration( kit, id ).GetTreePtr();
+        TreePtr<Record> r = TryGetRecordDeclaration( kit, id ).GetTreePtr();
 
         for( TreePtr<Declaration> d : r->members )
         {
@@ -2148,7 +2150,7 @@ private:
         TransKit kit { &utils };
         if( TreePtr<ArrayLiteral> ai = DynamicTreePtrCast<ArrayLiteral>(e) )
             if( TreePtr<TypeIdentifier> ti = DynamicTreePtrCast<TypeIdentifier>(t) )
-                if( TreePtr<Record> r = GetRecordDeclaration(kit, ti).GetTreePtr() )
+                if( TreePtr<Record> r = TryGetRecordDeclaration(kit, ti).GetTreePtr() )
                     e = CreateRecordLiteralFromArrayLiteral( ai, r );
 
         return hold_expr.ToRaw( e );

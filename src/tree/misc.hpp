@@ -22,7 +22,7 @@ public:
 
 // Look for a record, skipping over typedefs. Returns nullptr if not a record.
 // TODO make this a Transformation
-AugTreePtr<CPPTree::Record> GetRecordDeclaration( const TransKit &kit, AugTreePtr<CPPTree::TypeIdentifier> id );
+AugTreePtr<CPPTree::Record> TryGetRecordDeclaration( const TransKit &kit, AugTreePtr<CPPTree::TypeIdentifier> id );
 
 // Hunt through a record and its bases to find the named member
 AugTreePtr<CPPTree::Instance> FindMemberByName( const TransKit &kit, AugTreePtr<CPPTree::Record> r, string name );

@@ -113,7 +113,7 @@ DeclsToModule::DeclsToModule()
     auto vdecls = MakePatternNode< Star<Declaration> >();
     auto vstmts = MakePatternNode< Star<Statement> >();
     auto fn = MakePatternNode<Field>();
-    auto ut = MakePatternNode<UserType>();
+    auto ut = MakePatternNode<TypeDeclaration>();
     auto ft = MakePatternNode<Thread>();
     auto stuff = MakePatternNode< Stuff<Initialiser> >();
     auto s_comp = MakePatternNode<Compound>();

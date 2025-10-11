@@ -75,7 +75,7 @@ struct Type : virtual Node
 	Production GetOperandInDeclaratorProduction() const override;   
 };
 
-/// A declaration specifies the creation of a UserType or an Instance. 
+/// A declaration specifies the creation of a TypeDeclaration or an Instance. 
 /** Declaration can appear where statements can and also inside structs etc
  and at top level. */
 struct Declaration : virtual Node 
@@ -678,7 +678,7 @@ struct Labeley : Type
 /* The user type node is a declaration and goes into a declaration scope. It points
  to a TypeIdentifier, and all usages of the type actually point to the
  TypeIdentifier. TODO rename to TypeDecl or similar */
-struct UserType : Declaration 
+struct TypeDeclaration : Declaration 
 { 
     NODE_FUNCTIONS
     TreePtr<TypeIdentifier> identifier; ///< The handle to the type that has been declared
@@ -688,7 +688,7 @@ struct UserType : Declaration
 /// Represents a typedef. 
 /** Typedef is to the specified type. We do not expand these at parse, but try to retain
     them for as long as possible */
-struct Typedef : UserType
+struct Typedef : TypeDeclaration
 {
     NODE_FUNCTIONS_FINAL
     TreePtr<Type> type; ///< emulate this type
@@ -700,12 +700,12 @@ struct Typedef : UserType
 /** The set of member Declaration (which will be Field
  or Static) is in the Scope. They can be variables/objects in all 
  cases and additionally Callable instances in Struct/Class. */
-struct Record : UserType,
+struct Record : TypeDeclaration,
                 DeclScope // Member declarations go in here
 {
     NODE_FUNCTIONS
     
-    virtual string GetColour() const { return UserType::GetColour(); } // UserType wins
+    virtual string GetColour() const { return TypeDeclaration::GetColour(); } // TypeDeclaration wins
 	Production GetMyProduction() const override;	    
 };
 
@@ -950,6 +950,7 @@ struct Call : GoSub, Expression, Uncombable
 struct Construction : Initialiser, Uncombable
 {
     NODE_FUNCTIONS_FINAL	
+    TreePtr<Type> type;
 	Collection<IdValuePair> args;
 	
 	Production GetMyProduction() const override;

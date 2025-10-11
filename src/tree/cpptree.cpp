@@ -582,6 +582,13 @@ Syntax::Production Call::GetMyProduction() const
 	return Production::POSTFIX; 
 }
 
+//////////////////////////// Construction ///////////////////////////////
+
+Syntax::Production Construction::GetMyProduction() const
+{ 
+	return Production::PARENTHESISED; 
+}
+
 //////////////////////////// RecordLiteral ///////////////////////////////
 
 Syntax::Production RecordLiteral::GetMyProduction() const
