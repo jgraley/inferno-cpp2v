@@ -925,15 +925,6 @@ struct IdValuePair : virtual Node
     virtual string GetColour() const { return "/set28/8"; }    
 };
 
-/// An operator with operands whose order is established by mapping
-/** Maps a multiplicity of Instances to Expressions via their InstanceIdentifiers.*/
-struct IdValueMap : virtual Node
-{
-    NODE_FUNCTIONS
-    Collection<IdValuePair> operands; ///< Operands whose relationship is established via identifiers
-};
-
-
 struct GoSub : virtual Node
 {
     NODE_FUNCTIONS
@@ -945,9 +936,10 @@ struct GoSub : virtual Node
  calls have callee -> some InstanceIdentifier for a Callable Instance.
  Arguments passed via IdValueMap - mapped to the parameters in the callee
  type (if it's a CallableParams). */
-struct Call : GoSub, IdValueMap, Expression, Uncombable
+struct Call : GoSub, Expression, Uncombable
 {
-    NODE_FUNCTIONS_FINAL
+    NODE_FUNCTIONS_FINAL	
+	Collection<IdValuePair> operands;
 	
 	Production GetMyProduction() const override;
 };
@@ -956,10 +948,11 @@ struct Call : GoSub, IdValueMap, Expression, Uncombable
 /** Uses a map to associate elements with corresponding record 
  members. We also give the record type explicitly since the map is
  not enough information. */
-struct RecordLiteral : IdValueMap, Expression
+struct RecordLiteral : Expression
 {
     NODE_FUNCTIONS_FINAL
     TreePtr<TypeIdentifier> type; ///< handle of the type of the record we are making
+	Collection<IdValuePair> operands;
 	
 	Production GetMyProduction() const override;
 };

@@ -51,11 +51,8 @@ private:
     string RenderMacroStatement( const Render::Kit &kit, TreePtr<CPPTree::MacroStatement> ms, Syntax::Production surround_prod );
     string RenderExpression( const Render::Kit &kit, TreePtr<CPPTree::Initialiser> expression, Syntax::Production surround_prod );
     string RenderMakeRecord( const Render::Kit &kit, TreePtr<CPPTree::RecordLiteral> make_rec, Syntax::Production surround_prod );
-    string RenderMapInOrder( const Render::Kit &kit, 
-                             TreePtr<CPPTree::IdValueMap> ro,
-                             Sequence<CPPTree::Declaration> key_sequence );
-	Sequence<CPPTree::Expression> SortMapOperands( TreePtr<CPPTree::IdValueMap> ro,
-                                                   Sequence<CPPTree::Declaration> key_sequence );  
+	Sequence<CPPTree::Expression> SortMapById( Collection<CPPTree::IdValuePair> &id_value_map,
+                                               Sequence<CPPTree::Declaration> key_sequence );  
     string RenderAccessSpec( const Render::Kit &kit, TreePtr<CPPTree::AccessSpec> access, Syntax::Production surround_prod );
     string RenderStorage( const Render::Kit &kit, TreePtr<CPPTree::Instance> st ); // No actual storage node
     void ExtractInits( const Render::Kit &kit, Sequence<CPPTree::Statement> &body, 

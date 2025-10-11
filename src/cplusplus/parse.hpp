@@ -1134,7 +1134,7 @@ private:
         // If CallableParams, fill in the args map based on the supplied args and original function type
         TreePtr<Node> t = TypeOf::instance(callee, all_decls).GetTreePtr();
         if( TreePtr<CallableParams> p = DynamicTreePtrCast<CallableParams>(t) )
-            PopulateMapOperator( c, args, p );
+            PopulateMapOperator( c->operands, args, p );
 
         return c;
     }
@@ -1795,13 +1795,13 @@ private:
 
         // Fill in the RecordLiteral operands collection with pairs that relate operands to their member ids
         TreePtr<Scope> s = r;
-        PopulateMapOperator( ri, ai->operands, s );
+        PopulateMapOperator( ri->operands, ai->operands, s );
 
         return ri;
     }
 
     // Populate a map operator using elements from a sequence of expressions
-    void PopulateMapOperator( TreePtr<IdValueMap> mapop, // MapOperands corresponding to the elements of ai go in here
+    void PopulateMapOperator( Collection<IdValuePair> &id_value_map, // MapOperands corresponding to the elements of ai go in here
             Sequence<Expression> &seq, // Operands to insert, ordered as per the input program
             TreePtr<Node> key ) // Original Scope that established ordering, must be in backing_ordering
 
@@ -1829,7 +1829,7 @@ private:
                     auto mi = MakeTreeNode<IdValuePair>();
                     mi->key = i->identifier;
                     mi->value = v;
-                    mapop->operands.insert( mi );
+                    id_value_map.insert( mi );
 
                     ++seq_it;
                 }
@@ -1837,7 +1837,7 @@ private:
         }        
         ASSERT( seq_it == seq.end() )
               ("Too many arguments to function/struct init (we allow too few for poor mans overlading, but not too many)\n")
-              ("Key was ")(*key)(" for map operator ")(mapop)("\n");
+              ("Key was ")(*key)(" for map ")(id_value_map)("\n");
     }
 
     TreePtr<String> CreateString( const char *s )

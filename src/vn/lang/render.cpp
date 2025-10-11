@@ -655,7 +655,7 @@ string Render::RenderCallArgs( const Render::Kit &kit, TreePtr<Call> call ) try
             param_sequence.push_back(param); 
 
     // Determine args sequence using param sequence
-    Sequence<Expression> arg_sequence  = SortMapOperands( call, param_sequence );
+    Sequence<Expression> arg_sequence  = SortMapById( call->operands, param_sequence );
     
     // Render to strings
     list<string> ls;
@@ -763,7 +763,7 @@ string Render::RenderMakeRecord( const Render::Kit &kit, TreePtr<RecordLiteral> 
     // is implied in the generalised case: the record type has a collection of 
     // fields, but they need to be sorted based on dependency order when rendering
     // the records (we also aim for repeatability here). This ordering must then
-    // be applied to the IdValueMap in order to get a match-up between sub-expressions
+    // be applied to the Collection<IdValuePair> in order to get a match-up between sub-expressions
     // and fields. I think C++ side-steps this by diallowing the RecordLiteral syntax
     // in classes where dependencies might matter.
 
@@ -772,7 +772,7 @@ string Render::RenderMakeRecord( const Render::Kit &kit, TreePtr<RecordLiteral> 
     Sequence<Declaration> sorted_members = SortDecls( r->members, true, unique_ids );
 
     // Determine args sequence using param sequence
-    Sequence<Expression> sub_expr_sequence  = SortMapOperands( make_rec, sorted_members );
+    Sequence<Expression> sub_expr_sequence  = SortMapById( make_rec->operands, sorted_members );
     
     // Render to strings
     list<string> ls;
@@ -787,8 +787,8 @@ string Render::RenderMakeRecord( const Render::Kit &kit, TreePtr<RecordLiteral> 
 DEFAULT_CATCH_CLAUSE
 
 
-Sequence<Expression> Render::SortMapOperands( TreePtr<IdValueMap> ro,
-                                              Sequence<Declaration> key_sequence )
+Sequence<Expression> Render::SortMapById( Collection<IdValuePair> &id_value_map,
+                                          Sequence<Declaration> key_sequence )
 {   
     Sequence<Expression> out_sequence;
     for( TreePtr<Declaration> d : key_sequence )
@@ -800,7 +800,7 @@ Sequence<Expression> Render::SortMapOperands( TreePtr<IdValueMap> ro,
             if( !DynamicTreePtrCast<Callable>( i->type ) )
             {
                 // search init for matching member (not a map: this is a Collection of IdValuePair nodes)
-                for( TreePtr<IdValuePair> mi : ro->operands )
+                for( TreePtr<IdValuePair> mi : id_value_map )
                 {
                     if( i->identifier == mi->key )
                     {
