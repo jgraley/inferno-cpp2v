@@ -655,7 +655,7 @@ string Render::RenderCallArgs( const Render::Kit &kit, TreePtr<Call> call ) try
             param_sequence.push_back(param); 
 
     // Determine args sequence using param sequence
-    Sequence<Expression> arg_sequence  = SortMapById( call->operands, param_sequence );
+    Sequence<Expression> arg_sequence  = SortMapById( call->args, param_sequence );
     
     // Render to strings
     list<string> ls;

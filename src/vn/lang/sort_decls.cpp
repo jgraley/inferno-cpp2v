@@ -293,3 +293,16 @@ Sequence<Declaration> ReverseDecls( Sequence<Declaration> c )
 //     PROTOTYPE production triggers prototype declarator. Consider eliding Typedef(Record...).
 // Get Instance::GetMyProduction to vary depending on type: functions are DECLARATION, others are BARE_DECLARATION.
 //     No initiualiser is also BARE_DECLARATION. Drop the semicolons accordingly.
+
+// Construction : Initialiser 
+// ObjectLiteral : Expression (or Literal : Expression)
+// IdInitPair = <InstanceIdentifier, Initialiser>
+//
+// ClassType obj(args...);         // Instance( ClassType, obj, Construction( args ) ) "direct initialisation"
+//
+// Otherclass(otherargs...) :     
+//     obj(args...)                // IdInitPair( obj, Construction( args ) )
+// {
+// }
+//
+// foo = x + ClassType(args...);   // ObjectLiteral( ClassType, Construction( args ) )

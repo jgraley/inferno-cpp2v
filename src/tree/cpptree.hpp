@@ -939,7 +939,18 @@ struct GoSub : virtual Node
 struct Call : GoSub, Expression, Uncombable
 {
     NODE_FUNCTIONS_FINAL	
-	Collection<IdValuePair> operands;
+	Collection<IdValuePair> args;
+	
+	Production GetMyProduction() const override;
+};
+
+/// Lives in Initialiser context and indicates that something will be constructed,
+/// i.e. a call to a constructor will be made. The type and object id are assumed
+/// to be nearby, i.e. this can't be used in isolation.
+struct Construction : Initialiser, Uncombable
+{
+    NODE_FUNCTIONS_FINAL	
+	Collection<IdValuePair> args;
 	
 	Production GetMyProduction() const override;
 };

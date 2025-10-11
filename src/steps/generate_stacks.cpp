@@ -147,7 +147,7 @@ ReturnViaTemp::ReturnViaTemp()
     m_call->callee = m_any;
     m_any->disjuncts = ( func_id, m_lookup );
     m_lookup->member = func_id;
-    m_call->operands = (m_operands);
+    m_call->args = (m_operands);
     mr_comp->statements = (m_call, r_temp_id);
     auto embedded_m = MakePatternNode< EmbeddedSearchReplace<Scope> >( r_module, ms_gg, mr_comp );
     
@@ -231,7 +231,7 @@ AddLinkAddress::AddLinkAddress()
     auto ll_over = MakePatternNode< Delta<Statement> >();
     auto m_gg = MakePatternNode< GreenGrass<Statement> >();
     auto ll_gg = MakePatternNode< GreenGrass<Statement> >();
-    auto mr_operand = MakePatternNode<IdValuePair>();
+    auto mr_new_arg = MakePatternNode<IdValuePair>();
 
     ll_gg->through = ll_return;
     ll_over->overlay = llr_comp;        
@@ -242,13 +242,13 @@ AddLinkAddress::AddLinkAddress()
     auto embedded_ll = MakePatternNode< EmbeddedSearchReplace<Compound> >( lr_comp, ll_gg, llr_comp );   
    
     m_gg->through = ms_call;
-    ms_call->operands = (MakePatternNode< Star<IdValuePair> >());
+    ms_call->args = (MakePatternNode< Star<IdValuePair> >());
     ms_call->callee = l_inst_id;
     mr_comp->statements = (mr_call, mr_label);  
-    mr_call->operands = (ms_call->operands, mr_operand);
+    mr_call->args = (ms_call->args, mr_new_arg);
     mr_call->callee = l_inst_id;
-    mr_operand->key = lr_retaddr_id;
-    mr_operand->value = mr_labelid;
+    mr_new_arg->key = lr_retaddr_id;
+    mr_new_arg->value = mr_labelid;
     mr_label->identifier = mr_labelid;    
     
     auto embedded_m = MakePatternNode< EmbeddedSearchReplace<Scope> >( r_module, m_gg, mr_comp );
@@ -323,13 +323,13 @@ ParamsViaTemps::ParamsViaTemps()
     auto over = MakePatternNode< Delta<Declaration> >();
     
     ms_call->callee = func_id;
-    ms_call->operands = (m_operands, ms_operand);
+    ms_call->args = (m_operands, ms_operand);
     ms_operand->key = param_id;
     ms_operand->value = m_expr;
     mr_comp->statements = (mr_assign, mr_call);
     mr_assign->operands = (r_temp_id, m_expr);
     mr_call->callee = func_id;
-    mr_call->operands = (m_operands);
+    mr_call->args = (m_operands);
     auto embedded_m = MakePatternNode< EmbeddedSearchReplace<Scope> >( r_module, ms_call, mr_comp );
     
     s_module->members = (decls, over);

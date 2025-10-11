@@ -846,7 +846,15 @@ private:
             lu->member = memb_type->identifier;            
             Sequence<Expression> args;
             CollectArgs( &args, Args, NumArgs );
+            
+#ifdef NEWS            
+            auto c = MakeTreeNode<Construction>();
+			TreePtr<Node> t = TypeOf::instance(lu, all_decls).GetTreePtr();
+			if( TreePtr<CallableParams> p = DynamicTreePtrCast<CallableParams>(t) )
+				PopulateMapOperator( c->args, args, p );
+#else            
             TreePtr<Call> c = CreateCall( args, lu );
+#endif            
             our_inst->initialiser = c;
         }
         
@@ -1134,7 +1142,7 @@ private:
         // If CallableParams, fill in the args map based on the supplied args and original function type
         TreePtr<Node> t = TypeOf::instance(callee, all_decls).GetTreePtr();
         if( TreePtr<CallableParams> p = DynamicTreePtrCast<CallableParams>(t) )
-            PopulateMapOperator( c->operands, args, p );
+            PopulateMapOperator( c->args, args, p );
 
         return c;
     }
@@ -1804,7 +1812,6 @@ private:
     void PopulateMapOperator( Collection<IdValuePair> &id_value_map, // MapOperands corresponding to the elements of ai go in here
             Sequence<Expression> &seq, // Operands to insert, ordered as per the input program
             TreePtr<Node> key ) // Original Scope that established ordering, must be in backing_ordering
-
     {
         // Get a reference to the ordered list of members for this scope from a backing list
         Sequence<Declaration> &ordered = backing_ordering.at(key);

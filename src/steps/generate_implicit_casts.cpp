@@ -46,7 +46,7 @@ GenerateImplicitCasts::GenerateImplicitCasts()
     s_arg_value->pattern = s_arg_type;
     s_arg_type->negand = type;
     auto other_args = MakePatternNode< Star<IdValuePair> >();
-    s_call->operands = ( s_arg, other_args );
+    s_call->args = ( s_arg, other_args );
 
     auto r_call = MakePatternNode<Call>();
     auto r_arg = MakePatternNode< IdValuePair >();
@@ -55,7 +55,7 @@ GenerateImplicitCasts::GenerateImplicitCasts()
     r_arg->value = r_cast;
     r_cast->operand = s_arg->value;
     r_cast->type = type;
-    r_call->operands = ( r_arg, other_args );
+    r_call->args = ( r_arg, other_args );
     r_call->callee = callee;
     
     Configure(SEARCH_REPLACE, s_call, r_call);

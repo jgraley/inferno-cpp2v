@@ -662,7 +662,7 @@ ExtractCallParams::ExtractCallParams()
     func->params = MakePatternNode<Star<Parameter>>();
     field->identifier = func_id;
     
-    s_call->operands = (params, s_param);
+    s_call->args = (params, s_param);
     s_param->value = all;
     all->conjuncts = (value, x_not);
     s_param->key = id;
@@ -677,7 +677,7 @@ ExtractCallParams::ExtractCallParams()
     r_temp->type = type;
     r_ce->statements = (r_assign, r_call);
     r_assign->operands = (r_temp_id, value);
-    r_call->operands = (params, r_param);
+    r_call->args = (params, r_param);
     r_param->value = r_temp_id;    
     r_param->key = id;
     r_call->callee = func_id;
