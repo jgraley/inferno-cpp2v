@@ -97,7 +97,7 @@ string Render::RenderIntoProduction( const Render::Kit &kit, TreePtr<Node> node,
     bool semicolon = Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::CONDITION) &&
                      Syntax::GetPrecedence(node_prod) > Syntax::GetPrecedence(Syntax::Production::PROTOTYPE);  
     bool do_init = surround_prod == Syntax::Production::INITIALISER;
-    if( ReadArgs::use_feature_option=='c' )
+    if( ReadArgs::use.count("c") )
 		s += SSPrintf("\n// %s Surround %d node %d (%s) from %p boot: %s semcolon: %s init: %s\n", 
 					 Tracer::GetPrefix().c_str(), 
 					 Syntax::GetPrecedence(surround_prod), 
@@ -107,10 +107,7 @@ string Render::RenderIntoProduction( const Render::Kit &kit, TreePtr<Node> node,
 					 do_boot ? "yes" : "no",
 					 semicolon ? "yes" : "no",
 					 do_init ? "yes" : "no" );
-        
-    ASSERT( node_prod != Syntax::Production::UNDEFINED )
-          ("Rendering expression: ")(node)(" surr prod: %d",(int)surround_prod)(" got no ideal production\n");
-    
+           
     switch(node_prod)
     {
         case Syntax::Production::BOOT_STMT_DECL...Syntax::Production::TOP_STMT_DECL: // Statement productions at different precedences
@@ -129,19 +126,17 @@ string Render::RenderIntoProduction( const Render::Kit &kit, TreePtr<Node> node,
                       ("Node: ")(node)("\n")
                       ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); 
 			}
-			if( do_init )
-				s += "\n";
             if( do_boot )
-                s += "{ // RIP-stmt\n";
+                s += "{\n";
 
             if( do_boot || semicolon )
 				surround_prod = Syntax::Production::BOOT_STMT_DECL;
 			s += Dispatch( kit, node, surround_prod );
 			
             if( semicolon )
-                s += "; // RIP-stmt\n";
+                s += ";\n";
             if( do_boot )
-                s += "} // RIP-stmt\n";            
+                s += "}\n";            
             break;
         }
 
@@ -160,14 +155,18 @@ string Render::RenderIntoProduction( const Render::Kit &kit, TreePtr<Node> node,
             if( do_boot )
                 s += "(";
 
-            if( do_boot || semicolon )
+			if( do_boot )
+				surround_prod = Syntax::Production::BOOT_EXPR;
+			else if( do_init )
+				surround_prod = Syntax::Production::ASSIGN;
+            else if( semicolon )
 				surround_prod = Syntax::Production::BOOT_EXPR;
 			s += Dispatch( kit, node, surround_prod );
 
             if( do_boot )
                 s += ")";            
             if( semicolon )
-                s += "; // RIP-expr \n";
+                s += ";\n";
             break;
         }
         
@@ -178,7 +177,7 @@ string Render::RenderIntoProduction( const Render::Kit &kit, TreePtr<Node> node,
 			s += Dispatch( kit, node, surround_prod );
 			
             if( semicolon )
-                s += "; // RIP-default \n";            
+                s += ";\n";            
 			break;
 		}
     }
@@ -197,6 +196,8 @@ string Render::Dispatch( const Render::Kit &kit, TreePtr<Node> node, Syntax::Pro
         return RenderIdentifier( kit, identifier, surround_prod );
     else if( auto access = TreePtr<AccessSpec>::DynamicCast(node) ) // Identifier can be a kind of type or expression
         return RenderAccessSpec( kit, access, surround_prod );
+    else if( auto ivp = TreePtr<IdValuePair>::DynamicCast(node) )
+        return RenderIdValuePair( kit, ivp, surround_prod );
     else if( auto floating = TreePtr<Floating>::DynamicCast(node) )
         return RenderFloating( kit, floating, surround_prod );
     else if( auto integral = TreePtr<Integral>::DynamicCast(node) )
@@ -207,6 +208,8 @@ string Render::Dispatch( const Render::Kit &kit, TreePtr<Node> node, Syntax::Pro
         return RenderLiteral( kit, literal, surround_prod );
     else if( auto call = TreePtr<Call>::DynamicCast(node) )
         return RenderCall( kit, call, surround_prod );
+    else if( auto cons = TreePtr<Construction>::DynamicCast(node) )
+        return RenderConstruction( kit, cons, surround_prod );
     else if( auto make_rec = TreePtr<RecordLiteral>::DynamicCast(node) )
         return RenderMakeRecord( kit, make_rec, surround_prod );
     else if( auto ext_call = TreePtr<SeqArgsCall>::DynamicCast(node) )
@@ -228,8 +231,56 @@ string Render::Dispatch( const Render::Kit &kit, TreePtr<Node> node, Syntax::Pro
     else if( auto statement = TreePtr<Statement>::DynamicCast(node) )
         return RenderStatement( kit, statement, surround_prod );
     else
-        return ERROR_UNSUPPORTED( node );       
+        return RenderAny( kit, node );       
 }
+
+
+string Render::RenderAny( const Render::Kit &kit, TreePtr<Node> node, unsigned enables )
+{
+	string s = node->GetRender();
+	if( !s.empty() )
+		return s;
+	
+	s = "🞊"+TYPE_ID_NAME(*node);
+	
+	list<string> sitems;
+    vector< Itemiser::Element * > items = node->Itemise();
+    for( vector< Itemiser::Element * >::size_type i=0; i<items.size(); i++ )
+    {
+		if( (enables & (1U << i))==0 )
+			continue;
+			
+        //TRACE("Duplicating member %d\n", i );
+        ASSERT( items[i] )( "itemise returned null element" );
+        
+        if( ContainerInterface *con = dynamic_cast<ContainerInterface *>(items[i]) )                
+        {
+			list<string> scon;
+            for( const TreePtrInterface &p : *con )
+            {
+                ASSERT( p ); // present simplified scheme disallows nullptr
+                scon.push_back( RenderIntoProduction( kit, TreePtr<Node>(p), Syntax::Production::COMMA_SEP ) );
+            }
+            sitems.push_back( Join( scon, ", ") );
+        }            
+        else if( TreePtrInterface *singular = dynamic_cast<TreePtrInterface *>(items[i]) )
+        {
+            sitems.push_back( RenderIntoProduction( kit, TreePtr<Node>(*singular), Syntax::Production::BARE_STATEMENT ) );
+        }
+        else
+        {
+            ASSERTFAIL("got something from itemise that isn't a sequence or a shared pointer");
+        }
+    }
+        
+    s += Join( sitems, "; ", "⦑", "⦒" ); 
+    
+    if( Syntax::GetPrecedence(node->GetMyProduction()) < Syntax::GetPrecedence(Syntax::Production::CONDITION) )
+		s += ";\n"; // Statement-ize it
+
+	return s;
+}
+
 
 string Render::RenderProgram( const Render::Kit &kit, TreePtr<CPPTree::Program> program, Syntax::Production surround_prod )
 {
@@ -254,11 +305,23 @@ string Render::RenderProgram( const Render::Kit &kit, TreePtr<CPPTree::Program> 
 }
 
 
+string Render::RenderIdValuePair( const Render::Kit &kit, TreePtr<IdValuePair> ivp, Syntax::Production surround_prod ) try
+{
+	// Not part of C/C++ grammer at time of writing but handy for calls with no decl
+	(void)surround_prod;
+    (void)kit;
+    return RenderIntoProduction(kit, ivp->key, Syntax::Production::ASSIGN) + 
+           "🡆" + 
+           RenderIntoProduction(kit, ivp->value, Syntax::Production::ASSIGN);
+}
+DEFAULT_CATCH_CLAUSE
+
+
 string Render::RenderLiteral( const Render::Kit &kit, TreePtr<Literal> sp, Syntax::Production surround_prod ) try
 {
 	(void)surround_prod;
     (void)kit;
-    return Sanitise( sp->GetToken() );
+    return Sanitise( sp->GetRender() );
 }
 DEFAULT_CATCH_CLAUSE
 
@@ -274,7 +337,7 @@ string Render::RenderPureIdentifier( const Render::Kit &kit, TreePtr<Identifier>
         {           
             if( unique_ids.count(ii) == 0 )
             {
-                return ERROR_UNKNOWN( SSPrintf("identifier %s missing from unique_ids", ii->GetToken().c_str() ) );
+                return ERROR_UNKNOWN( SSPrintf("identifier %s missing from unique_ids", ii->GetRender().c_str() ) );
             }
             ids = unique_ids.at(ii);
         }
@@ -515,7 +578,7 @@ string Render::RenderType( const Render::Kit &kit, TreePtr<CPPTree::Type> type, 
 		return RenderTypeAndDeclarator( kit, type, "", Syntax::Production::ANONYMOUS, surround_prod, false ); 
 	}
 	else
-		return ERROR_UNSUPPORTED(type);
+		return RenderAny(kit, type);
 }
 
 // Insert escapes into a string so it can be put in source code
@@ -644,19 +707,28 @@ DEFAULT_CATCH_CLAUSE
 
 string Render::RenderMapArgs( const Render::Kit &kit, TreePtr<Type> dest_type, Collection<IdValuePair> &args ) try
 {   
-    // Convert f->params from Parameters to Declarations
-    Sequence<Declaration> param_sequence;   
-    if( auto f = TreePtr<CallableParams>::DynamicCast(dest_type) )  
-        for( auto param : f->params )
-            param_sequence.push_back(param); 
+	list<string> ls;
+	if( dest_type )
+    {
+		// Convert f->params from Parameters to Declarations
+		Sequence<Declaration> param_sequence;   
+		if( auto f = TreePtr<CallableParams>::DynamicCast(dest_type) )  
+			for( auto param : f->params )
+				param_sequence.push_back(param); 
 
-    // Determine args sequence using param sequence
-    Sequence<Expression> arg_sequence  = SortMapById( args, param_sequence );
-    
-    // Render to strings
-    list<string> ls;
-    for( TreePtr<Expression> e : arg_sequence )
-        ls.push_back( RenderIntoProduction( kit, e, Syntax::Production::COMMA_SEP ) );
+		// Determine args sequence using param sequence
+		Sequence<Expression> arg_sequence  = SortMapById( args, param_sequence );
+
+		// Render to strings
+		for( TreePtr<Expression> e : arg_sequence )
+			ls.push_back( RenderIntoProduction( kit, e, Syntax::Production::COMMA_SEP ) );
+    }
+    else
+    {
+		// No type, so render map-style
+        for( TreePtr<IdValuePair> mi : args )
+			ls.push_back( RenderIntoProduction( kit, mi, Syntax::Production::COMMA_SEP ) );
+	}    
 
     // Do the syntax
     return Join( ls, ", ", "(", ")" );
@@ -696,16 +768,19 @@ string Render::RenderConstruction( const Render::Kit &kit, TreePtr<Construction>
 		if( !f )
 			continue;
 			
-		if( auto c = TreePtr<Constructor>::DynamicCast( f->type ) )
-		{
-			// TODO Filter for matching overload here
-			found_cons_decl_type = d;
-			break;
-		}
+		auto c = TreePtr<Constructor>::DynamicCast( f->type );
+		if( !c )
+			continue;
+		
+		// TODO Filter for matching overload here. By using the identifiers, we can guarantee 
+		// unambiguous matching. No need for policy here.
+		found_cons_decl_type = c;
+		break;		
 	}
-    
+	    
     string s;
-    s += RenderMapArgs(kit, cons->type, cons->args);
+    s += RenderMapArgs(kit, found_cons_decl_type, cons->args);
+    s += ";\n";
     return s;
 }
 DEFAULT_CATCH_CLAUSE
@@ -729,7 +804,7 @@ string Render::RenderExteriorCall( const Render::Kit &kit, TreePtr<SeqArgsCall> 
     // Constructor case: spot by use of Lookup to empty-named method. Elide the "."
     if( auto lu = DynamicTreePtrCast< Lookup >(call->callee) )
         if( auto id = DynamicTreePtrCast< InstanceIdentifier >(lu->member) )
-            if( id->GetToken().empty() )
+            if( id->GetRender().empty() )
                 return RenderIntoProduction( kit, lu->object, Syntax::Production::POSTFIX ) + args_in_parens;
 
     // Other funcitons just evaluate
@@ -888,16 +963,26 @@ void Render::ExtractInits( const Render::Kit &kit,
                            Sequence<Statement> &inits, 
                            Sequence<Statement> &remainder )
 {
+	(void)kit;
     // Initialisers are just calls to the constructor embedded in the body. In Inferno,
     // we call a constructor by 
     for( TreePtr<Statement> s : body )
     {
-        if( auto call = DynamicTreePtrCast< GoSub >(s) )
+		if( auto ivp = DynamicTreePtrCast< IdValuePair >(s) )
+		{
+			if( auto cons = DynamicTreePtrCast< Construction >(ivp->value) )
+			{
+				inits.push_back(s);
+				continue;
+			}
+		}
+        if( auto call = DynamicTreePtrCast< GoSub >(s) ) // TODO drop after changeover to Construction
         {
             try
             {
                 if( TypeOf::instance.TryGetConstructedExpression( kit, call ) )
                 {
+					ASSERT( !ReadArgs::use.count("n") ); // obsolete
                     inits.push_back(s);
                     continue;
                 }
@@ -979,7 +1064,7 @@ string Render::RenderInitialisation( const Render::Kit &kit, TreePtr<Initialiser
         {
             if( auto lu = TreePtr<Lookup>::DynamicCast(call->callee) )
                 if( auto id = TreePtr<InstanceIdentifier>::DynamicCast(lu->member) )
-                    if( id->GetToken().empty() ) // syscall to a nameless member function => sys construct
+                    if( id->GetRender().empty() ) // syscall to a nameless member function => sys construct
                         return RenderExprSeq(kit, call->arguments) + ";\n";
         }
         if( auto call = DynamicTreePtrCast<Call>( ei ) ) try
@@ -1051,7 +1136,7 @@ string Render::RenderInstance( const Render::Kit &kit, TreePtr<Instance> o, Synt
 		    if( ShouldSplitInstance(kit, o) )
 			{
 				// Emit just a prototype now and request definition later
-				s += "; // RI-ssi\n";
+				s += ";\n";
 				// Split out the definition of the instance for rendering later at Program scope
 				definitions.push(o);
 			}		
@@ -1128,7 +1213,7 @@ string Render::RenderRecordProto( const Render::Kit &kit, TreePtr<Record> record
     else if( DynamicTreePtrCast< Enum >(record) )
         s += "enum";
     else
-        return ERROR_UNSUPPORTED(record);
+        s += RenderAny( kit, record, 0 );
 
     // Name of the record
     s += " " + RenderIntoProduction(kit, record->identifier, Syntax::Production::SPACE_SEP_DECLARATION);
@@ -1144,7 +1229,7 @@ string Render::RenderPreProcDecl(const Render::Kit &kit, TreePtr<PreProcDecl> pp
     if( auto si = TreePtr<SystemInclude>::DynamicCast(ppd) )
         return "#include <" + si->filename->GetString() + ">";
     else if( auto si = TreePtr<LocalInclude>::DynamicCast(ppd) )
-        return "#include " + si->filename->GetToken();
+        return "#include " + si->filename->GetRender();
     else
         return ERROR_UNSUPPORTED(ppd);     
 }
@@ -1193,18 +1278,7 @@ string Render::RenderDeclaration( const Render::Kit &kit, TreePtr<Declaration> d
 
         // Members
         s += "\n{ // memb\n";
-        TreePtr<AccessSpec> a;
-        if( DynamicTreePtrCast< Class >(r) )
-            a = MakeTreeNode<Private>();
-        else if( DynamicTreePtrCast< Struct >(r) )
-            a = MakeTreeNode<Public>();
-        else if( DynamicTreePtrCast< Union >(r) )
-            a = MakeTreeNode<Public>();
-        else if( DynamicTreePtrCast< Enum >(r) )
-            a = nullptr;
-        else
-            return ERROR_UNSUPPORTED(declaration);
-
+        TreePtr<AccessSpec> a = r->GetInitialAccess();
         AutoPush< TreePtr<Node> > cs( scope_stack, r );
         if( a )
             s += RenderDeclScope( kit, r, a );          
@@ -1218,7 +1292,7 @@ string Render::RenderDeclaration( const Render::Kit &kit, TreePtr<Declaration> d
     else if( TreePtr<Label> l = DynamicTreePtrCast<Label>(declaration) )
         return RenderIntoProduction(kit, l->identifier, Syntax::Production::PURE_IDENTIFIER) + ":;\n"; // need ; after a label in case last in compound block
     else
-        s += ERROR_UNSUPPORTED(declaration);
+        s += RenderAny(kit, declaration);
 
     TRACE();
     return s;
@@ -1300,7 +1374,7 @@ string Render::RenderStatement( const Render::Kit &kit, TreePtr<Statement> state
     else if( DynamicTreePtrCast<Nop>(statement) )
         return "";
     else
-        return ERROR_UNSUPPORTED(statement);
+        return RenderAny( kit, statement );
 }
 DEFAULT_CATCH_CLAUSE
 

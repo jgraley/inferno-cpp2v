@@ -19,7 +19,7 @@ struct SCNode : virtual Node {};
 
 /// Anything derived from this renders like a record
 struct SCRecord : virtual SCNode,
-                       CPPTree::InheritanceRecord 
+                  CPPTree::InheritanceRecord 
 {
     NODE_FUNCTIONS
 };
@@ -44,7 +44,9 @@ struct Event : CPPTree::Type
 struct Module : SCRecord
 {
     NODE_FUNCTIONS_FINAL
+    
     virtual string GetToken() const { return "sc_module"; }
+  	TreePtr<CPPTree::AccessSpec> GetInitialAccess() const override { return MakeTreeNode<CPPTree::Private>(); }   
 };
 
 /** SystemC interface construct. Not exactly sure whether/how I will use 
@@ -52,7 +54,9 @@ struct Module : SCRecord
 struct Interface : SCRecord
 {
     NODE_FUNCTIONS_FINAL
+    
     virtual string GetToken() const { return "sc_interface"; }
+  	TreePtr<CPPTree::AccessSpec> GetInitialAccess() const override { return MakeTreeNode<CPPTree::Private>(); } 
 };
 
 /** SystemC interface construct. Not exactly sure whether/how I will use 

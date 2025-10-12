@@ -831,6 +831,8 @@ private:
                                                    clang::SourceLocation) 
         {
             TRACE();
+            Sequence<Expression> args;
+            CollectArgs( &args, Args, NumArgs );
             // Free-standing direct initialiser: we initialise with
             // a call to the InstanceIdentifier of a Field of type 
             // Constructor. We don't bother with a Lookup since the
@@ -839,25 +841,25 @@ private:
             auto our_inst = DynamicTreePtrCast<Instance> (d);
             ASSERT( our_inst )(d);
             ASSERT( our_inst->identifier );            
-#ifdef NEWS            
-            auto c = MakeTreeNode<Construction>();
-            c->type = our_inst->type;
-			TreePtr<Node> type = TypeOf::instance(lu, all_decls).GetTreePtr();
-			if( TreePtr<CallableParams> p = DynamicTreePtrCast<CallableParams>(t) )
-				PopulateMapOperator( c->args, args, p );
-#else            
             TreePtr<Instance> memb_o = GetConstructor( our_inst->type );
             ASSERT( memb_o );
             ASSERT( memb_o->identifier );
-            // Build a lookup to the constructor, using the specified subobject and the matching constructor
-            auto lu = MakeTreeNode<Lookup>();
-            lu->object = our_inst->identifier;
-            lu->member = memb_o->identifier;            
-            Sequence<Expression> args;
-            CollectArgs( &args, Args, NumArgs );
-            TreePtr<Call> c = CreateCall( args, lu );
-#endif            
-            our_inst->initialiser = c;
+			if( ReadArgs::use.count("n") )
+			{
+				auto cons = MakeTreeNode<Construction>();
+				cons->type = our_inst->type;
+				if( TreePtr<CallableParams> p = DynamicTreePtrCast<CallableParams>(memb_o->type) )
+					PopulateMapOperator( cons->args, args, p );
+				our_inst->initialiser = cons;
+			}
+			else
+			{
+				// Build a lookup to the constructor, using the specified subobject and the matching constructor
+				auto lu = MakeTreeNode<Lookup>();
+				lu->object = our_inst->identifier;
+				lu->member = memb_o->identifier;                       
+				our_inst->initialiser = CreateCall( args, lu );
+			}
         }
         
         // Clang tends to parse parameters and function bodies in seperate
@@ -1517,13 +1519,28 @@ private:
 
         TreePtr<InstanceIdentifier> memb_cons_id = memb_cons->identifier;
 
-        // Build a lookup to the constructor, using the specified subobject and the matching constructor
-        auto lu = MakeTreeNode<Lookup>();
-        lu->object = our_field->identifier;
-        lu->member = memb_cons_id;
-        
-		TreePtr<Call> c = CreateCall( args, lu );
-        return hold_expr.ToRaw( c );
+		if( ReadArgs::use.count("n") )
+		{
+			auto cons = MakeTreeNode<Construction>();
+			cons->type = our_field->type;
+			if( TreePtr<CallableParams> p = DynamicTreePtrCast<CallableParams>(memb_cons->type) )
+				PopulateMapOperator( cons->args, args, p );
+			auto ivp = MakeTreeNode<IdValuePair>();
+			ASSERT( our_field->identifier );
+			ivp->key = our_field->identifier;
+			ivp->value = cons;
+			return hold_expr.ToRaw( cons ); //  TODO store the ivp
+		}
+		else
+		{
+			// Build a lookup to the constructor, using the specified subobject and the matching constructor
+			auto lu = MakeTreeNode<Lookup>();
+			lu->object = our_field->identifier;
+			lu->member = memb_cons_id;
+			
+			TreePtr<Call> call = CreateCall( args, lu );
+			return hold_expr.ToRaw( call );
+		}
     }
 
     /// ActOnMemInitializers - This is invoked when all of the member
@@ -1547,7 +1564,15 @@ private:
         comp = MakeTreeNode<Compound>();
         o->initialiser = comp;
         for( auto i : inits )
+        {
+			if( ReadArgs::use.count("n") )
+			{
+				auto ivp = TreePtr<IdValuePair>::DynamicCast(i);
+				ASSERT( ivp );
+				ASSERT( ivp->key );
+			}
 			comp->statements.push_back( i );
+		}
     }
   
     virtual DeclTy *ActOnTag(clang::Scope *S, unsigned TagType, TagKind TK,

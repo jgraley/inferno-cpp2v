@@ -146,7 +146,7 @@ struct SpecificString : String
     virtual bool IsLocalMatchCovariant( const Matcher &candidate ) const; /// Overloaded comparison for search&replace
     virtual Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
-    virtual string GetToken() const; 
+    virtual string GetRender() const; 
 	Production GetMyProduction() const override;
 	string GetString() final { return value; }
 private:
@@ -181,7 +181,7 @@ struct SpecificInteger : Integer
     virtual bool IsLocalMatchCovariant( const Matcher &candidate ) const; /// Overloaded comparison for search&replace
     virtual Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
-    virtual string GetToken() const; 
+    virtual string GetRender() const; 
 	Production GetMyProduction() const override;
 	
 private:
@@ -203,7 +203,7 @@ struct SpecificFloat : Float, llvm::APFloat
     virtual bool IsLocalMatchCovariant( const Matcher &candidate ) const; /// Overloaded comparison for search&replace
     virtual Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
-    virtual string GetToken() const; 
+    virtual string GetRender() const; 
     Production GetMyProduction() const override;
 };
 
@@ -216,7 +216,7 @@ struct Bool : Literal { NODE_FUNCTIONS };
 struct True : Bool
 {
     NODE_FUNCTIONS_FINAL
-    virtual string GetToken() const { return "true"; } ///< Produce a string for debug
+    virtual string GetRender() const { return "true"; } ///< Produce a string for debug
 	Production GetMyProduction() const override;
 };
 
@@ -224,7 +224,7 @@ struct True : Bool
 struct False : Bool
 {
     NODE_FUNCTIONS_FINAL
-    virtual string GetToken() const { return "false"; } 
+    virtual string GetRender() const { return "false"; } 
 	Production GetMyProduction() const override;
 };
 
@@ -261,7 +261,7 @@ struct SpecificIdentifier : virtual Property
     virtual bool IsLocalMatchCovariant( const Matcher &candidate ) const; /// Overloaded comparison for search&replace
     virtual Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
-    virtual string GetToken() const; /// This is relied upon to just return the identifier name for rendering
+    virtual string GetRender() const; /// This is relied upon to just return the identifier name for rendering
     virtual string GetGraphName() const;
     virtual string GetTrace() const;
 	
@@ -706,16 +706,25 @@ struct Record : TypeDeclaration,
     NODE_FUNCTIONS
     
     virtual string GetColour() const { return TypeDeclaration::GetColour(); } // TypeDeclaration wins
-	Production GetMyProduction() const override;	    
+	Production GetMyProduction() const override;	
+	virtual TreePtr<AccessSpec> GetInitialAccess() const;    
 };
 
 /// A union, as per Record.
-struct Union : Record { NODE_FUNCTIONS_FINAL };
+struct Union : Record 
+{ 
+	NODE_FUNCTIONS_FINAL 
+	
+	TreePtr<AccessSpec> GetInitialAccess() const override;    
+};
 
 /// An Enum, as per record. 
 /** We regard enumerations as static const variables, initialised as per 
  the given value. Values are always explicit. */
-struct Enum : Record { NODE_FUNCTIONS_FINAL };
+struct Enum : Record 
+{ 
+	NODE_FUNCTIONS_FINAL 	
+};
 
 /// A record that can inherit from other records and be inherited from. 
 /** We add in a list of base class declarations. */
@@ -723,14 +732,23 @@ struct InheritanceRecord : Record
 {
     NODE_FUNCTIONS
     Collection<Base> bases; ///< contains the InheritanceRecords from which we inherit
-    // TODO just chuck them into Record::members? 
 };
 
 /// Struct as per InheritanceRecord
-struct Struct : InheritanceRecord { NODE_FUNCTIONS_FINAL };
+struct Struct : InheritanceRecord 
+{ 
+	NODE_FUNCTIONS_FINAL 
+	
+	TreePtr<AccessSpec> GetInitialAccess() const override;    
+};
 
 /// Class as per InheritanceRecord
-struct Class : InheritanceRecord { NODE_FUNCTIONS_FINAL };
+struct Class : InheritanceRecord 
+{ 
+	NODE_FUNCTIONS_FINAL 
+	
+	TreePtr<AccessSpec> GetInitialAccess() const override;    
+};
 
 //////////////////////////// Expressions ////////////////////////////
 
@@ -916,13 +934,14 @@ struct Cast : Operator
 
 /// Associates an Expression with an InstanceIdentifier. 
 /** Basically a key-value pair of identifier and value. Use in Maps. */
-struct IdValuePair : virtual Node
+struct IdValuePair : virtual Node 
 {
     NODE_FUNCTIONS_FINAL
     TreePtr<InstanceIdentifier> key; ///< the handle for this particualar operand
     TreePtr<Expression> value; ///< the Expression for this operand
     
     virtual string GetColour() const { return "/set28/8"; }    
+	Production GetMyProduction() const override;
 };
 
 struct GoSub : virtual Node
@@ -947,7 +966,7 @@ struct Call : GoSub, Expression, Uncombable
 /// Lives in Initialiser context and indicates that something will be constructed,
 /// i.e. a call to a constructor will be made. The type and object id are assumed
 /// to be nearby, i.e. this can't be used in isolation.
-struct Construction : Initialiser, Uncombable
+struct Construction : Expression, Uncombable
 {
     NODE_FUNCTIONS_FINAL	
     TreePtr<Type> type;

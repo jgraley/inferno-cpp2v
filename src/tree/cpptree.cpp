@@ -47,7 +47,7 @@ Syntax::Production Program::GetMyProduction() const
 
 string Literal::GetName() const
 {
-    return Traceable::GetName() + "(" + GetToken() + ")";
+    return Traceable::GetName() + "(" + GetRender() + ")";
 }
 
 //////////////////////////// SpecificString ///////////////////////////////
@@ -78,7 +78,7 @@ Orderable::Diff SpecificString::OrderCompare3WayCovariant( const Orderable &righ
 }
  
  
-string SpecificString::GetToken() const
+string SpecificString::GetRender() const
 {
     // Since this is a string literal, output it double quoted
     return "\"" + value + "\"";
@@ -167,7 +167,7 @@ Orderable::Diff SpecificInteger::OrderCompare3WayCovariant( const Orderable &rig
 }
  
  
-string SpecificInteger::GetToken() const 
+string SpecificInteger::GetRender() const 
 {
     return string(value.toString(10)) + // decimal
            (value.isUnsigned() ? "U" : "") +
@@ -231,7 +231,7 @@ Orderable::Diff SpecificFloat::OrderCompare3WayCovariant( const Orderable &right
 }
  
 
-string SpecificFloat::GetToken() const
+string SpecificFloat::GetRender() const
 {
     char hs[256];
     // generate hex float since it can be exact
@@ -307,7 +307,7 @@ Orderable::Diff SpecificIdentifier::OrderCompare3WayCovariant( const Orderable &
 }
 
 
-string SpecificIdentifier::GetToken() const 
+string SpecificIdentifier::GetRender() const 
 {
     return name;
 }
@@ -503,6 +503,32 @@ Syntax::Production Record::GetMyProduction() const
 	return Production::PROTOTYPE; // prototype render is supported
 }
 
+TreePtr<AccessSpec> Record::GetInitialAccess() const
+{
+	return nullptr;
+}
+
+//////////////////////////// Union ///////////////////////////////
+
+TreePtr<AccessSpec> Union::GetInitialAccess() const
+{
+	return MakeTreeNode<Public>();
+}
+
+//////////////////////////// Struct ///////////////////////////////
+
+TreePtr<AccessSpec> Struct::GetInitialAccess() const
+{
+	return MakeTreeNode<Public>();
+}
+
+//////////////////////////// Class ///////////////////////////////
+
+TreePtr<AccessSpec> Class::GetInitialAccess() const
+{
+	return MakeTreeNode<Private>();
+}
+
 //////////////////////////// True ///////////////////////////////
 
 Syntax::Production True::GetMyProduction() const
@@ -575,6 +601,13 @@ Syntax::Production Cast::GetMyProduction() const
 	return Production::PREFIX; 
 }
 
+//////////////////////////// IdValuePair ///////////////////////////////
+
+Syntax::Production IdValuePair::GetMyProduction() const
+{ 
+	return Production::ASSIGN; 
+}
+
 //////////////////////////// Call ///////////////////////////////
 
 Syntax::Production Call::GetMyProduction() const
@@ -586,7 +619,7 @@ Syntax::Production Call::GetMyProduction() const
 
 Syntax::Production Construction::GetMyProduction() const
 { 
-	return Production::PARENTHESISED; 
+	return Production::INITIALISER; // Be a true initialiser, i.e. no = required
 }
 
 //////////////////////////// RecordLiteral ///////////////////////////////

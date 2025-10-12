@@ -287,10 +287,13 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     auto s_module = MakePatternNode< Module >();
     auto r_module = MakePatternNode< Module >();
     auto l1s_call = MakePatternNode< Call >();
+    auto l1s_ivp = MakePatternNode< IdValuePair >();
+    auto l1s_cons = MakePatternNode< Construction >();
     auto l1s_lookup = MakePatternNode< Lookup >();
     auto l_instance = MakePatternNode<Instance>();  
     auto l_delta = MakePatternNode<Delta<Initialiser>>();  
     auto l2s_call = MakePatternNode<Call>();
+    auto l2s_cons = MakePatternNode<Construction>();
     auto l2s_lookup = MakePatternNode<Lookup>();
 	auto l2s_args = MakePatternNode< Star<IdValuePair> >();
 
@@ -317,23 +320,44 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
             
     // Embedded 1: dispense with any calls to it from member inits
     ls_comp->members = (l_decls);
-    ls_comp->statements = (l_pre, l1s_call, l_post);
-    l1s_call->callee = l1s_lookup;
-    l1s_call->args = (l1s_args); // any number of args, it doesn't matter, ctor is still empty so does nothing
-    l1s_lookup->object = MakePatternNode< InstanceIdentifier >();
-    l1s_lookup->member = s_id;        
+	if( ReadArgs::use.count("n") )
+	{
+		ls_comp->statements = (l_pre, l1s_ivp, l_post);
+		l1s_ivp->key = MakePatternNode<InstanceIdentifier>();
+		l1s_ivp->value = l1s_cons;
+		l1s_cons->args = (l1s_args); // any number of args, it doesn't matter, ctor is still empty so does nothing
+		l1s_cons->type = module_typeid;
+	}
+	else
+	{
+		ls_comp->statements = (l_pre, l1s_call, l_post);
+		l1s_call->callee = l1s_lookup;
+		l1s_call->args = (l1s_args); // any number of args, it doesn't matter, ctor is still empty so does nothing
+		l1s_lookup->object = MakePatternNode< InstanceIdentifier >();
+		l1s_lookup->member = s_id;        
+	}
     lr_comp->members = (l_decls);
     lr_comp->statements = (l_pre, l_post);
 
     // Embedded 2: dispense with any calls to it from instances
-    l_instance->type = module_typeid;
+    l_instance->type = module_typeid; // TODO could be "auto" here?
     l_instance->initialiser = l_delta;
-    l_delta->through = l2s_call;
+	if( ReadArgs::use.count("n") )
+	{
+		l_delta->through = l2s_cons;
+		l2s_cons->args = (l2s_args); // any number of args, it doesn't matter, ctor is still empty so does nothing
+		l2s_cons->type = module_typeid; 
+	}
+	else
+	{		
+		l_delta->through = l2s_call;
+		l2s_call->args = (l2s_args); // any number of args, it doesn't matter, ctor is still empty so does nothing
+		l2s_call->callee = l2s_lookup;
+		l2s_lookup->object = l_instance->identifier;
+		l2s_lookup->member = s_id;
+	}
+
     l_delta->overlay = MakePatternNode< Uninitialised >();
-    l2s_call->callee = l2s_lookup;
-    l2s_call->args = (l2s_args); // any number of args, it doesn't matter, ctor is still empty so does nothing
-    l2s_lookup->object = l_instance->identifier;
-    l2s_lookup->member = s_id;
             
     Configure( COMPARE_REPLACE, stuff, r_embedded_1 );
 }

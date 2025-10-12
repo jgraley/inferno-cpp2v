@@ -5,6 +5,7 @@
 
 #include <string>
 #include <vector>
+#include <set>
 
 // Try to share one command line args parser between all executable
 // targets so usage is consistent and to avoid duplciation. We allow
@@ -48,7 +49,7 @@ public:
     static bool test_db;
     static bool documentation_graphs;
     static bool output_all;
-    static char use_feature_option;
+    static set<string> use;
     
 private:
     void ParseQuitAfter(string arg);

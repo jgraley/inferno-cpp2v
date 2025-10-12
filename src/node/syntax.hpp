@@ -85,7 +85,7 @@ public:
 
 	virtual string GetRender() const
     {
-        return GetToken(); 
+        return ""; 
     }
 
 	// What production do I become once rendered

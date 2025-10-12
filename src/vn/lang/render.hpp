@@ -31,7 +31,9 @@ private:
     UniquifyIdentifiers::IdentifierNameMap unique_ids;
 	string RenderIntoProduction( const Render::Kit &kit, TreePtr<Node> node, Syntax::Production prod );
 	string Dispatch( const Render::Kit &kit, TreePtr<Node> node, Syntax::Production surround_prod );
+	string RenderAny( const Render::Kit &kit, TreePtr<Node> node, unsigned enables = 0xFFFFFFFF );
 	string RenderProgram( const Render::Kit &kit, TreePtr<CPPTree::Program> program, Syntax::Production surround_prod ); 
+	string RenderIdValuePair( const Render::Kit &kit, TreePtr<CPPTree::IdValuePair> ivp, Syntax::Production surround_prod );
     string RenderLiteral( const Render::Kit &kit, TreePtr<CPPTree::Literal> sp, Syntax::Production surround_prod ); 
     string RenderPureIdentifier( const Render::Kit &kit, TreePtr<CPPTree::Identifier> id, Syntax::Production surround_prod );
     string ScopeResolvingPrefix( const Render::Kit &kit, TreePtr<CPPTree::Identifier> id, Syntax::Production surround_prod );
