@@ -293,20 +293,4 @@ Sequence<Declaration> ReverseDecls( Sequence<Declaration> c )
 //     PROTOTYPE production triggers prototype declarator. Consider eliding Typedef(Record...).
 // Get Instance::GetMyProduction to vary depending on type: functions are DECLARATION, others are BARE_DECLARATION.
 //     No initiualiser is also BARE_DECLARATION. Drop the semicolons accordingly.
-// Parse::GetConstructor() and Render::RenderConstructionArgs() are heavily duplicated. NO!
-//     in fact at remder time, the use of identifiers as keys absolutely locks in exactly one choice
-//     with no ambiguity. For parsed constructions, we get what the parser chose; for ones added
-//     by transformations, we get the one implied by the identifiers used (or created)
 // ⏏
-
-// Construction : Expression 
-// IdInitPair = <InstanceIdentifier, Initialiser>
-//
-// ClassType obj(args...);         // Instance( ClassType (or auto?), obj, Construction( ClassType, args ) ) "direct initialisation"
-//
-// Otherclass(otherargs...) :     
-//     obj(args...)                // IdInitPair( obj, Construction( ClassType, args ) )
-// {
-// }
-//
-// foo = x + ClassType(args...);   // Construction( ClassType, args )

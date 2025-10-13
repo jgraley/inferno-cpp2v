@@ -963,18 +963,6 @@ struct Call : GoSub, Expression, Uncombable
 	Production GetMyProduction() const override;
 };
 
-/// Lives in Initialiser context and indicates that something will be constructed,
-/// i.e. a call to a constructor will be made. The type and object id are assumed
-/// to be nearby, i.e. this can't be used in isolation.
-struct Construction : Expression, Uncombable
-{
-    NODE_FUNCTIONS_FINAL	
-    TreePtr<Type> type;
-	Collection<IdValuePair> args;
-	
-	Production GetMyProduction() const override;
-};
-
 /// Initialiser for a record 
 /** Uses a map to associate elements with corresponding record 
  members. We also give the record type explicitly since the map is

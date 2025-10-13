@@ -3,6 +3,7 @@
 #include "link.hpp"
 #include "db/x_tree_database.hpp"
 #include "../../tree/cpptree.hpp"
+#include "../../helpers/simple_duplicate.hpp"
 
 #define THROW_ON_NULL
 
@@ -283,13 +284,15 @@ RelocatingAgent::RelocatingQueryResult TransformOfAgent::RunRelocatingQuery( con
         if( auto base_bem = ValuePtr<AugBEMeandering>::DynamicCast(move(base_be)) ) 
         {            
             // Base is outside the X tree, so domain extension will be required                        
-            TreePtr<Node> tp = base_bem->GetGenericTreePtr();        
+            TreePtr<Node> tp = base_bem->GetGenericTreePtr(); 
+            SimpleDuplicate::DuplicateSubtree( tp ); // Validate (check for NULL child pointer)       
             return RelocatingQueryResult( tp, deps );  // free 
         }
         else if( auto base_ber = ValuePtr<AugBERoaming>::DynamicCast(move(base_be)) ) 
         {
             // Base is inside the X tree, so domain extension will not be required
             XLink xlink = base_ber->GetXLink(); 
+            SimpleDuplicate::DuplicateSubtree( xlink.GetChildTreePtr() ); // Validate (check for NULL child pointer)       
             return RelocatingQueryResult( xlink );  // tree      
         }
         else

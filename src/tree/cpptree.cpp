@@ -615,13 +615,6 @@ Syntax::Production Call::GetMyProduction() const
 	return Production::POSTFIX; 
 }
 
-//////////////////////////// Construction ///////////////////////////////
-
-Syntax::Production Construction::GetMyProduction() const
-{ 
-	return Production::INITIALISER; // Be a true initialiser, i.e. no = required
-}
-
 //////////////////////////// RecordLiteral ///////////////////////////////
 
 Syntax::Production RecordLiteral::GetMyProduction() const

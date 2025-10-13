@@ -208,8 +208,6 @@ string Render::Dispatch( const Render::Kit &kit, TreePtr<Node> node, Syntax::Pro
         return RenderLiteral( kit, literal, surround_prod );
     else if( auto call = TreePtr<Call>::DynamicCast(node) )
         return RenderCall( kit, call, surround_prod );
-    else if( auto cons = TreePtr<Construction>::DynamicCast(node) )
-        return RenderConstruction( kit, cons, surround_prod );
     else if( auto make_rec = TreePtr<RecordLiteral>::DynamicCast(node) )
         return RenderMakeRecord( kit, make_rec, surround_prod );
     else if( auto ext_call = TreePtr<SeqArgsCall>::DynamicCast(node) )
@@ -754,38 +752,6 @@ string Render::RenderCall( const Render::Kit &kit, TreePtr<Call> call, Syntax::P
 DEFAULT_CATCH_CLAUSE
 
 
-string Render::RenderConstruction( const Render::Kit &kit, TreePtr<Construction> cons, Syntax::Production surround_prod ) try
-{
-	(void)surround_prod;
-    TreePtr<TypeIdentifier> obj_type_id = DynamicTreePtrCast<TypeIdentifier>(cons->type);
-    ASSERT(obj_type_id); // TODO what if the type is already a record? What if neither Record nor Id?
-    TreePtr<Record> record = TryGetRecordDeclaration(kit, obj_type_id).GetTreePtr();
-    
-    TreePtr<Constructor> found_cons_decl_type;
-    for( TreePtr<Declaration> d : record->members )
-    {
-		auto f = TreePtr<Field>::DynamicCast( d );
-		if( !f )
-			continue;
-			
-		auto c = TreePtr<Constructor>::DynamicCast( f->type );
-		if( !c )
-			continue;
-		
-		// TODO Filter for matching overload here. By using the identifiers, we can guarantee 
-		// unambiguous matching. No need for policy here.
-		found_cons_decl_type = c;
-		break;		
-	}
-	    
-    string s;
-    s += RenderMapArgs(kit, found_cons_decl_type, cons->args);
-    s += ";\n";
-    return s;
-}
-DEFAULT_CATCH_CLAUSE
-
-
 string Render::RenderExprSeq( const Render::Kit &kit, Sequence<Expression> seq ) try
 {
     list<string> renders;
@@ -968,21 +934,12 @@ void Render::ExtractInits( const Render::Kit &kit,
     // we call a constructor by 
     for( TreePtr<Statement> s : body )
     {
-		if( auto ivp = DynamicTreePtrCast< IdValuePair >(s) )
-		{
-			if( auto cons = DynamicTreePtrCast< Construction >(ivp->value) )
-			{
-				inits.push_back(s);
-				continue;
-			}
-		}
         if( auto call = DynamicTreePtrCast< GoSub >(s) ) // TODO drop after changeover to Construction
         {
             try
             {
                 if( TypeOf::instance.TryGetConstructedExpression( kit, call ) )
                 {
-					ASSERT( !ReadArgs::use.count("n") ); // obsolete
                     inits.push_back(s);
                     continue;
                 }

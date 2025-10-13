@@ -302,6 +302,7 @@ RelocatingAgent::RelocatingQueryResult NestedAgent::RunRelocatingQuery( const XT
             xlink = next_xlink; 
             deps.insert( xlink );
         }
+        
         return RelocatingQueryResult(MakeTreeNode<SpecificString>(s), deps); 
     }
     
