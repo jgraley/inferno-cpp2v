@@ -189,9 +189,8 @@ void IdentifierFingerprinter::ProcessChildren( TreePtr<Node> x, int &index )
 
 void IdentifierFingerprinter::ProcessSingularNode( const TreePtrInterface *p_x_sing, int &index )
 {
-	//if( !*p_x_sing )
-	//	return; // NULL singular indicates wildcard
-    ProcessNode( (TreePtr<Node>)(*p_x_sing), index );
+	if( *p_x_sing ) // Permitting NULL because patterns
+		ProcessNode( (TreePtr<Node>)(*p_x_sing), index );
 }
 
 

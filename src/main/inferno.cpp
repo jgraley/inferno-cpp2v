@@ -600,7 +600,7 @@ void Inferno::DoPatternRender( const Step &sp, string outfile, bool add_file_ext
 	(void)title;
 	if( add_file_extension )
 		outfile += ".vn";
-    Render r( outfile );
+    CppRender r( outfile );
     vn_sequence->DoRender( sp.step_index, r );
 }
    
@@ -612,7 +612,7 @@ void Inferno::RunTransformationStep(const Step &sp)
     program = vn_sequence->TransformStep( sp.step_index );
     if( ReadArgs::output_all )
     {
-        Render r( ReadArgs::outfile+SSPrintf("_%03d.cpp", sp.step_index) );
+        CppRender r( ReadArgs::outfile+SSPrintf("_%03d.cpp", sp.step_index) );
         r.WriteToFile( r.RenderToString( program ) );     
         Graph g( ReadArgs::outfile+SSPrintf("_%03d.dot", sp.step_index), 
                  ReadArgs::outfile+SSPrintf(" after T%03d-%s", sp.step_index, vn_sequence->GetStepName(sp.step_index).c_str()) );
