@@ -194,13 +194,13 @@ string Render::Dispatch( const RenderKit &kit, TreePtr<Node> node, Syntax::Produ
 string Render::RenderSpecial( const RenderKit &kit, TreePtr<Node> node, Syntax::Production surround_prod )
 {
 	const Agent *agent = Agent::TryAsAgentConst(node);
-	return agent->GetRender2( kit, surround_prod );
+	return agent->GetRender( kit, surround_prod );
 }
 
 
 string Render::RenderAny( const RenderKit &kit, TreePtr<Node> node, unsigned enables )
 {
-	string s = node->GetRender();
+	string s = node->GetRenderTerminal();
 	if( !s.empty() )
 		return s;
 	

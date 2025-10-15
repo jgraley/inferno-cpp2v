@@ -83,7 +83,7 @@ public:
 		return "";
 	} 
 
-	virtual string GetRender() const
+	virtual string GetRenderTerminal() const
     {
         return ""; 
     }

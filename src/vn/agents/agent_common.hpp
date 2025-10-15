@@ -26,7 +26,7 @@ public:
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicCouplingQuery(PatternLink keyer, const set<PatternLink> &residuals) const;       
     bool IsNonTrivialPreRestriction(const TreePtrInterface *pptr) const override;
     bool ShouldGenerateCategoryClause() const override;                                
-	string GetRender2( const RenderKit &kit, Syntax::Production surround_prod ) const override;
+	string GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const override;
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicPreRestriction(PatternLink keyer_plink) const;
     bool IsPreRestrictionMatch( TreePtr<Node> x ) const; // return true if matches
     bool IsPreRestrictionMatch( XLink x ) const; // return true if matches

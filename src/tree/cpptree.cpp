@@ -47,7 +47,7 @@ Syntax::Production Program::GetMyProduction() const
 
 string Literal::GetName() const
 {
-    return Traceable::GetName() + "(" + GetRender() + ")";
+    return Traceable::GetName() + "(" + GetRenderTerminal() + ")";
 }
 
 //////////////////////////// SpecificString ///////////////////////////////
@@ -78,7 +78,7 @@ Orderable::Diff SpecificString::OrderCompare3WayCovariant( const Orderable &righ
 }
  
  
-string SpecificString::GetRender() const
+string SpecificString::GetRenderTerminal() const
 {
     // Since this is a string literal, output it double quoted
     return "\"" + value + "\"";
@@ -167,7 +167,7 @@ Orderable::Diff SpecificInteger::OrderCompare3WayCovariant( const Orderable &rig
 }
  
  
-string SpecificInteger::GetRender() const 
+string SpecificInteger::GetRenderTerminal() const 
 {
     return string(value.toString(10)) + // decimal
            (value.isUnsigned() ? "U" : "") +
@@ -231,7 +231,7 @@ Orderable::Diff SpecificFloat::OrderCompare3WayCovariant( const Orderable &right
 }
  
 
-string SpecificFloat::GetRender() const
+string SpecificFloat::GetRenderTerminal() const
 {
     char hs[256];
     // generate hex float since it can be exact
@@ -307,7 +307,7 @@ Orderable::Diff SpecificIdentifier::OrderCompare3WayCovariant( const Orderable &
 }
 
 
-string SpecificIdentifier::GetRender() const 
+string SpecificIdentifier::GetRenderTerminal() const 
 {
     return name;
 }

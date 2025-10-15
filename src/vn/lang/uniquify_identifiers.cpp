@@ -32,7 +32,7 @@ string VisibleIdentifiers::MakeUniqueName( string b, unsigned n ) // note static
 
 void VisibleIdentifiers::SplitName( TreePtr<SpecificIdentifier> i, string *b, unsigned *n ) // note static
 {
-    string original_name = i->GetRender();
+    string original_name = i->GetRenderTerminal();
 #ifdef UID_FORMAT_HINT 
     char cb[1024]; // hope that's big enough!
     int c = sscanf( original_name.c_str(), UID_FORMAT_HINT, cb, n ); // TODO maybe add %s at the end to catch junk after the number
@@ -106,7 +106,7 @@ string VisibleIdentifiers::AddIdentifier( TreePtr<SpecificIdentifier> id )
 
 void VisibleIdentifiers::AddUndeclaredIdentifier( TreePtr<SpecificIdentifier> i )
 {
-	ASSERT( !i->GetRender().empty() );
+	ASSERT( !i->GetRenderTerminal().empty() );
 		
     // Get canonical form of identifier name
     string base_name;
@@ -119,7 +119,7 @@ void VisibleIdentifiers::AddUndeclaredIdentifier( TreePtr<SpecificIdentifier> i 
     // semantics; do a #819 when introducing.
     ASSERT( name_usages.count(base_name) == 0 )
             ("Name conflict among undeclared identifiers (would force a rename - unsafe)\n")
-            ("identifier: ")(i)(" token: ")(i->GetRender())("\n")
+            ("identifier: ")(i)(" token: ")(i->GetRenderTerminal())("\n")
             ("previous usages: ")(name_usages); 
 
     // Otherwise start a new record for this base name.
@@ -268,14 +268,14 @@ UniquifyIdentifiers::IdentifierNameMap UniquifyIdentifiers::UniquifyAll( const T
 		catch(DeclarationOf::DeclarationNotFound &)
 		{
 			// An undeclared indentifier cannot safely be renamed and so must have a non-empty name
-			if( id->GetRender().empty() )
+			if( id->GetRenderTerminal().empty() )
 				continue;
 	
 			// Assume undeclared identifier is really a system node identifier.
 			// Ensure it will keep its name and not be conflicted, and add to the
 			// map so normal IDs don't conflict with it.
 			vi.AddUndeclaredIdentifier( id );
-			inm.insert( IdentifierNamePair( id, id->GetRender() ) );
+			inm.insert( IdentifierNamePair( id, id->GetRenderTerminal() ) );
 		}
 	}
 

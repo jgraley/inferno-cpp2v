@@ -132,7 +132,7 @@ string CppRender::RenderLiteral( const VN::RenderKit &kit, TreePtr<Literal> sp, 
 {
 	(void)surround_prod;
     (void)kit;
-    return Sanitise( sp->GetRender() );
+    return Sanitise( sp->GetRenderTerminal() );
 }
 DEFAULT_CATCH_CLAUSE
 
@@ -148,7 +148,7 @@ string CppRender::RenderPureIdentifier( const VN::RenderKit &kit, TreePtr<Identi
         {           
             if( unique_ids.count(ii) == 0 )
             {
-                return ERROR_UNKNOWN( SSPrintf("identifier %s missing from unique_ids", ii->GetRender().c_str() ) );
+                return ERROR_UNKNOWN( SSPrintf("identifier %s missing from unique_ids", ii->GetRenderTerminal().c_str() ) );
             }
             ids = unique_ids.at(ii);
         }
@@ -586,7 +586,7 @@ string CppRender::RenderExteriorCall( const VN::RenderKit &kit, TreePtr<SeqArgsC
     // Constructor case: spot by use of Lookup to empty-named method. Elide the "."
     if( auto lu = DynamicTreePtrCast< Lookup >(call->callee) )
         if( auto id = DynamicTreePtrCast< InstanceIdentifier >(lu->member) )
-            if( id->GetRender().empty() )
+            if( id->GetRenderTerminal().empty() )
                 return RenderIntoProduction( kit, lu->object, Syntax::Production::POSTFIX ) + args_in_parens;
 
     // Other funcitons just evaluate
@@ -822,7 +822,7 @@ string CppRender::RenderInitialisation( const VN::RenderKit &kit, TreePtr<Initia
         {
             if( auto lu = TreePtr<Lookup>::DynamicCast(call->callee) )
                 if( auto id = TreePtr<InstanceIdentifier>::DynamicCast(lu->member) )
-                    if( id->GetRender().empty() ) // syscall to a nameless member function => sys construct
+                    if( id->GetRenderTerminal().empty() ) // syscall to a nameless member function => sys construct
                         return RenderExprSeq(kit, call->arguments) + ";\n";
         }
         if( auto call = DynamicTreePtrCast<Call>( ei ) ) try
@@ -990,7 +990,7 @@ string CppRender::RenderPreProcDecl(const VN::RenderKit &kit, TreePtr<PreProcDec
     if( auto si = TreePtr<SystemInclude>::DynamicCast(ppd) )
         return "#include <" + si->filename->GetString() + ">";
     else if( auto si = TreePtr<LocalInclude>::DynamicCast(ppd) )
-        return "#include " + si->filename->GetRender();
+        return "#include " + si->filename->GetRenderTerminal();
     else
         return ERROR_UNSUPPORTED(ppd);     
 }
