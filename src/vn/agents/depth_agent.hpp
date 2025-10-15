@@ -86,6 +86,7 @@ public:
                                            const SolutionMap *hypothesis_links,
                                            PatternLink keyer_plink,
                                            const XTreeDatabase *x_tree_db ) const;                                              
+	string GetRender( const RenderKit &kit, string prefix, Syntax::Production surround_prod ) const final;
     virtual NodeBlock GetGraphBlockInfo() const;
 
     TreePtr<Node> recurse_restriction; // Restricts the intermediate nodes in the truncated subtree

@@ -8,6 +8,7 @@
 #include "sym/predicate_operators.hpp"
 #include "sym/symbol_operators.hpp"
 #include "sym/lazy_eval.hpp"
+#include "lang/render.hpp"
 
 using namespace VN;
 using namespace SYM;
@@ -145,6 +146,16 @@ void StuffAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
     
     query.RegisterMultiplicityNode( PatternLink(&recurse_restriction), xpr_ss ); // Links into X    
 }
+    
+    
+string StuffAgent::GetRender( const RenderKit &kit, string prefix, Syntax::Production surround_prod ) const
+{
+	if( recurse_restriction )
+		prefix += "#【" + kit.render("", recurse_restriction, Syntax::Production::BOOT_EXPR) + "】";
+	else
+		prefix += "#";
+	return kit.render( prefix, terminus, surround_prod ); // keep the same surround_prod when only modifying prefix
+}    
     
     
 Graphable::NodeBlock StuffAgent::GetGraphBlockInfo() const

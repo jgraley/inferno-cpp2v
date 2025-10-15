@@ -130,11 +130,11 @@ bool AgentCommon::ShouldGenerateCategoryClause() const
 }                                
 
 
-string AgentCommon::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
+string AgentCommon::GetRender( const RenderKit &kit, string prefix, Syntax::Production surround_prod ) const
 {
 	(void)kit;
 	(void)surround_prod;
-	return GetTrace();
+	return prefix + "(" + GetTrace() + ")";
 }
 
 

@@ -30,6 +30,7 @@ public:
     virtual void StartPlanOverlay(SCREngine *acting_engine);
     
 private:
+	string GetRender( const RenderKit &kit, string prefix, Syntax::Production surround_prod ) const final;
     virtual const TreePtrInterface *GetThrough() const = 0;
     virtual const TreePtrInterface *GetOverlay() const = 0;    
     virtual NodeBlock GetGraphBlockInfo() const;

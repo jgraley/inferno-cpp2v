@@ -2,6 +2,7 @@
 #include "green_grass_agent.hpp"
 #include "../search_replace.hpp" 
 #include "link.hpp"
+#include "lang/render.hpp"
 
 using namespace VN;
 
@@ -79,3 +80,14 @@ Agent::ReplacePatchPtr DeltaAgent::GenReplaceLayoutImpl( const ReplaceKit &kit,
     PatternLink overlay_plink(GetOverlay());
     return overlay_plink.GetChildAgent()->GenReplaceLayout(kit, overlay_plink, acting_engine);    
 }                                         
+
+
+string DeltaAgent::GetRender( const RenderKit &kit, string prefix, Syntax::Production surround_prod ) const
+{
+	(void)surround_prod;
+	return kit.render( string(), (TreePtr<Node>)(*GetThrough()), Syntax::Production::DELTA_AGENT ) + // TODO declare and use GetMyProduction() and decide associativity
+	       "\n" + prefix + "Δ" + "\n" +
+	       kit.render( string(), (TreePtr<Node>)(*GetOverlay()), Syntax::Production::DELTA_AGENT );
+}    
+    
+    

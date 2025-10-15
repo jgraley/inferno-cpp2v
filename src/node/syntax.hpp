@@ -53,6 +53,7 @@ public:
 		ADD_SUB,
 		MUL_DIV,
 		TYPE_IN_NEW, // new(args) <here>(args)
+		DELTA_AGENT,
 		PREFIX, // C++: all prefix including keywords where expression
 		POSTFIX, // C++: all prefix including sub clauses
 		SPACE_SEP_TYPE, // eg unsigned long. Interestingly, the spaces take precedence

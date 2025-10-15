@@ -46,9 +46,11 @@ CppRender::CppRender( string of ) :
 }
 
 
-string CppRender::Dispatch( const VN::RenderKit &kit, TreePtr<Node> node, Syntax::Production surround_prod )
+string CppRender::Dispatch( const VN::RenderKit &kit, string prefix, TreePtr<Node> node, Syntax::Production surround_prod )
 {
-    if( TreePtr<Uninitialised>::DynamicCast(node) )
+	if( !prefix.empty() )
+		return prefix + RenderIntoProduction(kit, node, Syntax::Production::PREFIX );
+    else if( TreePtr<Uninitialised>::DynamicCast(node) )
         return string();  
     else if( auto program = TreePtr<Program>::DynamicCast(node) )
         return RenderProgram( kit, program, surround_prod );
@@ -89,7 +91,7 @@ string CppRender::Dispatch( const VN::RenderKit &kit, TreePtr<Node> node, Syntax
     else if( auto statement = TreePtr<Statement>::DynamicCast(node) )
         return RenderStatement( kit, statement, surround_prod );
     else
-        return Render::Dispatch( kit, node, surround_prod );       
+        return Render::Dispatch( kit, prefix, node, surround_prod );       
 }
 
 
@@ -153,7 +155,7 @@ string CppRender::RenderPureIdentifier( const VN::RenderKit &kit, TreePtr<Identi
             ids = unique_ids.at(ii);
         }
         else
-            return Render::Dispatch( kit, id, surround_prod );
+            return Render::Dispatch( kit, "", id, surround_prod );
 
         TRACE( "%s\n", ids.c_str() );
     }
@@ -252,7 +254,7 @@ string CppRender::RenderIntegral( const VN::RenderKit &kit, TreePtr<Integral> ty
     else if( width <= TypeDb::integral_bits[clang::DeclSpec::TSW_longlong] )
         s += "long long";
     else
-		Render::Dispatch( kit, type, surround_prod );
+		Render::Dispatch( kit, "", type, surround_prod );
 		
 	s += SSPrintf("/* %d bits */", width );
 
@@ -313,7 +315,7 @@ string CppRender::RenderFloating( const VN::RenderKit &kit, TreePtr<Floating> ty
     else if( &(const llvm::fltSemantics &)*sem == TypeDb::long_double_semantics )
         s += "long double";
     else
-        Render::Dispatch( kit, type, surround_prod );
+        Render::Dispatch( kit, "", type, surround_prod );
 
     return s;
 }
@@ -392,7 +394,7 @@ string CppRender::RenderType( const VN::RenderKit &kit, TreePtr<CPPTree::Type> t
 		return RenderTypeAndDeclarator( kit, type, "", Syntax::Production::ANONYMOUS, surround_prod, false ); 
 	}
 	else
-		return Render::Dispatch( kit, type, surround_prod );
+		return Render::Dispatch( kit, "", type, surround_prod );
 }
 
 // Insert escapes into a string so it can be put in source code
@@ -627,7 +629,7 @@ string CppRender::RenderExpression( const VN::RenderKit &kit, TreePtr<Initialise
     else if( auto pot = DynamicTreePtrCast< AlignOf >(expression) )
         return "alignof(" + RenderIntoProduction( kit, pot->argument, Syntax::Production::BOOT_EXPR ) + ")";    
     else
-        return Render::Dispatch( kit, expression, surround_prod );
+        return Render::Dispatch( kit, "", expression, surround_prod );
 
 }
 DEFAULT_CATCH_CLAUSE
@@ -974,7 +976,7 @@ string CppRender::RenderRecordProto( const VN::RenderKit &kit, TreePtr<Record> r
     else if( DynamicTreePtrCast< Enum >(record) )
         s += "enum";
     else
-        s += Render::Dispatch( kit, record, Syntax::Production::SPACE_SEP_DECLARATION );
+        s += Render::Dispatch( kit, "", record, Syntax::Production::SPACE_SEP_DECLARATION );
 
     // Name of the record
     s += " " + RenderIntoProduction(kit, record->identifier, Syntax::Production::SPACE_SEP_DECLARATION);
@@ -1053,7 +1055,7 @@ string CppRender::RenderDeclaration( const VN::RenderKit &kit, TreePtr<Declarati
     else if( TreePtr<Label> l = DynamicTreePtrCast<Label>(declaration) )
         return RenderIntoProduction(kit, l->identifier, Syntax::Production::PURE_IDENTIFIER) + ":;\n"; // need ; after a label in case last in compound block
     else
-        s += Render::Dispatch( kit, declaration, surround_prod );
+        s += Render::Dispatch( kit, "", declaration, surround_prod );
 
     TRACE();
     return s;
@@ -1135,7 +1137,7 @@ string CppRender::RenderStatement( const VN::RenderKit &kit, TreePtr<Statement> 
     else if( DynamicTreePtrCast<Nop>(statement) )
         return "";
     else
-        return Render::Dispatch( kit, statement, surround_prod );
+        return Render::Dispatch( kit, "", statement, surround_prod );
 }
 DEFAULT_CATCH_CLAUSE
 
