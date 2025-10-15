@@ -13,6 +13,7 @@
 #include "clang/Parse/DeclSpec.h"
 #include "uniquify_identifiers.hpp"
 #include "search_replace.hpp"
+#include "agents/special_agent.hpp"
 
 using namespace CPPTree; // TODO should not need
 using namespace VN;
@@ -26,9 +27,12 @@ Render::Render( string of ) :
 
 string Render::RenderToString( shared_ptr<CompareReplace> pattern )
 {
-    return RenderToString( pattern->GetSearchComparePattern() ) +
-           "\n꩜\n" +
-           RenderToString( pattern->GetReplacePattern() );
+	if( pattern->GetSearchComparePattern() == pattern->GetReplacePattern() )
+		return "꩜\n" + RenderToString( pattern->GetReplacePattern() ); // it's a stem
+	else
+        return RenderToString( pattern->GetSearchComparePattern() ) +
+               "\n꩜ Δ\n" +
+               RenderToString( pattern->GetReplacePattern() );
 }
 
 
@@ -39,7 +43,7 @@ string Render::RenderToString( TreePtr<Node> root )
     context = root; 
         
     DefaultTransUtils utils(context);
-    Render::Kit kit { &utils };
+    RenderKit kit { &utils };
 
     // Make the identifiers unique (does its own tree walk)
     unique_ids = UniquifyIdentifiers::UniquifyAll( kit, context );
@@ -64,12 +68,12 @@ void Render::WriteToFile( string s )
 }
 
 
-string Render::RenderIntoProduction( const Render::Kit &kit, TreePtr<Node> node, Syntax::Production surround_prod )
+string Render::RenderIntoProduction( const RenderKit &kit, TreePtr<Node> node, Syntax::Production surround_prod )
 {	
     INDENT("R");
     if( !node )
-		return RenderNullPointer( kit, surround_prod );
-		
+		return RenderNullPointer( kit, surround_prod );	
+					
     // Production surround_prod relates to the surrounding grammar production and can be 
     // used to change the render of a certain subtree. It represents all the ancestor nodes of
     // the one supplied.
@@ -168,28 +172,39 @@ string Render::RenderIntoProduction( const Render::Kit &kit, TreePtr<Node> node,
 }
 
 
-string Render::RenderNullPointer( const Render::Kit &kit, Syntax::Production surround_prod )
+string Render::RenderNullPointer( const RenderKit &kit, Syntax::Production surround_prod )
 {	
+	(void)kit;
+	(void)surround_prod;
 	// Assume NULL means we're in a pattern, and it represents a wildcard
 	// Note: we'd better not supply NULL, or we'll recurse forever.
-	return RenderIntoProduction( kit, MakeTreeNode<Node>(), surround_prod );
+	return "NULL";//RenderIntoProduction( kit, MakeTreeNode<Node>(), surround_prod );
 }
 
 
-string Render::Dispatch( const Render::Kit &kit, TreePtr<Node> node, Syntax::Production surround_prod )
+string Render::Dispatch( const RenderKit &kit, TreePtr<Node> node, Syntax::Production surround_prod )
 {
 	(void)surround_prod;
+	if( dynamic_cast<const SpecialBase *>(node.get()) )
+		return RenderSpecial( kit, node, surround_prod ); 
 	return RenderAny( kit, node );       
 }
 
 
-string Render::RenderAny( const Render::Kit &kit, TreePtr<Node> node, unsigned enables )
+string Render::RenderSpecial( const RenderKit &kit, TreePtr<Node> node, Syntax::Production surround_prod )
+{
+	const Agent *agent = Agent::TryAsAgentConst(node);
+	return agent->GetRender2( kit, surround_prod );
+}
+
+
+string Render::RenderAny( const RenderKit &kit, TreePtr<Node> node, unsigned enables )
 {
 	string s = node->GetRender();
 	if( !s.empty() )
 		return s;
 	
-	s = "🞊"+TYPE_ID_NAME(*node);
+	s = "⁜"+TYPE_ID_NAME(*node);
 	
 	list<string> sitems;
     vector< Itemiser::Element * > items = node->Itemise();
@@ -213,7 +228,7 @@ string Render::RenderAny( const Render::Kit &kit, TreePtr<Node> node, unsigned e
         }            
         else if( TreePtrInterface *singular = dynamic_cast<TreePtrInterface *>(items[i]) )
         {
-            sitems.push_back( RenderIntoProduction( kit, TreePtr<Node>(*singular), Syntax::Production::BARE_STATEMENT ) );
+            sitems.push_back( RenderIntoProduction( kit, TreePtr<Node>(*singular), Syntax::Production::COMMA_SEP ) );
         }
         else
         {
@@ -221,7 +236,7 @@ string Render::RenderAny( const Render::Kit &kit, TreePtr<Node> node, unsigned e
         }
     }
         
-    s += Join( sitems, "; ", "⦑", "⦒" ); 
+    s += Join( sitems, "︙", "⦑", "⦒" ); 
     
     // We can't change the production returned by GetMyProduction(), so try instead to render in 
     // accordance with whatever the node returned.
@@ -244,13 +259,18 @@ TreePtr<Scope> Render::TryGetScope( TreePtr<Identifier> id )
     }
     catch( ScopeNotFoundMismatch & )
     {
-        // There is a scope but our id us not in it, maybe it was undeclared?
+        // There is a scope but our id is not in it, maybe it was undeclared?
+        return nullptr;
+    }
+    catch( ScopeOnNonSpecificMismatch & )
+    {
+        // Trying to get scope on eg Identifier during pattern rendering.
         return nullptr;
     }
 }
 
 
-bool Render::IsDeclared( const Render::Kit &kit, TreePtr<Identifier> id )
+bool Render::IsDeclared( const RenderKit &kit, TreePtr<Identifier> id )
 {
     try
     {

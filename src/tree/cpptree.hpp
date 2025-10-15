@@ -276,6 +276,7 @@ struct InstanceIdentifier : Identifier,
 { 
     NODE_FUNCTIONS 
     virtual string GetColour() const { return Identifier::GetColour(); } // Identifier wins
+	Production GetMyProduction() const override;
 };
                                
 /// Identifier for a specific Instance, linked to by a particular Declaration                           
@@ -286,7 +287,6 @@ struct SpecificInstanceIdentifier : InstanceIdentifier,
     SpecificInstanceIdentifier( string s, BoundingRole addr_bounding_role = BoundingRole::NONE ) : 
         SpecificIdentifier(s, addr_bounding_role) {} ///< make identifier with the given name
     NODE_FUNCTIONS_FINAL
-	Production GetMyProduction() const override;
 };
                             
 
@@ -296,6 +296,7 @@ struct TypeIdentifier : Identifier,
 { 
     NODE_FUNCTIONS
     virtual string GetColour() const { return Identifier::GetColour(); } // Identifier wins
+	Production GetMyProduction() const override;
 };
                            
 /// Identifier for a specific user defined type, linked to by a particular Declaration.
@@ -306,7 +307,6 @@ struct SpecificTypeIdentifier : TypeIdentifier,
     SpecificTypeIdentifier( string s, BoundingRole addr_bounding_role = BoundingRole::NONE ) : 
         SpecificIdentifier(s, addr_bounding_role) {} ///< make identifier with the given name
     NODE_FUNCTIONS_FINAL
-	Production GetMyProduction() const override;
 };
 
 // General note about identifiers: in a valid program tree, there should
@@ -472,6 +472,7 @@ struct LabelIdentifier : Identifier,
 { 
     NODE_FUNCTIONS 
     virtual string GetColour() const { return Identifier::GetColour(); } // Identifier wins
+	Production GetMyProduction() const override;    
 };
 
 /// Identifier for a specific label that has been declared somewhere.
@@ -482,8 +483,6 @@ struct SpecificLabelIdentifier : LabelIdentifier,
     SpecificLabelIdentifier( string s, BoundingRole addr_bounding_role = BoundingRole::NONE ) : 
         SpecificIdentifier(s, addr_bounding_role) {} ///< construct with initial name
     NODE_FUNCTIONS_FINAL
-    
-	Production GetMyProduction() const override;    
 };
 
 /// Declaration of a label for switch, goto etc.
@@ -1188,6 +1187,7 @@ struct Nop : Statement
 struct PreprocessorIdentifier : Identifier
 { 
     NODE_FUNCTIONS 
+	Production GetMyProduction() const override;    
 };
 
 /// Identifier for a specific label that has been declared somewhere.
@@ -1197,9 +1197,7 @@ struct SpecificPreprocessorIdentifier : PreprocessorIdentifier,
     SpecificPreprocessorIdentifier() {} ///< Default constructor
     SpecificPreprocessorIdentifier( string s, BoundingRole addr_bounding_role = BoundingRole::NONE ) : 
         SpecificIdentifier(s, addr_bounding_role) {} ///< construct with initial name
-    NODE_FUNCTIONS_FINAL
-    
-	Production GetMyProduction() const override;    
+    NODE_FUNCTIONS_FINAL    
 };
 
 

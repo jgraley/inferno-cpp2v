@@ -46,7 +46,7 @@ CppRender::CppRender( string of ) :
 }
 
 
-string CppRender::Dispatch( const Render::Kit &kit, TreePtr<Node> node, Syntax::Production surround_prod )
+string CppRender::Dispatch( const VN::RenderKit &kit, TreePtr<Node> node, Syntax::Production surround_prod )
 {
     if( TreePtr<Uninitialised>::DynamicCast(node) )
         return string();  
@@ -93,7 +93,7 @@ string CppRender::Dispatch( const Render::Kit &kit, TreePtr<Node> node, Syntax::
 }
 
 
-string CppRender::RenderProgram( const Render::Kit &kit, TreePtr<CPPTree::Program> program, Syntax::Production surround_prod )
+string CppRender::RenderProgram( const VN::RenderKit &kit, TreePtr<CPPTree::Program> program, Syntax::Production surround_prod )
 {
 	(void)surround_prod;
     string s;
@@ -116,7 +116,7 @@ string CppRender::RenderProgram( const Render::Kit &kit, TreePtr<CPPTree::Progra
 }
 
 
-string CppRender::RenderIdValuePair( const Render::Kit &kit, TreePtr<IdValuePair> ivp, Syntax::Production surround_prod ) try
+string CppRender::RenderIdValuePair( const VN::RenderKit &kit, TreePtr<IdValuePair> ivp, Syntax::Production surround_prod ) try
 {
 	// Not part of C/C++ grammer at time of writing but handy for calls with no decl
 	(void)surround_prod;
@@ -128,7 +128,7 @@ string CppRender::RenderIdValuePair( const Render::Kit &kit, TreePtr<IdValuePair
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderLiteral( const Render::Kit &kit, TreePtr<Literal> sp, Syntax::Production surround_prod ) try
+string CppRender::RenderLiteral( const VN::RenderKit &kit, TreePtr<Literal> sp, Syntax::Production surround_prod ) try
 {
 	(void)surround_prod;
     (void)kit;
@@ -137,14 +137,14 @@ string CppRender::RenderLiteral( const Render::Kit &kit, TreePtr<Literal> sp, Sy
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderPureIdentifier( const Render::Kit &kit, TreePtr<Identifier> id, Syntax::Production surround_prod ) try
+string CppRender::RenderPureIdentifier( const VN::RenderKit &kit, TreePtr<Identifier> id, Syntax::Production surround_prod ) try
 {   
     (void)kit;
     (void)surround_prod;
     string ids;
     if( id )
     {
-        if( TreePtr<SpecificIdentifier> ii = DynamicTreePtrCast<SpecificIdentifier>( id ) )
+        if( auto ii = DynamicTreePtrCast<SpecificIdentifier>( id ) )
         {           
             if( unique_ids.count(ii) == 0 )
             {
@@ -153,7 +153,7 @@ string CppRender::RenderPureIdentifier( const Render::Kit &kit, TreePtr<Identifi
             ids = unique_ids.at(ii);
         }
         else
-            return ERROR_UNSUPPORTED( (id) );
+            return Render::Dispatch( kit, id, surround_prod );
 
         TRACE( "%s\n", ids.c_str() );
     }
@@ -167,7 +167,7 @@ string CppRender::RenderPureIdentifier( const Render::Kit &kit, TreePtr<Identifi
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::ScopeResolvingPrefix( const Render::Kit &kit, TreePtr<Identifier> id, Syntax::Production surround_prod ) try
+string CppRender::ScopeResolvingPrefix( const VN::RenderKit &kit, TreePtr<Identifier> id, Syntax::Production surround_prod ) try
 {
     TreePtr<Node> scope = TryGetScope(id);
        
@@ -192,7 +192,7 @@ string CppRender::ScopeResolvingPrefix( const Render::Kit &kit, TreePtr<Identifi
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderIdentifier( const Render::Kit &kit, TreePtr<Identifier> id, Syntax::Production surround_prod ) try
+string CppRender::RenderIdentifier( const VN::RenderKit &kit, TreePtr<Identifier> id, Syntax::Production surround_prod ) try
 {
     // Slight cheat for expediency: below SCOPE_RESOLVE we prepend && which make it expressional
     if( DynamicTreePtrCast< SpecificLabelIdentifier >(id) && surround_prod < Syntax::Production::SCOPE_RESOLVE )
@@ -215,7 +215,7 @@ string CppRender::RenderIdentifier( const Render::Kit &kit, TreePtr<Identifier> 
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderIntegral( const Render::Kit &kit, TreePtr<Integral> type, Syntax::Production surround_prod ) try
+string CppRender::RenderIntegral( const VN::RenderKit &kit, TreePtr<Integral> type, Syntax::Production surround_prod ) try
 {
 	(void)surround_prod;
     (void)kit;
@@ -252,7 +252,7 @@ string CppRender::RenderIntegral( const Render::Kit &kit, TreePtr<Integral> type
     else if( width <= TypeDb::integral_bits[clang::DeclSpec::TSW_longlong] )
         s += "long long";
     else
-		ASSERTFAIL();
+		Render::Dispatch( kit, type, surround_prod );
 		
 	s += SSPrintf("/* %d bits */", width );
 
@@ -261,7 +261,7 @@ string CppRender::RenderIntegral( const Render::Kit &kit, TreePtr<Integral> type
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderIntegralTypeAndDeclarator( const Render::Kit &kit, TreePtr<Integral> type, string declarator ) try
+string CppRender::RenderIntegralTypeAndDeclarator( const VN::RenderKit &kit, TreePtr<Integral> type, string declarator ) try
 {
     (void)kit;
     // This function only exists to provide bitfields in member declarations that use declarators.
@@ -298,7 +298,7 @@ string CppRender::RenderIntegralTypeAndDeclarator( const Render::Kit &kit, TreeP
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderFloating( const Render::Kit &kit, TreePtr<Floating> type, Syntax::Production surround_prod ) try
+string CppRender::RenderFloating( const VN::RenderKit &kit, TreePtr<Floating> type, Syntax::Production surround_prod ) try
 {
 	(void)surround_prod;
     (void)kit;
@@ -313,16 +313,27 @@ string CppRender::RenderFloating( const Render::Kit &kit, TreePtr<Floating> type
     else if( &(const llvm::fltSemantics &)*sem == TypeDb::long_double_semantics )
         s += "long double";
     else
-        ASSERT(0)("no builtin floating type has required semantics"); // TODO drop in a bit vector
+        Render::Dispatch( kit, type, surround_prod );
 
     return s;
 }
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderTypeAndDeclarator( const Render::Kit &kit, TreePtr<Type> type, string declarator, 
-                                        Syntax::Production declarator_prod, Syntax::Production surround_prod, bool constant ) try
+string CppRender::RenderTypeAndDeclarator( const VN::RenderKit &kit, TreePtr<Type> type, string declarator, 
+                                           Syntax::Production declarator_prod, Syntax::Production surround_prod, bool constant ) try
 {
+	ASSERT( declarator != "🞊Node⦑⦒" );
+    string const_str = constant?"const ":"";
+    bool pure_type = (declarator == "");
+    string sdeclarator;
+    if( !pure_type )
+        sdeclarator = " " + declarator;
+    Syntax::Production type_prod = pure_type ? surround_prod  
+                                             : Syntax::Production::SPACE_SEP_DECLARATION;
+	if( !type )
+        return const_str + RenderIntoProduction( kit, type, type_prod ) + sdeclarator;
+
     // Production passed in here comes from the current value of the delcarator string, not surrounding production.
     Syntax::Production prod_surrounding_declarator = type->GetOperandInDeclaratorProduction();
     ASSERT( prod_surrounding_declarator != Syntax::Production::UNDEFINED )
@@ -331,17 +342,9 @@ string CppRender::RenderTypeAndDeclarator( const Render::Kit &kit, TreePtr<Type>
     ASSERT( Syntax::GetPrecedence(declarator_prod) >= Syntax::GetPrecedence(Syntax::Production::BOOT_EXPR) ); // Can't put this node into parentheses
     bool parenthesise = Syntax::GetPrecedence(declarator_prod) < Syntax::GetPrecedence(prod_surrounding_declarator);  
     // Apply to object rather than recursing, because this is declarator    
-    bool pure_type = (declarator == "");
     if( parenthesise )
         declarator = "(" + declarator + ")";
-    string sdeclarator;
-    if( !pure_type )
-        sdeclarator = " " + declarator;
-    Syntax::Production type_prod = pure_type ? surround_prod  
-                                             : Syntax::Production::SPACE_SEP_DECLARATION;
                 
-    string const_str = constant?"const ":"";
-
     TRACE();
     if( TreePtr<Integral> i = DynamicTreePtrCast< Integral >(type) )
         return const_str + RenderIntegralTypeAndDeclarator( kit, i, declarator );        
@@ -375,7 +378,7 @@ string CppRender::RenderTypeAndDeclarator( const Render::Kit &kit, TreePtr<Type>
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderType( const Render::Kit &kit, TreePtr<CPPTree::Type> type, Syntax::Production surround_prod )
+string CppRender::RenderType( const VN::RenderKit &kit, TreePtr<CPPTree::Type> type, Syntax::Production surround_prod )
 {
 	if( DynamicTreePtrCast< Void >(type) )
         return "void";
@@ -410,7 +413,7 @@ string CppRender::Sanitise( string s ) try
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderOperator( const Render::Kit &kit, TreePtr<Operator> op, Syntax::Production surround_prod ) try
+string CppRender::RenderOperator( const VN::RenderKit &kit, TreePtr<Operator> op, Syntax::Production surround_prod ) try
 {
     (void)surround_prod;
     ASSERT(op);
@@ -516,7 +519,7 @@ string CppRender::RenderOperator( const Render::Kit &kit, TreePtr<Operator> op, 
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderMapArgs( const Render::Kit &kit, TreePtr<Type> dest_type, Collection<IdValuePair> &args ) try
+string CppRender::RenderMapArgs( const VN::RenderKit &kit, TreePtr<Type> dest_type, Collection<IdValuePair> &args ) try
 {   
 	list<string> ls;
 	if( dest_type )
@@ -547,7 +550,7 @@ string CppRender::RenderMapArgs( const Render::Kit &kit, TreePtr<Type> dest_type
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderCall( const Render::Kit &kit, TreePtr<Call> call, Syntax::Production surround_prod ) try
+string CppRender::RenderCall( const VN::RenderKit &kit, TreePtr<Call> call, Syntax::Production surround_prod ) try
 {
 	(void)surround_prod;
     string s;
@@ -565,7 +568,7 @@ string CppRender::RenderCall( const Render::Kit &kit, TreePtr<Call> call, Syntax
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderExprSeq( const Render::Kit &kit, Sequence<Expression> seq ) try
+string CppRender::RenderExprSeq( const VN::RenderKit &kit, Sequence<Expression> seq ) try
 {
     list<string> renders;
     for( TreePtr<Expression> e : seq )    
@@ -575,7 +578,7 @@ string CppRender::RenderExprSeq( const Render::Kit &kit, Sequence<Expression> se
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderExteriorCall( const Render::Kit &kit, TreePtr<SeqArgsCall> call, Syntax::Production surround_prod ) try
+string CppRender::RenderExteriorCall( const VN::RenderKit &kit, TreePtr<SeqArgsCall> call, Syntax::Production surround_prod ) try
 {
 	(void)surround_prod;
     string args_in_parens = RenderExprSeq(kit, call->arguments);
@@ -592,7 +595,7 @@ string CppRender::RenderExteriorCall( const Render::Kit &kit, TreePtr<SeqArgsCal
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderMacroStatement( const Render::Kit &kit, TreePtr<MacroStatement> ms, Syntax::Production surround_prod ) try
+string CppRender::RenderMacroStatement( const VN::RenderKit &kit, TreePtr<MacroStatement> ms, Syntax::Production surround_prod ) try
 {
 	(void)surround_prod;
 	string s = RenderIntoProduction( kit, ms->identifier, Syntax::Production::POSTFIX );
@@ -606,18 +609,18 @@ string CppRender::RenderMacroStatement( const Render::Kit &kit, TreePtr<MacroSta
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser> expression, Syntax::Production surround_prod ) try
+string CppRender::RenderExpression( const VN::RenderKit &kit, TreePtr<Initialiser> expression, Syntax::Production surround_prod ) try
 {
     (void)surround_prod;
       
     if( auto ce = DynamicTreePtrCast< StatementExpression >(expression) )
     {
-        string s = "{ ";
+        string s = "({ ";
         AutoPush< TreePtr<Node> > cs( scope_stack, ce );
         s += RenderDeclScope( kit, ce ); // Must do this first to populate backing list
         for( TreePtr<Statement> st : ce->statements )    
             s += RenderIntoProduction( kit, st, Syntax::Production::STATEMENT_LOW );    
-        return s + " }";
+        return s + " })";
     }
     else if( auto pot = DynamicTreePtrCast< SizeOf >(expression) )
         return "sizeof(" + RenderIntoProduction( kit, pot->argument, Syntax::Production::BOOT_EXPR ) + ")";               
@@ -630,7 +633,7 @@ string CppRender::RenderExpression( const Render::Kit &kit, TreePtr<Initialiser>
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderMakeRecord( const Render::Kit &kit, TreePtr<RecordLiteral> make_rec, Syntax::Production surround_prod ) try
+string CppRender::RenderMakeRecord( const VN::RenderKit &kit, TreePtr<RecordLiteral> make_rec, Syntax::Production surround_prod ) try
 {
 	(void)surround_prod;
     string s;
@@ -695,7 +698,7 @@ Sequence<Expression> CppRender::SortMapById( Collection<IdValuePair> &id_value_m
 }
 
 
-string CppRender::RenderAccessSpec( const Render::Kit &kit, TreePtr<AccessSpec> access, Syntax::Production surround_prod ) try
+string CppRender::RenderAccessSpec( const VN::RenderKit &kit, TreePtr<AccessSpec> access, Syntax::Production surround_prod ) try
 {
 	(void)surround_prod;
     (void)kit;
@@ -711,10 +714,10 @@ string CppRender::RenderAccessSpec( const Render::Kit &kit, TreePtr<AccessSpec> 
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderStorage( const Render::Kit &kit, TreePtr<Instance> st ) try
+string CppRender::RenderStorage( const VN::RenderKit &kit, TreePtr<Instance> st ) try
 {
     (void)kit;
-    if( DynamicTreePtrCast<Program>( scope_stack.top() ) )
+    if( !scope_stack.empty() && DynamicTreePtrCast<Program>( scope_stack.top() ) )
         return ""; // at top-level scope, everything is set to static, but don't actually output the word
     else if( DynamicTreePtrCast<Static>( st ) )
         return "static ";
@@ -733,12 +736,12 @@ string CppRender::RenderStorage( const Render::Kit &kit, TreePtr<Instance> st ) 
             return ERROR_UNKNOWN("virtualness");
     }
     else
-        return ERROR_UNKNOWN(st->GetTypeName());
+        return ""; // eg for Instance as a wildcard
 }
 DEFAULT_CATCH_CLAUSE
 
 
-void CppRender::ExtractInits( const Render::Kit &kit, 
+void CppRender::ExtractInits( const VN::RenderKit &kit, 
                               Sequence<Statement> &body, 
                               Sequence<Statement> &inits, 
                               Sequence<Statement> &remainder )
@@ -769,13 +772,11 @@ void CppRender::ExtractInits( const Render::Kit &kit,
 }
 
 
-string CppRender::RenderInstanceProto( const Render::Kit &kit, 
-                                    TreePtr<Instance> o ) try
+string CppRender::RenderInstanceProto( const VN::RenderKit &kit, 
+                                       TreePtr<Instance> o ) try
 {
     string s;
     bool constant=false;
-
-    ASSERT(o->type);
 
     if( TreePtr<Static> st = DynamicTreePtrCast<Static>(o) )
         if( DynamicTreePtrCast<Const>(st->constancy) )
@@ -811,7 +812,7 @@ string CppRender::RenderInstanceProto( const Render::Kit &kit,
 DEFAULT_CATCH_CLAUSE  
 
 
-string CppRender::RenderInitialisation( const Render::Kit &kit, TreePtr<Initialiser> init ) try
+string CppRender::RenderInitialisation( const VN::RenderKit &kit, TreePtr<Initialiser> init ) try
 {
 	string s;
 	if( TreePtr<Expression> ei = DynamicTreePtrCast<Expression>( init ) )
@@ -871,7 +872,7 @@ string CppRender::RenderInitialisation( const Render::Kit &kit, TreePtr<Initiali
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderInstance( const Render::Kit &kit, TreePtr<Instance> o, Syntax::Production surround_prod )
+string CppRender::RenderInstance( const VN::RenderKit &kit, TreePtr<Instance> o, Syntax::Production surround_prod )
 {
     string s;
        
@@ -913,7 +914,7 @@ string CppRender::RenderInstance( const Render::Kit &kit, TreePtr<Instance> o, S
 // get split into a part that goes into the record (main line of rendering) and
 // a part that goes separately (definitions gets appended at the very end).
 // Do all functions, since SortDecls() ignores function bodies for dep analysis
-bool CppRender::ShouldSplitInstance( const Render::Kit &kit, TreePtr<Instance> o ) 
+bool CppRender::ShouldSplitInstance( const VN::RenderKit &kit, TreePtr<Instance> o ) 
 {
     (void)kit;
     if( DynamicTreePtrCast<Callable>( o->type ) )
@@ -927,6 +928,9 @@ bool CppRender::ShouldSplitInstance( const Render::Kit &kit, TreePtr<Instance> o
     else
     {
         // ----- objects ------ 
+        if( scope_stack.empty() )
+			return false;
+			
         if( !DynamicTreePtrCast<Record>( scope_stack.top() ) )
             return false;
         
@@ -943,7 +947,7 @@ bool CppRender::ShouldSplitInstance( const Render::Kit &kit, TreePtr<Instance> o
 }
 
 
-string CppRender::RenderMacroDeclaration( const Render::Kit &kit, TreePtr<MacroDeclaration> md, Syntax::Production surround_prod )
+string CppRender::RenderMacroDeclaration( const VN::RenderKit &kit, TreePtr<MacroDeclaration> md, Syntax::Production surround_prod )
 {
 	(void)surround_prod;	
     // ---- Proto ----
@@ -958,7 +962,7 @@ string CppRender::RenderMacroDeclaration( const Render::Kit &kit, TreePtr<MacroD
 }
 
 
-string CppRender::RenderRecordProto( const Render::Kit &kit, TreePtr<Record> record )
+string CppRender::RenderRecordProto( const VN::RenderKit &kit, TreePtr<Record> record )
 {
     string s;
     if( DynamicTreePtrCast< Class >(record) )
@@ -979,7 +983,7 @@ string CppRender::RenderRecordProto( const Render::Kit &kit, TreePtr<Record> rec
 }
 
 
-string CppRender::RenderPreProcDecl(const Render::Kit &kit, TreePtr<PreProcDecl> ppd, Syntax::Production surround_prod ) try
+string CppRender::RenderPreProcDecl(const VN::RenderKit &kit, TreePtr<PreProcDecl> ppd, Syntax::Production surround_prod ) try
 {
 	(void)surround_prod;
     (void)kit;
@@ -993,7 +997,7 @@ string CppRender::RenderPreProcDecl(const Render::Kit &kit, TreePtr<PreProcDecl>
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderDeclaration( const Render::Kit &kit, TreePtr<Declaration> declaration, Syntax::Production surround_prod ) try
+string CppRender::RenderDeclaration( const VN::RenderKit &kit, TreePtr<Declaration> declaration, Syntax::Production surround_prod ) try
 {
     TRACE();
     string s;
@@ -1057,7 +1061,7 @@ string CppRender::RenderDeclaration( const Render::Kit &kit, TreePtr<Declaration
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderStatement( const Render::Kit &kit, TreePtr<Statement> statement, Syntax::Production surround_prod ) try
+string CppRender::RenderStatement( const VN::RenderKit &kit, TreePtr<Statement> statement, Syntax::Production surround_prod ) try
 {
     (void)surround_prod;
     TRACE();
@@ -1136,7 +1140,7 @@ string CppRender::RenderStatement( const Render::Kit &kit, TreePtr<Statement> st
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderConstructorInitList( const Render::Kit &kit, 
+string CppRender::RenderConstructorInitList( const VN::RenderKit &kit, 
                                           Sequence<Statement> spe ) try
 {
     TRACE();
@@ -1158,7 +1162,7 @@ string CppRender::RenderConstructorInitList( const Render::Kit &kit,
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderEnumBodyScope( const Render::Kit &kit, 
+string CppRender::RenderEnumBodyScope( const VN::RenderKit &kit, 
                                     TreePtr<CPPTree::Record> record ) try
 {
     TRACE();   
@@ -1192,7 +1196,7 @@ string CppRender::RenderEnumBodyScope( const Render::Kit &kit,
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderOperandSequence( const Render::Kit &kit, 
+string CppRender::RenderOperandSequence( const VN::RenderKit &kit, 
                                       Sequence<Expression> spe ) try
 {
     TRACE();
@@ -1205,7 +1209,7 @@ string CppRender::RenderOperandSequence( const Render::Kit &kit,
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::MaybeRenderFieldAccess( const Render::Kit &kit, TreePtr<Declaration> declaration,
+string CppRender::MaybeRenderFieldAccess( const VN::RenderKit &kit, TreePtr<Declaration> declaration,
                                        TreePtr<AccessSpec> *current_access )
 {
     ASSERT( current_access );
@@ -1220,7 +1224,7 @@ string CppRender::MaybeRenderFieldAccess( const Render::Kit &kit, TreePtr<Declar
 }                                 
 
 
-string CppRender::MaybeRenderAccessColon( const Render::Kit &kit, TreePtr<AccessSpec> this_access,
+string CppRender::MaybeRenderAccessColon( const VN::RenderKit &kit, TreePtr<AccessSpec> this_access,
                                        TreePtr<AccessSpec> *current_access )
 {
     ASSERT( current_access );
@@ -1236,7 +1240,7 @@ string CppRender::MaybeRenderAccessColon( const Render::Kit &kit, TreePtr<Access
 }                                 
 
 
-string CppRender::RenderDeclScope( const Render::Kit &kit, 
+string CppRender::RenderDeclScope( const VN::RenderKit &kit, 
                                 TreePtr<DeclScope> decl_scope,
                                 TreePtr<AccessSpec> init_access ) try
 {
@@ -1282,7 +1286,7 @@ string CppRender::RenderDeclScope( const Render::Kit &kit,
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderParams( const Render::Kit &kit, 
+string CppRender::RenderParams( const VN::RenderKit &kit, 
                              TreePtr<CallableParams> key ) try
 {
     TRACE();

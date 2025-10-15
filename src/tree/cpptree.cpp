@@ -337,16 +337,16 @@ string SpecificIdentifier::GetTrace() const
     return GetName() + "(" + GetGraphName() + ")" + GetSerialString();
 }
 
-//////////////////////////// SpecificInstanceIdentifier //////////////////////////////
+//////////////////////////// InstanceIdentifier //////////////////////////////
 
-Syntax::Production SpecificInstanceIdentifier::GetMyProduction() const
+Syntax::Production InstanceIdentifier::GetMyProduction() const
 { 
 	return Production::PURE_IDENTIFIER; 
 }
 
-//////////////////////////// SpecificTypeIdentifier //////////////////////////////
+//////////////////////////// TypeIdentifier //////////////////////////////
 
-Syntax::Production SpecificTypeIdentifier::GetMyProduction() const
+Syntax::Production TypeIdentifier::GetMyProduction() const
 { 
 	return Production::PURE_IDENTIFIER; 
 }
@@ -365,9 +365,9 @@ Syntax::Production Instance::GetMyProduction() const
 	return Production::DECLARATION;
 }
 
-//////////////////////////// SpecificLabelIdentifier //////////////////////////////
+//////////////////////////// LabelIdentifier //////////////////////////////
 
-Syntax::Production SpecificLabelIdentifier::GetMyProduction() const
+Syntax::Production LabelIdentifier::GetMyProduction() const
 { 
 	return Production::PURE_IDENTIFIER; 
 }
@@ -647,7 +647,7 @@ Syntax::Production Compound::GetMyProduction() const
 
 Syntax::Production StatementExpression::GetMyProduction() const
 { 
-	return Production::BOOT_EXPR; // Force central to give us () 
+	return Production::PARENTHESISED; 
 }
 
 //////////////////////////// Return ///////////////////////////////
@@ -716,9 +716,9 @@ Syntax::Production Nop::GetMyProduction() const
 	return Production::BOOT_STMT_DECL; // Force a {}
 }
 
-//////////////////////////// SpecificPreprocessorIdentifier //////////////////////////////
+//////////////////////////// PreprocessorIdentifier //////////////////////////////
 
-Syntax::Production SpecificPreprocessorIdentifier::GetMyProduction() const
+Syntax::Production PreprocessorIdentifier::GetMyProduction() const
 { 
 	return Production::PURE_IDENTIFIER; 
 }

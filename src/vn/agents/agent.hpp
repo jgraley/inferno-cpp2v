@@ -15,6 +15,7 @@ class AndRuleEngine;
 class Agent;
 class XTreeDatabase;
 class Patch;
+struct RenderKit;
 
 /// Interface for Agents, which co-exist with pattern nodes and implement the search and replace funcitonality for each pattern node.
 class Agent : public virtual Graphable,
@@ -89,6 +90,8 @@ public:
     virtual list<PatternLink> GetChildren() const = 0;
     virtual list<PatternLink> GetVisibleChildren( Path v ) const = 0;                        
     virtual bool ShouldGenerateCategoryClause() const = 0;                                
+
+	virtual string GetRender2( const RenderKit &kit, Syntax::Production surround_prod ) const = 0;
 
     static Agent *AsAgent( shared_ptr<Node> node );
     static Agent *TryAsAgent( shared_ptr<Node> node );
