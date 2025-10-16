@@ -3,6 +3,7 @@
 #include "../scr_engine.hpp"
 #include "../db/duplicate.hpp"
 #include "link.hpp"
+#include "lang/render.hpp"
 
 using namespace VN;
 
@@ -59,6 +60,22 @@ TreePtr<Node> EmbeddedSCRAgent::GetEmbeddedReplacePattern() const
 { 
     return replace_pattern; 
 }
+
+
+string EmbeddedSCRAgent::GetRender( const RenderKit &kit, string prefix, Syntax::Production surround_prod ) const
+{
+	(void)surround_prod;
+	if( search_pattern==replace_pattern && !is_search )	
+		return prefix + "⦑" + // TODO implement GetMyProduction and automatically boot to VN_COMMAND when required
+			   kit.render( string(), (TreePtr<Node>)(*GetThrough()), Syntax::Production::VN_COMMAND ) + 
+			   "︙\n" +
+			   kit.render( "꩜", search_pattern, Syntax::BoostPrecedence( Syntax::Production::VN_COMMAND ) ) + // Left-associative
+ 			   "⦒";
+	else
+		return "😦"; // Should have done pattern transformations to get rid of this
+}    
+    
+    
 
 
 Graphable::NodeBlock EmbeddedSCRAgent::GetGraphBlockInfo() const

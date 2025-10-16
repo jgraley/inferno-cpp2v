@@ -12,6 +12,7 @@ public:
 		UNDEFINED,
 		
 		PROGRAM,
+		VN_COMMAND,
 		DEFINITION,		
 		
 		// ----- Complete self-sufficient statements and declarations. There is a precedence

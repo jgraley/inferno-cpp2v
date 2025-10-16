@@ -156,7 +156,10 @@ void IdentifierFingerprinter::ProcessNode( TreePtr<Node> x, int &index )
 	ASSERT( x );
     // Record the fingerprints and increment index in depth-first pre-order
     if( auto id_x = TreePtr<SpecificIdentifier>::DynamicCast(x) )
+    {
+		ASSERT( id_x );
         fingerprints[id_x].insert(index);
+    }
         
     index++;
 
@@ -233,7 +236,7 @@ void IdentifierFingerprinter::ProcessCollection( CollectionInterface *x_col, int
 
 //////////////////////////// UniquifyIdentifiers ///////////////////////////////
 
-UniquifyIdentifiers::IdentifierNameMap UniquifyIdentifiers::UniquifyAll( const TransKit &kit, TreePtr<Node> context )
+UniquifyIdentifiers::IdentifierNameMap UniquifyIdentifiers::UniquifyAll( const TransKit &kit, TreePtr<Node> context, bool relax_about_declarations )
 {
 	IdentifierFingerprinter::IdsByFingerprint ids_by_fp = IdentifierFingerprinter().GetIdentifiersInTreeByFingerprint(context);    
 	
@@ -250,7 +253,10 @@ UniquifyIdentifiers::IdentifierNameMap UniquifyIdentifiers::UniquifyAll( const T
 		// If assert is removed, this loop could iterate more than once; the order
 		// of the iterations will not be repeatable, and so id uniquification won't be.
 		for( TreePtr<SpecificIdentifier> si : p.second ) 
+		{
+			ASSERT( si );		
 			ids.push_back( si );
+		}
 	}
 	
 	VisibleIdentifiers vi;
@@ -260,9 +266,11 @@ UniquifyIdentifiers::IdentifierNameMap UniquifyIdentifiers::UniquifyAll( const T
     list< TreePtr<SpecificIdentifier> > renamable_ids;
 	for( auto id : ids )
 	{
+		ASSERT( id );
 		try
 		{
-			DeclarationOf().TryApplyTransformation( kit, id );
+			if( !relax_about_declarations )
+				DeclarationOf().TryApplyTransformation( kit, id );
 			renamable_ids.push_back( id ); // can only rename if there is a decl
 		}
 		catch(DeclarationOf::DeclarationNotFound &)

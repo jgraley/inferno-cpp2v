@@ -35,6 +35,7 @@ public:
     TreePtr<Node> GetEmbeddedSearchPattern() const override;
     TreePtr<Node> GetEmbeddedReplacePattern() const override;
     
+	string GetRender( const RenderKit &kit, string prefix, Syntax::Production surround_prod ) const final;
     NodeBlock GetGraphBlockInfo() const override;
     
     virtual TreePtr<Node> EvolveIntoEmbeddedCompareReplace() = 0;

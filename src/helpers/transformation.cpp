@@ -75,6 +75,7 @@ set<AugTreePtr<Node>> DefaultTransUtils::GetDeclarers( AugTreePtr<Node> atp_node
     Walk w(context, nullptr, nullptr);
     for( const TreePtrInterface &n : w )
     {
+		ASSERT( (TreePtr<Node>)n )("NULL pointer in X tree"); // asserting this because we're not expecting to be used on patterns.
         set<const TreePtrInterface *> declared = ((TreePtr<Node>)n)->GetDeclared();
         for( const TreePtrInterface *pd : declared )
         {

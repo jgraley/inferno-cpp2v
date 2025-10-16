@@ -23,7 +23,7 @@ class Render
 public:	
     Render( string of = string() );
     string RenderToString( shared_ptr<VN::CompareReplace> pattern );
-    string RenderToString( TreePtr<Node> root, string prefix="" );
+    string RenderToString( TreePtr<Node> root );
     void WriteToFile(string s);
     
 protected:
@@ -45,7 +45,7 @@ protected:
     UniquifyIdentifiers::IdentifierNameMap unique_ids;
     const string outfile;                                     
     SimpleCompare sc;
-    
+    unique_ptr<DefaultTransUtils> utils;
     RenderKit kit;
 };
 };

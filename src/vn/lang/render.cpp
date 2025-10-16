@@ -27,30 +27,40 @@ Render::Render( string of ) :
 
 string Render::RenderToString( shared_ptr<CompareReplace> pattern )
 {
+    // Context is used for various lookups but does not need
+    // to be a Scope.
+    context = pattern->GetSearchComparePattern(); 
+        
+    utils = make_unique<DefaultTransUtils>(context);
+    using namespace placeholders;
+    kit = RenderKit{ utils.get(),
+		             bind(&Render::RenderIntoProduction2, this, _1, _2, _3)  };
+
+    // Make the identifiers unique (does its own tree walk)
+    unique_ids = UniquifyIdentifiers::UniquifyAll( kit, context, true );
+
 	if( pattern->GetSearchComparePattern() == pattern->GetReplacePattern() )
-		return RenderToString( pattern->GetReplacePattern(), "꩜" ); // it's a stem
+		return kit.render( "꩜", pattern->GetSearchComparePattern(), Syntax::Production::PROGRAM ); // it's a stem
 	else
-        return RenderToString( pattern->GetSearchComparePattern() ) +
-               "\n꩜ Δ\n" +
-               RenderToString( pattern->GetReplacePattern() );
+        ASSERTFAIL();
 }
 
 
-string Render::RenderToString( TreePtr<Node> root, string prefix )
+string Render::RenderToString( TreePtr<Node> root )
 {       
     // Context is used for various lookups but does not need
     // to be a Scope.
     context = root; 
         
-    DefaultTransUtils utils(context);
+    utils = make_unique<DefaultTransUtils>(context);
     using namespace placeholders;
-    kit = RenderKit{ &utils,
+    kit = RenderKit{ utils.get(),
 		             bind(&Render::RenderIntoProduction2, this, _1, _2, _3)  };
 
     // Make the identifiers unique (does its own tree walk)
-    unique_ids = UniquifyIdentifiers::UniquifyAll( kit, context );
+    unique_ids = UniquifyIdentifiers::UniquifyAll( kit, context, false );
 
-    return kit.render( prefix, root, Syntax::Production::PROGRAM );
+    return kit.render( "", root, Syntax::Production::PROGRAM );
 }
 
 
@@ -231,13 +241,13 @@ string Render::RenderAny( string prefix, TreePtr<Node> node, unsigned enables )
             for( const TreePtrInterface &p : *con )
             {
                 ASSERT( p ); // present simplified scheme disallows nullptr
-                scon.push_back( RenderIntoProduction( TreePtr<Node>(p), Syntax::Production::COMMA_SEP ) );
+                scon.push_back( RenderIntoProduction( TreePtr<Node>(p), Syntax::Production::COMMA_SEP ) ); // TODO depend on sequence type
             }
             sitems.push_back( Join( scon, ", ") );
         }            
         else if( TreePtrInterface *singular = dynamic_cast<TreePtrInterface *>(items[i]) )
         {
-            sitems.push_back( RenderIntoProduction( TreePtr<Node>(*singular), Syntax::Production::COMMA_SEP ) );
+            sitems.push_back( RenderIntoProduction( TreePtr<Node>(*singular), Syntax::BoostPrecedence( Syntax::Production::VN_COMMAND ) ) );
         }
         else
         {

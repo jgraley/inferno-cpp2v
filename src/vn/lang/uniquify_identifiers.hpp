@@ -75,7 +75,7 @@ struct UniquifyIdentifiers
 {
     typedef pair<const TreePtr<CPPTree::SpecificIdentifier>, string> IdentifierNamePair;
     typedef map< TreePtr<CPPTree::SpecificIdentifier>, string> IdentifierNameMap;
-    static IdentifierNameMap UniquifyAll( const TransKit &kit, TreePtr<Node> context );
+    static IdentifierNameMap UniquifyAll( const TransKit &kit, TreePtr<Node> context, bool relax_about_declarations );
 };
 
 
