@@ -45,12 +45,12 @@ string Render::RenderToString( TreePtr<Node> root, string prefix )
     DefaultTransUtils utils(context);
     using namespace placeholders;
     kit = RenderKit{ &utils,
-		             bind(&Render::RenderIntoProduction2, this, kit, _1, _2, _3)  };
+		             bind(&Render::RenderIntoProduction2, this, _1, _2, _3)  };
 
     // Make the identifiers unique (does its own tree walk)
     unique_ids = UniquifyIdentifiers::UniquifyAll( kit, context );
 
-    return RenderIntoProduction2( kit, prefix, root, Syntax::Production::PROGRAM );
+    return kit.render( prefix, root, Syntax::Production::PROGRAM );
 }
 
 
@@ -70,19 +70,18 @@ void Render::WriteToFile( string s )
 }
 
 
-string Render::RenderIntoProduction( const RenderKit &kit, TreePtr<Node> node, Syntax::Production surround_prod )
+string Render::RenderIntoProduction( TreePtr<Node> node, Syntax::Production surround_prod )
 {
-	return RenderIntoProduction2( kit, "", node, surround_prod ); 
+	return RenderIntoProduction2( "", node, surround_prod ); 
 }
 
 
-string Render::RenderIntoProduction2( const RenderKit &kit, string prefix, TreePtr<Node> node, Syntax::Production surround_prod )
+string Render::RenderIntoProduction2( string prefix, TreePtr<Node> node, Syntax::Production surround_prod )
 {	
-	(void)kit; // TODO unsafe when called via bind, because bind is trying to make its own copy
 	(void)prefix; // TODO do something awesome with prefix
     INDENT("R");
     if( !node )
-		return RenderNullPointer( Render::kit, prefix, surround_prod );	
+		return RenderNullPointer( prefix, surround_prod );	
 					
     // Production surround_prod relates to the surrounding grammar production and can be 
     // used to change the render of a certain subtree. It represents all the ancestor nodes of
@@ -127,7 +126,7 @@ string Render::RenderIntoProduction2( const RenderKit &kit, string prefix, TreeP
 
             if( do_boot || semicolon )
 				surround_prod = Syntax::Production::BOOT_STMT_DECL;
-			s += Dispatch( Render::kit, prefix, node, surround_prod );
+			s += Dispatch( prefix, node, surround_prod );
 			
             if( semicolon )
                 s += ";\n";
@@ -157,7 +156,7 @@ string Render::RenderIntoProduction2( const RenderKit &kit, string prefix, TreeP
 				surround_prod = Syntax::Production::ASSIGN;
             else if( semicolon )
 				surround_prod = Syntax::Production::BOOT_EXPR;
-			s += Dispatch( Render::kit, prefix, node, surround_prod );
+			s += Dispatch( prefix, node, surround_prod );
 
             if( do_boot )
                 s += ")";            
@@ -170,7 +169,7 @@ string Render::RenderIntoProduction2( const RenderKit &kit, string prefix, TreeP
         {
             if( semicolon )
 				surround_prod = Syntax::Production::BOOT_EXPR;
-			s += Dispatch( Render::kit, prefix, node, surround_prod );
+			s += Dispatch( prefix, node, surround_prod );
 			
             if( semicolon )
                 s += ";\n";            
@@ -182,39 +181,39 @@ string Render::RenderIntoProduction2( const RenderKit &kit, string prefix, TreeP
 }
 
 
-string Render::RenderNullPointer( const RenderKit &kit, string prefix, Syntax::Production surround_prod )
+string Render::RenderNullPointer( string prefix, Syntax::Production surround_prod )
 {	
 	(void)kit;
 	(void)surround_prod;
 	// Assume NULL means we're in a pattern, and it represents a wildcard
 	// Note: we'd better not supply NULL, or we'll recurse forever.
-	return prefix+"NULL";//RenderIntoProduction( kit, MakeTreeNode<Node>(), surround_prod );
+	return prefix+"NULL";//RenderIntoProduction( MakeTreeNode<Node>(), surround_prod );
 }
 
 
-string Render::Dispatch( const RenderKit &kit, string prefix, TreePtr<Node> node, Syntax::Production surround_prod )
+string Render::Dispatch( string prefix, TreePtr<Node> node, Syntax::Production surround_prod )
 {
 	(void)surround_prod;
 	if( dynamic_cast<const SpecialBase *>(node.get()) )
-		return RenderSpecial( kit, prefix, node, surround_prod ); 
-	return RenderAny( kit, prefix, node );       
+		return RenderSpecial( prefix, node, surround_prod ); 
+	return RenderAny( prefix, node );       
 }
 
 
-string Render::RenderSpecial( const RenderKit &kit, string prefix, TreePtr<Node> node, Syntax::Production surround_prod )
+string Render::RenderSpecial( string prefix, TreePtr<Node> node, Syntax::Production surround_prod )
 {
 	const Agent *agent = Agent::TryAsAgentConst(node);
 	return agent->GetRender( kit, prefix, surround_prod );
 }
 
 
-string Render::RenderAny( const RenderKit &kit, string prefix, TreePtr<Node> node, unsigned enables )
+string Render::RenderAny( string prefix, TreePtr<Node> node, unsigned enables )
 {
 	string s = node->GetRenderTerminal();
 	if( !s.empty() )
 		return s;
 	
-	s = prefix + "⁜"+TYPE_ID_NAME(*node);
+	s = prefix + "⁜" + TYPE_ID_NAME(*node);
 	
 	list<string> sitems;
     vector< Itemiser::Element * > items = node->Itemise();
@@ -232,13 +231,13 @@ string Render::RenderAny( const RenderKit &kit, string prefix, TreePtr<Node> nod
             for( const TreePtrInterface &p : *con )
             {
                 ASSERT( p ); // present simplified scheme disallows nullptr
-                scon.push_back( RenderIntoProduction( kit, TreePtr<Node>(p), Syntax::Production::COMMA_SEP ) );
+                scon.push_back( RenderIntoProduction( TreePtr<Node>(p), Syntax::Production::COMMA_SEP ) );
             }
             sitems.push_back( Join( scon, ", ") );
         }            
         else if( TreePtrInterface *singular = dynamic_cast<TreePtrInterface *>(items[i]) )
         {
-            sitems.push_back( RenderIntoProduction( kit, TreePtr<Node>(*singular), Syntax::Production::COMMA_SEP ) );
+            sitems.push_back( RenderIntoProduction( TreePtr<Node>(*singular), Syntax::Production::COMMA_SEP ) );
         }
         else
         {
@@ -280,7 +279,7 @@ TreePtr<Scope> Render::TryGetScope( TreePtr<Identifier> id )
 }
 
 
-bool Render::IsDeclared( const RenderKit &kit, TreePtr<Identifier> id )
+bool Render::IsDeclared( TreePtr<Identifier> id )
 {
     try
     {
@@ -296,5 +295,5 @@ bool Render::IsDeclared( const RenderKit &kit, TreePtr<Identifier> id )
 
 string Render::RenderMismatchException( string fname, const Mismatch &me )
 {
-    return "«"+fname+"() error: "+me.What()+"»";
+    return "❌"+fname+"() error: "+me.What()+"❌";
 }

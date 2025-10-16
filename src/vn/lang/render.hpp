@@ -27,15 +27,15 @@ public:
     void WriteToFile(string s);
     
 protected:
-	string RenderIntoProduction( const RenderKit &kit, TreePtr<Node> node, Syntax::Production surround_prod );
-	string RenderIntoProduction2( const RenderKit &kit, string prefix, TreePtr<Node> node, Syntax::Production surround_prod );
-	string RenderNullPointer( const RenderKit &kit, string prefix, Syntax::Production surround_prod );
-	virtual string Dispatch( const RenderKit &kit, string prefix, TreePtr<Node> node, Syntax::Production surround_prod );
-	string RenderSpecial( const RenderKit &kit, string prefix, TreePtr<Node> node, Syntax::Production surround_prod );
-	string RenderAny( const RenderKit &kit, string prefix, TreePtr<Node> node, unsigned enables = 0xFFFFFFFF );
+	string RenderIntoProduction( TreePtr<Node> node, Syntax::Production surround_prod );
+	string RenderIntoProduction2( string prefix, TreePtr<Node> node, Syntax::Production surround_prod );
+	string RenderNullPointer( string prefix, Syntax::Production surround_prod );
+	virtual string Dispatch( string prefix, TreePtr<Node> node, Syntax::Production surround_prod );
+	string RenderSpecial( string prefix, TreePtr<Node> node, Syntax::Production surround_prod );
+	string RenderAny( string prefix, TreePtr<Node> node, unsigned enables = 0xFFFFFFFF );
 						 
 	TreePtr<CPPTree::Scope> TryGetScope( TreePtr<CPPTree::Identifier> id );
-	bool IsDeclared( const RenderKit &kit, TreePtr<CPPTree::Identifier> id );
+	bool IsDeclared( TreePtr<CPPTree::Identifier> id );
 							 
 	string RenderMismatchException( string fname, const Mismatch &me );
 
