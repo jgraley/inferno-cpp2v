@@ -148,6 +148,12 @@ void StuffAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
 }
     
     
+Syntax::Production StuffAgent::GetAgentProduction() const
+{
+	return Syntax::Production::VN_PREFIX;
+}
+
+
 string StuffAgent::GetRender( const RenderKit &kit, string prefix, Syntax::Production surround_prod ) const
 {
 	if( recurse_restriction )

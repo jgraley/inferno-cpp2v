@@ -40,7 +40,7 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern )
     unique_ids = UniquifyIdentifiers::UniquifyAll( kit, context, true );
 
 	if( pattern->GetSearchComparePattern() == pattern->GetReplacePattern() )
-		return kit.render( "꩜", pattern->GetSearchComparePattern(), Syntax::Production::PROGRAM ); // it's a stem
+		return kit.render( "꩜", pattern->GetSearchComparePattern(), Syntax::Production::BOOT_VN ); // it's a stem
 	else
         ASSERTFAIL();
 }
@@ -88,33 +88,70 @@ string Render::RenderIntoProduction( TreePtr<Node> node, Syntax::Production surr
 
 string Render::RenderIntoProduction2( string prefix, TreePtr<Node> node, Syntax::Production surround_prod )
 {	
-	(void)prefix; // TODO do something awesome with prefix
+	(void)prefix; // TODO do something awesome with prefix	
     INDENT("R");
+    string s;
+    
     if( !node )
 		return RenderNullPointer( prefix, surround_prod );	
 					
     // Production surround_prod relates to the surrounding grammar production and can be 
     // used to change the render of a certain subtree. It represents all the ancestor nodes of
     // the one supplied.
-    string s, ss;
-    Syntax::Production node_prod = node->GetMyProduction();
-    bool do_boot = Syntax::GetPrecedence(node_prod) < Syntax::GetPrecedence(surround_prod);    
-    bool semicolon = Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::CONDITION) &&
-                     Syntax::GetPrecedence(node_prod) > Syntax::GetPrecedence(Syntax::Production::PROTOTYPE);  
-    bool do_init = surround_prod == Syntax::Production::INITIALISER;
-    if( ReadArgs::use.count("c") )
-		s += SSPrintf("\n// %s Surround %d node %d (%s) from %p boot: %s semcolon: %s init: %s\n", 
+    Syntax::Production node_prod;
+   	if( dynamic_cast<const SpecialBase *>(node.get()) )
+		node_prod = Agent::TryAsAgentConst(node)->GetAgentProduction();
+	else
+		node_prod = node->GetMyProduction();
+	if( ReadArgs::use.count("c") )
+		s += SSPrintf("\n// Prefix \"%s\" surround: %d node: %d (%s) from %p\n", 
 					 Tracer::GetPrefix().c_str(), 
 					 Syntax::GetPrecedence(surround_prod), 
 					 Syntax::GetPrecedence(node_prod),
 					 Trace(node).c_str(), 
-					 RETURN_ADDR(),
+					 RETURN_ADDR() );		
+					 
+	// If we got a VN prefix, take no action. It will be handled when we reach something else.
+	if( node_prod == Syntax::Production::VN_PREFIX )
+		return s + Dispatch( prefix, node, surround_prod );
+		
+    bool do_boot = Syntax::GetPrecedence(node_prod) < Syntax::GetPrecedence(surround_prod);    
+    bool semicolon = Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::CONDITION) &&
+                     Syntax::GetPrecedence(node_prod) > Syntax::GetPrecedence(Syntax::Production::PROTOTYPE);  
+    bool do_init = surround_prod == Syntax::Production::INITIALISER;
+
+    if( ReadArgs::use.count("c") )
+		s += SSPrintf("\n// Boot: %s semcolon: %s init: %s\n", 
 					 do_boot ? "yes" : "no",
 					 semicolon ? "yes" : "no",
 					 do_init ? "yes" : "no" );
            
     switch(node_prod)
     {
+        case Syntax::Production::BOOT_VN...Syntax::Production::TOP_VN: // Expression productions at different precedences
+        {
+            // If current production has too-high precedence, boot back down using parentheses
+            if( do_boot )
+				ASSERT( Syntax::GetPrecedence(surround_prod) <= Syntax::GetPrecedence(Syntax::Production::PARENTHESISED) )
+					  ("VN-braces won't achieve high enough precedence for surrounding production\n")
+					  ("Node: ")(node)("\n")
+					  ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); 
+					  
+			// Deal with expression in initialiser production by prepending =
+			ASSERT( !do_init );
+			ASSERT( !semicolon );
+            if( do_boot )
+                s += "⦑";//+SSPrintf("/*Surr: %d, node: %d*/", (int)surround_prod, (int)node_prod);
+
+			if( do_boot )
+				surround_prod = Syntax::Production::BOOT_VN;
+			s += Dispatch( prefix, node, surround_prod );
+
+            if( do_boot )
+                s += "⦒";            
+            break;
+        }
+
         case Syntax::Production::BOOT_STMT_DECL...Syntax::Production::TOP_STMT_DECL: // Statement productions at different precedences
         {
             // If current production has too-high precedence, boot back down using braces
@@ -241,13 +278,13 @@ string Render::RenderAny( string prefix, TreePtr<Node> node, unsigned enables )
             for( const TreePtrInterface &p : *con )
             {
                 ASSERT( p ); // present simplified scheme disallows nullptr
-                scon.push_back( RenderIntoProduction( TreePtr<Node>(p), Syntax::Production::COMMA_SEP ) ); // TODO depend on sequence type
+                scon.push_back( RenderIntoProduction( TreePtr<Node>(p), Syntax::Production::VN_SEP ) );
             }
-            sitems.push_back( Join( scon, ", ") );
+            sitems.push_back( Join( scon, "︙ ") );
         }            
         else if( TreePtrInterface *singular = dynamic_cast<TreePtrInterface *>(items[i]) )
         {
-            sitems.push_back( RenderIntoProduction( TreePtr<Node>(*singular), Syntax::BoostPrecedence( Syntax::Production::VN_COMMAND ) ) );
+            sitems.push_back( RenderIntoProduction( TreePtr<Node>(*singular), Syntax::BoostPrecedence( Syntax::Production::VN_SEP ) ) );
         }
         else
         {
@@ -255,7 +292,7 @@ string Render::RenderAny( string prefix, TreePtr<Node> node, unsigned enables )
         }
     }
         
-    s += Join( sitems, "︙", "⦑", "⦒" ); 
+    s += Join( sitems, "┆ ", "⦑", "⦒" ); 
     
     // We can't change the production returned by GetMyProduction(), so try instead to render in 
     // accordance with whatever the node returned.

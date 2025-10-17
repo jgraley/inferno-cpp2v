@@ -91,6 +91,7 @@ public:
     virtual list<PatternLink> GetVisibleChildren( Path v ) const = 0;                        
     virtual bool ShouldGenerateCategoryClause() const = 0;                                
 
+	virtual Syntax::Production GetAgentProduction() const = 0;
 	virtual string GetRender( const RenderKit &kit, string prefix, Syntax::Production surround_prod ) const = 0;
 
     static Agent *AsAgent( shared_ptr<Node> node );

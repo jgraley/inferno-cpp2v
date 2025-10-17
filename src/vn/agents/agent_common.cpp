@@ -130,11 +130,17 @@ bool AgentCommon::ShouldGenerateCategoryClause() const
 }                                
 
 
+Syntax::Production AgentCommon::GetAgentProduction() const
+{
+	return Syntax::Production::PARENTHESISED; // only for provisional AgentCommon::GetRender() TODO remove both
+}
+
+
 string AgentCommon::GetRender( const RenderKit &kit, string prefix, Syntax::Production surround_prod ) const
 {
 	(void)kit;
 	(void)surround_prod;
-	return prefix + "(" + GetTrace() + ")";
+	return prefix + "⦑TODO:" + GetTrace() + "⦒";
 }
 
 

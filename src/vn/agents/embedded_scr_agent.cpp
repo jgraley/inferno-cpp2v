@@ -62,14 +62,20 @@ TreePtr<Node> EmbeddedSCRAgent::GetEmbeddedReplacePattern() const
 }
 
 
+Syntax::Production EmbeddedSCRAgent::GetAgentProduction() const
+{
+	return Syntax::Production::VN_SEP;
+}
+
+
 string EmbeddedSCRAgent::GetRender( const RenderKit &kit, string prefix, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
 	if( search_pattern==replace_pattern && !is_search )	
-		return prefix + "⦑" + // TODO implement GetMyProduction and automatically boot to VN_COMMAND when required
-			   kit.render( string(), (TreePtr<Node>)(*GetThrough()), Syntax::Production::VN_COMMAND ) + 
+		return prefix + "⦑" + // TODO implement GetMyProduction and automatically boot to VN_SEP when required
+			   kit.render( string(), (TreePtr<Node>)(*GetThrough()), Syntax::Production::VN_SEP ) + 
 			   "︙\n" +
-			   kit.render( "꩜", search_pattern, Syntax::BoostPrecedence( Syntax::Production::VN_COMMAND ) ) + // Left-associative
+			   kit.render( "꩜", search_pattern, Syntax::BoostPrecedence( Syntax::Production::VN_SEP ) ) + // Left-associative
  			   "⦒";
 	else
 		return "😦"; // Should have done pattern transformations to get rid of this

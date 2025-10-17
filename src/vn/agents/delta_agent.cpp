@@ -82,12 +82,18 @@ Agent::ReplacePatchPtr DeltaAgent::GenReplaceLayoutImpl( const ReplaceKit &kit,
 }                                         
 
 
+Syntax::Production DeltaAgent::GetAgentProduction() const
+{
+	return Syntax::Production::VN_DELTA;
+}
+
+
 string DeltaAgent::GetRender( const RenderKit &kit, string prefix, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
-	return kit.render( string(), (TreePtr<Node>)(*GetThrough()), Syntax::Production::DELTA_AGENT ) + // TODO declare and use GetMyProduction() and decide associativity
+	return kit.render( string(), (TreePtr<Node>)(*GetThrough()), Syntax::Production::VN_DELTA ) + // TODO declare and use GetMyProduction() and decide associativity
 	       "\n" + prefix + "Δ" + "\n" +
-	       kit.render( string(), (TreePtr<Node>)(*GetOverlay()), Syntax::Production::DELTA_AGENT );
+	       kit.render( string(), (TreePtr<Node>)(*GetOverlay()), Syntax::Production::VN_DELTA );
 }    
     
     

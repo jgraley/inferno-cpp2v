@@ -35,6 +35,7 @@ public:
     TreePtr<Node> GetEmbeddedSearchPattern() const override;
     TreePtr<Node> GetEmbeddedReplacePattern() const override;
     
+	Syntax::Production GetAgentProduction() const override;
 	string GetRender( const RenderKit &kit, string prefix, Syntax::Production surround_prod ) const final;
     NodeBlock GetGraphBlockInfo() const override;
     

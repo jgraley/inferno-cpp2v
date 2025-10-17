@@ -11,27 +11,32 @@ public:
 	{		
 		UNDEFINED,
 		
-		PROGRAM,
-		VN_COMMAND,
+		// ----- Vida Nova commands and binops. There is a precedence
+		BOOT_VN,		
+		VN_SEP, // Separated by eg ︙
+		VN_DELTA,
+		TOP_VN, // Highest VN precedence (aside from prefix operators)
+
+		PROGRAM = 10,
 		DEFINITION,		
 		
 		// ----- Complete self-sufficient statements and declarations. There is a precedence
 		// scheme, booted using {}, to disambiguate if/else.
-		BOOT_STMT_DECL,		
+		BOOT_STMT_DECL = 20,		
 		STATEMENT_SEQ, // A number of statements in sequence without {}
 		STATEMENT_LOW, // Lowest statement precedence: {} etc from the inside		
 		STATEMENT_HIGH, // eg if( ... ) <here>;    is this prefix?
 		STATEMENT,
 		DECLARATION,
 		INITIALISER, // eg MyType thing <here>; and " = " is inserted if node is expressional
-		BRACED,		 // {} from the outside	#10
+		BRACED,		 // {} from the outside
 
 		// ----- Parts of statements and declarations
 		// Note: surroundings lower than here can get ";" added.
-		CONDITION,		// Use in surrounds like if( <here> ) ... which could be a decl etc. 
+		CONDITION = 30,		// Use in surrounds like if( <here> ) ... which could be a decl etc. 
 		PROTOTYPE,      // Render prototype only, no initialiser or ";". 		
 		// Note: nodes higher than this can get ";" added.
-		BARE_STATEMENT, // Statement with no semicolon
+		BARE_STATEMENT = 40, // Statement with no semicolon
 		BARE_DECLARATION, // Actual declaration with no semicolon, eg int i	
 		SPACE_SEP_STATEMENT, // eg throw <here>;
 		SPACE_SEP_DECLARATION, // the type in <here> <declarator>;
@@ -39,8 +44,8 @@ public:
 		TOP_STMT_DECL, // Highest statement precedence
 										
 		// ----- Expressions and types. There is a precedence scheme, booted using ()
-		BOOT_EXPR, // Lowest expression precedence: (), {}, [] etc from the inside		
-		COMMA_OP, // #20
+		BOOT_EXPR = 50, // Lowest expression precedence: (), {}, [] etc from the inside		
+		COMMA_OP, 
 		COMMA_SEP, // Use this for comma-separated lists to force parens for COMMA_OP
 		ASSIGN, //C++: assign ops and statement-like keywords eg throw
 		LOGIC_OR,
@@ -50,11 +55,10 @@ public:
 		BITWISE_AND,
 		EQ_COMP,
 		MAG_COMP,
-		SHIFT, //  #30
+		SHIFT, 
 		ADD_SUB,
 		MUL_DIV,
 		TYPE_IN_NEW, // new(args) <here>(args)
-		DELTA_AGENT,
 		PREFIX, // C++: all prefix including keywords where expression
 		POSTFIX, // C++: all prefix including sub clauses
 		SPACE_SEP_TYPE, // eg unsigned long. Interestingly, the spaces take precedence
@@ -64,7 +68,8 @@ public:
 		TOP_EXPR, // Highest expression precedence
 		
 		// ----- Abstract, lexer-ish productions of no particuler kind
-		SCOPE_RESOLVE, // :: in C++	
+		SCOPE_RESOLVE = 80, // :: in C++	
+		VN_PREFIX, // Prefix with middle-binding; handling is deferred to the binop
 		PURE_IDENTIFIER, // Higher than expr because could be a type, label etc
 		TOKEN, // Lexer tokens of any kind (other than type or expression)
 		ANONYMOUS
