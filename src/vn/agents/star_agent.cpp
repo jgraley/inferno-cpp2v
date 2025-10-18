@@ -6,6 +6,7 @@
 #include "sym/symbol_operators.hpp"
 #include "sym/boolean_operators.hpp"
 #include "sym/result.hpp"
+#include "lang/render.hpp"
 
 using namespace VN;
 using namespace SYM;
@@ -115,6 +116,24 @@ Agent::ReplacePatchPtr StarAgent::GenReplaceLayoutImpl( const ReplaceKit &kit,
 }
 
 
+Syntax::Production StarAgent::GetAgentProduction() const
+{
+	return Syntax::Production::TOKEN; 
+}
+
+
+string StarAgent::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
+{
+	(void)surround_prod;
+
+	string s = "★";
+	if( *GetRestriction() )
+		s += "【" + kit.render( TreePtr<Node>(*GetRestriction()), Syntax::Production::BOOT_VN) + "】";
+	
+	return s;
+}  
+
+
 Graphable::NodeBlock StarAgent::GetGraphBlockInfo() const
 {
     // The Star node appears as a small circle with a * character inside it. * is chosen for its role in 
@@ -122,7 +141,7 @@ Graphable::NodeBlock StarAgent::GetGraphBlockInfo() const
     NodeBlock block;
     block.bold = true;
     block.title = "Star";
-    block.symbol = "*";
+    block.symbol = "★";
     block.shape = "circle";
     block.block_type = Graphable::NODE_SHAPED;
     block.node = GetPatternPtr();

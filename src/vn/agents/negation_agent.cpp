@@ -5,6 +5,7 @@
 #include "sym/predicate_operators.hpp"
 #include "sym/symbol_operators.hpp"
 #include "sym/lazy_eval.hpp"
+#include "lang/render.hpp"
 
 using namespace VN;
 using namespace SYM;
@@ -39,6 +40,19 @@ void NegationAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
     // Context is abnormal because patterns must not match
     query.RegisterAbnormalNode( PatternLink(GetNegand()), nullptr, keyer_xlink ); // Link into X, abnormal
 }
+
+
+Syntax::Production NegationAgent::GetAgentProduction() const
+{
+	return Syntax::Production::VN_PREFIX;
+}
+
+
+string NegationAgent::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
+{
+	(void)surround_prod;
+	return "¬" + kit.render( (TreePtr<Node>)(*GetNegand()), Syntax::Production::VN_PREFIX );
+}    
 
 
 Graphable::NodeBlock NegationAgent::GetGraphBlockInfo() const

@@ -14,7 +14,8 @@ public:
 		// ----- Vida Nova commands and binops. There is a precedence
 		BOOT_VN,		
 		VN_SEP, // Separated by eg ︙
-		VN_DELTA,
+		VN_DISJUNCTION,
+		VN_CONJUNCTION,
 		TOP_VN, // Highest VN precedence (aside from prefix operators)
 
 		PROGRAM = 10,
@@ -61,6 +62,7 @@ public:
 		TYPE_IN_NEW, // new(args) <here>(args)
 		PREFIX, // C++: all prefix including keywords where expression
 		POSTFIX, // C++: all prefix including sub clauses
+		VN_PREFIX, 
 		SPACE_SEP_TYPE, // eg unsigned long. Interestingly, the spaces take precedence
 		PRIMITIVE_EXPR, // one-token literal eg 12, 12.34, "foo"
 		PRIMITIVE_TYPE, // one-token type eg void, bool
@@ -69,7 +71,6 @@ public:
 		
 		// ----- Abstract, lexer-ish productions of no particuler kind
 		SCOPE_RESOLVE = 80, // :: in C++	
-		VN_PREFIX, // Prefix with middle-binding; handling is deferred to the binop
 		PURE_IDENTIFIER, // Higher than expr because could be a type, label etc
 		TOKEN, // Lexer tokens of any kind (other than type or expression)
 		ANONYMOUS

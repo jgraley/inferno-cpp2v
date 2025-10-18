@@ -84,16 +84,17 @@ Agent::ReplacePatchPtr DeltaAgent::GenReplaceLayoutImpl( const ReplaceKit &kit,
 
 Syntax::Production DeltaAgent::GetAgentProduction() const
 {
-	return Syntax::Production::VN_DELTA;
+	return Syntax::Production::VN_PREFIX;
 }
 
 
-string DeltaAgent::GetRender( const RenderKit &kit, string prefix, Syntax::Production surround_prod ) const
+string DeltaAgent::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
-	return kit.render( string(), (TreePtr<Node>)(*GetThrough()), Syntax::Production::VN_DELTA ) + // TODO declare and use GetMyProduction() and decide associativity
-	       "\n" + prefix + "Δ" + "\n" +
-	       kit.render( string(), (TreePtr<Node>)(*GetOverlay()), Syntax::Production::VN_DELTA );
+	// Nesting of deltas is wrong, but for now just boost both to force VN-bracing
+	return "Δ⦑" + kit.render( (TreePtr<Node>)(*GetThrough()), Syntax::BoostPrecedence(Syntax::Production::VN_SEP) ) + 
+	       "┆\n" + kit.render( (TreePtr<Node>)(*GetOverlay()), Syntax::BoostPrecedence(Syntax::Production::VN_SEP) ) +
+	       "⦒";
 }    
     
     

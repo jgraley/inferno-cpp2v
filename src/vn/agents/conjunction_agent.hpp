@@ -16,12 +16,15 @@ class ConjunctionAgent : public virtual AutolocatingAgent
 public:               
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
 
+    ReplacePatchPtr GenReplaceLayoutImpl( const ReplaceKit &kit, 
+                                          PatternLink me_plink, 
+                                          XLink key_xlink,
+                                          const SCREngine *acting_engine ) final;
+
+	Syntax::Production GetAgentProduction() const override;
+	string GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const final;
     virtual NodeBlock GetGraphBlockInfo() const;
 
-    ReplacePatchPtr GenReplaceLayoutImpl( const ReplaceKit &kit, 
-                                         PatternLink me_plink, 
-                                         XLink key_xlink,
-                                                  const SCREngine *acting_engine ) final;
 private:
     virtual CollectionInterface &GetConjuncts() const = 0;
 };

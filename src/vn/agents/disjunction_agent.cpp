@@ -5,6 +5,7 @@
 #include "sym/predicate_operators.hpp"
 #include "sym/symbol_operators.hpp"
 #include "sym/result.hpp"
+#include "lang/render.hpp"
 
 using namespace VN;
 using namespace SYM;
@@ -58,6 +59,25 @@ SYM::Lazy<SYM::BooleanExpression> DisjunctionAgent::SymbolicNormalLinkedQuery(Pa
     return main_expr;
 }
 
+
+Syntax::Production DisjunctionAgent::GetAgentProduction() const
+{
+	return Syntax::Production::VN_DISJUNCTION;
+}
+
+
+string DisjunctionAgent::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
+{
+	(void)surround_prod;
+
+	// Commutative and associative so don't boost productions
+	list<string> ls;
+	for( const TreePtrInterface &p : GetDisjuncts() )                 
+		ls.push_back( kit.render( (TreePtr<Node>)p, Syntax::Production::VN_DISJUNCTION ) );
+
+	return Join(ls, "∨", "⦑", "⦒");
+}    
+    
 
 Graphable::NodeBlock DisjunctionAgent::GetGraphBlockInfo() const
 {

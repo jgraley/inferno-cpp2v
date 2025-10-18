@@ -14,7 +14,7 @@ class CompareReplace;
 
 struct RenderKit : TransKit
 {	
-	function<string(string prefix, TreePtr<Node> node, Syntax::Production prod)> render;
+	function<string(TreePtr<Node> node, Syntax::Production prod)> render;
 };
 
 
@@ -28,11 +28,10 @@ public:
     
 protected:
 	string RenderIntoProduction( TreePtr<Node> node, Syntax::Production surround_prod );
-	string RenderIntoProduction2( string prefix, TreePtr<Node> node, Syntax::Production surround_prod );
-	string RenderNullPointer( string prefix, Syntax::Production surround_prod );
-	virtual string Dispatch( string prefix, TreePtr<Node> node, Syntax::Production surround_prod );
-	string RenderSpecial( string prefix, TreePtr<Node> node, Syntax::Production surround_prod );
-	string RenderAny( string prefix, TreePtr<Node> node, unsigned enables = 0xFFFFFFFF );
+	string RenderNullPointer( Syntax::Production surround_prod );
+	virtual string Dispatch( TreePtr<Node> node, Syntax::Production surround_prod );
+	string RenderSpecial( TreePtr<Node> node, Syntax::Production surround_prod );
+	string RenderAny( TreePtr<Node> node, unsigned enables = 0xFFFFFFFF );
 						 
 	TreePtr<CPPTree::Scope> TryGetScope( TreePtr<CPPTree::Identifier> id );
 	bool IsDeclared( TreePtr<CPPTree::Identifier> id );

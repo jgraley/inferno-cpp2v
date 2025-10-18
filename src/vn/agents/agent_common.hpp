@@ -27,7 +27,7 @@ public:
     bool IsNonTrivialPreRestriction(const TreePtrInterface *pptr) const override;
     bool ShouldGenerateCategoryClause() const override;                                
 	Syntax::Production GetAgentProduction() const override;
-	string GetRender( const RenderKit &kit, string prefix, Syntax::Production surround_prod ) const override;
+	string GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const override;
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicPreRestriction(PatternLink keyer_plink) const;
     bool IsPreRestrictionMatch( TreePtr<Node> x ) const; // return true if matches
     bool IsPreRestrictionMatch( XLink x ) const; // return true if matches

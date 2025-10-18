@@ -18,17 +18,11 @@ namespace VN
 class DisjunctionAgent : public virtual AutolocatingAgent
 {
 public:
-    class NoOptionsMatchedMismatch : public Mismatch {};
-    class TakenOptionMismatch : public Mismatch {};
-    class MMAXRequiredOnUntakenOptionMismatch : public Mismatch {};
-    
-    // Only to prevent crash when hypothesis_links is empty eg during truth table pre-solve
-    class IncompleteQuery : public Mismatch {}; 
-
-    virtual shared_ptr<PatternQuery> GetPatternQuery() const;                                
-                                                               
+    virtual shared_ptr<PatternQuery> GetPatternQuery() const;                                                                                               
     SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuery(PatternLink keyer_plink) const override;                                       
 
+	Syntax::Production GetAgentProduction() const override;
+	string GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const final;
     virtual NodeBlock GetGraphBlockInfo() const;
     
     // Interface for pattern trasformation

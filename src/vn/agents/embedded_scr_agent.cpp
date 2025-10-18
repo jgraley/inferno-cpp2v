@@ -68,15 +68,14 @@ Syntax::Production EmbeddedSCRAgent::GetAgentProduction() const
 }
 
 
-string EmbeddedSCRAgent::GetRender( const RenderKit &kit, string prefix, Syntax::Production surround_prod ) const
+string EmbeddedSCRAgent::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
 	if( search_pattern==replace_pattern && !is_search )	
-		return prefix + "⦑" + // TODO implement GetMyProduction and automatically boot to VN_SEP when required
-			   kit.render( string(), (TreePtr<Node>)(*GetThrough()), Syntax::Production::VN_SEP ) + 
+		return kit.render( (TreePtr<Node>)(*GetThrough()), Syntax::Production::VN_SEP ) + 
 			   "︙\n" +
-			   kit.render( "꩜", search_pattern, Syntax::BoostPrecedence( Syntax::Production::VN_SEP ) ) + // Left-associative
- 			   "⦒";
+			   "꩜" + 
+			   kit.render( search_pattern, Syntax::BoostPrecedence( Syntax::Production::VN_PREFIX ) ); // Left-associative 
 	else
 		return "😦"; // Should have done pattern transformations to get rid of this
 }    

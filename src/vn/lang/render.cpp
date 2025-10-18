@@ -34,13 +34,13 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern )
     utils = make_unique<DefaultTransUtils>(context);
     using namespace placeholders;
     kit = RenderKit{ utils.get(),
-		             bind(&Render::RenderIntoProduction2, this, _1, _2, _3)  };
+		             bind(&Render::RenderIntoProduction, this, _1, _2)  };
 
     // Make the identifiers unique (does its own tree walk)
     unique_ids = UniquifyIdentifiers::UniquifyAll( kit, context, true );
 
 	if( pattern->GetSearchComparePattern() == pattern->GetReplacePattern() )
-		return kit.render( "꩜", pattern->GetSearchComparePattern(), Syntax::Production::BOOT_VN ); // it's a stem
+		return "꩜" + kit.render( pattern->GetSearchComparePattern(), Syntax::Production::VN_PREFIX );
 	else
         ASSERTFAIL();
 }
@@ -55,12 +55,12 @@ string Render::RenderToString( TreePtr<Node> root )
     utils = make_unique<DefaultTransUtils>(context);
     using namespace placeholders;
     kit = RenderKit{ utils.get(),
-		             bind(&Render::RenderIntoProduction2, this, _1, _2, _3)  };
+		             bind(&Render::RenderIntoProduction, this, _1, _2)  };
 
     // Make the identifiers unique (does its own tree walk)
     unique_ids = UniquifyIdentifiers::UniquifyAll( kit, context, false );
 
-    return kit.render( "", root, Syntax::Production::PROGRAM );
+    return kit.render( root, Syntax::Production::PROGRAM );
 }
 
 
@@ -81,19 +81,12 @@ void Render::WriteToFile( string s )
 
 
 string Render::RenderIntoProduction( TreePtr<Node> node, Syntax::Production surround_prod )
-{
-	return RenderIntoProduction2( "", node, surround_prod ); 
-}
-
-
-string Render::RenderIntoProduction2( string prefix, TreePtr<Node> node, Syntax::Production surround_prod )
 {	
-	(void)prefix; // TODO do something awesome with prefix	
     INDENT("R");
     string s;
     
     if( !node )
-		return RenderNullPointer( prefix, surround_prod );	
+		return RenderNullPointer( surround_prod );	
 					
     // Production surround_prod relates to the surrounding grammar production and can be 
     // used to change the render of a certain subtree. It represents all the ancestor nodes of
@@ -113,7 +106,7 @@ string Render::RenderIntoProduction2( string prefix, TreePtr<Node> node, Syntax:
 					 
 	// If we got a VN prefix, take no action. It will be handled when we reach something else.
 	if( node_prod == Syntax::Production::VN_PREFIX )
-		return s + Dispatch( prefix, node, surround_prod );
+		return s + Dispatch( node, surround_prod );
 		
     bool do_boot = Syntax::GetPrecedence(node_prod) < Syntax::GetPrecedence(surround_prod);    
     bool semicolon = Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::CONDITION) &&
@@ -145,7 +138,7 @@ string Render::RenderIntoProduction2( string prefix, TreePtr<Node> node, Syntax:
 
 			if( do_boot )
 				surround_prod = Syntax::Production::BOOT_VN;
-			s += Dispatch( prefix, node, surround_prod );
+			s += Dispatch( node, surround_prod );
 
             if( do_boot )
                 s += "⦒";            
@@ -169,16 +162,16 @@ string Render::RenderIntoProduction2( string prefix, TreePtr<Node> node, Syntax:
                       ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); 
 			}
             if( do_boot )
-                s += "{\n";
+                s += "{ ";
 
             if( do_boot || semicolon )
 				surround_prod = Syntax::Production::BOOT_STMT_DECL;
-			s += Dispatch( prefix, node, surround_prod );
+			s += Dispatch( node, surround_prod );
 			
             if( semicolon )
-                s += ";\n";
+                s += "; ";
             if( do_boot )
-                s += "}\n";            
+                s += "} ";            
             break;
         }
 
@@ -203,12 +196,12 @@ string Render::RenderIntoProduction2( string prefix, TreePtr<Node> node, Syntax:
 				surround_prod = Syntax::Production::ASSIGN;
             else if( semicolon )
 				surround_prod = Syntax::Production::BOOT_EXPR;
-			s += Dispatch( prefix, node, surround_prod );
+			s += Dispatch( node, surround_prod );
 
             if( do_boot )
                 s += ")";            
             if( semicolon )
-                s += ";\n";
+                s += "; ";
             break;
         }
         
@@ -216,10 +209,10 @@ string Render::RenderIntoProduction2( string prefix, TreePtr<Node> node, Syntax:
         {
             if( semicolon )
 				surround_prod = Syntax::Production::BOOT_EXPR;
-			s += Dispatch( prefix, node, surround_prod );
+			s += Dispatch( node, surround_prod );
 			
             if( semicolon )
-                s += ";\n";            
+                s += "; ";            
 			break;
 		}
     }
@@ -228,39 +221,39 @@ string Render::RenderIntoProduction2( string prefix, TreePtr<Node> node, Syntax:
 }
 
 
-string Render::RenderNullPointer( string prefix, Syntax::Production surround_prod )
+string Render::RenderNullPointer( Syntax::Production surround_prod )
 {	
 	(void)kit;
 	(void)surround_prod;
 	// Assume NULL means we're in a pattern, and it represents a wildcard
 	// Note: we'd better not supply NULL, or we'll recurse forever.
-	return prefix+"NULL";//RenderIntoProduction( MakeTreeNode<Node>(), surround_prod );
+	return RenderIntoProduction( MakeTreeNode<Node>(), surround_prod );
 }
 
 
-string Render::Dispatch( string prefix, TreePtr<Node> node, Syntax::Production surround_prod )
+string Render::Dispatch( TreePtr<Node> node, Syntax::Production surround_prod )
 {
 	(void)surround_prod;
 	if( dynamic_cast<const SpecialBase *>(node.get()) )
-		return RenderSpecial( prefix, node, surround_prod ); 
-	return RenderAny( prefix, node );       
+		return RenderSpecial( node, surround_prod ); 
+	return RenderAny( node );       
 }
 
 
-string Render::RenderSpecial( string prefix, TreePtr<Node> node, Syntax::Production surround_prod )
+string Render::RenderSpecial( TreePtr<Node> node, Syntax::Production surround_prod )
 {
 	const Agent *agent = Agent::TryAsAgentConst(node);
-	return agent->GetRender( kit, prefix, surround_prod );
+	return agent->GetRender( kit, surround_prod );
 }
 
 
-string Render::RenderAny( string prefix, TreePtr<Node> node, unsigned enables )
+string Render::RenderAny( TreePtr<Node> node, unsigned enables )
 {
 	string s = node->GetRenderTerminal();
 	if( !s.empty() )
 		return s;
 	
-	s = prefix + "⁜" + TYPE_ID_NAME(*node);
+	s = "⁜" + TYPE_ID_NAME(*node);
 	
 	list<string> sitems;
     vector< Itemiser::Element * > items = node->Itemise();
@@ -298,7 +291,7 @@ string Render::RenderAny( string prefix, TreePtr<Node> node, unsigned enables )
     // accordance with whatever the node returned.
     if( Syntax::GetPrecedence(node->GetMyProduction()) < Syntax::GetPrecedence(Syntax::Production::CONDITION) &&
         Syntax::GetPrecedence(node->GetMyProduction()) >= Syntax::GetPrecedence(Syntax::Production::BOOT_STMT_DECL))
-		s += ";\n"; // Statement-ize it
+		s += "; "; // Statement-ize it
 
 	return s;
 }

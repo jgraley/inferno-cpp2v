@@ -36,7 +36,7 @@ public:
     TreePtr<Node> GetEmbeddedReplacePattern() const override;
     
 	Syntax::Production GetAgentProduction() const override;
-	string GetRender( const RenderKit &kit, string prefix, Syntax::Production surround_prod ) const final;
+	string GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const final;
     NodeBlock GetGraphBlockInfo() const override;
     
     virtual TreePtr<Node> EvolveIntoEmbeddedCompareReplace() = 0;

@@ -9,7 +9,7 @@ public:
     CppRender( string of = string() );
 	
 private:	
-	string Dispatch( string prefix, TreePtr<Node> node, Syntax::Production surround_prod ) override;
+	string Dispatch( TreePtr<Node> node, Syntax::Production surround_prod ) override;
 	string RenderProgram( TreePtr<CPPTree::Program> program, Syntax::Production surround_prod ); 
 	string RenderIdValuePair( TreePtr<CPPTree::IdValuePair> ivp, Syntax::Production surround_prod );
     string RenderLiteral( TreePtr<CPPTree::Literal> sp, Syntax::Production surround_prod ); 

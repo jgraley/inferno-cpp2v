@@ -43,6 +43,8 @@ public:
                                        XLink key_xlink,
                                                   const SCREngine *acting_engine ) final;
 
+	Syntax::Production GetAgentProduction() const override;
+	string GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const final;
     virtual NodeBlock GetGraphBlockInfo() const;
     
 private:

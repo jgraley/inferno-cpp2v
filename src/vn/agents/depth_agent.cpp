@@ -81,13 +81,27 @@ SYM::Lazy<SYM::BooleanExpression> ChildAgent::SymbolicNormalLinkedQueryPRed(Patt
 }
 
 
+Syntax::Production ChildAgent::GetAgentProduction() const
+{
+	return Syntax::Production::VN_PREFIX;
+}
+
+
+string ChildAgent::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
+{
+	(void)surround_prod;
+	string s = "⩨【=1】";
+	return s + kit.render( terminus, Syntax::Production::VN_PREFIX ); 
+}    
+    
+    
 Graphable::NodeBlock ChildAgent::GetGraphBlockInfo() const
 {
     // The Child node appears as a small circle with the text #==1 in it. The terminus block emerges from the
     // right of the circle. 1 implies the tendancy to match exactly one level. See #256.
     NodeBlock block = DepthAgent::GetGraphBlockInfo();
     block.title = "Child";
-    block.symbol = "#=1"; // TODO this can be generated when Stuff nodes are generalised, see #256
+    block.symbol = "⩨=1"; // TODO this can be generated when Stuff nodes are generalised, see #256
     return block;
 }
 
@@ -150,28 +164,28 @@ void StuffAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
     
 Syntax::Production StuffAgent::GetAgentProduction() const
 {
-	return Syntax::Production::VN_PREFIX;
+	return Syntax::Production::VN_PREFIX; 
 }
 
 
-string StuffAgent::GetRender( const RenderKit &kit, string prefix, Syntax::Production surround_prod ) const
+string StuffAgent::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
 {
+	(void)surround_prod;
+	string s = "⩨";
 	if( recurse_restriction )
-		prefix += "#【" + kit.render("", recurse_restriction, Syntax::Production::BOOT_EXPR) + "】";
-	else
-		prefix += "#";
-	return kit.render( prefix, terminus, surround_prod ); // keep the same surround_prod when only modifying prefix
+		s += "【" + kit.render(  recurse_restriction, Syntax::Production::BOOT_VN) + "】";
+	return s + kit.render( terminus, Syntax::Production::VN_PREFIX ); 
 }    
     
     
 Graphable::NodeBlock StuffAgent::GetGraphBlockInfo() const
 {
     // The Stuff node appears as a small square with a # character inside it. The terminus block emerges from the
-    // right of the circle. # is chosen (as is the name Stuff) for its addr_bounding_role to * because
+    // right of the circle. # is chosen (as is the name Stuff) for its resemblence to * because
     // the nodes are both able to wildcard multiple nodes in the input tree.
     NodeBlock block = DepthAgent::GetGraphBlockInfo();
     block.title = "Stuff"; 
-    block.symbol = "#"; 
+    block.symbol = "⩨"; 
     if( recurse_restriction )
     {
         auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(recurse_restriction.get()), 

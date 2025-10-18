@@ -293,4 +293,11 @@ Sequence<Declaration> ReverseDecls( Sequence<Declaration> c )
 //     PROTOTYPE production triggers prototype declarator. Consider eliding Typedef(Record...).
 // Get Instance::GetMyProduction to vary depending on type: functions are DECLARATION, others are BARE_DECLARATION.
 //     No initiualiser is also BARE_DECLARATION. Drop the semicolons accordingly.
-// ⏏
+//
+// - detect pre-restrictions before going to special nodes and add as prefix inside 〖 〗
+//   (doing them with conjunction operator can come later)
+// - Tidy RenderAny output, dropping VN::StandardAgentWrapper<> and maybe shorten namespaces 
+// - NULL to become something based on ? (i.e. traditional wildcarding)
+// - couplings!
+// - VN binops: boost both sides when prefix so we get (Case ∨ Default) ¬∨ Label and not Case ∨ Default ¬∨ Label because the prefix breaks associativity
+
