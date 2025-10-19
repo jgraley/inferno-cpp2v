@@ -148,7 +148,7 @@ void ExtractDeclsToBack( Sequence<Declaration> &sorted, Sequence<Declaration> &p
 }
 
 
-Sequence<Declaration> SortDecls( ContainerInterface &c, bool ignore_indirection_to_record, const UniquifyIdentifiers::IdentifierNameMap &unique_ids )
+Sequence<Declaration> SortDecls( ContainerInterface &c, bool ignore_indirection_to_record, const UniquifyNames::IdentifierNameMap &unique_ids )
 {
     int ocs = c.size();
     
@@ -215,7 +215,7 @@ Sequence<Declaration> SortDecls( ContainerInterface &c, bool ignore_indirection_
 }
 
 
-Sequence<Declaration> PreSortDecls( Sequence<Declaration> c, const UniquifyIdentifiers::IdentifierNameMap &unique_ids )
+Sequence<Declaration> PreSortDecls( Sequence<Declaration> c, const UniquifyNames::IdentifierNameMap &unique_ids )
 {
     //FTRACE("PreSortDecls()\n");
 

@@ -41,7 +41,7 @@ protected:
     TreePtr<Node> context;
     stack< TreePtr<Node> > scope_stack;
     queue<TreePtr<CPPTree::Instance>> definitions;
-    UniquifyIdentifiers::IdentifierNameMap unique_ids;
+    UniquifyNames::IdentifierNameMap unique_ids;
     const string outfile;                                     
     SimpleCompare sc;
     unique_ptr<DefaultTransUtils> utils;

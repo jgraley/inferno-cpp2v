@@ -9,35 +9,35 @@
 #include "helpers/simple_compare.hpp"
 #include "helpers/transformation.hpp"
 
-// Check identifiers for duplication
+// Check names for duplication
 // Policy is to dedupe with a simple scheme like <name>_<unique number> or even without the underscore
 // This or any scheme could clash with existing names. BUT if we bring existing names that happen to be
 // the same form into our scheme, as if we created them, then uniqueness is guaranteed (but we will sometimes
 // want to change the number, so what started as foo_2 could become foo_3 by the time we're done with it).
 
-typedef map< unsigned, TreePtr<CPPTree::SpecificIdentifier> > NameUsage;
+typedef map< unsigned, TreePtr<Node> > Usages;
 
-struct UniquifyIdentifiers;
+struct UniquifyNames;
 
-class VisibleIdentifiers
+class VisibleNames
 {
     // map of basenames to their offset number tables
-    typedef pair<const string, NameUsage> NameUsagePair;
-    map< string, NameUsage > name_usages;
+    typedef pair<const string, Usages> NameUsagesPair;
+    map< string, Usages > name_usages;
 
     static string MakeUniqueName( string b, unsigned n );
-    static void SplitName( TreePtr<CPPTree::SpecificIdentifier> i, string *b, unsigned *n ); // note static
-    unsigned AssignNumber( NameUsage &nu, TreePtr<CPPTree::SpecificIdentifier> i, unsigned n );
+    static void SplitName( TreePtr<Node> node, string *b, unsigned *n ); // note static
+    unsigned AssignNumber( Usages &nu, TreePtr<Node> node, unsigned n );
 
 public:    
-    string AddIdentifier( TreePtr<CPPTree::SpecificIdentifier> i );
-    void AddUndeclaredIdentifier( TreePtr<CPPTree::SpecificIdentifier> i );
+    string AddNode( TreePtr<Node> node );
+    void AddNodeNoRename( TreePtr<Node> node );
 };
 
 
 ///
-/// Generate a "fingerprint" for each specific identifier node. This captures the 
-/// places the identifier is referenced within the code. These "places" are
+/// Generate a "fingerprint" for each specific node. This captures the 
+/// places the node is reached within the code. These "places" are
 /// ambiguous in the case of collections, because every member of a collection
 /// is nominally at the same "place". So we sort these using a subtree comparer -
 /// this allows us to differentiate different-looking subtrees in a collection 
@@ -49,15 +49,15 @@ public:
 ///
 /// See #225
 ///
-class IdentifierFingerprinter
+class Fingerprinter
 {
 public:
     typedef set<int> Fingerprint;
-    typedef map< Fingerprint, set<TreePtr<CPPTree::SpecificIdentifier>> > IdsByFingerprint;
+    typedef map< Fingerprint, set<TreePtr<Node>> > NodeSetByFingerprint;
 
-    IdentifierFingerprinter();
+    Fingerprinter();
     
-    IdsByFingerprint GetIdentifiersInTreeByFingerprint(TreePtr<Node> context);
+    NodeSetByFingerprint GetNodesInTreeByFingerprint(TreePtr<Node> context);
     void ProcessNode( TreePtr<Node> x, int &index );
     void ProcessChildren( TreePtr<Node> x, int &index );
     void ProcessSingularNode( const TreePtrInterface *p_x_sing, int &index );
@@ -66,15 +66,15 @@ public:
     
 private:
     SimpleCompare comparer;
-    map< TreePtr<CPPTree::SpecificIdentifier>, Fingerprint > fingerprints;
+    map< TreePtr<Node>, Fingerprint > fingerprints;
 };
 
 
 // Main API.
-struct UniquifyIdentifiers
+struct UniquifyNames
 {
-    typedef pair<const TreePtr<CPPTree::SpecificIdentifier>, string> IdentifierNamePair;
-    typedef map< TreePtr<CPPTree::SpecificIdentifier>, string> IdentifierNameMap;
+    typedef pair<const TreePtr<Node>, string> IdentifierNamePair;
+    typedef map< TreePtr<Node>, string> IdentifierNameMap;
     static IdentifierNameMap UniquifyAll( const TransKit &kit, TreePtr<Node> context, bool relax_about_declarations );
 };
 
@@ -84,10 +84,10 @@ struct UniquifyIdentifiers
 class UniquifyCompare : public SimpleCompare
 {
 public:
-    UniquifyCompare( const UniquifyIdentifiers::IdentifierNameMap &unique_ids_ );
+    UniquifyCompare( const UniquifyNames::IdentifierNameMap &unique_ids_ );
     Orderable::Diff Compare3Way( TreePtr<Node> l, TreePtr<Node> r ) const override;
     
 private:
-    const UniquifyIdentifiers::IdentifierNameMap &unique_ids;
+    const UniquifyNames::IdentifierNameMap &unique_ids;
 };
 #endif

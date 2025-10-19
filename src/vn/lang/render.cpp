@@ -37,7 +37,7 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern )
 		             bind(&Render::RenderIntoProduction, this, _1, _2)  };
 
     // Make the identifiers unique (does its own tree walk)
-    unique_ids = UniquifyIdentifiers::UniquifyAll( kit, context, true );
+    unique_ids = UniquifyNames::UniquifyAll( kit, context, true );
 
 	if( pattern->GetSearchComparePattern() == pattern->GetReplacePattern() )
 		return "꩜" + kit.render( pattern->GetSearchComparePattern(), Syntax::Production::VN_PREFIX );
@@ -58,7 +58,7 @@ string Render::RenderToString( TreePtr<Node> root )
 		             bind(&Render::RenderIntoProduction, this, _1, _2)  };
 
     // Make the identifiers unique (does its own tree walk)
-    unique_ids = UniquifyIdentifiers::UniquifyAll( kit, context, false );
+    unique_ids = UniquifyNames::UniquifyAll( kit, context, false );
 
     return kit.render( root, Syntax::Production::PROGRAM );
 }
