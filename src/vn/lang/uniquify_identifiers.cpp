@@ -32,7 +32,8 @@ string VisibleNames::MakeUniqueName( string b, unsigned n ) // note static
 
 void VisibleNames::SplitName( TreePtr<Node> node, string *b, unsigned *n ) // note static
 {
-    string original_name = node->GetRenderTerminal();
+    string original_name = node->GetToken();
+    //FTRACE(node)(" has name \"")(original_name)("\"\n");
 #ifdef UID_FORMAT_HINT 
     char cb[1024]; // hope that's big enough!
     int c = sscanf( original_name.c_str(), UID_FORMAT_HINT, cb, n ); // TODO maybe add %s at the end to catch junk after the number
@@ -106,7 +107,7 @@ string VisibleNames::AddNode( TreePtr<Node> node )
 
 void VisibleNames::AddNodeNoRename( TreePtr<Node> node )
 {
-	ASSERT( !node->GetRenderTerminal().empty() );
+	ASSERT( !node->GetToken().empty() );
 		
     // Get canonical form of identifier name
     string base_name;
@@ -119,7 +120,7 @@ void VisibleNames::AddNodeNoRename( TreePtr<Node> node )
     // semantics; do a #819 when introducing.
     ASSERT( name_usages.count(base_name) == 0 )
             ("Name conflict among undeclared identifiers (would force a rename - unsafe)\n")
-            ("identifier: ")(node)(" token: ")(node->GetRenderTerminal())("\n")
+            ("identifier: ")(node)(" token: ")(node->GetToken())("\n")
             ("previous usages: ")(name_usages); 
 
     // Otherwise start a new record for this base name.
@@ -155,11 +156,8 @@ void Fingerprinter::ProcessNode( TreePtr<Node> x, int &index )
 {
 	ASSERT( x );
     // Record the fingerprints and increment index in depth-first pre-order
-    if( auto id_x = TreePtr<SpecificIdentifier>::DynamicCast(x) )
-    {
-		ASSERT( id_x );
-        fingerprints[x].insert(index);
-    }
+    bool first = fingerprints.count(x)==0;
+    fingerprints[x].insert(index);
         
     index++;
 
@@ -168,7 +166,8 @@ void Fingerprinter::ProcessNode( TreePtr<Node> x, int &index )
     // because the purpose of this walk is to determine a fingerprint for
     // repeatable uniquification - if all paths go into the fingerprint, that's
     // good.
-    ProcessChildren( x, index );
+    if( first )
+	    ProcessChildren( x, index );
 }
 
 
@@ -236,15 +235,17 @@ void Fingerprinter::ProcessCollection( CollectionInterface *x_col, int &index )
 
 //////////////////////////// UniquifyNames ///////////////////////////////
 
-UniquifyNames::IdentifierNameMap UniquifyNames::UniquifyAll( const TransKit &kit, TreePtr<Node> context, bool relax_about_declarations )
+UniquifyNames::NodeToNameMap UniquifyNames::UniquifyAll( const TransKit &kit, TreePtr<Node> context, 
+                                                         bool multiparent_only, bool preserve_undeclared_ids )
 {
-	Fingerprinter::NodeSetByFingerprint ids_by_fp = Fingerprinter().GetNodesInTreeByFingerprint(context);    
+	(void)multiparent_only;
+	Fingerprinter::NodeSetByFingerprint node_sets_by_fp = Fingerprinter().GetNodesInTreeByFingerprint(context);    
 	
 	// For repeatability of renders, get a list of identifiers in the tree, ordered:
 	// - mainly depth-first, wind-in
 	// - collections disambiguated using SimpleCompare
-    list< TreePtr<Node> > ids;
-	for( auto p : ids_by_fp )
+    list< TreePtr<Node> > nodes;
+	for( auto p : node_sets_by_fp )
 	{
 		//ASSERT(p.second.size() == 1)
 		//  ("Could not differentiate between these identifiers: ")(p.second)
@@ -252,56 +253,67 @@ UniquifyNames::IdentifierNameMap UniquifyNames::UniquifyAll( const TransKit &kit
 		//  (". Need to write some more code to uniquify the renders in this case!! (#225)\n");
 		// If assert is removed, this loop could iterate more than once; the order
 		// of the iterations will not be repeatable, and so id uniquification won't be.
-		for( TreePtr<Node> si : p.second ) 
+		for( TreePtr<Node> node : p.second ) 
 		{
-			ASSERT( si );		
-			ids.push_back( si );
+			ASSERT( node );		
+			int num_reachings = p.first.size();
+			if( multiparent_only && num_reachings == 1 )
+				continue;
+				
+			nodes.push_back( node );
 		}
 	}
 	
 	VisibleNames vi;
-	IdentifierNameMap inm;
+	NodeToNameMap nodes_to_names;
 
 	// Deal with undeclared (system) identifiers which must be preserved
-    list< TreePtr<Node> > renamable_ids;
-	for( auto id : ids )
+    list< TreePtr<Node> > renamable_nodes;
+	for( auto node : nodes )
 	{
-		ASSERT( id );
-		try
+		ASSERT( node );
+		if( preserve_undeclared_ids )
 		{
-			if( !relax_about_declarations )
-				DeclarationOf().TryApplyTransformation( kit, id );
-			renamable_ids.push_back( id ); // can only rename if there is a decl
+			try
+			{		
+				if( TreePtr<SpecificIdentifier>::DynamicCast(node) )
+				    DeclarationOf().TryApplyTransformation( kit, node );
+				renamable_nodes.push_back( node ); // can only rename if there is a decl
+			}
+			catch(DeclarationOf::DeclarationNotFound &)
+			{
+				// An undeclared indentifier cannot safely be renamed and so must have a non-empty name
+				if( node->GetRenderTerminal().empty() )
+					continue;
+		
+				// Assume undeclared identifier is really a system node identifier.
+				// Ensure it will keep its name and not be conflicted, and add to the
+				// map so normal IDs don't conflict with it.
+				vi.AddNodeNoRename( node );
+				nodes_to_names.insert( NodeAndNamePair( node, node->GetRenderTerminal() ) );
+			}
 		}
-		catch(DeclarationOf::DeclarationNotFound &)
+		else
 		{
-			// An undeclared indentifier cannot safely be renamed and so must have a non-empty name
-			if( id->GetRenderTerminal().empty() )
-				continue;
-	
-			// Assume undeclared identifier is really a system node identifier.
-			// Ensure it will keep its name and not be conflicted, and add to the
-			// map so normal IDs don't conflict with it.
-			vi.AddNodeNoRename( id );
-			inm.insert( IdentifierNamePair( id, id->GetRenderTerminal() ) );
+			renamable_nodes.push_back( node );
 		}
 	}
 
-    for( TreePtr<Node> id : renamable_ids )
+    for( TreePtr<Node> node : renamable_nodes )
     {
-        string nn = vi.AddNode( id );
-        ASSERT( !nn.empty() );
-        inm.insert( IdentifierNamePair( id, nn ) );
+        string name = vi.AddNode( node );
+        ASSERT( !name.empty() );
+        nodes_to_names.insert( NodeAndNamePair( node, name ) );
     }        
     
-    return inm;
+    return nodes_to_names;
 }
 
 //////////////////////////// UniquifyCompare ///////////////////////////////
 
-UniquifyCompare::UniquifyCompare( const UniquifyNames::IdentifierNameMap &unique_ids_ ) :
+UniquifyCompare::UniquifyCompare( const UniquifyNames::NodeToNameMap &unique_nodes_ ) :
     SimpleCompare(Orderable::REPEATABLE),  // Use REPEATABLE but doesn't really matter since we're overriding identifier compare 
-    unique_ids( unique_ids_ )
+    unique_nodes( unique_nodes_ )
 {
 }
 
@@ -319,8 +331,8 @@ Orderable::Diff UniquifyCompare::Compare3Way( TreePtr<Node> l, TreePtr<Node> r )
         return SimpleCompare::Compare3Way(l, r);
         
     // We have two SpecificIdentifiers, so get their unique names
-    string ustr_l = unique_ids.at(id_l);
-    string ustr_r = unique_ids.at(id_r);
+    string ustr_l = unique_nodes.at(l);
+    string ustr_r = unique_nodes.at(r);
     //FTRACE(id_a)(" becomes ")(ustr_a)("\n");
     
     // Compare those. This is like a REPEATABLE SC but using the

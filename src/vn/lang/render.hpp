@@ -23,10 +23,8 @@ class Render
 public:	
     Render( string of = string() );
     string RenderToString( shared_ptr<VN::CompareReplace> pattern );
-    string RenderToString( TreePtr<Node> root );
     void WriteToFile(string s);
     
-protected:
 	string RenderIntoProduction( TreePtr<Node> node, Syntax::Production surround_prod );
 	string RenderNullPointer( Syntax::Production surround_prod );
 	virtual string Dispatch( TreePtr<Node> node, Syntax::Production surround_prod );
@@ -41,11 +39,12 @@ protected:
     TreePtr<Node> context;
     stack< TreePtr<Node> > scope_stack;
     queue<TreePtr<CPPTree::Instance>> definitions;
-    UniquifyNames::IdentifierNameMap unique_ids;
+    UniquifyNames::NodeToNameMap unique_names;
     const string outfile;                                     
     SimpleCompare sc;
     unique_ptr<DefaultTransUtils> utils;
     RenderKit kit;
+    bool name_all_uniques = false;
 };
 };
 

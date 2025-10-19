@@ -37,30 +37,19 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern )
 		             bind(&Render::RenderIntoProduction, this, _1, _2)  };
 
     // Make the identifiers unique (does its own tree walk)
-    unique_ids = UniquifyNames::UniquifyAll( kit, context, true );
+    unique_names = UniquifyNames::UniquifyAll( kit, context, true, false );
+	name_all_uniques = true; // Now we've defined them all, use their names
+
+	string s;
+	if( ReadArgs::use.count("c") )
+		s += Trace(unique_names) + "\n\n";
+	for( UniquifyNames::NodeAndNamePair p : unique_names )
+		s += p.second + " ≝ " + Dispatch( p.first, Syntax::Production::VN_PREFIX ) + "┆\n";
 
 	if( pattern->GetSearchComparePattern() == pattern->GetReplacePattern() )
-		return "꩜" + kit.render( pattern->GetSearchComparePattern(), Syntax::Production::VN_PREFIX );
+		return s + "꩜" + kit.render( pattern->GetSearchComparePattern(), Syntax::Production::VN_PREFIX );
 	else
         ASSERTFAIL();
-}
-
-
-string Render::RenderToString( TreePtr<Node> root )
-{       
-    // Context is used for various lookups but does not need
-    // to be a Scope.
-    context = root; 
-        
-    utils = make_unique<DefaultTransUtils>(context);
-    using namespace placeholders;
-    kit = RenderKit{ utils.get(),
-		             bind(&Render::RenderIntoProduction, this, _1, _2)  };
-
-    // Make the identifiers unique (does its own tree walk)
-    unique_ids = UniquifyNames::UniquifyAll( kit, context, false );
-
-    return kit.render( root, Syntax::Production::PROGRAM );
 }
 
 
@@ -88,6 +77,15 @@ string Render::RenderIntoProduction( TreePtr<Node> node, Syntax::Production surr
     if( !node )
 		return RenderNullPointer( surround_prod );	
 					
+	if( ReadArgs::use.count("c") )
+		s += SSPrintf("\n// %s Node %s from %p\n", 
+				      Tracer::GetPrefix().c_str(), 
+					  Trace(node).c_str(), 
+					  RETURN_ADDR() );
+
+	if( name_all_uniques && unique_names.count(node) > 0 )			
+		return unique_names.at(node);					
+					
     // Production surround_prod relates to the surrounding grammar production and can be 
     // used to change the render of a certain subtree. It represents all the ancestor nodes of
     // the one supplied.
@@ -96,13 +94,11 @@ string Render::RenderIntoProduction( TreePtr<Node> node, Syntax::Production surr
 		node_prod = Agent::TryAsAgentConst(node)->GetAgentProduction();
 	else
 		node_prod = node->GetMyProduction();
+		
 	if( ReadArgs::use.count("c") )
-		s += SSPrintf("\n// Prefix \"%s\" surround: %d node: %d (%s) from %p\n", 
-					 Tracer::GetPrefix().c_str(), 
-					 Syntax::GetPrecedence(surround_prod), 
-					 Syntax::GetPrecedence(node_prod),
-					 Trace(node).c_str(), 
-					 RETURN_ADDR() );		
+		s += SSPrintf("// Surround prod: %d node prod: %d\n", 
+					  Syntax::GetPrecedence(surround_prod), 
+					  Syntax::GetPrecedence(node_prod) );		
 					 
 	// If we got a VN prefix, take no action. It will be handled when we reach something else.
 	if( node_prod == Syntax::Production::VN_PREFIX )
@@ -114,7 +110,7 @@ string Render::RenderIntoProduction( TreePtr<Node> node, Syntax::Production surr
     bool do_init = surround_prod == Syntax::Production::INITIALISER;
 
     if( ReadArgs::use.count("c") )
-		s += SSPrintf("\n// Boot: %s semcolon: %s init: %s\n", 
+		s += SSPrintf("// Boot: %s semcolon: %s init: %s\n", 
 					 do_boot ? "yes" : "no",
 					 semicolon ? "yes" : "no",
 					 do_init ? "yes" : "no" );
@@ -253,7 +249,7 @@ string Render::RenderAny( TreePtr<Node> node, unsigned enables )
 	if( !s.empty() )
 		return s;
 	
-	s = "⁜" + TYPE_ID_NAME(*node);
+	s = "⁜" + GetInnermostTemplateParam(TYPE_ID_NAME(*node));
 	
 	list<string> sitems;
     vector< Itemiser::Element * > items = node->Itemise();

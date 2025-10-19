@@ -313,6 +313,12 @@ string SpecificIdentifier::GetRenderTerminal() const
 }
 
 
+string SpecificIdentifier::GetToken() const
+{
+	return name;
+}
+
+
 string SpecificIdentifier::GetGraphName() const
 {
     // Since this is text from the program, use single quotes

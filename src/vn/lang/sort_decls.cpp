@@ -148,7 +148,7 @@ void ExtractDeclsToBack( Sequence<Declaration> &sorted, Sequence<Declaration> &p
 }
 
 
-Sequence<Declaration> SortDecls( ContainerInterface &c, bool ignore_indirection_to_record, const UniquifyNames::IdentifierNameMap &unique_ids )
+Sequence<Declaration> SortDecls( ContainerInterface &c, bool ignore_indirection_to_record, const UniquifyNames::NodeToNameMap &unique_names )
 {
     int ocs = c.size();
     
@@ -158,7 +158,7 @@ Sequence<Declaration> SortDecls( ContainerInterface &c, bool ignore_indirection_
         unsorted.push_back( a );
 
      // Sort using SimpleCompare first: this should improve reproducibility
-    Sequence<Declaration> pre_sorted = PreSortDecls( unsorted, unique_ids );
+    Sequence<Declaration> pre_sorted = PreSortDecls( unsorted, unique_names );
 
     Sequence<Declaration> sorted;
 
@@ -215,12 +215,12 @@ Sequence<Declaration> SortDecls( ContainerInterface &c, bool ignore_indirection_
 }
 
 
-Sequence<Declaration> PreSortDecls( Sequence<Declaration> c, const UniquifyNames::IdentifierNameMap &unique_ids )
+Sequence<Declaration> PreSortDecls( Sequence<Declaration> c, const UniquifyNames::NodeToNameMap &unique_names )
 {
     //FTRACE("PreSortDecls()\n");
 
     // Make a SimpleCompare-ordered set and fill it with the decls
-    auto comparer = UniquifyCompare(unique_ids);
+    auto comparer = UniquifyCompare(unique_names);
     SimpleCompare::TreePtrOrdering sco = comparer.GetTreePtrOrdering(c);
     //SimpleCompare(Orderable::REPEATABLE).GetTreePtrOrdering(c);
 

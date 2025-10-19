@@ -73,9 +73,10 @@ private:
 // Main API.
 struct UniquifyNames
 {
-    typedef pair<const TreePtr<Node>, string> IdentifierNamePair;
-    typedef map< TreePtr<Node>, string> IdentifierNameMap;
-    static IdentifierNameMap UniquifyAll( const TransKit &kit, TreePtr<Node> context, bool relax_about_declarations );
+    typedef pair<const TreePtr<Node>, string> NodeAndNamePair;
+    typedef map< TreePtr<Node>, string> NodeToNameMap;
+    static NodeToNameMap UniquifyAll( const TransKit &kit, TreePtr<Node> context,  
+                                      bool multiparent_only, bool preserve_undeclared_ids );
 };
 
 
@@ -84,10 +85,10 @@ struct UniquifyNames
 class UniquifyCompare : public SimpleCompare
 {
 public:
-    UniquifyCompare( const UniquifyNames::IdentifierNameMap &unique_ids_ );
+    UniquifyCompare( const UniquifyNames::NodeToNameMap &unique_ids_ );
     Orderable::Diff Compare3Way( TreePtr<Node> l, TreePtr<Node> r ) const override;
     
 private:
-    const UniquifyNames::IdentifierNameMap &unique_ids;
+    const UniquifyNames::NodeToNameMap &unique_nodes;
 };
 #endif

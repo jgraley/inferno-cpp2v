@@ -7,6 +7,7 @@ class CppRender : public VN::Render
 {
 public:	
     CppRender( string of = string() );
+    string RenderToString( TreePtr<Node> root );
 	
 private:	
 	string Dispatch( TreePtr<Node> node, Syntax::Production surround_prod ) override;

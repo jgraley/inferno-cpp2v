@@ -46,6 +46,25 @@ CppRender::CppRender( string of ) :
 }
 
 
+string CppRender::RenderToString( TreePtr<Node> root )
+{       
+    // Context is used for various lookups but does not need
+    // to be a Scope.
+    context = root; 
+        
+    utils = make_unique<DefaultTransUtils>(context);
+    using namespace placeholders;
+    kit = VN::RenderKit{ utils.get(),
+		                 bind(&Render::RenderIntoProduction, this, _1, _2)  };
+
+    // Make the identifiers unique (does its own tree walk)
+    unique_names = UniquifyNames::UniquifyAll( kit, context, false, true );
+    
+    return kit.render( root, Syntax::Production::PROGRAM );
+}
+
+
+
 string CppRender::Dispatch( TreePtr<Node> node, Syntax::Production surround_prod )
 {
     if( TreePtr<Uninitialised>::DynamicCast(node) )
@@ -143,11 +162,11 @@ string CppRender::RenderPureIdentifier( TreePtr<Identifier> id, Syntax::Producti
     {
         if( auto ii = DynamicTreePtrCast<SpecificIdentifier>( id ) )
         {           
-            if( unique_ids.count(ii) == 0 )
+            if( unique_names.count(ii) == 0 )
             {
-                return ERROR_UNKNOWN( SSPrintf("identifier %s missing from unique_ids", ii->GetRenderTerminal().c_str() ) );
+                return ERROR_UNKNOWN( SSPrintf("identifier %s missing from unique_names", ii->GetRenderTerminal().c_str() ) );
             }
-            ids = unique_ids.at(ii);
+            ids = unique_names.at(ii);
         }
         else
             return Render::Dispatch( id, surround_prod );
@@ -646,7 +665,7 @@ string CppRender::RenderMakeRecord( TreePtr<RecordLiteral> make_rec, Syntax::Pro
 
     TreePtr<Record> r = TryGetRecordDeclaration(kit, id).GetTreePtr();
     // Make sure we have the same ordering as when the record was rendered
-    Sequence<Declaration> sorted_members = SortDecls( r->members, true, unique_ids );
+    Sequence<Declaration> sorted_members = SortDecls( r->members, true, unique_names );
 
     // Determine args sequence using param sequence
     Sequence<Expression> sub_expr_sequence  = SortMapById( make_rec->operands, sorted_members );
@@ -1229,7 +1248,7 @@ string CppRender::RenderDeclScope( TreePtr<DeclScope> decl_scope,
                                    TreePtr<AccessSpec> init_access ) try
 {
     TRACE();
-    Sequence<Declaration> sorted = SortDecls( decl_scope->members, true, unique_ids );
+    Sequence<Declaration> sorted = SortDecls( decl_scope->members, true, unique_names );
 
     // Emit a prototype for each record and preproc
     string s;

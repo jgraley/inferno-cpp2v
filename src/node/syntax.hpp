@@ -86,28 +86,10 @@ public:
 	};
 	
 	/// Produce the source-code-name of the corresponding SystemC construct
-    virtual string GetToken() const
-    {
-		return "";
-	} 
-
-	virtual string GetRenderTerminal() const
-    {
-        return ""; 
-    }
-
-	// What production do I become once rendered
-	virtual Production GetMyProduction() const
-    {
-        return Production::UNDEFINED; 
-    }
-    
-    // What production is expected as my operand in a declarator
-	virtual Production GetOperandInDeclaratorProduction() const
-    {
-        return Production::UNDEFINED; 
-    }
-    
+    virtual string GetToken() const;
+	virtual string GetRenderTerminal() const;
+	virtual Production GetMyProduction() const;
+	virtual Production GetOperandInDeclaratorProduction() const;
     static Syntax::Production BoostPrecedence( Syntax::Production prec );
     static int GetPrecedence( Syntax::Production prec );
 };
