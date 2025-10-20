@@ -65,6 +65,10 @@ public:
     {
         return shared_from_this();
     }    
+    string GetToken() const final
+    {
+		return "child"; 
+	}  
 };
 
 //---------------------------------- StuffAgent ------------------------------------    
@@ -107,6 +111,10 @@ public:
     {
         return shared_from_this();
     }
+    string GetToken() const final
+    {
+		return "stuff"; 
+	}  
 };
 
 };

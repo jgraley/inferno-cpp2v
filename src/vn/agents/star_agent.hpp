@@ -80,6 +80,11 @@ public:
     {
         return &restriction;
     }
+    
+    string GetToken() const final
+    {
+		return PRE_RESTRICTION::GetToken() + "s"; // Pluralise
+	}    
 };
 
 };

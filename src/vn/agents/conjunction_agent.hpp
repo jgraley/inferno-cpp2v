@@ -48,7 +48,10 @@ private:
     {
         return conjuncts;
     }
-};
+    string GetToken() const final
+    {
+		return "all"; 
+	}};
 
 };
 

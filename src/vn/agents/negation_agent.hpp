@@ -55,6 +55,10 @@ private:
     {
         return &negand;
     }
+    string GetToken() const final
+    {
+		return "not"; 
+	}
 };
     
 };

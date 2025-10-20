@@ -59,6 +59,10 @@ public:
     {
         return &overlay;
     }
+    string GetToken() const final
+    {
+		return "delta"; 
+	}     
 };
 
 };

@@ -71,7 +71,10 @@ private:
     {
         return MakePatternNode<Disjunction<PRE_RESTRICTION>>();
     }
-    
+    string GetToken() const final
+    {
+		return "any"; 
+	}
 };
 
 };

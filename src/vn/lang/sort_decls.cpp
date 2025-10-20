@@ -298,6 +298,3 @@ Sequence<Declaration> ReverseDecls( Sequence<Declaration> c )
 //   (doing them with conjunction operator can come later)
 // - Tidy RenderAny output, dropping VN::StandardAgentWrapper<> and maybe shorten namespaces 
 // - NULL to become something based on ? (i.e. traditional wildcarding)
-// - couplings!
-// - VN binops: boost both sides when prefix so we get (Case ∨ Default) ¬∨ Label and not Case ∨ Default ¬∨ Label because the prefix breaks associativity
-
