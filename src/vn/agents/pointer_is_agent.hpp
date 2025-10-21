@@ -17,10 +17,11 @@ class PointerIsAgent : public virtual RelocatingAgent
 public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     RelocatingQueryResult RunRelocatingQuery( const XTreeDatabase *db, XLink stimulus_xlink ) const override;
-                 
-    virtual NodeBlock GetGraphBlockInfo() const;
-            
     int GetExtenderChannelOrdinal() const override;
+                 
+	Syntax::Production GetAgentProduction() const override;
+	string GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const final;	
+	virtual NodeBlock GetGraphBlockInfo() const;           
                                            
 private:
     virtual const TreePtrInterface *GetPointer() const = 0;
@@ -44,6 +45,10 @@ public:
     {
         return &pointer;
     }
+    string GetToken() const final
+    {
+		return "ptr_is"; 
+	}     
 };
 
 };

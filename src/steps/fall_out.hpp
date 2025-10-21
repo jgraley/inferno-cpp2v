@@ -21,20 +21,6 @@ public:
     LabelTypeToEnum();
 };
 
-/// Variable-by-variable, change type from Labeley to the state enum, and move lmap lookups though the variable
-class LabelVarsToEnum : public VNStep
-{
-public:
-    LabelVarsToEnum();
-};
-
-/// Find c ? a[i] : a[j] and replace with a[ c ? i : j ]
-class SwapSubscriptConditionalOperator : public VNStep
-{
-public:
-    SwapSubscriptConditionalOperator();
-};
-
 /// Insert state variable as an enum
 class AddStateEnumVar : public VNStep
 {

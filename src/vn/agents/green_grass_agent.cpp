@@ -4,6 +4,7 @@
 #include "link.hpp"
 #include "sym/symbol_operators.hpp"
 #include "sym/result.hpp"
+#include "lang/render.hpp"
 
 using namespace VN;
 using namespace SYM;
@@ -23,15 +24,28 @@ Lazy<BooleanExpression> GreenGrassAgent::SymbolicAutolocatingQuery(PatternLink k
 }
 
 
+Syntax::Production GreenGrassAgent::GetAgentProduction() const
+{
+	return Syntax::Production::VN_PREFIX;
+}
+
+
+string GreenGrassAgent::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
+{
+	(void)surround_prod;
+	return "⫴" + kit.render( (TreePtr<Node>)(*GetThrough()), Syntax::Production::VN_PREFIX );
+} 
+
+
 Graphable::NodeBlock GreenGrassAgent::GetGraphBlockInfo() const
 {
     // The GreenGrass node appears as a cylinder containing four vertical line characters,
-    // like this: ||||. These are meant to represent the blades of grass. It was late and I was
-    // tired.
+    // like this: ⫴. These are meant to represent the blades of grass. It was late and I was
+    // tired. Now in Unicode!
     NodeBlock block;
     block.bold = true;
     block.title = "GreenGrass";
-    block.symbol = "||||";
+    block.symbol = "⫴";
     block.shape = "cylinder";
     block.block_type = Graphable::NODE_SHAPED;
     block.node = GetPatternPtr();

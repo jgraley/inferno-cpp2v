@@ -298,3 +298,5 @@ Sequence<Declaration> ReverseDecls( Sequence<Declaration> c )
 //   (doing them with conjunction operator can come later)
 // - Tidy RenderAny output, dropping VN::StandardAgentWrapper<> and maybe shorten namespaces 
 // - NULL to become something based on ? (i.e. traditional wildcarding)
+// - Move stuff in steps/inferno_agents.xpp into vn/agents, in separate source files (the fact that I wrote a step qualifies the corresponding nodes into VN)
+// - New uses of GetToken() should be called GetCouplingNameHint()

@@ -14,7 +14,7 @@ using namespace VN;
 #define BYPASS_WHEN_IDENTICAL 1
 
 //---------------------------------- BuildIdentifierAgent ------------------------------------    
-
+// ⧇
 /// Make an identifer based on an existing set, `sources` and a printf
 /// format string, `format`. The new identfier is named using
 /// `sprintf( format, sources[0].name, source[1].name, etc )`
@@ -112,11 +112,14 @@ struct StringizeAgent : Special<CPPTree::String>,
 
 private:
     TreePtr<Node> BuildNewSubtree(const SCREngine *acting_engine) override;    
+	Syntax::Production GetAgentProduction() const override;
+	string GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const final;
+    string GetToken() const final;
     NodeBlock GetGraphBlockInfo() const override;
 };
 
 //---------------------------------- IdentifierByNameAgent ------------------------------------    
-
+// 🞊
 /// These can be used in search pattern to match a SpecificIdentifier by name.
 /// The identifier must have a name that matches the string in `name`. One
 /// cannot do this using a SpecificIdentifier in the search pattern because
@@ -235,91 +238,8 @@ struct PreprocessorIdentifierByNameAgent : Special<CPPTree::PreprocessorIdentifi
     pair<TreePtr<Node>, TreePtr<Node>> GetBounds( string name ) const override;
 };
 
-//---------------------------------- NestedAgent ------------------------------------    
-
-/// Matching for the nested nature of array and struct nodes, both when declaring and 
-/// when accessing arrays. The `terminus` is the node to be found at the end of
-/// the recursion and `depth` is a string matching the steps taken to 
-/// reach the terminus.
-struct NestedAgent : public virtual RelocatingAgent
-{
-    virtual shared_ptr<PatternQuery> GetPatternQuery() const;                
-    virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed(PatternLink keyer_plink) const;                                       
-
-    RelocatingQueryResult RunRelocatingQuery( const XTreeDatabase *db, XLink stimulus_xlink ) const override;                
-
-    virtual XLink Advance( XLink xlink, 
-                           string *depth ) const = 0;
-
-    int GetExtenderChannelOrdinal() const override;
-
-    virtual NodeBlock GetGraphBlockInfo() const;
-    
-    TreePtr<Node> terminus; 
-    TreePtr<CPPTree::String> depth;      
-
-    class NestingOperator : public SYM::SymbolToSymbolExpression
-    {
-    public:    
-        typedef SymbolExpression NominalType;
-        explicit NestingOperator( const NestedAgent *agent,
-                                  shared_ptr<SymbolExpression> keyer ); 
-        virtual list<shared_ptr<SYM::SymbolExpression>> GetSymbolOperands() const override;
-        virtual unique_ptr<SYM::SymbolicResult> Evaluate( const EvalKit &kit,
-                                                                 list<unique_ptr<SYM::SymbolicResult>> &&op_results ) const override;
-
-        Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
-                                           OrderProperty order_property ) const override;
-
-        virtual string Render() const override;
-        virtual Precedence GetPrecedence() const override;
-        
-    protected:
-        const NestedAgent *agent;
-        shared_ptr<SymbolExpression> keyer;
-    };
-};
-
-
-/// Recurse through a number of nested `Array` nodes, but only by going through
-/// the "element" member, not the "size" member. So this will get you from the type
-/// of an instance to the type of the eventual element in a nested array decl.
-/// `depth` is not checked.
-struct NestedArrayAgent : NestedAgent, Special<CPPTree::Type>
-{
-    SPECIAL_NODE_FUNCTIONS
-
-    shared_ptr<const Node> GetPatternPtr() const
-    {
-        return shared_from_this();
-    }
-    
-    virtual XLink Advance( XLink xlink, 
-                           string *depth ) const;
-};
-
-
-/// Recurse through a number of `Subscript` nodes, but only going through
-/// the base, not the index. Thus we seek the instance that contains the 
-/// data we started with. Also go through member field of `Lookup` nodes.
-/// The `depth` pointer must match a `String` node corresponding to the
-/// nodes that were seen during traversal, where the letter `S` corresponds 
-/// to a `Substript` and `L` corresponds to a `Lookup`.
-struct NestedSubscriptLookupAgent : NestedAgent, Special<CPPTree::Expression>
-{
-    SPECIAL_NODE_FUNCTIONS
-
-    shared_ptr<const Node> GetPatternPtr() const
-    {
-        return shared_from_this();
-    }
-    
-    virtual XLink Advance( XLink xlink, 
-                           string *depth ) const;
-};
-
 //---------------------------------- BuildContainerSizeAgent ------------------------------------    
-
+// ⧆
 /// `BuildContainerSizeAgent` is used in replace context to create an integer-valued
 /// constant that is the size of a `Star` node pointed to by `container`. The
 /// container should couple the star node.

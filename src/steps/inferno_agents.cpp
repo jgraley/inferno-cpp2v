@@ -11,6 +11,7 @@
 #include "vn/sym/boolean_operators.hpp"
 #include "vn/sym/symbol_operators.hpp"
 #include "vn/sym/set_operators.hpp"
+#include "vn/lang/render.hpp"
 
 // Not pulling in SYM because it clashes with CPPTree
 //using namespace SYM;
@@ -107,7 +108,26 @@ TreePtr<Node> StringizeAgent::BuildNewSubtree(const SCREngine *acting_engine)
     return MakeTreeNode<CPPTree::SpecificString>( new_identifier->GetRenderTerminal() ); 
 }
 
+
+Syntax::Production StringizeAgent::GetAgentProduction() const
+{
+	return Syntax::Production::VN_PREFIX;
+}
+
+
+string StringizeAgent::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
+{
+	(void)surround_prod;
+	return "§" + kit.render( source, Syntax::Production::VN_PREFIX );
+} 
+
     
+string StringizeAgent::GetToken() const
+{
+	return "stringize"; 
+} 
+
+
 Graphable::NodeBlock StringizeAgent::GetGraphBlockInfo() const
 {
     NodeBlock block;
@@ -120,7 +140,7 @@ Graphable::NodeBlock StringizeAgent::GetGraphBlockInfo() const
     block.item_blocks = Node::GetSubblocks(const_cast<TreePtr<CPPTree::Identifier> *>(&source), phase);
     return block;
 }
-
+	
 //---------------------------------- IdentifierByNameAgent ------------------------------------    
 
 Graphable::NodeBlock IdentifierByNameAgent::GetGraphBlockInfo() const
@@ -256,188 +276,6 @@ pair<TreePtr<Node>, TreePtr<Node>> PreprocessorIdentifierByNameAgent::GetBounds(
     TreePtr<Node> minimus = MakeTreeNode<SpecificPreprocessorIdentifier>( name, Orderable::BoundingRole::MINIMUS );
     TreePtr<Node> maximus = MakeTreeNode<SpecificPreprocessorIdentifier>( name, Orderable::BoundingRole::MAXIMUS );
     return make_pair( minimus, maximus );
-}
-
-//---------------------------------- NestedAgent ------------------------------------    
-
-shared_ptr<PatternQuery> NestedAgent::GetPatternQuery() const
-{
-    auto pq = make_shared<PatternQuery>();
-    pq->RegisterNormalLink( PatternLink(&terminus) );
-    if( depth )
-        pq->RegisterNormalLink( PatternLink(&depth) ); // local
-    return pq;
-}
-
-    
-SYM::Lazy<SYM::BooleanExpression> NestedAgent::SymbolicNormalLinkedQueryPRed(PatternLink keyer_plink) const                                      
-{                 
-    shared_ptr<PatternQuery> my_pq = GetPatternQuery();         
-    PatternLink child_plink = my_pq->GetNormalLinks().front();
-    
-    SYM::Lazy<SYM::SymbolExpression> keyer_expr = SYM::MakeLazy<SYM::SymbolVariable>(keyer_plink);
-    SYM::Lazy<SYM::SymbolExpression> child_expr = SYM::MakeLazy<SYM::SymbolVariable>(child_plink);
-    
-    SYM::Lazy<SYM::BooleanExpression> expr = SYM::MakeLazy<NestingOperator>( this, keyer_expr ) == child_expr;
-    
-    if( depth )
-        expr &= RelocatingAgent::SymbolicNormalLinkedQueryPRed(keyer_plink);
-        
-    return expr;
-}                     
-
-
-RelocatingAgent::RelocatingQueryResult NestedAgent::RunRelocatingQuery( const XTreeDatabase *db, XLink stimulus_xlink ) const
-{   
-	(void)db;
-    // Compare the depth with the supplied pattern if present
-    if( depth )
-    {
-        set<XLink> deps = {stimulus_xlink};
-        string s;
-        // Keep advancing until we get nullptr, and remember the last non-null position
-        XLink xlink = stimulus_xlink;
-        while( XLink next_xlink = Advance(xlink, &s) )
-        {            
-            xlink = next_xlink; 
-            deps.insert( xlink );
-        }
-        
-        return RelocatingQueryResult(MakeTreeNode<SpecificString>(s), deps); 
-    }
-    
-    return RelocatingQueryResult();
-}    
-
-
-int NestedAgent::GetExtenderChannelOrdinal() const
-{
-    return 3;
-}
-
-
-Graphable::NodeBlock NestedAgent::GetGraphBlockInfo() const
-{
-    NodeBlock block;
-    block.bold = false;
-    block.title = GetName();
-    block.shape = "plaintext";
-    block.block_type = Graphable::NODE_EXPANDED;
-    block.node = GetPatternPtr();
-    if( terminus )
-    {
-        auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(terminus.get()),
-                  list<string>{},
-                  list<string>{},
-                  phase,
-                  &terminus );
-        block.item_blocks.push_back( { "terminus", 
-                                      "", 
-                                      false,
-                                      { link } } );
-    }
-    if( depth )
-    {
-        auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(depth.get()),
-                  list<string>{},
-                  list<string>{},
-                  phase,
-                  &depth );
-        block.item_blocks.push_back( { "depth", 
-                                      "", 
-                                      false,
-                                      { link } } );
-    }
-    return block;
-}
-
-
-NestedAgent::NestingOperator::NestingOperator( const NestedAgent *agent_,
-                                               shared_ptr<SymbolExpression> keyer_ ) :
-    agent( agent_ ),
-    keyer( keyer_ )
-{    
-}                                                
-
-
-list<shared_ptr<SYM::SymbolExpression>> NestedAgent::NestingOperator::GetSymbolOperands() const
-{
-    return { keyer };
-}
-
-
-unique_ptr<SYM::SymbolicResult> NestedAgent::NestingOperator::Evaluate( const EvalKit &kit,
-                                                                        list<unique_ptr<SYM::SymbolicResult>> &&op_results ) const 
-{
-	(void)kit;
-    ASSERT( op_results.size()==1 );        
-    unique_ptr<SYM::SymbolicResult> keyer_result = SoloElementOf(move(op_results));
-    if( !keyer_result->IsDefinedAndUnique() )
-        return make_unique<SYM::EmptyResult>();
-    XLink keyer_xlink = keyer_result->GetOnlyXLink();
-    
-    // Keep advancing until we get nullptr, and remember the last non-null position
-    string s;
-    XLink xlink = keyer_xlink;
-    while( XLink next_xlink = agent->Advance(xlink, &s) )
-        xlink = next_xlink;
-        
-    return make_unique<SYM::UniqueResult>( xlink );        
-}
-
-
-Orderable::Diff NestedAgent::NestingOperator::OrderCompare3WayCovariant( const Orderable &right, 
-                                                                         OrderProperty order_property ) const 
-{
-	(void)order_property;
-    auto &r = GET_THAT_REFERENCE(right);
-    // Agents aren't comparable, so value of operator is identiy of agent
-    return Node::Compare3WayIdentity( *agent->GetPatternPtr(), *r.agent->GetPatternPtr() );
-}  
-
-
-string NestedAgent::NestingOperator::Render() const
-{
-    return "Nesting<" + agent->GetName() + ">(" + keyer->Render() + ")"; 
-}
-
-
-SYM::Expression::Precedence NestedAgent::NestingOperator::GetPrecedence() const
-{
-    return Precedence::PREFIX;
-}
-
-//---------------------------------- NestedArrayAgent ------------------------------------    
-
-XLink NestedArrayAgent::Advance( XLink xlink, 
-                                 string *depth ) const
-{
-	(void)depth;
-    if( auto a = TreePtr<Array>::DynamicCast(xlink.GetChildTreePtr()) )         
-        return XLink(&(a->element)); // TODO support depth string (or integer)
-    else
-        return XLink();
-}
-
-//---------------------------------- NestedSubscriptLookupAgent ------------------------------------    
-
-XLink NestedSubscriptLookupAgent::Advance( XLink xlink, 
-                                           string *depth ) const
-{
-    if( auto subs = DynamicTreePtrCast<Subscript>(xlink.GetChildTreePtr()) )            
-    {
-        *depth += "S";
-        return XLink(&(subs->destination)); // the base, not the index
-    }
-    else if( auto l = DynamicTreePtrCast<Lookup>(xlink.GetChildTreePtr()) )            
-    {
-        *depth += "L";
-        return XLink(&(l->member)); 
-    }
-    else
-    {
-        return XLink();
-    }
 }
 
 //---------------------------------- BuildContainerSizeAgent ------------------------------------    

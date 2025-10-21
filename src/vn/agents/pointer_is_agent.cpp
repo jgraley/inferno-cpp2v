@@ -5,6 +5,7 @@
 #include "link.hpp"
 #include "standard_agent.hpp"
 #include "db/x_tree_database.hpp"
+#include "lang/render.hpp"
 
 using namespace VN;
 
@@ -43,12 +44,32 @@ RelocatingAgent::RelocatingQueryResult PointerIsAgent::RunRelocatingQuery( const
 }
 
 
+int PointerIsAgent::GetExtenderChannelOrdinal() const
+{
+    return 2;
+}
+
+
+Syntax::Production PointerIsAgent::GetAgentProduction() const
+{
+	return Syntax::Production::VN_PREFIX;
+}
+
+
+string PointerIsAgent::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
+{
+	(void)surround_prod;
+	return "⮎" + kit.render( (TreePtr<Node>)(*GetPointer()), Syntax::Production::VN_PREFIX );
+} 
+
+
 Graphable::NodeBlock PointerIsAgent::GetGraphBlockInfo() const
 {
     // The PointerIs node appears as a slightly flattened pentagon.
     NodeBlock block;
     block.bold = true;
     block.title = "PointerIs"; 
+    block.symbol = "⮎";
     block.shape = "house";
     block.block_type = Graphable::NODE_SHAPED;
     block.node = GetPatternPtr();
@@ -62,10 +83,4 @@ Graphable::NodeBlock PointerIsAgent::GetGraphBlockInfo() const
                            true,
                            { link } } };
     return block;
-}
-
-
-int PointerIsAgent::GetExtenderChannelOrdinal() const
-{
-    return 2;
 }

@@ -441,7 +441,7 @@ CleanupUnusedVariables::CleanupUnusedVariables()
     auto over_scope = MakePatternNode< Delta<Scope> >();
     auto decls = MakePatternNode< Star<Declaration> >();
     auto inst = MakePatternNode<Instance>();
-    auto nested_array = MakePatternNode<NestedArrayAgent>();
+    auto nested_array = MakePatternNode<Stuff<Type>>();
     auto sx_not = MakePatternNode< Negation<Type> >();
     auto sx_any = MakePatternNode< Disjunction<Type> >();
     auto getdecl = MakePatternNode< TransformOf<TypeIdentifier> >( &DeclarationOf::instance ); // TODO should be modulo typedefs
@@ -462,6 +462,7 @@ CleanupUnusedVariables::CleanupUnusedVariables()
     r_scope->members = (decls);
     inst->type = nested_array;
     inst->identifier = id;
+    nested_array->recurse_restriction = MakePatternNode<Array>();
     nested_array->terminus = sx_not;
     sx_not->negand = sx_any;
     sx_any->disjuncts = ( MakePatternNode<Callable>(),
