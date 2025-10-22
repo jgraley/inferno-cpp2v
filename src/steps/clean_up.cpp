@@ -209,7 +209,7 @@ CleanupDuplicateLabels::CleanupDuplicateLabels()
     auto post = MakePatternNode< Star<Statement> >();
     auto s_labelid1 = MakePatternNode<LabelIdentifier>();
     auto s_labelid2 = MakePatternNode<LabelIdentifier>();
-    auto r_labelid = MakePatternNode<BuildLabelIdentifierAgent>("%s_%s", BYPASS_WHEN_IDENTICAL);
+    auto r_labelid = MakePatternNode<BuildLabelIdentifierAgent>();
     auto l_s_orrule = MakePatternNode< Disjunction<LabelIdentifier> >();
     auto identifier = MakePatternNode<InstanceIdentifier>();
     auto type = MakePatternNode<Callable>();
@@ -268,7 +268,7 @@ CleanupIneffectualLabels::CleanupIneffectualLabels()
     auto post = MakePatternNode< Star<Statement> >();
     auto s_labelid1 = MakePatternNode<LabelIdentifier>();
     auto s_labelid2 = MakePatternNode<LabelIdentifier>();
-    auto r_labelid = MakePatternNode<BuildLabelIdentifierAgent>("%s_%s", BYPASS_WHEN_IDENTICAL);
+    auto r_labelid = MakePatternNode<BuildLabelIdentifierAgent>();
     auto l_s_orrule = MakePatternNode< Disjunction<LabelIdentifier> >();
     auto identifier = MakePatternNode<InstanceIdentifier>();
     auto type = MakePatternNode<Callable>();

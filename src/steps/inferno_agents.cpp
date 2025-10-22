@@ -29,7 +29,7 @@ string BuildIdentifierAgent::GetNewName(const SCREngine *acting_engine)
 {
     INDENT("B");
     TRACE("Begin SoftMakeIdentifier recurse for \"")(format)("\"\n");
-    vector<string> vs;
+    list<string> ls;
     bool all_same = true;
     for( TreePtrInterface &source : sources )
     {
@@ -43,26 +43,34 @@ string BuildIdentifierAgent::GetNewName(const SCREngine *acting_engine)
         TreePtr<SpecificIdentifier> si = DynamicTreePtrCast<SpecificIdentifier>( new_identifier );
         ASSERT( si )("BuildIdentifier: ")(*new_identifier)(" should be a kind of SpecificIdentifier (format is %s)", format.c_str());
         string s = si->GetRenderTerminal();
-        if( !vs.empty() )
-            all_same = all_same && (s == vs.back());
-        vs.push_back( s );
+        if( !ls.empty() )
+            all_same = all_same && (s == ls.back());
+        ls.push_back( s );
     }
 
-    // Optional functionality: when every identifier has the same name, just return that
-    // name. Handy for "merging" operations.
-    if( (flags & BYPASS_WHEN_IDENTICAL) && all_same )
-        return vs[0];  
+	// Empty format string gives default behaviour
+    if( format.empty() )
+    {		
+		// Optional functionality: when every identifier has the same name, just return that
+		// name. Handy for "merging" operations.
+		if( ls.empty() )
+			return "unnamed"; // TODO caps for labels
+		else if( all_same )
+			return ls.front();  
+		else
+			return Join( ls, "_" );
+	}	
 
     // Use sprintf to build a new identifier based on the found one. Obviously %s
     // becomes the old identifier's name.
-    switch( vs.size() )
+    switch( ls.size() )
     {
         case 0:
             return SSPrintf( format.c_str() );
         case 1:
-            return SSPrintf( format.c_str(), vs[0].c_str() );
+            return SSPrintf( format.c_str(), ls.front().c_str() );
         case 2:
-            return SSPrintf( format.c_str(), vs[0].c_str(), vs[1].c_str() );
+            return SSPrintf( format.c_str(), ls.front().c_str(), next(ls.begin())->c_str() );
         default:
             ASSERTFAIL("Please add more cases to GetNewName()");
     }
@@ -77,8 +85,10 @@ Syntax::Production BuildIdentifierAgent::GetAgentProduction() const
 string BuildIdentifierAgent::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
-	string s = (flags & BYPASS_WHEN_IDENTICAL) ? "⧇" : "⧈";
-	s += "【" + GetIdentifierSubTypeName() + "┆'" + format + "'】";
+	string s = "⧇【" + GetIdentifierSubTypeName();
+	if( !format.empty() )
+		s += "┆'" + format + "'";
+	s += "】";
 	list<string> ls;
 	Sequence<CPPTree::Identifier> scopy = sources;
 	for( TreePtrInterface &source : scopy )

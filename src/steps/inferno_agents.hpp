@@ -10,8 +10,6 @@
 #include "vn/sym/expression.hpp"
 
 using namespace VN;
-// TODO pollutes client namespace
-#define BYPASS_WHEN_IDENTICAL 1
 
 //---------------------------------- BuildIdentifierAgent ------------------------------------    
 // 
@@ -32,7 +30,7 @@ using namespace VN;
 struct BuildIdentifierAgent : public virtual BuilderAgent    
 {
     // TODO do this via a transformation as with TransformOf/TransformOf
-    BuildIdentifierAgent( string s, int f=0 ) : format(s), flags(f) {}
+    BuildIdentifierAgent( string s ) : format(s) {}
 
     TreePtr<Node> BuildNewSubtree(const SCREngine *acting_engine) final;
     string GetNewName(const SCREngine *acting_engine);
@@ -46,7 +44,6 @@ struct BuildIdentifierAgent : public virtual BuilderAgent
 
     Sequence<CPPTree::Identifier> sources;
     string format;
-    int flags;
 };
 
 
@@ -60,8 +57,7 @@ struct BuildInstanceIdentifierAgent : Special<CPPTree::InstanceIdentifier>,
         return shared_from_this();
     }
     
-    BuildInstanceIdentifierAgent( string s, int f=0 ) : BuildIdentifierAgent(s,f) {}
-    BuildInstanceIdentifierAgent() : BuildIdentifierAgent("unnamed") {}
+    BuildInstanceIdentifierAgent( string s="" ) : BuildIdentifierAgent(s) {}
 
 private:    
     TreePtr<CPPTree::SpecificIdentifier> BuildSpecificIdentifier( string name ) const final;
@@ -79,7 +75,7 @@ struct BuildTypeIdentifierAgent : Special<CPPTree::TypeIdentifier>,
         return shared_from_this();
     }
     
-    BuildTypeIdentifierAgent( string s="Unnamed", int f=0 ) : BuildIdentifierAgent(s,f) {}
+    BuildTypeIdentifierAgent( string s="" ) : BuildIdentifierAgent(s) {}
 
 private:
     TreePtr<CPPTree::SpecificIdentifier> BuildSpecificIdentifier( string name ) const final;
@@ -97,8 +93,7 @@ struct BuildLabelIdentifierAgent : Special<CPPTree::LabelIdentifier>,
         return shared_from_this();
     }
     
-    BuildLabelIdentifierAgent() : BuildIdentifierAgent("UNNAMED") {}
-    BuildLabelIdentifierAgent( string s, int f=0 ) : BuildIdentifierAgent(s,f) {}
+    BuildLabelIdentifierAgent( string s="" ) : BuildIdentifierAgent(s) {}
 
 private:
     TreePtr<CPPTree::SpecificIdentifier> BuildSpecificIdentifier( string name ) const final;
