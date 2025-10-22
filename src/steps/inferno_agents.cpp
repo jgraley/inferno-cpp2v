@@ -77,28 +77,22 @@ Syntax::Production BuildIdentifierAgent::GetAgentProduction() const
 string BuildIdentifierAgent::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
-	// Note: we are not differentiating between different kinds of identifier
-	// (type, instance, label, preproc (which doens't have support here anyway)).
-	// TODO drop these subclasses. TODO:
-	// - Loosen up the pointer types
-	// - This class derives from Special<CPPTree::SpecificIdentifier> (if we're still doing that)
-	// - Move BuildSpecificIdentifier() into nodes like Type, Expression etc
-	// - Get parent pointer archetype and call on that.
-	// OR JUST SHOVE IN WHATEVER FITS
 	string s = (flags & BYPASS_WHEN_IDENTICAL) ? "⧇" : "⧈";
-	s += "【'" + format + "'】";
+	s += "【" + GetIdentifierSubTypeName() + "┆'" + format + "'】";
 	list<string> ls;
 	Sequence<CPPTree::Identifier> scopy = sources;
 	for( TreePtrInterface &source : scopy )
 		ls.push_back( kit.render( (TreePtr<Node>)source, Syntax::Production::VN_SEP ) );
-	s += Join( ls, "┆ ", "⦑ ", " ⦒");
+	s += Join( ls, "︙ ", "⦑ ", " ⦒");
 	return s;
 } 
   
     
 string BuildIdentifierAgent::GetCouplingNameHint() const
 {
-	return "new_id"; 
+	string t = GetIdentifierSubTypeName();
+	transform(t.begin(), t.end(), t.begin(), [](unsigned char c){ return tolower(c); });
+	return "new_" + t + "_id";
 } 
 
 
@@ -124,6 +118,12 @@ TreePtr<CPPTree::SpecificIdentifier> BuildInstanceIdentifierAgent::BuildSpecific
     return MakeTreeNode<CPPTree::SpecificInstanceIdentifier>( name ); 
 }
 
+
+string BuildInstanceIdentifierAgent::GetIdentifierSubTypeName() const
+{
+	return "Instance";
+}    
+
 //---------------------------------- BuildTypeIdentifierAgent ------------------------------------    
 
 TreePtr<CPPTree::SpecificIdentifier> BuildTypeIdentifierAgent::BuildSpecificIdentifier(string name) const
@@ -131,12 +131,24 @@ TreePtr<CPPTree::SpecificIdentifier> BuildTypeIdentifierAgent::BuildSpecificIden
     return MakeTreeNode<CPPTree::SpecificTypeIdentifier>( name ); 
 }
 
+
+string BuildTypeIdentifierAgent::GetIdentifierSubTypeName() const
+{
+	return "Type";
+}    
+
 //---------------------------------- BuildLabelIdentifierAgent ------------------------------------    
 
 TreePtr<CPPTree::SpecificIdentifier> BuildLabelIdentifierAgent::BuildSpecificIdentifier(string name) const
 {
     return MakeTreeNode<CPPTree::SpecificLabelIdentifier>( name ); 
 }
+
+
+string BuildLabelIdentifierAgent::GetIdentifierSubTypeName() const
+{
+	return "Label";
+}    
 
 //---------------------------------- StringizeAgent ------------------------------------    
 

@@ -41,6 +41,7 @@ struct BuildIdentifierAgent : public virtual BuilderAgent
 	Syntax::Production GetAgentProduction() const override;
 	string GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const final;
     string GetCouplingNameHint() const final;
+    virtual string GetIdentifierSubTypeName() const = 0;
     NodeBlock GetGraphBlockInfo() const final;
 
     Sequence<CPPTree::Identifier> sources;
@@ -64,6 +65,7 @@ struct BuildInstanceIdentifierAgent : Special<CPPTree::InstanceIdentifier>,
 
 private:    
     TreePtr<CPPTree::SpecificIdentifier> BuildSpecificIdentifier( string name ) const final;
+    string GetIdentifierSubTypeName() const final;
 };
 
 
@@ -81,6 +83,7 @@ struct BuildTypeIdentifierAgent : Special<CPPTree::TypeIdentifier>,
 
 private:
     TreePtr<CPPTree::SpecificIdentifier> BuildSpecificIdentifier( string name ) const final;
+    string GetIdentifierSubTypeName() const final;
 };
 
 
@@ -99,6 +102,7 @@ struct BuildLabelIdentifierAgent : Special<CPPTree::LabelIdentifier>,
 
 private:
     TreePtr<CPPTree::SpecificIdentifier> BuildSpecificIdentifier( string name ) const final;
+    string GetIdentifierSubTypeName() const final;
 };
 
 //---------------------------------- StringizeAgent ------------------------------------    
