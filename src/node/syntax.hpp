@@ -87,6 +87,7 @@ public:
 	
 	/// Produce the source-code-name of the corresponding SystemC construct
     virtual string GetToken() const;
+    virtual string GetCouplingNameHint() const;
 	virtual string GetRenderTerminal() const;
 	virtual Production GetMyProduction() const;
 	virtual Production GetOperandInDeclaratorProduction() const;

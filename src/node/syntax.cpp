@@ -3,7 +3,19 @@
 
 string Syntax::GetToken() const
 {
-	string s = TYPE_ID_NAME(*this);
+	return "";
+}
+
+
+string Syntax::GetCouplingNameHint() const
+{
+	// Try token if defined
+	string s = GetToken();
+	if( !s.empty() )
+		return s;
+	
+	// If no token, just use the type
+	s = TYPE_ID_NAME(*this);
 	s = GetInnermostTemplateParam(s);
 	s = Traceable::Denamespace(s);
 	

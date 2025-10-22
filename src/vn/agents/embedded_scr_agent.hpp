@@ -87,7 +87,7 @@ public:
     EmbeddedCompareReplace() : EmbeddedSCR<PRE_RESTRICTION>( nullptr, nullptr, nullptr, false ) {}      
     EmbeddedCompareReplace( TreePtr<PRE_RESTRICTION> t, TreePtr<Node> sp=TreePtr<Node>(), TreePtr<Node> rp=TreePtr<Node>() ) :
         EmbeddedSCR<PRE_RESTRICTION>( t, sp, rp, false ) {}
-    string GetToken() const final
+    string GetCouplingNameHint() const final
     {
 		return "embedded"; 
 	}

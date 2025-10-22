@@ -45,7 +45,7 @@ public:
     {
         return &pointer;
     }
-    string GetToken() const final
+    string GetCouplingNameHint() const final
     {
 		return "ptr_is"; 
 	}     

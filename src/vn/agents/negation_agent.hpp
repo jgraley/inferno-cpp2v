@@ -55,7 +55,7 @@ private:
     {
         return &negand;
     }
-    string GetToken() const final
+    string GetCouplingNameHint() const final
     {
 		return "not"; 
 	}

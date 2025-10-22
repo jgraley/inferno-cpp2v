@@ -39,12 +39,11 @@ public:
     TreePtr<Node> context;
     stack< TreePtr<Node> > scope_stack;
     queue<TreePtr<CPPTree::Instance>> definitions;
-    UniquifyNames::NodeToNameMap unique_names;
+    UniquifyNames::NodeToNameMap unique_coupling_names;
     const string outfile;                                     
     SimpleCompare sc;
     unique_ptr<DefaultTransUtils> utils;
     RenderKit kit;
-    bool name_all_uniques = false;
 };
 };
 

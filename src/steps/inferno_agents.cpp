@@ -19,19 +19,9 @@ using namespace CPPTree;
 
 //---------------------------------- BuildIdentifierAgent ------------------------------------    
 
-Graphable::NodeBlock BuildIdentifierAgent::GetGraphBlockInfo() const
+TreePtr<Node> BuildIdentifierAgent::BuildNewSubtree(const SCREngine *acting_engine)
 {
-    // The BuildIdentifier node appears as a parallelogram (rectangle pushed to the side) with
-    // the printf format string that controls the name of the generated identifier inside it.
-    // TODO indicate whether it's building instance, label or type identifier
-    NodeBlock block;
-    block.bold = true;
-    block.title = "'"+format+"'!"; // text from program code, so use single quotes
-    block.shape = "parallelogram";
-    block.block_type = Graphable::NODE_SHAPED;
-    block.node = GetPatternPtr();
-    block.item_blocks = Node::GetSubblocks(const_cast<Sequence<CPPTree::Identifier> *>(&sources), phase);
-    return block;
+    return BuildSpecificIdentifier( GetNewName(acting_engine) ); 
 }
 
 
@@ -78,26 +68,75 @@ string BuildIdentifierAgent::GetNewName(const SCREngine *acting_engine)
     }
 }
 
+Syntax::Production BuildIdentifierAgent::GetAgentProduction() const
+{
+	return Syntax::Production::VN_PREFIX;
+}
+
+
+string BuildIdentifierAgent::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
+{
+	(void)surround_prod;
+	// Note: we are not differentiating between different kinds of identifier
+	// (type, instance, label, preproc (which doens't have support here anyway)).
+	// TODO drop these subclasses. TODO:
+	// - Loosen up the pointer types
+	// - This class derives from Special<CPPTree::SpecificIdentifier> (if we're still doing that)
+	// - Move BuildSpecificIdentifier() into nodes like Type, Expression etc
+	// - Get parent pointer archetype and call on that.
+
+	string s = (flags & BYPASS_WHEN_IDENTICAL) ? "⧇" : "⧈";
+	s += "【'" + format + "'】";
+	list<string> ls;
+	Sequence<CPPTree::Identifier> scopy = sources;
+	for( TreePtrInterface &source : scopy )
+		ls.push_back( kit.render( (TreePtr<Node>)source, Syntax::Production::VN_SEP ) );
+	s += Join( ls, "┆ ", "⦑ ", " ⦒");
+	return s;
+} 
+  
+    
+string BuildIdentifierAgent::GetCouplingNameHint() const
+{
+	return "new_id"; 
+} 
+
+
+Graphable::NodeBlock BuildIdentifierAgent::GetGraphBlockInfo() const
+{
+    // The BuildIdentifier node appears as a parallelogram (rectangle pushed to the side) with
+    // the printf format string that controls the name of the generated identifier inside it.
+    // TODO indicate whether it's building instance, label or type identifier
+    NodeBlock block;
+    block.bold = true;
+    block.title = "⧇'"+format+"'"; // text from program code, so use single quotes
+    block.shape = "parallelogram";
+    block.block_type = Graphable::NODE_SHAPED;
+    block.node = GetPatternPtr();
+    block.item_blocks = Node::GetSubblocks(const_cast<Sequence<CPPTree::Identifier> *>(&sources), phase);
+    return block;
+}
+
 //---------------------------------- BuildInstanceIdentifierAgent ------------------------------------    
 
-TreePtr<Node> BuildInstanceIdentifierAgent::BuildNewSubtree(const SCREngine *acting_engine)
+TreePtr<CPPTree::SpecificIdentifier> BuildInstanceIdentifierAgent::BuildSpecificIdentifier(string name) const
 {
-    return MakeTreeNode<CPPTree::SpecificInstanceIdentifier>( GetNewName(acting_engine) ); 
+    return MakeTreeNode<CPPTree::SpecificInstanceIdentifier>( name ); 
 }
 
 //---------------------------------- BuildTypeIdentifierAgent ------------------------------------    
 
-TreePtr<Node> BuildTypeIdentifierAgent::BuildNewSubtree(const SCREngine *acting_engine)
+TreePtr<CPPTree::SpecificIdentifier> BuildTypeIdentifierAgent::BuildSpecificIdentifier(string name) const
 {
-    return MakeTreeNode<CPPTree::SpecificTypeIdentifier>( GetNewName(acting_engine) ); 
-}                                                   
+    return MakeTreeNode<CPPTree::SpecificTypeIdentifier>( name ); 
+}
 
 //---------------------------------- BuildLabelIdentifierAgent ------------------------------------    
 
-TreePtr<Node> BuildLabelIdentifierAgent::BuildNewSubtree(const SCREngine *acting_engine)
+TreePtr<CPPTree::SpecificIdentifier> BuildLabelIdentifierAgent::BuildSpecificIdentifier(string name) const
 {
-    return MakeTreeNode<CPPTree::SpecificLabelIdentifier>( GetNewName(acting_engine) ); 
-}                                                   
+    return MakeTreeNode<CPPTree::SpecificLabelIdentifier>( name ); 
+}
 
 //---------------------------------- StringizeAgent ------------------------------------    
 
@@ -122,7 +161,7 @@ string StringizeAgent::GetRender( const RenderKit &kit, Syntax::Production surro
 } 
 
     
-string StringizeAgent::GetToken() const
+string StringizeAgent::GetCouplingNameHint() const
 {
 	return "stringize"; 
 } 

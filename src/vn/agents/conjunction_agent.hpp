@@ -48,7 +48,7 @@ private:
     {
         return conjuncts;
     }
-    string GetToken() const final
+    string GetCouplingNameHint() const final
     {
 		return "all"; 
 	}};

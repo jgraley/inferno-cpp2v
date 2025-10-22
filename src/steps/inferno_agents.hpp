@@ -14,7 +14,7 @@ using namespace VN;
 #define BYPASS_WHEN_IDENTICAL 1
 
 //---------------------------------- BuildIdentifierAgent ------------------------------------    
-// ⧇
+// 
 /// Make an identifer based on an existing set, `sources` and a printf
 /// format string, `format`. The new identfier is named using
 /// `sprintf( format, sources[0].name, source[1].name, etc )`
@@ -33,9 +33,17 @@ struct BuildIdentifierAgent : public virtual BuilderAgent
 {
     // TODO do this via a transformation as with TransformOf/TransformOf
     BuildIdentifierAgent( string s, int f=0 ) : format(s), flags(f) {}
-    virtual NodeBlock GetGraphBlockInfo() const;
-    Sequence<CPPTree::Identifier> sources;
+
+    TreePtr<Node> BuildNewSubtree(const SCREngine *acting_engine) final;
     string GetNewName(const SCREngine *acting_engine);
+    virtual TreePtr<CPPTree::SpecificIdentifier> BuildSpecificIdentifier( string name ) const = 0;
+
+	Syntax::Production GetAgentProduction() const override;
+	string GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const final;
+    string GetCouplingNameHint() const final;
+    virtual NodeBlock GetGraphBlockInfo() const;
+
+    Sequence<CPPTree::Identifier> sources;
     string format;
     int flags;
 };
@@ -55,7 +63,7 @@ struct BuildInstanceIdentifierAgent : Special<CPPTree::InstanceIdentifier>,
     BuildInstanceIdentifierAgent() : BuildIdentifierAgent("unnamed") {}
 
 private:    
-    TreePtr<Node> BuildNewSubtree(const SCREngine *acting_engine) override;
+    TreePtr<CPPTree::SpecificIdentifier> BuildSpecificIdentifier( string name ) const final;
 };
 
 
@@ -72,7 +80,7 @@ struct BuildTypeIdentifierAgent : Special<CPPTree::TypeIdentifier>,
     BuildTypeIdentifierAgent( string s="Unnamed", int f=0 ) : BuildIdentifierAgent(s,f) {}
 
 private:
-    virtual TreePtr<Node> BuildNewSubtree(const SCREngine *acting_engine) override;
+    TreePtr<CPPTree::SpecificIdentifier> BuildSpecificIdentifier( string name ) const final;
 };
 
 
@@ -90,7 +98,7 @@ struct BuildLabelIdentifierAgent : Special<CPPTree::LabelIdentifier>,
     BuildLabelIdentifierAgent( string s, int f=0 ) : BuildIdentifierAgent(s,f) {}
 
 private:
-    virtual TreePtr<Node> BuildNewSubtree(const SCREngine *acting_engine) override;
+    TreePtr<CPPTree::SpecificIdentifier> BuildSpecificIdentifier( string name ) const final;
 };
 
 //---------------------------------- StringizeAgent ------------------------------------    
@@ -114,7 +122,7 @@ private:
     TreePtr<Node> BuildNewSubtree(const SCREngine *acting_engine) override;    
 	Syntax::Production GetAgentProduction() const override;
 	string GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const final;
-    string GetToken() const final;
+    string GetCouplingNameHint() const final;
     NodeBlock GetGraphBlockInfo() const override;
 };
 

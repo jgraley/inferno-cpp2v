@@ -19,19 +19,22 @@ typedef map< unsigned, TreePtr<Node> > Usages;
 
 struct UniquifyNames;
 
-class VisibleNames
+class UniqueNameGenerator
 {
+public:    
+	UniqueNameGenerator( string (Syntax::*name_getter_)() const );
+    string AddNode( TreePtr<Node> node );
+    void AddNodeNoRename( TreePtr<Node> node );
+
+private:    
+    string MakeUniqueName( string b, unsigned n ) const;
+    void SplitName( TreePtr<Node> node, string *b, unsigned *n ) const;
+    unsigned AssignNumber( Usages &nu, TreePtr<Node> node, unsigned n );
+
+	string (Syntax::*name_getter)() const;
     // map of basenames to their offset number tables
     typedef pair<const string, Usages> NameUsagesPair;
     map< string, Usages > name_usages;
-
-    static string MakeUniqueName( string b, unsigned n );
-    static void SplitName( TreePtr<Node> node, string *b, unsigned *n ); // note static
-    unsigned AssignNumber( Usages &nu, TreePtr<Node> node, unsigned n );
-
-public:    
-    string AddNode( TreePtr<Node> node );
-    void AddNodeNoRename( TreePtr<Node> node );
 };
 
 
@@ -71,12 +74,21 @@ private:
 
 
 // Main API.
-struct UniquifyNames
+class UniquifyNames
 {
+public:
     typedef pair<const TreePtr<Node>, string> NodeAndNamePair;
     typedef map< TreePtr<Node>, string> NodeToNameMap;
-    static NodeToNameMap UniquifyAll( const TransKit &kit, TreePtr<Node> context,  
-                                      bool multiparent_only, bool preserve_undeclared_ids );
+
+	UniquifyNames( string (Syntax::*name_getter_)() const, // Method on nodes to get the initial name string
+	               bool multiparent_only_,                 // Restrict to nodes with more than one parent
+	               bool preserve_undeclared_ids_ );        // Refuse to rename identifiers that have no definition
+    NodeToNameMap UniquifyAll( const TransKit &kit, TreePtr<Node> context ) const;
+                               
+private:
+    string (Syntax::*name_getter)() const; 
+	const bool multiparent_only;          
+	const bool preserve_undeclared_ids;
 };
 
 

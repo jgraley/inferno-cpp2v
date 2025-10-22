@@ -65,7 +65,7 @@ public:
     {
         return shared_from_this();
     }    
-    string GetToken() const final
+    string GetCouplingNameHint() const final
     {
 		return "child"; 
 	}  
@@ -111,7 +111,7 @@ public:
     {
         return shared_from_this();
     }
-    string GetToken() const final
+    string GetCouplingNameHint() const final
     {
 		return "stuff"; 
 	}  

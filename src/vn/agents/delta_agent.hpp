@@ -59,7 +59,7 @@ public:
     {
         return &overlay;
     }
-    string GetToken() const final
+    string GetCouplingNameHint() const final
     {
 		return "delta"; 
 	}     

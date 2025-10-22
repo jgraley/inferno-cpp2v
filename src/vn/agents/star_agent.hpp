@@ -81,9 +81,9 @@ public:
         return &restriction;
     }
     
-    string GetToken() const final
+    string GetCouplingNameHint() const final
     {
-		return PRE_RESTRICTION::GetToken() + "s"; // Pluralise
+		return PRE_RESTRICTION::GetCouplingNameHint() + "s"; // Pluralise
 	}    
 };
 

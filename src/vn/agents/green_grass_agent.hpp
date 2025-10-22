@@ -67,7 +67,7 @@ public:
     {
         return &through;
     }
-    string GetToken() const final
+    string GetCouplingNameHint() const final
     {
 		return "green"; 
 	} 

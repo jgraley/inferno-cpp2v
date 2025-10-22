@@ -36,14 +36,15 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern )
     kit = RenderKit{ utils.get(),
 		             bind(&Render::RenderIntoProduction, this, _1, _2)  };
 
-    // Make the identifiers unique (does its own tree walk)
-    unique_names = UniquifyNames::UniquifyAll( kit, context, true, false );
-	name_all_uniques = true; // Now we've defined them all, use their names
+    // Make the hinted coupling names unique. Only bother with true couplings
+    // (more than one parent) and don't worry about declarations.
+    UniquifyNames coupling_names_uniqifier(&Syntax::GetCouplingNameHint, true, false);
+    unique_coupling_names = coupling_names_uniqifier.UniquifyAll( kit, context );
 
 	string s;
 	if( ReadArgs::use.count("c") )
-		s += Trace(unique_names) + "\n\n";
-	for( UniquifyNames::NodeAndNamePair p : unique_names )
+		s += Trace(unique_coupling_names) + "\n\n";
+	for( UniquifyNames::NodeAndNamePair p : unique_coupling_names )
 		s += p.second + " ≝ " + Dispatch( p.first, Syntax::Production::VN_PREFIX ) + "┆\n";
 
 	if( pattern->GetSearchComparePattern() == pattern->GetReplacePattern() )
@@ -83,8 +84,8 @@ string Render::RenderIntoProduction( TreePtr<Node> node, Syntax::Production surr
 					  Trace(node).c_str(), 
 					  RETURN_ADDR() );
 
-	if( name_all_uniques && unique_names.count(node) > 0 )			
-		return unique_names.at(node);					
+	if( unique_coupling_names.count(node) > 0 )			
+		return unique_coupling_names.at(node);					
 					
     // Production surround_prod relates to the surrounding grammar production and can be 
     // used to change the render of a certain subtree. It represents all the ancestor nodes of

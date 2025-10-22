@@ -9,9 +9,63 @@ using namespace CPPTree;
 //#define UID_FORMAT_PURE "id_%u"
 
 
-//////////////////////////// VisibleNames ///////////////////////////////
+//////////////////////////// UniqueNameGenerator ///////////////////////////////
 
-string VisibleNames::MakeUniqueName( string b, unsigned n ) // note static
+UniqueNameGenerator::UniqueNameGenerator( string (Syntax::*name_getter_)() const ) :
+    name_getter( name_getter_ )
+{	
+}
+
+
+string UniqueNameGenerator::AddNode( TreePtr<Node> node )
+{
+    // Get canonical form of identifier name
+    string base_name;
+    unsigned n_want;
+    SplitName( node, &base_name, &n_want );
+
+    // Do we have the base name already? If so, add this new instance
+    if( name_usages.count(base_name) > 0 )
+    {
+        unsigned n_got = AssignNumber( name_usages.at(base_name), node, n_want );
+        return MakeUniqueName( base_name, n_got );
+	}
+
+    // Otherwise start a new record for this base name.
+    Usages nu;
+    unsigned n_got = AssignNumber( nu, node, n_want );
+    name_usages.insert( NameUsagesPair( base_name, nu ) );
+    return MakeUniqueName( base_name, n_got );
+}
+
+
+void UniqueNameGenerator::AddNodeNoRename( TreePtr<Node> node )
+{
+	ASSERT( !(node.get()->*name_getter)().empty() ); // GetToken for ids
+		
+    // Get canonical form of identifier name
+    string base_name;
+    unsigned n_want;
+    SplitName( node, &base_name, &n_want );
+
+    // Undeclared identifiers should already be unique. We must assume they are 
+    // declared "somewhere else" and that to rename them would break things. In
+    // fact they're probably system node ids. These have the usual identifier 
+    // semantics; do a #819 when introducing.
+    ASSERT( name_usages.count(base_name) == 0 )
+            ("Name conflict among undeclared identifiers (would force a rename - unsafe)\n")
+            ("node: ")(node)(" name: ")((node.get()->*name_getter)())("\n")  
+            ("previous usages: ")(name_usages); 
+
+    // Otherwise start a new record for this base name.
+    Usages nu;
+    unsigned n_got = AssignNumber( nu, node, n_want );
+    ASSERT( n_got == n_want )( "Undeclared identifier: ")(node)(" would be renamed - unsafe"); 
+    name_usages.insert( NameUsagesPair( base_name, nu ) );
+}
+
+
+string UniqueNameGenerator::MakeUniqueName( string b, unsigned n ) const // note static
 {
 #ifdef UID_FORMAT_HINT 
     if( n>0 )
@@ -30,9 +84,9 @@ string VisibleNames::MakeUniqueName( string b, unsigned n ) // note static
 }
 
 
-void VisibleNames::SplitName( TreePtr<Node> node, string *b, unsigned *n ) // note static
+void UniqueNameGenerator::SplitName( TreePtr<Node> node, string *b, unsigned *n ) const // note static
 {
-    string original_name = node->GetToken();
+    string original_name = (node.get()->*name_getter)(); // GetToken for ids
     //FTRACE(node)(" has name \"")(original_name)("\"\n");
 #ifdef UID_FORMAT_HINT 
     char cb[1024]; // hope that's big enough!
@@ -54,7 +108,7 @@ void VisibleNames::SplitName( TreePtr<Node> node, string *b, unsigned *n ) // no
 }
 
 
-unsigned VisibleNames::AssignNumber( Usages &nu, TreePtr<Node> node, unsigned n )
+unsigned UniqueNameGenerator::AssignNumber( Usages &nu, TreePtr<Node> node, unsigned n )
 {
     // Uniquify the number n, by incrementing it until there are no conflicts
     bool tryagain;
@@ -80,54 +134,6 @@ unsigned VisibleNames::AssignNumber( Usages &nu, TreePtr<Node> node, unsigned n 
 
 	// Return the number got
 	return n;
-}
-
-
-string VisibleNames::AddNode( TreePtr<Node> node )
-{
-    // Get canonical form of identifier name
-    string base_name;
-    unsigned n_want;
-    SplitName( node, &base_name, &n_want );
-
-    // Do we have the base name already? If so, add this new instance
-    if( name_usages.count(base_name) > 0 )
-    {
-        unsigned n_got = AssignNumber( name_usages.at(base_name), node, n_want );
-        return MakeUniqueName( base_name, n_got );
-	}
-
-    // Otherwise start a new record for this base name.
-    Usages nu;
-    unsigned n_got = AssignNumber( nu, node, n_want );
-    name_usages.insert( NameUsagesPair( base_name, nu ) );
-    return MakeUniqueName( base_name, n_got );
-}
-
-
-void VisibleNames::AddNodeNoRename( TreePtr<Node> node )
-{
-	ASSERT( !node->GetToken().empty() );
-		
-    // Get canonical form of identifier name
-    string base_name;
-    unsigned n_want;
-    SplitName( node, &base_name, &n_want );
-
-    // Undeclared identifiers should already be unique. We must assume they are 
-    // declared "somewhere else" and that to rename them would break things. In
-    // fact they're probably system node ids. These have the usual identifier 
-    // semantics; do a #819 when introducing.
-    ASSERT( name_usages.count(base_name) == 0 )
-            ("Name conflict among undeclared identifiers (would force a rename - unsafe)\n")
-            ("identifier: ")(node)(" token: ")(node->GetToken())("\n")
-            ("previous usages: ")(name_usages); 
-
-    // Otherwise start a new record for this base name.
-    Usages nu;
-    unsigned n_got = AssignNumber( nu, node, n_want );
-    ASSERT( n_got == n_want )( "Undeclared identifier: ")(node)(" would be renamed - unsafe"); 
-    name_usages.insert( NameUsagesPair( base_name, nu ) );
 }
 
 //////////////////////////// Fingerprinter ///////////////////////////////
@@ -235,8 +241,15 @@ void Fingerprinter::ProcessCollection( CollectionInterface *x_col, int &index )
 
 //////////////////////////// UniquifyNames ///////////////////////////////
 
-UniquifyNames::NodeToNameMap UniquifyNames::UniquifyAll( const TransKit &kit, TreePtr<Node> context, 
-                                                         bool multiparent_only, bool preserve_undeclared_ids )
+UniquifyNames::UniquifyNames( string (Syntax::*name_getter_)() const, bool multiparent_only_, bool preserve_undeclared_ids_ ) :
+    name_getter(name_getter_),
+    multiparent_only(multiparent_only_),
+    preserve_undeclared_ids(preserve_undeclared_ids_)
+{
+}
+
+
+UniquifyNames::NodeToNameMap UniquifyNames::UniquifyAll( const TransKit &kit, TreePtr<Node> context ) const
 {
 	(void)multiparent_only;
 	Fingerprinter::NodeSetByFingerprint node_sets_by_fp = Fingerprinter().GetNodesInTreeByFingerprint(context);    
@@ -264,7 +277,7 @@ UniquifyNames::NodeToNameMap UniquifyNames::UniquifyAll( const TransKit &kit, Tr
 		}
 	}
 	
-	VisibleNames vi;
+	UniqueNameGenerator name_gen( name_getter );
 	NodeToNameMap nodes_to_names;
 
 	// Deal with undeclared (system) identifiers which must be preserved
@@ -289,7 +302,7 @@ UniquifyNames::NodeToNameMap UniquifyNames::UniquifyAll( const TransKit &kit, Tr
 				// Assume undeclared identifier is really a system node identifier.
 				// Ensure it will keep its name and not be conflicted, and add to the
 				// map so normal IDs don't conflict with it.
-				vi.AddNodeNoRename( node );
+				name_gen.AddNodeNoRename( node );
 				nodes_to_names.insert( NodeAndNamePair( node, node->GetRenderTerminal() ) );
 			}
 		}
@@ -301,7 +314,7 @@ UniquifyNames::NodeToNameMap UniquifyNames::UniquifyAll( const TransKit &kit, Tr
 
     for( TreePtr<Node> node : renamable_nodes )
     {
-        string name = vi.AddNode( node );
+        string name = name_gen.AddNode( node );
         ASSERT( !name.empty() );
         nodes_to_names.insert( NodeAndNamePair( node, name ) );
     }        

@@ -60,6 +60,8 @@ private:
 							TreePtr<CPPTree::AccessSpec> init_access = TreePtr<CPPTree::AccessSpec>() );
 
 	string RenderParams( TreePtr<CPPTree::CallableParams> key);
+
+	UniquifyNames::NodeToNameMap unique_identifier_names;
 };
 
 #endif

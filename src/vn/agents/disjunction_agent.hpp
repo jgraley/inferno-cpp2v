@@ -71,7 +71,7 @@ private:
     {
         return MakePatternNode<Disjunction<PRE_RESTRICTION>>();
     }
-    string GetToken() const final
+    string GetCouplingNameHint() const final
     {
 		return "any"; 
 	}
