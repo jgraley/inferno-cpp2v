@@ -41,7 +41,7 @@ struct BuildIdentifierAgent : public virtual BuilderAgent
 	Syntax::Production GetAgentProduction() const override;
 	string GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const final;
     string GetCouplingNameHint() const final;
-    virtual NodeBlock GetGraphBlockInfo() const;
+    NodeBlock GetGraphBlockInfo() const final;
 
     Sequence<CPPTree::Identifier> sources;
     string format;
@@ -139,7 +139,7 @@ private:
 struct IdentifierByNameAgent : public virtual NonlocatingAgent 
 {
     IdentifierByNameAgent( string n ) : name(n) {}
-    virtual NodeBlock GetGraphBlockInfo() const;
+    NodeBlock GetGraphBlockInfo() const final;
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed(PatternLink keyer_plink) const;                                       
 
     virtual pair<TreePtr<Node>, TreePtr<Node>> GetBounds( string ) const { ASSERTFAIL(); } // TODO implemnt all and put back = 0
@@ -264,7 +264,7 @@ struct BuildContainerSizeAgent : public virtual BuilderAgent,
     TreePtr<Node> container;
 private:
     virtual TreePtr<Node> BuildNewSubtree(const SCREngine *acting_engine) override;
-    virtual NodeBlock GetGraphBlockInfo() const;
+    NodeBlock GetGraphBlockInfo() const final;
 }; 
 
 #endif

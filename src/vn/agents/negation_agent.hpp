@@ -27,7 +27,7 @@ public:
 
 	Syntax::Production GetAgentProduction() const override;
 	string GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const final;
-    virtual NodeBlock GetGraphBlockInfo() const;
+    NodeBlock GetGraphBlockInfo() const final;
     
 private:
     virtual const TreePtrInterface *GetNegand() const = 0;

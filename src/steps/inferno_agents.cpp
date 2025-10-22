@@ -84,7 +84,7 @@ string BuildIdentifierAgent::GetRender( const RenderKit &kit, Syntax::Production
 	// - This class derives from Special<CPPTree::SpecificIdentifier> (if we're still doing that)
 	// - Move BuildSpecificIdentifier() into nodes like Type, Expression etc
 	// - Get parent pointer archetype and call on that.
-
+	// OR JUST SHOVE IN WHATEVER FITS
 	string s = (flags & BYPASS_WHEN_IDENTICAL) ? "⧇" : "⧈";
 	s += "【'" + format + "'】";
 	list<string> ls;

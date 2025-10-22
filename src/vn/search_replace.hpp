@@ -61,7 +61,7 @@ public:
     void SetXTreeDb( shared_ptr<XTreeDatabase> x_tree_db );
     void Transform();
     
-    virtual NodeBlock GetGraphBlockInfo() const;
+    NodeBlock GetGraphBlockInfo() const final;
     virtual string GetGraphId() const; 
     void GenerateGraphRegions( Graph &graph ) const;
 

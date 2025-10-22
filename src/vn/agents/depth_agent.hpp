@@ -28,7 +28,7 @@ public:
                                                   const SCREngine *acting_engine ) final;
 
     virtual void PatternQueryRestrictions( shared_ptr<PatternQuery> ) const {};
-    virtual NodeBlock GetGraphBlockInfo() const;
+    NodeBlock GetGraphBlockInfo() const override;
 
     TreePtr<Node> terminus; // A node somewhere under Stuff, that matches normally, truncating the subtree
     virtual const TreePtrInterface *GetTerminus() const
@@ -49,7 +49,7 @@ class ChildAgent : public DepthAgent
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed(PatternLink keyer_plink) const;                                       
 	Syntax::Production GetAgentProduction() const override;
 	string GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const final;
-    virtual NodeBlock GetGraphBlockInfo() const;
+    NodeBlock GetGraphBlockInfo() const final;
 };
 
 
@@ -94,7 +94,7 @@ public:
                                            const XTreeDatabase *x_tree_db ) const;                                              
 	Syntax::Production GetAgentProduction() const override;
 	string GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const final;
-    virtual NodeBlock GetGraphBlockInfo() const;
+    NodeBlock GetGraphBlockInfo() const final;
 
     TreePtr<Node> recurse_restriction; // Restricts the intermediate nodes in the truncated subtree
 };

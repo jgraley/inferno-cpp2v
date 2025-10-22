@@ -140,7 +140,7 @@ public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     RelocatingQueryResult RunRelocatingQuery( const XTreeDatabase *db, XLink stimulus_xlink ) const override;                
 
-    virtual NodeBlock GetGraphBlockInfo() const;
+    NodeBlock GetGraphBlockInfo() const final;
     string GetName() const override;
     string GetTrace() const override;
     

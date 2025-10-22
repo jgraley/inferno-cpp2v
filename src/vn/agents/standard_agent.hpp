@@ -160,7 +160,7 @@ private:
                                                   const SCREngine *acting_engine );
     
 public:
-    virtual NodeBlock GetGraphBlockInfo() const;
+    NodeBlock GetGraphBlockInfo() const final;
 
 private:
     Plan plan; // can't be const because children added after construct
