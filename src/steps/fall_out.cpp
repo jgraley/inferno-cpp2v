@@ -6,7 +6,6 @@
 #include "vn/agents/all.hpp"
 #include "tree/typeof.hpp"
 #include "tree/misc.hpp"
-#include "inferno_agents.hpp"
 
 using namespace CPPTree;
 using namespace SCTree;
@@ -19,7 +18,6 @@ struct StateLabel : Label
     NODE_FUNCTIONS_FINAL
     TreePtr<InstanceIdentifier> state;
 };
-
 
 
 PlaceLabelsInArray::PlaceLabelsInArray()

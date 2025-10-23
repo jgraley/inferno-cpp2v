@@ -12,15 +12,16 @@
 #include "common/trace.hpp"
 #include "common/read_args.hpp"
 #include "graph.hpp"
-#include "steps/inferno_agents.hpp"
 #include <sstream>
 #include <inttypes.h>
 #include <algorithm>
 #include "node/graphable.hpp"
 #include "vn/link.hpp"
-#include "vn/agents/standard_agent.hpp" // temporary, I hope
+#include "vn/agents/standard_agent.hpp" 
+#include "vn/agents/special_agent.hpp" 
 
 using namespace CPPTree;
+using namespace VN;
 
 // Graph Documentation
 //

@@ -6,7 +6,6 @@
 #include "vn/agents/all.hpp"
 #include "tree/typeof.hpp"
 #include "steps/uncombable.hpp"
-#include "inferno_agents.hpp"
 
 using namespace CPPTree;
 using namespace SCTree;

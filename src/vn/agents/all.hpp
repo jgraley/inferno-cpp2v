@@ -13,3 +13,7 @@
 #include "negation_agent.hpp"
 #include "pointer_is_agent.hpp"
 #include "transform_of_agent.hpp"
+#include "build_identifier_agent.hpp"
+#include "stringize_agent.hpp"
+#include "identifier_by_name_agent.hpp"
+#include "build_container_size_agent.hpp"

@@ -11,7 +11,6 @@
 #include "vn/agents/all.hpp"
 #include "tree/typeof.hpp"
 #include "tree/misc.hpp"
-#include "inferno_agents.hpp"
 
 using namespace CPPTree;
 using namespace Steps;

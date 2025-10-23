@@ -10,7 +10,6 @@
 #include "common/common.hpp"
 #include "vn/agents/all.hpp"
 #include "tree/sctree.hpp"
-#include "inferno_agents.hpp"
 
 using namespace CPPTree;
 using namespace Steps;
