@@ -14,31 +14,6 @@ shared_ptr<PatternQuery> DeltaAgent::GetPatternQuery() const
 }
 
 
-Graphable::NodeBlock DeltaAgent::GetGraphBlockInfo() const
-{
-    list<ItemBlock> item_blocks;
-    auto link_through = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(GetThrough()->get()), 
-              list<string>{},
-              list<string>{},
-              IN_COMPARE_ONLY,
-              GetThrough() );
-    item_blocks.push_back( { "through", 
-                            "",
-                            true,
-                            { link_through } } );
-    auto link_overlay = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(GetOverlay()->get()), 
-              list<string>{},
-              list<string>{},
-              IN_REPLACE_ONLY,
-              GetOverlay() );
-    item_blocks.push_back( { "overlay", 
-                            "",
-                            true,
-                            { link_overlay } } );
-    return { false, "Delta", "Δ", "triangle", NODE_SHAPED, GetPatternPtr(), item_blocks };
-}
-
-
 list<PatternLink> DeltaAgent::GetVisibleChildren( Path v ) const
 {    
     ASSERT( *GetOverlay() );          
@@ -84,17 +59,40 @@ Agent::ReplacePatchPtr DeltaAgent::GenReplaceLayoutImpl( const ReplaceKit &kit,
 
 Syntax::Production DeltaAgent::GetAgentProduction() const
 {
-	return Syntax::Production::VN_PREFIX;
+	return Syntax::Production::VN_DELTA;
 }
 
 
 string DeltaAgent::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
-	// Nesting of deltas is wrong, but for now just boost both to force VN-bracing
-	return "Δ⦑" + kit.render( (TreePtr<Node>)(*GetThrough()), Syntax::BoostPrecedence(Syntax::Production::VN_SEP) ) + 
-	       "┆\n" + kit.render( (TreePtr<Node>)(*GetOverlay()), Syntax::BoostPrecedence(Syntax::Production::VN_SEP) ) +
-	       "⦒";
+	// Not too keen on BOOT_VN between the symbols but it reflects what C/C++ does with ?:
+	// I will claim it to be bad style to exploit this.
+	return "Δ" + kit.render( (TreePtr<Node>)(*GetThrough()), Syntax::BoostPrecedence(Syntax::Production::BOOT_VN) ) + 
+	       "🡺" + kit.render( (TreePtr<Node>)(*GetOverlay()), Syntax::BoostPrecedence(Syntax::Production::VN_DELTA) );
 }    
     
-    
+
+Graphable::NodeBlock DeltaAgent::GetGraphBlockInfo() const
+{
+    list<ItemBlock> item_blocks;
+    auto link_through = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(GetThrough()->get()), 
+              list<string>{},
+              list<string>{},
+              IN_COMPARE_ONLY,
+              GetThrough() );
+    item_blocks.push_back( { "through", 
+                            "",
+                            true,
+                            { link_through } } );
+    auto link_overlay = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(GetOverlay()->get()), 
+              list<string>{},
+              list<string>{},
+              IN_REPLACE_ONLY,
+              GetOverlay() );
+    item_blocks.push_back( { "overlay", 
+                            "",
+                            true,
+                            { link_overlay } } );
+    return { false, "Delta", "Δ", "triangle", NODE_SHAPED, GetPatternPtr(), item_blocks };
+}   

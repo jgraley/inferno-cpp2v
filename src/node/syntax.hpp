@@ -13,9 +13,6 @@ public:
 		
 		// ----- Vida Nova commands and binops. There is a precedence
 		BOOT_VN,		
-		VN_SEP, // Separated by eg ︙
-		VN_DISJUNCTION,
-		VN_CONJUNCTION,
 		TOP_VN, // Highest VN precedence (aside from prefix operators)
 
 		PROGRAM = 10,
@@ -48,6 +45,10 @@ public:
 		BOOT_EXPR = 50, // Lowest expression precedence: (), {}, [] etc from the inside		
 		COMMA_OP, 
 		COMMA_SEP, // Use this for comma-separated lists to force parens for COMMA_OP
+		VN_SEP, // Separated by eg ︙
+		VN_DELTA,
+		VN_DISJUNCTION,
+		VN_CONJUNCTION,
 		ASSIGN, //C++: assign ops and statement-like keywords eg throw
 		LOGIC_OR,
 		LOGIC_AND,		

@@ -300,3 +300,6 @@ Sequence<Declaration> ReverseDecls( Sequence<Declaration> c )
 // - NULL to become something based on ? (i.e. traditional wildcarding)
 // - Move stuff in steps/inferno_agents.xpp into vn/agents, in separate source files (the fact that I wrote a step qualifies the corresponding nodes into VN)
 // - New uses of GetToken() should be called GetCouplingNameHint()
+// - GetRender() etc to be declared in SpecialAgent if we really don't want them in StandardAgent, then can use = 0
+// - Tidy away TOP_VN and BOOT_VN
+// - Sort out Δ🡺 syntax so we dont need to parenthesise the Δ

@@ -17,22 +17,6 @@ using namespace CPPTree;
 
 //---------------------------------- IdentifierByNameAgent ------------------------------------    
 
-Graphable::NodeBlock IdentifierByNameAgent::GetGraphBlockInfo() const
-{
-    // The IdentifierByNameBase node appears as a trapezium (rectangle narrower at the top) with
-    // the string that must be matched inside it.
-    // TODO indicate whether it's matching instance, label or type identifier
-    // Update: PreRestriction indicator seems to be doing that now
-    NodeBlock block;
-    block.bold = true;
-    block.title = "'" + name + "'?";    
-    block.shape = "trapezium";
-    block.block_type = Graphable::NODE_SHAPED;
-    block.node = GetPatternPtr();
-    return block;
-}
-
-
 SYM::Lazy<SYM::BooleanExpression> IdentifierByNameAgent::SymbolicNormalLinkedQueryPRed(PatternLink keyer_plink) const
 {
     auto keyer_expr = SYM::MakeLazy<SYM::SymbolVariable>(keyer_plink);   
@@ -116,6 +100,47 @@ SYM::Expression::Precedence IdentifierByNameAgent::IsIdentifierNamedOperator::Ge
     return Precedence::COMPARE;
 }
 
+
+Syntax::Production IdentifierByNameAgent::GetAgentProduction() const
+{
+	return Syntax::Production::VN_PREFIX;
+}
+
+
+string IdentifierByNameAgent::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
+{
+    (void)kit;
+	(void)surround_prod;
+	string s = "⊜【" + GetIdentifierSubTypeName();
+	s += "┆'" + name + "'";
+	s += "】";
+	return s;
+} 
+  
+    
+string IdentifierByNameAgent::GetCouplingNameHint() const
+{
+	string t = GetIdentifierSubTypeName();
+	transform(t.begin(), t.end(), t.begin(), [](unsigned char c){ return tolower(c); });
+	return "found_" + t + "_id";
+} 
+
+
+Graphable::NodeBlock IdentifierByNameAgent::GetGraphBlockInfo() const
+{
+    // The IdentifierByNameBase node appears as a trapezium (rectangle narrower at the top) with
+    // the string that must be matched inside it.
+    // TODO indicate whether it's matching instance, label or type identifier
+    // Update: PreRestriction indicator seems to be doing that now
+    NodeBlock block;
+    block.bold = true;
+    block.title = "⊜'" + name + "'";    
+    block.shape = "trapezium";
+    block.block_type = Graphable::NODE_SHAPED;
+    block.node = GetPatternPtr();
+    return block;
+}
+
 //---------------------------------- InstanceIdentifierByNameAgent ------------------------------------    
 
 pair<TreePtr<Node>, TreePtr<Node>> InstanceIdentifierByNameAgent::GetBounds( string name ) const
@@ -124,6 +149,11 @@ pair<TreePtr<Node>, TreePtr<Node>> InstanceIdentifierByNameAgent::GetBounds( str
     TreePtr<Node> maximus = MakeTreeNode<SpecificInstanceIdentifier>( name, Orderable::BoundingRole::MAXIMUS );
     return make_pair( minimus, maximus );
 }
+
+string InstanceIdentifierByNameAgent::GetIdentifierSubTypeName() const
+{
+	return "Instance";
+}  
 
 //---------------------------------- TypeIdentifierByNameAgent ------------------------------------    
 
@@ -134,6 +164,12 @@ pair<TreePtr<Node>, TreePtr<Node>> TypeIdentifierByNameAgent::GetBounds( string 
     return make_pair( minimus, maximus );
 }
 
+
+string TypeIdentifierByNameAgent::GetIdentifierSubTypeName() const
+{
+	return "Type";
+}  
+
 //---------------------------------- LabelIdentifierByNameAgent ------------------------------------    
 
 pair<TreePtr<Node>, TreePtr<Node>> LabelIdentifierByNameAgent::GetBounds( string name ) const
@@ -143,6 +179,12 @@ pair<TreePtr<Node>, TreePtr<Node>> LabelIdentifierByNameAgent::GetBounds( string
     return make_pair( minimus, maximus );
 }
 
+
+string LabelIdentifierByNameAgent::GetIdentifierSubTypeName() const
+{
+	return "Label";
+}  
+
 //---------------------------------- PreprocessorIdentifierByNameAgent ------------------------------------    
 
 pair<TreePtr<Node>, TreePtr<Node>> PreprocessorIdentifierByNameAgent::GetBounds( string name ) const
@@ -151,3 +193,9 @@ pair<TreePtr<Node>, TreePtr<Node>> PreprocessorIdentifierByNameAgent::GetBounds(
     TreePtr<Node> maximus = MakeTreeNode<SpecificPreprocessorIdentifier>( name, Orderable::BoundingRole::MAXIMUS );
     return make_pair( minimus, maximus );
 }
+
+
+string PreprocessorIdentifierByNameAgent::GetIdentifierSubTypeName() const
+{
+	return "Preprocessor";
+}  

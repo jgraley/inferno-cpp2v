@@ -28,6 +28,10 @@ struct BuildContainerSizeAgent : public virtual BuilderAgent,
     TreePtr<Node> container;
 private:
     virtual TreePtr<Node> BuildNewSubtree(const SCREngine *acting_engine) override;
+    
+	Syntax::Production GetAgentProduction() const override;
+	string GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const final;
+    string GetCouplingNameHint() const final;    
     NodeBlock GetGraphBlockInfo() const final;
 }; 
 

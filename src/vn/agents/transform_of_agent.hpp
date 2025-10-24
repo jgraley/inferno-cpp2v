@@ -139,14 +139,16 @@ public:
 
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     RelocatingQueryResult RunRelocatingQuery( const XTreeDatabase *db, XLink stimulus_xlink ) const override;                
+    bool IsExtenderChannelLess( const Extender &r ) const override;
+    int GetExtenderChannelOrdinal() const override;
 
+	Syntax::Production GetAgentProduction() const override;
+	string GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const final;
+    string GetCouplingNameHint() const final;
     NodeBlock GetGraphBlockInfo() const final;
     string GetName() const override;
     string GetTrace() const override;
     
-     bool IsExtenderChannelLess( const Extender &r ) const override;
-    int GetExtenderChannelOrdinal() const override;
-
     TreePtr<Node> pattern; 
     Transformation *transformation;
 

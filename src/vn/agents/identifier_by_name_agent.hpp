@@ -12,24 +12,22 @@
 using namespace VN;
 
 //---------------------------------- IdentifierByNameAgent ------------------------------------    
-// 🞊
+// 
 /// These can be used in search pattern to match a SpecificIdentifier by name.
 /// The identifier must have a name that matches the string in `name`. One
 /// cannot do this using a SpecificIdentifier in the search pattern because
 /// the address of the node would be compared, not the name string.
 /// Wildcarding is not supported and use of this node should be kept to
-/// a minimum due to the risk of co-incidentla unwanted matches and the 
+/// a minimum due to the risk of co-incidental unwanted matches and the 
 /// general principle that identifier names should not be important (it is
 /// the identiy proprty itself that matters with identifiers). 
 struct IdentifierByNameAgent : public virtual NonlocatingAgent 
 {
     IdentifierByNameAgent( string n ) : name(n) {}
-    NodeBlock GetGraphBlockInfo() const final;
+
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed(PatternLink keyer_plink) const;                                       
-
-    virtual pair<TreePtr<Node>, TreePtr<Node>> GetBounds( string ) const { ASSERTFAIL(); } // TODO implemnt all and put back = 0
-    string name;
-
+    virtual pair<TreePtr<Node>, TreePtr<Node>> GetBounds( string ) const = 0;
+    
     // We use the term _similar_ to describe nodes whose internal values and 
     // children are the same under Simple Compare, but can be different 
     // instances (which implies that root arrow-head identity is ignored). For 
@@ -60,6 +58,15 @@ struct IdentifierByNameAgent : public virtual NonlocatingAgent
         shared_ptr<SYM::SymbolExpression> a;
         const string name;
     };
+
+	Syntax::Production GetAgentProduction() const override;
+	string GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const final;
+    string GetCouplingNameHint() const final;
+    virtual string GetIdentifierSubTypeName() const = 0;
+    NodeBlock GetGraphBlockInfo() const final;
+
+    string name;
+
 };
 
 //---------------------------------- InstanceIdentifierByNameAgent ------------------------------------    
@@ -77,6 +84,7 @@ struct InstanceIdentifierByNameAgent : Special<CPPTree::InstanceIdentifier>,
     InstanceIdentifierByNameAgent() : IdentifierByNameAgent(string()) {}    
     InstanceIdentifierByNameAgent( string n ) : IdentifierByNameAgent(n) {}
     pair<TreePtr<Node>, TreePtr<Node>> GetBounds( string name ) const override;
+    string GetIdentifierSubTypeName() const final;
 };
 
 //---------------------------------- TypeIdentifierByNameAgent ------------------------------------    
@@ -94,6 +102,7 @@ struct TypeIdentifierByNameAgent : Special<CPPTree::TypeIdentifier>,
     TypeIdentifierByNameAgent() : IdentifierByNameAgent(string()) {}    
     TypeIdentifierByNameAgent( string n ) : IdentifierByNameAgent(n) {}                         
     pair<TreePtr<Node>, TreePtr<Node>> GetBounds( string name ) const override;
+    string GetIdentifierSubTypeName() const final;
 };
 
 //---------------------------------- LabelIdentifierByNameAgent ------------------------------------    
@@ -112,6 +121,7 @@ struct LabelIdentifierByNameAgent : Special<CPPTree::LabelIdentifier>,
     LabelIdentifierByNameAgent() : IdentifierByNameAgent(string()) {}    
     LabelIdentifierByNameAgent( string n ) : IdentifierByNameAgent(n) {}                    
     pair<TreePtr<Node>, TreePtr<Node>> GetBounds( string name ) const override;
+    string GetIdentifierSubTypeName() const final;
 };
 
 //---------------------------------- PreprocessorIdentifierByNameAgent ------------------------------------    
@@ -129,6 +139,7 @@ struct PreprocessorIdentifierByNameAgent : Special<CPPTree::PreprocessorIdentifi
     PreprocessorIdentifierByNameAgent() : IdentifierByNameAgent(string()) {}    
     PreprocessorIdentifierByNameAgent( string n ) : IdentifierByNameAgent(n) {}                    
     pair<TreePtr<Node>, TreePtr<Node>> GetBounds( string name ) const override;
+    string GetIdentifierSubTypeName() const final;
 };
 
 #endif

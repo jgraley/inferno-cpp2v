@@ -4,6 +4,7 @@
 #include "db/x_tree_database.hpp"
 #include "../../tree/cpptree.hpp"
 #include "../../helpers/simple_duplicate.hpp"
+#include "lang/render.hpp"
 
 #define THROW_ON_NULL
 
@@ -308,6 +309,48 @@ RelocatingAgent::RelocatingQueryResult TransformOfAgent::RunRelocatingQuery( con
 }
 
 
+bool TransformOfAgent::IsExtenderChannelLess( const Extender &r ) const
+{
+    // If comparing two TransformOfAgent, secondary onto the transformation object's type
+    // TODO transformation object's state might matter, so should call into it
+    if( auto rto = dynamic_cast<const TransformOfAgent *>(&r) )
+        return typeid(*transformation).before(typeid(*rto->transformation));
+    
+    // Otherwise resort to the default compare
+    return RelocatingAgent::IsExtenderChannelLess(r);
+}
+
+
+int TransformOfAgent::GetExtenderChannelOrdinal() const
+{
+    return 1; // TODO class id as an ordinal?
+}
+
+
+Syntax::Production TransformOfAgent::GetAgentProduction() const
+{
+	return Syntax::Production::VN_PREFIX;
+}
+
+
+string TransformOfAgent::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
+{
+	(void)surround_prod;
+	return "⤨" + transformation->GetName() + kit.render( pattern, Syntax::Production::VN_PREFIX );
+} 
+
+    
+string TransformOfAgent::GetCouplingNameHint() const
+{
+	string s = transformation->GetName();
+	transform(s.begin(), s.end(), s.begin(),
+        [](unsigned char c){ return tolower(c); });
+	// try to address the old issue that the node itself is pre-transform, and it's the child pattern
+	// that must match the transformed subtree.
+	return "has_" + s; 
+} 
+
+
 Graphable::NodeBlock TransformOfAgent::GetGraphBlockInfo() const
 {
     NodeBlock block;
@@ -341,24 +384,4 @@ string TransformOfAgent::GetTrace() const
 {
     return TransformOfAgent::GetName(); // No v-call, use our one
 }
-
-
-bool TransformOfAgent::IsExtenderChannelLess( const Extender &r ) const
-{
-    // If comparing two TransformOfAgent, secondary onto the transformation object's type
-    // TODO transformation object's state might matter, so should call into it
-    if( auto rto = dynamic_cast<const TransformOfAgent *>(&r) )
-        return typeid(*transformation).before(typeid(*rto->transformation));
-    
-    // Otherwise resort to the default compare
-    return RelocatingAgent::IsExtenderChannelLess(r);
-}
-
-
-int TransformOfAgent::GetExtenderChannelOrdinal() const
-{
-    return 1; // TODO class id as an ordinal?
-}
-
-
 
