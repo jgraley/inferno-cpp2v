@@ -981,7 +981,10 @@ string StandardAgent::GetRender( const RenderKit &kit, Syntax::Production surrou
                 ASSERT( p ); 
                 scon.push_back( kit.render( TreePtr<Node>(p), Syntax::Production::VN_SEP ) );
             }
-            sitems.push_back( Join( scon, ", ") );
+            if( GetTotalSize(scon) > Syntax::GetLineBreakThreshold() )
+				sitems.push_back( Join( scon, ",\n", "", "") );
+			else
+				sitems.push_back( Join( scon, ", ", "", "") );
         }            
         else if( TreePtrInterface *singular = dynamic_cast<TreePtrInterface *>(items[i]) )
         {
@@ -993,7 +996,10 @@ string StandardAgent::GetRender( const RenderKit &kit, Syntax::Production surrou
         }
     }
         
-    s += Join( sitems, "⨟", "(", ")" );    
+    if( GetTotalSize(sitems) > Syntax::GetLineBreakThreshold() )
+		s += Join( sitems, "⨟\n", "(\n", "\n)" );   
+	else 
+		s += Join( sitems, "⨟ ", "(", ")" );    
 
 	return s;
 }

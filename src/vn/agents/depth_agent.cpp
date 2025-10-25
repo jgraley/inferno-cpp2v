@@ -90,7 +90,7 @@ Syntax::Production ChildAgent::GetAgentProduction() const
 string ChildAgent::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
-	string s = "⩨【=1】";
+	string s = "⩨《=1》";
 	return s + kit.render( terminus, Syntax::Production::VN_PREFIX ); 
 }    
     
@@ -173,7 +173,7 @@ string StuffAgent::GetRender( const RenderKit &kit, Syntax::Production surround_
 	(void)surround_prod;
 	string s = "⩨";
 	if( recurse_restriction )
-		s += "【" + kit.render(  recurse_restriction, Syntax::Production::BOOT_EXPR) + "】";
+		s += "《" + kit.render(  recurse_restriction, Syntax::Production::BOOT_EXPR) + "》";
 	return s + kit.render( terminus, Syntax::Production::VN_PREFIX ); 
 }    
     

@@ -84,7 +84,7 @@ string EmbeddedSCRAgent::GetRender( const RenderKit &kit, Syntax::Production sur
 	// i.e. doing it on the unwind.
 	// Chaining via stem should look like x⨟꩜(y⨟꩜z) which will indent as required.
 	return kit.render( (TreePtr<Node>)(*GetThrough()), Syntax::Production::VN_SEP ) + 
-		   "⨟" +
+		   "⨟\n" +
 		   "꩜" + 
 		   kit.render( search_pattern, Syntax::BoostPrecedence( Syntax::Production::VN_PREFIX ) ); // Left-associative 
 }    

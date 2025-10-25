@@ -336,7 +336,7 @@ Syntax::Production TransformOfAgent::GetAgentProduction() const
 string TransformOfAgent::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
-	return "⤨" + transformation->GetName() + kit.render( pattern, Syntax::Production::VN_PREFIX );
+	return "⤨《" + transformation->GetName() + "》" + kit.render( pattern, Syntax::Production::VN_PREFIX );
 } 
 
     

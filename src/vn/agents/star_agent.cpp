@@ -128,7 +128,7 @@ string StarAgent::GetRender( const RenderKit &kit, Syntax::Production surround_p
 
 	string s = "★";
 	if( *GetRestriction() )
-		s += "【" + kit.render( TreePtr<Node>(*GetRestriction()), Syntax::Production::BOOT_EXPR) + "】";
+		s += "《" + kit.render( TreePtr<Node>(*GetRestriction()), Syntax::Production::BOOT_EXPR) + "》";
 	
 	return s;
 }  

@@ -90,6 +90,7 @@ public:
 	virtual Production GetOperandInDeclaratorProduction() const;
     static Syntax::Production BoostPrecedence( Syntax::Production prec );
     static int GetPrecedence( Syntax::Production prec );
+    static string::size_type GetLineBreakThreshold();
 };
 
 #endif

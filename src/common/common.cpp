@@ -71,5 +71,14 @@ string RemoveOuterTemplate( string s )
 }
 
 
+string::size_type GetTotalSize( list<string> ls )
+{
+	int ts = 0;
+	for( string s : ls )
+		ts += s.size();
+	return ts;
+}
+
+
 const vector<bool> index_range_bool = {false, true};
 

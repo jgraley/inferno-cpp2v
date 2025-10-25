@@ -109,7 +109,10 @@ string Join( const list<string> &ls, string sep, string pre, string post )
         first = false;
         s += si;
         if( !sep_has_nl && s.size() > MAX_INLINE_JOIN )
-            return Join( ls, sep+string("\n"), pre+string("\n"), string("\n")+post );
+            return Join( ls, 
+                         sep+string("\n"), 
+                         pre.empty()?"":pre+string("\n"), 
+                         post.empty()?"":string("\n")+post );
     }
     s += post;
     return s;

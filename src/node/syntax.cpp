@@ -56,4 +56,9 @@ int Syntax::GetPrecedence( Syntax::Production prec )
 {
 	return (int)prec;
 }
-    
+   
+
+string::size_type Syntax::GetLineBreakThreshold()
+{
+	return 80;
+}

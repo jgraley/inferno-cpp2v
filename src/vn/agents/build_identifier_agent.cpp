@@ -78,10 +78,10 @@ Syntax::Production BuildIdentifierAgent::GetAgentProduction() const
 string BuildIdentifierAgent::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
-	string s = "⧇【" + GetIdentifierSubTypeName();
+	string s = "⧇《" + GetIdentifierSubTypeName();
 	if( !format.empty() )
 		s += ",'" + format + "'";
-	s += "】";
+	s += "》";
 	list<string> ls;
 	Sequence<CPPTree::Identifier> scopy = sources;
 	for( TreePtrInterface &source : scopy )
