@@ -101,11 +101,7 @@ string Render::RenderIntoProduction( TreePtr<Node> node, Syntax::Production surr
 		s += SSPrintf("// Surround prod: %d node prod: %d\n", 
 					  Syntax::GetPrecedence(surround_prod), 
 					  Syntax::GetPrecedence(node_prod) );		
-					 
-	// If we got a VN prefix, take no action. It will be handled when we reach something else.
-	//if( node_prod == Syntax::Production::PREFIX )
-	//	return s + Dispatch( node, surround_prod );
-		
+					 		
     bool do_boot = Syntax::GetPrecedence(node_prod) < Syntax::GetPrecedence(surround_prod);    
     bool semicolon = Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::CONDITION) &&
                      Syntax::GetPrecedence(node_prod) > Syntax::GetPrecedence(Syntax::Production::PROTOTYPE);  
