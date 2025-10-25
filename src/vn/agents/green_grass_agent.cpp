@@ -26,14 +26,14 @@ Lazy<BooleanExpression> GreenGrassAgent::SymbolicAutolocatingQuery(PatternLink k
 
 Syntax::Production GreenGrassAgent::GetAgentProduction() const
 {
-	return Syntax::Production::VN_PREFIX;
+	return Syntax::Production::PREFIX;
 }
 
 
 string GreenGrassAgent::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
-	return "⫴" + kit.render( (TreePtr<Node>)(*GetThrough()), Syntax::Production::VN_PREFIX );
+	return "⫴" + kit.render( (TreePtr<Node>)(*GetThrough()), Syntax::Production::PREFIX );
 } 
 
 

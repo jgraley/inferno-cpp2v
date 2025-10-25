@@ -44,14 +44,14 @@ void NegationAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
 
 Syntax::Production NegationAgent::GetAgentProduction() const
 {
-	return Syntax::Production::VN_PREFIX;
+	return Syntax::Production::PREFIX;
 }
 
 
 string NegationAgent::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
-	return "¬" + kit.render( (TreePtr<Node>)(*GetNegand()), Syntax::Production::VN_PREFIX );
+	return "¬" + kit.render( (TreePtr<Node>)(*GetNegand()), Syntax::Production::PREFIX );
 }    
 
 

@@ -569,7 +569,7 @@ Syntax::Production Subscript::GetMyProduction() const
 
 Syntax::Production ArrayLiteral::GetMyProduction() const
 { 
-	return Production::PARENTHESISED; 
+	return Production::BRACKETED; 
 }
 
 //////////////////////////// This ///////////////////////////////
@@ -625,7 +625,7 @@ Syntax::Production Call::GetMyProduction() const
 
 Syntax::Production RecordLiteral::GetMyProduction() const
 { 
-	return Production::PARENTHESISED; 
+	return Production::BRACKETED; 
 }
 
 //////////////////////////// SizeOf ///////////////////////////////
@@ -653,7 +653,7 @@ Syntax::Production Compound::GetMyProduction() const
 
 Syntax::Production StatementExpression::GetMyProduction() const
 { 
-	return Production::PARENTHESISED; 
+	return Production::BRACKETED; 
 }
 
 //////////////////////////// Return ///////////////////////////////

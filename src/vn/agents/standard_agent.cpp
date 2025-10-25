@@ -975,20 +975,27 @@ string StandardAgent::GetRender( const RenderKit &kit, Syntax::Production surrou
         
         if( ContainerInterface *con = dynamic_cast<ContainerInterface *>(items[i]) )                
         {
-			list<string> scon;
-            for( const TreePtrInterface &p : *con )
-            {
-                ASSERT( p ); 
-                scon.push_back( kit.render( TreePtr<Node>(p), Syntax::Production::VN_SEP ) );
-            }
-            if( GetTotalSize(scon) > Syntax::GetLineBreakThreshold() )
-				sitems.push_back( Join( scon, ",\n", "", "") );
+			if( con->size() == 0 )
+				sitems.push_back( "()" );
+			else if( con->size() == 1 )
+				sitems.push_back( kit.render( TreePtr<Node>(con->front()), Syntax::Production::VN_SEP_ITEMS ) );
 			else
-				sitems.push_back( Join( scon, ", ", "", "") );
+			{
+				list<string> scon;
+				for( const TreePtrInterface &p : *con )
+				{
+					ASSERT( p ); 
+					scon.push_back( kit.render( TreePtr<Node>(p), Syntax::Production::COMMA_SEP ) );
+				}
+				if( GetTotalSize(scon) > Syntax::GetLineBreakThreshold() )
+					sitems.push_back( Join( scon, ",\n", "", "") );
+				else
+					sitems.push_back( Join( scon, ", ", "", "") );
+			}
         }            
         else if( TreePtrInterface *singular = dynamic_cast<TreePtrInterface *>(items[i]) )
         {
-            sitems.push_back( kit.render( TreePtr<Node>(*singular), Syntax::BoostPrecedence( Syntax::Production::VN_SEP ) ) );
+            sitems.push_back( kit.render( TreePtr<Node>(*singular), Syntax::Production::VN_SEP_ITEMS ) );
         }
         else
         {
@@ -997,9 +1004,9 @@ string StandardAgent::GetRender( const RenderKit &kit, Syntax::Production surrou
     }
         
     if( GetTotalSize(sitems) > Syntax::GetLineBreakThreshold() )
-		s += Join( sitems, "⨟\n", "(\n", "\n)" );   
+		s += Join( sitems, "⚬\n", "(\n", "\n)" );   
 	else 
-		s += Join( sitems, "⨟ ", "(", ")" );    
+		s += Join( sitems, " ⚬ ", "(", ")" );    
 
 	return s;
 }

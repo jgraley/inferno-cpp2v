@@ -14,6 +14,7 @@
 #include "uniquify_identifiers.hpp"
 #include "search_replace.hpp"
 #include "agents/special_agent.hpp"
+#include "indenter.hpp"
 
 using namespace CPPTree; // TODO should not need
 using namespace VN;
@@ -45,12 +46,16 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern )
 	if( ReadArgs::use.count("c") )
 		s += Trace(unique_coupling_names) + "\n\n";
 	for( UniquifyNames::NodeAndNamePair p : unique_coupling_names )
-		s += p.second + " ≝ " + Dispatch( p.first, Syntax::Production::VN_PREFIX ) + "⨟\n";
+		s += p.second + " ≝ " + Dispatch( p.first, Syntax::Production::PREFIX ) + "⨟\n";
 
 	if( pattern->GetSearchComparePattern() == pattern->GetReplacePattern() )
-		return s + "꩜" + kit.render( pattern->GetSearchComparePattern(), Syntax::Production::VN_PREFIX );
+		s += "꩜" + kit.render( pattern->GetSearchComparePattern(), Syntax::Production::PREFIX );
 	else
         ASSERTFAIL();
+            
+    indenter.AddLinesFromString(s);
+    indenter.DoIndent();
+    return indenter.GetString();
 }
 
 
@@ -98,8 +103,8 @@ string Render::RenderIntoProduction( TreePtr<Node> node, Syntax::Production surr
 					  Syntax::GetPrecedence(node_prod) );		
 					 
 	// If we got a VN prefix, take no action. It will be handled when we reach something else.
-	if( node_prod == Syntax::Production::VN_PREFIX )
-		return s + Dispatch( node, surround_prod );
+	//if( node_prod == Syntax::Production::PREFIX )
+	//	return s + Dispatch( node, surround_prod );
 		
     bool do_boot = Syntax::GetPrecedence(node_prod) < Syntax::GetPrecedence(surround_prod);    
     bool semicolon = Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::CONDITION) &&
@@ -111,7 +116,7 @@ string Render::RenderIntoProduction( TreePtr<Node> node, Syntax::Production surr
 					 do_boot ? "yes" : "no",
 					 semicolon ? "yes" : "no",
 					 do_init ? "yes" : "no" );
-           
+                 
     switch(node_prod)
     {
         case Syntax::Production::BOOT_STMT_DECL...Syntax::Production::TOP_STMT_DECL: // Statement productions at different precedences
@@ -125,22 +130,22 @@ string Render::RenderIntoProduction( TreePtr<Node> node, Syntax::Production surr
 					  ("Braces won't achieve high enough precedence for surrounding statement production\n")
                       ("Node: ")(node)("\n")
                       ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); 
-				ASSERT( Syntax::GetPrecedence(surround_prod) <= Syntax::GetPrecedence(Syntax::Production::PARENTHESISED) )
+				ASSERT( Syntax::GetPrecedence(surround_prod) <= Syntax::GetPrecedence(Syntax::Production::BRACKETED) )
 					  ("Braces won't achieve high enough precedence for surrounding expressional or higher production\n")
                       ("Node: ")(node)("\n")
                       ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); 
 			}
             if( do_boot )
-                s += "{ ";
+                s += "{\n ";
 
             if( do_boot || semicolon )
 				surround_prod = Syntax::Production::BOOT_STMT_DECL;
 			s += Dispatch( node, surround_prod );
 			
             if( semicolon )
-                s += "; ";
+                s += ";\n ";
             if( do_boot )
-                s += "} ";            
+                s += "\n} ";            
             break;
         }
 
@@ -148,7 +153,7 @@ string Render::RenderIntoProduction( TreePtr<Node> node, Syntax::Production surr
         {
             // If current production has too-high precedence, boot back down using parentheses
             if( do_boot )
-				ASSERT( Syntax::GetPrecedence(surround_prod) <= Syntax::GetPrecedence(Syntax::Production::PARENTHESISED) )
+				ASSERT( Syntax::GetPrecedence(surround_prod) <= Syntax::GetPrecedence(Syntax::Production::BRACKETED) )
 					  ("Parentheses won't achieve high enough precedence for surrounding production\n")
 					  ("Node: ")(node)("\n")
 					  ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); 
@@ -157,7 +162,7 @@ string Render::RenderIntoProduction( TreePtr<Node> node, Syntax::Production surr
 			if( do_init )
 				s += " = ";
             if( do_boot )
-                s += "(";
+                s += "(\n";
 
 			if( do_boot )
 				surround_prod = Syntax::Production::BOOT_EXPR;
@@ -168,7 +173,7 @@ string Render::RenderIntoProduction( TreePtr<Node> node, Syntax::Production surr
 			s += Dispatch( node, surround_prod );
 
             if( do_boot )
-                s += ")";            
+                s += "\n)";            
             if( semicolon )
                 s += "; ";
             break;

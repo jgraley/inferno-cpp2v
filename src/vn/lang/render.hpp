@@ -7,6 +7,7 @@
 #include "uniquify_identifiers.hpp"
 #include "helpers/simple_compare.hpp"
 #include "tree/misc.hpp"
+#include "indenter.hpp"
 
 namespace VN 
 {
@@ -43,6 +44,7 @@ public:
     SimpleCompare sc;
     unique_ptr<DefaultTransUtils> utils;
     RenderKit kit;
+    Indenter indenter;
 };
 };
 

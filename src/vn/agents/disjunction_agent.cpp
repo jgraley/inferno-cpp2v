@@ -75,7 +75,7 @@ string DisjunctionAgent::GetRender( const RenderKit &kit, Syntax::Production sur
 	for( const TreePtrInterface &p : GetDisjuncts() )                 
 		ls.push_back( kit.render( (TreePtr<Node>)p, Syntax::Production::VN_DISJUNCTION ) );
 
-	return Join(ls, "∨");
+	return Join(ls, " ∨ ");
 }    
     
 

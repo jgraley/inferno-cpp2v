@@ -360,7 +360,7 @@ string CppRender::RenderTypeAndDeclarator( TreePtr<Type> type, string declarator
     Syntax::Production prod_surrounding_declarator = type->GetOperandInDeclaratorProduction();
     ASSERT( prod_surrounding_declarator != Syntax::Production::UNDEFINED )
           ("Rendering type: ")(type)(" in production %d",(int)prod_surrounding_declarator)(" got no surrounding production\n");
-    ASSERT( Syntax::GetPrecedence(prod_surrounding_declarator) <= Syntax::GetPrecedence(Syntax::Production::PARENTHESISED) ); // Can't satisfy this production's precedence demand using parentheses
+    ASSERT( Syntax::GetPrecedence(prod_surrounding_declarator) <= Syntax::GetPrecedence(Syntax::Production::BRACKETED) ); // Can't satisfy this production's precedence demand using parentheses
     ASSERT( Syntax::GetPrecedence(declarator_prod) >= Syntax::GetPrecedence(Syntax::Production::BOOT_EXPR) ); // Can't put this node into parentheses
     bool parenthesise = Syntax::GetPrecedence(declarator_prod) < Syntax::GetPrecedence(prod_surrounding_declarator);  
     // Apply to object rather than recursing, because this is declarator    

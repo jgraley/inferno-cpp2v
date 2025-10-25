@@ -80,5 +80,19 @@ string::size_type GetTotalSize( list<string> ls )
 }
 
 
+int Count(string c, string s)
+{
+	int count = 0;
+	string::size_type next_start = 0;
+	string::size_type found_pos;
+    while ((found_pos = s.find(c, next_start)) != string::npos)
+    {
+		count++;
+		next_start = found_pos+1;		
+	}
+	return count;
+}
+
+
 const vector<bool> index_range_bool = {false, true};
 

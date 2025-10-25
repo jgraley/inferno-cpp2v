@@ -59,22 +59,22 @@ Agent::ReplacePatchPtr DeltaAgent::GenReplaceLayoutImpl( const ReplaceKit &kit,
 
 Syntax::Production DeltaAgent::GetAgentProduction() const
 {
-	return Syntax::Production::VN_PREFIX;
+	return Syntax::Production::PREFIX;
 }
 
 
 string DeltaAgent::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
-	// We can use VN_PREFIX for this because there's nothing in front of the Δ unlike
+	// We can use PREFIX for this because there's nothing in front of the Δ unlike
 	// with c's ?: operator. The segment Δ...🡺 is a prefix to the overlay argument.
 	// As with ?: we could use BOOT_EXPR for the through argument, and probably should
-	// in the parser, but to generate consistent style in renders we use VN_PREFIX so
+	// in the parser, but to generate consistent style in renders we use PREFIX so
 	// that parens are just as likely in both args.
-	string st = kit.render( (TreePtr<Node>)(*GetThrough()), Syntax::BoostPrecedence(Syntax::Production::VN_PREFIX) );
-	string so = kit.render( (TreePtr<Node>)(*GetOverlay()), Syntax::BoostPrecedence(Syntax::Production::VN_PREFIX) );
+	string st = kit.render( (TreePtr<Node>)(*GetThrough()), Syntax::BoostPrecedence(Syntax::Production::PREFIX) );
+	string so = kit.render( (TreePtr<Node>)(*GetOverlay()), Syntax::BoostPrecedence(Syntax::Production::PREFIX) );
 	if( st.size() > Syntax::GetLineBreakThreshold() )
-		return "Δ\n" + st + "\n🡺" + so;
+		return "Δ" + st + "\n🡺" + so;
 	else
 		return "Δ" + st + "🡺" + so;
 }    

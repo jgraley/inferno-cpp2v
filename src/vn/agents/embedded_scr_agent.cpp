@@ -64,7 +64,7 @@ TreePtr<Node> EmbeddedSCRAgent::GetEmbeddedReplacePattern() const
 
 Syntax::Production EmbeddedSCRAgent::GetAgentProduction() const
 {
-	return Syntax::Production::VN_SEP;
+	return Syntax::Production::VN_SEP_ENGINES;
 }
 
 
@@ -76,17 +76,17 @@ string EmbeddedSCRAgent::GetRender( const RenderKit &kit, Syntax::Production sur
 
 	// We must render the through pattern, but it isn't part of the embedded C&R operation,
 	// so we want it to look like it isn't part of this node. So, we add a separator and 
-	// render the ꩜ as if a prefix operator. When parsing, the ꩜ needs to have VN_PREFIX
+	// render the ꩜ as if a prefix operator. When parsing, the ꩜ needs to have PREFIX
 	// precedence and we'll have to recognise the pattern of the two productions.
 	// All of this is contrived st when multiple ꩜ are chained via through pattern, 
 	// we get eg x⨟꩜y3⨟꩜y2⨟꩜y1 which avoids impying nesting. TODO make sure we 
 	// run them in the correct order, innermost first as implied by tree structure
 	// i.e. doing it on the unwind.
 	// Chaining via stem should look like x⨟꩜(y⨟꩜z) which will indent as required.
-	return kit.render( (TreePtr<Node>)(*GetThrough()), Syntax::Production::VN_SEP ) + 
+	return kit.render( (TreePtr<Node>)(*GetThrough()), Syntax::Production::VN_SEP_ENGINES ) + 
 		   "⨟\n" +
 		   "꩜" + 
-		   kit.render( search_pattern, Syntax::BoostPrecedence( Syntax::Production::VN_PREFIX ) ); // Left-associative 
+		   kit.render( search_pattern, Syntax::BoostPrecedence( Syntax::Production::PREFIX ) ); // Left-associative 
 }    
        
 

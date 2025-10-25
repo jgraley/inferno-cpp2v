@@ -52,14 +52,14 @@ int PointerIsAgent::GetExtenderChannelOrdinal() const
 
 Syntax::Production PointerIsAgent::GetAgentProduction() const
 {
-	return Syntax::Production::VN_PREFIX;
+	return Syntax::Production::PREFIX;
 }
 
 
 string PointerIsAgent::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
-	return "⮎" + kit.render( (TreePtr<Node>)(*GetPointer()), Syntax::Production::VN_PREFIX );
+	return "⮎" + kit.render( (TreePtr<Node>)(*GetPointer()), Syntax::Production::PREFIX );
 } 
 
 

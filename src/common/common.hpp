@@ -17,6 +17,7 @@ string RemoveOneOuterScope( string s );
 void RemoveCommonPrefix( string &s1, string &s2 );
 string RemoveOuterTemplate( string s );
 extern string::size_type GetTotalSize( list<string> ls );
+extern int Count(string c, string s);
 
 // Pushes element t of type T onto stack s, then pops again in destructor
 template< typename T >

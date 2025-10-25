@@ -39,13 +39,17 @@ public:
 										
 		// ----- Expressions and types. There is a precedence scheme, booted using ()
 		BOOT_EXPR = 50, // Lowest expression precedence: (), {}, [] etc from the inside		
+
+		VN_SEP_ENGINES, // Separated by ⨟ (in embedded engine renders)
+		VN_SEP_ITEMS, // Separated by ⚬ (in StandardAgent renders, which always have ())
+		
 		COMMA_OP, 
-		COMMA_SEP, // Use this for comma-separated lists to force parens for COMMA_OP
-		VN_SEP, // Separated by eg ︙
-		VN_DELTA,
+		COMMA_SEP, // Use this for comma-separated lists to force parens for COMMA_OP, including VN
+
 		VN_DISJUNCTION,
 		VN_CONJUNCTION,
-		ASSIGN, //C++: assign ops and statement-like keywords eg throw
+
+		ASSIGN = 60, //C++: assign ops and statement-like keywords eg throw
 		LOGIC_OR,
 		LOGIC_AND,		
 		BITWISE_OR,
@@ -57,13 +61,12 @@ public:
 		ADD_SUB,
 		MUL_DIV,
 		TYPE_IN_NEW, // new(args) <here>(args)
-		PREFIX, // C++: all prefix including keywords where expression
-		POSTFIX, // C++: all prefix including sub clauses
-		VN_PREFIX, 
+		PREFIX, // C++ and VN: all prefix 
+		POSTFIX, // C++: all postfix including sub clauses
 		SPACE_SEP_TYPE, // eg unsigned long. Interestingly, the spaces take precedence
 		PRIMITIVE_EXPR, // one-token literal eg 12, 12.34, "foo"
 		PRIMITIVE_TYPE, // one-token type eg void, bool
-		PARENTHESISED, // (), {} from the outside		
+		BRACKETED, // (), {} from the outside		
 		TOP_EXPR, // Highest expression precedence
 		
 		// ----- Abstract, lexer-ish productions of no particuler kind
