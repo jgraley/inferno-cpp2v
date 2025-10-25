@@ -59,17 +59,20 @@ Agent::ReplacePatchPtr DeltaAgent::GenReplaceLayoutImpl( const ReplaceKit &kit,
 
 Syntax::Production DeltaAgent::GetAgentProduction() const
 {
-	return Syntax::Production::VN_DELTA;
+	return Syntax::Production::VN_PREFIX;
 }
 
 
 string DeltaAgent::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
-	// Not too keen on BOOT_VN between the symbols but it reflects what C/C++ does with ?:
-	// I will claim it to be bad style to exploit this.
-	return "Δ" + kit.render( (TreePtr<Node>)(*GetThrough()), Syntax::BoostPrecedence(Syntax::Production::BOOT_VN) ) + 
-	       "🡺" + kit.render( (TreePtr<Node>)(*GetOverlay()), Syntax::BoostPrecedence(Syntax::Production::VN_DELTA) );
+	// We can use VN_PREFIX for this because there's nothing in front of the Δ unlike
+	// with c's ?: operator. The segment Δ...🡺 is a prefix to the overlay argument.
+	// As with ?: we could use BOOT_EXPR for the through argument, and probably should
+	// in the parser, but to generate consistent style in renders we use VN_PREFIX so
+	// that parens are just as likely in both args.
+	return "Δ" + kit.render( (TreePtr<Node>)(*GetThrough()), Syntax::BoostPrecedence(Syntax::Production::VN_PREFIX) ) + 
+	       "🡺" + kit.render( (TreePtr<Node>)(*GetOverlay()), Syntax::BoostPrecedence(Syntax::Production::VN_PREFIX) );
 }    
     
 

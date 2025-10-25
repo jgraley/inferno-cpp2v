@@ -173,7 +173,7 @@ string StuffAgent::GetRender( const RenderKit &kit, Syntax::Production surround_
 	(void)surround_prod;
 	string s = "⩨";
 	if( recurse_restriction )
-		s += "【" + kit.render(  recurse_restriction, Syntax::Production::BOOT_VN) + "】";
+		s += "【" + kit.render(  recurse_restriction, Syntax::Production::BOOT_EXPR) + "】";
 	return s + kit.render( terminus, Syntax::Production::VN_PREFIX ); 
 }    
     

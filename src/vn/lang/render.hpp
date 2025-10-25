@@ -27,9 +27,8 @@ public:
     
 	string RenderIntoProduction( TreePtr<Node> node, Syntax::Production surround_prod );
 	string RenderNullPointer( Syntax::Production surround_prod );
+	virtual Syntax::Production GetNodeProduction( TreePtr<Node> node ) const;
 	virtual string Dispatch( TreePtr<Node> node, Syntax::Production surround_prod );
-	string RenderSpecial( TreePtr<Node> node, Syntax::Production surround_prod );
-	string RenderAny( TreePtr<Node> node, unsigned enables = 0xFFFFFFFF );
 						 
 	TreePtr<CPPTree::Scope> TryGetScope( TreePtr<CPPTree::Identifier> id );
 	bool IsDeclared( TreePtr<CPPTree::Identifier> id );

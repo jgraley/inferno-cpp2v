@@ -10,6 +10,7 @@
 #include "sym/boolean_operators.hpp"
 #include "sym/predicate_operators.hpp"
 #include "sym/symbol_operators.hpp"
+#include "lang/render.hpp"
 
 using namespace VN;
 using namespace SYM;
@@ -947,6 +948,60 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutNormal( const ReplaceKit &
     }
     
     return make_shared<FreePatch>( zone, move(child_patches) );     
+}
+
+
+Syntax::Production StandardAgent::GetAgentProduction() const
+{
+	return Syntax::Production::VN_PREFIX;
+}
+
+
+string StandardAgent::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
+{
+	(void)surround_prod;	
+	shared_ptr<const Node> node = GetPatternPtr();
+	string s = node->GetRenderTerminal();
+	if( !s.empty() )
+		return s;
+	
+    s = "⁜" + GetInnermostTemplateParam(TYPE_ID_NAME(*node));
+	
+    list<string> sitems;
+    vector< Itemiser::Element * > items = node->Itemise();
+    for( vector< Itemiser::Element * >::size_type i=0; i<items.size(); i++ )
+    {
+        ASSERT( items[i] )( "itemise returned null element" );
+        
+        if( ContainerInterface *con = dynamic_cast<ContainerInterface *>(items[i]) )                
+        {
+			list<string> scon;
+            for( const TreePtrInterface &p : *con )
+            {
+                ASSERT( p ); 
+                scon.push_back( kit.render( TreePtr<Node>(p), Syntax::Production::VN_SEP ) );
+            }
+            sitems.push_back( Join( scon, "︙ ") );
+        }            
+        else if( TreePtrInterface *singular = dynamic_cast<TreePtrInterface *>(items[i]) )
+        {
+            sitems.push_back( kit.render( TreePtr<Node>(*singular), Syntax::BoostPrecedence( Syntax::Production::VN_SEP ) ) );
+        }
+        else
+        {
+            ASSERTFAIL("got something from itemise that isn't a sequence or a shared pointer");
+        }
+    }
+        
+    s += Join( sitems, "┆ ", "⦑", "⦒" ); 
+    
+    // We can't change the production returned by GetMyProduction(), so try instead to render in 
+    // accordance with whatever the node returned.
+    //if( Syntax::GetPrecedence(node->GetMyProduction()) < Syntax::GetPrecedence(Syntax::Production::CONDITION) &&
+    //    Syntax::GetPrecedence(node->GetMyProduction()) >= Syntax::GetPrecedence(Syntax::Production::BOOT_STMT_DECL))
+	//	s += "; "; // Statement-ize it
+
+	return s;
 }
 
 

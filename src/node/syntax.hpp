@@ -11,10 +11,6 @@ public:
 	{		
 		UNDEFINED,
 		
-		// ----- Vida Nova commands and binops. There is a precedence
-		BOOT_VN,		
-		TOP_VN, // Highest VN precedence (aside from prefix operators)
-
 		PROGRAM = 10,
 		DEFINITION,		
 		

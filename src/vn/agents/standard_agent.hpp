@@ -160,6 +160,9 @@ private:
                                                   const SCREngine *acting_engine );
     
 public:
+	Syntax::Production GetAgentProduction() const override;
+	string GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const final;
+
     NodeBlock GetGraphBlockInfo() const final;
 
 private:

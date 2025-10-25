@@ -90,11 +90,7 @@ string Render::RenderIntoProduction( TreePtr<Node> node, Syntax::Production surr
     // Production surround_prod relates to the surrounding grammar production and can be 
     // used to change the render of a certain subtree. It represents all the ancestor nodes of
     // the one supplied.
-    Syntax::Production node_prod;
-   	if( dynamic_cast<const SpecialBase *>(node.get()) )
-		node_prod = Agent::TryAsAgentConst(node)->GetAgentProduction();
-	else
-		node_prod = node->GetMyProduction();
+    Syntax::Production node_prod = GetNodeProduction(node);
 		
 	if( ReadArgs::use.count("c") )
 		s += SSPrintf("// Surround prod: %d node prod: %d\n", 
@@ -118,30 +114,6 @@ string Render::RenderIntoProduction( TreePtr<Node> node, Syntax::Production surr
            
     switch(node_prod)
     {
-        case Syntax::Production::BOOT_VN...Syntax::Production::TOP_VN: // Expression productions at different precedences
-        {
-            // If current production has too-high precedence, boot back down using parentheses
-            if( do_boot )
-				ASSERT( Syntax::GetPrecedence(surround_prod) <= Syntax::GetPrecedence(Syntax::Production::PARENTHESISED) )
-					  ("VN-braces won't achieve high enough precedence for surrounding production\n")
-					  ("Node: ")(node)("\n")
-					  ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); 
-					  
-			// Deal with expression in initialiser production by prepending =
-			ASSERT( !do_init );
-			ASSERT( !semicolon );
-            if( do_boot )
-                s += "⦑";//+SSPrintf("/*Surr: %d, node: %d*/", (int)surround_prod, (int)node_prod);
-
-			if( do_boot )
-				surround_prod = Syntax::Production::BOOT_VN;
-			s += Dispatch( node, surround_prod );
-
-            if( do_boot )
-                s += "⦒";            
-            break;
-        }
-
         case Syntax::Production::BOOT_STMT_DECL...Syntax::Production::TOP_STMT_DECL: // Statement productions at different precedences
         {
             // If current production has too-high precedence, boot back down using braces
@@ -223,74 +195,27 @@ string Render::RenderNullPointer( Syntax::Production surround_prod )
 	(void)kit;
 	(void)surround_prod;
 	// Assume NULL means we're in a pattern, and it represents a wildcard
-	// Note: we'd better not supply NULL, or we'll recurse forever.
-	return RenderIntoProduction( MakeTreeNode<Node>(), surround_prod );
+	// Note same symbol as Stuff nodes etc but this is a terminal not a prefix
+	// so a risk of ambiguity here.
+	return "⩨";
+}
+
+
+Syntax::Production Render::GetNodeProduction( TreePtr<Node> node ) const
+{
+	//(void)node;
+   	//if( dynamic_cast<const SpecialBase *>(node.get()) )
+		return Agent::TryAsAgentConst(node)->GetAgentProduction();
+	//else
+	//	return Syntax::Production::VN_PREFIX;       
 }
 
 
 string Render::Dispatch( TreePtr<Node> node, Syntax::Production surround_prod )
 {
-	(void)surround_prod;
-	if( dynamic_cast<const SpecialBase *>(node.get()) )
-		return RenderSpecial( node, surround_prod ); 
-	return RenderAny( node );       
-}
-
-
-string Render::RenderSpecial( TreePtr<Node> node, Syntax::Production surround_prod )
-{
 	const Agent *agent = Agent::TryAsAgentConst(node);
-	return agent->GetRender( kit, surround_prod );
-}
-
-
-string Render::RenderAny( TreePtr<Node> node, unsigned enables )
-{
-	string s = node->GetRenderTerminal();
-	if( !s.empty() )
-		return s;
-	
-	s = "⁜" + GetInnermostTemplateParam(TYPE_ID_NAME(*node));
-	
-	list<string> sitems;
-    vector< Itemiser::Element * > items = node->Itemise();
-    for( vector< Itemiser::Element * >::size_type i=0; i<items.size(); i++ )
-    {
-		if( (enables & (1U << i))==0 )
-			continue;
-			
-        //TRACE("Duplicating member %d\n", i );
-        ASSERT( items[i] )( "itemise returned null element" );
-        
-        if( ContainerInterface *con = dynamic_cast<ContainerInterface *>(items[i]) )                
-        {
-			list<string> scon;
-            for( const TreePtrInterface &p : *con )
-            {
-                ASSERT( p ); // present simplified scheme disallows nullptr
-                scon.push_back( RenderIntoProduction( TreePtr<Node>(p), Syntax::Production::VN_SEP ) );
-            }
-            sitems.push_back( Join( scon, "︙ ") );
-        }            
-        else if( TreePtrInterface *singular = dynamic_cast<TreePtrInterface *>(items[i]) )
-        {
-            sitems.push_back( RenderIntoProduction( TreePtr<Node>(*singular), Syntax::BoostPrecedence( Syntax::Production::VN_SEP ) ) );
-        }
-        else
-        {
-            ASSERTFAIL("got something from itemise that isn't a sequence or a shared pointer");
-        }
-    }
-        
-    s += Join( sitems, "┆ ", "⦑", "⦒" ); 
-    
-    // We can't change the production returned by GetMyProduction(), so try instead to render in 
-    // accordance with whatever the node returned.
-    if( Syntax::GetPrecedence(node->GetMyProduction()) < Syntax::GetPrecedence(Syntax::Production::CONDITION) &&
-        Syntax::GetPrecedence(node->GetMyProduction()) >= Syntax::GetPrecedence(Syntax::Production::BOOT_STMT_DECL))
-		s += "; "; // Statement-ize it
-
-	return s;
+	ASSERT( agent )(node);
+	return agent->GetRender( kit, surround_prod );     
 }
 
 
