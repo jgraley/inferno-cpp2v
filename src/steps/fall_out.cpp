@@ -333,8 +333,7 @@ ApplyCombGotoPolicy::ApplyCombGotoPolicy()
     auto pre = MakePatternNode< Star<Statement> >();
     auto body = MakePatternNode< Star<Statement> >();
     auto post = MakePatternNode< Star<Statement> >();
-    auto s_goto1 = MakePatternNode<Goto>();
-    auto goto2 = MakePatternNode<Goto>();
+    auto gotooo = MakePatternNode<Goto>();
     auto sx_pre_goto = MakePatternNode<Goto>();
     auto sub = MakePatternNode<Subscript>();
     auto lmap_id = MakePatternNode<InstanceIdentifier>();
@@ -348,17 +347,23 @@ ApplyCombGotoPolicy::ApplyCombGotoPolicy()
     auto r_equal = MakePatternNode<Equal>();
     
     r_comp->members = s_comp->members = (decls);
-    s_comp->statements = (pre, s_goto1, label, body, goto2, post);
-    r_comp->statements = (pre, label, r_if, goto2, post);
+    // Note: we can use the coupling gotooo twice here, without introducing
+    // a requirement for two pointers to the same Goto node (which itself 
+    // would imply multi-parenting). Couplings work by equality (and so a 
+    // named subtree used in a coupling can be thought of as having value
+    // not reference semantics). The identifiers in this subtree (lmap_id,
+    // state_var_id) are still required to be the same node identity because 
+    // for identifiers, equality IS identity.
+    s_comp->statements = (pre, gotooo, label, body, gotooo, post);
+    r_comp->statements = (pre, label, r_if, gotooo, post);
     pre->restriction = sx_pre,
     sx_pre->negand = sx_pre_goto; // ensure we act on the first goto only
-    s_goto1->destination = sub;
     sub->destination = lmap_id;
     sub->index = state_var_id;
     label->state = state_id;
     body->restriction = sx_body;
     sx_body->negand = sx_uncombable; 
-    goto2->destination = sub;    
+    gotooo->destination = sub;    
     
     r_if->condition = r_equal;
     r_if->body = r_body_comp;
@@ -381,8 +386,7 @@ ApplyYieldGotoPolicy::ApplyYieldGotoPolicy()
     auto body1 = MakePatternNode< Star<Statement> >();
     auto body2 = MakePatternNode< Star<Statement> >();
     auto post = MakePatternNode< Star<Statement> >();
-    auto s_goto1 = MakePatternNode<Goto>();
-    auto goto2 = MakePatternNode<Goto>();
+    auto gotooo = MakePatternNode<Goto>();
     auto sx_pre_goto = MakePatternNode<Goto>();
     auto sub = MakePatternNode<Subscript>();
     auto lmap_id = MakePatternNode<InstanceIdentifier>();
@@ -399,15 +403,14 @@ ApplyYieldGotoPolicy::ApplyYieldGotoPolicy()
     auto sx_uncombable2 = MakePatternNode<Uncombable>();
     
     s_comp->members = r_comp->members = (decls);
-    s_comp->statements = (pre, s_goto1, label, body1, wait, body2, goto2, post);
-    r_comp->statements = (pre, label, r_if, goto2, post);
+    s_comp->statements = (pre, gotooo, label, body1, wait, body2, gotooo, post);
+    r_comp->statements = (pre, label, r_if, gotooo, post);
     pre->restriction = sx_pre,
     sx_pre->negand = sx_pre_goto; // ensure we act on the first goto only
-    s_goto1->destination = sub;
     sub->destination = lmap_id;
     sub->index = state_var_id;
     label->state = state_id;
-    goto2->destination = sub;    
+    gotooo->destination = sub;    
     body1->restriction = sx_body1;
     sx_body1->negand = sx_uncombable1;
     body2->restriction = sx_body2;
@@ -418,7 +421,7 @@ ApplyYieldGotoPolicy::ApplyYieldGotoPolicy()
     r_if->body_else = MakePatternNode<Nop>();
     r_equal->operands = (state_var_id, state_id);
     //r_body_comp->members = ();
-    r_body_comp->statements = (body1, wait, body2, goto2);
+    r_body_comp->statements = (body1, wait, body2, gotooo);
     
     Configure( SEARCH_REPLACE, s_comp, r_comp );
 }
