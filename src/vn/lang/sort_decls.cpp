@@ -287,14 +287,9 @@ Sequence<Declaration> ReverseDecls( Sequence<Declaration> c )
 }
 
 // TODO
-// Every way of getting to anything should be via RenderIntoProduction()
-// Add a ticket to make Record a true Type not a TypeDeclaration. Generate TypeDef during parse and just leave them in.
-//     For renderer, Record can just be handled like another type with declarator support, and
-//     PROTOTYPE production triggers prototype declarator. Consider eliding Typedef(Record...).
-// Get Instance::GetMyProduction to vary depending on type: functions are DECLARATION, others are BARE_DECLARATION.
-//     No initiualiser is also BARE_DECLARATION. Drop the semicolons accordingly.
 //
-// - detect pre-restrictions before going to special nodes and add as prefix inside 〖 〗
-//   (doing them with conjunction operator can come later)
-// - GetRender() etc to be declared in SpecialAgent if we really don't want them in StandardAgent, then can use = 0
-
+// - detect pre-restrictions before going to special nodes and add as prefix inside 
+//   (doing them with conjunction operator can come later). See Fingerprinter::ProcessNode()
+// - Agents not templated on a node type cannot pre-restrict as such, and should 
+//   overload IsNonTrivialPreRestriction() to return false. Maybe this can be done for some
+//   agent categories.

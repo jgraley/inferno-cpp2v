@@ -46,7 +46,7 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern )
 	if( ReadArgs::use.count("c") )
 		s += Trace(unique_coupling_names) + "\n\n";
 	for( UniquifyNames::NodeAndNamePair p : unique_coupling_names )
-		s += p.second + " ≝ " + Dispatch( p.first, Syntax::Production::PREFIX ) + "⨟\n";
+		s += p.second + " ≝ " + RenderConcreteIntoProduction( p.first, Syntax::Production::VN_DEFINE ) + "⨟\n";
 
 	if( pattern->GetSearchComparePattern() == pattern->GetReplacePattern() )
 		s += "꩜" + kit.render( pattern->GetSearchComparePattern(), Syntax::Production::PREFIX );
@@ -90,8 +90,32 @@ string Render::RenderIntoProduction( TreePtr<Node> node, Syntax::Production surr
 					  RETURN_ADDR() );
 
 	if( unique_coupling_names.count(node) > 0 )			
-		return unique_coupling_names.at(node);					
-					
+		return s + unique_coupling_names.at(node);		
+	else 
+		return s + RenderConcreteIntoProduction(node, surround_prod);
+}
+
+							
+string Render::RenderConcreteIntoProduction( TreePtr<Node> node, Syntax::Production surround_prod )
+{
+	string s;
+	const Agent *agent = Agent::TryAsAgentConst(node);
+	if( agent )
+	{
+		if( auto pspecial = dynamic_cast<const SpecialBase *>(agent) )
+		{
+			// We need the archetype because otherwise we'll just get hte name 
+			// of the special agent. We might be able to extract node name out
+			// of the template args, but using an archetype like this has precedent
+			// in the graph plotter.
+			TreePtr<Node> archetype_node = pspecial->SpecialGetArchetypeNode();
+
+			// This assumes no action is required in order to render at PREFIX
+			s += "【" + GetInnermostTemplateParam(TYPE_ID_NAME(*archetype_node)) + "】";	
+			surround_prod = Syntax::Production::PREFIX;
+		}
+	}
+
     // Production surround_prod relates to the surrounding grammar production and can be 
     // used to change the render of a certain subtree. It represents all the ancestor nodes of
     // the one supplied.

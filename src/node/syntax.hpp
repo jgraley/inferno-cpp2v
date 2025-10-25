@@ -40,12 +40,13 @@ public:
 		// ----- Expressions and types. There is a precedence scheme, booted using ()
 		BOOT_EXPR = 50, // Lowest expression precedence: (), {}, [] etc from the inside		
 
-		VN_SEP_ENGINES, // Separated by ⨟ (in embedded engine renders)
+		VN_SEP_SCRIPTY, // Separated by ⨟ (in embedded engine renders)
 		VN_SEP_ITEMS, // Separated by ⚬ (in StandardAgent renders, which always have ())
 		
 		COMMA_OP, 
 		COMMA_SEP, // Use this for comma-separated lists to force parens for COMMA_OP, including VN
 
+		VN_DEFINE, // defining names using ≝
 		VN_DISJUNCTION,
 		VN_CONJUNCTION,
 

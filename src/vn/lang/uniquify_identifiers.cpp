@@ -166,9 +166,19 @@ void Fingerprinter::ProcessNode( TreePtr<Node> x, int &index )
 		
     // Record the fingerprints and increment index in depth-first pre-order
     bool first = fingerprints.count(x)==0;
-    fingerprints[x].insert(index);
-        
+    fingerprints[x].insert(index);        
     index++;
+
+	// Finding nono-trivial pre-restrictions here so that we don't have to pass
+	// TPI's around everywhere in the renderer.
+	
+	// This function to take TPI for x and determine if the current parent->child
+	// path (aka link, aka arrowhead) implies a non-trivial pre-restriction.
+	// If so, "or" the info into some data structure (probably just add the node
+	// to a set<TP Node> non-solo). Use AgentCommon::IsNonTrivialPreRestriction()
+	// which means we'll only do it on Agents - in fact we can only do it on 
+	// special agents so use dynamic_cast<const SpecialBase *>(agent). Maybe store
+	// a map to const SpecialBase * to be super helpful.
 
     // Recurse into our child nodes
     // Notw: not worried about repeat visits of arbitrary nodes due to couplings

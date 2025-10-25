@@ -27,6 +27,7 @@ public:
     void WriteToFile(string s);
     
 	string RenderIntoProduction( TreePtr<Node> node, Syntax::Production surround_prod );
+	string RenderConcreteIntoProduction( TreePtr<Node> node, Syntax::Production surround_prod );
 	string RenderNullPointer( Syntax::Production surround_prod );
 	virtual Syntax::Production GetNodeProduction( TreePtr<Node> node ) const;
 	virtual string Dispatch( TreePtr<Node> node, Syntax::Production surround_prod );
