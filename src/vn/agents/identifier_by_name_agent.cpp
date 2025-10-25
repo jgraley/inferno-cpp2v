@@ -103,7 +103,7 @@ SYM::Expression::Precedence IdentifierByNameAgent::IsIdentifierNamedOperator::Ge
 
 Syntax::Production IdentifierByNameAgent::GetAgentProduction() const
 {
-	return Syntax::Production::VN_PREFIX;
+	return Syntax::Production::PRIMITIVE_EXPR;
 }
 
 
@@ -112,7 +112,7 @@ string IdentifierByNameAgent::GetRender( const RenderKit &kit, Syntax::Productio
     (void)kit;
 	(void)surround_prod;
 	string s = "⊜【" + GetIdentifierSubTypeName();
-	s += "┆'" + name + "'";
+	s += ",'" + name + "'";
 	s += "】";
 	return s;
 } 

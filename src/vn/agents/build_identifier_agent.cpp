@@ -71,7 +71,7 @@ string BuildIdentifierAgent::GetNewName(const SCREngine *acting_engine)
 
 Syntax::Production BuildIdentifierAgent::GetAgentProduction() const
 {
-	return Syntax::Production::VN_PREFIX;
+	return Syntax::Production::PRIMITIVE_EXPR;
 }
 
 
@@ -80,13 +80,13 @@ string BuildIdentifierAgent::GetRender( const RenderKit &kit, Syntax::Production
 	(void)surround_prod;
 	string s = "⧇【" + GetIdentifierSubTypeName();
 	if( !format.empty() )
-		s += "┆'" + format + "'";
+		s += ",'" + format + "'";
 	s += "】";
 	list<string> ls;
 	Sequence<CPPTree::Identifier> scopy = sources;
 	for( TreePtrInterface &source : scopy )
-		ls.push_back( kit.render( (TreePtr<Node>)source, Syntax::Production::VN_SEP ) );
-	s += Join( ls, "︙ ", "⦑ ", " ⦒");
+		ls.push_back( kit.render( (TreePtr<Node>)source, Syntax::Production::COMMA_SEP ) );
+	s += Join( ls, ", ", "( ", " )");
 	return s;
 } 
   

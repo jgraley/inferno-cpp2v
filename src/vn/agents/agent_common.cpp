@@ -129,20 +129,6 @@ bool AgentCommon::ShouldGenerateCategoryClause() const
     // node constructor. 
 }                                
 
-/*
-Syntax::Production AgentCommon::GetAgentProduction() const
-{
-	return Syntax::Production::PARENTHESISED; // only for provisional AgentCommon::GetRender() TODO remove both
-}
-
-
-string AgentCommon::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
-{
-	(void)kit;
-	(void)surround_prod;
-	return "⦑OHNO!!1:" + GetTrace() + "⦒";
-}
-*/
 
 SYM::Lazy<SYM::BooleanExpression> AgentCommon::SymbolicPreRestriction(PatternLink keyer_plink) const
 {

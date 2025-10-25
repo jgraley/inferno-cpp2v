@@ -45,7 +45,7 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern )
 	if( ReadArgs::use.count("c") )
 		s += Trace(unique_coupling_names) + "\n\n";
 	for( UniquifyNames::NodeAndNamePair p : unique_coupling_names )
-		s += p.second + " ≝ " + Dispatch( p.first, Syntax::Production::VN_PREFIX ) + "┆\n";
+		s += p.second + " ≝ " + Dispatch( p.first, Syntax::Production::VN_PREFIX ) + "⨟\n";
 
 	if( pattern->GetSearchComparePattern() == pattern->GetReplacePattern() )
 		return s + "꩜" + kit.render( pattern->GetSearchComparePattern(), Syntax::Production::VN_PREFIX );
@@ -203,11 +203,7 @@ string Render::RenderNullPointer( Syntax::Production surround_prod )
 
 Syntax::Production Render::GetNodeProduction( TreePtr<Node> node ) const
 {
-	//(void)node;
-   	//if( dynamic_cast<const SpecialBase *>(node.get()) )
-		return Agent::TryAsAgentConst(node)->GetAgentProduction();
-	//else
-	//	return Syntax::Production::VN_PREFIX;       
+	return Agent::TryAsAgentConst(node)->GetAgentProduction();     
 }
 
 

@@ -953,7 +953,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutNormal( const ReplaceKit &
 
 Syntax::Production StandardAgent::GetAgentProduction() const
 {
-	return Syntax::Production::VN_PREFIX;
+	return Syntax::Production::PRIMITIVE_EXPR;
 }
 
 
@@ -965,7 +965,7 @@ string StandardAgent::GetRender( const RenderKit &kit, Syntax::Production surrou
 	if( !s.empty() )
 		return s;
 	
-    s = "⁜" + GetInnermostTemplateParam(TYPE_ID_NAME(*node));
+    s = "⯁" + GetInnermostTemplateParam(TYPE_ID_NAME(*node));
 	
     list<string> sitems;
     vector< Itemiser::Element * > items = node->Itemise();
@@ -981,7 +981,7 @@ string StandardAgent::GetRender( const RenderKit &kit, Syntax::Production surrou
                 ASSERT( p ); 
                 scon.push_back( kit.render( TreePtr<Node>(p), Syntax::Production::VN_SEP ) );
             }
-            sitems.push_back( Join( scon, "︙ ") );
+            sitems.push_back( Join( scon, ", ") );
         }            
         else if( TreePtrInterface *singular = dynamic_cast<TreePtrInterface *>(items[i]) )
         {
@@ -993,13 +993,7 @@ string StandardAgent::GetRender( const RenderKit &kit, Syntax::Production surrou
         }
     }
         
-    s += Join( sitems, "┆ ", "⦑", "⦒" ); 
-    
-    // We can't change the production returned by GetMyProduction(), so try instead to render in 
-    // accordance with whatever the node returned.
-    //if( Syntax::GetPrecedence(node->GetMyProduction()) < Syntax::GetPrecedence(Syntax::Production::CONDITION) &&
-    //    Syntax::GetPrecedence(node->GetMyProduction()) >= Syntax::GetPrecedence(Syntax::Production::BOOT_STMT_DECL))
-	//	s += "; "; // Statement-ize it
+    s += Join( sitems, "⨟", "(", ")" );    
 
 	return s;
 }

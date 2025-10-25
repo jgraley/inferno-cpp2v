@@ -2,8 +2,10 @@
 #include "helpers/walk.hpp"
 #include "tree/misc.hpp"
 #include "helpers/flatten.hpp"
+#include "agents/embedded_scr_agent.hpp"
 
 using namespace CPPTree;
+using namespace VN;
 
 #define UID_FORMAT_HINT "%s_%u"
 //#define UID_FORMAT_PURE "id_%u"
@@ -161,6 +163,7 @@ Fingerprinter::NodeSetByFingerprint Fingerprinter::GetNodesInTreeByFingerprint( 
 void Fingerprinter::ProcessNode( TreePtr<Node> x, int &index )
 {
 	ASSERT( x );
+		
     // Record the fingerprints and increment index in depth-first pre-order
     bool first = fingerprints.count(x)==0;
     fingerprints[x].insert(index);
@@ -180,6 +183,23 @@ void Fingerprinter::ProcessNode( TreePtr<Node> x, int &index )
 void Fingerprinter::ProcessChildren( TreePtr<Node> x, int &index )
 {
 	ASSERT( x );
+
+	// If we see an embedded agent with search and replace patterns equal,
+	// we will render that as a single stem, and we don't want to report
+	// multiple parents for it which would infer a coupling.
+	const Agent *agent = Agent::TryAsAgentConst(x);
+	if( agent )
+	{
+		if( auto emb = dynamic_cast<const EmbeddedSCRAgent *>(agent) )
+		{
+			if( emb->search_pattern == emb->replace_pattern )
+			{
+				ProcessSingularNode( &emb->search_pattern, index );
+				return;
+			}
+		}
+	}		
+
     vector< Itemiser::Element * > x_items = x->Itemise();
     for( Itemiser::Element *xe : x_items )
     {

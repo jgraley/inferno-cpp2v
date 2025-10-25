@@ -51,7 +51,7 @@ string ConjunctionAgent::GetRender( const RenderKit &kit, Syntax::Production sur
 	list<string> ls;
 	for( const TreePtrInterface &p : GetConjuncts() )                 
 		ls.push_back( kit.render( (TreePtr<Node>)p, Syntax::Production::VN_CONJUNCTION ) );
-	return Join(ls, "∧", "⦑", "⦒");
+	return Join(ls, "∧");
 }    
     
 
