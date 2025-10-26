@@ -46,6 +46,12 @@ string BuildContainerSizeAgent::GetCouplingNameHint() const
 } 
 
 
+bool BuildContainerSizeAgent::IsNonTrivialPreRestriction(const TreePtrInterface *) const
+{
+    return false;
+} 
+
+
 Graphable::NodeBlock BuildContainerSizeAgent::GetGraphBlockInfo() const
 {
 

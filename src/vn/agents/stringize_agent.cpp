@@ -41,6 +41,12 @@ string StringizeAgent::GetCouplingNameHint() const
 } 
 
 
+bool StringizeAgent::IsNonTrivialPreRestriction(const TreePtrInterface *) const
+{
+    return false;
+} 
+
+
 Graphable::NodeBlock StringizeAgent::GetGraphBlockInfo() const
 {
     NodeBlock block;

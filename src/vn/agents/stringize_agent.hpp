@@ -27,10 +27,11 @@ struct StringizeAgent : Special<CPPTree::String>,
     TreePtr<CPPTree::Identifier> source;
 
 private:
-    TreePtr<Node> BuildNewSubtree(const SCREngine *acting_engine) override;    
+    TreePtr<Node> BuildNewSubtree(const SCREngine *acting_engine) final;    
 	Syntax::Production GetAgentProduction() const override;
 	string GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const final;
     string GetCouplingNameHint() const final;
+    bool IsNonTrivialPreRestriction(const TreePtrInterface *pptr) const final;    
     NodeBlock GetGraphBlockInfo() const override;
 };
 

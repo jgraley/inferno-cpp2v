@@ -126,6 +126,12 @@ string IdentifierByNameAgent::GetCouplingNameHint() const
 } 
 
 
+bool IdentifierByNameAgent::IsNonTrivialPreRestriction(const TreePtrInterface *) const
+{
+    return false;
+} 
+
+
 Graphable::NodeBlock IdentifierByNameAgent::GetGraphBlockInfo() const
 {
     // The IdentifierByNameBase node appears as a trapezium (rectangle narrower at the top) with

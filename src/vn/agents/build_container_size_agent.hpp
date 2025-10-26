@@ -11,7 +11,6 @@
 
 using namespace VN;
 
-// ⧆
 /// `BuildContainerSizeAgent` is used in replace context to create an integer-valued
 /// constant that is the size of a `Star` node pointed to by `container`. The
 /// container should couple the star node.
@@ -31,7 +30,8 @@ private:
     
 	Syntax::Production GetAgentProduction() const override;
 	string GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const final;
-    string GetCouplingNameHint() const final;    
+    string GetCouplingNameHint() const final; 
+    bool IsNonTrivialPreRestriction(const TreePtrInterface *pptr) const final;           
     NodeBlock GetGraphBlockInfo() const final;
 }; 
 

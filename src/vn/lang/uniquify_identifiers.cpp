@@ -148,7 +148,10 @@ Fingerprinter::Fingerprinter() :
 
 Fingerprinter::NodeSetByFingerprint Fingerprinter::GetNodesInTreeByFingerprint( TreePtr<Node> context )
 {
+	fingerprints.clear();
+	incoming_links.clear();
     int index=0;
+    incoming_links[context]; // get the root in there, even though it has no parents
     ProcessNode( context, index );	
 	
     Fingerprinter::NodeSetByFingerprint rfp;
@@ -160,6 +163,18 @@ Fingerprinter::NodeSetByFingerprint Fingerprinter::GetNodesInTreeByFingerprint( 
 }
 
 
+void Fingerprinter::ProcessTPI( const TreePtrInterface *tpi, int &index )
+{	
+	auto x = (TreePtr<Node>)(*tpi);
+	ProcessNode( x, index );
+	
+	// Gathering incoming tree ptr interface pointers here so that we don't 
+	// have to pass TPI's around everywhere in the renderer. Will be used 
+	// by renderer do detect non-trivial pre-restrictions.
+	incoming_links[x].insert(tpi);
+}
+
+
 void Fingerprinter::ProcessNode( TreePtr<Node> x, int &index )
 {
 	ASSERT( x );
@@ -168,17 +183,6 @@ void Fingerprinter::ProcessNode( TreePtr<Node> x, int &index )
     bool first = fingerprints.count(x)==0;
     fingerprints[x].insert(index);        
     index++;
-
-	// Finding nono-trivial pre-restrictions here so that we don't have to pass
-	// TPI's around everywhere in the renderer.
-	
-	// This function to take TPI for x and determine if the current parent->child
-	// path (aka link, aka arrowhead) implies a non-trivial pre-restriction.
-	// If so, "or" the info into some data structure (probably just add the node
-	// to a set<TP Node> non-solo). Use AgentCommon::IsNonTrivialPreRestriction()
-	// which means we'll only do it on Agents - in fact we can only do it on 
-	// special agents so use dynamic_cast<const SpecialBase *>(agent). Maybe store
-	// a map to const SpecialBase * to be super helpful.
 
     // Recurse into our child nodes
     // Notw: not worried about repeat visits of arbitrary nodes due to couplings
@@ -204,7 +208,8 @@ void Fingerprinter::ProcessChildren( TreePtr<Node> x, int &index )
 		{
 			if( emb->search_pattern == emb->replace_pattern )
 			{
-				ProcessSingularNode( &emb->search_pattern, index );
+				ProcessSingularItem( emb->GetThrough(), index );
+				ProcessSingularItem( &emb->search_pattern, index );
 				return;
 			}
 		}
@@ -218,17 +223,17 @@ void Fingerprinter::ProcessChildren( TreePtr<Node> x, int &index )
         else if( CollectionInterface *x_col = dynamic_cast<CollectionInterface *>(xe) )
             ProcessCollection( x_col, index );
         else if( TreePtrInterface *p_x_sing = dynamic_cast<TreePtrInterface *>(xe) )
-            ProcessSingularNode( p_x_sing, index );
+            ProcessSingularItem( p_x_sing, index );
         else
             ASSERTFAIL("got something from itemise that isnt a Sequence, Collection or a singular TreePtr");
     }
 }
 
 
-void Fingerprinter::ProcessSingularNode( const TreePtrInterface *p_x_sing, int &index )
+void Fingerprinter::ProcessSingularItem( const TreePtrInterface *p_x_sing, int &index )
 {
 	if( *p_x_sing ) // Permitting NULL because patterns
-		ProcessNode( (TreePtr<Node>)(*p_x_sing), index );
+		ProcessTPI( p_x_sing, index );
 }
 
 
@@ -236,7 +241,7 @@ void Fingerprinter::ProcessSequence( SequenceInterface *x_seq, int &index )
 {
     for( const TreePtrInterface &x : *x_seq )
     {
-        ProcessNode( (TreePtr<Node>)x, index );
+        ProcessTPI( &x, index );
     }
 }
 
@@ -253,7 +258,7 @@ void Fingerprinter::ProcessCollection( CollectionInterface *x_col, int &index )
             // previous one, so "replay" the same indexes while traversing it.  
             int temp_start_index = prev_start_index;
             int temp_index = temp_start_index;
-            ProcessNode( (TreePtr<Node>)x, temp_index );
+            ProcessNode( x, temp_index );
             
             // But keep updating the "real" index so we get the same
             // values afterwards (as if this one had not compared equal).
@@ -262,11 +267,20 @@ void Fingerprinter::ProcessCollection( CollectionInterface *x_col, int &index )
         else
         {
             prev_start_index = index;
-            ProcessNode( (TreePtr<Node>)x, index );        
+            ProcessNode( x, index );        
         }
             
         prev_x = x;
     }
+    
+    for( const TreePtrInterface &tpi : *x_col )
+		incoming_links[(TreePtr<Node>)tpi].insert(&tpi);
+}
+
+
+const Fingerprinter::LinkSetByNode &Fingerprinter::GetIncomingLinksMap() const
+{
+	return incoming_links;
 }
 
 //////////////////////////// UniquifyNames ///////////////////////////////
@@ -279,10 +293,9 @@ UniquifyNames::UniquifyNames( string (Syntax::*name_getter_)() const, bool multi
 }
 
 
-UniquifyNames::NodeToNameMap UniquifyNames::UniquifyAll( const TransKit &kit, TreePtr<Node> context ) const
+UniquifyNames::NodeToNameMap UniquifyNames::UniquifyAll( const TransKit &kit, TreePtr<Node> context )
 {
-	(void)multiparent_only;
-	Fingerprinter::NodeSetByFingerprint node_sets_by_fp = Fingerprinter().GetNodesInTreeByFingerprint(context);    
+	Fingerprinter::NodeSetByFingerprint node_sets_by_fp = fingerprinter.GetNodesInTreeByFingerprint(context);    
 	
 	// For repeatability of renders, get a list of identifiers in the tree, ordered:
 	// - mainly depth-first, wind-in
@@ -350,6 +363,12 @@ UniquifyNames::NodeToNameMap UniquifyNames::UniquifyAll( const TransKit &kit, Tr
     }        
     
     return nodes_to_names;
+}
+
+
+const Fingerprinter::LinkSetByNode &UniquifyNames::GetIncomingLinksMap() const
+{
+	return fingerprinter.GetIncomingLinksMap();
 }
 
 //////////////////////////// UniquifyCompare ///////////////////////////////

@@ -21,25 +21,25 @@ struct Matcher
     {
     };
 
-    virtual bool IsSubcategory( const Matcher &source_archetype ) const = 0;
+    // Returns true if `candidate` is a non-strict subcategory of the category upon which the method was called
+    virtual bool IsSubcategory( const Matcher &candidate ) const = 0;
+    
     virtual bool IsLocalMatch( const Matcher &candidate ) const;
     virtual bool IsLocalMatchCovariant( const Matcher &candidate ) const;
     virtual ~Matcher();
-    template< class TARGET_TYPE >
-    static inline bool IsSubcategoryStatic( const TARGET_TYPE &target_archetype, const Matcher &source_archetype )
+    template< class MY_TYPE >
+    static inline bool IsSubcategoryStatic( const MY_TYPE &, const Matcher &candidate )
     {
-        (void)target_archetype; // don't care about value of archetypes; just want the type
-        return !!dynamic_cast<const TARGET_TYPE *>(&source_archetype);
+        return !!dynamic_cast<const MY_TYPE *>(&candidate);
     }
     
     static bool IsEquivalentCategory( const Matcher &l, const Matcher &r );
 };
 
 #define MATCHER_FUNCTION \
-    virtual bool IsSubcategory( const Matcher &source_archetype ) const \
+    virtual bool IsSubcategory( const Matcher &candidate ) const \
     { \
-        return Matcher::IsSubcategoryStatic( *this, source_archetype ); \
+        return Matcher::IsSubcategoryStatic( *this, candidate ); \
     }
-
 #endif
 

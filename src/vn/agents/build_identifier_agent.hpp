@@ -37,6 +37,7 @@ struct BuildIdentifierAgent : public virtual BuilderAgent
 	Syntax::Production GetAgentProduction() const override;
 	string GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const final;
     string GetCouplingNameHint() const final;
+    bool IsNonTrivialPreRestriction(const TreePtrInterface *pptr) const final;    
     virtual string GetIdentifierSubTypeName() const = 0;
     NodeBlock GetGraphBlockInfo() const final;
 

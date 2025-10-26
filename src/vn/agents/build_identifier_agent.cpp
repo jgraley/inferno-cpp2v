@@ -99,6 +99,12 @@ string BuildIdentifierAgent::GetCouplingNameHint() const
 } 
 
 
+bool BuildIdentifierAgent::IsNonTrivialPreRestriction(const TreePtrInterface *) const
+{
+    return false;
+} 
+
+
 Graphable::NodeBlock BuildIdentifierAgent::GetGraphBlockInfo() const
 {
     // The BuildIdentifier node appears as a parallelogram (rectangle pushed to the side) with

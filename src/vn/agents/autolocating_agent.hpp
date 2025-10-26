@@ -29,9 +29,11 @@ public:
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicAutolocatingQuery(PatternLink keyer_plink) const; 
 
     ReplacePatchPtr GenReplaceLayoutImpl( const ReplaceKit &kit, 
-                                         PatternLink me_plink, 
-                                         XLink key_xlink,
-                                                  const SCREngine *acting_engine ) override;
+                                          PatternLink me_plink, 
+                                          XLink key_xlink,
+                                          const SCREngine *acting_engine ) override;
+
+    bool IsNonTrivialPreRestriction(const TreePtrInterface *pptr) const final;          
 };
 
 };

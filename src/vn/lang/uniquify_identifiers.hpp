@@ -57,19 +57,23 @@ class Fingerprinter
 public:
     typedef set<int> Fingerprint;
     typedef map< Fingerprint, set<TreePtr<Node>> > NodeSetByFingerprint;
+    typedef map< TreePtr<Node>, set<const TreePtrInterface *> > LinkSetByNode;
 
     Fingerprinter();
     
     NodeSetByFingerprint GetNodesInTreeByFingerprint(TreePtr<Node> context);
+	void ProcessTPI( const TreePtrInterface *tpi, int &index );
     void ProcessNode( TreePtr<Node> x, int &index );
     void ProcessChildren( TreePtr<Node> x, int &index );
-    void ProcessSingularNode( const TreePtrInterface *p_x_sing, int &index );
+    void ProcessSingularItem( const TreePtrInterface *p_x_sing, int &index );
     void ProcessSequence( SequenceInterface *x_seq, int &index );
     void ProcessCollection( CollectionInterface *x_col, int &index );    
+    const LinkSetByNode &GetIncomingLinksMap() const;
     
 private:
     SimpleCompare comparer;
     map< TreePtr<Node>, Fingerprint > fingerprints;
+    LinkSetByNode incoming_links;
 };
 
 
@@ -79,16 +83,19 @@ class UniquifyNames
 public:
     typedef pair<const TreePtr<Node>, string> NodeAndNamePair;
     typedef map< TreePtr<Node>, string> NodeToNameMap;
+    typedef Fingerprinter::LinkSetByNode LinkSetByNode;
 
 	UniquifyNames( string (Syntax::*name_getter_)() const, // Method on nodes to get the initial name string
 	               bool multiparent_only_,                 // Restrict to nodes with more than one parent
 	               bool preserve_undeclared_ids_ );        // Refuse to rename identifiers that have no definition
-    NodeToNameMap UniquifyAll( const TransKit &kit, TreePtr<Node> context ) const;
+    NodeToNameMap UniquifyAll( const TransKit &kit, TreePtr<Node> context );
+    const LinkSetByNode &GetIncomingLinksMap() const;
                                
 private:
     string (Syntax::*name_getter)() const; 
 	const bool multiparent_only;          
-	const bool preserve_undeclared_ids;
+	const bool preserve_undeclared_ids;	
+	Fingerprinter fingerprinter;
 };
 
 

@@ -23,9 +23,9 @@ public:
     virtual list<PatternLink> GetVisibleChildren( Path v ) const;
 
     ReplacePatchPtr GenReplaceLayoutImpl( const ReplaceKit &kit, 
-                                    PatternLink me_plink, 
-                                    XLink key_xlink,
-                                                  const SCREngine *acting_engine ) final;
+                                          PatternLink me_plink, 
+                                          XLink key_xlink,
+                                          const SCREngine *acting_engine ) final;
 
     virtual void StartPlanOverlay(SCREngine *acting_engine);
     

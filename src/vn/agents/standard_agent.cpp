@@ -1012,6 +1012,12 @@ string StandardAgent::GetRender( const RenderKit &kit, Syntax::Production surrou
 }
 
 
+bool StandardAgent::IsNonTrivialPreRestriction(const TreePtrInterface *) const
+{
+    return false;
+}    
+
+
 Graphable::NodeBlock StandardAgent::GetGraphBlockInfo() const
 {
     // Inject a non-trivial pre-restriction detector

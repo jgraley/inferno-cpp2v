@@ -24,7 +24,6 @@ public:
     SYM::Lazy<SYM::BooleanExpression> SymbolicQuery( PatternLink keyer, const set<PatternLink> &residuals, bool coupling_only ) const override;                                       
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuery(PatternLink keyer_plink) const = 0;
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicCouplingQuery(PatternLink keyer, const set<PatternLink> &residuals) const;       
-    bool IsNonTrivialPreRestriction(const TreePtrInterface *pptr) const override;
     bool ShouldGenerateCategoryClause() const override;                                
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicPreRestriction(PatternLink keyer_plink) const;
     bool IsPreRestrictionMatch( TreePtr<Node> x ) const; // return true if matches
@@ -67,11 +66,13 @@ public:
                                                   XLink key_xlink,
                                                   const SCREngine *acting_engine );
     TreePtr<Node> CloneNode() const;
-    virtual string GetTrace() const;
 
+    bool IsNonTrivialPreRestriction(const TreePtrInterface *pptr) const override;
     virtual string GetGraphId() const;
     virtual string GetPlanAsString() const override;
     
+    virtual string GetTrace() const;
+
 protected:                                  
     Phase phase = UNDEFINED;    
 };

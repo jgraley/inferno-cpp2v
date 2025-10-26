@@ -71,8 +71,8 @@ string DeltaAgent::GetRender( const RenderKit &kit, Syntax::Production surround_
 	// As with ?: we could use BOOT_EXPR for the through argument, and probably should
 	// in the parser, but to generate consistent style in renders we use PREFIX so
 	// that parens are just as likely in both args.
-	string st = kit.render( (TreePtr<Node>)(*GetThrough()), Syntax::BoostPrecedence(Syntax::Production::PREFIX) );
-	string so = kit.render( (TreePtr<Node>)(*GetOverlay()), Syntax::BoostPrecedence(Syntax::Production::PREFIX) );
+	string st = kit.render( (TreePtr<Node>)(*GetThrough()), Syntax::Production::PREFIX );
+	string so = kit.render( (TreePtr<Node>)(*GetOverlay()), Syntax::Production::PREFIX );
 	if( st.size() > Syntax::GetLineBreakThreshold() )
 		return "Δ" + st + "\n🡺" + so;
 	else

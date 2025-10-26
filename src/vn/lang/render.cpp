@@ -41,7 +41,8 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern )
     // (more than one parent) and don't worry about declarations.
     UniquifyNames coupling_names_uniqifier(&Syntax::GetCouplingNameHint, true, false);
     unique_coupling_names = coupling_names_uniqifier.UniquifyAll( kit, context );
-
+	incoming_links = coupling_names_uniqifier.GetIncomingLinksMap();
+	
 	string s;
 	if( ReadArgs::use.count("c") )
 		s += Trace(unique_coupling_names) + "\n\n";
@@ -104,15 +105,23 @@ string Render::RenderConcreteIntoProduction( TreePtr<Node> node, Syntax::Product
 	{
 		if( auto pspecial = dynamic_cast<const SpecialBase *>(agent) )
 		{
-			// We need the archetype because otherwise we'll just get hte name 
-			// of the special agent. We might be able to extract node name out
-			// of the template args, but using an archetype like this has precedent
-			// in the graph plotter.
-			TreePtr<Node> archetype_node = pspecial->SpecialGetArchetypeNode();
+			bool prerestricted = false;
+			ASSERT( incoming_links.count(node)>0 )(incoming_links)("\nNode: ")(node);
+			for( const TreePtrInterface *tpi : incoming_links.at(node) )
+				prerestricted |= agent->IsNonTrivialPreRestriction(tpi);
+				
+			if(prerestricted)
+			{
+				// We need the archetype because otherwise we'll just get hte name 
+				// of the special agent. We might be able to extract node name out
+				// of the template args, but using an archetype like this has precedent
+				// in the graph plotter.
+				TreePtr<Node> archetype_node = pspecial->SpecialGetArchetypeNode();
 
-			// This assumes no action is required in order to render at PREFIX
-			s += "【" + GetInnermostTemplateParam(TYPE_ID_NAME(*archetype_node)) + "】";	
-			surround_prod = Syntax::Production::PREFIX;
+				// This assumes no action is required in order to render a prefix operation
+				s += "【" + GetInnermostTemplateParam(TYPE_ID_NAME(*archetype_node)) + "】";	
+				surround_prod = Syntax::Production::PREFIX;
+			}
 		}
 	}
 
@@ -222,7 +231,7 @@ string Render::RenderNullPointer( Syntax::Production surround_prod )
 	// Assume NULL means we're in a pattern, and it represents a wildcard
 	// Note same symbol as Stuff nodes etc but this is a terminal not a prefix
 	// so a risk of ambiguity here.
-	return "⩨";
+	return "☆";
 }
 
 

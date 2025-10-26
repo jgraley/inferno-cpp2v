@@ -105,14 +105,6 @@ Lazy<BooleanExpression> AgentCommon::SymbolicCouplingQuery(PatternLink keyer, co
 }
 
 
-bool AgentCommon::IsNonTrivialPreRestriction(const TreePtrInterface *pptr) const
-{
-    // Note: we are using typeid on the tree pointer type, not the node type.
-    // So we need an archetype tree pointer.
-    return typeid( *pptr ) != typeid( *GetArchetypeTreePtr() );
-}                                
-
-
 bool AgentCommon::ShouldGenerateCategoryClause() const
 {
     // It could be argued that, from the CSP solver's point of
@@ -488,10 +480,12 @@ TreePtr<Node> AgentCommon::CloneNode() const
 }
 
 
-string AgentCommon::GetTrace() const
+bool AgentCommon::IsNonTrivialPreRestriction(const TreePtrInterface *pptr) const
 {
-    return Traceable::GetName() + GetSerialString();
-}
+    // Note: we are using typeid on the tree pointer type, not the node type.
+    // So we need an archetype tree pointer.
+    return typeid( *pptr ) != typeid( *GetArchetypeTreePtr() );
+}                                
 
 
 string AgentCommon::GetGraphId() const
@@ -509,3 +503,7 @@ string AgentCommon::GetPlanAsString() const
 }
 
 
+string AgentCommon::GetTrace() const
+{
+    return Traceable::GetName() + GetSerialString();
+}

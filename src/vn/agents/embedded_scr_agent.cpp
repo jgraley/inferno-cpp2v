@@ -82,11 +82,13 @@ string EmbeddedSCRAgent::GetRender( const RenderKit &kit, Syntax::Production sur
 	// we get eg x⨟꩜y3⨟꩜y2⨟꩜y1 which avoids impying nesting. TODO make sure we 
 	// run them in the correct order, innermost first as implied by tree structure
 	// i.e. doing it on the unwind.
-	// Chaining via stem should look like x⨟꩜(y⨟꩜z) which will indent as required.
+	// Functional nesting i.e. chaining via stem should look like x⨟꩜(y⨟꩜z) which will 
+	// indent as required. If the ꩜<pattern> aere a production it would be at 
+	// Boost(VN_SEP_SCRIPTY) to get left-association.
 	return kit.render( (TreePtr<Node>)(*GetThrough()), Syntax::Production::VN_SEP_SCRIPTY ) + 
 		   "⨟\n" +
 		   "꩜" + 
-		   kit.render( search_pattern, Syntax::BoostPrecedence( Syntax::Production::PREFIX ) ); // Left-associative 
+		   kit.render( search_pattern, Syntax::Production::PREFIX ); // Left-associative 
 }    
        
 
