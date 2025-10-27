@@ -41,8 +41,8 @@ public:
     size_t GetHash() const noexcept;
     explicit operator bool() const;
     Agent *GetChildAgent() const;
-    TreePtr<Node> GetPattern() const;
-    const TreePtrInterface *GetPatternTreePtr() const;
+    TreePtr<Node> GetPatternTreePtr() const;
+    const TreePtrInterface *GetPatternTreePtrInterface() const;
     void Redirect( const TreePtrInterface &new_parent_pattern );
 	
     string GetTrace() const; // used for debug
@@ -135,7 +135,7 @@ public:
     explicit operator bool() const;
     operator pair<const PatternLink, XLink>() const;
     Agent *GetChildAgent() const;
-    const TreePtrInterface *GetPatternTreePtr() const;
+    const TreePtrInterface *GetPatternTreePtrInterface() const;
     TreePtr<Node> GetChildTreePtr() const;
     void SetX( const XLink &xlink );
     void SetPattern( const PatternLink &plink );

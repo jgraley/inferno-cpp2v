@@ -31,7 +31,7 @@ PatternTransformationCommon::PatternKnowledge::PatternKnowledge( VNStep &vnt, co
     agents_to_incoming_plinks.clear();
 	for( PatternLink plink : all_plinks )
 	{
-		all_pattern_nodes.insert( plink.GetPattern() );
+		all_pattern_nodes.insert( plink.GetPatternTreePtr() );
 		
 		if( trans->RequireAgentsToIncomingPlinksMap() )
 			agents_to_incoming_plinks[plink.GetChildAgent()].insert(plink);

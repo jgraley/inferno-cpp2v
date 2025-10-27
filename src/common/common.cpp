@@ -94,5 +94,23 @@ int Count(string c, string s)
 }
 
 
+bool All( const vector<bool> &vb )
+{
+	for( bool b : vb )
+		if( !b )
+			return false;
+	return true;
+}
+
+
+bool Any( const vector<bool> &vb )
+{
+	for( bool b : vb )
+		if( b )
+			return true;
+	return false;
+}
+
+
 const vector<bool> index_range_bool = {false, true};
 

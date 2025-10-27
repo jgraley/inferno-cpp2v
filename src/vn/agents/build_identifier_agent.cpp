@@ -99,9 +99,9 @@ string BuildIdentifierAgent::GetCouplingNameHint() const
 } 
 
 
-bool BuildIdentifierAgent::IsNonTrivialPreRestriction(const TreePtrInterface *) const
+bool BuildIdentifierAgent::IsFixedType() const
 {
-    return false;
+    return true;
 } 
 
 

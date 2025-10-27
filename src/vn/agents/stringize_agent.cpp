@@ -41,9 +41,9 @@ string StringizeAgent::GetCouplingNameHint() const
 } 
 
 
-bool StringizeAgent::IsNonTrivialPreRestriction(const TreePtrInterface *) const
+bool StringizeAgent::IsFixedType() const
 {
-    return false;
+    return true;
 } 
 
 

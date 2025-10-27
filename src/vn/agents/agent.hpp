@@ -92,6 +92,7 @@ public:
     virtual bool ShouldGenerateCategoryClause() const = 0;                                
 
 	virtual Syntax::Production GetAgentProduction() const = 0;
+	virtual bool IsFixedType() const = 0;
 	virtual string GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const = 0;
 
     static Agent *AsAgent( shared_ptr<Node> node );

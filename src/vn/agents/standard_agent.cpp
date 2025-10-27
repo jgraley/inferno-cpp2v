@@ -546,7 +546,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutImpl( const ReplaceKit &ki
                                                             const SCREngine *acting_engine ) 
 {
     INDENT("B");
-    //if( TreePtr<CPPTree::SpecificInstanceIdentifier>::DynamicCast(me_plink.GetPattern()) )
+    //if( TreePtr<CPPTree::SpecificInstanceIdentifier>::DynamicCast(me_plink.GetPatternTreePtr()) )
     //    FTRACE("For me_plink=")(me_plink)(" overlay_under_plink=")(overlay_under_plink)(" key_xlink=")(key_xlink)("\n");
 	PatternLink bottom_layer_plink = acting_engine->TryGetOverlayBottomLayer(this);
     if( bottom_layer_plink )
@@ -568,7 +568,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutImpl( const ReplaceKit &ki
     else
     {
         // Free replace pattern, just duplicate it.
-        ASSERT( me_plink.GetPattern()->IsFinal() )(me_plink); 
+        ASSERT( me_plink.GetPatternTreePtr()->IsFinal() )(me_plink); 
         return GenReplaceLayoutNormal( kit, me_plink, acting_engine ); 
     }
 }
@@ -613,7 +613,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingPattern( const
 	// With identifiers, Duplicate() would return *this as a replace node which 
 	// we don't support. Use BuildxxxIdentifierAgent for most cases. For exotic cases see #819.
 	ASSERT( !dynamic_cast<CPPTree::SpecificIdentifier *>(this) );		
-    TreePtr<Node> dest = Duplicate::DuplicateNode(me_plink.GetPattern());
+    TreePtr<Node> dest = Duplicate::DuplicateNode(me_plink.GetPatternTreePtr());
     
     // We "invent" dest, because of information coming from this pattern node.
     dest->SetInventedHere();
@@ -876,7 +876,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutNormal( const ReplaceKit &
 {
     INDENT("N");
  
-    //if( TreePtr<CPPTree::SpecificInstanceIdentifier>::DynamicCast(me_plink.GetPattern()) )
+    //if( TreePtr<CPPTree::SpecificInstanceIdentifier>::DynamicCast(me_plink.GetPatternTreePtr()) )
     //    FTRACE("For me_plink=")(me_plink)("\n");
 
     ASSERT( IsFinal() )("Trying to build non-final ")(*this); 
@@ -884,7 +884,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutNormal( const ReplaceKit &
 	// With identifiers, Duplicate() would return *this as a replace node which 
 	// we don't support. Use BuildxxxIdentifierAgent for most cases. For exotic cases see #819.
 	//ASSERT( !dynamic_cast<CPPTree::SpecificIdentifier *>(this) );		
-    TreePtr<Node> dest = Duplicate::DuplicateNode(me_plink.GetPattern());
+    TreePtr<Node> dest = Duplicate::DuplicateNode(me_plink.GetPatternTreePtr());
     
     ASSERT( dest->IsFinal() )(*this)(" trying to build non-final ")(*dest)("\n"); 
 
@@ -1012,9 +1012,9 @@ string StandardAgent::GetRender( const RenderKit &kit, Syntax::Production surrou
 }
 
 
-bool StandardAgent::IsNonTrivialPreRestriction(const TreePtrInterface *) const
+bool StandardAgent::IsFixedType() const
 {
-    return false;
+    return true;
 }    
 
 

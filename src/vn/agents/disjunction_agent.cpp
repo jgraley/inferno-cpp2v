@@ -110,3 +110,14 @@ Graphable::NodeBlock DisjunctionAgent::GetGraphBlockInfo() const
 
     return block;
 }
+
+
+bool DisjunctionAgent::IsNonTrivialPreRestriction(const TreePtrInterface *tpi) const
+{
+    if( !AgentCommon::IsNonTrivialPreRestriction(tpi) )
+		return false;
+				
+	// Disjunction only needs to match one child, so if we want to avoid a prerestriction
+	// we need all of them to restrict
+	return !All( AreChildrenRestricting() );
+} 

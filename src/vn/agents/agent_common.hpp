@@ -68,6 +68,7 @@ public:
     TreePtr<Node> CloneNode() const;
 
     bool IsNonTrivialPreRestriction(const TreePtrInterface *pptr) const override;
+	bool IsFixedType() const override;
     virtual string GetGraphId() const;
     virtual string GetPlanAsString() const override;
     

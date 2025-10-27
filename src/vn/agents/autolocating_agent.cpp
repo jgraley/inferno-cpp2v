@@ -64,27 +64,28 @@ Agent::ReplacePatchPtr AutolocatingAgent::GenReplaceLayoutImpl( const ReplaceKit
 
 bool AutolocatingAgent::IsNonTrivialPreRestriction(const TreePtrInterface *tpi) const
 {
-	// It doesn't further restrict the parent's pointer type, so by type 
-	// correctness rules it must be trivial
     if( !AgentCommon::IsNonTrivialPreRestriction(tpi) )
 		return false;
 				
-	// While I beleive this is correct, in fact all NormalLink children
-	// of an AutolocatingAgent are TreePtr<PRE_RESTRICTION> and will always
-	// satisfy the child_restricts_for_us condition. So we could just do
-	// child_restricts_for_us = !pq->GetNormalLinks().empty()
-	bool child_restricts_for_us = false;
+	// This is autolocating agents, so normal children are autolocating which means
+	// they must match the same XLink. If one of them restricts this XLink then we don't have
+	// to due to global and-rule.
+	return !Any( AreChildrenRestricting() );
+} 
+
+
+vector<bool> AutolocatingAgent::AreChildrenRestricting() const
+{
+	vector<bool> vb;
 	shared_ptr<PatternQuery> pq = GetPatternQuery();   
     for( PatternLink child_link : pq->GetNormalLinks() )
     {
-		TreePtr<Node> child_node = child_link.GetPattern();
-		// This is autolocating agents, so normal children are autolocating which means
-		// they must match the same XLink. If the child is a weak subcategory of our 
-		// prerestriction type, then it's weakly stricter and we don't need to pre-restrict.
-		child_restricts_for_us |= IsSubcategory(*child_node);
+		Agent *child_agent = child_link.GetChildAgent();
+		vb.push_back(
+		    child_agent->IsFixedType() ||
+		    child_agent->IsNonTrivialPreRestriction(child_link.GetPatternTreePtrInterface() ) );
 	}
-	ASSERT( child_restricts_for_us || pq->GetNormalLinks().empty() )(pq->GetNormalLinks());
-	return !child_restricts_for_us;
-} 
+	return vb;
+}
 
 

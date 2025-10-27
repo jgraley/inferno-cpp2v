@@ -126,9 +126,9 @@ string IdentifierByNameAgent::GetCouplingNameHint() const
 } 
 
 
-bool IdentifierByNameAgent::IsNonTrivialPreRestriction(const TreePtrInterface *) const
+bool IdentifierByNameAgent::IsFixedType() const
 {
-    return false;
+    return true;
 } 
 
 

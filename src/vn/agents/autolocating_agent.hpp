@@ -33,7 +33,8 @@ public:
                                           XLink key_xlink,
                                           const SCREngine *acting_engine ) override;
 
-    bool IsNonTrivialPreRestriction(const TreePtrInterface *pptr) const final;          
+    bool IsNonTrivialPreRestriction(const TreePtrInterface *pptr) const override;          
+    vector<bool> AreChildrenRestricting() const;          
 };
 
 };

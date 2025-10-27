@@ -46,9 +46,9 @@ string BuildContainerSizeAgent::GetCouplingNameHint() const
 } 
 
 
-bool BuildContainerSizeAgent::IsNonTrivialPreRestriction(const TreePtrInterface *) const
+bool BuildContainerSizeAgent::IsFixedType() const
 {
-    return false;
+    return true;
 } 
 
 

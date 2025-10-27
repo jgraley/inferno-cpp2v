@@ -74,7 +74,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
                            const map<const Agent *, PatternLink> &surrounding_agents_to_keyers,
                            const map<const Agent *, set<PatternLink>> &surrounding_agents_to_residuals) :
     algo( algo_ ),
-    base_pattern( base_plink_.GetPattern() ),
+    base_pattern( base_plink_.GetPatternTreePtr() ),
     base_plink( base_plink_ ),
     base_agent( base_plink.GetChildAgent() ),
     surrounding_plinks( surrounding_plinks_ ),
@@ -1055,7 +1055,7 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
             {
                 Graph::Figure::Link link;
                 link.short_name = plink.GetShortName();
-                link.pptr = plink.GetPatternTreePtr();
+                link.pptr = plink.GetPatternTreePtrInterface();
                 if( residuals.count(plink) > 0 )
                     link.details.planned_as = Graph::LINK_RESIDUAL;
                 else if( keyers.count(plink) > 0 )
@@ -1092,7 +1092,7 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
             Graph::Figure::Link incoming_link;
             incoming_link.details.planned_as = incoming_link_planned_as;
             incoming_link.short_name = p.first.GetShortName();
-            incoming_link.pptr = p.first.GetPatternTreePtr();  
+            incoming_link.pptr = p.first.GetPatternTreePtrInterface();  
             base_agent.incoming_links.push_back( incoming_link );
             TRACEC(p.second.get())(" : ( ")(incoming_link.short_name)("->")(base_agent.g->GetGraphId())(" )\n");
             figure.subordinate_engines_and_base_agents.push_back( make_pair(p.second.get(), base_agent) );

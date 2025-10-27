@@ -149,13 +149,13 @@ Agent *PatternLink::GetChildAgent() const
 }
 
 
-TreePtr<Node> PatternLink::GetPattern() const
+TreePtr<Node> PatternLink::GetPatternTreePtr() const
 {
     return (TreePtr<Node>)*p_tpi;
 }
 
 
-const TreePtrInterface *PatternLink::GetPatternTreePtr() const
+const TreePtrInterface *PatternLink::GetPatternTreePtrInterface() const
 {
     return p_tpi;
 }
@@ -420,9 +420,9 @@ Agent *LocatedLink::GetChildAgent() const
 }
 
 
-const TreePtrInterface *LocatedLink::GetPatternTreePtr() const
+const TreePtrInterface *LocatedLink::GetPatternTreePtrInterface() const
 {
-    return plink.GetPatternTreePtr();
+    return plink.GetPatternTreePtrInterface();
 }
 
 

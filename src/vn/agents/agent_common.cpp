@@ -482,10 +482,19 @@ TreePtr<Node> AgentCommon::CloneNode() const
 
 bool AgentCommon::IsNonTrivialPreRestriction(const TreePtrInterface *pptr) const
 {
+	if( IsFixedType() )
+		return false;
+		
     // Note: we are using typeid on the tree pointer type, not the node type.
     // So we need an archetype tree pointer.
     return typeid( *pptr ) != typeid( *GetArchetypeTreePtr() );
 }                                
+
+
+bool AgentCommon::IsFixedType() const
+{
+	return false; // "most" agents are templated on a node type
+}
 
 
 string AgentCommon::GetGraphId() const
