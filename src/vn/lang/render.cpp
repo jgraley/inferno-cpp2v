@@ -100,30 +100,8 @@ string Render::RenderIntoProduction( TreePtr<Node> node, Syntax::Production surr
 string Render::RenderConcreteIntoProduction( TreePtr<Node> node, Syntax::Production surround_prod )
 {
 	string s;
-	const Agent *agent = Agent::TryAsAgentConst(node);
-	if( agent )
-	{
-		if( auto pspecial = dynamic_cast<const SpecialBase *>(agent) )
-		{
-			bool prerestricted = false;
-			ASSERT( incoming_links.count(node)>0 )(incoming_links)("\nNode: ")(node);
-			for( const TreePtrInterface *tpi : incoming_links.at(node) )
-				prerestricted |= agent->IsNonTrivialPreRestriction(tpi);
-				
-			if(prerestricted)
-			{
-				// We need the archetype because otherwise we'll just get hte name 
-				// of the special agent. We might be able to extract node name out
-				// of the template args, but using an archetype like this has precedent
-				// in the graph plotter.
-				TreePtr<Node> archetype_node = pspecial->SpecialGetArchetypeNode();
 
-				// This assumes no action is required in order to render a prefix operation
-				s += "【" + GetInnermostTemplateParam(TYPE_ID_NAME(*archetype_node)) + "】";	
-				surround_prod = Syntax::Production::PREFIX;
-			}
-		}
-	}
+	s += MaybeRenderPreRestriction(node, surround_prod);
 
     // Production surround_prod relates to the surrounding grammar production and can be 
     // used to change the render of a certain subtree. It represents all the ancestor nodes of
@@ -221,6 +199,36 @@ string Render::RenderConcreteIntoProduction( TreePtr<Node> node, Syntax::Product
     }
     
     return s;
+}
+
+
+string Render::MaybeRenderPreRestriction( TreePtr<Node> node, Syntax::Production &surround_prod ) const
+{
+	const Agent *agent = Agent::TryAsAgentConst(node);
+	if( !agent )
+		return "";
+		
+	auto pspecial = dynamic_cast<const SpecialBase *>(agent);
+	if( !pspecial )
+		return "";
+	
+	bool prerestricted = false;
+	ASSERT( incoming_links.count(node)>0 )(incoming_links)("\nNode: ")(node);
+	for( const TreePtrInterface *tpi : incoming_links.at(node) )
+		prerestricted |= agent->IsNonTrivialPreRestriction(tpi);
+		
+	if(!prerestricted)
+		return "";
+		
+	// We need the archetype because otherwise we'll just get hte name 
+	// of the special agent. We might be able to extract node name out
+	// of the template args, but using an archetype like this has precedent
+	// in the graph plotter.
+	TreePtr<Node> archetype_node = pspecial->SpecialGetArchetypeNode();
+
+	// This assumes no action is required in order to render a prefix operation
+	surround_prod = Syntax::Production::PREFIX;	
+	return "【" + GetInnermostTemplateParam(TYPE_ID_NAME(*archetype_node)) + "】";	
 }
 
 

@@ -44,7 +44,7 @@ SYM::Lazy<SYM::BooleanExpression> AutolocatingAgent::SymbolicAutolocatingQuery(P
 Agent::ReplacePatchPtr AutolocatingAgent::GenReplaceLayoutImpl( const ReplaceKit &kit, 
                                                                 PatternLink me_plink, 
                                                                 XLink key_xlink,
-                                                  const SCREngine *acting_engine )
+                                                                const SCREngine *acting_engine )
 {
 	shared_ptr<PatternQuery> pq = GetPatternQuery();
     auto plinks = pq->GetNormalLinks();
@@ -70,8 +70,17 @@ bool AutolocatingAgent::IsNonTrivialPreRestriction(const TreePtrInterface *tpi) 
 	// This is autolocating agents, so normal children are autolocating which means
 	// they must match the same XLink. If one of them restricts this XLink then we don't have
 	// to due to global and-rule.
+	//FTRACE(GetPatternQuery()->GetNormalLinks())("\n")
+	//      (AreChildrenRestricting())("\n")
+	//      (!Any( AreChildrenRestricting() ))("\n");
 	return !Any( AreChildrenRestricting() );
 } 
+
+
+bool AutolocatingAgent::IsFixedType() const 
+{
+	return Any( AreChildrenFixedType() );
+}
 
 
 vector<bool> AutolocatingAgent::AreChildrenRestricting() const
@@ -83,7 +92,20 @@ vector<bool> AutolocatingAgent::AreChildrenRestricting() const
 		Agent *child_agent = child_link.GetChildAgent();
 		vb.push_back(
 		    child_agent->IsFixedType() ||
-		    child_agent->IsNonTrivialPreRestriction(child_link.GetPatternTreePtrInterface() ) );
+		    child_agent->IsNonTrivialPreRestriction(child_link.GetPatternTreePtrInterface()) );
+	}
+	return vb;
+}
+
+
+vector<bool> AutolocatingAgent::AreChildrenFixedType() const
+{
+	vector<bool> vb;
+	shared_ptr<PatternQuery> pq = GetPatternQuery();   
+    for( PatternLink child_link : pq->GetNormalLinks() )
+    {
+		Agent *child_agent = child_link.GetChildAgent();
+		vb.push_back( child_agent->IsFixedType() );
 	}
 	return vb;
 }

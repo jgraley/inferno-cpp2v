@@ -121,3 +121,9 @@ bool DisjunctionAgent::IsNonTrivialPreRestriction(const TreePtrInterface *tpi) c
 	// we need all of them to restrict
 	return !All( AreChildrenRestricting() );
 } 
+
+
+bool DisjunctionAgent::IsFixedType() const
+{
+	return All( AreChildrenFixedType() );
+}

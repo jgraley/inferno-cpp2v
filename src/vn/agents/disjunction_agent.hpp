@@ -25,6 +25,7 @@ public:
 	string GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const final;
     NodeBlock GetGraphBlockInfo() const final;
     bool IsNonTrivialPreRestriction(const TreePtrInterface *pptr) const final;          
+	bool IsFixedType() const final;
     
     // Interface for pattern trasformation
     virtual void SetDisjuncts( CollectionInterface &ci ) = 0;
