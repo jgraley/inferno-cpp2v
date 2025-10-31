@@ -149,7 +149,7 @@ class XTreeDbToSymbolOperator : public SymbolToSymbolExpression
 public:    
     typedef SymbolExpression NominalType;
     explicit XTreeDbToSymbolOperator( shared_ptr<SymbolExpression> a );
-    VariablesRequiringRows GetVariablesRequiringRows() const override;
+    VariablesRequiringDB GetVariablesRequiringDB() const override;
     virtual list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     virtual unique_ptr<SymbolicResult> Evaluate( const EvalKit &kit,
                                                list<unique_ptr<SymbolicResult>> &&op_results ) const override final;

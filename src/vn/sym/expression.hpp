@@ -64,11 +64,11 @@ public:
         COMMA 
     };    
                 
-    typedef set<VN::PatternLink> VariablesRequiringRows;
+    typedef set<VN::PatternLink> VariablesRequiringDB;
                 
     virtual list<shared_ptr<Expression>> GetOperands() const;
     virtual set<VN::PatternLink> GetRequiredVariables() const;
-    virtual VariablesRequiringRows GetVariablesRequiringRows() const;
+    virtual VariablesRequiringDB GetVariablesRequiringDB() const;
 
     void ForTreeDepthFirstWalk( function<void(const Expression *)> f ) const;
     

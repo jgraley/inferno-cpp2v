@@ -44,7 +44,7 @@ private:
                        shared_ptr<const VN::Lacing> lacing );
         void DetermineVariables();
         void DetermineHintExpressions();
-        void DetermineXTreeDbRequirement();
+        void DetermineVariablesRequiringDB();
         string GetTrace() const; // used for debug
 
         SymbolicConstraint * const algo;
@@ -53,12 +53,12 @@ private:
         typedef map< set<VariableId>, shared_ptr<SYM::SymbolExpression>> GivensToExpression;
         map<VariableId, GivensToExpression> suggestion_expressions;
         shared_ptr<SYM::BooleanExpression> alt_expression_for_testing;       
-        SYM::Expression::VariablesRequiringRows required_x_tree_db_level; 
+        SYM::Expression::VariablesRequiringDB variables_requiring_db; 
         shared_ptr<const VN::Lacing> lacing;
     } plan;
 
     const set<VariableId> &GetVariables() const override;
-    SYM::Expression::VariablesRequiringRows GetVariablesRequiringRows() const override;
+    SYM::Expression::VariablesRequiringDB GetVariablesRequiringDB() const override;
     virtual void Start( const VN::XTreeDatabase *x_tree_db );    
     bool IsSatisfied( const Assignments &assignments ) const override;
     unique_ptr<SYM::SubsetResult> GetSuggestedValues( const Assignments &assignments,

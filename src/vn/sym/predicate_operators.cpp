@@ -223,7 +223,7 @@ DepthFirstComparisonOperator::DepthFirstComparisonOperator( shared_ptr<SymbolExp
 }    
     
 
-Expression::VariablesRequiringRows DepthFirstComparisonOperator::GetVariablesRequiringRows() const
+Expression::VariablesRequiringDB DepthFirstComparisonOperator::GetVariablesRequiringDB() const
 {
     return GetRequiredVariables();
 }

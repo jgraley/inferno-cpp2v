@@ -72,7 +72,7 @@ class AllGreaterOperator : public SymbolToSymbolExpression
 public:    
     typedef SymbolExpression NominalType;
     AllGreaterOperator( shared_ptr<SymbolExpression> a );
-    VariablesRequiringRows GetVariablesRequiringRows() const override;
+    VariablesRequiringDB GetVariablesRequiringDB() const override;
     list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     unique_ptr<SymbolicResult> Evaluate( const EvalKit &kit,
                                                 list<unique_ptr<SymbolicResult>> &&op_results ) const final;
@@ -90,7 +90,7 @@ class AllLessOperator : public SymbolToSymbolExpression
 public:    
     typedef SymbolExpression NominalType;
     AllLessOperator( shared_ptr<SymbolExpression> a );
-    VariablesRequiringRows GetVariablesRequiringRows() const override;
+    VariablesRequiringDB GetVariablesRequiringDB() const override;
     list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     unique_ptr<SymbolicResult> Evaluate( const EvalKit &kit,
                                                 list<unique_ptr<SymbolicResult>> &&op_results ) const final;
@@ -108,7 +108,7 @@ class AllGreaterOrEqualOperator : public SymbolToSymbolExpression
 public:    
     typedef SymbolExpression NominalType;
     AllGreaterOrEqualOperator( shared_ptr<SymbolExpression> a );
-    VariablesRequiringRows GetVariablesRequiringRows() const override;
+    VariablesRequiringDB GetVariablesRequiringDB() const override;
     list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     unique_ptr<SymbolicResult> Evaluate( const EvalKit &kit,
                                                 list<unique_ptr<SymbolicResult>> &&op_results ) const final;
@@ -126,7 +126,7 @@ class AllLessOrEqualOperator : public SymbolToSymbolExpression
 public:    
     typedef SymbolExpression NominalType;
     AllLessOrEqualOperator( shared_ptr<SymbolExpression> a );
-    VariablesRequiringRows GetVariablesRequiringRows() const override;
+    VariablesRequiringDB GetVariablesRequiringDB() const override;
     list<shared_ptr<SymbolExpression>> GetSymbolOperands() const override;
     unique_ptr<SymbolicResult> Evaluate( const EvalKit &kit,
                                                 list<unique_ptr<SymbolicResult>> &&op_results ) const final;

@@ -353,7 +353,7 @@ XTreeDbToSymbolOperator::XTreeDbToSymbolOperator( shared_ptr<SymbolExpression> a
 }    
 
 
-Expression::VariablesRequiringRows XTreeDbToSymbolOperator::GetVariablesRequiringRows() const
+Expression::VariablesRequiringDB XTreeDbToSymbolOperator::GetVariablesRequiringDB() const
 {
     return GetRequiredVariables();
 }

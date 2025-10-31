@@ -114,7 +114,7 @@ public:
     typedef BooleanExpression NominalType;
     explicit DepthFirstComparisonOperator( shared_ptr<SymbolExpression> a_, 
                                       shared_ptr<SymbolExpression> b_ );
-    VariablesRequiringRows GetVariablesRequiringRows() const override;
+    VariablesRequiringDB GetVariablesRequiringDB() const override;
     list<shared_ptr<SymbolExpression> *> GetSymbolOperandPointers() override;
     virtual unique_ptr<BooleanResult> Evaluate( const EvalKit &kit,
                                                 list<unique_ptr<SymbolicResult>> &&op_results ) const override final;

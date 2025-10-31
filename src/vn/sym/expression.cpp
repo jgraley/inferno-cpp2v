@@ -22,11 +22,11 @@ set<VN::PatternLink> Expression::GetRequiredVariables() const
 }
 
 
-Expression::VariablesRequiringRows Expression::GetVariablesRequiringRows() const
+Expression::VariablesRequiringDB Expression::GetVariablesRequiringDB() const
 {
-    VariablesRequiringRows k;
+    VariablesRequiringDB k;
     for( shared_ptr<Expression> p : GetOperands() )
-        k = UnionOf( k, p->GetVariablesRequiringRows() );
+        k = UnionOf( k, p->GetVariablesRequiringDB() );
     return k;
 }
 

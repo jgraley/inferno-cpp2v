@@ -79,7 +79,7 @@ void ReferenceSolver::Plan::DeduceVariables()
                 // Enforce rule #525 - the arbitrary forces can be outside the
                 // domain and won't have x_tree_db xlink_table. This is OK as long
                 // as constraints that have to deal with them don't need xlink_table.
-                ASSERT( c->GetVariablesRequiringRows().count(v) == 0 )
+                ASSERT( c->GetVariablesRequiringDB().count(v) == 0 )
                       ( "Constraint:\n")(c)("\nrequires NUGGETS but ")(v)(" is arbitrary\n");
             }
         }        

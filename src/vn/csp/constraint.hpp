@@ -54,7 +54,7 @@ public:
      * 
      * @return A list of variables affected by this constraint.
      */
-    virtual SYM::Expression::VariablesRequiringRows GetVariablesRequiringRows() const = 0;
+    virtual SYM::Expression::VariablesRequiringDB GetVariablesRequiringDB() const = 0;
 
     /**
      * Set the values of the forced varibles
@@ -90,7 +90,7 @@ public:
      * @note the returned set is allowed to contain inconsistent values. 
      */
     virtual unique_ptr<SYM::SubsetResult> GetSuggestedValues( const Assignments &assignments,
-                                                           const VariableId &var ) const = 0;        
+                                                              const VariableId &var ) const = 0;        
     
     string GetTrace() const;
 

@@ -131,7 +131,7 @@ AllGreaterOperator::AllGreaterOperator( shared_ptr<SymbolExpression> a_ ) :
 }
 
     
-Expression::VariablesRequiringRows AllGreaterOperator::GetVariablesRequiringRows() const
+Expression::VariablesRequiringDB AllGreaterOperator::GetVariablesRequiringDB() const
 {
     return GetRequiredVariables();
 }
@@ -170,7 +170,7 @@ AllLessOperator::AllLessOperator( shared_ptr<SymbolExpression> a_ ) :
 }
 
     
-Expression::VariablesRequiringRows AllLessOperator::GetVariablesRequiringRows() const
+Expression::VariablesRequiringDB AllLessOperator::GetVariablesRequiringDB() const
 {
     return GetRequiredVariables();
 }
@@ -209,7 +209,7 @@ AllGreaterOrEqualOperator::AllGreaterOrEqualOperator( shared_ptr<SymbolExpressio
 }
 
     
-Expression::VariablesRequiringRows AllGreaterOrEqualOperator::GetVariablesRequiringRows() const
+Expression::VariablesRequiringDB AllGreaterOrEqualOperator::GetVariablesRequiringDB() const
 {
     return GetRequiredVariables();
 }
@@ -248,7 +248,7 @@ AllLessOrEqualOperator::AllLessOrEqualOperator( shared_ptr<SymbolExpression> a_ 
 }
 
     
-Expression::VariablesRequiringRows AllLessOrEqualOperator::GetVariablesRequiringRows() const
+Expression::VariablesRequiringDB AllLessOrEqualOperator::GetVariablesRequiringDB() const
 {
     return GetRequiredVariables();
 }

@@ -32,7 +32,7 @@ SymbolicConstraint::Plan::Plan( SymbolicConstraint *algo_,
 {
     DetermineVariables();   
     DetermineHintExpressions();   
-    DetermineXTreeDbRequirement(); 
+    DetermineVariablesRequiringDB(); 
 }
 
 
@@ -76,27 +76,9 @@ void SymbolicConstraint::Plan::DetermineHintExpressions()
 }
 
 
-void SymbolicConstraint::Plan::DetermineXTreeDbRequirement()
+void SymbolicConstraint::Plan::DetermineVariablesRequiringDB()
 {
-    required_x_tree_db_level.clear();
-    
-    consistency_expression->ForTreeDepthFirstWalk( [&](const SYM::Expression *expr)
-    {
-        required_x_tree_db_level = UnionOf( required_x_tree_db_level, 
-                                            expr->GetVariablesRequiringRows() );
-    } );
-    
-    for( const auto &target_suggestions : suggestion_expressions )
-    {
-        for( auto suggestion : target_suggestions.second )
-        {
-            suggestion.second->ForTreeDepthFirstWalk( [&](const SYM::Expression *expr)
-            {
-                required_x_tree_db_level = UnionOf( required_x_tree_db_level, 
-                                                    expr->GetVariablesRequiringRows() );            
-            } );
-        }
-    }    
+    variables_requiring_db = consistency_expression->GetVariablesRequiringDB();      
 }   
 
 
@@ -112,9 +94,9 @@ const set<VariableId> &SymbolicConstraint::GetVariables() const
 }
 
 
-SYM::Expression::VariablesRequiringRows SymbolicConstraint::GetVariablesRequiringRows() const
+SYM::Expression::VariablesRequiringDB SymbolicConstraint::GetVariablesRequiringDB() const
 {
-    return plan.required_x_tree_db_level;
+    return plan.variables_requiring_db;
 }
 
 
