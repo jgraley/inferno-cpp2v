@@ -23,8 +23,8 @@ public:
     ReadArgs( int argc, char *argv[] );
 
     static string exename;
-    static string infile;
-    static string outfile;
+    static string input_x_path;
+    static string output_x_path;
     static bool intermediate_graph;
     static int pattern_graph_index;
     static string pattern_graph_name;

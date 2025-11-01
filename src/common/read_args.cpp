@@ -10,8 +10,8 @@
 using namespace std;
 
 string ReadArgs::exename;
-string ReadArgs::infile;
-string ReadArgs::outfile;
+string ReadArgs::input_x_path;
+string ReadArgs::output_x_path;
 bool ReadArgs::intermediate_graph = false;
 int ReadArgs::pattern_graph_index = -1; // -1 disables
 string ReadArgs::pattern_graph_name = ""; // "" disables
@@ -44,8 +44,8 @@ void ReadArgs::Usage(string msg)
     fprintf(stderr, "Usage:\n"
                     "%s <options> \n"
                     "\n"
-                    "-i<infile>  Read input program (C/C++) from <infile>.\n"
-                    "-o<outfile> Write output program to <outfile>. C/C++ by default. Writes to stdout if omitted.\n"
+                    "-i<input_path>  Read input program (C/C++) from <input_x_path>.\n"
+                    "-o<output_path> Write output program to <output_x_path>. C/C++ by default. Writes to stdout if omitted.\n"
                     "-t          Turn on tracing internals (very verbose).\n"                    
                     "-th<fmt>    Dump hit counts at the end of execution based on <fmt>.\n"
                     "            Note: use -th? for help on <fmt>.\n"
@@ -70,7 +70,7 @@ void ReadArgs::Usage(string msg)
                     "            or number, or generate all into a directory if name ends in /.\n"
                     "-rn<n>      Stop search and replace after n repetitions and do not generate an error.\n"
                     "-re<n>      Stop search and replace after n repetitions and do generate an error.\n"
-                    "-f          Output all intermediates: .cpp and .dot. <outfile> is path/basename.\n"
+                    "-f          Output all intermediates: .cpp and .dot. <output_x_path> is path/basename.\n"
                     "-u<x>       Use feature x.\n"
                     "Hint: use eg I=-sd or I=\"-sd -t\" with make\n",
                     exename.c_str() );
@@ -109,11 +109,11 @@ ReadArgs::ReadArgs( int ac, char *av[] )
         
         if( option=='i' )
         {
-            infile = GetArg();
+            input_x_path = GetArg();
         }
         else if( option=='o' )
         {
-            outfile = GetArg();
+            output_x_path = GetArg();
         }
         else if( option=='t' )
         {

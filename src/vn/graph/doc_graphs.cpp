@@ -14,7 +14,7 @@ using namespace VN;
 /// name and path supplied by user with -o (or local dir)
 static void Output( TreePtr<Node> root, string name )
 {
-    string path = ReadArgs::outfile + name + string(".dot");
+    string path = ReadArgs::output_x_path + name + string(".dot");
     TRACE("Generating graph ")(path)("\n");    
     Graph g( path, __FILE__ );
     g.GenerateGraph( root ); 

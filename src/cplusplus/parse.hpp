@@ -25,9 +25,9 @@ class Parse
 {
 public:
     Parse(string i) :
-        infile(i)
+        input_x_path(i)
     {
-        ASSERT( infile!="" );
+        ASSERT( input_x_path!="" );
     }
 
     TreePtr<Node> DoParse()
@@ -58,12 +58,12 @@ public:
         clang::Preprocessor pp(diags, opts, *ptarget, sm, headers);
         pp.setPredefines("#define __INFERNO__ 1\n");            
             
-        const clang::FileEntry *file = fm.getFile(infile);
+        const clang::FileEntry *file = fm.getFile(input_x_path);
         if (file)
             sm.createMainFileID(file, clang::SourceLocation());
         if (sm.getMainFileID() == 0)
         {
-            fprintf(stderr, "Error reading '%s'!\n", infile.c_str());
+            fprintf(stderr, "Error reading '%s'!\n", input_x_path.c_str());
             exit(1);
         }
         pp.EnterMainSourceFile();
@@ -83,7 +83,7 @@ public:
     }
 
 private:
-    string infile;
+    string input_x_path;
 
     class InfernoAction: public clang::Action, public Traceable
     {

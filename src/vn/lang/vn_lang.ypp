@@ -107,21 +107,3 @@ void YY::VNLangParser::error(const location& loc, const std::string& msg)
   if (lexer.size() == 0) // if token is unknown (no match)
     lexer.matcher().winput(); // skip character
 }
-
-int main(int argc, char **argv) 
-{
-  if (argc < 2)
-    return EXIT_FAILURE;
-
-  FILE *file = fopen(argv[1], "r");
-
-  if (file == NULL)
-  {
-    perror("Cannot open file");
-    return EXIT_FAILURE;
-  }
-
-  YY::VNLangScanner scanner(file, std::cout);
-  YY::VNLangParser parser(scanner);
-  return parser.parse();
-}

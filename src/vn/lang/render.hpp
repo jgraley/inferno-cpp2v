@@ -22,7 +22,7 @@ struct RenderKit : TransKit
 class Render
 {
 public:	
-    Render( string of = string() );
+    Render( string output_x_path_ = string() );
     string RenderToString( shared_ptr<VN::CompareReplace> pattern );
     void WriteToFile(string s);
     
@@ -43,7 +43,7 @@ public:
     queue<TreePtr<CPPTree::Instance>> definitions;
     UniquifyNames::NodeToNameMap unique_coupling_names;
     UniquifyNames::LinkSetByNode incoming_links;
-    const string outfile;                                     
+    const string output_x_path;                                     
     SimpleCompare sc;
     unique_ptr<DefaultTransUtils> utils;
     RenderKit kit;

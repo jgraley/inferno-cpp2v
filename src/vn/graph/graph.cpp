@@ -42,17 +42,17 @@ using namespace VN;
 #include <functional>
 
 Graph::Graph( string of, string title ) :
-    outfile(of),
+    output_path(of),
     base_region( ReadArgs::graph_dark ? "black" : "antiquewhite1" ),
     line_colour( ReadArgs::graph_dark ? "grey85" : "black" ),
     font_colour( ReadArgs::graph_dark ? "white" : "black" ),
     external_font_colour( ReadArgs::graph_dark ? "grey60" : "grey40" ),
     backgrounded_font_colour( "black" )
 {
-    if( !outfile.empty() )
+    if( !output_path.empty() )
     {
-        filep = fopen( outfile.c_str(), "wt" );
-        ASSERT( filep )( "Cannot open output file \"%s\"", outfile.c_str() );
+        filep = fopen( output_path.c_str(), "wt" );
+        ASSERT( filep )( "Cannot open output file \"%s\"", output_path.c_str() );
     }
     
     Disburse( DoHeader(title) );
@@ -64,7 +64,7 @@ Graph::~Graph()
     Disburse( all_dot );
     Disburse( DoFooter() );
 
-    if( !outfile.empty() )
+    if( !output_path.empty() )
     {
         fclose( filep );
     }
@@ -942,7 +942,7 @@ string Graph::EscapeForGraphviz( string s )
 
 void Graph::Disburse( string s )
 {
-    if( outfile.empty() )
+    if( output_path.empty() )
     {
         puts( s.c_str() );
     }

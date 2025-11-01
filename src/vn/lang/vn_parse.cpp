@@ -1,3 +1,5 @@
+#include "vn_parse.hpp"
+
 #include "tree/cpptree.hpp"
 #include "helpers/transformation.hpp"
 #include "tree/typeof.hpp"
@@ -9,15 +11,10 @@
 #include "tree/misc.hpp"
 #include "tree/scope.hpp"
 #include "sort_decls.hpp"
-#include "render.hpp"
-#include "clang/Parse/DeclSpec.h"
-#include "uniquify_identifiers.hpp"
-#include "search_replace.hpp"
-#include "agents/special_agent.hpp"
-#include "vn_parse.hpp"
 #include "vn_lang.ypp.hpp"
 #include "vn_lang.lpp.hpp"
 #include "vn_lang.location.hpp"
+
 #include <iostream>
 #include <fstream>
 
@@ -28,12 +25,12 @@ using namespace reflex;
 
 void VN::Parse(string filepath)
 {
-	ifstream ifs; 
-	ifs.open(filepath, ifstream::in);
-	reflex::Input input(ifs);
-	
-	YY::VNLangScanner scanner( input, cerr );
-	
-	// I'm guessing this will invoke actions and then return a root symbol?
-	YY::VNLangParser::symbol_type symbol0 = scanner.lex();
+    FILE *file = fopen(filepath.c_str(), "r");
+
+    ASSERT(file != NULL)("Cannot open VN file: ")(filepath);
+
+    YY::VNLangScanner scanner(file, std::cout);
+    YY::VNLangParser parser(scanner);
+    int pr = parser.parse();
+    FTRACE("parse result: ")(pr)("\n");
 }

@@ -24,13 +24,13 @@ then
     exit 1
 fi
 
-infile=$1
+input_x_path=$1
 shift
 outpath=$1
 shift
 iargs=$*
-fb=`basename $infile`
-outfile=$outpath/$fb
+fb=`basename $input_x_path`
+output_x_path=$outpath/$fb
 
 mkdir -p $outpath
 
@@ -54,12 +54,12 @@ cmpres=1000
 return_code=1 
  
 echo Compile input...
-resource/script/compile.sh --exp-run -c $infile -o $outpath/"$fb"_in.o
+resource/script/compile.sh --exp-run -c $input_x_path -o $outpath/"$fb"_in.o
 c1res=$?
 if test $c1res -ne 0
 then
  # if it doesn't even compile, do nothing TODO return a failure
- echo TEST VECTOR $infile REJECTED
+ echo TEST VECTOR $input_x_path REJECTED
  exit 2
 fi
 
@@ -77,15 +77,15 @@ fi
 
 echo Transform... 
 # Always do self-test
-#gdb -ex run --args $inferno -s -i$infile -o$outfile $iargs
-time $inferno -i$infile -o$outfile $iargs
+#gdb -ex run --args $inferno -s -i$input_x_path -o$output_x_path $iargs
+time $inferno -i$input_x_path -o$output_x_path $iargs
 ires=$?
 
 if test $ires -eq 0
 then
- clang-format -i $outfile
+ clang-format -i $output_x_path
  echo Compile output...
- resource/script/compile.sh -c $outfile -o $outpath/"$fb"_out.o
+ resource/script/compile.sh -c $output_x_path -o $outpath/"$fb"_out.o
  c2res=$?
  if test $c2res -eq 0
  then
@@ -107,12 +107,12 @@ then
     if test $r1res -eq $r2res
     then
      cmpres=0
-     echo $infile PASSED
+     echo $input_x_path PASSED
      return_code=0
     fi
    fi 
   else
-   echo $infile PASSED COMPILE ONLY
+   echo $input_x_path PASSED COMPILE ONLY
    return_code=0
   fi
  fi

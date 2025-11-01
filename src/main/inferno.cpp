@@ -267,12 +267,12 @@ Inferno::Plan::Plan(Inferno *algo_) :
     Stage stage_parse_X(
         { Progress::PARSING, 
           true, false, false, false,
-          SSPrintf("Parsing input %s", ReadArgs::infile.c_str()), 
+          SSPrintf("Parsing input %s", ReadArgs::input_x_path.c_str()), 
           nullptr, 
           [this]()
           { 
-              Parse p( ReadArgs::infile );
-              algo->program = p.DoParse(); 
+              Parse input_x_parser( ReadArgs::input_x_path );
+              algo->program = input_x_parser.DoParse(); 
           } }
     );
     
@@ -283,8 +283,8 @@ Inferno::Plan::Plan(Inferno *algo_) :
           "Rendering output to code", 
           nullptr, [&]()
           { 
-              CppRender r( ReadArgs::outfile );
-              r.WriteToFile( r.RenderToString( algo->program ) ); 
+              CppRender output_x_renderer( ReadArgs::output_x_path );
+              output_x_renderer.WriteToFile( output_x_renderer.RenderToString( algo->program ) ); 
           } }
     );
 
@@ -327,7 +327,7 @@ Inferno::Plan::Plan(Inferno *algo_) :
           nullptr, 
           [this]()
           { 
-              Graph g( ReadArgs::outfile, ReadArgs::outfile );
+              Graph g( ReadArgs::output_x_path, ReadArgs::output_x_path );
               g.GenerateGraph( algo->program ); 
           } }
     );
@@ -462,7 +462,7 @@ Inferno::Plan::Plan(Inferno *algo_) :
     if( ReadArgs::documentation_graphs || generate_pattern_graphs )
         return;
 
-    if( ReadArgs::infile=="" )
+    if( ReadArgs::input_x_path=="" )
     {
         fprintf(stderr, "No input file provided so performing planning only. -h for help.\n");     
         goto FINAL_TRACE;
@@ -579,28 +579,28 @@ void Inferno::PatternDispatcher(PatternAction action, int pattern_index, string 
             }
         }
         Progress(Progress::RENDERING, my_sp.step_index).SetAsCurrent();        
-		action( my_sp, ReadArgs::outfile, false, vn_sequence->GetStepName(my_sp.step_index) );
+		action( my_sp, ReadArgs::output_x_path, false, vn_sequence->GetStepName(my_sp.step_index) );
     }       
 }
 
 
-void Inferno::DoPatternGraph( const Step &sp, string outfile, bool add_file_extension, string title ) const
+void Inferno::DoPatternGraph( const Step &sp, string output_x_path, bool add_file_extension, string title ) const
 {
 	if( add_file_extension )
-		outfile += ".dot";
-	Graph graph( outfile, title );
+		output_x_path += ".dot";
+	Graph graph( output_x_path, title );
     vn_sequence->DoGraph( sp.step_index, graph );
     if( ReadArgs::graph_trace )    
         vn_sequence->GenerateGraphRegions(sp.step_index, graph);
 }
    
  
-void Inferno::DoPatternRender( const Step &sp, string outfile, bool add_file_extension, string title ) const
+void Inferno::DoPatternRender( const Step &sp, string output_x_path, bool add_file_extension, string title ) const
 {
 	(void)title;
 	if( add_file_extension )
-		outfile += ".vn";
-    VN::Render r( outfile );
+		output_x_path += ".vn";
+    VN::Render r( output_x_path );
     vn_sequence->DoRender( sp.step_index, r );
 }
    
@@ -608,14 +608,14 @@ void Inferno::DoPatternRender( const Step &sp, string outfile, bool add_file_ext
 void Inferno::RunTransformationStep(const Step &sp)
 {
     if( !ReadArgs::trace_quiet )
-        fprintf(stderr, "%s at T%03d-%s\n", ReadArgs::infile.c_str(), sp.step_index, vn_sequence->GetStepName(sp.step_index).c_str() ); 
+        fprintf(stderr, "%s at T%03d-%s\n", ReadArgs::input_x_path.c_str(), sp.step_index, vn_sequence->GetStepName(sp.step_index).c_str() ); 
     program = vn_sequence->TransformStep( sp.step_index );
     if( ReadArgs::output_all )
     {
-        CppRender r( ReadArgs::outfile+SSPrintf("_%03d.cpp", sp.step_index) );
+        CppRender r( ReadArgs::output_x_path+SSPrintf("_%03d.cpp", sp.step_index) );
         r.WriteToFile( r.RenderToString( program ) );     
-        Graph g( ReadArgs::outfile+SSPrintf("_%03d.dot", sp.step_index), 
-                 ReadArgs::outfile+SSPrintf(" after T%03d-%s", sp.step_index, vn_sequence->GetStepName(sp.step_index).c_str()) );
+        Graph g( ReadArgs::output_x_path+SSPrintf("_%03d.dot", sp.step_index), 
+                 ReadArgs::output_x_path+SSPrintf(" after T%03d-%s", sp.step_index, vn_sequence->GetStepName(sp.step_index).c_str()) );
         g.GenerateGraph( program );    
     }           
 }

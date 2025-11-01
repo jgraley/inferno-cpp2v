@@ -20,8 +20,8 @@ using namespace CPPTree; // TODO should not need
 using namespace VN;
 
 
-Render::Render( string of ) :
-    outfile( of )
+Render::Render( string output_x_path_ ) :
+    output_x_path( output_x_path_ )
 {
 }
 
@@ -62,14 +62,14 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern )
 
 void Render::WriteToFile( string s )
 {
-    if( outfile.empty() )
+    if( output_x_path.empty() )
     {
         puts( s.c_str() );
     }
     else
     {
-        FILE *fp = fopen( outfile.c_str(), "wt" );
-        ASSERT( fp )( "Cannot open output file \"%s\"", outfile.c_str() );
+        FILE *fp = fopen( output_x_path.c_str(), "wt" );
+        ASSERT( fp )( "Cannot open output file \"%s\"", output_x_path.c_str() );
         fputs( s.c_str(), fp );
         fclose( fp );
     }        

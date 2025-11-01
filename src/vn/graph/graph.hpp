@@ -180,7 +180,7 @@ private:
     static string MakeTag(string tagname); 
     static string MakeHTMLForGraphViz(string html); 
 
-    const string outfile; // empty means stdout
+    const string output_path; // empty means stdout
     FILE *filep;
     set<const Graphable *> reached;
     set<string> block_ids_show_prerestriction;
