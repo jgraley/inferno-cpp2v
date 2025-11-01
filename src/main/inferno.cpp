@@ -660,7 +660,15 @@ int main( int argc, char *argv[] )
     if( ReadArgs::documentation_graphs )
         BuildDocSequence( &sequence );
     else if( !ReadArgs::vn_path.empty() )
-		VNParse().DoParse( ReadArgs::vn_path );
+    {
+		auto step = make_shared<VNStep>();
+		VNParse vn_parser;
+		TreePtr<Node> script = vn_parser.DoParse( ReadArgs::vn_path );
+		auto pure_engine = TreePtr<VN::VNParse::PureEngine>::DynamicCast(script);
+		ASSERT(pure_engine)( "Only a single pure engine supported rn, saw: ")(script)(" lol\n");
+		step->Configure(VNStep::COMPARE_REPLACE, pure_engine->stem);
+		sequence.push_back( step );
+	}
 	else
         BuildDefaultSequence( &sequence );    
         

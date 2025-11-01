@@ -14,6 +14,7 @@
 #include "vn_lang.ypp.hpp"
 #include "vn_lang.lpp.hpp"
 #include "vn_lang.location.hpp"
+#include "vn/agents/all.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -23,7 +24,7 @@ using namespace CPPTree; // TODO should not need
 using namespace VN;
 using namespace reflex;
 
-void VNParse::DoParse(string filepath)
+TreePtr<Node> VNParse::DoParse(string filepath)
 {
     FILE *file = fopen(filepath.c_str(), "r");
 
@@ -32,16 +33,63 @@ void VNParse::DoParse(string filepath)
     YY::VNLangScanner scanner(file, std::cout);
     scanner.filename = filepath;    
     YY::VNLangParser parser(scanner, this);
-    int pr = parser.parse();
     
-    // TODO provisional, until we can do something with the parsed pattern
-    FTRACE("parse result: ")(pr)(", stopping\n");
-    exit(pr);
+    saw_error = false;
+    script = nullptr;
+    int pr = parser.parse();    
+    ASSERT(pr==EXIT_SUCCESS);
+    ASSERT(script);
+    
+    return script;
 }
 
 
+void VNParse::OnError()
+{
+	saw_error = true;
+}
+
+
+void VNParse::OnVNScript( Production script_ )
+{
+	if( saw_error )
+		return;
+		
+	FTRACE("Got ")(script_)("\n");
+	script = script_;
+}
+
+ 
 Production VNParse::OnEngine( Production stem )
 {
-	FTRACE("Got engine stem:%d\n")(stem)("\n");
-	return stem*10;
+	FTRACE("Got engine stem: ")(stem)("\n");
+	auto pure_engine = MakeTreeNode<PureEngine>();
+	pure_engine->stem = stem;
+	return pure_engine;
+}
+
+
+Production VNParse::OnStuff( Production terminus )
+{
+	auto expr_terminus = TreePtr<Expression>::DynamicCast(terminus);
+	auto stuff = MakePatternNode<Stuff<Expression>>();
+	stuff->terminus = expr_terminus;
+	return stuff;
+}
+
+
+Production VNParse::OnDelta( Production through, Production overlay )
+{
+	auto expr_through = TreePtr<Expression>::DynamicCast(through);
+	auto expr_overlay = TreePtr<Expression>::DynamicCast(overlay);
+	auto delta = MakePatternNode<Delta<Expression>>();
+	delta->through = expr_through;
+	delta->overlay = expr_overlay;
+	return delta;
+}
+
+
+Production VNParse::OnSpecificInteger( int value )
+{
+	return MakePatternNode<SpecificInteger>(value);
 }

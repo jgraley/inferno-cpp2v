@@ -11,15 +11,30 @@
 
 namespace VN 
 {
-//typedef TreePtr<Node> Production;	
-typedef float Production;	
+typedef TreePtr<Node> Production;	
+//typedef float Production;	
  
 class VNParse	
 {
 public:
-	void DoParse(string filepath);
+	TreePtr<Node> DoParse(string filepath);
 	
+	struct PureEngine : Node
+	{
+		NODE_FUNCTIONS_FINAL
+		TreePtr<Node> stem;
+	};	 
+	
+	void OnError();
+	void OnVNScript( Production script_ );
 	Production OnEngine( Production stem );
+	Production OnStuff( Production terminus );
+	Production OnDelta( Production through, Production overlay );
+	Production OnSpecificInteger( int value );
+
+private: 
+	bool saw_error;
+	TreePtr<Node> script;	
 };
 	
 	
