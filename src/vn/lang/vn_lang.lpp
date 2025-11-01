@@ -17,7 +17,7 @@
 /* throw an exception in the scanner's default rule */
 %option exception="YY::VNLangParser::syntax_error(location(), \"Unknown token.\")"
 
-%option tabs=8
+%option tabs=4
 
 %option namespace=YY
 %option lexer=VNLangScanner
@@ -25,7 +25,9 @@
 %option unicode
 %option freespace
 
-var     \p{UnicodeIdentifierStart} \p{UnicodeIdentifierPart}*
+// We have to exclude delta from identifiers here, otherwise "match longest"
+// rule means eg Δd is parsed as a name.
+name    [\p{UnicodeIdentifierStart}]{-}[Δ] [\p{UnicodeIdentifierPart}{-}[Δ]]*
 exp     [Ee] [-+]? \d+
 num     \d* (\d | \.\d | \d\.) \d* {exp}?
 
@@ -33,9 +35,13 @@ num     \d* (\d | \.\d | \d\.) \d* {exp}?
 
 \s          // ignore space
 \"[^"]*\"   { return YY::VNLangParser::make_STR(wstr(), location()); }
-{var}       { return YY::VNLangParser::make_VAR(wstr(), location()); }
 {num}       { return YY::VNLangParser::make_NUM(strtod(text(), NULL), location()); }
+{name}      { return YY::VNLangParser::make_VAR(wstr(), location()); }
 [-+*/=();]  { return YY::VNLangParser::symbol_type(chr(), location()); }
+꩜			{ return YY::VNLangParser::make_ENGINE(location()); };
+⩨			{ return YY::VNLangParser::make_STUFF(location()); };
+Δ			{ return YY::VNLangParser::make_DELTA(location()); };
+🡺			{ return YY::VNLangParser::make_DELTA_ARROW(location()); };
 <<EOF>>     { return YY::VNLangParser::make_EOF(location()); }
 
 %%

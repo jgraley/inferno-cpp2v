@@ -10,6 +10,7 @@
 using namespace std;
 
 string ReadArgs::exename;
+string ReadArgs::vn_path;
 string ReadArgs::input_x_path;
 string ReadArgs::output_x_path;
 bool ReadArgs::intermediate_graph = false;
@@ -42,8 +43,9 @@ void ReadArgs::Usage(string msg)
 {
     fprintf(stderr, "%s\n", msg.c_str());
     fprintf(stderr, "Usage:\n"
-                    "%s <options> \n"
+                    "%s {<vn_path>} <options> \n"
                     "\n"
+                    "<vn_path>       Run this Vida Nova script.\n"
                     "-i<input_path>  Read input program (C/C++) from <input_x_path>.\n"
                     "-o<output_path> Write output program to <output_x_path>. C/C++ by default. Writes to stdout if omitted.\n"
                     "-t          Turn on tracing internals (very verbose).\n"                    
@@ -100,8 +102,11 @@ ReadArgs::ReadArgs( int ac, char *av[] )
     for( curarg=1; curarg<argc; curarg++ )
     {
         if( argv[curarg][0] != '-' )
-            Usage(SSPrintf("Expecting \"-\" in argument \"%s\"", argv[curarg]));
-            
+        {
+            vn_path = argv[curarg];
+            continue;
+		}
+		
         if( ((string)(argv[curarg])).size()<2 )
             Usage("Missing option letter");
 

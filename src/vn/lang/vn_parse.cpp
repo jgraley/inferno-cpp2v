@@ -23,14 +23,25 @@ using namespace CPPTree; // TODO should not need
 using namespace VN;
 using namespace reflex;
 
-void VN::Parse(string filepath)
+void VNParse::DoParse(string filepath)
 {
     FILE *file = fopen(filepath.c_str(), "r");
 
     ASSERT(file != NULL)("Cannot open VN file: ")(filepath);
 
     YY::VNLangScanner scanner(file, std::cout);
-    YY::VNLangParser parser(scanner);
+    scanner.filename = filepath;    
+    YY::VNLangParser parser(scanner, this);
     int pr = parser.parse();
-    FTRACE("parse result: ")(pr)("\n");
+    
+    // TODO provisional, until we can do something with the parsed pattern
+    FTRACE("parse result: ")(pr)(", stopping\n");
+    exit(pr);
+}
+
+
+Production VNParse::OnEngine( Production stem )
+{
+	FTRACE("Got engine stem:%d\n")(stem)("\n");
+	return stem*10;
 }

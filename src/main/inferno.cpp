@@ -26,6 +26,7 @@
 #include "vn/search_replace.hpp"
 #include "vn/csp/reference_solver.hpp"
 #include "vn/vn_sequence.hpp"
+#include "vn/lang/vn_parse.hpp"
 
 #include <cstdlib>
 
@@ -658,7 +659,9 @@ int main( int argc, char *argv[] )
         fprintf(stderr, "Building patterns\n"); 
     if( ReadArgs::documentation_graphs )
         BuildDocSequence( &sequence );
-    else
+    else if( !ReadArgs::vn_path.empty() )
+		VNParse().DoParse( ReadArgs::vn_path );
+	else
         BuildDefaultSequence( &sequence );    
         
     // Maybe we want to stop after buolding the steps

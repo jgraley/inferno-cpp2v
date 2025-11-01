@@ -23,6 +23,7 @@ public:
     ReadArgs( int argc, char *argv[] );
 
     static string exename;
+    static string vn_path;
     static string input_x_path;
     static string output_x_path;
     static bool intermediate_graph;

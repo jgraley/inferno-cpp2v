@@ -11,7 +11,17 @@
 
 namespace VN 
 {
-	extern void Parse(string filepath);
+//typedef TreePtr<Node> Production;	
+typedef float Production;	
+ 
+class VNParse	
+{
+public:
+	void DoParse(string filepath);
+	
+	Production OnEngine( Production stem );
+};
+	
 	
 };
 

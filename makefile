@@ -47,7 +47,7 @@ clean_libclang%.a :
 # Link inferno executable
 #
 inferno.exe : makefile makefile.common build/inferno.a build/src/lang.a $(LIB_PATHS)
-	$(ICC) build/inferno.a $(LIB_PATHS) $(OPTIONS) $(EXE_OPTIONS) $(LINK_OPTIONS) -o inferno.exe
+	$(ICC) build/inferno.a build/src/lang.a $(LIB_PATHS) $(OPTIONS) $(EXE_OPTIONS) $(LINK_OPTIONS) -o inferno.exe
 
 #
 # Build the doxygen docs

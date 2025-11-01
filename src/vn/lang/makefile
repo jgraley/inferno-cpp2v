@@ -34,14 +34,14 @@ $(VNL_LYPP_MODULES:%=build/%.ypp.cpp): build/%.ypp.cpp : %.ypp $(VNL_DEPS)
 	$(BISON) -d $< -o $@
 
 
-$(VNL_LYPP_MODULES:%=build/%.lpp.o): build/%.lpp.o : build/%.lpp.cpp build/%.lpp.hpp build/%.location.hpp $(VNL_DEPS)
+$(VNL_LYPP_MODULES:%=build/%.lpp.o): build/%.lpp.o : build/%.lpp.cpp build/%.ypp.hpp build/%.lpp.hpp build/%.location.hpp $(VNL_DEPS)
 	@mkdir -p $(dir $@)
-	g++ $< -c $(VNL_OPTIONS) -o $@ 
+	g++ $< -c $(VNL_CPP_OPTIONS) -o $@ 
 
 
 $(VNL_LYPP_MODULES:%=build/%.ypp.o): build/%.ypp.o : build/%.ypp.cpp build/%.ypp.hpp build/%.lpp.hpp build/%.location.hpp $(VNL_DEPS)
 	@mkdir -p $(dir $@)
-	g++ $< -c $(VNL_OPTIONS) -o $@ 
+	g++ $< -c $(VNL_CPP_OPTIONS) -o $@ 
 
 
 $(VNL_CPP_MODULES:%=build/%.o) : build/%.o : %.cpp $(VNL_DEPS)
@@ -53,11 +53,3 @@ build/src/lang.a : $(VNL_LYPP_MODULES:%=build/%.lpp.o) $(VNL_LYPP_MODULES:%=buil
 	@mkdir -p build/src 
 	$(AR) -r $@ $(VNL_LYPP_MODULES:%=build/%.lpp.o) $(VNL_LYPP_MODULES:%=build/%.ypp.o) $(VNL_CPP_MODULES:%=build/%.o)
 	
-
-$(VNL_LYPP_MODULES:%=build/%_exe): build/%_exe : build/src/lang.a $(VNL_DEPS)
-	g++ $< $(LIBREFLEX) $(VNL_OPTIONS) -o $@
-	
-	 
-.PHONY: langtest
-langtest : build/$(VNL_DIR)/vn_lang_exe $(VNL_DEPS) 
-	./$< $(VNL_DIR)/langtest.vn

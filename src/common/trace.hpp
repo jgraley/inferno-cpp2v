@@ -48,6 +48,7 @@ string Trace(bool b);
 string Trace(int i); 
 string Trace(unsigned i); 
 string Trace(size_t i); 
+string Trace(float i); 
 string Trace(const exception &e); 
 string Trace(const void *p); 
 string Trace(const Progress &progress); 
@@ -398,6 +399,9 @@ private:
 #define FTRACEC Tracer{Tracer::FORCE}
 
 // Asserts and such...
+#ifdef ASSERT
+#undef ASSERT // Ours can be used in palce of the usual type
+#endif
 #define ASSERT(CONDITION) (CONDITION) ? NewtonsCradle() : Tracer( __FILE__, __LINE__, GetTrace(), __func__, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #CONDITION )
 #define ASSERTS(CONDITION) (CONDITION) ? NewtonsCradle() : Tracer( __FILE__, __LINE__, "", __func__, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #CONDITION )
 

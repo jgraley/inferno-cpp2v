@@ -71,6 +71,12 @@ string Trace(size_t i)
 }
 
 
+string Trace(float f)
+{    
+    return to_string(f);
+}
+
+
 string Trace(const exception &e)
 {
     return string( e.what() ? e.what() : "exception:what()=NULL" );
