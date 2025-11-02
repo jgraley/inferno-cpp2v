@@ -15,8 +15,6 @@
 
 #include <unistd.h> // for get_current_dir_name()
 
-//#define NEWS
-
 using namespace CPPTree; // TODO put parse in cpp file so this using does not pollute
 
 #define INFERNO_TRIPLE "arm-linux"

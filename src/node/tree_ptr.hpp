@@ -8,8 +8,6 @@
 #ifndef TREE_PTR_HPP
 #define TREE_PTR_HPP
 
-#define NEWS
-
 #include "common/common.hpp"
 #include "common/magic.hpp"
 #include "itemise.hpp"
@@ -122,17 +120,9 @@ extern list<string> deletions;
 
 template<typename VALUE_TYPE>
 struct TreePtr : virtual TreePtrCommon, 
-#ifdef NEWS
-                 shared_ptr<Node>
-#else
-                 shared_ptr<VALUE_TYPE>
-#endif                 
+                 shared_ptr<Node>               
 {
-#ifdef NEWS
     typedef Node TruePtrType;
-#else
-    typedef VALUE_TYPE TruePtrType;
-#endif
 
 	using TreePtrInterface::operator=;
 	
@@ -181,13 +171,9 @@ struct TreePtr : virtual TreePtrCommon,
 
 	inline VALUE_TYPE *GetValueTypePointer() const
 	{
-#ifdef NEWS
 		auto pt = shared_ptr<TruePtrType>::get();
 		auto pv = dynamic_cast<VALUE_TYPE *>(pt);
 		ASSERT(!pt || pv)("Attempt to access member of degenerate child object"); 
-#else
-		auto pv = shared_ptr<TruePtrType>::get();
-#endif
         return pv;
 	}
 	
@@ -338,11 +324,7 @@ template< typename X, typename Y >
 bool operator==( const TreePtr<X> &x,
                  const TreePtr<Y> &y)
 {
-#ifdef NEWS
-    return operator==( (const shared_ptr<Node> &)x, (const shared_ptr<Node> &)y );
-#else    
-    return operator==( (const shared_ptr<X> &)x, (const shared_ptr<Y> &)y );
-#endif    
+    return operator==( (const shared_ptr<Node> &)x, (const shared_ptr<Node> &)y );  
 }
 
 
