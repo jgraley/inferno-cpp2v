@@ -192,17 +192,7 @@ struct TreePtr : virtual TreePtrCommon,
 
     TreePtr &operator=( const shared_ptr<Node> &n )
     {   
-        if( n )
-        {
-            auto p = dynamic_pointer_cast<Node>(n);
-            ASSERT( p )("TreePtr inferred dynamic cast has failed: from ")(*n)
-                       (" to type ")(TYPE_ID_NAME( VALUE_TYPE ))("\n");
-            (void)shared_ptr<Node>::operator=( p );
-        }
-        else
-        {
-            (void)shared_ptr<Node>::operator=( shared_ptr<Node>() );
-        }
+        (void)shared_ptr<Node>::operator=( n );
         (void)SatelliteSerial::operator=( SatelliteSerial( n.get(), this ) );
         return *this;
     }
