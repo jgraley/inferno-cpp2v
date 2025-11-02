@@ -4,7 +4,7 @@
 #include "agent.hpp"
 #include "common/common.hpp"
 
-//#define NEWS
+#define NEWS
 
 namespace VN
 { 
