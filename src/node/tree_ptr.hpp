@@ -122,8 +122,6 @@ template<typename VALUE_TYPE>
 struct TreePtr : virtual TreePtrCommon, 
                  shared_ptr<Node>               
 {
-    typedef Node TruePtrType;
-
 	using TreePtrInterface::operator=;
 	
     typedef VALUE_TYPE value_type;
@@ -139,39 +137,39 @@ struct TreePtr : virtual TreePtrCommon,
 
     explicit TreePtr( VALUE_TYPE *o ) : 
         TreePtrCommon( o ),
-        shared_ptr<TruePtrType>( o )
+        shared_ptr<Node>( o )
     {
     }
 
     TreePtr( nullptr_t o ) : 
         TreePtrCommon( o ),
-        shared_ptr<TruePtrType>( nullptr )
+        shared_ptr<Node>( nullptr )
     {
     }
 
     template< typename OTHER >
     explicit TreePtr( const shared_ptr<OTHER> &o ) :
         TreePtrCommon( o ),
-        shared_ptr<TruePtrType>( o )
+        shared_ptr<Node>( o )
     {
     }
 
     template< typename OTHER >
     TreePtr( const TreePtr<OTHER> &o ) :
         TreePtrCommon( o ),
-        shared_ptr<TruePtrType>( (shared_ptr<typename TreePtr<OTHER>::TruePtrType>)(o) )        
+        shared_ptr<Node>( (shared_ptr<Node>)(o) )        
     {
     }
 
     operator TreePtr<Node>() const override
     {
-        const shared_ptr<TruePtrType> p1 = *(const shared_ptr<TruePtrType> *)this;
+        const shared_ptr<Node> p1 = *(const shared_ptr<Node> *)this;
         return TreePtr<Node>( p1 );
     }
 
 	inline VALUE_TYPE *GetValueTypePointer() const
 	{
-		auto pt = shared_ptr<TruePtrType>::get();
+		auto pt = shared_ptr<Node>::get();
 		auto pv = dynamic_cast<VALUE_TYPE *>(pt);
 		ASSERT(!pt || pv)("Attempt to access member of degenerate child object"); 
         return pv;
@@ -196,14 +194,14 @@ struct TreePtr : virtual TreePtrCommon,
     {   
         if( n )
         {
-            auto p = dynamic_pointer_cast<TruePtrType>(n);
+            auto p = dynamic_pointer_cast<Node>(n);
             ASSERT( p )("TreePtr inferred dynamic cast has failed: from ")(*n)
                        (" to type ")(TYPE_ID_NAME( VALUE_TYPE ))("\n");
-            (void)shared_ptr<TruePtrType>::operator=( p );
+            (void)shared_ptr<Node>::operator=( p );
         }
         else
         {
-            (void)shared_ptr<TruePtrType>::operator=( shared_ptr<TruePtrType>() );
+            (void)shared_ptr<Node>::operator=( shared_ptr<Node>() );
         }
         (void)SatelliteSerial::operator=( SatelliteSerial( n.get(), this ) );
         return *this;
@@ -224,7 +222,7 @@ struct TreePtr : virtual TreePtrCommon,
     
     TreePtrInterface &operator=( nullptr_t n ) final
     {
-        (void)shared_ptr<TruePtrType>::operator=( n );
+        (void)shared_ptr<Node>::operator=( n );
         return *this;    
     }
    
@@ -252,7 +250,7 @@ struct TreePtr : virtual TreePtrCommon,
 
     operator bool() const final
     {
-        return !!*(const shared_ptr<TruePtrType> *)this;
+        return !!*(const shared_ptr<Node> *)this;
     }
 
     static TreePtr<VALUE_TYPE>
@@ -275,7 +273,7 @@ struct TreePtr : virtual TreePtrCommon,
     {
         if( g )
         {
-            auto v = dynamic_pointer_cast<TruePtrType>(TreePtr<Node>(g));
+            auto v = dynamic_pointer_cast<Node>(TreePtr<Node>(g));
             ASSERTS( v )("OOStd inferred dynamic cast has failed: from ")(*g)
                         (" to type ")(TYPE_ID_NAME( VALUE_TYPE ))("\n");
             return TreePtr<VALUE_TYPE>(v);
