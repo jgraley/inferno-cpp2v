@@ -71,21 +71,33 @@ Production VNParse::OnEngine( Production stem )
 
 Production VNParse::OnStuff( Production terminus )
 {
-	auto expr_terminus = TreePtr<Expression>::DynamicCast(terminus);
-	auto stuff = MakePatternNode<Stuff<Expression>>();
-	stuff->terminus = expr_terminus;
+	auto stuff = MakePatternNode<Stuff<Node>>();
+	stuff->terminus = terminus;
 	return stuff;
 }
 
 
 Production VNParse::OnDelta( Production through, Production overlay )
 {
-	auto expr_through = TreePtr<Expression>::DynamicCast(through);
-	auto expr_overlay = TreePtr<Expression>::DynamicCast(overlay);
-	auto delta = MakePatternNode<Delta<Expression>>();
-	delta->through = expr_through;
-	delta->overlay = expr_overlay;
+	auto delta = MakePatternNode<Delta<Node>>();
+	delta->through = through;
+	delta->overlay = overlay;
 	return delta;
+}
+
+
+Production VNParse::OnPrefixOperator( string tok, Production operand )
+{
+    if( tok=="-" )
+    {
+		auto op = MakePatternNode<Negate>();
+		op->operands = (operand);
+		return op;
+	}
+	else
+	{
+		ASSERTFAIL(); // TODO use operator_data.inc
+	}
 }
 
 

@@ -51,7 +51,7 @@ public:
     }
     
     // Patterns are an abnormal context
-    mutable Collection<PRE_RESTRICTION> disjuncts; // TODO provide const iterators and remove mutable
+    mutable Collection<Node> disjuncts; // TODO provide const iterators and remove mutable
 private:
     virtual CollectionInterface &GetDisjuncts() const override
     {

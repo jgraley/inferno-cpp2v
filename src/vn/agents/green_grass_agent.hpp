@@ -62,7 +62,7 @@ public:
         return shared_from_this();
     }
     
-    TreePtr<PRE_RESTRICTION> through;
+    TreePtr<Node> through;
     virtual const TreePtrInterface *GetThrough() const
     {
         return &through;

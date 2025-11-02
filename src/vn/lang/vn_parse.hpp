@@ -12,7 +12,6 @@
 namespace VN 
 {
 typedef TreePtr<Node> Production;	
-//typedef float Production;	
  
 class VNParse	
 {
@@ -30,6 +29,8 @@ public:
 	Production OnEngine( Production stem );
 	Production OnStuff( Production terminus );
 	Production OnDelta( Production through, Production overlay );
+	
+	Production OnPrefixOperator( string tok, Production operand );
 	Production OnSpecificInteger( int value );
 
 private: 

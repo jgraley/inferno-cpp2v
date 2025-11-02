@@ -56,6 +56,6 @@ Graphable::NodeBlock StringizeAgent::GetGraphBlockInfo() const
     block.shape = "parallelogram";    
     block.block_type = Graphable::NODE_SHAPED;
     block.node = GetPatternPtr();
-    block.item_blocks = Node::GetSubblocks(const_cast<TreePtr<CPPTree::Identifier> *>(&source), phase);
+    block.item_blocks = Node::GetSubblocks(const_cast<TreePtr<Node> *>(&source), phase);
     return block;
 }

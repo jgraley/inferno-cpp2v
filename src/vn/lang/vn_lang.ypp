@@ -68,7 +68,7 @@ expr : expr '+' expr      { $$ = $1; }
      | ENGINE %prec PREFIX expr 		{ $$ = vn->OnEngine($2); }
      | STUFF %prec PREFIX expr 			{ $$ = vn->OnStuff($2); }
      | DELTA expr DELTA_ARROW expr 		{ $$ = vn->OnDelta($2, $4); }
-     | '-' %prec PREFIX expr { $$ = $2; }
+     | '-' %prec PREFIX expr            { $$ = vn->OnPrefixOperator("-", $2); }
      | '(' expr ')'       { $$ = $2; }
      | NUM       						{ $$ = vn->OnSpecificInteger($1); }
      ;

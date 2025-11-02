@@ -41,7 +41,7 @@ struct BuildIdentifierAgent : public virtual BuilderAgent
     virtual string GetIdentifierSubTypeName() const = 0;
     NodeBlock GetGraphBlockInfo() const final;
 
-    Sequence<CPPTree::Identifier> sources;
+    Sequence<Node> sources;
     string format;
 };
 

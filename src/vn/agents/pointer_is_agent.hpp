@@ -40,7 +40,7 @@ public:
         return shared_from_this();
     }
     
-    TreePtr<PRE_RESTRICTION> pointer;
+    TreePtr<Node> pointer;
     virtual const TreePtrInterface *GetPointer() const
     {
         return &pointer;

@@ -83,7 +83,7 @@ string BuildIdentifierAgent::GetRender( const RenderKit &kit, Syntax::Production
 		s += ",'" + format + "'";
 	s += "》";
 	list<string> ls;
-	Sequence<CPPTree::Identifier> scopy = sources;
+	Sequence<Node> scopy = sources;
 	for( TreePtrInterface &source : scopy )
 		ls.push_back( kit.render( (TreePtr<Node>)source, Syntax::Production::COMMA_SEP ) );
 	s += Join( ls, ", ", "( ", " )");
@@ -116,7 +116,7 @@ Graphable::NodeBlock BuildIdentifierAgent::GetGraphBlockInfo() const
     block.shape = "parallelogram";
     block.block_type = Graphable::NODE_SHAPED;
     block.node = GetPatternPtr();
-    block.item_blocks = Node::GetSubblocks(const_cast<Sequence<CPPTree::Identifier> *>(&sources), phase);
+    block.item_blocks = Node::GetSubblocks(const_cast<Sequence<Node> *>(&sources), phase);
     return block;
 }
 

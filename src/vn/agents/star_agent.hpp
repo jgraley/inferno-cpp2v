@@ -75,7 +75,7 @@ public:
         return shared_from_this();
     }
     
-    TreePtr<PRE_RESTRICTION> restriction; 
+    TreePtr<Node> restriction; 
     virtual const TreePtrInterface *GetRestriction() const
     {
         return &restriction;
@@ -83,7 +83,7 @@ public:
     
     string GetCouplingNameHint() const final
     {
-		return PRE_RESTRICTION::GetCouplingNameHint() + "s"; // Pluralise
+		return Special<PRE_RESTRICTION>::SpecialGetArchetypeNode()->GetCouplingNameHint() + "s"; // Pluralise
 	}    
 };
 

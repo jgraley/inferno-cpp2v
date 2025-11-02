@@ -24,7 +24,7 @@ struct StringizeAgent : Special<CPPTree::String>,
 
     StringizeAgent() {}
 
-    TreePtr<CPPTree::Identifier> source;
+    TreePtr<Node> source;
 
 private:
     TreePtr<Node> BuildNewSubtree(const SCREngine *acting_engine) final;    

@@ -49,8 +49,8 @@ public:
         return shared_from_this();
     }
     
-    TreePtr<PRE_RESTRICTION> through;
-    TreePtr<PRE_RESTRICTION> overlay;
+    TreePtr<Node> through;
+    TreePtr<Node> overlay;
     virtual const TreePtrInterface *GetThrough() const override
     {
         return &through;

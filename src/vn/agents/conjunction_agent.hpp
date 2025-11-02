@@ -42,7 +42,7 @@ public:
         return shared_from_this();
     }
     
-    mutable Collection<PRE_RESTRICTION> conjuncts; // TODO provide const iterators and remove mutable
+    mutable Collection<Node> conjuncts; // TODO provide const iterators and remove mutable
 private:
     virtual CollectionInterface &GetConjuncts() const
     {
