@@ -180,9 +180,9 @@ struct TreePtr : virtual TreePtrCommon,
 		return GetValueTypePointer();
 	}
 
-    VALUE_TYPE *get() const final
+    Node *get() const final
     {
-		return GetValueTypePointer();
+		return shared_ptr<Node>::get();
     }
 
     VALUE_TYPE &operator *() const final
