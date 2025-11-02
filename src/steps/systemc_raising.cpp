@@ -393,6 +393,7 @@ RemoveSCPrototypes::RemoveSCPrototypes()
     
     s_scope->members = (decls, s_any);
     s_any->disjuncts = (s_cease_inst, s_exit_inst, s_wait_inst, s_next_trigger_inst, s_delta_count_inst);
+    
     // void cease( unsigned char exit_code );
     s_cease_inst->identifier = MakePatternNode< InstanceIdentifierByNameAgent >( "cease" ); 
     s_cease_inst->type = s_cease_type;

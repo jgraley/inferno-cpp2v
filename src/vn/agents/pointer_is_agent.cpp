@@ -38,6 +38,7 @@ RelocatingAgent::RelocatingQueryResult PointerIsAgent::RunRelocatingQuery( const
     
     // Make an archetypical node matching the pointer's type
     TreePtr<Node> tnode = px->MakeValueArchetype();
+    //FTRACE("stimulus_xlink: ")(stimulus_xlink)(", tnode: ")(tnode)("\n");
     
     // Package up to indicate we don't have a parent for the new node
     return RelocatingQueryResult( tnode, deps );

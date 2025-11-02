@@ -66,7 +66,7 @@ private:
         for( CollectionInterface::iterator pit = ci.begin(); 
              pit != ci.end(); 
              ++pit )    
-            disjuncts.insert( TreePtr<PRE_RESTRICTION>::DynamicCast(*pit) );      
+            disjuncts.insert( *pit );      
     }
     
     virtual TreePtr<Node> CloneToEmpty() const override

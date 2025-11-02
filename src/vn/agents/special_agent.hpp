@@ -4,8 +4,6 @@
 #include "agent.hpp"
 #include "common/common.hpp"
 
-#define NEWS
-
 namespace VN
 { 
 
@@ -51,11 +49,8 @@ public:
 /// Common stuff for pattern nodes other than standard nodes
 template<class PRE_RESTRICTION>
 class Special : public SpecialBase, 
-#ifdef NEWS
                 public virtual Node
-#else
-                public virtual PRE_RESTRICTION
-#endif
+
 {
 public:
     // Get an archetype NODE

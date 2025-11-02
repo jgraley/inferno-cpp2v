@@ -24,8 +24,11 @@ shared_ptr<PatternQuery> DisjunctionAgent::GetPatternQuery() const
 {
     auto pq = make_shared<PatternQuery>();
     pq->RegisterDecision(false); // Exclusive, please
-    for( const TreePtrInterface &p : GetDisjuncts() )                 
+    for( const TreePtrInterface &p : GetDisjuncts() )  
+    {
+		ASSERT(p);               
         pq->RegisterNormalLink( PatternLink(&p) );    
+	}
     
     return pq;
 }

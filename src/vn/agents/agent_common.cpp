@@ -139,7 +139,7 @@ SYM::Lazy<SYM::BooleanExpression> AgentCommon::SymbolicPreRestriction(PatternLin
 bool AgentCommon::IsPreRestrictionMatch( TreePtr<Node> x ) const
 {
     // Pre-restriction policy defined here. 
-    return IsSubcategory( *x );
+    return GetArchetypeNode()->IsSubcategory( *x );
 }
 
 
