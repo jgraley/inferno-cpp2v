@@ -25,6 +25,7 @@ namespace VN
 // Itemise is known required (for eg graph plotting), other bounces
 // are TBD.
 
+// Just enough to allow these functions to be called on an Agent *
 #define ARCHETYPE_FUNCTION \
     TreePtr<Node> GetArchetypeNode() const override \
     { \
@@ -41,33 +42,32 @@ namespace VN
 class SpecialBase
 {
 public:    
-    virtual shared_ptr< TreePtrInterface > SpecialGetArchetypeTreePtr() const = 0;
-    virtual TreePtr<Node> SpecialGetArchetypeNode() const = 0;
+    TreePtr<Node> SpecialGetArchetypeNode() const 
+    {
+        return TreePtr<Node>(pre_restriction_archetype_node);  
+    }
+    // Get an architype TREE PTR. This is a different thing. It's actually NULL which is fine.
+    shared_ptr< TreePtrInterface > SpecialGetArchetypeTreePtr() const 
+    {
+        return pre_restriction_archetype_ptr;  
+    } 
+    
+        // TreePtr<> here would show up in itemisation so don't do it.
+    shared_ptr<Node> pre_restriction_archetype_node;
+    shared_ptr< TreePtrInterface > pre_restriction_archetype_ptr;
 };
 
 
 /// Common stuff for pattern nodes other than standard nodes
 template<class PRE_RESTRICTION>
-class Special : public SpecialBase, 
+class Special : public virtual SpecialBase, 
                 public virtual Node
 
 {
 public:
 	typedef PRE_RESTRICTION PreRestrictionType;
     // Get an archetype NODE
-    virtual TreePtr<Node> SpecialGetArchetypeNode() const override
-    {
-        return TreePtr<Node>(pre_restriction_archetype_node);  
-    }
-    // Get an architype TREE PTR. This is a different thing. It's actually NULL which is fine.
-    virtual shared_ptr< TreePtrInterface > SpecialGetArchetypeTreePtr() const override
-    {
-        return pre_restriction_archetype_ptr;  
-    }
-    
-    // TreePtr<> here would show up in itemisation so don't do it.
-    shared_ptr<Node> pre_restriction_archetype_node;
-    shared_ptr< TreePtrInterface > pre_restriction_archetype_ptr;
+   
 };
 
 };

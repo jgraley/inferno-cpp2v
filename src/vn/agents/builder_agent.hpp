@@ -3,6 +3,7 @@
 
 #include "../search_replace.hpp"
 #include "agent_intermediates.hpp"
+#include "special_agent.hpp"
 
 namespace VN
 {

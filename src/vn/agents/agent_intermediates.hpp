@@ -5,6 +5,7 @@
 #include "common/common.hpp"
 #include "../query.hpp"
 #include "../sym/lazy_eval.hpp"
+#include "special_agent.hpp"
 
 namespace VN
 { 
@@ -34,7 +35,8 @@ public:
 /**
  * Commits agent to having no children
  */ 
-class NonlocatingAgent : public PreRestrictedAgent // names finalised in rule #729
+class NonlocatingAgent : public PreRestrictedAgent, // names finalised in rule #729
+                         public virtual SpecialBase 
 {
     virtual shared_ptr<PatternQuery> GetPatternQuery() const override;                
 };

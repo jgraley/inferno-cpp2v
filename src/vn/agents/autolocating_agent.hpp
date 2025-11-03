@@ -17,7 +17,8 @@ namespace VN
  * to build replace pattern. Subclasses may override 
  * RunAutolocatingQuery() to add additional restrictions. #271
  */
-class AutolocatingAgent : public virtual AgentCommon // names finalised in rule #729
+class AutolocatingAgent : public virtual AgentCommon, // names finalised in rule #729
+						  public virtual SpecialBase
 {
 public:
     class PreRestrictionMismatch : public Mismatch {};
