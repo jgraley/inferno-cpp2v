@@ -139,8 +139,8 @@ DomainExtension::Extender::Info RelocatingAgent::GetDomainExtension( const XTree
     
     if( stimulus_xlink == XLink::MMAX )
         return DomainExtension::Extender::Info(); // MMAX at base never expands domain because then, all child patterns are also MMAX
-    if( !IsPreRestrictionMatch(stimulus_xlink) )
-        return DomainExtension::Extender::Info(); // Failed pre-restriction so can't expand domain
+    //if( !IsPreRestrictionMatch(stimulus_xlink) )
+    //    return DomainExtension::Extender::Info(); // Failed pre-restriction so can't expand domain
 
     RelocatingQueryResult tq_result;
     try

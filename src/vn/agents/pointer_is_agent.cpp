@@ -42,10 +42,7 @@ RelocatingAgent::RelocatingQueryResult PointerIsAgent::RunRelocatingQuery( const
     
     // Major plot hole: even though there's a reasonable expectation that the pointer
     // is an intermediate type, it can still have children, for example Base has an access
-    // and Loop has a body. We can't fill these in with wildcards because relocation
-    // is meant to find/induce X tree nodes, and we can't leave them NULL. It might be
-    // necessary to do "recursive plugging" in which we recursively fill in the gaps
-    // with the pointed-to type until there are no more gaps. 
+    // and Loop has a body. TODO #864
     if( !induced_base_node->Itemise().empty() )
 		throw HasChildrenMismatch();
     
