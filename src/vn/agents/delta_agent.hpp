@@ -19,6 +19,12 @@ class DeltaAgent : public virtual AutolocatingAgent,
                    public StartsOverlay
 {  
 public:
+    SPECIAL_NODE_FUNCTIONS
+    shared_ptr<const Node> GetPatternPtr() const
+    {
+        return shared_from_this();
+    }
+    
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;                
     virtual list<PatternLink> GetVisibleChildren( Path v ) const;
 
@@ -29,12 +35,25 @@ public:
 
     virtual void StartPlanOverlay(SCREngine *acting_engine);
     
+    NodeBlock GetGraphBlockInfo() const final;
+    TreePtr<Node> through;
+    TreePtr<Node> overlay;
+    const TreePtrInterface *GetThrough() const 
+    {
+        return &through;
+    }
+    const TreePtrInterface *GetOverlay() const 
+    {
+        return &overlay;
+    }
+    string GetCouplingNameHint() const final
+    {
+		return "delta"; 
+	}   
+	
 private:
 	Syntax::Production GetAgentProduction() const final;
-	string GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const final;
-    virtual const TreePtrInterface *GetThrough() const = 0;
-    virtual const TreePtrInterface *GetOverlay() const = 0;    
-    NodeBlock GetGraphBlockInfo() const final;
+	string GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const final;  
 };
 
 
@@ -42,27 +61,6 @@ template<class PRE_RESTRICTION>
 class Delta : public DeltaAgent, 
               public Special<PRE_RESTRICTION>
 {
-public:
-    SPECIAL_NODE_FUNCTIONS
-    shared_ptr<const Node> GetPatternPtr() const
-    {
-        return shared_from_this();
-    }
-    
-    TreePtr<Node> through;
-    TreePtr<Node> overlay;
-    virtual const TreePtrInterface *GetThrough() const override
-    {
-        return &through;
-    }
-    virtual const TreePtrInterface *GetOverlay() const override
-    {
-        return &overlay;
-    }
-    string GetCouplingNameHint() const final
-    {
-		return "delta"; 
-	}     
 };
 
 };

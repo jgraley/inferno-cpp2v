@@ -246,7 +246,7 @@ public:
     template<typename ... CP>
     static inline TreePtr<NODE_TYPE> MakeNode(const CP &...cp)
     {
-        TreePtr<NODE_TYPE> agent_node = MakeTreeNode<NODE_TYPE>(cp...);
+        auto agent_node = MakeTreeNode<NODE_TYPE>(cp...);
         // These members are introduced by Special
         agent_node->pre_restriction_archetype_node = shared_ptr<Node>( new PreRestrictionType );
         agent_node->pre_restriction_archetype_ptr = make_shared<TreePtr<PreRestrictionType>>();

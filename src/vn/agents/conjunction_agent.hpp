@@ -14,6 +14,12 @@ namespace VN
 class ConjunctionAgent : public virtual AutolocatingAgent
 {
 public:               
+    SPECIAL_NODE_FUNCTIONS
+    
+    shared_ptr<const Node> GetPatternPtr() const
+    {
+        return shared_from_this();
+    }
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
 
     ReplacePatchPtr GenReplaceLayoutImpl( const ReplaceKit &kit, 
@@ -24,9 +30,17 @@ public:
 	Syntax::Production GetAgentProduction() const override;
 	string GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const final;
     NodeBlock GetGraphBlockInfo() const final;
+    mutable Collection<Node> conjuncts; // TODO provide const iterators and remove mutable
 
 private:
-    virtual CollectionInterface &GetConjuncts() const = 0;
+    CollectionInterface &GetConjuncts() const
+    {
+        return conjuncts;
+    }
+    string GetCouplingNameHint() const final
+    {
+		return "all"; 
+	}
 };
 
 
@@ -34,25 +48,7 @@ template<class PRE_RESTRICTION>
 class Conjunction : public Special<PRE_RESTRICTION>,
                     public ConjunctionAgent
 {
-public:
-    SPECIAL_NODE_FUNCTIONS
-    
-    shared_ptr<const Node> GetPatternPtr() const
-    {
-        return shared_from_this();
-    }
-    
-    mutable Collection<Node> conjuncts; // TODO provide const iterators and remove mutable
-private:
-    virtual CollectionInterface &GetConjuncts() const
-    {
-        return conjuncts;
-    }
-    string GetCouplingNameHint() const final
-    {
-		return "all"; 
-	}};
-
 };
 
+};
 #endif

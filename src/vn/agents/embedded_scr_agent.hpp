@@ -22,9 +22,15 @@ class SearchReplace;
 class EmbeddedSCRAgent : public virtual AutolocatingAgent
 {
 public:
+    SPECIAL_NODE_FUNCTIONS
+    shared_ptr<const Node> GetPatternPtr() const
+    {
+        return shared_from_this();
+    }
+    
+    EmbeddedSCRAgent();
     EmbeddedSCRAgent( TreePtr<Node> sp, TreePtr<Node> rp, bool is_search );
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;              
-    virtual const TreePtrInterface *GetThrough() const = 0;    
     virtual void MaybeChildrenPlanOverlay( SCREngine *acting_engine,
                                            PatternLink me_plink, 
                                            PatternLink bottom_layer_plink );
@@ -35,15 +41,24 @@ public:
     TreePtr<Node> GetEmbeddedSearchPattern() const override;
     TreePtr<Node> GetEmbeddedReplacePattern() const override;
     
-	Syntax::Production GetAgentProduction() const override;
-	string GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const final;
-    NodeBlock GetGraphBlockInfo() const override;
-    
-    virtual TreePtr<Node> EvolveIntoEmbeddedCompareReplace() = 0;
+    TreePtr<Node> EvolveIntoEmbeddedCompareReplace();
 
+    
     TreePtr<Node> search_pattern;
     TreePtr<Node> replace_pattern;   
+    TreePtr<Node> through;
+    const TreePtrInterface *GetThrough() const
+    {
+        return &through;
+    }
     
+	Syntax::Production GetAgentProduction() const override;
+	string GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const final;
+    NodeBlock GetGraphBlockInfo() const override;    
+    string GetCouplingNameHint() const final
+    {
+		return "embedded"; 
+	}    
 private:
     bool is_search;
 };
@@ -55,27 +70,13 @@ class EmbeddedSCR : public EmbeddedSCRAgent,
                     public Special<PRE_RESTRICTION>
 {
 public:
-    SPECIAL_NODE_FUNCTIONS
-
-    shared_ptr<const Node> GetPatternPtr() const
-    {
-        return shared_from_this();
-    }
     
     // EmbeddedSearchReplace must be constructed using constructor
     EmbeddedSCR( TreePtr<PRE_RESTRICTION> t, TreePtr<Node> sp, TreePtr<Node> rp, bool is_search ) :
-        EmbeddedSCRAgent( sp, rp, is_search ),
-        through( t )
+        EmbeddedSCRAgent( sp, rp, is_search )
     {
+		through = t;
     }
-
-    TreePtr<Node> through;
-    virtual const TreePtrInterface *GetThrough() const
-    {
-        return &through;
-    }
-    
-    TreePtr<Node> EvolveIntoEmbeddedCompareReplace() override;
 };
 
 
@@ -87,10 +88,7 @@ public:
     EmbeddedCompareReplace() : EmbeddedSCR<PRE_RESTRICTION>( nullptr, nullptr, nullptr, false ) {}      
     EmbeddedCompareReplace( TreePtr<PRE_RESTRICTION> t, TreePtr<Node> sp=TreePtr<Node>(), TreePtr<Node> rp=TreePtr<Node>() ) :
         EmbeddedSCR<PRE_RESTRICTION>( t, sp, rp, false ) {}
-    string GetCouplingNameHint() const final
-    {
-		return "embedded"; 
-	}
+
 };
 
 
@@ -104,16 +102,6 @@ public:
         EmbeddedSCR<PRE_RESTRICTION>( t, sp, rp, true ) {}
 };
 
-
-template<class PRE_RESTRICTION>
-TreePtr<Node> EmbeddedSCR<PRE_RESTRICTION>::EvolveIntoEmbeddedCompareReplace()
-{
-	auto agent_node = MakeTreeNode<EmbeddedCompareReplace<PRE_RESTRICTION>>(through, search_pattern, replace_pattern);
-	// These members are introduced by Special
-	agent_node->pre_restriction_archetype_node = pre_restriction_archetype_node;
-	agent_node->pre_restriction_archetype_ptr = pre_restriction_archetype_ptr;	
-	return agent_node;
-}
 
 };
 #endif

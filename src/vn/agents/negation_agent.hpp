@@ -16,6 +16,12 @@ namespace VN
 class NegationAgent : public virtual AutolocatingAgent 
 {
 public:
+    SPECIAL_NODE_FUNCTIONS
+    shared_ptr<const Node> GetPatternPtr() const
+    {
+        return shared_from_this();
+    }
+    
     class LocationMismatch : public Agent::Mismatch {};
 
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;              
@@ -28,9 +34,17 @@ public:
 	Syntax::Production GetAgentProduction() const override;
 	string GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const final;
     NodeBlock GetGraphBlockInfo() const final;
-    
-private:
-    virtual const TreePtrInterface *GetNegand() const = 0;
+
+    TreePtr<Node> negand;    
+    const TreePtrInterface *GetNegand() const
+    {
+        return &negand;
+    }
+
+    string GetCouplingNameHint() const final
+    {
+		return "not"; 
+	}
 };
 
 
@@ -38,27 +52,6 @@ template<class PRE_RESTRICTION>
 class Negation : public Special<PRE_RESTRICTION>,
                  public NegationAgent
 {
-public:
-    SPECIAL_NODE_FUNCTIONS
-
-    shared_ptr<const Node> GetPatternPtr() const
-    {
-        return shared_from_this();
-    }
-    
-    // Pattern is an abnormal context. Fascinatingly, we can supply any node here because there
-    // is no type-correctness limitation with *excluding* a kind of node. Use the virtual
-    // GetNegand() anyway, for consistency.
-    TreePtr<Node> negand;
-private:
-    virtual const TreePtrInterface *GetNegand() const
-    {
-        return &negand;
-    }
-    string GetCouplingNameHint() const final
-    {
-		return "not"; 
-	}
 };
     
 };

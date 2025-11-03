@@ -7,6 +7,12 @@
 
 using namespace VN;
 
+EmbeddedSCRAgent::EmbeddedSCRAgent() :
+    is_search( false )
+{
+}
+
+
 EmbeddedSCRAgent::EmbeddedSCRAgent( TreePtr<Node> sp, TreePtr<Node> rp, bool is_search_ ) :
     search_pattern( sp ),
     replace_pattern( rp ),
@@ -59,6 +65,16 @@ TreePtr<Node> EmbeddedSCRAgent::GetEmbeddedSearchPattern() const
 TreePtr<Node> EmbeddedSCRAgent::GetEmbeddedReplacePattern() const 
 { 
     return replace_pattern; 
+}
+
+
+TreePtr<Node> EmbeddedSCRAgent::EvolveIntoEmbeddedCompareReplace()
+{
+	auto agent_node = MakeTreeNode<EmbeddedSCRAgent>(search_pattern, replace_pattern, false);
+	agent_node->through = through;
+	agent_node->pre_restriction_archetype_node = pre_restriction_archetype_node;
+	agent_node->pre_restriction_archetype_ptr = pre_restriction_archetype_ptr;	
+	return agent_node;
 }
 
 

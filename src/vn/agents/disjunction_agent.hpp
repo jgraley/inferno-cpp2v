@@ -18,6 +18,12 @@ namespace VN
 class DisjunctionAgent : public virtual AutolocatingAgent
 {
 public:
+    SPECIAL_NODE_FUNCTIONS
+    shared_ptr<const Node> GetPatternPtr() const
+    {
+        return shared_from_this();
+    }
+    
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;                                                                                               
     SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuery(PatternLink keyer_plink) const override;                                       
 
@@ -28,37 +34,22 @@ public:
 	bool IsFixedType() const final;
     
     // Interface for pattern trasformation
-    virtual void SetDisjuncts( CollectionInterface &ci ) = 0;
-    virtual CollectionInterface &GetDisjuncts() const = 0;
-    virtual TreePtr<Node> CloneToEmpty() const = 0;
-    
-private:
-    virtual void SCRConfigure( Phase phase );
-    shared_ptr< Collection<Node> > options;
-};
-
-
-template<class PRE_RESTRICTION>
-class Disjunction : public Special<PRE_RESTRICTION>,
-                    public DisjunctionAgent
-{
-public:
-    SPECIAL_NODE_FUNCTIONS
-    
-    shared_ptr<const Node> GetPatternPtr() const
+    TreePtr<Node> CloneToEmpty() const
     {
-        return shared_from_this();
+        auto agent_node = MakeTreeNode<DisjunctionAgent>();
+        agent_node->pre_restriction_archetype_node = pre_restriction_archetype_node;
+        agent_node->pre_restriction_archetype_ptr = pre_restriction_archetype_ptr;
+        return agent_node;
     }
     
     // Patterns are an abnormal context
     mutable Collection<Node> disjuncts; // TODO provide const iterators and remove mutable
-private:
-    virtual CollectionInterface &GetDisjuncts() const override
+    CollectionInterface &GetDisjuncts() const
     {
         return disjuncts;
     }
     
-    virtual void SetDisjuncts( CollectionInterface &ci ) override
+    void SetDisjuncts( CollectionInterface &ci )
     {
         // Note: options should not have been set yet during ptrans so 
         // only need to update patterns
@@ -69,14 +60,23 @@ private:
             disjuncts.insert( *pit );      
     }
     
-    virtual TreePtr<Node> CloneToEmpty() const override
-    {
-        return MakePatternNode<Disjunction<PRE_RESTRICTION>>();
-    }
     string GetCouplingNameHint() const final
     {
 		return "any"; 
 	}
+
+private:
+    virtual void SCRConfigure( Phase phase );
+    shared_ptr< Collection<Node> > options;
+};
+
+
+template<class PRE_RESTRICTION>
+class Disjunction : public Special<PRE_RESTRICTION>,
+                    public DisjunctionAgent
+{
+
+
 };
 
 };
