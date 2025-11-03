@@ -14,8 +14,16 @@ namespace VN
 /// it does not match any part of the working graph that was created by an earlier
 /// replace operation in the same step. This departs from the reductive style, 
 /// so should be used with care.
-class GreenGrassAgent : public virtual AutolocatingAgent 
-{               
+class GreenGrassAgent : public virtual AutolocatingAgent,
+                        public virtual SpecialBase 
+{   
+public:            
+    SPECIAL_NODE_FUNCTIONS
+    shared_ptr<const Node> GetPatternPtr() const
+    {
+        return shared_from_this();
+    }
+    
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicAutolocatingQuery(PatternLink keyer_plink) const; 
 
@@ -23,8 +31,17 @@ class GreenGrassAgent : public virtual AutolocatingAgent
 	string GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const final;
 	
 	NodeBlock GetGraphBlockInfo() const final;
-    virtual const TreePtrInterface *GetThrough() const = 0;
-
+    TreePtr<Node> through;
+    const TreePtrInterface *GetThrough() const
+    {
+        return &through;
+    }
+    
+    string GetCouplingNameHint() const final
+    {
+		return "green"; 
+	} 
+	   
     class IsGreenGrassOperator : public SYM::PredicateOperator
     {
     public:    
@@ -54,23 +71,6 @@ template<class PRE_RESTRICTION>
 class GreenGrass : public GreenGrassAgent, 
                    public Special<PRE_RESTRICTION>
 {
-public:
-    SPECIAL_NODE_FUNCTIONS
-    
-    shared_ptr<const Node> GetPatternPtr() const
-    {
-        return shared_from_this();
-    }
-    
-    TreePtr<Node> through;
-    virtual const TreePtrInterface *GetThrough() const
-    {
-        return &through;
-    }
-    string GetCouplingNameHint() const final
-    {
-		return "green"; 
-	} 
 };
 
 };

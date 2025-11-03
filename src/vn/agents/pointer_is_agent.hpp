@@ -12,10 +12,17 @@ namespace VN
 /// original pointer object for the purposes of comparison, so if the
 /// original pointer is unavailable, as may be the case if it was 
 /// created locally, this agent will not work correctly.
-class PointerIsAgent : public virtual RelocatingAgent
+class PointerIsAgent : public virtual RelocatingAgent,
+                       public virtual SpecialBase
 {
 public:
-	struct HasChildrenMismatch : ::Mismatch {};
+    SPECIAL_NODE_FUNCTIONS
+    shared_ptr<const Node> GetPatternPtr() const
+    {
+        return shared_from_this();
+    }
+    
+    struct HasChildrenMismatch : ::Mismatch {};
 
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     RelocatingQueryResult RunRelocatingQuery( const XTreeDatabase *db, XLink stimulus_xlink ) const override;
@@ -25,8 +32,15 @@ public:
 	string GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const final;	
 	NodeBlock GetGraphBlockInfo() const final;           
                                            
-private:
-    virtual const TreePtrInterface *GetPointer() const = 0;
+    TreePtr<Node> pointer;
+    const TreePtrInterface *GetPointer() const
+    {
+        return &pointer;
+    }
+    string GetCouplingNameHint() const final
+    {
+		return "ptr_is"; 
+	}   
 };
     
     
@@ -34,23 +48,6 @@ template<class PRE_RESTRICTION>
 class PointerIs : public Special<PRE_RESTRICTION>,
                   public PointerIsAgent
 {
-public:
-    SPECIAL_NODE_FUNCTIONS
-
-    shared_ptr<const Node> GetPatternPtr() const
-    {
-        return shared_from_this();
-    }
-    
-    TreePtr<Node> pointer;
-    virtual const TreePtrInterface *GetPointer() const
-    {
-        return &pointer;
-    }
-    string GetCouplingNameHint() const final
-    {
-		return "ptr_is"; 
-	}     
 };
 
 };

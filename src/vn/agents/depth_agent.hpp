@@ -43,13 +43,24 @@ public:
 /// current node. This includes children in `Conbtainer`s. It can be used to 
 /// move "one level" down a tree with no assumption as to the nature of the node
 /// being bypassed.
-class ChildAgent : public DepthAgent
+class ChildAgent : public DepthAgent,
+                   public virtual SpecialBase
 {
+    SPECIAL_NODE_FUNCTIONS
+    shared_ptr<const Node> GetPatternPtr() const
+    {
+        return shared_from_this();
+    } 
+    
     class NoParentMismatch : public Mismatch {};
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed(PatternLink keyer_plink) const;                                       
 	Syntax::Production GetAgentProduction() const override;
 	string GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const final;
     NodeBlock GetGraphBlockInfo() const final;
+    string GetCouplingNameHint() const final
+    {
+		return "child"; 
+	}  
 };
 
 
@@ -58,17 +69,6 @@ template<class PRE_RESTRICTION>
 class Child : public ChildAgent, 
                 public Special<PRE_RESTRICTION> 
 {
-public:
-    SPECIAL_NODE_FUNCTIONS
-
-    shared_ptr<const Node> GetPatternPtr() const
-    {
-        return shared_from_this();
-    }    
-    string GetCouplingNameHint() const final
-    {
-		return "child"; 
-	}  
 };
 
 //---------------------------------- StuffAgent ------------------------------------    
@@ -83,9 +83,16 @@ public:
 /// traversed).
 /// The recurse restriction is an abnormal context because it can match zero or more 
 /// different subtrees.
-class StuffAgent : public DepthAgent
+class StuffAgent : public DepthAgent,
+                   public virtual SpecialBase
 {
 public:
+    SPECIAL_NODE_FUNCTIONS
+    shared_ptr<const Node> GetPatternPtr() const
+    {
+        return shared_from_this();
+    }
+
     virtual void PatternQueryRestrictions( shared_ptr<PatternQuery> pq ) const;
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQueryPRed(PatternLink keyer_plink) const;                                       
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
@@ -97,6 +104,11 @@ public:
     NodeBlock GetGraphBlockInfo() const final;
 
     TreePtr<Node> recurse_restriction; // Restricts the intermediate nodes in the truncated subtree
+
+    string GetCouplingNameHint() const final
+    {
+		return "stuff"; 
+	}  
 };
 
 
@@ -104,17 +116,6 @@ template<class PRE_RESTRICTION>
 class Stuff : public StuffAgent, 
               public Special<PRE_RESTRICTION> 
 {
-public:
-    SPECIAL_NODE_FUNCTIONS
-
-    shared_ptr<const Node> GetPatternPtr() const
-    {
-        return shared_from_this();
-    }
-    string GetCouplingNameHint() const final
-    {
-		return "stuff"; 
-	}  
 };
 
 };
