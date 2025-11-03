@@ -53,16 +53,21 @@ class Special : public SpecialBase,
 
 {
 public:
+	typedef PRE_RESTRICTION PreRestrictionType;
     // Get an archetype NODE
     virtual TreePtr<Node> SpecialGetArchetypeNode() const override
     {
-        return TreePtr<Node>( new PRE_RESTRICTION );  
+        return TreePtr<Node>(pre_restriction_archetype_node);  
     }
     // Get an architype TREE PTR. This is a different thing. It's actually NULL which is fine.
     virtual shared_ptr< TreePtrInterface > SpecialGetArchetypeTreePtr() const override
     {
-        return make_shared<TreePtr<PRE_RESTRICTION>>();  
+        return pre_restriction_archetype_ptr;  
     }
+    
+    // TreePtr<> here would show up in itemisation so don't do it.
+    shared_ptr<Node> pre_restriction_archetype_node;
+    shared_ptr< TreePtrInterface > pre_restriction_archetype_ptr;
 };
 
 };

@@ -241,10 +241,16 @@ template<typename NODE_TYPE>
 class MakePatternNodeHelper<true, NODE_TYPE> // NODE_TYPE is an agent, so behave like MakeTreeNode
 {
 public:
+	typedef NODE_TYPE::PreRestrictionType PreRestrictionType;
+
     template<typename ... CP>
     static inline TreePtr<NODE_TYPE> MakeNode(const CP &...cp)
     {
-        return MakeTreeNode<NODE_TYPE>(cp...);
+        TreePtr<NODE_TYPE> agent_node = MakeTreeNode<NODE_TYPE>(cp...);
+        // These members are introduced by Special
+        agent_node->pre_restriction_archetype_node = shared_ptr<Node>( new PreRestrictionType );
+        agent_node->pre_restriction_archetype_ptr = make_shared<TreePtr<PreRestrictionType>>();
+        return agent_node;
     }    
 };
 
