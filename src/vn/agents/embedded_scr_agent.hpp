@@ -108,7 +108,11 @@ public:
 template<class PRE_RESTRICTION>
 TreePtr<Node> EmbeddedSCR<PRE_RESTRICTION>::EvolveIntoEmbeddedCompareReplace()
 {
-    return MakePatternNode<EmbeddedCompareReplace<PRE_RESTRICTION>>( through, search_pattern, replace_pattern );
+	auto agent_node = MakeTreeNode<EmbeddedCompareReplace<PRE_RESTRICTION>>(through, search_pattern, replace_pattern);
+	// These members are introduced by Special
+	agent_node->pre_restriction_archetype_node = pre_restriction_archetype_node;
+	agent_node->pre_restriction_archetype_ptr = pre_restriction_archetype_ptr;	
+	return agent_node;
 }
 
 };
