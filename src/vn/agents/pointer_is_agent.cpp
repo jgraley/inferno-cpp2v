@@ -27,7 +27,7 @@ RelocatingAgent::RelocatingQueryResult PointerIsAgent::RunRelocatingQuery( const
         // If no parent node, there's no dep to declare, assuming root xlink
         // pointer type cannot change. Might be better to refuse the query, TBD.
         set<XLink> parent_xlinks = db->GetNodeRow(parent_node).incoming_xlinks;
-        ASSERT( parent_xlinks.size() == 1 ); // parent_node has children so it should only have one parent (rule #217)
+        ASSERT( parent_xlinks.size() == 1 ); // parent_node has children so it should be the sole parent (rule #217)
         
         deps.AddDep( SoloElementOf(parent_xlinks) );            
     }
@@ -37,11 +37,20 @@ RelocatingAgent::RelocatingQueryResult PointerIsAgent::RunRelocatingQuery( const
     ASSERT(px);     
     
     // Make an archetypical node matching the pointer's type
-    TreePtr<Node> tnode = px->MakeValueArchetype();
-    //FTRACE("stimulus_xlink: ")(stimulus_xlink)(", tnode: ")(tnode)("\n");
+    TreePtr<Node> induced_base_node = px->MakeValueArchetype();
+    //FTRACE("stimulus_xlink: ")(stimulus_xlink)(", induced_base_node: ")(induced_base_node)("\n");
+    
+    // Major plot hole: even though there's a reasonable expectation that the pointer
+    // is an intermediate type, it can still have children, for example Base has an access
+    // and Loop has a body. We can't fill these in with wildcards because relocation
+    // is meant to find/induce X tree nodes, and we can't leave them NULL. It might be
+    // necessary to do "recursive plugging" in which we recursively fill in the gaps
+    // with the pointed-to type until there are no more gaps. 
+    if( !induced_base_node->Itemise().empty() )
+		throw HasChildrenMismatch();
     
     // Package up to indicate we don't have a parent for the new node
-    return RelocatingQueryResult( tnode, deps );
+    return RelocatingQueryResult( induced_base_node, deps );
 }
 
 

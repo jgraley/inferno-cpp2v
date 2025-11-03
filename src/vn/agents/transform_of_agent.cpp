@@ -285,9 +285,9 @@ RelocatingAgent::RelocatingQueryResult TransformOfAgent::RunRelocatingQuery( con
         if( auto base_bem = ValuePtr<AugBEMeandering>::DynamicCast(move(base_be)) ) 
         {            
             // Base is outside the X tree, so domain extension will be required                        
-            TreePtr<Node> tp = base_bem->GetGenericTreePtr(); 
-            SimpleDuplicate::DuplicateSubtree( tp ); // Validate (check for NULL child pointer)       
-            return RelocatingQueryResult( tp, deps );  // free 
+            TreePtr<Node> induced_base_node = base_bem->GetGenericTreePtr(); 
+            SimpleDuplicate::DuplicateSubtree( induced_base_node ); // Validate (check for NULL child pointer)       
+            return RelocatingQueryResult( induced_base_node, deps );  // free 
         }
         else if( auto base_ber = ValuePtr<AugBERoaming>::DynamicCast(move(base_be)) ) 
         {

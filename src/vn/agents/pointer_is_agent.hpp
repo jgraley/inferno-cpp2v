@@ -15,6 +15,8 @@ namespace VN
 class PointerIsAgent : public virtual RelocatingAgent
 {
 public:
+	class HasChildrenMismatch : ::Mismatch {};
+
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     RelocatingQueryResult RunRelocatingQuery( const XTreeDatabase *db, XLink stimulus_xlink ) const override;
     int GetExtenderChannelOrdinal() const override;
