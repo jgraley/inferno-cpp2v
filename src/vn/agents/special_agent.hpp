@@ -52,7 +52,7 @@ public:
         return pre_restriction_archetype_ptr;  
     } 
     
-        // TreePtr<> here would show up in itemisation so don't do it.
+    // TreePtr<> here would show up in itemisation so don't do it.
     shared_ptr<Node> pre_restriction_archetype_node;
     shared_ptr< TreePtrInterface > pre_restriction_archetype_ptr;
 };

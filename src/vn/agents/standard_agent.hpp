@@ -266,6 +266,22 @@ TreePtr<NODE_TYPE> MakePatternNode(const CP &...cp)
     return MakePatternNodeHelper<is_base_of<Agent, NODE_TYPE>::value, NODE_TYPE>::MakeNode(cp...); 
 };
 
+
+// Similar to MakeTreeNode<> (see node/tree_ptr.hpp) but produces a TreePtr to 
+// StandardAgentWrapper<NODE_TYPE> rather than just NODE_TYPE when NODE_TYPE 
+// is not already a kind of Agent. 
+/// Utility for constructing nodes that are to be used in patterns from standard tree nodes
+template<typename AGENT_TYPE, typename PRE_RESTRICTION, typename ... CP>
+TreePtr<AGENT_TYPE> MakePatternNode(const CP &...cp)
+{
+    // Find out at compile time whether the NODE_TYPE is already an Agent.    
+    TreePtr<AGENT_TYPE> agent_node =  MakePatternNodeHelper<is_base_of<Agent, AGENT_TYPE>::value, AGENT_TYPE>::MakeNode(cp...); 
+    agent_node->pre_restriction_archetype_node = shared_ptr<Node>( new PRE_RESTRICTION );
+    agent_node->pre_restriction_archetype_ptr = make_shared<TreePtr<PRE_RESTRICTION>>();
+    return agent_node;    
+};
+
+
 };
 
 #endif
