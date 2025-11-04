@@ -3,7 +3,7 @@
 #include "clean_up.hpp"
 #include "tree/cpptree.hpp"
 #include "tree/typeof.hpp"
-#include "vn/agents/all.hpp"
+#include "pattern_helpers.hpp"
 
 using namespace CPPTree;
 using namespace SCTree;

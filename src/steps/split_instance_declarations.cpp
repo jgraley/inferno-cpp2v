@@ -1,6 +1,6 @@
 #include "split_instance_declarations.hpp"
 #include "tree/cpptree.hpp"
-#include "vn/agents/all.hpp"
+#include "pattern_helpers.hpp"
 
 using namespace CPPTree;
 using namespace Steps;

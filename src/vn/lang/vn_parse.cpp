@@ -71,7 +71,7 @@ Production VNParse::OnEngine( Production stem )
 
 Production VNParse::OnStuff( Production terminus )
 {
-	auto stuff = MakePatternNode<Stuff<Node>>();
+	auto stuff = MakeTreeNode<StuffAgent>();
 	stuff->terminus = terminus;
 	return stuff;
 }
@@ -79,7 +79,7 @@ Production VNParse::OnStuff( Production terminus )
 
 Production VNParse::OnDelta( Production through, Production overlay )
 {
-	auto delta = MakePatternNode<Delta<Node>>();
+	auto delta = MakeTreeNode<DeltaAgent>();
 	delta->through = through;
 	delta->overlay = overlay;
 	return delta;
@@ -90,7 +90,7 @@ Production VNParse::OnPrefixOperator( string tok, Production operand )
 {
     if( tok=="-" )
     {
-		auto op = MakePatternNode<Negate>();
+		auto op = MakeTreeNode<StandardAgentWrapper<Negate>>();
 		op->operands = (operand);
 		return op;
 	}
@@ -103,5 +103,5 @@ Production VNParse::OnPrefixOperator( string tok, Production operand )
 
 Production VNParse::OnSpecificInteger( int value )
 {
-	return MakePatternNode<SpecificInteger>(value);
+	return MakeTreeNode<StandardAgentWrapper<SpecificInteger>>(value);
 }

@@ -2,7 +2,7 @@
 #include "systemc_from_c_simple.hpp"
 #include "tree/cpptree.hpp"
 #include "tree/typeof.hpp"
-#include "vn/agents/all.hpp"
+#include "pattern_helpers.hpp"
 
 // Uncomment to reproduce #807
 #define ALSO_MOVE_VARS

@@ -107,6 +107,9 @@ Lazy<BooleanExpression> AgentCommon::SymbolicCouplingQuery(PatternLink keyer, co
 
 bool AgentCommon::ShouldGenerateCategoryClause() const
 {
+	if( !GetArchetypeNode() )
+		return false;
+		
     // It could be argued that, from the CSP solver's point of
     // view, if we didn't need pre-restriction constraint, we would
     // still need a "type-correctness constraint", i.e. something
@@ -118,7 +121,7 @@ bool AgentCommon::ShouldGenerateCategoryClause() const
     return typeid( *GetArchetypeNode() ) != typeid(Node);
     
     // Note about typeid(): if I go typeid( Node() ) I get the type of a 
-    // node constructor. 
+    // Node constructor. 
 }                                
 
 
@@ -483,6 +486,9 @@ TreePtr<Node> AgentCommon::CloneNode() const
 bool AgentCommon::IsNonTrivialPreRestriction(const TreePtrInterface *pptr) const
 {
 	if( IsFixedType() )
+		return false;
+		
+	if( !GetArchetypeTreePtr() )
 		return false;
 		
     // Note: we are using typeid on the tree pointer type, not the node type.

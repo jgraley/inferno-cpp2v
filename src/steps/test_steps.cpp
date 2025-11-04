@@ -1,7 +1,7 @@
 #include "steps/test_steps.hpp"
 #include "tree/cpptree.hpp"
 #include "common/common.hpp"
-#include "vn/agents/all.hpp"
+#include "pattern_helpers.hpp"
 
 using namespace CPPTree;
 using namespace Steps;

@@ -8,7 +8,7 @@
 #include "steps/generate_stacks.hpp"
 #include "tree/cpptree.hpp"
 #include "common/common.hpp"
-#include "vn/agents/all.hpp"
+#include "pattern_helpers.hpp"
 #include "tree/sctree.hpp"
 
 using namespace CPPTree;

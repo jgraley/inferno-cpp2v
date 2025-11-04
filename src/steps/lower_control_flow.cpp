@@ -3,7 +3,7 @@
 #include "tree/cpptree.hpp"
 #include "tree/sctree.hpp"
 #include "common/common.hpp"
-#include "vn/agents/all.hpp"
+#include "pattern_helpers.hpp"
 #include "tree/typeof.hpp"
 #include "steps/uncombable.hpp"
 
