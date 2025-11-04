@@ -56,13 +56,6 @@ private:
 	string GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const final;  
 };
 
-
-template<class PRE_RESTRICTION>
-class Delta : public DeltaAgent, 
-              public Special<PRE_RESTRICTION>
-{
-};
-
 };
 
 #endif

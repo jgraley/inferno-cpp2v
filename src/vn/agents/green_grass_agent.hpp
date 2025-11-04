@@ -66,13 +66,6 @@ public:
     };
 };
 
-
-template<class PRE_RESTRICTION>
-class GreenGrass : public GreenGrassAgent, 
-                   public Special<PRE_RESTRICTION>
-{
-};
-
 };
 
 #endif

@@ -63,14 +63,6 @@ class ChildAgent : public DepthAgent,
 	}  
 };
 
-
-/// Agent that matches any single node, with terminus support
-template<class PRE_RESTRICTION>
-class Child : public ChildAgent, 
-                public Special<PRE_RESTRICTION> 
-{
-};
-
 //---------------------------------- StuffAgent ------------------------------------    
 
 /// Agent that matches the sub-pattern under `terminus` to any node in 
@@ -109,13 +101,6 @@ public:
     {
 		return "stuff"; 
 	}  
-};
-
-
-template<class PRE_RESTRICTION>
-class Stuff : public StuffAgent, 
-              public Special<PRE_RESTRICTION> 
-{
 };
 
 };

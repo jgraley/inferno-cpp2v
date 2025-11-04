@@ -43,12 +43,5 @@ private:
 	}
 };
 
-
-template<class PRE_RESTRICTION>
-class Conjunction : public Special<PRE_RESTRICTION>,
-                    public ConjunctionAgent
-{
-};
-
 };
 #endif

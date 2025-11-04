@@ -44,11 +44,5 @@ public:
 };
     
     
-template<class PRE_RESTRICTION>
-class PointerIs : public Special<PRE_RESTRICTION>,
-                  public PointerIsAgent
-{
-};
-
 };
 #endif

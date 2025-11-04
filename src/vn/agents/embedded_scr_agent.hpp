@@ -64,44 +64,6 @@ private:
 };
 
 
-/// Agent that allows some transformation to run at the corresponding place in the output tree 
-template<class PRE_RESTRICTION>
-class EmbeddedSCR : public EmbeddedSCRAgent, 
-                    public Special<PRE_RESTRICTION>
-{
-public:
-    
-    // EmbeddedSearchReplace must be constructed using constructor
-    EmbeddedSCR( TreePtr<PRE_RESTRICTION> t, TreePtr<Node> sp, TreePtr<Node> rp, bool is_search ) :
-        EmbeddedSCRAgent( sp, rp, is_search )
-    {
-		through = t;
-    }
-};
-
-
-/// EmbeddedSCR that performs a seperate compare and replace operation at the corresponding place in the output tree
-template<class PRE_RESTRICTION>
-class EmbeddedCompareReplace : public EmbeddedSCR<PRE_RESTRICTION>
-{
-public:
-    EmbeddedCompareReplace() : EmbeddedSCR<PRE_RESTRICTION>( nullptr, nullptr, nullptr, false ) {}      
-    EmbeddedCompareReplace( TreePtr<PRE_RESTRICTION> t, TreePtr<Node> sp=TreePtr<Node>(), TreePtr<Node> rp=TreePtr<Node>() ) :
-        EmbeddedSCR<PRE_RESTRICTION>( t, sp, rp, false ) {}
-
-};
-
-
-/// EmbeddedSCR that performs a seperate search and replace operation at the corresponding place in the output tree
-template<class PRE_RESTRICTION>
-class EmbeddedSearchReplace : public EmbeddedSCR<PRE_RESTRICTION>
-{
-public:
-    EmbeddedSearchReplace() : EmbeddedSCR<PRE_RESTRICTION>( nullptr, nullptr, nullptr, true ) {}      
-    EmbeddedSearchReplace( TreePtr<PRE_RESTRICTION> t, TreePtr<Node> sp=TreePtr<Node>(), TreePtr<Node> rp=TreePtr<Node>() ) :
-        EmbeddedSCR<PRE_RESTRICTION>( t, sp, rp, true ) {}
-};
-
 
 };
 #endif

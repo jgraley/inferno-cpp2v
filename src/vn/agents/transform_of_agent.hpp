@@ -163,20 +163,5 @@ protected:
     TransformOfAgent() {}    
 };
 
-// ---------------------- TransformOf<> ---------------------------
-
-/// Match the output of some transformation against the child pattern 
-template<class PRE_RESTRICTION>
-class TransformOf : public TransformOfAgent,
-                    public Special<PRE_RESTRICTION>
-{
-public:   
-    TransformOf() {}    
-    TransformOf( Transformation *t, TreePtr<Node> p=TreePtr<Node>() ) : 
-        TransformOfAgent(t, p) 
-    {
-    }
-};
-
 };
 #endif

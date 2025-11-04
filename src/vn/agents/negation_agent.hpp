@@ -46,14 +46,7 @@ public:
 		return "not"; 
 	}
 };
-
-
-template<class PRE_RESTRICTION>
-class Negation : public Special<PRE_RESTRICTION>,
-                 public NegationAgent
-{
-};
-    
+  
 };
 
 #endif

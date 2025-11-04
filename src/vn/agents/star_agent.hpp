@@ -76,13 +76,6 @@ public:
 };
 
 
-/// Agent used in a container pattern that matches zero or more elements
-template<class PRE_RESTRICTION>
-class Star : public StarAgent, 
-             public Special<PRE_RESTRICTION>
-{
-};
-
 };
 
 #endif
