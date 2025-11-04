@@ -14,13 +14,13 @@ SplitInstanceDeclarations::SplitInstanceDeclarations()
     // decls section of the compound.
     auto sc = MakePatternNode<Compound>();
     auto si = MakePatternNode<LocalVariable>();
-    auto over = MakePatternNode< Delta<LocalVariable> >();
+    auto over = MakePatternNode<DeltaAgent, LocalVariable>();
     si->identifier = MakePatternNode<InstanceIdentifier>();  // Only acting on initialised Instances
     si->initialiser = MakePatternNode<Expression>();  // Only acting on initialised Instances
-    auto decls = MakePatternNode< Star<Declaration> >();
+    auto decls = MakePatternNode<StarAgent, Declaration>();
     sc->members = { decls };
-    auto pre = MakePatternNode< Star<Statement> >();
-    auto post = MakePatternNode< Star<Statement> >();
+    auto pre = MakePatternNode<StarAgent, Statement>();
+    auto post = MakePatternNode<StarAgent, Statement>();
     sc->statements = ( pre, over, post );
 
     auto rc = MakePatternNode<Compound>();
@@ -42,10 +42,10 @@ MoveInstanceDeclarations::MoveInstanceDeclarations()
     // Just move the decl to the decls collection
     auto sc = MakePatternNode<Compound>();
     auto var = MakePatternNode<LocalVariable>();
-    auto decls = MakePatternNode< Star<Declaration> >();
+    auto decls = MakePatternNode<StarAgent, Declaration>();
     sc->members = ( decls );
-    auto pre = MakePatternNode< Star<Statement> >();
-    auto post = MakePatternNode< Star<Statement> >();
+    auto pre = MakePatternNode<StarAgent, Statement>();
+    auto post = MakePatternNode<StarAgent, Statement>();
     sc->statements = ( pre, var, post );
 
     auto rc = MakePatternNode<Compound>();
@@ -63,12 +63,12 @@ SplitInstanceDeclarations2::SplitInstanceDeclarations2()
     // decls section of the compound.
     auto sc = MakePatternNode<Compound>();
     auto si = MakePatternNode<LocalVariable>();
-    auto over = MakePatternNode< Delta<LocalVariable> >();
+    auto over = MakePatternNode<DeltaAgent, LocalVariable>();
     si->identifier = MakePatternNode<InstanceIdentifier>();  // Only acting on initialised Instances
     si->initialiser = MakePatternNode<Expression>();  // Only acting on initialised Instances
-    auto decls = MakePatternNode< Star<Declaration> >();
+    auto decls = MakePatternNode<StarAgent, Declaration>();
     sc->members = ( decls, over );
-    auto stmts = MakePatternNode< Star<Statement> >();
+    auto stmts = MakePatternNode<StarAgent, Statement>();
     sc->statements = ( stmts );
 
     auto rc = MakePatternNode<Compound>();

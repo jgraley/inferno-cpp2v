@@ -14,24 +14,24 @@ AutosToModule::AutosToModule()
 {
     auto s_rec = MakePatternNode<DeclScope>();
     auto r_rec = MakePatternNode<DeclScope>();
-    auto decls = MakePatternNode< Star<Declaration> >();
-    auto vdecls = MakePatternNode< Star<Declaration> >();
-    auto vstmts = MakePatternNode< Star<Statement> >();
+    auto decls = MakePatternNode<StarAgent, Declaration>();
+    auto vdecls = MakePatternNode<StarAgent, Declaration>();
+    auto vstmts = MakePatternNode<StarAgent, Statement>();
     auto s_var = MakePatternNode<Automatic>();
     auto fn = MakePatternNode<Field>();
     auto r_var = MakePatternNode<Field>();
     auto ft = MakePatternNode<Callable>();
-    auto stuff = MakePatternNode< Stuff<Initialiser> >();
+    auto stuff = MakePatternNode<StuffAgent, Initialiser>();
     auto s_comp = MakePatternNode<Compound>();
     auto r_comp = MakePatternNode<Compound>();
-    auto over = MakePatternNode< Delta<Compound> >();
-    auto bases = MakePatternNode< Star<Base> >();
+    auto over = MakePatternNode<DeltaAgent, Compound>();
+    auto bases = MakePatternNode<StarAgent, Base>();
     auto type = MakePatternNode<Type>();
     auto var_id = MakePatternNode<InstanceIdentifier>();
     auto init = MakePatternNode<Initialiser>();
-    auto s_all = MakePatternNode< Conjunction<Compound> >();
-    auto sx_not = MakePatternNode< Negation<Compound> >();
-    auto sx_stuff = MakePatternNode< Stuff<Compound> >();
+    auto s_all = MakePatternNode<ConjunctionAgent, Compound>();
+    auto sx_not = MakePatternNode<NegationAgent, Compound>();
+    auto sx_stuff = MakePatternNode<StuffAgent, Compound>();
     auto sx_call = MakePatternNode<Call>();
         
     s_rec->members = (decls, fn);
@@ -68,19 +68,19 @@ TempsAndStaticsToModule::TempsAndStaticsToModule()
 {
     auto s_rec = MakePatternNode<DeclScope>();
     auto r_rec = MakePatternNode<DeclScope>();
-    auto decls = MakePatternNode< Star<Declaration> >();
-    auto vdecls = MakePatternNode< Star<Declaration> >();
-    auto vstmts = MakePatternNode< Star<Statement> >();
-    auto var = MakePatternNode< Disjunction<Instance> >();
+    auto decls = MakePatternNode<StarAgent, Declaration>();
+    auto vdecls = MakePatternNode<StarAgent, Declaration>();
+    auto vstmts = MakePatternNode<StarAgent, Statement>();
+    auto var = MakePatternNode<DisjunctionAgent, Instance>();
     auto tempvar = MakePatternNode<Temporary>();
     auto staticvar = MakePatternNode<Static>();
     auto fn = MakePatternNode<Field>();
     auto ft = MakePatternNode<Thread>();
-    auto stuff = MakePatternNode< Stuff<Initialiser> >();
+    auto stuff = MakePatternNode<StuffAgent, Initialiser>();
     auto s_comp = MakePatternNode<Compound>();
     auto r_comp = MakePatternNode<Compound>();
-    auto over = MakePatternNode< Delta<Compound> >();
-    auto bases = MakePatternNode< Star<Base> >();
+    auto over = MakePatternNode<DeltaAgent, Compound>();
+    auto bases = MakePatternNode<StarAgent, Base>();
     auto type = MakePatternNode<Type>();
     auto var_id = MakePatternNode<InstanceIdentifier>();
     auto init = MakePatternNode<Initialiser>();
@@ -108,17 +108,17 @@ DeclsToModule::DeclsToModule()
 {
     auto s_rec = MakePatternNode<DeclScope>();
     auto r_rec = MakePatternNode<DeclScope>();
-    auto decls = MakePatternNode< Star<Declaration> >();
-    auto vdecls = MakePatternNode< Star<Declaration> >();
-    auto vstmts = MakePatternNode< Star<Statement> >();
+    auto decls = MakePatternNode<StarAgent, Declaration>();
+    auto vdecls = MakePatternNode<StarAgent, Declaration>();
+    auto vstmts = MakePatternNode<StarAgent, Statement>();
     auto fn = MakePatternNode<Field>();
     auto ut = MakePatternNode<TypeDeclaration>();
     auto ft = MakePatternNode<Thread>();
-    auto stuff = MakePatternNode< Stuff<Initialiser> >();
+    auto stuff = MakePatternNode<StuffAgent, Initialiser>();
     auto s_comp = MakePatternNode<Compound>();
     auto r_comp = MakePatternNode<Compound>();
-    auto over = MakePatternNode< Delta<Compound> >();
-    auto bases = MakePatternNode< Star<Base> >();
+    auto over = MakePatternNode<DeltaAgent, Compound>();
+    auto bases = MakePatternNode<StarAgent, Base>();
     
     s_rec->members = (decls, fn);
     r_rec->members = (decls, fn, ut);
@@ -149,8 +149,8 @@ ThreadToMethod::ThreadToMethod()
     auto id = MakePatternNode<InstanceIdentifier>();
     auto s_loop = MakePatternNode<Do>();
     auto s_loop_cond = MakePatternNode<True>();
-    auto loop_decls = MakePatternNode< Star<Declaration> >();
-    auto loop_stmts = MakePatternNode< Star<Statement> >();
+    auto loop_decls = MakePatternNode<StarAgent, Declaration>();
+    auto loop_stmts = MakePatternNode<StarAgent, Statement>();
     auto ls_wait_dynamic = MakePatternNode<WaitDynamic>();
     auto lr_nt_dynamic = MakePatternNode<NextTriggerDynamic>();
     auto ms_wait_static = MakePatternNode<WaitStatic>();
@@ -164,10 +164,10 @@ ThreadToMethod::ThreadToMethod()
     
     or_return->return_value = or_retval;
     
-    auto embedded_o = MakePatternNode< EmbeddedSearchReplace<Compound> >( loop_comp, os_continue, or_return);
-    auto embedded_n = MakePatternNode< EmbeddedSearchReplace<Compound> >( embedded_o, ns_wait_delta, nr_nt_delta);
-    auto embedded_m = MakePatternNode< EmbeddedSearchReplace<Compound> >( embedded_n, ms_wait_static, mr_nt_static);
-    auto embedded_l = MakePatternNode< EmbeddedSearchReplace<Compound> >( embedded_m, ls_wait_dynamic, lr_nt_dynamic);
+    auto embedded_o = MakePatternNode<EmbeddedSearchReplaceAgent, Compound>( loop_comp, os_continue, or_return);
+    auto embedded_n = MakePatternNode<EmbeddedSearchReplaceAgent, Compound>( embedded_o, ns_wait_delta, nr_nt_delta);
+    auto embedded_m = MakePatternNode<EmbeddedSearchReplaceAgent, Compound>( embedded_n, ms_wait_static, mr_nt_static);
+    auto embedded_l = MakePatternNode<EmbeddedSearchReplaceAgent, Compound>( embedded_m, ls_wait_dynamic, lr_nt_dynamic);
 
     s_thread->type = s_thread_type;
     s_thread->initialiser = s_comp;
@@ -196,18 +196,18 @@ ExplicitiseReturns::ExplicitiseReturns()
     auto s_comp = MakePatternNode<Compound>();
     auto r_comp = MakePatternNode<Compound>();
     auto m_comp = MakePatternNode<Compound>();
-    auto over_comp = MakePatternNode< Delta<Compound> >();
-    auto s_all = MakePatternNode< Conjunction<Instance> >();
-    auto s_stuff = MakePatternNode< Stuff<Instance> >();
+    auto over_comp = MakePatternNode<DeltaAgent, Compound>();
+    auto s_all = MakePatternNode<ConjunctionAgent, Instance>();
+    auto s_stuff = MakePatternNode<StuffAgent, Instance>();
     auto s_return = MakePatternNode<Return>();
     auto ls_return = MakePatternNode<Return>();
     auto m_return = MakePatternNode<Return>();
-    auto decls = MakePatternNode< Star<Declaration> >();
-    auto m_decls = MakePatternNode< Star<Declaration> >();
-    auto stmts = MakePatternNode< Star<Statement> >();
-    auto m_pre = MakePatternNode< Star<Statement> >();
-    auto m_mid = MakePatternNode< Star<Statement> >();
-    auto m_post = MakePatternNode< Star<Statement> >();
+    auto decls = MakePatternNode<StarAgent, Declaration>();
+    auto m_decls = MakePatternNode<StarAgent, Declaration>();
+    auto stmts = MakePatternNode<StarAgent, Statement>();
+    auto m_pre = MakePatternNode<StarAgent, Statement>();
+    auto m_mid = MakePatternNode<StarAgent, Statement>();
+    auto m_post = MakePatternNode<StarAgent, Statement>();
     auto r_flag = MakePatternNode<Temporary>();
     auto r_boolean = MakePatternNode<Boolean>();
     auto r_flag_id = MakePatternNode<BuildInstanceIdentifierAgent>("enabled");
@@ -217,11 +217,11 @@ ExplicitiseReturns::ExplicitiseReturns()
     auto ls_uninit = MakePatternNode<Uninitialised>();
     auto m_uninit = MakePatternNode<Uninitialised>();
     auto lr_assign = MakePatternNode<Assign>();
-    auto m_stuff = MakePatternNode< Stuff<Statement> >();
-    auto ms_affected = MakePatternNode< Negation<Statement> >();
+    auto m_stuff = MakePatternNode<StuffAgent, Statement>();
+    auto ms_affected = MakePatternNode<NegationAgent, Statement>();
     auto ms_if = MakePatternNode<If>();
     auto mr_if = MakePatternNode<If>();
-    auto m_over = MakePatternNode< Delta<Statement> >();
+    auto m_over = MakePatternNode<DeltaAgent, Statement>();
     
     m_comp->members = (m_decls);
     m_comp->statements = (m_pre, m_stuff, m_mid, m_over, m_post);
@@ -235,12 +235,12 @@ ExplicitiseReturns::ExplicitiseReturns()
     mr_if->body = ms_affected;
     mr_if->body_else = MakePatternNode<Nop>();
     
-    auto embedded_m = MakePatternNode< EmbeddedSearchReplace<Compound> >( over_comp, m_comp );
+    auto embedded_m = MakePatternNode<EmbeddedSearchReplaceAgent, Compound>( over_comp, m_comp );
     
     ls_return->return_value = ls_uninit;
     lr_assign->operands = (r_flag_id, lr_false);
     
-    auto embedded_l = MakePatternNode< EmbeddedSearchReplace<Compound> >( embedded_m, ls_return, lr_assign);
+    auto embedded_l = MakePatternNode<EmbeddedSearchReplaceAgent, Compound>( embedded_m, ls_return, lr_assign);
     
     s_all->conjuncts = (inst, s_stuff);
     inst->type = s_callable; // TODO when functions are sorted out, set return type to void

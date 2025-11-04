@@ -26,7 +26,7 @@ GenerateImplicitCasts::GenerateImplicitCasts()
     // simply insert a cast to the declaration param type at the root of the 
     // expression.
     auto s_call = MakePatternNode<Call>();
-    auto callee = MakePatternNode< TransformOf<Expression> >( &TypeOf::instance );
+    auto callee = MakePatternNode<TransformOfAgent, Expression>( &TypeOf::instance );
     s_call->callee = callee;
     auto s_proc = MakePatternNode<CallableParams>();
     callee->pattern = s_proc;
@@ -35,17 +35,17 @@ GenerateImplicitCasts::GenerateImplicitCasts()
     s_param->identifier = param_id;
     auto type = MakePatternNode< Type >();
     s_param->type = type;
-    auto s_other_params = MakePatternNode< Star<Parameter> >();
+    auto s_other_params = MakePatternNode<StarAgent, Parameter>();
     s_proc->params = (s_param, s_other_params);
     auto s_arg = MakePatternNode< IdValuePair >();
     s_arg->key = param_id;
-    auto s_arg_value = MakePatternNode< TransformOf<Expression> >( &TypeOf::instance );
+    auto s_arg_value = MakePatternNode<TransformOfAgent, Expression>( &TypeOf::instance );
     s_arg->value = s_arg_value;
     //s_arg_value->pattern = MakePatternNode< Type >();
-    auto s_arg_type = MakePatternNode< Negation<Type> >();
+    auto s_arg_type = MakePatternNode<NegationAgent, Type>();
     s_arg_value->pattern = s_arg_type;
     s_arg_type->negand = type;
-    auto other_args = MakePatternNode< Star<IdValuePair> >();
+    auto other_args = MakePatternNode<StarAgent, IdValuePair>();
     s_call->args = ( s_arg, other_args );
 
     auto r_call = MakePatternNode<Call>();

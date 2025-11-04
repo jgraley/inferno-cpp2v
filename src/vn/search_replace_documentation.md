@@ -368,7 +368,7 @@ Remember that a singular `TreePtr<>` in a search pattern that is set to NULL is 
 It does not make sense for a singular `TreePtr<>` to be "empty" - this is not supported in Vida Nova, and singular relationships are always 1:1 in program trees. It does make sense to wildcard a `Collection<>` or `Sequence<>` - the way to do this is to insert a single `Star<>` of the contained type. It is unfortunately impossible to write
 
 ```
-MakePatternNode< Collection<X> > my_collection;
+MakePatternNode<CollectionAgent, X> my_collection;
 my_collection = ();
 ```
 

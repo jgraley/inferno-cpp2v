@@ -26,15 +26,15 @@ GotoAfterWait::GotoAfterWait()
     // Overall, a good example of but-not
     auto sx_comp = MakePatternNode<Compound>();
     auto r_comp = MakePatternNode<Compound>();
-    auto sx_decls = MakePatternNode< Star<Declaration> >();
-    auto sx_pre = MakePatternNode< Star<Statement> >();
-    auto sx_post = MakePatternNode< Star<Statement> >();
+    auto sx_decls = MakePatternNode<StarAgent, Declaration>();
+    auto sx_pre = MakePatternNode<StarAgent, Statement>();
+    auto sx_post = MakePatternNode<StarAgent, Statement>();
     auto wait = MakePatternNode<Wait>();
-    auto notmatch = MakePatternNode< Negation<Statement> >();
-    auto all = MakePatternNode< Conjunction<Statement> >();
-    auto anynode = MakePatternNode< Child<Statement> >();
-    auto over = MakePatternNode< Delta<Statement> >();
-    auto all_over = MakePatternNode< Delta<Statement> >();
+    auto notmatch = MakePatternNode<NegationAgent, Statement>();
+    auto all = MakePatternNode<ConjunctionAgent, Statement>();
+    auto anynode = MakePatternNode<ChildAgent, Statement>();
+    auto over = MakePatternNode<DeltaAgent, Statement>();
+    auto all_over = MakePatternNode<DeltaAgent, Statement>();
     auto sx_goto = MakePatternNode<Goto>();
     auto r_goto = MakePatternNode<Goto>();
     auto r_label = MakePatternNode<Label>();
@@ -63,11 +63,11 @@ GotoAfterWait::GotoAfterWait()
     // TODO will miss a yield at the very end
     auto s_comp = MakePatternNode<Compound>();
     auto r_comp = MakePatternNode<Compound>();
-    auto decls = MakePatternNode< Star<Declaration> >();
-    auto pre = MakePatternNode< Star<Statement> >();
-    auto post = MakePatternNode< Star<Statement> >();
+    auto decls = MakePatternNode<StarAgent, Declaration>();
+    auto pre = MakePatternNode<StarAgent, Statement>();
+    auto post = MakePatternNode<StarAgent, Statement>();
     auto wait = MakePatternNode<Wait>();
-    auto notmatch = MakePatternNode< Negation<Statement> >();
+    auto notmatch = MakePatternNode<NegationAgent, Statement>();
     auto sx_goto = MakePatternNode<Goto>();
     auto r_goto = MakePatternNode<Goto>();
     auto r_label = MakePatternNode<Label>();
@@ -97,15 +97,15 @@ NormaliseConditionalGotos::NormaliseConditionalGotos()
     auto s_else_goto = MakePatternNode< Goto >();
     auto r_goto = MakePatternNode< Goto >();
     auto sx_goto = MakePatternNode< Goto >();
-    auto decls = MakePatternNode< Star<Declaration> >();
-    auto pre = MakePatternNode< Star<Statement> >();
-    auto sx_pre = MakePatternNode< Star<Statement> >();
-    auto post = MakePatternNode< Star<Statement> >();
-    auto sx_post = MakePatternNode< Star<Statement> >();
+    auto decls = MakePatternNode<StarAgent, Declaration>();
+    auto pre = MakePatternNode<StarAgent, Statement>();
+    auto sx_pre = MakePatternNode<StarAgent, Statement>();
+    auto post = MakePatternNode<StarAgent, Statement>();
+    auto sx_post = MakePatternNode<StarAgent, Statement>();
     auto label = MakePatternNode< Label >();
     auto label_id = MakePatternNode< BuildLabelIdentifierAgent >("PROCEED");
-    auto s_all = MakePatternNode< Conjunction<Statement> >();
-    auto sx_not = MakePatternNode< Negation<Statement> >();
+    auto s_all = MakePatternNode<ConjunctionAgent, Statement>();
+    auto sx_not = MakePatternNode<NegationAgent, Statement>();
     
     s_all->conjuncts = (s_comp, sx_not);
     sx_not->negand = sx_comp;    
@@ -135,9 +135,9 @@ CompactGotos::CompactGotos()
     auto s_then_goto = MakePatternNode< Goto >();
     auto s_else_goto = MakePatternNode< Goto >();
     auto r_goto = MakePatternNode< Goto >();
-    auto decls = MakePatternNode< Star<Declaration> >();
-    auto pre = MakePatternNode< Star<Statement> >();
-    auto post = MakePatternNode< Star<Statement> >();
+    auto decls = MakePatternNode<StarAgent, Declaration>();
+    auto pre = MakePatternNode<StarAgent, Statement>();
+    auto post = MakePatternNode<StarAgent, Statement>();
     auto multiplexer = MakePatternNode< ConditionalOperator >();
     
     s_then_goto->destination = MakePatternNode<Expression>();    
@@ -167,16 +167,16 @@ AddGotoBeforeLabel::AddGotoBeforeLabel() // TODO really slow!!11
     auto r_comp = MakePatternNode< Compound >();
     auto sx_comp = MakePatternNode< Compound >();
     auto r_goto = MakePatternNode< Goto >();
-    auto decls = MakePatternNode< Star<Declaration> >();
-    auto sx_decls = MakePatternNode< Star<Declaration> >();
-    auto pre = MakePatternNode< Star<Statement> >();
-    auto post = MakePatternNode< Star<Statement> >();
-    auto sx_pre = MakePatternNode< Star<Statement> >();
-    auto sx_post = MakePatternNode< Star<Statement> >();
+    auto decls = MakePatternNode<StarAgent, Declaration>();
+    auto sx_decls = MakePatternNode<StarAgent, Declaration>();
+    auto pre = MakePatternNode<StarAgent, Statement>();
+    auto post = MakePatternNode<StarAgent, Statement>();
+    auto sx_pre = MakePatternNode<StarAgent, Statement>();
+    auto sx_post = MakePatternNode<StarAgent, Statement>();
     auto label = MakePatternNode< Label >();
     auto label_id = MakePatternNode< LabelIdentifier >();
-    auto s_all = MakePatternNode< Conjunction<Compound> >();
-    auto s_not = MakePatternNode< Negation<Compound> >();
+    auto s_all = MakePatternNode<ConjunctionAgent, Compound>();
+    auto s_not = MakePatternNode<NegationAgent, Compound>();
         
     s_all->conjuncts = (s_comp, s_not);
     s_not->negand = sx_comp;
@@ -197,7 +197,7 @@ AddGotoBeforeLabel::AddGotoBeforeLabel() // TODO really slow!!11
 static TreePtr<Statement> MakeResetAssignmentPattern()
 {
     auto ass = MakePatternNode<Assign>();
-    auto decl = MakePatternNode< TransformOf<InstanceIdentifier> >( &DeclarationOf::instance );
+    auto decl = MakePatternNode<TransformOfAgent, InstanceIdentifier>( &DeclarationOf::instance );
     decl->pattern = MakePatternNode<LocalVariable>();
     ass->operands = (decl, MakePatternNode<Literal>());    
     return ass;
@@ -208,20 +208,20 @@ EnsureBootstrap::EnsureBootstrap()
 {
     auto fn = MakePatternNode<Instance>();
     auto thread = MakePatternNode<Thread>();
-    auto over = MakePatternNode< Delta<Compound> >();
-    auto s_all = MakePatternNode< Conjunction<Compound> >();
-    auto s_not = MakePatternNode< Negation<Compound> >();
+    auto over = MakePatternNode<DeltaAgent, Compound>();
+    auto s_all = MakePatternNode<ConjunctionAgent, Compound>();
+    auto s_not = MakePatternNode<NegationAgent, Compound>();
     auto s_body = MakePatternNode<Compound>();
     auto r_body = MakePatternNode<Compound>();
     auto sx_body = MakePatternNode<Compound>();
-    auto decls = MakePatternNode< Star<Declaration> >();
-    auto pre = MakePatternNode< Star<Statement> >();
-    auto sx_pre = MakePatternNode< Star<Statement> >();
-    auto post = MakePatternNode< Star<Statement> >();
+    auto decls = MakePatternNode<StarAgent, Declaration>();
+    auto pre = MakePatternNode<StarAgent, Statement>();
+    auto sx_pre = MakePatternNode<StarAgent, Statement>();
+    auto post = MakePatternNode<StarAgent, Statement>();
     auto r_goto = MakePatternNode<Goto>();
     auto r_label = MakePatternNode<Label>();
     auto r_labelid = MakePatternNode<BuildLabelIdentifierAgent>("BOOTSTRAP");
-    auto stop = MakePatternNode< Negation<Statement> >();
+    auto stop = MakePatternNode<NegationAgent, Statement>();
     auto sx_goto = MakePatternNode<Goto>();
         
     fn->type = thread;
@@ -230,8 +230,8 @@ EnsureBootstrap::EnsureBootstrap()
     s_all->conjuncts = (s_not, s_body);
     s_not->negand = sx_body;
     // only exclude if there is a goto; a goto to anywhere will suffice to boot the state machine
-    sx_body->members = (MakePatternNode< Star<Declaration> >());
-    sx_body->statements = (sx_pre, sx_goto, MakePatternNode< Star<Statement> >());     
+    sx_body->members = (MakePatternNode<StarAgent, Declaration>());
+    sx_body->statements = (sx_pre, sx_goto, MakePatternNode<StarAgent, Statement>());     
     sx_pre->restriction = MakeResetAssignmentPattern();
     sx_goto->destination = MakePatternNode<LabelIdentifier>(); // must be a hard goto to exclude - otherwise might 
                                                            // have calculations in it which is no good for bootstrapping
@@ -254,16 +254,16 @@ AddStateLabelVar::AddStateLabelVar()
     auto s_comp = MakePatternNode<Compound>();
     auto r_comp = MakePatternNode<Compound>();
     auto lr_compound = MakePatternNode<Compound>();
-    auto decls = MakePatternNode< Star<Declaration> >();
-    auto pre = MakePatternNode< Star<Statement> >();
-    auto post = MakePatternNode< Star<Statement> >();
+    auto decls = MakePatternNode<StarAgent, Declaration>();
+    auto pre = MakePatternNode<StarAgent, Statement>();
+    auto post = MakePatternNode<StarAgent, Statement>();
     auto ls_goto = MakePatternNode<Goto>();
     auto lr_goto = MakePatternNode<Goto>();
     auto sx_goto = MakePatternNode<Goto>();
     auto lr_assign = MakePatternNode<Assign>();
     auto state_var = MakePatternNode<Automatic>();
-    auto sx_not = MakePatternNode< Negation<Expression> >();
-    auto lsx_not = MakePatternNode< Negation<Expression> >();
+    auto sx_not = MakePatternNode<NegationAgent, Expression>();
+    auto lsx_not = MakePatternNode<NegationAgent, Expression>();
     auto state_var_id = MakePatternNode< BuildInstanceIdentifierAgent >("state");
     
     ls_goto->destination = lsx_not;
@@ -273,7 +273,7 @@ AddStateLabelVar::AddStateLabelVar()
     lr_assign->operands = (state_var_id, lsx_not);
     lr_goto->destination = state_var_id;
             
-    auto r_embedded = MakePatternNode< EmbeddedSearchReplace<Statement> >( r_comp, ls_goto, lr_compound );
+    auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Statement>( r_comp, ls_goto, lr_compound );
      
     s_comp->members = (decls);
     s_comp->statements = (pre, sx_goto, post); 
@@ -294,19 +294,19 @@ EnsureSuperLoop::EnsureSuperLoop()
 {   
     auto fn = MakePatternNode<Instance>();
     auto thread = MakePatternNode<Thread>();
-    auto over = MakePatternNode< Delta<Compound> >();
-    auto s_all = MakePatternNode< Conjunction<Compound> >();
-    auto sx_not = MakePatternNode< Negation<Statement> >();
-    auto s_limit = MakePatternNode< Negation<Statement> >();
-    auto sx_stuff = MakePatternNode< Stuff<Compound> >();
+    auto over = MakePatternNode<DeltaAgent, Compound>();
+    auto s_all = MakePatternNode<ConjunctionAgent, Compound>();
+    auto sx_not = MakePatternNode<NegationAgent, Statement>();
+    auto s_limit = MakePatternNode<NegationAgent, Statement>();
+    auto sx_stuff = MakePatternNode<StuffAgent, Compound>();
     auto sx_goto = MakePatternNode< Goto >();
     auto first_goto = MakePatternNode< Goto >();
     auto s_body = MakePatternNode<Compound>();
     auto r_body = MakePatternNode<Compound>();
     auto r_loop_body = MakePatternNode<Compound>();
-    auto pre = MakePatternNode< Star<Statement> >();
-    auto post = MakePatternNode< Star<Statement> >();
-    auto decls = MakePatternNode< Star<Declaration> >();
+    auto pre = MakePatternNode<StarAgent, Statement>();
+    auto post = MakePatternNode<StarAgent, Statement>();
+    auto decls = MakePatternNode<StarAgent, Declaration>();
     auto r_loop = MakePatternNode<Do>();
         
     fn->type = thread;
@@ -334,12 +334,12 @@ EnsureSuperLoop::EnsureSuperLoop()
 ShareGotos::ShareGotos()
 {   
     auto loop = MakePatternNode<Do>();
-    auto over = MakePatternNode< Delta<Compound> >();
+    auto over = MakePatternNode<DeltaAgent, Compound>();
     auto s_body = MakePatternNode<Compound>();
     auto r_body = MakePatternNode<Compound>();
-    auto decls = MakePatternNode< Star<Declaration> >();
-    auto pre = MakePatternNode< Star<Statement> >();
-    auto post = MakePatternNode< Star<Statement> >();
+    auto decls = MakePatternNode<StarAgent, Declaration>();
+    auto pre = MakePatternNode<StarAgent, Statement>();
+    auto post = MakePatternNode<StarAgent, Statement>();
     auto first_goto = MakePatternNode< Goto >();
     auto r_goto = MakePatternNode< Goto >();
     auto r_label = MakePatternNode<Label>();
@@ -368,14 +368,14 @@ SwitchCleanUp::SwitchCleanUp()
     auto r_body = MakePatternNode<Compound>();
     auto s_switch = MakePatternNode<Switch>();
     auto r_switch = MakePatternNode<Switch>();
-    auto decls = MakePatternNode< Star<Declaration> >();
-    auto main = MakePatternNode< Star<Statement> >();
-    auto tail = MakePatternNode< Star<Statement> >();
+    auto decls = MakePatternNode<StarAgent, Declaration>();
+    auto main = MakePatternNode<StarAgent, Statement>();
+    auto tail = MakePatternNode<StarAgent, Statement>();
     auto label = MakePatternNode<Label>();
     auto cond = MakePatternNode<Expression>();
-    auto sx_not_tail = MakePatternNode< Negation<Statement> >();
-    auto sx_not_main = MakePatternNode< Negation<Statement> >();
-    auto sx_any_tail = MakePatternNode< Disjunction<Statement> >();
+    auto sx_not_tail = MakePatternNode<NegationAgent, Statement>();
+    auto sx_not_main = MakePatternNode<NegationAgent, Statement>();
+    auto sx_any_tail = MakePatternNode<DisjunctionAgent, Statement>();
 
     s_switch->condition = cond;
     s_switch->body = s_body;
@@ -402,9 +402,9 @@ InferBreak::InferBreak()
     auto ls_goto = MakePatternNode<Goto>();
     auto label = MakePatternNode<Label>();
     auto label_id = MakePatternNode<LabelIdentifier>();
-    auto decls = MakePatternNode< Star<Declaration> >();
-    auto pre = MakePatternNode< Star<Statement> >();
-    auto post = MakePatternNode< Star<Statement> >();
+    auto decls = MakePatternNode<StarAgent, Declaration>();
+    auto pre = MakePatternNode<StarAgent, Statement>();
+    auto post = MakePatternNode<StarAgent, Statement>();
     auto breakable = MakePatternNode<Breakable>();
     auto lr_break = MakePatternNode<Break>();
     auto s_comp = MakePatternNode<Compound>();
@@ -412,7 +412,7 @@ InferBreak::InferBreak()
 
     ls_goto->destination = label_id;
 
-    auto embedded = MakePatternNode< EmbeddedSearchReplace<Breakable> >( breakable, ls_goto, lr_break ); // todo restrict to not go through more breakables
+    auto embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Breakable>( breakable, ls_goto, lr_break ); // todo restrict to not go through more breakables
 
     s_comp->members = decls;
     s_comp->statements = (pre, breakable, label, post);
@@ -430,16 +430,16 @@ FixFallthrough::FixFallthrough()
     // don't actually need a switch statement here, just look in the body, pattern contains Case statements
     auto s_comp = MakePatternNode<Compound>();
     auto r_comp = MakePatternNode<Compound>();
-    auto decls = MakePatternNode< Star<Declaration> >();
-    auto pre = MakePatternNode< Star<Statement> >();
-    auto cb1 = MakePatternNode< Star<Statement> >();
-    auto cb2 = MakePatternNode< Star<Statement> >();
-    auto post = MakePatternNode< Star<Statement> >();
+    auto decls = MakePatternNode<StarAgent, Declaration>();
+    auto pre = MakePatternNode<StarAgent, Statement>();
+    auto cb1 = MakePatternNode<StarAgent, Statement>();
+    auto cb2 = MakePatternNode<StarAgent, Statement>();
+    auto post = MakePatternNode<StarAgent, Statement>();
     auto case1 = MakePatternNode<Case>();
     auto case2 = MakePatternNode<Case>();
     auto breakk = MakePatternNode<Break>();
-    auto s_not1 = MakePatternNode< Negation<Statement> >();
-    auto s_not2 = MakePatternNode< Negation<Statement> >();
+    auto s_not1 = MakePatternNode<NegationAgent, Statement>();
+    auto s_not2 = MakePatternNode<NegationAgent, Statement>();
     
     s_comp->members = (decls);
     s_comp->statements = (pre, case1, cb1,              case2, cb2, breakk, post);
@@ -466,22 +466,22 @@ AddYieldFlag::AddYieldFlag()
     auto ms_comp = MakePatternNode<Compound>();
     auto mr_comp = MakePatternNode<Compound>();
     auto msx_comp = MakePatternNode<Compound>();
-    auto enums = MakePatternNode< Star<Declaration> >();
-    auto decls = MakePatternNode< Star<Declaration> >();
-    auto func_decls = MakePatternNode< Star<Declaration> >();
-    auto m_decls = MakePatternNode< Star<Declaration> >();
-    auto msx_decls = MakePatternNode< Star<Declaration> >();
+    auto enums = MakePatternNode<StarAgent, Declaration>();
+    auto decls = MakePatternNode<StarAgent, Declaration>();
+    auto func_decls = MakePatternNode<StarAgent, Declaration>();
+    auto m_decls = MakePatternNode<StarAgent, Declaration>();
+    auto msx_decls = MakePatternNode<StarAgent, Declaration>();
     auto var_decl = MakePatternNode<Instance>();
     auto var_id = MakePatternNode<InstanceIdentifier>();
     auto enum_id = MakePatternNode<TypeIdentifier>();
-    auto func_pre = MakePatternNode< Star<Statement> >();
-    auto m_pre = MakePatternNode< Star<Statement> >();
-    auto msx_pre = MakePatternNode< Star<Statement> >();
-    auto m_post = MakePatternNode< Star<Statement> >();
-    auto msx_post = MakePatternNode< Star<Statement> >();
-    auto stmts = MakePatternNode< Star<Statement> >();
-    auto l_pre = MakePatternNode< Star<If> >();
-    auto l_post = MakePatternNode< Star<If> >();
+    auto func_pre = MakePatternNode<StarAgent, Statement>();
+    auto m_pre = MakePatternNode<StarAgent, Statement>();
+    auto msx_pre = MakePatternNode<StarAgent, Statement>();
+    auto m_post = MakePatternNode<StarAgent, Statement>();
+    auto msx_post = MakePatternNode<StarAgent, Statement>();
+    auto stmts = MakePatternNode<StarAgent, Statement>();
+    auto l_pre = MakePatternNode<StarAgent, If>();
+    auto l_post = MakePatternNode<StarAgent, If>();
     auto loop = MakePatternNode<Loop>();
     auto ls_if = MakePatternNode<If>();
     auto lr_if = MakePatternNode<If>();
@@ -492,18 +492,18 @@ AddYieldFlag::AddYieldFlag()
     auto l_equal = MakePatternNode<Equal>();
     auto lr_and = MakePatternNode<LogicalAnd>();
     auto lr_not = MakePatternNode<LogicalNot>();
-    auto func_over = MakePatternNode< Delta<Compound> >();
-    auto over = MakePatternNode< Delta<Compound> >();
+    auto func_over = MakePatternNode<DeltaAgent, Compound>();
+    auto over = MakePatternNode<DeltaAgent, Compound>();
     auto r_flag_decl = MakePatternNode<Temporary>();
     auto r_flag_init = MakePatternNode<Assign>();
     auto mr_assign = MakePatternNode<Assign>();
     auto msx_assign = MakePatternNode<Assign>();
     auto r_flag_id = MakePatternNode<BuildInstanceIdentifierAgent>("yield_flag");
-    auto ms_all = MakePatternNode< Conjunction<Compound> >();
-    auto ms_not = MakePatternNode< Negation<Compound> >();
+    auto ms_all = MakePatternNode<ConjunctionAgent, Compound>();
+    auto ms_not = MakePatternNode<NegationAgent, Compound>();
     
-    auto embedded_m = MakePatternNode< EmbeddedSearchReplace<Compound> >( r_func_comp, ms_all, mr_comp );
-    auto embedded = MakePatternNode< EmbeddedSearchReplace<Compound> >( r_comp, ls_if, lr_if );  
+    auto embedded_m = MakePatternNode<EmbeddedSearchReplaceAgent, Compound>( r_func_comp, ms_all, mr_comp );
+    auto embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Compound>( r_comp, ls_if, lr_if );  
       
     fn->type = sub;
     fn->initialiser = func_over;
@@ -558,19 +558,19 @@ AddInferredYield::AddInferredYield()
     auto s_comp = MakePatternNode<Compound>();
     auto sx_comp = MakePatternNode<Compound>();
     auto r_comp = MakePatternNode<Compound>();
-    auto func_decls = MakePatternNode< Star<Declaration> >();
-    auto func_pre = MakePatternNode< Star<Statement> >();
-    auto stmts = MakePatternNode< Star<Statement> >();
-    auto sx_pre = MakePatternNode< Star<Statement> >();
-    auto over = MakePatternNode< Delta<Statement> >();
+    auto func_decls = MakePatternNode<StarAgent, Declaration>();
+    auto func_pre = MakePatternNode<StarAgent, Statement>();
+    auto stmts = MakePatternNode<StarAgent, Statement>();
+    auto sx_pre = MakePatternNode<StarAgent, Statement>();
+    auto over = MakePatternNode<DeltaAgent, Statement>();
     auto flag_decl = MakePatternNode<LocalVariable>();
     auto flag_id = MakePatternNode<InstanceIdentifier>();
     auto r_yield = MakePatternNode<WaitDelta>();
     auto loop = MakePatternNode<Loop>();
     auto r_if = MakePatternNode<If>();
     auto sx_if = MakePatternNode<If>();
-    auto s_all = MakePatternNode< Conjunction<Compound> >();
-    auto s_notmatch = MakePatternNode< Negation<Compound> >();
+    auto s_all = MakePatternNode<ConjunctionAgent, Compound>();
+    auto s_notmatch = MakePatternNode<NegationAgent, Compound>();
     auto r_not = MakePatternNode< LogicalNot >();
     auto sx_not = MakePatternNode< LogicalNot >();
     auto assign = MakePatternNode< Assign >();
@@ -611,9 +611,9 @@ MoveInitIntoSuperLoop::MoveInitIntoSuperLoop()
     auto fn = MakePatternNode<Instance>();
     auto fn_id = MakePatternNode<InstanceIdentifier>();
     auto thread = MakePatternNode<Thread>(); // Must be SC_THREAD since we introduce SC stuff
-    auto func_decls = MakePatternNode< Star<Declaration> >();
-    auto inits = MakePatternNode< Star<Statement> >();
-    auto stmts = MakePatternNode< Star<Statement> >();
+    auto func_decls = MakePatternNode<StarAgent, Declaration>();
+    auto inits = MakePatternNode<StarAgent, Statement>();
+    auto stmts = MakePatternNode<StarAgent, Statement>();
     auto loop = MakePatternNode<Loop>();
     auto s_func_comp = MakePatternNode<Compound>();
     auto r_func_comp = MakePatternNode<Compound>();
@@ -622,8 +622,8 @@ MoveInitIntoSuperLoop::MoveInitIntoSuperLoop()
     auto r_if_comp = MakePatternNode<Compound>();
     auto r_if = MakePatternNode<If>();
     auto r_equal = MakePatternNode<Equal>();
-    auto func_over = MakePatternNode< Delta<Compound> >();
-    auto over = MakePatternNode< Delta<Compound> >();
+    auto func_over = MakePatternNode<DeltaAgent, Compound>();
+    auto over = MakePatternNode<DeltaAgent, Compound>();
     auto first_init = MakePatternNode<Statement>();
                     
     fn->type = thread;
@@ -664,23 +664,23 @@ LoopRotation::LoopRotation()
     auto s_cur_enum_id = MakePatternNode<InstanceIdentifier>();
     auto s_outer_enum_id = MakePatternNode<InstanceIdentifier>();
     auto thread = MakePatternNode<Thread>(); // Must be SC_THREAD since we introduce SC stuff
-    auto func_decls = MakePatternNode< Star<Declaration> >();
-    auto s_enums = MakePatternNode< Star<Declaration> >();
-    auto comp_loop_decls = MakePatternNode< Star<Declaration> >();
-    auto comp_yield_decls = MakePatternNode< Star<Declaration> >();
-    auto x_comp_decls = MakePatternNode< Star<Declaration> >();
+    auto func_decls = MakePatternNode<StarAgent, Declaration>();
+    auto s_enums = MakePatternNode<StarAgent, Declaration>();
+    auto comp_loop_decls = MakePatternNode<StarAgent, Declaration>();
+    auto comp_yield_decls = MakePatternNode<StarAgent, Declaration>();
+    auto x_comp_decls = MakePatternNode<StarAgent, Declaration>();
     auto s_cur_enum = MakePatternNode<Static>();
     auto s_outer_enum = MakePatternNode<Static>();
-    auto inits = MakePatternNode< Star<Statement> >();
-    auto stmts = MakePatternNode< Star<Statement> >();
-    auto prepre = MakePatternNode< Star<Statement> >();
-    auto prepost = MakePatternNode< Star<Statement> >();
-    auto postpre = MakePatternNode< Star<Statement> >();
-    auto postpost = MakePatternNode< Star<Statement> >();
-    auto comp_loop_pre = MakePatternNode< Star<Statement> >();
-    auto comp_loop_post = MakePatternNode< Star<Statement> >();
-    auto comp_yield_pre = MakePatternNode< Star<Statement> >();
-    auto comp_yield_post = MakePatternNode< Star<Statement> >();
+    auto inits = MakePatternNode<StarAgent, Statement>();
+    auto stmts = MakePatternNode<StarAgent, Statement>();
+    auto prepre = MakePatternNode<StarAgent, Statement>();
+    auto prepost = MakePatternNode<StarAgent, Statement>();
+    auto postpre = MakePatternNode<StarAgent, Statement>();
+    auto postpost = MakePatternNode<StarAgent, Statement>();
+    auto comp_loop_pre = MakePatternNode<StarAgent, Statement>();
+    auto comp_loop_post = MakePatternNode<StarAgent, Statement>();
+    auto comp_yield_pre = MakePatternNode<StarAgent, Statement>();
+    auto comp_yield_post = MakePatternNode<StarAgent, Statement>();
     auto loop = MakePatternNode<Loop>();
     auto func_comp = MakePatternNode<Compound>();
     auto s_comp_loop = MakePatternNode<Compound>();
@@ -693,30 +693,30 @@ LoopRotation::LoopRotation()
     auto yield = MakePatternNode<If>();
     auto outer_bottom = MakePatternNode<If>();
     auto outer_top = MakePatternNode<If>();
-    auto loop_body = MakePatternNode< Star<If> >();
-    auto pre_yield = MakePatternNode< Star<If> >();
-    auto post_yield = MakePatternNode< Star<If> >();
+    auto loop_body = MakePatternNode<StarAgent, If>();
+    auto pre_yield = MakePatternNode<StarAgent, If>();
+    auto post_yield = MakePatternNode<StarAgent, If>();
     auto r_equal = MakePatternNode<Equal>();
-    auto func_over = MakePatternNode< Delta<Compound> >();
-    auto over = MakePatternNode< Delta<Compound> >();
-    auto s_all = MakePatternNode< Conjunction<Compound> >();
+    auto func_over = MakePatternNode<DeltaAgent, Compound>();
+    auto over = MakePatternNode<DeltaAgent, Compound>();
+    auto s_all = MakePatternNode<ConjunctionAgent, Compound>();
     auto s_enum = MakePatternNode<Enum>();
     auto s_enum_id = MakePatternNode<TypeIdentifier>();
-    auto loop_top_stuff = MakePatternNode< Stuff<Expression> >();
-    auto outer_top_stuff = MakePatternNode< Stuff<Expression> >();
+    auto loop_top_stuff = MakePatternNode<StuffAgent, Expression>();
+    auto outer_top_stuff = MakePatternNode<StuffAgent, Expression>();
     auto loop_top_equal = MakePatternNode<Equal>();
     auto outer_top_equal = MakePatternNode<Equal>();
-    auto loop_bottom_stuff_enum = MakePatternNode< Stuff<Statement> >();
-    auto outer_bottom_stuff_enum = MakePatternNode< Stuff<Statement> >();
-    auto loop_bottom_stuff_noyield = MakePatternNode< Stuff<Statement> >();
-    auto yield_stuff = MakePatternNode< Stuff<Statement> >();
-    auto outer_bottom_stuff_noyield = MakePatternNode< Stuff<Statement> >();
-    auto loop_bottom_matchall = MakePatternNode< Conjunction<Statement> >();
-    auto outer_bottom_matchall = MakePatternNode< Conjunction<Statement> >();
-    auto loop_bottom_notmatch = MakePatternNode< Negation<Statement> >();
-    auto outer_bottom_notmatch = MakePatternNode< Negation<Statement> >();
-    auto s_notmatch = MakePatternNode< Negation<Compound> >();
-    auto inner_state = MakePatternNode< Disjunction<If> >();
+    auto loop_bottom_stuff_enum = MakePatternNode<StuffAgent, Statement>();
+    auto outer_bottom_stuff_enum = MakePatternNode<StuffAgent, Statement>();
+    auto loop_bottom_stuff_noyield = MakePatternNode<StuffAgent, Statement>();
+    auto yield_stuff = MakePatternNode<StuffAgent, Statement>();
+    auto outer_bottom_stuff_noyield = MakePatternNode<StuffAgent, Statement>();
+    auto loop_bottom_matchall = MakePatternNode<ConjunctionAgent, Statement>();
+    auto outer_bottom_matchall = MakePatternNode<ConjunctionAgent, Statement>();
+    auto loop_bottom_notmatch = MakePatternNode<NegationAgent, Statement>();
+    auto outer_bottom_notmatch = MakePatternNode<NegationAgent, Statement>();
+    auto s_notmatch = MakePatternNode<NegationAgent, Compound>();
+    auto inner_state = MakePatternNode<DisjunctionAgent, If>();
     
     fn->type = thread;
     fn->initialiser = func_comp;

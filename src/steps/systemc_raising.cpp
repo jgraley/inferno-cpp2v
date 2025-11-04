@@ -12,13 +12,13 @@ using namespace Steps;
 
 RaiseSCType::RaiseSCType( TreePtr< Type > lr_sctype )
 {
-    auto over = MakePatternNode< Delta<Node> >();
+    auto over = MakePatternNode<DeltaAgent, Node>();
     auto s_scope = MakePatternNode< DeclScope >();
     auto r_scope = MakePatternNode< DeclScope >();
-    auto decls = MakePatternNode< Star<Declaration> >();
+    auto decls = MakePatternNode<StarAgent, Declaration>();
     auto s_usertype = MakePatternNode< TypeDeclaration >();
     auto s_token = MakePatternNode< TypeIdentifierByNameAgent >( lr_sctype->GetToken() );                
-    auto r_embedded = MakePatternNode< EmbeddedSearchReplace<Node> >( over, s_token, lr_sctype );    
+    auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( over, s_token, lr_sctype );    
     
     // Eliminate the declaration that came from isystemc.h
     over->through = s_scope;
@@ -34,18 +34,18 @@ RaiseSCType::RaiseSCType( TreePtr< Type > lr_sctype )
 
 RaiseSCHierarchicalClass::RaiseSCHierarchicalClass( TreePtr< SCRecord > lr_scclass )
 {
-    auto over = MakePatternNode< Delta<Node> >();
+    auto over = MakePatternNode<DeltaAgent, Node>();
     auto s_scope = MakePatternNode< DeclScope >();
     auto r_scope = MakePatternNode< DeclScope >();
-    auto decls = MakePatternNode< Star<Declaration> >();
-    auto l_decls = MakePatternNode< Star<Declaration> >();
-    auto l_bases = MakePatternNode< Star<Base> >();
+    auto decls = MakePatternNode<StarAgent, Declaration>();
+    auto l_decls = MakePatternNode<StarAgent, Declaration>();
+    auto l_bases = MakePatternNode<StarAgent, Base>();
     auto s_usertype = MakePatternNode< TypeDeclaration >();
     auto ls_class = MakePatternNode< InheritanceRecord >();
     auto ls_base = MakePatternNode< Base >();
     auto l_tid = MakePatternNode< TypeIdentifier >();
     auto s_token = MakePatternNode< TypeIdentifierByNameAgent >( lr_scclass->GetToken() ); 
-    auto r_embedded = MakePatternNode< EmbeddedSearchReplace<Node> >( over, ls_class, lr_scclass );    
+    auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( over, ls_class, lr_scclass );    
     
     // Eliminate the declaration that came from isystemc.h
     over->through = s_scope;
@@ -72,7 +72,7 @@ RaiseSCDynamic::RaiseSCDynamic( TreePtr<SCDynamicFunction> r_dynamic )
     auto s_arg = MakePatternNode< IdValuePair >();
     auto s_token = MakePatternNode< InstanceIdentifierByNameAgent >( r_dynamic->GetToken() ); 
     auto s_param_id = MakePatternNode< InstanceIdentifierByNameAgent >( "p1" ); 
-    auto eexpr = MakePatternNode< TransformOf<Expression> >( &TypeOf::instance ); 
+    auto eexpr = MakePatternNode<TransformOfAgent, Expression>( &TypeOf::instance ); 
                     
     s_call->callee = s_token;       
     s_call->args = (s_arg);
@@ -139,32 +139,32 @@ RaiseTerminationFunction::RaiseTerminationFunction( TreePtr<TerminationFunction>
 
 RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
 {
-    auto over = MakePatternNode< Delta<Node> >();
+    auto over = MakePatternNode<DeltaAgent, Node>();
     auto s_scope = MakePatternNode< DeclScope >();
     auto r_scope = MakePatternNode< DeclScope >();
-    auto decls = MakePatternNode< Star<Declaration> >();
-    auto l_decls = MakePatternNode< Star<Declaration> >();
-    auto l_cdecls = MakePatternNode< Star<Declaration> >();
+    auto decls = MakePatternNode<StarAgent, Declaration>();
+    auto l_decls = MakePatternNode<StarAgent, Declaration>();
+    auto l_cdecls = MakePatternNode<StarAgent, Declaration>();
     auto s_instance = MakePatternNode< Static >();
     auto ls_comp = MakePatternNode< Compound >();
     auto lr_comp = MakePatternNode< Compound >();
     auto l_module = MakePatternNode< Module >();
     auto ls_pcall = MakePatternNode< Call >();
     auto ls_arg = MakePatternNode< IdValuePair >();
-    auto l_overcons = MakePatternNode< Delta<Instance> >();
-    auto l_overtype = MakePatternNode< Delta<Type> >();
+    auto l_overcons = MakePatternNode<DeltaAgent, Instance>();
+    auto l_overtype = MakePatternNode<DeltaAgent, Type>();
     auto ls_cons = MakePatternNode< Instance >();
     auto lr_cons = MakePatternNode< Instance >();
     auto l_process = MakePatternNode< Instance >();
-    auto l_pre = MakePatternNode< Star<Statement> >();
-    auto l_post = MakePatternNode< Star<Statement> >();
+    auto l_pre = MakePatternNode<StarAgent, Statement>();
+    auto l_post = MakePatternNode<StarAgent, Statement>();
     auto ls_id = MakePatternNode< InstanceIdentifier >();
-    auto l_bases = MakePatternNode< Star<Base> >();
+    auto l_bases = MakePatternNode<StarAgent, Base>();
     auto l_ctype = MakePatternNode<Constructor>();
     auto l_ident = MakePatternNode<InstanceIdentifier>();
     auto s_token = MakePatternNode< InstanceIdentifierByNameAgent >( lr_scprocess->GetToken() ); 
     auto s_arg_id = MakePatternNode< InstanceIdentifierByNameAgent >( "func" );
-    auto r_embedded = MakePatternNode< EmbeddedSearchReplace<Node> >( over, l_module, l_module );            
+    auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( over, l_module, l_module );            
     
     // Eliminate the declaration that came from isystemc.h
     over->through = s_scope;
@@ -224,7 +224,7 @@ RaiseSCNotifyImmediate::RaiseSCNotifyImmediate()
     auto s_event = MakePatternNode<Event>();
     auto r_notify = MakePatternNode<NotifyImmediate>();
     auto s_token = MakePatternNode< InstanceIdentifierByNameAgent >( r_notify->GetToken() );                
-    auto eexpr = MakePatternNode< TransformOf<Expression> >( &TypeOf::instance ); 
+    auto eexpr = MakePatternNode<TransformOfAgent, Expression>( &TypeOf::instance ); 
     //MakePatternNode< Expression > eexpr; 
             
     s_call->callee = s_lookup;
@@ -249,7 +249,7 @@ RaiseSCNotifyDelta::RaiseSCNotifyDelta()
     auto s_zero_token = MakePatternNode< InstanceIdentifierByNameAgent >( "SC_ZERO_TIME" );                
     auto s_arg_id = MakePatternNode< InstanceIdentifierByNameAgent >( "p1" ); 
     auto s_token = MakePatternNode< InstanceIdentifierByNameAgent >( r_notify->GetToken() );                
-    auto eexpr = MakePatternNode< TransformOf<Expression> >( &TypeOf::instance ); 
+    auto eexpr = MakePatternNode<TransformOfAgent, Expression>( &TypeOf::instance ); 
     //MakePatternNode< Expression > eexpr; 
             
     s_call->callee = s_lookup;
@@ -269,18 +269,18 @@ RaiseSCNotifyDelta::RaiseSCNotifyDelta()
 RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
 {
     auto module_typeid = MakePatternNode< TypeIdentifier >();
-    auto stuff = MakePatternNode< Stuff<Scope> >();
-    auto over = MakePatternNode< Delta<Scope> >();
-    auto decls = MakePatternNode< Star<Declaration> >();
-    auto l_decls = MakePatternNode< Star<Declaration> >();
-    auto l_pre = MakePatternNode< Star<Statement> >();
-    auto l_post = MakePatternNode< Star<Statement> >();
-    auto l1s_args = MakePatternNode< Star<IdValuePair> >();
+    auto stuff = MakePatternNode<StuffAgent, Scope>();
+    auto over = MakePatternNode<DeltaAgent, Scope>();
+    auto decls = MakePatternNode<StarAgent, Declaration>();
+    auto l_decls = MakePatternNode<StarAgent, Declaration>();
+    auto l_pre = MakePatternNode<StarAgent, Statement>();
+    auto l_post = MakePatternNode<StarAgent, Statement>();
+    auto l1s_args = MakePatternNode<StarAgent, IdValuePair>();
     auto s_cons = MakePatternNode< Field >();
     auto s_comp = MakePatternNode< Compound >();
     auto s_id = MakePatternNode< InstanceIdentifier >();
     auto s_ctype = MakePatternNode<Constructor>();
-    auto s_params = MakePatternNode< Star<Parameter> >();
+    auto s_params = MakePatternNode<StarAgent, Parameter>();
     auto ls_comp = MakePatternNode< Compound >();
     auto lr_comp = MakePatternNode< Compound >();
     auto s_module = MakePatternNode< Module >();
@@ -288,14 +288,14 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     auto l1s_call = MakePatternNode< Call >();
     auto l1s_lookup = MakePatternNode< Lookup >();
     auto l_instance = MakePatternNode<Instance>();  
-    auto l_delta = MakePatternNode<Delta<Initialiser>>();  
+    auto l_delta = MakePatternNode<DeltaAgent, Initialiser>();  
     auto l2s_call = MakePatternNode<Call>();
     auto l2s_lookup = MakePatternNode<Lookup>();
-	auto l2s_args = MakePatternNode< Star<IdValuePair> >();
+	auto l2s_args = MakePatternNode<StarAgent, IdValuePair>();
 
-    auto bases = MakePatternNode< Star<Base> >();
-    auto r_embedded_2 = MakePatternNode< EmbeddedSearchReplace<Node> >( stuff, l_instance, l_instance );            
-    auto r_embedded_1 = MakePatternNode< EmbeddedSearchReplace<Node> >( r_embedded_2, ls_comp, lr_comp );            
+    auto bases = MakePatternNode<StarAgent, Base>();
+    auto r_embedded_2 = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( stuff, l_instance, l_instance );            
+    auto r_embedded_1 = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( r_embedded_2, ls_comp, lr_comp );            
                     
     // dispense with an empty constructor                 
     stuff->terminus = over;
@@ -344,11 +344,11 @@ RemoveVoidInstances::RemoveVoidInstances()
 {
     auto s_scope = MakePatternNode<Program>();
     auto r_scope = MakePatternNode<Program>();
-    auto decls = MakePatternNode< Star<Declaration> >();
+    auto decls = MakePatternNode<StarAgent, Declaration>();
     auto s_instance = MakePatternNode<Static>();
-    auto s_any = MakePatternNode< Disjunction<Type> >();
+    auto s_any = MakePatternNode<DisjunctionAgent, Type>();
     auto s_callable = MakePatternNode<CallableParams>();
-    auto s_params = MakePatternNode< Star<Parameter> >();
+    auto s_params = MakePatternNode<StarAgent, Parameter>();
     auto s_void_param = MakePatternNode<Parameter>();
     
     // Eliminate the declaration that came from isystemc.h
@@ -368,8 +368,8 @@ RemoveSCPrototypes::RemoveSCPrototypes()
 {
     auto s_scope = MakePatternNode<Program>();
     auto r_scope = MakePatternNode<Program>();
-    auto decls = MakePatternNode< Star<Declaration> >();
-    auto s_any = MakePatternNode< Disjunction<Instance> >();
+    auto decls = MakePatternNode<StarAgent, Declaration>();
+    auto s_any = MakePatternNode<DisjunctionAgent, Instance>();
     
     auto s_cease_inst = MakePatternNode<Static>();
     auto s_cease_type = MakePatternNode<Function>();   

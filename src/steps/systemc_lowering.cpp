@@ -21,11 +21,11 @@ LowerSCType::LowerSCType( TreePtr< Type > s_sctype )
 EnsureConstructorsInSCRecordUsers::EnsureConstructorsInSCRecordUsers()
 {
 	auto s_scclass = MakePatternNode< SCRecord >();
-    auto decls = MakePatternNode< Star<Declaration> >();
-    auto bases = MakePatternNode< Star<Base> >();
-    auto s_decls_negation = MakePatternNode< Negation<Declaration> >();
+    auto decls = MakePatternNode<StarAgent, Declaration>();
+    auto bases = MakePatternNode<StarAgent, Base>();
+    auto s_decls_negation = MakePatternNode<NegationAgent, Declaration>();
     auto sx_cons_macro = MakePatternNode< MacroDeclaration >(); 
-    auto sx_params = MakePatternNode< Star<Node> >();
+    auto sx_params = MakePatternNode<StarAgent, Node>();
     
 	auto r_scclass = MakePatternNode< SCRecord >();
     auto r_base = MakePatternNode< Base >();
@@ -71,39 +71,39 @@ EnsureConstructorsInSCRecordUsers::EnsureConstructorsInSCRecordUsers()
 
 LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclass )
 {
-	auto stuff = MakePatternNode<Stuff<Scope>>();
-	auto delta = MakePatternNode<Delta<Scope>>();
-    auto decls = MakePatternNode< Star<Declaration> >();
-    auto bases = MakePatternNode< Star<Base> >();
+	auto stuff = MakePatternNode<StuffAgent, Scope>();
+	auto delta = MakePatternNode<DeltaAgent, Scope>();
+    auto decls = MakePatternNode<StarAgent, Declaration>();
+    auto bases = MakePatternNode<StarAgent, Base>();
     auto r_class = MakePatternNode< Class >();
     auto r_base = MakePatternNode< Base >();
     auto tid = MakePatternNode< TypeIdentifier >();
     auto r_token = MakePatternNode< SpecificTypeIdentifier >( s_scclass->GetToken() ); 
     
     auto l1_class = MakePatternNode< InheritanceRecord >();
-    auto l1_fields = MakePatternNode< Star<Declaration> >();
-    auto l1_bases = MakePatternNode< Star<Base> >();
-    auto l1_statements = MakePatternNode< Star<Statement> >();
-    auto l1_statements_negation = MakePatternNode< Negation<Statement> >();
+    auto l1_fields = MakePatternNode<StarAgent, Declaration>();
+    auto l1_bases = MakePatternNode<StarAgent, Base>();
+    auto l1_statements = MakePatternNode<StarAgent, Statement>();
+    auto l1_statements_negation = MakePatternNode<NegationAgent, Statement>();
     auto l1x_call = MakePatternNode<SeqArgsCall>();
     auto l1x_lookup = MakePatternNode<Lookup>();
-    auto l1_decls = MakePatternNode< Star<Declaration> >();
+    auto l1_decls = MakePatternNode<StarAgent, Declaration>();
     auto l1_cons_macro = MakePatternNode< MacroDeclaration >(); 
-    auto l1_macro_args = MakePatternNode< Star<Node> >();    
+    auto l1_macro_args = MakePatternNode<StarAgent, Node>();    
     auto l1s_comp = MakePatternNode< Compound >();
     auto l1r_comp = MakePatternNode< Compound >();
     auto l1_field = MakePatternNode< Field >();
     auto l1_field_id = MakePatternNode< InstanceIdentifier >();
-    auto l1_delta = MakePatternNode<Delta<Initialiser>>();  
+    auto l1_delta = MakePatternNode<DeltaAgent, Initialiser>();  
     auto l1r_call = MakePatternNode<SeqArgsCall>();
     auto l1r_lookup = MakePatternNode<Lookup>();
 	auto l1r_arg = MakePatternNode< StringizeAgent >();
     
-    auto l2_conjunction = MakePatternNode<Conjunction<Instance>>();  
-    auto l2_negation = MakePatternNode<Negation<Instance>>();  
+    auto l2_conjunction = MakePatternNode<ConjunctionAgent, Instance>();  
+    auto l2_negation = MakePatternNode<NegationAgent, Instance>();  
     auto l2_instance = MakePatternNode<Instance>();  
     auto l2_inst_id = MakePatternNode<InstanceIdentifier>();  
-    auto l2_delta = MakePatternNode<Delta<Initialiser>>();  
+    auto l2_delta = MakePatternNode<DeltaAgent, Initialiser>();  
     auto l2r_call = MakePatternNode<SeqArgsCall>();
     auto l2r_lookup = MakePatternNode<Lookup>();
 	auto l2r_arg = MakePatternNode< StringizeAgent >();
@@ -141,7 +141,7 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
 	l1_statements->restriction = l1_statements_negation;
 	l1_statements_negation->negand = l1x_call;
 	l1x_call->callee = l1x_lookup;
-	l1x_call->arguments = MakePatternNode<Star<Expression>>();
+	l1x_call->arguments = MakePatternNode<StarAgent, Expression>();
 	l1x_lookup->object = l1_field_id; // this should be enough to prevent spin
 	// l1_field_id is instance of a SC class and is not constructed in SC language
 	
@@ -166,8 +166,8 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     l2r_lookup->object = l2_instance->identifier;
     l2r_lookup->member = MakePatternNode< SpecificInstanceIdentifier >(""); // Empty indicates constructor SeqArgsCall
                                                            
-    auto embedded_2 = MakePatternNode< EmbeddedSearchReplace<Node> >( stuff, l2_conjunction, l2_instance );                         
-    auto embedded_1 = MakePatternNode< EmbeddedSearchReplace<Node> >( embedded_2, l1_class, l1_class );                         
+    auto embedded_2 = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( stuff, l2_conjunction, l2_instance );                         
+    auto embedded_1 = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( embedded_2, l1_class, l1_class );                         
     Configure( COMPARE_REPLACE, stuff, embedded_1 );
 }
 
@@ -228,23 +228,23 @@ LowerTerminationFunction::LowerTerminationFunction( TreePtr<SCTree::TerminationF
 
 LowerSCProcess::LowerSCProcess( TreePtr< SCTree::Process > s_scprocess )
 {
-    auto decls = MakePatternNode< Star<Declaration> >();
-    auto cdecls = MakePatternNode< Star<Declaration> >();
+    auto decls = MakePatternNode<StarAgent, Declaration>();
+    auto cdecls = MakePatternNode<StarAgent, Declaration>();
     auto s_comp = MakePatternNode< Compound >();
     auto r_comp = MakePatternNode< Compound >();
     auto module = MakePatternNode< Module >();
     auto r_process_macro = MakePatternNode< MacroStatement >();
-    auto overcons = MakePatternNode< Delta<Declaration> >();
-    auto overtype = MakePatternNode< Delta<Type> >();
+    auto overcons = MakePatternNode<DeltaAgent, Declaration>();
+    auto overtype = MakePatternNode<DeltaAgent, Type>();
     auto s_cons_macro = MakePatternNode< MacroDeclaration >();
     auto r_cons_macro = MakePatternNode< MacroDeclaration >();
-    auto macro_args = MakePatternNode< Star<Node> >();
+    auto macro_args = MakePatternNode<StarAgent, Node>();
     auto process = MakePatternNode< Instance >();
-    auto pre = MakePatternNode< Star<Statement> >();
-    auto statements_negation = MakePatternNode< Negation<Statement> >();    
+    auto pre = MakePatternNode<StarAgent, Statement>();
+    auto statements_negation = MakePatternNode<NegationAgent, Statement>();    
     auto sx_process_macro = MakePatternNode< MacroStatement >();
     auto id = MakePatternNode< InstanceIdentifier >(); 
-    auto bases = MakePatternNode< Star<Base> >();
+    auto bases = MakePatternNode<StarAgent, Base>();
     auto ident = MakePatternNode<PreprocessorIdentifier>();
     auto token = MakePatternNode< SpecificPreprocessorIdentifier >( s_scprocess->GetToken() ); // #819 style
     auto r_func = MakePatternNode<Function>();
@@ -288,7 +288,7 @@ LowerSCNotifyImmediate::LowerSCNotifyImmediate()
     auto r_lookup = MakePatternNode<Lookup>();
     auto r_event = MakePatternNode<Event>();
     auto r_token = MakePatternNode< SpecificInstanceIdentifier >( s_notify->GetToken() );                
-    auto eexpr = MakePatternNode< TransformOf<Expression> >( &TypeOf::instance ); 
+    auto eexpr = MakePatternNode<TransformOfAgent, Expression>( &TypeOf::instance ); 
     //MakePatternNode< Expression > eexpr; 
             
     s_notify->event = eexpr;
@@ -306,7 +306,7 @@ LowerSCNotifyImmediate::LowerSCNotifyImmediate()
 LowerSCNotifyDelta::LowerSCNotifyDelta(TreePtr<CPPTree::InstanceIdentifier> zero_time_id)
 {
     auto s_notify = MakePatternNode<NotifyDelta>();
-    auto eexpr = MakePatternNode< TransformOf<Expression> >( &TypeOf::instance ); 
+    auto eexpr = MakePatternNode<TransformOfAgent, Expression>( &TypeOf::instance ); 
     auto event = MakePatternNode<Event>();
     
     auto r_call = MakePatternNode<SeqArgsCall>();
@@ -345,13 +345,13 @@ AddIncludeSystemC::AddIncludeSystemC()
 {
 	string filename = "systemc.h";
 	
-    auto s_conjunction = MakePatternNode<Conjunction<Program>>();
+    auto s_conjunction = MakePatternNode<ConjunctionAgent, Program>();
     auto s_program = MakePatternNode<Program>();
     auto r_program = MakePatternNode<Program>();
-    auto decls = MakePatternNode<Star<Declaration>>();
-    auto s_stuff = MakePatternNode<Stuff<Program>>();
+    auto decls = MakePatternNode<StarAgent, Declaration>();
+    auto s_stuff = MakePatternNode<StuffAgent, Program>();
     auto r_include = MakePatternNode<SystemInclude>();
-    auto s_negation = MakePatternNode<Negation<Declaration>>();
+    auto s_negation = MakePatternNode<NegationAgent, Declaration>();
     auto sx_include = MakePatternNode<SystemInclude>();
 
 	s_conjunction->conjuncts = (s_program, s_stuff);
@@ -371,13 +371,13 @@ AddIncludeSCExtensions::AddIncludeSCExtensions()
 {
 	string filename = "systemc_extensions.h";
 
-    auto s_conjunction = MakePatternNode<Conjunction<Program>>();
+    auto s_conjunction = MakePatternNode<ConjunctionAgent, Program>();
     auto s_program = MakePatternNode<Program>();
     auto r_program = MakePatternNode<Program>();
-    auto decls = MakePatternNode<Star<Declaration>>();
-    auto s_stuff = MakePatternNode<Stuff<Program>>();
+    auto decls = MakePatternNode<StarAgent, Declaration>();
+    auto s_stuff = MakePatternNode<StuffAgent, Program>();
     auto r_include = MakePatternNode<LocalInclude>();
-    auto s_negation = MakePatternNode<Negation<Declaration>>();
+    auto s_negation = MakePatternNode<NegationAgent, Declaration>();
     auto sx_include = MakePatternNode<LocalInclude>();
 
 	s_conjunction->conjuncts = (s_program, s_stuff);

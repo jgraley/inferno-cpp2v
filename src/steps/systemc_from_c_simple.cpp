@@ -15,11 +15,11 @@ struct GlobalsModule : Module { NODE_FUNCTIONS_FINAL };
 
 GlobalScopeToModule::GlobalScopeToModule()
 {
-    auto delta = MakePatternNode< Delta<Scope> >();
-	auto s_all = MakePatternNode< Conjunction<Scope> >();
+    auto delta = MakePatternNode<DeltaAgent, Scope>();
+	auto s_all = MakePatternNode<ConjunctionAgent, Scope>();
 	auto s_scope = MakePatternNode< Program >();
-	auto s_decls = MakePatternNode< Star<Declaration> >();
-	auto s_despin = MakePatternNode< Negation<Scope> >();
+	auto s_decls = MakePatternNode<StarAgent, Declaration>();
+	auto s_despin = MakePatternNode<NegationAgent, Scope>();
 	auto sn_scope = MakePatternNode< Program >();
 	auto sn_module = MakePatternNode< Module >();
 	auto r_scope = MakePatternNode< Program >();
@@ -27,27 +27,27 @@ GlobalScopeToModule::GlobalScopeToModule()
 	auto r_gmodule_tid = MakePatternNode<BuildTypeIdentifierAgent>("GlobalScope");
 	auto r_gmodule_inst = MakePatternNode< Static >();
 	auto es_scope = MakePatternNode< Program >();
-	auto es_decls = MakePatternNode< Star<Declaration> >();
+	auto es_decls = MakePatternNode<StarAgent, Declaration>();
 	auto es_instance = MakePatternNode<Instance>();
 	auto es_gmodule = MakePatternNode< GlobalsModule >();
 	auto es_gmodule_name = MakePatternNode< TypeIdentifier >();
-	auto es_gmodule_decls = MakePatternNode< Star<Declaration> >();
+	auto es_gmodule_decls = MakePatternNode<StarAgent, Declaration>();
 	auto er_gmodule = MakePatternNode< GlobalsModule >();
 	auto er_scope = MakePatternNode< Program >();
 	auto er_field = MakePatternNode<Field>();
 	auto es_id = MakePatternNode<InstanceIdentifier>();
 #ifdef ALSO_MOVE_VARS
-	auto es_id_all = MakePatternNode<Conjunction<InstanceIdentifier>>();
-	auto es_id_not = MakePatternNode<Negation<InstanceIdentifier>>();
+	auto es_id_all = MakePatternNode<ConjunctionAgent, InstanceIdentifier>();
+	auto es_id_not = MakePatternNode<NegationAgent, InstanceIdentifier>();
 #endif		
 	delta->through = s_all;
 	s_all->conjuncts = (s_scope, s_despin);
 	s_scope->members = ( s_decls );
 	
 	s_despin->negand = sn_scope;
-	sn_scope->members = (sn_module, MakePatternNode< Star<Declaration> >() );
-	sn_module->bases = ( MakePatternNode< Star<Base> >() );
-	sn_module->members = ( MakePatternNode< Star<Declaration> >() );
+	sn_scope->members = (sn_module, MakePatternNode<StarAgent, Declaration>() );
+	sn_module->bases = ( MakePatternNode<StarAgent, Base>() );
+	sn_module->members = ( MakePatternNode<StarAgent, Declaration>() );
 	
 	r_scope->members = ( r_gmodule, r_gmodule_inst, s_decls );
 	r_gmodule->identifier = r_gmodule_tid;
@@ -85,7 +85,7 @@ GlobalScopeToModule::GlobalScopeToModule()
 	er_field->constancy = MakePatternNode<NonConst>();
 	
 	// Through, search, replace
-    auto r_embedded = MakePatternNode< EmbeddedSearchReplace<Scope> >( delta, es_scope, er_scope );
+    auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Scope>( delta, es_scope, er_scope );
     delta->overlay = r_scope;
     Configure( COMPARE_REPLACE, delta, r_embedded );
 }
@@ -93,8 +93,8 @@ GlobalScopeToModule::GlobalScopeToModule()
 
 MainToThread::MainToThread()
 {
-	auto e_stuff = MakePatternNode< Stuff<Initialiser> >();
-	auto e_delta = MakePatternNode< Delta<Statement> >();
+	auto e_stuff = MakePatternNode<StuffAgent, Initialiser>();
+	auto e_delta = MakePatternNode<DeltaAgent, Statement>();
 	auto es_return = MakePatternNode<Return>();
 	auto er_cease = MakePatternNode<Cease>();
 	
@@ -105,14 +105,14 @@ MainToThread::MainToThread()
 	er_cease->code = es_return->return_value;
 	
 	auto gmodule = MakePatternNode< GlobalsModule >();
-    auto delta = MakePatternNode< Delta<Instance> >();
+    auto delta = MakePatternNode<DeltaAgent, Instance>();
 	auto s_field = MakePatternNode< Field >();
     auto s_func = MakePatternNode<Function>();
     auto s_identifier = MakePatternNode<InstanceIdentifierByNameAgent>("main");
 	auto r_field = MakePatternNode< Field >();
 	
-	gmodule->bases = ( MakePatternNode< Star<Base> >() );
-	gmodule->members = ( delta, MakePatternNode< Star<Declaration> >() );	
+	gmodule->bases = ( MakePatternNode<StarAgent, Base>() );
+	gmodule->members = ( delta, MakePatternNode<StarAgent, Declaration>() );	
 	delta->through = s_field;
 	s_field->identifier = s_identifier;
 	s_field->type = s_func;
@@ -125,7 +125,7 @@ MainToThread::MainToThread()
 	r_field->virt = MakePatternNode<NonVirtual>();
 	r_field->access = MakePatternNode<Public>();
 	r_field->constancy = MakePatternNode<NonConst>();
-	auto r_embedded = MakePatternNode< EmbeddedSearchReplace<Initialiser> >( s_field->initialiser, e_stuff );
+	auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Initialiser>( s_field->initialiser, e_stuff );
 	r_field->initialiser = r_embedded;
 
     Configure( SEARCH_REPLACE, gmodule );

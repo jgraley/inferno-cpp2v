@@ -59,7 +59,7 @@ EmbeddedSCRTest2::EmbeddedSCRTest2()
     auto ss = MakePatternNode<Something>();
     auto sr = MakePatternNode<Something>();
     auto r_whenever = MakePatternNode<Whenever>();
-    auto r_embedded = MakePatternNode< EmbeddedCompareReplace<Node> >( t, ss, sr );
+    auto r_embedded = MakePatternNode<EmbeddedCompareReplaceAgent, Node>( t, ss, sr );
     auto s = MakePatternNode<Something>();
 
     r_whenever->members = (r_embedded, sr);
@@ -76,12 +76,12 @@ EmbeddedSCRTest3::EmbeddedSCRTest3()
     auto ss = MakePatternNode<Something>();
     auto sr = MakePatternNode<Something>();
     auto r_whatever = MakePatternNode<Whatever>();
-    auto r_embedded_1 = MakePatternNode< EmbeddedCompareReplace<Node> >( r_whatever, ss, sr );
+    auto r_embedded_1 = MakePatternNode<EmbeddedCompareReplaceAgent, Node>( r_whatever, ss, sr );
 
     auto s2s = MakePatternNode<Something>();
     auto s2r = MakePatternNode<Something>();
     auto r = MakePatternNode<Something>();
-    auto r_embedded_2 = MakePatternNode< EmbeddedCompareReplace<Node> >( r, s2s, s2r );
+    auto r_embedded_2 = MakePatternNode<EmbeddedCompareReplaceAgent, Node>( r, s2s, s2r );
     r_whatever->child = r_embedded_2;
     
     Configure( COMPARE_REPLACE, r_embedded_1 );
@@ -109,7 +109,7 @@ FixCrazyNumberEmb::FixCrazyNumberEmb()
     auto sr = MakePatternNode<CPPTree::Assign>();
 
     auto se = MakePatternNode<CPPTree::Expression>();    
-    auto r_embedded = MakePatternNode< EmbeddedCompareReplace<Expression> >( MakePatternNode<SpecificInteger>(54257), // through restricts to crazy number
+    auto r_embedded = MakePatternNode<EmbeddedCompareReplaceAgent, Expression>( MakePatternNode<SpecificInteger>(54257), // through restricts to crazy number
                                                                              MakePatternNode<SpecificInteger>(54257), // emb matches for crazy 
                                                                              MakePatternNode<SpecificInteger>(50) ); // and replaces with sensible
 
@@ -123,11 +123,11 @@ FixCrazyNumberEmb::FixCrazyNumberEmb()
 DroppedTreeZone::DroppedTreeZone()
 {
     // For #754
-    auto root_stuff = MakePatternNode< Stuff<Compound> >();
-    auto delta = MakePatternNode< Delta<Statement> >(); // pre-restriction forces result to be type-correct
-    auto mid_stuff = MakePatternNode< Stuff<Statement> >();
-    auto mid_child = MakePatternNode< Child<Statement> >(); // anti-spin
-    auto sub_stuff = MakePatternNode< Stuff<Expression> >(); // end will be StandardAgent which makes a FreeZone, so get a non-empty tree zone in here
+    auto root_stuff = MakePatternNode<StuffAgent, Compound>();
+    auto delta = MakePatternNode<DeltaAgent, Statement>(); // pre-restriction forces result to be type-correct
+    auto mid_stuff = MakePatternNode<StuffAgent, Statement>();
+    auto mid_child = MakePatternNode<ChildAgent, Statement>(); // anti-spin
+    auto sub_stuff = MakePatternNode<StuffAgent, Expression>(); // end will be StandardAgent which makes a FreeZone, so get a non-empty tree zone in here
     auto leaf = MakePatternNode< InstanceIdentifier >();
 
     root_stuff->terminus = delta;

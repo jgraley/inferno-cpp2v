@@ -16,8 +16,8 @@ using namespace VN;
  
 TreePtr<Node> Steps::MakeCheckUncombable( TreePtr<CPPTree::Statement> construct )
 {
-    auto all = MakePatternNode< Conjunction<Node> >();
-    auto stuff = MakePatternNode< Stuff<Node> >();
+    auto all = MakePatternNode<ConjunctionAgent, Node>();
+    auto stuff = MakePatternNode<StuffAgent, Node>();
     auto uncombable = MakePatternNode<Uncombable>();
     
     all->conjuncts = (construct, stuff);
