@@ -25,9 +25,16 @@ namespace VN
 /// the limitations of the use of restrictions in mutliple star nodes. TODO: clarify.
 /// The restriction is an abnormal context because it can match zero or more 
 /// different subtrees.
-class StarAgent : public virtual AgentCommon 
+class StarAgent : public virtual AgentCommon,
+                  public virtual SpecialBase 
 {
 public:
+    SPECIAL_NODE_FUNCTIONS
+    shared_ptr<const Node> GetPatternPtr() const
+    {
+        return shared_from_this();
+    }    
+    
     class PreRestrictionMismatch : public Mismatch {};
     class NotASubcontainerMismatch : public Mismatch {};
 
@@ -42,14 +49,21 @@ public:
                                        PatternLink me_plink, 
                                        XLink key_xlink,
                                                   const SCREngine *acting_engine ) final;
+    TreePtr<Node> restriction; 
 
+    
 	Syntax::Production GetAgentProduction() const override;
 	string GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const final;
     NodeBlock GetGraphBlockInfo() const final;
-    
+    string GetCouplingNameHint() const final
+    {
+		return "many"; 
+	} 
 private:
-    virtual const TreePtrInterface *GetRestriction() const = 0;
-
+    const TreePtrInterface *GetRestriction() const
+    {
+        return &restriction;
+    }
     class IsSubcontainerInCategoryOperator : public SYM::IsInCategoryOperator
     {
         using IsInCategoryOperator::IsInCategoryOperator; 
@@ -67,24 +81,6 @@ template<class PRE_RESTRICTION>
 class Star : public StarAgent, 
              public Special<PRE_RESTRICTION>
 {
-public:
-    SPECIAL_NODE_FUNCTIONS
-
-    shared_ptr<const Node> GetPatternPtr() const
-    {
-        return shared_from_this();
-    }
-    
-    TreePtr<Node> restriction; 
-    virtual const TreePtrInterface *GetRestriction() const
-    {
-        return &restriction;
-    }
-    
-    string GetCouplingNameHint() const final
-    {
-		return Special<PRE_RESTRICTION>::SpecialGetArchetypeNode()->GetCouplingNameHint() + "s"; // Pluralise
-	}    
 };
 
 };

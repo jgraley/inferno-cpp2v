@@ -19,9 +19,16 @@ namespace VN
 /// The transformation should be invarient during any single search operation
 /// but can change when replace acts to change the tree. Thus it can depend on
 /// the tree.
-class TransformOfAgent : public virtual RelocatingAgent
+class TransformOfAgent : public virtual RelocatingAgent,
+						 public virtual SpecialBase
 {
 public:    
+    SPECIAL_NODE_FUNCTIONS    
+    shared_ptr<const Node> GetPatternPtr() const
+    {
+        return shared_from_this();
+    }
+    
     class TransUtils;
     class AugBEMeandering;
     class ReachedNullChiled : public Mismatch {}; // Eg children of scaffold nodes
@@ -163,14 +170,7 @@ template<class PRE_RESTRICTION>
 class TransformOf : public TransformOfAgent,
                     public Special<PRE_RESTRICTION>
 {
-public:
-    SPECIAL_NODE_FUNCTIONS    
-
-    shared_ptr<const Node> GetPatternPtr() const
-    {
-        return shared_from_this();
-    }
-    
+public:   
     TransformOf() {}    
     TransformOf( Transformation *t, TreePtr<Node> p=TreePtr<Node>() ) : 
         TransformOfAgent(t, p) 

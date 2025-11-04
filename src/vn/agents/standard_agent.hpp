@@ -237,16 +237,16 @@ public:
 
 
 /// Helper that does the constructing of pattern nodes that are already agents
-template<typename NODE_TYPE>
-class MakePatternNodeHelper<true, NODE_TYPE> // NODE_TYPE is an agent, so behave like MakeTreeNode
+template<typename AGENT_TYPE>
+class MakePatternNodeHelper<true, AGENT_TYPE> // NODE_TYPE is an agent, so behave like MakeTreeNode
 {
 public:
-	typedef NODE_TYPE::PreRestrictionType PreRestrictionType;
+	typedef AGENT_TYPE::PreRestrictionType PreRestrictionType;
 
     template<typename ... CP>
-    static inline TreePtr<NODE_TYPE> MakeNode(const CP &...cp)
+    static inline TreePtr<AGENT_TYPE> MakeNode(const CP &...cp)
     {
-        auto agent_node = MakeTreeNode<NODE_TYPE>(cp...);
+        auto agent_node = MakeTreeNode<AGENT_TYPE>(cp...);
         // These members are introduced by Special
         agent_node->pre_restriction_archetype_node = shared_ptr<Node>( new PreRestrictionType );
         agent_node->pre_restriction_archetype_ptr = make_shared<TreePtr<PreRestrictionType>>();
@@ -275,7 +275,7 @@ template<typename AGENT_TYPE, typename PRE_RESTRICTION, typename ... CP>
 TreePtr<AGENT_TYPE> MakePatternNode(const CP &...cp)
 {
     // Find out at compile time whether the NODE_TYPE is already an Agent.    
-    TreePtr<AGENT_TYPE> agent_node =  MakePatternNodeHelper<is_base_of<Agent, AGENT_TYPE>::value, AGENT_TYPE>::MakeNode(cp...); 
+    TreePtr<AGENT_TYPE> agent_node = MakeTreeNode<AGENT_TYPE>(cp...); 
     agent_node->pre_restriction_archetype_node = shared_ptr<Node>( new PRE_RESTRICTION );
     agent_node->pre_restriction_archetype_ptr = make_shared<TreePtr<PRE_RESTRICTION>>();
     return agent_node;    

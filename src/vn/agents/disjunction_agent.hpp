@@ -75,8 +75,6 @@ template<class PRE_RESTRICTION>
 class Disjunction : public Special<PRE_RESTRICTION>,
                     public DisjunctionAgent
 {
-
-
 };
 
 };
