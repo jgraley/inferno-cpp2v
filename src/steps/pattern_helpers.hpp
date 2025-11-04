@@ -193,9 +193,6 @@ class Conjunction : public Special<PRE_RESTRICTION>,
 {
 };
 
-
-
-
 }; // end namespace
 
 #endif

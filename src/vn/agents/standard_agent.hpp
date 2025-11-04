@@ -12,10 +12,9 @@
 namespace VN
 { 
 
-/// Agent implementation used for all standard pattern nodes. Normal agents are
-/// constructed using `MakePatternNode`. All the `TreePtr` members are treated
-/// as pointers to sub-patterns and must match. Direct members (i.e. not in a 
-/// `Collection`) may be nullptr to indicate a full wildcard (matches anything). 
+/// Agent implementation used for all standard pattern nodes. All the `TreePtr` members are treated
+/// as pointers to sub-patterns and must match. Singular members (i.e. not in a 
+/// Container) may be nullptr to indicate a full wildcard (matches anything). 
 class StandardAgent : public virtual ColocatingAgent
 {
 public:
