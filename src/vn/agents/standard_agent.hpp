@@ -186,6 +186,21 @@ public:
     {
         return shared_from_this();
     } 
+
+    shared_ptr<Node> pre_restriction_archetype_node;
+    shared_ptr< TreePtrInterface > pre_restriction_archetype_ptr;
+
+    
+    virtual TreePtr<Node> GetArchetypeNode() const override
+    {
+        return TreePtr<Node>(pre_restriction_archetype_node);  
+    }
+    
+    shared_ptr< TreePtrInterface > GetArchetypeTreePtr() const override
+    {
+        return pre_restriction_archetype_ptr;  
+    }
+    
 private:
     Plan plan; // can't be const because children added after construct
     bool planned = false;
@@ -203,17 +218,6 @@ public:
     template<typename ... CP>
     StandardAgentWrapper(const CP &...cp) : 
         NODE_TYPE(cp...) {}
-   
-    
-    virtual TreePtr<Node> GetArchetypeNode() const override
-    {
-        return MakeTreeNode<NODE_TYPE>();  
-    }
-    
-    shared_ptr< TreePtrInterface > GetArchetypeTreePtr() const override
-    {
-        return make_shared<TreePtr<NODE_TYPE>>();  
-    }
        
     // disambiguate between Agent and Node: Agent wins
     virtual string GetTrace() const override
@@ -231,7 +235,10 @@ public:
     template<typename ... CP>
     static inline TreePtr<NODE_TYPE> MakeNode(const CP &...cp)
     {
-        return MakeTreeNode<StandardAgentWrapper<NODE_TYPE>>(cp...);
+        auto agent_node = MakeTreeNode<StandardAgentWrapper<NODE_TYPE>>(cp...);
+        agent_node->pre_restriction_archetype_node = shared_ptr<Node>( new NODE_TYPE );
+        agent_node->pre_restriction_archetype_ptr = make_shared<TreePtr<NODE_TYPE>>();
+        return agent_node;        
     }    
 };
 
