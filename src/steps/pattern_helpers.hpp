@@ -102,6 +102,19 @@ public:
 };
 
 
+/// EmbeddedSCR that performs a seperate compare and replace operation at the corresponding place in the output tree
+class EmbeddedCompareReplaceAgent : public EmbeddedSCRAgent
+{
+public:
+    EmbeddedCompareReplaceAgent() : EmbeddedSCRAgent( nullptr, nullptr, false ) {}      
+    EmbeddedCompareReplaceAgent( TreePtr<Node> t, TreePtr<Node> sp=TreePtr<Node>(), TreePtr<Node> rp=TreePtr<Node>() ) :
+        EmbeddedSCRAgent( sp, rp, false )
+    {
+		through = t;
+    }
+};
+
+
 /// EmbeddedSCR that performs a seperate search and replace operation at the corresponding place in the output tree
 template<class PRE_RESTRICTION>
 class EmbeddedSearchReplace : public EmbeddedSCR<PRE_RESTRICTION>
@@ -110,6 +123,19 @@ public:
     EmbeddedSearchReplace() : EmbeddedSCR<PRE_RESTRICTION>( nullptr, nullptr, nullptr, true ) {}      
     EmbeddedSearchReplace( TreePtr<PRE_RESTRICTION> t, TreePtr<Node> sp=TreePtr<Node>(), TreePtr<Node> rp=TreePtr<Node>() ) :
         EmbeddedSCR<PRE_RESTRICTION>( t, sp, rp, true ) {}
+};
+
+
+/// EmbeddedSCR that performs a seperate search and replace operation at the corresponding place in the output tree
+class EmbeddedSearchReplaceAgent : public EmbeddedSCRAgent
+{
+public:
+    EmbeddedSearchReplaceAgent() : EmbeddedSCRAgent( nullptr, nullptr, true ) {}      
+    EmbeddedSearchReplaceAgent( TreePtr<Node> t, TreePtr<Node> sp=TreePtr<Node>(), TreePtr<Node> rp=TreePtr<Node>() ) :
+        EmbeddedSCRAgent( sp, rp, true )
+    {
+		through = t;
+    }
 };
 
 

@@ -28,6 +28,7 @@ public:
     {
         return shared_from_this();
     }
+    TransformOfAgent() {}    
     
     class TransUtils;
     class AugBEMeandering;
@@ -158,9 +159,6 @@ public:
     
     TreePtr<Node> pattern; 
     Transformation *transformation;
-
-protected: 
-    TransformOfAgent() {}    
 };
 
 };
