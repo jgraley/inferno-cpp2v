@@ -66,15 +66,15 @@ ExplicitiseReturn::ExplicitiseReturn()
 UseTempForReturnValue::UseTempForReturnValue()
 {
     // search for return statement in a compound (TODO don't think we need the outer compound)
-    auto s_return = MakeTreeNode<Return>();
-    auto s_and = MakeTreeNode< Conjunction<Expression> >();
+    auto s_return = MakePatternNode<Return>();
+    auto s_and = MakePatternNode<ConjunctionAgent, Expression>();
     s_return->return_value = s_and;
     auto retval = MakePatternNode<TransformOfAgent, Expression>( &TypeOf::instance );
     auto type = MakePatternNode<Type>();
     retval->pattern = type;
     
     // Restrict the search to returns that have an automatic variable under them
-    auto cs_stuff = MakeTreeNode< Stuff<Expression> >(); // TODO the exclusion Stuff<GetDec<Automatic>> is too strong;
+    auto cs_stuff = MakePatternNode<StuffAgent, Expression>(); // TODO the exclusion Stuff<GetDec<Automatic>> is too strong;
                                                                     // use Not<GetDec<Temp>>
     s_and->conjuncts = ( retval, cs_stuff );
     auto cs_id = MakePatternNode<TransformOfAgent, InstanceIdentifier>( &DeclarationOf::instance );
