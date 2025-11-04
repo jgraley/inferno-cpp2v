@@ -186,21 +186,20 @@ public:
     {
         return shared_from_this();
     } 
-
-    shared_ptr<Node> pre_restriction_archetype_node;
-    shared_ptr< TreePtrInterface > pre_restriction_archetype_ptr;
-
-    
+	
     virtual TreePtr<Node> GetArchetypeNode() const override
     {
-        return TreePtr<Node>(pre_restriction_archetype_node);  
+        return TreePtr<Node>(my_archetype_node);  
     }
     
     shared_ptr< TreePtrInterface > GetArchetypeTreePtr() const override
     {
-        return pre_restriction_archetype_ptr;  
+        return my_archetype_ptr;  
     }
-    
+
+    shared_ptr<Node> my_archetype_node;
+    shared_ptr< TreePtrInterface > my_archetype_ptr;
+
 private:
     Plan plan; // can't be const because children added after construct
     bool planned = false;
@@ -236,8 +235,8 @@ public:
     static inline TreePtr<NODE_TYPE> MakeNode(const CP &...cp)
     {
         auto agent_node = MakeTreeNode<StandardAgentWrapper<NODE_TYPE>>(cp...);
-        agent_node->pre_restriction_archetype_node = shared_ptr<Node>( new NODE_TYPE );
-        agent_node->pre_restriction_archetype_ptr = make_shared<TreePtr<NODE_TYPE>>();
+        agent_node->my_archetype_node = shared_ptr<Node>( new NODE_TYPE );
+        agent_node->my_archetype_ptr = make_shared<TreePtr<NODE_TYPE>>();
         return agent_node;        
     }    
 };

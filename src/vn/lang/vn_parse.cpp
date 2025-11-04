@@ -90,9 +90,11 @@ Production VNParse::OnPrefixOperator( string tok, Production operand )
 {
     if( tok=="-" )
     {
-		auto op = MakeTreeNode<StandardAgentWrapper<Negate>>();
-		op->operands = (operand);
-		return op;
+		auto node = MakeTreeNode<StandardAgentWrapper<Negate>>();
+		node->operands = (operand);
+        node->my_archetype_node = shared_ptr<Node>( new Negate() );
+        node->my_archetype_ptr = make_shared<TreePtr<Negate>>();
+        return node;
 	}
 	else
 	{
@@ -103,5 +105,8 @@ Production VNParse::OnPrefixOperator( string tok, Production operand )
 
 Production VNParse::OnSpecificInteger( int value )
 {
-	return MakeTreeNode<StandardAgentWrapper<SpecificInteger>>(value);
+	auto node =  MakeTreeNode<StandardAgentWrapper<SpecificInteger>>(value);
+    node->my_archetype_node = shared_ptr<Node>( new SpecificInteger() );
+    node->my_archetype_ptr = make_shared<TreePtr<SpecificInteger>>();
+    return node;
 }

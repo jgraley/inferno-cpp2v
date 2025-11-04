@@ -476,7 +476,7 @@ const list<pair<int, int>> &Lacing::GetRangeListForCategory( TreePtr<Node> arche
           ("Could not find lacing info for ")(archetype)
           ("\nin:\n")(cats_to_lacing_range_lists)("\n")
           ("Did you leave NODE_FUNCTIONS_FINAL or NODE_FUNCTIONS out of a node decl?\n")
-          ("That sould make the node equivalent to its parent node wrt cat ordering\n")
+          ("That would make the node equivalent to its parent node wrt cat ordering\n")
           ("and so one of them will get dropped from the lacing process.");
     return lrl;
 }
