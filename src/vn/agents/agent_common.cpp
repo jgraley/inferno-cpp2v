@@ -105,10 +105,46 @@ Lazy<BooleanExpression> AgentCommon::SymbolicCouplingQuery(PatternLink keyer, co
 }
 
 
-bool AgentCommon::ShouldGenerateCategoryClause() const
+bool AgentCommon::IsNonTrivialPreRestriction(const TreePtrInterface *pptr) const
 {
-	if( !GetArchetypeNode() )
+	if( IsSelfOrChildrenFixedType() )
 		return false;
+		
+	if( !GetArchetypeTreePtr() )
+		return false;
+		
+    // Note: we are using typeid on the tree pointer type, not the node type.
+    // So we need an archetype tree pointer.
+    return typeid( *pptr ) != typeid( *GetArchetypeTreePtr() );
+}                                
+
+
+bool AgentCommon::IsFixedType() const
+{
+	return false; // "most" agents are templated on a node type
+}
+
+
+bool AgentCommon::IsSelfOrChildrenFixedType() const
+{
+	return IsFixedType(); // A fixed type agent is pre-restricted by self 
+}
+
+
+bool AgentCommon::ShouldGenerateCategoryClause(const TreePtrInterface *tpi) const
+{
+	if( !GetArchetypeTreePtr() )
+		return false; // Wouldn't be able to create clause 
+	
+	if( typeid( *GetArchetypeNode() ) == typeid(Node) )
+		return false; // Clause wouldn't restrict
+	
+	// Compulsory cat clause because agent has a fixed type
+	if( IsFixedType() )
+		return true;
+		
+	// Voluntary pre-restriction was supplied
+	return IsNonTrivialPreRestriction(tpi);
 		
     // It could be argued that, from the CSP solver's point of
     // view, if we didn't need pre-restriction constraint, we would
@@ -118,16 +154,12 @@ bool AgentCommon::ShouldGenerateCategoryClause() const
     // solver never finds them because they're not there due type-safety.
     // But if we're type Node, then the parent pointer(s) must also be
     // Node, and there's no need for any restriction.
-    return typeid( *GetArchetypeNode() ) != typeid(Node);
-    
-    // Note about typeid(): if I go typeid( Node() ) I get the type of a 
-    // Node constructor. 
 }                                
 
 
 SYM::Lazy<SYM::BooleanExpression> AgentCommon::SymbolicPreRestriction(PatternLink keyer_plink) const
 {
-    if( ShouldGenerateCategoryClause() )
+    if( ShouldGenerateCategoryClause(keyer_plink.GetPatternTreePtrInterface()) )
     {
         auto keyer_expr = MakeLazy<SymbolVariable>(keyer_plink);
         return MakeLazy<IsInCategoryOperator>(GetArchetypeNode(), keyer_expr);
@@ -482,25 +514,6 @@ TreePtr<Node> AgentCommon::CloneNode() const
     return dest;
 }
 
-
-bool AgentCommon::IsNonTrivialPreRestriction(const TreePtrInterface *pptr) const
-{
-	if( IsFixedType() )
-		return false;
-		
-	if( !GetArchetypeTreePtr() )
-		return false;
-		
-    // Note: we are using typeid on the tree pointer type, not the node type.
-    // So we need an archetype tree pointer.
-    return typeid( *pptr ) != typeid( *GetArchetypeTreePtr() );
-}                                
-
-
-bool AgentCommon::IsFixedType() const
-{
-	return false; // "most" agents are templated on a node type
-}
 
 
 string AgentCommon::GetGraphId() const

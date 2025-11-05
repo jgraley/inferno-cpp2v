@@ -42,7 +42,7 @@ public:
     stack< TreePtr<Node> > scope_stack;
     queue<TreePtr<CPPTree::Instance>> definitions;
     UniquifyNames::NodeToNameMap unique_coupling_names;
-    UniquifyNames::LinkSetByNode incoming_links;
+    UniquifyNames::LinkSetByNode incoming_links_map;
     const string output_x_path;                                     
     SimpleCompare sc;
     unique_ptr<DefaultTransUtils> utils;

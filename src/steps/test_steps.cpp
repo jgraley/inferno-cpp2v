@@ -9,16 +9,16 @@ using namespace Steps;
 // Just an early test for embedded patterns, not a valid transformation
 EmbeddedSCRTest::EmbeddedSCRTest()
 {
-    auto s_for = MakePatternNode<CPPTree::For>();
-    auto s_body = MakePatternNode<CPPTree::Statement>();
+    auto s_for = MakePatternNode<For>();
+    auto s_body = MakePatternNode<Statement>();
 
     s_for->body = s_body;
 
-    auto r_comp = MakePatternNode<CPPTree::Compound>();
-    auto r_body = MakePatternNode<CPPTree::Statement>();
-    auto ss_cont = MakePatternNode<CPPTree::Continue>();
-    auto sr_break = MakePatternNode<CPPTree::Break>();
-    auto r_embedded = MakePatternNode< EmbeddedCompareReplace<CPPTree::Statement> >( r_body, ss_cont, sr_break );
+    auto r_comp = MakePatternNode<Compound>();
+    auto r_body = MakePatternNode<Statement>();
+    auto ss_cont = MakePatternNode<Continue>();
+    auto sr_break = MakePatternNode<Break>();
+    auto r_embedded = MakePatternNode< EmbeddedCompareReplaceAgent, Statement >( r_body, ss_cont, sr_break );
     r_comp->statements = ( r_embedded );
 
     Configure( SEARCH_REPLACE, s_for, r_comp );
@@ -105,11 +105,11 @@ FixCrazyNumberEmb::FixCrazyNumberEmb()
     // and incuding the Assign "wants" to stay the same, and only the SpecificInteger "wants" to 
     // change. But the SimpleCompare relation between the Assign nodes will mutate due to the effect 
     // of the changing SpecificInteger value, and so the ordering will break if this is not catered for.
-    auto ss = MakePatternNode<CPPTree::Assign>();
-    auto sr = MakePatternNode<CPPTree::Assign>();
+    auto ss = MakePatternNode<Assign>();
+    auto sr = MakePatternNode<Assign>();
 
-    auto se = MakePatternNode<CPPTree::Expression>();    
-    auto r_embedded = MakePatternNode<EmbeddedCompareReplaceAgent, Expression>( MakePatternNode<SpecificInteger>(54257), // through restricts to crazy number
+    auto se = MakePatternNode<Expression>();    
+    auto r_embedded = MakePatternNodeNP<EmbeddedCompareReplaceAgent>( MakePatternNode<SpecificInteger>(54257), // through restricts to crazy number
                                                                              MakePatternNode<SpecificInteger>(54257), // emb matches for crazy 
                                                                              MakePatternNode<SpecificInteger>(50) ); // and replaces with sensible
 

@@ -122,11 +122,11 @@ bool DisjunctionAgent::IsNonTrivialPreRestriction(const TreePtrInterface *tpi) c
 				
 	// Disjunction only needs to match one child, so if we want to avoid a prerestriction
 	// we need all of them to restrict
-	return !All( AreChildrenRestricting() );
+	return !AllOf( AreChildrenRestricting() );
 } 
 
 
-bool DisjunctionAgent::IsFixedType() const
+bool DisjunctionAgent::IsSelfOrChildrenFixedType() const
 {
-	return All( AreChildrenFixedType() );
+	return AllOf( AreChildrenFixedType() );
 }

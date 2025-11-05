@@ -72,14 +72,14 @@ bool AutolocatingAgent::IsNonTrivialPreRestriction(const TreePtrInterface *tpi) 
 	// to due to global and-rule.
 	//FTRACE(GetPatternQuery()->GetNormalLinks())("\n")
 	//      (AreChildrenRestricting())("\n")
-	//      (!Any( AreChildrenRestricting() ))("\n");
-	return !Any( AreChildrenRestricting() );
+	//      (!AnyOf( AreChildrenRestricting() ))("\n");
+	return !AnyOf( AreChildrenRestricting() );
 } 
 
 
-bool AutolocatingAgent::IsFixedType() const 
+bool AutolocatingAgent::IsSelfOrChildrenFixedType() const 
 {
-	return Any( AreChildrenFixedType() );
+	return AnyOf( AreChildrenFixedType() );
 }
 
 
@@ -91,7 +91,7 @@ vector<bool> AutolocatingAgent::AreChildrenRestricting() const
     {
 		Agent *child_agent = child_link.GetChildAgent();
 		vb.push_back(
-		    child_agent->IsFixedType() ||
+		    child_agent->IsSelfOrChildrenFixedType() ||
 		    child_agent->IsNonTrivialPreRestriction(child_link.GetPatternTreePtrInterface()) );
 	}
 	return vb;
@@ -105,7 +105,7 @@ vector<bool> AutolocatingAgent::AreChildrenFixedType() const
     for( PatternLink child_link : pq->GetNormalLinks() )
     {
 		Agent *child_agent = child_link.GetChildAgent();
-		vb.push_back( child_agent->IsFixedType() );
+		vb.push_back( child_agent->IsSelfOrChildrenFixedType() );
 	}
 	return vb;
 }

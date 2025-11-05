@@ -29,11 +29,11 @@ namespace VN
 #define ARCHETYPE_FUNCTION \
     TreePtr<Node> GetArchetypeNode() const override \
     { \
-        return this->SpecialGetArchetypeNode(); \
+        return TreePtr<Node>(pre_restriction_archetype_node); \
     } \
     shared_ptr< TreePtrInterface > GetArchetypeTreePtr() const override \
     { \
-        return this->SpecialGetArchetypeTreePtr(); \
+        return pre_restriction_archetype_ptr; \
     }
 
 
@@ -41,20 +41,10 @@ namespace VN
 /// Common stuff for pattern nodes other than standard nodes
 class SpecialBase
 {
-public:    
-    TreePtr<Node> SpecialGetArchetypeNode() const 
-    {
-        return TreePtr<Node>(pre_restriction_archetype_node);  
-    }
-    // Get an architype TREE PTR. This is a different thing. It's actually NULL which is fine.
-    shared_ptr< TreePtrInterface > SpecialGetArchetypeTreePtr() const 
-    {
-        return pre_restriction_archetype_ptr;  
-    } 
-    
+public:      
     // TreePtr<> here would show up in itemisation so don't do it.
-    shared_ptr<Node> pre_restriction_archetype_node;
-    shared_ptr< TreePtrInterface > pre_restriction_archetype_ptr;
+    shared_ptr<Node> pre_restriction_archetype_node = nullptr;
+    shared_ptr< TreePtrInterface > pre_restriction_archetype_ptr = nullptr;
 };
 
 

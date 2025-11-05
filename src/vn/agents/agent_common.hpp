@@ -24,7 +24,10 @@ public:
     SYM::Lazy<SYM::BooleanExpression> SymbolicQuery( PatternLink keyer, const set<PatternLink> &residuals, bool coupling_only ) const override;                                       
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuery(PatternLink keyer_plink) const = 0;
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicCouplingQuery(PatternLink keyer, const set<PatternLink> &residuals) const;       
-    bool ShouldGenerateCategoryClause() const override;                                
+    bool IsNonTrivialPreRestriction(const TreePtrInterface *pptr) const override;
+	bool IsFixedType() const override;
+	bool IsSelfOrChildrenFixedType() const override;
+    bool ShouldGenerateCategoryClause(const TreePtrInterface *tpi) const override;                                
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicPreRestriction(PatternLink keyer_plink) const;
     bool IsPreRestrictionMatch( TreePtr<Node> x ) const; // return true if matches
     bool IsPreRestrictionMatch( XLink x ) const; // return true if matches
@@ -67,8 +70,7 @@ public:
                                                   const SCREngine *acting_engine );
     TreePtr<Node> CloneNode() const;
 
-    bool IsNonTrivialPreRestriction(const TreePtrInterface *pptr) const override;
-	bool IsFixedType() const override;
+
     virtual string GetGraphId() const;
     virtual string GetPlanAsString() const override;
     

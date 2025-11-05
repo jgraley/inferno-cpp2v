@@ -63,7 +63,5 @@ private:
     bool is_search;
 };
 
-
-
 };
 #endif

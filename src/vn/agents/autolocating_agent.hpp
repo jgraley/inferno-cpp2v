@@ -35,7 +35,7 @@ public:
                                           const SCREngine *acting_engine ) override;
 
     bool IsNonTrivialPreRestriction(const TreePtrInterface *pptr) const override;          
-	bool IsFixedType() const override;
+	bool IsSelfOrChildrenFixedType() const override;
     vector<bool> AreChildrenRestricting() const;          
     vector<bool> AreChildrenFixedType() const;          
 };

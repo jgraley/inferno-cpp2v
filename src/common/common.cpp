@@ -94,7 +94,7 @@ int Count(string c, string s)
 }
 
 
-bool All( const vector<bool> &vb )
+bool AllOf( const vector<bool> &vb )
 {
 	for( bool b : vb )
 		if( !b )
@@ -103,7 +103,7 @@ bool All( const vector<bool> &vb )
 }
 
 
-bool Any( const vector<bool> &vb )
+bool AnyOf( const vector<bool> &vb )
 {
 	for( bool b : vb )
 		if( b )

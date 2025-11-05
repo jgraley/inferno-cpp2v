@@ -30,8 +30,8 @@ public:
 
     // really just to reduce the amount of typing if I change it
     typedef shared_ptr<Patch> ReplacePatchPtr;
-
     typedef Graphable::Phase Phase;
+    typedef function<shared_ptr<DecidedQuery>()> QueryLambda;
     
     enum Path
     {
@@ -59,7 +59,8 @@ public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const = 0;
     virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const = 0;
     
-    typedef function<shared_ptr<DecidedQuery>()> QueryLambda;
+	virtual bool IsFixedType() const = 0;
+	virtual bool IsSelfOrChildrenFixedType() const = 0;
 
     /// Obtain a symbolic expression for this node's queries (coupling and maybe NLQ)
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicQuery( PatternLink keyer, const set<PatternLink> &residuals, bool coupling_only ) const = 0; 
@@ -89,10 +90,9 @@ public:
     
     virtual list<PatternLink> GetChildren() const = 0;
     virtual list<PatternLink> GetVisibleChildren( Path v ) const = 0;                        
-    virtual bool ShouldGenerateCategoryClause() const = 0;                                
+    virtual bool ShouldGenerateCategoryClause(const TreePtrInterface *tpi) const = 0;                                
 
 	virtual Syntax::Production GetAgentProduction() const = 0;
-	virtual bool IsFixedType() const = 0;
 	virtual string GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const = 0;
 
     static Agent *AsAgent( shared_ptr<Node> node );

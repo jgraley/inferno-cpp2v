@@ -483,6 +483,7 @@ Graph::MyNodeBlock Graph::PreProcessBlock( const Graphable::NodeBlock &block,
     ASSERT(g);
     const Node *pnode = dynamic_cast<const Node *>(g);
     const SpecialBase *pspecial = pnode ? dynamic_cast<const SpecialBase *>(pnode) : nullptr;
+	const Agent *agent = pnode ?  dynamic_cast<const Agent *>(pnode) : nullptr;
 
     // Fill in everything in my block 
     MyNodeBlock my_block;
@@ -493,7 +494,7 @@ Graph::MyNodeBlock Graph::PreProcessBlock( const Graphable::NodeBlock &block,
     
     // Capture the node (if there is one: might be NULL)
     if( pspecial )
-        my_block.prerestriction_name = (*(pspecial->SpecialGetArchetypeNode())).GetName();
+        my_block.prerestriction_name = (*(agent->GetArchetypeNode())).GetName();
     
     // In graph trace mode, nodes get their serial number added in as an extra sub-block (with no links)
     if( ReadArgs::graph_trace && pnode )

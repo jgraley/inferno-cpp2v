@@ -73,7 +73,7 @@ public:
 private:
     SimpleCompare comparer;
     map< TreePtr<Node>, Fingerprint > fingerprints;
-    LinkSetByNode incoming_links;
+    LinkSetByNode incoming_links_map;
 };
 
 

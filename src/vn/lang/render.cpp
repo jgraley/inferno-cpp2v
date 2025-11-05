@@ -41,7 +41,7 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern )
     // (more than one parent) and don't worry about declarations.
     UniquifyNames coupling_names_uniqifier(&Syntax::GetCouplingNameHint, true, false);
     unique_coupling_names = coupling_names_uniqifier.UniquifyAll( kit, context );
-	incoming_links = coupling_names_uniqifier.GetIncomingLinksMap();
+	incoming_links_map = coupling_names_uniqifier.GetIncomingLinksMap();
 	
 	string s;
 	if( ReadArgs::use.count("c") )
@@ -213,8 +213,8 @@ string Render::MaybeRenderPreRestriction( TreePtr<Node> node, Syntax::Production
 		return "";
 	
 	bool prerestricted = false;
-	ASSERT( incoming_links.count(node)>0 )(incoming_links)("\nNode: ")(node);
-	for( const TreePtrInterface *tpi : incoming_links.at(node) )
+	ASSERT( incoming_links_map.count(node)>0 )(incoming_links_map)("\nNode: ")(node);
+	for( const TreePtrInterface *tpi : incoming_links_map.at(node) )
 		prerestricted |= agent->IsNonTrivialPreRestriction(tpi);
 		
 	if(!prerestricted)
@@ -224,7 +224,7 @@ string Render::MaybeRenderPreRestriction( TreePtr<Node> node, Syntax::Production
 	// of the special agent. We might be able to extract node name out
 	// of the template args, but using an archetype like this has precedent
 	// in the graph plotter.
-	TreePtr<Node> archetype_node = pspecial->SpecialGetArchetypeNode();
+	TreePtr<Node> archetype_node = agent->GetArchetypeNode();
 
 	// This assumes no action is required in order to render a prefix operation
 	surround_prod = Syntax::Production::PREFIX;	

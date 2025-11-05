@@ -31,7 +31,7 @@ public:
 	string GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const final;
     NodeBlock GetGraphBlockInfo() const final;
     bool IsNonTrivialPreRestriction(const TreePtrInterface *pptr) const final;          
-	bool IsFixedType() const final;
+	bool IsSelfOrChildrenFixedType() const final;
     
     // Interface for pattern trasformation
     TreePtr<Node> CloneToEmpty() const

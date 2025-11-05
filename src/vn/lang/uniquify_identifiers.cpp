@@ -149,9 +149,9 @@ Fingerprinter::Fingerprinter() :
 Fingerprinter::NodeSetByFingerprint Fingerprinter::GetNodesInTreeByFingerprint( TreePtr<Node> context )
 {
 	fingerprints.clear();
-	incoming_links.clear();
+	incoming_links_map.clear();
     int index=0;
-    incoming_links[context]; // get the root in there, even though it has no parents
+    incoming_links_map[context]; // get the root in there, even though it has no parents
     ProcessNode( context, index );	
 	
     Fingerprinter::NodeSetByFingerprint rfp;
@@ -171,7 +171,7 @@ void Fingerprinter::ProcessTPI( const TreePtrInterface *tpi, int &index )
 	// Gathering incoming tree ptr interface pointers here so that we don't 
 	// have to pass TPI's around everywhere in the renderer. Will be used 
 	// by renderer do detect non-trivial pre-restrictions.
-	incoming_links[x].insert(tpi);
+	incoming_links_map[x].insert(tpi);
 }
 
 
@@ -274,13 +274,13 @@ void Fingerprinter::ProcessCollection( CollectionInterface *x_col, int &index )
     }
     
     for( const TreePtrInterface &tpi : *x_col )
-		incoming_links[(TreePtr<Node>)tpi].insert(&tpi);
+		incoming_links_map[(TreePtr<Node>)tpi].insert(&tpi);
 }
 
 
 const Fingerprinter::LinkSetByNode &Fingerprinter::GetIncomingLinksMap() const
 {
-	return incoming_links;
+	return incoming_links_map;
 }
 
 //////////////////////////// UniquifyNames ///////////////////////////////
