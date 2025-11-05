@@ -133,7 +133,7 @@ bool AgentCommon::IsSelfOrChildrenFixedType() const
 
 bool AgentCommon::ShouldGenerateCategoryClause(const TreePtrInterface *tpi) const
 {
-	if( !GetArchetypeTreePtr() )
+	if( !GetArchetypeNode() )
 		return false; // Wouldn't be able to create clause 
 	
 	if( typeid( *GetArchetypeNode() ) == typeid(Node) )
