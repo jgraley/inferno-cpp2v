@@ -184,20 +184,7 @@ public:
     shared_ptr<const Node> GetPatternPtr() const override
     {
         return shared_from_this();
-    } 
-	
-    virtual TreePtr<Node> GetArchetypeNode() const override
-    {
-        return TreePtr<Node>(my_archetype_node);  
-    }
-    
-    shared_ptr< TreePtrInterface > GetArchetypeTreePtr() const override
-    {
-        return my_archetype_ptr;  
-    }
-
-    shared_ptr<Node> my_archetype_node;
-    shared_ptr< TreePtrInterface > my_archetype_ptr;
+    } 	
 
 private:
     Plan plan; // can't be const because children added after construct
@@ -222,6 +209,16 @@ public:
     {
         return StandardAgent::GetTrace();
     }
+    
+    virtual TreePtr<Node> GetArchetypeNode() const override
+    {
+        return TreePtr<Node>( new NODE_TYPE );  
+    }
+    
+    shared_ptr< TreePtrInterface > GetArchetypeTreePtr() const override
+    {
+        return make_shared<TreePtr<NODE_TYPE>>();  
+    }    
 };
 
 };

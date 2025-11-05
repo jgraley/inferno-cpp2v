@@ -20,8 +20,6 @@ public:
     static inline TreePtr<NODE_TYPE> MakeNode(const CP &...cp)
     {
         auto agent_node = MakeTreeNode<StandardAgentWrapper<NODE_TYPE>>(cp...);
-        agent_node->my_archetype_node = shared_ptr<Node>( new NODE_TYPE );
-        agent_node->my_archetype_ptr = make_shared<TreePtr<NODE_TYPE>>();
         return agent_node;        
     }    
 };
