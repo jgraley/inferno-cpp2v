@@ -67,10 +67,10 @@ class Special : public virtual SpecialBase,
 public:    
 	typedef PRE_RESTRICTION PreRestrictionType;
 
-    // These are here to provide for a cat clause for fixed-type agents (which inherit 
-    // from Special<MyFixedType>). We over-ride the functions that get the archetypes.
+    // This is here to provide for a cat clause for fixed-type agents (which inherit 
+    // from Special<MyFixedType>). We over-ride the function that gets the archetype.
     // Thus, the stored pointer pre_restriction_archetype_node isn't required for the
-    // cat clause.
+    // cat clause for these agents.
     TreePtr<Node> SpecialGetArchetypeNode() const 
     {
         return TreePtr<Node>( new PRE_RESTRICTION );  
