@@ -92,8 +92,8 @@ Production VNParse::OnPrefixOperator( string tok, Production operand )
     {
 		auto node = MakeTreeNode<StandardAgentWrapper<Negate>>();
 		node->operands = (operand);
-        node->my_archetype_node = shared_ptr<Node>( new Negate() );
-        node->my_archetype_ptr = make_shared<TreePtr<Negate>>();
+        //node->my_archetype_node = shared_ptr<Node>( new Negate() );
+        //node->my_archetype_ptr = make_shared<TreePtr<Negate>>();
         return node;
 	}
 	else
@@ -106,7 +106,9 @@ Production VNParse::OnPrefixOperator( string tok, Production operand )
 Production VNParse::OnSpecificInteger( int value )
 {
 	auto node =  MakeTreeNode<StandardAgentWrapper<SpecificInteger>>(value);
-    node->my_archetype_node = shared_ptr<Node>( new SpecificInteger() );
-    node->my_archetype_ptr = make_shared<TreePtr<SpecificInteger>>();
+    //node->my_archetype_node = shared_ptr<Node>( new SpecificInteger() );
+    //node->my_archetype_ptr = make_shared<TreePtr<SpecificInteger>>();
     return node;
 }
+
+// TODO parse the pre-restrictions and apply to child in action
