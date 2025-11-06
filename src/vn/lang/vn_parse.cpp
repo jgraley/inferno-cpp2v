@@ -24,21 +24,33 @@ using namespace CPPTree; // TODO should not need
 using namespace VN;
 using namespace reflex;
 
+VNParse::VNParse() :
+	scanner( make_unique<YY::VNLangScanner>(reflex::Input(), std::cerr) ),
+	parser( make_unique<YY::VNLangParser>(*scanner, this) )
+{
+}
+
+VNParse::~VNParse()
+{
+	// Keep me: compiler can see complete VNLangScanner and VNLangParser here
+}
+
+
 TreePtr<Node> VNParse::DoParse(string filepath)
 {
     FILE *file = fopen(filepath.c_str(), "r");
 
     ASSERT(file != NULL)("Cannot open VN file: ")(filepath);
 
-    YY::VNLangScanner scanner(file, std::cout);
-    scanner.filename = filepath;    
-    YY::VNLangParser parser(scanner, this);
+    scanner->in(file);
+    scanner->filename = filepath;    
     
     saw_error = false;
     script = nullptr;
-    int pr = parser.parse();    
-    ASSERT(pr==EXIT_SUCCESS);
-    ASSERT(script);
+    int pr = parser->parse();    
+    if( saw_error ) // TODO figure out how to make the parser return a fail code
+		exit(1); // An error was already reported so an assert fail here looks like a knock-on error i.e. a bug
+    ASSERT(script && pr==EXIT_SUCCESS);
     
     return script;
 }
@@ -83,6 +95,30 @@ Production VNParse::OnDelta( Production through, Production overlay )
 	delta->through = through;
 	delta->overlay = overlay;
 	return delta;
+}
+
+
+Production VNParse::OnRestrict( any loc, list<string> type, Production target )
+{
+    Agent *agent = Agent::TryAsAgent(target);
+	ASSERT( agent );
+		
+	auto pspecial = dynamic_cast<SpecialBase *>(agent);
+	if( !pspecial )
+	{
+		parser->error( any_cast<YY::VNLangParser::location_type>(loc), 
+		               agent->GetTypeName() + " cannot be pre-restricted.");		
+		return target;
+	}
+
+	string ts = Join(type, "::"); // restore the ::
+	FTRACE(ts)("\n");
+	if( ts=="CPPTree::Integral" )
+	{
+		pspecial->pre_restriction_archetype_node = shared_ptr<Node>( new CPPTree::Integral );
+		pspecial->pre_restriction_archetype_ptr = make_shared<TreePtr<CPPTree::Integral>>();
+	}
+	return target;
 }
 
 

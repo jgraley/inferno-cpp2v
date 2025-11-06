@@ -27,21 +27,24 @@
 
 // We have to exclude delta from identifiers here, otherwise "match longest"
 // rule means eg Δd is parsed as a name.
-name    [\p{UnicodeIdentifierStart}]{-}[Δ] [\p{UnicodeIdentifierPart}{-}[Δ]]*
-exp     [Ee] [-+]? \d+
-num     \d* (\d | \.\d | \d\.) \d* {exp}?
+name       				[\p{UnicodeIdentifierStart}]{-}[Δ] [\p{UnicodeIdentifierPart}]{-}[Δ]*
+float_exp_suffix		[Ee] [-+]? \d+
+float_num				\d* (\d | \.\d | \d\.) \d* {float_exp_suffix}?
 
 %%
 
 \s          // ignore space
-\"[^"]*\"   { return YY::VNLangParser::make_STR(wstr(), location()); }
-{num}       { return YY::VNLangParser::make_NUM(strtod(text(), NULL), location()); }
-{name}      { return YY::VNLangParser::make_VAR(wstr(), location()); }
-[-+*/=();]  { return YY::VNLangParser::symbol_type(chr(), location()); }
-꩜			{ return YY::VNLangParser::make_ENGINE(location()); };
-⩨			{ return YY::VNLangParser::make_STUFF(location()); };
-Δ			{ return YY::VNLangParser::make_DELTA(location()); };
-🡺			{ return YY::VNLangParser::make_DELTA_ARROW(location()); };
-<<EOF>>     { return YY::VNLangParser::make_EOF(location()); }
+\"[^"]*\"   	{ return YY::VNLangParser::make_STR(wstr(), location()); }
+{float_num}		{ return YY::VNLangParser::make_NUM(strtod(text(), NULL), location()); }
+{name}      	{ return YY::VNLangParser::make_NAME(wstr(), location()); }
+[-+*/=();]  	{ return YY::VNLangParser::symbol_type(chr(), location()); }
+::				{ return YY::VNLangParser::make_SCOPE_RES(location()); };
+꩜				{ return YY::VNLangParser::make_ENGINE(location()); };
+⩨				{ return YY::VNLangParser::make_STUFF(location()); };
+Δ				{ return YY::VNLangParser::make_DELTA(location()); };
+🡺				{ return YY::VNLangParser::make_DELTA_ARROW(location()); };
+【				{ return YY::VNLangParser::make_OPEN_RESTRICT(location()); };
+】				{ return YY::VNLangParser::make_CLOSE_RESTRICT(location()); };
+<<EOF>>     	{ return YY::VNLangParser::make_EOF(location()); }
 
 %%
