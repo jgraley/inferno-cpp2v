@@ -25,9 +25,12 @@
 %option unicode
 %option freespace
 
+// ASCII must come before unicode otherwise they'd all lex as unicode.
+ascii_name				[a-zA-Z_][a-zA-Z0-9_]*
+
 // We have to exclude delta from identifiers here, otherwise "match longest"
-// rule means eg Δd is parsed as a name.
-name       				[\p{UnicodeIdentifierStart}]{-}[Δ] [\p{UnicodeIdentifierPart}]{-}[Δ]*
+// rule means eg Δd is parsed as a name. TODO Δ should be a keyword, see #866
+unicode_name			[\p{UnicodeIdentifierStart}]{-}[Δ] [\p{UnicodeIdentifierPart}]{-}[Δ]*
 float_exp_suffix		[Ee] [-+]? \d+
 float_num				\d* (\d | \.\d | \d\.) \d* {float_exp_suffix}?
 
@@ -36,7 +39,8 @@ float_num				\d* (\d | \.\d | \d\.) \d* {float_exp_suffix}?
 \s          // ignore space
 \"[^"]*\"   	{ return YY::VNLangParser::make_STR(wstr(), location()); }
 {float_num}		{ return YY::VNLangParser::make_NUM(strtod(text(), NULL), location()); }
-{name}      	{ return YY::VNLangParser::make_NAME(wstr(), location()); }
+{ascii_name}	{ return YY::VNLangParser::make_ASCII_NAME(str(), location()); }
+{unicode_name}	{ return YY::VNLangParser::make_UNICODE_NAME(wstr(), location()); }
 [-+*/=();]  	{ return YY::VNLangParser::symbol_type(chr(), location()); }
 ::				{ return YY::VNLangParser::make_SCOPE_RES(location()); };
 ꩜				{ return YY::VNLangParser::make_ENGINE(location()); };

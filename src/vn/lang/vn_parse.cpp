@@ -15,6 +15,7 @@
 #include "vn_lang.lpp.hpp"
 #include "vn_lang.location.hpp"
 #include "vn/agents/all.hpp"
+#include "enumerate_node_types.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -98,7 +99,7 @@ Production VNParse::OnDelta( Production through, Production overlay )
 }
 
 
-Production VNParse::OnRestrict( any loc, list<string> type, Production target )
+Production VNParse::OnRestrict( list<string> res_type, any res_loc, Production target, any target_loc )
 {
     Agent *agent = Agent::TryAsAgent(target);
 	ASSERT( agent );
@@ -106,18 +107,29 @@ Production VNParse::OnRestrict( any loc, list<string> type, Production target )
 	auto pspecial = dynamic_cast<SpecialBase *>(agent);
 	if( !pspecial )
 	{
-		parser->error( any_cast<YY::VNLangParser::location_type>(loc), 
-		               agent->GetTypeName() + " cannot be pre-restricted.");		
+		parser->error( any_cast<YY::VNLangParser::location_type>(target_loc), 
+		               "Restriction target " + agent->GetTypeName() + " cannot be pre-restricted.");		
 		return target;
 	}
-
-	string ts = Join(type, "::"); // restore the ::
-	FTRACE(ts)("\n");
-	if( ts=="CPPTree::Integral" )
+	foo();
+	if( !NodeData().GetNameToNodeMap().count(res_type) )
 	{
-		pspecial->pre_restriction_archetype_node = shared_ptr<Node>( new CPPTree::Integral );
-		pspecial->pre_restriction_archetype_ptr = make_shared<TreePtr<CPPTree::Integral>>();
+		parser->error( any_cast<YY::VNLangParser::location_type>(res_loc), 
+		               "Restriction type " + Join(res_type, "::") + " unknown.");		
+		return target;
 	}
+		
+	NodeEnum ne = NodeData().GetNameToNodeMap().at(res_type);
+	switch(ne)
+	{
+#define NODE(NS, NAME) \
+	case NodeEnum::NS##_##NAME: \
+		pspecial->pre_restriction_archetype_node = shared_ptr<Node>( new NS::NAME ); \
+		pspecial->pre_restriction_archetype_ptr = make_shared<TreePtr<NS::NAME>>(); \
+		break;
+#include "node_types_data.inc"			
+	}
+	
 	return target;
 }
 

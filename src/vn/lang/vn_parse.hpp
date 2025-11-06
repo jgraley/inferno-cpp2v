@@ -40,7 +40,7 @@ public:
 	Production OnStuff( Production terminus );
 	Production OnDelta( Production through, Production overlay );
 	Production OnRestrict( any loc, wstring type, Production target ) {(void)loc; (void)type;return target;};
-	Production OnRestrict( any loc, list<string> type, Production target );
+	Production OnRestrict( list<string> res_type, any res_loc, Production target, any target_loc );
 	
 	Production OnPrefixOperator( string tok, Production operand );
 	Production OnSpecificInteger( int value );

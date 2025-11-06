@@ -6,6 +6,9 @@
 #include "helpers/walk.hpp"
 #include "uniquify_identifiers.hpp"
 
+#define ENUMERATE_NODES_IN_SORT_DECLS
+
+
 // Does declaration of a depend on (ie use) declaration of b?
 // set ignore_ptr_ref_record to make function ignore the case where a's type contains a pointer or 
 // reference to b
@@ -24,5 +27,29 @@ Sequence<CPPTree::Declaration> JumbleDecls( Sequence<CPPTree::Declaration> c );
 
 // Reverse them!!
 Sequence<CPPTree::Declaration> ReverseDecls( Sequence<CPPTree::Declaration> c );
+
+
+void foo();
+
+#ifdef ENUMERATE_NODES_IN_SORT_DECLS
+enum class NodeEnum
+{
+#define NODE(NS, NAME) NS##_##NAME,
+#include "node_types_data.inc"	
+};
+
+// This should secure us a lexicographical log-time lookup for a scoped name.
+// 2-level for now, but could be expanded. You can then switch on the enum
+// which the compiler can probably make pretty quick (if all the cases are 
+// equivalent code, it should be a calculated jump).
+typedef map<list<string>, NodeEnum> NameToNodeMapType;	
+
+class NodeData
+{
+public:	
+	const NameToNodeMapType &GetNameToNodeMap();
+};
+
+#endif
 
 #endif

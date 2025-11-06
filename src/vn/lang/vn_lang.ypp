@@ -34,11 +34,12 @@
 %parse-param { VN::VNParse *vn }
 
 %define api.token.prefix {TOK_}
-%token <std::wstring> 	STR "String";
-%token <std::wstring> 	NAME "Name";
-%token <std::string>  	C_IDENTIFIER "C Identifier"
-%token <double>       	NUM "Number";
-%token EOF            	0   "End of file";
+
+%token <std::wstring> 	STR 					"string";
+%token <std::wstring> 	UNICODE_NAME 			"unicode name";
+%token <std::string>  	ASCII_NAME 				"ASCII name"
+%token <double>       	NUM 					"number";
+%token EOF            	0   					"end of file";
 %token '+';
 %token '-';
 %token '*';
@@ -60,18 +61,19 @@
 %left  '*' '/'
 %right PREFIX
 
-%type <VN::Production> expr
-%type <std::string> c_ident
-%type <std::list<std::string>> scoped_ident
+%type <VN::Production> 			expr
+%type <std::wstring> 			vn_name
+%type <std::list<std::string>> 	scoped_name
 
 %%
 
 vnscript : expr											{ vn->OnVNScript($1); }
      
-c_ident			: NAME       							{ $$ = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes($1); }     
+vn_name			: UNICODE_NAME    						{ $$ = $1 }
+				| ASCII_NAME							{ $$ = std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes($1); }     
      
-scoped_ident	: c_ident SCOPE_RES scoped_ident		{ $$ = $3; $$.push_front($1); }
-				| c_ident								{ $$.push_front($1); }
+scoped_name		: ASCII_NAME SCOPE_RES scoped_name		{ $$ = $3; $$.push_front($1); }
+				| ASCII_NAME							{ $$.push_front($1); }
      
 expr : expr '+' expr      { $$ = $1; }
      | expr '-' expr      { $$ = $1; }
@@ -82,7 +84,7 @@ expr : expr '+' expr      { $$ = $1; }
      | DELTA expr DELTA_ARROW expr 		   		   		{ $$ = vn->OnDelta($2, $4); }
      | '-' %prec PREFIX expr                  			{ $$ = vn->OnPrefixOperator("-", $2); }
      | '(' expr ')'                           			{ $$ = $2; }
-     | OPEN_RESTRICT scoped_ident CLOSE_RESTRICT expr 	{ $$ = vn->OnRestrict(@4, $2, $4); }
+     | OPEN_RESTRICT scoped_name CLOSE_RESTRICT expr 	{ $$ = vn->OnRestrict($2, @2, $4, @4); }
      | NUM       						      			{ $$ = vn->OnSpecificInteger($1); }
      ;
 

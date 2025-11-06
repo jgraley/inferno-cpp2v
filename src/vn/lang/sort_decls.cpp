@@ -293,3 +293,26 @@ Sequence<Declaration> ReverseDecls( Sequence<Declaration> c )
 // - Agents not templated on a node type cannot pre-restrict as such, and should 
 //   overload IsNonTrivialPreRestriction() to return false. Maybe this can be done for some
 //   agent categories.
+
+void foo() {}
+#ifdef ENUMERATE_NODES_IN_SORT_DECLS
+
+#include "enumerate_node_types.hpp"
+#include "tree/misc.hpp"
+
+#include <map>
+#include <list>
+#include <string>
+
+static const NameToNodeMapType name_to_node_map =
+{
+#define NODE(NS, NAME) { {#NS, #NAME}, NodeEnum::NS##_##NAME },
+#include "node_types_data.inc"	
+};
+ 
+const NameToNodeMapType &NodeData::GetNameToNodeMap()
+{
+	return name_to_node_map;
+}
+
+#endif
