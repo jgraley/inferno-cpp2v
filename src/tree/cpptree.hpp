@@ -502,9 +502,8 @@ struct Label : Declaration, //TODO commonize with Case and Default
 	Production GetMyProduction() const override;	
 };
 
-//////////////////////////// Anonymous Types ////////////////////////////
+//////////////////////////// Built-in Types ////////////////////////////
 
-/// Anything that can be called
 /** Types under Callable refer to a function's interface as seen by 
  caller and as used in eg function pointers (which is simply Pointer to
  the function type). To actually have a function, with a body, you need
@@ -1240,7 +1239,7 @@ struct PreProcDecl : virtual Declaration
     NODE_FUNCTIONS
 };
 
-/// Instruction to include a system header file
+/// Instruction to include a header file
 struct Include : virtual PreProcDecl 
 {
     NODE_FUNCTIONS

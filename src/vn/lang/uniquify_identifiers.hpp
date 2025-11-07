@@ -9,6 +9,9 @@
 #include "helpers/simple_compare.hpp"
 #include "helpers/transformation.hpp"
 
+//#define ENUMERATE_NODES_IN_SORT_DECLS
+
+
 // Check names for duplication
 // Policy is to dedupe with a simple scheme like <name>_<unique number> or even without the underscore
 // This or any scheme could clash with existing names. BUT if we bring existing names that happen to be

@@ -6,9 +6,6 @@
 #include "helpers/walk.hpp"
 #include "uniquify_identifiers.hpp"
 
-#define ENUMERATE_NODES_IN_SORT_DECLS
-
-
 // Does declaration of a depend on (ie use) declaration of b?
 // set ignore_ptr_ref_record to make function ignore the case where a's type contains a pointer or 
 // reference to b
