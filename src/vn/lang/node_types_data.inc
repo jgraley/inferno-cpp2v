@@ -1,3 +1,8 @@
+/*
+ * Nodes and their namespaces. CPPTree then SCTree.
+ * Tabulated operators are left out, use operator_data.inc for them.
+ */
+
 //----------- CPPTree ------------
 
 // Underlying Node Types
@@ -147,35 +152,35 @@ NODE(CPPTree, SystemInclude)
 NODE(CPPTree, LocalInclude)
 
 //----------- SCTree ------------
-NODE(CPPTree, SCNode)
-NODE(CPPTree, SCRecord)
-NODE(CPPTree, SCFunction)
-NODE(CPPTree, Event)
-NODE(CPPTree, Module)
-NODE(CPPTree, Interface)
-NODE(CPPTree, SCDynamicFunction)
-NODE(CPPTree, Wait)
-NODE(CPPTree, WaitDynamic)
-NODE(CPPTree, WaitStatic)
-NODE(CPPTree, WaitDelta)
-NODE(CPPTree, NextTrigger)
-NODE(CPPTree, NextTriggerDynamic)
-NODE(CPPTree, NextTriggerStatic)
-NODE(CPPTree, NextTriggerDelta)
-NODE(CPPTree, Notify)
-NODE(CPPTree, NotifyImmediate)
-NODE(CPPTree, NotifyDelta)
-NODE(CPPTree, NotifyTimed)
-NODE(CPPTree, Process)
-NODE(CPPTree, EventProcess)
-NODE(CPPTree, Method)
-NODE(CPPTree, Thread)
-NODE(CPPTree, ClockedThread)
-NODE(CPPTree, DeltaCount)
-NODE(CPPTree, TerminationFunction)
-NODE(CPPTree, Exit)
-NODE(CPPTree, SCExtension)
-NODE(CPPTree, Cease)
+NODE(SCTree, SCNode)
+NODE(SCTree, SCRecord)
+NODE(SCTree, SCFunction)
+NODE(SCTree, Event)
+NODE(SCTree, Module)
+NODE(SCTree, Interface)
+NODE(SCTree, SCDynamicFunction)
+NODE(SCTree, Wait)
+NODE(SCTree, WaitDynamic)
+NODE(SCTree, WaitStatic)
+NODE(SCTree, WaitDelta)
+NODE(SCTree, NextTrigger)
+NODE(SCTree, NextTriggerDynamic)
+NODE(SCTree, NextTriggerStatic)
+NODE(SCTree, NextTriggerDelta)
+NODE(SCTree, Notify)
+NODE(SCTree, NotifyImmediate)
+NODE(SCTree, NotifyDelta)
+NODE(SCTree, NotifyTimed)
+NODE(SCTree, Process)
+NODE(SCTree, EventProcess)
+NODE(SCTree, Method)
+NODE(SCTree, Thread)
+NODE(SCTree, ClockedThread)
+NODE(SCTree, DeltaCount)
+NODE(SCTree, TerminationFunction)
+NODE(SCTree, Exit)
+NODE(SCTree, SCExtension)
+NODE(SCTree, Cease)
 
 // Be helpful and get rid of this now we're done
 #undef NODE
