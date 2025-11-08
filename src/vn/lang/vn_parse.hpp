@@ -21,7 +21,43 @@ class NodeNames;
 
 namespace VN 
 {
+class VNParse;
 typedef TreePtr<Node> Production;	
+
+class Command : public Traceable
+{
+public:	
+    ~Command();
+	virtual bool OnParse(VNParse *vn);
+};
+
+
+class PatternCommand : public Command
+{
+public:	
+	PatternCommand( TreePtr<Node> pattern_ );
+	TreePtr<Node> GetPattern() const;
+	
+	string GetTrace() const final;
+	
+private:
+	const TreePtr<Node> pattern;
+};
+
+
+class Designation : public Command
+{
+public:	
+	Designation( std::string name_, TreePtr<Node> pattern_ );
+	bool OnParse(VNParse *vn) final;
+
+	string GetTrace() const final;
+
+private:
+	const std::string name;
+	const TreePtr<Node> pattern;
+};
+	
  
 class VNParse	
 {
@@ -38,7 +74,9 @@ public:
 	};	 
 	
 	void OnError();
-	void OnVNScript( Production script_ );
+	void OnVNScript( list<shared_ptr<Command>> commands_ );
+	shared_ptr<Command> OnCommand( shared_ptr<Command> command );
+
 	Production OnEngine( Production stem );
 	Production OnStuff( Production terminus );
 	Production OnDelta( Production through, Production overlay );
@@ -56,9 +94,9 @@ private:
 	unique_ptr<NodeNames> node_names;
 	
 	bool saw_error;
-	TreePtr<Node> script;	
+	TreePtr<Node> pattern;	
+	list<shared_ptr<Command>> commands;
 };
-	
 	
 };
 

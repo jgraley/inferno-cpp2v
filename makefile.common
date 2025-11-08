@@ -72,6 +72,12 @@ IVN_OPTIONS += -Wfatal-errors
 IVN_OPTIONS += -Wall 
 IVN_OPTIONS += -Wextra
 
+# Unused variable warnings are costly to satisfy, and cause excessive misfires 
+# during refactoring. There is also a risk of accumulation of (void)x even 
+# when X is used. Finally, it doesn't seem to always work, creating false sense
+# of security.
+IVN_OPTIONS += -Wno-unused-variable
+
 # Relates to rule-of-n, see #780 to re-instate
 IVN_OPTIONS += -Wdeprecated-copy 
 

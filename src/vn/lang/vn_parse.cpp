@@ -25,6 +25,61 @@ using namespace CPPTree; // TODO should not need
 using namespace VN;
 using namespace reflex;
 
+
+Command::~Command()
+{
+}
+
+
+bool Command::OnParse(VNParse *vn)
+{
+	return true; // By default, keep me
+}
+
+
+PatternCommand::PatternCommand( TreePtr<Node> pattern_ ) :
+	pattern( pattern_ )
+{
+	ASSERT(pattern);
+}
+
+
+TreePtr<Node> PatternCommand::GetPattern() const
+{
+	return pattern;
+}
+
+
+string PatternCommand::GetTrace() const
+{
+	return "PatternCommand:" + Trace(pattern);
+}
+
+
+Designation::Designation( std::string name_, TreePtr<Node> pattern_ ) :
+	name( name_ ),
+	pattern( pattern_ )
+{
+}
+
+
+bool Designation::OnParse(VNParse *vn)
+{
+	// Teeing into parse class during parse so name is available
+	//vn->OnDesignation(name, pattern);
+	FTRACE(name)(" designates ")(pattern)(" TODO\n");
+	
+	return false; // discard
+}
+
+
+string Designation::GetTrace() const
+{
+	return "Designation:" + Trace(name) + "≝" + Trace(pattern);
+}
+
+
+
 VNParse::VNParse() :
 	scanner( make_unique<YY::VNLangScanner>(reflex::Input(), std::cerr) ),
 	parser( make_unique<YY::VNLangParser>(*scanner, this) ),
@@ -48,13 +103,19 @@ TreePtr<Node> VNParse::DoParse(string filepath)
     scanner->filename = filepath;    
     
     saw_error = false;
-    script = nullptr;
+    commands.clear();
     int pr = parser->parse();    
     if( saw_error ) // TODO figure out how to make the parser return a fail code
 		exit(1); // An error was already reported so an assert fail here looks like a knock-on error i.e. a bug
-    ASSERT(script && pr==EXIT_SUCCESS);
+    ASSERT(pr==EXIT_SUCCESS);
     
-    return script;
+    // TODO return the commands for execution somewhere else
+    ASSERT( commands.size()==1 )(commands);
+    auto ec = dynamic_pointer_cast<PatternCommand>(commands.front());
+    ASSERT(ec);
+    ASSERT( ec->GetPattern() );
+    
+    return ec->GetPattern();
 }
 
 
@@ -64,19 +125,17 @@ void VNParse::OnError()
 }
 
 
-void VNParse::OnVNScript( Production script_ )
+void VNParse::OnVNScript( list<shared_ptr<Command>> commands_ )
 {
 	if( saw_error )
 		return;
 		
-	FTRACE("Got ")(script_)("\n");
-	script = script_;
+	commands = commands_;
 }
 
  
 Production VNParse::OnEngine( Production stem )
 {
-	FTRACE("Got engine stem: ")(stem)("\n");
 	auto pure_engine = MakeTreeNode<PureEngine>();
 	pure_engine->stem = stem;
 	return pure_engine;
@@ -183,4 +242,4 @@ Production VNParse::OnSpecificInteger( int value )
     return node;
 }
 
-// TODO parse the pre-restrictions and apply to child in action
+

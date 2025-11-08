@@ -36,19 +36,24 @@ float_num				\d* (\d | \.\d | \d\.) \d* {float_exp_suffix}?
 
 %%
 
-\s          // ignore space
-\"[^"]*\"   	{ return YY::VNLangParser::make_STR(wstr(), location()); }
-{float_num}		{ return YY::VNLangParser::make_NUM(strtod(text(), NULL), location()); }
-{ascii_name}	{ return YY::VNLangParser::make_ASCII_NAME(str(), location()); }
-{unicode_name}	{ return YY::VNLangParser::make_UNICODE_NAME(wstr(), location()); }
-[-+*/=();]  	{ return YY::VNLangParser::symbol_type(chr(), location()); }
-::				{ return YY::VNLangParser::make_SCOPE_RES(location()); };
+\s          	// ignore space
+≝				{ return YY::VNLangParser::make_DEFINE(location()); };
+⨟				{ return YY::VNLangParser::make_VN_SEMI(location()); };
 ꩜				{ return YY::VNLangParser::make_ENGINE(location()); };
 ⩨				{ return YY::VNLangParser::make_STUFF(location()); };
 Δ				{ return YY::VNLangParser::make_DELTA(location()); };
 🡺				{ return YY::VNLangParser::make_DELTA_ARROW(location()); };
 【				{ return YY::VNLangParser::make_OPEN_RESTRICT(location()); };
 】				{ return YY::VNLangParser::make_CLOSE_RESTRICT(location()); };
+
+::				{ return YY::VNLangParser::make_SCOPE_RES(location()); };
+[-+*/=();]  	{ return YY::VNLangParser::symbol_type(chr(), location()); }
+
+\"[^"]*\"   	{ return YY::VNLangParser::make_STR(wstr(), location()); }
+{float_num}		{ return YY::VNLangParser::make_NUM(strtod(text(), NULL), location()); }
+{ascii_name}	{ return YY::VNLangParser::make_ASCII_NAME(str(), location()); }
+{unicode_name}	{ return YY::VNLangParser::make_UNICODE_NAME(wstr(), location()); }
+
 <<EOF>>     	{ return YY::VNLangParser::make_EOF(location()); }
 
 %%

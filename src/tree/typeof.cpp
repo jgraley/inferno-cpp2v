@@ -220,9 +220,6 @@ AugTreePtr<CPPTree::Type> TypeOf::GetRegularOperator( const TransKit &kit, AugTr
 #define POSTFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) \
     else if( AugTreePtr<NODE>::DynamicCast(op) ) \
         return CAT;
-#define OTHER(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) \
-    else if( AugTreePtr<NODE>::DynamicCast(op) ) \
-        return CAT;
 #include "tree/operator_data.inc"
     else
     {
