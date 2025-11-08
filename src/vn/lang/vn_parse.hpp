@@ -22,7 +22,22 @@ class NodeNames;
 
 namespace VN 
 {
-typedef TreePtr<Node> Production;	
+	
+typedef TreePtr<Node> Production;
+	
+struct Item
+{
+	list<TreePtr<Node>> nodes;
+	any loc;
+};
+
+struct Itemisation
+{
+	list<Item> items;
+	any loc;
+};
+
+
 class Command;
 
 class VNParse	
@@ -39,7 +54,7 @@ public:
 
 	Production OnStuff( Production terminus );
 	Production OnDelta( Production through, Production overlay );
-	Production OnBuiltIn( list<string> builtin_type, any builtin_loc, list<list<Production>> itemisation );
+	Production OnBuiltIn( list<string> builtin_type, any builtin_loc, Itemisation itemisation );
 	Production OnName( wstring name, any name_loc );
 	Production OnEmbeddedCommands( list<shared_ptr<Command>> commands );
 	Production OnRestrict( list<string> res_type, any res_loc, Production target, any target_loc );

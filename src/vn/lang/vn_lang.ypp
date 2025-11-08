@@ -72,9 +72,9 @@
 %type <VN::Command::List>						commands
 %type <std::shared_ptr<VN::Command>>			command
 %type <std::shared_ptr<VN::Command>>			weak_command
-%type <list<list<VN::Production>>>				itemisation
-%type <list<list<VN::Production>>>				items
-%type <list<VN::Production>>					item
+%type <VN::Itemisation>				itemisation
+%type <VN::Itemisation>				items
+%type <VN::Item>					item
 
 %%
 
@@ -110,13 +110,13 @@ pattern	: pattern '+' pattern      { $$ = $1; }
 		;
 
 itemisation : '(' items ')'    							{ $$ = $2; }
-			| '(' ')'									{ $$ = list<list<VN::Production>>{}; }
+			| '(' ')'									{ $$ = VN::Itemisation{}; $$.loc = @$; }
   
-items     	: items VN_SEMI item   						{ $$ = $1; $$.push_back($3); }
-			| item										{ $$.push_back($1); }
+items     	: items VN_SEMI item   						{ $$ = $1; $$.items.push_back($3); $$.loc = @$; }
+			| item										{ $$.items.push_back($1); $$.loc = @$; }
 
-item		: item ',' pattern    						{ $$ = $1; $$.push_back($3); }
-			| pattern									{ $$.push_back($1); }
+item		: item ',' pattern    						{ $$ = $1; $$.nodes.push_back($3); $$.loc = @$; }
+			| pattern									{ $$.nodes.push_back($1); $$.loc = @$; }
 
 vn_name			: UNICODE_NAME    						{ $$ = $1; }
 				| ASCII_NAME							{ $$ = std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes($1); }     
