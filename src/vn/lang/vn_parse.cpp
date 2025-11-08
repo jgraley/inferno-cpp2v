@@ -99,6 +99,68 @@ Production VNParse::OnDelta( Production through, Production overlay )
 }
 
 
+static TreePtr<Node> MakeStandardAgent(NodeEnum ne)
+{
+	switch(ne)
+	{
+#define NODE(NS, NAME) \
+	case NodeEnum::NS##_##NAME: \
+		return MakeTreeNode<StandardAgentWrapper<NS::NAME>>(); 
+#include "tree/node_names.inc"			
+#define PREFIX(TOK, TEXT, NAME, BASE, CAT, PROD, ASSOC) NODE(CPPTree, NAME)
+#define POSTFIX(TOK, TEXT, NAME, BASE, CAT, PROD, ASSOC) NODE(CPPTree, NAME)
+#define INFIX(TOK, TEXT, NAME, BASE, CAT, PROD, ASSOC) NODE(CPPTree, NAME)
+#include "tree/operator_data.inc"
+#undef NODE
+	}
+	
+	// By design we should have a case for every value of the node enum
+	ASSERTFAIL("Invalid value for node enum"); 
+}
+
+
+Production VNParse::OnBuiltIn( list<string> builtin_type, any builtin_loc, list<list<Production>> src_itemisation )
+{
+	if( !node_names->GetNameToEnumMap().count(builtin_type) )
+	{
+		parser->error( any_cast<YY::VNLangParser::location_type>(builtin_loc), 
+		               "Built-in type " + Join(builtin_type, "::") + " unknown.");		
+		return MakeTreeNode<Node>();
+	}
+	NodeEnum ne = node_names->GetNameToEnumMap().at(builtin_type);		
+	// The new node is the destiation
+	TreePtr<Node> dest = MakeStandardAgent(ne);
+	
+	// The detination's itemisation "pulls" items from the source and we require a match (for now). 
+	// Then for containers, the source will "push" as many elements as it has, or just one
+	// for singular items.
+	list<list<TreePtr<Node>>>::const_iterator src_it = src_itemisation.begin();
+    vector< Itemiser::Element * > dest_items = dest->Itemise();
+    for( Itemiser::Element *dest_item : dest_items )
+    {
+		ASSERT( src_it != src_itemisation.end() )("Too few items in source"); // TODO semantic error TODO or switch to wild cards?
+		const list<TreePtr<Node>> &src_item = *src_it;
+        if( SequenceInterface *dest_seq = dynamic_cast<SequenceInterface *>(dest_item) ) // TODO could roll together as Container?
+            for( TreePtr<Node> src : src_item )
+				dest_seq->insert( src );				
+        else if( CollectionInterface *dest_col = dynamic_cast<CollectionInterface *>(dest_item) )
+            for( TreePtr<Node> src : src_item )
+				dest_col->insert( src );	
+        else if( TreePtrInterface *dest_sing = dynamic_cast<TreePtrInterface *>(dest_item) )
+        {
+			ASSERT( src_item.size() == 1 )("Singular item requires exactly one sub-pattern"); // TODO semantic error TODO or switch to wild cards? 
+            *dest_sing = src_item.front();
+		}
+        else
+            ASSERTFAIL("got something from itemise that isnt a Sequence, Collection or a singular TreePtr");
+        src_it++;
+    }
+	ASSERT( src_it == src_itemisation.end() )("Too many items in source"); // TODO semantic error
+
+	return dest;
+}
+
+
 Production VNParse::OnRestrict( list<string> res_type, any res_loc, Production target, any target_loc )
 {
 	if( !node_names->GetNameToEnumMap().count(res_type) )

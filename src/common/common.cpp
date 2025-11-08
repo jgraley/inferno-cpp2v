@@ -3,8 +3,8 @@
 #include "standard.hpp"
 #include "trace.hpp"
 
-#include <string>
-
+#include <string>  
+  
 string GetInnermostTemplateParam( string s )
 {
     while(true)

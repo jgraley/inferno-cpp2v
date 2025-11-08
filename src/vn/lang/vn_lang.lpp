@@ -43,11 +43,12 @@ float_num				\d* (\d | \.\d | \d\.) \d* {float_exp_suffix}?
 ⩨				{ return YY::VNLangParser::make_STUFF(location()); };
 Δ				{ return YY::VNLangParser::make_DELTA(location()); };
 🡺				{ return YY::VNLangParser::make_DELTA_ARROW(location()); };
+⯁				{ return YY::VNLangParser::make_BUILT_IN(location()); };
 【				{ return YY::VNLangParser::make_OPEN_RESTRICT(location()); };
 】				{ return YY::VNLangParser::make_CLOSE_RESTRICT(location()); };
 
 ::				{ return YY::VNLangParser::make_SCOPE_RES(location()); };
-[-+*/=();]  	{ return YY::VNLangParser::symbol_type(chr(), location()); }
+[-+*/=();,]  	{ return YY::VNLangParser::symbol_type(chr(), location()); }
 
 \"[^"]*\"   	{ return YY::VNLangParser::make_STR(wstr(), location()); }
 {float_num}		{ return YY::VNLangParser::make_NUM(strtod(text(), NULL), location()); }

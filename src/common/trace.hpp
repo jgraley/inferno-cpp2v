@@ -42,6 +42,7 @@ public:
     
 string Trace(const Traceable &t); 
 string Trace(string s); 
+string Trace(wstring s); 
 string Trace(const StringNoQuotes &snq); 
 string Trace(const KeyValuePair &kvp); 
 string Trace(bool b); 

@@ -51,6 +51,7 @@
 %token STUFF;
 %token DELTA;
 %token DELTA_ARROW;
+%token BUILT_IN;
 %token OPEN_RESTRICT;
 %token CLOSE_RESTRICT;
 
@@ -70,6 +71,9 @@
 %type <std::list<std::string>> 					scoped_name
 %type <VN::Command::List>						commands
 %type <std::shared_ptr<VN::Command>>			command
+%type <list<list<VN::Production>>>				itemisation
+%type <list<list<VN::Production>>>				items
+%type <list<VN::Production>>					item
 
 %%
 
@@ -85,9 +89,9 @@ end_cmd		: VN_SEMI									{}
 			| EOF										{}
 
 // A pattern terminated by ⨟ or end-of-file is a command. 
-command 	: ASCII_NAME DEFINE pattern end_cmd			{ $$ = std::make_shared<VN::Designation>($1, $3); }
+command 	: vn_name DEFINE pattern end_cmd			{ $$ = std::make_shared<VN::Designation>($1, $3); }
 			| pattern end_cmd							{ $$ = std::make_shared<VN::PatternCommand>($1); }
-     
+             
 pattern	: pattern '+' pattern      { $$ = $1; }
 		| pattern '-' pattern      { $$ = $1; }
 		| pattern '*' pattern      { $$ = $1; }
@@ -95,13 +99,23 @@ pattern	: pattern '+' pattern      { $$ = $1; }
 		| ENGINE %prec PREFIX pattern 		   			  	{ $$ = vn->OnEngine($2); }
 		| STUFF %prec PREFIX pattern 		     		 	{ $$ = vn->OnStuff($2); }
 		| DELTA pattern DELTA_ARROW pattern   		   		{ $$ = vn->OnDelta($2, $4); }
+		| BUILT_IN scoped_name itemisation					{ $$ = vn->OnBuiltIn($2, @2, $3); }
 		| '-' %prec PREFIX pattern                 			{ $$ = vn->OnPrefixOperator("-", $2); }
 		| '(' pattern ')'                          			{ $$ = $2; }
 		| OPEN_RESTRICT scoped_name CLOSE_RESTRICT pattern 	{ $$ = vn->OnRestrict($2, @2, $4, @4); }
 		| NUM       						      			{ $$ = vn->OnSpecificInteger($1); }
 		;
 
-vn_name			: UNICODE_NAME    						{ $$ = $1 }
+itemisation : '(' items ')'    							{ $$ = $2; }
+			| '(' ')'									{ $$ = list<list<VN::Production>>{}; }
+  
+items     	: items VN_SEMI item   						{ $$ = $1; $$.push_back($3); }
+			| item										{ $$.push_back($1); }
+
+item		: item ',' pattern    						{ $$ = $1; $$.push_back($3); }
+			| pattern									{ $$.push_back($1); }
+
+vn_name			: UNICODE_NAME    						{ $$ = $1; }
 				| ASCII_NAME							{ $$ = std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes($1); }     
      
 scoped_name		: ASCII_NAME SCOPE_RES scoped_name		{ $$ = $3; $$.push_front($1); }

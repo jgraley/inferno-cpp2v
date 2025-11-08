@@ -49,10 +49,14 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern )
 	for( UniquifyNames::NodeAndNamePair p : unique_coupling_names )
 		s += p.second + " ≝ " + RenderConcreteIntoProduction( p.first, Syntax::Production::VN_DEFINE ) + "⨟\n";
 
-	if( pattern->GetSearchComparePattern() == pattern->GetReplacePattern() )
-		s += "꩜" + kit.render( pattern->GetSearchComparePattern(), Syntax::Production::PREFIX );
-	else
-        ASSERTFAIL();
+	ASSERT( pattern->GetSearchComparePattern() == pattern->GetReplacePattern() || !pattern->GetReplacePattern() )
+	   	  (pattern->GetSearchComparePattern())
+	   	  (" should equal ")
+	   	  (pattern->GetReplacePattern())
+	   	  (" or be NULL");
+	   	  
+	s += "꩜" + kit.render( pattern->GetSearchComparePattern(), Syntax::Production::PREFIX );
+
             
     indenter.AddLinesFromString(s);
     indenter.DoIndent();

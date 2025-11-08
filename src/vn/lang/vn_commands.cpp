@@ -78,7 +78,7 @@ string PatternCommand::GetTrace() const
 
 //////////////////////////// Designation ///////////////////////////////
 
-Designation::Designation( std::string name_, TreePtr<Node> pattern_ ) :
+Designation::Designation( std::wstring name_, TreePtr<Node> pattern_ ) :
 	name( name_ ),
 	pattern( pattern_ )
 {

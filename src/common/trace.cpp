@@ -14,6 +14,8 @@
 #include <sstream>
 #include <algorithm>
 #include <cinttypes>
+#include <locale>  
+#include <codecvt>
 
 using namespace std;
 
@@ -28,6 +30,12 @@ string Trace(const Traceable &t)
 string Trace(string s)
 {
     return "\""+s+"\""; // quoted so we can spot an empty string TODO un-escape
+}
+
+
+string Trace(wstring s)
+{
+    return "w" + Trace(wstring_convert<codecvt_utf8<wchar_t>>().to_bytes(s)); // quoted so we can spot an empty string TODO un-escape
 }
 
 

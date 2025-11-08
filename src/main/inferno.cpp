@@ -431,10 +431,17 @@ Inferno::Plan::Plan(Inferno *algo_) :
                                    ReadArgs::pattern_graph_index != -1;
     bool generate_pattern_renders = !ReadArgs::pattern_render_name.empty() || 
                                     ReadArgs::pattern_render_index != -1;
+    bool generate_pattern_renders_before_ptrans = generate_pattern_renders &&
+                                                  !ReadArgs::vn_path.empty();
+    bool generate_pattern_renders_after_ptrans = generate_pattern_renders &&
+                                                 ReadArgs::vn_path.empty();
                                    
     if( generate_pattern_graphs && !ReadArgs::graph_trace )
         stages.push_back( stage_pattern_graphs );    
                 
+    if( generate_pattern_renders_before_ptrans )
+        stages.push_back( stage_pattern_renders );
+				
     stages.push_back( stage_pattern_transformation );         
     if( ShouldIQuitAfter(stage_pattern_transformation.progress_stage) )
         return;
@@ -451,8 +458,7 @@ Inferno::Plan::Plan(Inferno *algo_) :
 			if( generate_pattern_graphs && ReadArgs::graph_trace )
 				stages.push_back( stage_pattern_graphs );
 				
-			// VN language always rendered after pattern transformation
-			if( generate_pattern_renders )
+			if( generate_pattern_renders_after_ptrans )
 				stages.push_back( stage_pattern_renders );
         }
          

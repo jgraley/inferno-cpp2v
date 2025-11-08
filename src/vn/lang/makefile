@@ -44,7 +44,7 @@ $(VNL_LYPP_MODULES:%=build/%.ypp.o): build/%.ypp.o : build/%.ypp.cpp build/%.ypp
 	g++ $< -c $(VNL_CPP_OPTIONS) -o $@ 
 
 
-$(VNL_CPP_MODULES:%=build/%.o) : build/%.o : %.cpp $(VNL_DEPS)
+$(VNL_CPP_MODULES:%=build/%.o) : build/%.o : %.cpp $(VNL_LYPP_MODULES:%=build/%.ypp.hpp) $(VNL_LYPP_MODULES:%=build/%.lpp.hpp) $(VNL_LYPP_MODULES:%=build/%.location.hpp) $(VNL_DEPS)
 	@mkdir -p $(dir $@)
 	$(ICC) $< -c $(VNL_CPP_OPTIONS) -o $@
 	

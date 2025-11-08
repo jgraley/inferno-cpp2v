@@ -40,7 +40,7 @@ public:
 	Production OnEngine( Production stem );
 	Production OnStuff( Production terminus );
 	Production OnDelta( Production through, Production overlay );
-	Production OnRestrict( any loc, wstring type, Production target ) {(void)loc; (void)type;return target;};
+	Production OnBuiltIn( list<string> builtin_type, any builtin_loc, list<list<Production>> itemisation );
 	Production OnRestrict( list<string> res_type, any res_loc, Production target, any target_loc );
 	
 	Production OnPrefixOperator( string tok, Production operand );

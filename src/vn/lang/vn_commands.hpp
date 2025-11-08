@@ -64,13 +64,13 @@ private:
 class Designation : public Command
 {
 public:	
-	Designation( std::string name_, TreePtr<Node> pattern_ );
+	Designation( std::wstring name_, TreePtr<Node> pattern_ );
 	bool OnParse(VNParse *vn) final;
 
 	string GetTrace() const final;
 
 private:
-	const std::string name;
+	const std::wstring name;
 	const TreePtr<Node> pattern;
 };	 	
 	 	

@@ -107,7 +107,10 @@ vector<bool> AutolocatingAgent::AreChildrenFixedType() const
 	shared_ptr<PatternQuery> pq = GetPatternQuery();   
     for( PatternLink child_link : pq->GetNormalLinks() )
     {
-		Agent *child_agent = child_link.GetChildAgent();
+		TreePtr<Node> child_node = child_link.GetPatternTreePtr();
+		ASSERT( child_node );
+		Agent *child_agent = Agent::TryAsAgent(child_node);
+		ASSERT( child_agent )(child_node)(" should be an agent");
 		vb.push_back( child_agent->IsSelfOrChildrenFixedType() );
 	}
 	return vb;
