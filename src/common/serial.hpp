@@ -40,6 +40,7 @@ public:
     
 protected:
     SerialNumber();
+    ~SerialNumber();
     SerialNumber( const SerialNumber &other );
     SerialNumber &operator=( const SerialNumber &other );
 
@@ -62,11 +63,12 @@ private:
     SNType serial;
     Progress progress;
 
-    static struct Cache
+    struct Cache
     {
-        ~Cache();
         map<Progress, SNType> main_serial_by_progress;        
-    } cache;
+    };
+    static Cache *cache; 
+    static unsigned cache_refs; 
     
     mutable shared_ptr<Hook> hook;
 };

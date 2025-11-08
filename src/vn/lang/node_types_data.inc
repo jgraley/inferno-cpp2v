@@ -85,7 +85,7 @@ NODE(CPPTree, Labeley)
 NODE(CPPTree, TypeDeclaration)
 NODE(CPPTree, Typedef)
 NODE(CPPTree, Record)
-NODE(CPPTree, Union
+NODE(CPPTree, Union)
 NODE(CPPTree, Enum)
 NODE(CPPTree, InheritanceRecord)
 NODE(CPPTree, Struct)

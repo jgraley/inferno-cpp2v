@@ -12,15 +12,25 @@ using namespace CPPTree;
 #include <list>
 #include <string>
 
-static const NameToNodeMapType name_to_node_map =
-{
-#define NODE(NS, NAME) { {#NS, #NAME}, NodeEnum::NS##_##NAME },
-#include "node_types_data.inc"	
-};
- 
 const NameToNodeMapType &NodeData::GetNameToNodeMap()
 {
+	if( name_to_node_map.empty() )
+		InitialiseMap();
+	
 	return name_to_node_map;
 }
 
 
+void NodeData::InitialiseMap()
+{
+	name_to_node_map =
+	{
+#define NODE(NS, NAME) { {#NS, #NAME}, NodeEnum::NS##_##NAME },
+#include "node_types_data.inc"	
+	};
+	
+	ASSERT( !name_to_node_map.empty() );
+}
+
+
+NameToNodeMapType NodeData::name_to_node_map;

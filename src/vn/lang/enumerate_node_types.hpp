@@ -6,8 +6,6 @@
 #include "helpers/walk.hpp"
 #include "uniquify_identifiers.hpp"
 
-#ifndef ENUMERATE_NODES_IN_SORT_DECLS
-
 enum class NodeEnum
 {
 #define NODE(NS, NAME) NS##_##NAME,
@@ -24,8 +22,10 @@ class NodeData
 {
 public:	
 	const NameToNodeMapType &GetNameToNodeMap();
+	
+private:
+	static void InitialiseMap();
+	static NameToNodeMapType name_to_node_map;
 };
-
-#endif
 
 #endif

@@ -12,13 +12,34 @@
 //////////////////////////// SerialNumber ///////////////////////////////
 
 SerialNumber::SerialNumber()
-{    
-    progress = Progress::GetCurrent();    
-    serial = cache.main_serial_by_progress[progress];
+{    	
+	// Some clients are static, and we don't want to depend on init order.
+	// So, we manage the cache (with refcounting) explicitly on top of 
+	// static members that are compatible with system init-to-zero.
+    if( !cache )
+		cache = new Cache;
+	cache_refs++;
+	//FTRACE("Cons: cache %p refs %u\n", cache, cache_refs);
+	SNType &sr = cache->main_serial_by_progress[progress];
+	
+    progress = Progress::GetCurrent();   
+    serial = sr;
     
     // produce a new construction serial number
-    cache.main_serial_by_progress[progress]++;      
+    sr++;      
 }    
+
+
+SerialNumber::~SerialNumber()
+{
+	//FTRACE("Des: cache %p refs %u\n", cache, cache_refs);
+	ASSERT( cache );
+	if( --cache_refs==0 )
+	{
+		delete cache;
+		cache = nullptr;
+	}
+}
 
 
 SerialNumber::SerialNumber( const SerialNumber & ) :
@@ -73,14 +94,9 @@ shared_ptr<SerialNumber::Hook> SerialNumber::GetHook() const
     return hook;
 }
 
-
-SerialNumber::Cache::~Cache()
-{
-    //FTRACE(location_readback)("\n");   
-}
-
-
-SerialNumber::Cache SerialNumber::cache;
+// No initialsiers for these two: rely on system zero-init of statics
+SerialNumber::Cache *SerialNumber::cache;
+unsigned SerialNumber::cache_refs;
 
 //////////////////////////// SatelliteSerial ///////////////////////////////
 

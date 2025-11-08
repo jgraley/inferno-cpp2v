@@ -58,9 +58,11 @@ ALL_MODULES = $(COMMON_MODULES) $(NODE_MODULES) $(HELPERS_MODULES) $(TREE_MODULE
 # include dependencies.
 -include $(ALL_MODULES:%=build/%.d)
 
-build/inferno.a : $(ALL_MODULES:%=build/%.o)
+build/inferno.a : $(ALL_MODULES:%=build/%.o) build/src/lang.a
 	@mkdir -p build$(NODE)/type_db 
-	$(AR) -r build/inferno.a $(ALL_MODULES:%=build/%.o)
+	$(AR) -r build/src.a $(ALL_MODULES:%=build/%.o)
+	# Merge .a files created in subdirectories, which seems to require a command script
+	$(AR) -M <src/inferno.mri 
 
 $(COMMON_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
 	@mkdir -p $(dir $@)

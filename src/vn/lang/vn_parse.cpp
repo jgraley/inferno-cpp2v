@@ -111,7 +111,7 @@ Production VNParse::OnRestrict( list<string> res_type, any res_loc, Production t
 		               "Restriction target " + agent->GetTypeName() + " cannot be pre-restricted.");		
 		return target;
 	}
-	foo();
+ 
 	if( !NodeData().GetNameToNodeMap().count(res_type) )
 	{
 		parser->error( any_cast<YY::VNLangParser::location_type>(res_loc), 
@@ -126,10 +126,10 @@ Production VNParse::OnRestrict( list<string> res_type, any res_loc, Production t
 	case NodeEnum::NS##_##NAME: \
 		pspecial->pre_restriction_archetype_node = shared_ptr<Node>( new NS::NAME ); \
 		pspecial->pre_restriction_archetype_ptr = make_shared<TreePtr<NS::NAME>>(); \
-		break;
+		break; 
 #include "node_types_data.inc"			
 	}
-	
+	 
 	return target;
 }
 
