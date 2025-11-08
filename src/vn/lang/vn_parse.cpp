@@ -16,6 +16,7 @@
 #include "vn_lang.location.hpp"
 #include "vn/agents/all.hpp"
 #include "tree/node_names.hpp"
+#include "vn_commands.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -24,61 +25,6 @@
 using namespace CPPTree; // TODO should not need
 using namespace VN;
 using namespace reflex;
-
-
-Command::~Command()
-{
-}
-
-
-bool Command::OnParse(VNParse *vn)
-{
-	return true; // By default, keep me
-}
-
-
-PatternCommand::PatternCommand( TreePtr<Node> pattern_ ) :
-	pattern( pattern_ )
-{
-	ASSERT(pattern);
-}
-
-
-TreePtr<Node> PatternCommand::GetPattern() const
-{
-	return pattern;
-}
-
-
-string PatternCommand::GetTrace() const
-{
-	return "PatternCommand:" + Trace(pattern);
-}
-
-
-Designation::Designation( std::string name_, TreePtr<Node> pattern_ ) :
-	name( name_ ),
-	pattern( pattern_ )
-{
-}
-
-
-bool Designation::OnParse(VNParse *vn)
-{
-	// Teeing into parse class during parse so name is available
-	//vn->OnDesignation(name, pattern);
-	FTRACE(name)(" designates ")(pattern)(" TODO\n");
-	
-	return false; // discard
-}
-
-
-string Designation::GetTrace() const
-{
-	return "Designation:" + Trace(name) + "≝" + Trace(pattern);
-}
-
-
 
 VNParse::VNParse() :
 	scanner( make_unique<YY::VNLangScanner>(reflex::Input(), std::cerr) ),
@@ -93,7 +39,7 @@ VNParse::~VNParse()
 }
 
 
-TreePtr<Node> VNParse::DoParse(string filepath)
+Command::List VNParse::DoParse(string filepath)
 {
     FILE *file = fopen(filepath.c_str(), "r");
 
@@ -107,15 +53,9 @@ TreePtr<Node> VNParse::DoParse(string filepath)
     int pr = parser->parse();    
     if( saw_error ) // TODO figure out how to make the parser return a fail code
 		exit(1); // An error was already reported so an assert fail here looks like a knock-on error i.e. a bug
-    ASSERT(pr==EXIT_SUCCESS);
+    ASSERT(pr==EXIT_SUCCESS);    
     
-    // TODO return the commands for execution somewhere else
-    ASSERT( commands.size()==1 )(commands);
-    auto ec = dynamic_pointer_cast<PatternCommand>(commands.front());
-    ASSERT(ec);
-    ASSERT( ec->GetPattern() );
-    
-    return ec->GetPattern();
+    return commands;
 }
 
 
@@ -125,7 +65,7 @@ void VNParse::OnError()
 }
 
 
-void VNParse::OnVNScript( list<shared_ptr<Command>> commands_ )
+void VNParse::OnVNScript( Command::List commands_ )
 {
 	if( saw_error )
 		return;
@@ -136,7 +76,7 @@ void VNParse::OnVNScript( list<shared_ptr<Command>> commands_ )
  
 Production VNParse::OnEngine( Production stem )
 {
-	auto pure_engine = MakeTreeNode<PureEngine>();
+	auto pure_engine = MakeTreeNode<PatternCommand::PureEngine>();
 	pure_engine->stem = stem;
 	return pure_engine;
 }

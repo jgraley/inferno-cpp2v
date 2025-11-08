@@ -663,11 +663,10 @@ int main( int argc, char *argv[] )
     {
 		auto step = make_shared<VNStep>();
 		VNParse vn_parser;
-		TreePtr<Node> script = vn_parser.DoParse( ReadArgs::vn_path );
-		auto pure_engine = TreePtr<VN::VNParse::PureEngine>::DynamicCast(script);
-		ASSERT(pure_engine)( "Only a single pure engine supported rn, saw: ")(script)(" lol\n");
-		step->Configure(VNStep::COMPARE_REPLACE, pure_engine->stem);
-		sequence.push_back( step );
+		ScriptEngine script_engine;
+		VN::Command::List script = vn_parser.DoParse( ReadArgs::vn_path );
+		VN::ScriptKit script_kit{ &sequence };
+		script_engine.DoExecute( script_kit, script );
 	}
 	else
         BuildDefaultSequence( &sequence );    

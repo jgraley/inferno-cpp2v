@@ -18,6 +18,7 @@
     class VNLangScanner;
   };
   #include "vn_parse.hpp"
+  #include "vn_commands.hpp"
 }
 
 %code { 
@@ -67,7 +68,7 @@
 %type <VN::Production> 							pattern
 %type <std::wstring> 							vn_name
 %type <std::list<std::string>> 					scoped_name
-%type <std::list<std::shared_ptr<VN::Command>>>	commands
+%type <VN::Command::List>						commands
 %type <std::shared_ptr<VN::Command>>			command
 
 %%
@@ -80,8 +81,8 @@ commands 	: commands command 							{ $$ = $1; if( $2->OnParse(vn) ) $$.push_bac
 			| command									{ if( $1->OnParse(vn) ) $$.push_back($1); }
 
 // VN script does not require termination of last command
-end_cmd		: VN_SEMI								{}
-			| EOF									{}
+end_cmd		: VN_SEMI									{}
+			| EOF										{}
 
 // A pattern terminated by ⨟ or end-of-file is a command. 
 command 	: ASCII_NAME DEFINE pattern end_cmd			{ $$ = std::make_shared<VN::Designation>($1, $3); }

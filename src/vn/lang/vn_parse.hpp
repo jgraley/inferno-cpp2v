@@ -8,6 +8,7 @@
 #include "helpers/simple_compare.hpp"
 #include "tree/misc.hpp"
 #include "indenter.hpp"
+#include "vn_commands.hpp"
 #include <any> // to dep-break the generated headers
 
 namespace YY
@@ -21,57 +22,16 @@ class NodeNames;
 
 namespace VN 
 {
-class VNParse;
 typedef TreePtr<Node> Production;	
+class Command;
 
-class Command : public Traceable
-{
-public:	
-    ~Command();
-	virtual bool OnParse(VNParse *vn);
-};
-
-
-class PatternCommand : public Command
-{
-public:	
-	PatternCommand( TreePtr<Node> pattern_ );
-	TreePtr<Node> GetPattern() const;
-	
-	string GetTrace() const final;
-	
-private:
-	const TreePtr<Node> pattern;
-};
-
-
-class Designation : public Command
-{
-public:	
-	Designation( std::string name_, TreePtr<Node> pattern_ );
-	bool OnParse(VNParse *vn) final;
-
-	string GetTrace() const final;
-
-private:
-	const std::string name;
-	const TreePtr<Node> pattern;
-};
-	
- 
 class VNParse	
 {
 public:
 	VNParse();
 	~VNParse();
 	
-	TreePtr<Node> DoParse(string filepath);
-	
-	struct PureEngine : Node
-	{
-		NODE_FUNCTIONS_FINAL
-		TreePtr<Node> stem;
-	};	 
+	Command::List DoParse(string filepath);	 
 	
 	void OnError();
 	void OnVNScript( list<shared_ptr<Command>> commands_ );
@@ -94,8 +54,7 @@ private:
 	unique_ptr<NodeNames> node_names;
 	
 	bool saw_error;
-	TreePtr<Node> pattern;	
-	list<shared_ptr<Command>> commands;
+	Command::List commands;
 };
 	
 };
