@@ -29,7 +29,7 @@ public:
     }
     
     EmbeddedSCRAgent();
-    EmbeddedSCRAgent( TreePtr<Node> sp, TreePtr<Node> rp, bool is_search );
+    EmbeddedSCRAgent( TreePtr<Node> sp, TreePtr<Node> rp, bool is_search = false );
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;              
     virtual void MaybeChildrenPlanOverlay( SCREngine *acting_engine,
                                            PatternLink me_plink, 

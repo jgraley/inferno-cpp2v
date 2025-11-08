@@ -28,7 +28,14 @@ public:
 	typedef std::list<shared_ptr<Command>> List; 
 
     ~Command();
-	virtual bool OnParse( VNParse *vn ); // true to keep for execution, false to discard
+    
+    // Called as soon as node is seen, so that parsing context can be updated
+	virtual bool OnParse( VNParse *vn ); // true to keep for decay/execution, false to discard
+	
+	// Called on a sequence of commands when usage dictates it should become a sub-pattern 
+	virtual TreePtr<Node> Decay( TreePtr<Node> node, VNParse *vn ); // return NULL if cannot decay 
+	
+	// Called on a sequence of commands when usage dictates it should be a script
 	virtual void Execute( const ScriptKit &kit ) const;
 };
 
@@ -40,17 +47,27 @@ public:
 };
 
 
+class EngineCommand : public Command
+{
+public:	
+	EngineCommand( TreePtr<Node> pattern_ );
+	TreePtr<Node> Decay( TreePtr<Node> node, VNParse *vn ) final; 
+	void Execute( const ScriptKit &kit ) const final;
+	
+	TreePtr<Node> GetPattern() const;
+	
+	string GetTrace() const final;
+	
+private:
+	const TreePtr<Node> stem;
+};
+
+
 class PatternCommand : public Command
 {
 public:	
-	struct PureEngine : Node
-	{
-		NODE_FUNCTIONS_FINAL
-		TreePtr<Node> stem;
-	};
-	
 	PatternCommand( TreePtr<Node> pattern_ );
-	void Execute( const ScriptKit &kit ) const final;
+	TreePtr<Node> Decay( TreePtr<Node> node, VNParse *vn ) final; 
 	
 	TreePtr<Node> GetPattern() const;
 	

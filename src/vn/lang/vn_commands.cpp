@@ -11,6 +11,7 @@
 #include "tree/node_names.hpp"
 #include "vn_step.hpp"
 #include "vn_parse.hpp"
+#include "vn/agents/embedded_scr_agent.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -32,9 +33,16 @@ bool Command::OnParse(VNParse *vn)
 	return true; // By default, keep me
 }
 
+
+TreePtr<Node> Command::Decay( TreePtr<Node> node, VNParse *vn )
+{
+	return nullptr; // by default, I can't decay
+}
+
+
 void Command::Execute(const ScriptKit &kit) const
 {
-	ASSERTFAIL("Commands should either be discarded by OnParse() returning false, or implement Execute()")
+	ASSERTFAIL("Commands should either be discarded by OnParse() returning false, or implement Execute()");
 }
 
 //////////////////////////// ScriptEngine ///////////////////////////////
@@ -47,6 +55,43 @@ void ScriptEngine::DoExecute( const ScriptKit &kit, Command::List script )
 	}
 }
 
+//////////////////////////// EngineCommand ///////////////////////////////
+
+EngineCommand::EngineCommand( TreePtr<Node> stem_ ) :
+	stem( stem_ )
+{
+	ASSERT(stem);
+}
+
+
+TreePtr<Node> EngineCommand::Decay( TreePtr<Node> node, VNParse *vn )
+{
+	ASSERT( node )("Through pattern not specified before embedded engine");
+	auto embedded = MakeTreeNode<EmbeddedSCRAgent>(stem, stem);			
+	embedded->through = node;
+	return embedded;	
+}
+
+
+void EngineCommand::Execute(const ScriptKit &kit) const
+{
+	auto step = make_shared<VNStep>();
+	step->Configure(VNStep::COMPARE_REPLACE, stem);
+	kit.step_sequence->push_back( step );
+}
+
+
+TreePtr<Node> EngineCommand::GetPattern() const // TODO drop?
+{
+	return stem;
+}
+
+
+string EngineCommand::GetTrace() const
+{
+	return "EngineCommand stem: " + stem.GetTrace();
+}
+
 //////////////////////////// PatternCommand ///////////////////////////////
 
 PatternCommand::PatternCommand( TreePtr<Node> pattern_ ) :
@@ -56,13 +101,10 @@ PatternCommand::PatternCommand( TreePtr<Node> pattern_ ) :
 }
 
 
-void PatternCommand::Execute(const ScriptKit &kit) const
+TreePtr<Node> PatternCommand::Decay( TreePtr<Node> node, VNParse *vn )
 {
-	auto step = make_shared<VNStep>();
-	auto pure_engine = TreePtr<PureEngine>::DynamicCast(pattern);
-	ASSERT(pure_engine)( "Only a single pure engine supported rn, saw: ")(pattern)(" lol TODO\n");
-	step->Configure(VNStep::COMPARE_REPLACE, pure_engine->stem);
-	kit.step_sequence->push_back( step );
+	ASSERT( !node )("Unexpected extra pattern " + pattern.GetTrace() + " in command production");
+	return pattern; 
 }
 
 
@@ -74,7 +116,7 @@ TreePtr<Node> PatternCommand::GetPattern() const
 
 string PatternCommand::GetTrace() const
 {
-	return "PatternCommand:" + Trace(pattern);
+	return "PatternCommand: " + Trace(pattern);
 }
 
 //////////////////////////// Designation ///////////////////////////////
@@ -96,5 +138,5 @@ bool Designation::OnParse(VNParse *vn)
 
 string Designation::GetTrace() const
 {
-	return "Designation:" + Trace(name) + "≝" + Trace(pattern);
+	return "Designation: " + Trace(name) + "≝" + Trace(pattern);
 }

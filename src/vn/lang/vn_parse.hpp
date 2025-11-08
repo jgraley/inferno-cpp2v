@@ -37,11 +37,11 @@ public:
 	void OnVNScript( list<shared_ptr<Command>> commands_ );
 	shared_ptr<Command> OnCommand( shared_ptr<Command> command );
 
-	Production OnEngine( Production stem );
 	Production OnStuff( Production terminus );
 	Production OnDelta( Production through, Production overlay );
 	Production OnBuiltIn( list<string> builtin_type, any builtin_loc, list<list<Production>> itemisation );
 	Production OnName( wstring name, any name_loc );
+	Production OnEmbeddedCommands( list<shared_ptr<Command>> commands );
 	Production OnRestrict( list<string> res_type, any res_loc, Production target, any target_loc );
 	
 	Production OnPrefixOperator( string tok, Production operand );

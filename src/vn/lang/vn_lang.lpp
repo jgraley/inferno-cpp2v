@@ -37,7 +37,7 @@ float_num				\d* (\d | \.\d | \d\.) \d* {float_exp_suffix}?
 %%
 
 \s          	// ignore space
-≝				{ return YY::VNLangParser::make_DEFINE(location()); };
+≝				{ return YY::VNLangParser::make_DESIGNATE(location()); };
 ⨟				{ return YY::VNLangParser::make_VN_SEMI(location()); };
 ꩜				{ return YY::VNLangParser::make_ENGINE(location()); };
 ⩨				{ return YY::VNLangParser::make_STUFF(location()); };

@@ -74,14 +74,6 @@ void VNParse::OnVNScript( Command::List commands_ )
 	commands = commands_;
 }
 
- 
-Production VNParse::OnEngine( Production stem )
-{
-	auto pure_engine = MakeTreeNode<PatternCommand::PureEngine>();
-	pure_engine->stem = stem;
-	return pure_engine;
-}
-
 
 Production VNParse::OnStuff( Production terminus )
 {
@@ -112,6 +104,19 @@ Production VNParse::OnName( wstring name, any name_loc )
 	}
 			
 	return designations.at(name);
+}
+
+
+Production VNParse::OnEmbeddedCommands( list<shared_ptr<Command>> commands )
+{
+	TreePtr<Node> node;
+	for( shared_ptr<Command> c : commands )
+	{
+		node = c->Decay(node, this); 
+		// TODO could generalise to things that can Execute from within SCREngine
+		ASSERT( node )("Command ")(c)(" could not decay with sub-pattern ")(node);
+	}
+	return node;
 }
 
 
@@ -274,3 +279,4 @@ void VNParse::Designate( wstring name, TreePtr<Node> sub_pattern )
 // grammer for C operators
 // centralise your wstring conversions
 // designate vs def, sort it out
+// Consider c-style scoping of designations (eg for macros?)
