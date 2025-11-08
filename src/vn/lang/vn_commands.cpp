@@ -108,12 +108,6 @@ TreePtr<Node> PatternCommand::Decay( TreePtr<Node> node, VNParse *vn )
 }
 
 
-TreePtr<Node> PatternCommand::GetPattern() const
-{
-	return pattern;
-}
-
-
 string PatternCommand::GetTrace() const
 {
 	return "PatternCommand: " + Trace(pattern);

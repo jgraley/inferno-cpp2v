@@ -68,9 +68,7 @@ class PatternCommand : public Command
 public:	
 	PatternCommand( TreePtr<Node> pattern_ );
 	TreePtr<Node> Decay( TreePtr<Node> node, VNParse *vn ) final; 
-	
-	TreePtr<Node> GetPattern() const;
-	
+		
 	string GetTrace() const final;
 	
 private:
