@@ -16,6 +16,9 @@ namespace YY
 	class VNLangParser;
 };
 
+// Dep-break NodeNames because node_names.hpp will be big
+class NodeNames;
+
 namespace VN 
 {
 typedef TreePtr<Node> Production;	
@@ -43,11 +46,14 @@ public:
 	Production OnRestrict( list<string> res_type, any res_loc, Production target, any target_loc );
 	
 	Production OnPrefixOperator( string tok, Production operand );
+	Production OnPostfixOperator( string tok, Production operand );
+	Production OnInfixOperator( string tok, Production left, Production right );
 	Production OnSpecificInteger( int value );
 
 private: 
 	unique_ptr<YY::VNLangScanner> scanner;
 	unique_ptr<YY::VNLangParser> parser;
+	unique_ptr<NodeNames> node_names;
 	
 	bool saw_error;
 	TreePtr<Node> script;	

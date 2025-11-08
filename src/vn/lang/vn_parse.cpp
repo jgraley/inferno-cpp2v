@@ -27,7 +27,8 @@ using namespace reflex;
 
 VNParse::VNParse() :
 	scanner( make_unique<YY::VNLangScanner>(reflex::Input(), std::cerr) ),
-	parser( make_unique<YY::VNLangParser>(*scanner, this) )
+	parser( make_unique<YY::VNLangParser>(*scanner, this) ),
+	node_names( make_unique<NodeNames>() )
 {
 }
 
@@ -112,37 +113,64 @@ Production VNParse::OnRestrict( list<string> res_type, any res_loc, Production t
 		return target;
 	}
  
-	if( !NodeNames().GetNameToNodeMap().count(res_type) )
+	if( !NodeNames().GetNameToEnumMap().count(res_type) )
 	{
 		parser->error( any_cast<YY::VNLangParser::location_type>(res_loc), 
 		               "Restriction type " + Join(res_type, "::") + " unknown.");		
 		return target;
 	}
 		
-	NodeEnum ne = NodeNames().GetNameToNodeMap().at(res_type);
-	switch(ne)
-	{
-#define NODE(NS, NAME) \
-	case NodeEnum::NS##_##NAME: \
-		pspecial->pre_restriction_archetype_node = shared_ptr<Node>( new NS::NAME ); \
-		pspecial->pre_restriction_archetype_ptr = make_shared<TreePtr<NS::NAME>>(); \
-		break; 
-#include "tree/node_names.inc"			
-	}
-	 
+	NodeEnum ne = node_names->GetNameToEnumMap().at(res_type);
+	pspecial->pre_restriction_archetype_node = node_names->MakeNode(ne);
+	pspecial->pre_restriction_archetype_ptr = node_names->MakeTreePtr(ne);
+
 	return target;
 }
 
 
 Production VNParse::OnPrefixOperator( string tok, Production operand )
 {
-    if( tok=="-" )
-    {
-		auto node = MakeTreeNode<StandardAgentWrapper<Negate>>();
-		node->operands = (operand);
-        return node;
+#define PREFIX(TOK, TEXT, NAME, BASE, CAT, PROD, ASSOC) \
+    if( tok==TEXT ) \
+    { \
+		auto node = MakeTreeNode<StandardAgentWrapper<NAME>>(); \
+		node->operands.push_back(operand); \
+        return node; \
 	}
-	else
+#include "tree/operator_data.inc"
+	{
+		ASSERTFAIL(); // TODO use operator_data.inc
+	}
+}
+
+
+Production VNParse::OnPostfixOperator( string tok, Production operand )
+{
+#define POSTFIX(TOK, TEXT, NAME, BASE, CAT, PROD, ASSOC) \
+    if( tok==TEXT ) \
+    { \
+		auto node = MakeTreeNode<StandardAgentWrapper<NAME>>(); \
+		node->operands.push_back(operand); \
+        return node; \
+	}
+#include "tree/operator_data.inc"
+	{
+		ASSERTFAIL(); // TODO use operator_data.inc
+	}
+}
+
+
+Production VNParse::OnInfixOperator( string tok, Production left, Production right )
+{
+#define INFIX(TOK, TEXT, NAME, BASE, CAT, PROD, ASSOC) \
+    if( tok==TEXT ) \
+    { \
+		auto node = MakeTreeNode<StandardAgentWrapper<NAME>>(); \
+		node->operands.push_back(left); \
+		node->operands.push_back(right); \
+        return node; \
+	}
+#include "tree/operator_data.inc"
 	{
 		ASSERTFAIL(); // TODO use operator_data.inc
 	}

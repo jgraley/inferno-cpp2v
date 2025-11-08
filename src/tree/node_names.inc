@@ -182,6 +182,4 @@ NODE(SCTree, Exit)
 NODE(SCTree, SCExtension)
 NODE(SCTree, Cease)
 
-// Be helpful and get rid of this now we're done
-#undef NODE
 

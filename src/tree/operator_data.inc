@@ -33,7 +33,7 @@ INFIX(plus                 , "+",   Add,                  CommutativeBinop,     
 PREFIX(plusplus            , "++",  PreIncrement,         AssignmentOperator,     ARITHMETIC, PREFIX,      RIGHT ) // operator++()
 POSTFIX(plusplus           , "++",  PostIncrement,        AssignmentOperator,     ARITHMETIC, POSTFIX,     LEFT ) // operator++(int)
 INFIX(plusequal            , "+=",  AssignmentAdd,        AssignmentOperator,     ARITHMETIC, ASSIGN,      RIGHT )
-PREFIX(minus               , "-",   Negate,               Unop,                   ARITHMETIC, PREFIX,      RIGHT )
+PREFIX(minus               , "-",   Minus,                Unop,                   ARITHMETIC, PREFIX,      RIGHT )
 INFIX(minus                , "-",   Subtract,             Binop,                  ARITHMETIC, ADD_SUB,     LEFT )
 PREFIX(minusminus          , "--",  PreDecrement,         AssignmentOperator,     ARITHMETIC, PREFIX,      RIGHT ) // operator--()
 POSTFIX(minusminus         , "--",  PostDecrement,        AssignmentOperator,     ARITHMETIC, POSTFIX,     LEFT ) // operator--(int)
