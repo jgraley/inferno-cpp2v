@@ -65,7 +65,10 @@ Agent::ReplacePatchPtr AutolocatingAgent::GenReplaceLayoutImpl( const ReplaceKit
 bool AutolocatingAgent::IsNonTrivialPreRestriction(const TreePtrInterface *tpi) const
 {
     if( !AgentCommon::IsNonTrivialPreRestriction(tpi) )
+    {
+		//FTRACE("AC says no ")(GetArchetypeNode())("\n");
 		return false;
+	}
 				
 	// This is autolocating agents, so normal children are autolocating which means
 	// they must match the same XLink. If one of them restricts this XLink then we don't have

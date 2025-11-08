@@ -102,8 +102,16 @@ Production VNParse::OnDelta( Production through, Production overlay )
 
 Production VNParse::OnRestrict( list<string> res_type, any res_loc, Production target, any target_loc )
 {
-    Agent *agent = Agent::TryAsAgent(target);
-	ASSERT( agent );
+	if( !node_names->GetNameToEnumMap().count(res_type) )
+	{
+		parser->error( any_cast<YY::VNLangParser::location_type>(res_loc), 
+		               "Restriction type " + Join(res_type, "::") + " unknown.");		
+		return target;
+	}
+	NodeEnum ne = node_names->GetNameToEnumMap().at(res_type);
+	
+	Agent *agent = Agent::TryAsAgent(target);
+	ASSERT( agent )("We are parsing a pattern so everything should be agents");
 		
 	auto pspecial = dynamic_cast<SpecialBase *>(agent);
 	if( !pspecial )
@@ -112,15 +120,7 @@ Production VNParse::OnRestrict( list<string> res_type, any res_loc, Production t
 		               "Restriction target " + agent->GetTypeName() + " cannot be pre-restricted.");		
 		return target;
 	}
- 
-	if( !NodeNames().GetNameToEnumMap().count(res_type) )
-	{
-		parser->error( any_cast<YY::VNLangParser::location_type>(res_loc), 
-		               "Restriction type " + Join(res_type, "::") + " unknown.");		
-		return target;
-	}
 		
-	NodeEnum ne = node_names->GetNameToEnumMap().at(res_type);
 	pspecial->pre_restriction_archetype_node = node_names->MakeNode(ne);
 	pspecial->pre_restriction_archetype_ptr = node_names->MakeTreePtr(ne);
 

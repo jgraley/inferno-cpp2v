@@ -814,14 +814,6 @@ struct AssignmentOperator : NonCommutativeOperator { NODE_FUNCTIONS };
 		return Production::PROD; \
 	} \
 };
-#define OTHER(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) struct NODE : BASE \
-{ \
-	NODE_FUNCTIONS_FINAL \
-	Production GetMyProduction() const override \
-	{ \
-		return Production::PROD; \
-	} \
-};
 #include "operator_data.inc"
 
 /// The termary ?: operator

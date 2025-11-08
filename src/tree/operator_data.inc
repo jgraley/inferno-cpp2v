@@ -15,9 +15,6 @@
 #ifndef INFIX
 #define INFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC)
 #endif
-#ifndef OTHER
-#define OTHER(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC)
-#endif
 
 /*
 Syntax  Clang token          Text   Inferno node          Intermediate            Category    Syntax::Production   Association */
@@ -66,4 +63,3 @@ INFIX(comma                , ",",   Comma,                Binop,                
 #undef PREFIX
 #undef POSTFIX
 #undef INFIX
-#undef OTHER
