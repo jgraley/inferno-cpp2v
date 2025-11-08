@@ -10,6 +10,7 @@
 #include "tree/scope.hpp"
 #include "tree/node_names.hpp"
 #include "vn_step.hpp"
+#include "vn_parse.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -87,9 +88,7 @@ Designation::Designation( std::wstring name_, TreePtr<Node> pattern_ ) :
 
 bool Designation::OnParse(VNParse *vn)
 {
-	// Teeing into parse class during parse so name is available
-	//vn->OnDesignation(name, pattern);
-	FTRACE(name)(" designates ")(pattern)(" TODO\n");
+	vn->Designate(name, pattern);
 	
 	return false; // discard
 }

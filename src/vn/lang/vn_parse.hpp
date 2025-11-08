@@ -41,6 +41,7 @@ public:
 	Production OnStuff( Production terminus );
 	Production OnDelta( Production through, Production overlay );
 	Production OnBuiltIn( list<string> builtin_type, any builtin_loc, list<list<Production>> itemisation );
+	Production OnName( wstring name, any name_loc );
 	Production OnRestrict( list<string> res_type, any res_loc, Production target, any target_loc );
 	
 	Production OnPrefixOperator( string tok, Production operand );
@@ -48,6 +49,8 @@ public:
 	Production OnInfixOperator( string tok, Production left, Production right );
 	Production OnSpecificInteger( int value );
 
+	void Designate( wstring name, TreePtr<Node> sub_pattern );
+	
 private: 
 	unique_ptr<YY::VNLangScanner> scanner;
 	unique_ptr<YY::VNLangParser> parser;
@@ -55,6 +58,7 @@ private:
 	
 	bool saw_error;
 	Command::List commands;
+	map<wstring, TreePtr<Node>> designations;
 };
 	
 };

@@ -103,6 +103,7 @@ pattern	: pattern '+' pattern      { $$ = $1; }
 		| '-' %prec PREFIX pattern                 			{ $$ = vn->OnPrefixOperator("-", $2); }
 		| '(' pattern ')'                          			{ $$ = $2; }
 		| OPEN_RESTRICT scoped_name CLOSE_RESTRICT pattern 	{ $$ = vn->OnRestrict($2, @2, $4, @4); }
+		| vn_name       						  			{ $$ = vn->OnName($1, @1); }
 		| NUM       						      			{ $$ = vn->OnSpecificInteger($1); }
 		;
 

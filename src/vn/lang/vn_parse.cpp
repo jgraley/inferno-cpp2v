@@ -20,7 +20,8 @@
 
 #include <iostream>
 #include <fstream>
-
+#include <locale>  
+#include <codecvt>
 
 using namespace CPPTree; // TODO should not need
 using namespace VN;
@@ -99,6 +100,21 @@ Production VNParse::OnDelta( Production through, Production overlay )
 }
 
 
+Production VNParse::OnName( wstring name, any name_loc )
+{
+	if( designations.count(name)==0 )
+	{
+		parser->error( any_cast<YY::VNLangParser::location_type>(name_loc), 
+		               "Sub-pattern name " + 
+		               wstring_convert<codecvt_utf8<wchar_t>>().to_bytes(name) +
+		               " not designated.");		
+		return MakeTreeNode<Node>();
+	}
+			
+	return designations.at(name);
+}
+
+
 static TreePtr<Node> MakeStandardAgent(NodeEnum ne)
 {
 	switch(ne)
@@ -118,6 +134,7 @@ static TreePtr<Node> MakeStandardAgent(NodeEnum ne)
 	ASSERTFAIL("Invalid value for node enum"); 
 }
 
+	Production OnName( wstring name, any name_loc );
 
 Production VNParse::OnBuiltIn( list<string> builtin_type, any builtin_loc, list<list<Production>> src_itemisation )
 {
@@ -245,3 +262,15 @@ Production VNParse::OnSpecificInteger( int value )
 }
 
 
+void VNParse::Designate( wstring name, TreePtr<Node> sub_pattern )
+{
+	designations.insert( make_pair(name, sub_pattern) );
+}
+
+// Production->TreePtr<Node>
+// Exceptions
+// Better errors withe builtins (means custom types)
+// Better errors generally
+// grammer for C operators
+// centralise your wstring conversions
+// designate vs def, sort it out
