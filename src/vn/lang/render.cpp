@@ -47,7 +47,7 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern )
 	if( ReadArgs::use.count("c") )
 		s += Trace(unique_coupling_names) + "\n\n";
 	for( UniquifyNames::NodeAndNamePair p : unique_coupling_names )
-		s += p.second + " ≝ " + RenderConcreteIntoProduction( p.first, Syntax::Production::VN_DEFINE ) + "⨟\n";
+		s += p.second + " ⪮ " + RenderConcreteIntoProduction( p.first, Syntax::Production::VN_DEFINE ) + "⨟\n";
 
 	ASSERT( pattern->GetSearchComparePattern() == pattern->GetReplacePattern() || !pattern->GetReplacePattern() )
 	   	  (pattern->GetSearchComparePattern())

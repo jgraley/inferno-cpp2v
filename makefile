@@ -1,8 +1,8 @@
 include makefile.common
 
 .PHONY: default all test docs force_subordinate_makefiles clean iclean dclean resource publish doxygen pattern_graphs doc_graphs
-default : inferno.exe
-all : clean inferno.exe resource docs test
+default : inferno.exe patterns
+all : inferno.exe resource docs test patterns
 	
 #
 # Compile llvm and clang sources
@@ -97,6 +97,13 @@ publish : makefile docs inferno.exe docs/web/publish.sh
 	cd docs/web && ./publish.sh
 
 #
+# Render the built-in pattern to VN language
+#
+patterns : inferno.exe
+	mkdir -p patterns
+	./inferno.exe -ppatterns/
+
+#
 # Cleaning up
 #
 clean : $(LLVM_CLANG_LIBS:%=clean_%) iclean
@@ -105,6 +112,7 @@ iclean :
 	-rm -rf build/*
 	-rm -f inferno.exe
 	-rm -f resource/lib/*
+	-rm -f patterns/*
 
 #
 # Subordinate makefiles included last so they don't hijack the makefile default goal

@@ -22,9 +22,7 @@ class NodeNames;
 
 namespace VN 
 {
-	
-typedef TreePtr<Node> TreePtr<Node>;
-	
+		
 struct Item
 {
 	list<TreePtr<Node>> nodes;
@@ -65,14 +63,15 @@ public:
 	TreePtr<Node> OnSpecificInteger( int value );
 
 	void Designate( wstring name, TreePtr<Node> sub_pattern );
+	static string QuoteName(string name);
+	static string QuoteName(wstring name);
 	
 private: 
 	unique_ptr<YY::VNLangScanner> scanner;
 	unique_ptr<YY::VNLangParser> parser;
 	unique_ptr<NodeNames> node_names;
 	
-	bool saw_error;
-	Command::List commands;
+	Command::List top_level_commands;
 	map<wstring, TreePtr<Node>> designations;
 };
 	

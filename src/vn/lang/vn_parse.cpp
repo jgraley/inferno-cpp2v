@@ -52,29 +52,18 @@ Command::List VNParse::DoParse(string filepath)
     scanner->in(file);
     scanner->filename = filepath;    
     
-    saw_error = false;
-    commands.clear();
+    top_level_commands.clear();
     int pr = parser->parse();    
-    if( saw_error ) // TODO figure out how to make the parser return a fail code
-		exit(1); // An error was already reported so an assert fail here looks like a knock-on error i.e. a bug
-    ASSERT(pr==EXIT_SUCCESS);    
+    if( pr != EXIT_SUCCESS ) 
+		exit(pr); // An error was already reported so an assert fail here looks like a knock-on error i.e. a bug
     
-    return commands;
+    return top_level_commands;
 }
 
 
-void VNParse::OnError()
+void VNParse::OnVNScript( Command::List top_level_commands_ )
 {
-	saw_error = true;
-}
-
-
-void VNParse::OnVNScript( Command::List commands_ )
-{
-	if( saw_error )
-		return;
-		
-	commands = commands_;
+	top_level_commands = top_level_commands_;
 }
 
 
@@ -101,7 +90,7 @@ TreePtr<Node> VNParse::OnName( wstring name, any name_loc )
 		throw YY::VNLangParser::syntax_error( 
 		    any_cast<YY::VNLangParser::location_type>(name_loc), 
 		    "Sub-pattern name " + 
-		    wstring_convert<codecvt_utf8<wchar_t>>().to_bytes(name) +
+		    QuoteName(name) +
 		    " was not designated.");		
 			
 	return designations.at(name);
@@ -111,6 +100,7 @@ TreePtr<Node> VNParse::OnName( wstring name, any name_loc )
 TreePtr<Node> VNParse::OnEmbeddedCommands( list<shared_ptr<Command>> commands )
 {
 	TreePtr<Node> node;
+	TRACE("Decaying embedded commands: ")(commands)("\n");
 	for( shared_ptr<Command> c : commands )
 	{
 		node = c->Decay(node, this); 
@@ -160,7 +150,7 @@ TreePtr<Node> VNParse::OnBuiltIn( list<string> builtin_type, any builtin_loc, It
 			throw YY::VNLangParser::syntax_error( 
 				any_cast<YY::VNLangParser::location_type>(src_itemisation.loc), 
 				"Insufficient items provided for " + 
-				Join(builtin_type, "::") ); // TODO or switch to wild cards?
+				QuoteName(Join(builtin_type, "::")) ); // TODO or switch to wild cards?
 		const Item &src_item = *src_it;
         if( SequenceInterface *dest_seq = dynamic_cast<SequenceInterface *>(dest_item) ) // TODO could roll together as Container?
             for( TreePtr<Node> src : src_item.nodes )
@@ -184,7 +174,7 @@ TreePtr<Node> VNParse::OnBuiltIn( list<string> builtin_type, any builtin_loc, It
 		throw YY::VNLangParser::syntax_error( 
 			any_cast<YY::VNLangParser::location_type>(src_it->loc), 
 			"Excess items provided for " + 
-			Join(builtin_type, "::") +
+			QuoteName(Join(builtin_type, "::")) +
 			" beginning with the indicated item" );
 
 	return dest;
@@ -202,7 +192,7 @@ TreePtr<Node> VNParse::OnRestrict( list<string> res_type, any res_loc, TreePtr<N
 	if( !pspecial )
 		throw YY::VNLangParser::syntax_error(
 		     any_cast<YY::VNLangParser::location_type>(target_loc), 
-		     "Restriction target " + agent->GetTypeName() + " cannot be pre-restricted.");		
+		     "Restriction target " + QuoteName(agent->GetTypeName()) + " cannot be pre-restricted.");		
 		
 	pspecial->pre_restriction_archetype_node = node_names->MakeNode(ne);
 	pspecial->pre_restriction_archetype_ptr = node_names->MakeTreePtr(ne);
@@ -273,13 +263,25 @@ void VNParse::Designate( wstring name, TreePtr<Node> sub_pattern )
 }
 
 
+string VNParse::QuoteName(string name)
+{
+	return "`" + name + "'";
+}
+
+
+string VNParse::QuoteName(wstring name)
+{
+	return QuoteName( wstring_convert<codecvt_utf8<wchar_t>>().to_bytes(name) );
+}
+
+
 static NodeEnum GetNodeEnum( list<string> typ, any loc )
 {
 	if( !NodeNames().GetNameToEnumMap().count(typ) )
 	{
 		throw YY::VNLangParser::syntax_error(
 		    any_cast<YY::VNLangParser::location_type>(loc),
-			"Built-in type " + Join(typ, "::") + " unknown.");
+			"Built-in type " + VNParse::QuoteName(Join(typ, "::")) + " unknown.");
 	}
 	
 	return NodeNames().GetNameToEnumMap().at(typ);	
@@ -287,18 +289,15 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 
 
 // grammar for C operators
-// designate vs def, sort it out
 // Consider c-style scoping of designations (eg for macros?)
-// Drop std:: from lpp and ypp
 
 // Centralise your wstring conversions
-// In error messages, quote all excerpts from user code the way GCC does it
-// ...so, perhaps helper functions for both unicode and ascii
 
 // Parsing 130-LowerSCType.vn reveals a mis-render - the identifier should be rendered 
-// with some kind of "real identifier" syntax (and its name hint)
+// with some kind of "real identifier node" syntax (and its name hint)
 
 // Render will have to sort the designations, see 002-RaiseSCType.vn
+
 // Use "lexical tie-in" to handle the context of designations and prevent "undesignated name" errors in designations
 // - Parser designates (done)
 // - Lexer checks and produces either X_NEW_NAME or X_KNOWN_NAME

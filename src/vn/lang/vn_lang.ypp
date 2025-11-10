@@ -43,7 +43,7 @@
 
 // The order seems to matter here, find out why TODO
 %token
-	DESIGNATE 								"≝"
+	DESIGNATE 								"⪮"
 	VN_SEMI 								"⨟"
 	VN_SEP 									"⚬"
 	'+'
@@ -63,10 +63,10 @@
 	OPEN_RESTRICT 							"【"
 	CLOSE_RESTRICT 							"】"
 	ANY 									"☆"
-	<std::wstring> 	STR 					_("string")
-	<double>       	NUM 					_("number")
-	<std::string>  	ASCII_NAME 				_("ASCII name")
-	<std::wstring> 	UNICODE_NAME 			_("Unicode name")
+	<wstring> 	STR 						_("string")
+	<double>   	NUM 						_("number")
+	<string>  	ASCII_NAME 					_("ASCII name")
+	<wstring> 	UNICODE_NAME 				_("Unicode name")
 
 %right '='
 %left  '+' '-'
@@ -74,36 +74,35 @@
 %precedence PREFIX ENGINE STUFF DELTA DELTA_ARROW OPEN_RESTRICT CLOSE_RESTRICT
 %precedence BUILT_IN
 
-%type <VN::TreePtr<Node>> 							pattern
-%type <std::wstring> 							vn_name
-%type <std::list<std::string>> 					scoped_name
-%type <VN::Command::List>						commands
-%type <VN::Command::List>						weak_commands
-%type <std::shared_ptr<VN::Command>>			command
-%type <std::shared_ptr<VN::Command>>			weak_command
+%type <TreePtr<Node>> 				pattern
+%type <wstring> 					vn_name
+%type <list<string>> 				scoped_name
+%type <VN::Command::List>			commands
+%type <VN::Command::List>			sep_commands
+%type <shared_ptr<VN::Command>>		bare_command
 %type <VN::Itemisation>				itemisation
 %type <VN::Itemisation>				items
 %type <VN::Item>					item
 
 %%
 
-vnscript 	: commands 									{ vn->OnVNScript($1); }
+vnscript 		: commands 						{ vn->OnVNScript($1); }
      
-// The ⨟ turns patterns into commands. This rule must be left-associative so calls to OnParse() happen
-// in the corrrect order.
-commands        : weak_commands
-				| command								{ if( $1->OnParse(vn) ) $$.push_back($1); }
+// This is to make the ⨟ optional on last command
+commands        : sep_commands							{ $$ = $1; }
+				| sep_commands VN_SEMI					{ $$ = $1; }
 				
-weak_commands 	: weak_commands VN_SEMI weak_command	{ $$ = $1; if( $3->OnParse(vn) ) $$.push_back($3); }
-				| weak_command VN_SEMI weak_command		{ if( $1->OnParse(vn) ) $$.push_front($1); 
-														  if( $3->OnParse(vn) ) $$.push_front($3); }			
-weak_command	: command								{ $$ = $1; }
-				| pattern                               { $$ = std::make_shared<VN::PatternCommand>($1); }
+// The ⨟ turns patterns into commands. This rule must 
+// be left-associative so calls to OnParse() happen
+// in the correct order. STOP BREAKING THIS!!!
+sep_commands 	: sep_commands VN_SEMI bare_command		{ $$ = $1; if( $3->OnParse(vn) ) $$.push_back($3); }	
+				| bare_command							{ if( $1->OnParse(vn) ) $$.push_back($1); }
 			
 // Add more commands here
-command	: vn_name DESIGNATE pattern						{ $$ = std::make_shared<VN::Designation>($1, $3); }
-		| ENGINE pattern 		   		 			 	{ $$ = make_shared<VN::EngineCommand>($2); }
-             
+bare_command	: vn_name DESIGNATE pattern				{ $$ = make_shared<VN::Designation>($1, $3, @2); }
+				| ENGINE pattern   		 			 	{ $$ = make_shared<VN::EngineCommand>($2, @1); }
+				| pattern 			  					{ $$ = make_shared<VN::PatternCommand>($1, @$); }
+        
 pattern	: pattern '+' pattern      { $$ = $1; }
 		| pattern '-' pattern      { $$ = $1; }
 		| pattern '*' pattern      { $$ = $1; }
@@ -113,7 +112,6 @@ pattern	: pattern '+' pattern      { $$ = $1; }
 		| BUILT_IN scoped_name itemisation					{ $$ = vn->OnBuiltIn($2, @2, $3); }
 		| '-' %prec PREFIX pattern                 			{ $$ = vn->OnPrefixOperator("-", $2); }
 		| '(' commands ')'                          		{ $$ = vn->OnEmbeddedCommands($2); }
-		| '(' pattern ')'                          			{ $$ = $2; }
 		| OPEN_RESTRICT scoped_name CLOSE_RESTRICT pattern 	{ $$ = vn->OnRestrict($2, @2, $4, @4); }
 		| vn_name       						  			{ $$ = vn->OnName($1, @1); }
 		| NUM       						      			{ $$ = vn->OnSpecificInteger($1); }
@@ -130,46 +128,9 @@ item		: item ',' pattern    						{ $$ = $1; $$.nodes.push_back($3); $$.loc = @$
 			| pattern									{ $$.nodes.push_back($1); $$.loc = @$; }
 
 vn_name			: UNICODE_NAME    						{ $$ = $1; }
-				| ASCII_NAME							{ $$ = std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes($1); }     
+				| ASCII_NAME							{ $$ = wstring_convert<codecvt_utf8<wchar_t>>().from_bytes($1); }     
      
 scoped_name		: ASCII_NAME SCOPE_RES scoped_name		{ $$ = $3; $$.push_front($1); }
 				| ASCII_NAME							{ $$.push_front($1); }
 
 %%
-
-void YY::VNLangParser::error(const location& loc, const std::string& msg)
-{
-  vn->OnError();
-  std::cerr << loc << ": " << msg << std::endl;
-  if (loc.begin.line == loc.end.line && loc.begin.line == lexer.lineno())
-  {
-    std::cerr << lexer.matcher().line() << std::endl;
-    for (size_t i = 1; i < loc.begin.column; ++i)
-      std::cerr << " ";
-    for (size_t i = loc.begin.column; i < loc.end.column; ++i)
-      std::cerr << "~";
-    std::cerr << std::endl;
-  }
-  else
-  {
-    FILE *file = lexer.in().file(); // the current file being scanned
-    if (file != NULL)
-    {
-      YY::VNLangScanner::Matcher *m = lexer.new_matcher(file); // new matcher
-      lexer.push_matcher(m); // save the current matcher
-      off_t pos = ftell(file); // save current position in the file
-      fseek(file, 0, SEEK_SET); // go to the start of the file
-      for (size_t i = 1; i < loc.begin.line; ++i)
-        m->skip('\n'); // skip to the next line
-      for (size_t i = loc.begin.line; i <= loc.end.line; ++i)
-      {
-        std::cerr << m->line() << std::endl; // display the offending line
-        m->skip('\n'); // next line
-      }
-      fseek(file, pos, SEEK_SET); // restore position in the file to continue scanning
-      lexer.pop_matcher(); // restore matcher
-    }
-  }
-  if (lexer.size() == 0) // if token is unknown (no match)
-    lexer.matcher().winput(); // skip character
-}

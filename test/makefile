@@ -46,7 +46,7 @@ IARG="${DEFAULT_I_ARG} ${I}"
 test/autotestd : autotestd.cpp
 	g++ autotestd.cpp -o autotestd
 
-$(EXEC_CASES:%=${RESULTS_PATH}/exec/%.pass) : ${RESULTS_PATH}/exec/%.pass : test/examples/% test/makefile inferno.exe test/exec_test.sh .clang-format ${RESOURCE_DEPS}
+$(EXEC_CASES:%=${RESULTS_PATH}/exec/%.pass) : ${RESULTS_PATH}/exec/%.pass : test/examples/% test/makefile inferno.exe test/exec_test.sh .clang-format patterns ${RESOURCE_DEPS}
 	@mkdir -p ${RESULTS_PATH}/exec
 	@rm -f ${RESULTS_PATH}/exec/$*.
 	test/exec_test.sh $< ${RESULTS_PATH}/exec ${IARG} 2>&1 > ${RESULTS_PATH}/exec/$*.log

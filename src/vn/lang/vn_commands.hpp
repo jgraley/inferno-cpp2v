@@ -26,7 +26,7 @@ class Command : public Traceable
 {
 public:	
 	typedef std::list<shared_ptr<Command>> List; 
-
+	Command( any loc_ );
     ~Command();
     
     // Called as soon as node is seen, so that parsing context can be updated
@@ -37,6 +37,9 @@ public:
 	
 	// Called on a sequence of commands when usage dictates it should be a script
 	virtual void Execute( const ScriptKit &kit ) const;
+
+protected:
+	const any loc;
 };
 
 
@@ -50,7 +53,7 @@ public:
 class EngineCommand : public Command
 {
 public:	
-	EngineCommand( TreePtr<Node> pattern_ );
+	EngineCommand( TreePtr<Node> pattern_, any loc );
 	TreePtr<Node> Decay( TreePtr<Node> node, VNParse *vn ) final; 
 	void Execute( const ScriptKit &kit ) const final;
 	
@@ -66,7 +69,7 @@ private:
 class PatternCommand : public Command
 {
 public:	
-	PatternCommand( TreePtr<Node> pattern_ );
+	PatternCommand( TreePtr<Node> pattern_, any loc );
 	TreePtr<Node> Decay( TreePtr<Node> node, VNParse *vn ) final; 
 		
 	string GetTrace() const final;
@@ -79,7 +82,7 @@ private:
 class Designation : public Command
 {
 public:	
-	Designation( std::wstring name_, TreePtr<Node> pattern_ );
+	Designation( std::wstring name_, TreePtr<Node> pattern_, any loc );
 	bool OnParse(VNParse *vn) final;
 
 	string GetTrace() const final;
