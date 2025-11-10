@@ -23,7 +23,7 @@ class NodeNames;
 namespace VN 
 {
 	
-typedef TreePtr<Node> Production;
+typedef TreePtr<Node> TreePtr<Node>;
 	
 struct Item
 {
@@ -52,17 +52,17 @@ public:
 	void OnVNScript( list<shared_ptr<Command>> commands_ );
 	shared_ptr<Command> OnCommand( shared_ptr<Command> command );
 
-	Production OnStuff( Production terminus );
-	Production OnDelta( Production through, Production overlay );
-	Production OnBuiltIn( list<string> builtin_type, any builtin_loc, Itemisation itemisation );
-	Production OnName( wstring name, any name_loc );
-	Production OnEmbeddedCommands( list<shared_ptr<Command>> commands );
-	Production OnRestrict( list<string> res_type, any res_loc, Production target, any target_loc );
+	TreePtr<Node> OnStuff( TreePtr<Node> terminus );
+	TreePtr<Node> OnDelta( TreePtr<Node> through, TreePtr<Node> overlay );
+	TreePtr<Node> OnBuiltIn( list<string> builtin_type, any builtin_loc, Itemisation itemisation );
+	TreePtr<Node> OnName( wstring name, any name_loc );
+	TreePtr<Node> OnEmbeddedCommands( list<shared_ptr<Command>> commands );
+	TreePtr<Node> OnRestrict( list<string> res_type, any res_loc, TreePtr<Node> target, any target_loc );
 	
-	Production OnPrefixOperator( string tok, Production operand );
-	Production OnPostfixOperator( string tok, Production operand );
-	Production OnInfixOperator( string tok, Production left, Production right );
-	Production OnSpecificInteger( int value );
+	TreePtr<Node> OnPrefixOperator( string tok, TreePtr<Node> operand );
+	TreePtr<Node> OnPostfixOperator( string tok, TreePtr<Node> operand );
+	TreePtr<Node> OnInfixOperator( string tok, TreePtr<Node> left, TreePtr<Node> right );
+	TreePtr<Node> OnSpecificInteger( int value );
 
 	void Designate( wstring name, TreePtr<Node> sub_pattern );
 	

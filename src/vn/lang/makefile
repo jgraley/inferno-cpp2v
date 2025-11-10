@@ -3,7 +3,8 @@ REFLEX_DIR = reflex
 REFLEX = $(REFLEX_DIR)/bin/reflex
 LIBREFLEX = $(REFLEX_DIR)/lib/libreflex.a
 REFLEX_INC = $(REFLEX_DIR)/include
-REFLEX_OPTIONS = 
+REFLEX_OPTIONS = --bison-complete --bison-locations
+BISON_OPTIONS = -Wcounterexamples
 BISON = bison 
 
 # We need to be more relaxed than we are for most VN code.
@@ -24,14 +25,14 @@ VNL_DEPS = $(VNL_DIR)/makefile
 $(VNL_LYPP_MODULES:%=build/%.lpp.hpp) : build/%.lpp.hpp : build/%.lpp.cpp
 $(VNL_LYPP_MODULES:%=build/%.lpp.cpp): build/%.lpp.cpp : %.lpp $(VNL_DEPS)
 	@mkdir -p $(dir $@)
-	$(REFLEX) $(REFLEX_OPTIONS) --bison-complete --bison-locations $< --outfile=$@ --header-file=$(subst .cpp,.hpp,$@)	
+	$(REFLEX) $(REFLEX_OPTIONS) $< --outfile=$@ --header-file=$(subst .cpp,.hpp,$@)	
 	
 
 $(VNL_LYPP_MODULES:%=build/%.ypp.hpp) : build/%.ypp.hpp : build/%.ypp.cpp
 $(VNL_LYPP_MODULES:%=build/%.location.hpp) : build/%.location.hpp : build/%.ypp.cpp
 $(VNL_LYPP_MODULES:%=build/%.ypp.cpp): build/%.ypp.cpp : %.ypp $(VNL_DEPS) 
 	@mkdir -p $(dir $@)
-	$(BISON) -d $< -o $@
+	$(BISON) $(BISON_OPTIONS) -d $< -o $@ 
 
 
 $(VNL_LYPP_MODULES:%=build/%.lpp.o): build/%.lpp.o : build/%.lpp.cpp build/%.ypp.hpp build/%.lpp.hpp build/%.location.hpp $(VNL_DEPS)
@@ -52,4 +53,3 @@ $(VNL_CPP_MODULES:%=build/%.o) : build/%.o : %.cpp $(VNL_LYPP_MODULES:%=build/%.
 build/src/lang.a : $(VNL_LYPP_MODULES:%=build/%.lpp.o) $(VNL_LYPP_MODULES:%=build/%.ypp.o) $(VNL_CPP_MODULES:%=build/%.o) $(VNL_DEPS)
 	@mkdir -p build/src 
 	$(AR) -r $@ $(VNL_LYPP_MODULES:%=build/%.lpp.o) $(VNL_LYPP_MODULES:%=build/%.ypp.o) $(VNL_CPP_MODULES:%=build/%.o)
-	
