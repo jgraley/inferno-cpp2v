@@ -63,6 +63,7 @@
 	OPEN_RESTRICT 							"【"
 	CLOSE_RESTRICT 							"】"
 	ANY 									"☆"
+	STAR 									"★"
 	<wstring> 	STR 						_("string")
 	<double>   	NUM 						_("number")
 	<string>  	ASCII_NAME 					_("ASCII name")
@@ -107,6 +108,7 @@ pattern	: pattern '+' pattern      { $$ = $1; }
 		| pattern '-' pattern      { $$ = $1; }
 		| pattern '*' pattern      { $$ = $1; }
 		| pattern '/' pattern      { $$ = $1; }
+		| STAR												{ $$ = vn->OnStar(); }
 		| STUFF pattern 		     					 	{ $$ = vn->OnStuff($2); }
 		| DELTA pattern DELTA_ARROW pattern   		   		{ $$ = vn->OnDelta($2, $4); }
 		| BUILT_IN scoped_name itemisation					{ $$ = vn->OnBuiltIn($2, @2, $3); }

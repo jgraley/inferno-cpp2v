@@ -50,6 +50,7 @@ public:
 	void OnVNScript( list<shared_ptr<Command>> commands_ );
 	shared_ptr<Command> OnCommand( shared_ptr<Command> command );
 
+	TreePtr<Node> OnStar();
 	TreePtr<Node> OnStuff( TreePtr<Node> terminus );
 	TreePtr<Node> OnDelta( TreePtr<Node> through, TreePtr<Node> overlay );
 	TreePtr<Node> OnBuiltIn( list<string> builtin_type, any builtin_loc, Itemisation itemisation );

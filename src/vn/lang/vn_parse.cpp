@@ -67,6 +67,12 @@ void VNParse::OnVNScript( Command::List top_level_commands_ )
 }
 
 
+TreePtr<Node> VNParse::OnStar()
+{
+	return MakeTreeNode<StarAgent>();
+}
+
+
 TreePtr<Node> VNParse::OnStuff( TreePtr<Node> terminus )
 {
 	auto stuff = MakeTreeNode<StuffAgent>();

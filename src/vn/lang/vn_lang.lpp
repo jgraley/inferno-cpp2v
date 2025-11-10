@@ -46,6 +46,7 @@ float_num				\d* (\d | \.\d | \d\.) \d* {float_exp_suffix}?
 【				{ return YY::VNLangParser::make_OPEN_RESTRICT(location()); };
 】				{ return YY::VNLangParser::make_CLOSE_RESTRICT(location()); };
 ☆				{ return YY::VNLangParser::make_ANY(location()); };
+★				{ return YY::VNLangParser::make_STAR(location()); };
 
 ::				{ return YY::VNLangParser::make_SCOPE_RES(location()); };
 [-+*/=();,]  	{ return YY::VNLangParser::symbol_type(chr(), location()); }
