@@ -62,6 +62,7 @@ public:
 	TreePtr<Node> OnPostfixOperator( string tok, TreePtr<Node> operand );
 	TreePtr<Node> OnInfixOperator( string tok, TreePtr<Node> left, TreePtr<Node> right );
 	TreePtr<Node> OnSpecificInteger( int value );
+	TreePtr<Node> OnIdByName( list<string> typ, any type_loc, wstring name, any name_loc );
 
 	void Designate( wstring name, TreePtr<Node> sub_pattern );
 	static string QuoteName(string name);

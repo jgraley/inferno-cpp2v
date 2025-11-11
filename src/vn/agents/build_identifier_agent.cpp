@@ -69,6 +69,7 @@ string BuildIdentifierAgent::GetNewName(const SCREngine *acting_engine)
     }
 }
 
+
 Syntax::Production BuildIdentifierAgent::GetAgentProduction() const
 {
 	return Syntax::Production::PRIMITIVE_EXPR;

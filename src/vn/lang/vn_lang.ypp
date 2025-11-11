@@ -62,6 +62,9 @@
 	CLOSE_RESTRICT 							"】"
 	ANY 									"☆"
 	STAR 									"★"
+	ID_BY_NAME								"⊜"
+	OPEN_CHEVRON							"《"
+	CLOSE_CHEVRON							"》"
 	<wstring> 	STR 						_("string")
 	<double>   	NUM 						_("number")
 	<string>  	ASCII_NAME 					_("ASCII name")
@@ -116,6 +119,7 @@ pattern	: pattern '+' pattern      { $$ = $1; }
 		| vn_name       						  			{ $$ = vn->OnName($1, @1); }
 		| NUM       						      			{ $$ = vn->OnSpecificInteger($1); }
 		| ANY												{ $$ = nullptr; }
+		| ID_BY_NAME OPEN_CHEVRON scoped_name ',' STR CLOSE_CHEVRON { $$ = vn->OnIdByName($3, @3, $5, @5); }
 		;
 
 itemisation : '(' items ')'    							{ $$ = $2; }
