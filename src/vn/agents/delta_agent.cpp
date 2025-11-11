@@ -66,17 +66,17 @@ Syntax::Production DeltaAgent::GetAgentProduction() const
 string DeltaAgent::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
-	// We can use PREFIX for this because there's nothing in front of the Δ unlike
-	// with c's ?: operator. The segment Δ...🡺 is a prefix to the overlay argument.
+	// We can use PREFIX for this because there's nothing in front of the ▲ unlike
+	// with c's ?: operator. The segment ▲...🡺 is a prefix to the overlay argument.
 	// As with ?: we could use BOOT_EXPR for the through argument, and probably should
 	// in the parser, but to generate consistent style in renders we use PREFIX so
 	// that parens are just as likely in both args.
 	string st = kit.render( (TreePtr<Node>)(*GetThrough()), Syntax::Production::PREFIX );
 	string so = kit.render( (TreePtr<Node>)(*GetOverlay()), Syntax::Production::PREFIX );
 	if( st.size() > Syntax::GetLineBreakThreshold() )
-		return "Δ" + st + "\n🡺" + so;
+		return "▲" + st + "\n🡺" + so;
 	else
-		return "Δ" + st + "🡺" + so;
+		return "▲" + st + "🡺" + so;
 }    
     
 
@@ -101,5 +101,5 @@ Graphable::NodeBlock DeltaAgent::GetGraphBlockInfo() const
                             "",
                             true,
                             { link_overlay } } );
-    return { false, "Delta", "Δ", "triangle", NODE_SHAPED, GetPatternPtr(), item_blocks };
+    return { false, "Delta", "▲", "triangle", NODE_SHAPED, GetPatternPtr(), item_blocks };
 }   

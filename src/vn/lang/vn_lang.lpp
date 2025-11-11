@@ -27,8 +27,8 @@
 ascii_name				[a-zA-Z_][a-zA-Z0-9_]*
 
 // We have to exclude delta from identifiers here, otherwise "match longest"
-// rule means eg Δd is parsed as a name. TODO Δ should be a keyword, see #866
-unicode_name			[\p{UnicodeIdentifierStart}]{-}[Δ] [\p{UnicodeIdentifierPart}]{-}[Δ]*
+// rule means eg ▲d is parsed as a name. TODO ▲ should be a keyword, see #866
+unicode_name			\p{UnicodeIdentifierStart} \p{UnicodeIdentifierPart}*
 float_exp_suffix		[Ee] [-+]? \d+
 float_num				\d* (\d | \.\d | \d\.) \d* {float_exp_suffix}?
 
@@ -40,7 +40,7 @@ float_num				\d* (\d | \.\d | \d\.) \d* {float_exp_suffix}?
 ⚬				{ return YY::VNLangParser::make_VN_SEP(location()); };
 ꩜				{ return YY::VNLangParser::make_ENGINE(location()); };
 ⩨				{ return YY::VNLangParser::make_STUFF(location()); };
-Δ				{ return YY::VNLangParser::make_DELTA(location()); };
+▲				{ return YY::VNLangParser::make_DELTA(location()); };
 🡺				{ return YY::VNLangParser::make_DELTA_ARROW(location()); };
 ⯁				{ return YY::VNLangParser::make_BUILT_IN(location()); };
 【				{ return YY::VNLangParser::make_OPEN_RESTRICT(location()); };

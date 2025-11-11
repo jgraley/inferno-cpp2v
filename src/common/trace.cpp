@@ -14,8 +14,7 @@
 #include <sstream>
 #include <algorithm>
 #include <cinttypes>
-#include <locale>  
-#include <codecvt>
+
 
 using namespace std;
 
@@ -35,7 +34,7 @@ string Trace(string s)
 
 string Trace(wstring s)
 {
-    return "w" + Trace(wstring_convert<codecvt_utf8<wchar_t>>().to_bytes(s)); // quoted so we can spot an empty string TODO un-escape
+    return "w" + Trace(ToASCII(s));
 }
 
 

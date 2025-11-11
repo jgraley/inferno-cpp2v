@@ -2,6 +2,8 @@
 #include "trace.hpp"
 #include <cxxabi.h>
 #include <stdio.h>
+#include <locale>  
+#include <codecvt>
 
 //////////////////////////// Traceable ///////////////////////////////
 
@@ -136,4 +138,16 @@ string OrdinalString( int i )
     if( i%10==2 && i%100!=12 )
         return s+"nd";
     return s+"th";    
+}
+
+
+wstring ToUnicode(string s)
+{
+	return wstring_convert<codecvt_utf8<wchar_t>>().from_bytes(s);
+}
+
+
+string ToASCII(wstring s)
+{
+	return wstring_convert<codecvt_utf8<wchar_t>>().to_bytes(s);
 }

@@ -47,5 +47,7 @@ string Join( const list<string> &v, string sep=" ", string pre="", string post="
 string JoinInstanceFunction( string instance, string function );
 
 string OrdinalString( int i );
-
+wstring ToUnicode( string s );
+string ToASCII( wstring s );
+	
 #endif
