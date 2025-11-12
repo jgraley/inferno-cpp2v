@@ -352,6 +352,8 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 
 // Item/Itemisation trouble:
 // () is ambiguous: no items, or one empty one? Parses as the former. Resolve by looking at the node type.
+// - OR... no parents means no items, and empty parens mean one empty item. Give a "note" 
+//         when empty parens given for node type that wants no items
 // Source locations not filled in for empty items: use the location of the ⚬ that was "swallowed"
 // - we probably want explict syntax i.e. Item::Empty(@n)
 // Test out the erorr cases!
