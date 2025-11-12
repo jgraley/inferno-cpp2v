@@ -321,8 +321,6 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 // Parsing 130-LowerSCType.vn reveals a mis-render - the identifier should be rendered 
 // with some kind of "real identifier node" syntax (and its name hint)
 
-// Render will have to sort the designations, see 002-RaiseSCType.vn
-
 // Use "lexical tie-in" to handle the context of designations and prevent "undesignated name" errors in designations
 // - Parser designates (done)
 // - Lexer checks and produces either X_NEW_NAME or X_KNOWN_NAME

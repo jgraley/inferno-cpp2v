@@ -10,7 +10,7 @@
 using namespace std;
 
 string ReadArgs::exename;
-string ReadArgs::vn_path;
+list<string> ReadArgs::vn_paths;
 string ReadArgs::input_x_path;
 string ReadArgs::output_x_path;
 bool ReadArgs::intermediate_graph = false;
@@ -43,7 +43,7 @@ void ReadArgs::Usage(string msg)
 {
     fprintf(stderr, "%s\n", msg.c_str());
     fprintf(stderr, "Usage:\n"
-                    "%s {<vn_path>} <options> \n"
+                    "%s [<vn_path>...] <options> \n"
                     "\n"
                     "<vn_path>       Run this Vida Nova script.\n"
                     "-i<input_path>  Read input program (C/C++) from <input_x_path>.\n"
@@ -103,7 +103,7 @@ ReadArgs::ReadArgs( int ac, char *av[] )
     {
         if( argv[curarg][0] != '-' )
         {
-            vn_path = argv[curarg];
+            vn_paths.push_back(argv[curarg]);
             continue;
 		}
 		

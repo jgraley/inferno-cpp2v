@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <list>
 
 // Try to share one command line args parser between all executable
 // targets so usage is consistent and to avoid duplciation. We allow
@@ -23,7 +24,7 @@ public:
     ReadArgs( int argc, char *argv[] );
 
     static string exename;
-    static string vn_path;
+    static list<string> vn_paths;
     static string input_x_path;
     static string output_x_path;
     static bool intermediate_graph;

@@ -432,9 +432,9 @@ Inferno::Plan::Plan(Inferno *algo_) :
     bool generate_pattern_renders = !ReadArgs::pattern_render_name.empty() || 
                                     ReadArgs::pattern_render_index != -1;
     bool generate_pattern_renders_before_ptrans = generate_pattern_renders &&
-                                                  !ReadArgs::vn_path.empty();
+                                                  !ReadArgs::vn_paths.empty();
     bool generate_pattern_renders_after_ptrans = generate_pattern_renders &&
-                                                 ReadArgs::vn_path.empty();
+                                                 ReadArgs::vn_paths.empty();
                                    
     if( generate_pattern_graphs && !ReadArgs::graph_trace )
         stages.push_back( stage_pattern_graphs );    
@@ -661,21 +661,29 @@ int main( int argc, char *argv[] )
     // Build a sequence of steps 
     Progress(Progress::BUILDING_STEPS).SetAsCurrent();    
     vector< shared_ptr<VN::VNStep> > sequence;
-    if( !ReadArgs::trace_quiet )
-        fprintf(stderr, "Building patterns\n"); 
     if( ReadArgs::documentation_graphs )
         BuildDocSequence( &sequence );
-    else if( !ReadArgs::vn_path.empty() )
+    else if( !ReadArgs::vn_paths.empty() )
     {
 		auto step = make_shared<VNStep>();
 		VNParse vn_parser;
 		ScriptEngine script_engine;
-		VN::Command::List script = vn_parser.DoParse( ReadArgs::vn_path );
 		VN::ScriptKit script_kit{ &sequence };
-		script_engine.DoExecute( script_kit, script );
+		// Obviously there are lots of other ways of doing this
+		for( string p : ReadArgs::vn_paths )
+		{
+			VN::Command::List script = vn_parser.DoParse(p);
+			if( !ReadArgs::trace_quiet )
+				fprintf(stderr, "%s ok\n", p.c_str()); 
+			script_engine.DoExecute( script_kit, script );
+		}
 	}
 	else
+	{
+	    if( !ReadArgs::trace_quiet )
+			fprintf(stderr, "Building patterns\n"); 
         BuildDefaultSequence( &sequence );    
+	}
         
     // Maybe we want to stop after buolding the steps
     if( Inferno::ShouldIQuitAfter(Progress::BUILDING_STEPS) )
