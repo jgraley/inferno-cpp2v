@@ -65,6 +65,7 @@
 	ID_BY_NAME								"⊜"
 	OPEN_CHEVRON							"《"
 	CLOSE_CHEVRON							"》"
+	TRANSFORM								"⤨"
 	<wstring> 	STR 						_("string")
 	<double>   	NUM 						_("number")
 	<string>  	ASCII_NAME 					_("ASCII name")
@@ -73,7 +74,8 @@
 %right '='
 %left  '+' '-'
 %left  '*' '/'
-%precedence PREFIX ENGINE STUFF DELTA DELTA_ARROW OPEN_RESTRICT CLOSE_RESTRICT
+%precedence PREFIX ENGINE STUFF DELTA DELTA_ARROW TRANSFORM
+%precedence OPEN_CHEVRON CLOSE_CHEVRON OPEN_RESTRICT CLOSE_RESTRICT
 %precedence BUILT_IN
 
 %type <TreePtr<Node>> 				pattern
@@ -83,7 +85,8 @@
 %type <VN::Command::List>			sep_commands
 %type <shared_ptr<VN::Command>>		bare_command
 %type <VN::Itemisation>				itemisation
-%type <VN::Itemisation>				items
+%type <VN::Itemisation>				items_bare
+%type <VN::Itemisation>				items_sep
 %type <VN::Item>					item
 
 %%
@@ -120,13 +123,23 @@ pattern	: pattern '+' pattern      { $$ = $1; }
 		| NUM       						      			{ $$ = vn->OnSpecificInteger($1); }
 		| ANY												{ $$ = nullptr; }
 		| ID_BY_NAME OPEN_CHEVRON scoped_name ',' STR CLOSE_CHEVRON { $$ = vn->OnIdByName($3, @3, $5, @5); }
+		| TRANSFORM OPEN_CHEVRON ASCII_NAME CLOSE_CHEVRON pattern	{ $$ = vn->OnTransform($3, @3, $5, @5); }
 		;
+		
+		
+		
 
-itemisation : '(' items ')'    							{ $$ = $2; }
+itemisation : '(' items_bare ')'    					{ $$ = $2; $$.loc = @$; }
+			| '(' VN_SEP items_bare ')'    				{ $$ = $3; $$.items.push_front(VN::Item()); $$.loc = @$; }
 			| '(' ')'									{ $$ = VN::Itemisation{}; $$.loc = @$; }
   
-items     	: items VN_SEP item   						{ $$ = $1; $$.items.push_back($3); $$.loc = @$; }
-			| item										{ $$.items.push_back($1); $$.loc = @$; }
+// It seems wrong that we can have a VN_SEP at the end of items_bare, but it's being consumed
+// to infer an empty item, hence the default-constructed VN::Item in the action.
+items_bare 	: items_sep item							{ $$ = $1; $$.items.push_back($2); }
+			| item										{ $$.items.push_back($1); }
+			| items_bare VN_SEP		 					{ $$ = $1; $$.items.push_back(VN::Item()); }
+
+items_sep 	: items_bare VN_SEP		   					{ $$ = $1; } 
 
 item		: item ',' pattern    						{ $$ = $1; $$.nodes.push_back($3); $$.loc = @$; }
 			| pattern									{ $$.nodes.push_back($1); $$.loc = @$; }

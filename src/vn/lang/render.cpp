@@ -58,7 +58,6 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern )
 	   	  (" or be NULL");
 	   	  
 	s += "꩜" + kit.render( pattern->GetSearchComparePattern(), Syntax::Production::PREFIX );
-
             
     indenter.AddLinesFromString(s);
     indenter.DoIndent();

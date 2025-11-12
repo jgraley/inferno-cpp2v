@@ -975,9 +975,7 @@ string StandardAgent::GetRender( const RenderKit &kit, Syntax::Production surrou
         
         if( ContainerInterface *con = dynamic_cast<ContainerInterface *>(items[i]) )                
         {
-			if( con->size() == 0 )
-				sitems.push_back( "()" );
-			else if( con->size() == 1 )
+			if( con->size() == 1 )
 				sitems.push_back( kit.render( TreePtr<Node>(con->front()), Syntax::Production::VN_SEP_ITEMS ) );
 			else
 			{

@@ -50,6 +50,7 @@ float_num				\d* (\d | \.\d | \d\.) \d* {float_exp_suffix}?
 ⊜				{ return YY::VNLangParser::make_ID_BY_NAME(location()); };
 《				{ return YY::VNLangParser::make_OPEN_CHEVRON(location()); };
 》				{ return YY::VNLangParser::make_CLOSE_CHEVRON(location()); };
+⤨				{ return YY::VNLangParser::make_TRANSFORM(location()); };
 
 ::				{ return YY::VNLangParser::make_SCOPE_RES(location()); };
 [-+*/=();,]  	{ return YY::VNLangParser::symbol_type(chr(), location()); }

@@ -284,6 +284,23 @@ TreePtr<Node> VNParse::OnIdByName( list<string> typ, any type_loc, wstring name,
 }
 
 
+TreePtr<Node> VNParse::OnTransform( string kind, any kind_loc, TreePtr<Node> pattern, any pattern_loc )
+{
+	if( kind == "TypeOf" )
+	{
+		return MakeTreeNode<TransformOfAgent>( &TypeOf::instance );
+	}
+	else
+	{
+		throw YY::VNLangParser::syntax_error(
+		    any_cast<YY::VNLangParser::location_type>(kind_loc),
+			QuoteName(kind) +
+			" unsupported in ⤨.");
+	}
+}
+
+
+
 void VNParse::Designate( wstring name, TreePtr<Node> sub_pattern )
 {
 	designations.insert( make_pair(name, sub_pattern) );
@@ -318,7 +335,7 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 // grammar for C operators
 // Consider c-style scoping of designations (eg for macros?)
 
-// Parsing 130-LowerSCType.vn reveals a mis-render - the identifier should be rendered 
+// Parsing 016-RaiseSCDeltaCount.vn reveals a mis-render - the identifier should be rendered 
 // with some kind of "real identifier node" syntax (and its name hint)
 
 // Use "lexical tie-in" to handle the context of designations and prevent "undesignated name" errors in designations
@@ -331,7 +348,13 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 
 // Remove the need for subclasses in Identifier-related nodes, then simplify ⊜ 
 
-// Ability to run multiple VN scripts at the command line eg ./inferno.exe patterns/*.vn
+// .vn to .c.vn?
+
+// Item/Itemisation trouble:
+// () is ambiguous: no items, or one empty one? Parses as the former. Resolve by looking at the node type.
+// Source locations not filled in for empty items: use the location of the ⚬ that was "swallowed"
+// - we probably want explict syntax i.e. Item::Empty(@n)
+// Test out the erorr cases!
 
 // Tix:
 // Lose StandardAgentWrapper #867
