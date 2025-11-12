@@ -46,8 +46,10 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern )
 	string s;
 	if( ReadArgs::use.count("c") )
 		s += Trace(unique_coupling_names) + "\n\n";
-	for( UniquifyNames::NodeAndNamePair p : unique_coupling_names )
-		s += p.second + " ⪮ " + RenderConcreteIntoProduction( p.first, Syntax::Production::VN_DEFINE ) + "⨟\n";
+	for( TreePtr<Node> node : coupling_names_uniqifier.GetNodesInDepthFirstPostOrder() )	
+		s += unique_coupling_names.at(node) + 
+		     " ⪮ " + 
+		     RenderConcreteIntoProduction( node, Syntax::Production::VN_DESIGNATE ) + "⨟\n";
 
 	ASSERT( pattern->GetSearchComparePattern() == pattern->GetReplacePattern() || !pattern->GetReplacePattern() )
 	   	  (pattern->GetSearchComparePattern())

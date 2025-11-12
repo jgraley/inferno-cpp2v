@@ -84,18 +84,21 @@ public:
     typedef pair<const TreePtr<Node>, string> NodeAndNamePair;
     typedef map< TreePtr<Node>, string> NodeToNameMap;
     typedef Fingerprinter::LinkSetByNode LinkSetByNode;
+    typedef list<TreePtr<Node>> NodeOrdering;
 
 	UniquifyNames( string (Syntax::*name_getter_)() const, // Method on nodes to get the initial name string
 	               bool multiparent_only_,                 // Restrict to nodes with more than one parent
 	               bool preserve_undeclared_ids_ );        // Refuse to rename identifiers that have no definition
     NodeToNameMap UniquifyAll( const TransKit &kit, TreePtr<Node> context );
     const LinkSetByNode &GetIncomingLinksMap() const;
+    const NodeOrdering &GetNodesInDepthFirstPostOrder() const;
                                
 private:
     string (Syntax::*name_getter)() const; 
 	const bool multiparent_only;          
 	const bool preserve_undeclared_ids;	
 	Fingerprinter fingerprinter;
+	NodeOrdering nodes_in_dfpo;
 };
 
 

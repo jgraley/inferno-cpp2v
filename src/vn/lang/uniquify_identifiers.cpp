@@ -181,8 +181,6 @@ void Fingerprinter::ProcessNode( TreePtr<Node> x, int &index )
 		
     // Record the fingerprints and increment index in depth-first pre-order
     bool first = fingerprints.count(x)==0;
-    fingerprints[x].insert(index);        
-    index++;
 
     // Recurse into our child nodes
     // Notw: not worried about repeat visits of arbitrary nodes due to couplings
@@ -191,6 +189,14 @@ void Fingerprinter::ProcessNode( TreePtr<Node> x, int &index )
     // good.
     if( first )
 	    ProcessChildren( x, index );
+	    
+	// Insert+increment index in post-order so that the indexes we store for the
+	// child subtree is strictly less than the indices we store for x, even if x
+	// is reached multiple times. This is so that the designations for the child 
+	// subtree can render before ours, which we need because we can reference 
+	// child's designations.
+    fingerprints[x].insert(index);        
+    index++;
 }
 
 
@@ -300,8 +306,8 @@ UniquifyNames::NodeToNameMap UniquifyNames::UniquifyAll( const TransKit &kit, Tr
 	// For repeatability of renders, get a list of identifiers in the tree, ordered:
 	// - mainly depth-first, wind-in
 	// - collections disambiguated using SimpleCompare
-    list< TreePtr<Node> > nodes;
-	for( auto p : node_sets_by_fp )
+	nodes_in_dfpo.clear();
+	for( auto p : node_sets_by_fp ) // Finger prints are in depth-first post-order
 	{
 		//ASSERT(p.second.size() == 1)
 		//  ("Could not differentiate between these identifiers: ")(p.second)
@@ -316,25 +322,24 @@ UniquifyNames::NodeToNameMap UniquifyNames::UniquifyAll( const TransKit &kit, Tr
 			if( multiparent_only && num_reachings == 1 )
 				continue;
 				
-			nodes.push_back( node );
+			nodes_in_dfpo.push_back( node );
 		}
 	}
 	
 	UniqueNameGenerator name_gen( name_getter );
 	NodeToNameMap nodes_to_names;
 
-	// Deal with undeclared (system) identifiers which must be preserved
-    list< TreePtr<Node> > renamable_nodes;
-	for( auto node : nodes )
+	// Deal with undeclared (system) identifiers which must be preserved    
+	for( auto node : nodes_in_dfpo )
 	{
+		TreePtr<Node> renamable_node = nullptr;
 		ASSERT( node );
 		if( preserve_undeclared_ids )
-		{
+		{			
 			try
 			{		
 				if( TreePtr<SpecificIdentifier>::DynamicCast(node) )
 				    DeclarationOf().TryApplyTransformation( kit, node );
-				renamable_nodes.push_back( node ); // can only rename if there is a decl
 			}
 			catch(DeclarationOf::DeclarationNotFound &)
 			{
@@ -347,20 +352,15 @@ UniquifyNames::NodeToNameMap UniquifyNames::UniquifyAll( const TransKit &kit, Tr
 				// map so normal IDs don't conflict with it.
 				name_gen.AddNodeNoRename( node );
 				nodes_to_names.insert( NodeAndNamePair( node, node->GetRenderTerminal() ) );
+				continue; // done with this node
 			}
 		}
-		else
-		{
-			renamable_nodes.push_back( node );
-		}
-	}
-
-    for( TreePtr<Node> node : renamable_nodes )
-    {
-        string name = name_gen.AddNode( node );
-        ASSERT( !name.empty() );
-        nodes_to_names.insert( NodeAndNamePair( node, name ) );
-    }        
+		
+		// Rename the identifier to preserve uniqueness
+	    string name = name_gen.AddNode( node );
+		ASSERT( !name.empty() );
+		nodes_to_names.insert( NodeAndNamePair( node, name ) );		 
+	}      
     
     return nodes_to_names;
 }
@@ -370,6 +370,13 @@ const Fingerprinter::LinkSetByNode &UniquifyNames::GetIncomingLinksMap() const
 {
 	return fingerprinter.GetIncomingLinksMap();
 }
+
+
+const UniquifyNames::NodeOrdering &UniquifyNames::GetNodesInDepthFirstPostOrder() const
+{
+	return nodes_in_dfpo;
+}
+
 
 //////////////////////////// UniquifyCompare ///////////////////////////////
 

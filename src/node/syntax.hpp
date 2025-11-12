@@ -46,7 +46,7 @@ public:
 		COMMA_OP, 
 		COMMA_SEP, // Use this for comma-separated lists to force parens for COMMA_OP, including VN
 
-		VN_DEFINE, // defining names using ⪮
+		VN_DESIGNATE, // defining names using ⪮
 		VN_DISJUNCTION,
 		VN_CONJUNCTION,
 
