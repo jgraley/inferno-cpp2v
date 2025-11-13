@@ -286,7 +286,7 @@ TreePtr<Node> VNParse::OnIdByName( list<string> typ, any type_loc, wstring name,
 	if( !node )
 		throw YY::VNLangParser::syntax_error(
 		    any_cast<YY::VNLangParser::location_type>(type_loc),
-			"⊜ requires itentifier type discriminator i.e. " + 
+			"⊛ requires itentifier type discriminator i.e. " + 
 			QuoteName(Join(typ, "::") + "Identifier") +
 			" would need to exist as a node type.");
 	
@@ -356,7 +356,7 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 // Namespaces: CPPTree should be assumed as a default where not specified. More than one specifier is still TBD
 // Common stuff for qualified types with :: including ability to throw on eg A::B::C (but could support later)
 
-// Remove the need for subclasses in Identifier-related nodes, then simplify ⊜ 
+// Remove the need for subclasses in Identifier-related nodes, then simplify ⊛ 
 
 // .vn to .c.vn?
 

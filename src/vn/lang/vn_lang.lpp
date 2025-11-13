@@ -41,13 +41,13 @@ float_num				\d* (\d | \.\d | \d\.) \d* {float_exp_suffix}?
 ꩜				{ return YY::VNLangParser::make_ENGINE(location()); };
 ⩨				{ return YY::VNLangParser::make_STUFF(location()); };
 ▲				{ return YY::VNLangParser::make_DELTA(location()); };
-🡺				{ return YY::VNLangParser::make_DELTA_ARROW(location()); };
+⯈				{ return YY::VNLangParser::make_DELTA_ARROW(location()); };
 ⯁				{ return YY::VNLangParser::make_BUILT_IN(location()); };
 【				{ return YY::VNLangParser::make_OPEN_RESTRICT(location()); };
 】				{ return YY::VNLangParser::make_CLOSE_RESTRICT(location()); };
 ☆				{ return YY::VNLangParser::make_ANY(location()); };
 ★				{ return YY::VNLangParser::make_STAR(location()); };
-⊜				{ return YY::VNLangParser::make_ID_BY_NAME(location()); };
+⊛				{ return YY::VNLangParser::make_ID_BY_NAME(location()); };
 《				{ return YY::VNLangParser::make_OPEN_CHEVRON(location()); };
 》				{ return YY::VNLangParser::make_CLOSE_CHEVRON(location()); };
 ⤨				{ return YY::VNLangParser::make_TRANSFORM(location()); };
