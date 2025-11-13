@@ -9,6 +9,7 @@
 #include "tree/misc.hpp"
 #include "tree/scope.hpp"
 #include "vn/lang/sort_decls.hpp"
+#include "vn/agents/agent.hpp"
 #include "clang/Parse/DeclSpec.h"
 #include "vn/lang/uniquify_identifiers.hpp"
 #include "cpprender.hpp"
@@ -61,7 +62,7 @@ string CppRender::RenderToString( TreePtr<Node> root )
     // identifiers - to rename them would be unsafe because we assume there's
     // a declaration ouside of our tree. This actually gets other nodes too but 
     // we'll only look up identifiers.
-    UniquifyNames identifiers_uniqifier(&Syntax::GetToken, false, true); 
+    UniquifyNames identifiers_uniqifier(&Syntax::GetIdentifierName, false, true); 
     unique_identifier_names = identifiers_uniqifier.UniquifyAll( kit, context );
     
     return kit.render( root, Syntax::Production::PROGRAM );
@@ -76,6 +77,8 @@ Syntax::Production CppRender::GetNodeProduction( TreePtr<Node> node ) const
 
 string CppRender::Dispatch( TreePtr<Node> node, Syntax::Production surround_prod )
 {
+	//ASSERT( !VN::Agent::TryAsAgentConst(node) )("WTF?!!!"); // #869
+			
     if( TreePtr<Uninitialised>::DynamicCast(node) )
         return string();  
     else if( auto program = TreePtr<Program>::DynamicCast(node) )

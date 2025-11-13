@@ -15,7 +15,8 @@ public:
         HelperU();
     }
     void HelperU()
-    {         
+    { 
+		(void)sc_delta_count();        
     } 
 };
 

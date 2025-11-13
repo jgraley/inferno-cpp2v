@@ -262,7 +262,7 @@ struct SpecificIdentifier : virtual Property
     virtual Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
     virtual string GetRenderTerminal() const; /// This is relied upon to just return the identifier name for rendering
-    virtual string GetToken() const;
+    virtual string GetIdentifierName() const;
     virtual string GetGraphName() const;
     virtual string GetTrace() const;
 	

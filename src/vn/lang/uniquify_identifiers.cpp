@@ -43,7 +43,7 @@ string UniqueNameGenerator::AddNode( TreePtr<Node> node )
 
 void UniqueNameGenerator::AddNodeNoRename( TreePtr<Node> node )
 {
-	ASSERT( !(node.get()->*name_getter)().empty() ); // GetToken for ids
+	ASSERT( !(node.get()->*name_getter)().empty() ); 
 		
     // Get canonical form of identifier name
     string base_name;
@@ -88,7 +88,7 @@ string UniqueNameGenerator::MakeUniqueName( string b, unsigned n ) const // note
 
 void UniqueNameGenerator::SplitName( TreePtr<Node> node, string *b, unsigned *n ) const // note static
 {
-    string original_name = (node.get()->*name_getter)(); // GetToken for ids
+    string original_name = (node.get()->*name_getter)(); 
     //FTRACE(node)(" has name \"")(original_name)("\"\n");
 #ifdef UID_FORMAT_HINT 
     char cb[1024]; // hope that's big enough!

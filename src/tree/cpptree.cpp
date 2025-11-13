@@ -313,7 +313,7 @@ string SpecificIdentifier::GetRenderTerminal() const
 }
 
 
-string SpecificIdentifier::GetToken() const
+string SpecificIdentifier::GetIdentifierName() const
 {
 	return name;
 }

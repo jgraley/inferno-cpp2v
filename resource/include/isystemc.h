@@ -40,6 +40,9 @@ void cease( unsigned char exit_code );
 // Allow this symbol
 int SC_ZERO_TIME;
 
+// In SystemC, this is sc_dt::uint64 
+unsigned sc_delta_count();
+
 #else
 // Parsed by native compiler on raw input example files only.
 #include "systemc_extensions.h"

@@ -207,8 +207,8 @@ RaiseSCDeltaCount::RaiseSCDeltaCount()
 {
     auto r_delta_count = MakePatternNode<DeltaCount>();
 
-    auto s_call = MakePatternNode<SeqArgsCall>();
-    auto s_token = MakePatternNode< SpecificInstanceIdentifier >( r_delta_count->GetToken() );                
+    auto s_call = MakePatternNode<Call>();
+    auto s_token = MakePatternNode< InstanceIdentifierByNameAgent >( r_delta_count->GetToken() );                
                 
     s_call->callee = s_token;
     //s_call->operands = (); // no operands
@@ -433,7 +433,7 @@ RemoveSCPrototypes::RemoveSCPrototypes()
     // void sc_delta_count();
     s_delta_count_inst->identifier = MakePatternNode< InstanceIdentifierByNameAgent >( "sc_delta_count" ); 
     s_delta_count_inst->type = s_delta_count_type;
-    s_delta_count_type->return_type = MakePatternNode<Void>();
+    s_delta_count_type->return_type = MakePatternNode<Integral>(); // Some kind of integer (in SC it's a sc_dt::uint64) 
     //s_delta_count_type->params = ();
     
     r_scope->members = (decls);   

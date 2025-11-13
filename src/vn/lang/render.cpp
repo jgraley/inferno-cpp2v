@@ -257,7 +257,8 @@ Syntax::Production Render::GetNodeProduction( TreePtr<Node> node ) const
 string Render::Dispatch( TreePtr<Node> node, Syntax::Production surround_prod )
 {
 	const Agent *agent = Agent::TryAsAgentConst(node);
-	ASSERT( agent )(node);
+	if( !agent )
+		return "⯁"+node->GetTypeName()+"TODO";  // TODO Move the code for this out of StandardAgent so we can use it here
 	return agent->GetRender( kit, surround_prod );     
 }
 

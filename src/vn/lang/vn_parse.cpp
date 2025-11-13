@@ -148,13 +148,19 @@ TreePtr<Node> VNParse::OnBuiltIn( list<string> builtin_type, any builtin_loc, It
 	// for singular items.
 	list<Item>::const_iterator src_it = src_itemisation.items.begin();
     vector< Itemiser::Element * > dest_items = dest->Itemise();
+    string counts_msg = SSPrintf("%s expects %d %s, but %d %s given.",
+                             QuoteName(Join(builtin_type, "::")).c_str(),
+                             dest_items.size(),
+                             dest_items.size()==1?"item":"items",
+                             src_itemisation.items.size(),
+                             src_itemisation.items.size()==1?"was":"were");
+    YY::VNLangParser::location_type prev_loc = any_cast<YY::VNLangParser::location_type>(src_itemisation.loc);
     for( Itemiser::Element *dest_item : dest_items )
     {
 		if( src_it == src_itemisation.items.end() )
 			throw YY::VNLangParser::syntax_error( 
-				any_cast<YY::VNLangParser::location_type>(src_itemisation.loc), 
-				"Insufficient items provided for " + 
-				QuoteName(Join(builtin_type, "::")) ); // TODO or switch to wild cards?
+				prev_loc, 
+				"Insufficient items given. " + counts_msg );
 		const Item &src_item = *src_it;
         if( SequenceInterface *dest_seq = dynamic_cast<SequenceInterface *>(dest_item) ) // TODO could roll together as Container?
             for( TreePtr<Node> src : src_item.nodes )
@@ -167,19 +173,23 @@ TreePtr<Node> VNParse::OnBuiltIn( list<string> builtin_type, any builtin_loc, It
 			if( src_item.nodes.size() != 1 )
 			    throw YY::VNLangParser::syntax_error( 
 				    any_cast<YY::VNLangParser::location_type>(src_item.loc),
-				    ("Singular item requires exactly one sub-pattern") ); // TODO or switch to wild cards? 
+				    SSPrintf("Singular item requires exactly one sub-pattern but %d were given.",
+				    src_item.nodes.size() ) ); 
             *dest_sing = src_item.nodes.front();
 		}
         else
             ASSERTFAIL("got something from itemise that isnt a Sequence, Collection or a singular TreePtr");
         src_it++;
+        prev_loc = any_cast<YY::VNLangParser::location_type>(src_item.loc);
     }
+    string empty_note;
+    // Sniff out the case where user put eg ⯁Node() when ⯁Node is required
+    if( dest_items.size()==0 && src_itemisation.items.size()==1 && src_itemisation.items.front().nodes.size()==0 )
+		empty_note = "\nNote: where a node type requires zero items, simply omit the () entirely.";                             
 	if( src_it != src_itemisation.items.end() )
 		throw YY::VNLangParser::syntax_error( 
 			any_cast<YY::VNLangParser::location_type>(src_it->loc), 
-			"Excess items provided for " + 
-			QuoteName(Join(builtin_type, "::")) +
-			" beginning with the indicated item" );
+			"Excess items given. " + counts_msg + empty_note);
 
 	return dest;
 }

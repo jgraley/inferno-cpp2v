@@ -7,6 +7,12 @@ string Syntax::GetToken() const
 }
 
 
+string Syntax::GetIdentifierName() const
+{
+	return "";
+}
+
+
 string Syntax::GetCouplingNameHint() const
 {
 	// Try token if defined

@@ -961,9 +961,13 @@ string StandardAgent::GetRender( const RenderKit &kit, Syntax::Production surrou
 {
 	(void)surround_prod;	
 	shared_ptr<const Node> node = GetPatternPtr();
-	string s = node->GetRenderTerminal();
-	if( !s.empty() )
-		return s;
+	// SpecificIdentifiers appear rarely in patterns, and when they do they a
+	//if( !SpecificIdentifier::DynamicCast(node) )
+//	{
+		string s = node->GetRenderTerminal();
+		if( !s.empty() )
+			return s;
+//	}
 	
     s = "⯁" + GetInnermostTemplateParam(TYPE_ID_NAME(*node));
 	
@@ -1000,8 +1004,10 @@ string StandardAgent::GetRender( const RenderKit &kit, Syntax::Production surrou
             ASSERTFAIL("got something from itemise that isn't a sequence or a shared pointer");
         }
     }
-        
-    if( GetTotalSize(sitems) > Syntax::GetLineBreakThreshold() )
+    
+    if( sitems.empty() )
+		{} // We're done. To render () would imply ONE item with ZERO elements in it
+    else if( GetTotalSize(sitems) > Syntax::GetLineBreakThreshold() )
 		s += Join( sitems, "⚬\n", "(\n", "\n)" );   
 	else 
 		s += Join( sitems, " ⚬ ", "(", ")" );    
