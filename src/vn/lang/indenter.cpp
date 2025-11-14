@@ -2,6 +2,8 @@
 
 using namespace VN;
 
+#define INDENT_AMOUNT 4
+
 void Indenter::AddLinesFromString( string s )
 {	
 	string::size_type next_start = 0;
@@ -45,7 +47,7 @@ string Indenter::GetString() const
 {
 	string s;
 	for( const Line &line : lines )
-		s += string(line.depth, '\t') + line.text + "\n";
+		s += string(line.depth*INDENT_AMOUNT, ' ') + line.text + "\n";
 	return s;
 }
 

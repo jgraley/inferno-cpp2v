@@ -79,16 +79,15 @@ Syntax::Production BuildIdentifierAgent::GetAgentProduction() const
 string BuildIdentifierAgent::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
-	string s = "⧇《" + GetIdentifierSubTypeName();
-	if( !format.empty() )
-		s += ",'" + format + "'";
-	s += "》";
+
 	list<string> ls;
+	ls.push_back(GetIdentifierSubTypeName());
+	ls.push_back(format);
 	Sequence<Node> scopy = sources;
 	for( TreePtrInterface &source : scopy )
 		ls.push_back( kit.render( (TreePtr<Node>)source, Syntax::Production::COMMA_SEP ) );
-	s += Join( ls, ", ", "( ", " )");
-	return s;
+
+	return Join( ls, ", ", "⧇《", "》");
 } 
   
     
@@ -113,7 +112,7 @@ Graphable::NodeBlock BuildIdentifierAgent::GetGraphBlockInfo() const
     // TODO indicate whether it's building instance, label or type identifier
     NodeBlock block;
     block.bold = true;
-    block.title = "⧇'"+format+"'"; // text from program code, so use single quotes
+    block.title = "⧇"+format; // text from program code, so use single quotes
     block.shape = "parallelogram";
     block.block_type = Graphable::NODE_SHAPED;
     block.node = GetPatternPtr();
@@ -121,11 +120,22 @@ Graphable::NodeBlock BuildIdentifierAgent::GetGraphBlockInfo() const
     return block;
 }
 
+TreePtr<Node> BuildIdentifierAgent::TryMakeFromDestignatedType( string type_ns, string type_name, string format )
+{
+#define NODE(NS, NAME) \
+	if( #NS==type_ns && #NAME==type_name ) \
+		return MakeTreeNode<Build##NAME##IdentifierAgent>(format); \
+	else
+#include "tree/identifier_names.inc"	
+#undef NODE
+		return nullptr;
+}	
+
 //---------------------------------- BuildInstanceIdentifierAgent ------------------------------------    
 
-TreePtr<CPPTree::SpecificIdentifier> BuildInstanceIdentifierAgent::BuildSpecificIdentifier(string name) const
+TreePtr<CPPTree::SpecificIdentifier> BuildInstanceIdentifierAgent::BuildSpecificIdentifier(string format) const
 {
-    return MakeTreeNode<CPPTree::SpecificInstanceIdentifier>( name ); 
+    return MakeTreeNode<CPPTree::SpecificInstanceIdentifier>( format ); 
 }
 
 
@@ -136,9 +146,9 @@ string BuildInstanceIdentifierAgent::GetIdentifierSubTypeName() const
 
 //---------------------------------- BuildTypeIdentifierAgent ------------------------------------    
 
-TreePtr<CPPTree::SpecificIdentifier> BuildTypeIdentifierAgent::BuildSpecificIdentifier(string name) const
+TreePtr<CPPTree::SpecificIdentifier> BuildTypeIdentifierAgent::BuildSpecificIdentifier(string format) const
 {
-    return MakeTreeNode<CPPTree::SpecificTypeIdentifier>( name ); 
+    return MakeTreeNode<CPPTree::SpecificTypeIdentifier>( format ); 
 }
 
 
@@ -149,9 +159,9 @@ string BuildTypeIdentifierAgent::GetIdentifierSubTypeName() const
 
 //---------------------------------- BuildLabelIdentifierAgent ------------------------------------    
 
-TreePtr<CPPTree::SpecificIdentifier> BuildLabelIdentifierAgent::BuildSpecificIdentifier(string name) const
+TreePtr<CPPTree::SpecificIdentifier> BuildLabelIdentifierAgent::BuildSpecificIdentifier(string format) const
 {
-    return MakeTreeNode<CPPTree::SpecificLabelIdentifier>( name ); 
+    return MakeTreeNode<CPPTree::SpecificLabelIdentifier>( format ); 
 }
 
 

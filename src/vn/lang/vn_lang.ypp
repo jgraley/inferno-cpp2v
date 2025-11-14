@@ -63,27 +63,36 @@
 	ANY 									"☆"
 	STAR 									"★"
 	ID_BY_NAME								"⊛"
+	BUILD_ID								"⧇"
 	OPEN_CHEVRON							"《"
 	CLOSE_CHEVRON							"》"
 	TRANSFORM								"⤨"
+	NEGATION								"¬"
+	CONJUNCTION								"∧"
+	DISJUNCTION								"∨"
 	<wstring> 	STR 						_("string")
-	<double>   	NUM 						_("number")
+	<unsigned> 	NUM 						_("number")
 	<string>  	ASCII_NAME 					_("ASCII name")
+	<string>  	ASCII_FORMAT 				_("ASCII format string")
 	<wstring> 	UNICODE_NAME 				_("Unicode name")
 
+%left DISJUNCTION
+%left CONJUNCTION
 %right '='
 %left  '+' '-'
 %left  '*' '/'
-%precedence PREFIX ENGINE STUFF DELTA DELTA_ARROW TRANSFORM
+%precedence PREFIX ENGINE STUFF DELTA DELTA_ARROW TRANSFORM NEGATION
 %precedence OPEN_CHEVRON CLOSE_CHEVRON OPEN_RESTRICT CLOSE_RESTRICT
 %precedence BUILT_IN
 
 %type <TreePtr<Node>> 				pattern
 %type <wstring> 					vn_name
+%type <string>						format
 %type <list<string>> 				scoped_name
 %type <VN::Command::List>			commands
 %type <VN::Command::List>			sep_commands
 %type <shared_ptr<VN::Command>>		bare_command
+%type <VN::Limit>					limit
 %type <VN::Itemisation>				itemisation
 %type <VN::Itemisation>				items_bare
 %type <VN::Itemisation>				items_sep
@@ -113,7 +122,9 @@ pattern	: pattern '+' pattern      { $$ = $1; }
 		| pattern '*' pattern      { $$ = $1; }
 		| pattern '/' pattern      { $$ = $1; }
 		| STAR												{ $$ = vn->OnStar(); }
-		| STUFF pattern 		     					 	{ $$ = vn->OnStuff($2); }
+		| STUFF pattern 		     					 	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
+		| STUFF OPEN_CHEVRON pattern CLOSE_CHEVRON pattern 	{ $$ = vn->OnStuff($5, $3, VN::Limit()); }
+		| STUFF OPEN_CHEVRON limit CLOSE_CHEVRON pattern 	{ $$ = vn->OnStuff($5, nullptr, $3); }
 		| DELTA pattern DELTA_ARROW pattern   		   		{ $$ = vn->OnDelta($2, $4); }
 		| BUILT_IN scoped_name itemisation					{ $$ = vn->OnBuiltIn($2, @2, $3); }
 		| BUILT_IN scoped_name								{ $$ = vn->OnBuiltIn($2, @2, VN::Itemisation{{}, @2}); }
@@ -123,9 +134,18 @@ pattern	: pattern '+' pattern      { $$ = $1; }
 		| vn_name       						  			{ $$ = vn->OnName($1, @1); }
 		| NUM       						      			{ $$ = vn->OnSpecificInteger($1); }
 		| ANY												{ $$ = nullptr; }
-		| ID_BY_NAME OPEN_CHEVRON scoped_name ',' STR CLOSE_CHEVRON { $$ = vn->OnIdByName($3, @3, $5, @5); }
-		| TRANSFORM OPEN_CHEVRON ASCII_NAME CLOSE_CHEVRON pattern	{ $$ = vn->OnTransform($3, @3, $5, @5); }
+		| ID_BY_NAME OPEN_CHEVRON scoped_name ',' ASCII_NAME CLOSE_CHEVRON		{ $$ = vn->OnIdByName($3, @3, $5, @5); } // ASCII_NAME could be format
+		| BUILD_ID OPEN_CHEVRON scoped_name ',' format CLOSE_CHEVRON 			{ $$ = vn->OnBuildId($3, @3, $5, @5, VN::Item{}); }
+		| BUILD_ID OPEN_CHEVRON scoped_name ',' format ',' item CLOSE_CHEVRON 	{ $$ = vn->OnBuildId($3, @3, $5, @5, $7); }
+		| BUILD_ID OPEN_CHEVRON scoped_name ',' ',' item CLOSE_CHEVRON 			{ $$ = vn->OnBuildId($3, @3, "", @5, $6); }
+		| TRANSFORM OPEN_CHEVRON ASCII_NAME CLOSE_CHEVRON pattern				{ $$ = vn->OnTransform($3, @3, $5, @5); }
+		| NEGATION pattern 		     					 	{ $$ = vn->OnNegation($2); }
+		| pattern CONJUNCTION pattern						{ $$ = vn->OnConjunction($1, $3); }
+		| pattern DISJUNCTION pattern						{ $$ = vn->OnDisjunction($1, $3); }
 		;		
+
+// This one dips into ASCII/C because VN doesn't otherwise need inequalities.
+limit		: '=' NUM									{ $$ = VN::Limit{ "=", @1, $2, @2 }; }
 
 itemisation : '(' items_bare ')'    					{ $$ = $2; $$.loc = @$; }
 			| '(' items_sep ')'	    					{ $$ = $2; $$.loc = @$; $$.items.push_back({{}, @3}); }
@@ -140,6 +160,9 @@ items_sep 	: items_bare VN_SEP		   					{ $$ = $1; }
 
 item		: item ',' pattern    						{ $$ = $1; $$.nodes.push_back($3); $$.loc = @$; }
 			| pattern									{ $$.nodes.push_back($1); $$.loc = @$; }
+
+format		: ASCII_FORMAT  							{ $$ = $1; }
+			| ASCII_NAME		  						{ $$ = $1; }
 
 vn_name			: UNICODE_NAME    						{ $$ = $1; }
 				| ASCII_NAME							{ $$ = ToUnicode($1); }     

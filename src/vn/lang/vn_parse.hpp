@@ -23,6 +23,14 @@ class NodeNames;
 namespace VN 
 {
 		
+struct Limit
+{
+	string cond;
+	any cond_loc;
+	unsigned num;
+	any num_loc;
+};
+		
 struct Item
 {
 	list<TreePtr<Node>> nodes;
@@ -51,7 +59,7 @@ public:
 	shared_ptr<Command> OnCommand( shared_ptr<Command> command );
 
 	TreePtr<Node> OnStar();
-	TreePtr<Node> OnStuff( TreePtr<Node> terminus );
+	TreePtr<Node> OnStuff( TreePtr<Node> terminus, TreePtr<Node> recurse_restriction, Limit limit );
 	TreePtr<Node> OnDelta( TreePtr<Node> through, TreePtr<Node> overlay );
 	TreePtr<Node> OnBuiltIn( list<string> builtin_type, any builtin_loc, Itemisation itemisation );
 	TreePtr<Node> OnName( wstring name, any name_loc );
@@ -62,9 +70,13 @@ public:
 	TreePtr<Node> OnPostfixOperator( string tok, TreePtr<Node> operand );
 	TreePtr<Node> OnInfixOperator( string tok, TreePtr<Node> left, TreePtr<Node> right );
 	TreePtr<Node> OnSpecificInteger( int value );
-	TreePtr<Node> OnIdByName( list<string> typ, any type_loc, wstring name, any name_loc );
+	TreePtr<Node> OnIdByName( list<string> typ, any type_loc, string name, any name_loc );
+	TreePtr<Node> OnBuildId( list<string> typ, any type_loc, string format, any name_loc, Item sources );
 	TreePtr<Node> OnTransform( string kind, any kind_loc, TreePtr<Node> pattern, any pattern_loc );
-
+	TreePtr<Node> OnNegation( TreePtr<Node> operand );
+	TreePtr<Node> OnConjunction( TreePtr<Node> left, TreePtr<Node> right );
+	TreePtr<Node> OnDisjunction( TreePtr<Node> left, TreePtr<Node> right );
+	
 	void Designate( wstring name, TreePtr<Node> sub_pattern );
 	static string QuoteName(string name);
 	static string QuoteName(wstring name);

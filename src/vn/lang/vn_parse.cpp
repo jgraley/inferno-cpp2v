@@ -71,11 +71,31 @@ TreePtr<Node> VNParse::OnStar()
 }
 
 
-TreePtr<Node> VNParse::OnStuff( TreePtr<Node> terminus )
+TreePtr<Node> VNParse::OnStuff( TreePtr<Node> terminus, TreePtr<Node> recurse_restriction, Limit limit )
 {
-	auto stuff = MakeTreeNode<StuffAgent>();
-	stuff->terminus = terminus;
-	return stuff;
+	if( limit.cond.empty() )
+	{
+		auto stuff = MakeTreeNode<StuffAgent>();
+		stuff->terminus = terminus;
+		stuff->recurse_restriction = recurse_restriction;
+		return stuff;
+	}
+	else if( limit.cond=="=" )
+	{
+		if( limit.num == 1 )
+		{
+			return MakeTreeNode<ChildAgent>();
+		}
+		else
+			throw YY::VNLangParser::syntax_error(
+				any_cast<YY::VNLangParser::location_type>(limit.num_loc), 
+				"⩨ depth value " + to_string(limit.num) + " not supported (TODO).");		
+		
+	}
+	else
+		throw YY::VNLangParser::syntax_error(
+			any_cast<YY::VNLangParser::location_type>(limit.cond_loc), 
+			"⩨ depth condition " + QuoteName(limit.cond) + " not supported (TODO).");		
 }
 
 
@@ -271,26 +291,45 @@ TreePtr<Node> VNParse::OnSpecificInteger( int value )
 }
 
 
-TreePtr<Node> VNParse::OnIdByName( list<string> typ, any type_loc, wstring name, any name_loc )
+TreePtr<Node> VNParse::OnIdByName( list<string> typ, any type_loc, string name, any name_loc )
 {
 	(void)name_loc; // TODO perhaps IdentifierByNameAgent can validate this?
 	
 	if( typ.size() == 1 )
-		typ.push_front("CPPTree");
+		typ.push_front("CPPTree"); // TODO centralise
 	
-	// We need to strip off the quotes
-	name = name.substr(1, name.size() - 2);
-
-	TreePtr<Node> node = IdentifierByNameAgent::TryMakeFromName( typ.front(), typ.back(), ToASCII(name) );
+	TreePtr<Node> node = IdentifierByNameAgent::TryMakeFromDestignatedType( typ.front(), typ.back(), name );
 	
 	if( !node )
 		throw YY::VNLangParser::syntax_error(
 		    any_cast<YY::VNLangParser::location_type>(type_loc),
-			"⊛ requires itentifier type discriminator i.e. " + 
+			"⊛ requires identifier type discriminator i.e. " + 
 			QuoteName(Join(typ, "::") + "Identifier") +
 			" would need to exist as a node type.");
 	
 	return node;
+}
+
+
+TreePtr<Node> VNParse::OnBuildId( list<string> typ, any type_loc, string format, any name_loc, Item sources )
+{
+	(void)name_loc; // TODO perhaps BuildIdentifierAgent can validate this?
+	
+	if( typ.size() == 1 )
+		typ.push_front("CPPTree");  // TODO centralise
+
+	TreePtr<Node> bia_node = BuildIdentifierAgent::TryMakeFromDestignatedType( typ.front(), typ.back(), format );
+	
+	if( !bia_node )
+		throw YY::VNLangParser::syntax_error(
+		    any_cast<YY::VNLangParser::location_type>(type_loc),
+			"⧇ requires identifier type discriminator i.e. " + 
+			QuoteName(Join(typ, "::") + "Identifier") +
+			" would need to exist as a node type.");
+	
+	for( TreePtr<Node> src : sources.nodes )
+		dynamic_cast<BuildIdentifierAgent *>(bia_node.get())->sources.insert( src );						
+	return bia_node;
 }
 
 
@@ -299,6 +338,10 @@ TreePtr<Node> VNParse::OnTransform( string kind, any kind_loc, TreePtr<Node> pat
 	if( kind == "TypeOf" )
 	{
 		return MakeTreeNode<TransformOfAgent>( &TypeOf::instance );
+	}
+	else if( kind == "DeclarationOf" )
+	{
+		return MakeTreeNode<TransformOfAgent>( &DeclarationOf::instance );
 	}
 	else
 	{
@@ -309,7 +352,30 @@ TreePtr<Node> VNParse::OnTransform( string kind, any kind_loc, TreePtr<Node> pat
 	}
 }
 
+	
+TreePtr<Node> VNParse::OnNegation( TreePtr<Node> operand )
+{
+	auto node = MakeTreeNode<NegationAgent>();
+	node->negand = operand;
+	return node;
+}
 
+
+TreePtr<Node> VNParse::OnConjunction( TreePtr<Node> left, TreePtr<Node> right )
+{
+	auto node = MakeTreeNode<ConjunctionAgent>();
+	node->conjuncts = (left, right);
+	return node;
+}
+
+
+TreePtr<Node> VNParse::OnDisjunction( TreePtr<Node> left, TreePtr<Node> right )
+{
+	auto node = MakeTreeNode<DisjunctionAgent>();
+	node->disjuncts = (left, right);
+	return node;
+}
+	
 
 void VNParse::Designate( wstring name, TreePtr<Node> sub_pattern )
 {
@@ -360,13 +426,11 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 
 // .vn to .c.vn?
 
-// Item/Itemisation trouble:
-// () is ambiguous: no items, or one empty one? Parses as the former. Resolve by looking at the node type.
-// - OR... no parents means no items, and empty parens mean one empty item. Give a "note" 
-//         when empty parens given for node type that wants no items
-// Source locations not filled in for empty items: use the location of the ⚬ that was "swallowed"
-// - we probably want explict syntax i.e. Item::Empty(@n)
-// Test out the erorr cases!
+// Things like OnPrefixOperator() should take an actual parser token not a string
+
+// Diff testing!
+
+// Check the names given to ⊛ for validity as a C identifier OR a format string
 
 // Tix:
 // Lose StandardAgentWrapper #867

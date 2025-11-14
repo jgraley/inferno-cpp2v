@@ -25,12 +25,14 @@
 
 // ASCII must come before unicode otherwise they'd all lex as unicode.
 ascii_name				[a-zA-Z_][a-zA-Z0-9_]*
+ascii_format			[a-zA-Z_%][a-zA-Z0-9_%]*
 
 // We have to exclude delta from identifiers here, otherwise "match longest"
 // rule means eg ▲d is parsed as a name. TODO ▲ should be a keyword, see #866
 unicode_name			\p{UnicodeIdentifierStart} \p{UnicodeIdentifierPart}*
 float_exp_suffix		[Ee] [-+]? \d+
 float_num				\d* (\d | \.\d | \d\.) \d* {float_exp_suffix}?
+integral_num			\d*
 
 %%
 
@@ -48,16 +50,21 @@ float_num				\d* (\d | \.\d | \d\.) \d* {float_exp_suffix}?
 ☆				{ return YY::VNLangParser::make_ANY(location()); };
 ★				{ return YY::VNLangParser::make_STAR(location()); };
 ⊛				{ return YY::VNLangParser::make_ID_BY_NAME(location()); };
+⧇				{ return YY::VNLangParser::make_BUILD_ID(location()); };
 《				{ return YY::VNLangParser::make_OPEN_CHEVRON(location()); };
 》				{ return YY::VNLangParser::make_CLOSE_CHEVRON(location()); };
 ⤨				{ return YY::VNLangParser::make_TRANSFORM(location()); };
+¬				{ return YY::VNLangParser::make_NEGATION(location()); };
+∧				{ return YY::VNLangParser::make_CONJUNCTION(location()); };
+∨				{ return YY::VNLangParser::make_DISJUNCTION(location()); };
 
 ::				{ return YY::VNLangParser::make_SCOPE_RES(location()); };
 [-+*/=();,]  	{ return YY::VNLangParser::symbol_type(chr(), location()); }
 
 \"[^"]*\"   	{ return YY::VNLangParser::make_STR(wstr(), location()); }
-{float_num}		{ return YY::VNLangParser::make_NUM(strtod(text(), NULL), location()); }
+{integral_num}	{ return YY::VNLangParser::make_NUM(strtod(text(), NULL), location()); }
 {ascii_name}	{ return YY::VNLangParser::make_ASCII_NAME(str(), location()); }
+{ascii_format}	{ return YY::VNLangParser::make_ASCII_FORMAT(str(), location()); }
 {unicode_name}	{ return YY::VNLangParser::make_UNICODE_NAME(wstr(), location()); }
 
 %%

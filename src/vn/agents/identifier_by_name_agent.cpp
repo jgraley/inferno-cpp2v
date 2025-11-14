@@ -112,7 +112,7 @@ string IdentifierByNameAgent::GetRender( const RenderKit &kit, Syntax::Productio
     (void)kit;
 	(void)surround_prod;
 	string s = "⊛《" + GetIdentifierSubTypeName();
-	s += ",\"" + name + "\"";
+	s += "," + name;
 	s += "》";
 	return s;
 } 
@@ -140,7 +140,7 @@ Graphable::NodeBlock IdentifierByNameAgent::GetGraphBlockInfo() const
     // Update: PreRestriction indicator seems to be doing that now
     NodeBlock block;
     block.bold = true;
-    block.title = "⊛\"" + name + "\"";    
+    block.title = "⊛" + name;    
     block.shape = "trapezium";
     block.block_type = Graphable::NODE_SHAPED;
     block.node = GetPatternPtr();
@@ -148,7 +148,7 @@ Graphable::NodeBlock IdentifierByNameAgent::GetGraphBlockInfo() const
 }
 
 
-TreePtr<Node> IdentifierByNameAgent::TryMakeFromName( string type_ns, string type_name, string matching_name )
+TreePtr<Node> IdentifierByNameAgent::TryMakeFromDestignatedType( string type_ns, string type_name, string matching_name )
 {
 #define NODE(NS, NAME) \
 	if( #NS==type_ns && #NAME==type_name ) \

@@ -40,6 +40,7 @@ struct BuildIdentifierAgent : public virtual BuilderAgent
     bool IsFixedType() const final;    
     virtual string GetIdentifierSubTypeName() const = 0;
     NodeBlock GetGraphBlockInfo() const final;
+	static TreePtr<Node> TryMakeFromDestignatedType( string type_ns, string type_name, string matching_name );
 
     Sequence<Node> sources;
     string format;
