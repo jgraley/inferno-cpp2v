@@ -32,7 +32,7 @@ struct SCFunction : virtual SCNode {};
 struct Event : CPPTree::Type
 {
     NODE_FUNCTIONS_FINAL
-    virtual string GetToken() const { return "sc_event"; }
+    virtual string GetLoweredIdName() const { return "sc_event"; }
 };
 
 /** SystemC module type. The processes, registers, submodules and everything
@@ -45,7 +45,7 @@ struct Module : SCRecord
 {
     NODE_FUNCTIONS_FINAL
     
-    virtual string GetToken() const { return "sc_module"; }
+    virtual string GetLoweredIdName() const { return "sc_module"; }
   	TreePtr<CPPTree::AccessSpec> GetInitialAccess() const override { return MakeTreeNode<CPPTree::Private>(); }   
 };
 
@@ -55,7 +55,7 @@ struct Interface : SCRecord
 {
     NODE_FUNCTIONS_FINAL
     
-    virtual string GetToken() const { return "sc_interface"; }
+    virtual string GetLoweredIdName() const { return "sc_interface"; }
   	TreePtr<CPPTree::AccessSpec> GetInitialAccess() const override { return MakeTreeNode<CPPTree::Private>(); } 
 };
 
@@ -77,7 +77,7 @@ struct Wait : CPPTree::Statement,
               CPPTree::Uncombable
 {
     NODE_FUNCTIONS
-    virtual string GetToken() const { return "wait"; }
+    virtual string GetLoweredIdName() const { return "wait"; }
 };
 
 /** Waiting for a SystemC event - blocks until the event indicated by the expression is 
@@ -112,7 +112,7 @@ struct NextTrigger : CPPTree::Statement,
                      virtual SCFunction
 {
     NODE_FUNCTIONS
-    virtual string GetToken() const { return "next_trigger"; }
+    virtual string GetLoweredIdName() const { return "next_trigger"; }
 };
 
 /** Causes the method to be triggered again when the event indicated by the expression is 
@@ -146,7 +146,7 @@ struct Notify : CPPTree::Statement,
                 virtual SCFunction
 {
     NODE_FUNCTIONS
-    virtual string GetToken() const { return "notify"; }
+    virtual string GetLoweredIdName() const { return "notify"; }
     TreePtr<CPPTree::Expression> event; ///< event to notify 
 };
 
@@ -193,7 +193,7 @@ struct EventProcess : Process
 struct Method : EventProcess
 {
     NODE_FUNCTIONS_FINAL
-    virtual string GetToken() const { return "SC_METHOD"; }
+    virtual string GetLoweredIdName() const { return "SC_METHOD"; }
 };
 
 /** SystemC thread process. Local context, so this can run forever (stopping only to indicate completion
@@ -203,7 +203,7 @@ struct Thread : EventProcess // TODO if SystemC really can't pre-empt, then this
                              // TODO and I should create a real thread support extension because user's threads will run busy sometimes
 {
     NODE_FUNCTIONS_FINAL
-    virtual string GetToken() const { return "SC_THREAD"; }
+    virtual string GetLoweredIdName() const { return "SC_THREAD"; }
 };
 
 /** SystemC clocked thread process. A local context as with Thread, but can only
@@ -212,7 +212,7 @@ struct Thread : EventProcess // TODO if SystemC really can't pre-empt, then this
 struct ClockedThread : Process
 {
     NODE_FUNCTIONS_FINAL
-    virtual string GetToken() const { return "SC_CTHREAD"; }
+    virtual string GetLoweredIdName() const { return "SC_CTHREAD"; }
     //TODO TreePtr<Sensitivity> clock;
 };
 
@@ -222,7 +222,7 @@ struct DeltaCount : CPPTree::Operator,
                     virtual SCFunction // TODO rename as InferredReset() since that will transform more easily to a real reset system
 {
     NODE_FUNCTIONS_FINAL
-    virtual string GetToken() const { return "sc_delta_count"; }    
+    virtual string GetLoweredIdName() const { return "sc_delta_count"; }    
 	Production GetMyProduction() const override { return Production::POSTFIX; };	// renders like a function call
 };
 
@@ -241,7 +241,7 @@ struct TerminationFunction : CPPTree::Statement,
 struct Exit : TerminationFunction
 {
     NODE_FUNCTIONS_FINAL
-    virtual string GetToken() const { return "exit"; }
+    virtual string GetLoweredIdName() const { return "exit"; }
 };
 
 
@@ -258,7 +258,7 @@ struct SCExtension : virtual Node
 struct Cease : TerminationFunction, SCExtension
 {
     NODE_FUNCTIONS_FINAL
-    virtual string GetToken() const { return "cease"; }
+    virtual string GetLoweredIdName() const { return "cease"; }
 };
 
 };

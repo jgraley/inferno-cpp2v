@@ -962,13 +962,13 @@ string StandardAgent::GetRender( const RenderKit &kit, Syntax::Production surrou
 	(void)surround_prod;	
 	shared_ptr<const Node> node = GetPatternPtr();
 	// SpecificIdentifiers appear rarely in patterns, and when they do they are not declared,
-	// so we should not try to render the C++ terminal
-	if( !dynamic_cast<const CPPTree::SpecificIdentifier *>(node.get()) )
-    {
-		string s = node->GetRenderTerminal();
-		if( !s.empty() )
-			return s;
+	// so we should not try to render the C++ terminal	    
+	try 
+	{ 
+		if( !dynamic_cast<const CPPTree::SpecificIdentifier *>(node.get()) )
+			return GetRenderTerminal(); 
 	}
+	catch( Syntax::NotOnThisNode & ) {}
 	
     string s = "⯁" + GetInnermostTemplateParam(TYPE_ID_NAME(*node));
 	

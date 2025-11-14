@@ -2,6 +2,7 @@
 #define RENDERABLE_HPP
 
 #include "common/common.hpp"
+#include "common/mismatch.hpp"
 
 /// Interface for being able to reutnr a string for rendering (as opposed to debug)
 class Syntax : virtual Traceable
@@ -86,8 +87,12 @@ public:
 		RIGHT
 	};
 	
+	struct NotOnThisNode : Exception
+	{
+	};
+	
 	/// Produce the source-code-name of the corresponding SystemC construct
-    virtual string GetToken() const;
+    virtual string GetLoweredIdName() const;
     virtual string GetIdentifierName() const;
     virtual string GetCouplingNameHint() const;
 	virtual string GetRenderTerminal() const;

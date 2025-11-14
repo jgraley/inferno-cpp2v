@@ -12,7 +12,7 @@ using namespace Steps;
 
 LowerSCType::LowerSCType( TreePtr< Type > s_sctype )
 {
-    auto r_token = MakePatternNode< SpecificTypeIdentifier >( s_sctype->GetToken() );                
+    auto r_token = MakePatternNode< SpecificTypeIdentifier >( s_sctype->GetLoweredIdName() );                
 
     Configure( SEARCH_REPLACE, s_sctype, r_token );
 }
@@ -30,7 +30,7 @@ EnsureConstructorsInSCRecordUsers::EnsureConstructorsInSCRecordUsers()
 	auto r_scclass = MakePatternNode< SCRecord >();
     auto r_base = MakePatternNode< Base >();
     auto tid = MakePatternNode< TypeIdentifier >();
-    auto r_token = MakePatternNode< SpecificTypeIdentifier >( s_scclass->GetToken() ); 
+    auto r_token = MakePatternNode< SpecificTypeIdentifier >( ""/*s_scclass->GetLoweredIdName() TODO SCRecord is intermediate and has no lowered id name */ ); 
     auto r_cons_macro = MakePatternNode< MacroDeclaration >(); 
     auto r_comp = MakePatternNode< Compound >();
     auto ctor_macro_name = MakePatternNode< SpecificPreprocessorIdentifier >( "SC_CTOR" ); // #819 style
@@ -40,7 +40,7 @@ EnsureConstructorsInSCRecordUsers::EnsureConstructorsInSCRecordUsers()
 	// TODO not restricting properly: as per our name EnsureConstructorsInSCRecordUsers
 	// we should add constructors to the USERS of SC classes (i.e. those that declare
 	// one as a field). This will be the same set if every class is now an SC class.
-	// But one day they may not be, as with small pod-resembling untility classes.
+	// But one day they may not be, as with small pod-resembling utility classes.
 	// Actually we want the union of *is* SC and *uses* SC
 	
     // Module to a class and add a constructor such as SC_CTOR(ClassName)    
@@ -78,7 +78,7 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     auto r_class = MakePatternNode< Class >();
     auto r_base = MakePatternNode< Base >();
     auto tid = MakePatternNode< TypeIdentifier >();
-    auto r_token = MakePatternNode< SpecificTypeIdentifier >( s_scclass->GetToken() ); 
+    auto r_token = MakePatternNode< SpecificTypeIdentifier >( s_scclass->GetLoweredIdName() ); 
     
     auto l1_class = MakePatternNode< InheritanceRecord >();
     auto l1_fields = MakePatternNode<StarAgent, Declaration>();
@@ -214,7 +214,7 @@ LowerSCDelta::LowerSCDelta( TreePtr<SCFunction> s_delta,
 LowerTerminationFunction::LowerTerminationFunction( TreePtr<SCTree::TerminationFunction> s_tf )
 {
     auto r_call = MakePatternNode< SeqArgsCall >();
-    auto r_token = MakePatternNode< SpecificInstanceIdentifier >( s_tf->GetToken() ); 
+    auto r_token = MakePatternNode< SpecificInstanceIdentifier >( s_tf->GetLoweredIdName() ); 
     // TODO IdValuePair args can't render without a function decl. Maybe add OperandSequence as an alternative? 
     auto exit_expr = MakePatternNode< Expression >(); 
                     
@@ -246,7 +246,7 @@ LowerSCProcess::LowerSCProcess( TreePtr< SCTree::Process > s_scprocess )
     auto id = MakePatternNode< InstanceIdentifier >(); 
     auto bases = MakePatternNode<StarAgent, Base>();
     auto ident = MakePatternNode<PreprocessorIdentifier>();
-    auto token = MakePatternNode< SpecificPreprocessorIdentifier >( s_scprocess->GetToken() ); // #819 style
+    auto token = MakePatternNode< SpecificPreprocessorIdentifier >( s_scprocess->GetLoweredIdName() ); // #819 style
     auto r_func = MakePatternNode<Function>();
                 
     module->members = (overcons, process, decls);
@@ -287,7 +287,7 @@ LowerSCNotifyImmediate::LowerSCNotifyImmediate()
     auto r_call = MakePatternNode<SeqArgsCall>();
     auto r_lookup = MakePatternNode<Lookup>();
     auto r_event = MakePatternNode<Event>();
-    auto r_token = MakePatternNode< SpecificInstanceIdentifier >( s_notify->GetToken() );                
+    auto r_token = MakePatternNode< SpecificInstanceIdentifier >( s_notify->GetLoweredIdName() );                
     auto eexpr = MakePatternNode<TransformOfAgent, Expression>( &TypeOf::instance ); 
     //MakePatternNode< Expression > eexpr; 
             
@@ -311,7 +311,7 @@ LowerSCNotifyDelta::LowerSCNotifyDelta(TreePtr<CPPTree::InstanceIdentifier> zero
     
     auto r_call = MakePatternNode<SeqArgsCall>();
     auto r_lookup = MakePatternNode<Lookup>();
-    auto r_token = MakePatternNode< SpecificInstanceIdentifier >( s_notify->GetToken() );                
+    auto r_token = MakePatternNode< SpecificInstanceIdentifier >( s_notify->GetLoweredIdName() );                
     //MakePatternNode< Expression > eexpr; 
             
     s_notify->event = eexpr;
@@ -331,7 +331,7 @@ LowerSCDeltaCount::LowerSCDeltaCount()
     auto s_delta_count = MakePatternNode<DeltaCount>();
  
     auto r_call = MakePatternNode<SeqArgsCall>();
-    auto r_token = MakePatternNode< SpecificInstanceIdentifier >( s_delta_count->GetToken() );                
+    auto r_token = MakePatternNode< SpecificInstanceIdentifier >( s_delta_count->GetLoweredIdName() );                
     //MakePatternNode< Expression > eexpr; 
             
     r_call->callee = r_token;

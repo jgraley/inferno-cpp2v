@@ -1,27 +1,25 @@
 #include "syntax.hpp"
 #include "common/common.hpp"
 
-string Syntax::GetToken() const
+string Syntax::GetLoweredIdName() const
 {
-	return "";
+	throw NotOnThisNode();
 }
 
 
 string Syntax::GetIdentifierName() const
 {
-	return "";
+	throw NotOnThisNode();
 }
 
 
 string Syntax::GetCouplingNameHint() const
 {
-	// Try token if defined
-	string s = GetToken();
-	if( !s.empty() )
-		return s;
+	try { return GetLoweredIdName(); }
+	catch( NotOnThisNode & ) {}
 	
 	// If no token, just use the type
-	s = TYPE_ID_NAME(*this);
+	string s = TYPE_ID_NAME(*this);
 	s = GetInnermostTemplateParam(s);
 	s = Traceable::Denamespace(s);
 	
@@ -35,7 +33,7 @@ string Syntax::GetCouplingNameHint() const
 
 string Syntax::GetRenderTerminal() const
 {
-	return ""; 
+	throw NotOnThisNode();
 }
 
 

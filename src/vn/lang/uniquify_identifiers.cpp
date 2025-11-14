@@ -1,6 +1,7 @@
 #include "uniquify_identifiers.hpp"
 #include "helpers/walk.hpp"
 #include "tree/misc.hpp"
+#include "node/syntax.hpp"
 #include "helpers/flatten.hpp"
 #include "agents/embedded_scr_agent.hpp"
 
@@ -356,10 +357,19 @@ UniquifyNames::NodeToNameMap UniquifyNames::UniquifyAll( const TransKit &kit, Tr
 			}
 		}
 		
-		// Rename the identifier to preserve uniqueness
-	    string name = name_gen.AddNode( node );
-		ASSERT( !name.empty() );
-		nodes_to_names.insert( NodeAndNamePair( node, name ) );		 
+		try
+		{
+			// Rename the identifier to preserve uniqueness
+			string name = name_gen.AddNode( node );
+			ASSERT( !name.empty() );
+			nodes_to_names.insert( NodeAndNamePair( node, name ) );		 
+		}
+		catch( Syntax::NotOnThisNode & )
+		{
+			// Whether or not we get an exception will depend on the name_getter
+			// function that was supplied to the constructor. If we do throw, there
+			// will be no entry in the map that we return.
+		}
 	}      
     
     return nodes_to_names;
