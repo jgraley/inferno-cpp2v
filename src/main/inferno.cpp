@@ -657,8 +657,11 @@ static void ProcessVNPath(ScriptEngine &script_engine, vector< shared_ptr<VN::VN
 	filesystem::path path(spath);
 	if( filesystem::is_directory(path) )
 	{
+		set<string> ss;
 		for( const filesystem::directory_entry &entry : filesystem::directory_iterator(path) )
-			ProcessVNPath( script_engine, sequence, entry.path() );
+			ss.insert(entry.path()); // These won't be sorted (this isn't "ls")
+		for( string s : ss )
+			ProcessVNPath( script_engine, sequence, s );
 	}
 	else
 	{

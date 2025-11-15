@@ -169,3 +169,16 @@ string BuildLabelIdentifierAgent::GetIdentifierSubTypeName() const
 {
 	return "Label";
 }    
+
+//---------------------------------- BuildPreprocesorIdentifierAgent ------------------------------------    
+
+TreePtr<CPPTree::SpecificIdentifier> BuildPreprocessorIdentifierAgent::BuildSpecificIdentifier(string format) const
+{
+    return MakeTreeNode<CPPTree::SpecificPreprocessorIdentifier>( format ); 
+}
+
+
+string BuildPreprocessorIdentifierAgent::GetIdentifierSubTypeName() const
+{
+	return "Preprocesor";
+}    

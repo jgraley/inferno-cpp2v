@@ -72,6 +72,7 @@ public:
 	TreePtr<Node> OnIntegralLiteral( string text, any loc );
 	TreePtr<Node> OnStringLiteral( wstring value );
 	TreePtr<Node> OnBoolLiteral( bool value );
+	TreePtr<Node> OnSpecificId( list<string> typ, any type_loc, string name, any name_loc );
 	TreePtr<Node> OnIdByName( list<string> typ, any type_loc, string name, any name_loc );
 	TreePtr<Node> OnBuildId( list<string> typ, any type_loc, string format, any name_loc, Item sources );
 	TreePtr<Node> OnTransform( string kind, any kind_loc, TreePtr<Node> pattern, any pattern_loc );

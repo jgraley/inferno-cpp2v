@@ -63,6 +63,7 @@
 	ANY 									"☆"
 	STAR 									"★"
 	ID_BY_NAME								"⊛"
+	SPECIFIC_ID								"🞊"
 	BUILD_ID								"⧇"
 	OPEN_CHEVRON							"《"
 	CLOSE_CHEVRON							"》"
@@ -88,7 +89,7 @@
 %left  '*' '/'
 %precedence PREFIX ENGINE STUFF DELTA DELTA_ARROW TRANSFORM NEGATION GRASS POINTER_IS BUILD_SIZE STRINGIZE
 %precedence OPEN_CHEVRON CLOSE_CHEVRON OPEN_RESTRICT CLOSE_RESTRICT
-%precedence BUILT_IN BOOL_LITERAL STRING_LITERAL INTEGRAL_LITERAL
+%precedence BUILT_IN BOOL_LITERAL STRING_LITERAL INTEGRAL_LITERAL SPECIFIC_ID
 
 %type <TreePtr<Node>> 				pattern
 %type <wstring> 					vn_name
@@ -142,6 +143,8 @@ pattern	: pattern '+' pattern      { $$ = $1; }
 		| STRING_LITERAL					      			{ $$ = vn->OnStringLiteral($1); }
 		| BOOL_LITERAL										{ $$ = vn->OnBoolLiteral($1); }
 		| ANY												{ $$ = nullptr; }
+		| SPECIFIC_ID OPEN_CHEVRON scoped_name ',' ASCII_NAME CLOSE_CHEVRON		{ $$ = vn->OnSpecificId($3, @3, $5, @5); }
+		| SPECIFIC_ID OPEN_CHEVRON scoped_name ',' CLOSE_CHEVRON				{ $$ = vn->OnSpecificId($3, @3, "", @5); }
 		| ID_BY_NAME OPEN_CHEVRON scoped_name ',' ASCII_NAME CLOSE_CHEVRON		{ $$ = vn->OnIdByName($3, @3, $5, @5); } // ASCII_NAME could be format
 		| BUILD_ID OPEN_CHEVRON scoped_name ',' format CLOSE_CHEVRON 			{ $$ = vn->OnBuildId($3, @3, $5, @5, VN::Item{}); }
 		| BUILD_ID OPEN_CHEVRON scoped_name ',' format ',' item CLOSE_CHEVRON 	{ $$ = vn->OnBuildId($3, @3, $5, @5, $7); }

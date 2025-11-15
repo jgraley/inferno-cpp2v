@@ -45,6 +45,7 @@ integral_num			\d*[lLuU]*
 ▲				{ return YY::VNLangParser::make_DELTA(location()); };
 ⯈				{ return YY::VNLangParser::make_DELTA_ARROW(location()); };
 ⯁				{ return YY::VNLangParser::make_BUILT_IN(location()); };
+🞊				{ return YY::VNLangParser::make_SPECIFIC_ID(location()); };
 【				{ return YY::VNLangParser::make_OPEN_RESTRICT(location()); };
 】				{ return YY::VNLangParser::make_CLOSE_RESTRICT(location()); };
 ☆				{ return YY::VNLangParser::make_ANY(location()); };

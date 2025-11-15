@@ -330,6 +330,29 @@ TreePtr<Node> VNParse::OnBoolLiteral( bool value )
 }
 
 
+TreePtr<Node> VNParse::OnSpecificId( list<string> typ, any type_loc, string name, any name_loc )
+{
+	(void)name_loc; // TODO perhaps IdentifierByNameAgent can validate this?
+	
+	if( typ.size() == 1 )
+		typ.push_front("CPPTree"); // TODO centralise
+	
+	FTRACE("Front: ")(typ.front())(" back: ")(typ.back())("\n");
+	
+#define NODE(NS, NAME) \
+	if( string(#NS)==typ.front() && string(#NAME)==typ.back() ) \
+		return MakeTreeNode<StandardAgentWrapper<Specific##NAME##Identifier>>(name); \
+	else
+#include "tree/identifier_names.inc"	
+#undef NODE
+		throw YY::VNLangParser::syntax_error(
+		    any_cast<YY::VNLangParser::location_type>(type_loc),
+			"🞊 requires identifier type discriminator i.e. " + 
+			QuoteName(Join(typ, "::") + "Identifier") +
+			" would need to exist as a node type.");	
+}
+
+
 TreePtr<Node> VNParse::OnIdByName( list<string> typ, any type_loc, string name, any name_loc )
 {
 	(void)name_loc; // TODO perhaps IdentifierByNameAgent can validate this?
@@ -513,6 +536,12 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 // Diff testing!
 
 // Don't force user to use * on command line: accept a directory for input VN files
+
+// Check those "would need to exist" messages, the `' looks wrong
+
+// In all these chevronned productions, we need VN_SEP i.e. ⚬ not commas. This is because Identifier
+// names can be empty strings and that's consistent with ⚬ usage. Also ⚬ implies non-homogeneous storage
+// ie a struct rather than an array.
 
 // Tix:
 // Lose StandardAgentWrapper #867

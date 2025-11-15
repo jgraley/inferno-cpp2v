@@ -97,13 +97,6 @@ publish : makefile docs inferno.exe docs/web/publish.sh
 	cd docs/web && ./publish.sh
 
 #
-# Render the built-in pattern to VN language
-#
-patterns : inferno.exe
-	mkdir -p patterns
-	./inferno.exe -ppatterns/
-
-#
 # Cleaning up
 #
 clean : $(LLVM_CLANG_LIBS:%=clean_%) iclean

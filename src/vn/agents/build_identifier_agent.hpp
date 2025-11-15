@@ -100,4 +100,22 @@ private:
     string GetIdentifierSubTypeName() const final;
 };
 
+
+struct BuildPreprocessorIdentifierAgent : Special<CPPTree::PreprocessorIdentifier>,                             
+                                         BuildIdentifierAgent
+{
+    SPECIAL_NODE_FUNCTIONS
+
+    shared_ptr<const Node> GetPatternPtr() const
+    {
+        return shared_from_this();
+    }
+    
+    BuildPreprocessorIdentifierAgent( string s="" ) : BuildIdentifierAgent(s) {}
+
+private:
+    TreePtr<CPPTree::SpecificIdentifier> BuildSpecificIdentifier( string name ) const final;
+    string GetIdentifierSubTypeName() const final;
+};
+
 #endif

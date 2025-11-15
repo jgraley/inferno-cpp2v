@@ -19,11 +19,11 @@ using namespace CPPTree;
 
 // TODO indent back to previous level at end of string
 #define ERROR_UNKNOWN(V) \
-    ( string( "\n«" ) + \
+    ( string( "\n❌" ) + \
       string( V ) + \
       string( " not supported in " ) + \
       string( __func__ ) + \
-      string( "()»\n" ) )
+      string( "()❌\n" ) )
 
 #define ERROR_UNSUPPORTED(P) \
     ERROR_UNKNOWN( P ? TYPE_ID_NAME(*P) : "<nullptr>" )
@@ -176,7 +176,7 @@ string CppRender::RenderPureIdentifier( TreePtr<Identifier> id, Syntax::Producti
         {           
             if( unique_identifier_names.count(ii) == 0 )
             {
-                return ERROR_UNKNOWN( SSPrintf("identifier %s missing from unique_identifier_names", ii->GetRenderTerminal().c_str() ) );
+                return ERROR_UNKNOWN( ii->GetTrace() + SSPrintf(" (\"%s\") missing from unique_identifier_names", ii->GetRenderTerminal().c_str() ) );
             }
             ids = unique_identifier_names.at(ii);
         }

@@ -15,11 +15,10 @@ rm -f pp/*
 #diff --color pb pp
 
 TC=small.c
-QA=T116
+QA=T130
 
 ./inferno.exe pb/* -i test/examples/${TC} -q${QA} > p.cpp
 ./inferno.exe      -i test/examples/${TC} -q${QA} > b.cpp
 diff --color b.cpp p.cpp
 
-
-#test/exec_test.sh test/examples/${TC} test/resultspb/exec "pb"
+test/exec_test.sh test/examples/${TC} test/resultspb/exec "pb"

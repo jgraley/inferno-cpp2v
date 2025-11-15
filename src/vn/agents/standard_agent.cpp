@@ -972,16 +972,33 @@ string StandardAgent::GetRender( const RenderKit &kit, Syntax::Production surrou
 	shared_ptr<const Node> node = GetPatternPtr();
 	// SpecificIdentifiers appear rarely in patterns, and when they do they are not declared,
 	// so we should not try to render the C++ terminal	    
+	string node_type_name = GetInnermostTemplateParam(TYPE_ID_NAME(*node));
+	
+	if( dynamic_cast<const CPPTree::SpecificIdentifier *>(node.get()) )
+    {
+		size_t last_scope_pos = node_type_name.rfind("::");
+		string scope, name = node_type_name;
+		if( last_scope_pos != string::npos )
+		{
+			scope = node_type_name.substr(0, last_scope_pos+2); // include the ::
+			name = node_type_name.substr(last_scope_pos+2);
+		}
+		return "🞊《" + 
+		       scope + name.substr(8, name.size()-8-10) + // Take off Specific...Identifier
+		       ", " +
+			   GetRenderTerminal() + 
+			   "》";
+	}
+	
 	try 
 	{ 
-		if( !dynamic_cast<const CPPTree::SpecificIdentifier *>(node.get()) )
-			return GetRenderTerminal(); 
+		return GetRenderTerminal(); 
 	}
 	catch( Syntax::NotOnThisNode & ) {}
 	
     string s = "⯁" + GetInnermostTemplateParam(TYPE_ID_NAME(*node));
 	
-    list<string> sitems;
+    list<string> sitems;    
     vector< Itemiser::Element * > items = node->Itemise();
     for( vector< Itemiser::Element * >::size_type i=0; i<items.size(); i++ )
     {
@@ -1013,7 +1030,7 @@ string StandardAgent::GetRender( const RenderKit &kit, Syntax::Production surrou
         {
             ASSERTFAIL("got something from itemise that isn't a sequence or a shared pointer");
         }
-    }
+    }   
     
     if( sitems.empty() )
 		{} // We're done. To render () would imply ONE item with ZERO elements in it
