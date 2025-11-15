@@ -461,7 +461,6 @@ Inferno::Plan::Plan(Inferno *algo_) :
 			if( generate_pattern_renders_after_ptrans )
 				stages.push_back( stage_pattern_renders );
         }
-         
         if( ShouldIQuitAfter(stage.progress_stage) )
             return;
     }
@@ -665,16 +664,15 @@ int main( int argc, char *argv[] )
         BuildDocSequence( &sequence );
     else if( !ReadArgs::vn_paths.empty() )
     {
-		auto step = make_shared<VNStep>();
-		VNParse vn_parser;
+		// Kept across all scripts as overall state
 		ScriptEngine script_engine;
-		VN::ScriptKit script_kit{ &sequence };
-		// Obviously there are lots of other ways of doing this
 		for( string p : ReadArgs::vn_paths )
 		{
+			VNParse vn_parser;
 			VN::Command::List script = vn_parser.DoParse(p);
 			if( !ReadArgs::trace_quiet )
-				fprintf(stderr, "%s ok\n", p.c_str()); 
+				fprintf(stderr, "Read %s ok\n", p.c_str()); 
+			VN::ScriptKit script_kit{ &sequence, p };
 			script_engine.DoExecute( script_kit, script );
 		}
 	}

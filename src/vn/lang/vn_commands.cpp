@@ -11,15 +11,16 @@
 #include "tree/node_names.hpp"
 #include "vn_step.hpp"
 #include "vn_parse.hpp"
-#include "vn/agents/embedded_scr_agent.hpp"
+#include "agents/embedded_scr_agent.hpp"
 #include "vn_lang.ypp.hpp"
 #include "vn_lang.lpp.hpp"
 #include "vn_lang.location.hpp"
 
 #include <iostream>
 #include <fstream>
+#include <filesystem>
 
-
+#define ELIMINATE_STEP_NUMBER
 
 using namespace CPPTree; 
 using namespace VN;
@@ -64,6 +65,27 @@ void ScriptEngine::DoExecute( const ScriptKit &kit, Command::List script )
 	}
 }
 
+//////////////////////////// VNSoftStep ///////////////////////////////
+
+VNSoftStep::VNSoftStep( string filepath )
+{
+	filesystem::path path( filepath );
+	string basename = path.replace_extension().filename().string();
+#ifdef ELIMINATE_STEP_NUMBER
+	int s;
+	char c;
+	int n = sscanf( basename.c_str(), "%003d-%c", &s, &c );
+	if( n==2 )
+		basename = basename.substr(4);
+#endif
+	step_name = basename;
+}
+
+string VNSoftStep::GetName() const
+{
+	return step_name;
+}
+
 //////////////////////////// EngineCommand ///////////////////////////////
 
 EngineCommand::EngineCommand( TreePtr<Node> stem_, any loc_ ) :
@@ -88,7 +110,7 @@ TreePtr<Node> EngineCommand::Decay( TreePtr<Node> node, VNParse *vn )
 
 void EngineCommand::Execute(const ScriptKit &kit) const
 {
-	auto step = make_shared<VNStep>();
+	auto step = make_shared<VNSoftStep>(kit.script_filepath);
 	step->Configure(VNStep::COMPARE_REPLACE, stem);
 	kit.step_sequence->push_back( step );
 }

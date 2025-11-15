@@ -26,11 +26,20 @@ void StandardAgent::SCRConfigure( Phase phase )
 void StandardAgent::Plan::ConstructPlan( StandardAgent *algo_, Phase phase )
 {
     algo = algo_;
-    const vector< Itemiser::Element * > my_items = algo->Itemise();
-    int ii=0;
+
+	// For when an identifier is shared across steps: SCREngine prevents multiple
+	// planning due to coupling within a step, but not between them. Luckily,
+	// there isn't really anything in the plan that would need to be different
+	// since identifiers have no children, so just re-use the plan.
+	if( dynamic_cast<CPPTree::SpecificIdentifier *>(algo) && algo->planned )
+		return; 
+	
+    ASSERT( !algo->planned );
     ASSERT( sequences.empty() );
     ASSERT( collections.empty() );
     ASSERT( singulars.empty() );
+    const vector< Itemiser::Element * > my_items = algo->Itemise();
+    int ii=0;
     for( Itemiser::Element *ie : my_items )
     {
         if( SequenceInterface *pattern_seq = dynamic_cast<SequenceInterface *>(ie) )        

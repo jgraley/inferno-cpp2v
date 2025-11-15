@@ -1,8 +1,8 @@
 include makefile.common
 
 .PHONY: default all test docs force_subordinate_makefiles clean iclean dclean resource publish doxygen pattern_graphs doc_graphs
-default : inferno.exe patterns
-all : inferno.exe resource docs test patterns
+default : inferno.exe
+all : inferno.exe resource docs test
 	
 #
 # Compile llvm and clang sources

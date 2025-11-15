@@ -47,7 +47,13 @@ Syntax::Production Program::GetMyProduction() const
 
 string Literal::GetName() const
 {
-    return Traceable::GetName() + "(" + GetRenderTerminal() + ")";
+	string value_string;
+	try
+	{
+		value_string = "(" + GetRenderTerminal() + ")";
+	}
+	catch(NotOnThisNode &) {}
+	return Traceable::GetName() + value_string;
 }
 
 //////////////////////////// SpecificString ///////////////////////////////

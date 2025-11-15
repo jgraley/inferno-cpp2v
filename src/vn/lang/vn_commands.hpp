@@ -8,6 +8,7 @@
 #include "helpers/simple_compare.hpp"
 #include "tree/misc.hpp"
 #include "indenter.hpp"
+#include "vn/vn_step.hpp"
 #include <any> // to dep-break the generated headers
 
 // Dep-break NodeNames because node_names.hpp will be big
@@ -20,6 +21,7 @@ class VNStep;
 struct ScriptKit
 {
 	vector< shared_ptr<VN::VNStep> > *step_sequence;
+	string script_filepath;
 };
 
 class Command : public Traceable
@@ -47,6 +49,17 @@ class ScriptEngine
 {
 public:		
 	void DoExecute( const ScriptKit &kit, Command::List script );	
+};
+
+
+class VNSoftStep : public VNStep
+{
+public:	
+	VNSoftStep( string step_name_ );
+	string GetName() const final;
+
+private:
+	string step_name;
 };
 
 
@@ -91,7 +104,7 @@ private:
 	const std::wstring name;
 	const TreePtr<Node> pattern;
 };	 	
-	 	
+	 	 	
 };
 
 #endif

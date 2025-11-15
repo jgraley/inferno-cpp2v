@@ -312,9 +312,9 @@ TreePtr<Node> VNParse::OnStringLiteral( wstring value )
 TreePtr<Node> VNParse::OnBoolLiteral( bool value )
 {
 	if( value )
-		return MakeTreeNode<True>();
+		return MakeTreeNode<StandardAgentWrapper<True>>();
 	else
-		return MakeTreeNode<False>();
+		return MakeTreeNode<StandardAgentWrapper<False>>();
 }
 
 

@@ -141,7 +141,9 @@ void VNSequence::GenerateGraphRegions( int step_index, Graph &graph ) const
 
 string VNSequence::GetStepName( int step_index ) const
 {
-    return steps[step_index]->GetName();
+    string name = steps[step_index]->GetName();
+    ASSERT( name != "VNStep" )("VNStep needs to bo overridden by built-in or soft step");
+    return name;
 }
 
 
