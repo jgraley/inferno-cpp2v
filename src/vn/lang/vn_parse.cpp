@@ -21,6 +21,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <cctype>
 
 using namespace CPPTree; // TODO should not need
 using namespace VN;
@@ -84,6 +85,7 @@ TreePtr<Node> VNParse::OnBuildSize( TreePtr<Node> container )
 
 TreePtr<Node> VNParse::OnStuff( TreePtr<Node> terminus, TreePtr<Node> recurse_restriction, Limit limit )
 {
+	string note = "\nNote: Only 《=1... as a depth condition is supported at present (TODO).";
 	if( limit.cond.empty() )
 	{
 		auto stuff = MakeTreeNode<StuffAgent>();
@@ -93,20 +95,23 @@ TreePtr<Node> VNParse::OnStuff( TreePtr<Node> terminus, TreePtr<Node> recurse_re
 	}
 	else if( limit.cond=="=" )
 	{
-		if( limit.num == 1 )
+		unsigned num = stoul(limit.num_text);
+		if( num == 1 )
 		{
-			return MakeTreeNode<ChildAgent>();
+			auto child = MakeTreeNode<ChildAgent>();
+			child->terminus = terminus;
+			return child;
 		}
 		else
 			throw YY::VNLangParser::syntax_error(
 				any_cast<YY::VNLangParser::location_type>(limit.num_loc), 
-				"⩨ depth value " + to_string(limit.num) + " not supported (TODO).");		
+				"⩨ depth value " + limit.num_text + " not supported." + note);		
 		
 	}
 	else
 		throw YY::VNLangParser::syntax_error(
 			any_cast<YY::VNLangParser::location_type>(limit.cond_loc), 
-			"⩨ depth condition " + QuoteName(limit.cond) + " not supported (TODO).");		
+			"⩨ depth condition " + QuoteName(limit.cond) + " not supported." + note);		
 }
 
 
@@ -295,17 +300,24 @@ TreePtr<Node> VNParse::OnInfixOperator( string tok, TreePtr<Node> left, TreePtr<
 }
 
 
-TreePtr<Node> VNParse::OnNumericLiteral( int value )
+TreePtr<Node> VNParse::OnIntegralLiteral( string text, any loc )
 {
-	auto node = MakeTreeNode<StandardAgentWrapper<SpecificInteger>>(value);
-    return node;
+	// Normalise to upper case
+    transform(text.begin(), text.end(), text.begin(), ::toupper);
+    
+    bool uns = text.find("U") != std::string::npos;
+    bool lng2 = text.find("LL") != std::string::npos;
+    bool lng = (text.find("L") != std::string::npos) && !lng2;
+    
+    return CreateIntegralLiteral(uns, lng2, lng, stoull(text), loc);
 }
 
 
 TreePtr<Node> VNParse::OnStringLiteral( wstring value )
 {
-	auto node = MakeTreeNode<StandardAgentWrapper<SpecificString>>(ToASCII(value));
-    return node;
+	ASSERT( value.front() == '\"' && value.back() == '\"' ); // expecting quoted
+	value = value.substr(1, value.size()-2 );
+	return MakeTreeNode<StandardAgentWrapper<SpecificString>>(ToASCII(value));
 }
 
 
@@ -362,13 +374,14 @@ TreePtr<Node> VNParse::OnBuildId( list<string> typ, any type_loc, string format,
 
 TreePtr<Node> VNParse::OnTransform( string kind, any kind_loc, TreePtr<Node> pattern, any pattern_loc )
 {
+	TreePtr<TransformOfAgent> to_agent;
 	if( kind == "TypeOf" )
 	{
-		return MakeTreeNode<TransformOfAgent>( &TypeOf::instance );
+		to_agent = MakeTreeNode<TransformOfAgent>( &TypeOf::instance );
 	}
 	else if( kind == "DeclarationOf" )
 	{
-		return MakeTreeNode<TransformOfAgent>( &DeclarationOf::instance );
+		to_agent = MakeTreeNode<TransformOfAgent>( &DeclarationOf::instance );
 	}
 	else
 	{
@@ -377,6 +390,8 @@ TreePtr<Node> VNParse::OnTransform( string kind, any kind_loc, TreePtr<Node> pat
 			QuoteName(kind) +
 			" unsupported in ⤨.");
 	}
+	to_agent->pattern = pattern;
+	return to_agent;
 }
 
 	
@@ -446,6 +461,26 @@ string VNParse::QuoteName(wstring name)
 }
 
 
+TreePtr<Node> VNParse::CreateIntegralLiteral( bool uns, bool lng, bool lng2, uint64_t val, any loc )
+{
+	int bits;
+	if( lng )
+		bits = TypeDb::integral_bits[clang::DeclSpec::TSW_long];
+	else if( lng2 )
+		bits = TypeDb::integral_bits[clang::DeclSpec::TSW_longlong];
+	else
+		bits = TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified];
+
+	llvm::APSInt rv(bits, uns);
+	rv = val;
+	if( rv != val )
+		throw YY::VNLangParser::syntax_error(
+		    any_cast<YY::VNLangParser::location_type>(loc),
+			"Integer literal: could not fit value " + to_string(val) + " into required type.");
+	return MakeTreeNode<StandardAgentWrapper<SpecificInteger>>( rv );
+}
+
+
 static NodeEnum GetNodeEnum( list<string> typ, any loc )
 {
 	if( !NodeNames().GetNameToEnumMap().count(typ) )
@@ -475,15 +510,14 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 
 // Remove the need for subclasses in Identifier-related nodes, then simplify ⊛ 
 
-// .vn to .c.vn?
-
-// Things like OnPrefixOperator() should take an actual parser token not a string
-
 // Diff testing!
 
-// Major problems with sometimes generating StandardAgent and sometimes not
+// Don't force user to use * on command line: accept a directory for input VN files
 
 // Tix:
 // Lose StandardAgentWrapper #867
 // Add ability to pre-process #862
 // Be a proper Unicode language #868
+
+// C fold-in: 
+// things like OnPrefixOperator() should take an actual parser token not a string

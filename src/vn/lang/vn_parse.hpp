@@ -27,7 +27,7 @@ struct Limit
 {
 	string cond;
 	any cond_loc;
-	unsigned num;
+	string num_text;
 	any num_loc;
 };
 		
@@ -69,7 +69,7 @@ public:
 	TreePtr<Node> OnPrefixOperator( string tok, TreePtr<Node> operand );
 	TreePtr<Node> OnPostfixOperator( string tok, TreePtr<Node> operand );
 	TreePtr<Node> OnInfixOperator( string tok, TreePtr<Node> left, TreePtr<Node> right );
-	TreePtr<Node> OnNumericLiteral( int value );
+	TreePtr<Node> OnIntegralLiteral( string text, any loc );
 	TreePtr<Node> OnStringLiteral( wstring value );
 	TreePtr<Node> OnBoolLiteral( bool value );
 	TreePtr<Node> OnIdByName( list<string> typ, any type_loc, string name, any name_loc );
@@ -86,7 +86,8 @@ public:
 	void Designate( wstring name, TreePtr<Node> sub_pattern );
 	static string QuoteName(string name);
 	static string QuoteName(wstring name);
-	
+	TreePtr<Node> CreateIntegralLiteral( bool uns, bool lng, bool lng2, uint64_t val, any loc );
+
 private: 
 	unique_ptr<YY::VNLangScanner> scanner;
 	unique_ptr<YY::VNLangParser> parser;

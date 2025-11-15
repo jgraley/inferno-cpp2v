@@ -3,14 +3,23 @@
 make -j 30
 
 # Render the built-in patterns 
-mkdir -p patterns_builtin
-rm -f patterns_builtin/*
-./inferno.exe -p patterns_builtin/
+mkdir -p pb
+rm -f pb/*
+./inferno.exe -p pb/
 
-# Render the parsed patterns 
-mkdir -p patterns_parsed
-rm -f patterns_parsed/*
-./inferno.exe patterns_builtin/* -p patterns_parsed/ -qX
+# Re-render the parsed patterns 
+mkdir -p pp
+rm -f pp/*
+./inferno.exe pb/* -p pp/ -qX
 
-# Since differences are errors, make the parsed version be red by swapping them on diff command line
-diff --color patterns_parsed patterns_builtin
+#diff --color pb pp
+
+TC=small.c
+QA=T116
+
+./inferno.exe pb/* -i test/examples/${TC} -q${QA} > p.cpp
+./inferno.exe      -i test/examples/${TC} -q${QA} > b.cpp
+diff --color b.cpp p.cpp
+
+
+#test/exec_test.sh test/examples/${TC} test/resultspb/exec "pb"

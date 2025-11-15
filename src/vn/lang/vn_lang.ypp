@@ -75,7 +75,7 @@
 	BUILD_SIZE								"🄽"
 	STRINGIZE								"§"
 	<wstring> 	STRING_LITERAL 				_("string")
-	<unsigned> 	NUMERIC_LITERAL				_("number")
+	<string> 	INTEGRAL_LITERAL			_("integer literal")
 	<bool>		BOOL_LITERAL				_("boolean literal")
 	<string>  	ASCII_NAME 					_("ASCII name")
 	<string>  	ASCII_FORMAT 				_("ASCII format string")
@@ -88,7 +88,7 @@
 %left  '*' '/'
 %precedence PREFIX ENGINE STUFF DELTA DELTA_ARROW TRANSFORM NEGATION GRASS POINTER_IS BUILD_SIZE STRINGIZE
 %precedence OPEN_CHEVRON CLOSE_CHEVRON OPEN_RESTRICT CLOSE_RESTRICT
-%precedence BUILT_IN BOOL_LITERAL STRING_LITERAL NUMERIC_LITERAL
+%precedence BUILT_IN BOOL_LITERAL STRING_LITERAL INTEGRAL_LITERAL
 
 %type <TreePtr<Node>> 				pattern
 %type <wstring> 					vn_name
@@ -138,7 +138,7 @@ pattern	: pattern '+' pattern      { $$ = $1; }
 		| '(' commands ')'                          		{ $$ = vn->OnEmbeddedCommands($2); }
 		| OPEN_RESTRICT scoped_name CLOSE_RESTRICT pattern 	{ $$ = vn->OnRestrict($2, @2, $4, @4); }
 		| vn_name       						  			{ $$ = vn->OnName($1, @1); }
-		| NUMERIC_LITERAL					      			{ $$ = vn->OnNumericLiteral($1); }
+		| INTEGRAL_LITERAL					      			{ $$ = vn->OnIntegralLiteral($1, @1); }
 		| STRING_LITERAL					      			{ $$ = vn->OnStringLiteral($1); }
 		| BOOL_LITERAL										{ $$ = vn->OnBoolLiteral($1); }
 		| ANY												{ $$ = nullptr; }
@@ -157,7 +157,7 @@ pattern	: pattern '+' pattern      { $$ = $1; }
 		;		
 
 // This one dips into ASCII/C because VN doesn't otherwise need inequalities.
-limit		: '=' NUMERIC_LITERAL						{ $$ = VN::Limit{ "=", @1, $2, @2 }; }
+limit		: '=' INTEGRAL_LITERAL						{ $$ = VN::Limit{ "=", @1, $2, @2 }; }
 
 itemisation : '(' items_bare ')'    					{ $$ = $2; $$.loc = @$; }
 			| '(' items_sep ')'	    					{ $$ = $2; $$.loc = @$; $$.items.push_back({{}, @3}); }

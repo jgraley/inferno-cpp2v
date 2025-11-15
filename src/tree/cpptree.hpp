@@ -172,8 +172,9 @@ struct SpecificInteger : Integer
     SpecificInteger(); ///< default constructor, for making archetypes 
     SpecificInteger( llvm::APSInt i ); ///< Construct with an LLVM-style integer
     SpecificInteger( int i ); ///< Construct with a signed int
-    SpecificInteger( unsigned i ); ///< Construct with an unsigned int
     SpecificInteger( int64_t i ); ///< Construct with a 64-bit int
+    SpecificInteger( unsigned i ); ///< Construct with an unsigned int
+    SpecificInteger( uint64_t i ); ///< Construct with a 64-bit unsigned int
     int64_t GetInt64() const;
     bool IsSigned() const;
     int64_t GetWidth() const;

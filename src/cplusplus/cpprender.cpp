@@ -1104,7 +1104,7 @@ string CppRender::RenderStatement( TreePtr<Statement> statement, Syntax::Product
     else if( TreePtr<Goto> g = DynamicTreePtrCast<Goto>(statement) )
     {
         if( TreePtr<SpecificLabelIdentifier> li = DynamicTreePtrCast< SpecificLabelIdentifier >(g->destination) )
-            return "goto " + kit.render( li, Syntax::Production::SPACE_SEP_STATEMENT);  // regular goto
+            return "goto " + kit.render( li, Syntax::Production::SPACE_SEP_STATEMENT).substr(2);  // regular goto REMOVE THE &&
         else
             return "goto *" + kit.render( g->destination, Syntax::Production::PREFIX); // goto-a-variable (GCC extension)
     }

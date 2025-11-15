@@ -118,7 +118,7 @@ SpecificInteger::SpecificInteger( int i ) :
 
 
 SpecificInteger::SpecificInteger( int64_t i ) : 
-    value(TypeDb::int_bits, false)  // 64-bit
+    value(64, false)  // 64-bit
 { 
     value = i; 
 } 
@@ -126,6 +126,13 @@ SpecificInteger::SpecificInteger( int64_t i ) :
 
 SpecificInteger::SpecificInteger( unsigned i ) : 
     value(TypeDb::int_bits, true)  // unsigned
+{ 
+    value = i; 
+} 
+
+
+SpecificInteger::SpecificInteger( uint64_t i ) : 
+    value(64, false)  // unsigned
 { 
     value = i; 
 } 

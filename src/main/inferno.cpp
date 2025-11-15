@@ -29,6 +29,7 @@
 #include "vn/lang/vn_parse.hpp"
 
 #include <cstdlib>
+#include <filesystem>
 
 //#define TEST_754
 //#define REPRODUCE_833
@@ -640,6 +641,31 @@ bool Inferno::ShouldIQuitAfter(Progress::Stage stage)
            ReadArgs::quitafter_progress.GetStage()==stage;
 }
 
+static void ProcessVNScript(ScriptEngine &script_engine, vector< shared_ptr<VN::VNStep> > &sequence, string spath )
+{
+	VNParse vn_parser;
+	VN::Command::List script = vn_parser.DoParse(spath);
+	if( !ReadArgs::trace_quiet )
+		fprintf(stderr, "Read %s ok\n", spath.c_str()); 
+	VN::ScriptKit script_kit{ &sequence, spath };
+	script_engine.DoExecute( script_kit, script );
+}
+
+
+static void ProcessVNPath(ScriptEngine &script_engine, vector< shared_ptr<VN::VNStep> > &sequence, string spath )
+{
+	filesystem::path path(spath);
+	if( filesystem::is_directory(path) )
+	{
+		for( const filesystem::directory_entry &entry : filesystem::directory_iterator(path) )
+			ProcessVNPath( script_engine, sequence, entry.path() );
+	}
+	else
+	{
+		ProcessVNScript(script_engine, sequence, spath);
+	}
+}
+
 
 int main( int argc, char *argv[] )
 {
@@ -667,14 +693,7 @@ int main( int argc, char *argv[] )
 		// Kept across all scripts as overall state
 		ScriptEngine script_engine;
 		for( string p : ReadArgs::vn_paths )
-		{
-			VNParse vn_parser;
-			VN::Command::List script = vn_parser.DoParse(p);
-			if( !ReadArgs::trace_quiet )
-				fprintf(stderr, "Read %s ok\n", p.c_str()); 
-			VN::ScriptKit script_kit{ &sequence, p };
-			script_engine.DoExecute( script_kit, script );
-		}
+			ProcessVNPath(script_engine, sequence, p);
 	}
 	else
 	{

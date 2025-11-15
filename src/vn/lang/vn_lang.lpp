@@ -69,7 +69,7 @@ false			{ return YY::VNLangParser::make_BOOL_LITERAL(false, location()); };
 [-+*/=();,]  	{ return YY::VNLangParser::symbol_type(chr(), location()); }
 
 \"[^"]*\"   	{ return YY::VNLangParser::make_STRING_LITERAL(wstr(), location()); }
-{integral_num}	{ return YY::VNLangParser::make_NUMERIC_LITERAL(strtod(text(), NULL), location()); }
+{integral_num}	{ return YY::VNLangParser::make_INTEGRAL_LITERAL(str(), location()); }
 {ascii_name}	{ return YY::VNLangParser::make_ASCII_NAME(str(), location()); }
 {ascii_format}	{ return YY::VNLangParser::make_ASCII_FORMAT(str(), location()); }
 {unicode_name}	{ return YY::VNLangParser::make_UNICODE_NAME(wstr(), location()); }
