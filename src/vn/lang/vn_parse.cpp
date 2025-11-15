@@ -1,6 +1,7 @@
 #include "vn_parse.hpp"
 
 #include "tree/cpptree.hpp"
+#include "tree/localtree.hpp"
 #include "helpers/transformation.hpp"
 #include "tree/typeof.hpp"
 #include "common/trace.hpp"
@@ -65,9 +66,19 @@ void VNParse::OnVNScript( Command::List top_level_commands_ )
 }
 
 
-TreePtr<Node> VNParse::OnStar()
+TreePtr<Node> VNParse::OnStar( TreePtr<Node> restriction )
 {
-	return MakeTreeNode<StarAgent>();
+	auto node = MakeTreeNode<StarAgent>();
+	node->restriction = restriction;
+	return node;
+}
+
+
+TreePtr<Node> VNParse::OnBuildSize( TreePtr<Node> container )
+{
+	auto node = MakeTreeNode<BuildContainerSizeAgent>();
+	node->container = container;
+	return node;
 }
 
 
@@ -151,10 +162,10 @@ static TreePtr<Node> MakeStandardAgent(NodeEnum ne)
 	}
 	
 	// By design we should have a case for every value of the node enum
-	ASSERTFAIL("Invalid value for node enum"); 
+	ASSERT(false)("Invalid value for node enum value %d", ne); 
+	ASSERTFAIL();
 }
 
-	TreePtr<Node> OnName( wstring name, any name_loc );
 
 TreePtr<Node> VNParse::OnBuiltIn( list<string> builtin_type, any builtin_loc, Itemisation src_itemisation )
 {
@@ -180,7 +191,7 @@ TreePtr<Node> VNParse::OnBuiltIn( list<string> builtin_type, any builtin_loc, It
 		if( src_it == src_itemisation.items.end() )
 			throw YY::VNLangParser::syntax_error( 
 				prev_loc, 
-				"Insufficient items given. " + counts_msg );
+				"In ⯁, insufficient items given. " + counts_msg );
 		const Item &src_item = *src_it;
         if( SequenceInterface *dest_seq = dynamic_cast<SequenceInterface *>(dest_item) ) // TODO could roll together as Container?
             for( TreePtr<Node> src : src_item.nodes )
@@ -193,7 +204,7 @@ TreePtr<Node> VNParse::OnBuiltIn( list<string> builtin_type, any builtin_loc, It
 			if( src_item.nodes.size() != 1 )
 			    throw YY::VNLangParser::syntax_error( 
 				    any_cast<YY::VNLangParser::location_type>(src_item.loc),
-				    SSPrintf("Singular item requires exactly one sub-pattern but %d were given.",
+				    SSPrintf("In ⯁, singular item requires exactly one sub-pattern but %d were given.",
 				    src_item.nodes.size() ) ); 
             *dest_sing = src_item.nodes.front();
 		}
@@ -209,7 +220,7 @@ TreePtr<Node> VNParse::OnBuiltIn( list<string> builtin_type, any builtin_loc, It
 	if( src_it != src_itemisation.items.end() )
 		throw YY::VNLangParser::syntax_error( 
 			any_cast<YY::VNLangParser::location_type>(src_it->loc), 
-			"Excess items given. " + counts_msg + empty_note);
+			"In ⯁, excess items given. " + counts_msg + empty_note);
 
 	return dest;
 }
@@ -284,10 +295,26 @@ TreePtr<Node> VNParse::OnInfixOperator( string tok, TreePtr<Node> left, TreePtr<
 }
 
 
-TreePtr<Node> VNParse::OnSpecificInteger( int value )
+TreePtr<Node> VNParse::OnNumericLiteral( int value )
 {
-	auto node =  MakeTreeNode<StandardAgentWrapper<SpecificInteger>>(value);
+	auto node = MakeTreeNode<StandardAgentWrapper<SpecificInteger>>(value);
     return node;
+}
+
+
+TreePtr<Node> VNParse::OnStringLiteral( wstring value )
+{
+	auto node = MakeTreeNode<StandardAgentWrapper<SpecificString>>(ToASCII(value));
+    return node;
+}
+
+
+TreePtr<Node> VNParse::OnBoolLiteral( bool value )
+{
+	if( value )
+		return MakeTreeNode<True>();
+	else
+		return MakeTreeNode<False>();
 }
 
 
@@ -377,6 +404,30 @@ TreePtr<Node> VNParse::OnDisjunction( TreePtr<Node> left, TreePtr<Node> right )
 }
 	
 
+TreePtr<Node> VNParse::OnGrass( TreePtr<Node> through )
+{
+	auto node = MakeTreeNode<GreenGrassAgent>();
+	node->through = through;
+	return node;
+}
+
+
+TreePtr<Node> VNParse::OnPointerIs( TreePtr<Node> pointer )
+{
+	auto node = MakeTreeNode<PointerIsAgent>();
+	node->pointer = pointer;
+	return node;
+}
+
+
+TreePtr<Node> VNParse::OnStringize( TreePtr<Node> source )
+{
+	auto node = MakeTreeNode<StringizeAgent>();
+	node->source = source;
+	return node;
+}
+
+
 void VNParse::Designate( wstring name, TreePtr<Node> sub_pattern )
 {
 	designations.insert( make_pair(name, sub_pattern) );
@@ -430,7 +481,7 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 
 // Diff testing!
 
-// Check the names given to ⊛ for validity as a C identifier OR a format string
+// Major problems with sometimes generating StandardAgent and sometimes not
 
 // Tix:
 // Lose StandardAgentWrapper #867

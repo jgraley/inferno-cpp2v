@@ -1,6 +1,8 @@
 
 #include "systemc_from_c_simple.hpp"
 #include "tree/cpptree.hpp"
+#include "tree/sctree.hpp"
+#include "tree/localtree.hpp"
 #include "tree/typeof.hpp"
 #include "pattern_helpers.hpp"
 
@@ -9,9 +11,8 @@
 
 using namespace CPPTree;
 using namespace SCTree;
+using namespace LocalTree;
 using namespace Steps;
-
-struct GlobalsModule : Module { NODE_FUNCTIONS_FINAL };
 
 GlobalScopeToModule::GlobalScopeToModule()
 {
@@ -29,10 +30,10 @@ GlobalScopeToModule::GlobalScopeToModule()
 	auto es_scope = MakePatternNode< Program >();
 	auto es_decls = MakePatternNode<StarAgent, Declaration>();
 	auto es_instance = MakePatternNode<Instance>();
-	auto es_gmodule = MakePatternNode< GlobalsModule >();
+	auto es_gmodule = MakePatternNode< LocalTree::GlobalsModule >();
 	auto es_gmodule_name = MakePatternNode< TypeIdentifier >();
 	auto es_gmodule_decls = MakePatternNode<StarAgent, Declaration>();
-	auto er_gmodule = MakePatternNode< GlobalsModule >();
+	auto er_gmodule = MakePatternNode< LocalTree::GlobalsModule >();
 	auto er_scope = MakePatternNode< Program >();
 	auto er_field = MakePatternNode<Field>();
 	auto es_id = MakePatternNode<InstanceIdentifier>();
@@ -104,7 +105,7 @@ MainToThread::MainToThread()
 	e_delta->overlay = er_cease;
 	er_cease->code = es_return->return_value;
 	
-	auto gmodule = MakePatternNode< GlobalsModule >();
+	auto gmodule = MakePatternNode< LocalTree::GlobalsModule >();
     auto delta = MakePatternNode<DeltaAgent, Instance>();
 	auto s_field = MakePatternNode< Field >();
     auto s_func = MakePatternNode<Function>();

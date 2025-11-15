@@ -1,15 +1,11 @@
 #ifndef SCTREE_HPP
 #define SCTREE_HPP
 
-#include "clang/Basic/SourceLocation.h"
-#include "clang/Basic/TokenKinds.h"
-#include "llvm/ADT/APSInt.h"
-#include "llvm/ADT/APFloat.h"
-#include <string>
 #include "node/specialise_oostd.hpp"
 #include "clang/Parse/DeclSpec.h"
 #include "tree/type_data.hpp"
 #include "tree/cpptree.hpp"
+#include <string>
 
 /// SCTree namespace contains node definitions that represent elements of SystemC, as native language elements
 namespace SCTree {

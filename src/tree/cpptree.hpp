@@ -216,7 +216,7 @@ struct Bool : Literal { NODE_FUNCTIONS };
 struct True : Bool
 {
     NODE_FUNCTIONS_FINAL
-    virtual string GetRenderTerminal() const { return "true"; } ///< Produce a string for debug
+    virtual string GetRenderTerminal() const { return "true"; } 
 	Production GetMyProduction() const override;
 };
 

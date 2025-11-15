@@ -182,4 +182,12 @@ NODE(SCTree, Exit)
 NODE(SCTree, SCExtension)
 NODE(SCTree, Cease)
 
-
+//----------- LocalTree ------------
+NODE(LocalTree, GlobalsModule)
+NODE(LocalTree, UncombableSwitch)
+NODE(LocalTree, UncombableFor)
+NODE(LocalTree, CombableFor)
+NODE(LocalTree, UncombableBreak)
+NODE(LocalTree, CombableBreak)
+NODE(LocalTree, TempReturnAddress)
+NODE(LocalTree, StateLabel)

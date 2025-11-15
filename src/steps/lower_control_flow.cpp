@@ -2,6 +2,7 @@
 #include "steps/lower_control_flow.hpp"
 #include "tree/cpptree.hpp"
 #include "tree/sctree.hpp"
+#include "tree/localtree.hpp"
 #include "common/common.hpp"
 #include "pattern_helpers.hpp"
 #include "tree/typeof.hpp"
@@ -9,15 +10,8 @@
 
 using namespace CPPTree;
 using namespace SCTree;
-using namespace Steps;
-
-// Local nodes let us designate switch and for nodes as uncombable
-struct UncombableSwitch : Switch, Uncombable { NODE_FUNCTIONS_FINAL };
-struct UncombableFor : For, Uncombable { NODE_FUNCTIONS_FINAL };
-struct CombableFor : For { NODE_FUNCTIONS_FINAL };
-struct UncombableBreak : Break, Uncombable { NODE_FUNCTIONS_FINAL };
-struct CombableBreak : Break { NODE_FUNCTIONS_FINAL };
-   
+using namespace LocalTree;
+using namespace Steps;   
 
 DetectUncombableSwitch::DetectUncombableSwitch()
 {

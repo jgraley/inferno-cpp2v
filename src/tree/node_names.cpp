@@ -2,6 +2,7 @@
 #include "misc.hpp"
 #include "cpptree.hpp"
 #include "sctree.hpp"
+#include "localtree.hpp"
 
 #include <map>
 #include <list>

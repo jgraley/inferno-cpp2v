@@ -2,6 +2,7 @@
 #include "steps/fall_out.hpp"
 #include "tree/cpptree.hpp"
 #include "tree/sctree.hpp"
+#include "tree/localtree.hpp"
 #include "common/common.hpp"
 #include "pattern_helpers.hpp"
 #include "tree/typeof.hpp"
@@ -10,14 +11,6 @@
 using namespace CPPTree;
 using namespace SCTree;
 using namespace Steps;
-
-
-// A label with a piggybacked pointer to the corresponding enum value
-struct StateLabel : Label
-{
-    NODE_FUNCTIONS_FINAL
-    TreePtr<InstanceIdentifier> state;
-};
 
 
 PlaceLabelsInArray::PlaceLabelsInArray()
@@ -97,7 +90,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     auto l_comp = MakePatternNode<Compound>();
     auto over_comp = MakePatternNode<DeltaAgent, Compound>();
     auto l_overll = MakePatternNode<DeltaAgent, Statement>();
-    auto l_state_label = MakePatternNode< StateLabel >();
+    auto l_state_label = MakePatternNode< LocalTree::StateLabel >();
     auto comp_membs = MakePatternNode<StarAgent, Declaration>();
             
     ll_all_over->through = ll_all;
@@ -339,7 +332,7 @@ ApplyCombGotoPolicy::ApplyCombGotoPolicy()
     auto lmap_id = MakePatternNode<InstanceIdentifier>();
     auto state_var_id = MakePatternNode<InstanceIdentifier>();
     auto state_id = MakePatternNode<InstanceIdentifier>();
-    auto label = MakePatternNode<StateLabel>();
+    auto label = MakePatternNode<LocalTree::StateLabel>();
     auto sx_pre = MakePatternNode<NegationAgent, Statement>();
     auto sx_body = MakePatternNode<NegationAgent, Statement>();
     auto sx_uncombable = MakePatternNode<Uncombable>();
@@ -392,7 +385,7 @@ ApplyYieldGotoPolicy::ApplyYieldGotoPolicy()
     auto lmap_id = MakePatternNode<InstanceIdentifier>();
     auto state_var_id = MakePatternNode<InstanceIdentifier>();
     auto state_id = MakePatternNode<InstanceIdentifier>();
-    auto label = MakePatternNode<StateLabel>();
+    auto label = MakePatternNode<LocalTree::StateLabel>();
     auto sx_pre = MakePatternNode<NegationAgent, Statement>();
     auto sx_body1 = MakePatternNode<NegationAgent, Statement>();
     auto sx_body2 = MakePatternNode<NegationAgent, Statement>();
@@ -441,7 +434,7 @@ ApplyBottomPolicy::ApplyBottomPolicy()
     auto lmap_id = MakePatternNode<InstanceIdentifier>();
     auto state_var_id = MakePatternNode<InstanceIdentifier>();
     auto state_id = MakePatternNode<InstanceIdentifier>();
-    auto label = MakePatternNode<StateLabel>();
+    auto label = MakePatternNode<LocalTree::StateLabel>();
     auto sx_pre = MakePatternNode<NegationAgent, Statement>();
     auto sx_body = MakePatternNode<NegationAgent, Statement>();
     auto r_if = MakePatternNode<If>();
@@ -486,7 +479,7 @@ ApplyLabelPolicy::ApplyLabelPolicy()
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto pre = MakePatternNode<StarAgent, Statement>();
     auto post = MakePatternNode<StarAgent, Statement>();
-    auto item_name = MakePatternNode<StateLabel>();
+    auto item_name = MakePatternNode<LocalTree::StateLabel>();
     auto item_extra = MakePatternNode<Label>();
     auto sx_post_label = MakePatternNode<Label>();
     auto iif = MakePatternNode<If>();

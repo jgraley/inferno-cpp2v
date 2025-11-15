@@ -32,7 +32,7 @@ ascii_format			[a-zA-Z_%][a-zA-Z0-9_%]*
 unicode_name			\p{UnicodeIdentifierStart} \p{UnicodeIdentifierPart}*
 float_exp_suffix		[Ee] [-+]? \d+
 float_num				\d* (\d | \.\d | \d\.) \d* {float_exp_suffix}?
-integral_num			\d*
+integral_num			\d*[lLuU]*
 
 %%
 
@@ -57,12 +57,19 @@ integral_num			\d*
 ¬				{ return YY::VNLangParser::make_NEGATION(location()); };
 ∧				{ return YY::VNLangParser::make_CONJUNCTION(location()); };
 ∨				{ return YY::VNLangParser::make_DISJUNCTION(location()); };
+⫴				{ return YY::VNLangParser::make_GRASS(location()); };
+⮎				{ return YY::VNLangParser::make_POINTER_IS(location()); };
+🄽				{ return YY::VNLangParser::make_BUILD_SIZE(location()); };
+§				{ return YY::VNLangParser::make_STRINGIZE(location()); };
+
+true			{ return YY::VNLangParser::make_BOOL_LITERAL(true, location()); };
+false			{ return YY::VNLangParser::make_BOOL_LITERAL(false, location()); };
 
 ::				{ return YY::VNLangParser::make_SCOPE_RES(location()); };
 [-+*/=();,]  	{ return YY::VNLangParser::symbol_type(chr(), location()); }
 
-\"[^"]*\"   	{ return YY::VNLangParser::make_STR(wstr(), location()); }
-{integral_num}	{ return YY::VNLangParser::make_NUM(strtod(text(), NULL), location()); }
+\"[^"]*\"   	{ return YY::VNLangParser::make_STRING_LITERAL(wstr(), location()); }
+{integral_num}	{ return YY::VNLangParser::make_NUMERIC_LITERAL(strtod(text(), NULL), location()); }
 {ascii_name}	{ return YY::VNLangParser::make_ASCII_NAME(str(), location()); }
 {ascii_format}	{ return YY::VNLangParser::make_ASCII_FORMAT(str(), location()); }
 {unicode_name}	{ return YY::VNLangParser::make_UNICODE_NAME(wstr(), location()); }

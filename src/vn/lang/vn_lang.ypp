@@ -70,8 +70,13 @@
 	NEGATION								"¬"
 	CONJUNCTION								"∧"
 	DISJUNCTION								"∨"
-	<wstring> 	STR 						_("string")
-	<unsigned> 	NUM 						_("number")
+	GRASS									"⫴"
+	POINTER_IS								"⮎"
+	BUILD_SIZE								"🄽"
+	STRINGIZE								"§"
+	<wstring> 	STRING_LITERAL 				_("string")
+	<unsigned> 	NUMERIC_LITERAL				_("number")
+	<bool>		BOOL_LITERAL				_("boolean literal")
 	<string>  	ASCII_NAME 					_("ASCII name")
 	<string>  	ASCII_FORMAT 				_("ASCII format string")
 	<wstring> 	UNICODE_NAME 				_("Unicode name")
@@ -81,9 +86,9 @@
 %right '='
 %left  '+' '-'
 %left  '*' '/'
-%precedence PREFIX ENGINE STUFF DELTA DELTA_ARROW TRANSFORM NEGATION
+%precedence PREFIX ENGINE STUFF DELTA DELTA_ARROW TRANSFORM NEGATION GRASS POINTER_IS BUILD_SIZE STRINGIZE
 %precedence OPEN_CHEVRON CLOSE_CHEVRON OPEN_RESTRICT CLOSE_RESTRICT
-%precedence BUILT_IN
+%precedence BUILT_IN BOOL_LITERAL STRING_LITERAL NUMERIC_LITERAL
 
 %type <TreePtr<Node>> 				pattern
 %type <wstring> 					vn_name
@@ -121,7 +126,8 @@ pattern	: pattern '+' pattern      { $$ = $1; }
 		| pattern '-' pattern      { $$ = $1; }
 		| pattern '*' pattern      { $$ = $1; }
 		| pattern '/' pattern      { $$ = $1; }
-		| STAR												{ $$ = vn->OnStar(); }
+		| STAR												{ $$ = vn->OnStar(nullptr); }
+		| STAR OPEN_CHEVRON pattern CLOSE_CHEVRON			{ $$ = vn->OnStar($3); }
 		| STUFF pattern 		     					 	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
 		| STUFF OPEN_CHEVRON pattern CLOSE_CHEVRON pattern 	{ $$ = vn->OnStuff($5, $3, VN::Limit()); }
 		| STUFF OPEN_CHEVRON limit CLOSE_CHEVRON pattern 	{ $$ = vn->OnStuff($5, nullptr, $3); }
@@ -132,7 +138,9 @@ pattern	: pattern '+' pattern      { $$ = $1; }
 		| '(' commands ')'                          		{ $$ = vn->OnEmbeddedCommands($2); }
 		| OPEN_RESTRICT scoped_name CLOSE_RESTRICT pattern 	{ $$ = vn->OnRestrict($2, @2, $4, @4); }
 		| vn_name       						  			{ $$ = vn->OnName($1, @1); }
-		| NUM       						      			{ $$ = vn->OnSpecificInteger($1); }
+		| NUMERIC_LITERAL					      			{ $$ = vn->OnNumericLiteral($1); }
+		| STRING_LITERAL					      			{ $$ = vn->OnStringLiteral($1); }
+		| BOOL_LITERAL										{ $$ = vn->OnBoolLiteral($1); }
 		| ANY												{ $$ = nullptr; }
 		| ID_BY_NAME OPEN_CHEVRON scoped_name ',' ASCII_NAME CLOSE_CHEVRON		{ $$ = vn->OnIdByName($3, @3, $5, @5); } // ASCII_NAME could be format
 		| BUILD_ID OPEN_CHEVRON scoped_name ',' format CLOSE_CHEVRON 			{ $$ = vn->OnBuildId($3, @3, $5, @5, VN::Item{}); }
@@ -142,10 +150,14 @@ pattern	: pattern '+' pattern      { $$ = $1; }
 		| NEGATION pattern 		     					 	{ $$ = vn->OnNegation($2); }
 		| pattern CONJUNCTION pattern						{ $$ = vn->OnConjunction($1, $3); }
 		| pattern DISJUNCTION pattern						{ $$ = vn->OnDisjunction($1, $3); }
+		| GRASS pattern										{ $$ = vn->OnGrass($2); }
+		| POINTER_IS pattern								{ $$ = vn->OnPointerIs($2); }
+		| BUILD_SIZE pattern								{ $$ = vn->OnBuildSize($2); }
+		| STRINGIZE pattern									{ $$ = vn->OnStringize($2); }
 		;		
 
 // This one dips into ASCII/C because VN doesn't otherwise need inequalities.
-limit		: '=' NUM									{ $$ = VN::Limit{ "=", @1, $2, @2 }; }
+limit		: '=' NUMERIC_LITERAL						{ $$ = VN::Limit{ "=", @1, $2, @2 }; }
 
 itemisation : '(' items_bare ')'    					{ $$ = $2; $$.loc = @$; }
 			| '(' items_sep ')'	    					{ $$ = $2; $$.loc = @$; $$.items.push_back({{}, @3}); }

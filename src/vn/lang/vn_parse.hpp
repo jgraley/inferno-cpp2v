@@ -58,7 +58,7 @@ public:
 	void OnVNScript( list<shared_ptr<Command>> commands_ );
 	shared_ptr<Command> OnCommand( shared_ptr<Command> command );
 
-	TreePtr<Node> OnStar();
+	TreePtr<Node> OnStar( TreePtr<Node> restriction );
 	TreePtr<Node> OnStuff( TreePtr<Node> terminus, TreePtr<Node> recurse_restriction, Limit limit );
 	TreePtr<Node> OnDelta( TreePtr<Node> through, TreePtr<Node> overlay );
 	TreePtr<Node> OnBuiltIn( list<string> builtin_type, any builtin_loc, Itemisation itemisation );
@@ -69,13 +69,19 @@ public:
 	TreePtr<Node> OnPrefixOperator( string tok, TreePtr<Node> operand );
 	TreePtr<Node> OnPostfixOperator( string tok, TreePtr<Node> operand );
 	TreePtr<Node> OnInfixOperator( string tok, TreePtr<Node> left, TreePtr<Node> right );
-	TreePtr<Node> OnSpecificInteger( int value );
+	TreePtr<Node> OnNumericLiteral( int value );
+	TreePtr<Node> OnStringLiteral( wstring value );
+	TreePtr<Node> OnBoolLiteral( bool value );
 	TreePtr<Node> OnIdByName( list<string> typ, any type_loc, string name, any name_loc );
 	TreePtr<Node> OnBuildId( list<string> typ, any type_loc, string format, any name_loc, Item sources );
 	TreePtr<Node> OnTransform( string kind, any kind_loc, TreePtr<Node> pattern, any pattern_loc );
 	TreePtr<Node> OnNegation( TreePtr<Node> operand );
 	TreePtr<Node> OnConjunction( TreePtr<Node> left, TreePtr<Node> right );
 	TreePtr<Node> OnDisjunction( TreePtr<Node> left, TreePtr<Node> right );
+	TreePtr<Node> OnGrass( TreePtr<Node> through );
+	TreePtr<Node> OnPointerIs( TreePtr<Node> pointer );
+	TreePtr<Node> OnBuildSize( TreePtr<Node> container );
+	TreePtr<Node> OnStringize( TreePtr<Node> source );
 	
 	void Designate( wstring name, TreePtr<Node> sub_pattern );
 	static string QuoteName(string name);

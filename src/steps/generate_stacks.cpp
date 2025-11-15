@@ -10,6 +10,7 @@
 #include "common/common.hpp"
 #include "pattern_helpers.hpp"
 #include "tree/sctree.hpp"
+#include "tree/localtree.hpp"
 
 using namespace CPPTree;
 using namespace Steps;
@@ -175,12 +176,6 @@ ReturnViaTemp::ReturnViaTemp()
 }
 
 
-struct TempReturnAddress : Temporary
-{
-    NODE_FUNCTIONS_FINAL
-};
-
-
 AddLinkAddress::AddLinkAddress()
 {
     auto s_module = MakePatternNode<Module>();
@@ -191,7 +186,7 @@ AddLinkAddress::AddLinkAddress()
     auto r_retaddr_id = MakePatternNode<BuildInstanceIdentifierAgent>("%s_link");
     auto lr_retaddr = MakePatternNode<Parameter>();
     auto lr_retaddr_id = MakePatternNode<BuildInstanceIdentifierAgent>("link");
-    auto lr_temp_retaddr = MakePatternNode<TempReturnAddress>();
+    auto lr_temp_retaddr = MakePatternNode<LocalTree::TempReturnAddress>();
     auto lr_temp_retaddr_id = MakePatternNode<BuildInstanceIdentifierAgent>("temp_link");
     auto s_nm = MakePatternNode<NegationAgent, Declaration>();
     auto ls_nm = MakePatternNode<NegationAgent, Declaration>();
@@ -541,7 +536,7 @@ MergeFunctions::MergeFunctions()
     auto lr_goto = MakePatternNode<Goto>();
     auto mr_goto = MakePatternNode<Goto>();
     auto ms_return = MakePatternNode<Return>();
-    auto retaddr = MakePatternNode<TempReturnAddress>();
+    auto retaddr = MakePatternNode<LocalTree::TempReturnAddress>();
     auto retaddr_id = MakePatternNode<InstanceIdentifier>();
     
     mr_goto->destination = retaddr_id;

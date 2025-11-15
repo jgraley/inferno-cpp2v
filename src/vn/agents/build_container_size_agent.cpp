@@ -35,7 +35,7 @@ Syntax::Production BuildContainerSizeAgent::GetAgentProduction() const
 string BuildContainerSizeAgent::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
-	string s = "⧆" + kit.render( container, Syntax::Production::PREFIX );
+	string s = "🄽" + kit.render( container, Syntax::Production::PREFIX );
 	return s;
 } 
   
