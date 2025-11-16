@@ -2,8 +2,6 @@
 
 using namespace VN;
 
-#define INDENT_AMOUNT 4
-
 void Indenter::AddLinesFromString( string s )
 {	
 	string::size_type next_start = 0;
@@ -45,9 +43,11 @@ void Indenter::DoIndent()
 
 string Indenter::GetString() const
 {
+	// Tabs give more cosistent indentation in Geany when using 
+	// Unicode (which makes spaces vary for come ewason)
 	string s;
 	for( const Line &line : lines )
-		s += string(line.depth*INDENT_AMOUNT, ' ') + line.text + "\n";
+		s += string(line.depth, '\t') + line.text + "\n";
 	return s;
 }
 

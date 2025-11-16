@@ -11,6 +11,13 @@ using namespace VN;
 #define UID_FORMAT_HINT "%s_%u"
 //#define UID_FORMAT_PURE "id_%u"
 
+// Allow conflict of undeclared names. We don't rename these on the grounds
+// that without a declaration we can see, there mest be some declaration
+// we can't see and so can't change. So a conflict is potentially an error
+// although we can tolerate it if we truct the transformation to agree on 
+// usage.
+#define TOLERATE_UNDECLARED_CONFLICT // TODO remove once VN allows us to share 🞊 across steps
+
 
 //////////////////////////// UniqueNameGenerator ///////////////////////////////
 
@@ -51,6 +58,7 @@ void UniqueNameGenerator::AddNodeNoRename( TreePtr<Node> node )
     unsigned n_want;
     SplitName( node, &base_name, &n_want );
 
+#ifndef TOLERATE_UNDECLARED_CONFLICT    
     // Undeclared identifiers should already be unique. We must assume they are 
     // declared "somewhere else" and that to rename them would break things. In
     // fact they're probably system node ids. These have the usual identifier 
@@ -59,11 +67,11 @@ void UniqueNameGenerator::AddNodeNoRename( TreePtr<Node> node )
             ("Name conflict among undeclared identifiers (would force a rename - unsafe)\n")
             ("node: ")(node)(" name: ")((node.get()->*name_getter)())("\n")  
             ("previous usages: ")(name_usages); 
+#endif
 
     // Otherwise start a new record for this base name.
     Usages nu;
     unsigned n_got = AssignNumber( nu, node, n_want );
-    ASSERT( n_got == n_want )( "Undeclared identifier: ")(node)(" would be renamed - unsafe"); 
     name_usages.insert( NameUsagesPair( base_name, nu ) );
 }
 

@@ -336,9 +336,7 @@ TreePtr<Node> VNParse::OnSpecificId( list<string> typ, any type_loc, string name
 	
 	if( typ.size() == 1 )
 		typ.push_front("CPPTree"); // TODO centralise
-	
-	FTRACE("Front: ")(typ.front())(" back: ")(typ.back())("\n");
-	
+		
 #define NODE(NS, NAME) \
 	if( string(#NS)==typ.front() && string(#NAME)==typ.back() ) \
 		return MakeTreeNode<StandardAgentWrapper<Specific##NAME##Identifier>>(name); \
@@ -533,15 +531,14 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 
 // Remove the need for subclasses in Identifier-related nodes, then simplify ⊛ 
 
-// Diff testing!
-
 // Don't force user to use * on command line: accept a directory for input VN files
 
 // Check those "would need to exist" messages, the `' looks wrong
 
 // In all these chevronned productions, we need VN_SEP i.e. ⚬ not commas. This is because Identifier
 // names can be empty strings and that's consistent with ⚬ usage. Also ⚬ implies non-homogeneous storage
-// ie a struct rather than an array.
+// ie a struct rather than an array. 
+// And consider moving the type out to before the open paren, like with the diamond production
 
 // Tix:
 // Lose StandardAgentWrapper #867

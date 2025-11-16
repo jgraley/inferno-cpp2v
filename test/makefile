@@ -34,7 +34,7 @@ EXEC_CASES = ${SC_CASES} ${C_CASES} ${CPP_CASES}
 # what to update. However, we don't variant the reference path, i.e. there
 # is one ref for each combination of make args. 
 I_NO_SPACES=$(shell echo ${I} | tr -d '[:space:]')
-RESULTS_PATH=test/results${I_NO_SPACES}
+RESULTS_PATH=test/results_${I_NO_SPACES}
 REFERENCE_PATH=test/reference
 
 # Prepend default inferno args so they can be overridden. Thus, no need 
