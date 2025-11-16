@@ -16,8 +16,7 @@ using namespace VN;
 // we can't see and so can't change. So a conflict is potentially an error
 // although we can tolerate it if we truct the transformation to agree on 
 // usage.
-#define TOLERATE_UNDECLARED_CONFLICT // TODO remove once VN allows us to share 🞊 across steps
-
+#define TOLERATE_UNDECLARED_CONFLICT // TODO remove once VN allows us to share 🞊 across steps #872
 
 //////////////////////////// UniqueNameGenerator ///////////////////////////////
 
