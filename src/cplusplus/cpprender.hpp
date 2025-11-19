@@ -11,7 +11,10 @@ public:
 	
 private:	
 	Syntax::Production GetNodeProduction( TreePtr<Node> node ) const final;
+	
 	string Dispatch( TreePtr<Node> node, Syntax::Production surround_prod ) override;
+	
+	string DispatchInternal( TreePtr<Node> node, Syntax::Production surround_prod );
 	string RenderProgram( TreePtr<CPPTree::Program> program, Syntax::Production surround_prod ); 
 	string RenderIdValuePair( TreePtr<CPPTree::IdValuePair> ivp, Syntax::Production surround_prod );
     string RenderLiteral( TreePtr<CPPTree::Literal> sp, Syntax::Production surround_prod ); 

@@ -79,13 +79,19 @@ Syntax::Production CppRender::GetNodeProduction( TreePtr<Node> node ) const
 string CppRender::Dispatch( TreePtr<Node> node, Syntax::Production surround_prod )
 {
 	//ASSERT( !VN::Agent::TryAsAgentConst(node) )("WTF?!!!"); // #869
-/*	try 
+	string s = DispatchInternal( node, surround_prod );
+	try 
 	{ 
-		return node->GetRenderTerminal(); 
+		string snode = node->GetRenderTerminal();
+		ASSERT( snode==s )(node)("node: \"")(snode)("\" cpp_renderer: \"")(s)("\""); 
 	}
 	catch( Syntax::NotOnThisNode & ) {}
-*/
-			
+	return s;
+}
+
+
+string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surround_prod )
+{			
     if( TreePtr<Uninitialised>::DynamicCast(node) )
         return string();  
     else if( auto program = TreePtr<Program>::DynamicCast(node) )

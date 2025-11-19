@@ -274,7 +274,8 @@ string Render::RenderNodeOnly( shared_ptr<const Node> node, Syntax::Production s
 	}
 	catch( Syntax::NotOnThisNode & ) {}
 
-	return RenderNodeExplicit(node);}		
+	return RenderNodeExplicit(node);
+}		
 
 
 string Render::RenderNodeExplicit( shared_ptr<const Node> node )
