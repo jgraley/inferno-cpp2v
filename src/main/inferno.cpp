@@ -27,6 +27,7 @@
 #include "vn/csp/reference_solver.hpp"
 #include "vn/vn_sequence.hpp"
 #include "vn/lang/vn_parse.hpp"
+#include "vn/lang/vn_script.hpp"
 
 #include <cstdlib>
 #include <filesystem>
@@ -641,34 +642,6 @@ bool Inferno::ShouldIQuitAfter(Progress::Stage stage)
            ReadArgs::quitafter_progress.GetStage()==stage;
 }
 
-static void ProcessVNScript(ScriptEngine &script_engine, vector< shared_ptr<VN::VNStep> > &sequence, string spath )
-{
-	VNParse vn_parser;
-	VN::Command::List script = vn_parser.DoParse(spath);
-	if( !ReadArgs::trace_quiet )
-		fprintf(stderr, "Read %s ok\n", spath.c_str()); 
-	VN::ScriptKit script_kit{ &sequence, spath };
-	script_engine.DoExecute( script_kit, script );
-}
-
-
-static void ProcessVNPath(ScriptEngine &script_engine, vector< shared_ptr<VN::VNStep> > &sequence, string spath )
-{
-	filesystem::path path(spath);
-	if( filesystem::is_directory(path) )
-	{
-		set<string> ss;
-		for( const filesystem::directory_entry &entry : filesystem::directory_iterator(path) )
-			ss.insert(entry.path()); // These won't be sorted (this isn't "ls")
-		for( string s : ss )
-			ProcessVNPath( script_engine, sequence, s );
-	}
-	else
-	{
-		ProcessVNScript(script_engine, sequence, spath);
-	}
-}
-
 
 int main( int argc, char *argv[] )
 {
@@ -690,13 +663,15 @@ int main( int argc, char *argv[] )
     Progress(Progress::BUILDING_STEPS).SetAsCurrent();    
     vector< shared_ptr<VN::VNStep> > sequence;
     if( ReadArgs::documentation_graphs )
+    {
         BuildDocSequence( &sequence );
+	}
     else if( !ReadArgs::vn_paths.empty() )
     {
 		// Kept across all scripts as overall state
-		ScriptEngine script_engine;
-		for( string p : ReadArgs::vn_paths )
-			ProcessVNPath(script_engine, sequence, p);
+		VNScriptRunner script_engine(&sequence);
+		for( string path : ReadArgs::vn_paths )
+			script_engine.ProcessVNPath(path);
 	}
 	else
 	{
@@ -705,7 +680,7 @@ int main( int argc, char *argv[] )
         BuildDefaultSequence( &sequence );    
 	}
         
-    // Maybe we want to stop after buolding the steps
+    // Maybe we want to stop after building the steps
     if( Inferno::ShouldIQuitAfter(Progress::BUILDING_STEPS) )
         return EXIT_SUCCESS;    
 

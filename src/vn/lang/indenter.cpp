@@ -55,8 +55,8 @@ string Indenter::GetString() const
 int Indenter::GetBracketBalance(string s) const
 {
 	// Note: <> for templates is not so easy
-	int opens = Count("(", s) + Count("[", s) + Count("{", s) + Count("《", s);
-	int closes = Count(")", s) + Count("[", s) + Count("}", s) + Count("》", s);
+	int opens = Count("(", s) + Count("[", s) + Count("{", s) + Count("【", s);
+	int closes = Count(")", s) + Count("[", s) + Count("}", s) + Count("】", s);
 	return opens - closes;
 }
 

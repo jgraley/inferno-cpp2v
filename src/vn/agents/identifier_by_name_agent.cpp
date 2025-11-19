@@ -111,9 +111,9 @@ string IdentifierByNameAgent::GetRender( const RenderKit &kit, Syntax::Productio
 {
     (void)kit;
 	(void)surround_prod;
-	string s = "⊛《" + GetIdentifierSubTypeName();
-	s += "," + name;
-	s += "》";
+	string s = "⊛【" + GetIdentifierSubTypeName();
+	s += "⚬" + name;
+	s += "】";
 	return s;
 } 
   

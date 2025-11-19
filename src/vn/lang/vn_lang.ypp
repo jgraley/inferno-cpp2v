@@ -58,8 +58,8 @@
 	DELTA 									"▲"
 	DELTA_ARROW 							"⯈"
 	BUILT_IN 								"⯁"
-	OPEN_RESTRICT 							"【"
-	CLOSE_RESTRICT 							"】"
+	OPEN_VN 								"【"
+	CLOSE_VN 								"】"
 	ANY 									"☆"
 	STAR 									"★"
 	ID_BY_NAME								"⊛"
@@ -75,6 +75,7 @@
 	POINTER_IS								"⮎"
 	BUILD_SIZE								"🄽"
 	STRINGIZE								"§"
+	PRERESTRICT								"‽"
 	<wstring> 	STRING_LITERAL 				_("string")
 	<string> 	INTEGRAL_LITERAL			_("integer literal")
 	<bool>		BOOL_LITERAL				_("boolean literal")
@@ -88,7 +89,7 @@
 %left  '+' '-'
 %left  '*' '/'
 %precedence PREFIX ENGINE STUFF DELTA DELTA_ARROW TRANSFORM NEGATION GRASS POINTER_IS BUILD_SIZE STRINGIZE
-%precedence OPEN_CHEVRON CLOSE_CHEVRON OPEN_RESTRICT CLOSE_RESTRICT
+%precedence OPEN_CHEVRON CLOSE_CHEVRON OPEN_VN CLOSE_VN
 %precedence BUILT_IN BOOL_LITERAL STRING_LITERAL INTEGRAL_LITERAL SPECIFIC_ID
 
 %type <TreePtr<Node>> 				pattern
@@ -128,28 +129,28 @@ pattern	: pattern '+' pattern      { $$ = $1; }
 		| pattern '*' pattern      { $$ = $1; }
 		| pattern '/' pattern      { $$ = $1; }
 		| STAR												{ $$ = vn->OnStar(nullptr); }
-		| STAR OPEN_CHEVRON pattern CLOSE_CHEVRON			{ $$ = vn->OnStar($3); }
+		| STAR OPEN_VN pattern CLOSE_VN			{ $$ = vn->OnStar($3); }
 		| STUFF pattern 		     					 	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
-		| STUFF OPEN_CHEVRON pattern CLOSE_CHEVRON pattern 	{ $$ = vn->OnStuff($5, $3, VN::Limit()); }
-		| STUFF OPEN_CHEVRON limit CLOSE_CHEVRON pattern 	{ $$ = vn->OnStuff($5, nullptr, $3); }
+		| STUFF OPEN_VN pattern CLOSE_VN pattern 	{ $$ = vn->OnStuff($5, $3, VN::Limit()); }
+		| STUFF OPEN_VN limit CLOSE_VN pattern 	{ $$ = vn->OnStuff($5, nullptr, $3); }
 		| DELTA pattern DELTA_ARROW pattern   		   		{ $$ = vn->OnDelta($2, $4); }
 		| BUILT_IN scoped_name itemisation					{ $$ = vn->OnBuiltIn($2, @2, $3); }
 		| BUILT_IN scoped_name								{ $$ = vn->OnBuiltIn($2, @2, VN::Itemisation{{}, @2}); }
 		| '-' %prec PREFIX pattern                 			{ $$ = vn->OnPrefixOperator("-", $2); }
 		| '(' commands ')'                          		{ $$ = vn->OnEmbeddedCommands($2); }
-		| OPEN_RESTRICT scoped_name CLOSE_RESTRICT pattern 	{ $$ = vn->OnRestrict($2, @2, $4, @4); }
 		| vn_name       						  			{ $$ = vn->OnName($1, @1); }
 		| INTEGRAL_LITERAL					      			{ $$ = vn->OnIntegralLiteral($1, @1); }
 		| STRING_LITERAL					      			{ $$ = vn->OnStringLiteral($1); }
 		| BOOL_LITERAL										{ $$ = vn->OnBoolLiteral($1); }
 		| ANY												{ $$ = nullptr; }
-		| SPECIFIC_ID OPEN_CHEVRON scoped_name ',' ASCII_NAME CLOSE_CHEVRON		{ $$ = vn->OnSpecificId($3, @3, $5, @5); }
-		| SPECIFIC_ID OPEN_CHEVRON scoped_name ',' CLOSE_CHEVRON				{ $$ = vn->OnSpecificId($3, @3, "", @5); }
-		| ID_BY_NAME OPEN_CHEVRON scoped_name ',' ASCII_NAME CLOSE_CHEVRON		{ $$ = vn->OnIdByName($3, @3, $5, @5); } // ASCII_NAME could be format
-		| BUILD_ID OPEN_CHEVRON scoped_name ',' format CLOSE_CHEVRON 			{ $$ = vn->OnBuildId($3, @3, $5, @5, VN::Item{}); }
-		| BUILD_ID OPEN_CHEVRON scoped_name ',' format ',' item CLOSE_CHEVRON 	{ $$ = vn->OnBuildId($3, @3, $5, @5, $7); }
-		| BUILD_ID OPEN_CHEVRON scoped_name ',' ',' item CLOSE_CHEVRON 			{ $$ = vn->OnBuildId($3, @3, "", @5, $6); }
-		| TRANSFORM OPEN_CHEVRON ASCII_NAME CLOSE_CHEVRON pattern				{ $$ = vn->OnTransform($3, @3, $5, @5); }
+		| PRERESTRICT OPEN_VN scoped_name CLOSE_VN pattern        	{ $$ = vn->OnRestrict($3, @3, $5, @5); }
+		| SPECIFIC_ID OPEN_VN scoped_name VN_SEP ASCII_NAME CLOSE_VN		{ $$ = vn->OnSpecificId($3, @3, $5, @5); }
+		| SPECIFIC_ID OPEN_VN scoped_name VN_SEP CLOSE_VN				{ $$ = vn->OnSpecificId($3, @3, "", @5); }
+		| ID_BY_NAME OPEN_VN scoped_name VN_SEP ASCII_NAME CLOSE_VN		{ $$ = vn->OnIdByName($3, @3, $5, @5); } // ASCII_NAME could be format
+		| BUILD_ID OPEN_VN scoped_name VN_SEP format VN_SEP CLOSE_VN 			{ $$ = vn->OnBuildId($3, @3, $5, @5, VN::Item{}); }
+		| BUILD_ID OPEN_VN scoped_name VN_SEP format VN_SEP item CLOSE_VN 	{ $$ = vn->OnBuildId($3, @3, $5, @5, $7); }
+		| BUILD_ID OPEN_VN scoped_name VN_SEP VN_SEP item CLOSE_VN 			{ $$ = vn->OnBuildId($3, @3, "", @5, $6); }
+		| TRANSFORM OPEN_VN ASCII_NAME CLOSE_VN pattern				{ $$ = vn->OnTransform($3, @3, $5, @5); }
 		| NEGATION pattern 		     					 	{ $$ = vn->OnNegation($2); }
 		| pattern CONJUNCTION pattern						{ $$ = vn->OnConjunction($1, $3); }
 		| pattern DISJUNCTION pattern						{ $$ = vn->OnDisjunction($1, $3); }

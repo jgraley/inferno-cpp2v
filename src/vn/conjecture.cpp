@@ -130,7 +130,7 @@ bool Conjecture::IncrementAgent( AgentRecords::const_iterator rit, int bc )
     {
         back_choice.iter = back_decision.begin;
         back_choice.mode = DecidedQueryCommon::Choice::ITER;
-        //TRACEC("Decay BEGIN\n");
+        //TRACEC("DecayToPattern BEGIN\n");
     }
     
     // Inclusive case - we let the choice go to end but we won't go any further

@@ -80,14 +80,20 @@ string BuildIdentifierAgent::GetRender( const RenderKit &kit, Syntax::Production
 {
 	(void)surround_prod;
 
-	list<string> ls;
-	ls.push_back(GetIdentifierSubTypeName());
-	ls.push_back(format);
+	// List the sources as a pseudo-item
+	list<string> ls_sources;
 	Sequence<Node> scopy = sources;
 	for( TreePtrInterface &source : scopy )
-		ls.push_back( kit.render( (TreePtr<Node>)source, Syntax::Production::COMMA_SEP ) );
-
-	return Join( ls, ", ", "⧇《", "》");
+		ls_sources.push_back( kit.render( (TreePtr<Node>)source, Syntax::Production::COMMA_SEP ) );
+	string sources = Join( ls_sources, ", ");
+		
+	// Add in the subtype name and format to make a pseudo-itemisation
+	list<string> ls_production;
+	ls_production.push_back(GetIdentifierSubTypeName());
+	ls_production.push_back(format); // can be empty, but this is syntactically ok with ⚬
+	ls_production.push_back( sources );
+	
+	return Join( ls_production, "⚬", "⧇【", "】");
 } 
   
     

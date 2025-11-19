@@ -348,7 +348,7 @@ DEFAULT_CATCH_CLAUSE
 string CppRender::RenderTypeAndDeclarator( TreePtr<Type> type, string declarator, 
                                            Syntax::Production declarator_prod, Syntax::Production surround_prod, bool constant ) try
 {
-	ASSERT( declarator != "🞊Node⦑⦒" );
+	ASSERT( declarator != "🞊Node【】" );
     string const_str = constant?"const ":"";
     bool pure_type = (declarator == "");
     string sdeclarator;

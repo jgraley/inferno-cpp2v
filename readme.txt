@@ -81,3 +81,7 @@ script for usage instructions. If you want to see a graph, try e.g.
 To make git work with a GitHub access token:
 
 git remote set-url origin https://<user>:<token>@github.com/jgraley/inferno-cpp2v.git
+
+The VN language renderer uses tabs, and the parser assumes these are set to 4 characters You may want to do
+tabs -4
+so that VN parser error messages display correctly.

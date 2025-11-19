@@ -143,7 +143,7 @@ TreePtr<Node> VNParse::OnEmbeddedCommands( list<shared_ptr<Command>> commands )
 	TRACE("Decaying embedded commands: ")(commands)("\n");
 	for( shared_ptr<Command> c : commands )
 	{
-		node = c->Decay(node, this); 
+		node = c->DecayToPattern(node, this); 
 		// TODO could generalise to things that can Execute from within SCREngine
 		ASSERT( node )("Command ")(c)(" could not decay with sub-pattern ")(node);
 	}
@@ -242,7 +242,7 @@ TreePtr<Node> VNParse::OnRestrict( list<string> res_type, any res_loc, TreePtr<N
 	if( !pspecial )
 		throw YY::VNLangParser::syntax_error(
 		     any_cast<YY::VNLangParser::location_type>(target_loc), 
-		     "Restriction target " + QuoteName(agent->GetTypeName()) + " cannot be pre-restricted.");		
+		     "‽ cannot be used with " + QuoteName(agent->GetTypeName()));		
 		
 	pspecial->pre_restriction_archetype_node = node_names->MakeNode(ne);
 	pspecial->pre_restriction_archetype_ptr = node_names->MakeTreePtr(ne);
@@ -531,19 +531,20 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 
 // Remove the need for subclasses in Identifier-related nodes, then simplify ⊛ 
 
-// Don't force user to use * on command line: accept a directory for input VN files
-
 // Check those "would need to exist" messages, the `' looks wrong
 
-// In all these chevronned productions, we need VN_SEP i.e. ⚬ not commas. This is because Identifier
-// names can be empty strings and that's consistent with ⚬ usage. Also ⚬ implies non-homogeneous storage
-// ie a struct rather than an array. 
-// And consider moving the type out to before the open paren, like with the diamond production
+// Productions using 【 】: 
+// Consider moving the type out to before the open paren, like with the diamond production
+// Consider bringing back double-chevrons aka french quotes for name/format
+// Consider putting build ident source patterns in ()
+// ^ all this is technically better but so ugly!
 
 // Tix:
 // Lose StandardAgentWrapper #867
 // Add ability to pre-process #862
 // Be a proper Unicode language #868
+// Global designations #872
+// Type mismatches #874
 
 // C fold-in: 
 // things like OnPrefixOperator() should take an actual parser token not a string

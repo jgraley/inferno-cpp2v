@@ -11,6 +11,7 @@
 #include "tree/node_names.hpp"
 #include "vn_step.hpp"
 #include "vn_parse.hpp"
+#include "vn_script.hpp"
 #include "agents/embedded_scr_agent.hpp"
 #include "vn_lang.ypp.hpp"
 #include "vn_lang.lpp.hpp"
@@ -44,7 +45,7 @@ bool Command::OnParse(VNParse *vn)
 }
 
 
-TreePtr<Node> Command::Decay( TreePtr<Node> node, VNParse *vn )
+TreePtr<Node> Command::DecayToPattern( TreePtr<Node> node, VNParse *vn )
 {
 	return nullptr; // by default, I can't decay
 }
@@ -53,37 +54,6 @@ TreePtr<Node> Command::Decay( TreePtr<Node> node, VNParse *vn )
 void Command::Execute(const ScriptKit &kit) const
 {
 	ASSERTFAIL("Commands should either be discarded by OnParse() returning false, or implement Execute()");
-}
-
-//////////////////////////// ScriptEngine ///////////////////////////////
-
-void ScriptEngine::DoExecute( const ScriptKit &kit, Command::List script )
-{
-	for( shared_ptr<Command> c : script )
-	{
-		c->Execute(kit);
-	}
-}
-
-//////////////////////////// VNSoftStep ///////////////////////////////
-
-VNSoftStep::VNSoftStep( string filepath )
-{
-	filesystem::path path( filepath );
-	string basename = path.replace_extension().filename().string();
-#ifdef ELIMINATE_STEP_NUMBER
-	int s;
-	char c;
-	int n = sscanf( basename.c_str(), "%003d-%c", &s, &c );
-	if( n==2 )
-		basename = basename.substr(4);
-#endif
-	step_name = basename;
-}
-
-string VNSoftStep::GetName() const
-{
-	return step_name;
 }
 
 //////////////////////////// EngineCommand ///////////////////////////////
@@ -96,7 +66,7 @@ EngineCommand::EngineCommand( TreePtr<Node> stem_, any loc_ ) :
 }
 
 
-TreePtr<Node> EngineCommand::Decay( TreePtr<Node> node, VNParse *vn )
+TreePtr<Node> EngineCommand::DecayToPattern( TreePtr<Node> node, VNParse *vn )
 {
 	if( !node )
 		throw YY::VNLangParser::syntax_error(
@@ -110,9 +80,7 @@ TreePtr<Node> EngineCommand::Decay( TreePtr<Node> node, VNParse *vn )
 
 void EngineCommand::Execute(const ScriptKit &kit) const
 {
-	auto step = make_shared<VNSoftStep>(kit.script_filepath);
-	step->Configure(VNStep::COMPARE_REPLACE, stem);
-	kit.step_sequence->push_back( step );
+	kit.vn_script->AddStep( kit, stem );
 }
 
 
@@ -137,7 +105,7 @@ PatternCommand::PatternCommand( TreePtr<Node> pattern_, any loc_ ) :
 }
 
 
-TreePtr<Node> PatternCommand::Decay( TreePtr<Node> node, VNParse *vn )
+TreePtr<Node> PatternCommand::DecayToPattern( TreePtr<Node> node, VNParse *vn )
 {
 	if( node )
 		throw YY::VNLangParser::syntax_error(

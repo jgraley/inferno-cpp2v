@@ -233,7 +233,7 @@ string Render::MaybeRenderPreRestriction( TreePtr<Node> node, Syntax::Production
 
 	// This assumes no action is required in order to render a prefix operation
 	surround_prod = Syntax::Production::PREFIX;	
-	return "【" + GetInnermostTemplateParam(TYPE_ID_NAME(*archetype_node)) + "】";	
+	return "‽【" + GetInnermostTemplateParam(TYPE_ID_NAME(*archetype_node)) + "】";	
 }
 
 
