@@ -988,58 +988,9 @@ string StandardAgent::GetRender( const RenderKit &kit, Syntax::Production surrou
 		       "⚬" +
 			   GetRenderTerminal() + 
 			   "】";
-	}
-	
-	try 
-	{ 
-		return GetRenderTerminal(); 
-	}
-	catch( Syntax::NotOnThisNode & ) {}
-	
-    string s = "⯁" + GetInnermostTemplateParam(TYPE_ID_NAME(*node));
-	
-    list<string> sitems;    
-    vector< Itemiser::Element * > items = node->Itemise();
-    for( vector< Itemiser::Element * >::size_type i=0; i<items.size(); i++ )
-    {
-        ASSERT( items[i] )( "itemise returned null element" );
-        
-        if( ContainerInterface *con = dynamic_cast<ContainerInterface *>(items[i]) )                
-        {
-			if( con->size() == 1 )
-				sitems.push_back( kit.render( TreePtr<Node>(con->front()), Syntax::Production::VN_SEP_ITEMS ) );
-			else
-			{
-				list<string> scon;
-				for( const TreePtrInterface &p : *con )
-				{
-					ASSERT( p ); 
-					scon.push_back( kit.render( TreePtr<Node>(p), Syntax::Production::COMMA_SEP ) );
-				}
-				if( GetTotalSize(scon) > Syntax::GetLineBreakThreshold() )
-					sitems.push_back( Join( scon, ",\n", "", "") );
-				else
-					sitems.push_back( Join( scon, ", ", "", "") );
-			}
-        }            
-        else if( TreePtrInterface *singular = dynamic_cast<TreePtrInterface *>(items[i]) )
-        {
-            sitems.push_back( kit.render( TreePtr<Node>(*singular), Syntax::Production::VN_SEP_ITEMS ) );
-        }
-        else
-        {
-            ASSERTFAIL("got something from itemise that isn't a sequence or a shared pointer");
-        }
-    }   
-    
-    if( sitems.empty() )
-		{} // We're done. To render () would imply ONE item with ZERO elements in it
-    else if( GetTotalSize(sitems) > Syntax::GetLineBreakThreshold() )
-		s += Join( sitems, "⚬\n", "(\n", "\n)" );   
-	else 
-		s += Join( sitems, " ⚬ ", "(", ")" );    
-
-	return s;
+	}	
+	else
+		return kit.render_node(node, surround_prod);
 }
 
 

@@ -529,20 +529,11 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 // Namespaces: CPPTree should be assumed as a default where not specified. More than one specifier is still TBD
 // Common stuff for qualified types with :: including ability to throw on eg A::B::C (but could support later)
 
-// Remove the need for subclasses in Identifier-related nodes, then simplify ⊛ 
-
-// Check those "would need to exist" messages, the `' looks wrong
-
-// Productions using 【 】: 
-// Consider moving the type out to before the open paren, like with the diamond production
-// Consider bringing back double-chevrons aka french quotes for name/format
-// Consider putting build ident source patterns in ()
-// ^ all this is technically better but so ugly!
+// Productions using 【 】: AFTER adding C minxture, try using () and making things look like printf etc
 
 // Tix:
 // Lose StandardAgentWrapper #867
 // Add ability to pre-process #862
-// Be a proper Unicode language #868
 // Global designations #872
 // Type mismatches #874
 

@@ -14,6 +14,7 @@
 #include "uniquify_identifiers.hpp"
 #include "search_replace.hpp"
 #include "agents/special_agent.hpp"
+#include "agents/standard_agent.hpp"
 #include "indenter.hpp"
 
 using namespace CPPTree; // TODO should not need
@@ -35,7 +36,8 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern )
     utils = make_unique<DefaultTransUtils>(context);
     using namespace placeholders;
     kit = RenderKit{ utils.get(),
-		             bind(&Render::RenderIntoProduction, this, _1, _2)  };
+		             bind(&Render::RenderIntoProduction, this, _1, _2),
+		             bind(&Render::RenderNodeOnly, this, _1, _2) };
 
     // Make the hinted coupling names unique. Only bother with true couplings
     // (more than one parent) and don't worry about declarations.
@@ -248,18 +250,85 @@ string Render::RenderNullPointer( Syntax::Production surround_prod )
 }
 
 
-Syntax::Production Render::GetNodeProduction( TreePtr<Node> node ) const
-{
-	return Agent::TryAsAgentConst(node)->GetAgentProduction();     
+string Render::Dispatch( TreePtr<Node> node, Syntax::Production surround_prod )
+{	
+	if( const Agent *agent = Agent::TryAsAgentConst(node) )
+		return agent->GetRender( kit, surround_prod );     
+
+	try 
+	{ 
+		return node->GetRenderTerminal(); 
+	}
+	catch( Syntax::NotOnThisNode & ) {}
+
+	return RenderNodeExplicit(node);
 }
 
 
-string Render::Dispatch( TreePtr<Node> node, Syntax::Production surround_prod )
+string Render::RenderNodeOnly( shared_ptr<const Node> node, Syntax::Production surround_prod )
 {
-	const Agent *agent = Agent::TryAsAgentConst(node);
-	if( !agent )
-		return "⯁"+node->GetTypeName()+"TODO";  // TODO Move the code for this out of StandardAgent so we can use it here
-	return agent->GetRender( kit, surround_prod );     
+	(void)surround_prod;
+	try 
+	{ 
+		return node->GetRenderTerminal(); 
+	}
+	catch( Syntax::NotOnThisNode & ) {}
+
+	return RenderNodeExplicit(node);}		
+
+
+string Render::RenderNodeExplicit( shared_ptr<const Node> node )
+{
+    string s = "⯁" + GetInnermostTemplateParam(TYPE_ID_NAME(*node));
+	
+    list<string> sitems;    
+    vector< Itemiser::Element * > items = node->Itemise();
+    for( vector< Itemiser::Element * >::size_type i=0; i<items.size(); i++ )
+    {
+        ASSERT( items[i] )( "itemise returned null element" );
+        
+        if( ContainerInterface *con = dynamic_cast<ContainerInterface *>(items[i]) )                
+        {
+			if( con->size() == 1 )
+				sitems.push_back( RenderIntoProduction( TreePtr<Node>(con->front()), Syntax::Production::VN_SEP_ITEMS ) );
+			else
+			{
+				list<string> scon;
+				for( const TreePtrInterface &p : *con )
+				{
+					ASSERT( p ); 
+					scon.push_back( RenderIntoProduction( TreePtr<Node>(p), Syntax::Production::COMMA_SEP ) );
+				}
+				if( GetTotalSize(scon) > Syntax::GetLineBreakThreshold() )
+					sitems.push_back( Join( scon, ",\n", "", "") );
+				else
+					sitems.push_back( Join( scon, ", ", "", "") );
+			}
+        }            
+        else if( TreePtrInterface *singular = dynamic_cast<TreePtrInterface *>(items[i]) )
+        {
+            sitems.push_back( RenderIntoProduction( TreePtr<Node>(*singular), Syntax::Production::VN_SEP_ITEMS ) );
+        }
+        else
+        {
+            ASSERTFAIL("got something from itemise that isn't a sequence or a shared pointer");
+        }
+    }   
+    
+    if( sitems.empty() )
+		{} // We're done. To render () would imply ONE item with ZERO elements in it
+    else if( GetTotalSize(sitems) > Syntax::GetLineBreakThreshold() )
+		s += Join( sitems, "⚬\n", "(\n", "\n)" );   
+	else 
+		s += Join( sitems, " ⚬ ", "(", ")" );    
+
+	return s;
+}
+
+
+Syntax::Production Render::GetNodeProduction( TreePtr<Node> node ) const
+{
+	return Agent::TryAsAgentConst(node)->GetAgentProduction();     
 }
 
 

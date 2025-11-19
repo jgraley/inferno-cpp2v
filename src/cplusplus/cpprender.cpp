@@ -56,7 +56,8 @@ string CppRender::RenderToString( TreePtr<Node> root )
     utils = make_unique<DefaultTransUtils>(context);
     using namespace placeholders;
     kit = VN::RenderKit{ utils.get(),
-		                 bind(&Render::RenderIntoProduction, this, _1, _2)  };
+		                 bind(&Render::RenderIntoProduction, this, _1, _2),
+						 bind(&Render::RenderNodeOnly, this, _1, _2) };
 
     // Make the identifiers unique (does its own tree walk). Be strict about undeclared
     // identifiers - to rename them would be unsafe because we assume there's
@@ -78,6 +79,12 @@ Syntax::Production CppRender::GetNodeProduction( TreePtr<Node> node ) const
 string CppRender::Dispatch( TreePtr<Node> node, Syntax::Production surround_prod )
 {
 	//ASSERT( !VN::Agent::TryAsAgentConst(node) )("WTF?!!!"); // #869
+/*	try 
+	{ 
+		return node->GetRenderTerminal(); 
+	}
+	catch( Syntax::NotOnThisNode & ) {}
+*/
 			
     if( TreePtr<Uninitialised>::DynamicCast(node) )
         return string();  
@@ -119,8 +126,10 @@ string CppRender::Dispatch( TreePtr<Node> node, Syntax::Production surround_prod
         return RenderDeclaration( declaration, surround_prod );
     else if( auto statement = TreePtr<Statement>::DynamicCast(node) )
         return RenderStatement( statement, surround_prod );
-    else
-        return Render::Dispatch( node, surround_prod );       
+        
+    // Due #969 we might have a standard agent, so fall back to a function that
+    // definitely won't call any agent methods.
+    return Render::RenderNodeOnly( node, surround_prod );      
 }
 
 
