@@ -630,7 +630,23 @@ Syntax::Production NODE::GetMyProduction() const \
 { \
 	return Production::PROD; \
 } \
- 
+string NODE::GetRender( VN::RendererInterface *renderer, Production ) \
+{ \
+	Syntax::Production prod_left = Syntax::Production::PROD; \
+	Syntax::Production prod_right = Syntax::Production::PROD; \
+	switch( Syntax::Association::ASSOC ) \
+	{ \
+		case Syntax::Association::RIGHT: prod_left = Syntax::BoostPrecedence(prod_left); break; \
+		case Syntax::Association::LEFT:  prod_right = Syntax::BoostPrecedence(prod_right); break; \
+	} \
+	Sequence<Expression>::iterator operands_it = operands.begin(); \
+	string s = renderer->RenderIntoProduction( *operands_it, prod_left ); \
+	s += TEXT; \
+	++operands_it; \
+	s += renderer->RenderIntoProduction( *operands_it, prod_right ); \
+	return s; \
+}
+
 #include "operator_data.inc"
 
 //////////////////////////// ConditionalOperator ///////////////////////////////

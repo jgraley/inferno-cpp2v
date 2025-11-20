@@ -812,6 +812,7 @@ struct NODE : BASE \
 { \
 	NODE_FUNCTIONS_FINAL \
 	Production GetMyProduction() const final; \
+	string GetRender( VN::RendererInterface *renderer, Production surround_prod ) final; \
 }; \
 
 #include "operator_data.inc"

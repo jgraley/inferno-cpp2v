@@ -32,6 +32,7 @@ unicode_name			\p{UnicodeIdentifierStart} \p{UnicodeIdentifierPart}*
 float_exp_suffix		[Ee] [-+]? \d+
 float_num				\d* (\d | \.\d | \d\.) \d* {float_exp_suffix}?
 integral_num			\d*[lLuU]*
+comp_assign				\+=|-=|\*=|\/=|%=|<<=|>>=
 
 %%
 
@@ -63,10 +64,19 @@ integral_num			\d*[lLuU]*
 §				{ return YY::VNLangParser::make_STRINGIZE(location()); };
 ‽ 				{ return YY::VNLangParser::make_PRERESTRICT(location()); };
 
+// Multi-character before single-character
+==|!=			{ return YY::VNLangParser::make_C_EQUALITY_OP(str(), location()); }
+<|<=|>|>=		{ return YY::VNLangParser::make_C_RELATION_OP(str(), location()); }
+{comp_assign} 	{ return YY::VNLangParser::make_C_COMPOUND_ASSIGN(str(), location()); }
+\|\|		  	{ return YY::VNLangParser::make_C_LOGICAL_OR(location()); }
+&&			  	{ return YY::VNLangParser::make_C_LOGICAL_AND(location()); }
+
 !|~				{ return YY::VNLangParser::make_C_PREFIX_OP(str(), location()); };
 \+\+|--			{ return YY::VNLangParser::make_C_PRE_OR_POSTFIX_OP(str(), location()); };
--|\+|\*|&	  	{ return YY::VNLangParser::make_C_PRE_OR_INFIX_OP(str(), location()); }
+\*|&	  		{ return YY::VNLangParser::make_C_PRE_OR_INFIX_OP(str(), location()); }
 =			  	{ return YY::VNLangParser::make_C_ASSIGN(location()); }
+-|\+		  	{ return YY::VNLangParser::make_C_ADD_SUB_OP(str(), location()); }
+
 
 true			{ return YY::VNLangParser::make_BOOL_LITERAL(true, location()); };
 false			{ return YY::VNLangParser::make_BOOL_LITERAL(false, location()); };
