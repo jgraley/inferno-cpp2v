@@ -29,7 +29,7 @@ public:
     int GetExtenderChannelOrdinal() const override;
                  
 	Syntax::Production GetAgentProduction() const override;
-	string GetAgentRender( const RenderKit &kit, Syntax::Production surround_prod ) const final;	
+	string GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod ) const final;	
 	NodeBlock GetGraphBlockInfo() const final;           
                                            
     TreePtr<Node> pointer;

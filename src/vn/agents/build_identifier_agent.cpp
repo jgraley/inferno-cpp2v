@@ -76,7 +76,7 @@ Syntax::Production BuildIdentifierAgent::GetAgentProduction() const
 }
 
 
-string BuildIdentifierAgent::GetAgentRender( const RenderKit &kit, Syntax::Production surround_prod ) const
+string BuildIdentifierAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
 
@@ -84,7 +84,7 @@ string BuildIdentifierAgent::GetAgentRender( const RenderKit &kit, Syntax::Produ
 	list<string> ls_sources;
 	Sequence<Node> scopy = sources;
 	for( TreePtrInterface &source : scopy )
-		ls_sources.push_back( kit.renderer->RenderIntoProduction( (TreePtr<Node>)source, Syntax::Production::COMMA_SEP ) );
+		ls_sources.push_back( renderer->RenderIntoProduction( (TreePtr<Node>)source, Syntax::Production::COMMA_SEP ) );
 	string sources = Join( ls_sources, ", ");
 		
 	// Add in the subtype name and format to make a pseudo-itemisation

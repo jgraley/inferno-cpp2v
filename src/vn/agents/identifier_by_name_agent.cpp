@@ -107,9 +107,9 @@ Syntax::Production IdentifierByNameAgent::GetAgentProduction() const
 }
 
 
-string IdentifierByNameAgent::GetAgentRender( const RenderKit &kit, Syntax::Production surround_prod ) const
+string IdentifierByNameAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod ) const
 {
-    (void)kit;
+    (void)renderer;
 	(void)surround_prod;
 	string s = "⊛【" + GetIdentifierSubTypeName();
 	s += "⚬" + name;

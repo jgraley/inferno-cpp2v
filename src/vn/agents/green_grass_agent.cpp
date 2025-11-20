@@ -30,10 +30,10 @@ Syntax::Production GreenGrassAgent::GetAgentProduction() const
 }
 
 
-string GreenGrassAgent::GetAgentRender( const RenderKit &kit, Syntax::Production surround_prod ) const
+string GreenGrassAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
-	return "⫴" + kit.renderer->RenderIntoProduction( (TreePtr<Node>)(*GetThrough()), Syntax::Production::PREFIX );
+	return "⫴" + renderer->RenderIntoProduction( (TreePtr<Node>)(*GetThrough()), Syntax::Production::PREFIX );
 } 
 
 

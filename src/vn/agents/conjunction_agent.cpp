@@ -43,14 +43,14 @@ Syntax::Production ConjunctionAgent::GetAgentProduction() const
 }
 
 
-string ConjunctionAgent::GetAgentRender( const RenderKit &kit, Syntax::Production surround_prod ) const
+string ConjunctionAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
 
 	// Commutative and associative so don't boost productions
 	list<string> ls;
 	for( const TreePtrInterface &p : GetConjuncts() )                 
-		ls.push_back( kit.renderer->RenderIntoProduction( (TreePtr<Node>)p, Syntax::Production::VN_CONJUNCTION ) );
+		ls.push_back( renderer->RenderIntoProduction( (TreePtr<Node>)p, Syntax::Production::VN_CONJUNCTION ) );
 	return Join(ls, " ∧ ");
 }    
     

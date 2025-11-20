@@ -53,7 +53,7 @@ public:
 
     
 	Syntax::Production GetAgentProduction() const override;
-	string GetAgentRender( const RenderKit &kit, Syntax::Production surround_prod ) const final;
+	string GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod ) const final;
     NodeBlock GetGraphBlockInfo() const final;
     string GetCouplingNameHint() const final
     {

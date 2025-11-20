@@ -87,11 +87,11 @@ Syntax::Production ChildAgent::GetAgentProduction() const
 }
 
 
-string ChildAgent::GetAgentRender( const RenderKit &kit, Syntax::Production surround_prod ) const
+string ChildAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
 	string s = "⩨【=1】";
-	return s + kit.renderer->RenderIntoProduction( terminus, Syntax::Production::PREFIX ); 
+	return s + renderer->RenderIntoProduction( terminus, Syntax::Production::PREFIX ); 
 }    
     
     
@@ -168,13 +168,13 @@ Syntax::Production StuffAgent::GetAgentProduction() const
 }
 
 
-string StuffAgent::GetAgentRender( const RenderKit &kit, Syntax::Production surround_prod ) const
+string StuffAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
 	string s = "⩨";
 	if( recurse_restriction )
-		s += "【" + kit.renderer->RenderIntoProduction( recurse_restriction, Syntax::Production::BOOT_EXPR) + "】";
-	return s + kit.renderer->RenderIntoProduction( terminus, Syntax::Production::PREFIX ); 
+		s += "【" + renderer->RenderIntoProduction( recurse_restriction, Syntax::Production::BOOT_EXPR) + "】";
+	return s + renderer->RenderIntoProduction( terminus, Syntax::Production::PREFIX ); 
 }    
     
     

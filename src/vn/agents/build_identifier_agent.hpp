@@ -35,7 +35,7 @@ struct BuildIdentifierAgent : public virtual BuilderAgent
     virtual TreePtr<CPPTree::SpecificIdentifier> BuildSpecificIdentifier( string name ) const = 0;
 
 	Syntax::Production GetAgentProduction() const override;
-	string GetAgentRender( const RenderKit &kit, Syntax::Production surround_prod ) const final;
+	string GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod ) const final;
     string GetCouplingNameHint() const final;
     bool IsFixedType() const final;    
     virtual string GetIdentifierSubTypeName() const = 0;

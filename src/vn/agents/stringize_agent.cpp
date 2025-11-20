@@ -28,10 +28,10 @@ Syntax::Production StringizeAgent::GetAgentProduction() const
 }
 
 
-string StringizeAgent::GetAgentRender( const RenderKit &kit, Syntax::Production surround_prod ) const
+string StringizeAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
-	return "§" + kit.renderer->RenderIntoProduction( source, Syntax::Production::PREFIX );
+	return "§" + renderer->RenderIntoProduction( source, Syntax::Production::PREFIX );
 } 
 
     

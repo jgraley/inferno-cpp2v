@@ -6,7 +6,7 @@
 
 namespace VN
 {
-	class RenderKit;
+	class RendererInterface;
 };
 
 /// Interface for being able to reutnr a string for rendering (as opposed to debug)
@@ -96,13 +96,13 @@ public:
 	struct NotOnThisNode : Exception
 	{
 	};
-	
+		
 	/// Produce the source-code-name of the corresponding SystemC construct
     virtual string GetLoweredIdName() const;
     virtual string GetIdentifierName() const;
     virtual string GetCouplingNameHint() const;
 	
-	virtual string GetRender( const VN::RenderKit &kit, Production surround_prod ) const;
+	virtual string GetRender( VN::RendererInterface *renderer, Production surround_prod ) const;
 	
 	// Like GetRender, but without a kit it can't render sub-productions, so it can only work for terminals
 	virtual string GetRenderTerminal( Production surround_prod ) const;

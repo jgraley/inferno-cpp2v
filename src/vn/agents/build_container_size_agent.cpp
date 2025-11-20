@@ -32,10 +32,10 @@ Syntax::Production BuildContainerSizeAgent::GetAgentProduction() const
 }
 
 
-string BuildContainerSizeAgent::GetAgentRender( const RenderKit &kit, Syntax::Production surround_prod ) const
+string BuildContainerSizeAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
-	string s = "🄽" + kit.renderer->RenderIntoProduction( container, Syntax::Production::PREFIX );
+	string s = "🄽" + renderer->RenderIntoProduction( container, Syntax::Production::PREFIX );
 	return s;
 } 
   

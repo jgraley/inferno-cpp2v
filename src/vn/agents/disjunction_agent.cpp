@@ -69,14 +69,14 @@ Syntax::Production DisjunctionAgent::GetAgentProduction() const
 }
 
 
-string DisjunctionAgent::GetAgentRender( const RenderKit &kit, Syntax::Production surround_prod ) const
+string DisjunctionAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
 
 	// Commutative and associative so don't boost productions
 	list<string> ls;
 	for( const TreePtrInterface &p : GetDisjuncts() )                 
-		ls.push_back( kit.renderer->RenderIntoProduction( (TreePtr<Node>)p, Syntax::Production::VN_DISJUNCTION ) );
+		ls.push_back( renderer->RenderIntoProduction( (TreePtr<Node>)p, Syntax::Production::VN_DISJUNCTION ) );
 
 	return Join(ls, " ∨ ");
 }    

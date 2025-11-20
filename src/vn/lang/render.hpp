@@ -13,23 +13,13 @@ namespace VN
 {
 class CompareReplace; 
 
-class RenderRecursionInterface
-{
-public:	
-	virtual string RenderIntoProduction( TreePtr<Node> node, Syntax::Production surround_prod ) = 0;
-	virtual string RenderNodeOnly( shared_ptr<const Node> node, Syntax::Production surround_prod ) = 0;
-	virtual string ScopeResolvingPrefix( TreePtr<Node> id, Syntax::Production surround_prod ) = 0;
-	virtual string GetUniqueIdentifierName( TreePtr<Node> id ) const = 0;
-};
-
-
 struct RenderKit 
 {	
-	RenderRecursionInterface *renderer;
+	RendererInterface *renderer;
 };
 
 
-class Render : public RenderRecursionInterface
+class Render : public RendererInterface
 {
 public:	
     Render( string output_x_path_ = string() );
@@ -62,7 +52,6 @@ public:
     const string output_x_path;                                     
     SimpleCompare sc;
     unique_ptr<DefaultTransUtils> utils;
-    RenderKit kit;
     TransKit trans_kit;
     Indenter indenter;
 };

@@ -84,7 +84,7 @@ Syntax::Production EmbeddedSCRAgent::GetAgentProduction() const
 }
 
 
-string EmbeddedSCRAgent::GetAgentRender( const RenderKit &kit, Syntax::Production surround_prod ) const
+string EmbeddedSCRAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
 	if( search_pattern!=replace_pattern || is_search )	
@@ -101,10 +101,10 @@ string EmbeddedSCRAgent::GetAgentRender( const RenderKit &kit, Syntax::Productio
 	// Functional nesting i.e. chaining via stem should look like x⨟꩜(y⨟꩜z) which will 
 	// indent as required. If the ꩜<pattern> aere a production it would be at 
 	// Boost(VN_SEP_SCRIPTY) to get left-association.
-	return kit.renderer->RenderIntoProduction( (TreePtr<Node>)(*GetThrough()), Syntax::Production::VN_SEP_SCRIPTY ) + 
+	return renderer->RenderIntoProduction( (TreePtr<Node>)(*GetThrough()), Syntax::Production::VN_SEP_SCRIPTY ) + 
 		   "⨟\n" +
 		   "꩜" + 
-		   kit.renderer->RenderIntoProduction( search_pattern, Syntax::Production::PREFIX ); // Left-associative 
+		   renderer->RenderIntoProduction( search_pattern, Syntax::Production::PREFIX ); // Left-associative 
 }    
        
 

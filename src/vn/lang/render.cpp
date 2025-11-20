@@ -35,7 +35,6 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern )
         
     utils = make_unique<DefaultTransUtils>(context);
     using namespace placeholders;
-    kit = RenderKit{ this };
 
     // Make the hinted coupling names unique. Only bother with true couplings
     // (more than one parent) and don't worry about declarations.
@@ -240,7 +239,6 @@ string Render::MaybeRenderPreRestriction( TreePtr<Node> node, Syntax::Production
 
 string Render::RenderNullPointer( Syntax::Production surround_prod )
 {	
-	(void)kit;
 	(void)surround_prod;
 	// Assume NULL means we're in a pattern, and it represents a wildcard
 	// Note same symbol as Stuff nodes etc but this is a terminal not a prefix
@@ -252,11 +250,11 @@ string Render::RenderNullPointer( Syntax::Production surround_prod )
 string Render::Dispatch( TreePtr<Node> node, Syntax::Production surround_prod )
 {	
 	if( const Agent *agent = Agent::TryAsAgentConst(node) )
-		return agent->GetAgentRender( kit, surround_prod );     
+		return agent->GetAgentRender( this, surround_prod );     
 
 	try 
 	{ 
-		return node->GetRender(kit, surround_prod); 
+		return node->GetRender(this, surround_prod); 
 	}
 	catch( Syntax::NotOnThisNode & ) {}
 
@@ -269,7 +267,7 @@ string Render::RenderNodeOnly( shared_ptr<const Node> node, Syntax::Production s
 	(void)surround_prod;
 	try 
 	{ 
-		return node->GetRender(kit, surround_prod); 
+		return node->GetRender(this, surround_prod); 
 	}
 	catch( Syntax::NotOnThisNode & ) {}
 

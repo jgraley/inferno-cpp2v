@@ -122,13 +122,13 @@ Syntax::Production StarAgent::GetAgentProduction() const
 }
 
 
-string StarAgent::GetAgentRender( const RenderKit &kit, Syntax::Production surround_prod ) const
+string StarAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
 
 	string s = "★";
 	if( *GetRestriction() )
-		s += "【" + kit.renderer->RenderIntoProduction( TreePtr<Node>(*GetRestriction()), Syntax::Production::BOOT_EXPR) + "】";
+		s += "【" + renderer->RenderIntoProduction( TreePtr<Node>(*GetRestriction()), Syntax::Production::BOOT_EXPR) + "】";
 	
 	return s;
 }  

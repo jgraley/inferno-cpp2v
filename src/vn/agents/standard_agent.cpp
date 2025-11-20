@@ -966,7 +966,7 @@ Syntax::Production StandardAgent::GetAgentProduction() const
 }
 
 
-string StandardAgent::GetAgentRender( const RenderKit &kit, Syntax::Production surround_prod ) const
+string StandardAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;	
 	shared_ptr<const Node> node = GetPatternPtr();
@@ -990,7 +990,7 @@ string StandardAgent::GetAgentRender( const RenderKit &kit, Syntax::Production s
 			   "】";
 	}	
 	else
-		return kit.renderer->RenderNodeOnly(node, surround_prod);
+		return renderer->RenderNodeOnly(node, surround_prod);
 }
 
 

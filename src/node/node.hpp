@@ -94,6 +94,17 @@ struct Node : NodeBases,
     virtual string GetTrace() const override;    
 };
 
+namespace VN
+{
+	class RendererInterface
+	{
+	public:	
+		virtual string RenderIntoProduction( TreePtr<Node> node, Syntax::Production surround_prod ) = 0;
+		virtual string RenderNodeOnly( shared_ptr<const Node> node, Syntax::Production surround_prod ) = 0;
+		virtual string ScopeResolvingPrefix( TreePtr<Node> id, Syntax::Production surround_prod ) = 0;
+		virtual string GetUniqueIdentifierName( TreePtr<Node> id ) const = 0;
+	};
+};
 
 extern void GenericsTest();
 

@@ -63,7 +63,7 @@ Syntax::Production DeltaAgent::GetAgentProduction() const
 }
 
 
-string DeltaAgent::GetAgentRender( const RenderKit &kit, Syntax::Production surround_prod ) const
+string DeltaAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
 	// We can use PREFIX for this because there's nothing in front of the ▲ unlike
@@ -71,8 +71,8 @@ string DeltaAgent::GetAgentRender( const RenderKit &kit, Syntax::Production surr
 	// As with ?: we could use BOOT_EXPR for the through argument, and probably should
 	// in the parser, but to generate consistent style in renders we use PREFIX so
 	// that parens are just as likely in both args.
-	string st = kit.renderer->RenderIntoProduction( (TreePtr<Node>)(*GetThrough()), Syntax::Production::PREFIX );
-	string so = kit.renderer->RenderIntoProduction( (TreePtr<Node>)(*GetOverlay()), Syntax::Production::PREFIX );
+	string st = renderer->RenderIntoProduction( (TreePtr<Node>)(*GetThrough()), Syntax::Production::PREFIX );
+	string so = renderer->RenderIntoProduction( (TreePtr<Node>)(*GetOverlay()), Syntax::Production::PREFIX );
 	if( st.size() > Syntax::GetLineBreakThreshold() )
 		return "▲" + st + "\n⯈" + so;
 	else
