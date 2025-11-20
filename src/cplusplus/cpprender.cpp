@@ -55,17 +55,15 @@ string CppRender::RenderToString( TreePtr<Node> root )
         
     utils = make_unique<DefaultTransUtils>(context);
     using namespace placeholders;
-    kit = VN::RenderKit{ utils.get(),
-		                 this,
-						 &unique_identifier_names,
-						 nullptr }; // couplings for pattern renders only
+    kit = VN::RenderKit{ this };
 
     // Make the identifiers unique (does its own tree walk). Be strict about undeclared
     // identifiers - to rename them would be unsafe because we assume there's
     // a declaration ouside of our tree. This actually gets other nodes too but 
     // we'll only look up identifiers.
     UniquifyNames identifiers_uniqifier(&Syntax::GetIdentifierName, false, true); 
-    unique_identifier_names = identifiers_uniqifier.UniquifyAll( kit, context );
+    trans_kit = TransKit{ utils.get() };
+    unique_identifier_names = identifiers_uniqifier.UniquifyAll( trans_kit, context );
     
     return RenderIntoProduction( root, Syntax::Production::PROGRAM );
 }
@@ -212,10 +210,17 @@ string CppRender::ScopeResolvingPrefix( TreePtr<Node> node, Syntax::Production s
 DEFAULT_CATCH_CLAUSE
 
 
+string CppRender::GetUniqueIdentifierName( TreePtr<Node> id ) 
+{
+	ASSERT( unique_identifier_names.count(id) > 0 )
+	      (id)
+	      (" (\"%s\") missing from unique_identifier_names", id->GetIdentifierName().c_str() );
+	return unique_identifier_names.at(id);
+}
+
+
 string CppRender::RenderIdentifier( TreePtr<Identifier> id, Syntax::Production surround_prod ) try
 {
-	auto that = dynamic_cast<const SpecificIdentifier *>(id.get());
-	(void)that;
     // Put this in SpecificLabelIdentifier
     if( DynamicTreePtrCast< SpecificLabelIdentifier >(id) )
     {
@@ -237,8 +242,7 @@ string CppRender::RenderIdentifier( TreePtr<Identifier> id, Syntax::Production s
 	if( !ii )
 		throw Syntax::NotOnThisNode();
 
-	ASSERT( kit.unique_identifier_names->count(ii) > 0 )(ii)(" (\"%s\") missing from unique_identifier_names", ii->GetIdentifierName().c_str() );
-	string s = kit.unique_identifier_names->at(ii);          
+	string s = kit.renderer->GetUniqueIdentifierName(ii);          
     ASSERT(s.size()>0)(*id)(" rendered to an empty string\n");
 
     // Slight cheat for expediency: if a PURE_IDENTIFIER is expected, suppress scope resolution.
@@ -591,12 +595,12 @@ string CppRender::RenderCall( TreePtr<Call> call, Syntax::Production surround_pr
 
     // Render the expression that resolves to the function name unless this is
     // a constructor call in which case just the name of the thing being constructed.
-    if( TreePtr<Expression> base = TypeOf::instance.TryGetConstructedExpression( kit, call ).GetTreePtr() )
+    if( TreePtr<Expression> base = TypeOf::instance.TryGetConstructedExpression( trans_kit, call ).GetTreePtr() )
         s += kit.renderer->RenderIntoProduction( base, Syntax::Production::POSTFIX );
     else
         s += kit.renderer->RenderIntoProduction( call->callee, Syntax::Production::POSTFIX );
 
-    s += RenderMapArgs(TypeOf::instance.Get(kit, call->callee).GetTreePtr(), call->args);
+    s += RenderMapArgs(TypeOf::instance.Get(trans_kit, call->callee).GetTreePtr(), call->args);
     return s;
 }
 DEFAULT_CATCH_CLAUSE
@@ -684,7 +688,7 @@ string CppRender::RenderMakeRecord( TreePtr<RecordLiteral> make_rec, Syntax::Pro
     // and fields. I think C++ side-steps this by diallowing the RecordLiteral syntax
     // in classes where dependencies might matter.
 
-    TreePtr<Record> r = TryGetRecordDeclaration(kit, id).GetTreePtr();
+    TreePtr<Record> r = TryGetRecordDeclaration(trans_kit, id).GetTreePtr();
     // Make sure we have the same ordering as when the record was rendered
     Sequence<Declaration> sorted_members = SortDecls( r->members, true, unique_identifier_names );
 
@@ -786,7 +790,7 @@ void CppRender::ExtractInits( Sequence<Statement> &body,
         {
             try
             {
-                if( TypeOf::instance.TryGetConstructedExpression( kit, call ) )
+                if( TypeOf::instance.TryGetConstructedExpression( trans_kit, call ) )
                 {
                     inits.push_back(s);
                     continue;
@@ -857,8 +861,8 @@ string CppRender::RenderInitialisation( TreePtr<Initialiser> init ) try
         }
         if( auto call = DynamicTreePtrCast<Call>( ei ) ) try
         {       
-            if( TypeOf::instance.TryGetConstructedExpression( kit, call ).GetTreePtr() )        
-                return RenderMapArgs(TypeOf::instance.Get(kit, call->callee).GetTreePtr(), call->args) + ";\n";
+            if( TypeOf::instance.TryGetConstructedExpression( trans_kit, call ).GetTreePtr() )        
+                return RenderMapArgs(TypeOf::instance.Get(trans_kit, call->callee).GetTreePtr(), call->args) + ";\n";
         }
         catch(DeclarationOf::DeclarationNotFound &)
         {

@@ -19,6 +19,7 @@ private:
 	string RenderIdValuePair( TreePtr<CPPTree::IdValuePair> ivp, Syntax::Production surround_prod );
     string RenderLiteral( TreePtr<CPPTree::Literal> sp, Syntax::Production surround_prod ); 
     string ScopeResolvingPrefix( TreePtr<Node> node, Syntax::Production surround_prod ) final;
+	string GetUniqueIdentifierName( TreePtr<Node> id ) final;
     string RenderIdentifier( TreePtr<CPPTree::Identifier> id, Syntax::Production surround_prod );
     string RenderIntegral( TreePtr<CPPTree::Integral> type, Syntax::Production surround_prod );
     string RenderIntegralTypeAndDeclarator( TreePtr<CPPTree::Integral> type, string declarator );

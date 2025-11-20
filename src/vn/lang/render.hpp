@@ -19,14 +19,13 @@ public:
 	virtual string RenderIntoProduction( TreePtr<Node> node, Syntax::Production surround_prod ) = 0;
 	virtual string RenderNodeOnly( shared_ptr<const Node> node, Syntax::Production surround_prod ) = 0;
 	virtual string ScopeResolvingPrefix( TreePtr<Node> id, Syntax::Production surround_prod ) = 0;
+	virtual string GetUniqueIdentifierName( TreePtr<Node> id ) = 0;
 };
 
 
-struct RenderKit : TransKit
+struct RenderKit 
 {	
 	RenderRecursionInterface *renderer;
-	const UniquifyNames::NodeToNameMap *unique_identifier_names;
-	const UniquifyNames::NodeToNameMap *unique_coupling_names;
 };
 
 
@@ -47,7 +46,8 @@ public:
 	string RenderNodeOnly( shared_ptr<const Node> node, Syntax::Production surround_prod ) override;
 	string RenderNodeExplicit( shared_ptr<const Node> node );
 	string ScopeResolvingPrefix( TreePtr<Node> id, Syntax::Production surround_prod ) override;
-	
+	string GetUniqueIdentifierName( TreePtr<Node> id ) override;
+
 	virtual Syntax::Production GetNodeProduction( TreePtr<Node> node ) const;						 
 	TreePtr<CPPTree::Scope> TryGetScope( TreePtr<Node> node );
 	bool IsDeclared( TreePtr<CPPTree::Identifier> id );
@@ -63,6 +63,7 @@ public:
     SimpleCompare sc;
     unique_ptr<DefaultTransUtils> utils;
     RenderKit kit;
+    TransKit trans_kit;
     Indenter indenter;
 };
 };

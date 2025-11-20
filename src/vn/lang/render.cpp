@@ -35,15 +35,13 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern )
         
     utils = make_unique<DefaultTransUtils>(context);
     using namespace placeholders;
-    kit = RenderKit{ utils.get(),
-					 this,
-		             nullptr, // Identifiers should never be directly rendered in patterns - probably
-		             &unique_coupling_names };
+    kit = RenderKit{ this };
 
     // Make the hinted coupling names unique. Only bother with true couplings
     // (more than one parent) and don't worry about declarations.
     UniquifyNames coupling_names_uniqifier(&Syntax::GetCouplingNameHint, true, false);
-    unique_coupling_names = coupling_names_uniqifier.UniquifyAll( kit, context );
+    trans_kit = TransKit{ utils.get() };
+    unique_coupling_names = coupling_names_uniqifier.UniquifyAll( trans_kit, context );
 	incoming_links_map = coupling_names_uniqifier.GetIncomingLinksMap();
 	
 	string s;
@@ -334,6 +332,12 @@ string Render::ScopeResolvingPrefix( TreePtr<Node>, Syntax::Production )
 }
 
 
+string Render::GetUniqueIdentifierName( TreePtr<Node> ) 
+{
+	ASSERTFAIL("VN renderer never renders identifiers directly");
+}
+
+
 Syntax::Production Render::GetNodeProduction( TreePtr<Node> node ) const
 {
 	return Agent::TryAsAgentConst(node)->GetAgentProduction();     
@@ -370,7 +374,7 @@ bool Render::IsDeclared( TreePtr<Identifier> id )
 {
     try
     {
-        DeclarationOf().TryApplyTransformation( kit, id );
+        DeclarationOf().TryApplyTransformation( trans_kit, id );
         return true;
     }
     catch(DeclarationOf::DeclarationNotFound &)
