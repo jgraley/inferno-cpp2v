@@ -101,7 +101,7 @@ namespace VN
 	public:	
 		virtual string RenderIntoProduction( TreePtr<Node> node, Syntax::Production surround_prod ) = 0;
 		virtual string RenderNodeOnly( shared_ptr<const Node> node, Syntax::Production surround_prod ) = 0;
-		virtual string ScopeResolvingPrefix( TreePtr<Node> id, Syntax::Production surround_prod ) = 0;
+		virtual string RenderScopeResolvingPrefix( TreePtr<Node> id ) = 0;
 		virtual string GetUniqueIdentifierName( TreePtr<Node> id ) const = 0;
 	};
 };

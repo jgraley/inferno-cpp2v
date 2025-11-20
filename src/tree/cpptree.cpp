@@ -320,10 +320,44 @@ Orderable::Diff SpecificIdentifier::OrderCompare3WayCovariant( const Orderable &
 }
 
 
-string SpecificIdentifier::GetRenderTerminal( Production surround_prod ) const 
-{
-	(void)surround_prod;
-    return name+"SDAFASDFASDFADSFADSFR";
+string SpecificIdentifier::GetRender( VN::RendererInterface *renderer, Production surround_prod ) const 
+{	
+	// Get rid of all this casting, including const casting, by building the entire
+	// rendering subsystem using plain old const pointers.
+	auto node = TreePtr<Node>(const_pointer_cast<Node>(shared_from_this()));
+	auto id = TreePtr<SpecificIdentifier>::DynamicCast(node);
+		
+    // Put this in SpecificLabelIdentifier
+    if( DynamicTreePtrCast< SpecificLabelIdentifier >(id) )
+    {
+		if(  surround_prod < Syntax::Production::SCOPE_RESOLVE )
+		{
+			// label-as-variable (GCC extension)  
+			return "&&" + renderer->RenderIntoProduction( id, Syntax::Production::SCOPE_RESOLVE ); // recurse at strictly higher precedence
+		}
+		else
+		{
+			// TODO call SpecificIdentifier::...
+		}			
+    }
+
+    if( !id )
+		throw Syntax::NotOnThisNode();
+
+	auto ii = DynamicTreePtrCast<SpecificIdentifier>( id );
+	if( !ii )
+		throw Syntax::NotOnThisNode();
+
+	string s = renderer->GetUniqueIdentifierName(ii);          
+    ASSERT(s.size()>0)(*id)(" rendered to an empty string\n");
+
+    // Slight cheat for expediency: if a PURE_IDENTIFIER is expected, suppress scope resolution.
+    // This could lead to the rendering of identifiers in the wrong scope. But, most PURE_IDENTIFIER
+    // uses are declaring the id, or otherwise can't cope with the :: anyway. 
+    if( surround_prod < Syntax::Production::PURE_IDENTIFIER ) 
+        s = renderer->RenderScopeResolvingPrefix( id ) + s;   
+                                     
+    return s;
 }
 
 

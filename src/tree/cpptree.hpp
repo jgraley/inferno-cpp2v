@@ -262,7 +262,7 @@ struct SpecificIdentifier : virtual Property
     virtual bool IsLocalMatchCovariant( const Matcher &candidate ) const; /// Overloaded comparison for search&replace
     virtual Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
-    virtual string GetRenderTerminal( Production surround_prod ) const; 
+	string GetRender( VN::RendererInterface *renderer, Production surround_prod ) const;
     virtual string GetIdentifierName() const; /// This is relied upon to just return the identifier name 
     virtual string GetGraphName() const;
     virtual string GetTrace() const;

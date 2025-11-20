@@ -74,22 +74,13 @@ Syntax::Production CppRender::GetNodeProduction( TreePtr<Node> node ) const
 }
 
 
-string CppRender::Dispatch( TreePtr<Node> node, Syntax::Production surround_prod )
-{
-	//ASSERT( !VN::Agent::TryAsAgentConst(node) )("WTF?!!!"); // #869
-	string s = DispatchInternal( node, surround_prod );		
-
-	if( ReadArgs::use.count("a") )
-	{
-		string s_internal = s;
-		try 
-		{ 		
-			s = node->GetRender(this, surround_prod);		
-		}
-		catch( Syntax::NotOnThisNode & ) {		}
-		ASSERT( s==s_internal )(node)("node: \"")(s)("\" internal: \"")(s_internal)("\""); 
-	}
-	return s;
+string CppRender::Dispatch( TreePtr<Node> node, Syntax::Production surround_prod ) try 
+{ 		
+	return node->GetRender( this, surround_prod );		
+}
+catch( Syntax::NotOnThisNode & ) 
+{	
+	return DispatchInternal( node, surround_prod );
 }
 
 
@@ -99,8 +90,6 @@ string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surro
         return string();  
     else if( auto program = TreePtr<Program>::DynamicCast(node) )
         return RenderProgram( program, surround_prod );
-    else if( auto identifier = TreePtr<Identifier>::DynamicCast(node) ) // Identifier can be a kind of type or expression
-        return RenderIdentifier( identifier, surround_prod );
     else if( auto access = TreePtr<AccessSpec>::DynamicCast(node) ) // Identifier can be a kind of type or expression
         return RenderAccessSpec( access, surround_prod );
     else if( auto ivp = TreePtr<IdValuePair>::DynamicCast(node) )
@@ -138,7 +127,7 @@ string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surro
         
     // Due #969 we might have a standard agent, so fall back to a function that
     // definitely won't call any agent methods.
-    return Render::RenderNodeOnly( node, surround_prod );      
+    return Render::RenderNodeExplicit( node );      
 }
 
 
@@ -184,7 +173,7 @@ string CppRender::RenderLiteral( TreePtr<Literal> sp, Syntax::Production surroun
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::ScopeResolvingPrefix( TreePtr<Node> node, Syntax::Production surround_prod ) try
+string CppRender::RenderScopeResolvingPrefix( TreePtr<Node> node ) try
 {
     TreePtr<Node> scope = TryGetScope(node);
               
@@ -196,9 +185,9 @@ string CppRender::ScopeResolvingPrefix( TreePtr<Node> node, Syntax::Production s
     else if( DynamicTreePtrCast<Program>( scope ) )
         return "";
     else if( auto e = DynamicTreePtrCast<Enum>( scope ) ) // <- for enum
-        return ScopeResolvingPrefix( e->identifier, surround_prod );    // omit scope for the enum itself
+        return RenderScopeResolvingPrefix( e->identifier );    // omit scope for the enum itself
     else if( auto r = DynamicTreePtrCast<Record>( scope ) ) // <- for class, struct, union
-        return RenderIdentifier( r->identifier, Syntax::Production::SCOPE_RESOLVE ) + "::";
+        return r->identifier->GetRender(this, Syntax::Production::SCOPE_RESOLVE) + "::";
     else if( DynamicTreePtrCast<CallableParams>( scope ) ||  // <- this is for params
              DynamicTreePtrCast<Compound>( scope ) ||    // <- this is for locals in body
              DynamicTreePtrCast<StatementExpression>( scope ) )    // <- this is for locals in body
@@ -216,43 +205,6 @@ string CppRender::GetUniqueIdentifierName( TreePtr<Node> id ) const
 	      (" (\"%s\") missing from unique_identifier_names", id->GetIdentifierName().c_str() );
 	return unique_identifier_names.at(id);
 }
-
-
-string CppRender::RenderIdentifier( TreePtr<Identifier> id, Syntax::Production surround_prod ) try
-{
-    // Put this in SpecificLabelIdentifier
-    if( DynamicTreePtrCast< SpecificLabelIdentifier >(id) )
-    {
-		if(  surround_prod < Syntax::Production::SCOPE_RESOLVE )
-		{
-			// label-as-variable (GCC extension)  
-			return "&&" + RenderIntoProduction( id, Syntax::Production::SCOPE_RESOLVE ); // recurse at strictly higher precedence
-		}
-		else
-		{
-			// TODO call SpecificIdentifier::...
-		}			
-    }
-
-    if( !id )
-		throw Syntax::NotOnThisNode();
-
-	auto ii = DynamicTreePtrCast<SpecificIdentifier>( id );
-	if( !ii )
-		throw Syntax::NotOnThisNode();
-
-	string s = GetUniqueIdentifierName(ii);          
-    ASSERT(s.size()>0)(*id)(" rendered to an empty string\n");
-
-    // Slight cheat for expediency: if a PURE_IDENTIFIER is expected, suppress scope resolution.
-    // This could lead to the rendering of identifiers in the wrong scope. But, most PURE_IDENTIFIER
-    // uses are declaring the id, or otherwise can't cope with the :: anyway. 
-    if( surround_prod < Syntax::Production::PURE_IDENTIFIER ) 
-        s = ScopeResolvingPrefix( id, surround_prod ) + s;   
-                                     
-    return s;
-}
-DEFAULT_CATCH_CLAUSE
 
 
 string CppRender::RenderIntegral( TreePtr<Integral> type, Syntax::Production surround_prod ) try
@@ -536,7 +488,7 @@ string CppRender::RenderOperator( TreePtr<Operator> op, Syntax::Production surro
         /* Prevent interpretation as a member function pointer literal */ \
         if( auto ao = TreePtr<AddressOf>::DynamicCast(op) ) \
             if( auto id = TreePtr<Identifier>::DynamicCast(*operands_it) ) \
-                paren = !ScopeResolvingPrefix( id, Syntax::Production::PROD ).empty(); \
+                paren = !RenderScopeResolvingPrefix( id ).empty(); \
         s += (paren?"(":"") + RenderIntoProduction( *operands_it, Syntax::Production::PROD) + (paren?")":""); \
     }
 #define POSTFIX(TOK, TEXT, NODE_SHAPED, BASE, CAT, PROD, ASSOC) \
@@ -823,7 +775,7 @@ string CppRender::RenderInstanceProto( TreePtr<Instance> o ) try
     TreePtr<Destructor> de = DynamicTreePtrCast<Destructor>(o->type);
     if( con || de )
     {
-		name = ScopeResolvingPrefix(o->identifier, Syntax::Production::SCOPE_RESOLVE);
+		name = RenderScopeResolvingPrefix(o->identifier);
         // TODO use TryGetRecordDeclaration( Typeof( o->identifier ) ) and leave scopes out of it
         TreePtr<Record> rec = DynamicTreePtrCast<Record>( TryGetScope( o->identifier ) );
         ASSERT( rec );        

@@ -252,19 +252,12 @@ string Render::Dispatch( TreePtr<Node> node, Syntax::Production surround_prod )
 	if( const Agent *agent = Agent::TryAsAgentConst(node) )
 		return agent->GetAgentRender( this, surround_prod );     
 
-	try 
-	{ 
-		return node->GetRender(this, surround_prod); 
-	}
-	catch( Syntax::NotOnThisNode & ) {}
-
-	return RenderNodeExplicit(node);
+	return RenderNodeOnly(node, surround_prod);
 }
 
 
 string Render::RenderNodeOnly( shared_ptr<const Node> node, Syntax::Production surround_prod )
 {
-	(void)surround_prod;
 	try 
 	{ 
 		return node->GetRender(this, surround_prod); 
@@ -324,7 +317,7 @@ string Render::RenderNodeExplicit( shared_ptr<const Node> node )
 }
 
 
-string Render::ScopeResolvingPrefix( TreePtr<Node>, Syntax::Production )
+string Render::RenderScopeResolvingPrefix( TreePtr<Node> )
 {
 	ASSERTFAIL("VN renderer doesn't do scope resolution");
 }

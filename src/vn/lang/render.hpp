@@ -35,7 +35,7 @@ public:
 
 	string RenderNodeOnly( shared_ptr<const Node> node, Syntax::Production surround_prod ) override;
 	string RenderNodeExplicit( shared_ptr<const Node> node );
-	string ScopeResolvingPrefix( TreePtr<Node> id, Syntax::Production surround_prod ) override;
+	string RenderScopeResolvingPrefix( TreePtr<Node> id ) override;
 	string GetUniqueIdentifierName( TreePtr<Node> id ) const override;
 
 	virtual Syntax::Production GetNodeProduction( TreePtr<Node> node ) const;						 
