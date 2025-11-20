@@ -13,34 +13,43 @@ namespace VN
 {
 class CompareReplace; 
 
+class RenderRecursionInterface
+{
+public:	
+	virtual string RenderIntoProduction( TreePtr<Node> node, Syntax::Production surround_prod ) = 0;
+	virtual string RenderNodeOnly( shared_ptr<const Node> node, Syntax::Production surround_prod ) = 0;
+	virtual string ScopeResolvingPrefix( TreePtr<Node> id, Syntax::Production surround_prod ) = 0;
+};
+
+
 struct RenderKit : TransKit
 {	
-	function<string(TreePtr<Node> node, Syntax::Production prod)> render;
-	function<string(shared_ptr<const Node>, Syntax::Production surround_prod)> render_node;
+	RenderRecursionInterface *recurse;
 	const UniquifyNames::NodeToNameMap *unique_identifier_names;
 	const UniquifyNames::NodeToNameMap *unique_coupling_names;
 };
 
 
-class Render
+class Render : public RenderRecursionInterface
 {
 public:	
     Render( string output_x_path_ = string() );
     string RenderToString( shared_ptr<VN::CompareReplace> pattern );
     void WriteToFile(string s);
     
-	string RenderIntoProduction( TreePtr<Node> node, Syntax::Production surround_prod );
+	string RenderIntoProduction( TreePtr<Node> node, Syntax::Production surround_prod ) override;
 	string RenderConcreteIntoProduction( TreePtr<Node> node, Syntax::Production surround_prod );
 	string MaybeRenderPreRestriction( TreePtr<Node> node,Syntax::Production &surround_prod ) const;
 	string RenderNullPointer( Syntax::Production surround_prod );
 
 	virtual string Dispatch( TreePtr<Node> node, Syntax::Production surround_prod );
 
-	string RenderNodeOnly( shared_ptr<const Node> node, Syntax::Production surround_prod );
+	string RenderNodeOnly( shared_ptr<const Node> node, Syntax::Production surround_prod ) override;
 	string RenderNodeExplicit( shared_ptr<const Node> node );
-	virtual Syntax::Production GetNodeProduction( TreePtr<Node> node ) const;
-						 
-	TreePtr<CPPTree::Scope> TryGetScope( TreePtr<CPPTree::Identifier> id );
+	string ScopeResolvingPrefix( TreePtr<Node> id, Syntax::Production surround_prod ) override;
+	
+	virtual Syntax::Production GetNodeProduction( TreePtr<Node> node ) const;						 
+	TreePtr<CPPTree::Scope> TryGetScope( TreePtr<Node> node );
 	bool IsDeclared( TreePtr<CPPTree::Identifier> id );
 							 
 	string RenderMismatchException( string fname, const Mismatch &me );

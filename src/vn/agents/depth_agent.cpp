@@ -91,7 +91,7 @@ string ChildAgent::GetAgentRender( const RenderKit &kit, Syntax::Production surr
 {
 	(void)surround_prod;
 	string s = "⩨【=1】";
-	return s + kit.render( terminus, Syntax::Production::PREFIX ); 
+	return s + kit.recurse->RenderIntoProduction( terminus, Syntax::Production::PREFIX ); 
 }    
     
     
@@ -173,8 +173,8 @@ string StuffAgent::GetAgentRender( const RenderKit &kit, Syntax::Production surr
 	(void)surround_prod;
 	string s = "⩨";
 	if( recurse_restriction )
-		s += "【" + kit.render( recurse_restriction, Syntax::Production::BOOT_EXPR) + "】";
-	return s + kit.render( terminus, Syntax::Production::PREFIX ); 
+		s += "【" + kit.recurse->RenderIntoProduction( recurse_restriction, Syntax::Production::BOOT_EXPR) + "】";
+	return s + kit.recurse->RenderIntoProduction( terminus, Syntax::Production::PREFIX ); 
 }    
     
     

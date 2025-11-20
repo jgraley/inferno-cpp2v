@@ -36,8 +36,7 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern )
     utils = make_unique<DefaultTransUtils>(context);
     using namespace placeholders;
     kit = RenderKit{ utils.get(),
-		             bind(&Render::RenderIntoProduction, this, _1, _2),
-		             bind(&Render::RenderNodeOnly, this, _1, _2),
+					 this,
 		             nullptr, // Identifiers should never be directly rendered in patterns - probably
 		             &unique_coupling_names };
 
@@ -61,7 +60,7 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern )
 	   	  (pattern->GetReplacePattern())
 	   	  (" or be NULL");
 	   	  
-	s += "꩜" + kit.render( pattern->GetSearchComparePattern(), Syntax::Production::PREFIX );
+	s += "꩜" + RenderIntoProduction( pattern->GetSearchComparePattern(), Syntax::Production::PREFIX );
             
     indenter.AddLinesFromString(s);
     indenter.DoIndent();
@@ -329,17 +328,27 @@ string Render::RenderNodeExplicit( shared_ptr<const Node> node )
 }
 
 
+string Render::ScopeResolvingPrefix( TreePtr<Node>, Syntax::Production )
+{
+	ASSERTFAIL("VN renderer doesn't do scope resolution");
+}
+
+
 Syntax::Production Render::GetNodeProduction( TreePtr<Node> node ) const
 {
 	return Agent::TryAsAgentConst(node)->GetAgentProduction();     
 }
 
 
-TreePtr<Scope> Render::TryGetScope( TreePtr<Identifier> id )
-{
+TreePtr<Scope> Render::TryGetScope( TreePtr<Node> node )
+{       
     if( scope_stack.empty() ) 
         return nullptr; // We aren't even in any scopes
-
+        
+    auto id = TreePtr<CPPTree::Identifier>::DynamicCast(node);
+    if( !id )
+        return nullptr; // GetScope() is language-specific and only works on identifiers
+		
     try
     {
         return GetScope( context, id );

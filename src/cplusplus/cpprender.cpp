@@ -56,8 +56,7 @@ string CppRender::RenderToString( TreePtr<Node> root )
     utils = make_unique<DefaultTransUtils>(context);
     using namespace placeholders;
     kit = VN::RenderKit{ utils.get(),
-		                 bind(&Render::RenderIntoProduction, this, _1, _2),
-						 bind(&Render::RenderNodeOnly, this, _1, _2),
+		                 this,
 						 &unique_identifier_names,
 						 nullptr }; // couplings for pattern renders only
 
@@ -68,7 +67,7 @@ string CppRender::RenderToString( TreePtr<Node> root )
     UniquifyNames identifiers_uniqifier(&Syntax::GetIdentifierName, false, true); 
     unique_identifier_names = identifiers_uniqifier.UniquifyAll( kit, context );
     
-    return kit.render( root, Syntax::Production::PROGRAM );
+    return RenderIntoProduction( root, Syntax::Production::PROGRAM );
 }
 
 
@@ -162,7 +161,7 @@ string CppRender::RenderProgram( TreePtr<CPPTree::Program> program, Syntax::Prod
     // that were on the scope stack when the instance was seen.
     while( !definitions.empty() )
     {
-        s += " " + kit.render( definitions.front(), Syntax::Production::DEFINITION ); // these could go in a .cpp file
+        s += " " + kit.recurse->RenderIntoProduction( definitions.front(), Syntax::Production::DEFINITION ); // these could go in a .cpp file
         definitions.pop();
     }
     return s;  
@@ -173,9 +172,9 @@ string CppRender::RenderIdValuePair( TreePtr<IdValuePair> ivp, Syntax::Productio
 {
 	// Not part of C/C++ grammer at time of writing but handy for calls with no decl
 	(void)surround_prod;
-    return kit.render( ivp->key, Syntax::Production::ASSIGN) + 
+    return kit.recurse->RenderIntoProduction( ivp->key, Syntax::Production::ASSIGN) + 
            "🡆" + 
-           kit.render( ivp->value, Syntax::Production::ASSIGN);
+           kit.recurse->RenderIntoProduction( ivp->value, Syntax::Production::ASSIGN);
 }
 DEFAULT_CATCH_CLAUSE
 
@@ -188,10 +187,10 @@ string CppRender::RenderLiteral( TreePtr<Literal> sp, Syntax::Production surroun
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::ScopeResolvingPrefix( TreePtr<Identifier> id, Syntax::Production surround_prod ) try
+string CppRender::ScopeResolvingPrefix( TreePtr<Node> node, Syntax::Production surround_prod ) try
 {
-    TreePtr<Node> scope = TryGetScope(id);
-       
+    TreePtr<Node> scope = TryGetScope(node);
+              
     //TRACE("%p %p %p\n", program.get(), scope.get(), scope_stack.top().get() );
     if( !scope )
         return ""; // either we're not in a scope or id is undeclared
@@ -221,7 +220,7 @@ string CppRender::RenderIdentifier( TreePtr<Identifier> id, Syntax::Production s
 		if(  surround_prod < Syntax::Production::SCOPE_RESOLVE )
 		{
 			// label-as-variable (GCC extension)  
-			return "&&" + kit.render( id, Syntax::Production::SCOPE_RESOLVE ); // recurse at strictly higher precedence
+			return "&&" + kit.recurse->RenderIntoProduction( id, Syntax::Production::SCOPE_RESOLVE ); // recurse at strictly higher precedence
 		}
 		else
 		{
@@ -244,7 +243,7 @@ string CppRender::RenderIdentifier( TreePtr<Identifier> id, Syntax::Production s
     // This could lead to the rendering of identifiers in the wrong scope. But, most PURE_IDENTIFIER
     // uses are declaring the id, or otherwise can't cope with the :: anyway. 
     if( surround_prod < Syntax::Production::PURE_IDENTIFIER ) 
-        s = ScopeResolvingPrefix( id, surround_prod ) + s;   
+        s = kit.recurse->ScopeResolvingPrefix( id, surround_prod ) + s;   
                                      
     return s;
 }
@@ -309,7 +308,7 @@ string CppRender::RenderIntegralTypeAndDeclarator( TreePtr<Integral> type, strin
 
     TRACE("width %" PRId64 "\n", width);
 
-    string s = kit.render( type, Syntax::Production::SPACE_SEP_DECLARATION );
+    string s = kit.recurse->RenderIntoProduction( type, Syntax::Production::SPACE_SEP_DECLARATION );
 
     s += " " + declarator;
 
@@ -365,7 +364,7 @@ string CppRender::RenderTypeAndDeclarator( TreePtr<Type> type, string declarator
     Syntax::Production type_prod = pure_type ? surround_prod  
                                              : Syntax::Production::SPACE_SEP_DECLARATION;
 	if( !type )
-        return const_str + kit.render( type, type_prod ) + sdeclarator;
+        return const_str + kit.recurse->RenderIntoProduction( type, type_prod ) + sdeclarator;
 
     // Production passed in here comes from the current value of the delcarator string, not surrounding production.
     Syntax::Production prod_surrounding_declarator = type->GetOperandInDeclaratorProduction();
@@ -397,16 +396,16 @@ string CppRender::RenderTypeAndDeclarator( TreePtr<Type> type, string declarator
     else if( TreePtr<Array> a = DynamicTreePtrCast< Array >(type) )
         return RenderTypeAndDeclarator( 
                            a->element, 
-                           declarator + "[" + kit.render( a->size, Syntax::Production::BOOT_EXPR) + "]", 
+                           declarator + "[" + kit.recurse->RenderIntoProduction( a->size, Syntax::Production::BOOT_EXPR) + "]", 
                            Syntax::Production::POSTFIX,
                            surround_prod,
                            constant );
     else if( TreePtr<SpecificTypeIdentifier> ti = DynamicTreePtrCast< SpecificTypeIdentifier >(type) )
-        return const_str + kit.render( ti, type_prod) + sdeclarator;
+        return const_str + kit.recurse->RenderIntoProduction( ti, type_prod) + sdeclarator;
     else if( dynamic_pointer_cast<Labeley>(type) )
         return const_str + "void *" + declarator;
     else // Assume the type renders expressionally
-        return const_str + kit.render( type, type_prod ) + sdeclarator;
+        return const_str + kit.recurse->RenderIntoProduction( type, type_prod ) + sdeclarator;
 }
 DEFAULT_CATCH_CLAUSE
 
@@ -456,33 +455,33 @@ string CppRender::RenderOperator( TreePtr<Operator> op, Syntax::Production surro
     if( auto n = DynamicTreePtrCast< New >(op) )
         return string (DynamicTreePtrCast<Global>(n->global) ? "::" : "") +
                "new(" + RenderOperandSequence( n->placement_arguments ) + ") " +
-               kit.render( n->type, Syntax::Production::TYPE_IN_NEW ) +
+               kit.recurse->RenderIntoProduction( n->type, Syntax::Production::TYPE_IN_NEW ) +
                (n->constructor_arguments.empty() ? "" : "(" + RenderOperandSequence( n->constructor_arguments ) + ")" );
     else if( auto d = DynamicTreePtrCast< Delete >(op) )
         return string(DynamicTreePtrCast<Global>(d->global) ? "::" : "") +
                "delete" +
                (DynamicTreePtrCast<DeleteArray>(d->array) ? "[]" : "") +
-               " " + kit.render( d->pointer, Syntax::Production::PREFIX );
+               " " + kit.recurse->RenderIntoProduction( d->pointer, Syntax::Production::PREFIX );
     else if( auto lu = DynamicTreePtrCast< Lookup >(op) )
-        return kit.render( lu->object, Syntax::Production::POSTFIX ) + "." +
-               kit.render( lu->member, Syntax::BoostPrecedence(Syntax::Production::POSTFIX) );
+        return kit.recurse->RenderIntoProduction( lu->object, Syntax::Production::POSTFIX ) + "." +
+               kit.recurse->RenderIntoProduction( lu->member, Syntax::BoostPrecedence(Syntax::Production::POSTFIX) );
     else if( auto c = DynamicTreePtrCast< Cast >(op) )
-        return "(" + kit.render( c->type, Syntax::Production::BOOT_EXPR ) + ")" +
-               kit.render( c->operand, Syntax::Production::PREFIX );
+        return "(" + kit.recurse->RenderIntoProduction( c->type, Syntax::Production::BOOT_EXPR ) + ")" +
+               kit.recurse->RenderIntoProduction( c->operand, Syntax::Production::PREFIX );
     else if( auto condo = DynamicTreePtrCast< ConditionalOperator >(op) )
     {
-        return kit.render( condo->condition, Syntax::BoostPrecedence(Syntax::Production::ASSIGN) ) + 
+        return kit.recurse->RenderIntoProduction( condo->condition, Syntax::BoostPrecedence(Syntax::Production::ASSIGN) ) + 
                " ? " +
                // Middle expression boots parser - so you can't split it up using (), [] etc
-               kit.render( condo->expr_then, Syntax::Production::BOOT_EXPR ) + 
+               kit.recurse->RenderIntoProduction( condo->expr_then, Syntax::Production::BOOT_EXPR ) + 
                " : " +
-               kit.render( condo->expr_else, Syntax::Production::ASSIGN );          
+               kit.recurse->RenderIntoProduction( condo->expr_else, Syntax::Production::ASSIGN );          
     }
     else if( auto subs = DynamicTreePtrCast< Subscript >(op) )
     {
-        return kit.render( subs->destination, Syntax::Production::POSTFIX ) + 
+        return kit.recurse->RenderIntoProduction( subs->destination, Syntax::Production::POSTFIX ) + 
                "[" +
-			   kit.render( subs->index, Syntax::Production::BOOT_EXPR ) + 
+			   kit.recurse->RenderIntoProduction( subs->index, Syntax::Production::BOOT_EXPR ) + 
 			   "]";
     }
     else if( auto al = DynamicTreePtrCast< ArrayLiteral >(op) )    
@@ -518,10 +517,10 @@ string CppRender::RenderOperator( TreePtr<Operator> op, Syntax::Production surro
             case Syntax::Association::LEFT:  prod_right = Syntax::BoostPrecedence(prod_right); break; \
         } \
 		Sequence<Expression>::iterator operands_it = operands.begin(); \
-        s = kit.render( *operands_it, prod_left ); \
+        s = kit.recurse->RenderIntoProduction( *operands_it, prod_left ); \
         s += TEXT; \
         ++operands_it; \
-        s += kit.render( *operands_it, prod_right ); \
+        s += kit.recurse->RenderIntoProduction( *operands_it, prod_right ); \
     }
 #define PREFIX(TOK, TEXT, NODE_SHAPED, BASE, CAT, PROD, ASSOC) \
     else if( DynamicTreePtrCast<NODE_SHAPED>(op) ) \
@@ -533,13 +532,13 @@ string CppRender::RenderOperator( TreePtr<Operator> op, Syntax::Production surro
         if( auto ao = TreePtr<AddressOf>::DynamicCast(op) ) \
             if( auto id = TreePtr<Identifier>::DynamicCast(*operands_it) ) \
                 paren = !ScopeResolvingPrefix( id, Syntax::Production::PROD ).empty(); \
-        s += (paren?"(":"") + kit.render( *operands_it, Syntax::Production::PROD) + (paren?")":""); \
+        s += (paren?"(":"") + kit.recurse->RenderIntoProduction( *operands_it, Syntax::Production::PROD) + (paren?")":""); \
     }
 #define POSTFIX(TOK, TEXT, NODE_SHAPED, BASE, CAT, PROD, ASSOC) \
     else if( DynamicTreePtrCast<NODE_SHAPED>(op) ) \
     { \
 		Sequence<Expression>::iterator operands_it = operands.begin(); \
-        s = kit.render( *operands_it, Syntax::Production::PROD ); \
+        s = kit.recurse->RenderIntoProduction( *operands_it, Syntax::Production::PROD ); \
         s += TEXT; \
     }
 #include "tree/operator_data.inc"
@@ -568,13 +567,13 @@ string CppRender::RenderMapArgs( TreePtr<Type> dest_type, Collection<IdValuePair
 
 		// Render to strings
 		for( TreePtr<Expression> e : arg_sequence )
-			ls.push_back( kit.render( e, Syntax::Production::COMMA_SEP ) );
+			ls.push_back( kit.recurse->RenderIntoProduction( e, Syntax::Production::COMMA_SEP ) );
     }
     else
     {
 		// No type, so render map-style
         for( TreePtr<IdValuePair> mi : args )
-			ls.push_back( kit.render( mi, Syntax::Production::COMMA_SEP ) );
+			ls.push_back( kit.recurse->RenderIntoProduction( mi, Syntax::Production::COMMA_SEP ) );
 	}    
 
     // Do the syntax
@@ -591,9 +590,9 @@ string CppRender::RenderCall( TreePtr<Call> call, Syntax::Production surround_pr
     // Render the expression that resolves to the function name unless this is
     // a constructor call in which case just the name of the thing being constructed.
     if( TreePtr<Expression> base = TypeOf::instance.TryGetConstructedExpression( kit, call ).GetTreePtr() )
-        s += kit.render( base, Syntax::Production::POSTFIX );
+        s += kit.recurse->RenderIntoProduction( base, Syntax::Production::POSTFIX );
     else
-        s += kit.render( call->callee, Syntax::Production::POSTFIX );
+        s += kit.recurse->RenderIntoProduction( call->callee, Syntax::Production::POSTFIX );
 
     s += RenderMapArgs(TypeOf::instance.Get(kit, call->callee).GetTreePtr(), call->args);
     return s;
@@ -605,7 +604,7 @@ string CppRender::RenderExprSeq( Sequence<Expression> seq ) try
 {
     list<string> renders;
     for( TreePtr<Expression> e : seq )    
-        renders.push_back( kit.render( e, Syntax::Production::COMMA_SEP) );               
+        renders.push_back( kit.recurse->RenderIntoProduction( e, Syntax::Production::COMMA_SEP) );               
     return Join(renders, ", ", "(", ")");
 }
 DEFAULT_CATCH_CLAUSE
@@ -620,10 +619,10 @@ string CppRender::RenderExteriorCall( TreePtr<SeqArgsCall> call, Syntax::Product
     if( auto lu = DynamicTreePtrCast< Lookup >(call->callee) )
         if( auto id = DynamicTreePtrCast< InstanceIdentifier >(lu->member) )
             if( id->GetIdentifierName().empty() )
-                return kit.render( lu->object, Syntax::Production::POSTFIX ) + args_in_parens;
+                return kit.recurse->RenderIntoProduction( lu->object, Syntax::Production::POSTFIX ) + args_in_parens;
 
     // Other funcitons just evaluate
-    return kit.render( call->callee, Syntax::Production::POSTFIX ) + args_in_parens;
+    return kit.recurse->RenderIntoProduction( call->callee, Syntax::Production::POSTFIX ) + args_in_parens;
 }
 DEFAULT_CATCH_CLAUSE
 
@@ -631,11 +630,11 @@ DEFAULT_CATCH_CLAUSE
 string CppRender::RenderMacroStatement( TreePtr<MacroStatement> ms, Syntax::Production surround_prod ) try
 {
 	(void)surround_prod;
-	string s = kit.render( ms->identifier, Syntax::Production::POSTFIX );
+	string s = kit.recurse->RenderIntoProduction( ms->identifier, Syntax::Production::POSTFIX );
 	
     list<string> renders; // TODO duplicated code, factor out into RenderSeqMacroArgs()
     for( TreePtr<Node> node : ms->arguments )
-        renders.push_back( kit.render( node, Syntax::Production::COMMA_SEP) );
+        renders.push_back( kit.recurse->RenderIntoProduction( node, Syntax::Production::COMMA_SEP) );
     s += Join(renders, ", ", "(", ");\n");
     return s;
 }
@@ -652,13 +651,13 @@ string CppRender::RenderExpression( TreePtr<Initialiser> expression, Syntax::Pro
         AutoPush< TreePtr<Node> > cs( scope_stack, ce );
         s += RenderDeclScope( ce ); // Must do this first to populate backing list
         for( TreePtr<Statement> st : ce->statements )    
-            s += kit.render( st, Syntax::Production::STATEMENT_LOW );    
+            s += kit.recurse->RenderIntoProduction( st, Syntax::Production::STATEMENT_LOW );    
         return s + " })";
     }
     else if( auto pot = DynamicTreePtrCast< SizeOf >(expression) )
-        return "sizeof(" + kit.render( pot->argument, Syntax::Production::BOOT_EXPR ) + ")";               
+        return "sizeof(" + kit.recurse->RenderIntoProduction( pot->argument, Syntax::Production::BOOT_EXPR ) + ")";               
     else if( auto pot = DynamicTreePtrCast< AlignOf >(expression) )
-        return "alignof(" + kit.render( pot->argument, Syntax::Production::BOOT_EXPR ) + ")";    
+        return "alignof(" + kit.recurse->RenderIntoProduction( pot->argument, Syntax::Production::BOOT_EXPR ) + ")";    
     else
         return Render::Dispatch( expression, surround_prod );
 
@@ -693,10 +692,10 @@ string CppRender::RenderMakeRecord( TreePtr<RecordLiteral> make_rec, Syntax::Pro
     // Render to strings
     list<string> ls;
     for( TreePtr<Expression> e : sub_expr_sequence )
-        ls.push_back( kit.render( e, Syntax::Production::COMMA_SEP ) );
+        ls.push_back( kit.recurse->RenderIntoProduction( e, Syntax::Production::COMMA_SEP ) );
 
     // Do the syntax
-    s += "(" + kit.render( make_rec->type, Syntax::Production::BOOT_EXPR ) + ")"; 
+    s += "(" + kit.recurse->RenderIntoProduction( make_rec->type, Syntax::Production::BOOT_EXPR ) + ")"; 
     s += Join( ls, ", ", "{", "}" );   // Use of {} in expressions is irregular so handle locally 
     return s;
 }
@@ -826,12 +825,12 @@ string CppRender::RenderInstanceProto( TreePtr<Instance> o ) try
         ASSERT( rec );        
         name += (de ? "~" : ""); 
         starting_declarator_prod = Syntax::Production::PURE_IDENTIFIER; // we already rendered the scope prefix into name
-        name += kit.render( rec->identifier, starting_declarator_prod);
+        name += kit.recurse->RenderIntoProduction( rec->identifier, starting_declarator_prod);
     }
     else
     {
         starting_declarator_prod = Syntax::Production::SCOPE_RESOLVE;
-        name += kit.render( o->identifier, starting_declarator_prod);
+        name += kit.recurse->RenderIntoProduction( o->identifier, starting_declarator_prod);
     }
 
     s += RenderTypeAndDeclarator( o->type, name, starting_declarator_prod, Syntax::Production::PROTOTYPE, constant );
@@ -896,7 +895,7 @@ string CppRender::RenderInitialisation( TreePtr<Initialiser> init ) try
 		}	
     }
 
-    return s + kit.render( init, Syntax::Production::INITIALISER); 
+    return s + kit.recurse->RenderIntoProduction( init, Syntax::Production::INITIALISER); 
 }
 DEFAULT_CATCH_CLAUSE
 
@@ -979,10 +978,10 @@ string CppRender::RenderMacroDeclaration( TreePtr<MacroDeclaration> md, Syntax::
 {
 	(void)surround_prod;	
     // ---- Proto ----
-	string s = kit.render( md->identifier, Syntax::Production::POSTFIX );
+	string s = kit.recurse->RenderIntoProduction( md->identifier, Syntax::Production::POSTFIX );
 	list<string> renders;
 	for( TreePtr<Node> node : md->arguments )
-		renders.push_back( kit.render( node, Syntax::Production::COMMA_SEP) );
+		renders.push_back( kit.recurse->RenderIntoProduction( node, Syntax::Production::COMMA_SEP) );
 	s += Join(renders, ", ", "(", ")");
 	
 	// ---- Initialisation ----	    
@@ -1005,7 +1004,7 @@ string CppRender::RenderRecordProto( TreePtr<Record> record )
         s += Render::Dispatch( record, Syntax::Production::SPACE_SEP_DECLARATION );
 
     // Name of the record
-    s += " " + kit.render( record->identifier, Syntax::Production::SPACE_SEP_DECLARATION);
+    s += " " + kit.recurse->RenderIntoProduction( record->identifier, Syntax::Production::SPACE_SEP_DECLARATION);
     
     return s;
 }
@@ -1033,7 +1032,7 @@ string CppRender::RenderDeclaration( TreePtr<Declaration> declaration, Syntax::P
     if( TreePtr<Typedef> t = DynamicTreePtrCast< Typedef >(declaration) )
     {
         Syntax::Production starting_declarator_prod = Syntax::Production::PURE_IDENTIFIER;
-        auto id = kit.render( t->identifier, starting_declarator_prod);
+        auto id = kit.recurse->RenderIntoProduction( t->identifier, starting_declarator_prod);
         s += "typedef " + RenderTypeAndDeclarator( t->type, id, starting_declarator_prod, Syntax::Production::SPACE_SEP_DECLARATION );
     }
     else if( TreePtr<Record> r = DynamicTreePtrCast< Record >(declaration) )
@@ -1058,8 +1057,8 @@ string CppRender::RenderDeclaration( TreePtr<Declaration> declaration, Syntax::P
                     first=false;
                     auto b = TreePtr<Base>::DynamicCast(bn);
                     ASSERT( b );
-                    s += kit.render( b->access, Syntax::Production::TOKEN ) + " ";
-                    s += kit.render( b->record, Syntax::Production::SCOPE_RESOLVE);
+                    s += kit.recurse->RenderIntoProduction( b->access, Syntax::Production::TOKEN ) + " ";
+                    s += kit.recurse->RenderIntoProduction( b->record, Syntax::Production::SCOPE_RESOLVE);
                 }
             }
         }
@@ -1078,7 +1077,7 @@ string CppRender::RenderDeclaration( TreePtr<Declaration> declaration, Syntax::P
         s = '\n' + s + '\n';
     }
     else if( TreePtr<Label> l = DynamicTreePtrCast<Label>(declaration) )
-        return kit.render( l->identifier, Syntax::Production::PURE_IDENTIFIER) + ":;\n"; // need ; after a label in case last in compound block
+        return kit.recurse->RenderIntoProduction( l->identifier, Syntax::Production::PURE_IDENTIFIER) + ":;\n"; // need ; after a label in case last in compound block
     else
         s += Render::Dispatch( declaration, surround_prod );
 
@@ -1102,56 +1101,56 @@ string CppRender::RenderStatement( TreePtr<Statement> statement, Syntax::Product
         AutoPush< TreePtr<Node> > cs( scope_stack, c );
         s += RenderDeclScope( c ); // Must do this first to populate backing list
         for( TreePtr<Statement> st : c->statements )    
-            s += kit.render( st, Syntax::Production::STATEMENT_LOW );    
+            s += kit.recurse->RenderIntoProduction( st, Syntax::Production::STATEMENT_LOW );    
         return s;
     }
     else if( TreePtr<Expression> e = DynamicTreePtrCast< Expression >(statement) )
-        return kit.render( e, surround_prod);
+        return kit.recurse->RenderIntoProduction( e, surround_prod);
     else if( TreePtr<Return> es = DynamicTreePtrCast<Return>(statement) )
-        return "return " + kit.render( es->return_value, Syntax::Production::SPACE_SEP_STATEMENT);
+        return "return " + kit.recurse->RenderIntoProduction( es->return_value, Syntax::Production::SPACE_SEP_STATEMENT);
     else if( TreePtr<Goto> g = DynamicTreePtrCast<Goto>(statement) )
     {
         if( TreePtr<SpecificLabelIdentifier> li = DynamicTreePtrCast< SpecificLabelIdentifier >(g->destination) )
-            return "goto " + kit.render( li, Syntax::Production::SPACE_SEP_STATEMENT).substr(2);  // regular goto REMOVE THE &&
+            return "goto " + kit.recurse->RenderIntoProduction( li, Syntax::Production::SPACE_SEP_STATEMENT).substr(2);  // regular goto REMOVE THE &&
         else
-            return "goto *" + kit.render( g->destination, Syntax::Production::PREFIX); // goto-a-variable (GCC extension)
+            return "goto *" + kit.recurse->RenderIntoProduction( g->destination, Syntax::Production::PREFIX); // goto-a-variable (GCC extension)
     }
     else if( TreePtr<If> i = DynamicTreePtrCast<If>(statement) )
     {
         bool has_else_clause = !DynamicTreePtrCast<Nop>(i->body_else); // Nop means no else clause
         string s;
-        s += "if( " + kit.render( i->condition, Syntax::Production::CONDITION) + " )\n";
+        s += "if( " + kit.recurse->RenderIntoProduction( i->condition, Syntax::Production::CONDITION) + " )\n";
         // The choice of production here causes then "else" ambuguity to be resolved.
-        s += kit.render( i->body, has_else_clause ? Syntax::Production::STATEMENT_HIGH : Syntax::Production::STATEMENT_LOW);
+        s += kit.recurse->RenderIntoProduction( i->body, has_else_clause ? Syntax::Production::STATEMENT_HIGH : Syntax::Production::STATEMENT_LOW);
         if( has_else_clause )  
-            s += "else\n" + kit.render( i->body_else, Syntax::Production::STATEMENT_LOW);
+            s += "else\n" + kit.recurse->RenderIntoProduction( i->body_else, Syntax::Production::STATEMENT_LOW);
         return s;
     }
     else if( TreePtr<While> w = DynamicTreePtrCast<While>(statement) )
         return "while( " + 
-               kit.render( w->condition, Syntax::Production::CONDITION) + " )\n" +
-               kit.render( w->body, surround_prod);
+               kit.recurse->RenderIntoProduction( w->condition, Syntax::Production::CONDITION) + " )\n" +
+               kit.recurse->RenderIntoProduction( w->body, surround_prod);
     else if( TreePtr<Do> d = DynamicTreePtrCast<Do>(statement) )
         return "do\n" +
-               kit.render( d->body, Syntax::Production::STATEMENT_LOW) +
-               "while( " + kit.render( d->condition, Syntax::Production::CONDITION) + " )";
+               kit.recurse->RenderIntoProduction( d->body, Syntax::Production::STATEMENT_LOW) +
+               "while( " + kit.recurse->RenderIntoProduction( d->condition, Syntax::Production::CONDITION) + " )";
     else if( TreePtr<For> f = DynamicTreePtrCast<For>(statement) )
         return "for( " + 
-               kit.render( f->initialisation, Syntax::Production::STATEMENT_LOW) + 
-               kit.render( f->condition, Syntax::Production::STATEMENT_LOW) + 
-               kit.render( f->increment, Syntax::Production::BOOT_EXPR) + " )\n" +
-               kit.render( f->body, surround_prod);
+               kit.recurse->RenderIntoProduction( f->initialisation, Syntax::Production::STATEMENT_LOW) + 
+               kit.recurse->RenderIntoProduction( f->condition, Syntax::Production::STATEMENT_LOW) + 
+               kit.recurse->RenderIntoProduction( f->increment, Syntax::Production::BOOT_EXPR) + " )\n" +
+               kit.recurse->RenderIntoProduction( f->body, surround_prod);
     else if( TreePtr<Switch> s = DynamicTreePtrCast<Switch>(statement) )
-        return "switch( " + kit.render( s->condition, Syntax::Production::CONDITION) + " )\n" +
-               kit.render( s->body, surround_prod);
+        return "switch( " + kit.recurse->RenderIntoProduction( s->condition, Syntax::Production::CONDITION) + " )\n" +
+               kit.recurse->RenderIntoProduction( s->body, surround_prod);
     else if( TreePtr<Case> c = DynamicTreePtrCast<Case>(statement) )
-        return "case " + kit.render( c->value, Syntax::Production::SPACE_SEP_STATEMENT) + ":";
+        return "case " + kit.recurse->RenderIntoProduction( c->value, Syntax::Production::SPACE_SEP_STATEMENT) + ":";
     else if( TreePtr<RangeCase> rc = DynamicTreePtrCast<RangeCase>(statement) )
         // GCC extension: assume that ... is part of the case statement, and can boot the expressions.
         return "case " + 
-               kit.render( rc->value_lo, Syntax::Production::SPACE_SEP_STATEMENT) + 
+               kit.recurse->RenderIntoProduction( rc->value_lo, Syntax::Production::SPACE_SEP_STATEMENT) + 
                " ... " + 
-               kit.render( rc->value_hi, Syntax::Production::SPACE_SEP_STATEMENT) + 
+               kit.recurse->RenderIntoProduction( rc->value_hi, Syntax::Production::SPACE_SEP_STATEMENT) + 
                ":";
     else if( DynamicTreePtrCast<Default>(statement) )
         return "default:";
@@ -1178,7 +1177,7 @@ string CppRender::RenderConstructorInitList( Sequence<Statement> spe ) try
             s += ",\n";
         s += "    "; // indentation
         if( auto e = TreePtr<Expression>::DynamicCast(st) )
-            s += kit.render( e, Syntax::Production::COMMA_SEP );
+            s += kit.recurse->RenderIntoProduction( e, Syntax::Production::COMMA_SEP );
         else 
             s += ERROR_UNSUPPORTED(st);
         first = false;
@@ -1204,7 +1203,7 @@ string CppRender::RenderEnumBodyScope( TreePtr<CPPTree::Record> record ) try
             s += ERROR_UNSUPPORTED(pe);
             continue;
         }
-        s += kit.render( o->identifier, Syntax::BoostPrecedence(Syntax::Production::ASSIGN)) + " = ";
+        s += kit.recurse->RenderIntoProduction( o->identifier, Syntax::BoostPrecedence(Syntax::Production::ASSIGN)) + " = ";
         
         auto ei = TreePtr<Expression>::DynamicCast( o->initialiser );
         if( !ei )
@@ -1212,7 +1211,7 @@ string CppRender::RenderEnumBodyScope( TreePtr<CPPTree::Record> record ) try
             s += ERROR_UNSUPPORTED(o->initialiser);
             continue;
         }       
-        s += kit.render( ei, Syntax::Production::ASSIGN);
+        s += kit.recurse->RenderIntoProduction( ei, Syntax::Production::ASSIGN);
 
         first = false;    
     }
@@ -1227,7 +1226,7 @@ string CppRender::RenderOperandSequence( Sequence<Expression> spe ) try
     string s;
 	list<string> renders;    
     for( TreePtr<Expression> pe : spe )
-		renders.push_back( kit.render( pe, Syntax::Production::COMMA_SEP ) );
+		renders.push_back( kit.recurse->RenderIntoProduction( pe, Syntax::Production::COMMA_SEP ) );
     return Join(renders, ", ", "{", "}"); // Use of {} in expressions is irregular so handle locally 
 }
 DEFAULT_CATCH_CLAUSE
@@ -1257,7 +1256,7 @@ string CppRender::MaybeRenderAccessColon( TreePtr<AccessSpec> this_access,
     if( typeid(*this_access) != typeid(**current_access) ) // current_access spec must have changed
     {
         *current_access = this_access;
-        return kit.render( this_access, Syntax::Production::TOKEN ) + ":\n";
+        return kit.recurse->RenderIntoProduction( this_access, Syntax::Production::TOKEN ) + ":\n";
     }
     
     return "";  
@@ -1276,7 +1275,7 @@ string CppRender::RenderDeclScope( TreePtr<DeclScope> decl_scope,
     {       
         if( auto ppd = DynamicTreePtrCast<PreProcDecl>(pd) )
         {
-            s += kit.render( ppd, Syntax::Production::DECLARATION ) + "\n";
+            s += kit.recurse->RenderIntoProduction( ppd, Syntax::Production::DECLARATION ) + "\n";
             continue;
         }
         
@@ -1290,7 +1289,7 @@ string CppRender::RenderDeclScope( TreePtr<DeclScope> decl_scope,
         if( init_access )
             s += MaybeRenderFieldAccess( r, &init_access );
         //s += RenderRecordProto( r ) + "; // RDS-record proto\n";   
-        s += kit.render( r, Syntax::Production::PROTOTYPE ) + "; // RDS-record proto (new)\n"; 
+        s += kit.recurse->RenderIntoProduction( r, Syntax::Production::PROTOTYPE ) + "; // RDS-record proto (new)\n"; 
     }
     
     // Emit the actual definitions, sorted for dependencies
@@ -1301,7 +1300,7 @@ string CppRender::RenderDeclScope( TreePtr<DeclScope> decl_scope,
             
         if( init_access )
             s += MaybeRenderFieldAccess( d, &init_access );        
-        s += kit.render( d, Syntax::Production::STATEMENT_LOW );
+        s += kit.recurse->RenderIntoProduction( d, Syntax::Production::STATEMENT_LOW );
     }
     TRACE();
     return s;
@@ -1330,7 +1329,7 @@ string CppRender::RenderParams( TreePtr<CallableParams> key ) try
             continue;
         }
         Syntax::Production starting_declarator_prod = Syntax::Production::PURE_IDENTIFIER;
-        string name = kit.render( o->identifier, starting_declarator_prod);
+        string name = kit.recurse->RenderIntoProduction( o->identifier, starting_declarator_prod);
         s += RenderTypeAndDeclarator( o->type, name, starting_declarator_prod, Syntax::Production::BARE_DECLARATION, false );
             
         first = false;
