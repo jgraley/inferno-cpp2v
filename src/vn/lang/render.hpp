@@ -17,6 +17,8 @@ struct RenderKit : TransKit
 {	
 	function<string(TreePtr<Node> node, Syntax::Production prod)> render;
 	function<string(shared_ptr<const Node>, Syntax::Production surround_prod)> render_node;
+	const UniquifyNames::NodeToNameMap *unique_identifier_names;
+	const UniquifyNames::NodeToNameMap *unique_coupling_names;
 };
 
 

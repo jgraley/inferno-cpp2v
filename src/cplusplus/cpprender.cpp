@@ -57,7 +57,9 @@ string CppRender::RenderToString( TreePtr<Node> root )
     using namespace placeholders;
     kit = VN::RenderKit{ utils.get(),
 		                 bind(&Render::RenderIntoProduction, this, _1, _2),
-						 bind(&Render::RenderNodeOnly, this, _1, _2) };
+						 bind(&Render::RenderNodeOnly, this, _1, _2),
+						 &unique_identifier_names,
+						 nullptr }; // couplings for pattern renders only
 
     // Make the identifiers unique (does its own tree walk). Be strict about undeclared
     // identifiers - to rename them would be unsafe because we assume there's
@@ -79,13 +81,18 @@ Syntax::Production CppRender::GetNodeProduction( TreePtr<Node> node ) const
 string CppRender::Dispatch( TreePtr<Node> node, Syntax::Production surround_prod )
 {
 	//ASSERT( !VN::Agent::TryAsAgentConst(node) )("WTF?!!!"); // #869
-	string s = DispatchInternal( node, surround_prod );
-	try 
-	{ 
-		string snode = node->GetRenderTerminal();
-		ASSERT( snode==s )(node)("node: \"")(snode)("\" cpp_renderer: \"")(s)("\""); 
+	string s = DispatchInternal( node, surround_prod );		
+
+	if( ReadArgs::use.count("a") )
+	{
+		string s_internal = s;
+		try 
+		{ 		
+			s = node->GetRenderTerminal();		
+		}
+		catch( Syntax::NotOnThisNode & ) {		}
+		ASSERT( s==s_internal )(node)("node: \"")(s)("\" internal: \"")(s_internal)("\""); 
 	}
-	catch( Syntax::NotOnThisNode & ) {}
 	return s;
 }
 
@@ -181,35 +188,6 @@ string CppRender::RenderLiteral( TreePtr<Literal> sp, Syntax::Production surroun
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderPureIdentifier( TreePtr<Identifier> id, Syntax::Production surround_prod ) try
-{   
-    (void)surround_prod;
-    string ids;
-    if( id )
-    {
-        if( auto ii = DynamicTreePtrCast<SpecificIdentifier>( id ) )
-        {           
-            if( unique_identifier_names.count(ii) == 0 )
-            {
-                return ERROR_UNKNOWN( ii->GetTrace() + SSPrintf(" (\"%s\") missing from unique_identifier_names", ii->GetRenderTerminal().c_str() ) );
-            }
-            ids = unique_identifier_names.at(ii);
-        }
-        else
-            return Render::Dispatch( id, surround_prod );
-
-        TRACE( "%s\n", ids.c_str() );
-    }
-    else
-    {
-        TRACE();
-    }
-    ASSERT(ids.size()>0)(*id)(" rendered to an empty string\n");
-    return ids;
-}
-DEFAULT_CATCH_CLAUSE
-
-
 string CppRender::ScopeResolvingPrefix( TreePtr<Identifier> id, Syntax::Production surround_prod ) try
 {
     TreePtr<Node> scope = TryGetScope(id);
@@ -237,23 +215,38 @@ DEFAULT_CATCH_CLAUSE
 
 string CppRender::RenderIdentifier( TreePtr<Identifier> id, Syntax::Production surround_prod ) try
 {
-    // Slight cheat for expediency: below SCOPE_RESOLVE we prepend && which make it expressional
-    if( DynamicTreePtrCast< SpecificLabelIdentifier >(id) && surround_prod < Syntax::Production::SCOPE_RESOLVE )
+    // Put this in SpecificLabelIdentifier
+    if( DynamicTreePtrCast< SpecificLabelIdentifier >(id) )
     {
-        string s = "&&"; // label-as-variable (GCC extension)  
-        return s + kit.render( id, Syntax::Production::SCOPE_RESOLVE ); // recurse at strictly higher precedence
+		if(  surround_prod < Syntax::Production::SCOPE_RESOLVE )
+		{
+			// label-as-variable (GCC extension)  
+			return "&&" + kit.render( id, Syntax::Production::SCOPE_RESOLVE ); // recurse at strictly higher precedence
+		}
+		else
+		{
+			// TODO call SpecificIdentifier::...
+		}			
     }
+
+    if( !id )
+		throw Syntax::NotOnThisNode();
+
+	auto ii = DynamicTreePtrCast<SpecificIdentifier>( id );
+	if( !ii )
+		throw Syntax::NotOnThisNode();
+
+	ASSERT( kit.unique_identifier_names->count(ii) > 0 )(ii)(" (\"%s\") missing from unique_identifier_names", ii->GetIdentifierName().c_str() );
+	string s = kit.unique_identifier_names->at(ii);          
+    ASSERT(s.size()>0)(*id)(" rendered to an empty string\n");
 
     // Slight cheat for expediency: if a PURE_IDENTIFIER is expected, suppress scope resolution.
     // This could lead to the rendering of identifiers in the wrong scope. But, most PURE_IDENTIFIER
     // uses are declaring the id, or otherwise can't cope with the :: anyway. 
     if( surround_prod < Syntax::Production::PURE_IDENTIFIER ) 
-    {
-        string s = ScopeResolvingPrefix( id, surround_prod );   
-        return s + kit.render( id, Syntax::Production::PURE_IDENTIFIER ); // recurse at strictly higher precedence
-    }
+        s = ScopeResolvingPrefix( id, surround_prod ) + s;   
                                      
-    return RenderPureIdentifier( id, surround_prod );
+    return s;
 }
 DEFAULT_CATCH_CLAUSE
 
@@ -626,7 +619,7 @@ string CppRender::RenderExteriorCall( TreePtr<SeqArgsCall> call, Syntax::Product
     // Constructor case: spot by use of Lookup to empty-named method. Elide the "."
     if( auto lu = DynamicTreePtrCast< Lookup >(call->callee) )
         if( auto id = DynamicTreePtrCast< InstanceIdentifier >(lu->member) )
-            if( id->GetRenderTerminal().empty() )
+            if( id->GetIdentifierName().empty() )
                 return kit.render( lu->object, Syntax::Production::POSTFIX ) + args_in_parens;
 
     // Other funcitons just evaluate
@@ -858,7 +851,7 @@ string CppRender::RenderInitialisation( TreePtr<Initialiser> init ) try
         {
             if( auto lu = TreePtr<Lookup>::DynamicCast(call->callee) )
                 if( auto id = TreePtr<InstanceIdentifier>::DynamicCast(lu->member) )
-                    if( id->GetRenderTerminal().empty() ) // syscall to a nameless member function => sys construct
+                    if( id->GetIdentifierName().empty() ) // syscall to a nameless member function => sys construct
                         return RenderExprSeq(call->arguments) + ";\n";
         }
         if( auto call = DynamicTreePtrCast<Call>( ei ) ) try

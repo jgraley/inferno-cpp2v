@@ -352,14 +352,14 @@ UniquifyNames::NodeToNameMap UniquifyNames::UniquifyAll( const TransKit &kit, Tr
 			catch(DeclarationOf::DeclarationNotFound &)
 			{
 				// An undeclared indentifier cannot safely be renamed and so must have a non-empty name
-				if( node->GetRenderTerminal().empty() )
+				if( node->GetIdentifierName().empty() )
 					continue;
 		
 				// Assume undeclared identifier is really a system node identifier.
 				// Ensure it will keep its name and not be conflicted, and add to the
 				// map so normal IDs don't conflict with it.
 				name_gen.AddNodeNoRename( node );
-				nodes_to_names.insert( NodeAndNamePair( node, node->GetRenderTerminal() ) );
+				nodes_to_names.insert( NodeAndNamePair( node, node->GetIdentifierName() ) );
 				continue; // done with this node
 			}
 		}

@@ -37,7 +37,9 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern )
     using namespace placeholders;
     kit = RenderKit{ utils.get(),
 		             bind(&Render::RenderIntoProduction, this, _1, _2),
-		             bind(&Render::RenderNodeOnly, this, _1, _2) };
+		             bind(&Render::RenderNodeOnly, this, _1, _2),
+		             nullptr, // Identifiers should never be directly rendered in patterns - probably
+		             &unique_coupling_names };
 
     // Make the hinted coupling names unique. Only bother with true couplings
     // (more than one parent) and don't worry about declarations.
@@ -253,7 +255,7 @@ string Render::RenderNullPointer( Syntax::Production surround_prod )
 string Render::Dispatch( TreePtr<Node> node, Syntax::Production surround_prod )
 {	
 	if( const Agent *agent = Agent::TryAsAgentConst(node) )
-		return agent->GetRender( kit, surround_prod );     
+		return agent->GetAgentRender( kit, surround_prod );     
 
 	try 
 	{ 

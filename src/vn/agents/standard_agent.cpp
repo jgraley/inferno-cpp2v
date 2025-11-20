@@ -966,7 +966,7 @@ Syntax::Production StandardAgent::GetAgentProduction() const
 }
 
 
-string StandardAgent::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
+string StandardAgent::GetAgentRender( const RenderKit &kit, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;	
 	shared_ptr<const Node> node = GetPatternPtr();
@@ -986,7 +986,7 @@ string StandardAgent::GetRender( const RenderKit &kit, Syntax::Production surrou
 		return "🞊【" + 
 		       scope + name.substr(8, name.size()-8-10) + // Take off Specific...Identifier
 		       "⚬" +
-			   GetRenderTerminal() + 
+			   GetIdentifierName() + 
 			   "】";
 	}	
 	else

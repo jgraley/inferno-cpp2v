@@ -69,7 +69,7 @@ Syntax::Production DisjunctionAgent::GetAgentProduction() const
 }
 
 
-string DisjunctionAgent::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
+string DisjunctionAgent::GetAgentRender( const RenderKit &kit, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
 

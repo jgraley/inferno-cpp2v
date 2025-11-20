@@ -415,7 +415,7 @@ AugTreePtr<CPPTree::Expression> TypeOf::TryGetConstructedExpression( const Trans
 		if( AugTreePtr<Call>::DynamicCast(gs) )		
 			is_cons = !!AugTreePtr<Constructor>::DynamicCast( Get( kit, GET_CHILD(lu, member) ) );		
 		else if( AugTreePtr<SeqArgsCall>::DynamicCast(gs) )		
-			is_cons = lu->member->GetRenderTerminal().empty();					
+			is_cons = lu->member->GetIdentifierName().empty();					
 		
 		if( is_cons )
 			e = GET_CHILD(lu, object);

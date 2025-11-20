@@ -8,7 +8,7 @@ BISON_OPTIONS = -Wcounterexamples
 BISON = bison 
 
 # We need to be more relaxed than we are for most VN code.
-VNL_OPTIONS = -O0 -std=c++20 -ggdb3
+VNL_OPTIONS = $(OPTIONS) -std=c++20
 VNL_OPTIONS += -Ibuild/$(VNL_DIR) -I$(REFLEX_INC) -I. 
 
 VNL_LYPP_MODULES=$(VNL_DIR)/vn_lang
@@ -21,6 +21,12 @@ VNL_CPP_OPTIONS = $(VNL_OPTIONS) -I$(SRC) -I$(VN) -I$(VN_LANG) -I$(LLVM)/include
 VNL_CPP_MODULES = $(VNL_DIR)/vn_parse $(VN_LANG)/vn_commands $(VN_LANG)/vn_lang_error  
 
 VNL_DEPS = $(VNL_DIR)/makefile
+
+# Include the auto-generated .d files which contain rules for the
+# include dependencies.
+-include $(VNL_CPP_MODULES:%=build/%.d)
+-include $(VNL_LYPP_MODULES:%=build/%.lpp.d) 
+-include $(VNL_LYPP_MODULES:%=build/%.ypp.d)
 
 $(VNL_LYPP_MODULES:%=build/%.lpp.hpp) : build/%.lpp.hpp : build/%.lpp.cpp
 $(VNL_LYPP_MODULES:%=build/%.lpp.cpp): build/%.lpp.cpp : %.lpp $(VNL_DEPS)

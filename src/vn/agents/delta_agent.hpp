@@ -53,7 +53,7 @@ public:
 	
 private:
 	Syntax::Production GetAgentProduction() const final;
-	string GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const final;  
+	string GetAgentRender( const RenderKit &kit, Syntax::Production surround_prod ) const final;  
 };
 
 };

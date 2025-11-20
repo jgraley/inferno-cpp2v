@@ -122,7 +122,7 @@ Syntax::Production StarAgent::GetAgentProduction() const
 }
 
 
-string StarAgent::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
+string StarAgent::GetAgentRender( const RenderKit &kit, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
 

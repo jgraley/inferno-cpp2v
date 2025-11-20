@@ -87,7 +87,7 @@ Syntax::Production ChildAgent::GetAgentProduction() const
 }
 
 
-string ChildAgent::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
+string ChildAgent::GetAgentRender( const RenderKit &kit, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
 	string s = "⩨【=1】";
@@ -168,7 +168,7 @@ Syntax::Production StuffAgent::GetAgentProduction() const
 }
 
 
-string StuffAgent::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
+string StuffAgent::GetAgentRender( const RenderKit &kit, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
 	string s = "⩨";

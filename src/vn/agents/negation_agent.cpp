@@ -48,7 +48,7 @@ Syntax::Production NegationAgent::GetAgentProduction() const
 }
 
 
-string NegationAgent::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
+string NegationAgent::GetAgentRender( const RenderKit &kit, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
 	return "¬" + kit.render( (TreePtr<Node>)(*GetNegand()), Syntax::Production::PREFIX );

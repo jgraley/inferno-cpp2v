@@ -58,8 +58,8 @@ unique_ptr<SYM::BooleanResult> IdentifierByNameAgent::IsIdentifierNamedOperator:
     TreePtr<Node> base_x = ra->GetOnlyXLink().GetChildTreePtr(); // TODO dynamic_pointer_cast support for TreePtrInterface #27
     if( auto si_x = DynamicTreePtrCast<CPPTree::SpecificIdentifier>(base_x) )
     {
-        TRACE("Comparing ")(si_x->GetRenderTerminal())(" with ")(name);
-        if( si_x->GetRenderTerminal() == name )
+        TRACE("Comparing ")(si_x->GetIdentifierName())(" with ")(name);
+        if( si_x->GetIdentifierName() == name )
         {
             TRACE(" : same\n");
             return make_unique<SYM::BooleanResult>( true );
@@ -107,7 +107,7 @@ Syntax::Production IdentifierByNameAgent::GetAgentProduction() const
 }
 
 
-string IdentifierByNameAgent::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
+string IdentifierByNameAgent::GetAgentRender( const RenderKit &kit, Syntax::Production surround_prod ) const
 {
     (void)kit;
 	(void)surround_prod;

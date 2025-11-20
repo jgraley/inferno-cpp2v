@@ -30,7 +30,7 @@ Syntax::Production GreenGrassAgent::GetAgentProduction() const
 }
 
 
-string GreenGrassAgent::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
+string GreenGrassAgent::GetAgentRender( const RenderKit &kit, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
 	return "⫴" + kit.render( (TreePtr<Node>)(*GetThrough()), Syntax::Production::PREFIX );

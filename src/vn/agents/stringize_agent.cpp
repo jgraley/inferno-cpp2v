@@ -18,7 +18,7 @@ TreePtr<Node> StringizeAgent::BuildNewSubtree(const SCREngine *acting_engine)
 {
     PatternLink source_plink(&source);
     TreePtr<Node> new_identifier = source_plink.GetChildAgent()->BuildForBuildersAnalysis(source_plink, acting_engine);
-    return MakeTreeNode<CPPTree::SpecificString>( new_identifier->GetRenderTerminal() ); 
+    return MakeTreeNode<CPPTree::SpecificString>( new_identifier->GetIdentifierName() ); 
 }
 
 
@@ -28,7 +28,7 @@ Syntax::Production StringizeAgent::GetAgentProduction() const
 }
 
 
-string StringizeAgent::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
+string StringizeAgent::GetAgentRender( const RenderKit &kit, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
 	return "§" + kit.render( source, Syntax::Production::PREFIX );

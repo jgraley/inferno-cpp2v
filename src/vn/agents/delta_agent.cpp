@@ -63,7 +63,7 @@ Syntax::Production DeltaAgent::GetAgentProduction() const
 }
 
 
-string DeltaAgent::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
+string DeltaAgent::GetAgentRender( const RenderKit &kit, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
 	// We can use PREFIX for this because there's nothing in front of the ▲ unlike

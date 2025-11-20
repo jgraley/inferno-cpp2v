@@ -43,7 +43,7 @@ Syntax::Production ConjunctionAgent::GetAgentProduction() const
 }
 
 
-string ConjunctionAgent::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
+string ConjunctionAgent::GetAgentRender( const RenderKit &kit, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
 

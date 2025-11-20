@@ -35,7 +35,7 @@ string BuildIdentifierAgent::GetNewName(const SCREngine *acting_engine)
         ASSERT( new_identifier );
         TreePtr<SpecificIdentifier> si = DynamicTreePtrCast<SpecificIdentifier>( new_identifier );
         ASSERT( si )("BuildIdentifier: ")(*new_identifier)(" should be a kind of SpecificIdentifier (format is %s)", format.c_str());
-        string s = si->GetRenderTerminal();
+        string s = si->GetIdentifierName();
         if( !ls.empty() )
             all_same = all_same && (s == ls.back());
         ls.push_back( s );
@@ -76,7 +76,7 @@ Syntax::Production BuildIdentifierAgent::GetAgentProduction() const
 }
 
 
-string BuildIdentifierAgent::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
+string BuildIdentifierAgent::GetAgentRender( const RenderKit &kit, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
 

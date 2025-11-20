@@ -84,7 +84,7 @@ Syntax::Production EmbeddedSCRAgent::GetAgentProduction() const
 }
 
 
-string EmbeddedSCRAgent::GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const
+string EmbeddedSCRAgent::GetAgentRender( const RenderKit &kit, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
 	if( search_pattern!=replace_pattern || is_search )	

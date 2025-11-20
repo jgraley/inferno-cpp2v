@@ -32,7 +32,7 @@ public:
                                            const XTreeDatabase *x_tree_db ) const;                                              
 
 	Syntax::Production GetAgentProduction() const override;
-	string GetRender( const RenderKit &kit, Syntax::Production surround_prod ) const final;
+	string GetAgentRender( const RenderKit &kit, Syntax::Production surround_prod ) const final;
     NodeBlock GetGraphBlockInfo() const final;
 
     TreePtr<Node> negand;    
