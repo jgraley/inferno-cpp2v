@@ -88,7 +88,7 @@ string CppRender::Dispatch( TreePtr<Node> node, Syntax::Production surround_prod
 		string s_internal = s;
 		try 
 		{ 		
-			s = node->GetRenderTerminal();		
+			s = node->GetRender(kit, surround_prod);		
 		}
 		catch( Syntax::NotOnThisNode & ) {		}
 		ASSERT( s==s_internal )(node)("node: \"")(s)("\" internal: \"")(s_internal)("\""); 
@@ -183,7 +183,7 @@ DEFAULT_CATCH_CLAUSE
 string CppRender::RenderLiteral( TreePtr<Literal> sp, Syntax::Production surround_prod ) try
 {
 	(void)surround_prod;
-    return Sanitise( sp->GetRenderTerminal() );
+    return Sanitise( sp->GetRender(kit, surround_prod) );
 }
 DEFAULT_CATCH_CLAUSE
 
@@ -1017,7 +1017,7 @@ string CppRender::RenderPreProcDecl( TreePtr<PreProcDecl> ppd, Syntax::Productio
     if( auto si = TreePtr<SystemInclude>::DynamicCast(ppd) )
         return "#include <" + si->filename->GetString() + ">";
     else if( auto si = TreePtr<LocalInclude>::DynamicCast(ppd) )
-        return "#include " + si->filename->GetRenderTerminal();
+        return "#include " + si->filename->GetRender(kit, Syntax::Production::SPACE_SEP_PRE_PROC);
     else
         return ERROR_UNSUPPORTED(ppd);     
 }

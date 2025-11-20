@@ -4,6 +4,11 @@
 #include "common/common.hpp"
 #include "common/mismatch.hpp"
 
+namespace VN
+{
+	class RenderKit;
+};
+
 /// Interface for being able to reutnr a string for rendering (as opposed to debug)
 class Syntax : virtual Traceable
 {
@@ -13,6 +18,7 @@ public:
 		UNDEFINED,
 		
 		PROGRAM = 10,
+		SPACE_SEP_PRE_PROC,
 		DEFINITION,		
 		
 		// ----- Complete self-sufficient statements and declarations. There is a precedence
@@ -95,7 +101,12 @@ public:
     virtual string GetLoweredIdName() const;
     virtual string GetIdentifierName() const;
     virtual string GetCouplingNameHint() const;
-	virtual string GetRenderTerminal() const;
+	
+	virtual string GetRender( const VN::RenderKit &kit, Production surround_prod ) const;
+	
+	// Like GetRender, but without a kit it can't render sub-productions, so it can only work for terminals
+	virtual string GetRenderTerminal( Production surround_prod ) const;
+	
 	virtual Production GetMyProduction() const;
 	virtual Production GetOperandInDeclaratorProduction() const;
     static Syntax::Production BoostPrecedence( Syntax::Production prec );

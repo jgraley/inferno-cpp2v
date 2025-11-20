@@ -50,7 +50,7 @@ string Literal::GetName() const
 	string value_string;
 	try
 	{
-		value_string = "(" + GetRenderTerminal() + ")";
+		value_string = "(" + GetRenderTerminal(Syntax::Production::BOOT_EXPR) + ")";
 	}
 	catch(NotOnThisNode &) {}
 	return Traceable::GetName() + value_string;
@@ -84,7 +84,7 @@ Orderable::Diff SpecificString::OrderCompare3WayCovariant( const Orderable &righ
 }
  
  
-string SpecificString::GetRenderTerminal() const
+string SpecificString::GetRenderTerminal( Production ) const
 {
     // Since this is a string literal, output it double quoted
     return "\"" + value + "\"";
@@ -180,7 +180,7 @@ Orderable::Diff SpecificInteger::OrderCompare3WayCovariant( const Orderable &rig
 }
  
  
-string SpecificInteger::GetRenderTerminal() const 
+string SpecificInteger::GetRenderTerminal( Production ) const 
 {
     return string(value.toString(10)) + // decimal
            (value.isUnsigned() ? "U" : "") +
@@ -244,7 +244,7 @@ Orderable::Diff SpecificFloat::OrderCompare3WayCovariant( const Orderable &right
 }
  
 
-string SpecificFloat::GetRenderTerminal() const
+string SpecificFloat::GetRenderTerminal( Production ) const
 {
     char hs[256];
     // generate hex float since it can be exact
@@ -320,9 +320,10 @@ Orderable::Diff SpecificIdentifier::OrderCompare3WayCovariant( const Orderable &
 }
 
 
-string SpecificIdentifier::GetRenderTerminal() const 
+string SpecificIdentifier::GetRenderTerminal( Production surround_prod ) const 
 {
-    return name;
+	(void)surround_prod;
+    return name+"SDAFASDFASDFADSFADSFR";
 }
 
 

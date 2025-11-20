@@ -259,7 +259,7 @@ string Render::Dispatch( TreePtr<Node> node, Syntax::Production surround_prod )
 
 	try 
 	{ 
-		return node->GetRenderTerminal(); 
+		return node->GetRender(kit, surround_prod); 
 	}
 	catch( Syntax::NotOnThisNode & ) {}
 
@@ -272,7 +272,7 @@ string Render::RenderNodeOnly( shared_ptr<const Node> node, Syntax::Production s
 	(void)surround_prod;
 	try 
 	{ 
-		return node->GetRenderTerminal(); 
+		return node->GetRender(kit, surround_prod); 
 	}
 	catch( Syntax::NotOnThisNode & ) {}
 

@@ -146,7 +146,7 @@ struct SpecificString : String
     virtual bool IsLocalMatchCovariant( const Matcher &candidate ) const; /// Overloaded comparison for search&replace
     virtual Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
-    virtual string GetRenderTerminal() const; 
+    virtual string GetRenderTerminal( Production surround_prod ) const; 
 	Production GetMyProduction() const override;
 	string GetString() final { return value; }
 private:
@@ -182,7 +182,7 @@ struct SpecificInteger : Integer
     virtual bool IsLocalMatchCovariant( const Matcher &candidate ) const; /// Overloaded comparison for search&replace
     virtual Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
-    virtual string GetRenderTerminal() const; 
+    virtual string GetRenderTerminal( Production surround_prod ) const; 
 	Production GetMyProduction() const override;
 	
 private:
@@ -204,7 +204,7 @@ struct SpecificFloat : Float, llvm::APFloat
     virtual bool IsLocalMatchCovariant( const Matcher &candidate ) const; /// Overloaded comparison for search&replace
     virtual Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
-    virtual string GetRenderTerminal() const; 
+    virtual string GetRenderTerminal( Production surround_prod ) const; 
     Production GetMyProduction() const override;
 };
 
@@ -217,7 +217,7 @@ struct Bool : Literal { NODE_FUNCTIONS };
 struct True : Bool
 {
     NODE_FUNCTIONS_FINAL
-    virtual string GetRenderTerminal() const { return "true"; } 
+    virtual string GetRenderTerminal( Production ) const { return "true"; } 
 	Production GetMyProduction() const override;
 };
 
@@ -225,7 +225,7 @@ struct True : Bool
 struct False : Bool
 {
     NODE_FUNCTIONS_FINAL
-    virtual string GetRenderTerminal() const { return "false"; } 
+    virtual string GetRenderTerminal( Production ) const { return "false"; } 
 	Production GetMyProduction() const override;
 };
 
@@ -262,7 +262,7 @@ struct SpecificIdentifier : virtual Property
     virtual bool IsLocalMatchCovariant( const Matcher &candidate ) const; /// Overloaded comparison for search&replace
     virtual Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
-    virtual string GetRenderTerminal() const; /// This is relied upon to just return the identifier name for rendering
+    virtual string GetRenderTerminal( Production surround_prod ) const; /// This is relied upon to just return the identifier name for rendering
     virtual string GetIdentifierName() const;
     virtual string GetGraphName() const;
     virtual string GetTrace() const;

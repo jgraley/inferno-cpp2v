@@ -31,7 +31,13 @@ string Syntax::GetCouplingNameHint() const
 }
 
 
-string Syntax::GetRenderTerminal() const
+string Syntax::GetRender( const VN::RenderKit &, Production production ) const
+{
+	return GetRenderTerminal(production);
+}
+
+
+string Syntax::GetRenderTerminal( Production ) const
 {
 	throw NotOnThisNode();
 }
@@ -42,6 +48,7 @@ Syntax::Production Syntax::GetMyProduction() const
 {
     return Production::UNDEFINED; 
 }
+    
     
 // What production is expected as my operand in a declarator?
 Syntax::Production Syntax::GetOperandInDeclaratorProduction() const
