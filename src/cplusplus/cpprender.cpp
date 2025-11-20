@@ -210,7 +210,7 @@ string CppRender::ScopeResolvingPrefix( TreePtr<Node> node, Syntax::Production s
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::GetUniqueIdentifierName( TreePtr<Node> id ) 
+string CppRender::GetUniqueIdentifierName( TreePtr<Node> id ) const 
 {
 	ASSERT( unique_identifier_names.count(id) > 0 )
 	      (id)

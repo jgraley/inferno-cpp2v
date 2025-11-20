@@ -19,7 +19,7 @@ public:
 	virtual string RenderIntoProduction( TreePtr<Node> node, Syntax::Production surround_prod ) = 0;
 	virtual string RenderNodeOnly( shared_ptr<const Node> node, Syntax::Production surround_prod ) = 0;
 	virtual string ScopeResolvingPrefix( TreePtr<Node> id, Syntax::Production surround_prod ) = 0;
-	virtual string GetUniqueIdentifierName( TreePtr<Node> id ) = 0;
+	virtual string GetUniqueIdentifierName( TreePtr<Node> id ) const = 0;
 };
 
 
@@ -46,10 +46,10 @@ public:
 	string RenderNodeOnly( shared_ptr<const Node> node, Syntax::Production surround_prod ) override;
 	string RenderNodeExplicit( shared_ptr<const Node> node );
 	string ScopeResolvingPrefix( TreePtr<Node> id, Syntax::Production surround_prod ) override;
-	string GetUniqueIdentifierName( TreePtr<Node> id ) override;
+	string GetUniqueIdentifierName( TreePtr<Node> id ) const override;
 
 	virtual Syntax::Production GetNodeProduction( TreePtr<Node> node ) const;						 
-	TreePtr<CPPTree::Scope> TryGetScope( TreePtr<Node> node );
+	TreePtr<CPPTree::Scope> TryGetScope( TreePtr<Node> node ) const;
 	bool IsDeclared( TreePtr<CPPTree::Identifier> id );
 							 
 	string RenderMismatchException( string fname, const Mismatch &me );

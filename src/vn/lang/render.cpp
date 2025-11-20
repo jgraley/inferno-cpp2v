@@ -332,7 +332,7 @@ string Render::ScopeResolvingPrefix( TreePtr<Node>, Syntax::Production )
 }
 
 
-string Render::GetUniqueIdentifierName( TreePtr<Node> ) 
+string Render::GetUniqueIdentifierName( TreePtr<Node> ) const 
 {
 	ASSERTFAIL("VN renderer never renders identifiers directly");
 }
@@ -344,7 +344,7 @@ Syntax::Production Render::GetNodeProduction( TreePtr<Node> node ) const
 }
 
 
-TreePtr<Scope> Render::TryGetScope( TreePtr<Node> node )
+TreePtr<Scope> Render::TryGetScope( TreePtr<Node> node ) const
 {       
     if( scope_stack.empty() ) 
         return nullptr; // We aren't even in any scopes
