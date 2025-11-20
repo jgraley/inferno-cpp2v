@@ -990,7 +990,7 @@ string StandardAgent::GetAgentRender( const RenderKit &kit, Syntax::Production s
 			   "】";
 	}	
 	else
-		return kit.recurse->RenderNodeOnly(node, surround_prod);
+		return kit.renderer->RenderNodeOnly(node, surround_prod);
 }
 
 

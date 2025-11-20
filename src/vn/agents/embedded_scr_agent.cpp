@@ -101,10 +101,10 @@ string EmbeddedSCRAgent::GetAgentRender( const RenderKit &kit, Syntax::Productio
 	// Functional nesting i.e. chaining via stem should look like x⨟꩜(y⨟꩜z) which will 
 	// indent as required. If the ꩜<pattern> aere a production it would be at 
 	// Boost(VN_SEP_SCRIPTY) to get left-association.
-	return kit.recurse->RenderIntoProduction( (TreePtr<Node>)(*GetThrough()), Syntax::Production::VN_SEP_SCRIPTY ) + 
+	return kit.renderer->RenderIntoProduction( (TreePtr<Node>)(*GetThrough()), Syntax::Production::VN_SEP_SCRIPTY ) + 
 		   "⨟\n" +
 		   "꩜" + 
-		   kit.recurse->RenderIntoProduction( search_pattern, Syntax::Production::PREFIX ); // Left-associative 
+		   kit.renderer->RenderIntoProduction( search_pattern, Syntax::Production::PREFIX ); // Left-associative 
 }    
        
 

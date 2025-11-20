@@ -24,7 +24,7 @@ public:
 
 struct RenderKit : TransKit
 {	
-	RenderRecursionInterface *recurse;
+	RenderRecursionInterface *renderer;
 	const UniquifyNames::NodeToNameMap *unique_identifier_names;
 	const UniquifyNames::NodeToNameMap *unique_coupling_names;
 };
