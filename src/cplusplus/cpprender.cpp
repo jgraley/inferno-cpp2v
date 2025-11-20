@@ -463,8 +463,8 @@ string CppRender::RenderOperator( TreePtr<Operator> op, Syntax::Production surro
     if( false )
     {
 	}        
-#define INFIX(TOK, TEXT, NODE_SHAPED, BASE, CAT, PROD, ASSOC) \
-    else if( DynamicTreePtrCast<NODE_SHAPED>(op) ) \
+#define INFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) \
+    else if( DynamicTreePtrCast<NODE>(op) ) \
     { \
         Syntax::Production prod_left = Syntax::Production::PROD; \
         Syntax::Production prod_right = Syntax::Production::PROD; \
@@ -479,8 +479,8 @@ string CppRender::RenderOperator( TreePtr<Operator> op, Syntax::Production surro
         ++operands_it; \
         s += RenderIntoProduction( *operands_it, prod_right ); \
     }
-#define PREFIX(TOK, TEXT, NODE_SHAPED, BASE, CAT, PROD, ASSOC) \
-    else if( DynamicTreePtrCast<NODE_SHAPED>(op) ) \
+#define PREFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) \
+    else if( DynamicTreePtrCast<NODE>(op) ) \
     { \
 		Sequence<Expression>::iterator operands_it = operands.begin(); \
         s = TEXT; \
@@ -491,8 +491,8 @@ string CppRender::RenderOperator( TreePtr<Operator> op, Syntax::Production surro
                 paren = !RenderScopeResolvingPrefix( id ).empty(); \
         s += (paren?"(":"") + RenderIntoProduction( *operands_it, Syntax::Production::PROD) + (paren?")":""); \
     }
-#define POSTFIX(TOK, TEXT, NODE_SHAPED, BASE, CAT, PROD, ASSOC) \
-    else if( DynamicTreePtrCast<NODE_SHAPED>(op) ) \
+#define POSTFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) \
+    else if( DynamicTreePtrCast<NODE>(op) ) \
     { \
 		Sequence<Expression>::iterator operands_it = operands.begin(); \
         s = RenderIntoProduction( *operands_it, Syntax::Production::PROD ); \

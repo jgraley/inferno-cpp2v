@@ -33,7 +33,7 @@ public:
 
 	virtual string Dispatch( TreePtr<Node> node, Syntax::Production surround_prod );
 
-	string RenderNodeOnly( shared_ptr<const Node> node, Syntax::Production surround_prod ) override;
+	string RenderNodeOnly( TreePtr<Node> node, Syntax::Production surround_prod );
 	string RenderNodeExplicit( shared_ptr<const Node> node );
 	string RenderScopeResolvingPrefix( TreePtr<Node> id ) override;
 	string GetUniqueIdentifierName( TreePtr<Node> id ) const override;

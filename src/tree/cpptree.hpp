@@ -262,7 +262,7 @@ struct SpecificIdentifier : virtual Property
     virtual bool IsLocalMatchCovariant( const Matcher &candidate ) const; /// Overloaded comparison for search&replace
     virtual Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
-	string GetRender( VN::RendererInterface *renderer, Production surround_prod ) const;
+	string GetRender( VN::RendererInterface *renderer, Production surround_prod );
     virtual string GetIdentifierName() const; /// This is relied upon to just return the identifier name 
     virtual string GetGraphName() const;
     virtual string GetTrace() const;
@@ -791,30 +791,29 @@ struct AssignmentOperator : NonCommutativeOperator { NODE_FUNCTIONS };
 
 // Use an include file to generate nodes for all the actual operators based on
 // contents of operator_data.inc
-#define PREFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) struct NODE : BASE \
+#define PREFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) \
+struct NODE : BASE \
 { \
 	NODE_FUNCTIONS_FINAL \
-	Production GetMyProduction() const override \
-	{ \
-		return Production::PROD; \
-	} \
-};
-#define POSTFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) struct NODE : BASE \
+	Production GetMyProduction() const final; \
+	string GetRender( VN::RendererInterface *renderer, Production surround_prod ) final; \
+}; \
+
+#define POSTFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) \
+struct NODE : BASE \
 { \
 	NODE_FUNCTIONS_FINAL \
-	Production GetMyProduction() const override \
-	{ \
-		return Production::PROD; \
-	} \
-};
-#define INFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) struct NODE : BASE \
+	Production GetMyProduction() const final; \
+	string GetRender( VN::RendererInterface *renderer, Production surround_prod ) final; \
+}; \
+
+#define INFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) \
+struct NODE : BASE \
 { \
 	NODE_FUNCTIONS_FINAL \
-	Production GetMyProduction() const override \
-	{ \
-		return Production::PROD; \
-	} \
-};
+	Production GetMyProduction() const final; \
+}; \
+
 #include "operator_data.inc"
 
 /// The termary ?: operator

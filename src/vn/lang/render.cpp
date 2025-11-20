@@ -249,14 +249,18 @@ string Render::RenderNullPointer( Syntax::Production surround_prod )
 
 string Render::Dispatch( TreePtr<Node> node, Syntax::Production surround_prod )
 {	
-	if( const Agent *agent = Agent::TryAsAgentConst(node) )
-		return agent->GetAgentRender( this, surround_prod );     
-
+	try
+	{
+		if( const Agent *agent = Agent::TryAsAgentConst(node) )
+			return agent->GetAgentRender( this, surround_prod );
+	}
+	catch( Syntax::NotOnThisNode & ) {}
+	
 	return RenderNodeOnly(node, surround_prod);
 }
 
 
-string Render::RenderNodeOnly( shared_ptr<const Node> node, Syntax::Production surround_prod )
+string Render::RenderNodeOnly( TreePtr<Node> node, Syntax::Production surround_prod )
 {
 	try 
 	{ 

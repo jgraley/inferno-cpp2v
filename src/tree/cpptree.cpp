@@ -320,12 +320,10 @@ Orderable::Diff SpecificIdentifier::OrderCompare3WayCovariant( const Orderable &
 }
 
 
-string SpecificIdentifier::GetRender( VN::RendererInterface *renderer, Production surround_prod ) const 
+string SpecificIdentifier::GetRender( VN::RendererInterface *renderer, Production surround_prod ) 
 {	
-	// Get rid of all this casting, including const casting, by building the entire
-	// rendering subsystem using plain old const pointers.
-	auto node = TreePtr<Node>(const_pointer_cast<Node>(shared_from_this()));
-	auto id = TreePtr<SpecificIdentifier>::DynamicCast(node);
+	// Get rid of all this casting by building the entire rendering subsystem using plain old const pointers.
+	auto id = TreePtr<SpecificIdentifier>::DynamicCast( TreePtr<Node>(shared_from_this()) );
 		
     // Put this in SpecificLabelIdentifier
     if( DynamicTreePtrCast< SpecificLabelIdentifier >(id) )
@@ -596,6 +594,44 @@ Syntax::Production False::GetMyProduction() const
 { 
 	return Production::PRIMITIVE_EXPR; 
 }
+
+//////////////////////////// Operators from operator_data.inc ///////////////////////////////
+
+#define PREFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) \
+Syntax::Production NODE::GetMyProduction() const \
+{ \
+	return Production::PROD; \
+} \
+string NODE::GetRender( VN::RendererInterface *renderer, Production ) \
+{ \
+	Sequence<Expression>::iterator operands_it = operands.begin(); \
+	string s = TEXT; \
+	bool paren = false; \
+	/* Prevent interpretation as a member function pointer literal */ \
+	if( dynamic_cast<AddressOf *>(shared_from_this().get()) ) \
+		if( auto id = TreePtr<Identifier>::DynamicCast(*operands_it) ) \
+			paren = !renderer->RenderScopeResolvingPrefix( id ).empty(); \
+	return s + (paren?"(":"") + renderer->RenderIntoProduction( *operands_it, Syntax::Production::PROD) + (paren?")":""); \
+} \
+
+#define POSTFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) \
+Syntax::Production NODE::GetMyProduction() const \
+{ \
+	return Production::PROD; \
+} \
+string NODE::GetRender( VN::RendererInterface *renderer, Production ) \
+{ \
+	Sequence<Expression>::iterator operands_it = operands.begin(); \
+	return renderer->RenderIntoProduction( *operands_it, Syntax::Production::PROD) + TEXT; \
+} \
+
+#define INFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) \
+Syntax::Production NODE::GetMyProduction() const \
+{ \
+	return Production::PROD; \
+} \
+ 
+#include "operator_data.inc"
 
 //////////////////////////// ConditionalOperator ///////////////////////////////
 

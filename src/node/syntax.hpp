@@ -102,7 +102,7 @@ public:
     virtual string GetIdentifierName() const;
     virtual string GetCouplingNameHint() const;
 	
-	virtual string GetRender( VN::RendererInterface *renderer, Production surround_prod ) const;
+	virtual string GetRender( VN::RendererInterface *renderer, Production surround_prod );
 	
 	// Like GetRender, but without a kit it can't render sub-productions, so it can only work for terminals
 	virtual string GetRenderTerminal( Production surround_prod ) const;

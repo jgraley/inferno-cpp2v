@@ -63,11 +63,17 @@ integral_num			\d*[lLuU]*
 §				{ return YY::VNLangParser::make_STRINGIZE(location()); };
 ‽ 				{ return YY::VNLangParser::make_PRERESTRICT(location()); };
 
+!|~				{ return YY::VNLangParser::make_C_PREFIX_OP(str(), location()); };
+\+\+|--			{ return YY::VNLangParser::make_C_PRE_OR_POSTFIX_OP(str(), location()); };
+-|\+|\*|&	  	{ return YY::VNLangParser::make_C_PRE_OR_INFIX_OP(str(), location()); }
+=			  	{ return YY::VNLangParser::make_C_ASSIGN(location()); }
+
 true			{ return YY::VNLangParser::make_BOOL_LITERAL(true, location()); };
 false			{ return YY::VNLangParser::make_BOOL_LITERAL(false, location()); };
 
 ::				{ return YY::VNLangParser::make_SCOPE_RES(location()); };
-[-+*/=();,]  	{ return YY::VNLangParser::symbol_type(chr(), location()); }
+
+[();,]  		{ return YY::VNLangParser::symbol_type(chr(), location()); }
 
 \"[^"]*\"   	{ return YY::VNLangParser::make_STRING_LITERAL(wstr(), location()); }
 {integral_num}	{ return YY::VNLangParser::make_INTEGRAL_LITERAL(str(), location()); }

@@ -966,9 +966,8 @@ Syntax::Production StandardAgent::GetAgentProduction() const
 }
 
 
-string StandardAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod ) const
+string StandardAgent::GetAgentRender( VN::RendererInterface *, Syntax::Production  ) const
 {
-	(void)surround_prod;	
 	shared_ptr<const Node> node = GetPatternPtr();
 	// SpecificIdentifiers appear rarely in patterns, and when they do they are not declared,
 	// so we should not try to render the C++ terminal	    
@@ -990,7 +989,11 @@ string StandardAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::P
 			   "】";
 	}	
 	else
-		return renderer->RenderNodeOnly(node, surround_prod);
+	{
+		// Refusing to proceed on any other node type, forcing the renderer to consider
+		// rendering it using GetRender() etc
+		throw NotOnThisNode();
+	}
 }
 
 

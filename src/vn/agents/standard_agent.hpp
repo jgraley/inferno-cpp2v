@@ -137,26 +137,26 @@ public:
                                            PatternLink me_plink, 
                                            PatternLink bottom_layer_plink );
     ReplacePatchPtr GenReplaceLayoutImpl( const ReplaceKit &kit, 
-                                    PatternLink me_plink, 
-                                    XLink key_xlink,
-                                                  const SCREngine *acting_engine ) final;
+                                          PatternLink me_plink, 
+                                          XLink key_xlink,
+                                          const SCREngine *acting_engine ) final;
 
 private:    
     ReplacePatchPtr GenReplaceLayoutOverlay( const ReplaceKit &kit, 
                                              PatternLink me_plink, 
                                              XLink under_xlink,
-                                                  const SCREngine *acting_engine ); // under substitution if not nullptr
+                                             const SCREngine *acting_engine ); // under substitution if not nullptr
     ReplacePatchPtr GenReplaceLayoutOverlayUsingPattern( const ReplaceKit &kit, 
                                                          PatternLink me_plink, 
                                                          XLink under_xlink,
-                                                  const SCREngine *acting_engine );
+                                                         const SCREngine *acting_engine );
     ReplacePatchPtr GenReplaceLayoutOverlayUsingX( const ReplaceKit &kit, 
                                                    PatternLink me_plink, 
                                                    XLink under_xlink,
-                                                  const SCREngine *acting_engine ); 
+                                                   const SCREngine *acting_engine ); 
     ReplacePatchPtr GenReplaceLayoutNormal( const ReplaceKit &kit, 
                                             PatternLink me_plink,
-                                                  const SCREngine *acting_engine );
+                                            const SCREngine *acting_engine );
     
 public:
 	Syntax::Production GetAgentProduction() const override;
