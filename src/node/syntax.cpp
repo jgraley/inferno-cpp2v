@@ -43,17 +43,23 @@ string Syntax::GetRenderTerminal( Production ) const
 }
 
 
-// What production do I become once rendered?
-Syntax::Production Syntax::GetMyProduction() const
+Syntax::Production Syntax::GetMyProduction(VN::RendererInterface *) const
 {
-    return Production::UNDEFINED; 
+	return GetMyProductionTerminal();
+}
+
+
+// What production do I become once rendered?
+Syntax::Production Syntax::GetMyProductionTerminal() const
+{
+	throw NotOnThisNode();
 }
     
     
 // What production is expected as my operand in a declarator?
 Syntax::Production Syntax::GetOperandInDeclaratorProduction() const
 {
-    return Production::UNDEFINED; 
+	throw NotOnThisNode();
 } 
 
 

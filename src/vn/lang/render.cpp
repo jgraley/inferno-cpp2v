@@ -338,7 +338,7 @@ Syntax::Production Render::GetNodeProduction( TreePtr<Node> node ) const
 	
 	try 
 	{ 
-		return node->GetMyProduction(); 
+		return node->GetMyProductionTerminal(); 
 	}
 	catch( Syntax::NotOnThisNode & ) {}
 

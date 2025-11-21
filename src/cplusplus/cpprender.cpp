@@ -70,7 +70,7 @@ string CppRender::RenderToString( TreePtr<Node> root )
 
 Syntax::Production CppRender::GetNodeProduction( TreePtr<Node> node ) const
 {
-	return node->GetMyProduction();       
+	return node->GetMyProductionTerminal();       
 }
 
 
@@ -325,8 +325,6 @@ string CppRender::RenderTypeAndDeclarator( TreePtr<Type> type, string declarator
 
     // Production passed in here comes from the current value of the delcarator string, not surrounding production.
     Syntax::Production prod_surrounding_declarator = type->GetOperandInDeclaratorProduction();
-    ASSERT( prod_surrounding_declarator != Syntax::Production::UNDEFINED )
-          ("Rendering type: ")(type)(" in production %d",(int)prod_surrounding_declarator)(" got no surrounding production\n");
     ASSERT( Syntax::GetPrecedence(prod_surrounding_declarator) <= Syntax::GetPrecedence(Syntax::Production::BRACKETED) ); // Can't satisfy this production's precedence demand using parentheses
     ASSERT( Syntax::GetPrecedence(declarator_prod) >= Syntax::GetPrecedence(Syntax::Production::BOOT_EXPR) ); // Can't put this node into parentheses
     bool parenthesise = Syntax::GetPrecedence(declarator_prod) < Syntax::GetPrecedence(prod_surrounding_declarator);  
@@ -375,7 +373,7 @@ string CppRender::RenderType( TreePtr<CPPTree::Type> type, Syntax::Production su
         return "bool";
     	
     // If we got here, we should not be looking at a type that renders expressionally
-	if( Syntax::GetPrecedence(type->GetMyProduction()) < Syntax::GetPrecedence(Syntax::Production::BOOT_EXPR) ) 
+	if( Syntax::GetPrecedence(type->GetMyProductionTerminal()) < Syntax::GetPrecedence(Syntax::Production::BOOT_EXPR) ) 
 	{
 		// Production ANONYMOUS relates to the fact that we've provided an empty string for the initial declarator.
 		return RenderTypeAndDeclarator( type, "", Syntax::Production::ANONYMOUS, surround_prod, false ); 

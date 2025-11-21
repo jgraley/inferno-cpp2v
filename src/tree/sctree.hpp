@@ -219,7 +219,7 @@ struct DeltaCount : CPPTree::Operator,
 {
     NODE_FUNCTIONS_FINAL
     virtual string GetLoweredIdName() const { return "sc_delta_count"; }    
-	Production GetMyProduction() const override { return Production::POSTFIX; };	// renders like a function call
+	Production GetMyProductionTerminal() const override { return Production::POSTFIX; };	// renders like a function call
 };
 
 /// Termination functions

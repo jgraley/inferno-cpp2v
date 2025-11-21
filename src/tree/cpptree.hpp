@@ -41,7 +41,7 @@ struct Uninitialised : Initialiser
 { 
 	NODE_FUNCTIONS_FINAL 
 	
-	Production GetMyProduction() const override;
+	Production GetMyProductionTerminal() const override;
 }; 
 
 /// Represents a statement as found inside a function body. 
@@ -71,7 +71,7 @@ struct Type : virtual Node
     NODE_FUNCTIONS 
     
     virtual string GetColour() const { return "/set28/3"; }    
-   	Production GetMyProduction() const override;
+   	Production GetMyProductionTerminal() const override;
 	Production GetOperandInDeclaratorProduction() const override;   
 };
 
@@ -83,7 +83,7 @@ struct Declaration : virtual Node
     NODE_FUNCTIONS 
     
     virtual string GetColour() const { return "/set28/1"; }
-	Production GetMyProduction() const override;	    
+	Production GetMyProductionTerminal() const override;	    
 };
 
 /// A scope is any space in a program where declarations may appear. Declarations
@@ -108,7 +108,7 @@ struct DeclScope : virtual Scope
 struct Program : DeclScope 
 { 
 	NODE_FUNCTIONS_FINAL
-	Production GetMyProduction() const override;
+	Production GetMyProductionTerminal() const override;
 };
 
 /// Indicates that the node cannot be combinationalised
@@ -147,7 +147,7 @@ struct SpecificString : String
     virtual Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
     virtual string GetRenderTerminal( Production surround_prod ) const; 
-	Production GetMyProduction() const override;
+	Production GetMyProductionTerminal() const override;
 	string GetString() final { return value; }
 private:
     string value; ///< The string itself
@@ -183,7 +183,7 @@ struct SpecificInteger : Integer
     virtual Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
     virtual string GetRenderTerminal( Production surround_prod ) const; 
-	Production GetMyProduction() const override;
+	Production GetMyProductionTerminal() const override;
 	
 private:
     llvm::APSInt value;    
@@ -205,7 +205,7 @@ struct SpecificFloat : Float, llvm::APFloat
     virtual Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
     virtual string GetRenderTerminal( Production surround_prod ) const; 
-    Production GetMyProduction() const override;
+    Production GetMyProductionTerminal() const override;
 };
 
 /// Intermediate property node that represents either boolean value.
@@ -218,7 +218,7 @@ struct True : Bool
 {
     NODE_FUNCTIONS_FINAL
     virtual string GetRenderTerminal( Production ) const { return "true"; } 
-	Production GetMyProduction() const override;
+	Production GetMyProductionTerminal() const override;
 };
 
 /// Property node for boolean value false 
@@ -226,7 +226,7 @@ struct False : Bool
 {
     NODE_FUNCTIONS_FINAL
     virtual string GetRenderTerminal( Production ) const { return "false"; } 
-	Production GetMyProduction() const override;
+	Production GetMyProductionTerminal() const override;
 };
 
 //////////////////////////// Declarations //////////////////////////// 
@@ -278,7 +278,7 @@ struct InstanceIdentifier : Identifier,
 { 
     NODE_FUNCTIONS 
     virtual string GetColour() const { return Identifier::GetColour(); } // Identifier wins
-	Production GetMyProduction() const override;
+	Production GetMyProductionTerminal() const override;
 };
                                
 /// Identifier for a specific Instance, linked to by a particular Declaration                           
@@ -298,7 +298,7 @@ struct TypeIdentifier : Identifier,
 { 
     NODE_FUNCTIONS
     virtual string GetColour() const { return Identifier::GetColour(); } // Identifier wins
-	Production GetMyProduction() const override;
+	Production GetMyProductionTerminal() const override;
 };
                            
 /// Identifier for a specific user defined type, linked to by a particular Declaration.
@@ -341,7 +341,7 @@ struct AccessSpec : Property
 { 
 	NODE_FUNCTIONS 
 
-	Production GetMyProduction() const override;
+	Production GetMyProductionTerminal() const override;
 };
 
 /// Property for public access
@@ -396,7 +396,7 @@ struct Instance : Declaration,
     
     virtual string GetColour() const { return Declaration::GetColour(); } // Declaration wins
     set<const TreePtrInterface *> GetDeclared() override { return { &identifier }; };
-	Production GetMyProduction() const override;    
+	Production GetMyProductionTerminal() const override;    
 };
 
 /// A variable or function with one instance across the entire program. 
@@ -474,7 +474,7 @@ struct LabelIdentifier : Identifier,
 { 
     NODE_FUNCTIONS 
     virtual string GetColour() const { return Identifier::GetColour(); } // Identifier wins
-	Production GetMyProduction() const override;    
+	Production GetMyProductionTerminal() const override;    
 };
 
 /// Identifier for a specific label that has been declared somewhere.
@@ -500,7 +500,7 @@ struct Label : Declaration, //TODO commonize with Case and Default
     
     virtual string GetColour() const { return Declaration::GetColour(); } // Declaration wins
     set<const TreePtrInterface *> GetDeclared() override { return { &identifier }; };
-	Production GetMyProduction() const override;	
+	Production GetMyProductionTerminal() const override;	
 };
 
 //////////////////////////// Built-in Types ////////////////////////////
@@ -573,7 +573,7 @@ struct Array : Type
     TreePtr<Type> element; ///< the element type
     TreePtr<Initialiser> size; ///< evaluates to the size or Uninitialised if not given eg []
    
-	Production GetMyProduction() const override;	
+	Production GetMyProductionTerminal() const override;	
 	Production GetOperandInDeclaratorProduction() const override;
 };
 
@@ -584,7 +584,7 @@ struct Indirection : Type
     TreePtr<Type> destination; ///< reaching an object of this type, indirectly
 	TreePtr<Constancy> constancy;  ///< is the destination const?
 
-	Production GetMyProduction() const override;	
+	Production GetMyProductionTerminal() const override;	
 	Production GetOperandInDeclaratorProduction() const override;
 };
 
@@ -599,7 +599,7 @@ struct Void : Type
 { 
 	NODE_FUNCTIONS_FINAL 
 
-	Production GetMyProduction() const override;
+	Production GetMyProductionTerminal() const override;
 };
 
 /// Boolean type. 
@@ -611,14 +611,14 @@ struct Boolean : Type
 { 
 	NODE_FUNCTIONS_FINAL 
 	
-	Production GetMyProduction() const override;	
+	Production GetMyProductionTerminal() const override;	
 };
 
 /// Intermediate for any type that represents a number that you can eg add and subtract. 
 struct Numeric : Type 
 { 
 	NODE_FUNCTIONS 
-	Production GetMyProduction() const override;
+	Production GetMyProductionTerminal() const override;
 };
 
 /// Type represents an integral (singed or unsigned) type. 
@@ -669,7 +669,7 @@ struct Labeley : Type
 {
     NODE_FUNCTIONS_FINAL   
     
-	Production GetMyProduction() const override;	    
+	Production GetMyProductionTerminal() const override;	    
 };
 
 //////////////////////////// User-defined Types ////////////////////////////
@@ -693,7 +693,7 @@ struct Typedef : TypeDeclaration
     NODE_FUNCTIONS_FINAL
     TreePtr<Type> type; ///< emulate this type
 
-	Production GetMyProduction() const override;	    
+	Production GetMyProductionTerminal() const override;	    
 }; 
 
 /// Intermediate for declaration of a struct, class, union or enum. 
@@ -706,7 +706,7 @@ struct Record : TypeDeclaration,
     NODE_FUNCTIONS
     
     virtual string GetColour() const { return TypeDeclaration::GetColour(); } // TypeDeclaration wins
-	Production GetMyProduction() const override;	
+	Production GetMyProductionTerminal() const override;	
 	virtual TreePtr<AccessSpec> GetInitialAccess() const;    
 };
 
@@ -795,7 +795,7 @@ struct AssignmentOperator : NonCommutativeOperator { NODE_FUNCTIONS };
 struct NODE : BASE \
 { \
 	NODE_FUNCTIONS_FINAL \
-	Production GetMyProduction() const final; \
+	Production GetMyProductionTerminal() const final; \
 	string GetRender( VN::RendererInterface *renderer, Production surround_prod ) final; \
 }; \
 
@@ -803,7 +803,7 @@ struct NODE : BASE \
 struct NODE : BASE \
 { \
 	NODE_FUNCTIONS_FINAL \
-	Production GetMyProduction() const final; \
+	Production GetMyProductionTerminal() const final; \
 	string GetRender( VN::RendererInterface *renderer, Production surround_prod ) final; \
 }; \
 
@@ -811,7 +811,7 @@ struct NODE : BASE \
 struct NODE : BASE \
 { \
 	NODE_FUNCTIONS_FINAL \
-	Production GetMyProduction() const final; \
+	Production GetMyProductionTerminal() const final; \
 	string GetRender( VN::RendererInterface *renderer, Production surround_prod ) final; \
 }; \
 
@@ -825,7 +825,7 @@ struct ConditionalOperator : Operator
 	TreePtr<Expression> expr_then;
 	TreePtr<Expression> expr_else;	
 	
-	Production GetMyProduction() const override;
+	Production GetMyProductionTerminal() const override;
 };
 
 /// Subscripting on objects
@@ -835,7 +835,7 @@ struct Subscript : Operator
 	TreePtr<Expression> destination;
 	TreePtr<Expression> index;	
 	
-	Production GetMyProduction() const override;
+	Production GetMyProductionTerminal() const override;
 };
 
 /// An array formed directly from elements which should all be the same type
@@ -843,14 +843,14 @@ struct ArrayLiteral : NonCommutativeOperator
 {
 	NODE_FUNCTIONS_FINAL	
 	
-	Production GetMyProduction() const override;
+	Production GetMyProductionTerminal() const override;
 };
 
 struct This : Operator
 {
 	NODE_FUNCTIONS_FINAL	
 	
-	Production GetMyProduction() const override;
+	Production GetMyProductionTerminal() const override;
 };
 
 /// Property indicating whether a New/Delete is global 
@@ -887,7 +887,7 @@ struct New : Operator
     Sequence<Expression> constructor_arguments; ///< arguments to the constructor
     TreePtr<Globality> global; ///< whether placement is global
 
-	Production GetMyProduction() const override;
+	Production GetMyProductionTerminal() const override;
 };
 
 /// Node for C++ delete operator
@@ -898,7 +898,7 @@ struct Delete : Operator
     TreePtr<DeleteArrayness> array; ///< whether array delete
     TreePtr<Globality> global; ///< whether global placement
 
-	Production GetMyProduction() const override;
+	Production GetMyProductionTerminal() const override;
 };
 
 /// Node for accessing an element in a record as in base.member
@@ -910,7 +910,7 @@ struct Lookup : Operator
     TreePtr<Expression> object; ///< the Record instance we look in
     TreePtr<InstanceIdentifier> member; ///< the member to find
 	
-	Production GetMyProduction() const override;
+	Production GetMyProductionTerminal() const override;
 };
 
 /// Node for a c-style cast. 
@@ -921,7 +921,7 @@ struct Cast : Operator
     TreePtr<Expression> operand; ///< the expression to cast
     TreePtr<Type> type; ///< the desired new type
 	
-	Production GetMyProduction() const override;
+	Production GetMyProductionTerminal() const override;
 };
 
 /// Associates an Expression with an InstanceIdentifier. 
@@ -933,7 +933,7 @@ struct IdValuePair : virtual Node
     TreePtr<Expression> value; ///< the Expression for this operand
     
     virtual string GetColour() const { return "/set28/8"; }    
-	Production GetMyProduction() const override;
+	Production GetMyProductionTerminal() const override;
 };
 
 struct GoSub : virtual Node
@@ -952,7 +952,7 @@ struct Call : GoSub, Expression, Uncombable
     NODE_FUNCTIONS_FINAL	
 	Collection<IdValuePair> args;
 	
-	Production GetMyProduction() const override;
+	Production GetMyProductionTerminal() const override;
 };
 
 /// Initialiser for a record 
@@ -965,7 +965,7 @@ struct RecordLiteral : Expression
     TreePtr<TypeIdentifier> type; ///< handle of the type of the record we are making
 	Collection<IdValuePair> operands;
 	
-	Production GetMyProduction() const override;
+	Production GetMyProductionTerminal() const override;
 };
 
 /// Operator that operates on data types as parameters. 
@@ -980,14 +980,14 @@ struct TemplateExpression : Expression
 struct SizeOf : TemplateExpression 
 { 
 	NODE_FUNCTIONS_FINAL 
-	Production GetMyProduction() const override;
+	Production GetMyProductionTerminal() const override;
 }; 
 
 /// alignof() a type
 struct AlignOf : TemplateExpression 
 { 
 	NODE_FUNCTIONS_FINAL
-	Production GetMyProduction() const override;	
+	Production GetMyProductionTerminal() const override;	
 };
 
 //////////////////////////// Statements ////////////////////////////
@@ -1009,7 +1009,7 @@ struct Compound : SequentialScope,  ///< Local declarations go in here (preferab
                   Initialiser       ///< Can "initialise" a function (with the body) 
 {
     NODE_FUNCTIONS_FINAL
-	Production GetMyProduction() const override;	
+	Production GetMyProductionTerminal() const override;	
 };                   
 
 /// GCC extension for compound statements that return a value
@@ -1021,7 +1021,7 @@ struct StatementExpression : Expression, ///< Evaluates to whatever the last sta
     NODE_FUNCTIONS_FINAL
     
     virtual string GetColour() const { return Expression::GetColour(); } // Expression wins    
-	Production GetMyProduction() const override;	
+	Production GetMyProductionTerminal() const override;	
 };                   
 
 /// The return statement of a function
@@ -1032,7 +1032,7 @@ struct Return : Statement
     NODE_FUNCTIONS_FINAL
     TreePtr<Initialiser> return_value; ///< return value or Uninitialised
 
-	Production GetMyProduction() const override;	
+	Production GetMyProductionTerminal() const override;	
 };
 
 /// A goto statement
@@ -1047,7 +1047,7 @@ struct Goto : Statement, Uncombable
     // Ordinary gotos will have Label here.
     TreePtr<Expression> destination; ///< where to go to, expresison allowed
 
-	Production GetMyProduction() const override;	
+	Production GetMyProductionTerminal() const override;	
 };
 
 /// If statement
@@ -1058,7 +1058,7 @@ struct If : Statement
     TreePtr<Statement> body;       ///< executes when true
     TreePtr<Statement> body_else;  ///< executes when false, can be Nop if no else clause
 
-	Production GetMyProduction() const override;	
+	Production GetMyProductionTerminal() const override;	
 };
 
 /// Designate a statement that may be broken out of
@@ -1071,7 +1071,7 @@ struct Breakable : Statement
     NODE_FUNCTIONS
     TreePtr<Statement> body; ///< a break in here jumps to the end of here
 
-	Production GetMyProduction() const override;	
+	Production GetMyProductionTerminal() const override;	
 };
 
 /// Any loop.
@@ -1093,7 +1093,7 @@ struct Do : Loop, Uncombable // a do..while() construct
     NODE_FUNCTIONS_FINAL
     TreePtr<Expression> condition; ///< Tested after each iteration; false terminates immediately
 
-	Production GetMyProduction() const override;	
+	Production GetMyProductionTerminal() const override;	
 };
 
 /// C-style for loop. 
@@ -1124,7 +1124,7 @@ struct SwitchTarget : Statement
 { 
 	NODE_FUNCTIONS 
 
-	Production GetMyProduction() const override;
+	Production GetMyProductionTerminal() const override;
 };
 
 /// Case label, supporting range extension in case useful for optimisation
@@ -1151,7 +1151,7 @@ struct Continue : Statement, Uncombable
 { 
 	NODE_FUNCTIONS_FINAL 
 
-	Production GetMyProduction() const override;
+	Production GetMyProductionTerminal() const override;
 };
 
 /// Break (from innermost Breakable)
@@ -1159,7 +1159,7 @@ struct Break : Statement
 { 
 	NODE_FUNCTIONS_FINAL 
 
-	Production GetMyProduction() const override;
+	Production GetMyProductionTerminal() const override;
 };
 
 /// Do nothing; these get optimised out where possible
@@ -1167,7 +1167,7 @@ struct Nop : Statement
 { 
 	NODE_FUNCTIONS_FINAL 
 
-	Production GetMyProduction() const override;
+	Production GetMyProductionTerminal() const override;
 };
   
 //////////////////////////// Preprocessor stuff ////////////////////////////
@@ -1180,7 +1180,7 @@ struct Nop : Statement
 struct PreprocessorIdentifier : Identifier
 { 
     NODE_FUNCTIONS 
-	Production GetMyProduction() const override;    
+	Production GetMyProductionTerminal() const override;    
 };
 
 /// Identifier for a specific label that has been declared somewhere.
@@ -1201,7 +1201,7 @@ struct SeqArgsCall : GoSub, Expression
     NODE_FUNCTIONS_FINAL
     Sequence<Expression> arguments; ///< Arguments taken in order
 	
-	Production GetMyProduction() const override;
+	Production GetMyProductionTerminal() const override;
 };  
 
 /// A proprocessor macro usage that may be used as a field, and takes 
@@ -1223,7 +1223,7 @@ struct MacroStatement : Statement
     TreePtr<PreprocessorIdentifier> identifier;
     Sequence<Node> arguments; ///< Arguments taken in order. Can be anything at all!
    	
-   	Production GetMyProduction() const override;
+   	Production GetMyProductionTerminal() const override;
 };
 
 /// Preprocessor decl-like stuff: includes, defines

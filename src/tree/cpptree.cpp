@@ -7,7 +7,7 @@ using namespace CPPTree;
 
 //////////////////////////// Uninitialised ///////////////////////////////
 
-Syntax::Production Uninitialised::GetMyProduction() const
+Syntax::Production Uninitialised::GetMyProductionTerminal() const
 {
 	// Most types don't use declarators, so provide a safe default
 	return Production::ANONYMOUS; // Renders as an empty string
@@ -15,9 +15,9 @@ Syntax::Production Uninitialised::GetMyProduction() const
 
 //////////////////////////// Type ///////////////////////////////
 
-Syntax::Production Type::GetMyProduction() const
+Syntax::Production Type::GetMyProductionTerminal() const
 {
-	// GetMyProduction on types is for non-booted anonymous types eg with auto a = new <here>;
+	// GetMyProductionTerminal on types is for non-booted anonymous types eg with auto a = new <here>;
 	// Default shall be to boot (i.e. force parentheses).
 	return Production::BOOT_EXPR;
 }
@@ -31,14 +31,14 @@ Syntax::Production Type::GetOperandInDeclaratorProduction() const
 
 //////////////////////////// Declaration ///////////////////////////////
 
-Syntax::Production Declaration::GetMyProduction() const
+Syntax::Production Declaration::GetMyProductionTerminal() const
 {
 	return Production::DECLARATION;
 }
 
 //////////////////////////// Program ///////////////////////////////
 
-Syntax::Production Program::GetMyProduction() const
+Syntax::Production Program::GetMyProductionTerminal() const
 {
 	return Production::PROGRAM;
 }
@@ -91,7 +91,7 @@ string SpecificString::GetRenderTerminal( Production ) const
 }
 
 
-Syntax::Production SpecificString::GetMyProduction() const
+Syntax::Production SpecificString::GetMyProductionTerminal() const
 { 
 	return Production::PRIMITIVE_EXPR; 
 }
@@ -194,7 +194,7 @@ string SpecificInteger::GetRenderTerminal( Production ) const
 }
 
 
-Syntax::Production SpecificInteger::GetMyProduction() const
+Syntax::Production SpecificInteger::GetMyProductionTerminal() const
 { 
 	return Production::PRIMITIVE_EXPR; 
 }
@@ -255,7 +255,7 @@ string SpecificFloat::GetRenderTerminal( Production ) const
 }
 
 
-Syntax::Production SpecificFloat::GetMyProduction() const
+Syntax::Production SpecificFloat::GetMyProductionTerminal() const
 { 
 	return Production::PRIMITIVE_EXPR; 
 }
@@ -391,42 +391,42 @@ string SpecificIdentifier::GetTrace() const
 
 //////////////////////////// InstanceIdentifier //////////////////////////////
 
-Syntax::Production InstanceIdentifier::GetMyProduction() const
+Syntax::Production InstanceIdentifier::GetMyProductionTerminal() const
 { 
 	return Production::PURE_IDENTIFIER; 
 }
 
 //////////////////////////// TypeIdentifier //////////////////////////////
 
-Syntax::Production TypeIdentifier::GetMyProduction() const
+Syntax::Production TypeIdentifier::GetMyProductionTerminal() const
 { 
 	return Production::PURE_IDENTIFIER; 
 }
 
 //////////////////////////// AccessSpec //////////////////////////////
 
-Syntax::Production AccessSpec::GetMyProduction() const
+Syntax::Production AccessSpec::GetMyProductionTerminal() const
 { 
 	return Production::TOKEN; 
 }
 
 //////////////////////////// Instance //////////////////////////////
 
-Syntax::Production Instance::GetMyProduction() const
+Syntax::Production Instance::GetMyProductionTerminal() const
 { 
 	return Production::DECLARATION;
 }
 
 //////////////////////////// LabelIdentifier //////////////////////////////
 
-Syntax::Production LabelIdentifier::GetMyProduction() const
+Syntax::Production LabelIdentifier::GetMyProductionTerminal() const
 { 
 	return Production::PURE_IDENTIFIER; 
 }
 
 //////////////////////////// Label //////////////////////////////
 
-Syntax::Production Label::GetMyProduction() const
+Syntax::Production Label::GetMyProductionTerminal() const
 { 
 	return Production::LABEL; 
 }
@@ -440,7 +440,7 @@ Syntax::Production Callable::GetOperandInDeclaratorProduction() const
 
 //////////////////////////// Array //////////////////////////////
 
-Syntax::Production Array::GetMyProduction() const
+Syntax::Production Array::GetMyProductionTerminal() const
 { 
 	return Production::POSTFIX; // eg auto a = new int[9]; (without booting)
 }
@@ -453,7 +453,7 @@ Syntax::Production Array::GetOperandInDeclaratorProduction() const
 
 //////////////////////////// Indirection //////////////////////////////
 
-Syntax::Production Indirection::GetMyProduction() const
+Syntax::Production Indirection::GetMyProductionTerminal() const
 { 
 	return Production::POSTFIX; // eg auto a = new int *; (without booting)
 }
@@ -466,21 +466,21 @@ Syntax::Production Indirection::GetOperandInDeclaratorProduction() const
 
 //////////////////////////// Void ///////////////////////////////
 
-Syntax::Production Void::GetMyProduction() const
+Syntax::Production Void::GetMyProductionTerminal() const
 { 
 	return Production::PRIMITIVE_TYPE; // eg auto a = new void;
 }
 
 //////////////////////////// Boolean ///////////////////////////////
 
-Syntax::Production Boolean::GetMyProduction() const
+Syntax::Production Boolean::GetMyProductionTerminal() const
 { 
 	return Production::PRIMITIVE_TYPE; // eg auto a = new bool;
 }
 
 //////////////////////////// Numeric ///////////////////////////////
 
-Syntax::Production Numeric::GetMyProduction() const
+Syntax::Production Numeric::GetMyProductionTerminal() const
 { 
 	return Production::SPACE_SEP_TYPE; // eg auto a = new unsigned long;
 }
@@ -536,21 +536,21 @@ SpecificFloatSemantics::operator const llvm::fltSemantics &() const
 
 //////////////////////////// Labeley ///////////////////////////////
 
-Syntax::Production Labeley::GetMyProduction() const
+Syntax::Production Labeley::GetMyProductionTerminal() const
 {
 	return Production::POSTFIX; // renders as void *
 }
 
 //////////////////////////// Typedef ///////////////////////////////
 
-Syntax::Production Typedef::GetMyProduction() const
+Syntax::Production Typedef::GetMyProductionTerminal() const
 {
 	return Production::BARE_DECLARATION; 
 }
 
 //////////////////////////// Record ///////////////////////////////
 
-Syntax::Production Record::GetMyProduction() const
+Syntax::Production Record::GetMyProductionTerminal() const
 {
 	return Production::PROTOTYPE; // prototype render is supported
 }
@@ -583,14 +583,14 @@ TreePtr<AccessSpec> Class::GetInitialAccess() const
 
 //////////////////////////// True ///////////////////////////////
 
-Syntax::Production True::GetMyProduction() const
+Syntax::Production True::GetMyProductionTerminal() const
 { 
 	return Production::PRIMITIVE_EXPR; 
 }
 
 //////////////////////////// False ///////////////////////////////
 
-Syntax::Production False::GetMyProduction() const
+Syntax::Production False::GetMyProductionTerminal() const
 { 
 	return Production::PRIMITIVE_EXPR; 
 }
@@ -598,7 +598,7 @@ Syntax::Production False::GetMyProduction() const
 //////////////////////////// Operators from operator_data.inc ///////////////////////////////
 
 #define PREFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) \
-Syntax::Production NODE::GetMyProduction() const \
+Syntax::Production NODE::GetMyProductionTerminal() const \
 { \
 	return Production::PROD; \
 } \
@@ -615,7 +615,7 @@ string NODE::GetRender( VN::RendererInterface *renderer, Production ) \
 } \
 
 #define POSTFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) \
-Syntax::Production NODE::GetMyProduction() const \
+Syntax::Production NODE::GetMyProductionTerminal() const \
 { \
 	return Production::PROD; \
 } \
@@ -626,7 +626,7 @@ string NODE::GetRender( VN::RendererInterface *renderer, Production ) \
 } \
 
 #define INFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) \
-Syntax::Production NODE::GetMyProduction() const \
+Syntax::Production NODE::GetMyProductionTerminal() const \
 { \
 	return Production::PROD; \
 } \
@@ -651,7 +651,7 @@ string NODE::GetRender( VN::RendererInterface *renderer, Production ) \
 
 //////////////////////////// ConditionalOperator ///////////////////////////////
 
-Syntax::Production ConditionalOperator::GetMyProduction() const
+Syntax::Production ConditionalOperator::GetMyProductionTerminal() const
 { 
 	// This operator borros ASSIGN's precidence and both are right-associative, 
 	// so the two can be mingled freely and will always evaluate right-to-left.
@@ -660,119 +660,119 @@ Syntax::Production ConditionalOperator::GetMyProduction() const
 
 //////////////////////////// Subscript ///////////////////////////////
 
-Syntax::Production Subscript::GetMyProduction() const
+Syntax::Production Subscript::GetMyProductionTerminal() const
 { 
 	return Production::POSTFIX; 
 }
 
 //////////////////////////// ArrayLiteral ///////////////////////////////
 
-Syntax::Production ArrayLiteral::GetMyProduction() const
+Syntax::Production ArrayLiteral::GetMyProductionTerminal() const
 { 
 	return Production::BRACKETED; 
 }
 
 //////////////////////////// This ///////////////////////////////
 
-Syntax::Production This::GetMyProduction() const
+Syntax::Production This::GetMyProductionTerminal() const
 { 
 	return Production::PRIMITIVE_EXPR; 
 }
 
 //////////////////////////// New ///////////////////////////////
 
-Syntax::Production New::GetMyProduction() const
+Syntax::Production New::GetMyProductionTerminal() const
 { 
 	return Production::PREFIX; 
 }
 
 //////////////////////////// Delete ///////////////////////////////
 
-Syntax::Production Delete::GetMyProduction() const
+Syntax::Production Delete::GetMyProductionTerminal() const
 { 
 	return Production::PREFIX; 
 }
 
 //////////////////////////// Lookup ///////////////////////////////
 
-Syntax::Production Lookup::GetMyProduction() const
+Syntax::Production Lookup::GetMyProductionTerminal() const
 { 
 	return Production::POSTFIX; 
 }
 
 //////////////////////////// Cast ///////////////////////////////
 
-Syntax::Production Cast::GetMyProduction() const
+Syntax::Production Cast::GetMyProductionTerminal() const
 { 
 	return Production::PREFIX; 
 }
 
 //////////////////////////// IdValuePair ///////////////////////////////
 
-Syntax::Production IdValuePair::GetMyProduction() const
+Syntax::Production IdValuePair::GetMyProductionTerminal() const
 { 
 	return Production::ASSIGN; 
 }
 
 //////////////////////////// Call ///////////////////////////////
 
-Syntax::Production Call::GetMyProduction() const
+Syntax::Production Call::GetMyProductionTerminal() const
 { 
 	return Production::POSTFIX; 
 }
 
 //////////////////////////// RecordLiteral ///////////////////////////////
 
-Syntax::Production RecordLiteral::GetMyProduction() const
+Syntax::Production RecordLiteral::GetMyProductionTerminal() const
 { 
 	return Production::BRACKETED; 
 }
 
 //////////////////////////// SizeOf ///////////////////////////////
 
-Syntax::Production SizeOf::GetMyProduction() const
+Syntax::Production SizeOf::GetMyProductionTerminal() const
 { 
 	return Production::PREFIX; 	
 }
 
 //////////////////////////// AlignOf ///////////////////////////////
 
-Syntax::Production AlignOf::GetMyProduction() const
+Syntax::Production AlignOf::GetMyProductionTerminal() const
 { 
 	return Production::PREFIX; 
 }
 
 //////////////////////////// Compound ///////////////////////////////
 
-Syntax::Production Compound::GetMyProduction() const
+Syntax::Production Compound::GetMyProductionTerminal() const
 { 
 	return Production::STATEMENT_SEQ; // Get the central system to generate the {} for us
 }
 
 //////////////////////////// StatementExpression ///////////////////////////////
 
-Syntax::Production StatementExpression::GetMyProduction() const
+Syntax::Production StatementExpression::GetMyProductionTerminal() const
 { 
 	return Production::BRACKETED; 
 }
 
 //////////////////////////// Return ///////////////////////////////
 
-Syntax::Production Return::GetMyProduction() const
+Syntax::Production Return::GetMyProductionTerminal() const
 { 
 	return Production::BARE_STATEMENT; 
 }
 
 //////////////////////////// Goto ///////////////////////////////
 
-Syntax::Production Goto::GetMyProduction() const
+Syntax::Production Goto::GetMyProductionTerminal() const
 { 
 	return Production::BARE_STATEMENT; 
 }
 
 //////////////////////////// If ///////////////////////////////
 
-Syntax::Production If::GetMyProduction() const
+Syntax::Production If::GetMyProductionTerminal() const
 { 
 	// If we don't have an else clause, we might steal the else from a 
 	// surrounding If node, so drop our precedence a little bit.
@@ -782,63 +782,63 @@ Syntax::Production If::GetMyProduction() const
 
 //////////////////////////// Breakable ///////////////////////////////
 
-Syntax::Production Breakable::GetMyProduction() const
+Syntax::Production Breakable::GetMyProductionTerminal() const
 { 
 	return Production::STATEMENT_HIGH; 
 }
 
 //////////////////////////// Do ///////////////////////////////
 
-Syntax::Production Do::GetMyProduction() const
+Syntax::Production Do::GetMyProductionTerminal() const
 { 
 	return Production::BARE_STATEMENT; 
 }
 
 //////////////////////////// SwitchTarget ///////////////////////////////
 
-Syntax::Production SwitchTarget::GetMyProduction() const
+Syntax::Production SwitchTarget::GetMyProductionTerminal() const
 { 
 	return Production::LABEL; 
 }
 
 //////////////////////////// Continue ///////////////////////////////
 
-Syntax::Production Continue::GetMyProduction() const
+Syntax::Production Continue::GetMyProductionTerminal() const
 { 
 	return Production::BARE_STATEMENT; 
 }
 
 //////////////////////////// Break ///////////////////////////////
 
-Syntax::Production Break::GetMyProduction() const
+Syntax::Production Break::GetMyProductionTerminal() const
 { 
 	return Production::BARE_STATEMENT; 
 }
 
 //////////////////////////// Nop ///////////////////////////////
 
-Syntax::Production Nop::GetMyProduction() const
+Syntax::Production Nop::GetMyProductionTerminal() const
 { 
 	return Production::BOOT_STMT_DECL; // Force a {}
 }
 
 //////////////////////////// PreprocessorIdentifier //////////////////////////////
 
-Syntax::Production PreprocessorIdentifier::GetMyProduction() const
+Syntax::Production PreprocessorIdentifier::GetMyProductionTerminal() const
 { 
 	return Production::PURE_IDENTIFIER; 
 }
 
 //////////////////////////// SeqArgsCall ///////////////////////////////
 
-Syntax::Production SeqArgsCall::GetMyProduction() const
+Syntax::Production SeqArgsCall::GetMyProductionTerminal() const
 { 
 	return Production::POSTFIX; 
 }
 
 //////////////////////////// MacroStatement ///////////////////////////////
 
-Syntax::Production MacroStatement::GetMyProduction() const
+Syntax::Production MacroStatement::GetMyProductionTerminal() const
 { 
 	return Production::STATEMENT; 
 }

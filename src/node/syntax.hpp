@@ -15,8 +15,6 @@ class Syntax : virtual Traceable
 public:
 	enum class Production // "Syntax::Production" is a generalisation of precedence
 	{		
-		UNDEFINED,
-		
 		PROGRAM = 10,
 		SPACE_SEP_PRE_PROC,
 		DEFINITION,		
@@ -108,7 +106,8 @@ public:
 	// Like GetRender, but without a kit it can't render sub-productions, so it can only work for terminals
 	virtual string GetRenderTerminal( Production surround_prod ) const;
 	
-	virtual Production GetMyProduction() const;
+	virtual Production GetMyProduction(VN::RendererInterface *renderer) const;
+	virtual Production GetMyProductionTerminal() const;
 	virtual Production GetOperandInDeclaratorProduction() const;
     static Syntax::Production BoostPrecedence( Syntax::Production prec );
     static int GetPrecedence( Syntax::Production prec );
