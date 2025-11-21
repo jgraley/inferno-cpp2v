@@ -262,7 +262,7 @@ struct SpecificIdentifier : virtual Property
     virtual bool IsLocalMatchCovariant( const Matcher &candidate ) const; /// Overloaded comparison for search&replace
     virtual Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
-	string GetRender( VN::RendererInterface *renderer, Production surround_prod );
+	string GetRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Policy policy );
     virtual string GetIdentifierName() const; /// This is relied upon to just return the identifier name 
     virtual string GetGraphName() const;
     virtual string GetTrace() const;
@@ -796,7 +796,7 @@ struct NODE : BASE \
 { \
 	NODE_FUNCTIONS_FINAL \
 	Production GetMyProductionTerminal() const final; \
-	string GetRender( VN::RendererInterface *renderer, Production surround_prod ) final; \
+	string GetRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Policy policy ) final; \
 }; \
 
 #define POSTFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) \
@@ -804,7 +804,7 @@ struct NODE : BASE \
 { \
 	NODE_FUNCTIONS_FINAL \
 	Production GetMyProductionTerminal() const final; \
-	string GetRender( VN::RendererInterface *renderer, Production surround_prod ) final; \
+	string GetRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Policy policy ) final; \
 }; \
 
 #define INFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) \
@@ -812,7 +812,7 @@ struct NODE : BASE \
 { \
 	NODE_FUNCTIONS_FINAL \
 	Production GetMyProductionTerminal() const final; \
-	string GetRender( VN::RendererInterface *renderer, Production surround_prod ) final; \
+	string GetRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Policy policy ) final; \
 }; \
 
 #include "operator_data.inc"

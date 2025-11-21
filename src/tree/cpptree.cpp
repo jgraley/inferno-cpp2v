@@ -320,7 +320,7 @@ Orderable::Diff SpecificIdentifier::OrderCompare3WayCovariant( const Orderable &
 }
 
 
-string SpecificIdentifier::GetRender( VN::RendererInterface *renderer, Production surround_prod ) 
+string SpecificIdentifier::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy ) 
 {	
 	// Get rid of all this casting by building the entire rendering subsystem using plain old const pointers.
 	auto id = TreePtr<SpecificIdentifier>::DynamicCast( TreePtr<Node>(shared_from_this()) );
@@ -602,7 +602,7 @@ Syntax::Production NODE::GetMyProductionTerminal() const \
 { \
 	return Production::PROD; \
 } \
-string NODE::GetRender( VN::RendererInterface *renderer, Production ) \
+string NODE::GetRender( VN::RendererInterface *renderer, Production, Policy ) \
 { \
 	Sequence<Expression>::iterator operands_it = operands.begin(); \
 	string s = TEXT; \
@@ -619,7 +619,7 @@ Syntax::Production NODE::GetMyProductionTerminal() const \
 { \
 	return Production::PROD; \
 } \
-string NODE::GetRender( VN::RendererInterface *renderer, Production ) \
+string NODE::GetRender( VN::RendererInterface *renderer, Production, Policy ) \
 { \
 	Sequence<Expression>::iterator operands_it = operands.begin(); \
 	return renderer->RenderIntoProduction( *operands_it, Syntax::Production::PROD) + TEXT; \
@@ -630,7 +630,7 @@ Syntax::Production NODE::GetMyProductionTerminal() const \
 { \
 	return Production::PROD; \
 } \
-string NODE::GetRender( VN::RendererInterface *renderer, Production ) \
+string NODE::GetRender( VN::RendererInterface *renderer, Production, Policy ) \
 { \
 	Syntax::Production prod_left = Syntax::Production::PROD; \
 	Syntax::Production prod_right = Syntax::Production::PROD; \

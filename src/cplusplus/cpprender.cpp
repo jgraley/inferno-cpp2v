@@ -64,27 +64,28 @@ string CppRender::RenderToString( TreePtr<Node> root )
     trans_kit = TransKit{ utils.get() };
     unique_identifier_names = identifiers_uniqifier.UniquifyAll( trans_kit, context );
     
-    return RenderIntoProduction( root, Syntax::Production::PROGRAM );
+    Syntax::Policy top_policy;
+    return RenderIntoProduction( root, Syntax::Production::PROGRAM, top_policy );
 }
 
 
-Syntax::Production CppRender::GetNodeProduction( TreePtr<Node> node ) const
+Syntax::Production CppRender::GetNodeProduction( TreePtr<Node> node, Syntax::Policy policy ) const
 {
-	return node->GetMyProductionTerminal();       
+	return node->GetMyProduction(this, policy);       
 }
 
 
-string CppRender::Dispatch( TreePtr<Node> node, Syntax::Production surround_prod ) try 
+string CppRender::Dispatch( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy ) try 
 { 		
-	return node->GetRender( this, surround_prod );		
+	return node->GetRender( this, surround_prod, policy );		
 }
 catch( Syntax::NotOnThisNode & ) 
 {	
-	return DispatchInternal( node, surround_prod );
+	return DispatchInternal( node, surround_prod, policy );
 }
 
 
-string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surround_prod )
+string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
 {			
     if( TreePtr<Uninitialised>::DynamicCast(node) )
         return string();  
@@ -95,11 +96,11 @@ string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surro
     else if( auto ivp = TreePtr<IdValuePair>::DynamicCast(node) )
         return RenderIdValuePair( ivp, surround_prod );
     else if( auto floating = TreePtr<Floating>::DynamicCast(node) )
-        return RenderFloating( floating, surround_prod );
+        return RenderFloating( floating, surround_prod, policy );
     else if( auto integral = TreePtr<Integral>::DynamicCast(node) )
-        return RenderIntegral( integral, surround_prod );
+        return RenderIntegral( integral, surround_prod, policy );
     else if( auto type = TreePtr<Type>::DynamicCast(node) )  // Type is a kind of Operator
-        return RenderType( type, surround_prod );
+        return RenderType( type, surround_prod, policy );
     else if( auto literal = DynamicTreePtrCast< Literal >(node) )
         return RenderLiteral( literal, surround_prod );
     else if( auto call = TreePtr<Call>::DynamicCast(node) )
@@ -115,15 +116,15 @@ string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surro
     else if( auto op = TreePtr<Operator>::DynamicCast(node) ) // Operator is a kind of Expression
         return RenderOperator( op, surround_prod );
     else if( auto expression = TreePtr<Expression>::DynamicCast(node) ) // Expression is a kind of Statement
-        return RenderExpression( expression, surround_prod );
+        return RenderExpression( expression, surround_prod, policy );
     else if( auto instance = TreePtr<Instance>::DynamicCast(node) )    // Instance is a kind of Statement and Declaration
-        return RenderInstance( instance, surround_prod ); 
+        return RenderInstance( instance, surround_prod, policy ); 
     else if( auto ppd = TreePtr<PreProcDecl>::DynamicCast(node) )
         return RenderPreProcDecl(ppd, surround_prod); 
     else if( auto declaration = TreePtr<Declaration>::DynamicCast(node) )
-        return RenderDeclaration( declaration, surround_prod );
+        return RenderDeclaration( declaration, surround_prod, policy );
     else if( auto statement = TreePtr<Statement>::DynamicCast(node) )
-        return RenderStatement( statement, surround_prod );
+        return RenderStatement( statement, surround_prod, policy );
         
     // Due #969 we might have a standard agent, so fall back to a function that
     // definitely won't call any agent methods.
@@ -144,10 +145,12 @@ string CppRender::RenderProgram( TreePtr<CPPTree::Program> program, Syntax::Prod
     s += "// Definitions\n";    
     
     // These are rendered here, inside program scope but outside any additional scopes
-    // that were on the scope stack when the instance was seen.
+    // that were on the scope stack when the instance was seen. These could go in a .cpp file.
     while( !definitions.empty() )
     {
-        s += " " + RenderIntoProduction( definitions.front(), Syntax::Production::DEFINITION ); // these could go in a .cpp file
+		Syntax::Policy definition_policy;
+		definition_policy.force_initialisation = true;
+        s += " " + RenderIntoProduction( definitions.front(), Syntax::Production::DEFINITION, definition_policy ); 
         definitions.pop();
     }
     return s;  
@@ -207,7 +210,7 @@ string CppRender::GetUniqueIdentifierName( TreePtr<Node> id ) const
 }
 
 
-string CppRender::RenderIntegral( TreePtr<Integral> type, Syntax::Production surround_prod ) try
+string CppRender::RenderIntegral( TreePtr<Integral> type, Syntax::Production surround_prod, Syntax::Policy policy ) try
 {
 	(void)surround_prod;
     bool ds;
@@ -243,7 +246,7 @@ string CppRender::RenderIntegral( TreePtr<Integral> type, Syntax::Production sur
     else if( width <= TypeDb::integral_bits[clang::DeclSpec::TSW_longlong] )
         s += "long long";
     else
-		Render::Dispatch( type, surround_prod );
+		Render::Dispatch( type, surround_prod, policy );
 		
 	s += SSPrintf("/* %d bits */", width );
 
@@ -288,7 +291,7 @@ string CppRender::RenderIntegralTypeAndDeclarator( TreePtr<Integral> type, strin
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderFloating( TreePtr<Floating> type, Syntax::Production surround_prod ) try
+string CppRender::RenderFloating( TreePtr<Floating> type, Syntax::Production surround_prod, Syntax::Policy policy ) try
 {
 	(void)surround_prod;
     string s;
@@ -302,7 +305,7 @@ string CppRender::RenderFloating( TreePtr<Floating> type, Syntax::Production sur
     else if( &(const llvm::fltSemantics &)*sem == TypeDb::long_double_semantics )
         s += "long double";
     else
-        Render::Dispatch( type, surround_prod );
+        Render::Dispatch( type, surround_prod, policy );
 
     return s;
 }
@@ -365,7 +368,7 @@ string CppRender::RenderTypeAndDeclarator( TreePtr<Type> type, string declarator
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderType( TreePtr<CPPTree::Type> type, Syntax::Production surround_prod )
+string CppRender::RenderType( TreePtr<CPPTree::Type> type, Syntax::Production surround_prod, Syntax::Policy policy )
 {
 	if( DynamicTreePtrCast< Void >(type) )
         return "void";
@@ -379,7 +382,7 @@ string CppRender::RenderType( TreePtr<CPPTree::Type> type, Syntax::Production su
 		return RenderTypeAndDeclarator( type, "", Syntax::Production::ANONYMOUS, surround_prod, false ); 
 	}
 	else
-		return Render::Dispatch( type, surround_prod );
+		return Render::Dispatch( type, surround_prod, policy );
 }
 
 // Insert escapes into a string so it can be put in source code
@@ -596,7 +599,7 @@ string CppRender::RenderMacroStatement( TreePtr<MacroStatement> ms, Syntax::Prod
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderExpression( TreePtr<Initialiser> expression, Syntax::Production surround_prod ) try
+string CppRender::RenderExpression( TreePtr<Initialiser> expression, Syntax::Production surround_prod, Syntax::Policy policy ) try
 {
     (void)surround_prod;
       
@@ -614,7 +617,7 @@ string CppRender::RenderExpression( TreePtr<Initialiser> expression, Syntax::Pro
     else if( auto pot = DynamicTreePtrCast< AlignOf >(expression) )
         return "alignof(" + RenderIntoProduction( pot->argument, Syntax::Production::BOOT_EXPR ) + ")";    
     else
-        return Render::Dispatch( expression, surround_prod );
+        return Render::Dispatch( expression, surround_prod, policy );
 
 }
 DEFAULT_CATCH_CLAUSE
@@ -854,39 +857,37 @@ string CppRender::RenderInitialisation( TreePtr<Initialiser> init ) try
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderInstance( TreePtr<Instance> o, Syntax::Production surround_prod )
+string CppRender::RenderInstance( TreePtr<Instance> o, Syntax::Production, Syntax::Policy policy )
 {
     string s;
        
-	switch( surround_prod )
+	if( policy.force_initialisation )
 	{
-		case Syntax::Production::DEFINITION:
-			{
-				// Definition is out-of-line so skip the storage
-				s += RenderInstanceProto( o );
-				AutoPush< TreePtr<Node> > cs( scope_stack, TryGetScope( o->identifier ) );
-				s += RenderInitialisation( o->initialiser );	
-				s += "\n";		
-			}
-			break;
-			
-		default: // should be one of the statement-level prods
-			s += RenderStorage( o );
-			s += RenderInstanceProto( o );
-		    if( ShouldSplitInstance(o) )
-			{
-				// Emit just a prototype now and request definition later
-				s += ";\n";
-				// Split out the definition of the instance for rendering later at Program scope
-				definitions.push(o);
-			}		
-			else
-			{
-				// Emit the whole lot in-line
-				AutoPush< TreePtr<Node> > cs( scope_stack, TryGetScope( o->identifier ) );
-				s += RenderInitialisation( o->initialiser );							
-				s += "\n";		
-			}
+		// Definition is out-of-line so skip the storage
+		policy.force_initialisation = false; // stop at one level
+		s += RenderInstanceProto( o );
+		AutoPush< TreePtr<Node> > cs( scope_stack, TryGetScope( o->identifier ) );
+		s += RenderInitialisation( o->initialiser );	
+		s += "\n";		
+	}
+	else 
+	{
+		s += RenderStorage( o );
+		s += RenderInstanceProto( o );
+		if( ShouldSplitInstance(o) )
+		{
+			// Emit just a prototype now and request definition later
+			s += ";\n";
+			// Split out the definition of the instance for rendering later at Program scope
+			definitions.push(o);
+		}		
+		else
+		{
+			// Emit the whole lot in-line
+			AutoPush< TreePtr<Node> > cs( scope_stack, TryGetScope( o->identifier ) );
+			s += RenderInitialisation( o->initialiser );							
+			s += "\n";		
+		}
 	}
 	return s;
 }
@@ -943,7 +944,7 @@ string CppRender::RenderMacroDeclaration( TreePtr<MacroDeclaration> md, Syntax::
 }
 
 
-string CppRender::RenderRecordProto( TreePtr<Record> record )
+string CppRender::RenderRecordProto( TreePtr<Record> record, Syntax::Policy policy )
 {
     string s;
     if( DynamicTreePtrCast< Class >(record) )
@@ -955,7 +956,7 @@ string CppRender::RenderRecordProto( TreePtr<Record> record )
     else if( DynamicTreePtrCast< Enum >(record) )
         s += "enum";
     else
-        s += Render::Dispatch( record, Syntax::Production::SPACE_SEP_DECLARATION );
+        s += Render::Dispatch( record, Syntax::Production::SPACE_SEP_DECLARATION, policy );
 
     // Name of the record
     s += " " + RenderIntoProduction( record->identifier, Syntax::Production::SPACE_SEP_DECLARATION);
@@ -977,7 +978,7 @@ string CppRender::RenderPreProcDecl( TreePtr<PreProcDecl> ppd, Syntax::Productio
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderDeclaration( TreePtr<Declaration> declaration, Syntax::Production surround_prod ) try
+string CppRender::RenderDeclaration( TreePtr<Declaration> declaration, Syntax::Production surround_prod, Syntax::Policy policy ) try
 {
     TRACE();
     string s;
@@ -992,7 +993,7 @@ string CppRender::RenderDeclaration( TreePtr<Declaration> declaration, Syntax::P
     else if( TreePtr<Record> r = DynamicTreePtrCast< Record >(declaration) )
     {
         // Prototype of the record
-        s += RenderRecordProto( r );
+        s += RenderRecordProto( r, policy );
         
         if( surround_prod == Syntax::Production::PROTOTYPE )
 			return s;
@@ -1033,7 +1034,7 @@ string CppRender::RenderDeclaration( TreePtr<Declaration> declaration, Syntax::P
     else if( TreePtr<Label> l = DynamicTreePtrCast<Label>(declaration) )
         return RenderIntoProduction( l->identifier, Syntax::Production::PURE_IDENTIFIER) + ":;\n"; // need ; after a label in case last in compound block
     else
-        s += Render::Dispatch( declaration, surround_prod );
+        s += Render::Dispatch( declaration, surround_prod, policy );
 
     TRACE();
     return s;
@@ -1041,14 +1042,14 @@ string CppRender::RenderDeclaration( TreePtr<Declaration> declaration, Syntax::P
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderStatement( TreePtr<Statement> statement, Syntax::Production surround_prod ) try
+string CppRender::RenderStatement( TreePtr<Statement> statement, Syntax::Production surround_prod, Syntax::Policy policy ) try
 {
     (void)surround_prod;
     TRACE();
     ASSERT( statement );
     //printf( "%s %d things\n", typeid(*statement).name(), statement->Itemise().size() );
     if( TreePtr<Declaration> d = DynamicTreePtrCast< Declaration >(statement) )
-        return RenderDeclaration( d, surround_prod );
+        return RenderDeclaration( d, surround_prod, policy );
     else if( TreePtr<Compound> c = DynamicTreePtrCast< Compound >(statement) )
     {
         string s;
@@ -1115,7 +1116,7 @@ string CppRender::RenderStatement( TreePtr<Statement> statement, Syntax::Product
     else if( DynamicTreePtrCast<Nop>(statement) )
         return "";
     else
-        return Render::Dispatch( statement, surround_prod );
+        return Render::Dispatch( statement, surround_prod, policy );
 }
 DEFAULT_CATCH_CLAUSE
 

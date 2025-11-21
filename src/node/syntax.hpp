@@ -83,6 +83,12 @@ public:
 		ANONYMOUS
 	};
 	
+	struct Policy
+	{
+		Policy() : force_initialisation(false) {}
+		bool force_initialisation;
+	};
+	
 	// We deal with syntactical association only, not mathematical, because:
 	// - most operators can be overloaded with no-associative stuff and/or side-effects
 	// - most of the others are side-effecty eg &&, ||, ?:
@@ -101,12 +107,12 @@ public:
     virtual string GetIdentifierName() const;
     virtual string GetCouplingNameHint() const;
 	
-	virtual string GetRender( VN::RendererInterface *renderer, Production surround_prod );
+	virtual string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy = Policy() );
 	
 	// Like GetRender, but without a kit it can't render sub-productions, so it can only work for terminals
 	virtual string GetRenderTerminal( Production surround_prod ) const;
 	
-	virtual Production GetMyProduction(VN::RendererInterface *renderer) const;
+	virtual Production GetMyProduction(const VN::RendererInterface *renderer, Policy policy = Policy() ) const;
 	virtual Production GetMyProductionTerminal() const;
 	virtual Production GetOperandInDeclaratorProduction() const;
     static Syntax::Production BoostPrecedence( Syntax::Production prec );

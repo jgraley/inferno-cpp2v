@@ -31,7 +31,7 @@ string Syntax::GetCouplingNameHint() const
 }
 
 
-string Syntax::GetRender( VN::RendererInterface *, Production production )
+string Syntax::GetRender( VN::RendererInterface *, Production production, Policy )
 {
 	return GetRenderTerminal(production);
 }
@@ -43,7 +43,7 @@ string Syntax::GetRenderTerminal( Production ) const
 }
 
 
-Syntax::Production Syntax::GetMyProduction(VN::RendererInterface *) const
+Syntax::Production Syntax::GetMyProduction(const VN::RendererInterface *, Policy) const
 {
 	return GetMyProductionTerminal();
 }

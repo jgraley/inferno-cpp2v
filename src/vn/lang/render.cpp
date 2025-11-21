@@ -43,13 +43,14 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern )
     unique_coupling_names = coupling_names_uniqifier.UniquifyAll( trans_kit, context );
 	incoming_links_map = coupling_names_uniqifier.GetIncomingLinksMap();
 	
+	Syntax::Policy designation_policy;
 	string s;
 	if( ReadArgs::use.count("c") )
 		s += Trace(unique_coupling_names) + "\n\n";
 	for( TreePtr<Node> node : coupling_names_uniqifier.GetNodesInDepthFirstPostOrder() )	
 		s += unique_coupling_names.at(node) + 
 		     " ⪮ " + 
-		     RenderConcreteIntoProduction( node, Syntax::Production::VN_DESIGNATE ) + "⨟\n";
+		     RenderConcreteIntoProduction( node, Syntax::Production::VN_DESIGNATE, designation_policy ) + "⨟\n";
 
 	ASSERT( pattern->GetSearchComparePattern() == pattern->GetReplacePattern() || !pattern->GetReplacePattern() )
 	   	  (pattern->GetSearchComparePattern())
@@ -57,7 +58,8 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern )
 	   	  (pattern->GetReplacePattern())
 	   	  (" or be NULL");
 	   	  
-	s += "꩜" + RenderIntoProduction( pattern->GetSearchComparePattern(), Syntax::Production::PREFIX );
+	Syntax::Policy top_pattern_policy;
+	s += "꩜" + RenderIntoProduction( pattern->GetSearchComparePattern(), Syntax::Production::PREFIX, top_pattern_policy );
             
     indenter.AddLinesFromString(s);
     indenter.DoIndent();
@@ -81,7 +83,7 @@ void Render::WriteToFile( string s )
 }
 
 
-string Render::RenderIntoProduction( TreePtr<Node> node, Syntax::Production surround_prod )
+string Render::RenderIntoProduction( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
 {	
     INDENT("R");
     string s;
@@ -98,11 +100,11 @@ string Render::RenderIntoProduction( TreePtr<Node> node, Syntax::Production surr
 	if( unique_coupling_names.count(node) > 0 )			
 		return s + unique_coupling_names.at(node);		
 	else 
-		return s + RenderConcreteIntoProduction(node, surround_prod);
+		return s + RenderConcreteIntoProduction(node, surround_prod, policy);
 }
 
 							
-string Render::RenderConcreteIntoProduction( TreePtr<Node> node, Syntax::Production surround_prod )
+string Render::RenderConcreteIntoProduction( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
 {
 	string s;
 
@@ -111,7 +113,7 @@ string Render::RenderConcreteIntoProduction( TreePtr<Node> node, Syntax::Product
     // Production surround_prod relates to the surrounding grammar production and can be 
     // used to change the render of a certain subtree. It represents all the ancestor nodes of
     // the one supplied.
-    Syntax::Production node_prod = GetNodeProduction(node);
+    Syntax::Production node_prod = GetNodeProduction(node, policy);
 		
 	if( ReadArgs::use.count("c") )
 		s += SSPrintf("// Surround prod: %d node prod: %d\n", 
@@ -152,7 +154,7 @@ string Render::RenderConcreteIntoProduction( TreePtr<Node> node, Syntax::Product
 
             if( do_boot || semicolon )
 				surround_prod = Syntax::Production::BOOT_STMT_DECL;
-			s += Dispatch( node, surround_prod );
+			s += Dispatch( node, surround_prod, policy );
 			
             if( semicolon )
                 s += ";\n ";
@@ -182,7 +184,7 @@ string Render::RenderConcreteIntoProduction( TreePtr<Node> node, Syntax::Product
 				surround_prod = Syntax::Production::ASSIGN;
             else if( semicolon )
 				surround_prod = Syntax::Production::BOOT_EXPR;
-			s += Dispatch( node, surround_prod );
+			s += Dispatch( node, surround_prod, policy );
 
             if( do_boot )
                 s += "\n)";            
@@ -195,7 +197,7 @@ string Render::RenderConcreteIntoProduction( TreePtr<Node> node, Syntax::Product
         {
             if( semicolon )
 				surround_prod = Syntax::Production::BOOT_EXPR;
-			s += Dispatch( node, surround_prod );
+			s += Dispatch( node, surround_prod, policy );
 			
             if( semicolon )
                 s += "; ";            
@@ -247,7 +249,7 @@ string Render::RenderNullPointer( Syntax::Production surround_prod )
 }
 
 
-string Render::Dispatch( TreePtr<Node> node, Syntax::Production surround_prod )
+string Render::Dispatch( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
 {	
 	try
 	{
@@ -258,7 +260,7 @@ string Render::Dispatch( TreePtr<Node> node, Syntax::Production surround_prod )
 	
 	try 
 	{ 
-		return node->GetRender(this, surround_prod); 
+		return node->GetRender(this, surround_prod, policy); 
 	}
 	catch( Syntax::NotOnThisNode & ) {}
 
@@ -327,7 +329,7 @@ string Render::GetUniqueIdentifierName( TreePtr<Node> ) const
 }
 
 
-Syntax::Production Render::GetNodeProduction( TreePtr<Node> node ) const
+Syntax::Production Render::GetNodeProduction( TreePtr<Node> node, Syntax::Policy policy ) const
 {
 	try
 	{
@@ -338,7 +340,7 @@ Syntax::Production Render::GetNodeProduction( TreePtr<Node> node ) const
 	
 	try 
 	{ 
-		return node->GetMyProductionTerminal(); 
+		return node->GetMyProduction(this, policy); 
 	}
 	catch( Syntax::NotOnThisNode & ) {}
 

@@ -26,18 +26,20 @@ public:
     string RenderToString( shared_ptr<VN::CompareReplace> pattern );
     void WriteToFile(string s);
     
-	string RenderIntoProduction( TreePtr<Node> node, Syntax::Production surround_prod ) override;
-	string RenderConcreteIntoProduction( TreePtr<Node> node, Syntax::Production surround_prod );
-	string MaybeRenderPreRestriction( TreePtr<Node> node,Syntax::Production &surround_prod ) const;
+	string RenderIntoProduction( TreePtr<Node> node, 
+	                             Syntax::Production surround_prod, 
+	                             Syntax::Policy policy = Syntax::Policy() ) final;
+	string RenderConcreteIntoProduction( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy );
+	string MaybeRenderPreRestriction( TreePtr<Node> node, Syntax::Production &surround_prod ) const;
 	string RenderNullPointer( Syntax::Production surround_prod );
 
-	virtual string Dispatch( TreePtr<Node> node, Syntax::Production surround_prod );
+	virtual string Dispatch( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy );
 
 	string RenderNodeExplicit( shared_ptr<const Node> node );
 	string RenderScopeResolvingPrefix( TreePtr<Node> id ) override;
 	string GetUniqueIdentifierName( TreePtr<Node> id ) const override;
 
-	virtual Syntax::Production GetNodeProduction( TreePtr<Node> node ) const;						 
+	virtual Syntax::Production GetNodeProduction( TreePtr<Node> node, Syntax::Policy policy ) const;						 
 	TreePtr<CPPTree::Scope> TryGetScope( TreePtr<Node> node ) const;
 	bool IsDeclared( TreePtr<CPPTree::Identifier> id );
 							 
