@@ -396,7 +396,7 @@ struct Instance : Declaration,
     
     virtual string GetColour() const { return Declaration::GetColour(); } // Declaration wins
     set<const TreePtrInterface *> GetDeclared() override { return { &identifier }; };
-	Production GetMyProductionTerminal() const override;    
+	Production GetMyProduction(const VN::RendererInterface *, Policy policy) const override;    
 };
 
 /// A variable or function with one instance across the entire program. 
@@ -1213,6 +1213,8 @@ struct MacroDeclaration : Declaration
     TreePtr<PreprocessorIdentifier> identifier;
     Sequence<Node> arguments; ///< Arguments taken in order, macro so can be anything
     TreePtr<Initialiser> initialiser;
+    
+	Production GetMyProduction(const VN::RendererInterface *, Policy policy) const override;        
 };
 
 /// A proprocessor macro usage that may be used as a statement, and takes 
@@ -1230,6 +1232,7 @@ struct MacroStatement : Statement
 struct PreProcDecl : virtual Declaration 
 {
     NODE_FUNCTIONS
+   	Production GetMyProductionTerminal() const override;
 };
 
 /// Instruction to include a header file

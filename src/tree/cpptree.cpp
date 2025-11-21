@@ -33,7 +33,7 @@ Syntax::Production Type::GetOperandInDeclaratorProduction() const
 
 Syntax::Production Declaration::GetMyProductionTerminal() const
 {
-	return Production::DECLARATION;
+	return Production::BARE_DECLARATION;
 }
 
 //////////////////////////// Program ///////////////////////////////
@@ -412,9 +412,12 @@ Syntax::Production AccessSpec::GetMyProductionTerminal() const
 
 //////////////////////////// Instance //////////////////////////////
 
-Syntax::Production Instance::GetMyProductionTerminal() const
+Syntax::Production Instance::GetMyProduction(const VN::RendererInterface *, Policy policy) const
 { 
-	return Production::DECLARATION;
+	if( !DynamicTreePtrCast<Expression>(initialiser) && policy.force_initialisation )
+		return Production::DECLARATION;
+	else
+		return Production::BARE_DECLARATION;
 }
 
 //////////////////////////// LabelIdentifier //////////////////////////////
@@ -836,10 +839,27 @@ Syntax::Production SeqArgsCall::GetMyProductionTerminal() const
 	return Production::POSTFIX; 
 }
 
+//////////////////////////// MacroDeclaration ///////////////////////////////
+
+Syntax::Production MacroDeclaration::GetMyProduction(const VN::RendererInterface *, Policy) const
+{ 
+	if( !DynamicTreePtrCast<Expression>(initialiser) )
+		return Production::DECLARATION;
+	else
+		return Production::BARE_DECLARATION;
+}
+
 //////////////////////////// MacroStatement ///////////////////////////////
 
 Syntax::Production MacroStatement::GetMyProductionTerminal() const
 { 
 	return Production::STATEMENT; 
+}
+
+//////////////////////////// PreProcDecl ///////////////////////////////
+
+Syntax::Production PreProcDecl::GetMyProductionTerminal() const
+{ 
+	return Production::PRE_PROC_DIRECTIVE; 
 }
 

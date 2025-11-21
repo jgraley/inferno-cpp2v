@@ -100,7 +100,33 @@ string Render::RenderIntoProduction( TreePtr<Node> node, Syntax::Production surr
 	if( unique_coupling_names.count(node) > 0 )			
 		return s + unique_coupling_names.at(node);		
 	else 
-		return s + RenderConcreteIntoProduction(node, surround_prod, policy);
+		return s + MaybeRenderInitAssignment(node, surround_prod, policy);
+}
+
+
+string Render::MaybeRenderInitAssignment( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
+{
+    Syntax::Production node_prod = GetNodeProduction(node, policy);
+
+	string s;
+	if( ReadArgs::use.count("c") )
+		s += SSPrintf(" // Surround prod: %d node prod: %d\n", 
+					  Syntax::GetPrecedence(surround_prod), 
+					  Syntax::GetPrecedence(node_prod) );		
+
+    if( !(surround_prod == Syntax::Production::INITIALISER) )
+		return s + RenderConcreteIntoProduction(node, surround_prod, policy );
+
+    switch(node_prod)
+    {
+        case Syntax::Production::BOOT_EXPR...Syntax::Production::TOP_EXPR: // Expression productions at different precedences			
+			if( ReadArgs::use.count("c") )
+				s += SSPrintf("// Add init assignment, surround prod to ASSIGN\n");
+			return s + " = " + RenderConcreteIntoProduction(node, Syntax::Production::ASSIGN, policy );
+			
+		default:
+			return s + RenderConcreteIntoProduction(node, surround_prod, policy ); 
+	}
 }
 
 							
@@ -112,22 +138,16 @@ string Render::RenderConcreteIntoProduction( TreePtr<Node> node, Syntax::Product
     // used to change the render of a certain subtree. It represents all the ancestor nodes of
     // the one supplied.
     Syntax::Production node_prod = GetNodeProduction(node, policy);
-		
-	if( ReadArgs::use.count("c") )
-		s += SSPrintf("// Surround prod: %d node prod: %d\n", 
-					  Syntax::GetPrecedence(surround_prod), 
-					  Syntax::GetPrecedence(node_prod) );		
-					 		
+							 		
     bool do_boot = Syntax::GetPrecedence(node_prod) < Syntax::GetPrecedence(surround_prod);    
-    bool semicolon = Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::CONDITION) &&
-                     Syntax::GetPrecedence(node_prod) > Syntax::GetPrecedence(Syntax::Production::PROTOTYPE);  
-    bool do_init = surround_prod == Syntax::Production::INITIALISER;
+    
+    bool semicolon = Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::MAX_SURR_SEMICOLON) &&
+                     Syntax::GetPrecedence(node_prod) > Syntax::GetPrecedence(Syntax::Production::MIN_NODE_SEMICOLON);  
 
     if( ReadArgs::use.count("c") )
-		s += SSPrintf("// Boot: %s semcolon: %s init: %s\n", 
+		s += SSPrintf("// Boot: %s semcolon: %s\n", 
 					 do_boot ? "yes" : "no",
-					 semicolon ? "yes" : "no",
-					 do_init ? "yes" : "no" );
+					 semicolon ? "yes" : "no" );
                  
     switch(node_prod)
     {
@@ -171,14 +191,10 @@ string Render::RenderConcreteIntoProduction( TreePtr<Node> node, Syntax::Product
 					  ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); 
 					  
 			// Deal with expression in initialiser production by prepending =
-			if( do_init )
-				s += " = ";
             if( do_boot )
                 s += "(\n";
 
-			if( do_init )
-				surround_prod = Syntax::Production::ASSIGN;
-            else if( do_boot )
+			if( do_boot )
 				surround_prod = Syntax::Production::BOOT_EXPR;
 			else if( semicolon )
 				surround_prod = Syntax::Production::BOOT_EXPR;
@@ -187,7 +203,7 @@ string Render::RenderConcreteIntoProduction( TreePtr<Node> node, Syntax::Product
             if( do_boot )
                 s += "\n)";            
             if( semicolon )
-                s += "; ";
+                s += ";";
             break;
         }
         
@@ -198,7 +214,7 @@ string Render::RenderConcreteIntoProduction( TreePtr<Node> node, Syntax::Product
 			s += MaybeRenderPreRestriction( node, surround_prod, policy );
 			
             if( semicolon )
-                s += "; ";            
+                s += ";";            
 			break;
 		}
     }

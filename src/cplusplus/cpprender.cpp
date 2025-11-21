@@ -808,12 +808,12 @@ string CppRender::RenderInitialisation( TreePtr<Initialiser> init ) try
             if( auto lu = TreePtr<Lookup>::DynamicCast(call->callee) )
                 if( auto id = TreePtr<InstanceIdentifier>::DynamicCast(lu->member) )
                     if( id->GetIdentifierName().empty() ) // syscall to a nameless member function => sys construct
-                        return RenderExprSeq(call->arguments) + ";\n";
+                        return RenderExprSeq(call->arguments);
         }
         if( auto call = DynamicTreePtrCast<Call>( ei ) ) try
         {       
             if( TypeOf::instance.TryGetConstructedExpression( trans_kit, call ).GetTreePtr() )        
-                return RenderMapArgs(TypeOf::instance.Get(trans_kit, call->callee).GetTreePtr(), call->args) + ";\n";
+                return RenderMapArgs(TypeOf::instance.Get(trans_kit, call->callee).GetTreePtr(), call->args);
         }
         catch(DeclarationOf::DeclarationNotFound &)
         {
@@ -877,7 +877,6 @@ string CppRender::RenderInstance( TreePtr<Instance> o, Syntax::Production, Synta
 		if( ShouldSplitInstance(o) )
 		{
 			// Emit just a prototype now and request definition later
-			s += ";\n";
 			// Split out the definition of the instance for rendering later at Program scope
 			definitions.push(o);
 		}		
@@ -886,7 +885,6 @@ string CppRender::RenderInstance( TreePtr<Instance> o, Syntax::Production, Synta
 			// Emit the whole lot in-line
 			AutoPush< TreePtr<Node> > cs( scope_stack, TryGetScope( o->identifier ) );
 			s += RenderInitialisation( o->initialiser );							
-			s += "\n";		
 		}
 	}
 	return s;

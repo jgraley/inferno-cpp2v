@@ -15,9 +15,11 @@ class Syntax : virtual Traceable
 public:
 	enum class Production // "Syntax::Production" is a generalisation of precedence
 	{		
-		PROGRAM = 10,
+		PROGRAM = 0,
+		PRE_PROC_DIRECTIVE,
 		SPACE_SEP_PRE_PROC,
-		DEFINITION,		
+
+		DEFINITION = 10,	
 		
 		// ----- Complete self-sufficient statements and declarations. There is a precedence
 		// scheme, booted using {}, to disambiguate if/else.
@@ -27,14 +29,15 @@ public:
 		STATEMENT_HIGH, // eg if( ... ) <here>;    is this prefix?
 		STATEMENT,
 		DECLARATION,
-		INITIALISER, // eg MyType thing <here>; and " = " is inserted if node is expressional
-		BRACED,		 // {} from the outside
+		MAX_SURR_SEMICOLON,	// Note: surroundings lower than here /\ can get ";" added.
 
 		// ----- Parts of statements and declarations
-		// Note: surroundings lower than here can get ";" added.
-		CONDITION = 30,		// Use in surrounds like if( <here> ) ... which could be a decl etc. 
+		INITIALISER = 30, // eg MyType thing <here>; and " = " is inserted if node is expressional
+		CONDITION,		// Use in surrounds like if( <here> ) ... which could be a decl etc. 
 		PROTOTYPE,      // Render prototype only, no initialiser or ";". 		
-		// Note: nodes higher than this can get ";" added.
+		BRACED,		 // {} from the outside
+		
+		MIN_NODE_SEMICOLON, // Note: nodes higher than here \/ can get ";" added.
 		BARE_STATEMENT = 40, // Statement with no semicolon
 		BARE_DECLARATION, // Actual declaration with no semicolon, eg int i	
 		SPACE_SEP_STATEMENT, // eg throw <here>;
