@@ -851,7 +851,7 @@ string CppRender::RenderInitialisation( TreePtr<Initialiser> init ) try
 			init = r;	
 		}	
     }
-
+	
     return s + RenderIntoProduction( init, Syntax::Production::INITIALISER); 
 }
 DEFAULT_CATCH_CLAUSE

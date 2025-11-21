@@ -108,8 +108,6 @@ string Render::RenderConcreteIntoProduction( TreePtr<Node> node, Syntax::Product
 {
 	string s;
 
-	s += MaybeRenderPreRestriction(node, surround_prod);
-
     // Production surround_prod relates to the surrounding grammar production and can be 
     // used to change the render of a certain subtree. It represents all the ancestor nodes of
     // the one supplied.
@@ -154,7 +152,7 @@ string Render::RenderConcreteIntoProduction( TreePtr<Node> node, Syntax::Product
 
             if( do_boot || semicolon )
 				surround_prod = Syntax::Production::BOOT_STMT_DECL;
-			s += Dispatch( node, surround_prod, policy );
+			s += MaybeRenderPreRestriction( node, surround_prod, policy );
 			
             if( semicolon )
                 s += ";\n ";
@@ -178,13 +176,13 @@ string Render::RenderConcreteIntoProduction( TreePtr<Node> node, Syntax::Product
             if( do_boot )
                 s += "(\n";
 
-			if( do_boot )
-				surround_prod = Syntax::Production::BOOT_EXPR;
-			else if( do_init )
+			if( do_init )
 				surround_prod = Syntax::Production::ASSIGN;
-            else if( semicolon )
+            else if( do_boot )
 				surround_prod = Syntax::Production::BOOT_EXPR;
-			s += Dispatch( node, surround_prod, policy );
+			else if( semicolon )
+				surround_prod = Syntax::Production::BOOT_EXPR;
+			s += MaybeRenderPreRestriction( node, surround_prod, policy );
 
             if( do_boot )
                 s += "\n)";            
@@ -197,7 +195,7 @@ string Render::RenderConcreteIntoProduction( TreePtr<Node> node, Syntax::Product
         {
             if( semicolon )
 				surround_prod = Syntax::Production::BOOT_EXPR;
-			s += Dispatch( node, surround_prod, policy );
+			s += MaybeRenderPreRestriction( node, surround_prod, policy );
 			
             if( semicolon )
                 s += "; ";            
@@ -209,15 +207,15 @@ string Render::RenderConcreteIntoProduction( TreePtr<Node> node, Syntax::Product
 }
 
 
-string Render::MaybeRenderPreRestriction( TreePtr<Node> node, Syntax::Production &surround_prod ) const
+string Render::MaybeRenderPreRestriction( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
 {
 	const Agent *agent = Agent::TryAsAgentConst(node);
 	if( !agent )
-		return "";
+		return Dispatch( node, surround_prod, policy );
 		
 	auto pspecial = dynamic_cast<const SpecialBase *>(agent);
 	if( !pspecial )
-		return "";
+		return Dispatch( node, surround_prod, policy );
 	
 	bool prerestricted = false;
 	ASSERT( incoming_links_map.count(node)>0 )(incoming_links_map)("\nNode: ")(node);
@@ -225,7 +223,7 @@ string Render::MaybeRenderPreRestriction( TreePtr<Node> node, Syntax::Production
 		prerestricted |= agent->IsNonTrivialPreRestriction(tpi);
 		
 	if(!prerestricted)
-		return "";
+		return Dispatch( node, surround_prod, policy );
 		
 	// We need the archetype because otherwise we'll just get hte name 
 	// of the special agent. We might be able to extract node name out
@@ -235,7 +233,10 @@ string Render::MaybeRenderPreRestriction( TreePtr<Node> node, Syntax::Production
 
 	// This assumes no action is required in order to render a prefix operation
 	surround_prod = Syntax::Production::PREFIX;	
-	return "‽【" + GetInnermostTemplateParam(TYPE_ID_NAME(*archetype_node)) + "】";	
+	return "‽【" + 
+	       GetInnermostTemplateParam(TYPE_ID_NAME(*archetype_node)) + 
+	       "】" +
+	       Dispatch( node, surround_prod, policy );	
 }
 
 

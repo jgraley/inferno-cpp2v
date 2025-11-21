@@ -30,7 +30,7 @@ public:
 	                             Syntax::Production surround_prod, 
 	                             Syntax::Policy policy = Syntax::Policy() ) final;
 	string RenderConcreteIntoProduction( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy );
-	string MaybeRenderPreRestriction( TreePtr<Node> node, Syntax::Production &surround_prod ) const;
+	string MaybeRenderPreRestriction( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy );
 	string RenderNullPointer( Syntax::Production surround_prod );
 
 	virtual string Dispatch( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy );
