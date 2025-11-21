@@ -962,19 +962,24 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutNormal( const ReplaceKit &
 
 Syntax::Production StandardAgent::GetAgentProduction() const
 {
-	return Syntax::Production::PRIMITIVE_EXPR;
-}
+	// Be similar to GetAgentRender()
+	shared_ptr<const Node> node = GetPatternPtr();
+	if( dynamic_cast<const CPPTree::SpecificIdentifier *>(node.get()) )
+		return Syntax::Production::PRIMITIVE_EXPR;
+	else
+		throw NotOnThisNode();
+}		
 
 
 string StandardAgent::GetAgentRender( VN::RendererInterface *, Syntax::Production  ) const
 {
 	shared_ptr<const Node> node = GetPatternPtr();
-	// SpecificIdentifiers appear rarely in patterns, and when they do they are not declared,
-	// so we should not try to render the C++ terminal	    
-	string node_type_name = GetInnermostTemplateParam(TYPE_ID_NAME(*node));
-	
 	if( dynamic_cast<const CPPTree::SpecificIdentifier *>(node.get()) )
     {
+		// SpecificIdentifiers appear rarely in patterns, and when they do they are not declared,
+		// so we should not try to render the C++ terminal	    	
+		string node_type_name = GetInnermostTemplateParam(TYPE_ID_NAME(*node));
+		
 		size_t last_scope_pos = node_type_name.rfind("::");
 		string scope, name = node_type_name;
 		if( last_scope_pos != string::npos )

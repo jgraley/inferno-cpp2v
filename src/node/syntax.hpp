@@ -78,7 +78,8 @@ public:
 		TOP_EXPR, // Highest expression precedence
 		
 		// ----- Abstract, lexer-ish productions of no particuler kind
-		SCOPE_RESOLVE = 80, // :: in C++	
+		EXPLICIT_NODE = 80, // Eg ⯁CPPTree::MyNode(...)
+		SCOPE_RESOLVE, // :: in C++	
 		PURE_IDENTIFIER, // Higher than expr because could be a type, label etc
 		TOKEN, // Lexer tokens of any kind (other than type or expression)
 		ANONYMOUS

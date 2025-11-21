@@ -83,7 +83,7 @@ false			{ return YY::VNLangParser::make_BOOL_LITERAL(false, location()); };
 
 ::				{ return YY::VNLangParser::make_SCOPE_RES(location()); };
 
-[();,]  		{ return YY::VNLangParser::symbol_type(chr(), location()); }
+[()\{\};,] 		{ return YY::VNLangParser::symbol_type(chr(), location()); }
 
 \"[^"]*\"   	{ return YY::VNLangParser::make_STRING_LITERAL(wstr(), location()); }
 {integral_num}	{ return YY::VNLangParser::make_INTEGRAL_LITERAL(str(), location()); }

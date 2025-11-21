@@ -531,6 +531,10 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 
 // Productions using 【 】: AFTER adding C minxture, try using () and making things look like printf etc
 
+// When designating a ⧇ or speciifc identifier node, why not use the given name as the name of the designation?
+
+// NOT putting some kind of quotes around identifier names or format strings feels like a conflict even if it isn't
+
 // Tix:
 // Lose StandardAgentWrapper #867
 // Add ability to pre-process #862

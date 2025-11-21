@@ -99,7 +99,7 @@
 %precedence BUILT_IN BOOL_LITERAL STRING_LITERAL INTEGRAL_LITERAL SPECIFIC_ID
 
 %type <TreePtr<Node>> 				pattern pat_unit pat_post pat_pre pat_rel pat_dis pat_con 
-%type <TreePtr<Node>> 				pat_ass pat_eq pat_add pat_lor pat_land
+%type <TreePtr<Node>> 				pat_ass pat_eq pat_add pat_lor pat_land statements statement
 %type <wstring> 					vn_name
 %type <string>						format
 %type <list<string>> 				scoped_name
@@ -144,6 +144,11 @@ items_sep 	: items_bare VN_SEP		   					{ $$ = $1; }
 
 item		: item ',' pattern    						{ $$ = $1; $$.nodes.push_back($3); $$.loc = @$; }
 			| pattern									{ $$.nodes.push_back($1); $$.loc = @$; }
+
+
+statements	: statement
+
+statement	: pattern
                       
 pattern	: pat_dis
                       
@@ -201,6 +206,7 @@ pat_unit: STAR												{ $$ = vn->OnStar(nullptr); }
 		| BOOL_LITERAL										{ $$ = vn->OnBoolLiteral($1); }
 		| ANY												{ $$ = nullptr; }
 		| '(' commands ')'                          		{ $$ = vn->OnEmbeddedCommands($2); }
+		| '{' statements '}'                          		{ $$ = $2; }
 		| vn_name       						  			{ $$ = vn->OnName($1, @1); }
 		| SPECIFIC_ID OPEN_VN scoped_name VN_SEP ASCII_NAME CLOSE_VN		{ $$ = vn->OnSpecificId($3, @3, $5, @5); }
 		| SPECIFIC_ID OPEN_VN scoped_name VN_SEP CLOSE_VN					{ $$ = vn->OnSpecificId($3, @3, "", @5); }

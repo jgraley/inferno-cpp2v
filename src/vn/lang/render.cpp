@@ -256,12 +256,6 @@ string Render::Dispatch( TreePtr<Node> node, Syntax::Production surround_prod )
 	}
 	catch( Syntax::NotOnThisNode & ) {}
 	
-	return RenderNodeOnly(node, surround_prod);
-}
-
-
-string Render::RenderNodeOnly( TreePtr<Node> node, Syntax::Production surround_prod )
-{
 	try 
 	{ 
 		return node->GetRender(this, surround_prod); 
@@ -335,7 +329,20 @@ string Render::GetUniqueIdentifierName( TreePtr<Node> ) const
 
 Syntax::Production Render::GetNodeProduction( TreePtr<Node> node ) const
 {
-	return Agent::TryAsAgentConst(node)->GetAgentProduction();     
+	try
+	{
+		if( const Agent *agent = Agent::TryAsAgentConst(node) )
+			return agent->GetAgentProduction();
+	}
+	catch( Syntax::NotOnThisNode & ) {}
+	
+	try 
+	{ 
+		return node->GetMyProduction(); 
+	}
+	catch( Syntax::NotOnThisNode & ) {}
+
+	return Syntax::Production::EXPLICIT_NODE;     
 }
 
 
