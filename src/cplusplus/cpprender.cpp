@@ -1027,25 +1027,22 @@ string CppRender::RenderDeclaration( TreePtr<Declaration> declaration, Syntax::P
     {
         Syntax::Production starting_declarator_prod = Syntax::Production::PURE_IDENTIFIER;
         auto id = RenderIntoProduction( t->identifier, starting_declarator_prod);
-        s += "typedef " + RenderTypeAndDeclarator( t->type, id, starting_declarator_prod, Syntax::Production::SPACE_SEP_DECLARATION );
+        s = "typedef " + RenderTypeAndDeclarator( t->type, id, starting_declarator_prod, Syntax::Production::SPACE_SEP_DECLARATION );
     }
     else if( TreePtr<Record> record = DynamicTreePtrCast< Record >(declaration) )
     {
         // Prototype of the record
-        s += RenderRecordProto( record, policy );
-        
-        if( policy.force_incomplete_records )
-			return s;
-
-		s += RenderRecordCompletion( record );
-
-        // Add blank lines before and after
-        s = '\n' + s + '\n';
+        s = RenderRecordProto( record, policy );        
+        if( !policy.force_incomplete_records )
+        {
+			s += RenderRecordCompletion( record );
+			s = '\n' + s + '\n';
+		}
     }
     else if( TreePtr<Label> l = DynamicTreePtrCast<Label>(declaration) )
-        return RenderIntoProduction( l->identifier, Syntax::Production::PURE_IDENTIFIER) + ":"; 
+        s = RenderIntoProduction( l->identifier, Syntax::Production::PURE_IDENTIFIER) + ":"; 
     else
-        s += Render::Dispatch( declaration, surround_prod, policy );
+        s = Render::Dispatch( declaration, surround_prod, policy );
 
     TRACE();
     return s;
@@ -1169,7 +1166,7 @@ string CppRender::RenderEnumBodyScope( TreePtr<CPPTree::Record> record ) try
             s += ERROR_UNSUPPORTED(pe);
             continue;
         }
-        s += RenderIntoProduction( o->identifier, Syntax::BoostPrecedence(Syntax::Production::ASSIGN)) + " = ";
+        s += RenderIntoProduction( o->identifier, Syntax::BoostPrecedence(Syntax::Production::ASSIGN));
         
         auto ei = TreePtr<Expression>::DynamicCast( o->initialiser );
         if( !ei )
@@ -1177,7 +1174,7 @@ string CppRender::RenderEnumBodyScope( TreePtr<CPPTree::Record> record ) try
             s += ERROR_UNSUPPORTED(o->initialiser);
             continue;
         }       
-        s += RenderIntoProduction( ei, Syntax::Production::ASSIGN);
+        s += RenderIntoProduction( ei, Syntax::Production::INITIALISER);
 
         first = false;    
     }
