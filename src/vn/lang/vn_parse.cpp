@@ -541,5 +541,10 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 // Global designations #872
 // Type mismatches #874
 
+// Render: 
+// - ditch PROTOTYPE
+// - ditch DEFINITION
+// - split RenderConcrete... into MaybeBoot..., MaybeSemicolon...
+
 // C fold-in: 
 // things like OnPrefixOperator() should take an actual parser token not a string

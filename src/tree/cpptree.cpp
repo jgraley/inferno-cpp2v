@@ -555,7 +555,7 @@ Syntax::Production Typedef::GetMyProductionTerminal() const
 
 Syntax::Production Record::GetMyProductionTerminal() const
 {
-	return Production::PROTOTYPE; // prototype render is supported
+	return Production::BARE_DECLARATION;
 }
 
 TreePtr<AccessSpec> Record::GetInitialAccess() const

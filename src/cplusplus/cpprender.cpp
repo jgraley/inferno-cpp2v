@@ -790,7 +790,9 @@ string CppRender::RenderInstanceProto( TreePtr<Instance> o ) try
         name += RenderIntoProduction( o->identifier, starting_declarator_prod);
     }
 
-    s += RenderTypeAndDeclarator( o->type, name, starting_declarator_prod, Syntax::Production::PROTOTYPE, constant );
+    Syntax::Policy proto_policy;
+    proto_policy.force_incomplete_records = true; 
+    s += RenderTypeAndDeclarator( o->type, name, starting_declarator_prod, Syntax::Production::BARE_DECLARATION, constant );
 
     return s;
 } 
@@ -976,6 +978,45 @@ string CppRender::RenderPreProcDecl( TreePtr<PreProcDecl> ppd, Syntax::Productio
 DEFAULT_CATCH_CLAUSE
 
 
+string CppRender::RenderRecordCompletion( TreePtr<Record> record ) 
+{
+	string s;
+	
+	// Base classes
+	if( TreePtr<InheritanceRecord> ir = DynamicTreePtrCast< InheritanceRecord >(record) )
+	{
+		if( !ir->bases.empty() )
+		{
+			s += " : ";
+			bool first=true;
+			for( TreePtr<Node> bn : sc.GetTreePtrOrdering(ir->bases) )
+			{
+				if( !first )
+					s += ", ";
+				first=false;
+				auto b = TreePtr<Base>::DynamicCast(bn);
+				ASSERT( b );
+				s += RenderIntoProduction( b->access, Syntax::Production::TOKEN ) + " ";
+				s += RenderIntoProduction( b->record, Syntax::Production::SCOPE_RESOLVE);
+			}
+		}
+	}
+
+	// Members
+	s += "\n{ // memb\n";
+	TreePtr<AccessSpec> a = record->GetInitialAccess();
+	AutoPush< TreePtr<Node> > cs( scope_stack, record );
+	if( a )
+		s += RenderDeclScope( record, a );          
+	else
+		s += RenderEnumBodyScope( record ); 
+		
+	s += "}";
+	return s;
+}
+
+
+
 string CppRender::RenderDeclaration( TreePtr<Declaration> declaration, Syntax::Production surround_prod, Syntax::Policy policy ) try
 {
     TRACE();
@@ -988,49 +1029,21 @@ string CppRender::RenderDeclaration( TreePtr<Declaration> declaration, Syntax::P
         auto id = RenderIntoProduction( t->identifier, starting_declarator_prod);
         s += "typedef " + RenderTypeAndDeclarator( t->type, id, starting_declarator_prod, Syntax::Production::SPACE_SEP_DECLARATION );
     }
-    else if( TreePtr<Record> r = DynamicTreePtrCast< Record >(declaration) )
+    else if( TreePtr<Record> record = DynamicTreePtrCast< Record >(declaration) )
     {
         // Prototype of the record
-        s += RenderRecordProto( r, policy );
+        s += RenderRecordProto( record, policy );
         
-        if( surround_prod == Syntax::Production::PROTOTYPE )
+        if( policy.force_incomplete_records )
 			return s;
 
-        // Base classes
-        if( TreePtr<InheritanceRecord> ir = DynamicTreePtrCast< InheritanceRecord >(declaration) )
-        {
-            if( !ir->bases.empty() )
-            {
-                s += " : ";
-                bool first=true;
-                for( TreePtr<Node> bn : sc.GetTreePtrOrdering(ir->bases) )
-                {
-                    if( !first )
-                        s += ", ";
-                    first=false;
-                    auto b = TreePtr<Base>::DynamicCast(bn);
-                    ASSERT( b );
-                    s += RenderIntoProduction( b->access, Syntax::Production::TOKEN ) + " ";
-                    s += RenderIntoProduction( b->record, Syntax::Production::SCOPE_RESOLVE);
-                }
-            }
-        }
+		s += RenderRecordCompletion( record );
 
-        // Members
-        s += "\n{ // memb\n";
-        TreePtr<AccessSpec> a = r->GetInitialAccess();
-        AutoPush< TreePtr<Node> > cs( scope_stack, r );
-        if( a )
-            s += RenderDeclScope( r, a );          
-        else
-            s += RenderEnumBodyScope( r ); 
-            
-        s += "};\n";
         // Add blank lines before and after
         s = '\n' + s + '\n';
     }
     else if( TreePtr<Label> l = DynamicTreePtrCast<Label>(declaration) )
-        return RenderIntoProduction( l->identifier, Syntax::Production::PURE_IDENTIFIER) + ":;\n"; // need ; after a label in case last in compound block
+        return RenderIntoProduction( l->identifier, Syntax::Production::PURE_IDENTIFIER) + ":"; 
     else
         s += Render::Dispatch( declaration, surround_prod, policy );
 
@@ -1222,9 +1235,11 @@ string CppRender::RenderDeclScope( TreePtr<DeclScope> decl_scope,
     TRACE();
     Sequence<Declaration> sorted = SortDecls( decl_scope->members, true, unique_identifier_names );
 
-    // Emit a prototype for each record and preproc
+	queue<TreePtr<Declaration>> require_complete;
+	
+    // Emit preprocs and an incomplete for each record 
     string s;
-    for( TreePtr<Declaration> pd : sorted ) //for( int i=0; i<sorted.size(); i++ )
+    for( TreePtr<Declaration> pd : sorted )
     {       
         if( auto ppd = DynamicTreePtrCast<PreProcDecl>(pd) )
         {
@@ -1232,28 +1247,28 @@ string CppRender::RenderDeclScope( TreePtr<DeclScope> decl_scope,
             continue;
         }
         
-        TreePtr<Record> r = DynamicTreePtrCast<Record>(pd); 
-        if( !r )
-            continue; // only do records and preprocessor decls
-            
-        if( DynamicTreePtrCast<Enum>(r) ) 
-            continue; // but not an enum
-    
-        if( init_access )
-            s += MaybeRenderFieldAccess( r, &init_access );
-        //s += RenderRecordProto( r ) + "; // RDS-record proto\n";   
-        s += RenderIntoProduction( r, Syntax::Production::PROTOTYPE ) + "; // RDS-record proto (new)\n"; 
+        if( DynamicTreePtrCast<Record>(pd) && !DynamicTreePtrCast<Enum>(pd) ) 
+        {    
+			if( init_access )
+				s += MaybeRenderFieldAccess( pd, &init_access );
+
+			Syntax::Policy record_policy;
+			record_policy.force_incomplete_records = true; 
+			s += RenderIntoProduction( pd, Syntax::Production::DECLARATION, record_policy ); 
+		}
+		
+		require_complete.push( pd );
     }
     
     // Emit the actual definitions, sorted for dependencies
-    for( TreePtr<Declaration> d : sorted )
+    while( !require_complete.empty()  )
     {
-        if( DynamicTreePtrCast<PreProcDecl>(d) )
-            continue;
+        TreePtr<Declaration> d = require_complete.front();
+        require_complete.pop();
             
         if( init_access )
             s += MaybeRenderFieldAccess( d, &init_access );        
-        s += RenderIntoProduction( d, Syntax::Production::STATEMENT_LOW );
+        s += RenderIntoProduction( d, Syntax::Production::DECLARATION );
     }
     TRACE();
     return s;

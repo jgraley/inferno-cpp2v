@@ -34,7 +34,6 @@ public:
 		// ----- Parts of statements and declarations
 		INITIALISER = 30, // eg MyType thing <here>; and " = " is inserted if node is expressional
 		CONDITION,		// Use in surrounds like if( <here> ) ... which could be a decl etc. 
-		PROTOTYPE,      // Render prototype only, no initialiser or ";". 		
 		BRACED,		 // {} from the outside
 		
 		MIN_NODE_SEMICOLON, // Note: nodes higher than here \/ can get ";" added.
@@ -88,8 +87,9 @@ public:
 	
 	struct Policy
 	{
-		Policy() : force_initialisation(false) {}
+		Policy() : force_initialisation(false), force_incomplete_records(false) {}
 		bool force_initialisation;
+		bool force_incomplete_records;
 	};
 	
 	// We deal with syntactical association only, not mathematical, because:

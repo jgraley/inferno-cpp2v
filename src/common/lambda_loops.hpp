@@ -112,6 +112,7 @@ catch( const BreakException & )
 {
 }
 
+
 // The value range of a bool, to be used with ForPower
 extern const vector<bool> index_range_bool;
 
