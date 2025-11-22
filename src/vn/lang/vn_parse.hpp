@@ -9,6 +9,7 @@
 #include "tree/misc.hpp"
 #include "indenter.hpp"
 #include "vn_commands.hpp"
+#include "vn_shim.hpp"
 #include <any> // to dep-break the generated headers
 
 namespace YY
@@ -92,10 +93,9 @@ public:
 	static string DiagQuote(wstring name);
 	TreePtr<Node> CreateIntegralLiteral( bool uns, bool lng, bool lng2, uint64_t val, any loc );
 
-	//bool IsType() const;
-	bool IsDesignated(wstring name) const;
-
 private: 
+	friend class VNShim;
+	VNShim shim;
 	unique_ptr<YY::VNLangScanner> scanner;
 	unique_ptr<YY::VNLangParser> parser;
 	unique_ptr<NodeNames> node_names;

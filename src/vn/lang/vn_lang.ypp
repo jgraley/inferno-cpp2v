@@ -94,10 +94,9 @@
 	<bool>		BOOL_LITERAL				_("boolean literal")
 	<string>  	ASCII_NAME 					_("ASCII name")
 	<string>  	ASCII_FORMAT 				_("ASCII format string")
-	<string>  	ASCII_SUBTREE				_("ASCII subtree")
 	<wstring> 	UNICODE_NAME 				_("Unicode name")
-	<wstring> 	UNICODE_SUBTREE				_("Unicode subtree")
 	<string>    TYPENAME					"typename"
+	<TreePtr<Node>> NAMED_SUBTREE			_("named subtree")
 	
 %left DISJUNCTION
 %left CONJUNCTION 
@@ -113,7 +112,7 @@
 %type <TreePtr<Node>> 				expr_assignment expr_equality expr_add_etc expr_logical_or expr_logical_and statements statement
 %type <TreePtr<Node>> 				expr_mul_etc expr_shift expr_bitwise_and expr_bitwise_or expr_bitwise_xor expr_no_comma_op 
 %type <TreePtr<Node>> 				expr_paren expr_comma_op type_unit type_prefix type_paren
-%type <wstring> 					vn_name vn_subtree
+%type <wstring> 					vn_name
 %type <list<string>> 				scoped_name
 %type <VN::Command::List>			commands sep_commands
 %type <shared_ptr<VN::Command>>		bare_command
@@ -269,7 +268,7 @@ expr_unit	: BUILT_IN scoped_name itemisation					{ $$ = vn->OnBuiltIn($2, @2, $3
 			| BOOL_LITERAL										{ $$ = vn->OnBoolLiteral($1); }
 			| ANY												{ $$ = nullptr; }
 			| '{' statements '}'                          		{ $$ = $2; }
-			| vn_subtree       						  			{ $$ = vn->OnName($1, @1); }
+			| NAMED_SUBTREE       					  			{ $$ = $1; }
 			| SPECIFIC_ID OPEN_VN scoped_name VN_SEP STRING_LITERAL CLOSE_VN			{ $$ = vn->OnSpecificId($3, @3, $5, @5); }
 			| SPECIFIC_ID OPEN_VN scoped_name VN_SEP CLOSE_VN							{ $$ = vn->OnSpecificId($3, @3, wstring(), @5); }
 			| ID_BY_NAME OPEN_VN scoped_name VN_SEP STRING_LITERAL CLOSE_VN				{ $$ = vn->OnIdByName($3, @3, $5, @5); } // ASCII_NAME could be format
@@ -279,9 +278,6 @@ expr_unit	: BUILT_IN scoped_name itemisation					{ $$ = vn->OnBuiltIn($2, @2, $3
 
 vn_name		: UNICODE_NAME    						{ $$ = $1; }
 			| ASCII_NAME							{ $$ = ToUnicode($1); }     
-     
-vn_subtree	: UNICODE_SUBTREE  						{ $$ = $1; }
-			| ASCII_SUBTREE							{ $$ = ToUnicode($1); }     
      
 scoped_name	: ASCII_NAME SCOPE_RES scoped_name		{ $$ = $3; $$.push_front($1); }
 			| ASCII_NAME							{ $$.push_front($1); }

@@ -31,7 +31,8 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc );
 
 
 VNParse::VNParse() :
-	scanner( make_unique<YY::VNLangScanner>(this, reflex::Input(), std::cerr) ),
+	shim( this ),
+	scanner( make_unique<YY::VNLangScanner>(&shim, reflex::Input(), std::cerr) ),
 	parser( make_unique<YY::VNLangParser>(*scanner, this) ),
 	node_names( make_unique<NodeNames>() )
 {
@@ -527,14 +528,6 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 	
 	return NodeNames().GetNameToEnumMap().at(typ);	
 }
-
-
-bool VNParse::IsDesignated(wstring name) const
-{
-	return designations.count(name) > 0;
-}
-
-
 
 // grammar for C operators
 // Consider c-style scoping of designations (eg for macros?)
