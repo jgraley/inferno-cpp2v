@@ -100,11 +100,11 @@ string Render::RenderIntoProduction( TreePtr<Node> node, Syntax::Production surr
 	if( unique_coupling_names.count(node) > 0 )			
 		return s + unique_coupling_names.at(node);		
 	else 
-		return s + MaybeRenderInitAssignment(node, surround_prod, policy);
+		return s + RenderMaybeInitAssignment(node, surround_prod, policy);
 }
 
 
-string Render::MaybeRenderInitAssignment( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
+string Render::RenderMaybeInitAssignment( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
 {
     Syntax::Production node_prod = GetNodeProduction(node, policy);
 
@@ -115,18 +115,78 @@ string Render::MaybeRenderInitAssignment( TreePtr<Node> node, Syntax::Production
 					  Syntax::GetPrecedence(node_prod) );		
 
     if( !(surround_prod == Syntax::Production::INITIALISER) )
-		return s + RenderConcreteIntoProduction(node, surround_prod, policy );
+		return s + RenderMaybeBoot(node, surround_prod, policy );
 
+	// Deal with expression in initialiser production by prepending =
     switch(node_prod)
     {
         case Syntax::Production::BOOT_EXPR...Syntax::Production::TOP_EXPR: // Expression productions at different precedences			
 			if( ReadArgs::use.count("c") )
 				s += SSPrintf("// Add init assignment, surround prod to ASSIGN\n");
-			return s + " = " + RenderConcreteIntoProduction(node, Syntax::Production::ASSIGN, policy );
+			return s + " = " + RenderMaybeBoot(node, Syntax::Production::ASSIGN, policy );
 			
 		default:
-			return s + RenderConcreteIntoProduction(node, surround_prod, policy ); 
+			return s + RenderMaybeBoot(node, surround_prod, policy ); 
 	}
+}
+
+
+string Render::RenderMaybeBoot( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
+{
+    Syntax::Production node_prod = GetNodeProduction(node, policy);
+							 		
+    if( !(Syntax::GetPrecedence(node_prod) < Syntax::GetPrecedence(surround_prod)) )
+		return RenderConcreteIntoProduction( node, surround_prod, policy );
+	string s;
+
+    switch(node_prod)
+    {
+        case Syntax::Production::BOOT_STMT_DECL...Syntax::Production::TOP_STMT_DECL: // Statement productions at different precedences
+        {
+			// Braces can actually work in expressions, eg in {}. The nodes are STATEMENT_SEQ and we boot to BOOT_STMT_DECL
+			ASSERT( Syntax::GetPrecedence(surround_prod) <= Syntax::GetPrecedence(Syntax::Production::BRACED) ||			
+					Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::TOP_STMT_DECL) )
+				  ("Braces won't achieve high enough precedence for surrounding statement production\n")
+				  ("Node: ")(node)("\n")
+				  ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); 
+			ASSERT( Syntax::GetPrecedence(surround_prod) <= Syntax::GetPrecedence(Syntax::Production::BRACKETED) )
+				  ("Braces won't achieve high enough precedence for surrounding expressional or higher production\n")
+				  ("Node: ")(node)("\n")
+				  ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); 
+
+            s += "{\n ";
+
+			surround_prod = Syntax::Production::BOOT_STMT_DECL;
+			s += MaybeRenderPreRestriction( node, surround_prod, policy );
+			
+			s += "\n} ";            
+            break;
+        }
+
+        case Syntax::Production::BOOT_EXPR...Syntax::Production::TOP_EXPR: // Expression productions at different precedences
+        {
+            // If current production has too-high precedence, boot back down using parentheses
+			ASSERT( Syntax::GetPrecedence(surround_prod) <= Syntax::GetPrecedence(Syntax::Production::BRACKETED) )
+				  ("Parentheses won't achieve high enough precedence for surrounding production\n")
+				  ("Node: ")(node)("\n")
+				  ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); 
+					  
+            s += "(\n";
+
+			surround_prod = Syntax::Production::BOOT_EXPR;
+			s += MaybeRenderPreRestriction( node, surround_prod, policy );
+
+            s += "\n)";            
+            break;
+        }
+        
+        default: 
+        {
+			s += MaybeRenderPreRestriction( node, surround_prod, policy );         
+			break;
+		}
+    }
+    return s;
 }
 
 							
@@ -194,9 +254,7 @@ string Render::RenderConcreteIntoProduction( TreePtr<Node> node, Syntax::Product
             if( do_boot )
                 s += "(\n";
 
-			if( do_boot )
-				surround_prod = Syntax::Production::BOOT_EXPR;
-			else if( semicolon )
+			if( do_boot || semicolon )
 				surround_prod = Syntax::Production::BOOT_EXPR;
 			s += MaybeRenderPreRestriction( node, surround_prod, policy );
 
