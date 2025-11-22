@@ -10,7 +10,6 @@
 #include "helpers/walk.hpp"
 #include "tree/validate.hpp"
 #include "steps/split_instance_declarations.hpp"
-#include "steps/generate_implicit_casts.hpp"
 #include "steps/generate_stacks.hpp"
 #include "steps/test_steps.hpp"
 #include "steps/lower_control_flow.hpp"

@@ -922,6 +922,7 @@ struct Cast : Operator
     TreePtr<Type> type; ///< the desired new type
 	
 	Production GetMyProductionTerminal() const override;
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
 };
 
 /// Associates an Expression with an InstanceIdentifier. 

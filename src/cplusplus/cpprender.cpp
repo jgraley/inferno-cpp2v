@@ -129,7 +129,7 @@ string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surro
         
     // Due #969 we might have a standard agent, so fall back to a function that
     // definitely won't call any agent methods.
-    return Render::RenderNodeExplicit( node );      
+    return Render::RenderNodeExplicit( node, surround_prod );      
 }
 
 
@@ -424,9 +424,6 @@ string CppRender::RenderOperator( TreePtr<Operator> op, Syntax::Production surro
     else if( auto lu = DynamicTreePtrCast< Lookup >(op) )
         return RenderIntoProduction( lu->object, Syntax::Production::POSTFIX ) + "." +
                RenderIntoProduction( lu->member, Syntax::BoostPrecedence(Syntax::Production::POSTFIX) );
-    else if( auto c = DynamicTreePtrCast< Cast >(op) )
-        return "(" + RenderIntoProduction( c->type, Syntax::Production::BOOT_EXPR ) + ")" +
-               RenderIntoProduction( c->operand, Syntax::Production::PREFIX );
     else if( auto condo = DynamicTreePtrCast< ConditionalOperator >(op) )
     {
         return RenderIntoProduction( condo->condition, Syntax::BoostPrecedence(Syntax::Production::ASSIGN) ) + 

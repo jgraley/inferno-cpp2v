@@ -66,12 +66,15 @@ public:
 	TreePtr<Node> OnEmbeddedCommands( list<shared_ptr<Command>> commands );
 	TreePtr<Node> OnRestrict( list<string> res_type, any res_loc, TreePtr<Node> target, any target_loc );
 	
+	TreePtr<Node> OnInfixOperator( string tok, TreePtr<Node> left, TreePtr<Node> right );
 	TreePtr<Node> OnPrefixOperator( string tok, TreePtr<Node> operand );
 	TreePtr<Node> OnPostfixOperator( string tok, TreePtr<Node> operand );
-	TreePtr<Node> OnInfixOperator( string tok, TreePtr<Node> left, TreePtr<Node> right );
-	TreePtr<Node> OnIntegralLiteral( string text, any loc );
+	TreePtr<Node> OnIntegralLiteral( string text, any loc ); 
 	TreePtr<Node> OnStringLiteral( wstring value );
 	TreePtr<Node> OnBoolLiteral( bool value );
+	TreePtr<Node> OnCast( TreePtr<Node> type, any type_loc, TreePtr<Node> target, any target_loc );
+	
+	
 	TreePtr<Node> OnSpecificId( list<string> typ, any type_loc, wstring wname, any name_loc );
 	TreePtr<Node> OnIdByName( list<string> typ, any type_loc, wstring wname, any name_loc );
 	TreePtr<Node> OnBuildId( list<string> typ, any type_loc, wstring wformat, any name_loc, Item sources );
@@ -88,6 +91,9 @@ public:
 	static string DiagQuote(string name);
 	static string DiagQuote(wstring name);
 	TreePtr<Node> CreateIntegralLiteral( bool uns, bool lng, bool lng2, uint64_t val, any loc );
+
+	//bool IsType() const;
+	bool IsDesignated(wstring name) const;
 
 private: 
 	unique_ptr<YY::VNLangScanner> scanner;

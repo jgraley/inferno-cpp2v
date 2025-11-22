@@ -46,8 +46,12 @@ public:
 		SPACE_SEP_DECLARATION, // the type in <here> <declarator>;
 		LABEL,  // Anything with a : after it. Could be (a) like a bare statement needing a ; or (b) a prefix on statements.
 		TOP_STMT_DECL, // Highest statement precedence
-										
-		// ----- Expressions and types. There is a precedence scheme, booted using ()
+							
+		// ----- Types. Just this for now.
+		BOOT_TYPE,
+		TOP_TYPE,
+		
+		// ----- Expressions. There is a precedence scheme, booted using ()
 		BOOT_EXPR = 50, // Lowest expression precedence: (), {}, [] etc from the inside		
 
 		VN_SEP_SCRIPTY, // Separated by ⨟ (in embedded engine renders)
@@ -81,7 +85,7 @@ public:
 		TOP_EXPR, // Highest expression precedence
 		
 		// ----- Abstract, lexer-ish productions of no particuler kind
-		EXPLICIT_NODE = 80, // Eg ⯁CPPTree::MyNode(...)
+		EXPLICIT_NODE = 80, // Eg ◼CPPTree::MyNode(...)
 		SCOPE_RESOLVE, // :: in C++	
 		PURE_IDENTIFIER, // Higher than expr because could be a type, label etc
 		TOKEN, // Lexer tokens of any kind (other than type or expression)

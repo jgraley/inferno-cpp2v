@@ -258,13 +258,16 @@ string Render::Dispatch( TreePtr<Node> node, Syntax::Production surround_prod, S
 	}
 	catch( Syntax::NotOnThisNode & ) {}
 
-	return RenderNodeExplicit(node);
+	return RenderNodeExplicit(node, surround_prod);
 }		
 
 
-string Render::RenderNodeExplicit( shared_ptr<const Node> node )
+string Render::RenderNodeExplicit( shared_ptr<const Node> node, Syntax::Production surround_prod )
 {
-    string s = "⯁" + GetInnermostTemplateParam(TYPE_ID_NAME(*node));
+	bool need_a_type = surround_prod >= Syntax::Production::BOOT_TYPE && 
+	                   surround_prod <= Syntax::Production::TOP_TYPE;
+    string s = need_a_type ? "⯁" : "◼";
+    s += GetInnermostTemplateParam(TYPE_ID_NAME(*node));
 	
     list<string> sitems;    
     vector< Itemiser::Element * > items = node->Itemise();
@@ -335,7 +338,7 @@ Syntax::Production Render::GetNodeProduction( TreePtr<Node> node, Syntax::Produc
 	try 
 	{ 
 		// A lot of nodes have GetMyProduction() but not GetRender(). If GetRender() is not
-		// implemented, we'll generate explicit (⯁) form, which is EXPLICIT_NODE.
+		// implemented, we'll generate explicit (◼) form, which is EXPLICIT_NODE.
 		// Passing in the real renderer would cause unwanted side-effects.
 		struct FakeRenderer : RendererInterface
 		{

@@ -710,6 +710,12 @@ Syntax::Production Cast::GetMyProductionTerminal() const
 	return Production::PREFIX; 
 }
 
+string Cast::GetRender( VN::RendererInterface *renderer, Production, Policy  )
+{
+    return "(" + renderer->RenderIntoProduction( type, Syntax::Production::BOOT_TYPE ) + ")" +
+           renderer->RenderIntoProduction( operand, Syntax::Production::PREFIX );
+}
+
 //////////////////////////// IdValuePair ///////////////////////////////
 
 Syntax::Production IdValuePair::GetMyProductionTerminal() const

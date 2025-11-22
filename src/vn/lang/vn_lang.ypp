@@ -52,7 +52,8 @@
 	STUFF		 							"⩨"
 	DELTA 									"▲"
 	DELTA_ARROW 							"⯈"
-	BUILT_IN 								"⯁"
+	BUILT_IN 								"◼"
+	BUILT_IN_TYPE							"⯁"
 	OPEN_VN 								"【"
 	CLOSE_VN 								"】"
 	ANY 									"☆"
@@ -80,7 +81,7 @@
 	<string>	C_BITWISE_XOR_OP			"^"
 	<string>	C_AMPERSAND					"&"
 	<string>	C_EQUALITY_OP				_("C equality operator")
-	<string>  	C_RELATION_OP				_("C relation operator")
+	<string>  	C_RELATIONAL_OP				_("C relation operator")
 	<string>	C_SHIFT_OP					_("C shift operator")
 	<string>	C_ADD_SUB_OP				_("C add/subtract")
 	<string>    C_DIV_MOD_OP				_("C divide/modulo")
@@ -93,8 +94,11 @@
 	<bool>		BOOL_LITERAL				_("boolean literal")
 	<string>  	ASCII_NAME 					_("ASCII name")
 	<string>  	ASCII_FORMAT 				_("ASCII format string")
+	<string>  	ASCII_SUBTREE				_("ASCII subtree")
 	<wstring> 	UNICODE_NAME 				_("Unicode name")
-
+	<wstring> 	UNICODE_SUBTREE				_("Unicode subtree")
+	<string>    TYPENAME					"typename"
+	
 %left DISJUNCTION
 %left CONJUNCTION 
 %right C_ASSIGN
@@ -103,12 +107,13 @@
 %right ENGINE STUFF DELTA DELTA_ARROW TRANSFORM NEGATION GRASS POINTER_IS BUILD_SIZE STRINGIZE C_PREFIX_OP
 %left C_PRE_OR_POSTFIX_OP
 %precedence OPEN_CHEVRON CLOSE_CHEVRON OPEN_VN CLOSE_VN
-%precedence BUILT_IN BOOL_LITERAL STRING_LITERAL INTEGRAL_LITERAL SPECIFIC_ID
+%precedence BUILT_IN BUILT_IN_TYPE BOOL_LITERAL STRING_LITERAL INTEGRAL_LITERAL SPECIFIC_ID
 
-%type <TreePtr<Node>> 				pattern pat_unit pat_post pat_pre pat_rel pat_dis pat_con 
-%type <TreePtr<Node>> 				pat_ass pat_eq pat_add pat_lor pat_land statements statement
-%type <TreePtr<Node>> 				pat_mul pat_shft pat_band pat_bor pat_bxor pat_no_comma_op pat_comma_op
-%type <wstring> 					vn_name
+%type <TreePtr<Node>> 				expression expr_unit expr_postfix expr_prefix expr_relational expr_disjunction expr_conjunction type 
+%type <TreePtr<Node>> 				expr_assignment expr_equality expr_add_etc expr_logical_or expr_logical_and statements statement
+%type <TreePtr<Node>> 				expr_mul_etc expr_shift expr_bitwise_and expr_bitwise_or expr_bitwise_xor expr_no_comma_op 
+%type <TreePtr<Node>> 				expr_paren expr_comma_op type_unit type_prefix type_paren
+%type <wstring> 					vn_name vn_subtree
 %type <list<string>> 				scoped_name
 %type <VN::Command::List>			commands sep_commands
 %type <shared_ptr<VN::Command>>		bare_command
@@ -118,7 +123,7 @@
 
 %%
 
-vnscript 		: commands 						{ vn->OnVNScript($1); }
+vnscript 		: commands 								{ vn->OnVNScript($1); }
      
 // This is to make the ⨟ optional on last command
 commands        : sep_commands							{ $$ = $1; }
@@ -131,9 +136,9 @@ sep_commands 	: sep_commands VN_SEMI bare_command		{ $$ = $1; if( $3->OnParse(vn
 				| bare_command							{ if( $1->OnParse(vn) ) $$.push_back($1); }
 			
 // Add more commands here
-bare_command	: vn_name DESIGNATE pattern				{ $$ = make_shared<VN::Designation>($1, $3, @2); }
-				| ENGINE pattern   		 			 	{ $$ = make_shared<VN::EngineCommand>($2, @1); }
-				| pattern 			  					{ $$ = make_shared<VN::PatternCommand>($1, @$); }
+bare_command	: vn_name DESIGNATE expression			{ $$ = make_shared<VN::Designation>($1, $3, @2); }
+				| ENGINE expression   		 		 	{ $$ = make_shared<VN::EngineCommand>($2, @1); }
+				| expression 			  				{ $$ = make_shared<VN::PatternCommand>($1, @$); }
 
 // This one dips into ASCII/C because VN doesn't otherwise need equality/inequality operators
 limit		: C_ASSIGN INTEGRAL_LITERAL					{ $$ = VN::Limit{ $1, @1, $2, @2 }; }
@@ -149,106 +154,136 @@ items_sep 	: items_bare VN_SEP		   					{ $$ = $1; }
 			| items_sep VN_SEP		 					{ $$ = $1; $$.items.push_back({{}, @2}); }
 			| VN_SEP	 								{ $$.items.push_front({{}, @1}); }
 
-item		: item COMMA pat_no_comma_op				{ $$ = $1; $$.nodes.push_back($3); $$.loc = @$; }
-			| pat_no_comma_op							{ $$.nodes.push_back($1); $$.loc = @$; }
+item		: item COMMA expr_no_comma_op				{ $$ = $1; $$.nodes.push_back($3); $$.loc = @$; }
+			| expr_no_comma_op							{ $$.nodes.push_back($1); $$.loc = @$; }
 
 
 statements	: statement
 
-statement	: pattern
+statement	: expression
+          
+type		: type_unit          
+          
+type_prefix : 										     type_paren
+			|  									  STUFF type_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
+			| 		  STUFF OPEN_VN expression CLOSE_VN type_prefix	{ $$ = vn->OnStuff($5, $3, VN::Limit()); }
+			| 		  STUFF OPEN_VN limit      CLOSE_VN type_prefix	{ $$ = vn->OnStuff($5, nullptr, $3); }
+			| 			   DELTA expression DELTA_ARROW type_prefix	{ $$ = vn->OnDelta($2, $4); }
+			|  PRERESTRICT OPEN_VN scoped_name CLOSE_VN type_prefix	{ $$ = vn->OnRestrict($3, @3, $5, @5); }
+			| 	  TRANSFORM OPEN_VN ASCII_NAME CLOSE_VN type_prefix	{ $$ = vn->OnTransform($3, @3, $5, @5); }
+			| 								   NEGATION type_prefix	{ $$ = vn->OnNegation($2); }
+			| 									  GRASS type_prefix	{ $$ = vn->OnGrass($2); }
+			| 								 POINTER_IS type_prefix	{ $$ = vn->OnPointerIs($2); }
+			| 								 BUILD_SIZE type_prefix	{ $$ = vn->OnBuildSize($2); }
+			| 								  STRINGIZE type_prefix	{ $$ = vn->OnStringize($2); }
+
+
+type_paren	: type_unit
+			| '(' type ')'                          	{ $$ = vn->OnEmbeddedCommands($2); }
+                                        
+type_unit	: BUILT_IN_TYPE scoped_name itemisation		{ $$ = vn->OnBuiltIn($2, @2, $3); }
+			| BUILT_IN_TYPE scoped_name					{ $$ = vn->OnBuiltIn($2, @2, VN::Itemisation{{}, @2}); }
+			
+
                       
-pattern	: pat_comma_op
+expression			: expr_comma_op
                       
-pat_comma_op	: pat_no_comma_op
-				| pat_no_comma_op COMMA pat_comma_op		{ $$ = vn->OnInfixOperator($2, $1, $3); }
+expr_comma_op		: expr_no_comma_op
+					| expr_no_comma_op COMMA expr_comma_op						{ $$ = vn->OnInfixOperator($2, $1, $3); }
 
-pat_no_comma_op : pat_dis
+expr_no_comma_op 	: expr_disjunction
 
-pat_dis	: pat_con
-		| pat_dis DISJUNCTION pat_con						{ $$ = vn->OnDisjunction($1, $3); }
+expr_disjunction	: expr_conjunction
+					| expr_disjunction DISJUNCTION expr_conjunction				{ $$ = vn->OnDisjunction($1, $3); }
 
-pat_con : pat_ass
-		| pat_con CONJUNCTION pat_ass						{ $$ = vn->OnConjunction($1, $3); }
+expr_conjunction 	: expr_assignment
+					| expr_conjunction CONJUNCTION expr_assignment				{ $$ = vn->OnConjunction($1, $3); }
 		
-pat_ass : pat_lor 
-		| 						   pat_lor C_ASSIGN pat_ass	{ $$ = vn->OnInfixOperator($2, $1, $3); }
-		|                 pat_lor C_COMPOUND_ASSIGN pat_ass	{ $$ = vn->OnInfixOperator($2, $1, $3); }
+expr_assignment 	: 											expr_logical_or 
+					| 				   expr_logical_or C_ASSIGN expr_assignment	{ $$ = vn->OnInfixOperator($2, $1, $3); }
+					|         expr_logical_or C_COMPOUND_ASSIGN expr_assignment	{ $$ = vn->OnInfixOperator($2, $1, $3); }
 
-pat_lor : pat_land
-		| pat_lor C_LOGICAL_OR_OP pat_land					{ $$ = vn->OnInfixOperator($2, $1, $3); }
+expr_logical_or 	: expr_logical_and
+					| expr_logical_or C_LOGICAL_OR_OP expr_logical_and			{ $$ = vn->OnInfixOperator($2, $1, $3); }
 		
-pat_land: pat_bor
-		| pat_land C_LOGICAL_AND_OP pat_bor					{ $$ = vn->OnInfixOperator($2, $1, $3); }
+expr_logical_and	: expr_bitwise_or
+					| expr_logical_and C_LOGICAL_AND_OP expr_bitwise_or			{ $$ = vn->OnInfixOperator($2, $1, $3); }
 
-pat_bor : pat_bxor
-		| pat_bor C_BITWISE_OR_OP pat_bxor					{ $$ = vn->OnInfixOperator($2, $1, $3); }
+expr_bitwise_or 	: expr_bitwise_xor
+					| expr_bitwise_or C_BITWISE_OR_OP expr_bitwise_xor			{ $$ = vn->OnInfixOperator($2, $1, $3); }
 		
-pat_bxor: pat_band
-		| pat_bxor C_BITWISE_XOR_OP pat_band				{ $$ = vn->OnInfixOperator($2, $1, $3); }
+expr_bitwise_xor	: expr_bitwise_and
+					| expr_bitwise_xor C_BITWISE_XOR_OP expr_bitwise_and		{ $$ = vn->OnInfixOperator($2, $1, $3); }
 		
-pat_band: pat_eq
-		| pat_band C_AMPERSAND pat_eq						{ $$ = vn->OnInfixOperator($2, $1, $3); }
+expr_bitwise_and	: expr_equality
+					| expr_bitwise_and C_AMPERSAND expr_equality				{ $$ = vn->OnInfixOperator($2, $1, $3); }
 
-pat_eq  : pat_rel
-		| pat_eq C_EQUALITY_OP pat_rel						{ $$ = vn->OnInfixOperator($2, $1, $3); }
+expr_equality 		: expr_relational
+					| expr_equality C_EQUALITY_OP expr_relational				{ $$ = vn->OnInfixOperator($2, $1, $3); }
 
-pat_rel : pat_shft
-		| pat_rel C_RELATION_OP pat_shft					{ $$ = vn->OnInfixOperator($2, $1, $3); }
+expr_relational 	: expr_shift
+					| expr_relational C_RELATIONAL_OP expr_shift				{ $$ = vn->OnInfixOperator($2, $1, $3); }
 
-pat_shft: pat_add
-		| pat_shft C_SHIFT_OP pat_add						{ $$ = vn->OnInfixOperator($2, $1, $3); }
+expr_shift			: expr_add_etc
+					| expr_shift C_SHIFT_OP expr_add_etc						{ $$ = vn->OnInfixOperator($2, $1, $3); }
 		
-pat_add : pat_mul
-		| pat_add C_ADD_SUB_OP pat_mul						{ $$ = vn->OnInfixOperator($2, $1, $3); }
+expr_add_etc 		: expr_mul_etc
+					| expr_add_etc C_ADD_SUB_OP expr_mul_etc					{ $$ = vn->OnInfixOperator($2, $1, $3); }
 		
-pat_mul : pat_pre
-		| pat_mul C_DIV_MOD_OP pat_pre						{ $$ = vn->OnInfixOperator($2, $1, $3); }
-		| pat_mul '*' pat_pre								{ $$ = vn->OnInfixOperator("*", $1, $3); }
+expr_mul_etc 		: expr_prefix
+					| expr_mul_etc C_DIV_MOD_OP expr_prefix						{ $$ = vn->OnInfixOperator($2, $1, $3); }
+					| expr_mul_etc '*' expr_prefix								{ $$ = vn->OnInfixOperator("*", $1, $3); }
 		
-pat_pre : pat_post
-		|  									  STUFF pat_pre	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
-		| 			 STUFF OPEN_VN pattern CLOSE_VN pat_pre	{ $$ = vn->OnStuff($5, $3, VN::Limit()); }
-		| 			 STUFF OPEN_VN limit   CLOSE_VN pat_pre	{ $$ = vn->OnStuff($5, nullptr, $3); }
-		| 				  DELTA pattern DELTA_ARROW pat_pre	{ $$ = vn->OnDelta($2, $4); }
-		| 					    C_PREFIX_OP 		pat_pre	{ $$ = vn->OnPrefixOperator($1, $2); }
-		| 					    C_AMPERSAND 		pat_pre	{ $$ = vn->OnPrefixOperator($1, $2); }
-		| 					    C_STAR		 		pat_pre	{ $$ = vn->OnPrefixOperator($1, $2); }
-		| 					    C_ADD_SUB_OP	    pat_pre	{ $$ = vn->OnPrefixOperator($1, $2); }
-		| 					    C_PRE_OR_INFIX_OP   pat_pre	{ $$ = vn->OnPrefixOperator($1, $2); }
-		| 					    C_PRE_OR_POSTFIX_OP pat_pre	{ $$ = vn->OnPrefixOperator($1, $2); }
-		|  PRERESTRICT OPEN_VN scoped_name CLOSE_VN pat_pre	{ $$ = vn->OnRestrict($3, @3, $5, @5); }
-		| 	  TRANSFORM OPEN_VN ASCII_NAME CLOSE_VN pat_pre	{ $$ = vn->OnTransform($3, @3, $5, @5); }
-		| 								   NEGATION pat_pre	{ $$ = vn->OnNegation($2); }
-		| 									  GRASS pat_pre	{ $$ = vn->OnGrass($2); }
-		| 								 POINTER_IS pat_pre	{ $$ = vn->OnPointerIs($2); }
-		| 								 BUILD_SIZE pat_pre	{ $$ = vn->OnBuildSize($2); }
-		| 								  STRINGIZE pat_pre	{ $$ = vn->OnStringize($2); }
+expr_prefix : 										   expr_postfix
+			|  									  STUFF expr_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
+			| 		  STUFF OPEN_VN expression CLOSE_VN expr_prefix	{ $$ = vn->OnStuff($5, $3, VN::Limit()); }
+			| 			 STUFF OPEN_VN limit   CLOSE_VN expr_prefix	{ $$ = vn->OnStuff($5, nullptr, $3); }
+			| 			   DELTA expression DELTA_ARROW expr_prefix	{ $$ = vn->OnDelta($2, $4); }
+			| 					    C_PREFIX_OP 		expr_prefix	{ $$ = vn->OnPrefixOperator($1, $2); }
+			| 					    C_AMPERSAND 		expr_prefix	{ $$ = vn->OnPrefixOperator($1, $2); }
+			| 					    C_STAR		 		expr_prefix	{ $$ = vn->OnPrefixOperator($1, $2); }
+			| 					    C_ADD_SUB_OP	    expr_prefix	{ $$ = vn->OnPrefixOperator($1, $2); }
+			| 					    C_PRE_OR_INFIX_OP   expr_prefix	{ $$ = vn->OnPrefixOperator($1, $2); }
+			| 					    C_PRE_OR_POSTFIX_OP expr_prefix	{ $$ = vn->OnPrefixOperator($1, $2); }
+			|							   '(' type ')' expr_prefix { $$ = vn->OnCast($2, @2, $4, @4); }
+			|  PRERESTRICT OPEN_VN scoped_name CLOSE_VN expr_prefix	{ $$ = vn->OnRestrict($3, @3, $5, @5); }
+			| 	  TRANSFORM OPEN_VN ASCII_NAME CLOSE_VN expr_prefix	{ $$ = vn->OnTransform($3, @3, $5, @5); }
+			| 								   NEGATION expr_prefix	{ $$ = vn->OnNegation($2); }
+			| 									  GRASS expr_prefix	{ $$ = vn->OnGrass($2); }
+			| 								 POINTER_IS expr_prefix	{ $$ = vn->OnPointerIs($2); }
+			| 								 BUILD_SIZE expr_prefix	{ $$ = vn->OnBuildSize($2); }
+			| 								  STRINGIZE expr_prefix	{ $$ = vn->OnStringize($2); }
 
-pat_post: pat_unit     
-		| pat_post C_PRE_OR_POSTFIX_OP 					 	{ $$ = vn->OnPostfixOperator($2, $1); }
-  
-pat_unit: STAR												{ $$ = vn->OnStar(nullptr); }
-		| STAR OPEN_VN pattern CLOSE_VN						{ $$ = vn->OnStar($3); }
-		| BUILT_IN scoped_name itemisation					{ $$ = vn->OnBuiltIn($2, @2, $3); }
-		| BUILT_IN scoped_name								{ $$ = vn->OnBuiltIn($2, @2, VN::Itemisation{{}, @2}); }
-		| INTEGRAL_LITERAL					      			{ $$ = vn->OnIntegralLiteral($1, @1); }
-		| STRING_LITERAL					      			{ $$ = vn->OnStringLiteral($1); }
-		| BOOL_LITERAL										{ $$ = vn->OnBoolLiteral($1); }
-		| ANY												{ $$ = nullptr; }
-		| '(' commands ')'                          		{ $$ = vn->OnEmbeddedCommands($2); }
-		| '{' statements '}'                          		{ $$ = $2; }
-		| vn_name       						  			{ $$ = vn->OnName($1, @1); }
-		| SPECIFIC_ID OPEN_VN scoped_name VN_SEP STRING_LITERAL CLOSE_VN			{ $$ = vn->OnSpecificId($3, @3, $5, @5); }
-		| SPECIFIC_ID OPEN_VN scoped_name VN_SEP CLOSE_VN							{ $$ = vn->OnSpecificId($3, @3, wstring(), @5); }
-		| ID_BY_NAME OPEN_VN scoped_name VN_SEP STRING_LITERAL CLOSE_VN				{ $$ = vn->OnIdByName($3, @3, $5, @5); } // ASCII_NAME could be format
-		| BUILD_ID OPEN_VN scoped_name VN_SEP STRING_LITERAL VN_SEP CLOSE_VN 		{ $$ = vn->OnBuildId($3, @3, $5, @5, VN::Item{}); }
-		| BUILD_ID OPEN_VN scoped_name VN_SEP STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($3, @3, $5, @5, $7); }
-		| BUILD_ID OPEN_VN scoped_name VN_SEP VN_SEP item CLOSE_VN 					{ $$ = vn->OnBuildId($3, @3, wstring(), @5, $6); }
+expr_postfix: expr_paren     
+			| expr_postfix C_PRE_OR_POSTFIX_OP 				 	{ $$ = vn->OnPostfixOperator($2, $1); }
+		
+expr_paren	: expr_unit
+			| '(' commands ')'                          		{ $$ = vn->OnEmbeddedCommands($2); }
 
-vn_name			: UNICODE_NAME    						{ $$ = $1; }
-				| ASCII_NAME							{ $$ = ToUnicode($1); }     
+expr_unit	: BUILT_IN scoped_name itemisation					{ $$ = vn->OnBuiltIn($2, @2, $3); }
+			| BUILT_IN scoped_name								{ $$ = vn->OnBuiltIn($2, @2, VN::Itemisation{{}, @2}); }
+			| STAR												{ $$ = vn->OnStar(nullptr); }
+			| STAR OPEN_VN expression CLOSE_VN					{ $$ = vn->OnStar($3); }
+			| INTEGRAL_LITERAL					      			{ $$ = vn->OnIntegralLiteral($1, @1); }
+			| STRING_LITERAL					      			{ $$ = vn->OnStringLiteral($1); }
+			| BOOL_LITERAL										{ $$ = vn->OnBoolLiteral($1); }
+			| ANY												{ $$ = nullptr; }
+			| '{' statements '}'                          		{ $$ = $2; }
+			| vn_subtree       						  			{ $$ = vn->OnName($1, @1); }
+			| SPECIFIC_ID OPEN_VN scoped_name VN_SEP STRING_LITERAL CLOSE_VN			{ $$ = vn->OnSpecificId($3, @3, $5, @5); }
+			| SPECIFIC_ID OPEN_VN scoped_name VN_SEP CLOSE_VN							{ $$ = vn->OnSpecificId($3, @3, wstring(), @5); }
+			| ID_BY_NAME OPEN_VN scoped_name VN_SEP STRING_LITERAL CLOSE_VN				{ $$ = vn->OnIdByName($3, @3, $5, @5); } // ASCII_NAME could be format
+			| BUILD_ID OPEN_VN scoped_name VN_SEP STRING_LITERAL VN_SEP CLOSE_VN 		{ $$ = vn->OnBuildId($3, @3, $5, @5, VN::Item{}); }
+			| BUILD_ID OPEN_VN scoped_name VN_SEP STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($3, @3, $5, @5, $7); }
+			| BUILD_ID OPEN_VN scoped_name VN_SEP VN_SEP item CLOSE_VN 					{ $$ = vn->OnBuildId($3, @3, wstring(), @5, $6); }
+
+vn_name		: UNICODE_NAME    						{ $$ = $1; }
+			| ASCII_NAME							{ $$ = ToUnicode($1); }     
      
-scoped_name		: ASCII_NAME SCOPE_RES scoped_name		{ $$ = $3; $$.push_front($1); }
-				| ASCII_NAME							{ $$.push_front($1); }
+vn_subtree	: UNICODE_SUBTREE  						{ $$ = $1; }
+			| ASCII_SUBTREE							{ $$ = ToUnicode($1); }     
+     
+scoped_name	: ASCII_NAME SCOPE_RES scoped_name		{ $$ = $3; $$.push_front($1); }
+			| ASCII_NAME							{ $$.push_front($1); }
 
 %%

@@ -31,7 +31,7 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc );
 
 
 VNParse::VNParse() :
-	scanner( make_unique<YY::VNLangScanner>(reflex::Input(), std::cerr) ),
+	scanner( make_unique<YY::VNLangScanner>(this, reflex::Input(), std::cerr) ),
 	parser( make_unique<YY::VNLangParser>(*scanner, this) ),
 	node_names( make_unique<NodeNames>() )
 {
@@ -196,7 +196,7 @@ TreePtr<Node> VNParse::OnBuiltIn( list<string> builtin_type, any builtin_loc, It
 		if( src_it == src_itemisation.items.end() )
 			throw YY::VNLangParser::syntax_error( 
 				prev_loc, 
-				"In ⯁, insufficient items given. " + counts_msg );
+				"In ◼, insufficient items given. " + counts_msg );
 		const Item &src_item = *src_it;
         if( SequenceInterface *dest_seq = dynamic_cast<SequenceInterface *>(dest_item) ) // TODO could roll together as Container?
             for( TreePtr<Node> src : src_item.nodes )
@@ -209,7 +209,7 @@ TreePtr<Node> VNParse::OnBuiltIn( list<string> builtin_type, any builtin_loc, It
 			if( src_item.nodes.size() != 1 )
 			    throw YY::VNLangParser::syntax_error( 
 				    any_cast<YY::VNLangParser::location_type>(src_item.loc),
-				    SSPrintf("In ⯁, singular item requires exactly one sub-pattern but %d were given.",
+				    SSPrintf("In ◼, singular item requires exactly one sub-pattern but %d were given.",
 				    src_item.nodes.size() ) ); 
             *dest_sing = src_item.nodes.front();
 		}
@@ -219,13 +219,13 @@ TreePtr<Node> VNParse::OnBuiltIn( list<string> builtin_type, any builtin_loc, It
         prev_loc = any_cast<YY::VNLangParser::location_type>(src_item.loc);
     }
     string empty_note;
-    // Sniff out the case where user put eg ⯁Node() when ⯁Node is required
+    // Sniff out the case where user put eg ◼Node() when ◼Node is required
     if( dest_items.size()==0 && src_itemisation.items.size()==1 && src_itemisation.items.front().nodes.size()==0 )
 		empty_note = "\nNote: where a node type requires zero items, simply omit the () entirely.";                             
 	if( src_it != src_itemisation.items.end() )
 		throw YY::VNLangParser::syntax_error( 
 			any_cast<YY::VNLangParser::location_type>(src_it->loc), 
-			"In ⯁, excess items given. " + counts_msg + empty_note);
+			"In ◼, excess items given. " + counts_msg + empty_note);
 
 	return dest;
 }
@@ -327,6 +327,16 @@ TreePtr<Node> VNParse::OnBoolLiteral( bool value )
 	else
 		return MakeTreeNode<StandardAgentWrapper<False>>();
 }
+
+
+TreePtr<Node> VNParse::OnCast( TreePtr<Node> type, any type_loc, TreePtr<Node> operand, any operand_loc )
+{
+	auto node = MakeTreeNode<StandardAgentWrapper<Cast>>();
+	node->operand = operand;	
+	node->type = type;
+	return node;
+}
+
 
 
 TreePtr<Node> VNParse::OnSpecificId( list<string> typ, any type_loc, wstring wname, any name_loc )
@@ -517,6 +527,13 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 	
 	return NodeNames().GetNameToEnumMap().at(typ);	
 }
+
+
+bool VNParse::IsDesignated(wstring name) const
+{
+	return designations.count(name) > 0;
+}
+
 
 
 // grammar for C operators
