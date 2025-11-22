@@ -4,6 +4,9 @@
 #include "common/common.hpp"
 #include "common/mismatch.hpp"
 
+#include <typeinfo>
+#include <typeindex>
+
 namespace VN
 {
 	class RendererInterface;
@@ -85,11 +88,19 @@ public:
 		ANONYMOUS
 	};
 	
+	static const type_index DefaultAccess;
+	
 	struct Policy
 	{
-		Policy() : force_initialisation(false), force_incomplete_records(false) {}
+		Policy() : 
+			force_initialisation(false), 
+			force_incomplete_records(false),
+			current_access(DefaultAccess) {}
 		bool force_initialisation;
 		bool force_incomplete_records;
+		// A good thing about typeindex/typeid is that you can refer to a node
+		// type without needing to have an actual node of that type.
+		type_index current_access;
 	};
 	
 	// We deal with syntactical association only, not mathematical, because:

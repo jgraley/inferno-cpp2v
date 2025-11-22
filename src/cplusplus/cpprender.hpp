@@ -3,6 +3,9 @@
 
 #include "vn/lang/render.hpp"
 
+#include <typeinfo>
+#include <typeindex>
+
 class CppRender : public VN::Render
 {
 public:	
@@ -38,7 +41,7 @@ private:
     string RenderMakeRecord( TreePtr<CPPTree::RecordLiteral> make_rec, Syntax::Production surround_prod );
 	Sequence<CPPTree::Expression> SortMapById( Collection<CPPTree::IdValuePair> &id_value_map,
                                                Sequence<CPPTree::Declaration> key_sequence );  
-    string RenderAccessSpec( TreePtr<CPPTree::AccessSpec> access, Syntax::Production surround_prod );
+    string RenderAccessSpec( TreePtr<CPPTree::AccessSpec> access, Syntax::Production surround_prod, Syntax::Policy policy );
     string RenderStorage( TreePtr<CPPTree::Instance> st ); // No actual storage node
     void ExtractInits( Sequence<CPPTree::Statement> &body, 
                        Sequence<CPPTree::Statement> &inits, 
@@ -58,11 +61,9 @@ private:
 	string RenderEnumBodyScope( TreePtr<CPPTree::Record> record );
     string RenderOperandSequence( Sequence<CPPTree::Expression> spe );
 	string MaybeRenderFieldAccess( TreePtr<CPPTree::Declaration> declaration,
-			  			           TreePtr<CPPTree::AccessSpec> *current_access );
-	string MaybeRenderAccessColon( TreePtr<CPPTree::AccessSpec> this_access,
-			  			           TreePtr<CPPTree::AccessSpec> *current_access );
+			  			           type_index *current_access );
     string RenderDeclScope( TreePtr<CPPTree::DeclScope> decl_scope,
-							TreePtr<CPPTree::AccessSpec> init_access = TreePtr<CPPTree::AccessSpec>() );
+							type_index init_access = Syntax::DefaultAccess );
 
 	string RenderParams( TreePtr<CPPTree::CallableParams> key);
 

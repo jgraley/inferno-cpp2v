@@ -1,6 +1,11 @@
 #include "syntax.hpp"
 #include "common/common.hpp"
 
+#include "tree/cpptree.hpp"
+
+const type_index Syntax::DefaultAccess = type_index(typeid(CPPTree::Public));
+
+
 string Syntax::GetLoweredIdName() const
 {
 	throw NotOnThisNode();
