@@ -41,7 +41,7 @@ public:
 	string RenderScopeResolvingPrefix( TreePtr<Node> id ) override;
 	string GetUniqueIdentifierName( TreePtr<Node> id ) const override;
 
-	virtual Syntax::Production GetNodeProduction( TreePtr<Node> node, Syntax::Policy policy ) const;						 
+	virtual Syntax::Production GetNodeProduction( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy ) const;						 
 	TreePtr<CPPTree::Scope> TryGetScope( TreePtr<Node> node ) const;
 	bool IsDeclared( TreePtr<CPPTree::Identifier> id );
 							 

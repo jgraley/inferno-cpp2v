@@ -69,8 +69,9 @@ string CppRender::RenderToString( TreePtr<Node> root )
 }
 
 
-Syntax::Production CppRender::GetNodeProduction( TreePtr<Node> node, Syntax::Policy policy ) const
+Syntax::Production CppRender::GetNodeProduction( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy ) const
 {
+	(void)surround_prod;
 	return node->GetMyProduction(this, policy);       
 }
 

@@ -53,7 +53,7 @@ public:
 		VN_SEP_SCRIPTY, // Separated by ⨟ (in embedded engine renders)
 		VN_SEP_ITEMS, // Separated by ⚬ (in StandardAgent renders, which always have ())
 		
-		COMMA_OP, 
+		COMMA_OP, // Must be lowest binop, so we can bypass it when we want comma as separator
 		COMMA_SEP, // Use this for comma-separated lists to force parens for COMMA_OP, including VN
 
 		VN_DESIGNATE, // defining names using ⪮

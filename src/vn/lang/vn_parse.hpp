@@ -72,9 +72,9 @@ public:
 	TreePtr<Node> OnIntegralLiteral( string text, any loc );
 	TreePtr<Node> OnStringLiteral( wstring value );
 	TreePtr<Node> OnBoolLiteral( bool value );
-	TreePtr<Node> OnSpecificId( list<string> typ, any type_loc, string name, any name_loc );
-	TreePtr<Node> OnIdByName( list<string> typ, any type_loc, string name, any name_loc );
-	TreePtr<Node> OnBuildId( list<string> typ, any type_loc, string format, any name_loc, Item sources );
+	TreePtr<Node> OnSpecificId( list<string> typ, any type_loc, wstring wname, any name_loc );
+	TreePtr<Node> OnIdByName( list<string> typ, any type_loc, wstring wname, any name_loc );
+	TreePtr<Node> OnBuildId( list<string> typ, any type_loc, wstring wformat, any name_loc, Item sources );
 	TreePtr<Node> OnTransform( string kind, any kind_loc, TreePtr<Node> pattern, any pattern_loc );
 	TreePtr<Node> OnNegation( TreePtr<Node> operand );
 	TreePtr<Node> OnConjunction( TreePtr<Node> left, TreePtr<Node> right );
@@ -85,8 +85,8 @@ public:
 	TreePtr<Node> OnStringize( TreePtr<Node> source );
 	
 	void Designate( wstring name, TreePtr<Node> sub_pattern );
-	static string QuoteName(string name);
-	static string QuoteName(wstring name);
+	static string DiagQuote(string name);
+	static string DiagQuote(wstring name);
 	TreePtr<Node> CreateIntegralLiteral( bool uns, bool lng, bool lng2, uint64_t val, any loc );
 
 private: 

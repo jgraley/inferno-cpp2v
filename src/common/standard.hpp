@@ -49,5 +49,6 @@ string JoinInstanceFunction( string instance, string function );
 string OrdinalString( int i );
 wstring ToUnicode( string s );
 string ToASCII( wstring s );
-	
+string Unquote(string s);
+
 #endif

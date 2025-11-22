@@ -27,12 +27,11 @@
 
 // ASCII must come before unicode otherwise they'd all lex as unicode.
 ascii_name				[a-zA-Z_][a-zA-Z0-9_]*
-ascii_format			[a-zA-Z_%][a-zA-Z0-9_%]*
 unicode_name			\p{UnicodeIdentifierStart} \p{UnicodeIdentifierPart}*
 float_exp_suffix		[Ee] [-+]? \d+
 float_num				\d* (\d | \.\d | \d\.) \d* {float_exp_suffix}?
 integral_num			\d*[lLuU]*
-comp_assign				\+=|-=|\*=|\/=|%=|<<=|>>=
+comp_assign				\|=|^=|&=|<<=|>>=|\+=|-=|\*=|\/=|%=
 
 %%
 
@@ -68,27 +67,31 @@ comp_assign				\+=|-=|\*=|\/=|%=|<<=|>>=
 ==|!=			{ return YY::VNLangParser::make_C_EQUALITY_OP(str(), location()); }
 <|<=|>|>=		{ return YY::VNLangParser::make_C_RELATION_OP(str(), location()); }
 {comp_assign} 	{ return YY::VNLangParser::make_C_COMPOUND_ASSIGN(str(), location()); }
-\|\|		  	{ return YY::VNLangParser::make_C_LOGICAL_OR(location()); }
-&&			  	{ return YY::VNLangParser::make_C_LOGICAL_AND(location()); }
+\|\|		  	{ return YY::VNLangParser::make_C_LOGICAL_OR_OP(str(), location()); }
+&&			  	{ return YY::VNLangParser::make_C_LOGICAL_AND_OP(str(), location()); }
+<<|>>		  	{ return YY::VNLangParser::make_C_SHIFT_OP(str(), location()); }
 
 !|~				{ return YY::VNLangParser::make_C_PREFIX_OP(str(), location()); };
 \+\+|--			{ return YY::VNLangParser::make_C_PRE_OR_POSTFIX_OP(str(), location()); };
-\*|&	  		{ return YY::VNLangParser::make_C_PRE_OR_INFIX_OP(str(), location()); }
-=			  	{ return YY::VNLangParser::make_C_ASSIGN(location()); }
+=			  	{ return YY::VNLangParser::make_C_ASSIGN(str(), location()); }
 -|\+		  	{ return YY::VNLangParser::make_C_ADD_SUB_OP(str(), location()); }
-
+\/|%		  	{ return YY::VNLangParser::make_C_DIV_MOD_OP(str(), location()); }
+&				{ return YY::VNLangParser::make_C_AMPERSAND(str(), location()); }
+\|				{ return YY::VNLangParser::make_C_BITWISE_OR_OP(str(), location()); }
+\^				{ return YY::VNLangParser::make_C_BITWISE_XOR_OP(str(), location()); }
+\*				{ return YY::VNLangParser::make_C_STAR(str(), location()); }
+,				{ return YY::VNLangParser::make_COMMA(str(), location()); }
 
 true			{ return YY::VNLangParser::make_BOOL_LITERAL(true, location()); };
 false			{ return YY::VNLangParser::make_BOOL_LITERAL(false, location()); };
 
 ::				{ return YY::VNLangParser::make_SCOPE_RES(location()); };
 
-[()\{\};,] 		{ return YY::VNLangParser::symbol_type(chr(), location()); }
+[()\{\};,]		{ return YY::VNLangParser::symbol_type(chr(), location()); }
 
 \"[^"]*\"   	{ return YY::VNLangParser::make_STRING_LITERAL(wstr(), location()); }
 {integral_num}	{ return YY::VNLangParser::make_INTEGRAL_LITERAL(str(), location()); }
 {ascii_name}	{ return YY::VNLangParser::make_ASCII_NAME(str(), location()); }
-{ascii_format}	{ return YY::VNLangParser::make_ASCII_FORMAT(str(), location()); }
 {unicode_name}	{ return YY::VNLangParser::make_UNICODE_NAME(wstr(), location()); }
 
 %%

@@ -13,7 +13,7 @@ public:
     string RenderToString( TreePtr<Node> root );
 	
 private:	
-	Syntax::Production GetNodeProduction( TreePtr<Node> node, Syntax::Policy policy ) const final;
+	Syntax::Production GetNodeProduction( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy ) const final;
 	
 	string Dispatch( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy ) override;
 	

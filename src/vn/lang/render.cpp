@@ -106,7 +106,7 @@ string Render::RenderIntoProduction( TreePtr<Node> node, Syntax::Production surr
 
 string Render::RenderMaybeInitAssignment( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
 {
-    Syntax::Production node_prod = GetNodeProduction(node, policy);
+    Syntax::Production node_prod = GetNodeProduction(node, surround_prod, policy);
 
 	string s;
 	if( ReadArgs::use.count("c") )
@@ -133,7 +133,7 @@ string Render::RenderMaybeInitAssignment( TreePtr<Node> node, Syntax::Production
 
 string Render::RenderMaybeBoot( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
 {
-    Syntax::Production node_prod = GetNodeProduction(node, policy);
+    Syntax::Production node_prod = GetNodeProduction(node, surround_prod, policy);
 							 		
     if( !(Syntax::GetPrecedence(node_prod) < Syntax::GetPrecedence(surround_prod)) )
 		return RenderMaybeSemicolon( node, surround_prod, policy );
@@ -187,28 +187,17 @@ string Render::RenderMaybeSemicolon( TreePtr<Node> node, Syntax::Production surr
     // Production surround_prod relates to the surrounding grammar production and can be 
     // used to change the render of a certain subtree. It represents all the ancestor nodes of
     // the one supplied.
-    Syntax::Production node_prod = GetNodeProduction(node, policy);
+    Syntax::Production node_prod = GetNodeProduction(node, surround_prod, policy);
 							 		    
     if( !(Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::MAX_SURR_SEMICOLON) &&
           Syntax::GetPrecedence(node_prod) > Syntax::GetPrecedence(Syntax::Production::MIN_NODE_SEMICOLON) ) )
          return MaybeRenderPreRestriction( node, surround_prod, policy );
                  
-    switch(node_prod)
-    {
-        case Syntax::Production::BOOT_STMT_DECL...Syntax::Production::TOP_STMT_DECL: // Statement productions at different precedences        
-			return MaybeRenderPreRestriction( node, Syntax::Production::BOOT_STMT_DECL, policy ) +
-				   ";\n ";                              
+	if( ReadArgs::use.count("c") )
+		s += SSPrintf("// Adding semicolon, surround prod to BARE_STATEMENT\n");
 
-        case Syntax::Production::BOOT_EXPR...Syntax::Production::TOP_EXPR: // Expression productions at different precedences        
-			return MaybeRenderPreRestriction( node, Syntax::Production::BOOT_EXPR, policy ) +
-                   ";";                   
-        
-        default:         
-			return MaybeRenderPreRestriction( node, Syntax::Production::BOOT_EXPR, policy ) +
-				   ";";            					
-    }
-    
-    return s;
+ 	return MaybeRenderPreRestriction( node, Syntax::Production::BARE_STATEMENT, policy ) +
+		   ";\n ";                                  
 }
 
 
@@ -230,18 +219,17 @@ string Render::MaybeRenderPreRestriction( TreePtr<Node> node, Syntax::Production
 	if(!prerestricted)
 		return Dispatch( node, surround_prod, policy );
 		
-	// We need the archetype because otherwise we'll just get hte name 
+	// We need the archetype because otherwise we'll just get the name 
 	// of the special agent. We might be able to extract node name out
 	// of the template args, but using an archetype like this has precedent
 	// in the graph plotter.
 	TreePtr<Node> archetype_node = agent->GetArchetypeNode();
 
 	// This assumes no action is required in order to render a prefix operation
-	surround_prod = Syntax::Production::PREFIX;	
 	return "‽【" + 
 	       GetInnermostTemplateParam(TYPE_ID_NAME(*archetype_node)) + 
 	       "】" +
-	       Dispatch( node, surround_prod, policy );	
+	       Dispatch( node, Syntax::Production::PREFIX, policy );	
 }
 
 
@@ -335,7 +323,7 @@ string Render::GetUniqueIdentifierName( TreePtr<Node> ) const
 }
 
 
-Syntax::Production Render::GetNodeProduction( TreePtr<Node> node, Syntax::Policy policy ) const
+Syntax::Production Render::GetNodeProduction( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy ) const
 {
 	try
 	{
@@ -343,9 +331,22 @@ Syntax::Production Render::GetNodeProduction( TreePtr<Node> node, Syntax::Policy
 			return agent->GetAgentProduction();
 	}
 	catch( Syntax::NotOnThisNode & ) {}
-	
+		
 	try 
 	{ 
+		// A lot of nodes have GetMyProduction() but not GetRender(). If GetRender() is not
+		// implemented, we'll generate explicit (⯁) form, which is EXPLICIT_NODE.
+		// Passing in the real renderer would cause unwanted side-effects.
+		struct FakeRenderer : RendererInterface
+		{
+			string RenderIntoProduction( TreePtr<Node>, 
+										 Syntax::Production, 
+										 Syntax::Policy ) final { return "fake"; } 
+			string RenderScopeResolvingPrefix( TreePtr<Node> ) final { return ""; } 
+			string GetUniqueIdentifierName( TreePtr<Node> ) const final { return "fake"; }
+		} fake_renderer;
+		(void)node->GetRender(&fake_renderer, surround_prod, policy);
+		
 		return node->GetMyProduction(this, policy); 
 	}
 	catch( Syntax::NotOnThisNode & ) {}

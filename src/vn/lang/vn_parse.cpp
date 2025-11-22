@@ -111,7 +111,7 @@ TreePtr<Node> VNParse::OnStuff( TreePtr<Node> terminus, TreePtr<Node> recurse_re
 	else
 		throw YY::VNLangParser::syntax_error(
 			any_cast<YY::VNLangParser::location_type>(limit.cond_loc), 
-			"⩨ depth condition " + QuoteName(limit.cond) + " not supported." + note);		
+			"⩨ depth condition " + DiagQuote(limit.cond) + " not supported." + note);		
 }
 
 
@@ -130,7 +130,7 @@ TreePtr<Node> VNParse::OnName( wstring name, any name_loc )
 		throw YY::VNLangParser::syntax_error( 
 		    any_cast<YY::VNLangParser::location_type>(name_loc), 
 		    "Sub-pattern name " + 
-		    QuoteName(name) +
+		    DiagQuote(name) +
 		    " was not designated.");		
 			
 	return designations.at(name);
@@ -185,7 +185,7 @@ TreePtr<Node> VNParse::OnBuiltIn( list<string> builtin_type, any builtin_loc, It
 	list<Item>::const_iterator src_it = src_itemisation.items.begin();
     vector< Itemiser::Element * > dest_items = dest->Itemise();
     string counts_msg = SSPrintf("%s expects %d %s, but %d %s given.",
-                             QuoteName(Join(builtin_type, "::")).c_str(),
+                             DiagQuote(Join(builtin_type, "::")).c_str(),
                              dest_items.size(),
                              dest_items.size()==1?"item":"items",
                              src_itemisation.items.size(),
@@ -242,7 +242,7 @@ TreePtr<Node> VNParse::OnRestrict( list<string> res_type, any res_loc, TreePtr<N
 	if( !pspecial )
 		throw YY::VNLangParser::syntax_error(
 		     any_cast<YY::VNLangParser::location_type>(target_loc), 
-		     "‽ cannot be used with " + QuoteName(agent->GetTypeName()));		
+		     "‽ cannot be used with " + DiagQuote(agent->GetTypeName()));		
 		
 	pspecial->pre_restriction_archetype_node = node_names->MakeNode(ne);
 	pspecial->pre_restriction_archetype_ptr = node_names->MakeTreePtr(ne);
@@ -313,11 +313,10 @@ TreePtr<Node> VNParse::OnIntegralLiteral( string text, any loc )
 }
 
 
-TreePtr<Node> VNParse::OnStringLiteral( wstring value )
+TreePtr<Node> VNParse::OnStringLiteral( wstring wvalue )
 {
-	ASSERT( value.front() == '\"' && value.back() == '\"' ); // expecting quoted
-	value = value.substr(1, value.size()-2 );
-	return MakeTreeNode<StandardAgentWrapper<SpecificString>>(ToASCII(value));
+	string value = Unquote(ToASCII(wvalue));
+	return MakeTreeNode<StandardAgentWrapper<SpecificString>>(value);
 }
 
 
@@ -330,9 +329,10 @@ TreePtr<Node> VNParse::OnBoolLiteral( bool value )
 }
 
 
-TreePtr<Node> VNParse::OnSpecificId( list<string> typ, any type_loc, string name, any name_loc )
+TreePtr<Node> VNParse::OnSpecificId( list<string> typ, any type_loc, wstring wname, any name_loc )
 {
 	(void)name_loc; // TODO perhaps IdentifierByNameAgent can validate this?
+	string name = Unquote(ToASCII(wname));
 	
 	if( typ.size() == 1 )
 		typ.push_front("CPPTree"); // TODO centralise
@@ -346,15 +346,16 @@ TreePtr<Node> VNParse::OnSpecificId( list<string> typ, any type_loc, string name
 		throw YY::VNLangParser::syntax_error(
 		    any_cast<YY::VNLangParser::location_type>(type_loc),
 			"🞊 requires identifier type discriminator i.e. " + 
-			QuoteName(Join(typ, "::") + "Identifier") +
+			DiagQuote(Join(typ, "::") + "Identifier") +
 			" would need to exist as a node type.");	
 }
 
 
-TreePtr<Node> VNParse::OnIdByName( list<string> typ, any type_loc, string name, any name_loc )
+TreePtr<Node> VNParse::OnIdByName( list<string> typ, any type_loc, wstring wname, any name_loc )
 {
 	(void)name_loc; // TODO perhaps IdentifierByNameAgent can validate this?
-	
+	string name = Unquote(ToASCII(wname));
+
 	if( typ.size() == 1 )
 		typ.push_front("CPPTree"); // TODO centralise
 	
@@ -364,27 +365,30 @@ TreePtr<Node> VNParse::OnIdByName( list<string> typ, any type_loc, string name, 
 		throw YY::VNLangParser::syntax_error(
 		    any_cast<YY::VNLangParser::location_type>(type_loc),
 			"⊛ requires identifier type discriminator i.e. " + 
-			QuoteName(Join(typ, "::") + "Identifier") +
+			DiagQuote(Join(typ, "::") + "Identifier") +
 			" would need to exist as a node type.");
 	
 	return node;
 }
 
 
-TreePtr<Node> VNParse::OnBuildId( list<string> typ, any type_loc, string format, any name_loc, Item sources )
+TreePtr<Node> VNParse::OnBuildId( list<string> typ, any type_loc, wstring wformat, any name_loc, Item sources )
 {
 	(void)name_loc; // TODO perhaps BuildIdentifierAgent can validate this?
+
+	// Format is "" if omitted otherwise a quoted string with the quotes still on
+	string format = wformat.empty() ? "" : Unquote(ToASCII(wformat));
 	
 	if( typ.size() == 1 )
 		typ.push_front("CPPTree");  // TODO centralise
-
+		
 	TreePtr<Node> bia_node = BuildIdentifierAgent::TryMakeFromDestignatedType( typ.front(), typ.back(), format );
 	
 	if( !bia_node )
 		throw YY::VNLangParser::syntax_error(
 		    any_cast<YY::VNLangParser::location_type>(type_loc),
 			"⧇ requires identifier type discriminator i.e. " + 
-			QuoteName(Join(typ, "::") + "Identifier") +
+			DiagQuote(Join(typ, "::") + "Identifier") +
 			" would need to exist as a node type.");
 	
 	for( TreePtr<Node> src : sources.nodes )
@@ -408,7 +412,7 @@ TreePtr<Node> VNParse::OnTransform( string kind, any kind_loc, TreePtr<Node> pat
 	{
 		throw YY::VNLangParser::syntax_error(
 		    any_cast<YY::VNLangParser::location_type>(kind_loc),
-			QuoteName(kind) +
+			DiagQuote(kind) +
 			" unsupported in ⤨.");
 	}
 	to_agent->pattern = pattern;
@@ -470,15 +474,15 @@ void VNParse::Designate( wstring name, TreePtr<Node> sub_pattern )
 }
 
 
-string VNParse::QuoteName(string name)
+string VNParse::DiagQuote(string name)
 {
 	return "`" + name + "'";
 }
 
 
-string VNParse::QuoteName(wstring name)
+string VNParse::DiagQuote(wstring name)
 {
-	return QuoteName( ToASCII(name) ); 
+	return DiagQuote( ToASCII(name) ); 
 }
 
 
@@ -508,7 +512,7 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 	{
 		throw YY::VNLangParser::syntax_error(
 		    any_cast<YY::VNLangParser::location_type>(loc),
-			"Built-in type " + VNParse::QuoteName(Join(typ, "::")) + " unknown.");
+			"Built-in type " + VNParse::DiagQuote(Join(typ, "::")) + " unknown.");
 	}
 	
 	return NodeNames().GetNameToEnumMap().at(typ);	

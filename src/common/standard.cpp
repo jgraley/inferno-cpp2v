@@ -151,3 +151,11 @@ string ToASCII(wstring s)
 {
 	return wstring_convert<codecvt_utf8<wchar_t>>().to_bytes(s);
 }
+
+
+string Unquote(string s)
+{
+	ASSERT( s.front() == '\"' );
+	ASSERT( s.back() == '\"' );
+	return s.substr( 1, s.size()-2 );
+}

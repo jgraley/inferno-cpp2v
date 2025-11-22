@@ -112,8 +112,8 @@ string IdentifierByNameAgent::GetAgentRender( VN::RendererInterface *renderer, S
     (void)renderer;
 	(void)surround_prod;
 	string s = "⊛【" + GetIdentifierSubTypeName();
-	s += "⚬" + name;
-	s += "】";
+	s += "⚬\"" + name;
+	s += "\"】";
 	return s;
 } 
   

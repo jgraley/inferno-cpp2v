@@ -989,9 +989,9 @@ string StandardAgent::GetAgentRender( VN::RendererInterface *, Syntax::Productio
 		}
 		return "🞊【" + 
 		       scope + name.substr(8, name.size()-8-10) + // Take off Specific...Identifier
-		       "⚬" +
+		       "⚬\"" +
 			   GetIdentifierName() + 
-			   "】";
+			   "\"】";
 	}	
 	else
 	{
