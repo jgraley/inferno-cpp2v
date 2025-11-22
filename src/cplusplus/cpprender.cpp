@@ -1211,9 +1211,9 @@ string CppRender::MaybeRenderFieldAccess( TreePtr<Declaration> declaration,
     ASSERT( current_access );
     string s;
     
+    // Decide access spec for this declaration (explicit if instance, 
+    // otherwise force to Public). TODO fix this, #877
     TreePtr<AccessSpec> this_access = MakeTreeNode<Public>();
-
-    // Decide access spec for this declaration (explicit if instance, otherwise force to Public)
 	if( TreePtr<Field> f = DynamicTreePtrCast<Field>(declaration) )
 		this_access = f->access;
 
