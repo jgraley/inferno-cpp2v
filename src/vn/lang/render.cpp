@@ -142,7 +142,6 @@ string Render::RenderMaybeBoot( TreePtr<Node> node, Syntax::Production surround_
     switch(node_prod)
     {
         case Syntax::Production::BOOT_STMT_DECL...Syntax::Production::TOP_STMT_DECL: // Statement productions at different precedences
-        {
 			// Braces can actually work in expressions, eg in {}. The nodes are STATEMENT_SEQ and we boot to BOOT_STMT_DECL
 			ASSERT( Syntax::GetPrecedence(surround_prod) <= Syntax::GetPrecedence(Syntax::Production::BRACED) ||			
 					Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::TOP_STMT_DECL) )
@@ -153,40 +152,31 @@ string Render::RenderMaybeBoot( TreePtr<Node> node, Syntax::Production surround_
 				  ("Braces won't achieve high enough precedence for surrounding expressional or higher production\n")
 				  ("Node: ")(node)("\n")
 				  ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); 
-
-            s += "{\n ";
-
-			surround_prod = Syntax::Production::BOOT_STMT_DECL;
-			s += MaybeRenderPreRestriction( node, surround_prod, policy );
-			
-			s += "\n} ";            
-            break;
-        }
+				  
+			if( ReadArgs::use.count("c") )
+				s += SSPrintf("// Booting statement, surround prod to BOOT_STMT_DECL\n");
+				
+            return "{\n " + 
+                   RenderConcreteIntoProduction( node, Syntax::Production::BOOT_STMT_DECL, policy ) +	
+				   "\n} ";            
 
         case Syntax::Production::BOOT_EXPR...Syntax::Production::TOP_EXPR: // Expression productions at different precedences
-        {
             // If current production has too-high precedence, boot back down using parentheses
 			ASSERT( Syntax::GetPrecedence(surround_prod) <= Syntax::GetPrecedence(Syntax::Production::BRACKETED) )
 				  ("Parentheses won't achieve high enough precedence for surrounding production\n")
 				  ("Node: ")(node)("\n")
 				  ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); 
 					  
-            s += "(\n";
+			if( ReadArgs::use.count("c") )
+				s += SSPrintf("// Booting expression, surround prod to BOOT_EXPR\n");
 
-			surround_prod = Syntax::Production::BOOT_EXPR;
-			s += MaybeRenderPreRestriction( node, surround_prod, policy );
-
-            s += "\n)";            
-            break;
-        }
+            return "(\n" +
+				   RenderConcreteIntoProduction( node, Syntax::Production::BOOT_EXPR, policy ) +
+				   "\n)";            
         
-        default: 
-        {
-			s += MaybeRenderPreRestriction( node, surround_prod, policy );         
-			break;
-		}
+        default:        
+			return RenderConcreteIntoProduction( node, surround_prod, policy );         
     }
-    return s;
 }
 
 							
