@@ -10,13 +10,21 @@
 #include "indenter.hpp"
 #include <any> // to dep-break the generated headers
 
+// WHAT WE NEED
+// A "name info" struct containing a variety of handy info relating to a name we saw:
+// - unicode/ASCII flag
+// - A subtree if the name was designated
+// - An archetype if the type is known
+// - An enum of TYPE, OTHER etc which has been deduced from the above according to some priority scheme
+// It is this enum that the scanner will use to decide what token to issue
+// Alternatively, WE could choose the token and put that in the struct instead.
+
 namespace YY
 {
 	class VNLangScanner;
 	class VNLangParser;
 };
 
-// Dep-break NodeNames because node_names.hpp will be big
 class NodeNames;
 
 namespace VN 
