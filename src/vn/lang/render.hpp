@@ -31,7 +31,7 @@ public:
 	                             Syntax::Policy policy = Syntax::Policy() ) final;
 	string RenderMaybeInitAssignment( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy );
 	string RenderMaybeBoot( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy );
-	string RenderConcreteIntoProduction( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy );
+	string RenderMaybeSemicolon( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy );
 	string MaybeRenderPreRestriction( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy );
 	string RenderNullPointer( Syntax::Production surround_prod );
 

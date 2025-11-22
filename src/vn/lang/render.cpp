@@ -50,7 +50,7 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern )
 	for( TreePtr<Node> node : coupling_names_uniqifier.GetNodesInDepthFirstPostOrder() )	
 		s += unique_coupling_names.at(node) + 
 		     " ⪮ " + 
-		     RenderConcreteIntoProduction( node, Syntax::Production::VN_DESIGNATE, designation_policy ) + "⨟\n";
+		     RenderMaybeSemicolon( node, Syntax::Production::VN_DESIGNATE, designation_policy ) + "⨟\n";
 
 	ASSERT( pattern->GetSearchComparePattern() == pattern->GetReplacePattern() || !pattern->GetReplacePattern() )
 	   	  (pattern->GetSearchComparePattern())
@@ -136,7 +136,7 @@ string Render::RenderMaybeBoot( TreePtr<Node> node, Syntax::Production surround_
     Syntax::Production node_prod = GetNodeProduction(node, policy);
 							 		
     if( !(Syntax::GetPrecedence(node_prod) < Syntax::GetPrecedence(surround_prod)) )
-		return RenderConcreteIntoProduction( node, surround_prod, policy );
+		return RenderMaybeSemicolon( node, surround_prod, policy );
 	string s;
 
     switch(node_prod)
@@ -157,7 +157,7 @@ string Render::RenderMaybeBoot( TreePtr<Node> node, Syntax::Production surround_
 				s += SSPrintf("// Booting statement, surround prod to BOOT_STMT_DECL\n");
 				
             return "{\n " + 
-                   RenderConcreteIntoProduction( node, Syntax::Production::BOOT_STMT_DECL, policy ) +	
+                   RenderMaybeSemicolon( node, Syntax::Production::BOOT_STMT_DECL, policy ) +	
 				   "\n} ";            
 
         case Syntax::Production::BOOT_EXPR...Syntax::Production::TOP_EXPR: // Expression productions at different precedences
@@ -171,16 +171,16 @@ string Render::RenderMaybeBoot( TreePtr<Node> node, Syntax::Production surround_
 				s += SSPrintf("// Booting expression, surround prod to BOOT_EXPR\n");
 
             return "(\n" +
-				   RenderConcreteIntoProduction( node, Syntax::Production::BOOT_EXPR, policy ) +
+				   RenderMaybeSemicolon( node, Syntax::Production::BOOT_EXPR, policy ) +
 				   "\n)";            
         
         default:        
-			return RenderConcreteIntoProduction( node, surround_prod, policy );         
+			return RenderMaybeSemicolon( node, surround_prod, policy );         
     }
 }
 
 							
-string Render::RenderConcreteIntoProduction( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
+string Render::RenderMaybeSemicolon( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
 {
 	string s;
 
@@ -188,83 +188,24 @@ string Render::RenderConcreteIntoProduction( TreePtr<Node> node, Syntax::Product
     // used to change the render of a certain subtree. It represents all the ancestor nodes of
     // the one supplied.
     Syntax::Production node_prod = GetNodeProduction(node, policy);
-							 		
-    bool do_boot = Syntax::GetPrecedence(node_prod) < Syntax::GetPrecedence(surround_prod);    
-    
-    bool semicolon = Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::MAX_SURR_SEMICOLON) &&
-                     Syntax::GetPrecedence(node_prod) > Syntax::GetPrecedence(Syntax::Production::MIN_NODE_SEMICOLON);  
-
-    if( ReadArgs::use.count("c") )
-		s += SSPrintf("// Boot: %s semcolon: %s\n", 
-					 do_boot ? "yes" : "no",
-					 semicolon ? "yes" : "no" );
+							 		    
+    if( !(Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::MAX_SURR_SEMICOLON) &&
+          Syntax::GetPrecedence(node_prod) > Syntax::GetPrecedence(Syntax::Production::MIN_NODE_SEMICOLON) ) )
+         return MaybeRenderPreRestriction( node, surround_prod, policy );
                  
     switch(node_prod)
     {
-        case Syntax::Production::BOOT_STMT_DECL...Syntax::Production::TOP_STMT_DECL: // Statement productions at different precedences
-        {
-            // If current production has too-high precedence, boot back down using braces
-            if( do_boot )
-            {
-				// Braces can actually work in expressions, eg in {}. The nodes are STATEMENT_SEQ and we boot to BOOT_STMT_DECL
-				ASSERT( Syntax::GetPrecedence(surround_prod) <= Syntax::GetPrecedence(Syntax::Production::BRACED) ||			
-				        Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::TOP_STMT_DECL) )
-					  ("Braces won't achieve high enough precedence for surrounding statement production\n")
-                      ("Node: ")(node)("\n")
-                      ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); 
-				ASSERT( Syntax::GetPrecedence(surround_prod) <= Syntax::GetPrecedence(Syntax::Production::BRACKETED) )
-					  ("Braces won't achieve high enough precedence for surrounding expressional or higher production\n")
-                      ("Node: ")(node)("\n")
-                      ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); 
-			}
-            if( do_boot )
-                s += "{\n ";
+        case Syntax::Production::BOOT_STMT_DECL...Syntax::Production::TOP_STMT_DECL: // Statement productions at different precedences        
+			return MaybeRenderPreRestriction( node, Syntax::Production::BOOT_STMT_DECL, policy ) +
+				   ";\n ";                              
 
-            if( do_boot || semicolon )
-				surround_prod = Syntax::Production::BOOT_STMT_DECL;
-			s += MaybeRenderPreRestriction( node, surround_prod, policy );
-			
-            if( semicolon )
-                s += ";\n ";
-            if( do_boot )
-                s += "\n} ";            
-            break;
-        }
-
-        case Syntax::Production::BOOT_EXPR...Syntax::Production::TOP_EXPR: // Expression productions at different precedences
-        {
-            // If current production has too-high precedence, boot back down using parentheses
-            if( do_boot )
-				ASSERT( Syntax::GetPrecedence(surround_prod) <= Syntax::GetPrecedence(Syntax::Production::BRACKETED) )
-					  ("Parentheses won't achieve high enough precedence for surrounding production\n")
-					  ("Node: ")(node)("\n")
-					  ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); 
-					  
-			// Deal with expression in initialiser production by prepending =
-            if( do_boot )
-                s += "(\n";
-
-			if( do_boot || semicolon )
-				surround_prod = Syntax::Production::BOOT_EXPR;
-			s += MaybeRenderPreRestriction( node, surround_prod, policy );
-
-            if( do_boot )
-                s += "\n)";            
-            if( semicolon )
-                s += ";";
-            break;
-        }
+        case Syntax::Production::BOOT_EXPR...Syntax::Production::TOP_EXPR: // Expression productions at different precedences        
+			return MaybeRenderPreRestriction( node, Syntax::Production::BOOT_EXPR, policy ) +
+                   ";";                   
         
-        default: 
-        {
-            if( semicolon )
-				surround_prod = Syntax::Production::BOOT_EXPR;
-			s += MaybeRenderPreRestriction( node, surround_prod, policy );
-			
-            if( semicolon )
-                s += ";";            
-			break;
-		}
+        default:         
+			return MaybeRenderPreRestriction( node, Syntax::Production::BOOT_EXPR, policy ) +
+				   ";";            					
     }
     
     return s;
