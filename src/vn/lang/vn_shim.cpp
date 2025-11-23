@@ -78,6 +78,10 @@ VNShim::VNShim( const VNParse *parse_ ) :
 // can go top priotity first, doing eg
 // if (cond)
 //     return YY::VNLangParser::make_SOME_KIND_OF_NAME( string, name_data );
+//
+// Stored designations: store the PARSED "kind" and recover in shim. Thus, we only need the kind 
+// for explicit nodes, and we don't need to go hunting through the pattern. Mis-parses like 
+// conjunction( type, not-type ) will cause parse errors.
 
 TreePtr<Node> VNShim::TryGetNamedSubtree(wstring name) const
 {
