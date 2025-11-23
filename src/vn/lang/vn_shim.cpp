@@ -53,10 +53,31 @@ static TreePtr<Node> MakeStandardAgent(NodeEnum ne)
 VNShim::VNShim( const VNParse *parse_ ) :
 	parse( parse_ )
 {
-}
+}dlapmi
 
-
-
+// You want to call 
+// YY::VNLangParser::symbol_type YY::VNLangParser::make_SOME_KIND_OF_NAME( string v, location_type l ) <--- a static function
+// of if you want the token in a varaible eg tok, use
+// YY::VNLangParser::symbol_type::symbol_type( int tok, VNShim::NameData, location_type l )   <--- a constructor
+// with tok = token::TOK_SOME_KIND_OF_NAME
+// and VNShim::NameData being the type of TOK_SOME_KIND_OF_NAME etc as specified in the .ypp file
+//
+// Scanner rule is
+// xyz   { return shim.OnUnicodeName( wstr(), location() ); }
+//
+// defined like YY::VNLangParser::symbol_type VNShim::OnUnicodeName( wstring v, location_type l );   <--- or "any" for location
+//
+// ALL strings found by parser go in here, ASCII or Unicode, quoted or not, including keywords.
+// There's a separate entry point for each parsing token. EP for quoted should unquote.
+// All call a common analysis function:
+// - designations
+// - Node type names
+// - Indeitifer subtypes
+// Returning this data in a struct VNShim::NameData which will also be passed to parser
+// Then do a priority-based analysis that leads to a choice of parser token. Presumably, we
+// can go top priotity first, doing eg
+// if (cond)
+//     return YY::VNLangParser::make_SOME_KIND_OF_NAME( string, name_data );
 
 TreePtr<Node> VNShim::TryGetNamedSubtree(wstring name) const
 {
