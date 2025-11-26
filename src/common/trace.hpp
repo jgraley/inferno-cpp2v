@@ -81,6 +81,18 @@ string Trace(const shared_ptr<T> &p)
     
     
 template<typename T>
+string Trace(const weak_ptr<T> &p) 
+{
+    if( auto p_locked = p.lock() )
+		return Trace(p_locked.get());        
+	else if( p.expired() )
+		return "expired";
+	else
+		return "NULL";
+}
+    
+    
+template<typename T>
 string Trace(const unique_ptr<T> &p) 
 {
     return Trace(p.get());        

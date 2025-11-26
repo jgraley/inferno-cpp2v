@@ -9,7 +9,6 @@
 #include "tree/misc.hpp"
 #include "indenter.hpp"
 #include "vn_commands.hpp"
-#include "vn_shim.hpp"
 #include <any> // to dep-break the generated headers
 
 namespace YY
@@ -46,6 +45,7 @@ struct Itemisation
 
 
 class Command;
+class VNShim;
 
 class VNParse	
 {
@@ -63,7 +63,6 @@ public:
 	TreePtr<Node> OnStuff( TreePtr<Node> terminus, TreePtr<Node> recurse_restriction, Limit limit );
 	TreePtr<Node> OnDelta( TreePtr<Node> through, TreePtr<Node> overlay );
 	TreePtr<Node> OnBuiltIn( list<string> builtin_type, any builtin_loc, Itemisation itemisation );
-	TreePtr<Node> OnName( wstring name, any name_loc );
 	TreePtr<Node> OnEmbeddedCommands( list<shared_ptr<Command>> commands );
 	TreePtr<Node> OnRestrict( list<string> res_type, any res_loc, TreePtr<Node> target, any target_loc );
 	
@@ -88,20 +87,18 @@ public:
 	TreePtr<Node> OnBuildSize( TreePtr<Node> container );
 	TreePtr<Node> OnStringize( TreePtr<Node> source );
 	
-	void Designate( wstring name, TreePtr<Node> sub_pattern );
 	static string DiagQuote(string name);
 	static string DiagQuote(wstring name);
 	TreePtr<Node> CreateIntegralLiteral( bool uns, bool lng, bool lng2, uint64_t val, any loc );
-
+	VNShim &GetShim();
+	
 private: 
-	friend class VNShim;
-	VNShim shim;
+	unique_ptr<VNShim> shim;
 	unique_ptr<YY::VNLangScanner> scanner;
 	unique_ptr<YY::VNLangParser> parser;
 	unique_ptr<NodeNames> node_names;
 	
 	Command::List top_level_commands;
-	map<wstring, TreePtr<Node>> designations;
 };
 	
 };

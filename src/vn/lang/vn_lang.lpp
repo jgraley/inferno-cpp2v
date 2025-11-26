@@ -100,15 +100,7 @@ typename		{ return YY::VNLangParser::make_TYPENAME(str(), location()); };
 
 \"[^"]*\"   	{ return YY::VNLangParser::make_STRING_LITERAL(wstr(), location()); }
 {integral_num}	{ return YY::VNLangParser::make_INTEGRAL_LITERAL(str(), location()); }
-{ascii_name}	{ TreePtr<Node> node = shim->TryGetNamedSubtree(wstr());
-				  if( node )
-                      return YY::VNLangParser::make_NAMED_SUBTREE(node, location());
-                  else
-                      return YY::VNLangParser::make_ASCII_NAME(str(), location()); }
-{unicode_name}	{ TreePtr<Node> node = shim->TryGetNamedSubtree(wstr());
-                  if( node )
-                      return YY::VNLangParser::make_NAMED_SUBTREE(node, location());
-                  else
-                      return YY::VNLangParser::make_UNICODE_NAME(wstr(), location()); }
+{ascii_name}	{ return shim->OnUnquoted(str(), location()); }
+{unicode_name}	{ return shim->OnUnquoted(wstr(), location()); }
 
 %%

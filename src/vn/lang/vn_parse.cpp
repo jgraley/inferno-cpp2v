@@ -18,6 +18,7 @@
 #include "vn/agents/all.hpp"
 #include "tree/node_names.hpp"
 #include "vn_commands.hpp"
+#include "vn_shim.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -31,9 +32,9 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc );
 
 
 VNParse::VNParse() :
-	shim( this ),
-	scanner( make_unique<YY::VNLangScanner>(&shim, reflex::Input(), std::cerr) ),
-	parser( make_unique<YY::VNLangParser>(*scanner, this) ),
+	shim( make_unique<VNShim>() ),
+	scanner( make_unique<YY::VNLangScanner>(shim.get(), reflex::Input(), std::cerr) ),
+	parser( make_unique<YY::VNLangParser>(*scanner, this, shim.get()) ),
 	node_names( make_unique<NodeNames>() )
 {
 }
@@ -122,19 +123,6 @@ TreePtr<Node> VNParse::OnDelta( TreePtr<Node> through, TreePtr<Node> overlay )
 	delta->through = through;
 	delta->overlay = overlay;
 	return delta;
-}
-
-
-TreePtr<Node> VNParse::OnName( wstring name, any name_loc )
-{
-	if( designations.count(name)==0 )
-		throw YY::VNLangParser::syntax_error( 
-		    any_cast<YY::VNLangParser::location_type>(name_loc), 
-		    "Sub-pattern name " + 
-		    DiagQuote(name) +
-		    " was not designated.");		
-			
-	return designations.at(name);
 }
 
 
@@ -479,12 +467,6 @@ TreePtr<Node> VNParse::OnStringize( TreePtr<Node> source )
 }
 
 
-void VNParse::Designate( wstring name, TreePtr<Node> sub_pattern )
-{
-	designations.insert( make_pair(name, sub_pattern) );
-}
-
-
 string VNParse::DiagQuote(string name)
 {
 	return "`" + name + "'";
@@ -529,6 +511,12 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 	return NodeNames().GetNameToEnumMap().at(typ);	
 }
 
+
+VNShim &VNParse::GetShim()
+{
+	return *shim;
+}
+
 // grammar for C operators
 // Consider c-style scoping of designations (eg for macros?)
 
@@ -543,11 +531,13 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 // Namespaces: CPPTree should be assumed as a default where not specified. More than one specifier is still TBD
 // Common stuff for qualified types with :: including ability to throw on eg A::B::C (but could support later)
 
-// Productions using 【 】: AFTER adding C minxture, try using () and making things look like printf etc
+// Productions using 【 】: AFTER adding C mixture, try using () and making things look like printf etc
 
 // When designating a ⧇ or speciifc identifier node, why not use the given name as the name of the designation?
 
 // NOT putting some kind of quotes around identifier names or format strings feels like a conflict even if it isn't
+
+// Implement %printer for semantic values
 
 // Tix:
 // Lose StandardAgentWrapper #867

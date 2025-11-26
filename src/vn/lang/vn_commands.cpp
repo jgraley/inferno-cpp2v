@@ -16,6 +16,7 @@
 #include "vn_lang.ypp.hpp"
 #include "vn_lang.lpp.hpp"
 #include "vn_lang.location.hpp"
+#include "vn_shim.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -132,7 +133,7 @@ Designation::Designation( std::wstring name_, TreePtr<Node> pattern_, any loc_ )
 
 bool Designation::OnParse(VNParse *vn)
 {
-	vn->Designate(name, pattern);
+	vn->GetShim().Designate(name, pattern);
 	
 	return false; // discard
 }

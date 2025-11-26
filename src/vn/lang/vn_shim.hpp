@@ -8,7 +8,9 @@
 #include "helpers/simple_compare.hpp"
 #include "tree/misc.hpp"
 #include "indenter.hpp"
-#include <any> // to dep-break the generated headers
+#include "vn_lang.ypp.hpp"
+#include "vn_lang.lpp.hpp"
+#include "vn_lang.location.hpp"
 
 // WHAT WE NEED
 // A "name info" struct containing a variety of handy info relating to a name we saw:
@@ -31,19 +33,53 @@ namespace VN
 {
 	
 class VNParse;	
+class Gnomon : public Traceable
+{
+public:
+	Gnomon( list<string> resolution_ ) : 
+		resolution(resolution_)
+	{ 
+		FTRACE("Gnomon at %p constructed with resolution: ", this)(resolution)("\n");
+	}
+	~Gnomon()
+	{ 
+		FTRACE("Gnomon at %p destructed, resolution was: ", this)(resolution)("\n");
+	}
+	list<string> Get() { return resolution; } // TODO should not need this
+	string GetTrace() const
+	{
+		return Trace(resolution);
+	}
+	
+	
+private:
+	list<string> resolution;
+};
+
 	
 class VNShim
 {
 public:
-	VNShim( const VNParse *parse_ );
+	struct Data
+	{
+		TreePtr<Node> designated;
+	};
+		
+	shared_ptr<Gnomon> SetScopeRes( list<string> resolution );
+
+	void Designate( wstring name, TreePtr<Node> sub_pattern );
+
 	
-	//bool IsType() const;
+	YY::VNLangParser::symbol_type OnUnquoted(string word, YY::VNLangParser::location_type loc) const;
+	YY::VNLangParser::symbol_type OnUnquoted(wstring word, YY::VNLangParser::location_type loc) const;
+	YY::VNLangParser::symbol_type OnWord(wstring word, bool quoted, bool ascii, YY::VNLangParser::location_type loc) const;
+	
 	TreePtr<Node> TryGetNamedSubtree(wstring name) const;	
-	TreePtr<Node> TryGetArchetype( list<string> typ ) const;
+	TreePtr<Node> TryGetArchetype(list<string> typ) const;
 
 private:	
-	const VNParse * const parse;
-	
+	map<wstring, TreePtr<Node>> designations;	
+	stack<weak_ptr<Gnomon>> current_gnomons;
 };
 	
 };

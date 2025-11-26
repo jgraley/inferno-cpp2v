@@ -49,12 +49,6 @@ static TreePtr<Node> MakeStandardAgent(NodeEnum ne)
 	ASSERTFAIL();
 }
 
-
-VNShim::VNShim( const VNParse *parse_ ) :
-	parse( parse_ )
-{
-}dlapmi
-
 // You want to call 
 // YY::VNLangParser::symbol_type YY::VNLangParser::make_SOME_KIND_OF_NAME( string v, location_type l ) <--- a static function
 // of if you want the token in a varaible eg tok, use
@@ -83,12 +77,54 @@ VNShim::VNShim( const VNParse *parse_ ) :
 // for explicit nodes, and we don't need to go hunting through the pattern. Mis-parses like 
 // conjunction( type, not-type ) will cause parse errors.
 
-TreePtr<Node> VNShim::TryGetNamedSubtree(wstring name) const
+shared_ptr<Gnomon> VNShim::SetScopeRes( list<string> resolution )
 {
-	if( parse->designations.count(name) > 0 )
-		return parse->designations.at(name);
+	auto spg = make_shared<Gnomon>(resolution);
+	current_gnomons.push( spg );
+	return spg;
+}
+
+
+
+void VNShim::Designate( wstring name, TreePtr<Node> sub_pattern )
+{
+	designations.insert( make_pair(name, sub_pattern) );
+}
+
+
+
+
+YY::VNLangParser::symbol_type VNShim::OnUnquoted(string word, YY::VNLangParser::location_type loc) const
+{
+	return OnWord( ToUnicode(word), false, true, loc );
+}
+
+
+YY::VNLangParser::symbol_type VNShim::OnUnquoted(wstring word, YY::VNLangParser::location_type loc) const
+{
+	return OnWord( word, false, false, loc );
+}
+
+
+YY::VNLangParser::symbol_type VNShim::OnWord(wstring word, bool quoted, bool ascii, YY::VNLangParser::location_type loc) const
+{
+	Data data;
+	(void)ascii;
+
+	FTRACE(word)(" with ")(current_gnomons)("\n");
+
+	// Where unicode is allowed, ascii is allowed too, so positive checks only
+	if( !quoted && designations.count(word) > 0 )	
+		data.designated = designations.at(word);
 	else
-		return nullptr;
+		data.designated = nullptr;
+		
+	if( data.designated )
+         return YY::VNLangParser::make_NAMED_SUBTREE(data.designated, loc);
+    else if( ascii )
+         return YY::VNLangParser::make_ASCII_NAME(ToASCII(word), loc);
+    else
+         return YY::VNLangParser::make_UNICODE_NAME(word, loc);
 }
 
 
@@ -106,3 +142,5 @@ TreePtr<Node> VNShim::TryGetArchetype( list<string> typ ) const
 		return nullptr;
 	}
 }
+
+

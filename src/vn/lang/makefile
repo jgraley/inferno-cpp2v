@@ -4,7 +4,7 @@ REFLEX = $(REFLEX_DIR)/bin/reflex
 LIBREFLEX = $(REFLEX_DIR)/lib/libreflex.a
 REFLEX_INC = $(REFLEX_DIR)/include
 REFLEX_OPTIONS = --bison-complete --bison-locations
-BISON_OPTIONS = -Wcounterexamples
+BISON_OPTIONS = -Wcounterexamples -Wdangling-alias -Wall -Werror
 BISON = bison 
 
 # We need to be more relaxed than we are for most VN code.
