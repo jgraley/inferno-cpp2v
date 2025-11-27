@@ -77,10 +77,11 @@ static TreePtr<Node> MakeStandardAgent(NodeEnum ne)
 // for explicit nodes, and we don't need to go hunting through the pattern. Mis-parses like 
 // conjunction( type, not-type ) will cause parse errors.
 
-shared_ptr<Gnomon> VNShim::SetScopeRes( list<string> resolution )
+shared_ptr<Gnomon> VNShim::PushScopeRes( list<string> resolution )
 {
+	PurgeExpiredGnomons();
 	auto spg = make_shared<Gnomon>(resolution);
-	current_gnomons.push( spg );
+	current_gnomons.push_front( spg ); // front is top
 	return spg;
 }
 
@@ -94,37 +95,59 @@ void VNShim::Designate( wstring name, TreePtr<Node> sub_pattern )
 
 
 
-YY::VNLangParser::symbol_type VNShim::OnUnquoted(string word, YY::VNLangParser::location_type loc) const
+YY::VNLangParser::symbol_type VNShim::OnUnquoted(string text, YY::VNLangParser::location_type loc) const
 {
-	return OnWord( ToUnicode(word), false, true, loc );
+	return ProcessToken( ToUnicode(text), true, loc );
 }
 
 
-YY::VNLangParser::symbol_type VNShim::OnUnquoted(wstring word, YY::VNLangParser::location_type loc) const
+YY::VNLangParser::symbol_type VNShim::OnUnquoted(wstring text, YY::VNLangParser::location_type loc) const
 {
-	return OnWord( word, false, false, loc );
+	return ProcessToken( text, false, loc );
 }
 
 
-YY::VNLangParser::symbol_type VNShim::OnWord(wstring word, bool quoted, bool ascii, YY::VNLangParser::location_type loc) const
+YY::VNLangParser::symbol_type VNShim::ProcessToken(wstring text, bool ascii, YY::VNLangParser::location_type loc) const
 {
-	Data data;
 	(void)ascii;
-
-	FTRACE(word)(" with ")(current_gnomons)("\n");
+	FTRACE(text)(" with ")(current_gnomons)("\n");
 
 	// Where unicode is allowed, ascii is allowed too, so positive checks only
-	if( !quoted && designations.count(word) > 0 )	
-		data.designated = designations.at(word);
+	YY::NameInfo info;
+	if( designations.count(text) > 0 )	
+		info.as_designated = designations.at(text);
 	else
-		data.designated = nullptr;
+		info.as_designated = nullptr;
 		
-	if( data.designated )
-         return YY::VNLangParser::make_NAMED_SUBTREE(data.designated, loc);
+	for( weak_ptr<Gnomon> wpg : current_gnomons )
+	{
+		if( auto spg = wpg.lock() )
+		{
+			info.as_name_res_list = spg->resolution;
+			break; // we only want one, because the names build up
+		}
+	}
+			
+	if( !info.as_name_res_list.empty() )
+	{
+		if( !ascii )
+			throw YY::VNLangParser::syntax_error( loc, 
+				"Resolved Unicode name not supported (resolved by " + Join(info.as_name_res_list, "::") + ")");		
+		info.as_name_res_list.push_back(ToASCII(text));
+		// TODO merge the locations
+		FTRACE(	"Supply RESOLVED_NAME with: ")(info.as_name_res_list)("\n");
+	}
+	
+	info.as_unicode = text;
+	info.as_ascii = ToASCII(text);
+	if( !info.as_name_res_list.empty() )
+		return YY::VNLangParser::make_RESOLVED_NAME(info, loc);
+	else if( info.as_designated )
+         return YY::VNLangParser::make_NAMED_SUBTREE(info, loc);
     else if( ascii )
-         return YY::VNLangParser::make_ASCII_NAME(ToASCII(word), loc);
+         return YY::VNLangParser::make_ASCII_NAME(info, loc);
     else
-         return YY::VNLangParser::make_UNICODE_NAME(word, loc);
+         return YY::VNLangParser::make_UNICODE_NAME(info, loc);
 }
 
 
@@ -143,4 +166,25 @@ TreePtr<Node> VNShim::TryGetArchetype( list<string> typ ) const
 	}
 }
 
+
+void VNShim::PurgeExpiredGnomons()
+{
+	current_gnomons.remove_if([](weak_ptr<Gnomon> wpg){return wpg.expired();});
+}
+
+// TODO NodeNames to tree form and walk immediately on sight of a name. Generate 
+// errors early and replace list<string> with shared_ptr<NodeNameNode> etc.
+// Don't forget the shortened identifier names eg Type, Instance etc
+
+// Type hierarchy for gnomons: ScopeResGnomon : Gnomon for our scopes
+
+// TODO parser should create the gnomon instances so 
+// part_resolve	: resolved_name SCOPE_RES				{ $$ = shim->PushScopeRes($1); }
+// becomes
+// part_resolve	: resolved_name SCOPE_RES				{ $$ = ScopeResGnomon($1); shim->Push($$); }
+// It's slightly longer but the subexpression shows (a) the gnomon is purely derived from $1,
+// (b) we're pushing it to the parse stack and (c) finally offering it to the shim
+
+// TODO designation action to call eg VNShim::PushDesignation() and shim keeps
+// it under shared pointer, and returns it in the same form in info.as_designation
 

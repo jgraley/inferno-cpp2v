@@ -45,41 +45,38 @@ public:
 	{ 
 		FTRACE("Gnomon at %p destructed, resolution was: ", this)(resolution)("\n");
 	}
-	list<string> Get() { return resolution; } // TODO should not need this
+
 	string GetTrace() const
 	{
 		return Trace(resolution);
 	}
 	
-	
+	friend class VNShim;
 private:
 	list<string> resolution;
 };
 
-	
+		
 class VNShim
 {
-public:
-	struct Data
-	{
-		TreePtr<Node> designated;
-	};
-		
-	shared_ptr<Gnomon> SetScopeRes( list<string> resolution );
+public:	
+	shared_ptr<Gnomon> PushScopeRes( list<string> resolution );
 
 	void Designate( wstring name, TreePtr<Node> sub_pattern );
 
 	
-	YY::VNLangParser::symbol_type OnUnquoted(string word, YY::VNLangParser::location_type loc) const;
-	YY::VNLangParser::symbol_type OnUnquoted(wstring word, YY::VNLangParser::location_type loc) const;
-	YY::VNLangParser::symbol_type OnWord(wstring word, bool quoted, bool ascii, YY::VNLangParser::location_type loc) const;
+	YY::VNLangParser::symbol_type OnUnquoted(string text, YY::VNLangParser::location_type loc) const;
+	YY::VNLangParser::symbol_type OnUnquoted(wstring text, YY::VNLangParser::location_type loc) const;
+	YY::VNLangParser::symbol_type ProcessToken(wstring text, bool ascii, YY::VNLangParser::location_type loc) const;
 	
 	TreePtr<Node> TryGetNamedSubtree(wstring name) const;	
 	TreePtr<Node> TryGetArchetype(list<string> typ) const;
 
 private:	
+	void PurgeExpiredGnomons();
+
 	map<wstring, TreePtr<Node>> designations;	
-	stack<weak_ptr<Gnomon>> current_gnomons;
+	list<weak_ptr<Gnomon>> current_gnomons;
 };
 	
 };
