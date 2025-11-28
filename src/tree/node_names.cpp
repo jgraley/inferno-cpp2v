@@ -17,6 +17,15 @@ const NodeNames::NameToNodeMapType &NodeNames::GetNameToEnumMap()
 }
 
 
+const NodeNameBlock *NodeNames::GetRootBlock()
+{
+	if( root_block.sub_blocks.empty() )
+		InitialiseMap();	
+		
+	return &root_block;
+}
+
+
 shared_ptr<Node> NodeNames::MakeNode(NodeEnum ne) const 
 {
 	switch(ne)
@@ -70,8 +79,25 @@ void NodeNames::InitialiseMap()
 #undef NODE
 	};
 	
-	ASSERT( !name_to_node_map.empty() );
+	for( auto p : name_to_node_map )
+	{
+		list<string> flat_list = p.first;
+		NodeEnum node_enum = p.second;
+		
+		if( root_block.sub_blocks.count(flat_list.front())==0 )
+		{
+			auto sb = make_unique<NodeNameBlock>();
+			root_block.sub_blocks[flat_list.front()] = move(sb);
+		}
+		
+		auto lb = make_unique<NodeNameBlock>();
+		lb->leaf_enum = node_enum;
+		root_block.sub_blocks.at( flat_list.front() )->sub_blocks[flat_list.back()] = move(lb);
+		
+		ASSERT( !name_to_node_map.empty() );
+	}
 }
 
 
 NodeNames::NameToNodeMapType NodeNames::name_to_node_map;
+NodeNameBlock NodeNames::root_block;

@@ -77,10 +77,10 @@ static TreePtr<Node> MakeStandardAgent(NodeEnum ne)
 // for explicit nodes, and we don't need to go hunting through the pattern. Mis-parses like 
 // conjunction( type, not-type ) will cause parse errors.
 
-shared_ptr<Gnomon> VNShim::PushScopeRes( list<string> resolution )
+shared_ptr<Gnomon> VNShim::PushScopeRes( const YY::NameInfo &info )
 {
 	PurgeExpiredGnomons();
-	auto spg = make_shared<Gnomon>(resolution);
+	auto spg = make_shared<Gnomon>(info);
 	current_gnomons.push_front( spg ); // front is top
 	return spg;
 }
@@ -114,16 +114,22 @@ YY::VNLangParser::symbol_type VNShim::ProcessToken(wstring text, bool ascii, YY:
 
 	// Where unicode is allowed, ascii is allowed too, so positive checks only
 	YY::NameInfo info;
+	info.as_unicode = text;
+	info.as_ascii = ToASCII(text);
 	if( designations.count(text) > 0 )	
 		info.as_designated = designations.at(text);
 	else
 		info.as_designated = nullptr;
 		
+	const NodeNameBlock *current_block = NodeNames().GetRootBlock();
+		
 	for( weak_ptr<Gnomon> wpg : current_gnomons )
 	{
 		if( auto spg = wpg.lock() )
 		{
-			info.as_name_res_list = spg->resolution;
+			info.as_name_res_list = spg->info.as_name_res_list;
+			if( spg->info.as_node_name_block )
+				current_block = spg->info.as_node_name_block;
 			break; // we only want one, because the names build up
 		}
 	}
@@ -133,16 +139,26 @@ YY::VNLangParser::symbol_type VNShim::ProcessToken(wstring text, bool ascii, YY:
 		if( !ascii )
 			throw YY::VNLangParser::syntax_error( loc, 
 				"Resolved Unicode name not supported (resolved by " + Join(info.as_name_res_list, "::") + ")");		
-		info.as_name_res_list.push_back(ToASCII(text));
-		// TODO merge the locations
-		FTRACE(	"Supply RESOLVED_NAME with: ")(info.as_name_res_list)("\n");
 	}
-	
-	info.as_unicode = text;
-	info.as_ascii = ToASCII(text);
-	if( !info.as_name_res_list.empty() )
-		return YY::VNLangParser::make_RESOLVED_NAME(info, loc);
-	else if( info.as_designated )
+
+	info.as_node_name_block = nullptr;
+	if( ascii )
+	{
+		info.as_name_res_list.push_back(ToASCII(text));				
+		FTRACE("ASCII token ")(ToASCII(text))(" current_block:\n")(*current_block)("\n");
+		if( current_block->sub_blocks.count(ToASCII(text)) > 0 )
+		{
+			info.as_node_name_block = current_block->sub_blocks.at(ToASCII(text)).get();
+			if( info.as_node_name_block->leaf_enum )
+			{
+				FTRACE(	"Supply RESOLVED_NAME with: ")(info.as_name_res_list)("\n");
+				return YY::VNLangParser::make_RESOLVED_NAME(info, loc);
+			}
+		}
+	}
+			
+	FTRACE(	"Supply something else\n");
+	if( info.as_designated )
          return YY::VNLangParser::make_NAMED_SUBTREE(info, loc);
     else if( ascii )
          return YY::VNLangParser::make_ASCII_NAME(info, loc);
@@ -172,9 +188,10 @@ void VNShim::PurgeExpiredGnomons()
 	current_gnomons.remove_if([](weak_ptr<Gnomon> wpg){return wpg.expired();});
 }
 
-// TODO NodeNames to tree form and walk immediately on sight of a name. Generate 
-// errors early and replace list<string> with shared_ptr<NodeNameNode> etc.
-// Don't forget the shortened identifier names eg Type, Instance etc
+// TODO fix identifier type names by adding them to NodeNames 
+// Tidy away list<string>
+// Don't plonk the whole of YY::NameInfo in the Gnomon
+// Split out ScopeResGnomon as subclass of Gnomon
 
 // Type hierarchy for gnomons: ScopeResGnomon : Gnomon for our scopes
 
@@ -185,6 +202,6 @@ void VNShim::PurgeExpiredGnomons()
 // It's slightly longer but the subexpression shows (a) the gnomon is purely derived from $1,
 // (b) we're pushing it to the parse stack and (c) finally offering it to the shim
 
-// TODO designation action to call eg VNShim::PushDesignation() and shim keeps
-// it under shared pointer, and returns it in the same form in info.as_designation
+// TODO designation action to push a new DesignationGnomon and shim keeps
+// it under shared pointer, and returns it in the same form in the info.
 

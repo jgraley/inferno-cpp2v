@@ -3,6 +3,7 @@
 
 #include "common/common.hpp"
 #include "node/node.hpp"
+#include <optional>
 
 enum class NodeEnum
 {
@@ -15,22 +16,27 @@ enum class NodeEnum
 #undef NODE
 };
 
-// This should secure us a lexicographical log-time lookup for a scoped name.
-// 2-level for now, but could be expanded. We can then switch on the enum
-// which the compiler can probably make pretty quick (if all the cases are 
-// equivalent code, it should be a calculated jump).
+struct NodeNameBlock : Traceable
+{
+	map<string, unique_ptr<NodeNameBlock>> sub_blocks;
+	optional<NodeEnum> leaf_enum;
+	string GetTrace() const { return Trace(sub_blocks)+":"+(leaf_enum?Trace((int)(leaf_enum.value())):"NULL"); }
+};
+
 
 class NodeNames
 {
 public:	
 	typedef map<list<string>, NodeEnum> NameToNodeMapType;	
 	const NameToNodeMapType &GetNameToEnumMap();
+	const NodeNameBlock *GetRootBlock();
 	shared_ptr<Node> MakeNode(NodeEnum ne) const;
 	shared_ptr<TreePtrInterface> MakeTreePtr(NodeEnum ne) const;
 	
 private:
 	static void InitialiseMap();
 	static NameToNodeMapType name_to_node_map;
+	static NodeNameBlock root_block;
 };
 
 #endif

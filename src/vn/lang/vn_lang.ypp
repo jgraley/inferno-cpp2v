@@ -20,6 +20,7 @@
   // Appears high-ish in the generated .hpp file
   #include "vn_parse.hpp" // TODO we actually only need Item and Itemisation from here
   #include "node/tree_ptr.hpp"
+  #include "tree/node_names.hpp"
   #include <string>
   namespace YY {
     class VNLangScanner;  
@@ -29,6 +30,7 @@
 		string as_ascii;
 		wstring as_unicode;
 		list<string> as_name_res_list;
+		const NodeNameBlock *as_node_name_block;
 	};     	
   };
   // Things we point to from semantic values
@@ -123,7 +125,7 @@
 %type <TreePtr<Node>> 				expr_mul_etc expr_shift expr_bitwise_and expr_bitwise_or expr_bitwise_xor expr_no_comma_op 
 %type <TreePtr<Node>> 				expr_paren expr_comma_op type_unit type_prefix type_paren
 %type <wstring> 					vn_name
-%type <list<string>> 				resolved_name
+%type <YY::NameInfo> 				resolved_name
 %type <list<shared_ptr<VN::Command>>>			commands sep_commands
 %type <shared_ptr<VN::Command>>		bare_command
 %type <VN::Limit>					limit
@@ -174,24 +176,24 @@ statement	: expression
 type		: type_prefix          
           
 type_prefix : 										     type_paren
-			|  									  STUFF type_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
-			| 		  STUFF OPEN_VN expression CLOSE_VN type_prefix	{ $$ = vn->OnStuff($5, $3, VN::Limit()); }
-			| 		  STUFF OPEN_VN limit      CLOSE_VN type_prefix	{ $$ = vn->OnStuff($5, nullptr, $3); }
-			| 			   DELTA expression DELTA_ARROW type_prefix	{ $$ = vn->OnDelta($2, $4); }
-			|  PRERESTRICT OPEN_VN resolved_name CLOSE_VN type_prefix	{ $$ = vn->OnRestrict($3, @3, $5, @5); }
-			| 	  TRANSFORM OPEN_VN ASCII_NAME CLOSE_VN type_prefix	{ $$ = vn->OnTransform($3.as_ascii, @3, $5, @5); }
-			| 								   NEGATION type_prefix	{ $$ = vn->OnNegation($2); }
-			| 									  GRASS type_prefix	{ $$ = vn->OnGrass($2); }
-			| 								 POINTER_IS type_prefix	{ $$ = vn->OnPointerIs($2); }
-			| 								 BUILD_SIZE type_prefix	{ $$ = vn->OnBuildSize($2); }
-			| 								  STRINGIZE type_prefix	{ $$ = vn->OnStringize($2); }
+			|  									  STUFF type_prefix	 { $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
+			| 		  STUFF OPEN_VN expression CLOSE_VN type_prefix	 { $$ = vn->OnStuff($5, $3, VN::Limit()); }
+			| 		  STUFF OPEN_VN limit      CLOSE_VN type_prefix	 { $$ = vn->OnStuff($5, nullptr, $3); }
+			| 			   DELTA expression DELTA_ARROW type_prefix	 { $$ = vn->OnDelta($2, $4); }
+			| PRERESTRICT OPEN_VN resolved_name CLOSE_VN type_prefix { $$ = vn->OnRestrict($3.as_name_res_list, @3, $5, @5); }
+			| 	  TRANSFORM OPEN_VN ASCII_NAME CLOSE_VN type_prefix	 { $$ = vn->OnTransform($3.as_ascii, @3, $5, @5); }
+			| 								   NEGATION type_prefix	 { $$ = vn->OnNegation($2); }
+			| 									  GRASS type_prefix	 { $$ = vn->OnGrass($2); }
+			| 								 POINTER_IS type_prefix	 { $$ = vn->OnPointerIs($2); }
+			| 								 BUILD_SIZE type_prefix	 { $$ = vn->OnBuildSize($2); }
+			| 								  STRINGIZE type_prefix	 { $$ = vn->OnStringize($2); }
 
 
 type_paren	: type_unit
 			| '(' type ')'                          	{ $$ = $2; } // TODO We're losing the ability to embed commands in a type
                                         
-type_unit	: BUILT_IN_TYPE resolved_name itemisation		{ $$ = vn->OnBuiltIn($2, @2, $3); }
-			| BUILT_IN_TYPE resolved_name					{ $$ = vn->OnBuiltIn($2, @2, VN::Itemisation{{}, @2}); }
+type_unit	: BUILT_IN_TYPE resolved_name itemisation		{ $$ = vn->OnBuiltIn($2.as_name_res_list, @2, $3); }
+			| BUILT_IN_TYPE resolved_name					{ $$ = vn->OnBuiltIn($2.as_name_res_list, @2, VN::Itemisation{{}, @2}); }
 			
 
                       
@@ -255,7 +257,7 @@ expr_prefix : 										   expr_postfix
 			| 					    C_PRE_OR_INFIX_OP   expr_prefix	{ $$ = vn->OnPrefixOperator($1, $2); }
 			| 					    C_PRE_OR_POSTFIX_OP expr_prefix	{ $$ = vn->OnPrefixOperator($1, $2); }
 			|							   '(' type ')' expr_prefix { $$ = vn->OnCast($2, @2, $4, @4); }
-			|  PRERESTRICT OPEN_VN resolved_name CLOSE_VN expr_prefix	{ $$ = vn->OnRestrict($3, @3, $5, @5); }
+			|  PRERESTRICT OPEN_VN resolved_name CLOSE_VN expr_prefix	{ $$ = vn->OnRestrict($3.as_name_res_list, @3, $5, @5); }
 			| 	  TRANSFORM OPEN_VN ASCII_NAME CLOSE_VN expr_prefix	{ $$ = vn->OnTransform($3.as_ascii, @3, $5, @5); }
 			| 								   NEGATION expr_prefix	{ $$ = vn->OnNegation($2); }
 			| 									  GRASS expr_prefix	{ $$ = vn->OnGrass($2); }
@@ -269,8 +271,8 @@ expr_postfix: expr_paren
 expr_paren	: expr_unit
 			| '(' commands ')'                          		{ $$ = vn->OnEmbeddedCommands($2); }
 
-expr_unit	: BUILT_IN resolved_name itemisation					{ $$ = vn->OnBuiltIn($2, @2, $3); }
-			| BUILT_IN resolved_name								{ $$ = vn->OnBuiltIn($2, @2, VN::Itemisation{{}, @2}); }
+expr_unit	: BUILT_IN resolved_name itemisation					{ $$ = vn->OnBuiltIn($2.as_name_res_list, @2, $3); }
+			| BUILT_IN resolved_name								{ $$ = vn->OnBuiltIn($2.as_name_res_list, @2, VN::Itemisation{{}, @2}); }
 			| STAR												{ $$ = vn->OnStar(nullptr); }
 			| STAR OPEN_VN expression CLOSE_VN					{ $$ = vn->OnStar($3); }
 			| INTEGRAL_LITERAL					      			{ $$ = vn->OnIntegralLiteral($1, @1); }
@@ -279,12 +281,12 @@ expr_unit	: BUILT_IN resolved_name itemisation					{ $$ = vn->OnBuiltIn($2, @2, 
 			| ANY												{ $$ = nullptr; }
 			| '{' statements '}'                          		{ $$ = $2; }
 			| NAMED_SUBTREE       					  			{ $$ = $1.as_designated; }
-			| SPECIFIC_ID OPEN_VN resolved_name VN_SEP STRING_LITERAL CLOSE_VN			{ $$ = vn->OnSpecificId($3, @3, $5, @5); }
-			| SPECIFIC_ID OPEN_VN resolved_name VN_SEP CLOSE_VN							{ $$ = vn->OnSpecificId($3, @3, wstring(), @5); }
-			| ID_BY_NAME OPEN_VN resolved_name VN_SEP STRING_LITERAL CLOSE_VN			{ $$ = vn->OnIdByName($3, @3, $5, @5); } // ASCII_NAME could be format
-			| BUILD_ID OPEN_VN resolved_name VN_SEP STRING_LITERAL VN_SEP CLOSE_VN 		{ $$ = vn->OnBuildId($3, @3, $5, @5, VN::Item{}); }
-			| BUILD_ID OPEN_VN resolved_name VN_SEP STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($3, @3, $5, @5, $7); }
-			| BUILD_ID OPEN_VN resolved_name VN_SEP VN_SEP item CLOSE_VN 				{ $$ = vn->OnBuildId($3, @3, wstring(), @5, $6); }
+			| SPECIFIC_ID OPEN_VN resolved_name VN_SEP STRING_LITERAL CLOSE_VN			{ $$ = vn->OnSpecificId($3.as_name_res_list, @3, $5, @5); }
+			| SPECIFIC_ID OPEN_VN resolved_name VN_SEP CLOSE_VN							{ $$ = vn->OnSpecificId($3.as_name_res_list, @3, wstring(), @5); }
+			| ID_BY_NAME OPEN_VN resolved_name VN_SEP STRING_LITERAL CLOSE_VN			{ $$ = vn->OnIdByName($3.as_name_res_list, @3, $5, @5); } // ASCII_NAME could be format
+			| BUILD_ID OPEN_VN resolved_name VN_SEP STRING_LITERAL VN_SEP CLOSE_VN 		{ $$ = vn->OnBuildId($3.as_name_res_list, @3, $5, @5, VN::Item{}); }
+			| BUILD_ID OPEN_VN resolved_name VN_SEP STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($3.as_name_res_list, @3, $5, @5, $7); }
+			| BUILD_ID OPEN_VN resolved_name VN_SEP VN_SEP item CLOSE_VN 				{ $$ = vn->OnBuildId($3.as_name_res_list, @3, wstring(), @5, $6); }
 
 vn_name		: UNICODE_NAME    							{ $$ = $1.as_unicode; }
 			| ASCII_NAME								{ $$ = $1.as_unicode; }     
@@ -296,7 +298,7 @@ part_resolve	: resolved_name SCOPE_RES				{ $$ = shim->PushScopeRes($1); }
     
 // RESOLVED_NAME is strong i.e. there was definitely a ::. resolved_name is weak and
 // doesn't require this. See comment by part_resolve for why we don't need a value from it.
-resolved_name	: part_resolve RESOLVED_NAME			{ $$ = $2.as_name_res_list; }
-				| ASCII_NAME							{ $$.push_back($1.as_ascii); }
+resolved_name	: part_resolve RESOLVED_NAME			{ $$ = $2; }
+				| ASCII_NAME							{ $$ = $1; }
 
 %%

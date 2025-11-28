@@ -28,39 +28,39 @@ namespace YY
 };
 
 class NodeNames;
+class NodeNameBlock;
 
 namespace VN 
 {
-	
 class VNParse;	
 class Gnomon : public Traceable
 {
 public:
-	Gnomon( list<string> resolution_ ) : 
-		resolution(resolution_)
+	Gnomon( YY::NameInfo info_ ) : 
+		info(info_)
 	{ 
-		FTRACE("Gnomon at %p constructed with resolution: ", this)(resolution)("\n");
+		FTRACE("Gnomon at %p constructed\n", this);
 	}
 	~Gnomon()
 	{ 
-		FTRACE("Gnomon at %p destructed, resolution was: ", this)(resolution)("\n");
+		FTRACE("Gnomon at %p destructed\n", this);
 	}
 
 	string GetTrace() const
 	{
-		return Trace(resolution);
+		return Trace(info.as_name_res_list);
 	}
 	
 	friend class VNShim;
 private:
-	list<string> resolution;
+	YY::NameInfo info;
 };
 
 		
 class VNShim
 {
 public:	
-	shared_ptr<Gnomon> PushScopeRes( list<string> resolution );
+	shared_ptr<Gnomon> PushScopeRes( const YY::NameInfo &info );
 
 	void Designate( wstring name, TreePtr<Node> sub_pattern );
 
