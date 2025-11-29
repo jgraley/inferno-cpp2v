@@ -34,15 +34,14 @@ public:
 	
 	struct ScopeBlock : Block
 	{
-		map<string, unique_ptr<AvailableNodeData::Block>> sub_blocks;
 		string What() const final { return "node name scope"; }
 		string GetTrace() const { return Trace(sub_blocks); }
+
+		map<string, unique_ptr<AvailableNodeData::Block>> sub_blocks;
 	};
 
 	struct LeafBlock : Block
 	{
-		optional<NodeEnum> node_enum;
-		optional<IdentifierEnum> identifier_discriminator_enum;
 		string What() const final 
 		{ 
 			list<string> ls;
@@ -59,6 +58,9 @@ public:
 			s += identifier_discriminator_enum ? "id-disc#"+Trace((int)(identifier_discriminator_enum.value())) : "no-id-disc";
 			return s;
 		}
+
+		optional<NodeEnum> node_enum;
+		optional<IdentifierEnum> identifier_discriminator_enum;
 	};
 
 	typedef map<list<string>, NodeEnum> NameToNodeMapType;	
@@ -66,6 +68,7 @@ public:
 	const AvailableNodeData::ScopeBlock *GetRootBlock();
 	shared_ptr<Node> MakeNode(NodeEnum ne) const;
 	shared_ptr<TreePtrInterface> MakeTreePtr(NodeEnum ne) const;
+	bool IsType(const LeafBlock *block) const;
 	
 private:
 	static void InitialiseMap();

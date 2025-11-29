@@ -66,6 +66,38 @@ shared_ptr<TreePtrInterface> AvailableNodeData::MakeTreePtr(NodeEnum ne) const
 }
 
 
+bool AvailableNodeData::IsType(const LeafBlock *block) const
+{
+	bool is_type = false;
+	if( block->node_enum )
+	{
+		shared_ptr<Node> spn = MakeNode(block->node_enum.value());
+		if( dynamic_cast<const CPPTree::Type *>(spn.get()) )
+			is_type = true;
+	} 
+	else if( block->identifier_discriminator_enum )
+	{
+		shared_ptr<Node> spn;
+		switch( block->identifier_discriminator_enum.value() )
+		{
+#define NODE(NS, NAME) \
+		case IdentifierEnum::NS##_##NAME: \
+			spn = make_shared<NS::Specific##NAME##Identifier>(); \
+			break;
+#include "tree/identifier_names.inc"	
+#undef NODE
+		default:
+			ASSERTFAIL(); // switch should have covered everything in the inc file
+		}	
+
+		if( dynamic_cast<const CPPTree::Type *>(spn.get()) )
+			is_type = true;
+	}
+	return is_type;
+}
+
+
+
 void AvailableNodeData::InitialiseMap()
 {
 	name_to_node_map =

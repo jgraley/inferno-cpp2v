@@ -93,6 +93,8 @@
 	BUILD_SIZE								"🄽"
 	STRINGIZE								"§"
 	PRERESTRICT								"‽"
+	OPEN_TYPE								"⦅"
+	CLOSE_TYPE								"⦆"
 	<string>	COMMA						_("comma")
 	<string>	C_ASSIGN					"="
 	<string>	C_COMPOUND_ASSIGN			_("C compound assignment operator")
@@ -119,21 +121,24 @@
 	<string>  		TYPENAME				_("typename")
 	<YY::NameInfo>	DESIGNATED_NONTYPE		_("designated non-type")
 	<YY::NameInfo>	DESIGNATED_TYPE			_("designated type")
-	<YY::NameInfo>	RESOLVED_NAME			_("resolved name")
+	<YY::NameInfo>	RESOLVED_NONTYPE		_("resolved non-type node name")
+	<YY::NameInfo>	RESOLVED_TYPE			_("resolved type node name")
 	<YY::NameInfo>	SCOPE_NAME				_("scope name")
 	
-%type <TreePtr<Node>> 				expression expr_unit expr_postfix expr_prefix expr_relational expr_disjunction expr_conjunction type 
-%type <TreePtr<Node>> 				expr_assignment expr_equality expr_add_etc expr_logical_or expr_logical_and statements statement
-%type <TreePtr<Node>> 				expr_mul_etc expr_shift expr_bitwise_and expr_bitwise_or expr_bitwise_xor expr_no_comma_op 
-%type <TreePtr<Node>> 				expr_paren expr_comma_op type_unit type_prefix type_paren
+%type <TreePtr<Node>> 				normal norm_unit norm_postfix norm_prefix norm_relational norm_disjunction norm_conjunction  
+%type <TreePtr<Node>> 				norm_assignment norm_equality norm_add_etc norm_logical_or norm_logical_and statements statement
+%type <TreePtr<Node>> 				norm_mul_etc norm_shift norm_bitwise_and norm_bitwise_or norm_bitwise_xor norm_no_comma_op 
+%type <TreePtr<Node>> 				norm_paren norm_comma_op 
+%type <TreePtr<Node>> 				type type_unit type_prefix type_disjunction type_conjunction type_paren
+%type <TreePtr<Node>> 				unified_no_comma_op unified unified_prefix
 %type <wstring> 					vn_name
-%type <YY::NameInfo> 				resolved_name
+%type <YY::NameInfo> 				resolved_name resolved_type_name resolve
 %type <list<shared_ptr<VN::Command>>>			commands sep_commands
 %type <shared_ptr<VN::Command>>		script_command 
 %type <VN::Limit>					limit
 %type <VN::Itemisation>				itemisation items_bare items_sep
 %type <VN::Item>					item
-%type <shared_ptr<VN::Gnomon>>		part_resolve recogniser_command
+%type <shared_ptr<VN::Gnomon>>		part_resolve recogniser_command 
 %%
 
 vnscript 		: commands 								{ vn->OnVNScript($1); }
@@ -151,12 +156,12 @@ sep_commands 	: sep_commands VN_SEMI script_command		{ $$ = $1; $$.push_back($3)
 				| recogniser_command						{ recogniser->AddGnomon($1); }
 			
 // Add more commands here
-script_command	: ENGINE expression   		 		 	{ $$ = make_shared<VN::EngineCommand>($2, @1); }
-				| expression 			  				{ $$ = make_shared<VN::PatternCommand>($1, @$); }
+script_command	: ENGINE normal   		 		 	{ $$ = make_shared<VN::EngineCommand>($2, @1); }
+				| normal 			  				{ $$ = make_shared<VN::PatternCommand>($1, @$); }
 
 // or here
-recogniser_command	: vn_name DESIGNATE expression		{ $$ = make_shared<VN::NonTypeDesignationGnomon>($1, $3); }
-					| vn_name DESIGNATE type_paren		{ $$ = make_shared<VN::TypeDesignationGnomon>($1, $3); }
+recogniser_command	: vn_name DESIGNATE normal		{ $$ = make_shared<VN::NonTypeDesignationGnomon>($1, $3); }
+					| vn_name DESIGNATE type			{ $$ = make_shared<VN::TypeDesignationGnomon>($1, $3); }
 
 
 // This one dips into ASCII/C because VN doesn't otherwise need equality/inequality operators
@@ -173,115 +178,131 @@ items_sep 	: items_bare VN_SEP		   					{ $$ = $1; }
 			| items_sep VN_SEP		 					{ $$ = $1; $$.items.push_back({{}, @2}); }
 			| VN_SEP	 								{ $$.items.push_front({{}, @1}); }
 
-item		: item COMMA expr_no_comma_op				{ $$ = $1; $$.nodes.push_back($3); $$.loc = @$; }
-			| expr_no_comma_op							{ $$.nodes.push_back($1); $$.loc = @$; }
+item		: item COMMA unified_no_comma_op			{ $$ = $1; $$.nodes.push_back($3); $$.loc = @$; }
+			| unified_no_comma_op						{ $$.nodes.push_back($1); $$.loc = @$; }
 
+unified_no_comma_op : norm_no_comma_op					{ $$ = $1; }
+					| type								{ $$ = $1; }
+
+unified		: normal									{ $$ = $1; }
+			| type										{ $$ = $1; }
 
 statements	: statement
 
-statement	: expression
+statement	: normal
           
-type		: type_prefix          
+type		: type_disjunction          
           
+type_disjunction	: type_conjunction
+					| type_disjunction DISJUNCTION type_conjunction				{ $$ = vn->OnDisjunction($1, $3); }
+
+type_conjunction 	: type_prefix
+					| type_conjunction CONJUNCTION type_prefix				{ $$ = vn->OnConjunction($1, $3); }
+                    
 type_prefix : 										     type_paren
-			|  									  STUFF type_prefix	 { $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
-			| 		  STUFF OPEN_VN expression CLOSE_VN type_prefix	 { $$ = vn->OnStuff($5, $3, VN::Limit()); }
-			| 		  STUFF OPEN_VN limit      CLOSE_VN type_prefix	 { $$ = vn->OnStuff($5, nullptr, $3); }
-			| 			   DELTA expression DELTA_ARROW type_prefix	 { $$ = vn->OnDelta($2, $4); }
-			| PRERESTRICT OPEN_VN resolved_name CLOSE_VN type_prefix { $$ = vn->OnRestrict($3.as_andata_block, @3, $5, @5); }
-			| 	  TRANSFORM OPEN_VN ASCII_NAME CLOSE_VN type_prefix	 { $$ = vn->OnTransform($3.as_ascii, @3, $5, @5); }
-			| 								   NEGATION type_prefix	 { $$ = vn->OnNegation($2); }
-			| 									  GRASS type_prefix	 { $$ = vn->OnGrass($2); }
-			| 								 POINTER_IS type_prefix	 { $$ = vn->OnPointerIs($2); }
-			| 								 BUILD_SIZE type_prefix	 { $$ = vn->OnBuildSize($2); }
-			| 								  STRINGIZE type_prefix	 { $$ = vn->OnStringize($2); }
+			| 				      DELTA type DELTA_ARROW type_prefix { $$ = vn->OnDelta($2, $4); }
+			| PRERESTRICT OPEN_VN resolved_type_name CLOSE_VN type_prefix { $$ = vn->OnRestrict($3.as_andata_block, @3, $5, @5); }
+			| 									   GRASS type_prefix { $$ = vn->OnGrass($2); }
+			| 								  POINTER_IS type_prefix { $$ = vn->OnPointerIs($2); }
+			| 								    NEGATION type_prefix { $$ = vn->OnNegation($2); }
 
-
-type_paren	: type_unit
-			| '(' type ')'                          	{ $$ = $2; } // TODO We're losing the ability to embed commands in a type
+type_paren  : type_unit
+			| OPEN_TYPE unified CLOSE_TYPE                  { $$ = $2; }	
+			
                                         
-type_unit	: BUILT_IN_TYPE resolved_name itemisation		{ $$ = vn->OnBuiltIn($2.as_andata_block, @2, $3); }
-			| BUILT_IN_TYPE resolved_name					{ $$ = vn->OnBuiltIn($2.as_andata_block, @2, VN::Itemisation{{}, @2}); }
+type_unit	: BUILT_IN_TYPE resolved_type_name itemisation	{ $$ = vn->OnBuiltIn($2.as_andata_block, @2, $3); }
+			| BUILT_IN_TYPE resolved_type_name				{ $$ = vn->OnBuiltIn($2.as_andata_block, @2, VN::Itemisation{{}, @2}); }
+			| BUILT_IN resolved_type_name itemisation		{ $$ = vn->OnBuiltIn($2.as_andata_block, @2, $3); }
+			| BUILT_IN resolved_type_name					{ $$ = vn->OnBuiltIn($2.as_andata_block, @2, VN::Itemisation{{}, @2}); }
 			| DESIGNATED_TYPE       				 		{ $$ = $1.as_designated; }		
+   			| SPECIFIC_ID OPEN_VN resolved_type_name VN_SEP STRING_LITERAL CLOSE_VN				{ $$ = vn->OnSpecificId($3.as_andata_block, @3, $5, @5); }
+			| SPECIFIC_ID OPEN_VN resolved_type_name VN_SEP CLOSE_VN							{ $$ = vn->OnSpecificId($3.as_andata_block, @3, wstring(), @5); }
+			| ID_BY_NAME OPEN_VN resolved_type_name VN_SEP STRING_LITERAL CLOSE_VN				{ $$ = vn->OnIdByName($3.as_andata_block, @3, $5, @5); } // ASCII_NAME could be format
+			| BUILD_ID OPEN_VN resolved_type_name VN_SEP STRING_LITERAL VN_SEP CLOSE_VN 		{ $$ = vn->OnBuildId($3.as_andata_block, @3, $5, @5, VN::Item{}); }
+			| BUILD_ID OPEN_VN resolved_type_name VN_SEP STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($3.as_andata_block, @3, $5, @5, $7); }
+			| BUILD_ID OPEN_VN resolved_type_name VN_SEP VN_SEP item CLOSE_VN 					{ $$ = vn->OnBuildId($3.as_andata_block, @3, wstring(), @5, $6); }
+
+normal				: norm_comma_op
                       
-expression			: expr_comma_op
-                      
-expr_comma_op		: expr_no_comma_op
-					| expr_no_comma_op COMMA expr_comma_op						{ $$ = vn->OnInfixOperator($2, $1, $3); }
+norm_comma_op		: norm_no_comma_op
+					| norm_no_comma_op COMMA norm_comma_op						{ $$ = vn->OnInfixOperator($2, $1, $3); }
 
-expr_no_comma_op 	: expr_disjunction
+norm_no_comma_op 	: norm_disjunction
 
-expr_disjunction	: expr_conjunction
-					| expr_disjunction DISJUNCTION expr_conjunction				{ $$ = vn->OnDisjunction($1, $3); }
+norm_disjunction	: norm_conjunction
+					| norm_disjunction DISJUNCTION norm_conjunction				{ $$ = vn->OnDisjunction($1, $3); }
 
-expr_conjunction 	: expr_assignment
-					| expr_conjunction CONJUNCTION expr_assignment				{ $$ = vn->OnConjunction($1, $3); }
+norm_conjunction 	: norm_assignment
+					| norm_conjunction CONJUNCTION norm_assignment				{ $$ = vn->OnConjunction($1, $3); }
 		
-expr_assignment 	: 											expr_logical_or 
-					| 				   expr_logical_or C_ASSIGN expr_assignment	{ $$ = vn->OnInfixOperator($2, $1, $3); }
-					|         expr_logical_or C_COMPOUND_ASSIGN expr_assignment	{ $$ = vn->OnInfixOperator($2, $1, $3); }
+norm_assignment 	: 											norm_logical_or 
+					| 				   norm_logical_or C_ASSIGN norm_assignment	{ $$ = vn->OnInfixOperator($2, $1, $3); }
+					|         norm_logical_or C_COMPOUND_ASSIGN norm_assignment	{ $$ = vn->OnInfixOperator($2, $1, $3); }
 
-expr_logical_or 	: expr_logical_and
-					| expr_logical_or C_LOGICAL_OR_OP expr_logical_and			{ $$ = vn->OnInfixOperator($2, $1, $3); }
+norm_logical_or 	: norm_logical_and
+					| norm_logical_or C_LOGICAL_OR_OP norm_logical_and			{ $$ = vn->OnInfixOperator($2, $1, $3); }
 		
-expr_logical_and	: expr_bitwise_or
-					| expr_logical_and C_LOGICAL_AND_OP expr_bitwise_or			{ $$ = vn->OnInfixOperator($2, $1, $3); }
+norm_logical_and	: norm_bitwise_or
+					| norm_logical_and C_LOGICAL_AND_OP norm_bitwise_or			{ $$ = vn->OnInfixOperator($2, $1, $3); }
 
-expr_bitwise_or 	: expr_bitwise_xor
-					| expr_bitwise_or C_BITWISE_OR_OP expr_bitwise_xor			{ $$ = vn->OnInfixOperator($2, $1, $3); }
+norm_bitwise_or 	: norm_bitwise_xor
+					| norm_bitwise_or C_BITWISE_OR_OP norm_bitwise_xor			{ $$ = vn->OnInfixOperator($2, $1, $3); }
 		
-expr_bitwise_xor	: expr_bitwise_and
-					| expr_bitwise_xor C_BITWISE_XOR_OP expr_bitwise_and		{ $$ = vn->OnInfixOperator($2, $1, $3); }
+norm_bitwise_xor	: norm_bitwise_and
+					| norm_bitwise_xor C_BITWISE_XOR_OP norm_bitwise_and		{ $$ = vn->OnInfixOperator($2, $1, $3); }
 		
-expr_bitwise_and	: expr_equality
-					| expr_bitwise_and C_AMPERSAND expr_equality				{ $$ = vn->OnInfixOperator($2, $1, $3); }
+norm_bitwise_and	: norm_equality
+					| norm_bitwise_and C_AMPERSAND norm_equality				{ $$ = vn->OnInfixOperator($2, $1, $3); }
 
-expr_equality 		: expr_relational
-					| expr_equality C_EQUALITY_OP expr_relational				{ $$ = vn->OnInfixOperator($2, $1, $3); }
+norm_equality 		: norm_relational
+					| norm_equality C_EQUALITY_OP norm_relational				{ $$ = vn->OnInfixOperator($2, $1, $3); }
 
-expr_relational 	: expr_shift
-					| expr_relational C_RELATIONAL_OP expr_shift				{ $$ = vn->OnInfixOperator($2, $1, $3); }
+norm_relational 	: norm_shift
+					| norm_relational C_RELATIONAL_OP norm_shift				{ $$ = vn->OnInfixOperator($2, $1, $3); }
 
-expr_shift			: expr_add_etc
-					| expr_shift C_SHIFT_OP expr_add_etc						{ $$ = vn->OnInfixOperator($2, $1, $3); }
+norm_shift			: norm_add_etc
+					| norm_shift C_SHIFT_OP norm_add_etc						{ $$ = vn->OnInfixOperator($2, $1, $3); }
 		
-expr_add_etc 		: expr_mul_etc
-					| expr_add_etc C_ADD_SUB_OP expr_mul_etc					{ $$ = vn->OnInfixOperator($2, $1, $3); }
+norm_add_etc 		: norm_mul_etc
+					| norm_add_etc C_ADD_SUB_OP norm_mul_etc					{ $$ = vn->OnInfixOperator($2, $1, $3); }
 		
-expr_mul_etc 		: expr_prefix
-					| expr_mul_etc C_DIV_MOD_OP expr_prefix						{ $$ = vn->OnInfixOperator($2, $1, $3); }
-					| expr_mul_etc '*' expr_prefix								{ $$ = vn->OnInfixOperator("*", $1, $3); }
+norm_mul_etc 		: norm_prefix
+					| norm_mul_etc C_DIV_MOD_OP norm_prefix						{ $$ = vn->OnInfixOperator($2, $1, $3); }
+					| norm_mul_etc '*' norm_prefix								{ $$ = vn->OnInfixOperator("*", $1, $3); }
 		
-expr_prefix : 										   expr_postfix
-			|  									  STUFF expr_prefix	 { $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
-			| 		  STUFF OPEN_VN expression CLOSE_VN expr_prefix	 { $$ = vn->OnStuff($5, $3, VN::Limit()); }
-			| 			 STUFF OPEN_VN limit   CLOSE_VN expr_prefix	 { $$ = vn->OnStuff($5, nullptr, $3); }
-			| 			   DELTA expression DELTA_ARROW expr_prefix	 { $$ = vn->OnDelta($2, $4); }
-			| 					    C_PREFIX_OP 		expr_prefix	 { $$ = vn->OnPrefixOperator($1, $2); }
-			| 					    C_AMPERSAND 		expr_prefix	 { $$ = vn->OnPrefixOperator($1, $2); }
-			| 					    C_STAR		 		expr_prefix	 { $$ = vn->OnPrefixOperator($1, $2); }
-			| 					    C_ADD_SUB_OP	    expr_prefix	 { $$ = vn->OnPrefixOperator($1, $2); }
-			| 					    C_PRE_OR_INFIX_OP   expr_prefix	 { $$ = vn->OnPrefixOperator($1, $2); }
-			| 					    C_PRE_OR_POSTFIX_OP expr_prefix	 { $$ = vn->OnPrefixOperator($1, $2); }
-			|							   '(' type ')' expr_prefix  { $$ = vn->OnCast($2, @2, $4, @4); }
-			| PRERESTRICT OPEN_VN resolved_name CLOSE_VN expr_prefix { $$ = vn->OnRestrict($3.as_andata_block, @3, $5, @5); }
-			| 	  TRANSFORM OPEN_VN ASCII_NAME CLOSE_VN expr_prefix	 { $$ = vn->OnTransform($3.as_ascii, @3, $5, @5); }
-			| 								   NEGATION expr_prefix	 { $$ = vn->OnNegation($2); }
-			| 									  GRASS expr_prefix	 { $$ = vn->OnGrass($2); }
-			| 								 POINTER_IS expr_prefix	 { $$ = vn->OnPointerIs($2); }
-			| 								 BUILD_SIZE expr_prefix	 { $$ = vn->OnBuildSize($2); }
-			| 								  STRINGIZE expr_prefix	 { $$ = vn->OnStringize($2); }
+norm_prefix : 										   norm_postfix
+			| 			   DELTA normal DELTA_ARROW norm_prefix	 { $$ = vn->OnDelta($2, $4); }
+			| 					    C_PREFIX_OP 		norm_prefix	 { $$ = vn->OnPrefixOperator($1, $2); }
+			| 					    C_AMPERSAND 		norm_prefix	 { $$ = vn->OnPrefixOperator($1, $2); }
+			| 					    C_STAR		 		norm_prefix	 { $$ = vn->OnPrefixOperator($1, $2); }
+			| 					    C_ADD_SUB_OP	    norm_prefix	 { $$ = vn->OnPrefixOperator($1, $2); }
+			| 					    C_PRE_OR_INFIX_OP   norm_prefix	 { $$ = vn->OnPrefixOperator($1, $2); }
+			| 					    C_PRE_OR_POSTFIX_OP norm_prefix	 { $$ = vn->OnPrefixOperator($1, $2); }
+			|							   '(' type ')' norm_prefix  { $$ = vn->OnCast($2, @2, $4, @4); }
+			| PRERESTRICT OPEN_VN resolved_name CLOSE_VN norm_prefix { $$ = vn->OnRestrict($3.as_andata_block, @3, $5, @5); }
+			| 									  GRASS norm_prefix	 { $$ = vn->OnGrass($2); }
+			| 								 POINTER_IS norm_prefix	 { $$ = vn->OnPointerIs($2); }
+			| 								   NEGATION norm_prefix	 { $$ = vn->OnNegation($2); }
+			| 								 BUILD_SIZE unified_prefix	 { $$ = vn->OnBuildSize($2); }
+			| 								  STRINGIZE unified_prefix	 { $$ = vn->OnStringize($2); }
+			| 	  TRANSFORM OPEN_VN ASCII_NAME CLOSE_VN unified_prefix	 { $$ = vn->OnTransform($3.as_ascii, @3, $5, @5); }
+			|  									  STUFF unified_prefix	 { $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
+			| 		  	 STUFF OPEN_VN unified CLOSE_VN unified_prefix	 { $$ = vn->OnStuff($5, $3, VN::Limit()); }
+			| 			 STUFF OPEN_VN limit   CLOSE_VN unified_prefix	 { $$ = vn->OnStuff($5, nullptr, $3); }
 
-expr_postfix: expr_paren     
-			| expr_postfix C_PRE_OR_POSTFIX_OP 				 	{ $$ = vn->OnPostfixOperator($2, $1); }
+unified_prefix	: norm_prefix
+				| type_prefix
+
+norm_postfix: norm_paren     
+			| norm_postfix C_PRE_OR_POSTFIX_OP 				 	{ $$ = vn->OnPostfixOperator($2, $1); }
 		
-expr_paren	: expr_unit
+norm_paren	: norm_unit
 			| '(' commands ')'                          		{ $$ = vn->OnEmbeddedCommands($2); }
 
-expr_unit	: BUILT_IN resolved_name itemisation				{ $$ = vn->OnBuiltIn($2.as_andata_block, @2, $3); }
+norm_unit	: BUILT_IN resolved_name itemisation				{ $$ = vn->OnBuiltIn($2.as_andata_block, @2, $3); }
 			| BUILT_IN resolved_name							{ $$ = vn->OnBuiltIn($2.as_andata_block, @2, VN::Itemisation{{}, @2}); }
 			| STAR												{ $$ = vn->OnStar(nullptr); }
-			| STAR OPEN_VN expression CLOSE_VN					{ $$ = vn->OnStar($3); }
+			| STAR OPEN_VN normal CLOSE_VN						{ $$ = vn->OnStar($3); }
 			| INTEGRAL_LITERAL					      			{ $$ = vn->OnIntegralLiteral($1, @1); }
 			| STRING_LITERAL					      			{ $$ = vn->OnStringLiteral($1); }
 			| BOOL_LITERAL										{ $$ = vn->OnBoolLiteral($1); }
@@ -300,13 +321,20 @@ vn_name		: UNICODE_NAME    							{ $$ = $1.as_unicode; }
           
 // On sight of ::, we inform the recognition layer, which returns a shared_ptr which will 
 // expire when the production is complete or an error forces unwind. The naming layer
-// keeps weak_ptrs to these and will send us RESOLVED_NAME if one exists.
-part_resolve	: resolved_name SCOPE_RES				{ $$ = make_shared<VN::ScopeBlockGnomon>($1.as_andata_block);
+// keeps weak_ptrs to these and will send us RESOLVED_NONTYPE if one exists.
+part_resolve	: resolve SCOPE_RES						{ $$ = make_shared<VN::ScopeBlockGnomon>($1.as_andata_block);
                                                           recogniser->AddGnomon($$); }
     
-// RESOLVED_NAME is strong i.e. there was definitely a ::. resolved_name is weak and
-// doesn't require this. See comment by part_resolve for why we don't need a value from it.
-resolved_name	: part_resolve RESOLVED_NAME			{ $$ = $2; }
+resolve     	: part_resolve SCOPE_NAME				{ $$ = $2; }
 				| SCOPE_NAME							{ $$ = $1; }
+				      
+
+// RESOLVED_NONTYPE is strong i.e. there was definitely a ::. resolved_name is weak and
+// doesn't require this. See comment by part_resolve for why we don't need a value from it.
+resolved_name	: part_resolve RESOLVED_NONTYPE			{ $$ = $2; }
+				| RESOLVED_NONTYPE						{ $$ = $1; }
+
+resolved_type_name	: part_resolve RESOLVED_TYPE		{ $$ = $2; }
+					| RESOLVED_TYPE						{ $$ = $1; }
 
 %%

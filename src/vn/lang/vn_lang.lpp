@@ -70,6 +70,8 @@ comp_assign				\|=|^=|&=|<<=|>>=|\+=|-=|\*=|\/=|%=
 🄽				{ return YY::VNLangParser::make_BUILD_SIZE(location()); };
 §				{ return YY::VNLangParser::make_STRINGIZE(location()); };
 ‽ 				{ return YY::VNLangParser::make_PRERESTRICT(location()); };
+⦅ 				{ return YY::VNLangParser::make_OPEN_TYPE(location()); };
+⦆ 				{ return YY::VNLangParser::make_CLOSE_TYPE(location()); };
 
 // Multi-character before single-character
 ==|!=			{ return YY::VNLangParser::make_C_EQUALITY_OP(str(), location()); }

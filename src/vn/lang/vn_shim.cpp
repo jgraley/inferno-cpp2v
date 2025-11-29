@@ -134,8 +134,13 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessToken(wstring text, bool 
 	if( ascii && current_scope_block && current_scope_block->sub_blocks.count(ToASCII(text)) > 0 )
 	{
 		info.as_andata_block = current_scope_block->sub_blocks.at(ToASCII(text)).get();
-		if( dynamic_cast<const AvailableNodeData::LeafBlock *>(info.as_andata_block) )
-			return YY::VNLangParser::make_RESOLVED_NAME(info, loc);
+		if( auto lb = dynamic_cast<const AvailableNodeData::LeafBlock *>(info.as_andata_block) )
+		{
+			if( AvailableNodeData().IsType(lb) )			
+				return YY::VNLangParser::make_RESOLVED_TYPE(info, loc);
+			else
+				return YY::VNLangParser::make_RESOLVED_NONTYPE(info, loc);
+		}
 		else if( dynamic_cast<const AvailableNodeData::ScopeBlock *>(info.as_andata_block) )
 			return YY::VNLangParser::make_SCOPE_NAME(info, loc);				
 		else
