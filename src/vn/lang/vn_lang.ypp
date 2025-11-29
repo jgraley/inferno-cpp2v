@@ -36,7 +36,7 @@
   namespace VN { 
     class Command;
     class Gnomon;
-    class ANDataBlockGnomon;
+    class ScopeBlockGnomon;
   }
 }
 
@@ -113,12 +113,13 @@
 	<wstring> 	STRING_LITERAL 				_("string")
 	<string> 	INTEGRAL_LITERAL			_("integer literal")
 	<bool>		BOOL_LITERAL				_("boolean literal")
-	<YY::NameInfo>  	ASCII_NAME 					_("ASCII name")
-	<string>  	ASCII_FORMAT 				_("ASCII format string")
-	<YY::NameInfo> 	UNICODE_NAME 				_("Unicode name")
-	<string>    TYPENAME					"typename"
-	<YY::NameInfo> 	NAMED_SUBTREE			_("named subtree")
-	<YY::NameInfo> RESOLVED_NAME			_("resolved name")
+	<YY::NameInfo>  ASCII_NAME 				_("ASCII name")
+	<string>  		ASCII_FORMAT 			_("ASCII format string")
+	<YY::NameInfo> 	UNICODE_NAME 			_("Unicode name")
+	<string>  		TYPENAME				_("typename")
+	<YY::NameInfo>	NAMED_SUBTREE			_("named subtree")
+	<YY::NameInfo>	RESOLVED_NAME			_("resolved name")
+	<YY::NameInfo>	SCOPE_NAME				_("scope name")
 	
 %type <TreePtr<Node>> 				expression expr_unit expr_postfix expr_prefix expr_relational expr_disjunction expr_conjunction type 
 %type <TreePtr<Node>> 				expr_assignment expr_equality expr_add_etc expr_logical_or expr_logical_and statements statement
@@ -290,16 +291,17 @@ expr_unit	: BUILT_IN resolved_name itemisation				{ $$ = vn->OnBuiltIn($2.as_and
 
 vn_name		: UNICODE_NAME    							{ $$ = $1.as_unicode; }
 			| ASCII_NAME								{ $$ = $1.as_unicode; }     
+			| SCOPE_NAME								{ $$ = $1.as_unicode; }     
           
 // On sight of ::, we inform the recognition layer, which returns a shared_ptr which will 
 // expire when the production is complete or an error forces unwind. The naming layer
 // keeps weak_ptrs to these and will send us RESOLVED_NAME if one exists.
-part_resolve	: resolved_name SCOPE_RES				{ $$ = make_shared<VN::ANDataBlockGnomon>($1.as_andata_block);
+part_resolve	: resolved_name SCOPE_RES				{ $$ = make_shared<VN::ScopeBlockGnomon>($1.as_andata_block);
                                                           recogniser->AddGnomon($$); }
     
 // RESOLVED_NAME is strong i.e. there was definitely a ::. resolved_name is weak and
 // doesn't require this. See comment by part_resolve for why we don't need a value from it.
 resolved_name	: part_resolve RESOLVED_NAME			{ $$ = $2; }
-				| ASCII_NAME							{ $$ = $1; }
+				| SCOPE_NAME							{ $$ = $1; }
 
 %%

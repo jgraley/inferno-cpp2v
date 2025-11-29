@@ -41,21 +41,22 @@ public:
 };
 
 
-class ANDataBlockGnomon : public Gnomon
+class ScopeBlockGnomon : public Gnomon
 {
 public:	
-	ANDataBlockGnomon( const AvailableNodeData::Block *andata_block_ ) : 
-		andata_block(andata_block_)
+	ScopeBlockGnomon( const AvailableNodeData::Block *andata_block ) : 
+		scope_block(dynamic_cast<const AvailableNodeData::ScopeBlock *>(andata_block))
 	{
+		ASSERT( scope_block );
 	}
 
 	string GetTrace() const
 	{
-		return Trace(andata_block);
+		return Trace(scope_block);
 	}
 private:
 	friend class VNLangRecogniser;
-	const AvailableNodeData::Block *andata_block;
+	const AvailableNodeData::ScopeBlock *scope_block;
 };
 		
 class VNLangRecogniser
@@ -76,7 +77,7 @@ private:
 	void PurgeExpiredGnomons();
 
 	map<wstring, TreePtr<Node>> designations;	
-	list<weak_ptr<const ANDataBlockGnomon>> scope_res_gnomons;
+	list<weak_ptr<const ScopeBlockGnomon>> scope_block_gnomons;
 };
 	
 };

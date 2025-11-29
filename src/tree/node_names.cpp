@@ -17,7 +17,7 @@ const AvailableNodeData::NameToNodeMapType &AvailableNodeData::GetNameToEnumMap(
 }
 
 
-const AvailableNodeData::Block *AvailableNodeData::GetRootBlock()
+const AvailableNodeData::ScopeBlock *AvailableNodeData::GetRootBlock()
 {
 	if( root_block.sub_blocks.empty() )
 		InitialiseMap();	

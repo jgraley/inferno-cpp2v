@@ -63,7 +63,7 @@ public:
 
 	typedef map<list<string>, NodeEnum> NameToNodeMapType;	
 	const NameToNodeMapType &GetNameToEnumMap();
-	const AvailableNodeData::Block *GetRootBlock();
+	const AvailableNodeData::ScopeBlock *GetRootBlock();
 	shared_ptr<Node> MakeNode(NodeEnum ne) const;
 	shared_ptr<TreePtrInterface> MakeTreePtr(NodeEnum ne) const;
 	

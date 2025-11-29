@@ -81,8 +81,8 @@ void VNLangRecogniser::AddGnomon( shared_ptr<Gnomon> gnomon )
 {
 	PurgeExpiredGnomons();
 	
-	if( auto scope_res_gnomon = dynamic_pointer_cast<const ANDataBlockGnomon>(gnomon) )
-		scope_res_gnomons.push_front( scope_res_gnomon ); // front is top
+	if( auto scope_block_gnomon = dynamic_pointer_cast<const ScopeBlockGnomon>(gnomon) )
+		scope_block_gnomons.push_front( scope_block_gnomon ); // front is top
 }
 
 
@@ -117,34 +117,29 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessToken(wstring text, bool 
 	else
 		info.as_designated = nullptr;
 		
-	const AvailableNodeData::Block *current_block = AvailableNodeData().GetRootBlock();
-		
-	for( weak_ptr<const ANDataBlockGnomon> wpg : scope_res_gnomons )
+	// Determine the current scope from our weak gnomons
+	const AvailableNodeData::ScopeBlock *current_scope_block = AvailableNodeData().GetRootBlock();
+	for( weak_ptr<const ScopeBlockGnomon> wpg : scope_block_gnomons )
 	{
 		if( auto spg = wpg.lock() )
 		{
-			if( spg->andata_block )
-				current_block = spg->andata_block;
+			if( spg->scope_block )
+				current_scope_block = spg->scope_block;
 			break; // we only need the one at the front, because the names build up
 		}
 	}
-
+	
+	// See if we want to supply a block
 	info.as_andata_block = nullptr;
-	if( ascii )
+	if( ascii && current_scope_block && current_scope_block->sub_blocks.count(ToASCII(text)) > 0 )
 	{
-		FTRACE("ASCII token ")(ToASCII(text))(" current_block:\n")(*current_block)("\n");
-		if( auto scope_block = dynamic_cast<const AvailableNodeData::ScopeBlock *>(current_block) )
-		{
-			if( scope_block->sub_blocks.count(ToASCII(text)) > 0 )
-			{
-				info.as_andata_block = scope_block->sub_blocks.at(ToASCII(text)).get();
-				if( auto node_block = dynamic_cast<const AvailableNodeData::LeafBlock *>(info.as_andata_block) )
-				{
-					FTRACE(	"Supply RESOLVED_NAME with: ")(info.as_andata_block)("\n");
-					return YY::VNLangParser::make_RESOLVED_NAME(info, loc);
-				}
-			}
-		}
+		info.as_andata_block = current_scope_block->sub_blocks.at(ToASCII(text)).get();
+		if( dynamic_cast<const AvailableNodeData::LeafBlock *>(info.as_andata_block) )
+			return YY::VNLangParser::make_RESOLVED_NAME(info, loc);
+		else if( dynamic_cast<const AvailableNodeData::ScopeBlock *>(info.as_andata_block) )
+			return YY::VNLangParser::make_SCOPE_NAME(info, loc);				
+		else
+			ASSERTFAIL("unreconised andata block");
 	}
 			
 	FTRACE(	"Supply something else\n");
@@ -175,11 +170,11 @@ TreePtr<Node> VNLangRecogniser::TryGetArchetype( list<string> typ ) const
 
 void VNLangRecogniser::PurgeExpiredGnomons()
 {
-	auto expired = [&](weak_ptr<const ANDataBlockGnomon> wpg)
+	auto expired = [&](weak_ptr<const ScopeBlockGnomon> wpg)
 	{
 		return wpg.expired();
 	};
-	scope_res_gnomons.remove_if(expired);
+	scope_block_gnomons.remove_if(expired);
 }
 
 
