@@ -309,7 +309,7 @@ Lazy<BooleanExpression> StandardAgent::SymbolicNormalLinkedQuerySequence(const P
         auto candidate_b_expr = MakeLazy<SymbolVariable>(p.second);
         auto candidate_a_successor_expr = MakeLazy<MySequenceSuccessorOperator>(candidate_a_expr);
         expr &= ( candidate_b_expr == candidate_a_successor_expr );
-        // Avoid being pushed off the end since candidate b is not a shim
+        // Avoid being pushed off the end since candidate b is not a recogniser
         expr &= ( candidate_b_expr != MakeLazy<SymbolConstant>(XLink::OffEnd) ); 
     }
         

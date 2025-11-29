@@ -32,10 +32,10 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc );
 
 
 VNParse::VNParse() :
-	shim( make_unique<VNShim>() ),
-	scanner( make_unique<YY::VNLangScanner>(shim.get(), reflex::Input(), std::cerr) ),
-	parser( make_unique<YY::VNLangParser>(*scanner, this, shim.get()) ),
-	node_names( make_unique<NodeNames>() )
+	recogniser( make_unique<VNLangRecogniser>() ),
+	scanner( make_unique<YY::VNLangScanner>(recogniser.get(), reflex::Input(), std::cerr) ),
+	parser( make_unique<YY::VNLangParser>(*scanner, this, recogniser.get()) ),
+	node_names( make_unique<AvailableNodeData>() )
 {
 }
 
@@ -161,17 +161,17 @@ static TreePtr<Node> MakeStandardAgent(NodeEnum ne)
 }
 
 
-TreePtr<Node> VNParse::OnBuiltIn( const NodeNames::Block *block, any node_name_loc, Itemisation src_itemisation )
+TreePtr<Node> VNParse::OnBuiltIn( const AvailableNodeData::Block *block, any node_name_loc, Itemisation src_itemisation )
 {
-	auto node_block = dynamic_cast<const NodeNames::NodeBlock *>(block);
+	auto leaf_block = dynamic_cast<const AvailableNodeData::LeafBlock *>(block);
 	// Parser could do this if we separated the tokens 
-	if( !node_block || !node_block->node_enum )
+	if( !leaf_block || !leaf_block->node_enum )
 		throw YY::VNLangParser::syntax_error( 
 				    any_cast<YY::VNLangParser::location_type>(node_name_loc), 
 				    SSPrintf("In ◼, unexpected %s when expecting node name.", block->What().c_str()) ); 
 	
 	// The new node is the destiation
-	NodeEnum ne = node_block->node_enum.value();
+	NodeEnum ne = leaf_block->node_enum.value();
 	TreePtr<Node> dest = MakeStandardAgent(ne);
 	
 	// The detination's itemisation "pulls" items from the source and we require a match (for now). 
@@ -226,16 +226,16 @@ TreePtr<Node> VNParse::OnBuiltIn( const NodeNames::Block *block, any node_name_l
 }
 
 
-TreePtr<Node> VNParse::OnRestrict( const NodeNames::Block *block, any node_name_loc, TreePtr<Node> target, any target_loc )
+TreePtr<Node> VNParse::OnRestrict( const AvailableNodeData::Block *block, any node_name_loc, TreePtr<Node> target, any target_loc )
 {
-	auto node_block = dynamic_cast<const NodeNames::NodeBlock *>(block);
+	auto leaf_block = dynamic_cast<const AvailableNodeData::LeafBlock *>(block);
 	// Parser could do this if we separated the tokens 
-	if( !node_block || !node_block->node_enum )
+	if( !leaf_block || !leaf_block->node_enum )
 		throw YY::VNLangParser::syntax_error( 
 				    any_cast<YY::VNLangParser::location_type>(node_name_loc), 
 				    SSPrintf("In ‽, unexpected %s when expecting node name.", block->What().c_str()) ); 	
 	
-	NodeEnum ne = node_block->node_enum.value();
+	NodeEnum ne = leaf_block->node_enum.value();
 	Agent *agent = Agent::TryAsAgent(target);
 	ASSERT( agent )("We are parsing a pattern so everything should be agents");
 		
@@ -340,17 +340,17 @@ TreePtr<Node> VNParse::OnCast( TreePtr<Node> type, any type_loc, TreePtr<Node> o
 
 
 
-TreePtr<Node> VNParse::OnSpecificId( const NodeNames::Block *block, any id_disc_loc, wstring wname, any name_loc )
+TreePtr<Node> VNParse::OnSpecificId( const AvailableNodeData::Block *block, any id_disc_loc, wstring wname, any name_loc )
 {
 	(void)name_loc; // TODO perhaps IdentifierByNameAgent can validate this?
 
-	auto node_block = dynamic_cast<const NodeNames::NodeBlock *>(block);
+	auto leaf_block = dynamic_cast<const AvailableNodeData::LeafBlock *>(block);
 	// Parser could do this if we separated the tokens 
-	if( !node_block || !node_block->identifier_discriminator_enum )
+	if( !leaf_block || !leaf_block->identifier_discriminator_enum )
 		throw YY::VNLangParser::syntax_error( 
 				    any_cast<YY::VNLangParser::location_type>(id_disc_loc), 
 				    SSPrintf("In 🞊, unexpected %s when expecting identifier-discriminator.", block->What().c_str()) ); 		
-	IdentifierEnum ie = node_block->identifier_discriminator_enum.value();
+	IdentifierEnum ie = leaf_block->identifier_discriminator_enum.value();
 
 	string name = Unquote(ToASCII(wname));
 		
@@ -367,7 +367,7 @@ TreePtr<Node> VNParse::OnSpecificId( const NodeNames::Block *block, any id_disc_
 }
 
 
-TreePtr<Node> VNParse::OnIdByName( const NodeNames::Block *block, any id_disc_loc, wstring wname, any name_loc )
+TreePtr<Node> VNParse::OnIdByName( const AvailableNodeData::Block *block, any id_disc_loc, wstring wname, any name_loc )
 {
 	(void)name_loc; // TODO perhaps IdentifierByNameAgent can validate this?
 
@@ -377,13 +377,13 @@ TreePtr<Node> VNParse::OnIdByName( const NodeNames::Block *block, any id_disc_lo
 				    SSPrintf("In ⊛, unexpected non-block when expecting identifier-discriminator.") ); 		
 
 
-	auto node_block = dynamic_cast<const NodeNames::NodeBlock *>(block);
+	auto leaf_block = dynamic_cast<const AvailableNodeData::LeafBlock *>(block);
 	// Parser could do this if we separated the tokens 
-	if( !node_block || !node_block->identifier_discriminator_enum )
+	if( !leaf_block || !leaf_block->identifier_discriminator_enum )
 		throw YY::VNLangParser::syntax_error( 
 				    any_cast<YY::VNLangParser::location_type>(id_disc_loc), 
 				    SSPrintf("In ⊛, unexpected %s when expecting identifier-discriminator.", block->What().c_str()) ); 		
-	IdentifierEnum ie = node_block->identifier_discriminator_enum.value();
+	IdentifierEnum ie = leaf_block->identifier_discriminator_enum.value();
 
 	string name = Unquote(ToASCII(wname));
 
@@ -400,17 +400,17 @@ TreePtr<Node> VNParse::OnIdByName( const NodeNames::Block *block, any id_disc_lo
 }
 
 
-TreePtr<Node> VNParse::OnBuildId( const NodeNames::Block *block, any id_disc_loc, wstring wformat, any name_loc, Item sources )
+TreePtr<Node> VNParse::OnBuildId( const AvailableNodeData::Block *block, any id_disc_loc, wstring wformat, any name_loc, Item sources )
 {
 	(void)name_loc; // TODO perhaps BuildIdentifierAgent can validate this?
 
-	auto node_block = dynamic_cast<const NodeNames::NodeBlock *>(block);
+	auto leaf_block = dynamic_cast<const AvailableNodeData::LeafBlock *>(block);
 	// Parser could do this if we separated the tokens 
-	if( !node_block || !node_block->identifier_discriminator_enum )
+	if( !leaf_block || !leaf_block->identifier_discriminator_enum )
 		throw YY::VNLangParser::syntax_error( 
 				    any_cast<YY::VNLangParser::location_type>(id_disc_loc), 
 				    SSPrintf("In ⧇, unexpected %s when expecting identifier-discriminator.", block->What().c_str()) ); 		
-	IdentifierEnum ie = node_block->identifier_discriminator_enum.value();
+	IdentifierEnum ie = leaf_block->identifier_discriminator_enum.value();
 
 	// Format is "" if omitted otherwise a quoted string with the quotes still on
 	string format = wformat.empty() ? "" : Unquote(ToASCII(wformat));
@@ -539,20 +539,20 @@ TreePtr<Node> VNParse::CreateIntegralLiteral( bool uns, bool lng, bool lng2, uin
 
 static NodeEnum GetNodeEnum( list<string> typ, any loc )
 {
-	if( !NodeNames().GetNameToEnumMap().count(typ) )
+	if( !AvailableNodeData().GetNameToEnumMap().count(typ) )
 	{
 		throw YY::VNLangParser::syntax_error(
 		    any_cast<YY::VNLangParser::location_type>(loc),
 			"Built-in type " + VNParse::DiagQuote(Join(typ, "::")) + " unknown.");
 	}
 	
-	return NodeNames().GetNameToEnumMap().at(typ);	
+	return AvailableNodeData().GetNameToEnumMap().at(typ);	
 }
 
 
-VNShim &VNParse::GetShim()
+VNLangRecogniser &VNParse::GetShim()
 {
-	return *shim;
+	return *recogniser;
 }
 
 // grammar for C operators

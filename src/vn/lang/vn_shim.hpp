@@ -27,7 +27,7 @@ namespace YY
 	class VNLangParser;
 };
 
-class NodeNames;
+class AvailableNodeData;
 
 namespace VN 
 {
@@ -35,34 +35,35 @@ class VNParse;
 class Gnomon : public Traceable
 {
 public:
-	Gnomon( YY::NameInfo info_ ) : 
-		info(info_)
+	virtual ~Gnomon()
 	{ 
-		FTRACE("Gnomon at %p constructed\n", this);
 	}
-	~Gnomon()
-	{ 
-		FTRACE("Gnomon at %p destructed\n", this);
+};
+
+
+class ANDataBlockGnomon : public Gnomon
+{
+public:	
+	ANDataBlockGnomon( const AvailableNodeData::Block *andata_block_ ) : 
+		andata_block(andata_block_)
+	{
 	}
 
 	string GetTrace() const
 	{
-		return Trace(info.as_name_res_list);
+		return Trace(andata_block);
 	}
-	
-	friend class VNShim;
 private:
-	YY::NameInfo info;
+	friend class VNLangRecogniser;
+	const AvailableNodeData::Block *andata_block;
 };
-
 		
-class VNShim
+class VNLangRecogniser
 {
 public:	
-	shared_ptr<Gnomon> PushScopeRes( const YY::NameInfo &info );
+	void AddGnomon( shared_ptr<Gnomon> gnomon );
 
 	void Designate( wstring name, TreePtr<Node> sub_pattern );
-
 	
 	YY::VNLangParser::symbol_type OnUnquoted(string text, YY::VNLangParser::location_type loc) const;
 	YY::VNLangParser::symbol_type OnUnquoted(wstring text, YY::VNLangParser::location_type loc) const;
@@ -75,7 +76,7 @@ private:
 	void PurgeExpiredGnomons();
 
 	map<wstring, TreePtr<Node>> designations;	
-	list<weak_ptr<Gnomon>> current_gnomons;
+	list<weak_ptr<const ANDataBlockGnomon>> scope_res_gnomons;
 };
 	
 };

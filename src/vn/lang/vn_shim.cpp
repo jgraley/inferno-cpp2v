@@ -52,14 +52,14 @@ static TreePtr<Node> MakeStandardAgent(NodeEnum ne)
 // You want to call 
 // YY::VNLangParser::symbol_type YY::VNLangParser::make_SOME_KIND_OF_NAME( string v, location_type l ) <--- a static function
 // of if you want the token in a varaible eg tok, use
-// YY::VNLangParser::symbol_type::symbol_type( int tok, VNShim::NameData, location_type l )   <--- a constructor
+// YY::VNLangParser::symbol_type::symbol_type( int tok, VNLangRecogniser::NameData, location_type l )   <--- a constructor
 // with tok = token::TOK_SOME_KIND_OF_NAME
-// and VNShim::NameData being the type of TOK_SOME_KIND_OF_NAME etc as specified in the .ypp file
+// and VNLangRecogniser::NameData being the type of TOK_SOME_KIND_OF_NAME etc as specified in the .ypp file
 //
 // Scanner rule is
-// xyz   { return shim.OnUnicodeName( wstr(), location() ); }
+// xyz   { return recogniser.OnUnicodeName( wstr(), location() ); }
 //
-// defined like YY::VNLangParser::symbol_type VNShim::OnUnicodeName( wstring v, location_type l );   <--- or "any" for location
+// defined like YY::VNLangParser::symbol_type VNLangRecogniser::OnUnicodeName( wstring v, location_type l );   <--- or "any" for location
 //
 // ALL strings found by parser go in here, ASCII or Unicode, quoted or not, including keywords.
 // There's a separate entry point for each parsing token. EP for quoted should unquote.
@@ -67,50 +67,46 @@ static TreePtr<Node> MakeStandardAgent(NodeEnum ne)
 // - designations
 // - Node type names
 // - Indeitifer subtypes
-// Returning this data in a struct VNShim::NameData which will also be passed to parser
+// Returning this data in a struct VNLangRecogniser::NameData which will also be passed to parser
 // Then do a priority-based analysis that leads to a choice of parser token. Presumably, we
 // can go top priotity first, doing eg
 // if (cond)
 //     return YY::VNLangParser::make_SOME_KIND_OF_NAME( string, name_data );
 //
-// Stored designations: store the PARSED "kind" and recover in shim. Thus, we only need the kind 
+// Stored designations: store the PARSED "kind" and recover in recogniser. Thus, we only need the kind 
 // for explicit nodes, and we don't need to go hunting through the pattern. Mis-parses like 
 // conjunction( type, not-type ) will cause parse errors.
 
-shared_ptr<Gnomon> VNShim::PushScopeRes( const YY::NameInfo &info )
+void VNLangRecogniser::AddGnomon( shared_ptr<Gnomon> gnomon )
 {
 	PurgeExpiredGnomons();
-	auto spg = make_shared<Gnomon>(info);
-	current_gnomons.push_front( spg ); // front is top
-	return spg;
+	
+	if( auto scope_res_gnomon = dynamic_pointer_cast<const ANDataBlockGnomon>(gnomon) )
+		scope_res_gnomons.push_front( scope_res_gnomon ); // front is top
 }
 
 
-
-void VNShim::Designate( wstring name, TreePtr<Node> sub_pattern )
+void VNLangRecogniser::Designate( wstring name, TreePtr<Node> sub_pattern )
 {
 	designations.insert( make_pair(name, sub_pattern) );
 }
 
 
-
-
-YY::VNLangParser::symbol_type VNShim::OnUnquoted(string text, YY::VNLangParser::location_type loc) const
+YY::VNLangParser::symbol_type VNLangRecogniser::OnUnquoted(string text, YY::VNLangParser::location_type loc) const
 {
 	return ProcessToken( ToUnicode(text), true, loc );
 }
 
 
-YY::VNLangParser::symbol_type VNShim::OnUnquoted(wstring text, YY::VNLangParser::location_type loc) const
+YY::VNLangParser::symbol_type VNLangRecogniser::OnUnquoted(wstring text, YY::VNLangParser::location_type loc) const
 {
 	return ProcessToken( text, false, loc );
 }
 
 
-YY::VNLangParser::symbol_type VNShim::ProcessToken(wstring text, bool ascii, YY::VNLangParser::location_type loc) const
+YY::VNLangParser::symbol_type VNLangRecogniser::ProcessToken(wstring text, bool ascii, YY::VNLangParser::location_type loc) const
 {
 	(void)ascii;
-	FTRACE(text)(" with ")(current_gnomons)("\n");
 
 	// Where unicode is allowed, ascii is allowed too, so positive checks only
 	YY::NameInfo info;
@@ -121,39 +117,30 @@ YY::VNLangParser::symbol_type VNShim::ProcessToken(wstring text, bool ascii, YY:
 	else
 		info.as_designated = nullptr;
 		
-	const NodeNames::Block *current_block = NodeNames().GetRootBlock();
+	const AvailableNodeData::Block *current_block = AvailableNodeData().GetRootBlock();
 		
-	for( weak_ptr<Gnomon> wpg : current_gnomons )
+	for( weak_ptr<const ANDataBlockGnomon> wpg : scope_res_gnomons )
 	{
 		if( auto spg = wpg.lock() )
 		{
-			info.as_name_res_list = spg->info.as_name_res_list;
-			if( spg->info.as_node_name_block )
-				current_block = spg->info.as_node_name_block;
-			break; // we only want one, because the names build up
+			if( spg->andata_block )
+				current_block = spg->andata_block;
+			break; // we only need the one at the front, because the names build up
 		}
 	}
-			
-	if( !info.as_name_res_list.empty() )
-	{
-		if( !ascii )
-			throw YY::VNLangParser::syntax_error( loc, 
-				"Resolved Unicode name not supported (resolved by " + Join(info.as_name_res_list, "::") + ")");		
-	}
 
-	info.as_node_name_block = nullptr;
+	info.as_andata_block = nullptr;
 	if( ascii )
 	{
-		info.as_name_res_list.push_back(ToASCII(text));				
 		FTRACE("ASCII token ")(ToASCII(text))(" current_block:\n")(*current_block)("\n");
-		if( auto scope_block = dynamic_cast<const NodeNames::ScopeBlock *>(current_block) )
+		if( auto scope_block = dynamic_cast<const AvailableNodeData::ScopeBlock *>(current_block) )
 		{
 			if( scope_block->sub_blocks.count(ToASCII(text)) > 0 )
 			{
-				info.as_node_name_block = scope_block->sub_blocks.at(ToASCII(text)).get();
-				if( auto node_block = dynamic_cast<const NodeNames::NodeBlock *>(info.as_node_name_block) )
+				info.as_andata_block = scope_block->sub_blocks.at(ToASCII(text)).get();
+				if( auto node_block = dynamic_cast<const AvailableNodeData::LeafBlock *>(info.as_andata_block) )
 				{
-					FTRACE(	"Supply RESOLVED_NAME with: ")(info.as_node_name_block)("\n");
+					FTRACE(	"Supply RESOLVED_NAME with: ")(info.as_andata_block)("\n");
 					return YY::VNLangParser::make_RESOLVED_NAME(info, loc);
 				}
 			}
@@ -170,11 +157,11 @@ YY::VNLangParser::symbol_type VNShim::ProcessToken(wstring text, bool ascii, YY:
 }
 
 
-TreePtr<Node> VNShim::TryGetArchetype( list<string> typ ) const
+TreePtr<Node> VNLangRecogniser::TryGetArchetype( list<string> typ ) const
 {
-	if( NodeNames().GetNameToEnumMap().count(typ) > 0 )
+	if( AvailableNodeData().GetNameToEnumMap().count(typ) > 0 )
 	{		
-		NodeEnum ne = NodeNames().GetNameToEnumMap().at(typ);
+		NodeEnum ne = AvailableNodeData().GetNameToEnumMap().at(typ);
 	
 		// The new node is the destiation
 		return MakeStandardAgent(ne);
@@ -186,25 +173,16 @@ TreePtr<Node> VNShim::TryGetArchetype( list<string> typ ) const
 }
 
 
-void VNShim::PurgeExpiredGnomons()
+void VNLangRecogniser::PurgeExpiredGnomons()
 {
-	current_gnomons.remove_if([](weak_ptr<Gnomon> wpg){return wpg.expired();});
+	auto expired = [&](weak_ptr<const ANDataBlockGnomon> wpg)
+	{
+		return wpg.expired();
+	};
+	scope_res_gnomons.remove_if(expired);
 }
 
-// TODO fix identifier type names by adding them to NodeNames 
-// Tidy away list<string>
-// Don't plonk the whole of YY::NameInfo in the Gnomon
-// Split out ScopeResGnomon as subclass of Gnomon
 
-// Type hierarchy for gnomons: ScopeResGnomon : Gnomon for our scopes
-
-// TODO parser should create the gnomon instances so 
-// part_resolve	: resolved_name SCOPE_RES				{ $$ = shim->PushScopeRes($1); }
-// becomes
-// part_resolve	: resolved_name SCOPE_RES				{ $$ = ScopeResGnomon($1); shim->Push($$); }
-// It's slightly longer but the subexpression shows (a) the gnomon is purely derived from $1,
-// (b) we're pushing it to the parse stack and (c) finally offering it to the shim
-
-// TODO designation action to push a new DesignationGnomon and shim keeps
+// TODO designation action to push a new DesignationGnomon and recogniser keeps
 // it under shared pointer, and returns it in the same form in the info.
 

@@ -24,7 +24,7 @@ enum class IdentifierEnum
 };
 
 
-class NodeNames
+class AvailableNodeData
 {
 public:	
 	struct Block : Traceable
@@ -34,12 +34,12 @@ public:
 	
 	struct ScopeBlock : Block
 	{
-		map<string, unique_ptr<NodeNames::Block>> sub_blocks;
+		map<string, unique_ptr<AvailableNodeData::Block>> sub_blocks;
 		string What() const final { return "node name scope"; }
 		string GetTrace() const { return Trace(sub_blocks); }
 	};
 
-	struct NodeBlock : Block
+	struct LeafBlock : Block
 	{
 		optional<NodeEnum> node_enum;
 		optional<IdentifierEnum> identifier_discriminator_enum;
@@ -63,14 +63,14 @@ public:
 
 	typedef map<list<string>, NodeEnum> NameToNodeMapType;	
 	const NameToNodeMapType &GetNameToEnumMap();
-	const NodeNames::Block *GetRootBlock();
+	const AvailableNodeData::Block *GetRootBlock();
 	shared_ptr<Node> MakeNode(NodeEnum ne) const;
 	shared_ptr<TreePtrInterface> MakeTreePtr(NodeEnum ne) const;
 	
 private:
 	static void InitialiseMap();
 	static NameToNodeMapType name_to_node_map;
-	static NodeNames::ScopeBlock root_block;
+	static AvailableNodeData::ScopeBlock root_block;
 };
 
 #endif

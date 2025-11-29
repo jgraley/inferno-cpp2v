@@ -27,10 +27,10 @@
 %option freespace
 
 %class{
-	VN::VNShim const *shim;
+	VN::VNLangRecogniser const *recogniser;
 }
-%option ctorarg="VN::VNShim *shim_"
-%option ctorinit="shim( shim_ )"
+%option ctorarg="VN::VNLangRecogniser *shim_"
+%option ctorinit="recogniser( shim_ )"
 
 // ASCII must come before unicode otherwise they'd all lex as unicode.
 ascii_name				[a-zA-Z_][a-zA-Z0-9_]*
@@ -100,7 +100,7 @@ typename		{ return YY::VNLangParser::make_TYPENAME(str(), location()); };
 
 \"[^"]*\"   	{ return YY::VNLangParser::make_STRING_LITERAL(wstr(), location()); }
 {integral_num}	{ return YY::VNLangParser::make_INTEGRAL_LITERAL(str(), location()); }
-{ascii_name}	{ return shim->OnUnquoted(str(), location()); }
-{unicode_name}	{ return shim->OnUnquoted(wstr(), location()); }
+{ascii_name}	{ return recogniser->OnUnquoted(str(), location()); }
+{unicode_name}	{ return recogniser->OnUnquoted(wstr(), location()); }
 
 %%

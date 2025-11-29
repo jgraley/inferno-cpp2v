@@ -43,7 +43,7 @@ struct Itemisation
 
 
 class Command;
-class VNShim;
+class VNLangRecogniser;
 
 class VNParse	
 {
@@ -60,9 +60,9 @@ public:
 	TreePtr<Node> OnStar( TreePtr<Node> restriction );
 	TreePtr<Node> OnStuff( TreePtr<Node> terminus, TreePtr<Node> recurse_restriction, Limit limit );
 	TreePtr<Node> OnDelta( TreePtr<Node> through, TreePtr<Node> overlay );
-	TreePtr<Node> OnBuiltIn( const NodeNames::Block *block, any node_name_loc, Itemisation itemisation );
+	TreePtr<Node> OnBuiltIn( const AvailableNodeData::Block *block, any node_name_loc, Itemisation itemisation );
 	TreePtr<Node> OnEmbeddedCommands( list<shared_ptr<Command>> commands );
-	TreePtr<Node> OnRestrict( const NodeNames::Block *block, any node_name_loc, TreePtr<Node> target, any target_loc );
+	TreePtr<Node> OnRestrict( const AvailableNodeData::Block *block, any node_name_loc, TreePtr<Node> target, any target_loc );
 	
 	TreePtr<Node> OnInfixOperator( string tok, TreePtr<Node> left, TreePtr<Node> right );
 	TreePtr<Node> OnPrefixOperator( string tok, TreePtr<Node> operand );
@@ -72,9 +72,9 @@ public:
 	TreePtr<Node> OnBoolLiteral( bool value );
 	TreePtr<Node> OnCast( TreePtr<Node> type, any type_loc, TreePtr<Node> target, any target_loc );	
 	
-	TreePtr<Node> OnSpecificId( const NodeNames::Block *block, any id_disc_loc, wstring wname, any name_loc );
-	TreePtr<Node> OnIdByName( const NodeNames::Block *block, any id_disc_loc, wstring wname, any name_loc );
-	TreePtr<Node> OnBuildId( const NodeNames::Block *block, any id_disc_loc, wstring wformat, any name_loc, Item sources );
+	TreePtr<Node> OnSpecificId( const AvailableNodeData::Block *block, any id_disc_loc, wstring wname, any name_loc );
+	TreePtr<Node> OnIdByName( const AvailableNodeData::Block *block, any id_disc_loc, wstring wname, any name_loc );
+	TreePtr<Node> OnBuildId( const AvailableNodeData::Block *block, any id_disc_loc, wstring wformat, any name_loc, Item sources );
 	TreePtr<Node> OnTransform( string kind, any kind_loc, TreePtr<Node> pattern, any pattern_loc );
 	TreePtr<Node> OnNegation( TreePtr<Node> operand );
 	TreePtr<Node> OnConjunction( TreePtr<Node> left, TreePtr<Node> right );
@@ -87,13 +87,13 @@ public:
 	static string DiagQuote(string name);
 	static string DiagQuote(wstring name);
 	TreePtr<Node> CreateIntegralLiteral( bool uns, bool lng, bool lng2, uint64_t val, any loc );
-	VNShim &GetShim();
+	VNLangRecogniser &GetShim();
 	
 private: 
-	unique_ptr<VNShim> shim;
+	unique_ptr<VNLangRecogniser> recogniser;
 	unique_ptr<YY::VNLangScanner> scanner;
 	unique_ptr<YY::VNLangParser> parser;
-	unique_ptr<NodeNames> node_names;
+	unique_ptr<AvailableNodeData> node_names;
 	
 	Command::List top_level_commands;
 };

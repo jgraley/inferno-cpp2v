@@ -8,7 +8,7 @@
 #include <list>
 #include <string>
 
-const NodeNames::NameToNodeMapType &NodeNames::GetNameToEnumMap()
+const AvailableNodeData::NameToNodeMapType &AvailableNodeData::GetNameToEnumMap()
 {
 	if( name_to_node_map.empty() )
 		InitialiseMap();
@@ -17,7 +17,7 @@ const NodeNames::NameToNodeMapType &NodeNames::GetNameToEnumMap()
 }
 
 
-const NodeNames::Block *NodeNames::GetRootBlock()
+const AvailableNodeData::Block *AvailableNodeData::GetRootBlock()
 {
 	if( root_block.sub_blocks.empty() )
 		InitialiseMap();	
@@ -26,7 +26,7 @@ const NodeNames::Block *NodeNames::GetRootBlock()
 }
 
 
-shared_ptr<Node> NodeNames::MakeNode(NodeEnum ne) const 
+shared_ptr<Node> AvailableNodeData::MakeNode(NodeEnum ne) const 
 {
 	switch(ne)
 	{
@@ -46,7 +46,7 @@ shared_ptr<Node> NodeNames::MakeNode(NodeEnum ne) const
 }
 
 
-shared_ptr<TreePtrInterface> NodeNames::MakeTreePtr(NodeEnum ne) const
+shared_ptr<TreePtrInterface> AvailableNodeData::MakeTreePtr(NodeEnum ne) const
 {
 	switch(ne)
 	{
@@ -66,7 +66,7 @@ shared_ptr<TreePtrInterface> NodeNames::MakeTreePtr(NodeEnum ne) const
 }
 
 
-void NodeNames::InitialiseMap()
+void AvailableNodeData::InitialiseMap()
 {
 	name_to_node_map =
 	{
@@ -96,9 +96,9 @@ void NodeNames::InitialiseMap()
 		ASSERT(scope_block);
 
 		if( !scope_block->sub_blocks[flat_list.back()] ) // can create -> NULL
-			scope_block->sub_blocks.at(flat_list.back()) = make_unique<NodeBlock>();
+			scope_block->sub_blocks.at(flat_list.back()) = make_unique<LeafBlock>();
 
-		NodeBlock *node_block = dynamic_cast<NodeBlock *>(scope_block->sub_blocks.at(flat_list.back()).get());
+		LeafBlock *node_block = dynamic_cast<LeafBlock *>(scope_block->sub_blocks.at(flat_list.back()).get());
 		ASSERT( node_block );
 		node_block->node_enum = node_enum;		
 	}
@@ -126,9 +126,9 @@ void NodeNames::InitialiseMap()
 		ASSERT(scope_block);
 
 		if( !scope_block->sub_blocks[flat_list.back()] ) // can create -> NULL
-			scope_block->sub_blocks.at(flat_list.back()) = make_unique<NodeBlock>();
+			scope_block->sub_blocks.at(flat_list.back()) = make_unique<LeafBlock>();
 
-		NodeBlock *node_block = dynamic_cast<NodeBlock *>(scope_block->sub_blocks.at(flat_list.back()).get());
+		LeafBlock *node_block = dynamic_cast<LeafBlock *>(scope_block->sub_blocks.at(flat_list.back()).get());
 		ASSERT( node_block );
 		node_block->identifier_discriminator_enum = identifier_discriminator_enum;
 		
@@ -139,5 +139,5 @@ void NodeNames::InitialiseMap()
 }
 
 
-NodeNames::NameToNodeMapType NodeNames::name_to_node_map;
-NodeNames::ScopeBlock NodeNames::root_block;
+AvailableNodeData::NameToNodeMapType AvailableNodeData::name_to_node_map;
+AvailableNodeData::ScopeBlock AvailableNodeData::root_block;

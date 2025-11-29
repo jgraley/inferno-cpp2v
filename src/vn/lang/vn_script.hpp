@@ -12,8 +12,8 @@
 #include "vn/vn_step.hpp"
 #include <any> // to dep-break the generated headers
 
-// Dep-break NodeNames because node_names.hpp will be big
-class NodeNames;
+// Dep-break AvailableNodeData because node_names.hpp will be big
+class AvailableNodeData;
 
 namespace VN 
 {
