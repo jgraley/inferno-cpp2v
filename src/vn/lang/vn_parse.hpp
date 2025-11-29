@@ -73,8 +73,8 @@ public:
 	TreePtr<Node> OnCast( TreePtr<Node> type, any type_loc, TreePtr<Node> target, any target_loc );	
 	
 	TreePtr<Node> OnSpecificId( const NodeNames::Block *block, any id_disc_loc, wstring wname, any name_loc );
-	TreePtr<Node> OnIdByName( list<string> typ, any type_loc, wstring wname, any name_loc );
-	TreePtr<Node> OnBuildId( list<string> typ, any type_loc, wstring wformat, any name_loc, Item sources );
+	TreePtr<Node> OnIdByName( const NodeNames::Block *block, any id_disc_loc, wstring wname, any name_loc );
+	TreePtr<Node> OnBuildId( const NodeNames::Block *block, any id_disc_loc, wstring wformat, any name_loc, Item sources );
 	TreePtr<Node> OnTransform( string kind, any kind_loc, TreePtr<Node> pattern, any pattern_loc );
 	TreePtr<Node> OnNegation( TreePtr<Node> operand );
 	TreePtr<Node> OnConjunction( TreePtr<Node> left, TreePtr<Node> right );

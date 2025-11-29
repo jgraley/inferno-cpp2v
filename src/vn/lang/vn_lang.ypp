@@ -283,10 +283,10 @@ expr_unit	: BUILT_IN resolved_name itemisation				{ $$ = vn->OnBuiltIn($2.as_nod
 			| NAMED_SUBTREE       					  			{ $$ = $1.as_designated; }
 			| SPECIFIC_ID OPEN_VN resolved_name VN_SEP STRING_LITERAL CLOSE_VN			{ $$ = vn->OnSpecificId($3.as_node_name_block, @3, $5, @5); }
 			| SPECIFIC_ID OPEN_VN resolved_name VN_SEP CLOSE_VN							{ $$ = vn->OnSpecificId($3.as_node_name_block, @3, wstring(), @5); }
-			| ID_BY_NAME OPEN_VN resolved_name VN_SEP STRING_LITERAL CLOSE_VN			{ $$ = vn->OnIdByName($3.as_name_res_list, @3, $5, @5); } // ASCII_NAME could be format
-			| BUILD_ID OPEN_VN resolved_name VN_SEP STRING_LITERAL VN_SEP CLOSE_VN 		{ $$ = vn->OnBuildId($3.as_name_res_list, @3, $5, @5, VN::Item{}); }
-			| BUILD_ID OPEN_VN resolved_name VN_SEP STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($3.as_name_res_list, @3, $5, @5, $7); }
-			| BUILD_ID OPEN_VN resolved_name VN_SEP VN_SEP item CLOSE_VN 				{ $$ = vn->OnBuildId($3.as_name_res_list, @3, wstring(), @5, $6); }
+			| ID_BY_NAME OPEN_VN resolved_name VN_SEP STRING_LITERAL CLOSE_VN			{ $$ = vn->OnIdByName($3.as_node_name_block, @3, $5, @5); } // ASCII_NAME could be format
+			| BUILD_ID OPEN_VN resolved_name VN_SEP STRING_LITERAL VN_SEP CLOSE_VN 		{ $$ = vn->OnBuildId($3.as_node_name_block, @3, $5, @5, VN::Item{}); }
+			| BUILD_ID OPEN_VN resolved_name VN_SEP STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($3.as_node_name_block, @3, $5, @5, $7); }
+			| BUILD_ID OPEN_VN resolved_name VN_SEP VN_SEP item CLOSE_VN 				{ $$ = vn->OnBuildId($3.as_node_name_block, @3, wstring(), @5, $6); }
 
 vn_name		: UNICODE_NAME    							{ $$ = $1.as_unicode; }
 			| ASCII_NAME								{ $$ = $1.as_unicode; }     

@@ -361,53 +361,76 @@ TreePtr<Node> VNParse::OnSpecificId( const NodeNames::Block *block, any id_disc_
 		return MakeTreeNode<StandardAgentWrapper<NS::Specific##NAME##Identifier>>(name); 
 #include "tree/identifier_names.inc"	
 #undef NODE
-	}
+	default:
+		ASSERTFAIL(); // switch should have covered everything in the inc file
+	}	
 }
 
 
-TreePtr<Node> VNParse::OnIdByName( list<string> typ, any type_loc, wstring wname, any name_loc )
+TreePtr<Node> VNParse::OnIdByName( const NodeNames::Block *block, any id_disc_loc, wstring wname, any name_loc )
 {
 	(void)name_loc; // TODO perhaps IdentifierByNameAgent can validate this?
+
+	if( !block )
+		throw YY::VNLangParser::syntax_error( 
+				    any_cast<YY::VNLangParser::location_type>(id_disc_loc), 
+				    SSPrintf("In ⊛, unexpected non-block when expecting identifier-discriminator.") ); 		
+
+
+	auto node_block = dynamic_cast<const NodeNames::NodeBlock *>(block);
+	// Parser could do this if we separated the tokens 
+	if( !node_block || !node_block->identifier_discriminator_enum )
+		throw YY::VNLangParser::syntax_error( 
+				    any_cast<YY::VNLangParser::location_type>(id_disc_loc), 
+				    SSPrintf("In ⊛, unexpected %s when expecting identifier-discriminator.", block->What().c_str()) ); 		
+	IdentifierEnum ie = node_block->identifier_discriminator_enum.value();
+
 	string name = Unquote(ToASCII(wname));
 
-	if( typ.size() == 1 )
-		typ.push_front("CPPTree"); // TODO centralise
-	
-	TreePtr<Node> node = IdentifierByNameAgent::TryMakeFromDestignatedType( typ.front(), typ.back(), name );
-	
-	if( !node )
-		throw YY::VNLangParser::syntax_error(
-		    any_cast<YY::VNLangParser::location_type>(type_loc),
-			"⊛ requires identifier type discriminator i.e. " + 
-			DiagQuote(Join(typ, "::") + "Identifier") +
-			" would need to exist as a node type.");
-	
-	return node;
+	switch( ie )
+	{
+#define NODE(NS, NAME) \
+	case IdentifierEnum::NS##_##NAME: \
+		return IdentifierByNameAgent::TryMakeFromDestignatedType( #NS, #NAME, name );
+#include "tree/identifier_names.inc"	
+#undef NODE
+	default:
+		ASSERTFAIL(); // switch should have covered everything in the inc file
+	}	
 }
 
 
-TreePtr<Node> VNParse::OnBuildId( list<string> typ, any type_loc, wstring wformat, any name_loc, Item sources )
+TreePtr<Node> VNParse::OnBuildId( const NodeNames::Block *block, any id_disc_loc, wstring wformat, any name_loc, Item sources )
 {
 	(void)name_loc; // TODO perhaps BuildIdentifierAgent can validate this?
 
+	auto node_block = dynamic_cast<const NodeNames::NodeBlock *>(block);
+	// Parser could do this if we separated the tokens 
+	if( !node_block || !node_block->identifier_discriminator_enum )
+		throw YY::VNLangParser::syntax_error( 
+				    any_cast<YY::VNLangParser::location_type>(id_disc_loc), 
+				    SSPrintf("In ⧇, unexpected %s when expecting identifier-discriminator.", block->What().c_str()) ); 		
+	IdentifierEnum ie = node_block->identifier_discriminator_enum.value();
+
 	// Format is "" if omitted otherwise a quoted string with the quotes still on
 	string format = wformat.empty() ? "" : Unquote(ToASCII(wformat));
-	
-	if( typ.size() == 1 )
-		typ.push_front("CPPTree");  // TODO centralise
 		
-	TreePtr<Node> bia_node = BuildIdentifierAgent::TryMakeFromDestignatedType( typ.front(), typ.back(), format );
-	
-	if( !bia_node )
-		throw YY::VNLangParser::syntax_error(
-		    any_cast<YY::VNLangParser::location_type>(type_loc),
-			"⧇ requires identifier type discriminator i.e. " + 
-			DiagQuote(Join(typ, "::") + "Identifier") +
-			" would need to exist as a node type.");
+	TreePtr<Node> bia_node;
+	switch( ie )
+	{
+#define NODE(NS, NAME) \
+	case IdentifierEnum::NS##_##NAME: \
+		bia_node = BuildIdentifierAgent::TryMakeFromDestignatedType( #NS, #NAME, format ); \
+		break;
+#include "tree/identifier_names.inc"	
+#undef NODE
+	default:
+		ASSERTFAIL(); // switch should have covered everything in the inc file
+	}
 	
 	for( TreePtr<Node> src : sources.nodes )
 		dynamic_cast<BuildIdentifierAgent *>(bia_node.get())->sources.insert( src );						
-	return bia_node;
+	return bia_node;	
 }
 
 

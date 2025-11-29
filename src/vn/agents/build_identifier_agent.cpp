@@ -89,7 +89,7 @@ string BuildIdentifierAgent::GetAgentRender( VN::RendererInterface *renderer, Sy
 		
 	// Add in the subtype name and format to make a pseudo-itemisation
 	list<string> ls_production;
-	ls_production.push_back(GetIdentifierSubTypeName());
+	ls_production.push_back("CPPTree::"+GetIdentifierSubTypeName());
 	if( format.empty() )
 		ls_production.push_back( "" ); // this is syntactically ok with ⚬
 	else
