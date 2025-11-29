@@ -161,11 +161,17 @@ static TreePtr<Node> MakeStandardAgent(NodeEnum ne)
 }
 
 
-TreePtr<Node> VNParse::OnBuiltIn( list<string> builtin_type, any builtin_loc, Itemisation src_itemisation )
+TreePtr<Node> VNParse::OnBuiltIn( const NodeNames::Block *block, any builtin_loc, Itemisation src_itemisation )
 {
-	NodeEnum ne = GetNodeEnum( builtin_type, builtin_loc );
+	auto node_block = dynamic_cast<const NodeNames::NodeBlock *>(block);
+	// Parser could do this if we separated the tokens 
+	if( !node_block || !node_block->node_enum )
+		throw YY::VNLangParser::syntax_error( 
+				    any_cast<YY::VNLangParser::location_type>(builtin_loc), // TODO use the loc of the final name
+				    SSPrintf("In ◼, unexpected %s when expecting node name.", block->What().c_str()) ); 
 	
 	// The new node is the destiation
+	NodeEnum ne = node_block->node_enum.value();
 	TreePtr<Node> dest = MakeStandardAgent(ne);
 	
 	// The detination's itemisation "pulls" items from the source and we require a match (for now). 
@@ -174,7 +180,7 @@ TreePtr<Node> VNParse::OnBuiltIn( list<string> builtin_type, any builtin_loc, It
 	list<Item>::const_iterator src_it = src_itemisation.items.begin();
     vector< Itemiser::Element * > dest_items = dest->Itemise();
     string counts_msg = SSPrintf("%s expects %d %s, but %d %s given.",
-                             DiagQuote(Join(builtin_type, "::")).c_str(),
+                             DiagQuote(Traceable::TypeIdName( *dest )).c_str(),
                              dest_items.size(),
                              dest_items.size()==1?"item":"items",
                              src_itemisation.items.size(),

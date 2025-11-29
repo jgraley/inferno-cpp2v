@@ -121,7 +121,7 @@ YY::VNLangParser::symbol_type VNShim::ProcessToken(wstring text, bool ascii, YY:
 	else
 		info.as_designated = nullptr;
 		
-	const NodeNameBlock *current_block = NodeNames().GetRootBlock();
+	const NodeNames::Block *current_block = NodeNames().GetRootBlock();
 		
 	for( weak_ptr<Gnomon> wpg : current_gnomons )
 	{
@@ -146,13 +146,16 @@ YY::VNLangParser::symbol_type VNShim::ProcessToken(wstring text, bool ascii, YY:
 	{
 		info.as_name_res_list.push_back(ToASCII(text));				
 		FTRACE("ASCII token ")(ToASCII(text))(" current_block:\n")(*current_block)("\n");
-		if( current_block->sub_blocks.count(ToASCII(text)) > 0 )
+		if( auto scope_block = dynamic_cast<const NodeNames::ScopeBlock *>(current_block) )
 		{
-			info.as_node_name_block = current_block->sub_blocks.at(ToASCII(text)).get();
-			if( info.as_node_name_block->leaf_enum )
+			if( scope_block->sub_blocks.count(ToASCII(text)) > 0 )
 			{
-				FTRACE(	"Supply RESOLVED_NAME with: ")(info.as_name_res_list)("\n");
-				return YY::VNLangParser::make_RESOLVED_NAME(info, loc);
+				info.as_node_name_block = scope_block->sub_blocks.at(ToASCII(text)).get();
+				if( auto node_block = dynamic_cast<const NodeNames::NodeBlock *>(info.as_node_name_block) )
+				{
+					FTRACE(	"Supply RESOLVED_NAME with: ")(info.as_node_name_block)("\n");
+					return YY::VNLangParser::make_RESOLVED_NAME(info, loc);
+				}
 			}
 		}
 	}

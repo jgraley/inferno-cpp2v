@@ -17,7 +17,7 @@ const NodeNames::NameToNodeMapType &NodeNames::GetNameToEnumMap()
 }
 
 
-const NodeNameBlock *NodeNames::GetRootBlock()
+const NodeNames::Block *NodeNames::GetRootBlock()
 {
 	if( root_block.sub_blocks.empty() )
 		InitialiseMap();	
@@ -78,7 +78,8 @@ void NodeNames::InitialiseMap()
 #include "operator_data.inc"
 #undef NODE
 	};
-	
+	ASSERT( !name_to_node_map.empty() );
+		
 	for( auto p : name_to_node_map )
 	{
 		list<string> flat_list = p.first;
@@ -86,18 +87,55 @@ void NodeNames::InitialiseMap()
 		
 		if( root_block.sub_blocks.count(flat_list.front())==0 )
 		{
-			auto sb = make_unique<NodeNameBlock>();
+			auto sb = make_unique<ScopeBlock>();
+			root_block.sub_blocks[flat_list.front()] = move(sb);
+		}
+	
+		Block *block = root_block.sub_blocks.at( flat_list.front() ).get();
+		auto scope_block = dynamic_cast<ScopeBlock *>(block);
+		ASSERT(scope_block);
+
+		if( !scope_block->sub_blocks[flat_list.back()] ) // can create -> NULL
+			scope_block->sub_blocks.at(flat_list.back()) = make_unique<NodeBlock>();
+
+		NodeBlock *node_block = dynamic_cast<NodeBlock *>(scope_block->sub_blocks.at(flat_list.back()).get());
+		ASSERT( node_block );
+		node_block->node_enum = node_enum;		
+		node_block->is_identifier_type = false;		
+	}
+	
+	set<list<string>> ident_name_set = 
+	{
+#define NODE(NS, NAME) {#NS, #NAME},
+#include "identifier_names.inc"	
+#undef NODE	
+	};
+	
+	for( list<string> flat_list : ident_name_set )
+	{
+		if( root_block.sub_blocks.count(flat_list.front())==0 )
+		{
+			auto sb = make_unique<ScopeBlock>();
 			root_block.sub_blocks[flat_list.front()] = move(sb);
 		}
 		
-		auto lb = make_unique<NodeNameBlock>();
-		lb->leaf_enum = node_enum;
-		root_block.sub_blocks.at( flat_list.front() )->sub_blocks[flat_list.back()] = move(lb);
+		Block *block = root_block.sub_blocks.at( flat_list.front() ).get();
+		auto scope_block = dynamic_cast<ScopeBlock *>(block);
+		ASSERT(scope_block);
+
+		if( !scope_block->sub_blocks[flat_list.back()] ) // can create -> NULL
+			scope_block->sub_blocks.at(flat_list.back()) = make_unique<NodeBlock>();
+
+		NodeBlock *node_block = dynamic_cast<NodeBlock *>(scope_block->sub_blocks.at(flat_list.back()).get());
+		ASSERT( node_block );
+		node_block->is_identifier_type = true;
 		
 		ASSERT( !name_to_node_map.empty() );
 	}
+	
+	
 }
 
 
 NodeNames::NameToNodeMapType NodeNames::name_to_node_map;
-NodeNameBlock NodeNames::root_block;
+NodeNames::ScopeBlock NodeNames::root_block;

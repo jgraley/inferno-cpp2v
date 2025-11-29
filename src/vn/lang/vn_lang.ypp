@@ -30,7 +30,7 @@
 		string as_ascii;
 		wstring as_unicode;
 		list<string> as_name_res_list;
-		const NodeNameBlock *as_node_name_block;
+		const NodeNames::Block *as_node_name_block;
 	};     	
   };
   // Things we point to from semantic values
@@ -192,8 +192,8 @@ type_prefix : 										     type_paren
 type_paren	: type_unit
 			| '(' type ')'                          	{ $$ = $2; } // TODO We're losing the ability to embed commands in a type
                                         
-type_unit	: BUILT_IN_TYPE resolved_name itemisation		{ $$ = vn->OnBuiltIn($2.as_name_res_list, @2, $3); }
-			| BUILT_IN_TYPE resolved_name					{ $$ = vn->OnBuiltIn($2.as_name_res_list, @2, VN::Itemisation{{}, @2}); }
+type_unit	: BUILT_IN_TYPE resolved_name itemisation		{ $$ = vn->OnBuiltIn($2.as_node_name_block, @2, $3); }
+			| BUILT_IN_TYPE resolved_name					{ $$ = vn->OnBuiltIn($2.as_node_name_block, @2, VN::Itemisation{{}, @2}); }
 			
 
                       
@@ -271,8 +271,8 @@ expr_postfix: expr_paren
 expr_paren	: expr_unit
 			| '(' commands ')'                          		{ $$ = vn->OnEmbeddedCommands($2); }
 
-expr_unit	: BUILT_IN resolved_name itemisation					{ $$ = vn->OnBuiltIn($2.as_name_res_list, @2, $3); }
-			| BUILT_IN resolved_name								{ $$ = vn->OnBuiltIn($2.as_name_res_list, @2, VN::Itemisation{{}, @2}); }
+expr_unit	: BUILT_IN resolved_name itemisation				{ $$ = vn->OnBuiltIn($2.as_node_name_block, @2, $3); }
+			| BUILT_IN resolved_name							{ $$ = vn->OnBuiltIn($2.as_node_name_block, @2, VN::Itemisation{{}, @2}); }
 			| STAR												{ $$ = vn->OnStar(nullptr); }
 			| STAR OPEN_VN expression CLOSE_VN					{ $$ = vn->OnStar($3); }
 			| INTEGRAL_LITERAL					      			{ $$ = vn->OnIntegralLiteral($1, @1); }

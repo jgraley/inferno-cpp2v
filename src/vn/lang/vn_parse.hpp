@@ -9,6 +9,7 @@
 #include "tree/misc.hpp"
 #include "indenter.hpp"
 #include "vn_commands.hpp"
+#include "tree/node_names.hpp"
 #include <any> // to dep-break the generated headers
 
 namespace YY
@@ -16,9 +17,6 @@ namespace YY
 	class VNLangScanner;
 	class VNLangParser;
 };
-
-// Dep-break NodeNames because node_names.hpp will be big
-class NodeNames;
 
 namespace VN 
 {
@@ -62,7 +60,7 @@ public:
 	TreePtr<Node> OnStar( TreePtr<Node> restriction );
 	TreePtr<Node> OnStuff( TreePtr<Node> terminus, TreePtr<Node> recurse_restriction, Limit limit );
 	TreePtr<Node> OnDelta( TreePtr<Node> through, TreePtr<Node> overlay );
-	TreePtr<Node> OnBuiltIn( list<string> builtin_type, any builtin_loc, Itemisation itemisation );
+	TreePtr<Node> OnBuiltIn( const NodeNames::Block *block, any builtin_loc, Itemisation itemisation );
 	TreePtr<Node> OnEmbeddedCommands( list<shared_ptr<Command>> commands );
 	TreePtr<Node> OnRestrict( list<string> res_type, any res_loc, TreePtr<Node> target, any target_loc );
 	

@@ -28,7 +28,6 @@ namespace YY
 };
 
 class NodeNames;
-class NodeNameBlock;
 
 namespace VN 
 {
