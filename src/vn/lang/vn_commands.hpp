@@ -31,10 +31,7 @@ public:
 	typedef std::list<shared_ptr<Command>> List; 
 	Command( any loc_ );
     ~Command();
-    
-    // Called as soon as node is seen, so that parsing context can be updated
-	virtual bool OnParse( VNParse *vn ); // true to keep for decay/execution, false to discard
-	
+
 	// Called on a sequence of commands when usage dictates it should become a sub-pattern 
 	virtual TreePtr<Node> DecayToPattern( TreePtr<Node> node, VNParse *vn ); // return NULL if cannot decay 
 	
@@ -73,21 +70,7 @@ public:
 private:
 	const TreePtr<Node> pattern;
 };
-
-
-class Designation : public Command
-{
-public:	
-	Designation( std::wstring name_, TreePtr<Node> pattern_, any loc );
-	bool OnParse(VNParse *vn) final;
-
-	string GetTrace() const final;
-
-private:
-	const std::wstring name;
-	const TreePtr<Node> pattern;
-};	 	
-	 	 	
+	
 };
 
 #endif

@@ -54,10 +54,49 @@ public:
 	{
 		return Trace(scope_block);
 	}
+	
 private:
 	friend class VNLangRecogniser;
-	const AvailableNodeData::ScopeBlock *scope_block;
+	const AvailableNodeData::ScopeBlock * const scope_block;
 };
+		
+		
+class DesignationGnomon : public Gnomon
+{
+public:	
+	DesignationGnomon( std::wstring name_, TreePtr<Node> pattern_ ) : 
+		name( name_ ),
+		pattern( pattern_ )	
+	{
+		ASSERT( !name.empty() );
+		ASSERT( pattern );
+	}
+
+	string GetTrace() const
+	{
+		return ToASCII(name) + "⪮" + pattern->GetTrace();
+	}
+	
+private:
+	friend class VNLangRecogniser;
+	std::wstring name;
+	TreePtr<Node> pattern;
+};
+		
+		
+class TypeDesignationGnomon : public DesignationGnomon
+{
+public:	
+	using DesignationGnomon::DesignationGnomon;
+};
+		
+		
+class NonTypeDesignationGnomon : public DesignationGnomon
+{
+public:	
+	using DesignationGnomon::DesignationGnomon;
+};
+		
 		
 class VNLangRecogniser
 {
@@ -76,7 +115,9 @@ public:
 private:	
 	void PurgeExpiredGnomons();
 
-	map<wstring, TreePtr<Node>> designations;	
+	// Store with shared_ptr => these will stick around until we ditch them
+	map<wstring, shared_ptr<const DesignationGnomon>> designation_gnomons;
+	// store with weak_ptr => these will expire when the parser exists the production
 	list<weak_ptr<const ScopeBlockGnomon>> scope_block_gnomons;
 };
 	

@@ -40,12 +40,6 @@ Command::~Command()
 }
 
 
-bool Command::OnParse(VNParse *vn)
-{
-	return true; // By default, keep me
-}
-
-
 TreePtr<Node> Command::DecayToPattern( TreePtr<Node> node, VNParse *vn )
 {
 	return nullptr; // by default, I can't decay
@@ -54,7 +48,6 @@ TreePtr<Node> Command::DecayToPattern( TreePtr<Node> node, VNParse *vn )
 
 void Command::Execute(const ScriptKit &kit) const
 {
-	ASSERTFAIL("Commands should either be discarded by OnParse() returning false, or implement Execute()");
 }
 
 //////////////////////////// EngineCommand ///////////////////////////////
@@ -119,27 +112,4 @@ TreePtr<Node> PatternCommand::DecayToPattern( TreePtr<Node> node, VNParse *vn )
 string PatternCommand::GetTrace() const
 {
 	return "PatternCommand: " + Trace(pattern);
-}
-
-//////////////////////////// Designation ///////////////////////////////
-
-Designation::Designation( std::wstring name_, TreePtr<Node> pattern_, any loc_ ) :
-	Command(loc_),
-	name( name_ ),
-	pattern( pattern_ )
-{
-}
-
-
-bool Designation::OnParse(VNParse *vn)
-{
-	vn->GetShim().Designate(name, pattern);
-	
-	return false; // discard
-}
-
-
-string Designation::GetTrace() const
-{
-	return "Designation: " + Trace(name) + "⪮" + Trace(pattern);
 }

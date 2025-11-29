@@ -117,7 +117,8 @@
 	<string>  		ASCII_FORMAT 			_("ASCII format string")
 	<YY::NameInfo> 	UNICODE_NAME 			_("Unicode name")
 	<string>  		TYPENAME				_("typename")
-	<YY::NameInfo>	NAMED_SUBTREE			_("named subtree")
+	<YY::NameInfo>	DESIGNATED_NONTYPE		_("designated non-type")
+	<YY::NameInfo>	DESIGNATED_TYPE			_("designated type")
 	<YY::NameInfo>	RESOLVED_NAME			_("resolved name")
 	<YY::NameInfo>	SCOPE_NAME				_("scope name")
 	
@@ -128,11 +129,11 @@
 %type <wstring> 					vn_name
 %type <YY::NameInfo> 				resolved_name
 %type <list<shared_ptr<VN::Command>>>			commands sep_commands
-%type <shared_ptr<VN::Command>>		bare_command
+%type <shared_ptr<VN::Command>>		script_command 
 %type <VN::Limit>					limit
 %type <VN::Itemisation>				itemisation items_bare items_sep
 %type <VN::Item>					item
-%type <shared_ptr<VN::Gnomon>>		part_resolve
+%type <shared_ptr<VN::Gnomon>>		part_resolve recogniser_command
 %%
 
 vnscript 		: commands 								{ vn->OnVNScript($1); }
@@ -144,13 +145,19 @@ commands        : sep_commands							{ $$ = $1; }
 // The ⨟ turns patterns into commands. This rule must 
 // be left-associative so calls to OnParse() happen
 // in the correct order. STOP BREAKING THIS!!!
-sep_commands 	: sep_commands VN_SEMI bare_command		{ $$ = $1; if( $3->OnParse(vn) ) $$.push_back($3); }	
-				| bare_command							{ if( $1->OnParse(vn) ) $$.push_back($1); }
+sep_commands 	: sep_commands VN_SEMI script_command		{ $$ = $1; $$.push_back($3); }	
+				| script_command							{ $$.push_back($1); }
+				| sep_commands VN_SEMI recogniser_command	{ $$ = $1; recogniser->AddGnomon($3); }	
+				| recogniser_command						{ recogniser->AddGnomon($1); }
 			
 // Add more commands here
-bare_command	: vn_name DESIGNATE expression			{ $$ = make_shared<VN::Designation>($1, $3, @2); }
-				| ENGINE expression   		 		 	{ $$ = make_shared<VN::EngineCommand>($2, @1); }
+script_command	: ENGINE expression   		 		 	{ $$ = make_shared<VN::EngineCommand>($2, @1); }
 				| expression 			  				{ $$ = make_shared<VN::PatternCommand>($1, @$); }
+
+// or here
+recogniser_command	: vn_name DESIGNATE expression		{ $$ = make_shared<VN::NonTypeDesignationGnomon>($1, $3); }
+					| vn_name DESIGNATE type_paren		{ $$ = make_shared<VN::TypeDesignationGnomon>($1, $3); }
+
 
 // This one dips into ASCII/C because VN doesn't otherwise need equality/inequality operators
 limit		: C_ASSIGN INTEGRAL_LITERAL					{ $$ = VN::Limit{ $1, @1, $2, @2 }; }
@@ -195,8 +202,7 @@ type_paren	: type_unit
                                         
 type_unit	: BUILT_IN_TYPE resolved_name itemisation		{ $$ = vn->OnBuiltIn($2.as_andata_block, @2, $3); }
 			| BUILT_IN_TYPE resolved_name					{ $$ = vn->OnBuiltIn($2.as_andata_block, @2, VN::Itemisation{{}, @2}); }
-			
-
+			| DESIGNATED_TYPE       				 		{ $$ = $1.as_designated; }		
                       
 expression			: expr_comma_op
                       
@@ -281,7 +287,7 @@ expr_unit	: BUILT_IN resolved_name itemisation				{ $$ = vn->OnBuiltIn($2.as_and
 			| BOOL_LITERAL										{ $$ = vn->OnBoolLiteral($1); }
 			| ANY												{ $$ = nullptr; }
 			| '{' statements '}'                          		{ $$ = $2; }
-			| NAMED_SUBTREE       					  			{ $$ = $1.as_designated; }
+			| DESIGNATED_NONTYPE       				  			{ $$ = $1.as_designated; }
 			| SPECIFIC_ID OPEN_VN resolved_name VN_SEP STRING_LITERAL CLOSE_VN			{ $$ = vn->OnSpecificId($3.as_andata_block, @3, $5, @5); }
 			| SPECIFIC_ID OPEN_VN resolved_name VN_SEP CLOSE_VN							{ $$ = vn->OnSpecificId($3.as_andata_block, @3, wstring(), @5); }
 			| ID_BY_NAME OPEN_VN resolved_name VN_SEP STRING_LITERAL CLOSE_VN			{ $$ = vn->OnIdByName($3.as_andata_block, @3, $5, @5); } // ASCII_NAME could be format
@@ -291,7 +297,6 @@ expr_unit	: BUILT_IN resolved_name itemisation				{ $$ = vn->OnBuiltIn($2.as_and
 
 vn_name		: UNICODE_NAME    							{ $$ = $1.as_unicode; }
 			| ASCII_NAME								{ $$ = $1.as_unicode; }     
-			| SCOPE_NAME								{ $$ = $1.as_unicode; }     
           
 // On sight of ::, we inform the recognition layer, which returns a shared_ptr which will 
 // expire when the production is complete or an error forces unwind. The naming layer

@@ -83,12 +83,8 @@ void VNLangRecogniser::AddGnomon( shared_ptr<Gnomon> gnomon )
 	
 	if( auto scope_block_gnomon = dynamic_pointer_cast<const ScopeBlockGnomon>(gnomon) )
 		scope_block_gnomons.push_front( scope_block_gnomon ); // front is top
-}
-
-
-void VNLangRecogniser::Designate( wstring name, TreePtr<Node> sub_pattern )
-{
-	designations.insert( make_pair(name, sub_pattern) );
+	else if( auto designation_gnomon = dynamic_pointer_cast<const DesignationGnomon>(gnomon) )
+		designation_gnomons.insert( make_pair( designation_gnomon->name, designation_gnomon ) );
 }
 
 
@@ -112,8 +108,12 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessToken(wstring text, bool 
 	YY::NameInfo info;
 	info.as_unicode = text;
 	info.as_ascii = ToASCII(text);
-	if( designations.count(text) > 0 )	
-		info.as_designated = designations.at(text);
+	shared_ptr<const DesignationGnomon> designation_gnomon;
+	if( designation_gnomons.count(text) > 0 )	
+	    designation_gnomon = designation_gnomons.at(text);
+	    
+	if( designation_gnomon )
+		info.as_designated = designation_gnomon->pattern;
 	else
 		info.as_designated = nullptr;
 		
@@ -123,8 +123,8 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessToken(wstring text, bool 
 	{
 		if( auto spg = wpg.lock() )
 		{
-			if( spg->scope_block )
-				current_scope_block = spg->scope_block;
+			ASSERT( spg->scope_block );
+			current_scope_block = spg->scope_block;
 			break; // we only need the one at the front, because the names build up
 		}
 	}
@@ -142,9 +142,15 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessToken(wstring text, bool 
 			ASSERTFAIL("unreconised andata block");
 	}
 			
-	FTRACE(	"Supply something else\n");
-	if( info.as_designated )
-         return YY::VNLangParser::make_NAMED_SUBTREE(info, loc);
+	if( designation_gnomon )
+	{
+		if( dynamic_cast<const NonTypeDesignationGnomon *>(designation_gnomon.get()) )
+            return YY::VNLangParser::make_DESIGNATED_NONTYPE(info, loc);
+        else if( dynamic_cast<const TypeDesignationGnomon *>(designation_gnomon.get()) )
+            return YY::VNLangParser::make_DESIGNATED_TYPE(info, loc);
+        else 
+			ASSERTFAIL();
+	}
     else if( ascii )
          return YY::VNLangParser::make_ASCII_NAME(info, loc);
     else
@@ -176,8 +182,4 @@ void VNLangRecogniser::PurgeExpiredGnomons()
 	};
 	scope_block_gnomons.remove_if(expired);
 }
-
-
-// TODO designation action to push a new DesignationGnomon and recogniser keeps
-// it under shared pointer, and returns it in the same form in the info.
 
