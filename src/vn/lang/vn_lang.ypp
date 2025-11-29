@@ -180,7 +180,7 @@ type_prefix : 										     type_paren
 			| 		  STUFF OPEN_VN expression CLOSE_VN type_prefix	 { $$ = vn->OnStuff($5, $3, VN::Limit()); }
 			| 		  STUFF OPEN_VN limit      CLOSE_VN type_prefix	 { $$ = vn->OnStuff($5, nullptr, $3); }
 			| 			   DELTA expression DELTA_ARROW type_prefix	 { $$ = vn->OnDelta($2, $4); }
-			| PRERESTRICT OPEN_VN resolved_name CLOSE_VN type_prefix { $$ = vn->OnRestrict($3.as_name_res_list, @3, $5, @5); }
+			| PRERESTRICT OPEN_VN resolved_name CLOSE_VN type_prefix { $$ = vn->OnRestrict($3.as_node_name_block, @3, $5, @5); }
 			| 	  TRANSFORM OPEN_VN ASCII_NAME CLOSE_VN type_prefix	 { $$ = vn->OnTransform($3.as_ascii, @3, $5, @5); }
 			| 								   NEGATION type_prefix	 { $$ = vn->OnNegation($2); }
 			| 									  GRASS type_prefix	 { $$ = vn->OnGrass($2); }
@@ -246,24 +246,24 @@ expr_mul_etc 		: expr_prefix
 					| expr_mul_etc '*' expr_prefix								{ $$ = vn->OnInfixOperator("*", $1, $3); }
 		
 expr_prefix : 										   expr_postfix
-			|  									  STUFF expr_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
-			| 		  STUFF OPEN_VN expression CLOSE_VN expr_prefix	{ $$ = vn->OnStuff($5, $3, VN::Limit()); }
-			| 			 STUFF OPEN_VN limit   CLOSE_VN expr_prefix	{ $$ = vn->OnStuff($5, nullptr, $3); }
-			| 			   DELTA expression DELTA_ARROW expr_prefix	{ $$ = vn->OnDelta($2, $4); }
-			| 					    C_PREFIX_OP 		expr_prefix	{ $$ = vn->OnPrefixOperator($1, $2); }
-			| 					    C_AMPERSAND 		expr_prefix	{ $$ = vn->OnPrefixOperator($1, $2); }
-			| 					    C_STAR		 		expr_prefix	{ $$ = vn->OnPrefixOperator($1, $2); }
-			| 					    C_ADD_SUB_OP	    expr_prefix	{ $$ = vn->OnPrefixOperator($1, $2); }
-			| 					    C_PRE_OR_INFIX_OP   expr_prefix	{ $$ = vn->OnPrefixOperator($1, $2); }
-			| 					    C_PRE_OR_POSTFIX_OP expr_prefix	{ $$ = vn->OnPrefixOperator($1, $2); }
-			|							   '(' type ')' expr_prefix { $$ = vn->OnCast($2, @2, $4, @4); }
-			|  PRERESTRICT OPEN_VN resolved_name CLOSE_VN expr_prefix	{ $$ = vn->OnRestrict($3.as_name_res_list, @3, $5, @5); }
-			| 	  TRANSFORM OPEN_VN ASCII_NAME CLOSE_VN expr_prefix	{ $$ = vn->OnTransform($3.as_ascii, @3, $5, @5); }
-			| 								   NEGATION expr_prefix	{ $$ = vn->OnNegation($2); }
-			| 									  GRASS expr_prefix	{ $$ = vn->OnGrass($2); }
-			| 								 POINTER_IS expr_prefix	{ $$ = vn->OnPointerIs($2); }
-			| 								 BUILD_SIZE expr_prefix	{ $$ = vn->OnBuildSize($2); }
-			| 								  STRINGIZE expr_prefix	{ $$ = vn->OnStringize($2); }
+			|  									  STUFF expr_prefix	 { $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
+			| 		  STUFF OPEN_VN expression CLOSE_VN expr_prefix	 { $$ = vn->OnStuff($5, $3, VN::Limit()); }
+			| 			 STUFF OPEN_VN limit   CLOSE_VN expr_prefix	 { $$ = vn->OnStuff($5, nullptr, $3); }
+			| 			   DELTA expression DELTA_ARROW expr_prefix	 { $$ = vn->OnDelta($2, $4); }
+			| 					    C_PREFIX_OP 		expr_prefix	 { $$ = vn->OnPrefixOperator($1, $2); }
+			| 					    C_AMPERSAND 		expr_prefix	 { $$ = vn->OnPrefixOperator($1, $2); }
+			| 					    C_STAR		 		expr_prefix	 { $$ = vn->OnPrefixOperator($1, $2); }
+			| 					    C_ADD_SUB_OP	    expr_prefix	 { $$ = vn->OnPrefixOperator($1, $2); }
+			| 					    C_PRE_OR_INFIX_OP   expr_prefix	 { $$ = vn->OnPrefixOperator($1, $2); }
+			| 					    C_PRE_OR_POSTFIX_OP expr_prefix	 { $$ = vn->OnPrefixOperator($1, $2); }
+			|							   '(' type ')' expr_prefix  { $$ = vn->OnCast($2, @2, $4, @4); }
+			| PRERESTRICT OPEN_VN resolved_name CLOSE_VN expr_prefix { $$ = vn->OnRestrict($3.as_node_name_block, @3, $5, @5); }
+			| 	  TRANSFORM OPEN_VN ASCII_NAME CLOSE_VN expr_prefix	 { $$ = vn->OnTransform($3.as_ascii, @3, $5, @5); }
+			| 								   NEGATION expr_prefix	 { $$ = vn->OnNegation($2); }
+			| 									  GRASS expr_prefix	 { $$ = vn->OnGrass($2); }
+			| 								 POINTER_IS expr_prefix	 { $$ = vn->OnPointerIs($2); }
+			| 								 BUILD_SIZE expr_prefix	 { $$ = vn->OnBuildSize($2); }
+			| 								  STRINGIZE expr_prefix	 { $$ = vn->OnStringize($2); }
 
 expr_postfix: expr_paren     
 			| expr_postfix C_PRE_OR_POSTFIX_OP 				 	{ $$ = vn->OnPostfixOperator($2, $1); }
@@ -281,8 +281,8 @@ expr_unit	: BUILT_IN resolved_name itemisation				{ $$ = vn->OnBuiltIn($2.as_nod
 			| ANY												{ $$ = nullptr; }
 			| '{' statements '}'                          		{ $$ = $2; }
 			| NAMED_SUBTREE       					  			{ $$ = $1.as_designated; }
-			| SPECIFIC_ID OPEN_VN resolved_name VN_SEP STRING_LITERAL CLOSE_VN			{ $$ = vn->OnSpecificId($3.as_name_res_list, @3, $5, @5); }
-			| SPECIFIC_ID OPEN_VN resolved_name VN_SEP CLOSE_VN							{ $$ = vn->OnSpecificId($3.as_name_res_list, @3, wstring(), @5); }
+			| SPECIFIC_ID OPEN_VN resolved_name VN_SEP STRING_LITERAL CLOSE_VN			{ $$ = vn->OnSpecificId($3.as_node_name_block, @3, $5, @5); }
+			| SPECIFIC_ID OPEN_VN resolved_name VN_SEP CLOSE_VN							{ $$ = vn->OnSpecificId($3.as_node_name_block, @3, wstring(), @5); }
 			| ID_BY_NAME OPEN_VN resolved_name VN_SEP STRING_LITERAL CLOSE_VN			{ $$ = vn->OnIdByName($3.as_name_res_list, @3, $5, @5); } // ASCII_NAME could be format
 			| BUILD_ID OPEN_VN resolved_name VN_SEP STRING_LITERAL VN_SEP CLOSE_VN 		{ $$ = vn->OnBuildId($3.as_name_res_list, @3, $5, @5, VN::Item{}); }
 			| BUILD_ID OPEN_VN resolved_name VN_SEP STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($3.as_name_res_list, @3, $5, @5, $7); }

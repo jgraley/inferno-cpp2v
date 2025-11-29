@@ -60,9 +60,9 @@ public:
 	TreePtr<Node> OnStar( TreePtr<Node> restriction );
 	TreePtr<Node> OnStuff( TreePtr<Node> terminus, TreePtr<Node> recurse_restriction, Limit limit );
 	TreePtr<Node> OnDelta( TreePtr<Node> through, TreePtr<Node> overlay );
-	TreePtr<Node> OnBuiltIn( const NodeNames::Block *block, any builtin_loc, Itemisation itemisation );
+	TreePtr<Node> OnBuiltIn( const NodeNames::Block *block, any node_name_loc, Itemisation itemisation );
 	TreePtr<Node> OnEmbeddedCommands( list<shared_ptr<Command>> commands );
-	TreePtr<Node> OnRestrict( list<string> res_type, any res_loc, TreePtr<Node> target, any target_loc );
+	TreePtr<Node> OnRestrict( const NodeNames::Block *block, any node_name_loc, TreePtr<Node> target, any target_loc );
 	
 	TreePtr<Node> OnInfixOperator( string tok, TreePtr<Node> left, TreePtr<Node> right );
 	TreePtr<Node> OnPrefixOperator( string tok, TreePtr<Node> operand );
@@ -70,10 +70,9 @@ public:
 	TreePtr<Node> OnIntegralLiteral( string text, any loc ); 
 	TreePtr<Node> OnStringLiteral( wstring value );
 	TreePtr<Node> OnBoolLiteral( bool value );
-	TreePtr<Node> OnCast( TreePtr<Node> type, any type_loc, TreePtr<Node> target, any target_loc );
+	TreePtr<Node> OnCast( TreePtr<Node> type, any type_loc, TreePtr<Node> target, any target_loc );	
 	
-	
-	TreePtr<Node> OnSpecificId( list<string> typ, any type_loc, wstring wname, any name_loc );
+	TreePtr<Node> OnSpecificId( const NodeNames::Block *block, any id_disc_loc, wstring wname, any name_loc );
 	TreePtr<Node> OnIdByName( list<string> typ, any type_loc, wstring wname, any name_loc );
 	TreePtr<Node> OnBuildId( list<string> typ, any type_loc, wstring wformat, any name_loc, Item sources );
 	TreePtr<Node> OnTransform( string kind, any kind_loc, TreePtr<Node> pattern, any pattern_loc );

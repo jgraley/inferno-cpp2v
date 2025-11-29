@@ -24,7 +24,7 @@
 #include <fstream>
 #include <cctype>
 
-using namespace CPPTree; // TODO should not need
+//using namespace CPPTree; // TODO should not need
 using namespace VN;
 using namespace reflex;
 
@@ -161,13 +161,13 @@ static TreePtr<Node> MakeStandardAgent(NodeEnum ne)
 }
 
 
-TreePtr<Node> VNParse::OnBuiltIn( const NodeNames::Block *block, any builtin_loc, Itemisation src_itemisation )
+TreePtr<Node> VNParse::OnBuiltIn( const NodeNames::Block *block, any node_name_loc, Itemisation src_itemisation )
 {
 	auto node_block = dynamic_cast<const NodeNames::NodeBlock *>(block);
 	// Parser could do this if we separated the tokens 
 	if( !node_block || !node_block->node_enum )
 		throw YY::VNLangParser::syntax_error( 
-				    any_cast<YY::VNLangParser::location_type>(builtin_loc), // TODO use the loc of the final name
+				    any_cast<YY::VNLangParser::location_type>(node_name_loc), 
 				    SSPrintf("In ◼, unexpected %s when expecting node name.", block->What().c_str()) ); 
 	
 	// The new node is the destiation
@@ -226,10 +226,16 @@ TreePtr<Node> VNParse::OnBuiltIn( const NodeNames::Block *block, any builtin_loc
 }
 
 
-TreePtr<Node> VNParse::OnRestrict( list<string> res_type, any res_loc, TreePtr<Node> target, any target_loc )
+TreePtr<Node> VNParse::OnRestrict( const NodeNames::Block *block, any node_name_loc, TreePtr<Node> target, any target_loc )
 {
-	NodeEnum ne = GetNodeEnum( res_type, res_loc );
+	auto node_block = dynamic_cast<const NodeNames::NodeBlock *>(block);
+	// Parser could do this if we separated the tokens 
+	if( !node_block || !node_block->node_enum )
+		throw YY::VNLangParser::syntax_error( 
+				    any_cast<YY::VNLangParser::location_type>(node_name_loc), 
+				    SSPrintf("In ‽, unexpected %s when expecting node name.", block->What().c_str()) ); 	
 	
+	NodeEnum ne = node_block->node_enum.value();
 	Agent *agent = Agent::TryAsAgent(target);
 	ASSERT( agent )("We are parsing a pattern so everything should be agents");
 		
@@ -251,7 +257,7 @@ TreePtr<Node> VNParse::OnPrefixOperator( string tok, TreePtr<Node> operand )
 #define PREFIX(TOK, TEXT, NAME, BASE, CAT, PROD, ASSOC) \
     if( tok==TEXT ) \
     { \
-		auto node = MakeTreeNode<StandardAgentWrapper<NAME>>(); \
+		auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::NAME>>(); \
 		node->operands.push_back(operand); \
         return node; \
 	}
@@ -267,7 +273,7 @@ TreePtr<Node> VNParse::OnPostfixOperator( string tok, TreePtr<Node> operand )
 #define POSTFIX(TOK, TEXT, NAME, BASE, CAT, PROD, ASSOC) \
     if( tok==TEXT ) \
     { \
-		auto node = MakeTreeNode<StandardAgentWrapper<NAME>>(); \
+		auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::NAME>>(); \
 		node->operands.push_back(operand); \
         return node; \
 	}
@@ -283,7 +289,7 @@ TreePtr<Node> VNParse::OnInfixOperator( string tok, TreePtr<Node> left, TreePtr<
 #define INFIX(TOK, TEXT, NAME, BASE, CAT, PROD, ASSOC) \
     if( tok==TEXT ) \
     { \
-		auto node = MakeTreeNode<StandardAgentWrapper<NAME>>(); \
+		auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::NAME>>(); \
 		node->operands.push_back(left); \
 		node->operands.push_back(right); \
         return node; \
@@ -311,22 +317,22 @@ TreePtr<Node> VNParse::OnIntegralLiteral( string text, any loc )
 TreePtr<Node> VNParse::OnStringLiteral( wstring wvalue )
 {
 	string value = Unquote(ToASCII(wvalue));
-	return MakeTreeNode<StandardAgentWrapper<SpecificString>>(value);
+	return MakeTreeNode<StandardAgentWrapper<CPPTree::SpecificString>>(value);
 }
 
 
 TreePtr<Node> VNParse::OnBoolLiteral( bool value )
 {
 	if( value )
-		return MakeTreeNode<StandardAgentWrapper<True>>();
+		return MakeTreeNode<StandardAgentWrapper<CPPTree::True>>();
 	else
-		return MakeTreeNode<StandardAgentWrapper<False>>();
+		return MakeTreeNode<StandardAgentWrapper<CPPTree::False>>();
 }
 
 
 TreePtr<Node> VNParse::OnCast( TreePtr<Node> type, any type_loc, TreePtr<Node> operand, any operand_loc )
 {
-	auto node = MakeTreeNode<StandardAgentWrapper<Cast>>();
+	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::Cast>>();
 	node->operand = operand;	
 	node->type = type;
 	return node;
@@ -334,25 +340,28 @@ TreePtr<Node> VNParse::OnCast( TreePtr<Node> type, any type_loc, TreePtr<Node> o
 
 
 
-TreePtr<Node> VNParse::OnSpecificId( list<string> typ, any type_loc, wstring wname, any name_loc )
+TreePtr<Node> VNParse::OnSpecificId( const NodeNames::Block *block, any id_disc_loc, wstring wname, any name_loc )
 {
 	(void)name_loc; // TODO perhaps IdentifierByNameAgent can validate this?
+
+	auto node_block = dynamic_cast<const NodeNames::NodeBlock *>(block);
+	// Parser could do this if we separated the tokens 
+	if( !node_block || !node_block->identifier_discriminator_enum )
+		throw YY::VNLangParser::syntax_error( 
+				    any_cast<YY::VNLangParser::location_type>(id_disc_loc), 
+				    SSPrintf("In 🞊, unexpected %s when expecting identifier-discriminator.", block->What().c_str()) ); 		
+	IdentifierEnum ie = node_block->identifier_discriminator_enum.value();
+
 	string name = Unquote(ToASCII(wname));
-	
-	if( typ.size() == 1 )
-		typ.push_front("CPPTree"); // TODO centralise
 		
+	switch( ie )
+	{
 #define NODE(NS, NAME) \
-	if( string(#NS)==typ.front() && string(#NAME)==typ.back() ) \
-		return MakeTreeNode<StandardAgentWrapper<Specific##NAME##Identifier>>(name); \
-	else
+	case IdentifierEnum::NS##_##NAME: \
+		return MakeTreeNode<StandardAgentWrapper<NS::Specific##NAME##Identifier>>(name); 
 #include "tree/identifier_names.inc"	
 #undef NODE
-		throw YY::VNLangParser::syntax_error(
-		    any_cast<YY::VNLangParser::location_type>(type_loc),
-			"🞊 requires identifier type discriminator i.e. " + 
-			DiagQuote(Join(typ, "::") + "Identifier") +
-			" would need to exist as a node type.");	
+	}
 }
 
 
@@ -501,7 +510,7 @@ TreePtr<Node> VNParse::CreateIntegralLiteral( bool uns, bool lng, bool lng2, uin
 		throw YY::VNLangParser::syntax_error(
 		    any_cast<YY::VNLangParser::location_type>(loc),
 			"Integer literal: could not fit value " + to_string(val) + " into required type.");
-	return MakeTreeNode<StandardAgentWrapper<SpecificInteger>>( rv );
+	return MakeTreeNode<StandardAgentWrapper<CPPTree::SpecificInteger>>( rv );
 }
 
 

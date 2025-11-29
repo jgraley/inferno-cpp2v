@@ -16,6 +16,13 @@ enum class NodeEnum
 #undef NODE
 };
 
+enum class IdentifierEnum
+{
+#define NODE(NS, NAME) NS##_##NAME,
+#include "identifier_names.inc"	
+#undef NODE
+};
+
 
 class NodeNames
 {
@@ -35,21 +42,21 @@ public:
 	struct NodeBlock : Block
 	{
 		optional<NodeEnum> node_enum;
-		bool is_identifier_type;
+		optional<IdentifierEnum> identifier_discriminator_enum;
 		string What() const final 
 		{ 
 			list<string> ls;
 			if( node_enum )
-				ls.push_back( "node" );
-			if( is_identifier_type )
-				ls.push_back( "identifier" );
-			return Join(ls, "/") + " name";
+				ls.push_back( "node-name" );
+			if( identifier_discriminator_enum )
+				ls.push_back( "identifier-discriminator" );
+			return Join(ls, "/");
 		}
 		string GetTrace() const 
 		{ 
 			string s = node_enum ? "node#"+Trace((int)(node_enum.value())) : "no-node"; 
 			s += ",";
-			s += is_identifier_type ? "id-type" : "no-id-type";
+			s += identifier_discriminator_enum ? "id-disc#"+Trace((int)(identifier_discriminator_enum.value())) : "no-id-disc";
 			return s;
 		}
 	};

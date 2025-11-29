@@ -101,18 +101,20 @@ void NodeNames::InitialiseMap()
 		NodeBlock *node_block = dynamic_cast<NodeBlock *>(scope_block->sub_blocks.at(flat_list.back()).get());
 		ASSERT( node_block );
 		node_block->node_enum = node_enum;		
-		node_block->is_identifier_type = false;		
 	}
 	
-	set<list<string>> ident_name_set = 
+	map<list<string>, IdentifierEnum> ident_name_map = 
 	{
-#define NODE(NS, NAME) {#NS, #NAME},
+#define NODE(NS, NAME) { {#NS, #NAME}, IdentifierEnum::NS##_##NAME },
 #include "identifier_names.inc"	
 #undef NODE	
 	};
 	
-	for( list<string> flat_list : ident_name_set )
+	for( auto p : ident_name_map )
 	{
+		list<string> flat_list = p.first;
+		IdentifierEnum identifier_discriminator_enum = p.second;		
+		
 		if( root_block.sub_blocks.count(flat_list.front())==0 )
 		{
 			auto sb = make_unique<ScopeBlock>();
@@ -128,7 +130,7 @@ void NodeNames::InitialiseMap()
 
 		NodeBlock *node_block = dynamic_cast<NodeBlock *>(scope_block->sub_blocks.at(flat_list.back()).get());
 		ASSERT( node_block );
-		node_block->is_identifier_type = true;
+		node_block->identifier_discriminator_enum = identifier_discriminator_enum;
 		
 		ASSERT( !name_to_node_map.empty() );
 	}
