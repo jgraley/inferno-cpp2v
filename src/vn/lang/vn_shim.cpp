@@ -117,6 +117,12 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessToken(wstring text, bool 
 	else
 		info.as_designated = nullptr;
 		
+	// Pick off the transformations we know about
+	if( ascii && ToASCII(text)=="DeclarationOf" )
+		return YY::VNLangParser::make_DECLARATION_OF(info, loc);
+	else if( ascii && ToASCII(text)=="TypeOf" )
+		return YY::VNLangParser::make_TYPE_OF(info, loc);
+		
 	// Determine the current scope from our weak gnomons
 	const AvailableNodeData::ScopeBlock *current_scope_block = AvailableNodeData().GetRootBlock();
 	for( weak_ptr<const ScopeBlockGnomon> wpg : scope_block_gnomons )

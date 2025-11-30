@@ -168,7 +168,7 @@ TreePtr<Node> VNParse::OnBuiltIn( const AvailableNodeData::Block *block, any nod
 	if( !leaf_block || !leaf_block->node_enum )
 		throw YY::VNLangParser::syntax_error( 
 				    any_cast<YY::VNLangParser::location_type>(node_name_loc), 
-				    SSPrintf("In ◼, unexpected %s when expecting node name.", block->What().c_str()) ); 
+				    SSPrintf("In ⯁, unexpected %s when expecting node name.", block->What().c_str()) ); 
 	
 	// The new node is the destiation
 	NodeEnum ne = leaf_block->node_enum.value();
@@ -191,7 +191,7 @@ TreePtr<Node> VNParse::OnBuiltIn( const AvailableNodeData::Block *block, any nod
 		if( src_it == src_itemisation.items.end() )
 			throw YY::VNLangParser::syntax_error( 
 				prev_loc, 
-				"In ◼, insufficient items given. " + counts_msg );
+				"In ⯁, insufficient items given. " + counts_msg );
 		const Item &src_item = *src_it;
         if( SequenceInterface *dest_seq = dynamic_cast<SequenceInterface *>(dest_item) ) // TODO could roll together as Container?
             for( TreePtr<Node> src : src_item.nodes )
@@ -204,7 +204,7 @@ TreePtr<Node> VNParse::OnBuiltIn( const AvailableNodeData::Block *block, any nod
 			if( src_item.nodes.size() != 1 )
 			    throw YY::VNLangParser::syntax_error( 
 				    any_cast<YY::VNLangParser::location_type>(src_item.loc),
-				    SSPrintf("In ◼, singular item requires exactly one sub-pattern but %d were given.",
+				    SSPrintf("In ⯁, singular item requires exactly one sub-pattern but %d were given.",
 				    src_item.nodes.size() ) ); 
             *dest_sing = src_item.nodes.front();
 		}
@@ -214,13 +214,13 @@ TreePtr<Node> VNParse::OnBuiltIn( const AvailableNodeData::Block *block, any nod
         prev_loc = any_cast<YY::VNLangParser::location_type>(src_item.loc);
     }
     string empty_note;
-    // Sniff out the case where user put eg ◼Node() when ◼Node is required
+    // Sniff out the case where user put eg ⯁Node() when ⯁Node is required
     if( dest_items.size()==0 && src_itemisation.items.size()==1 && src_itemisation.items.front().nodes.size()==0 )
 		empty_note = "\nNote: where a node type requires zero items, simply omit the () entirely.";                             
 	if( src_it != src_itemisation.items.end() )
 		throw YY::VNLangParser::syntax_error( 
 			any_cast<YY::VNLangParser::location_type>(src_it->loc), 
-			"In ◼, excess items given. " + counts_msg + empty_note);
+			"In ⯁, excess items given. " + counts_msg + empty_note);
 
 	return dest;
 }
@@ -563,10 +563,9 @@ VNLangRecogniser &VNParse::GetShim()
 // Namespaces: CPPTree should be assumed as a default where not specified. More than one specifier is still TBD
 // Common stuff for qualified types with :: including ability to throw on eg A::B::C (but could support later)
 
-// Don't require ◼ and ⯁ to differentiate type/non-type designation. Use recognition layer to 
-// figure out from the node type. Go back to ⯁ for all.
-
 // Renamings: available_node_info, recogniser, and this file. VNParse -> VNHolder + VNActions
+
+// Productions using 【 】: Use a gnomon to enable recogniser to "see" whatever is in the brackets eg TypeOf
 
 // Productions using 【 】: AFTER adding C mixture, try using () and making things look like printf etc
 

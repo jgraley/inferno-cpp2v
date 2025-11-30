@@ -73,8 +73,7 @@
 	STUFF		 							"⩨"
 	DELTA 									"▲"
 	DELTA_ARROW 							"⯈"
-	BUILT_IN 								"◼"
-	BUILT_IN_TYPE							"⯁"
+	BUILT_IN 								"⯁"
 	OPEN_VN 								"【"
 	CLOSE_VN 								"】"
 	ANY 									"☆"
@@ -124,6 +123,8 @@
 	<YY::NameInfo>	RESOLVED_NONTYPE		_("resolved non-type node name")
 	<YY::NameInfo>	RESOLVED_TYPE			_("resolved type node name")
 	<YY::NameInfo>	SCOPE_NAME				_("scope name")
+	<YY::NameInfo>	DECLARATION_OF			_("DeclarationOf")
+	<YY::NameInfo>	TYPE_OF					_("TypeOf")
 	
 %type <TreePtr<Node>> 				normal norm_unit norm_postfix norm_prefix norm_relational norm_disjunction norm_conjunction  
 %type <TreePtr<Node>> 				norm_assignment norm_equality norm_add_etc norm_logical_or norm_logical_and statements statement
@@ -201,18 +202,16 @@ type_conjunction 	: type_prefix
                     
 type_prefix : 										     type_paren
 			| 				      DELTA type DELTA_ARROW type_prefix { $$ = vn->OnDelta($2, $4); }
-			| PRERESTRICT OPEN_VN resolved_type_name CLOSE_VN type_prefix { $$ = vn->OnRestrict($3.as_andata_block, @3, $5, @5); }
 			| 									   GRASS type_prefix { $$ = vn->OnGrass($2); }
 			| 								  POINTER_IS type_prefix { $$ = vn->OnPointerIs($2); }
 			| 								    NEGATION type_prefix { $$ = vn->OnNegation($2); }
+			| PRERESTRICT OPEN_VN resolved_type_name CLOSE_VN unified_prefix { $$ = vn->OnRestrict($3.as_andata_block, @3, $5, @5); }
 
 type_paren  : type_unit
-			| OPEN_TYPE unified CLOSE_TYPE                  { $$ = $2; }	
+			| '(' type ')'									{ $$ = $2; }	
 			
                                         
-type_unit	: BUILT_IN_TYPE resolved_type_name itemisation	{ $$ = vn->OnBuiltIn($2.as_andata_block, @2, $3); }
-			| BUILT_IN_TYPE resolved_type_name				{ $$ = vn->OnBuiltIn($2.as_andata_block, @2, VN::Itemisation{{}, @2}); }
-			| BUILT_IN resolved_type_name itemisation		{ $$ = vn->OnBuiltIn($2.as_andata_block, @2, $3); }
+type_unit	: BUILT_IN resolved_type_name itemisation		{ $$ = vn->OnBuiltIn($2.as_andata_block, @2, $3); }
 			| BUILT_IN resolved_type_name					{ $$ = vn->OnBuiltIn($2.as_andata_block, @2, VN::Itemisation{{}, @2}); }
 			| DESIGNATED_TYPE       				 		{ $$ = $1.as_designated; }		
    			| SPECIFIC_ID OPEN_VN resolved_type_name VN_SEP STRING_LITERAL CLOSE_VN				{ $$ = vn->OnSpecificId($3.as_andata_block, @3, $5, @5); }
@@ -278,20 +277,22 @@ norm_prefix : 										   norm_postfix
 			| 					    C_ADD_SUB_OP	    norm_prefix	 { $$ = vn->OnPrefixOperator($1, $2); }
 			| 					    C_PRE_OR_INFIX_OP   norm_prefix	 { $$ = vn->OnPrefixOperator($1, $2); }
 			| 					    C_PRE_OR_POSTFIX_OP norm_prefix	 { $$ = vn->OnPrefixOperator($1, $2); }
-			|							   '(' type ')' norm_prefix  { $$ = vn->OnCast($2, @2, $4, @4); }
-			| PRERESTRICT OPEN_VN resolved_name CLOSE_VN norm_prefix { $$ = vn->OnRestrict($3.as_andata_block, @3, $5, @5); }
 			| 									  GRASS norm_prefix	 { $$ = vn->OnGrass($2); }
 			| 								 POINTER_IS norm_prefix	 { $$ = vn->OnPointerIs($2); }
 			| 								   NEGATION norm_prefix	 { $$ = vn->OnNegation($2); }
+			|        TRANSFORM OPEN_VN TYPE_OF CLOSE_VN type_prefix	 { $$ = vn->OnTransform($3.as_ascii, @3, $5, @5); }
 			| 								 BUILD_SIZE unified_prefix	 { $$ = vn->OnBuildSize($2); }
 			| 								  STRINGIZE unified_prefix	 { $$ = vn->OnStringize($2); }
-			| 	  TRANSFORM OPEN_VN ASCII_NAME CLOSE_VN unified_prefix	 { $$ = vn->OnTransform($3.as_ascii, @3, $5, @5); }
 			|  									  STUFF unified_prefix	 { $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
 			| 		  	 STUFF OPEN_VN unified CLOSE_VN unified_prefix	 { $$ = vn->OnStuff($5, $3, VN::Limit()); }
 			| 			 STUFF OPEN_VN limit   CLOSE_VN unified_prefix	 { $$ = vn->OnStuff($5, nullptr, $3); }
+			| PRERESTRICT OPEN_VN resolved_name CLOSE_VN unified_prefix { $$ = vn->OnRestrict($3.as_andata_block, @3, $5, @5); }
 
+// Use a prerestriction to disambiguate ⤨【DeclarationOf】...
 unified_prefix	: norm_prefix
 				| type_prefix
+				| TRANSFORM OPEN_VN DECLARATION_OF CLOSE_VN norm_prefix	 { $$ = vn->OnTransform($3.as_ascii, @3, $5, @5); }
+  
 
 norm_postfix: norm_paren     
 			| norm_postfix C_PRE_OR_POSTFIX_OP 				 	{ $$ = vn->OnPostfixOperator($2, $1); }
@@ -329,7 +330,7 @@ resolve     	: part_resolve SCOPE_NAME				{ $$ = $2; }
 				| SCOPE_NAME							{ $$ = $1; }
 				      
 
-// RESOLVED_NONTYPE is strong i.e. there was definitely a ::. resolved_name is weak and
+// RESOLVED_X is strong i.e. there was definitely a ::. resolved_x is weak and
 // doesn't require this. See comment by part_resolve for why we don't need a value from it.
 resolved_name	: part_resolve RESOLVED_NONTYPE			{ $$ = $2; }
 				| RESOLVED_NONTYPE						{ $$ = $1; }
