@@ -86,9 +86,9 @@ public:
 		
 		// ----- Abstract, lexer-ish productions of no particuler kind
 		EXPLICIT_NODE = 80, // Eg ◼CPPTree::MyNode(...)
-		SCOPE_RESOLVE, // :: in C++	
+		RESOLVER, // :: in C++	
 		PURE_IDENTIFIER, // Higher than expr because could be a type, label etc
-		TOKEN, // Lexer tokens of any kind (other than type or expression)
+		TERMINAL, // Lexer tokens of any kind (other than type or expression)
 		ANONYMOUS
 	};
 	
@@ -99,12 +99,14 @@ public:
 		Policy() : 
 			force_initialisation(false), 
 			force_incomplete_records(false),
-			current_access(DefaultAccess) {}
+			current_access(DefaultAccess),
+			refuse_c_style_cast(false) {}
 		bool force_initialisation;
 		bool force_incomplete_records;
 		// A good thing about typeindex/typeid is that you can refer to a node
 		// type without needing to have an actual node of that type.
 		type_index current_access;
+		bool refuse_c_style_cast;		
 	};
 	
 	// We deal with syntactical association only, not mathematical, because:
@@ -116,21 +118,21 @@ public:
 		RIGHT
 	};
 	
-	struct NotOnThisNode : Exception
-	{
-	};
+	struct Refusal : Exception {};
+	struct Unimplemented : Refusal {};
+	struct RefusedByPolicy : Refusal {};
 		
 	/// Produce the source-code-name of the corresponding SystemC construct
     virtual string GetLoweredIdName() const;
     virtual string GetIdentifierName() const;
     virtual string GetCouplingNameHint() const;
 	
-	virtual string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy = Policy() );
+	virtual string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy );
 	
 	// Like GetRender, but without a kit it can't render sub-productions, so it can only work for terminals
 	virtual string GetRenderTerminal( Production surround_prod ) const;
 	
-	virtual Production GetMyProduction(const VN::RendererInterface *renderer, Policy policy = Policy() ) const;
+	virtual Production GetMyProduction(const VN::RendererInterface *renderer, Policy policy ) const;
 	virtual Production GetMyProductionTerminal() const;
 	virtual Production GetOperandInDeclaratorProduction() const;
     static Syntax::Production BoostPrecedence( Syntax::Production prec );

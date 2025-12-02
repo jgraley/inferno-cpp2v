@@ -8,20 +8,20 @@ const type_index Syntax::DefaultAccess = type_index(typeid(CPPTree::Public));
 
 string Syntax::GetLoweredIdName() const
 {
-	throw NotOnThisNode();
+	throw Unimplemented();
 }
 
 
 string Syntax::GetIdentifierName() const
 {
-	throw NotOnThisNode();
+	throw Unimplemented();
 }
 
 
 string Syntax::GetCouplingNameHint() const
 {
 	try { return GetLoweredIdName(); }
-	catch( NotOnThisNode & ) {}
+	catch( Refusal & ) {}
 	
 	// If no token, just use the type
 	string s = TYPE_ID_NAME(*this);
@@ -44,7 +44,7 @@ string Syntax::GetRender( VN::RendererInterface *, Production production, Policy
 
 string Syntax::GetRenderTerminal( Production ) const
 {
-	throw NotOnThisNode();
+	throw Unimplemented();
 }
 
 
@@ -57,14 +57,14 @@ Syntax::Production Syntax::GetMyProduction(const VN::RendererInterface *, Policy
 // What production do I become once rendered?
 Syntax::Production Syntax::GetMyProductionTerminal() const
 {
-	throw NotOnThisNode();
+	throw Unimplemented();
 }
     
     
 // What production is expected as my operand in a declarator?
 Syntax::Production Syntax::GetOperandInDeclaratorProduction() const
 {
-	throw NotOnThisNode();
+	throw Unimplemented();
 } 
 
 

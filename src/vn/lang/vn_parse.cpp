@@ -339,6 +339,62 @@ TreePtr<Node> VNParse::OnCast( TreePtr<Node> type, any type_loc, TreePtr<Node> o
 }
 
 
+TreePtr<Node> VNParse::OnConditionalOperator( TreePtr<Node> condition, TreePtr<Node> expr_then, TreePtr<Node> expr_else )
+{
+	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::ConditionalOperator>>();
+	node->condition = condition;	
+	node->expr_then = expr_then;
+	node->expr_else = expr_else;
+	return node;
+}
+	
+
+TreePtr<Node> VNParse::OnSubscript( TreePtr<Node> destination, TreePtr<Node> index )
+{
+	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::Subscript>>();
+	node->destination = destination;	
+	node->index = index;
+	return node;
+}
+	
+
+TreePtr<Node> VNParse::OnCompound( list<TreePtr<Node>> statements )
+{
+	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::Compound>>();
+	for( TreePtr<Node> statement : statements )
+		node->statements.insert( statement );
+	return node;
+}
+
+
+TreePtr<Node> VNParse::OnArrayLiteral( TreePtr<Node> root_of_comma_expression )
+{
+	// Break up a comma-separated expression, assuming left-associative
+	TreePtr<Node> current = root_of_comma_expression;
+	list<TreePtr<Node>> values;
+	while( auto comma = TreePtr<CPPTree::Comma>::DynamicCast(current) )
+	{
+		values.push_front( comma->operands.back() );
+		current = comma->operands.front();
+	}
+	values.push_front( current );
+	
+	// Fill out the array literal
+	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::ArrayLiteral>>();
+	for( TreePtr<Node> value : values )
+		node->operands.insert( value );
+	return node;
+}
+
+
+TreePtr<Node> VNParse::OnNormalTerminalKeyword( string keyword, any keyword_loc )
+{
+	if( keyword=="this" )
+		return MakeTreeNode<StandardAgentWrapper<CPPTree::This>>();
+	
+	ASSERTFAIL();
+}
+
 
 TreePtr<Node> VNParse::OnSpecificId( const AvailableNodeData::Block *block, any id_disc_loc, wstring wname, any name_loc )
 {
@@ -563,7 +619,10 @@ VNLangRecogniser &VNParse::GetShim()
 // Namespaces: CPPTree should be assumed as a default where not specified. More than one specifier is still TBD
 // Common stuff for qualified types with :: including ability to throw on eg A::B::C (but could support later)
 
-// Renamings: available_node_info, recogniser, and this file. VNParse -> VNHolder + VNActions
+// Renamings: 
+// VNScriptRunner -> VNScript
+// VNParse -> VNActions and move DoParse() into VNScript.
+// Ensure available_node_info, recogniser, and this file have the right filenames
 
 // Productions using 【 】: Use a gnomon to enable recogniser to "see" whatever is in the brackets eg TypeOf
 

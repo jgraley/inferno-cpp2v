@@ -52,7 +52,7 @@ string Literal::GetName() const
 	{
 		value_string = "(" + GetRenderTerminal(Syntax::Production::BOOT_EXPR) + ")";
 	}
-	catch(NotOnThisNode &) {}
+	catch(Refusal &) {}
 	return Traceable::GetName() + value_string;
 }
 
@@ -328,10 +328,10 @@ string SpecificIdentifier::GetRender( VN::RendererInterface *renderer, Productio
     // Put this in SpecificLabelIdentifier
     if( DynamicTreePtrCast< SpecificLabelIdentifier >(id) )
     {
-		if(  surround_prod < Syntax::Production::SCOPE_RESOLVE )
+		if(  surround_prod < Syntax::Production::RESOLVER )
 		{
 			// label-as-variable (GCC extension)  
-			return "&&" + renderer->RenderIntoProduction( id, Syntax::Production::SCOPE_RESOLVE ); // recurse at strictly higher precedence
+			return "&&" + renderer->RenderIntoProduction( id, Syntax::Production::RESOLVER ); // recurse at strictly higher precedence
 		}
 		else
 		{
@@ -340,11 +340,11 @@ string SpecificIdentifier::GetRender( VN::RendererInterface *renderer, Productio
     }
 
     if( !id )
-		throw Syntax::NotOnThisNode();
+		throw Syntax::Unimplemented();
 
 	auto ii = DynamicTreePtrCast<SpecificIdentifier>( id );
 	if( !ii )
-		throw Syntax::NotOnThisNode();
+		throw Syntax::Unimplemented();
 
 	string s = renderer->GetUniqueIdentifierName(ii);          
     ASSERT(s.size()>0)(*id)(" rendered to an empty string\n");
@@ -407,7 +407,7 @@ Syntax::Production TypeIdentifier::GetMyProductionTerminal() const
 
 Syntax::Production AccessSpec::GetMyProductionTerminal() const
 { 
-	return Production::TOKEN; 
+	return Production::TERMINAL; 
 }
 
 //////////////////////////// Instance //////////////////////////////
@@ -614,7 +614,7 @@ string NODE::GetRender( VN::RendererInterface *renderer, Production, Policy ) \
 	if( dynamic_cast<AddressOf *>(shared_from_this().get()) ) \
 		if( auto id = TreePtr<Identifier>::DynamicCast(*operands_it) ) \
 			paren = !renderer->RenderScopeResolvingPrefix( id ).empty(); \
-	return s + (paren?"(":"") + renderer->RenderIntoProduction( *operands_it, Syntax::Production::PROD) + (paren?")":""); \
+	return s + (paren?"(":"") + renderer->RenderIntoProduction( *operands_it, Production::PROD) + (paren?")":""); \
 } \
 
 #define POSTFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) \
@@ -625,7 +625,7 @@ Syntax::Production NODE::GetMyProductionTerminal() const \
 string NODE::GetRender( VN::RendererInterface *renderer, Production, Policy ) \
 { \
 	Sequence<Expression>::iterator operands_it = operands.begin(); \
-	return renderer->RenderIntoProduction( *operands_it, Syntax::Production::PROD) + TEXT; \
+	return renderer->RenderIntoProduction( *operands_it, Production::PROD) + TEXT; \
 } \
 
 #define INFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) \
@@ -635,12 +635,12 @@ Syntax::Production NODE::GetMyProductionTerminal() const \
 } \
 string NODE::GetRender( VN::RendererInterface *renderer, Production, Policy ) \
 { \
-	Syntax::Production prod_left = Syntax::Production::PROD; \
-	Syntax::Production prod_right = Syntax::Production::PROD; \
-	switch( Syntax::Association::ASSOC ) \
+	Production prod_left = Production::PROD; \
+	Production prod_right = Production::PROD; \
+	switch( Association::ASSOC ) \
 	{ \
-		case Syntax::Association::RIGHT: prod_left = Syntax::BoostPrecedence(prod_left); break; \
-		case Syntax::Association::LEFT:  prod_right = Syntax::BoostPrecedence(prod_right); break; \
+		case Association::RIGHT: prod_left = BoostPrecedence(prod_left); break; \
+		case Association::LEFT:  prod_right = BoostPrecedence(prod_right); break; \
 	} \
 	Sequence<Expression>::iterator operands_it = operands.begin(); \
 	string s = renderer->RenderIntoProduction( *operands_it, prod_left ); \
@@ -661,11 +661,31 @@ Syntax::Production ConditionalOperator::GetMyProductionTerminal() const
 	return Production::ASSIGN; 
 }
 
+
+string ConditionalOperator::GetRender( VN::RendererInterface *renderer, Production, Policy )
+{
+	return renderer->RenderIntoProduction( condition, BoostPrecedence(Syntax::Production::ASSIGN) ) + 
+		   " ? " +
+		   // Middle expression boots parser - so you can't split it up using (), [] etc
+		   renderer->RenderIntoProduction( expr_then, Production::BOOT_EXPR ) + 
+		   " : " +
+		   renderer->RenderIntoProduction( expr_else, Production::ASSIGN );          
+}
+
+
 //////////////////////////// Subscript ///////////////////////////////
 
 Syntax::Production Subscript::GetMyProductionTerminal() const
 { 
 	return Production::POSTFIX; 
+}
+
+string Subscript::GetRender( VN::RendererInterface *renderer, Production, Policy )
+{
+	return renderer->RenderIntoProduction( destination, Production::POSTFIX ) + 
+		   "[" +
+		   renderer->RenderIntoProduction( index, Production::BOOT_EXPR ) + 
+		   "]";       
 }
 
 //////////////////////////// ArrayLiteral ///////////////////////////////
@@ -675,11 +695,24 @@ Syntax::Production ArrayLiteral::GetMyProductionTerminal() const
 	return Production::BRACKETED; 
 }
 
+string ArrayLiteral::GetRender( VN::RendererInterface *renderer, Production, Policy )
+{
+	list<string> renders;    
+    for( TreePtr<Expression> operand : operands )
+		renders.push_back( renderer->RenderIntoProduction( operand, Production::COMMA_SEP ) );
+    return Join(renders, ", ", "{", "}"); // Use of {} in expressions is irregular so handle locally 
+}
+
 //////////////////////////// This ///////////////////////////////
 
 Syntax::Production This::GetMyProductionTerminal() const
 { 
 	return Production::PRIMITIVE_EXPR; 
+}
+
+string This::GetRenderTerminal( Production ) const
+{
+	return "this";
 }
 
 //////////////////////////// New ///////////////////////////////
@@ -710,10 +743,12 @@ Syntax::Production Cast::GetMyProductionTerminal() const
 	return Production::PREFIX; 
 }
 
-string Cast::GetRender( VN::RendererInterface *renderer, Production, Policy  )
+string Cast::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
+	if( policy.refuse_c_style_cast )
+		throw RefusedByPolicy();
     return "(" + renderer->RenderIntoProduction( type, Syntax::Production::BOOT_TYPE ) + ")" +
-           renderer->RenderIntoProduction( operand, Syntax::Production::PREFIX );
+                 renderer->RenderIntoProduction( operand, Syntax::Production::PREFIX );
 }
 
 //////////////////////////// IdValuePair ///////////////////////////////
@@ -723,9 +758,9 @@ Syntax::Production IdValuePair::GetMyProductionTerminal() const
 	return Production::ASSIGN; 
 }
 
-//////////////////////////// Call ///////////////////////////////
+//////////////////////////// MapArgsCall ///////////////////////////////
 
-Syntax::Production Call::GetMyProductionTerminal() const
+Syntax::Production MapArgsCall::GetMyProductionTerminal() const
 { 
 	return Production::POSTFIX; 
 }

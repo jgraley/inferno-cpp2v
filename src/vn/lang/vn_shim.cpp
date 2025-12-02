@@ -81,7 +81,7 @@ void VNLangRecogniser::AddGnomon( shared_ptr<Gnomon> gnomon )
 {
 	PurgeExpiredGnomons();
 	
-	if( auto scope_block_gnomon = dynamic_pointer_cast<const ScopeBlockGnomon>(gnomon) )
+	if( auto scope_block_gnomon = dynamic_pointer_cast<const ResolverGnomon>(gnomon) )
 		scope_block_gnomons.push_front( scope_block_gnomon ); // front is top
 	else if( auto designation_gnomon = dynamic_pointer_cast<const DesignationGnomon>(gnomon) )
 		designation_gnomons.insert( make_pair( designation_gnomon->name, designation_gnomon ) );
@@ -102,30 +102,32 @@ YY::VNLangParser::symbol_type VNLangRecogniser::OnUnquoted(wstring text, YY::VNL
 
 YY::VNLangParser::symbol_type VNLangRecogniser::ProcessToken(wstring text, bool ascii, YY::VNLangParser::location_type loc) const
 {
-	(void)ascii;
-
 	// Where unicode is allowed, ascii is allowed too, so positive checks only
-	YY::NameInfo info;
-	info.as_unicode = text;
-	info.as_ascii = ToASCII(text);
+	YY::TokenMetadata metadata;
+	metadata.as_unicode = text;
+	metadata.as_ascii = ToASCII(text);
 	shared_ptr<const DesignationGnomon> designation_gnomon;
 	if( designation_gnomons.count(text) > 0 )	
 	    designation_gnomon = designation_gnomons.at(text);
 	    
 	if( designation_gnomon )
-		info.as_designated = designation_gnomon->pattern;
+		metadata.as_designated = designation_gnomon->pattern;
 	else
-		info.as_designated = nullptr;
+		metadata.as_designated = nullptr;
+		
+	// Pick off keywords
+	if( ascii && ToASCII(text)=="this" )
+		return YY::VNLangParser::make_NORM_TERM_KEYWORD(metadata, loc);
 		
 	// Pick off the transformations we know about
 	if( ascii && ToASCII(text)=="DeclarationOf" )
-		return YY::VNLangParser::make_DECLARATION_OF(info, loc);
+		return YY::VNLangParser::make_DECLARATION_OF(metadata, loc);
 	else if( ascii && ToASCII(text)=="TypeOf" )
-		return YY::VNLangParser::make_TYPE_OF(info, loc);
+		return YY::VNLangParser::make_TYPE_OF(metadata, loc);
 		
 	// Determine the current scope from our weak gnomons
 	const AvailableNodeData::ScopeBlock *current_scope_block = AvailableNodeData().GetRootBlock();
-	for( weak_ptr<const ScopeBlockGnomon> wpg : scope_block_gnomons )
+	for( weak_ptr<const ResolverGnomon> wpg : scope_block_gnomons )
 	{
 		if( auto spg = wpg.lock() )
 		{
@@ -136,19 +138,19 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessToken(wstring text, bool 
 	}
 	
 	// See if we want to supply a block
-	info.as_andata_block = nullptr;
+	metadata.as_andata_block = nullptr;
 	if( ascii && current_scope_block && current_scope_block->sub_blocks.count(ToASCII(text)) > 0 )
 	{
-		info.as_andata_block = current_scope_block->sub_blocks.at(ToASCII(text)).get();
-		if( auto lb = dynamic_cast<const AvailableNodeData::LeafBlock *>(info.as_andata_block) )
+		metadata.as_andata_block = current_scope_block->sub_blocks.at(ToASCII(text)).get();
+		if( auto lb = dynamic_cast<const AvailableNodeData::LeafBlock *>(metadata.as_andata_block) )
 		{
 			if( AvailableNodeData().IsType(lb) )			
-				return YY::VNLangParser::make_RESOLVED_TYPE(info, loc);
+				return YY::VNLangParser::make_RESOLVED_TYPE(metadata, loc);
 			else
-				return YY::VNLangParser::make_RESOLVED_NONTYPE(info, loc);
+				return YY::VNLangParser::make_RESOLVED_NORMAL(metadata, loc);
 		}
-		else if( dynamic_cast<const AvailableNodeData::ScopeBlock *>(info.as_andata_block) )
-			return YY::VNLangParser::make_SCOPE_NAME(info, loc);				
+		else if( dynamic_cast<const AvailableNodeData::ScopeBlock *>(metadata.as_andata_block) )
+			return YY::VNLangParser::make_RESOLVING_NAME(metadata, loc);				
 		else
 			ASSERTFAIL("unreconised andata block");
 	}
@@ -156,16 +158,16 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessToken(wstring text, bool 
 	if( designation_gnomon )
 	{
 		if( dynamic_cast<const NonTypeDesignationGnomon *>(designation_gnomon.get()) )
-            return YY::VNLangParser::make_DESIGNATED_NONTYPE(info, loc);
+            return YY::VNLangParser::make_DESIGNATED_NONTYPE(metadata, loc);
         else if( dynamic_cast<const TypeDesignationGnomon *>(designation_gnomon.get()) )
-            return YY::VNLangParser::make_DESIGNATED_TYPE(info, loc);
+            return YY::VNLangParser::make_DESIGNATED_TYPE(metadata, loc);
         else 
 			ASSERTFAIL();
 	}
     else if( ascii )
-         return YY::VNLangParser::make_ASCII_NAME(info, loc);
+         return YY::VNLangParser::make_ASCII_NAME(metadata, loc);
     else
-         return YY::VNLangParser::make_UNICODE_NAME(info, loc);
+         return YY::VNLangParser::make_UNICODE_NAME(metadata, loc);
 }
 
 
@@ -187,7 +189,7 @@ TreePtr<Node> VNLangRecogniser::TryGetArchetype( list<string> typ ) const
 
 void VNLangRecogniser::PurgeExpiredGnomons()
 {
-	auto expired = [&](weak_ptr<const ScopeBlockGnomon> wpg)
+	auto expired = [&](weak_ptr<const ResolverGnomon> wpg)
 	{
 		return wpg.expired();
 	};

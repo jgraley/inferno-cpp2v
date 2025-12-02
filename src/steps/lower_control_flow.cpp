@@ -631,8 +631,8 @@ ExtractCallParams::ExtractCallParams()
     auto func = MakePatternNode<Function>();
     auto func_id = MakePatternNode<InstanceIdentifier>();
     
-    auto s_call = MakePatternNode<Call>();
-    auto r_call = MakePatternNode<Call>();
+    auto s_call = MakePatternNode<MapArgsCall>();
+    auto r_call = MakePatternNode<MapArgsCall>();
     auto r_temp_id = MakePatternNode<BuildInstanceIdentifierAgent>("temp_%s");
     auto r_temp = MakePatternNode<Temporary>();
     auto r_ce = MakePatternNode<StatementExpression>();

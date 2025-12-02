@@ -23,12 +23,16 @@ class Render : public RendererInterface
 {
 public:	
     Render( string output_x_path_ = string() );
+    Render( Syntax::Policy default_policy_, string output_x_path_ = string() );
     string RenderToString( shared_ptr<VN::CompareReplace> pattern );
     void WriteToFile(string s);
     
+	static Syntax::Policy GetDefaultPolicy();
+	string RenderIntoProduction( TreePtr<Node> node, 
+	                             Syntax::Production surround_prod ) final;
 	string RenderIntoProduction( TreePtr<Node> node, 
 	                             Syntax::Production surround_prod, 
-	                             Syntax::Policy policy = Syntax::Policy() ) final;
+	                             Syntax::Policy policy ) final;
 	string RenderMaybeInitAssignment( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy );
 	string RenderMaybeBoot( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy );
 	string RenderMaybeSemicolon( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy );
@@ -47,6 +51,7 @@ public:
 							 
 	string RenderMismatchException( string fname, const Mismatch &me );
 
+    const Syntax::Policy default_policy;
     TreePtr<Node> context;
     stack< TreePtr<Node> > scope_stack;
     queue<TreePtr<CPPTree::Instance>> definitions;

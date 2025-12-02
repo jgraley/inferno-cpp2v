@@ -846,7 +846,7 @@ private:
 			auto lu = MakeTreeNode<Lookup>();
 			lu->object = our_inst->identifier;
 			lu->member = memb_o->identifier;                       
-			our_inst->initialiser = CreateCall( args, lu );			
+			our_inst->initialiser = CreateMapArgsCall( args, lu );			
         }
         
         // Clang tends to parse parameters and function bodies in seperate
@@ -1124,10 +1124,10 @@ private:
         return hold_expr.ToRaw( condo );
     }
 
-    TreePtr<Call> CreateCall( Sequence<Expression> &args, TreePtr<Expression> callee )
+    TreePtr<MapArgsCall> CreateMapArgsCall( Sequence<Expression> &args, TreePtr<Expression> callee )
     {
-        // Make the Call node and fill in the called function
-        auto c = MakeTreeNode<Call>();
+        // Make the MapArgsCall node and fill in the called function
+        auto c = MakeTreeNode<MapArgsCall>();
         c->callee = callee;
 
         // If CallableParams, fill in the args map based on the supplied args and original function type
@@ -1146,7 +1146,7 @@ private:
         // Get the args in a Sequence
         Sequence<Expression> args;
         CollectArgs( &args, Args, NumArgs );
-        TreePtr<Call> c = CreateCall( args, hold_expr.FromRaw(Fn) );
+        TreePtr<MapArgsCall> c = CreateMapArgsCall( args, hold_expr.FromRaw(Fn) );
         return hold_expr.ToRaw( c );
     }
 
@@ -1511,7 +1511,7 @@ private:
 		lu->object = our_field->identifier;
 		lu->member = memb_cons_id;
 			
-		TreePtr<Call> call = CreateCall( args, lu );
+		TreePtr<MapArgsCall> call = CreateMapArgsCall( args, lu );
 		return hold_expr.ToRaw( call );
     }
 

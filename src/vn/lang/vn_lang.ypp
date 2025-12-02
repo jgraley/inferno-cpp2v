@@ -24,7 +24,7 @@
   #include <string>
   namespace YY {
     class VNLangScanner;  
-  	struct NameInfo
+  	struct TokenMetadata
 	{
 		TreePtr<Node> as_designated;
 		string as_ascii;
@@ -36,7 +36,7 @@
   namespace VN { 
     class Command;
     class Gnomon;
-    class ScopeBlockGnomon;
+    class ResolverGnomon;
   }
 }
 
@@ -68,7 +68,7 @@
 	'('
 	')'
 	';'
-	SCOPE_RES 								"::"
+	RESOLUTION_OP 							"::"
 	ENGINE	 								"꩜"
 	STUFF		 							"⩨"
 	DELTA 									"▲"
@@ -80,7 +80,7 @@
 	STAR 									"★"
 	ID_BY_NAME								"⊛"
 	SPECIFIC_ID								"🞊"
-	BUILD_ID								"⧇"
+	BUILDER_ID								"⧇"
 	OPEN_CHEVRON							"《"
 	CLOSE_CHEVRON							"》"
 	TRANSFORM								"⤨"
@@ -114,32 +114,35 @@
 	<wstring> 	STRING_LITERAL 				_("string")
 	<string> 	INTEGRAL_LITERAL			_("integer literal")
 	<bool>		BOOL_LITERAL				_("boolean literal")
-	<YY::NameInfo>  ASCII_NAME 				_("ASCII name")
-	<string>  		ASCII_FORMAT 			_("ASCII format string")
-	<YY::NameInfo> 	UNICODE_NAME 			_("Unicode name")
-	<string>  		TYPENAME				_("typename")
-	<YY::NameInfo>	DESIGNATED_NONTYPE		_("designated non-type")
-	<YY::NameInfo>	DESIGNATED_TYPE			_("designated type")
-	<YY::NameInfo>	RESOLVED_NONTYPE		_("resolved non-type node name")
-	<YY::NameInfo>	RESOLVED_TYPE			_("resolved type node name")
-	<YY::NameInfo>	SCOPE_NAME				_("scope name")
-	<YY::NameInfo>	DECLARATION_OF			_("DeclarationOf")
-	<YY::NameInfo>	TYPE_OF					_("TypeOf")
+	<string>	ASCII_FORMAT 				_("ASCII format string")
+	<string>	TYPENAME					_("type name")
+	<YY::TokenMetadata> ASCII_NAME 				_("ASCII name")
+	<YY::TokenMetadata> UNICODE_NAME 			_("Unicode name")
+	<YY::TokenMetadata>	DESIGNATED_NONTYPE		_("designated name")
+	<YY::TokenMetadata>	DESIGNATED_TYPE			_("designated type name")
+	<YY::TokenMetadata>	RESOLVED_NORMAL			_("resolved node name")
+	<YY::TokenMetadata>	RESOLVED_TYPE			_("resolved type node name")
+	<YY::TokenMetadata>	RESOLVING_NAME			_("scope resolving name")
+	<YY::TokenMetadata>	DECLARATION_OF			_("DeclarationOf")
+	<YY::TokenMetadata>	TYPE_OF					_("TypeOf")
+	<YY::TokenMetadata> NORM_TERM_KEYWORD		_("terminal keyword")
 	
-%type <TreePtr<Node>> 				normal norm_unit norm_postfix norm_prefix norm_relational norm_disjunction norm_conjunction  
-%type <TreePtr<Node>> 				norm_assignment norm_equality norm_add_etc norm_logical_or norm_logical_and statements statement
+%type <TreePtr<Node>> 				normal norm_term norm_postfix norm_prefix norm_relational norm_disjunction norm_conjunction  
+%type <TreePtr<Node>> 				norm_assignment norm_equality norm_add_etc norm_logical_or norm_logical_and 
 %type <TreePtr<Node>> 				norm_mul_etc norm_shift norm_bitwise_and norm_bitwise_or norm_bitwise_xor norm_no_comma_op 
 %type <TreePtr<Node>> 				norm_paren norm_comma_op 
-%type <TreePtr<Node>> 				type type_unit type_prefix type_disjunction type_conjunction type_paren
+%type <TreePtr<Node>> 				type type_term type_prefix type_disjunction type_conjunction type_paren
 %type <TreePtr<Node>> 				unified_no_comma_op unified unified_prefix
+%type <TreePtr<Node>> 				bare_statement
 %type <wstring> 					vn_name
-%type <YY::NameInfo> 				resolved_name resolved_type_name resolve
+%type <YY::TokenMetadata> 			resolved_name resolved_type_name resolve
 %type <list<shared_ptr<VN::Command>>>			commands sep_commands
 %type <shared_ptr<VN::Command>>		script_command 
 %type <VN::Limit>					limit
 %type <VN::Itemisation>				itemisation items_bare items_sep
 %type <VN::Item>					item
 %type <shared_ptr<VN::Gnomon>>		part_resolve recogniser_command 
+%type <list<TreePtr<Node>>>			bare_statements
 %%
 
 vnscript 		: commands 								{ vn->OnVNScript($1); }
@@ -161,7 +164,7 @@ script_command	: ENGINE normal   		 		 	{ $$ = make_shared<VN::EngineCommand>($2
 				| normal 			  				{ $$ = make_shared<VN::PatternCommand>($1, @$); }
 
 // or here
-recogniser_command	: vn_name DESIGNATE normal		{ $$ = make_shared<VN::NonTypeDesignationGnomon>($1, $3); }
+recogniser_command	: vn_name DESIGNATE normal			{ $$ = make_shared<VN::NonTypeDesignationGnomon>($1, $3); }
 					| vn_name DESIGNATE type			{ $$ = make_shared<VN::TypeDesignationGnomon>($1, $3); }
 
 
@@ -188,11 +191,12 @@ unified_no_comma_op : norm_no_comma_op					{ $$ = $1; }
 unified		: normal									{ $$ = $1; }
 			| type										{ $$ = $1; }
 
-statements	: statement
+bare_statements	: bare_statement 						{ $$.push_back($1); }
+				| bare_statements ';' bare_statement 	{ $$ = $1; $$.push_back($3); }
 
-statement	: normal
+bare_statement	: normal
           
-type		: type_disjunction          
+type			: type_disjunction          
           
 type_disjunction	: type_conjunction
 					| type_disjunction DISJUNCTION type_conjunction				{ $$ = vn->OnDisjunction($1, $3); }
@@ -207,24 +211,23 @@ type_prefix : 										     type_paren
 			| 								    NEGATION type_prefix { $$ = vn->OnNegation($2); }
 			| PRERESTRICT OPEN_VN resolved_type_name CLOSE_VN unified_prefix { $$ = vn->OnRestrict($3.as_andata_block, @3, $5, @5); }
 
-type_paren  : type_unit
+type_paren  : type_term
 			| '(' type ')'									{ $$ = $2; }	
-			
-                                        
-type_unit	: BUILT_IN resolved_type_name itemisation		{ $$ = vn->OnBuiltIn($2.as_andata_block, @2, $3); }
+			                                        
+type_term	: BUILT_IN resolved_type_name itemisation		{ $$ = vn->OnBuiltIn($2.as_andata_block, @2, $3); }
 			| BUILT_IN resolved_type_name					{ $$ = vn->OnBuiltIn($2.as_andata_block, @2, VN::Itemisation{{}, @2}); }
 			| DESIGNATED_TYPE       				 		{ $$ = $1.as_designated; }		
    			| SPECIFIC_ID OPEN_VN resolved_type_name VN_SEP STRING_LITERAL CLOSE_VN				{ $$ = vn->OnSpecificId($3.as_andata_block, @3, $5, @5); }
 			| SPECIFIC_ID OPEN_VN resolved_type_name VN_SEP CLOSE_VN							{ $$ = vn->OnSpecificId($3.as_andata_block, @3, wstring(), @5); }
 			| ID_BY_NAME OPEN_VN resolved_type_name VN_SEP STRING_LITERAL CLOSE_VN				{ $$ = vn->OnIdByName($3.as_andata_block, @3, $5, @5); } // ASCII_NAME could be format
-			| BUILD_ID OPEN_VN resolved_type_name VN_SEP STRING_LITERAL VN_SEP CLOSE_VN 		{ $$ = vn->OnBuildId($3.as_andata_block, @3, $5, @5, VN::Item{}); }
-			| BUILD_ID OPEN_VN resolved_type_name VN_SEP STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($3.as_andata_block, @3, $5, @5, $7); }
-			| BUILD_ID OPEN_VN resolved_type_name VN_SEP VN_SEP item CLOSE_VN 					{ $$ = vn->OnBuildId($3.as_andata_block, @3, wstring(), @5, $6); }
+			| BUILDER_ID OPEN_VN resolved_type_name VN_SEP STRING_LITERAL VN_SEP CLOSE_VN 		{ $$ = vn->OnBuildId($3.as_andata_block, @3, $5, @5, VN::Item{}); }
+			| BUILDER_ID OPEN_VN resolved_type_name VN_SEP STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($3.as_andata_block, @3, $5, @5, $7); }
+			| BUILDER_ID OPEN_VN resolved_type_name VN_SEP VN_SEP item CLOSE_VN 				{ $$ = vn->OnBuildId($3.as_andata_block, @3, wstring(), @5, $6); }
 
 normal				: norm_comma_op
                       
 norm_comma_op		: norm_no_comma_op
-					| norm_no_comma_op COMMA norm_comma_op						{ $$ = vn->OnInfixOperator($2, $1, $3); }
+					| norm_comma_op COMMA norm_no_comma_op						{ $$ = vn->OnInfixOperator($2, $1, $3); }
 
 norm_no_comma_op 	: norm_disjunction
 
@@ -237,6 +240,7 @@ norm_conjunction 	: norm_assignment
 norm_assignment 	: 											norm_logical_or 
 					| 				   norm_logical_or C_ASSIGN norm_assignment	{ $$ = vn->OnInfixOperator($2, $1, $3); }
 					|         norm_logical_or C_COMPOUND_ASSIGN norm_assignment	{ $$ = vn->OnInfixOperator($2, $1, $3); }
+					|            norm_logical_or '?' normal ':' norm_assignment	{ $$ = vn->OnConditionalOperator($1, $3, $5); }
 
 norm_logical_or 	: norm_logical_and
 					| norm_logical_or C_LOGICAL_OR_OP norm_logical_and			{ $$ = vn->OnInfixOperator($2, $1, $3); }
@@ -270,7 +274,7 @@ norm_mul_etc 		: norm_prefix
 					| norm_mul_etc '*' norm_prefix								{ $$ = vn->OnInfixOperator("*", $1, $3); }
 		
 norm_prefix : 										   norm_postfix
-			| 			   DELTA normal DELTA_ARROW norm_prefix	 { $$ = vn->OnDelta($2, $4); }
+			| 			       DELTA normal DELTA_ARROW norm_prefix	 { $$ = vn->OnDelta($2, $4); }
 			| 					    C_PREFIX_OP 		norm_prefix	 { $$ = vn->OnPrefixOperator($1, $2); }
 			| 					    C_AMPERSAND 		norm_prefix	 { $$ = vn->OnPrefixOperator($1, $2); }
 			| 					    C_STAR		 		norm_prefix	 { $$ = vn->OnPrefixOperator($1, $2); }
@@ -293,14 +297,14 @@ unified_prefix	: norm_prefix
 				| type_prefix
 				| TRANSFORM OPEN_VN DECLARATION_OF CLOSE_VN norm_prefix	 { $$ = vn->OnTransform($3.as_ascii, @3, $5, @5); }
   
-
 norm_postfix: norm_paren     
 			| norm_postfix C_PRE_OR_POSTFIX_OP 				 	{ $$ = vn->OnPostfixOperator($2, $1); }
+			| norm_postfix '[' normal ']'	 				 	{ $$ = vn->OnSubscript($1, $3); }
 		
-norm_paren	: norm_unit
+norm_paren	: norm_term
 			| '(' commands ')'                          		{ $$ = vn->OnEmbeddedCommands($2); }
 
-norm_unit	: BUILT_IN resolved_name itemisation				{ $$ = vn->OnBuiltIn($2.as_andata_block, @2, $3); }
+norm_term	: BUILT_IN resolved_name itemisation				{ $$ = vn->OnBuiltIn($2.as_andata_block, @2, $3); }
 			| BUILT_IN resolved_name							{ $$ = vn->OnBuiltIn($2.as_andata_block, @2, VN::Itemisation{{}, @2}); }
 			| STAR												{ $$ = vn->OnStar(nullptr); }
 			| STAR OPEN_VN normal CLOSE_VN						{ $$ = vn->OnStar($3); }
@@ -308,32 +312,35 @@ norm_unit	: BUILT_IN resolved_name itemisation				{ $$ = vn->OnBuiltIn($2.as_and
 			| STRING_LITERAL					      			{ $$ = vn->OnStringLiteral($1); }
 			| BOOL_LITERAL										{ $$ = vn->OnBoolLiteral($1); }
 			| ANY												{ $$ = nullptr; }
-			| '{' statements '}'                          		{ $$ = $2; }
+			| NORM_TERM_KEYWORD									{ $$ = vn->OnNormalTerminalKeyword($1.as_ascii, @1); }
+			| '{' '}'                          					{ $$ = vn->OnCompound({}); } // TODO will be erroneously invoked on empty array literal
+			| '{' norm_comma_op '}'                  	  		{ $$ = vn->OnArrayLiteral($2); }
+			| '{' bare_statements ';' '}'                  		{ $$ = vn->OnCompound($2); }
 			| DESIGNATED_NONTYPE       				  			{ $$ = $1.as_designated; }
-			| SPECIFIC_ID OPEN_VN resolved_name VN_SEP STRING_LITERAL CLOSE_VN			{ $$ = vn->OnSpecificId($3.as_andata_block, @3, $5, @5); }
-			| SPECIFIC_ID OPEN_VN resolved_name VN_SEP CLOSE_VN							{ $$ = vn->OnSpecificId($3.as_andata_block, @3, wstring(), @5); }
-			| ID_BY_NAME OPEN_VN resolved_name VN_SEP STRING_LITERAL CLOSE_VN			{ $$ = vn->OnIdByName($3.as_andata_block, @3, $5, @5); } // ASCII_NAME could be format
-			| BUILD_ID OPEN_VN resolved_name VN_SEP STRING_LITERAL VN_SEP CLOSE_VN 		{ $$ = vn->OnBuildId($3.as_andata_block, @3, $5, @5, VN::Item{}); }
-			| BUILD_ID OPEN_VN resolved_name VN_SEP STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($3.as_andata_block, @3, $5, @5, $7); }
-			| BUILD_ID OPEN_VN resolved_name VN_SEP VN_SEP item CLOSE_VN 				{ $$ = vn->OnBuildId($3.as_andata_block, @3, wstring(), @5, $6); }
+			| SPECIFIC_ID OPEN_VN resolved_name VN_SEP STRING_LITERAL CLOSE_VN				{ $$ = vn->OnSpecificId($3.as_andata_block, @3, $5, @5); }
+			| SPECIFIC_ID OPEN_VN resolved_name VN_SEP CLOSE_VN								{ $$ = vn->OnSpecificId($3.as_andata_block, @3, wstring(), @5); }
+			| ID_BY_NAME OPEN_VN resolved_name VN_SEP STRING_LITERAL CLOSE_VN				{ $$ = vn->OnIdByName($3.as_andata_block, @3, $5, @5); } // ASCII_NAME could be format
+			| BUILDER_ID OPEN_VN resolved_name VN_SEP STRING_LITERAL VN_SEP CLOSE_VN 		{ $$ = vn->OnBuildId($3.as_andata_block, @3, $5, @5, VN::Item{}); }
+			| BUILDER_ID OPEN_VN resolved_name VN_SEP STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($3.as_andata_block, @3, $5, @5, $7); }
+			| BUILDER_ID OPEN_VN resolved_name VN_SEP VN_SEP item CLOSE_VN 					{ $$ = vn->OnBuildId($3.as_andata_block, @3, wstring(), @5, $6); }
 
 vn_name		: UNICODE_NAME    							{ $$ = $1.as_unicode; }
 			| ASCII_NAME								{ $$ = $1.as_unicode; }     
           
 // On sight of ::, we inform the recognition layer, which returns a shared_ptr which will 
 // expire when the production is complete or an error forces unwind. The naming layer
-// keeps weak_ptrs to these and will send us RESOLVED_NONTYPE if one exists.
-part_resolve	: resolve SCOPE_RES						{ $$ = make_shared<VN::ScopeBlockGnomon>($1.as_andata_block);
+// keeps weak_ptrs to these and will send us RESOLVED_NORMAL if one exists.
+part_resolve	: resolve RESOLUTION_OP					{ $$ = make_shared<VN::ResolverGnomon>($1.as_andata_block);
                                                           recogniser->AddGnomon($$); }
     
-resolve     	: part_resolve SCOPE_NAME				{ $$ = $2; }
-				| SCOPE_NAME							{ $$ = $1; }
+resolve     	: part_resolve RESOLVING_NAME			{ $$ = $2; }
+				| RESOLVING_NAME						{ $$ = $1; }
 				      
 
 // RESOLVED_X is strong i.e. there was definitely a ::. resolved_x is weak and
 // doesn't require this. See comment by part_resolve for why we don't need a value from it.
-resolved_name	: part_resolve RESOLVED_NONTYPE			{ $$ = $2; }
-				| RESOLVED_NONTYPE						{ $$ = $1; }
+resolved_name	: part_resolve RESOLVED_NORMAL			{ $$ = $2; }
+				| RESOLVED_NORMAL						{ $$ = $1; }
 
 resolved_type_name	: part_resolve RESOLVED_TYPE		{ $$ = $2; }
 					| RESOLVED_TYPE						{ $$ = $1; }

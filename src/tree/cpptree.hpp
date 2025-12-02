@@ -826,6 +826,7 @@ struct ConditionalOperator : Operator
 	TreePtr<Expression> expr_else;	
 	
 	Production GetMyProductionTerminal() const override;
+	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) final;
 };
 
 /// Subscripting on objects
@@ -836,6 +837,7 @@ struct Subscript : Operator
 	TreePtr<Expression> index;	
 	
 	Production GetMyProductionTerminal() const override;
+	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) final;
 };
 
 /// An array formed directly from elements which should all be the same type
@@ -844,6 +846,7 @@ struct ArrayLiteral : NonCommutativeOperator
 	NODE_FUNCTIONS_FINAL	
 	
 	Production GetMyProductionTerminal() const override;
+	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) final;
 };
 
 struct This : Operator
@@ -851,6 +854,7 @@ struct This : Operator
 	NODE_FUNCTIONS_FINAL	
 	
 	Production GetMyProductionTerminal() const override;
+	string GetRenderTerminal( Production ) const final;
 };
 
 /// Property indicating whether a New/Delete is global 
@@ -858,7 +862,7 @@ struct This : Operator
  front of it. This differentiates when placement args are given as follows:
  Global: must be one placement arg, it is address to construct at
  NonGlobal: all placement args go to a corresponding operator new which returns address to construct at
- TODO bring these in line with Call etc */
+ TODO bring these in line with MapArgsCall etc */
 struct Globality : Property { NODE_FUNCTIONS };
 
 /// Property indicating ::new/::delete was used
@@ -948,7 +952,7 @@ struct GoSub : virtual Node
  calls have callee -> some InstanceIdentifier for a Callable Instance.
  Arguments passed via IdValueMap - mapped to the parameters in the callee
  type (if it's a CallableParams). */
-struct Call : GoSub, Expression, Uncombable
+struct MapArgsCall : GoSub, Expression, Uncombable
 {
     NODE_FUNCTIONS_FINAL	
 	Collection<IdValuePair> args;

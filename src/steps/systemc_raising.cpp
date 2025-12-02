@@ -68,7 +68,7 @@ RaiseSCHierarchicalClass::RaiseSCHierarchicalClass( TreePtr< SCRecord > lr_sccla
 
 RaiseSCDynamic::RaiseSCDynamic( TreePtr<SCDynamicFunction> r_dynamic )
 {
-    auto s_call = MakePatternNode< Call >();
+    auto s_call = MakePatternNode< MapArgsCall >();
     auto s_arg = MakePatternNode< IdValuePair >();
     auto s_token = MakePatternNode< InstanceIdentifierByNameAgent >( r_dynamic->GetLoweredIdName() ); 
     auto s_param_id = MakePatternNode< InstanceIdentifierByNameAgent >( "p1" ); 
@@ -87,7 +87,7 @@ RaiseSCDynamic::RaiseSCDynamic( TreePtr<SCDynamicFunction> r_dynamic )
 
 RaiseSCStatic::RaiseSCStatic( TreePtr<SCFunction> r_static )
 {
-    auto s_call = MakePatternNode< Call >();
+    auto s_call = MakePatternNode< MapArgsCall >();
     auto s_token = MakePatternNode< InstanceIdentifierByNameAgent >( r_static->GetLoweredIdName() ); 
                       
     s_call->callee = s_token;   
@@ -99,7 +99,7 @@ RaiseSCStatic::RaiseSCStatic( TreePtr<SCFunction> r_static )
 
 RaiseSCDelta::RaiseSCDelta( TreePtr<SCFunction> r_delta )
 {
-    auto s_call = MakePatternNode< Call >();
+    auto s_call = MakePatternNode< MapArgsCall >();
     auto s_arg = MakePatternNode< IdValuePair >();
     auto s_token = MakePatternNode< InstanceIdentifierByNameAgent >( r_delta->GetLoweredIdName() ); 
     auto s_param_id = MakePatternNode< InstanceIdentifierByNameAgent >( "p1" ); 
@@ -120,7 +120,7 @@ RaiseSCDelta::RaiseSCDelta( TreePtr<SCFunction> r_delta )
 RaiseTerminationFunction::RaiseTerminationFunction( TreePtr<TerminationFunction> r_tf )
 {
     auto event = MakePatternNode< Expression >();
-    auto s_call = MakePatternNode< Call >();
+    auto s_call = MakePatternNode< MapArgsCall >();
     auto s_arg = MakePatternNode< IdValuePair >();
     auto s_token = MakePatternNode< InstanceIdentifierByNameAgent >( r_tf->GetLoweredIdName() ); 
     auto s_param_id = MakePatternNode< InstanceIdentifierByNameAgent >( "exit_code" ); 
@@ -149,7 +149,7 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     auto ls_comp = MakePatternNode< Compound >();
     auto lr_comp = MakePatternNode< Compound >();
     auto l_module = MakePatternNode< Module >();
-    auto ls_pcall = MakePatternNode< Call >();
+    auto ls_pcall = MakePatternNode< MapArgsCall >();
     auto ls_arg = MakePatternNode< IdValuePair >();
     auto l_overcons = MakePatternNode<DeltaAgent, Instance>();
     auto l_overtype = MakePatternNode<DeltaAgent, Type>();
@@ -207,7 +207,7 @@ RaiseSCDeltaCount::RaiseSCDeltaCount()
 {
     auto r_delta_count = MakePatternNode<DeltaCount>();
 
-    auto s_call = MakePatternNode<Call>();
+    auto s_call = MakePatternNode<MapArgsCall>();
     auto s_token = MakePatternNode< InstanceIdentifierByNameAgent >( r_delta_count->GetLoweredIdName() );                
                 
     s_call->callee = s_token;
@@ -219,7 +219,7 @@ RaiseSCDeltaCount::RaiseSCDeltaCount()
 
 RaiseSCNotifyImmediate::RaiseSCNotifyImmediate()
 {
-    auto s_call = MakePatternNode<Call>();
+    auto s_call = MakePatternNode<MapArgsCall>();
     auto s_lookup = MakePatternNode<Lookup>();
     auto s_event = MakePatternNode<Event>();
     auto r_notify = MakePatternNode<NotifyImmediate>();
@@ -241,7 +241,7 @@ RaiseSCNotifyImmediate::RaiseSCNotifyImmediate()
 
 RaiseSCNotifyDelta::RaiseSCNotifyDelta()
 {
-    auto s_call = MakePatternNode<Call>();
+    auto s_call = MakePatternNode<MapArgsCall>();
     auto s_lookup = MakePatternNode<Lookup>();
     auto s_event = MakePatternNode<Event>();
     auto r_notify = MakePatternNode<NotifyDelta>();
@@ -285,11 +285,11 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     auto lr_comp = MakePatternNode< Compound >();
     auto s_module = MakePatternNode< Module >();
     auto r_module = MakePatternNode< Module >();
-    auto l1s_call = MakePatternNode< Call >();
+    auto l1s_call = MakePatternNode< MapArgsCall >();
     auto l1s_lookup = MakePatternNode< Lookup >();
     auto l_instance = MakePatternNode<Instance>();  
     auto l_delta = MakePatternNode<DeltaAgent, Initialiser>();  
-    auto l2s_call = MakePatternNode<Call>();
+    auto l2s_call = MakePatternNode<MapArgsCall>();
     auto l2s_lookup = MakePatternNode<Lookup>();
 	auto l2s_args = MakePatternNode<StarAgent, IdValuePair>();
 

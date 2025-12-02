@@ -13,6 +13,7 @@ public:
     string RenderToString( TreePtr<Node> root );
 	
 private:	
+	static Syntax::Policy GetDefaultPolicy();
 	Syntax::Production GetNodeProduction( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy ) const final;
 	
 	string Dispatch( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy ) override;
@@ -33,7 +34,7 @@ private:
     string Sanitise( string s );
     string RenderOperator( TreePtr<CPPTree::Operator> op, Syntax::Production surround_prod );
     string RenderMapArgs( TreePtr<CPPTree::Type> dest_type, Collection<CPPTree::IdValuePair> &args );
-    string RenderCall( TreePtr<CPPTree::Call> call, Syntax::Production surround_prod );
+    string RenderMapArgsCallAsSeqArg( TreePtr<CPPTree::MapArgsCall> call, Syntax::Production surround_prod );
     string RenderExprSeq( Sequence<CPPTree::Expression> seq );
     string RenderExteriorCall( TreePtr<CPPTree::SeqArgsCall> call, Syntax::Production surround_prod );
     string RenderMacroStatement( TreePtr<CPPTree::MacroStatement> ms, Syntax::Production surround_prod );
@@ -54,7 +55,7 @@ private:
 	string RenderMacroDeclaration( TreePtr<CPPTree::MacroDeclaration> md, Syntax::Production surround_prod );
     string RenderRecordProto( TreePtr<CPPTree::Record> record, Syntax::Policy policy );
 	string RenderPreProcDecl( TreePtr<CPPTree::PreProcDecl> ppd, Syntax::Production surround_prod );
-	string RenderRecordCompletion( TreePtr<CPPTree::Record> record );
+	string RenderRecordBody( TreePtr<CPPTree::Record> record );
     string RenderDeclaration( TreePtr<CPPTree::Declaration> declaration, Syntax::Production surround_prod, Syntax::Policy policy );
     string RenderStatement( TreePtr<CPPTree::Statement> statement, Syntax::Production surround_prod, Syntax::Policy policy );
  	string RenderConstructorInitList( Sequence<CPPTree::Statement> spe );

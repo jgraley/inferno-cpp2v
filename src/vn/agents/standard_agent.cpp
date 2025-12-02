@@ -967,7 +967,7 @@ Syntax::Production StandardAgent::GetAgentProduction() const
 	if( dynamic_cast<const CPPTree::SpecificIdentifier *>(node.get()) )
 		return Syntax::Production::PRIMITIVE_EXPR;
 	else
-		throw NotOnThisNode();
+		throw Unimplemented();
 }		
 
 
@@ -997,7 +997,7 @@ string StandardAgent::GetAgentRender( VN::RendererInterface *, Syntax::Productio
 	{
 		// Refusing to proceed on any other node type, forcing the renderer to consider
 		// rendering it using GetRender() etc
-		throw NotOnThisNode();
+		throw Unimplemented();
 	}
 }
 

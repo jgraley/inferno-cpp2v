@@ -42,7 +42,7 @@ using namespace CPPTree;
 
 
 CppRender::CppRender( string of ) :
-	Render( of )
+	Render( GetDefaultPolicy(), of ) // default policy when rendering to pure C++
 {
 }
 
@@ -69,6 +69,13 @@ string CppRender::RenderToString( TreePtr<Node> root )
 }
 
 
+Syntax::Policy CppRender::GetDefaultPolicy()
+{
+	Syntax::Policy policy;
+	return policy;
+}
+
+
 Syntax::Production CppRender::GetNodeProduction( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy ) const
 {
 	(void)surround_prod;
@@ -80,7 +87,7 @@ string CppRender::Dispatch( TreePtr<Node> node, Syntax::Production surround_prod
 { 		
 	return node->GetRender( this, surround_prod, policy );		
 }
-catch( Syntax::NotOnThisNode & ) 
+catch( Syntax::Refusal & ) 
 {	
 	return DispatchInternal( node, surround_prod, policy );
 }
@@ -104,8 +111,8 @@ string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surro
         return RenderType( type, surround_prod, policy );
     else if( auto literal = DynamicTreePtrCast< Literal >(node) )
         return RenderLiteral( literal, surround_prod );
-    else if( auto call = TreePtr<Call>::DynamicCast(node) )
-        return RenderCall( call, surround_prod );
+    else if( auto call = TreePtr<MapArgsCall>::DynamicCast(node) )
+        return RenderMapArgsCallAsSeqArg( call, surround_prod );
     else if( auto make_rec = TreePtr<RecordLiteral>::DynamicCast(node) )
         return RenderMakeRecord( make_rec, surround_prod );
     else if( auto ext_call = TreePtr<SeqArgsCall>::DynamicCast(node) )
@@ -172,7 +179,7 @@ DEFAULT_CATCH_CLAUSE
 string CppRender::RenderLiteral( TreePtr<Literal> sp, Syntax::Production surround_prod ) try
 {
 	(void)surround_prod;
-    return Sanitise( sp->GetRender(this, surround_prod) );
+    return Sanitise( sp->GetRender(this, surround_prod, default_policy) );
 }
 DEFAULT_CATCH_CLAUSE
 
@@ -191,7 +198,7 @@ string CppRender::RenderScopeResolvingPrefix( TreePtr<Node> node ) try
     else if( auto e = DynamicTreePtrCast<Enum>( scope ) ) // <- for enum
         return RenderScopeResolvingPrefix( e->identifier );    // omit scope for the enum itself
     else if( auto r = DynamicTreePtrCast<Record>( scope ) ) // <- for class, struct, union
-        return r->identifier->GetRender(this, Syntax::Production::SCOPE_RESOLVE) + "::";
+        return r->identifier->GetRender(this, Syntax::Production::RESOLVER, default_policy) + "::";
     else if( DynamicTreePtrCast<CallableParams>( scope ) ||  // <- this is for params
              DynamicTreePtrCast<Compound>( scope ) ||    // <- this is for locals in body
              DynamicTreePtrCast<StatementExpression>( scope ) )    // <- this is for locals in body
@@ -424,26 +431,6 @@ string CppRender::RenderOperator( TreePtr<Operator> op, Syntax::Production surro
     else if( auto lu = DynamicTreePtrCast< Lookup >(op) )
         return RenderIntoProduction( lu->object, Syntax::Production::POSTFIX ) + "." +
                RenderIntoProduction( lu->member, Syntax::BoostPrecedence(Syntax::Production::POSTFIX) );
-    else if( auto condo = DynamicTreePtrCast< ConditionalOperator >(op) )
-    {
-        return RenderIntoProduction( condo->condition, Syntax::BoostPrecedence(Syntax::Production::ASSIGN) ) + 
-               " ? " +
-               // Middle expression boots parser - so you can't split it up using (), [] etc
-               RenderIntoProduction( condo->expr_then, Syntax::Production::BOOT_EXPR ) + 
-               " : " +
-               RenderIntoProduction( condo->expr_else, Syntax::Production::ASSIGN );          
-    }
-    else if( auto subs = DynamicTreePtrCast< Subscript >(op) )
-    {
-        return RenderIntoProduction( subs->destination, Syntax::Production::POSTFIX ) + 
-               "[" +
-			   RenderIntoProduction( subs->index, Syntax::Production::BOOT_EXPR ) + 
-			   "]";
-    }
-    else if( auto al = DynamicTreePtrCast< ArrayLiteral >(op) )    
-        return RenderOperandSequence( al->operands );
-    else if( DynamicTreePtrCast< This >(op) )
-        return "this";
     else if( auto nco = DynamicTreePtrCast< NonCommutativeOperator >(op) )
         operands = nco->operands;           
     else if( auto co = DynamicTreePtrCast< CommutativeOperator >(op) )
@@ -538,7 +525,7 @@ string CppRender::RenderMapArgs( TreePtr<Type> dest_type, Collection<IdValuePair
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderCall( TreePtr<Call> call, Syntax::Production surround_prod ) try
+string CppRender::RenderMapArgsCallAsSeqArg( TreePtr<MapArgsCall> call, Syntax::Production surround_prod ) try
 {
 	(void)surround_prod;
     string s;
@@ -550,6 +537,7 @@ string CppRender::RenderCall( TreePtr<Call> call, Syntax::Production surround_pr
     else
         s += RenderIntoProduction( call->callee, Syntax::Production::POSTFIX );
 
+	// A map-args call isn't C++, so lower it to sequential args - requires the function type
     s += RenderMapArgs(TypeOf::instance.Get(trans_kit, call->callee).GetTreePtr(), call->args);
     return s;
 }
@@ -794,7 +782,7 @@ string CppRender::RenderInstanceProto( TreePtr<Instance> o ) try
     }
     else
     {
-        starting_declarator_prod = Syntax::Production::SCOPE_RESOLVE;
+        starting_declarator_prod = Syntax::Production::RESOLVER;
         name += RenderIntoProduction( o->identifier, starting_declarator_prod);
     }
 
@@ -820,7 +808,7 @@ string CppRender::RenderInitialisation( TreePtr<Initialiser> init ) try
                     if( id->GetIdentifierName().empty() ) // syscall to a nameless member function => sys construct
                         return RenderExprSeq(call->arguments);
         }
-        if( auto call = DynamicTreePtrCast<Call>( ei ) ) try
+        if( auto call = DynamicTreePtrCast<MapArgsCall>( ei ) ) try
         {       
             if( TypeOf::instance.TryGetConstructedExpression( trans_kit, call ).GetTreePtr() )        
                 return RenderMapArgs(TypeOf::instance.Get(trans_kit, call->callee).GetTreePtr(), call->args);
@@ -979,14 +967,14 @@ string CppRender::RenderPreProcDecl( TreePtr<PreProcDecl> ppd, Syntax::Productio
     if( auto si = TreePtr<SystemInclude>::DynamicCast(ppd) )
         return "#include <" + si->filename->GetString() + ">";
     else if( auto si = TreePtr<LocalInclude>::DynamicCast(ppd) )
-        return "#include " + si->filename->GetRender(this, Syntax::Production::SPACE_SEP_PRE_PROC);
+        return "#include " + si->filename->GetRender(this, Syntax::Production::SPACE_SEP_PRE_PROC, default_policy);
     else
         return ERROR_UNSUPPORTED(ppd);     
 }
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderRecordCompletion( TreePtr<Record> record ) 
+string CppRender::RenderRecordBody( TreePtr<Record> record ) 
 {
 	string s;
 	
@@ -1004,8 +992,8 @@ string CppRender::RenderRecordCompletion( TreePtr<Record> record )
 				first=false;
 				auto b = TreePtr<Base>::DynamicCast(bn);
 				ASSERT( b );
-				s += RenderIntoProduction( b->access, Syntax::Production::TOKEN ) + " ";
-				s += RenderIntoProduction( b->record, Syntax::Production::SCOPE_RESOLVE);
+				s += RenderIntoProduction( b->access, Syntax::Production::TERMINAL ) + " ";
+				s += RenderIntoProduction( b->record, Syntax::Production::RESOLVER);
 			}
 		}
 	}
@@ -1043,7 +1031,7 @@ string CppRender::RenderDeclaration( TreePtr<Declaration> declaration, Syntax::P
         s = RenderRecordProto( record, policy );        
         if( !policy.force_incomplete_records )
         {
-			s += RenderRecordCompletion( record );
+			s += RenderRecordBody( record );
 			s = '\n' + s + '\n';
 		}
     }
@@ -1198,7 +1186,7 @@ string CppRender::RenderOperandSequence( Sequence<Expression> spe ) try
 	list<string> renders;    
     for( TreePtr<Expression> pe : spe )
 		renders.push_back( RenderIntoProduction( pe, Syntax::Production::COMMA_SEP ) );
-    return Join(renders, ", ", "{", "}"); // Use of {} in expressions is irregular so handle locally 
+    return Join(renders, ", ", "{", "}"); // TODO now only used in operaotr new, where the {} looks wrong
 }
 DEFAULT_CATCH_CLAUSE
 

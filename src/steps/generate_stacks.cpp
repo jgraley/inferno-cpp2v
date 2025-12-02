@@ -121,7 +121,7 @@ ReturnViaTemp::ReturnViaTemp()
     auto func_id = MakePatternNode<InstanceIdentifier>();
     auto module_id = MakePatternNode<TypeIdentifier>();
     auto params = MakePatternNode<StarAgent, Parameter>();
-    auto m_call = MakePatternNode<Call>();
+    auto m_call = MakePatternNode<MapArgsCall>();
     auto m_any = MakePatternNode<DisjunctionAgent, Expression>();
     auto m_lookup = MakePatternNode<Lookup>();
     auto m_operands = MakePatternNode<StarAgent, IdValuePair>();
@@ -133,7 +133,7 @@ ReturnViaTemp::ReturnViaTemp()
     auto lr_return = MakePatternNode<Return>();
     auto l_return_value = MakePatternNode<Expression>();
     auto mr_comp = MakePatternNode<StatementExpression>();
-    auto ms_gg = MakePatternNode<GreenGrassAgent, Call>();
+    auto ms_gg = MakePatternNode<GreenGrassAgent, MapArgsCall>();
     auto overcp = MakePatternNode<DeltaAgent, Type>();
     auto overi = MakePatternNode<DeltaAgent, Initialiser>();
     
@@ -199,8 +199,8 @@ AddLinkAddress::AddLinkAddress()
     auto l_stmts = MakePatternNode<StarAgent, Statement>();
     auto msx_stmts = MakePatternNode<StarAgent, Statement>();
     auto msx_assign = MakePatternNode<Assign>();
-    auto ms_call = MakePatternNode<Call>();
-    auto mr_call = MakePatternNode<Call>();
+    auto ms_call = MakePatternNode<MapArgsCall>();
+    auto mr_call = MakePatternNode<MapArgsCall>();
     auto mr_comp = MakePatternNode<Compound>();
     auto msx_comp = MakePatternNode<Compound>();
     auto mr_label = MakePatternNode<Label>();
@@ -304,8 +304,8 @@ ParamsViaTemps::ParamsViaTemps()
     auto module_id = MakePatternNode<TypeIdentifier>();
     auto s_param = MakePatternNode<Parameter>();
     auto params = MakePatternNode<StarAgent, Parameter>();
-    auto ms_call = MakePatternNode<Call>();
-    auto mr_call = MakePatternNode<Call>();
+    auto ms_call = MakePatternNode<MapArgsCall>();
+    auto mr_call = MakePatternNode<MapArgsCall>();
     auto ms_operand = MakePatternNode<IdValuePair>();
     auto m_operands = MakePatternNode<StarAgent, IdValuePair>();
     auto r_param = MakePatternNode<Automatic>();
@@ -524,8 +524,8 @@ MergeFunctions::MergeFunctions()
     auto thread_over = MakePatternNode<DeltaAgent, Compound>();
     auto s_thread_comp = MakePatternNode<Compound>();
     auto r_thread_comp = MakePatternNode<Compound>();
-    auto s_call = MakePatternNode<Call>();
-    auto ls_call = MakePatternNode<Call>();
+    auto s_call = MakePatternNode<MapArgsCall>();
+    auto ls_call = MakePatternNode<MapArgsCall>();
     auto func_id = MakePatternNode<InstanceIdentifier>();
     auto r_label = MakePatternNode<Label>();
     auto r_label_id = MakePatternNode< BuildLabelIdentifierAgent >("ENTER_%s");

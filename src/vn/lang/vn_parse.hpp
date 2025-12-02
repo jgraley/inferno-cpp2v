@@ -71,6 +71,11 @@ public:
 	TreePtr<Node> OnStringLiteral( wstring value );
 	TreePtr<Node> OnBoolLiteral( bool value );
 	TreePtr<Node> OnCast( TreePtr<Node> type, any type_loc, TreePtr<Node> target, any target_loc );	
+	TreePtr<Node> OnConditionalOperator( TreePtr<Node> condition, TreePtr<Node> expr_then, TreePtr<Node> expr_else );	
+	TreePtr<Node> OnSubscript( TreePtr<Node> destination, TreePtr<Node> index );	
+	TreePtr<Node> OnCompound( list<TreePtr<Node>> statements );	
+	TreePtr<Node> OnArrayLiteral( TreePtr<Node> root_of_comma_expression );	
+	TreePtr<Node> OnNormalTerminalKeyword( string keyword, any keyword_loc );
 	
 	TreePtr<Node> OnSpecificId( const AvailableNodeData::Block *block, any id_disc_loc, wstring wname, any name_loc );
 	TreePtr<Node> OnIdByName( const AvailableNodeData::Block *block, any id_disc_loc, wstring wname, any name_loc );

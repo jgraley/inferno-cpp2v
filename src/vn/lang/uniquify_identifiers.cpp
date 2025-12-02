@@ -371,7 +371,7 @@ UniquifyNames::NodeToNameMap UniquifyNames::UniquifyAll( const TransKit &kit, Tr
 			ASSERT( !name.empty() );
 			nodes_to_names.insert( NodeAndNamePair( node, name ) );		 
 		}
-		catch( Syntax::NotOnThisNode & )
+		catch( Syntax::Refusal & )
 		{
 			// Whether or not we get an exception will depend on the name_getter
 			// function that was supplied to the constructor. If we do throw, there

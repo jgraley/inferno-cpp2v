@@ -57,7 +57,7 @@ comp_assign				\|=|^=|&=|<<=|>>=|\+=|-=|\*=|\/=|%=
 ☆				{ return YY::VNLangParser::make_ANY(location()); };
 ★				{ return YY::VNLangParser::make_STAR(location()); };
 ⊛				{ return YY::VNLangParser::make_ID_BY_NAME(location()); };
-⧇				{ return YY::VNLangParser::make_BUILD_ID(location()); };
+⧇				{ return YY::VNLangParser::make_BUILDER_ID(location()); };
 《				{ return YY::VNLangParser::make_OPEN_CHEVRON(location()); };
 》				{ return YY::VNLangParser::make_CLOSE_CHEVRON(location()); };
 ⤨				{ return YY::VNLangParser::make_TRANSFORM(location()); };
@@ -95,9 +95,9 @@ true			{ return YY::VNLangParser::make_BOOL_LITERAL(true, location()); };
 false			{ return YY::VNLangParser::make_BOOL_LITERAL(false, location()); };
 typename		{ return YY::VNLangParser::make_TYPENAME(str(), location()); };
 
-::				{ return YY::VNLangParser::make_SCOPE_RES(location()); };
+::				{ return YY::VNLangParser::make_RESOLUTION_OP(location()); };
 
-[()\{\};,]		{ return YY::VNLangParser::symbol_type(chr(), location()); }
+[()\{\};,?:\[\]]	{ return YY::VNLangParser::symbol_type(chr(), location()); }
 
 \"[^"]*\"   	{ return YY::VNLangParser::make_STRING_LITERAL(wstr(), location()); }
 {integral_num}	{ return YY::VNLangParser::make_INTEGRAL_LITERAL(str(), location()); }

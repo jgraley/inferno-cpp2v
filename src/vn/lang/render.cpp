@@ -22,6 +22,14 @@ using namespace VN;
 
 
 Render::Render( string output_x_path_ ) :
+	default_policy( GetDefaultPolicy() ),
+    output_x_path( output_x_path_ )
+{
+}
+
+
+Render::Render( Syntax::Policy default_policy_, string output_x_path_ ) :
+	default_policy( default_policy_ ),
     output_x_path( output_x_path_ )
 {
 }
@@ -80,6 +88,22 @@ void Render::WriteToFile( string s )
         fputs( s.c_str(), fp );
         fclose( fp );
     }        
+}
+
+
+Syntax::Policy Render::GetDefaultPolicy()
+{
+	Syntax::Policy policy;
+	// our render allows eg (type1 ∧ type2) for grouping (aka parser booting) but
+	// this conflicts with c-style cast syntax.
+	policy.refuse_c_style_cast = true; 
+	return policy;
+}
+
+
+string Render::RenderIntoProduction( TreePtr<Node> node, Syntax::Production surround_prod )
+{
+	return RenderIntoProduction( node, surround_prod, default_policy );
 }
 
 
@@ -250,14 +274,13 @@ string Render::Dispatch( TreePtr<Node> node, Syntax::Production surround_prod, S
 		if( const Agent *agent = Agent::TryAsAgentConst(node) )
 			return agent->GetAgentRender( this, surround_prod );
 	}
-	catch( Syntax::NotOnThisNode & ) {}
+	catch( Syntax::Refusal & ) {}
 	
 	try 
 	{ 
-		if( !dynamic_cast<CPPTree::Cast *>(node.get()) ) // C-style cast syntax causes ambiguity with () for precedecne in types
-			return node->GetRender(this, surround_prod, policy); 
+		return node->GetRender(this, surround_prod, policy); 
 	}
-	catch( Syntax::NotOnThisNode & ) {}
+	catch( Syntax::Refusal & ) {}
 
 	return RenderNodeExplicit(node, surround_prod);
 }		
@@ -334,7 +357,7 @@ Syntax::Production Render::GetNodeProduction( TreePtr<Node> node, Syntax::Produc
 		if( const Agent *agent = Agent::TryAsAgentConst(node) )
 			return agent->GetAgentProduction();
 	}
-	catch( Syntax::NotOnThisNode & ) {}
+	catch( Syntax::Refusal & ) {}
 		
 	try 
 	{ 
@@ -343,6 +366,8 @@ Syntax::Production Render::GetNodeProduction( TreePtr<Node> node, Syntax::Produc
 		// Passing in the real renderer would cause unwanted side-effects.
 		struct FakeRenderer : RendererInterface
 		{
+			string RenderIntoProduction( TreePtr<Node>, 
+										 Syntax::Production ) final { return "fake"; } 
 			string RenderIntoProduction( TreePtr<Node>, 
 										 Syntax::Production, 
 										 Syntax::Policy ) final { return "fake"; } 
@@ -353,7 +378,7 @@ Syntax::Production Render::GetNodeProduction( TreePtr<Node> node, Syntax::Produc
 		
 		return node->GetMyProduction(this, policy); 
 	}
-	catch( Syntax::NotOnThisNode & ) {}
+	catch( Syntax::Refusal & ) {}
 
 	return Syntax::Production::EXPLICIT_NODE;     
 }

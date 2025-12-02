@@ -41,10 +41,10 @@ public:
 };
 
 
-class ScopeBlockGnomon : public Gnomon
+class ResolverGnomon : public Gnomon
 {
 public:	
-	ScopeBlockGnomon( const AvailableNodeData::Block *andata_block ) : 
+	ResolverGnomon( const AvailableNodeData::Block *andata_block ) : 
 		scope_block(dynamic_cast<const AvailableNodeData::ScopeBlock *>(andata_block))
 	{
 		ASSERT( scope_block );
@@ -118,7 +118,7 @@ private:
 	// Store with shared_ptr => these will stick around until we ditch them
 	map<wstring, shared_ptr<const DesignationGnomon>> designation_gnomons;
 	// store with weak_ptr => these will expire when the parser exists the production
-	list<weak_ptr<const ScopeBlockGnomon>> scope_block_gnomons;
+	list<weak_ptr<const ResolverGnomon>> scope_block_gnomons;
 };
 	
 };

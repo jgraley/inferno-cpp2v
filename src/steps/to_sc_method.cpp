@@ -32,7 +32,7 @@ AutosToModule::AutosToModule()
     auto s_all = MakePatternNode<ConjunctionAgent, Compound>();
     auto sx_not = MakePatternNode<NegationAgent, Compound>();
     auto sx_stuff = MakePatternNode<StuffAgent, Compound>();
-    auto sx_call = MakePatternNode<Call>();
+    auto sx_call = MakePatternNode<MapArgsCall>();
         
     s_rec->members = (decls, fn);
     r_rec->members = (decls, fn, r_var);
