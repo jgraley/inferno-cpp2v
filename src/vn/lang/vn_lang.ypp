@@ -141,8 +141,9 @@
 %type <VN::Limit>					limit
 %type <VN::Itemisation>				itemisation items_bare items_sep
 %type <VN::Item>					item
-%type <shared_ptr<VN::Gnomon>>		part_resolve recogniser_command 
+%type <shared_ptr<VN::Gnomon>>		part_resolve recogniser_command builtin_symbol
 %type <list<TreePtr<Node>>>			bare_statements
+%type <const AvailableNodeData::Block *> builtin_part type_builtin_part
 %%
 
 vnscript 		: commands 								{ vn->OnVNScript($1); }
@@ -214,7 +215,7 @@ type_prefix : 										     type_paren
 type_paren  : type_term
 			| '(' type ')'									{ $$ = $2; }	
 			                                        
-type_term	: BUILT_IN resolved_type_name itemisation		{ $$ = vn->OnBuiltIn($2.as_andata_block, @2, $3); }
+type_term	: type_builtin_part itemisation					{ $$ = vn->OnBuiltIn($1, @1, $2); }
 			| DESIGNATED_TYPE       				 		{ $$ = $1.as_designated; }		
    			| SPECIFIC_ID OPEN_VN resolved_type_name VN_SEP STRING_LITERAL CLOSE_VN				{ $$ = vn->OnSpecificId($3.as_andata_block, @3, $5, @5); }
 			| SPECIFIC_ID OPEN_VN resolved_type_name VN_SEP CLOSE_VN							{ $$ = vn->OnSpecificId($3.as_andata_block, @3, wstring(), @5); }
@@ -222,6 +223,8 @@ type_term	: BUILT_IN resolved_type_name itemisation		{ $$ = vn->OnBuiltIn($2.as_
 			| BUILDER_ID OPEN_VN resolved_type_name VN_SEP STRING_LITERAL VN_SEP CLOSE_VN 		{ $$ = vn->OnBuildId($3.as_andata_block, @3, $5, @5, VN::Item{}); }
 			| BUILDER_ID OPEN_VN resolved_type_name VN_SEP STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($3.as_andata_block, @3, $5, @5, $7); }
 			| BUILDER_ID OPEN_VN resolved_type_name VN_SEP VN_SEP item CLOSE_VN 				{ $$ = vn->OnBuildId($3.as_andata_block, @3, wstring(), @5, $6); }
+
+type_builtin_part : builtin_symbol resolved_type_name				{ $$ = $2.as_andata_block; (void)$1; }
 
 normal				: norm_comma_op
                       
@@ -303,7 +306,7 @@ norm_postfix: norm_paren
 norm_paren	: norm_term
 			| '(' commands ')'                          		{ $$ = vn->OnEmbeddedCommands($2); }
 
-norm_term	: BUILT_IN resolved_name itemisation				{ $$ = vn->OnBuiltIn($2.as_andata_block, @2, $3); }
+norm_term	: builtin_part itemisation							{ $$ = vn->OnBuiltIn($1, @1, $2); }
 			| STAR												{ $$ = vn->OnStar(nullptr); }
 			| STAR OPEN_VN normal CLOSE_VN						{ $$ = vn->OnStar($3); }
 			| INTEGRAL_LITERAL					      			{ $$ = vn->OnIntegralLiteral($1, @1); }
@@ -321,6 +324,8 @@ norm_term	: BUILT_IN resolved_name itemisation				{ $$ = vn->OnBuiltIn($2.as_and
 			| BUILDER_ID OPEN_VN resolved_name VN_SEP STRING_LITERAL VN_SEP CLOSE_VN 		{ $$ = vn->OnBuildId($3.as_andata_block, @3, $5, @5, VN::Item{}); }
 			| BUILDER_ID OPEN_VN resolved_name VN_SEP STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($3.as_andata_block, @3, $5, @5, $7); }
 			| BUILDER_ID OPEN_VN resolved_name VN_SEP VN_SEP item CLOSE_VN 					{ $$ = vn->OnBuildId($3.as_andata_block, @3, wstring(), @5, $6); }
+
+builtin_part : builtin_symbol resolved_name				{ $$ = $2.as_andata_block; (void)$1; }
 
 vn_name		: UNICODE_NAME    							{ $$ = $1.as_unicode; }
 			| ASCII_NAME								{ $$ = $1.as_unicode; }     
@@ -343,5 +348,7 @@ part_resolve	: resolving_name RESOLUTION_OP			{ $$ = make_shared<VN::ResolverGno
 resolving_name 	: part_resolve RESOLVING_NAME			{ $$ = $2; }
 				| RESOLVING_NAME						{ $$ = $1; }				      
 
+builtin_symbol	: BUILT_IN 				{ $$ = make_shared<VN::NodeNameScopeGnomon>(); 
+										  recogniser->AddGnomon($$); }
 
 %%

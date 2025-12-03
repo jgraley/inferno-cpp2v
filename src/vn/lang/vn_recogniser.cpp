@@ -80,11 +80,16 @@ static TreePtr<Node> MakeStandardAgent(NodeEnum ne)
 void VNLangRecogniser::AddGnomon( shared_ptr<Gnomon> gnomon )
 {
 	PurgeExpiredGnomons();
+	ASSERT( gnomon );
 	
-	if( auto scope_block_gnomon = dynamic_pointer_cast<const ResolverGnomon>(gnomon) )
-		scope_block_gnomons.push_front( scope_block_gnomon ); // front is top
+	if( auto node_name_scope_gnomon = dynamic_pointer_cast<const NodeNameScopeGnomon>(gnomon) )
+		scope_gnomons.push_front( node_name_scope_gnomon ); // front is top
+	else if( auto resolver_gnomon = dynamic_pointer_cast<const ResolverGnomon>(gnomon) )
+		resolver_gnomons.push_front( resolver_gnomon ); // front is top
 	else if( auto designation_gnomon = dynamic_pointer_cast<const DesignationGnomon>(gnomon) )
 		designation_gnomons.insert( make_pair( designation_gnomon->name, designation_gnomon ) );
+	else 
+		ASSERT(false)("Recogniser doesn't know about gnomon: ")(*gnomon);
 }
 
 
@@ -127,7 +132,7 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessToken(wstring text, bool 
 		
 	// Determine the current scope from our weak gnomons
 	const AvailableNodeData::ScopeBlock *current_scope_block = AvailableNodeData().GetRootBlock();
-	for( weak_ptr<const ResolverGnomon> wpg : scope_block_gnomons )
+	for( weak_ptr<const ResolverGnomon> wpg : resolver_gnomons )
 	{
 		if( auto spg = wpg.lock() )
 		{
@@ -189,10 +194,11 @@ TreePtr<Node> VNLangRecogniser::TryGetArchetype( list<string> typ ) const
 
 void VNLangRecogniser::PurgeExpiredGnomons()
 {
-	auto expired = [&](weak_ptr<const ResolverGnomon> wpg)
+	auto expired = [&](weak_ptr<const Gnomon> wpg)
 	{
 		return wpg.expired();
 	};
-	scope_block_gnomons.remove_if(expired);
+	resolver_gnomons.remove_if(expired);
+	scope_gnomons.remove_if(expired);
 }
 

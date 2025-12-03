@@ -635,6 +635,10 @@ VNLangRecogniser &VNParse::GetShim()
 
 // Implement %printer for semantic values
 
+// itemisation () should parse as zero items, and then be relaxed into one empty item in the action, i.e.
+// the other way around fropm how it is now. That's because, if they are used in "resembles" productions,
+// we won't want empty items - we'll want items to be one of: singular, collection, sequence
+
 // Tix:
 // Lose StandardAgentWrapper #867
 // Add ability to pre-process #862

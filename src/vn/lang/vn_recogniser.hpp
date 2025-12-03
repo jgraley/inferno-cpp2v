@@ -98,7 +98,12 @@ public:
 };
 		
 		
-class NodeNameScopeGnomon : public Gnomon
+class ScopeGnomon : public Gnomon
+{
+};
+
+
+class NodeNameScopeGnomon : public ScopeGnomon
 {
 };
 		
@@ -120,10 +125,14 @@ public:
 private:	
 	void PurgeExpiredGnomons();
 
+	// store with weak_ptr => these will expire when the parser exists the scope
+	list<weak_ptr<const ScopeGnomon>> scope_gnomons;
+
+	// store with weak_ptr => these will expire when the parser exists the resolver production
+	list<weak_ptr<const ResolverGnomon>> resolver_gnomons;
+	
 	// Store with shared_ptr => these will stick around until we ditch them
 	map<wstring, shared_ptr<const DesignationGnomon>> designation_gnomons;
-	// store with weak_ptr => these will expire when the parser exists the production
-	list<weak_ptr<const ResolverGnomon>> scope_block_gnomons;
 };
 	
 };
