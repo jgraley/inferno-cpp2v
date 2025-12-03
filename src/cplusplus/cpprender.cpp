@@ -158,7 +158,7 @@ string CppRender::RenderProgram( TreePtr<CPPTree::Program> program, Syntax::Prod
     {
 		Syntax::Policy definition_policy;
 		definition_policy.force_initialisation = true;
-        s += " " + RenderIntoProduction( definitions.front(), Syntax::Production::DEFINITION, definition_policy ); 
+        s += " " + RenderIntoProduction( definitions.front(), Syntax::Production::DECLARATION, definition_policy ); 
         definitions.pop();
     }
     return s;  

@@ -18,11 +18,9 @@ class Syntax : virtual Traceable
 public:
 	enum class Production // "Syntax::Production" is a generalisation of precedence
 	{		
-		PROGRAM = 0,
+		PROGRAM = 10,
 		PRE_PROC_DIRECTIVE,
 		SPACE_SEP_PRE_PROC,
-
-		DEFINITION = 10,	
 		
 		// ----- Complete self-sufficient statements and declarations. There is a precedence
 		// scheme, booted using {}, to disambiguate if/else.

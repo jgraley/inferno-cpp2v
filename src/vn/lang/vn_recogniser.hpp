@@ -98,6 +98,11 @@ public:
 };
 		
 		
+class NodeNameScopeGnomon : public Gnomon
+{
+};
+		
+		
 class VNLangRecogniser
 {
 public:	

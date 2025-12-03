@@ -116,16 +116,16 @@
 	<bool>		BOOL_LITERAL				_("boolean literal")
 	<string>	ASCII_FORMAT 				_("ASCII format string")
 	<string>	TYPENAME					_("type name")
-	<YY::TokenMetadata> ASCII_NAME 				_("ASCII name")
-	<YY::TokenMetadata> UNICODE_NAME 			_("Unicode name")
-	<YY::TokenMetadata>	DESIGNATED_NONTYPE		_("designated name")
-	<YY::TokenMetadata>	DESIGNATED_TYPE			_("designated type name")
-	<YY::TokenMetadata>	RESOLVED_NORMAL			_("resolved node name")
-	<YY::TokenMetadata>	RESOLVED_TYPE			_("resolved type node name")
-	<YY::TokenMetadata>	RESOLVING_NAME			_("scope resolving name")
-	<YY::TokenMetadata>	DECLARATION_OF			_("DeclarationOf")
-	<YY::TokenMetadata>	TYPE_OF					_("TypeOf")
-	<YY::TokenMetadata> NORM_TERM_KEYWORD		_("terminal keyword")
+	<YY::TokenMetadata> ASCII_NAME 			_("ASCII name")
+	<YY::TokenMetadata> UNICODE_NAME 		_("Unicode name")
+	<YY::TokenMetadata>	DESIGNATED_NONTYPE	_("designated name")
+	<YY::TokenMetadata>	DESIGNATED_TYPE		_("designated type name")
+	<YY::TokenMetadata>	RESOLVED_NORMAL		_("resolved node name")
+	<YY::TokenMetadata>	RESOLVED_TYPE		_("resolved type node name")
+	<YY::TokenMetadata>	RESOLVING_NAME		_("scope resolving name")
+	<YY::TokenMetadata>	DECLARATION_OF		_("DeclarationOf")
+	<YY::TokenMetadata>	TYPE_OF				_("TypeOf")
+	<YY::TokenMetadata> NORM_TERM_KEYWORD	_("terminal keyword")
 	
 %type <TreePtr<Node>> 				normal norm_term norm_postfix norm_prefix norm_relational norm_disjunction norm_conjunction  
 %type <TreePtr<Node>> 				norm_assignment norm_equality norm_add_etc norm_logical_or norm_logical_and 
@@ -135,7 +135,7 @@
 %type <TreePtr<Node>> 				unified_no_comma_op unified unified_prefix
 %type <TreePtr<Node>> 				bare_statement
 %type <wstring> 					vn_name
-%type <YY::TokenMetadata> 			resolved_name resolved_type_name resolve
+%type <YY::TokenMetadata> 			resolved_name resolved_type_name resolving_name
 %type <list<shared_ptr<VN::Command>>>			commands sep_commands
 %type <shared_ptr<VN::Command>>		script_command 
 %type <VN::Limit>					limit
@@ -215,7 +215,6 @@ type_paren  : type_term
 			| '(' type ')'									{ $$ = $2; }	
 			                                        
 type_term	: BUILT_IN resolved_type_name itemisation		{ $$ = vn->OnBuiltIn($2.as_andata_block, @2, $3); }
-			| BUILT_IN resolved_type_name					{ $$ = vn->OnBuiltIn($2.as_andata_block, @2, VN::Itemisation{{}, @2}); }
 			| DESIGNATED_TYPE       				 		{ $$ = $1.as_designated; }		
    			| SPECIFIC_ID OPEN_VN resolved_type_name VN_SEP STRING_LITERAL CLOSE_VN				{ $$ = vn->OnSpecificId($3.as_andata_block, @3, $5, @5); }
 			| SPECIFIC_ID OPEN_VN resolved_type_name VN_SEP CLOSE_VN							{ $$ = vn->OnSpecificId($3.as_andata_block, @3, wstring(), @5); }
@@ -305,7 +304,6 @@ norm_paren	: norm_term
 			| '(' commands ')'                          		{ $$ = vn->OnEmbeddedCommands($2); }
 
 norm_term	: BUILT_IN resolved_name itemisation				{ $$ = vn->OnBuiltIn($2.as_andata_block, @2, $3); }
-			| BUILT_IN resolved_name							{ $$ = vn->OnBuiltIn($2.as_andata_block, @2, VN::Itemisation{{}, @2}); }
 			| STAR												{ $$ = vn->OnStar(nullptr); }
 			| STAR OPEN_VN normal CLOSE_VN						{ $$ = vn->OnStar($3); }
 			| INTEGRAL_LITERAL					      			{ $$ = vn->OnIntegralLiteral($1, @1); }
@@ -327,22 +325,23 @@ norm_term	: BUILT_IN resolved_name itemisation				{ $$ = vn->OnBuiltIn($2.as_and
 vn_name		: UNICODE_NAME    							{ $$ = $1.as_unicode; }
 			| ASCII_NAME								{ $$ = $1.as_unicode; }     
           
-// On sight of ::, we inform the recognition layer, which returns a shared_ptr which will 
-// expire when the production is complete or an error forces unwind. The naming layer
-// keeps weak_ptrs to these and will send us RESOLVED_NORMAL if one exists.
-part_resolve	: resolve RESOLUTION_OP					{ $$ = make_shared<VN::ResolverGnomon>($1.as_andata_block);
-                                                          recogniser->AddGnomon($$); }
-    
-resolve     	: part_resolve RESOLVING_NAME			{ $$ = $2; }
-				| RESOLVING_NAME						{ $$ = $1; }
-				      
-
 // RESOLVED_X is strong i.e. there was definitely a ::. resolved_x is weak and
 // doesn't require this. See comment by part_resolve for why we don't need a value from it.
+// I think the Gnomon is still around because we *could* use $1 here, so it must be valid.
 resolved_name	: part_resolve RESOLVED_NORMAL			{ $$ = $2; }
 				| RESOLVED_NORMAL						{ $$ = $1; }
 
 resolved_type_name	: part_resolve RESOLVED_TYPE		{ $$ = $2; }
 					| RESOLVED_TYPE						{ $$ = $1; }
+
+// On sight of ::, we inform the recognition layer, which returns a shared_ptr which will 
+// expire when the production is complete or an error forces unwind. The naming layer
+// keeps weak_ptrs to these and will send us RESOLVED_NORMAL if one exists.
+part_resolve	: resolving_name RESOLUTION_OP			{ $$ = make_shared<VN::ResolverGnomon>($1.as_andata_block);
+                                                          recogniser->AddGnomon($$); }
+    
+resolving_name 	: part_resolve RESOLVING_NAME			{ $$ = $2; }
+				| RESOLVING_NAME						{ $$ = $1; }				      
+
 
 %%

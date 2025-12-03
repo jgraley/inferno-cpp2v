@@ -327,9 +327,7 @@ string Render::RenderNodeExplicit( shared_ptr<const Node> node, Syntax::Producti
         }
     }   
     
-    if( sitems.empty() )
-		{} // We're done. To render () would imply ONE item with ZERO elements in it
-    else if( GetTotalSize(sitems) > Syntax::GetLineBreakThreshold() )
+    if( GetTotalSize(sitems) > Syntax::GetLineBreakThreshold() )
 		s += Join( sitems, "⚬\n", "(\n", "\n)" );   
 	else 
 		s += Join( sitems, " ⚬ ", "(", ")" );    

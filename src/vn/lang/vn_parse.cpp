@@ -18,7 +18,7 @@
 #include "vn/agents/all.hpp"
 #include "tree/node_names.hpp"
 #include "vn_commands.hpp"
-#include "vn_shim.hpp"
+#include "vn_recogniser.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -170,7 +170,7 @@ TreePtr<Node> VNParse::OnBuiltIn( const AvailableNodeData::Block *block, any nod
 				    any_cast<YY::VNLangParser::location_type>(node_name_loc), 
 				    SSPrintf("In ⯁, unexpected %s when expecting node name.", block->What().c_str()) ); 
 	
-	// The new node is the destiation
+	// The new node is the destination
 	NodeEnum ne = leaf_block->node_enum.value();
 	TreePtr<Node> dest = MakeStandardAgent(ne);
 	
@@ -214,9 +214,10 @@ TreePtr<Node> VNParse::OnBuiltIn( const AvailableNodeData::Block *block, any nod
         prev_loc = any_cast<YY::VNLangParser::location_type>(src_item.loc);
     }
     string empty_note;
-    // Sniff out the case where user put eg ⯁Node() when ⯁Node is required
+    // Sniff out the case where we got one empty item and needed zero items: this is now allowed!
     if( dest_items.size()==0 && src_itemisation.items.size()==1 && src_itemisation.items.front().nodes.size()==0 )
-		empty_note = "\nNote: where a node type requires zero items, simply omit the () entirely.";                             
+		return dest;
+		                             
 	if( src_it != src_itemisation.items.end() )
 		throw YY::VNLangParser::syntax_error( 
 			any_cast<YY::VNLangParser::location_type>(src_it->loc), 
@@ -640,10 +641,6 @@ VNLangRecogniser &VNParse::GetShim()
 // Global designations #872
 // Type mismatches #874
 
-// Render: 
-// - ditch PROTOTYPE
-// - ditch DEFINITION
-// - split RenderConcrete... into MaybeBoot..., MaybeSemicolon...
 
 // C fold-in: 
 // things like OnPrefixOperator() should take an actual parser token not a string
