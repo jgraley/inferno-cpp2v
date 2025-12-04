@@ -50,5 +50,7 @@ string OrdinalString( int i );
 wstring ToUnicode( string s );
 string ToASCII( wstring s );
 string Unquote(string s);
+string DiagQuote(string name);
+string DiagQuote(wstring name);
 
 #endif

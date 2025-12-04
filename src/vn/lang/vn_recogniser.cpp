@@ -28,62 +28,13 @@ using namespace CPPTree; // TODO should not need
 using namespace VN;
 using namespace reflex;
 
-
-static TreePtr<Node> MakeStandardAgent(NodeEnum ne)
-{
-	switch(ne)
-	{
-#define NODE(NS, NAME) \
-	case NodeEnum::NS##_##NAME: \
-		return MakeTreeNode<StandardAgentWrapper<NS::NAME>>(); 
-#include "tree/node_names.inc"			
-#define PREFIX(TOK, TEXT, NAME, BASE, CAT, PROD, ASSOC) NODE(CPPTree, NAME)
-#define POSTFIX(TOK, TEXT, NAME, BASE, CAT, PROD, ASSOC) NODE(CPPTree, NAME)
-#define INFIX(TOK, TEXT, NAME, BASE, CAT, PROD, ASSOC) NODE(CPPTree, NAME)
-#include "tree/operator_data.inc"
-#undef NODE
-	}
-	
-	// By design we should have a case for every value of the node enum
-	ASSERT(false)("Invalid value for node enum value %d", ne); 
-	ASSERTFAIL();
-}
-
-// You want to call 
-// YY::VNLangParser::symbol_type YY::VNLangParser::make_SOME_KIND_OF_NAME( string v, location_type l ) <--- a static function
-// of if you want the token in a varaible eg tok, use
-// YY::VNLangParser::symbol_type::symbol_type( int tok, VNLangRecogniser::NameData, location_type l )   <--- a constructor
-// with tok = token::TOK_SOME_KIND_OF_NAME
-// and VNLangRecogniser::NameData being the type of TOK_SOME_KIND_OF_NAME etc as specified in the .ypp file
-//
-// Scanner rule is
-// xyz   { return recogniser.OnUnicodeName( wstr(), location() ); }
-//
-// defined like YY::VNLangParser::symbol_type VNLangRecogniser::OnUnicodeName( wstring v, location_type l );   <--- or "any" for location
-//
-// ALL strings found by parser go in here, ASCII or Unicode, quoted or not, including keywords.
-// There's a separate entry point for each parsing token. EP for quoted should unquote.
-// All call a common analysis function:
-// - designations
-// - Node type names
-// - Indeitifer subtypes
-// Returning this data in a struct VNLangRecogniser::NameData which will also be passed to parser
-// Then do a priority-based analysis that leads to a choice of parser token. Presumably, we
-// can go top priotity first, doing eg
-// if (cond)
-//     return YY::VNLangParser::make_SOME_KIND_OF_NAME( string, name_data );
-//
-// Stored designations: store the PARSED "kind" and recover in recogniser. Thus, we only need the kind 
-// for explicit nodes, and we don't need to go hunting through the pattern. Mis-parses like 
-// conjunction( type, not-type ) will cause parse errors.
-
 void VNLangRecogniser::AddGnomon( shared_ptr<Gnomon> gnomon )
 {
 	PurgeExpiredGnomons();
 	ASSERT( gnomon );
 	
-	if( auto node_name_scope_gnomon = dynamic_pointer_cast<const NodeNameScopeGnomon>(gnomon) )
-		scope_gnomons.push_front( node_name_scope_gnomon ); // front is top
+	if( auto scope_gnomon = dynamic_pointer_cast<const ScopeGnomon>(gnomon) )
+		scope_gnomons.push_front( scope_gnomon ); // front is top
 	else if( auto resolver_gnomon = dynamic_pointer_cast<const ResolverGnomon>(gnomon) )
 		resolver_gnomons.push_front( resolver_gnomon ); // front is top
 	else if( auto designation_gnomon = dynamic_pointer_cast<const DesignationGnomon>(gnomon) )
@@ -120,11 +71,14 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessToken(wstring text, bool 
 		{
 			if( dynamic_cast<const NodeNameScopeGnomon *>(spg.get()) )
 				return ProcessTokenInNodeNameScope(text, ascii, loc, metadata);
+			else if( dynamic_cast<const IdentifierDiscriminatorScopeGnomon *>(spg.get()) )
+				return ProcessTokenInIdentifierDiscriminatorScope(text, ascii, loc, metadata);
+			else if( dynamic_cast<const TransformNameScopeGnomon *>(spg.get()) )
+				return ProcessTokenTransformNameScope(text, ascii, loc, metadata);
 			
 			break; // Only considering innermost for now			
 		}
-	}
-	
+	}	
 	
 	shared_ptr<const DesignationGnomon> designation_gnomon;
 	if( designation_gnomons.count(text) > 0 )	
@@ -138,21 +92,7 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessToken(wstring text, bool 
 	// Pick off keywords
 	if( ascii && ToASCII(text)=="this" )
 		return YY::VNLangParser::make_NORM_TERM_KEYWORD(metadata, loc);
-		
-	// Pick off the transformations we know about
-	if( ascii && ToASCII(text)=="DeclarationOf" )
-		return YY::VNLangParser::make_DECLARATION_OF(metadata, loc);
-	else if( ascii && ToASCII(text)=="TypeOf" )
-		return YY::VNLangParser::make_TYPE_OF(metadata, loc);
-					
-	try // for identifier designators
-	{	
-		return ProcessTokenInNodeNameScope(text, ascii, loc, metadata);
-	}
-	catch( Unrecognised & )
-	{
-	}	
-	
+			
 	if( designation_gnomon )
 	{
 		if( dynamic_cast<const NonTypeDesignationGnomon *>(designation_gnomon.get()) )
@@ -172,7 +112,7 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessToken(wstring text, bool 
 YY::VNLangParser::symbol_type VNLangRecogniser::ProcessTokenInNodeNameScope(wstring text, bool ascii, YY::VNLangParser::location_type loc, YY::TokenMetadata metadata) const
 {
 	// Determine the current scope from our weak gnomons
-	const AvailableNodeData::NamespaceBlock *namespace_block = AvailableNodeData().GetGlobalNamespaceBlock();
+	const AvailableNodeData::NamespaceBlock *namespace_block = AvailableNodeData().GetNodeNamesRoot();
 	for( weak_ptr<const ResolverGnomon> wpg : resolver_gnomons )
 	{
 		if( auto spg = wpg.lock() )
@@ -201,23 +141,63 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessTokenInNodeNameScope(wstr
 			ASSERTFAIL("unreconised andata block");
 	}
 	
-	throw Unrecognised();
+	// In these scopes, there are no designations so we must succeed and can raise an error here if we don#t
+	throw YY::VNLangParser::syntax_error( loc,
+	    SSPrintf("Unrecognised: %s %", DiagQuote(text).c_str(), GetContextText().c_str()) ); 
 }
 
 
-TreePtr<Node> VNLangRecogniser::TryGetArchetype( list<string> typ ) const
+YY::VNLangParser::symbol_type VNLangRecogniser::ProcessTokenInIdentifierDiscriminatorScope(wstring text, bool ascii, YY::VNLangParser::location_type loc, YY::TokenMetadata metadata) const
 {
-	if( AvailableNodeData().GetNameToEnumMap().count(typ) > 0 )
-	{		
-		NodeEnum ne = AvailableNodeData().GetNameToEnumMap().at(typ);
-	
-		// The new node is the destiation
-		return MakeStandardAgent(ne);
-	}
-	else
+	// Determine the current scope from our weak gnomons
+	const AvailableNodeData::NamespaceBlock *namespace_block = AvailableNodeData().GetIdentifierDiscriminatorsRoot();
+	for( weak_ptr<const ResolverGnomon> wpg : resolver_gnomons )
 	{
-		return nullptr;
+		if( auto spg = wpg.lock() )
+		{
+			ASSERT( spg->namespace_block );
+			namespace_block = spg->namespace_block;
+			break; // we only need the one at the front, because the names build up
+		}
 	}
+	
+	// See if we want to supply a block
+	if( ascii && namespace_block && namespace_block->sub_blocks.count(ToASCII(text)) > 0 )
+	{
+		const AvailableNodeData::Block *sub_block = namespace_block->sub_blocks.at(ToASCII(text)).get();
+		metadata.as_andata_block = sub_block; // return it to the parser whatever it is
+		if( auto lb = dynamic_cast<const AvailableNodeData::LeafBlock *>(sub_block) )
+		{
+			if( AvailableNodeData().IsType(lb) )			
+				return YY::VNLangParser::make_RESOLVED_TYPE(metadata, loc);
+			else
+				return YY::VNLangParser::make_RESOLVED_NORMAL(metadata, loc);
+		}
+		else if( dynamic_cast<const AvailableNodeData::NamespaceBlock *>(sub_block) )
+			return YY::VNLangParser::make_NODE_NAMESPACE(metadata, loc);				
+		else
+			ASSERTFAIL("unknown andata block");
+	}
+	
+	// In these scopes, there are no designations so we must succeed and can raise an error here if we don#t
+	throw YY::VNLangParser::syntax_error( loc,
+	    SSPrintf("Unrecognised: %s", DiagQuote(text).c_str(), GetContextText().c_str()) ); 
+}
+
+
+YY::VNLangParser::symbol_type VNLangRecogniser::ProcessTokenTransformNameScope(wstring text, bool ascii, YY::VNLangParser::location_type loc, YY::TokenMetadata metadata) const
+{
+	// Transformations that act on normal scopes (instances, in this case)
+	if( ascii && ToASCII(text)=="TypeOf" )
+		return YY::VNLangParser::make_TRANSFORM_NAME_NORMAL(metadata, loc);					
+
+	// Transformations that act on unified scopes (instances or types, in this case)
+	if( ascii && ToASCII(text)=="DeclarationOf" )
+		return YY::VNLangParser::make_TRANSFORM_NAME_UNIFIED(metadata, loc);
+
+	// In these scopes, there are no designations so we must succeed and can raise an error here if we don#t
+	throw YY::VNLangParser::syntax_error( loc,
+	    SSPrintf("Unrecognised: %s %s", DiagQuote(text).c_str(), GetContextText().c_str()) ); 
 }
 
 
@@ -230,4 +210,17 @@ void VNLangRecogniser::PurgeExpiredGnomons()
 	resolver_gnomons.remove_if(expired);
 	scope_gnomons.remove_if(expired);
 }
+
+
+string VNLangRecogniser::GetContextText() const
+{
+	list<string> ls;
+	for( weak_ptr<const ScopeGnomon> wpg : scope_gnomons )
+	{
+		if( auto spg = wpg.lock() )
+			ls.push_back("inside "+spg->GetMessageText());
+	}
+	return Join( ls, ", " );
+}
+
 

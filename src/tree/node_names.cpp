@@ -17,12 +17,21 @@ const AvailableNodeData::NameToNodeMapType &AvailableNodeData::GetNameToEnumMap(
 }
 
 
-const AvailableNodeData::NamespaceBlock *AvailableNodeData::GetGlobalNamespaceBlock()
+const AvailableNodeData::NamespaceBlock *AvailableNodeData::GetNodeNamesRoot()
 {
-	if( global_namespace_block.sub_blocks.empty() )
+	if( node_names_root.sub_blocks.empty() )
 		InitialiseMap();	
 		
-	return &global_namespace_block;
+	return &node_names_root;
+}
+
+
+const AvailableNodeData::NamespaceBlock *AvailableNodeData::GetIdentifierDiscriminatorsRoot()
+{
+	if( identifier_discriminators_root.sub_blocks.empty() )
+		InitialiseMap();	
+		
+	return &identifier_discriminators_root;
 }
 
 
@@ -117,13 +126,13 @@ void AvailableNodeData::InitialiseMap()
 		list<string> flat_list = p.first;
 		NodeEnum node_enum = p.second;
 		
-		if( global_namespace_block.sub_blocks.count(flat_list.front())==0 )
+		if( node_names_root.sub_blocks.count(flat_list.front())==0 )
 		{
 			auto sb = make_unique<NamespaceBlock>();
-			global_namespace_block.sub_blocks[flat_list.front()] = move(sb);
+			node_names_root.sub_blocks[flat_list.front()] = move(sb);
 		}
 	
-		Block *block = global_namespace_block.sub_blocks.at( flat_list.front() ).get();
+		Block *block = node_names_root.sub_blocks.at( flat_list.front() ).get();
 		auto namespace_block = dynamic_cast<NamespaceBlock *>(block);
 		ASSERT(namespace_block);
 
@@ -147,13 +156,13 @@ void AvailableNodeData::InitialiseMap()
 		list<string> flat_list = p.first;
 		IdentifierEnum identifier_discriminator_enum = p.second;		
 		
-		if( global_namespace_block.sub_blocks.count(flat_list.front())==0 )
+		if( identifier_discriminators_root.sub_blocks.count(flat_list.front())==0 )
 		{
 			auto sb = make_unique<NamespaceBlock>();
-			global_namespace_block.sub_blocks[flat_list.front()] = move(sb);
+			identifier_discriminators_root.sub_blocks[flat_list.front()] = move(sb);
 		}
 		
-		Block *block = global_namespace_block.sub_blocks.at( flat_list.front() ).get();
+		Block *block = identifier_discriminators_root.sub_blocks.at( flat_list.front() ).get();
 		auto namespace_block = dynamic_cast<NamespaceBlock *>(block);
 		ASSERT(namespace_block);
 
@@ -172,4 +181,5 @@ void AvailableNodeData::InitialiseMap()
 
 
 AvailableNodeData::NameToNodeMapType AvailableNodeData::name_to_node_map;
-AvailableNodeData::NamespaceBlock AvailableNodeData::global_namespace_block;
+AvailableNodeData::NamespaceBlock AvailableNodeData::node_names_root;
+AvailableNodeData::NamespaceBlock AvailableNodeData::identifier_discriminators_root;

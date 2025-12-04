@@ -159,3 +159,15 @@ string Unquote(string s)
 	ASSERT( s.back() == '\"' );
 	return s.substr( 1, s.size()-2 );
 }
+
+
+string DiagQuote(string name)
+{
+	return "`" + name + "'";
+}
+
+
+string DiagQuote(wstring name)
+{
+	return DiagQuote( ToASCII(name) ); 
+}

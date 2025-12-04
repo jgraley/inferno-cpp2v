@@ -89,8 +89,6 @@ public:
 	TreePtr<Node> OnBuildSize( TreePtr<Node> container );
 	TreePtr<Node> OnStringize( TreePtr<Node> source );
 	
-	static string DiagQuote(string name);
-	static string DiagQuote(wstring name);
 	TreePtr<Node> CreateIntegralLiteral( bool uns, bool lng, bool lng2, uint64_t val, any loc );
 	VNLangRecogniser &GetShim();
 	
