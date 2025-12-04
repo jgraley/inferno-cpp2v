@@ -17,12 +17,12 @@ const AvailableNodeData::NameToNodeMapType &AvailableNodeData::GetNameToEnumMap(
 }
 
 
-const AvailableNodeData::ScopeBlock *AvailableNodeData::GetRootBlock()
+const AvailableNodeData::NamespaceBlock *AvailableNodeData::GetGlobalNamespaceBlock()
 {
-	if( root_block.sub_blocks.empty() )
+	if( global_namespace_block.sub_blocks.empty() )
 		InitialiseMap();	
 		
-	return &root_block;
+	return &global_namespace_block;
 }
 
 
@@ -117,20 +117,20 @@ void AvailableNodeData::InitialiseMap()
 		list<string> flat_list = p.first;
 		NodeEnum node_enum = p.second;
 		
-		if( root_block.sub_blocks.count(flat_list.front())==0 )
+		if( global_namespace_block.sub_blocks.count(flat_list.front())==0 )
 		{
-			auto sb = make_unique<ScopeBlock>();
-			root_block.sub_blocks[flat_list.front()] = move(sb);
+			auto sb = make_unique<NamespaceBlock>();
+			global_namespace_block.sub_blocks[flat_list.front()] = move(sb);
 		}
 	
-		Block *block = root_block.sub_blocks.at( flat_list.front() ).get();
-		auto scope_block = dynamic_cast<ScopeBlock *>(block);
-		ASSERT(scope_block);
+		Block *block = global_namespace_block.sub_blocks.at( flat_list.front() ).get();
+		auto namespace_block = dynamic_cast<NamespaceBlock *>(block);
+		ASSERT(namespace_block);
 
-		if( !scope_block->sub_blocks[flat_list.back()] ) // can create -> NULL
-			scope_block->sub_blocks.at(flat_list.back()) = make_unique<LeafBlock>();
+		if( !namespace_block->sub_blocks[flat_list.back()] ) // can create -> NULL
+			namespace_block->sub_blocks.at(flat_list.back()) = make_unique<LeafBlock>();
 
-		LeafBlock *node_block = dynamic_cast<LeafBlock *>(scope_block->sub_blocks.at(flat_list.back()).get());
+		LeafBlock *node_block = dynamic_cast<LeafBlock *>(namespace_block->sub_blocks.at(flat_list.back()).get());
 		ASSERT( node_block );
 		node_block->node_enum = node_enum;		
 	}
@@ -147,20 +147,20 @@ void AvailableNodeData::InitialiseMap()
 		list<string> flat_list = p.first;
 		IdentifierEnum identifier_discriminator_enum = p.second;		
 		
-		if( root_block.sub_blocks.count(flat_list.front())==0 )
+		if( global_namespace_block.sub_blocks.count(flat_list.front())==0 )
 		{
-			auto sb = make_unique<ScopeBlock>();
-			root_block.sub_blocks[flat_list.front()] = move(sb);
+			auto sb = make_unique<NamespaceBlock>();
+			global_namespace_block.sub_blocks[flat_list.front()] = move(sb);
 		}
 		
-		Block *block = root_block.sub_blocks.at( flat_list.front() ).get();
-		auto scope_block = dynamic_cast<ScopeBlock *>(block);
-		ASSERT(scope_block);
+		Block *block = global_namespace_block.sub_blocks.at( flat_list.front() ).get();
+		auto namespace_block = dynamic_cast<NamespaceBlock *>(block);
+		ASSERT(namespace_block);
 
-		if( !scope_block->sub_blocks[flat_list.back()] ) // can create -> NULL
-			scope_block->sub_blocks.at(flat_list.back()) = make_unique<LeafBlock>();
+		if( !namespace_block->sub_blocks[flat_list.back()] ) // can create -> NULL
+			namespace_block->sub_blocks.at(flat_list.back()) = make_unique<LeafBlock>();
 
-		LeafBlock *node_block = dynamic_cast<LeafBlock *>(scope_block->sub_blocks.at(flat_list.back()).get());
+		LeafBlock *node_block = dynamic_cast<LeafBlock *>(namespace_block->sub_blocks.at(flat_list.back()).get());
 		ASSERT( node_block );
 		node_block->identifier_discriminator_enum = identifier_discriminator_enum;
 		
@@ -172,4 +172,4 @@ void AvailableNodeData::InitialiseMap()
 
 
 AvailableNodeData::NameToNodeMapType AvailableNodeData::name_to_node_map;
-AvailableNodeData::ScopeBlock AvailableNodeData::root_block;
+AvailableNodeData::NamespaceBlock AvailableNodeData::global_namespace_block;

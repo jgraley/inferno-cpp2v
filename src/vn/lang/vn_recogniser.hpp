@@ -45,19 +45,19 @@ class ResolverGnomon : public Gnomon
 {
 public:	
 	ResolverGnomon( const AvailableNodeData::Block *andata_block ) : 
-		scope_block(dynamic_cast<const AvailableNodeData::ScopeBlock *>(andata_block))
+		namespace_block(dynamic_cast<const AvailableNodeData::NamespaceBlock *>(andata_block))
 	{
-		ASSERT( scope_block );
+		ASSERT( namespace_block );
 	}
 
 	string GetTrace() const
 	{
-		return Trace(scope_block);
+		return Trace(namespace_block);
 	}
 	
 private:
 	friend class VNLangRecogniser;
-	const AvailableNodeData::ScopeBlock * const scope_block;
+	const AvailableNodeData::NamespaceBlock * const namespace_block;
 };
 		
 		
@@ -118,11 +118,14 @@ public:
 	YY::VNLangParser::symbol_type OnUnquoted(string text, YY::VNLangParser::location_type loc) const;
 	YY::VNLangParser::symbol_type OnUnquoted(wstring text, YY::VNLangParser::location_type loc) const;
 	YY::VNLangParser::symbol_type ProcessToken(wstring text, bool ascii, YY::VNLangParser::location_type loc) const;
+	YY::VNLangParser::symbol_type ProcessTokenInNodeNameScope(wstring text, bool ascii, YY::VNLangParser::location_type loc, YY::TokenMetadata metadata) const;
 	
 	TreePtr<Node> TryGetNamedSubtree(wstring name) const;	
 	TreePtr<Node> TryGetArchetype(list<string> typ) const;
 
 private:	
+	class Unrecognised : public Exception {};
+
 	void PurgeExpiredGnomons();
 
 	// store with weak_ptr => these will expire when the parser exists the scope

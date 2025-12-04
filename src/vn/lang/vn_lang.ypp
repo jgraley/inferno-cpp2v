@@ -122,7 +122,7 @@
 	<YY::TokenMetadata>	DESIGNATED_TYPE		_("designated type name")
 	<YY::TokenMetadata>	RESOLVED_NORMAL		_("resolved node name")
 	<YY::TokenMetadata>	RESOLVED_TYPE		_("resolved type node name")
-	<YY::TokenMetadata>	RESOLVING_NAME		_("scope resolving name")
+	<YY::TokenMetadata>	NODE_NAMESPACE		_("scope resolving name")
 	<YY::TokenMetadata>	DECLARATION_OF		_("DeclarationOf")
 	<YY::TokenMetadata>	TYPE_OF				_("TypeOf")
 	<YY::TokenMetadata> NORM_TERM_KEYWORD	_("terminal keyword")
@@ -135,7 +135,7 @@
 %type <TreePtr<Node>> 				unified_no_comma_op unified unified_prefix
 %type <TreePtr<Node>> 				bare_statement
 %type <wstring> 					vn_name
-%type <YY::TokenMetadata> 			resolved_name resolved_type_name resolving_name
+%type <YY::TokenMetadata> 			resolved_name resolved_type_name node_namespace
 %type <list<shared_ptr<VN::Command>>>			commands sep_commands
 %type <shared_ptr<VN::Command>>		script_command 
 %type <VN::Limit>					limit
@@ -342,11 +342,11 @@ resolved_type_name	: part_resolve RESOLVED_TYPE		{ $$ = $2; }
 // On sight of ::, we inform the recognition layer, which returns a shared_ptr which will 
 // expire when the production is complete or an error forces unwind. The naming layer
 // keeps weak_ptrs to these and will send us RESOLVED_NORMAL if one exists.
-part_resolve	: resolving_name RESOLUTION_OP			{ $$ = make_shared<VN::ResolverGnomon>($1.as_andata_block);
+part_resolve	: node_namespace RESOLUTION_OP			{ $$ = make_shared<VN::ResolverGnomon>($1.as_andata_block);
                                                           recogniser->AddGnomon($$); }
     
-resolving_name 	: part_resolve RESOLVING_NAME			{ $$ = $2; }
-				| RESOLVING_NAME						{ $$ = $1; }				      
+node_namespace 	: part_resolve NODE_NAMESPACE			{ $$ = $2; }
+				| NODE_NAMESPACE						{ $$ = $1; }				      
 
 builtin_symbol	: BUILT_IN 				{ $$ = make_shared<VN::NodeNameScopeGnomon>(); 
 										  recogniser->AddGnomon($$); }

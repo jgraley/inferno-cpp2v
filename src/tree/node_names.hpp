@@ -32,7 +32,7 @@ public:
 		virtual string What() const = 0;
 	};
 	
-	struct ScopeBlock : Block
+	struct NamespaceBlock : Block
 	{
 		string What() const final { return "node name scope"; }
 		string GetTrace() const { return Trace(sub_blocks); }
@@ -65,7 +65,7 @@ public:
 
 	typedef map<list<string>, NodeEnum> NameToNodeMapType;	
 	const NameToNodeMapType &GetNameToEnumMap();
-	const AvailableNodeData::ScopeBlock *GetRootBlock();
+	const AvailableNodeData::NamespaceBlock *GetGlobalNamespaceBlock();
 	shared_ptr<Node> MakeNode(NodeEnum ne) const;
 	shared_ptr<TreePtrInterface> MakeTreePtr(NodeEnum ne) const;
 	bool IsType(const LeafBlock *block) const;
@@ -73,7 +73,7 @@ public:
 private:
 	static void InitialiseMap();
 	static NameToNodeMapType name_to_node_map;
-	static AvailableNodeData::ScopeBlock root_block;
+	static AvailableNodeData::NamespaceBlock global_namespace_block;
 };
 
 #endif

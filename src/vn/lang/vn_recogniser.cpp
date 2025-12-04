@@ -111,6 +111,21 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessToken(wstring text, bool 
 	YY::TokenMetadata metadata;
 	metadata.as_unicode = text;
 	metadata.as_ascii = ToASCII(text);
+	metadata.as_andata_block = nullptr;
+	
+	const ScopeGnomon *scope = nullptr;
+	for( weak_ptr<const ScopeGnomon> wpg : scope_gnomons ) // loops from top down
+	{
+		if( auto spg = wpg.lock() )
+		{
+			if( dynamic_cast<const NodeNameScopeGnomon *>(spg.get()) )
+				return ProcessTokenInNodeNameScope(text, ascii, loc, metadata);
+			
+			break; // Only considering innermost for now			
+		}
+	}
+	
+	
 	shared_ptr<const DesignationGnomon> designation_gnomon;
 	if( designation_gnomons.count(text) > 0 )	
 	    designation_gnomon = designation_gnomons.at(text);
@@ -129,37 +144,15 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessToken(wstring text, bool 
 		return YY::VNLangParser::make_DECLARATION_OF(metadata, loc);
 	else if( ascii && ToASCII(text)=="TypeOf" )
 		return YY::VNLangParser::make_TYPE_OF(metadata, loc);
-		
-	// Determine the current scope from our weak gnomons
-	const AvailableNodeData::ScopeBlock *current_scope_block = AvailableNodeData().GetRootBlock();
-	for( weak_ptr<const ResolverGnomon> wpg : resolver_gnomons )
-	{
-		if( auto spg = wpg.lock() )
-		{
-			ASSERT( spg->scope_block );
-			current_scope_block = spg->scope_block;
-			break; // we only need the one at the front, because the names build up
-		}
+					
+	try // for identifier designators
+	{	
+		return ProcessTokenInNodeNameScope(text, ascii, loc, metadata);
 	}
+	catch( Unrecognised & )
+	{
+	}	
 	
-	// See if we want to supply a block
-	metadata.as_andata_block = nullptr;
-	if( ascii && current_scope_block && current_scope_block->sub_blocks.count(ToASCII(text)) > 0 )
-	{
-		metadata.as_andata_block = current_scope_block->sub_blocks.at(ToASCII(text)).get();
-		if( auto lb = dynamic_cast<const AvailableNodeData::LeafBlock *>(metadata.as_andata_block) )
-		{
-			if( AvailableNodeData().IsType(lb) )			
-				return YY::VNLangParser::make_RESOLVED_TYPE(metadata, loc);
-			else
-				return YY::VNLangParser::make_RESOLVED_NORMAL(metadata, loc);
-		}
-		else if( dynamic_cast<const AvailableNodeData::ScopeBlock *>(metadata.as_andata_block) )
-			return YY::VNLangParser::make_RESOLVING_NAME(metadata, loc);				
-		else
-			ASSERTFAIL("unreconised andata block");
-	}
-			
 	if( designation_gnomon )
 	{
 		if( dynamic_cast<const NonTypeDesignationGnomon *>(designation_gnomon.get()) )
@@ -173,6 +166,42 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessToken(wstring text, bool 
          return YY::VNLangParser::make_ASCII_NAME(metadata, loc);
     else
          return YY::VNLangParser::make_UNICODE_NAME(metadata, loc);
+}
+
+
+YY::VNLangParser::symbol_type VNLangRecogniser::ProcessTokenInNodeNameScope(wstring text, bool ascii, YY::VNLangParser::location_type loc, YY::TokenMetadata metadata) const
+{
+	// Determine the current scope from our weak gnomons
+	const AvailableNodeData::NamespaceBlock *namespace_block = AvailableNodeData().GetGlobalNamespaceBlock();
+	for( weak_ptr<const ResolverGnomon> wpg : resolver_gnomons )
+	{
+		if( auto spg = wpg.lock() )
+		{
+			ASSERT( spg->namespace_block );
+			namespace_block = spg->namespace_block;
+			break; // we only need the one at the front, because the names build up
+		}
+	}
+	
+	// See if we want to supply a block
+	if( ascii && namespace_block && namespace_block->sub_blocks.count(ToASCII(text)) > 0 )
+	{
+		const AvailableNodeData::Block *sub_block = namespace_block->sub_blocks.at(ToASCII(text)).get();
+		metadata.as_andata_block = sub_block; // return it to the parser whatever it is
+		if( auto lb = dynamic_cast<const AvailableNodeData::LeafBlock *>(sub_block) )
+		{
+			if( AvailableNodeData().IsType(lb) )			
+				return YY::VNLangParser::make_RESOLVED_TYPE(metadata, loc);
+			else
+				return YY::VNLangParser::make_RESOLVED_NORMAL(metadata, loc);
+		}
+		else if( dynamic_cast<const AvailableNodeData::NamespaceBlock *>(sub_block) )
+			return YY::VNLangParser::make_NODE_NAMESPACE(metadata, loc);				
+		else
+			ASSERTFAIL("unreconised andata block");
+	}
+	
+	throw Unrecognised();
 }
 
 
