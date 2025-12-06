@@ -121,7 +121,8 @@ ReturnViaTemp::ReturnViaTemp()
     auto func_id = MakePatternNode<InstanceIdentifier>();
     auto module_id = MakePatternNode<TypeIdentifier>();
     auto params = MakePatternNode<StarAgent, Parameter>();
-    auto m_call = MakePatternNode<MapArgsCall>();
+    auto m_call = MakePatternNode<Call>();
+    auto m_args = MakePatternNode<MapArguments>();
     auto m_any = MakePatternNode<DisjunctionAgent, Expression>();
     auto m_lookup = MakePatternNode<Lookup>();
     auto m_operands = MakePatternNode<StarAgent, IdValuePair>();
@@ -133,7 +134,7 @@ ReturnViaTemp::ReturnViaTemp()
     auto lr_return = MakePatternNode<Return>();
     auto l_return_value = MakePatternNode<Expression>();
     auto mr_comp = MakePatternNode<StatementExpression>();
-    auto ms_gg = MakePatternNode<GreenGrassAgent, MapArgsCall>();
+    auto ms_gg = MakePatternNode<GreenGrassAgent, Call>();
     auto overcp = MakePatternNode<DeltaAgent, Type>();
     auto overi = MakePatternNode<DeltaAgent, Initialiser>();
     
@@ -147,7 +148,8 @@ ReturnViaTemp::ReturnViaTemp()
     m_call->callee = m_any;
     m_any->disjuncts = ( func_id, m_lookup );
     m_lookup->member = func_id;
-    m_call->args = (m_operands);
+    m_call->args = m_args;
+    m_args->arguments = (m_operands);
     mr_comp->statements = (m_call, r_temp_id);
     auto embedded_m = MakePatternNode<EmbeddedSearchReplaceAgent, Scope>( r_module, ms_gg, mr_comp );
     
@@ -199,8 +201,10 @@ AddLinkAddress::AddLinkAddress()
     auto l_stmts = MakePatternNode<StarAgent, Statement>();
     auto msx_stmts = MakePatternNode<StarAgent, Statement>();
     auto msx_assign = MakePatternNode<Assign>();
-    auto ms_call = MakePatternNode<MapArgsCall>();
-    auto mr_call = MakePatternNode<MapArgsCall>();
+    auto ms_call = MakePatternNode<Call>();
+    auto ms_args = MakePatternNode<MapArguments>();
+    auto mr_call = MakePatternNode<Call>();
+    auto mr_args = MakePatternNode<MapArguments>();
     auto mr_comp = MakePatternNode<Compound>();
     auto msx_comp = MakePatternNode<Compound>();
     auto mr_label = MakePatternNode<Label>();
@@ -236,10 +240,12 @@ AddLinkAddress::AddLinkAddress()
     auto embedded_ll = MakePatternNode<EmbeddedSearchReplaceAgent, Compound>( lr_comp, ll_gg, llr_comp );   
    
     m_gg->through = ms_call;
-    ms_call->args = (MakePatternNode<StarAgent, IdValuePair>());
+    ms_call->args = ms_args;
+    ms_args->arguments = (MakePatternNode<StarAgent, IdValuePair>());
     ms_call->callee = l_inst_id;
     mr_comp->statements = (mr_call, mr_label);  
-    mr_call->args = (ms_call->args, mr_new_arg);
+    mr_call->args = mr_args;
+    mr_args->arguments = (ms_call->args, mr_new_arg);
     mr_call->callee = l_inst_id;
     mr_new_arg->key = lr_retaddr_id;
     mr_new_arg->value = mr_labelid;
@@ -304,8 +310,10 @@ ParamsViaTemps::ParamsViaTemps()
     auto module_id = MakePatternNode<TypeIdentifier>();
     auto s_param = MakePatternNode<Parameter>();
     auto params = MakePatternNode<StarAgent, Parameter>();
-    auto ms_call = MakePatternNode<MapArgsCall>();
-    auto mr_call = MakePatternNode<MapArgsCall>();
+    auto ms_call = MakePatternNode<Call>();
+    auto ms_args = MakePatternNode<MapArguments>();
+    auto mr_call = MakePatternNode<Call>();
+    auto mr_args = MakePatternNode<MapArguments>();
     auto ms_operand = MakePatternNode<IdValuePair>();
     auto m_operands = MakePatternNode<StarAgent, IdValuePair>();
     auto r_param = MakePatternNode<Automatic>();
@@ -317,13 +325,15 @@ ParamsViaTemps::ParamsViaTemps()
     auto over = MakePatternNode<DeltaAgent, Declaration>();
     
     ms_call->callee = func_id;
-    ms_call->args = (m_operands, ms_operand);
+    ms_call->args = ms_args;
+    ms_args->arguments = (m_operands, ms_operand);
     ms_operand->key = param_id;
     ms_operand->value = m_expr;
     mr_comp->statements = (mr_assign, mr_call);
     mr_assign->operands = (r_temp_id, m_expr);
     mr_call->callee = func_id;
-    mr_call->args = (m_operands);
+    mr_call->args = mr_args;
+    mr_args->arguments = (m_operands);
     auto embedded_m = MakePatternNode<EmbeddedSearchReplaceAgent, Scope>( r_module, ms_call, mr_comp );
     
     s_module->members = (decls, over);
@@ -524,8 +534,10 @@ MergeFunctions::MergeFunctions()
     auto thread_over = MakePatternNode<DeltaAgent, Compound>();
     auto s_thread_comp = MakePatternNode<Compound>();
     auto r_thread_comp = MakePatternNode<Compound>();
-    auto s_call = MakePatternNode<MapArgsCall>();
-    auto ls_call = MakePatternNode<MapArgsCall>();
+    auto s_call = MakePatternNode<Call>();
+    auto s_args = MakePatternNode<Call>();
+    auto ls_call = MakePatternNode<Call>();
+    auto ls_args = MakePatternNode<SeqArguments>();
     auto func_id = MakePatternNode<InstanceIdentifier>();
     auto r_label = MakePatternNode<Label>();
     auto r_label_id = MakePatternNode< BuildLabelIdentifierAgent >("ENTER_%s");
@@ -544,6 +556,7 @@ MergeFunctions::MergeFunctions()
     auto embedded_m = MakePatternNode<EmbeddedSearchReplaceAgent, Compound>( func_stuff, ms_return, mr_goto );        
     
     ls_call->callee = func_id;
+    ls_call->args = ls_args;
     lr_goto->destination = r_label_id;
         
     auto embedded_l = MakePatternNode<EmbeddedSearchReplaceAgent, Compound>( r_thread_comp, ls_call, lr_goto );    
@@ -558,6 +571,7 @@ MergeFunctions::MergeFunctions()
     s_thread_comp->members = (thread_decls);
     s_thread_comp->statements = (thread_stmts);
     s_call->callee = func_id;    
+    s_call->args = s_args;
     s_func->type = func_type;
     s_func->initialiser = func_stuff;
     s_func->identifier = func_id;

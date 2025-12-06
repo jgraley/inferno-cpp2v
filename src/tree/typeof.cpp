@@ -403,7 +403,7 @@ AugTreePtr<CPPTree::Type> TypeOf::GetLiteral( const TransKit &kit, AugTreePtr<Li
 
 // Is this call really a constructor call? If so return the object being
 // constructed. Otherwise, return nullptr
-AugTreePtr<CPPTree::Expression> TypeOf::TryGetConstructedExpression( const TransKit &kit, AugTreePtr<GoSub> gs ) const
+AugTreePtr<CPPTree::Expression> TypeOf::TryGetConstructedExpression( const TransKit &, AugTreePtr<GoSub> gs ) const
 {
     AugTreePtr<CPPTree::Expression> e;
 
@@ -412,10 +412,7 @@ AugTreePtr<CPPTree::Expression> TypeOf::TryGetConstructedExpression( const Trans
         ASSERT(lu->member);
         bool is_cons = false;
 
-		if( AugTreePtr<MapArgsCall>::DynamicCast(gs) )		
-			is_cons = !!AugTreePtr<Constructor>::DynamicCast( Get( kit, GET_CHILD(lu, member) ) );		
-		else if( AugTreePtr<SeqArgsCall>::DynamicCast(gs) )		
-			is_cons = lu->member->GetIdentifierName().empty();					
+		is_cons = lu->member->GetIdentifierName().empty();					
 		
 		if( is_cons )
 			e = GET_CHILD(lu, object);

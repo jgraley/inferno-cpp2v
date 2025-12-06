@@ -631,8 +631,10 @@ ExtractCallParams::ExtractCallParams()
     auto func = MakePatternNode<Function>();
     auto func_id = MakePatternNode<InstanceIdentifier>();
     
-    auto s_call = MakePatternNode<MapArgsCall>();
-    auto r_call = MakePatternNode<MapArgsCall>();
+    auto s_call = MakePatternNode<Call>();
+    auto s_args = MakePatternNode<MapArguments>();
+    auto r_call = MakePatternNode<Call>();
+    auto r_args = MakePatternNode<MapArguments>();
     auto r_temp_id = MakePatternNode<BuildInstanceIdentifierAgent>("temp_%s");
     auto r_temp = MakePatternNode<Temporary>();
     auto r_ce = MakePatternNode<StatementExpression>();
@@ -655,7 +657,8 @@ ExtractCallParams::ExtractCallParams()
     func->params = MakePatternNode<StarAgent, Parameter>();
     field->identifier = func_id;
     
-    s_call->args = (params, s_param);
+    s_call->args = s_args;
+    s_args->arguments = (params, s_param);
     s_param->value = all;
     all->conjuncts = (value, x_not);
     s_param->key = id;
@@ -670,7 +673,8 @@ ExtractCallParams::ExtractCallParams()
     r_temp->type = type;
     r_ce->statements = (r_assign, r_call);
     r_assign->operands = (r_temp_id, value);
-    r_call->args = (params, r_param);
+    r_call->args = r_args;
+    r_args->arguments = (params, r_param);
     r_param->value = r_temp_id;    
     r_param->key = id;
     r_call->callee = func_id;

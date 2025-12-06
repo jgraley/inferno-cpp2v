@@ -392,23 +392,27 @@ TreePtr<Node> VNParse::OnIdValuePair( TreePtr<Node> key, any id_loc, TreePtr<Nod
 }	
 
 
-TreePtr<Node> VNParse::OnMapArgsCall( TreePtr<Node> callee, list<TreePtr<Node>> args )
+TreePtr<Node> VNParse::OnMapArgsCall( TreePtr<Node> callee, list<TreePtr<Node>> arguments )
 {
-	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::MapArgsCall>>();
-	node->callee = callee;
-	for( auto arg : args )
-		node->args.insert( arg );
-	return node;
+	auto call = MakeTreeNode<StandardAgentWrapper<CPPTree::Call>>();
+	auto args = MakeTreeNode<StandardAgentWrapper<CPPTree::MapArguments>>();
+	call->callee = callee;
+	call->args = args;
+	for( auto argument : arguments )
+		args->arguments.insert( argument );
+	return call;
 }	
 
 
-TreePtr<Node> VNParse::OnSeqArgsCall( TreePtr<Node> callee, list<TreePtr<Node>> args )
+TreePtr<Node> VNParse::OnSeqArgsCall( TreePtr<Node> callee, list<TreePtr<Node>> arguments )
 {
-	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::SeqArgsCall>>();
-	node->callee = callee;
-	for( auto arg : args )
-		node->arguments.insert( arg );
-	return node;
+	auto call = MakeTreeNode<StandardAgentWrapper<CPPTree::Call>>();
+	auto args = MakeTreeNode<StandardAgentWrapper<CPPTree::SeqArguments>>();
+	call->callee = callee;
+	call->args = args;
+	for( auto argument : arguments )
+		args->arguments.insert( argument );
+	return call;
 }	
 
 
@@ -623,6 +627,12 @@ VNLangRecogniser &VNParse::GetShim()
 // Implement %printer for semantic values
 
 // There are still some keywords in vn_lang.lcc - spot them in recogniser
+
+// Calls/Constructors plan:
+// - Factor out map/seq args
+// - Separate node for Construct, with common intermediate with call ("Invoke"?)
+// It will always be explicit when we want a construct that has args. This includes at least MyClass my_object( arg1, arg2, ... )
+// - Try to parse in VN language
 
 // Tix:
 // Lose StandardAgentWrapper #867

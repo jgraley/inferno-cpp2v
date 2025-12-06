@@ -774,38 +774,55 @@ string IdValuePair::GetRender( VN::RendererInterface *renderer, Production, Poli
            renderer->RenderIntoProduction( value, Production::COLON_SEP );	
 }
 
-//////////////////////////// MapArgsCall ///////////////////////////////
+//////////////////////////// MapArguments ///////////////////////////////
 
-Syntax::Production MapArgsCall::GetMyProductionTerminal() const
+Syntax::Production MapArguments::GetMyProductionTerminal() const
 { 
-	return Production::POSTFIX; 
+	return Production::BRACKETED; 
 }
 
 
-string MapArgsCall::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+string MapArguments::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	//if( policy.refuse_map_args_call )
-		throw RefusedByPolicy();
-	
 	list<string> ls;
-	for( TreePtr<Node> arg : args )
+	for( TreePtr<Node> arg : arguments )
 		ls.push_back( renderer->RenderIntoProduction( arg, Production::COMMA_SEP ) );
 	
-    return renderer->RenderIntoProduction( callee, Production::POSTFIX ) + 
-		   (policy.symbol_for_map_args ? "⊷" : "") + // after id because call is postfix operator
+	// TODO ⊷ disambiguates the no-args case, instead try unifying with a NoArguments node under Arguments
+    return (policy.symbol_for_map_args ? "⊷" : "") + // after id because call is postfix operator 
 		   Join( ls, ", ", "(", ")" );	
 }
 
-//////////////////////////// SeqArgsCall ///////////////////////////////
+//////////////////////////// SeqArguments ///////////////////////////////
 
-Syntax::Production SeqArgsCall::GetMyProductionTerminal() const
+Syntax::Production SeqArguments::GetMyProductionTerminal() const
 { 
-	return Production::POSTFIX; 
+	return Production::BRACKETED; 
 }
 
 
-string SeqArgsCall::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+string SeqArguments::GetRender( VN::RendererInterface *renderer, Production, Policy )
 {	
+	list<string> ls;
+	for( TreePtr<Node> arg : arguments )
+		ls.push_back( renderer->RenderIntoProduction( arg, Production::COMMA_SEP ) );	
+	
+	return Join( ls, ", ", "(", ")" );	
+}
+
+//////////////////////////// Call ///////////////////////////////
+
+Syntax::Production Call::GetMyProductionTerminal() const
+{
+	return Production::POSTFIX; 	
+}
+
+
+string Call::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+{		
+	if( policy.refuse_call_if_map_args && TreePtr<MapArguments>::DynamicCast(args) )
+		throw RefusedByPolicy(); // Would output ⦂, so C++ renderer needs to resolve into seq args
+
     // Constructor case: spot by use of Lookup to empty-named method. Elide the "."
     TreePtr<Node> cons_object;
     if( policy.detect_and_render_constructor )
@@ -820,15 +837,9 @@ string SeqArgsCall::GetRender( VN::RendererInterface *renderer, Production, Poli
 	else
 		s_callee = renderer->RenderIntoProduction( callee, Syntax::Production::POSTFIX );
 			
-	list<string> ls;
-	for( TreePtr<Node> arg : arguments )
-		ls.push_back( renderer->RenderIntoProduction( arg, Production::COMMA_SEP ) );	
-	string s_bare_args = Join( ls, ", " );	
+	string s_args = renderer->RenderIntoProduction( args, Syntax::Production::PRIMITIVE_EXPR );
 	
-	if( cons_object )
-		return s_callee + "(" + s_bare_args + ")";
-	else
-		return s_callee + "(" + s_bare_args + ")";
+	return s_callee + s_args;
 }
 
 //////////////////////////// RecordLiteral ///////////////////////////////

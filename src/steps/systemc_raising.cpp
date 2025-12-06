@@ -68,14 +68,16 @@ RaiseSCHierarchicalClass::RaiseSCHierarchicalClass( TreePtr< SCRecord > lr_sccla
 
 RaiseSCDynamic::RaiseSCDynamic( TreePtr<SCDynamicFunction> r_dynamic )
 {
-    auto s_call = MakePatternNode< MapArgsCall >();
+    auto s_call = MakePatternNode<Call>();
+    auto s_args = MakePatternNode<MapArguments>();
     auto s_arg = MakePatternNode< IdValuePair >();
     auto s_token = MakePatternNode< InstanceIdentifierByNameAgent >( r_dynamic->GetLoweredIdName() ); 
     auto s_param_id = MakePatternNode< InstanceIdentifierByNameAgent >( "p1" ); 
     auto eexpr = MakePatternNode<TransformOfAgent, Expression>( &TypeOf::instance ); 
                     
     s_call->callee = s_token;       
-    s_call->args = (s_arg);
+    s_call->args = s_args;
+    s_args->arguments = (s_arg);
     s_arg->key = s_param_id;
     s_arg->value = eexpr;
     eexpr->pattern = MakePatternNode<Event>();
@@ -87,11 +89,13 @@ RaiseSCDynamic::RaiseSCDynamic( TreePtr<SCDynamicFunction> r_dynamic )
 
 RaiseSCStatic::RaiseSCStatic( TreePtr<SCFunction> r_static )
 {
-    auto s_call = MakePatternNode< MapArgsCall >();
+    auto s_call = MakePatternNode<Call>();
+    auto s_args = MakePatternNode<MapArguments>();
     auto s_token = MakePatternNode< InstanceIdentifierByNameAgent >( r_static->GetLoweredIdName() ); 
                       
     s_call->callee = s_token;   
-    //s_call->args = ();       
+    s_call->args = s_args;       
+    //s_args->arguments = ();       
        
     Configure( SEARCH_REPLACE, s_call, r_static );
 }
@@ -99,14 +103,16 @@ RaiseSCStatic::RaiseSCStatic( TreePtr<SCFunction> r_static )
 
 RaiseSCDelta::RaiseSCDelta( TreePtr<SCFunction> r_delta )
 {
-    auto s_call = MakePatternNode< MapArgsCall >();
+    auto s_call = MakePatternNode<Call>();
+    auto s_args = MakePatternNode<MapArguments>();
     auto s_arg = MakePatternNode< IdValuePair >();
     auto s_token = MakePatternNode< InstanceIdentifierByNameAgent >( r_delta->GetLoweredIdName() ); 
     auto s_param_id = MakePatternNode< InstanceIdentifierByNameAgent >( "p1" ); 
     auto s_arg_id = MakePatternNode< InstanceIdentifierByNameAgent >( "SC_ZERO_TIME" ); 
                     
     s_call->callee = s_token;       
-    s_call->args = (s_arg);
+    s_call->args = s_args;
+    s_args->arguments = (s_arg);
     s_arg->key = s_param_id;
     s_arg->value = s_arg_id;
       
@@ -120,13 +126,15 @@ RaiseSCDelta::RaiseSCDelta( TreePtr<SCFunction> r_delta )
 RaiseTerminationFunction::RaiseTerminationFunction( TreePtr<TerminationFunction> r_tf )
 {
     auto event = MakePatternNode< Expression >();
-    auto s_call = MakePatternNode< MapArgsCall >();
+    auto s_call = MakePatternNode<Call>();
+    auto s_args = MakePatternNode<MapArguments>();
     auto s_arg = MakePatternNode< IdValuePair >();
     auto s_token = MakePatternNode< InstanceIdentifierByNameAgent >( r_tf->GetLoweredIdName() ); 
     auto s_param_id = MakePatternNode< InstanceIdentifierByNameAgent >( "exit_code" ); 
             
     s_call->callee = s_token;       
-    s_call->args = (s_arg);
+    s_call->args = s_args;
+    s_args->arguments = (s_arg);
     s_arg->key = s_param_id;
     s_arg->value = event;
     r_tf->code = event;       
@@ -149,7 +157,8 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     auto ls_comp = MakePatternNode< Compound >();
     auto lr_comp = MakePatternNode< Compound >();
     auto l_module = MakePatternNode< Module >();
-    auto ls_pcall = MakePatternNode< MapArgsCall >();
+    auto ls_pcall = MakePatternNode<Call>();
+    auto ls_pargs = MakePatternNode<MapArguments>();
     auto ls_arg = MakePatternNode< IdValuePair >();
     auto l_overcons = MakePatternNode<DeltaAgent, Instance>();
     auto l_overtype = MakePatternNode<DeltaAgent, Type>();
@@ -184,7 +193,8 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     ls_cons->identifier = l_ident;
     l_ctype->params = (MakePatternNode<Parameter>()); // one parameter
     ls_pcall->callee = s_token;
-    ls_pcall->args = (ls_arg);
+    ls_pcall->args = ls_pargs;
+    ls_pargs->arguments = (ls_arg);
     ls_arg->key = s_arg_id;
     ls_arg->value = ls_id;
     l_overcons->overlay = lr_cons;
@@ -207,11 +217,13 @@ RaiseSCDeltaCount::RaiseSCDeltaCount()
 {
     auto r_delta_count = MakePatternNode<DeltaCount>();
 
-    auto s_call = MakePatternNode<MapArgsCall>();
+    auto s_call = MakePatternNode<Call>();
+    auto s_args = MakePatternNode<MapArguments>();
     auto s_token = MakePatternNode< InstanceIdentifierByNameAgent >( r_delta_count->GetLoweredIdName() );                
                 
     s_call->callee = s_token;
-    //s_call->operands = (); // no operands
+    s_call->args = s_args;
+    //s_args->arguments = (); // no operands
        
     Configure( SEARCH_REPLACE, s_call, r_delta_count );
 }
@@ -219,7 +231,8 @@ RaiseSCDeltaCount::RaiseSCDeltaCount()
 
 RaiseSCNotifyImmediate::RaiseSCNotifyImmediate()
 {
-    auto s_call = MakePatternNode<MapArgsCall>();
+    auto s_call = MakePatternNode<Call>();
+    auto s_args = MakePatternNode<MapArguments>();
     auto s_lookup = MakePatternNode<Lookup>();
     auto s_event = MakePatternNode<Event>();
     auto r_notify = MakePatternNode<NotifyImmediate>();
@@ -228,7 +241,8 @@ RaiseSCNotifyImmediate::RaiseSCNotifyImmediate()
     //MakePatternNode< Expression > eexpr; 
             
     s_call->callee = s_lookup;
-    //s_call->args = ();
+    s_call->args = s_args;
+    //s_args->arguments = ();
     s_lookup->object = eexpr;          
     eexpr->pattern = s_event;     // ensure base really evaluates to an event 
     s_lookup->member = s_token;        
@@ -241,7 +255,8 @@ RaiseSCNotifyImmediate::RaiseSCNotifyImmediate()
 
 RaiseSCNotifyDelta::RaiseSCNotifyDelta()
 {
-    auto s_call = MakePatternNode<MapArgsCall>();
+    auto s_call = MakePatternNode<Call>();
+    auto s_args = MakePatternNode<MapArguments>();
     auto s_lookup = MakePatternNode<Lookup>();
     auto s_event = MakePatternNode<Event>();
     auto r_notify = MakePatternNode<NotifyDelta>();
@@ -253,7 +268,8 @@ RaiseSCNotifyDelta::RaiseSCNotifyDelta()
     //MakePatternNode< Expression > eexpr; 
             
     s_call->callee = s_lookup;
-    s_call->args = (s_arg);
+    s_call->args = s_args;
+    s_args->arguments = (s_arg);
     s_arg->key = s_arg_id;
     s_arg->value = s_zero_token;        
     s_lookup->object = eexpr;          
@@ -275,7 +291,7 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     auto l_decls = MakePatternNode<StarAgent, Declaration>();
     auto l_pre = MakePatternNode<StarAgent, Statement>();
     auto l_post = MakePatternNode<StarAgent, Statement>();
-    auto l1s_args = MakePatternNode<StarAgent, IdValuePair>();
+    auto l1s_arg = MakePatternNode<StarAgent, IdValuePair>();
     auto s_cons = MakePatternNode< Field >();
     auto s_comp = MakePatternNode< Compound >();
     auto s_id = MakePatternNode< InstanceIdentifier >();
@@ -285,13 +301,15 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     auto lr_comp = MakePatternNode< Compound >();
     auto s_module = MakePatternNode< Module >();
     auto r_module = MakePatternNode< Module >();
-    auto l1s_call = MakePatternNode< MapArgsCall >();
+    auto l1s_call = MakePatternNode<Call>();
+    auto l1s_args = MakePatternNode<MapArguments>();
     auto l1s_lookup = MakePatternNode< Lookup >();
     auto l_instance = MakePatternNode<Instance>();  
     auto l_delta = MakePatternNode<DeltaAgent, Initialiser>();  
-    auto l2s_call = MakePatternNode<MapArgsCall>();
+    auto l2s_call = MakePatternNode<Call>();
+    auto l2s_args = MakePatternNode<MapArguments>();
     auto l2s_lookup = MakePatternNode<Lookup>();
-	auto l2s_args = MakePatternNode<StarAgent, IdValuePair>();
+	auto l2s_arg = MakePatternNode<StarAgent, IdValuePair>();
 
     auto bases = MakePatternNode<StarAgent, Base>();
     auto r_embedded_2 = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( stuff, l_instance, l_instance );            
@@ -318,7 +336,8 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     ls_comp->members = (l_decls);
 	ls_comp->statements = (l_pre, l1s_call, l_post);
 	l1s_call->callee = l1s_lookup;
-	l1s_call->args = (l1s_args); // any number of args, it doesn't matter, ctor is still empty so does nothing
+	l1s_call->args = l1s_args;
+	l1s_args->arguments = (l1s_arg); // any number of args, it doesn't matter, ctor is still empty so does nothing
 	l1s_lookup->object = MakePatternNode< InstanceIdentifier >();
 	l1s_lookup->member = s_id;        	
     lr_comp->members = (l_decls);
@@ -329,8 +348,9 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     l_instance->initialiser = l_delta;
 	
 	l_delta->through = l2s_call;
-	l2s_call->args = (l2s_args); // any number of args, it doesn't matter, ctor is still empty so does nothing
+	l2s_args->arguments = (l2s_arg); // any number of args, it doesn't matter, ctor is still empty so does nothing
 	l2s_call->callee = l2s_lookup;
+	l2s_call->args = l2s_args;
 	l2s_lookup->object = l_instance->identifier;
 	l2s_lookup->member = s_id;
 

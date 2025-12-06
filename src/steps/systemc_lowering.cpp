@@ -85,7 +85,8 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     auto l1_bases = MakePatternNode<StarAgent, Base>();
     auto l1_statements = MakePatternNode<StarAgent, Statement>();
     auto l1_statements_negation = MakePatternNode<NegationAgent, Statement>();
-    auto l1x_call = MakePatternNode<SeqArgsCall>();
+    auto l1x_call = MakePatternNode<Call>();
+    auto l1x_args = MakePatternNode<SeqArguments>();
     auto l1x_lookup = MakePatternNode<Lookup>();
     auto l1_decls = MakePatternNode<StarAgent, Declaration>();
     auto l1_cons_macro = MakePatternNode< MacroDeclaration >(); 
@@ -95,7 +96,8 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     auto l1_field = MakePatternNode< Field >();
     auto l1_field_id = MakePatternNode< InstanceIdentifier >();
     auto l1_delta = MakePatternNode<DeltaAgent, Initialiser>();  
-    auto l1r_call = MakePatternNode<SeqArgsCall>();
+    auto l1r_call = MakePatternNode<Call>();
+    auto l1r_args = MakePatternNode<SeqArguments>();
     auto l1r_lookup = MakePatternNode<Lookup>();
 	auto l1r_arg = MakePatternNode< StringizeAgent >();
     
@@ -104,7 +106,8 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     auto l2_instance = MakePatternNode<Instance>();  
     auto l2_inst_id = MakePatternNode<InstanceIdentifier>();  
     auto l2_delta = MakePatternNode<DeltaAgent, Initialiser>();  
-    auto l2r_call = MakePatternNode<SeqArgsCall>();
+    auto l2r_call = MakePatternNode<Call>();
+    auto l2r_args = MakePatternNode<SeqArguments>();
     auto l2r_lookup = MakePatternNode<Lookup>();
 	auto l2r_arg = MakePatternNode< StringizeAgent >();
     
@@ -121,7 +124,7 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     r_base->record = r_token;
     r_base->access = MakePatternNode< Public >();
        
-    // Field decl of our module in some OTHER class: add SeqArgsCall to all constructors
+    // Field decl of our module in some OTHER class: add call to all constructors
     l1_class->identifier = MakePatternNode< TypeIdentifier >(); // not tid, the OTHER class
     l1_class->members = (l1_fields, l1_cons_macro, l1_field);
     l1_class->bases = (l1_bases);
@@ -141,17 +144,19 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
 	l1_statements->restriction = l1_statements_negation;
 	l1_statements_negation->negand = l1x_call;
 	l1x_call->callee = l1x_lookup;
-	l1x_call->arguments = MakePatternNode<StarAgent, Expression>();
+	l1x_call->args = l1x_args;
+	l1x_args->arguments = MakePatternNode<StarAgent, Expression>();
 	l1x_lookup->object = l1_field_id; // this should be enough to prevent spin
 	// l1_field_id is instance of a SC class and is not constructed in SC language
 	
     l1r_call->callee = l1r_lookup;
-    l1r_call->arguments = (l1r_arg);
+    l1r_call->args = l1r_args;
+    l1r_args->arguments = (l1r_arg);
     l1r_arg->source =  tid;
     l1r_lookup->object = l1_field_id;
-    l1r_lookup->member = MakePatternNode< SpecificInstanceIdentifier >(""); // Empty indicates constructor SeqArgsCall
+    l1r_lookup->member = MakePatternNode< SpecificInstanceIdentifier >(""); // Empty indicates constructor call
                     
-    // Static decl of our module: init to SeqArgsCall
+    // Static decl of our module: init to call
     // Not fields: they can't have constructor calls as intiialisers
     l2_conjunction->conjuncts = (l2_instance, l2_negation);
     l2_negation->negand = MakePatternNode<Field>();
@@ -161,10 +166,11 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     l2_delta->through = MakePatternNode< Uninitialised >();
     l2_delta->overlay = l2r_call;
     l2r_call->callee = l2r_lookup;
-    l2r_call->arguments = (l2r_arg);
+    l2r_call->args = l2r_args;
+    l2r_args->arguments = (l2r_arg);
     l2r_arg->source =  tid;
     l2r_lookup->object = l2_instance->identifier;
-    l2r_lookup->member = MakePatternNode< SpecificInstanceIdentifier >(""); // Empty indicates constructor SeqArgsCall
+    l2r_lookup->member = MakePatternNode< SpecificInstanceIdentifier >(""); // Empty indicates constructor call
                                                            
     auto embedded_2 = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( stuff, l2_conjunction, l2_instance );                         
     auto embedded_1 = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( embedded_2, l1_class, l1_class );                         
@@ -175,13 +181,15 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
 LowerSCDynamic::LowerSCDynamic( TreePtr<SCDynamicFunction> s_dynamic,
                                 TreePtr<InstanceIdentifier> r_dest )                              
 {
-    auto r_call = MakePatternNode< SeqArgsCall >();
+    auto r_call = MakePatternNode<Call>();
+    auto r_args = MakePatternNode<SeqArguments>();
     // TODO IdValuePair args can't render without a function decl. Maybe add OperandSequence as an alternative? 
     auto event_expr = MakePatternNode< Expression >(); 
                     
     s_dynamic->event = event_expr;       
     r_call->callee = r_dest;       
-    r_call->arguments = (event_expr);
+    r_call->args = r_args;
+    r_args->arguments = (event_expr);
       
     Configure( SEARCH_REPLACE, s_dynamic, r_call );
 }
@@ -190,9 +198,11 @@ LowerSCDynamic::LowerSCDynamic( TreePtr<SCDynamicFunction> s_dynamic,
 LowerSCStatic::LowerSCStatic( TreePtr<SCFunction> s_static,
                               TreePtr<InstanceIdentifier> r_dest )
 {
-    auto r_call = MakePatternNode< SeqArgsCall >();
+    auto r_call = MakePatternNode<Call>();
+    auto r_args = MakePatternNode<SeqArguments>();
                         
     r_call->callee = r_dest;       
+    r_call->args = r_args;
       
     Configure( SEARCH_REPLACE, s_static, r_call );
 }
@@ -202,10 +212,12 @@ LowerSCDelta::LowerSCDelta( TreePtr<SCFunction> s_delta,
                             TreePtr<InstanceIdentifier> r_dest,
                             TreePtr<CPPTree::InstanceIdentifier> zero_time_id )
 {
-    auto r_call = MakePatternNode< SeqArgsCall >();
+    auto r_call = MakePatternNode<Call>();
+    auto r_args = MakePatternNode<SeqArguments>();
                     
     r_call->callee = r_dest;       
-    r_call->arguments = (zero_time_id);
+    r_call->args = r_args;
+    r_args->arguments = (zero_time_id);
           
     Configure( SEARCH_REPLACE, s_delta, r_call );
 }
@@ -213,14 +225,16 @@ LowerSCDelta::LowerSCDelta( TreePtr<SCFunction> s_delta,
 
 LowerTerminationFunction::LowerTerminationFunction( TreePtr<SCTree::TerminationFunction> s_tf )
 {
-    auto r_call = MakePatternNode< SeqArgsCall >();
+    auto r_call = MakePatternNode<Call>();
+    auto r_args = MakePatternNode<SeqArguments>();
     auto r_token = MakePatternNode< SpecificInstanceIdentifier >( s_tf->GetLoweredIdName() ); 
     // TODO IdValuePair args can't render without a function decl. Maybe add OperandSequence as an alternative? 
     auto exit_expr = MakePatternNode< Expression >(); 
                     
     s_tf->code = exit_expr;       
     r_call->callee = r_token;       
-    r_call->arguments = (exit_expr);
+    r_call->args = r_args;
+    r_args->arguments = (exit_expr);
       
     Configure( SEARCH_REPLACE, s_tf, r_call );
 }
@@ -284,7 +298,8 @@ LowerSCProcess::LowerSCProcess( TreePtr< SCTree::Process > s_scprocess )
 LowerSCNotifyImmediate::LowerSCNotifyImmediate()
 {
     auto s_notify = MakePatternNode<NotifyImmediate>();
-    auto r_call = MakePatternNode<SeqArgsCall>();
+    auto r_call = MakePatternNode<Call>();
+    auto r_args = MakePatternNode<SeqArguments>();
     auto r_lookup = MakePatternNode<Lookup>();
     auto r_event = MakePatternNode<Event>();
     auto r_token = MakePatternNode< SpecificInstanceIdentifier >( s_notify->GetLoweredIdName() );                
@@ -294,7 +309,8 @@ LowerSCNotifyImmediate::LowerSCNotifyImmediate()
     s_notify->event = eexpr;
             
     r_call->callee = r_lookup;
-    //s_call->arguments = ();
+    r_call->args = r_args;
+    //r_args->arguments = ();
     r_lookup->object = eexpr;          
     eexpr->pattern = r_event;     // ensure base really evaluates to an event 
     r_lookup->member = r_token;        
@@ -309,7 +325,8 @@ LowerSCNotifyDelta::LowerSCNotifyDelta(TreePtr<CPPTree::InstanceIdentifier> zero
     auto eexpr = MakePatternNode<TransformOfAgent, Expression>( &TypeOf::instance ); 
     auto event = MakePatternNode<Event>();
     
-    auto r_call = MakePatternNode<SeqArgsCall>();
+    auto r_call = MakePatternNode<Call>();
+    auto r_args = MakePatternNode<SeqArguments>();
     auto r_lookup = MakePatternNode<Lookup>();
     auto r_token = MakePatternNode< SpecificInstanceIdentifier >( s_notify->GetLoweredIdName() );                
     //MakePatternNode< Expression > eexpr; 
@@ -318,7 +335,8 @@ LowerSCNotifyDelta::LowerSCNotifyDelta(TreePtr<CPPTree::InstanceIdentifier> zero
     eexpr->pattern = event;     // ensure base really evaluates to an event 
 
     r_call->callee = r_lookup;
-    r_call->arguments = (zero_time_id);
+    r_call->args = r_args;
+    r_args->arguments = (zero_time_id);
     r_lookup->object = eexpr;          
     r_lookup->member = r_token;        
        
@@ -330,12 +348,14 @@ LowerSCDeltaCount::LowerSCDeltaCount()
 {
     auto s_delta_count = MakePatternNode<DeltaCount>();
  
-    auto r_call = MakePatternNode<SeqArgsCall>();
+    auto r_call = MakePatternNode<Call>();
+    auto r_args = MakePatternNode<SeqArguments>();
     auto r_token = MakePatternNode< SpecificInstanceIdentifier >( s_delta_count->GetLoweredIdName() );                
     //MakePatternNode< Expression > eexpr; 
             
     r_call->callee = r_token;
-    //r_call->arguments = (); // no operands
+    r_call->args = r_args;
+    //r_args->arguments = (); // no operands
        
     Configure( SEARCH_REPLACE, s_delta_count, r_call );
 }

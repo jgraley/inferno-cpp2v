@@ -861,8 +861,7 @@ struct This : Operator
 /** New/Delete is global if it has :: in
  front of it. This differentiates when placement args are given as follows:
  Global: must be one placement arg, it is address to construct at
- NonGlobal: all placement args go to a corresponding operator new which returns address to construct at
- TODO bring these in line with MapArgsCall etc */
+ NonGlobal: all placement args go to a corresponding operator new which returns address to construct at */
 struct Globality : Property { NODE_FUNCTIONS };
 
 /// Property indicating ::new/::delete was used
@@ -943,21 +942,24 @@ struct IdValuePair : virtual Node
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );	
 };
 
-struct GoSub : virtual Node
+struct GoSub : virtual Node, Uncombable
 {
     NODE_FUNCTIONS
     TreePtr<Expression> callee; ///< evaluates to the Callable Instance we must call	
 };
 
+
+struct Arguments : virtual Node
+{
+    NODE_FUNCTIONS
+};
+
+
 /// A function call to specified function passing in specified arguments
-/* Function is an expression to allow eg function pointer dereference. Normal
- calls have callee -> some InstanceIdentifier for a Callable Instance.
- Arguments passed via IdValueMap - mapped to the parameters in the callee
- type (if it's a CallableParams). */
-struct MapArgsCall : GoSub, Expression, Uncombable
+struct MapArguments : Arguments
 {
     NODE_FUNCTIONS_FINAL	
-	Collection<IdValuePair> args;
+	Collection<IdValuePair> arguments;
 	
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
@@ -966,10 +968,20 @@ struct MapArgsCall : GoSub, Expression, Uncombable
 
 /// A regular function call whose arguments are given in sequence, so that a 
 /// declaration is not needed. Good for eg library calls.
-struct SeqArgsCall : GoSub, Expression
+struct SeqArguments : Arguments
 {
     NODE_FUNCTIONS_FINAL
     Sequence<Expression> arguments; ///< Arguments taken in order
+	
+	Production GetMyProductionTerminal() const override;
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
+};  
+
+
+struct Call : GoSub, Expression
+{
+    NODE_FUNCTIONS_FINAL
+    TreePtr<Arguments> args; ///< Arguments taken in order
 	
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );

@@ -1124,16 +1124,19 @@ private:
         return hold_expr.ToRaw( condo );
     }
 
-    TreePtr<MapArgsCall> CreateMapArgsCall( Sequence<Expression> &args, TreePtr<Expression> callee )
+    TreePtr<Call> CreateMapArgsCall( Sequence<Expression> &args, TreePtr<Expression> callee )
     {
-        // Make the MapArgsCall node and fill in the called function
-        auto c = MakeTreeNode<MapArgsCall>();
+        // Make the Call with MapArguments and fill in the called function
+        auto c = MakeTreeNode<Call>();
         c->callee = callee;
+
+        auto a = MakeTreeNode<MapArguments>();
+		c->args = a;
 
         // If CallableParams, fill in the args map based on the supplied args and original function type
         TreePtr<Node> t = TypeOf::instance(callee, all_decls).GetTreePtr();
         if( TreePtr<CallableParams> p = DynamicTreePtrCast<CallableParams>(t) )
-            PopulateMapOperator( c->args, args, p );
+            PopulateMapOperator( a->arguments, args, p );
 
         return c;
     }
@@ -1146,7 +1149,7 @@ private:
         // Get the args in a Sequence
         Sequence<Expression> args;
         CollectArgs( &args, Args, NumArgs );
-        TreePtr<MapArgsCall> c = CreateMapArgsCall( args, hold_expr.FromRaw(Fn) );
+        TreePtr<Call> c = CreateMapArgsCall( args, hold_expr.FromRaw(Fn) );
         return hold_expr.ToRaw( c );
     }
 
@@ -1511,7 +1514,7 @@ private:
 		lu->object = our_field->identifier;
 		lu->member = memb_cons_id;
 			
-		TreePtr<MapArgsCall> call = CreateMapArgsCall( args, lu );
+		TreePtr<Call> call = CreateMapArgsCall( args, lu );
 		return hold_expr.ToRaw( call );
     }
 

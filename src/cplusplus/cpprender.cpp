@@ -72,7 +72,6 @@ string CppRender::RenderToString( TreePtr<Node> root )
 Syntax::Policy CppRender::GetDefaultPolicy()
 {
 	Syntax::Policy policy;
-	policy.refuse_map_args_call = true;
 	return policy;
 }
 
@@ -110,7 +109,7 @@ string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surro
         return RenderType( type, surround_prod, policy );
     else if( auto literal = DynamicTreePtrCast< Literal >(node) )
         return RenderLiteral( literal, surround_prod );
-    else if( auto call = TreePtr<MapArgsCall>::DynamicCast(node) )
+    else if( auto call = TreePtr<Call>::DynamicCast(node) )
         return RenderMapArgsCallAsSeqArg( call, surround_prod );
     else if( auto make_rec = TreePtr<RecordLiteral>::DynamicCast(node) )
         return RenderMakeRecord( make_rec, surround_prod );
@@ -508,31 +507,26 @@ string CppRender::RenderMapArgs( TreePtr<Type> dest_type, Collection<IdValuePair
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderMapArgsCallAsSeqArg( TreePtr<MapArgsCall> call, Syntax::Production surround_prod ) try
+string CppRender::RenderMapArgsCallAsSeqArg( TreePtr<Call> call, Syntax::Production surround_prod ) try
 {
 	(void)surround_prod;
-    string s;
+	// Note: we need to operate on the call, so that we can use callee to find the declaration and 
+	// resolve the map into a sequence.
+
+	auto map_args = TreePtr<MapArguments>::DynamicCast( call->args );
+	ASSERT( map_args );
 
     // Render the expression that resolves to the function name unless this is
     // a constructor call in which case just the name of the thing being constructed.
+    string s;
     if( TreePtr<Expression> base = TypeOf::instance.TryGetConstructedExpression( trans_kit, call ).GetTreePtr() )
         s += RenderIntoProduction( base, Syntax::Production::POSTFIX );
     else
         s += RenderIntoProduction( call->callee, Syntax::Production::POSTFIX );
 
 	// A map-args call isn't C++, so lower it to sequential args - requires the function type
-    s += RenderMapArgs(TypeOf::instance.Get(trans_kit, call->callee).GetTreePtr(), call->args);
+    s += RenderMapArgs(TypeOf::instance.Get(trans_kit, call->callee).GetTreePtr(), map_args->arguments);
     return s;
-}
-DEFAULT_CATCH_CLAUSE
-
-
-string CppRender::RenderExprSeq( Sequence<Expression> seq ) try
-{
-    list<string> renders;
-    for( TreePtr<Expression> e : seq )    
-        renders.push_back( RenderIntoProduction( e, Syntax::Production::COMMA_SEP) );               
-    return Join(renders, ", ", "(", ")");
 }
 DEFAULT_CATCH_CLAUSE
 
@@ -767,18 +761,21 @@ string CppRender::RenderInitialisation( TreePtr<Initialiser> init ) try
 	if( TreePtr<Expression> ei = DynamicTreePtrCast<Expression>( init ) )
     {
         // Attempt direct initialisation by providing args for a constructor call
-        if( auto call = DynamicTreePtrCast<SeqArgsCall>( ei ) )
+        try
         {
-            if( auto lu = TreePtr<Lookup>::DynamicCast(call->callee) )
-                if( auto id = TreePtr<InstanceIdentifier>::DynamicCast(lu->member) )
-                    if( id->GetIdentifierName().empty() ) // syscall to a nameless member function => sys construct
-                        return RenderExprSeq(call->arguments);
-        }
-        if( auto call = DynamicTreePtrCast<MapArgsCall>( ei ) ) try
-        {       
-            if( TypeOf::instance.TryGetConstructedExpression( trans_kit, call ).GetTreePtr() )        
-                return RenderMapArgs(TypeOf::instance.Get(trans_kit, call->callee).GetTreePtr(), call->args);
-        }
+			if( auto call = DynamicTreePtrCast<Call>( ei ) )
+			{
+				if( auto map_args = TreePtr<MapArguments>::DynamicCast(call->args) )
+				{
+					if( TypeOf::instance.TryGetConstructedExpression( trans_kit, call ).GetTreePtr() )   
+						return RenderMapArgs(TypeOf::instance.Get(trans_kit, call->callee).GetTreePtr(), map_args->arguments);
+				}
+				else // seq args
+				{
+					return RenderIntoProduction(call->args, Syntax::Production::PRIMITIVE_EXPR);    
+				}
+			}
+		}
         catch(DeclarationOf::DeclarationNotFound &)
         {
         }   

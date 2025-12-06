@@ -77,8 +77,8 @@ public:
 	TreePtr<Node> OnArrayLiteral( TreePtr<Node> root_of_comma_expression );	
 	TreePtr<Node> OnNormalTerminalKeyword( string keyword, any keyword_loc );
 	TreePtr<Node> OnIdValuePair( TreePtr<Node> id, any id_loc, TreePtr<Node> value );
-	TreePtr<Node> OnMapArgsCall( TreePtr<Node> callee, list<TreePtr<Node>> args );
-	TreePtr<Node> OnSeqArgsCall( TreePtr<Node> callee, list<TreePtr<Node>> args );
+	TreePtr<Node> OnMapArgsCall( TreePtr<Node> callee, list<TreePtr<Node>> arguments );
+	TreePtr<Node> OnSeqArgsCall( TreePtr<Node> callee, list<TreePtr<Node>> arguments );
 	TreePtr<Node> OnLookup( TreePtr<Node> object, TreePtr<Node> member, any member_loc );
 
 	TreePtr<Node> OnSpecificId( const AvailableNodeData::Block *block, any id_disc_loc, wstring wname, any name_loc );
