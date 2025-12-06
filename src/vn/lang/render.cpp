@@ -291,9 +291,10 @@ string Render::RenderNodeExplicit( shared_ptr<const Node> node, Syntax::Producti
 	//bool need_a_type = surround_prod >= Syntax::Production::BOOT_TYPE && 
 	//                   surround_prod <= Syntax::Production::TOP_TYPE;
     string s = "⯁";
-    s += GetInnermostTemplateParam(TYPE_ID_NAME(*node));
-	
     list<string> sitems;    
+
+    sitems.push_back( GetInnermostTemplateParam(TYPE_ID_NAME(*node)) );
+	
     vector< Itemiser::Element * > items = node->Itemise();
     for( vector< Itemiser::Element * >::size_type i=0; i<items.size(); i++ )
     {
@@ -328,9 +329,9 @@ string Render::RenderNodeExplicit( shared_ptr<const Node> node, Syntax::Producti
     }   
     
     if( GetTotalSize(sitems) > Syntax::GetLineBreakThreshold() )
-		s += Join( sitems, "⚬\n", "(\n", "\n)" );   
+		s += Join( sitems, "⚬\n", "【\n", "\n】" );   
 	else 
-		s += Join( sitems, " ⚬ ", "(", ")" );    
+		s += Join( sitems, " ⚬ ", "【", "】" );    
 
 	return s;
 }

@@ -10,6 +10,7 @@
 %define lr.type ielr
 // Lookahead Correction
 %define parse.lac full
+%define parse.trace
 
 %defines
 
@@ -64,6 +65,7 @@
 %token
 	DESIGNATE 								"⪮"
 	VN_SEMI 								"⨟"
+	VN_COLON 								"⦂"
 	VN_SEP 									"⚬"
 	'('
 	')'
@@ -120,7 +122,7 @@
 	<YY::TokenMetadata> TRANSFORM_NAME_NORMAL		_("normal transformation name")
 	<YY::TokenMetadata> ASCII_NAME 			_("ASCII name")
 	<YY::TokenMetadata> UNICODE_NAME 		_("Unicode name")
-	<YY::TokenMetadata>	DESIGNATED_NONTYPE	_("designated name")
+	<YY::TokenMetadata>	DESIGNATED_NORMAL	_("designated name")
 	<YY::TokenMetadata>	DESIGNATED_TYPE		_("designated type name")
 	<YY::TokenMetadata>	RESOLVED_NORMAL		_("resolved node name")
 	<YY::TokenMetadata>	RESOLVED_TYPE		_("resolved type node name")
@@ -129,27 +131,28 @@
 	<YY::TokenMetadata>	TYPE_OF				_("TypeOf")
 	<YY::TokenMetadata> NORM_TERM_KEYWORD	_("terminal keyword")
 	
-%type <TreePtr<Node>> 				normal norm_term norm_postfix norm_prefix norm_relational norm_disjunction norm_conjunction  
+%type <TreePtr<Node>> 				normal norm_unit norm_postfix norm_prefix norm_relational norm_disjunction norm_conjunction  
 %type <TreePtr<Node>> 				norm_assignment norm_equality norm_add_etc norm_logical_or norm_logical_and 
 %type <TreePtr<Node>> 				norm_mul_etc norm_shift norm_bitwise_and norm_bitwise_or norm_bitwise_xor norm_no_comma_op 
 %type <TreePtr<Node>> 				norm_paren norm_comma_op 
-%type <TreePtr<Node>> 				type type_term type_prefix type_disjunction type_conjunction type_paren
+%type <TreePtr<Node>> 				type type_unit type_prefix type_disjunction type_conjunction type_paren
 %type <TreePtr<Node>> 				unified_no_comma_op unified unified_prefix
 %type <TreePtr<Node>> 				bare_statement
+%type <TreePtr<Node>> 				norm_id_value
 %type <wstring> 					vn_name
 %type <string>						transform_norm_part transform_unif_part
 %type <YY::TokenMetadata> 			resolved_name resolved_type_name node_namespace
 %type <list<shared_ptr<VN::Command>>>			commands sep_commands
 %type <shared_ptr<VN::Command>>		script_command 
 %type <VN::Limit>					limit
-%type <VN::Itemisation>				itemisation items_bare items_sep
+%type <VN::Itemisation>				close_itemisation items_bare items_sep
 %type <VN::Item>					item
 %type <shared_ptr<VN::Gnomon>>		part_resolve recogniser_command 
-%type <shared_ptr<VN::Gnomon>>		start_node_name_scope start_id_discrim_scope 
-%type <shared_ptr<VN::Gnomon>>		start_builtin_scope start_transform_name_scope
+%type <shared_ptr<VN::Gnomon>>		start_node_name_scope start_id_discrim_scope start_transform_name_scope
 %type <list<TreePtr<Node>>>			bare_statements
+%type <list<TreePtr<Node>>>			map_args
 %type <const AvailableNodeData::Block *> node_name_part type_node_name_part id_discrim_part
-%type <const AvailableNodeData::Block *> type_id_discrim_part builtin_part type_builtin_part
+%type <const AvailableNodeData::Block *> type_id_discrim_part 
 %%
 
 vnscript 		: commands 								{ vn->OnVNScript($1); }
@@ -178,10 +181,10 @@ recogniser_command	: vn_name DESIGNATE normal			{ $$ = make_shared<VN::NonTypeDe
 // This one dips into ASCII/C because VN doesn't otherwise need equality/inequality operators
 limit		: C_ASSIGN INTEGRAL_LITERAL					{ $$ = VN::Limit{ $1, @1, $2, @2 }; }
 
-itemisation : '(' items_bare ')'    					{ $$ = $2; $$.loc = @$; }
-			| '(' items_sep ')'	    					{ $$ = $2; $$.loc = @$; $$.items.push_back({{}, @3}); }
-			| '(' ')'									{ $$.loc = @$; }
-  
+close_itemisation	: VN_SEP items_bare CLOSE_VN   		{ $$ = $2; $$.loc = @$; }
+					| VN_SEP items_sep CLOSE_VN			{ $$ = $2; $$.loc = @$; $$.items.push_back({{}, @3}); }
+					| CLOSE_VN							{ $$.loc = @$; }
+					
 items_bare 	: items_sep item							{ $$ = $1; $$.items.push_back($2); }
 			| item										{ $$.items.push_back($1); }
 
@@ -218,11 +221,11 @@ type_prefix : 										         type_paren
 			| 								       NEGATION type_prefix	{ $$ = vn->OnNegation($2); }
 			|   PRERESTRICT type_node_name_part CLOSE_VN unified_prefix	{ $$ = vn->OnRestrict($2, @2, $4, @4); }
 
-type_paren  : type_term
+type_paren  : type_unit
 			| '(' type ')'									{ $$ = $2; }	
 			                                        
-type_term	: type_builtin_part itemisation					{ $$ = vn->OnBuiltIn($1, @1, $2); }
-			| DESIGNATED_TYPE       				 		{ $$ = $1.as_designated; }		
+type_unit	: BUILT_IN type_node_name_part close_itemisation								{ $$ = vn->OnBuiltIn($2, @2, $3); }
+			| DESIGNATED_TYPE     									  				 		{ $$ = $1.as_designated; }		
    			| SPECIFIC_ID type_id_discrim_part VN_SEP STRING_LITERAL CLOSE_VN				{ $$ = vn->OnSpecificId($2, @2, $4, @4); }
 			| SPECIFIC_ID type_id_discrim_part VN_SEP CLOSE_VN								{ $$ = vn->OnSpecificId($2, @2, wstring(), @4); }
 			| ID_BY_NAME type_id_discrim_part VN_SEP STRING_LITERAL CLOSE_VN				{ $$ = vn->OnIdByName($2, @2, $4, @4); } // ASCII_NAME could be format
@@ -234,7 +237,10 @@ type_node_name_part : start_node_name_scope resolved_type_name		{ $$ = $2.as_and
 
 type_id_discrim_part : start_id_discrim_scope resolved_type_name 	{ $$ = $2.as_andata_block; (void)$1; }
 
-type_builtin_part : start_builtin_scope resolved_type_name			{ $$ = $2.as_andata_block; (void)$1; }
+
+map_args	: map_args COMMA norm_id_value								{ $$ = $1; $$.push_back($3); }
+			| norm_id_value												{ $$.push_back($1); }
+
 
 
 normal				: norm_comma_op
@@ -242,8 +248,11 @@ normal				: norm_comma_op
 norm_comma_op		: norm_no_comma_op
 					| norm_comma_op COMMA norm_no_comma_op						{ $$ = vn->OnInfixOperator($2, $1, $3); }
 
-norm_no_comma_op 	: norm_disjunction
+norm_no_comma_op 	: norm_id_value
 
+norm_id_value		: norm_disjunction
+					| norm_id_value VN_COLON norm_disjunction					{ $$ = vn->OnIdValuePair($1, @1, $3); }
+					
 norm_disjunction	: norm_conjunction
 					| norm_disjunction DISJUNCTION norm_conjunction				{ $$ = vn->OnDisjunction($1, $3); }
 
@@ -317,11 +326,13 @@ transform_unif_part : start_transform_name_scope TRANSFORM_NAME_UNIFIED { $$ = $
 norm_postfix: norm_paren     
 			| norm_postfix C_PRE_OR_POSTFIX_OP 				 	{ $$ = vn->OnPostfixOperator($2, $1); }
 			| norm_postfix '[' normal ']'	 				 	{ $$ = vn->OnSubscript($1, $3); }
+			| norm_postfix '(' map_args ')'	 				 	{ $$ = vn->OnMapArgsCall($1, $3); }
+			| norm_postfix '(' ')'	 				 			{ $$ = vn->OnMapArgsCall($1, list<TreePtr<Node>>()); }
 		
-norm_paren	: norm_term
+norm_paren	: norm_unit
 			| '(' commands ')'                          		{ $$ = vn->OnEmbeddedCommands($2); }
 
-norm_term	: builtin_part itemisation							{ $$ = vn->OnBuiltIn($1, @1, $2); }
+norm_unit	: BUILT_IN node_name_part close_itemisation			{ $$ = vn->OnBuiltIn($2, @2, $3); }
 			| STAR												{ $$ = vn->OnStar(nullptr); }
 			| STAR OPEN_VN normal CLOSE_VN						{ $$ = vn->OnStar($3); }
 			| INTEGRAL_LITERAL					      			{ $$ = vn->OnIntegralLiteral($1, @1); }
@@ -332,7 +343,7 @@ norm_term	: builtin_part itemisation							{ $$ = vn->OnBuiltIn($1, @1, $2); }
 			| '{' '}'                          					{ $$ = vn->OnCompound({}); } // TODO will be erroneously invoked on empty array literal
 			| '{' norm_comma_op '}'                  	  		{ $$ = vn->OnArrayLiteral($2); }
 			| '{' bare_statements ';' '}'                  		{ $$ = vn->OnCompound($2); }
-			| DESIGNATED_NONTYPE       				  			{ $$ = $1.as_designated; }
+			| DESIGNATED_NORMAL       				  			{ $$ = $1.as_designated; }
 			| SPECIFIC_ID id_discrim_part VN_SEP STRING_LITERAL CLOSE_VN			{ $$ = vn->OnSpecificId($2, @2, $4, @4); }
 			| SPECIFIC_ID id_discrim_part VN_SEP CLOSE_VN							{ $$ = vn->OnSpecificId($2, @2, wstring(), @4); }
 			| ID_BY_NAME id_discrim_part VN_SEP STRING_LITERAL CLOSE_VN				{ $$ = vn->OnIdByName($2, @2, $4, @4); } // ASCII_NAME could be format
@@ -343,8 +354,6 @@ norm_term	: builtin_part itemisation							{ $$ = vn->OnBuiltIn($1, @1, $2); }
 node_name_part : start_node_name_scope resolved_name	{ $$ = $2.as_andata_block; (void)$1; }
 
 id_discrim_part : start_id_discrim_scope resolved_name	{ $$ = $2.as_andata_block; (void)$1; }
-
-builtin_part : start_builtin_scope resolved_name		{ $$ = $2.as_andata_block; (void)$1; }
 
 vn_name		: UNICODE_NAME    							{ $$ = $1.as_unicode; }
 			| ASCII_NAME								{ $$ = $1.as_unicode; }     
@@ -375,10 +384,5 @@ start_id_discrim_scope	: OPEN_VN 			{ $$ = make_shared<VN::IdentifierDiscriminat
 
 start_transform_name_scope	: OPEN_VN 		{ $$ = make_shared<VN::TransformNameScopeGnomon>(); 
 											  recogniser->AddGnomon($$); }
-
-
-// Built-in is a special case because it doesn't have the VN brackets
-start_builtin_scope	: BUILT_IN 				{ $$ = make_shared<VN::NodeNameScopeGnomon>(); 
-										      recogniser->AddGnomon($$); }
 
 %%

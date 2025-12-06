@@ -4,7 +4,8 @@ REFLEX = $(REFLEX_DIR)/bin/reflex
 LIBREFLEX = $(REFLEX_DIR)/lib/libreflex.a
 REFLEX_INC = $(REFLEX_DIR)/include
 REFLEX_OPTIONS = --bison-complete --bison-locations
-BISON_OPTIONS = -Wcounterexamples -Wdangling-alias -Wall -Werror
+BISON_OPTIONS = -Wcounterexamples -Wdangling-alias -Wall -Werror 
+# --report=all
 BISON = bison 
 
 # We need to be more relaxed than we are for most VN code.
@@ -31,6 +32,7 @@ VNL_DEPS = $(VNL_DIR)/makefile
 $(VNL_LYPP_MODULES:%=build/%.lpp.hpp) : build/%.lpp.hpp : build/%.lpp.cpp
 $(VNL_LYPP_MODULES:%=build/%.lpp.cpp): build/%.lpp.cpp : %.lpp $(VNL_DEPS)
 	@mkdir -p $(dir $@)
+	@echo GENERATING LEXER
 	$(REFLEX) $(REFLEX_OPTIONS) $< --outfile=$@ --header-file=$(subst .cpp,.hpp,$@)	
 	
 
@@ -38,6 +40,7 @@ $(VNL_LYPP_MODULES:%=build/%.ypp.hpp) : build/%.ypp.hpp : build/%.ypp.cpp
 $(VNL_LYPP_MODULES:%=build/%.location.hpp) : build/%.location.hpp : build/%.ypp.cpp
 $(VNL_LYPP_MODULES:%=build/%.ypp.cpp): build/%.ypp.cpp : %.ypp $(VNL_DEPS) 
 	@mkdir -p $(dir $@)
+	@echo GENERATING PARSER
 	$(BISON) $(BISON_OPTIONS) -d $< -o $@ 
 
 

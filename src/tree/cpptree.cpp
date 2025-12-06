@@ -755,12 +755,38 @@ string Cast::GetRender( VN::RendererInterface *renderer, Production, Policy poli
 
 Syntax::Production IdValuePair::GetMyProductionTerminal() const
 { 
-	return Production::ASSIGN; 
+	return Production::COLON_SEP; 
+}
+
+
+string IdValuePair::GetRender( VN::RendererInterface *renderer, Production, Policy )
+{
+    return renderer->RenderIntoProduction( key, BoostPrecedence(Production::COLON_SEP) ) +
+		   "⦂ " +
+           renderer->RenderIntoProduction( value, Production::COLON_SEP );	
 }
 
 //////////////////////////// MapArgsCall ///////////////////////////////
 
 Syntax::Production MapArgsCall::GetMyProductionTerminal() const
+{ 
+	return Production::POSTFIX; 
+}
+
+
+string MapArgsCall::GetRender( VN::RendererInterface *renderer, Production, Policy )
+{
+	list<string> ls;
+	for( TreePtr<Node> arg : args )
+		ls.push_back( renderer->RenderIntoProduction( arg, Production::COMMA_SEP ) );
+	
+    return renderer->RenderIntoProduction( callee, Production::POSTFIX ) +
+		   Join( ls, ", ", "(", ")" );	
+}
+
+//////////////////////////// SeqArgsCall ///////////////////////////////
+
+Syntax::Production SeqArgsCall::GetMyProductionTerminal() const
 { 
 	return Production::POSTFIX; 
 }
@@ -871,13 +897,6 @@ Syntax::Production Nop::GetMyProductionTerminal() const
 Syntax::Production PreprocessorIdentifier::GetMyProductionTerminal() const
 { 
 	return Production::PURE_IDENTIFIER; 
-}
-
-//////////////////////////// SeqArgsCall ///////////////////////////////
-
-Syntax::Production SeqArgsCall::GetMyProductionTerminal() const
-{ 
-	return Production::POSTFIX; 
 }
 
 //////////////////////////// MacroDeclaration ///////////////////////////////

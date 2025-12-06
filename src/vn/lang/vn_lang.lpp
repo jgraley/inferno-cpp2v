@@ -45,6 +45,7 @@ comp_assign				\|=|^=|&=|<<=|>>=|\+=|-=|\*=|\/=|%=
 \s          	// ignore space
 ⪮				{ return YY::VNLangParser::make_DESIGNATE(location()); };
 ⨟				{ return YY::VNLangParser::make_VN_SEMI(location()); };
+⦂				{ return YY::VNLangParser::make_VN_COLON(location()); };
 ⚬				{ return YY::VNLangParser::make_VN_SEP(location()); };
 ꩜				{ return YY::VNLangParser::make_ENGINE(location()); };
 ⩨				{ return YY::VNLangParser::make_STUFF(location()); };
@@ -91,13 +92,9 @@ comp_assign				\|=|^=|&=|<<=|>>=|\+=|-=|\*=|\/=|%=
 \*				{ return YY::VNLangParser::make_C_STAR(str(), location()); }
 ,				{ return YY::VNLangParser::make_COMMA(str(), location()); }
 
-true			{ return YY::VNLangParser::make_BOOL_LITERAL(true, location()); };
-false			{ return YY::VNLangParser::make_BOOL_LITERAL(false, location()); };
-typename		{ return YY::VNLangParser::make_TYPENAME(str(), location()); };
-
 ::				{ return YY::VNLangParser::make_RESOLUTION_OP(location()); };
 
-[()\{\};,?:\[\]]	{ return YY::VNLangParser::symbol_type(chr(), location()); }
+[()\{\};?:\[\]]	{ return YY::VNLangParser::symbol_type(chr(), location()); }
 
 \"[^"]*\"   	{ return YY::VNLangParser::make_STRING_LITERAL(wstr(), location()); }
 {integral_num}	{ return YY::VNLangParser::make_INTEGRAL_LITERAL(str(), location()); }

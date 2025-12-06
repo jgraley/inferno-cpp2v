@@ -57,6 +57,7 @@ public:
 		
 		COMMA_OP, // Must be lowest binop, so we can bypass it when we want comma as separator
 		COMMA_SEP, // Use this for comma-separated lists to force parens for COMMA_OP, including VN
+		COLON_SEP, // Use for map arguments
 
 		VN_DESIGNATE, // defining names using ⪮
 		VN_DISJUNCTION,

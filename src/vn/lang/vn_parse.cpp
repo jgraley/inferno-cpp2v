@@ -53,6 +53,7 @@ Command::List VNParse::DoParse(string filepath)
 
     scanner->in(file);
     scanner->filename = filepath;    
+    //parser->set_debug_level(1);
     
     top_level_commands.clear();
     int pr = parser->parse();    
@@ -385,6 +386,26 @@ TreePtr<Node> VNParse::OnNormalTerminalKeyword( string keyword, any keyword_loc 
 }
 
 
+TreePtr<Node> VNParse::OnIdValuePair( TreePtr<Node> key, any id_loc, TreePtr<Node> value )
+{
+	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::IdValuePair>>();
+	
+	node->key = key;
+	node->value = value;
+	return node;
+}	
+
+
+TreePtr<Node> VNParse::OnMapArgsCall( TreePtr<Node> callee, list<TreePtr<Node>> args )
+{
+	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::MapArgsCall>>();
+	node->callee = callee;
+	for( auto arg : args )
+		node->args.insert( arg );
+	return node;
+}	
+
+
 TreePtr<Node> VNParse::OnSpecificId( const AvailableNodeData::Block *block, any id_disc_loc, wstring wname, any name_loc )
 {
 	(void)name_loc; // TODO perhaps IdentifierByNameAgent can validate this?
@@ -576,8 +597,6 @@ VNLangRecogniser &VNParse::GetShim()
 // VNParse -> VNActions and move DoParse() into VNScript.
 // Ensure available_node_info, recogniser, and this file have the right filenames
 
-// Productions using 【 】: Use a gnomon to enable recogniser to "see" whatever is in the brackets eg TypeOf
-
 // Productions using 【 】: AFTER adding C mixture, try using () and making things look like printf etc
 
 // When designating a ⧇ or speciifc identifier node, why not use the given name as the name of the designation?
@@ -586,9 +605,7 @@ VNLangRecogniser &VNParse::GetShim()
 
 // Implement %printer for semantic values
 
-// itemisation () should parse as zero items, and then be relaxed into one empty item in the action, i.e.
-// the other way around fropm how it is now. That's because, if they are used in "resembles" productions,
-// we won't want empty items - we'll want items to be one of: singular, collection, sequence
+// There are still some keywords in vn_lang.lcc - spot them in recogniser
 
 // Tix:
 // Lose StandardAgentWrapper #867

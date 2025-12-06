@@ -934,11 +934,12 @@ struct Cast : Operator
 struct IdValuePair : virtual Node 
 {
     NODE_FUNCTIONS_FINAL
-    TreePtr<InstanceIdentifier> key; ///< the handle for this particualar operand
+    TreePtr<InstanceIdentifier> key; ///< the handle for this particular operand
     TreePtr<Expression> value; ///< the Expression for this operand
     
     virtual string GetColour() const { return "/set28/8"; }    
 	Production GetMyProductionTerminal() const override;
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );	
 };
 
 struct GoSub : virtual Node
@@ -958,7 +959,20 @@ struct MapArgsCall : GoSub, Expression, Uncombable
 	Collection<IdValuePair> args;
 	
 	Production GetMyProductionTerminal() const override;
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
 };
+
+
+/// A regular function call whose arguments are given in sequence, so that a 
+/// declaration is not needed. Good for eg library calls.
+struct SeqArgsCall : GoSub, Expression
+{
+    NODE_FUNCTIONS_FINAL
+    Sequence<Expression> arguments; ///< Arguments taken in order
+	
+	Production GetMyProductionTerminal() const override;
+};  
+
 
 /// Initialiser for a record 
 /** Uses a map to associate elements with corresponding record 
@@ -1199,16 +1213,6 @@ struct SpecificPreprocessorIdentifier : PreprocessorIdentifier,
 };
 
 
-/// A regular function call whose arguments are given in sequence, so that a 
-/// declaration is not needed. Good for eg library calls.
-struct SeqArgsCall : GoSub, Expression
-{
-    NODE_FUNCTIONS_FINAL
-    Sequence<Expression> arguments; ///< Arguments taken in order
-	
-	Production GetMyProductionTerminal() const override;
-};  
-
 /// A proprocessor macro usage that may be used as a field, and takes 
 /// arbitrary operands.
 struct MacroDeclaration : Declaration
@@ -1222,6 +1226,7 @@ struct MacroDeclaration : Declaration
 	Production GetMyProduction(const VN::RendererInterface *, Policy policy) const override;        
 };
 
+
 /// A proprocessor macro usage that may be used as a statement, and takes 
 /// arbitrary operands.
 struct MacroStatement : Statement 
@@ -1233,12 +1238,14 @@ struct MacroStatement : Statement
    	Production GetMyProductionTerminal() const override;
 };
 
+
 /// Preprocessor decl-like stuff: includes, defines
 struct PreProcDecl : virtual Declaration 
 {
     NODE_FUNCTIONS
    	Production GetMyProductionTerminal() const override;
 };
+
 
 /// Instruction to include a header file
 struct Include : virtual PreProcDecl 
@@ -1247,18 +1254,19 @@ struct Include : virtual PreProcDecl
     TreePtr<String> filename;
 };
 
+
 /// Instruction to include a system header file in <>
 struct SystemInclude : virtual Include 
 {
     NODE_FUNCTIONS_FINAL
 };
 
+
 /// Instruction to include a system header file in ""
 struct LocalInclude : virtual Include 
 {
     NODE_FUNCTIONS_FINAL
 };
-
 
 }; // end namespace  
    
