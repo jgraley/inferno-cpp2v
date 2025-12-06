@@ -96,6 +96,7 @@
 	PRERESTRICT								"‽"
 	OPEN_TYPE								"⦅"
 	CLOSE_TYPE								"⦆"
+	MAP_CALL								"⊷"
 	<string>	COMMA						_("comma")
 	<string>	C_ASSIGN					"="
 	<string>	C_COMPOUND_ASSIGN			_("C compound assignment operator")
@@ -150,7 +151,7 @@
 %type <shared_ptr<VN::Gnomon>>		part_resolve recogniser_command 
 %type <shared_ptr<VN::Gnomon>>		start_node_name_scope start_id_discrim_scope start_transform_name_scope
 %type <list<TreePtr<Node>>>			bare_statements
-%type <list<TreePtr<Node>>>			map_args
+%type <list<TreePtr<Node>>>			arguments
 %type <const AvailableNodeData::Block *> node_name_part type_node_name_part id_discrim_part
 %type <const AvailableNodeData::Block *> type_id_discrim_part 
 %%
@@ -238,10 +239,8 @@ type_node_name_part : start_node_name_scope resolved_type_name		{ $$ = $2.as_and
 type_id_discrim_part : start_id_discrim_scope resolved_type_name 	{ $$ = $2.as_andata_block; (void)$1; }
 
 
-map_args	: map_args COMMA norm_id_value								{ $$ = $1; $$.push_back($3); }
-			| norm_id_value												{ $$.push_back($1); }
-
-
+arguments	: arguments COMMA norm_no_comma_op								{ $$ = $1; $$.push_back($3); }
+			| norm_no_comma_op												{ $$.push_back($1); }
 
 normal				: norm_comma_op
                       
@@ -326,8 +325,11 @@ transform_unif_part : start_transform_name_scope TRANSFORM_NAME_UNIFIED { $$ = $
 norm_postfix: norm_paren     
 			| norm_postfix C_PRE_OR_POSTFIX_OP 				 	{ $$ = vn->OnPostfixOperator($2, $1); }
 			| norm_postfix '[' normal ']'	 				 	{ $$ = vn->OnSubscript($1, $3); }
-			| norm_postfix '(' map_args ')'	 				 	{ $$ = vn->OnMapArgsCall($1, $3); }
-			| norm_postfix '(' ')'	 				 			{ $$ = vn->OnMapArgsCall($1, list<TreePtr<Node>>()); }
+			| norm_postfix MAP_CALL'(' arguments ')'		 	{ $$ = vn->OnMapArgsCall($1, $4); }
+			| norm_postfix MAP_CALL '(' ')'	 					{ $$ = vn->OnMapArgsCall($1, list<TreePtr<Node>>()); }
+			| norm_postfix '(' arguments ')'		 			{ $$ = vn->OnSeqArgsCall($1, $3); }
+			| norm_postfix '(' ')'	 							{ $$ = vn->OnSeqArgsCall($1, list<TreePtr<Node>>()); }
+			| norm_postfix '.' norm_unit						{ $$ = vn->OnLookup($1, $3, @3); }
 		
 norm_paren	: norm_unit
 			| '(' commands ')'                          		{ $$ = vn->OnEmbeddedCommands($2); }

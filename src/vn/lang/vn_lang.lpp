@@ -72,6 +72,7 @@ comp_assign				\|=|^=|&=|<<=|>>=|\+=|-=|\*=|\/=|%=
 ‽ 				{ return YY::VNLangParser::make_PRERESTRICT(location()); };
 ⦅ 				{ return YY::VNLangParser::make_OPEN_TYPE(location()); };
 ⦆ 				{ return YY::VNLangParser::make_CLOSE_TYPE(location()); };
+⊷				{ return YY::VNLangParser::make_MAP_CALL(location()); };
 
 // Multi-character before single-character
 ==|!=			{ return YY::VNLangParser::make_C_EQUALITY_OP(str(), location()); }
@@ -94,7 +95,7 @@ comp_assign				\|=|^=|&=|<<=|>>=|\+=|-=|\*=|\/=|%=
 
 ::				{ return YY::VNLangParser::make_RESOLUTION_OP(location()); };
 
-[()\{\};?:\[\]]	{ return YY::VNLangParser::symbol_type(chr(), location()); }
+[()\{\};?:\[\]\.]	{ return YY::VNLangParser::symbol_type(chr(), location()); }
 
 \"[^"]*\"   	{ return YY::VNLangParser::make_STRING_LITERAL(wstr(), location()); }
 {integral_num}	{ return YY::VNLangParser::make_INTEGRAL_LITERAL(str(), location()); }

@@ -36,7 +36,6 @@ private:
     string RenderMapArgs( TreePtr<CPPTree::Type> dest_type, Collection<CPPTree::IdValuePair> &args );
     string RenderMapArgsCallAsSeqArg( TreePtr<CPPTree::MapArgsCall> call, Syntax::Production surround_prod );
     string RenderExprSeq( Sequence<CPPTree::Expression> seq );
-    string RenderExteriorCall( TreePtr<CPPTree::SeqArgsCall> call, Syntax::Production surround_prod );
     string RenderMacroStatement( TreePtr<CPPTree::MacroStatement> ms, Syntax::Production surround_prod );
     string RenderExpression( TreePtr<CPPTree::Initialiser> expression, Syntax::Production surround_prod, Syntax::Policy policy );
     string RenderMakeRecord( TreePtr<CPPTree::RecordLiteral> make_rec, Syntax::Production surround_prod );

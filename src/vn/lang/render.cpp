@@ -97,6 +97,12 @@ Syntax::Policy Render::GetDefaultPolicy()
 	// our render allows eg (type1 ∧ type2) for grouping (aka parser booting) but
 	// this conflicts with c-style cast syntax.
 	policy.refuse_c_style_cast = true; 
+	
+	// constructor syntax will probably ambiguate
+	policy.detect_and_render_constructor = false;
+	
+	// Need to disambiguate map args vs seq args for the case of no args (at least)
+	policy.symbol_for_map_args = true;
 	return policy;
 }
 

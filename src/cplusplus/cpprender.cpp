@@ -72,6 +72,7 @@ string CppRender::RenderToString( TreePtr<Node> root )
 Syntax::Policy CppRender::GetDefaultPolicy()
 {
 	Syntax::Policy policy;
+	policy.refuse_map_args_call = true;
 	return policy;
 }
 
@@ -115,8 +116,6 @@ string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surro
         return RenderMapArgsCallAsSeqArg( call, surround_prod );
     else if( auto make_rec = TreePtr<RecordLiteral>::DynamicCast(node) )
         return RenderMakeRecord( make_rec, surround_prod );
-    else if( auto ext_call = TreePtr<SeqArgsCall>::DynamicCast(node) )
-        return RenderExteriorCall( ext_call, surround_prod );
     else if( auto macro_decl = TreePtr<MacroDeclaration>::DynamicCast(node) )
         return RenderMacroDeclaration( macro_decl, surround_prod );
     else if( auto macro_stmt = TreePtr<MacroStatement>::DynamicCast(node) )
@@ -428,9 +427,6 @@ string CppRender::RenderOperator( TreePtr<Operator> op, Syntax::Production surro
                "delete" +
                (DynamicTreePtrCast<DeleteArray>(d->array) ? "[]" : "") +
                " " + RenderIntoProduction( d->pointer, Syntax::Production::PREFIX );
-    else if( auto lu = DynamicTreePtrCast< Lookup >(op) )
-        return RenderIntoProduction( lu->object, Syntax::Production::POSTFIX ) + "." +
-               RenderIntoProduction( lu->member, Syntax::BoostPrecedence(Syntax::Production::POSTFIX) );
     else if( auto nco = DynamicTreePtrCast< NonCommutativeOperator >(op) )
         operands = nco->operands;           
     else if( auto co = DynamicTreePtrCast< CommutativeOperator >(op) )
@@ -550,23 +546,6 @@ string CppRender::RenderExprSeq( Sequence<Expression> seq ) try
     for( TreePtr<Expression> e : seq )    
         renders.push_back( RenderIntoProduction( e, Syntax::Production::COMMA_SEP) );               
     return Join(renders, ", ", "(", ")");
-}
-DEFAULT_CATCH_CLAUSE
-
-
-string CppRender::RenderExteriorCall( TreePtr<SeqArgsCall> call, Syntax::Production surround_prod ) try
-{
-	(void)surround_prod;
-    string args_in_parens = RenderExprSeq(call->arguments);
-
-    // Constructor case: spot by use of Lookup to empty-named method. Elide the "."
-    if( auto lu = DynamicTreePtrCast< Lookup >(call->callee) )
-        if( auto id = DynamicTreePtrCast< InstanceIdentifier >(lu->member) )
-            if( id->GetIdentifierName().empty() )
-                return RenderIntoProduction( lu->object, Syntax::Production::POSTFIX ) + args_in_parens;
-
-    // Other funcitons just evaluate
-    return RenderIntoProduction( call->callee, Syntax::Production::POSTFIX ) + args_in_parens;
 }
 DEFAULT_CATCH_CLAUSE
 

@@ -99,13 +99,19 @@ public:
 			force_initialisation(false), 
 			force_incomplete_records(false),
 			current_access(DefaultAccess),
-			refuse_c_style_cast(false) {}
+			refuse_c_style_cast(false),
+			detect_and_render_constructor(true),
+			symbol_for_map_args(false),
+			refuse_map_args_call(false) {}
 		bool force_initialisation;
 		bool force_incomplete_records;
 		// A good thing about typeindex/typeid is that you can refer to a node
 		// type without needing to have an actual node of that type.
 		type_index current_access;
 		bool refuse_c_style_cast;		
+		bool detect_and_render_constructor;
+		bool symbol_for_map_args;
+		bool refuse_map_args_call;
 	};
 	
 	// We deal with syntactical association only, not mathematical, because:

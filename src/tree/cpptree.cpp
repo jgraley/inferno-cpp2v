@@ -736,6 +736,14 @@ Syntax::Production Lookup::GetMyProductionTerminal() const
 	return Production::POSTFIX; 
 }
 
+
+string Lookup::GetRender( VN::RendererInterface *renderer, Production , Policy  )
+{
+	return renderer->RenderIntoProduction(object, Production::POSTFIX) +
+		   "." +
+		   renderer->RenderIntoProduction(member, Production::PRIMITIVE_EXPR);
+}
+
 //////////////////////////// Cast ///////////////////////////////
 
 Syntax::Production Cast::GetMyProductionTerminal() const
@@ -774,13 +782,17 @@ Syntax::Production MapArgsCall::GetMyProductionTerminal() const
 }
 
 
-string MapArgsCall::GetRender( VN::RendererInterface *renderer, Production, Policy )
+string MapArgsCall::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
+	//if( policy.refuse_map_args_call )
+		throw RefusedByPolicy();
+	
 	list<string> ls;
 	for( TreePtr<Node> arg : args )
 		ls.push_back( renderer->RenderIntoProduction( arg, Production::COMMA_SEP ) );
 	
-    return renderer->RenderIntoProduction( callee, Production::POSTFIX ) +
+    return renderer->RenderIntoProduction( callee, Production::POSTFIX ) + 
+		   (policy.symbol_for_map_args ? "⊷" : "") + // after id because call is postfix operator
 		   Join( ls, ", ", "(", ")" );	
 }
 
@@ -789,6 +801,34 @@ string MapArgsCall::GetRender( VN::RendererInterface *renderer, Production, Poli
 Syntax::Production SeqArgsCall::GetMyProductionTerminal() const
 { 
 	return Production::POSTFIX; 
+}
+
+
+string SeqArgsCall::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+{	
+    // Constructor case: spot by use of Lookup to empty-named method. Elide the "."
+    TreePtr<Node> cons_object;
+    if( policy.detect_and_render_constructor )
+		if( auto lu = DynamicTreePtrCast< Lookup >(callee) )
+			if( auto id = DynamicTreePtrCast< InstanceIdentifier >(lu->member) )
+				if( id->GetIdentifierName().empty() )
+					cons_object = lu->object;
+				
+	string s_callee;
+	if( cons_object )
+		s_callee = renderer->RenderIntoProduction( cons_object, Syntax::Production::POSTFIX );
+	else
+		s_callee = renderer->RenderIntoProduction( callee, Syntax::Production::POSTFIX );
+			
+	list<string> ls;
+	for( TreePtr<Node> arg : arguments )
+		ls.push_back( renderer->RenderIntoProduction( arg, Production::COMMA_SEP ) );	
+	string s_bare_args = Join( ls, ", " );	
+	
+	if( cons_object )
+		return s_callee + "(" + s_bare_args + ")";
+	else
+		return s_callee + "(" + s_bare_args + ")";
 }
 
 //////////////////////////// RecordLiteral ///////////////////////////////

@@ -171,7 +171,10 @@ struct TreePtr : virtual TreePtrCommon,
 	{
 		auto pt = shared_ptr<Node>::get();
 		auto pv = dynamic_cast<VALUE_TYPE *>(pt);
-		ASSERT(!pt || pv)("Attempt to access member of degenerate child object"); 
+		ASSERT(!pt || pv)
+		  	  ("Attempt to access degenerate object. ")
+		  	  ("TreePtr<")(TYPE_ID_NAME(VALUE_TYPE))("> ")
+		  	  ("really points to ")(get()->GetTrace());
         return pv;
 	}
 	

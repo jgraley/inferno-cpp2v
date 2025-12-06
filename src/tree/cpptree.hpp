@@ -915,6 +915,7 @@ struct Lookup : Operator
     TreePtr<InstanceIdentifier> member; ///< the member to find
 	
 	Production GetMyProductionTerminal() const override;
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
 };
 
 /// Node for a c-style cast. 
@@ -971,6 +972,7 @@ struct SeqArgsCall : GoSub, Expression
     Sequence<Expression> arguments; ///< Arguments taken in order
 	
 	Production GetMyProductionTerminal() const override;
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
 };  
 
 

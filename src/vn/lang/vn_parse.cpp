@@ -172,11 +172,7 @@ TreePtr<Node> VNParse::OnBuiltIn( const AvailableNodeData::Block *block, any nod
 	// Then for containers, the source will "push" as many elements as it has, or just one
 	// for singular items.
 	list<Item>::const_iterator src_it = src_itemisation.items.begin();
-    vector< Itemiser::Element * > dest_items = dest->Itemise();
-    
-    // Sniff out the case where we got zero items and dest needed one item: this is now allowed and we leave that one item empty
-    if( dest_items.size()==1 && src_itemisation.items.size()==0 )
-		src_itemisation.items.push_back({{}, src_itemisation.loc});
+    vector< Itemiser::Element * > dest_items = dest->Itemise();   
     
     string counts_msg = SSPrintf("%s expects %d %s, but %d %s given.",
                              DiagQuote(Traceable::TypeIdName( *dest )).c_str(),
@@ -404,6 +400,27 @@ TreePtr<Node> VNParse::OnMapArgsCall( TreePtr<Node> callee, list<TreePtr<Node>> 
 		node->args.insert( arg );
 	return node;
 }	
+
+
+TreePtr<Node> VNParse::OnSeqArgsCall( TreePtr<Node> callee, list<TreePtr<Node>> args )
+{
+	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::SeqArgsCall>>();
+	node->callee = callee;
+	for( auto arg : args )
+		node->arguments.insert( arg );
+	return node;
+}	
+
+
+TreePtr<Node> VNParse::OnLookup( TreePtr<Node> object, TreePtr<Node> member, any member_loc )
+{
+	(void)member_loc;
+	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::Lookup>>();
+	node->object = object;
+	node->member = member;
+	return node;
+}
+
 
 
 TreePtr<Node> VNParse::OnSpecificId( const AvailableNodeData::Block *block, any id_disc_loc, wstring wname, any name_loc )
