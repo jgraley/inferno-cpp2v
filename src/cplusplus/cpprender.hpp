@@ -20,7 +20,6 @@ private:
 	
 	string DispatchInternal( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy );
 	string RenderProgram( TreePtr<CPPTree::Program> program, Syntax::Production surround_prod ); 
-	string RenderIdValuePair( TreePtr<CPPTree::IdValuePair> ivp, Syntax::Production surround_prod );
     string RenderLiteral( TreePtr<CPPTree::Literal> sp, Syntax::Production surround_prod ); 
     string RenderScopeResolvingPrefix( TreePtr<Node> node ) final;
 	string GetUniqueIdentifierName( TreePtr<Node> id ) const final;

@@ -102,8 +102,6 @@ string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surro
         return RenderProgram( program, surround_prod );
     else if( auto access = TreePtr<AccessSpec>::DynamicCast(node) ) // Identifier can be a kind of type or expression
         return RenderAccessSpec( access, surround_prod, policy );
-    else if( auto ivp = TreePtr<IdValuePair>::DynamicCast(node) )
-        return RenderIdValuePair( ivp, surround_prod );
     else if( auto floating = TreePtr<Floating>::DynamicCast(node) )
         return RenderFloating( floating, surround_prod, policy );
     else if( auto integral = TreePtr<Integral>::DynamicCast(node) )
@@ -162,17 +160,6 @@ string CppRender::RenderProgram( TreePtr<CPPTree::Program> program, Syntax::Prod
     }
     return s;  
 }
-
-
-string CppRender::RenderIdValuePair( TreePtr<IdValuePair> ivp, Syntax::Production surround_prod ) try
-{
-	// Not part of C/C++ grammer at time of writing but handy for calls with no decl
-	(void)surround_prod;
-    return RenderIntoProduction( ivp->key, Syntax::Production::ASSIGN) + 
-           "🡆" + 
-           RenderIntoProduction( ivp->value, Syntax::Production::ASSIGN);
-}
-DEFAULT_CATCH_CLAUSE
 
 
 string CppRender::RenderLiteral( TreePtr<Literal> sp, Syntax::Production surround_prod ) try
