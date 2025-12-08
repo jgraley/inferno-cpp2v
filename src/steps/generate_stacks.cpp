@@ -238,13 +238,13 @@ AddLinkAddress::AddLinkAddress()
     auto embedded_ll = MakePatternNode<EmbeddedSearchReplaceAgent, Compound>( lr_comp, ll_gg, llr_comp );   
    
     m_gg->through = ms_call;
+    ms_call->callee = l_inst_id;
     ms_call->args_node = ms_args;
     ms_args->arguments = (MakePatternNode<StarAgent, IdValuePair>());
-    ms_call->callee = l_inst_id;
     mr_comp->statements = (mr_call, mr_label);  
-    mr_call->args_node = mr_args;
-    mr_args->arguments = (ms_call->args_node, mr_new_arg);
     mr_call->callee = l_inst_id;
+    mr_call->args_node = mr_args;
+    mr_args->arguments = (ms_args->arguments, mr_new_arg);
     mr_new_arg->key = lr_retaddr_id;
     mr_new_arg->value = mr_labelid;
     mr_label->identifier = mr_labelid;    
@@ -533,9 +533,9 @@ MergeFunctions::MergeFunctions()
     auto s_thread_comp = MakePatternNode<Compound>();
     auto r_thread_comp = MakePatternNode<Compound>();
     auto s_call = MakePatternNode<Call>();
-    auto s_args = MakePatternNode<Call>();
+    auto s_args = MakePatternNode<MapArguments>();
     auto ls_call = MakePatternNode<Call>();
-    auto ls_args = MakePatternNode<SeqArguments>();
+    auto ls_args = MakePatternNode<MapArguments>();
     auto func_id = MakePatternNode<InstanceIdentifier>();
     auto r_label = MakePatternNode<Label>();
     auto r_label_id = MakePatternNode< BuildLabelIdentifierAgent >("ENTER_%s");

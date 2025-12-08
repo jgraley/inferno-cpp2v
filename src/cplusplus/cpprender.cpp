@@ -362,7 +362,7 @@ string CppRender::RenderTypeAndDeclarator( TreePtr<Type> type, string declarator
     else if( TreePtr<SpecificTypeIdentifier> ti = DynamicTreePtrCast< SpecificTypeIdentifier >(type) )
         return const_str + RenderIntoProduction( ti, type_prod) + sdeclarator;
     else if( dynamic_pointer_cast<Labeley>(type) )
-        return const_str + "void *" + declarator;
+        return "const void *" + declarator; // Always const
     else // Assume the type renders expressionally
         return const_str + RenderIntoProduction( type, type_prod ) + sdeclarator;
 }

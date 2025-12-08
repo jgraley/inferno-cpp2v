@@ -101,8 +101,8 @@ then
     LD_LIBRARY_PATH=systemc/lib-linux64/ $outpath/"$fb"_out.exe
     r2res=$?
     set -e
-    echo From inferno $r2res
-    echo Expected $r1res
+    echo From $inferno -i$input_x_path $iargs : $r2res
+    echo Expected for $input_x_path: $r1res
     cmpres=1
     if test $r1res -eq $r2res
     then
