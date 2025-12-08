@@ -820,7 +820,7 @@ Syntax::Production Call::GetMyProductionTerminal() const
 
 string Call::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {		
-	if( policy.refuse_call_if_map_args && TreePtr<MapArguments>::DynamicCast(args) )
+	if( policy.refuse_call_if_map_args && TreePtr<MapArguments>::DynamicCast(args_node) )
 		throw RefusedByPolicy(); // Would output ⦂, so C++ renderer needs to resolve into seq args
 
     // Constructor case: spot by use of Lookup to empty-named method. Elide the "."
@@ -837,7 +837,7 @@ string Call::GetRender( VN::RendererInterface *renderer, Production, Policy poli
 	else
 		s_callee = renderer->RenderIntoProduction( callee, Syntax::Production::POSTFIX );
 			
-	string s_args = renderer->RenderIntoProduction( args, Syntax::Production::PRIMITIVE_EXPR );
+	string s_args = renderer->RenderIntoProduction( args_node, Syntax::Production::PRIMITIVE_EXPR );
 	
 	return s_callee + s_args;
 }

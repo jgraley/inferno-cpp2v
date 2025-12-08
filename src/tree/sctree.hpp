@@ -21,7 +21,13 @@ struct SCRecord : virtual SCNode,
 };
 
 /// Anything derived from this renders like a function
-struct SCFunction : virtual SCNode {};
+struct SCFunction : virtual SCNode 
+{
+	Production GetMyProductionTerminal() const
+	{
+		return Production::POSTFIX; 	
+	}
+};
 
 /** SystemC event type, no members need to be set up. Event instances
     are declared to be of this type. They can then be signalled, waited etc. */

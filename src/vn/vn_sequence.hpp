@@ -50,6 +50,7 @@ public:
     
     void XTreeDbDump() const;
     void XTreeDbExpectMatches() const;
+    bool IsLoweringForRenderStep(int step_index) const;
     
 private:
     vector< shared_ptr<VNStep> > steps;

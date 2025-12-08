@@ -144,13 +144,13 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
 	l1_statements->restriction = l1_statements_negation;
 	l1_statements_negation->negand = l1x_call;
 	l1x_call->callee = l1x_lookup;
-	l1x_call->args = l1x_args;
+	l1x_call->args_node = l1x_args;
 	l1x_args->arguments = MakePatternNode<StarAgent, Expression>();
 	l1x_lookup->object = l1_field_id; // this should be enough to prevent spin
 	// l1_field_id is instance of a SC class and is not constructed in SC language
 	
     l1r_call->callee = l1r_lookup;
-    l1r_call->args = l1r_args;
+    l1r_call->args_node = l1r_args;
     l1r_args->arguments = (l1r_arg);
     l1r_arg->source =  tid;
     l1r_lookup->object = l1_field_id;
@@ -166,7 +166,7 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     l2_delta->through = MakePatternNode< Uninitialised >();
     l2_delta->overlay = l2r_call;
     l2r_call->callee = l2r_lookup;
-    l2r_call->args = l2r_args;
+    l2r_call->args_node = l2r_args;
     l2r_args->arguments = (l2r_arg);
     l2r_arg->source =  tid;
     l2r_lookup->object = l2_instance->identifier;
@@ -188,7 +188,7 @@ LowerSCDynamic::LowerSCDynamic( TreePtr<SCDynamicFunction> s_dynamic,
                     
     s_dynamic->event = event_expr;       
     r_call->callee = r_dest;       
-    r_call->args = r_args;
+    r_call->args_node = r_args;
     r_args->arguments = (event_expr);
       
     Configure( SEARCH_REPLACE, s_dynamic, r_call );
@@ -202,7 +202,7 @@ LowerSCStatic::LowerSCStatic( TreePtr<SCFunction> s_static,
     auto r_args = MakePatternNode<SeqArguments>();
                         
     r_call->callee = r_dest;       
-    r_call->args = r_args;
+    r_call->args_node = r_args;
       
     Configure( SEARCH_REPLACE, s_static, r_call );
 }
@@ -216,7 +216,7 @@ LowerSCDelta::LowerSCDelta( TreePtr<SCFunction> s_delta,
     auto r_args = MakePatternNode<SeqArguments>();
                     
     r_call->callee = r_dest;       
-    r_call->args = r_args;
+    r_call->args_node = r_args;
     r_args->arguments = (zero_time_id);
           
     Configure( SEARCH_REPLACE, s_delta, r_call );
@@ -233,7 +233,7 @@ LowerTerminationFunction::LowerTerminationFunction( TreePtr<SCTree::TerminationF
                     
     s_tf->code = exit_expr;       
     r_call->callee = r_token;       
-    r_call->args = r_args;
+    r_call->args_node = r_args;
     r_args->arguments = (exit_expr);
       
     Configure( SEARCH_REPLACE, s_tf, r_call );
@@ -309,7 +309,7 @@ LowerSCNotifyImmediate::LowerSCNotifyImmediate()
     s_notify->event = eexpr;
             
     r_call->callee = r_lookup;
-    r_call->args = r_args;
+    r_call->args_node = r_args;
     //r_args->arguments = ();
     r_lookup->object = eexpr;          
     eexpr->pattern = r_event;     // ensure base really evaluates to an event 
@@ -335,7 +335,7 @@ LowerSCNotifyDelta::LowerSCNotifyDelta(TreePtr<CPPTree::InstanceIdentifier> zero
     eexpr->pattern = event;     // ensure base really evaluates to an event 
 
     r_call->callee = r_lookup;
-    r_call->args = r_args;
+    r_call->args_node = r_args;
     r_args->arguments = (zero_time_id);
     r_lookup->object = eexpr;          
     r_lookup->member = r_token;        
@@ -354,7 +354,7 @@ LowerSCDeltaCount::LowerSCDeltaCount()
     //MakePatternNode< Expression > eexpr; 
             
     r_call->callee = r_token;
-    r_call->args = r_args;
+    r_call->args_node = r_args;
     //r_args->arguments = (); // no operands
        
     Configure( SEARCH_REPLACE, s_delta_count, r_call );

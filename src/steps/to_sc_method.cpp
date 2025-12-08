@@ -45,7 +45,7 @@ AutosToModule::AutosToModule()
     s_all->conjuncts = (sx_not, s_comp);
     sx_not->negand = sx_stuff;
     sx_stuff->terminus = sx_call;
-    sx_call->args = sx_args;
+    sx_call->args_node = sx_args;
     s_comp->members = (vdecls, s_var);
     s_comp->statements = (vstmts);
     s_var->type = type;

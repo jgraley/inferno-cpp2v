@@ -165,3 +165,9 @@ void VNSequence::XTreeDbDump() const
     x_tree_db->Dump();
 }
 
+
+bool VNSequence::IsLoweringForRenderStep(int step_index) const
+{
+	return steps[step_index]->IsLoweringForRenderStep();
+}
+

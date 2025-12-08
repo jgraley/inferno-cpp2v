@@ -55,6 +55,9 @@ public:
     shared_ptr<CompareReplace> GetTopLevelEngine() const;
     void SetTopLevelEngine( shared_ptr<CompareReplace> tle );
 
+	// For sequencing
+	virtual bool IsLoweringForRenderStep() const { return false; }
+
 private:
     shared_ptr<CompareReplace> root_engine;
     VNSequence *vn_sequence = nullptr;

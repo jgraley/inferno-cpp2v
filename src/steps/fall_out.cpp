@@ -200,14 +200,10 @@ LabelTypeToEnum::LabelTypeToEnum()
     auto lmap_const = MakePatternNode<Const>();
     auto lmap_type = MakePatternNode<Array>();
     auto lmap_id = MakePatternNode<InstanceIdentifier>();
-    auto apall = MakePatternNode<ConjunctionAgent, Node>();
-    auto l_apall = MakePatternNode<ConjunctionAgent, Node>();
-    auto apnot = MakePatternNode<NegationAgent, Node>();
+    auto l_stuff = MakePatternNode<StuffAgent, Scope>();
     auto l_apnot = MakePatternNode<NegationAgent, Node>();
-    auto apany = MakePatternNode<ChildAgent, Node>();
-    auto l_apany = MakePatternNode<ChildAgent, Node>();
     auto l_apall_over = MakePatternNode<DeltaAgent, Node>();
-    auto l_over = MakePatternNode<DeltaAgent, Type>();
+    auto apnot = MakePatternNode<NegationAgent, Node>();
     auto ms_sub = MakePatternNode<Subscript>();
     auto nr_sub = MakePatternNode<Subscript>();
     auto nsx_sub = MakePatternNode<Subscript>();
@@ -221,17 +217,15 @@ LabelTypeToEnum::LabelTypeToEnum()
     auto decls = MakePatternNode<StarAgent, Declaration>();
     
     record->members = ( decls );
+	l_stuff->terminus = l_apall_over;
+	l_stuff->recurse_restriction = l_apnot;
+	l_apnot->negand = lmap;
+    l_apall_over->through = MakePatternNode<Labeley>();
+    l_apall_over->overlay = l_enum;
 
-    l_apall_over->through = l_apall;
-    l_apall_over->overlay = l_apany;
-    l_apall->conjuncts = (l_apany, l_apnot);
-    l_apnot->negand = lmap;
-    l_apany->terminus = l_over;
-    l_over->through = MakePatternNode<Labeley>(); 
-    l_over->overlay = l_enum; 
     l_enum->width = MakePatternNode<SpecificInteger>(TypeDb::int_bits);
             
-    auto embedded_l = MakePatternNode<EmbeddedSearchReplaceAgent, Scope>( record, l_apall_over );   
+    auto embedded_l = MakePatternNode<EmbeddedCompareReplaceAgent, Scope>( record, l_stuff );   
 
     ms_sub->destination = lmap_id;
     ms_sub->index = m_state_id;
@@ -254,9 +248,8 @@ LabelTypeToEnum::LabelTypeToEnum()
     lmap->type = lmap_type;
     lmap->constancy = lmap_const;
     lmap_type->element = MakePatternNode<Labeley>();
-    stuff_labeley->terminus = apall;
-    apall->conjuncts = (apany, apnot);
-    apany->terminus = labeley;
+    stuff_labeley->terminus = labeley;
+    stuff_labeley->recurse_restriction = apnot;
     apnot->negand = lmap;
     
     Configure( SEARCH_REPLACE, all, embedded_n );

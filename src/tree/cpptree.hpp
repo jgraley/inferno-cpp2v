@@ -981,7 +981,7 @@ struct SeqArguments : Arguments
 struct Call : GoSub, Expression
 {
     NODE_FUNCTIONS_FINAL
-    TreePtr<Arguments> args; ///< Arguments taken in order
+    TreePtr<Arguments> args_node; ///< Arguments taken in order
 	
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );

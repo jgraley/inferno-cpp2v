@@ -42,6 +42,7 @@ public:
     static bool quitafter;
     static Progress quitafter_progress;
     static vector<int> quitafter_counts;
+    static bool quitafter_still_do_lowering;
     static int runonlystep;
     static bool runonlyenable;
     static int repetitions;

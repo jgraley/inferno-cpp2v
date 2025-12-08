@@ -79,7 +79,15 @@ Syntax::Policy CppRender::GetDefaultPolicy()
 Syntax::Production CppRender::GetNodeProduction( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy ) const
 {
 	(void)surround_prod;
-	return node->GetMyProduction(this, policy);       
+	try
+	{
+		return node->GetMyProduction(this, policy);       
+	}
+	catch( Syntax::Refusal &r )
+	{
+		ASSERT(false)(node)(" unknown production");
+	}
+	ASSERTFAIL();
 }
 
 
@@ -132,7 +140,7 @@ string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surro
         
     // Due #969 we might have a standard agent, so fall back to a function that
     // definitely won't call any agent methods.
-    return Render::RenderNodeExplicit( node, surround_prod );      
+    return RenderNodeExplicit( node, surround_prod, policy );      
 }
 
 
@@ -189,7 +197,7 @@ string CppRender::RenderScopeResolvingPrefix( TreePtr<Node> node ) try
              DynamicTreePtrCast<StatementExpression>( scope ) )    // <- this is for locals in body
         return "";
     else
-        return ERROR_UNSUPPORTED( scope );
+        return "?::"; // unknown scope
 }
 DEFAULT_CATCH_CLAUSE
 
@@ -424,7 +432,7 @@ string CppRender::RenderOperator( TreePtr<Operator> op, Syntax::Production surro
     }
     else
     {
-        return ERROR_UNSUPPORTED(op);
+        return RenderNodeExplicit( op, surround_prod, default_policy );
 	}
 
     // Regular operators: kinds of either NonCommutativeOperator or CommutativeOperator; operands in operands  
@@ -469,7 +477,7 @@ string CppRender::RenderOperator( TreePtr<Operator> op, Syntax::Production surro
 #include "tree/operator_data.inc"
     else
     {
-        s = ERROR_UNSUPPORTED(op);
+        s = RenderNodeExplicit( op, surround_prod, default_policy );
     }
     return s;
 }
@@ -513,7 +521,7 @@ string CppRender::RenderMapArgsCallAsSeqArg( TreePtr<Call> call, Syntax::Product
 	// Note: we need to operate on the call, so that we can use callee to find the declaration and 
 	// resolve the map into a sequence.
 
-	auto map_args = TreePtr<MapArguments>::DynamicCast( call->args );
+	auto map_args = TreePtr<MapArguments>::DynamicCast( call->args_node );
 	ASSERT( map_args );
 
     // Render the expression that resolves to the function name unless this is
@@ -746,8 +754,6 @@ string CppRender::RenderInstanceProto( TreePtr<Instance> o ) try
         name += RenderIntoProduction( o->identifier, starting_declarator_prod);
     }
 
-    Syntax::Policy proto_policy;
-    proto_policy.force_incomplete_records = true; 
     s += RenderTypeAndDeclarator( o->type, name, starting_declarator_prod, Syntax::Production::BARE_DECLARATION, constant );
 
     return s;
@@ -765,14 +771,14 @@ string CppRender::RenderInitialisation( TreePtr<Initialiser> init ) try
         {
 			if( auto call = DynamicTreePtrCast<Call>( ei ) )
 			{
-				if( auto map_args = TreePtr<MapArguments>::DynamicCast(call->args) )
+				if( auto map_args = TreePtr<MapArguments>::DynamicCast(call->args_node) )
 				{
 					if( TypeOf::instance.TryGetConstructedExpression( trans_kit, call ).GetTreePtr() )   
 						return RenderMapArgs(TypeOf::instance.Get(trans_kit, call->callee).GetTreePtr(), map_args->arguments);
 				}
 				else // seq args
 				{
-					return RenderIntoProduction(call->args, Syntax::Production::PRIMITIVE_EXPR);    
+					return RenderIntoProduction(call->args_node, Syntax::Production::PRIMITIVE_EXPR);    
 				}
 			}
 		}
@@ -918,7 +924,7 @@ string CppRender::RenderRecordProto( TreePtr<Record> record, Syntax::Policy poli
         s += Render::Dispatch( record, Syntax::Production::SPACE_SEP_DECLARATION, policy );
 
     // Name of the record
-    s += " " + RenderIntoProduction( record->identifier, Syntax::Production::SPACE_SEP_DECLARATION);
+    s += " " + RenderIntoProduction( record->identifier, Syntax::Production::SPACE_SEP_DECLARATION, policy);
     
     return s;
 }
@@ -932,7 +938,7 @@ string CppRender::RenderPreProcDecl( TreePtr<PreProcDecl> ppd, Syntax::Productio
     else if( auto si = TreePtr<LocalInclude>::DynamicCast(ppd) )
         return "#include " + si->filename->GetRender(this, Syntax::Production::SPACE_SEP_PRE_PROC, default_policy);
     else
-        return ERROR_UNSUPPORTED(ppd);     
+        return RenderNodeExplicit( ppd, surround_prod, default_policy );     
 }
 DEFAULT_CATCH_CLAUSE
 
@@ -1101,7 +1107,7 @@ string CppRender::RenderConstructorInitList( Sequence<Statement> spe ) try
         if( auto e = TreePtr<Expression>::DynamicCast(st) )
             s += RenderIntoProduction( e, Syntax::Production::COMMA_SEP );
         else 
-            s += ERROR_UNSUPPORTED(st);
+            s += RenderNodeExplicit( st, Syntax::Production::COMMA_SEP, default_policy );
         first = false;
     }
     return s;
@@ -1122,7 +1128,7 @@ string CppRender::RenderEnumBodyScope( TreePtr<CPPTree::Record> record ) try
         auto o = TreePtr<Instance>::DynamicCast(pe);
         if( !o )
         {
-            s += ERROR_UNSUPPORTED(pe);
+            s += RenderNodeExplicit( pe, Syntax::Production::ASSIGN, default_policy );
             continue;
         }
         s += RenderIntoProduction( o->identifier, Syntax::BoostPrecedence(Syntax::Production::ASSIGN));
@@ -1130,7 +1136,7 @@ string CppRender::RenderEnumBodyScope( TreePtr<CPPTree::Record> record ) try
         auto ei = TreePtr<Expression>::DynamicCast( o->initialiser );
         if( !ei )
         {
-            s += ERROR_UNSUPPORTED(o->initialiser);
+            s += RenderNodeExplicit( o->initialiser, Syntax::Production::INITIALISER, default_policy );
             continue;
         }       
         s += RenderIntoProduction( ei, Syntax::Production::INITIALISER);
@@ -1237,7 +1243,7 @@ string CppRender::RenderParams( TreePtr<CallableParams> key ) try
         auto o = TreePtr<Instance>::DynamicCast(d);
         if( !o )
         {
-            s += ERROR_UNSUPPORTED(d);
+            s += RenderNodeExplicit( d, Syntax::Production::BARE_DECLARATION, default_policy );
             continue;
         }
         Syntax::Production starting_declarator_prod = Syntax::Production::PURE_IDENTIFIER;

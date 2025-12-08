@@ -1131,7 +1131,7 @@ private:
         c->callee = callee;
 
         auto a = MakeTreeNode<MapArguments>();
-		c->args = a;
+		c->args_node = a;
 
         // If CallableParams, fill in the args map based on the supplied args and original function type
         TreePtr<Node> t = TypeOf::instance(callee, all_decls).GetTreePtr();

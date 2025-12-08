@@ -33,6 +33,7 @@ bool ReadArgs::runonlyenable = false;
 bool ReadArgs::quitafter = false;
 Progress ReadArgs::quitafter_progress;
 vector<int> ReadArgs::quitafter_counts;
+bool ReadArgs::quitafter_still_do_lowering = false;
 int ReadArgs::repetitions = 100; // default behaviour
 bool ReadArgs::rep_error = true; // default behaviour
 bool ReadArgs::documentation_graphs = false;
@@ -58,7 +59,7 @@ void ReadArgs::Usage(string msg)
                     "-sd         Enable DB self-checks: relation integrity and compare with new build.\n"
                     "-q<p>.<c>...   Stop after stage+step <p>, and optional match count(s) <c>. Eg -qA\n"
                     "               to stop after analysis, or -qT12.2.3 to stop after transformation 12,\n"
-                    "               root match 2, first embedded match 3.\n"    
+                    "               root match 2, first embedded match 3. Append + to still run the lowering steps.\n"    
                     "               Note: step is 0-based; counts are 1-based or 0 to disable.\n"
                     "               Note: -qT<n> makes -t and -r operate only on step n.\n"                
                     "               Note: if quitting after parse or later, output is attempted.\n"     
@@ -258,6 +259,12 @@ void ReadArgs::ParseQuitAfter(string arg)
     string::size_type p = 0;
     string::size_type dot = 0;
     bool first = true;
+    if( arg.back() == '+' )
+    {
+		quitafter_still_do_lowering = true;
+		arg = arg.substr(0, arg.size()-1); // drop the +
+	}
+	
     do
     {
         dot = arg.find('.', p);

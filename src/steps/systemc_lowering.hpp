@@ -11,28 +11,35 @@ namespace Steps {
 
 using namespace VN;
 
+class LoweringStep : public VNStep
+{
+public:	
+	virtual bool IsLoweringForRenderStep() const { return true; }
+};
+
+
 /// Spot SystemC type-like nodes and replace by user type with the required name.
-class LowerSCType : public VNStep 
+class LowerSCType : public LoweringStep 
 {
 public:
     LowerSCType( TreePtr< CPPTree::Type > s_scnode );
 };
 
 
-class EnsureConstructorsInSCRecordUsers : public VNStep 
+class EnsureConstructorsInSCRecordUsers : public LoweringStep 
 {
 public:
 	EnsureConstructorsInSCRecordUsers();
 };
 
-class LowerSCHierarchicalClass : public VNStep 
+class LowerSCHierarchicalClass : public LoweringStep 
 {
 public:
     LowerSCHierarchicalClass( TreePtr< SCTree::SCRecord > s_scclass );
 };
 
 
-class LowerSCDynamic : public VNStep
+class LowerSCDynamic : public LoweringStep
 {
 public:
     LowerSCDynamic( TreePtr<SCTree::SCDynamicFunction> s_dynamic,
@@ -40,7 +47,7 @@ public:
 };
 
 
-class LowerSCStatic : public VNStep
+class LowerSCStatic : public LoweringStep
 {
 public:
     LowerSCStatic( TreePtr<SCTree::SCFunction> s_dynamic,
@@ -48,7 +55,7 @@ public:
 };
 
 
-class LowerSCDelta : public VNStep
+class LowerSCDelta : public LoweringStep
 {
 public:
     LowerSCDelta( TreePtr<SCTree::SCFunction> s_delta,
@@ -57,49 +64,49 @@ public:
 };
 
 
-class LowerTerminationFunction : public VNStep
+class LowerTerminationFunction : public LoweringStep
 {
 public:
     LowerTerminationFunction( TreePtr<SCTree::TerminationFunction> s_tf );
 };
 
 
-class LowerSCProcess : public VNStep
+class LowerSCProcess : public LoweringStep
 {
 public:
     LowerSCProcess( TreePtr< SCTree::Process > s_scprocess );
 };
 
 
-class LowerSCNotifyImmediate : public VNStep
+class LowerSCNotifyImmediate : public LoweringStep
 {
 public:
     LowerSCNotifyImmediate();
 };
 
 
-class LowerSCNotifyDelta : public VNStep
+class LowerSCNotifyDelta : public LoweringStep
 {
 public:
     LowerSCNotifyDelta( TreePtr<CPPTree::InstanceIdentifier> zero_time_id );
 };
 
 
-class LowerSCDeltaCount : public VNStep
+class LowerSCDeltaCount : public LoweringStep
 {
 public:
     LowerSCDeltaCount();
 };
 
 
-class AddIncludeSystemC : public VNStep
+class AddIncludeSystemC : public LoweringStep
 {
 public:
     AddIncludeSystemC();
 };
 
 
-class AddIncludeSCExtensions : public VNStep
+class AddIncludeSCExtensions : public LoweringStep
 {
 public:
     AddIncludeSCExtensions();

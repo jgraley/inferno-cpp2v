@@ -238,23 +238,37 @@ Inferno::Plan::Plan(Inferno *algo_) :
 {
     // ------------------------ Form steps plan -------------------------
     // Start a steps plan
+	vector<Step> lowering_steps;      
     algo->vn_sequence->ForSteps( [&](int i)
     {
-        steps.push_back( { i, ReadArgs::trace, ReadArgs::trace_hits, true, false } );        
+        Step step { i, ReadArgs::trace, ReadArgs::trace_hits, true, false };
+        if( algo->vn_sequence->IsLoweringForRenderStep(i) && ReadArgs::quitafter_still_do_lowering )
+			lowering_steps.push_back(step);
+		else
+			steps.push_back(step);        
     } );
     
     // If we're to run only one step, restrict all stepped stages
     if( ReadArgs::runonlyenable )
+    {
         steps = { steps[ReadArgs::runonlystep] };
+	}
 
     // If we're to quit after a particular step, restrict all stepped stages
     if( ReadArgs::quitafter &&
         ReadArgs::quitafter_progress.GetStep() != Progress::NO_STEP )
     {
-        steps.resize(ReadArgs::quitafter_progress.GetStep() + 1);
+		vector<Step>::size_type last_aside_from_lowerings = ReadArgs::quitafter_progress.GetStep();
+        steps.resize( last_aside_from_lowerings + 1 );
         steps.back().allow_stop = true;
-        for( vector<Step>::size_type i=0; i<steps.size()-1; i++ )
-            steps[i].allow_trace = steps[i].allow_hits = steps[i].allow_reps = steps[i].allow_stop = false;        
+        
+        // Append any lowering steps
+        steps.insert( steps.end(), lowering_steps.begin(), lowering_steps.end() );     
+          
+        for( vector<Step>::size_type i=0; i<steps.size(); i++ )
+			if( i != last_aside_from_lowerings )
+				steps[i].allow_trace = steps[i].allow_hits = steps[i].allow_reps = steps[i].allow_stop = false;        
+        
         for( vector<Step>::size_type i=0; i<steps.size(); i++ )
             TRACE("Step %03d ALLOWS: trace=", i)
                  (steps[i].allow_trace)(" hits=")

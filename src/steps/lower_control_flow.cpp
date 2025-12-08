@@ -657,7 +657,7 @@ ExtractCallParams::ExtractCallParams()
     func->params = MakePatternNode<StarAgent, Parameter>();
     field->identifier = func_id;
     
-    s_call->args = s_args;
+    s_call->args_node = s_args;
     s_args->arguments = (params, s_param);
     s_param->value = all;
     all->conjuncts = (value, x_not);
@@ -673,7 +673,7 @@ ExtractCallParams::ExtractCallParams()
     r_temp->type = type;
     r_ce->statements = (r_assign, r_call);
     r_assign->operands = (r_temp_id, value);
-    r_call->args = r_args;
+    r_call->args_node = r_args;
     r_args->arguments = (params, r_param);
     r_param->value = r_temp_id;    
     r_param->key = id;

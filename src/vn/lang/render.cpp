@@ -288,11 +288,11 @@ string Render::Dispatch( TreePtr<Node> node, Syntax::Production surround_prod, S
 	}
 	catch( Syntax::Refusal & ) {}
 
-	return RenderNodeExplicit(node, surround_prod);
+	return RenderNodeExplicit(node, surround_prod, default_policy);
 }		
 
 
-string Render::RenderNodeExplicit( shared_ptr<const Node> node, Syntax::Production )
+string Render::RenderNodeExplicit( shared_ptr<const Node> node, Syntax::Production, Syntax::Policy policy )
 {
 	//bool need_a_type = surround_prod >= Syntax::Production::BOOT_TYPE && 
 	//                   surround_prod <= Syntax::Production::TOP_TYPE;
@@ -301,38 +301,41 @@ string Render::RenderNodeExplicit( shared_ptr<const Node> node, Syntax::Producti
 
     sitems.push_back( GetInnermostTemplateParam(TYPE_ID_NAME(*node)) );
 	
-    vector< Itemiser::Element * > items = node->Itemise();
-    for( vector< Itemiser::Element * >::size_type i=0; i<items.size(); i++ )
+    if( !policy.force_incomplete_records )
     {
-        ASSERT( items[i] )( "itemise returned null element" );
-        
-        if( ContainerInterface *con = dynamic_cast<ContainerInterface *>(items[i]) )                
-        {
-			if( con->size() == 1 )
-				sitems.push_back( RenderIntoProduction( TreePtr<Node>(con->front()), Syntax::Production::VN_SEP_ITEMS ) );
+		vector< Itemiser::Element * > items = node->Itemise();
+		for( vector< Itemiser::Element * >::size_type i=0; i<items.size(); i++ )
+		{
+			ASSERT( items[i] )( "itemise returned null element" );
+			
+			if( ContainerInterface *con = dynamic_cast<ContainerInterface *>(items[i]) )                
+			{
+				if( con->size() == 1 )
+					sitems.push_back( RenderIntoProduction( TreePtr<Node>(con->front()), Syntax::Production::VN_SEP_ITEMS ) );
+				else
+				{
+					list<string> scon;
+					for( const TreePtrInterface &p : *con )
+					{
+						ASSERT( p ); 
+						scon.push_back( RenderIntoProduction( TreePtr<Node>(p), Syntax::Production::COMMA_SEP ) );
+					}
+					if( GetTotalSize(scon) > Syntax::GetLineBreakThreshold() )
+						sitems.push_back( Join( scon, ",\n", "", "") );
+					else
+						sitems.push_back( Join( scon, ", ", "", "") );
+				}
+			}            
+			else if( TreePtrInterface *singular = dynamic_cast<TreePtrInterface *>(items[i]) )
+			{
+				sitems.push_back( RenderIntoProduction( TreePtr<Node>(*singular), Syntax::Production::VN_SEP_ITEMS ) );
+			}
 			else
 			{
-				list<string> scon;
-				for( const TreePtrInterface &p : *con )
-				{
-					ASSERT( p ); 
-					scon.push_back( RenderIntoProduction( TreePtr<Node>(p), Syntax::Production::COMMA_SEP ) );
-				}
-				if( GetTotalSize(scon) > Syntax::GetLineBreakThreshold() )
-					sitems.push_back( Join( scon, ",\n", "", "") );
-				else
-					sitems.push_back( Join( scon, ", ", "", "") );
+				ASSERTFAIL("got something from itemise that isn't a sequence or a shared pointer");
 			}
-        }            
-        else if( TreePtrInterface *singular = dynamic_cast<TreePtrInterface *>(items[i]) )
-        {
-            sitems.push_back( RenderIntoProduction( TreePtr<Node>(*singular), Syntax::Production::VN_SEP_ITEMS ) );
-        }
-        else
-        {
-            ASSERTFAIL("got something from itemise that isn't a sequence or a shared pointer");
-        }
-    }   
+		}   
+	}
     
     if( GetTotalSize(sitems) > Syntax::GetLineBreakThreshold() )
 		s += Join( sitems, "⚬\n", "【\n", "\n】" );   

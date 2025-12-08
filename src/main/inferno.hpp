@@ -49,7 +49,7 @@ private:
         Plan(Inferno *algo_);    
 
         Inferno *algo;
-        vector<Step> steps;      
+        vector<Step> steps;              
         list<Stage> stages;  
     } plan;
     
