@@ -51,7 +51,7 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern )
     unique_coupling_names = coupling_names_uniqifier.UniquifyAll( trans_kit, context );
 	incoming_links_map = coupling_names_uniqifier.GetIncomingLinksMap();
 	
-	Syntax::Policy designation_policy;
+	Syntax::Policy designation_policy = default_policy;
 	string s;
 	if( ReadArgs::use.count("c") )
 		s += Trace(unique_coupling_names) + "\n\n";
@@ -66,7 +66,7 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern )
 	   	  (pattern->GetReplacePattern())
 	   	  (" or be NULL");
 	   	  
-	Syntax::Policy top_pattern_policy;
+	Syntax::Policy top_pattern_policy = default_policy;
 	s += "꩜" + RenderIntoProduction( pattern->GetSearchComparePattern(), Syntax::Production::PREFIX, top_pattern_policy );
             
     indenter.AddLinesFromString(s);
@@ -101,8 +101,8 @@ Syntax::Policy Render::GetDefaultPolicy()
 	// constructor syntax will probably ambiguate
 	policy.detect_and_render_constructor = false;
 	
-	// Need to disambiguate map args vs seq args for the case of no args (at least)
-	policy.symbol_for_map_args = true;
+	// Permit map args with their non-C syntax
+	policy.refuse_call_if_map_args = false;
 	return policy;
 }
 

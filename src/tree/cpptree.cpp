@@ -782,14 +782,13 @@ Syntax::Production MapArguments::GetMyProductionTerminal() const
 }
 
 
-string MapArguments::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+string MapArguments::GetRender( VN::RendererInterface *renderer, Production, Policy )
 {
 	list<string> ls;
 	for( TreePtr<Node> arg : arguments )
 		ls.push_back( renderer->RenderIntoProduction( arg, Production::COMMA_SEP ) );
 	
-	// TODO ⊷ disambiguates the no-args case, instead try unifying with a NoArguments node under Arguments
-    return (policy.symbol_for_map_args ? "⊷" : "") + // after id because call is postfix operator 
+    return "⊷" + // after id because call is postfix operator 
 		   Join( ls, ", ", "(", ")" );	
 }
 
@@ -821,7 +820,7 @@ Syntax::Production Call::GetMyProductionTerminal() const
 string Call::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {		
 	if( policy.refuse_call_if_map_args && TreePtr<MapArguments>::DynamicCast(args_node) )
-		throw RefusedByPolicy(); // Would output ⦂, so C++ renderer needs to resolve into seq args
+		throw RefusedByPolicy(); // Would output ⊷ and ⦂, so C++ renderer needs to resolve into seq args
 
     // Constructor case: spot by use of Lookup to empty-named method. Elide the "."
     TreePtr<Node> cons_object;

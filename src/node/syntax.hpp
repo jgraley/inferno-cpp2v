@@ -101,7 +101,6 @@ public:
 			current_access(DefaultAccess),
 			refuse_c_style_cast(false),
 			detect_and_render_constructor(true),
-			symbol_for_map_args(false),
 			refuse_call_if_map_args(true) {}
 		bool force_initialisation;
 		bool force_incomplete_records;
@@ -110,7 +109,6 @@ public:
 		type_index current_access;
 		bool refuse_c_style_cast;		
 		bool detect_and_render_constructor;
-		bool symbol_for_map_args;
 		bool refuse_call_if_map_args;
 	};
 	

@@ -83,9 +83,9 @@ void VNScriptRunner::ProcessVNPath( string spath )
 void VNScriptRunner::ProcessVNFile(string spath )
 {
 	VNParse vn_parser;
-	VN::Command::List script = vn_parser.DoParse(spath);
 	if( !ReadArgs::trace_quiet )
-		fprintf(stderr, "Read %s ok\n", spath.c_str()); 
+		fprintf(stderr, "Reading %s\n", spath.c_str()); 
+	VN::Command::List script = vn_parser.DoParse(spath);
 	RunScript( spath, script );
 }
 

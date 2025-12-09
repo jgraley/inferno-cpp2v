@@ -64,7 +64,7 @@ string CppRender::RenderToString( TreePtr<Node> root )
     trans_kit = TransKit{ utils.get() };
     unique_identifier_names = identifiers_uniqifier.UniquifyAll( trans_kit, context );
     
-    Syntax::Policy top_policy;
+    Syntax::Policy top_policy = default_policy;
     return RenderIntoProduction( root, Syntax::Production::PROGRAM, top_policy );
 }
 
@@ -160,7 +160,7 @@ string CppRender::RenderProgram( TreePtr<CPPTree::Program> program, Syntax::Prod
     // that were on the scope stack when the instance was seen. These could go in a .cpp file.
     while( !definitions.empty() )
     {
-		Syntax::Policy definition_policy;
+		Syntax::Policy definition_policy = default_policy;
 		definition_policy.force_initialisation = true;
         s += " " + RenderIntoProduction( definitions.front(), Syntax::Production::DECLARATION, definition_policy ); 
         definitions.pop();
@@ -1172,7 +1172,7 @@ string CppRender::MaybeRenderFieldAccess( TreePtr<Declaration> declaration,
 	if( TreePtr<Field> f = DynamicTreePtrCast<Field>(declaration) )
 		this_access = f->access;
 
-	Syntax::Policy policy;
+	Syntax::Policy policy = default_policy;
 	policy.current_access = *current_access;
     s = RenderIntoProduction( this_access, Syntax::Production::BARE_DECLARATION, policy );
     *current_access = type_index(typeid(*this_access));
@@ -1203,7 +1203,7 @@ string CppRender::RenderDeclScope( TreePtr<DeclScope> decl_scope,
         {    
 			s += MaybeRenderFieldAccess( pd, &init_access );
 
-			Syntax::Policy record_policy;
+			Syntax::Policy record_policy = default_policy;
 			record_policy.force_incomplete_records = true; 
 			s += RenderIntoProduction( pd, Syntax::Production::DECLARATION, record_policy ); 
 		}
