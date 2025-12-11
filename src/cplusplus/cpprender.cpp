@@ -60,13 +60,20 @@ string CppRender::RenderToString( TreePtr<Node> root )
     // identifiers - to rename them would be unsafe because we assume there's
     // a declaration ouside of our tree. This actually gets other nodes too but 
     // we'll only look up identifiers.
-    UniquifyNames identifiers_uniqifier(&Syntax::GetIdentifierName, false, true); 
+    UniquifyNames::Policy un_policy {
+	    .name_getter = &Syntax::GetIdentifierName, 
+		.include_single_parent = true,
+		.include_multi_parent = true,
+		.include_named_identifiers = false,
+		.preserve_undeclared_ids = true
+	};
+	UniquifyNames identifiers_uniqifier(un_policy); 
     trans_kit = TransKit{ utils.get() };
     unique_identifier_names = identifiers_uniqifier.UniquifyAll( trans_kit, context );
     
     Syntax::Policy top_policy = default_policy;
     return RenderIntoProduction( root, Syntax::Production::PROGRAM, top_policy );
-}
+}	
 
 
 Syntax::Policy CppRender::GetDefaultPolicy()
@@ -521,7 +528,7 @@ string CppRender::RenderMapArgsCallAsSeqArg( TreePtr<Call> call, Syntax::Product
 	// Note: we need to operate on the call, so that we can use callee to find the declaration and 
 	// resolve the map into a sequence.
 
-	auto map_args = TreePtr<MapArguments>::DynamicCast( call->args_node );
+	auto map_args = TreePtr<MapArgumentation>::DynamicCast( call->argumentation );
 	ASSERT( map_args );
 
     // Render the expression that resolves to the function name unless this is
@@ -771,14 +778,14 @@ string CppRender::RenderInitialisation( TreePtr<Initialiser> init ) try
         {
 			if( auto call = DynamicTreePtrCast<Call>( ei ) )
 			{
-				if( auto map_args = TreePtr<MapArguments>::DynamicCast(call->args_node) )
+				if( auto map_args = TreePtr<MapArgumentation>::DynamicCast(call->argumentation) )
 				{
 					if( TypeOf::instance.TryGetConstructedExpression( trans_kit, call ).GetTreePtr() )   
 						return RenderMapArgs(TypeOf::instance.Get(trans_kit, call->callee).GetTreePtr(), map_args->arguments);
 				}
 				else // seq args
 				{
-					return RenderIntoProduction(call->args_node, Syntax::Production::PRIMITIVE_EXPR);    
+					return RenderIntoProduction(call->argumentation, Syntax::Production::PRIMITIVE_EXPR);    
 				}
 			}
 		}

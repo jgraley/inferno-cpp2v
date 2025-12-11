@@ -33,7 +33,7 @@ AutosToModule::AutosToModule()
     auto sx_not = MakePatternNode<NegationAgent, Compound>();
     auto sx_stuff = MakePatternNode<StuffAgent, Compound>();
     auto sx_call = MakePatternNode<Call>();
-    auto sx_args = MakePatternNode<MapArguments>();
+    auto sx_args = MakePatternNode<MapArgumentation>();
         
     s_rec->members = (decls, fn);
     r_rec->members = (decls, fn, r_var);
@@ -45,7 +45,7 @@ AutosToModule::AutosToModule()
     s_all->conjuncts = (sx_not, s_comp);
     sx_not->negand = sx_stuff;
     sx_stuff->terminus = sx_call;
-    sx_call->args_node = sx_args;
+    sx_call->argumentation = sx_args;
     s_comp->members = (vdecls, s_var);
     s_comp->statements = (vstmts);
     s_var->type = type;

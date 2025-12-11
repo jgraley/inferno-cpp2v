@@ -263,9 +263,10 @@ struct SpecificIdentifier : virtual Property
     virtual Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
 	string GetRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Policy policy );
-    virtual string GetIdentifierName() const; /// This is relied upon to just return the identifier name 
-    virtual string GetGraphName() const;
-    virtual string GetTrace() const;
+    string GetIdentifierName() const override; /// This is relied upon to just return the identifier name 
+    string GetCouplingNameHint() const override;
+    string GetGraphName() const override;
+    string GetTrace() const override;
 	
 protected:
     BoundingRole addr_bounding_role;
@@ -949,14 +950,14 @@ struct GoSub : virtual Node, Uncombable
 };
 
 
-struct Arguments : virtual Node
+struct Argumentation : virtual Node
 {
     NODE_FUNCTIONS
 };
 
 
 /// A function call to specified function passing in specified arguments
-struct MapArguments : Arguments
+struct MapArgumentation : Argumentation
 {
     NODE_FUNCTIONS_FINAL	
 	Collection<IdValuePair> arguments;
@@ -968,10 +969,10 @@ struct MapArguments : Arguments
 
 /// A regular function call whose arguments are given in sequence, so that a 
 /// declaration is not needed. Good for eg library calls.
-struct SeqArguments : Arguments
+struct SeqArgumentation : Argumentation
 {
     NODE_FUNCTIONS_FINAL
-    Sequence<Expression> arguments; ///< Arguments taken in order
+    Sequence<Expression> arguments; ///< Argumentation taken in order
 	
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
@@ -981,7 +982,7 @@ struct SeqArguments : Arguments
 struct Call : GoSub, Expression
 {
     NODE_FUNCTIONS_FINAL
-    TreePtr<Arguments> args_node; ///< Arguments taken in order
+    TreePtr<Argumentation> argumentation; ///< Argumentation taken in order
 	
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
@@ -1234,7 +1235,7 @@ struct MacroDeclaration : Declaration
 	// TODO be MacroDeclaration, inherit from Declaration and add an initialiser for body of declared function
     NODE_FUNCTIONS_FINAL
     TreePtr<PreprocessorIdentifier> identifier;
-    Sequence<Node> arguments; ///< Arguments taken in order, macro so can be anything
+    Sequence<Node> arguments; ///< Args taken in order, macro so can be anything
     TreePtr<Initialiser> initialiser;
     
 	Production GetMyProduction(const VN::RendererInterface *, Policy policy) const override;        
@@ -1247,7 +1248,7 @@ struct MacroStatement : Statement
 {
     NODE_FUNCTIONS_FINAL
     TreePtr<PreprocessorIdentifier> identifier;
-    Sequence<Node> arguments; ///< Arguments taken in order. Can be anything at all!
+    Sequence<Node> arguments; ///< Args taken in order. Can be anything at all!
    	
    	Production GetMyProductionTerminal() const override;
 };

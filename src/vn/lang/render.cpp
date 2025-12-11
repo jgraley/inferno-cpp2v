@@ -46,7 +46,15 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern )
 
     // Make the hinted coupling names unique. Only bother with true couplings
     // (more than one parent) and don't worry about declarations.
-    UniquifyNames coupling_names_uniqifier(&Syntax::GetCouplingNameHint, true, false);
+    UniquifyNames::Policy un_policy 
+    {
+	    .name_getter = &Syntax::GetCouplingNameHint, 
+		.include_single_parent = false,
+		.include_multi_parent = true,
+		.include_named_identifiers = true,
+		.preserve_undeclared_ids = false
+	};
+    UniquifyNames coupling_names_uniqifier(un_policy);
     trans_kit = TransKit{ utils.get() };
     unique_coupling_names = coupling_names_uniqifier.UniquifyAll( trans_kit, context );
 	incoming_links_map = coupling_names_uniqifier.GetIncomingLinksMap();

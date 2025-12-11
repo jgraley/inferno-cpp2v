@@ -829,7 +829,7 @@ void Preprocessor::HandleImportDirective(Token &ImportTok) {
 /// closing ), updating MI with what we learn.  Return true if an error occurs
 /// parsing the arg list.
 bool Preprocessor::ReadMacroDefinitionArgList(MacroInfo *MI) {
-  llvm::SmallVector<IdentifierInfo*, 32> Arguments;
+  llvm::SmallVector<IdentifierInfo*, 32> Argumentation;
   
   Token Tok;
   while (1) {
@@ -837,8 +837,8 @@ bool Preprocessor::ReadMacroDefinitionArgList(MacroInfo *MI) {
     switch (Tok.getKind()) {
     case tok::r_paren:
       // Found the end of the argument list.
-      if (Arguments.empty()) {  // #define FOO()
-        MI->setArgumentList(Arguments.begin(), Arguments.end());
+      if (Argumentation.empty()) {  // #define FOO()
+        MI->setArgumentList(Argumentation.begin(), Argumentation.end());
         return false;
       }
       // Otherwise we have #define FOO(A,)
@@ -855,9 +855,9 @@ bool Preprocessor::ReadMacroDefinitionArgList(MacroInfo *MI) {
         return true;
       }
       // Add the __VA_ARGS__ identifier as an argument.
-      Arguments.push_back(Ident__VA_ARGS__);
+      Argumentation.push_back(Ident__VA_ARGS__);
       MI->setIsC99Varargs();
-      MI->setArgumentList(Arguments.begin(), Arguments.end());
+      MI->setArgumentList(Argumentation.begin(), Argumentation.end());
       return false;
     case tok::eom:  // #define X(
       Diag(Tok, diag::err_pp_missing_rparen_in_macro_def);
@@ -874,14 +874,14 @@ bool Preprocessor::ReadMacroDefinitionArgList(MacroInfo *MI) {
 
       // If this is already used as an argument, it is used multiple times (e.g.
       // #define X(A,A.
-      if (std::find(Arguments.begin(), Arguments.end(), II) != 
-          Arguments.end()) {  // C99 6.10.3p6
+      if (std::find(Argumentation.begin(), Argumentation.end(), II) != 
+          Argumentation.end()) {  // C99 6.10.3p6
         Diag(Tok, diag::err_pp_duplicate_name_in_arg_list) << II;
         return true;
       }
         
       // Add the argument to the macro info.
-      Arguments.push_back(II);
+      Argumentation.push_back(II);
       
       // Lex the token after the identifier.
       LexUnexpandedToken(Tok);
@@ -891,7 +891,7 @@ bool Preprocessor::ReadMacroDefinitionArgList(MacroInfo *MI) {
         Diag(Tok, diag::err_pp_expected_comma_in_arg_list);
         return true;
       case tok::r_paren: // #define X(A)
-        MI->setArgumentList(Arguments.begin(), Arguments.end());
+        MI->setArgumentList(Argumentation.begin(), Argumentation.end());
         return false;
       case tok::comma:  // #define X(A,
         break;
@@ -907,7 +907,7 @@ bool Preprocessor::ReadMacroDefinitionArgList(MacroInfo *MI) {
         }
           
         MI->setIsGNUVarargs();
-        MI->setArgumentList(Arguments.begin(), Arguments.end());
+        MI->setArgumentList(Argumentation.begin(), Argumentation.end());
         return false;
       }
     }

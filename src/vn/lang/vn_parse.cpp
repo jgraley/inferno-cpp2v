@@ -395,9 +395,9 @@ TreePtr<Node> VNParse::OnIdValuePair( TreePtr<Node> key, any id_loc, TreePtr<Nod
 TreePtr<Node> VNParse::OnMapArgsCall( TreePtr<Node> callee, list<TreePtr<Node>> arguments )
 {
 	auto call = MakeTreeNode<StandardAgentWrapper<CPPTree::Call>>();
-	auto args = MakeTreeNode<StandardAgentWrapper<CPPTree::MapArguments>>();
+	auto args = MakeTreeNode<StandardAgentWrapper<CPPTree::MapArgumentation>>();
 	call->callee = callee;
-	call->args_node = args;
+	call->argumentation = args;
 	for( auto argument : arguments )
 		args->arguments.insert( argument );
 	return call;
@@ -407,9 +407,9 @@ TreePtr<Node> VNParse::OnMapArgsCall( TreePtr<Node> callee, list<TreePtr<Node>> 
 TreePtr<Node> VNParse::OnSeqArgsCall( TreePtr<Node> callee, list<TreePtr<Node>> arguments )
 {
 	auto call = MakeTreeNode<StandardAgentWrapper<CPPTree::Call>>();
-	auto args = MakeTreeNode<StandardAgentWrapper<CPPTree::SeqArguments>>();
+	auto args = MakeTreeNode<StandardAgentWrapper<CPPTree::SeqArgumentation>>();
 	call->callee = callee;
-	call->args_node = args;
+	call->argumentation = args;
 	for( auto argument : arguments )
 		args->arguments.insert( argument );
 	return call;

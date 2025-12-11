@@ -365,6 +365,12 @@ string SpecificIdentifier::GetIdentifierName() const
 }
 
 
+string SpecificIdentifier::GetCouplingNameHint() const
+{
+	return GetIdentifierName();
+}
+
+
 string SpecificIdentifier::GetGraphName() const
 {
     // Since this is text from the program, use single quotes
@@ -774,33 +780,32 @@ string IdValuePair::GetRender( VN::RendererInterface *renderer, Production, Poli
            renderer->RenderIntoProduction( value, Production::COLON_SEP );	
 }
 
-//////////////////////////// MapArguments ///////////////////////////////
+//////////////////////////// MapArgumentation ///////////////////////////////
 
-Syntax::Production MapArguments::GetMyProductionTerminal() const
+Syntax::Production MapArgumentation::GetMyProductionTerminal() const
 { 
 	return Production::BRACKETED; 
 }
 
 
-string MapArguments::GetRender( VN::RendererInterface *renderer, Production, Policy )
+string MapArgumentation::GetRender( VN::RendererInterface *renderer, Production, Policy )
 {
 	list<string> ls;
 	for( TreePtr<Node> arg : arguments )
 		ls.push_back( renderer->RenderIntoProduction( arg, Production::COMMA_SEP ) );
 	
-    return "⊷" + // after id because call is postfix operator 
-		   Join( ls, ", ", "(", ")" );	
+    return Join( ls, ", ", "〔", "〕" );	
 }
 
-//////////////////////////// SeqArguments ///////////////////////////////
+//////////////////////////// SeqArgumentation ///////////////////////////////
 
-Syntax::Production SeqArguments::GetMyProductionTerminal() const
+Syntax::Production SeqArgumentation::GetMyProductionTerminal() const
 { 
 	return Production::BRACKETED; 
 }
 
 
-string SeqArguments::GetRender( VN::RendererInterface *renderer, Production, Policy )
+string SeqArgumentation::GetRender( VN::RendererInterface *renderer, Production, Policy )
 {	
 	list<string> ls;
 	for( TreePtr<Node> arg : arguments )
@@ -819,8 +824,8 @@ Syntax::Production Call::GetMyProductionTerminal() const
 
 string Call::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {		
-	if( policy.refuse_call_if_map_args && TreePtr<MapArguments>::DynamicCast(args_node) )
-		throw RefusedByPolicy(); // Would output ⊷ and ⦂, so C++ renderer needs to resolve into seq args
+	if( policy.refuse_call_if_map_args && TreePtr<MapArgumentation>::DynamicCast(argumentation) )
+		throw RefusedByPolicy(); // Would output 〔, 〕 and ⦂, so C++ renderer needs to resolve into seq args
 
     // Constructor case: spot by use of Lookup to empty-named method. Elide the "."
     TreePtr<Node> cons_object;
@@ -836,7 +841,7 @@ string Call::GetRender( VN::RendererInterface *renderer, Production, Policy poli
 	else
 		s_callee = renderer->RenderIntoProduction( callee, Syntax::Production::POSTFIX );
 			
-	string s_args = renderer->RenderIntoProduction( args_node, Syntax::Production::PRIMITIVE_EXPR );
+	string s_args = renderer->RenderIntoProduction( argumentation, Syntax::Production::PRIMITIVE_EXPR );
 	
 	return s_callee + s_args;
 }

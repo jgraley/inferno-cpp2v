@@ -27,7 +27,7 @@ C_CASES = declchain.c buriedcall.c test02.c test03.c test05.c test06.c test09.c 
 # The whole lot for the benefit of auto rules
 EXEC_CASES = ${SC_CASES} ${C_CASES} ${CPP_CASES}
 
-# Arguments to inferno executable:
+# Argumentation to inferno executable:
 # Args supplied via eg I=-uc will be squished together and appended to the
 # results directory. This will change the make target - i.e. make will 
 # regard each different combination of arguments separately when deciding 

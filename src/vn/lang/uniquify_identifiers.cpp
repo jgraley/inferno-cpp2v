@@ -299,10 +299,8 @@ const Fingerprinter::LinkSetByNode &Fingerprinter::GetIncomingLinksMap() const
 
 //////////////////////////// UniquifyNames ///////////////////////////////
 
-UniquifyNames::UniquifyNames( string (Syntax::*name_getter_)() const, bool multiparent_only_, bool preserve_undeclared_ids_ ) :
-    name_getter(name_getter_),
-    multiparent_only(multiparent_only_),
-    preserve_undeclared_ids(preserve_undeclared_ids_)
+UniquifyNames::UniquifyNames( Policy policy_ ) :
+    policy( policy_ )
 {
 }
 
@@ -327,14 +325,23 @@ UniquifyNames::NodeToNameMap UniquifyNames::UniquifyAll( const TransKit &kit, Tr
 		{
 			ASSERT( node );		
 			int num_reachings = p.first.size();
-			if( multiparent_only && num_reachings == 1 )
-				continue;
+			bool use = false;
+			if( policy.include_single_parent && num_reachings == 1 )
+				use = true;
+			else if( policy.include_multi_parent && num_reachings >= 2 )
+				use = true;				
+			else if( policy.include_named_identifiers )
+			{
+				try { (void)node->GetIdentifierName(); use = true; }
+				catch( Syntax::Unimplemented &e ) {}
+			}
 				
-			nodes_in_dfpo.push_back( node );
+			if( use )
+				nodes_in_dfpo.push_back( node );
 		}
 	}
 	
-	UniqueNameGenerator name_gen( name_getter );
+	UniqueNameGenerator name_gen( policy.name_getter );
 	NodeToNameMap nodes_to_names;
 
 	// Deal with undeclared (system) identifiers which must be preserved    
@@ -342,7 +349,7 @@ UniquifyNames::NodeToNameMap UniquifyNames::UniquifyAll( const TransKit &kit, Tr
 	{
 		TreePtr<Node> renamable_node = nullptr;
 		ASSERT( node );
-		if( preserve_undeclared_ids )
+		if( policy.preserve_undeclared_ids )
 		{			
 			try
 			{		
