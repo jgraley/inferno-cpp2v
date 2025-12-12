@@ -40,7 +40,7 @@ string BuildContainerSizeAgent::GetAgentRender( VN::RendererInterface *renderer,
 } 
   
     
-string BuildContainerSizeAgent::GetCouplingNameHint() const
+string BuildContainerSizeAgent::GetDesignationNameHint() const
 {
 	return "size";
 } 

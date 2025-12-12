@@ -55,7 +55,7 @@ public:
 	Syntax::Production GetAgentProduction() const override;
 	string GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod ) const final;
     NodeBlock GetGraphBlockInfo() const final;
-    string GetCouplingNameHint() const final
+    string GetDesignationNameHint() const final
     {
 		return "many"; 
 	} 

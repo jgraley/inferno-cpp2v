@@ -60,7 +60,7 @@ public:
             disjuncts.insert( *pit );      
     }
     
-    string GetCouplingNameHint() const final
+    string GetDesignationNameHint() const final
     {
 		return "any"; 
 	}

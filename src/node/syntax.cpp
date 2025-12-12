@@ -18,7 +18,7 @@ string Syntax::GetIdentifierName() const
 }
 
 
-string Syntax::GetCouplingNameHint() const
+string Syntax::GetDesignationNameHint() const
 {
 	try { return GetLoweredIdName(); }
 	catch( Refusal & ) {}
@@ -33,6 +33,12 @@ string Syntax::GetCouplingNameHint() const
         [](unsigned char c){ return tolower(c); });
 	
 	return s;
+}
+
+
+bool Syntax::IsDesignationNamedIdentifier() const
+{
+	return false;
 }
 
 

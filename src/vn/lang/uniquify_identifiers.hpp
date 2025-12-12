@@ -86,7 +86,7 @@ public:
 	    string (Syntax::*name_getter)() const;  // Method on nodes to get the initial name string
 		bool include_single_parent;
 		bool include_multi_parent;
-		bool include_named_identifiers;
+		bool include_designation_named_identifiers;
 		bool preserve_undeclared_ids;		    // Refuse to rename identifiers that have no definition
 	};
     typedef pair<const TreePtr<Node>, string> NodeAndNamePair;

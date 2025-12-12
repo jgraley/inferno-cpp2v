@@ -41,7 +41,7 @@ public:
         return &negand;
     }
 
-    string GetCouplingNameHint() const final
+    string GetDesignationNameHint() const final
     {
 		return "not"; 
 	}

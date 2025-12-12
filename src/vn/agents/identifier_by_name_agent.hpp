@@ -61,7 +61,8 @@ struct IdentifierByNameAgent : public virtual NonlocatingAgent
 
 	Syntax::Production GetAgentProduction() const override;
 	string GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod ) const final;
-    string GetCouplingNameHint() const final;
+    string GetDesignationNameHint() const final;
+	bool IsDesignationNamedIdentifier() const final;
     bool IsFixedType() const final;
     virtual string GetIdentifierSubTypeName() const = 0;
     NodeBlock GetGraphBlockInfo() const final;

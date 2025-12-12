@@ -30,7 +30,7 @@ private:
     TreePtr<Node> BuildNewSubtree(const SCREngine *acting_engine) final;    
 	Syntax::Production GetAgentProduction() const override;
 	string GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod ) const final;
-    string GetCouplingNameHint() const final;
+    string GetDesignationNameHint() const final;
     bool IsFixedType() const final;    
     NodeBlock GetGraphBlockInfo() const override;
 };

@@ -264,7 +264,8 @@ struct SpecificIdentifier : virtual Property
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
 	string GetRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Policy policy );
     string GetIdentifierName() const override; /// This is relied upon to just return the identifier name 
-    string GetCouplingNameHint() const override;
+    string GetDesignationNameHint() const override;
+    bool IsDesignationNamedIdentifier() const override;
     string GetGraphName() const override;
     string GetTrace() const override;
 	

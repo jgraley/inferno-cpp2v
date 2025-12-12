@@ -46,7 +46,7 @@ public:
     {
         return &overlay;
     }
-    string GetCouplingNameHint() const final
+    string GetDesignationNameHint() const final
     {
 		return "delta"; 
 	}   

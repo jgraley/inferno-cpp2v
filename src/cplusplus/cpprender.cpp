@@ -64,7 +64,7 @@ string CppRender::RenderToString( TreePtr<Node> root )
 	    .name_getter = &Syntax::GetIdentifierName, 
 		.include_single_parent = true,
 		.include_multi_parent = true,
-		.include_named_identifiers = false,
+		.include_designation_named_identifiers = false,
 		.preserve_undeclared_ids = true
 	};
 	UniquifyNames identifiers_uniqifier(un_policy); 

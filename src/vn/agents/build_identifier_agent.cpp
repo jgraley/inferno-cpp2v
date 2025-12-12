@@ -100,12 +100,33 @@ string BuildIdentifierAgent::GetAgentRender( VN::RendererInterface *renderer, Sy
 } 
   
     
-string BuildIdentifierAgent::GetCouplingNameHint() const
+string BuildIdentifierAgent::GetDesignationNameHint() const
 {
-	string t = GetIdentifierSubTypeName();
-	transform(t.begin(), t.end(), t.begin(), [](unsigned char c){ return tolower(c); });
-	return "new_" + t + "_id";
+	if( format.empty() )
+	{
+		string t = GetIdentifierSubTypeName();
+		transform(t.begin(), t.end(), t.begin(), [](unsigned char c){ return tolower(c); });
+		return "new_" + t;
+	}
+	
+    switch( sources.size() )
+    {
+        case 0:
+            return SSPrintf( format.c_str() );
+        case 1:
+            return SSPrintf( format.c_str(), "x" );
+        case 2:
+            return SSPrintf( format.c_str(), "x", "y" );
+        default:
+            ASSERTFAIL("Please add more cases to GetDesignationNameHint()");
+	}
 } 
+
+
+bool BuildIdentifierAgent::IsDesignationNamedIdentifier() const
+{
+	return !format.empty(); // refuse if there's no format string at all
+}
 
 
 bool BuildIdentifierAgent::IsFixedType() const

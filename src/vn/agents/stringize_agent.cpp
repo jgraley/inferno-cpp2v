@@ -35,7 +35,7 @@ string StringizeAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::
 } 
 
     
-string StringizeAgent::GetCouplingNameHint() const
+string StringizeAgent::GetDesignationNameHint() const
 {
 	return "stringize"; 
 } 

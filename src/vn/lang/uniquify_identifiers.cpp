@@ -330,11 +330,8 @@ UniquifyNames::NodeToNameMap UniquifyNames::UniquifyAll( const TransKit &kit, Tr
 				use = true;
 			else if( policy.include_multi_parent && num_reachings >= 2 )
 				use = true;				
-			else if( policy.include_named_identifiers )
-			{
-				try { (void)node->GetIdentifierName(); use = true; }
-				catch( Syntax::Unimplemented &e ) {}
-			}
+			else if( policy.include_designation_named_identifiers && node->IsDesignationNamedIdentifier() )
+				use = true;
 				
 			if( use )
 				nodes_in_dfpo.push_back( node );

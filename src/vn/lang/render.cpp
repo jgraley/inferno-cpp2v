@@ -48,10 +48,10 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern )
     // (more than one parent) and don't worry about declarations.
     UniquifyNames::Policy un_policy 
     {
-	    .name_getter = &Syntax::GetCouplingNameHint, 
+	    .name_getter = &Syntax::GetDesignationNameHint, 
 		.include_single_parent = false,
 		.include_multi_parent = true,
-		.include_named_identifiers = true,
+		.include_designation_named_identifiers = true,
 		.preserve_undeclared_ids = false
 	};
     UniquifyNames coupling_names_uniqifier(un_policy);

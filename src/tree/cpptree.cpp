@@ -365,9 +365,15 @@ string SpecificIdentifier::GetIdentifierName() const
 }
 
 
-string SpecificIdentifier::GetCouplingNameHint() const
+string SpecificIdentifier::GetDesignationNameHint() const
 {
 	return GetIdentifierName();
+}
+
+
+bool SpecificIdentifier::IsDesignationNamedIdentifier() const
+{
+	return true;
 }
 
 

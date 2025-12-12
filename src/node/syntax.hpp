@@ -128,7 +128,8 @@ public:
 	/// Produce the source-code-name of the corresponding SystemC construct
     virtual string GetLoweredIdName() const;
     virtual string GetIdentifierName() const;
-    virtual string GetCouplingNameHint() const;
+    virtual string GetDesignationNameHint() const;
+    virtual bool IsDesignationNamedIdentifier() const;
 	
 	virtual string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy );
 	

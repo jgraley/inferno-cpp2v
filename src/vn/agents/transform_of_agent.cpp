@@ -340,7 +340,7 @@ string TransformOfAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax
 } 
 
     
-string TransformOfAgent::GetCouplingNameHint() const
+string TransformOfAgent::GetDesignationNameHint() const
 {
 	string s = transformation->GetName();
 	transform(s.begin(), s.end(), s.begin(),

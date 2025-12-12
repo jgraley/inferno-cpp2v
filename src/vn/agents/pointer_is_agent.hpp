@@ -37,7 +37,7 @@ public:
     {
         return &pointer;
     }
-    string GetCouplingNameHint() const final
+    string GetDesignationNameHint() const final
     {
 		return "ptr_is"; 
 	}   

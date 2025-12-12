@@ -37,7 +37,7 @@ public:
         return &through;
     }
     
-    string GetCouplingNameHint() const final
+    string GetDesignationNameHint() const final
     {
 		return "green"; 
 	} 

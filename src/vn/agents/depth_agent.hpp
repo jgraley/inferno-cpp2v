@@ -57,7 +57,7 @@ class ChildAgent : public DepthAgent,
 	Syntax::Production GetAgentProduction() const override;
 	string GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod ) const final;
     NodeBlock GetGraphBlockInfo() const final;
-    string GetCouplingNameHint() const final
+    string GetDesignationNameHint() const final
     {
 		return "child"; 
 	}  
@@ -97,7 +97,7 @@ public:
 
     TreePtr<Node> recurse_restriction; // Restricts the intermediate nodes in the truncated subtree
 
-    string GetCouplingNameHint() const final
+    string GetDesignationNameHint() const final
     {
 		return "stuff"; 
 	}  

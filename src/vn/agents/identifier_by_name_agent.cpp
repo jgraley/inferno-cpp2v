@@ -118,12 +118,16 @@ string IdentifierByNameAgent::GetAgentRender( VN::RendererInterface *renderer, S
 } 
   
     
-string IdentifierByNameAgent::GetCouplingNameHint() const
+string IdentifierByNameAgent::GetDesignationNameHint() const
 {
-	string t = GetIdentifierSubTypeName();
-	transform(t.begin(), t.end(), t.begin(), [](unsigned char c){ return tolower(c); });
-	return "found_" + t + "_id";
+	return name;
 } 
+
+
+bool IdentifierByNameAgent::IsDesignationNamedIdentifier() const
+{
+	return true;
+}
 
 
 bool IdentifierByNameAgent::IsFixedType() const
