@@ -1057,7 +1057,9 @@ struct StatementExpression : Expression, ///< Evaluates to whatever the last sta
     
     virtual string GetColour() const { return Expression::GetColour(); } // Expression wins    
 	Production GetMyProductionTerminal() const override;	
+	//string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
 };                   
+
 
 /// The return statement of a function
 /** return_value is an Expression giving the return value or 

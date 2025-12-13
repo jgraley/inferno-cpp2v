@@ -156,12 +156,10 @@ string CppRender::RenderProgram( TreePtr<CPPTree::Program> program, Syntax::Prod
 	(void)surround_prod;
     string s;
 
-    AutoPush< TreePtr<Node> > cs( scope_stack, program );
-
     // Track scopes for name resolution
     s += RenderDeclScope( program ); // gets the .hpp stuff directly 
     
-    s += "// Definitions\n";    
+    s += "// Definitions";    
     
     // These are rendered here, inside program scope but outside any additional scopes
     // that were on the scope stack when the instance was seen. These could go in a .cpp file.
@@ -169,7 +167,9 @@ string CppRender::RenderProgram( TreePtr<CPPTree::Program> program, Syntax::Prod
     {
 		Syntax::Policy definition_policy = default_policy;
 		definition_policy.force_initialisation = true;
-        s += " " + RenderIntoProduction( definitions.front(), Syntax::Production::DECLARATION, definition_policy ); 
+        s += "\n";
+        s += RenderIntoProduction( definitions.front(), Syntax::Production::DECLARATION, definition_policy ); 
+        s += "\n";
         definitions.pop();
     }
     return s;  
@@ -188,11 +188,8 @@ string CppRender::RenderScopeResolvingPrefix( TreePtr<Node> node ) try
 {
     TreePtr<Node> scope = TryGetScope(node);
               
-    //TRACE("%p %p %p\n", program.get(), scope.get(), scope_stack.top().get() );
     if( !scope )
         return ""; // either we're not in a scope or id is undeclared
-    else if( scope == scope_stack.top() )
-        return ""; // local scope
     else if( DynamicTreePtrCast<Program>( scope ) )
         return "";
     else if( auto e = DynamicTreePtrCast<Enum>( scope ) ) // <- for enum
@@ -204,7 +201,7 @@ string CppRender::RenderScopeResolvingPrefix( TreePtr<Node> node ) try
              DynamicTreePtrCast<StatementExpression>( scope ) )    // <- this is for locals in body
         return "";
     else
-        return "?::"; // unknown scope
+        return scope->GetTrace()+"::"; // unknown scope
 }
 DEFAULT_CATCH_CLAUSE
 
@@ -567,7 +564,6 @@ string CppRender::RenderExpression( TreePtr<Initialiser> expression, Syntax::Pro
     if( auto ce = DynamicTreePtrCast< StatementExpression >(expression) )
     {
         string s = "({ ";
-        AutoPush< TreePtr<Node> > cs( scope_stack, ce );
         s += RenderDeclScope( ce ); // Must do this first to populate backing list
         for( TreePtr<Statement> st : ce->statements )    
             s += RenderIntoProduction( st, Syntax::Production::STATEMENT_LOW );    
@@ -676,9 +672,7 @@ DEFAULT_CATCH_CLAUSE
 
 string CppRender::RenderStorage( TreePtr<Instance> st ) try
 {
-    if( !scope_stack.empty() && DynamicTreePtrCast<Program>( scope_stack.top() ) )
-        return ""; // at top-level scope, everything is set to static, but don't actually output the word
-    else if( DynamicTreePtrCast<Static>( st ) )
+    if( DynamicTreePtrCast<Static>( st ) )
         return "static ";
     else if( DynamicTreePtrCast<LocalVariable>( st ) )
         return ""; // Assume automatic allocation is the default
@@ -729,7 +723,7 @@ void CppRender::ExtractInits( Sequence<Statement> &body,
 }
 
 
-string CppRender::RenderInstanceProto( TreePtr<Instance> o ) try
+string CppRender::RenderInstanceProto( TreePtr<Instance> o, Syntax::Production starting_declarator_prod ) try
 {
     string s;
     bool constant=false;
@@ -742,12 +736,14 @@ string CppRender::RenderInstanceProto( TreePtr<Instance> o ) try
             constant = true;
             
     string name;     
-    Syntax::Production starting_declarator_prod; 
     TreePtr<Constructor> con = DynamicTreePtrCast<Constructor>(o->type);
     TreePtr<Destructor> de = DynamicTreePtrCast<Destructor>(o->type);
     if( con || de )
     {
-		name = RenderScopeResolvingPrefix(o->identifier);
+		// Do the scope resolution separately so can insert ~
+		if( starting_declarator_prod < Syntax::Production::PURE_IDENTIFIER )
+			name = RenderScopeResolvingPrefix(o->identifier);
+			
         // TODO use TryGetRecordDeclaration( Typeof( o->identifier ) ) and leave scopes out of it
         TreePtr<Record> rec = DynamicTreePtrCast<Record>( TryGetScope( o->identifier ) );
         ASSERT( rec );        
@@ -757,7 +753,7 @@ string CppRender::RenderInstanceProto( TreePtr<Instance> o ) try
     }
     else
     {
-        starting_declarator_prod = Syntax::Production::RESOLVER;
+        //starting_declarator_prod = Syntax::Production::RESOLVER; // TODO only RESOLVER in definitions, otherwise PURE_IDENTIFIER
         name += RenderIntoProduction( o->identifier, starting_declarator_prod);
     }
 
@@ -831,7 +827,7 @@ string CppRender::RenderInitialisation( TreePtr<Initialiser> init ) try
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderInstance( TreePtr<Instance> o, Syntax::Production, Syntax::Policy policy )
+string CppRender::RenderInstance( TreePtr<Instance> o, Syntax::Production surround_prod, Syntax::Policy policy )
 {
     string s;
        
@@ -839,16 +835,15 @@ string CppRender::RenderInstance( TreePtr<Instance> o, Syntax::Production, Synta
 	{
 		// Definition is out-of-line so skip the storage
 		policy.force_initialisation = false; // stop at one level
-		s += RenderInstanceProto( o );
-		AutoPush< TreePtr<Node> > cs( scope_stack, TryGetScope( o->identifier ) );
+		s += RenderInstanceProto( o, Syntax::Production::RESOLVER );
 		s += RenderInitialisation( o->initialiser );	
 		s += "\n";		
 	}
 	else 
 	{
 		s += RenderStorage( o );
-		s += RenderInstanceProto( o );
-		if( ShouldSplitInstance(o) )
+		s += RenderInstanceProto( o, Syntax::Production::PURE_IDENTIFIER );
+		if( ShouldSplitInstance(o, surround_prod, policy) )
 		{
 			// Emit just a prototype now and request definition later
 			// Split out the definition of the instance for rendering later at Program scope
@@ -857,7 +852,6 @@ string CppRender::RenderInstance( TreePtr<Instance> o, Syntax::Production, Synta
 		else
 		{
 			// Emit the whole lot in-line
-			AutoPush< TreePtr<Node> > cs( scope_stack, TryGetScope( o->identifier ) );
 			s += RenderInitialisation( o->initialiser );							
 		}
 	}
@@ -869,7 +863,7 @@ string CppRender::RenderInstance( TreePtr<Instance> o, Syntax::Production, Synta
 // get split into a part that goes into the record (main line of rendering) and
 // a part that goes separately (definitions gets appended at the very end).
 // Do all functions, since SortDecls() ignores function bodies for dep analysis
-bool CppRender::ShouldSplitInstance( TreePtr<Instance> o ) 
+bool CppRender::ShouldSplitInstance( TreePtr<Instance> o, Syntax::Production , Syntax::Policy policy ) 
 {
     if( DynamicTreePtrCast<Callable>( o->type ) )
     {
@@ -882,19 +876,20 @@ bool CppRender::ShouldSplitInstance( TreePtr<Instance> o )
     else
     {
         // ----- objects ------ 
-        if( scope_stack.empty() )
-			return false;
+        //if( surround_prod==Syntax::Production::DECLARATION )
+	//		return false;
 			
-        if( !DynamicTreePtrCast<Record>( scope_stack.top() ) )
-            return false;
-        
-        if( TreePtr<Static> s = DynamicTreePtrCast<Static>(o) )
-        {
-            if( DynamicTreePtrCast<Const>(s->constancy) && DynamicTreePtrCast<Numeric>( o->type ) )
-                return false;
+        if( policy.split_bulky_statics )
+		{
+			// we're a field of a record
+			if( TreePtr<Static> s = DynamicTreePtrCast<Static>(o) )
+			{
+				if( DynamicTreePtrCast<Const>(s->constancy) && DynamicTreePtrCast<Numeric>( o->type ) )
+					return false;
 
-            return true;                
-        }
+				return true;                
+			}
+		}
 
         return false;
     }
@@ -931,7 +926,7 @@ string CppRender::RenderRecordProto( TreePtr<Record> record, Syntax::Policy poli
         s += Render::Dispatch( record, Syntax::Production::SPACE_SEP_DECLARATION, policy );
 
     // Name of the record
-    s += " " + RenderIntoProduction( record->identifier, Syntax::Production::SPACE_SEP_DECLARATION, policy);
+    s += " " + RenderIntoProduction( record->identifier, Syntax::Production::PURE_IDENTIFIER, policy); // Don't want scope resolution when declaring
     
     return s;
 }
@@ -977,7 +972,6 @@ string CppRender::RenderRecordBody( TreePtr<Record> record )
 	// Members
 	s += "\n{ // memb\n";
 	TreePtr<AccessSpec> a = record->GetInitialAccess();
-	AutoPush< TreePtr<Node> > cs( scope_stack, record );
 	if( a )
 		s += RenderDeclScope( record, type_index(typeid(*a)) );          
 	else
@@ -1033,7 +1027,6 @@ string CppRender::RenderStatement( TreePtr<Statement> statement, Syntax::Product
     else if( TreePtr<Compound> c = DynamicTreePtrCast< Compound >(statement) )
     {
         string s;
-        AutoPush< TreePtr<Node> > cs( scope_stack, c );
         s += RenderDeclScope( c ); // Must do this first to populate backing list
         for( TreePtr<Statement> st : c->statements )    
             s += RenderIntoProduction( st, Syntax::Production::STATEMENT_LOW );    
@@ -1111,10 +1104,18 @@ string CppRender::RenderConstructorInitList( Sequence<Statement> spe ) try
         if( !first )
             s += ",\n";
         s += "    "; // indentation
-        if( auto e = TreePtr<Expression>::DynamicCast(st) )
-            s += RenderIntoProduction( e, Syntax::Production::COMMA_SEP );
+        if( auto c = TreePtr<Call>::DynamicCast(st) ) // TODO will be some other kind of node eventully i.e. MemInit
+        {
+			if( auto lu = TreePtr<Lookup>::DynamicCast(c->callee) )
+				s += RenderIntoProduction( lu->object, Syntax::Production::PURE_IDENTIFIER ); // No scope resolution please
+			else
+				s += RenderNodeExplicit( lu, Syntax::Production::COMMA_SEP, default_policy );
+			s += RenderIntoProduction( c->argumentation, Syntax::Production::PRIMITIVE_EXPR );
+		}
         else 
-            s += RenderNodeExplicit( st, Syntax::Production::COMMA_SEP, default_policy );
+        {
+			s += RenderNodeExplicit( st, Syntax::Production::COMMA_SEP, default_policy );
+		}
         first = false;
     }
     return s;
@@ -1138,7 +1139,8 @@ string CppRender::RenderEnumBodyScope( TreePtr<CPPTree::Record> record ) try
             s += RenderNodeExplicit( pe, Syntax::Production::ASSIGN, default_policy );
             continue;
         }
-        s += RenderIntoProduction( o->identifier, Syntax::BoostPrecedence(Syntax::Production::ASSIGN));
+        // We're really declaring the id, and don't want scope resolution
+        s += RenderIntoProduction( o->identifier, Syntax::Production::PURE_IDENTIFIER); 
         
         auto ei = TreePtr<Expression>::DynamicCast( o->initialiser );
         if( !ei )
@@ -1192,6 +1194,10 @@ string CppRender::RenderDeclScope( TreePtr<DeclScope> decl_scope,
                                    type_index init_access ) try
 {
     TRACE();
+    Syntax::Policy decl_scope_policy = default_policy;
+    if( DynamicTreePtrCast<Record>(decl_scope) )
+		decl_scope_policy.split_bulky_statics = true; // Our scope is a record body
+
     Sequence<Declaration> sorted = SortDecls( decl_scope->members, true, unique_identifier_names );
 
 	queue<TreePtr<Declaration>> require_complete;
@@ -1208,9 +1214,10 @@ string CppRender::RenderDeclScope( TreePtr<DeclScope> decl_scope,
         
         if( DynamicTreePtrCast<Record>(pd) && !DynamicTreePtrCast<Enum>(pd) ) 
         {    
+			// A record within our scope
 			s += MaybeRenderFieldAccess( pd, &init_access );
 
-			Syntax::Policy record_policy = default_policy;
+			Syntax::Policy record_policy = decl_scope_policy;
 			record_policy.force_incomplete_records = true; 
 			s += RenderIntoProduction( pd, Syntax::Production::DECLARATION, record_policy ); 
 		}
@@ -1222,10 +1229,9 @@ string CppRender::RenderDeclScope( TreePtr<DeclScope> decl_scope,
     while( !require_complete.empty()  )
     {
         TreePtr<Declaration> d = require_complete.front();
-        require_complete.pop();
-            
+        require_complete.pop();       		
         s += MaybeRenderFieldAccess( d, &init_access );        
-        s += RenderIntoProduction( d, Syntax::Production::DECLARATION );
+        s += RenderIntoProduction( d, Syntax::Production::DECLARATION, decl_scope_policy );
     }
     TRACE();
     return s;

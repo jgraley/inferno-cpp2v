@@ -234,7 +234,28 @@ string Render::RenderMaybeSemicolon( TreePtr<Node> node, Syntax::Production surr
 	if( ReadArgs::use.count("c") )
 		s += SSPrintf("// Adding semicolon, surround prod to BARE_STATEMENT\n");
 
- 	return MaybeRenderPreRestriction( node, Syntax::Production::BARE_STATEMENT, policy ) +
+	switch( surround_prod )
+	{
+		case Syntax::Production::BOOT_STMT_DECL:
+		case Syntax::Production::STATEMENT:
+		case Syntax::Production::STATEMENT_LOW...Syntax::Production::STATEMENT_HIGH:
+			surround_prod = Syntax::Production::BARE_STATEMENT;
+			break;
+			
+		case Syntax::Production::DECLARATION:
+			surround_prod = Syntax::Production::BARE_DECLARATION;
+			break;
+			
+		default:
+			ASSERT(false)
+			      ("Adding semicolon but not sure what bare production should be\n")
+			      ("node: ")(node)("\n")
+			      ("node_prod: ")((int)node_prod)("\n")
+			      ("surround_prod: ")((int)surround_prod);
+			
+	}
+
+ 	return MaybeRenderPreRestriction( node, surround_prod, policy ) +
 		   ";\n ";                                  
 }
 
@@ -402,9 +423,6 @@ Syntax::Production Render::GetNodeProduction( TreePtr<Node> node, Syntax::Produc
 
 TreePtr<Scope> Render::TryGetScope( TreePtr<Node> node ) const
 {       
-    if( scope_stack.empty() ) 
-        return nullptr; // We aren't even in any scopes
-        
     auto id = TreePtr<CPPTree::Identifier>::DynamicCast(node);
     if( !id )
         return nullptr; // GetScope() is language-specific and only works on identifiers

@@ -53,7 +53,6 @@ public:
 
     const Syntax::Policy default_policy;
     TreePtr<Node> context;
-    stack< TreePtr<Node> > scope_stack;
     queue<TreePtr<CPPTree::Instance>> definitions;
     UniquifyNames::NodeToNameMap unique_coupling_names;
     UniquifyNames::LinkSetByNode incoming_links_map;

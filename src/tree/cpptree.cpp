@@ -887,6 +887,18 @@ Syntax::Production StatementExpression::GetMyProductionTerminal() const
 	return Production::BRACKETED; 
 }
 
+/*
+string StatementExpression::GetRender( VN::RendererInterface *renderer, Production production, Policy policy )
+{
+	string s = "[](){";
+        AutoPush< TreePtr<Node> > cs( scope_stack, ce );
+    s += RenderDeclScope( ce ); // Must do this first to populate backing list
+    for( TreePtr<Statement> st : ce->statements )    
+        s += RenderIntoProduction( st, Syntax::Production::STATEMENT_LOW );    
+	s += "}()";
+	return s;
+}*/
+
 //////////////////////////// Return ///////////////////////////////
 
 Syntax::Production Return::GetMyProductionTerminal() const

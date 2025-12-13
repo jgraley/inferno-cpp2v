@@ -45,10 +45,10 @@ private:
                        Sequence<CPPTree::Statement> &inits, 
                        Sequence<CPPTree::Statement> &remainder );
 
-    string RenderInstanceProto( TreePtr<CPPTree::Instance> o );
+    string RenderInstanceProto( TreePtr<CPPTree::Instance> o, Syntax::Production starting_declarator_prod );
     string RenderInitialisation( TreePtr<CPPTree::Initialiser> init );
     string RenderInstance( TreePtr<CPPTree::Instance> o, Syntax::Production surround_prod, Syntax::Policy policy );
-    bool ShouldSplitInstance( TreePtr<CPPTree::Instance> o );
+    bool ShouldSplitInstance( TreePtr<CPPTree::Instance> o, Syntax::Production surround_prod, Syntax::Policy policy );
 	string RenderMacroDeclaration( TreePtr<CPPTree::MacroDeclaration> md, Syntax::Production surround_prod );
     string RenderRecordProto( TreePtr<CPPTree::Record> record, Syntax::Policy policy );
 	string RenderPreProcDecl( TreePtr<CPPTree::PreProcDecl> ppd, Syntax::Production surround_prod );
