@@ -382,6 +382,19 @@ TreePtr<Node> VNParse::OnNormalTerminalKeyword( string keyword, any keyword_loc 
 }
 
 
+TreePtr<Node> VNParse::OnSpaceSepStmtKeyword( string keyword, any keyword_loc, TreePtr<Node> operand, any operand_loc )
+{
+	if( keyword=="return" )
+	{
+		auto ret = MakeTreeNode<StandardAgentWrapper<CPPTree::Return>>();
+		ret->return_value = operand;
+		return ret;
+	}
+	
+	ASSERTFAIL();
+}
+
+
 TreePtr<Node> VNParse::OnIdValuePair( TreePtr<Node> key, any id_loc, TreePtr<Node> value )
 {
 	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::IdValuePair>>();
@@ -622,11 +635,13 @@ VNLangRecogniser &VNParse::GetShim()
 
 // When designating a ⧇ or speciifc identifier node, why not use the given name as the name of the designation?
 
-// NOT putting some kind of quotes around identifier names or format strings feels like a conflict even if it isn't
+// Parser check broken with -qX+ 
+// Add a command for IsLoweringForRenderStep(), render it and parse it back
 
-// Implement %printer for semantic values
+// C++ renderer is broken rendering main() as static. Static node is in the C++ sense not the C sense, so
+// they should only be renderered with the static keyword if in a record, not at top level.
 
-// There are still some keywords in vn_lang.lcc - spot them in recogniser
+// Turn on ELIMINATE_STEP_NUMBER and fix if need be
 
 // Calls/Constructors plan:
 // - Factor out map/seq args

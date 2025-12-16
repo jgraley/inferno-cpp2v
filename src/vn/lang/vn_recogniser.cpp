@@ -92,6 +92,8 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessToken(wstring text, bool 
 	// Pick off keywords
 	if( ascii && ToASCII(text)=="this" )
 		return YY::VNLangParser::make_NORM_TERM_KEYWORD(metadata, loc);
+	if( ascii && ToASCII(text)=="return" )
+		return YY::VNLangParser::make_SPACE_SEP_STMT_KEYWORD(metadata, loc);
 	else if( ascii && ToASCII(text)=="true" )
 		return YY::VNLangParser::make_BOOL_LITERAL(true, loc);
 	else if( ascii && ToASCII(text)=="false" )

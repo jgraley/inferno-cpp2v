@@ -35,7 +35,7 @@ Render::Render( Syntax::Policy default_policy_, string output_x_path_ ) :
 }
 
 
-string Render::RenderToString( shared_ptr<CompareReplace> pattern )
+string Render::RenderToString( shared_ptr<CompareReplace> pattern, bool lowering_for_render )
 {
     // Context is used for various lookups but does not need
     // to be a Scope.
@@ -63,10 +63,18 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern )
 	string s;
 	if( ReadArgs::use.count("c") )
 		s += Trace(unique_coupling_names) + "\n\n";
+
+	list<string> commands;
+
+	if( lowering_for_render )
+		commands.push_back("‡"); // TODO this will be the general attribute syntax, presumably with VN braces and accepting textual attributes
+
 	for( TreePtr<Node> node : coupling_names_uniqifier.GetNodesInDepthFirstPostOrder() )	
-		s += unique_coupling_names.at(node) + 
-		     " ⪮ " + 
-		     RenderMaybeSemicolon( node, Syntax::Production::VN_DESIGNATE, designation_policy ) + "⨟\n";
+		commands.push_back( unique_coupling_names.at(node) + 
+							" ⪮ " + 
+							RenderMaybeSemicolon( node, 
+							                      Syntax::Production::VN_DESIGNATE, 
+							                      designation_policy ) );
 
 	ASSERT( pattern->GetSearchComparePattern() == pattern->GetReplacePattern() || !pattern->GetReplacePattern() )
 	   	  (pattern->GetSearchComparePattern())
@@ -75,8 +83,12 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern )
 	   	  (" or be NULL");
 	   	  
 	Syntax::Policy top_pattern_policy = default_policy;
-	s += "꩜" + RenderIntoProduction( pattern->GetSearchComparePattern(), Syntax::Production::PREFIX, top_pattern_policy );
-            
+	commands.push_back( "꩜" + 
+	                    RenderIntoProduction( pattern->GetSearchComparePattern(), 
+	                                          Syntax::Production::PREFIX, 
+	                                          top_pattern_policy ) );
+    
+    s += Join( commands, "⨟\n" );
     indenter.AddLinesFromString(s);
     indenter.DoIndent();
     return indenter.GetString();
@@ -130,9 +142,9 @@ string Render::RenderIntoProduction( TreePtr<Node> node, Syntax::Production surr
 		return RenderNullPointer( surround_prod );	
 					
 	if( ReadArgs::use.count("c") )
-		s += SSPrintf("\n// %s Node %s from %p\n", 
+		s += SSPrintf("\n// %s Node %s called from %p\n", 
 				      Tracer::GetPrefix().c_str(), 
-					  Trace(node).c_str(), 
+					  Traceable::TypeIdName(*node).c_str(), // No serial numbers because we diff these
 					  RETURN_ADDR() );
 
 	if( unique_coupling_names.count(node) > 0 )			
@@ -148,8 +160,9 @@ string Render::RenderMaybeInitAssignment( TreePtr<Node> node, Syntax::Production
 
 	string s;
 	if( ReadArgs::use.count("c") )
-		s += SSPrintf(" // Surround prod: %d node prod: %d\n", 
+		s += SSPrintf(" // Surround prod: %d, %s prod: %d\n", 
 					  Syntax::GetPrecedence(surround_prod), 
+					  Traceable::TypeIdName(*node).c_str(), // No serial numbers because we diff these
 					  Syntax::GetPrecedence(node_prod) );		
 
     if( !(surround_prod == Syntax::Production::INITIALISER) )

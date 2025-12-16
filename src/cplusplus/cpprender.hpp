@@ -40,7 +40,7 @@ private:
 	Sequence<CPPTree::Expression> SortMapById( Collection<CPPTree::IdValuePair> &id_value_map,
                                                Sequence<CPPTree::Declaration> key_sequence );  
     string RenderAccessSpec( TreePtr<CPPTree::AccessSpec> access, Syntax::Production surround_prod, Syntax::Policy policy );
-    string RenderStorage( TreePtr<CPPTree::Instance> st ); // No actual storage node
+    string RenderStorage( TreePtr<CPPTree::Instance> st, Syntax::Policy policy ); // No actual storage node
     void ExtractInits( Sequence<CPPTree::Statement> &body, 
                        Sequence<CPPTree::Statement> &inits, 
                        Sequence<CPPTree::Statement> &remainder );

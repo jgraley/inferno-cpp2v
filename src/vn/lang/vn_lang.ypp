@@ -98,6 +98,7 @@
 	CLOSE_TYPE								"⦆"
 	OPEN_MAP_CALL							"〔"
 	CLOSE_MAP_CALL							"〕"
+	ATTRIBUTE								"‡"
 	<string>	COMMA						_("comma")
 	<string>	C_ASSIGN					"="
 	<string>	C_COMPOUND_ASSIGN			_("C compound assignment operator")
@@ -122,16 +123,17 @@
 	<string>	TYPENAME					_("type name")
 	<YY::TokenMetadata> TRANSFORM_NAME_UNIFIED		_("unified transformation name")
 	<YY::TokenMetadata> TRANSFORM_NAME_NORMAL		_("normal transformation name")
-	<YY::TokenMetadata> ASCII_NAME 			_("ASCII name")
-	<YY::TokenMetadata> UNICODE_NAME 		_("Unicode name")
-	<YY::TokenMetadata>	DESIGNATED_NORMAL	_("designated name")
-	<YY::TokenMetadata>	DESIGNATED_TYPE		_("designated type name")
-	<YY::TokenMetadata>	RESOLVED_NORMAL		_("resolved node name")
-	<YY::TokenMetadata>	RESOLVED_TYPE		_("resolved type node name")
-	<YY::TokenMetadata>	NODE_NAMESPACE		_("scope resolving name")
-	<YY::TokenMetadata>	DECLARATION_OF		_("DeclarationOf")
-	<YY::TokenMetadata>	TYPE_OF				_("TypeOf")
-	<YY::TokenMetadata> NORM_TERM_KEYWORD	_("terminal keyword")
+	<YY::TokenMetadata> ASCII_NAME 				_("ASCII name")
+	<YY::TokenMetadata> UNICODE_NAME 			_("Unicode name")
+	<YY::TokenMetadata>	DESIGNATED_NORMAL		_("designated name")
+	<YY::TokenMetadata>	DESIGNATED_TYPE			_("designated type name")
+	<YY::TokenMetadata>	RESOLVED_NORMAL			_("resolved node name")
+	<YY::TokenMetadata>	RESOLVED_TYPE			_("resolved type node name")
+	<YY::TokenMetadata>	NODE_NAMESPACE			_("scope resolving name")
+	<YY::TokenMetadata>	DECLARATION_OF			_("DeclarationOf")
+	<YY::TokenMetadata>	TYPE_OF					_("TypeOf")
+	<YY::TokenMetadata> NORM_TERM_KEYWORD		_("terminal keyword")
+	<YY::TokenMetadata> SPACE_SEP_STMT_KEYWORD 	_("space separated statement keyword")
 	
 %type <TreePtr<Node>> 				normal norm_unit norm_postfix norm_prefix norm_relational norm_disjunction norm_conjunction  
 %type <TreePtr<Node>> 				norm_assignment norm_equality norm_add_etc norm_logical_or norm_logical_and 
@@ -146,7 +148,7 @@
 %type <YY::TokenMetadata> 			resolved_name resolved_type_name node_namespace
 %type <list<shared_ptr<VN::Command>>>			commands sep_commands
 %type <shared_ptr<VN::Command>>		script_command 
-%type <VN::Limit>					limit
+%type <VN::Limit>					stuff_depth_limit
 %type <VN::Itemisation>				close_itemisation items_bare items_sep
 %type <VN::Item>					item
 %type <shared_ptr<VN::Gnomon>>		part_resolve recogniser_command 
@@ -174,14 +176,15 @@ sep_commands 	: sep_commands VN_SEMI script_command		{ $$ = $1; $$.push_back($3)
 // Add more commands here
 script_command	: ENGINE normal   		 		 	{ $$ = make_shared<VN::EngineCommand>($2, @1); }
 				| normal 			  				{ $$ = make_shared<VN::PatternCommand>($1, @$); }
+				| ATTRIBUTE		  					{ $$ = make_shared<VN::AttributeCommand>(@$); }
 
 // or here
-recogniser_command	: vn_name DESIGNATE normal			{ $$ = make_shared<VN::NonTypeDesignationGnomon>($1, $3); }
+recogniser_command	: vn_name DESIGNATE bare_statement	{ $$ = make_shared<VN::NonTypeDesignationGnomon>($1, $3); }
 					| vn_name DESIGNATE type			{ $$ = make_shared<VN::TypeDesignationGnomon>($1, $3); }
 
 
 // This one dips into ASCII/C because VN doesn't otherwise need equality/inequality operators
-limit		: C_ASSIGN INTEGRAL_LITERAL					{ $$ = VN::Limit{ $1, @1, $2, @2 }; }
+stuff_depth_limit		: C_ASSIGN INTEGRAL_LITERAL					{ $$ = VN::Limit{ $1, @1, $2, @2 }; }
 
 close_itemisation	: VN_SEP items_bare CLOSE_VN   		{ $$ = $2; $$.loc = @$; }
 					| VN_SEP items_sep CLOSE_VN			{ $$ = $2; $$.loc = @$; $$.items.push_back({{}, @3}); }
@@ -207,6 +210,7 @@ bare_statements	: bare_statement 						{ $$.push_back($1); }
 				| bare_statements ';' bare_statement 	{ $$ = $1; $$.push_back($3); }
 
 bare_statement	: normal
+//				| SPACE_SEP_STMT_KEYWORD normal			{ $$ = vn->OnSpaceSepStmtKeyword($1.as_ascii, @1, $2, @2); }
           
 type			: type_disjunction          
           
@@ -310,8 +314,8 @@ norm_prefix : 										   norm_postfix
 			| 								 BUILD_SIZE unified_prefix	{ $$ = vn->OnBuildSize($2); }
 			| 								  STRINGIZE unified_prefix	{ $$ = vn->OnStringize($2); }
 			|  									  STUFF unified_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
-			| 		  	 STUFF OPEN_VN unified CLOSE_VN unified_prefix	{ $$ = vn->OnStuff($5, $3, VN::Limit()); }
-			| 			 STUFF OPEN_VN limit   CLOSE_VN unified_prefix	{ $$ = vn->OnStuff($5, nullptr, $3); }
+			|  STUFF OPEN_VN           unified CLOSE_VN unified_prefix	{ $$ = vn->OnStuff($5, $3, VN::Limit()); }
+			|  STUFF OPEN_VN stuff_depth_limit CLOSE_VN unified_prefix	{ $$ = vn->OnStuff($5, nullptr, $3); }
 			|       PRERESTRICT node_name_part CLOSE_VN unified_prefix	{ $$ = vn->OnRestrict($2, @2, $4, @4); }
 
 transform_norm_part : start_transform_name_scope TRANSFORM_NAME_NORMAL { $$ = $2.as_ascii; (void)$1; }

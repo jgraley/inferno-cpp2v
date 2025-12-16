@@ -74,7 +74,8 @@ comp_assign				\|=|^=|&=|<<=|>>=|\+=|-=|\*=|\/=|%=
 ⦆ 				{ return YY::VNLangParser::make_CLOSE_TYPE(location()); };
 〔				{ return YY::VNLangParser::make_OPEN_MAP_CALL(location()); };
  〕				{ return YY::VNLangParser::make_CLOSE_MAP_CALL(location()); };
- 
+‡				{ return YY::VNLangParser::make_ATTRIBUTE(location()); };
+
 // Multi-character before single-character
 ==|!=			{ return YY::VNLangParser::make_C_EQUALITY_OP(str(), location()); }
 <|<=|>|>=		{ return YY::VNLangParser::make_C_RELATIONAL_OP(str(), location()); }

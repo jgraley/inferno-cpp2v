@@ -24,7 +24,7 @@ class Render : public RendererInterface
 public:	
     Render( string output_x_path_ = string() );
     Render( Syntax::Policy default_policy_, string output_x_path_ = string() );
-    string RenderToString( shared_ptr<VN::CompareReplace> pattern );
+    string RenderToString( shared_ptr<VN::CompareReplace> pattern, bool lowering_for_render );
     void WriteToFile(string s);
     
 	static Syntax::Policy GetDefaultPolicy();

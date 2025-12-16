@@ -23,11 +23,13 @@ class VNStep;
 class VNSoftStep : public VNStep
 {
 public:	
-	VNSoftStep( string step_name_ );
+	VNSoftStep( string step_name_, bool lowering_for_render_ );
 	string GetName() const final;
+   	bool IsLoweringForRenderStep() const final;
 
 private:
-	string step_name;
+	const string step_name;
+	const bool lowering_for_render;
 };
 
 
@@ -37,6 +39,7 @@ class VNScriptRunner
 {
 public:		
 	VNScriptRunner( vector< shared_ptr<VN::VNStep> > *sequence_ );
+	void SetLoweringForRenderStep();
 	void AddStep(const VN::ScriptKit &kit, TreePtr<Node> stem);
 	void ProcessVNPath( string spath );
 
@@ -45,7 +48,7 @@ private:
 	void RunScript( string spath, Command::List script );	
 
 	vector< shared_ptr<VN::VNStep> > *sequence;
-
+	bool lowering_for_render = false;
 };
 
 

@@ -903,8 +903,14 @@ string StatementExpression::GetRender( VN::RendererInterface *renderer, Producti
 
 Syntax::Production Return::GetMyProductionTerminal() const
 { 
-	return Production::BARE_STATEMENT; 
+	return Production::BARE_STATEMENT; 	
 }
+
+
+/*string Return::GetRender( VN::RendererInterface *renderer, Production, Policy )
+{
+	return "return " + renderer->RenderIntoProduction( return_value, Syntax::Production::SPACE_SEP_STATEMENT );
+}*/
 
 //////////////////////////// Goto ///////////////////////////////
 

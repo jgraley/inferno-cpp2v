@@ -99,6 +99,7 @@ public:
 			force_initialisation(false), 
 			force_incomplete_records(false),
 			split_bulky_statics(false),
+			permit_static_keyword(false),
 			current_access(DefaultAccess),
 			refuse_c_style_cast(false),
 			detect_and_render_constructor(true),
@@ -106,6 +107,7 @@ public:
 		bool force_initialisation;
 		bool force_incomplete_records;
 		bool split_bulky_statics;
+		bool permit_static_keyword;
 		// A good thing about typeindex/typeid is that you can refer to a node
 		// type without needing to have an actual node of that type.
 		type_index current_access;

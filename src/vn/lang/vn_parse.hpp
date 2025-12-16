@@ -75,7 +75,10 @@ public:
 	TreePtr<Node> OnSubscript( TreePtr<Node> destination, TreePtr<Node> index );	
 	TreePtr<Node> OnCompound( list<TreePtr<Node>> statements );	
 	TreePtr<Node> OnArrayLiteral( TreePtr<Node> root_of_comma_expression );	
+	
 	TreePtr<Node> OnNormalTerminalKeyword( string keyword, any keyword_loc );
+	TreePtr<Node> OnSpaceSepStmtKeyword( string keyword, any keyword_loc, TreePtr<Node> operand, any operand_loc );
+	
 	TreePtr<Node> OnIdValuePair( TreePtr<Node> id, any id_loc, TreePtr<Node> value );
 	TreePtr<Node> OnMapArgsCall( TreePtr<Node> callee, list<TreePtr<Node>> arguments );
 	TreePtr<Node> OnSeqArgsCall( TreePtr<Node> callee, list<TreePtr<Node>> arguments );

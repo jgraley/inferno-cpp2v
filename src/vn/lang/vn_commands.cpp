@@ -113,3 +113,34 @@ string PatternCommand::GetTrace() const
 {
 	return "PatternCommand: " + Trace(pattern);
 }
+
+
+//////////////////////////// AttributeCommand ///////////////////////////////
+
+AttributeCommand::AttributeCommand( any loc_ ) :
+	Command(loc_)
+{
+}
+
+
+TreePtr<Node> AttributeCommand::DecayToPattern( TreePtr<Node> node, VNParse *vn )
+{
+	throw YY::VNLangParser::syntax_error(
+	     any_cast<YY::VNLangParser::location_type>(loc), 
+	     "Attributes only at top level");	
+}
+
+
+void AttributeCommand::Execute(const ScriptKit &kit) const
+{
+	// The only thing we can do with attributes is to set the lowering-for-render flag
+	// which marks the step as still to be run when using -q...+
+	kit.vn_script->SetLoweringForRenderStep();
+}
+
+
+string AttributeCommand::GetTrace() const
+{
+	return "AttributeCommand";
+}
+

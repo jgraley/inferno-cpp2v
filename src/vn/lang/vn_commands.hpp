@@ -70,8 +70,18 @@ public:
 private:
 	const TreePtr<Node> pattern;
 };
+
+	
+class AttributeCommand : public Command
+{
+public:	
+	AttributeCommand( any loc );
+	TreePtr<Node> DecayToPattern( TreePtr<Node> node, VNParse *vn ) final; 
+	void Execute( const ScriptKit &kit ) const final;
+
+	string GetTrace() const final;	
+};
 	
 };
 
 #endif
-

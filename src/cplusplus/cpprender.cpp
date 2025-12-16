@@ -670,9 +670,10 @@ string CppRender::RenderAccessSpec( TreePtr<AccessSpec> access, Syntax::Producti
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderStorage( TreePtr<Instance> st ) try
+string CppRender::RenderStorage( TreePtr<Instance> st, Syntax::Policy policy ) try
 {
-    if( DynamicTreePtrCast<Static>( st ) )
+	// In VN, Static means in the C++ sense not the C sense
+    if( DynamicTreePtrCast<Static>( st ) && policy.permit_static_keyword )
         return "static ";
     else if( DynamicTreePtrCast<LocalVariable>( st ) )
         return ""; // Assume automatic allocation is the default
@@ -830,9 +831,10 @@ DEFAULT_CATCH_CLAUSE
 string CppRender::RenderInstance( TreePtr<Instance> o, Syntax::Production surround_prod, Syntax::Policy policy )
 {
     string s;
-       
+    
 	if( policy.force_initialisation )
 	{
+		s += "/* force init */";   
 		// Definition is out-of-line so skip the storage
 		policy.force_initialisation = false; // stop at one level
 		s += RenderInstanceProto( o, Syntax::Production::RESOLVER );
@@ -840,17 +842,20 @@ string CppRender::RenderInstance( TreePtr<Instance> o, Syntax::Production surrou
 		s += "\n";		
 	}
 	else 
-	{
-		s += RenderStorage( o );
+	{		
+		s += "/* no force init */";   
+		s += RenderStorage( o, policy );
 		s += RenderInstanceProto( o, Syntax::Production::PURE_IDENTIFIER );
 		if( ShouldSplitInstance(o, surround_prod, policy) )
 		{
+			s += "/* split */";   
 			// Emit just a prototype now and request definition later
 			// Split out the definition of the instance for rendering later at Program scope
 			definitions.push(o);
 		}		
 		else
 		{
+			s += "/* no split */";   
 			// Emit the whole lot in-line
 			s += RenderInitialisation( o->initialiser );							
 		}
@@ -1196,8 +1201,10 @@ string CppRender::RenderDeclScope( TreePtr<DeclScope> decl_scope,
     TRACE();
     Syntax::Policy decl_scope_policy = default_policy;
     if( DynamicTreePtrCast<Record>(decl_scope) )
+    {
 		decl_scope_policy.split_bulky_statics = true; // Our scope is a record body
-
+		decl_scope_policy.permit_static_keyword = true; // Our scope is a record body
+	}
     Sequence<Declaration> sorted = SortDecls( decl_scope->members, true, unique_identifier_names );
 
 	queue<TreePtr<Declaration>> require_complete;

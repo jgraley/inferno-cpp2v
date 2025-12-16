@@ -24,14 +24,22 @@ using namespace VN;
 
 //////////////////////////// VNSoftStep ///////////////////////////////
 
-VNSoftStep::VNSoftStep( string name )
-{
-	step_name = name;
+VNSoftStep::VNSoftStep( string step_name_, bool lowering_for_render_ ) :
+	step_name( step_name_ ),
+	lowering_for_render( lowering_for_render_ )
+{	
 }
+
 
 string VNSoftStep::GetName() const
 {
 	return step_name;
+}
+
+
+bool VNSoftStep::IsLoweringForRenderStep() const
+{
+	return lowering_for_render;
 }
 
 //////////////////////////// VNScriptRunner ///////////////////////////////
@@ -39,6 +47,12 @@ string VNSoftStep::GetName() const
 VNScriptRunner::VNScriptRunner( vector< shared_ptr<VN::VNStep> > *sequence_ ) :
 	sequence(sequence_)
 {
+}
+
+
+void VNScriptRunner::SetLoweringForRenderStep()
+{
+	lowering_for_render = true;
 }
 
 
@@ -54,7 +68,7 @@ void VNScriptRunner::AddStep(const VN::ScriptKit &kit, TreePtr<Node> stem)
 		basename = basename.substr(4);
 #endif
 
-	auto step = make_shared<VNSoftStep>(basename);
+	auto step = make_shared<VNSoftStep>(basename, lowering_for_render);
 	step->Configure(VNStep::COMPARE_REPLACE, stem);
 	kit.step_sequence->push_back( step );
 }
