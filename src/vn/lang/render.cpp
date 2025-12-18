@@ -72,9 +72,9 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern, bool lowering
 	for( TreePtr<Node> node : coupling_names_uniqifier.GetNodesInDepthFirstPostOrder() )	
 		commands.push_back( unique_coupling_names.at(node) + 
 							" ⪮ " + 
-							RenderMaybeSemicolon( node, 
-							                      Syntax::Production::VN_DESIGNATE, 
-							                      designation_policy ) );
+							RenderMaybeInitAssignment( node, 
+							                           Syntax::Production::VN_DESIGNATE, 
+							                           designation_policy ) );
 
 	ASSERT( pattern->GetSearchComparePattern() == pattern->GetReplacePattern() || !pattern->GetReplacePattern() )
 	   	  (pattern->GetSearchComparePattern())
@@ -142,7 +142,7 @@ string Render::RenderIntoProduction( TreePtr<Node> node, Syntax::Production surr
 		return RenderNullPointer( surround_prod );	
 					
 	if( ReadArgs::use.count("c") )
-		s += SSPrintf("\n// %s Node %s called from %p\n", 
+		s += SSPrintf("\n//%s Node %s called from %p\n", 
 				      Tracer::GetPrefix().c_str(), 
 					  Traceable::TypeIdName(*node).c_str(), // No serial numbers because we diff these
 					  RETURN_ADDR() );
@@ -160,9 +160,10 @@ string Render::RenderMaybeInitAssignment( TreePtr<Node> node, Syntax::Production
 
 	string s;
 	if( ReadArgs::use.count("c") )
-		s += SSPrintf(" // Surround prod: %d, %s prod: %d\n", 
-					  Syntax::GetPrecedence(surround_prod), 
+		s += SSPrintf("\n//%s Node %s, surround prod: %d, node prod: %d\n", 
+					  Tracer::GetPrefix().c_str(), 
 					  Traceable::TypeIdName(*node).c_str(), // No serial numbers because we diff these
+					  Syntax::GetPrecedence(surround_prod), 
 					  Syntax::GetPrecedence(node_prod) );		
 
     if( !(surround_prod == Syntax::Production::INITIALISER) )

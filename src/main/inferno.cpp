@@ -259,7 +259,8 @@ Inferno::Plan::Plan(Inferno *algo_) :
         ReadArgs::quitafter_progress.GetStep() != Progress::NO_STEP )
     {
 		vector<Step>::size_type last_aside_from_lowerings = ReadArgs::quitafter_progress.GetStep();
-        steps.resize( last_aside_from_lowerings + 1 );
+        if( last_aside_from_lowerings+1 < steps.size() ) // tolerate large quit-after numbers
+			steps.resize( last_aside_from_lowerings + 1 );
         steps.back().allow_stop = true;
         
         // Append any lowering steps

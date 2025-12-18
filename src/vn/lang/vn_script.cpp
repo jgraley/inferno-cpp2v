@@ -82,8 +82,7 @@ void VNScriptRunner::ProcessVNPath( string spath )
 		set<string> ss;
 		for( const filesystem::directory_entry &entry : filesystem::directory_iterator(path) )
 			ss.insert(entry.path()); // These won't be sorted (this isn't "ls")
-			
-		// Process the steps in lexigographical order so they can be prefixed with 000-, 001- etc
+		// Process the steps in lexicographical order so they can be prefixed with 000-, 001- etc
 		for( string s : ss )
 			ProcessVNPath( s );
 	}

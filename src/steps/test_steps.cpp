@@ -110,8 +110,8 @@ FixCrazyNumberEmb::FixCrazyNumberEmb()
 
     auto se = MakePatternNode<Expression>();    
     auto r_embedded = MakePatternNodeNP<EmbeddedCompareReplaceAgent>( MakePatternNode<SpecificInteger>(54257), // through restricts to crazy number
-                                                                             MakePatternNode<SpecificInteger>(54257), // emb matches for crazy 
-                                                                             MakePatternNode<SpecificInteger>(50) ); // and replaces with sensible
+                                                                      MakePatternNode<SpecificInteger>(54257), // emb matches for crazy 
+                                                                      MakePatternNode<SpecificInteger>(50) ); // and replaces with sensible
 
     ss->operands = (se, r_embedded);
     sr->operands = (se, r_embedded);
