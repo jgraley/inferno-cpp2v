@@ -49,6 +49,7 @@ private:
 
 	vector< shared_ptr<VN::VNStep> > *sequence;
 	bool lowering_for_render = false;
+	bool used_script_filepath = false;
 };
 
 

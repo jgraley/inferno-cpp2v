@@ -18,9 +18,10 @@
 #include <fstream>
 #include <filesystem>
 
+#define ELIMINATE_STEP_NUMBER
+
 using namespace CPPTree; 
 using namespace VN;
-
 
 //////////////////////////// VNSoftStep ///////////////////////////////
 
@@ -67,10 +68,13 @@ void VNScriptRunner::AddStep(const VN::ScriptKit &kit, TreePtr<Node> stem)
 	if( n==2 )
 		basename = basename.substr(4);
 #endif
+	ASSERT(!used_script_filepath)
+	      ("Tried to create a second step with the same name (`%s' from the name of the .vn file)", basename.c_str());
 
 	auto step = make_shared<VNSoftStep>(basename, lowering_for_render);
 	step->Configure(VNStep::COMPARE_REPLACE, stem);
 	kit.step_sequence->push_back( step );
+	used_script_filepath = true;
 }
 
 
@@ -105,6 +109,7 @@ void VNScriptRunner::ProcessVNFile(string spath )
 
 void VNScriptRunner::RunScript( string spath, Command::List script )
 {
+	used_script_filepath = false; // got a new path
 	VN::ScriptKit kit{ this, sequence, spath };
 	for( shared_ptr<Command> c : script )
 	{
