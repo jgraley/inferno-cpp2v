@@ -707,11 +707,12 @@ Syntax::Production ArrayLiteral::GetMyProductionTerminal() const
 	return Production::INITIALISER; 
 }
 
+
 string ArrayLiteral::GetRender( VN::RendererInterface *renderer, Production, Policy )
 {
 	list<string> renders;    
-    for( TreePtr<Expression> operand : operands )
-		renders.push_back( renderer->RenderIntoProduction( operand, Production::COMMA_SEP ) );
+    for( TreePtr<Expression> e : elements )
+		renders.push_back( renderer->RenderIntoProduction( e, Production::COMMA_SEP ) );
     // Use of ={} in expressions is irregular so handle locally. = is used to disambiguate
     // from a compound statement.
     return "=" + Join(renders, ", ", "{", "}"); 

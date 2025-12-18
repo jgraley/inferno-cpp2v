@@ -843,9 +843,10 @@ struct Subscript : Operator
 };
 
 /// An array formed directly from elements which should all be the same type
-struct ArrayLiteral : NonCommutativeOperator // TODO change to Initialiser
+struct ArrayLiteral : Initialiser
 {
 	NODE_FUNCTIONS_FINAL	
+    Sequence<Expression> elements; 
 	
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) final;

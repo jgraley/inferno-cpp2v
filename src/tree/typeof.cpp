@@ -131,12 +131,12 @@ AugTreePtr<CPPTree::Type> TypeOf::Get( const TransKit &kit, AugTreePtr<Expressio
     else if( auto al = AugTreePtr<ArrayLiteral>::DynamicCast(op) )
     {
         auto a = kit.utils->MakeAugTreeNode<Array>();
-        auto sz = kit.utils->MakeAugTreeNode<SpecificInteger>( (int)(al->operands.size()) ); // TODO make it work with size_t and remove the cast
+        auto sz = kit.utils->MakeAugTreeNode<SpecificInteger>( (int)(al->elements.size()) ); // TODO make it work with size_t and remove the cast
         SET_CHILD(a, size, sz);
-        if( al->operands.empty() )
+        if( al->elements.empty() )
             SET_CHILD(a, element, kit.utils->MakeAugTreeNode<Void>()); // array has no elements so cannot determine type
         else
-            SET_CHILD(a, element, Get( kit, GET_CHILD_FRONT(al, operands) ));
+            SET_CHILD(a, element, Get( kit, GET_CHILD_FRONT(al, elements) ));
         return AugTreePtr<Type>(a);
     }
     else if( AugTreePtr<This>::DynamicCast(op) )

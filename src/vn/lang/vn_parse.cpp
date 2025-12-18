@@ -372,7 +372,7 @@ TreePtr<Node> VNParse::OnArrayLiteral( TreePtr<Node> root_of_comma_expression )
 	// Fill out the array literal
 	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::ArrayLiteral>>();
 	for( TreePtr<Node> value : values )
-		node->operands.insert( value );
+		node->elements.insert( value );
 	return node;
 }
 

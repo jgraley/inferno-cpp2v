@@ -807,7 +807,7 @@ private:
 				// in from the initialiser
                 if( auto a = DynamicTreePtrCast<Array>(o->type) )                
 					if( DynamicTreePtrCast<Uninitialised>(a->size) )
-						a->size = MakeTreeNode<SpecificInteger>( ai->operands.size() );				
+						a->size = MakeTreeNode<SpecificInteger>( ai->elements.size() );				
                 
                 // At this point, when we have the instance (and hence the type) and the initialiser
 				// we can detect when an array initialiser has been inserted for a record instance and
@@ -1779,7 +1779,7 @@ private:
         for(unsigned i=0; i<NumInit; i++)
         {
             TreePtr<Expression> e = hold_expr.FromRaw( InitList[i] );
-            ao->operands.push_back( e );
+            ao->elements.push_back( e );
         }
         TRACE("ActOnInitList: ")(ao)("\n");
         return hold_expr.ToRaw( ao );
@@ -1797,7 +1797,7 @@ private:
 
         // Fill in the RecordLiteral operands collection with pairs that relate operands to their member ids
         TreePtr<Scope> s = r;
-        PopulateMapOperator( ri->operands, ai->operands, s );
+        PopulateMapOperator( ri->operands, ai->elements, s );
 
         return ri;
     }

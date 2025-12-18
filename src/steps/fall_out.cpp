@@ -102,7 +102,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     ll_sub->destination = r_lmap_id;
     ll_sub->index = lr_state_id;
     lls_not1->negand = lls_make;
-    lls_make->operands = (MakePatternNode<StarAgent, Expression>(), 
+    lls_make->elements = (MakePatternNode<StarAgent, Expression>(), 
                           ls_label_id,
                           MakePatternNode<StarAgent, Expression>()); // TODO too strong, will hit (arr){LABEL} in original code
     lls_not2->negand = lls_label;
@@ -136,8 +136,8 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     l_lmap->initialiser = l_mover;
     l_mover->through = ls_make;
     l_mover->overlay = lr_make;
-    ls_make->operands = (l_existing);
-    lr_make->operands = (l_existing, ls_label_id);
+    ls_make->elements = (l_existing);
+    lr_make->elements = (l_existing, ls_label_id);
     l_existing->restriction = l_mnot;
     l_mnot->negand = ls_label_id;
     l_label->identifier = ls_label_id;
@@ -175,7 +175,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
   //  r_lmap->access = MakePatternNode<Private>();    
     r_array->element = MakePatternNode<Labeley>();
     r_array->size = MakePatternNode<Uninitialised>();
-    //r_make->operands = ()
+    //r_make->elements = ()
     
     Configure( SEARCH_REPLACE, s_module, embedded_l );    
 }
