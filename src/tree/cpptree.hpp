@@ -843,7 +843,7 @@ struct Subscript : Operator
 };
 
 /// An array formed directly from elements which should all be the same type
-struct ArrayLiteral : NonCommutativeOperator
+struct ArrayLiteral : NonCommutativeOperator // TODO change to Initialiser
 {
 	NODE_FUNCTIONS_FINAL	
 	

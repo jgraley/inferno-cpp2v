@@ -355,15 +355,19 @@ TreePtr<Node> VNParse::OnCompound( list<TreePtr<Node>> statements )
 
 TreePtr<Node> VNParse::OnArrayLiteral( TreePtr<Node> root_of_comma_expression )
 {
-	// Break up a comma-separated expression, assuming left-associative
-	TreePtr<Node> current = root_of_comma_expression;
 	list<TreePtr<Node>> values;
-	while( auto comma = TreePtr<CPPTree::Comma>::DynamicCast(current) )
+
+	if( root_of_comma_expression )
 	{
-		values.push_front( comma->operands.back() );
-		current = comma->operands.front();
+		// Break up a comma-separated expression, assuming left-associative
+		TreePtr<Node> current = root_of_comma_expression;
+		while( auto comma = TreePtr<CPPTree::Comma>::DynamicCast(current) )
+		{
+			values.push_front( comma->operands.back() );
+			current = comma->operands.front();
+		}
+		values.push_front( current );
 	}
-	values.push_front( current );
 	
 	// Fill out the array literal
 	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::ArrayLiteral>>();

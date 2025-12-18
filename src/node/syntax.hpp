@@ -33,8 +33,7 @@ public:
 		MAX_SURR_SEMICOLON,	// Note: surroundings lower than here /\ can get ";" added.
 
 		// ----- Parts of statements and declarations
-		INITIALISER = 30, // eg MyType thing <here>; and " = " is inserted if node is expressional
-		CONDITION,		// Use in surrounds like if( <here> ) ... which could be a decl etc. 
+		CONDITION = 30,		// Use in surrounds like if( <here> ) ... which could be a decl etc. 
 		BRACED,		 // {} from the outside
 		
 		MIN_NODE_SEMICOLON, // Note: nodes higher than here \/ can get ";" added.
@@ -44,13 +43,15 @@ public:
 		SPACE_SEP_DECLARATION, // the type in <here> <declarator>;
 		LABEL,  // Anything with a : after it. Could be (a) like a bare statement needing a ; or (b) a prefix on statements.
 		TOP_STMT_DECL, // Highest statement precedence
+
+		INITIALISER = 50, // eg MyType thing <here>; and " = " is inserted if node is expressional
 							
 		// ----- Types. Just this for now.
 		BOOT_TYPE,
 		TOP_TYPE,
 		
 		// ----- Expressions. There is a precedence scheme, booted using ()
-		BOOT_EXPR = 50, // Lowest expression precedence: (), {}, [] etc from the inside		
+		BOOT_EXPR = 60, // Lowest expression precedence: (), {}, [] etc from the inside		
 
 		VN_SEP_SCRIPTY, // Separated by ⨟ (in embedded engine renders)
 		VN_SEP_ITEMS, // Separated by ⚬ (in StandardAgent renders, which always have ())
@@ -63,7 +64,7 @@ public:
 		VN_DISJUNCTION,
 		VN_CONJUNCTION,
 
-		ASSIGN = 60, //C++: assign ops and statement-like keywords eg throw
+		ASSIGN = 70, //C++: assign ops and statement-like keywords eg throw
 		LOGIC_OR,
 		LOGIC_AND,		
 		BITWISE_OR,
@@ -84,7 +85,7 @@ public:
 		TOP_EXPR, // Highest expression precedence 
 		
 		// ----- Abstract, lexer-ish productions of no particuler kind
-		EXPLICIT_NODE = 80, // Eg ◼CPPTree::MyNode(...)
+		EXPLICIT_NODE = 90, // Eg ◼CPPTree::MyNode(...)
 		RESOLVER, // :: in C++	
 		PURE_IDENTIFIER, // Higher than expr because could be a type, label etc
 		TERMINAL, // Lexer tokens of any kind (other than type or expression)

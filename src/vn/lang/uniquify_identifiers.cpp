@@ -178,7 +178,7 @@ void Fingerprinter::ProcessTPI( const TreePtrInterface *tpi, int &index )
 	
 	// Gathering incoming tree ptr interface pointers here so that we don't 
 	// have to pass TPI's around everywhere in the renderer. Will be used 
-	// by renderer do detect non-trivial pre-restrictions.
+	// by renderer to detect non-trivial pre-restrictions.
 	incoming_links_map[x].insert(tpi);
 }
 

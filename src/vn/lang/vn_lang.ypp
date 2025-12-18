@@ -138,7 +138,7 @@
 %type <TreePtr<Node>> 				normal norm_unit norm_postfix norm_prefix norm_relational norm_disjunction norm_conjunction  
 %type <TreePtr<Node>> 				norm_assignment norm_equality norm_add_etc norm_logical_or norm_logical_and 
 %type <TreePtr<Node>> 				norm_mul_etc norm_shift norm_bitwise_and norm_bitwise_or norm_bitwise_xor norm_no_comma_op 
-%type <TreePtr<Node>> 				norm_paren norm_comma_op 
+%type <TreePtr<Node>> 				norm_paren norm_comma_op
 %type <TreePtr<Node>> 				type type_unit type_prefix type_disjunction type_conjunction type_paren
 %type <TreePtr<Node>> 				unified_no_comma_op unified unified_prefix
 %type <TreePtr<Node>> 				bare_statement
@@ -248,7 +248,7 @@ arguments	: arguments COMMA norm_no_comma_op								{ $$ = $1; $$.push_back($3);
 			| norm_no_comma_op												{ $$.push_back($1); }
 
 normal				: norm_comma_op
-                      
+                                     
 norm_comma_op		: norm_no_comma_op
 					| norm_comma_op COMMA norm_no_comma_op						{ $$ = vn->OnInfixOperator($2, $1, $3); }
 
@@ -347,9 +347,10 @@ norm_unit	: BUILT_IN node_name_part close_itemisation			{ $$ = vn->OnBuiltIn($2,
 			| BOOL_LITERAL										{ $$ = vn->OnBoolLiteral($1); }
 			| ANY												{ $$ = nullptr; }
 			| NORM_TERM_KEYWORD									{ $$ = vn->OnNormalTerminalKeyword($1.as_ascii, @1); }
-			| '{' '}'                          					{ $$ = vn->OnCompound({}); } // TODO will be erroneously invoked on empty array literal
-			| '{' norm_comma_op '}'                  	  		{ $$ = vn->OnArrayLiteral($2); }
+			| '{' '}'                          					{ $$ = vn->OnCompound({}); } 
 			| '{' bare_statements ';' '}'                  		{ $$ = vn->OnCompound($2); }
+			| C_ASSIGN '{' '}'             				  		{ $$ = vn->OnArrayLiteral(nullptr); } // ={...} dismbiguates against compound
+			| C_ASSIGN '{' norm_comma_op '}'           	  		{ $$ = vn->OnArrayLiteral($3); }               
 			| DESIGNATED_NORMAL       				  			{ $$ = $1.as_designated; }
 			| SPECIFIC_ID id_discrim_part VN_SEP STRING_LITERAL CLOSE_VN			{ $$ = vn->OnSpecificId($2, @2, $4, @4); }
 			| SPECIFIC_ID id_discrim_part VN_SEP CLOSE_VN							{ $$ = vn->OnSpecificId($2, @2, wstring(), @4); }

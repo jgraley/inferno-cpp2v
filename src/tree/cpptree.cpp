@@ -704,7 +704,7 @@ string Subscript::GetRender( VN::RendererInterface *renderer, Production, Policy
 
 Syntax::Production ArrayLiteral::GetMyProductionTerminal() const
 { 
-	return Production::BRACKETED; 
+	return Production::INITIALISER; 
 }
 
 string ArrayLiteral::GetRender( VN::RendererInterface *renderer, Production, Policy )
@@ -712,7 +712,9 @@ string ArrayLiteral::GetRender( VN::RendererInterface *renderer, Production, Pol
 	list<string> renders;    
     for( TreePtr<Expression> operand : operands )
 		renders.push_back( renderer->RenderIntoProduction( operand, Production::COMMA_SEP ) );
-    return Join(renders, ", ", "{", "}"); // Use of {} in expressions is irregular so handle locally 
+    // Use of ={} in expressions is irregular so handle locally. = is used to disambiguate
+    // from a compound statement.
+    return "=" + Join(renders, ", ", "{", "}"); 
 }
 
 //////////////////////////// This ///////////////////////////////
