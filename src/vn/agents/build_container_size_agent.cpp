@@ -35,7 +35,7 @@ Syntax::Production BuildContainerSizeAgent::GetAgentProduction() const
 string BuildContainerSizeAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
-	string s = "🄽" + renderer->RenderIntoProduction( container, Syntax::Production::PREFIX );
+	string s = "🄽" + renderer->DoRender( container, Syntax::Production::PREFIX );
 	return s;
 } 
   

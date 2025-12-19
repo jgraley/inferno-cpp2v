@@ -51,7 +51,7 @@ Syntax::Production NegationAgent::GetAgentProduction() const
 string NegationAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
-	return "¬" + renderer->RenderIntoProduction( (TreePtr<Node>)(*GetNegand()), Syntax::Production::PREFIX );
+	return "¬" + renderer->DoRender( (TreePtr<Node>)(*GetNegand()), Syntax::Production::PREFIX );
 }    
 
 

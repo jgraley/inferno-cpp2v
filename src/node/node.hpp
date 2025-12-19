@@ -99,9 +99,9 @@ namespace VN
 	class RendererInterface
 	{
 	public:	
-		virtual string RenderIntoProduction( TreePtr<Node> node, 
+		virtual string DoRender( TreePtr<Node> node, 
 		                                     Syntax::Production surround_prod ) = 0;
-		virtual string RenderIntoProduction( TreePtr<Node> node, 
+		virtual string DoRender( TreePtr<Node> node, 
 		                                     Syntax::Production surround_prod, 
 		                                     Syntax::Policy policy ) = 0;
 		virtual string RenderScopeResolvingPrefix( TreePtr<Node> id ) = 0;

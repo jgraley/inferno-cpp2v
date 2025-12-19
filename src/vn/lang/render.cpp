@@ -1,4 +1,5 @@
 #include "tree/cpptree.hpp"
+#include "tree/localtree.hpp"
 #include "helpers/transformation.hpp"
 #include "tree/typeof.hpp"
 #include "common/trace.hpp"
@@ -72,7 +73,7 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern, bool lowering
 	for( TreePtr<Node> node : coupling_names_uniqifier.GetNodesInDepthFirstPostOrder() )	
 		commands.push_back( unique_coupling_names.at(node) + 
 							" ⪮ " + 
-							RenderMaybeInitAssignment( node, 
+							AccomodateInit( node, 
 							                           Syntax::Production::VN_DESIGNATE, 
 							                           designation_policy ) );
 
@@ -84,7 +85,7 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern, bool lowering
 	   	  
 	Syntax::Policy top_pattern_policy = default_policy;
 	commands.push_back( "꩜" + 
-	                    RenderIntoProduction( pattern->GetSearchComparePattern(), 
+	                    DoRender( pattern->GetSearchComparePattern(), 
 	                                          Syntax::Production::PREFIX, 
 	                                          top_pattern_policy ) );
     
@@ -127,13 +128,13 @@ Syntax::Policy Render::GetDefaultPolicy()
 }
 
 
-string Render::RenderIntoProduction( TreePtr<Node> node, Syntax::Production surround_prod )
+string Render::DoRender( TreePtr<Node> node, Syntax::Production surround_prod )
 {
-	return RenderIntoProduction( node, surround_prod, default_policy );
+	return DoRender( node, surround_prod, default_policy );
 }
 
 
-string Render::RenderIntoProduction( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
+string Render::DoRender( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
 {	
     INDENT("R");
     string s;
@@ -150,11 +151,11 @@ string Render::RenderIntoProduction( TreePtr<Node> node, Syntax::Production surr
 	if( unique_coupling_names.count(node) > 0 )			
 		return s + unique_coupling_names.at(node);		
 	else 
-		return s + RenderMaybeInitAssignment(node, surround_prod, policy);
+		return s + AccomodateInit(node, surround_prod, policy);
 }
 
 
-string Render::RenderMaybeInitAssignment( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
+string Render::AccomodateInit( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
 {
     Syntax::Production node_prod = GetNodeProduction(node, surround_prod, policy);
 
@@ -167,7 +168,7 @@ string Render::RenderMaybeInitAssignment( TreePtr<Node> node, Syntax::Production
 					  Syntax::GetPrecedence(node_prod) );		
 
     if( !(surround_prod == Syntax::Production::INITIALISER) )
-		return s + RenderMaybeBoot(node, surround_prod, policy );
+		return s + AccomodateBoot(node, surround_prod, policy );
 
 	// Deal with expression in initialiser production by prepending =
     switch(node_prod)
@@ -175,20 +176,20 @@ string Render::RenderMaybeInitAssignment( TreePtr<Node> node, Syntax::Production
         case Syntax::Production::BOOT_EXPR...Syntax::Production::TOP_EXPR: // Expression productions at different precedences			
 			if( ReadArgs::use.count("c") )
 				s += SSPrintf("// Add init assignment, surround prod to ASSIGN\n");
-			return s + " = " + RenderMaybeBoot(node, Syntax::Production::ASSIGN, policy );
+			return s + " = " + AccomodateBoot(node, Syntax::Production::ASSIGN, policy );
 			
 		default:
-			return s + RenderMaybeBoot(node, surround_prod, policy ); 
+			return s + AccomodateBoot(node, surround_prod, policy ); 
 	}
 }
 
 
-string Render::RenderMaybeBoot( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
+string Render::AccomodateBoot( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
 {
     Syntax::Production node_prod = GetNodeProduction(node, surround_prod, policy);
 							 		
     if( !(Syntax::GetPrecedence(node_prod) < Syntax::GetPrecedence(surround_prod)) )
-		return RenderMaybeSemicolon( node, surround_prod, policy );
+		return AccomodateSemiocolon( node, surround_prod, policy );
 	string s;
 
     switch(node_prod)
@@ -209,8 +210,8 @@ string Render::RenderMaybeBoot( TreePtr<Node> node, Syntax::Production surround_
 				s += SSPrintf("// Booting statement, surround prod to BOOT_STMT_DECL\n");
 				
             return "{\n " + 
-                   RenderMaybeSemicolon( node, Syntax::Production::BOOT_STMT_DECL, policy ) +	
-				   "\n} ";            
+                   AccomodateSemiocolon( node, Syntax::Production::BOOT_STMT_DECL, policy ) +	
+				   "}\n";            
 
         case Syntax::Production::BOOT_EXPR...Syntax::Production::TOP_EXPR: // Expression productions at different precedences
             // If current production has too-high precedence, boot back down using parentheses
@@ -222,17 +223,17 @@ string Render::RenderMaybeBoot( TreePtr<Node> node, Syntax::Production surround_
 			if( ReadArgs::use.count("c") )
 				s += SSPrintf("// Booting expression, surround prod to BOOT_EXPR\n");
 
-            return "(\n" +
-				   RenderMaybeSemicolon( node, Syntax::Production::BOOT_EXPR, policy ) +
-				   "\n)";            
+            return "( " +
+				   AccomodateSemiocolon( node, Syntax::Production::BOOT_EXPR, policy ) +
+				   " )";            
         
         default:        
-			return RenderMaybeSemicolon( node, surround_prod, policy );         
+			return AccomodateSemiocolon( node, surround_prod, policy );         
     }
 }
 
 							
-string Render::RenderMaybeSemicolon( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
+string Render::AccomodateSemiocolon( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
 {
 	string s;
 
@@ -243,7 +244,7 @@ string Render::RenderMaybeSemicolon( TreePtr<Node> node, Syntax::Production surr
 							 		    
     if( !(Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::MAX_SURR_SEMICOLON) &&
           Syntax::GetPrecedence(node_prod) > Syntax::GetPrecedence(Syntax::Production::MIN_NODE_SEMICOLON) ) )
-         return MaybeRenderPreRestriction( node, surround_prod, policy );
+         return AccomodatePreRestriction( node, surround_prod, policy );
                  
 	if( ReadArgs::use.count("c") )
 		s += SSPrintf("// Adding semicolon, surround prod to BARE_STATEMENT\n");
@@ -269,12 +270,12 @@ string Render::RenderMaybeSemicolon( TreePtr<Node> node, Syntax::Production surr
 			
 	}
 
- 	return MaybeRenderPreRestriction( node, surround_prod, policy ) +
-		   ";\n ";                                  
+ 	return AccomodatePreRestriction( node, surround_prod, policy ) +
+		   ";\n";                                  
 }
 
 
-string Render::MaybeRenderPreRestriction( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
+string Render::AccomodatePreRestriction( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
 {
 	const Agent *agent = Agent::TryAsAgentConst(node);
 	if( !agent )
@@ -331,7 +332,7 @@ string Render::Dispatch( TreePtr<Node> node, Syntax::Production surround_prod, S
 	}
 	catch( Syntax::Refusal & ) {}
 
-	return RenderNodeExplicit(node, surround_prod, default_policy);
+	return RenderNodeExplicit(node, surround_prod, policy);
 }		
 
 
@@ -343,7 +344,10 @@ string Render::RenderNodeExplicit( shared_ptr<const Node> node, Syntax::Producti
     list<string> sitems;    
 
     sitems.push_back( GetInnermostTemplateParam(TYPE_ID_NAME(*node)) );
-	
+
+	if( ReadArgs::use.count("c") )
+		s += policy.force_incomplete_records ? "/* force incomplete */" : "/* no force incomplete */";
+    
     if( !policy.force_incomplete_records )
     {
 		vector< Itemiser::Element * > items = node->Itemise();
@@ -354,14 +358,14 @@ string Render::RenderNodeExplicit( shared_ptr<const Node> node, Syntax::Producti
 			if( ContainerInterface *con = dynamic_cast<ContainerInterface *>(items[i]) )                
 			{
 				if( con->size() == 1 )
-					sitems.push_back( RenderIntoProduction( TreePtr<Node>(con->front()), Syntax::Production::VN_SEP_ITEMS ) );
+					sitems.push_back( DoRender( TreePtr<Node>(con->front()), Syntax::Production::VN_SEP_ITEMS ) );
 				else
 				{
 					list<string> scon;
 					for( const TreePtrInterface &p : *con )
 					{
 						ASSERT( p ); 
-						scon.push_back( RenderIntoProduction( TreePtr<Node>(p), Syntax::Production::COMMA_SEP ) );
+						scon.push_back( DoRender( TreePtr<Node>(p), Syntax::Production::COMMA_SEP ) );
 					}
 					if( GetTotalSize(scon) > Syntax::GetLineBreakThreshold() )
 						sitems.push_back( Join( scon, ",\n", "", "") );
@@ -371,7 +375,7 @@ string Render::RenderNodeExplicit( shared_ptr<const Node> node, Syntax::Producti
 			}            
 			else if( TreePtrInterface *singular = dynamic_cast<TreePtrInterface *>(items[i]) )
 			{
-				sitems.push_back( RenderIntoProduction( TreePtr<Node>(*singular), Syntax::Production::VN_SEP_ITEMS ) );
+				sitems.push_back( DoRender( TreePtr<Node>(*singular), Syntax::Production::VN_SEP_ITEMS ) );
 			}
 			else
 			{
@@ -417,9 +421,9 @@ Syntax::Production Render::GetNodeProduction( TreePtr<Node> node, Syntax::Produc
 		// Passing in the real renderer would cause unwanted side-effects.
 		struct FakeRenderer : RendererInterface
 		{
-			string RenderIntoProduction( TreePtr<Node>, 
+			string DoRender( TreePtr<Node>, 
 										 Syntax::Production ) final { return "fake"; } 
-			string RenderIntoProduction( TreePtr<Node>, 
+			string DoRender( TreePtr<Node>, 
 										 Syntax::Production, 
 										 Syntax::Policy ) final { return "fake"; } 
 			string RenderScopeResolvingPrefix( TreePtr<Node> ) final { return ""; } 

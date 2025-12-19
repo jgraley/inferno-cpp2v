@@ -33,7 +33,7 @@ Syntax::Production GreenGrassAgent::GetAgentProduction() const
 string GreenGrassAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
-	return "⫴" + renderer->RenderIntoProduction( (TreePtr<Node>)(*GetThrough()), Syntax::Production::PREFIX );
+	return "⫴" + renderer->DoRender( (TreePtr<Node>)(*GetThrough()), Syntax::Production::PREFIX );
 } 
 
 

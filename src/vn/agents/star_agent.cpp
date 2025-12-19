@@ -128,7 +128,7 @@ string StarAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Produ
 
 	string s = "★";
 	if( *GetRestriction() )
-		s += "【" + renderer->RenderIntoProduction( TreePtr<Node>(*GetRestriction()), Syntax::Production::BOOT_EXPR) + "】";
+		s += "【" + renderer->DoRender( TreePtr<Node>(*GetRestriction()), Syntax::Production::BOOT_EXPR) + "】";
 	
 	return s;
 }  

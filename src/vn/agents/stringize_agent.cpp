@@ -31,7 +31,7 @@ Syntax::Production StringizeAgent::GetAgentProduction() const
 string StringizeAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
-	return "§" + renderer->RenderIntoProduction( source, Syntax::Production::PREFIX );
+	return "§" + renderer->DoRender( source, Syntax::Production::PREFIX );
 } 
 
     

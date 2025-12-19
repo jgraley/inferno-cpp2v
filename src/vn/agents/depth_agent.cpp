@@ -91,7 +91,7 @@ string ChildAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Prod
 {
 	(void)surround_prod;
 	string s = "⩨【=1】";
-	return s + renderer->RenderIntoProduction( terminus, Syntax::Production::PREFIX ); 
+	return s + renderer->DoRender( terminus, Syntax::Production::PREFIX ); 
 }    
     
     
@@ -173,8 +173,8 @@ string StuffAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Prod
 	(void)surround_prod;
 	string s = "⩨";
 	if( recurse_restriction )
-		s += "【" + renderer->RenderIntoProduction( recurse_restriction, Syntax::Production::BOOT_EXPR) + "】";
-	return s + renderer->RenderIntoProduction( terminus, Syntax::Production::PREFIX ); 
+		s += "【" + renderer->DoRender( recurse_restriction, Syntax::Production::BOOT_EXPR) + "】";
+	return s + renderer->DoRender( terminus, Syntax::Production::PREFIX ); 
 }    
     
     
