@@ -39,7 +39,7 @@ REFERENCE_PATH=test/reference
 
 # Prepend default inferno args so they can be overridden. Thus, no need 
 # for these to be appended to the results directory (see above)
-DEFAULT_I_ARG=-tq
+DEFAULT_I_ARG=
 IARG="${DEFAULT_I_ARG} ${I}"
 
 # Looking for the "Keep going" thing? Do it by passing -k directly to make.
@@ -50,7 +50,7 @@ test/autotestd : autotestd.cpp
 $(EXEC_CASES:%=${RESULTS_PATH}/exec/%.pass) : ${RESULTS_PATH}/exec/%.pass : test/examples/% test/makefile inferno.exe test/exec_test.sh .clang-format ${RESOURCE_DEPS}
 	@mkdir -p ${RESULTS_PATH}/exec
 	@rm -f ${RESULTS_PATH}/exec/$*.
-	test/exec_test.sh $< ${RESULTS_PATH}/exec ${IARG} 2>&1 > ${RESULTS_PATH}/exec/$*.log
+	test/exec_test.sh $< ${RESULTS_PATH}/exec ${IARG} > ${RESULTS_PATH}/exec/$*.log 2>&1
 	touch ${RESULTS_PATH}/exec/$*.pass
 		
 test : $(EXEC_CASES:%=${RESULTS_PATH}/exec/%.pass)
