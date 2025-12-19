@@ -737,12 +737,31 @@ Syntax::Production New::GetMyProductionTerminal() const
 	return Production::PREFIX; 
 }
 
+
+string New::GetRender( VN::RendererInterface *renderer, Production, Policy )
+{
+	return string (DynamicTreePtrCast<Global>(global) ? "::" : "") +
+		   "new(?)" /*+ RenderOperandSequence( placement_arguments ) + ") "*/ +
+		   renderer->DoRender( type, Syntax::Production::TYPE_IN_NEW ) +
+		   (constructor_arguments.empty() ? "" : "(?)" /*+ RenderOperandSequence( constructor_arguments ) + ")"*/ );
+}
+
 //////////////////////////// Delete ///////////////////////////////
 
 Syntax::Production Delete::GetMyProductionTerminal() const
 { 
 	return Production::PREFIX; 
 }
+
+
+string Delete::GetRender( VN::RendererInterface *renderer, Production, Policy )
+{
+	return string(DynamicTreePtrCast<Global>(global) ? "::" : "") +
+		   "delete" +
+		   (DynamicTreePtrCast<DeleteArray>(array) ? "[]" : "") +
+		   " " + renderer->DoRender( pointer, Syntax::Production::PREFIX );
+}
+
 
 //////////////////////////// Lookup ///////////////////////////////
 

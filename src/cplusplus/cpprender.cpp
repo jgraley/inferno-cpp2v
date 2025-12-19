@@ -125,15 +125,15 @@ string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surro
     else if( auto literal = DynamicTreePtrCast< Literal >(node) )
         return RenderLiteral( literal, surround_prod );
     else if( auto call = TreePtr<Call>::DynamicCast(node) )
-        return RenderMapArgsCallAsSeqArg( call, surround_prod );
+        return RenderMapArgsCallAsSeqArg( call, surround_prod ); // Still need this for map args resolution TODO raise/lower steps
     else if( auto make_rec = TreePtr<RecordLiteral>::DynamicCast(node) )
         return RenderMakeRecord( make_rec, surround_prod );
     else if( auto macro_decl = TreePtr<MacroDeclaration>::DynamicCast(node) )
         return RenderMacroDeclaration( macro_decl, surround_prod );
     else if( auto macro_stmt = TreePtr<MacroStatement>::DynamicCast(node) )
         return RenderMacroStatement( macro_stmt, surround_prod );
-    else if( auto op = TreePtr<Operator>::DynamicCast(node) ) // Operator is a kind of Expression
-        return RenderOperator( op, surround_prod );
+//    else if( auto op = TreePtr<Operator>::DynamicCast(node) ) // Operator is a kind of Expression
+//        return RenderOperator( op, surround_prod );
     else if( auto expression = TreePtr<Expression>::DynamicCast(node) ) // Expression is a kind of Statement
         return RenderExpression( expression, surround_prod, policy );
     else if( auto instance = TreePtr<Instance>::DynamicCast(node) )    // Instance is a kind of Statement and Declaration
@@ -417,74 +417,11 @@ string CppRender::RenderOperator( TreePtr<Operator> op, Syntax::Production surro
     string s;
     Sequence<Expression> operands;
     if( auto n = DynamicTreePtrCast< New >(op) )
-        return string (DynamicTreePtrCast<Global>(n->global) ? "::" : "") +
-               "new(" + RenderOperandSequence( n->placement_arguments ) + ") " +
-               DoRender( n->type, Syntax::Production::TYPE_IN_NEW ) +
-               (n->constructor_arguments.empty() ? "" : "(" + RenderOperandSequence( n->constructor_arguments ) + ")" );
-    else if( auto d = DynamicTreePtrCast< Delete >(op) )
-        return string(DynamicTreePtrCast<Global>(d->global) ? "::" : "") +
-               "delete" +
-               (DynamicTreePtrCast<DeleteArray>(d->array) ? "[]" : "") +
-               " " + DoRender( d->pointer, Syntax::Production::PREFIX );
-    else if( auto nco = DynamicTreePtrCast< NonCommutativeOperator >(op) )
-        operands = nco->operands;           
-    else if( auto co = DynamicTreePtrCast< CommutativeOperator >(op) )
     {
-        Sequence<Expression> seq_operands;
-        // Operands are in collection, so sort them and put them in a sequence
-        for( TreePtr<Node> o : sc.GetTreePtrOrdering(co->operands) )
-            operands.push_back( TreePtr<Expression>::DynamicCast(o) );
+        ASSERTFAIL(); // Hold this spot for resolving the map args to the constructor
     }
     else
-    {
         return RenderNodeExplicit( op, surround_prod, default_policy );
-	}
-
-    // Regular operators: kinds of either NonCommutativeOperator or CommutativeOperator; operands in operands  
-    if( false )
-    {
-	}        
-#define INFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) \
-    else if( DynamicTreePtrCast<NODE>(op) ) \
-    { \
-        Syntax::Production prod_left = Syntax::Production::PROD; \
-        Syntax::Production prod_right = Syntax::Production::PROD; \
-        switch( Syntax::Association::ASSOC ) \
-        { \
-            case Syntax::Association::RIGHT: prod_left = Syntax::BoostPrecedence(prod_left); break; \
-            case Syntax::Association::LEFT:  prod_right = Syntax::BoostPrecedence(prod_right); break; \
-        } \
-		Sequence<Expression>::iterator operands_it = operands.begin(); \
-        s = DoRender( *operands_it, prod_left ); \
-        s += TEXT; \
-        ++operands_it; \
-        s += DoRender( *operands_it, prod_right ); \
-    }
-#define PREFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) \
-    else if( DynamicTreePtrCast<NODE>(op) ) \
-    { \
-		Sequence<Expression>::iterator operands_it = operands.begin(); \
-        s = TEXT; \
-        bool paren = false; \
-        /* Prevent interpretation as a member function pointer literal */ \
-        if( auto ao = TreePtr<AddressOf>::DynamicCast(op) ) \
-            if( auto id = TreePtr<Identifier>::DynamicCast(*operands_it) ) \
-                paren = !RenderScopeResolvingPrefix( id ).empty(); \
-        s += (paren?"(":"") + DoRender( *operands_it, Syntax::Production::PROD) + (paren?")":""); \
-    }
-#define POSTFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) \
-    else if( DynamicTreePtrCast<NODE>(op) ) \
-    { \
-		Sequence<Expression>::iterator operands_it = operands.begin(); \
-        s = DoRender( *operands_it, Syntax::Production::PROD ); \
-        s += TEXT; \
-    }
-#include "tree/operator_data.inc"
-    else
-    {
-        s = RenderNodeExplicit( op, surround_prod, default_policy );
-    }
-    return s;
 }
 DEFAULT_CATCH_CLAUSE
 

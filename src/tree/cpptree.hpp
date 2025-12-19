@@ -894,6 +894,7 @@ struct New : Operator
     TreePtr<Globality> global; ///< whether placement is global
 
 	Production GetMyProductionTerminal() const override;
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
 };
 
 /// Node for C++ delete operator
@@ -905,6 +906,7 @@ struct Delete : Operator
     TreePtr<Globality> global; ///< whether global placement
 
 	Production GetMyProductionTerminal() const override;
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
 };
 
 /// Node for accessing an element in a record as in base.member
