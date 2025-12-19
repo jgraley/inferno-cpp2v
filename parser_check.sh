@@ -19,5 +19,5 @@ QA=T130+
 ./inferno.exe    -i test/examples/${TC} -q${QA} > out_builtin.cpp
 diff --color out_builtin.cpp out_p1.cpp
 
-# Test run using patterns we previously wrote to p1/
+# Full test run using patterns we previously wrote to p1/
 make -j 30 test I="p1"

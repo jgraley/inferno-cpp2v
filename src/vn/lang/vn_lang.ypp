@@ -349,8 +349,8 @@ norm_unit	: BUILT_IN node_name_part close_itemisation			{ $$ = vn->OnBuiltIn($2,
 			| NORM_TERM_KEYWORD									{ $$ = vn->OnNormalTerminalKeyword($1.as_ascii, @1); }
 			| '{' '}'                          					{ $$ = vn->OnCompound({}); } 
 			| '{' bare_statements ';' '}'                  		{ $$ = vn->OnCompound($2); }
-			| C_ASSIGN '{' '}'             				  		{ $$ = vn->OnArrayLiteral(nullptr); } // ={...} dismbiguates against compound
-			| C_ASSIGN '{' norm_comma_op '}'           	  		{ $$ = vn->OnArrayLiteral($3); }               
+			| C_ASSIGN '{' '}'             				  		{ $$ = vn->OnArrayLiteral(VN::Item()); } // ={...} dismbiguates against compound
+			| C_ASSIGN '{' item '}'         		  	  		{ $$ = vn->OnArrayLiteral($3); }               
 			| DESIGNATED_NORMAL       				  			{ $$ = $1.as_designated; }
 			| SPECIFIC_ID id_discrim_part VN_SEP STRING_LITERAL CLOSE_VN			{ $$ = vn->OnSpecificId($2, @2, $4, @4); }
 			| SPECIFIC_ID id_discrim_part VN_SEP CLOSE_VN							{ $$ = vn->OnSpecificId($2, @2, wstring(), @4); }

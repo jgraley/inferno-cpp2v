@@ -74,7 +74,7 @@ public:
 	TreePtr<Node> OnConditionalOperator( TreePtr<Node> condition, TreePtr<Node> expr_then, TreePtr<Node> expr_else );	
 	TreePtr<Node> OnSubscript( TreePtr<Node> destination, TreePtr<Node> index );	
 	TreePtr<Node> OnCompound( list<TreePtr<Node>> statements );	
-	TreePtr<Node> OnArrayLiteral( TreePtr<Node> root_of_comma_expression );	
+	TreePtr<Node> OnArrayLiteral( Item elements );	
 	
 	TreePtr<Node> OnNormalTerminalKeyword( string keyword, any keyword_loc );
 	TreePtr<Node> OnSpaceSepStmtKeyword( string keyword, any keyword_loc, TreePtr<Node> operand, any operand_loc );
