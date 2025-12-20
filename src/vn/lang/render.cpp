@@ -124,6 +124,11 @@ Syntax::Policy Render::GetDefaultPolicy()
 	
 	// Permit map args with their non-C syntax
 	policy.refuse_call_if_map_args = false;
+
+	// Don't insert {} into patterns because they imply Compound or StatementExpression
+	// or ArrayLiteral or RecordLiteral. Use () instead, which are purely for disamiguation.
+	policy.boot_statements_using_braces = false;
+	
 	return policy;
 }
 
@@ -195,24 +200,28 @@ string Render::AccomodateBoot( TreePtr<Node> node, Syntax::Production surround_p
     switch(node_prod)
     {
         case Syntax::Production::BOOT_STMT_DECL...Syntax::Production::TOP_STMT_DECL: // Statement productions at different precedences
-			// Braces can actually work in expressions, eg in {}. The nodes are STATEMENT_SEQ and we boot to BOOT_STMT_DECL
-			ASSERT( Syntax::GetPrecedence(surround_prod) <= Syntax::GetPrecedence(Syntax::Production::BRACED) ||			
-					Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::TOP_STMT_DECL) )
-				  ("Braces won't achieve high enough precedence for surrounding statement production\n")
-				  ("Node: ")(node)("\n")
-				  ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); 
-			ASSERT( Syntax::GetPrecedence(surround_prod) <= Syntax::GetPrecedence(Syntax::Production::BRACKETED) )
-				  ("Braces won't achieve high enough precedence for surrounding expressional or higher production\n")
-				  ("Node: ")(node)("\n")
-				  ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); 
-				  
-			if( ReadArgs::use.count("c") )
-				s += SSPrintf("// Booting statement, surround prod to BOOT_STMT_DECL\n");
-				
-            return "{\n " + 
-                   AccomodateSemiocolon( node, Syntax::Production::BOOT_STMT_DECL, policy ) +	
-				   "}\n";            
-
+			if( policy.boot_statements_using_braces )
+			{
+				// Braces can actually work in expressions, eg in {}. The nodes are STATEMENT_SEQ and we boot to BOOT_STMT_DECL
+				ASSERT( Syntax::GetPrecedence(surround_prod) <= Syntax::GetPrecedence(Syntax::Production::BRACED) ||			
+						Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::TOP_STMT_DECL) )
+					  ("Braces won't achieve high enough precedence for surrounding statement production\n")
+					  ("Node: ")(node)("\n")
+					  ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); 
+				ASSERT( Syntax::GetPrecedence(surround_prod) <= Syntax::GetPrecedence(Syntax::Production::BRACKETED) )
+					  ("Braces won't achieve high enough precedence for surrounding expressional or higher production\n")
+					  ("Node: ")(node)("\n")
+					  ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); 
+					  
+				if( ReadArgs::use.count("c") )
+					s += SSPrintf("// Booting statement, surround prod to BOOT_STMT_DECL\n");
+					
+				return s + "{\n " + 
+					   AccomodateSemiocolon( node, Syntax::Production::BOOT_STMT_DECL, policy ) +	
+					   "}\n";         
+			}   
+			[[fallthrough]]; // ELSE FALL THOROUGH INTO PARENS CASE
+			
         case Syntax::Production::BOOT_EXPR...Syntax::Production::TOP_EXPR: // Expression productions at different precedences
             // If current production has too-high precedence, boot back down using parentheses
 			ASSERT( Syntax::GetPrecedence(surround_prod) <= Syntax::GetPrecedence(Syntax::Production::BRACKETED) )
@@ -223,7 +232,7 @@ string Render::AccomodateBoot( TreePtr<Node> node, Syntax::Production surround_p
 			if( ReadArgs::use.count("c") )
 				s += SSPrintf("// Booting expression, surround prod to BOOT_EXPR\n");
 
-            return "( " +
+            return s + "( " +
 				   AccomodateSemiocolon( node, Syntax::Production::BOOT_EXPR, policy ) +
 				   " )";            
         
@@ -270,7 +279,7 @@ string Render::AccomodateSemiocolon( TreePtr<Node> node, Syntax::Production surr
 			
 	}
 
- 	return AccomodatePreRestriction( node, surround_prod, policy ) +
+ 	return s + AccomodatePreRestriction( node, surround_prod, policy ) +
 		   ";\n";                                  
 }
 

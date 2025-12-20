@@ -18,6 +18,7 @@ class Syntax : virtual Traceable
 public:
 	enum class Production // "Syntax::Production" is a generalisation of precedence
 	{		
+		BOOT = 0,
 		PROGRAM = 10,
 		PRE_PROC_DIRECTIVE,
 		SPACE_SEP_PRE_PROC,
@@ -104,7 +105,8 @@ public:
 			current_access(DefaultAccess),
 			refuse_c_style_cast(false),
 			detect_and_render_constructor(true),
-			refuse_call_if_map_args(true) {}
+			refuse_call_if_map_args(true),
+			boot_statements_using_braces(true) {}
 		bool force_initialisation;
 		bool force_incomplete_records;
 		bool split_bulky_statics;
@@ -115,6 +117,7 @@ public:
 		bool refuse_c_style_cast;		
 		bool detect_and_render_constructor;
 		bool refuse_call_if_map_args;
+		bool boot_statements_using_braces;
 	};
 	
 	// We deal with syntactical association only, not mathematical, because:

@@ -39,8 +39,7 @@ REFERENCE_PATH=test/reference
 
 # Prepend default inferno args so they can be overridden. Thus, no need 
 # for these to be appended to the results directory (see above)
-DEFAULT_I_ARG=
-IARG="${DEFAULT_I_ARG} ${I}"
+IARG=$(shell echo ${I} | tr -d '"')
 
 # Looking for the "Keep going" thing? Do it by passing -k directly to make.
 

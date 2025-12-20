@@ -114,6 +114,133 @@ struct Program : DeclScope
 /// Indicates that the node cannot be combinationalised
 struct Uncombable : virtual Node { NODE_FUNCTIONS };
 
+//////////////////////////// Identifiers etc ///////////////////////////////
+
+/// Property node for any identifier
+/** An Identifier is a name given to a user-defined entity within 
+ the program (variable/object/function, user-defined type or
+ label). In the inferno tree, these are fully scope resolved
+ and are maintained as unique nodes so that the declaration
+ and all usages all point to the same node, this preserving
+
+ identity via topology. We store a string, but it isn't strictly 
+ needed and there's no need to uniquify it (it's really just 
+ a hint for users examining the output). */
+struct Identifier : virtual Property 
+{ 
+    NODE_FUNCTIONS 
+    virtual string GetColour() const { return "/set28/5"; }    
+};
+
+/// Property for a specific identifier, linked to by a particular Declaration
+/** This is for unquoted strings, as opposed to String. Strictly,
+ Inferno doesn't need to keep this data, but it helps
+ to make renders and graphs clearer. Inferno will uniquify
+ the name when rendering code. */
+struct SpecificIdentifier : virtual Property
+{ 
+    NODE_FUNCTIONS
+        
+    SpecificIdentifier(); ///< default constructor, for making archetypes 
+    SpecificIdentifier( string s, BoundingRole addr_bounding_role = BoundingRole::NONE ); ///< construct with a given name
+    virtual shared_ptr<Cloner> Duplicate( shared_ptr<Cloner> p ); /// Overloaded duplication function for search&replace
+    virtual bool IsLocalMatchCovariant( const Matcher &candidate ) const; /// Overloaded comparison for search&replace
+    virtual Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
+                                                 OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
+	string GetRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Policy policy );
+    string GetIdentifierName() const override; /// This is relied upon to just return the identifier name 
+    string GetDesignationNameHint() const override;
+    bool IsDesignationNamedIdentifier() const override;
+    string GetGraphName() const override;
+    string GetTrace() const override;
+	
+protected:
+    BoundingRole addr_bounding_role;
+    string name;
+};
+
+/// Identifier for any Instance (variable or object or function)
+struct InstanceIdentifier : Identifier,
+                            Expression 
+{ 
+    NODE_FUNCTIONS 
+    virtual string GetColour() const { return Identifier::GetColour(); } // Identifier wins
+	Production GetMyProductionTerminal() const override;
+};
+                               
+/// Identifier for a specific Instance, linked to by a particular Declaration                           
+struct SpecificInstanceIdentifier : InstanceIdentifier,
+                                    SpecificIdentifier
+{
+    SpecificInstanceIdentifier() {} ///< Default constructor
+    SpecificInstanceIdentifier( string s, BoundingRole addr_bounding_role = BoundingRole::NONE ) : 
+        SpecificIdentifier(s, addr_bounding_role) {} ///< make identifier with the given name
+    NODE_FUNCTIONS_FINAL
+};
+                            
+
+/// Identifier for any user defined type.
+struct TypeIdentifier : Identifier,
+                        Type 
+{ 
+    NODE_FUNCTIONS
+    virtual string GetColour() const { return Identifier::GetColour(); } // Identifier wins
+	Production GetMyProductionTerminal() const override;
+};
+                           
+/// Identifier for a specific user defined type, linked to by a particular Declaration.
+struct SpecificTypeIdentifier : TypeIdentifier,
+                                SpecificIdentifier
+{
+    SpecificTypeIdentifier() {} ///< Default constructor
+    SpecificTypeIdentifier( string s, BoundingRole addr_bounding_role = BoundingRole::NONE ) : 
+        SpecificIdentifier(s, addr_bounding_role) {} ///< make identifier with the given name
+    NODE_FUNCTIONS_FINAL
+};
+
+
+/// Associates an Expression with an InstanceIdentifier. 
+/** Basically a key-value pair of identifier and value. Use in Maps. */
+struct IdValuePair : virtual Node 
+{
+    NODE_FUNCTIONS_FINAL
+    TreePtr<InstanceIdentifier> key; ///< the handle for this particular operand
+    TreePtr<Expression> value; ///< the Expression for this operand
+    
+    virtual string GetColour() const { return "/set28/8"; }    
+	Production GetMyProductionTerminal() const override;
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );	
+};
+
+
+struct Argumentation : virtual Node
+{
+    NODE_FUNCTIONS
+};
+
+
+/// A function call to specified function passing in specified arguments
+struct MapArgumentation : Argumentation
+{
+    NODE_FUNCTIONS_FINAL	
+	Collection<IdValuePair> arguments;
+	
+	Production GetMyProductionTerminal() const override;
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
+};
+
+
+/// A regular function call whose arguments are given in sequence, so that a 
+/// declaration is not needed. Good for eg library calls.
+struct SeqArgumentation : Argumentation
+{
+    NODE_FUNCTIONS_FINAL
+    Sequence<Expression> arguments; ///< Argumentation taken in order
+	
+	Production GetMyProductionTerminal() const override;
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
+};  
+
 //////////////////////////// Literals ///////////////////////////////
 
 /// A property that can also be used as a literal in a program
@@ -230,88 +357,6 @@ struct False : Bool
 };
 
 //////////////////////////// Declarations //////////////////////////// 
-
-/// Property node for any identifier
-/** An Identifier is a name given to a user-defined entity within 
- the program (variable/object/function, user-defined type or
- label). In the inferno tree, these are fully scope resolved
- and are maintained as unique nodes so that the declaration
- and all usages all point to the same node, this preserving
-
- identity via topology. We store a string, but it isn't strictly 
- needed and there's no need to uniquify it (it's really just 
- a hint for users examining the output). */
-struct Identifier : virtual Property 
-{ 
-    NODE_FUNCTIONS 
-    virtual string GetColour() const { return "/set28/5"; }    
-};
-
-/// Property for a specific identifier, linked to by a particular Declaration
-/** This is for unquoted strings, as opposed to String. Strictly,
- Inferno doesn't need to keep this data, but it helps
- to make renders and graphs clearer. Inferno will uniquify
- the name when rendering code. */
-struct SpecificIdentifier : virtual Property
-{ 
-    NODE_FUNCTIONS
-        
-    SpecificIdentifier(); ///< default constructor, for making archetypes 
-    SpecificIdentifier( string s, BoundingRole addr_bounding_role = BoundingRole::NONE ); ///< construct with a given name
-    virtual shared_ptr<Cloner> Duplicate( shared_ptr<Cloner> p ); /// Overloaded duplication function for search&replace
-    virtual bool IsLocalMatchCovariant( const Matcher &candidate ) const; /// Overloaded comparison for search&replace
-    virtual Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
-                                                 OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
-	string GetRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Policy policy );
-    string GetIdentifierName() const override; /// This is relied upon to just return the identifier name 
-    string GetDesignationNameHint() const override;
-    bool IsDesignationNamedIdentifier() const override;
-    string GetGraphName() const override;
-    string GetTrace() const override;
-	
-protected:
-    BoundingRole addr_bounding_role;
-    string name;
-};
-
-/// Identifier for any Instance (variable or object or function)
-struct InstanceIdentifier : Identifier,
-                            Expression 
-{ 
-    NODE_FUNCTIONS 
-    virtual string GetColour() const { return Identifier::GetColour(); } // Identifier wins
-	Production GetMyProductionTerminal() const override;
-};
-                               
-/// Identifier for a specific Instance, linked to by a particular Declaration                           
-struct SpecificInstanceIdentifier : InstanceIdentifier,
-                                    SpecificIdentifier
-{
-    SpecificInstanceIdentifier() {} ///< Default constructor
-    SpecificInstanceIdentifier( string s, BoundingRole addr_bounding_role = BoundingRole::NONE ) : 
-        SpecificIdentifier(s, addr_bounding_role) {} ///< make identifier with the given name
-    NODE_FUNCTIONS_FINAL
-};
-                            
-
-/// Identifier for any user defined type.
-struct TypeIdentifier : Identifier,
-                        Type 
-{ 
-    NODE_FUNCTIONS
-    virtual string GetColour() const { return Identifier::GetColour(); } // Identifier wins
-	Production GetMyProductionTerminal() const override;
-};
-                           
-/// Identifier for a specific user defined type, linked to by a particular Declaration.
-struct SpecificTypeIdentifier : TypeIdentifier,
-                                SpecificIdentifier
-{
-    SpecificTypeIdentifier() {} ///< Default constructor
-    SpecificTypeIdentifier( string s, BoundingRole addr_bounding_role = BoundingRole::NONE ) : 
-        SpecificIdentifier(s, addr_bounding_role) {} ///< make identifier with the given name
-    NODE_FUNCTIONS_FINAL
-};
 
 // General note about identifiers: in a valid program tree, there should
 // be *one* Declaration node that points to the identifier and serves to 
@@ -889,8 +934,8 @@ struct New : Operator
 {
     NODE_FUNCTIONS_FINAL
     TreePtr<Type> type; ///< Type of object to be constructed
-    Sequence<Expression> placement_arguments; ///< arguments for placement usage
-    Sequence<Expression> constructor_arguments; ///< arguments to the constructor
+    TreePtr<Argumentation> placement_argumentation; ///< arguments for placement usage
+    TreePtr<Argumentation> constructor_argumentation; ///< arguments to the constructor
     TreePtr<Globality> global; ///< whether placement is global
 
 	Production GetMyProductionTerminal() const override;
@@ -934,53 +979,12 @@ struct Cast : Operator
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
 };
 
-/// Associates an Expression with an InstanceIdentifier. 
-/** Basically a key-value pair of identifier and value. Use in Maps. */
-struct IdValuePair : virtual Node 
-{
-    NODE_FUNCTIONS_FINAL
-    TreePtr<InstanceIdentifier> key; ///< the handle for this particular operand
-    TreePtr<Expression> value; ///< the Expression for this operand
-    
-    virtual string GetColour() const { return "/set28/8"; }    
-	Production GetMyProductionTerminal() const override;
-	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );	
-};
 
 struct GoSub : virtual Node, Uncombable
 {
     NODE_FUNCTIONS
     TreePtr<Expression> callee; ///< evaluates to the Callable Instance we must call	
 };
-
-
-struct Argumentation : virtual Node
-{
-    NODE_FUNCTIONS
-};
-
-
-/// A function call to specified function passing in specified arguments
-struct MapArgumentation : Argumentation
-{
-    NODE_FUNCTIONS_FINAL	
-	Collection<IdValuePair> arguments;
-	
-	Production GetMyProductionTerminal() const override;
-	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
-};
-
-
-/// A regular function call whose arguments are given in sequence, so that a 
-/// declaration is not needed. Good for eg library calls.
-struct SeqArgumentation : Argumentation
-{
-    NODE_FUNCTIONS_FINAL
-    Sequence<Expression> arguments; ///< Argumentation taken in order
-	
-	Production GetMyProductionTerminal() const override;
-	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
-};  
 
 
 struct Call : GoSub, Expression
@@ -1073,8 +1077,9 @@ struct Return : Statement
     TreePtr<Initialiser> return_value; ///< return value or Uninitialised
 
 	Production GetMyProductionTerminal() const override;	
-	//string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
 };
+
 
 /// A goto statement
 /** inferno tree supports goto-a-variable because

@@ -133,7 +133,7 @@
 	<YY::TokenMetadata>	DECLARATION_OF			_("DeclarationOf")
 	<YY::TokenMetadata>	TYPE_OF					_("TypeOf")
 	<YY::TokenMetadata> NORM_TERM_KEYWORD		_("terminal keyword")
-	<YY::TokenMetadata> SPACE_SEP_STMT_KEYWORD 	_("space separated statement keyword")
+	<YY::TokenMetadata> SPACE_SEP_STMT_KEYWORD 	_("space-separated statement keyword")
 	
 %type <TreePtr<Node>> 				normal norm_unit norm_postfix norm_prefix norm_relational norm_disjunction norm_conjunction  
 %type <TreePtr<Node>> 				norm_assignment norm_equality norm_add_etc norm_logical_or norm_logical_and 
@@ -208,10 +208,7 @@ unified		: normal									{ $$ = $1; }
 
 bare_statements	: bare_statement 						{ $$.push_back($1); }
 				| bare_statements ';' bare_statement 	{ $$ = $1; $$.push_back($3); }
-
-bare_statement	: normal
-//				| SPACE_SEP_STMT_KEYWORD normal			{ $$ = vn->OnSpaceSepStmtKeyword($1.as_ascii, @1, $2, @2); }
-          
+         
 type			: type_disjunction          
           
 type_disjunction	: type_conjunction
@@ -247,7 +244,10 @@ type_id_discrim_part : start_id_discrim_scope resolved_type_name 	{ $$ = $2.as_a
 arguments	: arguments COMMA norm_no_comma_op								{ $$ = $1; $$.push_back($3); }
 			| norm_no_comma_op												{ $$.push_back($1); }
 
-normal				: norm_comma_op
+normal				: bare_statement
+
+bare_statement		: norm_comma_op
+					| SPACE_SEP_STMT_KEYWORD norm_comma_op						{ $$ = vn->OnSpaceSepStmtKeyword($1.as_ascii, @1, $2, @2); }
                                      
 norm_comma_op		: norm_no_comma_op
 					| norm_comma_op COMMA norm_no_comma_op						{ $$ = vn->OnInfixOperator($2, $1, $3); }

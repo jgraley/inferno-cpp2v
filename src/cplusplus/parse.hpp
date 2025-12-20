@@ -2092,8 +2092,12 @@ private:
     {
         auto n = MakeTreeNode<New>();
         n->type = CreateTypeNode( D );
-        CollectArgs( &(n->placement_arguments), PlacementArgs, NumPlaceArgs );
-        CollectArgs( &(n->constructor_arguments), ConstructorArgs, NumConsArgs );
+        auto pa = MakeTreeNode<SeqArgumentation>();
+        n->placement_argumentation = pa;
+        CollectArgs( &(pa->arguments), PlacementArgs, NumPlaceArgs );
+        auto ca = MakeTreeNode<SeqArgumentation>();
+        n->constructor_argumentation = ca;
+        CollectArgs( &(ca->arguments), ConstructorArgs, NumConsArgs );
 
         if( UseGlobal )
             n->global = MakeTreeNode<Global>();

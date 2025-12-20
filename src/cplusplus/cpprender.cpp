@@ -79,6 +79,10 @@ string CppRender::RenderToString( TreePtr<Node> root )
 Syntax::Policy CppRender::GetDefaultPolicy()
 {
 	Syntax::Policy policy;
+	
+	// Insert braces to disambiguate stratements eg in case of if/else ambiguity
+	policy.boot_statements_using_braces = true;
+	
 	return policy;
 }
 
@@ -426,33 +430,23 @@ string CppRender::RenderOperator( TreePtr<Operator> op, Syntax::Production surro
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderMapArgs( TreePtr<Type> dest_type, Collection<IdValuePair> &args ) try
+string CppRender::RenderMapArgs( TreePtr<Type> callee_type, TreePtr<MapArgumentation> map_argumentation ) try
 {   
 	list<string> ls;
-	if( dest_type )
-    {
-		// Convert f->params from Parameters to Declarations
-		Sequence<Declaration> param_sequence;   
-		if( auto f = TreePtr<CallableParams>::DynamicCast(dest_type) )  
-			for( auto param : f->params )
-				param_sequence.push_back(param); 
+	ASSERT( callee_type );
+    
+	// Convert f->params from Parameters to Declarations and settle on an arbitrary 
+	// ordering. This needs to be the same on each visit with a given callee.
+	Sequence<Declaration> decl_sequence;   
+	if( auto f = TreePtr<CallableParams>::DynamicCast(callee_type) )  
+		for( auto param : f->params )
+			decl_sequence.push_back(param); 
 
-		// Determine args sequence using param sequence
-		Sequence<Expression> arg_sequence  = SortMapById( args, param_sequence );
+	// Determine args sequence using param sequence
+	TreePtr<SeqArgumentation> sa = MakeSeqArgumentation( map_argumentation, decl_sequence );
 
-		// Render to strings
-		for( TreePtr<Expression> e : arg_sequence )
-			ls.push_back( DoRender( e, Syntax::Production::COMMA_SEP ) );
-    }
-    else
-    {
-		// No type, so render map-style
-        for( TreePtr<IdValuePair> mi : args )
-			ls.push_back( DoRender( mi, Syntax::Production::COMMA_SEP ) );
-	}    
-
-    // Do the syntax
-    return Join( ls, ", ", "(", ")" );
+	// Let the SeqArgumentation node do the actual render
+	return DoRender(sa, Syntax::Production::POSTFIX, default_policy);
 }
 DEFAULT_CATCH_CLAUSE
 
@@ -475,7 +469,7 @@ string CppRender::RenderMapArgsCallAsSeqArg( TreePtr<Call> call, Syntax::Product
         s += DoRender( call->callee, Syntax::Production::POSTFIX );
 
 	// A map-args call isn't C++, so lower it to sequential args - requires the function type
-    s += RenderMapArgs(TypeOf::instance.Get(trans_kit, call->callee).GetTreePtr(), map_args->arguments);
+    s += RenderMapArgs(TypeOf::instance.Get(trans_kit, call->callee).GetTreePtr(), map_args);
     return s;
 }
 DEFAULT_CATCH_CLAUSE
@@ -581,6 +575,15 @@ Sequence<Expression> CppRender::SortMapById( Collection<IdValuePair> &id_value_m
     }
     return out_sequence;
 }
+
+
+TreePtr<SeqArgumentation> CppRender::MakeSeqArgumentation( TreePtr<MapArgumentation> map_argumentation,
+														   Sequence<Declaration> key_sequence )
+{
+	auto sa = MakeTreeNode<SeqArgumentation>();
+	sa->arguments = SortMapById( map_argumentation->arguments, key_sequence ); // TODO could absorb
+	return sa;
+}											   
 
 
 string CppRender::RenderAccessSpec( TreePtr<AccessSpec> access, Syntax::Production surround_prod, Syntax::Policy policy ) try
@@ -716,7 +719,7 @@ string CppRender::RenderInitialisation( TreePtr<Initialiser> init ) try
 				if( auto map_args = TreePtr<MapArgumentation>::DynamicCast(call->argumentation) )
 				{
 					if( TypeOf::instance.TryGetConstructedExpression( trans_kit, call ).GetTreePtr() )   
-						return RenderMapArgs(TypeOf::instance.Get(trans_kit, call->callee).GetTreePtr(), map_args->arguments);
+						return RenderMapArgs(TypeOf::instance.Get(trans_kit, call->callee).GetTreePtr(), map_args);
 				}
 				else // seq args
 				{
@@ -976,9 +979,11 @@ string CppRender::RenderStatement( TreePtr<Statement> statement, Syntax::Product
     else if( TreePtr<Compound> c = DynamicTreePtrCast< Compound >(statement) )
     {
         string s;
+        s += "{";
         s += RenderDeclScope( c ); // Must do this first to populate backing list
         for( TreePtr<Statement> st : c->statements )    
             s += DoRender( st, Syntax::Production::STATEMENT_LOW );    
+        s += "}";
         return s;
     }
     else if( TreePtr<Expression> e = DynamicTreePtrCast< Expression >(statement) )

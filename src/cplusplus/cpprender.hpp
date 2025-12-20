@@ -32,13 +32,15 @@ private:
     string RenderType( TreePtr<CPPTree::Type> type, Syntax::Production surround_prod, Syntax::Policy policy );
     string Sanitise( string s );
     string RenderOperator( TreePtr<CPPTree::Operator> op, Syntax::Production surround_prod );
-    string RenderMapArgs( TreePtr<CPPTree::Type> dest_type, Collection<CPPTree::IdValuePair> &args );
+    string RenderMapArgs( TreePtr<CPPTree::Type> callee_type, TreePtr<CPPTree::MapArgumentation> map_argumentation );
     string RenderMapArgsCallAsSeqArg( TreePtr<CPPTree::Call> call, Syntax::Production surround_prod );
     string RenderMacroStatement( TreePtr<CPPTree::MacroStatement> ms, Syntax::Production surround_prod );
     string RenderExpression( TreePtr<CPPTree::Initialiser> expression, Syntax::Production surround_prod, Syntax::Policy policy );
     string RenderMakeRecord( TreePtr<CPPTree::RecordLiteral> make_rec, Syntax::Production surround_prod );
 	Sequence<CPPTree::Expression> SortMapById( Collection<CPPTree::IdValuePair> &id_value_map,
                                                Sequence<CPPTree::Declaration> key_sequence );  
+	TreePtr<CPPTree::SeqArgumentation> MakeSeqArgumentation( TreePtr<CPPTree::MapArgumentation> map_argumentation,
+										 		             Sequence<CPPTree::Declaration> key_sequence );
     string RenderAccessSpec( TreePtr<CPPTree::AccessSpec> access, Syntax::Production surround_prod, Syntax::Policy policy );
     string RenderStorage( TreePtr<CPPTree::Instance> st, Syntax::Policy policy ); // No actual storage node
     void ExtractInits( Sequence<CPPTree::Statement> &body, 

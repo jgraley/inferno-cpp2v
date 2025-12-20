@@ -43,6 +43,210 @@ Syntax::Production Program::GetMyProductionTerminal() const
 	return Production::PROGRAM;
 }
 
+//////////////////////////// SpecificIdentifier ///////////////////////////////
+
+SpecificIdentifier::SpecificIdentifier() :
+    addr_bounding_role( BoundingRole::NONE )
+{
+}
+
+
+SpecificIdentifier::SpecificIdentifier( string s, BoundingRole addr_bounding_role_ ) : 
+    addr_bounding_role(addr_bounding_role_),
+    name(s) 
+{
+}
+
+
+shared_ptr<Cloner> SpecificIdentifier::Duplicate( shared_ptr<Cloner> p )
+{
+    return p; // duplicating specific identifiers just gets the same id, since they are unique.
+    // This means x.Duplicate() matches x, wheras x.Clone() does not
+}
+
+
+bool SpecificIdentifier::IsLocalMatchCovariant( const Matcher &candidate ) const 
+{
+    return &candidate == this;
+}
+
+
+Orderable::Diff SpecificIdentifier::OrderCompare3WayCovariant( const Orderable &right, 
+                                                               OrderProperty order_property ) const
+{
+	(void)order_property;
+    auto &r = GET_THAT_REFERENCE(right);
+        
+    //FTRACEC("Compare ")(*this)(" with ")(*r)(": ");
+
+    if( &r == this )
+    {
+        //FTRACEC("0 (fast out)\n");
+        return 0; // fast-out
+    }
+        
+    // Primary ordering on name due rule #528
+    if( name != r.name )
+    {
+        //FTRACEC("%d (name)\n", name.compare(r->name));
+        return name.compare(r.name);      
+    }
+          
+    // Optional over-ride of address compare for making ranges, see rule #528
+    if( addr_bounding_role != BoundingRole::NONE || r.addr_bounding_role != BoundingRole::NONE )
+    {
+        return (int)addr_bounding_role - (int)(r.addr_bounding_role);
+    }    
+    
+    // Secondary ordering on identity due rule #528
+    return Compare3WayIdentity(*this, r);
+}
+
+
+string SpecificIdentifier::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy ) 
+{	
+	// Get rid of all this casting by building the entire rendering subsystem using plain old const pointers.
+	auto id = TreePtr<SpecificIdentifier>::DynamicCast( TreePtr<Node>(shared_from_this()) );
+		
+    // Put this in SpecificLabelIdentifier
+    if( DynamicTreePtrCast< SpecificLabelIdentifier >(id) )
+    {
+		if(  surround_prod < Syntax::Production::RESOLVER )
+		{
+			// label-as-variable (GCC extension)  
+			return "&&" + renderer->DoRender( id, Syntax::Production::RESOLVER ); // recurse at strictly higher precedence
+		}
+		else
+		{
+			// TODO call SpecificIdentifier::...
+		}			
+    }
+
+    if( !id )
+		throw Syntax::Unimplemented();
+
+	auto ii = DynamicTreePtrCast<SpecificIdentifier>( id );
+	if( !ii )
+		throw Syntax::Unimplemented();
+
+	string s = renderer->GetUniqueIdentifierName(ii);          
+    ASSERT(s.size()>0)(*id)(" rendered to an empty string\n");
+
+    // Slight cheat for expediency: if a PURE_IDENTIFIER is expected, suppress scope resolution.
+    // This could lead to the rendering of identifiers in the wrong scope. But, most PURE_IDENTIFIER
+    // uses are declaring the id, or otherwise can't cope with the :: anyway. 
+    if( surround_prod < Syntax::Production::PURE_IDENTIFIER ) 
+        s = renderer->RenderScopeResolvingPrefix( id ) + s;   
+                                     
+    return s;
+}
+
+
+string SpecificIdentifier::GetIdentifierName() const
+{
+	return name;
+}
+
+
+string SpecificIdentifier::GetDesignationNameHint() const
+{
+	return GetIdentifierName();
+}
+
+
+bool SpecificIdentifier::IsDesignationNamedIdentifier() const
+{
+	return true;
+}
+
+
+string SpecificIdentifier::GetGraphName() const
+{
+    // Since this is text from the program, use single quotes
+    string s = "'" + name + "'";
+    switch( addr_bounding_role )
+    {
+        case BoundingRole::NONE:
+            break;
+        case BoundingRole::MINIMUS:
+            s += " MINIMUS";
+            break;
+        case BoundingRole::MAXIMUS:
+            s += " MAXIMUS";
+            break;
+    }    
+    return s;
+}
+
+
+string SpecificIdentifier::GetTrace() const
+{
+    return GetName() + "(" + GetGraphName() + ")" + GetSerialString();
+}
+
+//////////////////////////// InstanceIdentifier //////////////////////////////
+
+Syntax::Production InstanceIdentifier::GetMyProductionTerminal() const
+{ 
+	return Production::PURE_IDENTIFIER; 
+}
+
+//////////////////////////// TypeIdentifier //////////////////////////////
+
+Syntax::Production TypeIdentifier::GetMyProductionTerminal() const
+{ 
+	return Production::PURE_IDENTIFIER; 
+}
+
+//////////////////////////// IdValuePair ///////////////////////////////
+
+Syntax::Production IdValuePair::GetMyProductionTerminal() const
+{ 
+	return Production::COLON_SEP; 
+}
+
+
+string IdValuePair::GetRender( VN::RendererInterface *renderer, Production, Policy )
+{
+    return renderer->DoRender( key, BoostPrecedence(Production::COLON_SEP) ) +
+		   "⦂ " +
+           renderer->DoRender( value, Production::COLON_SEP );	
+}
+
+//////////////////////////// MapArgumentation ///////////////////////////////
+
+Syntax::Production MapArgumentation::GetMyProductionTerminal() const
+{ 
+	return Production::BRACKETED; 
+}
+
+
+string MapArgumentation::GetRender( VN::RendererInterface *renderer, Production, Policy )
+{
+	list<string> ls;
+	for( TreePtr<Node> arg : arguments )
+		ls.push_back( renderer->DoRender( arg, Production::COMMA_SEP ) );
+	
+    return Join( ls, ", ", "〔", "〕" );	
+}
+
+//////////////////////////// SeqArgumentation ///////////////////////////////
+
+Syntax::Production SeqArgumentation::GetMyProductionTerminal() const
+{ 
+	return Production::BRACKETED; 
+}
+
+
+string SeqArgumentation::GetRender( VN::RendererInterface *renderer, Production, Policy )
+{	
+	list<string> ls;
+	for( TreePtr<Node> arg : arguments )
+		ls.push_back( renderer->DoRender( arg, Production::COMMA_SEP ) );	
+	
+	return Join( ls, ", ", "(", ")" );	
+}
+
 //////////////////////////// Literal ///////////////////////////////
 
 string Literal::GetName() const
@@ -258,161 +462,6 @@ string SpecificFloat::GetRenderTerminal( Production ) const
 Syntax::Production SpecificFloat::GetMyProductionTerminal() const
 { 
 	return Production::PRIMITIVE_EXPR; 
-}
-
-//////////////////////////// SpecificIdentifier ///////////////////////////////
-
-SpecificIdentifier::SpecificIdentifier() :
-    addr_bounding_role( BoundingRole::NONE )
-{
-}
-
-
-SpecificIdentifier::SpecificIdentifier( string s, BoundingRole addr_bounding_role_ ) : 
-    addr_bounding_role(addr_bounding_role_),
-    name(s) 
-{
-}
-
-
-shared_ptr<Cloner> SpecificIdentifier::Duplicate( shared_ptr<Cloner> p )
-{
-    return p; // duplicating specific identifiers just gets the same id, since they are unique.
-    // This means x.Duplicate() matches x, wheras x.Clone() does not
-}
-
-
-bool SpecificIdentifier::IsLocalMatchCovariant( const Matcher &candidate ) const 
-{
-    return &candidate == this;
-}
-
-
-Orderable::Diff SpecificIdentifier::OrderCompare3WayCovariant( const Orderable &right, 
-                                                               OrderProperty order_property ) const
-{
-	(void)order_property;
-    auto &r = GET_THAT_REFERENCE(right);
-        
-    //FTRACEC("Compare ")(*this)(" with ")(*r)(": ");
-
-    if( &r == this )
-    {
-        //FTRACEC("0 (fast out)\n");
-        return 0; // fast-out
-    }
-        
-    // Primary ordering on name due rule #528
-    if( name != r.name )
-    {
-        //FTRACEC("%d (name)\n", name.compare(r->name));
-        return name.compare(r.name);      
-    }
-          
-    // Optional over-ride of address compare for making ranges, see rule #528
-    if( addr_bounding_role != BoundingRole::NONE || r.addr_bounding_role != BoundingRole::NONE )
-    {
-        return (int)addr_bounding_role - (int)(r.addr_bounding_role);
-    }    
-    
-    // Secondary ordering on identity due rule #528
-    return Compare3WayIdentity(*this, r);
-}
-
-
-string SpecificIdentifier::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy ) 
-{	
-	// Get rid of all this casting by building the entire rendering subsystem using plain old const pointers.
-	auto id = TreePtr<SpecificIdentifier>::DynamicCast( TreePtr<Node>(shared_from_this()) );
-		
-    // Put this in SpecificLabelIdentifier
-    if( DynamicTreePtrCast< SpecificLabelIdentifier >(id) )
-    {
-		if(  surround_prod < Syntax::Production::RESOLVER )
-		{
-			// label-as-variable (GCC extension)  
-			return "&&" + renderer->DoRender( id, Syntax::Production::RESOLVER ); // recurse at strictly higher precedence
-		}
-		else
-		{
-			// TODO call SpecificIdentifier::...
-		}			
-    }
-
-    if( !id )
-		throw Syntax::Unimplemented();
-
-	auto ii = DynamicTreePtrCast<SpecificIdentifier>( id );
-	if( !ii )
-		throw Syntax::Unimplemented();
-
-	string s = renderer->GetUniqueIdentifierName(ii);          
-    ASSERT(s.size()>0)(*id)(" rendered to an empty string\n");
-
-    // Slight cheat for expediency: if a PURE_IDENTIFIER is expected, suppress scope resolution.
-    // This could lead to the rendering of identifiers in the wrong scope. But, most PURE_IDENTIFIER
-    // uses are declaring the id, or otherwise can't cope with the :: anyway. 
-    if( surround_prod < Syntax::Production::PURE_IDENTIFIER ) 
-        s = renderer->RenderScopeResolvingPrefix( id ) + s;   
-                                     
-    return s;
-}
-
-
-string SpecificIdentifier::GetIdentifierName() const
-{
-	return name;
-}
-
-
-string SpecificIdentifier::GetDesignationNameHint() const
-{
-	return GetIdentifierName();
-}
-
-
-bool SpecificIdentifier::IsDesignationNamedIdentifier() const
-{
-	return true;
-}
-
-
-string SpecificIdentifier::GetGraphName() const
-{
-    // Since this is text from the program, use single quotes
-    string s = "'" + name + "'";
-    switch( addr_bounding_role )
-    {
-        case BoundingRole::NONE:
-            break;
-        case BoundingRole::MINIMUS:
-            s += " MINIMUS";
-            break;
-        case BoundingRole::MAXIMUS:
-            s += " MAXIMUS";
-            break;
-    }    
-    return s;
-}
-
-
-string SpecificIdentifier::GetTrace() const
-{
-    return GetName() + "(" + GetGraphName() + ")" + GetSerialString();
-}
-
-//////////////////////////// InstanceIdentifier //////////////////////////////
-
-Syntax::Production InstanceIdentifier::GetMyProductionTerminal() const
-{ 
-	return Production::PURE_IDENTIFIER; 
-}
-
-//////////////////////////// TypeIdentifier //////////////////////////////
-
-Syntax::Production TypeIdentifier::GetMyProductionTerminal() const
-{ 
-	return Production::PURE_IDENTIFIER; 
 }
 
 //////////////////////////// AccessSpec //////////////////////////////
@@ -741,9 +790,9 @@ Syntax::Production New::GetMyProductionTerminal() const
 string New::GetRender( VN::RendererInterface *renderer, Production, Policy )
 {
 	return string (DynamicTreePtrCast<Global>(global) ? "::" : "") +
-		   "new(?)" /*+ RenderOperandSequence( placement_arguments ) + ") "*/ +
+		   "new" + renderer->DoRender( placement_argumentation, Syntax::Production::PRIMITIVE_EXPR ) +
 		   renderer->DoRender( type, Syntax::Production::TYPE_IN_NEW ) +
-		   (constructor_arguments.empty() ? "" : "(?)" /*+ RenderOperandSequence( constructor_arguments ) + ")"*/ );
+		   renderer->DoRender( constructor_argumentation, Syntax::Production::PRIMITIVE_EXPR );
 }
 
 //////////////////////////// Delete ///////////////////////////////
@@ -791,55 +840,6 @@ string Cast::GetRender( VN::RendererInterface *renderer, Production, Policy poli
 		throw RefusedByPolicy();
     return "(" + renderer->DoRender( type, Syntax::Production::BOOT_TYPE ) + ")" +
                  renderer->DoRender( operand, Syntax::Production::PREFIX );
-}
-
-//////////////////////////// IdValuePair ///////////////////////////////
-
-Syntax::Production IdValuePair::GetMyProductionTerminal() const
-{ 
-	return Production::COLON_SEP; 
-}
-
-
-string IdValuePair::GetRender( VN::RendererInterface *renderer, Production, Policy )
-{
-    return renderer->DoRender( key, BoostPrecedence(Production::COLON_SEP) ) +
-		   "⦂ " +
-           renderer->DoRender( value, Production::COLON_SEP );	
-}
-
-//////////////////////////// MapArgumentation ///////////////////////////////
-
-Syntax::Production MapArgumentation::GetMyProductionTerminal() const
-{ 
-	return Production::BRACKETED; 
-}
-
-
-string MapArgumentation::GetRender( VN::RendererInterface *renderer, Production, Policy )
-{
-	list<string> ls;
-	for( TreePtr<Node> arg : arguments )
-		ls.push_back( renderer->DoRender( arg, Production::COMMA_SEP ) );
-	
-    return Join( ls, ", ", "〔", "〕" );	
-}
-
-//////////////////////////// SeqArgumentation ///////////////////////////////
-
-Syntax::Production SeqArgumentation::GetMyProductionTerminal() const
-{ 
-	return Production::BRACKETED; 
-}
-
-
-string SeqArgumentation::GetRender( VN::RendererInterface *renderer, Production, Policy )
-{	
-	list<string> ls;
-	for( TreePtr<Node> arg : arguments )
-		ls.push_back( renderer->DoRender( arg, Production::COMMA_SEP ) );	
-	
-	return Join( ls, ", ", "(", ")" );	
 }
 
 //////////////////////////// Call ///////////////////////////////
@@ -899,7 +899,7 @@ Syntax::Production AlignOf::GetMyProductionTerminal() const
 
 Syntax::Production Compound::GetMyProductionTerminal() const
 { 
-	return Production::STATEMENT_SEQ; // Get the central system to generate the {} for us
+	return Production::STATEMENT;
 }
 
 //////////////////////////// StatementExpression ///////////////////////////////
@@ -929,10 +929,10 @@ Syntax::Production Return::GetMyProductionTerminal() const
 }
 
 
-/*string Return::GetRender( VN::RendererInterface *renderer, Production, Policy )
+string Return::GetRender( VN::RendererInterface *renderer, Production, Policy )
 {
 	return "return " + renderer->DoRender( return_value, Syntax::Production::SPACE_SEP_STATEMENT );
-}*/
+}
 
 //////////////////////////// Goto ///////////////////////////////
 
