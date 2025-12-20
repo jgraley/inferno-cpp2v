@@ -339,7 +339,7 @@ string CppRender::RenderTypeAndDeclarator( TreePtr<Type> type, string declarator
     // Production passed in here comes from the current value of the delcarator string, not surrounding production.
     Syntax::Production prod_surrounding_declarator = type->GetOperandInDeclaratorProduction();
     ASSERT( Syntax::GetPrecedence(prod_surrounding_declarator) <= Syntax::GetPrecedence(Syntax::Production::BRACKETED) ); // Can't satisfy this production's precedence demand using parentheses
-    ASSERT( Syntax::GetPrecedence(declarator_prod) >= Syntax::GetPrecedence(Syntax::Production::BOOT_EXPR) ); // Can't put this node into parentheses
+    ASSERT( Syntax::GetPrecedence(declarator_prod) >= Syntax::GetPrecedence(Syntax::Production::BOTTOM_EXPR) ); // Can't put this node into parentheses
     bool parenthesise = Syntax::GetPrecedence(declarator_prod) < Syntax::GetPrecedence(prod_surrounding_declarator);  
     // Apply to object rather than recursing, because this is declarator    
     if( parenthesise )
@@ -364,7 +364,7 @@ string CppRender::RenderTypeAndDeclarator( TreePtr<Type> type, string declarator
     else if( TreePtr<Array> a = DynamicTreePtrCast< Array >(type) )
         return RenderTypeAndDeclarator( 
                            a->element, 
-                           declarator + "[" + DoRender( a->size, Syntax::Production::BOOT_EXPR) + "]", 
+                           declarator + "[" + DoRender( a->size, Syntax::Production::BOTTOM_EXPR) + "]", 
                            Syntax::Production::POSTFIX,
                            surround_prod,
                            constant );
@@ -386,7 +386,7 @@ string CppRender::RenderType( TreePtr<CPPTree::Type> type, Syntax::Production su
         return "bool";
     	
     // If we got here, we should not be looking at a type that renders expressionally
-	if( Syntax::GetPrecedence(type->GetMyProductionTerminal()) < Syntax::GetPrecedence(Syntax::Production::BOOT_EXPR) ) 
+	if( Syntax::GetPrecedence(type->GetMyProductionTerminal()) < Syntax::GetPrecedence(Syntax::Production::BOTTOM_EXPR) ) 
 	{
 		// Production ANONYMOUS relates to the fact that we've provided an empty string for the initial declarator.
 		return RenderTypeAndDeclarator( type, "", Syntax::Production::ANONYMOUS, surround_prod, false ); 
@@ -502,9 +502,9 @@ string CppRender::RenderExpression( TreePtr<Initialiser> expression, Syntax::Pro
         return s + " })";
     }
     else if( auto pot = DynamicTreePtrCast< SizeOf >(expression) )
-        return "sizeof(" + DoRender( pot->argument, Syntax::Production::BOOT_EXPR ) + ")";               
+        return "sizeof(" + DoRender( pot->argument, Syntax::Production::BOTTOM_EXPR ) + ")";               
     else if( auto pot = DynamicTreePtrCast< AlignOf >(expression) )
-        return "alignof(" + DoRender( pot->argument, Syntax::Production::BOOT_EXPR ) + ")";    
+        return "alignof(" + DoRender( pot->argument, Syntax::Production::BOTTOM_EXPR ) + ")";    
     else
         return Render::Dispatch( expression, surround_prod, policy );
 
@@ -542,7 +542,7 @@ string CppRender::RenderMakeRecord( TreePtr<RecordLiteral> make_rec, Syntax::Pro
         ls.push_back( DoRender( e, Syntax::Production::COMMA_SEP ) );
 
     // Do the syntax
-    s += "(" + DoRender( make_rec->type, Syntax::Production::BOOT_EXPR ) + ")"; 
+    s += "(" + DoRender( make_rec->type, Syntax::Production::BOTTOM_EXPR ) + ")"; 
     s += Join( ls, ", ", "{", "}" );   // Use of {} in expressions is irregular so handle locally 
     return s;
 }
@@ -1020,7 +1020,7 @@ string CppRender::RenderStatement( TreePtr<Statement> statement, Syntax::Product
         return "for( " + 
                DoRender( f->initialisation, Syntax::Production::STATEMENT_LOW) + 
                DoRender( f->condition, Syntax::Production::STATEMENT_LOW) + 
-               DoRender( f->increment, Syntax::Production::BOOT_EXPR) + " )\n" +
+               DoRender( f->increment, Syntax::Production::BOTTOM_EXPR) + " )\n" +
                DoRender( f->body, surround_prod);
     else if( TreePtr<Switch> s = DynamicTreePtrCast<Switch>(statement) )
         return "switch( " + DoRender( s->condition, Syntax::Production::CONDITION) + " )\n" +

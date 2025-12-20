@@ -19,14 +19,14 @@ Syntax::Production Type::GetMyProductionTerminal() const
 {
 	// GetMyProductionTerminal on types is for non-booted anonymous types eg with auto a = new <here>;
 	// Default shall be to boot (i.e. force parentheses).
-	return Production::BOOT_EXPR;
+	return Production::BOTTOM_EXPR;
 }
 
 
 Syntax::Production Type::GetOperandInDeclaratorProduction() const
 {
 	// Most types don't use declarators, so provide a safe default
-	return Production::BOOT_EXPR;
+	return Production::BOTTOM_EXPR;
 }
 
 //////////////////////////// Declaration ///////////////////////////////
@@ -254,7 +254,7 @@ string Literal::GetName() const
 	string value_string;
 	try
 	{
-		value_string = "(" + GetRenderTerminal(Syntax::Production::BOOT_EXPR) + ")";
+		value_string = "(" + GetRenderTerminal(Syntax::Production::BOTTOM_EXPR) + ")";
 	}
 	catch(Refusal &) {}
 	return Traceable::GetName() + value_string;
@@ -728,7 +728,7 @@ string ConditionalOperator::GetRender( VN::RendererInterface *renderer, Producti
 	return renderer->DoRender( condition, BoostPrecedence(Syntax::Production::ASSIGN) ) + 
 		   " ? " +
 		   // Middle expression boots parser - so you can't split it up using (), [] etc
-		   renderer->DoRender( expr_then, Production::BOOT_EXPR ) + 
+		   renderer->DoRender( expr_then, Production::BOTTOM_EXPR ) + 
 		   " : " +
 		   renderer->DoRender( expr_else, Production::ASSIGN );          
 }
@@ -745,7 +745,7 @@ string Subscript::GetRender( VN::RendererInterface *renderer, Production, Policy
 {
 	return renderer->DoRender( destination, Production::POSTFIX ) + 
 		   "[" +
-		   renderer->DoRender( index, Production::BOOT_EXPR ) + 
+		   renderer->DoRender( index, Production::BOTTOM_EXPR ) + 
 		   "]";       
 }
 
@@ -990,7 +990,7 @@ Syntax::Production Break::GetMyProductionTerminal() const
 
 Syntax::Production Nop::GetMyProductionTerminal() const
 { 
-	return Production::BOOT_STMT_DECL; // Force a {}
+	return Production::BOTTOM_STMT_DECL; // Force a {}
 }
 
 //////////////////////////// PreprocessorIdentifier //////////////////////////////

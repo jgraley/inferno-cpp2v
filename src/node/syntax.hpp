@@ -19,18 +19,21 @@ public:
 	enum class Production // "Syntax::Production" is a generalisation of precedence
 	{		
 		BOOT = 0,
-		PROGRAM = 10,
-		PRE_PROC_DIRECTIVE,
-		SPACE_SEP_PRE_PROC,
+		PROGRAM,
+		VN_SEP_SCRIPTY, // Separated by ⨟ (in embedded engine renders)
+		VN_SEP_ITEMS, // Separated by ⚬ (in StandardAgent renders, which always have ())
+		
 		
 		// ----- Complete self-sufficient statements and declarations. There is a precedence
 		// scheme, booted using {}, to disambiguate if/else.
-		BOOT_STMT_DECL = 20,		
+		BOTTOM_STMT_DECL,		
+		MIN_SURR_SEMICOLON = 20, // Note: surroundings higher than here \/ can get ";" added.
 		STATEMENT_SEQ, // A number of statements in sequence without {}
 		STATEMENT_LOW, // Lowest statement precedence: {} etc from the inside		
 		STATEMENT_HIGH, // eg if( ... ) <here>;    is this prefix?
 		STATEMENT,
 		DECLARATION,
+		PRE_PROC_DIRECTIVE, // Preprocessor directives are treated like non-bare statements
 		MAX_SURR_SEMICOLON,	// Note: surroundings lower than here /\ can get ";" added.
 
 		// ----- Parts of statements and declarations
@@ -42,6 +45,7 @@ public:
 		BARE_DECLARATION, // Actual declaration with no semicolon, eg int i	
 		SPACE_SEP_STATEMENT, // eg throw <here>;
 		SPACE_SEP_DECLARATION, // the type in <here> <declarator>;
+		SPACE_SEP_PRE_PROC,
 		LABEL,  // Anything with a : after it. Could be (a) like a bare statement needing a ; or (b) a prefix on statements.
 		TOP_STMT_DECL, // Highest statement precedence
 
@@ -52,10 +56,7 @@ public:
 		TOP_TYPE,
 		
 		// ----- Expressions. There is a precedence scheme, booted using ()
-		BOOT_EXPR = 60, // Lowest expression precedence: (), {}, [] etc from the inside		
-
-		VN_SEP_SCRIPTY, // Separated by ⨟ (in embedded engine renders)
-		VN_SEP_ITEMS, // Separated by ⚬ (in StandardAgent renders, which always have ())
+		BOTTOM_EXPR = 60, // Lowest expression precedence: (), {}, [] etc from the inside		
 		
 		COMMA_OP, // Must be lowest binop, so we can bypass it when we want comma as separator
 		COMMA_SEP, // Use this for comma-separated lists to force parens for COMMA_OP, including VN

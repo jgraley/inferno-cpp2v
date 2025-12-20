@@ -173,7 +173,7 @@ string StuffAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Prod
 	(void)surround_prod;
 	string s = "⩨";
 	if( recurse_restriction )
-		s += "【" + renderer->DoRender( recurse_restriction, Syntax::Production::BOOT_EXPR) + "】";
+		s += "【" + renderer->DoRender( recurse_restriction, Syntax::Production::BOTTOM_EXPR) + "】";
 	return s + renderer->DoRender( terminus, Syntax::Production::PREFIX ); 
 }    
     

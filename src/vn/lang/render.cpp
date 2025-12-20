@@ -74,8 +74,8 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern, bool lowering
 		commands.push_back( unique_coupling_names.at(node) + 
 							" ⪮ " + 
 							AccomodateInit( node, 
-							                           Syntax::Production::VN_DESIGNATE, 
-							                           designation_policy ) );
+							                Syntax::Production::VN_DESIGNATE, 
+							                designation_policy ) );
 
 	ASSERT( pattern->GetSearchComparePattern() == pattern->GetReplacePattern() || !pattern->GetReplacePattern() )
 	   	  (pattern->GetSearchComparePattern())
@@ -178,7 +178,7 @@ string Render::AccomodateInit( TreePtr<Node> node, Syntax::Production surround_p
 	// Deal with expression in initialiser production by prepending =
     switch(node_prod)
     {
-        case Syntax::Production::BOOT_EXPR...Syntax::Production::TOP_EXPR: // Expression productions at different precedences			
+        case Syntax::Production::BOTTOM_EXPR...Syntax::Production::TOP_EXPR: // Expression productions at different precedences			
 			if( ReadArgs::use.count("c") )
 				s += SSPrintf("// Add init assignment, surround prod to ASSIGN\n");
 			return s + " = " + AccomodateBoot(node, Syntax::Production::ASSIGN, policy );
@@ -199,10 +199,10 @@ string Render::AccomodateBoot( TreePtr<Node> node, Syntax::Production surround_p
 
     switch(node_prod)
     {
-        case Syntax::Production::BOOT_STMT_DECL...Syntax::Production::TOP_STMT_DECL: // Statement productions at different precedences
+        case Syntax::Production::BOOT...Syntax::Production::TOP_STMT_DECL: // Statement productions at different precedences
 			if( policy.boot_statements_using_braces )
 			{
-				// Braces can actually work in expressions, eg in {}. The nodes are STATEMENT_SEQ and we boot to BOOT_STMT_DECL
+				// Braces can actually work in expressions, eg in {}. The nodes are STATEMENT_SEQ and we boot to BOTTOM_STMT_DECL
 				ASSERT( Syntax::GetPrecedence(surround_prod) <= Syntax::GetPrecedence(Syntax::Production::BRACED) ||			
 						Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::TOP_STMT_DECL) )
 					  ("Braces won't achieve high enough precedence for surrounding statement production\n")
@@ -214,15 +214,15 @@ string Render::AccomodateBoot( TreePtr<Node> node, Syntax::Production surround_p
 					  ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); 
 					  
 				if( ReadArgs::use.count("c") )
-					s += SSPrintf("// Booting statement, surround prod to BOOT_STMT_DECL\n");
+					s += SSPrintf("// Booting statement, surround prod to BOTTOM_STMT_DECL\n");
 					
 				return s + "{\n " + 
-					   AccomodateSemiocolon( node, Syntax::Production::BOOT_STMT_DECL, policy ) +	
+					   AccomodateSemiocolon( node, Syntax::Production::BOOT, policy ) +	
 					   "}\n";         
 			}   
 			[[fallthrough]]; // ELSE FALL THOROUGH INTO PARENS CASE
 			
-        case Syntax::Production::BOOT_EXPR...Syntax::Production::TOP_EXPR: // Expression productions at different precedences
+        case Syntax::Production::BOTTOM_EXPR...Syntax::Production::TOP_EXPR: // Expression productions at different precedences
             // If current production has too-high precedence, boot back down using parentheses
 			ASSERT( Syntax::GetPrecedence(surround_prod) <= Syntax::GetPrecedence(Syntax::Production::BRACKETED) )
 				  ("Parentheses won't achieve high enough precedence for surrounding production\n")
@@ -230,10 +230,10 @@ string Render::AccomodateBoot( TreePtr<Node> node, Syntax::Production surround_p
 				  ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); 
 					  
 			if( ReadArgs::use.count("c") )
-				s += SSPrintf("// Booting expression, surround prod to BOOT_EXPR\n");
+				s += SSPrintf("// Booting expression, surround prod to BOTTOM_EXPR\n");
 
             return s + "( " +
-				   AccomodateSemiocolon( node, Syntax::Production::BOOT_EXPR, policy ) +
+				   AccomodateSemiocolon( node, Syntax::Production::BOOT, policy ) +
 				   " )";            
         
         default:        
@@ -251,7 +251,8 @@ string Render::AccomodateSemiocolon( TreePtr<Node> node, Syntax::Production surr
     // the one supplied.
     Syntax::Production node_prod = GetNodeProduction(node, surround_prod, policy);
 							 		    
-    if( !(Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::MAX_SURR_SEMICOLON) &&
+    if( !(Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::MIN_SURR_SEMICOLON) &&
+          Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::MAX_SURR_SEMICOLON) &&
           Syntax::GetPrecedence(node_prod) > Syntax::GetPrecedence(Syntax::Production::MIN_NODE_SEMICOLON) ) )
          return AccomodatePreRestriction( node, surround_prod, policy );
                  
@@ -260,7 +261,7 @@ string Render::AccomodateSemiocolon( TreePtr<Node> node, Syntax::Production surr
 
 	switch( surround_prod )
 	{
-		case Syntax::Production::BOOT_STMT_DECL:
+		case Syntax::Production::BOTTOM_STMT_DECL:
 		case Syntax::Production::STATEMENT:
 		case Syntax::Production::STATEMENT_LOW...Syntax::Production::STATEMENT_HIGH:
 			surround_prod = Syntax::Production::BARE_STATEMENT;

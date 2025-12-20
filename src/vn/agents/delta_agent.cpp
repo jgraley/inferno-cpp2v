@@ -68,7 +68,7 @@ string DeltaAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Prod
 	(void)surround_prod;
 	// We can use PREFIX for this because there's nothing in front of the ▲ unlike
 	// with c's ?: operator. The segment ▲...⯈ is a prefix to the overlay argument.
-	// As with ?: we could use BOOT_EXPR for the through argument, and probably should
+	// As with ?: we could use BOTTOM_EXPR for the through argument, and probably should
 	// in the parser, but to generate consistent style in renders we use PREFIX so
 	// that parens are just as likely in both args.
 	string st = renderer->DoRender( (TreePtr<Node>)(*GetThrough()), Syntax::Production::PREFIX );
