@@ -1288,7 +1288,7 @@ private:
             clang::IdentifierInfo *LabelII) // "&&foo"
 
     {
-        // TODO doesn't && meaning label-as-variable conflict with C++0x right-reference thingy?
+        // TODO doesn't && meaning label-as-variable conflict with C++0x RValue?
         return hold_expr.ToRaw( MaybeCreateLabelIdentifier(LabelII) );
     }
 

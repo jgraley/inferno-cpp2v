@@ -795,7 +795,8 @@ string CppRender::RenderInstance( TreePtr<Instance> o, Syntax::Production surrou
 				s += "/* split */";   
 			// Emit just a prototype now and request definition later
 			// Split out the definition of the instance for rendering later at Program scope
-			definitions.push(o);
+			if( !TreePtr<Uninitialised>::DynamicCast(o->initialiser) )
+				definitions.push(o);
 		}		
 		else
 		{

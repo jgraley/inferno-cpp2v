@@ -111,7 +111,7 @@ string SpecificIdentifier::GetRender( VN::RendererInterface *renderer, Productio
     // Put this in SpecificLabelIdentifier
     if( DynamicTreePtrCast< SpecificLabelIdentifier >(id) )
     {
-		if(  surround_prod < Syntax::Production::RESOLVER )
+		if( surround_prod < Syntax::Production::RESOLVER )
 		{
 			// label-as-variable (GCC extension)  
 			return "&&" + renderer->DoRender( id, Syntax::Production::RESOLVER ); // recurse at strictly higher precedence

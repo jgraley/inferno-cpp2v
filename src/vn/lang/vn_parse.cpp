@@ -643,16 +643,10 @@ VNLangRecogniser &VNParse::GetShim()
 // When designating a ⧇ or speciifc identifier node, why not use the given name as the name of the designation?
 
 // Parser check broken with -qX+ 
-// Add a command for IsLoweringForRenderStep(), render it and parse it back
-
-// C++ renderer is broken rendering main() as static. Static node is in the C++ sense not the C sense, so
-// they should only be renderered with the static keyword if in a record, not at top level.
-
-// Turn on ELIMINATE_STEP_NUMBER and fix if need be
 
 // Calls/Constructors plan:
-// - Factor out map/seq args
-// - Separate node for Construct, with common intermediate with call ("Invoke"?)
+// - Factor out map/seq args DONE
+// - Separate node for Construct, with common intermediate with call ("Invoke"?) 
 // It will always be explicit when we want a construct that has args. This includes at least MyClass my_object( arg1, arg2, ... )
 // - Try to parse in VN language
 
