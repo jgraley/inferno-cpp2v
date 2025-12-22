@@ -495,6 +495,13 @@ Syntax::Production Label::GetMyProductionTerminal() const
 	return Production::LABEL; 
 }
 
+
+string Label::GetRender( VN::RendererInterface *renderer, Production, Policy )
+{
+	throw Unimplemented(); // TODO remove
+	return renderer->DoRender( identifier, Syntax::Production::PURE_IDENTIFIER) + ":";	
+}
+
 //////////////////////////// Callable //////////////////////////////
 
 Syntax::Production Callable::GetOperandInDeclaratorProduction() const
@@ -939,6 +946,16 @@ string Return::GetRender( VN::RendererInterface *renderer, Production, Policy )
 Syntax::Production Goto::GetMyProductionTerminal() const
 { 
 	return Production::BARE_STATEMENT; 
+}
+
+
+string Goto::GetRender( VN::RendererInterface *renderer, Production, Policy )
+{
+	throw Unimplemented(); // TODO remove
+    if( auto li = DynamicTreePtrCast< SpecificLabelIdentifier >(destination) )
+        return "goto " + renderer->DoRender( li, Syntax::Production::SPACE_SEP_STATEMENT).substr(2);  // regular goto REMOVE THE &&
+    else
+        return "goto *" + renderer->DoRender( destination, Syntax::Production::PREFIX); // goto-a-variable (GCC extension)
 }
 
 //////////////////////////// If ///////////////////////////////

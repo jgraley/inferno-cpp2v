@@ -95,8 +95,10 @@ PatternCommand::PatternCommand( TreePtr<Node> pattern_, any loc_ ) :
 	Command(loc_),
 	pattern( pattern_ )
 {
-	ASSERT(pattern);
+	// pattern can be NULL (i.e. singular wildcard)
 }
+//	‽【CPPTree::Compound】¬‽【CPPTree::Compound】⩨【¬( ☆: )】my_labelidentifier
+//                                                ~~
 
 
 TreePtr<Node> PatternCommand::DecayToPattern( TreePtr<Node> node, VNParse *vn )
@@ -104,7 +106,7 @@ TreePtr<Node> PatternCommand::DecayToPattern( TreePtr<Node> node, VNParse *vn )
 	if( node )
 		throw YY::VNLangParser::syntax_error(
 		     any_cast<YY::VNLangParser::location_type>(loc), 
-		     "Only the first command in an embedded command sequnce may be a pattern");
+		     "Only the first command in an embedded command sequence may be a pattern");
 	return pattern; 
 }
 

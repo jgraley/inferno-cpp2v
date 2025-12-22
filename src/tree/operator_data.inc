@@ -17,7 +17,7 @@
 #endif
 
 /*
-Syntax  Clang token          Text   Inferno node          Intermediate            Category    Syntax::Production   Association */
+Syntax  Clang token          Text   Inferno node          Intermediate            Category    Production   Association */
 
 PREFIX(amp                 , "&",   AddressOf,            Unop,                   SPECIAL,    PREFIX,      RIGHT )
 INFIX(amp                  , "&",   BitwiseAnd,           CommutativeBinop,       BITWISE,    BITWISE_AND, LEFT )

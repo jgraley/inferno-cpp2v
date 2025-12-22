@@ -548,6 +548,7 @@ struct Label : Declaration, //TODO commonize with Case and Default
     virtual string GetColour() const { return Declaration::GetColour(); } // Declaration wins
     set<const TreePtrInterface *> GetDeclared() override { return { &identifier }; };
 	Production GetMyProductionTerminal() const override;	
+	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) final;
 };
 
 //////////////////////////// Built-in Types ////////////////////////////
@@ -1094,6 +1095,7 @@ struct Goto : Statement, Uncombable
     TreePtr<Expression> destination; ///< where to go to, expresison allowed
 
 	Production GetMyProductionTerminal() const override;	
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
 };
 
 /// If statement

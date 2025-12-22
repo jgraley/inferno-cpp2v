@@ -137,10 +137,10 @@
 	
 %type <TreePtr<Node>> 				normal norm_unit norm_postfix norm_prefix norm_relational norm_disjunction norm_conjunction  
 %type <TreePtr<Node>> 				norm_assignment norm_equality norm_add_etc norm_logical_or norm_logical_and 
-%type <TreePtr<Node>> 				norm_mul_etc norm_shift norm_bitwise_and norm_bitwise_or norm_bitwise_xor norm_no_comma_op 
-%type <TreePtr<Node>> 				norm_paren norm_comma_op
+%type <TreePtr<Node>> 				norm_mul_etc norm_shift norm_bitwise_and norm_bitwise_or norm_bitwise_xor  
+%type <TreePtr<Node>> 				norm_paren norm_expression
 %type <TreePtr<Node>> 				type type_unit type_prefix type_disjunction type_conjunction type_paren
-%type <TreePtr<Node>> 				unified_no_comma_op unified unified_prefix
+%type <TreePtr<Node>> 				unified unified_prefix
 %type <TreePtr<Node>> 				bare_statement
 %type <TreePtr<Node>> 				norm_id_value
 %type <wstring> 					vn_name
@@ -175,36 +175,33 @@ sep_commands 	: sep_commands VN_SEMI script_command		{ $$ = $1; $$.push_back($3)
 			
 // Add more commands here
 script_command	: ENGINE normal   		 		 	{ $$ = make_shared<VN::EngineCommand>($2, @1); }
-				| normal 			  				{ $$ = make_shared<VN::PatternCommand>($1, @$); }
+				| normal 			  				{ $$ = make_shared<VN::PatternCommand>($1, @$); } // in trivial cases, this decays back to the node
 				| ATTRIBUTE		  					{ $$ = make_shared<VN::AttributeCommand>(@$); }
 
 // or here
-recogniser_command	: vn_name DESIGNATE bare_statement	{ $$ = make_shared<VN::NonTypeDesignationGnomon>($1, $3); }
-					| vn_name DESIGNATE type			{ $$ = make_shared<VN::TypeDesignationGnomon>($1, $3); }
+recogniser_command	: vn_name DESIGNATE normal		{ $$ = make_shared<VN::NonTypeDesignationGnomon>($1, $3); }
+					| vn_name DESIGNATE type		{ $$ = make_shared<VN::TypeDesignationGnomon>($1, $3); }
 
 
 // This one dips into ASCII/C because VN doesn't otherwise need equality/inequality operators
 stuff_depth_limit		: C_ASSIGN INTEGRAL_LITERAL					{ $$ = VN::Limit{ $1, @1, $2, @2 }; }
 
-close_itemisation	: VN_SEP items_bare CLOSE_VN   		{ $$ = $2; $$.loc = @$; }
-					| VN_SEP items_sep CLOSE_VN			{ $$ = $2; $$.loc = @$; $$.items.push_back({{}, @3}); }
-					| CLOSE_VN							{ $$.loc = @$; }
+close_itemisation	: VN_SEP items_bare CLOSE_VN  	{ $$ = $2; $$.loc = @$; }
+					| VN_SEP items_sep CLOSE_VN		{ $$ = $2; $$.loc = @$; $$.items.push_back({{}, @3}); }
+					| CLOSE_VN						{ $$.loc = @$; }
 					
-items_bare 	: items_sep item							{ $$ = $1; $$.items.push_back($2); }
-			| item										{ $$.items.push_back($1); }
+items_bare 	: items_sep item						{ $$ = $1; $$.items.push_back($2); }
+			| item									{ $$.items.push_back($1); }
 
-items_sep 	: items_bare VN_SEP		   					{ $$ = $1; } 
-			| items_sep VN_SEP		 					{ $$ = $1; $$.items.push_back({{}, @2}); }
-			| VN_SEP	 								{ $$.items.push_front({{}, @1}); }
+items_sep 	: items_bare VN_SEP		   				{ $$ = $1; } 
+			| items_sep VN_SEP		 				{ $$ = $1; $$.items.push_back({{}, @2}); }
+			| VN_SEP	 							{ $$.items.push_front({{}, @1}); }
 
-item		: item COMMA unified_no_comma_op			{ $$ = $1; $$.nodes.push_back($3); $$.loc = @$; }
-			| unified_no_comma_op						{ $$.nodes.push_back($1); $$.loc = @$; }
+item		: item COMMA unified					{ $$ = $1; $$.nodes.push_back($3); $$.loc = @$; }
+			| unified								{ $$.nodes.push_back($1); $$.loc = @$; }
 
-unified_no_comma_op : norm_no_comma_op					{ $$ = $1; }
-					| type								{ $$ = $1; }
-
-unified		: normal									{ $$ = $1; }
-			| type										{ $$ = $1; }
+unified		: normal								{ $$ = $1; }
+			| type									{ $$ = $1; }
 
 bare_statements	: bare_statement 						{ $$.push_back($1); }
 				| bare_statements ';' bare_statement 	{ $$ = $1; $$.push_back($3); }
@@ -217,7 +214,7 @@ type_disjunction	: type_conjunction
 type_conjunction 	: type_prefix
 					| type_conjunction CONJUNCTION type_prefix				{ $$ = vn->OnConjunction($1, $3); }
                     
-type_prefix : 										         type_paren
+type_prefix : type_paren
 			| 				         DELTA type DELTA_ARROW type_prefix	{ $$ = vn->OnDelta($2, $4); }
 			| 									      GRASS type_prefix	{ $$ = vn->OnGrass($2); }
 			| 								     POINTER_IS type_prefix	{ $$ = vn->OnPointerIs($2); }
@@ -240,19 +237,16 @@ type_node_name_part : start_node_name_scope resolved_type_name		{ $$ = $2.as_and
 
 type_id_discrim_part : start_id_discrim_scope resolved_type_name 	{ $$ = $2.as_andata_block; (void)$1; }
 
-
-arguments	: arguments COMMA norm_no_comma_op								{ $$ = $1; $$.push_back($3); }
-			| norm_no_comma_op												{ $$.push_back($1); }
+arguments	: arguments COMMA norm_expression								{ $$ = $1; $$.push_back($3); }
+			| norm_expression												{ $$.push_back($1); }
 
 normal				: bare_statement
 
-bare_statement		: norm_comma_op
-					| SPACE_SEP_STMT_KEYWORD norm_comma_op						{ $$ = vn->OnSpaceSepStmtKeyword($1.as_ascii, @1, $2, @2); }
-                                     
-norm_comma_op		: norm_no_comma_op
-					| norm_comma_op COMMA norm_no_comma_op						{ $$ = vn->OnInfixOperator($2, $1, $3); }
-
-norm_no_comma_op 	: norm_id_value
+bare_statement		: norm_expression
+					| SPACE_SEP_STMT_KEYWORD norm_expression				{ $$ = vn->OnSpaceSepStmtKeyword($1.as_ascii, @1, $2, @2); }
+					| norm_expression ':'									{ $$ = vn->OnLabel($1, @1); } 
+                                    
+norm_expression 	: norm_id_value
 
 norm_id_value		: norm_disjunction
 					| norm_id_value VN_COLON norm_disjunction					{ $$ = vn->OnIdValuePair($1, @1, $3); }
@@ -263,10 +257,10 @@ norm_disjunction	: norm_conjunction
 norm_conjunction 	: norm_assignment
 					| norm_conjunction CONJUNCTION norm_assignment				{ $$ = vn->OnConjunction($1, $3); }
 		
-norm_assignment 	: 											norm_logical_or 
+norm_assignment 	: norm_logical_or 
 					| 				   norm_logical_or C_ASSIGN norm_assignment	{ $$ = vn->OnInfixOperator($2, $1, $3); }
 					|         norm_logical_or C_COMPOUND_ASSIGN norm_assignment	{ $$ = vn->OnInfixOperator($2, $1, $3); }
-					|            norm_logical_or '?' normal ':' norm_assignment	{ $$ = vn->OnConditionalOperator($1, $3, $5); }
+					|   norm_logical_or '?' norm_expression ':' norm_assignment	{ $$ = vn->OnConditionalOperator($1, $3, $5); }
 
 norm_logical_or 	: norm_logical_and
 					| norm_logical_or C_LOGICAL_OR_OP norm_logical_and			{ $$ = vn->OnInfixOperator($2, $1, $3); }
@@ -299,7 +293,7 @@ norm_mul_etc 		: norm_prefix
 					| norm_mul_etc C_DIV_MOD_OP norm_prefix						{ $$ = vn->OnInfixOperator($2, $1, $3); }
 					| norm_mul_etc '*' norm_prefix								{ $$ = vn->OnInfixOperator("*", $1, $3); }
 		
-norm_prefix : 										   norm_postfix
+norm_prefix : norm_postfix
 			| 			       DELTA normal DELTA_ARROW norm_prefix	 { $$ = vn->OnDelta($2, $4); }
 			| 					    C_PREFIX_OP 		norm_prefix	 { $$ = vn->OnPrefixOperator($1, $2); }
 			| 					    C_AMPERSAND 		norm_prefix	 { $$ = vn->OnPrefixOperator($1, $2); }

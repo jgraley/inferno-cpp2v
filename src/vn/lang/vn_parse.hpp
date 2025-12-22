@@ -75,6 +75,7 @@ public:
 	TreePtr<Node> OnSubscript( TreePtr<Node> destination, TreePtr<Node> index );	
 	TreePtr<Node> OnCompound( list<TreePtr<Node>> statements );	
 	TreePtr<Node> OnArrayLiteral( Item elements );	
+	TreePtr<Node> OnLabel( TreePtr<Node> identifier, any loc );	
 	
 	TreePtr<Node> OnNormalTerminalKeyword( string keyword, any keyword_loc );
 	TreePtr<Node> OnSpaceSepStmtKeyword( string keyword, any keyword_loc, TreePtr<Node> operand, any operand_loc );

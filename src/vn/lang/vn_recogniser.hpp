@@ -69,12 +69,12 @@ public:
 		pattern( pattern_ )	
 	{
 		ASSERT( !name.empty() );
-		ASSERT( pattern );
+		// Pattern can be NULL for eg singular wildcard
 	}
 
 	string GetTrace() const
 	{
-		return ToASCII(name) + "⪮" + pattern->GetTrace();
+		return ToASCII(name) + "⪮" + Trace(pattern);
 	}
 	
 private:

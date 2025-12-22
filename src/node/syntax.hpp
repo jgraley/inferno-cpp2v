@@ -21,8 +21,8 @@ public:
 		BOOT = 0,
 		PROGRAM,
 		VN_SEP_SCRIPTY, // Separated by ⨟ (in embedded engine renders)
-		VN_SEP_ITEMS, // Separated by ⚬ (in StandardAgent renders, which always have ())
-		
+		VN_SEP_ITEMS, // Separated by ⚬ (in StandardAgent renders, which always have ())		
+		VN_DESIGNATE, // defining names using ⪮
 		
 		// ----- Complete self-sufficient statements and declarations. There is a precedence
 		// scheme, booted using {}, to disambiguate if/else.
@@ -62,7 +62,6 @@ public:
 		COMMA_SEP, // Use this for comma-separated lists to force parens for COMMA_OP, including VN
 		COLON_SEP, // Use for map arguments
 
-		VN_DESIGNATE, // defining names using ⪮
 		VN_DISJUNCTION,
 		VN_CONJUNCTION,
 

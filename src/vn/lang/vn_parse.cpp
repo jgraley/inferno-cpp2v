@@ -133,9 +133,8 @@ TreePtr<Node> VNParse::OnEmbeddedCommands( list<shared_ptr<Command>> commands )
 	TRACE("Decaying embedded commands: ")(commands)("\n");
 	for( shared_ptr<Command> c : commands )
 	{
-		node = c->DecayToPattern(node, this); 
+		node = c->DecayToPattern(node, this); // node can be NULL for singular wildcard
 		// TODO could generalise to things that can Execute from within SCREngine
-		ASSERT( node )("Command ")(c)(" could not decay with sub-pattern ")(node);
 	}
 	return node;
 }
@@ -363,6 +362,14 @@ TreePtr<Node> VNParse::OnArrayLiteral( Item elements )
 }
 
 
+TreePtr<Node> VNParse::OnLabel( TreePtr<Node> identifier, any loc )
+{
+	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::Label>>();
+	node->identifier = identifier;
+	return node;
+}
+
+
 TreePtr<Node> VNParse::OnNormalTerminalKeyword( string keyword, any keyword_loc )
 {
 	if( keyword=="this" )
@@ -378,6 +385,16 @@ TreePtr<Node> VNParse::OnSpaceSepStmtKeyword( string keyword, any keyword_loc, T
 	{
 		auto ret = MakeTreeNode<StandardAgentWrapper<CPPTree::Return>>();
 		ret->return_value = operand;
+		return ret;
+	}
+	else if( keyword=="goto" )
+	{
+		auto ret = MakeTreeNode<StandardAgentWrapper<CPPTree::Goto>>();
+		if( auto der = TreePtr<CPPTree::Dereference>::DynamicCast(operand) )
+			ret->destination = der->operands.front();
+		else
+			ret->destination = operand;
+			
 		return ret;
 	}
 	
