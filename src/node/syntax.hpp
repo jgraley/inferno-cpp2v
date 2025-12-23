@@ -80,8 +80,8 @@ public:
 		PREFIX, // C++ and VN: all prefix 
 		POSTFIX, // C++: all postfix including sub clauses
 		SPACE_SEP_TYPE, // eg unsigned long. Interestingly, the spaces take precedence
-		PRIMITIVE_EXPR, // one-token literal eg 12, 12.34, "foo"
-		PRIMITIVE_TYPE, // one-token type eg void, bool
+		PRIMARY_EXPR, // one-token literal eg 12, 12.34, "foo"
+		PRIMARY_TYPE, // one-token type eg void, bool
 		BRACKETED, // (), {} from the outside		
 		TOP_EXPR, // Highest expression precedence 
 		

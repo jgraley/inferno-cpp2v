@@ -297,7 +297,7 @@ string SpecificString::GetRenderTerminal( Production ) const
 
 Syntax::Production SpecificString::GetMyProductionTerminal() const
 { 
-	return Production::PRIMITIVE_EXPR; 
+	return Production::PRIMARY_EXPR; 
 }
 
 //////////////////////////// SpecificInteger ///////////////////////////////
@@ -400,7 +400,7 @@ string SpecificInteger::GetRenderTerminal( Production ) const
 
 Syntax::Production SpecificInteger::GetMyProductionTerminal() const
 { 
-	return Production::PRIMITIVE_EXPR; 
+	return Production::PRIMARY_EXPR; 
 }
 
 //////////////////////////// SpecificFloat ///////////////////////////////
@@ -461,7 +461,7 @@ string SpecificFloat::GetRenderTerminal( Production ) const
 
 Syntax::Production SpecificFloat::GetMyProductionTerminal() const
 { 
-	return Production::PRIMITIVE_EXPR; 
+	return Production::PRIMARY_EXPR; 
 }
 
 //////////////////////////// AccessSpec //////////////////////////////
@@ -539,14 +539,14 @@ Syntax::Production Indirection::GetOperandInDeclaratorProduction() const
 
 Syntax::Production Void::GetMyProductionTerminal() const
 { 
-	return Production::PRIMITIVE_TYPE; // eg auto a = new void;
+	return Production::PRIMARY_TYPE; // eg auto a = new void;
 }
 
 //////////////////////////// Boolean ///////////////////////////////
 
 Syntax::Production Boolean::GetMyProductionTerminal() const
 { 
-	return Production::PRIMITIVE_TYPE; // eg auto a = new bool;
+	return Production::PRIMARY_TYPE; // eg auto a = new bool;
 }
 
 //////////////////////////// Numeric ///////////////////////////////
@@ -656,14 +656,14 @@ TreePtr<AccessSpec> Class::GetInitialAccess() const
 
 Syntax::Production True::GetMyProductionTerminal() const
 { 
-	return Production::PRIMITIVE_EXPR; 
+	return Production::PRIMARY_EXPR; 
 }
 
 //////////////////////////// False ///////////////////////////////
 
 Syntax::Production False::GetMyProductionTerminal() const
 { 
-	return Production::PRIMITIVE_EXPR; 
+	return Production::PRIMARY_EXPR; 
 }
 
 //////////////////////////// Operators from operator_data.inc ///////////////////////////////
@@ -778,7 +778,7 @@ string ArrayLiteral::GetRender( VN::RendererInterface *renderer, Production, Pol
 
 Syntax::Production This::GetMyProductionTerminal() const
 { 
-	return Production::PRIMITIVE_EXPR; 
+	return Production::PRIMARY_EXPR; 
 }
 
 string This::GetRenderTerminal( Production ) const
@@ -797,9 +797,9 @@ Syntax::Production New::GetMyProductionTerminal() const
 string New::GetRender( VN::RendererInterface *renderer, Production, Policy )
 {
 	return string (DynamicTreePtrCast<Global>(global) ? "::" : "") +
-		   "new" + renderer->DoRender( placement_argumentation, Syntax::Production::PRIMITIVE_EXPR ) +
+		   "new" + renderer->DoRender( placement_argumentation, Syntax::Production::PRIMARY_EXPR ) +
 		   renderer->DoRender( type, Syntax::Production::TYPE_IN_NEW ) +
-		   renderer->DoRender( constructor_argumentation, Syntax::Production::PRIMITIVE_EXPR );
+		   renderer->DoRender( constructor_argumentation, Syntax::Production::PRIMARY_EXPR );
 }
 
 //////////////////////////// Delete ///////////////////////////////
@@ -831,7 +831,7 @@ string Lookup::GetRender( VN::RendererInterface *renderer, Production , Policy  
 {
 	return renderer->DoRender(object, Production::POSTFIX) +
 		   "." +
-		   renderer->DoRender(member, Production::PRIMITIVE_EXPR);
+		   renderer->DoRender(member, Production::PRIMARY_EXPR);
 }
 
 //////////////////////////// Cast ///////////////////////////////
@@ -876,7 +876,7 @@ string Call::GetRender( VN::RendererInterface *renderer, Production, Policy poli
 	else
 		s_callee = renderer->DoRender( callee, Syntax::Production::POSTFIX );
 			
-	string s_args = renderer->DoRender( argumentation, Syntax::Production::PRIMITIVE_EXPR );
+	string s_args = renderer->DoRender( argumentation, Syntax::Production::PRIMARY_EXPR );
 	
 	return s_callee + s_args;
 }

@@ -57,7 +57,7 @@
 }
 
 %parse-param { YY::VNLangScanner& lexer }
-%parse-param { VN::VNParse *vn }
+%parse-param { VN::VNLangActions *vn }
 %parse-param { VN::VNLangRecogniser *recogniser }
 
 %define api.token.prefix {TOK_}
@@ -135,11 +135,11 @@
 	<YY::TokenMetadata> NORM_TERM_KEYWORD		_("terminal keyword")
 	<YY::TokenMetadata> SPACE_SEP_STMT_KEYWORD 	_("space-separated statement keyword")
 	
-%type <TreePtr<Node>> 				normal norm_unit norm_postfix norm_prefix norm_relational norm_disjunction norm_conjunction  
+%type <TreePtr<Node>> 				normal norm_primary norm_postfix norm_prefix norm_relational norm_disjunction norm_conjunction  
 %type <TreePtr<Node>> 				norm_assignment norm_equality norm_add_etc norm_logical_or norm_logical_and 
 %type <TreePtr<Node>> 				norm_mul_etc norm_shift norm_bitwise_and norm_bitwise_or norm_bitwise_xor  
 %type <TreePtr<Node>> 				norm_paren norm_comma_op norm_no_comma_op norm_expression
-%type <TreePtr<Node>> 				type type_unit type_prefix type_disjunction type_conjunction type_paren
+%type <TreePtr<Node>> 				type type_primary type_prefix type_disjunction type_conjunction type_paren
 %type <TreePtr<Node>> 				unified_no_comma_op unified unified_prefix
 %type <TreePtr<Node>> 				bare_statement
 %type <TreePtr<Node>> 				norm_id_value
@@ -224,10 +224,10 @@ type_prefix : type_paren
 			| 								       NEGATION type_prefix	{ $$ = vn->OnNegation($2); }
 			|   PRERESTRICT type_node_name_part CLOSE_VN unified_prefix	{ $$ = vn->OnRestrict($2, @2, $4, @4); }
 
-type_paren  : type_unit
+type_paren  : type_primary
 			| '(' type ')'									{ $$ = $2; }	
 			                                        
-type_unit	: BUILT_IN type_node_name_part close_itemisation								{ $$ = vn->OnBuiltIn($2, @2, $3); }
+type_primary: BUILT_IN type_node_name_part close_itemisation								{ $$ = vn->OnBuiltIn($2, @2, $3); }
 			| DESIGNATED_TYPE     									  				 		{ $$ = $1.as_designated; }		
    			| SPECIFIC_ID type_id_discrim_part VN_SEP STRING_LITERAL CLOSE_VN				{ $$ = vn->OnSpecificId($2, @2, $4, @4); }
 			| SPECIFIC_ID type_id_discrim_part VN_SEP CLOSE_VN								{ $$ = vn->OnSpecificId($2, @2, wstring(), @4); }
@@ -336,12 +336,12 @@ norm_postfix: norm_paren
 			| norm_postfix OPEN_MAP_CALL CLOSE_MAP_CALL				{ $$ = vn->OnMapArgsCall($1, list<TreePtr<Node>>()); }
 			| norm_postfix '(' arguments ')'		 				{ $$ = vn->OnSeqArgsCall($1, $3); }
 			| norm_postfix '(' ')'	 								{ $$ = vn->OnSeqArgsCall($1, list<TreePtr<Node>>()); }
-			| norm_postfix '.' norm_unit							{ $$ = vn->OnLookup($1, $3, @3); }
+			| norm_postfix '.' norm_primary							{ $$ = vn->OnLookup($1, $3, @3); }
 		
-norm_paren	: norm_unit
+norm_paren	: norm_primary
 			| '(' commands ')'                          		{ $$ = vn->OnEmbeddedCommands($2); }
 
-norm_unit	: BUILT_IN node_name_part close_itemisation			{ $$ = vn->OnBuiltIn($2, @2, $3); }
+norm_primary: BUILT_IN node_name_part close_itemisation			{ $$ = vn->OnBuiltIn($2, @2, $3); }
 			| STAR												{ $$ = vn->OnStar(nullptr); }
 			| STAR OPEN_VN normal CLOSE_VN						{ $$ = vn->OnStar($3); }
 			| INTEGRAL_LITERAL					      			{ $$ = vn->OnIntegralLiteral($1, @1); }

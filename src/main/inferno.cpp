@@ -683,7 +683,7 @@ int main( int argc, char *argv[] )
     else if( !ReadArgs::vn_paths.empty() )
     {
 		// Kept across all scripts as overall state
-		VNScriptRunner script_engine(&sequence);
+		VNScript script_engine(&sequence);
 		for( string path : ReadArgs::vn_paths )
 			script_engine.ProcessVNPath(path);
 	}

@@ -118,7 +118,7 @@ Agent::ReplacePatchPtr StarAgent::GenReplaceLayoutImpl( const ReplaceKit &kit,
 
 Syntax::Production StarAgent::GetAgentProduction() const
 {
-	return Syntax::Production::PRIMITIVE_EXPR; 
+	return Syntax::Production::PRIMARY_EXPR; 
 }
 
 

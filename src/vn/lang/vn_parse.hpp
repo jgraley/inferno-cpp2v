@@ -45,14 +45,12 @@ struct Itemisation
 class Command;
 class VNLangRecogniser;
 
-class VNParse	
+class VNLangActions	
 {
 public:
-	VNParse();
-	~VNParse();
-	
-	Command::List DoParse(string filepath);	 
-	
+	VNLangActions();
+	~VNLangActions();
+		
 	void OnError();
 	void OnVNScript( list<shared_ptr<Command>> commands_ );
 	shared_ptr<Command> OnCommand( shared_ptr<Command> command );
@@ -98,14 +96,10 @@ public:
 	TreePtr<Node> OnStringize( TreePtr<Node> source );
 	
 	TreePtr<Node> CreateIntegralLiteral( bool uns, bool lng, bool lng2, uint64_t val, any loc );
-	VNLangRecogniser &GetShim();
 	
 private: 
-	unique_ptr<VNLangRecogniser> recogniser;
-	unique_ptr<YY::VNLangScanner> scanner;
-	unique_ptr<YY::VNLangParser> parser;
-	unique_ptr<AvailableNodeData> node_names;
-	
+	unique_ptr<AvailableNodeData> node_names;	
+public: // TODO provide a getter	
 	Command::List top_level_commands;
 };
 	

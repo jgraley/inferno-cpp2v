@@ -31,7 +31,7 @@ class AvailableNodeData;
 
 namespace VN 
 {
-class VNParse;	
+class VNLangActions;	
 class Gnomon : public Traceable
 {
 public:

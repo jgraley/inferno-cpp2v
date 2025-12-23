@@ -31,46 +31,24 @@ using namespace reflex;
 static NodeEnum GetNodeEnum( list<string> typ, any loc );
 
 
-VNParse::VNParse() :
-	recogniser( make_unique<VNLangRecogniser>() ),
-	scanner( make_unique<YY::VNLangScanner>(recogniser.get(), reflex::Input(), std::cerr) ),
-	parser( make_unique<YY::VNLangParser>(*scanner, this, recogniser.get()) ),
+VNLangActions::VNLangActions() :
 	node_names( make_unique<AvailableNodeData>() )
 {
 }
 
-VNParse::~VNParse()
+VNLangActions::~VNLangActions()
 {
 	// Keep me: compiler can see complete VNLangScanner and VNLangParser here
 }
 
 
-Command::List VNParse::DoParse(string filepath)
-{
-    FILE *file = fopen(filepath.c_str(), "r");
-
-    ASSERT(file != NULL)("Cannot open VN file: ")(filepath);
-
-    scanner->in(file);
-    scanner->filename = filepath;    
-    //parser->set_debug_level(1);
-    
-    top_level_commands.clear();
-    int pr = parser->parse();    
-    if( pr != EXIT_SUCCESS ) 
-		exit(pr); // An error was already reported so an assert fail here looks like a knock-on error i.e. a bug
-    
-    return top_level_commands;
-}
-
-
-void VNParse::OnVNScript( Command::List top_level_commands_ )
+void VNLangActions::OnVNScript( Command::List top_level_commands_ )
 {
 	top_level_commands = top_level_commands_;
 }
 
 
-TreePtr<Node> VNParse::OnStar( TreePtr<Node> restriction )
+TreePtr<Node> VNLangActions::OnStar( TreePtr<Node> restriction )
 {
 	auto node = MakeTreeNode<StarAgent>();
 	node->restriction = restriction;
@@ -78,7 +56,7 @@ TreePtr<Node> VNParse::OnStar( TreePtr<Node> restriction )
 }
 
 
-TreePtr<Node> VNParse::OnBuildSize( TreePtr<Node> container )
+TreePtr<Node> VNLangActions::OnBuildSize( TreePtr<Node> container )
 {
 	auto node = MakeTreeNode<BuildContainerSizeAgent>();
 	node->container = container;
@@ -86,7 +64,7 @@ TreePtr<Node> VNParse::OnBuildSize( TreePtr<Node> container )
 }
 
 
-TreePtr<Node> VNParse::OnStuff( TreePtr<Node> terminus, TreePtr<Node> recurse_restriction, Limit limit )
+TreePtr<Node> VNLangActions::OnStuff( TreePtr<Node> terminus, TreePtr<Node> recurse_restriction, Limit limit )
 {
 	string note = "\nNote: Only 《=1... as a depth condition is supported at present (TODO).";
 	if( limit.cond.empty() )
@@ -118,7 +96,7 @@ TreePtr<Node> VNParse::OnStuff( TreePtr<Node> terminus, TreePtr<Node> recurse_re
 }
 
 
-TreePtr<Node> VNParse::OnDelta( TreePtr<Node> through, TreePtr<Node> overlay )
+TreePtr<Node> VNLangActions::OnDelta( TreePtr<Node> through, TreePtr<Node> overlay )
 {
 	auto delta = MakeTreeNode<DeltaAgent>();
 	delta->through = through;
@@ -127,7 +105,7 @@ TreePtr<Node> VNParse::OnDelta( TreePtr<Node> through, TreePtr<Node> overlay )
 }
 
 
-TreePtr<Node> VNParse::OnEmbeddedCommands( list<shared_ptr<Command>> commands )
+TreePtr<Node> VNLangActions::OnEmbeddedCommands( list<shared_ptr<Command>> commands )
 {
 	TreePtr<Node> node;
 	TRACE("Decaying embedded commands: ")(commands)("\n");
@@ -161,7 +139,7 @@ static TreePtr<Node> MakeStandardAgent(NodeEnum ne)
 }
 
 
-TreePtr<Node> VNParse::OnBuiltIn( const AvailableNodeData::Block *block, any node_name_loc, Itemisation src_itemisation )
+TreePtr<Node> VNLangActions::OnBuiltIn( const AvailableNodeData::Block *block, any node_name_loc, Itemisation src_itemisation )
 {
 	auto leaf_block = dynamic_cast<const AvailableNodeData::LeafBlock *>(block);
 	NodeEnum ne = leaf_block->node_enum.value();
@@ -217,7 +195,7 @@ TreePtr<Node> VNParse::OnBuiltIn( const AvailableNodeData::Block *block, any nod
 }
 
 
-TreePtr<Node> VNParse::OnRestrict( const AvailableNodeData::Block *block, any node_name_loc, TreePtr<Node> target, any target_loc )
+TreePtr<Node> VNLangActions::OnRestrict( const AvailableNodeData::Block *block, any node_name_loc, TreePtr<Node> target, any target_loc )
 {
 	auto leaf_block = dynamic_cast<const AvailableNodeData::LeafBlock *>(block);
 	NodeEnum ne = leaf_block->node_enum.value();
@@ -237,7 +215,7 @@ TreePtr<Node> VNParse::OnRestrict( const AvailableNodeData::Block *block, any no
 }
 
 
-TreePtr<Node> VNParse::OnPrefixOperator( string tok, TreePtr<Node> operand )
+TreePtr<Node> VNLangActions::OnPrefixOperator( string tok, TreePtr<Node> operand )
 {
 #define PREFIX(TOK, TEXT, NAME, BASE, CAT, PROD, ASSOC) \
     if( tok==TEXT ) \
@@ -253,7 +231,7 @@ TreePtr<Node> VNParse::OnPrefixOperator( string tok, TreePtr<Node> operand )
 }
 
 
-TreePtr<Node> VNParse::OnPostfixOperator( string tok, TreePtr<Node> operand )
+TreePtr<Node> VNLangActions::OnPostfixOperator( string tok, TreePtr<Node> operand )
 {
 #define POSTFIX(TOK, TEXT, NAME, BASE, CAT, PROD, ASSOC) \
     if( tok==TEXT ) \
@@ -269,7 +247,7 @@ TreePtr<Node> VNParse::OnPostfixOperator( string tok, TreePtr<Node> operand )
 }
 
 
-TreePtr<Node> VNParse::OnInfixOperator( string tok, TreePtr<Node> left, TreePtr<Node> right )
+TreePtr<Node> VNLangActions::OnInfixOperator( string tok, TreePtr<Node> left, TreePtr<Node> right )
 {
 #define INFIX(TOK, TEXT, NAME, BASE, CAT, PROD, ASSOC) \
     if( tok==TEXT ) \
@@ -286,7 +264,7 @@ TreePtr<Node> VNParse::OnInfixOperator( string tok, TreePtr<Node> left, TreePtr<
 }
 
 
-TreePtr<Node> VNParse::OnIntegralLiteral( string text, any loc )
+TreePtr<Node> VNLangActions::OnIntegralLiteral( string text, any loc )
 {
 	// Normalise to upper case
     transform(text.begin(), text.end(), text.begin(), ::toupper);
@@ -299,14 +277,14 @@ TreePtr<Node> VNParse::OnIntegralLiteral( string text, any loc )
 }
 
 
-TreePtr<Node> VNParse::OnStringLiteral( wstring wvalue )
+TreePtr<Node> VNLangActions::OnStringLiteral( wstring wvalue )
 {
 	string value = Unquote(ToASCII(wvalue));
 	return MakeTreeNode<StandardAgentWrapper<CPPTree::SpecificString>>(value);
 }
 
 
-TreePtr<Node> VNParse::OnBoolLiteral( bool value )
+TreePtr<Node> VNLangActions::OnBoolLiteral( bool value )
 {
 	if( value )
 		return MakeTreeNode<StandardAgentWrapper<CPPTree::True>>();
@@ -315,7 +293,7 @@ TreePtr<Node> VNParse::OnBoolLiteral( bool value )
 }
 
 
-TreePtr<Node> VNParse::OnCast( TreePtr<Node> type, any type_loc, TreePtr<Node> operand, any operand_loc )
+TreePtr<Node> VNLangActions::OnCast( TreePtr<Node> type, any type_loc, TreePtr<Node> operand, any operand_loc )
 {
 	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::Cast>>();
 	node->operand = operand;	
@@ -324,7 +302,7 @@ TreePtr<Node> VNParse::OnCast( TreePtr<Node> type, any type_loc, TreePtr<Node> o
 }
 
 
-TreePtr<Node> VNParse::OnConditionalOperator( TreePtr<Node> condition, TreePtr<Node> expr_then, TreePtr<Node> expr_else )
+TreePtr<Node> VNLangActions::OnConditionalOperator( TreePtr<Node> condition, TreePtr<Node> expr_then, TreePtr<Node> expr_else )
 {
 	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::ConditionalOperator>>();
 	node->condition = condition;	
@@ -334,7 +312,7 @@ TreePtr<Node> VNParse::OnConditionalOperator( TreePtr<Node> condition, TreePtr<N
 }
 	
 
-TreePtr<Node> VNParse::OnSubscript( TreePtr<Node> destination, TreePtr<Node> index )
+TreePtr<Node> VNLangActions::OnSubscript( TreePtr<Node> destination, TreePtr<Node> index )
 {
 	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::Subscript>>();
 	node->destination = destination;	
@@ -343,7 +321,7 @@ TreePtr<Node> VNParse::OnSubscript( TreePtr<Node> destination, TreePtr<Node> ind
 }
 	
 
-TreePtr<Node> VNParse::OnCompound( list<TreePtr<Node>> statements )
+TreePtr<Node> VNLangActions::OnCompound( list<TreePtr<Node>> statements )
 {
 	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::Compound>>();
 	for( TreePtr<Node> statement : statements )
@@ -352,7 +330,7 @@ TreePtr<Node> VNParse::OnCompound( list<TreePtr<Node>> statements )
 }
 
 
-TreePtr<Node> VNParse::OnArrayLiteral( Item elements )
+TreePtr<Node> VNLangActions::OnArrayLiteral( Item elements )
 {
 	// Fill out the array literal
 	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::ArrayLiteral>>();
@@ -362,7 +340,7 @@ TreePtr<Node> VNParse::OnArrayLiteral( Item elements )
 }
 
 
-TreePtr<Node> VNParse::OnLabel( TreePtr<Node> identifier, any loc )
+TreePtr<Node> VNLangActions::OnLabel( TreePtr<Node> identifier, any loc )
 {
 	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::Label>>();
 	node->identifier = identifier;
@@ -370,7 +348,7 @@ TreePtr<Node> VNParse::OnLabel( TreePtr<Node> identifier, any loc )
 }
 
 
-TreePtr<Node> VNParse::OnNormalTerminalKeyword( string keyword, any keyword_loc )
+TreePtr<Node> VNLangActions::OnNormalTerminalKeyword( string keyword, any keyword_loc )
 {
 	if( keyword=="this" )
 		return MakeTreeNode<StandardAgentWrapper<CPPTree::This>>();
@@ -379,7 +357,7 @@ TreePtr<Node> VNParse::OnNormalTerminalKeyword( string keyword, any keyword_loc 
 }
 
 
-TreePtr<Node> VNParse::OnSpaceSepStmtKeyword( string keyword, any keyword_loc, TreePtr<Node> operand, any operand_loc )
+TreePtr<Node> VNLangActions::OnSpaceSepStmtKeyword( string keyword, any keyword_loc, TreePtr<Node> operand, any operand_loc )
 {
 	if( keyword=="return" )
 	{
@@ -402,7 +380,7 @@ TreePtr<Node> VNParse::OnSpaceSepStmtKeyword( string keyword, any keyword_loc, T
 }
 
 
-TreePtr<Node> VNParse::OnIdValuePair( TreePtr<Node> key, any id_loc, TreePtr<Node> value )
+TreePtr<Node> VNLangActions::OnIdValuePair( TreePtr<Node> key, any id_loc, TreePtr<Node> value )
 {
 	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::IdValuePair>>();
 	
@@ -412,7 +390,7 @@ TreePtr<Node> VNParse::OnIdValuePair( TreePtr<Node> key, any id_loc, TreePtr<Nod
 }	
 
 
-TreePtr<Node> VNParse::OnMapArgsCall( TreePtr<Node> callee, list<TreePtr<Node>> arguments )
+TreePtr<Node> VNLangActions::OnMapArgsCall( TreePtr<Node> callee, list<TreePtr<Node>> arguments )
 {
 	auto call = MakeTreeNode<StandardAgentWrapper<CPPTree::Call>>();
 	auto args = MakeTreeNode<StandardAgentWrapper<CPPTree::MapArgumentation>>();
@@ -424,7 +402,7 @@ TreePtr<Node> VNParse::OnMapArgsCall( TreePtr<Node> callee, list<TreePtr<Node>> 
 }	
 
 
-TreePtr<Node> VNParse::OnSeqArgsCall( TreePtr<Node> callee, list<TreePtr<Node>> arguments )
+TreePtr<Node> VNLangActions::OnSeqArgsCall( TreePtr<Node> callee, list<TreePtr<Node>> arguments )
 {
 	auto call = MakeTreeNode<StandardAgentWrapper<CPPTree::Call>>();
 	auto args = MakeTreeNode<StandardAgentWrapper<CPPTree::SeqArgumentation>>();
@@ -436,7 +414,7 @@ TreePtr<Node> VNParse::OnSeqArgsCall( TreePtr<Node> callee, list<TreePtr<Node>> 
 }	
 
 
-TreePtr<Node> VNParse::OnLookup( TreePtr<Node> object, TreePtr<Node> member, any member_loc )
+TreePtr<Node> VNLangActions::OnLookup( TreePtr<Node> object, TreePtr<Node> member, any member_loc )
 {
 	(void)member_loc;
 	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::Lookup>>();
@@ -447,7 +425,7 @@ TreePtr<Node> VNParse::OnLookup( TreePtr<Node> object, TreePtr<Node> member, any
 
 
 
-TreePtr<Node> VNParse::OnSpecificId( const AvailableNodeData::Block *block, any id_disc_loc, wstring wname, any name_loc )
+TreePtr<Node> VNLangActions::OnSpecificId( const AvailableNodeData::Block *block, any id_disc_loc, wstring wname, any name_loc )
 {
 	(void)name_loc; // TODO perhaps IdentifierByNameAgent can validate this?
 
@@ -469,7 +447,7 @@ TreePtr<Node> VNParse::OnSpecificId( const AvailableNodeData::Block *block, any 
 }
 
 
-TreePtr<Node> VNParse::OnIdByName( const AvailableNodeData::Block *block, any id_disc_loc, wstring wname, any name_loc )
+TreePtr<Node> VNLangActions::OnIdByName( const AvailableNodeData::Block *block, any id_disc_loc, wstring wname, any name_loc )
 {
 	(void)name_loc; // TODO perhaps IdentifierByNameAgent can validate this?
 	auto leaf_block = dynamic_cast<const AvailableNodeData::LeafBlock *>(block);
@@ -490,7 +468,7 @@ TreePtr<Node> VNParse::OnIdByName( const AvailableNodeData::Block *block, any id
 }
 
 
-TreePtr<Node> VNParse::OnBuildId( const AvailableNodeData::Block *block, any id_disc_loc, wstring wformat, any name_loc, Item sources )
+TreePtr<Node> VNLangActions::OnBuildId( const AvailableNodeData::Block *block, any id_disc_loc, wstring wformat, any name_loc, Item sources )
 {
 	(void)name_loc; // TODO perhaps BuildIdentifierAgent can validate this?
 
@@ -519,7 +497,7 @@ TreePtr<Node> VNParse::OnBuildId( const AvailableNodeData::Block *block, any id_
 }
 
 
-TreePtr<Node> VNParse::OnTransform( string kind, any kind_loc, TreePtr<Node> pattern, any pattern_loc )
+TreePtr<Node> VNLangActions::OnTransform( string kind, any kind_loc, TreePtr<Node> pattern, any pattern_loc )
 {
 	TreePtr<TransformOfAgent> to_agent;
 	if( kind == "TypeOf" )
@@ -539,7 +517,7 @@ TreePtr<Node> VNParse::OnTransform( string kind, any kind_loc, TreePtr<Node> pat
 }
 
 	
-TreePtr<Node> VNParse::OnNegation( TreePtr<Node> operand )
+TreePtr<Node> VNLangActions::OnNegation( TreePtr<Node> operand )
 {
 	auto node = MakeTreeNode<NegationAgent>();
 	node->negand = operand;
@@ -547,7 +525,7 @@ TreePtr<Node> VNParse::OnNegation( TreePtr<Node> operand )
 }
 
 
-TreePtr<Node> VNParse::OnConjunction( TreePtr<Node> left, TreePtr<Node> right )
+TreePtr<Node> VNLangActions::OnConjunction( TreePtr<Node> left, TreePtr<Node> right )
 {
 	auto node = MakeTreeNode<ConjunctionAgent>();
 	node->conjuncts = (left, right);
@@ -555,7 +533,7 @@ TreePtr<Node> VNParse::OnConjunction( TreePtr<Node> left, TreePtr<Node> right )
 }
 
 
-TreePtr<Node> VNParse::OnDisjunction( TreePtr<Node> left, TreePtr<Node> right )
+TreePtr<Node> VNLangActions::OnDisjunction( TreePtr<Node> left, TreePtr<Node> right )
 {
 	auto node = MakeTreeNode<DisjunctionAgent>();
 	node->disjuncts = (left, right);
@@ -563,7 +541,7 @@ TreePtr<Node> VNParse::OnDisjunction( TreePtr<Node> left, TreePtr<Node> right )
 }
 	
 
-TreePtr<Node> VNParse::OnGrass( TreePtr<Node> through )
+TreePtr<Node> VNLangActions::OnGrass( TreePtr<Node> through )
 {
 	auto node = MakeTreeNode<GreenGrassAgent>();
 	node->through = through;
@@ -571,7 +549,7 @@ TreePtr<Node> VNParse::OnGrass( TreePtr<Node> through )
 }
 
 
-TreePtr<Node> VNParse::OnPointerIs( TreePtr<Node> pointer )
+TreePtr<Node> VNLangActions::OnPointerIs( TreePtr<Node> pointer )
 {
 	auto node = MakeTreeNode<PointerIsAgent>();
 	node->pointer = pointer;
@@ -579,7 +557,7 @@ TreePtr<Node> VNParse::OnPointerIs( TreePtr<Node> pointer )
 }
 
 
-TreePtr<Node> VNParse::OnStringize( TreePtr<Node> source )
+TreePtr<Node> VNLangActions::OnStringize( TreePtr<Node> source )
 {
 	auto node = MakeTreeNode<StringizeAgent>();
 	node->source = source;
@@ -587,7 +565,7 @@ TreePtr<Node> VNParse::OnStringize( TreePtr<Node> source )
 }
 
 
-TreePtr<Node> VNParse::CreateIntegralLiteral( bool uns, bool lng, bool lng2, uint64_t val, any loc )
+TreePtr<Node> VNLangActions::CreateIntegralLiteral( bool uns, bool lng, bool lng2, uint64_t val, any loc )
 {
 	int bits;
 	if( lng )
@@ -620,35 +598,34 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 }
 
 
-VNLangRecogniser &VNParse::GetShim()
-{
-	return *recogniser;
-}
-
 // Consider c-style scoping of designations (eg for macros?)
 
 // Parsing 016-RaiseSCDeltaCount.vn reveals a mis-render - the identifier should be rendered 
 // with some kind of "real identifier node" syntax (and its name hint)
 
-// Namespaces: CPPTree should be assumed as a default where not specified. More than one specifier is still TBD
-// Common stuff for qualified types with :: including ability to throw on eg A::B::C (but could support later)
-
 // Renamings: 
-// VNScriptRunner -> VNScript
-// VNParse -> VNActions and move DoParse() into VNScript.
-// Ensure available_node_info, recogniser, and this file have the right filenames
+// Ensure this file has the right filename
 
-// Productions using 【 】: AFTER adding C mixture, try using () and making things look like printf etc
+// Productions using 【 】: 
+// - I think it looks better to go eg ⯁CPPTree::TypeDeclaration【sc_module】 and similar for that whole family of productions
+// - Default away the CPPTree:: (it's sugar, but the bulkiness of these is affecting my decisions!)
+// - AFTER adding C mixture, try using () and making things look like printf etc
 
-// When designating a ⧇ or speciifc identifier node, why not use the given name as the name of the designation?
-
-// Parser check broken with -qX+ 
+// Try c-style cast again, this time at a strictly lower precedence than the other prefix ops, per https://alx71hub.github.io/hcb/#statement
 
 // Calls/Constructors plan:
 // - Factor out map/seq args DONE
 // - Separate node for Construct, with common intermediate with call ("Invoke"?) 
 // It will always be explicit when we want a construct that has args. This includes at least MyClass my_object( arg1, arg2, ... )
 // - Try to parse in VN language
+
+// Note: comma operator can stay in: C-productions that use commas are all expressional and come in at norm_no_comma_op
+
+// Renaming of productions and nodes 
+// - Use eg https://alx71hub.github.io/hcb/#statement to rename everything in line with C++ grammar terminology. 
+// - There are other interesting things here, like assign and ?: are not merged, ?: is higher and some RValue-like cases go straight to ?:, excluding assign - reproduce in parser and renderer, don't accept what C++ doesn't!
+// - I think norm_/normal can become expr_
+// - Labels will need their own "stuff" I think, otherwise it will be too hard to disambiguate with things like : and && hanging around
 
 // Tix:
 // Lose StandardAgentWrapper #867

@@ -16,11 +16,11 @@ class AvailableNodeData;
 
 namespace VN 
 {
-class VNParse;
+class VNLangActions;
 class VNStep;
 struct ScriptKit
 {
-	class VNScriptRunner *vn_script;
+	class VNScript *vn_script;
 	vector< shared_ptr<VN::VNStep> > *step_sequence;
 	string script_filepath;
 };
@@ -33,7 +33,7 @@ public:
     ~Command();
 
 	// Called on a sequence of commands when usage dictates it should become a sub-pattern 
-	virtual TreePtr<Node> DecayToPattern( TreePtr<Node> node, VNParse *vn ); // return NULL if cannot decay 
+	virtual TreePtr<Node> DecayToPattern( TreePtr<Node> node, VNLangActions *vn ); // return NULL if cannot decay 
 	
 	// Called on a sequence of commands when usage dictates it should be part of a script
 	virtual void Execute( const ScriptKit &kit ) const;
@@ -47,7 +47,7 @@ class EngineCommand : public Command
 {
 public:	
 	EngineCommand( TreePtr<Node> pattern_, any loc );
-	TreePtr<Node> DecayToPattern( TreePtr<Node> node, VNParse *vn ) final; 
+	TreePtr<Node> DecayToPattern( TreePtr<Node> node, VNLangActions *vn ) final; 
 	void Execute( const ScriptKit &kit ) const final;
 	
 	TreePtr<Node> GetPattern() const;
@@ -63,7 +63,7 @@ class PatternCommand : public Command
 {
 public:	
 	PatternCommand( TreePtr<Node> pattern_, any loc );
-	TreePtr<Node> DecayToPattern( TreePtr<Node> node, VNParse *vn ) final; 
+	TreePtr<Node> DecayToPattern( TreePtr<Node> node, VNLangActions *vn ) final; 
 		
 	string GetTrace() const final;
 	
@@ -76,7 +76,7 @@ class AttributeCommand : public Command
 {
 public:	
 	AttributeCommand( any loc );
-	TreePtr<Node> DecayToPattern( TreePtr<Node> node, VNParse *vn ) final; 
+	TreePtr<Node> DecayToPattern( TreePtr<Node> node, VNLangActions *vn ) final; 
 	void Execute( const ScriptKit &kit ) const final;
 
 	string GetTrace() const final;	

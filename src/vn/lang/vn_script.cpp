@@ -13,6 +13,9 @@
 #include "vn_step.hpp"
 #include "vn_parse.hpp"
 #include "agents/embedded_scr_agent.hpp"
+#include "vn_lang.ypp.hpp"
+#include "vn_lang.lpp.hpp"
+#include "vn_lang.location.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -43,21 +46,21 @@ bool VNSoftStep::IsLoweringForRenderStep() const
 	return lowering_for_render;
 }
 
-//////////////////////////// VNScriptRunner ///////////////////////////////
+//////////////////////////// VNScript ///////////////////////////////
 
-VNScriptRunner::VNScriptRunner( vector< shared_ptr<VN::VNStep> > *sequence_ ) :
+VNScript::VNScript( vector< shared_ptr<VN::VNStep> > *sequence_ ) :
 	sequence(sequence_)
 {
 }
 
 
-void VNScriptRunner::SetLoweringForRenderStep()
+void VNScript::SetLoweringForRenderStep()
 {
 	lowering_for_render = true;
 }
 
 
-void VNScriptRunner::AddStep(const VN::ScriptKit &kit, TreePtr<Node> stem)
+void VNScript::AddStep(const VN::ScriptKit &kit, TreePtr<Node> stem)
 {
 	filesystem::path path( kit.script_filepath );
 	string basename = path.replace_extension().filename().string();
@@ -78,7 +81,7 @@ void VNScriptRunner::AddStep(const VN::ScriptKit &kit, TreePtr<Node> stem)
 }
 
 
-void VNScriptRunner::ProcessVNPath( string spath )
+void VNScript::ProcessVNPath( string spath )
 {
 	filesystem::path path(spath);
 	if( filesystem::is_directory(path) )
@@ -97,17 +100,41 @@ void VNScriptRunner::ProcessVNPath( string spath )
 }
 
 
-void VNScriptRunner::ProcessVNFile(string spath )
+void VNScript::ProcessVNFile(string spath)
 {
-	VNParse vn_parser;
 	if( !ReadArgs::trace_quiet )
 		fprintf(stderr, "Reading %s\n", spath.c_str()); 
-	VN::Command::List script = vn_parser.DoParse(spath);
+		
+	Command::List script = ParseFile(spath);
 	RunScript( spath, script );
 }
 
 
-void VNScriptRunner::RunScript( string spath, Command::List script )
+Command::List VNScript::ParseFile(string spath)
+{
+	// The flow is scanner -> recogniser <-> parser -> actions
+	VNLangActions actions;
+	VNLangRecogniser recogniser;
+	YY::VNLangScanner scanner(&recogniser, reflex::Input(), std::cerr);
+	YY::VNLangParser parser(scanner, &actions, &recogniser);
+	
+	// Set up the scanner
+    FILE *file = fopen(spath.c_str(), "r");
+    ASSERT(file != NULL)("Cannot open VN file: ")(spath);
+    scanner.in(file);
+    scanner.filename = spath;    
+    
+    // Do the parse
+    //parser->set_debug_level(1);
+    int pr = parser.parse();        
+    if( pr != EXIT_SUCCESS ) 
+		exit(pr); // An error was already reported so an assert fail here would look like a knock-on error
+    
+    return actions.top_level_commands;
+}
+
+
+void VNScript::RunScript( string spath, Command::List script )
 {
 	used_script_filepath = false; // got a new path
 	VN::ScriptKit kit{ this, sequence, spath };

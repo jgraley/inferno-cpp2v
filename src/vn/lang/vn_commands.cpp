@@ -40,7 +40,7 @@ Command::~Command()
 }
 
 
-TreePtr<Node> Command::DecayToPattern( TreePtr<Node> node, VNParse *vn )
+TreePtr<Node> Command::DecayToPattern( TreePtr<Node> node, VNLangActions *vn )
 {
 	return nullptr; // by default, I can't decay
 }
@@ -60,7 +60,7 @@ EngineCommand::EngineCommand( TreePtr<Node> stem_, any loc_ ) :
 }
 
 
-TreePtr<Node> EngineCommand::DecayToPattern( TreePtr<Node> node, VNParse *vn )
+TreePtr<Node> EngineCommand::DecayToPattern( TreePtr<Node> node, VNLangActions *vn )
 {
 	if( !node )
 		throw YY::VNLangParser::syntax_error(
@@ -101,7 +101,7 @@ PatternCommand::PatternCommand( TreePtr<Node> pattern_, any loc_ ) :
 //                                                ~~
 
 
-TreePtr<Node> PatternCommand::DecayToPattern( TreePtr<Node> node, VNParse *vn )
+TreePtr<Node> PatternCommand::DecayToPattern( TreePtr<Node> node, VNLangActions *vn )
 {
 	if( node )
 		throw YY::VNLangParser::syntax_error(
@@ -125,7 +125,7 @@ AttributeCommand::AttributeCommand( any loc_ ) :
 }
 
 
-TreePtr<Node> AttributeCommand::DecayToPattern( TreePtr<Node> node, VNParse *vn )
+TreePtr<Node> AttributeCommand::DecayToPattern( TreePtr<Node> node, VNLangActions *vn )
 {
 	throw YY::VNLangParser::syntax_error(
 	     any_cast<YY::VNLangParser::location_type>(loc), 

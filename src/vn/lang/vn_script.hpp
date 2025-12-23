@@ -17,7 +17,7 @@ class AvailableNodeData;
 
 namespace VN 
 {
-class VNParse;
+class VNLangActions;
 class VNStep;
 
 class VNSoftStep : public VNStep
@@ -35,15 +35,16 @@ private:
 
 
 
-class VNScriptRunner
+class VNScript
 {
 public:		
-	VNScriptRunner( vector< shared_ptr<VN::VNStep> > *sequence_ );
+	VNScript( vector< shared_ptr<VN::VNStep> > *sequence_ );	
 	void SetLoweringForRenderStep();
 	void AddStep(const VN::ScriptKit &kit, TreePtr<Node> stem);
 	void ProcessVNPath( string spath );
 
 private:
+	Command::List ParseFile( string spath );
 	void ProcessVNFile( string spath );
 	void RunScript( string spath, Command::List script );	
 

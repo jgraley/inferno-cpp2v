@@ -965,7 +965,7 @@ Syntax::Production StandardAgent::GetAgentProduction() const
 	// Be similar to GetAgentRender()
 	shared_ptr<const Node> node = GetPatternPtr();
 	if( dynamic_cast<const CPPTree::SpecificIdentifier *>(node.get()) )
-		return Syntax::Production::PRIMITIVE_EXPR;
+		return Syntax::Production::PRIMARY_EXPR;
 	else
 		throw Unimplemented();
 }		

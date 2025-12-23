@@ -723,7 +723,7 @@ string CppRender::RenderInitialisation( TreePtr<Initialiser> init ) try
 				}
 				else // seq args
 				{
-					return DoRender(call->argumentation, Syntax::Production::PRIMITIVE_EXPR);    
+					return DoRender(call->argumentation, Syntax::Production::PRIMARY_EXPR);    
 				}
 			}
 		}
@@ -1065,7 +1065,7 @@ string CppRender::RenderConstructorInitList( Sequence<Statement> spe ) try
 				s += DoRender( lu->object, Syntax::Production::PURE_IDENTIFIER ); // No scope resolution please
 			else
 				s += RenderNodeExplicit( lu, Syntax::Production::COMMA_SEP, default_policy );
-			s += DoRender( c->argumentation, Syntax::Production::PRIMITIVE_EXPR );
+			s += DoRender( c->argumentation, Syntax::Production::PRIMARY_EXPR );
 		}
         else 
         {
