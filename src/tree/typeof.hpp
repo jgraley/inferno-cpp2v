@@ -31,10 +31,6 @@ public:
     // If you have kit and an Expression, well done! You can call this one
     AugTreePtr<CPPTree::Type> Get( const TransKit &kit, AugTreePtr<CPPTree::Expression> o ) const;
 
-    // Is this call really a constructor call? If so return the object being
-    // constructed. Otherwise, return nullptr
-    AugTreePtr<CPPTree::Expression> TryGetConstructedExpression( const TransKit &kit, AugTreePtr<CPPTree::GoSub> gs ) const;
-
 private:    
     AugTreePtr<CPPTree::Type> GetRegularOperator( const TransKit &kit, AugTreePtr<CPPTree::Operator> op, list<AugTreePtr<CPPTree::Type>> optypes ) const;
     AugTreePtr<CPPTree::Type> GetStandard( const TransKit &kit, list<AugTreePtr<CPPTree::Type>> &optypes ) const;

@@ -462,11 +462,7 @@ string CppRender::RenderMapArgsCallAsSeqArg( TreePtr<Call> call, Syntax::Product
 
     // Render the expression that resolves to the function name unless this is
     // a constructor call in which case just the name of the thing being constructed.
-    string s;
-    if( TreePtr<Expression> base = TypeOf::instance.TryGetConstructedExpression( trans_kit, call ).GetTreePtr() )
-        s += DoRender( base, Syntax::Production::POSTFIX );
-    else
-        s += DoRender( call->callee, Syntax::Production::POSTFIX );
+    string s = DoRender( call->callee, Syntax::Production::POSTFIX );
 
 	// A map-args call isn't C++, so lower it to sequential args - requires the function type
     s += RenderMapArgs(TypeOf::instance.Get(trans_kit, call->callee).GetTreePtr(), map_args);
@@ -645,27 +641,9 @@ void CppRender::ExtractInits( Sequence<Statement> &body,
     for( TreePtr<Statement> s : body )
     {
         if( auto call = DynamicTreePtrCast< MembInitialisation >(s) ) 
-        {
 			inits.push_back(s);
-			continue;
-		}
-        else if( auto call = DynamicTreePtrCast< GoSub >(s) ) // TODO drop after changeover to Construction
-        {
-            try
-            {
-                if( TypeOf::instance.TryGetConstructedExpression( trans_kit, call ) )
-                {
-                    inits.push_back(s);
-                    continue;
-                }
-            }
-            catch( ::Mismatch &me )
-            {
-                remainder.push_back(MakeTreeNode<SpecificString>(RenderMismatchException(__func__, me)));
-                continue;
-            }
-        }
-        remainder.push_back(s);
+		else
+		    remainder.push_back(s);
     }
 }
 
@@ -716,29 +694,7 @@ string CppRender::RenderInitialisation( TreePtr<Initialiser> init ) try
 	string s;
 	if( ReadArgs::use.count("c") )
 		s += "/* RenderInitialisation(" + Trace(init) + ") */";
-	if( TreePtr<Expression> ei = DynamicTreePtrCast<Expression>( init ) )
-    {
-        // Attempt direct initialisation by providing args for a constructor call
-        try
-        {
-			if( auto call = DynamicTreePtrCast<Call>( ei ) )
-			{
-				if( auto map_args = TreePtr<MapArgumentation>::DynamicCast(call->argumentation) )
-				{
-					if( TypeOf::instance.TryGetConstructedExpression( trans_kit, call ).GetTreePtr() )   
-						return s + RenderMapArgs(TypeOf::instance.Get(trans_kit, call->callee).GetTreePtr(), map_args);
-				}
-				else // seq args
-				{
-					return s + call->argumentation->DirectRenderArgumentation(this, default_policy);    
-				}
-			}
-		}
-        catch(DeclarationOf::DeclarationNotFound &)
-        {
-        }   
-    }
-    else if( auto stmt = DynamicTreePtrCast<Statement>(init) )
+	if( auto stmt = DynamicTreePtrCast<Statement>(init) )
     {
         // Put the contents of the body into a Compound-like form even if there's only one
         // Statement there - this is because we will wrangle with them later

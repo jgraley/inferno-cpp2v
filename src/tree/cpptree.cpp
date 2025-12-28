@@ -875,20 +875,8 @@ Syntax::Production Call::GetMyProductionTerminal() const
 
 
 string Call::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
-{		
-    // Constructor case: spot by use of Lookup to empty-named method. Elide the "."
-    TreePtr<Node> cons_object;
-    if( policy.detect_and_render_constructor )
-		if( auto lu = DynamicTreePtrCast< Lookup >(callee) )
-			if( auto id = DynamicTreePtrCast< InstanceIdentifier >(lu->member) )
-				if( id->GetIdentifierName().empty() ) // TODO no!
-					cons_object = lu->object;
-				
-	string s_callee;
-	if( cons_object )
-		s_callee = renderer->DoRender( cons_object, Syntax::Production::POSTFIX );
-	else
-		s_callee = renderer->DoRender( callee, Syntax::Production::POSTFIX );
+{				
+	string s_callee = renderer->DoRender( callee, Syntax::Production::POSTFIX );
 			
 	string s_args = argumentation->DirectRenderArgumentation(renderer, policy);
 	
@@ -909,7 +897,7 @@ string ConstructInit::GetRender( VN::RendererInterface *renderer, Production, Po
 		throw RefusedByPolicy(); // TODO find a way of disambiguating from a Call in VN lang
 			
 	// We never render the identifier for constructors - they are "invisible" and represent
-	// the choice of which overload we are binded to.		
+	// the choice of which overload we are bound to.		
 	return argumentation->DirectRenderArgumentation(renderer, policy);
 }
 
