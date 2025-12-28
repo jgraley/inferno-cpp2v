@@ -597,7 +597,7 @@ void Inferno::PatternDispatcher(PatternAction action, int pattern_index, string 
                     msg += SSPrintf(" (%03d)", sp.step_index);
                     fprintf( stderr, "%s\n", msg.c_str() );
                 }
-                ASSERT(false);
+                exit(EXIT_FAILURE);
             }
         }
         Progress(Progress::RENDERING, my_sp.step_index).SetAsCurrent();        

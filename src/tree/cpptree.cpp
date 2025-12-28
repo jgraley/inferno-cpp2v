@@ -104,7 +104,7 @@ Orderable::Diff SpecificIdentifier::OrderCompare3WayCovariant( const Orderable &
 
 
 string SpecificIdentifier::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy ) 
-{	
+{		
 	// Get rid of all this casting by building the entire rendering subsystem using plain old const pointers.
 	auto id = TreePtr<SpecificIdentifier>::DynamicCast( TreePtr<Node>(shared_from_this()) );
 		
@@ -221,7 +221,13 @@ Syntax::Production MapArgumentation::GetMyProductionTerminal() const
 }
 
 
-string MapArgumentation::GetRender( VN::RendererInterface *renderer, Production, Policy )
+string MapArgumentation::GetRender( VN::RendererInterface *, Production, Policy )
+{
+	throw Unimplemented(); // Not syntactically valid in isolation
+}
+
+
+string MapArgumentation::DirectRenderArgumentation(VN::RendererInterface *renderer)
 {
 	list<string> ls;
 	for( TreePtr<Node> arg : arguments )
@@ -238,8 +244,14 @@ Syntax::Production SeqArgumentation::GetMyProductionTerminal() const
 }
 
 
-string SeqArgumentation::GetRender( VN::RendererInterface *renderer, Production, Policy )
+string SeqArgumentation::GetRender( VN::RendererInterface *, Production, Policy )
 {	
+	throw Unimplemented(); // Not syntactically valid in isolation
+}
+
+
+string SeqArgumentation::DirectRenderArgumentation(VN::RendererInterface *renderer)
+{
 	list<string> ls;
 	for( TreePtr<Node> arg : arguments )
 		ls.push_back( renderer->DoRender( arg, Production::COMMA_SEP ) );	
@@ -781,6 +793,7 @@ Syntax::Production This::GetMyProductionTerminal() const
 	return Production::PRIMARY_EXPR; 
 }
 
+
 string This::GetRenderTerminal( Production ) const
 {
 	return "this";
@@ -797,9 +810,10 @@ Syntax::Production New::GetMyProductionTerminal() const
 string New::GetRender( VN::RendererInterface *renderer, Production, Policy )
 {
 	return string (DynamicTreePtrCast<Global>(global) ? "::" : "") +
-		   "new" + renderer->DoRender( placement_argumentation, Syntax::Production::PRIMARY_EXPR ) +
+		   "new" + placement_argumentation->DirectRenderArgumentation(renderer) +
+		   " " +
 		   renderer->DoRender( type, Syntax::Production::TYPE_IN_NEW ) +
-		   renderer->DoRender( constructor_argumentation, Syntax::Production::PRIMARY_EXPR );
+		   constructor_argumentation->DirectRenderArgumentation(renderer);
 }
 
 //////////////////////////// Delete ///////////////////////////////
@@ -867,7 +881,7 @@ string Call::GetRender( VN::RendererInterface *renderer, Production, Policy poli
     if( policy.detect_and_render_constructor )
 		if( auto lu = DynamicTreePtrCast< Lookup >(callee) )
 			if( auto id = DynamicTreePtrCast< InstanceIdentifier >(lu->member) )
-				if( id->GetIdentifierName().empty() )
+				if( id->GetIdentifierName().empty() ) // TODO no!
 					cons_object = lu->object;
 				
 	string s_callee;
@@ -876,9 +890,30 @@ string Call::GetRender( VN::RendererInterface *renderer, Production, Policy poli
 	else
 		s_callee = renderer->DoRender( callee, Syntax::Production::POSTFIX );
 			
-	string s_args = renderer->DoRender( argumentation, Syntax::Production::PRIMARY_EXPR );
+	string s_args = argumentation->DirectRenderArgumentation(renderer);
 	
 	return s_callee + s_args;
+}
+
+//////////////////////////// ConstructInit ///////////////////////////////
+
+Syntax::Production ConstructInit::GetMyProductionTerminal() const
+{
+	return Production::INITIALISER; 	
+}
+
+
+string ConstructInit::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+{		
+	if( policy.refuse_call_if_map_args && TreePtr<MapArgumentation>::DynamicCast(argumentation) )
+		throw RefusedByPolicy(); // Would output 〔, 〕 and ⦂, so C++ renderer needs to resolve into seq args
+			
+	if( !policy.detect_and_render_constructor )
+		throw RefusedByPolicy(); // TODO find a way of disambiguating from a Call in VN lang
+			
+	// We never render the identifier for constructors - they are "invisible" and represent
+	// the choice of which overload we are binded to.		
+	return argumentation->DirectRenderArgumentation(renderer);
 }
 
 //////////////////////////// RecordLiteral ///////////////////////////////
@@ -894,6 +929,7 @@ Syntax::Production SizeOf::GetMyProductionTerminal() const
 { 
 	return Production::PREFIX; 	
 }
+
 
 //////////////////////////// AlignOf ///////////////////////////////
 
@@ -1002,6 +1038,24 @@ Syntax::Production Break::GetMyProductionTerminal() const
 { 
 	return Production::BARE_STATEMENT; 
 }
+
+//////////////////////////// MembInitialisation ///////////////////////////////
+
+Syntax::Production MembInitialisation::GetMyProductionTerminal() const
+{ 
+	return Production::COMMA_SEP; 
+}
+
+
+string MembInitialisation::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+{
+	if( !policy.detect_and_render_constructor )
+		throw RefusedByPolicy(); // TODO find a way of disambiguating from a Call in VN lang
+
+	return renderer->DoRender( member_id, Production::PURE_IDENTIFIER, policy ) +
+		   renderer->DoRender( initialiser, Production::INITIALISER, policy );
+}
+
 
 //////////////////////////// Nop ///////////////////////////////
 

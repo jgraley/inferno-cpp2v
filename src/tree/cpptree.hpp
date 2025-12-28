@@ -216,6 +216,8 @@ struct IdValuePair : virtual Node
 struct Argumentation : virtual Node
 {
     NODE_FUNCTIONS
+    
+    virtual string DirectRenderArgumentation(VN::RendererInterface *) { return ""; }
 };
 
 
@@ -227,6 +229,7 @@ struct MapArgumentation : Argumentation
 	
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
+    string DirectRenderArgumentation(VN::RendererInterface *renderer) final;
 };
 
 
@@ -239,6 +242,7 @@ struct SeqArgumentation : Argumentation
 	
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
+    string DirectRenderArgumentation(VN::RendererInterface *renderer) final;
 };  
 
 //////////////////////////// Literals ///////////////////////////////
@@ -991,11 +995,23 @@ struct GoSub : virtual Node, Uncombable
 struct Call : GoSub, Expression
 {
     NODE_FUNCTIONS_FINAL
-    TreePtr<Argumentation> argumentation; ///< Argumentation taken in order
+    TreePtr<Argumentation> argumentation; 
 	
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
 };  
+
+
+/// Initialiser that will require a constructor call eg the (a) in MyType x(a);
+struct ConstructInit : Initialiser
+{
+	NODE_FUNCTIONS_FINAL
+	TreePtr<InstanceIdentifier> constructor_id; // TODO could generalise to include built-in "constructor"
+    TreePtr<Argumentation> argumentation; 
+
+	Production GetMyProductionTerminal() const override;
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
+};
 
 
 /// Initialiser for a record 
@@ -1208,6 +1224,18 @@ struct Break : Statement
 	NODE_FUNCTIONS_FINAL 
 
 	Production GetMyProductionTerminal() const override;
+};
+
+/// Initialise a member from inside a constructor body
+struct MembInitialisation : Statement 
+{
+	NODE_FUNCTIONS_FINAL
+
+	TreePtr<InstanceIdentifier> member_id;
+	TreePtr<Initialiser> initialiser;
+
+	Production GetMyProductionTerminal() const override;
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );	
 };
 
 /// Do nothing; these get optimised out where possible

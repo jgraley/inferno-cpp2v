@@ -333,6 +333,7 @@ UniquifyNames::NodeToNameMap UniquifyNames::UniquifyAll( const TransKit &kit, Tr
 			else if( policy.include_designation_named_identifiers && node->IsDesignationNamedIdentifier() )
 				use = true;
 				
+			//FTRACE("ID ")(node)(use ? " used" : " not used")("\n");
 			if( use )
 				nodes_in_dfpo.push_back( node );
 		}
@@ -357,7 +358,10 @@ UniquifyNames::NodeToNameMap UniquifyNames::UniquifyAll( const TransKit &kit, Tr
 			{
 				// An undeclared indentifier cannot safely be renamed and so must have a non-empty name
 				if( node->GetIdentifierName().empty() )
+				{
+					FTRACE("WARNING found undeclared identifier with empty name, which will be unresolvable");
 					continue;
+				}
 		
 				// Assume undeclared identifier is really a system node identifier.
 				// Ensure it will keep its name and not be conflicted, and add to the

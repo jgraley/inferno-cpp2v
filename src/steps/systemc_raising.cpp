@@ -304,15 +304,21 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     auto l1s_call = MakePatternNode<Call>();
     auto l1s_args = MakePatternNode<MapArgumentation>();
     auto l1s_lookup = MakePatternNode< Lookup >();
-    auto l_instance = MakePatternNode<Instance>();  
-    auto l_delta = MakePatternNode<DeltaAgent, Initialiser>();  
+    auto l2_instance = MakePatternNode<Instance>();  
+    auto l2_delta = MakePatternNode<DeltaAgent, Initialiser>();  
     auto l2s_call = MakePatternNode<Call>();
     auto l2s_args = MakePatternNode<MapArgumentation>();
     auto l2s_lookup = MakePatternNode<Lookup>();
 	auto l2s_arg = MakePatternNode<StarAgent, IdValuePair>();
+    auto l3_instance = MakePatternNode<Instance>();  
+    auto l3_delta = MakePatternNode<DeltaAgent, Initialiser>();  
+    auto l3s_construct_init = MakePatternNode<ConstructInit>();
+    auto l3s_args = MakePatternNode<MapArgumentation>();
+	auto l3s_arg = MakePatternNode<StarAgent, IdValuePair>();
 
     auto bases = MakePatternNode<StarAgent, Base>();
-    auto r_embedded_2 = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( stuff, l_instance, l_instance );            
+    auto r_embedded_3 = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( stuff, l3_instance, l3_instance );            
+    auto r_embedded_2 = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( r_embedded_3, l2_instance, l2_instance );            
     auto r_embedded_1 = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( r_embedded_2, ls_comp, lr_comp );            
                     
     // dispense with an empty constructor                 
@@ -344,17 +350,28 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     lr_comp->statements = (l_pre, l_post);
 
     // Embedded 2: dispense with any calls to it from instances
-    l_instance->type = module_typeid; // TODO could be "auto" here?
-    l_instance->initialiser = l_delta;
+    l2_instance->type = module_typeid; // TODO could be "auto" here?
+    l2_instance->initialiser = l2_delta;
 	
-	l_delta->through = l2s_call;
+	l2_delta->through = l2s_call;
 	l2s_call->callee = l2s_lookup;
 	l2s_call->argumentation = l2s_args;
 	l2s_args->arguments = (l2s_arg); // any number of args, it doesn't matter, ctor is still empty so does nothing
-	l2s_lookup->object = l_instance->identifier;
+	l2s_lookup->object = l2_instance->identifier;
 	l2s_lookup->member = s_id;
 
-    l_delta->overlay = MakePatternNode< Uninitialised >();
+    l2_delta->overlay = MakePatternNode< Uninitialised >();
+    
+    // Embedded 3: dispense with any init constructs to it 
+    l3_instance->type = module_typeid;
+    l3_instance->initialiser = l3_delta;
+	
+	l3_delta->through = l3s_construct_init;
+	l3s_construct_init->constructor_id = s_id;
+	l3s_construct_init->argumentation = l3s_args;
+	l3s_args->arguments = (l3s_arg); // any number of args, it doesn't matter, ctor is still empty so does nothing
+
+    l3_delta->overlay = MakePatternNode< Uninitialised >();
             
     Configure( COMPARE_REPLACE, stuff, r_embedded_1 );
 }

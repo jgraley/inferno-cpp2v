@@ -412,7 +412,7 @@ AugTreePtr<CPPTree::Expression> TypeOf::TryGetConstructedExpression( const Trans
         ASSERT(lu->member);
         bool is_cons = false;
 
-		is_cons = lu->member->GetIdentifierName().empty();					
+		is_cons = lu->member->GetIdentifierName().empty();			//TODO no!		
 		
 		if( is_cons )
 			e = GET_CHILD(lu, object);

@@ -842,11 +842,10 @@ private:
             TreePtr<Instance> memb_o = GetConstructor( our_inst->type );
             ASSERT( memb_o );
             ASSERT( memb_o->identifier );
-			// Build a lookup to the constructor, using the specified subobject and the matching constructor
-			auto lu = MakeTreeNode<Lookup>();
-			lu->object = our_inst->identifier;
-			lu->member = memb_o->identifier;                       
-			our_inst->initialiser = CreateMapArgsCall( args, lu );			
+			auto ci = MakeTreeNode<ConstructInit>();
+			ci->argumentation = CreateMapArgumentation( args, memb_o->type );
+			ci->constructor_id = memb_o->identifier;
+			our_inst->initialiser = ci;				
         }
         
         // Clang tends to parse parameters and function bodies in seperate
@@ -1130,15 +1129,21 @@ private:
         auto c = MakeTreeNode<Call>();
         c->callee = callee;
 
+        TreePtr<Node> t = TypeOf::instance(callee, all_decls).GetTreePtr();
+		c->argumentation = CreateMapArgumentation(args, t);
+
+        return c;
+    }
+
+   TreePtr<MapArgumentation> CreateMapArgumentation( Sequence<Expression> &args, TreePtr<Node> t )
+    {
         auto a = MakeTreeNode<MapArgumentation>();
-		c->argumentation = a;
 
         // If CallableParams, fill in the args map based on the supplied args and original function type
-        TreePtr<Node> t = TypeOf::instance(callee, all_decls).GetTreePtr();
         if( TreePtr<CallableParams> p = DynamicTreePtrCast<CallableParams>(t) )
             PopulateMapOperator( a->arguments, args, p );
 
-        return c;
+        return a;
     }
 
     virtual ExprResult ActOnCallExpr(clang::Scope *, ExprTy *Fn, clang::SourceLocation,
@@ -1509,13 +1514,26 @@ private:
 
         TreePtr<InstanceIdentifier> memb_cons_id = memb_cons->identifier;
 
-		// Build a lookup to the constructor, using the specified subobject and the matching constructor
-		auto lu = MakeTreeNode<Lookup>();
-		lu->object = our_field->identifier;
-		lu->member = memb_cons_id;
-			
-		TreePtr<Call> call = CreateMapArgsCall( args, lu );
-		return hold_expr.ToRaw( call );
+		if( ReadArgs::use.count("x") )
+		{
+			auto ci = MakeTreeNode<ConstructInit>();
+			ci->argumentation = CreateMapArgumentation( args, memb_cons->type );
+			ci->constructor_id = memb_cons->identifier;
+			auto mi = MakeTreeNode<MembInitialisation>();
+			mi->member_id = our_field->identifier;
+			mi->initialiser = ci;
+			return hold_expr.ToRaw( mi );
+		}
+		else
+		{
+			// Build a lookup to the constructor, using the specified subobject and the matching constructor
+			auto lu = MakeTreeNode<Lookup>();
+			lu->object = our_field->identifier;
+			lu->member = memb_cons_id;
+				
+			TreePtr<Call> call = CreateMapArgsCall( args, lu );
+			return hold_expr.ToRaw( call );
+		}
     }
 
     /// ActOnMemInitializers - This is invoked when all of the member

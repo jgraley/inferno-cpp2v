@@ -446,7 +446,7 @@ string CppRender::RenderMapArgs( TreePtr<Type> callee_type, TreePtr<MapArgumenta
 	TreePtr<SeqArgumentation> sa = MakeSeqArgumentation( map_argumentation, decl_sequence );
 
 	// Let the SeqArgumentation node do the actual render
-	return DoRender(sa, Syntax::Production::POSTFIX, default_policy);
+	return sa->DirectRenderArgumentation(this);
 }
 DEFAULT_CATCH_CLAUSE
 
@@ -534,7 +534,7 @@ string CppRender::RenderMakeRecord( TreePtr<RecordLiteral> make_rec, Syntax::Pro
     Sequence<Declaration> sorted_members = SortDecls( r->members, true, unique_identifier_names );
 
     // Determine args sequence using param sequence
-    Sequence<Expression> sub_expr_sequence  = SortMapById( make_rec->operands, sorted_members );
+    Sequence<Expression> sub_expr_sequence = SortMapById( make_rec->operands, sorted_members );
     
     // Render to strings
     list<string> ls;
@@ -644,7 +644,12 @@ void CppRender::ExtractInits( Sequence<Statement> &body,
     // we call a constructor by 
     for( TreePtr<Statement> s : body )
     {
-        if( auto call = DynamicTreePtrCast< GoSub >(s) ) // TODO drop after changeover to Construction
+        if( auto call = DynamicTreePtrCast< MembInitialisation >(s) ) 
+        {
+			inits.push_back(s);
+			continue;
+		}
+        else if( auto call = DynamicTreePtrCast< GoSub >(s) ) // TODO drop after changeover to Construction
         {
             try
             {
@@ -709,6 +714,8 @@ DEFAULT_CATCH_CLAUSE
 string CppRender::RenderInitialisation( TreePtr<Initialiser> init ) try
 {
 	string s;
+	if( ReadArgs::use.count("c") )
+		s += "/* RenderInitialisation(" + Trace(init) + ") */";
 	if( TreePtr<Expression> ei = DynamicTreePtrCast<Expression>( init ) )
     {
         // Attempt direct initialisation by providing args for a constructor call
@@ -719,11 +726,11 @@ string CppRender::RenderInitialisation( TreePtr<Initialiser> init ) try
 				if( auto map_args = TreePtr<MapArgumentation>::DynamicCast(call->argumentation) )
 				{
 					if( TypeOf::instance.TryGetConstructedExpression( trans_kit, call ).GetTreePtr() )   
-						return RenderMapArgs(TypeOf::instance.Get(trans_kit, call->callee).GetTreePtr(), map_args);
+						return s + RenderMapArgs(TypeOf::instance.Get(trans_kit, call->callee).GetTreePtr(), map_args);
 				}
 				else // seq args
 				{
-					return DoRender(call->argumentation, Syntax::Production::PRIMARY_EXPR);    
+					return s + call->argumentation->DirectRenderArgumentation(this);    
 				}
 			}
 		}
@@ -854,7 +861,7 @@ string CppRender::RenderMacroDeclaration( TreePtr<MacroDeclaration> md, Syntax::
 	string s = DoRender( md->identifier, Syntax::Production::POSTFIX );
 	list<string> renders;
 	for( TreePtr<Node> node : md->arguments )
-		renders.push_back( DoRender( node, Syntax::Production::COMMA_SEP) );
+		renders.push_back( DoRender(node, Syntax::Production::COMMA_SEP) );
 	s += Join(renders, ", ", "(", ")");
 	
 	// ---- Initialisation ----	    
@@ -1065,11 +1072,11 @@ string CppRender::RenderConstructorInitList( Sequence<Statement> spe ) try
 				s += DoRender( lu->object, Syntax::Production::PURE_IDENTIFIER ); // No scope resolution please
 			else
 				s += RenderNodeExplicit( lu, Syntax::Production::COMMA_SEP, default_policy );
-			s += DoRender( c->argumentation, Syntax::Production::PRIMARY_EXPR );
+			s += c->argumentation->DirectRenderArgumentation(this);
 		}
         else 
         {
-			s += RenderNodeExplicit( st, Syntax::Production::COMMA_SEP, default_policy );
+			s += DoRender( st, Syntax::Production::COMMA_SEP, default_policy );
 		}
         first = false;
     }

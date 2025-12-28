@@ -385,7 +385,8 @@ string Render::RenderNodeExplicit( shared_ptr<const Node> node, Syntax::Producti
 			}            
 			else if( TreePtrInterface *singular = dynamic_cast<TreePtrInterface *>(items[i]) )
 			{
-				sitems.push_back( DoRender( TreePtr<Node>(*singular), Syntax::Production::VN_SEP_ITEMS ) );
+				string ss = DoRender( TreePtr<Node>(*singular), Syntax::Production::VN_SEP_ITEMS );
+				sitems.push_back( ss );
 			}
 			else
 			{

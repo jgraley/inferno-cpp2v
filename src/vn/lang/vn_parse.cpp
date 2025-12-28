@@ -414,6 +414,30 @@ TreePtr<Node> VNLangActions::OnSeqArgsCall( TreePtr<Node> callee, list<TreePtr<N
 }	
 
 
+TreePtr<Node> VNLangActions::OnMapArgsConsInit( TreePtr<Node> constructor_id, list<TreePtr<Node>> arguments )
+{
+	auto call = MakeTreeNode<StandardAgentWrapper<CPPTree::ConstructInit>>();
+	auto args = MakeTreeNode<StandardAgentWrapper<CPPTree::MapArgumentation>>();
+	call->constructor_id = constructor_id;
+	call->argumentation = args;
+	for( auto argument : arguments )
+		args->arguments.insert( argument );
+	return call;
+}	
+
+
+TreePtr<Node> VNLangActions::OnSeqArgsConsInit( TreePtr<Node> constructor_id, list<TreePtr<Node>> arguments )
+{
+	auto call = MakeTreeNode<StandardAgentWrapper<CPPTree::ConstructInit>>();
+	auto args = MakeTreeNode<StandardAgentWrapper<CPPTree::SeqArgumentation>>();
+	call->constructor_id = constructor_id;
+	call->argumentation = args;
+	for( auto argument : arguments )
+		args->arguments.insert( argument );
+	return call;
+}	
+
+
 TreePtr<Node> VNLangActions::OnLookup( TreePtr<Node> object, TreePtr<Node> member, any member_loc )
 {
 	(void)member_loc;
@@ -620,6 +644,8 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 // - Try to parse in VN language
 
 // Note: comma operator can stay in: C-productions that use commas are all expressional and come in at norm_no_comma_op
+
+// It looks like TRANSFORM rule is acting on types only, which might be good for TypeOf but not others
 
 // Renaming of productions and nodes 
 // - Use eg https://alx71hub.github.io/hcb/#statement to rename everything in line with C++ grammar terminology. 
