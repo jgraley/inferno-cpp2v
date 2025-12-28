@@ -123,7 +123,7 @@ Syntax::Policy Render::GetDefaultPolicy()
 	policy.detect_and_render_constructor = false;
 	
 	// Permit map args with their non-C syntax
-	policy.refuse_call_if_map_args = false;
+	policy.refuse_map_argumentation = false;
 
 	// Don't insert {} into patterns because they imply Compound or StatementExpression
 	// or ArrayLiteral or RecordLiteral. Use () instead, which are purely for disamiguation.

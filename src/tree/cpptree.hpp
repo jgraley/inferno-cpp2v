@@ -217,7 +217,7 @@ struct Argumentation : virtual Node
 {
     NODE_FUNCTIONS
     
-    virtual string DirectRenderArgumentation(VN::RendererInterface *) { return ""; }
+    virtual string DirectRenderArgumentation(VN::RendererInterface *, Policy) { return ""; }
 };
 
 
@@ -229,7 +229,7 @@ struct MapArgumentation : Argumentation
 	
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
-    string DirectRenderArgumentation(VN::RendererInterface *renderer) final;
+    string DirectRenderArgumentation(VN::RendererInterface *renderer, Policy policy) final;
 };
 
 
@@ -242,7 +242,7 @@ struct SeqArgumentation : Argumentation
 	
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
-    string DirectRenderArgumentation(VN::RendererInterface *renderer) final;
+    string DirectRenderArgumentation(VN::RendererInterface *renderer, Policy policy) final;
 };  
 
 //////////////////////////// Literals ///////////////////////////////

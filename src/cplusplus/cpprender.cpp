@@ -446,7 +446,7 @@ string CppRender::RenderMapArgs( TreePtr<Type> callee_type, TreePtr<MapArgumenta
 	TreePtr<SeqArgumentation> sa = MakeSeqArgumentation( map_argumentation, decl_sequence );
 
 	// Let the SeqArgumentation node do the actual render
-	return sa->DirectRenderArgumentation(this);
+	return sa->DirectRenderArgumentation(this, default_policy);
 }
 DEFAULT_CATCH_CLAUSE
 
@@ -730,7 +730,7 @@ string CppRender::RenderInitialisation( TreePtr<Initialiser> init ) try
 				}
 				else // seq args
 				{
-					return s + call->argumentation->DirectRenderArgumentation(this);    
+					return s + call->argumentation->DirectRenderArgumentation(this, default_policy);    
 				}
 			}
 		}
@@ -1072,7 +1072,7 @@ string CppRender::RenderConstructorInitList( Sequence<Statement> spe ) try
 				s += DoRender( lu->object, Syntax::Production::PURE_IDENTIFIER ); // No scope resolution please
 			else
 				s += RenderNodeExplicit( lu, Syntax::Production::COMMA_SEP, default_policy );
-			s += c->argumentation->DirectRenderArgumentation(this);
+			s += c->argumentation->DirectRenderArgumentation(this, default_policy);
 		}
         else 
         {

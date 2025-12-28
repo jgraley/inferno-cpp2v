@@ -227,8 +227,11 @@ string MapArgumentation::GetRender( VN::RendererInterface *, Production, Policy 
 }
 
 
-string MapArgumentation::DirectRenderArgumentation(VN::RendererInterface *renderer)
+string MapArgumentation::DirectRenderArgumentation(VN::RendererInterface *renderer, Policy policy)
 {
+	if( policy.refuse_map_argumentation )
+		throw RefusedByPolicy(); // Would output 〔, 〕 and ⦂, so C++ renderer needs to resolve into seq args
+			
 	list<string> ls;
 	for( TreePtr<Node> arg : arguments )
 		ls.push_back( renderer->DoRender( arg, Production::COMMA_SEP ) );
@@ -250,7 +253,7 @@ string SeqArgumentation::GetRender( VN::RendererInterface *, Production, Policy 
 }
 
 
-string SeqArgumentation::DirectRenderArgumentation(VN::RendererInterface *renderer)
+string SeqArgumentation::DirectRenderArgumentation(VN::RendererInterface *renderer, Policy)
 {
 	list<string> ls;
 	for( TreePtr<Node> arg : arguments )
@@ -807,13 +810,13 @@ Syntax::Production New::GetMyProductionTerminal() const
 }
 
 
-string New::GetRender( VN::RendererInterface *renderer, Production, Policy )
+string New::GetRender( VN::RendererInterface *renderer, Production, Policy policy)
 {
 	return string (DynamicTreePtrCast<Global>(global) ? "::" : "") +
-		   "new" + placement_argumentation->DirectRenderArgumentation(renderer) +
+		   "new" + placement_argumentation->DirectRenderArgumentation(renderer, policy) +
 		   " " +
 		   renderer->DoRender( type, Syntax::Production::TYPE_IN_NEW ) +
-		   constructor_argumentation->DirectRenderArgumentation(renderer);
+		   constructor_argumentation->DirectRenderArgumentation(renderer, policy);
 }
 
 //////////////////////////// Delete ///////////////////////////////
@@ -873,9 +876,6 @@ Syntax::Production Call::GetMyProductionTerminal() const
 
 string Call::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {		
-	if( policy.refuse_call_if_map_args && TreePtr<MapArgumentation>::DynamicCast(argumentation) )
-		throw RefusedByPolicy(); // Would output 〔, 〕 and ⦂, so C++ renderer needs to resolve into seq args
-
     // Constructor case: spot by use of Lookup to empty-named method. Elide the "."
     TreePtr<Node> cons_object;
     if( policy.detect_and_render_constructor )
@@ -890,7 +890,7 @@ string Call::GetRender( VN::RendererInterface *renderer, Production, Policy poli
 	else
 		s_callee = renderer->DoRender( callee, Syntax::Production::POSTFIX );
 			
-	string s_args = argumentation->DirectRenderArgumentation(renderer);
+	string s_args = argumentation->DirectRenderArgumentation(renderer, policy);
 	
 	return s_callee + s_args;
 }
@@ -905,15 +905,12 @@ Syntax::Production ConstructInit::GetMyProductionTerminal() const
 
 string ConstructInit::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {		
-	if( policy.refuse_call_if_map_args && TreePtr<MapArgumentation>::DynamicCast(argumentation) )
-		throw RefusedByPolicy(); // Would output 〔, 〕 and ⦂, so C++ renderer needs to resolve into seq args
-			
 	if( !policy.detect_and_render_constructor )
 		throw RefusedByPolicy(); // TODO find a way of disambiguating from a Call in VN lang
 			
 	// We never render the identifier for constructors - they are "invisible" and represent
 	// the choice of which overload we are binded to.		
-	return argumentation->DirectRenderArgumentation(renderer);
+	return argumentation->DirectRenderArgumentation(renderer, policy);
 }
 
 //////////////////////////// RecordLiteral ///////////////////////////////

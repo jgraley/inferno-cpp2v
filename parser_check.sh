@@ -24,4 +24,4 @@ TC=small.c
 diff --color out_builtin.cpp out_p1.cpp
 
 # Full test run using patterns we previously wrote to p1/
-make -j 30 test I="p1 -q${QA}"
+make -j 30 test I="${ARGS} p1 -q${QA}"
