@@ -1514,26 +1514,15 @@ private:
 
         TreePtr<InstanceIdentifier> memb_cons_id = memb_cons->identifier;
 
-		if( ReadArgs::use.count("x") )
-		{
-			auto ci = MakeTreeNode<ConstructInit>();
-			ci->argumentation = CreateMapArgumentation( args, memb_cons->type );
-			ci->constructor_id = memb_cons->identifier;
-			auto mi = MakeTreeNode<MembInitialisation>();
-			mi->member_id = our_field->identifier;
-			mi->initialiser = ci;
-			return hold_expr.ToRaw( mi );
-		}
-		else
-		{
-			// Build a lookup to the constructor, using the specified subobject and the matching constructor
-			auto lu = MakeTreeNode<Lookup>();
-			lu->object = our_field->identifier;
-			lu->member = memb_cons_id;
-				
-			TreePtr<Call> call = CreateMapArgsCall( args, lu );
-			return hold_expr.ToRaw( call );
-		}
+		auto ci = MakeTreeNode<ConstructInit>();
+		ci->argumentation = CreateMapArgumentation( args, memb_cons->type );
+		ci->constructor_id = memb_cons->identifier;
+		
+		auto mi = MakeTreeNode<MembInitialisation>();
+		mi->member_id = our_field->identifier;
+		mi->initialiser = ci;
+		
+		return hold_expr.ToRaw( mi );
     }
 
     /// ActOnMemInitializers - This is invoked when all of the member

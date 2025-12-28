@@ -85,9 +85,6 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     auto l1_bases = MakePatternNode<StarAgent, Base>();
     auto l1_statements = MakePatternNode<StarAgent, Statement>();
     auto l1_statements_negation = MakePatternNode<NegationAgent, Statement>();
-    auto l1x_call = MakePatternNode<Call>();
-    auto l1x_args = MakePatternNode<SeqArgumentation>();
-    auto l1x_lookup = MakePatternNode<Lookup>();
     auto l1x_memb_init = MakePatternNode<MembInitialisation>();
     auto l1_decls = MakePatternNode<StarAgent, Declaration>();
     auto l1_cons_macro = MakePatternNode< MacroDeclaration >(); 
@@ -97,11 +94,9 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     auto l1_field = MakePatternNode< Field >();
     auto l1_field_id = MakePatternNode< InstanceIdentifier >();
     auto l1_delta = MakePatternNode<DeltaAgent, Initialiser>();  
-    auto l1r_call = MakePatternNode<Call>();
     auto l1r_memb_init = MakePatternNode<MembInitialisation>();
     auto l1r_cons_init = MakePatternNode<ConstructInit>();
     auto l1r_args = MakePatternNode<SeqArgumentation>();
-    auto l1r_lookup = MakePatternNode<Lookup>();
 	auto l1r_arg = MakePatternNode< StringizeAgent >();
     
     auto l2_conjunction = MakePatternNode<ConjunctionAgent, Instance>();  
@@ -145,40 +140,14 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     l1_field->identifier = l1_field_id;
     
 	l1_statements->restriction = l1_statements_negation;
-    if( ReadArgs::use.count("x") )
-    {
-		l1_statements_negation->negand = l1x_memb_init;
-		l1x_memb_init->member_id = l1_field_id; // this should be enough to prevent spin
-		
-		l1r_comp->statements = (l1_statements, l1r_memb_init);
-		l1r_memb_init->member_id = l1_field_id;
-		l1r_memb_init->initialiser = l1r_cons_init;
-		l1r_cons_init->constructor_id = MakePatternNode< SpecificInstanceIdentifier >("");
-		l1r_cons_init->argumentation = l1r_args;
-		(void)l1x_call;
-		(void)l1x_lookup;
-		(void)l1x_args;
-		(void)l1r_call;
-		(void)l1r_lookup;
-	}
-	else
-	{
-		l1_statements_negation->negand = l1x_call;
-		l1x_call->callee = l1x_lookup;
-		l1x_call->argumentation = l1x_args;
-		l1x_args->arguments = MakePatternNode<StarAgent, Expression>();
-		l1x_lookup->object = l1_field_id; // this should be enough to prevent spin
-		// l1_field_id is instance of a SC class and is not constructed in SC language
-		
-		l1r_comp->statements = (l1_statements, l1r_call);
-		l1r_call->callee = l1r_lookup;
-		l1r_call->argumentation = l1r_args;
-		l1r_lookup->object = l1_field_id;
-		l1r_lookup->member = MakePatternNode< SpecificInstanceIdentifier >(""); // Empty indicates constructor call
-		(void)l1x_memb_init;
-		(void)l1r_memb_init;
-		(void)l1r_cons_init;
-	}
+	l1_statements_negation->negand = l1x_memb_init;
+	l1x_memb_init->member_id = l1_field_id; // this should be enough to prevent spin
+	
+	l1r_comp->statements = (l1_statements, l1r_memb_init);
+	l1r_memb_init->member_id = l1_field_id;
+	l1r_memb_init->initialiser = l1r_cons_init;
+	l1r_cons_init->constructor_id = MakePatternNode< SpecificInstanceIdentifier >("");
+	l1r_cons_init->argumentation = l1r_args;
 
 	l1r_args->arguments = (l1r_arg);
 	l1r_arg->source =  tid;                    
@@ -190,23 +159,9 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     l2_instance->initialiser = l2_delta;
     l2_instance->identifier = l2_inst_id;
     l2_delta->through = MakePatternNode< Uninitialised >();
-    if( ReadArgs::use.count("x") )
-    {
-		l2_delta->overlay = l2r_cons_init;
-		l2r_cons_init->constructor_id = MakePatternNode< SpecificInstanceIdentifier >("");
-		l2r_cons_init->argumentation = l2r_args;
-		(void)l1r_call;
-		(void)l1r_lookup;	
-	}
-	else
-	{
-		l2_delta->overlay = l2r_call;
-		l2r_call->callee = l2r_lookup;
-		l2r_call->argumentation = l2r_args;
-	    l2r_lookup->object = l2_instance->identifier;
-		l2r_lookup->member = MakePatternNode< SpecificInstanceIdentifier >(""); // Empty indicates constructor call
-		(void)l2r_cons_init;
-	}
+	l2_delta->overlay = l2r_cons_init;
+	l2r_cons_init->constructor_id = MakePatternNode< SpecificInstanceIdentifier >("");
+	l2r_cons_init->argumentation = l2r_args;	
 	
     l2r_args->arguments = (l2r_arg);
     l2r_arg->source =  tid;
