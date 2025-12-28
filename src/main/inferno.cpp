@@ -25,7 +25,7 @@
 #include "vn/search_replace.hpp"
 #include "vn/csp/reference_solver.hpp"
 #include "vn/vn_sequence.hpp"
-#include "vn/lang/vn_parse.hpp"
+#include "vn/lang/vn_actions.hpp"
 #include "vn/lang/vn_script.hpp"
 
 #include <cstdlib>

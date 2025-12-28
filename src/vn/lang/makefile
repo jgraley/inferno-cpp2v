@@ -19,7 +19,7 @@ VNL_CPP_OPTIONS = $(VNL_OPTIONS) -I$(SRC) -I$(VN) -I$(VN_LANG) -I$(LLVM)/include
 
 # We need to compile the RE/flex headers with different flags, so all sources that include
 # them need to be here.
-VNL_CPP_MODULES = $(VNL_DIR)/vn_recogniser $(VNL_DIR)/vn_parse $(VN_LANG)/vn_commands $(VN_LANG)/vn_lang_error $(VN_LANG)/vn_script
+VNL_CPP_MODULES = $(VNL_DIR)/vn_recogniser $(VNL_DIR)/vn_actions $(VN_LANG)/vn_commands $(VN_LANG)/vn_lang_error $(VN_LANG)/vn_script
 
 VNL_DEPS = $(VNL_DIR)/makefile
 

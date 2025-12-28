@@ -1,4 +1,4 @@
-#include "vn_parse.hpp"
+#include "vn_actions.hpp"
 
 #include "tree/cpptree.hpp"
 #include "tree/localtree.hpp"
@@ -627,8 +627,6 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 // Parsing 016-RaiseSCDeltaCount.vn reveals a mis-render - the identifier should be rendered 
 // with some kind of "real identifier node" syntax (and its name hint)
 
-// Renamings: 
-// Ensure this file has the right filename
 
 // Productions using 【 】: 
 // - I think it looks better to go eg ⯁CPPTree::TypeDeclaration【sc_module】 and similar for that whole family of productions
@@ -638,10 +636,7 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 // Try c-style cast again, this time at a strictly lower precedence than the other prefix ops, per https://alx71hub.github.io/hcb/#statement
 
 // Calls/Constructors plan:
-// - Factor out map/seq args DONE
-// - Separate node for Construct, with common intermediate with call ("Invoke"?) 
-// It will always be explicit when we want a construct that has args. This includes at least MyClass my_object( arg1, arg2, ... )
-// - Try to parse in VN language
+// - Try to use ⫶ to switch into initialiser production just for the next thing i.e. ⫶ goes in at the last minute
 
 // Note: comma operator can stay in: C-productions that use commas are all expressional and come in at norm_no_comma_op
 

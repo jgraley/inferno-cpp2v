@@ -10,7 +10,7 @@
 #include "tree/scope.hpp"
 #include "tree/node_names.hpp"
 #include "vn_step.hpp"
-#include "vn_parse.hpp"
+#include "vn_actions.hpp"
 #include "vn_script.hpp"
 #include "agents/embedded_scr_agent.hpp"
 #include "vn_lang.ypp.hpp"

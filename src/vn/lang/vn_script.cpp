@@ -11,7 +11,7 @@
 #include "tree/scope.hpp"
 #include "tree/node_names.hpp"
 #include "vn_step.hpp"
-#include "vn_parse.hpp"
+#include "vn_actions.hpp"
 #include "agents/embedded_scr_agent.hpp"
 #include "vn_lang.ypp.hpp"
 #include "vn_lang.lpp.hpp"
