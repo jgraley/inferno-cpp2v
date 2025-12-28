@@ -310,9 +310,9 @@ string Render::AccomodatePreRestriction( TreePtr<Node> node, Syntax::Production 
 	TreePtr<Node> archetype_node = agent->GetArchetypeNode();
 
 	// This assumes no action is required in order to render a prefix operation
-	return "‽【" + 
+	return "‽" + 
 	       GetInnermostTemplateParam(TYPE_ID_NAME(*archetype_node)) + 
-	       "】" +
+	       " " +
 	       Dispatch( node, Syntax::Production::PREFIX, policy );	
 }
 
@@ -353,7 +353,7 @@ string Render::RenderNodeExplicit( shared_ptr<const Node> node, Syntax::Producti
     string s = "⯁";
     list<string> sitems;    
 
-    sitems.push_back( GetInnermostTemplateParam(TYPE_ID_NAME(*node)) );
+    s += GetInnermostTemplateParam(TYPE_ID_NAME(*node));
 
 	if( ReadArgs::use.count("c") )
 		s += policy.force_incomplete_records ? "/* force incomplete */" : "/* no force incomplete */";

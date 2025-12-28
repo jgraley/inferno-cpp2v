@@ -78,6 +78,7 @@ Syntax::Production BuildIdentifierAgent::GetAgentProduction() const
 
 string BuildIdentifierAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod ) const
 {
+	string s = "⧇CPPTree::" + GetIdentifierSubTypeName(); 
 	(void)surround_prod;
 
 	// List the sources as a pseudo-item
@@ -89,14 +90,13 @@ string BuildIdentifierAgent::GetAgentRender( VN::RendererInterface *renderer, Sy
 		
 	// Add in the subtype name and format to make a pseudo-itemisation
 	list<string> ls_production;
-	ls_production.push_back("CPPTree::"+GetIdentifierSubTypeName());
 	if( format.empty() )
 		ls_production.push_back( "" ); // this is syntactically ok with ⚬
 	else
 		ls_production.push_back( "\"" + format + "\"" ); // quotes to diambiguate from % as modulo
 	ls_production.push_back( sources );
 	
-	return Join( ls_production, "⚬", "⧇【", "】");
+	return s + Join( ls_production, "⚬", "【", "】");
 } 
   
     

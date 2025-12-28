@@ -987,9 +987,9 @@ string StandardAgent::GetAgentRender( VN::RendererInterface *, Syntax::Productio
 			scope = node_type_name.substr(0, last_scope_pos+2); // include the ::
 			name = node_type_name.substr(last_scope_pos+2);
 		}
-		return "🞊【" + 
+		return "🞊" + 
 		       scope + name.substr(8, name.size()-8-10) + // Take off Specific...Identifier
-		       "⚬\"" +
+		       "【\"" +
 			   GetIdentifierName() + 
 			   "\"】";
 	}	

@@ -629,8 +629,8 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 
 
 // Productions using 【 】: 
-// - I think it looks better to go eg ⯁CPPTree::TypeDeclaration【sc_module】 and similar for that whole family of productions
 // - Default away the CPPTree:: (it's sugar, but the bulkiness of these is affecting my decisions!)
+// - Try again at TypeOf->TypeIs etc
 // - AFTER adding C mixture, try using () and making things look like printf etc
 
 // Try c-style cast again, this time at a strictly lower precedence than the other prefix ops, per https://alx71hub.github.io/hcb/#statement

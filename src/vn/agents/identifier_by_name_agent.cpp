@@ -111,8 +111,8 @@ string IdentifierByNameAgent::GetAgentRender( VN::RendererInterface *renderer, S
 {
     (void)renderer;
 	(void)surround_prod;
-	string s = "⊛【CPPTree::" + GetIdentifierSubTypeName();
-	s += "⚬\"" + name;
+	string s = "⊛CPPTree::" + GetIdentifierSubTypeName();
+	s += "【\"" + name;
 	s += "\"】";
 	return s;
 } 
