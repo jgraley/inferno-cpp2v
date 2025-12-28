@@ -172,7 +172,7 @@ string Render::AccomodateInit( TreePtr<Node> node, Syntax::Production surround_p
 					  Syntax::GetPrecedence(surround_prod), 
 					  Syntax::GetPrecedence(node_prod) );		
 
-    if( !(surround_prod == Syntax::Production::INITIALISER) )
+    if( surround_prod != Syntax::Production::INITIALISER )
 		return s + AccomodateBoot(node, surround_prod, policy );
 
 	// Deal with expression in initialiser production by prepending =

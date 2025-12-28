@@ -635,8 +635,9 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 
 // Try c-style cast again, this time at a strictly lower precedence than the other prefix ops, per https://alx71hub.github.io/hcb/#statement
 
-// Calls/Constructors plan:
-// - Try to use ⫶ to switch into initialiser production just for the next thing i.e. ⫶ goes in at the last minute
+// NOTE ON CONSTRUCTORS
+// Since VN uses "bound" C++, we will always need to specify which of possibly overloaded constructors we are
+// referring to when constructing. So pure C++ is basically not possible here. Falling back to built-in node syntax here.
 
 // Note: comma operator can stay in: C-productions that use commas are all expressional and come in at norm_no_comma_op
 

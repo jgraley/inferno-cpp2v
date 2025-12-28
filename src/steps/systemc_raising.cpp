@@ -291,24 +291,20 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     auto l_decls = MakePatternNode<StarAgent, Declaration>();
     auto l_pre = MakePatternNode<StarAgent, Statement>();
     auto l_post = MakePatternNode<StarAgent, Statement>();
-    auto l1s_arg = MakePatternNode<StarAgent, IdValuePair>();
     auto s_cons = MakePatternNode< Field >();
     auto s_comp = MakePatternNode< Compound >();
-    auto s_id = MakePatternNode< InstanceIdentifier >();
+    auto s_constructor_id = MakePatternNode< InstanceIdentifier >();
     auto s_ctype = MakePatternNode<Constructor>();
     auto s_params = MakePatternNode<StarAgent, Parameter>();
     auto ls_comp = MakePatternNode< Compound >();
     auto lr_comp = MakePatternNode< Compound >();
     auto s_module = MakePatternNode< Module >();
     auto r_module = MakePatternNode< Module >();
-    auto l1s_args = MakePatternNode<MapArgumentation>();
     auto l1s_memb_init = MakePatternNode<MembInitialisation>();
     auto l1s_cons_init = MakePatternNode<ConstructInit>();    
     auto l3_instance = MakePatternNode<Instance>();  
     auto l3_delta = MakePatternNode<DeltaAgent, Initialiser>();  
     auto l3s_construct_init = MakePatternNode<ConstructInit>();
-    auto l3s_args = MakePatternNode<MapArgumentation>();
-	auto l3s_arg = MakePatternNode<StarAgent, IdValuePair>();
 
     auto bases = MakePatternNode<StarAgent, Base>();
     auto r_embedded_3 = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( stuff, l3_instance, l3_instance );            
@@ -324,32 +320,27 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     s_cons->type = MakePatternNode<Constructor>();        
     s_cons->constancy = MakePatternNode<NonConst>();
     s_cons->initialiser = s_comp;
-    s_cons->identifier = s_id;
+    s_cons->identifier = s_constructor_id;
     s_cons->type = s_ctype;
     s_ctype->params = (s_params); // any parameters
     r_module->members = (decls);
     r_module->bases = (bases);
     r_module->identifier = module_typeid;
             
-    // Embedded 1: dispense with any calls to it from member inits
+    // Embedded 1: dispense with any calls to s_constructor_id from member inits
     ls_comp->members = (l_decls);
 	ls_comp->statements = (l_pre, l1s_memb_init, l_post);
-	l1s_memb_init->member_id = MakePatternNode< InstanceIdentifier >();
 	l1s_memb_init->initialiser = l1s_cons_init;
-	l1s_cons_init->constructor_id = s_id;
-	l1s_cons_init->argumentation = l1s_args;
-	l1s_args->arguments = (l1s_arg); // any number of args, it doesn't matter, ctor is still empty so does nothing        	
+	l1s_cons_init->constructor_id = s_constructor_id;
     lr_comp->members = (l_decls);
     lr_comp->statements = (l_pre, l_post);
 
-    // Embedded 3: dispense with any init constructs
+    // Embedded 3: dispense with any init constructs using s_constructor_id
     l3_instance->type = module_typeid;
     l3_instance->initialiser = l3_delta;
 	
 	l3_delta->through = l3s_construct_init;
-	l3s_construct_init->constructor_id = s_id;
-	l3s_construct_init->argumentation = l3s_args;
-	l3s_args->arguments = (l3s_arg); // any number of args, it doesn't matter, ctor is still empty so does nothing
+	l3s_construct_init->constructor_id = s_constructor_id;
 
     l3_delta->overlay = MakePatternNode< Uninitialised >();
             
