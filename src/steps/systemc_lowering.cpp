@@ -104,10 +104,8 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     auto l2_instance = MakePatternNode<Instance>();  
     auto l2_inst_id = MakePatternNode<InstanceIdentifier>();  
     auto l2_delta = MakePatternNode<DeltaAgent, Initialiser>();  
-    auto l2r_call = MakePatternNode<Call>();
     auto l2r_cons_init = MakePatternNode<ConstructInit>();
     auto l2r_args = MakePatternNode<SeqArgumentation>();
-    auto l2r_lookup = MakePatternNode<Lookup>();
 	auto l2r_arg = MakePatternNode< StringizeAgent >();
     
     // Module to a class 
@@ -146,7 +144,7 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
 	l1r_comp->statements = (l1_statements, l1r_memb_init);
 	l1r_memb_init->member_id = l1_field_id;
 	l1r_memb_init->initialiser = l1r_cons_init;
-	l1r_cons_init->constructor_id = MakePatternNode< SpecificInstanceIdentifier >("");
+	l1r_cons_init->constructor_id = MakePatternNode< SpecificInstanceIdentifier >("constructor_id_should_not_appear_in_code");
 	l1r_cons_init->argumentation = l1r_args;
 
 	l1r_args->arguments = (l1r_arg);
@@ -160,7 +158,7 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     l2_instance->identifier = l2_inst_id;
     l2_delta->through = MakePatternNode< Uninitialised >();
 	l2_delta->overlay = l2r_cons_init;
-	l2r_cons_init->constructor_id = MakePatternNode< SpecificInstanceIdentifier >("");
+	l2r_cons_init->constructor_id = MakePatternNode< SpecificInstanceIdentifier >("constructor_id_should_not_appear_in_code");
 	l2r_cons_init->argumentation = l2r_args;	
 	
     l2r_args->arguments = (l2r_arg);

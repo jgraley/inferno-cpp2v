@@ -876,11 +876,8 @@ Syntax::Production Call::GetMyProductionTerminal() const
 
 string Call::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {				
-	string s_callee = renderer->DoRender( callee, Syntax::Production::POSTFIX );
-			
-	string s_args = argumentation->DirectRenderArgumentation(renderer, policy);
-	
-	return s_callee + s_args;
+	return renderer->DoRender( callee, Syntax::Production::POSTFIX ) + 
+	       argumentation->DirectRenderArgumentation(renderer, policy);
 }
 
 //////////////////////////// ConstructInit ///////////////////////////////

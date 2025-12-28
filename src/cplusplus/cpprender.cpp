@@ -1014,29 +1014,10 @@ DEFAULT_CATCH_CLAUSE
 
 string CppRender::RenderConstructorInitList( Sequence<Statement> spe ) try
 {
-    TRACE();
-    string s; 
-    bool first = true;
+    list<string> ls; 
     for( TreePtr<Statement> st : spe )
-    {
-        if( !first )
-            s += ",\n";
-        s += "    "; // indentation
-        if( auto c = TreePtr<Call>::DynamicCast(st) ) // TODO will be some other kind of node eventully i.e. MemInit
-        {
-			if( auto lu = TreePtr<Lookup>::DynamicCast(c->callee) )
-				s += DoRender( lu->object, Syntax::Production::PURE_IDENTIFIER ); // No scope resolution please
-			else
-				s += RenderNodeExplicit( lu, Syntax::Production::COMMA_SEP, default_policy );
-			s += c->argumentation->DirectRenderArgumentation(this, default_policy);
-		}
-        else 
-        {
-			s += DoRender( st, Syntax::Production::COMMA_SEP, default_policy );
-		}
-        first = false;
-    }
-    return s;
+        ls.push_back( "    " + DoRender( st, Syntax::Production::COMMA_SEP, default_policy ) );		
+    return Join(ls, ",\n");
 }
 DEFAULT_CATCH_CLAUSE
 
