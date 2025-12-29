@@ -977,7 +977,7 @@ Syntax::Production Goto::GetMyProductionTerminal() const
 
 string Goto::GetRender( VN::RendererInterface *renderer, Production, Policy )
 {
-	throw Unimplemented(); // TODO remove
+	//throw Unimplemented(); // TODO remove
     if( auto li = DynamicTreePtrCast< SpecificLabelIdentifier >(destination) )
         return "goto " + renderer->DoRender( li, Syntax::Production::SPACE_SEP_STATEMENT).substr(2);  // regular goto REMOVE THE &&
     else
