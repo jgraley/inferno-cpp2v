@@ -924,7 +924,7 @@ Syntax::Production AlignOf::GetMyProductionTerminal() const
 
 Syntax::Production Compound::GetMyProductionTerminal() const
 { 
-	return Production::STATEMENT;
+	return Production::INITIALISER;
 }
 
 //////////////////////////// StatementExpression ///////////////////////////////
