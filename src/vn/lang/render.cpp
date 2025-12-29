@@ -393,7 +393,7 @@ string Render::RenderNodeExplicit( shared_ptr<const Node> node, Syntax::Producti
 					for( const TreePtrInterface &p : *con )
 					{
 						ASSERT( p ); 
-						scon.push_back( DoRender( TreePtr<Node>(p), Syntax::Production::COMMA_SEP ) );
+						scon.push_back( DoRender( TreePtr<Node>(p), Syntax::Production::VN_SEP_ITEMS ) );
 					}
 					if( GetTotalSize(scon) > Syntax::GetLineBreakThreshold() )
 						sitems.push_back( Join( scon, "🞄\n", "", "") );
