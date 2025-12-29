@@ -47,6 +47,7 @@ comp_assign				\|=|^=|&=|<<=|>>=|\+=|-=|\*=|\/=|%=
 ⨟				{ return YY::VNLangParser::make_VN_SEMI(location()); };
 ⦂				{ return YY::VNLangParser::make_VN_COLON(location()); };
 ⚬				{ return YY::VNLangParser::make_VN_SEP(location()); };
+🞄				{ return YY::VNLangParser::make_VN_SUB_SEP(location()); };
 ꩜				{ return YY::VNLangParser::make_ENGINE(location()); };
 ⩨				{ return YY::VNLangParser::make_STUFF(location()); };
 ▲				{ return YY::VNLangParser::make_DELTA(location()); };

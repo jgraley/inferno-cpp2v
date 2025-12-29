@@ -332,11 +332,11 @@ TreePtr<Node> VNLangActions::OnCompound( list<TreePtr<Node>> members, any memb_l
 }
 
 
-TreePtr<Node> VNLangActions::OnArrayLiteral( Item elements )
+TreePtr<Node> VNLangActions::OnArrayLiteral( list<TreePtr<Node>> elements )
 {
 	// Fill out the array literal
 	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::ArrayLiteral>>();
-	for( TreePtr<Node> value : elements.nodes )
+	for( TreePtr<Node> value : elements )
 		node->elements.insert( value );
 	return node;
 }

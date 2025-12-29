@@ -396,9 +396,9 @@ string Render::RenderNodeExplicit( shared_ptr<const Node> node, Syntax::Producti
 						scon.push_back( DoRender( TreePtr<Node>(p), Syntax::Production::COMMA_SEP ) );
 					}
 					if( GetTotalSize(scon) > Syntax::GetLineBreakThreshold() )
-						sitems.push_back( Join( scon, ",\n", "", "") );
+						sitems.push_back( Join( scon, "🞄\n", "", "") );
 					else
-						sitems.push_back( Join( scon, ", ", "", "") );
+						sitems.push_back( Join( scon, "🞄", "", "") );
 				}
 			}            
 			else if( TreePtrInterface *singular = dynamic_cast<TreePtrInterface *>(items[i]) )

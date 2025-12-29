@@ -86,7 +86,7 @@ string BuildIdentifierAgent::GetAgentRender( VN::RendererInterface *renderer, Sy
 	Sequence<Node> scopy = sources;
 	for( TreePtrInterface &source : scopy )
 		ls_sources.push_back( renderer->DoRender( (TreePtr<Node>)source, Syntax::Production::COMMA_SEP ) );
-	string sources = Join( ls_sources, ", ");
+	string sources = Join( ls_sources, "🞄");
 		
 	// Add in the subtype name and format to make a pseudo-itemisation
 	list<string> ls_production;
