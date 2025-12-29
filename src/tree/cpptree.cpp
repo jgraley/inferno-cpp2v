@@ -931,9 +931,6 @@ Syntax::Production Compound::GetMyProductionTerminal() const
 
 string Compound::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	if( !ReadArgs::use.count("x") )
-		throw Unimplemented();
-		
     string s = " { ";
     for( TreePtr<Declaration> m : members )    
         s += renderer->DoRender( m, Syntax::Production::DECLARATION, policy );    
