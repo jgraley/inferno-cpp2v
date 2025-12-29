@@ -43,6 +43,7 @@ public:
 		MIN_NODE_SEMICOLON, // Note: nodes higher than here \/ can get ";" added.
 		BARE_STATEMENT = 40, // Statement with no semicolon
 		BARE_DECLARATION, // Actual declaration with no semicolon, eg int i	
+		PREFIX_STATEMENT, // eg throw <here>;
 		SPACE_SEP_STATEMENT, // eg throw <here>;
 		SPACE_SEP_DECLARATION, // the type in <here> <declarator>;
 		SPACE_SEP_PRE_PROC,

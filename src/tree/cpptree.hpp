@@ -1182,6 +1182,9 @@ struct Switch : Breakable
 {
     NODE_FUNCTIONS_FINAL
     TreePtr<Expression> condition; ///< Evaluates to a value whose case we'll jump to
+
+	Production GetMyProductionTerminal() const override;	
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
 };
 
 /// Intermediate for labels in a switch statement.
@@ -1217,6 +1220,7 @@ struct Continue : Statement, Uncombable
 	NODE_FUNCTIONS_FINAL 
 
 	Production GetMyProductionTerminal() const override;
+	string GetRenderTerminal( Production production ) const override;	
 };
 
 /// Break (from innermost Breakable)
@@ -1225,6 +1229,7 @@ struct Break : Statement
 	NODE_FUNCTIONS_FINAL 
 
 	Production GetMyProductionTerminal() const override;
+	string GetRenderTerminal( Production production ) const override;	
 };
 
 /// Initialise a member from inside a constructor body

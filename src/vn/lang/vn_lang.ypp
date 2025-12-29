@@ -133,7 +133,9 @@
 	<YY::TokenMetadata>	DECLARATION_OF			_("DeclarationOf")
 	<YY::TokenMetadata>	TYPE_OF					_("TypeOf")
 	<YY::TokenMetadata> NORM_TERM_KEYWORD		_("terminal keyword")
+	<YY::TokenMetadata> PRIMITIVE_STMT_KEYWORD  _("statement keyword")
 	<YY::TokenMetadata> SPACE_SEP_STMT_KEYWORD 	_("space-separated statement keyword")
+	<YY::TokenMetadata> ARGS_BODY_STMT_KEYWORD 	_("comma_args-and-body statement keyword")
 	
 %type <TreePtr<Node>> 				normal norm_primary norm_postfix norm_prefix norm_relational norm_disjunction norm_conjunction  
 %type <TreePtr<Node>> 				norm_assignment norm_equality norm_add_etc norm_logical_or norm_logical_and 
@@ -155,7 +157,7 @@
 %type <shared_ptr<VN::Gnomon>>		start_transform_name_scope
 %type <shared_ptr<VN::Gnomon>>		start_builtin_scope start_prerestrict_scope start_specific_id_scope start_id_by_name_scope start_build_id_scope
 %type <list<TreePtr<Node>>>			bare_statements
-%type <list<TreePtr<Node>>>			arguments
+%type <list<TreePtr<Node>>>			comma_args semicolon_args
 %type <const AvailableNodeData::Block *> builtin_name_part prerestrict_name_part specific_id_part id_by_name_part build_id_part
 %type <const AvailableNodeData::Block *> type_builtin_name_part type_prerestrict_name_part type_specific_id_part type_id_by_name_part type_build_id_part
 %%
@@ -244,20 +246,25 @@ type_specific_id_part	: start_specific_id_scope resolved_type_name	{ $$ = $2.as_
 type_id_by_name_part 	: start_id_by_name_scope resolved_type_name		{ $$ = $2.as_andata_block; (void)$1; }
 type_build_id_part 		: start_build_id_scope resolved_type_name		{ $$ = $2.as_andata_block; (void)$1; }
 
-arguments	: arguments COMMA norm_no_comma_op								{ $$ = $1; $$.push_back($3); }
-			| norm_no_comma_op												{ $$.push_back($1); }
-
 normal				: bare_statement
 
 bare_statement		: norm_expression
-					| SPACE_SEP_STMT_KEYWORD norm_expression					{ $$ = vn->OnSpaceSepStmtKeyword($1.as_ascii, @1, $2, @2); }
-					| norm_expression ':'										{ $$ = vn->OnLabel($1, @1); } 
+					| PRIMITIVE_STMT_KEYWORD										{ $$ = vn->OnPrimitiveStmt($1.as_ascii, @1); }
+					| SPACE_SEP_STMT_KEYWORD norm_expression						{ $$ = vn->OnSpaceSepStmt($1.as_ascii, @1, $2, @2); }
+					| ARGS_BODY_STMT_KEYWORD '(' semicolon_args ')' bare_statement	{ $$ = vn->OnArgsBodyStmt($1.as_ascii, @1, $3, @3, $5, @5); }
+					| norm_expression ':'											{ $$ = vn->OnLabel($1, @1); } 
+
+semicolon_args		: norm_expression											{ $$.push_back($1); }
+					| semicolon_args ';' norm_expression						{ $$ = $1; $$.push_back($3); }
 
 norm_expression		: norm_comma_op
                                    
 norm_comma_op       : norm_no_comma_op
                     | norm_comma_op COMMA norm_no_comma_op						{ $$ = vn->OnInfixOperator($2, $1, $3); }
    
+comma_args			: norm_no_comma_op											{ $$.push_back($1); }
+					| comma_args COMMA norm_no_comma_op							{ $$ = $1; $$.push_back($3); }			
+
 norm_no_comma_op 	: norm_id_value
 
 norm_id_value		: norm_disjunction
@@ -336,9 +343,9 @@ transform_unif_part : start_transform_name_scope TRANSFORM_NAME_UNIFIED { $$ = $
 norm_postfix: norm_paren     
 			| norm_postfix C_PRE_OR_POSTFIX_OP 				 		{ $$ = vn->OnPostfixOperator($2, $1); }
 			| norm_postfix '[' normal ']'	 				 		{ $$ = vn->OnSubscript($1, $3); }
-			| norm_postfix OPEN_MAP_CALL arguments CLOSE_MAP_CALL	{ $$ = vn->OnMapArgsCall($1, $3); }
+			| norm_postfix OPEN_MAP_CALL comma_args CLOSE_MAP_CALL	{ $$ = vn->OnMapArgsCall($1, $3); }
 			| norm_postfix OPEN_MAP_CALL CLOSE_MAP_CALL				{ $$ = vn->OnMapArgsCall($1, list<TreePtr<Node>>()); }
-			| norm_postfix '(' arguments ')'		 				{ $$ = vn->OnSeqArgsCall($1, $3); }
+			| norm_postfix '(' comma_args ')'		 				{ $$ = vn->OnSeqArgsCall($1, $3); }
 			| norm_postfix '(' ')'	 								{ $$ = vn->OnSeqArgsCall($1, list<TreePtr<Node>>()); }
 			| norm_postfix '.' norm_primary							{ $$ = vn->OnLookup($1, $3, @3); }
 		

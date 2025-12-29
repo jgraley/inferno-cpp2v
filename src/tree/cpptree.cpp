@@ -1008,6 +1008,22 @@ Syntax::Production Do::GetMyProductionTerminal() const
 	return Production::BARE_STATEMENT; 
 }
 
+//////////////////////////// Switch ///////////////////////////////
+
+Syntax::Production Switch::GetMyProductionTerminal() const
+{ 
+	return Production::BARE_STATEMENT; 
+}
+
+
+string Switch::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+{
+	return "switch( " +
+		   renderer->DoRender( condition, Production::BOTTOM_EXPR, policy ) +
+		   " )\n" +
+		   renderer->DoRender( body, Production::PREFIX_STATEMENT, policy );
+}
+
 //////////////////////////// SwitchTarget ///////////////////////////////
 
 Syntax::Production SwitchTarget::GetMyProductionTerminal() const
@@ -1022,11 +1038,24 @@ Syntax::Production Continue::GetMyProductionTerminal() const
 	return Production::BARE_STATEMENT; 
 }
 
+
+string Continue::GetRenderTerminal( Production ) const
+{
+	return "continue";
+}
+
+
 //////////////////////////// Break ///////////////////////////////
 
 Syntax::Production Break::GetMyProductionTerminal() const
 { 
 	return Production::BARE_STATEMENT; 
+}
+
+
+string Break::GetRenderTerminal( Production ) const
+{
+	return "break";
 }
 
 //////////////////////////// MembInitialisation ///////////////////////////////
@@ -1045,7 +1074,6 @@ string MembInitialisation::GetRender( VN::RendererInterface *renderer, Productio
 	return renderer->DoRender( member_id, Production::PURE_IDENTIFIER, policy ) +
 		   renderer->DoRender( initialiser, Production::INITIALISER, policy );
 }
-
 
 //////////////////////////// Nop ///////////////////////////////
 

@@ -358,8 +358,18 @@ TreePtr<Node> VNLangActions::OnNormalTerminalKeyword( string keyword, any keywor
 	ASSERTFAIL();
 }
 
+TreePtr<Node> VNLangActions::OnPrimitiveStmt( string keyword, any keyword_loc)
+{
+	if( keyword=="break" )
+		return MakeTreeNode<StandardAgentWrapper<CPPTree::Break>>();
+	else if( keyword=="continue" )
+		return MakeTreeNode<StandardAgentWrapper<CPPTree::Continue>>();
+	
+	ASSERTFAIL(); // internal error: parser should not call this unless recogniser produced PRIMITIVE_STMT_KEYWORD		
+}
 
-TreePtr<Node> VNLangActions::OnSpaceSepStmtKeyword( string keyword, any keyword_loc, TreePtr<Node> operand, any operand_loc )
+
+TreePtr<Node> VNLangActions::OnSpaceSepStmt( string keyword, any keyword_loc, TreePtr<Node> operand, any operand_loc )
 {
 	if( keyword=="return" )
 	{
@@ -378,7 +388,25 @@ TreePtr<Node> VNLangActions::OnSpaceSepStmtKeyword( string keyword, any keyword_
 		return ret;
 	}
 	
-	ASSERTFAIL();
+	ASSERTFAIL(); // internal error: parser should not call this unless recogniser produced SPACE_SEP_STMT_KEYWORD		
+}
+
+TreePtr<Node> VNLangActions::OnArgsBodyStmt( string keyword, any keyword_loc, list<TreePtr<Node>> args, any args_loc, TreePtr<Node> body, any body_loc )
+{
+	if( keyword=="switch" )
+	{
+		if( args.size() != 1 )
+			throw YY::VNLangParser::syntax_error(
+				any_cast<YY::VNLangParser::location_type>(args_loc),
+				keyword + " requires 1 argument inside ().");
+				
+		auto ret = MakeTreeNode<StandardAgentWrapper<CPPTree::Switch>>();
+		ret->condition = args.front();
+		ret->body = body;
+		return ret;
+	}
+	
+	ASSERTFAIL(); // internal error: parser should not call this unless recogniser produced ARGS_BODY_STMT_KEYWORD		
 }
 
 
@@ -655,6 +683,11 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 // Organisation: blend norm_paren into norm_primary and other stuff from the C++ BNF
 
 // Try and drag the precedence of ∨ etc down below the statements, for consistency with ⪮ and will look nicer on eg CleanUpDeadCode
+// And maybe ▲⯈ which perhaps we could argue isn't really a prefix operator after all...
+
+// Finish Goto!!! See its GetRender()
+
+// Reveiw the virt-specificers and const on the node methods for rendering
 
 // Tix:
 // Lose StandardAgentWrapper #867
