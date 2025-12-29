@@ -514,7 +514,6 @@ Syntax::Production Label::GetMyProductionTerminal() const
 
 string Label::GetRender( VN::RendererInterface *renderer, Production, Policy )
 {
-	throw Unimplemented(); // TODO remove
 	return renderer->DoRender( identifier, Syntax::Production::PURE_IDENTIFIER) + ":";	
 }
 

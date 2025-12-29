@@ -552,7 +552,7 @@ struct Label : Declaration, //TODO commonize with Case and Default
     virtual string GetColour() const { return Declaration::GetColour(); } // Declaration wins
     set<const TreePtrInterface *> GetDeclared() override { return { &identifier }; };
 	Production GetMyProductionTerminal() const override;	
-	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) final;
+	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;
 };
 
 //////////////////////////// Built-in Types ////////////////////////////

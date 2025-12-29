@@ -685,9 +685,13 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 // Try and drag the precedence of ∨ etc down below the statements, for consistency with ⪮ and will look nicer on eg CleanUpDeadCode
 // And maybe ▲⯈ which perhaps we could argue isn't really a prefix operator after all...
 
-// Finish Goto!!! See its GetRender()
+// Review the virt-specificers and const on the node methods for rendering
 
-// Reveiw the virt-specificers and const on the node methods for rendering
+// Getting NEXT:; ... goto *NEXT; in patterns (eg DoToIfGoto) even though tests pass. Find out if C++ renders are doing this
+// by finding a test case with do while and redering up to this step. Check with bi and p1.
+
+// The local nodes should all refuse rendering so they don't impersonate the nodes they subclass - do this before you get bitten
+
 
 // Tix:
 // Lose StandardAgentWrapper #867

@@ -30,6 +30,10 @@ struct StateLabel : CPPTree::Label
 {
     NODE_FUNCTIONS_FINAL
     TreePtr<CPPTree::InstanceIdentifier> state;
+    string GetRender( VN::RendererInterface *, Production , Policy  ) override
+    {
+		throw Unimplemented();
+	}
 };
 
 
