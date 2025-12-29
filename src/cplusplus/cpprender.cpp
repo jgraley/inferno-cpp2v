@@ -940,16 +940,6 @@ string CppRender::RenderStatement( TreePtr<Statement> statement, Syntax::Product
     //printf( "%s %d things\n", typeid(*statement).name(), statement->Itemise().size() );
     if( TreePtr<Declaration> d = DynamicTreePtrCast< Declaration >(statement) )
         return RenderDeclaration( d, surround_prod, policy );
-    else if( TreePtr<Compound> c = DynamicTreePtrCast< Compound >(statement) )
-    {
-        string s;
-        s += "{";
-        s += RenderDeclScope( c ); // Must do this first to populate backing list
-        for( TreePtr<Statement> st : c->statements )    
-            s += DoRender( st, Syntax::Production::STATEMENT_LOW );    
-        s += "}";
-        return s;
-    }
     else if( TreePtr<Expression> e = DynamicTreePtrCast< Expression >(statement) )
         return DoRender( e, surround_prod);
     else if( TreePtr<Return> es = DynamicTreePtrCast<Return>(statement) )
