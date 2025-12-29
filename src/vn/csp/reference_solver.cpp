@@ -331,15 +331,16 @@ ReferenceSolver::SelectNextValueRV ReferenceSolver::TryFindNextConsistentValue( 
         all_unsatisfied = UnionOf(all_unsatisfied, unsatisfied);      
         if( consistent )
         {
-            TRACEC("Value is ")(value)("\n");
+            TRACEC("Value ")(value)(" for X")(my_var_index)(" is consistent\n");
             return make_pair(value, all_unsatisfied);
         }
         else
         {
+            TRACEC("Value ")(value)(" for X")(my_var_index)(" is inconsistent with constraints (")(unsatisfied)("\n");
             EraseSolo( assignments, plan.free_variables.at(my_var_index) );
         }
     }
-    TRACEC("No (more) values found\n");
+    TRACEC("No consistent values found for X")(my_var_index)("\n");
 #ifdef CHECK_NONEMPTY_RESIDUAL
     ASSERT( values_tried_count > 0 ); // Note: could fire if domain is empty
     ASSERT( !all_unsatisfied.empty() ); 

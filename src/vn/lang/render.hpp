@@ -35,7 +35,7 @@ public:
 	                             Syntax::Policy policy ) final;
 	string AccomodateInit( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy );
 	string AccomodateBoot( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy );
-	string AccomodateSemiocolon( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy );
+	string AccomodateSemicolon( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy );
 	string AccomodatePreRestriction( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy );
 	string RenderNullPointer( Syntax::Production surround_prod );
 

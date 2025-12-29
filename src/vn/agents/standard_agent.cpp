@@ -694,7 +694,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingPattern( const
                     zone.AddTerminus( Mutator::CreateFreeContainer(dest, dest_con, dest_it) );     
                     
                     ASSERT( my_elt )("Some element of member %d (", j)(*my_con)(") of ")(*this)(" was nullptr\n");
-                    TRACE("Got ")(*my_elt)("\n");
+                    TRACE("Got ")(my_elt)("\n");
                     PatternLink my_elt_plink( &my_elt );
                     child_patches.push_back( my_elt_plink.GetChildAgent()->GenReplaceLayout(kit, my_elt_plink, acting_engine) );                
                 }
@@ -827,7 +827,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingX( const Repla
                     zone.AddTerminus( Mutator::CreateFreeContainer(dest, dest_con, dest_it) );     
                     
                     ASSERT( my_elt )("Some element of member %d (", j)(*my_con)(") of ")(*this)(" was nullptr\n");
-                    TRACE("Got ")(*my_elt)("\n");
+                    TRACE("Got ")(my_elt)("\n");
                     PatternLink my_elt_plink( &my_elt );
                     child_patches.push_back( my_elt_plink.GetChildAgent()->GenReplaceLayout(kit, my_elt_plink, acting_engine) );                
                 }
@@ -929,7 +929,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutNormal( const ReplaceKit &
             for( const TreePtrInterface &my_elt : *my_con )
             {
                 ASSERT( my_elt )("Some element of member %d (", i)(*my_con)(") of ")(*this)(" was nullptr\n");
-                TRACE("Got ")(*my_elt)("\n");
+                TRACE("Got ")(my_elt)("\n");
                 
                 // Make a placeholder in the dest container for the mutator to point to
                 ContainerInterface::iterator dest_it = dest_con->insert( Mutator::MakePlaceholder() );

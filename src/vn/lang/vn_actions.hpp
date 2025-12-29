@@ -71,7 +71,7 @@ public:
 	TreePtr<Node> OnCast( TreePtr<Node> type, any type_loc, TreePtr<Node> target, any target_loc );	
 	TreePtr<Node> OnConditionalOperator( TreePtr<Node> condition, TreePtr<Node> expr_then, TreePtr<Node> expr_else );	
 	TreePtr<Node> OnSubscript( TreePtr<Node> destination, TreePtr<Node> index );	
-	TreePtr<Node> OnCompound( list<TreePtr<Node>> statements );	
+	TreePtr<Node> OnCompound( list<TreePtr<Node>> members, any memb_loc, list<TreePtr<Node>> statements, any stmt_loc );	
 	TreePtr<Node> OnArrayLiteral( Item elements );	
 	TreePtr<Node> OnLabel( TreePtr<Node> identifier, any loc );	
 	

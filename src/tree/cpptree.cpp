@@ -1,5 +1,6 @@
 
 #include "cpptree.hpp"
+#include "common/read_args.hpp"
 
 #define EXPLICIT_BASE 0
 
@@ -927,6 +928,23 @@ Syntax::Production Compound::GetMyProductionTerminal() const
 	return Production::INITIALISER;
 }
 
+
+string Compound::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+{
+	if( !ReadArgs::use.count("x") )
+		throw Unimplemented();
+		
+    string s = " { ";
+    for( TreePtr<Declaration> m : members )    
+        s += renderer->DoRender( m, Syntax::Production::DECLARATION, policy );    
+    if( policy.compound_uses_vn_separator )
+		s += "⚬";
+    for( TreePtr<Statement> st : statements )    
+        s += renderer->DoRender( st, Syntax::Production::STATEMENT_LOW, policy );    
+    s += " } ";
+    return s;
+}
+
 //////////////////////////// StatementExpression ///////////////////////////////
 
 Syntax::Production StatementExpression::GetMyProductionTerminal() const
@@ -937,13 +955,6 @@ Syntax::Production StatementExpression::GetMyProductionTerminal() const
 /*
 string StatementExpression::GetRender( VN::RendererInterface *renderer, Production production, Policy policy )
 {
-	string s = "[](){";
-        AutoPush< TreePtr<Node> > cs( scope_stack, ce );
-    s += RenderDeclScope( ce ); // Must do this first to populate backing list
-    for( TreePtr<Statement> st : ce->statements )    
-        s += DoRender( st, Syntax::Production::STATEMENT_LOW );    
-	s += "}()";
-	return s;
 }*/
 
 //////////////////////////// Return ///////////////////////////////

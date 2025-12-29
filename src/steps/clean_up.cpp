@@ -464,8 +464,9 @@ CleanupUnusedVariables::CleanupUnusedVariables()
     nested_array->recurse_restriction = MakePatternNode<Array>();
     nested_array->terminus = sx_not;
     sx_not->negand = sx_any;
-    sx_any->disjuncts = ( MakePatternNode<Callable>(),
-                         getdecl );
+    sx_any->disjuncts = ( MakePatternNode<Array>(), // ensure we recursed out of arrays
+                          MakePatternNode<Callable>(),
+                          getdecl );
     getdecl->pattern = sx_ir;
     sx_ir->members = MakePatternNode<StarAgent, Declaration>();
     sx_ir->bases = MakePatternNode<StarAgent, Base>();

@@ -3,16 +3,21 @@
 ARGS=$*
 
 make -j 30
+rm -rf p1 gp1 p2 gp2
 
 # Render the built-in patterns 
-rm -rf p1
 mkdir -p p1 
 ./inferno.exe ${ARGS} -p p1/
+mkdir -p gp1 
+./inferno.exe ${ARGS} -gp gp1/
+./convert_all_dot.sh -d gp1
 
 # Re-render the parsed patterns 
 mkdir -p p2
-rm -f p2/*
 ./inferno.exe ${ARGS} p1 -p p2/ -qX
+mkdir -p gp2
+./inferno.exe ${ARGS} p1 -gp gp2/ -qX
+./convert_all_dot.sh -d gp2
 
 # All ensuing tests stop after this step
 QA=T130+

@@ -129,6 +129,9 @@ Syntax::Policy Render::GetDefaultPolicy()
 	// or ArrayLiteral or RecordLiteral. Use () instead, which are purely for disamiguation.
 	policy.boot_statements_using_braces = false;
 	
+	// Need to separate members from statements in Compound
+	policy.compound_uses_vn_separator = true;
+	
 	return policy;
 }
 
@@ -154,7 +157,15 @@ string Render::DoRender( TreePtr<Node> node, Syntax::Production surround_prod, S
 					  RETURN_ADDR() );
 
 	if( unique_coupling_names.count(node) > 0 )			
-		return s + unique_coupling_names.at(node);		
+	{
+		s += unique_coupling_names.at(node);
+		// Does the designation need a swemicolon?
+		// TODO duplicating AccomodateSemicolon(): resolve by having these act on strings rather than nodes
+		if( Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::MIN_SURR_SEMICOLON) &&
+            Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::MAX_SURR_SEMICOLON) )
+            s += ";\n";
+		return s;
+	}
 	else 
 		return s + AccomodateInit(node, surround_prod, policy);
 }
@@ -194,7 +205,7 @@ string Render::AccomodateBoot( TreePtr<Node> node, Syntax::Production surround_p
     Syntax::Production node_prod = GetNodeProduction(node, surround_prod, policy);
 							 		
     if( !(Syntax::GetPrecedence(node_prod) < Syntax::GetPrecedence(surround_prod)) )
-		return AccomodateSemiocolon( node, surround_prod, policy );
+		return AccomodateSemicolon( node, surround_prod, policy );
 	string s;
 
     switch(node_prod)
@@ -217,7 +228,7 @@ string Render::AccomodateBoot( TreePtr<Node> node, Syntax::Production surround_p
 					s += SSPrintf("// Booting statement, surround prod to BOTTOM_STMT_DECL\n");
 					
 				return s + "{\n " + 
-					   AccomodateSemiocolon( node, Syntax::Production::BOOT, policy ) +	
+					   AccomodateSemicolon( node, Syntax::Production::BOOT, policy ) +	
 					   "}\n";         
 			}   
 			[[fallthrough]]; // ELSE FALL THOROUGH INTO PARENS CASE
@@ -232,17 +243,24 @@ string Render::AccomodateBoot( TreePtr<Node> node, Syntax::Production surround_p
 			if( ReadArgs::use.count("c") )
 				s += SSPrintf("// Booting expression, surround prod to BOTTOM_EXPR\n");
 
-            return s + "( " +
-				   AccomodateSemiocolon( node, Syntax::Production::BOOT, policy ) +
+            s += "( " +
+				   AccomodateSemicolon( node, Syntax::Production::BOOT, policy ) +
 				   " )";            
+				   
+			// Node prod is now effectively BRACKETED... do we now need a semicolon?
+			if( Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::MIN_SURR_SEMICOLON) &&
+				Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::MAX_SURR_SEMICOLON) )
+				s += ";\n";		
+			
+			return s;
         
         default:        
-			return AccomodateSemiocolon( node, surround_prod, policy );         
+			return AccomodateSemicolon( node, surround_prod, policy );         
     }
 }
 
 							
-string Render::AccomodateSemiocolon( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
+string Render::AccomodateSemicolon( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
 {
 	string s;
 

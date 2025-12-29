@@ -142,7 +142,7 @@
 %type <TreePtr<Node>> 				type type_primary type_prefix type_disjunction type_conjunction type_paren
 %type <TreePtr<Node>> 				unified_no_comma_op unified unified_prefix
 %type <TreePtr<Node>> 				bare_statement
-%type <TreePtr<Node>> 				norm_id_value
+%type <TreePtr<Node>> 				norm_id_value compound
 %type <wstring> 					vn_name
 %type <string>						transform_norm_part transform_unif_part
 %type <YY::TokenMetadata> 			resolved_name resolved_type_name node_namespace
@@ -345,7 +345,8 @@ norm_postfix: norm_paren
 norm_paren	: norm_primary
 			| '(' commands ')'                          		{ $$ = vn->OnEmbeddedCommands($2); }
 
-norm_primary: builtin_name_part itemisation						{ $$ = vn->OnBuiltIn($1, @1, $2); }
+norm_primary: compound
+			| builtin_name_part itemisation						{ $$ = vn->OnBuiltIn($1, @1, $2); }
 			| STAR												{ $$ = vn->OnStar(nullptr); }
 			| STAR OPEN_VN normal CLOSE_VN						{ $$ = vn->OnStar($3); }
 			| INTEGRAL_LITERAL					      			{ $$ = vn->OnIntegralLiteral($1, @1); }
@@ -353,8 +354,6 @@ norm_primary: builtin_name_part itemisation						{ $$ = vn->OnBuiltIn($1, @1, $2
 			| BOOL_LITERAL										{ $$ = vn->OnBoolLiteral($1); }
 			| ANY												{ $$ = nullptr; }
 			| NORM_TERM_KEYWORD									{ $$ = vn->OnNormalTerminalKeyword($1.as_ascii, @1); }
-			| '{' '}'                          					{ $$ = vn->OnCompound({}); } 
-			| '{' bare_statements ';' '}'                  		{ $$ = vn->OnCompound($2); }
 			| C_ASSIGN '{' '}'             				  		{ $$ = vn->OnArrayLiteral(VN::Item()); } // ={...} dismbiguates against compound
 			| C_ASSIGN '{' item '}'         		  	  		{ $$ = vn->OnArrayLiteral($3); }               
 			| DESIGNATED_NORMAL       				  			{ $$ = $1.as_designated; }
@@ -364,6 +363,11 @@ norm_primary: builtin_name_part itemisation						{ $$ = vn->OnBuiltIn($1, @1, $2
 			| build_id_part OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN 		{ $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
 			| build_id_part OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($1, @1, $3, @3, $5); }
 			| build_id_part OPEN_VN VN_SEP item CLOSE_VN 				{ $$ = vn->OnBuildId($1, @1, wstring(), @3, $4); }
+
+compound	: '{' VN_SEP '}'                   							{ $$ = vn->OnCompound({}, @2, {}, @3); } 
+			| '{' bare_statements ';' VN_SEP '}'           				{ $$ = vn->OnCompound($2, @2, {}, @5); }
+			| '{' VN_SEP bare_statements ';' '}'           				{ $$ = vn->OnCompound({}, @2, $3, @3); }
+			| '{' bare_statements ';' VN_SEP bare_statements ';' '}'  	{ $$ = vn->OnCompound($2, @2, $5, @5); }
 
 builtin_name_part 	: start_builtin_scope resolved_name			{ $$ = $2.as_andata_block; (void)$1; }
 prerestrict_name_part : start_prerestrict_scope resolved_name	{ $$ = $2.as_andata_block; (void)$1; }

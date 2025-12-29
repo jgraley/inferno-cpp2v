@@ -1069,6 +1069,7 @@ struct Compound : SequentialScope,  ///< Local declarations go in here (preferab
 {
     NODE_FUNCTIONS_FINAL
 	Production GetMyProductionTerminal() const override;	
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
 };                   
 
 /// GCC extension for compound statements that return a value

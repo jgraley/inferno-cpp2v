@@ -109,7 +109,6 @@ void SymbolicConstraint::Start( const VN::XTreeDatabase *x_tree_db_ )
 
 bool SymbolicConstraint::IsSatisfied( const Assignments &assignments ) const
 {   
-    INDENT("T");
     ASSERT(plan.consistency_expression);
 
 #ifdef CHECK_ASSIGNMENTS_INLCUDES_REQUIRED_VARS

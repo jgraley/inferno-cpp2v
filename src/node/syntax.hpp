@@ -106,7 +106,8 @@ public:
 			refuse_c_style_cast(false),
 			detect_and_render_constructor(true),
 			refuse_map_argumentation(true),
-			boot_statements_using_braces(true) {}
+			boot_statements_using_braces(true),
+			compound_uses_vn_separator(false) {}
 		bool force_initialisation;
 		bool force_incomplete_records;
 		bool split_bulky_statics;
@@ -118,6 +119,7 @@ public:
 		bool detect_and_render_constructor;
 		bool refuse_map_argumentation;
 		bool boot_statements_using_braces;
+		bool compound_uses_vn_separator;
 	};
 	
 	// We deal with syntactical association only, not mathematical, because:

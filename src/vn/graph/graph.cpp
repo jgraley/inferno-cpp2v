@@ -494,7 +494,10 @@ Graph::MyNodeBlock Graph::PreProcessBlock( const Graphable::NodeBlock &block,
     
     // Capture the node (if there is one: might be NULL)
     if( pspecial )
-        my_block.prerestriction_name = (*(agent->GetArchetypeNode())).GetName();
+    {
+		TreePtr<Node> archetype_node = agent->GetArchetypeNode();
+        my_block.prerestriction_name = archetype_node ? archetype_node->GetName() : "";
+	}
     
     // In graph trace mode, nodes get their serial number added in as an extra sub-block (with no links)
     if( ReadArgs::graph_trace && pnode )

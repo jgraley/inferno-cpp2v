@@ -78,7 +78,6 @@ string SymbolicResult::GetTrace() const
 
 UniqueResult::UniqueResult( XValue xlink_ )    
 {
-	INDENT("U");
     ASSERT( xlink_ )("Not allowed to construct with NULL; use EmptyResult instead");
 	//FTRACE("Result at %p sets xlink to: ", this)(xlink_)("\n"); // crashes when xlink copy constructor nulls the sp_tp_
 	xlink = xlink_;

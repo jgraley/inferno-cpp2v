@@ -321,11 +321,13 @@ TreePtr<Node> VNLangActions::OnSubscript( TreePtr<Node> destination, TreePtr<Nod
 }
 	
 
-TreePtr<Node> VNLangActions::OnCompound( list<TreePtr<Node>> statements )
+TreePtr<Node> VNLangActions::OnCompound( list<TreePtr<Node>> members, any memb_loc, list<TreePtr<Node>> statements, any stmt_loc )
 {
 	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::Compound>>();
+	for( TreePtr<Node> member : members )
+		node->members.insert(member);
 	for( TreePtr<Node> statement : statements )
-		node->statements.insert( statement );
+		node->statements.insert(statement);
 	return node;
 }
 
@@ -647,10 +649,12 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 // - I think norm_/normal can become expr_
 // - Labels will need their own "stuff" I think, otherwise it will be too hard to disambiguate with things like : and && hanging around
 
-// Ensure that in VN renders, only () is used for booting eg the if-else ambig. {} is always an explicit Compound
+// {} is always an explicit Compound
 // and ({}) is StatementExpression so {} should be available wherever () is
 
 // Organisation: blend norm_paren into norm_primary and other stuff from the C++ BNF
+
+// Try and drag the precedence of ∨ etc down below the statements, for consistency with ⪮ and will look nicer on eg CleanUpDeadCode
 
 // Tix:
 // Lose StandardAgentWrapper #867
