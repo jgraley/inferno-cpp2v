@@ -51,7 +51,6 @@ public:
 		SPACE_SEP_DECLARATION, // the type in <here> <declarator>;
 		SPACE_SEP_PRE_PROC,
 		LABEL,  // Anything with a : after it. Could be (a) like a bare statement needing a ; or (b) a prefix on statements.
-		COMPOUND, // excluded from added ;
 		TOP_STMT_DECL, // Highest statement precedence
 						
 		// ----- Types. Just this for now.
@@ -83,6 +82,7 @@ public:
 		INITIALISER, // eg MyType thing <here>; prefix = may be inserted. Here to be near ASSIGN	
 		PRIMARY_EXPR, // one-token literal eg 12, 12.34, "foo"
 		PRIMARY_TYPE, // one-token type eg void, bool
+		COMPOUND, // excluded from added ;
 		BRACKETED, // (), {} from the outside		
 		TOP_EXPR, // Highest expression precedence 
 		

@@ -677,8 +677,8 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 
 // Organisation: blend norm_paren into norm_primary and other stuff from the C++ BNF
 
-// Try and drag the precedence of ∨ etc down below the statements, for consistency with ⪮ and will look nicer on eg CleanUpDeadCode
-// And maybe ▲⯈ which perhaps we could argue isn't really a prefix operator after all...
+// Note: ▲⯈ stays at low prec so we can have ꩜⩨▲ uninterupted. Luckily both () and {} are lower and can be used directly, 
+// each booting the parser so we can put a wide range of stuff in them.
 
 // Review the virt-specificers and const on the node methods for rendering
 
