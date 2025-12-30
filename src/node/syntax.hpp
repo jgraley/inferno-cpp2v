@@ -137,6 +137,7 @@ public:
 	struct Refusal : Exception {};
 	struct Unimplemented : Refusal {};
 	struct RefusedByPolicy : Refusal {};
+	struct RefuseDueLocal : Refusal {};
 		
 	/// Produce the source-code-name of the corresponding SystemC construct
     virtual string GetLoweredIdName() const;

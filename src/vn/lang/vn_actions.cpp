@@ -684,8 +684,6 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 
 // Seeing semicolon aftter } in rendered C++ (eg loop.c -qT45)
 
-// The local nodes should all refuse rendering so they don't impersonate the nodes they subclass - do this before you get bitten
-
 // A pattern emerges in the CPPTree GetRender() functions: we are using VN-render policy to prevent the render from depending on a 
 // direct analysis of child nodes - this works because VN-renders are patterns and could have special nodes in between (and
 // we never attempt to analyse special nodes for their "true" type because it can be ambiguous.
