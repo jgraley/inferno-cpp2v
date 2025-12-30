@@ -145,7 +145,7 @@
 %type <TreePtr<Node>> 				type type_primary type_prefix type_disjunction type_conjunction type_paren
 %type <TreePtr<Node>> 				unified unified_prefix
 %type <TreePtr<Node>> 				bare_statement statement_nc statement
-%type <TreePtr<Node>> 				norm_id_value compound
+%type <TreePtr<Node>> 				norm_id_value compound comp_prefix
 %type <wstring> 					vn_name
 %type <string>						transform_norm_part transform_unif_part
 %type <YY::TokenMetadata> 			resolved_name resolved_type_name node_namespace
@@ -285,9 +285,9 @@ norm_disjunction	: norm_conjunction
 
 norm_conjunction 	: norm_assignment
 					| norm_conjunction CONJUNCTION norm_assignment				{ $$ = vn->OnConjunction($1, $3); }
-					| compound // Can't get any lower due conflict with prefix = (for array inits)
 		
 norm_assignment 	: norm_logical_or 
+					| comp_prefix // Branch off here for compound to avoid conflicts with prefix = (used for inits)
 					| 				   norm_logical_or C_ASSIGN norm_assignment	{ $$ = vn->OnInfixOperator($2, $1, $3); }
 					|         norm_logical_or C_COMPOUND_ASSIGN norm_assignment	{ $$ = vn->OnInfixOperator($2, $1, $3); }
 					|   norm_logical_or '?' norm_expression ':' norm_assignment	{ $$ = vn->OnConditionalOperator($1, $3, $5); }
@@ -324,7 +324,6 @@ norm_mul_etc 		: norm_prefix
 					| norm_mul_etc '*' norm_prefix								{ $$ = vn->OnInfixOperator("*", $1, $3); }
 		
 norm_prefix : norm_postfix
-			| 			       DELTA normal DELTA_ARROW norm_prefix	 { $$ = vn->OnDelta($2, $4); }
 			| 					    C_PREFIX_OP 		norm_prefix	 { $$ = vn->OnPrefixOperator($1, $2); }
 			| 					    C_AMPERSAND 		norm_prefix	 { $$ = vn->OnPrefixOperator($1, $2); }
 			| 					    C_STAR		 		norm_prefix	 { $$ = vn->OnPrefixOperator($1, $2); }
@@ -333,6 +332,7 @@ norm_prefix : norm_postfix
 			| 					    C_PRE_OR_POSTFIX_OP norm_prefix	 { $$ = vn->OnPrefixOperator($1, $2); }
 			| 									  GRASS norm_prefix	 { $$ = vn->OnGrass($2); }
 			| 								 POINTER_IS norm_prefix	 { $$ = vn->OnPointerIs($2); }
+			| 			       DELTA normal DELTA_ARROW norm_prefix	 { $$ = vn->OnDelta($2, $4); }
 			| 								   NEGATION norm_prefix	 { $$ = vn->OnNegation($2); }
 			|       				transform_norm_part type_prefix	 { $$ = vn->OnTransform($1, @1, $2, @2); }
 			| 								 BUILD_SIZE unified_prefix	{ $$ = vn->OnBuildSize($2); }
@@ -387,6 +387,22 @@ prerestrict_name_part : start_prerestrict_scope resolved_name	{ $$ = $2.as_andat
 specific_id_part	: start_specific_id_scope resolved_name	{ $$ = $2.as_andata_block; (void)$1; }
 id_by_name_part 	: start_id_by_name_scope resolved_name	{ $$ = $2.as_andata_block; (void)$1; }
 build_id_part 		: start_build_id_scope resolved_name	{ $$ = $2.as_andata_block; (void)$1; }
+
+
+// Because there's no separator in {{code} expr} the prefix ops would conflict with infix that use same symbol,
+// so we'll need to complete a branch of the syntax for compounds with a copy of the unary VN operators (none are postfix).
+comp_prefix : compound 
+			| 			       DELTA normal DELTA_ARROW comp_prefix	{ $$ = vn->OnDelta($2, $4); }
+			| 								   NEGATION comp_prefix	{ $$ = vn->OnNegation($2); }
+			|       				transform_norm_part comp_prefix	{ $$ = vn->OnTransform($1, @1, $2, @2); }
+			| 								 BUILD_SIZE comp_prefix	{ $$ = vn->OnBuildSize($2); }
+			| 								  STRINGIZE comp_prefix	{ $$ = vn->OnStringize($2); }
+			|  									  STUFF comp_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
+			|  STUFF OPEN_VN           unified CLOSE_VN comp_prefix	{ $$ = vn->OnStuff($5, $3, VN::Limit()); }
+			|  STUFF OPEN_VN stuff_depth_limit CLOSE_VN comp_prefix	{ $$ = vn->OnStuff($5, nullptr, $3); }
+			|                     prerestrict_name_part comp_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
+
+
 
 vn_name		: UNICODE_NAME    							{ $$ = $1.as_unicode; }
 			| ASCII_NAME								{ $$ = $1.as_unicode; }     

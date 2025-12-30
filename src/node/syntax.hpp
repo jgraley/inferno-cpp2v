@@ -23,7 +23,7 @@ public:
 		VN_SEP_SCRIPTY, // Separated by ⨟ (in embedded engine renders)
 		VN_SEP_ITEMS, // Separated by ⚬ (in StandardAgent renders, which always have ())		
 		VN_DESIGNATE, // defining names using ⪮
-		
+						
 		// ----- Complete self-sufficient statements and declarations. There is a precedence
 		// scheme, booted using {}, to disambiguate if/else.
 		BOTTOM_STMT_DECL,		
@@ -49,9 +49,9 @@ public:
 		LABEL,  // Anything with a : after it. Could be (a) like a bare statement needing a ; or (b) a prefix on statements.
 		COMPOUND, // excluded from added ;
 		TOP_STMT_DECL, // Highest statement precedence
+						
+		INITIALISER = 50, // eg MyType thing <here>; prefix = may be inserted.
 
-		INITIALISER = 50, // eg MyType thing <here>; and " = " is inserted if node is expressional
-							
 		// ----- Types. Just this for now.
 		BOOT_TYPE,
 		TOP_TYPE,
