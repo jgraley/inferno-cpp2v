@@ -380,11 +380,7 @@ TreePtr<Node> VNLangActions::OnSpaceSepStmt( string keyword, any keyword_loc, Tr
 	else if( keyword=="goto" )
 	{
 		auto ret = MakeTreeNode<StandardAgentWrapper<CPPTree::Goto>>();
-		if( auto der = TreePtr<CPPTree::Dereference>::DynamicCast(operand) )
-			ret->destination = der->operands.front();
-		else
-			ret->destination = operand;
-			
+		ret->destination = operand;		
 		return ret;
 	}
 	
@@ -693,6 +689,9 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 
 // The local nodes should all refuse rendering so they don't impersonate the nodes they subclass - do this before you get bitten
 
+// A pattern emerges in the CPPTree GetRender() functions: we are using VN-render policy to prevent the render from depending on a 
+// direct analysis of child nodes - this works because VN-renders are patterns and could have special nodes in between (and
+// we never attempt to analyse special nodes for their "true" type because it can be ambiguous.
 
 // Tix:
 // Lose StandardAgentWrapper #867

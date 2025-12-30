@@ -104,23 +104,19 @@ Orderable::Diff SpecificIdentifier::OrderCompare3WayCovariant( const Orderable &
 }
 
 
-string SpecificIdentifier::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy ) 
+string SpecificIdentifier::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) 
 {		
 	// Get rid of all this casting by building the entire rendering subsystem using plain old const pointers.
 	auto id = TreePtr<SpecificIdentifier>::DynamicCast( TreePtr<Node>(shared_from_this()) );
 		
-    // Put this in SpecificLabelIdentifier
+    // TODO Put this in SpecificLabelIdentifier
     if( DynamicTreePtrCast< SpecificLabelIdentifier >(id) )
     {
-		if( surround_prod < Syntax::Production::RESOLVER )
+		if( policy.goto_uses_ref_and_deref && surround_prod < Syntax::Production::RESOLVER )
 		{
 			// label-as-variable (GCC extension)  
 			return "&&" + renderer->DoRender( id, Syntax::Production::RESOLVER ); // recurse at strictly higher precedence
-		}
-		else
-		{
-			// TODO call SpecificIdentifier::...
-		}			
+		}		
     }
 
     if( !id )
@@ -974,17 +970,20 @@ Syntax::Production Goto::GetMyProductionTerminal() const
 }
 
 
-string Goto::GetRender( VN::RendererInterface *renderer, Production, Policy )
+string Goto::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
 	string s = "goto ";
 	bool star = false;
 	bool remove_double_deref = false;
 	Production prod = Production::SPACE_SEP_STATEMENT;
-    if( !DynamicTreePtrCast< SpecificLabelIdentifier >(destination) )
-		star = true;
-	else
-		remove_double_deref = true;
-		
+    if( policy.goto_uses_ref_and_deref )
+    {
+		if( !DynamicTreePtrCast< SpecificLabelIdentifier >(destination) )
+			star = true;
+		else
+			remove_double_deref = true;
+	}
+	
 	if( star )
 	{
 		s += "*";
@@ -998,7 +997,6 @@ string Goto::GetRender( VN::RendererInterface *renderer, Production, Policy )
 	
 	return s + label;
 }
-//goto_uses_ref_and_deref
 
 //////////////////////////// If ///////////////////////////////
 
