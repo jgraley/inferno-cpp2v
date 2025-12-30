@@ -17,13 +17,16 @@ MINI_SC_SR_CASES = small.c pointeris.c ${MINI_SC_CASES}
 MINI_SC_SR_CASES = small.c pointeris.c ${MINI_SC_CASES} 
 
 # The original C/C++ test cases, no SystemC
-CPP_CASES = test04.cpp test07.cpp test12.cpp test14.cpp methodcall.cpp ut_in_func.cpp
-C_CASES = declchain.c buriedcall.c test02.c test03.c test05.c test06.c test09.c test10.c test11.c test13.c test15.c test16.c small.c compound.c ifelse.c
-  
+CPP_CASES = test04.cpp test07.cpp test12.cpp test14.cpp 
+CPP_CASES += methodcall.cpp ut_in_func.cpp
+C_CASES = test02.c test03.c test05.c test06.c test09.c test10.c test11.c test13.c test15.c test16.c 
+C_CASES += declchain.c buriedcall.c small.c compound.c ifelse.c loop.c
+
 # Skip due #834: gotovar.c  
 # Skip due #836: duffs_device.c  
 # Skip because can't use it with -qN due ({}) outside function: pointeris.c
-  
+# template.cpp has actual templates
+
 # The whole lot for the benefit of auto rules
 EXEC_CASES = ${SC_CASES} ${C_CASES} ${CPP_CASES}
 
