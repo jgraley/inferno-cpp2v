@@ -19,10 +19,14 @@ public:
 	enum class Production // "Syntax::Production" is a generalisation of precedence
 	{		
 		PROGRAM = 0,
+		BOTTOM_VN,
 		BOOT,
 		VN_SEP_SCRIPTY, // Separated by ⨟ (in embedded engine renders)
 		VN_SEP_ITEMS, // Separated by ⚬ (in StandardAgent renders, which always have ())		
 		VN_DESIGNATE, // defining names using ⪮
+		VN_DISJUNCTION,
+		VN_CONJUNCTION,
+		TOP_VN,
 						
 		// ----- Complete self-sufficient statements and declarations. There is a precedence
 		// scheme, booted using {}, to disambiguate if/else.
@@ -60,9 +64,6 @@ public:
 		COMMA_OP, // Must be lowest binop, so we can bypass it when we want comma as separator
 		COMMA_SEP, // Use this for comma-separated lists to force parens for COMMA_OP, including VN
 		COLON_SEP, // Use for map arguments
-
-		VN_DISJUNCTION,
-		VN_CONJUNCTION,
 
 		ASSIGN = 70, //C++: assign ops and statement-like keywords eg throw
 		LOGIC_OR,

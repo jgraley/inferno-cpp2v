@@ -282,8 +282,8 @@ string Render::AccomodateSemicolon( TreePtr<Node> node, Syntax::Production surro
         
     if( (Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::BOTTOM_EXPR) &&
          Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::TOP_EXPR)) ||
-        (Syntax::GetPrecedence(surround_prod) >= Syntax::GetPrecedence(Syntax::Production::BOOT) &&
-         Syntax::GetPrecedence(surround_prod) <= Syntax::GetPrecedence(Syntax::Production::VN_DESIGNATE)) )
+        (Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::BOTTOM_VN) &&
+         Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::TOP_VN)) )
         if( Syntax::GetPrecedence(node_prod) > Syntax::GetPrecedence(Syntax::Production::MIN_NODE_SEMICOLON) &&
 			Syntax::GetPrecedence(node_prod) < Syntax::GetPrecedence(Syntax::Production::TOP_STMT_DECL) &&
 			node_prod != Syntax::Production::COMPOUND )

@@ -141,11 +141,11 @@
 %type <TreePtr<Node>> 				normal expr_primary expr_postfix expr_prefix expr_relational expr_disjunction expr_conjunction  
 %type <TreePtr<Node>> 				expr_assignment expr_equality expr_add_etc expr_logical_or expr_logical_and 
 %type <TreePtr<Node>> 				expr_mul_etc expr_shift expr_bitwise_and expr_bitwise_or expr_bitwise_xor  
-%type <TreePtr<Node>> 				expr_comma_op expr_no_comma_op expr_expression expr_vn_prim
+%type <TreePtr<Node>> 				expr_comma_op expr_no_comma_op expr_expression expr_vn_prim expr_id_value
 %type <TreePtr<Node>> 				type type_primary type_prefix type_disjunction type_conjunction type_vn_prim
 %type <TreePtr<Node>> 				unified unified_prefix
-%type <TreePtr<Node>> 				bare_statement statement_nc statement
-%type <TreePtr<Node>> 				expr_id_value compound comp_prefix
+%type <TreePtr<Node>> 				bare_statement statement_nc statement join_expr_stmt
+%type <TreePtr<Node>> 				compound comp_prefix
 %type <wstring> 					vn_name
 %type <string>						transform_norm_part transform_unif_part
 %type <YY::TokenMetadata> 			resolved_name resolved_type_name node_namespace
@@ -265,8 +265,16 @@ type_specific_id_part	: start_specific_id_scope resolved_type_name	{ $$ = $2.as_
 type_id_by_name_part 	: start_id_by_name_scope resolved_type_name		{ $$ = $2.as_andata_block; (void)$1; }
 type_build_id_part 		: start_build_id_scope resolved_type_name		{ $$ = $2.as_andata_block; (void)$1; }
 
-normal				: expr_expression
-					| statement_nc
+normal				: expr_disjunction
+
+expr_disjunction	: expr_conjunction
+					| expr_disjunction DISJUNCTION expr_conjunction				{ $$ = vn->OnDisjunction($1, $3); }
+
+expr_conjunction 	: join_expr_stmt
+					| expr_conjunction CONJUNCTION join_expr_stmt				{ $$ = vn->OnConjunction($1, $3); }
+		
+join_expr_stmt		: expr_expression
+					| statement_nc // statements not including Compound, which is expressional from this POV
 
 expr_expression		: expr_comma_op
                                    
@@ -278,15 +286,9 @@ comma_args			: expr_no_comma_op											{ $$.push_back($1); }
 
 expr_no_comma_op 	: expr_id_value
 
-expr_id_value		: expr_disjunction
-					| expr_id_value VN_COLON expr_disjunction					{ $$ = vn->OnIdValuePair($1, @1, $3); }
+expr_id_value		: expr_assignment
+					| expr_id_value VN_COLON expr_assignment					{ $$ = vn->OnIdValuePair($1, @1, $3); }
 					
-expr_disjunction	: expr_conjunction
-					| expr_disjunction DISJUNCTION expr_conjunction				{ $$ = vn->OnDisjunction($1, $3); }
-
-expr_conjunction 	: expr_assignment
-					| expr_conjunction CONJUNCTION expr_assignment				{ $$ = vn->OnConjunction($1, $3); }
-		
 expr_assignment 	: expr_logical_or 
 					| comp_prefix // Branch off here for compound to avoid conflicts with prefix = (used for inits)
 					| 				   expr_logical_or C_ASSIGN expr_assignment	{ $$ = vn->OnInfixOperator($2, $1, $3); }
