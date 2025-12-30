@@ -50,10 +50,8 @@ public:
 		COMPOUND, // excluded from added ;
 		TOP_STMT_DECL, // Highest statement precedence
 						
-		INITIALISER = 50, // eg MyType thing <here>; prefix = may be inserted.
-
 		// ----- Types. Just this for now.
-		BOOT_TYPE,
+		BOOT_TYPE = 50,
 		TOP_TYPE,
 		
 		// ----- Expressions. There is a precedence scheme, booted using ()
@@ -81,13 +79,14 @@ public:
 		PREFIX, // C++ and VN: all prefix 
 		POSTFIX, // C++: all postfix including sub clauses
 		SPACE_SEP_TYPE, // eg unsigned long. Interestingly, the spaces take precedence
+		INITIALISER, // eg MyType thing <here>; prefix = may be inserted. Here to be near ASSIGN	
 		PRIMARY_EXPR, // one-token literal eg 12, 12.34, "foo"
 		PRIMARY_TYPE, // one-token type eg void, bool
 		BRACKETED, // (), {} from the outside		
 		TOP_EXPR, // Highest expression precedence 
 		
 		// ----- Abstract, lexer-ish productions of no particuler kind
-		EXPLICIT_NODE = 90, // Eg ◼CPPTree::MyNode(...)
+		EXPLICIT_NODE = 100, // Eg ◼CPPTree::MyNode(...)
 		RESOLVER, // :: in C++	
 		PURE_IDENTIFIER, // Higher than expr because could be a type, label etc
 		TERMINAL, // Lexer tokens of any kind (other than type or expression)
