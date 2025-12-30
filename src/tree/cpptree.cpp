@@ -104,21 +104,11 @@ Orderable::Diff SpecificIdentifier::OrderCompare3WayCovariant( const Orderable &
 }
 
 
-string SpecificIdentifier::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) 
+string SpecificIdentifier::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy ) 
 {		
 	// Get rid of all this casting by building the entire rendering subsystem using plain old const pointers.
 	auto id = TreePtr<SpecificIdentifier>::DynamicCast( TreePtr<Node>(shared_from_this()) );
 		
-    // TODO Put this in SpecificLabelIdentifier
-    if( DynamicTreePtrCast< SpecificLabelIdentifier >(id) )
-    {
-		if( policy.goto_uses_ref_and_deref && surround_prod < Syntax::Production::RESOLVER )
-		{
-			// label-as-variable (GCC extension)  
-			return "&&" + renderer->DoRender( id, Syntax::Production::RESOLVER ); // recurse at strictly higher precedence
-		}		
-    }
-
     if( !id )
 		throw Syntax::Unimplemented();
 
@@ -500,15 +490,35 @@ Syntax::Production LabelIdentifier::GetMyProductionTerminal() const
 	return Production::PURE_IDENTIFIER; 
 }
 
-//////////////////////////// Label //////////////////////////////
+//////////////////////////// SpecificLabelIdentifier //////////////////////////////
 
-Syntax::Production Label::GetMyProductionTerminal() const
+Syntax::Production SpecificLabelIdentifier::GetMyProductionTerminal() const
+{ 
+	return Production::PURE_IDENTIFIER; 
+}
+
+
+string SpecificLabelIdentifier::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy)
+{
+	if( policy.goto_uses_ref_and_deref && 
+	    surround_prod < Syntax::Production::PURE_IDENTIFIER ) // Don't add && in a label declaration
+	{
+		// label-as-variable (GCC extension)  
+		return "&&" + SpecificIdentifier::GetRender( renderer, Syntax::Production::RESOLVER, policy );
+	}		   
+    
+    return SpecificIdentifier::GetRender( renderer, surround_prod, policy );
+}
+
+//////////////////////////// LabelDeclaration //////////////////////////////
+
+Syntax::Production LabelDeclaration::GetMyProductionTerminal() const
 { 
 	return Production::LABEL; 
 }
 
 
-string Label::GetRender( VN::RendererInterface *renderer, Production, Policy )
+string LabelDeclaration::GetRender( VN::RendererInterface *renderer, Production, Policy )
 {
 	return renderer->DoRender( identifier, Syntax::Production::PURE_IDENTIFIER) + ":";	
 }

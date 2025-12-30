@@ -197,7 +197,7 @@ TreePtr<CPPTree::SpecificIdentifier> BuildLabelIdentifierAgent::BuildSpecificIde
 
 string BuildLabelIdentifierAgent::GetIdentifierSubTypeName() const
 {
-	return "Label";
+	return "LabelDeclaration";
 }    
 
 //---------------------------------- BuildPreprocesorIdentifierAgent ------------------------------------    

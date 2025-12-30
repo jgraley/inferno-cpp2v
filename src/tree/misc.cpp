@@ -18,7 +18,7 @@ AugTreePtr<Identifier> GetIdentifierOfDeclaration( AugTreePtr<Declaration> d )
         return GET_CHILD(i, identifier);
     else if( auto t = AugTreePtr<TypeDeclaration>::DynamicCast( d ) )
         return GET_CHILD(t, identifier);
-    else if( auto l = AugTreePtr<Label>::DynamicCast( d ) )
+    else if( auto l = AugTreePtr<LabelDeclaration>::DynamicCast( d ) )
         return GET_CHILD(l, identifier);
     else
         return AugTreePtr<Identifier>(); // was a declaration without an identifier, ie a base class

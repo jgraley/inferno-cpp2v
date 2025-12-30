@@ -200,9 +200,9 @@ CleanupDuplicateLabels::CleanupDuplicateLabels()
     auto overlay = MakePatternNode<DeltaAgent, Statement>();
     auto s_comp = MakePatternNode<Compound>();
     auto r_comp = MakePatternNode<Compound>();
-    auto s_label1 = MakePatternNode<Label>(); // keep l1 and elide l2
-    auto s_label2 = MakePatternNode<Label>();
-    auto r_label1 = MakePatternNode<Label>();
+    auto s_label1 = MakePatternNode<LabelDeclaration>(); // keep l1 and elide l2
+    auto s_label2 = MakePatternNode<LabelDeclaration>();
+    auto r_label1 = MakePatternNode<LabelDeclaration>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto pre = MakePatternNode<StarAgent, Statement>();
     auto post = MakePatternNode<StarAgent, Statement>();
@@ -261,7 +261,7 @@ CleanupIneffectualLabels::CleanupIneffectualLabels()
     auto overlay = MakePatternNode<DeltaAgent, Statement>();
     auto s_comp = MakePatternNode<Compound>();
     auto r_comp = MakePatternNode<Compound>();
-    auto s_label = MakePatternNode<Label>(); // keep l1 and elide l2
+    auto s_label = MakePatternNode<LabelDeclaration>(); // keep l1 and elide l2
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto pre = MakePatternNode<StarAgent, Statement>();
     auto post = MakePatternNode<StarAgent, Statement>();
@@ -302,14 +302,14 @@ CleanupIneffectualLabels::CleanupIneffectualLabels()
 
 CleanupIneffectualGoto::CleanupIneffectualGoto()
 {
-    // Find a compound containing a Goto and a Label where the 
-    // goto goes to the label. Remove the Goto (but not the Label
+    // Find a compound containing a Goto and a LabelDeclaration where the 
+    // goto goes to the label. Remove the Goto (but not the LabelDeclaration
     // since there may be other Gotos to it).
     auto s_comp = MakePatternNode<Compound>();
     auto r_comp = MakePatternNode<Compound>();
     auto s_goto = MakePatternNode<Goto>();
-    auto s_label = MakePatternNode<Label>();
-    auto r_label = MakePatternNode<Label>();
+    auto s_label = MakePatternNode<LabelDeclaration>();
+    auto r_label = MakePatternNode<LabelDeclaration>();
     auto labelid = MakePatternNode<LabelIdentifier>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto pre = MakePatternNode<StarAgent, Statement>();
@@ -336,7 +336,7 @@ CleanupUnusedLabels::CleanupUnusedLabels()
     //
     // Usages are detected by searching for the label's identifier
     // using a recurse restriction that prevents recusing through
-    // the Label node, thus excluding the declaration which we want
+    // the LabelDeclaration node, thus excluding the declaration which we want
     // to ignore.
     auto s_instance = MakePatternNode<Instance>();
     auto r_instance = MakePatternNode<Instance>();
@@ -345,7 +345,7 @@ CleanupUnusedLabels::CleanupUnusedLabels()
     auto overlay = MakePatternNode<DeltaAgent, Statement>();
     auto s_comp = MakePatternNode<Compound>();
     auto r_comp = MakePatternNode<Compound>();
-    auto s_label = MakePatternNode<Label>(); // keep l1 and elide l2
+    auto s_label = MakePatternNode<LabelDeclaration>(); // keep l1 and elide l2
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto pre = MakePatternNode<StarAgent, Statement>();
     auto post = MakePatternNode<StarAgent, Statement>();
@@ -354,7 +354,7 @@ CleanupUnusedLabels::CleanupUnusedLabels()
     auto s_andrule = MakePatternNode<ConjunctionAgent, Compound>();
     auto sx_notrule = MakePatternNode<NegationAgent, Compound>();
     auto sxx_notrule = MakePatternNode<NegationAgent, Node>();
-    auto sxx_label = MakePatternNode< Label >();
+    auto sxx_label = MakePatternNode< LabelDeclaration >();
     auto identifier = MakePatternNode<InstanceIdentifier>();
     auto type = MakePatternNode<Callable>();
 
@@ -401,7 +401,7 @@ CleanUpDeadCode::CleanUpDeadCode()
     s_comp->statements = ( pre, s_exit_any, s_dead_not, post );
     s_exit_any->disjuncts = (MakePatternNode<Break>(), MakePatternNode<Continue>(), MakePatternNode<Return>(), MakePatternNode<Goto>());
     s_dead_not->negand = s_dead_any;
-    s_dead_any->disjuncts = (MakePatternNode<Case>(), MakePatternNode<Default>(), MakePatternNode<Label>());
+    s_dead_any->disjuncts = (MakePatternNode<Case>(), MakePatternNode<Default>(), MakePatternNode<LabelDeclaration>());
     r_comp->members = decls;
     r_comp->statements = ( pre, s_exit_any, post );
     

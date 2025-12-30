@@ -62,7 +62,7 @@ NODE(CPPTree, Temporary)
 NODE(CPPTree, Base)
 NODE(CPPTree, LabelIdentifier)
 NODE(CPPTree, SpecificLabelIdentifier)
-NODE(CPPTree, Label)
+NODE(CPPTree, LabelDeclaration)
 // Built-in Types 
 NODE(CPPTree, Callable)
 NODE(CPPTree, CallableParams)

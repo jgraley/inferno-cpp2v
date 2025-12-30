@@ -26,7 +26,7 @@ struct TempReturnAddress : CPPTree::Temporary { NODE_FUNCTIONS_FINAL };
 
 // From Fall Out
 // A label with a piggybacked pointer to the corresponding enum value
-struct StateLabel : CPPTree::Label
+struct StateLabel : CPPTree::LabelDeclaration
 {
     NODE_FUNCTIONS_FINAL
     TreePtr<CPPTree::InstanceIdentifier> state;

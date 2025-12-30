@@ -204,7 +204,7 @@ pair<TreePtr<Node>, TreePtr<Node>> LabelIdentifierByNameAgent::GetBounds( string
 
 string LabelIdentifierByNameAgent::GetIdentifierSubTypeName() const
 {
-	return "Label";
+	return "LabelDeclaration";
 }  
 
 //---------------------------------- PreprocessorIdentifierByNameAgent ------------------------------------    

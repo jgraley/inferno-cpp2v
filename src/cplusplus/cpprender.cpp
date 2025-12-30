@@ -924,7 +924,7 @@ string CppRender::RenderDeclaration( TreePtr<Declaration> declaration, Syntax::P
 		{
 		}
     }
-    else if( TreePtr<Label> l = DynamicTreePtrCast<Label>(declaration) )
+    else if( TreePtr<LabelDeclaration> l = DynamicTreePtrCast<LabelDeclaration>(declaration) )
         return DoRender( l->identifier, Syntax::Production::PURE_IDENTIFIER) + ":"; 
     
     return Render::Dispatch( declaration, surround_prod, policy );

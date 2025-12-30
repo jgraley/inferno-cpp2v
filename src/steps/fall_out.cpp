@@ -60,10 +60,10 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     auto ll_over = MakePatternNode<DeltaAgent, Node>();
     auto ll_all_over = MakePatternNode<DeltaAgent, Node>();
     auto lls_goto = MakePatternNode<Goto>();
-    auto lls_label = MakePatternNode<Label>();
+    auto lls_label = MakePatternNode<LabelDeclaration>();
     auto ls_goto = MakePatternNode<Goto>();
-    auto ls_label = MakePatternNode<Label>();
-    auto l_label = MakePatternNode<Label>();
+    auto ls_label = MakePatternNode<LabelDeclaration>();
+    auto l_label = MakePatternNode<LabelDeclaration>();
     auto lr_if = MakePatternNode<If>();
     auto lr_equal = MakePatternNode<Equal>();
     auto l_loop = MakePatternNode<Loop>();
@@ -473,14 +473,14 @@ ApplyLabelPolicy::ApplyLabelPolicy()
     auto pre = MakePatternNode<StarAgent, Statement>();
     auto post = MakePatternNode<StarAgent, Statement>();
     auto item_name = MakePatternNode<LocalTree::StateLabel>();
-    auto item_extra = MakePatternNode<Label>();
-    auto sx_post_label = MakePatternNode<Label>();
+    auto item_extra = MakePatternNode<LabelDeclaration>();
+    auto sx_post_label = MakePatternNode<LabelDeclaration>();
     auto iif = MakePatternNode<If>();
     auto equal = MakePatternNode<Equal>();
     auto sx_post = MakePatternNode<NegationAgent, Statement>();
     auto state_var_id = MakePatternNode<InstanceIdentifier>();
     auto state_id = MakePatternNode<InstanceIdentifier>();
-    auto label_star = MakePatternNode<StarAgent, Label>();
+    auto label_star = MakePatternNode<StarAgent, LabelDeclaration>();
         
     s_comp->members = r_comp->members = (decls);
     s_comp->statements = (pre, item_name, iif, item_extra, label_star, post);
@@ -504,9 +504,9 @@ ApplyTopPolicy::ApplyTopPolicy()
     auto body1 = MakePatternNode<StarAgent, Statement>();
     auto body2 = MakePatternNode<StarAgent, Statement>();
     auto post = MakePatternNode<StarAgent, Statement>();
-    auto label = MakePatternNode<Label>();
-    auto sx_label = MakePatternNode<Label>();
-    auto sx_label2 = MakePatternNode<Label>();
+    auto label = MakePatternNode<LabelDeclaration>();
+    auto sx_label = MakePatternNode<LabelDeclaration>();
+    auto sx_label2 = MakePatternNode<LabelDeclaration>();
     auto sx_stmt = MakePatternNode<NegationAgent, Statement>();
     auto r_if = MakePatternNode<If>();
     auto r_equal = MakePatternNode<Equal>();
@@ -558,7 +558,7 @@ EnsureResetYield::EnsureResetYield()
     r_comp->statements = (pre, r_yield, gotoo, post);
     pre->restriction = sx_not;
     sx_not->negand = sx_any;
-    sx_any->disjuncts = (MakePatternNode<Goto>(), MakePatternNode<Label>(), MakePatternNode<Wait>() );
+    sx_any->disjuncts = (MakePatternNode<Goto>(), MakePatternNode<LabelDeclaration>(), MakePatternNode<Wait>() );
         
     Configure( SEARCH_REPLACE, s_comp, r_comp );
 }
@@ -572,7 +572,7 @@ DetectSuperLoop::DetectSuperLoop( bool is_conditional_goto )
     auto r_body_comp = MakePatternNode<Compound>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto body = MakePatternNode<StarAgent, Statement>();
-    auto s_label = MakePatternNode<Label>();
+    auto s_label = MakePatternNode<LabelDeclaration>();
     auto s_ifgoto = MakePatternNode<If>();
     auto s_goto = MakePatternNode<Goto>();
     auto cond = MakePatternNode<Expression>();
@@ -590,7 +590,7 @@ DetectSuperLoop::DetectSuperLoop( bool is_conditional_goto )
                                          ? TreePtr<Statement>(s_ifgoto) 
                                          : TreePtr<Statement>(s_goto) );
     body->restriction = sx_not;
-    sx_not->negand = MakePatternNode<Label>(); // so s_label is the only one - all gotos must go to it.
+    sx_not->negand = MakePatternNode<LabelDeclaration>(); // so s_label is the only one - all gotos must go to it.
     s_ifgoto->condition = cond;
     s_ifgoto->body = s_goto;
     s_ifgoto->body_else = MakePatternNode<Nop>();

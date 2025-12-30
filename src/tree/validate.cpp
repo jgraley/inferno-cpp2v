@@ -117,7 +117,7 @@ void Validate::OnLink( TreePtr<Node> p, TreePtr<Node> c )
         if( c == pu->identifier )
             decl_refs[c]++;
     }
-    else if( TreePtr<Label> pl = DynamicTreePtrCast<Label>(p) )
+    else if( TreePtr<LabelDeclaration> pl = DynamicTreePtrCast<LabelDeclaration>(p) )
     {
         if( c == pl->identifier )
             decl_refs[c]++;

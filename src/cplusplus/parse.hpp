@@ -112,7 +112,7 @@ private:
         // The statement after a label is parsed as a sub-construct under the label which
         // is not how the inferno tree does it. Remember that relationship here and
         // generate the extra nodes when rendering a compound statement.
-        map<TreePtr<Label> , TreePtr<Statement> > backing_labels;
+        map<TreePtr<LabelDeclaration> , TreePtr<Statement> > backing_labels;
         map<TreePtr<SwitchTarget> , TreePtr<Statement> > backing_targets;
         map<TreePtr<Declaration> , TreePtr<Declaration> >
                 backing_paired_decl;
@@ -636,9 +636,9 @@ private:
             return t;
         }
         /*
-         TreePtr<Label> CreateLabelNode( clang::IdentifierInfo *ID )
+         TreePtr<LabelDeclaration> CreateLabelNode( clang::IdentifierInfo *ID )
          {
-         auto l = MakeTreeNode<Label>();
+         auto l = MakeTreeNode<LabelDeclaration>();
          all_decls->members.insert(l);
          l->access = MakeTreeNode<Public>();
          l->identifier = CreateLabelIdentifier(ID);
@@ -1206,7 +1206,7 @@ private:
             s->statements.push_back( st );
 
         // Flatten the "sub" statements of labels etc
-        if( TreePtr<Label> l = DynamicTreePtrCast<Label>( st ) )
+        if( TreePtr<LabelDeclaration> l = DynamicTreePtrCast<LabelDeclaration>( st ) )
         {
             ASSERT( backing_labels[l] );
             AddStatementToCompound( s, backing_labels[l] );
@@ -1265,7 +1265,7 @@ private:
     virtual StmtResult ActOnLabelStmt(clang::SourceLocation, clang::IdentifierInfo *II,
             clang::SourceLocation, StmtTy *SubStmt)
     {
-        auto l = MakeTreeNode<Label>();
+        auto l = MakeTreeNode<LabelDeclaration>();
         l->identifier = MaybeCreateLabelIdentifier(II);
         backing_labels[l] = hold_stmt.FromRaw( SubStmt );
         return hold_stmt.ToRaw( l );

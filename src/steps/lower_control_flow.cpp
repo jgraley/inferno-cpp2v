@@ -220,7 +220,7 @@ ForToWhile::ForToWhile()
     auto l_s_cont = MakePatternNode<Continue>();
     auto l_r_nop = MakePatternNode<Nop>();
     auto r_cont_labelid = MakePatternNode<BuildLabelIdentifierAgent>("CONTINUE");
-    auto r_cont_label = MakePatternNode<Label>();
+    auto r_cont_label = MakePatternNode<LabelDeclaration>();
     auto lr_goto = MakePatternNode<Goto>();
 
     l_stuff->terminus = l_overlay;
@@ -292,8 +292,8 @@ IfToIfGoto::IfToIfGoto()
     auto r_not = MakePatternNode<LogicalNot>();
     auto r_labelid1 = MakePatternNode<BuildLabelIdentifierAgent>("THEN");
     auto r_labelid2 = MakePatternNode<BuildLabelIdentifierAgent>("ELSE");
-    auto r_label1 = MakePatternNode<Label>();
-    auto r_label2 = MakePatternNode<Label>();
+    auto r_label1 = MakePatternNode<LabelDeclaration>();
+    auto r_label2 = MakePatternNode<LabelDeclaration>();
     
     s_and->conjuncts = (s_if, l_r_not);
     s_if->condition = cond;
@@ -349,7 +349,7 @@ SwitchToIfGoto::SwitchToIfGoto()
     auto l1_pre = MakePatternNode<StarAgent, Statement>();
     auto l1_post = MakePatternNode<StarAgent, Statement>();
     auto l1_s_default = MakePatternNode< Default >();
-    auto l1_r_label = MakePatternNode< Label >();
+    auto l1_r_label = MakePatternNode< LabelDeclaration >();
     auto l1_r_labelid = MakePatternNode<BuildLabelIdentifierAgent>("DEFAULT");
     auto l1_r_goto = MakePatternNode<Goto>();
     
@@ -370,7 +370,7 @@ SwitchToIfGoto::SwitchToIfGoto()
     auto l2_pre = MakePatternNode<StarAgent, Statement>();
     auto l2_post = MakePatternNode<StarAgent, Statement>();
     auto l2_s_case = MakePatternNode< Case >();
-    auto l2_r_label = MakePatternNode< Label >();
+    auto l2_r_label = MakePatternNode< LabelDeclaration >();
     auto l2_r_labelid = MakePatternNode<BuildLabelIdentifierAgent>("CASE");
     auto l2_r_if = MakePatternNode<If>();
     auto l2_r_nop = MakePatternNode<Nop>();
@@ -400,7 +400,7 @@ SwitchToIfGoto::SwitchToIfGoto()
     auto l3_pre = MakePatternNode<StarAgent, Statement>();
     auto l3_post = MakePatternNode<StarAgent, Statement>();
     auto l3_s_case = MakePatternNode< RangeCase >();
-    auto l3_r_label = MakePatternNode< Label >();
+    auto l3_r_label = MakePatternNode< LabelDeclaration >();
     auto l3_r_labelid = MakePatternNode<BuildLabelIdentifierAgent>("CASE");
     auto l3_r_if = MakePatternNode<If>();
     auto l3_r_nop = MakePatternNode<Nop>();
@@ -445,7 +445,7 @@ SwitchToIfGoto::SwitchToIfGoto()
 
 DoToIfGoto::DoToIfGoto()
 {
-    // Create a compound block, put the body of the loop in there with a Label
+    // Create a compound block, put the body of the loop in there with a LabelDeclaration
     // at the top and a conditional goto (if(x) goto y;) at the bottom, using the
     // same expression as the Do. continue just becomes a Goto directly to the If.
     //
@@ -462,8 +462,8 @@ DoToIfGoto::DoToIfGoto()
     auto r_comp = MakePatternNode<Compound>();
     auto r_labelid = MakePatternNode<BuildLabelIdentifierAgent>("NEXT");
     auto l_r_cont_labelid = MakePatternNode<BuildLabelIdentifierAgent>("CONTINUE");
-    auto r_label = MakePatternNode<Label>();
-    auto r_cont_label = MakePatternNode<Label>();
+    auto r_label = MakePatternNode<LabelDeclaration>();
+    auto r_cont_label = MakePatternNode<LabelDeclaration>();
     auto l_stuff = MakePatternNode<StuffAgent, Statement>();
     auto l_overlay = MakePatternNode<DeltaAgent, Statement>();
     auto l_s_cont = MakePatternNode<Continue>();
@@ -509,7 +509,7 @@ BreakToGoto::BreakToGoto()
     auto s_break = MakePatternNode<Break>();
     auto r_goto = MakePatternNode<Goto>();
     auto r_labelid = MakePatternNode<BuildLabelIdentifierAgent>("BREAK");
-    auto r_label = MakePatternNode<Label>();
+    auto r_label = MakePatternNode<LabelDeclaration>();
     auto r_comp = MakePatternNode<Compound>();
     
     sx_not->negand = sx_breakable;

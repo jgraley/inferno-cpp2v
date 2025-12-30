@@ -207,7 +207,7 @@ AddLinkAddress::AddLinkAddress()
     auto mr_args = MakePatternNode<MapArgumentation>();
     auto mr_comp = MakePatternNode<Compound>();
     auto msx_comp = MakePatternNode<Compound>();
-    auto mr_label = MakePatternNode<Label>();
+    auto mr_label = MakePatternNode<LabelDeclaration>();
     auto mr_labelid = MakePatternNode<BuildLabelIdentifierAgent>("LINK");
     auto m_all = MakePatternNode<ConjunctionAgent, Statement>();
     auto ms_not = MakePatternNode<NegationAgent, Statement>();
@@ -537,7 +537,7 @@ MergeFunctions::MergeFunctions()
     auto ls_call = MakePatternNode<Call>();
     auto ls_args = MakePatternNode<MapArgumentation>();
     auto func_id = MakePatternNode<InstanceIdentifier>();
-    auto r_label = MakePatternNode<Label>();
+    auto r_label = MakePatternNode<LabelDeclaration>();
     auto r_label_id = MakePatternNode< BuildLabelIdentifierAgent >("ENTER_%s");
     auto s_all = MakePatternNode<ConjunctionAgent, Compound>();
     auto s_stuff = MakePatternNode<StuffAgent, Compound>();

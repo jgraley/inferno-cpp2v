@@ -37,7 +37,7 @@ GotoAfterWait::GotoAfterWait()
     auto all_over = MakePatternNode<DeltaAgent, Statement>();
     auto sx_goto = MakePatternNode<Goto>();
     auto r_goto = MakePatternNode<Goto>();
-    auto r_label = MakePatternNode<Label>();
+    auto r_label = MakePatternNode<LabelDeclaration>();
     auto r_labelid = MakePatternNode<BuildLabelIdentifierAgent>("YIELD");
           
     all_over->through = all;
@@ -70,7 +70,7 @@ GotoAfterWait::GotoAfterWait()
     auto notmatch = MakePatternNode<NegationAgent, Statement>();
     auto sx_goto = MakePatternNode<Goto>();
     auto r_goto = MakePatternNode<Goto>();
-    auto r_label = MakePatternNode<Label>();
+    auto r_label = MakePatternNode<LabelDeclaration>();
     auto r_labelid = MakePatternNode<BuildLabelIdentifierAgent>("YIELD");
         
     s_comp->members = (decls);
@@ -102,7 +102,7 @@ NormaliseConditionalGotos::NormaliseConditionalGotos()
     auto sx_pre = MakePatternNode<StarAgent, Statement>();
     auto post = MakePatternNode<StarAgent, Statement>();
     auto sx_post = MakePatternNode<StarAgent, Statement>();
-    auto label = MakePatternNode< Label >();
+    auto label = MakePatternNode< LabelDeclaration >();
     auto label_id = MakePatternNode< BuildLabelIdentifierAgent >("PROCEED");
     auto s_all = MakePatternNode<ConjunctionAgent, Statement>();
     auto sx_not = MakePatternNode<NegationAgent, Statement>();
@@ -173,7 +173,7 @@ AddGotoBeforeLabel::AddGotoBeforeLabel() // TODO really slow!!11
     auto post = MakePatternNode<StarAgent, Statement>();
     auto sx_pre = MakePatternNode<StarAgent, Statement>();
     auto sx_post = MakePatternNode<StarAgent, Statement>();
-    auto label = MakePatternNode< Label >();
+    auto label = MakePatternNode< LabelDeclaration >();
     auto label_id = MakePatternNode< LabelIdentifier >();
     auto s_all = MakePatternNode<ConjunctionAgent, Compound>();
     auto s_not = MakePatternNode<NegationAgent, Compound>();
@@ -219,7 +219,7 @@ EnsureBootstrap::EnsureBootstrap()
     auto sx_pre = MakePatternNode<StarAgent, Statement>();
     auto post = MakePatternNode<StarAgent, Statement>();
     auto r_goto = MakePatternNode<Goto>();
-    auto r_label = MakePatternNode<Label>();
+    auto r_label = MakePatternNode<LabelDeclaration>();
     auto r_labelid = MakePatternNode<BuildLabelIdentifierAgent>("BOOTSTRAP");
     auto stop = MakePatternNode<NegationAgent, Statement>();
     auto sx_goto = MakePatternNode<Goto>();
@@ -342,7 +342,7 @@ ShareGotos::ShareGotos()
     auto post = MakePatternNode<StarAgent, Statement>();
     auto first_goto = MakePatternNode< Goto >();
     auto r_goto = MakePatternNode< Goto >();
-    auto r_label = MakePatternNode<Label>();
+    auto r_label = MakePatternNode<LabelDeclaration>();
     auto r_labelid = MakePatternNode<BuildLabelIdentifierAgent>("ITERATE");
                     
     loop->body = over;
@@ -371,7 +371,7 @@ SwitchCleanUp::SwitchCleanUp()
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto main = MakePatternNode<StarAgent, Statement>();
     auto tail = MakePatternNode<StarAgent, Statement>();
-    auto label = MakePatternNode<Label>();
+    auto label = MakePatternNode<LabelDeclaration>();
     auto cond = MakePatternNode<Expression>();
     auto sx_not_tail = MakePatternNode<NegationAgent, Statement>();
     auto sx_not_main = MakePatternNode<NegationAgent, Statement>();
@@ -400,7 +400,7 @@ SwitchCleanUp::SwitchCleanUp()
 InferBreak::InferBreak()
 {
     auto ls_goto = MakePatternNode<Goto>();
-    auto label = MakePatternNode<Label>();
+    auto label = MakePatternNode<LabelDeclaration>();
     auto label_id = MakePatternNode<LabelIdentifier>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto pre = MakePatternNode<StarAgent, Statement>();

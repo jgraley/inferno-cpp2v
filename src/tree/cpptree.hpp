@@ -536,15 +536,19 @@ struct SpecificLabelIdentifier : LabelIdentifier,
     SpecificLabelIdentifier( string s, BoundingRole addr_bounding_role = BoundingRole::NONE ) : 
         SpecificIdentifier(s, addr_bounding_role) {} ///< construct with initial name
     NODE_FUNCTIONS_FINAL
+    
+	Production GetMyProductionTerminal() const override;	
+	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy);
+    
 };
 
 /// Declaration of a label for switch, goto etc.
 /** This node represents a label such as mylabel:
  It serves to declare the label; the identifier should be
  used for references. */
-struct Label : Declaration, //TODO commonize with Case and Default
-               Statement,
-               Uncombable
+struct LabelDeclaration : Declaration, //TODO commonize with Case and Default
+                          Statement,
+                          Uncombable
 {
     NODE_FUNCTIONS_FINAL
     TreePtr<LabelIdentifier> identifier; ///< a handle for the label to be referenced elewhere
@@ -716,7 +720,7 @@ struct Floating : Numeric
 /// Type of a variable that can hold a label. Similar to the GCC extension
 /// for labels-in-variables but we use this type not void * (which is 
 /// inconvenient for stataic analysis). To declare a conventional label
-/// at a particular position, use Label.
+/// at a particular position, use LabelDeclaration.
 struct Labeley : Type
 {
     NODE_FUNCTIONS_FINAL   
@@ -1108,7 +1112,7 @@ struct Goto : Statement, Uncombable
 {
     NODE_FUNCTIONS_FINAL
     // Dest is an expression for goto-a-variable support.
-    // Ordinary gotos will have Label here.
+    // Ordinary gotos will have LabelDeclaration here.
     TreePtr<Expression> destination; ///< where to go to, expresison allowed
 
 	Production GetMyProductionTerminal() const override;	

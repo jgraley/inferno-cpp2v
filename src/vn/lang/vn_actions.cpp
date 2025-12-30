@@ -344,7 +344,7 @@ TreePtr<Node> VNLangActions::OnArrayLiteral( list<TreePtr<Node>> elements )
 
 TreePtr<Node> VNLangActions::OnLabel( TreePtr<Node> identifier, any loc )
 {
-	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::Label>>();
+	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::LabelDeclaration>>();
 	node->identifier = identifier;
 	return node;
 }
@@ -681,9 +681,6 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 // And maybe ▲⯈ which perhaps we could argue isn't really a prefix operator after all...
 
 // Review the virt-specificers and const on the node methods for rendering
-
-// Getting NEXT:; ... goto *NEXT; in patterns (eg DoToIfGoto) even though tests pass. Find out if C++ renders are doing this
-// by finding a test case with do while and redering up to this step. Check with bi and p1.
 
 // Seeing semicolon aftter } in rendered C++ (eg loop.c -qT45)
 
