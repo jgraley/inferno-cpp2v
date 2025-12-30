@@ -132,6 +132,9 @@ Syntax::Policy Render::GetDefaultPolicy()
 	// Need to separate members from statements in Compound
 	policy.compound_uses_vn_separator = true;
 	
+	// Don't bother trying to use * and && with goto-a-variable
+	policy.goto_uses_ref_and_deref = false;
+	
 	return policy;
 }
 

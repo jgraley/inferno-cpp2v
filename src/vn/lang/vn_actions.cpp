@@ -478,7 +478,6 @@ TreePtr<Node> VNLangActions::OnLookup( TreePtr<Node> object, TreePtr<Node> membe
 }
 
 
-
 TreePtr<Node> VNLangActions::OnSpecificId( const AvailableNodeData::Block *block, any id_disc_loc, wstring wname, any name_loc )
 {
 	(void)name_loc; // TODO perhaps IdentifierByNameAgent can validate this?
@@ -689,6 +688,8 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 
 // Getting NEXT:; ... goto *NEXT; in patterns (eg DoToIfGoto) even though tests pass. Find out if C++ renders are doing this
 // by finding a test case with do while and redering up to this step. Check with bi and p1.
+
+// Seeing semicolon aftter } in rendered C++ (eg loop.c -qT45)
 
 // The local nodes should all refuse rendering so they don't impersonate the nodes they subclass - do this before you get bitten
 

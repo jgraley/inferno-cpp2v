@@ -108,7 +108,8 @@ public:
 			detect_and_render_constructor(true),
 			refuse_map_argumentation(true),
 			boot_statements_using_braces(true),
-			compound_uses_vn_separator(false) {}
+			compound_uses_vn_separator(false),
+			goto_uses_ref_and_deref(true) {}
 		bool force_initialisation;
 		bool force_incomplete_records;
 		bool split_bulky_statics;
@@ -121,6 +122,7 @@ public:
 		bool refuse_map_argumentation;
 		bool boot_statements_using_braces;
 		bool compound_uses_vn_separator;
+		bool goto_uses_ref_and_deref;
 	};
 	
 	// We deal with syntactical association only, not mathematical, because:

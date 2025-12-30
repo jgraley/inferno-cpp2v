@@ -976,12 +976,29 @@ Syntax::Production Goto::GetMyProductionTerminal() const
 
 string Goto::GetRender( VN::RendererInterface *renderer, Production, Policy )
 {
-	//throw Unimplemented(); // TODO remove
-    if( auto li = DynamicTreePtrCast< SpecificLabelIdentifier >(destination) )
-        return "goto " + renderer->DoRender( li, Syntax::Production::SPACE_SEP_STATEMENT).substr(2);  // regular goto REMOVE THE &&
-    else
-        return "goto *" + renderer->DoRender( destination, Syntax::Production::PREFIX); // goto-a-variable (GCC extension)
+	string s = "goto ";
+	bool star = false;
+	bool remove_double_deref = false;
+	Production prod = Production::SPACE_SEP_STATEMENT;
+    if( !DynamicTreePtrCast< SpecificLabelIdentifier >(destination) )
+		star = true;
+	else
+		remove_double_deref = true;
+		
+	if( star )
+	{
+		s += "*";
+		prod = Production::PREFIX;
+	}
+	
+	string label = renderer->DoRender( destination, prod );
+	
+	if( remove_double_deref )
+		label = label.substr(2); // REMOVE THE &&
+	
+	return s + label;
 }
+//goto_uses_ref_and_deref
 
 //////////////////////////// If ///////////////////////////////
 
