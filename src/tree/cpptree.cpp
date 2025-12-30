@@ -930,7 +930,7 @@ Syntax::Production AlignOf::GetMyProductionTerminal() const
 
 Syntax::Production Compound::GetMyProductionTerminal() const
 { 
-	return Production::INITIALISER;
+	return Production::COMPOUND;
 }
 
 
@@ -1036,7 +1036,7 @@ Syntax::Production Do::GetMyProductionTerminal() const
 
 Syntax::Production Switch::GetMyProductionTerminal() const
 { 
-	return Production::BARE_STATEMENT; 
+	return Production::STATEMENT; 
 }
 
 
@@ -1045,7 +1045,7 @@ string Switch::GetRender( VN::RendererInterface *renderer, Production, Policy po
 	return "switch( " +
 		   renderer->DoRender( condition, Production::BOTTOM_EXPR, policy ) +
 		   " )\n" +
-		   renderer->DoRender( body, Production::PREFIX_STATEMENT, policy );
+		   renderer->DoRender( body, Production::STATEMENT, policy );
 }
 
 //////////////////////////// SwitchTarget ///////////////////////////////

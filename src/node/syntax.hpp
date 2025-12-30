@@ -18,8 +18,8 @@ class Syntax : virtual Traceable
 public:
 	enum class Production // "Syntax::Production" is a generalisation of precedence
 	{		
-		BOOT = 0,
-		PROGRAM,
+		PROGRAM = 0,
+		BOOT,
 		VN_SEP_SCRIPTY, // Separated by ⨟ (in embedded engine renders)
 		VN_SEP_ITEMS, // Separated by ⚬ (in StandardAgent renders, which always have ())		
 		VN_DESIGNATE, // defining names using ⪮
@@ -43,11 +43,11 @@ public:
 		MIN_NODE_SEMICOLON, // Note: nodes higher than here \/ can get ";" added.
 		BARE_STATEMENT = 40, // Statement with no semicolon
 		BARE_DECLARATION, // Actual declaration with no semicolon, eg int i	
-		PREFIX_STATEMENT, // eg throw <here>;
 		SPACE_SEP_STATEMENT, // eg throw <here>;
 		SPACE_SEP_DECLARATION, // the type in <here> <declarator>;
 		SPACE_SEP_PRE_PROC,
 		LABEL,  // Anything with a : after it. Could be (a) like a bare statement needing a ; or (b) a prefix on statements.
+		COMPOUND, // excluded from added ;
 		TOP_STMT_DECL, // Highest statement precedence
 
 		INITIALISER = 50, // eg MyType thing <here>; and " = " is inserted if node is expressional

@@ -682,8 +682,6 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 
 // Review the virt-specificers and const on the node methods for rendering
 
-// Seeing semicolon aftter } in rendered C++ (eg loop.c -qT45)
-
 // A pattern emerges in the CPPTree GetRender() functions: we are using VN-render policy to prevent the render from depending on a 
 // direct analysis of child nodes - this works because VN-renders are patterns and could have special nodes in between (and
 // we never attempt to analyse special nodes for their "true" type because it can be ambiguous.

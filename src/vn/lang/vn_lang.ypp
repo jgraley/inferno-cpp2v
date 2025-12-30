@@ -144,7 +144,7 @@
 %type <TreePtr<Node>> 				norm_paren norm_comma_op norm_no_comma_op norm_expression
 %type <TreePtr<Node>> 				type type_primary type_prefix type_disjunction type_conjunction type_paren
 %type <TreePtr<Node>> 				unified unified_prefix
-%type <TreePtr<Node>> 				bare_statement
+%type <TreePtr<Node>> 				bare_statement statement
 %type <TreePtr<Node>> 				norm_id_value compound
 %type <wstring> 					vn_name
 %type <string>						transform_norm_part transform_unif_part
@@ -157,7 +157,7 @@
 %type <shared_ptr<VN::Gnomon>>		part_resolve recogniser_command 
 %type <shared_ptr<VN::Gnomon>>		start_transform_name_scope
 %type <shared_ptr<VN::Gnomon>>		start_builtin_scope start_prerestrict_scope start_specific_id_scope start_id_by_name_scope start_build_id_scope
-%type <list<TreePtr<Node>>>			bare_statements
+%type <list<TreePtr<Node>>>			statements
 %type <list<TreePtr<Node>>>			comma_args semicolon_args
 %type <const AvailableNodeData::Block *> builtin_name_part prerestrict_name_part specific_id_part id_by_name_part build_id_part
 %type <const AvailableNodeData::Block *> type_builtin_name_part type_prerestrict_name_part type_specific_id_part type_id_by_name_part type_build_id_part
@@ -207,10 +207,28 @@ item		: item VN_SUB_SEP unified				{ $$ = $1; $$.nodes.push_back($3); $$.loc = @
 unified		: normal
 			| type	
 
-bare_statements	: bare_statement 						{ $$.push_back($1); }
-				| bare_statements ';' bare_statement 	{ $$ = $1; $$.push_back($3); }
+statements	: statement									{ $$.push_back($1); }
+			| statements statement						{ $$ = $1; $$.push_back($2); }
          
-type			: type_disjunction          
+statement	: bare_statement ';'												{ $$ = $1; }      
+			| compound
+			| ARGS_BODY_STMT_KEYWORD '(' semicolon_args ')' statement			{ $$ = vn->OnArgsBodyStmt($1.as_ascii, @1, $3, @3, $5, @5); }
+
+compound	: '{' VN_SEP '}'                   									{ $$ = vn->OnCompound({}, @2, {}, @3); } 
+			| '{' statements VN_SEP '}'           								{ $$ = vn->OnCompound($2, @2, {}, @4); }
+			| '{' VN_SEP statements '}'           								{ $$ = vn->OnCompound({}, @2, $3, @3); }
+			| '{' statements VN_SEP statements '}'  							{ $$ = vn->OnCompound($2, @2, $4, @4); }
+
+bare_statement		: norm_expression
+					| norm_expression ':'										{ $$ = vn->OnLabel($1, @1); } 
+					| PRIMITIVE_STMT_KEYWORD									{ $$ = vn->OnPrimitiveStmt($1.as_ascii, @1); }
+					| SPACE_SEP_STMT_KEYWORD norm_expression					{ $$ = vn->OnSpaceSepStmt($1.as_ascii, @1, $2, @2); }
+
+semicolon_args		: norm_expression											{ $$.push_back($1); }
+					| semicolon_args ';' norm_expression						{ $$ = $1; $$.push_back($3); }
+
+         
+type		: type_disjunction          
           
 type_disjunction	: type_conjunction
 					| type_disjunction DISJUNCTION type_conjunction				{ $$ = vn->OnDisjunction($1, $3); }
@@ -244,16 +262,8 @@ type_specific_id_part	: start_specific_id_scope resolved_type_name	{ $$ = $2.as_
 type_id_by_name_part 	: start_id_by_name_scope resolved_type_name		{ $$ = $2.as_andata_block; (void)$1; }
 type_build_id_part 		: start_build_id_scope resolved_type_name		{ $$ = $2.as_andata_block; (void)$1; }
 
-normal				: bare_statement
-
-bare_statement		: norm_expression
-					| PRIMITIVE_STMT_KEYWORD										{ $$ = vn->OnPrimitiveStmt($1.as_ascii, @1); }
-					| SPACE_SEP_STMT_KEYWORD norm_expression						{ $$ = vn->OnSpaceSepStmt($1.as_ascii, @1, $2, @2); }
-					| ARGS_BODY_STMT_KEYWORD '(' semicolon_args ')' bare_statement	{ $$ = vn->OnArgsBodyStmt($1.as_ascii, @1, $3, @3, $5, @5); }
-					| norm_expression ':'											{ $$ = vn->OnLabel($1, @1); } 
-
-semicolon_args		: norm_expression											{ $$.push_back($1); }
-					| semicolon_args ';' norm_expression						{ $$ = $1; $$.push_back($3); }
+normal				: norm_expression
+					| statement
 
 norm_expression		: norm_comma_op
                                    
@@ -350,8 +360,7 @@ norm_postfix: norm_paren
 norm_paren	: norm_primary
 			| '(' commands ')'                          		{ $$ = vn->OnEmbeddedCommands($2); }
 
-norm_primary: compound
-			| builtin_name_part itemisation						{ $$ = vn->OnBuiltIn($1, @1, $2); }
+norm_primary: builtin_name_part itemisation						{ $$ = vn->OnBuiltIn($1, @1, $2); }
 			| STAR												{ $$ = vn->OnStar(nullptr); }
 			| STAR OPEN_VN normal CLOSE_VN						{ $$ = vn->OnStar($3); }
 			| INTEGRAL_LITERAL					      			{ $$ = vn->OnIntegralLiteral($1, @1); }
@@ -368,11 +377,6 @@ norm_primary: compound
 			| build_id_part OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN 		{ $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
 			| build_id_part OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($1, @1, $3, @3, $5); }
 			| build_id_part OPEN_VN VN_SEP item CLOSE_VN 				{ $$ = vn->OnBuildId($1, @1, wstring(), @3, $4); }
-
-compound	: '{' VN_SEP '}'                   							{ $$ = vn->OnCompound({}, @2, {}, @3); } 
-			| '{' bare_statements ';' VN_SEP '}'           				{ $$ = vn->OnCompound($2, @2, {}, @5); }
-			| '{' VN_SEP bare_statements ';' '}'           				{ $$ = vn->OnCompound({}, @2, $3, @3); }
-			| '{' bare_statements ';' VN_SEP bare_statements ';' '}'  	{ $$ = vn->OnCompound($2, @2, $5, @5); }
 
 builtin_name_part 	: start_builtin_scope resolved_name			{ $$ = $2.as_andata_block; (void)$1; }
 prerestrict_name_part : start_prerestrict_scope resolved_name	{ $$ = $2.as_andata_block; (void)$1; }

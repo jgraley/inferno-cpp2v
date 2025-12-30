@@ -271,10 +271,25 @@ string Render::AccomodateSemicolon( TreePtr<Node> node, Syntax::Production surro
     // used to change the render of a certain subtree. It represents all the ancestor nodes of
     // the one supplied.
     Syntax::Production node_prod = GetNodeProduction(node, surround_prod, policy);
-							 		    
-    if( !(Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::MIN_SURR_SEMICOLON) &&
-          Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::MAX_SURR_SEMICOLON) &&
-          Syntax::GetPrecedence(node_prod) > Syntax::GetPrecedence(Syntax::Production::MIN_NODE_SEMICOLON) ) )
+		
+	bool semicolon = false;					 		    
+    if( Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::MIN_SURR_SEMICOLON) &&
+        Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::MAX_SURR_SEMICOLON) &&
+        Syntax::GetPrecedence(node_prod) > Syntax::GetPrecedence(Syntax::Production::MIN_NODE_SEMICOLON) &&
+        node_prod != Syntax::Production::COMPOUND )
+        semicolon = true;
+        
+    if( (Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::BOTTOM_EXPR) &&
+         Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::TOP_EXPR)) ||
+        (Syntax::GetPrecedence(surround_prod) >= Syntax::GetPrecedence(Syntax::Production::BOOT) &&
+         Syntax::GetPrecedence(surround_prod) <= Syntax::GetPrecedence(Syntax::Production::VN_DESIGNATE) ) )
+        if( Syntax::GetPrecedence(node_prod) > Syntax::GetPrecedence(Syntax::Production::MIN_NODE_SEMICOLON) &&
+			Syntax::GetPrecedence(node_prod) < Syntax::GetPrecedence(Syntax::Production::TOP_STMT_DECL) &&
+			node_prod != Syntax::Production::COMPOUND )
+			semicolon = true;
+       
+          
+    if( !semicolon )
          return AccomodatePreRestriction( node, surround_prod, policy );
                  
 	if( ReadArgs::use.count("c") )
@@ -292,12 +307,9 @@ string Render::AccomodateSemicolon( TreePtr<Node> node, Syntax::Production surro
 			surround_prod = Syntax::Production::BARE_DECLARATION;
 			break;
 			
-		default:
-			ASSERT(false)
-			      ("Adding semicolon but not sure what bare production should be\n")
-			      ("node: ")(node)("\n")
-			      ("node_prod: ")((int)node_prod)("\n")
-			      ("surround_prod: ")((int)surround_prod);
+		default: // Expr cases -> expr decays to statement
+			surround_prod = Syntax::Production::BARE_STATEMENT;
+			break;
 			
 	}
 
