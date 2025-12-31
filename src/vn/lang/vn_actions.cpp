@@ -401,6 +401,21 @@ TreePtr<Node> VNLangActions::OnArgsBodyStmt( string keyword, any keyword_loc, li
 		ret->body = body;
 		return ret;
 	}
+	else if( keyword=="for" )
+	{
+		if( args.size() != 3 )
+			throw YY::VNLangParser::syntax_error(
+				any_cast<YY::VNLangParser::location_type>(args_loc),
+				keyword + " requires 3 argument inside ().");
+				
+		auto ret = MakeTreeNode<StandardAgentWrapper<CPPTree::For>>();
+		auto it = args.begin();
+		ret->initialisation = *it++;
+		ret->condition = *it++;
+		ret->increment = *it++;
+		ret->body = body;
+		return ret;
+	}
 	
 	ASSERTFAIL(); // internal error: parser should not call this unless recogniser produced ARGS_BODY_STMT_KEYWORD		
 }
@@ -682,9 +697,14 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 
 // Review the virt-specificers and const on the node methods for rendering
 
+// MAYBE Move conj and disj back to original precidences. The lowered precs require two syntaxes, statement and expression. So we can
+// get confused by eg { return x; ∧ goto y; } (=new form) versus { (return x;) ∧ (goto y;); } - or maybe we use the former and it's not confusing...
+
 // A pattern emerges in the CPPTree GetRender() functions: we are using VN-render policy to prevent the render from depending on a 
 // direct analysis of child nodes - this works because VN-renders are patterns and could have special nodes in between (and
 // we never attempt to analyse special nodes for their "true" type because it can be ambiguous.
+
+// Check 093-DetectSuperLoop, we have ☆:; and then goto ☆ even though a coupling would seem to be needed, but we didn't get a designation.
 
 // Tix:
 // Lose StandardAgentWrapper #867

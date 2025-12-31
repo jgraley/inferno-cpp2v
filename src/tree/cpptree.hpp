@@ -1175,6 +1175,9 @@ struct For : Loop
     // Note: K&R has all three as expressions but init needs to be a statement
     // if we are to declare the loop variable there. OTOH if inc is a statement
     // then the grammar will want to produce a terminator ie `for(a;b;c;)`
+
+	Production GetMyProductionTerminal() const override;	
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
 };
 
 /// Switch statement. 

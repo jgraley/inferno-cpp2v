@@ -1032,6 +1032,26 @@ Syntax::Production Do::GetMyProductionTerminal() const
 	return Production::BARE_STATEMENT; 
 }
 
+//////////////////////////// For ///////////////////////////////
+
+Syntax::Production For::GetMyProductionTerminal() const
+{ 
+	return Production::STATEMENT; 
+}
+
+
+string For::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+{
+	return "for( " +
+		   renderer->DoRender( initialisation, Production::BOTTOM_EXPR, policy ) +
+		   "; " +
+		   renderer->DoRender( condition, Production::BOTTOM_EXPR, policy ) +
+		   "; " +
+		   renderer->DoRender( increment, Production::BOTTOM_EXPR, policy ) +
+		   " )\n" +
+		   renderer->DoRender( body, Production::STATEMENT, policy );
+}
+
 //////////////////////////// Switch ///////////////////////////////
 
 Syntax::Production Switch::GetMyProductionTerminal() const
