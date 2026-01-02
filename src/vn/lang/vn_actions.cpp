@@ -421,6 +421,54 @@ TreePtr<Node> VNLangActions::OnArgsBodyStmt( string keyword, any keyword_loc, li
 }
 
 
+TreePtr<Node> VNLangActions::OnArgsBodyChainStmt( string keyword, any keyword_loc, 
+												  list<TreePtr<Node>> args, any args_loc, 
+												  TreePtr<Node> body, any body_loc,
+												  string chain_keyword, any chain_keyword_loc, 
+												  TreePtr<Node> chain_body, any chain_body_loc )
+{
+	if( keyword=="if" )
+	{
+		if( args.size() != 1 )
+			throw YY::VNLangParser::syntax_error(
+				any_cast<YY::VNLangParser::location_type>(args_loc),
+				keyword + " requires 1 argument inside ().");
+				
+		auto ret = MakeTreeNode<StandardAgentWrapper<CPPTree::If>>();
+		ret->condition = args.front();
+		ret->body = body;
+		if( chain_keyword=="else" )		
+			ret->body_else = chain_body;
+		else if( chain_keyword=="" )		
+			ret->body_else = MakeTreeNode<StandardAgentWrapper<CPPTree::Nop>>();
+		else
+			throw YY::VNLangParser::syntax_error(
+				any_cast<YY::VNLangParser::location_type>(chain_keyword_loc),
+				keyword + " requires else (optional).");
+		return ret;
+	}
+	ASSERTFAIL(); // internal error: parser should not call this unless recogniser produced ARGS_BODY_STMT_KEYWORD		
+}
+
+
+TreePtr<Node> VNLangActions::OnWhile( TreePtr<Node> arg, any arg_loc, TreePtr<Node> body, any body_loc )
+{
+	auto ret = MakeTreeNode<StandardAgentWrapper<CPPTree::While>>();
+	ret->condition = arg;
+	ret->body = body;
+	return ret;
+}
+
+
+TreePtr<Node> VNLangActions::OnDo( TreePtr<Node> body, any body_loc, TreePtr<Node> arg, any arg_loc )
+{
+	auto ret = MakeTreeNode<StandardAgentWrapper<CPPTree::Do>>();
+	ret->condition = arg;
+	ret->body = body;
+	return ret;
+}
+
+
 TreePtr<Node> VNLangActions::OnIdValuePair( TreePtr<Node> key, any id_loc, TreePtr<Node> value )
 {
 	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::IdValuePair>>();

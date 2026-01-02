@@ -135,6 +135,10 @@ Syntax::Policy Render::GetDefaultPolicy()
 	// Don't bother trying to use * and && with goto-a-variable
 	policy.goto_uses_ref_and_deref = false;
 	
+	// Rendering local node types that don't have their own syntax will just
+	// use the parent class's render which will be parsed back as the parent class.
+	policy.refuse_local_node_types = true;
+	
 	return policy;
 }
 
@@ -149,10 +153,7 @@ string Render::DoRender( TreePtr<Node> node, Syntax::Production surround_prod, S
 {	
     INDENT("R");
     string s;
-    
-    if( !node )
-		return RenderNullPointer( surround_prod );	
-					
+		
 	if( ReadArgs::use.count("c") )
 		s += SSPrintf("\n//%s Node %s called from %p\n", 
 				      Tracer::GetPrefix().c_str(), 
@@ -319,7 +320,10 @@ string Render::AccomodateSemicolon( TreePtr<Node> node, Syntax::Production surro
 
 
 string Render::AccomodatePreRestriction( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
-{
+{   
+    if( !node )
+		return RenderNullPointer( surround_prod );	
+			
 	const Agent *agent = Agent::TryAsAgentConst(node);
 	if( !agent )
 		return Dispatch( node, surround_prod, policy );
@@ -451,6 +455,9 @@ string Render::GetUniqueIdentifierName( TreePtr<Node> ) const
 
 Syntax::Production Render::GetNodeProduction( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy ) const
 {
+	if( !node )
+		return Syntax::Production::NULLPTR;
+		
 	try
 	{
 		if( const Agent *agent = Agent::TryAsAgentConst(node) )

@@ -6,10 +6,12 @@
 #include "tree/cpptree.hpp"
 #include "tree/sctree.hpp"
 
-#define REFUSE_RENDERS \
-    string GetRender( VN::RendererInterface *, Production , Policy  ) override \
+#define RENDER_MACRO(BASE) \
+    string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override \
     { \
-		throw RefuseDueLocal(); \
+		if( policy.refuse_local_node_types ) \
+			throw RefuseDueLocal(); \
+		return BASE::GetRender(renderer, surround_prod, policy); \
 	}
 
 
@@ -18,25 +20,25 @@
 namespace LocalTree {
 
 // From Simple C to SC
-struct GlobalsModule : SCTree::Module { NODE_FUNCTIONS_FINAL REFUSE_RENDERS };
+struct GlobalsModule : SCTree::Module { NODE_FUNCTIONS_FINAL RENDER_MACRO(SCTree::Module) };
 
 // From Lower Control Flow 
 // Local nodes let us designate switch and for nodes as uncombable
-struct UncombableSwitch : CPPTree::Switch, CPPTree::Uncombable { NODE_FUNCTIONS_FINAL REFUSE_RENDERS };
-struct UncombableFor : CPPTree::For, CPPTree::Uncombable { NODE_FUNCTIONS_FINAL REFUSE_RENDERS };
-struct CombableFor : CPPTree::For { NODE_FUNCTIONS_FINAL REFUSE_RENDERS };
-struct UncombableBreak : CPPTree::Break, CPPTree::Uncombable { NODE_FUNCTIONS_FINAL REFUSE_RENDERS };
-struct CombableBreak : CPPTree::Break { NODE_FUNCTIONS_FINAL REFUSE_RENDERS };
+struct UncombableSwitch : CPPTree::Switch, CPPTree::Uncombable { NODE_FUNCTIONS_FINAL RENDER_MACRO(CPPTree::Switch) };
+struct UncombableFor : CPPTree::For, CPPTree::Uncombable { NODE_FUNCTIONS_FINAL RENDER_MACRO(CPPTree::For) };
+struct CombableFor : CPPTree::For { NODE_FUNCTIONS_FINAL RENDER_MACRO(CPPTree::For) };
+struct UncombableBreak : CPPTree::Break, CPPTree::Uncombable { NODE_FUNCTIONS_FINAL RENDER_MACRO(CPPTree::Break) };
+struct CombableBreak : CPPTree::Break { NODE_FUNCTIONS_FINAL RENDER_MACRO(CPPTree::Break) };
 
 // From Generate stacks
-struct TempReturnAddress : CPPTree::Temporary { NODE_FUNCTIONS_FINAL REFUSE_RENDERS };
+struct TempReturnAddress : CPPTree::Temporary { NODE_FUNCTIONS_FINAL RENDER_MACRO(CPPTree::Temporary) };
 
 // From Fall Out
 // A label with a piggybacked pointer to the corresponding enum value
 struct StateLabel : CPPTree::LabelDeclaration
 {
     NODE_FUNCTIONS_FINAL 
-    REFUSE_RENDERS
+    RENDER_MACRO(CPPTree::LabelDeclaration)
     TreePtr<CPPTree::InstanceIdentifier> state;
 };
 

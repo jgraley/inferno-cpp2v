@@ -1128,6 +1128,7 @@ struct If : Statement
     TreePtr<Statement> body_else;  ///< executes when false, can be Nop if no else clause
 
 	Production GetMyProductionTerminal() const override;	
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
 };
 
 /// Designate a statement that may be broken out of
@@ -1154,6 +1155,9 @@ struct While : Loop, Uncombable
 {
     NODE_FUNCTIONS_FINAL
     TreePtr<Expression> condition; ///< Tested before each iteration; false terminates immediately
+
+	Production GetMyProductionTerminal() const override;	
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
 };
 
 /// Do loop (first iteration always runs)
@@ -1163,6 +1167,7 @@ struct Do : Loop, Uncombable // a do..while() construct
     TreePtr<Expression> condition; ///< Tested after each iteration; false terminates immediately
 
 	Production GetMyProductionTerminal() const override;	
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
 };
 
 /// C-style for loop. 

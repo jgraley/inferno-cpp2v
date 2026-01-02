@@ -79,6 +79,13 @@ public:
 	TreePtr<Node> OnPrimitiveStmt( string keyword, any keyword_loc);
 	TreePtr<Node> OnSpaceSepStmt( string keyword, any keyword_loc, TreePtr<Node> operand, any operand_loc );
 	TreePtr<Node> OnArgsBodyStmt( string keyword, any keyword_loc, list<TreePtr<Node>> args, any args_loc, TreePtr<Node> body, any body_loc );
+	TreePtr<Node> OnArgsBodyChainStmt( string keyword, any keyword_loc, 
+	                                   list<TreePtr<Node>> args, any args_loc, 
+	                                   TreePtr<Node> body, any body_loc,
+	                                   string chain_keyword, any chain_keyword_loc, 
+	                                   TreePtr<Node> chain_body, any chain_body_loc );
+	TreePtr<Node> OnWhile( TreePtr<Node> arg, any arg_loc, TreePtr<Node> body, any body_loc );
+	TreePtr<Node> OnDo( TreePtr<Node> body, any body_loc, TreePtr<Node> arg, any arg_loc );
 	
 	TreePtr<Node> OnIdValuePair( TreePtr<Node> id, any id_loc, TreePtr<Node> value );
 	TreePtr<Node> OnMapArgsCall( TreePtr<Node> callee, list<TreePtr<Node>> arguments );

@@ -68,8 +68,7 @@
 	VN_COLON 								"⦂"
 	VN_SEP 									"⚬"
 	VN_SUB_SEP								"🞄"
-	'('
-	')'
+	'('	
 	';'
 	RESOLUTION_OP 							"::"
 	ENGINE	 								"꩜"
@@ -134,9 +133,15 @@
 	<YY::TokenMetadata>	DECLARATION_OF			_("DeclarationOf")
 	<YY::TokenMetadata>	TYPE_OF					_("TypeOf")
 	<YY::TokenMetadata> NORM_TERM_KEYWORD		_("terminal keyword")
-	<YY::TokenMetadata> PRIMITIVE_STMT_KEYWORD  _("statement keyword")
-	<YY::TokenMetadata> SPACE_SEP_STMT_KEYWORD 	_("space-separated statement keyword")
-	<YY::TokenMetadata> ARGS_BODY_STMT_KEYWORD 	_("args-and-body statement keyword")
+	<YY::TokenMetadata> PRIMITIVE_STMT_KEYWORD  _("statement keyword") // eg break;
+	<YY::TokenMetadata> SPACE_SEP_STMT_KEYWORD 	_("space-separated statement keyword") // eg return 12;
+	<YY::TokenMetadata> ARGS_BODY_STMT_KEYWORD 	_("args-and-body statement keyword") // eg switch(args) body
+	<YY::TokenMetadata> ARGS_BODY_CHAIN_STMT_KEYWORD 	_("args-body-chain statement keyword") // eg if(args) body else chain_body	
+	<YY::TokenMetadata> PRIMITIVE_CHAIN_KEYWORD _("chain keyword") // eg else
+	<YY::TokenMetadata> DO_KEYWORD				_("do")
+	<YY::TokenMetadata> WHILE_KEYWORD			_("while")
+	stmt_low 
+	stmt_high
 	
 %type <TreePtr<Node>> 				normal expr_primary expr_postfix expr_prefix expr_relational norm_disjunction norm_conjunction  
 %type <TreePtr<Node>> 				expr_assignment expr_equality expr_add_etc expr_logical_or expr_logical_and 
@@ -161,6 +166,14 @@
 %type <list<TreePtr<Node>>>			comma_args semicolon_args
 %type <const AvailableNodeData::Block *> builtin_name_part prerestrict_name_part specific_id_part id_by_name_part build_id_part
 %type <const AvailableNodeData::Block *> type_builtin_name_part type_prerestrict_name_part type_specific_id_part type_id_by_name_part type_build_id_part
+
+// Solve the dangling-else amiguity by giving the "else" token a higher priority than the "if" token
+// In the rule, we must set the no-else rule to the "if" priority using %prec. Then, the TOKEN
+// for "else" will be compared with the RULE for no-else case and highest precidence will win.
+// It's all rather brittle.
+%precedence ARGS_BODY_CHAIN_STMT_KEYWORD
+%precedence PRIMITIVE_CHAIN_KEYWORD
+
 %%
 
 vnscript 		: commands 								{ vn->OnVNScript($1); }
@@ -225,14 +238,20 @@ stmt_conjunction 	: stmt_primary
 
 stmt_primary: compound
 			| statement_nc
-			
+						
 statement_nc: bare_statement ';'												{ $$ = $1; }      
 			| ARGS_BODY_STMT_KEYWORD '(' semicolon_args ')' stmt_primary		{ $$ = vn->OnArgsBodyStmt($1.as_ascii, @1, $3, @3, $5, @5); }
+			| WHILE_KEYWORD '(' expr_expression ')' stmt_primary 				{ $$ = vn->OnWhile($3, @3, $5, @5); }
+			| ARGS_BODY_CHAIN_STMT_KEYWORD '(' semicolon_args ')' stmt_primary	
+			  %prec ARGS_BODY_CHAIN_STMT_KEYWORD								{ $$ = vn->OnArgsBodyChainStmt($1.as_ascii, @1, $3, @3, $5, @5, "", @1, nullptr, @1); }
+			| ARGS_BODY_CHAIN_STMT_KEYWORD '(' semicolon_args ')' stmt_primary
+			  PRIMITIVE_CHAIN_KEYWORD stmt_primary								{ $$ = vn->OnArgsBodyChainStmt($1.as_ascii, @1, $3, @3, $5, @5, $6.as_ascii, @6, $7, @7); }
 
-bare_statement		: expr_expression
-					| expr_expression ':'										{ $$ = vn->OnLabel($1, @1); } 
-					| PRIMITIVE_STMT_KEYWORD									{ $$ = vn->OnPrimitiveStmt($1.as_ascii, @1); }
-					| SPACE_SEP_STMT_KEYWORD expr_expression					{ $$ = vn->OnSpaceSepStmt($1.as_ascii, @1, $2, @2); }
+bare_statement	: expr_expression
+				| expr_expression ':'											{ $$ = vn->OnLabel($1, @1); } 
+				| PRIMITIVE_STMT_KEYWORD										{ $$ = vn->OnPrimitiveStmt($1.as_ascii, @1); }
+				| SPACE_SEP_STMT_KEYWORD expr_expression						{ $$ = vn->OnSpaceSepStmt($1.as_ascii, @1, $2, @2); }
+				| DO_KEYWORD statement WHILE_KEYWORD '(' expr_expression ')' 	{ $$ = vn->OnDo($2, @2, $5, @5); }
 
 semicolon_args		: expr_expression											{ $$.push_back($1); }
 					| semicolon_args ';' expr_expression						{ $$ = $1; $$.push_back($3); }

@@ -91,7 +91,8 @@ public:
 		RESOLVER, // :: in C++	
 		PURE_IDENTIFIER, // Higher than expr because could be a type, label etc
 		TERMINAL, // Lexer tokens of any kind (other than type or expression)
-		ANONYMOUS
+		ANONYMOUS,
+		NULLPTR // NULL in a pattern as a singluar wildcard
 	};
 	
 	static const type_index DefaultAccess;
@@ -109,7 +110,8 @@ public:
 			refuse_map_argumentation(true),
 			boot_statements_using_braces(true),
 			compound_uses_vn_separator(false),
-			goto_uses_ref_and_deref(true) {}
+			goto_uses_ref_and_deref(true),
+			refuse_local_node_types(false) {}
 		bool force_initialisation;
 		bool force_incomplete_records;
 		bool split_bulky_statics;
@@ -123,6 +125,7 @@ public:
 		bool boot_statements_using_braces;
 		bool compound_uses_vn_separator;
 		bool goto_uses_ref_and_deref;
+		bool refuse_local_node_types;
 	};
 	
 	// We deal with syntactical association only, not mathematical, because:

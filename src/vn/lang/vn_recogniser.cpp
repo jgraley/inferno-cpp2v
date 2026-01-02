@@ -104,6 +104,14 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessToken(wstring text, bool 
 		return YY::VNLangParser::make_ARGS_BODY_STMT_KEYWORD(metadata, loc);
 	else if( ascii && ToASCII(text)=="for" )
 		return YY::VNLangParser::make_ARGS_BODY_STMT_KEYWORD(metadata, loc);
+	else if( ascii && ToASCII(text)=="if" )
+		return YY::VNLangParser::make_ARGS_BODY_CHAIN_STMT_KEYWORD(metadata, loc);
+	else if( ascii && ToASCII(text)=="else" )
+		return YY::VNLangParser::make_PRIMITIVE_CHAIN_KEYWORD(metadata, loc);
+	else if( ascii && ToASCII(text)=="while" )
+		return YY::VNLangParser::make_WHILE_KEYWORD(metadata, loc);
+	else if( ascii && ToASCII(text)=="do" )
+		return YY::VNLangParser::make_DO_KEYWORD(metadata, loc);
 	else if( ascii && ToASCII(text)=="true" )
 		return YY::VNLangParser::make_BOOL_LITERAL(true, loc);
 	else if( ascii && ToASCII(text)=="false" )

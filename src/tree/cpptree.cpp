@@ -1018,6 +1018,21 @@ Syntax::Production If::GetMyProductionTerminal() const
 	return has_else_clause ? Production::STATEMENT_HIGH : Production::STATEMENT_LOW; 
 }
 
+
+string If::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+{
+	bool has_else_clause = !DynamicTreePtrCast<Nop>(body_else); // Nop means no else clause
+	string s = "if( " +
+		       renderer->DoRender( condition, Production::BOTTOM_EXPR, policy ) +
+		       " )\n" +
+		       renderer->DoRender( body, has_else_clause ? Production::STATEMENT_HIGH : Production::STATEMENT_LOW, policy );
+		       
+    if( has_else_clause )  
+        s += "else\n" + renderer->DoRender( body_else, Production::STATEMENT_LOW);
+        
+    return s;		       
+}
+
 //////////////////////////// Breakable ///////////////////////////////
 
 Syntax::Production Breakable::GetMyProductionTerminal() const
@@ -1025,11 +1040,37 @@ Syntax::Production Breakable::GetMyProductionTerminal() const
 	return Production::STATEMENT_HIGH; 
 }
 
+//////////////////////////// While ///////////////////////////////
+
+Syntax::Production While::GetMyProductionTerminal() const
+{ 
+	return Production::STATEMENT; 
+}
+
+
+string While::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+{
+	return "while( " +
+		   renderer->DoRender( condition, Production::BOTTOM_EXPR, policy ) +
+		   " )\n" +
+		   renderer->DoRender( body, Production::STATEMENT, policy );
+}
+
 //////////////////////////// Do ///////////////////////////////
 
 Syntax::Production Do::GetMyProductionTerminal() const
 { 
 	return Production::BARE_STATEMENT; 
+}
+
+
+string Do::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+{
+	return "do\n" +
+		   renderer->DoRender( body, Production::STATEMENT_LOW, policy ) +
+		   "while( " +
+		   renderer->DoRender( condition, Production::BOTTOM_EXPR, policy ) +
+		   " )" ;
 }
 
 //////////////////////////// For ///////////////////////////////

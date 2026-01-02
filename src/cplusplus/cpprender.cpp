@@ -942,43 +942,6 @@ string CppRender::RenderStatement( TreePtr<Statement> statement, Syntax::Product
         return RenderDeclaration( d, surround_prod, policy );
     else if( TreePtr<Expression> e = DynamicTreePtrCast< Expression >(statement) )
         return DoRender( e, surround_prod);
-    else if( TreePtr<Return> es = DynamicTreePtrCast<Return>(statement) )
-        return "return " + DoRender( es->return_value, Syntax::Production::SPACE_SEP_STATEMENT);
-    else if( TreePtr<Goto> g = DynamicTreePtrCast<Goto>(statement) )
-    {
-        if( TreePtr<SpecificLabelIdentifier> li = DynamicTreePtrCast< SpecificLabelIdentifier >(g->destination) )
-            return "goto " + DoRender( li, Syntax::Production::SPACE_SEP_STATEMENT).substr(2);  // regular goto REMOVE THE &&
-        else
-            return "goto *" + DoRender( g->destination, Syntax::Production::PREFIX); // goto-a-variable (GCC extension)
-    }
-    else if( TreePtr<If> i = DynamicTreePtrCast<If>(statement) )
-    {
-        bool has_else_clause = !DynamicTreePtrCast<Nop>(i->body_else); // Nop means no else clause
-        string s;
-        s += "if( " + DoRender( i->condition, Syntax::Production::CONDITION) + " )\n";
-        // The choice of production here causes then "else" ambuguity to be resolved.
-        s += DoRender( i->body, has_else_clause ? Syntax::Production::STATEMENT_HIGH : Syntax::Production::STATEMENT_LOW);
-        if( has_else_clause )  
-            s += "else\n" + DoRender( i->body_else, Syntax::Production::STATEMENT_LOW);
-        return s;
-    }
-    else if( TreePtr<While> w = DynamicTreePtrCast<While>(statement) )
-        return "while( " + 
-               DoRender( w->condition, Syntax::Production::CONDITION) + " )\n" +
-               DoRender( w->body, surround_prod);
-    else if( TreePtr<Do> d = DynamicTreePtrCast<Do>(statement) )
-        return "do\n" +
-               DoRender( d->body, Syntax::Production::STATEMENT_LOW) +
-               "while( " + DoRender( d->condition, Syntax::Production::CONDITION) + " )";
-    else if( TreePtr<For> f = DynamicTreePtrCast<For>(statement) )
-        return "for( " + 
-               DoRender( f->initialisation, Syntax::Production::STATEMENT_LOW) + 
-               DoRender( f->condition, Syntax::Production::STATEMENT_LOW) + 
-               DoRender( f->increment, Syntax::Production::BOTTOM_EXPR) + " )\n" +
-               DoRender( f->body, surround_prod);
-    else if( TreePtr<Switch> s = DynamicTreePtrCast<Switch>(statement) )
-        return "switch( " + DoRender( s->condition, Syntax::Production::CONDITION) + " )\n" +
-               DoRender( s->body, surround_prod);
     else if( TreePtr<Case> c = DynamicTreePtrCast<Case>(statement) )
         return "case " + DoRender( c->value, Syntax::Production::SPACE_SEP_STATEMENT) + ":";
     else if( TreePtr<RangeCase> rc = DynamicTreePtrCast<RangeCase>(statement) )
@@ -990,10 +953,6 @@ string CppRender::RenderStatement( TreePtr<Statement> statement, Syntax::Product
                ":";
     else if( DynamicTreePtrCast<Default>(statement) )
         return "default:";
-    else if( DynamicTreePtrCast<Continue>(statement) )
-        return "continue";
-    else if( DynamicTreePtrCast<Break>(statement) )
-        return "break";
     else if( DynamicTreePtrCast<Nop>(statement) )
         return "";
     else
