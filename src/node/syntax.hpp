@@ -65,6 +65,8 @@ public:
 		COLON_SEP, // Use for map arguments
 
 		ASSIGN = 70, //C++: assign ops and statement-like keywords eg throw
+		EXPR_CONST,
+		// TODO ?: precedence here,
 		LOGIC_OR,
 		LOGIC_AND,		
 		BITWISE_OR,

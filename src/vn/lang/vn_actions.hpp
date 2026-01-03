@@ -74,6 +74,9 @@ public:
 	TreePtr<Node> OnCompound( list<TreePtr<Node>> members, any memb_loc, list<TreePtr<Node>> statements, any stmt_loc );	
 	TreePtr<Node> OnArrayLiteral( list<TreePtr<Node>> elements );	
 	TreePtr<Node> OnLabel( TreePtr<Node> identifier, any loc );	
+	TreePtr<Node> OnCase( TreePtr<Node> value, any loc );	
+	TreePtr<Node> OnRangeCase( TreePtr<Node> value_lo, any lo_loc, TreePtr<Node> value_hi, any hi_loc );	
+	TreePtr<Node> OnDefault( any loc );	
 	
 	TreePtr<Node> OnNormalTerminalKeyword( string keyword, any keyword_loc );
 	TreePtr<Node> OnPrimitiveStmt( string keyword, any keyword_loc);

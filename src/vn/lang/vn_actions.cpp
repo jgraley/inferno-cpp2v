@@ -350,6 +350,29 @@ TreePtr<Node> VNLangActions::OnLabel( TreePtr<Node> identifier, any loc )
 }
 
 
+TreePtr<Node> VNLangActions::OnCase( TreePtr<Node> value, any loc )
+{
+	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::Case>>();
+	node->value = value;
+	return node;
+}
+
+
+TreePtr<Node> VNLangActions::OnRangeCase( TreePtr<Node> value_lo, any lo_loc, TreePtr<Node> value_hi, any hi_loc )
+{
+	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::RangeCase>>();
+	node->value_lo = value_lo;
+	node->value_hi = value_hi;
+	return node;
+}
+
+
+TreePtr<Node> VNLangActions::OnDefault( any loc )
+{
+	return MakeTreeNode<StandardAgentWrapper<CPPTree::Default>>();
+}
+
+
 TreePtr<Node> VNLangActions::OnNormalTerminalKeyword( string keyword, any keyword_loc )
 {
 	if( keyword=="this" )

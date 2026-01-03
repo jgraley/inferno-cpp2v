@@ -97,6 +97,7 @@ comp_assign				\|=|^=|&=|<<=|>>=|\+=|-=|\*=|\/=|%=
 ,				{ return YY::VNLangParser::make_COMMA(str(), location()); }
 
 ::				{ return YY::VNLangParser::make_RESOLUTION_OP(location()); };
+\.\. 				{ return YY::VNLangParser::make_RANGE_OP(location()); };
 
 [()\{\};?:\[\]\.]	{ return YY::VNLangParser::symbol_type(chr(), location()); }
 

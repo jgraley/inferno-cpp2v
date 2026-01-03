@@ -1214,6 +1214,8 @@ struct RangeCase : SwitchTarget
     // support gcc extension of case x..y:
     TreePtr<Expression> value_lo; ///< start of range, inclusive
     TreePtr<Expression> value_hi; ///< end of range, inclusive
+
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
 }; 
 
 /// Case label
@@ -1221,10 +1223,17 @@ struct Case : SwitchTarget
 {
     NODE_FUNCTIONS_FINAL
     TreePtr<Expression> value; ///< Switch jumps here when condition is this value
+
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
 };
 
 /// Default label in a switch statement
-struct Default : SwitchTarget { NODE_FUNCTIONS_FINAL };
+struct Default : SwitchTarget 
+{ 
+	NODE_FUNCTIONS_FINAL
+	
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
+};
 
 /// Continue (to innermost Loop)
 struct Continue : Statement, Uncombable 

@@ -1116,6 +1116,31 @@ Syntax::Production SwitchTarget::GetMyProductionTerminal() const
 	return Production::LABEL; 
 }
 
+//////////////////////////// RangeCase //////////////////////////////
+
+string RangeCase::GetRender( VN::RendererInterface *renderer, Production, Policy )
+{
+	return "case " + 
+	       renderer->DoRender( value_lo, Syntax::Production::EXPR_CONST) + 
+	       ".." +
+	       renderer->DoRender( value_hi, Syntax::Production::EXPR_CONST) + 
+	       ":";	
+}
+
+//////////////////////////// Case //////////////////////////////
+
+string Case::GetRender( VN::RendererInterface *renderer, Production, Policy )
+{
+	return "case " + renderer->DoRender( value, Syntax::Production::EXPR_CONST) + ":";	
+}
+
+//////////////////////////// Default //////////////////////////////
+
+string Default::GetRender( VN::RendererInterface *, Production, Policy )
+{
+	return "default:";	
+}
+
 //////////////////////////// Continue ///////////////////////////////
 
 Syntax::Production Continue::GetMyProductionTerminal() const

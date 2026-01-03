@@ -112,6 +112,10 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessToken(wstring text, bool 
 		return YY::VNLangParser::make_WHILE_KEYWORD(metadata, loc);
 	else if( ascii && ToASCII(text)=="do" )
 		return YY::VNLangParser::make_DO_KEYWORD(metadata, loc);
+	else if( ascii && ToASCII(text)=="case" )
+		return YY::VNLangParser::make_CASE_KEYWORD(metadata, loc);
+	else if( ascii && ToASCII(text)=="default" )
+		return YY::VNLangParser::make_DEFAULT_KEYWORD(metadata, loc);
 	else if( ascii && ToASCII(text)=="true" )
 		return YY::VNLangParser::make_BOOL_LITERAL(true, loc);
 	else if( ascii && ToASCII(text)=="false" )
