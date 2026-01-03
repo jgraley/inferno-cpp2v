@@ -136,8 +136,6 @@ string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surro
         return RenderMacroDeclaration( macro_decl, surround_prod );
     else if( auto macro_stmt = TreePtr<MacroStatement>::DynamicCast(node) )
         return RenderMacroStatement( macro_stmt, surround_prod );
-//    else if( auto op = TreePtr<Operator>::DynamicCast(node) ) // Operator is a kind of Expression
-//        return RenderOperator( op, surround_prod );
     else if( auto expression = TreePtr<Expression>::DynamicCast(node) ) // Expression is a kind of Statement
         return RenderExpression( expression, surround_prod, policy );
     else if( auto instance = TreePtr<Instance>::DynamicCast(node) )    // Instance is a kind of Statement and Declaration
@@ -146,8 +144,6 @@ string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surro
         return RenderPreProcDecl(ppd, surround_prod); 
     else if( auto declaration = TreePtr<Declaration>::DynamicCast(node) )
         return RenderDeclaration( declaration, surround_prod, policy );
-    else if( auto statement = TreePtr<Statement>::DynamicCast(node) )
-        return RenderStatement( statement, surround_prod, policy );
         
     // Due #969 we might have a standard agent, so fall back to a function that
     // definitely won't call any agent methods.
@@ -928,35 +924,6 @@ string CppRender::RenderDeclaration( TreePtr<Declaration> declaration, Syntax::P
         return DoRender( l->identifier, Syntax::Production::PURE_IDENTIFIER) + ":"; 
     
     return Render::Dispatch( declaration, surround_prod, policy );
-}
-DEFAULT_CATCH_CLAUSE
-
-
-string CppRender::RenderStatement( TreePtr<Statement> statement, Syntax::Production surround_prod, Syntax::Policy policy ) try
-{
-    (void)surround_prod;
-    TRACE();
-    ASSERT( statement );
-    //printf( "%s %d things\n", typeid(*statement).name(), statement->Itemise().size() );
-    if( TreePtr<Declaration> d = DynamicTreePtrCast< Declaration >(statement) )
-        return RenderDeclaration( d, surround_prod, policy );
-    else if( TreePtr<Expression> e = DynamicTreePtrCast< Expression >(statement) )
-        return DoRender( e, surround_prod);
-    else if( TreePtr<Case> c = DynamicTreePtrCast<Case>(statement) )
-        return "case " + DoRender( c->value, Syntax::Production::SPACE_SEP_STATEMENT) + ":";
-    else if( TreePtr<RangeCase> rc = DynamicTreePtrCast<RangeCase>(statement) )
-        // GCC extension: assume that ... is part of the case statement, and can boot the expressions.
-        return "case " + 
-               DoRender( rc->value_lo, Syntax::Production::SPACE_SEP_STATEMENT) + 
-               " ... " + 
-               DoRender( rc->value_hi, Syntax::Production::SPACE_SEP_STATEMENT) + 
-               ":";
-    else if( DynamicTreePtrCast<Default>(statement) )
-        return "default:";
-    else if( DynamicTreePtrCast<Nop>(statement) )
-        return "";
-    else
-        return Render::Dispatch( statement, surround_prod, policy );
 }
 DEFAULT_CATCH_CLAUSE
 

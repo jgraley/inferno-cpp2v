@@ -56,7 +56,6 @@ private:
 	string RenderPreProcDecl( TreePtr<CPPTree::PreProcDecl> ppd, Syntax::Production surround_prod );
 	string RenderRecordBody( TreePtr<CPPTree::Record> record );
     string RenderDeclaration( TreePtr<CPPTree::Declaration> declaration, Syntax::Production surround_prod, Syntax::Policy policy );
-    string RenderStatement( TreePtr<CPPTree::Statement> statement, Syntax::Production surround_prod, Syntax::Policy policy );
  	string RenderConstructorInitList( Sequence<CPPTree::Statement> spe );
 	string RenderEnumBodyScope( TreePtr<CPPTree::Record> record );
     string RenderOperandSequence( Sequence<CPPTree::Expression> spe );

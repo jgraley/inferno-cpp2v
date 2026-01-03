@@ -1189,7 +1189,13 @@ string MembInitialisation::GetRender( VN::RendererInterface *renderer, Productio
 
 Syntax::Production Nop::GetMyProductionTerminal() const
 { 
-	return Production::BOTTOM_STMT_DECL; // Force a {}
+	return Production::BARE_STATEMENT; // Force a ;
+}
+
+
+string Nop::GetRender( VN::RendererInterface *, Production, Policy )
+{
+	return "";
 }
 
 //////////////////////////// PreprocessorIdentifier //////////////////////////////

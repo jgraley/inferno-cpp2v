@@ -77,6 +77,7 @@ public:
 	TreePtr<Node> OnCase( TreePtr<Node> value, any loc );	
 	TreePtr<Node> OnRangeCase( TreePtr<Node> value_lo, any lo_loc, TreePtr<Node> value_hi, any hi_loc );	
 	TreePtr<Node> OnDefault( any loc );	
+	TreePtr<Node> OnNop( any loc );	
 	
 	TreePtr<Node> OnNormalTerminalKeyword( string keyword, any keyword_loc );
 	TreePtr<Node> OnPrimitiveStmt( string keyword, any keyword_loc);

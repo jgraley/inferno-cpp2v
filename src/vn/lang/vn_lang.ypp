@@ -239,8 +239,9 @@ stmt_disjunction	: stmt_conjunction
 stmt_conjunction 	: stmt_primary
 					| stmt_conjunction CONJUNCTION stmt_primary					{ $$ = vn->OnConjunction($1, $3); }
 
-stmt_primary: compound
-			| statement_nc
+stmt_primary: compound 
+			| statement_nc %prec ';'
+			| ';'																{ $$ = vn->OnNop(@1); }      
 						
 statement_nc: bare_statement ';'												{ $$ = $1; }      
 			| ARGS_BODY_STMT_KEYWORD '(' semicolon_args ')' stmt_primary		{ $$ = vn->OnArgsBodyStmt($1.as_ascii, @1, $3, @3, $5, @5); }
@@ -308,6 +309,7 @@ norm_conjunction 	: norm_expr_or_stmt
 		
 norm_expr_or_stmt	: expr_expression
 					| statement_nc // statements not including Compound, which is expressional from this POV
+					| comp_prefix // Branch off here for compound to avoid conflicts with prefix = (used for inits)
 
 expr_expression		: expr_comma_op
                                    
@@ -323,7 +325,6 @@ expr_id_value		: expr_assignment
 					| expr_id_value VN_COLON expr_assignment					{ $$ = vn->OnIdValuePair($1, @1, $3); }
 					
 expr_assignment 	: expr_logical_or 
-					| comp_prefix // Branch off here for compound to avoid conflicts with prefix = (used for inits)
 					| 				   expr_logical_or C_ASSIGN expr_assignment	{ $$ = vn->OnInfixOperator($2, $1, $3); }
 					|         expr_logical_or C_COMPOUND_ASSIGN expr_assignment	{ $$ = vn->OnInfixOperator($2, $1, $3); }
 					|   expr_logical_or '?' expr_expression ':' expr_assignment	{ $$ = vn->OnConditionalOperator($1, $3, $5); }

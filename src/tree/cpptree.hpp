@@ -1271,6 +1271,7 @@ struct Nop : Statement
 	NODE_FUNCTIONS_FINAL 
 
 	Production GetMyProductionTerminal() const override;
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
 };
   
 //////////////////////////// Preprocessor stuff ////////////////////////////

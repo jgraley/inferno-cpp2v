@@ -373,6 +373,12 @@ TreePtr<Node> VNLangActions::OnDefault( any loc )
 }
 
 
+TreePtr<Node> VNLangActions::OnNop( any loc )
+{
+	return MakeTreeNode<StandardAgentWrapper<CPPTree::Nop>>();
+}
+
+
 TreePtr<Node> VNLangActions::OnNormalTerminalKeyword( string keyword, any keyword_loc )
 {
 	if( keyword=="this" )
