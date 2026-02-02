@@ -789,6 +789,15 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 // Global designations #872
 // Type mismatches #874
 
-
 // C fold-in: 
 // things like OnPrefixOperator() should take an actual parser token not a string
+
+// Types: see https://alx71hub.github.io/hcb/#decl-specifier-seq
+// Keep the () on types for disambiguation unless you can prove away or just rely on designations TODO.
+// Use your type/type_disjunction as the basis for a type_id with anonymous declarator.
+// type-id which uses anonymous-declarator shall be used for designations so we retain ⪮ syntax and they resemble "using".
+// Use type_id instead of type_spec in decl_spec_seq: type_id will be a node while the others are just modifiers
+// to the decl (not the type) so do eg 
+// decl_specification = decl-spec-seq(opt) type_id decl-spec-seq(opt) 
+// producing type node and multiset of decl-spec strings and keep them separate
+

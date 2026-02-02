@@ -122,6 +122,18 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessToken(wstring text, bool 
 		return YY::VNLangParser::make_BOOL_LITERAL(false, loc);
 	else if( ascii && ToASCII(text)=="typename" )
 		return YY::VNLangParser::make_TYPENAME(ToASCII(text), loc);
+	else if( ascii && 
+	         ( ToASCII(text)=="char" ||
+	           ToASCII(text)=="bool" ||
+	           ToASCII(text)=="short" ||
+	           ToASCII(text)=="int" ||
+	           ToASCII(text)=="long" ||
+	           ToASCII(text)=="signed" ||
+	           ToASCII(text)=="unsigned" ||
+	           ToASCII(text)=="float" ||
+	           ToASCII(text)=="double" ||
+	           ToASCII(text)=="void" ) )	           
+		return YY::VNLangParser::make_SIMPLE_TYPE_SPEC(ToASCII(text), loc);
 		
 	if( designation_gnomon )
 	{
