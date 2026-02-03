@@ -69,10 +69,13 @@ struct Expression : virtual Statement,
 struct Type : virtual Node 
 { 
     NODE_FUNCTIONS 
-    
+        
     virtual string GetColour() const { return "/set28/3"; }    
    	Production GetMyProductionTerminal() const override;
 	Production GetOperandInDeclaratorProduction() const override;   
+
+    // Render a simple type only, no declarators
+	virtual string GetRenderSimpleType( VN::RendererInterface *renderer, Policy policy );    
 };
 
 /// A declaration specifies the creation of a TypeDeclaration or an Instance. 

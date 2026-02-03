@@ -122,7 +122,7 @@
 	<bool>		BOOL_LITERAL				_("boolean literal")
 	<string>	ASCII_FORMAT 				_("ASCII format string")
 	<string>	TYPENAME					_("type name")
-	<string>	SIMPLE_TYPE_SPEC			_("simple type specifier")
+//	<string>	SIMPLE_TYPE_SPEC			_("simple type specifier")
 	<YY::TokenMetadata> TRANSFORM_NAME_UNIFIED	_("unified transformation name")
 	<YY::TokenMetadata> TRANSFORM_NAME_NORMAL	_("normal transformation name")
 	<YY::TokenMetadata> ASCII_NAME 				_("ASCII name")
@@ -281,8 +281,8 @@ type_prefix : type_primary
 			|                 type_prerestrict_name_part unified_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
 			                                       
 type_primary: type_vn_prim
-			| type_spec_seq 													{ TODO become a node here }
 			| '(' type ')'														{ $$ = $2; } // Only for disambiguation unless can prove away or just rely on designations TODO
+//			| type_spec_seq 													{ TODO become a node here }
 
 type_vn_prim: type_builtin_name_part itemisation								{ $$ = vn->OnBuiltIn($1, @1, $2); }
 			| DESIGNATED_TYPE     									  			{ $$ = $1.as_designated; }		
@@ -302,10 +302,10 @@ type_build_id_part 		: start_build_id_scope resolved_type_name		{ $$ = $2.as_and
 
 // eg "long unsigned int". VN represents this as a single node. We don't want nodes for its constituent parts.
 // So, this is the level at which we mix in the VN syntax.
-type_spec_seq	: type_spec												{ TODO just build a multiset }
-				| type_spec type_spec_seq								{ TODO just build a multiset }
+//type_spec_seq	: type_spec												{ TODO just build a multiset }
+//				| type_spec type_spec_seq								{ TODO just build a multiset }
 
-type_spec	: SIMPLE_TYPE_SPEC											{ TODO just get the ASCII string }
+//type_spec	: SIMPLE_TYPE_SPEC											{ TODO just get the ASCII string }
 
 
 normal				: norm_disjunction

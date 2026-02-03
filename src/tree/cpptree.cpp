@@ -30,6 +30,12 @@ Syntax::Production Type::GetOperandInDeclaratorProduction() const
 	return Production::BOTTOM_EXPR;
 }
 
+
+string Type::GetRenderSimpleType( VN::RendererInterface *, Policy )
+{
+	throw Unimplemented();
+}
+
 //////////////////////////// Declaration ///////////////////////////////
 
 Syntax::Production Declaration::GetMyProductionTerminal() const

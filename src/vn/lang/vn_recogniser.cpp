@@ -122,7 +122,7 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessToken(wstring text, bool 
 		return YY::VNLangParser::make_BOOL_LITERAL(false, loc);
 	else if( ascii && ToASCII(text)=="typename" )
 		return YY::VNLangParser::make_TYPENAME(ToASCII(text), loc);
-	else if( ascii && 
+	/*else if( ascii && 
 	         ( ToASCII(text)=="char" ||
 	           ToASCII(text)=="bool" ||
 	           ToASCII(text)=="short" ||
@@ -134,7 +134,7 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessToken(wstring text, bool 
 	           ToASCII(text)=="double" ||
 	           ToASCII(text)=="void" ) )	           
 		return YY::VNLangParser::make_SIMPLE_TYPE_SPEC(ToASCII(text), loc);
-		
+	*/	
 	if( designation_gnomon )
 	{
 		if( dynamic_cast<const NonTypeDesignationGnomon *>(designation_gnomon.get()) )
