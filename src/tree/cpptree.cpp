@@ -31,6 +31,12 @@ Syntax::Production Type::GetOperandInDeclaratorProduction() const
 }
 
 
+string Type::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+{	
+	return GetRenderSimpleType( renderer, policy ); // TODO eventually should be type-and-anonymous-declarator
+}
+
+
 string Type::GetRenderSimpleType( VN::RendererInterface *, Policy )
 {
 	throw Unimplemented();
@@ -189,6 +195,21 @@ Syntax::Production InstanceIdentifier::GetMyProductionTerminal() const
 Syntax::Production TypeIdentifier::GetMyProductionTerminal() const
 { 
 	return Production::PURE_IDENTIFIER; 
+}
+
+//////////////////////////// SpecificTypeIdentifier //////////////////////////////
+
+string SpecificTypeIdentifier::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy )
+{
+	// Render as identifier for cases that are not a type usage eg declarations
+	return SpecificIdentifier::GetRender(renderer, surround_prod, policy);
+}
+
+
+string SpecificTypeIdentifier::GetRenderSimpleType( VN::RendererInterface *renderer, Policy policy )
+{
+	// Yes to scope resolution, otherwise we drop scope reolution on type usages
+	return SpecificIdentifier::GetRender(renderer, Production::RESOLVER, policy);
 }
 
 //////////////////////////// IdValuePair ///////////////////////////////
@@ -567,6 +588,12 @@ Syntax::Production Indirection::GetOperandInDeclaratorProduction() const
 Syntax::Production Void::GetMyProductionTerminal() const
 { 
 	return Production::PRIMARY_TYPE; // eg auto a = new void;
+}
+
+
+string Void::GetRenderSimpleType( VN::RendererInterface *, Policy )
+{
+	return "void";
 }
 
 //////////////////////////// Boolean ///////////////////////////////

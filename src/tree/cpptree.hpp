@@ -74,6 +74,8 @@ struct Type : virtual Node
    	Production GetMyProductionTerminal() const override;
 	Production GetOperandInDeclaratorProduction() const override;   
 
+	string GetRender( VN::RendererInterface *renderer, Production, Policy policy ) override;
+
     // Render a simple type only, no declarators
 	virtual string GetRenderSimpleType( VN::RendererInterface *renderer, Policy policy );    
 };
@@ -190,6 +192,7 @@ struct TypeIdentifier : Identifier,
     virtual string GetColour() const { return Identifier::GetColour(); } // Identifier wins
 	Production GetMyProductionTerminal() const override;
 };
+
                            
 /// Identifier for a specific user defined type, linked to by a particular Declaration.
 struct SpecificTypeIdentifier : TypeIdentifier,
@@ -199,6 +202,9 @@ struct SpecificTypeIdentifier : TypeIdentifier,
     SpecificTypeIdentifier( string s, BoundingRole addr_bounding_role = BoundingRole::NONE ) : 
         SpecificIdentifier(s, addr_bounding_role) {} ///< make identifier with the given name
     NODE_FUNCTIONS_FINAL
+
+	string GetRender( VN::RendererInterface *renderer, Production, Policy policy ) final;
+	string GetRenderSimpleType( VN::RendererInterface *renderer, Policy policy ) final;
 };
 
 
@@ -659,6 +665,7 @@ struct Void : Type
 	NODE_FUNCTIONS_FINAL 
 
 	Production GetMyProductionTerminal() const override;
+	string GetRenderSimpleType( VN::RendererInterface *renderer, Policy policy ) override;
 };
 
 /// Boolean type. 

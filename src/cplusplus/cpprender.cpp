@@ -369,20 +369,23 @@ DEFAULT_CATCH_CLAUSE
 
 string CppRender::RenderSimpleType( TreePtr<CPPTree::Type> type, Syntax::Production surround_prod, Syntax::Policy policy )
 {
-	if( TreePtr<SpecificTypeIdentifier> ti = DynamicTreePtrCast< SpecificTypeIdentifier >(type) )
-        return DoRender( ti, surround_prod ); // TODO implement GetRenderSimpleType() on this and call
-    else if( dynamic_pointer_cast<Labeley>(type) )
+	if( dynamic_pointer_cast<Labeley>(type) )
         return "const void *"; // Always const
     else if( auto floating = TreePtr<Floating>::DynamicCast(type) )
         return RenderSimpleTypeFloating( floating, surround_prod, policy);
     else if( auto integral = TreePtr<Integral>::DynamicCast(type) )
         return RenderSimpleTypeIntegral( integral, surround_prod, policy );
-	else if( DynamicTreePtrCast< Void >(type) )
-        return "void"; 
     else if( DynamicTreePtrCast< Boolean >(type) )
         return "bool";
-    else 
+        
+    try
+    {
+		return type->GetRenderSimpleType( this, policy );
+	}
+	catch( Syntax::Refusal & ) 
+	{
         return RenderNodeExplicit( type, surround_prod, policy );
+	}
 }
 
 string CppRender::RenderType( TreePtr<CPPTree::Type> type, Syntax::Production surround_prod, Syntax::Policy policy )
