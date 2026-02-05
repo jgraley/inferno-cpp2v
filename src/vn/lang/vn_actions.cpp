@@ -215,6 +215,24 @@ TreePtr<Node> VNLangActions::OnRestrict( const AvailableNodeData::Block *block, 
 }
 
 
+TreePtr<Node> VNLangActions::OnTypeSpecifierSeq( const multiset<string> &specifiers, any loc )
+{
+	ASSERT( specifiers.size() >= 1 ); // this would be a bug in the parser
+	
+	if( specifiers.count("void") >= 1 )
+	{
+		if( specifiers.size() > 1 )
+			throw YY::VNLangParser::syntax_error(
+				any_cast<YY::VNLangParser::location_type>(loc), 
+				"void must appear on its own.");	
+		return MakeTreeNode<StandardAgentWrapper<CPPTree::Void>>();
+	}
+	throw YY::VNLangParser::syntax_error(
+	     any_cast<YY::VNLangParser::location_type>(loc), 
+	     "Illegal type specifier sequence: "+Trace(specifiers));	
+}
+
+
 TreePtr<Node> VNLangActions::OnPrefixOperator( string tok, TreePtr<Node> operand )
 {
 #define PREFIX(TOK, TEXT, NAME, BASE, CAT, PROD, ASSOC) \
