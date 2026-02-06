@@ -215,30 +215,82 @@ TreePtr<Node> VNLangActions::OnRestrict( const AvailableNodeData::Block *block, 
 }
 
 
-TreePtr<Node> VNLangActions::OnTypeSpecifierSeq( const multiset<string> &specifiers, any loc )
+TreePtr<Node> VNLangActions::OnTypeSpecifierSeq( multiset<string> specifiers, any loc )
 {
 	ASSERT( specifiers.size() >= 1 ); // this would be a bug in the parser
+	TreePtr<CPPTree::Type> type;
+	TreePtr<CPPTree::SpecificFloatSemantics> float_sem;
+	int width_bits = 0;
+	bool is_signed = true;
+	if( specifiers.extract("void") )
+		type = MakeTreeNode<StandardAgentWrapper<CPPTree::Void>>();
+	else if( specifiers.extract("bool") )
+		type = MakeTreeNode<StandardAgentWrapper<CPPTree::Boolean>>();
+	else if( specifiers.extract("float") )
+		float_sem = MakeTreeNode<StandardAgentWrapper<CPPTree::SpecificFloatSemantics>>(TypeDb::float_semantics);
+	else if( specifiers.extract("double") )
+	{
+		if( specifiers.extract("long") )
+			float_sem = MakeTreeNode<StandardAgentWrapper<CPPTree::SpecificFloatSemantics>>(TypeDb::long_double_semantics);
+		else
+			float_sem = MakeTreeNode<StandardAgentWrapper<CPPTree::SpecificFloatSemantics>>(TypeDb::double_semantics);
+	}
+	else if( specifiers.extract("char") )	
+	{
+		is_signed = TypeDb::char_default_signed; // start with the default signedness for char
+		width_bits = TypeDb::char_bits; 
+	}
+	else // try for an integral type based on int
+	{
+		is_signed = true; // int-based types are signed by default
+		if( specifiers.extract("int") )			
+			width_bits = TypeDb::integral_bits[0]; // int
+								
+		if( specifiers.extract("short") )	
+			width_bits = TypeDb::integral_bits[1]; // short
+		else if( specifiers.extract("long") )	
+		{
+			width_bits = TypeDb::integral_bits[2]; // long
+			if( specifiers.extract("long") )	// second long
+				width_bits = TypeDb::integral_bits[3]; // long long
+		}
+	}		
+		
+	if( width_bits > 0 )
+	{
+		if( specifiers.extract("signed") )	
+			is_signed = true;
+		else if( specifiers.extract("unsigned") )	
+			is_signed = false;
+			
+	    TreePtr<CPPTree::Integral> i;
+		if (is_signed)
+			i = MakeTreeNode<StandardAgentWrapper<CPPTree::Signed>>();
+		else
+			i = MakeTreeNode<StandardAgentWrapper<CPPTree::Unsigned>>();
+
+		i->width = MakeTreeNode<StandardAgentWrapper<CPPTree::SpecificInteger>>( width_bits );
+		type = i;
+	}
+	else if( float_sem )
+	{
+		auto f = MakeTreeNode<StandardAgentWrapper<CPPTree::Floating>>();
+		f->semantics = float_sem;
+		type = f;
+	}
+
+	if( !type )
+		throw YY::VNLangParser::syntax_error(
+			any_cast<YY::VNLangParser::location_type>(loc), 
+			"Unknown type specifier sequence: "+Trace(specifiers));	
+			
+	// Should have "gobbled up" all the specifiers using extract()
+	if( specifiers.size() > 0 )
+		throw YY::VNLangParser::syntax_error(
+			any_cast<YY::VNLangParser::location_type>(loc), 
+			"Unknown additional type specifiers: "+Trace(specifiers));	
 	
-	if( specifiers.count("void") >= 1 )
-	{
-		if( specifiers.size() > 1 )
-			throw YY::VNLangParser::syntax_error(
-				any_cast<YY::VNLangParser::location_type>(loc), 
-				"void must appear on its own.");	
-		return MakeTreeNode<StandardAgentWrapper<CPPTree::Void>>();
-	}
-	else if( specifiers.count("bool") >= 1 )
-	{
-		if( specifiers.size() > 1 )
-			throw YY::VNLangParser::syntax_error(
-				any_cast<YY::VNLangParser::location_type>(loc), 
-				"bool must appear on its own.");	
-		return MakeTreeNode<StandardAgentWrapper<CPPTree::Boolean>>();
-	}
-	else 
-	throw YY::VNLangParser::syntax_error(
-	     any_cast<YY::VNLangParser::location_type>(loc), 
-	     "Illegal type specifier sequence: "+Trace(specifiers));	
+	return type;
 }
 
 

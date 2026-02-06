@@ -24,9 +24,7 @@ private:
     string RenderScopeResolvingPrefix( TreePtr<Node> node ) final;
 	string GetUniqueIdentifierName( TreePtr<Node> id ) const final;
     string RenderIdentifier( TreePtr<CPPTree::Identifier> id, Syntax::Production surround_prod );
-    string RenderSimpleTypeIntegral( TreePtr<CPPTree::Integral> type, Syntax::Production surround_prod, Syntax::Policy policy );
     string RenderIntegralTypeAndDeclarator( TreePtr<CPPTree::Integral> type, string declarator, Syntax::Policy policy );
-    string RenderSimpleTypeFloating( TreePtr<CPPTree::Floating> type, Syntax::Production surround_prod, Syntax::Policy policy );
     string RenderTypeAndDeclarator( TreePtr<CPPTree::Type> type, string declarator, 
                                     Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
                                     bool constant=false );

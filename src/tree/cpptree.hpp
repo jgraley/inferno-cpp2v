@@ -695,13 +695,26 @@ struct Integral : Numeric
 {
     NODE_FUNCTIONS
     TreePtr<Integer> width;  ///< Number of bits, not bytes
+
+	struct UnimplemetedIntegralType : Unimplemented {};
+
+	string GetRenderSimpleType( VN::RendererInterface *renderer, Policy policy ) override;
+	virtual bool IsSigned() { throw Unimplemented(); }
 };
 
 /// Type of a signed integer number (2's complement).
-struct Signed : Integral { NODE_FUNCTIONS_FINAL };
+struct Signed : Integral 
+{ 
+	NODE_FUNCTIONS_FINAL 
+	bool IsSigned() final { return true; }
+};
 
 /// Type of an unsigned integer number.
-struct Unsigned : Integral { NODE_FUNCTIONS_FINAL };
+struct Unsigned : Integral 
+{ 
+	NODE_FUNCTIONS_FINAL
+	bool IsSigned() final { return false; }
+};	
 
 /// Property for the details of any floating point behaviour
 /** implying representation size and implementation. */
@@ -726,6 +739,10 @@ struct Floating : Numeric
 { 
     NODE_FUNCTIONS_FINAL
     TreePtr<FloatSemantics> semantics; ///< These are the semantics of the representation
+
+	struct UnimplemetedFloatingType : Unimplemented {};
+
+	string GetRenderSimpleType( VN::RendererInterface *renderer, Policy policy ) override;
 }; 
 
 /// Type of a variable that can hold a label. Similar to the GCC extension

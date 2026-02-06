@@ -615,6 +615,53 @@ Syntax::Production Numeric::GetMyProductionTerminal() const
 	return Production::SPACE_SEP_TYPE; // eg auto a = new unsigned long;
 }
 
+//////////////////////////// Integral ///////////////////////////////
+
+string Integral::GetRenderSimpleType( VN::RendererInterface *, Policy )
+{
+    bool ds;
+    int64_t width_bits;
+    auto ic = DynamicTreePtrCast<SpecificInteger>( width );
+    if(!ic)
+		throw UnimplemetedIntegralType();
+    width_bits = ic->GetInt64();
+
+    TRACE("width %" PRId64 "\n", width);
+
+    if( width_bits == TypeDb::char_bits )
+        ds = TypeDb::char_default_signed;
+    else
+        ds = true;
+
+    // Produce signed or unsigned if required
+    // Note: literal strings can be converted to char * but not unsigned char * or signed char *
+    bool is_signed = IsSigned();
+    string s;
+    if( is_signed && !ds )
+        s = "signed ";
+    else if( !is_signed && ds )
+        s = "unsigned ";
+
+    // Fix the width
+    if( width_bits <= TypeDb::char_bits )
+        s += "char";
+    else if( width_bits <= TypeDb::integral_bits[clang::DeclSpec::TSW_short] )
+        s += "short";
+    else if( width_bits <= TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified] )
+        s += "int";
+    else if( width_bits <= TypeDb::integral_bits[clang::DeclSpec::TSW_long] )
+        s += "long";
+    else if( width_bits <= TypeDb::integral_bits[clang::DeclSpec::TSW_longlong] )
+        s += "long long";
+    else
+		throw UnimplemetedIntegralType();
+		
+	if( ReadArgs::use.count("c") )
+		s += SSPrintf("/* %d bits */", width_bits );
+
+    return s;	
+}
+
 //////////////////////////// SpecificFloatSemantics ///////////////////////////////
 
 SpecificFloatSemantics::SpecificFloatSemantics() 
@@ -662,6 +709,26 @@ Orderable::Diff SpecificFloatSemantics::OrderCompare3WayCovariant( const Orderab
 SpecificFloatSemantics::operator const llvm::fltSemantics &() const 
 {
     return *value;
+}
+
+//////////////////////////// Floating ///////////////////////////////
+
+string Floating::GetRenderSimpleType( VN::RendererInterface *, Policy )
+{
+    string s;
+    TreePtr<SpecificFloatSemantics> sem = DynamicTreePtrCast<SpecificFloatSemantics>(semantics);
+    ASSERT(sem);
+
+    if( &(const llvm::fltSemantics &)*sem == TypeDb::float_semantics )
+        s += "float";
+    else if( &(const llvm::fltSemantics &)*sem == TypeDb::double_semantics )
+        s += "double";
+    else if( &(const llvm::fltSemantics &)*sem == TypeDb::long_double_semantics )
+        s += "long double";
+    else
+        throw UnimplemetedFloatingType();
+
+    return s;
 }
 
 //////////////////////////// Labeley ///////////////////////////////

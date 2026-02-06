@@ -62,7 +62,7 @@ public:
 	TreePtr<Node> OnEmbeddedCommands( list<shared_ptr<Command>> commands );
 	TreePtr<Node> OnRestrict( const AvailableNodeData::Block *block, any node_name_loc, TreePtr<Node> target, any target_loc );
 	
-	TreePtr<Node> OnTypeSpecifierSeq( const multiset<string> &specifiers, any loc );
+	TreePtr<Node> OnTypeSpecifierSeq( multiset<string> specifiers, any loc );
 	
 	TreePtr<Node> OnInfixOperator( string tok, TreePtr<Node> left, TreePtr<Node> right );
 	TreePtr<Node> OnPrefixOperator( string tok, TreePtr<Node> operand );

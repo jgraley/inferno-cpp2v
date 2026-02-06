@@ -211,52 +211,6 @@ string CppRender::GetUniqueIdentifierName( TreePtr<Node> id ) const
 }
 
 
-string CppRender::RenderSimpleTypeIntegral( TreePtr<Integral> type, Syntax::Production surround_prod, Syntax::Policy policy ) try
-{
-	(void)surround_prod;
-    bool ds;
-    int64_t width;
-    auto ic = DynamicTreePtrCast<SpecificInteger>( type->width );
-    ASSERT(ic)("width must be integer");
-    width = ic->GetInt64();
-
-    TRACE("width %" PRId64 "\n", width);
-
-    if( width == TypeDb::char_bits )
-        ds = TypeDb::char_default_signed;
-    else
-        ds = true;
-
-    // Produce signed or unsigned if required
-    // Note: literal strings can be converted to char * but not unsigned char * or signed char *
-    string s;
-    if( DynamicTreePtrCast< Signed >(type) && !ds )
-        s = "signed ";
-    else if( DynamicTreePtrCast< Unsigned >(type) && ds )
-        s = "unsigned ";
-
-    // Fix the width
-    if( width <= TypeDb::char_bits )
-        s += "char";
-    else if( width <= TypeDb::integral_bits[clang::DeclSpec::TSW_short] )
-        s += "short";
-    else if( width <= TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified] )
-        s += "int";
-    else if( width <= TypeDb::integral_bits[clang::DeclSpec::TSW_long] )
-        s += "long";
-    else if( width <= TypeDb::integral_bits[clang::DeclSpec::TSW_longlong] )
-        s += "long long";
-    else
-		Render::Dispatch( type, surround_prod, policy );
-		
-	if( ReadArgs::use.count("c") )
-		s += SSPrintf("/* %d bits */", width );
-
-    return s;
-}
-DEFAULT_CATCH_CLAUSE
-
-
 string CppRender::RenderIntegralTypeAndDeclarator( TreePtr<Integral> type, string declarator, Syntax::Policy policy ) try
 {
     int64_t width;
@@ -286,27 +240,6 @@ string CppRender::RenderIntegralTypeAndDeclarator( TreePtr<Integral> type, strin
 		sprintf(b, ":%" PRId64, width);
 		s += b;
     }
-
-    return s;
-}
-DEFAULT_CATCH_CLAUSE
-
-
-string CppRender::RenderSimpleTypeFloating( TreePtr<Floating> type, Syntax::Production surround_prod, Syntax::Policy policy ) try
-{
-	(void)surround_prod;
-    string s;
-    TreePtr<SpecificFloatSemantics> sem = DynamicTreePtrCast<SpecificFloatSemantics>(type->semantics);
-    ASSERT(sem);
-
-    if( &(const llvm::fltSemantics &)*sem == TypeDb::float_semantics )
-        s += "float";
-    else if( &(const llvm::fltSemantics &)*sem == TypeDb::double_semantics )
-        s += "double";
-    else if( &(const llvm::fltSemantics &)*sem == TypeDb::long_double_semantics )
-        s += "long double";
-    else
-        Render::Dispatch( type, surround_prod, policy );
 
     return s;
 }
@@ -371,11 +304,7 @@ string CppRender::RenderSimpleType( TreePtr<CPPTree::Type> type, Syntax::Product
 {
 	if( dynamic_pointer_cast<Labeley>(type) )
         return "const void *"; // Always const - keeping this here because ambiguous with "true" const void *
-    else if( auto floating = TreePtr<Floating>::DynamicCast(type) )
-        return RenderSimpleTypeFloating( floating, surround_prod, policy);
-    else if( auto integral = TreePtr<Integral>::DynamicCast(type) )
-        return RenderSimpleTypeIntegral( integral, surround_prod, policy );
-        
+                
     try
     {
 		return type->GetRenderSimpleType( this, policy );
