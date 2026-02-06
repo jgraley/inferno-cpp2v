@@ -227,6 +227,15 @@ TreePtr<Node> VNLangActions::OnTypeSpecifierSeq( const multiset<string> &specifi
 				"void must appear on its own.");	
 		return MakeTreeNode<StandardAgentWrapper<CPPTree::Void>>();
 	}
+	else if( specifiers.count("bool") >= 1 )
+	{
+		if( specifiers.size() > 1 )
+			throw YY::VNLangParser::syntax_error(
+				any_cast<YY::VNLangParser::location_type>(loc), 
+				"bool must appear on its own.");	
+		return MakeTreeNode<StandardAgentWrapper<CPPTree::Boolean>>();
+	}
+	else 
 	throw YY::VNLangParser::syntax_error(
 	     any_cast<YY::VNLangParser::location_type>(loc), 
 	     "Illegal type specifier sequence: "+Trace(specifiers));	

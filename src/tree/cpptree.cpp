@@ -603,6 +603,11 @@ Syntax::Production Boolean::GetMyProductionTerminal() const
 	return Production::PRIMARY_TYPE; // eg auto a = new bool;
 }
 
+string Boolean::GetRenderSimpleType( VN::RendererInterface *, Policy )
+{
+	return "bool";
+}
+
 //////////////////////////// Numeric ///////////////////////////////
 
 Syntax::Production Numeric::GetMyProductionTerminal() const

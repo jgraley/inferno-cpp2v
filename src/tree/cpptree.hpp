@@ -678,6 +678,7 @@ struct Boolean : Type
 	NODE_FUNCTIONS_FINAL 
 	
 	Production GetMyProductionTerminal() const override;	
+	string GetRenderSimpleType( VN::RendererInterface *renderer, Policy policy ) override;
 };
 
 /// Intermediate for any type that represents a number that you can eg add and subtract. 

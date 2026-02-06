@@ -370,13 +370,11 @@ DEFAULT_CATCH_CLAUSE
 string CppRender::RenderSimpleType( TreePtr<CPPTree::Type> type, Syntax::Production surround_prod, Syntax::Policy policy )
 {
 	if( dynamic_pointer_cast<Labeley>(type) )
-        return "const void *"; // Always const
+        return "const void *"; // Always const - keeping this here because ambiguous with "true" const void *
     else if( auto floating = TreePtr<Floating>::DynamicCast(type) )
         return RenderSimpleTypeFloating( floating, surround_prod, policy);
     else if( auto integral = TreePtr<Integral>::DynamicCast(type) )
         return RenderSimpleTypeIntegral( integral, surround_prod, policy );
-    else if( DynamicTreePtrCast< Boolean >(type) )
-        return "bool";
         
     try
     {
