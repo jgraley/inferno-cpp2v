@@ -34,7 +34,7 @@ EnsureConstructorsInSCRecordUsers::EnsureConstructorsInSCRecordUsers()
     auto r_cons_macro = MakePatternNode< MacroDeclaration >(); 
     auto r_comp = MakePatternNode< Compound >();
     auto ctor_macro_name = MakePatternNode< SpecificPreprocessorIdentifier >( "SC_CTOR" ); // #819 style
-    auto ctor_macro_byname = MakePatternNode< PreprocessorIdentifierByNameAgent >( "SC_CTOR" );                
+    auto ctor_macro_byname = MakePatternNode< SpecificPreprocessorIdentifierByNameAgent >( "SC_CTOR" );                
     auto ctor_macro_wildname = MakePatternNode< PreprocessorIdentifier >(); // TODO too broad               
 
 	// TODO not restricting properly: as per our name EnsureConstructorsInSCRecordUsers

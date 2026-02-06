@@ -27,7 +27,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     auto func_stmts = MakePatternNode<StarAgent, Statement>();
     auto bases = MakePatternNode<StarAgent, Base>();
     auto r_module_enum = MakePatternNode<Enum>();
-    auto r_enum_id = MakePatternNode<BuildTypeIdentifierAgent>("%sStates");
+    auto r_enum_id = MakePatternNode<BuildSpecificTypeIdentifierAgent>("%sStates");
     auto var_id = MakePatternNode<InstanceIdentifier>();
     auto module_id = MakePatternNode<TypeIdentifier>();
     auto l_func_decls = MakePatternNode<StarAgent, Declaration>();
@@ -46,7 +46,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     auto ls_enum = MakePatternNode<Enum>();
     auto lr_enum = MakePatternNode<Enum>();
     auto lr_state_decl = MakePatternNode<Static>();
-    auto lr_state_id = MakePatternNode<BuildInstanceIdentifierAgent>("%s_STATE_%s");
+    auto lr_state_id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("%s_STATE_%s");
     auto lr_case = MakePatternNode<Case>();
     auto lr_int = MakePatternNode<Signed>();
     auto lr_count = MakePatternNode<BuildContainerSizeAgent>();
@@ -74,7 +74,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     auto l_func = MakePatternNode<Field>();
     auto r_lmap = MakePatternNode<Static>();
     auto l_lmap = MakePatternNode<Static>();
-    auto r_lmap_id = MakePatternNode<BuildInstanceIdentifierAgent>("lmap");
+    auto r_lmap_id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("lmap");
     auto r_array = MakePatternNode<Array>();
     auto r_make = MakePatternNode<ArrayLiteral>();
     auto ls_make = MakePatternNode<ArrayLiteral>();
@@ -270,7 +270,7 @@ AddStateEnumVar::AddStateEnumVar()
     auto lr_assign = MakePatternNode<Assign>();
     auto state_var = MakePatternNode<Automatic>();
     auto lx_not = MakePatternNode<NegationAgent, Expression>();
-    auto state_var_id = MakePatternNode< BuildInstanceIdentifierAgent >("state");
+    auto state_var_id = MakePatternNode< BuildSpecificInstanceIdentifierAgent >("state");
     auto s_gg = MakePatternNode<GreenGrassAgent, Compound>();
     auto s_sub = MakePatternNode<Subscript>();
     auto ls_sub = MakePatternNode<Subscript>();

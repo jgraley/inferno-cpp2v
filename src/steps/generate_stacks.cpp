@@ -87,7 +87,7 @@ UseTempForReturnValue::UseTempForReturnValue()
     auto r_sub_comp= MakeTreeNode<Compound>();
     auto r_newvar = MakeTreeNode< Temporary >();
     r_newvar->type = type;
-    auto id = MakePatternNode<BuildInstanceIdentifierAgent>("temp_retval");
+    auto id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("temp_retval");
     r_newvar->identifier = id;
     r_newvar->initialiser = MakePatternNode<Uninitialised>();
     r_sub_comp->members = ( r_newvar );
@@ -129,7 +129,7 @@ ReturnViaTemp::ReturnViaTemp()
     auto r_temp = MakePatternNode<Temporary>();
     auto mr_assign = MakePatternNode<Assign>();
     auto lr_assign = MakePatternNode<Assign>();
-    auto r_temp_id = MakePatternNode<BuildInstanceIdentifierAgent>("%s_return");
+    auto r_temp_id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("%s_return");
     auto ls_return = MakePatternNode<Return>();
     auto lr_return = MakePatternNode<Return>();
     auto l_return_value = MakePatternNode<Expression>();
@@ -185,11 +185,11 @@ AddLinkAddress::AddLinkAddress()
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto bases = MakePatternNode<StarAgent, Base>();
     auto r_retaddr = MakePatternNode<Temporary>();
-    auto r_retaddr_id = MakePatternNode<BuildInstanceIdentifierAgent>("%s_link");
+    auto r_retaddr_id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("%s_link");
     auto lr_retaddr = MakePatternNode<Parameter>();
-    auto lr_retaddr_id = MakePatternNode<BuildInstanceIdentifierAgent>("link");
+    auto lr_retaddr_id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("link");
     auto lr_temp_retaddr = MakePatternNode<LocalTree::TempReturnAddress>();
-    auto lr_temp_retaddr_id = MakePatternNode<BuildInstanceIdentifierAgent>("temp_link");
+    auto lr_temp_retaddr_id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("temp_link");
     auto s_nm = MakePatternNode<NegationAgent, Declaration>();
     auto ls_nm = MakePatternNode<NegationAgent, Declaration>();
     auto gg = MakePatternNode<GreenGrassAgent, Declaration>();
@@ -208,7 +208,7 @@ AddLinkAddress::AddLinkAddress()
     auto mr_comp = MakePatternNode<Compound>();
     auto msx_comp = MakePatternNode<Compound>();
     auto mr_label = MakePatternNode<LabelDeclaration>();
-    auto mr_labelid = MakePatternNode<BuildLabelIdentifierAgent>("LINK");
+    auto mr_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>("LINK");
     auto m_all = MakePatternNode<ConjunctionAgent, Statement>();
     auto ms_not = MakePatternNode<NegationAgent, Statement>();
     auto m_over = MakePatternNode<DeltaAgent, Statement>();
@@ -319,7 +319,7 @@ ParamsViaTemps::ParamsViaTemps()
     auto r_temp = MakePatternNode<Temporary>();
     auto mr_assign = MakePatternNode<Assign>();
     auto m_expr = MakePatternNode<Expression>();
-    auto r_temp_id = MakePatternNode<BuildInstanceIdentifierAgent>("%s_%s");
+    auto r_temp_id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("%s_%s");
     auto over = MakePatternNode<DeltaAgent, Declaration>();
     
     ms_call->callee = func_id;
@@ -410,8 +410,8 @@ GenerateStacks::GenerateStacks()
     auto ret = MakePatternNode<Return>();
     auto l_r_sub = MakePatternNode<Subscript>();
     auto s_and3 = MakePatternNode<ConjunctionAgent, Node>();
-    auto r_index_identifier = MakePatternNode<BuildInstanceIdentifierAgent>("%s_stack_index");
-    auto r_identifier = MakePatternNode<BuildInstanceIdentifierAgent>("%s_stack");
+    auto r_index_identifier = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("%s_stack_index");
+    auto r_identifier = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("%s_stack");
     auto s_gg = MakePatternNode<GreenGrassAgent, Statement>();
     auto r_index_init = MakePatternNode<Assign>();
     auto members = MakePatternNode<StarAgent, Declaration>();
@@ -538,7 +538,7 @@ MergeFunctions::MergeFunctions()
     auto ls_args = MakePatternNode<MapArgumentation>();
     auto func_id = MakePatternNode<InstanceIdentifier>();
     auto r_label = MakePatternNode<LabelDeclaration>();
-    auto r_label_id = MakePatternNode< BuildLabelIdentifierAgent >("ENTER_%s");
+    auto r_label_id = MakePatternNode< BuildSpecificLabelIdentifierAgent >("ENTER_%s");
     auto s_all = MakePatternNode<ConjunctionAgent, Compound>();
     auto s_stuff = MakePatternNode<StuffAgent, Compound>();
     auto func_stuff = MakePatternNode<StuffAgent, Compound>();

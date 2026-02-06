@@ -154,61 +154,61 @@ TreePtr<Node> BuildIdentifierAgent::TryMakeFromDestignatedType( string type_ns, 
 {
 #define NODE(NS, NAME) \
 	if( #NS==type_ns && #NAME==type_name ) \
-		return MakeTreeNode<Build##NAME##IdentifierAgent>(format); \
+		return MakeTreeNode<BuildSpecific##NAME##IdentifierAgent>(format); \
 	else
 #include "tree/identifier_names.inc"	
 #undef NODE
 		return nullptr;
 }	
 
-//---------------------------------- BuildInstanceIdentifierAgent ------------------------------------    
+//---------------------------------- BuildSpecificInstanceIdentifierAgent ------------------------------------    
 
-TreePtr<CPPTree::SpecificIdentifier> BuildInstanceIdentifierAgent::BuildSpecificIdentifier(string format) const
+TreePtr<CPPTree::SpecificIdentifier> BuildSpecificInstanceIdentifierAgent::BuildSpecificIdentifier(string format) const
 {
     return MakeTreeNode<CPPTree::SpecificInstanceIdentifier>( format ); 
 }
 
 
-string BuildInstanceIdentifierAgent::GetIdentifierSubTypeName() const
+string BuildSpecificInstanceIdentifierAgent::GetIdentifierSubTypeName() const
 {
 	return "Instance";
 }    
 
-//---------------------------------- BuildTypeIdentifierAgent ------------------------------------    
+//---------------------------------- BuildSpecificTypeIdentifierAgent ------------------------------------    
 
-TreePtr<CPPTree::SpecificIdentifier> BuildTypeIdentifierAgent::BuildSpecificIdentifier(string format) const
+TreePtr<CPPTree::SpecificIdentifier> BuildSpecificTypeIdentifierAgent::BuildSpecificIdentifier(string format) const
 {
     return MakeTreeNode<CPPTree::SpecificTypeIdentifier>( format ); 
 }
 
 
-string BuildTypeIdentifierAgent::GetIdentifierSubTypeName() const
+string BuildSpecificTypeIdentifierAgent::GetIdentifierSubTypeName() const
 {
 	return "Type";
 }    
 
-//---------------------------------- BuildLabelIdentifierAgent ------------------------------------    
+//---------------------------------- BuildSpecificLabelIdentifierAgent ------------------------------------    
 
-TreePtr<CPPTree::SpecificIdentifier> BuildLabelIdentifierAgent::BuildSpecificIdentifier(string format) const
+TreePtr<CPPTree::SpecificIdentifier> BuildSpecificLabelIdentifierAgent::BuildSpecificIdentifier(string format) const
 {
     return MakeTreeNode<CPPTree::SpecificLabelIdentifier>( format ); 
 }
 
 
-string BuildLabelIdentifierAgent::GetIdentifierSubTypeName() const
+string BuildSpecificLabelIdentifierAgent::GetIdentifierSubTypeName() const
 {
 	return "Label";
 }    
 
-//---------------------------------- BuildPreprocesorIdentifierAgent ------------------------------------    
+//---------------------------------- BuildSpecificPreprocessorIdentifierAgent ------------------------------------    
 
-TreePtr<CPPTree::SpecificIdentifier> BuildPreprocessorIdentifierAgent::BuildSpecificIdentifier(string format) const
+TreePtr<CPPTree::SpecificIdentifier> BuildSpecificPreprocessorIdentifierAgent::BuildSpecificIdentifier(string format) const
 {
     return MakeTreeNode<CPPTree::SpecificPreprocessorIdentifier>( format ); 
 }
 
 
-string BuildPreprocessorIdentifierAgent::GetIdentifierSubTypeName() const
+string BuildSpecificPreprocessorIdentifierAgent::GetIdentifierSubTypeName() const
 {
 	return "Preprocesor";
 }    

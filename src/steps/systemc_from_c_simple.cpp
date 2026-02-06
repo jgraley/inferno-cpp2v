@@ -25,7 +25,7 @@ GlobalScopeToModule::GlobalScopeToModule()
 	auto sn_module = MakePatternNode< Module >();
 	auto r_scope = MakePatternNode< Program >();
 	auto r_gmodule = MakePatternNode< GlobalsModule >();
-	auto r_gmodule_tid = MakePatternNode<BuildTypeIdentifierAgent>("GlobalScope");
+	auto r_gmodule_tid = MakePatternNode<BuildSpecificTypeIdentifierAgent>("GlobalScope");
 	auto r_gmodule_inst = MakePatternNode< Static >();
 	auto es_scope = MakePatternNode< Program >();
 	auto es_decls = MakePatternNode<StarAgent, Declaration>();
@@ -53,7 +53,7 @@ GlobalScopeToModule::GlobalScopeToModule()
 	r_scope->members = ( r_gmodule, r_gmodule_inst, s_decls );
 	r_gmodule->identifier = r_gmodule_tid;
 	r_gmodule_inst->type = r_gmodule_tid;
-	r_gmodule_inst->identifier = MakePatternNode<BuildInstanceIdentifierAgent>("globals");
+	r_gmodule_inst->identifier = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("globals");
 	r_gmodule_inst->initialiser = MakePatternNode<Uninitialised>();
 	r_gmodule_inst->constancy = MakePatternNode<NonConst>();
 	
@@ -109,7 +109,7 @@ MainToThread::MainToThread()
     auto delta = MakePatternNode<DeltaAgent, Instance>();
 	auto s_field = MakePatternNode< Field >();
     auto s_func = MakePatternNode<Function>();
-    auto s_identifier = MakePatternNode<InstanceIdentifierByNameAgent>("main");
+    auto s_identifier = MakePatternNode<SpecificInstanceIdentifierByNameAgent>("main");
 	auto r_field = MakePatternNode< Field >();
 	
 	gmodule->bases = ( MakePatternNode<StarAgent, Base>() );

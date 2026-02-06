@@ -72,9 +72,9 @@ struct IdentifierByNameAgent : public virtual NonlocatingAgent
 
 };
 
-//---------------------------------- InstanceIdentifierByNameAgent ------------------------------------    
+//---------------------------------- SpecificInstanceIdentifierByNameAgent ------------------------------------    
 
-struct InstanceIdentifierByNameAgent : Special<CPPTree::InstanceIdentifier>,                             
+struct SpecificInstanceIdentifierByNameAgent : Special<CPPTree::InstanceIdentifier>,                             
                                        IdentifierByNameAgent
 {
     SPECIAL_NODE_FUNCTIONS
@@ -84,15 +84,15 @@ struct InstanceIdentifierByNameAgent : Special<CPPTree::InstanceIdentifier>,
         return shared_from_this();
     }
         
-    InstanceIdentifierByNameAgent() : IdentifierByNameAgent(string()) {}    
-    InstanceIdentifierByNameAgent( string n ) : IdentifierByNameAgent(n) {}
+    SpecificInstanceIdentifierByNameAgent() : IdentifierByNameAgent(string()) {}    
+    SpecificInstanceIdentifierByNameAgent( string n ) : IdentifierByNameAgent(n) {}
     pair<TreePtr<Node>, TreePtr<Node>> GetBounds( string name ) const override;
     string GetIdentifierSubTypeName() const final;
 };
 
-//---------------------------------- TypeIdentifierByNameAgent ------------------------------------    
+//---------------------------------- SpecificTypeIdentifierByNameAgent ------------------------------------    
 
-struct TypeIdentifierByNameAgent : Special<CPPTree::TypeIdentifier>,                             
+struct SpecificTypeIdentifierByNameAgent : Special<CPPTree::TypeIdentifier>,                             
                                    IdentifierByNameAgent
 {
     SPECIAL_NODE_FUNCTIONS
@@ -102,16 +102,16 @@ struct TypeIdentifierByNameAgent : Special<CPPTree::TypeIdentifier>,
         return shared_from_this();
     }
     
-    TypeIdentifierByNameAgent() : IdentifierByNameAgent(string()) {}    
-    TypeIdentifierByNameAgent( string n ) : IdentifierByNameAgent(n) {}                         
+    SpecificTypeIdentifierByNameAgent() : IdentifierByNameAgent(string()) {}    
+    SpecificTypeIdentifierByNameAgent( string n ) : IdentifierByNameAgent(n) {}                         
     pair<TreePtr<Node>, TreePtr<Node>> GetBounds( string name ) const override;
     string GetIdentifierSubTypeName() const final;
 };
 
-//---------------------------------- LabelIdentifierByNameAgent ------------------------------------    
+//---------------------------------- SpecificLabelIdentifierByNameAgent ------------------------------------    
 
 // OUT OF TEST COVERAGE - keep consistent or de-duplicate/template/macro
-struct LabelIdentifierByNameAgent : Special<CPPTree::LabelIdentifier>,                             
+struct SpecificLabelIdentifierByNameAgent : Special<CPPTree::LabelIdentifier>,                             
                                     IdentifierByNameAgent  
 {
     SPECIAL_NODE_FUNCTIONS
@@ -121,15 +121,15 @@ struct LabelIdentifierByNameAgent : Special<CPPTree::LabelIdentifier>,
         return shared_from_this();
     }
     
-    LabelIdentifierByNameAgent() : IdentifierByNameAgent(string()) {}    
-    LabelIdentifierByNameAgent( string n ) : IdentifierByNameAgent(n) {}                    
+    SpecificLabelIdentifierByNameAgent() : IdentifierByNameAgent(string()) {}    
+    SpecificLabelIdentifierByNameAgent( string n ) : IdentifierByNameAgent(n) {}                    
     pair<TreePtr<Node>, TreePtr<Node>> GetBounds( string name ) const override;
     string GetIdentifierSubTypeName() const final;
 };
 
-//---------------------------------- PreprocessorIdentifierByNameAgent ------------------------------------    
+//---------------------------------- SpecificPreprocessorIdentifierByNameAgent ------------------------------------    
 
-struct PreprocessorIdentifierByNameAgent : Special<CPPTree::PreprocessorIdentifier>,                             
+struct SpecificPreprocessorIdentifierByNameAgent : Special<CPPTree::PreprocessorIdentifier>,                             
                                            IdentifierByNameAgent  
 {
     SPECIAL_NODE_FUNCTIONS
@@ -139,8 +139,8 @@ struct PreprocessorIdentifierByNameAgent : Special<CPPTree::PreprocessorIdentifi
         return shared_from_this();
     }
     
-    PreprocessorIdentifierByNameAgent() : IdentifierByNameAgent(string()) {}    
-    PreprocessorIdentifierByNameAgent( string n ) : IdentifierByNameAgent(n) {}                    
+    SpecificPreprocessorIdentifierByNameAgent() : IdentifierByNameAgent(string()) {}    
+    SpecificPreprocessorIdentifierByNameAgent( string n ) : IdentifierByNameAgent(n) {}                    
     pair<TreePtr<Node>, TreePtr<Node>> GetBounds( string name ) const override;
     string GetIdentifierSubTypeName() const final;
 };

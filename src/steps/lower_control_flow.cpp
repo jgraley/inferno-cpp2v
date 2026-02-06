@@ -219,7 +219,7 @@ ForToWhile::ForToWhile()
     
     auto l_s_cont = MakePatternNode<Continue>();
     auto l_r_nop = MakePatternNode<Nop>();
-    auto r_cont_labelid = MakePatternNode<BuildLabelIdentifierAgent>("CONTINUE");
+    auto r_cont_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>("CONTINUE");
     auto r_cont_label = MakePatternNode<LabelDeclaration>();
     auto lr_goto = MakePatternNode<Goto>();
 
@@ -290,8 +290,8 @@ IfToIfGoto::IfToIfGoto()
     auto r_nop = MakePatternNode<Nop>();
     auto r_comp = MakePatternNode<Compound>();
     auto r_not = MakePatternNode<LogicalNot>();
-    auto r_labelid1 = MakePatternNode<BuildLabelIdentifierAgent>("THEN");
-    auto r_labelid2 = MakePatternNode<BuildLabelIdentifierAgent>("ELSE");
+    auto r_labelid1 = MakePatternNode<BuildSpecificLabelIdentifierAgent>("THEN");
+    auto r_labelid2 = MakePatternNode<BuildSpecificLabelIdentifierAgent>("ELSE");
     auto r_label1 = MakePatternNode<LabelDeclaration>();
     auto r_label2 = MakePatternNode<LabelDeclaration>();
     
@@ -339,7 +339,7 @@ SwitchToIfGoto::SwitchToIfGoto()
     auto body = MakePatternNode<Statement>();
     auto cond_type = MakePatternNode<Type>();
     auto r_decl = MakePatternNode<Automatic>();
-    auto id = MakePatternNode<BuildInstanceIdentifierAgent>("switch_value");
+    auto id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("switch_value");
     auto s_cond = MakePatternNode<TransformOfAgent, Expression>( &TypeOf::instance );
     
     // EmbeddedSearchReplace for default
@@ -350,7 +350,7 @@ SwitchToIfGoto::SwitchToIfGoto()
     auto l1_post = MakePatternNode<StarAgent, Statement>();
     auto l1_s_default = MakePatternNode< Default >();
     auto l1_r_label = MakePatternNode< LabelDeclaration >();
-    auto l1_r_labelid = MakePatternNode<BuildLabelIdentifierAgent>("DEFAULT");
+    auto l1_r_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>("DEFAULT");
     auto l1_r_goto = MakePatternNode<Goto>();
     
     l1_s_body->members = l1_decls;
@@ -371,7 +371,7 @@ SwitchToIfGoto::SwitchToIfGoto()
     auto l2_post = MakePatternNode<StarAgent, Statement>();
     auto l2_s_case = MakePatternNode< Case >();
     auto l2_r_label = MakePatternNode< LabelDeclaration >();
-    auto l2_r_labelid = MakePatternNode<BuildLabelIdentifierAgent>("CASE");
+    auto l2_r_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>("CASE");
     auto l2_r_if = MakePatternNode<If>();
     auto l2_r_nop = MakePatternNode<Nop>();
     auto l2_r_goto = MakePatternNode<Goto>();
@@ -401,7 +401,7 @@ SwitchToIfGoto::SwitchToIfGoto()
     auto l3_post = MakePatternNode<StarAgent, Statement>();
     auto l3_s_case = MakePatternNode< RangeCase >();
     auto l3_r_label = MakePatternNode< LabelDeclaration >();
-    auto l3_r_labelid = MakePatternNode<BuildLabelIdentifierAgent>("CASE");
+    auto l3_r_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>("CASE");
     auto l3_r_if = MakePatternNode<If>();
     auto l3_r_nop = MakePatternNode<Nop>();
     auto l3_r_goto = MakePatternNode<Goto>();
@@ -460,8 +460,8 @@ DoToIfGoto::DoToIfGoto()
     auto l_r_goto = MakePatternNode<Goto>();
     auto r_nop = MakePatternNode<Nop>();
     auto r_comp = MakePatternNode<Compound>();
-    auto r_labelid = MakePatternNode<BuildLabelIdentifierAgent>("NEXT");
-    auto l_r_cont_labelid = MakePatternNode<BuildLabelIdentifierAgent>("CONTINUE");
+    auto r_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>("NEXT");
+    auto l_r_cont_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>("CONTINUE");
     auto r_label = MakePatternNode<LabelDeclaration>();
     auto r_cont_label = MakePatternNode<LabelDeclaration>();
     auto l_stuff = MakePatternNode<StuffAgent, Statement>();
@@ -508,7 +508,7 @@ BreakToGoto::BreakToGoto()
     auto sx_not = MakePatternNode<NegationAgent, Statement>();
     auto s_break = MakePatternNode<Break>();
     auto r_goto = MakePatternNode<Goto>();
-    auto r_labelid = MakePatternNode<BuildLabelIdentifierAgent>("BREAK");
+    auto r_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>("BREAK");
     auto r_label = MakePatternNode<LabelDeclaration>();
     auto r_comp = MakePatternNode<Compound>();
     
@@ -533,7 +533,7 @@ LogicalAndToIf::LogicalAndToIf()
     auto op1 = MakePatternNode<Expression>();
     auto op2 = MakePatternNode<Expression>();
     auto r_comp = MakePatternNode<StatementExpression>();
-    auto r_temp_id = MakePatternNode<BuildInstanceIdentifierAgent>("andtemp");
+    auto r_temp_id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("andtemp");
     auto r_temp = MakePatternNode<Temporary>();
     auto r_boolean = MakePatternNode<Boolean>();
     auto r_if = MakePatternNode<If>();
@@ -563,7 +563,7 @@ LogicalOrToIf::LogicalOrToIf()
     auto op1 = MakePatternNode<Expression>();
     auto op2 = MakePatternNode<Expression>();
     auto r_comp = MakePatternNode<StatementExpression>();
-    auto r_temp_id = MakePatternNode<BuildInstanceIdentifierAgent>("ortemp");
+    auto r_temp_id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("ortemp");
     auto r_temp = MakePatternNode<Temporary>();
     auto r_boolean = MakePatternNode<Boolean>();
     auto r_if = MakePatternNode<If>();
@@ -593,7 +593,7 @@ ConditionalOperatorToIf::ConditionalOperatorToIf()
     auto op1 = MakePatternNode<Expression>();
     auto op3 = MakePatternNode<Expression>();
     auto r_comp = MakePatternNode<StatementExpression>();
-    auto r_temp_id = MakePatternNode<BuildInstanceIdentifierAgent>("muxtemp");
+    auto r_temp_id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("muxtemp");
     auto r_temp = MakePatternNode<Temporary>();
     auto op2 = MakePatternNode<TransformOfAgent, Expression>( &TypeOf::instance );
     auto type = MakePatternNode<Type>();
@@ -635,7 +635,7 @@ ExtractCallParams::ExtractCallParams()
     auto s_args = MakePatternNode<MapArgumentation>();
     auto r_call = MakePatternNode<Call>();
     auto r_args = MakePatternNode<MapArgumentation>();
-    auto r_temp_id = MakePatternNode<BuildInstanceIdentifierAgent>("temp_%s");
+    auto r_temp_id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("temp_%s");
     auto r_temp = MakePatternNode<Temporary>();
     auto r_ce = MakePatternNode<StatementExpression>();
     auto r_assign = MakePatternNode<Assign>();

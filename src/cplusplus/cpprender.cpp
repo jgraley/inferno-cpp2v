@@ -220,7 +220,7 @@ string CppRender::RenderIntegralTypeAndDeclarator( TreePtr<Integral> type, strin
 
     TRACE("width %" PRId64 "\n", width);
 
-	string s = RenderSimpleTypeIntegral( type, Syntax::Production::SPACE_SEP_DECLARATION, policy );
+	string s = RenderSimpleType( type, Syntax::Production::SPACE_SEP_DECLARATION, policy );
 
     s += " " + declarator;
 

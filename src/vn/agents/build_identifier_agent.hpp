@@ -48,7 +48,7 @@ struct BuildIdentifierAgent : public virtual BuilderAgent
 };
 
 
-struct BuildInstanceIdentifierAgent : Special<CPPTree::InstanceIdentifier>,                             
+struct BuildSpecificInstanceIdentifierAgent : Special<CPPTree::InstanceIdentifier>,                             
                                       BuildIdentifierAgent
 {
     SPECIAL_NODE_FUNCTIONS
@@ -58,7 +58,7 @@ struct BuildInstanceIdentifierAgent : Special<CPPTree::InstanceIdentifier>,
         return shared_from_this();
     }
     
-    BuildInstanceIdentifierAgent( string s="" ) : BuildIdentifierAgent(s) {}
+    BuildSpecificInstanceIdentifierAgent( string s="" ) : BuildIdentifierAgent(s) {}
 
 private:    
     TreePtr<CPPTree::SpecificIdentifier> BuildSpecificIdentifier( string name ) const final;
@@ -66,7 +66,7 @@ private:
 };
 
 
-struct BuildTypeIdentifierAgent : Special<CPPTree::TypeIdentifier>,                             
+struct BuildSpecificTypeIdentifierAgent : Special<CPPTree::TypeIdentifier>,                             
                                   BuildIdentifierAgent
 {
     SPECIAL_NODE_FUNCTIONS
@@ -76,7 +76,7 @@ struct BuildTypeIdentifierAgent : Special<CPPTree::TypeIdentifier>,
         return shared_from_this();
     }
     
-    BuildTypeIdentifierAgent( string s="" ) : BuildIdentifierAgent(s) {}
+    BuildSpecificTypeIdentifierAgent( string s="" ) : BuildIdentifierAgent(s) {}
 
 private:
     TreePtr<CPPTree::SpecificIdentifier> BuildSpecificIdentifier( string name ) const final;
@@ -84,7 +84,7 @@ private:
 };
 
 
-struct BuildLabelIdentifierAgent : Special<CPPTree::LabelIdentifier>,                             
+struct BuildSpecificLabelIdentifierAgent : Special<CPPTree::LabelIdentifier>,                             
                                    BuildIdentifierAgent
 {
     SPECIAL_NODE_FUNCTIONS
@@ -94,7 +94,7 @@ struct BuildLabelIdentifierAgent : Special<CPPTree::LabelIdentifier>,
         return shared_from_this();
     }
     
-    BuildLabelIdentifierAgent( string s="" ) : BuildIdentifierAgent(s) {}
+    BuildSpecificLabelIdentifierAgent( string s="" ) : BuildIdentifierAgent(s) {}
 
 private:
     TreePtr<CPPTree::SpecificIdentifier> BuildSpecificIdentifier( string name ) const final;
@@ -102,7 +102,7 @@ private:
 };
 
 
-struct BuildPreprocessorIdentifierAgent : Special<CPPTree::PreprocessorIdentifier>,                             
+struct BuildSpecificPreprocessorIdentifierAgent : Special<CPPTree::PreprocessorIdentifier>,                             
                                          BuildIdentifierAgent
 {
     SPECIAL_NODE_FUNCTIONS
@@ -112,7 +112,7 @@ struct BuildPreprocessorIdentifierAgent : Special<CPPTree::PreprocessorIdentifie
         return shared_from_this();
     }
     
-    BuildPreprocessorIdentifierAgent( string s="" ) : BuildIdentifierAgent(s) {}
+    BuildSpecificPreprocessorIdentifierAgent( string s="" ) : BuildIdentifierAgent(s) {}
 
 private:
     TreePtr<CPPTree::SpecificIdentifier> BuildSpecificIdentifier( string name ) const final;

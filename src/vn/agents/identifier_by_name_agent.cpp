@@ -156,30 +156,30 @@ TreePtr<Node> IdentifierByNameAgent::TryMakeFromDestignatedType( string type_ns,
 {
 #define NODE(NS, NAME) \
 	if( #NS==type_ns && #NAME==type_name ) \
-		return MakeTreeNode<NAME##IdentifierByNameAgent>(matching_name); \
+		return MakeTreeNode<Specific##NAME##IdentifierByNameAgent>(matching_name); \
 	else
 #include "tree/identifier_names.inc"	
 #undef NODE
 		return nullptr;
 }	
 
-//---------------------------------- InstanceIdentifierByNameAgent ------------------------------------    
+//---------------------------------- SpecificInstanceIdentifierByNameAgent ------------------------------------    
 
-pair<TreePtr<Node>, TreePtr<Node>> InstanceIdentifierByNameAgent::GetBounds( string name ) const
+pair<TreePtr<Node>, TreePtr<Node>> SpecificInstanceIdentifierByNameAgent::GetBounds( string name ) const
 {
     TreePtr<Node> minimus = MakeTreeNode<SpecificInstanceIdentifier>( name, Orderable::BoundingRole::MINIMUS );
     TreePtr<Node> maximus = MakeTreeNode<SpecificInstanceIdentifier>( name, Orderable::BoundingRole::MAXIMUS );
     return make_pair( minimus, maximus );
 }
 
-string InstanceIdentifierByNameAgent::GetIdentifierSubTypeName() const
+string SpecificInstanceIdentifierByNameAgent::GetIdentifierSubTypeName() const
 {
 	return "Instance";
 }  
 
-//---------------------------------- TypeIdentifierByNameAgent ------------------------------------    
+//---------------------------------- SpecificTypeIdentifierByNameAgent ------------------------------------    
 
-pair<TreePtr<Node>, TreePtr<Node>> TypeIdentifierByNameAgent::GetBounds( string name ) const
+pair<TreePtr<Node>, TreePtr<Node>> SpecificTypeIdentifierByNameAgent::GetBounds( string name ) const
 {
     TreePtr<Node> minimus = MakeTreeNode<SpecificTypeIdentifier>( name, Orderable::BoundingRole::MINIMUS );
     TreePtr<Node> maximus = MakeTreeNode<SpecificTypeIdentifier>( name, Orderable::BoundingRole::MAXIMUS );
@@ -187,14 +187,14 @@ pair<TreePtr<Node>, TreePtr<Node>> TypeIdentifierByNameAgent::GetBounds( string 
 }
 
 
-string TypeIdentifierByNameAgent::GetIdentifierSubTypeName() const
+string SpecificTypeIdentifierByNameAgent::GetIdentifierSubTypeName() const
 {
 	return "Type";
 }  
 
-//---------------------------------- LabelIdentifierByNameAgent ------------------------------------    
+//---------------------------------- SpecificLabelIdentifierByNameAgent ------------------------------------    
 
-pair<TreePtr<Node>, TreePtr<Node>> LabelIdentifierByNameAgent::GetBounds( string name ) const
+pair<TreePtr<Node>, TreePtr<Node>> SpecificLabelIdentifierByNameAgent::GetBounds( string name ) const
 {
     TreePtr<Node> minimus = MakeTreeNode<SpecificLabelIdentifier>( name, Orderable::BoundingRole::MINIMUS );
     TreePtr<Node> maximus = MakeTreeNode<SpecificLabelIdentifier>( name, Orderable::BoundingRole::MAXIMUS );
@@ -202,14 +202,14 @@ pair<TreePtr<Node>, TreePtr<Node>> LabelIdentifierByNameAgent::GetBounds( string
 }
 
 
-string LabelIdentifierByNameAgent::GetIdentifierSubTypeName() const
+string SpecificLabelIdentifierByNameAgent::GetIdentifierSubTypeName() const
 {
 	return "Label";
 }  
 
-//---------------------------------- PreprocessorIdentifierByNameAgent ------------------------------------    
+//---------------------------------- SpecificPreprocessorIdentifierByNameAgent ------------------------------------    
 
-pair<TreePtr<Node>, TreePtr<Node>> PreprocessorIdentifierByNameAgent::GetBounds( string name ) const
+pair<TreePtr<Node>, TreePtr<Node>> SpecificPreprocessorIdentifierByNameAgent::GetBounds( string name ) const
 {
     TreePtr<Node> minimus = MakeTreeNode<SpecificPreprocessorIdentifier>( name, Orderable::BoundingRole::MINIMUS );
     TreePtr<Node> maximus = MakeTreeNode<SpecificPreprocessorIdentifier>( name, Orderable::BoundingRole::MAXIMUS );
@@ -217,7 +217,7 @@ pair<TreePtr<Node>, TreePtr<Node>> PreprocessorIdentifierByNameAgent::GetBounds(
 }
 
 
-string PreprocessorIdentifierByNameAgent::GetIdentifierSubTypeName() const
+string SpecificPreprocessorIdentifierByNameAgent::GetIdentifierSubTypeName() const
 {
 	return "Preprocessor";
 }  

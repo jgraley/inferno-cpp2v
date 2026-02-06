@@ -56,7 +56,7 @@ CleanupStatementExpression::CleanupStatementExpression() // LIMITAION: decls in 
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto r_temp = MakePatternNode<Temporary>();
     auto last = MakePatternNode<TransformOfAgent, Expression>( &TypeOf::instance );
-    auto r_temp_id = MakePatternNode<BuildInstanceIdentifierAgent>("result");
+    auto r_temp_id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("result");
     auto r_assign = MakePatternNode<Assign>();
     auto overlay = MakePatternNode<DeltaAgent, Expression>();
     auto r_type = MakePatternNode<Type>();
@@ -208,7 +208,7 @@ CleanupDuplicateLabels::CleanupDuplicateLabels()
     auto post = MakePatternNode<StarAgent, Statement>();
     auto s_labelid1 = MakePatternNode<LabelIdentifier>();
     auto s_labelid2 = MakePatternNode<LabelIdentifier>();
-    auto r_labelid = MakePatternNode<BuildLabelIdentifierAgent>();
+    auto r_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>();
     auto l_s_orrule = MakePatternNode<DisjunctionAgent, LabelIdentifier>();
     auto identifier = MakePatternNode<InstanceIdentifier>();
     auto type = MakePatternNode<Callable>();
@@ -267,7 +267,7 @@ CleanupIneffectualLabels::CleanupIneffectualLabels()
     auto post = MakePatternNode<StarAgent, Statement>();
     auto s_labelid1 = MakePatternNode<LabelIdentifier>();
     auto s_labelid2 = MakePatternNode<LabelIdentifier>();
-    auto r_labelid = MakePatternNode<BuildLabelIdentifierAgent>();
+    auto r_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>();
     auto l_s_orrule = MakePatternNode<DisjunctionAgent, LabelIdentifier>();
     auto identifier = MakePatternNode<InstanceIdentifier>();
     auto type = MakePatternNode<Callable>();

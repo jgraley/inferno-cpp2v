@@ -38,7 +38,7 @@ GotoAfterWait::GotoAfterWait()
     auto sx_goto = MakePatternNode<Goto>();
     auto r_goto = MakePatternNode<Goto>();
     auto r_label = MakePatternNode<LabelDeclaration>();
-    auto r_labelid = MakePatternNode<BuildLabelIdentifierAgent>("YIELD");
+    auto r_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>("YIELD");
           
     all_over->through = all;
     all_over->overlay = anynode;
@@ -71,7 +71,7 @@ GotoAfterWait::GotoAfterWait()
     auto sx_goto = MakePatternNode<Goto>();
     auto r_goto = MakePatternNode<Goto>();
     auto r_label = MakePatternNode<LabelDeclaration>();
-    auto r_labelid = MakePatternNode<BuildLabelIdentifierAgent>("YIELD");
+    auto r_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>("YIELD");
         
     s_comp->members = (decls);
     s_comp->statements = (pre, wait, notmatch, post);
@@ -103,7 +103,7 @@ NormaliseConditionalGotos::NormaliseConditionalGotos()
     auto post = MakePatternNode<StarAgent, Statement>();
     auto sx_post = MakePatternNode<StarAgent, Statement>();
     auto label = MakePatternNode< LabelDeclaration >();
-    auto label_id = MakePatternNode< BuildLabelIdentifierAgent >("PROCEED");
+    auto label_id = MakePatternNode< BuildSpecificLabelIdentifierAgent >("PROCEED");
     auto s_all = MakePatternNode<ConjunctionAgent, Statement>();
     auto sx_not = MakePatternNode<NegationAgent, Statement>();
     
@@ -220,7 +220,7 @@ EnsureBootstrap::EnsureBootstrap()
     auto post = MakePatternNode<StarAgent, Statement>();
     auto r_goto = MakePatternNode<Goto>();
     auto r_label = MakePatternNode<LabelDeclaration>();
-    auto r_labelid = MakePatternNode<BuildLabelIdentifierAgent>("BOOTSTRAP");
+    auto r_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>("BOOTSTRAP");
     auto stop = MakePatternNode<NegationAgent, Statement>();
     auto sx_goto = MakePatternNode<Goto>();
         
@@ -264,7 +264,7 @@ AddStateLabelVar::AddStateLabelVar()
     auto state_var = MakePatternNode<Automatic>();
     auto sx_not = MakePatternNode<NegationAgent, Expression>();
     auto lsx_not = MakePatternNode<NegationAgent, Expression>();
-    auto state_var_id = MakePatternNode< BuildInstanceIdentifierAgent >("state");
+    auto state_var_id = MakePatternNode< BuildSpecificInstanceIdentifierAgent >("state");
     
     ls_goto->destination = lsx_not;
     lsx_not->negand = state_var_id; //  MakePatternNode<InstanceIdentifier>();
@@ -343,7 +343,7 @@ ShareGotos::ShareGotos()
     auto first_goto = MakePatternNode< Goto >();
     auto r_goto = MakePatternNode< Goto >();
     auto r_label = MakePatternNode<LabelDeclaration>();
-    auto r_labelid = MakePatternNode<BuildLabelIdentifierAgent>("ITERATE");
+    auto r_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>("ITERATE");
                     
     loop->body = over;
     loop->condition = MakePatternNode<SpecificInteger>(1);
@@ -498,7 +498,7 @@ AddYieldFlag::AddYieldFlag()
     auto r_flag_init = MakePatternNode<Assign>();
     auto mr_assign = MakePatternNode<Assign>();
     auto msx_assign = MakePatternNode<Assign>();
-    auto r_flag_id = MakePatternNode<BuildInstanceIdentifierAgent>("yield_flag");
+    auto r_flag_id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("yield_flag");
     auto ms_all = MakePatternNode<ConjunctionAgent, Compound>();
     auto ms_not = MakePatternNode<NegationAgent, Compound>();
     

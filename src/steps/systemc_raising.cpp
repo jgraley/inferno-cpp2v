@@ -17,7 +17,7 @@ RaiseSCType::RaiseSCType( TreePtr< Type > lr_sctype )
     auto r_scope = MakePatternNode< DeclScope >();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto s_usertype = MakePatternNode< TypeDeclaration >();
-    auto s_token = MakePatternNode< TypeIdentifierByNameAgent >( lr_sctype->GetLoweredIdName() );                
+    auto s_token = MakePatternNode< SpecificTypeIdentifierByNameAgent >( lr_sctype->GetLoweredIdName() );                
     auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( over, s_token, lr_sctype );    
     
     // Eliminate the declaration that came from isystemc.h
@@ -44,7 +44,7 @@ RaiseSCHierarchicalClass::RaiseSCHierarchicalClass( TreePtr< SCRecord > lr_sccla
     auto ls_class = MakePatternNode< InheritanceRecord >();
     auto ls_base = MakePatternNode< Base >();
     auto l_tid = MakePatternNode< TypeIdentifier >();
-    auto s_token = MakePatternNode< TypeIdentifierByNameAgent >( lr_scclass->GetLoweredIdName() ); 
+    auto s_token = MakePatternNode< SpecificTypeIdentifierByNameAgent >( lr_scclass->GetLoweredIdName() ); 
     auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( over, ls_class, lr_scclass );    
     
     // Eliminate the declaration that came from isystemc.h
@@ -71,8 +71,8 @@ RaiseSCDynamic::RaiseSCDynamic( TreePtr<SCDynamicFunction> r_dynamic )
     auto s_call = MakePatternNode<Call>();
     auto s_args = MakePatternNode<MapArgumentation>();
     auto s_arg = MakePatternNode< IdValuePair >();
-    auto s_token = MakePatternNode< InstanceIdentifierByNameAgent >( r_dynamic->GetLoweredIdName() ); 
-    auto s_param_id = MakePatternNode< InstanceIdentifierByNameAgent >( "p1" ); 
+    auto s_token = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( r_dynamic->GetLoweredIdName() ); 
+    auto s_param_id = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( "p1" ); 
     auto eexpr = MakePatternNode<TransformOfAgent, Expression>( &TypeOf::instance ); 
                     
     s_call->callee = s_token;       
@@ -91,7 +91,7 @@ RaiseSCStatic::RaiseSCStatic( TreePtr<SCFunction> r_static )
 {
     auto s_call = MakePatternNode<Call>();
     auto s_args = MakePatternNode<MapArgumentation>();
-    auto s_token = MakePatternNode< InstanceIdentifierByNameAgent >( r_static->GetLoweredIdName() ); 
+    auto s_token = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( r_static->GetLoweredIdName() ); 
                       
     s_call->callee = s_token;   
     s_call->argumentation = s_args;       
@@ -106,9 +106,9 @@ RaiseSCDelta::RaiseSCDelta( TreePtr<SCFunction> r_delta )
     auto s_call = MakePatternNode<Call>();
     auto s_args = MakePatternNode<MapArgumentation>();
     auto s_arg = MakePatternNode< IdValuePair >();
-    auto s_token = MakePatternNode< InstanceIdentifierByNameAgent >( r_delta->GetLoweredIdName() ); 
-    auto s_param_id = MakePatternNode< InstanceIdentifierByNameAgent >( "p1" ); 
-    auto s_arg_id = MakePatternNode< InstanceIdentifierByNameAgent >( "SC_ZERO_TIME" ); 
+    auto s_token = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( r_delta->GetLoweredIdName() ); 
+    auto s_param_id = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( "p1" ); 
+    auto s_arg_id = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( "SC_ZERO_TIME" ); 
                     
     s_call->callee = s_token;       
     s_call->argumentation = s_args;
@@ -129,8 +129,8 @@ RaiseTerminationFunction::RaiseTerminationFunction( TreePtr<TerminationFunction>
     auto s_call = MakePatternNode<Call>();
     auto s_args = MakePatternNode<MapArgumentation>();
     auto s_arg = MakePatternNode< IdValuePair >();
-    auto s_token = MakePatternNode< InstanceIdentifierByNameAgent >( r_tf->GetLoweredIdName() ); 
-    auto s_param_id = MakePatternNode< InstanceIdentifierByNameAgent >( "exit_code" ); 
+    auto s_token = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( r_tf->GetLoweredIdName() ); 
+    auto s_param_id = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( "exit_code" ); 
             
     s_call->callee = s_token;       
     s_call->argumentation = s_args;
@@ -171,8 +171,8 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     auto l_bases = MakePatternNode<StarAgent, Base>();
     auto l_ctype = MakePatternNode<Constructor>();
     auto l_ident = MakePatternNode<InstanceIdentifier>();
-    auto s_token = MakePatternNode< InstanceIdentifierByNameAgent >( lr_scprocess->GetLoweredIdName() ); 
-    auto s_arg_id = MakePatternNode< InstanceIdentifierByNameAgent >( "func" );
+    auto s_token = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( lr_scprocess->GetLoweredIdName() ); 
+    auto s_arg_id = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( "func" );
     auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( over, l_module, l_module );            
     
     // Eliminate the declaration that came from isystemc.h
@@ -219,7 +219,7 @@ RaiseSCDeltaCount::RaiseSCDeltaCount()
 
     auto s_call = MakePatternNode<Call>();
     auto s_args = MakePatternNode<MapArgumentation>();
-    auto s_token = MakePatternNode< InstanceIdentifierByNameAgent >( r_delta_count->GetLoweredIdName() );                
+    auto s_token = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( r_delta_count->GetLoweredIdName() );                
                 
     s_call->callee = s_token;
     s_call->argumentation = s_args;
@@ -236,7 +236,7 @@ RaiseSCNotifyImmediate::RaiseSCNotifyImmediate()
     auto s_lookup = MakePatternNode<Lookup>();
     auto s_event = MakePatternNode<Event>();
     auto r_notify = MakePatternNode<NotifyImmediate>();
-    auto s_token = MakePatternNode< InstanceIdentifierByNameAgent >( r_notify->GetLoweredIdName() );                
+    auto s_token = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( r_notify->GetLoweredIdName() );                
     auto eexpr = MakePatternNode<TransformOfAgent, Expression>( &TypeOf::instance ); 
     //MakePatternNode< Expression > eexpr; 
             
@@ -261,9 +261,9 @@ RaiseSCNotifyDelta::RaiseSCNotifyDelta()
     auto s_event = MakePatternNode<Event>();
     auto r_notify = MakePatternNode<NotifyDelta>();
     auto s_arg = MakePatternNode<IdValuePair>();
-    auto s_zero_token = MakePatternNode< InstanceIdentifierByNameAgent >( "SC_ZERO_TIME" );                
-    auto s_arg_id = MakePatternNode< InstanceIdentifierByNameAgent >( "p1" ); 
-    auto s_token = MakePatternNode< InstanceIdentifierByNameAgent >( r_notify->GetLoweredIdName() );                
+    auto s_zero_token = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( "SC_ZERO_TIME" );                
+    auto s_arg_id = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( "p1" ); 
+    auto s_token = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( r_notify->GetLoweredIdName() );                
     auto eexpr = MakePatternNode<TransformOfAgent, Expression>( &TypeOf::instance ); 
     //MakePatternNode< Expression > eexpr; 
             
@@ -403,43 +403,43 @@ RemoveSCPrototypes::RemoveSCPrototypes()
     s_any->disjuncts = (s_cease_inst, s_exit_inst, s_wait_inst, s_next_trigger_inst, s_delta_count_inst);
     
     // void cease( unsigned char exit_code );
-    s_cease_inst->identifier = MakePatternNode< InstanceIdentifierByNameAgent >( "cease" ); 
+    s_cease_inst->identifier = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( "cease" ); 
     s_cease_inst->type = s_cease_type;
     s_cease_type->return_type = MakePatternNode<Void>();
     s_cease_type->params = (s_cease_param);
     s_cease_param->type = s_unsigned_char;
     s_unsigned_char->width = MakePatternNode<SpecificInteger>((int)TypeDb::char_bits);
-    s_cease_param->identifier = MakePatternNode<InstanceIdentifierByNameAgent>( "exit_code" );   
+    s_cease_param->identifier = MakePatternNode<SpecificInstanceIdentifierByNameAgent>( "exit_code" );   
     
     // void exit( int exit_code );
-    s_exit_inst->identifier = MakePatternNode< InstanceIdentifierByNameAgent >( "exit" ); 
+    s_exit_inst->identifier = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( "exit" ); 
     s_exit_inst->type = s_exit_type;
     s_exit_type->return_type = MakePatternNode<Void>();
     s_exit_type->params = (s_exit_param);
     s_exit_param->type = s_int;
     s_int->width = MakePatternNode<SpecificInteger>((int)TypeDb::int_bits);
-    s_exit_param->identifier = MakePatternNode<InstanceIdentifierByNameAgent>( "exit_code" );   
+    s_exit_param->identifier = MakePatternNode<SpecificInstanceIdentifierByNameAgent>( "exit_code" );   
     
     // void wait( int p1 );
-    s_wait_inst->identifier = MakePatternNode< InstanceIdentifierByNameAgent >( "wait" ); 
+    s_wait_inst->identifier = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( "wait" ); 
     s_wait_inst->type = s_wait_type;
     s_wait_type->return_type = MakePatternNode<Void>();
     s_wait_type->params = (s_wait_param);
     s_wait_param->type = s_int2;
     s_int2->width = MakePatternNode<SpecificInteger>((int)TypeDb::int_bits);
-    s_wait_param->identifier = MakePatternNode<InstanceIdentifierByNameAgent>( "p1" );   
+    s_wait_param->identifier = MakePatternNode<SpecificInstanceIdentifierByNameAgent>( "p1" );   
     
     // void next_trigger( int p1 );
-    s_next_trigger_inst->identifier = MakePatternNode< InstanceIdentifierByNameAgent >( "next_trigger" ); 
+    s_next_trigger_inst->identifier = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( "next_trigger" ); 
     s_next_trigger_inst->type = s_next_trigger_type;
     s_next_trigger_type->return_type = MakePatternNode<Void>();
     s_next_trigger_type->params = (s_next_trigger_param);
     s_next_trigger_param->type = s_int3;
     s_int3->width = MakePatternNode<SpecificInteger>((int)TypeDb::int_bits);
-    s_next_trigger_param->identifier = MakePatternNode<InstanceIdentifierByNameAgent>( "p1" );   
+    s_next_trigger_param->identifier = MakePatternNode<SpecificInstanceIdentifierByNameAgent>( "p1" );   
     
     // void sc_delta_count();
-    s_delta_count_inst->identifier = MakePatternNode< InstanceIdentifierByNameAgent >( "sc_delta_count" ); 
+    s_delta_count_inst->identifier = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( "sc_delta_count" ); 
     s_delta_count_inst->type = s_delta_count_type;
     s_delta_count_type->return_type = MakePatternNode<Integral>(); // Some kind of integer (in SC it's a sc_dt::uint64) 
     //s_delta_count_type->params = ();
