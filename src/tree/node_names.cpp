@@ -26,15 +26,6 @@ const AvailableNodeData::NamespaceBlock *AvailableNodeData::GetNodeNamesRoot()
 }
 
 
-const AvailableNodeData::NamespaceBlock *AvailableNodeData::GetIdentifierDiscriminatorsRoot()
-{
-	if( identifier_discriminators_root.sub_blocks.empty() )
-		InitialiseMap();	
-		
-	return &identifier_discriminators_root;
-}
-
-
 shared_ptr<Node> AvailableNodeData::MakeNode(NodeEnum ne) const 
 {
 	switch(ne)
@@ -83,24 +74,6 @@ bool AvailableNodeData::IsType(const LeafBlock *block) const
 		shared_ptr<Node> spn = MakeNode(block->node_enum.value());
 		if( dynamic_cast<const CPPTree::Type *>(spn.get()) )
 			is_type = true;
-	} 
-	else if( block->identifier_discriminator_enum )
-	{
-		shared_ptr<Node> spn;
-		switch( block->identifier_discriminator_enum.value() )
-		{
-#define NODE(NS, NAME) \
-		case IdentifierEnum::NS##_##NAME: \
-			spn = make_shared<NS::Specific##NAME##Identifier>(); \
-			break;
-#include "tree/identifier_names.inc"	
-#undef NODE
-		default:
-			ASSERTFAIL(); // switch should have covered everything in the inc file
-		}	
-
-		if( dynamic_cast<const CPPTree::Type *>(spn.get()) )
-			is_type = true;
 	}
 	return is_type;
 }
@@ -143,43 +116,8 @@ void AvailableNodeData::InitialiseMap()
 		ASSERT( node_block );
 		node_block->node_enum = node_enum;		
 	}
-	
-	map<list<string>, IdentifierEnum> ident_name_map = 
-	{
-#define NODE(NS, NAME) { {#NS, #NAME}, IdentifierEnum::NS##_##NAME },
-#include "identifier_names.inc"	
-#undef NODE	
-	};
-	
-	for( auto p : ident_name_map )
-	{
-		list<string> flat_list = p.first;
-		IdentifierEnum identifier_discriminator_enum = p.second;		
-		
-		if( identifier_discriminators_root.sub_blocks.count(flat_list.front())==0 )
-		{
-			auto sb = make_unique<NamespaceBlock>();
-			identifier_discriminators_root.sub_blocks[flat_list.front()] = move(sb);
-		}
-		
-		Block *block = identifier_discriminators_root.sub_blocks.at( flat_list.front() ).get();
-		auto namespace_block = dynamic_cast<NamespaceBlock *>(block);
-		ASSERT(namespace_block);
-
-		if( !namespace_block->sub_blocks[flat_list.back()] ) // can create -> NULL
-			namespace_block->sub_blocks.at(flat_list.back()) = make_unique<LeafBlock>();
-
-		LeafBlock *node_block = dynamic_cast<LeafBlock *>(namespace_block->sub_blocks.at(flat_list.back()).get());
-		ASSERT( node_block );
-		node_block->identifier_discriminator_enum = identifier_discriminator_enum;
-		
-		ASSERT( !name_to_node_map.empty() );
-	}
-	
-	
 }
 
 
 AvailableNodeData::NameToNodeMapType AvailableNodeData::name_to_node_map;
 AvailableNodeData::NamespaceBlock AvailableNodeData::node_names_root;
-AvailableNodeData::NamespaceBlock AvailableNodeData::identifier_discriminators_root;

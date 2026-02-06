@@ -159,7 +159,6 @@ struct SpecificIdentifier : virtual Property
     string GetGraphName() const override;
     string GetTrace() const override;
 	
-protected:
     BoundingRole addr_bounding_role;
     string name;
 };

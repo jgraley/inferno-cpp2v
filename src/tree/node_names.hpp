@@ -47,26 +47,20 @@ public:
 			list<string> ls;
 			if( node_enum )
 				ls.push_back( "node-name" );
-			if( identifier_discriminator_enum )
-				ls.push_back( "identifier-discriminator" );
 			return Join(ls, "/");
 		}
 		string GetTrace() const 
 		{ 
 			string s = node_enum ? "node#"+Trace((int)(node_enum.value())) : "no-node"; 
-			s += ",";
-			s += identifier_discriminator_enum ? "id-disc#"+Trace((int)(identifier_discriminator_enum.value())) : "no-id-disc";
 			return s;
 		}
 
 		optional<NodeEnum> node_enum;
-		optional<IdentifierEnum> identifier_discriminator_enum;
 	};
 
 	typedef map<list<string>, NodeEnum> NameToNodeMapType;	
 	const NameToNodeMapType &GetNameToEnumMap();
 	const AvailableNodeData::NamespaceBlock *GetNodeNamesRoot();
-	const AvailableNodeData::NamespaceBlock *GetIdentifierDiscriminatorsRoot();
 	shared_ptr<Node> MakeNode(NodeEnum ne) const;
 	shared_ptr<TreePtrInterface> MakeTreePtr(NodeEnum ne) const;
 	bool IsType(const LeafBlock *block) const;
@@ -75,7 +69,6 @@ private:
 	static void InitialiseMap();
 	static NameToNodeMapType name_to_node_map;
 	static AvailableNodeData::NamespaceBlock node_names_root;
-	static AvailableNodeData::NamespaceBlock identifier_discriminators_root;
 };
 
 #endif

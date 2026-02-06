@@ -479,6 +479,9 @@ Syntax::Production Render::GetNodeProduction( TreePtr<Node> node, Syntax::Produc
 										 Syntax::Policy ) final { return "fake"; } 
 			string RenderScopeResolvingPrefix( TreePtr<Node> ) final { return ""; } 
 			string GetUniqueIdentifierName( TreePtr<Node> ) const final { return "fake"; }
+		    string RenderNodeExplicit( shared_ptr<const Node>, 
+									   Syntax::Production, 
+		                               Syntax::Policy ) final { return "fake"; } 	
 		} fake_renderer;
 		(void)node->GetRender(&fake_renderer, surround_prod, policy);
 		

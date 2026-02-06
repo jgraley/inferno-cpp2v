@@ -428,10 +428,9 @@ expr_vn_prim: builtin_name_part itemisation								{ $$ = vn->OnBuiltIn($1, @1, 
 
 builtin_name_part 	: start_builtin_scope resolved_name			{ $$ = $2.as_andata_block; (void)$1; }
 prerestrict_name_part : start_prerestrict_scope resolved_name	{ $$ = $2.as_andata_block; (void)$1; }
-
-specific_id_part	: start_specific_id_scope resolved_name	{ $$ = $2.as_andata_block; (void)$1; }
-id_by_name_part 	: start_id_by_name_scope resolved_name	{ $$ = $2.as_andata_block; (void)$1; }
-build_id_part 		: start_build_id_scope resolved_name	{ $$ = $2.as_andata_block; (void)$1; }
+specific_id_part	: start_specific_id_scope resolved_name		{ $$ = $2.as_andata_block; (void)$1; }
+id_by_name_part 	: start_id_by_name_scope resolved_name		{ $$ = $2.as_andata_block; (void)$1; }
+build_id_part 		: start_build_id_scope resolved_name		{ $$ = $2.as_andata_block; (void)$1; }
 
 
 // Because there's no separator in {{code} expr} the prefix ops would conflict with infix that use same symbol,
@@ -475,13 +474,13 @@ start_builtin_scope		: BUILT_IN 			{ $$ = make_shared<VN::NodeNameScopeGnomon>()
 start_prerestrict_scope	: PRERESTRICT		{ $$ = make_shared<VN::NodeNameScopeGnomon>(); 
 										      recogniser->AddGnomon($$); }
 
-start_specific_id_scope	: SPECIFIC_ID 		{ $$ = make_shared<VN::IdentifierDiscriminatorScopeGnomon>(); 
+start_specific_id_scope	: SPECIFIC_ID 		{ $$ = make_shared<VN::NodeNameScopeGnomon>(); 
 											  recogniser->AddGnomon($$); }
 
-start_id_by_name_scope	: ID_BY_NAME 		{ $$ = make_shared<VN::IdentifierDiscriminatorScopeGnomon>(); 
+start_id_by_name_scope	: ID_BY_NAME 		{ $$ = make_shared<VN::NodeNameScopeGnomon>(); 
 											  recogniser->AddGnomon($$); }
 
-start_build_id_scope	: BUILDER_ID 		{ $$ = make_shared<VN::IdentifierDiscriminatorScopeGnomon>(); 
+start_build_id_scope	: BUILDER_ID 		{ $$ = make_shared<VN::NodeNameScopeGnomon>(); 
 											  recogniser->AddGnomon($$); }
 
 start_transform_name_scope	: TRANSFORM		{ $$ = make_shared<VN::TransformNameScopeGnomon>(); 

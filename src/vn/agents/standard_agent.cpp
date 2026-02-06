@@ -971,13 +971,13 @@ Syntax::Production StandardAgent::GetAgentProduction() const
 }		
 
 
-string StandardAgent::GetAgentRender( VN::RendererInterface *, Syntax::Production  ) const
+string StandardAgent::GetAgentRender( VN::RendererInterface *, Syntax::Production ) const
 {
 	shared_ptr<const Node> node = GetPatternPtr();
 	if( dynamic_cast<const CPPTree::SpecificIdentifier *>(node.get()) )
     {
 		// SpecificIdentifiers appear rarely in patterns, and when they do they are not declared,
-		// so we should not try to render the C++ terminal	    	
+		// so we should not try to render the C++ terminal	   
 		string node_type_name = GetInnermostTemplateParam(TYPE_ID_NAME(*node));
 		
 		size_t last_scope_pos = node_type_name.rfind("::");
@@ -987,8 +987,11 @@ string StandardAgent::GetAgentRender( VN::RendererInterface *, Syntax::Productio
 			scope = node_type_name.substr(0, last_scope_pos+2); // include the ::
 			name = node_type_name.substr(last_scope_pos+2);
 		}
+		// #882 should use ⯁ now, and drop 🞊. But will need to extend ⯁ to include the string i.e.
+		// the exact same usage as seen here with 🞊. Easier to do once parser uses the same scope 
+		// gnomon for both 🞊 and ⯁.
 		return "🞊" + 
-		       scope + name.substr(8, name.size()-8-10) + // Take off Specific...Identifier
+		       scope + name + 
 		       "【\"" +
 			   GetIdentifierName() + 
 			   "\"】";

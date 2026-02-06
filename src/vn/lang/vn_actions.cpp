@@ -648,22 +648,20 @@ TreePtr<Node> VNLangActions::OnLookup( TreePtr<Node> object, TreePtr<Node> membe
 TreePtr<Node> VNLangActions::OnSpecificId( const AvailableNodeData::Block *block, any id_disc_loc, wstring wname, any name_loc )
 {
 	(void)name_loc; // TODO perhaps IdentifierByNameAgent can validate this?
-
 	auto leaf_block = dynamic_cast<const AvailableNodeData::LeafBlock *>(block);
-	IdentifierEnum ie = leaf_block->identifier_discriminator_enum.value();
+	NodeEnum ne = leaf_block->node_enum.value();
 
 	string name = Unquote(ToASCII(wname));
 		
-	switch( ie )
-	{
-#define NODE(NS, NAME) \
-	case IdentifierEnum::NS##_##NAME: \
-		return MakeTreeNode<StandardAgentWrapper<NS::Specific##NAME##Identifier>>(name); 
-#include "tree/identifier_names.inc"	
-#undef NODE
-	default:
-		ASSERTFAIL(); // switch should have covered everything in the inc file
-	}	
+	TreePtr<Node> dest = MakeStandardAgent(ne);
+	auto dest_sid = TreePtr<CPPTree::SpecificIdentifier>::DynamicCast( dest );
+	if( !dest_sid )
+		throw YY::VNLangParser::syntax_error(
+				any_cast<YY::VNLangParser::location_type>(name_loc),
+				"Cannot initialise "+Trace(dest)+" with a string");
+	
+	dest_sid->name = name;
+	return dest_sid;
 }
 
 
@@ -671,45 +669,53 @@ TreePtr<Node> VNLangActions::OnIdByName( const AvailableNodeData::Block *block, 
 {
 	(void)name_loc; // TODO perhaps IdentifierByNameAgent can validate this?
 	auto leaf_block = dynamic_cast<const AvailableNodeData::LeafBlock *>(block);
-	IdentifierEnum ie = leaf_block->identifier_discriminator_enum.value();
+	NodeEnum ne = leaf_block->node_enum.value();
 
 	string name = Unquote(ToASCII(wname));
 
-	switch( ie )
+	string idt_ns, idt_name;	
+	switch(ne)
 	{
 #define NODE(NS, NAME) \
-	case IdentifierEnum::NS##_##NAME: \
-		return IdentifierByNameAgent::TryMakeFromDestignatedType( #NS, #NAME, name );
-#include "tree/identifier_names.inc"	
+	case NodeEnum::NS##_##NAME: \
+		idt_ns = #NS; \
+		idt_name = #NAME; \
+		break;
+#include "tree/node_names.inc"			
 #undef NODE
-	default:
-		ASSERTFAIL(); // switch should have covered everything in the inc file
 	}	
+	ASSERT( !idt_name.empty() ); // internal error because we get a NodeEnum from the recogniser
+	
+	TreePtr<Node> ibn_node = IdentifierByNameAgent::TryMakeFromDestignatedType( idt_ns, idt_name, name );
+	ASSERT( ibn_node )("%s::%s could not make id by name agent", idt_ns, idt_name);
+	return ibn_node;
 }
 
 
 TreePtr<Node> VNLangActions::OnBuildId( const AvailableNodeData::Block *block, any id_disc_loc, wstring wformat, any name_loc, Item sources )
 {
-	(void)name_loc; // TODO perhaps BuildIdentifierAgent can validate this?
-
+	(void)name_loc; // TODO perhaps IdentifierByNameAgent can validate this?
 	auto leaf_block = dynamic_cast<const AvailableNodeData::LeafBlock *>(block);
-	IdentifierEnum ie = leaf_block->identifier_discriminator_enum.value();
+	NodeEnum ne = leaf_block->node_enum.value();
 
 	// Format is "" if omitted otherwise a quoted string with the quotes still on
 	string format = wformat.empty() ? "" : Unquote(ToASCII(wformat));
 		
-	TreePtr<Node> bia_node;
-	switch( ie )
+	string idt_ns, idt_name;	
+	switch(ne)
 	{
 #define NODE(NS, NAME) \
-	case IdentifierEnum::NS##_##NAME: \
-		bia_node = BuildIdentifierAgent::TryMakeFromDestignatedType( #NS, #NAME, format ); \
+	case NodeEnum::NS##_##NAME: \
+		idt_ns = #NS; \
+		idt_name = #NAME; \
 		break;
-#include "tree/identifier_names.inc"	
+#include "tree/node_names.inc"			
 #undef NODE
-	default:
-		ASSERTFAIL(); // switch should have covered everything in the inc file
-	}
+	}	
+	ASSERT( !idt_name.empty() ); // internal error because we get a NodeEnum from the recogniser
+	
+	TreePtr<Node> bia_node = BuildIdentifierAgent::TryMakeFromDestignatedType( idt_ns, idt_name, format ); 
+	ASSERT( bia_node );
 	
 	for( TreePtr<Node> src : sources.nodes )
 		dynamic_cast<BuildIdentifierAgent *>(bia_node.get())->sources.insert( src );						

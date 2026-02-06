@@ -78,7 +78,7 @@ Syntax::Production BuildIdentifierAgent::GetAgentProduction() const
 
 string BuildIdentifierAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod ) const
 {
-	string s = "⧇CPPTree::" + GetIdentifierSubTypeName(); 
+	string s = "⧇CPPTree::Specific" + GetIdentifierSubTypeName() + "Identifier"; 
 	(void)surround_prod;
 
 	// List the sources as a pseudo-item
@@ -153,7 +153,7 @@ Graphable::NodeBlock BuildIdentifierAgent::GetGraphBlockInfo() const
 TreePtr<Node> BuildIdentifierAgent::TryMakeFromDestignatedType( string type_ns, string type_name, string format )
 {
 #define NODE(NS, NAME) \
-	if( #NS==type_ns && #NAME==type_name ) \
+	if( #NS==type_ns && "Specific" #NAME "Identifier"==type_name ) \
 		return MakeTreeNode<BuildSpecific##NAME##IdentifierAgent>(format); \
 	else
 #include "tree/identifier_names.inc"	

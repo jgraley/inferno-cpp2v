@@ -114,15 +114,6 @@ public:
 	}
 };
 		
-		
-class IdentifierDiscriminatorScopeGnomon : public ScopeGnomon
-{
-public:	
-	string GetMessageText() const final
-	{
-		return "identifier discriminator scope";
-	}
-};		
 
 class TransformNameScopeGnomon : public ScopeGnomon
 {
@@ -145,7 +136,6 @@ public:
 	YY::VNLangParser::symbol_type OnUnquoted(wstring text, YY::VNLangParser::location_type loc) const;
 	YY::VNLangParser::symbol_type ProcessToken(wstring text, bool ascii, YY::VNLangParser::location_type loc) const;
 	YY::VNLangParser::symbol_type ProcessTokenInNodeNameScope(wstring text, bool ascii, YY::VNLangParser::location_type loc, YY::TokenMetadata metadata) const;
-	YY::VNLangParser::symbol_type ProcessTokenInIdentifierDiscriminatorScope(wstring text, bool ascii, YY::VNLangParser::location_type loc, YY::TokenMetadata metadata) const;
 	YY::VNLangParser::symbol_type ProcessTokenTransformNameScope(wstring text, bool ascii, YY::VNLangParser::location_type loc, YY::TokenMetadata metadata) const;
 
 private:	

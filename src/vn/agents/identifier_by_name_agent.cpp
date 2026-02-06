@@ -111,7 +111,7 @@ string IdentifierByNameAgent::GetAgentRender( VN::RendererInterface *renderer, S
 {
     (void)renderer;
 	(void)surround_prod;
-	string s = "⊛CPPTree::" + GetIdentifierSubTypeName();
+	string s = "⊛CPPTree::Specific" + GetIdentifierSubTypeName() + "Identifier";
 	s += "【\"" + name;
 	s += "\"】";
 	return s;
@@ -155,7 +155,7 @@ Graphable::NodeBlock IdentifierByNameAgent::GetGraphBlockInfo() const
 TreePtr<Node> IdentifierByNameAgent::TryMakeFromDestignatedType( string type_ns, string type_name, string matching_name )
 {
 #define NODE(NS, NAME) \
-	if( #NS==type_ns && #NAME==type_name ) \
+	if( #NS==type_ns && "Specific" #NAME "Identifier"==type_name ) \
 		return MakeTreeNode<Specific##NAME##IdentifierByNameAgent>(matching_name); \
 	else
 #include "tree/identifier_names.inc"	

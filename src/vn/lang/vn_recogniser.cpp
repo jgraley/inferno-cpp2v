@@ -71,8 +71,6 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessToken(wstring text, bool 
 		{
 			if( dynamic_cast<const NodeNameScopeGnomon *>(spg.get()) )
 				return ProcessTokenInNodeNameScope(text, ascii, loc, metadata);
-			else if( dynamic_cast<const IdentifierDiscriminatorScopeGnomon *>(spg.get()) )
-				return ProcessTokenInIdentifierDiscriminatorScope(text, ascii, loc, metadata);
 			else if( dynamic_cast<const TransformNameScopeGnomon *>(spg.get()) )
 				return ProcessTokenTransformNameScope(text, ascii, loc, metadata);
 			
@@ -164,7 +162,7 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessTokenInNodeNameScope(wstr
 			break; // we only need the one at the front, because the names build up
 		}
 	}
-	
+		
 	// See if we want to supply a block
 	if( ascii && namespace_block && namespace_block->sub_blocks.count(ToASCII(text)) > 0 )
 	{
@@ -183,47 +181,9 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessTokenInNodeNameScope(wstr
 			ASSERTFAIL("unreconised andata block");
 	}
 	
-	// In these scopes, there are no designations so we must succeed and can raise an error here if we don#t
+	// In these scopes, there are no designations so we must succeed and can raise an error here if we don't
 	throw YY::VNLangParser::syntax_error( loc,
-	    SSPrintf("Unrecognised: %s %", DiagQuote(text).c_str(), GetContextText().c_str()) ); 
-}
-
-
-YY::VNLangParser::symbol_type VNLangRecogniser::ProcessTokenInIdentifierDiscriminatorScope(wstring text, bool ascii, YY::VNLangParser::location_type loc, YY::TokenMetadata metadata) const
-{
-	// Determine the current scope from our weak gnomons
-	const AvailableNodeData::NamespaceBlock *namespace_block = AvailableNodeData().GetIdentifierDiscriminatorsRoot();
-	for( weak_ptr<const ResolverGnomon> wpg : resolver_gnomons )
-	{
-		if( auto spg = wpg.lock() )
-		{
-			ASSERT( spg->namespace_block );
-			namespace_block = spg->namespace_block;
-			break; // we only need the one at the front, because the names build up
-		}
-	}
-	
-	// See if we want to supply a block
-	if( ascii && namespace_block && namespace_block->sub_blocks.count(ToASCII(text)) > 0 )
-	{
-		const AvailableNodeData::Block *sub_block = namespace_block->sub_blocks.at(ToASCII(text)).get();
-		metadata.as_andata_block = sub_block; // return it to the parser whatever it is
-		if( auto lb = dynamic_cast<const AvailableNodeData::LeafBlock *>(sub_block) )
-		{
-			if( AvailableNodeData().IsType(lb) )			
-				return YY::VNLangParser::make_RESOLVED_TYPE(metadata, loc);
-			else
-				return YY::VNLangParser::make_RESOLVED_NORMAL(metadata, loc);
-		}
-		else if( dynamic_cast<const AvailableNodeData::NamespaceBlock *>(sub_block) )
-			return YY::VNLangParser::make_NODE_NAMESPACE(metadata, loc);				
-		else
-			ASSERTFAIL("unknown andata block");
-	}
-	
-	// In these scopes, there are no designations so we must succeed and can raise an error here if we don#t
-	throw YY::VNLangParser::syntax_error( loc,
-	    SSPrintf("Unrecognised: %s", DiagQuote(text).c_str(), GetContextText().c_str()) ); 
+	    SSPrintf("Unrecognised: %s %s", DiagQuote(text).c_str(), GetContextText().c_str()) ); 
 }
 
 
