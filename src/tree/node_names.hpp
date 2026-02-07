@@ -59,7 +59,9 @@ public:
 	};
 
 	typedef map<list<string>, NodeEnum> NameToNodeMapType;	
+	typedef map<NodeEnum, list<string>> NodeToNameMapType;	
 	const NameToNodeMapType &GetNameToEnumMap();
+	const NodeToNameMapType &GetEnumToNameMap();
 	const AvailableNodeData::NamespaceBlock *GetNodeNamesRoot();
 	shared_ptr<Node> MakeNode(NodeEnum ne) const;
 	shared_ptr<TreePtrInterface> MakeTreePtr(NodeEnum ne) const;
@@ -68,6 +70,7 @@ public:
 private:
 	static void InitialiseMap();
 	static NameToNodeMapType name_to_node_map;
+	static NodeToNameMapType node_to_name_map;
 	static AvailableNodeData::NamespaceBlock node_names_root;
 };
 

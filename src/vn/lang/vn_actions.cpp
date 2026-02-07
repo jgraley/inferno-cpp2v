@@ -673,17 +673,10 @@ TreePtr<Node> VNLangActions::OnIdByName( const AvailableNodeData::Block *block, 
 
 	string name = Unquote(ToASCII(wname));
 
-	string idt_ns, idt_name;	
-	switch(ne)
-	{
-#define NODE(NS, NAME) \
-	case NodeEnum::NS##_##NAME: \
-		idt_ns = #NS; \
-		idt_name = #NAME; \
-		break;
-#include "tree/node_names.inc"			
-#undef NODE
-	}	
+	auto m = AvailableNodeData().GetEnumToNameMap();
+	auto l = m.at(ne);
+	string idt_ns = l.front();
+	string idt_name = l.back();	
 	ASSERT( !idt_name.empty() ); // internal error because we get a NodeEnum from the recogniser
 	
 	TreePtr<Node> ibn_node = IdentifierByNameAgent::TryMakeFromDestignatedType( idt_ns, idt_name, name );
@@ -701,17 +694,10 @@ TreePtr<Node> VNLangActions::OnBuildId( const AvailableNodeData::Block *block, a
 	// Format is "" if omitted otherwise a quoted string with the quotes still on
 	string format = wformat.empty() ? "" : Unquote(ToASCII(wformat));
 		
-	string idt_ns, idt_name;	
-	switch(ne)
-	{
-#define NODE(NS, NAME) \
-	case NodeEnum::NS##_##NAME: \
-		idt_ns = #NS; \
-		idt_name = #NAME; \
-		break;
-#include "tree/node_names.inc"			
-#undef NODE
-	}	
+	auto m = AvailableNodeData().GetEnumToNameMap();
+	auto l = m.at(ne);
+	string idt_ns = l.front();
+	string idt_name = l.back();	
 	ASSERT( !idt_name.empty() ); // internal error because we get a NodeEnum from the recogniser
 	
 	TreePtr<Node> bia_node = BuildIdentifierAgent::TryMakeFromDestignatedType( idt_ns, idt_name, format ); 

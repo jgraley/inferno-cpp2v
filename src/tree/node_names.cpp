@@ -17,6 +17,15 @@ const AvailableNodeData::NameToNodeMapType &AvailableNodeData::GetNameToEnumMap(
 }
 
 
+const AvailableNodeData::NodeToNameMapType &AvailableNodeData::GetEnumToNameMap()
+{
+	if( node_to_name_map.empty() )
+		InitialiseMap();
+	
+	return node_to_name_map;
+}
+
+
 const AvailableNodeData::NamespaceBlock *AvailableNodeData::GetNodeNamesRoot()
 {
 	if( node_names_root.sub_blocks.empty() )
@@ -96,6 +105,8 @@ void AvailableNodeData::InitialiseMap()
 		
 	for( auto p : name_to_node_map )
 	{
+		node_to_name_map[p.second] = p.first;
+		
 		list<string> flat_list = p.first;
 		NodeEnum node_enum = p.second;
 		
@@ -120,4 +131,5 @@ void AvailableNodeData::InitialiseMap()
 
 
 AvailableNodeData::NameToNodeMapType AvailableNodeData::name_to_node_map;
+AvailableNodeData::NodeToNameMapType AvailableNodeData::node_to_name_map;
 AvailableNodeData::NamespaceBlock AvailableNodeData::node_names_root;
