@@ -165,11 +165,11 @@
 %type <VN::Item>					item
 %type <shared_ptr<VN::Gnomon>>		part_resolve recogniser_command 
 %type <shared_ptr<VN::Gnomon>>		start_transform_name_scope
-%type <shared_ptr<VN::Gnomon>>		start_builtin_scope start_prerestrict_scope start_specific_id_scope start_id_by_name_scope start_build_id_scope
+%type <shared_ptr<VN::Gnomon>>		start_builtin_scope start_prerestrict_scope start_id_by_name_scope start_build_id_scope
 %type <list<TreePtr<Node>>>			statements
 %type <list<TreePtr<Node>>>			comma_args semicolon_args
-%type <const AvailableNodeData::Block *> builtin_name_part prerestrict_name_part specific_id_part id_by_name_part build_id_part
-%type <const AvailableNodeData::Block *> type_builtin_name_part type_prerestrict_name_part type_specific_id_part type_id_by_name_part type_build_id_part
+%type <const AvailableNodeData::Block *> builtin_name_part prerestrict_name_part id_by_name_part build_id_part
+%type <const AvailableNodeData::Block *> type_builtin_name_part type_prerestrict_name_part type_id_by_name_part type_build_id_part
 %type <multiset<string>>			type_specifier_seq
 
 // Solve the dangling-else amiguity by giving the "else" token a higher priority than the "if" token
@@ -287,8 +287,6 @@ type_primary: type_vn_prim
 
 type_vn_prim: type_builtin_name_part itemisation								{ $$ = vn->OnBuiltIn($1, @1, $2); }
 			| DESIGNATED_TYPE     									  			{ $$ = $1.as_designated; }		
-   			| type_specific_id_part OPEN_VN STRING_LITERAL CLOSE_VN				{ $$ = vn->OnSpecificId($1, @1, $3, @3); }
-			| type_specific_id_part OPEN_VN CLOSE_VN							{ $$ = vn->OnSpecificId($1, @1, wstring(), @3); }
 			| type_id_by_name_part OPEN_VN STRING_LITERAL CLOSE_VN				{ $$ = vn->OnIdByName($1, @1, $3, @3); } // ASCII_NAME could be format
 			| type_build_id_part OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN 		{ $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
 			| type_build_id_part OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($1, @1, $3, @3, $5); }
@@ -296,10 +294,8 @@ type_vn_prim: type_builtin_name_part itemisation								{ $$ = vn->OnBuiltIn($1,
 
 type_builtin_name_part : start_builtin_scope resolved_type_name				{ $$ = $2.as_andata_block; (void)$1; }
 type_prerestrict_name_part : start_prerestrict_scope resolved_type_name		{ $$ = $2.as_andata_block; (void)$1; }
-
-type_specific_id_part	: start_specific_id_scope resolved_type_name	{ $$ = $2.as_andata_block; (void)$1; }
-type_id_by_name_part 	: start_id_by_name_scope resolved_type_name		{ $$ = $2.as_andata_block; (void)$1; }
-type_build_id_part 		: start_build_id_scope resolved_type_name		{ $$ = $2.as_andata_block; (void)$1; }
+type_id_by_name_part 	: start_id_by_name_scope resolved_type_name			{ $$ = $2.as_andata_block; (void)$1; }
+type_build_id_part 		: start_build_id_scope resolved_type_name			{ $$ = $2.as_andata_block; (void)$1; }
 
 // eg "long unsigned int". VN represents this as a single node. We don't want nodes for its constituent parts.
 // So, this is the level at which we mix in the VN syntax.
@@ -419,8 +415,6 @@ expr_primary: expr_vn_prim
 
 expr_vn_prim: builtin_name_part itemisation								{ $$ = vn->OnBuiltIn($1, @1, $2); }
 			| DESIGNATED_NORMAL       				  					{ $$ = $1.as_designated; }
-			| specific_id_part OPEN_VN STRING_LITERAL CLOSE_VN			{ $$ = vn->OnSpecificId($1, @1, $3, @3); }
-			| specific_id_part OPEN_VN CLOSE_VN							{ $$ = vn->OnSpecificId($1, @1, wstring(), @3); }
 			| id_by_name_part OPEN_VN STRING_LITERAL CLOSE_VN			{ $$ = vn->OnIdByName($1, @1, $3, @3); } // ASCII_NAME could be format
 			| build_id_part OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN 		{ $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
 			| build_id_part OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($1, @1, $3, @3, $5); }
@@ -428,7 +422,6 @@ expr_vn_prim: builtin_name_part itemisation								{ $$ = vn->OnBuiltIn($1, @1, 
 
 builtin_name_part 	: start_builtin_scope resolved_name			{ $$ = $2.as_andata_block; (void)$1; }
 prerestrict_name_part : start_prerestrict_scope resolved_name	{ $$ = $2.as_andata_block; (void)$1; }
-specific_id_part	: start_specific_id_scope resolved_name		{ $$ = $2.as_andata_block; (void)$1; }
 id_by_name_part 	: start_id_by_name_scope resolved_name		{ $$ = $2.as_andata_block; (void)$1; }
 build_id_part 		: start_build_id_scope resolved_name		{ $$ = $2.as_andata_block; (void)$1; }
 
@@ -473,9 +466,6 @@ start_builtin_scope		: BUILT_IN 			{ $$ = make_shared<VN::NodeNameScopeGnomon>()
 										      
 start_prerestrict_scope	: PRERESTRICT		{ $$ = make_shared<VN::NodeNameScopeGnomon>(); 
 										      recogniser->AddGnomon($$); }
-
-start_specific_id_scope	: SPECIFIC_ID 		{ $$ = make_shared<VN::NodeNameScopeGnomon>(); 
-											  recogniser->AddGnomon($$); }
 
 start_id_by_name_scope	: ID_BY_NAME 		{ $$ = make_shared<VN::NodeNameScopeGnomon>(); 
 											  recogniser->AddGnomon($$); }

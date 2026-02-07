@@ -144,6 +144,27 @@ TreePtr<Node> VNLangActions::OnBuiltIn( const AvailableNodeData::Block *block, a
 	auto leaf_block = dynamic_cast<const AvailableNodeData::LeafBlock *>(block);
 	NodeEnum ne = leaf_block->node_enum.value();
 	TreePtr<Node> dest = MakeStandardAgent(ne);
+    YY::VNLangParser::location_type prev_loc = any_cast<YY::VNLangParser::location_type>(src_itemisation.loc);
+	
+	// Special case for specific identifiers
+	if( auto dest_sid = TreePtr<CPPTree::SpecificIdentifier>::DynamicCast( dest ) )
+	{
+		if( src_itemisation.items.size() != 1  )
+			throw YY::VNLangParser::syntax_error( 
+				prev_loc,
+				SSPrintf("%s expects a string, but %d items given.",
+				         DiagQuote(Traceable::TypeIdName( *dest )).c_str(),
+				         src_itemisation.items.size()));
+		if( src_itemisation.items.front().nodes.size() != 1 )
+			throw YY::VNLangParser::syntax_error( 
+				prev_loc,
+				SSPrintf("%s expects a string, but %d nodes given.",
+				         DiagQuote(Traceable::TypeIdName( *dest )).c_str(),
+				         src_itemisation.items.front().nodes.size()));
+		auto string_node = TreePtr<CPPTree::String>::DynamicCast(src_itemisation.items.front().nodes.front());
+		dest_sid->name = string_node->GetString();
+		return dest_sid;
+	}		
 	
 	// The detination's itemisation "pulls" items from the source and we require a match (for now). 
 	// Then for containers, the source will "push" as many elements as it has, or just one
@@ -157,7 +178,6 @@ TreePtr<Node> VNLangActions::OnBuiltIn( const AvailableNodeData::Block *block, a
                              dest_items.size()==1?"item":"items",
                              src_itemisation.items.size(),
                              src_itemisation.items.size()==1?"was":"were");
-    YY::VNLangParser::location_type prev_loc = any_cast<YY::VNLangParser::location_type>(src_itemisation.loc);
     for( Itemiser::Element *dest_item : dest_items )
     {
 		if( src_it == src_itemisation.items.end() )
@@ -642,26 +662,6 @@ TreePtr<Node> VNLangActions::OnLookup( TreePtr<Node> object, TreePtr<Node> membe
 	node->object = object;
 	node->member = member;
 	return node;
-}
-
-
-TreePtr<Node> VNLangActions::OnSpecificId( const AvailableNodeData::Block *block, any id_disc_loc, wstring wname, any name_loc )
-{
-	(void)name_loc; // TODO perhaps IdentifierByNameAgent can validate this?
-	auto leaf_block = dynamic_cast<const AvailableNodeData::LeafBlock *>(block);
-	NodeEnum ne = leaf_block->node_enum.value();
-
-	string name = Unquote(ToASCII(wname));
-		
-	TreePtr<Node> dest = MakeStandardAgent(ne);
-	auto dest_sid = TreePtr<CPPTree::SpecificIdentifier>::DynamicCast( dest );
-	if( !dest_sid )
-		throw YY::VNLangParser::syntax_error(
-				any_cast<YY::VNLangParser::location_type>(name_loc),
-				"Cannot initialise "+Trace(dest)+" with a string");
-	
-	dest_sid->name = name;
-	return dest_sid;
 }
 
 

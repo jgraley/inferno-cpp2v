@@ -987,10 +987,8 @@ string StandardAgent::GetAgentRender( VN::RendererInterface *, Syntax::Productio
 			scope = node_type_name.substr(0, last_scope_pos+2); // include the ::
 			name = node_type_name.substr(last_scope_pos+2);
 		}
-		// #882 should use ⯁ now, and drop 🞊. But will need to extend ⯁ to include the string i.e.
-		// the exact same usage as seen here with 🞊. Easier to do once parser uses the same scope 
-		// gnomon for both 🞊 and ⯁.
-		return "🞊" + 
+
+		return "⯁" + 
 		       scope + name + 
 		       "【\"" +
 			   GetIdentifierName() + 
