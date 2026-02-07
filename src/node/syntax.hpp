@@ -163,4 +163,6 @@ public:
     static string::size_type GetLineBreakThreshold();
 };
 
+#define DEFAULT_NODE_NAMESPACE "CPPTree"
+
 #endif

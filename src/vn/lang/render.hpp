@@ -41,6 +41,8 @@ public:
 
 	virtual string Dispatch( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy );
 
+	list<string> PopulateItemStrings( shared_ptr<const Node> node, Syntax::Policy policy );
+	string RenderNodeTypeName( shared_ptr<const Node> node ) const; 
 	string RenderNodeExplicit( shared_ptr<const Node> node, Syntax::Production surround_prod, Syntax::Policy policy ) final;
 	string RenderScopeResolvingPrefix( TreePtr<Node> id ) override;
 	string GetUniqueIdentifierName( TreePtr<Node> id ) const override;

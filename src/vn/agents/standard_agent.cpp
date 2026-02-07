@@ -971,28 +971,14 @@ Syntax::Production StandardAgent::GetAgentProduction() const
 }		
 
 
-string StandardAgent::GetAgentRender( VN::RendererInterface *, Syntax::Production ) const
+string StandardAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod) const
 {
 	shared_ptr<const Node> node = GetPatternPtr();
 	if( dynamic_cast<const CPPTree::SpecificIdentifier *>(node.get()) )
     {
 		// SpecificIdentifiers appear rarely in patterns, and when they do they are not declared,
 		// so we should not try to render the C++ terminal	   
-		string node_type_name = GetInnermostTemplateParam(TYPE_ID_NAME(*node));
-		
-		size_t last_scope_pos = node_type_name.rfind("::");
-		string scope, name = node_type_name;
-		if( last_scope_pos != string::npos )
-		{
-			scope = node_type_name.substr(0, last_scope_pos+2); // include the ::
-			name = node_type_name.substr(last_scope_pos+2);
-		}
-
-		return "⯁" + 
-		       scope + name + 
-		       "【\"" +
-			   GetIdentifierName() + 
-			   "\"】";
+		return renderer->RenderNodeExplicit(node, surround_prod, Syntax::Policy());
 	}	
 	else
 	{

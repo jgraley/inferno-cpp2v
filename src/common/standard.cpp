@@ -121,6 +121,23 @@ string Join( const list<string> &ls, string sep, string pre, string post )
 } 
 
 
+list<string> Split( string s, string sep )
+{	
+    list<string> tokens;
+    size_t pos = 0;
+    string token;
+    while( (pos = s.find(sep)) != string::npos ) 
+	{
+        token = s.substr(0, pos);
+        tokens.push_back(token);
+        s.erase(0, pos + sep.length());
+    }
+    tokens.push_back(s);
+
+    return tokens;
+}
+
+
 string JoinInstanceFunction( string instance, string function )
 {
     string indot;

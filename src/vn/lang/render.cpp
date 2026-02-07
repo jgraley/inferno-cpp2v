@@ -348,7 +348,7 @@ string Render::AccomodatePreRestriction( TreePtr<Node> node, Syntax::Production 
 
 	// This assumes no action is required in order to render a prefix operation
 	return "‽" + 
-	       GetInnermostTemplateParam(TYPE_ID_NAME(*archetype_node)) + 
+	       RenderNodeTypeName(archetype_node) + 
 	       " " +
 	       Dispatch( node, Syntax::Production::PREFIX, policy );	
 }
@@ -383,17 +383,16 @@ string Render::Dispatch( TreePtr<Node> node, Syntax::Production surround_prod, S
 }		
 
 
-string Render::RenderNodeExplicit( shared_ptr<const Node> node, Syntax::Production, Syntax::Policy policy )
+list<string> Render::PopulateItemStrings( shared_ptr<const Node> node, Syntax::Policy policy )
 {
-	//bool need_a_type = surround_prod >= Syntax::Production::BOOT_TYPE && 
-	//                   surround_prod <= Syntax::Production::TOP_TYPE;
-    string s = "⯁";
     list<string> sitems;    
 
-    s += GetInnermostTemplateParam(TYPE_ID_NAME(*node));
-
-	if( ReadArgs::use.count("c") )
-		s += policy.force_incomplete_records ? "/* force incomplete */" : "/* no force incomplete */";
+   	// Special case for specific identifiers
+	if( auto node_sid = dynamic_pointer_cast<const CPPTree::SpecificIdentifier>( node ) )
+	{
+		sitems.push_back( "\"" + node_sid->GetIdentifierName() + "\"");
+		return sitems;
+	}		
     
     if( !policy.force_incomplete_records )
     {
@@ -431,7 +430,33 @@ string Render::RenderNodeExplicit( shared_ptr<const Node> node, Syntax::Producti
 			}
 		}   
 	}
+	return sitems;
+}
+
+
+string Render::RenderNodeTypeName( shared_ptr<const Node> node ) const
+{
+	list<string> parts = Split( GetInnermostTemplateParam(TYPE_ID_NAME(*node)), "::" );
+	
+	if( parts.front()==DEFAULT_NODE_NAMESPACE )
+		parts.pop_front();		
+			
+    return Join( parts, "::" );    
+}
+
+
+string Render::RenderNodeExplicit( shared_ptr<const Node> node, Syntax::Production, Syntax::Policy policy )
+{
+	//bool need_a_type = surround_prod >= Syntax::Production::BOOT_TYPE && 
+	//                   surround_prod <= Syntax::Production::TOP_TYPE;
+    string s = "⯁";
+    			
+    s += RenderNodeTypeName(node);
+
+	if( ReadArgs::use.count("c") )
+		s += policy.force_incomplete_records ? "/* force incomplete */" : "/* no force incomplete */";
     
+    list<string> sitems = PopulateItemStrings( node, policy );    
     if( GetTotalSize(sitems) > Syntax::GetLineBreakThreshold() )
 		s += Join( sitems, "⚬\n", "【\n", "\n】" );   
 	else 

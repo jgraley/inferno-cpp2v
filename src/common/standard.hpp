@@ -43,6 +43,7 @@ string SSPrintf(string fmt, ...);
 void CommonTest();
 
 string Join( const list<string> &v, string sep=" ", string pre="", string post="" );
+list<string> Split( string s, string sep );
 
 string JoinInstanceFunction( string instance, string function );
 
